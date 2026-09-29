@@ -17,6 +17,7 @@ PHP                                                                        NEWS
     (ndossche)
   . Fixed AVX being reported as supported when the OS has not enabled AVX
     state. (Ilia Alshanetsky)
+  . Fixed GH-23980 (ZEND_ASSERT violation @ ZEND_INCLUDE_OR_EVAL). (ndossche)
 
 - DOM:
   . Fixed use-after-free when re-constructing a DOMXPath whose php:function
