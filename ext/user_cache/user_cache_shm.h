@@ -68,15 +68,7 @@
 
 #define UCACHE_SHM_RESERVE_ATTEMPTS	8U
 
-#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L
-# define UCACHE_PLATFORM_ALIGNMENT (alignof(ucache_align_test) < 8 ? 8 : alignof(ucache_align_test))
-#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
-# define UCACHE_PLATFORM_ALIGNMENT (_Alignof(ucache_align_test) < 8 ? 8 : _Alignof(ucache_align_test))
-#elif ZEND_GCC_VERSION >= 2000 || defined(__clang__)
-# define UCACHE_PLATFORM_ALIGNMENT (__alignof__(ucache_align_test) < 8 ? 8 : __alignof__(ucache_align_test))
-#else
-# define UCACHE_PLATFORM_ALIGNMENT (sizeof(ucache_align_test))
-#endif
+#define UCACHE_PLATFORM_ALIGNMENT (alignof(ucache_align_test) < 8 ? 8 : alignof(ucache_align_test))
 
 #define UCACHE_ALIGNED_SIZE(size) \
 	ZEND_MM_ALIGNED_SIZE_EX(size, UCACHE_PLATFORM_ALIGNMENT)

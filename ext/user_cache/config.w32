@@ -22,8 +22,5 @@ ADD_EXTENSION_DEP('user_cache', 'hash');
 ADD_EXTENSION_DEP('user_cache', 'random');
 
 ADD_FLAG('CFLAGS_USER_CACHE', "/I " + configure_module_dirname);
-if (VS_TOOLSET) {
-	ADD_FLAG('CFLAGS_USER_CACHE', "/experimental:c11atomics");
-}
 
 PHP_INSTALL_HEADERS("ext/user_cache", "php_user_cache.h");
