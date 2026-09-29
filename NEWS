@@ -13,6 +13,8 @@ PHP                                                                        NEWS
     function). (ndossche)
   . Fixed AVX being reported as supported when the OS has not enabled AVX
     state. (Ilia Alshanetsky)
+  . Fixed OSS-Fuzz #552682112 (assertion failure wrt
+    zp_arg_must_be_sent_by_ref()). (ndossche)
 
 - FFI:
   . Fixed crashes with FFI callbacks created from __call() trampolines
