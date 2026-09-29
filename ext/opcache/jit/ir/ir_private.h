@@ -1,7 +1,7 @@
 /*
  * IR - Lightweight JIT Compilation Framework
  * (Common data structures and non public definitions)
- * Copyright (C) 2022 Zend by Perforce.
+ * This file is part of the IR Project distributed under the MIT-style LICENSE.
  * Authors: Dmitry Stogov <dmitry@php.net>
  */
 
@@ -254,29 +254,41 @@ IR_ALWAYS_INLINE void ir_arena_free(ir_arena *arena)
 	} while (arena);
 }
 
-IR_ALWAYS_INLINE void* ir_arena_alloc(ir_arena **arena_ptr, size_t size)
+IR_ALWAYS_INLINE void* ir_arena_alloc_aligned(ir_arena **arena_ptr, size_t size, size_t align)
 {
 	ir_arena *arena = *arena_ptr;
-	char *ptr = (char*)IR_ALIGNED_SIZE((uintptr_t)arena->ptr, 8);
+	char *ptr;
 
+	if (align < 8) {
+		align = 8;
+	}
+	ptr = (char*)IR_ALIGNED_SIZE((uintptr_t)arena->ptr, align);
 	if (EXPECTED((ptrdiff_t)size <= (ptrdiff_t)(arena->end - ptr))) {
 		arena->ptr = ptr + size;
 	} else {
+		size_t hdr_size = IR_ALIGNED_SIZE(sizeof(ir_arena), align);
 		size_t arena_size =
-			UNEXPECTED((size + IR_ALIGNED_SIZE(sizeof(ir_arena), 8)) > (size_t)(arena->end - (char*) arena)) ?
-				(size + IR_ALIGNED_SIZE(sizeof(ir_arena), 8)) :
-				(size_t)(arena->end - (char*) arena);
-		ir_arena *new_arena = (ir_arena*)ir_mem_malloc(arena_size);
+			UNEXPECTED((size + hdr_size) > (size_t)(arena->end - (char*) arena)) ?
+				(size + hdr_size) :
+				(size_t)(arena->end - (char*)arena);
+		ir_arena *new_arena;
 
+		if (align > 16) arena_size += IR_ALIGNED_SIZE(align, 16);
+		new_arena = (ir_arena*)ir_mem_malloc(arena_size);
 		if (UNEXPECTED(!new_arena)) return NULL;
-		ptr = (char*) new_arena + IR_ALIGNED_SIZE(sizeof(ir_arena), 8);
-		new_arena->ptr = (char*) new_arena + IR_ALIGNED_SIZE(sizeof(ir_arena), 8) + size;
+		ptr = (char*)IR_ALIGNED_SIZE((uintptr_t)new_arena + sizeof(ir_arena), align);
+		new_arena->ptr = (char*) ptr + size;
 		new_arena->end = (char*) new_arena + arena_size;
 		new_arena->prev = arena;
 		*arena_ptr = new_arena;
 	}
 
 	return (void*) ptr;
+}
+
+IR_ALWAYS_INLINE void* ir_arena_alloc(ir_arena **arena_ptr, size_t size)
+{
+	return ir_arena_alloc_aligned(arena_ptr, size, 8);
 }
 
 IR_ALWAYS_INLINE void* ir_arena_checkpoint(ir_arena *arena)
@@ -878,11 +890,34 @@ void ir_addrtab_free(ir_hashtab *tab);
 ir_ref ir_addrtab_find(const ir_hashtab *tab, uint64_t key);
 void ir_addrtab_set(ir_hashtab *tab, uint64_t key, ir_ref val);
 
-/*** IR OP info ***/
+/*** IR Type info ***/
 extern const uint8_t ir_type_flags[IR_LAST_TYPE];
 extern const char *ir_type_name[IR_LAST_TYPE];
 extern const char *ir_type_cname[IR_LAST_TYPE];
 extern const uint8_t ir_type_size[IR_LAST_TYPE];
+
+#define IR_VECTOR_SIZE(t)                 (ir_type_size[IR_VECTOR_BASE_TYPE(t)] * IR_VECTOR_LENGTH(t))
+#define IR_MAKE_VECTOR_TYPE(base, length) ir_make_vector_type(base, length)
+
+IR_ALWAYS_INLINE ir_type ir_make_vector_type(ir_type base, uint8_t length)
+{
+	IR_ASSERT(IR_IS_TYPE_SCALAR(base) && length > 0 && length <= 64 && (length & (length - 1)) == 0);
+
+	if (base == IR_CHAR) {
+		base = IR_I8;
+	}
+	return base | ((ir_ntz(length) + 1) << 4);
+}
+
+IR_ALWAYS_INLINE uint32_t ir_get_type_size(ir_type type)
+{
+#if IR_SIMD
+	if (IR_IS_TYPE_VECTOR(type)) return IR_VECTOR_SIZE(type);
+#endif
+	return ir_type_size[type];
+}
+
+/*** IR OP info ***/
 extern const uint32_t ir_op_flags[IR_LAST_OP];
 extern const char *ir_op_name[IR_LAST_OP];
 
@@ -946,17 +981,17 @@ IR_ALWAYS_INLINE bool ir_ref_is_true(const ir_ctx *ctx, ir_ref ref)
 #define IR_OP_FLAG_MEM_ALLOC      ((1<<6)|(1<<7))
 #define IR_OP_FLAG_MEM_MASK       ((1<<6)|(1<<7))
 
-#define IR_OPND_UNUSED            0x0
-#define IR_OPND_DATA              0x1
-#define IR_OPND_CONTROL           0x2
-#define IR_OPND_LABEL_REF         0x3
-#define IR_OPND_CONTROL_DEP       0x4
-#define IR_OPND_CONTROL_REF       0x5
-#define IR_OPND_CONTROL_GUARD     0x6
-#define IR_OPND_STR               0x7
-#define IR_OPND_NUM               0x8
-#define IR_OPND_PROB              0x9
-#define IR_OPND_PROTO             0xa
+#define IR_OPND_UNUSED            0x0U
+#define IR_OPND_DATA              0x1U
+#define IR_OPND_CONTROL           0x2U
+#define IR_OPND_LABEL_REF         0x3U
+#define IR_OPND_CONTROL_DEP       0x4U
+#define IR_OPND_CONTROL_REF       0x5U
+#define IR_OPND_CONTROL_GUARD     0x6U
+#define IR_OPND_STR               0x7U
+#define IR_OPND_NUM               0x8U
+#define IR_OPND_PROB              0x9U
+#define IR_OPND_PROTO             0xaU
 
 #define IR_OP_FLAGS(op_flags, op1_flags, op2_flags, op3_flags) \
 	((op_flags) | ((op1_flags) << 20) | ((op2_flags) << 24) | ((op3_flags) << 28))
@@ -1020,7 +1055,9 @@ IR_ALWAYS_INLINE uint32_t ir_insn_len(const ir_insn *insn)
 #define IR_16B_FRAME_ALIGNMENT (1<<11)
 #define IR_HAS_BLOCK_ADDR      (1<<12)
 #define IR_PREALLOCATED_STACK  (1<<13)
-
+#define IR_RECURSIVE_TAILCALL  (1<<14)
+#define IR_HAS_MEMCPY          (1<<15)
+#define IR_HAS_LONG_CONSTANTS  (1<<16)
 
 /* Temporary: MEM2SSA -> SCCP */
 #define IR_MEM2SSA_VARS        (1<<25)
@@ -1089,6 +1126,12 @@ IR_ALWAYS_INLINE ir_ref ir_next_control(const ir_ctx *ctx, ir_ref ref)
 		_ref2 = _tmp; \
 	} while (0)
 
+#define SWAP_REGS(_reg1, _reg2) do { \
+		ir_reg _tmp = _reg1; \
+		_reg1 = _reg2; \
+		_reg2 = _tmp; \
+	} while (0)
+
 #define SWAP_INSNS(_insn1, _insn2) do { \
 		ir_insn *_tmp = _insn1; \
 		_insn1 = _insn2; \
@@ -1101,7 +1144,6 @@ void ir_update_op(ir_ctx *ctx, ir_ref ref, uint32_t idx, ir_ref new_val);
 /*** Iterative Optimization ***/
 void ir_iter_add_uses(ir_ctx *ctx, ir_ref ref, ir_bitqueue *worklist);
 void ir_iter_replace(ir_ctx *ctx, ir_ref ref, ir_ref new_ref, ir_bitqueue *worklist);
-void ir_iter_update_op(ir_ctx *ctx, ir_ref ref, uint32_t idx, ir_ref new_val, ir_bitqueue *worklist);
 void ir_iter_opt(ir_ctx *ctx, ir_bitqueue *worklist);
 void ir_iter_cleanup(ir_ctx *ctx);
 
@@ -1115,25 +1157,29 @@ void ir_iter_cleanup(ir_ctx *ctx);
 #define IR_IS_BB_END(op) \
 	((ir_op_flags[op] & IR_OP_FLAG_BB_END) != 0)
 
-#define IR_BB_UNREACHABLE      (1<<0)
-#define IR_BB_START            (1<<1)
-#define IR_BB_ENTRY            (1<<2)
-#define IR_BB_LOOP_HEADER      (1<<3)
-#define IR_BB_IRREDUCIBLE_LOOP (1<<4)
-#define IR_BB_DESSA_MOVES      (1<<5) /* translation out of SSA requires MOVEs */
-#define IR_BB_EMPTY            (1<<6)
-#define IR_BB_PREV_EMPTY_ENTRY (1<<7)
-#define IR_BB_OSR_ENTRY_LOADS  (1<<8) /* OSR Entry-point with register LOADs   */
-#define IR_BB_LOOP_WITH_ENTRY  (1<<9) /* set together with LOOP_HEADER if there is an ENTRY in the loop */
+#define IR_BB_UNREACHABLE       (1<<0)
+#define IR_BB_START             (1<<1)
+#define IR_BB_ENTRY             (1<<2)
+#define IR_BB_LOOP_HEADER       (1<<3)
+#define IR_BB_IRREDUCIBLE_LOOP  (1<<4)
+#define IR_BB_IRREDUCIBLE_ENTRY (1<<5)
+#define IR_BB_DESSA_MOVES       (1<<6) /* translation out of SSA requires MOVEs */
+#define IR_BB_EMPTY             (1<<7)
+#define IR_BB_PREV_EMPTY_ENTRY  (1<<8)
+#define IR_BB_OSR_ENTRY_LOADS   (1<<9) /* OSR Entry-point with register LOADs   */
+#define IR_BB_LOOP_WITH_ENTRY   (1<<10) /* set together with LOOP_HEADER if there is an ENTRY in the loop */
 
 /* The following flags are set by GCM */
-#define IR_BB_HAS_PHI          (1<<10)
-#define IR_BB_HAS_PI           (1<<11)
-#define IR_BB_HAS_PARAM        (1<<12)
-#define IR_BB_HAS_VAR          (1<<13)
+#define IR_BB_HAS_PHI           (1<<11)
+#define IR_BB_HAS_PI            (1<<12)
+#define IR_BB_HAS_PARAM         (1<<13)
+#define IR_BB_HAS_VAR           (1<<14)
 
 /* The following flags are set by BB scheduler */
-#define IR_BB_ALIGN_LOOP       (1<<14)
+#define IR_BB_ALIGN_LOOP        (1<<15)
+
+#define IR_BB_DESSA_TMP_INT     (1<<16) /* translation out of SSA may need temporary genral purpose register */
+#define IR_BB_DESSA_TMP_FP      (1<<17) /* translation out of SSA may need temporary floating point register */
 
 struct _ir_block {
 	uint32_t flags;
@@ -1157,6 +1203,7 @@ struct _ir_block {
 	union {
 		uint32_t loop_depth;
 		uint32_t next_succ;      /* used temporary for iterative Post Ordering */
+		uint32_t next_loop;      /* used temporary for loop nesting tree       */
 	};
 };
 
@@ -1225,21 +1272,25 @@ typedef struct _ir_use_pos       ir_use_pos;
 /* ir_use_pos.flags bits */
 #define IR_USE_MUST_BE_IN_REG            (1<<0)
 #define IR_USE_SHOULD_BE_IN_REG          (1<<1)
-#define IR_DEF_REUSES_OP1_REG            (1<<2)
-#define IR_DEF_CONFLICTS_WITH_INPUT_REGS (1<<3)
-#define IR_EXTEND_INPUTS_TO_NEXT         (1<<4) /* used for SNAPSHOT followed by GUARD */
+#define IR_HINT_TWO_REGS                 (1<<2)
+#define IR_DEF_REUSES_OP1_REG            (1<<3)
+#define IR_DEF_CONFLICTS_WITH_INPUT_REGS (1<<4)
+#define IR_EXTEND_INPUTS_TO_NEXT         (1<<5) /* used for SNAPSHOT followed by GUARD */
 
 #define IR_FUSED_USE                     (1<<6)
 #define IR_PHI_USE                       (1<<7)
 
 #define IR_OP1_MUST_BE_IN_REG            (1<<8)
 #define IR_OP1_SHOULD_BE_IN_REG          (1<<9)
-#define IR_OP2_MUST_BE_IN_REG            (1<<10)
-#define IR_OP2_SHOULD_BE_IN_REG          (1<<11)
-#define IR_OP3_MUST_BE_IN_REG            (1<<12)
-#define IR_OP3_SHOULD_BE_IN_REG          (1<<13)
+#define IR_OP1_HINT_TWO_REGS             (1<<10)
+#define IR_OP2_MUST_BE_IN_REG            (1<<11)
+#define IR_OP2_SHOULD_BE_IN_REG          (1<<12)
+#define IR_OP2_HINT_TWO_REGS             (1<<13)
+#define IR_OP3_MUST_BE_IN_REG            (1<<14)
+#define IR_OP3_SHOULD_BE_IN_REG          (1<<15)
+#define IR_OP3_HINT_TWO_REGS             (1<<16)
 
-#define IR_USE_FLAGS(def_flags, op_num)  (((def_flags) >> (6 + (IR_MIN((op_num), 3) * 2))) & 3)
+#define IR_USE_FLAGS(def_flags, op_num) (((def_flags) >> (5 + (IR_MIN((op_num), 3) * 3))) & 7)
 
 struct _ir_use_pos {
 	uint16_t       op_num; /* 0 - means result */
@@ -1266,10 +1317,14 @@ struct _ir_live_range {
 #define IR_LIVE_INTERVAL_SPILL_SPECIAL   (1<<6) /* spill slot is pre-allocated in a special area (see ir_ctx.spill_reserved_base) */
 #define IR_LIVE_INTERVAL_SPILLED         (1<<7)
 #define IR_LIVE_INTERVAL_SPLIT_CHILD     (1<<8)
+#define IR_LIVE_INTERVAL_TWO_REGS        (1<<9)
 
 struct _ir_live_interval {
 	uint8_t           type;
 	int8_t            reg;
+#if IR_X86_I64
+	int8_t            reg_hi;
+#endif
 	uint16_t          flags;
 	union {
 		int32_t       vreg;
@@ -1386,12 +1441,18 @@ struct _ir_call_conv_dsc {
 	uint8_t       shadow_store_size;          /* reserved stack space to keep arguemnts passed in registers (WIN64) */
 	uint8_t       int_param_regs_count;       /* number of registers for INT parameters */
 	uint8_t       fp_param_regs_count;        /* number of registers for FP parameters */
+	uint8_t       vector_param_regs_count;    /* number of registers for SIMD vector parameters */
 	int8_t        int_ret_reg;                /* register to return INT value */
+	int8_t        int_ret2_reg;               /* register to return second INT value (used to return I64 on 32-bit) */
 	int8_t        fp_ret_reg;                 /* register to return FP value */
+	int8_t        fp_ret2_reg;                /* register to return second FP value */
+	int8_t        vector_ret_reg;             /* register to return SIMD vector value */
+	int8_t        vector_ret2_reg;            /* register to return second SIMD vector value */
 	int8_t        fp_varargs_reg;             /* register to pass number of fp register arguments into vararg func */
 	int8_t        scratch_reg;                /* pseudo register to reffer srcatch regset (clobbered by call) */
 	const int8_t *int_param_regs;             /* registers for INT parameters */
 	const int8_t *fp_param_regs;              /* registers for FP parameters */
+	const int8_t *vector_param_regs;          /* registers for SIMD vector parameters */
 	ir_regset     preserved_regs;             /* preserved or callee-saved registers */
 };
 
@@ -1413,15 +1474,32 @@ typedef struct _ir_reg_alloc_data {
 } ir_reg_alloc_data;
 
 int32_t ir_allocate_spill_slot(ir_ctx *ctx, ir_type type);
+int32_t ir_allocate_big_spill_slot(ir_ctx *ctx, int32_t size);
+void ir_dump_reg(const ir_ctx *ctx, int8_t reg, ir_ref ref, bool store, FILE *f);
 
 IR_ALWAYS_INLINE void ir_set_alocated_reg(ir_ctx *ctx, ir_ref ref, int op_num, int8_t reg)
 {
 	int8_t *regs = ctx->regs[ref];
 
-	if (op_num > 0) {
-		/* regs[] is not limited by the declared boundary 4, the real boundary checked below */
-		IR_ASSERT(op_num <= IR_MAX(3, ctx->ir_base[ref].inputs_count));
+	/* regs[] is not limited by the declared boundary 4, the real boundary checked below */
+	IR_ASSERT(op_num >=0 && op_num <= IR_MAX(3, ctx->ir_base[ref].inputs_count));
+	regs[op_num] = reg;
+}
+
+IR_ALWAYS_INLINE void ir_set_alocated_tmp_reg(ir_ctx *ctx, ir_ref ref, int op_num, int8_t reg)
+{
+	int8_t *regs = ctx->regs[ref];
+
+	if (UNEXPECTED(op_num == 4)) {
+		/* Used for COND(I64, _, _) and SIMD instructions */
+		if (!ctx->tmp_regs) {
+			ctx->tmp_regs = ir_mem_malloc(ctx->insns_count);
+			memset(ctx->tmp_regs, -1, ctx->insns_count);
+		}
+		ctx->tmp_regs[ref] = reg;
+		return;
 	}
+	IR_ASSERT(op_num >= 0 && op_num <= 3);
 	regs[op_num] = reg;
 }
 
@@ -1430,7 +1508,7 @@ IR_ALWAYS_INLINE int8_t ir_get_alocated_reg(const ir_ctx *ctx, ir_ref ref, int o
 	int8_t *regs = ctx->regs[ref];
 
 	/* regs[] is not limited by the declared boundary 4, the real boundary checked below */
-	IR_ASSERT(op_num <= IR_MAX(3, ctx->ir_base[ref].inputs_count));
+	IR_ASSERT(op_num >= 0 && op_num <= IR_MAX(3, ctx->ir_base[ref].inputs_count));
 	return regs[op_num];
 }
 
@@ -1439,12 +1517,14 @@ IR_ALWAYS_INLINE int8_t ir_get_alocated_reg(const ir_ctx *ctx, ir_ref ref, int o
 /* ctx->rules[] flags */
 #define IR_FUSED     (1U<<31) /* Insn is fused into others (code is generated as part of the fusion root) */
 #define IR_SKIPPED   (1U<<30) /* Insn is skipped (code is not generated) */
-#define IR_SIMPLE    (1U<<29) /* Insn doesn't have any target constraints */
-#define IR_FUSED_REG (1U<<28) /* Register assignemnt may be stored in ctx->fused_regs instead of ctx->regs */
-#define IR_MAY_SWAP  (1U<<27) /* Allow swapping operands for better register allocation */
-#define IR_MAY_REUSE (1U<<26) /* Result may reuse register of the source */
+#define IR_NO_REG    (1U<<29) /* Result doesn't need register (used for TAILCALL) */
+#define IR_SIMPLE    (1U<<28) /* Insn doesn't have any target constraints */
+#define IR_FUSED_REG (1U<<27) /* Register assignemnt may be stored in ctx->fused_regs instead of ctx->regs */
+#define IR_MAY_SWAP  (1U<<26) /* Allow swapping operands for better register allocation */
+#define IR_MAY_REUSE (1U<<25) /* Result may reuse register of the source */
+#define IR_TWO_REGS  (1U<<24) /* Result needs two registers (used for 64-bit integers on x86) */
 
-#define IR_RULE_MASK 0xff
+#define IR_RULE_MASK 0xffff
 
 #define IR_MAX_REG_ARGS 64
 
@@ -1464,7 +1544,7 @@ typedef struct {
 	int8_t      def_reg;
 	uint8_t     tmps_count;
 	uint8_t     hints_count;
-	ir_tmp_reg  tmp_regs[3];
+	ir_tmp_reg  tmp_regs[4];
 	int8_t      hints[IR_MAX_REG_ARGS + 3];
 } ir_target_constraints;
 
