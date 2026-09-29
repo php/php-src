@@ -140,8 +140,8 @@ PHPAPI uint32_t php_poll_timer_count(php_poll_ctx *ctx);
 
 /* On Windows a set is a bit per CRT signal number, like ior_sigset_t */
 #ifdef PHP_WIN32
-typedef struct { uint32_t bits; } php_sigset_t;
-typedef struct { int si_signo; int si_code; } php_siginfo_t;
+typedef struct php_sigset_t { uint32_t bits; } php_sigset_t;
+typedef struct php_siginfo_t { int si_signo; int si_code; } php_siginfo_t;
 # define PHP_NSIG NSIG
 static zend_always_inline int php_sigemptyset(php_sigset_t *set)
 {

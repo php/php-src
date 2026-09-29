@@ -109,7 +109,7 @@ struct _php_io_ring_req {
 	} u;
 };
 
-typedef struct {
+typedef struct php_io_ring_cqe {
 	uintptr_t data;
 	int32_t res;
 	bool more; /* IOR_CQE_F_MORE: a multishot's edge, not its last completion */
@@ -2085,7 +2085,7 @@ PHPAPI void php_io_ring_destroy(php_io_ring *ring)
 
 /* The ring as an operation queue */
 
-typedef struct {
+typedef struct php_io_ring_queue {
 	php_io_queue base;
 	php_io_ring *ring;
 } php_io_ring_queue;

@@ -199,7 +199,7 @@ PHP_FUNCTION(curl_multi_get_handles)
 	}
 }
 
-typedef struct {
+typedef struct php_curl_multi_fd {
 	php_socket_t fd;
 	uint32_t events;
 } php_curl_multi_fd;

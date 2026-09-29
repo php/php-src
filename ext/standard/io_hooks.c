@@ -65,18 +65,18 @@ static zend_object_handlers php_io_registration_handlers;
 static zend_object_handlers php_io_completion_handlers;
 PHPAPI zend_object_handlers php_io_opqueue_handlers;
 
-typedef struct {
+typedef struct php_io_operation_obj {
 	php_io_op *op; /* NULL once ended */
 	zend_object *lazy_handle; /* created by getHandle() */
 	zend_object std;
 } php_io_operation_obj;
 
-typedef struct {
+typedef struct php_io_registration_obj {
 	php_io_registration *reg; /* NULL once ended */
 	zend_object std;
 } php_io_registration_obj;
 
-typedef struct {
+typedef struct php_io_completion_obj {
 	zend_object *operation;
 	php_io_status status;
 	int64_t res;
@@ -703,8 +703,7 @@ PHP_METHOD(Io_Operation_GetAddrInfo, completeWithAddresses)
 
 	const struct addrinfo *hints = op->u.getaddrinfo.hints;
 	struct addrinfo *head = NULL, **tail = &head;
-	zval *entry;
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(addresses), entry) {
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(addresses), zval *entry) {
 		if (Z_TYPE_P(entry) != IS_STRING) {
 			zend_argument_type_error(1, "must be a list of IP address strings");
 			goto fail;
@@ -863,8 +862,7 @@ PHP_METHOD(Io_Operation_Any, completeWith)
 	}
 
 	bool *seen = ecalloc(op->u.any.n, sizeof(bool));
-	zval *entry;
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(completions), entry) {
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(completions), zval *entry) {
 		if (Z_TYPE_P(entry) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(entry), php_io_completion_ce)) {
 			efree(seen);
 			zend_argument_type_error(1, "must be a list of Io\\Completion objects");
@@ -1012,7 +1010,7 @@ static php_io_opqueue_obj *php_io_opqueue_fetch(zval *zv)
 {
 	php_io_opqueue_obj *intern = PHP_IO_OPQUEUE_FROM_ZOBJ(Z_OBJ_P(zv));
 	if (!intern->queue) {
-		zend_throw_error(NULL, "%s object is not constructed", ZSTR_VAL(Z_OBJCE_P(zv)->name));
+		zend_throw_error(NULL, "%pS object is not constructed", Z_OBJCE_P(zv)->name);
 	}
 	return intern;
 }
@@ -1029,7 +1027,7 @@ PHP_METHOD(Io_Poll_OperationQueue, __construct)
 	php_io_opqueue_obj *intern = PHP_IO_OPQUEUE_FROM_ZOBJ(Z_OBJ_P(ZEND_THIS));
 
 	if (intern->queue) {
-		zend_throw_error(NULL, "Io\\Poll\\OperationQueue object is already constructed");
+		zend_throw_error(NULL, "%pS object is already constructed", Z_OBJCE_P(ZEND_THIS)->name);
 		RETURN_THROWS();
 	}
 	if (context) {
@@ -1333,7 +1331,7 @@ PHP_METHOD(Io_Poll_OperationQueue, getHookCapabilities)
 
 /* The userland provider adapter, installed as the C provider by set_hooks() */
 
-typedef struct {
+typedef struct php_io_hooks_php {
 	php_io_hooks hooks;
 	zend_object *obj;
 	zend_fcall_info_cache run_fcc;
@@ -1446,8 +1444,7 @@ static zend_result php_io_hooks_php_run(php_io_hooks *hooks, php_io_op *op, php_
 	if (op->type == PHP_IO_OP_ANY) {
 		uint32_t n = 0;
 		if (Z_TYPE(c->completions) == IS_ARRAY) {
-			zval *entry;
-			ZEND_HASH_FOREACH_VAL(Z_ARRVAL(c->completions), entry) {
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL(c->completions), zval *entry) {
 				php_io_completion_obj *m = PHP_IO_COMPLETION_FROM_ZOBJ(Z_OBJ_P(entry));
 				int32_t index = php_io_any_member_index(op, m->operation);
 				if (index < 0 || n >= op->u.any.n) {
@@ -1507,9 +1504,7 @@ static zend_object *php_io_hooks_php_current(void)
 static uint32_t php_io_hooks_capabilities_to_flags(zval *capabilities)
 {
 	uint32_t flags = 0;
-	zval *entry;
-
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(capabilities), entry) {
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(capabilities), zval *entry) {
 		if (Z_TYPE_P(entry) != IS_OBJECT || Z_OBJCE_P(entry) != php_io_hooks_capability_ce) {
 			zend_throw_error(NULL, "Io\\Hooks\\Hooks::getCapabilities() must return a list of Io\\Hooks\\Capability");
 			return 0;

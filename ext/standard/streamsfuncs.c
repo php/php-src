@@ -687,7 +687,7 @@ static int stream_array_to_fd_set(const HashTable *stream_array, fd_set *fds, ph
 /* stream_select() under a provider: one Poll member per stream with the
  * events of the sets it is in, a Timer member for the timeout, and the
  * reported members put back into the fd sets for the usual filtering. */
-typedef struct {
+typedef struct php_select_member {
 	php_stream *stream;
 	php_socket_t fd;
 	uint32_t events;

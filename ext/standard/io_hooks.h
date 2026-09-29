@@ -22,7 +22,7 @@ PHPAPI zend_object *php_io_operation_get_zobj(php_io_op *op);
 
 typedef struct _php_io_opqueue_sub php_io_opqueue_sub;
 
-typedef struct {
+typedef struct php_io_opqueue_obj {
 	php_io_queue *queue;
 	php_io_opqueue_sub *subs;
 	zend_object std;

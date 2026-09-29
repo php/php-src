@@ -94,7 +94,7 @@ typedef struct _php_stream_error_stack {
 	php_stream_error_operation operation_pool[PHP_STREAM_ERROR_OPERATION_POOL_SIZE];
 } php_stream_error_stack;
 
-typedef struct {
+typedef struct php_stream_error_state {
 	php_stream_error_stack main_stack;
 	php_stream_error_stack *fiber_stacks;
 	php_stream_stored_error *stored_errors;

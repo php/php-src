@@ -65,7 +65,7 @@ struct _php_io_poll_req {
 	php_io_poll_req *next;
 };
 
-typedef struct {
+typedef struct php_io_poll_queue {
 	php_io_queue base;
 	uint64_t id;
 	php_poll_ctx *ctx;

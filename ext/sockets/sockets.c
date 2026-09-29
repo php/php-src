@@ -162,7 +162,7 @@ struct _php_socket_poll_handle_data {
 	php_socket_poll_handle_data *next;
 };
 
-typedef struct {
+typedef struct php_socket_poll_weak_handle_data {
 	php_socket *sock; /* not referenced, NULL once the descriptor closed */
 } php_socket_poll_weak_handle_data;
 
@@ -325,7 +325,7 @@ PHP_METHOD(SocketPollHandle, __construct)
 
 	php_poll_handle_object *intern = PHP_POLL_HANDLE_OBJ_FROM_ZV(ZEND_THIS);
 	if (intern->handle_data) {
-		zend_throw_error(NULL, "SocketPollHandle object is already constructed");
+		zend_throw_error(NULL, "%pS object is already constructed", Z_OBJCE_P(ZEND_THIS)->name);
 		RETURN_THROWS();
 	}
 	php_socket *sock = Z_SOCKET_P(zsocket);
@@ -351,7 +351,7 @@ PHP_METHOD(SocketPollHandle, getSocket)
 
 	php_socket_poll_handle_data *data = PHP_POLL_HANDLE_OBJ_FROM_ZV(ZEND_THIS)->handle_data;
 	if (!data) {
-		zend_throw_error(NULL, "SocketPollHandle object is not constructed");
+		zend_throw_error(NULL, "%pS object is not constructed", Z_OBJCE_P(ZEND_THIS)->name);
 		RETURN_THROWS();
 	}
 	RETURN_OBJ_COPY(&data->sock->std);
@@ -367,8 +367,8 @@ PHP_METHOD(SocketPollHandle, isValid)
 
 PHP_METHOD(SocketPollWeakHandle, __construct)
 {
-	zend_throw_error(NULL, "Direct instantiation of SocketPollWeakHandle is not allowed, "
-			"use SocketPollWeakHandle::create instead");
+	zend_throw_error(NULL, "Direct instantiation of %pS is not allowed, use %pS::create instead",
+			Z_OBJCE_P(ZEND_THIS)->name, Z_OBJCE_P(ZEND_THIS)->name);
 }
 
 PHP_METHOD(SocketPollWeakHandle, create)
@@ -1261,13 +1261,13 @@ static void php_sock_array_from_fd_set(zval *sock_array, fd_set *fds) /* {{{ */
  * every Socket of the sets frozen for the wait, and the stream a Socket shares its descriptor
  * with frozen and carried like the Socket's own operations carry it. */
 
-typedef struct {
+typedef struct php_socket_select_member {
 	php_socket *sock;
 	php_socket_t fd;
 	uint32_t events;
 } php_socket_select_member;
 
-typedef struct {
+typedef struct php_socket_select_frozen {
 	php_socket **socks;
 	php_stream **streams;
 	uint32_t n_socks, cap_socks, n_streams, cap_streams;
@@ -1275,9 +1275,7 @@ typedef struct {
 
 static bool php_socket_select_freeze(HashTable *sock_array, php_socket_select_frozen *fz)
 {
-	zval *element;
-
-	ZEND_HASH_FOREACH_VAL(sock_array, element) {
+	ZEND_HASH_FOREACH_VAL(sock_array, zval *element) {
 		ZVAL_DEREF(element);
 		php_socket *sock = Z_SOCKET_P(element);
 		bool seen = false;
@@ -1343,9 +1341,7 @@ static void php_socket_select_unfreeze(php_socket_select_frozen *fz)
 static void php_socket_select_collect(HashTable *sock_array, uint32_t events,
 		php_socket_select_member **members, uint32_t *n, uint32_t *cap)
 {
-	zval *element;
-
-	ZEND_HASH_FOREACH_VAL(sock_array, element) {
+	ZEND_HASH_FOREACH_VAL(sock_array, zval *element) {
 		ZVAL_DEREF(element);
 		php_socket *sock = Z_SOCKET_P(element);
 		php_socket_t fd = (php_socket_t) sock->bsd_socket;

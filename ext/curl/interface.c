@@ -1595,9 +1595,7 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 		}
 
 		if (Z_TYPE_P(current) == IS_ARRAY) {
-			zval *current_element;
-
-			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(current), current_element) {
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(current), zval *current_element) {
 				add_simple_field(mime, string_key, current_element);
 			} ZEND_HASH_FOREACH_END();
 
@@ -2441,7 +2439,7 @@ PHP_FUNCTION(curl_setopt_array)
  * connection pool, from the first report to CURL_POLL_REMOVE. Nothing is
  * owned: the handle only answers the descriptor while libcurl is interested. */
 
-typedef struct {
+typedef struct php_curl_socket_handle_data {
 	curl_socket_t socket; /* CURL_SOCKET_BAD once removed */
 } php_curl_socket_handle_data;
 
@@ -2481,7 +2479,7 @@ static zend_object *php_curl_socket_handle_create_object(zend_class_entry *ce)
 
 ZEND_METHOD(CurlSocketPollWeakHandle, __construct)
 {
-	zend_throw_error(NULL, "Cannot directly construct CurlSocketPollWeakHandle");
+	zend_throw_error(NULL, "Cannot directly construct %pS", Z_OBJCE_P(ZEND_THIS)->name);
 }
 
 ZEND_METHOD(CurlSocketPollWeakHandle, isValid)
@@ -2599,8 +2597,7 @@ static zend_result php_curl_socket_reconcile(php_curl *ch)
 	}
 
 	if (ch->io_sockets) {
-		php_curl_socket_entry *e;
-		ZEND_HASH_FOREACH_PTR(ch->io_sockets, e) {
+		ZEND_HASH_FOREACH_PTR(ch->io_sockets, php_curl_socket_entry *e) {
 			uint32_t events = php_curl_what_to_events(e->what);
 			php_poll_handle_object *h = PHP_POLL_HANDLE_OBJ_FROM_ZOBJ(e->handle);
 			for (uint32_t event = PHP_POLL_READ; event <= PHP_POLL_WRITE; event <<= 1) {
@@ -2634,8 +2631,7 @@ static void php_curl_socket_table_free(php_curl *ch)
 		php_curl_socket_entry_free(e);
 	}
 	if (ch->io_sockets) {
-		php_curl_socket_entry *e;
-		ZEND_HASH_FOREACH_PTR(ch->io_sockets, e) {
+		ZEND_HASH_FOREACH_PTR(ch->io_sockets, php_curl_socket_entry *e) {
 			php_curl_socket_entry_invalidate(e);
 			php_curl_socket_entry_free(e);
 		} ZEND_HASH_FOREACH_END();
@@ -2709,8 +2705,7 @@ static CURLcode php_curl_exec_multi(php_curl *ch)
 		uint32_t n_members = 0;
 
 		if (n_sockets > 0) {
-			php_curl_socket_entry *e;
-			ZEND_HASH_FOREACH_PTR(ch->io_sockets, e) {
+			ZEND_HASH_FOREACH_PTR(ch->io_sockets, php_curl_socket_entry *e) {
 				uint32_t events = php_curl_what_to_events(e->what);
 				for (uint32_t event = PHP_POLL_READ; event <= PHP_POLL_WRITE; event <<= 1) {
 					if (events & event) {

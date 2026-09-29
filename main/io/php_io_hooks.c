@@ -75,7 +75,7 @@ static zend_always_inline void php_io_set_errno(int err)
 }
 
 /* A stream whose in-flight op outlived its frame, kept by a queue */
-typedef struct {
+typedef struct php_io_orphan {
 	php_io_queue *queue;
 	php_stream *stream;
 	bool freeing; /* php_stream_free() is draining it */
@@ -531,7 +531,7 @@ PHPAPI void php_io_freeaddrinfo(struct addrinfo *res)
 	freeaddrinfo(res);
 }
 
-typedef struct {
+typedef struct php_io_reaped_child {
 	int status;
 	pid_t pgid;
 } php_io_reaped_child;
@@ -1017,7 +1017,7 @@ static int php_io_poll_result_to_revents(const php_io_op_result *result, uint32_
 
 /* The stream is frozen for the duration; a queue keeping the op past this
  * frame (the ring on an abnormal exit) keeps it frozen until the op settled */
-typedef struct {
+typedef struct php_io_frame {
 	php_stream *stream;
 	zend_resource *res;
 } php_io_frame;
@@ -1152,7 +1152,7 @@ static bool php_io_data_result(const php_io_op_result *result, ssize_t *ret)
 }
 
 /* The arguments of a socket call made through the ladders below */
-typedef struct {
+typedef struct php_io_sock_call {
 	php_socket_t fd;
 	void *buf;
 	size_t len;

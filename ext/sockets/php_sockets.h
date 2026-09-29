@@ -143,13 +143,13 @@ PHP_SOCKETS_API bool socket_import_file_descriptor(PHP_SOCKET socket, php_socket
 
 /* A call that may block under a provider: the Socket is frozen for it, and its operations carry
  * the stream it shares its descriptor with or, without one, its handle */
-typedef struct {
+typedef struct php_socket_op {
 	php_stream *stream;
 	zend_object *handle;
 	bool active; /* a provider is installed */
 } php_socket_op;
 
-typedef struct {
+typedef struct php_socket_waiter {
 	uint64_t end;
 	int optname;
 	bool started;
