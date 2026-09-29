@@ -37,6 +37,8 @@ PHP                                                                        NEWS
     an exception is pending. (nicolas-grekas)
   . Fixed pcntl_signal_dispatch() dropping the signals queued behind a handler
     that throws. (nicolas-grekas)
+  . Fixed bug GH-23986 (/proc/self paths resolve to the parent process after
+    pcntl_fork()). (Lazizbek Ergashev)
 
 - PDO:
   . Fixed PDO::setAttribute() installing a PDO::ATTR_STATEMENT_CLASS class
