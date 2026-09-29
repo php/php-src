@@ -920,6 +920,13 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 		ret[passwd_len] = '\0';
 	} else {
 		*auth_data_len = 0;
+
+		if (auth_plugin_data_len < SCRAMBLE_LENGTH) {
+			SET_CLIENT_ERROR(conn->error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "The server sent wrong length for scramble");
+			DBG_ERR_FMT("The server sent wrong length for scramble %zu. Expected %u", auth_plugin_data_len, SCRAMBLE_LENGTH);
+			DBG_RETURN(NULL);
+		}
+
 		server_public_key = mysqlnd_sha256_get_rsa_key(conn, session_options, pfc_data);
 
 		if (server_public_key) {
