@@ -399,7 +399,7 @@ static zend_result zend_create_closure_from_callable(zval *return_value, zval *c
 	zend_function *mptr;
 	zend_internal_function call;
 
-	if (!zend_is_callable_ex(callable, NULL, 0, NULL, &fcc, error)) {
+	if (!zend_is_callable(callable, &fcc, error)) {
 		return FAILURE;
 	}
 
