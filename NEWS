@@ -64,6 +64,10 @@ PHP                                                                        NEWS
 - PDO_PGSQL:
   . Fixed crash when a persistent connection fails. (KentarouTakeda)
 
+- Reflection:
+  . Fixed bug GH-23842 (ReflectionProperty::skipLazyInitialization() copies
+    invalid constant defaults with OPcache). (DirkTrunkstar, Lazizbek Ergashev)
+
 - SimpleXML:
   . Fixed reconstructing a SimpleXMLElement freeing a child element that
     another variable still references. (Ilia Alshanetsky)
