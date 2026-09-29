@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.6.0RC3
 
+- BCMath:
+  . Fixed BcMath\Number results that truncate to zero keeping a negative sign
+    and comparing less than zero. (Ilia Alshanetsky)
+
 - Core:
   . Fixed OSS-Fuzz #536440507 (Immutable class incorrect assertion).
     (ndossche)
