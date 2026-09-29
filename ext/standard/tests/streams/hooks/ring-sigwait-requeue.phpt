@@ -6,6 +6,7 @@ posix
 --SKIPIF--
 <?php
 if (!class_exists(Io\Ring\Engine::class)) die("skip Io\\Ring\\Engine not available");
+if (!function_exists('pcntl_sigwaitinfo')) die('skip pcntl_sigwaitinfo() not available');
 ?>
 --FILE--
 <?php
