@@ -62,8 +62,19 @@ foreach ($pipes1 as $pipe) {
 proc_close($proc1);
 
 // 2. Empty submission returning empty string ""
+$code2 = '
+fwrite(STDERR, "STARTED\n");
+fflush(STDERR);
+fgets(STDIN);
+
+fwrite(STDOUT, "\n");
+fflush(STDOUT);
+fwrite(STDERR, "READY\n");
+fflush(STDERR);
+fgets(STDIN);
+';
 $proc2 = proc_open(
-    [PHP_BINARY, '-r', 'fwrite(STDOUT, "\n"); fflush(STDOUT); fgets(STDIN);'],
+    [PHP_BINARY, '-r', $code2],
     [
         0 => ['pty'],
         1 => ['pty'],
@@ -71,7 +82,13 @@ $proc2 = proc_open(
     ],
     $pipes2,
 );
+$r0 = fgets($pipes2[2]);
 $terminal2 = Terminal::fromStreams($pipes2[0]);
+$terminal2->enableRawMode();
+
+fwrite($pipes2[0], "START\n");
+$r1 = fgets($pipes2[2]);
+
 $secret2 = $terminal2->readSecret(Duration::fromMilliseconds(100));
 
 var_dump($secret2 === "");
@@ -84,8 +101,19 @@ foreach ($pipes2 as $pipe) {
 proc_close($proc2);
 
 // 3. Normal submission returning text
+$code3 = '
+fwrite(STDERR, "STARTED\n");
+fflush(STDERR);
+fgets(STDIN);
+
+fwrite(STDOUT, "secret123\n");
+fflush(STDOUT);
+fwrite(STDERR, "READY\n");
+fflush(STDERR);
+fgets(STDIN);
+';
 $proc3 = proc_open(
-    [PHP_BINARY, '-r', 'fwrite(STDOUT, "secret123\n"); fflush(STDOUT); fgets(STDIN);'],
+    [PHP_BINARY, '-r', $code3],
     [
         0 => ['pty'],
         1 => ['pty'],
@@ -93,7 +121,13 @@ $proc3 = proc_open(
     ],
     $pipes3,
 );
+$r0 = fgets($pipes3[2]);
 $terminal3 = Terminal::fromStreams($pipes3[0]);
+$terminal3->enableRawMode();
+
+fwrite($pipes3[0], "START\n");
+$r1 = fgets($pipes3[2]);
+
 $secret3 = $terminal3->readSecret(Duration::fromMilliseconds(100));
 
 var_dump($secret3 === "secret123");
@@ -106,8 +140,19 @@ foreach ($pipes3 as $pipe) {
 proc_close($proc3);
 
 // 4. Cancellation (Ctrl+C) throws TerminalException
+$code4 = '
+fwrite(STDERR, "STARTED\n");
+fflush(STDERR);
+fgets(STDIN);
+
+fwrite(STDOUT, "\x03");
+fflush(STDOUT);
+fwrite(STDERR, "READY\n");
+fflush(STDERR);
+fgets(STDIN);
+';
 $proc4 = proc_open(
-    [PHP_BINARY, '-r', 'fwrite(STDOUT, "\x03"); fflush(STDOUT); fgets(STDIN);'],
+    [PHP_BINARY, '-r', $code4],
     [
         0 => ['pty'],
         1 => ['pty'],
@@ -115,7 +160,13 @@ $proc4 = proc_open(
     ],
     $pipes4,
 );
+$r0 = fgets($pipes4[2]);
 $terminal4 = Terminal::fromStreams($pipes4[0]);
+$terminal4->enableRawMode();
+
+fwrite($pipes4[0], "START\n");
+$r1 = fgets($pipes4[2]);
+
 try {
     $terminal4->readSecret(Duration::fromMilliseconds(100));
     echo "FAIL: expected TerminalException on cancellation\n";
