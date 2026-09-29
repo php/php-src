@@ -71,6 +71,15 @@ class Sleeper
     }
 }
 
+/* Built at runtime: OPcache folds a constant str_repeat() into an interned string that preg_match() cannot mark. */
+function valid_utf8(int $chars): string
+{
+    $string = str_repeat('é', $chars);
+    preg_match('//u', $string);
+
+    return $string;
+}
+
 $cache = UserCache\Cache::getPool('graph-internal-sleep-object');
 
 $shared = new Plain();
@@ -118,10 +127,8 @@ for ($round = 0; $round < 2; $round++) {
 }
 
 echo "valid UTF-8 flag:\n";
-$utf8 = str_repeat('é', 4000);
-preg_match('//u', $utf8);
-$overPinBudget = str_repeat('é', 2500000);
-preg_match('//u', $overPinBudget);
+$utf8 = valid_utf8(4000);
+$overPinBudget = valid_utf8(2500000);
 var_dump(zend_test_is_string_marked_as_valid_utf8($utf8), zend_test_is_string_marked_as_valid_utf8($overPinBudget));
 var_dump($cache->store('utf8', $utf8));
 echo 'zero-copy root: ';

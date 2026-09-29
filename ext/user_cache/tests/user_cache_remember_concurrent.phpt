@@ -11,6 +11,8 @@ user_cache.enable=1
 user_cache.enable_cli=1
 --FILE--
 <?php
+/* The segment outlives the request (php --repeat): start from a fresh pool. */
+UserCache\Cache::deletePool('remember-concurrent');
 $cache = UserCache\Cache::getPool('remember-concurrent');
 $cache->store('calls', 0);
 $sockets = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);

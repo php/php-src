@@ -264,7 +264,7 @@ static void ucache_shared_boundary_log_dir_failure(const char *dir_path, const c
 	snprintf(
 		ucache_boundary_dir_failure_msg,
 		sizeof(ucache_boundary_dir_failure_msg),
-		"UserCache boundary directory %s is unusable (%s); it must be a directory owned by uid %lu "
+		"UserCache: boundary directory %s is unusable (%s); it must be a directory owned by uid %lu "
 		"with mode 0700 (see user_cache.lockfile_path)",
 		dir_path,
 		reason,

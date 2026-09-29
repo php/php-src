@@ -21,6 +21,9 @@ function in_child(callable $write): void
     }
 }
 
+/* The segment outlives the request (php --repeat): start from fresh pools. */
+UserCache\Cache::deletePool('cross');
+UserCache\Cache::deletePool('zero-copy-record');
 $cache = UserCache\Cache::getPool('cross');
 
 echo "has():\n";

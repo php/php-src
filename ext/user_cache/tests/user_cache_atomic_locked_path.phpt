@@ -60,7 +60,7 @@ echo attempt(fn() => $cache->increment('held')), "\n";
 var_dump($cache->fetch('held') === PHP_INT_MAX - 9);
 var_dump($cache->fetch('held-missing'));
 ?>
---EXPECT--
+--EXPECTF--
 5
 -2
 1
@@ -68,13 +68,13 @@ int(1)
 -4
 int(-4)
 bool(true)
-9223372036854775807
+%d
 ArithmeticError: Increment of user cache key "expiring-max" would exceed the range of a PHP integer
 bool(true)
 bool(true)
--9223372036854775807-1
+-%d-1
 ArithmeticError: Decrement of user cache key "expiring-min" would exceed the range of a PHP integer
--9223372036854775807-1
+-%d-1
 bool(true)
 bool(true)
 bool(true)
@@ -86,13 +86,13 @@ float(1.5)
 bool(true)
 bool(true)
 -10
-9223372036854775797
+%d
 ArithmeticError: Increment of user cache key "held" would exceed the range of a PHP integer
 bool(true)
 bool(true)
 -4
 bool(true)
 bool(true)
-9223372036854775798
+%d
 bool(true)
 int(-4)

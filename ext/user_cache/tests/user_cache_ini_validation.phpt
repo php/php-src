@@ -14,14 +14,22 @@ user_cache.lockfile_path=relative/dir
 var_dump(ini_get('user_cache.preferred_memory_model'), ini_get('user_cache.lockfile_path'));
 var_dump(UserCache\Cache::getPool('ini-validation')->store('k', 1), UserCache\Cache::getPool('ini-validation')->fetch('k'));
 
-$command = sprintf(
-    '%s -n -d user_cache.enable=1 -d user_cache.enable_cli=1 -d user_cache.preferred_memory_model=cgi -d user_cache.lockfile_path= -r %s 2>&1',
+/* "cgi" is accepted as an alias of "shm", which only builds with SysV shared memory provide (never macOS) */
+$shm = shell_exec(sprintf(
+    '%s -n -d user_cache.preferred_memory_model=shm -r %s 2>&1',
     escapeshellarg(PHP_BINARY),
+    escapeshellarg('echo ini_get("user_cache.preferred_memory_model");')
+));
+$model = $shm === 'shm' ? 'cgi' : 'mmap';
+$command = sprintf(
+    '%s -n -d user_cache.enable=1 -d user_cache.enable_cli=1 -d user_cache.preferred_memory_model=%s -d user_cache.lockfile_path= -r %s 2>&1',
+    escapeshellarg(PHP_BINARY),
+    $model,
     escapeshellarg('var_dump(ini_get("user_cache.preferred_memory_model"), ini_get("user_cache.lockfile_path"), UserCache\Cache::getPool("x")->store("k", 1));')
 );
 echo shell_exec($command);
 ?>
---EXPECT--
+--EXPECTF--
 Warning: user_cache.lockfile_path must be an absolute path, "relative/dir" given in Unknown on line 0
 
 Warning: user_cache.preferred_memory_model "bogus" is not a memory model available on this platform in Unknown on line 0
@@ -31,6 +39,6 @@ bool(true)
 int(1)
 
 Warning: user_cache.lockfile_path must be an absolute path, "" given in Unknown on line 0
-string(3) "cgi"
+string(%d) "%s"
 string(4) "/tmp"
 bool(true)

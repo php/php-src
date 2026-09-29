@@ -159,7 +159,9 @@
 # define UCACHE_OPTIMISTIC_MSVC	1
 #endif
 
-#if !defined(ZEND_WIN32) && defined(HAVE_PTHREAD_MUTEXATTR_SETROBUST) && defined(HAVE_PTHREAD_MUTEX_CONSISTENT)
+#if !defined(ZEND_WIN32) && defined(HAVE_PTHREAD_MUTEXATTR_SETPSHARED) && \
+	defined(HAVE_PTHREAD_MUTEXATTR_SETROBUST) && defined(HAVE_PTHREAD_MUTEX_CONSISTENT) && \
+	(defined(HAVE_PTHREAD_MUTEX_CLOCKLOCK) || defined(HAVE_PTHREAD_MUTEX_TIMEDLOCK))
 # define UCACHE_HAVE_SHARED_MUTEX	1
 #endif
 
@@ -1288,7 +1290,9 @@ static zend_always_inline size_t ucache_offset_bytes(uint32_t offset)
 static zend_always_inline uint32_t ucache_offset_from_bytes(size_t bytes)
 {
 	ZEND_ASSERT((bytes & (UCACHE_OFFSET_UNIT - 1)) == 0);
+#if SIZEOF_SIZE_T > 4
 	ZEND_ASSERT((uint64_t) bytes <= UCACHE_SEG_SIZE_MAX);
+#endif
 
 	return (uint32_t) (bytes >> UCACHE_OFFSET_SHIFT);
 }

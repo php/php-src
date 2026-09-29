@@ -3,6 +3,7 @@ UserCache\Cache: a write to a key another process has locked waits for the lock,
 --SKIPIF--
 <?php
 if (!PHP_DEBUG) die('skip requires a debug build (fault injection is ZEND_DEBUG-only)');
+if (getenv('SKIP_REPEAT')) die('skip leased locks of the previous run still guard the keys');
 ?>
 --EXTENSIONS--
 pcntl

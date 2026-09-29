@@ -188,7 +188,7 @@ static void ucache_log_boundary_partition_limit(void)
 	snprintf(
 		limit_msg,
 		sizeof(limit_msg),
-		"UserCache boundary partition limit (%u) reached; creation of new partitions has been disabled "
+		"UserCache: boundary partition limit (%u) reached; creation of new partitions has been disabled "
 		"for this process; existing partitions remain available",
 		UCACHE_MAX_BOUNDARY_PARTITIONS
 	);
@@ -333,7 +333,7 @@ static bool ucache_boundary_partition_startup_storage(php_ucache_partition *part
 	if (php_ucache_is_enabled_by_ini() &&
 		!atomic_exchange(&ucache_boundary_startup_failed_logged, true)
 	) {
-		ucache_log_err("UserCache partition startup failed; UserCache will be unavailable");
+		ucache_log_err("UserCache: partition startup failed; UserCache will be unavailable");
 	}
 
 	return false;

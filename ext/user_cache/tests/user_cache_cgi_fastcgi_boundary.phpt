@@ -45,7 +45,7 @@ PHP;
 
     $server->start([
         'user_cache.enable=1',
-        'user_cache.shm_size=32M',
+        'user_cache.shm_size=8M',
         'opcache.file_update_protection=0',
     ], $alphaScript, $alphaRoot, 'alpha.local', 'action=fetch');
 
@@ -158,7 +158,7 @@ PHP;
     $limit->expect('host01.local:host01.local-value:Available', $script, $docRoots[1], 'host01.local', 'action=fetch');
 
     $contents = is_file($log) ? file_get_contents($log) : '';
-    $needle = 'UserCache boundary partition limit (32) reached; creation of new partitions has been disabled';
+    $needle = 'UserCache: boundary partition limit (32) reached; creation of new partitions has been disabled';
     if (substr_count($contents, $needle) !== 1) {
         throw new RuntimeException("Expected one boundary-limit error-log entry, got:\n" . $contents);
     }

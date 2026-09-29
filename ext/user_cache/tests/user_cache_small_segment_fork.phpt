@@ -162,6 +162,16 @@ function remember_lock_table_full(): void
     var_dump(pcntl_wexitstatus($status));
 }
 
+/* The segment outlives the request (php --repeat): start from fresh pools. */
+foreach ([
+            'eviction-lru-small-table',
+            'lock-dead-owners',
+            'dead-owner-lease-eviction',
+            'remember-lock-table-full'
+        ] as $pool) {
+    Cache::deletePool($pool);
+}
+
 echo "eviction lru small table:\n";
 eviction_lru_small_table();
 
