@@ -75,11 +75,12 @@ static void dblib_handle_closer(pdo_dbh_t *dbh)
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 
 	if (H) {
-		pdo_dblib_err_dtor(&H->err);
 		if (H->link) {
+			dbsetuserdata(H->link, (BYTE*) &H->err);
 			dbclose(H->link);
 			H->link = NULL;
 		}
+		pdo_dblib_err_dtor(&H->err);
 		if (H->login) {
 			dbfreelogin(H->login);
 			H->login = NULL;
@@ -200,6 +201,8 @@ static bool pdo_dblib_transaction_cmd(const char *cmd, pdo_dbh_t *dbh)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 
+	dbsetuserdata(H->link, (BYTE*) &H->err);
+
 	if (FAIL == dbcmd(H->link, cmd)) {
 		return false;
 	}
@@ -237,6 +240,8 @@ zend_string *dblib_handle_last_id(pdo_dbh_t *dbh, const zend_string *name)
 	/*
 	 * Would use scope_identity() but it's not implemented on Sybase
 	 */
+
+	dbsetuserdata(H->link, (BYTE*) &H->err);
 
 	if (FAIL == dbcmd(H->link, "SELECT @@IDENTITY")) {
 		return NULL;
