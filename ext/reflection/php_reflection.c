@@ -5142,7 +5142,7 @@ void reflection_class_new_lazy(INTERNAL_FUNCTION_PARAMETERS,
 		/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
 		 * with it ourselves. It is important that it is not refetched on every call,
 		 * because calls may occur from different scopes. */
-		zend_is_callable_ex(&fci.function_name, NULL, 0, NULL, &fcc, NULL);
+		zend_is_callable(&fci.function_name, &fcc, NULL);
 	}
 
 	obj = zend_object_make_lazy(obj, ce, &fci.function_name, &fcc,
