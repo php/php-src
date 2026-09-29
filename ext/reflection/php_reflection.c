@@ -5277,7 +5277,7 @@ ZEND_METHOD(ReflectionClass, getLazyInitializer)
 		RETURN_NULL();
 	}
 
-	RETURN_ZVAL(zend_lazy_object_get_initializer_zv(object), true, false);
+	zend_lazy_object_get_initializer_callback(object, return_value);
 }
 /* }}} */
 

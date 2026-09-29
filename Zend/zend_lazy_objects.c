@@ -116,7 +116,7 @@ static bool zend_lazy_object_has_stale_info(const zend_object *obj)
 	return zend_hash_index_find_ptr(&EG(lazy_objects_store).infos, obj->handle);
 }
 
-zval* zend_lazy_object_get_initializer_zv(zend_object *obj)
+ZEND_API void zend_lazy_object_get_initializer_callback(zend_object *obj, zval *callback)
 {
 	ZEND_ASSERT(!zend_lazy_object_initialized(obj));
 
@@ -124,7 +124,7 @@ zval* zend_lazy_object_get_initializer_zv(zend_object *obj)
 
 	ZEND_ASSERT(!(info->flags & ZEND_LAZY_OBJECT_INITIALIZED));
 
-	return &info->u.initializer.zv;
+	zend_get_callable_zval_from_fcc(&info->u.initializer.fcc, callback);
 }
 
 static zend_fcall_info_cache* zend_lazy_object_get_initializer_fcc(const zend_object *obj)
