@@ -65,7 +65,7 @@ ZEND_API zend_object *zend_lazy_object_mark_as_initialized(zend_object *obj);
 
 void zend_lazy_objects_init(zend_lazy_objects_store *store);
 void zend_lazy_objects_destroy(zend_lazy_objects_store *store);
-zval* zend_lazy_object_get_initializer_zv(zend_object *obj);
+ZEND_API void zend_lazy_object_get_initializer_callback(zend_object *obj, zval *callback);
 zend_object *zend_lazy_object_get_instance(zend_object *obj);
 zend_lazy_object_flags_t zend_lazy_object_get_flags(const zend_object *obj);
 void zend_lazy_object_del_info(const zend_object *obj);
