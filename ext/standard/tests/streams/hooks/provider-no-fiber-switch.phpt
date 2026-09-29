@@ -24,12 +24,18 @@ final class CapsSuspends extends Base
 
 final class AddSuspends extends Base
 {
+    private bool $reported = false;
+
     public function add(Io\Registration $registration): void
     {
         try {
             Fiber::suspend();
         } catch (FiberError $e) {
-            echo "add: ", $e->getMessage(), "\n";
+            /* libcurl may report the socket more than once for one connect */
+            if (!$this->reported) {
+                echo "add: ", $e->getMessage(), "\n";
+                $this->reported = true;
+            }
         }
     }
 }

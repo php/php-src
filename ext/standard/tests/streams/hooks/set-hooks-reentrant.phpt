@@ -48,12 +48,18 @@ final class RunDrops extends Base
 
 final class AddReplaces extends Base
 {
+    private bool $reported = false;
+
     public function add(Io\Registration $registration): void
     {
         try {
             Io\Hooks\set_hooks(new Base());
         } catch (Error $e) {
-            echo $e->getMessage(), "\n";
+            /* libcurl may report the socket more than once for one connect */
+            if (!$this->reported) {
+                echo $e->getMessage(), "\n";
+                $this->reported = true;
+            }
         }
     }
 }
