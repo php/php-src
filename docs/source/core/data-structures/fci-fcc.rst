@@ -412,8 +412,8 @@ The FCC API is defined in ``Zend/zend_API.h``.
    Specifies positional arguments whose ownership is transfered to the function being called. This
    is used as an optimization to avoid an unnecessary ``Z_ADDREF_P()``/``zval_ptr_dtor()`` when the
    value is not used after the call. Only one argument can be specified at once with
-   ``zend_fci_consumed_arg(n)`` (zero-based), and the value must not be a reference.
-   Must be set to ``0`` when no parameter applies. New since PHP 8.6.
+   ``zend_fci_consumed_arg(n)`` (zero-based), and the value must not be a reference. Must be set to
+   ``0`` when no parameter applies. New since PHP 8.6.
 
 ``params``:
    contains positional arguments that will be provided to this call to the function. If
