@@ -2541,7 +2541,7 @@ static zend_class_entry* zend_accel_inheritance_cache_get(zend_class_entry *ce, 
 	zend_inheritance_cache_entry *entry = ce->inheritance_cache;
 
 	if (entry) {
-		ZEND_ATOMIC_FENCE_ACQUIRE();
+		atomic_thread_fence(memory_order_acquire);
 	}
 
 	while (entry) {
@@ -2702,7 +2702,7 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 	entry->next = proto->inheritance_cache;
 
 	ZCSG(map_ptr_last) = CG(map_ptr_last);
-	ZEND_ATOMIC_FENCE_RELEASE();
+	atomic_thread_fence(memory_order_release);
 	proto->inheritance_cache = entry;
 
 	zend_shared_alloc_destroy_xlat_table();
