@@ -556,7 +556,7 @@ static bool php_socket_wait(php_socket *sock, php_socket_waiter *w, int events)
 			return false;
 		}
 		/* a timed call fails on a signal, otherwise only when PHP has work for it */
-		if (errno != EINTR || w->end || zend_atomic_bool_load_ex(&EG(vm_interrupt))) {
+		if (errno != EINTR || w->end || atomic_load(&EG(vm_interrupt))) {
 			return false;
 		}
 	}

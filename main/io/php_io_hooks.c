@@ -33,7 +33,7 @@ PHPAPI bool (*php_io_signal_pending)(void) = NULL;
 
 PHPAPI bool php_io_interrupt_pending(void)
 {
-	return zend_atomic_bool_load_ex(&EG(vm_interrupt)) || (php_io_signal_pending && php_io_signal_pending());
+	return atomic_load(&EG(vm_interrupt)) || (php_io_signal_pending && php_io_signal_pending());
 }
 
 /* The callers of the socket entry points read php_socket_errno(), which on
