@@ -64,28 +64,6 @@ MBSTRING_API bool php_unicode_is_prop1(unsigned long code, int prop)
 	return prop_lookup(code, prop);
 }
 
-MBSTRING_API bool php_unicode_is_prop(unsigned long code, ...)
-{
-	bool result = false;
-	va_list va;
-	va_start(va, code);
-
-	while (1) {
-		int prop = va_arg(va, int);
-		if (prop < 0) {
-			break;
-		}
-
-		if (prop_lookup(code, prop)) {
-			result = true;
-			break;
-		}
-	}
-
-	va_end(va);
-	return result;
-}
-
 static inline unsigned mph_hash(unsigned d, unsigned x) {
 	x ^= d;
 	x = ((x >> 16) ^ x) * 0x45d9f3b;

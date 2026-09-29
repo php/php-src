@@ -45,36 +45,6 @@ void mbfl_memory_device_init(mbfl_memory_device *device, size_t initsz, size_t a
 	device->allocsz = MAX(allocsz, MBFL_MEMORY_DEVICE_ALLOC_SIZE);
 }
 
-void mbfl_memory_device_realloc(mbfl_memory_device *device, size_t initsz, size_t allocsz)
-{
-	if (initsz > device->length) {
-		device->buffer = erealloc(device->buffer, initsz);
-		device->length = initsz;
-	}
-	device->allocsz = MAX(allocsz, MBFL_MEMORY_DEVICE_ALLOC_SIZE);
-}
-
-void mbfl_memory_device_clear(mbfl_memory_device *device)
-{
-	if (device->buffer) {
-		efree(device->buffer);
-	}
-	device->buffer = NULL;
-	device->length = device->pos = 0;
-}
-
-void mbfl_memory_device_reset(mbfl_memory_device *device)
-{
-	device->pos = 0;
-}
-
-void mbfl_memory_device_unput(mbfl_memory_device *device)
-{
-	if (device->pos > 0) {
-		device->pos--;
-	}
-}
-
 mbfl_string* mbfl_memory_device_result(mbfl_memory_device *device, mbfl_string *result)
 {
 	result->len = device->pos;
@@ -103,82 +73,5 @@ int mbfl_memory_device_output(int c, void *data)
 	}
 
 	device->buffer[device->pos++] = (unsigned char)c;
-	return 0;
-}
-
-int mbfl_memory_device_strcat(mbfl_memory_device *device, const char *psrc)
-{
-	return mbfl_memory_device_strncat(device, psrc, strlen(psrc));
-}
-
-int mbfl_memory_device_strncat(mbfl_memory_device *device, const char *psrc, size_t len)
-{
-	if (len > device->length - device->pos) {
-		/* reallocate buffer */
-
-		if (len > SIZE_MAX - MBFL_MEMORY_DEVICE_ALLOC_SIZE
-				|| device->length > SIZE_MAX - (len + MBFL_MEMORY_DEVICE_ALLOC_SIZE)) {
-			/* overflow */
-			return -1;
-		}
-
-		size_t newlen = device->length + len + MBFL_MEMORY_DEVICE_ALLOC_SIZE;
-		device->buffer = erealloc(device->buffer, newlen);
-		device->length = newlen;
-	}
-
-	unsigned char *w = &device->buffer[device->pos];
-	memcpy(w, psrc, len);
-	device->pos += len;
-
-	return 0;
-}
-
-int mbfl_memory_device_devcat(mbfl_memory_device *dest, mbfl_memory_device *src)
-{
-	return mbfl_memory_device_strncat(dest, (const char*)src->buffer, src->pos);
-}
-
-void mbfl_wchar_device_init(mbfl_wchar_device *device)
-{
-	device->buffer = NULL;
-	device->length = 0;
-	device->pos = 0;
-	device->allocsz = MBFL_MEMORY_DEVICE_ALLOC_SIZE;
-}
-
-void mbfl_wchar_device_clear(mbfl_wchar_device *device)
-{
-	if (device->buffer) {
-		efree(device->buffer);
-	}
-	device->buffer = NULL;
-	device->length = device->pos = 0;
-}
-
-int mbfl_wchar_device_output(int c, void *data)
-{
-	mbfl_wchar_device *device = (mbfl_wchar_device *)data;
-
-	if (device->pos >= device->length) {
-		/* reallocate buffer */
-		size_t newlen;
-
-		if (device->length > SIZE_MAX - device->allocsz) {
-			/* overflow */
-			return -1;
-		}
-
-		newlen = device->length + device->allocsz;
-		if (newlen > SIZE_MAX / sizeof(int)) {
-			/* overflow */
-			return -1;
-		}
-
-		device->buffer = erealloc(device->buffer, newlen * sizeof(int));
-		device->length = newlen;
-	}
-
-	device->buffer[device->pos++] = c;
 	return 0;
 }

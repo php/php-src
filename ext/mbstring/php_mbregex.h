@@ -20,8 +20,6 @@
 #include "php.h"
 #include "zend.h"
 
-#define PHP_MBREGEX_MAXCACHE 50
-
 PHP_MINIT_FUNCTION(mb_regex);
 PHP_MSHUTDOWN_FUNCTION(mb_regex);
 PHP_RINIT_FUNCTION(mb_regex);

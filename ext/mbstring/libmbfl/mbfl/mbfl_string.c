@@ -42,11 +42,3 @@ void mbfl_string_init(mbfl_string *string)
 {
 	mbfl_string_init_set(string, &mbfl_encoding_pass);
 }
-
-void mbfl_string_clear(mbfl_string *string)
-{
-	if (string->val) {
-		efree(string->val);
-	}
-	mbfl_string_init_set(string, NULL); /* Poison it so any attempt to reuse will fail hard */
-}

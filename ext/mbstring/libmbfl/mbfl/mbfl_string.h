@@ -47,6 +47,5 @@ typedef struct _mbfl_string {
 
 MBFLAPI extern void mbfl_string_init(mbfl_string *string);
 MBFLAPI extern void mbfl_string_init_set(mbfl_string *string, const mbfl_encoding *encoding);
-MBFLAPI extern void mbfl_string_clear(mbfl_string *string);
 
 #endif /* MBFL_STRING_H */

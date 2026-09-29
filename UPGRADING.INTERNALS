@@ -46,6 +46,19 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 3. Module changes
 ========================
 
+- Mbstring:
+  . The following unused libmbfl functions were removed:
+    mbfl_convert_filter_new2(), mbfl_convert_filter_feed_string(),
+    mbfl_convert_filter_reset(), mbfl_convert_filter_devcat(),
+    mbfl_memory_device_realloc(), mbfl_memory_device_clear(),
+    mbfl_memory_device_reset(), mbfl_memory_device_unput(),
+    mbfl_memory_device_strcat(), mbfl_memory_device_strncat(),
+    mbfl_memory_device_devcat(), mbfl_wchar_device_init(),
+    mbfl_wchar_device_output(), mbfl_wchar_device_clear(),
+    mbfl_string_clear() and mbfl_filter_output_pipe().
+  . The mbfl_wchar_device struct was removed.
+  . The unused MBFL_ERROR_EMPTY and PHP_MBREGEX_MAXCACHE macros were removed.
+
 - Standard:
   . php_explode() now takes a HashTable* instead of a zval* to store the
     resulting parts. It already expected the zval* to be IS_ARRAY.
