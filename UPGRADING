@@ -79,3 +79,5 @@ PHP 8.7 UPGRADE NOTES
 - Standard:
   . Improved performance of array_splice() when inserting without removing
     elements.
+  . Improved performance of min() and max() for integer-only and float-only
+    arrays.
