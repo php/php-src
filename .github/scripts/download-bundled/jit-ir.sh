@@ -5,7 +5,7 @@ cd "$(dirname "$0")/../../.."
 tmp_dir=/tmp/php-src-download-bundled/jit-ir
 rm -rf "$tmp_dir"
 
-revision=a098f9ed6c2f1c2852d6c0921283212aafb4afed
+revision=00bec1ca490b8bc51f636a42040c5e9f64c1a91b
 
 git clone --depth 1 --revision="$revision" https://github.com/dstogov/ir.git "$tmp_dir"
 
@@ -15,7 +15,7 @@ cp -R "$tmp_dir" ext/opcache/jit/ir
 cd ext/opcache/jit/ir
 
 # remove unneeded files
-rm -r .git
+rm -rf .git
 rm -r .github
 rm -r bench
 rm -r examples
