@@ -94,6 +94,8 @@ PHP                                                                        NEWS
     the inclusive upper bound. (lacatoire)
   . Fixed pcntl_setqos_class() requiring its optional $qos_class argument.
     (lacatoire)
+  . Fixed bug GH-23986 (/proc/self paths resolve to the parent process after
+    pcntl_fork()). (Lazizbek Ergashev)
 
 - PDO:
   . Fixed PDOStatement::getColumnMeta() reading out of bounds for an invalid
