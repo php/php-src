@@ -1068,6 +1068,9 @@ static zend_always_inline void bcmath_number_add_internal(
 	}
 	*ret = bc_add(n1, n2, *scale);
 	(*ret)->n_scale = MIN(*scale, (*ret)->n_scale);
+	if (bc_is_zero(*ret)) {
+		(*ret)->n_sign = PLUS;
+	}
 	bc_rm_trailing_zeros(*ret);
 }
 
@@ -1080,6 +1083,9 @@ static zend_always_inline void bcmath_number_sub_internal(
 	}
 	*ret = bc_sub(n1, n2, *scale);
 	(*ret)->n_scale = MIN(*scale, (*ret)->n_scale);
+	if (bc_is_zero(*ret)) {
+		(*ret)->n_sign = PLUS;
+	}
 	bc_rm_trailing_zeros(*ret);
 }
 
@@ -1096,6 +1102,9 @@ static zend_always_inline zend_result bcmath_number_mul_internal(
 	}
 	*ret = bc_multiply(n1, n2, *scale);
 	(*ret)->n_scale = MIN(*scale, (*ret)->n_scale);
+	if (bc_is_zero(*ret)) {
+		(*ret)->n_sign = PLUS;
+	}
 	bc_rm_trailing_zeros(*ret);
 	return SUCCESS;
 }
