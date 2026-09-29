@@ -84,7 +84,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-23637 (PHP-FPM worker SIGSEGV: run_time_cache map_ptr offset
     beyond CG(map_ptr_last) when a class is reached through the CE cache).
     (David Carlier)
-  . Fix incorrect DCE due to unsound escape analysis. (ndossche)
+  . Fix multiple incorrect DCE due to unsound escape analysis. (ndossche,
+    arnaud-lb)
 
 - OpenSSL:
   . Fixed stream_socket_enable_crypto() leaving the socket non-blocking
