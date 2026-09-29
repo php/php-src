@@ -1814,6 +1814,7 @@ PHPAPI void php_child_init(void)
 {
 	refresh_memory_manager();
 	zend_max_execution_timer_init();
+	php_clear_stat_cache(true, NULL, 0);
 }
 
 /* {{{ php_request_startup */
