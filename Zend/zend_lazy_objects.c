@@ -96,7 +96,7 @@ static void zend_lazy_object_set_info(const zend_object *obj, zend_lazy_object_i
 {
 	ZEND_ASSERT(zend_object_is_lazy(obj));
 
-	zval *zv = zend_hash_index_add_new_ptr(&EG(lazy_objects_store).infos, obj->handle, info);
+	const zval *zv = zend_hash_index_add_new_ptr(&EG(lazy_objects_store).infos, obj->handle, info);
 	ZEND_ASSERT(zv);
 	(void)zv;
 }
@@ -127,7 +127,7 @@ zval* zend_lazy_object_get_initializer_zv(zend_object *obj)
 	return &info->u.initializer.zv;
 }
 
-static zend_fcall_info_cache* zend_lazy_object_get_initializer_fcc(zend_object *obj)
+static zend_fcall_info_cache* zend_lazy_object_get_initializer_fcc(const zend_object *obj)
 {
 	ZEND_ASSERT(!zend_lazy_object_initialized(obj));
 
@@ -236,8 +236,8 @@ static bool zlo_is_iterating(zend_object *object)
 /* Make object 'obj' lazy. If 'obj' is NULL, create a lazy instance of
  * class 'reflection_ce' */
 ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
-		zend_class_entry *reflection_ce, zval *initializer_zv,
-		zend_fcall_info_cache *initializer_fcc, zend_lazy_object_flags_t flags)
+		zend_class_entry *reflection_ce, const zval *initializer_zv,
+		const zend_fcall_info_cache *initializer_fcc, zend_lazy_object_flags_t flags)
 {
 	ZEND_ASSERT(!(flags & ~(ZEND_LAZY_OBJECT_USER_MASK|ZEND_LAZY_OBJECT_STRATEGY_MASK)));
 	ZEND_ASSERT((flags & ZEND_LAZY_OBJECT_STRATEGY_MASK) == ZEND_LAZY_OBJECT_STRATEGY_GHOST
@@ -252,7 +252,7 @@ ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 		return NULL;
 	}
 
-	for (zend_class_entry *parent = reflection_ce->parent; parent; parent = parent->parent) {
+	for (const zend_class_entry *parent = reflection_ce->parent; parent; parent = parent->parent) {
 		if (UNEXPECTED(parent->type == ZEND_INTERNAL_CLASS && parent != zend_standard_class_def)) {
 			zend_throw_error(NULL, "Cannot make instance of internal class lazy: %s inherits internal class %s",
 				ZSTR_VAL(reflection_ce->name), ZSTR_VAL(parent->name));
@@ -285,7 +285,7 @@ ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 			ZVAL_UNDEF(p);
 			Z_PROP_FLAG_P(p) = 0;
 
-			zend_property_info *prop_info = obj->ce->properties_info_table[i];
+			const zend_property_info *prop_info = obj->ce->properties_info_table[i];
 			if (prop_info) {
 				zval *p = &obj->properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
 				Z_PROP_FLAG_P(p) = IS_PROP_UNINIT | IS_PROP_LAZY;
@@ -417,7 +417,7 @@ ZEND_API zend_object *zend_lazy_object_mark_as_initialized(zend_object *obj)
 /* Revert initializer effects */
 static void zend_lazy_object_revert_init(zend_object *obj, zval *properties_table_snapshot, HashTable *properties_snapshot)
 {
-	zend_class_entry *ce = obj->ce;
+	const zend_class_entry *ce = obj->ce;
 
 	if (ce->default_properties_count) {
 		ZEND_ASSERT(properties_table_snapshot);
@@ -502,7 +502,7 @@ static zend_object *zend_lazy_object_init_proxy(zend_object *obj)
 
 	/* Snapshot declared properties */
 	if (obj->ce->default_properties_count) {
-		zval *properties_table = obj->properties_table;
+		const zval *properties_table = obj->properties_table;
 		properties_table_snapshot = emalloc(sizeof(*properties_table_snapshot) * obj->ce->default_properties_count);
 
 		for (int i = 0; i < obj->ce->default_properties_count; i++) {
@@ -514,7 +514,7 @@ static zend_object *zend_lazy_object_init_proxy(zend_object *obj)
 	zval retval;
 	zval zobj;
 	HashTable *named_params = NULL;
-	zend_fcall_info_cache *initializer = &info->u.initializer.fcc;
+	const zend_fcall_info_cache *initializer = &info->u.initializer.fcc;
 	zend_object *instance = NULL;
 
 	ZVAL_OBJ(&zobj, obj);
@@ -623,7 +623,7 @@ ZEND_API zend_object *zend_lazy_object_init(zend_object *obj)
 		return info->u.instance;
 	}
 
-	zend_class_entry *ce = obj->ce;
+	const zend_class_entry *ce = obj->ce;
 
 #if ZEND_DEBUG
 	ZEND_ASSERT(zend_class_constants_are_updated(ce));
@@ -652,7 +652,7 @@ ZEND_API zend_object *zend_lazy_object_init(zend_object *obj)
 	/* Snapshot declared properties and initialize lazy properties to their
 	 * default value */
 	if (ce->default_properties_count) {
-		zval *default_properties_table = CE_DEFAULT_PROPERTIES_TABLE(ce);
+		const zval *default_properties_table = CE_DEFAULT_PROPERTIES_TABLE(ce);
 		zval *properties_table = obj->properties_table;
 		properties_table_snapshot = emalloc(sizeof(*properties_table_snapshot) * ce->default_properties_count);
 
@@ -773,7 +773,7 @@ zend_object *zend_lazy_object_clone(zend_object *old_obj)
 		return zend_objects_clone_obj(old_obj);
 	}
 
-	zend_lazy_object_info *info = zend_lazy_object_get_info(old_obj);
+	const zend_lazy_object_info *info = zend_lazy_object_get_info(old_obj);
 	zend_class_entry *ce = old_obj->ce;
 	zend_object *new_proxy = zend_objects_new(ce);
 
