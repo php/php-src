@@ -21,6 +21,10 @@ PHP                                                                        NEWS
     php_openssl_matches_wildcard_name() on crafted server certificate wildcard
     CN). (CVE-2026-91767) (Jakub Zelenka)
 
+- PCRE:
+  . Backported upstream fix for GHSA-r9hj-j2rw-4q3m (Out-of-bounds write in JIT
+    matching with large stack allocations). (Alexandre Daubois)
+
 - Phar:
   . Fixed GHSA-j3wh-g957-2m85 (Integer overflow in phar_tar_number() allowing
     TAR archive entry injection). (CVE-2026-6103) (Jakub Zelenka)
