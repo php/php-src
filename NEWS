@@ -163,6 +163,10 @@ PHP                                                                        NEWS
     lookup, and an unchecked CreateFileA() failure. (Ilia Alshanetsky)
   . Fix persistent stream context lifetime during shutdown (Levi Morrison)
 
+- Tidy:
+  . Fixed a use-after-free when a tidyNode is used after its document is
+    reparsed. (Ilia Alshanetsky)
+
 - Zlib:
   . Fixed inflate_init() dropping the preset dictionary for raw streams with
     a non-default window. (Ilia Alshanetsky)
