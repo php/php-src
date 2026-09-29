@@ -528,8 +528,9 @@ static zend_result php_io_poll_queue_cancel(php_io_queue *base, php_io_op *op)
 }
 
 /* A registration retains the descriptor's record between waits, and an Edge pair arms it
- * edge-triggered for good. The record is found by descriptor, never through the registration,
- * so a record a replaced provider left behind costs nothing more than its memory. */
+ * edge-triggered for good. The record is found through the registration while the queue's id
+ * matches and by descriptor otherwise, so a record a replaced provider left behind costs nothing
+ * more than its memory. */
 static zend_result php_io_poll_queue_add(php_io_queue *base, php_io_registration *registration)
 {
 	php_io_poll_queue *q = (php_io_poll_queue *) base;

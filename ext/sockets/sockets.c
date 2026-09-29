@@ -770,6 +770,7 @@ static int php_socket_connect(php_socket *sock, const struct sockaddr *addr, soc
 		php_deadline dl = php_socket_op_deadline(sock, SO_SNDTIMEO, 0);
 		int ret = php_io_connect_ex(o.stream, o.handle, sock->bsd_socket, addr, addrlen, &dl);
 		php_socket_op_end(sock, &o);
+		php_socket_op_errno(ret);
 		if (ret != 0 && errno == PHP_SOCKET_WAIT_TIMEOUT) {
 			set_errno(EINPROGRESS);
 		}

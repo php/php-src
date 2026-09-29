@@ -33,7 +33,7 @@ class Scheduler implements \Io\Hooks\Hooks
         return new \Io\Poll\OperationQueue();
     }
 
-    /* IO_HOOKS_CAPS=files,direct opts in to what the queue supports, default is its own set */
+    /* IO_HOOKS_CAPS=files,directData,directAccept opts in to what the queue supports, default is its own set */
     public static function capabilities(\Io\OperationQueue $queue, ?array $wanted = null): array
     {
         if ($wanted === null) {

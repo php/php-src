@@ -3528,6 +3528,8 @@ static inline int php_openssl_tcp_sockop_accept(php_stream *stream, php_openssl_
 		clisockdata->s.socket = clisock;
 		clisockdata->s.is_blocked = true;
 		php_netstream_set_nonblocking(&clisockdata->s);
+		/* accepted by us, non-blocking already when the ring accepted it */
+		clisockdata->s.restore_blocking = true;
 
 		xparam->outputs.client = php_stream_alloc_rel(stream->ops, clisockdata, NULL, "r+");
 		if (xparam->outputs.client) {
