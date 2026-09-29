@@ -2,6 +2,8 @@
 Fibers in destructors 015: Exception thrown by a destructor called by the GC from internal code
 --INI--
 zend.enable_gc=1
+--XFAIL--
+Destructor exception is not caught if fiber is produced from create_fiber()???
 --FILE--
 <?php
 

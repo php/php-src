@@ -1923,7 +1923,6 @@ static zend_fiber *gc_create_destructor_fiber(void)
 	}
 
 	fiber = (zend_fiber *)Z_OBJ(zobj);
-	fiber->fci.size = sizeof(fiber->fci);
 	fiber->fci_cache.function_handler = (zend_function*) &gc_destructor_fiber;
 
 	GC_G(dtor_fiber) = fiber;

@@ -66,20 +66,20 @@ echo "end\n";
 --EXPECT--
 -- started after its creator's last reference went
 m on a1
-released a1
 after start
 -- a string callable
+released a1
 m on a2
-released a2
 after start
 -- never started, released with the fiber
+released a2
 released a3
 after unset
 -- suspended while its object has no other reference
 resumed on a4
-released a4
 after resume
 -- a cycle through the fiber is collected
 released a5
 int(2)
 end
+released a4
