@@ -13,14 +13,17 @@ function proc_self_pid() {
 }
 
 var_dump(proc_self_pid() === getmypid());
+$parent_inode = fileinode('/proc/self');
 
 $pid = pcntl_fork();
 if ($pid === 0) {
+    var_dump(fileinode('/proc/self') !== $parent_inode);
     var_dump(proc_self_pid() === getmypid());
     exit(0);
 }
 pcntl_waitpid($pid, $status);
 ?>
 --EXPECT--
+bool(true)
 bool(true)
 bool(true)

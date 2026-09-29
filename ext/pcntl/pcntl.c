@@ -29,6 +29,7 @@
 
 #include "php.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_filestat.h"
 #include "php_signal.h"
 #include "php_ticks.h"
 #include "zend_exceptions.h"
@@ -294,7 +295,7 @@ PHP_FUNCTION(pcntl_fork)
 		}
 	} else if (id == 0) {
 		zend_max_execution_timer_init();
-		realpath_cache_clean();
+		php_clear_stat_cache(true, NULL, 0);
 	}
 
 	RETURN_LONG((zend_long) id);
@@ -1574,7 +1575,7 @@ PHP_FUNCTION(pcntl_rfork)
 		}
 	} else if (pid == 0) {
 		zend_max_execution_timer_init();
-		realpath_cache_clean();
+		php_clear_stat_cache(true, NULL, 0);
 	}
 
 	RETURN_LONG((zend_long) pid);
@@ -1620,7 +1621,7 @@ PHP_FUNCTION(pcntl_forkx)
 		}
 	} else if (pid == 0) {
 		zend_max_execution_timer_init();
-		realpath_cache_clean();
+		php_clear_stat_cache(true, NULL, 0);
 	}
 
 	RETURN_LONG((zend_long) pid);
