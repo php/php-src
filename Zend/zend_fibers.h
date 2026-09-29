@@ -101,9 +101,6 @@ struct _zend_fiber {
 	/* PHP object handle. */
 	zend_object std;
 
-	/* Flags are defined in enum zend_fiber_flag. */
-	uint8_t flags;
-
 	/* Native C fiber context. */
 	zend_fiber_context context;
 
@@ -113,8 +110,13 @@ struct _zend_fiber {
 	/* Fiber that suspended us. */
 	zend_fiber_context *previous;
 
-	/* Callback and info / cache to be used when fiber is started. */
-	zend_fcall_info fci;
+	/* Flags are defined in enum zend_fiber_flag. */
+	uint8_t flags;
+
+	/* Callback and parameters to be used when fiber is started. */
+	uint32_t param_count;
+	zval *params;
+	HashTable *named_params;
 	zend_fcall_info_cache fci_cache;
 
 	/* Current Zend VM execute data being run by the fiber. */
