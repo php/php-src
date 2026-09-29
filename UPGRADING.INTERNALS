@@ -31,7 +31,8 @@ PHP 8.7 INTERNALS UPGRADE NOTES
   header interoperability is not required.
 - The signature of zend_is_callable() has been changed to
   zend_is_callable(const zval *callable, zend_fcall_info_cache *fcc, char **error)
-  from zend_is_callable(const zval *callable, uint32_t check_flags, zend_string **callable_name)
+  from zend_is_callable(const zval *callable, uint32_t check_flags, zend_string **callable_name).
+  This new signature covers the most common parameters used with zend_is_callable_ex().
 
 ========================
 2. Build system changes
