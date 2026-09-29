@@ -29,6 +29,7 @@
 
 #include "php.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_filestat.h"
 #include "php_signal.h"
 #include "php_ticks.h"
 #include "zend_exceptions.h"
