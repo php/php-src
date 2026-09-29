@@ -381,6 +381,8 @@ static void php_io_poll_fdreg_fire(php_io_poll_queue *q, php_io_poll_fdreg *reg,
 	}
 	bool failure = (revents & (PHP_POLL_ERROR | PHP_POLL_HUP)) != 0;
 	uint32_t consumed = 0;
+	/* A registration retains the record; without one it goes with its last request */
+	uint32_t edge = reg->edge;
 	php_io_poll_req *r = reg->reqs;
 	while (r) {
 		php_io_poll_req *next = r->fd_next;
@@ -391,7 +393,7 @@ static void php_io_poll_fdreg_fire(php_io_poll_queue *q, php_io_poll_fdreg *reg,
 		}
 		r = next;
 	}
-	if (reg->edge) {
+	if (edge) {
 		if (failure) {
 			reg->hup = true;
 		}

@@ -18,7 +18,8 @@ class Counting extends Scheduler
     public function run(\Io\Operation $op): \Io\Completion
     {
         if ($op instanceof \Io\Operation\SigWait) {
-            $this->seen[] = [$op->getSignals(), get_class($op->getHandle()), $op->getTimeout() !== null];
+            $names = array_map(fn($s) => $s === SIGUSR1 ? 'USR1' : ($s === SIGUSR2 ? 'USR2' : $s), $op->getSignals());
+            $this->seen[] = [$names, get_class($op->getHandle()), $op->getTimeout() !== null];
         }
         return parent::run($op);
     }
@@ -62,7 +63,7 @@ array(2) {
     [0]=>
     array(1) {
       [0]=>
-      int(10)
+      string(4) "USR1"
     }
     [1]=>
     string(20) "Io\Poll\SignalHandle"
@@ -74,7 +75,7 @@ array(2) {
     [0]=>
     array(1) {
       [0]=>
-      int(12)
+      string(4) "USR2"
     }
     [1]=>
     string(20) "Io\Poll\SignalHandle"

@@ -1146,7 +1146,7 @@ PHP_FUNCTION(pcntl_sigtimedwait)
 	errno = 0;
 	siginfo_t siginfo;
 	/* Too far to represent is as good as forever */
-	zend_hrtime_t ns = (zend_ulong) tv_sec >= ZEND_HRTIME_T_MAX / ZEND_NANO_IN_SEC
+	zend_hrtime_t ns = (zend_hrtime_t) tv_sec >= ZEND_HRTIME_T_MAX / ZEND_NANO_IN_SEC
 			? ZEND_HRTIME_T_MAX : (zend_hrtime_t) tv_sec * ZEND_NANO_IN_SEC + tv_nsec;
 	php_deadline dl = php_io_deadline_from_ns(ns);
 	int signal_no = php_io_sigwait(NULL, &set, &siginfo, &dl);

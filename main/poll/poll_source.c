@@ -144,7 +144,7 @@ PHPAPI int php_poll_process_source_open(pid_t pid)
 #endif
 }
 
-#if defined(PHP_POLL_SIGNAL_SOURCE_KQUEUE) || !defined(HAVE_SIGTIMEDWAIT)
+#if defined(PHP_POLL_SIGNAL_SOURCE_KQUEUE)
 static bool php_poll_signal_any_pending(const sigset_t *set, int after)
 {
 	sigset_t pending;

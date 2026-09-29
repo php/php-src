@@ -14,7 +14,7 @@ final class Again implements Io\Hooks\Hooks
     public function run(Io\Operation $op): Io\Completion
     {
         if ($op instanceof Io\Operation\SigWait) {
-            return $op->complete(Io\CompletionStatus::Done, -1, 11);
+            return $op->complete(Io\CompletionStatus::Done, -1, PCNTL_EAGAIN);
         }
         return $op->complete(Io\CompletionStatus::Unsupported);
     }

@@ -16,7 +16,9 @@ posix_kill(posix_getpid(), SIGUSR1);
 $ctx = new Io\Poll\Context();
 $handle = new Io\Poll\SignalHandle([SIGUSR1, SIGUSR2]);
 $watcher = $ctx->add($handle, [Io\Poll\Event::Signal]);
-$events = $ctx->wait(Time\Duration::fromSeconds(0));
+// FreeBSD announces a nested kqueue's readiness from a kernel task, so a zero timeout may miss
+// what add() triggered; a bounded wait returns as soon as it is reported
+$events = $ctx->wait(Time\Duration::fromSeconds(1));
 var_dump(count($events), $handle->getDelivered() === [SIGUSR1]);
 
 // Consumed: nothing pending, nothing reported

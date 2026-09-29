@@ -23,6 +23,10 @@
 # include <unistd.h>
 # include <sys/wait.h>
 #endif
+#if defined(HAVE_FDATASYNC) && defined(__APPLE__)
+/* The symbol is present, the headers do not declare it */
+extern int fdatasync(int);
+#endif
 
 /* The op layer's signal types are handed to ior as they are */
 static_assert(sizeof(php_sigset_t) == sizeof(ior_sigset_t), "php_sigset_t must match ior_sigset_t");

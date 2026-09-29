@@ -22,6 +22,10 @@
 #endif
 #include <time.h>
 #include "zend_fibers.h"
+#if defined(HAVE_FDATASYNC) && defined(__APPLE__)
+/* The symbol is present, the headers do not declare it */
+extern int fdatasync(int);
+#endif
 #ifndef PHP_WIN32
 # include <sys/wait.h>
 # include <signal.h>

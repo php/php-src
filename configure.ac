@@ -586,6 +586,7 @@ AC_CHECK_FUNCS([
   setitimer
   shutdown
   sigprocmask
+  sigtimedwait
   splice
   statfs
   statvfs
