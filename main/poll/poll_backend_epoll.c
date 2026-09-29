@@ -20,7 +20,7 @@
 
 #ifdef HAVE_EPOLL_PWAIT2
 /* Cleared when the running kernel returns ENOSYS */
-static zend_atomic_bool epoll_pwait2_available = ZEND_ATOMIC_BOOL_INITIALIZER(true);
+static atomic_bool epoll_pwait2_available = true;
 #endif
 
 typedef struct epoll_backend_data {
@@ -193,14 +193,14 @@ static int epoll_backend_wait(
 
 	int nfds = 0;
 #ifdef HAVE_EPOLL_PWAIT2
-	if (EXPECTED(zend_atomic_bool_load_ex(&epoll_pwait2_available))) {
+	if (EXPECTED(atomic_load(&epoll_pwait2_available))) {
 		nfds = epoll_pwait2(
 				backend_data->epoll_fd, backend_data->events, max_events, timeout, NULL);
 		if (UNEXPECTED(nfds < 0 && (errno == ENOSYS || errno == ENOTSUP))) {
-			zend_atomic_bool_store_ex(&epoll_pwait2_available, false);
+			atomic_store(&epoll_pwait2_available, false);
 		}
 	}
-	if (UNEXPECTED(!zend_atomic_bool_load_ex(&epoll_pwait2_available)))
+	if (UNEXPECTED(!atomic_load(&epoll_pwait2_available)))
 #endif
 	{
 		int timeout_ms = php_poll_timespec_to_ms(timeout);
