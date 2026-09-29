@@ -835,13 +835,7 @@ HashTable *zend_lazy_object_get_gc(zend_object *zobj, zval **table, int *n)
 		return NULL;
 	}
 
-	zend_fcall_info_cache *fcc = &info->u.initializer.fcc;
-	if (fcc->object) {
-		zend_get_gc_buffer_add_obj(gc_buffer, fcc->object);
-	}
-	if (fcc->closure) {
-		zend_get_gc_buffer_add_obj(gc_buffer, fcc->closure);
-	}
+	zend_get_gc_buffer_add_fcc(gc_buffer, &info->u.initializer.fcc);
 	zend_get_gc_buffer_add_zval(gc_buffer, &info->u.initializer.zv);
 
 	/* Lazy objects may have a properties ht in two cases:
