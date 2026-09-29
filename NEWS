@@ -36,6 +36,11 @@ PHP                                                                        NEWS
   . Fixed OSS-Fuzz #545352966 (default value AST of an SHM-persisted partial).
     (ndossche)
 
+- OpenSSL:
+  . Added the $x509_verify_flags parameter to openssl_x509_checkpurpose() and
+    the OPENSSL_X509_VERIFY_FLAG_{CRL_CHECK,CRL_CHECK_ALL,PARTIAL_CHAIN}
+    constants. (Alexander Danilov)
+
 - PDO:
   . Fixed PDOStatement::getColumnMeta() reading out of bounds for an invalid
     column index. (Ilia Alshanetsky)

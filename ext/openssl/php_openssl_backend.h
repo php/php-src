@@ -276,7 +276,7 @@ int openssl_x509v3_subjectAltName(BIO *bio, PHP_OPENSSL_X509_EXTENSION *extensio
 STACK_OF(X509) *php_openssl_load_all_certs_from_file(
 		char *cert_file, size_t cert_file_len, uint32_t arg_num);
 
-int php_openssl_check_cert(X509_STORE *ctx, X509 *x, STACK_OF(X509) *untrustedchain, int purpose);
+int php_openssl_check_cert(X509_STORE *ctx, X509 *x, STACK_OF(X509) *untrustedchain, int purpose, unsigned long verify_flags);
 
 X509_STORE *php_openssl_setup_verify(zval *calist, uint32_t arg_num);
 
