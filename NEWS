@@ -38,6 +38,12 @@ PHP                                                                        NEWS
   . Fixed pcntl_signal_dispatch() dropping the signals queued behind a handler
     that throws. (nicolas-grekas)
 
+- PDO:
+  . Fixed PDO::setAttribute() installing a PDO::ATTR_STATEMENT_CLASS class
+    whose constructor arguments it rejects. (Ilia Alshanetsky)
+  . Fixed PDO::ATTR_STATEMENT_CLASS constructor_args type errors reporting
+    "array given" regardless of the value passed. (Ilia Alshanetsky)
+
 - PDO_PGSQL:
   . Fixed crash when a persistent connection fails. (KentarouTakeda)
 
