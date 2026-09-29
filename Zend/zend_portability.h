@@ -52,6 +52,23 @@
 #include <assert.h>
 #include <math.h>
 
+#ifdef __cplusplus
+extern "C++" {
+# include <atomic>
+/* Make the atomic types used by Zend available to C++ extensions. */
+using std::atomic_bool;
+using std::atomic_int;
+}
+#else
+# if !defined(__STDC_VERSION__) || __STDC_VERSION__ < 201112L
+#  error "Zend requires C11 or later"
+# endif
+# ifdef __STDC_NO_ATOMICS__
+#  error "Zend requires C11 atomics"
+# endif
+# include <stdatomic.h>
+#endif
+
 #ifdef HAVE_UNIX_H
 # include <unix.h>
 #endif

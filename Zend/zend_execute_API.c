@@ -172,8 +172,8 @@ void init_executor(void) /* {{{ */
 	zend_lazy_objects_init(&EG(lazy_objects_store));
 
 	EG(full_tables_cleanup) = 0;
-	ZEND_ATOMIC_BOOL_INIT(&EG(vm_interrupt), false);
-	ZEND_ATOMIC_BOOL_INIT(&EG(timed_out), false);
+	atomic_init(&EG(vm_interrupt), false);
+	atomic_init(&EG(timed_out), false);
 
 	EG(exception) = NULL;
 
@@ -1099,8 +1099,8 @@ cleanup_args:
 
 		/* This flag is regularly checked while running user functions, but not internal
 		 * So see whether interrupt flag was set while the function was running... */
-		if (zend_atomic_bool_exchange_ex(&EG(vm_interrupt), false)) {
-			if (zend_atomic_bool_load_ex(&EG(timed_out))) {
+		if (atomic_exchange(&EG(vm_interrupt), false)) {
+			if (atomic_load(&EG(timed_out))) {
 				zend_timeout();
 			} else if (zend_interrupt_function) {
 				zend_interrupt_function(EG(current_execute_data));
@@ -1476,14 +1476,14 @@ ZEND_NORETURN ZEND_API void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 	   timer is not restarted properly, it could hang in the shutdown
 	   function. */
 	if (EG(hard_timeout) > 0) {
-		zend_atomic_bool_store_ex(&EG(timed_out), false);
+		atomic_store(&EG(timed_out), false);
 		zend_set_timeout_ex(EG(hard_timeout), true);
 		/* XXX Abused, introduce an additional flag if the value needs to be kept. */
 		EG(hard_timeout) = 0;
 	}
 # endif
 #else
-	zend_atomic_bool_store_ex(&EG(timed_out), false);
+	atomic_store(&EG(timed_out), false);
 	zend_set_timeout_ex(0, true);
 #endif
 
@@ -1528,7 +1528,7 @@ static void zend_timeout_handler(int dummy) /* {{{ */
 		return;
 	}
 #else
-	if (zend_atomic_bool_load_ex(&EG(timed_out))) {
+	if (atomic_load(&EG(timed_out))) {
 		/* Die on hard timeout */
 		const char *error_filename = NULL;
 		uint32_t error_lineno = 0;
@@ -1563,8 +1563,8 @@ static void zend_timeout_handler(int dummy) /* {{{ */
 		zend_on_timeout(EG(timeout_seconds));
 	}
 
-	zend_atomic_bool_store_ex(&EG(timed_out), true);
-	zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+	atomic_store(&EG(timed_out), true);
+	atomic_store(&EG(vm_interrupt), true);
 
 #ifndef ZTS
 	if (EG(hard_timeout) > 0) {
@@ -1588,8 +1588,8 @@ VOID CALLBACK tq_timer_cb(PVOID arg, BOOLEAN timed_out)
 	}
 
 	eg = (zend_executor_globals *)arg;
-	zend_atomic_bool_store_ex(&eg->timed_out, true);
-	zend_atomic_bool_store_ex(&eg->vm_interrupt, true);
+	atomic_store(&eg->timed_out, true);
+	atomic_store(&eg->vm_interrupt, true);
 }
 #endif
 
@@ -1697,7 +1697,7 @@ void zend_set_timeout(zend_long seconds, bool reset_signals) /* {{{ */
 
 	EG(timeout_seconds) = seconds;
 	zend_set_timeout_ex(seconds, reset_signals);
-	zend_atomic_bool_store_ex(&EG(timed_out), false);
+	atomic_store(&EG(timed_out), false);
 }
 /* }}} */
 
@@ -1706,7 +1706,7 @@ void zend_unset_timeout(void) /* {{{ */
 #ifdef ZEND_WIN32
 	if (NULL != tq_timer) {
 		if (!DeleteTimerQueueTimer(NULL, tq_timer, INVALID_HANDLE_VALUE)) {
-			zend_atomic_bool_store_ex(&EG(timed_out), false);
+			atomic_store(&EG(timed_out), false);
 			tq_timer = NULL;
 			zend_error_noreturn(E_ERROR, "Could not delete queued timer");
 		}
@@ -1729,7 +1729,7 @@ void zend_unset_timeout(void) /* {{{ */
 # endif
 	}
 #endif
-	zend_atomic_bool_store_ex(&EG(timed_out), false);
+	atomic_store(&EG(timed_out), false);
 }
 /* }}} */
 

@@ -1345,7 +1345,7 @@ static void pcntl_signal_handler(int signo, siginfo_t *siginfo, void *context)
 	PCNTL_G(tail) = psig;
 	PCNTL_G(pending_signals) = true;
 	if (PCNTL_G(async_signals)) {
-		zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+		atomic_store(&EG(vm_interrupt), true);
 	}
 }
 
@@ -1453,7 +1453,7 @@ void pcntl_signal_dispatch(void)
 		PCNTL_G(tail) = next;
 
 		if (PCNTL_G(async_signals)) {
-			zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+			atomic_store(&EG(vm_interrupt), true);
 		}
 	} else {
 		PCNTL_G(pending_signals) = false;
