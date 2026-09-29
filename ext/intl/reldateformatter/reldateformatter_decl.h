@@ -1,0 +1,39 @@
+/* This is a generated file, edit reldateformatter.stub.php instead.
+ * Stub hash: af29fb1710109d93ee24e216619e601ff7c72f81 */
+
+#ifndef ZEND_RELDATEFORMATTER_DECL_af29fb1710109d93ee24e216619e601ff7c72f81_H
+#define ZEND_RELDATEFORMATTER_DECL_af29fb1710109d93ee24e216619e601ff7c72f81_H
+
+typedef enum zend_enum_IntlRelativeDateTimeFormatterStyle {
+	ZEND_ENUM_IntlRelativeDateTimeFormatterStyle_Long = 1,
+	ZEND_ENUM_IntlRelativeDateTimeFormatterStyle_Short = 2,
+	ZEND_ENUM_IntlRelativeDateTimeFormatterStyle_Narrow = 3,
+} zend_enum_IntlRelativeDateTimeFormatterStyle;
+
+typedef enum zend_enum_IntlRelativeDateTimeFormatterCapitalization {
+	ZEND_ENUM_IntlRelativeDateTimeFormatterCapitalization_None = 1,
+	ZEND_ENUM_IntlRelativeDateTimeFormatterCapitalization_MiddleOfSentence = 2,
+	ZEND_ENUM_IntlRelativeDateTimeFormatterCapitalization_BeginningOfSentence = 3,
+	ZEND_ENUM_IntlRelativeDateTimeFormatterCapitalization_UiListAndMenu = 4,
+	ZEND_ENUM_IntlRelativeDateTimeFormatterCapitalization_Standalone = 5,
+} zend_enum_IntlRelativeDateTimeFormatterCapitalization;
+
+typedef enum zend_enum_IntlRelativeDateTimeFormatterUnit {
+	ZEND_ENUM_IntlRelativeDateTimeFormatterUnit_Year = 1,
+	ZEND_ENUM_IntlRelativeDateTimeFormatterUnit_Quarter = 2,
+	ZEND_ENUM_IntlRelativeDateTimeFormatterUnit_Month = 3,
+	ZEND_ENUM_IntlRelativeDateTimeFormatterUnit_Week = 4,
+	ZEND_ENUM_IntlRelativeDateTimeFormatterUnit_Day = 5,
+	ZEND_ENUM_IntlRelativeDateTimeFormatterUnit_Hour = 6,
+	ZEND_ENUM_IntlRelativeDateTimeFormatterUnit_Minute = 7,
+	ZEND_ENUM_IntlRelativeDateTimeFormatterUnit_Second = 8,
+	ZEND_ENUM_IntlRelativeDateTimeFormatterUnit_Sunday = 9,
+	ZEND_ENUM_IntlRelativeDateTimeFormatterUnit_Monday = 10,
+	ZEND_ENUM_IntlRelativeDateTimeFormatterUnit_Tuesday = 11,
+	ZEND_ENUM_IntlRelativeDateTimeFormatterUnit_Wednesday = 12,
+	ZEND_ENUM_IntlRelativeDateTimeFormatterUnit_Thursday = 13,
+	ZEND_ENUM_IntlRelativeDateTimeFormatterUnit_Friday = 14,
+	ZEND_ENUM_IntlRelativeDateTimeFormatterUnit_Saturday = 15,
+} zend_enum_IntlRelativeDateTimeFormatterUnit;
+
+#endif /* ZEND_RELDATEFORMATTER_DECL_af29fb1710109d93ee24e216619e601ff7c72f81_H */

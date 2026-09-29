@@ -29,6 +29,7 @@ extern "C" {
 
 typedef struct {
 	formatter_data  nf_data;
+	uint64_t        configuration_version;
 	zend_object     zo;
 } NumberFormatter_object;
 

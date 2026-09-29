@@ -52,6 +52,7 @@ U_CFUNC zend_object *NumberFormatter_object_create(zend_class_entry *ce)
 
 	intern = reinterpret_cast<NumberFormatter_object *>(zend_object_alloc(sizeof(NumberFormatter_object), ce));
 	formatter_data_init( &intern->nf_data );
+	intern->configuration_version = 0;
 	zend_object_std_init( &intern->zo, ce );
 	object_properties_init(&intern->zo, ce);
 
@@ -68,6 +69,7 @@ U_CFUNC zend_object *NumberFormatter_object_clone(zend_object *object)
 
 	/* clone standard parts */
 	zend_objects_clone_members(&new_nfo->zo, &nfo->zo);
+	new_nfo->configuration_version = nfo->configuration_version;
 
 	/* clone formatter object. It may fail, the destruction code must handle this case */
 	if (FORMATTER_OBJECT(nfo) != nullptr) {
