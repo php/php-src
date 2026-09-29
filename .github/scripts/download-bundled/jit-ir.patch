@@ -1,0 +1,22 @@
+diff --git a/ext/opcache/jit/ir/ir_fold.h b/ext/opcache/jit/ir/ir_fold.h
+index c5fd2f28894..fae3b4b4655 100644
+--- a/ext/opcache/jit/ir/ir_fold.h
++++ b/ext/opcache/jit/ir/ir_fold.h
+@@ -1841,7 +1841,7 @@ IR_FOLD(REPLACE(LONG_CONST, _))
+ 	 && IR_IS_CONST_REF(op2)
+ 	 && IR_IS_TYPE_INT(op2_insn->type)
+ 	 && op2_insn->val.i64 >= 0
+-	 && op2_insn->val.i64 < IR_VECTOR_LENGTH(op1_insn->type)) {
++	 && op2_insn->val.i64 < (int64_t)IR_VECTOR_LENGTH(op1_insn->type)) {
+ 		IR_ASSERT(IR_IS_TYPE_VECTOR(op1_insn->type)
+ 		  && (IR_VECTOR_BASE_TYPE(op1_insn->type) == op3_insn->type
+ 		   || (IR_IS_TYPE_INT(IR_VECTOR_BASE_TYPE(op1_insn->type))
+@@ -1943,7 +1943,7 @@ IR_FOLD(EXTRACT(LONG_CONST, _))
+ 	if (IR_IS_CONST_REF(op2)
+ 	 && IR_IS_TYPE_INT(op2_insn->type)
+ 	 && op2_insn->val.i64 >= 0
+-	 && op2_insn->val.i64 < IR_VECTOR_LENGTH(op1_insn->type)) {
++	 && op2_insn->val.i64 < (int64_t)IR_VECTOR_LENGTH(op1_insn->type)) {
+ 		uint32_t idx = op2_insn->val.u32;
+ 		void *ptr;
+ 

@@ -35,3 +35,6 @@ rm ir_mem2ssa.c
 
 # add extra files
 git restore README
+
+# patch customized files
+git apply -v ../../../../.github/scripts/download-bundled/jit-ir.patch
