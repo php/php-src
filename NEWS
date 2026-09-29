@@ -17,6 +17,7 @@ PHP                                                                        NEWS
     zp_arg_must_be_sent_by_ref()). (ndossche)
   . Fixed GH-23921 (Fibers start with error_reporting = 0 when the
     error_reporting INI directive is not set). (Girgias)
+  . Fixed GH-23980 (ZEND_ASSERT violation @ ZEND_INCLUDE_OR_EVAL). (ndossche)
 
 - FFI:
   . Fixed crashes with FFI callbacks created from __call() trampolines
