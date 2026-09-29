@@ -31,7 +31,8 @@ PHP                                                                        NEWS
   . Fix zend_analyze_calls() call_stack buffer overrun. (Mrmaxmeier)
   . Fixed bug GH-23679 (Tracing JIT writes a parent private property into a
     child's shadowing public property). (Ilia Alshanetsky)
-  . Fix incorrect DCE due to unsound escape analysis. (ndossche)
+  . Fix multiple incorrect DCE due to unsound escape analysis. (ndossche,
+    arnaud-lb)
 
 - OpenSSL:
   . Fixed stream_socket_enable_crypto() leaving the socket non-blocking
