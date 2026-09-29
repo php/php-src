@@ -64,6 +64,10 @@ PHP                                                                        NEWS
 - PDO_PGSQL:
   . Fixed crash when a persistent connection fails. (KentarouTakeda)
 
+- SimpleXML:
+  . Fixed reconstructing a SimpleXMLElement freeing a child element that
+    another variable still references. (Ilia Alshanetsky)
+
 - Zip:
   . Fixed bug GH-23899 (Assertion failure when a cancel callback returns an
     invalid type during shutdown). (Weilin Du)
