@@ -194,7 +194,8 @@ PHPAPI zend_result php_stream_cast(php_stream *stream, int castas, void **ret, i
 	castas &= ~PHP_STREAM_CAST_MASK;
 
 	/* synchronize our buffer (if possible) */
-	if (ret && castas != PHP_STREAM_AS_FD_FOR_SELECT && castas != PHP_STREAM_AS_FD_FOR_COPY) {
+	if (ret && castas != PHP_STREAM_AS_FD_FOR_SELECT && castas != PHP_STREAM_AS_FD_FOR_COPY
+			&& castas != PHP_STREAM_AS_FD_FOR_POLL) {
 		php_stream_flush(stream);
 		if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) {
 			zend_off_t dummy;
@@ -304,7 +305,8 @@ PHPAPI zend_result php_stream_cast(php_stream *stream, int castas, void **ret, i
 		}
 	}
 
-	if (php_stream_is_filtered(stream) && castas != PHP_STREAM_AS_FD_FOR_SELECT) {
+	if (php_stream_is_filtered(stream) && castas != PHP_STREAM_AS_FD_FOR_SELECT
+			&& castas != PHP_STREAM_AS_FD_FOR_POLL) {
 		if (show_err) {
 			php_stream_warn(stream, CastNotSupported,
 				"Cannot cast a filtered stream on this system");
@@ -316,11 +318,13 @@ PHPAPI zend_result php_stream_cast(php_stream *stream, int castas, void **ret, i
 
 	if (show_err) {
 		/* these names depend on the values of the PHP_STREAM_AS_XXX defines in php_streams.h */
-		static const char *cast_names[4] = {
+		static const char *cast_names[6] = {
 			"STDIO FILE*",
 			"File Descriptor",
 			"Socket Descriptor",
-			"select()able descriptor"
+			"select()able descriptor",
+			"copyable descriptor",
+			"pollable descriptor"
 		};
 
 		php_stream_warn(stream, CastNotSupported,
