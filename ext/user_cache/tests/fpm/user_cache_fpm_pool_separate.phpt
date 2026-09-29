@@ -79,7 +79,6 @@ function seedPool(FPM\Tester $tester, string $pool, string $expected): void
 
 $tester = new FPM\Tester($cfg, $code);
 $tester->start(iniEntries: [
-    'opcache.enable' => '1',
     'user_cache.shm_size' => '32M',
     'opcache.file_update_protection' => '0',
 ]);
@@ -96,6 +95,8 @@ expectPoolState($tester, 'beta', 'beta:beta-value:default');
 $tester->terminate();
 $tester->expectLogTerminatingNotices();
 $tester->close();
+
+/* Release builds do not collect cycles at shutdown. */
 unset($tester);
 gc_collect_cycles();
 

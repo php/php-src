@@ -12,9 +12,9 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef FPM_USER_CACHE_H
-#define FPM_USER_CACHE_H 1
+#ifndef FPM_UCACHE_H
+#define FPM_UCACHE_H 1
 
-int fpm_user_cache_init_main(void);
+int fpm_ucache_init_main(void);
 
-#endif /* FPM_USER_CACHE_H */
+#endif /* FPM_UCACHE_H */

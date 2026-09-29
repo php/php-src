@@ -3,7 +3,6 @@ CGI: UserCache\Cache is unavailable without a cache boundary
 --CGI--
 --INI--
 user_cache.enable=1
-opcache.file_cache_only=0
 user_cache.shm_size=16M
 --ENV--
 DOCUMENT_ROOT=

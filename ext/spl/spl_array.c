@@ -18,7 +18,8 @@
 
 #include "php.h"
 #include "ext/standard/php_var.h"
-
+#include "zend_attributes.h"
+#include "ext/user_cache/php_user_cache.h" /* For user_cache safe direct path */
 #include "zend_smart_str.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
@@ -28,8 +29,6 @@
 #include "spl_array_arginfo.h"
 #include "spl_exceptions.h"
 #include "spl_functions.h" /* For spl_set_private_debug_info_property() */
-
-#include "ext/user_cache/php_user_cache.h" /* For user_cache safe direct path */
 
 /* Defined later in the file */
 PHPAPI zend_class_entry  *spl_ce_ArrayIterator;
@@ -63,6 +62,12 @@ static inline HashTable **spl_array_get_hash_table_ptr(spl_array_object* intern)
 	if (intern->ar_flags & SPL_ARRAY_IS_SELF) {
 		/* rebuild properties */
 		zend_std_get_properties_ex(&intern->std);
+		if (GC_REFCOUNT(intern->std.properties) > 1) {
+			if (EXPECTED(!(GC_FLAGS(intern->std.properties) & IS_ARRAY_IMMUTABLE))) {
+				GC_DELREF(intern->std.properties);
+			}
+			intern->std.properties = zend_array_dup(intern->std.properties);
+		}
 		return &intern->std.properties;
 	} else if (intern->ar_flags & SPL_ARRAY_USE_OTHER) {
 		spl_array_object *other = Z_SPLARRAY_P(&intern->array);
@@ -1406,8 +1411,6 @@ outexcept:
 
 } /* }}} */
 
-/* Builds the state array shared by __serialize() and the user-cache safe-direct
- * path. The members slot only exists in the __serialize() format. */
 static void spl_array_object_serialize_state(zval *object, zval *return_value, bool with_members)
 {
 	spl_array_object *intern = Z_SPLARRAY_P(object);
@@ -1449,8 +1452,6 @@ static void spl_array_object_serialize_state(zval *object, zval *return_value, b
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
 }
 
-/* Restores the state array built above. Throws and returns false on malformed
- * data; the caller decides how to propagate the failure. */
 static PHP_UCACHE_HOT bool spl_array_object_unserialize_state(zval *object, HashTable *data, bool with_members)
 {
 	spl_array_object *intern = Z_SPLARRAY_P(object);
@@ -1551,11 +1552,11 @@ PHP_METHOD(ArrayObject, __unserialize)
 }
 /* }}} */
 
-static bool spl_array_object_copy_user_cache_state(
+static bool spl_array_object_copy_ucache_state(
 		void *ctx,
 		zend_object *new_obj,
 		zend_object *old_obj,
-		php_ucache_safe_direct_clone_value_func_t clone_value)
+		php_ucache_safe_direct_clone_val_func_t clone_value)
 {
 	spl_array_object *old_intern, *new_intern;
 	zval new_zv, cloned_storage_zv;
@@ -1579,57 +1580,66 @@ static bool spl_array_object_copy_user_cache_state(
 
 		result = true;
 
-		goto bailout;
+		goto cleanup;
 	}
 
 	if (!clone_value(ctx, &cloned_storage_zv, &old_intern->array) ||
 		(Z_TYPE(cloned_storage_zv) != IS_OBJECT && Z_TYPE(cloned_storage_zv) != IS_ARRAY)
 	) {
-		goto bailout;
+		goto cleanup;
 	}
 
 	spl_array_set_array(&new_zv, new_intern, &cloned_storage_zv, old_intern->ar_flags & SPL_ARRAY_CLONE_MASK, true);
 	result = !EG(exception);
 
-bailout:
-	zval_ptr_dtor(&cloned_storage_zv);
+cleanup:
+	if (Z_TYPE(cloned_storage_zv) != IS_UNDEF) {
+		zval_ptr_dtor(&cloned_storage_zv);
+	}
 
 	return result;
 }
 
-static bool spl_array_object_user_cache_state_has_unstorable(
-		void *ctx,
-		const zval *object,
-		php_ucache_safe_direct_value_has_unstorable_func_t value_has_unstorable)
+static bool spl_array_object_serialize_ucache_state(zval *state, const zval *object)
 {
-	spl_array_object *intern = Z_SPLARRAY_P(object);
+	zval *storage;
 
-	if (intern->ar_flags & SPL_ARRAY_IS_SELF) {
+	ZVAL_UNDEF(state);
+
+	spl_array_object_serialize_state((zval *) object, state, /* with_members */ false);
+
+	if (EG(exception) || Z_TYPE_P(state) != IS_ARRAY) {
+		if (Z_TYPE_P(state) != IS_UNDEF) {
+			zval_ptr_dtor(state);
+		}
+
+		ZVAL_UNDEF(state);
+
 		return false;
 	}
 
-	return value_has_unstorable(ctx, &intern->array);
-}
-
-static bool spl_array_object_serialize_user_cache_state(zval *state, const zval *object)
-{
-	spl_array_object_serialize_state((zval *) object, state, /* with_members */ false);
+	storage = zend_hash_index_find(Z_ARRVAL_P(state), 1);
+	if (storage != NULL && Z_TYPE_P(storage) == IS_ARRAY) {
+		SEPARATE_ARRAY(storage);
+	}
 
 	return true;
 }
 
-static PHP_UCACHE_HOT bool spl_array_object_unserialize_user_cache_state(zval *object, zval *state)
+static PHP_UCACHE_HOT bool spl_array_object_unserialize_ucache_state(zval *object, zval *state)
 {
+	if (Z_TYPE_P(state) != IS_ARRAY) {
+		return false;
+	}
+
 	return spl_array_object_unserialize_state(object, Z_ARRVAL_P(state), /* with_members */ false)
-		&& !EG(exception)
-	;
+		&& !EG(exception);
 }
 
-static const php_ucache_safe_direct_handlers_t spl_array_user_cache_handlers = {
-	.copy = spl_array_object_copy_user_cache_state,
-	.state_has_unstorable = spl_array_object_user_cache_state_has_unstorable,
-	.state_serialize = spl_array_object_serialize_user_cache_state,
-	.state_unserialize = spl_array_object_unserialize_user_cache_state,
+static const php_ucache_safe_direct_handlers spl_array_ucache_handlers = {
+	.copy = spl_array_object_copy_ucache_state,
+	.state_serialize = spl_array_object_serialize_ucache_state,
+	.state_unserialize = spl_array_object_unserialize_ucache_state,
 };
 
 /* {{{ */
@@ -2011,8 +2021,8 @@ PHP_MINIT_FUNCTION(spl_array)
 	spl_ce_RecursiveArrayIterator->create_object = spl_array_object_new;
 	spl_ce_RecursiveArrayIterator->get_iterator = spl_array_get_iterator;
 
-	php_ucache_safe_direct_register_class(spl_ce_ArrayObject, &spl_array_user_cache_handlers);
-	php_ucache_safe_direct_register_class(spl_ce_ArrayIterator, &spl_array_user_cache_handlers);
+	php_ucache_safe_direct_register_class(spl_ce_ArrayObject, &spl_array_ucache_handlers);
+	php_ucache_safe_direct_register_class(spl_ce_ArrayIterator, &spl_array_ucache_handlers);
 
 	return SUCCESS;
 }

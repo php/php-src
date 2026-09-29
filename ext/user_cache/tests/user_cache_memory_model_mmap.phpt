@@ -5,7 +5,6 @@ pcntl
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1
-opcache.file_cache_only=0
 user_cache.shm_size=16M
 user_cache.preferred_memory_model=mmap
 --SKIPIF--
@@ -26,7 +25,7 @@ if ($active !== 'mmap') {
 ?>
 --FILE--
 <?php
-require __DIR__ . '/memory_model_exercise.inc';
+require __DIR__ . '/user_cache_memory_model_exercise.inc';
 user_cache_memory_model_exercise('mmap');
 ?>
 --EXPECT--

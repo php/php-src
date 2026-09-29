@@ -1,73 +1,73 @@
 --TEST--
-UserCache\Cache: SPL safe-direct state is restored
+UserCache\Cache: SPL safe-direct state and SplObjectStorage graphs are restored, and storing a corrupted heap or a heap being modified throws the same exception as serialize()
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1
-opcache.file_cache_only=0
 user_cache.shm_size=16M
 --FILE--
 <?php
+/* SPL containers, subclass props, iterator classes and hook counts restore without compare() calls */
 $cache = UserCache\Cache::getPool('spl-safe-direct');
 
 class UserCacheSerializedArrayObject extends ArrayObject
 {
-	public static int $serializeCalls = 0;
-	public static int $unserializeCalls = 0;
+    public static int $serializeCalls = 0;
+    public static int $unserializeCalls = 0;
 
-	public function __construct(array $data)
-	{
-		parent::__construct($data);
-	}
+    public function __construct(array $data)
+    {
+        parent::__construct($data);
+    }
 
-	public function __serialize(): array
-	{
-		self::$serializeCalls++;
+    public function __serialize(): array
+    {
+        self::$serializeCalls++;
 
-		return ['payload' => parent::__serialize()];
-	}
+        return ['payload' => parent::__serialize()];
+    }
 
-	public function __unserialize(array $data): void
-	{
-		self::$unserializeCalls++;
-		parent::__unserialize($data['payload']);
-	}
+    public function __unserialize(array $data): void
+    {
+        self::$unserializeCalls++;
+        parent::__unserialize($data['payload']);
+    }
 }
 
 class UserCacheSerializedStack extends SplStack
 {
-	public static int $serializeCalls = 0;
-	public static int $unserializeCalls = 0;
+    public static int $serializeCalls = 0;
+    public static int $unserializeCalls = 0;
 
-	public function __serialize(): array
-	{
-		self::$serializeCalls++;
+    public function __serialize(): array
+    {
+        self::$serializeCalls++;
 
-		return parent::__serialize();
-	}
+        return parent::__serialize();
+    }
 
-	public function __unserialize(array $data): void
-	{
-		self::$unserializeCalls++;
-		parent::__unserialize($data);
-	}
+    public function __unserialize(array $data): void
+    {
+        self::$unserializeCalls++;
+        parent::__unserialize($data);
+    }
 }
 
 class UserCacheTaggedFixedArray extends SplFixedArray
 {
-	private string $tag;
-	protected int $version;
+    private string $tag;
+    protected int $version;
 
-	public function __construct(int $size, string $tag, int $version)
-	{
-		parent::__construct($size);
-		$this->tag = $tag;
-		$this->version = $version;
-	}
+    public function __construct(int $size, string $tag, int $version)
+    {
+        parent::__construct($size);
+        $this->tag = $tag;
+        $this->version = $version;
+    }
 
-	public function describe(): string
-	{
-		return $this->tag . ':' . $this->version;
-	}
+    public function describe(): string
+    {
+        return $this->tag . ':' . $this->version;
+    }
 }
 
 class UserCacheLabelIterator extends ArrayIterator
@@ -76,62 +76,62 @@ class UserCacheLabelIterator extends ArrayIterator
 
 class UserCacheTaggedCollection extends ArrayObject
 {
-	private string $type;
+    private string $type;
 
-	public function __construct(array $data, string $type, string $iteratorClass)
-	{
-		parent::__construct($data, 0, $iteratorClass);
-		$this->type = $type;
-	}
+    public function __construct(array $data, string $type, string $iteratorClass)
+    {
+        parent::__construct($data, 0, $iteratorClass);
+        $this->type = $type;
+    }
 
-	public function type(): string
-	{
-		return $this->type;
-	}
+    public function type(): string
+    {
+        return $this->type;
+    }
 }
 
 class UserCacheTaggedIterator extends ArrayIterator
 {
-	private string $label;
+    private string $label;
 
-	public function __construct(array $data, string $label)
-	{
-		parent::__construct($data);
-		$this->label = $label;
-	}
+    public function __construct(array $data, string $label)
+    {
+        parent::__construct($data);
+        $this->label = $label;
+    }
 
-	public function label(): string
-	{
-		return $this->label;
-	}
+    public function label(): string
+    {
+        return $this->label;
+    }
 }
 
 class UserCacheTaggedRecursiveIterator extends RecursiveArrayIterator
 {
-	private string $name;
+    private string $name;
 
-	public function __construct(array $data, string $name)
-	{
-		parent::__construct($data);
-		$this->name = $name;
-	}
+    public function __construct(array $data, string $name)
+    {
+        parent::__construct($data);
+        $this->name = $name;
+    }
 
-	public function name(): string
-	{
-		return $this->name;
-	}
+    public function name(): string
+    {
+        return $this->name;
+    }
 }
 
 class UserCacheCountingMaxHeap extends SplMaxHeap
 {
-	public static int $compareCalls = 0;
+    public static int $compareCalls = 0;
 
-	protected function compare(mixed $a, mixed $b): int
-	{
-		self::$compareCalls++;
+    protected function compare(mixed $a, mixed $b): int
+    {
+        self::$compareCalls++;
 
-		return $a['priority'] <=> $b['priority'];
-	}
+        return $a['priority'] <=> $b['priority'];
+    }
 }
 
 $arrayObject = new ArrayObject(['a' => 1, 'b' => ['c' => 2]], ArrayObject::ARRAY_AS_PROPS);
@@ -190,23 +190,23 @@ $serializedStack = new UserCacheSerializedStack();
 $serializedStack->push('fallback');
 
 $payload = compact(
-	'arrayObject',
-	'arrayIterator',
-	'recursiveArrayIterator',
-	'fixed',
-	'taggedFixed',
-	'taggedCollection',
-	'taggedIterator',
-	'taggedRecursiveIterator',
-	'dll',
-	'queue',
-	'stack',
-	'min',
-	'max',
-	'pq',
-	'countingMaxHeap',
-	'serializedArrayObject',
-	'serializedStack'
+    'arrayObject',
+    'arrayIterator',
+    'recursiveArrayIterator',
+    'fixed',
+    'taggedFixed',
+    'taggedCollection',
+    'taggedIterator',
+    'taggedRecursiveIterator',
+    'dll',
+    'queue',
+    'stack',
+    'min',
+    'max',
+    'pq',
+    'countingMaxHeap',
+    'serializedArrayObject',
+    'serializedStack'
 );
 
 var_dump($cache->store('spl', $payload));
@@ -272,14 +272,14 @@ var_dump($fetched['stack']->pop());
 var_dump($fetched['min'] instanceof SplMinHeap);
 $minOut = [];
 while (!$fetched['min']->isEmpty()) {
-	$minOut[] = $fetched['min']->extract();
+    $minOut[] = $fetched['min']->extract();
 }
 var_dump($minOut);
 
 var_dump($fetched['max'] instanceof SplMaxHeap);
 $maxOut = [];
 while (!$fetched['max']->isEmpty()) {
-	$maxOut[] = $fetched['max']->extract();
+    $maxOut[] = $fetched['max']->extract();
 }
 var_dump($maxOut);
 
@@ -300,6 +300,154 @@ var_dump($fetched['serializedStack'] instanceof UserCacheSerializedStack);
 var_dump($fetched['serializedStack'][0]);
 var_dump(UserCacheSerializedStack::$serializeCalls);
 var_dump(UserCacheSerializedStack::$unserializeCalls);
+
+/* SplObjectStorage entries, info data, shared key identity, subclasses and nesting round-trip */
+function ok(string $label, bool $cond): void
+{
+    echo $label, ': ', $cond ? 'OK' : 'FAIL', "\n";
+}
+
+class TaggedStorage extends SplObjectStorage
+{
+    public string $label = 'default';
+}
+
+$cache = UserCache\Cache::getPool('spl-storage-graph');
+
+$a = new stdClass();
+$a->id = 1;
+$b = new stdClass();
+$b->id = 2;
+$c = new stdClass();
+$c->id = 3;
+
+$storage = new SplObjectStorage();
+$storage[$a] = 'scalar-data';
+$storage[$b] = ['nested' => [1, 2, 3], 'flag' => true];
+$storage[$c] = (object) ['tag' => 'object-data'];
+
+$cache->store('storage', $storage);
+$fetched = $cache->fetch('storage');
+
+ok('instanceof', $fetched instanceof SplObjectStorage);
+ok('count', count($fetched) === 3);
+
+$byId = [];
+foreach ($fetched as $object) {
+    $byId[$object->id] = $fetched->getInfo();
+}
+ok('data preserved', $byId[1] === 'scalar-data'
+    && $byId[2] === ['nested' => [1, 2, 3], 'flag' => true]
+    && $byId[3] instanceof stdClass && $byId[3]->tag === 'object-data');
+ok('parity', serialize($fetched) === serialize($storage));
+
+$shared = new stdClass();
+$shared->id = 100;
+$sharedStorage = new SplObjectStorage();
+$sharedStorage[$shared] = 'info';
+$graph = ['storage' => $sharedStorage, 'also' => $shared];
+
+$cache->store('graph', $graph);
+$fetchedGraph = $cache->fetch('graph');
+$fetchedGraph['storage']->rewind();
+$keyObject = $fetchedGraph['storage']->current();
+ok('shared key identity', $keyObject === $fetchedGraph['also']);
+$fetchedGraph['also']->id = 200;
+ok('shared mutation follows', $keyObject->id === 200);
+
+$empty = new SplObjectStorage();
+$cache->store('empty', $empty);
+ok('empty storage', count($cache->fetch('empty')) === 0);
+
+$tagged = new TaggedStorage();
+$tagged->label = 'tagged';
+$element = new stdClass();
+$element->id = 5;
+$tagged[$element] = 'x';
+$cache->store('tagged', $tagged);
+$fetchedTagged = $cache->fetch('tagged');
+ok('subclass instanceof', $fetchedTagged instanceof TaggedStorage);
+ok('subclass property', $fetchedTagged->label === 'tagged' && count($fetchedTagged) === 1);
+ok('subclass parity', serialize($fetchedTagged) === serialize($tagged));
+
+$inner = new SplObjectStorage();
+$innerKey = new stdClass();
+$innerKey->id = 7;
+$inner[$innerKey] = 'inner';
+$outer = new SplObjectStorage();
+$outerKey = new stdClass();
+$outerKey->id = 8;
+$outer[$outerKey] = $inner;
+$cache->store('nested', $outer);
+$fetchedNested = $cache->fetch('nested');
+$fetchedNested->rewind();
+$nestedInfo = $fetchedNested->getInfo();
+ok('nested storage', $nestedInfo instanceof SplObjectStorage && count($nestedInfo) === 1);
+ok('nested parity', serialize($fetchedNested) === serialize($outer));
+
+class ThrowingHeap extends SplMinHeap
+{
+    public bool $throw = false;
+
+    protected function compare($value1, $value2): int
+    {
+        if ($this->throw) {
+            throw new Exception('compare failed');
+        }
+
+        return parent::compare($value1, $value2);
+    }
+}
+
+class StoringQueue extends SplPriorityQueue
+{
+    public ?Closure $hook = null;
+
+    public function compare($priority1, $priority2): int
+    {
+        if ($this->hook !== null) {
+            $hook = $this->hook;
+            $this->hook = null;
+            $hook($this);
+        }
+
+        return parent::compare($priority1, $priority2);
+    }
+}
+
+function show(string $label, Closure $callback): void
+{
+    try {
+        var_dump($callback());
+    } catch (Throwable $e) {
+        echo $label, ': ', $e::class, ': ', $e->getMessage(), "\n";
+    }
+}
+
+echo "\nspl heap unstorable state:\n";
+$cache = UserCache\Cache::getPool('spl-heap-unstorable-state');
+
+$heap = new ThrowingHeap;
+$heap->insert(1);
+$heap->insert(2);
+$heap->throw = true;
+try {
+    $heap->insert(3);
+} catch (Exception $e) {
+}
+
+show('serialize', static fn () => serialize($heap));
+show('store', static fn () => $cache->store('corrupted', $heap));
+var_dump($cache->has('corrupted'));
+
+$queue = new StoringQueue;
+$queue->insert('a', 1);
+$queue->hook = static function (StoringQueue $queue): void {
+    show('serialize', static fn () => serialize($queue));
+    show('store', static fn () => $GLOBALS['cache']->store('modified', $queue));
+};
+$queue->insert('b', 2);
+var_dump($cache->has('modified'));
 ?>
 --EXPECT--
 bool(true)
@@ -393,3 +541,23 @@ bool(true)
 string(8) "fallback"
 int(1)
 int(3)
+instanceof: OK
+count: OK
+data preserved: OK
+parity: OK
+shared key identity: OK
+shared mutation follows: OK
+empty storage: OK
+subclass instanceof: OK
+subclass property: OK
+subclass parity: OK
+nested storage: OK
+nested parity: OK
+
+spl heap unstorable state:
+serialize: RuntimeException: Heap is corrupted, heap properties are no longer ensured.
+store: RuntimeException: Heap is corrupted, heap properties are no longer ensured.
+bool(false)
+serialize: RuntimeException: Cannot serialize heap while it is being modified.
+store: RuntimeException: Cannot serialize heap while it is being modified.
+bool(false)

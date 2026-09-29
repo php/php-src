@@ -140,6 +140,19 @@ static inline zend_long GENERATE_SEED(void)
 	return (zend_long)php_random_generate_fallback_seed();
 }
 
+static zend_always_inline uint64_t php_random_splitmix64_mix(uint64_t z)
+{
+	z = (z ^ (z >> 30)) * UINT64_C(0xbf58476d1ce4e5b9);
+	z = (z ^ (z >> 27)) * UINT64_C(0x94d049bb133111eb);
+
+	return z ^ (z >> 31);
+}
+
+static zend_always_inline uint64_t php_random_splitmix64(uint64_t *seed)
+{
+	return php_random_splitmix64_mix(*seed += UINT64_C(0x9e3779b97f4a7c15));
+}
+
 PHPAPI void *php_random_status_alloc(const php_random_algo *algo, const bool persistent);
 PHPAPI void *php_random_status_copy(const php_random_algo *algo, void *old_status, void *new_status);
 PHPAPI void php_random_status_free(void *status, const bool persistent);
@@ -158,17 +171,6 @@ static inline php_random_algo_with_state php_random_default_engine(void)
 	raws.algo = php_random_default_algo();
 	raws.state = php_random_default_status();
 	return raws;
-}
-
-static inline uint64_t php_random_splitmix64(uint64_t *seed)
-{
-	uint64_t r;
-
-	r = (*seed += 0x9e3779b97f4a7c15ULL);
-	r = (r ^ (r >> 30)) * 0xbf58476d1ce4e5b9ULL;
-	r = (r ^ (r >> 27)) * 0x94d049bb133111ebULL;
-
-	return (r ^ (r >> 31));
 }
 
 PHPAPI zend_string *php_random_bin2hex_le(const void *ptr, const size_t len);

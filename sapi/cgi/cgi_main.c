@@ -779,92 +779,31 @@ static void sapi_cgi_log_message(const char *message, int syslog_type_int)
 	}
 }
 
-static const char *cgi_user_cache_getenv(const char *name)
+static const char *cgi_ucache_document_root(void)
 {
-	const char *value;
+	const char *document_root;
 	fcgi_request *request;
-	int name_len;
 
-	if (fcgi_is_fastcgi()) {
+	if (SG(server_context) != NULL && SG(server_context) != (void *) 1) {
 		request = (fcgi_request*) SG(server_context);
 		if (fcgi_has_env(request)) {
-			name_len = (int) strlen(name);
-			value = fcgi_getenv(request, name, name_len);
-			if (value != NULL) {
-				return value;
+			document_root = fcgi_getenv(request, "DOCUMENT_ROOT", sizeof("DOCUMENT_ROOT") - 1);
+			if (document_root != NULL) {
+				return document_root;
 			}
 		}
 	}
 
-	return getenv(name);
+	return getenv("DOCUMENT_ROOT");
 }
 
-static void cgi_user_cache_activate_request_partition(void)
+static void cgi_ucache_activate_request_partition(void)
 {
-	const char *document_root = cgi_user_cache_getenv("DOCUMENT_ROOT");
-	const char *server_name = cgi_user_cache_getenv("SERVER_NAME");
-	size_t document_root_len, server_name_len, boundary_size;
-	char *boundary;
-	int boundary_len;
-
-	if (server_name == NULL || server_name[0] == '\0') {
-		php_ucache_activate_boundary_partition_by_id(
-			"cgi-fcgi",
-			NULL,
-			0,
-			PHP_UCACHE_REASON_CGI_BOUNDARY_UNAVAILABLE
-		);
-
-		return;
-	}
-
-	if (document_root == NULL) {
-		document_root = "";
-	}
-	document_root_len = strlen(document_root);
-	server_name_len = strlen(server_name);
-
-	/* Three decimal digits per size_t byte over-cover each length prefix,
-	 * and the component lengths cannot overflow the sum: each component is
-	 * a live NUL-terminated string in this address space. */
-	boundary_size = sizeof("document-root::;server-name::") +
-		2 * (sizeof(size_t) * 3) +
-		document_root_len + server_name_len;
-	boundary = malloc(boundary_size);
-	if (boundary == NULL) {
-		php_ucache_activate_boundary_partition_by_id(
-			"cgi-fcgi",
-			NULL,
-			0,
-			PHP_UCACHE_REASON_CGI_BOUNDARY_UNAVAILABLE
-		);
-
-		return;
-	}
-
-	/* Derive the partition identity only from server-configured values.
-	 * HTTP_HOST is deliberately excluded: it is attacker-controlled, so folding
-	 * it in would let a remote client mint an unbounded number of persistent
-	 * shm-backed partitions by varying the Host header.  DOCUMENT_ROOT and
-	 * SERVER_NAME come from the web server configuration and are length-prefixed
-	 * so the composed values cannot form ambiguous identities. */
-	boundary_len = snprintf(
-		boundary,
-		boundary_size,
-		"document-root:%zu:%s;server-name:%zu:%s",
-		document_root_len,
-		document_root,
-		server_name_len,
-		server_name
-	);
-	ZEND_ASSERT(boundary_len > 0 && (size_t) boundary_len < boundary_size);
-	php_ucache_activate_boundary_partition_by_id(
+	php_ucache_activate_boundary_partition(
 		"cgi-fcgi",
-		boundary,
-		(size_t) boundary_len,
+		cgi_ucache_document_root(),
 		PHP_UCACHE_REASON_CGI_BOUNDARY_UNAVAILABLE
 	);
-	free(boundary);
 }
 
 /* {{{ php_cgi_ini_activate_user_config */
@@ -949,10 +888,8 @@ static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const 
 
 static int sapi_cgi_activate(void)
 {
-	/* Resolve the user-cache partition before any early return below: the
-	 * activate return value is ignored by sapi_activate(), so bailing out
-	 * first would leave the request without a partition. */
-	cgi_user_cache_activate_request_partition();
+	/* Resolve the partition before early returns: sapi_activate() ignores failure. */
+	cgi_ucache_activate_request_partition();
 
 	/* PATH_TRANSLATED should be defined at this stage but better safe than sorry :) */
 	if (!SG(request_info).path_translated) {
@@ -1069,7 +1006,9 @@ static int php_cgi_startup(sapi_module_struct *sapi_module_ptr)
 		return FAILURE;
 	}
 
-	php_ucache_opt_in();
+	if (php_ucache_opt_in(PHP_UCACHE_MODE_REQ) == FAILURE && php_ucache_is_enabled_by_ini()) {
+		php_error_docref(NULL, E_WARNING, "Unable to register UserCache request mode; UserCache will be unavailable");
+	}
 
 	return SUCCESS;
 }

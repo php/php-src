@@ -392,7 +392,9 @@ static int php_cli_startup(sapi_module_struct *sapi_module_ptr) /* {{{ */
 		return FAILURE;
 	}
 
-	php_ucache_opt_in();
+	if (php_ucache_opt_in(PHP_UCACHE_MODE_REQ) == FAILURE && php_ucache_is_enabled_by_ini()) {
+		php_error_docref(NULL, E_WARNING, "Unable to register UserCache request mode; UserCache will be unavailable");
+	}
 
 	return SUCCESS;
 }

@@ -701,7 +701,9 @@ static inline int php_sapi_phpdbg_module_startup(sapi_module_struct *module) /* 
 		return FAILURE;
 	}
 
-	php_ucache_opt_in();
+	if (php_ucache_opt_in(PHP_UCACHE_MODE_REQ) == FAILURE && php_ucache_is_enabled_by_ini()) {
+		php_error_docref(NULL, E_WARNING, "Unable to register UserCache request mode; UserCache will be unavailable");
+	}
 
 	phpdbg_booted = 1;
 

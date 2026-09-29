@@ -12,518 +12,305 @@
    +----------------------------------------------------------------------+
 */
 
-#include "user_cache_internal.h"
+#include "user_cache_entries.h"
 
 #include "Zend/zend_closures.h"
 #include "Zend/zend_gc.h"
-#include "Zend/zend_objects.h"
 
-#define PHP_UCACHE_REQUEST_LOCAL_NO_DEEP_CLONE ((void *) 1)
-#define PHP_UCACHE_REQUEST_LOCAL_NEEDS_DEEP_CLONE ((void *) 2)
+#define UCACHE_DIRECT_STR_MIN_LEN		4096U
 
-/* Release the lock before propagating a bailout, unless a bulk store asked to
- * keep it held so its rollback runs without a lock gap. */
-#define PHP_UCACHE_TRY_UNLOCK_ON_BAILOUT(stmt) \
+#define UCACHE_EXPUNGE_WRITE_OP_INTERVAL	64U
+#define UCACHE_REHASH_TOMBSTONE_DIVISOR		4U
+#define UCACHE_REHASH_EMPTY_SLOT_DIVISOR	16U
+#define UCACHE_REHASH_RETRY_SKIPS			64U
+
+#define UCACHE_ACCESS_NOW_REFRESH_INTERVAL	1024U
+#define UCACHE_ACCESS_SAMPLE_INTERVAL		64U
+
+#define UCACHE_RECORD_STORE_STR_MIN_LEN	256U
+
+#define UCACHE_MAX_REQ_LOCAL_SLOTS	4096U
+
+#define UCACHE_REQ_PIN_BUDGET_DIVISOR	4U
+
+#define UCACHE_TRY_UNLOCK_ON_BAILOUT(stmt) \
 	do { \
 		zend_try { \
 			stmt \
 		} zend_catch { \
-			if (!UC_G(store_defer_unlock)) { \
-				php_ucache_unlock_if_held(); \
-			} \
+			ucache_unlock_if_held(); \
 			zend_bailout(); \
 		} zend_end_try(); \
 	} while (0)
 
-#define PHP_UCACHE_LOOKUP_INVALID_SLOT	UINT32_MAX
-#define PHP_UCACHE_REQUEST_LOCAL_STRING_MIN_LEN	256U
-#define PHP_UCACHE_DIRECT_STRING_MIN_LEN		4096U
-#define PHP_UCACHE_EXPIRED_READ_EXPUNGE_THRESHOLD	64U
-/* Advance the bounded expiry scan on write traffic alone: expired entries
- * that are never read again would otherwise wait for allocation pressure. */
-#define PHP_UCACHE_EXPUNGE_WRITE_OP_INTERVAL	64U
-#define PHP_UCACHE_EXPUNGE_SCAN_MAX				4096U
-/* Advisory access-stamp clock: refreshing at most once per interval keeps the
- * hot read path free of clock reads while bounding staleness in long-lived
- * requests. */
-#define PHP_UCACHE_ACCESS_NOW_REFRESH_INTERVAL	1024U
-/* LRU eviction: victims per window scan, victims per store attempt, and the
- * live-slot bound per victim search under the write lock (scans walk the
- * occupancy bitmap, so empty slots cost nothing). */
-#define PHP_UCACHE_EVICTION_WINDOW			32U
-#define PHP_UCACHE_EVICTION_MAX_VICTIMS		64U
-#define PHP_UCACHE_EVICTION_SCAN_MAX		4096U
-/* Allocation-pressure reclaims between intern sweeps. */
-#define PHP_UCACHE_INTERN_SWEEP_PRESSURE_INTERVAL	64U
-
-#define PHP_UCACHE_LOOKUP_VALUE_NONE	0xFFU
-
 typedef enum {
-	PHP_UCACHE_REQUEST_LOCAL_SLOT_MISS,
-	PHP_UCACHE_REQUEST_LOCAL_SLOT_HIT
-} php_ucache_request_local_slot_result_t;
-
-typedef enum {
-	PHP_UCACHE_FIND_SLOT_IGNORE_EXPIRY = 0,
-	PHP_UCACHE_FIND_SLOT_SKIP_EXPIRED,
-	PHP_UCACHE_FIND_SLOT_DELETE_EXPIRED
-} php_ucache_find_slot_expiry_mode_t;
-
-typedef enum {
-	PHP_UCACHE_FETCH_LOCATE_MISS,
-	PHP_UCACHE_FETCH_LOCATE_SCALAR_HIT,
-	PHP_UCACHE_FETCH_LOCATE_SLOT,
-	PHP_UCACHE_FETCH_LOCATE_UNCACHED
-} php_ucache_fetch_locate_result_t;
-
-typedef enum {
-	PHP_UCACHE_OBJECT_STORABLE_VIA_HOOKS,
-	PHP_UCACHE_OBJECT_SERDES,
-	PHP_UCACHE_OBJECT_OPAQUE,
-	PHP_UCACHE_OBJECT_SCAN_MEMBERS
-} php_ucache_object_storability_t;
-
-typedef enum {
-	PHP_UCACHE_STORE_ATTEMPT_STORED,
-	PHP_UCACHE_STORE_ATTEMPT_RETRY,
-	/* The staged payload references interned strings of an older
-	 * generation: rebuild it without interning, then retry. */
-	PHP_UCACHE_STORE_ATTEMPT_REPREPARE,
-	PHP_UCACHE_STORE_ATTEMPT_FAILED
-} php_ucache_store_attempt_result_t;
-
-typedef struct {
-	HashTable arrays;
-	HashTable objects;
-	HashTable references;
-	HashTable *clone_verdicts;
-	bool track_identity;
-} php_ucache_request_local_clone_ctx_t;
-
-typedef struct {
-	HashTable *seen_arrays;
-	HashTable *seen_objects;
-	const char **failure_message;
-} php_ucache_unstorable_ctx_t;
-
-typedef struct {
-	uint64_t generation;
-	const void *ctx;
-	bool needs_deep_clone;
-	bool has_clone_verdicts;
-	bool no_aliases;
-	bool has_value;
-	zval value;
-	HashTable clone_verdicts;
-} php_ucache_request_local_slot_t;
+	UCACHE_FIND_SLOT_IGNORE_EXPIRY = 0,
+	UCACHE_FIND_SLOT_SKIP_EXPIRED,
+	UCACHE_FIND_SLOT_DELETE_EXPIRED
+} ucache_find_slot_expiry_mode;
 
 enum {
-	PHP_UCACHE_FETCH_FINISH_USE_REQUEST_LOCAL_SLOT = 1 << 0,
-	PHP_UCACHE_FETCH_FINISH_NO_ALIASES = 1 << 1,
-	PHP_UCACHE_FETCH_FINISH_DEFER_REQUEST_LOCAL_SLOT = 1 << 2
+	UCACHE_FETCH_FINISH_USE_REQ_LOCAL_SLOT = 1 << 0,
+	UCACHE_FETCH_FINISH_NO_ALIASES = 1 << 1,
+	UCACHE_FETCH_FINISH_RECORD_COPY = 1 << 2,
+	UCACHE_FETCH_FINISH_RESTORE_HOOKS_RAN = 1 << 3
 };
 
-static bool ucache_clone_request_local_value(
-		php_ucache_request_local_clone_ctx_t *ctx,
-		zval *dst,
-		zval *src);
+typedef enum {
+	UCACHE_FETCH_LOCATE_MISS,
+	UCACHE_FETCH_LOCATE_VAL_HIT,
+	UCACHE_FETCH_LOCATE_SLOT,
+	UCACHE_FETCH_LOCATE_UNCACHED
+} ucache_fetch_locate_result;
 
-static bool ucache_collect_request_local_clone_verdicts_impl(
-		zval *value,
-		HashTable *seen_arrs,
-		HashTable *seen_objs,
-		HashTable *verdicts,
-		bool record_array_result);
+typedef enum {
+	UCACHE_STORE_ATTEMPT_STORED,
+	UCACHE_STORE_ATTEMPT_RETRY,
+	UCACHE_STORE_ATTEMPT_FAILED
+} ucache_store_attempt_result;
 
-static bool ucache_find_unstorable_value(
-		zval *value,
-		HashTable *seen_arrs,
-		HashTable *seen_objs,
-		const char **msg);
+static zend_never_inline uint64_t ucache_clock_now_noinline(void);
+static zend_never_inline void ucache_key_record_release_refcounted_val(ucache_key_record *record, zval *detached);
+static zend_never_inline ucache_optimistic_result ucache_optimistic_locate_fallback(
+		ucache_hdr *hdr,
+		uint32_t capacity,
+		ucache_key_record *record,
+		uint64_t seq,
+		uint64_t epoch,
+		bool stamp_access,
+		ucache_entry *snapshot);
+static bool ucache_rehash_locked(ucache_hdr *hdr);
 
-static void ucache_rehash_locked(php_ucache_header_t *header);
-static bool ucache_expunge_expired_bounded_locked(void);
-static bool ucache_reprepare_without_interning(
+static bool ucache_find_slot_in_hdr_locked(
+		ucache_hdr *hdr,
 		zend_string *key,
-		zval *value,
-		php_ucache_prepared_value_t *prepared);
+		zend_ulong hash,
+		ucache_find_slot_expiry_mode expiry_mode,
+		uint32_t *slot_idx,
+		bool *found);
 
-static zend_always_inline uint64_t ucache_seq_reload(const uint64_t *seq)
+static zend_always_inline uint8_t ucache_entry_state(const ucache_entry *entry)
 {
-	php_ucache_atomic_fence_acquire();
-
-	return php_ucache_atomic_load_64(seq);
+	return (uint8_t) MIN(ucache_entry_kind(entry), UCACHE_ENTRY_USED);
 }
 
-static zend_always_inline bool ucache_value_uses_offset(uint8_t value_type)
+static zend_always_inline bool ucache_entry_is_empty(const ucache_entry *entry)
+{
+	return ucache_entry_kind(entry) == UCACHE_ENTRY_EMPTY;
+}
+
+static zend_always_inline void ucache_entry_set_val_type(ucache_entry *entry, uint8_t val_type)
+{
+	ucache_entry_set_kind(entry, UCACHE_ENTRY_USED + val_type);
+}
+
+static zend_always_inline uint32_t ucache_pool_bucket_for_key(const char *key, size_t key_len)
+{
+	const char *delim = memchr(key, UCACHE_KEY_DELIM_CHAR, key_len);
+	size_t prefix_len = delim != NULL ? (size_t) (delim - key) + 1 : key_len;
+
+	return (uint32_t) (zend_inline_hash_func(key, prefix_len) & (UCACHE_POOL_BUCKETS - 1));
+}
+
+static zend_always_inline uint32_t ucache_pool_link_ref(uint32_t slot)
+{
+	return slot + 1;
+}
+
+static zend_always_inline void ucache_pool_idx_link_locked(
+		ucache_hdr *hdr,
+		ucache_entry *entry,
+		uint32_t slot)
+{
+	ucache_pool_links *links = ucache_pool_links_ptr(hdr);
+	ucache_pool_links *link = &links[slot];
+	uint32_t bucket = ucache_entry_pool_bucket(entry), ref = ucache_pool_link_ref(slot);
+
+	link->prev = 0;
+	link->next = hdr->pool_bucket_heads[bucket];
+	if (link->next != 0) {
+		links[ucache_pool_link_ref_slot(link->next)].prev = ref;
+	}
+
+	hdr->pool_bucket_heads[bucket] = ref;
+}
+
+static zend_always_inline uint64_t ucache_load_seq(const ucache_hdr *hdr, zend_string *key)
+{
+	uint64_t seq = ucache_atomic_load_64(&hdr->write_seq);
+#ifdef UCACHE_HAVE_SCALAR_WRITE
+	uint64_t stripe_seq;
+
+	/* Relaxed: stripes are enabled in a write section, ordered by the write_seq acquire load above. */
+	if (UNEXPECTED(UCACHE_ATOMIC_LOAD_32_RELAXED(&hdr->scalar_write_enabled) != 0)) {
+		stripe_seq = ucache_atomic_load_64(
+			&hdr->scalar_write_stripes[ucache_scalar_write_idx(zend_string_hash_val(key))].seq
+		);
+
+		if (((seq | stripe_seq) & 1) != 0) {
+			return UINT64_MAX;
+		}
+
+		seq += stripe_seq;
+	}
+#else
+	(void) key;
+#endif
+
+	return seq;
+}
+
+static zend_always_inline uint64_t ucache_read_seq(const ucache_hdr *hdr, zend_string *key)
+{
+	ucache_atomic_fence_acquire();
+
+	return ucache_load_seq(hdr, key);
+}
+
+static zend_always_inline bool ucache_val_uses_offset(uint8_t val_type)
 {
 	return
-		value_type == PHP_UCACHE_VALUE_STRING ||
-		value_type == PHP_UCACHE_VALUE_SHARED_GRAPH
+		val_type == UCACHE_VAL_STR ||
+		val_type == UCACHE_VAL_SGRAPH
 	;
 }
 
-static zend_always_inline uint8_t *ucache_ptr_in_header(
-		const php_ucache_header_t *header,
+static zend_always_inline void ucache_entry_set_long_zero_filled(ucache_entry *entry, zend_long lval)
+{
+	entry->double_val = 0;
+	entry->long_val = lval;
+}
+
+static zend_always_inline uint8_t *ucache_ptr_in_hdr(
+		const ucache_hdr *hdr,
 		uint32_t offset)
 {
-	return (uint8_t *) header + php_ucache_shm_bytes(offset);
+	return (uint8_t *) hdr + ucache_offset_bytes(offset);
+}
+
+static zend_always_inline const char *ucache_entry_key_in_hdr(
+		const ucache_hdr *hdr,
+		const ucache_entry *entry)
+{
+	return (const char *) hdr + ucache_entry_key_pos(entry);
+}
+
+static zend_always_inline uint32_t ucache_combined_key_offset(uint32_t val_offset, size_t payload_size)
+{
+	return val_offset + (uint32_t) (payload_size >> UCACHE_OFFSET_SHIFT);
+}
+
+static zend_always_inline uint16_t ucache_combined_key_flags(size_t payload_size)
+{
+	return UCACHE_ENTRY_FLAG_COMBINED_VAL_KEY |
+		(uint16_t) ((payload_size & (UCACHE_OFFSET_UNIT - 1)) << UCACHE_ENTRY_KEY_BYTE_SHIFT)
+	;
 }
 
 static zend_always_inline bool ucache_key_equals(
-		const php_ucache_header_t *header,
-		const php_ucache_entry_t *entry,
+		const ucache_hdr *hdr,
+		const ucache_entry *entry,
 		zend_string *key,
 		zend_ulong hash)
 {
-	if (entry->state != PHP_UCACHE_ENTRY_USED || entry->hash != hash || entry->key_len != ZSTR_LEN(key)) {
+	if (
+		!ucache_entry_is_used(entry) ||
+		entry->hash != ucache_table_hash(hash) ||
+		entry->key_len != ZSTR_LEN(key)
+	) {
 		return false;
 	}
 
 	return memcmp(
-		ucache_ptr_in_header(header, entry->key_offset),
+		ucache_entry_key_in_hdr(hdr, entry),
 		ZSTR_VAL(key),
 		ZSTR_LEN(key)
 	) == 0;
 }
 
-static zend_always_inline uint32_t ucache_write_payload_locked(
-		const php_ucache_header_t *header,
+static zend_always_inline bool ucache_optimistic_key_matches(
+		const ucache_hdr *hdr,
+		size_t key_pos,
+		const zend_string *key)
+{
+	return ucache_bytes_in_bounds(hdr, key_pos, ZSTR_LEN(key)) &&
+		memcmp((const char *) hdr + key_pos, ZSTR_VAL(key), ZSTR_LEN(key)) == 0
+	;
+}
+
+static zend_always_inline bool ucache_reuse_block_locked(
+		ucache_hdr *hdr,
 		uint32_t reusable_offset,
 		size_t size,
-		const void *src)
+		uint32_t owner)
 {
-	if (reusable_offset != 0 && php_ucache_block_payload_capacity(reusable_offset) >= size) {
-		memcpy(ucache_ptr_in_header(header, reusable_offset), src, size);
+	uint32_t capacity;
+
+	if (reusable_offset == 0) {
+		return false;
+	}
+
+	capacity = ucache_block_payload_capacity(hdr, reusable_offset);
+	if (capacity < size) {
+		return false;
+	}
+
+	if (capacity - size >= UCACHE_BLOCK_MIN_SIZE) {
+		ucache_shrink_locked(reusable_offset, size);
+
+		ucache_pool_bucket_changed_locked(
+			hdr,
+			ucache_entry_pool_bucket(&ucache_entries_ptr(hdr)[owner])
+		);
+	}
+
+	return true;
+}
+
+static zend_always_inline uint32_t ucache_write_payload_locked(
+		ucache_hdr *hdr,
+		uint32_t reusable_offset,
+		size_t size,
+		const void *src,
+		uint32_t owner)
+{
+	if (ucache_reuse_block_locked(hdr, reusable_offset, size, owner)) {
+		memcpy(ucache_ptr_in_hdr(hdr, reusable_offset), src, size);
 
 		return reusable_offset;
 	}
 
-	return php_ucache_alloc_locked(size, src);
+	return ucache_alloc_locked(size, src, owner);
 }
 
-static zend_always_inline size_t ucache_combined_value_key_size(size_t payload_size, size_t key_size)
+static zend_always_inline void ucache_entry_set_block_owner(const ucache_entry *entry, uint32_t slot)
 {
-	return PHP_UCACHE_SHM_UNIT_ALIGNED_SIZE(payload_size) + key_size;
-}
+	uint32_t val_offset = ucache_entry_val_offset(entry);
 
-/* The key follows the value at the next unit boundary; the gap is zeroed so
- * no heap bytes reach the segment. */
-static zend_always_inline void ucache_write_combined_key(uint8_t *payload, size_t payload_size, const zend_string *key)
-{
-	size_t key_displacement = PHP_UCACHE_SHM_UNIT_ALIGNED_SIZE(payload_size);
-
-	memset(payload + payload_size, 0, key_displacement - payload_size);
-	memcpy(payload + key_displacement, ZSTR_VAL(key), ZSTR_LEN(key) + 1);
-}
-
-static zend_always_inline php_ucache_lookup_entry_t *ucache_lookup_cache_set(zend_ulong hash)
-{
-	uint32_t set_idx = (uint32_t) (hash & (PHP_UCACHE_LOOKUP_SETS - 1));
-
-	return &UC_G(lookup_entry_storage)[set_idx * PHP_UCACHE_LOOKUP_WAYS];
-}
-
-static zend_always_inline void ucache_lookup_entry_release_key(
-		php_ucache_lookup_entry_t *lookup_entry)
-{
-	if (lookup_entry->key != NULL) {
-		zend_string_release(lookup_entry->key);
-
-		lookup_entry->key = NULL;
+	if (val_offset != 0) {
+		ucache_block_ptr(ucache_payload_block_offset(val_offset))->owner = slot;
 	}
-}
 
-static zend_always_inline void ucache_lookup_cache_store(
-		php_ucache_lookup_entry_t *lookup_entry,
-		zend_ulong hash,
-		uint64_t epoch,
-		uint32_t slot_idx,
-		uint8_t state)
-{
-	ucache_lookup_entry_release_key(lookup_entry);
-
-	lookup_entry->hash = hash;
-	lookup_entry->mutation_epoch = epoch;
-	lookup_entry->ctx = php_ucache_active_context();
-	lookup_entry->slot_index = slot_idx;
-	lookup_entry->state = state;
-	lookup_entry->value_type = PHP_UCACHE_LOOKUP_VALUE_NONE;
-}
-
-/* Prefer the current context, then empty, stale and miss slots. */
-static zend_always_inline php_ucache_lookup_entry_t *ucache_lookup_cache_select_slot(
-		php_ucache_lookup_entry_t *lookup_entries,
-		zend_ulong hash,
-		uint64_t epoch,
-		bool allow_hit_eviction)
-{
-	const void *ctx = php_ucache_active_context();
-	php_ucache_lookup_entry_t *preferred, *alternate;
-	uint32_t way =
-		(uint32_t) ((((uint64_t) hash >> 32) ^ hash) & (PHP_UCACHE_LOOKUP_WAYS - 1))
-	;
-
-	preferred = &lookup_entries[way];
-	alternate = &lookup_entries[way ^ 1];
-
-	if (preferred->state != PHP_UCACHE_LOOKUP_EMPTY &&
-		preferred->hash == hash &&
-		preferred->mutation_epoch == epoch &&
-		preferred->ctx == ctx
+	if ((entry->flags & UCACHE_ENTRY_FLAG_COMBINED_VAL_KEY) == 0 &&
+		entry->key_offset != 0
 	) {
-		return preferred;
-	}
-
-	if (alternate->state != PHP_UCACHE_LOOKUP_EMPTY &&
-		alternate->hash == hash &&
-		alternate->mutation_epoch == epoch &&
-		alternate->ctx == ctx
-	) {
-		return alternate;
-	}
-
-	if (preferred->state == PHP_UCACHE_LOOKUP_EMPTY ||
-		preferred->mutation_epoch != epoch ||
-		preferred->ctx != ctx
-	) {
-		return preferred;
-	}
-
-	if (alternate->state == PHP_UCACHE_LOOKUP_EMPTY ||
-		alternate->mutation_epoch != epoch ||
-		alternate->ctx != ctx
-	) {
-		return alternate;
-	}
-
-	if (preferred->state == PHP_UCACHE_LOOKUP_MISS) {
-		return preferred;
-	}
-
-	if (alternate->state == PHP_UCACHE_LOOKUP_MISS) {
-		return alternate;
-	}
-
-	return allow_hit_eviction ? preferred : NULL;
-}
-
-static zend_always_inline void ucache_lookup_cache_store_miss(
-		php_ucache_lookup_entry_t *lookup_entries,
-		zend_ulong hash,
-		uint64_t epoch,
-		zend_string *key)
-{
-	php_ucache_lookup_entry_t *victim =
-		ucache_lookup_cache_select_slot(lookup_entries, hash, epoch, false)
-	;
-
-	if (victim == NULL) {
-		return;
-	}
-
-	ucache_lookup_cache_store(
-		victim,
-		hash,
-		epoch,
-		PHP_UCACHE_LOOKUP_INVALID_SLOT,
-		PHP_UCACHE_LOOKUP_MISS
-	);
-
-	/* MISS entries must still distinguish hash collisions. */
-	victim->key = zend_string_copy(key);
-}
-
-static zend_always_inline void ucache_lookup_cache_store_hit(
-		php_ucache_lookup_entry_t *lookup_entry,
-		zend_ulong hash,
-		uint64_t epoch,
-		uint32_t slot_idx,
-		zend_string *key,
-		const php_ucache_entry_t *entry)
-{
-	ucache_lookup_cache_store(
-		lookup_entry,
-		hash,
-		epoch,
-		slot_idx,
-		PHP_UCACHE_LOOKUP_HIT
-	);
-
-	lookup_entry->key = zend_string_copy(key);
-
-	if (entry->expires_at != 0) {
-		return;
-	}
-
-	switch (entry->value_type) {
-		case PHP_UCACHE_VALUE_NULL:
-		case PHP_UCACHE_VALUE_TRUE:
-		case PHP_UCACHE_VALUE_FALSE:
-		case PHP_UCACHE_VALUE_LONG:
-		case PHP_UCACHE_VALUE_DOUBLE:
-			lookup_entry->value_type = entry->value_type;
-			/* Copy the member selected by value_type: on ILP32 zend_long
-			 * covers only half of the scalar union. */
-			if (entry->value_type == PHP_UCACHE_VALUE_DOUBLE) {
-				lookup_entry->double_value = entry->double_value;
-			} else {
-				lookup_entry->long_value = entry->long_value;
-			}
-
-			break;
-		default:
-			break;
+		ucache_block_ptr(ucache_payload_block_offset(entry->key_offset))->owner = slot;
 	}
 }
 
-static zend_always_inline void ucache_lookup_cache_reset_entry(php_ucache_lookup_entry_t *lookup_entry)
+static zend_always_inline void ucache_expiry_floor_lower_locked(ucache_hdr *hdr, uint32_t expires_at)
 {
-	ucache_lookup_entry_release_key(lookup_entry);
-
-	memset(lookup_entry, 0, sizeof(*lookup_entry));
-}
-
-static zend_always_inline void ucache_release_value_storage_locked(uint8_t value_type, uint32_t value_offset)
-{
-	bool graph_quiescent;
-
-	if (value_offset == 0) {
-		return;
+	if (expires_at != 0 && expires_at < hdr->expiry_floor) {
+		hdr->expiry_floor = expires_at;
 	}
-
-	if (value_type == PHP_UCACHE_VALUE_SHARED_GRAPH) {
-		graph_quiescent = php_ucache_quiesce_graph_payloads_locked();
-
-		if (php_ucache_shared_graph_retire_payload_locked(value_offset)) {
-			if (graph_quiescent) {
-				php_ucache_free_locked(value_offset);
-			} else {
-				php_ucache_shared_graph_orphan_payload_locked(value_offset);
-			}
-		}
-	} else if (ucache_value_uses_offset(value_type)) {
-		php_ucache_free_locked(value_offset);
-	}
-}
-
-static zend_always_inline void ucache_release_entry_storage_except_locked(
-		php_ucache_entry_t *entry,
-		const php_ucache_entry_t *kept_entry)
-{
-	bool combined, kept_combined;
-
-	combined = (entry->flags & PHP_UCACHE_ENTRY_FLAG_COMBINED_VALUE_KEY) != 0;
-	kept_combined = kept_entry != NULL &&
-		(kept_entry->flags & PHP_UCACHE_ENTRY_FLAG_COMBINED_VALUE_KEY) != 0
-	;
-
-	if (entry->key_offset != 0 && !combined &&
-		(
-			kept_entry == NULL ||
-			kept_combined ||
-			entry->key_offset != kept_entry->key_offset
-		)
-	) {
-		php_ucache_free_locked(entry->key_offset);
-	}
-
-	if (entry->value_offset != 0 &&
-		(
-			kept_entry == NULL ||
-			entry->value_offset != kept_entry->value_offset ||
-			entry->value_type != kept_entry->value_type
-		)
-	) {
-		ucache_release_value_storage_locked(entry->value_type, entry->value_offset);
-	}
-}
-
-static zend_always_inline void ucache_release_entry_storage_locked(php_ucache_entry_t *entry)
-{
-	ucache_release_entry_storage_except_locked(entry, NULL);
-}
-
-static zend_always_inline void ucache_delete_entry_locked(php_ucache_header_t *header, php_ucache_entry_t *entry)
-{
-	if (entry->state == PHP_UCACHE_ENTRY_USED) {
-		php_ucache_occupancy_clear(header, (uint32_t) (entry - php_ucache_entries_ptr(header)));
-
-		if (header->count != 0) {
-			header->count--;
-
-			if (entry->expires_at != 0 && header->expiring_count != 0) {
-				header->expiring_count--;
-			}
-		}
-	}
-
-	if (entry->state != PHP_UCACHE_ENTRY_TOMBSTONE) {
-		header->tombstone_count++;
-	}
-
-	ucache_release_entry_storage_locked(entry);
-
-	entry->hash = 0;
-	entry->key_offset = 0;
-	entry->key_len = 0;
-	entry->state = PHP_UCACHE_ENTRY_TOMBSTONE;
-	entry->value_type = PHP_UCACHE_VALUE_NULL;
-	entry->value_offset = 0;
-	entry->value_len = 0;
-	entry->flags = 0;
-	entry->expires_at = 0;
-	entry->generation = 0;
-	/* double spans the whole scalar union on every ABI. */
-	entry->double_value = 0;
-
-	php_ucache_bump_mutation_epoch_locked(header);
-}
-
-/* Zeroing first keeps the delete from releasing the half-written block
- * through the graph retire path; it is freed directly below. */
-static zend_always_inline void ucache_drop_overwritten_combined_entry_locked(
-		php_ucache_header_t *header,
-		php_ucache_entry_t *entry,
-		uint32_t block_offset)
-{
-	entry->value_type = PHP_UCACHE_VALUE_NULL;
-	entry->value_offset = 0;
-
-	ucache_delete_entry_locked(header, entry);
-	php_ucache_free_locked(block_offset);
-}
-
-static zend_always_inline void ucache_release_request_local_slot_table(HashTable **slots_ptr)
-{
-	HashTable *slots = *slots_ptr;
-
-	if (slots == NULL) {
-		return;
-	}
-
-	*slots_ptr = NULL;
-
-	zend_hash_destroy(slots);
-
-	FREE_HASHTABLE(slots);
-}
-
-/* now_rel is seconds relative to header time_base (php_ucache_time_rel). */
-static zend_always_inline bool ucache_is_expired(const php_ucache_entry_t *entry, uint64_t now_rel)
-{
-	return entry->state == PHP_UCACHE_ENTRY_USED &&
-		entry->expires_at != 0 &&
-		(uint64_t) entry->expires_at <= now_rel
-	;
 }
 
 static zend_always_inline uint32_t ucache_access_now(void)
 {
 	uint32_t now = UC_G(access_now);
 
-	if (now == 0 || ++UC_G(access_now_touches) >= PHP_UCACHE_ACCESS_NOW_REFRESH_INTERVAL) {
-		now = (uint32_t) time(NULL);
+	if (now == 0 || ++UC_G(access_now_touches) >= UCACHE_ACCESS_NOW_REFRESH_INTERVAL) {
+		now = (uint32_t) (ucache_clock_now_noinline() / UCACHE_CLOCK_TICKS_PER_SEC);
 		if (now == 0) {
 			now = 1;
 		}
@@ -535,54 +322,79 @@ static zend_always_inline uint32_t ucache_access_now(void)
 	return now;
 }
 
-static zend_always_inline void ucache_access_note_time(uint64_t now)
+static zend_always_inline void ucache_record_entry_access(
+		ucache_hdr *hdr,
+		uint32_t capacity,
+		uint32_t slot_idx,
+		uint32_t now)
 {
-	if ((uint32_t) now != 0) {
-		UC_G(access_now) = (uint32_t) now;
-		UC_G(access_now_touches) = 0;
+	uint32_t *stamp, prev;
+
+	stamp = &((uint32_t *) (ucache_entries_ptr(hdr) + capacity))[slot_idx];
+
+	prev = UCACHE_ATOMIC_LOAD_32_RELAXED(stamp);
+	while (prev < now) {
+		if (ucache_atomic_cas_32(stamp, prev, now)) {
+			break;
+		}
+
+		prev = UCACHE_ATOMIC_LOAD_32_RELAXED(stamp);
 	}
 }
 
-static zend_always_inline void ucache_touch_entry_access(php_ucache_header_t *header, uint32_t slot_idx)
+static zend_always_inline void ucache_touch_entry_access(
+		ucache_hdr *hdr,
+		uint32_t capacity,
+		uint32_t slot_idx)
 {
-	uint32_t *stamp, now;
+	ucache_record_entry_access(hdr, capacity, slot_idx, ucache_access_now());
+}
 
-	stamp = &php_ucache_access_stamps_ptr(header)[slot_idx];
-	now = UC_G(access_now);
+static zend_always_inline void ucache_touch_cached_entry_access(
+		ucache_hdr *hdr,
+		uint32_t slot_idx,
+		uint16_t *touches)
+{
+	const ucache_storage *storage;
+	uint64_t now;
 
-	/* Warm case: the stamp already matches the request's coarse clock, so
-	 * skip even the touch counter. TTL checks, stores and evictions refresh
-	 * the clock opportunistically; a purely read-only TTL-free request may
-	 * keep its start-of-request clock, which only coarsens LRU recency. */
-	if (EXPECTED(now != 0) && PHP_UCACHE_ATOMIC_LOAD_32_RELAXED(stamp) == now) {
+	if (EXPECTED(++*touches < UCACHE_ACCESS_SAMPLE_INTERVAL)) {
 		return;
 	}
 
-	now = ucache_access_now();
+	*touches = 0;
 
-	if (PHP_UCACHE_ATOMIC_LOAD_32_RELAXED(stamp) != now) {
-		PHP_UCACHE_ATOMIC_STORE_32_RELAXED(stamp, now);
+	now = ucache_clock_now_noinline();
+
+	ucache_access_note_time(now);
+
+	storage = &ucache_active_ctx()->storage;
+	if (storage->layout_memo_valid && slot_idx < storage->capacity_memo) {
+		ucache_record_entry_access(
+			hdr,
+			storage->capacity_memo,
+			slot_idx,
+			UC_G(access_now)
+		);
 	}
 }
 
-/* *now caches the absolute wall clock (also feeding the access-stamp clock);
- * the expiry comparison itself runs on time_base-relative seconds. */
 static zend_always_inline bool ucache_is_expired_now(
-		const php_ucache_header_t *header,
-		const php_ucache_entry_t *entry,
+		const ucache_hdr *hdr,
+		const ucache_entry *entry,
 		uint64_t *now)
 {
-	if (entry->state != PHP_UCACHE_ENTRY_USED || entry->expires_at == 0) {
+	if (!ucache_entry_is_used(entry) || entry->expires_at == 0) {
 		return false;
 	}
 
 	if (*now == 0) {
-		*now = (uint64_t) time(NULL);
+		*now = ucache_clock_now_noinline();
 
 		ucache_access_note_time(*now);
 	}
 
-	return ucache_is_expired(entry, php_ucache_time_rel(header, *now));
+	return ucache_is_expired(entry, ucache_time_rel(hdr, *now));
 }
 
 static zend_always_inline void ucache_note_expired_read(void)
@@ -591,30 +403,30 @@ static zend_always_inline void ucache_note_expired_read(void)
 }
 
 static zend_always_inline bool ucache_scalar_to_zval(
-		uint8_t value_type,
-		zend_long lval,
-		double dval,
+		uint8_t val_type,
+		const zend_long *lval,
+		const double *dval,
 		zval *return_value)
 {
-	switch (value_type) {
-		case PHP_UCACHE_VALUE_NULL:
+	switch (val_type) {
+		case UCACHE_VAL_NULL:
 			ZVAL_NULL(return_value);
 
 			return true;
-		case PHP_UCACHE_VALUE_TRUE:
+		case UCACHE_VAL_TRUE:
 			ZVAL_TRUE(return_value);
 
 			return true;
-		case PHP_UCACHE_VALUE_FALSE:
+		case UCACHE_VAL_FALSE:
 			ZVAL_FALSE(return_value);
 
 			return true;
-		case PHP_UCACHE_VALUE_LONG:
-			ZVAL_LONG(return_value, lval);
+		case UCACHE_VAL_LONG:
+			ZVAL_LONG(return_value, *lval);
 
 			return true;
-		case PHP_UCACHE_VALUE_DOUBLE:
-			ZVAL_DOUBLE(return_value, dval);
+		case UCACHE_VAL_DOUBLE:
+			ZVAL_DOUBLE(return_value, *dval);
 
 			return true;
 		default:
@@ -622,24 +434,224 @@ static zend_always_inline bool ucache_scalar_to_zval(
 	}
 }
 
-static zend_always_inline bool ucache_payload_can_fit_locked(const php_ucache_header_t *header, size_t size)
+static zend_always_inline bool ucache_can_run_userland(void)
 {
-	uint32_t units;
-
-	return php_ucache_alloc_units(size, &units) && units <= header->data_size;
+	return !UC_G(lock_held) && UC_G(scalar_write_hdr) == NULL;
 }
 
-static zend_always_inline void ucache_init_prepared_value(php_ucache_prepared_value_t *prepared)
+static zend_always_inline void ucache_key_record_release_val(ucache_key_record *record, zval *detached)
+{
+	uint8_t kind = record->val_kind;
+
+	if (kind == UCACHE_RECORD_VAL_NONE) {
+		return;
+	}
+
+	record->val_kind = UCACHE_RECORD_VAL_NONE;
+
+	if (Z_REFCOUNTED(record->val)) {
+		ZEND_ASSERT(kind == UCACHE_RECORD_VAL_COPY || kind == UCACHE_RECORD_VAL_PINNED_COPY);
+
+		ucache_key_record_release_refcounted_val(record, detached);
+
+		return;
+	}
+
+	ZVAL_UNDEF(&record->val);
+}
+
+static zend_always_inline bool ucache_entry_written_after(const ucache_entry *entry, uint64_t epoch)
+{
+	return entry->gen > epoch;
+}
+
+static zend_always_inline void ucache_key_record_mark_miss(
+		ucache_key_record *record,
+		uint64_t epoch,
+		zval *detached)
+{
+	ucache_key_record_release_val(record, detached);
+
+	record->mutation_epoch = epoch;
+	record->state = UCACHE_RECORD_MISS;
+	record->access_touches = 0;
+}
+
+static zend_always_inline void ucache_key_record_mark_hit(
+		ucache_key_record *record,
+		uint64_t epoch,
+		uint32_t slot_idx,
+		const ucache_entry *entry,
+		zval *detached)
+{
+	if (record->state != UCACHE_RECORD_HIT || ucache_entry_written_after(entry, record->mutation_epoch)) {
+		ucache_key_record_release_val(record, detached);
+	}
+
+	record->mutation_epoch = epoch;
+	record->slot_idx = slot_idx;
+	record->expires_at = entry->expires_at;
+	record->state = UCACHE_RECORD_HIT;
+	record->access_touches = 0;
+
+	if (record->val_kind == UCACHE_RECORD_VAL_NONE &&
+		ucache_scalar_to_zval(
+			ucache_entry_val_type(entry),
+			&entry->long_val,
+			&entry->double_val,
+			&record->val
+		)
+	) {
+		record->val_kind = UCACHE_RECORD_VAL_COPY;
+	}
+}
+
+static zend_always_inline void ucache_key_record_mark_stored(
+		ucache_key_record *record,
+		uint64_t gen,
+		uint32_t slot_idx,
+		uint32_t expires_at)
+{
+	ucache_key_record_release_val(record, NULL);
+
+	record->mutation_epoch = gen;
+	record->slot_idx = slot_idx;
+	record->expires_at = expires_at;
+	record->state = UCACHE_RECORD_HIT;
+	record->access_touches = 0;
+}
+
+static zend_always_inline void ucache_key_record_reset_impl(ucache_key_record *record, zval *detached)
+{
+	ucache_key_record_release_val(record, detached);
+
+	record->mutation_epoch = 0;
+	record->state = UCACHE_RECORD_EMPTY;
+}
+
+static zend_always_inline bool ucache_key_record_charge_copy(ucache_key_record *record, size_t bytes)
+{
+	if (!ucache_record_val_fits(bytes)) {
+		return false;
+	}
+
+	UC_G(record_val_bytes) += bytes;
+
+	record->copy_charged_bytes = (uint32_t) bytes;
+
+	return true;
+}
+
+static zend_always_inline void ucache_key_record_cache_copy(
+		ucache_key_record *record,
+		zval *val,
+		size_t bytes)
+{
+	if (record->val_kind != UCACHE_RECORD_VAL_NONE) {
+		return;
+	}
+
+	if (Z_REFCOUNTED_P(val) && !ucache_key_record_charge_copy(record, bytes)) {
+		return;
+	}
+
+	ZVAL_COPY(&record->val, val);
+
+	record->val_kind = UCACHE_RECORD_VAL_COPY;
+}
+
+static zend_always_inline void ucache_key_record_cache_pinned_copy(
+		ucache_key_record *record,
+		zval *val,
+		uint32_t payload_offset,
+		uint32_t val_len)
+{
+	ZEND_ASSERT(Z_REFCOUNTED_P(val));
+
+	if (record->val_kind != UCACHE_RECORD_VAL_NONE ||
+		!ucache_key_record_charge_copy(record, val_len)
+	) {
+		return;
+	}
+
+	ZVAL_COPY(&record->val, val);
+
+	Z_EXTRA(record->val) = payload_offset;
+
+	record->val_kind = UCACHE_RECORD_VAL_PINNED_COPY;
+}
+
+static zend_always_inline void ucache_key_record_cache_pinned(
+		ucache_key_record *record,
+		zval *val,
+		uint32_t payload_offset,
+		uint32_t ref_idx)
+{
+	ZEND_ASSERT(!Z_REFCOUNTED_P(val));
+
+	if (record->val_kind != UCACHE_RECORD_VAL_NONE) {
+		return;
+	}
+
+	ZVAL_COPY_VALUE(&record->val, val);
+
+	Z_EXTRA(record->val) = ref_idx;
+
+	record->pinned_payload_offset = payload_offset;
+	record->val_kind = UCACHE_RECORD_VAL_PINNED;
+}
+
+static zend_always_inline bool ucache_req_holds_sgraph_ref(uint32_t idx, uint32_t payload_offset)
+{
+	return idx < UC_G(sgraph_ref_count) &&
+		UC_G(sgraph_ref_owner_pid) == ucache_cached_pid() &&
+		UC_G(sgraph_refs)[idx].payload_offset == payload_offset &&
+		UC_G(sgraph_refs)[idx].ctx == ucache_active_ctx()
+	;
+}
+
+static zend_always_inline bool ucache_key_record_val_retained(const ucache_key_record *record)
+{
+	ZEND_ASSERT(record->val_kind != UCACHE_RECORD_VAL_NONE);
+
+	if (!(record->val_kind & UCACHE_RECORD_VAL_PINNED)) {
+		return true;
+	}
+
+	if (!(record->val_kind & UCACHE_RECORD_VAL_COPY)) {
+		return ucache_req_holds_sgraph_ref(
+			Z_EXTRA(record->val),
+			record->pinned_payload_offset
+		);
+	}
+
+	return ucache_req_sgraph_ref_idx(Z_EXTRA(record->val)) != UINT32_MAX;
+}
+
+static zend_always_inline bool ucache_key_record_val_usable(
+		const ucache_hdr *hdr,
+		const ucache_key_record *record)
+{
+	uint64_t now;
+
+	if (record->expires_at != 0) {
+		now = ucache_clock_now_noinline();
+
+		ucache_access_note_time(now);
+
+		if ((uint64_t) record->expires_at <= ucache_time_rel(hdr, now)) {
+			return false;
+		}
+	}
+
+	return ucache_key_record_val_retained(record);
+}
+
+static zend_always_inline void ucache_init_prepared_val(ucache_prepared_val *prepared)
 {
 	memset(prepared, 0, sizeof(*prepared));
-}
 
-static zend_always_inline bool ucache_prepared_value_should_seed_request_local_slot(
-		const php_ucache_prepared_value_t *prepared)
-{
-	return prepared->value_type == PHP_UCACHE_VALUE_STRING &&
-		prepared->value_len >= PHP_UCACHE_REQUEST_LOCAL_STRING_MIN_LEN
-	;
+	prepared->val_type = UCACHE_VAL_NULL;
 }
 
 static zend_always_inline bool ucache_long_add_overflow(
@@ -666,147 +678,304 @@ static zend_always_inline bool ucache_long_sub_overflow(
 	;
 }
 
-static zend_always_inline void ucache_verbatim_memo_init(php_ucache_verbatim_memo_t *memo)
+static zend_always_inline bool ucache_rehash_due(const ucache_hdr *hdr)
 {
-	zend_hash_init(&memo->verdicts, 8, NULL, NULL, 0);
-	zend_hash_init(&memo->content_hashes, 8, NULL, NULL, 0);
-	zend_hash_init(&memo->canonicals, 8, NULL, NULL, 0);
-}
+	uint32_t empty_slots = hdr->capacity - hdr->count - hdr->tombstone_count;
 
-static zend_always_inline void ucache_verbatim_memo_destroy(php_ucache_verbatim_memo_t *memo)
-{
-	zend_hash_destroy(&memo->canonicals);
-	zend_hash_destroy(&memo->content_hashes);
-	zend_hash_destroy(&memo->verdicts);
+	return hdr->tombstone_count > hdr->capacity / UCACHE_REHASH_TOMBSTONE_DIVISOR || (
+		hdr->tombstone_count != 0 &&
+		empty_slots < hdr->capacity / UCACHE_REHASH_EMPTY_SLOT_DIVISOR
+	);
 }
 
 static zend_always_inline void ucache_maybe_rehash_locked(void)
 {
-	php_ucache_header_t *header = php_ucache_header_ptr();
+	ucache_hdr *hdr = ucache_hdr_ptr();
 
-	if (header != NULL &&
-		php_ucache_header_is_initialized_locked() &&
-		header->tombstone_count > header->capacity / 4
+	if (hdr == NULL ||
+		!ucache_hdr_is_initialized_locked() ||
+		!ucache_rehash_due(hdr)
 	) {
-		ucache_rehash_locked(header);
+		return;
 	}
+
+	if (UC_G(rehash_retry_skips) != 0) {
+		UC_G(rehash_retry_skips)--;
+
+		return;
+	}
+
+	if (!ucache_rehash_locked(hdr)) {
+		UC_G(rehash_retry_skips) = UCACHE_REHASH_RETRY_SKIPS;
+	}
+}
+
+static zend_always_inline bool ucache_expunge_due_on_this_write(void)
+{
+	return UC_G(expunge_write_ops) >= UCACHE_EXPUNGE_WRITE_OP_INTERVAL - 1 ||
+		UC_G(expired_read_observations) >= UCACHE_EXPIRED_READ_EXPUNGE_THRESHOLD
+	;
 }
 
 static zend_always_inline void ucache_maybe_expunge_expired_locked(void)
 {
-	UC_G(expunge_write_ops)++;
+	if (EXPECTED(!ucache_expunge_due_on_this_write())) {
+		UC_G(expunge_write_ops)++;
 
-	if (EXPECTED(UC_G(expired_read_observations) < PHP_UCACHE_EXPIRED_READ_EXPUNGE_THRESHOLD &&
-		UC_G(expunge_write_ops) < PHP_UCACHE_EXPUNGE_WRITE_OP_INTERVAL)
-	) {
 		return;
 	}
 
 	UC_G(expired_read_observations) = 0;
 	UC_G(expunge_write_ops) = 0;
 
-	(void) ucache_expunge_expired_bounded_locked();
+	ucache_expunge_expired_bounded_locked();
 }
 
-static zend_always_inline bool ucache_optimistic_header(
-		php_ucache_header_t **header_ptr,
-		uint64_t *seq_ptr)
+static zend_always_inline uint32_t ucache_optimistic_capacity(const ucache_hdr *hdr)
 {
-	php_ucache_header_t *header = php_ucache_header_ptr();
-	php_ucache_storage_t *storage;
-	uint64_t seq;
+	const ucache_storage *storage = &ucache_active_ctx()->storage;
 
-	if (!PHP_UCACHE_OPTIMISTIC_ENABLED || header == NULL) {
-		return false;
-	}
-
-	seq = php_ucache_seq_load(&header->write_seq);
-	if (seq < 2 || (seq & 1) != 0) {
-		return false;
-	}
-
-	/* Accept only the memoized layout: entry table and access-stamp array
-	 * are both sized by capacity, so a foreign or corrupt capacity must
-	 * fall back to the locked path instead of being read (and stamped)
-	 * optimistically. The memo is fixed under the write lock at attach. */
-	storage = &php_ucache_active_context()->storage;
-	if (header->magic != PHP_UCACHE_MAGIC ||
-		header->version != PHP_UCACHE_VERSION ||
+	if (hdr->magic != UCACHE_MAGIC ||
 		!storage->layout_memo_valid ||
-		header->capacity != storage->capacity_memo ||
-		header->data_offset != storage->data_offset_memo
+		hdr->capacity != storage->capacity_memo ||
+		hdr->data_offset != storage->data_offset_memo
 	) {
-		return false;
+		return 0;
 	}
 
-	if (ucache_seq_reload(&header->write_seq) != seq) {
-		return false;
-	}
-
-	*header_ptr = header;
-	*seq_ptr = seq;
-
-	return true;
+	return storage->capacity_memo;
 }
 
-static zend_always_inline php_ucache_request_local_slot_t *ucache_alloc_request_local_slot(
-		uint64_t gen,
-		bool no_aliases,
-		bool has_value)
+static zend_always_inline bool ucache_req_pin_fits_budget(const ucache_hdr *hdr, uint32_t payload_len)
 {
-	php_ucache_request_local_slot_t *slot;
-
-	slot = emalloc(sizeof(php_ucache_request_local_slot_t));
-	slot->generation = gen;
-	slot->ctx = php_ucache_active_context();
-	slot->needs_deep_clone = false;
-	slot->has_clone_verdicts = false;
-	slot->no_aliases = no_aliases;
-	slot->has_value = has_value;
-
-	ZVAL_UNDEF(&slot->value);
-
-	return slot;
+	return (uint64_t) UC_G(sgraph_ref_bytes) + payload_len <= hdr->data_size / UCACHE_REQ_PIN_BUDGET_DIVISOR;
 }
 
-/* 7/8 insert cap: pairs with the 0.75-load-factor sizing in
- * ucache_calculate_capacity() to keep ~17% probe headroom. */
+static zend_always_inline uint32_t ucache_fetch_finish_flags_after_decode(uint32_t flags, uint32_t hook_calls_before)
+{
+	if (UNEXPECTED(UC_G(restore_hook_calls) != hook_calls_before)) {
+		flags |= UCACHE_FETCH_FINISH_RESTORE_HOOKS_RAN;
+	}
+
+	return flags;
+}
+
+static zend_always_inline ucache_optimistic_result ucache_optimistic_unrestorable(
+		const ucache_entry *snapshot)
+{
+	UC_G(unrestorable_gen) = snapshot->gen;
+
+	return UCACHE_OPTIMISTIC_UNRESTORABLE;
+}
+
 static zend_always_inline uint32_t ucache_insert_cap(uint32_t capacity)
 {
 	return capacity - capacity / 8;
 }
 
+static zend_always_inline bool ucache_scalar_write_locate(
+		ucache_hdr *hdr,
+		const ucache_key_record *record,
+		uint32_t *slot_idx)
+{
+	zend_string *key = record->storage_key;
+	bool found;
+
+	if (record->state == UCACHE_RECORD_HIT &&
+		record->slot_idx < hdr->capacity &&
+		(
+			record->mutation_epoch == ucache_atomic_load_64(&hdr->mutation_epoch) ||
+			ucache_key_equals(
+				hdr,
+				&ucache_entries_ptr(hdr)[record->slot_idx],
+				key,
+				ZSTR_H(key)
+			)
+		)
+	) {
+		*slot_idx = record->slot_idx;
+
+		return true;
+	}
+
+	return ucache_find_slot_in_hdr_locked(
+			hdr,
+			key,
+			ZSTR_H(key),
+			UCACHE_FIND_SLOT_IGNORE_EXPIRY,
+			slot_idx,
+			&found
+		) && found
+	;
+}
+
+static zend_always_inline bool ucache_key_record_is_cur_miss(const ucache_key_record *record)
+{
+	ucache_hdr *hdr;
+
+	if (record->state != UCACHE_RECORD_MISS) {
+		return false;
+	}
+
+	hdr = ucache_hdr_ptr();
+
+	return hdr != NULL && record->mutation_epoch == ucache_atomic_load_64(&hdr->mutation_epoch);
+}
+
+static zend_always_inline void ucache_scalar_write_release_record_val(ucache_key_record *record)
+{
+	while (UNEXPECTED(Z_REFCOUNTED(record->val))) {
+		ucache_key_record_release_val(record, NULL);
+	}
+}
+
+static zend_always_inline bool ucache_scalar_write_can_skip_sweep(void)
+{
+	if (ucache_expunge_due_on_this_write()) {
+		return false;
+	}
+
+	UC_G(expunge_write_ops)++;
+
+	return true;
+}
+
+static zend_always_inline bool ucache_optimistic_key_record_slot(
+		ucache_hdr *hdr,
+		uint32_t capacity,
+		const ucache_key_record *record,
+		bool cur,
+		ucache_entry *snapshot)
+{
+	const ucache_entry *entry;
+	zend_string *key = record->storage_key;
+	uint64_t now;
+
+	if (record->slot_idx >= capacity) {
+		return false;
+	}
+
+	entry = &ucache_entries_ptr(hdr)[record->slot_idx];
+
+	if (!ucache_entry_is_used(entry) ||
+		(
+			!cur &&
+			(
+				entry->hash != ucache_table_hash(ZSTR_H(key)) ||
+				entry->key_len != ZSTR_LEN(key) ||
+				!ucache_optimistic_key_matches(hdr, ucache_entry_key_pos(entry), key)
+			)
+		)
+	) {
+		return false;
+	}
+
+	if (entry->expires_at != 0) {
+		now = ucache_clock_now_noinline();
+
+		ucache_access_note_time(now);
+
+		if ((uint64_t) entry->expires_at <= ucache_time_rel(hdr, now)) {
+			return false;
+		}
+	}
+
+	*snapshot = *entry;
+
+	return true;
+}
+
+static zend_always_inline ucache_optimistic_result ucache_optimistic_locate(
+		ucache_hdr *hdr,
+		uint32_t capacity,
+		ucache_key_record *record,
+		uint64_t seq,
+		uint64_t epoch,
+		bool stamp_access,
+		ucache_entry *snapshot)
+{
+	if (record->state != UCACHE_RECORD_HIT ||
+		record->mutation_epoch != epoch ||
+		!ucache_optimistic_key_record_slot(hdr, capacity, record, true, snapshot)
+	) {
+		return ucache_optimistic_locate_fallback(hdr, capacity, record, seq, epoch, stamp_access, snapshot);
+	}
+
+	if (ucache_read_seq(hdr, record->storage_key) != seq) {
+		return UCACHE_OPTIMISTIC_FALLBACK;
+	}
+
+	if (stamp_access) {
+		ucache_touch_cached_entry_access(hdr, record->slot_idx, &record->access_touches);
+	}
+
+	return UCACHE_OPTIMISTIC_FOUND;
+}
+
+/* Out of line: clock_gettime()'s &local would add a stack protector to every hot caller. */
+static zend_never_inline uint64_t ucache_clock_now_noinline(void)
+{
+	return ucache_clock_now();
+}
+
+static zend_never_inline void ucache_key_record_release_refcounted_val(ucache_key_record *record, zval *detached)
+{
+	zend_refcounted *counted;
+
+	UC_G(record_val_bytes) -= record->copy_charged_bytes;
+
+	if (detached != NULL && Z_COLLECTABLE(record->val)) {
+		ZEND_ASSERT(Z_ISUNDEF_P(detached));
+
+		ZVAL_COPY_VALUE(detached, &record->val);
+		ZVAL_UNDEF(&record->val);
+
+		return;
+	}
+
+	ZEND_ASSERT(!Z_COLLECTABLE(record->val) || ucache_can_run_userland());
+
+	counted = Z_COUNTED(record->val);
+
+	ZVAL_UNDEF(&record->val);
+
+	GC_DTOR(counted);
+}
+
 static bool ucache_optimistic_probe(
-		const php_ucache_header_t *header,
+		const ucache_hdr *hdr,
+		uint32_t capacity,
 		zend_string *key,
 		zend_ulong hash,
-		const php_ucache_entry_t *entries,
-		php_ucache_entry_t *snapshot,
+		const ucache_entry *entries,
+		ucache_entry *snapshot,
 		uint32_t *slot_idx,
 		bool *found)
 {
-	const php_ucache_entry_t *entry;
+	const ucache_entry *entry;
 	uint64_t now = 0;
 	uint32_t i, step;
+	size_t key_pos;
 
-	i = (uint32_t) (hash % header->capacity);
+	i = ucache_table_hash(hash) % capacity;
 
-	for (step = 0; step < header->capacity; step++) {
+	for (step = 0; step < capacity; step++) {
 		entry = &entries[i];
 
-		switch (entry->state) {
-			case PHP_UCACHE_ENTRY_EMPTY:
+		switch (ucache_entry_state(entry)) {
+			case UCACHE_ENTRY_EMPTY:
 				*found = false;
 
 				return true;
-			case PHP_UCACHE_ENTRY_USED:
-				if (entry->hash == hash && entry->key_len == ZSTR_LEN(key)) {
-					if (!php_ucache_payload_in_bounds(header, entry->key_offset, entry->key_len)) {
+			case UCACHE_ENTRY_USED:
+				if (entry->hash == ucache_table_hash(hash) && entry->key_len == ZSTR_LEN(key)) {
+					key_pos = ucache_entry_key_pos(entry);
+					if (!ucache_bytes_in_bounds(hdr, key_pos, ZSTR_LEN(key))) {
 						return false;
 					}
 
-					if (memcmp(ucache_ptr_in_header(header, entry->key_offset), ZSTR_VAL(key), ZSTR_LEN(key)) == 0) {
-						if (ucache_is_expired_now(header, entry, &now)) {
+					if (memcmp((const char *) hdr + key_pos, ZSTR_VAL(key), ZSTR_LEN(key)) == 0) {
+						if (ucache_is_expired_now(hdr, entry, &now)) {
 							ucache_note_expired_read();
 
 							*found = false;
@@ -823,15 +992,13 @@ static bool ucache_optimistic_probe(
 				}
 
 				break;
-			case PHP_UCACHE_ENTRY_TOMBSTONE:
+			case UCACHE_ENTRY_TOMBSTONE:
 				break;
-			default:
-				return false;
 		}
 
 		++i;
 
-		if (i == header->capacity) {
+		if (i == capacity) {
 			i = 0;
 		}
 	}
@@ -841,962 +1008,267 @@ static bool ucache_optimistic_probe(
 	return true;
 }
 
-static void ucache_request_local_slot_dtor(zval *slot_zv)
+static ucache_op_lease *ucache_op_lease_reserve(uint32_t payload_offset)
 {
-	php_ucache_request_local_slot_t *slot = Z_PTR_P(slot_zv);
+	ucache_op_lease *lease;
+	ucache_ctx *ctx = ucache_active_ctx();
+	uint64_t pid = ucache_cached_pid();
 
-	if (slot->has_clone_verdicts) {
-		zend_hash_destroy(&slot->clone_verdicts);
+	for (lease = UC_G(op_leases); lease != NULL; lease = lease->next) {
+		if (lease->ctx == ctx && lease->payload_offset == payload_offset && lease->owner_pid == pid) {
+			lease->users++;
+
+			return lease;
+		}
 	}
 
-	if (!Z_ISUNDEF(slot->value)) {
-		zval_ptr_dtor(&slot->value);
+	if (UC_G(op_lease_free) != NULL) {
+		lease = UC_G(op_lease_free);
+
+		UC_G(op_lease_free) = lease->next;
+	} else if (UC_G(op_lease_inline).ctx == NULL) {
+		lease = &UC_G(op_lease_inline);
+	} else {
+		lease = emalloc(sizeof(*lease));
 	}
 
-	efree(slot);
+	lease->ctx = ctx;
+	lease->payload_offset = payload_offset;
+	lease->owner_pid = pid;
+	lease->users = 1;
+	lease->acquired = false;
+	lease->next = UC_G(op_leases);
+
+	UC_G(op_leases) = lease;
+
+	return lease;
 }
 
-static bool ucache_value_needs_request_local_deep_clone_impl(
-		zval *value,
-		HashTable *seen_arrs)
+static bool ucache_op_lease_acquire(
+		ucache_op_lease *lease,
+		bool *resource_limited)
 {
-	zend_ulong arr_key;
-	zval *elem;
+	*resource_limited = false;
 
-	if (php_ucache_stack_overflowed()) {
-		return true;
+	if (!lease->acquired) {
+		lease->acquired = ucache_sgraph_acquire_ref(lease->payload_offset, resource_limited);
 	}
 
-	if (Z_ISREF_P(value)) {
-		return true;
+	return lease->acquired;
+}
+
+static void ucache_op_lease_release(ucache_op_lease *lease)
+{
+	ucache_op_lease **link;
+	ucache_ctx *prev;
+	bool released;
+
+	ZEND_ASSERT(lease->users == 0);
+
+	if (lease->acquired && lease->owner_pid == ucache_cached_pid()) {
+		prev = ucache_activate_ctx(lease->ctx);
+		released = ucache_sgraph_release_op_ref(lease->payload_offset);
+
+		ucache_restore_ctx(prev);
+
+		if (!released) {
+			return;
+		}
 	}
 
-	switch (Z_TYPE_P(value)) {
-		case IS_OBJECT:
-			return true;
-		case IS_ARRAY:
-			arr_key = (zend_ulong) (uintptr_t) Z_ARRVAL_P(value);
+	link = &UC_G(op_leases);
+	while (*link != lease) {
+		link = &(*link)->next;
+	}
 
-			if (!php_ucache_seen_test_and_add(seen_arrs, Z_ARRVAL_P(value))) {
-				return false;
-			}
+	*link = lease->next;
+	lease->ctx = NULL;
 
-			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(value), elem) {
-				if (ucache_value_needs_request_local_deep_clone_impl(elem, seen_arrs)) {
-					zend_hash_index_del(seen_arrs, arr_key);
+	if (lease != &UC_G(op_lease_inline)) {
+		lease->next = UC_G(op_lease_free);
 
-					return true;
-				}
-			} ZEND_HASH_FOREACH_END();
-
-			zend_hash_index_del(seen_arrs, arr_key);
-
-			return false;
-		default:
-			return false;
+		UC_G(op_lease_free) = lease;
 	}
 }
 
-static bool ucache_value_needs_request_local_deep_clone(zval *value)
+static void ucache_op_lease_end(ucache_op_lease *lease)
 {
-	HashTable seen_arrs;
-	bool result;
+	ZEND_ASSERT(lease->users > 0);
 
-	zend_hash_init(&seen_arrs, 8, NULL, NULL, 0);
-
-	result = ucache_value_needs_request_local_deep_clone_impl(value, &seen_arrs);
-
-	zend_hash_destroy(&seen_arrs);
-
-	return result;
+	if (--lease->users == 0) {
+		ucache_op_lease_release(lease);
+	}
 }
 
-static bool ucache_collect_request_local_object_clone_verdict(
-		zend_object *obj,
-		HashTable *seen_arrs,
-		HashTable *seen_objs,
-		HashTable *verdicts)
+static bool ucache_materialize_sgraph_locked(
+		const ucache_hdr *hdr,
+		uint32_t val_offset,
+		uint32_t val_len,
+		zval *return_value,
+		bool *lock_held,
+		bool *private_copy)
 {
-	zend_ulong obj_key;
-	zval *prop, *src, *end;
-	bool members_need_clone = false;
-	void *flag;
+	ucache_sgraph_snapshot *snapshot = NULL;
+	ucache_op_lease *lease = NULL;
+	bool result, pinned = true, resource_limited = false;
 
-	if (php_ucache_stack_overflowed()) {
-		UC_G(request_local_slot_may_cycle) = true;
+	ZEND_ASSERT(*lock_held && UC_G(lock_held));
 
-		return true;
-	}
-
-	obj_key = (zend_ulong) (uintptr_t) obj;
-
-	flag = zend_hash_index_find_ptr(verdicts, obj_key);
-	if (flag != NULL) {
-		return flag == PHP_UCACHE_REQUEST_LOCAL_NEEDS_DEEP_CLONE;
-	}
-
-	if (!php_ucache_seen_test_and_add(seen_objs, obj)) {
-		UC_G(request_local_slot_may_cycle) = true;
-
-		return true;
-	}
-
-	if (obj->ce->default_properties_count) {
-		src = obj->properties_table;
-		end = src + obj->ce->default_properties_count;
-
-		do {
-			if (ucache_collect_request_local_clone_verdicts_impl(
-					src,
-					seen_arrs,
-					seen_objs,
-					verdicts,
-					true
-				)
-			) {
-				members_need_clone = true;
-			}
-
-			src++;
-		} while (src != end);
-	}
-
-	if (obj->properties != NULL && zend_hash_num_elements(obj->properties) != 0) {
-		members_need_clone = true;
-
-		ZEND_HASH_MAP_FOREACH_VAL(obj->properties, prop) {
-			if (Z_TYPE_P(prop) != IS_INDIRECT) {
-				ucache_collect_request_local_clone_verdicts_impl(
-					prop,
-					seen_arrs,
-					seen_objs,
-					verdicts,
-					true
-				);
-			}
-		} ZEND_HASH_FOREACH_END();
-	}
-
-	zend_hash_index_update_ptr(
-		verdicts,
-		obj_key,
-		members_need_clone
-			? PHP_UCACHE_REQUEST_LOCAL_NEEDS_DEEP_CLONE
-			: PHP_UCACHE_REQUEST_LOCAL_NO_DEEP_CLONE
-	);
-
-	return members_need_clone;
-}
-
-static bool ucache_collect_request_local_clone_verdicts_impl(
-		zval *value,
-		HashTable *seen_arrs,
-		HashTable *seen_objs,
-		HashTable *verdicts,
-		bool record_array_result)
-{
-	zend_ulong arr_key;
-	zval *elem;
-	bool needs_deep_clone = false;
-	void *flag;
-
-	if (php_ucache_stack_overflowed()) {
-		UC_G(request_local_slot_may_cycle) = true;
-
-		return true;
-	}
-
-	if (Z_ISREF_P(value)) {
-		ucache_collect_request_local_clone_verdicts_impl(
-			&Z_REF_P(value)->val,
-			seen_arrs,
-			seen_objs,
-			verdicts,
-			true
+	if (UNEXPECTED(UC_G(persistent_exec))) {
+		UCACHE_TRY_UNLOCK_ON_BAILOUT(
+			lease = ucache_op_lease_reserve(val_offset);
 		);
 
-		return true;
-	}
+		if (!ucache_op_lease_acquire(lease, &resource_limited)) {
+			ucache_op_lease_end(lease);
 
-	switch (Z_TYPE_P(value)) {
-		case IS_OBJECT:
-			ucache_collect_request_local_object_clone_verdict(
-				Z_OBJ_P(value),
-				seen_arrs,
-				seen_objs,
-				verdicts
+			lease = NULL;
+			pinned = false;
+		}
+	} else if (ucache_req_sgraph_ref_idx(val_offset) == UINT32_MAX) {
+		if (ucache_req_pin_fits_budget(hdr, val_len)) {
+			UCACHE_TRY_UNLOCK_ON_BAILOUT(
+				ucache_sgraph_ref_reserve();
 			);
 
-			return true;
-		case IS_ARRAY:
-			arr_key = (zend_ulong) (uintptr_t) Z_ARRVAL_P(value);
-			flag = zend_hash_index_find_ptr(verdicts, arr_key);
-			if (flag != NULL) {
-				return flag == PHP_UCACHE_REQUEST_LOCAL_NEEDS_DEEP_CLONE;
+			pinned = ucache_sgraph_acquire_ref(val_offset, &resource_limited);
+			if (pinned) {
+				ucache_register_sgraph_ref(val_offset, val_len);
 			}
-
-			if (!php_ucache_seen_test_and_add(seen_arrs, Z_ARRVAL_P(value))) {
-				UC_G(request_local_slot_may_cycle) = true;
-
-				return false;
-			}
-
-			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(value), elem) {
-				if (ucache_collect_request_local_clone_verdicts_impl(
-						elem,
-						seen_arrs,
-						seen_objs,
-						verdicts,
-						false
-					)
-				) {
-					needs_deep_clone = true;
-				}
-			} ZEND_HASH_FOREACH_END();
-
-			zend_hash_index_del(seen_arrs, arr_key);
-
-			if (needs_deep_clone || record_array_result) {
-				zend_hash_index_update_ptr(
-					verdicts,
-					arr_key,
-					needs_deep_clone
-						? PHP_UCACHE_REQUEST_LOCAL_NEEDS_DEEP_CLONE
-						: PHP_UCACHE_REQUEST_LOCAL_NO_DEEP_CLONE
-				);
-			}
-
-			return needs_deep_clone;
-		default:
-			return false;
-	}
-}
-
-static bool ucache_collect_request_local_clone_verdicts(
-		zval *value,
-		HashTable *verdicts)
-{
-	HashTable seen_arrs, seen_objs;
-	bool result;
-
-	zend_hash_init(&seen_arrs, 8, NULL, NULL, 0);
-	zend_hash_init(&seen_objs, 8, NULL, NULL, 0);
-
-	result = ucache_collect_request_local_clone_verdicts_impl(
-		value,
-		&seen_arrs,
-		&seen_objs,
-		verdicts,
-		true
-	);
-
-	zend_hash_destroy(&seen_objs);
-	zend_hash_destroy(&seen_arrs);
-
-	return result;
-}
-
-static void ucache_request_local_clone_array_dtor(zval *zv)
-{
-	zend_array *array = Z_PTR_P(zv);
-
-	zend_array_release(array);
-}
-
-static void ucache_request_local_clone_context_init(
-		php_ucache_request_local_clone_ctx_t *ctx,
-		HashTable *verdicts,
-		bool track_identity)
-{
-	zend_hash_init(&ctx->arrays, 8, NULL, ucache_request_local_clone_array_dtor, 0);
-	zend_hash_init(&ctx->objects, 8, NULL, php_ucache_object_table_dtor, 0);
-	zend_hash_init(&ctx->references, 8, NULL, php_ucache_reference_table_dtor, 0);
-
-	ctx->clone_verdicts = verdicts;
-	ctx->track_identity = track_identity;
-}
-
-static void ucache_request_local_clone_context_destroy(
-		php_ucache_request_local_clone_ctx_t *ctx)
-{
-	zend_hash_destroy(&ctx->references);
-	zend_hash_destroy(&ctx->objects);
-	zend_hash_destroy(&ctx->arrays);
-}
-
-static bool ucache_value_needs_request_local_deep_clone_cached(
-		php_ucache_request_local_clone_ctx_t *ctx,
-		zval *value)
-{
-	void *flag;
-
-	if (Z_ISREF_P(value)) {
-		return true;
-	}
-
-	if (Z_TYPE_P(value) == IS_OBJECT) {
-		return true;
-	}
-
-	if (Z_TYPE_P(value) != IS_ARRAY) {
-		return false;
-	}
-
-	if (ctx->clone_verdicts != NULL) {
-		flag = zend_hash_index_find_ptr(ctx->clone_verdicts, (zend_ulong) (uintptr_t) Z_ARRVAL_P(value));
-		if (flag != NULL) {
-			return flag == PHP_UCACHE_REQUEST_LOCAL_NEEDS_DEEP_CLONE;
-		}
-	}
-
-	return ucache_value_needs_request_local_deep_clone(value);
-}
-
-static bool ucache_clone_request_local_array(
-		php_ucache_request_local_clone_ctx_t *ctx,
-		zval *dst,
-		zval *src,
-		bool known_needs_deep_clone)
-{
-	zend_ulong key = (zend_ulong) (uintptr_t) Z_ARRVAL_P(src);
-	zend_array *array;
-	zval *elem, cloned_elem;
-	void *flag;
-
-	if (!known_needs_deep_clone) {
-		if (ctx->clone_verdicts != NULL) {
-			flag = zend_hash_index_find_ptr(ctx->clone_verdicts, key);
-			if (flag == PHP_UCACHE_REQUEST_LOCAL_NO_DEEP_CLONE) {
-				ZVAL_COPY(dst, src);
-
-				return true;
-			} else if (flag == PHP_UCACHE_REQUEST_LOCAL_NEEDS_DEEP_CLONE) {
-				known_needs_deep_clone = true;
-			}
-		}
-
-		if (!known_needs_deep_clone && !ucache_value_needs_request_local_deep_clone(src)) {
-			ZVAL_COPY(dst, src);
-
-			return true;
-		}
-	}
-
-	if (ctx->track_identity) {
-		array = zend_hash_index_find_ptr(&ctx->arrays, key);
-		if (array != NULL) {
-			GC_ADDREF(array);
-
-			ZVAL_ARR(dst, array);
-
-			return true;
-		}
-	}
-
-	array = zend_array_dup(Z_ARRVAL_P(src));
-	if (ctx->track_identity) {
-		GC_ADDREF(array);
-		zend_hash_index_update_ptr(&ctx->arrays, key, array);
-	}
-
-	ZEND_HASH_FOREACH_VAL(array, elem) {
-		if (Z_TYPE_P(elem) == IS_INDIRECT ||
-			!ucache_value_needs_request_local_deep_clone_cached(ctx, elem)
-		) {
-			continue;
-		}
-
-		if (!ucache_clone_request_local_value(ctx, &cloned_elem, elem)) {
-			zend_array_release(array);
-
-			ZVAL_UNDEF(dst);
-
-			return false;
-		}
-
-		zval_ptr_dtor(elem);
-
-		ZVAL_COPY_VALUE(elem, &cloned_elem);
-	} ZEND_HASH_FOREACH_END();
-
-	ZVAL_ARR(dst, array);
-
-	return true;
-}
-
-static bool ucache_clone_request_local_reference(
-		php_ucache_request_local_clone_ctx_t *ctx,
-		zval *dst,
-		zend_reference *src_ref)
-{
-	zend_ulong key = (zend_ulong) (uintptr_t) src_ref;
-	zend_reference *new_ref;
-	zval inner;
-
-	if (ctx->track_identity) {
-		new_ref = zend_hash_index_find_ptr(&ctx->references, key);
-		if (new_ref != NULL) {
-			GC_ADDREF(new_ref);
-
-			ZVAL_REF(dst, new_ref);
-
-			return true;
-		}
-	}
-
-	ZVAL_NEW_EMPTY_REF(dst);
-	new_ref = Z_REF_P(dst);
-
-	ZVAL_UNDEF(&new_ref->val);
-
-	if (ctx->track_identity) {
-		GC_ADDREF(new_ref);
-
-		zend_hash_index_update_ptr(&ctx->references, key, new_ref);
-	}
-
-	if (!ucache_clone_request_local_value(ctx, &inner, &src_ref->val)) {
-		zval_ptr_dtor(dst);
-
-		ZVAL_UNDEF(dst);
-
-		return false;
-	}
-
-	ZVAL_COPY_VALUE(&new_ref->val, &inner);
-
-	return true;
-}
-
-static bool ucache_clone_request_local_object_members(
-		php_ucache_request_local_clone_ctx_t *ctx,
-		zend_object *old_obj,
-		zend_object *new_obj)
-{
-	zend_ulong num_key;
-	zend_string *key;
-	zend_property_info *prop_info;
-	zval *src, *dst, *end, *prop, new_prop;
-	uint32_t prop_idx = 0;
-
-	if (old_obj->ce->default_properties_count) {
-		src = old_obj->properties_table;
-		dst = new_obj->properties_table;
-		end = src + old_obj->ce->default_properties_count;
-
-		do {
-			if (!ucache_clone_request_local_value(ctx, &new_prop, src)) {
-				return false;
-			}
-
-			zval_ptr_dtor(dst);
-
-			ZVAL_COPY_VALUE(dst, &new_prop);
-
-			Z_PROP_FLAG_P(dst) = Z_PROP_FLAG_P(src);
-
-			if (Z_ISREF_P(dst) && new_obj->ce->properties_info_table != NULL) {
-				prop_info = new_obj->ce->properties_info_table[prop_idx];
-				if (prop_info != NULL &&
-					prop_info != ZEND_WRONG_PROPERTY_INFO &&
-					ZEND_TYPE_IS_SET(prop_info->type)
-				) {
-					ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(dst), prop_info);
-				}
-			}
-
-			src++;
-			dst++;
-			prop_idx++;
-		} while (src != end);
-	}
-
-	if (old_obj->properties != NULL && zend_hash_num_elements(old_obj->properties) != 0) {
-		if (new_obj->properties != NULL) {
-			zend_hash_clean(new_obj->properties);
-			zend_hash_extend(new_obj->properties, zend_hash_num_elements(old_obj->properties), 0);
 		} else {
-			new_obj->properties = zend_new_array(zend_hash_num_elements(old_obj->properties));
-
-			zend_hash_real_init_mixed(new_obj->properties);
-		}
-
-		HT_FLAGS(new_obj->properties) |=
-			HT_FLAGS(old_obj->properties) & HASH_FLAG_HAS_EMPTY_IND
-		;
-
-		ZEND_HASH_MAP_FOREACH_KEY_VAL(old_obj->properties, num_key, key, prop) {
-			if (Z_TYPE_P(prop) == IS_INDIRECT) {
-				ZVAL_INDIRECT(
-					&new_prop,
-					new_obj->properties_table + (Z_INDIRECT_P(prop) - old_obj->properties_table)
-				);
-			} else if (!ucache_clone_request_local_value(ctx, &new_prop, prop)) {
-				return false;
-			}
-
-			if (key != NULL) {
-				_zend_hash_append(new_obj->properties, key, &new_prop);
-			} else {
-				zend_hash_index_add_new(new_obj->properties, num_key, &new_prop);
-			}
-		} ZEND_HASH_FOREACH_END();
-	}
-
-	return true;
-}
-
-static bool ucache_clone_request_local_std_object(
-		php_ucache_request_local_clone_ctx_t *ctx,
-		zend_object *old_obj,
-		zend_object **new_obj_ptr)
-{
-	zend_object *new_obj;
-	zval *src, *dst, *end;
-	void *member_flag = NULL;
-
-	new_obj = zend_objects_new(old_obj->ce);
-
-	if (ctx->track_identity) {
-		GC_ADDREF(new_obj);
-		zend_hash_index_update_ptr(
-			&ctx->objects,
-			(zend_ulong) (uintptr_t) old_obj,
-			new_obj
-		);
-	}
-
-	if (ctx->clone_verdicts != NULL) {
-		member_flag = zend_hash_index_find_ptr(
-			ctx->clone_verdicts,
-			(zend_ulong) (uintptr_t) old_obj
-		);
-	}
-
-	if (member_flag == PHP_UCACHE_REQUEST_LOCAL_NO_DEEP_CLONE &&
-		old_obj->properties == NULL
-	) {
-		if (old_obj->ce->default_properties_count) {
-			src = old_obj->properties_table;
-			dst = new_obj->properties_table;
-			end = src + old_obj->ce->default_properties_count;
-
-			memcpy(dst, src, sizeof(zval) * old_obj->ce->default_properties_count);
-
-			do {
-				if (Z_REFCOUNTED_P(src)) {
-					Z_ADDREF_P(src);
-				}
-
-				src++;
-			} while (src != end);
-		}
-	} else {
-		if (new_obj->ce->default_properties_count) {
-			dst = new_obj->properties_table;
-			end = dst + new_obj->ce->default_properties_count;
-
-			do {
-				ZVAL_UNDEF(dst);
-
-				dst++;
-			} while (dst != end);
-		}
-
-		if (!ucache_clone_request_local_object_members(ctx, old_obj, new_obj)) {
-			OBJ_RELEASE(new_obj);
-
-			return false;
+			pinned = false;
+			resource_limited = true;
 		}
 	}
 
-	*new_obj_ptr = new_obj;
-
-	return true;
-}
-
-static bool ucache_clone_request_local_value_callback(
-		void *ctx,
-		zval *dst,
-		zval *src)
-{
-	return ucache_clone_request_local_value(
-		(php_ucache_request_local_clone_ctx_t *) ctx,
-		dst,
-		src
-	);
-}
-
-static bool ucache_clone_request_local_safe_direct_object(
-		php_ucache_request_local_clone_ctx_t *ctx,
-		zend_object *old_obj,
-		zend_object **new_obj_ptr)
-{
-	php_ucache_safe_direct_state_copy_func_t copy_func;
-	zend_ulong key;
-	zend_class_entry *ce;
-	zend_object *new_obj;
-	zval new_zv;
-
-	ce = old_obj->ce;
-
-	copy_func = php_ucache_safe_direct_state_copy_func(ce, NULL);
-	if (copy_func == NULL) {
-		return false;
-	}
-
-	ZVAL_UNDEF(&new_zv);
-
-	if (object_init_ex(&new_zv, ce) != SUCCESS) {
-		return false;
-	}
-
-	new_obj = Z_OBJ(new_zv);
-	key = (zend_ulong) (uintptr_t) old_obj;
-
-	if (ctx->track_identity) {
-		GC_ADDREF(new_obj);
-		zend_hash_index_update_ptr(&ctx->objects, key, new_obj);
-	}
-
-	if (!copy_func(ctx, new_obj, old_obj, ucache_clone_request_local_value_callback) ||
-		!ucache_clone_request_local_object_members(ctx, old_obj, new_obj)
-	) {
-		OBJ_RELEASE(new_obj);
-
-		return false;
-	}
-
-	*new_obj_ptr = new_obj;
-
-	return true;
-}
-
-#if ZEND_DEBUG
-/* Debug-only fault injection: refuse to clone objects of the named class so
- * the request-local clone failure paths become reachable from a PHPT. */
-static bool ucache_debug_request_local_clone_fails_for(const zend_class_entry *ce)
-{
-	const char *name = getenv("USER_CACHE_DEBUG_FAIL_REQUEST_LOCAL_CLONE_CLASS");
-
-	return name != NULL && name[0] != '\0' && zend_string_equals_cstr(ce->name, name, strlen(name));
-}
-
-/* Debug-only fault injection: make the shared-graph publish of a root object
- * of the named class throw, so the store failure paths that run after the
- * key block was allocated become reachable from a PHPT. */
-static bool ucache_debug_publish_fails_for(const zval *value)
-{
-	const char *name = getenv("USER_CACHE_DEBUG_FAIL_PUBLISH_CLASS");
-
-	if (name == NULL || name[0] == '\0' || Z_TYPE_P(value) != IS_OBJECT ||
-		!zend_string_equals_cstr(Z_OBJCE_P(value)->name, name, strlen(name))
-	) {
-		return false;
-	}
-
-	zend_throw_exception_ex(zend_ce_exception, 0, "Debug fault: publish refused for %s", name);
-
-	return true;
-}
-#endif /* ZEND_DEBUG */
-
-static bool ucache_clone_request_local_object(
-		php_ucache_request_local_clone_ctx_t *ctx,
-		zend_object *old_obj,
-		zend_object **new_obj_ptr)
-{
-	zend_ulong key;
-	zend_object *new_obj;
-
-	if (zend_object_is_lazy(old_obj)) {
-		return false;
-	}
-
-#if ZEND_DEBUG
-	if (ucache_debug_request_local_clone_fails_for(old_obj->ce)) {
-		return false;
-	}
-#endif
-
-	if (ctx->track_identity) {
-		key = (zend_ulong) (uintptr_t) old_obj;
-		new_obj = zend_hash_index_find_ptr(&ctx->objects, key);
-
-		if (new_obj != NULL) {
-			GC_ADDREF(new_obj);
-
-			*new_obj_ptr = new_obj;
-
-			return true;
-		}
-	}
-
-	if (old_obj->handlers == zend_get_std_object_handlers()) {
-		return ucache_clone_request_local_std_object(ctx, old_obj, new_obj_ptr);
-	}
-
-	return ucache_clone_request_local_safe_direct_object(ctx, old_obj, new_obj_ptr);
-}
-
-static bool ucache_clone_request_local_value(
-		php_ucache_request_local_clone_ctx_t *ctx,
-		zval *dst,
-		zval *src)
-{
-	zend_object *obj;
-
-	if (php_ucache_stack_overflowed()) {
-		ZVAL_UNDEF(dst);
-
-		return false;
-	}
-
-	if (Z_ISREF_P(src)) {
-		return ucache_clone_request_local_reference(ctx, dst, Z_REF_P(src));
-	}
-
-	switch (Z_TYPE_P(src)) {
-		case IS_ARRAY:
-			return ucache_clone_request_local_array(ctx, dst, src, false);
-		case IS_OBJECT:
-			if (!ucache_clone_request_local_object(ctx, Z_OBJ_P(src), &obj)) {
-				ZVAL_UNDEF(dst);
-
-				return false;
-			}
-
-			ZVAL_OBJ(dst, obj);
-
-			return true;
-		default:
-			ZVAL_COPY(dst, src);
-
-			return true;
-	}
-}
-
-static bool ucache_clone_request_local_slot_value_known(
-		zval *dst,
-		zval *src,
-		bool needs_deep_clone,
-		HashTable *verdicts,
-		bool no_aliases)
-{
-	php_ucache_request_local_clone_ctx_t ctx;
-	bool result;
-
-	if (!needs_deep_clone) {
-		ZVAL_COPY(dst, src);
-
-		return true;
-	}
-
-	ucache_request_local_clone_context_init(&ctx, verdicts, !no_aliases);
-
-	if (Z_TYPE_P(src) == IS_ARRAY) {
-		result = ucache_clone_request_local_array(&ctx, dst, src, true);
-	} else {
-		result = ucache_clone_request_local_value(&ctx, dst, src);
-	}
-
-	ucache_request_local_clone_context_destroy(&ctx);
-
-	return result;
-}
-
-static HashTable *ucache_request_local_slots(void)
-{
-	HashTable **slots_ptr = &UC_G(request_local_slot_table);
-
-	if (*slots_ptr == NULL) {
-		ALLOC_HASHTABLE(*slots_ptr);
-
-		zend_hash_init(*slots_ptr, 0, NULL, ucache_request_local_slot_dtor, 0);
-	}
-
-	return *slots_ptr;
-}
-
-static void ucache_replace_request_local_slot(
-		zend_string *key,
-		php_ucache_request_local_slot_t *slot)
-{
-	php_ucache_request_local_slot_t *old_slot;
-	HashTable *slots = ucache_request_local_slots();
-	zval *entry, old_zv;
-
-	entry = zend_hash_lookup(slots, key);
-	if (Z_TYPE_P(entry) == IS_NULL) {
-		ZVAL_PTR(entry, slot);
-
-		return;
-	}
-
-	old_slot = Z_PTR_P(entry);
-
-	ZVAL_PTR(entry, slot);
-
-	ZVAL_PTR(&old_zv, old_slot);
-
-	ucache_request_local_slot_dtor(&old_zv);
-}
-
-static bool ucache_materialize_shared_graph_locked(
-		const php_ucache_header_t *header,
-		uint32_t value_offset,
-		uint32_t value_len,
-		zval *return_value,
-		bool *lock_held)
-{
-	bool result, ref_registered, lock_safe;
-
-	ref_registered = php_ucache_has_request_shared_graph_ref(value_offset);
-	if (!ref_registered) {
-		php_ucache_shared_graph_ref_reserve();
-
-		if (!php_ucache_shared_graph_acquire_ref(value_offset)) {
+	if (!pinned) {
+		if (!resource_limited) {
 			return false;
 		}
 
-		php_ucache_register_shared_graph_ref(value_offset);
-	}
+		UCACHE_TRY_UNLOCK_ON_BAILOUT(
+			snapshot = ucache_sgraph_snapshot_create(
+				ucache_ptr_in_hdr(hdr, val_offset),
+				val_len
+			);
+		);
 
-	lock_safe = php_ucache_shared_graph_decode_is_lock_safe(value_offset);
-	if (!lock_safe) {
-		php_ucache_unlock();
+		if (snapshot == NULL) {
+			return false;
+		}
 	}
 
 	ZVAL_UNDEF(return_value);
 
-	if (lock_safe) {
-		PHP_UCACHE_TRY_UNLOCK_ON_BAILOUT(
-			result = php_ucache_shared_graph_decode(
-				ucache_ptr_in_header(header, value_offset),
-				value_len,
-				return_value
-			);
-		);
-	} else {
-		result = php_ucache_shared_graph_decode(
-			ucache_ptr_in_header(header, value_offset),
-			value_len,
+	ucache_unlock();
+
+	*lock_held = false;
+	*private_copy = snapshot != NULL;
+
+	result = snapshot != NULL
+		? ucache_sgraph_decode_snapshot(snapshot, return_value)
+		: ucache_sgraph_decode(
+			ucache_ptr_in_hdr(hdr, val_offset),
+			val_len,
 			return_value
-		);
+		)
+	;
+
+	if (!result && Z_TYPE_P(return_value) != IS_UNDEF) {
+		zval_ptr_dtor(return_value);
+
+		ZVAL_UNDEF(return_value);
 	}
 
-	if (!lock_safe && !php_ucache_rlock()) {
-		*lock_held = false;
-
-		if (Z_TYPE_P(return_value) != IS_UNDEF) {
-			zval_ptr_dtor(return_value);
-
-			ZVAL_UNDEF(return_value);
-		}
-
-		return false;
+	if (lease != NULL) {
+		ucache_op_lease_end(lease);
 	}
 
 	return result;
 }
 
-static php_ucache_request_local_slot_t *ucache_find_request_local_slot(
-		zend_string *key,
-		uint64_t gen)
-{
-	php_ucache_request_local_slot_t *slot;
-	HashTable **slots_ptr = &UC_G(request_local_slot_table);
-
-	if (*slots_ptr == NULL) {
-		return NULL;
-	}
-
-	slot = zend_hash_find_ptr(*slots_ptr, key);
-	if (slot == NULL) {
-		return NULL;
-	}
-
-	/* A stale slot (older generation or foreign context) is evicted so a
-	 * later seed for the same key starts from an empty slot. */
-	if (slot->generation != gen ||
-		slot->ctx != (const void *) php_ucache_active_context()
-	) {
-		zend_hash_del(*slots_ptr, key);
-
-		return NULL;
-	}
-
-	return slot;
-}
-
-static php_ucache_request_local_slot_result_t ucache_fetch_request_local_slot(
+static bool ucache_fetch_req_local_slot(
 		zend_string *key,
 		uint64_t gen,
 		zval *return_value)
 {
-	php_ucache_request_local_slot_t *slot = ucache_find_request_local_slot(key, gen);
+	ucache_req_local_slot *slot = ucache_find_req_local_slot(key, gen);
+	bool cloned;
 
-	if (slot == NULL || !slot->has_value) {
-		return PHP_UCACHE_REQUEST_LOCAL_SLOT_MISS;
+	if (slot == NULL || !slot->has_val) {
+		return false;
 	}
 
-	if (!ucache_clone_request_local_slot_value_known(
-			return_value,
-			&slot->value,
-			slot->needs_deep_clone,
-			slot->has_clone_verdicts ? &slot->clone_verdicts : NULL,
-			slot->no_aliases
-		)
-	) {
-		zend_hash_del(UC_G(request_local_slot_table), key);
+	slot->clone_depth++;
 
-		return PHP_UCACHE_REQUEST_LOCAL_SLOT_MISS;
+	cloned = ucache_clone_req_local_slot_val_known(
+		return_value,
+		&slot->val,
+		slot->has_clone_verdicts ? ucache_req_local_slot_verdicts(slot) : NULL,
+		slot->no_aliases,
+		NULL
+	);
+
+	slot->clone_depth--;
+
+	if (slot->released_while_cloning) {
+		ucache_req_local_slot_free(slot);
+
+		return cloned;
 	}
 
-	return PHP_UCACHE_REQUEST_LOCAL_SLOT_HIT;
+	if (!cloned) {
+		ucache_release_req_local_slot(key);
+
+		return false;
+	}
+
+	return true;
 }
 
-static void ucache_mark_request_local_slot(zend_string *key, uint64_t gen)
-{
-	php_ucache_request_local_slot_t *slot = ucache_alloc_request_local_slot(gen, true, false);
-
-	ucache_replace_request_local_slot(key, slot);
-}
-
-static bool ucache_find_slot_in_header_locked(
-		php_ucache_header_t *header,
+static bool ucache_find_slot_in_hdr_locked(
+		ucache_hdr *hdr,
 		zend_string *key,
 		zend_ulong hash,
-		php_ucache_find_slot_expiry_mode_t expiry_mode,
+		ucache_find_slot_expiry_mode expiry_mode,
 		uint32_t *slot_idx,
 		bool *found)
 {
-	php_ucache_entry_t *entries, *entry;
+	ucache_entry *entries, *entry;
 	uint64_t now = 0;
 	uint32_t i, first_tombstone = UINT32_MAX, step;
 
-	entries = php_ucache_entries_ptr(header);
-	i = (uint32_t) (hash % header->capacity);
+	ZEND_ASSERT(
+		UC_G(lock_held) ||
+		(UC_G(scalar_write_hdr) != NULL && expiry_mode == UCACHE_FIND_SLOT_IGNORE_EXPIRY)
+	);
 
-	for (step = 0; step < header->capacity; step++) {
+	if (hdr == NULL) {
+		return false;
+	}
+
+	entries = ucache_entries_ptr(hdr);
+	i = ucache_table_hash(hash) % hdr->capacity;
+
+	for (step = 0; step < hdr->capacity; step++) {
 		entry = &entries[i];
 
-		if (entry->state == PHP_UCACHE_ENTRY_EMPTY) {
+		if (ucache_entry_is_empty(entry)) {
 			*slot_idx = first_tombstone != UINT32_MAX ? first_tombstone : i;
 			*found = false;
 
 			return true;
 		}
 
-		if (entry->state == PHP_UCACHE_ENTRY_TOMBSTONE) {
+		if (ucache_entry_is_tombstone(entry)) {
 			if (first_tombstone == UINT32_MAX) {
 				first_tombstone = i;
 			}
-		} else if (expiry_mode != PHP_UCACHE_FIND_SLOT_IGNORE_EXPIRY &&
-			ucache_is_expired_now(header, entry, &now)
+		} else if (expiry_mode != UCACHE_FIND_SLOT_IGNORE_EXPIRY &&
+			ucache_is_expired_now(hdr, entry, &now)
 		) {
-			if (expiry_mode == PHP_UCACHE_FIND_SLOT_DELETE_EXPIRED) {
-				ucache_delete_entry_locked(header, entry);
+			if (expiry_mode == UCACHE_FIND_SLOT_DELETE_EXPIRED) {
+				ucache_delete_entry_locked(hdr, entry, i);
 			} else {
 				ucache_note_expired_read();
 			}
@@ -1804,7 +1276,7 @@ static bool ucache_find_slot_in_header_locked(
 			if (first_tombstone == UINT32_MAX) {
 				first_tombstone = i;
 			}
-		} else if (ucache_key_equals(header, entry, key, hash)) {
+		} else if (ucache_key_equals(hdr, entry, key, hash)) {
 			*slot_idx = i;
 			*found = true;
 
@@ -1813,7 +1285,7 @@ static bool ucache_find_slot_in_header_locked(
 
 		++i;
 
-		if (i == header->capacity) {
+		if (i == hdr->capacity) {
 			i = 0;
 		}
 	}
@@ -1831,23 +1303,23 @@ static bool ucache_find_slot_in_header_locked(
 static bool ucache_find_slot_locked(
 		zend_string *key,
 		zend_ulong hash,
-		php_ucache_find_slot_expiry_mode_t expiry_mode,
-		php_ucache_header_t **header_ptr,
+		ucache_find_slot_expiry_mode expiry_mode,
+		ucache_hdr **hdr_ptr,
 		uint32_t *slot_idx,
 		bool *found)
 {
-	php_ucache_header_t *header = php_ucache_header_ptr();
+	ucache_hdr *hdr = ucache_hdr_ptr();
 
-	if (!header || !php_ucache_header_adoptable_locked()) {
+	if (hdr == NULL || !ucache_hdr_adoptable_locked()) {
 		return false;
 	}
 
-	if (header_ptr != NULL) {
-		*header_ptr = header;
+	if (hdr_ptr != NULL) {
+		*hdr_ptr = hdr;
 	}
 
-	return ucache_find_slot_in_header_locked(
-		header,
+	return ucache_find_slot_in_hdr_locked(
+		hdr,
 		key,
 		hash,
 		expiry_mode,
@@ -1856,54 +1328,23 @@ static bool ucache_find_slot_locked(
 	);
 }
 
-static bool ucache_find_slot_ignore_expiry_locked(
-		zend_string *key,
-		zend_ulong hash,
-		php_ucache_header_t **header_ptr,
-		uint32_t *slot_idx,
-		bool *found)
-{
-	return ucache_find_slot_locked(
-		key,
-		hash,
-		PHP_UCACHE_FIND_SLOT_IGNORE_EXPIRY,
-		header_ptr,
-		slot_idx,
-		found
-	);
-}
-
-static bool ucache_find_slot_for_read_locked(
-		zend_string *key,
-		zend_ulong hash,
-		php_ucache_header_t **header_ptr,
-		uint32_t *slot_idx,
-		bool *found)
-{
-	return ucache_find_slot_locked(
-		key,
-		hash,
-		PHP_UCACHE_FIND_SLOT_SKIP_EXPIRED,
-		header_ptr,
-		slot_idx,
-		found
-	);
-}
-
 static bool ucache_find_slot_for_write_locked(
 		zend_string *key,
 		zend_ulong hash,
-		php_ucache_header_t **header_ptr,
+		ucache_hdr **hdr_ptr,
 		uint32_t *slot_idx,
 		bool *found)
 {
-	php_ucache_header_t *header;
+	ucache_hdr *hdr = ucache_hdr_ptr();
 
-	if (!ucache_find_slot_locked(
+	ZEND_ASSERT(UC_G(lock_held_is_write));
+
+	if (!ucache_hdr_is_initialized_locked() ||
+		!ucache_find_slot_in_hdr_locked(
+			hdr,
 			key,
 			hash,
-			PHP_UCACHE_FIND_SLOT_DELETE_EXPIRED,
-			header_ptr,
+			UCACHE_FIND_SLOT_DELETE_EXPIRED,
 			slot_idx,
 			found
 		)
@@ -1911,70 +1352,74 @@ static bool ucache_find_slot_for_write_locked(
 		return false;
 	}
 
-	header = *header_ptr;
+	*hdr_ptr = hdr;
 
-	if (!*found && header->count >= ucache_insert_cap(header->capacity)) {
+	if (!*found && hdr->count >= ucache_insert_cap(hdr->capacity)) {
 		return false;
 	}
 
 	return true;
 }
 
-static void ucache_rehash_locked(php_ucache_header_t *header)
+static bool ucache_rehash_locked(ucache_hdr *hdr)
 {
-	php_ucache_entry_t *entries, *snapshot, *entry, *target;
+	ucache_entry *entries, *snapshot, *entry, *target;
 	uint32_t i, slot, step, *stamps, *stamp_snapshot;
 
-	entries = php_ucache_entries_ptr(header);
-	stamps = php_ucache_access_stamps_ptr(header);
+	entries = ucache_entries_ptr(hdr);
+	stamps = ucache_access_stamps_ptr(hdr);
 
-	/* Plain malloc: an emalloc bailout here would longjmp away with the
-	 * write lock held. Skipping the rehash on OOM is always safe. */
-	snapshot = malloc((size_t) header->capacity * (sizeof(*snapshot) + sizeof(*stamp_snapshot)));
+	snapshot = UCACHE_DEBUG_FAULT("FAIL_REHASH_ALLOC")
+		? NULL
+		: malloc((size_t) hdr->capacity * (sizeof(*snapshot) + sizeof(*stamp_snapshot)))
+	;
 	if (snapshot == NULL) {
-		return;
+		return false;
 	}
 
-	stamp_snapshot = (uint32_t *) (snapshot + header->capacity);
+	stamp_snapshot = (uint32_t *) (snapshot + hdr->capacity);
 
-	memcpy(snapshot, entries, (size_t) header->capacity * sizeof(*snapshot));
+	memcpy(snapshot, entries, (size_t) hdr->capacity * sizeof(*snapshot));
 
-	for (i = 0; i < header->capacity; i++) {
-		stamp_snapshot[i] = PHP_UCACHE_ATOMIC_LOAD_32_RELAXED(&stamps[i]);
+	for (i = 0; i < hdr->capacity; i++) {
+		stamp_snapshot[i] = UCACHE_ATOMIC_LOAD_32_RELAXED(&stamps[i]);
 	}
 
-	memset(entries, 0, (size_t) header->capacity * sizeof(*entries));
+	memset(entries, 0, (size_t) hdr->capacity * sizeof(*entries));
 
-	php_ucache_access_stamps_reset(header);
-	php_ucache_occupancy_reset(header);
+	ucache_pool_idx_reset_locked(hdr);
+	ucache_access_stamps_reset(hdr);
 
-	header->count = 0;
-	header->tombstone_count = 0;
+	hdr->count = 0;
+	hdr->tombstone_count = 0;
 
-	for (i = 0; i < header->capacity; i++) {
+	for (i = 0; i < hdr->capacity; i++) {
 		entry = &snapshot[i];
 
-		if (entry->state != PHP_UCACHE_ENTRY_USED) {
+		if (!ucache_entry_is_used(entry)) {
 			continue;
 		}
 
-		slot = (uint32_t) (entry->hash % header->capacity);
-		for (step = 0; step < header->capacity; step++) {
+		slot = entry->hash % hdr->capacity;
+		for (step = 0; step < hdr->capacity; step++) {
 			target = &entries[slot];
 
-			if (target->state == PHP_UCACHE_ENTRY_EMPTY) {
+			if (ucache_entry_is_empty(target)) {
 				*target = *entry;
-				PHP_UCACHE_ATOMIC_STORE_32_RELAXED(&stamps[slot], stamp_snapshot[i]);
-				php_ucache_occupancy_set(header, slot);
 
-				header->count++;
+				ucache_pool_idx_link_locked(hdr, target, slot);
+				ucache_entry_set_block_owner(target, slot);
+
+				UCACHE_ATOMIC_STORE_32_RELAXED(&stamps[slot], stamp_snapshot[i]);
+
+				hdr->count++;
 
 				break;
 			}
 
 			++slot;
 
-			if (slot == header->capacity) {
+			if (slot == hdr->capacity) {
 				slot = 0;
 			}
 		}
@@ -1982,1157 +1427,662 @@ static void ucache_rehash_locked(php_ucache_header_t *header)
 
 	free(snapshot);
 
-	php_ucache_bump_mutation_epoch_locked(header);
+	ucache_bump_mutation_epoch_locked(hdr);
+
+	return true;
 }
 
-static bool ucache_expunge_expired_bounded_locked(void)
-{
-	php_ucache_header_t *header = php_ucache_header_ptr();
-	php_ucache_entry_t *entries;
-	uint64_t now;
-	uint32_t cursor, scan_len, slot, i;
-	bool removed = false;
-
-	if (!header || !php_ucache_header_init_locked()) {
-		return false;
-	}
-
-	if (header->expiring_count == 0) {
-		php_ucache_shared_graph_reclaim_orphaned_locked();
-
-		return false;
-	}
-
-	now = php_ucache_time_rel(header, (uint64_t) time(NULL));
-	entries = php_ucache_entries_ptr(header);
-
-	cursor = UC_G(expired_expunge_cursor);
-	if (cursor >= header->capacity) {
-		cursor = 0;
-	}
-
-	/* The budget counts live slots: the occupancy walk skips empty and
-	 * tombstoned ones, so a sparse table no longer exhausts it. */
-	scan_len = header->count < PHP_UCACHE_EXPUNGE_SCAN_MAX
-		? header->count
-		: PHP_UCACHE_EXPUNGE_SCAN_MAX
-	;
-	for (i = 0; i < scan_len; i++) {
-		slot = php_ucache_occupancy_next_used(header, cursor);
-		if (slot == UINT32_MAX) {
-			slot = php_ucache_occupancy_next_used(header, 0);
-			if (slot == UINT32_MAX) {
-				cursor = 0;
-
-				break;
-			}
-		}
-
-		cursor = slot + 1 == header->capacity ? 0 : slot + 1;
-
-		if (ucache_is_expired(&entries[slot], now)) {
-			ucache_delete_entry_locked(header, &entries[slot]);
-
-			removed = true;
-		}
-	}
-
-	UC_G(expired_expunge_cursor) = cursor;
-
-	php_ucache_shared_graph_reclaim_orphaned_locked();
-
-	return removed;
-}
-
-static bool ucache_safe_direct_value_has_unstorable(
-		void *ctx_ptr,
-		const zval *value)
-{
-	php_ucache_unstorable_ctx_t *ctx = ctx_ptr;
-
-	return ucache_find_unstorable_value(
-		(zval *) value,
-		ctx->seen_arrays,
-		ctx->seen_objects,
-		ctx->failure_message
-	);
-}
-
-static php_ucache_object_storability_t ucache_object_class_storability(
-		zend_class_entry *ce)
-{
-	if (php_ucache_class_uses_magic_serialize(ce) ||
-		php_ucache_class_uses_serialize_props(ce) ||
-		php_ucache_class_uses_magic_unserialize(ce)
-	) {
-		return PHP_UCACHE_OBJECT_STORABLE_VIA_HOOKS;
-	}
-
-	if (php_ucache_class_uses_serdes(ce)) {
-		return PHP_UCACHE_OBJECT_SERDES;
-	}
-
-	if ((ce->ce_flags & ZEND_ACC_ENUM) == 0 &&
-		php_ucache_safe_direct_state_serialize_func(ce) == NULL &&
-		(
-			(ce->ce_flags & ZEND_ACC_NOT_SERIALIZABLE) != 0 ||
-			(ce->type != ZEND_USER_CLASS && ce->create_object != NULL)
-		)
-	) {
-		return PHP_UCACHE_OBJECT_OPAQUE;
-	}
-
-	return PHP_UCACHE_OBJECT_SCAN_MEMBERS;
-}
-
-static bool ucache_find_unstorable_in_array(
-		zval *value,
-		HashTable *seen_arrs,
-		HashTable *seen_objs,
-		const char **msg)
-{
-	zval *elem;
-
-	if (!php_ucache_seen_test_and_add(seen_arrs, Z_ARR_P(value))) {
-		return false;
-	}
-
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(value), elem) {
-		if (ucache_find_unstorable_value(elem, seen_arrs, seen_objs, msg)) {
-			return true;
-		}
-	} ZEND_HASH_FOREACH_END();
-
-	return false;
-}
-
-static bool ucache_find_unstorable_in_object(
-		zval *value,
-		HashTable *seen_arrs,
-		HashTable *seen_objs,
-		const char **msg)
-{
-	php_ucache_safe_direct_state_has_unstorable_func_t state_has_unstorable;
-	php_ucache_unstorable_ctx_t uctx;
-	php_ucache_object_storability_t storability;
-	zend_object *obj = Z_OBJ_P(value);
-	zval *elem, *prop, *end;
-
-	if (zend_object_is_lazy(obj)) {
-		*msg = PHP_UCACHE_MSG_LAZY_OBJECT_UNSTORABLE;
-
-		return true;
-	}
-
-	if (!php_ucache_seen_test_and_add(seen_objs, obj)) {
-		return false;
-	}
-
-	storability = ucache_object_class_storability(obj->ce);
-	if (storability == PHP_UCACHE_OBJECT_STORABLE_VIA_HOOKS) {
-		return false;
-	}
-
-	state_has_unstorable = php_ucache_safe_direct_state_has_unstorable_func(obj->ce);
-	if (state_has_unstorable != NULL) {
-		uctx.seen_arrays = seen_arrs;
-		uctx.seen_objects = seen_objs;
-		uctx.failure_message = msg;
-
-		if (state_has_unstorable(
-				&uctx,
-				value,
-				ucache_safe_direct_value_has_unstorable)
-		) {
-			if (*msg == NULL) {
-				*msg = "objects of this class contain values that cannot be stored in the user cache";
-			}
-
-			return true;
-		}
-	}
-
-	if (storability == PHP_UCACHE_OBJECT_SERDES) {
-		return false;
-	}
-
-	if (storability == PHP_UCACHE_OBJECT_OPAQUE) {
-		*msg = PHP_UCACHE_MSG_OPAQUE_OBJECT_UNSTORABLE;
-
-		return true;
-	}
-
-	if (obj->ce->default_properties_count != 0) {
-		prop = obj->properties_table;
-		end = prop + obj->ce->default_properties_count;
-
-		do {
-			if (Z_TYPE_P(prop) != IS_UNDEF &&
-				ucache_find_unstorable_value(
-					prop, seen_arrs, seen_objs, msg
-				)
-			) {
-				return true;
-			}
-
-			prop++;
-		} while (prop != end);
-	}
-
-	if (obj->properties != NULL) {
-		ZEND_HASH_FOREACH_VAL(obj->properties, elem) {
-			if (Z_TYPE_P(elem) == IS_INDIRECT) {
-				elem = Z_INDIRECT_P(elem);
-				if (Z_TYPE_P(elem) == IS_UNDEF) {
-					continue;
-				}
-			}
-
-			if (ucache_find_unstorable_value(elem, seen_arrs, seen_objs, msg)) {
-				return true;
-			}
-		} ZEND_HASH_FOREACH_END();
-	}
-
-	return false;
-}
-
-static bool ucache_find_unstorable_value(
-		zval *value,
-		HashTable *seen_arrs,
-		HashTable *seen_objs,
-		const char **msg)
-{
-	if (php_ucache_stack_overflowed()) {
-		*msg = PHP_UCACHE_MSG_NESTED_TOO_DEEP_UNSTORABLE;
-
-		return true;
-	}
-
-	ZVAL_DEREF(value);
-
-	if (Z_TYPE_P(value) == IS_RESOURCE) {
-		*msg = PHP_UCACHE_MSG_RESOURCE_UNSTORABLE;
-
-		return true;
-	}
-
-	if (Z_TYPE_P(value) == IS_OBJECT && Z_OBJCE_P(value) == zend_ce_closure) {
-		*msg = PHP_UCACHE_MSG_CLOSURE_UNSTORABLE;
-
-		return true;
-	}
-
-	if (Z_TYPE_P(value) == IS_ARRAY) {
-		return ucache_find_unstorable_in_array(value, seen_arrs, seen_objs, msg);
-	}
-
-	if (Z_TYPE_P(value) == IS_OBJECT) {
-		return ucache_find_unstorable_in_object(value, seen_arrs, seen_objs, msg);
-	}
-
-	return false;
-}
-
-static bool ucache_validate_storable_value(zval *value)
-{
-	const char *msg = NULL;
-	HashTable seen_arrs, seen_objs;
-	bool found;
-
-	ZVAL_DEREF(value);
-
-	if (Z_TYPE_P(value) != IS_ARRAY && Z_TYPE_P(value) != IS_OBJECT) {
-		return true;
-	}
-
-	zend_hash_init(&seen_arrs, 8, NULL, NULL, 0);
-	zend_hash_init(&seen_objs, 8, NULL, NULL, 0);
-
-	found = ucache_find_unstorable_value(value, &seen_arrs, &seen_objs, &msg);
-
-	zend_hash_destroy(&seen_objs);
-	zend_hash_destroy(&seen_arrs);
-
-	if (EG(exception)) {
-		return false;
-	}
-
-	if (!found) {
-		return true;
-	}
-
-	if (msg != NULL) {
-		zend_type_error("%s", msg);
-	}
-
-	return false;
-}
-
-static uint8_t *ucache_reserve_combined_value_key_locked(
-		const php_ucache_header_t *header,
+static uint8_t *ucache_reserve_combined_val_key_locked(
+		ucache_hdr *hdr,
 		uint32_t reusable_offset,
 		zend_string *key,
 		size_t payload_size,
-		uint32_t *value_offset,
-		uint32_t *key_offset)
+		uint32_t owner,
+		uint32_t *val_offset)
 {
 	uint32_t base_offset;
-	size_t key_size, key_displacement, total_size;
+	size_t key_size, total_size;
 
 	key_size = ZSTR_LEN(key) + 1;
-	key_displacement = PHP_UCACHE_SHM_UNIT_ALIGNED_SIZE(payload_size);
-	if (key_displacement < payload_size || key_displacement > SIZE_MAX - key_size) {
-		return NULL;
-	}
-
-	total_size = ucache_combined_value_key_size(payload_size, key_size);
-	if (reusable_offset != 0 &&
-		php_ucache_block_payload_capacity(reusable_offset) >= total_size
-	) {
+	total_size = payload_size + key_size;
+	if (ucache_reuse_block_locked(hdr, reusable_offset, total_size, owner)) {
 		base_offset = reusable_offset;
 	} else {
-		base_offset = php_ucache_alloc_locked(total_size, NULL);
+		base_offset = ucache_alloc_locked(total_size, NULL, owner);
 		if (base_offset == 0) {
 			return NULL;
 		}
 	}
 
-	*value_offset = base_offset;
-	*key_offset = base_offset + php_ucache_shm_units(key_displacement);
+	*val_offset = base_offset;
 
-	return ucache_ptr_in_header(header, base_offset);
+	return ucache_ptr_in_hdr(hdr, base_offset);
 }
 
-static bool ucache_publish_combined_value_key_locked(
-		const php_ucache_header_t *header,
+static bool ucache_publish_combined_val_key_locked(
+		ucache_hdr *hdr,
 		uint32_t reusable_offset,
 		zend_string *key,
 		size_t payload_size,
 		const void *src,
-		uint32_t *value_offset,
-		uint32_t *key_offset)
+		uint32_t owner,
+		uint32_t *val_offset)
 {
 	uint8_t *payload;
 
-	payload = ucache_reserve_combined_value_key_locked(
-		header,
+	ZEND_ASSERT(src != NULL);
+
+	payload = ucache_reserve_combined_val_key_locked(
+		hdr,
 		reusable_offset,
 		key,
 		payload_size,
-		value_offset,
-		key_offset
+		owner,
+		val_offset
 	);
 	if (payload == NULL) {
 		return false;
 	}
 
 	memcpy(payload, src, payload_size);
-	ucache_write_combined_key(payload, payload_size, key);
+	memcpy(payload + payload_size, ZSTR_VAL(key), ZSTR_LEN(key) + 1);
 
 	return true;
 }
 
-static php_ucache_publish_result_t ucache_publish_prepared_shared_graph_locked(
-		php_ucache_prepared_value_t *prepared,
-		zval *value,
+static bool ucache_publish_prepared_sgraph_locked(
+		const ucache_prepared_val *prepared,
+		zval *val,
 		uint8_t *payload)
 {
-	php_ucache_publish_result_t result;
 	zval pinned_root;
 
-#if ZEND_DEBUG
-	if (ucache_debug_publish_fails_for(value)) {
-		return PHP_UCACHE_PUBLISH_FAILED;
-	}
-#endif
-
-	if (prepared->payload_source != NULL) {
-		result = php_ucache_shared_graph_publish_copied_payload_locked(
+	if (prepared->payload_src != NULL &&
+		ucache_sgraph_publish_copied_payload_locked(
 			payload,
-			prepared->payload_source,
+			prepared->payload_src,
 			prepared->payload_size,
 			prepared->payload_used_size,
-			prepared->has_verbatim_array,
+			prepared->has_verbatim_arr,
 			prepared->fixup_offsets,
-			prepared->fixup_count,
-			&prepared->intern
-		);
-
-		if (result != PHP_UCACHE_PUBLISH_FAILED) {
-			return result;
-		}
+			prepared->fixup_count
+		)
+	) {
+		return true;
 	}
 
-	if (prepared->owned_string != NULL) {
-		ZVAL_STR(&pinned_root, prepared->owned_string);
-		value = &pinned_root;
+	if (prepared->owner_type == UCACHE_PREPARED_OWNER_STR) {
+		ZVAL_STR(&pinned_root, prepared->owned_str);
+		val = &pinned_root;
 	}
 
-	return php_ucache_build_shared_graph_in_place(
-		value,
-		prepared->state_memo,
+	return ucache_build_sgraph_in_place(
+		val,
 		NULL,
+		NULL,
+		prepared->packed_vals_allowed,
 		payload,
 		prepared->payload_size,
 		NULL,
 		NULL,
 		NULL,
-		NULL,
 		NULL
-	) ? PHP_UCACHE_PUBLISH_DONE : PHP_UCACHE_PUBLISH_FAILED;
-}
-
-static bool ucache_evict_lru_locked(size_t needed_size, size_t needed_key_size)
-{
-	php_ucache_header_t *header = php_ucache_header_ptr();
-	php_ucache_entry_t *entries, *entry;
-	uint64_t lock_now, lock_now_rel;
-	uint32_t hand, slot, scanned, live, collected, stamp, best_slot,
-		best_stamp = 0, victims = 0, *stamps
-	;
-	int8_t graph_quiescent = -1;
-	bool evicted_any = false, expired_any = false;
-
-	if (!header || header->count == 0) {
-		return false;
-	}
-
-	entries = php_ucache_entries_ptr(header);
-	stamps = php_ucache_access_stamps_ptr(header);
-	hand = header->eviction_hand % header->capacity;
-	lock_now = (uint64_t) time(NULL);
-	lock_now_rel = php_ucache_time_rel(header, lock_now);
-
-	ucache_access_note_time(lock_now);
-
-	while (victims < PHP_UCACHE_EVICTION_MAX_VICTIMS) {
-		best_slot = UINT32_MAX;
-		collected = 0;
-		live = header->count;
-
-		for (scanned = 0;
-			scanned < live &&
-			collected < PHP_UCACHE_EVICTION_WINDOW &&
-			(collected == 0 || scanned < PHP_UCACHE_EVICTION_SCAN_MAX);
-			scanned++
-		) {
-			slot = php_ucache_occupancy_next_used(header, hand);
-			if (slot == UINT32_MAX) {
-				slot = php_ucache_occupancy_next_used(header, 0);
-				if (slot == UINT32_MAX) {
-					break;
-				}
-			}
-
-			hand = slot + 1 == header->capacity ? 0 : slot + 1;
-			entry = &entries[slot];
-
-			ZEND_ASSERT(entry->state == PHP_UCACHE_ENTRY_USED);
-
-			if (ucache_is_expired(entry, lock_now_rel)) {
-				ucache_delete_entry_locked(header, entry);
-				expired_any = true;
-
-				continue;
-			}
-
-			if (entry->value_type == PHP_UCACHE_VALUE_SHARED_GRAPH &&
-				entry->value_offset != 0
-			) {
-				if (php_ucache_shared_graph_payload_has_refs_locked(entry->value_offset)) {
-					continue;
-				}
-
-				if (graph_quiescent < 0) {
-					graph_quiescent = php_ucache_quiesce_graph_payloads_locked() ? 1 : 0;
-				}
-
-				if (graph_quiescent == 0) {
-					continue;
-				}
-			}
-
-			if (php_ucache_entry_key_lock_active_locked(
-					header,
-					entry->hash,
-					entry->key_offset,
-					entry->key_len,
-					&lock_now_rel
-				)
-			) {
-				continue;
-			}
-
-			collected++;
-
-			stamp = PHP_UCACHE_ATOMIC_LOAD_32_RELAXED(&stamps[slot]);
-			if (best_slot == UINT32_MAX || stamp < best_stamp) {
-				best_stamp = stamp;
-				best_slot = slot;
-			}
-		}
-
-		if (best_slot == UINT32_MAX ||
-			(
-				expired_any && needed_size != 0 &&
-				php_ucache_alloc_can_satisfy_locked(needed_size, needed_key_size)
-			)
-		) {
-			break;
-		}
-
-		entry = &entries[best_slot];
-
-		ucache_delete_entry_locked(header, entry);
-
-		header->eviction_count++;
-		victims++;
-		evicted_any = true;
-
-		if (needed_size == 0 ||
-			php_ucache_alloc_can_satisfy_locked(needed_size, needed_key_size)
-		) {
-			break;
-		}
-	}
-
-	header->eviction_hand = hand;
-
-	return evicted_any || expired_any;
-}
-
-static bool ucache_clear_locked(void)
-{
-	php_ucache_header_t *header = php_ucache_header_ptr();
-	php_ucache_entry_t *entries;
-	uint32_t i;
-
-	if (!header || !php_ucache_header_init_locked()) {
-		return false;
-	}
-
-	entries = php_ucache_entries_ptr(header);
-	for (i = 0; i < header->capacity; i++) {
-		if (entries[i].state == PHP_UCACHE_ENTRY_USED) {
-			ucache_release_entry_storage_locked(&entries[i]);
-		}
-	}
-
-	memset(entries, 0, sizeof(php_ucache_entry_t) * header->capacity);
-	php_ucache_access_stamps_reset(header);
-	php_ucache_occupancy_reset(header);
-
-	php_ucache_shared_graph_reclaim_orphaned_locked();
-	(void) php_ucache_shared_graph_strip_dead_pins_locked(true);
-	(void) php_ucache_shared_graph_intern_sweep_locked();
-
-	header->count = 0;
-	header->tombstone_count = 0;
-	header->expiring_count = 0;
-
-	php_ucache_bump_mutation_epoch_locked(header);
-
-	return true;
-}
-
-static bool ucache_reclaim_space_for_store_locked(
-		bool can_reclaim,
-		size_t needed_size,
-		size_t needed_key_size,
-		bool *expired_retry_used,
-		bool *evict_retry_used,
-		bool *clear_retry_used)
-{
-	bool reclaimed;
-
-	if (!*expired_retry_used) {
-		*expired_retry_used = true;
-
-		reclaimed = ucache_expunge_expired_bounded_locked();
-
-		if (php_ucache_shared_graph_strip_dead_pins_locked(true)) {
-			reclaimed = true;
-		}
-
-		if (reclaimed) {
-			return true;
-		}
-	}
-
-	/* Dead interned keys are cheap to free but need a block walk, so the
-	 * sweep runs on a fraction of the pressure events. */
-	if (++UC_G(intern_sweep_ticks) >= PHP_UCACHE_INTERN_SWEEP_PRESSURE_INTERVAL) {
-		UC_G(intern_sweep_ticks) = 0;
-
-		if (php_ucache_shared_graph_intern_sweep_locked()) {
-			return true;
-		}
-	}
-
-	/* can_reclaim == false means the failed allocation cannot fit even in
-	 * an empty cache: never sacrifice live entries for such a store. */
-	if (can_reclaim &&
-		UC_G(eviction_policy) == PHP_UCACHE_EVICTION_POLICY_LRU &&
-		!*evict_retry_used
-	) {
-		*evict_retry_used = true;
-
-		if (ucache_evict_lru_locked(needed_size, needed_key_size)) {
-			return true;
-		}
-	}
-
-	if (can_reclaim &&
-		UC_G(eviction_policy) != PHP_UCACHE_EVICTION_POLICY_NONE &&
-		!*clear_retry_used
-	) {
-		*clear_retry_used = true;
-
-		if (php_ucache_entry_locks_allow_clear_locked() && ucache_clear_locked()) {
-			php_ucache_header_ptr()->expunge_count++;
-
-			return true;
-		}
-	}
-
-	return false;
+	);
 }
 
 static void ucache_rollback_partial_store_allocs_locked(
-		uint32_t new_value_offset,
-		uint32_t old_value_offset,
+		uint32_t new_val_offset,
+		uint32_t old_val_offset,
 		uint32_t new_key_offset,
-		uint32_t old_key_offset,
-		uint16_t new_flags)
+		uint32_t old_key_offset)
 {
-	if (new_value_offset != 0 && new_value_offset != old_value_offset) {
-		php_ucache_free_locked(new_value_offset);
+	if (new_val_offset != 0 && new_val_offset != old_val_offset) {
+		ucache_free_locked(new_val_offset);
 	}
 
-	if (new_key_offset != 0 && new_key_offset != old_key_offset &&
-		(new_flags & PHP_UCACHE_ENTRY_FLAG_COMBINED_VALUE_KEY) == 0
-	) {
-		php_ucache_free_locked(new_key_offset);
+	if (new_key_offset != 0 && new_key_offset != old_key_offset) {
+		ucache_free_locked(new_key_offset);
 	}
 }
 
-static php_ucache_store_attempt_result_t ucache_store_attempt_locked(
-		zend_string *key,
-		zval *value,
-		php_ucache_prepared_value_t *prepared,
-		zend_long ttl,
-		const php_ucache_store_options_t *options,
-		php_ucache_store_result_t *result,
-		size_t key_size,
-		bool *expired_retry_used,
-		bool *evict_retry_used,
-		bool *clear_retry_used)
+static void ucache_delete_overwritten_combined_entry_locked(
+		ucache_hdr *hdr,
+		ucache_entry *entry,
+		uint32_t slot_idx)
 {
-	php_ucache_header_t *header;
-	php_ucache_entry_t *entries, *entry, replaced_snapshot;
-	php_ucache_publish_result_t publish_result = PHP_UCACHE_PUBLISH_FAILED;
+	uint32_t block_offset = entry->val_offset;
+
+	ucache_entry_set_val_type(entry, UCACHE_VAL_NULL);
+	entry->val_offset = 0;
+
+	ucache_delete_entry_locked(hdr, entry, slot_idx);
+
+	ucache_free_locked(block_offset);
+}
+
+static ucache_store_attempt_result ucache_store_attempt_locked(
+		zend_string *key,
+		zval *val,
+		const ucache_prepared_val *prepared,
+		zend_long ttl,
+		bool bulk,
+		ucache_store_result *result,
+		size_t key_size,
+		ucache_store_retries *retries)
+{
+	const bool retry_after_mem_pressure = !bulk;
+	ucache_hdr *hdr;
+	ucache_entry *entries, *entry, replaced_snapshot;
 	zend_long new_lval = 0;
+	double new_dval = 0;
 	uint64_t store_now;
-	uint32_t expires_at, slot_idx,
-		reusable_offset = 0, graph_offset = 0,
-		old_key_offset = 0, old_value_offset = 0,
-		new_key_offset = 0, new_value_offset = 0,
-		new_value_len = 0, combined_reuse_offset = 0
+	uint32_t expires_at, slot_idx, offset = 0, goffset = 0, reusable_offset,
+			old_key_offset = 0, old_val_offset = 0,
+			new_key_offset = 0, new_val_offset = 0, new_val_len = 0,
+			combined_reuse_offset = 0
 	;
 	uint16_t old_flags = 0, new_flags = 0;
-	uint8_t *combined_payload, old_value_type = PHP_UCACHE_VALUE_NULL, new_value_type = prepared->value_type;
-	bool found, old_combined, use_combined_publish, can_reclaim, capture_replaced = false, published = false;
-	double new_dval = 0;
+	uint8_t *combined_payload, old_val_type = UCACHE_VAL_NULL, new_val_type = prepared->val_type;
+	size_t reclaim_size;
+	bool found, old_combined, use_combined_publish, allocates_key, fits_in_empty_cache, capture_replaced = false,
+			published = false, blocks_changed
+	;
 
 	if (!ucache_find_slot_for_write_locked(
 			key,
 			prepared->hash,
-			&header,
+			&hdr,
 			&slot_idx,
 			&found
 		)
 	) {
-		if (options->retry_after_memory_pressure &&
+		if (retry_after_mem_pressure &&
 			ucache_reclaim_space_for_store_locked(
 				true,
 				0,
-				0,
-				expired_retry_used,
-				evict_retry_used,
-				clear_retry_used
+				retries
 			)
 		) {
-			return PHP_UCACHE_STORE_ATTEMPT_RETRY;
+			return UCACHE_STORE_ATTEMPT_RETRY;
 		}
 
-		php_ucache_header_ptr()->store_failure_count++;
+		ucache_hdr_ptr()->store_failure_count++;
 
-		return PHP_UCACHE_STORE_ATTEMPT_FAILED;
+		return UCACHE_STORE_ATTEMPT_FAILED;
 	}
 
-	entries = php_ucache_entries_ptr(header);
+	entries = ucache_entries_ptr(hdr);
 	entry = &entries[slot_idx];
 
 	if (ttl == 0) {
 		expires_at = 0;
+		if (!found) {
+			ucache_access_note_time(ucache_clock_now());
+		}
 	} else {
-		store_now = (uint64_t) time(NULL);
+		store_now = ucache_clock_now();
 
 		ucache_access_note_time(store_now);
 
-		expires_at = php_ucache_expiry_deadline(header, store_now, ttl);
+		expires_at = ucache_expiry_deadline(hdr, store_now, ttl);
 	}
 
 	if (found) {
-		capture_replaced = options->capture_replaced_entry && result != NULL;
+		capture_replaced = bulk;
+
 		replaced_snapshot = *entry;
+
 		old_key_offset = entry->key_offset;
-		old_value_type = entry->value_type;
-		old_value_offset = entry->value_offset;
+		old_val_type = ucache_entry_val_type(entry);
+		old_val_offset = ucache_entry_val_offset(entry);
 		old_flags = entry->flags;
 	}
 
-	old_combined = found && (old_flags & PHP_UCACHE_ENTRY_FLAG_COMBINED_VALUE_KEY) != 0;
+	old_combined = found && (old_flags & UCACHE_ENTRY_FLAG_COMBINED_VAL_KEY) != 0;
 	reusable_offset = 0;
 
-	if (found && !capture_replaced && old_value_type != PHP_UCACHE_VALUE_SHARED_GRAPH && !old_combined) {
-		reusable_offset = old_value_offset;
+	if (found && !capture_replaced && old_val_type != UCACHE_VAL_SGRAPH && !old_combined) {
+		reusable_offset = old_val_offset;
 	}
 
 	new_key_offset = found && !capture_replaced ? old_key_offset : 0;
 
-	use_combined_publish = ucache_value_uses_offset(prepared->value_type) &&
+	use_combined_publish = ucache_val_uses_offset(prepared->val_type) &&
 		(!found || old_combined)
 	;
 
-	if (old_combined && old_value_offset != 0 && !capture_replaced) {
-		if (old_value_type == PHP_UCACHE_VALUE_SHARED_GRAPH) {
-			if (ucache_value_uses_offset(prepared->value_type) &&
-				php_ucache_shared_graph_can_overwrite_payload_locked(old_value_offset) &&
+	if (old_combined && old_val_offset != 0 && !capture_replaced) {
+		if (old_val_type == UCACHE_VAL_SGRAPH) {
+			if (ucache_val_uses_offset(prepared->val_type) &&
+				ucache_sgraph_quiesce_for_overwrite_locked(old_val_offset) &&
 				(
-					prepared->value_type != PHP_UCACHE_VALUE_SHARED_GRAPH ||
-					prepared->payload_source == NULL ||
-					php_ucache_shared_graph_copy_fits_buffer(
-						ucache_ptr_in_header(header, old_value_offset),
-						prepared->payload_source,
+					prepared->val_type != UCACHE_VAL_SGRAPH ||
+					prepared->payload_src == NULL ||
+					ucache_sgraph_copy_fits_buf(
+						ucache_ptr_in_hdr(hdr, old_val_offset),
+						prepared->payload_src,
 						prepared->payload_size,
 						prepared->payload_used_size
 					)
 				)
 			) {
-				combined_reuse_offset = old_value_offset;
+				combined_reuse_offset = old_val_offset;
 			}
-		} else if (header->count == 1) {
-			combined_reuse_offset = old_value_offset;
+		} else if (hdr->count == 1) {
+			combined_reuse_offset = old_val_offset;
 		}
 	}
 
-	if (!use_combined_publish && (!found || old_combined || capture_replaced)) {
-		new_key_offset = php_ucache_alloc_locked(key_size, ZSTR_VAL(key));
+	allocates_key = !use_combined_publish && (!found || old_combined || capture_replaced);
+	if (allocates_key) {
+		new_key_offset = ucache_alloc_locked(key_size, ZSTR_VAL(key), slot_idx);
 		if (new_key_offset == 0) {
-			can_reclaim = ucache_payload_can_fit_locked(header, key_size + prepared->payload_size);
+			fits_in_empty_cache = ucache_payload_can_fit_locked(key_size);
 
 			goto bailout;
 		}
 	}
 
-	switch (prepared->value_type) {
-		case PHP_UCACHE_VALUE_NULL:
-		case PHP_UCACHE_VALUE_TRUE:
-		case PHP_UCACHE_VALUE_FALSE:
+	switch (prepared->val_type) {
+		case UCACHE_VAL_NULL:
+		case UCACHE_VAL_TRUE:
+		case UCACHE_VAL_FALSE:
 			break;
-		case PHP_UCACHE_VALUE_LONG:
-			new_lval = prepared->long_value;
+		case UCACHE_VAL_LONG:
+			new_lval = prepared->long_val;
 
 			break;
-		case PHP_UCACHE_VALUE_DOUBLE:
-			new_dval = prepared->double_value;
+		case UCACHE_VAL_DOUBLE:
+			new_dval = prepared->double_val;
 
 			break;
-		case PHP_UCACHE_VALUE_STRING:
+		case UCACHE_VAL_STR:
 			if (use_combined_publish) {
-				if (!ucache_publish_combined_value_key_locked(
-						header,
+				if (!ucache_publish_combined_val_key_locked(
+						hdr,
 						combined_reuse_offset,
 						key,
 						prepared->payload_size,
-						prepared->payload_source,
-						&new_value_offset,
-						&new_key_offset
+						prepared->payload_src,
+						slot_idx,
+						&new_val_offset
 					)
 				) {
-					can_reclaim = ucache_payload_can_fit_locked(
-						header,
-						ucache_combined_value_key_size(prepared->payload_size, key_size)
-					);
+					fits_in_empty_cache = ucache_payload_can_fit_locked(prepared->payload_size + key_size);
 
 					goto bailout;
 				}
 
-				new_flags = PHP_UCACHE_ENTRY_FLAG_COMBINED_VALUE_KEY;
+				new_key_offset = ucache_combined_key_offset(new_val_offset, prepared->payload_size);
+				new_flags = ucache_combined_key_flags(prepared->payload_size);
 			} else {
-				new_value_offset = ucache_write_payload_locked(
-					header,
+				offset = ucache_write_payload_locked(
+					hdr,
 					reusable_offset,
 					prepared->payload_size,
-					prepared->payload_source
+					prepared->payload_src,
+					slot_idx
 				);
-				if (new_value_offset == 0) {
-					can_reclaim = ucache_payload_can_fit_locked(header, prepared->payload_size);
+				if (offset == 0) {
+					fits_in_empty_cache = ucache_payload_can_fit_locked(prepared->payload_size);
 
 					goto bailout;
 				}
+
+				new_val_offset = offset;
 			}
 
-			new_value_len = prepared->value_len;
+			new_val_len = (uint32_t) prepared->payload_size - 1;
 
 			break;
-		case PHP_UCACHE_VALUE_SHARED_GRAPH:
+		case UCACHE_VAL_SGRAPH:
 			if (use_combined_publish) {
-				combined_payload = ucache_reserve_combined_value_key_locked(
-					header,
+				combined_payload = ucache_reserve_combined_val_key_locked(
+					hdr,
 					combined_reuse_offset,
 					key,
 					prepared->payload_size,
-					&new_value_offset,
-					&new_key_offset
+					slot_idx,
+					&new_val_offset
 				);
 
-				graph_offset = new_value_offset;
+				goffset = new_val_offset;
 
 				if (combined_payload != NULL) {
 					zend_try {
-						publish_result = ucache_publish_prepared_shared_graph_locked(
+						published = ucache_publish_prepared_sgraph_locked(
 							prepared,
-							value,
+							val,
 							combined_payload
 						);
-						published = publish_result == PHP_UCACHE_PUBLISH_DONE;
 					} zend_catch {
-						if (graph_offset != combined_reuse_offset) {
-							php_ucache_free_locked(graph_offset);
+						if (goffset != combined_reuse_offset) {
+							ucache_free_locked(goffset);
 						} else {
-							ucache_drop_overwritten_combined_entry_locked(header, entry, combined_reuse_offset);
+							ucache_delete_overwritten_combined_entry_locked(hdr, entry, slot_idx);
 						}
 
 						if (!UC_G(store_defer_unlock)) {
-							php_ucache_unlock_if_held();
+							ucache_unlock_if_held();
 						}
 
 						zend_bailout();
 					} zend_end_try();
 
 					if (published) {
-						ucache_write_combined_key(combined_payload, prepared->payload_size, key);
+						memcpy(combined_payload + prepared->payload_size, ZSTR_VAL(key), key_size);
 
-						new_flags = PHP_UCACHE_ENTRY_FLAG_COMBINED_VALUE_KEY;
-						new_value_offset = graph_offset;
-						new_value_len = prepared->value_len;
+						new_key_offset = ucache_combined_key_offset(goffset, prepared->payload_size);
+						new_flags = ucache_combined_key_flags(prepared->payload_size);
+						new_val_offset = goffset;
+						new_val_len = (uint32_t) prepared->payload_size;
 
 						break;
 					}
 
-					if (graph_offset != combined_reuse_offset) {
-						php_ucache_free_locked(graph_offset);
+					if (goffset != combined_reuse_offset) {
+						ucache_free_locked(goffset);
 					} else {
-						ucache_drop_overwritten_combined_entry_locked(header, entry, combined_reuse_offset);
+						ucache_delete_overwritten_combined_entry_locked(hdr, entry, slot_idx);
 
-						combined_reuse_offset = 0;
-						old_value_offset = 0;
+						old_val_offset = 0;
 						old_key_offset = 0;
 						found = false;
 					}
 
-					graph_offset = 0;
-					new_value_offset = 0;
+					new_val_offset = 0;
 					new_key_offset = found && !capture_replaced ? old_key_offset : 0;
 
 					if (EG(exception)) {
-						return PHP_UCACHE_STORE_ATTEMPT_FAILED;
+						return UCACHE_STORE_ATTEMPT_FAILED;
 					}
-
-					if (publish_result == PHP_UCACHE_PUBLISH_STALE_INTERNS) {
-						return PHP_UCACHE_STORE_ATTEMPT_REPREPARE;
-					}
+				} else if (retry_after_mem_pressure &&
+					ucache_payload_can_fit_locked(prepared->payload_size + key_size) &&
+					ucache_reclaim_space_for_store_locked(
+						true,
+						prepared->payload_size + key_size,
+						retries
+					)
+				) {
+					return UCACHE_STORE_ATTEMPT_RETRY;
 				}
 			} else {
-				graph_offset = php_ucache_alloc_locked(prepared->payload_size, NULL);
+				goffset = ucache_alloc_locked(prepared->payload_size, NULL, slot_idx);
 
-				if (graph_offset != 0) {
+				if (goffset != 0) {
 					zend_try {
-						publish_result = ucache_publish_prepared_shared_graph_locked(
+						published = ucache_publish_prepared_sgraph_locked(
 							prepared,
-							value,
-							ucache_ptr_in_header(header, graph_offset)
+							val,
+							ucache_ptr_in_hdr(hdr, goffset)
 						);
-						published = publish_result == PHP_UCACHE_PUBLISH_DONE;
 					} zend_catch {
-						php_ucache_free_locked(graph_offset);
+						ZEND_ASSERT((new_flags & UCACHE_ENTRY_FLAG_COMBINED_VAL_KEY) == 0);
+
 						ucache_rollback_partial_store_allocs_locked(
-							0,
-							old_value_offset,
+							goffset,
+							old_val_offset,
 							new_key_offset,
-							old_key_offset,
-							new_flags
+							old_key_offset
 						);
 
 						if (!UC_G(store_defer_unlock)) {
-							php_ucache_unlock_if_held();
+							ucache_unlock_if_held();
 						}
 
 						zend_bailout();
 					} zend_end_try();
 
 					if (published) {
-						new_value_offset = graph_offset;
-						new_value_len = prepared->value_len;
+						new_val_offset = goffset;
+						new_val_len = (uint32_t) prepared->payload_size;
 
 						break;
 					}
 
-					php_ucache_free_locked(graph_offset);
+					ucache_free_locked(goffset);
 
-					if (EG(exception) || publish_result == PHP_UCACHE_PUBLISH_STALE_INTERNS) {
+					if (EG(exception)) {
+						ZEND_ASSERT((new_flags & UCACHE_ENTRY_FLAG_COMBINED_VAL_KEY) == 0);
+
 						ucache_rollback_partial_store_allocs_locked(
 							0,
-							old_value_offset,
+							old_val_offset,
 							new_key_offset,
-							old_key_offset,
-							new_flags
+							old_key_offset
 						);
 
-						return EG(exception)
-							? PHP_UCACHE_STORE_ATTEMPT_FAILED
-							: PHP_UCACHE_STORE_ATTEMPT_REPREPARE
-						;
+						return UCACHE_STORE_ATTEMPT_FAILED;
 					}
-				} else if (options->retry_after_memory_pressure &&
-					ucache_payload_can_fit_locked(header, prepared->payload_size) &&
+				} else if (retry_after_mem_pressure &&
+					ucache_payload_can_fit_locked(prepared->payload_size) &&
 					ucache_reclaim_space_for_store_locked(
 						true,
 						prepared->payload_size,
-						0,
-						expired_retry_used,
-						evict_retry_used,
-						clear_retry_used
+						retries
 					)
 				) {
-					return PHP_UCACHE_STORE_ATTEMPT_RETRY;
+					return UCACHE_STORE_ATTEMPT_RETRY;
 				}
 			}
 
-			can_reclaim = ucache_payload_can_fit_locked(
-				header,
-				use_combined_publish
-					? ucache_combined_value_key_size(prepared->payload_size, key_size)
-					: prepared->payload_size
-			);
+			fits_in_empty_cache = ucache_payload_can_fit_locked(prepared->payload_size);
 
 			goto bailout;
 		default:
 			ZEND_UNREACHABLE();
 	}
 
-	if (found) {
-		if (replaced_snapshot.expires_at != 0 && header->expiring_count != 0) {
-			header->expiring_count--;
-		}
-	} else if (entry->state == PHP_UCACHE_ENTRY_TOMBSTONE && header->tombstone_count != 0) {
-		header->tombstone_count--;
+	if (!found && ucache_entry_is_tombstone(entry) && hdr->tombstone_count != 0) {
+		hdr->tombstone_count--;
+	}
+
+	if (found && entry->expires_at != 0) {
+		hdr->expiring_count--;
 	}
 
 	if (expires_at != 0) {
-		header->expiring_count++;
+		hdr->expiring_count++;
 	}
 
-	entry->hash = prepared->hash;
+	ZEND_ASSERT(ZSTR_LEN(key) <= UCACHE_STORAGE_KEY_MAX);
+
+	entry->hash = ucache_table_hash(prepared->hash);
 	entry->key_offset = new_key_offset;
-	entry->key_len = (uint32_t) ZSTR_LEN(key);
-	entry->value_offset = new_value_offset;
-	entry->value_len = new_value_len;
+	entry->key_len = (uint16_t) ZSTR_LEN(key);
 	entry->expires_at = expires_at;
-	entry->state = PHP_UCACHE_ENTRY_USED;
-	entry->value_type = new_value_type;
-	entry->flags = new_flags;
 
-	php_ucache_occupancy_set(header, slot_idx);
+	ucache_expiry_floor_lower_locked(hdr, expires_at);
+	entry->flags = new_flags | (found
+		? old_flags & UCACHE_ENTRY_POOL_BUCKET_MASK
+		: ucache_pool_bucket_for_key(ZSTR_VAL(key), ZSTR_LEN(key))
+			<< UCACHE_ENTRY_POOL_BUCKET_SHIFT
+	);
+	ucache_entry_set_val_type(entry, new_val_type);
 
-	/* Pre-zero so a narrow zend_long store never leaves stale union bytes
-	 * behind an earlier double on 32-bit environment. */
-	entry->double_value = 0;
-	if (new_value_type == PHP_UCACHE_VALUE_DOUBLE) {
-		entry->double_value = new_dval;
+	if (ucache_val_uses_offset(new_val_type)) {
+		entry->val_offset = new_val_offset;
+		entry->val_len = new_val_len;
+	} else if (new_val_type == UCACHE_VAL_DOUBLE) {
+		entry->double_val = new_dval;
 	} else {
-		entry->long_value = new_lval;
+		ucache_entry_set_long_zero_filled(entry, new_lval);
 	}
 
-	PHP_UCACHE_ATOMIC_STORE_32_RELAXED(
-		&php_ucache_access_stamps_ptr(header)[slot_idx],
-		ucache_access_now()
-	);
+	if (found) {
+		ucache_touch_entry_access(hdr, hdr->capacity, slot_idx);
+	} else {
+		UCACHE_ATOMIC_STORE_32_RELAXED(
+			&ucache_access_stamps_ptr(hdr)[slot_idx], ucache_access_now()
+		);
+	}
 
 	if (capture_replaced) {
-		result->replaced_entry.found = true;
-		result->replaced_entry.entry = replaced_snapshot;
+		result->replaced_entry = replaced_snapshot;
 	} else {
 		if (found &&
 			old_key_offset != 0 &&
 			old_key_offset != new_key_offset &&
 			!old_combined
 		) {
-			php_ucache_free_locked(old_key_offset);
+			ucache_free_locked(old_key_offset);
 		}
 
 		if (found &&
-			old_value_offset != 0 &&
-			old_value_offset != new_value_offset
+			old_val_offset != 0 &&
+			old_val_offset != new_val_offset
 		) {
-			ucache_release_value_storage_locked(old_value_type, old_value_offset);
+			ucache_release_val_storage_locked(old_val_type, old_val_offset);
 		}
 	}
 
 	if (!found) {
-		header->count++;
+		hdr->count++;
+		ucache_pool_idx_link_locked(hdr, entry, slot_idx);
 	}
 
-	php_ucache_bump_mutation_epoch_locked(header);
-
-	entry->generation = header->mutation_epoch;
-
-	if (result != NULL) {
-		result->stored_generation = entry->generation;
-		result->should_seed_request_local_slot = ucache_prepared_value_should_seed_request_local_slot(prepared);
+	blocks_changed = !found || old_val_offset != new_val_offset ||
+		old_combined != ((new_flags & UCACHE_ENTRY_FLAG_COMBINED_VAL_KEY) != 0) ||
+		(!old_combined && old_key_offset != new_key_offset)
+	;
+	if (blocks_changed) {
+		ucache_pool_bucket_changed_locked(hdr, ucache_entry_pool_bucket(entry));
 	}
 
-	return PHP_UCACHE_STORE_ATTEMPT_STORED;
+	ucache_bump_mutation_epoch_locked(hdr);
+
+	entry->gen = hdr->mutation_epoch;
+
+	if (found && !bulk && expires_at == 0 && replaced_snapshot.expires_at == 0 &&
+		old_val_type <= UCACHE_VAL_DOUBLE && new_val_type <= UCACHE_VAL_DOUBLE
+	) {
+		ucache_scalar_write_enable_locked(hdr);
+	}
+
+	result->stored_gen = entry->gen;
+	result->stored_slot = slot_idx;
+	result->stored_expires_at = expires_at;
+	result->stored_val_type = prepared->val_type;
+
+	return UCACHE_STORE_ATTEMPT_STORED;
 
 bailout:
+	ZEND_ASSERT((new_flags & UCACHE_ENTRY_FLAG_COMBINED_VAL_KEY) == 0);
+
 	ucache_rollback_partial_store_allocs_locked(
-		new_value_offset,
-		old_value_offset,
+		new_val_offset,
+		old_val_offset,
 		new_key_offset,
-		old_key_offset,
-		new_flags
+		old_key_offset
 	);
 
-	if (options->retry_after_memory_pressure &&
-		ucache_reclaim_space_for_store_locked(
-			can_reclaim,
-			use_combined_publish
-				? ucache_combined_value_key_size(prepared->payload_size, key_size)
-				: prepared->payload_size
-			,
-			use_combined_publish
-				? 0
-				: key_size
-			,
-			expired_retry_used,
-			evict_retry_used,
-			clear_retry_used
-		)
-	) {
-		return PHP_UCACHE_STORE_ATTEMPT_RETRY;
+	ZEND_ASSERT(!retry_after_mem_pressure || !allocates_key || !ucache_val_uses_offset(prepared->val_type));
+
+	reclaim_size = use_combined_publish ? prepared->payload_size + key_size : prepared->payload_size;
+	if (reclaim_size == 0) {
+		reclaim_size = key_size;
 	}
 
-	header->store_failure_count++;
+	if (retry_after_mem_pressure &&
+		ucache_reclaim_space_for_store_locked(
+			fits_in_empty_cache,
+			reclaim_size,
+			retries
+		)
+	) {
+		return UCACHE_STORE_ATTEMPT_RETRY;
+	}
 
-	return PHP_UCACHE_STORE_ATTEMPT_FAILED;
+	hdr->store_failure_count++;
+
+	return UCACHE_STORE_ATTEMPT_FAILED;
 }
 
 static bool ucache_store_prepared_locked_impl(
 		zend_string *key,
-		zval *value,
-		php_ucache_prepared_value_t *prepared,
+		zval *val,
+		const ucache_prepared_val *prepared,
 		zend_long ttl,
-		const php_ucache_store_options_t *options,
-		php_ucache_store_result_t *result)
+		bool bulk,
+		ucache_store_result *result)
 {
-	php_ucache_store_attempt_result_t attempt_result;
-	size_t key_size;
-	bool expired_retry_used = false, evict_retry_used = false,
-		clear_retry_used = false, reprepared = false
-	;
+	ucache_store_attempt_result attempt_result;
+	ucache_store_retries retries = {0};
+	size_t key_size, min_payload_size;
 
-	ZVAL_DEREF(value);
+	ZVAL_DEREF(val);
 
-	if (result != NULL) {
-		result->stored_generation = 0;
-		result->should_seed_request_local_slot = false;
-		result->replaced_entry.found = false;
-
-		memset(&result->replaced_entry.entry, 0, sizeof(result->replaced_entry.entry));
-	}
+	memset(result, 0, sizeof(*result));
 
 	key_size = ZSTR_LEN(key) + 1;
+	min_payload_size = ucache_val_uses_offset(prepared->val_type)
+		? prepared->payload_size
+		: 0
+	;
+
+	if (min_payload_size > SIZE_MAX - key_size ||
+		!ucache_payload_can_fit_locked(min_payload_size + key_size)
+	) {
+		ucache_hdr_ptr()->store_failure_count++;
+
+		return false;
+	}
 
 	ucache_maybe_rehash_locked();
 
 	for (;;) {
 		attempt_result = ucache_store_attempt_locked(
 			key,
-			value,
+			val,
 			prepared,
 			ttl,
-			options,
+			bulk,
 			result,
 			key_size,
-			&expired_retry_used,
-			&evict_retry_used,
-			&clear_retry_used
+			&retries
 		);
 
-		if (attempt_result == PHP_UCACHE_STORE_ATTEMPT_RETRY) {
+		if (attempt_result == UCACHE_STORE_ATTEMPT_RETRY) {
 			continue;
 		}
 
-		if (attempt_result == PHP_UCACHE_STORE_ATTEMPT_REPREPARE) {
-			if (reprepared || !ucache_reprepare_without_interning(key, value, prepared)) {
-				return false;
-			}
-
-			reprepared = true;
-
-			continue;
-		}
-
-		return attempt_result == PHP_UCACHE_STORE_ATTEMPT_STORED;
+		return attempt_result == UCACHE_STORE_ATTEMPT_STORED;
 	}
 }
 
-static bool ucache_prepare_direct_value(
-		zval *value,
-		php_ucache_prepared_value_t *prepared)
+static bool ucache_prepare_direct_val(
+		zval *val,
+		ucache_prepared_val *prepared)
 {
-	switch (Z_TYPE_P(value)) {
+	switch (Z_TYPE_P(val)) {
 		case IS_NULL:
-			prepared->value_type = PHP_UCACHE_VALUE_NULL;
+			prepared->val_type = UCACHE_VAL_NULL;
 
 			return true;
 		case IS_TRUE:
-			prepared->value_type = PHP_UCACHE_VALUE_TRUE;
+			prepared->val_type = UCACHE_VAL_TRUE;
 
 			return true;
 		case IS_FALSE:
-			prepared->value_type = PHP_UCACHE_VALUE_FALSE;
+			prepared->val_type = UCACHE_VAL_FALSE;
 
 			return true;
 		case IS_LONG:
-			prepared->value_type = PHP_UCACHE_VALUE_LONG;
-			prepared->long_value = Z_LVAL_P(value);
+			prepared->val_type = UCACHE_VAL_LONG;
+			prepared->long_val = Z_LVAL_P(val);
 
 			return true;
 		case IS_DOUBLE:
-			prepared->value_type = PHP_UCACHE_VALUE_DOUBLE;
-			prepared->double_value = Z_DVAL_P(value);
+			prepared->val_type = UCACHE_VAL_DOUBLE;
+			prepared->double_val = Z_DVAL_P(val);
 
 			return true;
 		case IS_STRING:
-			if (Z_STRLEN_P(value) < PHP_UCACHE_DIRECT_STRING_MIN_LEN) {
-				prepared->value_type = PHP_UCACHE_VALUE_STRING;
-				prepared->value_len = (uint32_t) Z_STRLEN_P(value);
-				prepared->payload_size = Z_STRLEN_P(value) + 1;
-				prepared->payload_source = (const uint8_t *) Z_STRVAL_P(value);
+			if (Z_STRLEN_P(val) < UCACHE_DIRECT_STR_MIN_LEN) {
+				prepared->val_type = UCACHE_VAL_STR;
+				prepared->payload_size = Z_STRLEN_P(val) + 1;
+				prepared->payload_used_size = prepared->payload_size;
+				prepared->payload_src = (const uint8_t *) Z_STRVAL_P(val);
 
 				return true;
 			}
@@ -3143,201 +2093,287 @@ static bool ucache_prepare_direct_value(
 	}
 }
 
-static bool ucache_prepare_shared_graph_value(
-		zval *value,
-		const php_ucache_prepare_options_t *options,
-		php_ucache_verbatim_memo_t *verbatim_memo,
-		size_t verbatim_graph_len,
-		uint32_t verbatim_intern_key_count,
-		php_ucache_prepared_value_t *prepared)
+static void ucache_throw_if_pass_overflowed_stack(void)
 {
-	size_t graph_len = 0;
-	uint32_t intern_key_count = 0;
-	bool sized, build_at_publish;
-
-	build_at_publish = options->caller_holds_write_lock || Z_TYPE_P(value) == IS_STRING;
-
-	if (!build_at_publish) {
-		if (options->state_memo != NULL) {
-			prepared->state_memo = options->state_memo;
-		} else {
-			prepared->state_memo = emalloc(sizeof(HashTable));
-			zend_hash_init(prepared->state_memo, 8, NULL, ZVAL_PTR_DTOR, 0);
-		}
+	if (!UC_G(stack_overflowed)) {
+		return;
 	}
 
-	if (verbatim_graph_len != 0) {
-		graph_len = verbatim_graph_len;
-		intern_key_count = verbatim_intern_key_count;
-		sized = true;
-	} else {
-		sized = php_ucache_calculate_shared_graph_size(
-			value,
+	UC_G(stack_overflowed) = false;
+
+	if (!EG(exception)) {
+		zend_type_error(UCACHE_MSG_NESTED_TOO_DEEPLY);
+	}
+}
+
+static bool ucache_build_prepared_sgraph(
+		zval *val,
+		HashTable *verbatim_verdicts,
+		size_t glen,
+		ucache_prepared_val *prepared)
+{
+	return ucache_build_sgraph_in_place(
+		val,
+		prepared->state_memo,
+		zend_hash_num_elements(prepared->state_memo) == 0 ? verbatim_verdicts : NULL,
+		prepared->packed_vals_allowed,
+		prepared->owned_buf,
+		glen,
+		&prepared->payload_used_size,
+		&prepared->has_verbatim_arr,
+		&prepared->fixup_offsets,
+		&prepared->fixup_count
+	);
+}
+
+static bool ucache_rebuild_prepared_sgraph_after_hooks(
+		zval *val,
+		ucache_prepared_val *prepared,
+		uint32_t calc_memo_count)
+{
+	size_t glen;
+
+	if (EG(exception) ||
+		UC_G(stack_overflowed) ||
+		calc_memo_count == 0 ||
+		zend_hash_num_elements(prepared->state_memo) != calc_memo_count ||
+		!ucache_calc_sgraph_size(
+			val,
 			prepared->state_memo,
-			verbatim_memo,
-			&graph_len,
-			&intern_key_count
-		);
-	}
-
-	if (sized) {
-		if (graph_len > UINT32_MAX) {
-			return false;
-		}
-
-		prepared->value_type = PHP_UCACHE_VALUE_SHARED_GRAPH;
-		prepared->value_len = (uint32_t) graph_len;
-		prepared->payload_size = graph_len;
-
-		if (build_at_publish) {
-			if (Z_TYPE_P(value) == IS_STRING) {
-				prepared->owned_string = zend_string_copy(Z_STR_P(value));
-			}
-
-			return true;
-		}
-
-		prepared->owned_buffer = emalloc(graph_len);
-
-		if (!options->disable_interning) {
-			prepared->intern.list_capacity = intern_key_count;
-		}
-
-		if (php_ucache_build_shared_graph_in_place(
-				value,
-				prepared->state_memo,
-				zend_hash_num_elements(prepared->state_memo) == 0 ? verbatim_memo : NULL,
-				prepared->owned_buffer,
-				graph_len,
-				&prepared->payload_used_size,
-				&prepared->has_verbatim_array,
-				&prepared->fixup_offsets,
-				&prepared->fixup_count,
-				&prepared->intern
-			)
-		) {
-			prepared->payload_source = prepared->owned_buffer;
-
-			/* Keys resolved to segment interns leave their reserved copies
-			 * unused: size the block by what the copy actually emitted. */
-			prepared->payload_size = prepared->payload_used_size + (ZEND_MM_ALIGNMENT - 1);
-			prepared->value_len = (uint32_t) prepared->payload_size;
-
-			return true;
-		}
-	}
-
-	return false;
-}
-
-/* Rebuilds a staged payload whose resolved interns went stale, reusing the
- * memoized states so no user hook runs (the caller holds the write lock). */
-static bool ucache_reprepare_without_interning(
-		zend_string *key,
-		zval *value,
-		php_ucache_prepared_value_t *prepared)
-{
-	php_ucache_prepare_options_t prep_opts = {
-		.caller_holds_write_lock = false,
-		.disable_interning = true,
-		.state_memo = prepared->state_memo,
-	};
-
-	prepared->state_memo = NULL;
-
-	php_ucache_destroy_prepared_value(prepared);
-
-	if (php_ucache_prepare_value(key, value, &prep_opts, prepared)) {
-		return true;
-	}
-
-	if (prepared->state_memo == NULL) {
-		prepared->state_memo = prep_opts.state_memo;
-	}
-
-	return false;
-}
-
-static bool ucache_fetch_resolve_prototype_mode_locked(
-		const php_ucache_entry_t *entry,
-		bool use_request_local_slot,
-		bool *no_aliases)
-{
-	*no_aliases = true;
-
-	if (!use_request_local_slot) {
+			NULL,
+			&glen,
+			&prepared->packed_vals_allowed
+		) ||
+		glen > UINT32_MAX
+	) {
 		return false;
 	}
 
-	switch (entry->value_type) {
-		case PHP_UCACHE_VALUE_SHARED_GRAPH:
-			if (!php_ucache_shared_graph_prefers_prototype(entry->value_offset)) {
-				return false;
-			}
+	prepared->owned_buf = erealloc(prepared->owned_buf, glen);
+	prepared->payload_size = glen;
 
-			*no_aliases = !php_ucache_shared_graph_payload_has_aliases(entry->value_offset);
-
-			return true;
-		case PHP_UCACHE_VALUE_STRING:
-			return true;
-		default:
-			return false;
-	}
+	return ucache_build_prepared_sgraph(val, NULL, glen, prepared);
 }
 
-static bool ucache_fetch_emit_value_locked(
-		const php_ucache_header_t *header,
-		php_ucache_entry_t *entry,
-		bool use_request_local_slot,
-		zval *return_value,
-		php_ucache_fetch_pending_seed_t *pending_seed,
-		bool *lock_held)
+static bool ucache_prepare_sgraph_val(
+		zval *val,
+		HashTable *verbatim_verdicts,
+		size_t verbatim_glen,
+		ucache_prepared_val *prepared)
 {
-	uint64_t gen;
-	uint32_t flags;
-	bool use_proto, no_aliases;
+	size_t glen = 0;
+	uint32_t calc_memo_count;
+	bool build_at_publish = Z_TYPE_P(val) == IS_STRING;
 
-	gen = entry->generation;
-	flags = 0;
-	use_proto = ucache_fetch_resolve_prototype_mode_locked(entry, use_request_local_slot, &no_aliases);
-	if (use_proto) {
-		flags |= PHP_UCACHE_FETCH_FINISH_USE_REQUEST_LOCAL_SLOT;
+	if (!build_at_publish && prepared->state_memo == NULL) {
+		prepared->state_memo = emalloc(sizeof(HashTable));
+
+		zend_hash_init(prepared->state_memo, 8, NULL, ZVAL_PTR_DTOR, 0);
 	}
 
-	if (no_aliases) {
-		flags |= PHP_UCACHE_FETCH_FINISH_NO_ALIASES;
+	UC_G(stack_overflowed) = false;
+
+	if (verbatim_glen != 0) {
+		glen = verbatim_glen;
+	} else if (!ucache_calc_sgraph_size(
+			val,
+			prepared->state_memo,
+			verbatim_verdicts,
+			&glen,
+			&prepared->packed_vals_allowed
+		)
+	) {
+		ucache_throw_if_pass_overflowed_stack();
+
+		return false;
 	}
 
-	if (ucache_scalar_to_zval(entry->value_type, entry->long_value, entry->double_value, return_value)) {
+	if (glen > UINT32_MAX) {
+		return false;
+	}
+
+	prepared->val_type = UCACHE_VAL_SGRAPH;
+	prepared->payload_size = glen;
+
+	if (build_at_publish) {
+		prepared->owner_type = UCACHE_PREPARED_OWNER_STR;
+		prepared->owned_str = zend_string_copy(Z_STR_P(val));
+
 		return true;
 	}
 
-	switch (entry->value_type) {
-		case PHP_UCACHE_VALUE_STRING:
-			PHP_UCACHE_TRY_UNLOCK_ON_BAILOUT(
-				ZVAL_STRINGL(return_value, (const char *) ucache_ptr_in_header(header, entry->value_offset), entry->value_len);
+	prepared->owner_type = UCACHE_PREPARED_OWNER_BUF;
+	prepared->owned_buf = emalloc(glen);
+
+	calc_memo_count = zend_hash_num_elements(prepared->state_memo);
+
+	if (!ucache_build_prepared_sgraph(val, verbatim_verdicts, glen, prepared) &&
+		!ucache_rebuild_prepared_sgraph_after_hooks(val, prepared, calc_memo_count)
+	) {
+		ucache_throw_if_pass_overflowed_stack();
+
+		return false;
+	}
+
+	prepared->payload_src = prepared->owned_buf;
+	if (prepared->packed_vals_allowed) {
+		if (UNEXPECTED(prepared->payload_used_size > prepared->payload_size - UCACHE_SGRAPH_ALIGNMENT_SLACK)) {
+			return false;
+		}
+
+		prepared->payload_size = prepared->payload_used_size + UCACHE_SGRAPH_ALIGNMENT_SLACK;
+	}
+
+	return true;
+}
+
+static uint32_t ucache_fetch_finish_flags(uint32_t gflags, bool owned_copy)
+{
+	uint32_t flags = 0;
+
+	if ((UC_G(persistent_exec) || owned_copy) &&
+		!(gflags & (
+			UCACHE_SGRAPH_FLAG_HAS_OBJ |
+			UCACHE_SGRAPH_FLAG_HAS_SHARED_IDENTITY
+		))
+	) {
+		return UCACHE_FETCH_FINISH_RECORD_COPY;
+	}
+
+	if (UCACHE_OPTIMISTIC_ENABLED &&
+		(
+			(gflags & UCACHE_SGRAPH_FLAG_PREFERS_PROTO) ||
+			(
+				UC_G(persistent_exec) &&
+				!(gflags & UCACHE_SGRAPH_FLAG_HAS_OBJ)
+			)
+		)
+	) {
+		flags |= UCACHE_FETCH_FINISH_USE_REQ_LOCAL_SLOT;
+	}
+
+	if (!(gflags & UCACHE_SGRAPH_FLAG_HAS_SHARED_IDENTITY)) {
+		flags |= UCACHE_FETCH_FINISH_NO_ALIASES;
+	}
+
+	return flags;
+}
+
+static PHP_UCACHE_HOT void ucache_fetch_finish_impl(
+		ucache_key_record *record,
+		uint64_t gen,
+		zval *return_value,
+		uint32_t flags,
+		uint32_t val_len)
+{
+	ucache_req_local_slot *slot;
+
+	if (flags & UCACHE_FETCH_FINISH_RECORD_COPY) {
+		if (record->state == UCACHE_RECORD_HIT &&
+			record->val_kind == UCACHE_RECORD_VAL_NONE
+		) {
+			ucache_key_record_cache_copy(record, return_value, val_len);
+		}
+
+		return;
+	}
+
+	if (!(flags & UCACHE_FETCH_FINISH_USE_REQ_LOCAL_SLOT)) {
+		return;
+	}
+
+	slot = ucache_find_req_local_slot(record->storage_key, gen);
+	if (slot == NULL) {
+		if (UC_G(req_local_slot_table) != NULL &&
+			zend_hash_num_elements(UC_G(req_local_slot_table)) >= UCACHE_MAX_REQ_LOCAL_SLOTS
+		) {
+			ucache_req_local_slots_drop_oldest_half();
+		}
+
+		ucache_mark_req_local_slot(record->storage_key, gen);
+	} else if (!slot->has_val && !slot->proto_rejected) {
+		if (UNEXPECTED(flags & UCACHE_FETCH_FINISH_RESTORE_HOOKS_RAN)) {
+			slot->proto_rejected = true;
+
+			return;
+		}
+
+		ucache_store_req_local_slot(
+			record->storage_key,
+			gen,
+			return_value,
+			(flags & UCACHE_FETCH_FINISH_NO_ALIASES) != 0,
+			val_len
+		);
+	}
+}
+
+static bool ucache_fetch_emit_val_locked(
+		const ucache_hdr *hdr,
+		ucache_entry *entry,
+		uint64_t epoch,
+		zval *return_value,
+		ucache_fetch_pending_seed *pending_seed,
+		bool *lock_held)
+{
+	uint64_t gen = entry->gen;
+	uint32_t gflags, hook_calls_before, val_len = entry->val_len;
+	bool private_copy = false;
+
+	pending_seed->should_seed = false;
+	pending_seed->mutation_epoch = epoch;
+	pending_seed->gen = gen;
+
+	if (ucache_scalar_to_zval(
+			ucache_entry_val_type(entry),
+			&entry->long_val,
+			&entry->double_val,
+			return_value
+		)
+	) {
+		return true;
+	}
+
+	switch (ucache_entry_val_type(entry)) {
+		case UCACHE_VAL_STR:
+			UCACHE_TRY_UNLOCK_ON_BAILOUT(
+				ZVAL_STRINGL(
+					return_value,
+					(const char *) ucache_ptr_in_hdr(
+						hdr,
+						entry->val_offset
+					),
+					val_len
+				);
 			);
 
-			pending_seed->generation = gen;
-			pending_seed->flags = flags;
-			pending_seed->should_seed_request_local_slot = true;
+			pending_seed->flags = UCACHE_FETCH_FINISH_RECORD_COPY;
+			pending_seed->val_len = val_len;
+			pending_seed->should_seed = true;
 
 			return true;
-		case PHP_UCACHE_VALUE_SHARED_GRAPH:
-			if (!ucache_materialize_shared_graph_locked(
-					header,
-					entry->value_offset,
-					entry->value_len,
+		case UCACHE_VAL_SGRAPH:
+			gflags = ucache_sgraph_payload_flags(entry->val_offset);
+			hook_calls_before = UC_G(restore_hook_calls);
+
+			if (!ucache_materialize_sgraph_locked(
+					hdr,
+					entry->val_offset,
+					val_len,
 					return_value,
-					lock_held
+					lock_held,
+					&private_copy
 				)
 			) {
 				return false;
 			}
 
-			pending_seed->generation = gen;
-			pending_seed->flags = flags | PHP_UCACHE_FETCH_FINISH_DEFER_REQUEST_LOCAL_SLOT;
-			pending_seed->should_seed_request_local_slot = true;
+			pending_seed->flags = ucache_fetch_finish_flags_after_decode(
+				ucache_fetch_finish_flags(gflags, private_copy),
+				hook_calls_before
+			);
+			pending_seed->val_len = val_len;
+			pending_seed->should_seed = true;
 
 			return true;
 		default:
@@ -3345,126 +2381,105 @@ static bool ucache_fetch_emit_value_locked(
 	}
 }
 
-static php_ucache_fetch_locate_result_t ucache_fetch_probe_lookup_cache_locked(
-		php_ucache_header_t *header,
-		zend_string *key,
-		zend_ulong hash,
-		php_ucache_entry_t *entries,
-		php_ucache_lookup_entry_t *lookup_entries,
+static ucache_fetch_locate_result ucache_fetch_probe_key_record_locked(
+		ucache_hdr *hdr,
+		ucache_key_record *record,
+		ucache_entry *entries,
 		uint64_t epoch,
 		zval *return_value,
-		uint32_t *slot_idx)
+		uint32_t *slot_idx,
+		zval *detached)
 {
-	const void *ctx = (const void *) php_ucache_active_context();
-	php_ucache_lookup_entry_t *lookup_entry;
-	php_ucache_entry_t *entry;
-	uint64_t now;
-	uint32_t way;
+	ucache_entry *entry;
+	uint64_t now = 0;
+	bool cur = record->mutation_epoch == epoch;
 
-	for (way = 0; way < PHP_UCACHE_LOOKUP_WAYS; way++) {
-		lookup_entry = &lookup_entries[way];
-		if (lookup_entry->state == PHP_UCACHE_LOOKUP_EMPTY ||
-			lookup_entry->hash != hash ||
-			lookup_entry->ctx != ctx
-		) {
-			continue;
-		}
-
-		if (lookup_entry->mutation_epoch != epoch) {
-			if (lookup_entry->state != PHP_UCACHE_LOOKUP_HIT) {
-				ucache_lookup_cache_reset_entry(lookup_entry);
-
-				continue;
-			}
-		} else {
-			if (lookup_entry->state == PHP_UCACHE_LOOKUP_MISS) {
-				if (lookup_entry->key == NULL ||
-					!zend_string_equals(lookup_entry->key, key)
-				) {
-					continue;
-				}
-
-				return PHP_UCACHE_FETCH_LOCATE_MISS;
-			}
-
-			if (lookup_entry->key == key &&
-				ucache_scalar_to_zval(
-					lookup_entry->value_type,
-					lookup_entry->long_value,
-					lookup_entry->double_value,
-					return_value
-				)
-			) {
-				return PHP_UCACHE_FETCH_LOCATE_SCALAR_HIT;
-			}
-		}
-
-		if (lookup_entry->slot_index >= header->capacity) {
-			ucache_lookup_cache_reset_entry(lookup_entry);
-
-			continue;
-		}
-
-		entry = &entries[lookup_entry->slot_index];
-		if (!ucache_key_equals(header, entry, key, hash)) {
-			ucache_lookup_cache_reset_entry(lookup_entry);
-
-			continue;
-		}
-
-		now = 0;
-		if (ucache_is_expired_now(header, entry, &now)) {
-			ucache_note_expired_read();
-			ucache_lookup_cache_reset_entry(lookup_entry);
-			ucache_lookup_cache_store_miss(lookup_entries, hash, epoch, key);
-
-			return PHP_UCACHE_FETCH_LOCATE_MISS;
-		}
-
-		*slot_idx = lookup_entry->slot_index;
-
-		if (lookup_entry->mutation_epoch != epoch || lookup_entry->key != key) {
-			ucache_lookup_cache_store_hit(lookup_entry, hash, epoch, *slot_idx, key, entry);
-		}
-
-		return PHP_UCACHE_FETCH_LOCATE_SLOT;
+	if (record->state == UCACHE_RECORD_EMPTY) {
+		return UCACHE_FETCH_LOCATE_UNCACHED;
 	}
 
-	return PHP_UCACHE_FETCH_LOCATE_UNCACHED;
+	if (cur) {
+		if (record->state == UCACHE_RECORD_MISS) {
+			return UCACHE_FETCH_LOCATE_MISS;
+		}
+
+		if (record->val_kind != UCACHE_RECORD_VAL_NONE &&
+			ucache_key_record_val_usable(hdr, record)
+		) {
+			ZVAL_COPY(return_value, &record->val);
+
+			ucache_touch_cached_entry_access(hdr, record->slot_idx, &record->access_touches);
+
+			return UCACHE_FETCH_LOCATE_VAL_HIT;
+		}
+	} else if (record->state != UCACHE_RECORD_HIT) {
+		ucache_key_record_reset_impl(record, detached);
+
+		return UCACHE_FETCH_LOCATE_UNCACHED;
+	}
+
+	if (record->slot_idx >= hdr->capacity ||
+		(
+			!cur &&
+			!ucache_key_equals(
+				hdr,
+				&entries[record->slot_idx],
+				record->storage_key,
+				ZSTR_H(record->storage_key)
+			)
+		)
+	) {
+		ucache_key_record_reset_impl(record, detached);
+
+		return UCACHE_FETCH_LOCATE_UNCACHED;
+	}
+
+	entry = &entries[record->slot_idx];
+	if (ucache_is_expired_now(hdr, entry, &now)) {
+		ucache_note_expired_read();
+
+		ucache_key_record_mark_miss(record, epoch, detached);
+
+		return UCACHE_FETCH_LOCATE_MISS;
+	}
+
+	*slot_idx = record->slot_idx;
+
+	if (!cur) {
+		ucache_key_record_mark_hit(record, epoch, *slot_idx, entry, detached);
+	}
+
+	return UCACHE_FETCH_LOCATE_SLOT;
 }
 
-static php_ucache_fetch_locate_result_t ucache_fetch_probe_entry_table_locked(
-		php_ucache_header_t *header,
-		zend_string *key,
-		zend_ulong hash,
-		php_ucache_entry_t *entries,
-		php_ucache_lookup_entry_t *lookup_entries,
+static ucache_fetch_locate_result ucache_fetch_probe_entry_table_locked(
+		ucache_hdr *hdr,
+		ucache_key_record *record,
+		ucache_entry *entries,
 		uint64_t epoch,
-		uint32_t *slot_idx)
+		uint32_t *slot_idx,
+		zval *detached)
 {
-	php_ucache_lookup_entry_t *lookup_entry;
 	bool found;
 
-	if (!ucache_find_slot_in_header_locked(
-			header,
-			key,
-			hash,
-			PHP_UCACHE_FIND_SLOT_SKIP_EXPIRED,
+	if (!ucache_find_slot_in_hdr_locked(
+			hdr,
+			record->storage_key,
+			ZSTR_H(record->storage_key),
+			UCACHE_FIND_SLOT_SKIP_EXPIRED,
 			slot_idx,
 			&found
 		) ||
 		!found
 	) {
-		ucache_lookup_cache_store_miss(lookup_entries, hash, epoch, key);
+		ucache_key_record_mark_miss(record, epoch, detached);
 
-		return PHP_UCACHE_FETCH_LOCATE_MISS;
+		return UCACHE_FETCH_LOCATE_MISS;
 	}
 
-	lookup_entry = ucache_lookup_cache_select_slot(lookup_entries, hash, epoch, true);
+	ucache_key_record_mark_hit(record, epoch, *slot_idx, &entries[*slot_idx], detached);
 
-	ucache_lookup_cache_store_hit(lookup_entry, hash, epoch, *slot_idx, key, &entries[*slot_idx]);
-
-	return PHP_UCACHE_FETCH_LOCATE_SLOT;
+	return UCACHE_FETCH_LOCATE_SLOT;
 }
 
 static bool ucache_atomic_insert_missing_locked(
@@ -3472,18 +2487,12 @@ static bool ucache_atomic_insert_missing_locked(
 		zend_long step,
 		zend_long ttl,
 		bool decrement,
-		php_ucache_atomic_update_result_t *result)
+		ucache_atomic_update_result *result)
 {
-	php_ucache_prepare_options_t prep_opts = {
-		.caller_holds_write_lock = true,
-	};
-	php_ucache_store_options_t store_opts = {
-		.retry_after_memory_pressure = true,
-		.capture_replaced_entry = false,
-	};
-	php_ucache_prepared_value_t prepared;
+	ucache_prepared_val prepared;
+	ucache_store_result store_result;
 	zend_long updated;
-	zval init_val;
+	zval init_val = {0};
 	bool is_overflow, stored;
 
 	is_overflow = decrement
@@ -3497,25 +2506,25 @@ static bool ucache_atomic_insert_missing_locked(
 	}
 
 	ZVAL_LONG(&init_val, updated);
-	if (!php_ucache_prepare_value(key, &init_val, &prep_opts, &prepared)) {
-		php_ucache_destroy_prepared_value(&prepared);
+
+	if (!ucache_prepare_val(key, &init_val, &prepared)) {
+		ucache_destroy_prepared_val(&prepared);
 
 		return false;
 	}
 
-	stored = php_ucache_store_prepared_locked(
-		key,
-		&init_val,
-		&prepared,
-		ttl,
-		&store_opts,
-		NULL
+	UCACHE_TRY_UNLOCK_ON_BAILOUT(
+		stored = ucache_store_prepared_locked_impl(key, &init_val, &prepared, ttl, false, &store_result);
 	);
 
-	php_ucache_destroy_prepared_value(&prepared);
+	ucache_destroy_prepared_val(&prepared);
 
 	if (stored) {
-		result->new_value = Z_LVAL(init_val);
+		result->new_val = Z_LVAL(init_val);
+
+		result->stored_gen = store_result.stored_gen;
+		result->stored_slot = store_result.stored_slot;
+		result->stored_expires_at = store_result.stored_expires_at;
 
 		return true;
 	}
@@ -3523,444 +2532,518 @@ static bool ucache_atomic_insert_missing_locked(
 	return false;
 }
 
-static PHP_UCACHE_HOT php_ucache_optimistic_result_t ucache_optimistic_locate(
-		php_ucache_header_t *header,
-		zend_string *key,
-		zend_ulong hash,
+static zend_never_inline ucache_optimistic_result ucache_optimistic_locate_fallback(
+		ucache_hdr *hdr,
+		uint32_t capacity,
+		ucache_key_record *record,
 		uint64_t seq,
 		uint64_t epoch,
-		php_ucache_lookup_entry_t *lookup_entries,
-		bool have_snapshot,
 		bool stamp_access,
-		php_ucache_entry_t *snapshot,
-		uint32_t *slot_idx)
+		ucache_entry *snapshot)
 {
-	php_ucache_lookup_entry_t *lookup_entry;
-	bool found = have_snapshot;
+	zend_string *key = record->storage_key;
+	uint32_t slot_idx = 0;
+	bool cur = record->mutation_epoch == epoch, found = true;
 
-	if (!have_snapshot &&
-		!ucache_optimistic_probe(
-			header,
-			key,
-			hash,
-			php_ucache_entries_ptr(header),
-			snapshot,
-			slot_idx,
-			&found
-		)
+	if (record->state == UCACHE_RECORD_HIT &&
+		ucache_optimistic_key_record_slot(hdr, capacity, record, cur, snapshot)
 	) {
-		return PHP_UCACHE_OPTIMISTIC_FALLBACK;
+		slot_idx = record->slot_idx;
+	} else {
+		cur = false;
+
+		if (!ucache_optimistic_probe(
+				hdr,
+				capacity,
+				key,
+				ZSTR_H(key),
+				ucache_entries_ptr(hdr),
+				snapshot,
+				&slot_idx,
+				&found
+			)
+		) {
+			return UCACHE_OPTIMISTIC_FALLBACK;
+		}
 	}
 
-	if (ucache_seq_reload(&header->write_seq) != seq) {
-		return PHP_UCACHE_OPTIMISTIC_FALLBACK;
+	if (ucache_read_seq(hdr, key) != seq) {
+		return UCACHE_OPTIMISTIC_FALLBACK;
 	}
 
 	if (!found) {
-		ucache_lookup_cache_store_miss(lookup_entries, hash, epoch, key);
+		ucache_key_record_mark_miss(record, epoch, NULL);
 
-		return PHP_UCACHE_OPTIMISTIC_MISS;
+		return UCACHE_OPTIMISTIC_MISS;
 	}
 
-	/* has() must not refresh recency. */
+	if (cur) {
+		if (stamp_access) {
+			ucache_touch_cached_entry_access(hdr, slot_idx, &record->access_touches);
+		}
+
+		return UCACHE_OPTIMISTIC_FOUND;
+	}
+
 	if (stamp_access) {
-		ucache_touch_entry_access(header, *slot_idx);
+		ucache_touch_entry_access(hdr, capacity, slot_idx);
 	}
 
-	lookup_entry = ucache_lookup_cache_select_slot(lookup_entries, hash, epoch, true);
-	ucache_lookup_cache_store_hit(lookup_entry, hash, epoch, *slot_idx, key, snapshot);
+	ucache_key_record_mark_hit(record, epoch, slot_idx, snapshot, NULL);
+	if (!stamp_access) {
+		record->access_touches = UCACHE_ACCESS_SAMPLE_INTERVAL - 1;
+	}
 
-	return PHP_UCACHE_OPTIMISTIC_FOUND;
+	return UCACHE_OPTIMISTIC_FOUND;
 }
 
-static bool ucache_optimistic_scan_lookup_cache(
-		php_ucache_header_t *header,
-		zend_string *key,
-		zend_ulong hash,
+static ucache_optimistic_result ucache_optimistic_emit_str(
+		ucache_hdr *hdr,
+		ucache_key_record *record,
 		uint64_t seq,
-		uint64_t epoch,
-		php_ucache_lookup_entry_t *lookup_entries,
-		zval *return_value,
-		uint32_t *hint_slot,
-		php_ucache_optimistic_result_t *result)
-{
-	const void *ctx = (const void *) php_ucache_active_context();
-	php_ucache_lookup_entry_t *lookup_entry;
-	uint32_t way;
-
-	*hint_slot = UINT32_MAX;
-
-	for (way = 0; way < PHP_UCACHE_LOOKUP_WAYS; way++) {
-		lookup_entry = &lookup_entries[way];
-
-		if (lookup_entry->state == PHP_UCACHE_LOOKUP_EMPTY ||
-			lookup_entry->hash != hash ||
-			lookup_entry->ctx != ctx
-		) {
-			continue;
-		}
-
-		if (lookup_entry->state == PHP_UCACHE_LOOKUP_MISS) {
-			if (lookup_entry->mutation_epoch != epoch) {
-				ucache_lookup_cache_reset_entry(lookup_entry);
-
-				continue;
-			}
-
-			if (lookup_entry->key == NULL || !zend_string_equals(lookup_entry->key, key)) {
-				continue;
-			}
-
-			*result = ucache_seq_reload(&header->write_seq) != seq
-				? PHP_UCACHE_OPTIMISTIC_FALLBACK
-				: PHP_UCACHE_OPTIMISTIC_MISS
-			;
-
-			return true;
-		}
-
-		if (lookup_entry->mutation_epoch == epoch &&
-			lookup_entry->key == key &&
-			ucache_scalar_to_zval(
-				lookup_entry->value_type,
-				lookup_entry->long_value,
-				lookup_entry->double_value,
-				return_value
-			)
-		) {
-			*result = ucache_seq_reload(&header->write_seq) != seq
-				? PHP_UCACHE_OPTIMISTIC_FALLBACK
-				: PHP_UCACHE_OPTIMISTIC_FOUND
-			;
-
-			return true;
-		}
-
-		*hint_slot = lookup_entry->slot_index;
-
-		break;
-	}
-
-	return false;
-}
-
-static bool ucache_optimistic_try_hint_slot(
-		php_ucache_header_t *header,
-		zend_string *key,
-		zend_ulong hash,
-		uint32_t hint_slot,
-		php_ucache_entry_t *snapshot,
-		uint32_t *slot_idx)
-{
-	const php_ucache_entry_t *hint_entry;
-
-	if (hint_slot == UINT32_MAX || hint_slot >= header->capacity) {
-		return false;
-	}
-
-	hint_entry = &php_ucache_entries_ptr(header)[hint_slot];
-
-	if (hint_entry->state == PHP_UCACHE_ENTRY_USED &&
-		hint_entry->hash == hash &&
-		hint_entry->key_len == ZSTR_LEN(key) &&
-		php_ucache_payload_in_bounds(header, hint_entry->key_offset, hint_entry->key_len) &&
-		memcmp(ucache_ptr_in_header(header, hint_entry->key_offset), ZSTR_VAL(key), ZSTR_LEN(key)) == 0 &&
-		(
-			hint_entry->expires_at == 0 ||
-			(uint64_t) hint_entry->expires_at > php_ucache_time_rel(header, (uint64_t) time(NULL))
-		)
-	) {
-		*snapshot = *hint_entry;
-		*slot_idx = hint_slot;
-
-		return true;
-	}
-
-	return false;
-}
-
-static php_ucache_optimistic_result_t ucache_optimistic_emit_string(
-		php_ucache_header_t *header,
-		zend_string *key,
-		uint64_t seq,
-		const php_ucache_entry_t *snapshot,
+		const ucache_entry *snapshot,
 		zval *return_value)
 {
-	zend_string *str;
+	zend_string *key = record->storage_key, *str;
 
-	if (ucache_fetch_request_local_slot(key, snapshot->generation, return_value) ==
-		PHP_UCACHE_REQUEST_LOCAL_SLOT_HIT
-	) {
-		return PHP_UCACHE_OPTIMISTIC_FOUND;
-	}
-
-	if (!php_ucache_payload_in_bounds(header, snapshot->value_offset, snapshot->value_len)) {
-		return PHP_UCACHE_OPTIMISTIC_FALLBACK;
+	if (!ucache_payload_in_bounds(hdr, snapshot->val_offset, snapshot->val_len)) {
+		return UCACHE_OPTIMISTIC_FALLBACK;
 	}
 
 	str = zend_string_init(
-		(const char *) ucache_ptr_in_header(header, snapshot->value_offset),
-		snapshot->value_len,
+		(const char *) ucache_ptr_in_hdr(hdr, snapshot->val_offset),
+		snapshot->val_len,
 		0
 	);
 
-	if (ucache_seq_reload(&header->write_seq) != seq) {
+	if (ucache_read_seq(hdr, key) != seq) {
 		zend_string_release(str);
 
-		return PHP_UCACHE_OPTIMISTIC_FALLBACK;
+		return UCACHE_OPTIMISTIC_FALLBACK;
 	}
 
 	ZVAL_STR(return_value, str);
-	php_ucache_fetch_finish(
-		key,
-		snapshot->generation,
-		return_value,
-		PHP_UCACHE_FETCH_FINISH_USE_REQUEST_LOCAL_SLOT | PHP_UCACHE_FETCH_FINISH_NO_ALIASES
-	);
 
-	return PHP_UCACHE_OPTIMISTIC_FOUND;
+	ucache_key_record_cache_copy(record, return_value, snapshot->val_len);
+
+	return UCACHE_OPTIMISTIC_FOUND;
 }
 
-static php_ucache_optimistic_result_t ucache_optimistic_emit_shared_graph(
-		php_ucache_header_t *header,
-		zend_string *key,
+static zend_never_inline ucache_optimistic_result ucache_optimistic_decode_owned_graph(
+		ucache_hdr *hdr,
+		ucache_key_record *record,
 		uint64_t seq,
-		const php_ucache_entry_t *snapshot,
+		const ucache_entry *snapshot,
 		zval *return_value,
-		bool allow_decode)
+		uint32_t gflags)
 {
-	uint32_t reader_slot = 0, flags;
-	bool use_proto, no_aliases, ref_registered;
+	zend_string *key = record->storage_key;
+	ucache_op_lease *lease = ucache_op_lease_reserve(snapshot->val_offset);
+	uint32_t reader_slot, hook_calls_before;
+	bool decoded, resource_limited;
 
-	if (!php_ucache_payload_in_bounds(
-			header,
-			snapshot->value_offset,
-			sizeof(php_ucache_shared_graph_header_t) + ZEND_MM_ALIGNMENT
-		) ||
-		!php_ucache_payload_in_bounds(
-			header,
-			snapshot->value_offset,
-			snapshot->value_len
-		)
-	) {
-		return PHP_UCACHE_OPTIMISTIC_FALLBACK;
-	}
+	if (!lease->acquired) {
+		if (!ucache_optimistic_reader_begin(hdr, &reader_slot)) {
+			ucache_op_lease_end(lease);
 
-	use_proto = php_ucache_shared_graph_prefers_prototype(snapshot->value_offset);
-	no_aliases = !php_ucache_shared_graph_payload_has_aliases(snapshot->value_offset);
-
-	if (ucache_seq_reload(&header->write_seq) != seq) {
-		return PHP_UCACHE_OPTIMISTIC_FALLBACK;
-	}
-
-	if (use_proto &&
-		ucache_fetch_request_local_slot(
-			key, snapshot->generation, return_value
-		) == PHP_UCACHE_REQUEST_LOCAL_SLOT_HIT
-	) {
-		return PHP_UCACHE_OPTIMISTIC_FOUND;
-	}
-
-	if (!allow_decode &&
-		!php_ucache_shared_graph_decode_is_lock_safe(snapshot->value_offset)
-	) {
-		return PHP_UCACHE_OPTIMISTIC_FALLBACK;
-	}
-
-	ref_registered = php_ucache_has_request_shared_graph_ref(snapshot->value_offset);
-	if (!ref_registered) {
-		php_ucache_shared_graph_ref_reserve();
-
-		if (!php_ucache_optimistic_reader_begin(header, &reader_slot)) {
-			return PHP_UCACHE_OPTIMISTIC_FALLBACK;
+			return UCACHE_OPTIMISTIC_FALLBACK;
 		}
 
-		if (ucache_seq_reload(&header->write_seq) != seq) {
-			php_ucache_optimistic_reader_end(header, reader_slot);
+		if (ucache_read_seq(hdr, key) != seq) {
+			ucache_optimistic_reader_end(hdr, reader_slot);
+			ucache_op_lease_end(lease);
 
-			return PHP_UCACHE_OPTIMISTIC_FALLBACK;
+			return UCACHE_OPTIMISTIC_FALLBACK;
 		}
 
-		if (!php_ucache_shared_graph_acquire_ref(snapshot->value_offset)) {
-			php_ucache_optimistic_reader_end(header, reader_slot);
+		decoded = ucache_op_lease_acquire(lease, &resource_limited);
 
-			return PHP_UCACHE_OPTIMISTIC_FALLBACK;
+		ucache_optimistic_reader_end(hdr, reader_slot);
+
+		if (!decoded) {
+			ucache_op_lease_end(lease);
+
+			return UCACHE_OPTIMISTIC_FALLBACK;
 		}
-
-		php_ucache_register_shared_graph_ref(snapshot->value_offset);
-		php_ucache_optimistic_reader_end(header, reader_slot);
 	}
 
 	ZVAL_UNDEF(return_value);
 
-	if (!php_ucache_shared_graph_decode(
-			ucache_ptr_in_header(header, snapshot->value_offset),
-			snapshot->value_len,
+	hook_calls_before = UC_G(restore_hook_calls);
+	decoded = ucache_sgraph_decode(
+		ucache_ptr_in_hdr(hdr, snapshot->val_offset),
+		snapshot->val_len,
+		return_value
+	);
+	if (!decoded && Z_TYPE_P(return_value) != IS_UNDEF) {
+		zval_ptr_dtor(return_value);
+
+		ZVAL_UNDEF(return_value);
+	}
+
+	ucache_op_lease_end(lease);
+
+	if (!decoded) {
+		return ucache_optimistic_unrestorable(snapshot);
+	}
+
+	ucache_fetch_finish_impl(
+		record,
+		snapshot->gen,
+		return_value,
+		ucache_fetch_finish_flags_after_decode(ucache_fetch_finish_flags(gflags, true), hook_calls_before),
+		snapshot->val_len
+	);
+
+	return UCACHE_OPTIMISTIC_FOUND;
+}
+
+static ucache_optimistic_result ucache_optimistic_emit_sgraph(
+		ucache_hdr *hdr,
+		ucache_key_record *record,
+		uint64_t seq,
+		const ucache_entry *snapshot,
+		zval *return_value,
+		bool allow_decode)
+{
+	zend_string *key = record->storage_key;
+	uint32_t reader_slot = 0, gflags, ref_idx, hook_calls_before;
+
+	if (!ucache_payload_in_bounds(
+			hdr,
+			snapshot->val_offset,
+			UCACHE_SGRAPH_HDR_SIZE(0) + UCACHE_SGRAPH_ALIGNMENT_SLACK
+		) ||
+		!ucache_payload_in_bounds(
+			hdr,
+			snapshot->val_offset,
+			snapshot->val_len
+		)
+	) {
+		return UCACHE_OPTIMISTIC_FALLBACK;
+	}
+
+	gflags = ucache_sgraph_payload_flags(snapshot->val_offset);
+
+	if (ucache_read_seq(hdr, key) != seq) {
+		return UCACHE_OPTIMISTIC_FALLBACK;
+	}
+
+	if (((gflags & UCACHE_SGRAPH_FLAG_PREFERS_PROTO) || UC_G(persistent_exec)) &&
+		ucache_fetch_req_local_slot(key, snapshot->gen, return_value)
+	) {
+		return UCACHE_OPTIMISTIC_FOUND;
+	}
+
+	if (!allow_decode && (gflags & UCACHE_SGRAPH_FLAG_HAS_OBJ)) {
+		return UCACHE_OPTIMISTIC_FALLBACK;
+	}
+
+	if (UNEXPECTED(UC_G(persistent_exec))) {
+		return ucache_optimistic_decode_owned_graph(
+			hdr,
+			record,
+			seq,
+			snapshot,
+			return_value,
+			gflags
+		);
+	}
+
+	ref_idx = ucache_req_sgraph_ref_idx(snapshot->val_offset);
+	if (ref_idx == UINT32_MAX) {
+		if (!ucache_req_pin_fits_budget(hdr, snapshot->val_len)) {
+			return UCACHE_OPTIMISTIC_FALLBACK;
+		}
+
+		ucache_sgraph_ref_reserve();
+
+		if (!ucache_optimistic_reader_begin(hdr, &reader_slot)) {
+			return UCACHE_OPTIMISTIC_FALLBACK;
+		}
+
+		if (ucache_read_seq(hdr, key) != seq) {
+			ucache_optimistic_reader_end(hdr, reader_slot);
+
+			return UCACHE_OPTIMISTIC_FALLBACK;
+		}
+
+		if (!ucache_sgraph_acquire_ref(snapshot->val_offset, NULL)) {
+			ucache_optimistic_reader_end(hdr, reader_slot);
+
+			return UCACHE_OPTIMISTIC_FALLBACK;
+		}
+
+		ref_idx = ucache_register_sgraph_ref(snapshot->val_offset, snapshot->val_len);
+
+		ucache_optimistic_reader_end(hdr, reader_slot);
+	}
+
+	ZVAL_UNDEF(return_value);
+
+	hook_calls_before = UC_G(restore_hook_calls);
+
+	if (!ucache_sgraph_decode(
+			ucache_ptr_in_hdr(hdr, snapshot->val_offset),
+			snapshot->val_len,
 			return_value
 		)
 	) {
-		return PHP_UCACHE_OPTIMISTIC_FALLBACK;
+		if (Z_TYPE_P(return_value) != IS_UNDEF) {
+			zval_ptr_dtor(return_value);
+
+			ZVAL_UNDEF(return_value);
+		}
+
+		return ucache_optimistic_unrestorable(snapshot);
 	}
 
-	flags = PHP_UCACHE_FETCH_FINISH_DEFER_REQUEST_LOCAL_SLOT;
-
-	if (use_proto) {
-		flags |= PHP_UCACHE_FETCH_FINISH_USE_REQUEST_LOCAL_SLOT;
+	if (gflags & UCACHE_SGRAPH_FLAG_PREFERS_PROTO) {
+		ucache_fetch_finish_impl(
+			record,
+			snapshot->gen,
+			return_value,
+			ucache_fetch_finish_flags_after_decode(ucache_fetch_finish_flags(gflags, false), hook_calls_before),
+			snapshot->val_len
+		);
+	} else if (!Z_REFCOUNTED_P(return_value)) {
+		ucache_key_record_cache_pinned(record, return_value, snapshot->val_offset, ref_idx);
+	} else if (!(gflags & (
+			UCACHE_SGRAPH_FLAG_HAS_OBJ |
+			UCACHE_SGRAPH_FLAG_HAS_SHARED_IDENTITY
+		))
+	) {
+		ucache_key_record_cache_pinned_copy(record, return_value, snapshot->val_offset, snapshot->val_len);
 	}
 
-	if (no_aliases) {
-		flags |= PHP_UCACHE_FETCH_FINISH_NO_ALIASES;
-	}
-
-	php_ucache_fetch_finish(key, snapshot->generation, return_value, flags);
-
-	return PHP_UCACHE_OPTIMISTIC_FOUND;
+	return UCACHE_OPTIMISTIC_FOUND;
 }
 
-void php_ucache_expunge_expired_at_request_end(void)
+static zend_never_inline ucache_optimistic_result ucache_exists_optimistic_entry(
+		ucache_hdr *hdr,
+		ucache_key_record *record,
+		uint64_t seq,
+		uint64_t epoch)
 {
-	if (EXPECTED(UC_G(expired_read_observations) < PHP_UCACHE_EXPIRED_READ_EXPUNGE_THRESHOLD)) {
-		return;
+	ucache_entry snapshot;
+	uint32_t capacity;
+
+	capacity = ucache_optimistic_capacity(hdr);
+	if (capacity == 0) {
+		return UCACHE_OPTIMISTIC_FALLBACK;
 	}
 
-	if (!php_ucache_wlock()) {
-		return;
-	}
-
-	UC_G(expired_read_observations) = 0;
-
-	(void) ucache_expunge_expired_bounded_locked();
-
-	php_ucache_unlock();
+	return ucache_optimistic_locate(hdr, capacity, record, seq, epoch, false, &snapshot);
 }
 
-void php_ucache_lookup_cache_clear(void)
+static zend_never_inline ucache_optimistic_result ucache_fetch_optimistic_entry(
+		ucache_hdr *hdr,
+		ucache_key_record *record,
+		uint64_t seq,
+		uint64_t epoch,
+		zval *return_value,
+		bool allow_decode)
 {
-	uint32_t i;
+	ucache_entry snapshot;
+	ucache_optimistic_result result;
+	uint32_t capacity;
 
-	for (i = 0; i < PHP_UCACHE_LOOKUP_BUCKETS; i++) {
-		ucache_lookup_entry_release_key(&UC_G(lookup_entry_storage)[i]);
+	capacity = ucache_optimistic_capacity(hdr);
+	if (capacity == 0) {
+		return UCACHE_OPTIMISTIC_FALLBACK;
 	}
 
-	memset(
-		UC_G(lookup_entry_storage),
-		0,
-		sizeof(php_ucache_lookup_entry_t) * PHP_UCACHE_LOOKUP_BUCKETS
-	);
+	result = ucache_optimistic_locate(hdr, capacity, record, seq, epoch, true, &snapshot);
+	if (result != UCACHE_OPTIMISTIC_FOUND) {
+		return result;
+	}
+
+	if (record->val_kind != UCACHE_RECORD_VAL_NONE) {
+		if (ucache_key_record_val_retained(record)) {
+			ZVAL_COPY(return_value, &record->val);
+
+			return UCACHE_OPTIMISTIC_FOUND;
+		}
+
+		ucache_key_record_release_val(record, NULL);
+	}
+
+	if (ucache_scalar_to_zval(
+			ucache_entry_val_type(&snapshot),
+			&snapshot.long_val,
+			&snapshot.double_val,
+			return_value
+		)
+	) {
+		return UCACHE_OPTIMISTIC_FOUND;
+	}
+
+	switch (ucache_entry_val_type(&snapshot)) {
+		case UCACHE_VAL_STR:
+			return ucache_optimistic_emit_str(hdr, record, seq, &snapshot, return_value);
+		case UCACHE_VAL_SGRAPH:
+			return ucache_optimistic_emit_sgraph(hdr, record, seq, &snapshot, return_value, allow_decode);
+		default:
+			return UCACHE_OPTIMISTIC_FALLBACK;
+	}
 }
 
-bool php_ucache_prepare_value(
+ucache_req_local_slot *ucache_find_req_local_slot(
 		zend_string *key,
-		zval *value,
-		const php_ucache_prepare_options_t *options,
-		php_ucache_prepared_value_t *prepared)
+		uint64_t gen)
 {
-	php_ucache_verbatim_memo_t verbatim_memo;
-	size_t verbatim_graph_len = 0;
-	uint32_t verbatim_intern_key_count = 0;
-	bool verbatim_eligible = false, has_verbatim_memo = false, result;
+	ucache_req_local_slot *slot;
+	HashTable **slots_ptr = &UC_G(req_local_slot_table);
 
-	ucache_init_prepared_value(prepared);
+	ucache_req_local_slots_check_fork();
 
-	ZVAL_DEREF(value);
+	if (*slots_ptr == NULL) {
+		return NULL;
+	}
+
+	slot = zend_hash_find_ptr(*slots_ptr, key);
+	if (slot == NULL) {
+		return NULL;
+	}
+
+	if (slot->gen != gen || slot->ctx != ucache_active_ctx()) {
+		ucache_release_req_local_slot(key);
+
+		return NULL;
+	}
+
+	return slot;
+}
+
+void ucache_retry_op_lease_releases(void)
+{
+	ucache_op_lease *lease, *next;
+
+	for (lease = UC_G(op_leases); lease != NULL; lease = next) {
+		next = lease->next;
+
+		if (lease->users == 0) {
+			ucache_op_lease_release(lease);
+		}
+	}
+}
+
+void ucache_release_op_leases(void)
+{
+	ucache_op_lease *lease, *next;
+	ucache_ctx *prev;
+	uint64_t pid = ucache_cached_pid();
+
+	lease = UC_G(op_leases);
+
+	UC_G(op_leases) = NULL;
+
+	while (lease != NULL) {
+		next = lease->next;
+		if (lease->acquired && lease->owner_pid == pid) {
+			prev = ucache_activate_ctx(lease->ctx);
+			(void) ucache_sgraph_release_op_ref(lease->payload_offset);
+			ucache_restore_ctx(prev);
+		}
+
+		if (lease != &UC_G(op_lease_inline)) {
+			efree(lease);
+		}
+
+		lease = next;
+	}
+
+	lease = UC_G(op_lease_free);
+
+	UC_G(op_lease_free) = NULL;
+
+	while (lease != NULL) {
+		next = lease->next;
+
+		efree(lease);
+
+		lease = next;
+	}
+
+	memset(&UC_G(op_lease_inline), 0, sizeof(UC_G(op_lease_inline)));
+}
+
+bool ucache_prepare_val(
+		zend_string *key,
+		zval *val,
+		ucache_prepared_val *prepared)
+{
+	HashTable verbatim_verdicts;
+	size_t verbatim_glen = 0;
+	bool has_verbatim_verdicts = false, result;
+
+	ucache_init_prepared_val(prepared);
+
+	ZVAL_DEREF(val);
 
 	prepared->hash = zend_string_hash_val(key);
 
-	if (Z_TYPE_P(value) == IS_RESOURCE) {
-		return false;
+	switch (Z_TYPE_P(val)) {
+		case IS_RESOURCE:
+			return false;
+		case IS_OBJECT:
+			if (Z_OBJCE_P(val) == zend_ce_closure) {
+				return false;
+			}
+
+			break;
+		case IS_ARRAY:
+			if (EXPECTED(!EG(exception))) {
+				zend_hash_init(&verbatim_verdicts, 8, NULL, NULL, 0);
+
+				has_verbatim_verdicts = true;
+
+				ucache_sgraph_calc_verbatim_root(val, &verbatim_verdicts, &verbatim_glen);
+			}
+
+			break;
+		default:
+			break;
 	}
 
-	if (Z_TYPE_P(value) == IS_OBJECT && Z_OBJCE_P(value) == zend_ce_closure) {
-		return false;
-	}
-
-	if (Z_TYPE_P(value) == IS_ARRAY && EXPECTED(!EG(exception))) {
-		ucache_verbatim_memo_init(&verbatim_memo);
-		has_verbatim_memo = true;
-
-		switch (php_ucache_shared_graph_calc_verbatim_root(
-			value,
-			&verbatim_memo,
-			&verbatim_graph_len,
-			&verbatim_intern_key_count
-		)) {
-			case PHP_UCACHE_VERBATIM_ROOT_SIZED:
-			case PHP_UCACHE_VERBATIM_ROOT_ELIGIBLE_UNSIZED:
-				verbatim_eligible = true;
-
-				break;
-			case PHP_UCACHE_VERBATIM_ROOT_INELIGIBLE:
-				break;
-			case PHP_UCACHE_VERBATIM_ROOT_UNDECIDED:
-				verbatim_eligible = php_ucache_shared_graph_can_copy_verbatim_root(
-					value,
-					&verbatim_memo
-				);
-
-				break;
-		}
-	}
-
-	if (!verbatim_eligible &&
-		!ucache_validate_storable_value(value)
-	) {
-		result = false;
-
-		goto finish;
-	}
-
-	if (ucache_prepare_direct_value(value, prepared)) {
+	if (ucache_prepare_direct_val(val, prepared)) {
 		result = true;
 
-		goto finish;
+		goto done;
 	}
 
-	if (!has_verbatim_memo) {
-		ucache_verbatim_memo_init(&verbatim_memo);
+	if (!has_verbatim_verdicts) {
+		zend_hash_init(&verbatim_verdicts, 8, NULL, NULL, 0);
 
-		has_verbatim_memo = true;
+		has_verbatim_verdicts = true;
 	}
 
-	result = ucache_prepare_shared_graph_value(
-		value,
-		options,
-		&verbatim_memo,
-		verbatim_graph_len,
-		verbatim_intern_key_count,
-		prepared
-	);
+	result = ucache_prepare_sgraph_val(val, &verbatim_verdicts, verbatim_glen, prepared);
 
-finish:
-	if (has_verbatim_memo) {
-		ucache_verbatim_memo_destroy(&verbatim_memo);
+done:
+	if (has_verbatim_verdicts) {
+		zend_hash_destroy(&verbatim_verdicts);
 	}
 
 	return result;
 }
 
-void php_ucache_destroy_prepared_value(php_ucache_prepared_value_t *prepared)
+void ucache_destroy_prepared_val(ucache_prepared_val *prepared)
 {
 	zend_ulong memo_key;
 	zval *memo_val;
 
-	if (prepared->owned_buffer != NULL) {
-		efree(prepared->owned_buffer);
+	if (prepared->owner_type == UCACHE_PREPARED_OWNER_BUF) {
+		efree(prepared->owned_buf);
+	} else if (prepared->owner_type == UCACHE_PREPARED_OWNER_STR) {
+		zend_string_release(prepared->owned_str);
 	}
 
 	if (prepared->fixup_offsets != NULL) {
 		efree(prepared->fixup_offsets);
 	}
 
-	php_ucache_graph_intern_plan_destroy(&prepared->intern);
-
-	if (prepared->owned_string != NULL) {
-		zend_string_release(prepared->owned_string);
-	}
-
 	if (prepared->state_memo != NULL) {
-		/* Drop the keep-alive pins taken when each state was memoized.
-		 * Only state/blob entries are object-keyed and pinned; schema
-		 * verdicts (IS_TRUE/IS_FALSE) are keyed by state-array address. */
 		ZEND_HASH_FOREACH_NUM_KEY_VAL(prepared->state_memo, memo_key, memo_val) {
 			if (Z_TYPE_P(memo_val) == IS_ARRAY || Z_TYPE_P(memo_val) == IS_STRING) {
 				OBJ_RELEASE((zend_object *) (uintptr_t) memo_key);
@@ -3971,273 +3054,216 @@ void php_ucache_destroy_prepared_value(php_ucache_prepared_value_t *prepared)
 
 		efree(prepared->state_memo);
 	}
-
-	ucache_init_prepared_value(prepared);
 }
 
-void php_ucache_object_table_dtor(zval *zv)
+bool ucache_store_prepared_locked(
+		zend_string *key,
+		zval *val,
+		const ucache_prepared_val *prepared,
+		zend_long ttl,
+		bool bulk,
+		ucache_store_result *result)
 {
-	zend_object *obj = Z_PTR_P(zv);
+	ucache_maybe_expunge_expired_locked();
 
-	OBJ_RELEASE(obj);
+	return ucache_store_prepared_locked_impl(key, val, prepared, ttl, bulk, result);
 }
 
-void php_ucache_reference_table_dtor(zval *zv)
+void ucache_key_record_reset(ucache_key_record *record, zval *detached)
 {
-	zval ref_zv;
-
-	ZVAL_REF(&ref_zv, (zend_reference *) Z_PTR_P(zv));
-
-	zval_ptr_dtor(&ref_zv);
+	ucache_key_record_reset_impl(record, detached);
 }
 
-void php_ucache_store_request_local_slot(zend_string *key, uint64_t gen, zval *value, bool no_aliases)
+void ucache_key_record_stored(
+		ucache_key_record *record,
+		const ucache_store_result *result,
+		zval *val)
 {
-	php_ucache_request_local_slot_t *slot;
-	HashTable verdicts;
-	zval slot_zv;
-	bool needs_deep_clone = false, has_verdicts = false;
+	ucache_key_record_mark_stored(record, result->stored_gen, result->stored_slot, result->stored_expires_at);
 
-	ZVAL_DEREF(value);
+	ZVAL_DEREF(val);
 
-	slot = ucache_alloc_request_local_slot(gen, no_aliases, true);
-
-	if (Z_TYPE_P(value) == IS_ARRAY || Z_TYPE_P(value) == IS_OBJECT || Z_ISREF_P(value)) {
-		zend_hash_init(&verdicts, 8, NULL, NULL, 0);
-		has_verdicts = true;
-		needs_deep_clone = ucache_collect_request_local_clone_verdicts(
-			value,
-			&verdicts
-		);
-	}
-
-	if (!ucache_clone_request_local_slot_value_known(
-			&slot->value,
-			value,
-			needs_deep_clone,
-			has_verdicts ? &verdicts : NULL,
-			no_aliases
-		)
+	if (result->stored_val_type < UCACHE_VAL_STR) {
+		ucache_key_record_cache_copy(record, val, 0);
+	} else if (result->stored_val_type == UCACHE_VAL_STR &&
+		Z_REFCOUNTED_P(val) &&
+		Z_STRLEN_P(val) >= UCACHE_RECORD_STORE_STR_MIN_LEN
 	) {
-		if (has_verdicts) {
-			zend_hash_destroy(&verdicts);
-		}
+		ucache_key_record_cache_copy(record, val, Z_STRLEN_P(val));
+	}
+}
 
-		ZVAL_PTR(&slot_zv, slot);
-
-		ucache_request_local_slot_dtor(&slot_zv);
+void ucache_key_record_deleted(ucache_key_record *record, uint64_t epoch)
+{
+	if (epoch == 0) {
+		ucache_key_record_reset_impl(record, NULL);
 
 		return;
 	}
 
-	slot->needs_deep_clone = needs_deep_clone;
-
-	if (has_verdicts) {
-		if (needs_deep_clone) {
-			zend_hash_destroy(&verdicts);
-
-			zend_hash_init(&slot->clone_verdicts, 8, NULL, NULL, 0);
-
-			ucache_collect_request_local_clone_verdicts(&slot->value, &slot->clone_verdicts);
-		} else {
-			slot->clone_verdicts = verdicts;
-		}
-
-		slot->has_clone_verdicts = true;
-	}
-
-	ucache_replace_request_local_slot(key, slot);
+	ucache_key_record_mark_miss(record, epoch, NULL);
 }
 
-bool php_ucache_store_prepared_locked(
-		zend_string *key,
-		zval *value,
-		php_ucache_prepared_value_t *prepared,
-		zend_long ttl,
-		const php_ucache_store_options_t *options,
-		php_ucache_store_result_t *result)
+void ucache_key_record_atomic_updated(
+		ucache_key_record *record,
+		const ucache_atomic_update_result *result)
 {
-	bool stored = false;
+	if (result->stored_gen == 0) {
+		return;
+	}
 
-	ucache_maybe_expunge_expired_locked();
+	ucache_key_record_mark_stored(record, result->stored_gen, result->stored_slot, result->stored_expires_at);
 
-	PHP_UCACHE_TRY_UNLOCK_ON_BAILOUT(
-		stored = ucache_store_prepared_locked_impl(
-			key,
-			value,
-			prepared,
-			ttl,
-			options,
-			result
+	if (record->val_kind != UCACHE_RECORD_VAL_NONE) {
+		return;
+	}
+
+	ZVAL_LONG(&record->val, result->new_val);
+
+	record->val_kind = UCACHE_RECORD_VAL_COPY;
+}
+
+void ucache_fetch_finish(
+		ucache_key_record *record,
+		ucache_fetch_pending_seed *pending_seed,
+		zval *return_value)
+{
+	if (return_value != NULL &&
+		pending_seed->should_seed &&
+		(
+			!(pending_seed->flags & UCACHE_FETCH_FINISH_RECORD_COPY) ||
+			record->mutation_epoch == pending_seed->mutation_epoch
+		)
+	) {
+		ucache_fetch_finish_impl(
+			record,
+			pending_seed->gen,
+			return_value,
+			pending_seed->flags,
+			pending_seed->val_len
 		);
-	);
-
-	return stored;
-}
-
-PHP_UCACHE_HOT void php_ucache_fetch_finish(
-		zend_string *key,
-		uint64_t gen,
-		zval *return_value,
-		uint32_t flags)
-{
-	php_ucache_request_local_slot_t *slot;
-	bool should_store;
-
-	if (flags & PHP_UCACHE_FETCH_FINISH_USE_REQUEST_LOCAL_SLOT) {
-		if (!(flags & PHP_UCACHE_FETCH_FINISH_DEFER_REQUEST_LOCAL_SLOT)) {
-			should_store = true;
-		} else {
-			slot = ucache_find_request_local_slot(key, gen);
-
-			if (slot == NULL) {
-				ucache_mark_request_local_slot(key, gen);
-				should_store = false;
-			} else if (!slot->has_value) {
-				should_store = true;
-			} else {
-				should_store = false;
-			}
-		}
-
-		if (should_store) {
-			php_ucache_store_request_local_slot(
-				key,
-				gen,
-				return_value,
-				(flags & PHP_UCACHE_FETCH_FINISH_NO_ALIASES) != 0
-			);
-		}
 	}
+
+	zval_ptr_dtor(&pending_seed->detached_val);
 }
 
-bool php_ucache_fetch_locked(
-		zend_string *key,
-		bool use_request_local_slot,
+bool ucache_fetch_locked(
+		ucache_key_record *record,
 		zval *return_value,
 		bool *found,
-		php_ucache_fetch_pending_seed_t *pending_seed,
+		ucache_fetch_pending_seed *pending_seed,
 		bool *lock_held)
 {
-	php_ucache_header_t *header;
-	php_ucache_entry_t *entries, *entry;
-	php_ucache_lookup_entry_t *lookup_entries;
-	php_ucache_fetch_locate_result_t locate;
-	zend_ulong hash;
+	ucache_hdr *hdr;
+	ucache_entry *entries, *entry;
+	ucache_fetch_locate_result locate;
 	uint64_t epoch;
 	uint32_t slot_idx = 0;
 
+	ZEND_ASSERT(*lock_held && UC_G(lock_held));
+
 	*found = false;
-	pending_seed->should_seed_request_local_slot = false;
 
-	hash = zend_string_hash_val(key);
+	pending_seed->should_seed = false;
+	pending_seed->gen = 0;
 
-	/* Adoptable, not merely initialized: the table probe and access stamp
-	 * below trust header->capacity for their bounds. */
-	header = php_ucache_header_ptr();
-	if (!header || !php_ucache_header_adoptable_locked()) {
+	ZVAL_UNDEF(&pending_seed->detached_val);
+
+	hdr = ucache_hdr_ptr();
+	if (hdr == NULL || !ucache_hdr_adoptable_locked()) {
 		return false;
 	}
 
-	entries = php_ucache_entries_ptr(header);
-	epoch = header->mutation_epoch;
-	lookup_entries = ucache_lookup_cache_set(hash);
+	entries = ucache_entries_ptr(hdr);
+	epoch = hdr->mutation_epoch;
 
-	locate = ucache_fetch_probe_lookup_cache_locked(
-		header, key, hash, entries, lookup_entries, epoch, return_value, &slot_idx
+	locate = ucache_fetch_probe_key_record_locked(
+		hdr,
+		record,
+		entries,
+		epoch,
+		return_value,
+		&slot_idx,
+		&pending_seed->detached_val
 	);
-
-	if (locate == PHP_UCACHE_FETCH_LOCATE_UNCACHED) {
+	if (locate == UCACHE_FETCH_LOCATE_UNCACHED) {
 		locate = ucache_fetch_probe_entry_table_locked(
-			header, key, hash, entries, lookup_entries, epoch, &slot_idx
+			hdr,
+			record,
+			entries,
+			epoch,
+			&slot_idx,
+			&pending_seed->detached_val
 		);
 	}
 
-	if (locate == PHP_UCACHE_FETCH_LOCATE_SCALAR_HIT) {
+	if (locate == UCACHE_FETCH_LOCATE_VAL_HIT) {
 		*found = true;
 
 		return true;
 	}
 
-	if (locate == PHP_UCACHE_FETCH_LOCATE_MISS) {
+	if (locate == UCACHE_FETCH_LOCATE_MISS) {
 		return false;
 	}
 
 	entry = &entries[slot_idx];
 
-	ucache_touch_entry_access(header, slot_idx);
+	ucache_touch_entry_access(hdr, hdr->capacity, slot_idx);
 
 	*found = true;
 
-	return ucache_fetch_emit_value_locked(
-		header,
-		entry,
-		use_request_local_slot,
-		return_value,
-		pending_seed,
-		lock_held
-	);
+	if (record->val_kind != UCACHE_RECORD_VAL_NONE) {
+		if (ucache_key_record_val_retained(record)) {
+			ZVAL_COPY(return_value, &record->val);
+
+			return true;
+		}
+
+		ucache_key_record_release_val(record, &pending_seed->detached_val);
+	}
+
+	return ucache_fetch_emit_val_locked(hdr, entry, epoch, return_value, pending_seed, lock_held);
 }
 
-bool php_ucache_exists_locked(zend_string *key)
+bool ucache_exists_locked(zend_string *key)
 {
 	zend_ulong hash = zend_string_hash_val(key);
 	uint32_t slot_idx;
 	bool found;
 
-	if (!ucache_find_slot_for_read_locked(key, hash, NULL, &slot_idx, &found)) {
+	if (!ucache_find_slot_locked(key, hash, UCACHE_FIND_SLOT_SKIP_EXPIRED, NULL, &slot_idx, &found)) {
 		return false;
 	}
 
 	return found;
 }
 
-void php_ucache_discard_replaced_entry_locked(
-		zend_string *key,
-		php_ucache_replaced_entry_t *replaced_entry)
+void ucache_discard_replaced_entry_locked(ucache_entry *replaced_entry)
 {
-	php_ucache_header_t *header;
-	php_ucache_entry_t *entries, *current_entry = NULL;
-	uint32_t slot_idx;
-	bool found;
-
-	if (replaced_entry == NULL || !replaced_entry->found) {
+	if (!ucache_entry_is_used(replaced_entry)) {
 		return;
 	}
 
-	if (ucache_find_slot_ignore_expiry_locked(
-			key,
-			replaced_entry->entry.hash,
-			&header,
-			&slot_idx,
-			&found
-		) &&
-		found
-	) {
-		entries = php_ucache_entries_ptr(header);
-		current_entry = &entries[slot_idx];
-	}
+	ucache_release_entry_storage_locked(replaced_entry);
 
-	ucache_release_entry_storage_except_locked(&replaced_entry->entry, current_entry);
-
-	replaced_entry->found = false;
-
-	memset(&replaced_entry->entry, 0, sizeof(replaced_entry->entry));
+	memset(replaced_entry, 0, sizeof(*replaced_entry));
 }
 
-void php_ucache_rollback_replaced_entry_locked(
+void ucache_rollback_replaced_entry_locked(
 		zend_string *key,
-		php_ucache_replaced_entry_t *replaced_entry)
+		ucache_entry *replaced_entry)
 {
-	php_ucache_header_t *header;
-	php_ucache_entry_t *entries, *entry;
+	ucache_hdr *hdr;
+	ucache_entry *entry;
 	uint32_t slot_idx;
 	bool found;
 
-	if (!ucache_find_slot_ignore_expiry_locked(
+	if (!ucache_find_slot_locked(
 			key,
 			zend_string_hash_val(key),
-			&header,
+			UCACHE_FIND_SLOT_IGNORE_EXPIRY,
+			&hdr,
 			&slot_idx,
 			&found
 		)
@@ -4245,74 +3271,117 @@ void php_ucache_rollback_replaced_entry_locked(
 		return;
 	}
 
-	entries = php_ucache_entries_ptr(header);
-	entry = &entries[slot_idx];
+	entry = &ucache_entries_ptr(hdr)[slot_idx];
 
-	if (replaced_entry != NULL && replaced_entry->found) {
+	if (ucache_entry_is_used(replaced_entry)) {
 		if (found) {
-			ucache_release_entry_storage_except_locked(entry, &replaced_entry->entry);
+			ucache_pool_idx_unlink_locked(hdr, entry, slot_idx);
+			ucache_release_entry_storage_locked(entry);
 		} else {
-			if (entry->state == PHP_UCACHE_ENTRY_TOMBSTONE && header->tombstone_count != 0) {
-				header->tombstone_count--;
+			if (ucache_entry_is_tombstone(entry) && hdr->tombstone_count != 0) {
+				hdr->tombstone_count--;
 			}
 
-			header->count++;
+			hdr->count++;
 		}
 
-		*entry = replaced_entry->entry;
+		if (found && entry->expires_at != 0) {
+			hdr->expiring_count--;
+		}
 
-		php_ucache_occupancy_set(header, slot_idx);
+		if (replaced_entry->expires_at != 0) {
+			hdr->expiring_count++;
+		}
 
-		replaced_entry->found = false;
+		*entry = *replaced_entry;
 
-		memset(&replaced_entry->entry, 0, sizeof(replaced_entry->entry));
+		ucache_expiry_floor_lower_locked(hdr, entry->expires_at);
+
+		ucache_pool_idx_link_locked(hdr, entry, slot_idx);
+		ucache_pool_bucket_changed_locked(hdr, ucache_entry_pool_bucket(entry));
+		ucache_entry_set_block_owner(entry, slot_idx);
+
+		ucache_bump_mutation_epoch_locked(hdr);
+
+		entry->gen = hdr->mutation_epoch;
+
+		memset(replaced_entry, 0, sizeof(*replaced_entry));
 	} else if (found) {
-		ucache_delete_entry_locked(header, entry);
+		ucache_delete_entry_locked(hdr, entry, slot_idx);
 	}
 }
 
-void php_ucache_delete_locked(zend_string *key)
+uint64_t ucache_delete_locked(zend_string *key)
 {
-	php_ucache_header_t *header;
-	php_ucache_entry_t *entries;
+	ucache_hdr *hdr;
+	ucache_entry *entries;
 	zend_ulong hash = zend_string_hash_val(key);
 	uint32_t slot_idx;
 	bool found;
 
 	ucache_maybe_expunge_expired_locked();
 
-	if (!ucache_find_slot_for_write_locked(key, hash, &header, &slot_idx, &found) || !found) {
-		return;
+	if (ucache_find_slot_for_write_locked(key, hash, &hdr, &slot_idx, &found) && found) {
+		entries = ucache_entries_ptr(hdr);
+
+		ucache_delete_entry_locked(hdr, &entries[slot_idx], slot_idx);
+
+		ucache_maybe_rehash_locked();
 	}
 
-	entries = php_ucache_entries_ptr(header);
-
-	ucache_delete_entry_locked(header, &entries[slot_idx]);
-
-	ucache_maybe_rehash_locked();
+	return ucache_hdr_is_initialized_locked()
+		? ucache_hdr_ptr()->mutation_epoch
+		: 0
+	;
 }
 
-void php_ucache_delete_by_prefix_locked(zend_string *prefix)
+uint64_t ucache_delete_gen_locked(zend_string *key, uint64_t gen)
 {
-	php_ucache_header_t *header;
-	php_ucache_entry_t *entries, *entry;
-	uint32_t i;
-	bool deleted = false;
+	ucache_hdr *hdr;
+	ucache_entry *entry;
+	uint32_t slot_idx;
+	bool found;
 
-	header = php_ucache_header_ptr();
-	if (!header || !php_ucache_header_adoptable_locked()) {
+	if (!ucache_find_slot_for_write_locked(key, zend_string_hash_val(key), &hdr, &slot_idx, &found) || !found) {
+		return 0;
+	}
+
+	entry = &ucache_entries_ptr(hdr)[slot_idx];
+	if (entry->gen != gen) {
+		return 0;
+	}
+
+	ucache_delete_entry_locked(hdr, entry, slot_idx);
+
+	ucache_maybe_rehash_locked();
+
+	return hdr->mutation_epoch;
+}
+
+void ucache_delete_by_prefix_locked(zend_string *prefix)
+{
+	ucache_hdr *hdr;
+	ucache_entry *entries, *entry;
+	ucache_pool_links *links;
+	uint32_t bucket, ref, next, slot;
+
+	hdr = ucache_hdr_ptr();
+	if (hdr == NULL || !ucache_hdr_adoptable_locked()) {
 		return;
 	}
 
-	entries = php_ucache_entries_ptr(header);
-	for (i = php_ucache_occupancy_next_used(header, 0);
-		i != UINT32_MAX;
-		i = php_ucache_occupancy_next_used(header, i + 1)
-	) {
-		entry = &entries[i];
-		if (entry->key_len < ZSTR_LEN(prefix) ||
+	entries = ucache_entries_ptr(hdr);
+	links = ucache_pool_links_ptr(hdr);
+	bucket = (uint32_t) (zend_string_hash_val(prefix) & (UCACHE_POOL_BUCKETS - 1));
+	for (ref = hdr->pool_bucket_heads[bucket]; ref != 0; ref = next) {
+		ZEND_ASSERT(ref <= hdr->capacity);
+		slot = ucache_pool_link_ref_slot(ref);
+		entry = &entries[slot];
+		next = links[slot].next;
+		if (!ucache_entry_is_used(entry) ||
+			entry->key_len < ZSTR_LEN(prefix) ||
 			memcmp(
-				ucache_ptr_in_header(header, entry->key_offset),
+				ucache_entry_key_in_hdr(hdr, entry),
 				ZSTR_VAL(prefix),
 				ZSTR_LEN(prefix)
 			) != 0
@@ -4320,53 +3389,56 @@ void php_ucache_delete_by_prefix_locked(zend_string *prefix)
 			continue;
 		}
 
-		ucache_delete_entry_locked(header, entry);
-		deleted = true;
+		ucache_delete_entry_locked(hdr, entry, slot);
 	}
+
+	ucache_sgraph_reclaim_orphaned_locked();
 
 	ucache_maybe_rehash_locked();
-
-	/* Interned keys that only the wiped entries used are freed now. */
-	if (deleted) {
-		(void) php_ucache_shared_graph_intern_sweep_locked();
-	}
 }
 
-bool php_ucache_atomic_update_locked(
+bool ucache_atomic_update_locked(
 		zend_string *key,
 		zend_long step,
 		zend_long ttl,
 		bool decrement,
-		php_ucache_atomic_update_result_t *result)
+		ucache_atomic_update_result *result)
 {
-	php_ucache_header_t *header;
-	php_ucache_entry_t *entries, *entry;
+	ucache_hdr *hdr;
+	ucache_entry *entries, *entry;
 	zend_ulong hash = zend_string_hash_val(key);
 	zend_long updated;
 	uint32_t slot_idx;
 	bool found, is_overflow;
 
-	result->new_value = 0;
+	result->new_val = 0;
+	result->stored_gen = 0;
 	result->is_overflow = false;
-	result->is_type_error = false;
+	result->is_type_err = false;
 
 	ucache_maybe_expunge_expired_locked();
 
-	if (!ucache_find_slot_for_write_locked(key, hash, &header, &slot_idx, &found) || !found) {
-		return ucache_atomic_insert_missing_locked(key, step, ttl, decrement, result);
+	if (!ucache_find_slot_for_write_locked(key, hash, &hdr, &slot_idx, &found) || !found) {
+		return ucache_atomic_insert_missing_locked(
+			key,
+			step,
+			ttl,
+			decrement,
+			result
+		);
 	}
 
-	entries = php_ucache_entries_ptr(header);
+	entries = ucache_entries_ptr(hdr);
 	entry = &entries[slot_idx];
-	if (entry->value_type != PHP_UCACHE_VALUE_LONG) {
-		result->is_type_error = true;
+	if (ucache_entry_val_type(entry) != UCACHE_VAL_LONG) {
+		result->is_type_err = true;
 
 		return false;
 	}
 
 	is_overflow = decrement
-		? ucache_long_sub_overflow(entry->long_value, step, &updated)
-		: ucache_long_add_overflow(entry->long_value, step, &updated)
+		? ucache_long_sub_overflow(entry->long_val, step, &updated)
+		: ucache_long_add_overflow(entry->long_val, step, &updated)
 	;
 	if (is_overflow) {
 		result->is_overflow = true;
@@ -4374,171 +3446,220 @@ bool php_ucache_atomic_update_locked(
 		return false;
 	}
 
-	entry->long_value = updated;
+	entry->long_val = updated;
 
-	ucache_touch_entry_access(header, slot_idx);
+	ucache_touch_entry_access(hdr, hdr->capacity, slot_idx);
 
-	php_ucache_bump_mutation_epoch_locked(header);
+	ucache_bump_mutation_epoch_locked(hdr);
 
-	entry->generation = header->mutation_epoch;
+	entry->gen = hdr->mutation_epoch;
 
-	result->new_value = entry->long_value;
+	result->new_val = entry->long_val;
+	result->stored_gen = entry->gen;
+	result->stored_slot = slot_idx;
+	result->stored_expires_at = entry->expires_at;
+	if (entry->expires_at == 0 && ttl == 0) {
+		ucache_scalar_write_enable_locked(hdr);
+	}
 
 	return true;
 }
 
-void php_ucache_release_request_local_slots(void)
+bool ucache_try_store_scalar(
+		ucache_key_record *record,
+		const ucache_prepared_val *prepared)
 {
-	ucache_release_request_local_slot_table(&UC_G(request_local_slot_table));
+	ucache_hdr *hdr;
+	ucache_entry *entry;
+	uint32_t stripe_idx, slot_idx;
+
+	ZEND_ASSERT(prepared->val_type <= UCACHE_VAL_DOUBLE);
+
+	if (ucache_key_record_is_cur_miss(record)) {
+		return false;
+	}
+
+	ucache_scalar_write_release_record_val(record);
+
+	if (!ucache_scalar_write_begin(prepared->hash, &hdr, &stripe_idx)) {
+		return false;
+	}
+
+	if (!ucache_scalar_write_locate(hdr, record, &slot_idx)) {
+		ucache_scalar_write_end();
+
+		return false;
+	}
+
+	entry = &ucache_entries_ptr(hdr)[slot_idx];
+	if (entry->expires_at != 0 || !ucache_entry_holds_scalar(entry) ||
+		!ucache_scalar_write_can_skip_sweep()
+	) {
+		ucache_scalar_write_end();
+
+		return false;
+	}
+
+	ucache_scalar_write_prepare(hdr, stripe_idx, slot_idx);
+
+	ucache_entry_set_val_type(entry, prepared->val_type);
+	if (prepared->val_type == UCACHE_VAL_DOUBLE) {
+		entry->double_val = prepared->double_val;
+	} else {
+		ucache_entry_set_long_zero_filled(
+			entry,
+			prepared->val_type == UCACHE_VAL_LONG ? prepared->long_val : 0
+		);
+	}
+
+	ucache_touch_entry_access(hdr, hdr->capacity, slot_idx);
+
+	ucache_scalar_write_commit(hdr, stripe_idx, entry);
+
+	ucache_key_record_mark_hit(record, entry->gen, slot_idx, entry, NULL);
+
+	ucache_scalar_write_end();
+
+	return true;
 }
 
-void php_ucache_release_active_request_local_slots_by_prefix(zend_string *prefix)
+bool ucache_try_atomic_update(
+		ucache_key_record *record,
+		zend_long step,
+		zend_long ttl,
+		bool decrement,
+		ucache_atomic_update_result *result,
+		bool *updated)
 {
-	zend_string *key, **keys;
-	HashTable *slots, **slots_ptr = &UC_G(request_local_slot_table);
-	uint32_t i, slot_count, count = 0;
+	ucache_hdr *hdr;
+	ucache_entry *entry;
+	zend_long val;
+	uint32_t stripe_idx, slot_idx;
 
-	if (*slots_ptr == NULL) {
-		return;
+	if (ttl != 0 || ucache_key_record_is_cur_miss(record)) {
+		return false;
 	}
 
-	slot_count = zend_hash_num_elements(*slots_ptr);
-	if (slot_count == 0) {
-		ucache_release_request_local_slot_table(slots_ptr);
+	ucache_scalar_write_release_record_val(record);
 
-		return;
+	if (!ucache_scalar_write_begin(ZSTR_H(record->storage_key), &hdr, &stripe_idx)) {
+		return false;
 	}
 
-	slots = *slots_ptr;
-	keys = safe_emalloc(slot_count, sizeof(zend_string *), 0);
-	ZEND_HASH_FOREACH_STR_KEY(slots, key) {
-		if (key != NULL &&
-			ZSTR_LEN(key) >= ZSTR_LEN(prefix) &&
-			memcmp(
-				ZSTR_VAL(key),
-				ZSTR_VAL(prefix),
-				ZSTR_LEN(prefix)
-			) == 0
-		) {
-			keys[count++] = zend_string_copy(key);
-		}
-	} ZEND_HASH_FOREACH_END();
+	if (!ucache_scalar_write_locate(hdr, record, &slot_idx)) {
+		ucache_scalar_write_end();
 
-	for (i = 0; i < count; i++) {
-		if (*slots_ptr == slots) {
-			zend_hash_del(slots, keys[i]);
-		}
-
-		zend_string_release(keys[i]);
+		return false;
 	}
 
-	efree(keys);
+	entry = &ucache_entries_ptr(hdr)[slot_idx];
+	if (entry->expires_at != 0 || !ucache_entry_holds_scalar(entry) ||
+		!ucache_scalar_write_can_skip_sweep()
+	) {
+		ucache_scalar_write_end();
 
-	if (*slots_ptr == slots && zend_hash_num_elements(slots) == 0) {
-		ucache_release_request_local_slot_table(slots_ptr);
+		return false;
 	}
+
+	memset(result, 0, sizeof(*result));
+
+	*updated = false;
+
+	if (ucache_entry_val_type(entry) != UCACHE_VAL_LONG) {
+		result->is_type_err = true;
+	} else if (decrement
+			? ucache_long_sub_overflow(entry->long_val, step, &val)
+			: ucache_long_add_overflow(entry->long_val, step, &val)
+	) {
+		result->is_overflow = true;
+	} else {
+		ucache_scalar_write_prepare(hdr, stripe_idx, slot_idx);
+		entry->long_val = val;
+
+		ucache_touch_entry_access(hdr, hdr->capacity, slot_idx);
+
+		ucache_scalar_write_commit(hdr, stripe_idx, entry);
+
+		ucache_key_record_mark_hit(record, entry->gen, slot_idx, entry, NULL);
+
+		result->new_val = val;
+		*updated = true;
+	}
+
+	ucache_scalar_write_end();
+
+	return true;
 }
 
-PHP_UCACHE_HOT php_ucache_optimistic_result_t php_ucache_fetch_optimistic(
-		zend_string *key,
+PHP_UCACHE_HOT ucache_optimistic_result ucache_fetch_optimistic(
+		ucache_key_record *record,
 		zval *return_value,
 		bool allow_decode)
 {
-	php_ucache_header_t *header;
-	php_ucache_entry_t snapshot;
-	php_ucache_lookup_entry_t *lookup_entries;
-	php_ucache_optimistic_result_t result;
-	zend_ulong hash;
+	ucache_hdr *hdr = ucache_hdr_ptr();
+	zend_string *key = record->storage_key;
 	uint64_t seq, epoch;
-	uint32_t slot_idx = 0, hint_slot;
-	bool have_snapshot;
 
-	if (!ucache_optimistic_header(&header, &seq)) {
-		return PHP_UCACHE_OPTIMISTIC_FALLBACK;
+	if (!UCACHE_OPTIMISTIC_ENABLED || hdr == NULL || UCACHE_DEBUG_FAULT("FORCE_LOCKED_FETCH")) {
+		return UCACHE_OPTIMISTIC_FALLBACK;
 	}
 
-	epoch = header->mutation_epoch;
-	hash = zend_string_hash_val(key);
-	lookup_entries = ucache_lookup_cache_set(hash);
-
-	if (ucache_optimistic_scan_lookup_cache(
-			header, key, hash, seq, epoch, lookup_entries, return_value, &hint_slot, &result
-		)
-	) {
-		return result;
+	seq = ucache_load_seq(hdr, key);
+	if (seq < 2 || (seq & 1) != 0) {
+		return UCACHE_OPTIMISTIC_FALLBACK;
 	}
 
-	have_snapshot = ucache_optimistic_try_hint_slot(
-		header, key, hash, hint_slot, &snapshot, &slot_idx
-	);
+	epoch = ucache_atomic_load_64(&hdr->mutation_epoch);
 
-	result = ucache_optimistic_locate(
-		header, key, hash, seq, epoch, lookup_entries, have_snapshot, true, &snapshot, &slot_idx
-	);
-	if (result != PHP_UCACHE_OPTIMISTIC_FOUND) {
-		return result;
+	if (record->mutation_epoch == epoch) {
+		if (record->state == UCACHE_RECORD_MISS) {
+			return UCACHE_OPTIMISTIC_MISS;
+		}
+
+		if (record->val_kind != UCACHE_RECORD_VAL_NONE &&
+			ucache_key_record_val_usable(hdr, record)
+		) {
+			if (record->expires_at != 0 && ucache_read_seq(hdr, key) != seq) {
+				return UCACHE_OPTIMISTIC_FALLBACK;
+			}
+
+			ZVAL_COPY(return_value, &record->val);
+
+			ucache_touch_cached_entry_access(hdr, record->slot_idx, &record->access_touches);
+
+			return UCACHE_OPTIMISTIC_FOUND;
+		}
 	}
 
-	if (ucache_scalar_to_zval(snapshot.value_type, snapshot.long_value, snapshot.double_value, return_value)) {
-		return PHP_UCACHE_OPTIMISTIC_FOUND;
-	}
-
-	switch (snapshot.value_type) {
-		case PHP_UCACHE_VALUE_STRING:
-			return ucache_optimistic_emit_string(header, key, seq, &snapshot, return_value);
-		case PHP_UCACHE_VALUE_SHARED_GRAPH:
-			return ucache_optimistic_emit_shared_graph(header, key, seq, &snapshot, return_value, allow_decode);
-		default:
-			return PHP_UCACHE_OPTIMISTIC_FALLBACK;
-	}
+	return ucache_fetch_optimistic_entry(hdr, record, seq, epoch, return_value, allow_decode);
 }
 
-php_ucache_optimistic_result_t php_ucache_exists_optimistic(zend_string *key)
+PHP_UCACHE_HOT ucache_optimistic_result ucache_exists_optimistic(ucache_key_record *record)
 {
-	const void *ctx;
-	php_ucache_header_t *header;
-	php_ucache_entry_t snapshot;
-	php_ucache_lookup_entry_t *lookup_entries, *lookup_entry;
-	zend_ulong hash;
+	ucache_hdr *hdr = ucache_hdr_ptr();
+	zend_string *key = record->storage_key;
 	uint64_t seq, epoch;
-	uint32_t way, slot_idx = 0;
 
-	if (!ucache_optimistic_header(&header, &seq)) {
-		return PHP_UCACHE_OPTIMISTIC_FALLBACK;
+	if (!UCACHE_OPTIMISTIC_ENABLED || hdr == NULL) {
+		return UCACHE_OPTIMISTIC_FALLBACK;
 	}
 
-	epoch = header->mutation_epoch;
-	hash = zend_string_hash_val(key);
-	lookup_entries = ucache_lookup_cache_set(hash);
-
-	ctx = (const void *) php_ucache_active_context();
-	for (way = 0; way < PHP_UCACHE_LOOKUP_WAYS; way++) {
-		lookup_entry = &lookup_entries[way];
-
-		if (lookup_entry->state == PHP_UCACHE_LOOKUP_EMPTY ||
-			lookup_entry->hash != hash ||
-			lookup_entry->mutation_epoch != epoch ||
-			lookup_entry->ctx != ctx
-		) {
-			continue;
-		}
-
-		if (lookup_entry->state == PHP_UCACHE_LOOKUP_MISS) {
-			if (lookup_entry->key == NULL || !zend_string_equals(lookup_entry->key, key)) {
-				continue;
-			}
-
-			if (ucache_seq_reload(&header->write_seq) != seq) {
-				return PHP_UCACHE_OPTIMISTIC_FALLBACK;
-			}
-
-			return PHP_UCACHE_OPTIMISTIC_MISS;
-		}
-
-		break;
+	seq = ucache_load_seq(hdr, key);
+	if (seq < 2 || (seq & 1) != 0) {
+		return UCACHE_OPTIMISTIC_FALLBACK;
 	}
 
-	return ucache_optimistic_locate(
-		header, key, hash, seq, epoch, lookup_entries, false, false, &snapshot, &slot_idx
-	);
+	epoch = ucache_atomic_load_64(&hdr->mutation_epoch);
+
+	if (record->mutation_epoch == epoch) {
+		if (record->state == UCACHE_RECORD_MISS) {
+			return UCACHE_OPTIMISTIC_MISS;
+		}
+
+		if (record->state == UCACHE_RECORD_HIT && record->expires_at == 0) {
+			return UCACHE_OPTIMISTIC_FOUND;
+		}
+	}
+
+	return ucache_exists_optimistic_entry(hdr, record, seq, epoch);
 }

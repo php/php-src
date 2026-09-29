@@ -17,7 +17,7 @@
 #endif
 
 #include "php.h"
-
+#include "ext/user_cache/php_user_cache.h" /* For user_cache safe direct path */
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 #include "zend_hash.h"
@@ -28,8 +28,6 @@
 #include "spl_dllist_arginfo.h"
 #include "spl_exceptions.h"
 #include "spl_functions.h" /* For spl_set_private_debug_info_property() */
-
-#include "ext/user_cache/php_user_cache.h" /* For user_cache safe direct path */
 
 static zend_object_handlers spl_handler_SplDoublyLinkedList;
 PHPAPI zend_class_entry  *spl_ce_SplDoublyLinkedList;
@@ -1048,8 +1046,6 @@ error:
 
 } /* }}} */
 
-/* Builds the state array shared by __serialize() and the user-cache safe-direct
- * path. The members slot only exists in the __serialize() format. */
 static void spl_dllist_object_serialize_state(zval *object, zval *return_value, bool with_members)
 {
 	spl_dllist_object *intern = Z_SPLDLLIST_P(object);
@@ -1123,11 +1119,11 @@ PHP_METHOD(SplDoublyLinkedList, __unserialize) {
 	object_properties_load(&intern->std, Z_ARRVAL_P(members_zv));
 } /* }}} */
 
-static bool spl_dllist_object_copy_user_cache_state(
+static bool spl_dllist_object_copy_ucache_state(
 		void *ctx,
 		zend_object *new_obj,
 		zend_object *old_obj,
-		php_ucache_safe_direct_clone_value_func_t clone_value)
+		php_ucache_safe_direct_clone_val_func_t clone_value)
 {
 	spl_dllist_object *old_intern, *new_intern;
 	spl_ptr_llist_element *current;
@@ -1135,12 +1131,15 @@ static bool spl_dllist_object_copy_user_cache_state(
 
 	old_intern = spl_dllist_from_obj(old_obj);
 	new_intern = spl_dllist_from_obj(new_obj);
-
-	ZEND_ASSERT(new_intern->llist->count == 0);
+	if (new_intern->llist->count != 0) {
+		return false;
+	}
 
 	new_intern->flags = old_intern->flags;
 	current = old_intern->llist->head;
 	while (current) {
+		ZVAL_UNDEF(&cloned_elem);
+
 		if (!clone_value(ctx, &cloned_elem, &current->data)) {
 			return false;
 		}
@@ -1155,41 +1154,22 @@ static bool spl_dllist_object_copy_user_cache_state(
 	return !EG(exception);
 }
 
-static bool spl_dllist_object_user_cache_state_has_unstorable(
-		void *ctx,
-		const zval *object,
-		php_ucache_safe_direct_value_has_unstorable_func_t value_has_unstorable)
-{
-	spl_dllist_object *intern;
-	spl_ptr_llist_element *current;
-
-	intern = Z_SPLDLLIST_P((zval *) object);
-	current = intern->llist->head;
-	while (current) {
-		if (value_has_unstorable(ctx, &current->data)) {
-			return true;
-		}
-
-		current = current->next;
-	}
-
-	return false;
-}
-
-static bool spl_dllist_object_serialize_user_cache_state(zval *state, const zval *object)
+static bool spl_dllist_object_serialize_ucache_state(zval *state, const zval *object)
 {
 	spl_dllist_object_serialize_state((zval *) object, state, /* with_members */ false);
 
 	return true;
 }
 
-/* Strict restore for the machine-written user-cache state: validates the flags
- * value. Returns false on malformed data. */
-static bool spl_dllist_object_unserialize_user_cache_state(zval *object, zval *state)
+static bool spl_dllist_object_unserialize_ucache_state(zval *object, zval *state)
 {
 	spl_dllist_object *intern = Z_SPLDLLIST_P(object);
 	zend_long flags;
 	zval *flags_zv, *storage_zv, *elem;
+
+	if (Z_TYPE_P(state) != IS_ARRAY) {
+		return false;
+	}
 
 	flags_zv = zend_hash_index_find(Z_ARRVAL_P(state), 0);
 	storage_zv = zend_hash_index_find(Z_ARRVAL_P(state), 1);
@@ -1206,7 +1186,9 @@ static bool spl_dllist_object_unserialize_user_cache_state(zval *object, zval *s
 		return false;
 	}
 
-	ZEND_ASSERT(intern->llist->count == 0);
+	if (intern->llist->count != 0) {
+		return false;
+	}
 
 	intern->flags = (int) flags;
 
@@ -1217,11 +1199,10 @@ static bool spl_dllist_object_unserialize_user_cache_state(zval *object, zval *s
 	return !EG(exception);
 }
 
-static const php_ucache_safe_direct_handlers_t spl_dllist_user_cache_handlers = {
-	.copy = spl_dllist_object_copy_user_cache_state,
-	.state_has_unstorable = spl_dllist_object_user_cache_state_has_unstorable,
-	.state_serialize = spl_dllist_object_serialize_user_cache_state,
-	.state_unserialize = spl_dllist_object_unserialize_user_cache_state,
+static const php_ucache_safe_direct_handlers spl_dllist_ucache_handlers = {
+	.copy = spl_dllist_object_copy_ucache_state,
+	.state_serialize = spl_dllist_object_serialize_ucache_state,
+	.state_unserialize = spl_dllist_object_unserialize_ucache_state,
 };
 
 /* {{{ Inserts a new entry before the specified $index consisting of $newval. */
@@ -1342,7 +1323,7 @@ PHP_MINIT_FUNCTION(spl_dllist) /* {{{ */
 	spl_ce_SplStack->create_object = spl_dllist_object_new;
 	spl_ce_SplStack->get_iterator = spl_dllist_get_iterator;
 
-	php_ucache_safe_direct_register_class(spl_ce_SplDoublyLinkedList, &spl_dllist_user_cache_handlers);
+	php_ucache_safe_direct_register_class(spl_ce_SplDoublyLinkedList, &spl_dllist_ucache_handlers);
 
 	return SUCCESS;
 }

@@ -1,5 +1,5 @@
 --TEST--
-CGI/FastCGI: boundary rendezvous files live in a per-uid private directory and fail closed when it is squatted
+CGI/FastCGI: boundary rendezvous objects live in a per-uid private directory and fail closed when it is squatted
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY === 'Windows') die('skip boundary shared memory is not supported on Windows');
@@ -18,6 +18,8 @@ die('skip CGI SAPI binary not available');
 ?>
 --FILE--
 <?php
+
+require_once __DIR__ . '/user_cache_fcgi_tester.inc';
 
 function user_cache_cgi_binary(): string
 {
@@ -123,8 +125,7 @@ PHP);
 try {
     $phpCgi = user_cache_cgi_binary();
 
-    /* Healthy startup: two independently started processes rendezvous
-     * through the private directory. */
+    /* Independently started processes share the private directory. */
     $lockfilePath = $root . '/lock';
     mkdir($lockfilePath, 0777);
 
@@ -145,15 +146,10 @@ try {
     var_dump(sprintf('%04o', fileperms($privateDir . '/salt') & 0777));
     var_dump(preg_match('/^[0-9a-f]{24}\.lock$/', $entries[0]) === 1);
     var_dump(sprintf('%04o', fileperms($privateDir . '/' . $entries[0]) & 0777));
-    var_dump(preg_match('/^[0-9a-f]{24}\.seg$/', $entries[1]) === 1);
-    var_dump(substr($entries[1], 0, 24) === substr($entries[0], 0, 24));
-    var_dump(is_file($privateDir . '/' . $entries[1]) && !is_link($privateDir . '/' . $entries[1]));
-    var_dump(sprintf('%04o', fileperms($privateDir . '/' . $entries[1]) & 0777));
-    var_dump(filesize($privateDir . '/' . $entries[1]) === 16 * 1024 * 1024);
+    /* Nothing but the private directory lands in user_cache.lockfile_path. */
     var_dump(user_cache_private_dir_entries($lockfilePath) === [$privateName]);
 
-    /* Squatted directory (same uid, wrong mode): startup fails closed,
-     * names the path, and creates nothing inside. */
+    /* Reject a directory owned by this uid with unsafe permissions. */
     $lockfilePath = $root . '/lock-mode';
     mkdir($lockfilePath . '/' . $privateName, 0755, true);
 
@@ -175,6 +171,7 @@ try {
 
     echo "Done\n";
 } finally {
+    FcgiTester::removeBoundarySegments($root);
     user_cache_cgi_rm_rf($root);
 }
 
@@ -185,16 +182,11 @@ second: Available:seeded
 bool(true)
 bool(true)
 string(4) "0700"
-int(3)
+int(2)
 int(32)
 string(4) "0600"
 bool(true)
 string(4) "0600"
-bool(true)
-bool(true)
-bool(true)
-string(4) "0600"
-bool(true)
 bool(true)
 wrong-mode: UnavailableBySharedMemoryInitializationFailed:MISS
 UserCache boundary directory %ROOT%/lock-mode/.PhpUserCacheBnd.%d is unusable (not a private directory owned by this uid); it must be a directory owned by uid %d with mode 0700 (see user_cache.lockfile_path)
