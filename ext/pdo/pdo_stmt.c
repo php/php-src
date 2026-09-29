@@ -2158,6 +2158,22 @@ static HashTable *dbstmt_get_gc(zend_object *object, zval **gc_data, int *gc_cou
 	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
 	zend_get_gc_buffer_add_zval(gc_buffer, &stmt->database_object_handle);
 	zend_get_gc_buffer_add_zval(gc_buffer, &stmt->fetch.into);
+	if (stmt->bound_params) {
+		zval *val;
+		ZEND_HASH_FOREACH_VAL(stmt->bound_params, val) {
+			struct pdo_bound_param_data *param = Z_PTR_P(val);
+			zend_get_gc_buffer_add_zval(gc_buffer, &param->parameter);
+			zend_get_gc_buffer_add_zval(gc_buffer, &param->driver_params);
+		} ZEND_HASH_FOREACH_END();
+	}
+	if (stmt->bound_columns) {
+		zval *val;
+		ZEND_HASH_FOREACH_VAL(stmt->bound_columns, val) {
+			struct pdo_bound_param_data *param = Z_PTR_P(val);
+			zend_get_gc_buffer_add_zval(gc_buffer, &param->parameter);
+			zend_get_gc_buffer_add_zval(gc_buffer, &param->driver_params);
+		} ZEND_HASH_FOREACH_END();
+	}
 	zend_get_gc_buffer_use(gc_buffer, gc_data, gc_count);
 
 	/**
