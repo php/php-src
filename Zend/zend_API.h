@@ -422,9 +422,9 @@ ZEND_API bool zend_is_callable_at_frame(
 		const zval *callable, zend_object *object, const zend_execute_data *frame,
 		uint32_t check_flags, zend_fcall_info_cache *fcc, char **error);
 ZEND_API bool zend_is_callable_ex(const zval *callable, zend_object *object, uint32_t check_flags, zend_string **callable_name, zend_fcall_info_cache *fcc, char **error);
-static zend_always_inline bool zend_is_callable(const zval *callable, uint32_t check_flags, zend_string **callable_name)
+static zend_always_inline bool zend_is_callable(const zval *callable, zend_fcall_info_cache *fcc, char **error)
 {
-	return zend_is_callable_ex(callable, NULL, check_flags, callable_name, NULL, NULL);
+	return zend_is_callable_ex(callable, NULL, 0, NULL, fcc, error);
 }
 
 ZEND_API const char *zend_get_module_version(const char *module_name);
