@@ -397,7 +397,7 @@ void ucache_win32_log_alloc_failure(const char *failure, const char *err_in, int
 	char *msg = php_win32_error_to_msg(err_code);
 
 	ucache_warn_docref(
-		"Cache: %s: %s: %s (%d)",
+		"UserCache: %s: %s: %s (%d)",
 		failure,
 		err_in != NULL ? err_in : "unknown",
 		msg,
@@ -593,7 +593,7 @@ int ucache_posix_alloc_err_code(void)
 void ucache_posix_log_alloc_failure(const char *failure, const char *err_in, int err_code)
 {
 	ucache_warn_docref(
-		"Cache: %s: %s: %s (%d)",
+		"UserCache: %s: %s: %s (%d)",
 		failure,
 		err_in != NULL ? err_in : "unknown",
 		strerror(err_code),

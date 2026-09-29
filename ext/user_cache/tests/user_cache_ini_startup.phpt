@@ -48,10 +48,12 @@ echo $run(
 );
 
 /* shm_size up to the addressable limit (32 GiB on 64-bit builds) is accepted; larger values are clamped with a warning */
-echo $run('-d user_cache.shm_size=8192M -d user_cache.entries_hint=1000', 'var_dump(UserCache\\Cache::getStatus()->getConfiguredMemory());');
-echo $run('-d user_cache.shm_size=34359738360 -d user_cache.entries_hint=1000', 'var_dump(UserCache\\Cache::getStatus()->getConfiguredMemory());');
-echo $run('-d user_cache.shm_size=34359738361 -d user_cache.entries_hint=1000', 'var_dump(UserCache\\Cache::getStatus()->getConfiguredMemory());');
-echo $run('-d user_cache.shm_size=64G -d user_cache.entries_hint=1000', 'var_dump(UserCache\\Cache::getStatus()->getConfiguredMemory());');
+/* Whether the host can actually allocate that much (overcommit, tmpfs size) is not checked, so the allocation warning is silenced */
+$configured = 'var_dump(@UserCache\\Cache::getStatus()->getConfiguredMemory());';
+echo $run('-d user_cache.shm_size=8192M -d user_cache.entries_hint=1000', $configured);
+echo $run('-d user_cache.shm_size=34359738360 -d user_cache.entries_hint=1000', $configured);
+echo $run('-d user_cache.shm_size=34359738361 -d user_cache.entries_hint=1000', $configured);
+echo $run('-d user_cache.shm_size=64G -d user_cache.entries_hint=1000', $configured);
 
 echo "invalid values\n";
 

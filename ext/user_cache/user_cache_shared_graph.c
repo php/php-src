@@ -706,7 +706,7 @@ static void ucache_grow_sgraph_refs(void)
 	uint32_t capacity = UC_G(sgraph_ref_capacity), i, *slots;
 
 	if (UNEXPECTED(capacity > UINT32_MAX / 4)) {
-		zend_error_noreturn(E_ERROR, "UserCache shared graph reference capacity exceeded");
+		zend_error_noreturn(E_ERROR, "UserCache: shared graph reference capacity exceeded");
 	}
 
 	capacity = capacity == 0 ? 8 : capacity * 2;

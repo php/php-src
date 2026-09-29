@@ -3,6 +3,7 @@ UserCache\Cache: the remainder of a split free block joins the free block after 
 --SKIPIF--
 <?php
 if (!PHP_DEBUG) die('skip requires a debug build (fault injection is ZEND_DEBUG-only)');
+if (getenv('SKIP_REPEAT')) die('skip needs the block layout of a fresh segment');
 ?>
 --ENV--
 USER_CACHE_DEBUG_SMALL_BLOCK_MERGE_LIMIT=1

@@ -5,6 +5,9 @@ UserCache\Cache: a process-private segment is formatted without touching its zer
 if (PHP_OS_FAMILY !== 'Linux') die('skip needs the RssShmem line of /proc/self/status');
 if (!preg_match('/^RssShmem:/m', (string) @file_get_contents('/proc/self/status'))) die('skip kernel does not report RssShmem');
 if (!function_exists('proc_open')) die('skip proc_open() not available');
+if (@disk_free_space('/dev/shm') < 256 * 1024 * 1024) die('skip the posix memory model needs 256M free in /dev/shm');
+$shm = shell_exec(escapeshellarg(PHP_BINARY) . ' -n -d user_cache.preferred_memory_model=shm -r ' . escapeshellarg('echo ini_get("user_cache.preferred_memory_model");') . ' 2>&1');
+if ($shm !== 'shm') die('skip the shm memory model is not built in (no SysV shared memory)');
 ?>
 --FILE--
 <?php

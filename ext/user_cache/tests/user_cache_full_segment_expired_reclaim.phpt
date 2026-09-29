@@ -107,6 +107,10 @@ function lock_full_segment(): void
     var_dump($cache->unlock($fresh));
 }
 
+/* The segment outlives the request (php --repeat): start from fresh pools. */
+UserCache\Cache::deletePool('expiry-floor');
+UserCache\Cache::deletePool('lock-space');
+
 echo "ttl expiry floor:\n";
 ttl_expiry_floor();
 

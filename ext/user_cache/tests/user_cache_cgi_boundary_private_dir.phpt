@@ -189,13 +189,13 @@ bool(true)
 string(4) "0600"
 bool(true)
 wrong-mode: UnavailableBySharedMemoryInitializationFailed:MISS
-UserCache boundary directory %ROOT%/lock-mode/.PhpUserCacheBnd.%d is unusable (not a private directory owned by this uid); it must be a directory owned by uid %d with mode 0700 (see user_cache.lockfile_path)
-UserCache partition startup failed; UserCache will be unavailable
+UserCache: boundary directory %ROOT%/lock-mode/.PhpUserCacheBnd.%d is unusable (not a private directory owned by this uid); it must be a directory owned by uid %d with mode 0700 (see user_cache.lockfile_path)
+UserCache: partition startup failed; UserCache will be unavailable
 array(0) {
 }
 symlink: UnavailableBySharedMemoryInitializationFailed:MISS
-UserCache boundary directory %ROOT%/lock-symlink/.PhpUserCacheBnd.%d is unusable (%s); it must be a directory owned by uid %d with mode 0700 (see user_cache.lockfile_path)
-UserCache partition startup failed; UserCache will be unavailable
+UserCache: boundary directory %ROOT%/lock-symlink/.PhpUserCacheBnd.%d is unusable (%s); it must be a directory owned by uid %d with mode 0700 (see user_cache.lockfile_path)
+UserCache: partition startup failed; UserCache will be unavailable
 array(0) {
 }
 Done

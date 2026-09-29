@@ -1,7 +1,13 @@
 AC_CHECK_FUNCS([posix_fallocate])
 
-AC_SEARCH_LIBS([pthread_mutexattr_setrobust], [pthread],
-  [AC_CHECK_FUNCS([pthread_mutexattr_setrobust pthread_mutex_consistent pthread_mutex_clocklock])])
+AC_SEARCH_LIBS([pthread_mutexattr_setpshared], [pthread],
+  [AC_CHECK_FUNCS(m4_normalize([
+    pthread_mutex_clocklock
+    pthread_mutex_consistent
+    pthread_mutex_timedlock
+    pthread_mutexattr_setpshared
+    pthread_mutexattr_setrobust
+  ]))])
 
 PHP_NEW_EXTENSION([user_cache], m4_normalize([
     user_cache.c

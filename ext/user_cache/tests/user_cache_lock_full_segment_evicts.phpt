@@ -23,7 +23,7 @@ function value(Randomizer $randomizer): string|int|array
         case 3:
             return range(1, $randomizer->getInt(1, 300));
         case 4:
-            return $randomizer->nextInt();
+            return $randomizer->getInt(PHP_INT_MIN, PHP_INT_MAX);
         default:
             $value = [];
             for ($i = $randomizer->getInt(1, 50); $i > 0; $i--) {
