@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.27
 
+- Calendar:
+  . Fixed bug GH-23915 (easter_date() reports inconsistent year ranges and
+    returns -1 after the year 3000 on Windows). (Marc Bennewitz)
+
 - CLI
   . Fix GH-22567 (Windows ZTS CLI SAPI should refresh its TSRMLS cache during
     request activation). (matyhtf)
