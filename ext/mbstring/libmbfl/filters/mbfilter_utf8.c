@@ -312,6 +312,12 @@ static void mb_wchar_to_utf8(uint32_t *in, size_t len, mb_convert_buf *buf, bool
 		} else if (w < 0x800) {
 			MB_CONVERT_BUF_ENSURE(buf, out, limit, len + 2);
 			out = mb_convert_buf_add2(out, ((w >> 6) & 0x1F) | 0xC0, (w & 0x3F) | 0x80);
+		} else if (w >= 0xD800 && w <= 0xDFFF && buf->error_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_BADUTF8) {
+			/* Surrogate codepoints (which may come from UCS-2, UCS-4 or numeric entities) are not valid in UTF-8.
+			 * BADUTF8 mode is only used internally to search strings; there, encoding them keeps them distinct
+			 * instead of turning them all into the same error marker. */
+			MB_CONVERT_ERROR(buf, out, limit, w, mb_wchar_to_utf8);
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, len);
 		} else if (w < 0x10000) {
 			MB_CONVERT_BUF_ENSURE(buf, out, limit, len + 3);
 			out = mb_convert_buf_add3(out, ((w >> 12) & 0xF) | 0xE0, ((w >> 6) & 0x3F) | 0x80, (w & 0x3F) | 0x80);

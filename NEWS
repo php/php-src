@@ -2,8 +2,101 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.7.0alpha1
 
+- FPM:
+  . Use recommended TYPE, HELP order for OpenMetrics metadata.
+    (Marcel Hernandez)
+
+- Hash:
+  . Fixed mhash_keygen_s2k() truncating a $length above INT_MAX instead of
+    throwing a ValueError. (Marc Bennewitz)
+
 - Intl:
   . Fixed Collator attribute and strength methods not rejecting an
     unconstructed Collator. (Ilia Alshanetsky)
+
+- Lexbor:
+  . Merge patches lexbor/lexbor@8a14bc0 and lexbor/lexbor@f67ce4b, fixing a
+    heap buffer overflow in :lexbor-contains() parsing and buffer overflows
+    in malformed decode replay. (alexandre-daubois)
+
+- MBString:
+  . Fixed bug GH-23106 (mb_strpos() reads past the end of a haystack ending in
+    a truncated UTF-8 sequence). (Lazizbek Ergashev)
+  . Updated Unicode data tables to Unicode 18.0 (Yuya Hamada)
+  . Fixed mbstring functions emitting surrogates in UTF-8 output and flagging
+    it as valid UTF-8. (Nicolas Grekas)
+
+- MySQLi:
+  . Fix GH-22854: Fixed failed assertion when accessing mysqli property after
+    failed reconnection. (Kamil Tekiela)
+  . Fixed memory leak when closing a prepared statement after its connection
+    was killed. (Kamil Tekiela)
+
+- MySQLnd:
+  . Fixed field_count not resetting on OK packet. (Kamil Tekiela)
+
+- Opcache:
+  . Fixed bug GH-23693 (Tracing JIT produces wrong results for a guard on a
+    loop-invariant addition). (Ilia Alshanetsky)
+  . Fixed OSS-Fuzz #545352966 (default value AST of an SHM-persisted partial).
+    (ndossche)
+
+- PDO:
+  . Fixed PDOStatement::getColumnMeta() reading out of bounds for an invalid
+    column index. (Ilia Alshanetsky)
+  . Fixed PDOStatement::bindColumn() registering a binding for a column name
+    that is not in the result set. (Ilia Alshanetsky)
+  . Fixed bug GH-23962 (Destroying a persistent PDO instance rolls back a
+    transaction still in use by another instance). (Lazizbek Ergashev)
+
+- PGSQL:
+  . Fixed pg_lo_write() rejecting data containing null bytes. (Ilia Alshanetsky)
+
+- Posix:
+  . Reverted the validity check on the flags argument of posix_access().
+    (David Carlier)
+
+- Readline:
+  . Fixed a heap over-read in the interactive shell prompt when cli.prompt is
+    set to an empty string. (Ilia Alshanetsky)
+
+- Session:
+  . Fixed session_start() continuing after a failed create_sid() when
+    session.use_strict_mode rejects the supplied ID. (Ilia Alshanetsky)
+  . Fixed exceptions from user-defined create_sid() handlers being replaced
+    by return-value validation errors. (Ilia Alshanetsky)
+
+- SOAP:
+  . Fixed the SOAP client accepting a response body shorter than its
+    Content-Length and reusing the connection. (Ilia Alshanetsky)
+
+- SPL:
+  . Fixed bug GH-23385 (SplDoublyLinkedList::serialize() use-after-free when
+    __serialize() removes an element). (David Carlier)
+
+- SQLite:
+  . Fixed a crash when SQLite3::close() is called from a userland callback.
+    (Ilia Alshanetsky)
+
+- Standard:
+  . Fixed bug #60110 (fclose(), file_put_contents(), copy() do not return false
+    properly). (Jakub Zelenka, Ilija Tovilo)
+  . Fixed three Windows-only proc_open() defects: an uninitialized
+    PROCESS_INFORMATION, an indeterminate comspec pointer after a failed
+    lookup, and an unchecked CreateFileA() failure. (Ilia Alshanetsky)
+  . Fix persistent stream context lifetime during shutdown (Levi Morrison)
+  . Fixed bug GH-23780 (unserialize('') fails silently). (timwolla)
+  . Improved performance of array_splice() when inserting without removing
+    elements. (mehmetcansahin)
+  . Enforce max_filter_count: limit the number of filters that can be chained
+    in a php://filter URL. (Sjoerd Langkemper)
+
+- URI:
+  . Fix casing of enum cases in UriHostType and UrlHostType to match the RFC
+    and PHP’s naming policy. (timwolla)
+
+- Zlib:
+  . Fixed inflate_init() dropping the preset dictionary for raw streams with
+    a non-default window. (Ilia Alshanetsky)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

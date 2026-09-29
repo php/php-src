@@ -19,6 +19,16 @@ PHP 8.7 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- PDO:
+  . PDOStatement::bindColumn() now throws a ValueError when the column name is
+    not present in the result set. It previously reported the condition
+    through PDO::ATTR_ERRMODE and returned false.
+
+- Standard:
+  . The number of filters that can be chained in a php://filter URL is limited
+    to 16 by default. Set the stream context option max_filter_count to change
+    this.
+
 ========================================
 2. New Features
 ========================================
@@ -70,3 +80,8 @@ PHP 8.7 UPGRADE NOTES
 ========================================
 14. Performance Improvements
 ========================================
+
+- Standard:
+  . Improved performance of array_splice() when inserting without removing
+    elements.
+  . Improved performance of str_rot13().

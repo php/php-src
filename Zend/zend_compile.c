@@ -1295,7 +1295,7 @@ ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 }
 /* }}} */
 
-static zend_never_inline ZEND_COLD ZEND_NORETURN void do_bind_function_error(const zend_string *lcname, const zend_op_array *op_array, bool compile_time) /* {{{ */
+ZEND_NORETURN static zend_never_inline ZEND_COLD void do_bind_function_error(const zend_string *lcname, const zend_op_array *op_array, bool compile_time) /* {{{ */
 {
 	const zval *zv = zend_hash_find_known_hash(compile_time ? CG(function_table) : EG(function_table), lcname);
 	int error_level = compile_time ? E_COMPILE_ERROR : E_ERROR;
@@ -5324,6 +5324,12 @@ static zend_result zend_compile_func_clone(znode *result, const zend_ast_list *a
 
 static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *args, zend_string *lcname, uint32_t lineno) /* {{{ */
 {
+	/* array_map() as an internal function calls the callback as if strict_types=0,
+	 * this optimization is therefore not legal if strict_types=1. */
+	if (CG(active_op_array)->fn_flags & ZEND_ACC_STRICT_TYPES) {
+		return FAILURE;
+	}
+
 	/* Bail out if we do not have exactly two parameters. */
 	if (args->children != 2) {
 		return FAILURE;
@@ -5938,7 +5944,7 @@ static void zend_compile_static_var_common(zend_string *var_name, zval *value, u
 	opline->op1_type = IS_CV;
 	opline->op1.var = lookup_cv(var_name);
 
-	ZEND_STATIC_ASSERT(sizeof(Bucket) % 8 == 0, "Bucket size not compatible with storing flags in lower three bits");
+	static_assert(sizeof(Bucket) % 8 == 0, "Bucket size not compatible with storing flags in lower three bits");
 	opline->extended_value = (uint32_t)((char*)value - (char*)CG(active_op_array)->static_variables->arData) | mode;
 }
 /* }}} */

@@ -680,7 +680,7 @@ __asm__(
     ".ascii \"See https://sourceware.org/gdb/current/onlinedocs/gdb.html/Python-Auto_002dloading.html\\n\"\n"
     ".ascii \"See https://sourceware.org/gdb/current/onlinedocs/gdb.html/Auto_002dloading-safe-path.html#Auto_002dloading-safe-path\\n\"\n"
     ".ascii \"\\n\"\n"
-    ".ascii \"If needed, pretty printers can be by-passed by using the /r flag:\\n\"\n"
+    ".ascii \"If needed, pretty printers can be bypassed by using the /r flag:\\n\"\n"
     ".ascii \"  (gdb) p /r any_variable\\n\"\n"
     ".ascii \"\\n\"\n"
     ".ascii \"Use |set print pretty| to enable multi-line printing and indentation:\\n\"\n"

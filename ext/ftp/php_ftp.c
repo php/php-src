@@ -615,7 +615,7 @@ PHP_FUNCTION(ftp_fget)
 }
 /* }}} */
 
-/* {{{ Retrieves a file from the FTP server asynchronly and writes it to an open file */
+/* {{{ Retrieves a file from the FTP server asynchronously and writes it to an open file */
 PHP_FUNCTION(ftp_nb_fget)
 {
 	zval		*z_ftp;

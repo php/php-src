@@ -14,13 +14,41 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 1. Internal API changes
 ========================
 
+- Removed zend_execute_scripts(). Manually call zend_execute_script() in a loop
+  instead.
+- Removed ZEND_STATIC_ASSERT(). Use C11 static_assert() directly instead.
+- Removed zend_atomic.h and the zend_atomic_* types and functions.
+  Use the standard C11 atomic_* types and functions instead.
+- The sapi_terminate_process() function was removed.
+- The sapi_force_http_10() function was removed.
+- The sapi_get_fd() function was removed.
+- The sapi_get_target_uid() and sapi_get_target_gid() functions were removed.
+- Removed HAVE_NORETURN and HAVE_NORETURN_ALIAS. ZEND_NORETURN is guaranteed to
+  work.
+- Redefined ZEND_NORETURN to make use of the [[noreturn]] attribute for C++
+  and C23, which means that ZEND_NORETURN needs to come first in the modifier
+  list. Consider using noreturn (C11) / [[noreturn]] (C23) directly if
+  header interoperability is not required.
+
 ========================
 2. Build system changes
 ========================
 
+- Windows build system changes:
+  . C sources are now compiled as C17 and require C11 atomics. MSVC builds require
+    Visual Studio 2026 or later and enable /experimental:c11atomics.
+  . C++-only extension compiler flags can be added to CXXFLAGS_<EXTENSION>.
+
+- Unix build system changes:
+  . Autoconf minimum required version upgraded to 2.71.
+
 ========================
 3. Module changes
 ========================
+
+- Standard:
+  . php_explode() now takes a HashTable* instead of a zval* to store the
+    resulting parts. It already expected the zval* to be IS_ARRAY.
 
 ========================
 4. OpCode changes
@@ -29,3 +57,9 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 ========================
 5. SAPI changes
 ========================
+
+- The size of the SAPI structure has changed.
+  . The terminate_process method has been removed.
+  . The force_http_10 method has been removed.
+  . The get_fd method has been removed.
+  . The get_target_uid and get_target_gid methods have been removed.

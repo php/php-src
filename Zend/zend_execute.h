@@ -295,7 +295,7 @@ struct _zend_vm_stack {
 };
 
 /* Ensure the correct alignment before slots calculation */
-ZEND_STATIC_ASSERT(ZEND_MM_ALIGNED_SIZE(sizeof(zval)) == sizeof(zval),
+static_assert(ZEND_MM_ALIGNED_SIZE(sizeof(zval)) == sizeof(zval),
                    "zval must be aligned by ZEND_MM_ALIGNMENT");
 /* A number of call frame slots (zvals) reserved for _zend_vm_stack. */
 #define ZEND_VM_STACK_HEADER_SLOTS \
@@ -522,10 +522,11 @@ ZEND_API uint32_t zend_get_executed_lineno(void);
 ZEND_API zend_class_entry *zend_get_executed_scope(void);
 ZEND_API bool zend_is_executing(void);
 ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_cannot_pass_by_reference(uint32_t arg_num);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_cannot_pass_by_reference_ex(const zend_function *func, uint32_t arg_num);
 
 ZEND_API void zend_set_timeout(zend_long seconds, bool reset_signals);
 ZEND_API void zend_unset_timeout(void);
-ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(void);
+ZEND_NORETURN ZEND_API void ZEND_FASTCALL zend_timeout(void);
 ZEND_API zend_class_entry *zend_fetch_class(zend_string *class_name, uint32_t fetch_type);
 ZEND_API zend_class_entry *zend_fetch_class_with_scope(zend_string *class_name, uint32_t fetch_type, zend_class_entry *scope);
 ZEND_API zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, zend_string *lcname, uint32_t fetch_type);

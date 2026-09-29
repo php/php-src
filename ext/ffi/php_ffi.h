@@ -209,7 +209,7 @@ zend_result zend_ffi_parse_type(const char *str, size_t len, zend_ffi_dcl *dcl);
 void zend_ffi_cleanup_dcl(zend_ffi_dcl *dcl);
 
 /* parser callbacks */
-void ZEND_NORETURN zend_ffi_parser_error(const char *msg, ...);
+ZEND_NORETURN void zend_ffi_parser_error(const char *msg, ...);
 bool zend_ffi_is_typedef_name(const char *name, size_t name_len);
 void zend_ffi_resolve_typedef(const char *name, size_t name_len, zend_ffi_dcl *dcl);
 void zend_ffi_resolve_const(const char *name, size_t name_len, zend_ffi_val *val);

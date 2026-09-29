@@ -32,6 +32,9 @@ PHP_MINIT_FUNCTION(string_intrin);
 	strnatcmp_ex(a, strlen(a), b, strlen(b), true)
 PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len, bool is_case_insensitive);
 PHPAPI struct lconv *localeconv_r(struct lconv *out);
+#ifdef ZTS
+PHPAPI char localeconv_decimal_point(void);
+#endif
 PHPAPI char *php_strtr(char *str, size_t len, const char *str_from, const char *str_to, size_t trlen);
 PHPAPI zend_string *php_addslashes(zend_string *str);
 PHPAPI void php_stripslashes(zend_string *str);
@@ -47,7 +50,7 @@ PHPAPI zend_string *php_trim(zend_string *str, const char *what, size_t what_len
 PHPAPI size_t php_strip_tags(char *rbuf, size_t len, const char *allow, size_t allow_len);
 PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, const char *allow, size_t allow_len, bool allow_tag_spaces);
 PHPAPI void php_implode(const zend_string *delim, HashTable *arr, zval *return_value);
-PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return_value, zend_long limit);
+PHPAPI void php_explode(const zend_string *delim, zend_string *str, HashTable *parts, zend_long limit);
 
 PHPAPI size_t php_strspn(const char *s1, const char *s2, const char *s1_end, const char *s2_end);
 PHPAPI size_t php_strcspn(const char *s1, const char *s2, const char *s1_end, const char *s2_end);

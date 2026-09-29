@@ -1,5 +1,5 @@
 --TEST--
-GH-23814 (Setting a callback option from within a curl callback is rejected)
+GH-23814 / GH-23860 (A curl callback can replace itself)
 --EXTENSIONS--
 curl
 --SKIPIF--
@@ -13,26 +13,27 @@ if (!in_array('file', curl_version()['protocols'], true)) {
 
 $handle = curl_init('file://' . __FILE__);
 $callback = static function (CurlHandle $handle, string $data): int {
-    try {
-        curl_setopt($handle, CURLOPT_WRITEFUNCTION, static fn($handle, $data) => strlen($data));
-    } catch (Error $error) {
-        echo $error->getMessage(), "\n";
-    }
-
-    try {
-        curl_setopt_array($handle, [CURLOPT_WRITEFUNCTION => null]);
-    } catch (Error $error) {
-        echo $error->getMessage(), "\n";
-    }
+    echo "Original callback\n";
+    var_dump(curl_setopt($handle, CURLOPT_WRITEFUNCTION, null));
+    var_dump(curl_setopt_array($handle, [CURLOPT_WRITEFUNCTION =>
+        static function (CurlHandle $handle, string $data): int {
+            echo "Replacement callback\n";
+            return strlen($data);
+        },
+    ]));
 
     return strlen($data);
 };
 curl_setopt($handle, CURLOPT_WRITEFUNCTION, $callback);
 var_dump(curl_exec($handle));
+var_dump(curl_exec($handle));
 var_dump(curl_setopt($handle, CURLOPT_WRITEFUNCTION, null));
 ?>
 --EXPECT--
-curl_setopt(): Attempt to set the CURLOPT_WRITEFUNCTION option from a callback
-curl_setopt_array(): Attempt to set the CURLOPT_WRITEFUNCTION option from a callback
+Original callback
+bool(true)
+bool(true)
+bool(true)
+Replacement callback
 bool(true)
 bool(true)

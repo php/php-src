@@ -410,7 +410,6 @@ static sapi_module_struct apache2_sapi_module = {
 	php_apache_sapi_register_variables,
 	php_apache_sapi_log_message,			/* Log message */
 	php_apache_sapi_get_request_time,		/* Request Time */
-	NULL,						/* Child Terminate */
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
@@ -714,7 +713,7 @@ zend_first_try {
 		if (!parent_req) {
 			php_execute_script(&zfd);
 		} else {
-			zend_execute_scripts(ZEND_INCLUDE, NULL, 1, &zfd);
+			zend_execute_script(ZEND_INCLUDE, NULL, &zfd);
 		}
 		zend_destroy_file_handle(&zfd);
 

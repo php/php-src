@@ -46,7 +46,7 @@ static int create_segments(size_t requested_size, zend_shared_segment_posix ***s
 	 * architectures have 3 entries max and we are interested
 	 * from the second offset minimum to be worthy creating
 	 * a special shared segment tagged as 'large'.
-	 * only then amd64/i386/arm64 and perharps risc64*
+	 * only then amd64/i386/arm64 and perhaps risc64*
 	 * archs are on interest here.
 	 */
 	size_t shared_segment_lg_index = 0;

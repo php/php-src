@@ -938,7 +938,7 @@ static int zend_jit_trace_copy_ssa_var_info(const zend_op_array  *op_array,
 			return 0;
 		}
 		if (opline) {
-			/* Try to find a difinition in SSA dominators tree */
+			/* Try to find a definition in SSA dominators tree */
 			var = tssa->vars[ssa_var].var;
 			uint32_t op_num = opline - op_array->opcodes;
 			uint32_t b = ssa->cfg.map[op_num];
@@ -8739,10 +8739,13 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 				const zend_op *op = t->exit_info[exit_num].opline;
 				ZEND_ASSERT(op);
 				op--;
-				if (op->opcode == ZEND_FETCH_DIM_IS || op->opcode == ZEND_FETCH_OBJ_IS) {
+				if (op->opcode == ZEND_FETCH_DIM_IS) {
+					ZVAL_NULL(EX_VAR_NUM(i));
+				} else if (op->opcode == ZEND_FETCH_OBJ_IS
+				 && (Z_PROP_FLAG_P(val) & (IS_PROP_LAZY|IS_PROP_UNINIT)) == IS_PROP_UNINIT) {
 					ZVAL_NULL(EX_VAR_NUM(i));
 				} else {
-					ZEND_ASSERT(op->opcode == ZEND_FETCH_DIM_R || op->opcode == ZEND_FETCH_LIST_R || op->opcode == ZEND_FETCH_OBJ_R || op->opcode == ZEND_FETCH_DIM_FUNC_ARG || op->opcode == ZEND_FETCH_OBJ_FUNC_ARG);
+					ZEND_ASSERT(op->opcode == ZEND_FETCH_DIM_R || op->opcode == ZEND_FETCH_LIST_R || op->opcode == ZEND_FETCH_OBJ_R || op->opcode == ZEND_FETCH_OBJ_IS || op->opcode == ZEND_FETCH_DIM_FUNC_ARG || op->opcode == ZEND_FETCH_OBJ_FUNC_ARG);
 					repeat_last_opline = 1;
 				}
 			} else {
@@ -8833,7 +8836,7 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 		EX(opline) = opline;
 	}
 
-	if (zend_atomic_bool_load_ex(&EG(vm_interrupt)) || JIT_G(tracing)) {
+	if (atomic_load(&EG(vm_interrupt)) || JIT_G(tracing)) {
 		return 1;
 	/* Lock-free check if the side trace was already JIT-ed or blacklist-ed in another process */
 	} else if (t->exit_info[exit_num].flags & (ZEND_JIT_EXIT_JITED|ZEND_JIT_EXIT_BLACKLISTED)) {

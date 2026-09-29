@@ -133,13 +133,13 @@ dnl
 AC_DEFUN([ZEND_INIT], [dnl
 AC_REQUIRE([AC_PROG_CC])
 
-AC_CHECK_HEADERS(m4_normalize([
+AC_CHECK_HEADERS([
   cpuid.h
   libproc.h
-]))
+])
 
 dnl Check for library functions.
-AC_CHECK_FUNCS(m4_normalize([
+AC_CHECK_FUNCS([
   getpid
   gettid
   kill
@@ -151,7 +151,7 @@ AC_CHECK_FUNCS(m4_normalize([
   pthread_getthrds_np
   pthread_stackseg_np
   strnlen
-]))
+])
 
 AC_CHECK_DECL([clock_gettime_nsec_np],
   [AC_DEFINE([HAVE_CLOCK_GETTIME_NSEC_NP], [1],
@@ -513,7 +513,7 @@ uintptr_t __attribute__((preserve_none,noinline,used)) fun(uintptr_t a, uintptr_
 	return (uintptr_t)const3;
 }
 
-uintptr_t __attribute__((preserve_none)) test(void) {
+uintptr_t __attribute__((preserve_none,noinline)) test(void) {
 	uintptr_t ret;
 
 #if defined(__x86_64__)
@@ -531,7 +531,7 @@ uintptr_t __attribute__((preserve_none)) test(void) {
 #endif
 		: "=a" (ret)
 		: "r" (const1), "r" (const2), "r" (key)
-		: "r12", "r13"
+		: "r12", "r13", "memory", "cc"
 	);
 #elif defined(__aarch64__)
 	__asm__ __volatile__(
@@ -547,7 +547,7 @@ uintptr_t __attribute__((preserve_none)) test(void) {
 		"mov    %0, x0\n"
 		: "=r" (ret)
 		: "r" (const1), "r" (const2), "r" (key)
-		: "x0", "x21", "x22", "x30"
+		: "x0", "x20", "x21", "x30", "memory", "cc"
 	);
 #else
 # error

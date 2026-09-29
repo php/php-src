@@ -624,17 +624,22 @@ static zend_never_inline ZEND_COLD zval *zend_wrong_assign_to_variable_reference
 	return zend_assign_to_variable_ex(variable_ptr, value_ptr, IS_TMP_VAR, EX_USES_STRICT_TYPES(), garbage_ptr);
 }
 
-ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_cannot_pass_by_reference(uint32_t arg_num)
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_cannot_pass_by_reference_ex(const zend_function *func, uint32_t arg_num)
 {
-	const zend_execute_data *execute_data = EG(current_execute_data);
-	zend_string *func_name = get_function_or_method_name(EX(call)->func);
-	const char *param_name = get_function_arg_name(EX(call)->func, arg_num);
+	zend_string *func_name = get_function_or_method_name(func);
+	const char *param_name = get_function_arg_name(func, arg_num);
 
 	zend_throw_error(NULL, "%s(): Argument #%d%s%s%s could not be passed by reference",
 		ZSTR_VAL(func_name), arg_num, param_name ? " ($" : "", param_name ? param_name : "", param_name ? ")" : ""
 	);
 
 	zend_string_release(func_name);
+}
+
+ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_cannot_pass_by_reference(uint32_t arg_num)
+{
+	const zend_execute_data *execute_data = EG(current_execute_data);
+	zend_cannot_pass_by_reference_ex(EX(call)->func, arg_num);
 }
 
 static zend_never_inline ZEND_COLD void zend_throw_auto_init_in_prop_error(const zend_property_info *prop) {
@@ -4339,8 +4344,8 @@ ZEND_API void ZEND_FASTCALL zend_free_compiled_variables(zend_execute_data *exec
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_fcall_interrupt(zend_execute_data *call)
 {
-	zend_atomic_bool_store_ex(&EG(vm_interrupt), false);
-	if (zend_atomic_bool_load_ex(&EG(timed_out))) {
+	atomic_store(&EG(vm_interrupt), false);
+	if (atomic_load(&EG(timed_out))) {
 		zend_timeout();
 	} else if (zend_interrupt_function) {
 		zend_interrupt_function(call);
@@ -4348,7 +4353,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_fcall_interrupt(zend_execute_data *ca
 }
 
 #define ZEND_VM_INTERRUPT_CHECK() do { \
-		if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) { \
+		if (UNEXPECTED(atomic_load(&EG(vm_interrupt)))) { \
 			ZEND_VM_INTERRUPT(); \
 		} \
 	} while (0)
@@ -4360,14 +4365,14 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_fcall_interrupt(zend_execute_data *ca
 #endif
 
 #define ZEND_VM_LOOP_INTERRUPT_CHECK() do { \
-		if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) { \
+		if (UNEXPECTED(atomic_load(&EG(vm_interrupt)))) { \
 			ZEND_VM_KIND_TAILCALL_SAVE_OPLINE(); \
 			ZEND_VM_LOOP_INTERRUPT(); \
 		} \
 	} while (0)
 
 #define ZEND_VM_FCALL_INTERRUPT_CHECK(call) do { \
-		if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) { \
+		if (UNEXPECTED(atomic_load(&EG(vm_interrupt)))) { \
 			zend_fcall_interrupt(call); \
 		} \
 	} while (0)

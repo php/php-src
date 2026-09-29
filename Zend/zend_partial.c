@@ -566,7 +566,10 @@ static zend_ast *zp_compile_forwarding_call(
 			ZEND_ASSERT(!Z_REFCOUNTED(argv[offset]));
 
 			/* This argument never changes, so we can burn it into the op_array
-			 * and check its type ahead of time. */
+			 * and check its type ahead of time.
+			 * Work with a value copy because a scalar type check may coerce this value. */
+			zval value;
+			ZVAL_COPY_VALUE(&value, &argv[offset]);
 
 			zend_arg_info *arg_info;
 			if (offset < function->common.num_args) {
@@ -577,18 +580,18 @@ static zend_ast *zp_compile_forwarding_call(
 				arg_info = NULL;
 			}
 			if (arg_info && ZEND_TYPE_IS_SET(arg_info->type)
-					&& UNEXPECTED(!zend_check_type_ex(&arg_info->type, &argv[offset],
+					&& UNEXPECTED(!zend_check_type_ex(&arg_info->type, &value,
 						/* current_frame */ true, /* is_internal */ false))) {
 				zend_string *need_msg = zend_type_to_string_resolved(arg_info->type,
 						function->common.scope);
 				zend_argument_type_error_ex(function, offset + 1,
 						"must be of type %s, %s given",
-						ZSTR_VAL(need_msg), zend_zval_value_name(&argv[offset]));
+						ZSTR_VAL(need_msg), zend_zval_value_name(&value));
 				zend_string_release(need_msg);
 				goto error;
 			}
 
-			args_ast = zend_ast_list_add(args_ast, zend_ast_create_zval(&argv[offset]));
+			args_ast = zend_ast_list_add(args_ast, zend_ast_create_zval(&value));
 		} else {
 			args_ast = zend_ast_list_add(args_ast, zend_ast_create(ZEND_AST_VAR,
 						zend_ast_create_zval_from_str(zend_string_copy(var_names->params[offset]))));
@@ -914,13 +917,13 @@ static zend_op_array *zp_compile(zval *this_ptr, zend_function *function,
 	/**
 	 * Generate function body.
 	 *
-	 * If we may need to forward superflous arguments, do that conditionally, as
+	 * If we may need to forward superfluous arguments, do that conditionally, as
 	 * it's faster:
 	 *
 	 * if (func_num_args() <= n) {
 	 *    // normal call
 	 * } else {
-	 *    // call with superflous arg forwarding
+	 *    // call with superfluous arg forwarding
 	 * }
 	 *
 	 * The func_num_args() call should be compiled to a single FUNC_NUM_ARGS op.

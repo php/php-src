@@ -1264,7 +1264,7 @@ ZEND_COLD void zenderror(const char *error) /* {{{ */
 }
 /* }}} */
 
-ZEND_API ZEND_COLD ZEND_NORETURN void _zend_bailout(const char *filename, uint32_t lineno) /* {{{ */
+ZEND_NORETURN ZEND_API ZEND_COLD void _zend_bailout(const char *filename, uint32_t lineno) /* {{{ */
 {
 
 	if (!EG(bailout)) {
@@ -1715,7 +1715,7 @@ ZEND_API ZEND_COLD void zend_error_unchecked(int type, const char *format, ...) 
 	zend_error_impl(type, format);
 }
 
-ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_at_noreturn(
+ZEND_NORETURN ZEND_API ZEND_COLD void zend_error_at_noreturn(
 		int type, zend_string *filename, uint32_t lineno, const char *format, ...)
 {
 	va_list args;
@@ -1744,17 +1744,17 @@ ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_at_noreturn(
 		abort(); \
 	} while (0)
 
-ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...)
+ZEND_NORETURN ZEND_API ZEND_COLD void zend_error_noreturn(int type, const char *format, ...)
 {
 	zend_error_noreturn_impl(type, format);
 }
 
-ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn_unchecked(int type, const char *format, ...)
+ZEND_NORETURN ZEND_API ZEND_COLD void zend_error_noreturn_unchecked(int type, const char *format, ...)
 {
 	zend_error_noreturn_impl(type, format);
 }
 
-ZEND_API ZEND_COLD ZEND_NORETURN void zend_strerror_noreturn(int type, int errn, const char *message)
+ZEND_NORETURN ZEND_API ZEND_COLD void zend_strerror_noreturn(int type, int errn, const char *message)
 {
 #ifdef HAVE_STRERROR_R
 	char b[1024];
@@ -1995,30 +1995,6 @@ ZEND_API zend_result zend_execute_script(int type, zval *retval, zend_file_handl
 
 	return ret;
 }
-
-ZEND_API zend_result zend_execute_scripts(int type, zval *retval, int file_count, ...) /* {{{ */
-{
-	va_list files;
-	int i;
-	zend_file_handle *file_handle;
-	zend_result ret = SUCCESS;
-
-	va_start(files, file_count);
-	for (i = 0; i < file_count; i++) {
-		file_handle = va_arg(files, zend_file_handle *);
-		if (!file_handle) {
-			continue;
-		}
-		if (ret == FAILURE) {
-			continue;
-		}
-		ret = zend_execute_script(type, retval, file_handle);
-	}
-	va_end(files);
-
-	return ret;
-}
-/* }}} */
 
 #define COMPILED_STRING_DESCRIPTION_FORMAT "%s(%d) : %s"
 

@@ -380,7 +380,7 @@ static const uint32_t bin_pages[] = {
 	ZEND_MM_BINS_INFO(_BIN_DATA_PAGES, x, y)
 };
 
-static ZEND_COLD ZEND_NORETURN void zend_mm_panic(const char *message)
+ZEND_NORETURN static ZEND_COLD void zend_mm_panic(const char *message)
 {
 	fprintf(stderr, "%s\n", message);
 /* See http://support.microsoft.com/kb/190351 */
@@ -393,7 +393,7 @@ static ZEND_COLD ZEND_NORETURN void zend_mm_panic(const char *message)
 	abort();
 }
 
-static ZEND_COLD ZEND_NORETURN void zend_mm_safe_error(zend_mm_heap *heap,
+ZEND_NORETURN static ZEND_COLD void zend_mm_safe_error(zend_mm_heap *heap,
 	const char *format,
 	size_t limit,
 #if ZEND_DEBUG
@@ -1269,7 +1269,7 @@ static zend_always_inline void zend_mm_free_large(zend_mm_heap *heap, zend_mm_ch
 /**************/
 
 /* higher set bit number (0->N/A, 1->1, 2->2, 4->3, 8->4, 127->7, 128->8 etc) */
-static zend_always_inline int zend_mm_small_size_to_bit(int size)
+static zend_always_inline int zend_mm_small_size_to_bit(uint32_t size)
 {
 #if (defined(__GNUC__) || __has_builtin(__builtin_clz))  && defined(PHP_HAVE_BUILTIN_CLZ)
 	return (__builtin_clz(size) ^ 0x1f) + 1;
@@ -1300,19 +1300,19 @@ static zend_always_inline int zend_mm_small_size_to_bit(int size)
 # define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 
-static zend_always_inline int zend_mm_small_size_to_bin(size_t size)
+static zend_always_inline uint32_t zend_mm_small_size_to_bin(size_t size)
 {
 #if 0
 	int n;
-                            /*0,  1,  2,  3,  4,  5,  6,  7,  8,  9  10, 11, 12*/
-	static const int f1[] = { 3,  3,  3,  3,  3,  3,  3,  4,  5,  6,  7,  8,  9};
-	static const int f2[] = { 0,  0,  0,  0,  0,  0,  0,  4,  8, 12, 16, 20, 24};
+                                 /*0,  1,  2,  3,  4,  5,  6,  7,  8,  9  10, 11, 12*/
+	static const uint32_t f1[] = { 3,  3,  3,  3,  3,  3,  3,  4,  5,  6,  7,  8,  9};
+	static const uint32_t f2[] = { 0,  0,  0,  0,  0,  0,  0,  4,  8, 12, 16, 20, 24};
 
 	if (UNEXPECTED(size <= 2)) return 0;
 	n = zend_mm_small_size_to_bit(size - 1);
 	return ((size-1) >> f1[n]) + f2[n];
 #else
-	unsigned int t1, t2;
+	uint32_t t1, t2;
 
 	if (size <= 64) {
 		/* we need to support size == 0 ... */
@@ -1323,7 +1323,7 @@ static zend_always_inline int zend_mm_small_size_to_bin(size_t size)
 		t1 = t1 >> t2;
 		t2 = t2 - 3;
 		t2 = t2 << 2;
-		return (int)(t1 + t2);
+		return t1 + t2;
 	}
 #endif
 }
@@ -1457,7 +1457,7 @@ static zend_never_inline void *zend_mm_alloc_small_slow(zend_mm_heap *heap, uint
 	return bin;
 }
 
-static zend_always_inline void *zend_mm_alloc_small(zend_mm_heap *heap, int bin_num ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+static zend_always_inline void *zend_mm_alloc_small(zend_mm_heap *heap, uint32_t bin_num ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	ZEND_ASSERT(bin_data_size[bin_num] >= ZEND_MM_MIN_USEABLE_BIN_SIZE);
 
@@ -1479,7 +1479,7 @@ static zend_always_inline void *zend_mm_alloc_small(zend_mm_heap *heap, int bin_
 	}
 }
 
-static zend_always_inline void zend_mm_free_small(zend_mm_heap *heap, void *ptr, int bin_num)
+static zend_always_inline void zend_mm_free_small(zend_mm_heap *heap, void *ptr, uint32_t bin_num)
 {
 	ZEND_ASSERT(bin_data_size[bin_num] >= ZEND_MM_MIN_USEABLE_BIN_SIZE);
 
@@ -1525,7 +1525,7 @@ static zend_always_inline zend_mm_debug_info *zend_mm_get_debug_info(zend_mm_hea
 	info = chunk->map[page_num];
 	ZEND_MM_CHECK(chunk->heap == heap, "zend_mm_heap corrupted");
 	if (EXPECTED(info & ZEND_MM_IS_SRUN)) {
-		int bin_num = ZEND_MM_SRUN_BIN_NUM(info);
+		uint32_t bin_num = ZEND_MM_SRUN_BIN_NUM(info);
 		return (zend_mm_debug_info*)((char*)ptr + bin_data_size[bin_num] - ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info)));
 	} else /* if (info & ZEND_MM_IS_LRUN) */ {
 		int pages_count = ZEND_MM_LRUN_PAGES(info);
@@ -1779,7 +1779,7 @@ static zend_always_inline void *zend_mm_realloc_heap(zend_mm_heap *heap, void *p
 
 		ZEND_MM_CHECK(chunk->heap == heap, "zend_mm_heap corrupted");
 		if (info & ZEND_MM_IS_SRUN) {
-			int old_bin_num = ZEND_MM_SRUN_BIN_NUM(info);
+			uint32_t old_bin_num = ZEND_MM_SRUN_BIN_NUM(info);
 
 			do {
 				old_size = bin_data_size[old_bin_num];
@@ -2124,7 +2124,7 @@ ZEND_API void zend_mm_refresh_key_child(zend_mm_heap *heap)
 	zend_mm_init_key(heap);
 
 	/* Update shadow pointers with new key */
-	for (int i = 0; i < ZEND_MM_BINS; i++) {
+	for (uint32_t i = 0; i < ZEND_MM_BINS; i++) {
 		zend_mm_free_slot *slot = heap->free_slot[i];
 		if (!slot) {
 			continue;
@@ -2299,7 +2299,7 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap)
 			if (zend_mm_bitset_is_set(chunk->free_map, i)) {
 				info = chunk->map[i];
 				if (info & ZEND_MM_IS_SRUN) {
-					int bin_num = ZEND_MM_SRUN_BIN_NUM(info);
+					uint32_t bin_num = ZEND_MM_SRUN_BIN_NUM(info);
 					int pages_count = bin_pages[bin_num];
 
 					if (ZEND_MM_SRUN_FREE_COUNTER(info) == bin_elements[bin_num]) {
@@ -2340,7 +2340,7 @@ static zend_long zend_mm_find_leaks_small(zend_mm_chunk *p, uint32_t i, uint32_t
 {
 	bool empty = true;
 	zend_long count = 0;
-	int bin_num = ZEND_MM_SRUN_BIN_NUM(p->map[i]);
+	uint32_t bin_num = ZEND_MM_SRUN_BIN_NUM(p->map[i]);
 	zend_mm_debug_info *dbg = (zend_mm_debug_info*)((char*)p + ZEND_MM_PAGE_SIZE * i + bin_data_size[bin_num] * (j + 1) - ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info)));
 
 	while (j < bin_elements[bin_num]) {
@@ -2371,7 +2371,7 @@ static zend_long zend_mm_find_leaks(zend_mm_heap *heap, zend_mm_chunk *p, uint32
 		while (i < p->free_tail) {
 			if (zend_mm_bitset_is_set(p->free_map, i)) {
 				if (p->map[i] & ZEND_MM_IS_SRUN) {
-					int bin_num = ZEND_MM_SRUN_BIN_NUM(p->map[i]);
+					uint32_t bin_num = ZEND_MM_SRUN_BIN_NUM(p->map[i]);
 					count += zend_mm_find_leaks_small(p, i, 0, leak);
 					i += bin_pages[bin_num];
 				} else /* if (p->map[i] & ZEND_MM_IS_LRUN) */ {
@@ -2462,7 +2462,7 @@ static void zend_mm_check_leaks(zend_mm_heap *heap)
 		while (i < p->free_tail) {
 			if (zend_mm_bitset_is_set(p->free_map, i)) {
 				if (p->map[i] & ZEND_MM_IS_SRUN) {
-					int bin_num = ZEND_MM_SRUN_BIN_NUM(p->map[i]);
+					uint32_t bin_num = ZEND_MM_SRUN_BIN_NUM(p->map[i]);
 					zend_mm_debug_info *dbg = (zend_mm_debug_info*)((char*)p + ZEND_MM_PAGE_SIZE * i + bin_data_size[bin_num] - ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info)));
 
 					j = 0;
@@ -2995,7 +2995,7 @@ ZEND_API char* ZEND_FASTCALL _estrndup(const char *s, size_t length ZEND_FILE_LI
 	return p;
 }
 
-static ZEND_COLD ZEND_NORETURN void zend_out_of_memory(void);
+ZEND_NORETURN static ZEND_COLD void zend_out_of_memory(void);
 
 ZEND_API char* ZEND_FASTCALL zend_strndup(const char *s, size_t length)
 {
@@ -3091,7 +3091,7 @@ ZEND_API void refresh_memory_manager(void)
 	zend_mm_refresh_key_child(AG(mm_heap));
 }
 
-static ZEND_COLD ZEND_NORETURN void zend_out_of_memory(void)
+ZEND_NORETURN static ZEND_COLD void zend_out_of_memory(void)
 {
 	fprintf(stderr, "Out of memory\n");
 	abort();

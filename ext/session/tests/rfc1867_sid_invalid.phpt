@@ -17,7 +17,7 @@ session.save_handler=files
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --COOKIE--
 PHPSESSID=_
 --POST_RAW--

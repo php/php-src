@@ -245,7 +245,7 @@ static bool zend_call_stack_get_linux_proc_maps(zend_call_stack *stack)
 	max_size = rlim.rlim_cur;
 
 #ifdef HAVE_VALGRIND
-	/* Under Valgrind, the last page is not useable */
+	/* Under Valgrind, the last page is not usable */
 	if (RUNNING_ON_VALGRIND) {
 		max_size -= zend_get_page_size();
 	}
@@ -388,7 +388,7 @@ static bool zend_call_stack_get_win32(zend_call_stack *stack)
 	 * is left in the uncommitted region, a stack overflow error is raised
 	 * instead.
 	 *
-	 * The total useable stack size is the size of the committed and uncommitted
+	 * The total usable stack size is the size of the committed and uncommitted
 	 * regions less one page.
 	 *
 	 * http://blogs.msdn.com/b/satyem/archive/2012/08/13/thread-s-stack-memory-management.aspx

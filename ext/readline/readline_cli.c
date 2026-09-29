@@ -607,7 +607,7 @@ static int readline_shell_run(void) /* {{{ */
 		zend_file_handle prepend_file;
 
 		zend_stream_init_filename(&prepend_file, PG(auto_prepend_file));
-		zend_execute_scripts(ZEND_REQUIRE, NULL, 1, &prepend_file);
+		zend_execute_script(ZEND_REQUIRE, NULL, &prepend_file);
 		zend_destroy_file_handle(&prepend_file);
 	}
 

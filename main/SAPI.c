@@ -633,11 +633,11 @@ static void sapi_header_add_op(sapi_header_op_enum op, sapi_header_struct *sapi_
 			char *colon_offset = strchr(sapi_header->header, ':');
 
 			if (colon_offset) {
-				char sav = *colon_offset;
+				char saved_char = *colon_offset;
 
 				*colon_offset = 0;
 				sapi_remove_header(&SG(sapi_headers).headers, sapi_header->header, strlen(sapi_header->header), 0);
-				*colon_offset = sav;
+				*colon_offset = saved_char;
 			}
 		}
 		zend_llist_add_element(&SG(sapi_headers).headers, (void *) sapi_header);
@@ -1036,43 +1036,6 @@ SAPI_API char *sapi_getenv(const char *name, size_t name_len)
 	return value;
 }
 
-SAPI_API int sapi_get_fd(int *fd)
-{
-	if (sapi_module.get_fd) {
-		return sapi_module.get_fd(fd);
-	} else {
-		return FAILURE;
-	}
-}
-
-SAPI_API int sapi_force_http_10(void)
-{
-	if (sapi_module.force_http_10) {
-		return sapi_module.force_http_10();
-	} else {
-		return FAILURE;
-	}
-}
-
-
-SAPI_API int sapi_get_target_uid(uid_t *obj)
-{
-	if (sapi_module.get_target_uid) {
-		return sapi_module.get_target_uid(obj);
-	} else {
-		return FAILURE;
-	}
-}
-
-SAPI_API int sapi_get_target_gid(gid_t *obj)
-{
-	if (sapi_module.get_target_gid) {
-		return sapi_module.get_target_gid(obj);
-	} else {
-		return FAILURE;
-	}
-}
-
 SAPI_API double sapi_get_request_time(void)
 {
 	if(SG(global_request_time)) return SG(global_request_time);
@@ -1087,12 +1050,6 @@ SAPI_API double sapi_get_request_time(void)
 		}
 	}
 	return SG(global_request_time);
-}
-
-SAPI_API void sapi_terminate_process(void) {
-	if (sapi_module.terminate_process) {
-		sapi_module.terminate_process();
-	}
 }
 
 SAPI_API void sapi_add_request_header(const char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg) /* {{{ */

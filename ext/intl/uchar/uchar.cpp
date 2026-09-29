@@ -312,7 +312,7 @@ static UBool enumCharNames_callback(enumCharNames_data *context,
 	}
 	zval_ptr_dtor(&retval);
 	zval_ptr_dtor_str(&args[2]);
-	return 1;
+	return !EG(exception);
 }
 IC_METHOD(enumCharNames) {
 	UChar32 start, limit;
