@@ -36,10 +36,26 @@ use Io\Terminal\Key;
 use Io\Terminal\Terminal;
 use Time\Duration;
 
-// Case 1: Overall deadline 30ms, ESC and [ sent before 30ms, A sent after 50ms.
+// Case 1: Overall deadline 30ms, ESC and [ sent before 30ms, A sent after release.
 // The first call returns incomplete escape sequence "\x1b[" (hex 1b5b).
 // The subsequent call returns "A".
-$code1 = 'fwrite(STDOUT, "\x1b["); fflush(STDOUT); usleep(60000); fwrite(STDOUT, "A"); fflush(STDOUT); fgets(STDIN);';
+$code1 = '
+fwrite(STDERR, "STARTED\n");
+fflush(STDERR);
+fgets(STDIN);
+
+fwrite(STDOUT, "\x1b[");
+fflush(STDOUT);
+fwrite(STDERR, "READY1\n");
+fflush(STDERR);
+fgets(STDIN);
+
+fwrite(STDOUT, "A");
+fflush(STDOUT);
+fwrite(STDERR, "READY2\n");
+fflush(STDERR);
+fgets(STDIN);
+';
 $proc1 = proc_open(
     [PHP_BINARY, '-r', $code1],
     [
@@ -50,10 +66,18 @@ $proc1 = proc_open(
     $pipes1,
 );
 
+$r0 = fgets($pipes1[2]);
 $terminal1 = Terminal::fromStreams($pipes1[0]);
 $terminal1->enableRawMode();
 
+fwrite($pipes1[0], "START\n");
+$r1 = fgets($pipes1[2]);
+
 $k1 = $terminal1->readKey(Duration::fromMilliseconds(30), Duration::fromMilliseconds(100));
+
+fwrite($pipes1[0], "GO\n");
+$r2 = fgets($pipes1[2]);
+
 $k2 = $terminal1->readKey(Duration::fromMilliseconds(100));
 
 echo "Case 1 k1 is string: ", var_export(is_string($k1), true), PHP_EOL;
@@ -67,10 +91,26 @@ foreach ($pipes1 as $pipe) {
 }
 proc_close($proc1);
 
-// Case 2: Overall deadline 30ms, ESC sent at 0ms, [ arrives at 80ms.
+// Case 2: Overall deadline 30ms, ESC sent at 0ms, [ arrives after release.
 // Because [ does not arrive before the 30ms deadline, the first call returns Key::Escape.
 // The subsequent call reads [ independently.
-$code2 = 'fwrite(STDOUT, "\x1b"); fflush(STDOUT); usleep(80000); fwrite(STDOUT, "["); fflush(STDOUT); fgets(STDIN);';
+$code2 = '
+fwrite(STDERR, "STARTED\n");
+fflush(STDERR);
+fgets(STDIN);
+
+fwrite(STDOUT, "\x1b");
+fflush(STDOUT);
+fwrite(STDERR, "READY1\n");
+fflush(STDERR);
+fgets(STDIN);
+
+fwrite(STDOUT, "[");
+fflush(STDOUT);
+fwrite(STDERR, "READY2\n");
+fflush(STDERR);
+fgets(STDIN);
+';
 $proc2 = proc_open(
     [PHP_BINARY, '-r', $code2],
     [
@@ -81,10 +121,18 @@ $proc2 = proc_open(
     $pipes2,
 );
 
+$r0 = fgets($pipes2[2]);
 $terminal2 = Terminal::fromStreams($pipes2[0]);
 $terminal2->enableRawMode();
 
+fwrite($pipes2[0], "START\n");
+$r1 = fgets($pipes2[2]);
+
 $k3 = $terminal2->readKey(Duration::fromMilliseconds(30), Duration::fromMilliseconds(100));
+
+fwrite($pipes2[0], "GO\n");
+$r2 = fgets($pipes2[2]);
+
 $k4 = $terminal2->readKey(Duration::fromMilliseconds(100));
 
 echo "Case 2 k3 is Escape: ", var_export($k3 === Key::Escape, true), PHP_EOL;

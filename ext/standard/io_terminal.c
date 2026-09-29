@@ -54,9 +54,18 @@ static inline time_t php_io_terminal_clamp_duration_seconds(uint64_t seconds)
 	return seconds > (uint64_t) INT64_MAX ? (time_t) INT64_MAX : (time_t) seconds;
 }
 
+static inline zend_hrtime_t php_io_terminal_saturating_add_deadline(zend_hrtime_t base_ns, zend_hrtime_t duration_ns)
+{
+	if (UINT64_MAX - base_ns <= duration_ns) {
+		return UINT64_MAX;
+	}
+	return base_ns + duration_ns;
+}
+
 #ifdef PHP_WIN32
 typedef HANDLE php_io_terminal_native_stream;
 # define PHP_IO_TERMINAL_INVALID_NATIVE_STREAM INVALID_HANDLE_VALUE
+# define PHP_IO_TERMINAL_MAX_WAIT_MS (INFINITE - 1)
 #else
 typedef int php_io_terminal_native_stream;
 # define PHP_IO_TERMINAL_INVALID_NATIVE_STREAM (-1)
@@ -66,7 +75,17 @@ static inline zend_hrtime_t php_io_terminal_timespec_to_ns(const struct timespec
 	if (ts == NULL) {
 		return 0;
 	}
-	return ((zend_hrtime_t) ts->tv_sec * 1000000000ULL) + (zend_hrtime_t) ts->tv_nsec;
+	if (ts->tv_sec <= 0 && ts->tv_nsec <= 0) {
+		return 0;
+	}
+	if ((uint64_t) ts->tv_sec >= (UINT64_MAX / 1000000000ULL)) {
+		return UINT64_MAX;
+	}
+	zend_hrtime_t sec_ns = (zend_hrtime_t) ts->tv_sec * 1000000000ULL;
+	if (UINT64_MAX - sec_ns < (zend_hrtime_t) ts->tv_nsec) {
+		return UINT64_MAX;
+	}
+	return sec_ns + (zend_hrtime_t) ts->tv_nsec;
 }
 
 static inline void php_io_terminal_ns_to_timespec(zend_hrtime_t ns, struct timespec *ts)
@@ -1074,7 +1093,10 @@ static zend_string *php_io_terminal_read_stream_secret(
 
 	zend_hrtime_t overall_deadline_ns = 0;
 	if (has_timeout) {
-		overall_deadline_ns = zend_hrtime() + ((zend_hrtime_t) wait_ms * 1000000ULL);
+		overall_deadline_ns = php_io_terminal_saturating_add_deadline(
+			zend_hrtime(),
+			((zend_hrtime_t) wait_ms * 1000000ULL)
+		);
 	}
 
 	for (;;) {
@@ -1086,13 +1108,12 @@ static zend_string *php_io_terminal_read_stream_secret(
 		if (has_timeout) {
 			zend_hrtime_t now = zend_hrtime();
 			if (now >= overall_deadline_ns) {
-				*timed_out = true;
-				failed = true;
-				break;
+				current_wait = 0;
+			} else {
+				zend_hrtime_t remaining_ns = overall_deadline_ns - now;
+				uint64_t ms = (remaining_ns + 999999ULL) / 1000000ULL;
+				current_wait = ms >= (DWORD) PHP_IO_TERMINAL_MAX_WAIT_MS ? PHP_IO_TERMINAL_MAX_WAIT_MS : (DWORD) ms;
 			}
-			zend_hrtime_t remaining_ns = overall_deadline_ns - now;
-			uint64_t ms = (remaining_ns + 999999ULL) / 1000000ULL;
-			current_wait = ms >= (DWORD) PHP_IO_TERMINAL_MAX_WAIT_MS ? PHP_IO_TERMINAL_MAX_WAIT_MS : (DWORD) ms;
 		}
 
 		if (!php_io_terminal_read_console_record(
@@ -1102,7 +1123,7 @@ static zend_string *php_io_terminal_read_stream_secret(
 				&high_surrogate,
 				pending_key,
 				pending_key_high_surrogate)) {
-			if (has_timeout && zend_hrtime() >= overall_deadline_ns) {
+			if (has_timeout && (current_wait == 0 || zend_hrtime() >= overall_deadline_ns)) {
 				*timed_out = true;
 			}
 			failed = true;
@@ -1159,6 +1180,7 @@ static zend_string *php_io_terminal_read_stream_secret(
 
 	if (mode_changed && !SetConsoleMode(handle, mode)) {
 		failed = true;
+		*timed_out = false;
 	}
 
 	if (success && !failed) {
@@ -1423,47 +1445,56 @@ static zend_string *php_io_terminal_finish_utf8_sequence(
 	const struct timespec *first_timeout,
 	const struct timespec *sequence_timeout,
 	bool has_overall_deadline,
-	zend_hrtime_t overall_deadline_ns
+	zend_hrtime_t overall_deadline_ns,
+	bool is_fresh
 )
 {
-	size_t initial_length = pending->length;
 	zend_hrtime_t seq_timeout_ns = php_io_terminal_timespec_to_ns(sequence_timeout);
-	zend_hrtime_t deadline_ns = 0;
-	bool deadline_set = false;
+	bool is_first_resumed_read = !is_fresh;
 
 	while (pending->length < pending->expected) {
 		unsigned char key;
 		struct timespec remaining_ts;
 		const struct timespec *timeout;
+		zend_hrtime_t now = zend_hrtime();
 
-		if (pending->length == initial_length) {
+		if (has_overall_deadline && now >= overall_deadline_ns) {
+			return NULL;
+		}
+
+		if (is_first_resumed_read) {
+			/* When resuming a previously pending sequence on a new readKey() call,
+			 * the first continuation read of that invocation may wait up to the
+			 * new call's overall timeout (capped by overall deadline). */
 			if (has_overall_deadline) {
-				zend_hrtime_t now = zend_hrtime();
-				if (now >= overall_deadline_ns) {
-					return NULL;
+				zend_hrtime_t remaining_ns = overall_deadline_ns - now;
+				if (first_timeout != NULL) {
+					zend_hrtime_t first_ns = php_io_terminal_timespec_to_ns(first_timeout);
+					if (first_ns < remaining_ns) {
+						remaining_ns = first_ns;
+					}
 				}
-				php_io_terminal_ns_to_timespec(overall_deadline_ns - now, &remaining_ts);
+				php_io_terminal_ns_to_timespec(remaining_ns, &remaining_ts);
 				timeout = &remaining_ts;
 			} else {
 				timeout = first_timeout;
 			}
 		} else {
-			if (!deadline_set) {
-				deadline_ns = zend_hrtime() + seq_timeout_ns;
-				if (has_overall_deadline && deadline_ns > overall_deadline_ns) {
-					deadline_ns = overall_deadline_ns;
+			/* Fresh continuation byte or subsequent resumed byte in this invocation:
+			 * bounded by sequence_timeout, capped by overall deadline. */
+			zend_hrtime_t step_ns = seq_timeout_ns;
+			if (has_overall_deadline) {
+				zend_hrtime_t remaining_ns = overall_deadline_ns - now;
+				if (step_ns > remaining_ns) {
+					step_ns = remaining_ns;
 				}
-				deadline_set = true;
 			}
-			zend_hrtime_t now = zend_hrtime();
-			if (now >= deadline_ns) {
-				return NULL;
-			}
-			php_io_terminal_ns_to_timespec(deadline_ns - now, &remaining_ts);
+			php_io_terminal_ns_to_timespec(step_ns, &remaining_ts);
 			timeout = &remaining_ts;
 		}
 
 		int result = php_io_terminal_read_byte(fd, stream, poll_ctx, &key, timeout, false, NULL);
+		is_first_resumed_read = false;
 
 		if (result == PHP_IO_TERMINAL_READ_TIMEOUT) {
 			return NULL;
@@ -1505,7 +1536,7 @@ static zend_string *php_io_terminal_key_from_escape_sequence(
 
 	zend_hrtime_t now = zend_hrtime();
 	zend_hrtime_t seq_timeout_ns = php_io_terminal_timespec_to_ns(sequence_timeout);
-	zend_hrtime_t deadline_ns = now + seq_timeout_ns;
+	zend_hrtime_t deadline_ns = php_io_terminal_saturating_add_deadline(now, seq_timeout_ns);
 	if (has_overall_deadline && deadline_ns > overall_deadline_ns) {
 		deadline_ns = overall_deadline_ns;
 	}
@@ -1637,7 +1668,7 @@ static zend_string *php_io_terminal_key_from_utf8_sequence(
 
 	return php_io_terminal_finish_utf8_sequence(
 		fd, stream, poll_ctx, pending, sequence_timeout, sequence_timeout,
-		has_overall_deadline, overall_deadline_ns
+		has_overall_deadline, overall_deadline_ns, true
 	);
 }
 
@@ -1723,7 +1754,10 @@ static zend_string *php_io_terminal_read_stream_key(
 	bool has_overall_deadline = (timeout != NULL);
 	zend_hrtime_t overall_deadline_ns = 0;
 	if (has_overall_deadline) {
-		overall_deadline_ns = zend_hrtime() + php_io_terminal_timespec_to_ns(timeout);
+		overall_deadline_ns = php_io_terminal_saturating_add_deadline(
+			zend_hrtime(),
+			php_io_terminal_timespec_to_ns(timeout)
+		);
 	}
 
 	zend_string *result = NULL;
@@ -1731,7 +1765,7 @@ static zend_string *php_io_terminal_read_stream_key(
 	if (pending->length > 0) {
 		result = php_io_terminal_finish_utf8_sequence(
 			fd, stream, poll_ctx, pending, timeout, sequence_timeout,
-			has_overall_deadline, overall_deadline_ns
+			has_overall_deadline, overall_deadline_ns, false
 		);
 	} else {
 		unsigned char key;
@@ -1812,7 +1846,10 @@ static zend_string *php_io_terminal_read_stream_secret(
 	bool has_overall_deadline = (timeout != NULL);
 	zend_hrtime_t overall_deadline_ns = 0;
 	if (has_overall_deadline) {
-		overall_deadline_ns = zend_hrtime() + php_io_terminal_timespec_to_ns(timeout);
+		overall_deadline_ns = php_io_terminal_saturating_add_deadline(
+			zend_hrtime(),
+			php_io_terminal_timespec_to_ns(timeout)
+		);
 	}
 
 	smart_str secret = {0};
@@ -1826,10 +1863,11 @@ static zend_string *php_io_terminal_read_stream_secret(
 		if (has_overall_deadline) {
 			zend_hrtime_t now = zend_hrtime();
 			if (now >= overall_deadline_ns) {
-				*timed_out = true;
-				goto restore;
+				current_timeout.tv_sec = 0;
+				current_timeout.tv_nsec = 0;
+			} else {
+				php_io_terminal_ns_to_timespec(overall_deadline_ns - now, &current_timeout);
 			}
-			php_io_terminal_ns_to_timespec(overall_deadline_ns - now, &current_timeout);
 			current_timeout_ptr = &current_timeout;
 		}
 
@@ -1864,12 +1902,13 @@ process_key:
 				if (has_overall_deadline) {
 					zend_hrtime_t now = zend_hrtime();
 					if (now >= overall_deadline_ns) {
-						*timed_out = true;
-						goto restore;
+						step_timeout.tv_sec = 0;
+						step_timeout.tv_nsec = 0;
+					} else {
+						zend_hrtime_t remaining_ns = overall_deadline_ns - now;
+						zend_hrtime_t step_ns = remaining_ns < 25000000ULL ? remaining_ns : 25000000ULL;
+						php_io_terminal_ns_to_timespec(step_ns, &step_timeout);
 					}
-					zend_hrtime_t remaining_ns = overall_deadline_ns - now;
-					zend_hrtime_t step_ns = remaining_ns < 25000000ULL ? remaining_ns : 25000000ULL;
-					php_io_terminal_ns_to_timespec(step_ns, &step_timeout);
 					step_timeout_ptr = &step_timeout;
 				} else {
 					step_timeout.tv_sec = 0;
@@ -1880,10 +1919,6 @@ process_key:
 				unsigned char next;
 				int read_res = php_io_terminal_read_byte(fd, stream, poll_ctx, &next, step_timeout_ptr, false, NULL);
 				if (read_res == PHP_IO_TERMINAL_READ_TIMEOUT) {
-					if (has_overall_deadline && zend_hrtime() >= overall_deadline_ns) {
-						*timed_out = true;
-						goto restore;
-					}
 					/* Standalone Escape cancels */
 					*timed_out = false;
 					goto restore;
@@ -1905,12 +1940,13 @@ process_key:
 						if (has_overall_deadline) {
 							zend_hrtime_t now = zend_hrtime();
 							if (now >= overall_deadline_ns) {
-								*timed_out = true;
-								goto restore;
+								step_timeout.tv_sec = 0;
+								step_timeout.tv_nsec = 0;
+							} else {
+								zend_hrtime_t remaining_ns = overall_deadline_ns - now;
+								zend_hrtime_t step_ns = remaining_ns < 25000000ULL ? remaining_ns : 25000000ULL;
+								php_io_terminal_ns_to_timespec(step_ns, &step_timeout);
 							}
-							zend_hrtime_t remaining_ns = overall_deadline_ns - now;
-							zend_hrtime_t step_ns = remaining_ns < 25000000ULL ? remaining_ns : 25000000ULL;
-							php_io_terminal_ns_to_timespec(step_ns, &step_timeout);
 							step_timeout_ptr = &step_timeout;
 						} else {
 							step_timeout.tv_sec = 0;
@@ -1949,12 +1985,13 @@ process_key:
 					if (has_overall_deadline) {
 						zend_hrtime_t now = zend_hrtime();
 						if (now >= overall_deadline_ns) {
-							*timed_out = true;
-							goto restore;
+							step_timeout.tv_sec = 0;
+							step_timeout.tv_nsec = 0;
+						} else {
+							zend_hrtime_t remaining_ns = overall_deadline_ns - now;
+							zend_hrtime_t step_ns = remaining_ns < 25000000ULL ? remaining_ns : 25000000ULL;
+							php_io_terminal_ns_to_timespec(step_ns, &step_timeout);
 						}
-						zend_hrtime_t remaining_ns = overall_deadline_ns - now;
-						zend_hrtime_t step_ns = remaining_ns < 25000000ULL ? remaining_ns : 25000000ULL;
-						php_io_terminal_ns_to_timespec(step_ns, &step_timeout);
 						step_timeout_ptr = &step_timeout;
 					} else {
 						step_timeout.tv_sec = 0;
@@ -2007,10 +2044,11 @@ process_key:
 						if (has_overall_deadline) {
 							zend_hrtime_t now = zend_hrtime();
 							if (now >= overall_deadline_ns) {
-								*timed_out = true;
-								goto restore;
+								cont_timeout.tv_sec = 0;
+								cont_timeout.tv_nsec = 0;
+							} else {
+								php_io_terminal_ns_to_timespec(overall_deadline_ns - now, &cont_timeout);
 							}
-							php_io_terminal_ns_to_timespec(overall_deadline_ns - now, &cont_timeout);
 							cont_timeout_ptr = &cont_timeout;
 						}
 
@@ -2046,6 +2084,7 @@ process_key:
 restore:
 	if (mode_changed && tcsetattr(fd, TCSANOW, &mode) != 0) {
 		success = false;
+		*timed_out = false;
 	}
 
 	php_poll_destroy(poll_ctx);
@@ -2311,6 +2350,21 @@ PHP_METHOD(Io_Terminal_Terminal, enableRawMode)
 	GC_ADDREF(intern->active_mode_token);
 }
 
+/*
+ * Invariant: A native Terminal implementation may only restore a native
+ * ModeToken associated with the same underlying terminal/shared mode record.
+ *
+ * The native implementation intentionally allows a token to be restored by
+ * another Terminal object that refers to the same underlying terminal identity
+ * or shared mode record.
+ *
+ * TerminalInterface::restoreMode(?ModeTokenInterface $mode = null) accepts the
+ * interface to allow polymorphic userland terminal fakes (e.g. for unit testing).
+ * However, the native Terminal implementation requires native C state attached to
+ * an internal ModeToken instance associated with the same underlying terminal or
+ * shared mode record; foreign userland token implementations must still be rejected
+ * with ValueError.
+ */
 PHP_METHOD(Io_Terminal_Terminal, restoreMode)
 {
 	zval *mode_token = NULL;
@@ -2437,7 +2491,6 @@ PHP_METHOD(Io_Terminal_Terminal, readKey)
 	}
 
 #ifdef PHP_WIN32
-# define PHP_IO_TERMINAL_MAX_WAIT_MS (INFINITE - 1)
 	DWORD wait_ms = INFINITE;
 	if (timeout_duration != NULL) {
 		uint64_t sec = timeout_duration->duration.seconds;
