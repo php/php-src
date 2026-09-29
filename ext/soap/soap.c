@@ -51,9 +51,9 @@ static void set_soap_fault(zval *obj, const char *fault_code_ns, const char *fau
 static void add_soap_fault_en(zval *obj, const char *fault_code, const char *fault_string);
 static void add_soap_fault_ex(zval *fault, zval *obj, const char *fault_code, const char *fault_string, zend_string *fault_actor, zval *fault_detail, zend_string *lang);
 static void add_soap_fault_ex_en(zval *fault, zval *obj, const char *fault_code, const char *fault_string);
-static ZEND_NORETURN void soap_server_fault(const char *code, const char *string, zend_string *actor, zval* details, zend_string *name, zend_string *lang);
+ZEND_NORETURN static void soap_server_fault(const char *code, const char *string, zend_string *actor, zval* details, zend_string *name, zend_string *lang);
 static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeader* hdr);
-static ZEND_NORETURN void soap_server_fault_en(const char *code, const char *string);
+ZEND_NORETURN static void soap_server_fault_en(const char *code, const char *string);
 
 static sdlParamPtr get_param(sdlFunctionPtr function, const char *param_name, zend_ulong index, int);
 static sdlFunctionPtr get_function(sdlPtr sdl, const char *function_name, size_t function_name_length);
@@ -1944,7 +1944,7 @@ static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeade
 }
 /* }}} */
 
-static ZEND_NORETURN void soap_server_fault(const char *code, const char *string, zend_string *actor, zval* details, zend_string* name, zend_string *lang) /* {{{ */
+ZEND_NORETURN static void soap_server_fault(const char *code, const char *string, zend_string *actor, zval* details, zend_string* name, zend_string *lang) /* {{{ */
 {
 	zval ret;
 
@@ -1956,7 +1956,7 @@ static ZEND_NORETURN void soap_server_fault(const char *code, const char *string
 }
 /* }}} */
 
-static ZEND_NORETURN void soap_server_fault_en(const char *code, const char *string)
+ZEND_NORETURN static void soap_server_fault_en(const char *code, const char *string)
 {
 	soap_server_fault(code, string, NULL, NULL, NULL, soap_lang_en);
 }

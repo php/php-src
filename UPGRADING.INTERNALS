@@ -21,6 +21,12 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 - The sapi_force_http_10() function was removed.
 - The sapi_get_fd() function was removed.
 - The sapi_get_target_uid() and sapi_get_target_gid() functions were removed.
+- Removed HAVE_NORETURN and HAVE_NORETURN_ALIAS. ZEND_NORETURN is guaranteed to
+  work.
+- Redefined ZEND_NORETURN to make use of the [[noreturn]] attribute for C++
+  and C23, which means that ZEND_NORETURN needs to come first in the modifier
+  list. Consider using noreturn (C11) / [[noreturn]] (C23) directly if
+  header interoperability is not required.
 
 ========================
 2. Build system changes
