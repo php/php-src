@@ -232,7 +232,7 @@ static bool zlo_is_iterating(zend_object *object)
 /* Make object 'obj' lazy. If 'obj' is NULL, create a lazy instance of
  * class 'reflection_ce' */
 ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
-		zend_class_entry *reflection_ce, const zval *initializer_zv,
+		zend_class_entry *reflection_ce,
 		const zend_fcall_info_cache *initializer_fcc, zend_lazy_object_flags_t flags)
 {
 	ZEND_ASSERT(!(flags & ~(ZEND_LAZY_OBJECT_USER_MASK|ZEND_LAZY_OBJECT_STRATEGY_MASK)));
