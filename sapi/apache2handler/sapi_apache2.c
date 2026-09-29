@@ -66,15 +66,21 @@ char *apache2_php_ini_path_override = NULL;
 ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 
-typedef struct _php_apache_user_cache_partition_entry {
+typedef struct _php_apache_ucache_partition_entry {
 	const server_rec *server;
 	const char *server_identity;
 	const char *configured_document_root;
-	php_ucache_partition_t *partition;
-	struct _php_apache_user_cache_partition_entry *next;
-} php_apache_user_cache_partition_entry;
+	php_ucache_partition *partition;
+	struct _php_apache_ucache_partition_entry *next;
+} php_apache_ucache_partition_entry;
 
-static php_apache_user_cache_partition_entry *php_apache_user_cache_partitions = NULL;
+typedef struct {
+	const char *name;
+	zend_ini_entry *entry;
+	zend_string *vhost_value;
+} php_apache_ucache_ini;
+
+static php_apache_ucache_partition_entry *php_apache_ucache_partitions = NULL;
 
 static size_t
 php_apache_sapi_ub_write(const char *str, size_t str_length)
@@ -429,6 +435,7 @@ static sapi_module_struct apache2_sapi_module = {
 static apr_status_t php_apache_server_shutdown(void *tmp)
 {
 	apache2_sapi_module.shutdown(&apache2_sapi_module);
+	php_apache_ucache_partitions = NULL;
 	sapi_shutdown();
 #ifdef ZTS
 	tsrm_shutdown();
@@ -469,7 +476,7 @@ static int php_pre_config(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp
 	return OK;
 }
 
-static const char *php_apache_user_cache_normalize_document_root(apr_pool_t *pool, const char *document_root)
+static const char *php_apache_ucache_normalize_document_root(apr_pool_t *pool, const char *document_root)
 {
 	char *normalized;
 
@@ -492,12 +499,12 @@ static const char *php_apache_user_cache_normalize_document_root(apr_pool_t *poo
 }
 
 /* Linear over the vhost list, run once per request. */
-static php_apache_user_cache_partition_entry *php_apache_user_cache_partition_entry_for_server(
+static php_apache_ucache_partition_entry *php_apache_ucache_partition_entry_for_server(
 		const server_rec *server)
 {
-	php_apache_user_cache_partition_entry *entry;
+	php_apache_ucache_partition_entry *entry;
 
-	for (entry = php_apache_user_cache_partitions; entry != NULL; entry = entry->next) {
+	for (entry = php_apache_ucache_partitions; entry != NULL; entry = entry->next) {
 		if (entry->server == server) {
 			return entry;
 		}
@@ -506,15 +513,15 @@ static php_apache_user_cache_partition_entry *php_apache_user_cache_partition_en
 	return NULL;
 }
 
-static void php_apache_user_cache_activate_request_partition(request_rec *r)
+static void php_apache_ucache_activate_request_partition(request_rec *r)
 {
 	const char *document_root, *boundary;
-	php_apache_user_cache_partition_entry *entry;
+	php_apache_ucache_partition_entry *entry;
 
-	entry = php_apache_user_cache_partition_entry_for_server(r->server);
-	document_root = php_apache_user_cache_normalize_document_root(r->pool, ap_context_document_root(r));
+	entry = php_apache_ucache_partition_entry_for_server(r->server);
+	document_root = php_apache_ucache_normalize_document_root(r->pool, ap_context_document_root(r));
 	if (document_root == NULL) {
-		document_root = php_apache_user_cache_normalize_document_root(r->pool, ap_document_root(r));
+		document_root = php_apache_ucache_normalize_document_root(r->pool, ap_document_root(r));
 	}
 
 	if (entry != NULL &&
@@ -554,21 +561,87 @@ static void php_apache_user_cache_activate_request_partition(request_rec *r)
 	);
 }
 
-static void php_apache_user_cache_init_partitions(apr_pool_t *pconf, server_rec *server)
+static void php_apache_ucache_apply_vhost_ini(
+		const server_rec *server,
+		php_apache_ucache_ini *settings,
+		size_t count)
 {
+	void *conf = ap_get_module_config(server->lookup_defaults, &php_module);
+	zend_ini_entry *entry;
+	zend_string *value;
+	const char *raw;
+	size_t i, raw_len;
+
+	for (i = 0; i < count; i++) {
+		settings[i].vhost_value = NULL;
+
+		entry = settings[i].entry;
+		if (conf == NULL ||
+			entry == NULL ||
+			entry->on_modify == NULL ||
+			!get_php_admin_config(conf, settings[i].name, strlen(settings[i].name), &raw, &raw_len)
+		) {
+			continue;
+		}
+
+		value = zend_string_init(raw, raw_len, 1);
+		GC_MAKE_PERSISTENT_LOCAL(value);
+
+		if (entry->on_modify(entry, value, entry->mh_arg1, entry->mh_arg2, entry->mh_arg3, PHP_INI_STAGE_ACTIVATE) == SUCCESS) {
+			settings[i].vhost_value = value;
+		} else {
+			zend_string_release_ex(value, 1);
+		}
+	}
+}
+
+static void php_apache_ucache_restore_vhost_ini(php_apache_ucache_ini *settings, size_t count)
+{
+	zend_ini_entry *entry;
+	size_t i;
+	bool restored;
+
+	for (i = 0; i < count; i++) {
+		if (settings[i].vhost_value == NULL) {
+			continue;
+		}
+
+		entry = settings[i].entry;
+		restored = entry->on_modify(entry, entry->value, entry->mh_arg1, entry->mh_arg2, entry->mh_arg3, PHP_INI_STAGE_DEACTIVATE) == SUCCESS;
+		ZEND_ASSERT(restored);
+
+		zend_string_release_ex(settings[i].vhost_value, 1);
+		settings[i].vhost_value = NULL;
+	}
+}
+
+static void php_apache_ucache_init_partitions(apr_pool_t *pconf, server_rec *server)
+{
+	php_apache_ucache_ini settings[] = {
+		{ "user_cache.enable", NULL, NULL },
+		{ "user_cache.shm_size", NULL, NULL },
+		{ "user_cache.entries_hint", NULL, NULL },
+		{ "user_cache.preferred_memory_model", NULL, NULL },
+		{ "user_cache.lockfile_path", NULL, NULL },
+	};
+	const size_t count = sizeof(settings) / sizeof(settings[0]);
 	const char *hostname, *partition_name;
-	php_apache_user_cache_partition_entry *entry;
+	php_apache_ucache_partition_entry *entry;
 	core_server_config *core_config;
 	server_rec *cur;
 	unsigned int i;
+	size_t setting;
 
-	/* The partition entries are pool-allocated (freed with pconf); the
-	 * php_ucache_partition_t objects created below are owned by the
-	 * user_cache extension and released together in its MSHUTDOWN
-	 * (ucache_partitions_shutdown), so no SAPI-side shutdown hook is
-	 * required here. */
-	php_apache_user_cache_partitions = NULL;
-	php_ucache_opt_in();
+	/* pconf owns the entries; user_cache frees their partitions in MSHUTDOWN. */
+	php_apache_ucache_partitions = NULL;
+
+	for (setting = 0; setting < count; setting++) {
+		settings[setting].entry = zend_hash_str_find_ptr(
+			EG(ini_directives),
+			settings[setting].name,
+			strlen(settings[setting].name)
+		);
+	}
 
 	i = 0;
 	for (cur = server; cur != NULL; cur = cur->next, i++) {
@@ -585,23 +658,31 @@ static void php_apache_user_cache_init_partitions(apr_pool_t *pconf, server_rec 
 		entry->server = cur;
 		entry->server_identity = partition_name;
 		core_config = ap_get_core_module_config(cur->module_config);
-		entry->configured_document_root = php_apache_user_cache_normalize_document_root(
+		entry->configured_document_root = php_apache_ucache_normalize_document_root(
 			pconf,
 			core_config != NULL ? core_config->ap_document_root : NULL
 		);
+		php_apache_ucache_apply_vhost_ini(cur, settings, count);
+
 		entry->partition = php_ucache_partition_create(partition_name);
 		if (entry->partition == NULL) {
-			ap_log_error(APLOG_MARK, APLOG_WARNING, 0, cur, "Unable to allocate UserCache partition");
+			if (php_ucache_is_enabled_by_ini()) {
+				ap_log_error(APLOG_MARK, APLOG_WARNING, 0, cur, "Unable to allocate UserCache partition");
+			}
+
+			php_apache_ucache_restore_vhost_ini(settings, count);
 
 			continue;
 		}
 
-		if (!php_ucache_partition_startup_storage(entry->partition)) {
+		if (!php_ucache_partition_startup_storage(entry->partition) && php_ucache_is_enabled_by_ini()) {
 			ap_log_error(APLOG_MARK, APLOG_WARNING, 0, cur, "UserCache partition startup failed; UserCache will be unavailable");
 		}
 
-		entry->next = php_apache_user_cache_partitions;
-		php_apache_user_cache_partitions = entry;
+		php_apache_ucache_restore_vhost_ini(settings, count);
+
+		entry->next = php_apache_ucache_partitions;
+		php_apache_ucache_partitions = entry;
 	}
 }
 
@@ -648,7 +729,14 @@ php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp
 		return DONE;
 	}
 
-	php_apache_user_cache_init_partitions(pconf, s);
+	if (php_ucache_opt_in(PHP_UCACHE_MODE_REQ) == FAILURE) {
+		if (php_ucache_is_enabled_by_ini()) {
+			ap_log_error(APLOG_MARK, APLOG_WARNING, 0, s, "Unable to register UserCache request mode; UserCache will be unavailable");
+		}
+	} else {
+		php_apache_ucache_init_partitions(pconf, s);
+	}
+
 	apr_pool_cleanup_register(pconf, NULL, php_apache_server_shutdown, apr_pool_cleanup_null);
 	php_apache_add_version(pconf);
 
@@ -697,7 +785,7 @@ static int php_apache_request_ctor(request_rec *r, php_struct *ctx)
 
 	ctx->r->user = apr_pstrdup(ctx->r->pool, SG(request_info).auth_user);
 
-	php_apache_user_cache_activate_request_partition(r);
+	php_apache_ucache_activate_request_partition(r);
 
 	if (php_request_startup() == FAILURE) {
 		php_ucache_partition_activate(NULL);

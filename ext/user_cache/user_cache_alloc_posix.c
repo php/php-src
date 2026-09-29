@@ -14,7 +14,7 @@
 
 #include "user_cache_shm.h"
 
-#ifdef PHP_UCACHE_USE_SHM_OPEN
+#ifdef UCACHE_USE_SHM_OPEN
 
 #include <errno.h>
 #include <stdio.h>
@@ -27,21 +27,24 @@
 
 #include "ext/random/php_random_csprng.h"
 
-#define PHP_UCACHE_POSIX_SHM_NAME_PREFIX   "/php_uc."
-#define PHP_UCACHE_POSIX_SHM_NAME_BYTES    10
-#define PHP_UCACHE_POSIX_SHM_NAME_ATTEMPTS 5
+#define UCACHE_POSIX_SHM_NAME_PREFIX   "/php_uc."
+#define UCACHE_POSIX_SHM_NAME_BYTES    10
+#define UCACHE_POSIX_SHM_NAME_ATTEMPTS 5
 
-typedef struct {
-	php_ucache_shm_segment_t common;
-	int shm_fd;
-} php_ucache_shm_segment_posix_t;
+static int ucache_alloc_posix_create_seg(size_t requested_size, ucache_shm_seg **shared_seg_p, const char **err_in);
+static void ucache_alloc_posix_detach_seg(ucache_shm_seg *shared_seg);
 
-static bool ucache_alloc_posix_segment_name(char *buf, size_t buf_size)
+const ucache_shm_handlers ucache_alloc_posix_handlers = {
+	ucache_alloc_posix_create_seg,
+	ucache_alloc_posix_detach_seg
+};
+
+static bool ucache_alloc_posix_seg_name(char *buf, size_t buf_size)
 {
 	static const char hexits[] = "0123456789abcdef";
-	size_t i;
-	unsigned char random_bytes[PHP_UCACHE_POSIX_SHM_NAME_BYTES];
+	unsigned char random_bytes[UCACHE_POSIX_SHM_NAME_BYTES];
 	char hex[sizeof(random_bytes) * 2 + 1];
+	size_t i;
 
 	if (php_random_bytes_silent(random_bytes, sizeof(random_bytes)) == FAILURE) {
 		return false;
@@ -54,149 +57,127 @@ static bool ucache_alloc_posix_segment_name(char *buf, size_t buf_size)
 
 	hex[sizeof(hex) - 1] = '\0';
 
-	snprintf(buf, buf_size, PHP_UCACHE_POSIX_SHM_NAME_PREFIX "%s", hex);
+	snprintf(buf, buf_size, UCACHE_POSIX_SHM_NAME_PREFIX "%s", hex);
 
 	return true;
 }
 
-static bool ucache_alloc_posix_create_segments(size_t requested_size, php_ucache_shm_segment_posix_t ***shared_segments_p, uint32_t *shared_segments_count, const char **error_in)
+static int ucache_alloc_posix_create_seg(size_t requested_size, ucache_shm_seg **shared_seg_p, const char **err_in)
 {
-	php_ucache_shm_segment_posix_t *shared_segment;
-	mode_t shared_segment_mode = 0600;
-	uint32_t shared_segment_attempt;
-	/* O_EXCL: never adopt an object somebody else created under this name. */
-	int shared_segment_flags = O_RDWR | O_CREAT | O_EXCL, shared_segment_fd = -1;
-	char shared_segment_name[sizeof(PHP_UCACHE_POSIX_SHM_NAME_PREFIX) + (PHP_UCACHE_POSIX_SHM_NAME_BYTES * 2)];
+	ucache_shm_seg *shared_seg;
+	mode_t shared_seg_mode = 0600;
+	uint32_t shared_seg_attempt;
+	int shared_seg_flags = O_RDWR | O_CREAT | O_EXCL,
+		shared_seg_fd = -1;
+	char shared_seg_name[sizeof(UCACHE_POSIX_SHM_NAME_PREFIX) + (UCACHE_POSIX_SHM_NAME_BYTES * 2)];
+	void *mapping;
 
 #if defined(HAVE_SHM_CREATE_LARGEPAGE)
-	/* Prefer the largest compatible page size. Capture the getpagesizes()
-	 * result as a signed int: its -1 error return in a size_t would pass
-	 * the > 0 guard and index far outside the array (see the equivalent
-	 * upstream fix in ext/opcache/shared_alloc_posix.c, GH-22429). */
-	size_t shared_segment_lg_index = 0, shared_segments_indexes[3] = {0};
-	const size_t entries = sizeof(shared_segments_indexes) / sizeof(shared_segments_indexes[0]);
-	int i, shared_segment_sizes;
+	size_t shared_seg_largest_idx = 0, shared_seg_sindexes[3] = {0};
+	const size_t entries = sizeof(shared_seg_sindexes) / sizeof(shared_seg_sindexes[0]);
+	int i, shared_seg_sizes;
 
-	shared_segment_sizes = getpagesizes(shared_segments_indexes, entries);
+	shared_seg_sizes = getpagesizes(shared_seg_sindexes, entries);
 
-	if (shared_segment_sizes > 0) {
-		for (i = shared_segment_sizes; i-- > 0; ) {
-			if (shared_segments_indexes[i] != 0 &&
-				!(requested_size % shared_segments_indexes[i])
+	if (shared_seg_sizes > 0) {
+		for (i = shared_seg_sizes; i-- > 0; ) {
+			if (shared_seg_sindexes[i] != 0 &&
+				!(requested_size % shared_seg_sindexes[i])
 			) {
-				shared_segment_lg_index = i;
+				shared_seg_largest_idx = i;
 
 				break;
 			}
 		}
 	}
-#endif /* defined(HAVE_SHM_CREATE_LARGEPAGE) */
+#endif /* HAVE_SHM_CREATE_LARGEPAGE */
 
-	*shared_segments_count = 1;
-	*shared_segments_p = (php_ucache_shm_segment_posix_t **) pecalloc(1, sizeof(php_ucache_shm_segment_posix_t) + sizeof(void *), true);
+	for (shared_seg_attempt = 0; shared_seg_attempt < UCACHE_POSIX_SHM_NAME_ATTEMPTS; shared_seg_attempt++) {
+		if (!ucache_alloc_posix_seg_name(shared_seg_name, sizeof(shared_seg_name))) {
+			*err_in = "php_random_bytes";
 
-	shared_segment = (php_ucache_shm_segment_posix_t *)((char *)(*shared_segments_p) + sizeof(void *));
-	(*shared_segments_p)[0] = shared_segment;
-
-	for (shared_segment_attempt = 0; shared_segment_attempt < PHP_UCACHE_POSIX_SHM_NAME_ATTEMPTS; shared_segment_attempt++) {
-		if (!ucache_alloc_posix_segment_name(shared_segment_name, sizeof(shared_segment_name))) {
-			*error_in = "php_random_bytes";
-
-			return false;
+			return UCACHE_ALLOC_FAILURE;
 		}
 
 #if defined(HAVE_SHM_CREATE_LARGEPAGE)
-		if (shared_segment_lg_index > 0) {
-			shared_segment_fd = shm_create_largepage(shared_segment_name, shared_segment_flags, shared_segment_lg_index, SHM_LARGEPAGE_ALLOC_DEFAULT, shared_segment_mode);
-			if (shared_segment_fd != -1) {
+		if (shared_seg_largest_idx > 0) {
+			shared_seg_fd = shm_create_largepage(shared_seg_name, shared_seg_flags, shared_seg_largest_idx, SHM_LARGEPAGE_ALLOC_DEFAULT, shared_seg_mode);
+			if (shared_seg_fd != -1) {
 				break;
 			}
 		}
-#endif /* defined(HAVE_SHM_CREATE_LARGEPAGE) */
+#endif /* HAVE_SHM_CREATE_LARGEPAGE */
 
-		shared_segment_fd = shm_open(shared_segment_name, shared_segment_flags, shared_segment_mode);
-		if (shared_segment_fd != -1) {
+		shared_seg_fd = shm_open(shared_seg_name, shared_seg_flags, shared_seg_mode);
+		if (shared_seg_fd != -1) {
 			break;
 		}
 
 		if (errno != EEXIST) {
-			*error_in = "shm_open";
+			*err_in = "shm_open";
 
-			return false;
+			return UCACHE_ALLOC_FAILURE;
 		}
 	}
 
-	if (shared_segment_fd == -1) {
-		*error_in = "shm_open";
+	if (shared_seg_fd == -1) {
+		*err_in = "shm_open";
 
-		return false;
+		return UCACHE_ALLOC_FAILURE;
 	}
 
-	shared_segment->shm_fd = shared_segment_fd;
+	if (shm_unlink(shared_seg_name) != 0) {
+		close(shared_seg_fd);
 
-	if (ftruncate(shared_segment->shm_fd, requested_size) != 0) {
-		*error_in = "ftruncate";
+		*err_in = "shm_unlink";
 
-		close(shared_segment->shm_fd);
-
-		shm_unlink(shared_segment_name);
-
-		return false;
+		return UCACHE_ALLOC_FAILURE;
 	}
 
-#ifndef __APPLE__
-	/* ftruncate() leaves the object sparse; on a tmpfs-backed /dev/shm the
-	 * first touch beyond the free space raises SIGBUS, so commit it now and
-	 * fail closed instead. Darwin shm objects are not files (fcntl would
-	 * return EBADF) and are not size-capped by a filesystem. */
-	if (!php_ucache_preallocate_fd(shared_segment->shm_fd, requested_size)) {
-		*error_in = "preallocate";
+	if (ftruncate(shared_seg_fd, requested_size) != 0) {
+		close(shared_seg_fd);
 
-		close(shared_segment->shm_fd);
+		*err_in = "ftruncate";
 
-		shm_unlink(shared_segment_name);
-
-		return false;
-	}
-#endif /* !__APPLE__ */
-
-	shared_segment->common.p = mmap(0, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED, shared_segment->shm_fd, 0);
-	if (shared_segment->common.p == MAP_FAILED) {
-		*error_in = "mmap";
-
-		close(shared_segment->shm_fd);
-
-		shm_unlink(shared_segment_name);
-
-		return false;
+		return UCACHE_ALLOC_FAILURE;
 	}
 
-	if (shm_unlink(shared_segment_name) != 0) {
-		*error_in = "shm_unlink";
+	if (!ucache_shm_fd_reserve(shared_seg_fd, requested_size)) {
+		close(shared_seg_fd);
 
-		munmap(shared_segment->common.p, requested_size);
+		*err_in = "posix_fallocate";
 
-		shared_segment->common.p = NULL;
-
-		close(shared_segment->shm_fd);
-
-		return false;
+		return UCACHE_ALLOC_FAILURE;
 	}
 
-	shared_segment->common.size = requested_size;
+	mapping = mmap(NULL, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED, shared_seg_fd, 0);
+	close(shared_seg_fd);
+	if (mapping == MAP_FAILED) {
+		*err_in = "mmap";
 
-	return true;
+		return UCACHE_ALLOC_FAILURE;
+	}
+
+	shared_seg = (ucache_shm_seg *) calloc(1, sizeof(*shared_seg));
+	if (shared_seg == NULL) {
+		munmap(mapping, requested_size);
+
+		*err_in = "calloc";
+
+		return UCACHE_ALLOC_FAILURE;
+	}
+
+	shared_seg->p = mapping;
+	shared_seg->size = requested_size;
+	shared_seg->zero_filled = true;
+	*shared_seg_p = shared_seg;
+
+	return UCACHE_ALLOC_SUCCESS;
 }
 
-static void ucache_alloc_posix_detach_segment(php_ucache_shm_segment_posix_t *shared_segment)
+static void ucache_alloc_posix_detach_seg(ucache_shm_seg *shared_seg)
 {
-	munmap(shared_segment->common.p, shared_segment->common.size);
-	close(shared_segment->shm_fd);
+	munmap(shared_seg->p, shared_seg->size);
 }
 
-const php_ucache_shm_handlers_t php_ucache_alloc_posix_handlers = {
-	(php_ucache_create_segments_t)ucache_alloc_posix_create_segments,
-	(php_ucache_detach_segment_t)ucache_alloc_posix_detach_segment
-};
-
-#endif /* PHP_UCACHE_USE_SHM_OPEN */
+#endif /* UCACHE_USE_SHM_OPEN */

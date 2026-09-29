@@ -5,7 +5,6 @@ session
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1
-opcache.file_cache_only=0
 user_cache.shm_size=16M
 session.save_path=
 session.use_cookies=0
@@ -29,6 +28,10 @@ session_set_save_handler(new class implements SessionHandlerInterface {
         var_dump($pool->fetch('k', 'default'));
         var_dump($pool->lock('k'));
         var_dump(UserCache\Cache::getStatus()->getAvailability()->name);
+        $cacheStatus = UserCache\Cache::getStatus();
+        var_dump($cacheStatus->getConfiguredMemory(), $cacheStatus->getSharedMemorySize(), $cacheStatus->getEntryCount(), $cacheStatus->getUsedMemory());
+        $status = UserCache\Cache::getPool('main')->getPoolStatus();
+        var_dump($status->getEntryCount(), $status->getEntryKeys(), $status->getUsedMemory());
 
         return true;
     }
@@ -57,3 +60,11 @@ bool(false)
 string(7) "default"
 bool(false)
 string(26) "UnavailableByUnknownReason"
+int(16777216)
+int(0)
+int(0)
+int(0)
+int(0)
+array(0) {
+}
+int(0)

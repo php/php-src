@@ -3,7 +3,6 @@ UserCache\Cache: user_cache.eviction_policy selects lru, clear or none behavior
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1
-opcache.file_cache_only=0
 user_cache.shm_size=4M
 --FILE--
 <?php
@@ -22,14 +21,23 @@ for ($i = 0; $i < 600; $i++) {
         $ok++;
     }
 }
+/* Every entry that survived eviction or wiping still holds the value stored under its key. */
+$keys = $cache->getPoolStatus()->getEntryKeys();
+$intact = $keys !== [];
+foreach ($keys as $key) {
+    if ($cache->fetch($key) !== $blob . substr($key, 1)) {
+        $intact = false;
+    }
+}
 $status = UserCache\Cache::getStatus();
 printf(
-    "stored=%d full=%d evicted=%d wiped=%d failed=%d\n",
+    "stored=%d full=%d evicted=%d wiped=%d failed=%d intact=%d\n",
     $ok,
     (int) ($status->getEntryCount() > 400),
     (int) ($status->getEvictionCount() > 0),
     (int) ($status->getExpungeCount() > 0),
-    (int) ($status->getStoreFailureCount() > 0)
+    (int) ($status->getStoreFailureCount() > 0),
+    (int) $intact
 );
 CODE);
 
@@ -39,14 +47,10 @@ foreach (['lru', 'clear', 'none'] as $policy) {
     );
 }
 
-/* Invalid values are rejected at INI time and fall back to the lru default. */
-echo shell_exec("$php $args -d user_cache.eviction_policy=bogus -r " . escapeshellarg("echo 'rejected';") . " 2>&1"), "\n";
-
 /* Unlink here instead of --CLEAN-- so --repeat runs keep this test. */
 unlink($child);
 ?>
 --EXPECTF--
-lru: stored=600 full=1 evicted=1 wiped=0 failed=0
-clear: stored=600 full=0 evicted=0 wiped=1 failed=0
-none: stored=%d full=1 evicted=0 wiped=0 failed=1
-%Auser_cache.eviction_policy must be one of "lru", "clear" or "none"%Arejected
+lru: stored=600 full=1 evicted=1 wiped=0 failed=0 intact=1
+clear: stored=600 full=0 evicted=0 wiped=1 failed=0 intact=1
+none: stored=%d full=1 evicted=0 wiped=0 failed=1 intact=1

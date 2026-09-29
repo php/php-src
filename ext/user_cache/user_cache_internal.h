@@ -12,410 +12,413 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef PHP_USER_CACHE_INTERNAL_H
-#define PHP_USER_CACHE_INTERNAL_H
+#ifndef UCACHE_INTERNAL_H
+#define UCACHE_INTERNAL_H
 
 #include "php.h"
 
+#include <stdatomic.h>
 #include <time.h>
 #ifdef ZTS
 # include "TSRM/TSRM.h"
 #endif
+#if defined(ZEND_WIN32) && defined(_MSC_VER)
+# include <intrin.h>
+#endif
+#ifndef ZEND_WIN32
+# include <pthread.h>
+#endif
 
-#include "Zend/zend_atomic.h"
 #include "Zend/zend_bitset.h"
 #include "Zend/zend_call_stack.h"
 #include "Zend/zend_enum.h"
 #include "Zend/zend_exceptions.h"
+#include "Zend/zend_hrtime.h"
 #include "Zend/zend_smart_str.h"
+#include "Zend/zend_system_id.h"
 
 #include "php_user_cache.h"
 #include "user_cache_shm.h"
 
-#ifdef ZEND_WIN32
-# include "zend_execute.h"
-# include "win32/ioutil.h"
+#include "ext/standard/php_var.h"
 
-# include <fcntl.h>
-# include <io.h>
-# include <winbase.h>
-# ifdef _MSC_VER
-#  include <intrin.h>
-# endif
-#else /* !ZEND_WIN32 */
-# include <errno.h>
-# include <fcntl.h>
-# include <pthread.h>
-# include <sys/types.h>
-# include <sys/stat.h>
-# ifdef HAVE_UNISTD_H
-#  include <unistd.h>
-# endif
-# if defined(PHP_UCACHE_USE_MMAP) || (defined(__linux__) && defined(HAVE_MEMFD_CREATE))
-#  include <sys/mman.h>
-# endif
-#endif /* ZEND_WIN32 */
-#define PHP_UCACHE_MAGIC		0xCAC17E01U
-#define PHP_UCACHE_VERSION		1U
-#define PHP_UCACHE_MIN_CAPACITY 127U
-#define PHP_UCACHE_OCCUPANCY_WORD_BITS	(sizeof(zend_ulong) * 8)
-#define PHP_UCACHE_OCCUPANCY_WORDS(capacity) \
-	(((size_t) (capacity) + PHP_UCACHE_OCCUPANCY_WORD_BITS - 1) / PHP_UCACHE_OCCUPANCY_WORD_BITS)
-#define PHP_UCACHE_OCCUPANCY_BYTES(capacity) \
-	(PHP_UCACHE_OCCUPANCY_WORDS(capacity) * sizeof(zend_ulong))
-/* Segment-wide interning of array string keys, property, class and enum
- * case names up to PHP_UCACHE_INTERN_MAX_LEN bytes. */
-#define PHP_UCACHE_INTERN_MIN_CAPACITY		256U
-#define PHP_UCACHE_INTERN_MAX_CAPACITY		(1U << 24)
-#define PHP_UCACHE_INTERN_MAX_LEN			64U
-/* Distinct keys one payload may intern: bounds the lock-free probes and
- * the candidate bookkeeping for key-heavy values whose keys are unique. */
-#define PHP_UCACHE_INTERN_MAX_KEYS_PER_PAYLOAD	256U
-#define PHP_UCACHE_INTERN_BYTES(capacity) \
-	((size_t) (capacity) * sizeof(php_ucache_intern_slot_t))
-/* String offset fields in graph payloads: bit 31 marks a segment unit
- * offset of an interned string instead of a payload-relative byte offset. */
-#define PHP_UCACHE_GRAPH_SEGMENT_STRING_FLAG	0x80000000U
-/* At or below this the header plus the minimum entry, occupancy and lock
- * tables cannot even be formatted, so the cache silently stays unavailable.
- * Mirrors the alignment roundings of ucache_header_layout_memo(). */
-#define PHP_UCACHE_SHM_SIZE_FLOOR \
-	PHP_UCACHE_ALIGNED_SIZE( \
-		PHP_UCACHE_ALIGNED_SIZE( \
-			PHP_UCACHE_ALIGNED_SIZE( \
-				PHP_UCACHE_ALIGNED_SIZE( \
-					sizeof(php_ucache_header_t) \
-					+ PHP_UCACHE_MIN_CAPACITY * (sizeof(php_ucache_entry_t) + sizeof(uint32_t)) \
-				) \
-				+ PHP_UCACHE_OCCUPANCY_BYTES(PHP_UCACHE_MIN_CAPACITY) \
-			) \
-			+ PHP_UCACHE_INTERN_BYTES(PHP_UCACHE_INTERN_MIN_CAPACITY) \
-		) \
-		+ PHP_UCACHE_ENTRY_LOCK_MIN_CAPACITY * sizeof(php_ucache_entry_lock_record_t) \
-	)
-#define PHP_UCACHE_BLOCK_HEADER_UNITS \
-	((uint32_t) (sizeof(php_ucache_block_t) / PHP_UCACHE_SHM_UNIT))
+#include "SAPI.h"
 
-#define PHP_UCACHE_KEY_DELIMITER		"\x1f"
-#define PHP_UCACHE_KEY_DELIMITER_CHAR	'\x1f'
-#define PHP_UCACHE_KEY_DELIMITER_NAME	"0x1F"
-
-#define PHP_UCACHE_MSG_RESOURCE_UNSTORABLE			"resources cannot be stored in the user cache"
-#define PHP_UCACHE_MSG_CLOSURE_UNSTORABLE			"Closure objects cannot be stored in the user cache"
-#define PHP_UCACHE_MSG_LAZY_OBJECT_UNSTORABLE		"lazy objects cannot be stored in the user cache"
-#define PHP_UCACHE_MSG_OPAQUE_OBJECT_UNSTORABLE		"objects with opaque internal state (e.g. Fiber, Generator, PDO) cannot be stored in the user cache"
-#define PHP_UCACHE_MSG_NESTED_TOO_DEEP_UNSTORABLE	"value is nested too deeply to be stored in the user cache"
-
-#define PHP_UCACHE_ENTRY_EMPTY		0
-#define PHP_UCACHE_ENTRY_USED		1
-#define PHP_UCACHE_ENTRY_TOMBSTONE	2
-
-#define PHP_UCACHE_VALUE_NULL			0
-#define PHP_UCACHE_VALUE_TRUE			1
-#define PHP_UCACHE_VALUE_FALSE			2
-#define PHP_UCACHE_VALUE_LONG			3
-#define PHP_UCACHE_VALUE_DOUBLE			4
-#define PHP_UCACHE_VALUE_STRING			5
-#define PHP_UCACHE_VALUE_SHARED_GRAPH	8
-
-#define PHP_UCACHE_SHARED_GRAPH_MAGIC						0xCAC17E02U
-#define PHP_UCACHE_SHARED_GRAPH_VERSION						1U
-#define PHP_UCACHE_SHARED_GRAPH_FLAG_HAS_SHARED_IDENTITY	0x2U
-#define PHP_UCACHE_SHARED_GRAPH_FLAG_HAS_OBJECT				0x4U
-#define PHP_UCACHE_SHARED_GRAPH_FLAG_PREFERS_PROTOTYPE		0x8U
-#define PHP_UCACHE_SHARED_GRAPH_RETIRED						(1 << 30) /* ref_state packs the RETIRED flag (bit 30) with the live refcount (low bits). */
-#define PHP_UCACHE_SHARED_GRAPH_REFCOUNT_MASK				(PHP_UCACHE_SHARED_GRAPH_RETIRED - 1)
-
-#define PHP_UCACHE_SHARED_GRAPH_VALUE_UNDEF						0
-#define PHP_UCACHE_SHARED_GRAPH_VALUE_NULL						1
-#define PHP_UCACHE_SHARED_GRAPH_VALUE_TRUE						2
-#define PHP_UCACHE_SHARED_GRAPH_VALUE_FALSE						3
-#define PHP_UCACHE_SHARED_GRAPH_VALUE_LONG						4
-#define PHP_UCACHE_SHARED_GRAPH_VALUE_DOUBLE					5
-#define PHP_UCACHE_SHARED_GRAPH_VALUE_STRING					6
-#define PHP_UCACHE_SHARED_GRAPH_VALUE_ARRAY						7
-#define PHP_UCACHE_SHARED_GRAPH_VALUE_OBJECT					8
-#define PHP_UCACHE_SHARED_GRAPH_VALUE_DYNAMIC_ARRAY				10
-#define PHP_UCACHE_SHARED_GRAPH_VALUE_OBJECT_REF				11
-#define PHP_UCACHE_SHARED_GRAPH_VALUE_REFERENCE					13
-#define PHP_UCACHE_SHARED_GRAPH_VALUE_REFERENCE_REF				14
-#define PHP_UCACHE_SHARED_GRAPH_VALUE_ARRAY_REF					15
-#define PHP_UCACHE_SHARED_GRAPH_VALUE_ENUM						16
-#define PHP_UCACHE_SHARED_GRAPH_VALUE_SAFE_DIRECT_OBJECT		18
-#define PHP_UCACHE_SHARED_GRAPH_VALUE_SERIALIZED_OBJECT			19
-#define PHP_UCACHE_SHARED_GRAPH_VALUE_SERDES_OBJECT				20
-#define PHP_UCACHE_SHARED_GRAPH_VALUE_SLEEP_OBJECT				21
-#define PHP_UCACHE_SHARED_GRAPH_VALUE_SHAPED_ARRAY				22
-#define PHP_UCACHE_SHARED_GRAPH_VALUE_SERIALIZED_SHAPED_OBJECT	23
-#define PHP_UCACHE_SHARED_GRAPH_VALUE_SLEEP_SHAPED_OBJECT		24
-
-#define PHP_UCACHE_SHARED_GRAPH_OBJECT_FLAG_SHARED	0x1U
-
-#define PHP_UCACHE_SHARED_GRAPH_ARRAY_FLAG_PACKED			0x2U
-#define PHP_UCACHE_SHARED_GRAPH_ARRAY_FLAG_WIDE_NEXT_FREE	0x4U /* next_free holds the offset of an out-of-line int64 next-free index. */
-/* Which key columns a dynamic array's column block carries. */
-#define PHP_UCACHE_SHARED_GRAPH_ARRAY_FLAG_STRING_KEYS		0x8U
-#define PHP_UCACHE_SHARED_GRAPH_ARRAY_FLAG_INT_KEYS			0x10U
-#define PHP_UCACHE_SHARED_GRAPH_ARRAY_SHAPE_MAX_KEYS		32U
-
-#define PHP_UCACHE_LOOKUP_BUCKETS		256U
-#define PHP_UCACHE_LOOKUP_WAYS			2U
-#define PHP_UCACHE_LOOKUP_SETS			(PHP_UCACHE_LOOKUP_BUCKETS / PHP_UCACHE_LOOKUP_WAYS)
-
-#define PHP_UCACHE_DECODE_DIRECT_CACHE_SLOTS	4U
-
-#define PHP_UCACHE_EVICTION_POLICY_LRU		0
-#define PHP_UCACHE_EVICTION_POLICY_CLEAR	1
-#define PHP_UCACHE_EVICTION_POLICY_NONE		2
-
-/* Per-key lock records live in a capacity-sized power-of-two region behind
- * the access stamps (see ucache_calculate_entry_lock_capacity()); the
- * bounds below clamp that sizing. */
-#define PHP_UCACHE_ENTRY_LOCK_MIN_CAPACITY		128U
-#define PHP_UCACHE_ENTRY_LOCK_MAX_CAPACITY		1024U
-#define PHP_UCACHE_ENTRY_LOCK_EMPTY				0
-#define PHP_UCACHE_ENTRY_LOCK_USED				1
-#define PHP_UCACHE_ENTRY_LOCK_TOMBSTONE			2
-
-#if defined(__GNUC__) || defined(__clang__)
-# define PHP_UCACHE_HAVE_OPTIMISTIC	1
-#elif defined(ZEND_WIN32) && defined(_MSC_VER)
-# define PHP_UCACHE_HAVE_OPTIMISTIC	1
-# define PHP_UCACHE_OPTIMISTIC_MSVC	1
-#endif
-
-#if !defined(ZEND_WIN32) && defined(__linux__)
-# define PHP_UCACHE_HAVE_SHARED_MUTEX	1
-#endif
-
-#if defined(PHP_UCACHE_USE_MMAP) && !defined(ZEND_WIN32)
-# define PHP_UCACHE_HAVE_ANON_MMAP	1
-/* Boundary partitions never touch POSIX shm (/dev/shm): independently
- * started processes rendezvous through a fully preallocated regular file
- * below user_cache.lockfile_path that is mapped with mmap(). */
-# define PHP_UCACHE_HAVE_BOUNDARY_MMAP	1
-# define PHP_UCACHE_BOUNDARY_SALT_SIZE	32
-# if defined(MAP_ANON) && !defined(MAP_ANONYMOUS)
-#  define MAP_ANONYMOUS MAP_ANON
-# endif
-#endif
-
-#define PHP_UCACHE_LOCK_MODEL_FCNTL	0U
-#define PHP_UCACHE_LOCK_MODEL_MUTEX	1U
-
-#define PHP_UCACHE_READER_SLOTS			256U
-#define PHP_UCACHE_POOL_STATS_SLOTS		128U
-#define PHP_UCACHE_POOL_STATS_EMPTY		0U
-#define PHP_UCACHE_POOL_STATS_USED		1U
-#define PHP_UCACHE_POOL_STATS_TOMBSTONE	2U
-#define PHP_UCACHE_READER_CLAIM_MAX		4U
-
-#define PHP_UCACHE_ORPHANED_GRAPH_SLOTS	32U
-
-#define PHP_UCACHE_GRAPH_PIN_SLOTS				256U
-#define PHP_UCACHE_GRAPH_PIN_WORDS				(PHP_UCACHE_GRAPH_PIN_SLOTS / 32U)
-#define PHP_UCACHE_GRAPH_PIN_CLAIM_MAX			4U
-
-#define PHP_UCACHE_LOOKUP_EMPTY	0
-#define PHP_UCACHE_LOOKUP_HIT	1
-#define PHP_UCACHE_LOOKUP_MISS	2
-
-#define PHP_UCACHE_ENTRY_FLAG_COMBINED_VALUE_KEY	0x0001U
-
-#define PHP_UCACHE_BLOCK_FREE			1U
-
-#ifdef ZEND_WIN32
-# define PHP_UCACHE_WIN32_MAPPING_NAME "PhpUserCache.SharedMemoryArea"
-# define PHP_UCACHE_WIN32_MAPPING_MUTEX_NAME "PhpUserCache.SharedMemoryMutex"
-# define PHP_UCACHE_WIN32_LOCK_FILE_NAME "PhpUserCache.LockFile"
+#if ZEND_DEBUG
+# define UCACHE_DEBUG_FAULT(name) ucache_debug_fault("USER_CACHE_DEBUG_" name)
+# define UCACHE_DEBUG_SIMULATE_KILL(name) \
+	do { \
+		if (UCACHE_DEBUG_FAULT(name)) { \
+			_Exit(0); \
+		} \
+	} while (0)
 #else
-# define PHP_UCACHE_SEM_FILENAME_PREFIX	".PhpUserCacheSem."
+# define UCACHE_DEBUG_FAULT(name) false
+# define UCACHE_DEBUG_SIMULATE_KILL(name) ((void) 0)
 #endif
+
+#define UCACHE_MAGIC						0xCAC17E01U
+#define UCACHE_MIN_CAPACITY					127U
+#define UCACHE_TABLE_SLOT_SIZE \
+	(sizeof(ucache_entry) + sizeof(uint32_t) + sizeof(ucache_pool_links))
+#define UCACHE_AUTO_SEG_BYTES_PER_ENTRY		1024U
+#define UCACHE_ENTRIES_HINT_MAX				16777213
+
+#define UCACHE_REQ_CACHE_BUDGET_MIN			(8U * 1024U * 1024U)
+#define UCACHE_REQ_CACHE_BUDGET_DIVISOR		8U
+
+#define UCACHE_STORAGE_KEY_MAX		UINT16_MAX
+#define UCACHE_POOL_NAME_MAX		(UCACHE_STORAGE_KEY_MAX - 1 - MAX_LENGTH_OF_LONG)
+
+#define UCACHE_KEY_DELIM		"\x1f"
+#define UCACHE_KEY_DELIM_CHAR	'\x1f'
+#define UCACHE_KEY_DELIM_NAME	"0x1F"
+
+#define UCACHE_MSG_RESOURCE_UNSTORABLE		"Resources cannot be stored in the user cache"
+#define UCACHE_MSG_OBJ_UNSTORABLE			"%s objects cannot be stored in the user cache"
+#define UCACHE_MSG_LAZY_OBJ_UNSTORABLE		"Uninitialized lazy objects cannot be stored in the user cache"
+#define UCACHE_MSG_NESTED_TOO_DEEPLY		"Value is nested too deeply to be stored in the user cache"
+
+#define UCACHE_ENTRY_EMPTY		0
+#define UCACHE_ENTRY_TOMBSTONE	1
+#define UCACHE_ENTRY_USED		2
+
+#define UCACHE_VAL_NULL		0
+#define UCACHE_VAL_TRUE		1
+#define UCACHE_VAL_FALSE	2
+#define UCACHE_VAL_LONG		3
+#define UCACHE_VAL_DOUBLE	4
+#define UCACHE_VAL_STR		5
+#define UCACHE_VAL_SGRAPH	6
+
+#define UCACHE_PREPARED_OWNER_BUF	1
+#define UCACHE_PREPARED_OWNER_STR	2
+
+#define UCACHE_SGRAPH_FLAG_EMPTY_ROOT			0x1U
+#define UCACHE_SGRAPH_FLAG_HAS_SHARED_IDENTITY	0x2U
+#define UCACHE_SGRAPH_FLAG_HAS_OBJ				0x4U
+#define UCACHE_SGRAPH_FLAG_PREFERS_PROTO		0x8U
+#define UCACHE_SGRAPH_REF_STATE_RETIRED			(1 << 30)
+#define UCACHE_SGRAPH_REF_STATE_REFCOUNT_MASK	(UCACHE_SGRAPH_REF_STATE_RETIRED - 1)
+
+#define UCACHE_SGRAPH_VAL_UNDEF					0
+#define UCACHE_SGRAPH_VAL_NULL					1
+#define UCACHE_SGRAPH_VAL_TRUE					2
+#define UCACHE_SGRAPH_VAL_FALSE					3
+#define UCACHE_SGRAPH_VAL_LONG					4
+#define UCACHE_SGRAPH_VAL_LONG_WIDE				5
+#define UCACHE_SGRAPH_VAL_DOUBLE				6
+#define UCACHE_SGRAPH_VAL_STR					7
+#define UCACHE_SGRAPH_VAL_ARR					8
+#define UCACHE_SGRAPH_VAL_OBJ					9
+#define UCACHE_SGRAPH_VAL_DYNAMIC_ARR			10
+#define UCACHE_SGRAPH_VAL_OBJ_REF				11
+#define UCACHE_SGRAPH_VAL_REF					12
+#define UCACHE_SGRAPH_VAL_REF_REF				13
+#define UCACHE_SGRAPH_VAL_ENUM					14
+#define UCACHE_SGRAPH_VAL_SAFE_DIRECT_OBJ		15
+#define UCACHE_SGRAPH_VAL_SERIALIZED_OBJ		16
+#define UCACHE_SGRAPH_VAL_SERDES_OBJ			17
+#define UCACHE_SGRAPH_VAL_SLEEP_OBJ				18
+#define UCACHE_SGRAPH_VAL_SHAPED_ARR			19
+#define UCACHE_SGRAPH_VAL_SERIALIZED_SHAPED_OBJ	20
+#define UCACHE_SGRAPH_VAL_SLEEP_SHAPED_OBJ		21
+
+#define UCACHE_SGRAPH_OBJ_FLAG_SHARED	0x1U
+
+#define UCACHE_SGRAPH_ELEM_STR_KEY	0x1U
+
+#define UCACHE_SGRAPH_ARR_FLAG_PACKED			0x1U
+#define UCACHE_SGRAPH_ARR_FLAG_WIDE_NEXT_FREE	0x2U
+#define UCACHE_SGRAPH_ARR_FLAG_PACKED_VALS		0x4U
+#define UCACHE_SGRAPH_ARR_SHAPE_MAX_KEYS		8U
+
+#define UCACHE_DECODE_DIRECT_CACHE_SLOTS	4U
+
+#define UCACHE_CLOCK_TICKS_PER_SEC	16U
+#define UCACHE_CLOCK_TICK_NS		(ZEND_NANO_IN_SEC / UCACHE_CLOCK_TICKS_PER_SEC)
+#define UCACHE_CLOCK_SPAN_SEC		(UINT32_MAX / UCACHE_CLOCK_TICKS_PER_SEC)
+
+#define UCACHE_EXPIRY_FLOOR_NONE	UINT32_MAX
+
+#define UCACHE_EVICTION_POLICY_LRU		0
+#define UCACHE_EVICTION_POLICY_CLEAR	1
+#define UCACHE_EVICTION_POLICY_NONE		2
+
+#define UCACHE_ENTRY_LOCK_MIN_CAPACITY		128U
+#define UCACHE_ENTRY_LOCK_EMPTY				0
+#define UCACHE_ENTRY_LOCK_USED				1
+#define UCACHE_ENTRY_LOCK_TOMBSTONE			2
+
+/* libatomic's fallback locks are per process; shared memory needs lock-free atomics. */
+#if (defined(__GNUC__) || defined(__clang__)) && \
+	defined(__GCC_ATOMIC_LLONG_LOCK_FREE) && __GCC_ATOMIC_LLONG_LOCK_FREE == 2
+# define UCACHE_HAVE_OPTIMISTIC	1
+#elif defined(ZEND_WIN32) && defined(_MSC_VER)
+# define UCACHE_HAVE_OPTIMISTIC	1
+# define UCACHE_OPTIMISTIC_MSVC	1
+#endif
+
+#if !defined(ZEND_WIN32) && defined(HAVE_PTHREAD_MUTEXATTR_SETROBUST) && defined(HAVE_PTHREAD_MUTEX_CONSISTENT)
+# define UCACHE_HAVE_SHARED_MUTEX	1
+#endif
+
+#if defined(UCACHE_HAVE_SHARED_MUTEX) && defined(UCACHE_HAVE_OPTIMISTIC)
+# define UCACHE_HAVE_SCALAR_WRITE	1
+#endif
+
+#ifdef UCACHE_USE_SHM_OPEN
+# define UCACHE_HAVE_BOUNDARY_SHM	1
+# define UCACHE_BOUNDARY_SALT_SIZE	32
+#endif
+
+#define UCACHE_MAX_BOUNDARY_PARTITIONS	32U
+
+#define UCACHE_LOCK_MODEL_FCNTL	0U
+#define UCACHE_LOCK_MODEL_MUTEX	1U
+
+#define UCACHE_CPU_CACHE_LINE_SIZE	64U
+
+#define UCACHE_SCALAR_WRITE_STRIPES	8U
+
+#define UCACHE_READER_SLOTS				256U
+#define UCACHE_READER_CLAIM_MAX			4U
+
+#define UCACHE_OWNER_PROBES				16U
+
+#define UCACHE_ORPHANED_GRAPH_SLOTS	32U
+
+#define UCACHE_GRAPH_PIN_SLOTS_MAX			256U
+#define UCACHE_GRAPH_PIN_WORDS_MAX			(UCACHE_GRAPH_PIN_SLOTS_MAX / 32U)
+#define UCACHE_GRAPH_PIN_CLAIM_MAX			4U
+#define UCACHE_GRAPH_PIN_OWNER_ABANDONED	(-2)
+
+#define UCACHE_RECORD_EMPTY	0
+#define UCACHE_RECORD_HIT	1
+#define UCACHE_RECORD_MISS	2
+
+#define UCACHE_RECORD_VAL_NONE			0
+#define UCACHE_RECORD_VAL_COPY			1
+#define UCACHE_RECORD_VAL_PINNED		2
+#define UCACHE_RECORD_VAL_PINNED_COPY	(UCACHE_RECORD_VAL_PINNED | UCACHE_RECORD_VAL_COPY)
+
+#define UCACHE_INLINE_KEY_RECORDS		4U
+
+#define UCACHE_ENTRY_FLAG_COMBINED_VAL_KEY		0x0001U
+#define UCACHE_ENTRY_KIND_SHIFT					4U
+#define UCACHE_ENTRY_KIND_MASK					0x00f0U
+#define UCACHE_ENTRY_KIND_USED_BITS				0x00e0U
+#define UCACHE_ENTRY_POOL_BUCKET_SHIFT			8U
+#define UCACHE_ENTRY_POOL_BUCKET_MASK			0xff00U
+
+#define UCACHE_POOL_BUCKETS	256U
+
+#define UCACHE_BLOCK_FREE			1U
+#define UCACHE_BLOCK_PREV_FREE		2U
+#define UCACHE_BLOCK_FLAGS			(UCACHE_BLOCK_FREE | UCACHE_BLOCK_PREV_FREE)
+#define UCACHE_BLOCK_MIN_SIZE		24U
+#define UCACHE_BLOCK_OWNER_NONE		UINT32_MAX
+#define UCACHE_BLOCK_PAYLOAD_ALIGNMENT	MIN(UCACHE_PLATFORM_ALIGNMENT, sizeof(ucache_block))
+#define UCACHE_BLOCK_SIZE_MAX		0xFE000000U
+#if ZEND_DEBUG
+# define UCACHE_DEBUG_BLOCK_MERGE_LIMIT	(64U * 1024U)
+#endif
+#define UCACHE_BLOCK_HDR_UNITS		1U
+
+#define UCACHE_OFFSET_SHIFT			3U
+#define UCACHE_OFFSET_UNIT			(1U << UCACHE_OFFSET_SHIFT)
+#define UCACHE_SEG_SIZE_MAX			((uint64_t) UINT32_MAX << UCACHE_OFFSET_SHIFT)
+#define UCACHE_SHM_SIZE_MAX \
+	MIN(UCACHE_SEG_SIZE_MAX, (uint64_t) (MIN((uint64_t) SIZE_MAX, (uint64_t) ZEND_LONG_MAX) & ~(uint64_t) (UCACHE_OFFSET_UNIT - 1)))
+
+#define UCACHE_ENTRY_KEY_BYTE_SHIFT	1U
+#define UCACHE_ENTRY_KEY_BYTE_MASK	((UCACHE_OFFSET_UNIT - 1U) << UCACHE_ENTRY_KEY_BYTE_SHIFT)
+
+#define UCACHE_SGRAPH_ALIGNMENT_SLACK \
+	(ZEND_MM_ALIGNMENT > UCACHE_BLOCK_PAYLOAD_ALIGNMENT ? ZEND_MM_ALIGNMENT - 1 : 0)
+#define UCACHE_SGRAPH_HDR_SIZE(pin_word_count) \
+	(offsetof(ucache_sgraph_hdr, pin_owners) + (size_t) (pin_word_count) * sizeof(atomic_int))
+
+#define UCACHE_SIZE_CLASS_EXACT_LIMIT	1024U
+#define UCACHE_SIZE_CLASS_EXACT_BINS	(UCACHE_SIZE_CLASS_EXACT_LIMIT / 8U - 2U)
+#define UCACHE_SIZE_CLASS_MIN_SHIFT		10U
+#define UCACHE_SIZE_CLASS_STEP_SHIFT	6U
+
+#define UCACHE_FREE_BINS \
+	(UCACHE_SIZE_CLASS_EXACT_BINS + ((32U - UCACHE_SIZE_CLASS_MIN_SHIFT) << UCACHE_SIZE_CLASS_STEP_SHIFT))
+
+#ifdef UCACHE_HAVE_OPTIMISTIC
+# define UCACHE_OPTIMISTIC_ENABLED	1
+#ifdef UCACHE_OPTIMISTIC_MSVC
+# if defined(_M_X64) || defined(_M_ARM64)
+/* Aligned loads are single-copy atomic here, so a load only needs the acquire barrier, not a locked read-modify-write. */
+#  define UCACHE_MSVC_PLAIN_ATOMIC_LOADS	1
+#  ifdef _M_ARM64
+#   define UCACHE_MSVC_LOAD_ACQUIRE_BARRIER()	__dmb(_ARM64_BARRIER_ISH)
+#  else
+#   define UCACHE_MSVC_LOAD_ACQUIRE_BARRIER()	_ReadWriteBarrier()
+#  endif
+#  define UCACHE_ATOMIC_LOAD_64(target) \
+	ucache_msvc_load_acquire_64((const volatile __int64 *) (target))
+#  define UCACHE_ATOMIC_LOAD_32(target) \
+	ucache_msvc_load_acquire_32((const volatile int *) (target))
+# else
+/* winnt.h maps these to intrinsics, or to CAS loops on x86 which lacks them. */
+#  define UCACHE_ATOMIC_LOAD_64(target) \
+	((uint64_t) InterlockedOr64((volatile LONG64 *) (target), 0))
+#  define UCACHE_ATOMIC_LOAD_32(target) \
+	((uint32_t) _InterlockedOr((volatile long *) (target), 0))
+# endif
+# define UCACHE_ATOMIC_STORE_64(target, val) \
+	((void) InterlockedExchange64((volatile LONG64 *) (target), (LONG64) (val)))
+# define UCACHE_ATOMIC_CAS_64(target, expected, desired) \
+	((uint64_t) _InterlockedCompareExchange64( \
+		(volatile __int64 *) (target), \
+		(__int64) (desired), \
+		(__int64) (expected) \
+	) == (expected))
+# define UCACHE_ATOMIC_STORE_32(target, val) \
+	((void) _InterlockedExchange((volatile long *) (target), (long) (val)))
+# define UCACHE_ATOMIC_CAS_32(target, expected, desired) \
+	((uint32_t) _InterlockedCompareExchange((volatile long *) (target), (long) (desired), (long) (expected)) == (expected))
+# define UCACHE_ATOMIC_LOAD_32_RELAXED(target) \
+	(*(volatile uint32_t *) (target))
+# define UCACHE_ATOMIC_STORE_32_RELAXED(target, val) \
+	((void) (*(volatile uint32_t *) (target) = (val)))
+# define UCACHE_ATOMIC_FENCE_SEQ_CST()	MemoryBarrier()
+# define UCACHE_ATOMIC_FENCE_ACQUIRE()	MemoryBarrier()
+#else
+/* i386 aligns uint64_t to 4, making clang call libatomic; all targets are 8-aligned. */
+# define UCACHE_ATOMIC_LOAD_64(target) \
+	__atomic_load_n((const ucache_atomic_u64 *) (const void *) (target), __ATOMIC_ACQUIRE)
+# define UCACHE_ATOMIC_STORE_64(target, val) \
+	__atomic_store_n((ucache_atomic_u64 *) (void *) (target), (val), __ATOMIC_RELEASE)
+# define UCACHE_ATOMIC_CAS_64(target, expected, desired) \
+	__atomic_compare_exchange_n( \
+		(ucache_atomic_u64 *) (void *) (target), \
+		(ucache_atomic_u64 *) (void *) &(expected), \
+		(desired), \
+		false, \
+		__ATOMIC_ACQ_REL, \
+		__ATOMIC_ACQUIRE \
+	)
+# define UCACHE_ATOMIC_LOAD_32(target) \
+	__atomic_load_n((target), __ATOMIC_ACQUIRE)
+# define UCACHE_ATOMIC_STORE_32(target, val) \
+	__atomic_store_n((target), (val), __ATOMIC_RELEASE)
+# define UCACHE_ATOMIC_CAS_32(target, expected, desired) \
+	__atomic_compare_exchange_n((target), &(expected), (desired), false, __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE)
+# define UCACHE_ATOMIC_LOAD_32_RELAXED(target) \
+	__atomic_load_n((target), __ATOMIC_RELAXED)
+# define UCACHE_ATOMIC_STORE_32_RELAXED(target, val) \
+	__atomic_store_n((target), (val), __ATOMIC_RELAXED)
+# define UCACHE_ATOMIC_FENCE_SEQ_CST()	__atomic_thread_fence(__ATOMIC_SEQ_CST)
+# define UCACHE_ATOMIC_FENCE_ACQUIRE()	__atomic_thread_fence(__ATOMIC_ACQUIRE)
+#endif /* UCACHE_OPTIMISTIC_MSVC */
+#else
+# define UCACHE_OPTIMISTIC_ENABLED 0
+# define UCACHE_ATOMIC_LOAD_64(target) (*(target))
+# define UCACHE_ATOMIC_STORE_64(target, val) ((void) (*(target) = (val)))
+# define UCACHE_ATOMIC_CAS_64(target, expected, desired) \
+	(*(target) == (expected) ? ((*(target) = (desired)), true) : false)
+# define UCACHE_ATOMIC_LOAD_32(target) (*(target))
+# define UCACHE_ATOMIC_STORE_32(target, val) ((void) (*(target) = (val)))
+# define UCACHE_ATOMIC_CAS_32(target, expected, desired) \
+	(*(target) == (expected) ? ((*(target) = (desired)), true) : false)
+# define UCACHE_ATOMIC_LOAD_32_RELAXED(target) (*(target))
+# define UCACHE_ATOMIC_STORE_32_RELAXED(target, val) ((void) (*(target) = (val)))
+# define UCACHE_ATOMIC_FENCE_SEQ_CST()	((void) 0)
+# define UCACHE_ATOMIC_FENCE_ACQUIRE()	((void) 0)
+#endif /* UCACHE_HAVE_OPTIMISTIC */
 
 #ifdef ZTS
-# ifdef ZEND_WIN32
-#  define PHP_UCACHE_STARTUP_LOCK_INITIALIZER SRWLOCK_INIT
+# define UC_G(v) ZEND_TSRMG_FAST(user_cache_globals_offset, ucache_globals *, v)
+# ifdef ZEND_ENABLE_STATIC_TSRMLS_CACHE
+#  define UCACHE_GLOBALS_PTR() TSRMG_FAST_BULK_STATIC(user_cache_globals_offset, ucache_globals *)
 # else
-#  define PHP_UCACHE_STARTUP_LOCK_INITIALIZER PTHREAD_MUTEX_INITIALIZER
+#  define UCACHE_GLOBALS_PTR() TSRMG_FAST_BULK(user_cache_globals_offset, ucache_globals *)
 # endif
-#endif
-
-/* Clear the debug-only flag before exposing a decoded table. */
-#if ZEND_DEBUG
-# define PHP_UCACHE_HT_DISALLOW_COW_VIOLATION(ht) HT_FLAGS(ht) &= ~HASH_FLAG_ALLOW_COW_VIOLATION
 #else
-# define PHP_UCACHE_HT_DISALLOW_COW_VIOLATION(ht)
+# define UC_G(v) (user_cache_globals.v)
+# define UCACHE_GLOBALS_PTR() (&user_cache_globals)
 #endif
 
-#ifdef PHP_UCACHE_HAVE_OPTIMISTIC
-# define PHP_UCACHE_OPTIMISTIC_ENABLED 1
-#ifdef PHP_UCACHE_OPTIMISTIC_MSVC
-/* The winnt.h wrappers, not the intrinsics: on x86 only the 64-bit
- * compare-exchange intrinsic exists, and winnt.h implements
- * InterlockedOr64 / InterlockedExchange64 there as inline CAS loops. */
-# define PHP_UCACHE_ATOMIC_LOAD_64(target) \
-	((uint64_t) InterlockedOr64((volatile LONG64 *) (target), 0))
-# define PHP_UCACHE_ATOMIC_STORE_64(target, value) \
-	((void) InterlockedExchange64((volatile LONG64 *) (target), (LONG64) (value)))
-# define PHP_UCACHE_ATOMIC_CAS_64(target, expected, desired) \
-	((uint64_t) InterlockedCompareExchange64( \
-		(volatile LONG64 *) (target), \
-		(LONG64) (desired), \
-		(LONG64) (expected) \
-	) == (expected))
-# define PHP_UCACHE_ATOMIC_LOAD_32(target) \
-	((uint32_t) _InterlockedOr((volatile long *) (target), 0))
-# define PHP_UCACHE_ATOMIC_STORE_32(target, value) \
-	((void) _InterlockedExchange((volatile long *) (target), (long) (value)))
-# define PHP_UCACHE_ATOMIC_CAS_32(target, expected, desired) \
-	((uint32_t) _InterlockedCompareExchange((volatile long *) (target), (long) (desired), (long) (expected)) == (expected))
-# define PHP_UCACHE_ATOMIC_LOAD_32_RELAXED(target) \
-	(*(volatile uint32_t *) (target))
-# define PHP_UCACHE_ATOMIC_STORE_32_RELAXED(target, value) \
-	((void) (*(volatile uint32_t *) (target) = (value)))
-# define PHP_UCACHE_ATOMIC_FENCE_SEQ_CST()	MemoryBarrier()
-# define PHP_UCACHE_ATOMIC_FENCE_ACQUIRE()	MemoryBarrier()
-#else /* !PHP_UCACHE_OPTIMISTIC_MSVC */
-# define PHP_UCACHE_ATOMIC_LOAD_64(target) \
-	__atomic_load_n((target), __ATOMIC_ACQUIRE)
-# define PHP_UCACHE_ATOMIC_STORE_64(target, value) \
-	__atomic_store_n((target), (value), __ATOMIC_RELEASE)
-# define PHP_UCACHE_ATOMIC_CAS_64(target, expected, desired) \
-	__atomic_compare_exchange_n((target), &(expected), (desired), false, __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE)
-# define PHP_UCACHE_ATOMIC_LOAD_32(target) \
-	__atomic_load_n((target), __ATOMIC_ACQUIRE)
-# define PHP_UCACHE_ATOMIC_STORE_32(target, value) \
-	__atomic_store_n((target), (value), __ATOMIC_RELEASE)
-# define PHP_UCACHE_ATOMIC_CAS_32(target, expected, desired) \
-	__atomic_compare_exchange_n((target), &(expected), (desired), false, __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE)
-# define PHP_UCACHE_ATOMIC_LOAD_32_RELAXED(target) \
-	__atomic_load_n((target), __ATOMIC_RELAXED)
-# define PHP_UCACHE_ATOMIC_STORE_32_RELAXED(target, value) \
-	__atomic_store_n((target), (value), __ATOMIC_RELAXED)
-# define PHP_UCACHE_ATOMIC_FENCE_SEQ_CST()	__atomic_thread_fence(__ATOMIC_SEQ_CST)
-# define PHP_UCACHE_ATOMIC_FENCE_ACQUIRE()	__atomic_thread_fence(__ATOMIC_ACQUIRE)
-#endif /* PHP_UCACHE_OPTIMISTIC_MSVC */
-#else /* !PHP_UCACHE_HAVE_OPTIMISTIC */
-/* Single-threaded fallbacks: PHP_UCACHE_OPTIMISTIC_ENABLED gates off the
- * lock-free reader path, so every remaining consumer runs under the exclusive
- * global lock. */
-# define PHP_UCACHE_OPTIMISTIC_ENABLED 0
-# define PHP_UCACHE_ATOMIC_LOAD_64(target) (*(target))
-# define PHP_UCACHE_ATOMIC_STORE_64(target, value) ((void) (*(target) = (value)))
-# define PHP_UCACHE_ATOMIC_CAS_64(target, expected, desired) \
-	(*(target) == (expected) ? ((*(target) = (desired)), true) : false)
-# define PHP_UCACHE_ATOMIC_LOAD_32(target) (*(target))
-# define PHP_UCACHE_ATOMIC_STORE_32(target, value) ((void) (*(target) = (value)))
-# define PHP_UCACHE_ATOMIC_CAS_32(target, expected, desired) \
-	(*(target) == (expected) ? ((*(target) = (desired)), true) : false)
-# define PHP_UCACHE_ATOMIC_LOAD_32_RELAXED(target) (*(target))
-# define PHP_UCACHE_ATOMIC_STORE_32_RELAXED(target, value) ((void) (*(target) = (value)))
-# define PHP_UCACHE_ATOMIC_FENCE_SEQ_CST()	((void) 0)
-# define PHP_UCACHE_ATOMIC_FENCE_ACQUIRE()	((void) 0)
-#endif /* PHP_UCACHE_HAVE_OPTIMISTIC */
+#define UCACHE_DEFINE_OBJ_FROM_STD(type, name) \
+	static zend_always_inline type *ucache_##name##_from_obj(zend_object *obj) \
+	{ \
+		return (type *) ((char *) obj - offsetof(type, std)); \
+	}
 
-#ifdef PHP_UCACHE_HAVE_SHARED_MUTEX
+#if defined(UCACHE_HAVE_OPTIMISTIC) && !defined(UCACHE_OPTIMISTIC_MSVC)
+typedef uint64_t ucache_atomic_u64 __attribute__((aligned(8)));
+#endif
+
+#ifdef UCACHE_HAVE_SHARED_MUTEX
 typedef union {
 	pthread_mutex_t mutex;
 	char padding[64];
-} php_ucache_shared_mutex_t;
-#endif
-
-#ifdef ZTS
-# ifdef ZEND_WIN32
-typedef SRWLOCK php_ucache_startup_lock;
-# else
-typedef pthread_mutex_t php_ucache_startup_lock;
-# endif
-#endif
-
-#ifdef ZEND_WIN32
-typedef struct _php_ucache_win32_segment {
-	php_ucache_shm_segment_t segment;
-	HANDLE memfile;
-	void *mapping_base;
-} php_ucache_win32_segment_t;
+} ucache_shared_mutex;
 #endif
 
 typedef enum {
-	PHP_UCACHE_OPTIMISTIC_FALLBACK = 0,
-	PHP_UCACHE_OPTIMISTIC_FOUND,
-	PHP_UCACHE_OPTIMISTIC_MISS
-} php_ucache_optimistic_result_t;
-
-typedef enum {
-	PHP_UCACHE_VERBATIM_ROOT_UNDECIDED = 0,
-	PHP_UCACHE_VERBATIM_ROOT_SIZED,
-	PHP_UCACHE_VERBATIM_ROOT_ELIGIBLE_UNSIZED,
-	PHP_UCACHE_VERBATIM_ROOT_INELIGIBLE
-} php_ucache_verbatim_root_result_t;
-
-/* Array address to verbatim eligibility, content hash and the address of
- * the equal-content array whose copy it shares (itself when first); all
- * stay valid across CALC and COPY only while no state hook has run. */
-typedef struct {
-	HashTable verdicts;
-	HashTable content_hashes;
-	HashTable canonicals;
-} php_ucache_verbatim_memo_t;
+	UCACHE_OPTIMISTIC_FALLBACK = 0,
+	UCACHE_OPTIMISTIC_FOUND,
+	UCACHE_OPTIMISTIC_MISS,
+	UCACHE_OPTIMISTIC_UNRESTORABLE
+} ucache_optimistic_result;
 
 typedef struct {
-	size_t configured_memory;
-	php_ucache_reason_t failure_reason;
+	size_t configured_mem;
+	php_ucache_reason failure_reason;
 	bool enabled;
 	bool available;
-} php_ucache_runtime_t;
+} ucache_runtime;
 
-/* Global lock model dispatch table (fcntl / robust shared mutex / win32),
- * defined in user_cache_storage.c and selected at lock negotiation time. */
-typedef struct _php_ucache_lock_ops php_ucache_lock_ops_t;
+typedef struct _ucache_lock_ops ucache_lock_ops;
 
 typedef struct {
-	const php_ucache_shm_handlers_t *handler;
+	const ucache_shm_handlers *handler;
 	const char *handler_name;
-	php_ucache_shm_segment_t **segments;
-	const php_ucache_lock_ops_t *lock_ops;
+	ucache_shm_seg *seg;
+	void *base;
+	const ucache_lock_ops *lock_ops;
 	size_t size;
-	uint32_t segment_count;
 	int lock_file;
+#ifdef ZTS
 	uint32_t startup_complete;
+#endif
 	uint32_t capacity_memo;
 	uint32_t data_offset_memo;
 	uint32_t entry_lock_capacity_memo;
 	uint32_t entry_lock_offset_memo;
-	uint32_t occupancy_offset_memo;
-	uint32_t intern_capacity_memo;
-	uint32_t intern_offset_memo;
+	uint32_t free_bins_offset_memo;
+	uint32_t free_bin_count_memo;
 	bool initialized;
-	bool initialized_before_request;
+	bool initialized_before_req;
 	bool lock_initialized;
 	bool layout_memo_valid;
 	bool capacity_clamped;
-#ifdef PHP_UCACHE_HAVE_BOUNDARY_MMAP
+#ifdef UCACHE_HAVE_BOUNDARY_SHM
 	bool boundary_digest_memoized;
 	uint8_t boundary_digest_memo[32];
 	bool boundary_salt_loaded;
-	uint8_t boundary_salt[PHP_UCACHE_BOUNDARY_SALT_SIZE];
+	uint8_t boundary_salt[UCACHE_BOUNDARY_SALT_SIZE];
 #endif
-	char lockfile_name[MAXPATHLEN];
 #ifdef ZTS
 	MUTEX_T zts_lock;
 #endif
-} php_ucache_storage_t;
+} ucache_storage;
 
 typedef struct {
-	php_ucache_storage_t storage;
+	ucache_storage storage;
 	const char *lock_name;
-#ifndef ZEND_WIN32
-	const char *sem_filename_prefix;
-#endif
-	bool boundary_shared;
 	const char *boundary_identity;
 	size_t boundary_identity_len;
-} php_ucache_ctx_t;
+	uint32_t graph_pin_slot_count;
+} ucache_ctx;
 
 struct _php_ucache_partition {
-	php_ucache_ctx_t ctx;
+	ucache_ctx ctx;
 	char *name;
 	struct _php_ucache_partition *next;
 };
@@ -430,874 +433,1065 @@ typedef struct {
 	uint64_t owner_pid;
 	uint64_t owner_start_time;
 	uint64_t owner_token;
-} php_ucache_entry_lock_record_t;
+} ucache_entry_lock_record;
 
-typedef struct {
-	php_ucache_ctx_t *ctx;
-	char *key;
+typedef struct _ucache_entry_lock {
+	ucache_ctx *ctx;
+	struct _ucache_entry_lock *next;
 	uint64_t owner_pid;
 	uint64_t owner_start_time;
 	uint64_t owner_token;
 	zend_long lease;
 	uint32_t key_len;
-	bool preserve_lease;
-} php_ucache_deferred_entry_lock_release_t;
+	bool requested_by_lock;
+	char key[1];
+} ucache_entry_lock;
 
 typedef struct {
 	uint64_t owner_pid;
 	uint64_t owner_start_time;
 	uint32_t active;
 	uint32_t reserved;
-} php_ucache_reader_slot_t;
+} ucache_reader_slot;
 
-/* Open-addressed table over interned strings: the tag holds the high hash
- * bits (the whole hash on ILP32), str_offset 0 is an empty slot. Written
- * only under the write lock and rebuilt by the mark-sweep; encoders probe
- * it lock-free and revalidate intern_generation under the write lock before
- * a payload that references an interned string is published. */
 typedef struct {
-	uint32_t str_offset;
-	uint32_t tag;
-} php_ucache_intern_slot_t;
-
-/* Per-pool lookup counters in an open-addressed table keyed by pool name;
- * the name bytes live in a data-region block. Requests accumulate counts
- * locally and fold them in under the write lock, so the hot fetch path
- * never touches this table. */
-typedef struct {
-	zend_ulong name_hash;
-	uint32_t name_offset;
-	uint32_t name_len;
-	uint32_t state;
-	uint32_t reserved;
-	uint64_t hit_count;
-	uint64_t miss_count;
-} php_ucache_pool_stats_t;
-
-/* Per-process record of shared-graph payload pins, claimed lock-free under
- * the read lock or an optimistic reader section. The pid lives in a
- * zend_atomic_int because, unlike reader slots, pin claims must also work on
- * builds without the 64-bit atomic macros; pids fit in 32 bits on every
- * supported platform. Pins of an abnormally terminated owner are stripped by
- * php_ucache_shared_graph_strip_dead_pins_locked() via pid + start-time
- * liveness, which is what makes retired-but-pinned payloads reclaimable. */
-typedef struct {
-	zend_atomic_int owner_pid;
-	zend_atomic_int pin_count;
+	atomic_int owner_pid;
+	atomic_int pin_count;
 	uint64_t owner_start_time;
-} php_ucache_graph_pin_slot_t;
+} ucache_graph_pin_slot;
 
-/* Cross-references are offsets from the segment base. */
+#ifdef UCACHE_HAVE_SHARED_MUTEX
+typedef struct {
+	ucache_shared_mutex mutex;
+	uint64_t seq;
+	uint64_t old_val;
+	uint64_t old_gen;
+	uint32_t slot_idx;
+	uint32_t active;
+	uint16_t old_flags;
+	uint8_t padding_to_128_bytes[30];
+} ucache_scalar_write_stripe;
+#endif
+
 typedef struct {
 	uint32_t magic;
-	uint32_t version;
 	uint32_t capacity;
 	uint32_t count;
 	uint32_t data_offset;
-	uint32_t data_size;
-	uint32_t next_free;
-	uint32_t free_list;
-	uint32_t last_block_offset;
 	uint32_t boundary_identity_digest_set;
+	uint32_t scalar_write_enabled;
+	uint64_t data_size;
+	uint64_t next_free;
+	uint64_t free_list_bytes;
 	uint64_t mutation_epoch;
 	uint64_t write_seq;
-	/* Epoch for relative second stamps (entry TTLs, lock leases): set once at
-	 * format time so 32-bit deadlines stay valid for ~136 years of segment
-	 * lifetime instead of breaking at an absolute wall-clock horizon. */
 	uint64_t time_base;
 	uint64_t expunge_count;
 	uint64_t store_failure_count;
 	uint64_t eviction_count;
-	/* Cumulative dead-pin recovery statistics: owners whose slots the sweep
-	 * reclaimed, and payload references stripped from them. */
 	uint64_t graph_dead_pin_owners_reclaimed;
 	uint64_t graph_dead_pins_stripped;
-	/* Segment-lifetime fetch lookups, folded in at request end. */
-	uint64_t hit_count;
-	uint64_t miss_count;
 	uint32_t tombstone_count;
 	uint32_t expiring_count;
 	uint32_t lock_model;
 	uint32_t orphaned_graphs_saturated;
-	/* Shared clock hand for LRU victim scans; fairness only, never trusted. */
 	uint32_t eviction_hand;
-	/* Power-of-two record count and segment offset of the per-key lock
-	 * region (header -> entries -> stamps -> occupancy -> intern slots ->
-	 * lock records -> data), and the regions before it. */
+	uint32_t reader_slots_used;
 	uint32_t entry_lock_capacity;
 	uint32_t entry_lock_offset;
-	uint32_t occupancy_offset;
-	uint32_t intern_capacity;
-	uint32_t intern_offset;
-	uint32_t intern_count;
-	/* Set once an insert found the table at its load limit; cleared by a
-	 * sweep that frees room. */
-	uint32_t intern_saturated;
-	/* Bumped by every sweep or reset: a payload prepared against an older
-	 * generation may reference strings that no longer exist. */
-	uint64_t intern_generation;
-	uint64_t intern_sweep_count;
-	/* Bumped under the write lock for every inserted lock record; the new
-	 * value becomes that record's owner_token. */
+	uint32_t entry_lock_count;
+	uint32_t entry_lock_tombstone_count;
+	uint32_t entry_lock_table_section_open;
+	uint32_t entry_lock_sweep_at;
+	uint32_t free_bins_offset;
+	uint32_t free_bin_count;
+	uint32_t graph_pin_slot_count;
+	uint32_t expiry_floor;
 	uint64_t entry_lock_acquire_seq;
-	/* A file-backed boundary image left by an earlier boot may be torn or
-	 * hold a robust mutex nobody can release; startup reformats it instead
-	 * of adopting it. */
-	uint64_t boot_token;
+	uint32_t pool_bucket_heads[UCACHE_POOL_BUCKETS];
+	uint64_t pool_bucket_epochs[UCACHE_POOL_BUCKETS];
 	uint8_t boundary_identity_digest[32];
-	uint32_t orphaned_graphs[PHP_UCACHE_ORPHANED_GRAPH_SLOTS];
-	php_ucache_pool_stats_t pool_stats[PHP_UCACHE_POOL_STATS_SLOTS];
-	php_ucache_graph_pin_slot_t graph_pin_slots[PHP_UCACHE_GRAPH_PIN_SLOTS];
-	php_ucache_reader_slot_t reader_slots[PHP_UCACHE_READER_SLOTS];
-#ifdef PHP_UCACHE_HAVE_SHARED_MUTEX
-	php_ucache_shared_mutex_t global_shared_mutex;
+	uint32_t orphaned_graphs[UCACHE_ORPHANED_GRAPH_SLOTS];
+	ucache_graph_pin_slot graph_pin_slots[UCACHE_GRAPH_PIN_SLOTS_MAX];
+	ucache_reader_slot reader_slots[UCACHE_READER_SLOTS];
+	uint64_t lock_file_dev;
+	uint64_t lock_file_ino;
+	uint64_t committed_end;
+	uint64_t commit_ceiling;
+	uint64_t commit_failure_count;
+	uint64_t stale_tail_end;
+#ifdef UCACHE_HAVE_SHARED_MUTEX
+	ucache_shared_mutex global_shared_mutex;
+	ZEND_SET_ALIGNED(128, uint32_t scalar_write_ready);
+	uint32_t scalar_write_gate;
+	ZEND_SET_ALIGNED(128, ucache_scalar_write_stripe scalar_write_stripes[UCACHE_SCALAR_WRITE_STRIPES]);
 #endif
-} php_ucache_header_t;
+} ucache_hdr;
 
-/* Sizes and offsets count PHP_UCACHE_SHM_UNIT bytes. The header is padded to
- * ZEND_MM_ALIGNMENT: blocks start aligned (data_offset and every block size
- * are PHP_UCACHE_ALIGNED_SIZE multiples), so the payload behind the header
- * starts aligned too. Payloads hold engine structures such as zend_string,
- * which require 8-byte alignment. */
 typedef struct {
 	uint32_t size;
-	uint32_t prev_size;
+	uint32_t owner;
+} ucache_block;
+
+typedef struct {
 	uint32_t next_free;
 	uint32_t prev_free;
-	uint32_t flags;
-	uint32_t reserved; /* for memory alignment */
-} php_ucache_block_t;
+} ucache_free_links;
 
-ZEND_STATIC_ASSERT(
-	sizeof(php_ucache_block_t) % ZEND_MM_ALIGNMENT == 0,
-	"php_ucache_block_t must keep block payloads ZEND_MM_ALIGNMENT-aligned"
-);
-
-ZEND_STATIC_ASSERT(sizeof(php_ucache_block_t) % PHP_UCACHE_SHM_UNIT == 0, "block header must be unit aligned");
-
-/* 48 bytes, hole-free on LP64. Probe-order layout: the fields a miss
- * rejection reads (hash, key, state, expiry) fill the first 24 bytes;
- * hit-only fields (scalar union, generation, value block) trail. */
 typedef struct {
-	zend_ulong hash;
+	uint32_t hash;
 	uint32_t key_offset;
-	uint32_t key_len;
-	/* Seconds relative to header time_base; 0 = never expires. */
 	uint32_t expires_at;
-	uint8_t state;
-	uint8_t value_type;
+	uint16_t key_len;
 	uint16_t flags;
 	union {
-		zend_long long_value;
-		double double_value;
+		zend_long long_val;
+		double double_val;
+		struct {
+			uint32_t val_offset;
+			uint32_t val_len;
+		};
 	};
-	uint64_t generation;
-	uint32_t value_offset;
-	uint32_t value_len;
-} php_ucache_entry_t;
+	uint64_t gen;
+} ucache_entry;
 
 typedef struct {
-	bool found;
-	php_ucache_entry_t entry;
-} php_ucache_replaced_entry_t;
+	uint32_t prev;
+	uint32_t next;
+} ucache_pool_links;
 
 typedef struct {
-	zend_ulong hash;
+	zend_string *storage_key;
 	uint64_t mutation_epoch;
-	const void *ctx;
-	uint32_t slot_index;
-	uint8_t state;
-	uint8_t value_type;
-	zend_string *key;
+	zval val;
+	uint32_t slot_idx;
 	union {
-		zend_long long_value;
-		double double_value;
+		uint32_t pinned_payload_offset;
+		uint32_t copy_charged_bytes;
 	};
-} php_ucache_lookup_entry_t;
-
-ZEND_STATIC_ASSERT(PHP_UCACHE_LOOKUP_WAYS == 2, "lookup cache is two-way");
-
-/* A payload field referring to a candidate's in-payload copy; patched at
- * publish once the candidate is interned. */
-typedef struct {
-	uint32_t candidate;
-	uint32_t site_offset;
-	bool pointer;
-} php_ucache_graph_intern_site_t;
-
-/* Interning state carried from CALC/COPY (outside the lock) to publish. */
-typedef struct {
-	uint64_t generation;
-	uint32_t list_capacity;
-	uint32_t list_offset;
-	uint32_t list_count;
-	/* In-payload string offsets; publish overwrites each with its segment
-	 * offset (0 when it stayed in the payload). */
-	uint32_t *candidates;
-	uint32_t candidate_count;
-	uint32_t candidate_capacity;
-	php_ucache_graph_intern_site_t *sites;
-	uint32_t site_count;
-	uint32_t site_capacity;
-	bool enabled;
-	/* Two lookups saw different generations: publish must re-prepare. */
-	bool generation_conflict;
-} php_ucache_graph_intern_plan_t;
-
-typedef enum {
-	PHP_UCACHE_PUBLISH_DONE = 0,
-	PHP_UCACHE_PUBLISH_FAILED,
-	/* An intern sweep ran since the payload was prepared. */
-	PHP_UCACHE_PUBLISH_STALE_INTERNS
-} php_ucache_publish_result_t;
+	uint32_t expires_at;
+	uint8_t state;
+	uint8_t val_kind;
+	uint16_t access_touches;
+} ucache_key_record;
 
 typedef struct {
 	zend_ulong hash;
 	size_t payload_size;
 	size_t payload_used_size;
-	const uint8_t *payload_source;
-	uint8_t *owned_buffer;
-	zend_string *owned_string;
-	/* Owned by the prepared value. */
-	uint32_t *fixup_offsets;
 	union {
-		zend_long long_value;
-		double double_value;
+		const uint8_t *payload_src;
+		zend_long long_val;
+		double double_val;
 	};
+	union {
+		uint8_t *owned_buf;
+		zend_string *owned_str;
+	};
+	uint32_t *fixup_offsets;
 	HashTable *state_memo;
-	php_ucache_graph_intern_plan_t intern;
-	uint32_t value_len;
 	uint32_t fixup_count;
-	uint8_t value_type;
-	bool has_verbatim_array;
-} php_ucache_prepared_value_t;
+	uint8_t val_type;
+	uint8_t owner_type;
+	bool has_verbatim_arr;
+	bool packed_vals_allowed;
+} ucache_prepared_val;
 
 typedef struct {
-	bool caller_holds_write_lock;
-	bool disable_interning;
-	/* A memo from an earlier prepare of the same value: its state hooks
-	 * are not run again, so the re-prepare may hold the write lock. */
-	HashTable *state_memo;
-} php_ucache_prepare_options_t;
+	ucache_entry replaced_entry;
+	uint64_t stored_gen;
+	uint32_t stored_slot;
+	uint32_t stored_expires_at;
+	uint8_t stored_val_type;
+	bool committed;
+} ucache_store_result;
 
 typedef struct {
-	bool retry_after_memory_pressure;
-	bool capture_replaced_entry;
-} php_ucache_store_options_t;
-
-typedef struct {
-	php_ucache_replaced_entry_t replaced_entry;
-	uint64_t stored_generation;
-	bool should_seed_request_local_slot;
-} php_ucache_store_result_t;
-
-/* Deferred until after the read lock is released. */
-typedef struct {
-	uint64_t generation;
+	uint64_t gen;
+	uint64_t mutation_epoch;
+	zval detached_val;
 	uint32_t flags;
-	bool should_seed_request_local_slot;
-} php_ucache_fetch_pending_seed_t;
+	uint32_t val_len;
+	bool should_seed;
+} ucache_fetch_pending_seed;
 
 typedef struct {
-	zend_long new_value;
+	zend_long new_val;
+	uint64_t stored_gen;
+	uint32_t stored_slot;
+	uint32_t stored_expires_at;
 	bool is_overflow;
-	bool is_type_error;
-} php_ucache_atomic_update_result_t;
+	bool is_type_err;
+} ucache_atomic_update_result;
 
 typedef struct {
-	uint32_t magic;
-	uint32_t version;
-	uint32_t root_offset;
-	uint32_t root_type;
-	uint32_t flags;
-	/* Segment unit offsets of the interned strings this payload references
-	 * (a uint32_t list inside the payload); the intern sweep marks them. */
-	uint32_t intern_list_offset;
-	uint32_t intern_count;
-	zend_atomic_int ref_state;
-	/* Bit per graph_pin_slots index: which owners hold ref_state references.
-	 * A reference taken without a claimable slot sets no bit and stays
-	 * unreclaimable if its owner crashes (the pre-record behavior). */
-	zend_atomic_int pin_owners[PHP_UCACHE_GRAPH_PIN_WORDS];
-} php_ucache_shared_graph_header_t;
+	uint8_t root_type;
+	uint8_t flags;
+	uint16_t pin_word_count;
+	atomic_int ref_state;
+	atomic_int pin_owners[1];
+} ucache_sgraph_hdr;
 
 typedef struct {
-	php_ucache_ctx_t *ctx;
+	ucache_ctx *ctx;
 	uint32_t payload_offset;
-} php_ucache_shared_graph_ref_t;
-
-typedef union {
-	zend_long long_value;
-	double double_value;
-	uint64_t offset;
-} php_ucache_shared_graph_payload_t;
-
-/* A single value (root, reference inner, safe-direct state). Sequences of
- * values live in column blocks instead: a type column and an 8-byte
- * payload column, plus key or property-name columns, each padded to 8
- * bytes (ucache_graph_*_columns_* in user_cache_shared_graph.c). */
-typedef struct {
-	uint8_t type;
-	uint8_t reserved[7];
-	php_ucache_shared_graph_payload_t payload;
-} php_ucache_shared_graph_value_t;
+} ucache_req_graph_ref;
 
 typedef struct {
-	uint32_t count;
-	uint32_t next_free;
-	uint32_t elements_offset;
-	uint32_t flags;
-} php_ucache_shared_graph_array_t;
+	ucache_hdr *hdr;
+	uint32_t slot_idx;
+} ucache_reader_claim;
 
 typedef struct {
-	uint32_t key_offset;
-} php_ucache_shared_graph_array_shape_element_t;
+	ucache_hdr *hdr;
+	uint32_t slot_idx;
+} ucache_graph_pin_claim;
 
 typedef struct {
-	uint32_t count;
-	uint32_t elements_offset;
-} php_ucache_shared_graph_array_shape_t;
+	uint64_t pid;
+	uint64_t start_time;
+	uint64_t probed_at;
+	bool dead;
+} ucache_owner_probe;
+
+typedef struct _ucache_restore_queue ucache_restore_queue;
+typedef struct _ucache_owned_decode_frame ucache_owned_decode_frame;
+typedef struct _ucache_sgraph_snapshot ucache_sgraph_snapshot;
+
+typedef struct _ucache_op_lease {
+	struct _ucache_op_lease *next;
+	ucache_ctx *ctx;
+	uint64_t owner_pid;
+	uint32_t payload_offset;
+	uint32_t users;
+	bool acquired;
+} ucache_op_lease;
+
+typedef struct _ucache_obj {
+	zend_string *scope;
+	zend_string *scope_prefix;
+	ucache_ctx *ctx;
+	struct _ucache_obj *live_prev;
+	struct _ucache_obj *live_next;
+	HashTable *key_records;
+	zend_string *inline_keys[UCACHE_INLINE_KEY_RECORDS];
+	ucache_key_record *inline_records[UCACHE_INLINE_KEY_RECORDS];
+	uint32_t inline_count;
+	uint32_t key_len_max;
+	zend_object std;
+} ucache_obj;
 
 typedef struct {
-	uint32_t count;
-	uint32_t next_free;
-	uint32_t shape_offset;
-	uint32_t flags;
-	uint32_t values_offset;
-} php_ucache_shared_graph_shaped_array_t;
+	zend_string *scope;
+	zend_long entry_count;
+	zend_long used_mem;
+	zval entry_keys;
+	zend_object std;
+} ucache_pool_status_obj;
 
 typedef struct {
-	uint32_t class_name_offset;
-	uint32_t property_count;
-	uint32_t properties_offset;
-	uint32_t flags;
-} php_ucache_shared_graph_object_t;
+	zend_long configured_mem;
+	zend_long shared_mem_size;
+	zend_long used_mem;
+	zend_long free_mem;
+	zend_long wasted_mem;
+	zend_long entry_count;
+	zend_long entry_capacity;
+	zend_long tombstone_count;
+	zend_long expunge_count;
+	zend_long store_failure_count;
+	zend_long eviction_count;
+	zend_long graph_pin_slots_in_use;
+	zend_long graph_pinned_refs;
+	zend_long dead_pin_owners_reclaimed;
+	zend_long dead_pins_stripped;
+	zend_long committed_mem;
+	zend_long commit_failure_count;
+} ucache_info_stats;
 
 typedef struct {
-	uint32_t class_name_offset;
-	uint32_t shape_offset;
-	uint32_t count;
-} php_ucache_shared_graph_state_schema_t;
+	ucache_info_stats stats;
+	php_ucache_reason availability_reason;
+	bool initialized;
+	zend_object std;
+} ucache_status_obj;
 
 typedef struct {
-	uint32_t state_schema_offset;
-	uint32_t flags;
-	uint32_t state_values_offset;
-	uint32_t state_next_free;
-} php_ucache_shared_graph_shaped_state_object_t;
-
-/* Shared layout for safe-direct and serialized object state. */
-typedef struct {
-	uint32_t class_name_offset;
-	uint32_t property_count;
-	uint32_t properties_offset;
-	uint32_t flags;
-	php_ucache_shared_graph_value_t state;
-} php_ucache_shared_graph_safe_direct_object_t;
-
-typedef struct {
-	uint32_t blob_len;
-	uint32_t flags;
-} php_ucache_shared_graph_serdes_object_t;
-
-typedef struct {
-	uint32_t flags;
-	uint32_t reserved;
-	php_ucache_shared_graph_value_t inner;
-} php_ucache_shared_graph_reference_t;
-
-typedef struct {
-	uint32_t class_name_offset;
-	uint32_t case_name_offset;
-} php_ucache_shared_graph_enum_t;
-
-typedef struct {
-	php_ucache_header_t *header;
-	uint32_t slot_index;
-} php_ucache_reader_claim_t;
-
-typedef struct {
-	php_ucache_header_t *header;
-	uint32_t slot_index;
-} php_ucache_graph_pin_claim_t;
-
-typedef struct {
-	php_ucache_partition_t *active_partition;
-	php_ucache_runtime_t runtime_state;
-	php_ucache_ctx_t *active_context_ptr;
-	php_ucache_reason_t request_unavailable_reason;
-	bool lock_held;
-	bool lock_held_is_write;
+	php_ucache_partition *active_partition;
+	ucache_ctx *active_ctx_ptr;
+	const ucache_ctx *runtime_resolved_ctx;
+	ucache_runtime runtime_state;
+	uint32_t op_depth;
+	uint32_t access_now;
+	uint32_t access_now_touches;
 	bool runtime_resolved;
 	bool runtime_resolved_enabled;
-	const php_ucache_ctx_t *runtime_resolved_ctx;
-	php_ucache_shared_graph_ref_t *shared_graph_refs;
-	uint32_t shared_graph_ref_count;
-	uint32_t shared_graph_ref_capacity;
-	uint64_t shared_graph_ref_owner_pid;
-	HashTable *shared_graph_ref_index;
-	php_ucache_lookup_entry_t lookup_entry_storage[PHP_UCACHE_LOOKUP_BUCKETS];
-	HashTable *request_local_slot_table;
+	bool enable;
+	bool enable_cli;
+	bool persistent_exec;
+	bool stack_overflowed;
+	bool in_req_shutdown;
+	bool key_records_trim_due;
+	uint32_t key_record_count;
+	bool lock_held;
+	bool lock_held_is_write;
+	ucache_hdr *scalar_write_hdr;
+	uint32_t scalar_write_idx;
+	php_ucache_reason req_unavailable_reason;
+	ucache_req_graph_ref *sgraph_refs;
+	uint32_t sgraph_ref_count;
+	uint32_t sgraph_ref_capacity;
+	uint64_t sgraph_ref_owner_pid;
+	uint32_t *sgraph_ref_slots;
+	size_t sgraph_ref_bytes;
+	HashTable *req_local_slot_table;
+	uint64_t req_local_slot_owner_pid;
 	HashTable *entry_lock_table;
-	php_ucache_deferred_entry_lock_release_t *deferred_entry_lock_releases;
-	uint32_t deferred_entry_lock_release_count;
-	uint32_t deferred_entry_lock_release_capacity;
+	ucache_entry_lock *deferred_entry_lock_releases;
+	ucache_entry_lock *entry_lock_spare;
 	HashTable *pool_table;
+	uint32_t pool_trim_at;
+	struct _ucache_obj *live_pools;
+	struct _ucache_held_records *held_records;
+	HashTable *pool_status_snapshots;
 	HashTable *decode_identity_map;
-	HashTable *decode_reference_map;
-	HashTable *decode_array_map;
+	HashTable *decode_ref_map;
+	ucache_restore_queue *decode_restore_queue;
+	ucache_owned_decode_frame *owned_decode_frame;
+	uint64_t unrestorable_gen;
+	ucache_op_lease *op_leases;
+	ucache_op_lease *op_lease_free;
+	ucache_op_lease op_lease_inline;
 	HashTable *decode_resolve_cache;
-	HashTable *decode_shape_prototype_cache;
-	HashTable *object_route_memo;
-	/* Segment bounds of the payload being decoded, for interned strings
-	 * referenced by segment offset (set and restored per decode). */
-	const uint8_t *decode_segment_base;
-	size_t decode_segment_len;
-	const void *decode_resolve_direct_keys[PHP_UCACHE_DECODE_DIRECT_CACHE_SLOTS];
-	void *decode_resolve_direct_values[PHP_UCACHE_DECODE_DIRECT_CACHE_SLOTS];
-	const void *decode_shape_prototype_direct_keys[PHP_UCACHE_DECODE_DIRECT_CACHE_SLOTS];
-	zend_array *decode_shape_prototype_direct_values[PHP_UCACHE_DECODE_DIRECT_CACHE_SLOTS];
-	php_ucache_reader_claim_t reader_claims[PHP_UCACHE_READER_CLAIM_MAX];
-	php_ucache_graph_pin_claim_t graph_pin_claims[PHP_UCACHE_GRAPH_PIN_CLAIM_MAX];
+	HashTable *decode_shape_proto_cache;
+	HashTable *obj_route_memo;
+	const void *decode_resolve_direct_keys[UCACHE_DECODE_DIRECT_CACHE_SLOTS];
+	void *decode_resolve_direct_vals[UCACHE_DECODE_DIRECT_CACHE_SLOTS];
+	const void *decode_shape_proto_direct_keys[UCACHE_DECODE_DIRECT_CACHE_SLOTS];
+	zend_array *decode_shape_proto_direct_vals[UCACHE_DECODE_DIRECT_CACHE_SLOTS];
+	ucache_reader_claim reader_claims[UCACHE_READER_CLAIM_MAX];
+	ucache_graph_pin_claim graph_pin_claims[UCACHE_GRAPH_PIN_CLAIM_MAX];
 #ifndef ZEND_WIN32
-	uint64_t entry_lock_owner_pid;
-#endif /* !ZEND_WIN32 */
+	zend_ulong entry_lock_owner_pid;
+#endif /* ZEND_WIN32 */
 	uint64_t graph_pin_probe_last_at;
-	uint64_t entry_lock_owner_probe_pid;
-	uint64_t entry_lock_owner_probe_start_time;
-	uint64_t entry_lock_owner_probe_at;
-	uint64_t self_start_time_pid; /* Recomputed after fork. */
+	uint64_t reader_claim_pid;
+	uint64_t reader_claim_failed_pid;
+	ucache_hdr *reader_claim_failed_hdr;
+	uint64_t graph_pin_claim_failed_pid;
+	ucache_hdr *graph_pin_claim_failed_hdr;
+	ucache_owner_probe owner_probes[UCACHE_OWNER_PROBES];
+	uint64_t self_start_time_pid;
 	uint64_t self_start_time_token;
 	zend_long shm_size;
 	zend_long entries_hint;
 	zend_long eviction_policy;
 	char *lockfile_path;
-	char *memory_model;
+	char *mem_model;
 	uint32_t reader_claim_count;
 	uint32_t graph_pin_claim_count;
+	uint32_t decode_depth;
+	uint32_t restore_hook_calls;
 	uint32_t expired_read_observations;
-	uint32_t expunge_write_ops; /* Write operations since the last bounded expiry scan. */
-	uint32_t intern_sweep_ticks; /* Allocation-pressure reclaims since the last intern sweep. */
+	uint32_t expunge_write_ops;
+	uint32_t rehash_retry_skips;
+	uint32_t entry_lock_sweep_ops;
 	uint32_t expired_expunge_cursor;
-	/* Request-lazy coarse clock for access stamps; refreshed opportunistically
-	 * and after a bounded number of touches (entries.c). */
-	uint32_t access_now;
-	uint32_t access_now_touches;
+	size_t record_val_bytes;
+	size_t req_local_slot_bytes;
+	size_t key_record_bytes;
+	size_t key_record_bytes_trim_at;
+	uint32_t key_record_trim_at;
 	uint8_t decode_resolve_direct_next;
-	uint8_t decode_shape_prototype_direct_next;
+	uint8_t decode_shape_proto_direct_next;
 	bool write_seq_bumped;
-	bool stack_overflowed;
-	/* Set while a bulk store commits its items so a per-item bailout keeps the
-	 * write lock held: the bulk rollback then runs without a lock gap another
-	 * process could mutate through. */
+	bool entry_lock_table_section_open;
 	bool store_defer_unlock;
-	bool request_local_slot_may_cycle; /* Request shutdown must collect cyclic slot clones. */
+	bool req_local_slot_may_cycle;
 	int8_t reader_drain_state;
-	bool entry_lock_owner_probe_dead;
-	bool in_request_shutdown;
-	bool enable;
-	bool enable_cli;
-} php_ucache_globals;
+	bool exec_prepared;
+	bool exec_active;
+	bool exec_poisoned;
+	bool logical_req_ending;
+	php_ucache_partition *exec_prev_partition;
+	ucache_ctx *exec_prev_ctx;
+	php_ucache_reason exec_prev_unavailable_reason;
+	php_ucache_partition *exec_partition;
+	uint64_t logical_scope_token;
+} ucache_globals;
 
 #ifdef ZTS
-# define UC_G(v) ZEND_TSRMG_FAST(user_cache_globals_offset, php_ucache_globals *, v)
 extern size_t user_cache_globals_offset;
 #else
-# define UC_G(v) (user_cache_globals.v)
-extern php_ucache_globals user_cache_globals;
+extern ucache_globals user_cache_globals;
 #endif
 
-extern php_ucache_ctx_t php_ucache_ctx_state;
-extern bool php_ucache_runtime_opted_in;
-extern php_ucache_partition_t *php_ucache_partitions;
-
-/* Guards boundary partition lookup/creation and request-time additions to
- * php_ucache_partitions; no-ops on non-ZTS builds. */
-void php_ucache_boundary_partitions_lock(void);
-void php_ucache_boundary_partitions_unlock(void);
-uint64_t php_ucache_cached_pid(void);
-void php_ucache_reset_runtime(void);
-void php_ucache_reset_storage(void);
-bool php_ucache_header_init_locked(void);
-bool php_ucache_header_adoptable_locked(void);
-void php_ucache_free_locked(uint32_t payload_offset);
-uint32_t php_ucache_alloc_locked(size_t size, const void *src);
-bool php_ucache_alloc_can_satisfy_locked(size_t size, size_t key_size);
-/* Lock-free; *generation is the value to confirm under the write lock. */
-uint32_t php_ucache_intern_find(zend_string *str, uint64_t *generation);
-uint32_t php_ucache_intern_add_locked(zend_string *str);
-void php_ucache_intern_table_reset_locked(void);
-void php_ucache_intern_table_insert_locked(uint32_t str_offset);
-bool php_ucache_shared_graph_intern_sweep_locked(void);
-bool php_ucache_startup_storage_before_request(void);
-void php_ucache_shutdown_storage(void);
-void php_ucache_ensure_ready_impl(void);
-bool php_ucache_rlock(void);
-bool php_ucache_wlock(void);
-bool php_ucache_wlock_for_entry_mutation(zend_string *key);
-bool php_ucache_wlock_for_ref_release(bool *write_section_entered);
-void php_ucache_unlock(void);
-void php_ucache_unlock_if_held(void);
-bool php_ucache_try_acquire_entry_lock(zend_string *key, zend_long lease);
-bool php_ucache_release_entry_lock(zend_string *key);
-bool php_ucache_request_owns_entry_lock(zend_string *key);
-/* Keys must be sorted with duplicates adjacent. */
-bool php_ucache_acquire_entry_locks(zend_string **keys, bool *acquired, uint32_t count);
-void php_ucache_release_entry_locks(zend_string **keys, const bool *acquired, uint32_t count);
-bool php_ucache_entry_locks_allow_clear_locked(void);
-/* *now is time_base-relative seconds, lazily filled when passed as 0. */
-bool php_ucache_entry_key_lock_active_locked(
-		php_ucache_header_t *header,
-		zend_ulong hash,
-		uint32_t key_offset,
-		uint32_t key_len,
-		uint64_t *now);
-void php_ucache_release_request_entry_locks(void);
+extern ucache_ctx ucache_ctx_state;
+extern uint64_t ucache_self_pid;
+extern bool ucache_runtime_opted_in;
+extern php_ucache_partition *ucache_partitions;
+extern zend_class_entry *ucache_availability_ce;
+extern zend_object_handlers ucache_status_obj_handlers;
+extern zend_object_handlers ucache_pool_status_obj_handlers;
+extern php_ucache_mode ucache_registered_mode;
+extern atomic_bool ucache_registration_closed;
 #ifdef ZTS
-void php_ucache_free_thread_deferred_entry_lock_releases(php_ucache_globals *globals);
-#endif /* ZTS */
-const php_ucache_safe_direct_handlers_t *php_ucache_safe_direct_find_handlers(
+extern MUTEX_T ucache_boundary_partitions_mutex;
+#endif
+
+void ucache_boundary_partitions_lock(void);
+void ucache_boundary_partitions_unlock(void);
+uint64_t ucache_resolve_pid(void);
+void ucache_use_req_method_handlers(void);
+void ucache_partitions_shutdown(void);
+void ucache_boundary_partitions_shutdown(void);
+void ucache_restore_exec_preparation(void);
+ZEND_COLD void ucache_warn(const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 1, 2);
+ZEND_COLD void ucache_warn_docref(const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 1, 2);
+ZEND_COLD void ucache_log_err(const char *msg);
+void ucache_collect_info_stats(ucache_info_stats *stats);
+void ucache_release_pool_status_snapshots(void);
+void ucache_collect_pool_status(
+		ucache_obj *cache,
+		zend_long *entry_count,
+		zend_long *used_mem,
+		zval *entry_keys);
+void ucache_pool_status_obj_free(zend_object *obj);
+zend_object *ucache_pool_status_obj_create(zend_class_entry *ce);
+zend_object *ucache_status_obj_create(zend_class_entry *ce);
+void ucache_reset_runtime(void);
+bool ucache_exec_available(void);
+bool ucache_storage_startup_is_complete(const ucache_storage *storage);
+void ucache_reset_storage(void);
+size_t ucache_shm_size_min(void);
+bool ucache_mem_model_is_available(const char *model);
+uint64_t ucache_committed_bytes_locked(const ucache_hdr *hdr);
+bool ucache_hdr_init_locked(void);
+bool ucache_hdr_adoptable_locked(void);
+const char *ucache_lock_model_name(const ucache_storage *storage);
+uint32_t ucache_free_locked(uint32_t payload_offset);
+void ucache_shrink_locked(uint32_t payload_offset, size_t payload_size);
+uint32_t ucache_alloc_locked(size_t size, const void *src, uint32_t owner);
+bool ucache_alloc_can_satisfy_locked(size_t size);
+bool ucache_reclaim_space_for_entry_lock_locked(size_t key_size);
+bool ucache_startup_storage_before_req(void);
+void ucache_shutdown_storage(void);
+void ucache_classify_sapi(void);
+void ucache_ensure_ready_impl(void);
+bool ucache_rlock(void);
+bool ucache_wlock(void);
+bool ucache_wlock_for_entry_mutation(zend_string *key);
+bool ucache_wlock_for_entry_mutations(zend_string **keys, uint32_t count);
+bool ucache_try_wlock_for_entry_mutation(zend_string *key);
+bool ucache_wlock_for_ref_release(bool *recovered);
+void ucache_unlock(void);
+void ucache_unlock_if_held(void);
+bool ucache_scalar_write_begin(zend_ulong hash, ucache_hdr **hdr_ptr, uint32_t *stripe_idx);
+void ucache_scalar_write_enable_locked(ucache_hdr *hdr);
+void ucache_scalar_write_prepare(ucache_hdr *hdr, uint32_t stripe_idx, uint32_t slot_idx);
+void ucache_scalar_write_commit(ucache_hdr *hdr, uint32_t stripe_idx, ucache_entry *entry);
+void ucache_scalar_write_end(void);
+bool ucache_try_acquire_entry_lock(zend_string *key, zend_long lease);
+bool ucache_acquire_entry_lock(zend_string *key);
+bool ucache_release_entry_lock(zend_string *key);
+bool ucache_release_entry_lock_unless_requested(zend_string *key);
+bool ucache_req_owns_entry_lock(zend_string *key);
+bool ucache_entry_locks_allow_clear_locked(zend_string *prefix);
+bool ucache_entry_key_lock_active_locked(
+		ucache_hdr *hdr,
+		uint32_t hash,
+		size_t key_pos,
+		uint32_t key_len,
+		uint64_t now);
+void ucache_release_req_entry_locks(void);
+void ucache_retry_deferred_entry_lock_releases(void);
+bool ucache_active_ctx_has_deferred_entry_lock_releases(void);
+void ucache_free_thread_deferred_entry_lock_releases(ucache_globals *globals);
+#ifdef ZTS
+void ucache_orphan_thread_deferred_entry_lock_releases(ucache_globals *globals);
+void ucache_free_orphaned_entry_lock_releases(void);
+#endif
+const php_ucache_safe_direct_handlers *ucache_safe_direct_find_handlers(
 		zend_class_entry *ce,
 		zend_class_entry **base_ce_ptr);
-php_ucache_safe_direct_state_copy_func_t php_ucache_safe_direct_state_copy_func(
-		zend_class_entry *ce,
-		zend_class_entry **base_ce_ptr);
-php_ucache_safe_direct_state_has_unstorable_func_t php_ucache_safe_direct_state_has_unstorable_func(
-		zend_class_entry *ce);
-php_ucache_safe_direct_state_serialize_func_t php_ucache_safe_direct_state_serialize_func(
-		zend_class_entry *ce);
-php_ucache_safe_direct_state_unserialize_func_t php_ucache_safe_direct_state_unserialize_func(
-		zend_class_entry *ce);
-bool php_ucache_safe_direct_prefers_request_local_prototype(zend_class_entry *ce);
-bool php_ucache_serdes_encode(zval *value, smart_str *buf, const char **failure_msg);
-bool php_ucache_serdes_decode(const uint8_t *data, size_t len, zval *dst);
-uint32_t php_ucache_serdes_declared_property_index_plus_one(
-		zend_class_entry *ce,
-		zend_string *name);
-bool php_ucache_serdes_get_sleep_state(
-		zval *obj_zv,
-		zval *state,
-		const char **failure_msg);
-bool php_ucache_serdes_call_magic_serialize(zend_object *obj, zval *state);
-bool php_ucache_shared_graph_update_object_property(
-		zval *obj_zv,
-		zend_string *prop_name,
-		zval *prop_val);
-bool php_ucache_shared_graph_update_object_property_at(
-		zval *obj_zv,
-		zend_string *prop_name,
-		uint32_t prop_idx,
-		zval *prop_val);
-bool php_ucache_shared_graph_can_copy_verbatim_root(const zval *value, php_ucache_verbatim_memo_t *verbatim_memo);
-php_ucache_verbatim_root_result_t php_ucache_shared_graph_calc_verbatim_root(
-		const zval *value,
-		php_ucache_verbatim_memo_t *verbatim_memo,
-		size_t *buf_len,
-		uint32_t *intern_key_count);
-bool php_ucache_calculate_shared_graph_size(
-		const zval *value,
+php_ucache_safe_direct_copy_func_t ucache_safe_direct_copy_func(zend_class_entry *ce);
+bool ucache_serdes_encode(zval *val, smart_str *buf);
+bool ucache_serdes_decode(const uint8_t *data, size_t len, zval *dst);
+void ucache_sgraph_calc_verbatim_root(
+		const zval *val,
+		HashTable *verbatim_verdicts,
+		size_t *buf_len);
+bool ucache_calc_sgraph_size(
+		const zval *val,
 		HashTable *state_memo,
-		php_ucache_verbatim_memo_t *verbatim_memo,
+		HashTable *verbatim_verdicts,
 		size_t *buf_len,
-		uint32_t *intern_key_count);
-bool php_ucache_build_shared_graph_in_place(
-		const zval *value,
+		bool *packed_vals_allowed);
+bool ucache_build_sgraph_in_place(
+		const zval *val,
 		HashTable *state_memo,
-		php_ucache_verbatim_memo_t *verbatim_memo,
+		const HashTable *verbatim_verdicts,
+		bool packed_vals_allowed,
 		uint8_t *buf,
 		size_t buf_len,
-		size_t *graph_len,
-		bool *has_verbatim_array,
+		size_t *glen,
+		bool *has_verbatim_arr,
 		uint32_t **fixup_offsets,
-		uint32_t *fixup_count,
-		php_ucache_graph_intern_plan_t *intern_plan);
-void php_ucache_graph_intern_plan_destroy(php_ucache_graph_intern_plan_t *plan);
-bool php_ucache_shared_graph_copy_fits_buffer(
+		uint32_t *fixup_count);
+bool ucache_sgraph_copy_fits_buf(
 		const uint8_t *dst_buf,
 		const uint8_t *src_buf,
 		size_t buf_len,
-		size_t src_graph_len);
-bool php_ucache_shared_graph_decode(const uint8_t *buf, size_t buf_len, zval *dst);
-bool php_ucache_shared_graph_prefers_prototype(uint32_t payload_offset);
-bool php_ucache_shared_graph_decode_is_lock_safe(uint32_t payload_offset);
-bool php_ucache_shared_graph_payload_has_aliases(uint32_t payload_offset);
-void php_ucache_decode_resolve_cache_release(void);
-void php_ucache_decode_shape_prototype_cache_release(void);
-void php_ucache_decode_maps_teardown(void);
-bool php_ucache_shared_graph_can_overwrite_payload_locked(uint32_t payload_offset);
-bool php_ucache_shared_graph_payload_has_refs_locked(uint32_t payload_offset);
-php_ucache_publish_result_t php_ucache_shared_graph_publish_copied_payload_locked(
+		size_t src_glen);
+bool ucache_sgraph_decode(const uint8_t *buf, size_t buf_len, zval *dst);
+ucache_sgraph_snapshot *ucache_sgraph_snapshot_create(const uint8_t *buf, size_t buf_len);
+bool ucache_sgraph_decode_snapshot(ucache_sgraph_snapshot *snapshot, zval *dst);
+bool ucache_owned_decode_validate_proc_impl(void);
+const uint32_t *ucache_sgraph_node_sizes(uint32_t *count);
+uint32_t ucache_sgraph_payload_flags(uint32_t payload_offset);
+void ucache_sgraph_obj_route_memo_release(void);
+ZEND_COLD void ucache_throw_unstorable_res(void);
+ZEND_COLD void ucache_throw_unstorable_obj(const zend_class_entry *ce);
+void ucache_decode_payload_addr_caches_release(void);
+void ucache_decode_maps_teardown(void);
+bool ucache_sgraph_quiesce_for_overwrite_locked(uint32_t payload_offset);
+bool ucache_sgraph_payload_has_refs_locked(uint32_t payload_offset);
+bool ucache_sgraph_publish_copied_payload_locked(
 		uint8_t *dst_buf,
 		const uint8_t *src_buf,
 		size_t buf_len,
-		size_t src_graph_len,
-		bool has_verbatim_array,
+		size_t src_glen,
+		bool has_verbatim_arr,
 		const uint32_t *fixup_offsets,
-		uint32_t fixup_count,
-		php_ucache_graph_intern_plan_t *intern_plan);
-bool php_ucache_shared_graph_acquire_ref(uint32_t payload_offset);
-bool php_ucache_shared_graph_retire_payload_locked(uint32_t payload_offset);
-bool php_ucache_has_request_shared_graph_ref(uint32_t payload_offset);
-void php_ucache_register_shared_graph_ref(uint32_t payload_offset);
-bool php_ucache_release_request_shared_graph_refs(void);
-void php_ucache_expunge_expired_at_request_end(void);
-void php_ucache_lookup_cache_clear(void);
-bool php_ucache_prepare_value(
+		uint32_t fixup_count);
+bool ucache_sgraph_acquire_ref(uint32_t payload_offset, bool *resource_limited);
+bool ucache_sgraph_release_op_ref(uint32_t payload_offset);
+void ucache_retry_op_lease_releases(void);
+void ucache_release_op_leases(void);
+void ucache_abandon_graph_pin_claims(void);
+size_t ucache_sgraph_largest_space_after_clear_locked(ucache_hdr *hdr);
+bool ucache_sgraph_retire_payload_locked(uint32_t payload_offset);
+uint32_t ucache_req_sgraph_ref_idx(uint32_t payload_offset);
+uint32_t ucache_register_sgraph_ref(uint32_t payload_offset, uint32_t payload_len);
+void ucache_release_req_sgraph_refs(void);
+void ucache_expunge_expired_at_req_end(void);
+bool ucache_prepare_val(
 		zend_string *key,
-		zval *value,
-		const php_ucache_prepare_options_t *options,
-		php_ucache_prepared_value_t *prepared);
-void php_ucache_destroy_prepared_value(php_ucache_prepared_value_t *prepared);
-bool php_ucache_store_prepared_locked(
+		zval *val,
+		ucache_prepared_val *prepared);
+void ucache_destroy_prepared_val(ucache_prepared_val *prepared);
+bool ucache_store_prepared_locked(
 		zend_string *key,
-		zval *value,
-		php_ucache_prepared_value_t *prepared,
+		zval *val,
+		const ucache_prepared_val *prepared,
 		zend_long ttl,
-		const php_ucache_store_options_t *options,
-		php_ucache_store_result_t *result);
-/* May release the global lock while materializing a value: when *lock_held
- * comes back false the caller no longer holds the lock and must neither
- * unlock nor touch SHM state afterwards. */
-bool php_ucache_fetch_locked(
-		zend_string *key,
-		bool use_request_local_slot,
+		bool bulk,
+		ucache_store_result *result);
+bool ucache_fetch_locked(
+		ucache_key_record *record,
 		zval *return_value,
 		bool *found,
-		php_ucache_fetch_pending_seed_t *pending_seed,
+		ucache_fetch_pending_seed *pending_seed,
 		bool *lock_held);
-void php_ucache_fetch_finish(zend_string *key, uint64_t gen, zval *return_value, uint32_t flags);
-bool php_ucache_exists_locked(zend_string *key);
-void php_ucache_delete_locked(zend_string *key);
-void php_ucache_discard_replaced_entry_locked(zend_string *key, php_ucache_replaced_entry_t *replaced_entry);
-void php_ucache_rollback_replaced_entry_locked(zend_string *key, php_ucache_replaced_entry_t *replaced_entry);
-void php_ucache_delete_by_prefix_locked(zend_string *prefix);
-bool php_ucache_atomic_update_locked(
+void ucache_fetch_finish(
+		ucache_key_record *record,
+		ucache_fetch_pending_seed *pending_seed,
+		zval *return_value);
+void ucache_key_record_reset(ucache_key_record *record, zval *detached);
+void ucache_key_record_stored(
+		ucache_key_record *record,
+		const ucache_store_result *result,
+		zval *val);
+void ucache_key_record_deleted(ucache_key_record *record, uint64_t epoch);
+void ucache_key_record_atomic_updated(
+		ucache_key_record *record,
+		const ucache_atomic_update_result *result);
+bool ucache_exists_locked(zend_string *key);
+uint64_t ucache_delete_locked(zend_string *key);
+uint64_t ucache_delete_gen_locked(zend_string *key, uint64_t gen);
+void ucache_discard_replaced_entry_locked(ucache_entry *replaced_entry);
+void ucache_rollback_replaced_entry_locked(zend_string *key, ucache_entry *replaced_entry);
+void ucache_delete_by_prefix_locked(zend_string *prefix);
+bool ucache_atomic_update_locked(
 		zend_string *key,
 		zend_long step,
 		zend_long ttl,
 		bool decrement,
-		php_ucache_atomic_update_result_t *result);
-void php_ucache_release_request_local_slots(void);
-void php_ucache_release_active_request_local_slots_by_prefix(zend_string *prefix);
-void php_ucache_store_request_local_slot(zend_string *key, uint64_t gen, zval *value, bool no_aliases);
-void php_ucache_object_table_dtor(zval *zv);
-void php_ucache_reference_table_dtor(zval *zv);
-php_ucache_optimistic_result_t php_ucache_fetch_optimistic(
-		zend_string *key,
+		ucache_atomic_update_result *result);
+bool ucache_try_store_scalar(
+		ucache_key_record *record,
+		const ucache_prepared_val *prepared);
+bool ucache_try_atomic_update(
+		ucache_key_record *record,
+		zend_long step,
+		zend_long ttl,
+		bool decrement,
+		ucache_atomic_update_result *result,
+		bool *updated);
+void ucache_release_req_local_slots(void);
+void ucache_release_req_local_slot(zend_string *key);
+void ucache_release_active_req_local_slots_by_prefix(zend_string *prefix);
+void ucache_obj_table_dtor(zval *zv);
+void ucache_ref_table_dtor(zval *zv);
+ucache_optimistic_result ucache_fetch_optimistic(
+		ucache_key_record *record,
 		zval *return_value,
 		bool allow_decode);
-php_ucache_optimistic_result_t php_ucache_exists_optimistic(zend_string *key);
-bool php_ucache_optimistic_reader_begin(php_ucache_header_t *header, uint32_t *slot_idx_ptr);
-void php_ucache_optimistic_reader_end(php_ucache_header_t *header, uint32_t slot_idx);
-void php_ucache_optimistic_fork_setup(void);
-#ifdef ZTS
-void php_ucache_release_thread_reader_claims(php_ucache_globals *globals);
+ucache_optimistic_result ucache_exists_optimistic(ucache_key_record *record);
+bool ucache_optimistic_reader_begin(ucache_hdr *hdr, uint32_t *slot_idx_ptr);
+void ucache_optimistic_reader_end(ucache_hdr *hdr, uint32_t slot_idx);
+#if defined(ZTS) && !defined(ZEND_WIN32)
+void ucache_lock_storage_startup_before_fork(void);
+void ucache_unlock_storage_startup_after_fork(void);
+void ucache_reinit_storage_locks_after_fork(void);
 #endif
-bool php_ucache_quiesce_graph_payloads_locked(void);
-void php_ucache_shared_graph_ref_reserve(void);
-void php_ucache_shared_graph_orphan_payload_locked(uint32_t payload_offset);
-void php_ucache_shared_graph_reclaim_orphaned_locked(void);
-bool php_ucache_shared_graph_strip_dead_pins_locked(bool force);
-bool php_ucache_graph_pin_owner_is_dead(uint64_t owner_pid, uint64_t owner_start_time);
-uint64_t php_ucache_self_start_time_token(void);
-#ifdef ZTS
-void php_ucache_release_thread_graph_pin_claims(php_ucache_globals *globals);
-#endif /* ZTS */
+#ifdef UCACHE_HAVE_BOUNDARY_SHM
+void ucache_shared_boundary_segs_after_fork(void);
+#endif
+void ucache_release_thread_reader_claims(ucache_globals *globals);
+bool ucache_quiesce_graph_payloads_locked(void);
+void ucache_sgraph_ref_reserve(void);
+void ucache_sgraph_orphan_payload_locked(uint32_t payload_offset);
+void ucache_sgraph_reclaim_orphaned_locked(void);
+bool ucache_sgraph_strip_dead_pins_locked(bool force);
+bool ucache_owner_is_dead(uint64_t owner_pid, uint64_t owner_start_time);
+uint64_t ucache_self_start_time_token(void);
+void ucache_release_thread_graph_pin_claims(ucache_globals *globals);
+ZEND_METHOD(UserCache_CacheStatus, __construct);
+ZEND_METHOD(UserCache_CacheStatus, getAvailability);
+ZEND_METHOD(UserCache_CacheStatus, getConfiguredMemory);
+ZEND_METHOD(UserCache_CacheStatus, getSharedMemorySize);
+ZEND_METHOD(UserCache_CacheStatus, getUsedMemory);
+ZEND_METHOD(UserCache_CacheStatus, getFreeMemory);
+ZEND_METHOD(UserCache_CacheStatus, getWastedMemory);
+ZEND_METHOD(UserCache_CacheStatus, getEntryCount);
+ZEND_METHOD(UserCache_CacheStatus, getEntryCapacity);
+ZEND_METHOD(UserCache_CacheStatus, getTombstoneCount);
+ZEND_METHOD(UserCache_CacheStatus, getExpungeCount);
+ZEND_METHOD(UserCache_CacheStatus, getEvictionCount);
+ZEND_METHOD(UserCache_CacheStatus, getStoreFailureCount);
+ZEND_METHOD(UserCache_CacheStatus, getGraphPinSlotsInUse);
+ZEND_METHOD(UserCache_CacheStatus, getGraphPinnedReferences);
+ZEND_METHOD(UserCache_CacheStatus, getDeadPinOwnersReclaimed);
+ZEND_METHOD(UserCache_CacheStatus, getDeadPinsStripped);
+ZEND_METHOD(UserCache_CacheStatus, getCommittedMemory);
+ZEND_METHOD(UserCache_CacheStatus, getCommitFailureCount);
+ZEND_METHOD(UserCache_CachePoolStatus, __construct);
+ZEND_METHOD(UserCache_CachePoolStatus, getPoolName);
+ZEND_METHOD(UserCache_CachePoolStatus, getEntryCount);
+ZEND_METHOD(UserCache_CachePoolStatus, getEntryKeys);
+ZEND_METHOD(UserCache_CachePoolStatus, getUsedMemory);
 
-static zend_always_inline uint64_t php_ucache_current_pid(void)
+static_assert(
+	offsetof(ucache_hdr, scalar_write_enabled) / UCACHE_CPU_CACHE_LINE_SIZE ==
+		offsetof(ucache_hdr, write_seq) / UCACHE_CPU_CACHE_LINE_SIZE,
+	"scalar_write_enabled must share the cache line of write_seq"
+);
+static_assert(
+	sizeof(ucache_entry) == 32,
+	"two entries must share a cache line"
+);
+static_assert(
+	sizeof(ucache_block) == UCACHE_BLOCK_HDR_UNITS * UCACHE_OFFSET_UNIT,
+	"the block header must span whole offset units"
+);
+static_assert(
+	UCACHE_PLATFORM_ALIGNMENT % UCACHE_OFFSET_UNIT == 0,
+	"blocks must start on offset units"
+);
+static_assert(
+	UCACHE_BLOCK_SIZE_MAX % UCACHE_PLATFORM_ALIGNMENT == 0,
+	"the largest block must keep block alignment"
+);
+static_assert(
+	(uint64_t) MAX(
+		UCACHE_ENTRIES_HINT_MAX,
+		UCACHE_SEG_SIZE_MAX / UCACHE_AUTO_SEG_BYTES_PER_ENTRY
+	) * 2 * UCACHE_TABLE_SLOT_SIZE < UINT32_MAX,
+	"the largest entry table must keep the layout offsets within 32 bits"
+);
+
+#if ZEND_DEBUG
+static zend_always_inline bool ucache_debug_fault(const char *env_name)
 {
-#ifdef ZEND_WIN32
-	return (uint64_t) GetCurrentProcessId();
-#else
-	return (uint64_t) getpid();
+	const char *val = getenv(env_name);
+
+	return val != NULL && val[0] != '\0' && val[0] != '0';
+}
 #endif
+
+static zend_always_inline uint32_t ucache_table_hash(zend_ulong hash)
+{
+	return (uint32_t) hash;
 }
 
-static zend_always_inline bool php_ucache_stack_overflowed(void)
+static zend_always_inline uint32_t ucache_entry_kind(const ucache_entry *entry)
+{
+	return (entry->flags & UCACHE_ENTRY_KIND_MASK) >> UCACHE_ENTRY_KIND_SHIFT;
+}
+
+static zend_always_inline bool ucache_entry_is_used(const ucache_entry *entry)
+{
+	return (entry->flags & UCACHE_ENTRY_KIND_USED_BITS) != 0;
+}
+
+static zend_always_inline bool ucache_entry_holds_scalar(const ucache_entry *entry)
+{
+	return ucache_entry_kind(entry) - UCACHE_ENTRY_USED <= UCACHE_VAL_DOUBLE;
+}
+
+static zend_always_inline uint8_t ucache_entry_val_type(const ucache_entry *entry)
+{
+	ZEND_ASSERT(ucache_entry_is_used(entry));
+
+	return (uint8_t) (ucache_entry_kind(entry) - UCACHE_ENTRY_USED);
+}
+
+static zend_always_inline uint32_t ucache_entry_val_offset(const ucache_entry *entry)
+{
+	uint32_t kind = ucache_entry_kind(entry);
+
+	return kind == UCACHE_ENTRY_USED + UCACHE_VAL_STR ||
+		kind == UCACHE_ENTRY_USED + UCACHE_VAL_SGRAPH
+		? entry->val_offset : 0
+	;
+}
+
+static zend_always_inline uint64_t ucache_cached_pid(void)
+{
+	uint64_t pid = ucache_self_pid;
+
+	return EXPECTED(pid != 0) ? pid : ucache_resolve_pid();
+}
+
+static zend_always_inline bool ucache_stack_exhausted(void)
 {
 #ifdef ZEND_CHECK_STACK_LIMIT
-	bool overflowed = UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)));
-
-	if (overflowed) {
-		UC_G(stack_overflowed) = true;
-	}
-
-	return overflowed;
+	return UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)));
 #else
 	return false;
 #endif /* ZEND_CHECK_STACK_LIMIT */
 }
 
-static zend_always_inline uint64_t php_ucache_atomic_load_64(const uint64_t *target)
+static zend_always_inline bool ucache_owned_decode_validate_proc(void)
 {
-	return PHP_UCACHE_ATOMIC_LOAD_64(target);
+	return EXPECTED(UC_G(owned_decode_frame) == NULL) || ucache_owned_decode_validate_proc_impl();
 }
 
-static zend_always_inline void php_ucache_atomic_fence_acquire(void)
+#ifdef UCACHE_MSVC_PLAIN_ATOMIC_LOADS
+static zend_always_inline uint64_t ucache_msvc_load_acquire_64(const volatile __int64 *target)
 {
-	PHP_UCACHE_ATOMIC_FENCE_ACQUIRE();
+	uint64_t val = (uint64_t) __iso_volatile_load64(target);
+
+	UCACHE_MSVC_LOAD_ACQUIRE_BARRIER();
+
+	return val;
 }
 
-static zend_always_inline void php_ucache_atomic_store_64(uint64_t *target, uint64_t value)
+static zend_always_inline uint32_t ucache_msvc_load_acquire_32(const volatile int *target)
 {
-	PHP_UCACHE_ATOMIC_STORE_64(target, value);
+	uint32_t val = (uint32_t) __iso_volatile_load32(target);
+
+	UCACHE_MSVC_LOAD_ACQUIRE_BARRIER();
+
+	return val;
+}
+#endif
+
+static zend_always_inline uint64_t ucache_atomic_load_64(const uint64_t *target)
+{
+	return UCACHE_ATOMIC_LOAD_64(target);
 }
 
-static zend_always_inline php_ucache_ctx_t *php_ucache_owning_context(void)
+static zend_always_inline void ucache_atomic_store_64(uint64_t *target, uint64_t val)
+{
+	UCACHE_ATOMIC_STORE_64(target, val);
+}
+
+static zend_always_inline bool ucache_atomic_cas_64(uint64_t *target, uint64_t expected, uint64_t desired)
+{
+	return UCACHE_ATOMIC_CAS_64(target, expected, desired);
+}
+
+static zend_always_inline bool ucache_atomic_cas_32(uint32_t *target, uint32_t expected, uint32_t desired)
+{
+	return UCACHE_ATOMIC_CAS_32(target, expected, desired);
+}
+
+static zend_always_inline uint32_t ucache_scalar_write_idx(zend_ulong hash)
+{
+	return (uint32_t) ((hash ^ (hash >> 16)) & (UCACHE_SCALAR_WRITE_STRIPES - 1));
+}
+
+static zend_always_inline void ucache_atomic_fence_acquire(void)
+{
+	UCACHE_ATOMIC_FENCE_ACQUIRE();
+}
+
+static zend_always_inline ucache_ctx *ucache_owning_ctx(void)
 {
 	return UC_G(active_partition) != NULL
 		? &UC_G(active_partition)->ctx
-		: &php_ucache_ctx_state
+		: &ucache_ctx_state
 	;
 }
 
-static zend_always_inline php_ucache_ctx_t *php_ucache_active_context(void)
+static zend_always_inline ucache_ctx *ucache_active_ctx(void)
 {
-	if (UC_G(active_context_ptr) != NULL) {
-		return UC_G(active_context_ptr);
+	if (UC_G(active_ctx_ptr) != NULL) {
+		return UC_G(active_ctx_ptr);
 	}
 
-	return php_ucache_owning_context();
+	return ucache_owning_ctx();
 }
 
-static zend_always_inline void *php_ucache_base(void)
+static zend_always_inline bool ucache_ctx_is_boundary(const ucache_ctx *ctx)
 {
-	php_ucache_storage_t *storage = &php_ucache_active_context()->storage;
+	return ctx->boundary_identity != NULL;
+}
 
-	if (!storage->initialized ||
-		storage->segment_count != 1
-	) {
-		return NULL;
+static zend_always_inline uint32_t ucache_ctx_graph_pin_slot_count(const ucache_ctx *ctx)
+{
+	return ctx->graph_pin_slot_count != 0 ? ctx->graph_pin_slot_count : UCACHE_GRAPH_PIN_SLOTS_MAX;
+}
+
+static zend_always_inline uint32_t ucache_graph_pin_slot_count(const ucache_hdr *hdr)
+{
+	return MIN(hdr->graph_pin_slot_count, UCACHE_GRAPH_PIN_SLOTS_MAX);
+}
+
+static zend_always_inline void *ucache_base(void)
+{
+	return ucache_active_ctx()->storage.base;
+}
+
+static zend_always_inline size_t ucache_req_cache_budget(void)
+{
+	size_t mem = PG(memory_limit) > 0
+		? (size_t) PG(memory_limit)
+		: ucache_active_ctx()->storage.size
+	;
+
+	return MAX(UCACHE_REQ_CACHE_BUDGET_MIN, mem / UCACHE_REQ_CACHE_BUDGET_DIVISOR);
+}
+
+static zend_always_inline ucache_hdr *ucache_hdr_ptr(void)
+{
+	return (ucache_hdr *) ucache_base();
+}
+
+static zend_always_inline size_t ucache_offset_bytes(uint32_t offset)
+{
+	return (size_t) offset << UCACHE_OFFSET_SHIFT;
+}
+
+static zend_always_inline uint32_t ucache_offset_from_bytes(size_t bytes)
+{
+	ZEND_ASSERT((bytes & (UCACHE_OFFSET_UNIT - 1)) == 0);
+	ZEND_ASSERT((uint64_t) bytes <= UCACHE_SEG_SIZE_MAX);
+
+	return (uint32_t) (bytes >> UCACHE_OFFSET_SHIFT);
+}
+
+static zend_always_inline uint32_t ucache_offset_after(uint32_t offset, size_t bytes)
+{
+	return offset + ucache_offset_from_bytes(bytes);
+}
+
+static zend_always_inline uint32_t ucache_payload_block_offset(uint32_t payload_offset)
+{
+	return payload_offset - UCACHE_BLOCK_HDR_UNITS;
+}
+
+static zend_always_inline uint32_t ucache_block_payload_offset(uint32_t block_offset)
+{
+	return block_offset + UCACHE_BLOCK_HDR_UNITS;
+}
+
+static zend_always_inline uint8_t *ucache_ptr(uint32_t offset)
+{
+	return (uint8_t *) ucache_base() + ucache_offset_bytes(offset);
+}
+
+static zend_always_inline size_t ucache_entry_key_pos(const ucache_entry *entry)
+{
+	return ucache_offset_bytes(entry->key_offset) |
+		((entry->flags & UCACHE_ENTRY_KEY_BYTE_MASK) >> UCACHE_ENTRY_KEY_BYTE_SHIFT)
+	;
+}
+
+static zend_always_inline uint32_t ucache_used_end_offset_locked(const ucache_hdr *hdr)
+{
+	return ucache_offset_from_bytes((size_t) hdr->data_offset + hdr->next_free);
+}
+
+static zend_always_inline ucache_block *ucache_block_ptr(uint32_t offset)
+{
+	return (ucache_block *) ucache_ptr(offset);
+}
+
+static zend_always_inline ucache_block *ucache_block_ptr_in_hdr(
+		const ucache_hdr *hdr,
+		uint32_t offset)
+{
+	return (ucache_block *) ((uint8_t *) hdr + ucache_offset_bytes(offset));
+}
+
+static zend_always_inline uint32_t ucache_block_merge_limit(void)
+{
+#if ZEND_DEBUG
+	if (UCACHE_DEBUG_FAULT("SMALL_BLOCK_MERGE_LIMIT")) {
+		return UCACHE_DEBUG_BLOCK_MERGE_LIMIT;
+	}
+#endif
+
+	return UCACHE_BLOCK_SIZE_MAX;
+}
+
+static zend_always_inline uint32_t ucache_block_size(const ucache_block *block)
+{
+	return block->size & ~UCACHE_BLOCK_FLAGS;
+}
+
+static zend_always_inline bool ucache_block_is_free(const ucache_block *block)
+{
+	return (block->size & UCACHE_BLOCK_FREE) != 0;
+}
+
+static zend_always_inline bool ucache_block_prev_is_free(const ucache_block *block)
+{
+	return (block->size & UCACHE_BLOCK_PREV_FREE) != 0;
+}
+
+static zend_always_inline uint32_t ucache_floor_log2(uint32_t val)
+{
+	return (uint32_t) (SIZEOF_ZEND_LONG * 8 - 1) - (uint32_t) zend_ulong_nlz((zend_ulong) val);
+}
+
+static zend_always_inline size_t ucache_size_class_round_up(size_t size)
+{
+	size_t step;
+
+	if (size < UCACHE_SIZE_CLASS_EXACT_LIMIT || size > UINT32_MAX) {
+		return size;
 	}
 
-	return storage->segments[0]->p;
+	step = (size_t) 1 << (ucache_floor_log2((uint32_t) size) - UCACHE_SIZE_CLASS_STEP_SHIFT);
+
+	return (size + step - 1) & ~(step - 1);
 }
 
-static zend_always_inline php_ucache_header_t *php_ucache_header_ptr(void)
+static zend_always_inline size_t ucache_block_total_size(size_t payload_size)
 {
-	return (php_ucache_header_t *) php_ucache_base();
+	size_t total = UCACHE_ALIGNED_SIZE(sizeof(ucache_block) + payload_size);
+
+	return ucache_size_class_round_up(MAX(total, UCACHE_BLOCK_MIN_SIZE));
 }
 
-static zend_always_inline size_t php_ucache_shm_bytes(uint32_t units)
+static zend_always_inline uint32_t ucache_block_payload_capacity(
+		const ucache_hdr *hdr,
+		uint32_t payload_offset)
 {
-	return (size_t) units * PHP_UCACHE_SHM_UNIT;
-}
+	uint32_t size;
 
-static zend_always_inline uint32_t php_ucache_shm_units(size_t bytes)
-{
-	ZEND_ASSERT(bytes % PHP_UCACHE_SHM_UNIT == 0);
-
-	return (uint32_t) (bytes / PHP_UCACHE_SHM_UNIT);
-}
-
-static zend_always_inline uint8_t *php_ucache_ptr(uint32_t offset)
-{
-	return (uint8_t *) php_ucache_base() + php_ucache_shm_bytes(offset);
-}
-
-static zend_always_inline php_ucache_block_t *php_ucache_block_ptr(uint32_t offset)
-{
-	return (php_ucache_block_t *) php_ucache_ptr(offset);
-}
-
-static zend_always_inline size_t php_ucache_block_payload_capacity(uint32_t payload_offset)
-{
-	php_ucache_block_t *block;
-
-	if (payload_offset < PHP_UCACHE_BLOCK_HEADER_UNITS) {
+	if (payload_offset < UCACHE_BLOCK_HDR_UNITS) {
 		return 0;
 	}
 
-	block = php_ucache_block_ptr(payload_offset - PHP_UCACHE_BLOCK_HEADER_UNITS);
-	if (block->size < PHP_UCACHE_BLOCK_HEADER_UNITS) {
-		return 0;
-	}
+	size = ucache_block_size(
+		ucache_block_ptr_in_hdr(hdr, ucache_payload_block_offset(payload_offset))
+	);
 
-	return php_ucache_shm_bytes(block->size - PHP_UCACHE_BLOCK_HEADER_UNITS);
+	return size < sizeof(ucache_block) ? 0 : size - (uint32_t) sizeof(ucache_block);
 }
 
-/* A size is allocatable only if its aligned block still fits a 32-bit unit count. */
-static zend_always_inline bool php_ucache_alloc_units(size_t size, uint32_t *units)
+static zend_always_inline bool ucache_bytes_committed(const ucache_hdr *hdr, uint64_t end)
 {
-	if (size == 0 ||
-		size > UINT32_MAX - sizeof(php_ucache_block_t) - (PHP_UCACHE_PLATFORM_ALIGNMENT - 1)
-	) {
-		return false;
-	}
-
-	*units = php_ucache_shm_units(PHP_UCACHE_ALIGNED_SIZE(sizeof(php_ucache_block_t) + size));
+#ifdef ZEND_WIN32
+	return end <= ucache_atomic_load_64(&hdr->committed_end);
+#else
+	(void) hdr;
+	(void) end;
 
 	return true;
+#endif
 }
 
-static zend_always_inline bool php_ucache_payload_in_bounds(
-		const php_ucache_header_t *header,
+static zend_always_inline bool ucache_bytes_in_bounds(
+		const ucache_hdr *hdr,
+		size_t pos,
+		uint64_t len)
+{
+	return pos >= (size_t) hdr->data_offset + sizeof(ucache_block) &&
+		(uint64_t) pos + len <= (uint64_t) hdr->data_offset + hdr->data_size &&
+		ucache_bytes_committed(hdr, (uint64_t) pos + len)
+	;
+}
+
+static zend_always_inline bool ucache_payload_in_bounds(
+		const ucache_hdr *hdr,
 		uint32_t offset,
 		uint64_t len)
 {
-	uint64_t limit = ((uint64_t) header->data_offset + header->data_size) * PHP_UCACHE_SHM_UNIT;
-
-	return offset >= header->data_offset + PHP_UCACHE_BLOCK_HEADER_UNITS &&
-		(uint64_t) php_ucache_shm_bytes(offset) + len <= limit
-	;
+	return ucache_bytes_in_bounds(hdr, ucache_offset_bytes(offset), len);
 }
 
-static zend_always_inline bool php_ucache_block_is_free(const php_ucache_block_t *block)
+static zend_always_inline ucache_ctx *ucache_activate_ctx(ucache_ctx *ctx)
 {
-	return (block->flags & PHP_UCACHE_BLOCK_FREE) != 0;
+	ucache_ctx *prev = UC_G(active_ctx_ptr);
+
+	UC_G(active_ctx_ptr) = ctx;
+
+	return prev;
 }
 
-static zend_always_inline php_ucache_ctx_t *php_ucache_activate_context(php_ucache_ctx_t *ctx)
+static zend_always_inline void ucache_restore_ctx(ucache_ctx *ctx)
 {
-	php_ucache_ctx_t *previous = UC_G(active_context_ptr);
-
-	UC_G(active_context_ptr) = ctx;
-
-	return previous;
+	UC_G(active_ctx_ptr) = ctx;
 }
 
-static zend_always_inline void php_ucache_restore_context(php_ucache_ctx_t *ctx)
-{
-	UC_G(active_context_ptr) = ctx;
-}
-
-static zend_always_inline php_ucache_runtime_t *php_ucache_active_runtime(void)
+static zend_always_inline ucache_runtime *ucache_active_runtime(void)
 {
 	return &UC_G(runtime_state);
 }
 
-static zend_always_inline uint64_t php_ucache_seq_load(const uint64_t *seq)
+static zend_always_inline bool ucache_hdr_is_initialized_locked(void)
 {
-	return php_ucache_atomic_load_64(seq);
+	ucache_hdr *hdr = ucache_hdr_ptr();
+
+	return hdr != NULL && hdr->magic == UCACHE_MAGIC;
 }
 
-static zend_always_inline bool php_ucache_header_is_initialized_locked(void)
+static zend_always_inline uint64_t ucache_clock_now(void)
 {
-	php_ucache_header_t *header = php_ucache_header_ptr();
+#if ZEND_HRTIME_AVAILABLE
+	return zend_hrtime() / UCACHE_CLOCK_TICK_NS;
+#else
+	return (uint64_t) time(NULL) * UCACHE_CLOCK_TICKS_PER_SEC;
+#endif
+}
 
-	return header != NULL &&
-		header->magic == PHP_UCACHE_MAGIC &&
-		header->version == PHP_UCACHE_VERSION
+static zend_always_inline uint64_t ucache_time_rel(const ucache_hdr *hdr, uint64_t now)
+{
+	return now > hdr->time_base
+		? now - hdr->time_base
+		: 0
 	;
 }
 
-static zend_always_inline uint64_t php_ucache_time_rel(const php_ucache_header_t *header, uint64_t now)
-{
-	return now > header->time_base ? now - header->time_base : 0;
-}
-
-/* 0 is reserved for "never expires"; the deadline saturates at UINT32_MAX,
- * i.e. ~136 years past the segment's format time. */
-static zend_always_inline uint32_t php_ucache_expiry_deadline(
-		const php_ucache_header_t *header,
+static zend_always_inline uint32_t ucache_expiry_deadline(
+		const ucache_hdr *hdr,
 		uint64_t now,
 		zend_long ttl)
 {
-	uint64_t deadline = php_ucache_time_rel(header, now) + (uint64_t) ttl;
+	uint64_t next_full_tick, deadline;
 
-	if (deadline == 0) {
-		deadline = 1;
+	if ((zend_ulong) ttl >= UCACHE_CLOCK_SPAN_SEC) {
+		return UINT32_MAX;
 	}
+
+	next_full_tick = ucache_time_rel(hdr, now) + 1;
+	deadline = next_full_tick + (uint64_t) ttl * UCACHE_CLOCK_TICKS_PER_SEC;
 
 	return deadline > (uint64_t) UINT32_MAX
 		? UINT32_MAX
@@ -1305,275 +1499,107 @@ static zend_always_inline uint32_t php_ucache_expiry_deadline(
 	;
 }
 
-static zend_always_inline void php_ucache_bump_mutation_epoch_locked(php_ucache_header_t *header)
+static zend_always_inline uint64_t ucache_data_tail_limit_locked(const ucache_hdr *hdr)
 {
-	if (header == NULL) {
+	if (hdr->commit_ceiling > hdr->data_offset &&
+		hdr->commit_ceiling - hdr->data_offset < hdr->data_size
+	) {
+		return hdr->commit_ceiling - hdr->data_offset;
+	}
+
+	return hdr->data_size;
+}
+
+static zend_always_inline void ucache_bump_mutation_epoch_locked(ucache_hdr *hdr)
+{
+	uint64_t epoch;
+
+	if (hdr == NULL) {
 		return;
 	}
 
-	header->mutation_epoch++;
-	if (header->mutation_epoch == 0) {
-		header->mutation_epoch = 1;
-	}
+	epoch = hdr->mutation_epoch + 1;
+
+	ucache_atomic_store_64(&hdr->mutation_epoch, epoch != 0 ? epoch : 1);
 }
 
-static zend_always_inline php_ucache_entry_t *php_ucache_entries_ptr(php_ucache_header_t *header)
+static zend_always_inline ucache_entry *ucache_entries_ptr(ucache_hdr *hdr)
 {
-	return (php_ucache_entry_t *) ((char *) header + sizeof(php_ucache_header_t));
+	return (ucache_entry *) ((char *) hdr + sizeof(ucache_hdr));
 }
 
-/* Advisory LRU stamps live in a parallel array behind the entry table so the
- * optimistic readers' plain 64B entry snapshots never share an address with
- * their relaxed stamp stores (a formal ZTS/TSan race otherwise). */
-static zend_always_inline uint32_t *php_ucache_access_stamps_ptr(php_ucache_header_t *header)
+static zend_always_inline ucache_pool_links *ucache_pool_links_ptr(ucache_hdr *hdr)
 {
-	return (uint32_t *) (
-		(char *) header
-		+ sizeof(php_ucache_header_t)
-		+ (size_t) header->capacity * sizeof(php_ucache_entry_t)
+	return (ucache_pool_links *) (
+		(char *) hdr
+		+ sizeof(ucache_hdr)
+		+ (size_t) hdr->capacity * (sizeof(ucache_entry) + sizeof(uint32_t))
 	);
 }
 
-/* Valid only on an adopted (layout-verified) or freshly formatted header:
- * the offset is trusted SHM state. */
-static zend_always_inline php_ucache_entry_lock_record_t *php_ucache_entry_lock_records_ptr(php_ucache_header_t *header)
+static zend_always_inline void ucache_pool_bucket_changed_locked(ucache_hdr *hdr, uint32_t bucket)
 {
-	return (php_ucache_entry_lock_record_t *) ((uint8_t *) header + php_ucache_shm_bytes(header->entry_lock_offset));
-}
-
-/* One bit per USED entry slot, so whole-table scans cost the live count
- * rather than the capacity. Mutated only under the write lock; readers
- * hold at least the read lock (optimistic readers never consult it). */
-static zend_always_inline zend_ulong *php_ucache_occupancy_ptr(php_ucache_header_t *header)
-{
-	return (zend_ulong *) ((uint8_t *) header + php_ucache_shm_bytes(header->occupancy_offset));
-}
-
-static zend_always_inline void php_ucache_occupancy_set(php_ucache_header_t *header, uint32_t slot_idx)
-{
-	php_ucache_occupancy_ptr(header)[slot_idx / PHP_UCACHE_OCCUPANCY_WORD_BITS] |=
-		(zend_ulong) 1 << (slot_idx % PHP_UCACHE_OCCUPANCY_WORD_BITS)
-	;
-}
-
-static zend_always_inline void php_ucache_occupancy_clear(php_ucache_header_t *header, uint32_t slot_idx)
-{
-	php_ucache_occupancy_ptr(header)[slot_idx / PHP_UCACHE_OCCUPANCY_WORD_BITS] &=
-		~((zend_ulong) 1 << (slot_idx % PHP_UCACHE_OCCUPANCY_WORD_BITS))
-	;
-}
-
-static zend_always_inline void php_ucache_occupancy_reset(php_ucache_header_t *header)
-{
-	memset(php_ucache_occupancy_ptr(header), 0, PHP_UCACHE_OCCUPANCY_BYTES(header->capacity));
-}
-
-/* First USED slot at or after from, or UINT32_MAX. */
-static zend_always_inline uint32_t php_ucache_occupancy_next_used(
-		php_ucache_header_t *header,
-		uint32_t from)
-{
-	const zend_ulong *words = php_ucache_occupancy_ptr(header);
-	zend_ulong word;
-	size_t word_idx, word_count;
-
-	if (from >= header->capacity) {
-		return UINT32_MAX;
-	}
-
-	word_count = PHP_UCACHE_OCCUPANCY_WORDS(header->capacity);
-	word_idx = from / PHP_UCACHE_OCCUPANCY_WORD_BITS;
-	word = words[word_idx] & (~(zend_ulong) 0 << (from % PHP_UCACHE_OCCUPANCY_WORD_BITS));
-
-	for (;;) {
-		if (word != 0) {
-			return (uint32_t) (word_idx * PHP_UCACHE_OCCUPANCY_WORD_BITS + (uint32_t) zend_ulong_ntz(word));
-		}
-
-		if (++word_idx == word_count) {
-			return UINT32_MAX;
-		}
-
-		word = words[word_idx];
+	hdr->pool_bucket_epochs[bucket]++;
+	if (hdr->pool_bucket_epochs[bucket] == 0) {
+		hdr->pool_bucket_epochs[bucket] = 1;
 	}
 }
 
-static zend_always_inline php_ucache_intern_slot_t *php_ucache_intern_slots_ptr(php_ucache_header_t *header)
+static zend_always_inline void ucache_pool_idx_reset_locked(ucache_hdr *hdr)
 {
-	return (php_ucache_intern_slot_t *) ((uint8_t *) header + php_ucache_shm_bytes(header->intern_offset));
-}
+	uint32_t bucket;
 
-static zend_always_inline uint32_t php_ucache_intern_tag(zend_ulong hash)
-{
-#if SIZEOF_ZEND_LONG > 4
-	return (uint32_t) (hash >> 32);
-#else
-	return (uint32_t) hash;
-#endif
-}
-
-static zend_always_inline uint32_t php_ucache_intern_load_limit(uint32_t capacity)
-{
-	return capacity - capacity / 4;
-}
-
-static zend_always_inline bool php_ucache_intern_eligible(const zend_string *str)
-{
-	return ZSTR_LEN(str) != 0 && ZSTR_LEN(str) <= PHP_UCACHE_INTERN_MAX_LEN;
-}
-
-/* Optimistic readers may still issue relaxed stamp stores after their
- * sequence check passes, so locked writers must also keep every stamp
- * access on relaxed atomics instead of plain bulk stores. */
-static zend_always_inline void php_ucache_access_stamps_reset(php_ucache_header_t *header)
-{
-	uint32_t i, *stamps = php_ucache_access_stamps_ptr(header);
-
-	for (i = 0; i < header->capacity; i++) {
-		PHP_UCACHE_ATOMIC_STORE_32_RELAXED(&stamps[i], 0);
+	memset(hdr->pool_bucket_heads, 0, sizeof(hdr->pool_bucket_heads));
+	for (bucket = 0; bucket < UCACHE_POOL_BUCKETS; bucket++) {
+		ucache_pool_bucket_changed_locked(hdr, bucket);
 	}
 }
 
-static zend_always_inline bool php_ucache_seen_test_and_add(HashTable *seen, const void *ptr)
+static zend_always_inline uint32_t *ucache_access_stamps_ptr(ucache_hdr *hdr)
 {
-	zend_ulong key = (zend_ulong) (uintptr_t) ptr;
-
-	if (zend_hash_index_exists(seen, key)) {
-		return false;
-	}
-
-	return zend_hash_index_add_empty_element(seen, key) != NULL;
+	return (uint32_t *) (
+		(char *) hdr
+		+ sizeof(ucache_hdr)
+		+ (size_t) hdr->capacity * sizeof(ucache_entry)
+	);
 }
 
-static inline bool php_ucache_class_overrides_safe_direct_magic_serialize_ex(
-		zend_class_entry *ce,
-		const php_ucache_safe_direct_handlers_t *handlers,
-		zend_class_entry *base_ce)
+static zend_always_inline uint32_t ucache_free_bin_words(uint32_t bin_count)
 {
-	if (ce->type != ZEND_USER_CLASS ||
-		ce->__serialize == NULL ||
-		ce->__unserialize == NULL ||
-		(ce->ce_flags & (ZEND_ACC_NOT_SERIALIZABLE|ZEND_ACC_ENUM)) != 0 ||
-		handlers == NULL ||
-		base_ce == ce
-	) {
-		return false;
-	}
-
-	return
-		(
-			ce->__serialize->type == ZEND_USER_FUNCTION ||
-			ce->__unserialize->type == ZEND_USER_FUNCTION
-		) &&
-		(
-			ce->__serialize->common.scope != base_ce ||
-			ce->__unserialize->common.scope != base_ce
-		)
-	;
+	return (bin_count + 31U) / 32U;
 }
 
-static inline bool php_ucache_class_has_sleep(zend_class_entry *ce)
+static zend_always_inline uint32_t *ucache_free_bins_ptr(const ucache_hdr *hdr)
 {
-	return zend_hash_find_known_hash(&ce->function_table, ZSTR_KNOWN(ZEND_STR_SLEEP)) != NULL;
+	return (uint32_t *) ((char *) hdr + hdr->free_bins_offset);
 }
 
-static inline bool php_ucache_class_has_wakeup(zend_class_entry *ce)
+static zend_always_inline uint32_t *ucache_free_bin_mask_ptr(const ucache_hdr *hdr)
 {
-	return zend_hash_find_known_hash(&ce->function_table, ZSTR_KNOWN(ZEND_STR_WAKEUP)) != NULL;
+	return ucache_free_bins_ptr(hdr) + hdr->free_bin_count;
 }
 
-static inline bool php_ucache_class_magic_route_active(zend_class_entry *ce)
+static zend_always_inline ucache_entry_lock_record *ucache_entry_lock_records_ptr(ucache_hdr *hdr)
 {
-	const php_ucache_safe_direct_handlers_t *handlers;
-	zend_class_entry *base_ce = NULL;
-
-	if (ce->ce_flags & (ZEND_ACC_NOT_SERIALIZABLE|ZEND_ACC_ENUM)) {
-		return false;
-	}
-
-	handlers = php_ucache_safe_direct_find_handlers(ce, &base_ce);
-
-	if (php_ucache_class_overrides_safe_direct_magic_serialize_ex(ce, handlers, base_ce)) {
-		return true;
-	}
-
-	return handlers == NULL;
+	return (ucache_entry_lock_record *) ((char *) hdr + hdr->entry_lock_offset);
 }
 
-static inline bool php_ucache_class_uses_magic_serialize(zend_class_entry *ce)
+static zend_always_inline void ucache_access_stamps_reset(ucache_hdr *hdr)
 {
-	return ce->__serialize != NULL && ce->__unserialize != NULL &&
-		php_ucache_class_magic_route_active(ce)
-	;
+	uint32_t i, *stamps = ucache_access_stamps_ptr(hdr);
+
+	for (i = 0; i < hdr->capacity; i++) {
+		UCACHE_ATOMIC_STORE_32_RELAXED(&stamps[i], 0);
+	}
 }
 
-static inline bool php_ucache_class_uses_serialize_props(zend_class_entry *ce)
+static zend_always_inline bool ucache_seen_test_and_add(HashTable *seen, const void *ptr)
 {
-	/* Native serialization restores this state as properties. */
-	return ce->__serialize != NULL && ce->__unserialize == NULL &&
-		php_ucache_class_magic_route_active(ce)
-	;
+	return zend_hash_index_add_empty_element(seen, (zend_ulong) (uintptr_t) ptr) != NULL;
 }
 
-static inline bool php_ucache_class_uses_magic_unserialize(zend_class_entry *ce)
-{
-	if (ce->__serialize != NULL || ce->__unserialize == NULL) {
-		return false;
-	}
+UCACHE_DEFINE_OBJ_FROM_STD(ucache_pool_status_obj, pool_status_obj)
 
-	/* Match native serialization precedence. */
-	if (ce->serialize != NULL && ce->unserialize != NULL) {
-		return false;
-	}
+UCACHE_DEFINE_OBJ_FROM_STD(ucache_status_obj, status_obj)
 
-	return php_ucache_class_magic_route_active(ce);
-}
-
-static inline bool php_ucache_class_uses_serdes(zend_class_entry *ce)
-{
-	if (ce->ce_flags & (ZEND_ACC_NOT_SERIALIZABLE|ZEND_ACC_ENUM)) {
-		return false;
-	}
-
-	if (php_ucache_class_uses_magic_serialize(ce) ||
-		php_ucache_class_uses_magic_unserialize(ce) ||
-		php_ucache_safe_direct_find_handlers(ce, NULL) != NULL
-	) {
-		return false;
-	}
-
-	if (php_ucache_class_has_sleep(ce) ||
-		php_ucache_class_has_wakeup(ce)
-	) {
-		return true;
-	}
-
-	return ce->serialize != NULL &&
-		ce->unserialize != NULL
-	;
-}
-
-/* Resolves a cached case name without trusting it; mirrors unserialize(). */
-static inline zend_object *php_ucache_enum_case_find(zend_class_entry *ce, zend_string *name)
-{
-	zend_class_constant *c;
-
-	c = zend_hash_find_ptr(CE_CONSTANTS_TABLE(ce), name);
-	if (c == NULL || !(ZEND_CLASS_CONST_FLAGS(c) & ZEND_CLASS_CONST_IS_CASE)) {
-		return NULL;
-	}
-
-	if (Z_TYPE(c->value) == IS_CONSTANT_AST &&
-		zval_update_constant_ex(&c->value, c->ce) == FAILURE
-	) {
-		return NULL;
-	}
-
-	if (Z_TYPE(c->value) != IS_OBJECT) {
-		return NULL;
-	}
-
-	return Z_OBJ(c->value);
-}
-
-#endif /* PHP_USER_CACHE_INTERNAL_H */
+#endif /* UCACHE_INTERNAL_H */

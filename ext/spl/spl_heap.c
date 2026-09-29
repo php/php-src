@@ -24,7 +24,6 @@
 #include "spl_heap_arginfo.h"
 #include "spl_exceptions.h"
 #include "spl_functions.h" /* For spl_set_private_debug_info_property() */
-
 #include "ext/user_cache/php_user_cache.h" /* For user_cache safe direct path */
 
 #define PTR_HEAP_BLOCK_SIZE 64
@@ -266,7 +265,6 @@ static spl_ptr_heap *spl_ptr_heap_init(spl_ptr_heap_cmp_func cmp, spl_ptr_heap_c
 static void spl_ptr_heap_grow(spl_ptr_heap *heap) { /* {{{ */
 	size_t alloc_size = heap->max_size * heap->elem_size;
 
-	/* need to allocate more memory */
 	heap->elements  = safe_erealloc(heap->elements, 2, alloc_size, 0);
 
 	memset((char *) heap->elements + alloc_size, 0, alloc_size);
@@ -1274,18 +1272,18 @@ static bool spl_heap_object_is_pqueue(zend_class_entry *ce)
 	return instanceof_function(ce, spl_ce_SplPriorityQueue);
 }
 
-static PHP_UCACHE_HOT void spl_heap_user_cache_ensure_capacity(spl_ptr_heap *heap, size_t count)
+static PHP_UCACHE_HOT void spl_heap_ucache_ensure_capacity(spl_ptr_heap *heap, size_t count)
 {
 	while (count > heap->max_size) {
 		spl_ptr_heap_grow(heap);
 	}
 }
 
-static PHP_UCACHE_HOT void spl_heap_object_user_cache_append_zval(spl_heap_object *intern, zval *value)
+static PHP_UCACHE_HOT void spl_heap_object_ucache_append_zval(spl_heap_object *intern, zval *value)
 {
 	zval *target;
 
-	spl_heap_user_cache_ensure_capacity(intern->heap, intern->heap->count + 1);
+	spl_heap_ucache_ensure_capacity(intern->heap, intern->heap->count + 1);
 	target = spl_heap_elem(intern->heap, intern->heap->count);
 
 	intern->heap->count++;
@@ -1293,11 +1291,11 @@ static PHP_UCACHE_HOT void spl_heap_object_user_cache_append_zval(spl_heap_objec
 	ZVAL_COPY(target, value);
 }
 
-static PHP_UCACHE_HOT void spl_heap_object_user_cache_append_pqueue_elem(spl_heap_object *intern, zval *data, zval *priority)
+static PHP_UCACHE_HOT void spl_heap_object_ucache_append_pqueue_elem(spl_heap_object *intern, zval *data, zval *priority)
 {
 	spl_pqueue_elem *target;
 
-	spl_heap_user_cache_ensure_capacity(intern->heap, intern->heap->count + 1);
+	spl_heap_ucache_ensure_capacity(intern->heap, intern->heap->count + 1);
 	target = spl_heap_elem(intern->heap, intern->heap->count);
 
 	intern->heap->count++;
@@ -1306,11 +1304,11 @@ static PHP_UCACHE_HOT void spl_heap_object_user_cache_append_pqueue_elem(spl_hea
 	ZVAL_COPY(&target->priority, priority);
 }
 
-static bool spl_heap_object_copy_user_cache_state(
+static bool spl_heap_object_copy_ucache_state(
 		void *ctx,
 		zend_object *new_obj,
 		zend_object *old_obj,
-		php_ucache_safe_direct_clone_value_func_t clone_value)
+		php_ucache_safe_direct_clone_val_func_t clone_value)
 {
 	spl_heap_object *old_intern, *new_intern;
 	spl_pqueue_elem *old_elem;
@@ -1320,10 +1318,9 @@ static bool spl_heap_object_copy_user_cache_state(
 
 	old_intern = spl_heap_from_obj(old_obj);
 	new_intern = spl_heap_from_obj(new_obj);
-
-	ZEND_ASSERT(new_intern->heap->count == 0);
-
-	if ((old_intern->heap->flags & (SPL_HEAP_CORRUPTED | SPL_HEAP_WRITE_LOCKED)) != 0) {
+	if (new_intern->heap->count != 0 ||
+		(old_intern->heap->flags & (SPL_HEAP_CORRUPTED | SPL_HEAP_WRITE_LOCKED)) != 0
+	) {
 		return false;
 	}
 
@@ -1332,6 +1329,9 @@ static bool spl_heap_object_copy_user_cache_state(
 	for (i = 0; i < old_intern->heap->count; i++) {
 		if (is_pqueue) {
 			old_elem = spl_heap_elem(old_intern->heap, i);
+
+			ZVAL_UNDEF(&cloned_data);
+			ZVAL_UNDEF(&cloned_priority);
 
 			if (!clone_value(ctx, &cloned_data, &old_elem->data)) {
 				return false;
@@ -1343,18 +1343,20 @@ static bool spl_heap_object_copy_user_cache_state(
 				return false;
 			}
 
-			spl_heap_object_user_cache_append_pqueue_elem(new_intern, &cloned_data, &cloned_priority);
+			spl_heap_object_ucache_append_pqueue_elem(new_intern, &cloned_data, &cloned_priority);
 
 			zval_ptr_dtor(&cloned_data);
 			zval_ptr_dtor(&cloned_priority);
 		} else {
 			zv_old_elem = spl_heap_elem(old_intern->heap, i);
 
+			ZVAL_UNDEF(&cloned_elem);
+
 			if (!clone_value(ctx, &cloned_elem, zv_old_elem)) {
 				return false;
 			}
 
-			spl_heap_object_user_cache_append_zval(new_intern, &cloned_elem);
+			spl_heap_object_ucache_append_zval(new_intern, &cloned_elem);
 
 			zval_ptr_dtor(&cloned_elem);
 		}
@@ -1363,48 +1365,7 @@ static bool spl_heap_object_copy_user_cache_state(
 	return !EG(exception);
 }
 
-static bool spl_heap_object_user_cache_state_has_unstorable(
-		void *ctx,
-		const zval *object,
-		php_ucache_safe_direct_value_has_unstorable_func_t value_has_unstorable)
-{
-	spl_heap_object *intern;
-	spl_pqueue_elem *elem;
-	zval *zv_elem;
-	size_t i;
-	bool is_pqueue;
-
-	intern = Z_SPLHEAP_P((zval *) object);
-
-	if ((intern->heap->flags & (SPL_HEAP_CORRUPTED | SPL_HEAP_WRITE_LOCKED)) != 0) {
-		return true;
-	}
-
-	is_pqueue = spl_heap_object_is_pqueue(Z_OBJCE_P(object));
-	for (i = 0; i < intern->heap->count; i++) {
-		if (is_pqueue) {
-			elem = spl_heap_elem(intern->heap, i);
-
-			if (value_has_unstorable(ctx, &elem->data) ||
-				value_has_unstorable(ctx, &elem->priority)
-			) {
-				return true;
-			}
-		} else {
-			zv_elem = spl_heap_elem(intern->heap, i);
-
-			if (value_has_unstorable(ctx, zv_elem)) {
-				return true;
-			}
-		}
-	}
-
-	return false;
-}
-
-/* The state is [flags, [elem...]]; priority-queue elements are encoded as
- * [data, priority] pairs. */
-static bool spl_heap_object_serialize_user_cache_state(zval *state, const zval *object)
+static bool spl_heap_object_serialize_ucache_state(zval *state, const zval *object)
 {
 	spl_heap_object *intern;
 	spl_pqueue_elem *pqueue_elem;
@@ -1413,7 +1374,12 @@ static bool spl_heap_object_serialize_user_cache_state(zval *state, const zval *
 	bool is_pqueue;
 
 	intern = Z_SPLHEAP_P((zval *) object);
-	if ((intern->heap->flags & (SPL_HEAP_CORRUPTED | SPL_HEAP_WRITE_LOCKED)) != 0) {
+	if (UNEXPECTED(spl_heap_consistency_validations(intern, false) != SUCCESS)) {
+		return false;
+	}
+
+	if (intern->heap->flags & SPL_HEAP_WRITE_LOCKED) {
+		zend_throw_exception(spl_ce_RuntimeException, "Cannot serialize heap while it is being modified.", 0);
 		return false;
 	}
 
@@ -1450,13 +1416,17 @@ static bool spl_heap_object_serialize_user_cache_state(zval *state, const zval *
 	return true;
 }
 
-static PHP_UCACHE_HOT bool spl_heap_object_unserialize_user_cache_state(zval *object, zval *state)
+static PHP_UCACHE_HOT bool spl_heap_object_unserialize_ucache_state(zval *object, zval *state)
 {
 	spl_heap_object *intern;
 	zend_long flags;
 	zval *flags_zv, *elements_zv, *elem, *data_zv, *priority_zv;
 	HashTable *data;
 	bool is_pqueue;
+
+	if (Z_TYPE_P(state) != IS_ARRAY) {
+		return false;
+	}
 
 	data = Z_ARRVAL_P(state);
 	flags_zv = zend_hash_index_find(data, 0);
@@ -1482,8 +1452,11 @@ static PHP_UCACHE_HOT bool spl_heap_object_unserialize_user_cache_state(zval *ob
 	}
 
 	intern = Z_SPLHEAP_P(object);
-
-	ZEND_ASSERT(intern->heap->count == 0 && (intern->heap->flags & SPL_HEAP_WRITE_LOCKED) == 0);
+	if (intern->heap->count != 0 ||
+		(intern->heap->flags & SPL_HEAP_WRITE_LOCKED) != 0
+	) {
+		return false;
+	}
 
 	intern->flags = (int) flags;
 
@@ -1499,20 +1472,19 @@ static PHP_UCACHE_HOT bool spl_heap_object_unserialize_user_cache_state(zval *ob
 				return false;
 			}
 
-			spl_heap_object_user_cache_append_pqueue_elem(intern, data_zv, priority_zv);
+			spl_heap_object_ucache_append_pqueue_elem(intern, data_zv, priority_zv);
 		} else {
-			spl_heap_object_user_cache_append_zval(intern, elem);
+			spl_heap_object_ucache_append_zval(intern, elem);
 		}
 	} ZEND_HASH_FOREACH_END();
 
 	return !EG(exception);
 }
 
-static const php_ucache_safe_direct_handlers_t spl_heap_user_cache_handlers = {
-	.copy = spl_heap_object_copy_user_cache_state,
-	.state_has_unstorable = spl_heap_object_user_cache_state_has_unstorable,
-	.state_serialize = spl_heap_object_serialize_user_cache_state,
-	.state_unserialize = spl_heap_object_unserialize_user_cache_state,
+static const php_ucache_safe_direct_handlers spl_heap_ucache_handlers = {
+	.copy = spl_heap_object_copy_ucache_state,
+	.state_serialize = spl_heap_object_serialize_ucache_state,
+	.state_unserialize = spl_heap_object_unserialize_ucache_state,
 };
 
 /* iterator handler table */
@@ -1612,8 +1584,8 @@ PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
 	spl_handler_SplPriorityQueue.get_gc         = spl_pqueue_object_get_gc;
 	spl_handler_SplPriorityQueue.free_obj = spl_heap_object_free_storage;
 
-	php_ucache_safe_direct_register_class(spl_ce_SplHeap, &spl_heap_user_cache_handlers);
-	php_ucache_safe_direct_register_class(spl_ce_SplPriorityQueue, &spl_heap_user_cache_handlers);
+	php_ucache_safe_direct_register_class(spl_ce_SplHeap, &spl_heap_ucache_handlers);
+	php_ucache_safe_direct_register_class(spl_ce_SplPriorityQueue, &spl_heap_ucache_handlers);
 
 	return SUCCESS;
 }

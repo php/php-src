@@ -502,7 +502,9 @@ static int sapi_cli_server_startup(sapi_module_struct *sapi_module_ptr) /* {{{ *
 		return FAILURE;
 	}
 
-	php_ucache_opt_in();
+	if (php_ucache_opt_in(PHP_UCACHE_MODE_REQ) == FAILURE && php_ucache_is_enabled_by_ini()) {
+		php_error_docref(NULL, E_WARNING, "Unable to register UserCache request mode; UserCache will be unavailable");
+	}
 
 	return SUCCESS;
 } /* }}} */
@@ -2648,7 +2650,7 @@ static zend_result php_cli_server_ctor(php_cli_server *server, const char *addr,
 	}
 	server->server_sock = server_sock;
 
-	if (!php_ucache_startup_default_context_storage()) {
+	if (php_ucache_is_enabled_by_ini() && !php_ucache_startup_default_ctx_storage()) {
 		php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR, "UserCache startup failed; UserCache will be unavailable");
 	}
 

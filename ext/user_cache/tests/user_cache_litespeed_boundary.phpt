@@ -21,6 +21,8 @@ die('skip litespeed SAPI binary not available; set TEST_PHP_LSAPI');
 --FILE--
 <?php
 
+require_once __DIR__ . '/user_cache_fcgi_tester.inc';
+
 const LSAPI_BEGIN_REQUEST = 1;
 const LSAPI_RESP_STREAM = 4;
 const LSAPI_RESP_END = 5;
@@ -321,6 +323,7 @@ file_put_contents($otherRoot . '/index.php', $script);
 file_put_contents($root . '/php.ini', implode("\n", [
     'user_cache.enable=1',
     'user_cache.shm_size=32M',
+    'user_cache.lockfile_path=' . $root,
     'opcache.file_update_protection=0',
 ]));
 
@@ -368,6 +371,7 @@ try {
     foreach ($processes as [$process, $pipes]) {
         user_cache_lsapi_stop($process, $pipes);
     }
+    FcgiTester::removeBoundarySegments($root);
     user_cache_lsapi_rm_rf($root);
 }
 

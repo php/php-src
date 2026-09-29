@@ -849,7 +849,7 @@ static inline bool php_var_serialize_class_name(smart_str *buf, zval *struc) /* 
 }
 /* }}} */
 
-static HashTable* php_var_serialize_call_sleep(zend_object *obj, zend_function *fn) /* {{{ */
+PHPAPI HashTable *php_var_serialize_call_sleep(zend_object *obj, zend_function *fn) /* {{{ */
 {
 	zval retval;
 
@@ -872,7 +872,7 @@ static HashTable* php_var_serialize_call_sleep(zend_object *obj, zend_function *
 }
 /* }}} */
 
-static int php_var_serialize_call_magic_serialize(zval *retval, zval *obj) /* {{{ */
+PHPAPI zend_result php_var_serialize_call_magic_serialize(zval *retval, zval *obj) /* {{{ */
 {
 	BG(serialize_lock)++;
 	zend_call_known_instance_method_with_0_params(
@@ -924,13 +924,13 @@ static int php_var_serialize_try_add_sleep_prop(
 }
 /* }}} */
 
-static int php_var_serialize_get_sleep_props(
+PHPAPI zend_result php_var_serialize_get_sleep_props(
 		HashTable *ht, zval *struc, HashTable *sleep_retval) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(struc);
 	HashTable *props = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_SERIALIZE);
 	zval *name_val;
-	int retval = SUCCESS;
+	zend_result retval = SUCCESS;
 
 	zend_hash_init(ht, zend_hash_num_elements(sleep_retval), NULL, ZVAL_PTR_DTOR, 0);
 	/* TODO: Rewrite this by fetching the property info instead of trying out different

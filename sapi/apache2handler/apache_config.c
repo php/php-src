@@ -186,6 +186,22 @@ char *get_php_config(void *conf, char *name, size_t name_len)
 	return "";
 }
 
+bool get_php_admin_config(void *conf, const char *name, size_t name_len, const char **value, size_t *value_len)
+{
+	php_conf_rec *d = conf;
+	php_dir_entry *pe;
+
+	pe = zend_hash_str_find_ptr(&d->config, name, name_len);
+	if (pe == NULL || pe->status != PHP_INI_SYSTEM) {
+		return false;
+	}
+
+	*value = pe->value;
+	*value_len = pe->value_len;
+
+	return true;
+}
+
 void apply_config(void *dummy)
 {
 	php_conf_rec *d = dummy;

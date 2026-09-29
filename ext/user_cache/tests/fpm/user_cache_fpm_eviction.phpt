@@ -10,7 +10,7 @@ require_once __DIR__ . '/tester.inc';
 $cfg = <<<EOT
 [global]
 error_log = {{FILE:LOG}}
-[opcache]
+[www]
 listen = {{ADDR}}
 pm = static
 pm.max_children = 1
@@ -72,7 +72,6 @@ PHP;
 
 $tester = new FPM\Tester($cfg, $code);
 $tester->start(iniEntries: [
-    'opcache.enable' => '1',
     'user_cache.shm_size' => '4M',
 ]);
 $tester->expectLogStartNotices();
@@ -97,5 +96,17 @@ $tester->terminate();
 $tester->expectLogTerminatingNotices();
 $tester->close();
 
+/* Release builds do not collect cycles at shutdown. */
+unset($tester);
+gc_collect_cycles();
+
+echo "Done\n";
+
 ?>
 --EXPECT--
+Done
+--CLEAN--
+<?php
+require_once __DIR__ . '/tester.inc';
+FPM\Tester::clean();
+?>

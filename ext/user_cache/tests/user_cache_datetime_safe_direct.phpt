@@ -1,218 +1,217 @@
 --TEST--
-UserCache\Cache: DateTime safe-direct state is restored for subclasses
+UserCache\Cache: DateTime and DateInterval safe-direct state is restored for subclasses and diffs
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1
-opcache.file_cache_only=0
 user_cache.shm_size=16M
 date.timezone=UTC
 --FILE--
 <?php
-
+/* DateTime, DateTimeZone and DateInterval subclasses restore state, hooks and object ids */
 class UserCacheCarbonLikeDateTime extends DateTimeImmutable
 {
-	public string $label = 'default';
+    public string $label = 'default';
 }
 
 class UserCacheDateModel
 {
-	public function __construct(
-		public UserCacheCarbonLikeDateTime $createdAt,
-		public UserCacheCarbonLikeDateTime $updatedAt,
-		public UserCacheCarbonLikeDateTime $deletedAt,
-	) {
-	}
+    public function __construct(
+        public UserCacheCarbonLikeDateTime $createdAt,
+        public UserCacheCarbonLikeDateTime $updatedAt,
+        public UserCacheCarbonLikeDateTime $deletedAt,
+    ) {
+    }
 }
 
 class UserCacheSelfIdDateTime extends DateTime
 {
-	private int $cachedSelfId;
-	public int $publicSelfId;
+    private int $cachedSelfId;
+    public int $publicSelfId;
 
-	public function __construct(string $time, DateTimeZone $timezone)
-	{
-		parent::__construct($time, $timezone);
-		$this->cachedSelfId = spl_object_id($this);
-		$this->publicSelfId = spl_object_id($this);
-	}
+    public function __construct(string $time, DateTimeZone $timezone)
+    {
+        parent::__construct($time, $timezone);
+        $this->cachedSelfId = spl_object_id($this);
+        $this->publicSelfId = spl_object_id($this);
+    }
 
-	public function cachedSelfId(): int
-	{
-		return $this->cachedSelfId;
-	}
+    public function cachedSelfId(): int
+    {
+        return $this->cachedSelfId;
+    }
 }
 
 class UserCacheMagicDateTime extends DateTime
 {
-	public static int $serializeCount = 0;
-	public static int $unserializeCount = 0;
+    public static int $serializeCount = 0;
+    public static int $unserializeCount = 0;
 
-	private string $label;
+    private string $label;
 
-	public function __construct(string $time, DateTimeZone $timezone, string $label)
-	{
-		parent::__construct($time, $timezone);
-		$this->label = $label;
-	}
+    public function __construct(string $time, DateTimeZone $timezone, string $label)
+    {
+        parent::__construct($time, $timezone);
+        $this->label = $label;
+    }
 
-	public function __serialize(): array
-	{
-		self::$serializeCount++;
+    public function __serialize(): array
+    {
+        self::$serializeCount++;
 
-		return parent::__serialize() + ['label' => 'serialized-' . $this->label];
-	}
+        return parent::__serialize() + ['label' => 'serialized-' . $this->label];
+    }
 
-	public function __unserialize(array $data): void
-	{
-		self::$unserializeCount++;
-		parent::__unserialize($data);
-		$this->label = $data['label'];
-	}
+    public function __unserialize(array $data): void
+    {
+        self::$unserializeCount++;
+        parent::__unserialize($data);
+        $this->label = $data['label'];
+    }
 
-	public function label(): string
-	{
-		return $this->label;
-	}
+    public function label(): string
+    {
+        return $this->label;
+    }
 }
 
 class UserCacheMagicSelfIdDateTime extends DateTime
 {
-	public static int $serializeCount = 0;
-	public static int $unserializeCount = 0;
+    public static int $serializeCount = 0;
+    public static int $unserializeCount = 0;
 
-	private int $constructedObjectId;
+    private int $constructedObjectId;
 
-	public function __construct(string $time, DateTimeZone $timezone)
-	{
-		parent::__construct($time, $timezone);
-		$this->constructedObjectId = spl_object_id($this);
-	}
+    public function __construct(string $time, DateTimeZone $timezone)
+    {
+        parent::__construct($time, $timezone);
+        $this->constructedObjectId = spl_object_id($this);
+    }
 
-	public function __serialize(): array
-	{
-		self::$serializeCount++;
+    public function __serialize(): array
+    {
+        self::$serializeCount++;
 
-		return parent::__serialize() + ['constructedObjectId' => $this->constructedObjectId];
-	}
+        return parent::__serialize() + ['constructedObjectId' => $this->constructedObjectId];
+    }
 
-	public function __unserialize(array $data): void
-	{
-		self::$unserializeCount++;
-		parent::__unserialize($data);
-		$this->constructedObjectId = spl_object_id($this);
-	}
+    public function __unserialize(array $data): void
+    {
+        self::$unserializeCount++;
+        parent::__unserialize($data);
+        $this->constructedObjectId = spl_object_id($this);
+    }
 
-	public function constructedObjectId(): int
-	{
-		return $this->constructedObjectId;
-	}
+    public function constructedObjectId(): int
+    {
+        return $this->constructedObjectId;
+    }
 }
 
 class UserCacheMagicFilteredDateTime extends DateTime
 {
-	public static int $serializeCount = 0;
-	public static int $unserializeCount = 0;
+    public static int $serializeCount = 0;
+    public static int $unserializeCount = 0;
 
-	public Closure $hidden;
-	private string $label;
+    public Closure $hidden;
+    private string $label;
 
-	public function __construct(string $time, DateTimeZone $timezone, string $label)
-	{
-		parent::__construct($time, $timezone);
-		$this->hidden = static fn(): int => 1;
-		$this->label = $label;
-	}
+    public function __construct(string $time, DateTimeZone $timezone, string $label)
+    {
+        parent::__construct($time, $timezone);
+        $this->hidden = static fn(): int => 1;
+        $this->label = $label;
+    }
 
-	public function __serialize(): array
-	{
-		self::$serializeCount++;
-		$timezone = $this->getTimezone();
+    public function __serialize(): array
+    {
+        self::$serializeCount++;
+        $timezone = $this->getTimezone();
 
-		return [
-			'date' => $this->format('Y-m-d H:i:s.u'),
-			'timezone_type' => 3,
-			'timezone' => $timezone->getName(),
-			'label' => $this->label,
-		];
-	}
+        return [
+            'date' => $this->format('Y-m-d H:i:s.u'),
+            'timezone_type' => 3,
+            'timezone' => $timezone->getName(),
+            'label' => $this->label,
+        ];
+    }
 
-	public function __unserialize(array $data): void
-	{
-		self::$unserializeCount++;
-		parent::__unserialize($data);
-		$this->hidden = static fn(): int => 2;
-		$this->label = $data['label'];
-	}
+    public function __unserialize(array $data): void
+    {
+        self::$unserializeCount++;
+        parent::__unserialize($data);
+        $this->hidden = static fn(): int => 2;
+        $this->label = $data['label'];
+    }
 
-	public function label(): string
-	{
-		return $this->label;
-	}
+    public function label(): string
+    {
+        return $this->label;
+    }
 }
 
 class UserCacheWakefulDateTime extends DateTime
 {
-	public static int $sleepCount = 0;
-	public static int $wakeupCount = 0;
+    public static int $sleepCount = 0;
+    public static int $wakeupCount = 0;
 
-	private string $label;
+    private string $label;
 
-	public function __construct(string $time, DateTimeZone $timezone, string $label)
-	{
-		parent::__construct($time, $timezone);
-		$this->label = $label;
-	}
+    public function __construct(string $time, DateTimeZone $timezone, string $label)
+    {
+        parent::__construct($time, $timezone);
+        $this->label = $label;
+    }
 
-	public function __sleep(): array
-	{
-		self::$sleepCount++;
+    public function __sleep(): array
+    {
+        self::$sleepCount++;
 
-		return ['label'];
-	}
+        return ['label'];
+    }
 
-	public function __wakeup(): void
-	{
-		self::$wakeupCount++;
-	}
+    public function __wakeup(): void
+    {
+        self::$wakeupCount++;
+    }
 
-	public function label(): string
-	{
-		return $this->label;
-	}
+    public function label(): string
+    {
+        return $this->label;
+    }
 }
 
 class UserCacheTaggedTimeZone extends DateTimeZone
 {
-	private string $label;
+    private string $label;
 
-	public function __construct(string $timezone, string $label)
-	{
-		parent::__construct($timezone);
-		$this->label = $label;
-	}
+    public function __construct(string $timezone, string $label)
+    {
+        parent::__construct($timezone);
+        $this->label = $label;
+    }
 
-	public function label(): string
-	{
-		return $this->label;
-	}
+    public function label(): string
+    {
+        return $this->label;
+    }
 }
 
 class UserCacheTaggedInterval extends DateInterval
 {
-	private string $label;
-	protected int $revision;
+    private string $label;
+    protected int $revision;
 
-	public function __construct(string $duration, string $label, int $revision)
-	{
-		parent::__construct($duration);
-		$this->label = $label;
-		$this->revision = $revision;
-	}
+    public function __construct(string $duration, string $label, int $revision)
+    {
+        parent::__construct($duration);
+        $this->label = $label;
+        $this->revision = $revision;
+    }
 
-	public function describe(): string
-	{
-		return $this->label . ':' . $this->revision;
-	}
+    public function describe(): string
+    {
+        return $this->label . ':' . $this->revision;
+    }
 }
 
 $cache = UserCache\Cache::getPool('datetime-safe-direct');
@@ -221,26 +220,26 @@ $date = new UserCacheCarbonLikeDateTime('2024-01-02 03:04:05.123456', new DateTi
 $date->label = 'tokyo';
 
 $model = new UserCacheDateModel(
-	new UserCacheCarbonLikeDateTime('2026-06-29 09:00:00.000001', new DateTimeZone('UTC')),
-	new UserCacheCarbonLikeDateTime('2026-06-29 09:30:00.000002', new DateTimeZone('Europe/Paris')),
-	new UserCacheCarbonLikeDateTime('2026-06-29 10:00:00.000003', new DateTimeZone('America/New_York')),
+    new UserCacheCarbonLikeDateTime('2026-06-29 09:00:00.000001', new DateTimeZone('UTC')),
+    new UserCacheCarbonLikeDateTime('2026-06-29 09:30:00.000002', new DateTimeZone('Europe/Paris')),
+    new UserCacheCarbonLikeDateTime('2026-06-29 10:00:00.000003', new DateTimeZone('America/New_York')),
 );
 
 $payload = [
-	'date' => $date,
-	'model' => $model,
-	'offset' => new DateTimeImmutable('2023-10-27 10:00:00.000001 +05:30'),
-	'abbr' => new DateTimeImmutable('2023-10-27 10:00:00.000002 EST'),
-	'timezone' => new DateTimeZone('Europe/Paris'),
-	'interval' => new DateInterval('P1DT2H'),
-	'taggedTimezone' => new UserCacheTaggedTimeZone('Europe/Paris', 'paris'),
-	'taggedInterval' => new UserCacheTaggedInterval('P1Y2M3DT4H5M6S', 'window', 9),
-	'relativeInterval' => DateInterval::createFromDateString('2 days 4 hours'),
-	'selfId' => new UserCacheSelfIdDateTime('2026-06-15 10:15:00.333333', new DateTimeZone('UTC')),
-	'magicDate' => new UserCacheMagicDateTime('2026-06-15 10:45:00.654321', new DateTimeZone('UTC'), 'magic'),
-	'magicSelfId' => new UserCacheMagicSelfIdDateTime('2026-06-15 11:45:00.111111', new DateTimeZone('UTC')),
-	'magicFiltered' => new UserCacheMagicFilteredDateTime('2026-06-15 12:00:00.222222', new DateTimeZone('UTC'), 'filtered'),
-	'wakefulDate' => new UserCacheWakefulDateTime('2026-06-15 12:15:00.987654', new DateTimeZone('UTC'), 'wakeful'),
+    'date' => $date,
+    'model' => $model,
+    'offset' => new DateTimeImmutable('2023-10-27 10:00:00.000001 +05:30'),
+    'abbr' => new DateTimeImmutable('2023-10-27 10:00:00.000002 EST'),
+    'timezone' => new DateTimeZone('Europe/Paris'),
+    'interval' => new DateInterval('P1DT2H'),
+    'taggedTimezone' => new UserCacheTaggedTimeZone('Europe/Paris', 'paris'),
+    'taggedInterval' => new UserCacheTaggedInterval('P1Y2M3DT4H5M6S', 'window', 9),
+    'relativeInterval' => DateInterval::createFromDateString('2 days 4 hours'),
+    'selfId' => new UserCacheSelfIdDateTime('2026-06-15 10:15:00.333333', new DateTimeZone('UTC')),
+    'magicDate' => new UserCacheMagicDateTime('2026-06-15 10:45:00.654321', new DateTimeZone('UTC'), 'magic'),
+    'magicSelfId' => new UserCacheMagicSelfIdDateTime('2026-06-15 11:45:00.111111', new DateTimeZone('UTC')),
+    'magicFiltered' => new UserCacheMagicFilteredDateTime('2026-06-15 12:00:00.222222', new DateTimeZone('UTC'), 'filtered'),
+    'wakefulDate' => new UserCacheWakefulDateTime('2026-06-15 12:15:00.987654', new DateTimeZone('UTC'), 'wakeful'),
 ];
 
 var_dump($cache->store('payload', $payload));
@@ -300,6 +299,28 @@ var_dump($fetched['wakefulDate']->format('Y-m-d H:i:s.u e'));
 var_dump($fetched['wakefulDate']->label());
 var_dump(UserCacheWakefulDateTime::$sleepCount);
 var_dump(UserCacheWakefulDateTime::$wakeupCount);
+
+/* DateInterval from diff() and relative strings keeps days, invert and special fields */
+$cache = UserCache\Cache::getPool('datetime-interval-diff');
+
+$diff = (new DateTimeImmutable('2026-01-01 00:00:00'))->diff(new DateTimeImmutable('2026-03-15 10:30:00'));
+$cache->store('diff', $diff);
+$d = $cache->fetch('diff');
+var_dump(serialize($d) === serialize($diff));
+var_dump($d->days);
+var_dump($d->invert);
+var_dump($d->format('%a days %h:%i'));
+
+$inv = (new DateTimeImmutable('2026-03-15'))->diff(new DateTimeImmutable('2026-01-01'));
+$cache->store('inv', $inv);
+var_dump($cache->fetch('inv')->invert);
+
+$rel = DateInterval::createFromDateString('last day of next month');
+$cache->store('rel', $rel);
+$rl = $cache->fetch('rel');
+var_dump(serialize($rl) === serialize($rel));
+$base = new DateTimeImmutable('2026-07-23');
+var_dump($base->add($rl)->format('Y-m-d') === $base->add($rel)->format('Y-m-d'));
 ?>
 --EXPECT--
 bool(true)
@@ -349,3 +370,10 @@ string(30) "2026-06-15 12:15:00.987654 UTC"
 string(7) "wakeful"
 int(0)
 int(0)
+bool(true)
+int(73)
+int(0)
+string(13) "73 days 10:30"
+int(1)
+bool(true)
+bool(true)

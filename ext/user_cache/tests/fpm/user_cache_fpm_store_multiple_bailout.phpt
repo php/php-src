@@ -13,7 +13,7 @@ require_once __DIR__ . '/tester.inc';
 $cfg = <<<EOT
 [global]
 error_log = {{FILE:LOG}}
-[opcache]
+[www]
 listen = {{ADDR}}
 pm = static
 pm.max_children = 1
@@ -30,22 +30,18 @@ $action = $_GET['action'] ?? 'seed';
 if ($action === 'seed') {
     $cache->clear();
     $cache->store('a', 'ORIGINAL');
-    $cache->fetch('a'); /* For initialization of pool stats */
     echo UserCache\Cache::getStatus()->getFreeMemory(), "\n";
     return;
 }
 
 if ($action === 'bail') {
-    /* The debug fault injection forces a bailout after 'a' commits (capturing
-     * 'ORIGINAL' as its replaced entry) and before 'z' is processed. */
+    /* Bail out after replacing 'a', before storing 'z'. */
     $cache->storeMultiple(['a' => 'REPLACEMENT', 'z' => 'NEW']);
     echo "no-bailout\n";
     return;
 }
 
-/* The committed replacement must be rolled back: 'a' reads back as the
- * pre-batch value, 'z' was never stored, and no shared-memory block leaked
- * (free memory matches the pre-batch value printed by the seed request). */
+/* Rollback must restore 'a' and free the replacement without storing 'z'. */
 echo $cache->fetch('a', 'MISS'), "\n";
 var_dump($cache->has('z'));
 echo UserCache\Cache::getStatus()->getFreeMemory(), "\n";
@@ -53,7 +49,6 @@ PHP;
 
 $tester = new FPM\Tester($cfg, $code);
 $tester->start(iniEntries: [
-    'opcache.enable' => '1',
     'user_cache.shm_size' => '32M',
 ]);
 $tester->expectLogStartNotices();
@@ -72,6 +67,8 @@ $tester->request(query: 'action=check')->expectBody(
 $tester->terminate();
 $tester->expectLogTerminatingNotices();
 $tester->close();
+
+/* Release builds do not collect cycles at shutdown. */
 unset($tester);
 gc_collect_cycles();
 

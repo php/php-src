@@ -58,6 +58,16 @@ function user_cache_apache_rm_rf(string $path): void
     rmdir($path);
 }
 
+function user_cache_apache_remove_boundary_segments(string $root): void
+{
+    foreach (glob($root . '/.PhpUserCacheBnd.*/*.lock') ?: [] as $lock) {
+        $segment = '/dev/shm/PUC.' . basename($lock, '.lock');
+        if (is_file($segment)) {
+            unlink($segment);
+        }
+    }
+}
+
 function user_cache_apache_request(int $port, string $host, string $path): string
 {
     $fp = @stream_socket_client("tcp://127.0.0.1:$port", $errno, $errstr, 2);
@@ -101,6 +111,7 @@ PHP);
 file_put_contents($root . '/php.ini', implode("\n", [
     'user_cache.enable=1',
     'user_cache.shm_size=1M',
+    'user_cache.lockfile_path=' . $root,
     'opcache.file_update_protection=0',
 ]));
 
@@ -203,6 +214,7 @@ try {
         proc_terminate($process);
         proc_close($process);
     }
+    user_cache_apache_remove_boundary_segments($root);
     user_cache_apache_rm_rf($root);
 }
 ?>
