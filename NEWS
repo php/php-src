@@ -132,6 +132,8 @@ PHP                                                                        NEWS
     PROCESS_INFORMATION, an indeterminate comspec pointer after a failed
     lookup, and an unchecked CreateFileA() failure. (Ilia Alshanetsky)
   . Fix persistent stream context lifetime during shutdown (Levi Morrison)
+  . Fixed unserialize() of enums sharing its state with the unserialize()
+    calls made by autoloaders. (nicolas-grekas)
 
 - XSL:
   . Fixed bug GH-23730 (use-after-free when XSLTProcessor::importStylesheet()
