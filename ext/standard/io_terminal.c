@@ -336,32 +336,32 @@ static bool php_io_terminal_identities_match(const php_io_terminal_identity *fir
 # define PATH_MAX 1024
 #endif
 
-static bool php_io_terminal_get_slave_dev_from_pty_master(int fd, dev_t *slave_dev)
+static bool php_io_terminal_get_pty_peer_dev(int fd, dev_t *peer_dev)
 {
-	char slave_path[PATH_MAX];
-	bool got_slave_name = false;
+	char peer_path[PATH_MAX];
+	bool got_peer_name = false;
 
 #if defined(PHP_IO_TERMINAL_HAVE_PTSNAME_R)
-	if (ptsname_r(fd, slave_path, sizeof(slave_path)) == 0) {
-		got_slave_name = true;
+	if (ptsname_r(fd, peer_path, sizeof(peer_path)) == 0) {
+		got_peer_name = true;
 	}
 #else
 	PHP_IO_TERMINAL_PTSNAME_LOCK();
 	const char *pts = ptsname(fd);
 	if (pts != NULL) {
 		size_t len = strlen(pts);
-		if (len < sizeof(slave_path)) {
-			memcpy(slave_path, pts, len + 1);
-			got_slave_name = true;
+		if (len < sizeof(peer_path)) {
+			memcpy(peer_path, pts, len + 1);
+			got_peer_name = true;
 		}
 	}
 	PHP_IO_TERMINAL_PTSNAME_UNLOCK();
 #endif
 
-	if (got_slave_name && slave_path[0] != '\0') {
+	if (got_peer_name && peer_path[0] != '\0') {
 		struct stat st;
-		if (stat(slave_path, &st) == 0 && S_ISCHR(st.st_mode) && st.st_rdev != 0) {
-			*slave_dev = st.st_rdev;
+		if (stat(peer_path, &st) == 0 && S_ISCHR(st.st_mode) && st.st_rdev != 0) {
+			*peer_dev = st.st_rdev;
 			return true;
 		}
 	}
@@ -385,9 +385,9 @@ static bool php_io_terminal_get_identity(php_io_terminal_native_stream fd, php_i
 		identity->has_sid = true;
 	}
 
-	dev_t slave_dev = 0;
-	if (php_io_terminal_get_slave_dev_from_pty_master(fd, &slave_dev)) {
-		identity->dev = slave_dev;
+	dev_t peer_dev = 0;
+	if (php_io_terminal_get_pty_peer_dev(fd, &peer_dev)) {
+		identity->dev = peer_dev;
 		identity->has_dev = true;
 		return true;
 	}
@@ -523,7 +523,6 @@ static bool php_io_terminal_restore_shared_mode(const php_io_terminal_shared_mod
 	if (GetConsoleMode(shared->restore_stream, &actual_mode) && actual_mode != shared->saved_mode) {
 		return false;
 	}
-	return true;
 #else
 	if (tcsetattr(shared->restore_stream, TCSANOW, &shared->saved_mode) != 0) {
 		return false;
@@ -534,8 +533,8 @@ static bool php_io_terminal_restore_shared_mode(const php_io_terminal_shared_mod
 			return false;
 		}
 	}
-	return true;
 #endif
+	return true;
 }
 
 static void php_io_terminal_destroy_shared_mode(php_io_terminal_shared_mode *shared)
@@ -598,8 +597,7 @@ static void php_io_terminal_mode_token_free_obj(zend_object *object)
 	php_io_terminal_mode_token_object *intern = PHP_IO_TERMINAL_MODE_TOKEN_OBJ_FROM_ZOBJ(object);
 
 	if (intern->valid && intern->shared != NULL) {
-		const char *err = NULL;
-		if (!php_io_terminal_release_token_lease(intern, &err)) {
+		if (!php_io_terminal_release_token_lease(intern, NULL)) {
 			intern->valid = false;
 			intern->shared = NULL;
 		}
@@ -941,8 +939,6 @@ static bool php_io_terminal_read_console_record(
 	WCHAR *pending_key_high_surrogate
 )
 {
-	DWORD records_read;
-
 	if (pending_key->Event.KeyEvent.wRepeatCount > 0) {
 		*record = *pending_key;
 		*high_surrogate = *pending_key_high_surrogate;
@@ -959,6 +955,7 @@ static bool php_io_terminal_read_console_record(
 		return false;
 	}
 
+	DWORD records_read;
 	if (!ReadConsoleInputW(handle, record, 1, &records_read) || records_read != 1) {
 		zend_throw_exception(php_io_terminal_exception_ce, "Failed to read console input", 0);
 		return false;
@@ -979,7 +976,6 @@ static zend_string *php_io_terminal_read_stream_key(
 	HANDLE handle = input;
 	DWORD mode = 0;
 	WCHAR high_surrogate = *pending_high_surrogate;
-	DWORD raw_mode;
 	ULONGLONG deadline_ms = wait_ms == INFINITE ? 0 : GetTickCount64() + wait_ms;
 	zend_string *result = NULL;
 	bool mode_changed = false;
@@ -995,14 +991,14 @@ static zend_string *php_io_terminal_read_stream_key(
 		return NULL;
 	}
 
-	raw_mode = php_io_terminal_make_raw_mode(mode) | ENABLE_WINDOW_INPUT;
+	DWORD raw_mode = php_io_terminal_make_raw_mode(mode) | ENABLE_WINDOW_INPUT;
 	if (raw_mode != mode && !SetConsoleMode(handle, raw_mode)) {
 		zend_throw_exception(php_io_terminal_exception_ce, "Failed to set console mode", 0);
 		return NULL;
 	}
 	mode_changed = raw_mode != mode;
 
-	for (;;) {
+	while (true) {
 		INPUT_RECORD record;
 		DWORD remaining_ms = INFINITE;
 
@@ -1099,10 +1095,8 @@ static zend_string *php_io_terminal_read_stream_secret(
 		);
 	}
 
-	for (;;) {
+	while (true) {
 		INPUT_RECORD record;
-		KEY_EVENT_RECORD *key;
-		WORD repeats;
 		DWORD current_wait = INFINITE;
 
 		if (has_timeout) {
@@ -1134,7 +1128,7 @@ static zend_string *php_io_terminal_read_stream_secret(
 			continue;
 		}
 
-		key = &record.Event.KeyEvent;
+		KEY_EVENT_RECORD *key = &record.Event.KeyEvent;
 		if (!key->bKeyDown) {
 			continue;
 		}
@@ -1151,7 +1145,7 @@ static zend_string *php_io_terminal_read_stream_secret(
 			break;
 		}
 
-		repeats = key->wRepeatCount > 0 ? key->wRepeatCount : 1;
+		WORD repeats = key->wRepeatCount > 0 ? key->wRepeatCount : 1;
 		while (repeats-- > 0) {
 			if (key->wVirtualKeyCode == VK_BACK) {
 				if (secret.s != NULL && ZSTR_LEN(secret.s) > 0) {
@@ -1383,7 +1377,7 @@ static int php_io_terminal_read_byte(
 		remaining = *timeout;
 	}
 
-	for (;;) {
+	while (true) {
 		php_poll_event event;
 		const struct timespec *wait_timeout = NULL;
 		zend_hrtime_t start_ns = 0;
@@ -1510,9 +1504,7 @@ static zend_string *php_io_terminal_finish_utf8_sequence(
 
 		pending->bytes[pending->length++] = key;
 		if ((key & 0xc0) != 0x80) {
-			zend_string *invalid = zend_string_init((const char *) pending->bytes, pending->length, false);
-			memset(pending, 0, sizeof(*pending));
-			return invalid;
+			break;
 		}
 	}
 
@@ -1591,29 +1583,35 @@ static zend_string *php_io_terminal_key_from_escape_sequence(
 		}
 
 #define PHP_IO_TERMINAL_CSI_IS(literal) \
-	(seq_len == sizeof(literal) - 1 && memcmp(seq, literal, sizeof(literal) - 1) == 0)
+	(memcmp(seq, literal, sizeof(literal) - 1) == 0)
 
-		if (PHP_IO_TERMINAL_CSI_IS("\x1b[A")) return ZSTR_INIT_LITERAL("up", false);
-		if (PHP_IO_TERMINAL_CSI_IS("\x1b[B")) return ZSTR_INIT_LITERAL("down", false);
-		if (PHP_IO_TERMINAL_CSI_IS("\x1b[C")) return ZSTR_INIT_LITERAL("right", false);
-		if (PHP_IO_TERMINAL_CSI_IS("\x1b[D")) return ZSTR_INIT_LITERAL("left", false);
-		if (PHP_IO_TERMINAL_CSI_IS("\x1b[H") || PHP_IO_TERMINAL_CSI_IS("\x1b[1~")) return ZSTR_INIT_LITERAL("home", false);
-		if (PHP_IO_TERMINAL_CSI_IS("\x1b[F") || PHP_IO_TERMINAL_CSI_IS("\x1b[4~")) return ZSTR_INIT_LITERAL("end", false);
-		if (PHP_IO_TERMINAL_CSI_IS("\x1b[3~")) return ZSTR_INIT_LITERAL("delete", false);
-		if (PHP_IO_TERMINAL_CSI_IS("\x1b[5~")) return ZSTR_INIT_LITERAL("pageup", false);
-		if (PHP_IO_TERMINAL_CSI_IS("\x1b[6~")) return ZSTR_INIT_LITERAL("pagedown", false);
-		if (PHP_IO_TERMINAL_CSI_IS("\x1b[11~")) return ZSTR_INIT_LITERAL("f1", false);
-		if (PHP_IO_TERMINAL_CSI_IS("\x1b[12~")) return ZSTR_INIT_LITERAL("f2", false);
-		if (PHP_IO_TERMINAL_CSI_IS("\x1b[13~")) return ZSTR_INIT_LITERAL("f3", false);
-		if (PHP_IO_TERMINAL_CSI_IS("\x1b[14~")) return ZSTR_INIT_LITERAL("f4", false);
-		if (PHP_IO_TERMINAL_CSI_IS("\x1b[15~")) return ZSTR_INIT_LITERAL("f5", false);
-		if (PHP_IO_TERMINAL_CSI_IS("\x1b[17~")) return ZSTR_INIT_LITERAL("f6", false);
-		if (PHP_IO_TERMINAL_CSI_IS("\x1b[18~")) return ZSTR_INIT_LITERAL("f7", false);
-		if (PHP_IO_TERMINAL_CSI_IS("\x1b[19~")) return ZSTR_INIT_LITERAL("f8", false);
-		if (PHP_IO_TERMINAL_CSI_IS("\x1b[20~")) return ZSTR_INIT_LITERAL("f9", false);
-		if (PHP_IO_TERMINAL_CSI_IS("\x1b[21~")) return ZSTR_INIT_LITERAL("f10", false);
-		if (PHP_IO_TERMINAL_CSI_IS("\x1b[23~")) return ZSTR_INIT_LITERAL("f11", false);
-		if (PHP_IO_TERMINAL_CSI_IS("\x1b[24~")) return ZSTR_INIT_LITERAL("f12", false);
+		if (seq_len == 3) {
+			if (PHP_IO_TERMINAL_CSI_IS("\x1b[A")) return ZSTR_INIT_LITERAL("up", false);
+			if (PHP_IO_TERMINAL_CSI_IS("\x1b[B")) return ZSTR_INIT_LITERAL("down", false);
+			if (PHP_IO_TERMINAL_CSI_IS("\x1b[C")) return ZSTR_INIT_LITERAL("right", false);
+			if (PHP_IO_TERMINAL_CSI_IS("\x1b[D")) return ZSTR_INIT_LITERAL("left", false);
+			if (PHP_IO_TERMINAL_CSI_IS("\x1b[H")) return ZSTR_INIT_LITERAL("home", false);
+			if (PHP_IO_TERMINAL_CSI_IS("\x1b[F")) return ZSTR_INIT_LITERAL("end", false);
+		} else if (seq_len == 4) {
+			if (PHP_IO_TERMINAL_CSI_IS("\x1b[1~")) return ZSTR_INIT_LITERAL("home", false);
+			if (PHP_IO_TERMINAL_CSI_IS("\x1b[4~")) return ZSTR_INIT_LITERAL("end", false);
+			if (PHP_IO_TERMINAL_CSI_IS("\x1b[3~")) return ZSTR_INIT_LITERAL("delete", false);
+			if (PHP_IO_TERMINAL_CSI_IS("\x1b[5~")) return ZSTR_INIT_LITERAL("pageup", false);
+			if (PHP_IO_TERMINAL_CSI_IS("\x1b[6~")) return ZSTR_INIT_LITERAL("pagedown", false);
+		} else if (seq_len == 5) {
+			if (PHP_IO_TERMINAL_CSI_IS("\x1b[11~")) return ZSTR_INIT_LITERAL("f1", false);
+			if (PHP_IO_TERMINAL_CSI_IS("\x1b[12~")) return ZSTR_INIT_LITERAL("f2", false);
+			if (PHP_IO_TERMINAL_CSI_IS("\x1b[13~")) return ZSTR_INIT_LITERAL("f3", false);
+			if (PHP_IO_TERMINAL_CSI_IS("\x1b[14~")) return ZSTR_INIT_LITERAL("f4", false);
+			if (PHP_IO_TERMINAL_CSI_IS("\x1b[15~")) return ZSTR_INIT_LITERAL("f5", false);
+			if (PHP_IO_TERMINAL_CSI_IS("\x1b[17~")) return ZSTR_INIT_LITERAL("f6", false);
+			if (PHP_IO_TERMINAL_CSI_IS("\x1b[18~")) return ZSTR_INIT_LITERAL("f7", false);
+			if (PHP_IO_TERMINAL_CSI_IS("\x1b[19~")) return ZSTR_INIT_LITERAL("f8", false);
+			if (PHP_IO_TERMINAL_CSI_IS("\x1b[20~")) return ZSTR_INIT_LITERAL("f9", false);
+			if (PHP_IO_TERMINAL_CSI_IS("\x1b[21~")) return ZSTR_INIT_LITERAL("f10", false);
+			if (PHP_IO_TERMINAL_CSI_IS("\x1b[23~")) return ZSTR_INIT_LITERAL("f11", false);
+			if (PHP_IO_TERMINAL_CSI_IS("\x1b[24~")) return ZSTR_INIT_LITERAL("f12", false);
+		}
 
 #undef PHP_IO_TERMINAL_CSI_IS
 	} else if (seq[1] == 'O' && seq_len < sizeof(seq)) {
