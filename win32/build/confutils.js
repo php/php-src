@@ -1625,6 +1625,8 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 
 	sym = target.toUpperCase() + "_GLOBAL_OBJS";
 	flags = "CFLAGS_" + target.toUpperCase() + '_OBJ';
+	var c_flags = VS_TOOLSET ? " /std:c11" : "";
+	var cxx_flags = " $(CXXFLAGS_" + target.toUpperCase() + ")";
 
 	var bd = get_define('BUILD_DIR');
 	var respd = bd + '\\resp';
@@ -1790,7 +1792,7 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 						"--library=win32\\build\\cppcheck.cfg " +
 						"--library=" + cppcheck_lib + " " +
 						/* "--rule-file=win32\build\cppcheck_rules.xml " + */
-						" --std=c89 --std=c++11 " +
+						" --std=c11 --std=c++11 " +
 						"--quiet --inconclusive --template=vs -j 4 " +
 						"--suppress=unmatchedSuppression " +
 						"--suppressions-list=win32\\build\\cppcheck_suppress.txt ";
@@ -1809,16 +1811,17 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 					var _tmp = src.split("\\");
 					var filename = _tmp.pop();
 					obj = filename.replace(re, ".obj");
-					var c11_flag = VS_TOOLSET && !cxx_mode_targets[target] && /\.c$/i.test(src) ? " /std:c11" : "";
+					var lang_flags = cxx_mode_targets[target] || !/\.c$/i.test(src) ? cxx_flags : c_flags;
+					var analyzer_lang_flags = lang_flags.replace(")", "_ANALYZER)");
 
-					MFO.WriteLine("\t" + CMD_MOD1 + "$(CC)" + c11_flag + " $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " /Fo" + sub_build + d + obj);
+					MFO.WriteLine("\t" + CMD_MOD1 + "$(CC)" + lang_flags + " $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " /Fo" + sub_build + d + obj);
 
 					if ("clang" == PHP_ANALYZER) {
-						MFO.WriteLine("\t" + CMD_MOD1 + "\"$(CLANG_CL)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + dir + "\\" + src);
+						MFO.WriteLine("\t" + CMD_MOD1 + "\"$(CLANG_CL)\"" + analyzer_lang_flags + " " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + dir + "\\" + src);
 					} else if ("cppcheck" == PHP_ANALYZER) {
 						MFO.WriteLine("\t\"" + CMD_MOD1 + "$(CPPCHECK)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + analyzer_base_flags + " " + dir + "\\" + src);
 					}else if (PHP_ANALYZER == "pvs") {
-						MFO.WriteLine("\t" + CMD_MOD1 + "\"$(PVS_STUDIO)\" --cl-params $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " --source-file "  + dir + "\\" + src
+						MFO.WriteLine("\t" + CMD_MOD1 + "\"$(PVS_STUDIO)\" --cl-params" + lang_flags + " $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " --source-file "  + dir + "\\" + src
 							+ " --cfg PVS-Studio.conf --errors-off \"V122 V117 V111\" ");
 					}
 				}
@@ -1830,19 +1833,21 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 					var source = file_list[srcs_by_dir[k][j]];
 					var source_path = dir + "\\" + source + " ";
 					src_line += source_path;
-					src_lines[VS_TOOLSET && /\.c$/i.test(source) ? 0 : 1] += source_path;
+					src_lines[!cxx_mode_targets[target] && /\.c$/i.test(source) ? 0 : 1] += source_path;
 				}
 
 				for (var language = 0; language < src_lines.length; language++) {
 					if (src_lines[language]) {
-						var c11_flag = language == 0 && !cxx_mode_targets[target] ? " /std:c11" : "";
-						MFO.WriteLine("\t" + CMD_MOD1 + "$(CC)" + c11_flag + " $(" + flags + ") $(CFLAGS) /Fo" + sub_build + d + " $(" + bd_flags_name + ") /c " + src_lines[language]);
+						var lang_flags = language == 0 ? c_flags : cxx_flags;
+						MFO.WriteLine("\t" + CMD_MOD1 + "$(CC)" + lang_flags + " $(" + flags + ") $(CFLAGS) /Fo" + sub_build + d + " $(" + bd_flags_name + ") /c " + src_lines[language]);
+						if ("clang" == PHP_ANALYZER) {
+							var analyzer_lang_flags = lang_flags.replace(")", "_ANALYZER)");
+							MFO.WriteLine("\t\"$(CLANG_CL)\"" + analyzer_lang_flags + " " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + src_lines[language]);
+						}
 					}
 				}
 
-				if ("clang" == PHP_ANALYZER) {
-					MFO.WriteLine("\t\"$(CLANG_CL)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER)  $(" + bd_flags_name + "_ANALYZER) " + src_line);
-				} else if ("cppcheck" == PHP_ANALYZER) {
+				if ("cppcheck" == PHP_ANALYZER) {
 					MFO.WriteLine("\t\"$(CPPCHECK)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER)  $(" + bd_flags_name + "_ANALYZER) " + analyzer_base_flags + " " + src_line);
 				}
 			}
@@ -2539,7 +2544,7 @@ function handle_analyzer_makefile_flags(fd, key, val)
 		return;
 	}
 
-	if (key.match("CFLAGS")) {
+	if (key.match(/C(?:XX)?FLAGS/)) {
 		var new_val = val;
 		var reg = /\$\(([^\)]+)\)/g;
 		var r;
