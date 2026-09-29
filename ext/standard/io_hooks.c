@@ -104,7 +104,7 @@ struct _php_io_opqueue_sub {
 /* Completion status enum */
 
 /* The enum cases are declared in the order of php_io_status */
-ZEND_STATIC_ASSERT(ZEND_ENUM_Io_CompletionStatus_Unsupported - ZEND_ENUM_Io_CompletionStatus_Done == PHP_IO_UNSUPPORTED - PHP_IO_DONE,
+static_assert(ZEND_ENUM_Io_CompletionStatus_Unsupported - ZEND_ENUM_Io_CompletionStatus_Done == PHP_IO_UNSUPPORTED - PHP_IO_DONE,
 		"Io\\CompletionStatus must mirror php_io_status");
 
 static zend_object *php_io_status_case(php_io_status status)

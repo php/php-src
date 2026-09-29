@@ -25,8 +25,8 @@
 #endif
 
 /* The op layer's signal types are handed to ior as they are */
-ZEND_STATIC_ASSERT(sizeof(php_sigset_t) == sizeof(ior_sigset_t), "php_sigset_t must match ior_sigset_t");
-ZEND_STATIC_ASSERT(sizeof(php_siginfo_t) == sizeof(ior_siginfo_t), "php_siginfo_t must match ior_siginfo_t");
+static_assert(sizeof(php_sigset_t) == sizeof(ior_sigset_t), "php_sigset_t must match ior_sigset_t");
+static_assert(sizeof(php_siginfo_t) == sizeof(ior_siginfo_t), "php_siginfo_t must match ior_siginfo_t");
 
 /* One submitted op, alive until the main cqe and its linked timeout's were reaped. What the backend
  * reads or writes, apart from a stream's read buffer, lives in the record and reaches the op only
