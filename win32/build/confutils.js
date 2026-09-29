@@ -1625,7 +1625,10 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 
 	sym = target.toUpperCase() + "_GLOBAL_OBJS";
 	flags = "CFLAGS_" + target.toUpperCase() + '_OBJ';
-	var c_flags = VS_TOOLSET ? " /std:c11" : "";
+	var c_flags = ICC_TOOLSET ? " /Qstd=c17" : " /std:c17";
+	if (VS_TOOLSET) {
+		c_flags += " /experimental:c11atomics";
+	}
 	var cxx_flags = " $(CXXFLAGS_" + target.toUpperCase() + ")";
 
 	var bd = get_define('BUILD_DIR');
@@ -1792,7 +1795,7 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 						"--library=win32\\build\\cppcheck.cfg " +
 						"--library=" + cppcheck_lib + " " +
 						/* "--rule-file=win32\build\cppcheck_rules.xml " + */
-						" --std=c11 --std=c++11 " +
+						" --std=c17 --std=c++11 " +
 						"--quiet --inconclusive --template=vs -j 4 " +
 						"--suppress=unmatchedSuppression " +
 						"--suppressions-list=win32\\build\\cppcheck_suppress.txt ";
@@ -3154,7 +3157,7 @@ function toolset_get_compiler_version()
 
 	if (VS_TOOLSET) {
 		version = probe_binary(PHP_CL).substr(0, 5).replace('.', '');
-		if (version < 1920) {
+		if (version < 1950) {
 			ERROR("Building with MSC_VER " + version + " is no longer supported");
 		}
 		return version;
