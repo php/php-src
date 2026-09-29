@@ -105,17 +105,6 @@ mbfl_convert_filter* mbfl_convert_filter_new(const mbfl_encoding *from, const mb
 	return filter;
 }
 
-mbfl_convert_filter* mbfl_convert_filter_new2(const struct mbfl_convert_vtbl *vtbl, output_function_t output_function,
-	flush_function_t flush_function, void* data)
-{
-	const mbfl_encoding *from_encoding = mbfl_no2encoding(vtbl->from);
-	const mbfl_encoding *to_encoding = mbfl_no2encoding(vtbl->to);
-
-	mbfl_convert_filter *filter = emalloc(sizeof(mbfl_convert_filter));
-	mbfl_convert_filter_init(filter, from_encoding, to_encoding, vtbl, output_function, flush_function, data);
-	return filter;
-}
-
 void mbfl_convert_filter_delete(mbfl_convert_filter *filter)
 {
 	if (filter->filter_dtor) {
@@ -130,36 +119,10 @@ int mbfl_convert_filter_feed(int c, mbfl_convert_filter *filter)
 	return (*filter->filter_function)(c, filter);
 }
 
-/* Feed string into `filter` byte by byte; return pointer to first byte not processed */
-unsigned char* mbfl_convert_filter_feed_string(mbfl_convert_filter *filter, unsigned char *p, size_t len)
-{
-	while (len--) {
-		if ((*filter->filter_function)(*p++, filter) < 0) {
-			break;
-		}
-	}
-	return p;
-}
-
 int mbfl_convert_filter_flush(mbfl_convert_filter *filter)
 {
 	(*filter->filter_flush)(filter);
 	return 0;
-}
-
-void mbfl_convert_filter_reset(mbfl_convert_filter *filter, const mbfl_encoding *from, const mbfl_encoding *to)
-{
-	if (filter->filter_dtor) {
-		(*filter->filter_dtor)(filter);
-	}
-
-	const struct mbfl_convert_vtbl *vtbl = mbfl_convert_filter_get_vtbl(from, to);
-
-	if (vtbl == NULL) {
-		vtbl = &vtbl_pass;
-	}
-
-	mbfl_convert_filter_init(filter, from, to, vtbl, filter->output_function, filter->flush_function, filter->data);
 }
 
 void mbfl_convert_filter_copy(mbfl_convert_filter *src, mbfl_convert_filter *dest)
@@ -170,11 +133,6 @@ void mbfl_convert_filter_copy(mbfl_convert_filter *src, mbfl_convert_filter *des
 	}
 
 	*dest = *src;
-}
-
-void mbfl_convert_filter_devcat(mbfl_convert_filter *filter, mbfl_memory_device *src)
-{
-	mbfl_convert_filter_feed_string(filter, src->buffer, src->pos);
 }
 
 int mbfl_convert_filter_strcat(mbfl_convert_filter *filter, const unsigned char *p)

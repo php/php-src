@@ -132,7 +132,6 @@ static inline int mbfl_is_error(size_t len) {
 
 #define MBFL_ERROR_NOT_FOUND ((size_t) -1)
 #define MBFL_ERROR_ENCODING ((size_t) -4)
-#define MBFL_ERROR_EMPTY ((size_t) -8)
 #define MBFL_ERROR_OFFSET ((size_t) -16)
 
 /*
