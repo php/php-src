@@ -21,6 +21,7 @@ rm -r bench
 rm -r examples
 rm -r tests
 rm -r tools
+rm -r fuzz
 rm README.md
 rm TODO
 rm ir.g
