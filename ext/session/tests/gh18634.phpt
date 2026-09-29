@@ -3,7 +3,7 @@ GH-18634 (Using pipe character in session variable key causes session data to be
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --FILE--
 <?php
 session_start();
