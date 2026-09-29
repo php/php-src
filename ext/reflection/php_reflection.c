@@ -5138,7 +5138,7 @@ void reflection_class_new_lazy(INTERNAL_FUNCTION_PARAMETERS,
 		obj = NULL;
 	}
 
-	if (!fcc.function_handler) {
+	if (!ZEND_FCC_INITIALIZED(fcc)) {
 		/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
 		 * with it ourselves. It is important that it is not refetched on every call,
 		 * because calls may occur from different scopes. */
