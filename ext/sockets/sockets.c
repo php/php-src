@@ -350,10 +350,6 @@ PHP_METHOD(SocketPollHandle, getSocket)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	php_socket_poll_handle_data *data = PHP_POLL_HANDLE_OBJ_FROM_ZV(ZEND_THIS)->handle_data;
-	if (!data) {
-		zend_throw_error(NULL, "%pS object is not constructed", Z_OBJCE_P(ZEND_THIS)->name);
-		RETURN_THROWS();
-	}
 	RETURN_OBJ_COPY(&data->sock->std);
 }
 

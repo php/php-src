@@ -1006,15 +1006,6 @@ static HashTable *php_io_poll_operation_queue_get_gc(zend_object *obj, zval **ta
 	return NULL;
 }
 
-static php_io_opqueue_obj *php_io_opqueue_fetch(zval *zv)
-{
-	php_io_opqueue_obj *intern = PHP_IO_OPQUEUE_FROM_ZOBJ(Z_OBJ_P(zv));
-	if (!intern->queue) {
-		zend_throw_error(NULL, "%pS object is not constructed", Z_OBJCE_P(zv)->name);
-	}
-	return intern;
-}
-
 PHP_METHOD(Io_Poll_OperationQueue, __construct)
 {
 	zval *context = NULL;
@@ -1058,10 +1049,7 @@ PHP_METHOD(Io_Poll_OperationQueue, submit)
 		Z_PARAM_ZVAL(data)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_io_opqueue_obj *intern = php_io_opqueue_fetch(ZEND_THIS);
-	if (!intern) {
-		RETURN_THROWS();
-	}
+	php_io_opqueue_obj *intern = PHP_IO_OPQUEUE_FROM_ZOBJ(Z_OBJ_P(ZEND_THIS));
 	php_io_op *op = php_io_operation_fetch(op_zv);
 	if (!op) {
 		RETURN_THROWS();
@@ -1116,10 +1104,7 @@ PHP_METHOD(Io_Poll_OperationQueue, cancel)
 		Z_PARAM_OBJECT_OF_CLASS(op_zv, php_io_operation_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_io_opqueue_obj *intern = php_io_opqueue_fetch(ZEND_THIS);
-	if (!intern) {
-		RETURN_THROWS();
-	}
+	php_io_opqueue_obj *intern = PHP_IO_OPQUEUE_FROM_ZOBJ(Z_OBJ_P(ZEND_THIS));
 	php_io_op *op = php_io_operation_fetch(op_zv);
 	if (!op) {
 		RETURN_THROWS();
@@ -1150,10 +1135,7 @@ PHP_METHOD(Io_Poll_OperationQueue, add)
 		Z_PARAM_OBJECT_OF_CLASS(reg_zv, php_io_registration_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_io_opqueue_obj *intern = php_io_opqueue_fetch(ZEND_THIS);
-	if (!intern) {
-		RETURN_THROWS();
-	}
+	php_io_opqueue_obj *intern = PHP_IO_OPQUEUE_FROM_ZOBJ(Z_OBJ_P(ZEND_THIS));
 	php_io_registration *reg = php_io_registration_fetch(reg_zv);
 	if (!reg) {
 		RETURN_THROWS();
@@ -1173,10 +1155,7 @@ PHP_METHOD(Io_Poll_OperationQueue, remove)
 		Z_PARAM_OBJECT_OF_CLASS(reg_zv, php_io_registration_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_io_opqueue_obj *intern = php_io_opqueue_fetch(ZEND_THIS);
-	if (!intern) {
-		RETURN_THROWS();
-	}
+	php_io_opqueue_obj *intern = PHP_IO_OPQUEUE_FROM_ZOBJ(Z_OBJ_P(ZEND_THIS));
 	php_io_registration *reg = php_io_registration_fetch(reg_zv);
 	if (!reg) {
 		RETURN_THROWS();
@@ -1222,10 +1201,7 @@ PHP_METHOD(Io_Poll_OperationQueue, waitCompletions)
 		Z_PARAM_LONG_OR_NULL(max, max_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_io_opqueue_obj *intern = php_io_opqueue_fetch(ZEND_THIS);
-	if (!intern) {
-		RETURN_THROWS();
-	}
+	php_io_opqueue_obj *intern = PHP_IO_OPQUEUE_FROM_ZOBJ(Z_OBJ_P(ZEND_THIS));
 
 	/* A zero duration is one reap that never blocks: the non-blocking deadline */
 	php_deadline dl;
@@ -1288,10 +1264,7 @@ PHP_METHOD(Io_Poll_OperationQueue, countPending)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	php_io_opqueue_obj *intern = php_io_opqueue_fetch(ZEND_THIS);
-	if (!intern) {
-		RETURN_THROWS();
-	}
+	php_io_opqueue_obj *intern = PHP_IO_OPQUEUE_FROM_ZOBJ(Z_OBJ_P(ZEND_THIS));
 	RETURN_LONG(intern->queue->ops->count_pending(intern->queue));
 }
 
@@ -1322,10 +1295,7 @@ PHP_METHOD(Io_Poll_OperationQueue, getHookCapabilities)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	php_io_opqueue_obj *intern = php_io_opqueue_fetch(ZEND_THIS);
-	if (!intern) {
-		RETURN_THROWS();
-	}
+	php_io_opqueue_obj *intern = PHP_IO_OPQUEUE_FROM_ZOBJ(Z_OBJ_P(ZEND_THIS));
 	php_io_hook_flags_to_capabilities(intern->queue->ops->hook_flags(intern->queue), return_value);
 }
 

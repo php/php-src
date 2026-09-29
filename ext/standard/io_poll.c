@@ -561,10 +561,6 @@ PHP_METHOD(Io_Poll_TimerHandle, getTimeout)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	php_io_poll_timer_handle_data *data = PHP_POLL_HANDLE_OBJ_FROM_ZV(ZEND_THIS)->handle_data;
-	if (!data) {
-		zend_throw_error(NULL, "%pS object is not constructed", Z_OBJCE_P(ZEND_THIS)->name);
-		RETURN_THROWS();
-	}
 	php_io_poll_ns_to_duration(return_value, data->timeout);
 }
 
@@ -573,10 +569,6 @@ PHP_METHOD(Io_Poll_TimerHandle, isPeriodic)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	php_io_poll_timer_handle_data *data = PHP_POLL_HANDLE_OBJ_FROM_ZV(ZEND_THIS)->handle_data;
-	if (!data) {
-		zend_throw_error(NULL, "%pS object is not constructed", Z_OBJCE_P(ZEND_THIS)->name);
-		RETURN_THROWS();
-	}
 	RETURN_BOOL(data->periodic);
 }
 
@@ -999,10 +991,6 @@ PHP_METHOD(Io_Poll_ProcessHandle, getPid)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	php_io_poll_process_handle_data *data = PHP_POLL_HANDLE_OBJ_FROM_ZV(ZEND_THIS)->handle_data;
-	if (!data) {
-		zend_throw_error(NULL, "%pS object is not constructed", Z_OBJCE_P(ZEND_THIS)->name);
-		RETURN_THROWS();
-	}
 	RETURN_LONG((zend_long) data->pid);
 }
 
@@ -1011,10 +999,6 @@ PHP_METHOD(Io_Poll_ProcessHandle, getStatus)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	php_io_poll_process_handle_data *data = PHP_POLL_HANDLE_OBJ_FROM_ZV(ZEND_THIS)->handle_data;
-	if (!data) {
-		zend_throw_error(NULL, "%pS object is not constructed", Z_OBJCE_P(ZEND_THIS)->name);
-		RETURN_THROWS();
-	}
 #ifdef PHP_WIN32
 	php_io_poll_process_handle_probe(data);
 #endif
@@ -1364,10 +1348,6 @@ PHP_METHOD(Io_Poll_SignalHandle, getSignals)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	php_io_poll_signal_handle_data *data = PHP_POLL_HANDLE_OBJ_FROM_ZV(ZEND_THIS)->handle_data;
-	if (!data) {
-		zend_throw_error(NULL, "%pS object is not constructed", Z_OBJCE_P(ZEND_THIS)->name);
-		RETURN_THROWS();
-	}
 	array_init(return_value);
 	for (int signo = 1; signo < PHP_NSIG; signo++) {
 		if (php_sigismember(&data->set, signo) == 1) {
@@ -1381,10 +1361,6 @@ PHP_METHOD(Io_Poll_SignalHandle, getDelivered)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	php_io_poll_signal_handle_data *data = PHP_POLL_HANDLE_OBJ_FROM_ZV(ZEND_THIS)->handle_data;
-	if (!data) {
-		zend_throw_error(NULL, "%pS object is not constructed", Z_OBJCE_P(ZEND_THIS)->name);
-		RETURN_THROWS();
-	}
 	array_init(return_value);
 	for (uint32_t i = 0; i < data->n_infos; i++) {
 		add_next_index_long(return_value, data->infos[i].si_signo);
@@ -1453,10 +1429,6 @@ PHP_METHOD(Io_Poll_NotifyHandle, notify)
 
 	php_poll_handle_object *intern = PHP_POLL_HANDLE_OBJ_FROM_ZV(ZEND_THIS);
 	php_io_poll_notify_handle_data *data = intern->handle_data;
-	if (!data) {
-		zend_throw_error(NULL, "%pS object is not constructed", Z_OBJCE_P(ZEND_THIS)->name);
-		RETURN_THROWS();
-	}
 	if (!data->owned) {
 		zend_throw_error(NULL, "This Io\\Poll\\NotifyHandle is raised by its owner and cannot be notified");
 		RETURN_THROWS();
@@ -1469,10 +1441,6 @@ PHP_METHOD(Io_Poll_NotifyHandle, clear)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	php_io_poll_notify_handle_data *data = PHP_POLL_HANDLE_OBJ_FROM_ZV(ZEND_THIS)->handle_data;
-	if (!data) {
-		zend_throw_error(NULL, "%pS object is not constructed", Z_OBJCE_P(ZEND_THIS)->name);
-		RETURN_THROWS();
-	}
 	if (!data->owned) {
 		data->clear(data->clear_arg);
 		return;

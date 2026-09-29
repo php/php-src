@@ -109,10 +109,6 @@ PHP_METHOD(Io_Ring_Engine, getSupportedHookCapabilities)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	php_io_opqueue_obj *intern = PHP_IO_OPQUEUE_FROM_ZOBJ(Z_OBJ_P(ZEND_THIS));
-	if (!intern->queue) {
-		zend_throw_error(NULL, "%pS object is not constructed", Z_OBJCE_P(ZEND_THIS)->name);
-		RETURN_THROWS();
-	}
 	if (php_io_ring_engine_check(ZEND_THIS) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -153,10 +149,6 @@ PHP_METHOD(Io_Ring_Engine, getBackend)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	php_io_opqueue_obj *intern = PHP_IO_OPQUEUE_FROM_ZOBJ(Z_OBJ_P(ZEND_THIS));
-	if (!intern->queue) {
-		zend_throw_error(NULL, "%pS object is not constructed", Z_OBJCE_P(ZEND_THIS)->name);
-		RETURN_THROWS();
-	}
 	if (php_io_ring_engine_check(ZEND_THIS) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -180,10 +172,6 @@ PHP_METHOD(Io_Ring_Engine, getHandle)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	php_io_opqueue_obj *intern = PHP_IO_OPQUEUE_FROM_ZOBJ(Z_OBJ_P(ZEND_THIS));
-	if (!intern->queue) {
-		zend_throw_error(NULL, "%pS object is not constructed", Z_OBJCE_P(ZEND_THIS)->name);
-		RETURN_THROWS();
-	}
 	if (php_io_ring_engine_check(ZEND_THIS) == FAILURE) {
 		RETURN_THROWS();
 	}
