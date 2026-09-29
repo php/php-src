@@ -570,12 +570,9 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 
 	zend_fiber *fiber = EG(active_fiber);
 
-	/* Determine the current error_reporting ini setting. */
-	zend_long error_reporting = EG(error_reporting);
-	/* A silence operator @ may modify the error_reporting value without changing the underlying INI value */
-	if (error_reporting != zend_ini_long_literal("error_reporting")) {
-		error_reporting = E_ALL;
-	}
+	/* We cannot rely on EG(error_reporting) as a silence operator @ may modify the executor global error_reporting
+	 * value without changing the underlying INI value */
+	zend_long error_reporting = zend_ini_long_literal("error_reporting");
 
 	EG(vm_stack) = NULL;
 
