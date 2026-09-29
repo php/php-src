@@ -49,11 +49,29 @@ namespace Io\Terminal {
         public function __construct(int $cols, int $rows) {}
     }
 
+    interface ModeTokenInterface {}
+
+    interface TerminalInterface
+    {
+        public function getSize(): ?TerminalSize;
+
+        public function enableRawMode(): ModeTokenInterface;
+
+        public function restoreMode(?ModeTokenInterface $mode = null): bool;
+
+        public function readKey(
+            ?\Time\Duration $timeout = null,
+            ?\Time\Duration $sequenceTimeout = null,
+        ): Key|string|null;
+
+        public function readSecret(?\Time\Duration $timeout = null): ?string;
+    }
+
     /**
      * @strict-properties
      * @not-serializable
      */
-    final class ModeToken
+    final class ModeToken implements ModeTokenInterface
     {
         private function __construct() {}
     }
@@ -62,7 +80,7 @@ namespace Io\Terminal {
      * @strict-properties
      * @not-serializable
      */
-    final class Terminal
+    final class Terminal implements TerminalInterface
     {
         private function __construct() {}
 
@@ -74,17 +92,17 @@ namespace Io\Terminal {
          */
         public static function fromStreams($input, $output = null): Terminal {}
 
-        public function getSize(): TerminalSize|false {}
+        public function getSize(): ?TerminalSize {}
 
         public function enableRawMode(): ModeToken {}
 
-        public function restoreMode(?ModeToken $mode = null): bool {}
+        public function restoreMode(?ModeTokenInterface $mode = null): bool {}
 
         public function readKey(
             ?\Time\Duration $timeout = null,
             ?\Time\Duration $sequenceTimeout = null,
-        ): Key|string|false {}
+        ): Key|string|null {}
 
-        public function readSecret(): string {}
+        public function readSecret(?\Time\Duration $timeout = null): ?string {}
     }
 }

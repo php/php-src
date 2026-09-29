@@ -1,5 +1,5 @@
 /* This is a generated file, edit io_terminal.stub.php instead.
- * Stub hash: 919125ad09816c09ee488556d37f36f42818be80
+ * Stub hash: 08c0a2c007b6991ce30979c5727ed83cf1728c8b
  * Has decl header: yes */
 
 #include "zend_enum.h"
@@ -7,6 +7,25 @@
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Io_Terminal_TerminalSize___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, cols, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, rows, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Io_Terminal_TerminalInterface_getSize, 0, 0, Io\\Terminal\\TerminalSize, 1)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Io_Terminal_TerminalInterface_enableRawMode, 0, 0, Io\\Terminal\\ModeTokenInterface, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Io_Terminal_TerminalInterface_restoreMode, 0, 0, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, mode, Io\\Terminal\\ModeTokenInterface, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Io_Terminal_TerminalInterface_readKey, 0, 0, Io\\Terminal\\Key, MAY_BE_STRING|MAY_BE_NULL)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, timeout, Time\\Duration, 1, "null")
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, sequenceTimeout, Time\\Duration, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Io_Terminal_TerminalInterface_readSecret, 0, 0, IS_STRING, 1)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, timeout, Time\\Duration, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Io_Terminal_ModeToken___construct, 0, 0, 0)
@@ -22,23 +41,16 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Io_Terminal_Terminal_fromSt
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, output, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Io_Terminal_Terminal_getSize, 0, 0, Io\\Terminal\\TerminalSize, MAY_BE_FALSE)
-ZEND_END_ARG_INFO()
+#define arginfo_class_Io_Terminal_Terminal_getSize arginfo_class_Io_Terminal_TerminalInterface_getSize
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Io_Terminal_Terminal_enableRawMode, 0, 0, Io\\Terminal\\ModeToken, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Io_Terminal_Terminal_restoreMode, 0, 0, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, mode, Io\\Terminal\\ModeToken, 1, "null")
-ZEND_END_ARG_INFO()
+#define arginfo_class_Io_Terminal_Terminal_restoreMode arginfo_class_Io_Terminal_TerminalInterface_restoreMode
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Io_Terminal_Terminal_readKey, 0, 0, Io\\Terminal\\Key, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, timeout, Time\\Duration, 1, "null")
-	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, sequenceTimeout, Time\\Duration, 1, "null")
-ZEND_END_ARG_INFO()
+#define arginfo_class_Io_Terminal_Terminal_readKey arginfo_class_Io_Terminal_TerminalInterface_readKey
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Io_Terminal_Terminal_readSecret, 0, 0, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_Io_Terminal_Terminal_readSecret arginfo_class_Io_Terminal_TerminalInterface_readSecret
 
 ZEND_METHOD(Io_Terminal_TerminalSize, __construct);
 ZEND_METHOD(Io_Terminal_ModeToken, __construct);
@@ -53,6 +65,15 @@ ZEND_METHOD(Io_Terminal_Terminal, readSecret);
 
 static const zend_function_entry class_Io_Terminal_TerminalSize_methods[] = {
 	ZEND_ME(Io_Terminal_TerminalSize, __construct, arginfo_class_Io_Terminal_TerminalSize___construct, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Io_Terminal_TerminalInterface_methods[] = {
+	ZEND_RAW_FENTRY("getSize", NULL, arginfo_class_Io_Terminal_TerminalInterface_getSize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("enableRawMode", NULL, arginfo_class_Io_Terminal_TerminalInterface_enableRawMode, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("restoreMode", NULL, arginfo_class_Io_Terminal_TerminalInterface_restoreMode, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("readKey", NULL, arginfo_class_Io_Terminal_TerminalInterface_readKey, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("readSecret", NULL, arginfo_class_Io_Terminal_TerminalInterface_readSecret, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_FE_END
 };
 
@@ -164,22 +185,44 @@ static zend_class_entry *register_class_Io_Terminal_TerminalSize(void)
 	return class_entry;
 }
 
-static zend_class_entry *register_class_Io_Terminal_ModeToken(void)
+static zend_class_entry *register_class_Io_Terminal_ModeTokenInterface(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Io\\Terminal", "ModeTokenInterface", NULL);
+	class_entry = zend_register_internal_interface(&ce);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Io_Terminal_TerminalInterface(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Io\\Terminal", "TerminalInterface", class_Io_Terminal_TerminalInterface_methods);
+	class_entry = zend_register_internal_interface(&ce);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Io_Terminal_ModeToken(zend_class_entry *class_entry_Io_Terminal_ModeTokenInterface)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Io\\Terminal", "ModeToken", class_Io_Terminal_ModeToken_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+	zend_class_implements(class_entry, 1, class_entry_Io_Terminal_ModeTokenInterface);
 
 	return class_entry;
 }
 
-static zend_class_entry *register_class_Io_Terminal_Terminal(void)
+static zend_class_entry *register_class_Io_Terminal_Terminal(zend_class_entry *class_entry_Io_Terminal_TerminalInterface)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Io\\Terminal", "Terminal", class_Io_Terminal_Terminal_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+	zend_class_implements(class_entry, 1, class_entry_Io_Terminal_TerminalInterface);
 
 	return class_entry;
 }

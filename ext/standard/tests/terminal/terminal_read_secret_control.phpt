@@ -166,6 +166,144 @@ foreach ($pipes5 as $pipe) {
 }
 proc_close($proc5);
 
+// 6. CSI followed by Ctrl+C (\x1b[\x03) cancels
+$code6 = 'fwrite(STDOUT, "\x1b[\x03"); fflush(STDOUT); fgets(STDIN);';
+$proc6 = proc_open(
+    [PHP_BINARY, '-r', $code6],
+    [
+        0 => ['pty'],
+        1 => ['pty'],
+        2 => ['pipe', 'w'],
+    ],
+    $pipes6,
+);
+$terminal6 = Terminal::fromStreams($pipes6[0]);
+try {
+    $terminal6->readSecret();
+    echo "FAIL: expected abort on CSI+Ctrl+C\n";
+} catch (TerminalException $e) {
+    echo "CSI+Ctrl+C: caught ", $e::class, ": ", $e->getMessage(), "\n";
+}
+fwrite($pipes6[0], "done\n");
+unset($terminal6);
+foreach ($pipes6 as $pipe) {
+    if (is_resource($pipe)) fclose($pipe);
+}
+proc_close($proc6);
+
+// 7. CSI followed by Ctrl+D (\x1b[\x04) cancels
+$code7 = 'fwrite(STDOUT, "\x1b[\x04"); fflush(STDOUT); fgets(STDIN);';
+$proc7 = proc_open(
+    [PHP_BINARY, '-r', $code7],
+    [
+        0 => ['pty'],
+        1 => ['pty'],
+        2 => ['pipe', 'w'],
+    ],
+    $pipes7,
+);
+$terminal7 = Terminal::fromStreams($pipes7[0]);
+try {
+    $terminal7->readSecret();
+    echo "FAIL: expected abort on CSI+Ctrl+D\n";
+} catch (TerminalException $e) {
+    echo "CSI+Ctrl+D: caught ", $e::class, ": ", $e->getMessage(), "\n";
+}
+fwrite($pipes7[0], "done\n");
+unset($terminal7);
+foreach ($pipes7 as $pipe) {
+    if (is_resource($pipe)) fclose($pipe);
+}
+proc_close($proc7);
+
+// 8. SS3 followed by Ctrl+C (\x1bO\x03) cancels
+$code8 = 'fwrite(STDOUT, "\x1bO\x03"); fflush(STDOUT); fgets(STDIN);';
+$proc8 = proc_open(
+    [PHP_BINARY, '-r', $code8],
+    [
+        0 => ['pty'],
+        1 => ['pty'],
+        2 => ['pipe', 'w'],
+    ],
+    $pipes8,
+);
+$terminal8 = Terminal::fromStreams($pipes8[0]);
+try {
+    $terminal8->readSecret();
+    echo "FAIL: expected abort on SS3+Ctrl+C\n";
+} catch (TerminalException $e) {
+    echo "SS3+Ctrl+C: caught ", $e::class, ": ", $e->getMessage(), "\n";
+}
+fwrite($pipes8[0], "done\n");
+unset($terminal8);
+foreach ($pipes8 as $pipe) {
+    if (is_resource($pipe)) fclose($pipe);
+}
+proc_close($proc8);
+
+// 9. Valid CSI sequence (e.g. Up arrow \x1b[A) ignored and secret input continues
+$code9 = 'fwrite(STDOUT, "\x1b[Asecret\n"); fflush(STDOUT); fgets(STDIN);';
+$proc9 = proc_open(
+    [PHP_BINARY, '-r', $code9],
+    [
+        0 => ['pty'],
+        1 => ['pty'],
+        2 => ['pipe', 'w'],
+    ],
+    $pipes9,
+);
+$terminal9 = Terminal::fromStreams($pipes9[0]);
+$secret9 = $terminal9->readSecret();
+echo "Valid CSI Up ignored: ", bin2hex($secret9), "\n";
+fwrite($pipes9[0], "done\n");
+unset($terminal9);
+foreach ($pipes9 as $pipe) {
+    if (is_resource($pipe)) fclose($pipe);
+}
+proc_close($proc9);
+
+// 10. Valid SS3 sequence (e.g. F1 \x1bOP) ignored and secret input continues
+$code10 = 'fwrite(STDOUT, "\x1bOPpassword\n"); fflush(STDOUT); fgets(STDIN);';
+$proc10 = proc_open(
+    [PHP_BINARY, '-r', $code10],
+    [
+        0 => ['pty'],
+        1 => ['pty'],
+        2 => ['pipe', 'w'],
+    ],
+    $pipes10,
+);
+$terminal10 = Terminal::fromStreams($pipes10[0]);
+$secret10 = $terminal10->readSecret();
+echo "Valid SS3 F1 ignored: ", bin2hex($secret10), "\n";
+fwrite($pipes10[0], "done\n");
+unset($terminal10);
+foreach ($pipes10 as $pipe) {
+    if (is_resource($pipe)) fclose($pipe);
+}
+proc_close($proc10);
+
+// 11. Internal 25ms timeout inside incomplete CSI ends sequence skipping and continues secret
+$code11 = 'fwrite(STDOUT, "\x1b["); fflush(STDOUT); usleep(35000); fwrite(STDOUT, "mysecret\n"); fflush(STDOUT); fgets(STDIN);';
+$proc11 = proc_open(
+    [PHP_BINARY, '-r', $code11],
+    [
+        0 => ['pty'],
+        1 => ['pty'],
+        2 => ['pipe', 'w'],
+    ],
+    $pipes11,
+);
+$terminal11 = Terminal::fromStreams($pipes11[0]);
+$secret11 = $terminal11->readSecret();
+echo "Internal timeout continue: ", bin2hex($secret11), "\n";
+fwrite($pipes11[0], "done\n");
+unset($terminal11);
+foreach ($pipes11 as $pipe) {
+    if (is_resource($pipe)) fclose($pipe);
+}
+proc_close($proc11);
+
 ?>
 --EXPECT--
 SUCCESS: caught Io\Terminal\TerminalException: Unable to read secret from terminal
@@ -173,3 +311,9 @@ Fragmented UTF-8: c3a9
 Disconnect: caught Io\Terminal\TerminalException: Unable to read secret from terminal
 Escape+Ctrl+C: caught Io\Terminal\TerminalException: Unable to read secret from terminal
 Escape+Enter: caught Io\Terminal\TerminalException: Unable to read secret from terminal
+CSI+Ctrl+C: caught Io\Terminal\TerminalException: Unable to read secret from terminal
+CSI+Ctrl+D: caught Io\Terminal\TerminalException: Unable to read secret from terminal
+SS3+Ctrl+C: caught Io\Terminal\TerminalException: Unable to read secret from terminal
+Valid CSI Up ignored: 736563726574
+Valid SS3 F1 ignored: 70617373776f7264
+Internal timeout continue: 6d79736563726574

@@ -1,0 +1,165 @@
+--TEST--
+Io\Terminal\Terminal: readSecret timeout, empty submission, and cancellation contracts
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY === 'Windows') {
+    die("skip PTY test is POSIX-only");
+}
+if (!function_exists('proc_open')) {
+    die("skip proc_open is not available");
+}
+try {
+    $proc = @proc_open(
+        [PHP_BINARY, '-r', ''],
+        [
+            0 => ['pty'],
+            1 => ['pty'],
+            2 => ['pipe', 'w'],
+        ],
+        $pipes,
+    );
+} catch (Throwable) {
+    die("skip PTY is not available");
+}
+if (!is_resource($proc)) {
+    die("skip PTY is not available");
+}
+foreach ($pipes as $pipe) {
+    if (is_resource($pipe)) fclose($pipe);
+}
+proc_close($proc);
+?>
+--FILE--
+<?php
+
+use Io\Terminal\Terminal;
+use Io\Terminal\TerminalException;
+use Time\Duration;
+
+// 1. Timeout returning null
+$proc1 = proc_open(
+    [PHP_BINARY, '-r', 'usleep(60000); fgets(STDIN);'],
+    [
+        0 => ['pty'],
+        1 => ['pty'],
+        2 => ['pipe', 'w'],
+    ],
+    $pipes1,
+);
+$terminal1 = Terminal::fromStreams($pipes1[0]);
+$start = hrtime(true);
+$secret1 = $terminal1->readSecret(Duration::fromMilliseconds(25));
+$elapsed_ms = (hrtime(true) - $start) / 1e6;
+
+var_dump($secret1 === null);
+var_dump($elapsed_ms >= 20.0);
+
+fwrite($pipes1[0], "done\n");
+unset($terminal1);
+foreach ($pipes1 as $pipe) {
+    if (is_resource($pipe)) fclose($pipe);
+}
+proc_close($proc1);
+
+// 2. Empty submission returning empty string ""
+$proc2 = proc_open(
+    [PHP_BINARY, '-r', 'fwrite(STDOUT, "\n"); fflush(STDOUT); fgets(STDIN);'],
+    [
+        0 => ['pty'],
+        1 => ['pty'],
+        2 => ['pipe', 'w'],
+    ],
+    $pipes2,
+);
+$terminal2 = Terminal::fromStreams($pipes2[0]);
+$secret2 = $terminal2->readSecret(Duration::fromMilliseconds(100));
+
+var_dump($secret2 === "");
+
+fwrite($pipes2[0], "done\n");
+unset($terminal2);
+foreach ($pipes2 as $pipe) {
+    if (is_resource($pipe)) fclose($pipe);
+}
+proc_close($proc2);
+
+// 3. Normal submission returning text
+$proc3 = proc_open(
+    [PHP_BINARY, '-r', 'fwrite(STDOUT, "secret123\n"); fflush(STDOUT); fgets(STDIN);'],
+    [
+        0 => ['pty'],
+        1 => ['pty'],
+        2 => ['pipe', 'w'],
+    ],
+    $pipes3,
+);
+$terminal3 = Terminal::fromStreams($pipes3[0]);
+$secret3 = $terminal3->readSecret(Duration::fromMilliseconds(100));
+
+var_dump($secret3 === "secret123");
+
+fwrite($pipes3[0], "done\n");
+unset($terminal3);
+foreach ($pipes3 as $pipe) {
+    if (is_resource($pipe)) fclose($pipe);
+}
+proc_close($proc3);
+
+// 4. Cancellation (Ctrl+C) throws TerminalException
+$proc4 = proc_open(
+    [PHP_BINARY, '-r', 'fwrite(STDOUT, "\x03"); fflush(STDOUT); fgets(STDIN);'],
+    [
+        0 => ['pty'],
+        1 => ['pty'],
+        2 => ['pipe', 'w'],
+    ],
+    $pipes4,
+);
+$terminal4 = Terminal::fromStreams($pipes4[0]);
+try {
+    $terminal4->readSecret(Duration::fromMilliseconds(100));
+    echo "FAIL: expected TerminalException on cancellation\n";
+} catch (TerminalException $e) {
+    echo "Cancellation caught: ", $e->getMessage(), PHP_EOL;
+}
+
+fwrite($pipes4[0], "done\n");
+unset($terminal4);
+foreach ($pipes4 as $pipe) {
+    if (is_resource($pipe)) fclose($pipe);
+}
+proc_close($proc4);
+
+// 5. Negative duration throws ValueError
+$proc5 = proc_open(
+    [PHP_BINARY, '-r', 'fgets(STDIN);'],
+    [
+        0 => ['pty'],
+        1 => ['pty'],
+        2 => ['pipe', 'w'],
+    ],
+    $pipes5,
+);
+$terminal5 = Terminal::fromStreams($pipes5[0]);
+try {
+    $terminal5->readSecret(Duration::fromSeconds(1)->negate());
+    echo "FAIL: expected ValueError on negative duration\n";
+} catch (ValueError $e) {
+    echo "Negative timeout caught: ", $e->getMessage(), PHP_EOL;
+}
+
+fwrite($pipes5[0], "done\n");
+unset($terminal5);
+foreach ($pipes5 as $pipe) {
+    if (is_resource($pipe)) fclose($pipe);
+}
+proc_close($proc5);
+
+?>
+--EXPECTF--
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+Cancellation caught: Unable to read secret from terminal
+Negative timeout caught: Io\Terminal\Terminal::readSecret(): Argument #1 ($timeout) must not be negative
