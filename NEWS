@@ -21,6 +21,12 @@ PHP                                                                        NEWS
     php_openssl_matches_wildcard_name() on crafted server certificate wildcard
     CN). (CVE-2026-91767) (Jakub Zelenka)
 
+- PCRE:
+  . Applied security fixes to bundled PCRE2 10.40 and disabled its legacy
+    ARM64 SIMD optimization (GHSA-2p8c-ff85-vh9x, GHSA-q8g2-wprr-34m9,
+    GHSA-9qww-pwc4-77qq, GHSA-fmgr-6ggq-9859, GHSA-3r4p-g7gg-ppmf,
+    GHSA-r9hj-j2rw-4q3m, and GHSA-43gg-c3xx-7w7g). (alexandre-daubois)
+
 - Phar:
   . Fixed GHSA-j3wh-g957-2m85 (Integer overflow in phar_tar_number() allowing
     TAR archive entry injection). (CVE-2026-6103) (Jakub Zelenka)

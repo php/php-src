@@ -5521,7 +5521,8 @@ for (;; pptr++)
 
     if (meta < META_ASTERISK || meta > META_MINMAX_QUERY)
       {
-      if (OFLOW_MAX - *lengthptr < (PCRE2_SIZE)(code - orig_code))
+      if (*lengthptr > OFLOW_MAX ||
+          OFLOW_MAX - *lengthptr < (PCRE2_SIZE)(code - orig_code))
         {
         *errorcodeptr = ERR20;   /* Integer overflow */
         return 0;
@@ -8305,7 +8306,8 @@ for (;;)
     *reqcuflagsptr = reqcuflags;
     if (lengthptr != NULL)
       {
-      if (OFLOW_MAX - *lengthptr < length)
+      if (*lengthptr > MAX_PATTERN_SIZE ||
+          MAX_PATTERN_SIZE - *lengthptr < length)
         {
         *errorcodeptr = ERR20;
         return 0;
@@ -8328,6 +8330,19 @@ for (;;)
     {
     code = *codeptr + 1 + LINK_SIZE + skipunits;
     length += 1 + LINK_SIZE;
+
+    /* Move the accumulated length into *lengthptr, providing the next call to
+    compile_branch with as much space in &length and &code as the first did. */
+
+    if (*lengthptr > MAX_PATTERN_SIZE ||
+        MAX_PATTERN_SIZE - *lengthptr < length)
+      {
+      *errorcodeptr = ERR20;
+      cb->erroroffset = 0;
+      return 0;
+      }
+    *lengthptr += length;
+    length = 0;
     }
   else
     {
@@ -10243,9 +10258,29 @@ the compiled pattern and names table. Integer overflow should no longer be
 possible because nowadays we limit the maximum value of cb.names_found and
 cb.name_entry_size. */
 
-re_blocksize = sizeof(pcre2_real_code) +
-  CU2BYTES(length +
+re_blocksize = CU2BYTES(
   (PCRE2_SIZE)cb.names_found * (PCRE2_SIZE)cb.name_entry_size);
+
+if (length > BYTES2CU(PCRE2_SIZE_MAX - re_blocksize))
+  {
+  /* Given the current value of 2^30 for MAX_PATTERN_SIZE, this block is only
+  reachable when both PCRE2_CODE_UNIT_WIDTH >= 16 and sizeof(size_t) is
+  32 bits. */
+  errorcode = ERR20;
+  cb.erroroffset = 0;
+  goto HAD_CB_ERROR;
+  }
+
+re_blocksize += CU2BYTES(length);
+
+if (sizeof(pcre2_real_code) > PCRE2_SIZE_MAX - re_blocksize)
+  {
+  errorcode = ERR20;
+  cb.erroroffset = 0;
+  goto HAD_CB_ERROR;
+  }
+
+re_blocksize += sizeof(pcre2_real_code);
 re = (pcre2_real_code *)
   ccontext->memctl.malloc(re_blocksize, ccontext->memctl.memory_data);
 if (re == NULL)

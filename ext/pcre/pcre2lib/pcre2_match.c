@@ -2550,7 +2550,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
     else
       {
       GETCHARINCTEST(fc, Feptr);
-      Feptr = PRIV(extuni)(fc, Feptr, mb->start_subject, mb->end_subject, utf,
+      Feptr = PRIV(extuni)(fc, Feptr, mb->check_subject, mb->end_subject, utf,
         NULL);
       }
     CHECK_PARTIAL();
@@ -2903,7 +2903,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
           else
             {
             GETCHARINCTEST(fc, Feptr);
-            Feptr = PRIV(extuni)(fc, Feptr, mb->start_subject,
+            Feptr = PRIV(extuni)(fc, Feptr, mb->check_subject,
               mb->end_subject, utf, NULL);
             }
           CHECK_PARTIAL();
@@ -3725,7 +3725,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
           else
             {
             GETCHARINCTEST(fc, Feptr);
-            Feptr = PRIV(extuni)(fc, Feptr, mb->start_subject, mb->end_subject,
+            Feptr = PRIV(extuni)(fc, Feptr, mb->check_subject, mb->end_subject,
               utf, NULL);
             }
           CHECK_PARTIAL();
@@ -4306,7 +4306,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
           else
             {
             GETCHARINCTEST(fc, Feptr);
-            Feptr = PRIV(extuni)(fc, Feptr, mb->start_subject, mb->end_subject,
+            Feptr = PRIV(extuni)(fc, Feptr, mb->check_subject, mb->end_subject,
               utf, NULL);
             }
           CHECK_PARTIAL();
@@ -6327,10 +6327,6 @@ PCRE2_SPTR req_cu_ptr;
 PCRE2_SPTR start_partial;
 PCRE2_SPTR match_partial;
 
-#ifdef SUPPORT_JIT
-BOOL use_jit;
-#endif
-
 /* This flag is needed even when Unicode is not supported for convenience
 (it is used by the IS_NEWLINE macro). */
 
@@ -6340,9 +6336,6 @@ BOOL utf = FALSE;
 BOOL ucp = FALSE;
 BOOL allow_invalid;
 uint32_t fragment_options = 0;
-#ifdef SUPPORT_JIT
-BOOL jit_checked_utf = FALSE;
-#endif
 #endif  /* SUPPORT_UNICODE */
 
 PCRE2_SIZE frame_size;
@@ -6411,15 +6404,6 @@ options |= (re->flags & FF) / ((FF & (~FF+1)) / (OO & (~OO+1)));
 #undef FF
 #undef OO
 
-/* If the pattern was successfully studied with JIT support, we will run the
-JIT executable instead of the rest of this function. Most options must be set
-at compile time for the JIT code to be usable. */
-
-#ifdef SUPPORT_JIT
-use_jit = (re->executable_jit != NULL &&
-          (options & ~PUBLIC_JIT_MATCH_OPTIONS) == 0);
-#endif
-
 /* Initialize UTF/UCP parameters. */
 
 #ifdef SUPPORT_UNICODE
@@ -6465,16 +6449,22 @@ match_data->startchar = 0;
 
 /* ============================= JIT matching ============================== */
 
-/* Prepare for JIT matching. Check a UTF string for validity unless no check is
-requested or invalid UTF can be handled. We check only the portion of the
-subject that might be be inspected during matching - from the offset minus the
-maximum lookbehind to the given length. This saves time when a small part of a
-large subject is being matched by the use of a starting offset. Note that the
-maximum lookbehind is a number of characters, not code units. */
+/* If the pattern was successfully studied with JIT support, we will run the
+JIT executable instead of the rest of this function. Most options must be set
+at compile time for the JIT code to be usable. */
 
 #ifdef SUPPORT_JIT
-if (use_jit)
+if (re->executable_jit != NULL &&
+    (options & ~PUBLIC_JIT_MATCH_OPTIONS) == 0 &&
+    PRIV(jit_check_exec)(re->executable_jit, options))
   {
+  /* Prepare for JIT matching. Check a UTF string for validity unless no check
+  is requested or invalid UTF can be handled. We check only the portion of the
+  subject that might be be inspected during matching - from the offset minus
+  the maximum lookbehind to the given length. This saves time when a small part
+  of a large subject is being matched by the use of a starting offset. Note that
+  the maximum lookbehind is a number of characters, not code units. */
+
 #ifdef SUPPORT_UNICODE
   if (utf && (options & PCRE2_NO_UTF_CHECK) == 0 && !allow_invalid)
     {
@@ -6534,16 +6524,12 @@ if (use_jit)
       match_data->startchar += start_match - subject;
       return match_data->rc;
       }
-    jit_checked_utf = TRUE;
     }
 #endif  /* SUPPORT_UNICODE */
 
-  /* If JIT returns BADOPTION, which means that the selected complete or
-  partial matching mode was not compiled, fall through to the interpreter. */
-
   rc = pcre2_jit_match(code, subject, length, start_offset, options,
     match_data, mcontext);
-  if (rc != PCRE2_ERROR_JIT_BADOPTION)
+
     {
     if (rc >= 0 && (options & PCRE2_COPY_MATCHED_SUBJECT) != 0)
       {
@@ -6568,12 +6554,8 @@ this. */
 
 mb->check_subject = subject;
 
-/* If a UTF subject string was not checked for validity in the JIT code above,
-check it here, and handle support for invalid UTF strings. The check above
-happens only when invalid UTF is not supported and PCRE2_NO_CHECK_UTF is unset.
-If we get here in those circumstances, it means the subject string is valid,
-but for some reason JIT matching was not successful. There is no need to check
-the subject again.
+/* Check the validity of UTF subject strings. The check happens only when
+PCRE2_NO_CHECK_UTF is unset.
 
 We check only the portion of the subject that might be be inspected during
 matching - from the offset minus the maximum lookbehind to the given length.
@@ -6585,11 +6567,7 @@ Note also that support for invalid UTF forces a check, overriding the setting
 of PCRE2_NO_CHECK_UTF. */
 
 #ifdef SUPPORT_UNICODE
-if (utf &&
-#ifdef SUPPORT_JIT
-    !jit_checked_utf &&
-#endif
-    ((options & PCRE2_NO_UTF_CHECK) == 0 || allow_invalid))
+if (utf && ((options & PCRE2_NO_UTF_CHECK) == 0 || allow_invalid))
   {
 #if PCRE2_CODE_UNIT_WIDTH != 32
   BOOL skipped_bad_start = FALSE;
