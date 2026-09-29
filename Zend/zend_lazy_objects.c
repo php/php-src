@@ -62,7 +62,7 @@ typedef struct _zend_lazy_object_info {
 		zend_object *instance; /* For initialized lazy proxy objects */
 	} u;
 	zend_lazy_object_flags_t flags;
-	int lazy_properties_count;
+	uint32_t lazy_properties_count;
 } zend_lazy_object_info;
 
 /* zend_hash dtor_func_t for zend_lazy_objects_store.infos */
@@ -260,7 +260,7 @@ ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 		}
 	}
 
-	int lazy_properties_count = 0;
+	uint32_t lazy_properties_count = 0;
 
 	if (!obj) {
 		if (UNEXPECTED(reflection_ce->ce_flags & ZEND_ACC_UNINSTANTIABLE)) {
