@@ -5145,7 +5145,7 @@ static void reflection_class_new_lazy(INTERNAL_FUNCTION_PARAMETERS,
 		zend_is_callable(&fci.function_name, &fcc, NULL);
 	}
 
-	obj = zend_object_make_lazy(obj, ce, &fci.function_name, &fcc,
+	obj = zend_object_make_lazy(obj, ce, &fcc,
 			strategy | options);
 
 	if (!obj) {
