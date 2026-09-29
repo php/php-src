@@ -1133,7 +1133,7 @@ cleanup_args:
 /* }}} */
 
 ZEND_API void zend_call_known_function_ex(
-		zend_function *fn, zend_object *object, zend_class_entry *called_scope, zval *retval_ptr,
+		zend_function *fn, zend_object *this_ptr, zend_class_entry *called_scope, zval *retval_ptr,
 		uint32_t param_count, zval *params, HashTable *named_params, uint32_t consumed_args)
 {
 	zval retval;
@@ -1143,16 +1143,17 @@ ZEND_API void zend_call_known_function_ex(
 	ZEND_ASSERT(fn && "zend_function must be passed!");
 
 	fci.size = sizeof(fci);
-	fci.object = object;
 	fci.retval = retval_ptr ? retval_ptr : &retval;
 	fci.param_count = param_count;
 	fci.params = params;
 	fci.named_params = named_params;
 	fci.consumed_args = consumed_args;
-	ZVAL_UNDEF(&fci.function_name); /* Unused */
+	/* Unused */
+	ZVAL_UNDEF(&fci.function_name);
+	fci.object = NULL;
 
 	fcic.function_handler = fn;
-	fcic.object = object;
+	fcic.object = this_ptr;
 	fcic.called_scope = called_scope;
 
 	zend_result result = zend_call_function(&fci, &fcic);
@@ -1170,16 +1171,16 @@ ZEND_API void zend_call_known_function_ex(
 }
 
 ZEND_API void zend_call_known_instance_method_with_2_params(
-		zend_function *fn, zend_object *object, zval *retval_ptr, zval *param1, zval *param2)
+		zend_function *fn, zend_object *this_ptr, zval *retval_ptr, zval *param1, zval *param2)
 {
 	zval params[2];
 	ZVAL_COPY_VALUE(&params[0], param1);
 	ZVAL_COPY_VALUE(&params[1], param2);
-	zend_call_known_instance_method(fn, object, retval_ptr, 2, params);
+	zend_call_known_instance_method(fn, this_ptr, retval_ptr, 2, params);
 }
 
 ZEND_API zend_result zend_call_method_if_exists(
-		zend_object *object, zend_string *method_name, zval *retval,
+		zend_object *this_ptr, zend_string *method_name, zval *retval,
 		uint32_t param_count, zval *params)
 {
 	zval zval_method;
@@ -1187,7 +1188,7 @@ ZEND_API zend_result zend_call_method_if_exists(
 
 	ZVAL_STR(&zval_method, method_name);
 
-	if (UNEXPECTED(!zend_is_callable_ex(&zval_method, object, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL))) {
+	if (UNEXPECTED(!zend_is_callable_ex(&zval_method, this_ptr, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL))) {
 		ZVAL_UNDEF(retval);
 		return FAILURE;
 	}

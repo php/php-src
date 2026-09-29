@@ -3791,13 +3791,13 @@ static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *sc
 		const zend_class_entry *frame_scope = get_scope(frame);
 		fcc->calling_scope = ce;
 		if (frame_scope && !fcc->object) {
-			zend_object *object = zend_get_this_object(frame);
+			zend_object *this_ptr = zend_get_this_object(frame);
 
-			if (object &&
-			    instanceof_function(object->ce, frame_scope) &&
+			if (this_ptr &&
+			    instanceof_function(this_ptr->ce, frame_scope) &&
 			    instanceof_function(frame_scope, ce)) {
-				fcc->object = object;
-				fcc->called_scope = object->ce;
+				fcc->object = this_ptr;
+				fcc->called_scope = this_ptr->ce;
 			} else {
 				fcc->called_scope = ce;
 			}
@@ -3870,13 +3870,13 @@ static zend_always_inline bool zend_is_method_callable(zend_string *callable, co
 		if (ZSTR_HAS_CE_CACHE(class_name) && ZSTR_GET_CE_CACHE(class_name)) {
 			fcc->calling_scope = ZSTR_GET_CE_CACHE(class_name);
 			if (scope && !fcc->object) {
-				zend_object *object = zend_get_this_object(frame);
+				zend_object *this_ptr = zend_get_this_object(frame);
 
-				if (object &&
-				    instanceof_function(object->ce, scope) &&
+				if (this_ptr &&
+				    instanceof_function(this_ptr->ce, scope) &&
 				    instanceof_function(scope, fcc->calling_scope)) {
-					fcc->object = object;
-					fcc->called_scope = object->ce;
+					fcc->object = this_ptr;
+					fcc->called_scope = this_ptr->ce;
 				} else {
 					fcc->called_scope = fcc->calling_scope;
 				}
@@ -3982,10 +3982,10 @@ get_function_via_handler:
 				retval = true;
 				call_via_handler = (fcc->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) != 0;
 				if (call_via_handler && !fcc->object) {
-					zend_object *object = zend_get_this_object(frame);
-					if (object &&
-					    instanceof_function(object->ce, fcc->calling_scope)) {
-						fcc->object = object;
+					zend_object *this_ptr = zend_get_this_object(frame);
+					if (this_ptr &&
+					    instanceof_function(this_ptr->ce, fcc->calling_scope)) {
+						fcc->object = this_ptr;
 					}
 				}
 			}
