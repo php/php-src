@@ -4,7 +4,9 @@ Bug GH-9590 003 (stream_select past FD_SETSIZE: every set grows, and a stream in
 posix
 --SKIPIF--
 <?php
-if (!function_exists('posix_setrlimit') || !posix_setrlimit(POSIX_RLIMIT_NOFILE, 2048, -1)) {
+// Keep the hard limit: raising it to unlimited fails even for root on Linux (fs.nr_open)
+$hard = function_exists('posix_getrlimit') ? posix_getrlimit(POSIX_RLIMIT_NOFILE)[1] : -1;
+if (!function_exists('posix_setrlimit') || !posix_setrlimit(POSIX_RLIMIT_NOFILE, 2048, is_int($hard) ? $hard : -1)) {
     die('skip Failed to set POSIX_RLIMIT_NOFILE');
 }
 if (PHP_OS_FAMILY === 'Solaris' && PHP_INT_SIZE === 8)
@@ -13,7 +15,8 @@ if (PHP_OS_FAMILY === 'Solaris' && PHP_INT_SIZE === 8)
 --FILE--
 <?php
 
-posix_setrlimit(POSIX_RLIMIT_NOFILE, 2048, -1);
+$hard = posix_getrlimit(POSIX_RLIMIT_NOFILE)[1];
+posix_setrlimit(POSIX_RLIMIT_NOFILE, 2048, is_int($hard) ? $hard : -1);
 
 // A low descriptor, opened before the filler.
 list($lo, $lo_peer) = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, STREAM_IPPROTO_IP);

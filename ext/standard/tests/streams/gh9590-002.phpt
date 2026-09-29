@@ -6,7 +6,9 @@ platforms where that limit has been lifted)
 posix
 --SKIPIF--
 <?php
-if (!function_exists('posix_setrlimit') || !posix_setrlimit(POSIX_RLIMIT_NOFILE, 2048, -1)) {
+// Keep the hard limit: raising it to unlimited fails even for root on Linux (fs.nr_open)
+$hard = function_exists('posix_getrlimit') ? posix_getrlimit(POSIX_RLIMIT_NOFILE)[1] : -1;
+if (!function_exists('posix_setrlimit') || !posix_setrlimit(POSIX_RLIMIT_NOFILE, 2048, is_int($hard) ? $hard : -1)) {
     die('skip Failed to set POSIX_RLIMIT_NOFILE');
 }
 if (PHP_OS_FAMILY === 'Solaris' && PHP_INT_SIZE === 8)
@@ -15,7 +17,8 @@ if (PHP_OS_FAMILY === 'Solaris' && PHP_INT_SIZE === 8)
 --FILE--
 <?php
 
-posix_setrlimit(POSIX_RLIMIT_NOFILE, 2048, -1);
+$hard = posix_getrlimit(POSIX_RLIMIT_NOFILE)[1];
+posix_setrlimit(POSIX_RLIMIT_NOFILE, 2048, is_int($hard) ? $hard : -1);
 
 $fds = [];
 for ($i = 0; $i < 1023; $i++) {
