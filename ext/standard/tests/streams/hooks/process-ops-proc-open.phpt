@@ -25,6 +25,12 @@ class Counting extends Scheduler
     }
 }
 
+// One child alone, for the bound below: a slow build (ASAN) starts php slowly
+$start = hrtime(true);
+$proc = proc_open([PHP_BINARY, '-n', '-r', "usleep(300000); exit(0);"], [], $pipes);
+proc_close($proc);
+$one = (hrtime(true) - $start) / 1e9;
+
 $scheduler = new Counting();
 Io\Hooks\set_hooks($scheduler);
 $results = [];
@@ -39,8 +45,8 @@ foreach ([7, 8] as $code) {
 $scheduler->loop();
 ksort($results);
 var_dump($results);
-// The two waits overlapped instead of adding up
-var_dump((hrtime(true) - $start) / 1e9 < 0.55);
+// The two waits overlapped instead of adding up to twice one child
+var_dump((hrtime(true) - $start) / 1e9 < 1.6 * $one);
 var_dump($scheduler->seen);
 Io\Hooks\set_hooks(null);
 ?>

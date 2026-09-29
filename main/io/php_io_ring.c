@@ -1751,7 +1751,9 @@ static void php_io_ring_multishot_cqe(php_io_ring *ring, php_io_ring_req *req, i
 static void php_io_ring_process_cqe(php_io_ring *ring, uintptr_t data, int32_t res, bool more)
 {
 	php_io_ring_req *req = (php_io_ring_req *) (data & ~PHP_IO_RING_TAG_MASK);
-	if (!req) {
+	/* A cancel's own cqe: the target completes on its own and may be freed by
+	 * the time it arrives, so it is not looked at */
+	if (!req || (data & PHP_IO_RING_TAG_MASK) == PHP_IO_RING_TAG_CANCEL) {
 		return;
 	}
 	if (req->multishot && (data & PHP_IO_RING_TAG_MASK) == 0) {
@@ -1761,9 +1763,6 @@ static void php_io_ring_process_cqe(php_io_ring *ring, uintptr_t data, int32_t r
 	switch (data & PHP_IO_RING_TAG_MASK) {
 		case PHP_IO_RING_TAG_LT:
 			php_io_ring_req_lt_cqe(ring, req, res);
-			break;
-		case PHP_IO_RING_TAG_CANCEL:
-			/* The target completes on its own, whatever the cancel reported */
 			break;
 		default:
 			php_io_ring_req_main_cqe(ring, req, res);

@@ -9,7 +9,7 @@ include __DIR__ . '/../../standard/tests/streams/hooks/scheduler.inc';
 
 class TimerScheduler extends Scheduler
 {
-    public int $latestDeadline = 0;
+    public int|float $latestDeadline = 0;   /* hrtime() is a float on 32-bit */
 
     public function run(\Io\Operation $op): \Io\Completion
     {

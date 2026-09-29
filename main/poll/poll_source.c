@@ -81,13 +81,17 @@ PHPAPI bool php_poll_has_signal_source(void)
 /* Make the kqueue readable at once, for what the filters would not report */
 static zend_result php_poll_kqueue_kick(int kq)
 {
-	struct kevent kev;
+	struct kevent kevs[2];
 #ifdef EVFILT_USER
-	EV_SET(&kev, 0, EVFILT_USER, EV_ADD | EV_ONESHOT, NOTE_TRIGGER, 0, NULL);
+	/* Added and triggered in two steps: FreeBSD drops NOTE_TRIGGER given with
+	 * the EV_ADD of a new note */
+	EV_SET(&kevs[0], 0, EVFILT_USER, EV_ADD | EV_ONESHOT, 0, 0, NULL);
+	EV_SET(&kevs[1], 0, EVFILT_USER, 0, NOTE_TRIGGER, 0, NULL);
+	return kevent(kq, kevs, 2, NULL, 0, NULL) == 0 ? SUCCESS : FAILURE;
 #else
-	EV_SET(&kev, 0, EVFILT_TIMER, EV_ADD | EV_ONESHOT, 0, 0, NULL);
+	EV_SET(&kevs[0], 0, EVFILT_TIMER, EV_ADD | EV_ONESHOT, 0, 0, NULL);
+	return kevent(kq, kevs, 1, NULL, 0, NULL) == 0 ? SUCCESS : FAILURE;
 #endif
-	return kevent(kq, &kev, 1, NULL, 0, NULL) == 0 ? SUCCESS : FAILURE;
 }
 
 static int php_poll_kqueue_open(void)
