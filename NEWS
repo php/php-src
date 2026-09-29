@@ -22,6 +22,9 @@ PHP                                                                        NEWS
   . Fixed crashes with FFI callbacks created from __call() trampolines
     and array callables whose object is released. (Ilia Alshanetsky)
 
+- MySQLnd:
+  . Fixed field_count not resetting on OK packet. (Kamil Tekiela)
+
 - Opcache:
   . Fix zend_analyze_calls() call_stack buffer overrun. (Mrmaxmeier)
   . Fixed bug GH-23679 (Tracing JIT writes a parent private property into a
