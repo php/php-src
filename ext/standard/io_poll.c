@@ -761,6 +761,9 @@ PHPAPI void php_poll_notify(zend_object *handle_obj)
 
 typedef struct {
 	pid_t pid;
+#ifndef PHP_WIN32
+	pid_t pgid; /* the child's group while it was alive, for a later wait on the group */
+#endif
 	int fd;
 	bool reaped;
 	bool exited; /* reaped here or elsewhere */
@@ -829,8 +832,12 @@ static bool php_io_poll_process_handle_fired(php_poll_handle_object *handle)
 	if (!data->exited) {
 		int status;
 		pid_t pid;
-		/* A zombie still has its group, for a later wait on the group */
+		/* A zombie keeps its group on Linux but not on macOS: fall back to the
+		 * group seen when the handle was made */
 		pid_t pgid = getpgid(data->pid);
+		if (pgid <= 0) {
+			pgid = data->pgid;
+		}
 		do {
 			pid = waitpid(data->pid, &status, WNOHANG);
 		} while (pid == -1 && errno == EINTR);
@@ -901,6 +908,8 @@ static zend_result php_io_poll_process_handle_init(php_poll_handle_object *handl
 	data->fd = fd;
 #ifdef PHP_WIN32
 	data->process = process;
+#else
+	data->pgid = getpgid(pid);
 #endif
 	handle->handle_data = data;
 	return SUCCESS;
@@ -914,6 +923,9 @@ PHPAPI void php_io_poll_process_handle_create(zval *dest, pid_t pid)
 		php_io_poll_process_handle_data *data = ecalloc(1, sizeof(*data));
 		data->pid = pid;
 		data->fd = -1;
+#ifndef PHP_WIN32
+		data->pgid = getpgid(pid);
+#endif
 		PHP_POLL_HANDLE_OBJ_FROM_ZV(dest)->handle_data = data;
 	}
 }

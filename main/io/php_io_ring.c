@@ -99,7 +99,7 @@ struct _php_io_ring_req {
 		         char *host; size_t hostlen; char *service; size_t servicelen; } gni;
 		struct { struct sockaddr *addr; socklen_t addrlen; socklen_t cap; } sock;
 		struct { php_socket_t fd; bool data_only; } fsync;
-		struct { int status; } waitpid;
+		struct { int status; pid_t pgid; } waitpid; /* pgid: the child's group at submit, 0 unknown */
 		struct { php_sigset_t set; php_siginfo_t info; } sigwait;
 		struct { char *buf; } io; /* bounce buffer, or NULL */
 	} u;
@@ -590,7 +590,7 @@ static void php_io_ring_req_discard(php_io_ring_req *req)
 #else
 			if (unclaimed && res > 0 && (WIFEXITED(req->u.waitpid.status) || WIFSIGNALED(req->u.waitpid.status))) {
 #endif
-				php_io_child_reaped((pid_t) res, req->u.waitpid.status);
+				php_io_child_reaped_ex((pid_t) res, req->u.waitpid.pgid, req->u.waitpid.status);
 			}
 			break;
 		case PHP_IO_OP_SIGWAIT:
@@ -959,6 +959,13 @@ static zend_result php_io_ring_submit_one(php_io_ring *ring, php_io_ring_req *re
 			uses_caller = true;
 			break;
 		case PHP_IO_OP_WAITPID:
+#ifndef PHP_WIN32
+			/* A zombie loses its group on macOS: take it while the child is alive */
+			req->u.waitpid.pgid = op->u.waitpid.pid > 0 ? getpgid((pid_t) op->u.waitpid.pid) : 0;
+			if (req->u.waitpid.pgid < 0) {
+				req->u.waitpid.pgid = 0;
+			}
+#endif
 			err = ior_prep_waitpid(ctx, sqe, (ior_pid_t) op->u.waitpid.pid, &req->u.waitpid.status, op->u.waitpid.options) < 0 ? ENOTSUP : 0;
 			break;
 		case PHP_IO_OP_SIGWAIT: {
