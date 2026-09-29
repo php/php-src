@@ -1,5 +1,5 @@
 --TEST--
-Io\Terminal\Terminal: getSize returns false for non-terminal streams without environment fallback
+Io\Terminal\Terminal: getSize returns null for non-terminal streams without environment fallback
 --ENV--
 COLUMNS=100
 LINES=30
@@ -15,4 +15,4 @@ var_dump($terminal->getSize());
 
 ?>
 --EXPECT--
-bool(false)
+NULL

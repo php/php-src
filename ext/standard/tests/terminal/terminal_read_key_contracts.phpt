@@ -1,5 +1,5 @@
 --TEST--
-Io\Terminal\Terminal: readKey false vs TerminalException contracts on POSIX PTY
+Io\Terminal\Terminal: readKey null vs TerminalException contracts on POSIX PTY
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY === 'Windows') {
@@ -48,20 +48,20 @@ $proc = proc_open(
 $terminal = Terminal::fromStreams($pipes[0]);
 $terminal->enableRawMode();
 
-// Contract 1: No input + zero timeout (non-blocking) returns false immediately
+// Contract 1: No input + zero timeout (non-blocking) returns null immediately
 $start = hrtime(true);
 $key = $terminal->readKey(Duration::fromSeconds(0));
 $elapsed_ms = (hrtime(true) - $start) / 1e6;
 
-var_dump($key === false);
+var_dump($key === null);
 var_dump($elapsed_ms < 20.0);
 
-// Contract 2: No input + small finite timeout returns false after duration
+// Contract 2: No input + small finite timeout returns null after duration
 $start = hrtime(true);
 $key = $terminal->readKey(Duration::fromMilliseconds(25));
 $elapsed_ms = (hrtime(true) - $start) / 1e6;
 
-var_dump($key === false);
+var_dump($key === null);
 var_dump($elapsed_ms >= 20.0);
 
 // Contract 3: Negative Duration throws ValueError
