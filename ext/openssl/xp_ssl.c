@@ -3060,6 +3060,7 @@ static int php_openssl_enable_crypto(php_stream *stream,
 				elapsed_time = php_openssl_subtract_timeval(cur_time, start_time);
 
 				if (php_openssl_compare_timeval( elapsed_time, *timeout) > 0) {
+					php_openssl_set_blocking(sslsock, blocked);
 					php_stream_warn(stream, TimeOut, "SSL: Handshake timed out");
 					return -1;
 				}

@@ -24,7 +24,6 @@
 #include "php.h"
 
 #include "Zend/zend_exceptions.h"
-#include "Zend/zend_atomic.h"
 
 #include "php_random.h"
 #include "php_random_csprng.h"
@@ -61,7 +60,7 @@
 #endif
 
 #ifndef PHP_WIN32
-static zend_atomic_int random_fd = ZEND_ATOMIC_INT_INITIALIZER(-1);
+static atomic_int random_fd = -1;
 #endif
 
 ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_random_bytes_ex(void *bytes, size_t size, char *errstr, size_t errstr_size)
@@ -146,7 +145,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_random_bytes_ex(void *bytes, size_
 	}
 # endif
 	if (read_bytes < size) {
-		int    fd = zend_atomic_int_load_ex(&random_fd);
+		int    fd = atomic_load(&random_fd);
 		struct stat st;
 
 		if (fd < 0) {
@@ -179,7 +178,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_random_bytes_ex(void *bytes, size_
 				return FAILURE;
 			}
 			int expected = -1;
-			if (!zend_atomic_int_compare_exchange_ex(&random_fd, &expected, fd)) {
+			if (!atomic_compare_exchange_strong(&random_fd, &expected, fd)) {
 				close(fd);
 				/* expected is now the actual value of random_fd */
 				fd = expected;
@@ -265,7 +264,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_random_int(zend_long min, zend_lon
 PHPAPI void php_random_csprng_shutdown(void)
 {
 #ifndef PHP_WIN32
-	int fd = zend_atomic_int_exchange(&random_fd, -1);
+	int fd = atomic_exchange(&random_fd, -1);
 	if (fd != -1) {
 		close(fd);
 	}

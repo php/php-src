@@ -52,10 +52,28 @@
 #include <assert.h>
 #include <math.h>
 
+#ifdef __cplusplus
+extern "C++" {
+# include <atomic>
+/* Make the atomic types used by Zend available to C++ extensions. */
+using std::atomic_bool;
+using std::atomic_int;
+}
+#else
+# if !defined(__STDC_VERSION__) || __STDC_VERSION__ < 201112L
+#  error "Zend requires C11 or later"
+# endif
+# ifdef __STDC_NO_ATOMICS__
+#  error "Zend requires C11 atomics"
+# endif
+# include <stdatomic.h>
+#endif
+
 #ifdef HAVE_UNIX_H
 # include <unix.h>
 #endif
 
+#include <stdalign.h>
 #include <stdarg.h>
 #include <stddef.h>
 
@@ -356,14 +374,10 @@ char *alloca();
 # endif
 #endif
 
-#if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(__APPLE__) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)) || __has_attribute(noreturn)
-# define HAVE_NORETURN
-# define ZEND_NORETURN __attribute__((noreturn))
-#elif defined(ZEND_WIN32)
-# define HAVE_NORETURN
-# define ZEND_NORETURN __declspec(noreturn)
+#if __STDC_VERSION__ >= 202311L || defined(__cplusplus)
+# define ZEND_NORETURN [[noreturn]]
 #else
-# define ZEND_NORETURN
+# define ZEND_NORETURN _Noreturn
 #endif
 
 #if __has_attribute(force_align_arg_pointer)
@@ -373,7 +387,6 @@ char *alloca();
 #endif
 
 #if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(__APPLE__) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__))
-# define HAVE_NORETURN_ALIAS
 # define HAVE_ATTRIBUTE_WEAK
 #endif
 

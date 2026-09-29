@@ -32,7 +32,6 @@
 #include "ext/standard/file.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_fopen_wrappers.h"
-#include "ext/standard/base64.h"
 #ifdef PHP_WIN32
 # include "win32/winutil.h"
 #endif
@@ -1733,7 +1732,7 @@ PHP_FUNCTION(openssl_pkcs12_export_to_file)
 
 	/* parse extra config from args array, promote this to an extra function */
 	if (args &&
-		(item = zend_hash_str_find(Z_ARRVAL_P(args), "friendly_name", sizeof("friendly_name")-1)) != NULL &&
+		(item = zend_hash_str_find(Z_ARRVAL_P(args), ZEND_STRL("friendly_name"))) != NULL &&
 		Z_TYPE_P(item) == IS_STRING
 	) {
 		friendly_name = Z_STRVAL_P(item);
@@ -1743,7 +1742,7 @@ PHP_FUNCTION(openssl_pkcs12_export_to_file)
 	   friendly_caname
 	*/
 
-	if (args && (item = zend_hash_str_find(Z_ARRVAL_P(args), "extracerts", sizeof("extracerts")-1)) != NULL) {
+	if (args && (item = zend_hash_str_find(Z_ARRVAL_P(args), ZEND_STRL("extracerts"))) != NULL) {
 		ca = php_openssl_array_to_X509_sk(item, 5, "extracerts");
 		if (!ca) {
 			goto cleanup;
@@ -1833,13 +1832,13 @@ PHP_FUNCTION(openssl_pkcs12_export)
 
 	/* parse extra config from args array, promote this to an extra function */
 	if (args &&
-		(item = zend_hash_str_find(Z_ARRVAL_P(args), "friendly_name", sizeof("friendly_name")-1)) != NULL &&
+		(item = zend_hash_str_find(Z_ARRVAL_P(args), ZEND_STRL("friendly_name"))) != NULL &&
 		Z_TYPE_P(item) == IS_STRING
 	) {
 		friendly_name = Z_STRVAL_P(item);
 	}
 
-	if (args && (item = zend_hash_str_find(Z_ARRVAL_P(args), "extracerts", sizeof("extracerts")-1)) != NULL) {
+	if (args && (item = zend_hash_str_find(Z_ARRVAL_P(args), ZEND_STRL("extracerts"))) != NULL) {
 		ca = php_openssl_array_to_X509_sk(item, 5, "extracerts");
 		if (!ca) {
 			goto cleanup;
@@ -2450,7 +2449,7 @@ PHP_FUNCTION(openssl_pkey_new)
 	if (args && Z_TYPE_P(args) == IS_ARRAY) {
 		EVP_PKEY *pkey;
 
-		if ((data = zend_hash_str_find(Z_ARRVAL_P(args), "rsa", sizeof("rsa")-1)) != NULL &&
+		if ((data = zend_hash_str_find(Z_ARRVAL_P(args), ZEND_STRL("rsa"))) != NULL &&
 			Z_TYPE_P(data) == IS_ARRAY) {
 			pkey = php_openssl_pkey_init_rsa(data);
 			if (!pkey) {
@@ -2458,7 +2457,7 @@ PHP_FUNCTION(openssl_pkey_new)
 			}
 			php_openssl_pkey_object_init(return_value, pkey, /* is_private */ true);
 			return;
-		} else if ((data = zend_hash_str_find(Z_ARRVAL_P(args), "dsa", sizeof("dsa") - 1)) != NULL &&
+		} else if ((data = zend_hash_str_find(Z_ARRVAL_P(args), ZEND_STRL("dsa"))) != NULL &&
 			Z_TYPE_P(data) == IS_ARRAY) {
 			bool is_private;
 			pkey = php_openssl_pkey_init_dsa(data, &is_private);
@@ -2467,7 +2466,7 @@ PHP_FUNCTION(openssl_pkey_new)
 			}
 			php_openssl_pkey_object_init(return_value, pkey, is_private);
 			return;
-		} else if ((data = zend_hash_str_find(Z_ARRVAL_P(args), "dh", sizeof("dh") - 1)) != NULL &&
+		} else if ((data = zend_hash_str_find(Z_ARRVAL_P(args), ZEND_STRL("dh"))) != NULL &&
 			Z_TYPE_P(data) == IS_ARRAY) {
 			bool is_private;
 			pkey = php_openssl_pkey_init_dh(data, &is_private);
@@ -2477,7 +2476,7 @@ PHP_FUNCTION(openssl_pkey_new)
 			php_openssl_pkey_object_init(return_value, pkey, is_private);
 			return;
 #ifdef HAVE_EVP_PKEY_EC
-		} else if ((data = zend_hash_str_find(Z_ARRVAL_P(args), "ec", sizeof("ec") - 1)) != NULL &&
+		} else if ((data = zend_hash_str_find(Z_ARRVAL_P(args), ZEND_STRL("ec"))) != NULL &&
 			Z_TYPE_P(data) == IS_ARRAY) {
 			bool is_private;
 			pkey = php_openssl_pkey_init_ec(data, &is_private);
@@ -2488,19 +2487,19 @@ PHP_FUNCTION(openssl_pkey_new)
 			return;
 #endif
 #if PHP_OPENSSL_API_VERSION >= 0x30000
-		} else if ((data = zend_hash_str_find(Z_ARRVAL_P(args), "x25519", sizeof("x25519") - 1)) != NULL &&
+		} else if ((data = zend_hash_str_find(Z_ARRVAL_P(args), ZEND_STRL("x25519"))) != NULL &&
 			Z_TYPE_P(data) == IS_ARRAY) {
 			php_openssl_pkey_object_curve_25519_448(return_value, "X25519", data);
 			return;
-		} else if ((data = zend_hash_str_find(Z_ARRVAL_P(args), "ed25519", sizeof("ed25519") - 1)) != NULL &&
+		} else if ((data = zend_hash_str_find(Z_ARRVAL_P(args), ZEND_STRL("ed25519"))) != NULL &&
 			Z_TYPE_P(data) == IS_ARRAY) {
 			php_openssl_pkey_object_curve_25519_448(return_value, "ED25519", data);
 			return;
-		} else if ((data = zend_hash_str_find(Z_ARRVAL_P(args), "x448", sizeof("x448") - 1)) != NULL &&
+		} else if ((data = zend_hash_str_find(Z_ARRVAL_P(args), ZEND_STRL("x448"))) != NULL &&
 			Z_TYPE_P(data) == IS_ARRAY) {
 			php_openssl_pkey_object_curve_25519_448(return_value, "X448", data);
 			return;
-		} else if ((data = zend_hash_str_find(Z_ARRVAL_P(args), "ed448", sizeof("ed448") - 1)) != NULL &&
+		} else if ((data = zend_hash_str_find(Z_ARRVAL_P(args), ZEND_STRL("ed448"))) != NULL &&
 			Z_TYPE_P(data) == IS_ARRAY) {
 			php_openssl_pkey_object_curve_25519_448(return_value, "ED448", data);
 			return;

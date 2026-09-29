@@ -1857,12 +1857,12 @@ static void zend_gc_remove_root_tmpvars(void);
 
 static zend_internal_function gc_destructor_fiber;
 
-static ZEND_COLD ZEND_NORETURN void gc_create_destructor_fiber_error(void)
+ZEND_NORETURN static ZEND_COLD void gc_create_destructor_fiber_error(void)
 {
 	zend_error_noreturn(E_ERROR, "Unable to create destructor fiber");
 }
 
-static ZEND_COLD ZEND_NORETURN void gc_start_destructor_fiber_error(void)
+ZEND_NORETURN static ZEND_COLD void gc_start_destructor_fiber_error(void)
 {
 	zend_error_noreturn(E_ERROR, "Unable to start destructor fiber");
 }

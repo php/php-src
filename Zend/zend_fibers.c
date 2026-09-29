@@ -358,9 +358,9 @@ ZEND_API void* zend_fiber_stack_base(zend_fiber_stack *stack)
 #endif
 
 #ifdef ZEND_FIBER_UCONTEXT
-static ZEND_NORETURN void zend_fiber_trampoline(void)
+ZEND_NORETURN static void zend_fiber_trampoline(void)
 #else
-static ZEND_NORETURN void zend_fiber_trampoline(boost_context_data data)
+ZEND_NORETURN static void zend_fiber_trampoline(boost_context_data data)
 #endif
 {
 	/* Initialize transfer struct with a copy of passed data. */
@@ -570,12 +570,9 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 
 	zend_fiber *fiber = EG(active_fiber);
 
-	/* Determine the current error_reporting ini setting. */
+	/* We cannot rely on EG(error_reporting) as a silence operator @ may modify the executor global error_reporting
+	 * value without changing the underlying INI value */
 	zend_long error_reporting = zend_ini_long_literal("error_reporting");
-	/* If error_reporting is 0 and not explicitly set to 0, zend_ini_str returns a null pointer. */
-	if (!error_reporting && !zend_ini_str_literal("error_reporting")) {
-		error_reporting = E_ALL;
-	}
 
 	EG(vm_stack) = NULL;
 

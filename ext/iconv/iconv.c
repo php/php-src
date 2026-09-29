@@ -1102,6 +1102,12 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 					const unsigned char *p;
 					size_t nbytes_required;
 
+					/* Some agents get confused about what char_cnt is; it will
+					 * be at least 4 at this point; if caller messed up and gave
+					 * too short of a max_line_len that was already caught above
+					 * and handled with PHP_ICONV_ERR_TOO_BIG. */
+					ZEND_ASSERT(char_cnt >= 4);
+
 					smart_str_appendc(pretval, 'Q');
 					char_cnt--;
 					smart_str_appendc(pretval, '?');

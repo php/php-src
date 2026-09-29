@@ -643,9 +643,9 @@ static int spl_array_has_dimension(zend_object *object, zval *offset, int check_
 PHP_METHOD(ArrayObject, offsetExists)
 {
 	zval *index;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &index) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(index)
+	ZEND_PARSE_PARAMETERS_END();
 	RETURN_BOOL(spl_array_has_dimension_ex(/* check_inherited */ false, Z_OBJ_P(ZEND_THIS), index, 2));
 } /* }}} */
 
@@ -653,9 +653,9 @@ PHP_METHOD(ArrayObject, offsetExists)
 PHP_METHOD(ArrayObject, offsetGet)
 {
 	zval *value, *index;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &index) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(index)
+	ZEND_PARSE_PARAMETERS_END();
 	value = spl_array_read_dimension_ex(0, Z_OBJ_P(ZEND_THIS), index, BP_VAR_R, return_value);
 	if (value != return_value) {
 		RETURN_COPY_DEREF(value);
@@ -666,9 +666,10 @@ PHP_METHOD(ArrayObject, offsetGet)
 PHP_METHOD(ArrayObject, offsetSet)
 {
 	zval *index, *value;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &index, &value) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL(index)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
 	spl_array_write_dimension_ex(0, Z_OBJ_P(ZEND_THIS), index, value);
 } /* }}} */
 
@@ -689,9 +690,9 @@ PHP_METHOD(ArrayObject, append)
 {
 	zval *value;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &value) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
 	spl_array_iterator_append(ZEND_THIS, value);
 } /* }}} */
 
@@ -699,9 +700,9 @@ PHP_METHOD(ArrayObject, append)
 PHP_METHOD(ArrayObject, offsetUnset)
 {
 	zval *index;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &index) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(index)
+	ZEND_PARSE_PARAMETERS_END();
 	spl_array_unset_dimension_ex(0, Z_OBJ_P(ZEND_THIS), index);
 } /* }}} */
 
@@ -1000,9 +1001,12 @@ PHP_METHOD(ArrayObject, __construct)
 		return; /* nothing to do */
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|AlC", &array, &ar_flags, &ce_get_iterator) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 3)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY_OR_OBJECT(array)
+		Z_PARAM_LONG(ar_flags)
+		Z_PARAM_CLASS(ce_get_iterator)
+	ZEND_PARSE_PARAMETERS_END();
 
 	intern = Z_SPLARRAY_P(object);
 
@@ -1669,9 +1673,11 @@ PHP_METHOD(ArrayIterator, __construct)
 		return; /* nothing to do */
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|Al", &array, &ar_flags) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY_OR_OBJECT(array)
+		Z_PARAM_LONG(ar_flags)
+	ZEND_PARSE_PARAMETERS_END();
 
 	intern = Z_SPLARRAY_P(object);
 
