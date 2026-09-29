@@ -512,7 +512,6 @@ static zend_object *zend_lazy_object_init_proxy(zend_object *obj)
 
 	/* Call factory */
 	zval retval;
-	int argc = 1;
 	zval zobj;
 	HashTable *named_params = NULL;
 	zend_fcall_info_cache *initializer = &info->u.initializer.fcc;
@@ -520,7 +519,7 @@ static zend_object *zend_lazy_object_init_proxy(zend_object *obj)
 
 	ZVAL_OBJ(&zobj, obj);
 
-	zend_call_known_fcc(initializer, &retval, argc, &zobj, named_params);
+	zend_call_known_fcc(initializer, &retval, 1, &zobj, named_params);
 
 	if (UNEXPECTED(EG(exception))) {
 		goto fail;
@@ -667,14 +666,13 @@ ZEND_API zend_object *zend_lazy_object_init(zend_object *obj)
 
 	/* Call initializer */
 	zval retval;
-	int argc = 1;
 	zval zobj;
 	HashTable *named_params = NULL;
 	zend_object *instance = NULL;
 
 	ZVAL_OBJ(&zobj, obj);
 
-	zend_call_known_fcc(initializer, &retval, argc, &zobj, named_params);
+	zend_call_known_fcc(initializer, &retval, 1, &zobj, named_params);
 
 	if (EG(exception)) {
 		zend_lazy_object_revert_init(obj, properties_table_snapshot, properties_snapshot);
