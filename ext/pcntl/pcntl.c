@@ -150,11 +150,14 @@ typedef psetid_t cpu_set_t;
 
 #define LONG_CONST(c) (zend_long) c
 
+#include "Zend/zend_bitset.h"
 #include "Zend/zend_enum.h"
 #include "Zend/zend_max_execution_timer.h"
 
 #include "pcntl_arginfo.h"
 #include "pcntl_decl.h"
+
+static zend_class_entry *SignalReturn_ce;
 static zend_class_entry *QosClass_ce;
 
 ZEND_DECLARE_MODULE_GLOBALS(pcntl)
@@ -185,12 +188,14 @@ ZEND_GET_MODULE(pcntl)
 #endif
 
 static void (*orig_interrupt_function)(zend_execute_data *execute_data);
+static zend_signal_interrupt_result (*orig_signal_interrupt_function)(void);
 
 static void pcntl_signal_handler(int, siginfo_t*, void*);
 static void pcntl_siginfo_to_zval(int, siginfo_t*, zval*);
-static void pcntl_signal_dispatch(void);
+static zend_signal_interrupt_result pcntl_signal_dispatch(void);
 static void pcntl_signal_dispatch_tick_function(int dummy_int, void *dummy_pointer);
 static void pcntl_interrupt_function(zend_execute_data *execute_data);
+static zend_signal_interrupt_result pcntl_signal_interrupt_function(void);
 
 static PHP_GINIT_FUNCTION(pcntl)
 {
@@ -204,7 +209,6 @@ PHP_RINIT_FUNCTION(pcntl)
 {
 	php_add_tick_function(pcntl_signal_dispatch_tick_function, NULL);
 	zend_hash_init(&PCNTL_G(php_signal_table), 16, NULL, ZVAL_PTR_DTOR, 0);
-	PCNTL_G(head) = PCNTL_G(tail) = PCNTL_G(spares) = NULL;
 	PCNTL_G(async_signals) = 0;
 	PCNTL_G(last_error) = 0;
 	PCNTL_G(num_signals) = NSIG;
@@ -220,17 +224,19 @@ PHP_RINIT_FUNCTION(pcntl)
 
 PHP_MINIT_FUNCTION(pcntl)
 {
+	SignalReturn_ce = register_class_Pcntl_SignalReturn();
 	QosClass_ce = register_class_Pcntl_QosClass();
 	register_pcntl_symbols(module_number);
 	orig_interrupt_function = zend_interrupt_function;
 	zend_interrupt_function = pcntl_interrupt_function;
+	orig_signal_interrupt_function = zend_signal_interrupt_function;
+	zend_signal_interrupt_function = pcntl_signal_interrupt_function;
 
 	return SUCCESS;
 }
 
 PHP_RSHUTDOWN_FUNCTION(pcntl)
 {
-	struct php_pcntl_pending_signal *sig;
 	zend_long signo;
 	zval *handle;
 
@@ -243,15 +249,11 @@ PHP_RSHUTDOWN_FUNCTION(pcntl)
 
 	zend_hash_destroy(&PCNTL_G(php_signal_table));
 
-	while (PCNTL_G(head)) {
-		sig = PCNTL_G(head);
-		PCNTL_G(head) = sig->next;
-		efree(sig);
-	}
-	while (PCNTL_G(spares)) {
-		sig = PCNTL_G(spares);
-		PCNTL_G(spares) = sig->next;
-		efree(sig);
+	if (PCNTL_G(pending_signals_queue)) {
+		efree(PCNTL_G(pending_signals_queue));
+		PCNTL_G(pending_signals_queue) = NULL;
+		efree(PCNTL_G(restart_syscalls));
+		PCNTL_G(pending_signals) = false;
 	}
 
 	return SUCCESS;
@@ -808,16 +810,11 @@ PHP_FUNCTION(pcntl_signal)
 		RETURN_THROWS();
 	}
 
-	if (!PCNTL_G(spares)) {
-		/* since calling malloc() from within a signal handler is not portable,
-		 * pre-allocate a few records for recording signals */
-		for (unsigned int i = 0; i < PCNTL_G(num_signals); i++) {
-			struct php_pcntl_pending_signal *psig;
-
-			psig = emalloc(sizeof(*psig));
-			psig->next = PCNTL_G(spares);
-			PCNTL_G(spares) = psig;
-		}
+	if (!PCNTL_G(pending_signals_queue)) {
+		atomic_store(&PCNTL_G(pending_signals_head), 0);
+		atomic_store(&PCNTL_G(pending_signals_tail), 0);
+		PCNTL_G(pending_signals_queue) = safe_emalloc(PCNTL_G(num_signals), sizeof(struct php_pcntl_pending_signal), 0);
+		PCNTL_G(restart_syscalls) = ecalloc(zend_bitset_len(PCNTL_G(num_signals)), ZEND_BITSET_ELM_SIZE);
 	}
 
 	/* If restart_syscalls was not explicitly specified and the signal is SIGALRM, then default
@@ -849,11 +846,19 @@ PHP_FUNCTION(pcntl_signal)
 		RETURN_THROWS();
 	}
 
-	/* Register with the OS first so that on failure we don't record a handler that was never installed */
-	if (php_signal4(signo, pcntl_signal_handler, (int) restart_syscalls, 1) == (void *)SIG_ERR) {
+	/* Register with the OS first so that on failure we don't record a handler that was never installed.
+	 * Always clear SA_RESTART so that interrupted syscalls return EINTR; zend_signal_interrupt_function
+	 * decides whether to restart based on the handler return value and restart_syscalls. */
+	if (php_signal4(signo, pcntl_signal_handler, false, 1) == (void *)SIG_ERR) {
 		PCNTL_G(last_error) = errno;
 		php_error_docref(NULL, E_WARNING, "Error assigning signal");
 		RETURN_FALSE;
+	}
+
+	if (restart_syscalls) {
+		zend_bitset_incl(PCNTL_G(restart_syscalls), signo);
+	} else {
+		zend_bitset_excl(PCNTL_G(restart_syscalls), signo);
 	}
 
 	/* Add the function name to our signal table */
@@ -1324,65 +1329,65 @@ PHP_FUNCTION(pcntl_strerror)
 /* Our custom signal handler that calls the appropriate php_function */
 static void pcntl_signal_handler(int signo, siginfo_t *siginfo, void *context)
 {
-	struct php_pcntl_pending_signal *psig = PCNTL_G(spares);
-	if (!psig) {
+	/* Only pcntl_signal_handler() modifies pending_signals_tail.
+	 * Signals are masked during execution. */
+
+	int tail = atomic_load(&PCNTL_G(pending_signals_tail));
+	int next_tail = (tail + 1) % PCNTL_G(num_signals);
+
+	if (next_tail == atomic_load(&PCNTL_G(pending_signals_head))) {
 		/* oops, too many signals for us to track, so we'll forget about this one */
 		return;
 	}
-	PCNTL_G(spares) = psig->next;
+
+	struct php_pcntl_pending_signal *psig = &PCNTL_G(pending_signals_queue)[tail];
 
 	psig->signo = signo;
-	psig->next = NULL;
-
 	psig->siginfo = *siginfo;
 
-	/* the head check is important, as the tick handler cannot atomically clear both
-	 * the head and tail */
-	if (PCNTL_G(head) && PCNTL_G(tail)) {
-		PCNTL_G(tail)->next = psig;
-	} else {
-		PCNTL_G(head) = psig;
-	}
-	PCNTL_G(tail) = psig;
+	atomic_store(&PCNTL_G(pending_signals_tail), next_tail);
+
 	PCNTL_G(pending_signals) = true;
 	if (PCNTL_G(async_signals)) {
 		atomic_store(&EG(vm_interrupt), true);
 	}
 }
 
-void pcntl_signal_dispatch(void)
+static bool pcntl_signal_dequeue(struct php_pcntl_pending_signal *sig)
+{
+	/* Only pcntl_signal_dequeue() modifies pending_signals_head.
+	 * pcntl_signal_dequeue() is never called concurrently with itself. */
+
+	int head = atomic_load(&PCNTL_G(pending_signals_head));
+
+	if (head == atomic_load(&PCNTL_G(pending_signals_tail))) {
+		return false; /* Queue is empty */
+	}
+
+	*sig = PCNTL_G(pending_signals_queue)[head];
+
+	atomic_store(&PCNTL_G(pending_signals_head), (head + 1) % PCNTL_G(num_signals));
+
+	return true;
+}
+
+zend_signal_interrupt_result pcntl_signal_dispatch(void)
 {
 	zval params[2], *handle, retval;
-	struct php_pcntl_pending_signal *queue, *next;
 	zend_object *old_exception;
 	const zend_op *old_opline_before_exception = NULL;
 	const zend_op *old_opline = NULL;
-	sigset_t mask;
-	sigset_t old_mask;
+	struct php_pcntl_pending_signal sig;
+	bool interrupt = false;
 
 	if(!PCNTL_G(pending_signals)) {
-		return;
+		return ZEND_SIGNAL_RESTART;
 	}
 
-	/* Mask all signals */
-	sigfillset(&mask);
-	sigprocmask(SIG_BLOCK, &mask, &old_mask);
-
-	/* Bail if the queue is empty or if we are already playing the queue */
-	if (!PCNTL_G(head) || PCNTL_G(processing_signal_queue)) {
-		sigprocmask(SIG_SETMASK, &old_mask, NULL);
-		return;
-	}
+	PCNTL_G(pending_signals) = false;
 
 	/* Prevent switching fibers when handling signals */
 	zend_fiber_switch_block();
-
-	/* Prevent reentrant handler calls */
-	PCNTL_G(processing_signal_queue) = true;
-
-	queue = PCNTL_G(head);
-	PCNTL_G(head) = NULL; /* simple stores are atomic */
-	PCNTL_G(tail) = NULL;
 
 	/* Dispatching can happen with an exception pending, e.g. from the interrupt check that runs
 	 * right after an internal function threw. call_user_function() does nothing in that state,
@@ -1398,33 +1403,48 @@ void pcntl_signal_dispatch(void)
 		EG(exception) = NULL;
 	}
 
-	/* Allocate */
-	while (queue) {
-		bool handler_threw = false;
-
-		if ((handle = zend_hash_index_find(&PCNTL_G(php_signal_table), queue->signo)) != NULL) {
+	/* Consume signals in FIFO order until the queue is empty. The queue may be
+	 * consumed during the invocation of PHP signal handlers if new signals are
+	 * delivered and PCNTL_G(pending_signals) is set. */
+	while (pcntl_signal_dequeue(&sig)) {
+		if ((handle = zend_hash_index_find(&PCNTL_G(php_signal_table), sig.signo)) != NULL) {
 			if (Z_TYPE_P(handle) != IS_LONG) {
-				ZVAL_LONG(&params[0], queue->signo);
+				ZVAL_LONG(&params[0], sig.signo);
 				array_init(&params[1]);
-				pcntl_siginfo_to_zval(queue->signo, &queue->siginfo, &params[1]);
+				pcntl_siginfo_to_zval(sig.signo, &sig.siginfo, &params[1]);
 
-				/* Call php signal handler - Note that we do not report errors, and we ignore the return value */
 				call_user_function(NULL, NULL, handle, &retval, 2, params);
-				zval_ptr_dtor(&retval);
 				zval_ptr_dtor(&params[1]);
 
-				handler_threw = NULL != EG(exception);
+				if (Z_TYPE(retval) == IS_OBJECT && Z_OBJCE(retval) == SignalReturn_ce) {
+					if (zend_enum_fetch_case_id(Z_OBJ(retval)) == ZEND_ENUM_Pcntl_SignalReturn_Interrupt) {
+						interrupt = true;
+					} else if (!zend_bitset_in(PCNTL_G(restart_syscalls), sig.signo)) {
+						interrupt = true;
+					}
+				} else if (Z_TYPE(retval) > IS_NULL) {
+					zend_type_error("Signal handler must return a Pcntl\\SignalReturn or no value, %s returned",
+						zend_zval_value_name(&retval));
+					interrupt = true;
+				} else if (!zend_bitset_in(PCNTL_G(restart_syscalls), sig.signo)) {
+					interrupt = true;
+				}
+
+				zval_ptr_dtor(&retval);
+
+				if (EG(exception)) {
+					interrupt = true;
+					break;
+				}
 			}
 		}
+	}
 
-		next = queue->next;
-		queue->next = PCNTL_G(spares);
-		PCNTL_G(spares) = queue;
-		queue = next;
-
-		/* No other handler can be called while the exception propagates */
-		if (handler_threw) {
-			break;
+	if (EG(exception)) {
+		/* Let any remaining signal be handled after the exception */
+		PCNTL_G(pending_signals) = true;
+		if (PCNTL_G(async_signals)) {
+			atomic_store(&EG(vm_interrupt), true);
 		}
 	}
 
@@ -1440,39 +1460,15 @@ void pcntl_signal_dispatch(void)
 		}
 	}
 
-	if (UNEXPECTED(queue)) {
-		/* Put back what the throwing handler did not get to, instead of dropping it, and ask
-		 * the engine to come back once the exception has been handled. Signals are still
-		 * blocked here, so PCNTL_G(head) cannot have been repopulated in the meantime. */
-		next = queue;
-
-		while (next->next) {
-			next = next->next;
-		}
-
-		PCNTL_G(head) = queue;
-		PCNTL_G(tail) = next;
-
-		if (PCNTL_G(async_signals)) {
-			atomic_store(&EG(vm_interrupt), true);
-		}
-	} else {
-		PCNTL_G(pending_signals) = false;
-	}
-
-	/* Re-enable queue */
-	PCNTL_G(processing_signal_queue) = false;
-
 	/* Re-enable fiber switching */
 	zend_fiber_switch_unblock();
 
-	/* return signal mask to previous state */
-	sigprocmask(SIG_SETMASK, &old_mask, NULL);
+	return interrupt ? ZEND_SIGNAL_INTERRUPT : ZEND_SIGNAL_RESTART;
 }
 
 static void pcntl_signal_dispatch_tick_function(int dummy_int, void *dummy_pointer)
 {
-	return pcntl_signal_dispatch();
+	pcntl_signal_dispatch();
 }
 
 /* {{{ Enable/disable asynchronous signal handling and return the old setting. */
@@ -1951,4 +1947,14 @@ static void pcntl_interrupt_function(zend_execute_data *execute_data)
 	if (orig_interrupt_function) {
 		orig_interrupt_function(execute_data);
 	}
+}
+
+static zend_signal_interrupt_result pcntl_signal_interrupt_function(void)
+{
+	zend_signal_interrupt_result result = pcntl_signal_dispatch();
+	if (orig_signal_interrupt_function() == ZEND_SIGNAL_INTERRUPT) {
+		result = ZEND_SIGNAL_INTERRUPT;
+	}
+
+	return result;
 }

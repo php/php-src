@@ -1112,6 +1112,12 @@ function pcntl_wifcontinued(int $status): bool {}
 
 namespace Pcntl
 {
+    enum SignalReturn
+    {
+        case Default;
+        case Interrupt;
+    }
+
     enum QosClass
     {
 	case UserInteractive;
