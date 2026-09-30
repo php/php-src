@@ -70,11 +70,6 @@ ZEND_API extern double zend_hrtime_timer_scale;
 # include <string.h>
 ZEND_API extern mach_timebase_info_data_t zend_hrtime_timerlib_info;
 
-#elif ZEND_HRTIME_PLATFORM_POSIX
-
-/* Not read anymore, kept for ABI compatibility */
-ZEND_API extern clockid_t zend_hrtime_posix_clock_id;
-
 #endif
 
 #define ZEND_NANO_IN_SEC UINT64_C(1000000000)
