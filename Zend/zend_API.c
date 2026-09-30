@@ -1685,7 +1685,7 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *ce) /* {{{ */
 }
 /* }}} */
 
-static zend_always_inline void _object_properties_init(zend_object *object, zend_class_entry *ce) /* {{{ */
+static zend_always_inline void _object_properties_init(zend_object *object, const zend_class_entry *ce) /* {{{ */
 {
 	if (ce->default_properties_count) {
 		zval *src = CE_DEFAULT_PROPERTIES_TABLE(ce);
@@ -1712,7 +1712,7 @@ static zend_always_inline void _object_properties_init(zend_object *object, zend
 }
 /* }}} */
 
-ZEND_API void object_properties_init(zend_object *object, zend_class_entry *ce) /* {{{ */
+ZEND_API void object_properties_init(zend_object *object, const zend_class_entry *ce) /* {{{ */
 {
 	object->properties = NULL;
 	_object_properties_init(object, ce);
