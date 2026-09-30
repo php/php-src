@@ -105,7 +105,7 @@ struct _php_io_ring_req {
 		struct { php_socket_t fd; bool data_only; } fsync;
 		struct { int status; } waitpid;
 		struct { php_sigset_t set; php_siginfo_t info; } sigwait;
-		struct { char *buf; } io; /* bounce buffer, or NULL */
+		struct { char *buf; bool advances; } io; /* bounce buffer, or NULL */
 	} u;
 };
 
@@ -474,6 +474,9 @@ static void php_io_ring_req_capture(php_io_ring_req *req, php_io_op *op)
 			break;
 		case PHP_IO_OP_READ:
 		case PHP_IO_OP_RECV:
+			/* Its bytes cannot be read again */
+			req->u.io.advances = op->u.io.offset < 0
+					&& !(op->type == PHP_IO_OP_RECV && (op->u.io.flags & MSG_PEEK));
 			if (!(op->flags & PHP_IO_OP_F_STREAM_BUF)) {
 				req->u.io.buf = pemalloc(MAX(php_io_ring_io_len(op), 1), 1);
 			}
@@ -1374,6 +1377,20 @@ static void php_io_ring_retry_cancels(php_io_ring *ring)
 	}
 }
 
+/* Bytes a read took for nobody */
+static void php_io_ring_read_unclaimed(php_io_ring_req *req, php_stream *stream, int32_t res)
+{
+	if ((req->type != PHP_IO_OP_READ && req->type != PHP_IO_OP_RECV) || !req->u.io.advances
+			|| res < 0) {
+		return;
+	}
+	if (res > 0 && req->u.io.buf) {
+		php_stream_mark_read_lost(stream);
+	} else {
+		php_stream_read_buffer_commit(stream, res);
+	}
+}
+
 /* The record is no longer wanted: drop it now if settled, or let the reap
  * that settles it drop it */
 static void php_io_ring_req_release(php_io_ring *ring, php_io_ring_req *req)
@@ -1386,6 +1403,10 @@ static void php_io_ring_req_release(php_io_ring *ring, php_io_ring_req *req)
 	if (req->ready) {
 		php_io_ring_list_remove(ring->ready, &ring->n_ready, req);
 		req->ready = false;
+	}
+	if (req->op && req->op->stream && req->main_done && !req->delivered) {
+		/* Reaped, never delivered */
+		php_io_ring_read_unclaimed(req, req->op->stream, req->main_res);
 	}
 	if (req->op) {
 		req->op->queue_data = NULL;
@@ -1534,6 +1555,9 @@ static void php_io_ring_req_main_cqe(php_io_ring *ring, php_io_ring_req *req, in
 	}
 
 	if (req->orphaned) {
+		if (req->orphan_stream && !req->delivered) {
+			php_io_ring_read_unclaimed(req, req->orphan_stream, res);
+		}
 		if (php_io_ring_req_settled(req)) {
 			php_io_ring_req_free(ring, req);
 		}
@@ -2094,12 +2118,25 @@ static zend_result php_io_ring_queue_submit(php_io_queue *base, php_io_op *op, v
 	return SUCCESS;
 }
 
+static void php_io_ring_queue_orphan(php_io_queue *base, php_io_op *op)
+{
+	if (op->queue == base && php_io_ring_orphan(((php_io_ring_queue *) base)->ring, op)) {
+		php_io_stream_orphan(op->stream, base);
+	}
+}
+
 static zend_result php_io_ring_queue_cancel(php_io_queue *base, php_io_op *op)
 {
 	php_io_ring_queue *q = (php_io_ring_queue *) base;
 	if (op->queue != base) {
 		errno = ENOENT;
 		return FAILURE;
+	}
+	php_io_ring_req *req = op->queue_data;
+	if (req && !req->group) {
+		/* Kept frozen as an orphan while the backend may fill the buffer */
+		php_io_ring_queue_orphan(base, op);
+		return SUCCESS;
 	}
 	return php_io_ring_cancel(q->ring, op);
 }
@@ -2122,13 +2159,6 @@ static bool php_io_ring_queue_take_inline(php_io_queue *base, php_io_op *op, php
 static int php_io_ring_queue_wait(php_io_queue *base, php_io_queue_completion *out, uint32_t max, const php_deadline *dl)
 {
 	return php_io_ring_wait(((php_io_ring_queue *) base)->ring, out, max, dl);
-}
-
-static void php_io_ring_queue_orphan(php_io_queue *base, php_io_op *op)
-{
-	if (op->queue == base && php_io_ring_orphan(((php_io_ring_queue *) base)->ring, op)) {
-		php_io_stream_orphan(op->stream, base);
-	}
 }
 
 static void php_io_ring_queue_drain(php_io_queue *base, php_stream *stream)

@@ -648,6 +648,16 @@ out_is_eof:
 	return retval;
 }
 
+PHPAPI void php_stream_read_buffer_commit(php_stream *stream, size_t len)
+{
+	if (len == 0) {
+		stream->eof = 1;
+		return;
+	}
+	ZEND_ASSERT(stream->readbuf && stream->writepos + len <= stream->readbuflen);
+	stream->writepos += len;
+}
+
 PHPAPI ssize_t php_stream_read(php_stream *stream, char *buf, size_t size)
 {
 	ssize_t toread = 0, didread = 0;

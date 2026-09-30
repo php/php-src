@@ -1154,7 +1154,16 @@ static zend_always_inline ssize_t php_io_descriptor_op(php_stream *stream, zend_
  * past the frame; any other buffer is the caller's. */
 static zend_always_inline uint32_t php_io_stream_buf_flag(php_stream *stream, const void *buf)
 {
-	return stream && stream->readbuf && buf == stream->readbuf + stream->writepos ? PHP_IO_OP_F_STREAM_BUF : 0;
+	return stream && buf == php_stream_read_buffer_tail(stream) ? PHP_IO_OP_F_STREAM_BUF : 0;
+}
+
+static zend_always_inline bool php_io_stream_read_lost(php_stream *stream)
+{
+	if (stream && php_stream_is_read_lost(stream)) {
+		php_io_set_errno(EIO);
+		return true;
+	}
+	return false;
 }
 
 #ifdef PHP_WIN32
@@ -1178,6 +1187,9 @@ static void php_io_recv_prep(php_io_op *op, php_stream *stream, const php_io_soc
 PHPAPI ssize_t php_io_recv_ex(php_stream *stream, zend_object *handle, php_socket_t fd, void *buf,
 		size_t len, int flags, php_deadline *dl)
 {
+	if (php_io_stream_read_lost(stream)) {
+		return -1;
+	}
 	php_io_sock_call c = { .fd = fd, .buf = buf, .len = len, .flags = flags };
 	return php_io_descriptor_op(stream, handle, dl, PHP_IO_HOOKS_F_DIRECT_DATA, php_io_recv_syscall,
 			php_io_recv_prep, &c);
@@ -1274,6 +1286,9 @@ static ssize_t php_io_recvfrom_syscall(const php_io_sock_call *c)
 PHPAPI ssize_t php_io_recvfrom_ex(php_stream *stream, zend_object *handle, php_socket_t fd, void *buf,
 		size_t len, int flags, struct sockaddr *addr, socklen_t *addrlen, php_deadline *dl)
 {
+	if (php_io_stream_read_lost(stream)) {
+		return -1;
+	}
 	php_io_sock_call c = { .fd = fd, .buf = buf, .len = len, .flags = flags, .addr = addr, .addrlen = addrlen };
 	return php_io_readiness_op(stream, handle, PHP_POLL_READ, dl, php_io_recvfrom_syscall, &c);
 }
@@ -1550,6 +1565,9 @@ static ssize_t php_io_write_syscall(int fd, void *buf, size_t len, int64_t offse
 
 PHPAPI ssize_t php_io_read_at(php_stream *stream, int fd, void *buf, size_t len, int64_t offset, php_deadline *dl)
 {
+	if (php_io_stream_read_lost(stream)) {
+		return -1;
+	}
 	bool regular = !stream || !(stream->flags & PHP_STREAM_FLAG_NO_SEEK);
 	return php_io_file_op(stream, fd, dl, regular, php_io_read_syscall, buf, len, offset, php_io_op_read);
 }

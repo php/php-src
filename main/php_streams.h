@@ -197,6 +197,9 @@ struct _php_stream_wrapper	{
 /* the IO hooks register no pair for it: every wait stays one-shot */
 #define PHP_STREAM_FLAG_NO_IO_REGISTRATION				0x1000
 
+/* Set by php_stream_mark_read_lost() */
+#define PHP_STREAM_FLAG_READ_LOST					0x2000
+
 #define PHP_STREAM_FLAG_WAS_WRITTEN					0x80000000
 
 struct _php_stream  {
@@ -390,6 +393,18 @@ PHPAPI ssize_t php_stream_write(php_stream *stream, const char *buf, size_t coun
 #define php_stream_write_string(stream, str)	php_stream_write(stream, str, strlen(str))
 
 PHPAPI zend_result php_stream_fill_read_buffer(php_stream *stream, size_t size);
+
+/* Where the next buffered read lands */
+static zend_always_inline unsigned char *php_stream_read_buffer_tail(php_stream *stream)
+{
+	return stream->readbuf ? stream->readbuf + stream->writepos : NULL;
+}
+/* Bytes a read placed at the tail; 0 is EOF */
+PHPAPI void php_stream_read_buffer_commit(php_stream *stream, size_t len);
+
+/* Bytes were lost: every later read fails */
+#define php_stream_mark_read_lost(stream) ((stream)->flags |= PHP_STREAM_FLAG_READ_LOST)
+#define php_stream_is_read_lost(stream) (((stream)->flags & PHP_STREAM_FLAG_READ_LOST) != 0)
 
 PHPAPI ssize_t php_stream_printf(php_stream *stream, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
 
