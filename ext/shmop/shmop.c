@@ -130,7 +130,6 @@ PHP_FUNCTION(shmop_open)
 {
 	zend_long key_arg, mode, size;
 	key_t key;
-	php_shmop *shmop;
 	struct shmid_ds shm;
 	char *flags;
 	size_t flags_len;
@@ -150,8 +149,8 @@ PHP_FUNCTION(shmop_open)
 		RETURN_THROWS();
 	}
 
-	object_init_ex(return_value, shmop_ce);
-	shmop = Z_SHMOP_P(return_value);
+	zend_object *shmop_obj = zend_object_init(shmop_ce);
+	php_shmop *shmop = shmop_from_obj(shmop_obj);
 	shmop->key = key;
 	shmop->shmflg |= mode;
 
@@ -208,10 +207,10 @@ PHP_FUNCTION(shmop_open)
 	}
 
 	shmop->size = shm.shm_segsz;
-	return;
+	RETURN_OBJ(shmop_obj);
 
 err:
-	zend_object_release(Z_OBJ_P(return_value));
+	zend_object_release(shmop_obj);
 	RETURN_FALSE;
 }
 /* }}} */
