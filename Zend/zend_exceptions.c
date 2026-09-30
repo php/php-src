@@ -884,7 +884,7 @@ void zend_register_default_exception(void) /* {{{ */
 
 static zend_object *zend_throw_exception_zstr(zend_class_entry *exception_ce, zend_string *message, zend_long code) /* {{{ */
 {
-	zval ex, tmp;
+	zval tmp;
 
 	if (!exception_ce) {
 		exception_ce = zend_ce_exception;
@@ -893,20 +893,20 @@ static zend_object *zend_throw_exception_zstr(zend_class_entry *exception_ce, ze
 	ZEND_ASSERT(instanceof_function(exception_ce, zend_ce_throwable)
 		&& "Exceptions must implement Throwable");
 
-	object_init_ex(&ex, exception_ce);
+	zend_object *ex = zend_object_init(exception_ce);
 
 	if (message) {
 		ZVAL_STR(&tmp, message);
-		zend_update_property_ex(exception_ce, Z_OBJ(ex), ZSTR_KNOWN(ZEND_STR_MESSAGE), &tmp);
+		zend_update_property_ex(exception_ce, ex, ZSTR_KNOWN(ZEND_STR_MESSAGE), &tmp);
 	}
 	if (code) {
 		ZVAL_LONG(&tmp, code);
-		zend_update_property_ex(exception_ce, Z_OBJ(ex), ZSTR_KNOWN(ZEND_STR_CODE), &tmp);
+		zend_update_property_ex(exception_ce, ex, ZSTR_KNOWN(ZEND_STR_CODE), &tmp);
 	}
 
-	zend_throw_exception_internal(Z_OBJ(ex));
+	zend_throw_exception_internal(ex);
 
-	return Z_OBJ(ex);
+	return ex;
 }
 /* }}} */
 
