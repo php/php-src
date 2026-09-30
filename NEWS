@@ -93,6 +93,10 @@ PHP                                                                        NEWS
   . Fixed reconstructing a SimpleXMLElement freeing a child element that
     another variable still references. (Ilia Alshanetsky)
 
+- Standard:
+  . Fixed bug GH-23948 (Io\Poll: data buffered by the stream layer is not
+    reported). (Jakub Zelenka)
+
 - Tidy:
   . Fixed a use-after-free when a tidyNode is used after its document is
     reparsed. (Ilia Alshanetsky)

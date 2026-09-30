@@ -56,6 +56,9 @@ typedef struct php_io_poll_watcher_object {
 	zval data;
 	bool active;
 	bool closed; /* Deactivated because its stream was closed */
+	bool disarmed; /* Fired one-shot, until modifyEvents() */
+	uint32_t wait_gen; /* Last wait() that reported it */
+	const php_poll_handle_ext_ops *ext_ops;
 	php_io_poll_context_object *context; /* Back reference to Context object */
 	php_socket_t fd; /* Registered fd, SOCK_ERR when inactive */
 	php_stream *stream; /* Watched stream, NULL when not registered in its watcher list */
@@ -66,6 +69,8 @@ typedef struct php_io_poll_watcher_object {
 struct php_io_poll_context_object {
 	php_poll_ctx *ctx;
 	HashTable *watchers; /* Maps fd -> watcher object */
+	uint32_t wait_gen; /* Incremented per wait() */
+	bool buffered_readers; /* Some watcher can report buffered data */
 	zend_object std;
 };
 
@@ -239,6 +244,17 @@ static php_poll_handle_ops php_stream_poll_handle_ops = {
 	.cleanup = php_stream_poll_handle_cleanup
 };
 
+/* The stream buffer only, without any IO */
+static bool php_stream_poll_handle_has_buffered_data(php_poll_handle_object *handle)
+{
+	php_stream *stream = php_stream_poll_handle_get_stream(handle);
+	return stream && stream->writepos > stream->readpos;
+}
+
+static const php_poll_handle_ext_ops php_stream_poll_handle_ext_ops = {
+	.has_buffered_data = php_stream_poll_handle_has_buffered_data
+};
+
 /* Handle interface internal only */
 static int php_stream_poll_handle_implement_interface(zend_class_entry *interface, zend_class_entry *implementor)
 {
@@ -271,6 +287,9 @@ static zend_object *php_io_poll_watcher_create_object(zend_class_entry *ce)
 	intern->triggered_events = 0;
 	intern->active = false;
 	intern->closed = false;
+	intern->disarmed = false;
+	intern->wait_gen = 0;
+	intern->ext_ops = NULL;
 	intern->context = NULL;
 	intern->fd = SOCK_ERR;
 	intern->stream = NULL;
@@ -288,6 +307,8 @@ static zend_object *php_io_poll_context_create_object(zend_class_entry *ce)
 
 	intern->ctx = NULL;
 	intern->watchers = NULL;
+	intern->wait_gen = 0;
+	intern->buffered_readers = false;
 
 	return &intern->std;
 }
@@ -298,6 +319,13 @@ static zend_always_inline zend_ulong php_io_poll_compute_ptr_key(void *ptr)
 {
 	zend_ulong key = (zend_ulong) (uintptr_t) ptr;
 	return (key >> 3) | (key << ((sizeof(key) * 8) - 3));
+}
+
+/* Level Read watcher whose handle can have buffered data */
+static zend_always_inline bool php_io_poll_watcher_reads_buffered(php_io_poll_watcher_object *watcher)
+{
+	return watcher->ext_ops && watcher->ext_ops->has_buffered_data
+			&& (watcher->watched_events & (PHP_POLL_READ | PHP_POLL_ET)) == PHP_POLL_READ;
 }
 
 static zend_always_inline void php_io_poll_watcher_deactivate(php_io_poll_watcher_object *watcher)
@@ -461,6 +489,10 @@ static zend_result php_io_poll_watcher_modify_events(
 
 	/* Update watcher state */
 	watcher->watched_events = events;
+	watcher->disarmed = false;
+	if (php_io_poll_watcher_reads_buffered(watcher)) {
+		watcher->context->buffered_readers = true;
+	}
 
 	return SUCCESS;
 }
@@ -841,6 +873,10 @@ PHP_METHOD(Io_Poll_Context, add)
 	watcher->active = true;
 	watcher->context = intern;
 	watcher->fd = fd;
+	watcher->ext_ops = php_poll_handle_get_ext_ops(handle->ops);
+	if (php_io_poll_watcher_reads_buffered(watcher)) {
+		intern->buffered_readers = true;
+	}
 
 	if (handle->ops == &php_stream_poll_handle_ops) {
 		php_stream *stream = php_stream_poll_handle_get_stream(handle);
@@ -889,33 +925,95 @@ PHP_METHOD(Io_Poll_Context, wait)
 		RETURN_THROWS();
 	}
 
-	php_poll_event *events = safe_emalloc((size_t) max_events, sizeof(*events), 0);
-	int num_events = php_poll_wait(intern->ctx, events, (int) max_events, timeout ? &timeout_ts : NULL);
-
-	if (num_events < 0) {
-		php_poll_error err = php_poll_get_error(intern->ctx);
-		efree(events);
-		php_io_poll_throw_failed_operation(
-				php_io_poll_failed_wait_class_entry, "Poll wait failed", err);
-		RETURN_THROWS();
+	/* Buffered watchers go first, then a non-blocking backend check */
+	php_io_poll_watcher_object **buffered = NULL;
+	int n_buffered = 0;
+	if (intern->buffered_readers) {
+		ZEND_HASH_FOREACH_VAL(intern->watchers, zval *zv) {
+			php_io_poll_watcher_object *watcher = PHP_POLL_WATCHER_OBJ_FROM_ZOBJ(Z_OBJ_P(zv));
+			if (watcher->disarmed || !php_io_poll_watcher_reads_buffered(watcher)
+					|| !watcher->ext_ops->has_buffered_data(watcher->handle)) {
+				continue;
+			}
+			if (!buffered) {
+				buffered = safe_emalloc((size_t) max_events, sizeof(*buffered), 0);
+			}
+			buffered[n_buffered++] = watcher;
+			if (n_buffered == max_events) {
+				break;
+			}
+		} ZEND_HASH_FOREACH_END();
 	}
 
-	array_init(return_value);
+	php_poll_event *events = safe_emalloc((size_t) max_events, sizeof(*events), 0);
+	int num_events = 0;
+	if (n_buffered < max_events) {
+		struct timespec zero_ts = {0, 0};
+		num_events = php_poll_wait(intern->ctx, events, (int) max_events - n_buffered,
+				n_buffered ? &zero_ts : (timeout ? &timeout_ts : NULL));
+		if (num_events < 0) {
+			php_poll_error err = php_poll_get_error(intern->ctx);
+			if (n_buffered == 0 || err != PHP_POLL_ERR_INTERRUPTED) {
+				efree(events);
+				if (buffered) {
+					efree(buffered);
+				}
+				php_io_poll_throw_failed_operation(
+						php_io_poll_failed_wait_class_entry, "Poll wait failed", err);
+				RETURN_THROWS();
+			}
+			/* The buffered data is the result */
+			num_events = 0;
+		}
+	}
+
+	uint32_t gen = ++intern->wait_gen;
+	array_init_size(return_value, (uint32_t) (n_buffered + num_events));
+
+	for (int i = 0; i < n_buffered; i++) {
+		php_io_poll_watcher_object *watcher = buffered[i];
+		watcher->triggered_events = PHP_POLL_READ;
+		watcher->wait_gen = gen;
+
+		zval watcher_zv;
+		ZVAL_OBJ_COPY(&watcher_zv, &watcher->std);
+		add_next_index_zval(return_value, &watcher_zv);
+	}
 
 	for (int i = 0; i < num_events; i++) {
 		php_io_poll_watcher_object *watcher = (php_io_poll_watcher_object *) events[i].data;
-		if (watcher) {
-			watcher->triggered_events = events[i].revents;
+		if (!watcher) {
+			continue;
+		}
+		if (watcher->watched_events & PHP_POLL_ONESHOT) {
+			watcher->disarmed = true;
+		}
+		if (watcher->wait_gen == gen) {
+			/* Already reported from its buffer */
+			watcher->triggered_events |= events[i].revents;
+			continue;
+		}
+		watcher->triggered_events = events[i].revents;
+		watcher->wait_gen = gen;
 
-			zval watcher_zv;
-			ZVAL_OBJ(&watcher_zv, &watcher->std);
-			GC_ADDREF(&watcher->std);
+		zval watcher_zv;
+		ZVAL_OBJ_COPY(&watcher_zv, &watcher->std);
+		add_next_index_zval(return_value, &watcher_zv);
+	}
 
-			add_next_index_zval(return_value, &watcher_zv);
+	/* Buffer-only one-shot is still armed in the backend */
+	for (int i = 0; i < n_buffered; i++) {
+		php_io_poll_watcher_object *watcher = buffered[i];
+		if ((watcher->watched_events & PHP_POLL_ONESHOT) && !watcher->disarmed) {
+			watcher->disarmed = true;
+			php_poll_remove(intern->ctx, (int) watcher->fd);
 		}
 	}
 
 	efree(events);
+	if (buffered) {
+		efree(buffered);
+	}
 }
 
 PHP_METHOD(Io_Poll_Context, getBackend)
@@ -1015,6 +1113,7 @@ PHP_MINIT_FUNCTION(poll)
 
 	/* Initialize polling backends */
 	php_poll_register_backends();
+	php_poll_handle_register_ext_ops(&php_stream_poll_handle_ops, &php_stream_poll_handle_ext_ops);
 
 	return SUCCESS;
 }
