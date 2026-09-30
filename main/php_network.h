@@ -292,6 +292,8 @@ BEGIN_EXTERN_C()
 PHPAPI int php_network_getaddresses(const char *host, int socktype, struct sockaddr ***sal, zend_string **error_string);
 PHPAPI void php_network_freeaddresses(struct sockaddr **sal);
 
+PHPAPI void php_network_apply_sockvals(php_socket_t sock, const php_sockvals *sockvals);
+
 PHPAPI php_socket_t php_network_connect_socket_to_host_ex(const char *host, unsigned short port,
 		int socktype, int asynchronous, struct timeval *timeout, zend_string **error_string,
 		int *error_code, const char *bindto, unsigned short bindport, long sockopts, php_sockvals *sockvals

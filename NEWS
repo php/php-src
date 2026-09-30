@@ -80,6 +80,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-22051 (Inconsistent error reporting in SQLite3Result::reset()
     and SQLite3Result::finalize()). (Ilia Alshanetsky)
 
+- Streams:
+  . Applied the so_linger, so_rcvbuf and so_sndbuf context options to unix
+    sockets. (David Carlier)
+
 - Standard:
   . Fixed bug #60110 (fclose(), file_put_contents(), copy() do not return false
     properly). (Jakub Zelenka, Ilija Tovilo)
