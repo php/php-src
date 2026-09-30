@@ -950,7 +950,12 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 			if (opline->opcode == ZEND_JMP) {
 				zend_basic_block *next = b + 1;
 
-				while (next < end && !(next->flags & ZEND_BB_REACHABLE)) {
+				/* Unreachable blocks that are kept alive for their loop var
+				 * frees are emitted as well, so they still separate this block
+				 * from its successor. */
+				while (next < end
+				 && !(next->flags & ZEND_BB_REACHABLE)
+				 && !((next->flags & ZEND_BB_UNREACHABLE_FREE) && next->len != 0)) {
 					next++;
 				}
 				if (next < end && next == blocks + b->successors[0]) {
@@ -1149,6 +1154,11 @@ static zend_always_inline zend_basic_block *get_next_block(const zend_cfg *cfg, 
 			return NULL;
 		} else if (next_block->flags & ZEND_BB_REACHABLE) {
 			break;
+		} else if ((next_block->flags & ZEND_BB_UNREACHABLE_FREE) && next_block->len != 0) {
+			/* This block is unreachable, but it is still emitted to keep the
+			 * live range of a loop var alive, so it separates the block from
+			 * whatever follows it. */
+			return NULL;
 		}
 		next_block++;
 	}
