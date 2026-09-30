@@ -1,7 +1,7 @@
 /*
  * IR - Lightweight JIT Compilation Framework
  * (IR saver)
- * Copyright (C) 2022 Zend by Perforce.
+ * This file is part of the IR Project distributed under the MIT-style LICENSE.
  * Authors: Dmitry Stogov <dmitry@php.net>
  */
 
@@ -50,15 +50,25 @@ static void ir_print_call_conv(uint32_t flags, FILE *f)
 	}
 }
 
+void ir_print_type_cname(ir_type type, FILE *f)
+{
+	if (IR_IS_TYPE_VECTOR(type)) {
+		fprintf(f, "<%s*%d>", ir_type_cname[IR_VECTOR_BASE_TYPE(type)], IR_VECTOR_LENGTH(type));
+	} else {
+		fprintf(f, "%s", ir_type_cname[type]);
+	}
+}
+
 void ir_print_proto_ex(uint8_t flags, ir_type ret_type, uint32_t params_count, const uint8_t *param_types, FILE *f)
 {
 	uint32_t j;
 
 	fprintf(f, "(");
 	if (params_count > 0) {
-		fprintf(f, "%s", ir_type_cname[param_types[0]]);
+		ir_print_type_cname(param_types[0], f);
 		for (j = 1; j < params_count; j++) {
-			fprintf(f, ", %s", ir_type_cname[param_types[j]]);
+			fprintf(f, ", ");
+			ir_print_type_cname(param_types[j], f);
 		}
 		if (flags & IR_VARARG_FUNC) {
 			fprintf(f, ", ...");
@@ -66,7 +76,8 @@ void ir_print_proto_ex(uint8_t flags, ir_type ret_type, uint32_t params_count, c
 	} else if (flags & IR_VARARG_FUNC) {
 		fprintf(f, "...");
 	}
-	fprintf(f, "): %s", ir_type_cname[ret_type]);
+	fprintf(f, "): ");
+	ir_print_type_cname(ret_type, f);
 	ir_print_call_conv(flags, f);
 	if (flags & IR_CONST_FUNC) {
 		fprintf(f, " __const");
@@ -86,10 +97,11 @@ void ir_print_func_proto(const ir_ctx *ctx, const char *name, bool prefix, FILE 
 	if (ctx->ir_base[2].op == IR_PARAM) {
 		ir_insn *insn = &ctx->ir_base[2];
 
-		fprintf(f, "%s", ir_type_cname[insn->type]);
+		ir_print_type_cname(insn->type, f);
 		insn++;
 		while (insn->op == IR_PARAM) {
-			fprintf(f, ", %s", ir_type_cname[insn->type]);
+			fprintf(f, ", ");
+			ir_print_type_cname(insn->type, f);
 			insn++;;
 		}
 		if (ctx->flags & IR_VARARG_FUNC) {
@@ -98,7 +110,8 @@ void ir_print_func_proto(const ir_ctx *ctx, const char *name, bool prefix, FILE 
 	} else if (ctx->flags & IR_VARARG_FUNC) {
 		fprintf(f, "...");
 	}
-	fprintf(f, "): %s", ir_type_cname[ctx->ret_type != (ir_type)-1 ? ctx->ret_type : IR_VOID]);
+	fprintf(f, "): ");
+	ir_print_type_cname(ctx->ret_type != (ir_type)-1 ? ctx->ret_type : IR_VOID, f);
 	ir_print_call_conv(ctx->flags, f);
 	if (ctx->flags & IR_CONST_FUNC) {
 		fprintf(f, " __const");
@@ -138,16 +151,14 @@ static void ir_save_dessa_moves(const ir_ctx *ctx, int b, ir_block *bb, FILE *f)
 				int8_t *regs = ctx->regs[use_ref];
 				int8_t reg = regs[k];
 				if (reg != IR_REG_NONE) {
-					fprintf(f, " {%%%s%s}", ir_reg_name(IR_REG_NUM(reg), ctx->ir_base[input].type),
-						(reg & (IR_REG_SPILL_LOAD|IR_REG_SPILL_SPECIAL)) ? ":load" : "");
+					ir_dump_reg(ctx, reg, input, 0, f);
 				}
 			}
 			fprintf(f, " -> d_%d {R%d}", use_ref, ctx->vregs[use_ref]);
 			if (ctx->regs) {
 				int8_t reg = ctx->regs[use_ref][0];
 				if (reg != IR_REG_NONE) {
-					fprintf(f, " {%%%s%s}", ir_reg_name(IR_REG_NUM(reg), ctx->ir_base[use_ref].type),
-						(reg & (IR_REG_SPILL_STORE|IR_REG_SPILL_SPECIAL)) ? ":store" : "");
+					ir_dump_reg(ctx, reg, use_ref, 1, f);
 				}
 			}
 			fprintf(f, "\n");
@@ -163,29 +174,65 @@ void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f)
 	bool first;
 
 	fprintf(f, "{\n");
-	for (i = IR_UNUSED + 1, insn = ctx->ir_base - i; i < ctx->consts_count; i++, insn--) {
-		fprintf(f, "\t%s c_%d = ", ir_type_cname[insn->type], i);
-		if (insn->op == IR_FUNC) {
-			fprintf(f, "func %s%s",
-				(save_flags & IR_SAVE_SAFE_NAMES) ? "@" : "",
-				ir_get_str(ctx, insn->val.name));
-			ir_print_proto(ctx, insn->proto, f);
-		} else if (insn->op == IR_SYM) {
-			fprintf(f, "sym(%s%s)",
-				(save_flags & IR_SAVE_SAFE_NAMES) ? "@" : "",
-				ir_get_str(ctx, insn->val.name));
-		} else if (insn->op == IR_LABEL) {
-			fprintf(f, "label(%s%s)",
-				(save_flags & IR_SAVE_SAFE_NAMES) ? "@" : "",
-				ir_get_str(ctx, insn->val.name));
-		} else if (insn->op == IR_FUNC_ADDR) {
-			fprintf(f, "func *");
-			ir_print_const(ctx, insn, f, true);
-			ir_print_proto(ctx, insn->proto, f);
-		} else {
-			ir_print_const(ctx, insn, f, true);
+	/* Separate behavior to keep tests compatibility. TODO: remove the old behavior */
+	if (ctx->flags2 & IR_HAS_LONG_CONSTANTS) {
+		for (i = 1 - ctx->consts_count, insn = ctx->ir_base + i; i < IR_UNUSED; i++, insn++) {
+			fprintf(f, "\t");
+			ir_print_type_cname(insn->type, f);
+			fprintf(f, " c_%d = ", -i);
+			if (insn->op == IR_FUNC) {
+				fprintf(f, "func %s%s",
+					(save_flags & IR_SAVE_SAFE_NAMES) ? "@" : "",
+					ir_get_str(ctx, insn->val.name));
+				ir_print_proto(ctx, insn->proto, f);
+			} else if (insn->op == IR_SYM) {
+				fprintf(f, "sym(%s%s)",
+					(save_flags & IR_SAVE_SAFE_NAMES) ? "@" : "",
+					ir_get_str(ctx, insn->val.name));
+			} else if (insn->op == IR_LABEL) {
+				fprintf(f, "label(%s%s)",
+					(save_flags & IR_SAVE_SAFE_NAMES) ? "@" : "",
+					ir_get_str(ctx, insn->val.name));
+			} else if (insn->op == IR_FUNC_ADDR) {
+				fprintf(f, "func *");
+				ir_print_const(ctx, insn, f, true);
+				ir_print_proto(ctx, insn->proto, f);
+			} else {
+				ir_print_const(ctx, insn, f, true);
+			}
+			fprintf(f, ";\n");
+			if (insn->op == IR_LONG_CONST) {
+				i += IR_ALIGNED_SIZE(insn->long_const_size, sizeof(ir_insn)) / sizeof(ir_insn);
+				insn += IR_ALIGNED_SIZE(insn->long_const_size, sizeof(ir_insn)) / sizeof(ir_insn);
+			}
 		}
-		fprintf(f, ";\n");
+	} else {
+		for (i = IR_UNUSED + 1, insn = ctx->ir_base - i; i < ctx->consts_count; i++, insn--) {
+			fprintf(f, "\t");
+			ir_print_type_cname(insn->type, f);
+			fprintf(f, " c_%d = ", i);
+			if (insn->op == IR_FUNC) {
+				fprintf(f, "func %s%s",
+					(save_flags & IR_SAVE_SAFE_NAMES) ? "@" : "",
+					ir_get_str(ctx, insn->val.name));
+				ir_print_proto(ctx, insn->proto, f);
+			} else if (insn->op == IR_SYM) {
+				fprintf(f, "sym(%s%s)",
+					(save_flags & IR_SAVE_SAFE_NAMES) ? "@" : "",
+					ir_get_str(ctx, insn->val.name));
+			} else if (insn->op == IR_LABEL) {
+				fprintf(f, "label(%s%s)",
+					(save_flags & IR_SAVE_SAFE_NAMES) ? "@" : "",
+					ir_get_str(ctx, insn->val.name));
+			} else if (insn->op == IR_FUNC_ADDR) {
+				fprintf(f, "func *");
+				ir_print_const(ctx, insn, f, true);
+				ir_print_proto(ctx, insn->proto, f);
+			} else {
+				ir_print_const(ctx, insn, f, true);
+			}
+			fprintf(f, ";\n");
+		}
 	}
 
 	for (i = IR_UNUSED + 1, insn = ctx->ir_base + i; i < ctx->insns_count;) {
@@ -220,6 +267,9 @@ void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f)
 			if (bb->flags & IR_BB_IRREDUCIBLE_LOOP) {
 				fprintf(f, ", IRREDUCIBLE");
 			}
+			if (bb->flags & IR_BB_IRREDUCIBLE_ENTRY) {
+				fprintf(f, ", IRREDUCIBLE_ENTRY");
+			}
 			if (bb->predecessors_count) {
 				uint32_t i;
 
@@ -245,7 +295,9 @@ void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f)
 			if (!(flags & IR_OP_FLAG_MEM) || insn->type == IR_VOID) {
 				fprintf(f, "\tl_%d = ", i);
 			} else {
-				fprintf(f, "\t%s d_%d", ir_type_cname[insn->type], i);
+				fprintf(f, "\t");
+				ir_print_type_cname(insn->type, f);
+				fprintf(f, " d_%d", i);
 				if (save_flags & IR_SAVE_REGS) {
 					if (ctx->vregs && ctx->vregs[i]) {
 						fprintf(f, " {R%d}", ctx->vregs[i]);
@@ -253,8 +305,7 @@ void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f)
 					if (ctx->regs) {
 						int8_t reg = ctx->regs[i][0];
 						if (reg != IR_REG_NONE) {
-							fprintf(f, " {%%%s%s}", ir_reg_name(IR_REG_NUM(reg), insn->type),
-								(reg & (IR_REG_SPILL_STORE|IR_REG_SPILL_SPECIAL)) ? ":store" : "");
+							ir_dump_reg(ctx, reg, i, 1, f);
 						}
 					}
 				}
@@ -263,7 +314,8 @@ void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f)
 		} else {
 			fprintf(f, "\t");
 			if (flags & IR_OP_FLAG_DATA) {
-				fprintf(f, "%s d_%d", ir_type_cname[insn->type], i);
+				ir_print_type_cname(insn->type, f);
+				fprintf(f, " d_%d", i);
 				if (save_flags & IR_SAVE_REGS) {
 					if (ctx->vregs && ctx->vregs[i]) {
 						fprintf(f, " {R%d}", ctx->vregs[i]);
@@ -271,8 +323,7 @@ void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f)
 					if (ctx->regs) {
 						int8_t reg = ctx->regs[i][0];
 						if (reg != IR_REG_NONE) {
-							fprintf(f, " {%%%s%s}", ir_reg_name(IR_REG_NUM(reg), insn->type),
-								(reg & (IR_REG_SPILL_STORE|IR_REG_SPILL_SPECIAL)) ? ":store" : "");
+							ir_dump_reg(ctx, reg, i, 1, f);
 						}
 					}
 				}
@@ -311,8 +362,7 @@ void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f)
 								int8_t *regs = ctx->regs[i];
 								int8_t reg = regs[j];
 								if (reg != IR_REG_NONE) {
-									fprintf(f, " {%%%s%s}", ir_reg_name(IR_REG_NUM(reg), ctx->ir_base[ref].type),
-										(reg & (IR_REG_SPILL_LOAD|IR_REG_SPILL_SPECIAL)) ? ":load" : "");
+									ir_dump_reg(ctx, reg, ref, 0, f);
 								}
 							}
 						}
@@ -416,6 +466,11 @@ void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f)
 			if (rule & IR_SIMPLE) {
 				fprintf(f, ":SIMPLE");
 			}
+#if IR_X86_I64
+			if (rule & IR_TWO_REGS) {
+				fprintf(f, ":TWO_REGS");
+			}
+#endif
 			fprintf(f, ");");
 		}
 

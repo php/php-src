@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.6.0RC3
 
+- BCMath:
+  . Fixed BcMath\Number results that truncate to zero keeping a negative sign
+    and comparing less than zero. (Ilia Alshanetsky)
+
 - Core:
   . Fixed OSS-Fuzz #536440507 (Immutable class incorrect assertion).
     (ndossche)
@@ -13,29 +17,73 @@ PHP                                                                        NEWS
     function). (ndossche)
   . Fixed AVX being reported as supported when the OS has not enabled AVX
     state. (Ilia Alshanetsky)
+  . Fixed OSS-Fuzz #552682112 (assertion failure wrt
+    zp_arg_must_be_sent_by_ref()). (ndossche)
+  . Fixed GH-23921 (Fibers start with error_reporting = 0 when the
+    error_reporting INI directive is not set). (Girgias)
+  . Fixed GH-23980 (ZEND_ASSERT violation @ ZEND_INCLUDE_OR_EVAL). (ndossche)
+  . Deprecated using "let" or "is" as the name of a class, function, or
+    constant, and as an alias in class_alias() and use declarations. (Girgias)
+  . Deprecated using "_" as a constant name and as an alias for a class or
+    constant in use declarations. (Girgias)
 
 - FFI:
   . Fixed crashes with FFI callbacks created from __call() trampolines
     and array callables whose object is released. (Ilia Alshanetsky)
 
+- MySQLnd:
+  . Fixed field_count not resetting on OK packet. (Kamil Tekiela)
+  . Fixed memory leak when closing a prepared statement after its connection
+    was killed. (Kamil Tekiela)
+
 - Opcache:
   . Fix zend_analyze_calls() call_stack buffer overrun. (Mrmaxmeier)
   . Fixed bug GH-23679 (Tracing JIT writes a parent private property into a
     child's shadowing public property). (Ilia Alshanetsky)
-  . Fix incorrect DCE due to unsound escape analysis. (ndossche)
+  . Fix multiple incorrect DCE due to unsound escape analysis. (ndossche,
+    arnaud-lb)
 
 - OpenSSL:
   . Fixed stream_socket_enable_crypto() leaving the socket non-blocking
     after a handshake timeout. (Ilia Alshanetsky)
+  . Fix memory leak by doing early salt validation. (adapik)
 
 - PCNTL:
   . Fixed pcntl_signal_dispatch() dropping the queued signals when it runs while
     an exception is pending. (nicolas-grekas)
   . Fixed pcntl_signal_dispatch() dropping the signals queued behind a handler
     that throws. (nicolas-grekas)
+  . Fixed bug GH-23986 (/proc/self paths resolve to the parent process after
+    pcntl_fork()). (Lazizbek Ergashev)
+
+- PDO:
+  . Fixed PDO::setAttribute() installing a PDO::ATTR_STATEMENT_CLASS class
+    whose constructor arguments it rejects. (Ilia Alshanetsky)
+  . Fixed PDO::ATTR_STATEMENT_CLASS constructor_args type errors reporting
+    "array given" regardless of the value passed. (Ilia Alshanetsky)
+  . Fixed PDOStatement::bindParam() and bindColumn() leaking the driver
+    options value. (Ilia Alshanetsky)
+
+- PDO_DBLIB:
+  . Fixed bug GH-23741 (segfault after a failed query inside a PDO
+    transaction). Errors raised by beginTransaction(), commit(), rollBack()
+    and lastInsertId() are now reported instead of being dropped.
+    (Ilia Alshanetsky)
 
 - PDO_PGSQL:
   . Fixed crash when a persistent connection fails. (KentarouTakeda)
+
+- Reflection:
+  . Fixed bug GH-23842 (ReflectionProperty::skipLazyInitialization() copies
+    invalid constant defaults with OPcache). (DirkTrunkstar, Lazizbek Ergashev)
+
+- SimpleXML:
+  . Fixed reconstructing a SimpleXMLElement freeing a child element that
+    another variable still references. (Ilia Alshanetsky)
+
+- Tidy:
+  . Fixed a use-after-free when a tidyNode is used after its document is
+    reparsed. (Ilia Alshanetsky)
 
 - Zip:
   . Fixed bug GH-23899 (Assertion failure when a cancel callback returns an

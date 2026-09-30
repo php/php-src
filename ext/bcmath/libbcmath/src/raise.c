@@ -254,6 +254,9 @@ bc_raise_status bc_raise(bc_num base, long exponent, bc_num *result, size_t scal
 		bc_free_num (result);
 		*result = power;
 		(*result)->n_scale = MIN(scale, (*result)->n_scale);
+		if (bc_is_zero(*result)) {
+			(*result)->n_sign = PLUS;
+		}
 	}
 	return BC_RAISE_STATUS_OK;
 }

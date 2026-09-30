@@ -714,7 +714,8 @@ static zend_execute_data *zend_ast_evaluate_arg_list(
 			arg = ZEND_CALL_VAR_NUM(frame, ZEND_CALL_NUM_ARGS(frame));
 		}
 
-		if (arg_ast->kind == ZEND_AST_PLACEHOLDER_ARG) {
+		bool is_placeholder = arg_ast->kind == ZEND_AST_PLACEHOLDER_ARG;
+		if (is_placeholder) {
 			if (arg_ast->attr == ZEND_PLACEHOLDER_VARIADIC) {
 				if (uses_variadic_placeholder) {
 					*uses_variadic_placeholder = true;
@@ -731,6 +732,12 @@ static zend_execute_data *zend_ast_evaluate_arg_list(
 		}
 		if (!arg_name) {
 			ZEND_CALL_NUM_ARGS(frame)++;
+		}
+
+		/* A constant expression can't be bound to a reference because it ain't a CV. */
+		if (!is_placeholder && UNEXPECTED(ARG_MUST_BE_SENT_BY_REF(func, arg_num))) {
+			zend_cannot_pass_by_reference_ex(func, arg_num);
+			goto fail;
 		}
 	}
 

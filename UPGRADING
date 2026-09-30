@@ -555,6 +555,16 @@ PHP 8.6 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/deprecate-return-value-from-construct
   . Naming a function readonly is now deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_the_possibility_to_name_a_function_readonly
+  . Using "let" or "is" as the name of a class, interface, trait, enum,
+    function, or constant (including via define()), as the alias passed to
+    class_alias(), or as the alias name in a use, use function, or use const
+    declaration is now deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_using_let_as_an_identifier
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_using_is_as_an_identifier
+  . Using "_" as a constant name (via const or define()), or as the alias
+    name for a class or constant in a use declaration, is now deprecated.
+    This extends the PHP 8.4 deprecation of "_" as a class name.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_using_as_a_constant_and_compile_time_alias
   . Passing a 3rd argument to define() is now deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_define_with_case_insensitive_being_specified
   . Calling is_a() or is_subclass_of() with a string as the first argument
