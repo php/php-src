@@ -39,6 +39,10 @@ PHP                                                                        NEWS
   . Fixed GH-24166 (Double-free in Phar::webPhar() in CGI without PATH_INFO).
     (RigelYoung, Jakub Zelenka)
 
+- Session:
+  . Fixed session_write_close() keeping the save handler open when the
+    session data cannot be encoded. (Ilia Alshanetsky)
+
 - Standard:
   . Fixed chown() and lchown() failing to resolve user names in ZTS builds
     when getpwnam_r() needs a larger buffer. (Ilia Alshanetsky)

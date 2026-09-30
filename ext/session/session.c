@@ -526,6 +526,7 @@ static void php_session_save_current_state(bool write)
 				/* Not being able to encode the session data means there is some kind of issue that prevents a write
 				 * (e.g. a key containing the '|' character with the default serialization) */
 				if (UNEXPECTED(val == NULL)) {
+					PS(mod)->s_close(&PS(mod_data));
 					return;
 				}
 
