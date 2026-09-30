@@ -29,6 +29,11 @@ PHP                                                                        NEWS
 - MySQLi:
   . Fix GH-22854: Fixed failed assertion when accessing mysqli property after
     failed reconnection. (Kamil Tekiela)
+  . Fixed memory leak when closing a prepared statement after its connection
+    was killed. (Kamil Tekiela)
+
+- MySQLnd:
+  . Fixed field_count not resetting on OK packet. (Kamil Tekiela)
 
 - Opcache:
   . Fixed bug GH-23693 (Tracing JIT produces wrong results for a guard on a

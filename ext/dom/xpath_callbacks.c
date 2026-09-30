@@ -204,7 +204,7 @@ static zend_result php_dom_xpath_callback_ns_update_method_handler(
 		ZEND_HASH_FOREACH_STR_KEY_VAL(callable_ht, key, entry) {
 			zend_fcall_info_cache* fcc = emalloc(sizeof(*fcc));
 			char *error;
-			if (!zend_is_callable_ex(entry, NULL, 0, NULL, fcc, &error)) {
+			if (!zend_is_callable(entry, fcc, &error)) {
 				zend_argument_type_error(1, "must be an array with valid callbacks as values, %s", error);
 				efree(fcc);
 				efree(error);
@@ -251,7 +251,7 @@ static zend_result php_dom_xpath_callback_ns_update_method_handler(
 		char *error;
 		zval tmp;
 		ZVAL_STR(&tmp, name);
-		if (!zend_is_callable_ex(&tmp, NULL, 0, NULL, fcc, &error)) {
+		if (!zend_is_callable(&tmp, fcc, &error)) {
 			zend_argument_type_error(1, "must be a callable, %s", error);
 			efree(fcc);
 			efree(error);

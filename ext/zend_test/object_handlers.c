@@ -250,7 +250,7 @@ static int vm_interrupt_comparable_compare(zval *op1, zval *op2)
 {
 	ZEND_COMPARE_OBJECTS_FALLBACK(op1, op2);
 
-	zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+	atomic_store(&EG(vm_interrupt), true);
 
 	return ZEND_THREEWAY_COMPARE(
 		Z_LVAL_P(OBJ_PROP_NUM(Z_OBJ_P(op1), 0)),

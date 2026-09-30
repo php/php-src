@@ -4032,14 +4032,14 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_J
 
 static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV  zend_interrupt_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_atomic_bool_store_ex(&EG(vm_interrupt), false);
+	atomic_store(&EG(vm_interrupt), false);
 #if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 	/* opline is &call_interrupt_op. Load orig opline. */
 	LOAD_OPLINE();
 #else
 	SAVE_OPLINE();
 #endif
-	if (zend_atomic_bool_load_ex(&EG(timed_out))) {
+	if (atomic_load(&EG(timed_out))) {
 		zend_timeout();
 	} else if (zend_interrupt_function) {
 		zend_interrupt_function(execute_data);
@@ -5464,7 +5464,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INCLUDE_OR_EV
 	}
 
 
-	ZEND_VM_NEXT_OPCODE();
+	if (IS_CONST & IS_CONST) {
+		ZEND_VM_NEXT_OPCODE();
+	} else {
+		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+	}
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INCLUDE_OR_EVAL_SPEC_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -5547,7 +5551,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INCLUDE_OR_EV
 		}
 	}
 	FREE_OP(opline->op1_type, opline->op1.var);
-	ZEND_VM_NEXT_OPCODE();
+	if (opline->op1_type & IS_CONST) {
+		ZEND_VM_NEXT_OPCODE();
+	} else {
+		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+	}
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FE_RESET_R_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -7660,10 +7668,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_USER_CAL
 
 	SAVE_OPLINE();
 	function_name = RT_CONSTANT(opline, opline->op2);
-	if (zend_is_callable_ex(function_name, NULL, 0, NULL, &fcc, &error)) {
+	if (zend_is_callable(function_name, &fcc, &error)) {
 		ZEND_ASSERT(!error);
 
-		/* Deprecation can be emitted from zend_is_callable_ex(), which can
+		/* Deprecation can be emitted from zend_is_callable(), which can
 		 * invoke a user error handler and throw an exception.
 		 * For the CONST and CV case we reuse the same exception block below
 		 * to make sure we don't increase VM size too much. */
@@ -10436,10 +10444,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_USER_CAL
 
 	SAVE_OPLINE();
 	function_name = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
-	if (zend_is_callable_ex(function_name, NULL, 0, NULL, &fcc, &error)) {
+	if (zend_is_callable(function_name, &fcc, &error)) {
 		ZEND_ASSERT(!error);
 
-		/* Deprecation can be emitted from zend_is_callable_ex(), which can
+		/* Deprecation can be emitted from zend_is_callable(), which can
 		 * invoke a user error handler and throw an exception.
 		 * For the CONST and CV case we reuse the same exception block below
 		 * to make sure we don't increase VM size too much. */
@@ -13100,10 +13108,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_USER_CAL
 
 	SAVE_OPLINE();
 	function_name = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
-	if (zend_is_callable_ex(function_name, NULL, 0, NULL, &fcc, &error)) {
+	if (zend_is_callable(function_name, &fcc, &error)) {
 		ZEND_ASSERT(!error);
 
-		/* Deprecation can be emitted from zend_is_callable_ex(), which can
+		/* Deprecation can be emitted from zend_is_callable(), which can
 		 * invoke a user error handler and throw an exception.
 		 * For the CONST and CV case we reuse the same exception block below
 		 * to make sure we don't increase VM size too much. */
@@ -17652,7 +17660,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INCLUDE_OR_EV
 		}
 	}
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-	ZEND_VM_NEXT_OPCODE();
+	if (IS_TMP_VAR & IS_CONST) {
+		ZEND_VM_NEXT_OPCODE();
+	} else {
+		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+	}
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FE_RESET_R_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -40426,7 +40438,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INCLUDE_OR_EV
 	}
 
 
-	ZEND_VM_NEXT_OPCODE();
+	if (IS_CV & IS_CONST) {
+		ZEND_VM_NEXT_OPCODE();
+	} else {
+		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+	}
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FE_RESET_R_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -56877,14 +56893,14 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_JMP_FO
 
 static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV  zend_interrupt_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_atomic_bool_store_ex(&EG(vm_interrupt), false);
+	atomic_store(&EG(vm_interrupt), false);
 #if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 	/* opline is &call_interrupt_op. Load orig opline. */
 	LOAD_OPLINE();
 #else
 	SAVE_OPLINE();
 #endif
-	if (zend_atomic_bool_load_ex(&EG(timed_out))) {
+	if (atomic_load(&EG(timed_out))) {
 		zend_timeout();
 	} else if (zend_interrupt_function) {
 		zend_interrupt_function(execute_data);
@@ -58309,7 +58325,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INCLUDE_OR_EVAL_SP
 	}
 
 
-	ZEND_VM_NEXT_OPCODE();
+	if (IS_CONST & IS_CONST) {
+		ZEND_VM_NEXT_OPCODE();
+	} else {
+		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+	}
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INCLUDE_OR_EVAL_SPEC_OBSERVER_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -58392,7 +58412,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INCLUDE_OR_EVAL_SP
 		}
 	}
 	FREE_OP(opline->op1_type, opline->op1.var);
-	ZEND_VM_NEXT_OPCODE();
+	if (opline->op1_type & IS_CONST) {
+		ZEND_VM_NEXT_OPCODE();
+	} else {
+		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+	}
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FE_RESET_R_SPEC_CONST_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -60505,10 +60529,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_USER_CALL_SPE
 
 	SAVE_OPLINE();
 	function_name = RT_CONSTANT(opline, opline->op2);
-	if (zend_is_callable_ex(function_name, NULL, 0, NULL, &fcc, &error)) {
+	if (zend_is_callable(function_name, &fcc, &error)) {
 		ZEND_ASSERT(!error);
 
-		/* Deprecation can be emitted from zend_is_callable_ex(), which can
+		/* Deprecation can be emitted from zend_is_callable(), which can
 		 * invoke a user error handler and throw an exception.
 		 * For the CONST and CV case we reuse the same exception block below
 		 * to make sure we don't increase VM size too much. */
@@ -63281,10 +63305,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_USER_CALL_SPE
 
 	SAVE_OPLINE();
 	function_name = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
-	if (zend_is_callable_ex(function_name, NULL, 0, NULL, &fcc, &error)) {
+	if (zend_is_callable(function_name, &fcc, &error)) {
 		ZEND_ASSERT(!error);
 
-		/* Deprecation can be emitted from zend_is_callable_ex(), which can
+		/* Deprecation can be emitted from zend_is_callable(), which can
 		 * invoke a user error handler and throw an exception.
 		 * For the CONST and CV case we reuse the same exception block below
 		 * to make sure we don't increase VM size too much. */
@@ -65843,10 +65867,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_USER_CALL_SPE
 
 	SAVE_OPLINE();
 	function_name = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
-	if (zend_is_callable_ex(function_name, NULL, 0, NULL, &fcc, &error)) {
+	if (zend_is_callable(function_name, &fcc, &error)) {
 		ZEND_ASSERT(!error);
 
-		/* Deprecation can be emitted from zend_is_callable_ex(), which can
+		/* Deprecation can be emitted from zend_is_callable(), which can
 		 * invoke a user error handler and throw an exception.
 		 * For the CONST and CV case we reuse the same exception block below
 		 * to make sure we don't increase VM size too much. */
@@ -70395,7 +70419,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INCLUDE_OR_EVAL_SP
 		}
 	}
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-	ZEND_VM_NEXT_OPCODE();
+	if (IS_TMP_VAR & IS_CONST) {
+		ZEND_VM_NEXT_OPCODE();
+	} else {
+		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+	}
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FE_RESET_R_SPEC_TMP_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -93069,7 +93097,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INCLUDE_OR_EVAL_SP
 	}
 
 
-	ZEND_VM_NEXT_OPCODE();
+	if (IS_CV & IS_CONST) {
+		ZEND_VM_NEXT_OPCODE();
+	} else {
+		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+	}
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FE_RESET_R_SPEC_CV_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)

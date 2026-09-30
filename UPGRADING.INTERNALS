@@ -17,6 +17,8 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 - Removed zend_execute_scripts(). Manually call zend_execute_script() in a loop
   instead.
 - Removed ZEND_STATIC_ASSERT(). Use C11 static_assert() directly instead.
+- Removed zend_atomic.h and the zend_atomic_* types and functions.
+  Use the standard C11 atomic_* types and functions instead.
 - The sapi_terminate_process() function was removed.
 - The sapi_force_http_10() function was removed.
 - The sapi_get_fd() function was removed.
@@ -27,14 +29,18 @@ PHP 8.7 INTERNALS UPGRADE NOTES
   and C23, which means that ZEND_NORETURN needs to come first in the modifier
   list. Consider using noreturn (C11) / [[noreturn]] (C23) directly if
   header interoperability is not required.
+- The signature of zend_is_callable() has been changed to
+  zend_is_callable(const zval *callable, zend_fcall_info_cache *fcc, char **error)
+  from zend_is_callable(const zval *callable, uint32_t check_flags, zend_string **callable_name).
+  This new signature covers the most common parameters used with zend_is_callable_ex().
 
 ========================
 2. Build system changes
 ========================
 
 - Windows build system changes:
-  . C sources are now compiled as C17. MSVC builds require Visual Studio
-    2026 or later and enable /experimental:c11atomics.
+  . C sources are now compiled as C17 and require C11 atomics. MSVC builds require
+    Visual Studio 2026 or later and enable /experimental:c11atomics.
   . C++-only extension compiler flags can be added to CXXFLAGS_<EXTENSION>.
 
 - Unix build system changes:

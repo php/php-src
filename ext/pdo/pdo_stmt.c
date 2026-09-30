@@ -281,10 +281,6 @@ static bool really_register_bound_param(struct pdo_bound_param_data *param, pdo_
 	param->stmt = stmt;
 	param->is_param = is_param;
 
-	if (Z_REFCOUNTED(param->driver_params)) {
-		Z_ADDREF(param->driver_params);
-	}
-
 	if (!is_param && param->name && stmt->columns) {
 		/* try to map the name to the column */
 		int i;
@@ -299,12 +295,7 @@ static bool really_register_bound_param(struct pdo_bound_param_data *param, pdo_
 		/* if you prepare and then execute passing an array of params keyed by names,
 		 * then this will trigger, and we don't want that */
 		if (param->paramno == -1) {
-			/* Should this always be an Error? */
-			char *tmp;
-			/* TODO Error? */
-			spprintf(&tmp, 0, "Did not find column name '%s' in the defined columns; it will not be bound", ZSTR_VAL(param->name));
-			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", tmp);
-			efree(tmp);
+			zend_argument_value_error(1, "must refer to a column present in the result set, \"%s\" given", ZSTR_VAL(param->name));
 			return false;
 		}
 	}
@@ -368,6 +359,7 @@ static bool really_register_bound_param(struct pdo_bound_param_data *param, pdo_
 			} else {
 				zend_hash_index_del(hash, pparam->paramno);
 			}
+			ZVAL_UNDEF(&param->driver_params);
 			/* param->parameter is freed by hash dtor */
 			ZVAL_UNDEF(&param->parameter);
 			return false;
@@ -1124,7 +1116,7 @@ static bool pdo_get_fcc_from_zval(zend_fcall_info_cache *fcc, zval *callable) {
 	}
 
 	char *is_callable_error = NULL;
-	if (!zend_is_callable_ex(callable, NULL, 0, NULL, fcc, &is_callable_error)) {
+	if (!zend_is_callable(callable, fcc, &is_callable_error)) {
 		if (is_callable_error) {
 			zend_type_error("%s", is_callable_error);
 			efree(is_callable_error);
@@ -1336,6 +1328,9 @@ static void register_bound_param(INTERNAL_FUNCTION_PARAMETERS, int is_param) /* 
 	if (!really_register_bound_param(&param, stmt, is_param)) {
 		if (!Z_ISUNDEF(param.parameter)) {
 			zval_ptr_dtor(&(param.parameter));
+		}
+		if (!Z_ISUNDEF(param.driver_params)) {
+			zval_ptr_dtor(&param.driver_params);
 		}
 
 		RETURN_FALSE;

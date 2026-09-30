@@ -26,7 +26,6 @@
 
 #include "zend_globals_macros.h"
 
-#include "zend_atomic.h"
 #include "zend_stack.h"
 #include "zend_ptr_stack.h"
 #include "zend_hash.h"
@@ -223,8 +222,8 @@ struct _zend_executor_globals {
 
 	bool full_tables_cleanup;
 
-	zend_atomic_bool vm_interrupt;
-	zend_atomic_bool timed_out;
+	atomic_bool vm_interrupt;
+	atomic_bool timed_out;
 
 	HashTable autoload_current_classnames;
 
