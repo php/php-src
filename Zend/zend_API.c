@@ -4100,51 +4100,15 @@ try_again:
 }
 /* }}} */
 
-static bool zend_fcc_function_handler_equals(const zend_function *func1, const zend_function *func2) /* {{{ */
+ZEND_API bool zend_fcc_closure_equals_ex(const zend_fcall_info_cache* a, const zend_fcall_info_cache* b)
 {
-	if (func1 == func2) {
-		return true;
-	}
+	const zend_function *fn_a = a->function_handler;
+	const zend_object *closure_zobj_a = a->closure && a->closure->ce == zend_ce_closure ? a->closure : NULL;
+	const zend_function *fn_b = b->function_handler;
+	const zend_object *closure_zobj_b = b->closure && b->closure->ce == zend_ce_closure ? b->closure : NULL;
 
-	const bool fake_closure1 = (func1->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) != 0;
-	const bool fake_closure2 = (func2->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) != 0;
-
-	if (!fake_closure1 && !fake_closure2) {
-		return false;
-	}
-	if (((func1->common.fn_flags & ZEND_ACC_CLOSURE) && !fake_closure1) ||
-			((func2->common.fn_flags & ZEND_ACC_CLOSURE) && !fake_closure2)) {
-		return false;
-	}
-	if (func1->type != func2->type ||
-			func1->common.scope != func2->common.scope ||
-			!zend_string_equals(func1->common.function_name, func2->common.function_name)) {
-		return false;
-	}
-
-	if (func1->type == ZEND_USER_FUNCTION) {
-		return func1->op_array.opcodes == func2->op_array.opcodes;
-	}
-
-	return func1->internal_function.handler == func2->internal_function.handler;
+	return zend_fn_closure_equals_ex(fn_a, closure_zobj_a, fn_b, closure_zobj_b);
 }
-/* }}} */
-
-ZEND_API bool zend_fcc_closure_equals_ex(const zend_fcall_info_cache* a, const zend_fcall_info_cache* b) /* {{{ */
-{
-	const zend_function *func1 = a->function_handler;
-	const zend_function *func2 = b->function_handler;
-
-	if (a->closure && a->closure->ce == zend_ce_closure) {
-		func1 = zend_get_closure_method_def(a->closure);
-	}
-	if (b->closure && b->closure->ce == zend_ce_closure) {
-		func2 = zend_get_closure_method_def(b->closure);
-	}
-
-	return zend_fcc_function_handler_equals(func1, func2);
-}
-/* }}} */
 
 ZEND_API bool zend_is_callable_at_frame(
 		const zval *callable, zend_object *object, const zend_execute_data *frame,
