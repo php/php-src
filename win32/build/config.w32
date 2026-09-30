@@ -47,7 +47,7 @@ if (PHP_PGI == "yes" || PHP_PGO != "no") {
 			ERROR("--enable-pgi and --with-pgo options can only be used if PGO capable compiler is present.");
 		}
 	} else if (CLANG_TOOLSET) {
-		if (!PATH_PROG('llvm-profdata', WshShell.Environment("Process").Item("PATH"))) {
+		if (!PATH_PROG('llvm-profdata', WshShell.Environment("Process").Item("PATH"), 'LLVM_PROFDATA')) {
 			ERROR("--enable-pgi and --with-pgo options can only be used if a PGO capable toolchain is present.");
 		}
 	}
