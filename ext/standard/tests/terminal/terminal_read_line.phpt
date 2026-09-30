@@ -114,6 +114,41 @@ $tMem = SystemTerminal::fromStreams($mem);
 var_dump($tMem->readLine());
 fclose($mem);
 
+// 13. Multiple consecutive empty CRLF lines and trailing CRLF
+$fp2 = fopen('php://temp', 'r+');
+fwrite($fp2, "\r\n\r\nline with crlf\r\n\r\n");
+rewind($fp2);
+$t2 = SystemTerminal::fromStreams($fp2);
+var_dump($t2->readLine());
+var_dump($t2->readLine());
+var_dump($t2->readLine());
+var_dump($t2->readLine());
+var_dump($t2->readLine()); // EOF
+
+// 14. Extended Unicode, surrogate pairs, and combining sequences
+ftruncate($fp2, 0);
+rewind($fp2);
+fwrite($fp2, "🐘🦀🚀\r\nHello \u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F467}\u{200D}\u{1F466} Family\r\ne\u{0301}cole\n");
+rewind($fp2);
+var_dump($t2->readLine());
+var_dump($t2->readLine());
+var_dump($t2->readLine());
+var_dump($t2->readLine()); // EOF
+
+// 15. Mode restoration & terminal state usability after raw mode attempt
+try {
+    $t2->enableRawMode();
+} catch (Throwable $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
+var_dump($t2->restoreMode());
+ftruncate($fp2, 0);
+rewind($fp2);
+fwrite($fp2, "post restoration line\r\n");
+rewind($fp2);
+var_dump($t2->readLine());
+fclose($fp2);
+
 ?>
 --EXPECT--
 bool(true)
@@ -146,3 +181,15 @@ string(12) "uffer line 1"
 string(13) "buffer line 2"
 NULL
 string(11) "memory line"
+string(0) ""
+string(0) ""
+string(14) "line with crlf"
+string(0) ""
+NULL
+string(12) "🐘🦀🚀"
+string(38) "Hello 👨‍👩‍👧‍👦 Family"
+string(7) "école"
+NULL
+Failed to enable terminal raw mode
+bool(false)
+string(21) "post restoration line"

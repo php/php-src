@@ -2700,13 +2700,22 @@ static zend_string *php_io_terminal_read_line_windows(
 		}
 	}
 
-	if (mode_changed) {
-		SetConsoleMode(handle, original_mode);
+	bool restore_failed = false;
+	if (mode_changed && !SetConsoleMode(handle, original_mode)) {
+		restore_failed = true;
 	}
 
 	if (read_failed) {
 		efree(wline);
 		zend_throw_exception(php_io_terminal_exception_ce, "Failed to read line from console", 0);
+		return NULL;
+	}
+
+	if (restore_failed) {
+		efree(wline);
+		if (!EG(exception)) {
+			zend_throw_exception(php_io_terminal_exception_ce, "Failed to restore console mode", 0);
+		}
 		return NULL;
 	}
 
@@ -2730,16 +2739,24 @@ static zend_string *php_io_terminal_read_line_windows(
 	}
 
 	int utf8_len = WideCharToMultiByte(CP_UTF8, 0, wline, (int) wlen, NULL, 0, NULL, NULL);
-	if (utf8_len < 0) {
+	if (utf8_len <= 0) {
 		efree(wline);
 		zend_throw_exception(php_io_terminal_exception_ce, "Failed to convert console line to UTF-8", 0);
 		return NULL;
 	}
 
 	zend_string *res = zend_string_alloc(utf8_len, 0);
-	WideCharToMultiByte(CP_UTF8, 0, wline, (int) wlen, ZSTR_VAL(res), utf8_len, NULL, NULL);
-	ZSTR_VAL(res)[utf8_len] = '\0';
+	int actual_len = WideCharToMultiByte(CP_UTF8, 0, wline, (int) wlen, ZSTR_VAL(res), utf8_len, NULL, NULL);
 	efree(wline);
+
+	if (actual_len <= 0) {
+		zend_string_release(res);
+		zend_throw_exception(php_io_terminal_exception_ce, "Failed to convert console line to UTF-8", 0);
+		return NULL;
+	}
+
+	ZSTR_VAL(res)[actual_len] = '\0';
+	ZSTR_LEN(res) = actual_len;
 	return res;
 }
 #else
