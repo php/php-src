@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed BcMath\Number results that truncate to zero keeping a negative sign
     and comparing less than zero. (Ilia Alshanetsky)
 
+- CLI:
+  . Fixed the built-in server truncating an error page and leaking its
+    unsent part after a partial socket write. (Ilia Alshanetsky)
+
 - Core:
   . Fixed OSS-Fuzz #536440507 (Immutable class incorrect assertion).
     (ndossche)
