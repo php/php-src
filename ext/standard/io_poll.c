@@ -15,7 +15,6 @@
 #include "php.h"
 #include "zend_enum.h"
 #include "zend_exceptions.h"
-#include "zend_signal.h"
 #include "SAPI.h"
 #include "php_network.h"
 #include "php_poll.h"
@@ -1009,13 +1008,14 @@ PHP_METHOD(Io_Poll_ProcessHandle, getStatus)
 }
 
 /* SignalHandle: the platform's signal source (php_poll_signal_source_open)
- * over the set where there is one. The signals are blocked for the life of
- * the handle; when the source fires every pending delivery is taken and its
- * info recorded until an op or getDelivered() takes it. */
+ * over the set where there is one. The signals are blocked while a context
+ * watches the handle; when the source fires every pending delivery is taken
+ * and its info recorded until an op or getDelivered() takes it. */
 
 typedef struct php_io_poll_signal_handle_data {
 	php_sigset_t set;
 	int fd;
+	uint32_t registrations; /* contexts watching the handle */
 	php_siginfo_t *infos;
 	uint32_t n_infos;
 	uint32_t cap_infos;
@@ -1028,9 +1028,9 @@ typedef struct php_io_poll_signal_handle_data {
 #  define php_io_poll_sigmask sigprocmask
 # endif
 
-/* Live handles per signal, and the signals the handles blocked themselves:
- * a signal is unblocked again when the last handle for it goes, and never
- * when the process had it blocked before any handle */
+/* Watched handles per signal, and the signals the handles blocked themselves:
+ * a signal is unblocked again when the last watched handle for it is removed,
+ * and never when the process had it blocked before any handle */
 ZEND_TLS uint32_t php_io_poll_signal_handle_count[NSIG];
 ZEND_TLS sigset_t php_io_poll_signals_blocked_by_handles;
 
@@ -1040,66 +1040,6 @@ PHPAPI void php_io_poll_signal_child_mask(sigset_t *mask)
 	for (int signo = 1; signo < NSIG; signo++) {
 		if (sigismember(&php_io_poll_signals_blocked_by_handles, signo) == 1) {
 			sigdelset(mask, signo);
-		}
-	}
-}
-#endif
-
-#ifndef PHP_WIN32
-static bool php_io_poll_signal_no_handler(const struct sigaction *act)
-{
-	/* sa_handler and sa_sigaction share storage; pcntl sets SA_SIGINFO even for SIG_DFL */
-	return act->sa_handler == SIG_DFL || act->sa_handler == SIG_IGN;
-}
-
-/* Whether a delivery runs a handler. With zend_signal the signals it manages
- * always have its trampoline installed, and the handler PHP code set is in
- * zend_sigaction(); any other signal has what sigaction() reports. */
-static bool php_io_poll_signal_has_handler(int signo)
-{
-	struct sigaction act;
-	memset(&act, 0, sizeof(act));
-	if (sigaction(signo, NULL, &act) != 0) {
-		return true;
-	}
-	if (php_io_poll_signal_no_handler(&act)) {
-		return false;
-	}
-# ifdef ZEND_SIGNALS
-	switch (signo) {
-		case SIGPROF: case SIGHUP: case SIGINT: case SIGQUIT:
-		case SIGTERM: case SIGUSR1: case SIGUSR2: case SIGALRM:
-			memset(&act, 0, sizeof(act));
-			zend_sigaction(signo, NULL, &act);
-			return !php_io_poll_signal_no_handler(&act);
-	}
-# endif
-	return true;
-}
-
-/* A signal still pending when the handle goes would be delivered on unblock;
- * one that nothing handles takes its default action, which mostly ends the
- * process. Setting SIG_IGN discards a pending signal (POSIX), so do that for
- * those and leave the ones with a handler pending for it. */
-static void php_io_poll_signal_discard_fatal(sigset_t *unblock)
-{
-	sigset_t pending;
-	if (sigpending(&pending) != 0) {
-		return;
-	}
-	for (int signo = 1; signo < NSIG; signo++) {
-		if (sigismember(unblock, signo) != 1 || sigismember(&pending, signo) != 1) {
-			continue;
-		}
-		if (php_io_poll_signal_has_handler(signo)) {
-			continue;
-		}
-		struct sigaction raw, ign;
-		memset(&ign, 0, sizeof(ign));
-		ign.sa_handler = SIG_IGN;
-		sigemptyset(&ign.sa_mask);
-		if (sigaction(signo, &ign, &raw) == 0) {
-			sigaction(signo, &raw, NULL);
 		}
 	}
 }
@@ -1116,41 +1056,6 @@ static int php_io_poll_signal_handle_is_valid(php_poll_handle_object *handle)
 	return handle->handle_data != NULL;
 }
 
-static void php_io_poll_signal_handle_cleanup(php_poll_handle_object *handle)
-{
-	php_io_poll_signal_handle_data *data = handle->handle_data;
-	if (data) {
-		if (data->fd >= 0) {
-			close(data->fd);
-		}
-#ifndef PHP_WIN32
-		sigset_t unblock;
-		bool any = false;
-		sigemptyset(&unblock);
-		for (int signo = 1; signo < NSIG; signo++) {
-			if (sigismember(&data->set, signo) != 1 || php_io_poll_signal_handle_count[signo] == 0) {
-				continue;
-			}
-			if (--php_io_poll_signal_handle_count[signo] == 0
-					&& sigismember(&php_io_poll_signals_blocked_by_handles, signo) == 1) {
-				sigdelset(&php_io_poll_signals_blocked_by_handles, signo);
-				sigaddset(&unblock, signo);
-				any = true;
-			}
-		}
-		if (any) {
-			php_io_poll_signal_discard_fatal(&unblock);
-			php_io_poll_sigmask(SIG_UNBLOCK, &unblock, NULL);
-		}
-#endif
-		if (data->infos) {
-			efree(data->infos);
-		}
-		efree(data);
-		handle->handle_data = NULL;
-	}
-}
-
 static void php_io_poll_signal_handle_record(php_io_poll_signal_handle_data *data, const php_siginfo_t *info)
 {
 	if (data->n_infos == data->cap_infos) {
@@ -1158,6 +1063,90 @@ static void php_io_poll_signal_handle_record(php_io_poll_signal_handle_data *dat
 		data->infos = safe_erealloc(data->infos, data->cap_infos, sizeof(*data->infos), 0);
 	}
 	data->infos[data->n_infos++] = *info;
+}
+
+static void php_io_poll_signal_handle_block(php_io_poll_signal_handle_data *data)
+{
+#ifndef PHP_WIN32
+	/* Block what is not blocked yet, so the signals queue for the source */
+	sigset_t old;
+	if (php_io_poll_sigmask(SIG_BLOCK, &data->set, &old) != 0) {
+		return;
+	}
+	for (int signo = 1; signo < NSIG; signo++) {
+		if (sigismember(&data->set, signo) != 1) {
+			continue;
+		}
+		if (php_io_poll_signal_handle_count[signo]++ == 0 && sigismember(&old, signo) == 0) {
+			sigaddset(&php_io_poll_signals_blocked_by_handles, signo);
+		}
+	}
+#endif
+}
+
+/* What arrived while the handle was watched is taken into its record before
+ * the unblock, so nothing is delivered with its default action later */
+static void php_io_poll_signal_handle_unblock(php_io_poll_signal_handle_data *data)
+{
+#ifndef PHP_WIN32
+	sigset_t unblock;
+	bool any = false;
+	sigemptyset(&unblock);
+	for (int signo = 1; signo < NSIG; signo++) {
+		if (sigismember(&data->set, signo) != 1 || php_io_poll_signal_handle_count[signo] == 0) {
+			continue;
+		}
+		if (--php_io_poll_signal_handle_count[signo] == 0
+				&& sigismember(&php_io_poll_signals_blocked_by_handles, signo) == 1) {
+			sigdelset(&php_io_poll_signals_blocked_by_handles, signo);
+			sigaddset(&unblock, signo);
+			any = true;
+		}
+	}
+	if (any) {
+		siginfo_t info;
+		while (php_poll_signal_take_pending(&unblock, &info) > 0) {
+			php_io_poll_signal_handle_record(data, &info);
+		}
+		php_io_poll_sigmask(SIG_UNBLOCK, &unblock, NULL);
+	}
+#endif
+}
+
+static void php_io_poll_signal_handle_added(php_poll_handle_object *handle)
+{
+	php_io_poll_signal_handle_data *data = handle->handle_data;
+	if (data && data->registrations++ == 0) {
+		php_io_poll_signal_handle_block(data);
+	}
+}
+
+static void php_io_poll_signal_handle_removed(php_poll_handle_object *handle)
+{
+	php_io_poll_signal_handle_data *data = handle->handle_data;
+	if (data && data->registrations > 0 && --data->registrations == 0) {
+		php_io_poll_signal_handle_unblock(data);
+	}
+}
+
+static void php_io_poll_signal_handle_cleanup(php_poll_handle_object *handle)
+{
+	php_io_poll_signal_handle_data *data = handle->handle_data;
+	if (data) {
+		/* Freed by the cycle collector before a context that still watches it */
+		if (data->registrations > 0) {
+			data->registrations = 0;
+			php_io_poll_signal_handle_unblock(data);
+		}
+		if (data->fd >= 0) {
+			close(data->fd);
+		}
+		if (data->infos) {
+			efree(data->infos);
+		}
+		efree(data);
+		handle->handle_data = NULL;
+	}
 }
 
 static bool php_io_poll_signal_handle_fired(php_poll_handle_object *handle)
@@ -1183,6 +1172,8 @@ static php_poll_handle_ops php_io_poll_signal_handle_ops = {
 	.cleanup  = php_io_poll_signal_handle_cleanup,
 	.event    = PHP_POLL_SIGNAL,
 	.fired    = php_io_poll_signal_handle_fired,
+	.added    = php_io_poll_signal_handle_added,
+	.removed  = php_io_poll_signal_handle_removed,
 };
 
 static zend_object *php_io_poll_signal_handle_create_object(zend_class_entry *ce)
@@ -1199,20 +1190,10 @@ static void php_io_poll_signal_handle_init(php_poll_handle_object *handle, const
 	data->set = *set;
 	data->fd = -1;
 #ifndef PHP_WIN32
-	/* Block what is not blocked yet, so the signals queue for the source */
-	sigset_t old;
-	if (php_io_poll_sigmask(SIG_BLOCK, set, &old) == 0) {
-		for (int signo = 1; signo < NSIG; signo++) {
-			if (sigismember(set, signo) != 1) {
-				continue;
-			}
-			if (php_io_poll_signal_handle_count[signo]++ == 0 && sigismember(&old, signo) == 0) {
-				sigaddset(&php_io_poll_signals_blocked_by_handles, signo);
-			}
-		}
-	}
-	/* No source (ENOSYS, or the platform could not open one): the handle is
-	 * still identity for a provider, and Context::add() refuses it */
+	/* The source sees only blocked signals, so it is inert until a context
+	 * watches the handle. No source (ENOSYS, or the platform could not open
+	 * one): the handle is still identity for a provider, and Context::add()
+	 * refuses it */
 	data->fd = php_poll_signal_source_open(set);
 #endif
 	handle->handle_data = data;
@@ -1565,8 +1546,11 @@ static void php_io_poll_stream_unwatch(php_io_poll_watcher_object *watcher)
 static void php_io_poll_handle_unwatch(
 		php_io_poll_context_object *context, php_io_poll_watcher_object *watcher)
 {
-	if (watcher->handle && watcher->handle->watching) {
-		zend_hash_index_del(watcher->handle->watching, php_io_poll_compute_ptr_key(context));
+	php_poll_handle_object *handle = watcher->handle;
+	if (handle && handle->watching
+			&& zend_hash_index_del(handle->watching, php_io_poll_compute_ptr_key(context)) == SUCCESS
+			&& handle->ops->removed) {
+		handle->ops->removed(handle);
 	}
 }
 
@@ -1683,6 +1667,11 @@ static void php_io_poll_watcher_free_object(zend_object *obj)
 
 	php_io_poll_stream_unwatch(intern);
 	zval_ptr_dtor(&intern->data);
+
+	/* Freed by the cycle collector before its context */
+	if (intern->active && intern->context) {
+		php_io_poll_handle_unwatch(intern->context, intern);
+	}
 
 	if (intern->handle) {
 		OBJ_RELEASE(&intern->handle->std);
@@ -2293,6 +2282,9 @@ PHP_METHOD(Io_Poll_Context, add)
 	zval watcher_ptr_zv;
 	ZVAL_PTR(&watcher_ptr_zv, watcher);
 	zend_hash_index_update(handle->watching, php_io_poll_compute_ptr_key(intern), &watcher_ptr_zv);
+	if (handle->ops->added) {
+		handle->ops->added(handle);
+	}
 
 	if (handle->ops == &php_stream_poll_handle_ops) {
 		php_stream *stream = php_stream_poll_handle_get_stream(handle);
@@ -2450,6 +2442,11 @@ PHPAPI void php_io_poll_handle_remove_from_all_contexts(zend_object *handle_obj)
 	efree(watching);
 
 	php_io_poll_retire_watchers(list, n);
+	if (handle->ops->removed) {
+		for (uint32_t i = 0; i < n; i++) {
+			handle->ops->removed(handle);
+		}
+	}
 }
 
 /* Initialize the stream poll classes - add to PHP_MINIT_FUNCTION */

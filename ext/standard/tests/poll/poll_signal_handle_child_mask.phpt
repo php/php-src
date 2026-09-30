@@ -1,5 +1,5 @@
 --TEST--
-Io\Poll\SignalHandle: the signals it blocks stay unblocked in exec'd children, mail() and pcntl_exec() included
+Io\Poll\SignalHandle: the signals it blocks while watched stay unblocked in exec'd children, mail() and pcntl_exec() included
 --EXTENSIONS--
 pcntl
 --SKIPIF--
@@ -17,6 +17,8 @@ function usr1_blocked(string $status_line): string {
 }
 
 $h = new Io\Poll\SignalHandle([SIGUSR1]);
+$ctx = new Io\Poll\Context();
+$ctx->add($h, [Io\Poll\Event::Signal]);
 echo "self: ", usr1_blocked(preg_replace('/.*^(SigBlk:[^\n]*).*/ms', '$1', file_get_contents('/proc/self/status'))), "\n";
 
 $out = __DIR__ . '/poll_signal_handle_child_mask.out';

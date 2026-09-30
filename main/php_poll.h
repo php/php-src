@@ -248,6 +248,17 @@ struct php_poll_handle_ops {
 	 * @return whether the event is reported
 	 */
 	bool (*fired)(php_poll_handle_object *handle);
+
+	/**
+	 * Called when a context starts watching the handle. May be NULL.
+	 */
+	void (*added)(php_poll_handle_object *handle);
+
+	/**
+	 * Called when a context stops watching the handle, also when it is destroyed with the handle
+	 * in it. May be NULL.
+	 */
+	void (*removed)(php_poll_handle_object *handle);
 };
 
 /* A script may reach the resource through the handle: set by the userland factory, or by the core

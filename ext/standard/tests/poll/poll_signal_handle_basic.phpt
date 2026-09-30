@@ -1,5 +1,5 @@
 --TEST--
-Io\Poll\SignalHandle: signals as events, blocked for the life of the handle
+Io\Poll\SignalHandle: signals as events, blocked while a context watches the handle
 --EXTENSIONS--
 posix
 pcntl
@@ -24,7 +24,7 @@ $ctx = new Io\Poll\Context();
 $handle = new Io\Poll\SignalHandle([SIGUSR1, SIGUSR2]);
 var_dump($handle->getSignals() === [SIGUSR1, SIGUSR2]);
 
-// The handle blocked its signals
+// Not watched yet: nothing blocked
 pcntl_sigprocmask(SIG_UNBLOCK, [SIGWINCH], $blocked);
 var_dump(in_array(SIGUSR1, $blocked), in_array(SIGUSR2, $blocked));
 
@@ -35,6 +35,9 @@ try {
 }
 
 $watcher = $ctx->add($handle, [Io\Poll\Event::Signal]);
+// Watched: the handle blocked its signals
+pcntl_sigprocmask(SIG_UNBLOCK, [SIGWINCH], $blocked);
+var_dump(in_array(SIGUSR1, $blocked), in_array(SIGUSR2, $blocked));
 var_dump(count($ctx->wait(Time\Duration::fromSeconds(0))));
 
 posix_kill(posix_getpid(), SIGUSR2);
@@ -52,10 +55,8 @@ $events = $ctx->wait(Time\Duration::fromSeconds(2));
 var_dump(count($events), count($handle->getDelivered()));
 
 $watcher->remove();
-// The exception above keeps the handle in its trace
-unset($handle, $watcher, $events, $e);
 
-// Gone with the handle: the signals are unblocked again
+// Removed: the signals are unblocked again while the handle lives on
 pcntl_sigprocmask(SIG_UNBLOCK, [SIGWINCH], $blocked);
 var_dump(in_array(SIGUSR1, $blocked), in_array(SIGUSR2, $blocked));
 ?>
@@ -63,9 +64,11 @@ var_dump(in_array(SIGUSR1, $blocked), in_array(SIGUSR2, $blocked));
 Io\Poll\SignalHandle::__construct(): Argument #1 ($signals) must not be empty
 Io\Poll\SignalHandle::__construct(): Argument #1 ($signals) signals must be between 1 and %d
 bool(true)
-bool(true)
-bool(true)
+bool(false)
+bool(false)
 Io\Poll\Context::add(): Argument #2 ($events) must be Event::Signal for a SignalHandle
+bool(true)
+bool(true)
 int(0)
 int(1)
 array(1) {
