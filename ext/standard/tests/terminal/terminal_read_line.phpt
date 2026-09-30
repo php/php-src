@@ -1,0 +1,148 @@
+--TEST--
+Io\Terminal\SystemTerminal: readLine line ending, whitespace, buffering, and EOF stream contracts
+--FILE--
+<?php
+
+use Io\Terminal\Terminal;
+use Io\Terminal\SystemTerminal;
+
+// Interface verification
+var_dump(is_subclass_of(SystemTerminal::class, Terminal::class));
+$reflection = new ReflectionMethod(Terminal::class, 'readLine');
+var_dump($reflection->getNumberOfParameters());
+var_dump((string) $reflection->getReturnType());
+
+// 1. Argument validation: readLine takes 0 parameters
+$fp = fopen('php://temp', 'r+');
+$terminal = SystemTerminal::fromStreams($fp);
+try {
+    $terminal->readLine('extra');
+    echo "FAIL: readLine accepted argument\n";
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+}
+
+// 2. Immediate EOF returns null
+var_dump($terminal->readLine());
+
+// 3. Ordinary completed line ("hello\n")
+fwrite($fp, "hello\n");
+rewind($fp);
+var_dump($terminal->readLine());
+var_dump($terminal->readLine()); // EOF
+
+// 4. CRLF line ending ("world\r\n")
+ftruncate($fp, 0);
+rewind($fp);
+fwrite($fp, "world\r\n");
+rewind($fp);
+var_dump($terminal->readLine());
+var_dump($terminal->readLine()); // EOF
+
+// 5. Empty line ("\n" and "\r\n")
+ftruncate($fp, 0);
+rewind($fp);
+fwrite($fp, "\n\r\n");
+rewind($fp);
+var_dump($terminal->readLine());
+var_dump($terminal->readLine());
+var_dump($terminal->readLine()); // EOF
+
+// 6. Leading and trailing whitespace preserved
+ftruncate($fp, 0);
+rewind($fp);
+fwrite($fp, "   spaced line   \n");
+rewind($fp);
+var_dump($terminal->readLine());
+
+// 7. Tabs preserved
+ftruncate($fp, 0);
+rewind($fp);
+fwrite($fp, "\t\tindented with tabs\t\t\r\n");
+rewind($fp);
+var_dump($terminal->readLine());
+
+// 8. Unterminated final line at EOF
+ftruncate($fp, 0);
+rewind($fp);
+fwrite($fp, "final unterminated");
+rewind($fp);
+var_dump($terminal->readLine());
+var_dump($terminal->readLine()); // EOF
+
+// 9. Multiple sequential lines
+ftruncate($fp, 0);
+rewind($fp);
+fwrite($fp, "alpha\nbeta\r\ngamma\ndelta");
+rewind($fp);
+var_dump($terminal->readLine());
+var_dump($terminal->readLine());
+var_dump($terminal->readLine());
+var_dump($terminal->readLine());
+var_dump($terminal->readLine()); // EOF
+
+// 10. Unicode line behavior
+ftruncate($fp, 0);
+rewind($fp);
+fwrite($fp, "こんにちは世界\nCafé au lait\r\n🦀 Rust & 🐘 PHP\n");
+rewind($fp);
+var_dump($terminal->readLine());
+var_dump($terminal->readLine());
+var_dump($terminal->readLine());
+var_dump($terminal->readLine()); // EOF
+
+// 11. Already-buffered php_stream input is not lost
+ftruncate($fp, 0);
+rewind($fp);
+fwrite($fp, "buffer line 1\nbuffer line 2\n");
+rewind($fp);
+// Read single character via standard PHP stream function to populate php_stream internal buffer
+$c = fgetc($fp);
+var_dump($c);
+// SystemTerminal::readLine must consume from php_stream buffer, not bypass it
+var_dump($terminal->readLine());
+var_dump($terminal->readLine());
+var_dump($terminal->readLine()); // EOF
+
+fclose($fp);
+
+// 12. Memory stream (php://memory)
+$mem = fopen('php://memory', 'r+');
+fwrite($mem, "memory line\n");
+rewind($mem);
+$tMem = SystemTerminal::fromStreams($mem);
+var_dump($tMem->readLine());
+fclose($mem);
+
+?>
+--EXPECT--
+bool(true)
+int(0)
+string(7) "?string"
+ArgumentCountError: Io\Terminal\SystemTerminal::readLine() expects exactly 0 arguments, 1 given
+NULL
+string(5) "hello"
+NULL
+string(5) "world"
+NULL
+string(0) ""
+string(0) ""
+NULL
+string(17) "   spaced line   "
+string(22) "		indented with tabs		"
+string(18) "final unterminated"
+NULL
+string(5) "alpha"
+string(4) "beta"
+string(5) "gamma"
+string(5) "delta"
+NULL
+string(21) "こんにちは世界"
+string(13) "Café au lait"
+string(20) "🦀 Rust & 🐘 PHP"
+NULL
+string(1) "b"
+string(12) "uffer line 1"
+string(13) "buffer line 2"
+NULL
+string(11) "memory line"

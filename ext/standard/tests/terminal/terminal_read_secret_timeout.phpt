@@ -1,5 +1,5 @@
 --TEST--
-Io\Terminal\Terminal: readSecret timeout, empty submission, and cancellation contracts
+Io\Terminal\SystemTerminal: readSecret timeout, empty submission, and cancellation contracts
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY === 'Windows') {
@@ -32,7 +32,7 @@ proc_close($proc);
 --FILE--
 <?php
 
-use Io\Terminal\Terminal;
+use Io\Terminal\SystemTerminal;
 use Io\Terminal\TerminalException;
 use Time\Duration;
 
@@ -46,7 +46,7 @@ $proc1 = proc_open(
     ],
     $pipes1,
 );
-$terminal1 = Terminal::fromStreams($pipes1[0]);
+$terminal1 = SystemTerminal::fromStreams($pipes1[0]);
 $start = hrtime(true);
 $secret1 = $terminal1->readSecret(Duration::fromMilliseconds(25));
 $elapsed_ms = (hrtime(true) - $start) / 1e6;
@@ -83,7 +83,7 @@ $proc2 = proc_open(
     $pipes2,
 );
 $r0 = fgets($pipes2[2]);
-$terminal2 = Terminal::fromStreams($pipes2[0]);
+$terminal2 = SystemTerminal::fromStreams($pipes2[0]);
 $terminal2->enableRawMode();
 
 fwrite($pipes2[0], "START\n");
@@ -122,7 +122,7 @@ $proc3 = proc_open(
     $pipes3,
 );
 $r0 = fgets($pipes3[2]);
-$terminal3 = Terminal::fromStreams($pipes3[0]);
+$terminal3 = SystemTerminal::fromStreams($pipes3[0]);
 $terminal3->enableRawMode();
 
 fwrite($pipes3[0], "START\n");
@@ -161,7 +161,7 @@ $proc4 = proc_open(
     $pipes4,
 );
 $r0 = fgets($pipes4[2]);
-$terminal4 = Terminal::fromStreams($pipes4[0]);
+$terminal4 = SystemTerminal::fromStreams($pipes4[0]);
 $terminal4->enableRawMode();
 
 fwrite($pipes4[0], "START\n");
@@ -191,7 +191,7 @@ $proc5 = proc_open(
     ],
     $pipes5,
 );
-$terminal5 = Terminal::fromStreams($pipes5[0]);
+$terminal5 = SystemTerminal::fromStreams($pipes5[0]);
 try {
     $terminal5->readSecret(Duration::fromSeconds(1)->negate());
     echo "FAIL: expected ValueError on negative duration\n";
@@ -228,7 +228,7 @@ $proc6 = proc_open(
     $pipes6,
 );
 $r0 = fgets($pipes6[2]);
-$terminal6 = Terminal::fromStreams($pipes6[0]);
+$terminal6 = SystemTerminal::fromStreams($pipes6[0]);
 $terminal6->enableRawMode();
 
 fwrite($pipes6[0], "START\n");
@@ -266,7 +266,7 @@ $proc7 = proc_open(
     $pipes7,
 );
 $r0 = fgets($pipes7[2]);
-$terminal7 = Terminal::fromStreams($pipes7[0]);
+$terminal7 = SystemTerminal::fromStreams($pipes7[0]);
 $terminal7->enableRawMode();
 
 fwrite($pipes7[0], "START\n");
@@ -293,6 +293,6 @@ bool(true)
 bool(true)
 bool(true)
 Cancellation caught: Unable to read secret from terminal
-Negative timeout caught: Io\Terminal\Terminal::readSecret(): Argument #1 ($timeout) must not be negative
+Negative timeout caught: Io\Terminal\SystemTerminal::readSecret(): Argument #1 ($timeout) must not be negative
 bool(true)
 Zero timeout escape caught: Unable to read secret from terminal

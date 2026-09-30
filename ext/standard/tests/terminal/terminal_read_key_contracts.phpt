@@ -1,5 +1,5 @@
 --TEST--
-Io\Terminal\Terminal: readKey null vs TerminalException contracts on POSIX PTY
+Io\Terminal\SystemTerminal: readKey null vs TerminalException contracts on POSIX PTY
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY === 'Windows') {
@@ -32,7 +32,7 @@ proc_close($proc);
 --FILE--
 <?php
 
-use Io\Terminal\Terminal;
+use Io\Terminal\SystemTerminal;
 use Time\Duration;
 
 $proc = proc_open(
@@ -45,7 +45,7 @@ $proc = proc_open(
     $pipes,
 );
 
-$terminal = Terminal::fromStreams($pipes[0]);
+$terminal = SystemTerminal::fromStreams($pipes[0]);
 $terminal->enableRawMode();
 
 // Contract 1: No input + zero timeout (non-blocking) returns null immediately
@@ -81,7 +81,7 @@ try {
 
 // Contract 4: Non-terminal input stream throws TerminalException
 $fp = fopen('php://temp', 'r+');
-$nonTty = Terminal::fromStreams($fp);
+$nonTty = SystemTerminal::fromStreams($fp);
 try {
     $nonTty->readKey(Duration::fromSeconds(0));
     echo "FAIL: non-terminal did not throw\n";
@@ -112,7 +112,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-ValueError: Io\Terminal\Terminal::readKey(): Argument #1 ($timeout) must not be negative
-ValueError: Io\Terminal\Terminal::readKey(): Argument #2 ($sequenceTimeout) must not be negative
+ValueError: Io\Terminal\SystemTerminal::readKey(): Argument #1 ($timeout) must not be negative
+ValueError: Io\Terminal\SystemTerminal::readKey(): Argument #2 ($sequenceTimeout) must not be negative
 Io\Terminal\TerminalException: Failed to read key: input stream is not a terminal
 Io\Terminal\TerminalException: %s terminal input stream

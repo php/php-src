@@ -1,5 +1,5 @@
 --TEST--
-Io\Terminal\Terminal: /dev/tty controlling terminal identity
+Io\Terminal\SystemTerminal: /dev/tty controlling terminal identity
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY === 'Windows') {
@@ -22,14 +22,14 @@ fclose($fp2);
 --FILE--
 <?php
 
-use Io\Terminal\Terminal;
+use Io\Terminal\SystemTerminal;
 use Io\Terminal\ModeToken;
 
 $ttyFp1 = fopen('/dev/tty', 'r+');
 $ttyFp2 = fopen('/dev/tty', 'r+');
 
-$tTty1 = Terminal::fromStreams($ttyFp1);
-$tTty2 = Terminal::fromStreams($ttyFp2);
+$tTty1 = SystemTerminal::fromStreams($ttyFp1);
+$tTty2 = SystemTerminal::fromStreams($ttyFp2);
 
 $mTty = $tTty1->enableRawMode();
 var_dump($mTty instanceof ModeToken);

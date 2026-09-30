@@ -32,7 +32,7 @@ proc_close($proc);
 --FILE--
 <?php
 
-use Io\Terminal\Terminal;
+use Io\Terminal\SystemTerminal;
 use Io\Terminal\TerminalException;
 
 // 1. Send malformed UTF-8 sequence followed immediately by Ctrl+C (\x03) and Enter (\r)
@@ -47,7 +47,7 @@ $proc1 = proc_open(
     $pipes1,
 );
 
-$terminal1 = Terminal::fromStreams($pipes1[0]);
+$terminal1 = SystemTerminal::fromStreams($pipes1[0]);
 
 try {
     $secret = $terminal1->readSecret();
@@ -75,7 +75,7 @@ $proc2 = proc_open(
     $pipes2,
 );
 
-$terminal2 = Terminal::fromStreams($pipes2[0]);
+$terminal2 = SystemTerminal::fromStreams($pipes2[0]);
 $secret2 = $terminal2->readSecret();
 echo "Fragmented UTF-8: ", bin2hex($secret2), "\n";
 
@@ -98,7 +98,7 @@ $proc3 = proc_open(
     $pipes3,
 );
 
-$terminal3 = Terminal::fromStreams($pipes3[0]);
+$terminal3 = SystemTerminal::fromStreams($pipes3[0]);
 try {
     $terminal3->readSecret();
     echo "FAIL: expected exception on disconnect\n";
@@ -124,7 +124,7 @@ $proc4 = proc_open(
     $pipes4,
 );
 
-$terminal4 = Terminal::fromStreams($pipes4[0]);
+$terminal4 = SystemTerminal::fromStreams($pipes4[0]);
 try {
     $terminal4->readSecret();
     echo "FAIL: expected abort on escape+Ctrl+C\n";
@@ -151,7 +151,7 @@ $proc5 = proc_open(
     $pipes5,
 );
 
-$terminal5 = Terminal::fromStreams($pipes5[0]);
+$terminal5 = SystemTerminal::fromStreams($pipes5[0]);
 try {
     $terminal5->readSecret();
     echo "FAIL: expected abort on escape+Enter\n";
@@ -177,7 +177,7 @@ $proc6 = proc_open(
     ],
     $pipes6,
 );
-$terminal6 = Terminal::fromStreams($pipes6[0]);
+$terminal6 = SystemTerminal::fromStreams($pipes6[0]);
 try {
     $terminal6->readSecret();
     echo "FAIL: expected abort on CSI+Ctrl+C\n";
@@ -202,7 +202,7 @@ $proc7 = proc_open(
     ],
     $pipes7,
 );
-$terminal7 = Terminal::fromStreams($pipes7[0]);
+$terminal7 = SystemTerminal::fromStreams($pipes7[0]);
 try {
     $terminal7->readSecret();
     echo "FAIL: expected abort on CSI+Ctrl+D\n";
@@ -227,7 +227,7 @@ $proc8 = proc_open(
     ],
     $pipes8,
 );
-$terminal8 = Terminal::fromStreams($pipes8[0]);
+$terminal8 = SystemTerminal::fromStreams($pipes8[0]);
 try {
     $terminal8->readSecret();
     echo "FAIL: expected abort on SS3+Ctrl+C\n";
@@ -252,7 +252,7 @@ $proc9 = proc_open(
     ],
     $pipes9,
 );
-$terminal9 = Terminal::fromStreams($pipes9[0]);
+$terminal9 = SystemTerminal::fromStreams($pipes9[0]);
 $secret9 = $terminal9->readSecret();
 echo "Valid CSI Up ignored: ", bin2hex($secret9), "\n";
 fwrite($pipes9[0], "done\n");
@@ -273,7 +273,7 @@ $proc10 = proc_open(
     ],
     $pipes10,
 );
-$terminal10 = Terminal::fromStreams($pipes10[0]);
+$terminal10 = SystemTerminal::fromStreams($pipes10[0]);
 $secret10 = $terminal10->readSecret();
 echo "Valid SS3 F1 ignored: ", bin2hex($secret10), "\n";
 fwrite($pipes10[0], "done\n");
@@ -294,7 +294,7 @@ $proc11 = proc_open(
     ],
     $pipes11,
 );
-$terminal11 = Terminal::fromStreams($pipes11[0]);
+$terminal11 = SystemTerminal::fromStreams($pipes11[0]);
 $secret11 = $terminal11->readSecret();
 echo "Internal timeout continue: ", bin2hex($secret11), "\n";
 fwrite($pipes11[0], "done\n");

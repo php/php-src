@@ -1,27 +1,27 @@
 --TEST--
-Io\Terminal\TerminalInterface: mockable terminal boundary and foreign token rejection
+Io\Terminal\Terminal: mockable terminal boundary and foreign token rejection
 --FILE--
 <?php
 
 use Io\Terminal\Key;
 use Io\Terminal\ModeToken;
-use Io\Terminal\ModeTokenInterface;
+use Io\Terminal\SystemModeToken;
 use Io\Terminal\Terminal;
-use Io\Terminal\TerminalInterface;
+use Io\Terminal\SystemTerminal;
 use Io\Terminal\TerminalSize;
 use Time\Duration;
 
 // Verify interface hierarchy
-$rcTerm = new ReflectionClass(Terminal::class);
-var_dump($rcTerm->implementsInterface(TerminalInterface::class));
+$rcTerm = new ReflectionClass(SystemTerminal::class);
+var_dump($rcTerm->implementsInterface(Terminal::class));
 
-$rcToken = new ReflectionClass(ModeToken::class);
-var_dump($rcToken->implementsInterface(ModeTokenInterface::class));
+$rcToken = new ReflectionClass(SystemModeToken::class);
+var_dump($rcToken->implementsInterface(ModeToken::class));
 
 // Application-level fake
-class FakeModeToken implements ModeTokenInterface {}
+class FakeModeToken implements ModeToken {}
 
-class FakeTerminal implements TerminalInterface
+class FakeTerminal implements Terminal
 {
     public bool $isRaw = false;
 
@@ -30,13 +30,13 @@ class FakeTerminal implements TerminalInterface
         return new TerminalSize(120, 40);
     }
 
-    public function enableRawMode(): ModeTokenInterface
+    public function enableRawMode(): ModeToken
     {
         $this->isRaw = true;
         return new FakeModeToken();
     }
 
-    public function restoreMode(?ModeTokenInterface $mode = null): bool
+    public function restoreMode(?ModeToken $mode = null): bool
     {
         $this->isRaw = false;
         return true;
@@ -49,14 +49,19 @@ class FakeTerminal implements TerminalInterface
         return Key::Up;
     }
 
+    public function readLine(): ?string
+    {
+        return "mocked-line";
+    }
+
     public function readSecret(?Duration $timeout = null): ?string
     {
         return "mocked-secret";
     }
 }
 
-// Application service consuming TerminalInterface
-function promptPassword(TerminalInterface $term): string
+// Application service consuming Terminal
+function promptPassword(Terminal $term): string
 {
     $size = $term->getSize();
     $token = $term->enableRawMode();
@@ -72,13 +77,13 @@ $fake = new FakeTerminal();
 echo promptPassword($fake), PHP_EOL;
 var_dump($fake->isRaw);
 
-// Native restoreMode rejects foreign ModeTokenInterface implementations
+// Native restoreMode rejects foreign ModeToken implementations
 $fp = fopen('php://temp', 'r+');
-$native = Terminal::fromStreams($fp);
+$native = SystemTerminal::fromStreams($fp);
 
 try {
     $native->restoreMode(new FakeModeToken());
-    echo "FAIL: native accepted foreign ModeTokenInterface\n";
+    echo "FAIL: native accepted foreign ModeToken\n";
 } catch (ValueError $e) {
     echo "Caught: ", $e->getMessage(), PHP_EOL;
 }
@@ -89,4 +94,4 @@ bool(true)
 bool(true)
 size=120x40 secret=mocked-secret
 bool(false)
-Caught: Io\Terminal\Terminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token belonging to this terminal
+Caught: Io\Terminal\SystemTerminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token belonging to this terminal

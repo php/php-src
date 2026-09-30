@@ -32,7 +32,7 @@ proc_close($proc);
 --FILE--
 <?php
 
-use Io\Terminal\Terminal;
+use Io\Terminal\SystemTerminal;
 use Time\Duration;
 
 function spawn_pty_child(string $childCode): array {
@@ -46,7 +46,7 @@ function spawn_pty_child(string $childCode): array {
         $pipes,
     );
     $started = fgets($pipes[2]);
-    $terminal = Terminal::fromStreams($pipes[0]);
+    $terminal = SystemTerminal::fromStreams($pipes[0]);
     $terminal->enableRawMode();
     return [$proc, $pipes, $terminal];
 }
