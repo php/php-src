@@ -164,10 +164,10 @@ typedef struct php_io_terminal_stream_target {
 static zend_class_entry *php_io_terminal_exception_ce;
 static zend_class_entry *php_io_terminal_key_ce;
 static zend_class_entry *php_io_terminal_terminal_size_ce;
-static zend_class_entry *php_io_terminal_mode_token_interface_ce;
-static zend_class_entry *php_io_terminal_terminal_interface_ce;
 static zend_class_entry *php_io_terminal_mode_token_ce;
 static zend_class_entry *php_io_terminal_terminal_ce;
+static zend_class_entry *php_io_terminal_system_mode_token_ce;
+static zend_class_entry *php_io_terminal_system_terminal_ce;
 static zend_object_handlers php_io_terminal_mode_token_handlers;
 static zend_object_handlers php_io_terminal_object_handlers;
 ZEND_TLS php_io_terminal_shared_mode *php_io_terminal_active_shared_modes;
@@ -624,7 +624,7 @@ static void php_io_terminal_create_mode_token(zval *return_value, php_io_termina
 {
 	php_io_terminal_mode_token_object *intern;
 
-	object_init_ex(return_value, php_io_terminal_mode_token_ce);
+	object_init_ex(return_value, php_io_terminal_system_mode_token_ce);
 	intern = PHP_IO_TERMINAL_MODE_TOKEN_OBJ_FROM_ZV(return_value);
 	intern->shared = shared;
 	intern->valid = true;
@@ -721,6 +721,33 @@ static bool php_io_terminal_stream_target_init_ex(
 #else
 		target->native_stream = is_input ? STDIN_FILENO : STDOUT_FILENO;
 #endif
+		if (is_input) {
+			zval *stdin_zv = zend_get_constant_str("STDIN", sizeof("STDIN") - 1);
+			if (stdin_zv != NULL && Z_TYPE_P(stdin_zv) == IS_RESOURCE) {
+				target->php_stream = (php_stream *) zend_fetch_resource2(
+					Z_RES_P(stdin_zv),
+					NULL,
+					php_file_le_stream(),
+					php_file_le_pstream()
+				);
+				if (target->php_stream != NULL) {
+					target->stream_resource = stdin_zv;
+				}
+			}
+		} else {
+			zval *stdout_zv = zend_get_constant_str("STDOUT", sizeof("STDOUT") - 1);
+			if (stdout_zv != NULL && Z_TYPE_P(stdout_zv) == IS_RESOURCE) {
+				target->php_stream = (php_stream *) zend_fetch_resource2(
+					Z_RES_P(stdout_zv),
+					NULL,
+					php_file_le_stream(),
+					php_file_le_pstream()
+				);
+				if (target->php_stream != NULL) {
+					target->stream_resource = stdout_zv;
+				}
+			}
+		}
 		return true;
 	}
 
@@ -2176,23 +2203,23 @@ PHP_METHOD(Io_Terminal_TerminalSize, __construct)
 	}
 }
 
-/* Io\Terminal\ModeToken methods */
-PHP_METHOD(Io_Terminal_ModeToken, __construct)
+/* Io\Terminal\SystemModeToken methods */
+PHP_METHOD(Io_Terminal_SystemModeToken, __construct)
 {
-	zend_throw_error(NULL, "Cannot directly construct Io\\Terminal\\ModeToken");
+	zend_throw_error(NULL, "Cannot directly construct Io\\Terminal\\SystemModeToken");
 }
 
-/* Io\Terminal\Terminal methods */
-PHP_METHOD(Io_Terminal_Terminal, __construct)
+/* Io\Terminal\SystemTerminal methods */
+PHP_METHOD(Io_Terminal_SystemTerminal, __construct)
 {
-	zend_throw_error(NULL, "Cannot directly construct Io\\Terminal\\Terminal");
+	zend_throw_error(NULL, "Cannot directly construct Io\\Terminal\\SystemTerminal");
 }
 
-PHP_METHOD(Io_Terminal_Terminal, fromStdio)
+PHP_METHOD(Io_Terminal_SystemTerminal, fromStdio)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	object_init_ex(return_value, php_io_terminal_terminal_ce);
+	object_init_ex(return_value, php_io_terminal_system_terminal_ce);
 	php_io_terminal_object *intern = PHP_IO_TERMINAL_OBJ_FROM_ZV(return_value);
 
 	php_io_terminal_stream_target target;
@@ -2202,7 +2229,7 @@ PHP_METHOD(Io_Terminal_Terminal, fromStdio)
 	}
 }
 
-PHP_METHOD(Io_Terminal_Terminal, fromStreams)
+PHP_METHOD(Io_Terminal_SystemTerminal, fromStreams)
 {
 	zval *input_arg;
 	zval *output_arg = NULL;
@@ -2231,7 +2258,7 @@ PHP_METHOD(Io_Terminal_Terminal, fromStreams)
 		}
 	}
 
-	object_init_ex(return_value, php_io_terminal_terminal_ce);
+	object_init_ex(return_value, php_io_terminal_system_terminal_ce);
 	php_io_terminal_object *intern = PHP_IO_TERMINAL_OBJ_FROM_ZV(return_value);
 	ZVAL_COPY(&intern->input_stream_val, input_arg);
 
@@ -2246,7 +2273,7 @@ PHP_METHOD(Io_Terminal_Terminal, fromStreams)
 	}
 }
 
-PHP_METHOD(Io_Terminal_Terminal, getSize)
+PHP_METHOD(Io_Terminal_SystemTerminal, getSize)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -2274,7 +2301,7 @@ PHP_METHOD(Io_Terminal_Terminal, getSize)
 	object_init_with_constructor(return_value, php_io_terminal_terminal_size_ce, 2, params, NULL);
 }
 
-PHP_METHOD(Io_Terminal_Terminal, enableRawMode)
+PHP_METHOD(Io_Terminal_SystemTerminal, enableRawMode)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -2329,19 +2356,19 @@ PHP_METHOD(Io_Terminal_Terminal, enableRawMode)
  * shared mode record; foreign userland token implementations must still be rejected
  * with ValueError.
  */
-PHP_METHOD(Io_Terminal_Terminal, restoreMode)
+PHP_METHOD(Io_Terminal_SystemTerminal, restoreMode)
 {
 	zval *mode_token = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(mode_token, php_io_terminal_mode_token_interface_ce)
+		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(mode_token, php_io_terminal_mode_token_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_io_terminal_object *intern = PHP_IO_TERMINAL_OBJ_FROM_ZV(ZEND_THIS);
 
 	if (mode_token != NULL && !Z_ISNULL_P(mode_token)) {
-		if (!instanceof_function(Z_OBJCE_P(mode_token), php_io_terminal_mode_token_ce)) {
+		if (!instanceof_function(Z_OBJCE_P(mode_token), php_io_terminal_system_mode_token_ce)) {
 			zend_argument_value_error(1, "must be an active terminal mode token belonging to this terminal");
 			RETURN_THROWS();
 		}
@@ -2411,7 +2438,7 @@ PHP_METHOD(Io_Terminal_Terminal, restoreMode)
 	RETURN_FALSE;
 }
 
-PHP_METHOD(Io_Terminal_Terminal, readKey)
+PHP_METHOD(Io_Terminal_SystemTerminal, readKey)
 {
 	php_date_time_duration *timeout_duration = NULL;
 	php_date_time_duration *seq_timeout_duration = NULL;
@@ -2538,7 +2565,343 @@ PHP_METHOD(Io_Terminal_Terminal, readKey)
 	RETURN_STR(key);
 }
 
-PHP_METHOD(Io_Terminal_Terminal, readSecret)
+#ifdef PHP_WIN32
+static zend_string *php_io_terminal_read_line_windows(
+	php_io_terminal_native_stream handle,
+	php_stream *stream,
+	php_io_terminal_object *intern
+)
+{
+	/* If there is already buffered data in php_stream, use php_stream_get_line */
+	if (stream != NULL && stream->writepos > stream->readpos) {
+		size_t line_len = 0;
+		char *buf = php_stream_get_line(stream, NULL, 0, &line_len);
+		if (buf == NULL) {
+			if (php_stream_eof(stream)) {
+				return NULL;
+			}
+			if (!EG(exception)) {
+				zend_throw_exception(php_io_terminal_exception_ce, "Failed to read line from stream", 0);
+			}
+			return NULL;
+		}
+		if (line_len >= 2 && buf[line_len - 2] == '\r' && buf[line_len - 1] == '\n') {
+			line_len -= 2;
+		} else if (line_len >= 1 && buf[line_len - 1] == '\n') {
+			line_len -= 1;
+		}
+		buf[line_len] = '\0';
+		zend_string *res = zend_string_init(buf, line_len, 0);
+		efree(buf);
+		return res;
+	}
+
+	DWORD original_mode = 0;
+	bool is_console = (handle != INVALID_HANDLE_VALUE && handle != NULL && GetConsoleMode(handle, &original_mode) != 0);
+
+	if (!is_console) {
+		/* Redirected/non-console stream or handle */
+		if (stream != NULL) {
+			size_t line_len = 0;
+			char *buf = php_stream_get_line(stream, NULL, 0, &line_len);
+			if (buf == NULL) {
+				if (php_stream_eof(stream)) {
+					return NULL;
+				}
+				if (!EG(exception)) {
+					zend_throw_exception(php_io_terminal_exception_ce, "Failed to read line from stream", 0);
+				}
+				return NULL;
+			}
+			if (line_len >= 2 && buf[line_len - 2] == '\r' && buf[line_len - 1] == '\n') {
+				line_len -= 2;
+			} else if (line_len >= 1 && buf[line_len - 1] == '\n') {
+				line_len -= 1;
+			}
+			buf[line_len] = '\0';
+			zend_string *res = zend_string_init(buf, line_len, 0);
+			efree(buf);
+			return res;
+		}
+
+		/* Bare non-console handle */
+		smart_str line = {0};
+		char ch;
+		DWORD bytes_read;
+		while (1) {
+			if (!ReadFile(handle, &ch, 1, &bytes_read, NULL)) {
+				DWORD err = GetLastError();
+				if (err == ERROR_BROKEN_PIPE || err == ERROR_HANDLE_EOF) {
+					break; /* EOF */
+				}
+				smart_str_free(&line);
+				zend_throw_exception(php_io_terminal_exception_ce, "Failed to read line from handle", 0);
+				return NULL;
+			}
+			if (bytes_read == 0) {
+				break; /* EOF */
+			}
+			smart_str_appendc(&line, ch);
+			if (ch == '\n') {
+				break;
+			}
+		}
+
+		if (line.s == NULL) {
+			return NULL;
+		}
+
+		size_t len = ZSTR_LEN(line.s);
+		char *val = ZSTR_VAL(line.s);
+		if (len >= 2 && val[len - 2] == '\r' && val[len - 1] == '\n') {
+			len -= 2;
+		} else if (len >= 1 && val[len - 1] == '\n') {
+			len -= 1;
+		}
+		val[len] = '\0';
+		zend_string *res = zend_string_init(val, len, 0);
+		smart_str_free(&line);
+		return res;
+	}
+
+	/* Native Windows console input */
+	DWORD cooked_mode = original_mode | (ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT | ENABLE_PROCESSED_INPUT);
+	bool mode_changed = false;
+	if (cooked_mode != original_mode) {
+		if (!SetConsoleMode(handle, cooked_mode)) {
+			zend_throw_exception(php_io_terminal_exception_ce, "Failed to set console mode for line reading", 0);
+			return NULL;
+		}
+		mode_changed = true;
+	}
+
+	size_t wcapacity = 1024;
+	size_t wlen = 0;
+	WCHAR *wline = emalloc(wcapacity * sizeof(WCHAR));
+	bool read_failed = false;
+
+	while (true) {
+		DWORD chars_read = 0;
+		BOOL ok = ReadConsoleW(handle, wline + wlen, (DWORD)(wcapacity - wlen), &chars_read, NULL);
+		if (!ok) {
+			read_failed = true;
+			break;
+		}
+		if (chars_read == 0) {
+			break; /* EOF */
+		}
+		wlen += chars_read;
+		if (wline[wlen - 1] == L'\n' || wline[wlen - 1] == 0x1a) {
+			break;
+		}
+		if (wlen == wcapacity) {
+			wcapacity *= 2;
+			wline = erealloc(wline, wcapacity * sizeof(WCHAR));
+		}
+	}
+
+	if (mode_changed) {
+		SetConsoleMode(handle, original_mode);
+	}
+
+	if (read_failed) {
+		efree(wline);
+		zend_throw_exception(php_io_terminal_exception_ce, "Failed to read line from console", 0);
+		return NULL;
+	}
+
+	if (wlen == 0 || (wlen == 1 && wline[0] == 0x1a)) {
+		efree(wline);
+		return NULL; /* EOF */
+	}
+
+	/* Normalize CRLF / LF */
+	if (wlen >= 2 && wline[wlen - 2] == L'\r' && wline[wlen - 1] == L'\n') {
+		wlen -= 2;
+	} else if (wlen >= 1 && (wline[wlen - 1] == L'\n' || wline[wlen - 1] == 0x1a)) {
+		wlen -= 1;
+	} else if (wlen >= 1 && wline[wlen - 1] == L'\r') {
+		wlen -= 1;
+	}
+
+	if (wlen == 0) {
+		efree(wline);
+		return zend_string_init("", 0, 0);
+	}
+
+	int utf8_len = WideCharToMultiByte(CP_UTF8, 0, wline, (int) wlen, NULL, 0, NULL, NULL);
+	if (utf8_len < 0) {
+		efree(wline);
+		zend_throw_exception(php_io_terminal_exception_ce, "Failed to convert console line to UTF-8", 0);
+		return NULL;
+	}
+
+	zend_string *res = zend_string_alloc(utf8_len, 0);
+	WideCharToMultiByte(CP_UTF8, 0, wline, (int) wlen, ZSTR_VAL(res), utf8_len, NULL, NULL);
+	ZSTR_VAL(res)[utf8_len] = '\0';
+	efree(wline);
+	return res;
+}
+#else
+static char *php_io_terminal_read_line_from_fd(int fd, size_t *out_len)
+{
+	smart_str line = {0};
+	char ch;
+	errno = 0;
+	while (1) {
+		ssize_t n = read(fd, &ch, 1);
+		if (n > 0) {
+			smart_str_appendc(&line, ch);
+			if (ch == '\n') {
+				break;
+			}
+		} else if (n == 0) {
+			break; /* EOF */
+		} else {
+			if (errno == EINTR) {
+				continue;
+			}
+			smart_str_free(&line);
+			return NULL;
+		}
+	}
+
+	if (line.s == NULL) {
+		*out_len = 0;
+		return NULL;
+	}
+
+	*out_len = ZSTR_LEN(line.s);
+	char *res = estrndup(ZSTR_VAL(line.s), *out_len);
+	smart_str_free(&line);
+	return res;
+}
+
+static char *php_io_terminal_read_line_posix(
+	php_io_terminal_native_stream fd,
+	php_stream *stream,
+	size_t *out_len,
+	bool *is_eof
+)
+{
+	*is_eof = false;
+	*out_len = 0;
+
+	if (stream != NULL) {
+		char *buf = php_stream_get_line(stream, NULL, 0, out_len);
+		if (buf == NULL) {
+			if (php_stream_eof(stream)) {
+				*is_eof = true;
+				return NULL;
+			}
+			/* Read error */
+			return NULL;
+		}
+		return buf;
+	}
+
+	if (fd >= 0) {
+		char *buf = php_io_terminal_read_line_from_fd(fd, out_len);
+		if (buf == NULL) {
+			if (errno == 0 || errno == EAGAIN) {
+				*is_eof = true;
+			}
+			return NULL;
+		}
+		return buf;
+	}
+
+	return NULL;
+}
+#endif
+
+PHP_METHOD(Io_Terminal_SystemTerminal, readLine)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	php_io_terminal_object *intern = PHP_IO_TERMINAL_OBJ_FROM_ZV(ZEND_THIS);
+
+	php_io_terminal_stream_target stream;
+	if (!php_io_terminal_stream_target_init(&intern->input_stream_val, true, &stream)) {
+		RETURN_THROWS();
+	}
+
+	if (!intern->has_identity && php_io_terminal_native_stream_is_valid(stream.native_stream)) {
+		intern->has_identity = php_io_terminal_get_identity(stream.native_stream, &intern->identity);
+	}
+
+	if (intern->active_mode_token != NULL || (intern->has_identity && php_io_terminal_find_shared_mode(&intern->identity) != NULL)) {
+		zend_throw_exception(php_io_terminal_exception_ce, "Cannot read a line while raw mode is active for this terminal", 0);
+		RETURN_THROWS();
+	}
+
+#ifdef PHP_WIN32
+	zend_string *line = php_io_terminal_read_line_windows(stream.native_stream, stream.php_stream, intern);
+	if (EG(exception)) {
+		if (line != NULL) {
+			zend_string_release(line);
+		}
+		RETURN_THROWS();
+	}
+	if (line == NULL) {
+		RETURN_NULL();
+	}
+	RETURN_STR(line);
+#else
+	size_t out_len = 0;
+	bool is_eof = false;
+	char *buf = php_io_terminal_read_line_posix(stream.native_stream, stream.php_stream, &out_len, &is_eof);
+	if (EG(exception)) {
+		if (buf != NULL) {
+			efree(buf);
+		}
+		RETURN_THROWS();
+	}
+
+	if (buf == NULL) {
+		if (is_eof) {
+			if (intern->pending_utf8.length > 0) {
+				zend_string *res = zend_string_init((char *) intern->pending_utf8.bytes, intern->pending_utf8.length, 0);
+				intern->pending_utf8.length = 0;
+				intern->pending_utf8.expected = 0;
+				RETURN_STR(res);
+			}
+			RETURN_NULL();
+		}
+		if (!EG(exception)) {
+			zend_throw_exception(php_io_terminal_exception_ce, "Failed to read line from terminal", 0);
+		}
+		RETURN_THROWS();
+	}
+
+	/* Strip line ending */
+	if (out_len >= 2 && buf[out_len - 2] == '\r' && buf[out_len - 1] == '\n') {
+		out_len -= 2;
+	} else if (out_len >= 1 && buf[out_len - 1] == '\n') {
+		out_len -= 1;
+	}
+	buf[out_len] = '\0';
+
+	zend_string *res;
+	if (intern->pending_utf8.length > 0) {
+		size_t total_len = intern->pending_utf8.length + out_len;
+		res = zend_string_alloc(total_len, 0);
+		memcpy(ZSTR_VAL(res), intern->pending_utf8.bytes, intern->pending_utf8.length);
+		if (out_len > 0) {
+			memcpy(ZSTR_VAL(res) + intern->pending_utf8.length, buf, out_len);
+		}
+		ZSTR_VAL(res)[total_len] = '\0';
+		intern->pending_utf8.length = 0;
+		intern->pending_utf8.expected = 0;
+	} else {
+		res = zend_string_init(buf, out_len, 0);
+	}
+	efree(buf);
+	RETURN_STR(res);
+#endif
+}
+
+PHP_METHOD(Io_Terminal_SystemTerminal, readSecret)
 {
 	php_date_time_duration *timeout_duration = NULL;
 
@@ -2633,18 +2996,18 @@ PHP_MINIT_FUNCTION(terminal)
 
 	php_io_terminal_terminal_size_ce = register_class_Io_Terminal_TerminalSize();
 
-	php_io_terminal_mode_token_interface_ce = register_class_Io_Terminal_ModeTokenInterface();
-	php_io_terminal_terminal_interface_ce = register_class_Io_Terminal_TerminalInterface();
+	php_io_terminal_mode_token_ce = register_class_Io_Terminal_ModeToken();
+	php_io_terminal_terminal_ce = register_class_Io_Terminal_Terminal();
 
-	php_io_terminal_mode_token_ce = register_class_Io_Terminal_ModeToken(php_io_terminal_mode_token_interface_ce);
-	php_io_terminal_mode_token_ce->create_object = php_io_terminal_mode_token_create_object;
+	php_io_terminal_system_mode_token_ce = register_class_Io_Terminal_SystemModeToken(php_io_terminal_mode_token_ce);
+	php_io_terminal_system_mode_token_ce->create_object = php_io_terminal_mode_token_create_object;
 	memcpy(&php_io_terminal_mode_token_handlers, zend_get_std_object_handlers(), sizeof(php_io_terminal_mode_token_handlers));
 	php_io_terminal_mode_token_handlers.offset = offsetof(php_io_terminal_mode_token_object, std);
 	php_io_terminal_mode_token_handlers.free_obj = php_io_terminal_mode_token_free_obj;
 	php_io_terminal_mode_token_handlers.clone_obj = NULL;
 
-	php_io_terminal_terminal_ce = register_class_Io_Terminal_Terminal(php_io_terminal_terminal_interface_ce);
-	php_io_terminal_terminal_ce->create_object = php_io_terminal_create_object;
+	php_io_terminal_system_terminal_ce = register_class_Io_Terminal_SystemTerminal(php_io_terminal_terminal_ce);
+	php_io_terminal_system_terminal_ce->create_object = php_io_terminal_create_object;
 	memcpy(&php_io_terminal_object_handlers, zend_get_std_object_handlers(), sizeof(php_io_terminal_object_handlers));
 	php_io_terminal_object_handlers.offset = offsetof(php_io_terminal_object, std);
 	php_io_terminal_object_handlers.free_obj = php_io_terminal_free_obj;

@@ -32,7 +32,7 @@ proc_close($proc);
 --FILE--
 <?php
 
-use Io\Terminal\Terminal;
+use Io\Terminal\SystemTerminal;
 use Time\Duration;
 
 // 1. 3-byte UTF-8 (€: \xe2\x82\xac) split across timeout
@@ -64,7 +64,7 @@ $proc1 = proc_open(
 );
 
 $r0 = fgets($pipes1[2]);
-$terminal1 = Terminal::fromStreams($pipes1[0]);
+$terminal1 = SystemTerminal::fromStreams($pipes1[0]);
 $terminal1->enableRawMode();
 
 fwrite($pipes1[0], "START\n");
@@ -117,7 +117,7 @@ $proc2 = proc_open(
 );
 
 $r0 = fgets($pipes2[2]);
-$terminal2 = Terminal::fromStreams($pipes2[0]);
+$terminal2 = SystemTerminal::fromStreams($pipes2[0]);
 $terminal2->enableRawMode();
 
 fwrite($pipes2[0], "START\n");
@@ -173,7 +173,7 @@ $proc3 = proc_open(
 );
 
 $r0 = fgets($pipes3[2]);
-$terminal3 = Terminal::fromStreams($pipes3[0]);
+$terminal3 = SystemTerminal::fromStreams($pipes3[0]);
 $terminal3->enableRawMode();
 
 fwrite($pipes3[0], "START\n");

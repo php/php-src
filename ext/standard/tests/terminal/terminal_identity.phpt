@@ -1,5 +1,5 @@
 --TEST--
-Io\Terminal\Terminal: POSIX terminal identity and unrelated PTY rejection
+Io\Terminal\SystemTerminal: POSIX terminal identity and unrelated PTY rejection
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY === 'Windows') {
@@ -32,7 +32,7 @@ proc_close($proc);
 --FILE--
 <?php
 
-use Io\Terminal\Terminal;
+use Io\Terminal\SystemTerminal;
 use Io\Terminal\ModeToken;
 
 $proc1 = proc_open(
@@ -55,9 +55,9 @@ $proc2 = proc_open(
     $pipes2,
 );
 
-$t1 = Terminal::fromStreams($pipes1[0]);
-$t1_dup = Terminal::fromStreams($pipes1[1]);
-$t2 = Terminal::fromStreams($pipes2[0]);
+$t1 = SystemTerminal::fromStreams($pipes1[0]);
+$t1_dup = SystemTerminal::fromStreams($pipes1[1]);
+$t2 = SystemTerminal::fromStreams($pipes2[0]);
 
 $m1_dup = $t1->enableRawMode();
 var_dump($m1_dup instanceof ModeToken);
@@ -92,7 +92,7 @@ $proc3 = proc_open(
     ],
     $pipes3,
 );
-$t3 = Terminal::fromStreams($pipes3[0]);
+$t3 = SystemTerminal::fromStreams($pipes3[0]);
 try {
     $t3->restoreMode($m_reuse);
     echo "FAIL: reused fd accepted token\n";
@@ -115,7 +115,7 @@ proc_close($proc3);
 --EXPECT--
 bool(true)
 bool(true)
-ValueError: Io\Terminal\Terminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token belonging to this terminal
+ValueError: Io\Terminal\SystemTerminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token belonging to this terminal
 bool(true)
 bool(false)
-ValueError: Io\Terminal\Terminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token belonging to this terminal
+ValueError: Io\Terminal\SystemTerminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token belonging to this terminal

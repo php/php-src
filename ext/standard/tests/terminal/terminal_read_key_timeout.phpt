@@ -33,7 +33,7 @@ proc_close($proc);
 <?php
 
 use Io\Terminal\Key;
-use Io\Terminal\Terminal;
+use Io\Terminal\SystemTerminal;
 use Time\Duration;
 
 $code = 'fgets(STDIN); fwrite(STDOUT, "\x1b"); fflush(STDOUT); fwrite(STDERR, "READY\n"); fflush(STDERR); fgets(STDIN);';
@@ -47,7 +47,7 @@ $proc = proc_open(
     $pipes,
 );
 
-$terminal = Terminal::fromStreams($pipes[0]);
+$terminal = SystemTerminal::fromStreams($pipes[0]);
 $terminal->enableRawMode();
 
 // Signal child to write lone escape

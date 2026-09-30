@@ -1,15 +1,15 @@
 --TEST--
-Io\Terminal\Terminal: getSize returns null for non-terminal streams without environment fallback
+Io\Terminal\SystemTerminal: getSize returns null for non-terminal streams without environment fallback
 --ENV--
 COLUMNS=100
 LINES=30
 --FILE--
 <?php
 
-use Io\Terminal\Terminal;
+use Io\Terminal\SystemTerminal;
 
 $fp = fopen('php://temp', 'r+');
-$terminal = Terminal::fromStreams($fp);
+$terminal = SystemTerminal::fromStreams($fp);
 
 var_dump($terminal->getSize());
 

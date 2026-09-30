@@ -1,12 +1,12 @@
 --TEST--
-Io\Terminal\Terminal: enableRawMode throws TerminalException for non-terminal streams
+Io\Terminal\SystemTerminal: enableRawMode throws TerminalException for non-terminal streams
 --FILE--
 <?php
 
-use Io\Terminal\Terminal;
+use Io\Terminal\SystemTerminal;
 
 $fp = fopen('php://temp', 'r+');
-$terminal = Terminal::fromStreams($fp);
+$terminal = SystemTerminal::fromStreams($fp);
 
 try {
     $terminal->enableRawMode();

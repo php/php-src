@@ -49,29 +49,33 @@ namespace Io\Terminal {
         public function __construct(int $cols, int $rows) {}
     }
 
-    interface ModeTokenInterface {}
+    interface ModeToken {}
 
-    interface TerminalInterface
+    interface Terminal
     {
         public function getSize(): ?TerminalSize;
 
-        public function enableRawMode(): ModeTokenInterface;
+        public function enableRawMode(): ModeToken;
 
-        public function restoreMode(?ModeTokenInterface $mode = null): bool;
+        public function restoreMode(?ModeToken $mode = null): bool;
 
         public function readKey(
             ?\Time\Duration $timeout = null,
             ?\Time\Duration $sequenceTimeout = null,
         ): Key|string|null;
 
-        public function readSecret(?\Time\Duration $timeout = null): ?string;
+        public function readLine(): ?string;
+
+        public function readSecret(
+            ?\Time\Duration $timeout = null,
+        ): ?string;
     }
 
     /**
      * @strict-properties
      * @not-serializable
      */
-    final class ModeToken implements ModeTokenInterface
+    final class SystemModeToken implements ModeToken
     {
         private function __construct() {}
     }
@@ -80,29 +84,38 @@ namespace Io\Terminal {
      * @strict-properties
      * @not-serializable
      */
-    final class Terminal implements TerminalInterface
+    final class SystemTerminal implements Terminal
     {
         private function __construct() {}
 
-        public static function fromStdio(): Terminal {}
+        public static function fromStdio(): SystemTerminal {}
 
         /**
          * @param resource $input
          * @param resource|null $output
          */
-        public static function fromStreams($input, $output = null): Terminal {}
+        public static function fromStreams(
+            $input,
+            $output = null,
+        ): SystemTerminal {}
 
         public function getSize(): ?TerminalSize {}
 
-        public function enableRawMode(): ModeToken {}
+        public function enableRawMode(): SystemModeToken {}
 
-        public function restoreMode(?ModeTokenInterface $mode = null): bool {}
+        public function restoreMode(
+            ?ModeToken $mode = null,
+        ): bool {}
 
         public function readKey(
             ?\Time\Duration $timeout = null,
             ?\Time\Duration $sequenceTimeout = null,
         ): Key|string|null {}
 
-        public function readSecret(?\Time\Duration $timeout = null): ?string {}
+        public function readLine(): ?string {}
+
+        public function readSecret(
+            ?\Time\Duration $timeout = null,
+        ): ?string {}
     }
 }

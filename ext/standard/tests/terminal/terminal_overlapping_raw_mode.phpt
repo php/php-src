@@ -1,5 +1,5 @@
 --TEST--
-Io\Terminal\Terminal: overlapping raw-mode sessions, ownership validation, and out-of-order restoration
+Io\Terminal\SystemTerminal: overlapping raw-mode sessions, ownership validation, and out-of-order restoration
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY === 'Windows') {
@@ -32,7 +32,7 @@ proc_close($proc);
 --FILE--
 <?php
 
-use Io\Terminal\Terminal;
+use Io\Terminal\SystemTerminal;
 use Io\Terminal\ModeToken;
 
 $proc = proc_open(
@@ -56,9 +56,9 @@ $proc2 = proc_open(
 );
 
 // Two separate Terminal instances referencing descriptors on the same PTY
-$t1 = Terminal::fromStreams($pipes[0]);
-$t2 = Terminal::fromStreams($pipes[1]);
-$tUnrelated = Terminal::fromStreams($pipes2[0]);
+$t1 = SystemTerminal::fromStreams($pipes[0]);
+$t2 = SystemTerminal::fromStreams($pipes[1]);
+$tUnrelated = SystemTerminal::fromStreams($pipes2[0]);
 
 // Test 1: Same Terminal + token
 $m = $t1->enableRawMode();
@@ -80,7 +80,7 @@ try {
 var_dump($t1->restoreMode($m1));
 
 // Test 4: Token survives Terminal destruction when held externally
-$tTemp = Terminal::fromStreams($pipes[0]);
+$tTemp = SystemTerminal::fromStreams($pipes[0]);
 $mTemp = $tTemp->enableRawMode();
 unset($tTemp); // Drops Terminal reference, but $mTemp remains active
 
@@ -116,13 +116,13 @@ var_dump($t2->restoreMode($m2));
 var_dump($t1->restoreMode($m1));
 
 // Test 7: Destroying the final externally-held token restores canonical mode
-$tLive = Terminal::fromStreams($pipes[0]);
+$tLive = SystemTerminal::fromStreams($pipes[0]);
 $mHeld = $tLive->enableRawMode();
 unset($tLive); // Terminal dropped; $mHeld keeps raw mode active
 unset($mHeld); // Final token destroyed; ModeToken destructor restores canonical mode
 
 // Terminal is back in canonical mode; further restore returns false
-$tVerify = Terminal::fromStreams($pipes[0]);
+$tVerify = SystemTerminal::fromStreams($pipes[0]);
 var_dump($tVerify->restoreMode());
 
 fwrite($pipes[0], "exit\n");
@@ -141,10 +141,10 @@ proc_close($proc2);
 bool(true)
 bool(true)
 bool(true)
-ValueError: Io\Terminal\Terminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token belonging to this terminal
+ValueError: Io\Terminal\SystemTerminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token belonging to this terminal
 bool(true)
 bool(true)
-ValueError: Io\Terminal\Terminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token belonging to this terminal
+ValueError: Io\Terminal\SystemTerminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token belonging to this terminal
 bool(true)
 bool(true)
 bool(true)
