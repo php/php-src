@@ -35,6 +35,7 @@ PHP 8.7 INTERNALS UPGRADE NOTES
   This new signature covers the most common parameters used with zend_is_callable_ex().
 - Removed zend_hrtime_posix_clock_id. zend_hrtime() always uses CLOCK_MONOTONIC
   on POSIX platforms.
+- Function pointer signature for interface_gets_implemented has been made void.
 - Added a new zend_object_copy() function which increases the refcount of
   a zend_object* and returns it. Allowing more descriptive code rather than
   doing an assignment followed by GC_ADDREF().
