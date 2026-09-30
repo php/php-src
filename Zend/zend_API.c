@@ -1932,6 +1932,10 @@ ZEND_API zend_result object_init_ex(zval *arg, zend_class_entry *ce) /* {{{ */
 }
 /* }}} */
 
+ZEND_API zend_object* zend_object_init(zend_class_entry *ce) {
+	return _object_and_properties_init(ce, NULL);
+}
+
 ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *ce, uint32_t param_count, zval *params, HashTable *named_params) /* {{{ */
 {
 	zend_object *obj = _object_and_properties_init(ce, NULL);
