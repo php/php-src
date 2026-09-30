@@ -1245,12 +1245,13 @@ static zend_string *zend_get_interface_delegation_property(  /* {{{ */
 zend_class_entry *ce,
 zend_class_entry *iface)
 {
-	for (uint32_t i = 0; i < ce->num_interface_delegations; i++) {
-		zend_interface_delegation *delegation =
-		&ce->interface_delegations[i];
-
-		if (ce->interfaces[delegation->interface_index] == iface) {
-			return delegation->property_name;
+	for (zend_class_entry *current = ce;current; current = current->parent) {
+		for (uint32_t i = 0; i < current->num_interface_delegations; i++) {
+			zend_interface_delegation *delegation =
+				&current->interface_delegations[i];
+			if (current->interfaces[delegation->interface_index] == iface) {
+				return delegation->property_name;
+			}
 		}
 	}
 
@@ -1315,10 +1316,16 @@ static void zend_generate_interface_delegation_methods_for_interface( /* {{{ */
 		zend_string *method_name = method->common.function_name;
 
 		zend_function *existing =
-		zend_hash_find_ptr_lc(&ce->function_table, method_name);
+			zend_hash_find_ptr_lc(&ce->function_table, method_name);
 
-		if (existing && !(existing->common.fn_flags & ZEND_ACC_ABSTRACT)) {
-			continue;
+		if (existing) {
+			if (!(existing->common.fn_flags & ZEND_ACC_ABSTRACT)) {
+				continue;
+			}
+
+			if (existing->common.scope == ce) {
+				continue;
+			}
 		}
 
 		zend_internal_function *generated =
@@ -1352,10 +1359,11 @@ static void zend_generate_interface_delegation_methods(zend_class_entry *ce) /* 
 {
 	for (uint32_t i = 0; i < ce->num_interface_delegations; i++) {
 		zend_interface_delegation *delegation =
-		&ce->interface_delegations[i];
+			&ce->interface_delegations[i];
 
 		zend_class_entry *iface =
-		ce->interfaces[delegation->interface_index];
+			ce->interfaces[delegation->interface_index];
+		ZEND_ASSERT(iface != NULL);
 
 		zend_generate_interface_delegation_methods_for_interface(ce,iface);
 	}
@@ -2401,6 +2409,12 @@ static void zend_do_implement_interfaces(zend_class_entry *ce, zend_class_entry 
 			interfaces[num_interfaces] = iface;
 			num_interfaces++;
 		}
+	}
+	for (i = 0; i < ce->num_interface_delegations; i++) {
+		zend_interface_delegation *delegation =
+			&ce->interface_delegations[i];
+
+		delegation->interface_index += num_parent_interfaces;
 	}
 
 	if (!(ce->ce_flags & ZEND_ACC_CACHED)) {

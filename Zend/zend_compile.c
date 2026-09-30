@@ -2127,6 +2127,8 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, bool nullify_hand
 		ce->parent_name = NULL;
 		ce->num_interfaces = 0;
 		ce->interfaces = NULL;
+		ce->num_interface_delegations = 0;
+		ce->interface_delegations = NULL;
 		ce->num_traits = 0;
 		ce->num_hooked_props = 0;
 		ce->num_hooked_prop_variance_checks = 0;
@@ -9809,14 +9811,11 @@ static void zend_compile_implements(zend_ast *ast) /* {{{ */
 		}
 		interface_names[i].name =
 			zend_resolve_const_class_name_reference(class_ast, "interface name");
-
-		interface_names[i].lc_name =
-			zend_string_tolower(interface_names[i].name);
+		interface_names[i].lc_name = zend_string_tolower(interface_names[i].name);
 	}
 
 	ce->num_interfaces = list->children;
 	ce->interface_names = interface_names;
-
 	ce->num_interface_delegations = num_interface_delegations;
 	ce->interface_delegations = interface_delegations;
 }

@@ -153,7 +153,6 @@ enum _zend_ast_kind {
 	ZEND_AST_MATCH_ARM,
 	ZEND_AST_NAMED_ARG,
 	ZEND_AST_PIPE,
-
 	ZEND_AST_INTERFACE_DELEGATION,
 
 	/* 3 child nodes */
