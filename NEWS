@@ -48,6 +48,8 @@ PHP                                                                        NEWS
 - GD:
   . Fixed undefined behavior with GD2 images with `INT_MAX`-sized chunks.
     (DanielEScherzer, cmb)
+  . Fixed undefined behavior with GIFs with problematic LZW compression data.
+    (DanielEScherzer, vapier)
 
 - Intl:
   . Fixed cloning IntlDateFormatter and MessageFormatter losing PHP-side state
