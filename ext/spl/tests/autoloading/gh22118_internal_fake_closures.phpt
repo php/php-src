@@ -22,16 +22,6 @@ array(1) {
     }
   }
 }
-bool(false)
-array(1) {
-  [0]=>
-  object(Closure)#1 (2) {
-    ["function"]=>
-    string(6) "strlen"
-    ["parameter"]=>
-    array(1) {
-      ["$string"]=>
-      string(10) "<required>"
-    }
-  }
+bool(true)
+array(0) {
 }
