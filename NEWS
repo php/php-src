@@ -65,6 +65,8 @@ PHP                                                                        NEWS
     (Ilia Alshanetsky)
   . Fixed Collator attribute and strength methods not rejecting an
     unconstructed Collator. (Ilia Alshanetsky)
+  . Fixed grapheme_strstr() and grapheme_stristr() returning incorrect substrings
+    when supplementary characters precede the match. (Weilin Du)
 
 - Lexbor:
   . Merge patches lexbor/lexbor@8a14bc0 and lexbor/lexbor@f67ce4b, fixing a
