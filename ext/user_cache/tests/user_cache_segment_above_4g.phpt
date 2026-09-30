@@ -6,13 +6,18 @@ pcntl
 <?php
 if (!PHP_DEBUG) die('skip requires a debug build (fault injection is ZEND_DEBUG-only)');
 if (PHP_INT_SIZE < 8) die('skip requires a 64-bit build');
+if (!function_exists('proc_open')) die('skip proc_open() not available');
 $php = getenv('TEST_PHP_EXECUTABLE') ?: PHP_BINARY;
 $probe = 'UserCache\Cache::getPool("probe")->store("k", 1);'
     . 'echo UserCache\Cache::getStatus()->getAvailability()->name;';
-$cmd = escapeshellarg($php)
-    . ' -n -d user_cache.enable=1 -d user_cache.enable_cli=1 -d user_cache.shm_size=4160M -d user_cache.entries_hint=4096'
-    . ' -r ' . escapeshellarg($probe) . ' 2>/dev/null';
-$availability = trim((string) shell_exec($cmd));
+$process = proc_open(
+    [$php, '-n', '-d', 'user_cache.enable=1', '-d', 'user_cache.enable_cli=1', '-d', 'user_cache.shm_size=4160M', '-d', 'user_cache.entries_hint=4096', '-r', $probe],
+    [1 => ['pipe', 'w'], 2 => ['null']],
+    $pipes
+);
+$availability = trim(stream_get_contents($pipes[1]));
+fclose($pipes[1]);
+proc_close($process);
 if ($availability !== 'Available') {
     die("skip a 4160M segment is unavailable ($availability)");
 }

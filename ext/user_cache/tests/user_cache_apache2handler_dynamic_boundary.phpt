@@ -11,7 +11,10 @@ if ($httpd === false || $module === false) {
 if (!is_file($httpd) || !is_executable($httpd)) die('skip TEST_PHP_APACHE2HANDLER_HTTPD is not executable');
 if (!is_file($module)) die('skip TEST_PHP_APACHE2HANDLER_MODULE is not a file');
 
-$builtIn = shell_exec(escapeshellarg($httpd) . ' -l 2>/dev/null') ?: '';
+$list = proc_open([$httpd, '-l'], [1 => ['pipe', 'w'], 2 => ['null']], $listPipes);
+$builtIn = stream_get_contents($listPipes[1]) ?: '';
+fclose($listPipes[1]);
+proc_close($list);
 if (str_contains($builtIn, 'mod_vhost_alias.c')) return;
 
 $candidates = [
@@ -120,7 +123,10 @@ $module = getenv('TEST_PHP_APACHE2HANDLER_MODULE');
 $moduleName = getenv('TEST_PHP_APACHE2HANDLER_MODULE_NAME') ?: 'php_module';
 $extraConfig = getenv('TEST_PHP_APACHE2HANDLER_EXTRA_CONFIG') ?: '';
 $ldPreload = getenv('TEST_PHP_APACHE2HANDLER_LD_PRELOAD');
-$builtIn = shell_exec(escapeshellarg($httpd) . ' -l 2>/dev/null') ?: '';
+$list = proc_open([$httpd, '-l'], [1 => ['pipe', 'w'], 2 => ['null']], $listPipes);
+$builtIn = stream_get_contents($listPipes[1]) ?: '';
+fclose($listPipes[1]);
+proc_close($list);
 $vhostAliasLoad = '';
 if (!str_contains($builtIn, 'mod_vhost_alias.c')) {
     $candidates = [
