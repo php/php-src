@@ -16,7 +16,7 @@ putenv("TRANSLATED_PATH=".$f."/x");
 putenv("SCRIPT_FILENAME=".$f."/x");
 file_put_contents($f, '<?php var_dump($_SERVER["TRANSLATED_PATH"]); ?>');
 
-echo shell_exec("$php -n $f");
+echo shell_exec("$php -n -d cgi.security_limit_extensions='' $f");
 
 echo "Done\n";
 
