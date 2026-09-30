@@ -325,12 +325,7 @@ PHPAPI int php_io_sigwait(zend_object *handle, const php_sigset_t *set, php_sigi
 /* Active php_io_run() frames */
 PHPAPI uint32_t php_io_ops_in_flight(void);
 
-/* A child reaped through a handle: the next wait for it gets its status. pgid 0 when unknown. */
-PHPAPI void php_io_child_reaped(pid_t pid, int status);
-PHPAPI void php_io_child_reaped_ex(pid_t pid, pid_t pgid, int status);
-/* pid as for waitpid(2); the reaped pid comes back */
-PHPAPI bool php_io_child_take_reaped(pid_t *pid, int *status);
-/* pid as fork() returned it */
+/* pid as fork() returned it: the child drops what the parent's ring had */
 PHPAPI void php_io_child_forget(pid_t pid);
 
 /* A stream whose in-flight op a queue kept after its frame ended */

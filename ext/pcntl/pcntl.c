@@ -393,15 +393,7 @@ PHP_FUNCTION(pcntl_waitpid)
 		}
 
 		memset(&rusage, 0, sizeof(struct rusage));
-		/* A child a handle reaped has no usage left to report */
-		pid_t reaped = (pid_t) pid;
-		int reaped_status;
-		if (php_io_child_take_reaped(&reaped, &reaped_status)) {
-			child_id = reaped;
-			status = reaped_status;
-		} else {
-			child_id = wait4((pid_t) pid, &status, options, &rusage);
-		}
+		child_id = wait4((pid_t) pid, &status, options, &rusage);
 	} else {
 		php_deadline dl = php_io_deadline_infinite();
 		child_id = php_io_waitpid(NULL, (pid_t) pid, &status, options, &dl);
@@ -517,14 +509,7 @@ PHP_FUNCTION(pcntl_wait)
 		}
 
 		memset(&rusage, 0, sizeof(struct rusage));
-		pid_t reaped = -1;
-		int reaped_status;
-		if (php_io_child_take_reaped(&reaped, &reaped_status)) {
-			child_id = reaped;
-			status = reaped_status;
-		} else {
-			child_id = wait3(&status, options, &rusage);
-		}
+		child_id = wait3(&status, options, &rusage);
 	} else {
 		php_deadline dl = php_io_deadline_infinite();
 		child_id = php_io_waitpid(NULL, -1, &status, options, &dl);

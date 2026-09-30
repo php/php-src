@@ -11,7 +11,7 @@ if (!Io\Poll\Backend::Auto->supportsProcessHandles()) die("skip no process handl
 <?php
 $ctx = new Io\Poll\Context();
 $proc = proc_open(['/bin/sh', '-c', 'exit 3'], [], $pipes);
-// Let it exit before the handle exists; it stays a zombie until reaped
+// Let it exit before the handle exists; it stays a zombie until collected
 usleep(200000);
 $handle = Io\Poll\ProcessHandle::fromProcess($proc);
 var_dump($handle->getStatus());

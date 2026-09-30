@@ -1503,9 +1503,6 @@ PHP_FUNCTION(proc_open)
 #endif
 
 	/* We forked/spawned and this is the parent */
-#ifndef PHP_WIN32
-	php_io_child_forget(child);
-#endif
 
 	pipes = zend_try_array_init(pipes);
 	if (!pipes) {

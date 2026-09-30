@@ -191,6 +191,9 @@ typedef siginfo_t php_siginfo_t;
 PHPAPI bool php_poll_has_process_source(void);
 PHPAPI bool php_poll_has_signal_source(void);
 PHPAPI int php_poll_process_source_open(pid_t pid);
+/* Whether the child exited, without collecting it: its pid with the waitpid() status, 0 while it
+ * runs (or is stopped), -1 with errno, ECHILD for a process that is not a waitable child */
+PHPAPI pid_t php_poll_process_exit_probe(pid_t pid, int *status);
 PHPAPI int php_poll_signal_source_open(const sigset_t *set);
 /* Never waits, 0 when nothing is pending; fd -1 takes from the pending set */
 PHPAPI int php_poll_signal_source_take(int fd, const sigset_t *set, siginfo_t *info);

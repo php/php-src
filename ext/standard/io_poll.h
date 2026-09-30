@@ -37,7 +37,6 @@ PHPAPI void php_stream_poll_handle_from_stream(zval *dest, php_stream *stream);
 PHPAPI void php_io_poll_timer_handle_create(zval *dest, zend_hrtime_t timeout_ns, bool periodic);
 PHPAPI void php_io_poll_process_handle_create(zval *dest, pid_t pid);
 PHPAPI void php_io_poll_signal_handle_create(zval *dest, const php_sigset_t *set);
-PHPAPI bool php_io_poll_process_handle_status(zend_object *handle, int *status);
 /* Returns 0 when no signal in the set was recorded */
 PHPAPI int php_io_poll_signal_handle_take(zend_object *handle, const php_sigset_t *set,
 	php_siginfo_t *info);

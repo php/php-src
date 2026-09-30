@@ -108,10 +108,10 @@ namespace Io\Poll {
 
     /**
      * A process by pid. Each context reports Event::Process once when the
-     * process exited. A child is reaped through the handle and getStatus()
-     * has its wait status; a later proc_close() or pcntl_waitpid() on it
-     * reads that. The status stays null for a process that is not our child
-     * or was reaped elsewhere.
+     * process exited, and getStatus() has its wait status then. The handle
+     * never collects the child: proc_close() or pcntl_waitpid() still does
+     * and returns at once. The status stays null for a process that is not
+     * our child or was collected elsewhere.
      * @strict-properties
      * @not-serializable
      */
@@ -124,7 +124,7 @@ namespace Io\Poll {
 
         public function getPid(): int {}
 
-        /** The wait status once the child was reaped through this handle, null before. */
+        /** The wait status once the child exited, null before. */
         public function getStatus(): ?int {}
     }
 

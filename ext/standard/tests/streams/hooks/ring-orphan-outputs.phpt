@@ -49,7 +49,7 @@ var_dump($ring->countPending());
 var_dump($ring->waitCompletions());
 var_dump($ring->countPending());
 
-// Where the ring reaped the child, its status went to the next wait for it
+// The ring observed the child without collecting it, so it is still there for the next wait
 var_dump(pcntl_waitpid($pid, $status) === $pid, pcntl_wexitstatus($status));
 ?>
 --EXPECT--

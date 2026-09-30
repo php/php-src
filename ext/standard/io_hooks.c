@@ -1341,7 +1341,7 @@ static void php_io_hooks_php_call(zend_fcall_info_cache *fcc, zval *retval, zend
 }
 
 /* A Done that hands data to the caller: bytes in its buffer, a descriptor,
- * a reaped child, a taken signal, a resolved name */
+ * an exited child, a taken signal, a resolved name */
 static bool php_io_op_result_is_data(php_io_op *op, const php_io_completion_obj *c)
 {
 	if (c->status != PHP_IO_DONE || c->error) {

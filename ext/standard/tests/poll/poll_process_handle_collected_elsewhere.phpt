@@ -1,5 +1,5 @@
 --TEST--
-Io\Poll\ProcessHandle: a process reaped elsewhere or not our child is reported once, in every context
+Io\Poll\ProcessHandle: a process collected elsewhere or not our child is reported once, in every context
 --EXTENSIONS--
 pcntl
 --SKIPIF--

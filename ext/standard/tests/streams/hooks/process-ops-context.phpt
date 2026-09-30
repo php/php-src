@@ -33,8 +33,8 @@ $provider = new Tracing();
 pcntl_sigprocmask(SIG_BLOCK, [SIGUSR1, SIGUSR2]);
 
 $provider->spawn(function () {
-    // The context reaps the child through the ProcessHandle; proc_close()
-    // gets the recorded status
+    // The context observes the exit through the ProcessHandle; proc_close()
+    // collects the child after Ready
     $proc = proc_open(['/bin/sh', '-c', 'sleep 0.1; exit 6'], [], $pipes);
     var_dump(proc_close($proc));
 });

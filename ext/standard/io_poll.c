@@ -747,17 +747,14 @@ PHPAPI void php_poll_notify(zend_object *handle_obj)
 
 
 /* ProcessHandle: the platform's process source (php_poll_process_source_open)
- * where there is one. When it fires the child is reaped and the status
- * recorded, here and for the WaitPid op. */
+ * where there is one. When it fires the exit status is read and recorded;
+ * the child stays waitable for whoever collects it. */
 
 typedef struct php_io_poll_process_handle_data {
 	pid_t pid;
-#ifndef PHP_WIN32
-	pid_t pgid; /* the child's group while it was alive, for a later wait on the group */
-#endif
 	int fd;
-	bool reaped;
-	bool exited; /* reaped here or elsewhere */
+	bool has_status;
+	bool exited; /* with a status, or collected elsewhere */
 	int status;
 #ifdef PHP_WIN32
 	HANDLE process; /* the process object: keeps the pid valid and answers the exit code */
@@ -775,7 +772,7 @@ static void php_io_poll_process_handle_probe(php_io_poll_process_handle_data *da
 		DWORD code = 0;
 		if (GetExitCodeProcess(data->process, &code)) {
 			data->status = (int) code;
-			data->reaped = true;
+			data->has_status = true;
 		}
 		data->exited = true;
 	}
@@ -822,23 +819,13 @@ static bool php_io_poll_process_handle_fired(php_poll_handle_object *handle)
 #else
 	if (!data->exited) {
 		int status;
-		pid_t pid;
-		/* A zombie keeps its group on Linux but not on macOS: fall back to the
-		 * group seen when the handle was made */
-		pid_t pgid = getpgid(data->pid);
-		if (pgid <= 0) {
-			pgid = data->pgid;
-		}
-		do {
-			pid = waitpid(data->pid, &status, WNOHANG);
-		} while (pid == -1 && errno == EINTR);
+		pid_t pid = php_poll_process_exit_probe(data->pid, &status);
 		if (pid == data->pid) {
-			data->reaped = true;
+			data->has_status = true;
 			data->exited = true;
 			data->status = status;
-			php_io_child_reaped_ex(pid, pgid > 0 ? pgid : 0, status);
 		} else if (pid == -1 && errno == ECHILD) {
-			/* Not our child, or reaped by someone else: gone all the same */
+			/* Not our child, or collected by someone else: gone all the same */
 			data->exited = true;
 		}
 	}
@@ -899,8 +886,6 @@ static zend_result php_io_poll_process_handle_init(php_poll_handle_object *handl
 	data->fd = fd;
 #ifdef PHP_WIN32
 	data->process = process;
-#else
-	data->pgid = getpgid(pid);
 #endif
 	handle->handle_data = data;
 	return SUCCESS;
@@ -914,30 +899,8 @@ PHPAPI void php_io_poll_process_handle_create(zval *dest, pid_t pid)
 		php_io_poll_process_handle_data *data = ecalloc(1, sizeof(*data));
 		data->pid = pid;
 		data->fd = -1;
-#ifndef PHP_WIN32
-		data->pgid = getpgid(pid);
-#endif
 		PHP_POLL_HANDLE_OBJ_FROM_ZV(dest)->handle_data = data;
 	}
-}
-
-PHPAPI bool php_io_poll_process_handle_status(zend_object *handle_obj, int *status)
-{
-	php_poll_handle_object *handle = PHP_POLL_HANDLE_OBJ_FROM_ZOBJ(handle_obj);
-	if (handle->ops != &php_io_poll_process_handle_ops) {
-		return false;
-	}
-	php_io_poll_process_handle_data *data = handle->handle_data;
-#ifdef PHP_WIN32
-	if (data) {
-		php_io_poll_process_handle_probe(data);
-	}
-#endif
-	if (!data || !data->reaped) {
-		return false;
-	}
-	*status = data->status;
-	return true;
 }
 
 PHP_METHOD(Io_Poll_ProcessHandle, __construct)
@@ -1001,7 +964,7 @@ PHP_METHOD(Io_Poll_ProcessHandle, getStatus)
 #ifdef PHP_WIN32
 	php_io_poll_process_handle_probe(data);
 #endif
-	if (!data->reaped) {
+	if (!data->has_status) {
 		RETURN_NULL();
 	}
 	RETURN_LONG(data->status);

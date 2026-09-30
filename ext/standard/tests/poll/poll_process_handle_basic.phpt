@@ -1,5 +1,5 @@
 --TEST--
-Io\Poll\ProcessHandle: a child's exit as an event, reaped through the handle
+Io\Poll\ProcessHandle: a child's exit as an event, left for proc_close() to collect
 --EXTENSIONS--
 posix
 pcntl
@@ -41,7 +41,7 @@ var_dump(count($events), $events[0]->getTriggeredEvents(), $events[0]->getHandle
 $status = $handle->getStatus();
 var_dump(pcntl_wifexited($status), pcntl_wexitstatus($status));
 
-// Reaped through the handle: proc_close() reads that status instead of failing
+// Observed, not collected: proc_close() collects the child with the same status
 var_dump(proc_get_status($proc)['running'], proc_close($proc));
 $watcher->remove();
 ?>

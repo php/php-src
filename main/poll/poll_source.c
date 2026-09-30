@@ -19,8 +19,8 @@
  *
  * kqueue: a private kqueue per source with EVFILT_PROC or one EVFILT_SIGNAL per signal. Both
  * filters record events, not state, so a child already waitable and a signal already pending are
- * announced by a triggered EVFILT_USER note. Neither consumes: the fired handle reaps the child,
- * and a pending signal is taken with sigwait() on it alone. */
+ * announced by a triggered EVFILT_USER note. Neither consumes: the fired handle reads the exit
+ * without collecting the child, and a pending signal is taken with sigwait() on it alone. */
 
 #include "php_poll_internal.h"
 
@@ -104,6 +104,40 @@ static int php_poll_kqueue_open(void)
 }
 #endif
 
+PHPAPI pid_t php_poll_process_exit_probe(pid_t pid, int *status)
+{
+	siginfo_t si;
+	int r;
+	/* si_pid is unspecified when nothing changed */
+	memset(&si, 0, sizeof(si));
+	do {
+		r = waitid(P_PID, (id_t) pid, &si, WEXITED | WNOHANG | WNOWAIT);
+	} while (r == -1 && errno == EINTR);
+	if (r == -1) {
+		return -1;
+	}
+	if (si.si_pid != pid) {
+		return 0;
+	}
+	/* The status waitpid() would store */
+	switch (si.si_code) {
+		case CLD_EXITED:
+			*status = (si.si_status & 0xff) << 8;
+			return pid;
+		case CLD_KILLED:
+			*status = si.si_status & 0x7f;
+			return pid;
+		case CLD_DUMPED:
+			*status = (si.si_status & 0x7f) | 0x80;
+			return pid;
+		default:
+			/* A stop or continue: macOS reports a stopped child whatever the
+			 * options ask, since its kernel tests WSTOPPED with a value every
+			 * option bit overlaps */
+			return 0;
+	}
+}
+
 PHPAPI int php_poll_process_source_open(pid_t pid)
 {
 #if defined(PHP_POLL_PROCESS_SOURCE_PIDFD)
@@ -128,12 +162,10 @@ PHPAPI int php_poll_process_source_open(pid_t pid)
 	}
 	int err = errno;
 	if (err == ESRCH) {
-		/* Exited already: a child not reaped yet is still waitable, and
-		 * the source reports it at the first wait */
-		siginfo_t si;
-		memset(&si, 0, sizeof(si));
-		if (waitid(P_PID, pid, &si, WEXITED | WNOHANG | WNOWAIT) == 0 && si.si_pid == pid
-				&& php_poll_kqueue_kick(kq) == SUCCESS) {
+		/* Exited already: a child not collected yet is still waitable,
+		 * and the source reports it at the first wait */
+		int status;
+		if (php_poll_process_exit_probe(pid, &status) == pid && php_poll_kqueue_kick(kq) == SUCCESS) {
 			return kq;
 		}
 		err = ESRCH;

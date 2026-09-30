@@ -109,7 +109,6 @@ typedef struct {
 	struct _php_io_registration *io_registrations;
 	uint32_t io_ops_in_flight;
 	HashTable *io_orphans; /* stream -> queue keeping its ops */
-	HashTable *io_reaped; /* pid -> wait status */
 	HashTable *io_addrinfo;
 	uint32_t io_hooks_locked;
 	bool io_shut_down;

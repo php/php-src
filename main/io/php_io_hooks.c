@@ -485,11 +485,6 @@ PHPAPI void php_io_hooks_request_shutdown(void)
 		php_io_unfreeze_list(&EG(persistent_list));
 		FG(io_ops_in_flight) = 0;
 	}
-	if (FG(io_reaped)) {
-		zend_hash_destroy(FG(io_reaped));
-		efree(FG(io_reaped));
-		FG(io_reaped) = NULL;
-	}
 	if (FG(io_addrinfo)) {
 		struct addrinfo *head;
 		ZEND_HASH_FOREACH_PTR(FG(io_addrinfo), head) {
@@ -531,84 +526,15 @@ PHPAPI void php_io_freeaddrinfo(struct addrinfo *res)
 	freeaddrinfo(res);
 }
 
-typedef struct php_io_reaped_child {
-	int status;
-	pid_t pgid;
-} php_io_reaped_child;
-
-static void php_io_reaped_child_dtor(zval *zv)
-{
-	efree(Z_PTR_P(zv));
-}
-
-PHPAPI void php_io_child_reaped_ex(pid_t pid, pid_t pgid, int status)
-{
-	if (!FG(io_reaped)) {
-		FG(io_reaped) = emalloc(sizeof(HashTable));
-		zend_hash_init(FG(io_reaped), 4, NULL, php_io_reaped_child_dtor, 0);
-	}
-	php_io_reaped_child *child = emalloc(sizeof(*child));
-	child->status = status;
-	child->pgid = pgid;
-	zend_hash_index_update_ptr(FG(io_reaped), (zend_ulong) pid, child);
-}
-
-PHPAPI void php_io_child_reaped(pid_t pid, int status)
-{
-	php_io_child_reaped_ex(pid, 0, status);
-}
-
-/* pid selects as waitpid() does: itself, -1 any child, 0 the caller's
- * process group, < -1 the group -pid. A child whose group is unknown is
- * only taken by pid or by -1. */
-PHPAPI bool php_io_child_take_reaped(pid_t *pid, int *status)
-{
-	if (!FG(io_reaped) || zend_hash_num_elements(FG(io_reaped)) == 0) {
-		return false;
-	}
-	php_io_reaped_child *child = NULL;
-	zend_ulong key = 0;
-	if (*pid > 0) {
-		key = (zend_ulong) *pid;
-		child = zend_hash_index_find_ptr(FG(io_reaped), key);
-	} else {
-#ifndef PHP_WIN32
-		pid_t pgid = *pid == 0 ? getpgrp() : -*pid;
-#else
-		pid_t pgid = -*pid;
-#endif
-		php_io_reaped_child *c;
-		ZEND_HASH_FOREACH_NUM_KEY_PTR(FG(io_reaped), key, c) {
-			if (*pid == -1 || (c->pgid > 0 && c->pgid == pgid)) {
-				child = c;
-				break;
-			}
-		} ZEND_HASH_FOREACH_END();
-	}
-	if (!child) {
-		return false;
-	}
-	*pid = (pid_t) key;
-	*status = child->status;
-	zend_hash_index_del(FG(io_reaped), key);
-	return true;
-}
-
 PHPAPI void php_io_child_forget(pid_t pid)
 {
 #ifdef HAVE_IOR
 	if (pid == 0) {
 		php_io_ring_after_fork();
 	}
+#else
+	(void) pid;
 #endif
-	if (!FG(io_reaped)) {
-		return;
-	}
-	if (pid == 0) {
-		zend_hash_clean(FG(io_reaped));
-	} else if (pid > 0) {
-		zend_hash_index_del(FG(io_reaped), (zend_ulong) pid);
-	}
 }
 
 PHPAPI uint32_t php_io_ops_in_flight(void)
@@ -1788,17 +1714,9 @@ static pid_t php_io_waitpid_sync(pid_t pid, int *status, php_deadline *dl)
  * WNOHANG of this platform. */
 PHPAPI pid_t php_io_waitpid(zend_object *handle, pid_t pid, int *status, int options, php_deadline *dl)
 {
-	int recorded;
-	pid_t which = pid;
 	if (pid <= 0) {
 		_set_errno(ENOTSUP);
 		return -1;
-	}
-	if (php_io_child_take_reaped(&which, &recorded)) {
-		if (status) {
-			*status = recorded;
-		}
-		return which;
 	}
 
 	if (FG(io_hooks) && !(dl && dl->hrtime == 0)) {
@@ -1814,15 +1732,7 @@ PHPAPI pid_t php_io_waitpid(zend_object *handle, pid_t pid, int *status, int opt
 				break;
 			}
 			if (result.status == PHP_IO_READY) {
-				/* A handle the provider watched: what it recorded, or the process asked without waiting */
-				which = pid;
-				if (php_io_child_take_reaped(&which, &recorded)) {
-					if (status) {
-						*status = recorded;
-					}
-					ret = which;
-					break;
-				}
+				/* A handle the provider watched: the process asked without waiting */
 				php_deadline now;
 				php_deadline_init_nonblock(&now);
 				ret = php_io_waitpid_sync(pid, status, &now);
@@ -1848,20 +1758,13 @@ PHPAPI pid_t php_io_waitpid(zend_object *handle, pid_t pid, int *status, int opt
 #endif
 
 #ifndef PHP_WIN32
-/* The wait is the provider's; after Ready the core takes what a handle recorded or asks the kernel
- * without waiting, and waits again when nothing changed yet. The op's descriptor is the process or
- * signal source, so the poll queue completes it Ready without a handle object. */
+/* The wait is the provider's and collecting the child is the core's. After Ready the core collects
+ * with waitpid(WNOHANG) and waits again when nothing changed yet. A Done names a child the ring
+ * observed without collecting it: the core collects that pid, and waits again when another waiter
+ * collected it first. The op's descriptor is the process or signal source, so the poll queue
+ * completes it Ready without a handle object. */
 PHPAPI pid_t php_io_waitpid(zend_object *handle, pid_t pid, int *status, int options, php_deadline *dl)
 {
-	int recorded;
-	pid_t which = pid;
-	if (php_io_child_take_reaped(&which, &recorded)) {
-		if (status) {
-			*status = recorded;
-		}
-		return which;
-	}
-
 	if (FG(io_hooks) && !(options & WNOHANG)) {
 		php_io_op op;
 		php_io_op_result result;
@@ -1889,14 +1792,6 @@ PHPAPI pid_t php_io_waitpid(zend_object *handle, pid_t pid, int *status, int opt
 				break;
 			}
 			if (result.status == PHP_IO_READY) {
-				which = pid;
-				if (php_io_child_take_reaped(&which, &recorded)) {
-					if (status) {
-						*status = recorded;
-					}
-					ret = which;
-					break;
-				}
 				ret = waitpid(pid, status, options | WNOHANG);
 				if (ret != 0) {
 					break;
@@ -1910,6 +1805,9 @@ PHPAPI pid_t php_io_waitpid(zend_object *handle, pid_t pid, int *status, int opt
 			ssize_t r;
 			php_io_data_result(&result, &r);
 			ret = (pid_t) r;
+			if (ret > 0 && waitpid(ret, status, options | WNOHANG) != ret) {
+				continue;
+			}
 			break;
 		}
 		if (pidfd >= 0) {

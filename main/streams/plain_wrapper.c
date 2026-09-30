@@ -484,7 +484,6 @@ PHPAPI php_stream *_php_stream_popen(const char *command, const char *mode STREA
 		_exit(127);
 	}
 
-	php_io_child_forget(pid);
 	int parent_end = reading ? fds[0] : fds[1];
 	close(reading ? fds[1] : fds[0]);
 	FILE *fp = fdopen(parent_end, reading ? "r" : "w");
