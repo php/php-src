@@ -240,7 +240,7 @@ static php_poll_handle_ops php_stream_poll_handle_ops = {
 };
 
 /* Handle interface internal only */
-static int php_stream_poll_handle_implement_interface(zend_class_entry *interface, zend_class_entry *implementor)
+static zend_result php_stream_poll_handle_implement_interface(zend_class_entry *interface, zend_class_entry *implementor)
 {
 	if (implementor->type == ZEND_USER_CLASS) {
 		zend_error_noreturn(E_ERROR, "Io\\Poll\\Handle cannot be implemented by user classes");

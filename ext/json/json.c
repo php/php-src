@@ -33,7 +33,7 @@ PHP_JSON_API zend_class_entry *php_json_exception_ce;
 
 PHP_JSON_API ZEND_DECLARE_MODULE_GLOBALS(json)
 
-static int php_json_implement_json_serializable(zend_class_entry *interface, zend_class_entry *class_type)
+static zend_result php_json_implement_json_serializable(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	class_type->ce_flags |= ZEND_ACC_USE_GUARDS;
 	return SUCCESS;
@@ -182,11 +182,11 @@ static const char *php_json_get_error_msg(php_json_error_code error_code) /* {{{
 static zend_string *php_json_get_error_msg_with_location(const php_json_error_details *details) /* {{{ */
 {
 	const char *base_msg = php_json_get_error_msg(details->code);
-	
+
 	if (details->line > 0 && details->column > 0) {
 		return zend_strpprintf(0, "%s near location %" PRIu64 ":%" PRIu64, base_msg, details->line, details->column);
 	}
-	
+
 	return zend_string_init(base_msg, strlen(base_msg), 0);
 }
 /* }}} */

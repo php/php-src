@@ -1703,7 +1703,7 @@ static zend_object_iterator *date_object_period_get_iterator(zend_class_entry *c
 	return (zend_object_iterator*)iterator;
 } /* }}} */
 
-static int implement_date_interface_handler(zend_class_entry *interface, zend_class_entry *implementor) /* {{{ */
+static zend_result implement_date_interface_handler(zend_class_entry *interface, zend_class_entry *implementor) /* {{{ */
 {
 	if (implementor->type == ZEND_USER_CLASS &&
 		!instanceof_function(implementor, date_ce_date) &&

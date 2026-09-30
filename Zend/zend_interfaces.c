@@ -256,7 +256,7 @@ ZEND_API zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *c
 /* }}} */
 
 /* {{{ zend_implement_traversable */
-static int zend_implement_traversable(zend_class_entry *interface, zend_class_entry *class_type)
+static zend_result zend_implement_traversable(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	/* Abstract class can implement Traversable only, in which case the extending class must
 	 * implement Iterator or IteratorAggregate. */
@@ -283,7 +283,7 @@ static int zend_implement_traversable(zend_class_entry *interface, zend_class_en
 /* }}} */
 
 /* {{{ zend_implement_aggregate */
-static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entry *class_type)
+static zend_result zend_implement_aggregate(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	if (zend_class_implements_interface(class_type, zend_ce_iterator)) {
 		zend_error_noreturn(E_ERROR,
@@ -325,7 +325,7 @@ static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entr
 /* }}} */
 
 /* {{{ zend_implement_iterator */
-static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry *class_type)
+static zend_result zend_implement_iterator(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	if (zend_class_implements_interface(class_type, zend_ce_aggregate)) {
 		zend_error_noreturn(E_ERROR,
@@ -379,7 +379,7 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 /* }}} */
 
 /* {{{ zend_implement_arrayaccess */
-static int zend_implement_arrayaccess(zend_class_entry *interface, zend_class_entry *class_type)
+static zend_result zend_implement_arrayaccess(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	ZEND_ASSERT(!class_type->arrayaccess_funcs_ptr && "ArrayAccess funcs already set?");
 	zend_class_arrayaccess_funcs *funcs_ptr = class_type->type == ZEND_INTERNAL_CLASS
@@ -459,7 +459,7 @@ ZEND_API int zend_user_unserialize(zval *object, zend_class_entry *ce, const uns
 /* }}} */
 
 /* {{{ zend_implement_serializable */
-static int zend_implement_serializable(zend_class_entry *interface, zend_class_entry *class_type)
+static zend_result zend_implement_serializable(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	if (class_type->parent
 		&& (class_type->parent->serialize || class_type->parent->unserialize)

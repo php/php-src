@@ -61,7 +61,7 @@ ZEND_API void (*zend_throw_exception_hook)(zend_object *ex);
 static zend_object_handlers default_exception_handlers;
 
 /* {{{ zend_implement_throwable */
-static int zend_implement_throwable(zend_class_entry *interface, zend_class_entry *class_type)
+static zend_result zend_implement_throwable(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	/* zend_ce_exception and zend_ce_error may not be initialized yet when this is called (e.g when
 	 * implementing Throwable for Exception itself). Perform a manual inheritance check. */
