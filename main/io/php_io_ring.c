@@ -81,6 +81,7 @@ struct _php_io_ring_req {
 	bool orphaned; /* nobody wants the completion */
 	bool delivered; /* the output went to the op */
 	php_stream *orphan_stream; /* frozen until the record settled */
+	zend_object *orphan_handle; /* the same for a handle's op without a stream */
 	bool ready; /* top-level: completion to deliver */
 	bool fired; /* group: in the fired list */
 	bool group_done; /* member: the group folded already */
@@ -697,6 +698,10 @@ static void php_io_ring_req_free(php_io_ring *ring, php_io_ring_req *req)
 		php_io_stream_unfreeze(req->orphan_stream);
 		req->orphan_stream = NULL;
 	}
+	if (req->orphan_handle) {
+		php_io_handle_unfreeze(req->orphan_handle);
+		req->orphan_handle = NULL;
+	}
 	if (req->backlogged) {
 		php_io_ring_backlog_remove(ring, req);
 	}
@@ -873,7 +878,8 @@ static zend_result php_io_ring_submit_one(php_io_ring *ring, php_io_ring_req *re
 	/* What has no ring form is refused before an entry is taken */
 	switch (req->type) {
 		case PHP_IO_OP_POLL:
-			if (!(ring->features & IOR_FEAT_POLL_ADD)) {
+			/* ior has no priority event */
+			if (!(ring->features & IOR_FEAT_POLL_ADD) || (req->op->u.poll.events & PHP_POLL_PRI)) {
 				errno = ENOTSUP;
 				return FAILURE;
 			}
@@ -1390,6 +1396,7 @@ static void php_io_ring_req_release(php_io_ring *ring, php_io_ring_req *req)
 	if (php_io_ring_req_settled(req)) {
 		/* Nothing outstanding: no freeze to keep */
 		req->orphan_stream = NULL;
+		req->orphan_handle = NULL;
 	}
 	if (req->ready) {
 		php_io_ring_list_remove(ring->ready, &ring->n_ready, req);
@@ -1425,6 +1432,7 @@ static void php_io_ring_req_cancel_or_forget(php_io_ring *ring, php_io_ring_req 
 		req->lt_done = true;
 		req->delivered = true;
 		req->orphan_stream = NULL;
+		req->orphan_handle = NULL;
 		return;
 	}
 	php_io_ring_req_cancel(ring, req);
@@ -1462,17 +1470,33 @@ PHPAPI zend_result php_io_ring_cancel(php_io_ring *ring, php_io_op *op)
 	return SUCCESS;
 }
 
+static void php_io_ring_owner_orphan(php_io_queue *queue, php_io_op *op)
+{
+	if (op->stream) {
+		php_io_stream_orphan(op->stream, queue);
+	} else {
+		php_io_handle_orphan(op->handle, queue);
+	}
+}
+
+/* An op the backend may still run after its frame: on a stream, or on a handle's descriptor */
+static zend_always_inline bool php_io_ring_op_keeps(const php_io_op *op)
+{
+	return op->stream || (op->handle && op->fd != SOCK_ERR);
+}
+
 PHPAPI bool php_io_ring_orphan(php_io_ring *ring, php_io_op *op)
 {
 	/* The caller's frame is going away; a record still in flight keeps the
 	 * stream frozen and finishes silently in a later wait. In a child
 	 * nothing completes, so nothing is kept. */
 	php_io_ring_req *req = op->queue_data;
-	bool keep = req && op->in_flight && op->stream && !req->group
+	bool keep = req && op->in_flight && php_io_ring_op_keeps(op) && !req->group
 			&& op->type != PHP_IO_OP_ANY && !php_io_ring_req_settled(req)
 			&& !php_io_ring_foreign(ring);
 	if (keep) {
 		req->orphan_stream = op->stream;
+		req->orphan_handle = op->stream ? NULL : op->handle;
 	}
 	php_io_ring_cancel(ring, op);
 	if (keep) {
@@ -1577,7 +1601,7 @@ static void php_io_ring_req_lt_cqe(php_io_ring *ring, php_io_ring_req *req, int3
 		return;
 	}
 	/* Without a queue nothing keeps the stream frozen for the backend */
-	if (!ring->queue && req->op && req->op->in_flight && req->op->stream) {
+	if (!ring->queue && req->op && req->op->in_flight && php_io_ring_op_keeps(req->op)) {
 		return;
 	}
 	req->early = true;
@@ -1842,7 +1866,7 @@ static zend_hrtime_t php_io_ring_expire(php_io_ring *ring, zend_hrtime_t now)
 
 /* Wait until every orphaned op on the stream settled; other completions
  * stay queued for delivery */
-PHPAPI void php_io_ring_drain(php_io_ring *ring, php_stream *stream)
+PHPAPI void php_io_ring_drain(php_io_ring *ring, const void *owner)
 {
 	if (php_io_ring_foreign(ring)) {
 		return;
@@ -1851,7 +1875,7 @@ PHPAPI void php_io_ring_drain(php_io_ring *ring, php_stream *stream)
 		php_io_ring_progress(ring);
 		bool pending = false;
 		for (php_io_ring_req *r = ring->live; r; r = r->next) {
-			if (r->orphan_stream == stream) {
+			if (r->orphan_stream == owner || r->orphan_handle == owner) {
 				pending = true;
 				break;
 			}
@@ -1872,10 +1896,11 @@ static void php_io_ring_deliver_one(php_io_ring *ring, php_io_ring_req *req, php
 {
 	if (req->type != PHP_IO_OP_ANY) {
 		php_io_ring_req_output(req, req->op);
-		if (!req->main_done && req->op->in_flight && req->op->stream) {
+		if (!req->main_done && req->op->in_flight && php_io_ring_op_keeps(req->op)) {
 			/* The backend still uses the stream: it stays frozen until the record settled */
 			req->orphan_stream = req->op->stream;
-			php_io_stream_orphan(req->op->stream, ring->queue);
+			req->orphan_handle = req->op->stream ? NULL : req->op->handle;
+			php_io_ring_owner_orphan(ring->queue, req->op);
 		}
 	}
 	out->op = req->op;
@@ -2112,7 +2137,7 @@ static zend_result php_io_ring_queue_submit(php_io_queue *base, php_io_op *op, v
 static void php_io_ring_queue_orphan(php_io_queue *base, php_io_op *op)
 {
 	if (op->queue == base && php_io_ring_orphan(((php_io_ring_queue *) base)->ring, op)) {
-		php_io_stream_orphan(op->stream, base);
+		php_io_ring_owner_orphan(base, op);
 	}
 }
 
@@ -2152,9 +2177,9 @@ static int php_io_ring_queue_wait(php_io_queue *base, php_io_queue_completion *o
 	return php_io_ring_wait(((php_io_ring_queue *) base)->ring, out, max, dl);
 }
 
-static void php_io_ring_queue_drain(php_io_queue *base, php_stream *stream)
+static void php_io_ring_queue_drain(php_io_queue *base, const void *owner)
 {
-	php_io_ring_drain(((php_io_ring_queue *) base)->ring, stream);
+	php_io_ring_drain(((php_io_ring_queue *) base)->ring, owner);
 }
 
 static uint32_t php_io_ring_queue_count_pending(php_io_queue *base)

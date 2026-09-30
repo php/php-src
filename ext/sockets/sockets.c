@@ -291,6 +291,20 @@ static zend_object *php_socket_get_weak_handle(php_socket *sock)
 	return sock->weak_handle;
 }
 
+/* In an op, or its descriptor still used by an op whose frame is gone */
+static bool php_socket_busy(php_socket *sock)
+{
+	return sock->in_use || (sock->weak_handle && php_io_handle_busy(sock->weak_handle));
+}
+
+/* Before the descriptor closes */
+static void php_socket_drain(php_socket *sock)
+{
+	if (sock->weak_handle) {
+		php_io_handle_drain(sock->weak_handle);
+	}
+}
+
 /* While the descriptor is still open: the handles stop reporting, the registrations end with the
  * provider's remove() per pair, then the Socket drops its handle */
 static void php_socket_release_io(php_socket *sock)
@@ -386,7 +400,7 @@ PHP_METHOD(SocketPollWeakHandle, getSocket)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	php_socket_poll_weak_handle_data *data = PHP_POLL_HANDLE_OBJ_FROM_ZV(ZEND_THIS)->handle_data;
-	if (!data || !data->sock || data->sock->in_use) {
+	if (!data || !data->sock || php_socket_busy(data->sock)) {
 		RETURN_NULL();
 	}
 	RETURN_OBJ_COPY(&data->sock->std);
@@ -411,6 +425,7 @@ static void socket_free_obj(zend_object *object)
 {
 	php_socket *socket = socket_from_obj(object);
 
+	php_socket_drain(socket);
 	php_socket_release_io(socket);
 	if (Z_ISUNDEF(socket->zstream)) {
 		if (!IS_INVALID_SOCKET(socket)) {
@@ -567,13 +582,14 @@ bool php_socket_op_begin(php_socket *sock, php_socket_op *o)
 	o->stream = NULL;
 	o->handle = NULL;
 	o->active = php_io_hooks_active();
-	if (!o->active) {
-		return true;
-	}
-	if (sock->in_use) {
+	if (php_socket_busy(sock)) {
+		o->active = false;
 		zend_throw_error(NULL, "Concurrent access to a socket");
 		set_errno(ECANCELED);
 		return false;
+	}
+	if (!o->active) {
+		return true;
 	}
 	if (sock->blocking && !sock->nonblocking_fd
 			&& php_set_sock_blocking(sock->bsd_socket, 0) == SUCCESS) {
@@ -1284,7 +1300,7 @@ static bool php_socket_select_freeze(HashTable *sock_array, php_socket_select_fr
 		if (seen) {
 			continue;
 		}
-		if (sock->in_use) {
+		if (php_socket_busy(sock)) {
 			zend_throw_error(NULL, "Concurrent access to a socket");
 			return false;
 		}
@@ -1796,6 +1812,7 @@ PHP_FUNCTION(socket_close)
 	ENSURE_SOCKET_VALID(socket);
 	ENSURE_SOCKET_FREE(socket);
 
+	php_socket_drain(socket);
 	php_socket_release_io(socket);
 	if (!Z_ISUNDEF(socket->zstream)) {
 		php_stream *stream = NULL;

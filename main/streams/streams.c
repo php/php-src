@@ -305,7 +305,9 @@ PHPAPI int php_stream_free(php_stream *stream, int close_options) /* {{{ */
 
 #endif
 
-	if (!(close_options & PHP_STREAM_FREE_RSRC_DTOR) && UNEXPECTED(php_io_stream_busy(stream))) {
+	/* Only the resource destructor cannot be refused; it runs with the resource cleared */
+	if (UNEXPECTED(php_io_stream_busy(stream)) && !((close_options & PHP_STREAM_FREE_RSRC_DTOR)
+			&& stream->res && stream->res->type < 0)) {
 		zend_throw_error(NULL, "Concurrent access to a stream");
 		return EOF;
 	}

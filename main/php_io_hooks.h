@@ -342,6 +342,10 @@ PHPAPI void php_io_child_forget(pid_t pid);
 PHPAPI void php_io_stream_orphan(php_stream *stream, php_io_queue *queue);
 PHPAPI void php_io_stream_unfreeze(php_stream *stream);
 PHPAPI void php_io_stream_drain(php_stream *stream);
+PHPAPI void php_io_handle_orphan(zend_object *handle, php_io_queue *queue);
+PHPAPI void php_io_handle_unfreeze(zend_object *handle);
+PHPAPI bool php_io_handle_busy(zend_object *handle);
+PHPAPI void php_io_handle_drain(zend_object *handle);
 /* Frozen by a running op, not only by an orphan */
 PHPAPI bool php_io_stream_busy(php_stream *stream);
 
@@ -400,7 +404,7 @@ typedef struct _php_io_queue_ops {
 	int (*wait)(php_io_queue *q, php_io_queue_completion *out, uint32_t max, const php_deadline *dl);
 	void (*orphan)(php_io_queue *q, php_io_op *op);
 	/* May be NULL when orphan() never keeps an op in flight */
-	void (*drain)(php_io_queue *q, php_stream *stream);
+	void (*drain)(php_io_queue *q, const void *owner);
 	uint32_t (*count_pending)(php_io_queue *q);
 	uint32_t (*hook_flags)(php_io_queue *q);
 	void (*destroy)(php_io_queue *q);

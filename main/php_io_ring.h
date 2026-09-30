@@ -45,7 +45,7 @@ PHPAPI bool php_io_ring_take_inline(php_io_ring *ring, php_io_op *op, php_io_que
 PHPAPI zend_result php_io_ring_cancel(php_io_ring *ring, php_io_op *op);
 /* Cancels the op silently; true when it stays in flight and its stream must stay frozen */
 PHPAPI bool php_io_ring_orphan(php_io_ring *ring, php_io_op *op);
-PHPAPI void php_io_ring_drain(php_io_ring *ring, php_stream *stream);
+PHPAPI void php_io_ring_drain(php_io_ring *ring, const void *owner);
 
 /* dl NULL waits for good; with the non-blocking deadline it first clears the notification
  * descriptor and reaps once */

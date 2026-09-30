@@ -61,6 +61,9 @@ static int php_io_wsa_error(int err)
 		case ECONNREFUSED: return WSAECONNREFUSED;
 		case ECONNRESET: return WSAECONNRESET;
 		case ECONNABORTED: return WSAECONNABORTED;
+		case ENETUNREACH: return WSAENETUNREACH;
+		case EHOSTUNREACH: return WSAEHOSTUNREACH;
+		case EADDRINUSE: return WSAEADDRINUSE;
 		default: return err;
 	}
 }
@@ -74,10 +77,12 @@ static zend_always_inline void php_io_set_errno(int err)
 	errno = err;
 }
 
-/* A stream whose in-flight op outlived its frame, kept by a queue */
+/* A stream or a handle whose in-flight op outlived its frame, kept by a queue */
 typedef struct php_io_orphan {
 	php_io_queue *queue;
-	php_stream *stream;
+	php_stream *stream; /* NULL for a handle */
+	zend_object *handle;
+	zend_resource *res; /* NULL for a stream kept off the resource list */
 	bool freeing; /* php_stream_free() is draining it */
 } php_io_orphan;
 
@@ -312,6 +317,8 @@ static php_io_registration *php_io_register(php_io_registration **list, php_stre
 	}
 
 	reg->trigger = trigger;
+	/* What an earlier provider kept is not the new one's */
+	reg->provider_data = NULL;
 	reg->generation = FG(io_hooks_generation);
 	if (hooks->ops->add) {
 		/* An add() that unregisters the pair (closes the stream) leaves the record to this frame */
@@ -470,11 +477,15 @@ PHPAPI void php_io_hooks_request_shutdown(void)
 		while (zend_hash_num_elements(FG(io_orphans)) > 0) {
 			zend_hash_internal_pointer_reset(FG(io_orphans));
 			php_io_orphan *o = zend_hash_get_current_data_ptr(FG(io_orphans));
-			php_stream *stream = o->stream;
-			if (o->queue->ops->drain) {
-				o->queue->ops->drain(o->queue, stream);
+			if (o->stream) {
+				php_stream *stream = o->stream;
+				if (o->queue->ops->drain) {
+					o->queue->ops->drain(o->queue, stream);
+				}
+				php_io_stream_unfreeze(stream);
+			} else {
+				php_io_handle_drain(o->handle);
 			}
-			php_io_stream_unfreeze(stream);
 		}
 		zend_hash_destroy(FG(io_orphans));
 		efree(FG(io_orphans));
@@ -544,65 +555,80 @@ PHPAPI uint32_t php_io_ops_in_flight(void)
 
 /* Orphans */
 
-static zend_always_inline zend_ulong php_io_stream_key(php_stream *stream)
+static zend_always_inline zend_ulong php_io_orphan_key(const void *owner)
 {
-	zend_ulong key = (zend_ulong) (uintptr_t) stream;
+	zend_ulong key = (zend_ulong) (uintptr_t) owner;
 	return (key >> 3) | (key << ((sizeof(key) * 8) - 3));
 }
-
 
 static void php_io_orphan_dtor(zval *zv)
 {
 	efree(Z_PTR_P(zv));
 }
 
-PHPAPI void php_io_stream_orphan(php_stream *stream, php_io_queue *queue)
+static php_io_orphan *php_io_orphan_add(const void *owner, php_io_queue *queue)
 {
 	if (!FG(io_orphans)) {
 		FG(io_orphans) = emalloc(sizeof(HashTable));
 		zend_hash_init(FG(io_orphans), 4, NULL, php_io_orphan_dtor, 0);
 	}
-	if (!zend_hash_index_exists(FG(io_orphans), php_io_stream_key(stream))) {
-		php_io_orphan *o = emalloc(sizeof(*o));
-		o->queue = queue;
+	if (zend_hash_index_exists(FG(io_orphans), php_io_orphan_key(owner))) {
+		return NULL;
+	}
+	php_io_orphan *o = ecalloc(1, sizeof(*o));
+	o->queue = queue;
+	zend_hash_index_add_new_ptr(FG(io_orphans), php_io_orphan_key(owner), o);
+	return o;
+}
+
+static zend_always_inline php_io_orphan *php_io_orphan_find(const void *owner)
+{
+	return FG(io_orphans) ? zend_hash_index_find_ptr(FG(io_orphans), php_io_orphan_key(owner)) : NULL;
+}
+
+PHPAPI void php_io_stream_orphan(php_stream *stream, php_io_queue *queue)
+{
+	php_io_orphan *o = php_io_orphan_add(stream, queue);
+	if (o) {
 		o->stream = stream;
-		o->freeing = false;
+		o->res = stream->res;
 		/* The buffer belongs to the backend until the completion arrives */
-		GC_ADDREF(stream->res);
-		zend_hash_index_add_new_ptr(FG(io_orphans), php_io_stream_key(stream), o);
+		if (o->res) {
+			GC_ADDREF(o->res);
+		}
 	}
 }
 
 PHPAPI void php_io_stream_unfreeze(php_stream *stream)
 {
-	if (!FG(io_orphans)) {
-		return;
-	}
-	php_io_orphan *o = zend_hash_index_find_ptr(FG(io_orphans), php_io_stream_key(stream));
+	php_io_orphan *o = php_io_orphan_find(stream);
 	if (!o) {
 		return;
 	}
+	zend_resource *res = o->res;
 	bool freeing = o->freeing;
-	zend_hash_index_del(FG(io_orphans), php_io_stream_key(stream));
+	zend_hash_index_del(FG(io_orphans), php_io_orphan_key(stream));
 	stream->flags &= ~PHP_STREAM_FLAG_IN_USE;
+	if (!res) {
+		return;
+	}
 	if (!freeing) {
-		zend_list_delete(stream->res);
+		zend_list_delete(res);
+	} else if (GC_REFCOUNT(res) > 1) {
+		/* The free still uses it: a last reference goes with the resource list */
+		GC_DELREF(res);
 	}
 }
 
 PHPAPI bool php_io_stream_busy(php_stream *stream)
 {
-	return (stream->flags & PHP_STREAM_FLAG_IN_USE)
-			&& !(FG(io_orphans) && zend_hash_index_exists(FG(io_orphans), php_io_stream_key(stream)));
+	return (stream->flags & PHP_STREAM_FLAG_IN_USE) && !php_io_orphan_find(stream);
 }
 
 /* Called from php_stream_free() with the stream still frozen */
 PHPAPI void php_io_stream_drain(php_stream *stream)
 {
-	if (!FG(io_orphans)) {
-		return;
-	}
-	php_io_orphan *o = zend_hash_index_find_ptr(FG(io_orphans), php_io_stream_key(stream));
+	php_io_orphan *o = php_io_orphan_find(stream);
 	if (!o) {
 		return;
 	}
@@ -611,6 +637,44 @@ PHPAPI void php_io_stream_drain(php_stream *stream)
 		o->queue->ops->drain(o->queue, stream);
 	}
 	php_io_stream_unfreeze(stream);
+}
+
+/* The op of a handle without a stream: its descriptor must stay open until the op settled */
+PHPAPI void php_io_handle_orphan(zend_object *handle, php_io_queue *queue)
+{
+	php_io_orphan *o = php_io_orphan_add(handle, queue);
+	if (o) {
+		o->handle = handle;
+		GC_ADDREF(handle);
+	}
+}
+
+PHPAPI void php_io_handle_unfreeze(zend_object *handle)
+{
+	if (php_io_orphan_find(handle)) {
+		zend_hash_index_del(FG(io_orphans), php_io_orphan_key(handle));
+		OBJ_RELEASE(handle);
+	}
+}
+
+PHPAPI bool php_io_handle_busy(zend_object *handle)
+{
+	return php_io_orphan_find(handle) != NULL;
+}
+
+/* Before the owner closes the descriptor */
+PHPAPI void php_io_handle_drain(zend_object *handle)
+{
+	php_io_orphan *o = php_io_orphan_find(handle);
+	if (!o) {
+		return;
+	}
+	GC_ADDREF(handle);
+	if (o->queue->ops->drain) {
+		o->queue->ops->drain(o->queue, handle);
+	}
+	php_io_handle_unfreeze(handle);
+	OBJ_RELEASE(handle);
 }
 
 /* Entry point */
@@ -850,6 +914,27 @@ static void php_io_op_clear_outputs(php_io_op *op)
 	}
 }
 
+/* A readiness Any with a member the provider cannot wait for runs here as a whole */
+static bool php_io_any_member_unsupported(const php_io_op *op)
+{
+	if (op->type != PHP_IO_OP_ANY) {
+		return false;
+	}
+	bool unsupported = false;
+	for (uint32_t i = 0; i < op->u.any.n_results; i++) {
+		unsupported |= op->u.any.results[i].status == PHP_IO_UNSUPPORTED;
+	}
+	if (!unsupported) {
+		return false;
+	}
+	for (uint32_t i = 0; i < op->u.any.n; i++) {
+		if (op->u.any.ops[i]->type != PHP_IO_OP_POLL && op->u.any.ops[i]->type != PHP_IO_OP_TIMER) {
+			return false;
+		}
+	}
+	return true;
+}
+
 /* A successful Done must fit the op: no more bytes than the buffer holds */
 static bool php_io_result_valid(const php_io_op *op, const php_io_op_result *result)
 {
@@ -863,6 +948,7 @@ static bool php_io_result_valid(const php_io_op *op, const php_io_op_result *res
 		case PHP_IO_OP_SEND:
 			return result->res >= 0 && (uint64_t) result->res <= op->u.io.len;
 		case PHP_IO_OP_ACCEPT:
+			return result->res >= 0;
 		case PHP_IO_OP_WAITPID:
 		case PHP_IO_OP_SIGWAIT:
 			return result->res > 0;
@@ -879,6 +965,15 @@ static bool php_io_result_valid(const php_io_op *op, const php_io_op_result *res
 static zend_result php_io_run_ex(php_io_op *op, php_io_op_result *result)
 {
 	php_io_hooks *hooks = FG(io_hooks);
+	if (hooks && UNEXPECTED(EG(exception))) {
+		/* A provider must not suspend with it pending, or a cancellation is lost */
+		php_io_op_finish(op);
+		result->status = PHP_IO_CANCELLED;
+		result->index = 0;
+		result->res = -1;
+		result->error = ECANCELED;
+		return FAILURE;
+	}
 	if (hooks) {
 		php_io_op_clear_outputs(op);
 		result->status = PHP_IO_UNSUPPORTED;
@@ -903,7 +998,8 @@ static zend_result php_io_run_ex(php_io_op *op, php_io_op_result *result)
 			result->error = ECANCELED;
 			return FAILURE;
 		}
-		if (result->status != PHP_IO_UNSUPPORTED || EG(exception)) {
+		if ((result->status != PHP_IO_UNSUPPORTED && !php_io_any_member_unsupported(op))
+				|| EG(exception)) {
 			return SUCCESS;
 		}
 	}

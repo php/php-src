@@ -1162,6 +1162,10 @@ php_socket_t php_network_connect_socket_to_host_stream(php_stream *stream, php_s
 		}
 #endif
 
+		/* The next attempt's socket must not inherit this one's records */
+		if (stream && stream->io_registrations) {
+			php_io_unregister_all(&stream->io_registrations);
+		}
 		closesocket(sock);
 	}
 	sock = -1;
