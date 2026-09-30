@@ -22,6 +22,8 @@ PHP                                                                        NEWS
   . Fixed AVX being reported as supported when the OS has not enabled AVX
     state. (Ilia Alshanetsky)
   . Fixed GH-23980 (ZEND_ASSERT violation @ ZEND_INCLUDE_OR_EVAL). (ndossche)
+  . Fixed bug GH-23896 (Assertion failure in zend_call_function() after a
+    throwing deprecation). (lazerg)
 
 - DOM:
   . Fixed use-after-free when re-constructing a DOMXPath whose php:function
