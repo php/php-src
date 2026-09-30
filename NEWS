@@ -170,6 +170,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23730 (use-after-free when XSLTProcessor::importStylesheet()
     is called during a transformation). (David Carlier)
 
+- Zend:
+  . Fixed use-after-free when a dl()-loaded extension declares a frameless
+    function and a later request calls it. (Ilia Alshanetsky)
+
 - Zip:
   . Fixed ZipArchive::extractTo() ignoring files given in a non-list array.
     (David Carlier)
