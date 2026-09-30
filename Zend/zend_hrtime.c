@@ -75,7 +75,7 @@ void zend_startup_hrtime(void)
 	}
 
 	// zend_error mechanism is not initialized at that point
-	fprintf(stderr, "No working CLOCK_MONOTONIC* found, this should never happen\n");
+	fprintf(stderr, "No working CLOCK_MONOTONIC found, this should never happen\n");
 	abort();
 
 #endif
