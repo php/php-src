@@ -1,12 +1,11 @@
 --TEST--
-Test Uri\WhatWg\UrlBuilder::setPassword() - success - empty string with credentials in base URL
+Test Uri\WhatWg\UrlBuilder::build() - success - empty reference with credentials in base URL
 --FILE--
 <?php
 
-$base = new Uri\WhatWg\Url('https://user:pass@example.com/base/path?oldQuery#oldFragment');
+$base = new Uri\WhatWg\Url('https://user:pass@example.com:123/base/path?oldQuery#oldFragment');
 
 $url = new Uri\WhatWg\UrlBuilder()
-    ->setPassword('')
     ->build($base);
 
 var_dump($url->toAsciiString());
@@ -16,7 +15,7 @@ var_dump($url->equals(new Uri\WhatWg\Url('', $base), Uri\UriComparisonMode::Incl
 
 ?>
 --EXPECTF--
-string(48) "https://user:pass@example.com/base/path?oldQuery"
+string(52) "https://user:pass@example.com:123/base/path?oldQuery"
 object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
@@ -27,7 +26,7 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["host"]=>
   string(11) "example.com"
   ["port"]=>
-  NULL
+  int(123)
   ["path"]=>
   string(10) "/base/path"
   ["query"]=>
