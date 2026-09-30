@@ -1370,7 +1370,11 @@ static zend_result php_io_hooks_php_run(php_io_hooks *hooks, php_io_op *op, php_
 	ZVAL_UNDEF(&retval);
 	php_io_hooks_php_call(&PHP_IO_HOOKS_PHP(hooks)->run_fcc, &retval, zobj);
 
-	if (EG(exception)) {
+	/* A completion from the queue survives an exception: the op's output is already delivered */
+	if (EG(exception) && (Z_TYPE(retval) != IS_OBJECT
+			|| !instanceof_function(Z_OBJCE(retval), php_io_completion_ce)
+			|| PHP_IO_COMPLETION_FROM_ZOBJ(Z_OBJ(retval))->operation != zobj
+			|| !PHP_IO_COMPLETION_FROM_ZOBJ(Z_OBJ(retval))->produced)) {
 		zval_ptr_dtor(&retval);
 		return FAILURE;
 	}

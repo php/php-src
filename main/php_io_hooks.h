@@ -127,6 +127,16 @@ struct _php_io_op {
 
 PHPAPI void php_io_op_poll(php_io_op *op, zend_object *handle, php_socket_t fd, uint32_t events,
 		php_deadline dl);
+
+/* A read whose bytes cannot be read again */
+static zend_always_inline bool php_io_op_read_advances(const php_io_op *op)
+{
+	return (op->type == PHP_IO_OP_READ || op->type == PHP_IO_OP_RECV) && op->u.io.offset < 0
+			&& !(op->type == PHP_IO_OP_RECV && (op->u.io.flags & MSG_PEEK));
+}
+
+/* Bytes a read took for nobody */
+PHPAPI void php_io_stream_keep_read(php_stream *stream, bool in_buffer, ssize_t res);
 PHPAPI void php_io_op_timer(php_io_op *op, php_deadline dl);
 PHPAPI void php_io_op_read(php_io_op *op, zend_object *handle, php_socket_t fd, void *buf, size_t len,
 		int64_t off, php_deadline dl);

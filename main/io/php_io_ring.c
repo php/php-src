@@ -474,9 +474,7 @@ static void php_io_ring_req_capture(php_io_ring_req *req, php_io_op *op)
 			break;
 		case PHP_IO_OP_READ:
 		case PHP_IO_OP_RECV:
-			/* Its bytes cannot be read again */
-			req->u.io.advances = op->u.io.offset < 0
-					&& !(op->type == PHP_IO_OP_RECV && (op->u.io.flags & MSG_PEEK));
+			req->u.io.advances = php_io_op_read_advances(op);
 			if (!(op->flags & PHP_IO_OP_F_STREAM_BUF)) {
 				req->u.io.buf = pemalloc(MAX(php_io_ring_io_len(op), 1), 1);
 			}
@@ -1377,17 +1375,10 @@ static void php_io_ring_retry_cancels(php_io_ring *ring)
 	}
 }
 
-/* Bytes a read took for nobody */
 static void php_io_ring_read_unclaimed(php_io_ring_req *req, php_stream *stream, int32_t res)
 {
-	if ((req->type != PHP_IO_OP_READ && req->type != PHP_IO_OP_RECV) || !req->u.io.advances
-			|| res < 0) {
-		return;
-	}
-	if (res > 0 && req->u.io.buf) {
-		php_stream_mark_read_lost(stream);
-	} else {
-		php_stream_read_buffer_commit(stream, res);
+	if ((req->type == PHP_IO_OP_READ || req->type == PHP_IO_OP_RECV) && req->u.io.advances) {
+		php_io_stream_keep_read(stream, !req->u.io.buf, res);
 	}
 }
 

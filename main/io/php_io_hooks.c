@@ -903,7 +903,7 @@ static zend_result php_io_run_ex(php_io_op *op, php_io_op_result *result)
 			result->error = ECANCELED;
 			return FAILURE;
 		}
-		if (result->status != PHP_IO_UNSUPPORTED) {
+		if (result->status != PHP_IO_UNSUPPORTED || EG(exception)) {
 			return SUCCESS;
 		}
 	}
@@ -981,6 +981,39 @@ static void php_io_frame_end(php_io_frame *f, php_io_op *op)
 	if (f->res) {
 		GC_DELREF(f->res);
 	}
+}
+
+PHPAPI void php_io_stream_keep_read(php_stream *stream, bool in_buffer, ssize_t res)
+{
+	if (res < 0) {
+		return;
+	}
+	if (res > 0 && !in_buffer) {
+		php_stream_mark_read_lost(stream);
+	} else {
+		php_stream_read_buffer_commit(stream, res);
+	}
+}
+
+/* The caller is being cancelled: a finished read keeps its bytes and nothing more runs */
+static bool php_io_run_cancelled(php_stream *stream, const php_io_op *op,
+		const php_io_op_result *result)
+{
+	if (EXPECTED(!EG(exception))) {
+		return false;
+	}
+	if (result->status == PHP_IO_DONE) {
+		if (op->type != PHP_IO_OP_READ && op->type != PHP_IO_OP_RECV) {
+			return false;
+		}
+		if (stream && !result->error && php_io_op_read_advances(op)) {
+			php_io_stream_keep_read(stream, op->flags & PHP_IO_OP_F_STREAM_BUF, result->res);
+		}
+	} else if (result->status != PHP_IO_READY && result->status != PHP_IO_UNSUPPORTED) {
+		return false;
+	}
+	php_io_set_errno(ECANCELED);
+	return true;
 }
 
 static zend_always_inline uint32_t php_io_hook_flags(void)
@@ -1129,7 +1162,8 @@ static zend_always_inline ssize_t php_io_descriptor_op(php_stream *stream, zend_
 			op.flags |= PHP_IO_OP_F_AFTER_DRAIN;
 		}
 		if (php_io_op_register_wait(&op, stream, op.ready_events) == FAILURE
-				|| php_io_run(&op, &result) == FAILURE) {
+				|| php_io_run(&op, &result) == FAILURE
+				|| php_io_run_cancelled(stream, &op, &result)) {
 			php_io_set_errno(ECANCELED);
 			ret = -1;
 			break;
@@ -1244,6 +1278,11 @@ static zend_always_inline ssize_t php_io_readiness_op(php_stream *stream, zend_o
 		}
 		if (php_io_poll_ex(stream, handle, c->fd, events, dl, PHP_IO_OP_F_AFTER_DRAIN) <= 0) {
 			/* errno: ETIMEDOUT, ECANCELED or the failure */
+			ret = -1;
+			break;
+		}
+		if (EG(exception)) {
+			php_io_set_errno(ECANCELED);
 			ret = -1;
 			break;
 		}
@@ -1478,7 +1517,8 @@ static ssize_t php_io_file_op(php_stream *stream, int fd, php_deadline *dl, bool
 			}
 			op.stream = stream;
 			if ((!regular && php_io_op_register_wait(&op, stream, op.ready_events) == FAILURE)
-					|| php_io_run(&op, &result) == FAILURE) {
+					|| php_io_run(&op, &result) == FAILURE
+					|| php_io_run_cancelled(stream, &op, &result)) {
 				php_io_set_errno(ECANCELED);
 				ret = -1;
 				break;
@@ -1504,7 +1544,8 @@ static ssize_t php_io_file_op(php_stream *stream, int fd, php_deadline *dl, bool
 			}
 			op.stream = stream;
 			if (php_io_op_register_wait(&op, stream, events) == FAILURE
-					|| php_io_run(&op, &result) == FAILURE) {
+					|| php_io_run(&op, &result) == FAILURE
+					|| php_io_run_cancelled(stream, &op, &result)) {
 				php_io_set_errno(ECANCELED);
 				ret = -1;
 				break;
