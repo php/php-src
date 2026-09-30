@@ -579,7 +579,6 @@ AC_CHECK_FUNCS([
   poll
   pthread_jit_write_protect_np
   putenv
-  reallocarray
   scandir
   sendfile
   setenv
