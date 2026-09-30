@@ -705,7 +705,6 @@ PHP_FUNCTION(socket_select)
 /* {{{ Opens a socket on port to accept connections */
 PHP_FUNCTION(socket_create_listen)
 {
-	php_socket	*php_sock;
 	zend_long	port, backlog = SOMAXCONN;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
@@ -719,16 +718,17 @@ PHP_FUNCTION(socket_create_listen)
 		RETURN_THROWS();
 	}
 
-	object_init_ex(return_value, socket_ce);
-	php_sock = Z_SOCKET_P(return_value);
+	zend_object *socket_obj = zend_object_init(socket_ce);
+	php_socket *php_sock = socket_from_obj(socket_obj);
 
 	if (!php_open_listen_sock(php_sock, (unsigned short)port, backlog)) {
-		zval_ptr_dtor(return_value);
+		OBJ_RELEASE(socket_obj);
 		RETURN_FALSE;
 	}
 
 	php_sock->error = 0;
 	php_sock->blocking = 1;
+	RETURN_OBJ(socket_obj);
 }
 /* }}} */
 
@@ -736,7 +736,6 @@ PHP_FUNCTION(socket_create_listen)
 PHP_FUNCTION(socket_accept)
 {
 	zval			 *arg1;
-	php_socket			 *php_sock, *new_sock;
 	php_sockaddr_storage sa;
 	socklen_t			 php_sa_len = sizeof(sa);
 
@@ -744,16 +743,17 @@ PHP_FUNCTION(socket_accept)
 		Z_PARAM_OBJECT_OF_CLASS(arg1, socket_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_sock = Z_SOCKET_P(arg1);
+	php_socket *php_sock = Z_SOCKET_P(arg1);
 	ENSURE_SOCKET_VALID(php_sock);
 
-	object_init_ex(return_value, socket_ce);
-	new_sock = Z_SOCKET_P(return_value);
+	zend_object *socket_obj = zend_object_init(socket_ce);
+	php_socket *new_sock = socket_from_obj(socket_obj);
 
 	if (!php_accept_connect(php_sock, new_sock, (struct sockaddr*)&sa, &php_sa_len)) {
-		zval_ptr_dtor(return_value);
+		OBJ_RELEASE(socket_obj);
 		RETURN_FALSE;
 	}
+	RETURN_OBJ(socket_obj);
 }
 /* }}} */
 
@@ -1152,7 +1152,6 @@ PHP_FUNCTION(socket_getpeername)
 PHP_FUNCTION(socket_create)
 {
 	zend_long	domain, type, checktype, protocol;
-	php_socket	*php_sock;
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
 		Z_PARAM_LONG(domain)
@@ -1189,8 +1188,8 @@ PHP_FUNCTION(socket_create)
 
 	PHP_ETH_PROTO_CHECK(protocol, domain);
 
-	object_init_ex(return_value, socket_ce);
-	php_sock = Z_SOCKET_P(return_value);
+	zend_object *socket_obj = zend_object_init(socket_ce);
+	php_socket *php_sock = socket_from_obj(socket_obj);
 
 	php_sock->bsd_socket = socket(domain, type, protocol);
 	php_sock->type = domain;
@@ -1198,12 +1197,13 @@ PHP_FUNCTION(socket_create)
 	if (IS_INVALID_SOCKET(php_sock)) {
 		SOCKETS_G(last_error) = errno;
 		php_error_docref(NULL, E_WARNING, "Unable to create socket [%d]: %s", errno, sockets_strerror(errno));
-		zval_ptr_dtor(return_value);
+		OBJ_RELEASE(socket_obj);
 		RETURN_FALSE;
 	}
 
 	php_sock->error = 0;
 	php_sock->blocking = 1;
+	RETURN_OBJ(socket_obj);
 }
 /* }}} */
 
@@ -2653,7 +2653,6 @@ PHP_FUNCTION(socket_import_stream)
 {
 	zval				 *zstream;
 	php_stream			 *stream;
-	php_socket			 *retsock = NULL;
 	PHP_SOCKET			 socket; /* fd */
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -2666,12 +2665,12 @@ PHP_FUNCTION(socket_import_stream)
 		RETURN_FALSE;
 	}
 
-	object_init_ex(return_value, socket_ce);
-	retsock = Z_SOCKET_P(return_value);
+	zend_object *socket_obj = zend_object_init(socket_ce);
+	php_socket *retsock = socket_from_obj(socket_obj);
 
 	if (!socket_import_file_descriptor(socket, retsock)) {
 		retsock->bsd_socket = -1;
-		zval_ptr_dtor(return_value);
+		OBJ_RELEASE(socket_obj);
 		RETURN_FALSE;
 	}
 
@@ -2691,6 +2690,7 @@ PHP_FUNCTION(socket_import_stream)
 	ZVAL_COPY(&retsock->zstream, zstream);
 
 	php_stream_set_option(stream, PHP_STREAM_OPTION_READ_BUFFER, PHP_STREAM_BUFFER_NONE, NULL);
+	RETURN_OBJ(socket_obj);
 }
 /* }}} */
 
@@ -2799,7 +2799,6 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 	int ret = 0;
 
 	struct addrinfo hints, *result, *rp;
-	php_addrinfo *res;
 
 	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_STR(hostname)
@@ -2910,10 +2909,8 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 		 || rp->ai_family == AF_INET6
 #endif
 				) {
-			zval zaddr;
-
-			object_init_ex(&zaddr, address_info_ce);
-			res = Z_ADDRESS_INFO_P(&zaddr);
+			zend_object *addr_obj = zend_object_init(address_info_ce);
+			php_addrinfo *res = address_info_from_obj(addr_obj);
 
 			memcpy(&res->addrinfo, rp, sizeof(struct addrinfo));
 
@@ -2924,7 +2921,7 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 				res->addrinfo.ai_canonname = estrdup(rp->ai_canonname);
 			}
 
-			add_next_index_zval(return_value, &zaddr);
+			add_next_index_object(return_value, addr_obj);
 		}
 	}
 
@@ -2937,7 +2934,6 @@ PHP_FUNCTION(socket_addrinfo_bind)
 {
 	zval			*arg1;
 	php_addrinfo	*ai;
-	php_socket		*php_sock;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_OBJECT_OF_CLASS(arg1, address_info_ce)
@@ -2949,8 +2945,8 @@ PHP_FUNCTION(socket_addrinfo_bind)
 
 	PHP_ETH_PROTO_CHECK(ai->addrinfo.ai_protocol, ai->addrinfo.ai_family);
 
-	object_init_ex(return_value, socket_ce);
-	php_sock = Z_SOCKET_P(return_value);
+	zend_object *socket_obj = zend_object_init(socket_ce);
+	php_socket *php_sock = socket_from_obj(socket_obj);
 
 	php_sock->bsd_socket = socket(ai->addrinfo.ai_family, ai->addrinfo.ai_socktype, ai->addrinfo.ai_protocol);
 	php_sock->type = ai->addrinfo.ai_family;
@@ -2958,7 +2954,7 @@ PHP_FUNCTION(socket_addrinfo_bind)
 	if (IS_INVALID_SOCKET(php_sock)) {
 		SOCKETS_G(last_error) = errno;
 		php_error_docref(NULL, E_WARNING, "Unable to create socket [%d]: %s", errno, sockets_strerror(errno));
-		zval_ptr_dtor(return_value);
+		OBJ_RELEASE(socket_obj);
 		RETURN_FALSE;
 	}
 
@@ -2968,9 +2964,10 @@ PHP_FUNCTION(socket_addrinfo_bind)
 	if (bind(php_sock->bsd_socket, ai->addrinfo.ai_addr, ai->addrinfo.ai_addrlen) != 0) {
 		PHP_SOCKET_ERROR(php_sock, "Unable to bind address", errno);
 		close(php_sock->bsd_socket);
-		zval_ptr_dtor(return_value);
+		OBJ_RELEASE(socket_obj);
 		RETURN_FALSE;
 	}
+	RETURN_OBJ(socket_obj);
 }
 /* }}} */
 
@@ -2979,7 +2976,6 @@ PHP_FUNCTION(socket_addrinfo_connect)
 {
 	zval			*arg1;
 	php_addrinfo	*ai;
-	php_socket		*php_sock;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_OBJECT_OF_CLASS(arg1, address_info_ce)
@@ -2991,8 +2987,8 @@ PHP_FUNCTION(socket_addrinfo_connect)
 
 	PHP_ETH_PROTO_CHECK(ai->addrinfo.ai_protocol, ai->addrinfo.ai_family);
 
-	object_init_ex(return_value, socket_ce);
-	php_sock = Z_SOCKET_P(return_value);
+	zend_object *socket_obj = zend_object_init(socket_ce);
+	php_socket *php_sock = socket_from_obj(socket_obj);
 
 	php_sock->bsd_socket = socket(ai->addrinfo.ai_family, ai->addrinfo.ai_socktype, ai->addrinfo.ai_protocol);
 	php_sock->type = ai->addrinfo.ai_family;
@@ -3000,7 +2996,7 @@ PHP_FUNCTION(socket_addrinfo_connect)
 	if (IS_INVALID_SOCKET(php_sock)) {
 		SOCKETS_G(last_error) = errno;
 		php_error_docref(NULL, E_WARNING, "Unable to create socket [%d]: %s", errno, sockets_strerror(errno));
-		zval_ptr_dtor(return_value);
+		OBJ_RELEASE(socket_obj);
 		RETURN_FALSE;
 	}
 
@@ -3010,9 +3006,10 @@ PHP_FUNCTION(socket_addrinfo_connect)
 	if (connect(php_sock->bsd_socket, ai->addrinfo.ai_addr, ai->addrinfo.ai_addrlen) != 0) {
 		PHP_SOCKET_ERROR(php_sock, "Unable to connect address", errno);
 		close(php_sock->bsd_socket);
-		zval_ptr_dtor(return_value);
+		OBJ_RELEASE(socket_obj);
 		RETURN_FALSE;
 	}
+	RETURN_OBJ(socket_obj);
 }
 /* }}} */
 
@@ -3133,7 +3130,6 @@ PHP_FUNCTION(socket_wsaprotocol_info_import)
 	size_t id_len;
 	WSAPROTOCOL_INFO wi;
 	PHP_SOCKET sock;
-	php_socket	*php_sock;
 	HANDLE map;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -3174,13 +3170,14 @@ PHP_FUNCTION(socket_wsaprotocol_info_import)
 		RETURN_FALSE;
 	}
 
-	object_init_ex(return_value, socket_ce);
-	php_sock = Z_SOCKET_P(return_value);
+	zend_object *socket_obj = zend_object_init(socket_ce);
+	php_socket *php_sock = socket_from_obj(socket_obj);
 
 	php_sock->bsd_socket = sock;
 	php_sock->type = wi.iAddressFamily;
 	php_sock->error = 0;
 	php_sock->blocking = 1;
+	RETURN_OBJ(socket_obj);
 }
 /* }}} */
 

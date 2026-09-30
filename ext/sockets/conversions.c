@@ -1454,7 +1454,6 @@ void to_zval_read_fd_array(const char *data, zval *zv, res_context *ctx)
 	array_init_size(zv, num_elems);
 
 	for (i = 0; i < num_elems; i++) {
-		zval		elem;
 		int			fd;
 		struct stat	statbuf;
 
@@ -1467,20 +1466,21 @@ void to_zval_read_fd_array(const char *data, zval *zv, res_context *ctx)
 			return;
 		}
 		if (S_ISSOCK(statbuf.st_mode)) {
-			object_init_ex(&elem, socket_ce);
-			php_socket *sock = Z_SOCKET_P(&elem);
+			zend_object *socket_obj = zend_object_init(socket_ce);
+			php_socket *sock = socket_from_obj(socket_obj);
 
 			if (!socket_import_file_descriptor(fd, sock)) {
 				do_to_zval_err(ctx, "error getting protocol descriptor %d: getsockopt() call failed with errno %d", fd, errno);
-				zval_ptr_dtor(&elem);
+				OBJ_RELEASE(socket_obj);
 				return;
 			}
+			add_next_index_object(zv, socket_obj);
 		} else {
+			zval elem;
 			php_stream *stream = php_stream_fopen_from_fd(fd, "rw", NULL);
 			php_stream_to_zval(stream, &elem);
+			add_next_index_zval(zv, &elem);
 		}
-
-		add_next_index_zval(zv, &elem);
 	}
 }
 #endif
