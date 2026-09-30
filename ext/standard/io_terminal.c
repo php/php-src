@@ -2804,31 +2804,123 @@ static char *php_io_terminal_read_line_posix(
 	*is_eof = false;
 	*out_len = 0;
 
-	if (stream != NULL) {
-		char *buf = php_stream_get_line(stream, NULL, 0, out_len);
-		if (buf == NULL) {
-			if (php_stream_eof(stream)) {
-				*is_eof = true;
+	bool is_tty = php_io_terminal_native_stream_is_tty(fd);
+	if (!is_tty) {
+		if (stream != NULL) {
+			char *buf = php_stream_get_line(stream, NULL, 0, out_len);
+			if (buf == NULL) {
+				if (php_stream_eof(stream)) {
+					*is_eof = true;
+					return NULL;
+				}
+				/* Read error */
 				return NULL;
 			}
-			/* Read error */
-			return NULL;
+			return buf;
 		}
-		return buf;
-	}
 
-	if (fd >= 0) {
-		char *buf = php_io_terminal_read_line_from_fd(fd, out_len);
-		if (buf == NULL) {
-			if (errno == 0 || errno == EAGAIN) {
-				*is_eof = true;
+		if (fd >= 0) {
+			char *buf = php_io_terminal_read_line_from_fd(fd, out_len);
+			if (buf == NULL) {
+				if (errno == 0 || errno == EAGAIN) {
+					*is_eof = true;
+				}
+				return NULL;
 			}
-			return NULL;
+			return buf;
 		}
-		return buf;
+
+		return NULL;
 	}
 
-	return NULL;
+	smart_str line = {0};
+	char ch = '\0';
+	bool eof_reached = false;
+	bool error_reached = false;
+
+	/* Drain any already-buffered bytes from php_stream first */
+	if (stream != NULL && stream->writepos > stream->readpos) {
+		while (stream->writepos > stream->readpos) {
+			size_t read_bytes = php_stream_read(stream, &ch, 1);
+			if (read_bytes != 1) {
+				break;
+			}
+			smart_str_appendc(&line, ch);
+			if (ch == '\n') {
+				break;
+			}
+		}
+	}
+
+	if (stream != NULL && php_stream_eof(stream)) {
+		eof_reached = true;
+	}
+
+	/* If newline was not reached in buffered bytes and stream is not at EOF, read from terminal fd */
+	if (ch != '\n' && !eof_reached) {
+		while (1) {
+			errno = 0;
+			ssize_t n = read(fd, &ch, 1);
+			if (n > 0) {
+				smart_str_appendc(&line, ch);
+				if (ch == '\n') {
+					break;
+				}
+			} else if (n == 0) {
+				eof_reached = true;
+				break; /* EOF */
+			} else {
+				if (errno == EINTR) {
+					continue;
+				}
+#if defined(EAGAIN) && defined(EWOULDBLOCK)
+				if (errno == EAGAIN || errno == EWOULDBLOCK) {
+					break;
+				}
+#elif defined(EAGAIN)
+				if (errno == EAGAIN) {
+					break;
+				}
+#endif
+#ifdef EIO
+				if (errno == EIO) {
+					/* On Linux, reading from a master PTY returns -1 with errno == EIO
+					 * when the slave side has closed. For a terminal/PTY, this closure
+					 * is end-of-input. */
+					eof_reached = true;
+					break;
+				}
+#endif
+				error_reached = true;
+				break;
+			}
+		}
+	}
+
+	if (error_reached) {
+		smart_str_free(&line);
+		*is_eof = false;
+		*out_len = 0;
+		return NULL;
+	}
+
+	if (line.s == NULL) {
+		if (stream != NULL && eof_reached) {
+			stream->eof = 1;
+		}
+		*is_eof = true;
+		*out_len = 0;
+		return NULL;
+	}
+
+	if (eof_reached && stream != NULL) {
+		stream->eof = 1;
+	}
+
+	*out_len = ZSTR_LEN(line.s);
+	char *res = estrndup(ZSTR_VAL(line.s), *out_len);
+	smart_str_free(&line);
+	return res;
 }
 #endif
 
