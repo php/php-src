@@ -550,6 +550,10 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 		Z_PARAM_BOOL(part)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (!f_ignore_case && haystack_len == 0 && needle_len > 0) {
+		RETURN_FALSE;
+	}
+
 	if ( !f_ignore_case
 			&& grapheme_ascii_check((unsigned char *)haystack, haystack_len) >= 0
 			&& grapheme_ascii_check((unsigned char *)needle, needle_len) >= 0 ) {
