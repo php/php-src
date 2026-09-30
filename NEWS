@@ -34,6 +34,9 @@ PHP                                                                        NEWS
     when (object) and use share an array). (David Carlier)
   . Fixed exception thrown by destructor during GC in a Fiber not being rethrown
     into the frame that triggered the GC. (Nicolas Grekas)
+  . Fixed memory manager keeping a block reallocated to exactly the size of
+    the next smaller bin in its larger bin, which efree_size() then freed
+    into the wrong one. (Marc Bennewitz)
 
 - DOM:
   . Fixed use-after-free when re-constructing a DOMXPath whose php:function

@@ -246,6 +246,8 @@ namespace {
 
     function zend_leak_bytes(int $bytes = 3): void {}
 
+    function zend_test_erealloc_block_size(int $old_size, int $new_size): array {}
+
     function zend_string_or_object(object|string $param): object|string {}
 
     function zend_string_or_object_or_null(object|string|null $param): object|string|null {}
