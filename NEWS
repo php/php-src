@@ -26,6 +26,8 @@ PHP                                                                        NEWS
     constant, and as an alias in class_alias() and use declarations. (Girgias)
   . Deprecated using "_" as a constant name and as an alias for a class or
     constant in use declarations. (Girgias)
+  . Switch the POSIX high resolution timer back to CLOCK_MONOTONIC from
+    CLOCK_MONOTONIC_RAW. (nicolas-grekas)
 
 - FFI:
   . Fixed crashes with FFI callbacks created from __call() trampolines
