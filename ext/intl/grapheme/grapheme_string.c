@@ -550,7 +550,9 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 		Z_PARAM_BOOL(part)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if ( !f_ignore_case ) {
+	if ( !f_ignore_case
+			&& grapheme_ascii_check((unsigned char *)haystack, haystack_len) >= 0
+			&& grapheme_ascii_check((unsigned char *)needle, needle_len) >= 0 ) {
 
 		/* ASCII optimization: quick check to see if the string might be there */
 		found = php_memnstr(haystack, needle, needle_len, haystack + haystack_len);
@@ -560,15 +562,12 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 			RETURN_FALSE;
 		}
 
-		/* if it is there, and if the haystack is ascii, we are all done */
-		if ( grapheme_ascii_check((unsigned char *)haystack, haystack_len) >= 0 ) {
-			size_t found_offset = found - haystack;
+		size_t found_offset = found - haystack;
 
-			if (part) {
-				RETURN_STRINGL(haystack, found_offset);
-			} else {
-				RETURN_STRINGL(found, haystack_len - found_offset);
-			}
+		if (part) {
+			RETURN_STRINGL(haystack, found_offset);
+		} else {
+			RETURN_STRINGL(found, haystack_len - found_offset);
 		}
 
 	}
