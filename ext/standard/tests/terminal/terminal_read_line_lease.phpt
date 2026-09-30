@@ -112,7 +112,12 @@ fwrite($pipes[0], "GO\n");
 fgets($pipes[2]); // Wait for READY2
 var_dump($t2->readLine());
 
-// 6. Fragmented UTF-8 prepending: pending UTF-8 bytes from readKey are prepended to readLine
+// 6. No-argument restoreMode() on a wrapper with a stale active token returns false
+$tokenStale = $t1->enableRawMode();
+$t2->restoreMode($tokenStale);
+var_dump($t1->restoreMode() === false);
+
+// 7. Fragmented UTF-8 prepending: pending UTF-8 bytes from readKey are prepended to readLine
 $token2 = $t1->enableRawMode();
 fwrite($pipes[0], "GO\n");
 fgets($pipes[2]); // Wait for READY3
@@ -128,7 +133,7 @@ fgets($pipes[2]); // Wait for READY4
 $line = $t1->readLine();
 var_dump($line);
 
-// 7. Immediate EOF on PTY returns null
+// 8. Immediate EOF on PTY returns null
 fwrite($pipes[0], "DONE\n");
 usleep(50000); // Allow child process to finish
 var_dump($t1->readLine());
@@ -146,6 +151,7 @@ Cross-instance: Cannot read a line while raw mode is active for this terminal
 bool(true)
 string(14) "canonical line"
 string(11) "second line"
+bool(true)
 bool(true)
 string(7) "éclair"
 NULL

@@ -2356,17 +2356,17 @@ PHP_METHOD(Io_Terminal_SystemTerminal, enableRawMode)
 }
 
 /*
- * Invariant: A native Terminal implementation may only restore a native
- * ModeToken associated with the same underlying terminal/shared mode record.
+ * Invariant: A native SystemTerminal implementation may only restore a native
+ * SystemModeToken associated with the same underlying terminal/shared mode record.
  *
  * The native implementation intentionally allows a token to be restored by
- * another Terminal object that refers to the same underlying terminal identity
+ * another SystemTerminal object that refers to the same underlying terminal identity
  * or shared mode record.
  *
- * TerminalInterface::restoreMode(?ModeTokenInterface $mode = null) accepts the
+ * Terminal::restoreMode(?ModeToken $mode = null) accepts the
  * interface to allow polymorphic userland terminal fakes (e.g. for unit testing).
- * However, the native Terminal implementation requires native C state attached to
- * an internal ModeToken instance associated with the same underlying terminal or
+ * However, the native SystemTerminal implementation requires native C state attached to
+ * an internal SystemModeToken instance associated with the same underlying terminal or
  * shared mode record; foreign userland token implementations must still be rejected
  * with ValueError.
  */
