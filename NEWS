@@ -177,6 +177,8 @@ PHP                                                                        NEWS
     PROCESS_INFORMATION, an indeterminate comspec pointer after a failed
     lookup, and an unchecked CreateFileA() failure. (Ilia Alshanetsky)
   . Fix persistent stream context lifetime during shutdown (Levi Morrison)
+  . Fixed chown() and lchown() failing to resolve user names in ZTS builds
+    when getpwnam_r() needs a larger buffer. (Ilia Alshanetsky)
 
 - Tidy:
   . Fixed a use-after-free when a tidyNode is used after its document is
