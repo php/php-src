@@ -2451,6 +2451,20 @@ static bool ir_try_promote_ext(ir_ctx *ctx, ir_ref ext_ref, ir_insn *insn)
 		 && ir_is_loop_invariant(ctx, insn->op1, ctx->ir_base[insn->op2].op1)) {
 			return ir_try_promote_induction_var_ext(ctx, ext_ref, insn->op2, ref);
 		}
+	} else if (insn->op == IR_COND
+		&& IR_IS_CONST_REF(insn->op2)
+		&& IR_IS_CONST_REF(insn->op3)
+		&& ctx->use_lists[ref].count == 1) {
+		IR_ASSERT(!IR_IS_SYM_CONST(ctx->ir_base[insn->op2].op));
+		IR_ASSERT(!IR_IS_SYM_CONST(ctx->ir_base[insn->op3].op));
+
+		ir_op op = ctx->ir_base[ext_ref].op;
+		ir_type type = ctx->ir_base[ext_ref].type;
+
+		insn->type = type;
+		insn->op2 = ir_ext_const(ctx, &ctx->ir_base[insn->op2], op, type);;
+		insn->op3 = ir_ext_const(ctx, &ctx->ir_base[insn->op3], op, type);;
+		ir_iter_replace_insn(ctx, ext_ref, ref);
 	}
 
 	return 0;
@@ -2837,6 +2851,8 @@ static bool ir_optimize_phi(ir_ctx *ctx, ir_ref merge_ref, ir_insn *merge, ir_re
 					MAKE_NOP(end2);   CLEAR_USES(end2_ref);
 					MAKE_NOP(merge);  CLEAR_USES(merge_ref);
 
+					ir_bitqueue_add(ctx->iter_worklist, ref);
+					ir_iter_add_uses(ctx, ref, ctx->iter_worklist);
 					if (ctx->ir_base[next->op1].op == IR_BEGIN || ctx->ir_base[next->op1].op == IR_MERGE) {
 						ir_bitqueue_add(ctx->iter_worklist, next->op1);
 					}
@@ -2928,6 +2944,8 @@ static bool ir_optimize_phi(ir_ctx *ctx, ir_ref merge_ref, ir_insn *merge, ir_re
 					MAKE_NOP(merge);  CLEAR_USES(merge_ref);
 					MAKE_NOP(&ctx->ir_base[neg_ref]); CLEAR_USES(neg_ref);
 
+					ir_bitqueue_add(ctx->iter_worklist, ref);
+					ir_iter_add_uses(ctx, ref, ctx->iter_worklist);
 					if (ctx->ir_base[next->op1].op == IR_BEGIN || ctx->ir_base[next->op1].op == IR_MERGE) {
 						ir_bitqueue_add(ctx->iter_worklist, next->op1);
 					}
@@ -2997,6 +3015,7 @@ static bool ir_optimize_phi(ir_ctx *ctx, ir_ref merge_ref, ir_insn *merge, ir_re
 					MAKE_NOP(merge);  CLEAR_USES(merge_ref);
 
 					ir_bitqueue_add(ctx->iter_worklist, ref);
+					ir_iter_add_uses(ctx, ref, ctx->iter_worklist);
 					if (ctx->ir_base[next->op1].op == IR_BEGIN || ctx->ir_base[next->op1].op == IR_MERGE) {
 						ir_bitqueue_add(ctx->iter_worklist, next->op1);
 					}
