@@ -287,6 +287,20 @@ static void php_io_terminal_restore_resize_handler(void)
 #define PHP_IO_TERMINAL_OBJ_FROM_ZV(_zv) \
 	PHP_IO_TERMINAL_OBJ_FROM_ZOBJ(Z_OBJ_P(_zv))
 
+static inline php_io_terminal_mode_token_object *php_io_terminal_get_active_mode_token(php_io_terminal_object *intern)
+{
+	if (intern->active_mode_token != NULL) {
+		php_io_terminal_mode_token_object *token = PHP_IO_TERMINAL_MODE_TOKEN_OBJ_FROM_ZOBJ(intern->active_mode_token);
+		if (!token->valid || token->shared == NULL) {
+			OBJ_RELEASE(intern->active_mode_token);
+			intern->active_mode_token = NULL;
+			return NULL;
+		}
+		return token;
+	}
+	return NULL;
+}
+
 static php_io_terminal_native_stream php_io_terminal_native_stream_from_php_stream(php_stream *stream);
 
 static bool php_io_terminal_native_stream_is_valid(php_io_terminal_native_stream stream)
@@ -2380,7 +2394,8 @@ PHP_METHOD(Io_Terminal_SystemTerminal, restoreMode)
 		}
 
 		bool matches = false;
-		if (intern->active_mode_token != NULL && intern->active_mode_token == Z_OBJ_P(mode_token)) {
+		php_io_terminal_mode_token_object *active = php_io_terminal_get_active_mode_token(intern);
+		if (active != NULL && intern->active_mode_token == Z_OBJ_P(mode_token)) {
 			matches = true;
 		} else {
 			php_io_terminal_stream_target stream;
@@ -2414,15 +2429,8 @@ PHP_METHOD(Io_Terminal_SystemTerminal, restoreMode)
 		RETURN_TRUE;
 	}
 
-	if (intern->active_mode_token != NULL) {
-		php_io_terminal_mode_token_object *mode = PHP_IO_TERMINAL_MODE_TOKEN_OBJ_FROM_ZOBJ(intern->active_mode_token);
-
-		if (!mode->valid || mode->shared == NULL) {
-			OBJ_RELEASE(intern->active_mode_token);
-			intern->active_mode_token = NULL;
-			RETURN_FALSE;
-		}
-
+	php_io_terminal_mode_token_object *mode = php_io_terminal_get_active_mode_token(intern);
+	if (mode != NULL) {
 		const char *err = NULL;
 		if (!php_io_terminal_release_token_lease(mode, &err)) {
 			zend_throw_exception(php_io_terminal_exception_ce, err != NULL ? err : "Failed to restore terminal mode", 0);
@@ -2939,7 +2947,7 @@ PHP_METHOD(Io_Terminal_SystemTerminal, readLine)
 		intern->has_identity = php_io_terminal_get_identity(stream.native_stream, &intern->identity);
 	}
 
-	if (intern->active_mode_token != NULL || (intern->has_identity && php_io_terminal_find_shared_mode(&intern->identity) != NULL)) {
+	if (php_io_terminal_get_active_mode_token(intern) != NULL || (intern->has_identity && php_io_terminal_find_shared_mode(&intern->identity) != NULL)) {
 		zend_throw_exception(php_io_terminal_exception_ce, "Cannot read a line while raw mode is active for this terminal", 0);
 		RETURN_THROWS();
 	}

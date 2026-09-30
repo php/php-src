@@ -98,11 +98,11 @@ try {
     echo "Cross-instance: ", $e->getMessage(), PHP_EOL;
 }
 
-// 3. Terminal state remains usable after failure and restoration
-$restored = $t1->restoreMode($token);
+// 3. Cross-instance restoreMode($token) succeeds and restores mode across wrappers
+$restored = $t2->restoreMode($token);
 var_dump($restored);
 
-// 4. readLine works normally after raw mode is restored
+// 4. readLine on original wrapper works normally after cross-wrapper restoration
 fwrite($pipes[0], "GO\n");
 fgets($pipes[2]); // Wait for READY1
 var_dump($t1->readLine());
