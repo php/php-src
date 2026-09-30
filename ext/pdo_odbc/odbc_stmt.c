@@ -734,7 +734,7 @@ static int odbc_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *re
 	pdo_odbc_column *C = &S->cols[colno];
 
 	array_init(return_value);
-	if (php_odbc_sqltype_is_binary(C->coltype)) {
+	if (C && php_odbc_sqltype_is_binary(C->coltype)) {
 		add_assoc_long(return_value, "pdo_type", PDO_PARAM_BINARY);
 	} else {
 		add_assoc_long(return_value, "pdo_type", PDO_PARAM_STR);
