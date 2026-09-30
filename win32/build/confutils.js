@@ -3395,7 +3395,7 @@ function toolset_setup_common_cflags()
 	} else if (CLANG_TOOLSET) {
 		ADD_FLAG("CFLAGS", "-Wno-deprecated-declarations -Wno-microsoft-enum-forward-reference");
 		if (TARGET_ARCH == 'x86') {
-			ADD_FLAG('CFLAGS', '-m32');
+			ADD_FLAG('CFLAGS', '-m32 /D_USE_32BIT_TIME_T=1');
 		} else {
 			ADD_FLAG('CFLAGS', '-m64');
 		}
