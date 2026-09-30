@@ -26,6 +26,8 @@ PHP                                                                        NEWS
   . Fixed GH-23980 (ZEND_ASSERT violation @ ZEND_INCLUDE_OR_EVAL). (ndossche)
   . Fixed bug GH-23896 (Assertion failure in zend_call_function() after a
     throwing deprecation). (lazerg)
+  . Fixed use-after-free when a dl()-loaded extension declares a frameless
+    function and a later request calls it. (Ilia Alshanetsky)
 
 - DOM:
   . Fixed use-after-free when re-constructing a DOMXPath whose php:function
