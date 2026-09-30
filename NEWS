@@ -41,6 +41,10 @@ PHP                                                                        NEWS
   . Fixed crashes with FFI callbacks created from __call() trampolines
     and array callables whose object is released. (Ilia Alshanetsky)
 
+- Intl:
+  . Fixed grapheme_strstr() and grapheme_stristr() returning incorrect substrings
+    when supplementary characters precede the match. (Weilin Du)
+
 - MySQLnd:
   . Fixed field_count not resetting on OK packet. (Kamil Tekiela)
   . Fixed memory leak when closing a prepared statement after its connection
