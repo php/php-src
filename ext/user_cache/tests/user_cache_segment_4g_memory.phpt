@@ -36,13 +36,18 @@ $available = available_memory();
 if ($available === null) die('skip cannot determine the available memory');
 if ($available < 6 << 30) die('skip needs 6 GiB of available memory');
 
+if (!function_exists('proc_open')) die('skip proc_open() not available');
 $php = getenv('TEST_PHP_EXECUTABLE') ?: PHP_BINARY;
 $probe = 'UserCache\Cache::getPool("probe")->store("k", 1);'
     . 'echo UserCache\Cache::getStatus()->getAvailability()->name;';
-$cmd = escapeshellarg($php)
-    . ' -n -d user_cache.enable=1 -d user_cache.enable_cli=1 -d user_cache.shm_size=4608M -d user_cache.entries_hint=4096'
-    . ' -r ' . escapeshellarg($probe) . ' 2>/dev/null';
-$availability = trim((string) shell_exec($cmd));
+$process = proc_open(
+    [$php, '-n', '-d', 'user_cache.enable=1', '-d', 'user_cache.enable_cli=1', '-d', 'user_cache.shm_size=4608M', '-d', 'user_cache.entries_hint=4096', '-r', $probe],
+    [1 => ['pipe', 'w'], 2 => ['null']],
+    $pipes
+);
+$availability = trim(stream_get_contents($pipes[1]));
+fclose($pipes[1]);
+proc_close($process);
 if ($availability !== 'Available') die("skip a 4608M segment is unavailable ($availability)");
 ?>
 --CONFLICTS--

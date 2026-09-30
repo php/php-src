@@ -1,18 +1,18 @@
 --TEST--
 UserCache\Cache: user_cache.eviction_policy selects lru, clear or none behavior
+--SKIPIF--
+<?php
+if (!function_exists('proc_open')) die('skip proc_open() not available');
+?>
 --INI--
 user_cache.enable=1
 user_cache.enable_cli=1
 user_cache.shm_size=4M
 --FILE--
 <?php
-$php = escapeshellarg(getenv('TEST_PHP_EXECUTABLE') ?: PHP_BINARY);
-$args = '-n -d user_cache.enable=1 -d user_cache.enable_cli=1 -d user_cache.shm_size=4M';
-/* Run the child from a file: escapeshellarg() on Windows strips the double
- * quotes and percent signs the inline code would need. */
-$child = __DIR__ . '/user_cache_eviction_policies_child.php';
-file_put_contents($child, <<<'CODE'
-<?php
+$php = getenv('TEST_PHP_EXECUTABLE') ?: PHP_BINARY;
+$args = ['-n', '-d', 'user_cache.enable=1', '-d', 'user_cache.enable_cli=1', '-d', 'user_cache.shm_size=4M'];
+$code = <<<'CODE'
 $cache = UserCache\Cache::getPool('p');
 $blob = str_repeat('x', 8192);
 $ok = 0;
@@ -39,16 +39,14 @@ printf(
     (int) ($status->getStoreFailureCount() > 0),
     (int) $intact
 );
-CODE);
+CODE;
 
 foreach (['lru', 'clear', 'none'] as $policy) {
-    echo $policy, ': ', shell_exec(
-        "$php $args -d user_cache.eviction_policy=$policy " . escapeshellarg($child)
-    );
+    $process = proc_open([$php, ...$args, '-d', "user_cache.eviction_policy=$policy", '-r', $code], [1 => ['pipe', 'w']], $pipes);
+    echo $policy, ': ', stream_get_contents($pipes[1]);
+    fclose($pipes[1]);
+    proc_close($process);
 }
-
-/* Unlink here instead of --CLEAN-- so --repeat runs keep this test. */
-unlink($child);
 ?>
 --EXPECTF--
 lru: stored=600 full=1 evicted=1 wiped=0 failed=0 intact=1

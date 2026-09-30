@@ -9,16 +9,20 @@ user_cache.shm_size=16M
 user_cache.preferred_memory_model=shm
 --SKIPIF--
 <?php
+if (!function_exists('proc_open')) die('skip proc_open() not available');
 $php = getenv('TEST_PHP_EXECUTABLE') ?: PHP_BINARY;
 $probe = 'UserCache\Cache::getPool("probe")->store("k", 1);'
     . 'ob_start(); phpinfo(INFO_MODULES);'
     . 'preg_match("/^Active memory model => (.+)$/m", ob_get_clean(), $m);'
     . 'echo trim($m[1] ?? "none");';
-$cmd = escapeshellarg($php)
-    . ' -n -d user_cache.enable=1 -d user_cache.enable_cli=1 -d user_cache.shm_size=16M'
-    . ' -d user_cache.preferred_memory_model=shm'
-    . ' -r ' . escapeshellarg($probe) . ' 2>/dev/null';
-$active = trim((string) shell_exec($cmd));
+$process = proc_open(
+    [$php, '-n', '-d', 'user_cache.enable=1', '-d', 'user_cache.enable_cli=1', '-d', 'user_cache.shm_size=16M', '-d', 'user_cache.preferred_memory_model=shm', '-r', $probe],
+    [1 => ['pipe', 'w'], 2 => ['null']],
+    $pipes
+);
+$active = trim(stream_get_contents($pipes[1]));
+fclose($pipes[1]);
+proc_close($process);
 if ($active !== 'shm') {
     die("skip shm memory model unavailable (active: $active)");
 }

@@ -3,7 +3,7 @@ UserCache\Cache: startup sizing follows entries_hint and shm_size, invalid direc
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
-if (!function_exists('shell_exec')) die('skip shell_exec() not available');
+if (!function_exists('proc_open')) die('skip proc_open() not available');
 ?>
 --INI--
 user_cache.enable=1
@@ -12,10 +12,15 @@ user_cache.shm_size=16M
 user_cache.entries_hint=1000
 --FILE--
 <?php
-$php = escapeshellarg(getenv('TEST_PHP_EXECUTABLE') ?: PHP_BINARY);
-$args = '-n -d display_errors=1 -d display_startup_errors=1 -d error_reporting=E_ALL -d user_cache.enable=1 -d user_cache.enable_cli=1';
+$php = getenv('TEST_PHP_EXECUTABLE') ?: PHP_BINARY;
+$args = ['-n', '-d', 'display_errors=1', '-d', 'display_startup_errors=1', '-d', 'error_reporting=E_ALL', '-d', 'user_cache.enable=1', '-d', 'user_cache.enable_cli=1'];
 $run = function (string $ini, string $code) use ($php, $args): string {
-    return shell_exec("$php $args $ini -r " . escapeshellarg($code) . ' 2>&1');
+    $process = proc_open([$php, ...$args, ...explode(' ', $ini), '-r', $code], [1 => ['pipe', 'w'], 2 => ['redirect', 1]], $pipes);
+    $output = stream_get_contents($pipes[1]);
+    fclose($pipes[1]);
+    proc_close($process);
+
+    return $output;
 };
 $capacity = 'echo UserCache\\Cache::getStatus()->getEntryCapacity();';
 $probe = '$status = UserCache\\Cache::getStatus();'
