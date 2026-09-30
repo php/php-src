@@ -1149,23 +1149,26 @@ PHP_FUNCTION(libxml_use_internal_errors)
 }
 /* }}} */
 
-static void php_libxml_create_error_object(zval *return_value, const xmlError *error)
+static zend_object* php_libxml_create_error_object(const xmlError *error)
 {
-	object_init_ex(return_value, libxmlerror_class_entry);
-	add_property_long(return_value, "level", error->level);
-	add_property_long(return_value, "code", error->code);
-	add_property_long(return_value, "column", error->int2);
+	zend_object *object = zend_object_init(libxmlerror_class_entry);
+
+	zend_update_property_long(libxmlerror_class_entry, object, ZEND_STRL("level"), error->level);
+	zend_update_property_long(libxmlerror_class_entry, object, ZEND_STRL("code"), error->code);
+	zend_update_property_long(libxmlerror_class_entry, object, ZEND_STRL("column"), error->int2);
 	if (error->message) {
-		add_property_string(return_value, "message", error->message);
+		zend_update_property_string(libxmlerror_class_entry, object, ZEND_STRL("message"), error->message);
 	} else {
-		add_property_str(return_value, "message", zend_empty_string);
+		zend_update_property_str(libxmlerror_class_entry, object, ZEND_STRL("message"), zend_empty_string);
 	}
 	if (error->file) {
-		add_property_string(return_value, "file", error->file);
+		zend_update_property_string(libxmlerror_class_entry, object, ZEND_STRL("file"), error->file);
 	} else {
-		add_property_str(return_value, "file", zend_empty_string);
+		zend_update_property_str(libxmlerror_class_entry, object, ZEND_STRL("file"), zend_empty_string);
 	}
-	add_property_long(return_value, "line", error->line);
+	zend_update_property_long(libxmlerror_class_entry, object, ZEND_STRL("line"), error->line);
+
+	return object;
 }
 
 /* {{{ Retrieve last error from libxml */
@@ -1182,7 +1185,7 @@ PHP_FUNCTION(libxml_get_last_error)
 	}
 
 	if (error) {
-		php_libxml_create_error_object(return_value, error);
+		RETURN_OBJ(php_libxml_create_error_object(error));
 	} else {
 		RETURN_FALSE;
 	}
@@ -1199,9 +1202,8 @@ PHP_FUNCTION(libxml_get_errors)
 		xmlErrorPtr error = zend_llist_get_first(LIBXML(error_list));
 
 		while (error != NULL) {
-			zval z_error;
-			php_libxml_create_error_object(&z_error, error);
-			add_next_index_zval(return_value, &z_error);
+			zend_object *error_obj = php_libxml_create_error_object(error);
+			add_next_index_object(return_value, error_obj);
 			error = zend_llist_get_next(LIBXML(error_list));
 		}
 	} else {
