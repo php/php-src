@@ -47,7 +47,7 @@ foreach ($seen as $otherBucket => $name) {
         break;
     }
 }
-[$a, $b, $c] = array_map(Cache::getPool(...), $names);
+[$a, $b, $c] = array_map(fn(string $name) => Cache::getPool($name), $names);
 foreach ([$a, $b, $c] as $cache) {
     $cache->clear();
 }
