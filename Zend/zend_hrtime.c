@@ -25,8 +25,6 @@
 # include <time.h>
 # include <string.h>
 
-ZEND_API clockid_t zend_hrtime_posix_clock_id = CLOCK_MONOTONIC;
-
 #elif ZEND_HRTIME_PLATFORM_WINDOWS
 
 # define WIN32_LEAN_AND_MEAN
