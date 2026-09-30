@@ -118,6 +118,8 @@ PHP                                                                        NEWS
     that is not in the result set. (Ilia Alshanetsky)
   . Fixed PDOStatement::execute() leaving the previous result available
     after a failed execution. (Ilia Alshanetsky)
+  . Fixed a use-after-free when bindValue()/execute()/closeCursor() is called
+    from a bound parameter's __toString() during execute(). (Ilia Alshanetsky)
   . Fixed bug GH-23962 (Destroying a persistent PDO instance rolls back a
     transaction still in use by another instance). (Lazizbek Ergashev)
   . Fixed PDO::setAttribute() installing a PDO::ATTR_STATEMENT_CLASS class
