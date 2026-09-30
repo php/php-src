@@ -77,6 +77,8 @@ PHP                                                                        NEWS
     "array given" regardless of the value passed. (Ilia Alshanetsky)
   . Fixed PDOStatement::bindParam() and bindColumn() leaking the driver
     options value. (Ilia Alshanetsky)
+  . Fixed PDOStatement not reporting its bound parameters and columns to the
+    cycle collector. (Ilia Alshanetsky)
   . Fixed PDOStatement::execute() leaving the previous result available
     after a failed execution. (Ilia Alshanetsky)
   . Fixed a use-after-free when bindValue()/execute()/closeCursor() is called
