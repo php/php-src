@@ -70,19 +70,12 @@ void zend_startup_hrtime(void)
 
 	struct timespec ts;
 
-#ifdef CLOCK_MONOTONIC_RAW
-	if (EXPECTED(0 == clock_gettime(CLOCK_MONOTONIC_RAW, &ts))) {
-		zend_hrtime_posix_clock_id = CLOCK_MONOTONIC_RAW;
-		return;
-	}
-#endif
-
-	if (EXPECTED(0 == clock_gettime(zend_hrtime_posix_clock_id, &ts))) {
+	if (EXPECTED(0 == clock_gettime(CLOCK_MONOTONIC, &ts))) {
 		return;
 	}
 
 	// zend_error mechanism is not initialized at that point
-	fprintf(stderr, "No working CLOCK_MONOTONIC* found, this should never happen\n");
+	fprintf(stderr, "No working CLOCK_MONOTONIC found, this should never happen\n");
 	abort();
 
 #endif
