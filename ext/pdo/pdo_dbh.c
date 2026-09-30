@@ -564,18 +564,18 @@ static zval *pdo_stmt_instantiate(pdo_dbh_t *dbh, zval *object, zend_class_entry
 	return object;
 } /* }}} */
 
-static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry *dbstmt_ce, HashTable *ctor_args)
+static void pdo_stmt_construct(const pdo_stmt_t *stmt, zend_object *object, const zend_class_entry *dbstmt_ce, HashTable *ctor_args)
 {
 	zval query_string;
 	zend_string *key;
 
 	ZVAL_STR(&query_string, stmt->query_string);
 	key = ZSTR_INIT_LITERAL("queryString", 0);
-	zend_std_write_property(Z_OBJ_P(object), key, &query_string, NULL);
+	zend_std_write_property(object, key, &query_string, NULL);
 	zend_string_release_ex(key, 0);
 
 	if (dbstmt_ce->constructor) {
-		zend_call_known_function(dbstmt_ce->constructor, Z_OBJ_P(object), Z_OBJCE_P(object), NULL, 0, NULL, ctor_args);
+		zend_call_known_function(dbstmt_ce->constructor, object, object->ce, NULL, 0, NULL, ctor_args);
 	}
 }
 
@@ -658,9 +658,9 @@ PHP_METHOD(PDO, prepare)
 
 	if (dbh->methods->preparer(dbh, statement, stmt, options)) {
 		if (Z_TYPE(ctor_args) == IS_ARRAY) {
-			pdo_stmt_construct(stmt, return_value, dbstmt_ce, Z_ARRVAL(ctor_args));
+			pdo_stmt_construct(stmt, Z_OBJ_P(return_value), dbstmt_ce, Z_ARRVAL(ctor_args));
 		} else {
-			pdo_stmt_construct(stmt, return_value, dbstmt_ce, /* ctor_args */ NULL);
+			pdo_stmt_construct(stmt, Z_OBJ_P(return_value), dbstmt_ce, /* ctor_args */ NULL);
 		}
 		return;
 	}
@@ -1236,9 +1236,9 @@ PHP_METHOD(PDO, query)
 				}
 				if (ret) {
 					if (Z_TYPE(dbh->def_stmt_ctor_args) == IS_ARRAY) {
-						pdo_stmt_construct(stmt, return_value, dbh->def_stmt_ce, Z_ARRVAL(dbh->def_stmt_ctor_args));
+						pdo_stmt_construct(stmt, Z_OBJ_P(return_value), dbh->def_stmt_ce, Z_ARRVAL(dbh->def_stmt_ctor_args));
 					} else {
-						pdo_stmt_construct(stmt, return_value, dbh->def_stmt_ce, /* ctor_args */ NULL);
+						pdo_stmt_construct(stmt, Z_OBJ_P(return_value), dbh->def_stmt_ce, /* ctor_args */ NULL);
 					}
 					return;
 				}
