@@ -477,16 +477,25 @@ typedef struct _zend_property_info {
 	zend_function **hooks;
 } zend_property_info;
 
-#define OBJ_PROP(obj, offset) \
-	((zval*)((char*)(obj) + offset))
-#define OBJ_PROP_NUM(obj, num) \
-	(&(obj)->properties_table[(num)])
-#define OBJ_PROP_TO_OFFSET(num) \
-	((uint32_t)(offsetof(zend_object, properties_table) + sizeof(zval) * (num)))
-#define OBJ_PROP_TO_NUM(offset) \
-	(((offset) - OBJ_PROP_TO_OFFSET(0)) / sizeof(zval))
-#define OBJ_PROP_SLOT_TO_OFFSET(obj, slot) \
-	((uintptr_t)(slot) - (uintptr_t)(obj))
+static zend_always_inline zval *OBJ_PROP(zend_object *obj, uint32_t offset) {
+	return (zval*)((char*)(obj) + offset);
+}
+
+static zend_always_inline zval *OBJ_PROP_NUM(zend_object *obj, uint32_t num) {
+	return &obj->properties_table[num];
+}
+
+ZEND_ATTRIBUTE_CONST static zend_always_inline uint32_t OBJ_PROP_TO_OFFSET(uint32_t num) {
+	return (uint32_t)(offsetof(zend_object, properties_table) + sizeof(zval) * num);
+}
+
+ZEND_ATTRIBUTE_CONST static zend_always_inline uint32_t OBJ_PROP_TO_NUM(uint32_t offset) {
+	return (offset - OBJ_PROP_TO_OFFSET(0)) / sizeof(zval);
+}
+
+static zend_always_inline uintptr_t OBJ_PROP_SLOT_TO_OFFSET(const zend_object *obj, const zval *slot) {
+	return ((uintptr_t)slot) - ((uintptr_t)obj);
+}
 
 typedef struct _zend_class_constant {
 	zval value; /* flags are stored in u2 */
