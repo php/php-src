@@ -564,6 +564,10 @@ static void ir_add_fusion_ranges(ir_ctx *ctx, ir_ref ref, ir_ref input, ir_block
 						/* intervals[opd].addRange(b.from, op.id) */
 						ival = ir_add_live_range(ctx, v,
 							IR_START_LIVE_POS_FROM_REF(bb->start), use_pos);
+					} else if (reg != IR_REG_NONE && (IR_USE_FLAGS(def_flags, j) & IR_HINT_NEEDS_HOLE)) {
+						ir_fix_live_range(ctx, v,
+							IR_START_LIVE_POS_FROM_REF(bb->start), use_pos + IR_DEF_SUB_REF);
+						ival = ir_add_live_range(ctx, v, IR_START_LIVE_POS_FROM_REF(bb->start), use_pos);
 					} else {
 						ival = ctx->live_intervals[v];
 					}
@@ -692,14 +696,15 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 						if (input > 0) {
 							uint32_t v = ctx->vregs[input];
 
-							/* live.add(phi.inputOf(b)) */
-							IR_ASSERT(v);
-							ir_bitset_incl(live, v);
-							/* intervals[phi.inputOf(b)].addRange(b.from, b.to) */
-							ival = ir_add_prev_live_range(ctx, v,
-								IR_START_LIVE_POS_FROM_REF(bb->start),
-								IR_END_LIVE_POS_FROM_REF(bb->end));
-							ir_add_phi_use(ctx, ival, k, IR_DEF_LIVE_POS_FROM_REF(bb->end), use);
+							if (v) {
+								/* live.add(phi.inputOf(b)) */
+								ir_bitset_incl(live, v);
+								/* intervals[phi.inputOf(b)].addRange(b.from, b.to) */
+								ival = ir_add_prev_live_range(ctx, v,
+									IR_START_LIVE_POS_FROM_REF(bb->start),
+									IR_END_LIVE_POS_FROM_REF(bb->end));
+								ir_add_phi_use(ctx, ival, k, IR_DEF_LIVE_POS_FROM_REF(bb->end), use);
+							}
 						}
 					}
 				}
@@ -766,8 +771,6 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 			insn = &ctx->ir_base[ref];
 			v = ctx->vregs[ref];
 			if (v) {
-				IR_ASSERT(ir_bitset_in(live, v));
-
 				if (insn->op != IR_PHI) {
 					ir_live_pos def_pos;
 					ir_ref hint_ref = 0;
@@ -878,6 +881,17 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 							} else
 #endif
 							ir_add_fixed_live_range(ctx, reg, use_pos, use_pos + IR_USE_SUB_REF);
+							if ((use_flags & IR_HINT_NEEDS_HOLE) && ir_bitset_in(live, v)) {
+								/* This is a special case for x86 SHIFT instructions that uses %rcx for op2.
+								 * SHIFT adds short fixed live range for %rcx and this makes a conflict with
+								 * operand live interval, if the operand is still alive after the SHIFT.
+								 * To avoid the conflict we create a "fake" hole in the operand live interval.
+								 * See: ./tests/debug/ra_004.irt
+								 */
+								ir_fix_live_range(ctx, v,
+									IR_START_LIVE_POS_FROM_REF(bb->start), use_pos + IR_DEF_SUB_REF);
+								ir_add_live_range(ctx, v, IR_START_LIVE_POS_FROM_REF(bb->start), use_pos);
+							}
 						} else if (def_flags & IR_DEF_REUSES_OP1_REG) {
 							if (j == 1) {
 								use_pos = IR_LOAD_LIVE_POS_FROM_REF(ref);
@@ -1286,6 +1300,10 @@ static void ir_add_fusion_ranges(ir_ctx *ctx, ir_ref ref, ir_ref input, ir_block
 						/* intervals[opd].addRange(b.from, op.id) */
 						ival = ir_add_live_range(ctx, v,
 							IR_START_LIVE_POS_FROM_REF(bb->start), use_pos);
+					} else if (reg != IR_REG_NONE && (IR_USE_FLAGS(def_flags, j) & IR_HINT_NEEDS_HOLE)) {
+						ir_fix_live_range(ctx, v,
+							IR_START_LIVE_POS_FROM_REF(bb->start), use_pos + IR_DEF_SUB_REF);
+						ival = ir_add_live_range(ctx, v, IR_START_LIVE_POS_FROM_REF(bb->start), use_pos);
 					} else {
 						ival = ctx->live_intervals[v];
 					}
@@ -1559,6 +1577,17 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 							} else
 #endif
 							ir_add_fixed_live_range(ctx, reg, use_pos, use_pos + IR_USE_SUB_REF);
+							if ((use_flags & IR_HINT_NEEDS_HOLE) && IS_LIVE_IN_BLOCK(v, b)) {
+								/* This is a special case for x86 SHIFT instructions that uses %rcx for op2.
+								 * SHIFT adds short fixed live range for %rcx and this makes a conflict with
+								 * operand live interval, if the operand is still alive after the SHIFT.
+								 * To avoid the conflict we create a "fake" hole in the operand live interval.
+								 * See: ./tests/debug/ra_004.irt
+								 */
+								ir_fix_live_range(ctx, v,
+									IR_START_LIVE_POS_FROM_REF(bb->start), use_pos + IR_DEF_SUB_REF);
+								ir_add_live_range(ctx, v, IR_START_LIVE_POS_FROM_REF(bb->start), use_pos);
+							}
 						} else if (def_flags & IR_DEF_REUSES_OP1_REG) {
 							if (j == 1) {
 								if (def_flags & IR_DEF_CONFLICTS_WITH_INPUT_REGS) {

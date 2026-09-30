@@ -2459,7 +2459,7 @@ PHP_FUNCTION(preg_replace_callback_array)
 		/* Copy potential trampoline */
 		ZVAL_COPY_VALUE(&fci.function_name, replace);
 
-		if (!zend_is_callable_ex(replace, NULL, 0, NULL, &fcc, NULL)) {
+		if (!zend_is_callable(replace, &fcc, NULL)) {
 			zend_argument_type_error(1, "must contain only valid callbacks");
 			goto error;
 		}

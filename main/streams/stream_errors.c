@@ -436,7 +436,7 @@ static void php_stream_call_error_handler(const zval *handler, zval *errors_arra
 	zend_fcall_info_cache fcc;
 	char *is_callable_error = NULL;
 
-	if (!zend_is_callable_ex(handler, NULL, 0, NULL, &fcc, &is_callable_error)) {
+	if (!zend_is_callable(handler, &fcc, &is_callable_error)) {
 		if (is_callable_error) {
 			zend_type_error("stream error handler must be a valid callback, %s", is_callable_error);
 			efree(is_callable_error);

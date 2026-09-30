@@ -87,6 +87,15 @@ static inline bool rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_p
 }
 /* }}} */
 
+static bool pdo_stmt_disallow_reentrant_param_event(pdo_stmt_t *stmt)
+{
+	if (UNEXPECTED(stmt->in_param_event)) {
+		zend_throw_error(NULL, "Cannot modify a PDOStatement while parameter hooks are running");
+		return false;
+	}
+	return true;
+}
+
 /* trigger callback hook for parameters */
 static bool dispatch_param_event(pdo_stmt_t *stmt, enum pdo_param_event event_type) /* {{{ */
 {
@@ -102,6 +111,7 @@ static bool dispatch_param_event(pdo_stmt_t *stmt, enum pdo_param_event event_ty
 		return true;
 	}
 
+	stmt->in_param_event = 1;
 	ht = stmt->bound_params;
 
 iterate:
@@ -119,6 +129,7 @@ iterate:
 		goto iterate;
 	}
 
+	stmt->in_param_event = 0;
 	return ret;
 }
 /* }}} */
@@ -369,6 +380,29 @@ static bool really_register_bound_param(struct pdo_bound_param_data *param, pdo_
 }
 /* }}} */
 
+static bool pdo_stmt_do_next_rowset(pdo_stmt_t *stmt);
+
+static void pdo_stmt_invalidate_result(pdo_stmt_t *stmt)
+{
+	if (stmt->methods->cursor_closer) {
+		stmt->methods->cursor_closer(stmt);
+	} else {
+		do {
+			while (stmt->methods->fetcher(stmt, PDO_FETCH_ORI_NEXT, 0))
+				;
+			if (!stmt->methods->next_rowset) {
+				break;
+			}
+
+			if (!pdo_stmt_do_next_rowset(stmt)) {
+				break;
+			}
+		} while (1);
+	}
+
+	stmt->executed = 0;
+}
+
 /* {{{ Execute a prepared statement, optionally binding parameters */
 PHP_METHOD(PDOStatement, execute)
 {
@@ -381,6 +415,13 @@ PHP_METHOD(PDOStatement, execute)
 	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STMT_GET_OBJ;
+	if (!pdo_stmt_disallow_reentrant_param_event(stmt)) {
+		RETURN_THROWS();
+	}
+
+	if (stmt->executed) {
+		pdo_stmt_invalidate_result(stmt);
+	}
 	PDO_STMT_CLEAR_ERR();
 
 	if (input_params) {
@@ -1116,7 +1157,7 @@ static bool pdo_get_fcc_from_zval(zend_fcall_info_cache *fcc, zval *callable) {
 	}
 
 	char *is_callable_error = NULL;
-	if (!zend_is_callable_ex(callable, NULL, 0, NULL, fcc, &is_callable_error)) {
+	if (!zend_is_callable(callable, fcc, &is_callable_error)) {
 		if (is_callable_error) {
 			zend_type_error("%s", is_callable_error);
 			efree(is_callable_error);
@@ -1304,6 +1345,9 @@ static void register_bound_param(INTERNAL_FUNCTION_PARAMETERS, int is_param) /* 
 	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STMT_GET_OBJ;
+	if (!pdo_stmt_disallow_reentrant_param_event(stmt)) {
+		RETURN_THROWS();
+	}
 
 	param.param_type = (int) param_type;
 
@@ -1356,6 +1400,9 @@ PHP_METHOD(PDOStatement, bindValue)
 	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STMT_GET_OBJ;
+	if (!pdo_stmt_disallow_reentrant_param_event(stmt)) {
+		RETURN_THROWS();
+	}
 	param.param_type = (int) param_type;
 
 	if (param.name) {
@@ -1817,6 +1864,9 @@ PHP_METHOD(PDOStatement, closeCursor)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	PHP_STMT_GET_OBJ;
+	if (!pdo_stmt_disallow_reentrant_param_event(stmt)) {
+		RETURN_THROWS();
+	}
 	if (!stmt->methods->cursor_closer) {
 		/* emulate it by fetching and discarding rows */
 		do {

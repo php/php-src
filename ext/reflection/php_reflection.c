@@ -1779,7 +1779,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getClosureThis)
 
 	GET_REFLECTION_OBJECT();
 	if (!Z_ISUNDEF(intern->obj)) {
-		zend_object *closure_this = zend_get_closure_this_ptr(&intern->obj);
+		zend_object *closure_this = zend_get_closure_this_ptr(Z_OBJ(intern->obj));
 		if (closure_this) {
 			RETURN_OBJ_COPY(closure_this);
 		}
@@ -5085,7 +5085,7 @@ ZEND_METHOD(ReflectionClass, newInstanceArgs)
 }
 /* }}} */
 
-void reflection_class_new_lazy(INTERNAL_FUNCTION_PARAMETERS,
+static zend_always_inline void reflection_class_new_lazy(INTERNAL_FUNCTION_PARAMETERS,
 		int strategy, bool is_reset)
 {
 	const reflection_object *intern;
@@ -5138,11 +5138,11 @@ void reflection_class_new_lazy(INTERNAL_FUNCTION_PARAMETERS,
 		obj = NULL;
 	}
 
-	if (!fcc.function_handler) {
+	if (!ZEND_FCC_INITIALIZED(fcc)) {
 		/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
 		 * with it ourselves. It is important that it is not refetched on every call,
 		 * because calls may occur from different scopes. */
-		zend_is_callable_ex(&fci.function_name, NULL, 0, NULL, &fcc, NULL);
+		zend_is_callable(&fci.function_name, &fcc, NULL);
 	}
 
 	obj = zend_object_make_lazy(obj, ce, &fci.function_name, &fcc,

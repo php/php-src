@@ -3985,10 +3985,10 @@ ZEND_VM_HANDLER(118, ZEND_INIT_USER_CALL, CONST, CONST|TMP|CV, NUM)
 
 	SAVE_OPLINE();
 	function_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
-	if (zend_is_callable_ex(function_name, NULL, 0, NULL, &fcc, &error)) {
+	if (zend_is_callable(function_name, &fcc, &error)) {
 		ZEND_ASSERT(!error);
 
-		/* Deprecation can be emitted from zend_is_callable_ex(), which can
+		/* Deprecation can be emitted from zend_is_callable(), which can
 		 * invoke a user error handler and throw an exception.
 		 * For the CONST and CV case we reuse the same exception block below
 		 * to make sure we don't increase VM size too much. */
@@ -9248,7 +9248,7 @@ ZEND_VM_HANDLER(182, ZEND_BIND_LEXICAL, TMP, CV, REF)
 		Z_TRY_ADDREF_P(var);
 	}
 
-	zend_closure_bind_var_ex(closure,
+	zend_closure_bind_var_ex(Z_OBJ_P(closure),
 		(opline->extended_value & ~(ZEND_BIND_REF|ZEND_BIND_IMPLICIT)), var);
 	ZEND_VM_NEXT_OPCODE();
 }

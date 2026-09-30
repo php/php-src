@@ -70,10 +70,6 @@ ZEND_API extern double zend_hrtime_timer_scale;
 # include <string.h>
 ZEND_API extern mach_timebase_info_data_t zend_hrtime_timerlib_info;
 
-#elif ZEND_HRTIME_PLATFORM_POSIX
-
-ZEND_API extern clockid_t zend_hrtime_posix_clock_id;
-
 #endif
 
 #define ZEND_HRTIME_T_MAX UINT64_MAX
@@ -95,7 +91,7 @@ static zend_always_inline zend_hrtime_t zend_hrtime(void)
 	return (zend_hrtime_t)mach_absolute_time() * zend_hrtime_timerlib_info.numer / zend_hrtime_timerlib_info.denom;
 #elif ZEND_HRTIME_PLATFORM_POSIX
 	struct timespec ts = { .tv_sec = 0, .tv_nsec = 0 };
-	clock_gettime(zend_hrtime_posix_clock_id, &ts);
+	clock_gettime(CLOCK_MONOTONIC, &ts);
 	return ((zend_hrtime_t) ts.tv_sec * (zend_hrtime_t)ZEND_NANO_IN_SEC) + ts.tv_nsec;
 #elif ZEND_HRTIME_PLATFORM_HPUX
 	return (zend_hrtime_t) gethrtime();
