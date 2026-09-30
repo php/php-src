@@ -1779,7 +1779,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getClosureThis)
 
 	GET_REFLECTION_OBJECT();
 	if (!Z_ISUNDEF(intern->obj)) {
-		zend_object *closure_this = zend_get_closure_this_ptr(&intern->obj);
+		zend_object *closure_this = zend_get_closure_this_ptr(Z_OBJ(intern->obj));
 		if (closure_this) {
 			RETURN_OBJ_COPY(closure_this);
 		}

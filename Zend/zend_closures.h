@@ -28,8 +28,8 @@ BEGIN_EXTERN_C()
 	((zend_object*)((char*)(op_array) - sizeof(zend_object)))
 
 void zend_register_closure_ce(void);
-void zend_closure_bind_var(zval *closure_zv, zend_string *var_name, zval *var);
-void zend_closure_bind_var_ex(zval *closure_zv, uint32_t offset, zval *val);
+void zend_closure_bind_var(zend_object *closure_zobj, zend_string *var_name, zval *var);
+void zend_closure_bind_var_ex(zend_object *closure_zobj, uint32_t offset, zval *val);
 void zend_closure_from_frame(zval *closure_zv, const zend_execute_data *frame);
 
 extern ZEND_API zend_class_entry *zend_ce_closure;
@@ -39,7 +39,7 @@ ZEND_API void zend_create_fake_closure(zval *res, zend_function *op_array, zend_
 ZEND_API void zend_create_partial_closure(zval *res, zend_function *func, zend_class_entry *scope, zend_class_entry *called_scope, zend_object *this_ptr, bool partial_of_closure);
 ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *obj);
 ZEND_API const zend_function *zend_get_closure_method_def(zend_object *obj);
-ZEND_API zend_object* zend_get_closure_this_ptr(zval *obj);
+ZEND_API zend_object* zend_get_closure_this_ptr(zend_object *closure_zobj);
 
 END_EXTERN_C()
 

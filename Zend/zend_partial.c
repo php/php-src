@@ -1087,7 +1087,7 @@ static void zp_bind(zval *result, zend_function *function, uint32_t argc, zval *
 		zval var;
 		ZVAL_OBJ(&var, ZEND_CLOSURE_OBJECT(function));
 		Z_ADDREF(var);
-		zend_closure_bind_var_ex(result, bind_offset, &var);
+		zend_closure_bind_var_ex(Z_OBJ_P(result), bind_offset, &var);
 		bind_offset += sizeof(Bucket);
 	}
 
@@ -1119,7 +1119,7 @@ static void zp_bind(zval *result, zend_function *function, uint32_t argc, zval *
 			return;
 		}
 		ZEND_ASSERT(zp_arg_must_be_sent_by_ref(function, offset+1) ? Z_ISREF_P(var) : !Z_ISREF_P(var));
-		zend_closure_bind_var_ex(result, bind_offset, var);
+		zend_closure_bind_var_ex(Z_OBJ_P(result), bind_offset, var);
 		bind_offset += sizeof(Bucket);
 	}
 
@@ -1127,7 +1127,7 @@ static void zp_bind(zval *result, zend_function *function, uint32_t argc, zval *
 		zval var;
 		ZVAL_ARR(&var, extra_named_params);
 		Z_ADDREF(var);
-		zend_closure_bind_var_ex(result, bind_offset, &var);
+		zend_closure_bind_var_ex(Z_OBJ_P(result), bind_offset, &var);
 	}
 }
 
