@@ -32,6 +32,8 @@ PHP                                                                        NEWS
     constant in use declarations. (Girgias)
   . Switch the POSIX high resolution timer back to CLOCK_MONOTONIC from
     CLOCK_MONOTONIC_RAW. (nicolas-grekas)
+  . Fixed array_map optimization with non-literal function or non-literal args.
+    (Arnaud)
 
 - FFI:
   . Fixed crashes with FFI callbacks created from __call() trampolines
