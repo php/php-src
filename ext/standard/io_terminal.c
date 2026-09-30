@@ -2873,11 +2873,11 @@ static char *php_io_terminal_read_line_posix(
 				if (errno == EINTR) {
 					continue;
 				}
-#if defined(EAGAIN) && defined(EWOULDBLOCK)
+#if defined(EWOULDBLOCK) && (EWOULDBLOCK != EAGAIN)
 				if (errno == EAGAIN || errno == EWOULDBLOCK) {
 					break;
 				}
-#elif defined(EAGAIN)
+#else
 				if (errno == EAGAIN) {
 					break;
 				}
