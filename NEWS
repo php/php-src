@@ -73,6 +73,8 @@ PHP                                                                        NEWS
     options value. (Ilia Alshanetsky)
   . Fixed PDOStatement::execute() leaving the previous result available
     after a failed execution. (Ilia Alshanetsky)
+  . Fixed a use-after-free when bindValue()/execute()/closeCursor() is called
+    from a bound parameter's __toString() during execute(). (Ilia Alshanetsky)
 
 - PDO_DBLIB:
   . Fixed bug GH-23741 (segfault after a failed query inside a PDO
