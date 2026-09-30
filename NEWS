@@ -24,6 +24,8 @@ PHP                                                                        NEWS
     request activation). (matyhtf)
   . Fixed bug GH-23764 (Built-in server leaks a file descriptor on every HEAD
     request for a static file). (jakubskopal)
+  . Fixed the built-in server truncating an error page and leaking its
+    unsent part after a partial socket write. (Ilia Alshanetsky)
 
 - DOM:
   . Fixed use-after-free when re-constructing a DOMXPath whose php:function

@@ -1067,7 +1067,8 @@ static void php_cli_server_content_sender_ctor(php_cli_server_content_sender *se
 static int php_cli_server_content_sender_send(php_cli_server_content_sender *sender, php_socket_t fd, size_t *nbytes_sent_total) /* {{{ */
 {
 	php_cli_server_chunk *chunk, *next;
-	size_t _nbytes_sent_total = 0;
+
+	*nbytes_sent_total = 0;
 
 	for (chunk = sender->buffer.first; chunk; chunk = next) {
 #ifdef PHP_WIN32
@@ -1085,7 +1086,6 @@ static int php_cli_server_content_sender_send(php_cli_server_content_sender *sen
 			nbytes_sent = send(fd, chunk->data.heap.p, chunk->data.heap.len, 0);
 #endif
 			if (nbytes_sent < 0) {
-				*nbytes_sent_total = _nbytes_sent_total;
 				return php_socket_errno();
 #ifdef PHP_WIN32
 			} else if (nbytes_sent == chunk->data.heap.len) {
@@ -1101,8 +1101,10 @@ static int php_cli_server_content_sender_send(php_cli_server_content_sender *sen
 			} else {
 				chunk->data.heap.p += nbytes_sent;
 				chunk->data.heap.len -= nbytes_sent;
+				*nbytes_sent_total += nbytes_sent;
+				return 0;
 			}
-			_nbytes_sent_total += nbytes_sent;
+			*nbytes_sent_total += nbytes_sent;
 			break;
 
 		case PHP_CLI_SERVER_CHUNK_IMMORTAL:
@@ -1112,7 +1114,6 @@ static int php_cli_server_content_sender_send(php_cli_server_content_sender *sen
 			nbytes_sent = send(fd, chunk->data.immortal.p, chunk->data.immortal.len, 0);
 #endif
 			if (nbytes_sent < 0) {
-				*nbytes_sent_total = _nbytes_sent_total;
 				return php_socket_errno();
 #ifdef PHP_WIN32
 			} else if (nbytes_sent == chunk->data.immortal.len) {
@@ -1128,12 +1129,13 @@ static int php_cli_server_content_sender_send(php_cli_server_content_sender *sen
 			} else {
 				chunk->data.immortal.p += nbytes_sent;
 				chunk->data.immortal.len -= nbytes_sent;
+				*nbytes_sent_total += nbytes_sent;
+				return 0;
 			}
-			_nbytes_sent_total += nbytes_sent;
+			*nbytes_sent_total += nbytes_sent;
 			break;
 		}
 	}
-	*nbytes_sent_total = _nbytes_sent_total;
 	return 0;
 } /* }}} */
 
