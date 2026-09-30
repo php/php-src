@@ -34,6 +34,8 @@ ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_userinfo_validate(cons
 ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_host_validate(const zend_string *host);
 ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_port_validate(zend_long port);
 ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_path_validate(const zend_string *path);
+ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc1866_query_is_well_formed(const char *query, size_t query_length);
+ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_query_is_well_formed(const char *query, size_t query_length);
 ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_query_validate(const zend_string *query);
 ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_fragment_validate(const zend_string *fragment);
 

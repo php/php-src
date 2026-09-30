@@ -1,12 +1,14 @@
 --TEST--
-Test Uri\QueryParams::parseRfc3986() - success - space character
+Test Uri\QueryParams::parseRfc3986() - success - percent-encoded space characters
 --FILE--
 <?php
 
-$params = Uri\QueryParams::parseRfc3986("a c=123&foo=b r");
+$params = Uri\QueryParams::parseRfc3986("a%20c=123&foo=b%20r");
 
-var_dump($params->list());
+var_dump($params->toList());
+var_dump($params->toRfc1866String());
 var_dump($params->toRfc3986String());
+var_dump($params->toWhatWgUrlString());
 
 ?>
 --EXPECT--
@@ -26,4 +28,6 @@ array(2) {
     string(3) "b r"
   }
 }
+string(15) "a+c=123&foo=b+r"
 string(19) "a%20c=123&foo=b%20r"
+string(15) "a+c=123&foo=b+r"

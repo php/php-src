@@ -40,8 +40,8 @@ zend_class_entry *php_uri_ce_comparison_mode;
 zend_class_entry *php_uri_ce_exception;
 zend_class_entry *php_uri_ce_error;
 zend_class_entry *php_uri_ce_invalid_uri_exception;
+zend_class_entry *php_uri_ce_invalid_query_params_exception;
 zend_class_entry *php_uri_ce_query_params;
-zend_class_entry *php_uri_ce_query_param_options;
 zend_class_entry *php_uri_ce_whatwg_url_host_type;
 zend_class_entry *php_uri_ce_whatwg_invalid_url_exception;
 zend_class_entry *php_uri_ce_whatwg_url_validation_error_type;
@@ -50,7 +50,6 @@ zend_class_entry *php_uri_ce_whatwg_url_validation_error;
 static zend_object_handlers object_handlers_rfc3986_uri;
 static zend_object_handlers object_handlers_whatwg_uri;
 static zend_object_handlers object_handlers_query_params;
-static zend_object_handlers object_handlers_query_param_options;
 
 typedef zend_result (*php_uri_component_validator_string)(const zend_string *component);
 typedef zend_result (*php_uri_component_validator_long)(zend_long component);
@@ -709,6 +708,54 @@ PHP_METHOD(Uri_Rfc3986_Uri, getQuery)
 	php_uri_property_read_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_URI_PROPERTY_NAME_QUERY, PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII);
 }
 
+static void uri_get_query_params(INTERNAL_FUNCTION_PARAMETERS, const php_uri_query_params_parsing_method parsing_method)
+{
+	zend_long max_param_count = PHP_URI_QUERY_PARAMS_DEFAULT_MAX_PARAM_COUNT;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(max_param_count)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (max_param_count < 0) {
+		zend_argument_value_error(1, "must be greater than or equal to 0");
+		RETURN_THROWS();
+	}
+
+	const php_uri_object *uri_object = Z_URI_OBJECT_P(ZEND_THIS);
+	ZEND_ASSERT(uri_object->uri != NULL);
+
+	zval query;
+	ZVAL_UNDEF(&query);
+
+	if (UNEXPECTED(uri_object->parser->property_handler.query.read(uri_object->uri, PHP_URI_COMPONENT_READ_MODE_RAW, &query) == FAILURE)) {
+		zval_ptr_dtor(&query);
+		zend_throw_exception_ex(php_uri_ce_error, 0, "The query component cannot be retrieved");
+		RETURN_THROWS();
+	}
+
+	if (Z_TYPE(query) == IS_NULL) {
+		RETURN_NULL();
+	}
+
+	object_init_ex(return_value, php_uri_ce_query_params);
+
+	const zend_result result = php_uri_query_params_parse(
+		Z_STRVAL(query), Z_STRLEN(query), Z_URI_QUERY_PARAMS_OBJECT_P(return_value),
+		parsing_method, false, max_param_count
+	);
+	zval_ptr_dtor(&query);
+
+	if (UNEXPECTED(result == FAILURE)) {
+		RETURN_THROWS();
+	}
+}
+
+PHP_METHOD(Uri_Rfc3986_Uri, getQueryParams)
+{
+	uri_get_query_params(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_URI_QUERY_PARAMS_PARSING_METHOD_RFC3986);
+}
+
 PHP_METHOD(Uri_Rfc3986_Uri, getRawQuery)
 {
 	php_uri_property_read_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_URI_PROPERTY_NAME_QUERY, PHP_URI_COMPONENT_READ_MODE_RAW);
@@ -717,6 +764,32 @@ PHP_METHOD(Uri_Rfc3986_Uri, getRawQuery)
 PHP_METHOD(Uri_Rfc3986_Uri, withQuery)
 {
 	php_uri_property_write_str_or_null_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_URI_PROPERTY_NAME_QUERY);
+}
+
+PHP_METHOD(Uri_Rfc3986_Uri, withQueryParams)
+{
+	zend_object *query_params = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ_OF_CLASS_OR_NULL(query_params, php_uri_ce_query_params)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zval zv;
+
+	if (query_params == NULL) {
+		ZVAL_NULL(&zv);
+	} else {
+		zend_string *query = php_uri_query_params_to_rfc3986_string(php_uri_query_params_object_from_obj(query_params));
+		/* This should be unreachable in practice, as query is null only due to memory errors. */
+		if (UNEXPECTED(query == NULL)) {
+			zend_throw_exception_ex(php_uri_ce_error, 0, "Cannot recompose %pS to a string", query_params->ce->name);
+			RETURN_THROWS();
+		}
+		ZVAL_STR(&zv, query);
+	}
+
+	php_uri_property_write_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_URI_PROPERTY_NAME_QUERY, &zv);
+	zval_ptr_dtor(&zv);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, getFragment)
@@ -992,6 +1065,37 @@ PHP_METHOD(Uri_WhatWg_Url, getHostType)
 	ZEND_ASSERT(uri_object->uri != NULL);
 
 	php_uri_parser_whatwg_host_type_read(uri_object->uri, return_value);
+}
+
+PHP_METHOD(Uri_WhatWg_Url, getQueryParams)
+{
+	uri_get_query_params(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_URI_QUERY_PARAMS_PARSING_METHOD_WHATWG_URL);
+}
+
+PHP_METHOD(Uri_WhatWg_Url, withQueryParams)
+{
+	zend_object *query_params = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ_OF_CLASS_OR_NULL(query_params, php_uri_ce_query_params)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zval zv;
+
+	if (query_params == NULL) {
+		ZVAL_NULL(&zv);
+	} else {
+		zend_string *query = php_uri_query_params_to_whatwg_string(php_uri_query_params_object_from_obj(query_params));
+		/* This should be unreachable in practice, as query is null only due to memory errors. */
+		if (UNEXPECTED(query == NULL)) {
+			zend_throw_exception_ex(php_uri_ce_error, 0, "Cannot recompose %pS to a string", query_params->ce->name);
+			RETURN_THROWS();
+		}
+		ZVAL_STR(&zv, query);
+	}
+
+	php_uri_property_write_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_URI_PROPERTY_NAME_QUERY, &zv);
+	zval_ptr_dtor(&zv);
 }
 
 PHP_METHOD(Uri_WhatWg_Url, equals)
@@ -1586,6 +1690,7 @@ static PHP_MINIT_FUNCTION(uri)
 	php_uri_ce_exception = register_class_Uri_UriException(zend_ce_exception);
 	php_uri_ce_error = register_class_Uri_UriError(zend_ce_error);
 	php_uri_ce_invalid_uri_exception = register_class_Uri_InvalidUriException(php_uri_ce_exception);
+	php_uri_ce_invalid_query_params_exception = register_class_Uri_InvalidQueryParamsException(php_uri_ce_exception);
 
 	php_uri_ce_query_params = register_class_Uri_QueryParams(zend_ce_aggregate, zend_ce_countable);
 	php_uri_ce_query_params->create_object = php_uri_object_query_params_create_object;
@@ -1595,18 +1700,6 @@ static PHP_MINIT_FUNCTION(uri)
 	object_handlers_query_params.offset = offsetof(php_uri_query_params_object, std);
 	object_handlers_query_params.free_obj = php_uri_query_params_object_handler_free;
 	object_handlers_query_params.clone_obj = php_uri_query_params_object_handler_clone;
-
-	php_uri_ce_query_param_options = register_class_Uri_QueryParamOptions();
-	php_uri_ce_query_param_options->create_object = php_uri_object_create_query_param_options;
-	memcpy(&object_handlers_query_param_options, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	object_handlers_query_param_options.offset = offsetof(php_uri_query_param_options_object, std);
-	object_handlers_query_param_options.free_obj = php_uri_query_param_options_object_handler_free;
-	object_handlers_query_param_options.clone_obj = php_uri_query_param_options_object_handler_clone;
-	object_handlers_query_param_options.has_property = php_uri_query_param_options_object_handler_has_property;
-	object_handlers_query_param_options.read_property = php_uri_query_param_options_object_handler_read_property;
-	object_handlers_query_param_options.write_property = php_uri_query_param_options_object_handler_write_property;
-	object_handlers_query_param_options.unset_property = php_uri_query_param_options_object_handler_unset_property;
-	object_handlers_query_param_options.get_property_ptr_ptr = php_uri_query_param_options_object_handler_get_property_ptr_ptr;
 
 	php_uri_ce_whatwg_invalid_url_exception = register_class_Uri_WhatWg_InvalidUrlException(php_uri_ce_invalid_uri_exception);
 	php_uri_ce_whatwg_url_host_type = register_class_Uri_WhatWg_UrlHostType();

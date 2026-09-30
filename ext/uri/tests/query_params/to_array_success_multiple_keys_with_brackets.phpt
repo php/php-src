@@ -3,7 +3,7 @@ Test Uri\QueryParams::toArray() - success - multiple keys, using brackets
 --FILE--
 <?php
 
-$params = Uri\QueryParams::parseRfc3986("abc[]=123&abc[]=456");
+$params = Uri\QueryParams::parseRfc3986("abc%5B%5D=123&abc%5B%5D=456");
 
 var_dump($params->toArray());
 

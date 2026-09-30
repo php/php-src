@@ -12,11 +12,13 @@ enum IntEnum: int {
 }
 
 $params = Uri\QueryParams::parseRfc3986("");
-$params->append("foo", StringEnum::Bar);
-$params->append("baz", IntEnum::Baz);
+$params = $params->append("foo", StringEnum::Bar);
+$params = $params->append("baz", IntEnum::Baz);
 
-var_dump($params->list());
+var_dump($params->toList());
+var_dump($params->toRfc1866String());
 var_dump($params->toRfc3986String());
+var_dump($params->toWhatWgUrlString());
 
 ?>
 --EXPECT--
@@ -36,4 +38,6 @@ array(2) {
     string(3) "123"
   }
 }
+string(15) "foo=bar&baz=123"
+string(15) "foo=bar&baz=123"
 string(15) "foo=bar&baz=123"
