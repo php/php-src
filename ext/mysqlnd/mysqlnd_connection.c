@@ -27,6 +27,7 @@
 #include "mysqlnd_debug.h"
 #include "mysqlnd_ext_plugin.h"
 #include "zend_smart_str.h"
+#include "main/php_io_hooks.h"
 
 
 extern MYSQLND_CHARSET *mysqlnd_charsets;
@@ -2337,3 +2338,10 @@ mysqlnd_connection_init(const size_t client_flags, const bool persistent, MYSQLN
 	DBG_RETURN(ret);
 }
 /* }}} */
+
+PHPAPI bool mysqlnd_conn_is_busy(const MYSQLND_CONN_DATA *conn)
+{
+	MYSQLND_VIO *vio = conn ? conn->vio : NULL;
+	php_stream *stream = vio ? vio->data->m.get_stream(vio) : NULL;
+	return stream && php_io_stream_busy(stream);
+}
