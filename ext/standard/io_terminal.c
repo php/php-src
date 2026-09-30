@@ -2768,12 +2768,44 @@ static zend_string *php_io_terminal_read_line_windows(
 	return res;
 }
 #else
-static char *php_io_terminal_read_line_from_fd(int fd, size_t *out_len)
+static bool php_io_terminal_wait_fd_readable(int fd, php_poll_ctx **poll_ctx)
 {
+	if (*poll_ctx == NULL) {
+		*poll_ctx = php_io_terminal_create_poll_context(fd);
+		if (*poll_ctx == NULL) {
+			return false;
+		}
+	}
+
+	php_poll_event event;
+	int poll_result;
+	do {
+		if (EG(exception)) {
+			return false;
+		}
+		poll_result = php_poll_wait(*poll_ctx, &event, 1, NULL);
+	} while (poll_result < 0 && php_poll_get_error(*poll_ctx) == PHP_POLL_ERR_INTERRUPTED);
+
+	if (EG(exception)) {
+		return false;
+	}
+
+	return poll_result > 0;
+}
+
+static char *php_io_terminal_read_line_from_fd(int fd, size_t *out_len, bool *is_eof)
+{
+	*is_eof = false;
+	*out_len = 0;
+
 	smart_str line = {0};
-	char ch;
-	errno = 0;
+	char ch = '\0';
+	bool eof_reached = false;
+	bool error_reached = false;
+	php_poll_ctx *poll_ctx = NULL;
+
 	while (1) {
+		errno = 0;
 		ssize_t n = read(fd, &ch, 1);
 		if (n > 0) {
 			smart_str_appendc(&line, ch);
@@ -2781,17 +2813,43 @@ static char *php_io_terminal_read_line_from_fd(int fd, size_t *out_len)
 				break;
 			}
 		} else if (n == 0) {
+			eof_reached = true;
 			break; /* EOF */
 		} else {
 			if (errno == EINTR) {
 				continue;
 			}
-			smart_str_free(&line);
-			return NULL;
+#if defined(EWOULDBLOCK) && (EWOULDBLOCK != EAGAIN)
+			if (errno == EAGAIN || errno == EWOULDBLOCK) {
+#else
+			if (errno == EAGAIN) {
+#endif
+				if (!php_io_terminal_wait_fd_readable(fd, &poll_ctx)) {
+					error_reached = true;
+					break;
+				}
+				continue;
+			}
+			error_reached = true;
+			break;
 		}
 	}
 
+	if (poll_ctx != NULL) {
+		php_poll_destroy(poll_ctx);
+	}
+
+	if (error_reached) {
+		smart_str_free(&line);
+		*is_eof = false;
+		*out_len = 0;
+		return NULL;
+	}
+
 	if (line.s == NULL) {
+		if (eof_reached) {
+			*is_eof = true;
+		}
 		*out_len = 0;
 		return NULL;
 	}
@@ -2828,14 +2886,7 @@ static char *php_io_terminal_read_line_posix(
 		}
 
 		if (fd >= 0) {
-			char *buf = php_io_terminal_read_line_from_fd(fd, out_len);
-			if (buf == NULL) {
-				if (errno == 0 || errno == EAGAIN) {
-					*is_eof = true;
-				}
-				return NULL;
-			}
-			return buf;
+			return php_io_terminal_read_line_from_fd(fd, out_len, is_eof);
 		}
 
 		return NULL;
@@ -2845,6 +2896,7 @@ static char *php_io_terminal_read_line_posix(
 	char ch = '\0';
 	bool eof_reached = false;
 	bool error_reached = false;
+	php_poll_ctx *poll_ctx = NULL;
 
 	/* Drain any already-buffered bytes from php_stream first */
 	if (stream != NULL && stream->writepos > stream->readpos) {
@@ -2883,13 +2935,15 @@ static char *php_io_terminal_read_line_posix(
 				}
 #if defined(EWOULDBLOCK) && (EWOULDBLOCK != EAGAIN)
 				if (errno == EAGAIN || errno == EWOULDBLOCK) {
-					break;
-				}
 #else
 				if (errno == EAGAIN) {
-					break;
-				}
 #endif
+					if (!php_io_terminal_wait_fd_readable(fd, &poll_ctx)) {
+						error_reached = true;
+						break;
+					}
+					continue;
+				}
 #ifdef EIO
 				if (errno == EIO) {
 					/* On Linux, reading from a master PTY returns -1 with errno == EIO
@@ -2905,6 +2959,10 @@ static char *php_io_terminal_read_line_posix(
 		}
 	}
 
+	if (poll_ctx != NULL) {
+		php_poll_destroy(poll_ctx);
+	}
+
 	if (error_reached) {
 		smart_str_free(&line);
 		*is_eof = false;
@@ -2913,10 +2971,12 @@ static char *php_io_terminal_read_line_posix(
 	}
 
 	if (line.s == NULL) {
-		if (stream != NULL && eof_reached) {
-			stream->eof = 1;
+		if (eof_reached) {
+			if (stream != NULL) {
+				stream->eof = 1;
+			}
+			*is_eof = true;
 		}
-		*is_eof = true;
 		*out_len = 0;
 		return NULL;
 	}
