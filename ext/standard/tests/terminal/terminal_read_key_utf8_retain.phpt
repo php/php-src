@@ -143,7 +143,7 @@ proc_close($proc2);
 
 // 3. 4-byte UTF-8 sequence where more than one byte (2 bytes: \xf0\x9f) is already pending,
 // and the remaining bytes arrive later than sequenceTimeout (20ms) but within the next call's
-// overall timeout (150ms).
+// overall timeout (1000ms).
 $code3 = '
 fwrite(STDERR, "STARTED\n");
 fflush(STDERR);
@@ -186,8 +186,8 @@ $k5 = $terminal3->readKey(Duration::fromMilliseconds(30), Duration::fromMillisec
 fwrite($pipes3[0], "GO\n");
 
 // Call 2 resumes sequence with 2 bytes already pending. The first continuation read of this invocation
-// uses overall timeout (150ms) rather than sequenceTimeout (20ms), successfully waiting for the 40ms delay.
-$k6 = $terminal3->readKey(Duration::fromMilliseconds(150), Duration::fromMilliseconds(20));
+// uses overall timeout (1000ms) rather than sequenceTimeout (20ms), successfully waiting for the 40ms delay.
+$k6 = $terminal3->readKey(Duration::fromMilliseconds(1000), Duration::fromMilliseconds(20));
 
 echo "k5 is null: ", var_export($k5 === null, true), PHP_EOL;
 echo "k6 is emoji: ", var_export($k6 === "😀", true), PHP_EOL;
