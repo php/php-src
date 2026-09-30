@@ -29,7 +29,6 @@ if (PHP_OPCACHE_JIT == "yes") {
 			 ir_dump.c ir_check.c ir_patch.c";
 
 		DEFINE("IR_TARGET", ir_target);
-		DEFINE("JIT_BUILD_CFLAGS", CLANG_TOOLSET ? (X64 ? "-m64" : "-m32") : "");
 		DEFINE("DASM_FLAGS", dasm_flags);
 		DEFINE("DASM_ARCH", "x86");
 		DEFINE("TLS_TARGET", "win");

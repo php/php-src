@@ -69,6 +69,7 @@ DEFINE('PHP_PREFIX', PHP_PREFIX);
 DEFINE("BASE_INCLUDES", "/I . /I main /I Zend /I TSRM /I ext ");
 
 toolset_setup_common_cflags();
+DEFINE("BUILD_CFLAGS", CLANG_TOOLSET ? (X64 ? "-m64" : "-m32") : "");
 
 if (VS_TOOLSET) {
 	ARG_WITH('mp', 'Tell Visual Studio use up to [n,auto,disable] processes for compilation', 'auto');
