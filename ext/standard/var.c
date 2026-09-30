@@ -531,6 +531,19 @@ static zend_result php_object_element_export(zval *zv, zend_ulong index, zend_st
 }
 /* }}} */
 
+static zend_object *php_var_pin_lazy_proxy_instance(zend_object *zobj)
+{
+	zend_object *instance;
+
+	if (!zend_object_is_lazy_proxy(zobj) || !zend_lazy_object_initialized(zobj)) {
+		return NULL;
+	}
+
+	instance = zend_lazy_object_get_instance(zobj);
+	GC_ADDREF(instance);
+	return instance;
+}
+
 PHPAPI zend_result php_var_export_ex(zval *struc, int level, smart_str *buf) /* {{{ */
 {
 	HashTable *myht;
@@ -625,6 +638,7 @@ again:
 			}
 			ZEND_GUARD_OR_GC_PROTECT_RECURSION(guard, EXPORT, zobj);
 			myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_VAR_EXPORT);
+			zend_object *lazy_instance = php_var_pin_lazy_proxy_instance(zobj);
 			if (level > 1) {
 				smart_str_appendc(buf, '\n');
 				buffer_append_spaces(buf, level - 1);
@@ -666,6 +680,9 @@ again:
 							if (EG(exception)) {
 								ZEND_GUARD_OR_GC_UNPROTECT_RECURSION(guard, EXPORT, zobj);
 								zend_release_properties(myht);
+								if (lazy_instance) {
+									OBJ_RELEASE(lazy_instance);
+								}
 								return FAILURE;
 							}
 						}
@@ -676,6 +693,9 @@ again:
 					} ZEND_HASH_FOREACH_END();
 				}
 				zend_release_properties(myht);
+			}
+			if (lazy_instance) {
+				OBJ_RELEASE(lazy_instance);
 			}
 			ZEND_GUARD_OR_GC_UNPROTECT_RECURSION(guard, EXPORT, zobj);
 			if (level > 1 && !is_enum) {
@@ -928,6 +948,7 @@ static int php_var_serialize_get_sleep_props(
 {
 	zend_class_entry *ce = Z_OBJCE_P(struc);
 	HashTable *props = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_SERIALIZE);
+	zend_object *lazy_instance = php_var_pin_lazy_proxy_instance(Z_OBJ_P(struc));
 	zval *name_val;
 	int retval = SUCCESS;
 
@@ -993,6 +1014,9 @@ static int php_var_serialize_get_sleep_props(
 	} ZEND_HASH_FOREACH_END();
 
 	zend_release_properties(props);
+	if (lazy_instance) {
+		OBJ_RELEASE(lazy_instance);
+	}
 	return retval;
 }
 /* }}} */
@@ -1309,6 +1333,7 @@ again:
 					return;
 				}
 				myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_SERIALIZE);
+				zend_object *lazy_instance = php_var_pin_lazy_proxy_instance(Z_OBJ_P(struc));
 				/* count after serializing name, since php_var_serialize_class_name
 				 * changes the count if the variable is incomplete class */
 				count = zend_array_count(myht);
@@ -1317,6 +1342,9 @@ again:
 				}
 				php_var_serialize_nested_data(buf, struc, myht, count, incomplete_class, var_hash, GC_REFCOUNT(myht) > 1);
 				zend_release_properties(myht);
+				if (lazy_instance) {
+					OBJ_RELEASE(lazy_instance);
+				}
 				return;
 			}
 		case IS_ARRAY:

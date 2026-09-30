@@ -169,6 +169,8 @@ PHP                                                                        NEWS
     PROCESS_INFORMATION, an indeterminate comspec pointer after a failed
     lookup, and an unchecked CreateFileA() failure. (Ilia Alshanetsky)
   . Fix persistent stream context lifetime during shutdown (Levi Morrison)
+  . Fixed use-after-free when serializing or exporting an initialized lazy
+    proxy whose real instance is freed from user code. (Ilia Alshanetsky)
 
 - Tidy:
   . Fixed a use-after-free when a tidyNode is used after its document is
