@@ -10,11 +10,11 @@ enum TestEnum {
 $params = new Uri\QueryParams();
 
 try {
-    $params->append("foo", TestEnum::Bar);
+    $params = $params->append("foo", TestEnum::Bar);
 } catch (Throwable $e) {
     echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-ValueError: Uri\QueryParams::append(): Argument #2 ($value) must not contain an object
+TypeError: Uri\QueryParams::append(): Argument #2 ($value) must be of type BackedEnum|string|int|float|null, TestEnum given

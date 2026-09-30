@@ -4,9 +4,9 @@ Test Uri\QueryParams::deleteValue() - success - int value
 <?php
 
 $params = Uri\QueryParams::parseRfc3986("abc=123&abc=456&abc=foo");
-$params->deleteValue("abc", 123);
+$params = $params->deleteValue("abc", 123);
 
-var_dump($params->list());
+var_dump($params->toList());
 var_dump($params->toRfc3986String());
 
 ?>

@@ -5,8 +5,10 @@ Test Uri\QueryParams::parseRfc3986() - success - basic
 
 $params = Uri\QueryParams::parseRfc3986("abc=123&foo=bar");
 
-var_dump($params->list());
+var_dump($params->toList());
+var_dump($params->toRfc1866String());
 var_dump($params->toRfc3986String());
+var_dump($params->toWhatWgUrlString());
 
 ?>
 --EXPECT--
@@ -26,4 +28,6 @@ array(2) {
     string(3) "bar"
   }
 }
+string(15) "abc=123&foo=bar"
+string(15) "abc=123&foo=bar"
 string(15) "abc=123&foo=bar"

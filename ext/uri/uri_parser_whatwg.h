@@ -46,6 +46,9 @@ ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_special_query_percent_
 ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_form_query_percent_encode(const char *str, size_t str_length);
 ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_fragment_percent_encode(const char *str, size_t str_length);
 
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_query_component_percent_decode(const char *str, size_t str_length);
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_query_params_to_string(const php_uri_query_params_object *object);
+
 PHP_RINIT_FUNCTION(uri_parser_whatwg);
 
 ZEND_MODULE_POST_ZEND_DEACTIVATE_D(uri_parser_whatwg);

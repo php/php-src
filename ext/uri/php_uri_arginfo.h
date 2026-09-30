@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_uri.stub.php instead.
- * Stub hash: 110a45436bc855c005e645118b72af8254534ec9
+ * Stub hash: ace84f735e326eee3eaeee710ac0a60ae0de3123
  * Has decl header: yes */
 
 #include "zend_attributes.h"
@@ -10,50 +10,22 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Uri_WhatWg_url_percent_encode, 0
 	ZEND_ARG_OBJ_INFO(0, mode, Uri\\WhatWg\\\125rlPercentEncodingMode, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Uri_QueryParamOptions___construct, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, parsingMaxQueryStringLength, IS_LONG, 0, "10000")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, parsingMaxParamCount, IS_LONG, 0, "1000")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, trueValue, IS_STRING, 0, "\"0\"")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, falseValue, IS_STRING, 0, "\"0\"")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, useNullAsEmptyString, _IS_BOOL, 0, "false")
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_QueryParamOptions___debugInfo, 0, 0, IS_ARRAY, 0)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Uri_QueryParams_parseRfc1866, 0, 1, Uri\\QueryParams, 0)
 	ZEND_ARG_TYPE_INFO(0, queryString, IS_STRING, 0)
-	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, options, Uri\\QueryParamOptions, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, maxParamCount, IS_LONG, 0, "1000")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Uri_QueryParams_parseRfc3986, 0, 1, Uri\\QueryParams, 1)
-	ZEND_ARG_TYPE_INFO(0, queryString, IS_STRING, 0)
-	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, options, Uri\\QueryParamOptions, 1, "null")
-ZEND_END_ARG_INFO()
+#define arginfo_class_Uri_QueryParams_parseRfc3986 arginfo_class_Uri_QueryParams_parseRfc1866
 
-#define arginfo_class_Uri_QueryParams_parseWhatWg arginfo_class_Uri_QueryParams_parseRfc1866
+#define arginfo_class_Uri_QueryParams_parseWhatWgUrlSearchParams arginfo_class_Uri_QueryParams_parseRfc1866
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Uri_QueryParams_fromArray, 0, 1, Uri\\QueryParams, 0)
 	ZEND_ARG_TYPE_INFO(0, queryParams, IS_ARRAY, 0)
-	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, options, Uri\\QueryParamOptions, 1, "null")
 ZEND_END_ARG_INFO()
+
+#define arginfo_class_Uri_QueryParams_fromList arginfo_class_Uri_QueryParams_fromArray
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Uri_QueryParams___construct, 0, 0, 0)
-	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, options, Uri\\QueryParamOptions, 1, "null")
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_QueryParams_append, 0, 2, IS_STATIC, 0)
-	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_QueryParams_delete, 0, 1, IS_STATIC, 0)
-	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_QueryParams_deleteValue, 0, 2, IS_STATIC, 0)
-	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_QueryParams_has, 0, 1, _IS_BOOL, 0)
@@ -62,7 +34,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_QueryParams_hasValue, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+	ZEND_ARG_OBJ_TYPE_MASK(0, value, BackedEnum, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_NULL, NULL)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_QueryParams_getFirst, 0, 1, IS_STRING, 1)
@@ -75,37 +47,57 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_QueryParams_getAll, 0,
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Uri_QueryParams_list arginfo_class_Uri_QueryParamOptions___debugInfo
-
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Uri_QueryParams_getIterator, 0, 0, Traversable, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_QueryParams_count, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Uri_QueryParams_set arginfo_class_Uri_QueryParams_append
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_QueryParams_sort, 0, 0, IS_STATIC, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_QueryParams_append, 0, 2, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+	ZEND_ARG_OBJ_TYPE_MASK(0, value, BackedEnum, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_NULL, NULL)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Uri_QueryParams_toArray arginfo_class_Uri_QueryParamOptions___debugInfo
+#define arginfo_class_Uri_QueryParams_set arginfo_class_Uri_QueryParams_append
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_QueryParams_delete, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Uri_QueryParams_deleteValue arginfo_class_Uri_QueryParams_append
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_QueryParams_sortByBytes, 0, 0, IS_STATIC, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Uri_QueryParams_sortByUtf16 arginfo_class_Uri_QueryParams_sortByBytes
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_QueryParams_withArray, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, queryParams, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_QueryParams_toList, 0, 0, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_QueryParams_toArray, 0, 0, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, maxNestingLevel, IS_LONG, 0, "64")
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_QueryParams_toRfc1866String, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_Uri_QueryParams_toRfc3986String arginfo_class_Uri_QueryParams_toRfc1866String
 
-#define arginfo_class_Uri_QueryParams_toWhatWgString arginfo_class_Uri_QueryParams_toRfc1866String
+#define arginfo_class_Uri_QueryParams_toWhatWgUrlString arginfo_class_Uri_QueryParams_toRfc1866String
 
-#define arginfo_class_Uri_QueryParams___serialize arginfo_class_Uri_QueryParamOptions___debugInfo
+#define arginfo_class_Uri_QueryParams___serialize arginfo_class_Uri_QueryParams_toList
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_QueryParams___unserialize, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Uri_QueryParams___debugInfo arginfo_class_Uri_QueryParamOptions___debugInfo
+#define arginfo_class_Uri_QueryParams___debugInfo arginfo_class_Uri_QueryParams_toList
 
-#define arginfo_class_Uri_Rfc3986_UriBuilder_reset arginfo_class_Uri_QueryParams_sort
+#define arginfo_class_Uri_Rfc3986_UriBuilder_reset arginfo_class_Uri_QueryParams_sortByBytes
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_UriBuilder_setScheme, 0, 1, IS_STATIC, 0)
 	ZEND_ARG_TYPE_INFO(0, scheme, IS_STRING, 1)
@@ -199,7 +191,15 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Uri_Rfc3986_Uri_getRawQuery arginfo_class_Uri_Rfc3986_Uri_getScheme
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_getQueryParams, 0, 0, Uri\\QueryParams, 1)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, maxParamCount, IS_LONG, 0, "1000")
+ZEND_END_ARG_INFO()
+
 #define arginfo_class_Uri_Rfc3986_Uri_withQuery arginfo_class_Uri_Rfc3986_UriBuilder_setQuery
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_withQueryParams, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_OBJ_INFO(0, queryParams, Uri\\QueryParams, 1)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_Uri_Rfc3986_Uri_getFragment arginfo_class_Uri_Rfc3986_Uri_getScheme
 
@@ -220,11 +220,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_resolve, 0
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Uri_Rfc3986_Uri___serialize arginfo_class_Uri_QueryParamOptions___debugInfo
+#define arginfo_class_Uri_Rfc3986_Uri___serialize arginfo_class_Uri_QueryParams_toList
 
 #define arginfo_class_Uri_Rfc3986_Uri___unserialize arginfo_class_Uri_QueryParams___unserialize
 
-#define arginfo_class_Uri_Rfc3986_Uri___debugInfo arginfo_class_Uri_QueryParamOptions___debugInfo
+#define arginfo_class_Uri_Rfc3986_Uri___debugInfo arginfo_class_Uri_QueryParams_toList
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Uri_WhatWg_InvalidUrlException___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, message, IS_STRING, 0, "\"\"")
@@ -239,7 +239,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Uri_WhatWg_UrlValidationError___construct, 
 	ZEND_ARG_TYPE_INFO(0, failure, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Uri_WhatWg_UrlBuilder_reset arginfo_class_Uri_QueryParams_sort
+#define arginfo_class_Uri_WhatWg_UrlBuilder_reset arginfo_class_Uri_QueryParams_sortByBytes
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_WhatWg_UrlBuilder_setScheme, 0, 1, IS_STATIC, 0)
 	ZEND_ARG_TYPE_INFO(0, scheme, IS_STRING, 0)
@@ -314,7 +314,11 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Uri_WhatWg_Url_getQuery arginfo_class_Uri_Rfc3986_Uri_getScheme
 
+#define arginfo_class_Uri_WhatWg_Url_getQueryParams arginfo_class_Uri_Rfc3986_Uri_getQueryParams
+
 #define arginfo_class_Uri_WhatWg_Url_withQuery arginfo_class_Uri_Rfc3986_UriBuilder_setQuery
+
+#define arginfo_class_Uri_WhatWg_Url_withQueryParams arginfo_class_Uri_Rfc3986_Uri_withQueryParams
 
 #define arginfo_class_Uri_WhatWg_Url_getFragment arginfo_class_Uri_Rfc3986_Uri_getScheme
 
@@ -334,37 +338,38 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_WhatWg_Url_resolve, 0,
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, softErrors, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Uri_WhatWg_Url___serialize arginfo_class_Uri_QueryParamOptions___debugInfo
+#define arginfo_class_Uri_WhatWg_Url___serialize arginfo_class_Uri_QueryParams_toList
 
 #define arginfo_class_Uri_WhatWg_Url___unserialize arginfo_class_Uri_QueryParams___unserialize
 
-#define arginfo_class_Uri_WhatWg_Url___debugInfo arginfo_class_Uri_QueryParamOptions___debugInfo
+#define arginfo_class_Uri_WhatWg_Url___debugInfo arginfo_class_Uri_QueryParams_toList
 
 ZEND_FUNCTION(Uri_WhatWg_url_percent_encode);
-ZEND_METHOD(Uri_QueryParamOptions, __construct);
-ZEND_METHOD(Uri_QueryParamOptions, __debugInfo);
 ZEND_METHOD(Uri_QueryParams, parseRfc1866);
 ZEND_METHOD(Uri_QueryParams, parseRfc3986);
-ZEND_METHOD(Uri_QueryParams, parseWhatWg);
+ZEND_METHOD(Uri_QueryParams, parseWhatWgUrlSearchParams);
 ZEND_METHOD(Uri_QueryParams, fromArray);
+ZEND_METHOD(Uri_QueryParams, fromList);
 ZEND_METHOD(Uri_QueryParams, __construct);
-ZEND_METHOD(Uri_QueryParams, append);
-ZEND_METHOD(Uri_QueryParams, delete);
-ZEND_METHOD(Uri_QueryParams, deleteValue);
 ZEND_METHOD(Uri_QueryParams, has);
 ZEND_METHOD(Uri_QueryParams, hasValue);
 ZEND_METHOD(Uri_QueryParams, getFirst);
 ZEND_METHOD(Uri_QueryParams, getLast);
 ZEND_METHOD(Uri_QueryParams, getAll);
-ZEND_METHOD(Uri_QueryParams, list);
 ZEND_METHOD(Uri_QueryParams, getIterator);
 ZEND_METHOD(Uri_QueryParams, count);
+ZEND_METHOD(Uri_QueryParams, append);
 ZEND_METHOD(Uri_QueryParams, set);
-ZEND_METHOD(Uri_QueryParams, sort);
+ZEND_METHOD(Uri_QueryParams, delete);
+ZEND_METHOD(Uri_QueryParams, deleteValue);
+ZEND_METHOD(Uri_QueryParams, sortByBytes);
+ZEND_METHOD(Uri_QueryParams, sortByUtf16);
+ZEND_METHOD(Uri_QueryParams, withArray);
+ZEND_METHOD(Uri_QueryParams, toList);
 ZEND_METHOD(Uri_QueryParams, toArray);
 ZEND_METHOD(Uri_QueryParams, toRfc1866String);
 ZEND_METHOD(Uri_QueryParams, toRfc3986String);
-ZEND_METHOD(Uri_QueryParams, toWhatWgString);
+ZEND_METHOD(Uri_QueryParams, toWhatWgUrlString);
 ZEND_METHOD(Uri_QueryParams, __serialize);
 ZEND_METHOD(Uri_QueryParams, __unserialize);
 ZEND_METHOD(Uri_QueryParams, __debugInfo);
@@ -401,7 +406,9 @@ ZEND_METHOD(Uri_Rfc3986_Uri, getRawPath);
 ZEND_METHOD(Uri_Rfc3986_Uri, withPath);
 ZEND_METHOD(Uri_Rfc3986_Uri, getQuery);
 ZEND_METHOD(Uri_Rfc3986_Uri, getRawQuery);
+ZEND_METHOD(Uri_Rfc3986_Uri, getQueryParams);
 ZEND_METHOD(Uri_Rfc3986_Uri, withQuery);
+ZEND_METHOD(Uri_Rfc3986_Uri, withQueryParams);
 ZEND_METHOD(Uri_Rfc3986_Uri, getFragment);
 ZEND_METHOD(Uri_Rfc3986_Uri, getRawFragment);
 ZEND_METHOD(Uri_Rfc3986_Uri, withFragment);
@@ -434,6 +441,8 @@ ZEND_METHOD(Uri_WhatWg_Url, withPassword);
 ZEND_METHOD(Uri_WhatWg_Url, getAsciiHost);
 ZEND_METHOD(Uri_WhatWg_Url, getUnicodeHost);
 ZEND_METHOD(Uri_WhatWg_Url, getHostType);
+ZEND_METHOD(Uri_WhatWg_Url, getQueryParams);
+ZEND_METHOD(Uri_WhatWg_Url, withQueryParams);
 ZEND_METHOD(Uri_WhatWg_Url, equals);
 ZEND_METHOD(Uri_WhatWg_Url, toAsciiString);
 ZEND_METHOD(Uri_WhatWg_Url, toUnicodeString);
@@ -447,35 +456,32 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_Uri_QueryParamOptions_methods[] = {
-	ZEND_ME(Uri_QueryParamOptions, __construct, arginfo_class_Uri_QueryParamOptions___construct, ZEND_ACC_PUBLIC)
-	ZEND_ME(Uri_QueryParamOptions, __debugInfo, arginfo_class_Uri_QueryParamOptions___debugInfo, ZEND_ACC_PUBLIC)
-	ZEND_FE_END
-};
-
 static const zend_function_entry class_Uri_QueryParams_methods[] = {
 	ZEND_ME(Uri_QueryParams, parseRfc1866, arginfo_class_Uri_QueryParams_parseRfc1866, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Uri_QueryParams, parseRfc3986, arginfo_class_Uri_QueryParams_parseRfc3986, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME(Uri_QueryParams, parseWhatWg, arginfo_class_Uri_QueryParams_parseWhatWg, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Uri_QueryParams, parseWhatWgUrlSearchParams, arginfo_class_Uri_QueryParams_parseWhatWgUrlSearchParams, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Uri_QueryParams, fromArray, arginfo_class_Uri_QueryParams_fromArray, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Uri_QueryParams, fromList, arginfo_class_Uri_QueryParams_fromList, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Uri_QueryParams, __construct, arginfo_class_Uri_QueryParams___construct, ZEND_ACC_PUBLIC)
-	ZEND_ME(Uri_QueryParams, append, arginfo_class_Uri_QueryParams_append, ZEND_ACC_PUBLIC)
-	ZEND_ME(Uri_QueryParams, delete, arginfo_class_Uri_QueryParams_delete, ZEND_ACC_PUBLIC)
-	ZEND_ME(Uri_QueryParams, deleteValue, arginfo_class_Uri_QueryParams_deleteValue, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_QueryParams, has, arginfo_class_Uri_QueryParams_has, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_QueryParams, hasValue, arginfo_class_Uri_QueryParams_hasValue, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_QueryParams, getFirst, arginfo_class_Uri_QueryParams_getFirst, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_QueryParams, getLast, arginfo_class_Uri_QueryParams_getLast, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_QueryParams, getAll, arginfo_class_Uri_QueryParams_getAll, ZEND_ACC_PUBLIC)
-	ZEND_ME(Uri_QueryParams, list, arginfo_class_Uri_QueryParams_list, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_QueryParams, getIterator, arginfo_class_Uri_QueryParams_getIterator, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_QueryParams, count, arginfo_class_Uri_QueryParams_count, ZEND_ACC_PUBLIC)
-	ZEND_ME(Uri_QueryParams, set, arginfo_class_Uri_QueryParams_set, ZEND_ACC_PUBLIC)
-	ZEND_ME(Uri_QueryParams, sort, arginfo_class_Uri_QueryParams_sort, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_QueryParams, append, arginfo_class_Uri_QueryParams_append, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD)
+	ZEND_ME(Uri_QueryParams, set, arginfo_class_Uri_QueryParams_set, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD)
+	ZEND_ME(Uri_QueryParams, delete, arginfo_class_Uri_QueryParams_delete, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD)
+	ZEND_ME(Uri_QueryParams, deleteValue, arginfo_class_Uri_QueryParams_deleteValue, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD)
+	ZEND_ME(Uri_QueryParams, sortByBytes, arginfo_class_Uri_QueryParams_sortByBytes, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD)
+	ZEND_ME(Uri_QueryParams, sortByUtf16, arginfo_class_Uri_QueryParams_sortByUtf16, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD)
+	ZEND_ME(Uri_QueryParams, withArray, arginfo_class_Uri_QueryParams_withArray, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_QueryParams, toList, arginfo_class_Uri_QueryParams_toList, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_QueryParams, toArray, arginfo_class_Uri_QueryParams_toArray, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_QueryParams, toRfc1866String, arginfo_class_Uri_QueryParams_toRfc1866String, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_QueryParams, toRfc3986String, arginfo_class_Uri_QueryParams_toRfc3986String, ZEND_ACC_PUBLIC)
-	ZEND_ME(Uri_QueryParams, toWhatWgString, arginfo_class_Uri_QueryParams_toWhatWgString, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_QueryParams, toWhatWgUrlString, arginfo_class_Uri_QueryParams_toWhatWgUrlString, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_QueryParams, __serialize, arginfo_class_Uri_QueryParams___serialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_QueryParams, __unserialize, arginfo_class_Uri_QueryParams___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_QueryParams, __debugInfo, arginfo_class_Uri_QueryParams___debugInfo, ZEND_ACC_PUBLIC)
@@ -520,7 +526,9 @@ static const zend_function_entry class_Uri_Rfc3986_Uri_methods[] = {
 	ZEND_ME(Uri_Rfc3986_Uri, withPath, arginfo_class_Uri_Rfc3986_Uri_withPath, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, getQuery, arginfo_class_Uri_Rfc3986_Uri_getQuery, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, getRawQuery, arginfo_class_Uri_Rfc3986_Uri_getRawQuery, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_Rfc3986_Uri, getQueryParams, arginfo_class_Uri_Rfc3986_Uri_getQueryParams, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, withQuery, arginfo_class_Uri_Rfc3986_Uri_withQuery, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_Rfc3986_Uri, withQueryParams, arginfo_class_Uri_Rfc3986_Uri_withQueryParams, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, getFragment, arginfo_class_Uri_Rfc3986_Uri_getFragment, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, getRawFragment, arginfo_class_Uri_Rfc3986_Uri_getRawFragment, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, withFragment, arginfo_class_Uri_Rfc3986_Uri_withFragment, ZEND_ACC_PUBLIC)
@@ -577,7 +585,9 @@ static const zend_function_entry class_Uri_WhatWg_Url_methods[] = {
 	ZEND_RAW_FENTRY("getPath", zim_Uri_Rfc3986_Uri_getPath, arginfo_class_Uri_WhatWg_Url_getPath, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("withPath", zim_Uri_Rfc3986_Uri_withPath, arginfo_class_Uri_WhatWg_Url_withPath, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getQuery", zim_Uri_Rfc3986_Uri_getQuery, arginfo_class_Uri_WhatWg_Url_getQuery, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_ME(Uri_WhatWg_Url, getQueryParams, arginfo_class_Uri_WhatWg_Url_getQueryParams, ZEND_ACC_PUBLIC)
 	ZEND_RAW_FENTRY("withQuery", zim_Uri_Rfc3986_Uri_withQuery, arginfo_class_Uri_WhatWg_Url_withQuery, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_ME(Uri_WhatWg_Url, withQueryParams, arginfo_class_Uri_WhatWg_Url_withQueryParams, ZEND_ACC_PUBLIC)
 	ZEND_RAW_FENTRY("getFragment", zim_Uri_Rfc3986_Uri_getFragment, arginfo_class_Uri_WhatWg_Url_getFragment, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("withFragment", zim_Uri_Rfc3986_Uri_withFragment, arginfo_class_Uri_WhatWg_Url_withFragment, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_ME(Uri_WhatWg_Url, equals, arginfo_class_Uri_WhatWg_Url_equals, ZEND_ACC_PUBLIC)
@@ -620,6 +630,16 @@ static zend_class_entry *register_class_Uri_InvalidUriException(zend_class_entry
 	return class_entry;
 }
 
+static zend_class_entry *register_class_Uri_InvalidQueryParamsException(zend_class_entry *class_entry_Uri_UriException)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Uri", "InvalidQueryParamsException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Uri_UriException, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+
+	return class_entry;
+}
+
 static zend_class_entry *register_class_Uri_UriComparisonMode(void)
 {
 	zend_class_entry *class_entry = zend_register_internal_enum("Uri\\UriComparisonMode", IS_UNDEF, NULL);
@@ -631,60 +651,26 @@ static zend_class_entry *register_class_Uri_UriComparisonMode(void)
 	return class_entry;
 }
 
-static zend_class_entry *register_class_Uri_QueryParamOptions(void)
-{
-	zend_class_entry ce, *class_entry;
-
-	INIT_NS_CLASS_ENTRY(ce, "Uri", "QueryParamOptions", class_Uri_QueryParamOptions_methods);
-	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_READONLY_CLASS);
-
-	zval property_parsingMaxQueryStringLength_default_value;
-	ZVAL_UNDEF(&property_parsingMaxQueryStringLength_default_value);
-	zend_string *property_parsingMaxQueryStringLength_name = zend_string_init("parsingMaxQueryStringLength", sizeof("parsingMaxQueryStringLength") - 1, true);
-	zend_declare_typed_property(class_entry, property_parsingMaxQueryStringLength_name, &property_parsingMaxQueryStringLength_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release_ex(property_parsingMaxQueryStringLength_name, true);
-
-	zval property_parsingMaxParamCount_default_value;
-	ZVAL_UNDEF(&property_parsingMaxParamCount_default_value);
-	zend_string *property_parsingMaxParamCount_name = zend_string_init("parsingMaxParamCount", sizeof("parsingMaxParamCount") - 1, true);
-	zend_declare_typed_property(class_entry, property_parsingMaxParamCount_name, &property_parsingMaxParamCount_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release_ex(property_parsingMaxParamCount_name, true);
-
-	zval property_trueValue_default_value;
-	ZVAL_UNDEF(&property_trueValue_default_value);
-	zend_string *property_trueValue_name = zend_string_init("trueValue", sizeof("trueValue") - 1, true);
-	zend_declare_typed_property(class_entry, property_trueValue_name, &property_trueValue_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release_ex(property_trueValue_name, true);
-
-	zval property_falseValue_default_value;
-	ZVAL_UNDEF(&property_falseValue_default_value);
-	zend_string *property_falseValue_name = zend_string_init("falseValue", sizeof("falseValue") - 1, true);
-	zend_declare_typed_property(class_entry, property_falseValue_name, &property_falseValue_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release_ex(property_falseValue_name, true);
-
-	zval property_useNullAsEmptyString_default_value;
-	ZVAL_UNDEF(&property_useNullAsEmptyString_default_value);
-	zend_string *property_useNullAsEmptyString_name = zend_string_init("useNullAsEmptyString", sizeof("useNullAsEmptyString") - 1, true);
-	zend_declare_typed_property(class_entry, property_useNullAsEmptyString_name, &property_useNullAsEmptyString_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
-	zend_string_release_ex(property_useNullAsEmptyString_name, true);
-
-	return class_entry;
-}
-
 static zend_class_entry *register_class_Uri_QueryParams(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_Countable)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Uri", "QueryParams", class_Uri_QueryParams_methods);
-	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_READONLY_CLASS);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_READONLY_CLASS);
 	zend_class_implements(class_entry, 2, class_entry_IteratorAggregate, class_entry_Countable);
 
-	zval property_options_default_value;
-	ZVAL_UNDEF(&property_options_default_value);
-	zend_string *property_options_name = zend_string_init("options", sizeof("options") - 1, true);
-	zend_string *property_options_class_Uri_QueryParamOptions = zend_string_init("Uri\\QueryParamOptions", sizeof("Uri\\QueryParamOptions")-1, 1);
-	zend_declare_typed_property(class_entry, property_options_name, &property_options_default_value, ZEND_ACC_PRIVATE|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_options_class_Uri_QueryParamOptions, 0, 0));
-	zend_string_release_ex(property_options_name, true);
+
+	zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "append", sizeof("append") - 1), ZSTR_KNOWN(ZEND_STR_NODISCARD), 0);
+
+	zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "set", sizeof("set") - 1), ZSTR_KNOWN(ZEND_STR_NODISCARD), 0);
+
+	zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "delete", sizeof("delete") - 1), ZSTR_KNOWN(ZEND_STR_NODISCARD), 0);
+
+	zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "deletevalue", sizeof("deletevalue") - 1), ZSTR_KNOWN(ZEND_STR_NODISCARD), 0);
+
+	zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "sortbybytes", sizeof("sortbybytes") - 1), ZSTR_KNOWN(ZEND_STR_NODISCARD), 0);
+
+	zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "sortbyutf16", sizeof("sortbyutf16") - 1), ZSTR_KNOWN(ZEND_STR_NODISCARD), 0);
 
 	return class_entry;
 }

@@ -4,9 +4,9 @@ Test Uri\QueryParams::delete() - success - non-existent key
 <?php
 
 $params = Uri\QueryParams::parseRfc3986("abc=123&foo=bar");
-$params->delete("xyz");
+$params = $params->delete("xyz");
 
-var_dump($params->list());
+var_dump($params->toList());
 var_dump($params->toRfc3986String());
 
 ?>
