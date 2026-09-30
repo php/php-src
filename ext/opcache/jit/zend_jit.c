@@ -650,6 +650,11 @@ static zend_property_info* zend_get_known_property_info(const zend_op_array *op_
 	}
 
 	if (info->flags & ZEND_ACC_PUBLIC) {
+		if ((info->flags & ZEND_ACC_CHANGED)
+		 && op_array->scope
+		 && op_array->scope != ce) {
+			return NULL;
+		}
 		return info;
 	} else if (on_this) {
 		if (ce == info->ce) {
@@ -3553,7 +3558,7 @@ void zend_jit_unprotect(void)
 		opts |= PROT_EXEC;
 # endif
 		if (mprotect(dasm_buf, dasm_size, opts) != 0) {
-			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "mprotect() failed [%d] %s\n", errno, strerror(errno));
 		}
 	}
 #elif defined(_WIN32)
@@ -3567,8 +3572,7 @@ void zend_jit_unprotect(void)
 		if (!VirtualProtect(dasm_buf, dasm_size, new, &old)) {
 			DWORD err = GetLastError();
 			char *msg = php_win32_error_to_msg(err);
-			fprintf(stderr, "VirtualProtect() failed [%lu] %s\n", err, msg);
-			php_win32_error_msg_free(msg);
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "VirtualProtect() failed [%lu] %s\n", err, msg);
 		}
 	}
 #endif
@@ -3581,7 +3585,7 @@ void zend_jit_protect(void)
 #elif defined(HAVE_MPROTECT)
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
 		if (mprotect(dasm_buf, dasm_size, PROT_READ | PROT_EXEC) != 0) {
-			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "mprotect() failed [%d] %s\n", errno, strerror(errno));
 		}
 	}
 #elif defined(_WIN32)
@@ -3591,8 +3595,7 @@ void zend_jit_protect(void)
 		if (!VirtualProtect(dasm_buf, dasm_size, PAGE_EXECUTE_READ, &old)) {
 			DWORD err = GetLastError();
 			char *msg = php_win32_error_to_msg(err);
-			fprintf(stderr, "VirtualProtect() failed [%lu] %s\n", err, msg);
-			php_win32_error_msg_free(msg);
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "VirtualProtect() failed [%lu] %s\n", err, msg);
 		}
 	}
 #endif
@@ -3838,11 +3841,11 @@ void zend_jit_startup(void *buf, size_t size, bool reattached)
 #elif defined(HAVE_MPROTECT)
 	if (JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP)) {
 		if (mprotect(dasm_buf, dasm_size, PROT_READ | PROT_WRITE | PROT_EXEC) != 0) {
-			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "mprotect() failed [%d] %s\n", errno, strerror(errno));
 		}
 	} else {
 		if (mprotect(dasm_buf, dasm_size, PROT_READ | PROT_EXEC) != 0) {
-			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "mprotect() failed [%d] %s\n", errno, strerror(errno));
 		}
 	}
 #elif defined(_WIN32)
@@ -3852,8 +3855,7 @@ void zend_jit_startup(void *buf, size_t size, bool reattached)
 		if (!VirtualProtect(dasm_buf, dasm_size, PAGE_EXECUTE_READWRITE, &old)) {
 			DWORD err = GetLastError();
 			char *msg = php_win32_error_to_msg(err);
-			fprintf(stderr, "VirtualProtect() failed [%lu] %s\n", err, msg);
-			php_win32_error_msg_free(msg);
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "VirtualProtect() failed [%lu] %s\n", err, msg);
 		}
 	} else {
 		DWORD old;
@@ -3861,8 +3863,7 @@ void zend_jit_startup(void *buf, size_t size, bool reattached)
 		if (!VirtualProtect(dasm_buf, dasm_size, PAGE_EXECUTE_READ, &old)) {
 			DWORD err = GetLastError();
 			char *msg = php_win32_error_to_msg(err);
-			fprintf(stderr, "VirtualProtect() failed [%lu] %s\n", err, msg);
-			php_win32_error_msg_free(msg);
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "VirtualProtect() failed [%lu] %s\n", err, msg);
 		}
 	}
 #endif

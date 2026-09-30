@@ -2,6 +2,14 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.6.0RC3
 
+- BCMath:
+  . Fixed BcMath\Number results that truncate to zero keeping a negative sign
+    and comparing less than zero. (Ilia Alshanetsky)
+
+- CLI:
+  . Fixed the built-in server truncating an error page and leaking its
+    unsent part after a partial socket write. (Ilia Alshanetsky)
+
 - Core:
   . Fixed OSS-Fuzz #536440507 (Immutable class incorrect assertion).
     (ndossche)
@@ -11,9 +19,81 @@ PHP                                                                        NEWS
     strict_types=1). (timwolla)
   . Fixed OSS-Fuzz #565486253 (coerced arg with '...' on non-variadic
     function). (ndossche)
+  . Fixed AVX being reported as supported when the OS has not enabled AVX
+    state. (Ilia Alshanetsky)
+  . Fixed OSS-Fuzz #552682112 (assertion failure wrt
+    zp_arg_must_be_sent_by_ref()). (ndossche)
+  . Fixed GH-23921 (Fibers start with error_reporting = 0 when the
+    error_reporting INI directive is not set). (Girgias)
+  . Fixed GH-23980 (ZEND_ASSERT violation @ ZEND_INCLUDE_OR_EVAL). (ndossche)
+  . Deprecated using "let" or "is" as the name of a class, function, or
+    constant, and as an alias in class_alias() and use declarations. (Girgias)
+  . Deprecated using "_" as a constant name and as an alias for a class or
+    constant in use declarations. (Girgias)
+  . Switch the POSIX high resolution timer back to CLOCK_MONOTONIC from
+    CLOCK_MONOTONIC_RAW. (nicolas-grekas)
+
+- FFI:
+  . Fixed crashes with FFI callbacks created from __call() trampolines
+    and array callables whose object is released. (Ilia Alshanetsky)
+
+- MySQLnd:
+  . Fixed field_count not resetting on OK packet. (Kamil Tekiela)
+  . Fixed memory leak when closing a prepared statement after its connection
+    was killed. (Kamil Tekiela)
 
 - Opcache:
   . Fix zend_analyze_calls() call_stack buffer overrun. (Mrmaxmeier)
+  . Fixed bug GH-23679 (Tracing JIT writes a parent private property into a
+    child's shadowing public property). (Ilia Alshanetsky)
+  . Fix multiple incorrect DCE due to unsound escape analysis. (ndossche,
+    arnaud-lb)
+
+- OpenSSL:
+  . Fixed stream_socket_enable_crypto() leaving the socket non-blocking
+    after a handshake timeout. (Ilia Alshanetsky)
+  . Fix memory leak by doing early salt validation. (adapik)
+
+- PCNTL:
+  . Fixed pcntl_signal_dispatch() dropping the queued signals when it runs while
+    an exception is pending. (nicolas-grekas)
+  . Fixed pcntl_signal_dispatch() dropping the signals queued behind a handler
+    that throws. (nicolas-grekas)
+  . Fixed bug GH-23986 (/proc/self paths resolve to the parent process after
+    pcntl_fork()). (Lazizbek Ergashev)
+
+- PDO:
+  . Fixed PDO::setAttribute() installing a PDO::ATTR_STATEMENT_CLASS class
+    whose constructor arguments it rejects. (Ilia Alshanetsky)
+  . Fixed PDO::ATTR_STATEMENT_CLASS constructor_args type errors reporting
+    "array given" regardless of the value passed. (Ilia Alshanetsky)
+  . Fixed PDOStatement::bindParam() and bindColumn() leaking the driver
+    options value. (Ilia Alshanetsky)
+
+- PDO_DBLIB:
+  . Fixed bug GH-23741 (segfault after a failed query inside a PDO
+    transaction). Errors raised by beginTransaction(), commit(), rollBack()
+    and lastInsertId() are now reported instead of being dropped.
+    (Ilia Alshanetsky)
+
+- PDO_PGSQL:
+  . Fixed crash when a persistent connection fails. (KentarouTakeda)
+
+- Reflection:
+  . Fixed bug GH-23842 (ReflectionProperty::skipLazyInitialization() copies
+    invalid constant defaults with OPcache). (DirkTrunkstar, Lazizbek Ergashev)
+
+- SimpleXML:
+  . Fixed reconstructing a SimpleXMLElement freeing a child element that
+    another variable still references. (Ilia Alshanetsky)
+
+- Tidy:
+  . Fixed a use-after-free when a tidyNode is used after its document is
+    reparsed. (Ilia Alshanetsky)
+
+- Zip:
+  . Fixed bug GH-23899 (Assertion failure when a cancel callback returns an
+    invalid type during shutdown). (Weilin Du)
 
 24 Sep 2026, PHP 8.6.0RC2
 
@@ -72,6 +152,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-23106 (mb_strpos() reads past the end of a haystack ending in
     a truncated UTF-8 sequence). (Lazizbek Ergashev)
   . Updated Unicode data tables to Unicode 18.0 (Yuya Hamada)
+  . Fixed mbstring functions emitting surrogates in UTF-8 output and flagging
+    it as valid UTF-8. (Nicolas Grekas)
 
 - MySQLi:
   . Fix GH-22854: Fixed failed assertion when accessing mysqli property after
@@ -88,6 +170,8 @@ PHP                                                                        NEWS
     column index. (Ilia Alshanetsky)
   . Fixed PDOStatement::bindColumn() registering a binding for a column name
     that is not in the result set. (Ilia Alshanetsky)
+  . Fixed bug GH-23962 (Destroying a persistent PDO instance rolls back a
+    transaction still in use by another instance). (Lazizbek Ergashev)
 
 - PGSQL:
   . Fixed pg_lo_write() rejecting data containing null bytes. (Ilia Alshanetsky)
@@ -120,6 +204,7 @@ PHP                                                                        NEWS
   . Fixed three Windows-only proc_open() defects: an uninitialized
     PROCESS_INFORMATION, an indeterminate comspec pointer after a failed
     lookup, and an unchecked CreateFileA() failure. (Ilia Alshanetsky)
+  . Fix persistent stream context lifetime during shutdown (Levi Morrison)
   . Fixed bug GH-23780 (unserialize('') fails silently). (timwolla)
 
 - URI:
