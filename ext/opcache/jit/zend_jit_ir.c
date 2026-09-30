@@ -314,6 +314,8 @@ typedef struct _zend_jit_ctx {
 	zend_jit_reg_var    *ra;
 	int                  delay_var;
 	ir_refs             *delay_refs;
+	ir_ref               eg_exception_addr;
+	ir_ref               stub_addr[jit_last_stub];
 } zend_jit_ctx;
 
 typedef int8_t zend_reg;
@@ -553,17 +555,39 @@ static ir_ref jit_ADD_OFFSET(zend_jit_ctx *jit, ir_ref addr, uintptr_t offset)
 
 static ir_ref jit_EG_exception(zend_jit_ctx *jit)
 {
+#ifdef ZTS
 	return jit_EG(exception);
+#else
+	ir_ref ref = jit->eg_exception_addr;
+
+	if (UNEXPECTED(!ref)) {
+		ref = ir_CONST_ADDR(&EG(exception));
+		jit->eg_exception_addr = ref;
+	}
+	return ref;
+#endif
 }
 
 static ir_ref jit_STUB_ADDR(zend_jit_ctx *jit, jit_stub_id id)
 {
-	return ir_CONST_ADDR(zend_jit_stub_handlers[id]);
+	ir_ref ref = jit->stub_addr[id];
+
+	if (UNEXPECTED(!ref)) {
+		ref = ir_CONST_ADDR(zend_jit_stub_handlers[id]);
+		jit->stub_addr[id] = ref;
+	}
+	return ref;
 }
 
 static ir_ref jit_STUB_FUNC_ADDR(zend_jit_ctx *jit, jit_stub_id id, uint16_t flags)
 {
-	return jit_CONST_FUNC(jit, (uintptr_t)zend_jit_stub_handlers[id], flags);
+	ir_ref ref = jit->stub_addr[id];
+
+	if (UNEXPECTED(!ref)) {
+		ref = jit_CONST_FUNC(jit, (uintptr_t)zend_jit_stub_handlers[id], flags);
+		jit->stub_addr[id] = ref;
+	}
+	return ref;
 }
 
 static void jit_SNAPSHOT(zend_jit_ctx *jit, ir_ref addr)
@@ -2765,6 +2789,8 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 	jit->ra = NULL;
 	jit->delay_var = -1;
 	jit->delay_refs = NULL;
+	jit->eg_exception_addr = 0;
+	memset(jit->stub_addr, 0, sizeof(jit->stub_addr));
 
 	ir_START();
 }
