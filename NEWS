@@ -96,6 +96,10 @@ PHP                                                                        NEWS
   . Fixed stack buffer overflow with long connection user names, passwords,
     charsets, or roles. (Ilia Alshanetsky)
 
+- PCNTL:
+  . Fixed pcntl_signal() raising a fatal error for SIGKILL and SIGSTOP.
+    (lacatoire)
+
 - PCRE:
   . Fixed \C being allowed in patterns enabling UTF mode with (*UTF) instead
     of the u modifier. (Jorg Sowa)

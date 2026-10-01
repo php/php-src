@@ -760,6 +760,25 @@ PHP_FUNCTION(pcntl_signal)
 		RETURN_THROWS();
 	}
 
+	if (Z_TYPE_P(handle) == IS_LONG) {
+		if (Z_LVAL_P(handle) != (zend_long) SIG_DFL && Z_LVAL_P(handle) != (zend_long) SIG_IGN) {
+			zend_argument_value_error(2, "must be either SIG_DFL or SIG_IGN when an integer value is given");
+			RETURN_THROWS();
+		}
+	} else if (!zend_is_callable_ex(handle, NULL, 0, NULL, NULL, NULL)) {
+		PCNTL_G(last_error) = EINVAL;
+
+		zend_argument_type_error(2, "must be of type callable|int, %s given", zend_zval_value_name(handle));
+		RETURN_THROWS();
+	}
+
+	/* sigaction() always fails for these, and zend_sigaction() turns that into a fatal error */
+	if (signo == SIGKILL || signo == SIGSTOP) {
+		PCNTL_G(last_error) = EINVAL;
+		php_error_docref(NULL, E_WARNING, "Error assigning signal");
+		RETURN_FALSE;
+	}
+
 	if (!PCNTL_G(spares)) {
 		/* since calling malloc() from within a signal handler is not portable,
 		 * pre-allocate a few records for recording signals */
@@ -781,10 +800,6 @@ PHP_FUNCTION(pcntl_signal)
 
 	/* Special long value case for SIG_DFL and SIG_IGN */
 	if (Z_TYPE_P(handle) == IS_LONG) {
-		if (Z_LVAL_P(handle) != (zend_long) SIG_DFL && Z_LVAL_P(handle) != (zend_long) SIG_IGN) {
-			zend_argument_value_error(2, "must be either SIG_DFL or SIG_IGN when an integer value is given");
-			RETURN_THROWS();
-		}
 		if (php_signal(signo, (Sigfunc *) Z_LVAL_P(handle), (int) restart_syscalls) == (void *)SIG_ERR) {
 			PCNTL_G(last_error) = errno;
 			php_error_docref(NULL, E_WARNING, "Error assigning signal");
@@ -792,13 +807,6 @@ PHP_FUNCTION(pcntl_signal)
 		}
 		zend_hash_index_update(&PCNTL_G(php_signal_table), signo, handle);
 		RETURN_TRUE;
-	}
-
-	if (!zend_is_callable_ex(handle, NULL, 0, NULL, NULL, NULL)) {
-		PCNTL_G(last_error) = EINVAL;
-
-		zend_argument_type_error(2, "must be of type callable|int, %s given", zend_zval_value_name(handle));
-		RETURN_THROWS();
 	}
 
 	/* Register with the OS first so that on failure we don't record a handler that was never installed */
