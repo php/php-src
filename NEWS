@@ -37,6 +37,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-24218 (Invalid opcode for count() of a literal array when
     SCCP is disabled). (Lazizbek Ergashev)
 
+- Phpdbg:
+  . Fix wrong command names. (ndossche, Weilin Du)
+
 - SOAP:
   . Fixed use of uninitialized func in do_request() on OOM bailout.
     (David Carlier)
