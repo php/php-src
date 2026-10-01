@@ -13,7 +13,7 @@ var_dump($db->enableExceptions(true));
 try{
     $db->query("SELECT * FROM non_existent_table");
 } catch(Exception $e) {
-    echo $e->getMessage().PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 var_dump($db->enableExceptions(false));
 $db->query("SELECT * FROM non_existent_table");
@@ -23,7 +23,7 @@ echo "Done\n";
 ?>
 --EXPECTF--
 bool(false)
-no such table: non_existent_table
+SQLite3Exception: no such table: non_existent_table
 
 Deprecated: SQLite3::enableExceptions(): Use of warnings for SQLite3 is deprecated in %s
 bool(true)

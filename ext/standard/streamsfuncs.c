@@ -563,7 +563,6 @@ PHP_FUNCTION(stream_get_meta_data)
 		add_assoc_bool(return_value, "blocked", 1);
 		add_assoc_bool(return_value, "eof", php_stream_eof(stream));
 	}
-	php_stream_error_operation_end_for_stream(stream);
 
 	if (!Z_ISUNDEF(stream->wrapperdata)) {
 		Z_ADDREF_P(&stream->wrapperdata);
@@ -598,6 +597,7 @@ PHP_FUNCTION(stream_get_meta_data)
 		add_assoc_string(return_value, "uri", stream->orig_path);
 	}
 
+	php_stream_error_operation_end_for_stream(stream);
 }
 /* }}} */
 
@@ -967,7 +967,7 @@ static zend_result parse_context_params(php_stream_context *context, const HashT
 
 		zend_fcall_info_cache *fcc = emalloc(sizeof(*fcc));
 		char *error;
-		if (!zend_is_callable_ex(tmp, NULL, 0, NULL, fcc, &error)) {
+		if (!zend_is_callable(tmp, fcc, &error)) {
 			zend_argument_type_error(1, "must be an array with valid callbacks as values, %s", error);
 			efree(fcc);
 			efree(error);
@@ -1457,7 +1457,7 @@ PHP_FUNCTION(stream_set_blocking)
 
 /* }}} */
 
-/* {{{ Set timeout on stream read to seconds + microseonds */
+/* {{{ Set timeout on stream read to seconds + microseconds */
 #if defined(HAVE_SYS_TIME_H) || defined(PHP_WIN32)
 PHP_FUNCTION(stream_set_timeout)
 {

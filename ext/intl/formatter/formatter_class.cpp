@@ -71,7 +71,7 @@ U_CFUNC zend_object *NumberFormatter_object_clone(zend_object *object)
 
 	/* clone formatter object. It may fail, the destruction code must handle this case */
 	if (FORMATTER_OBJECT(nfo) != nullptr) {
-		FORMATTER_OBJECT(new_nfo) = FORMATTER_OBJECT(nfo)->clone();
+		FORMATTER_OBJECT(new_nfo) = static_cast<NumberFormat *>(FORMATTER_OBJECT(nfo)->clone());
 		if (FORMATTER_OBJECT(new_nfo) == nullptr) {
 			zend_throw_error(NULL, "Failed to clone NumberFormatter");
 		}

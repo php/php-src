@@ -21,11 +21,12 @@
 
 #if !defined(HAVE_COPY_FILE_RANGE) && defined(__NR_copy_file_range)
 #define HAVE_COPY_FILE_RANGE 1
-static inline ssize_t copy_file_range(
+static inline ssize_t php_copy_file_range(
 		int fd_in, off_t *off_in, int fd_out, off_t *off_out, size_t len, unsigned int flags)
 {
 	return syscall(__NR_copy_file_range, fd_in, off_in, fd_out, off_out, len, flags);
 }
+#define copy_file_range php_copy_file_range
 #endif
 
 #ifdef HAVE_SENDFILE
@@ -54,13 +55,9 @@ static inline int php_io_linux_wait_for_data(php_io_fd *fd)
 		timeout_ms = ptimeout->tv_sec * 1000 + ptimeout->tv_usec / 1000;
 	}
 
-	struct pollfd pfd;
-	pfd.fd = fd->fd;
-	pfd.events = POLLIN;
-
 	int ret;
 	do {
-		ret = poll(&pfd, 1, timeout_ms);
+		ret = php_pollfd_for_ms(fd->fd, POLLIN, timeout_ms);
 	} while (ret == -1 && errno == EINTR);
 
 	return ret;

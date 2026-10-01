@@ -9,8 +9,8 @@ try {
         public $p = (unset) C::class;
     }
     new C;
-} catch (Error $e) {
-    echo $e->getMessage();
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--

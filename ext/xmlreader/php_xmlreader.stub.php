@@ -2,6 +2,7 @@
 
 /** @generate-class-entries */
 
+/** @not-serializable */
 class XMLReader
 {
     /* Constants for NodeType - cannot define common types to share with dom as there are differences in these types */

@@ -13,9 +13,8 @@ if (PHP_INT_SIZE == 4) {
 try {
 	jewishtojd(10, 6, PHP_INT_MIN);
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECTF--
-jewishtojd(): Argument #3 ($year) must be between %i and %d
-
+ValueError: jewishtojd(): Argument #3 ($year) must be between %i and %d

@@ -20,7 +20,7 @@ function too_many_parameters ($val1, $val2, $val3) {
 try {
     var_dump(array_udiff_uassoc($arr1, $arr2, 'too_many_parameters', 'too_many_parameters'));
 } catch (Throwable $e) {
-    echo "Exception: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "\n-- comparison function taking too few parameters --\n";
@@ -40,7 +40,7 @@ array(1) {
 }
 
 -- comparison function taking too many parameters --
-Exception: Too few arguments to function too_many_parameters(), 2 passed and exactly 3 expected
+ArgumentCountError: Too few arguments to function too_many_parameters(), 2 passed and exactly 3 expected
 
 -- comparison function taking too few parameters --
 array(1) {

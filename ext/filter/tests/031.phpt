@@ -36,7 +36,7 @@ foreach ($floats as $float => $dec) {
     try {
         var_dump(filter_var($float, FILTER_VALIDATE_FLOAT, array("options"=>array('decimal' => $dec))));
     } catch (ValueError $exception) {
-        echo $exception->getMessage() . "\n";
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
     }
 }
 
@@ -55,5 +55,5 @@ custom decimal:
 bool(false)
 float(1.234)
 float(1.234)
-filter_var(): "decimal" option must be one character long
+ValueError: filter_var(): "decimal" option must be one character long
 bool(false)

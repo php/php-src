@@ -47,7 +47,7 @@ extern void php_mysqli_dtor_p_elements(void *data);
 
 extern void php_mysqli_close(MY_MYSQL * mysql, int close_type, int resource_status);
 
-extern void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flag, int into_object);
+extern void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flag);
 extern void php_clear_stmt_bind(MY_STMT *stmt);
 extern void php_clear_mysql(MY_MYSQL *);
 extern MYSQLI_WARNING *php_get_warnings(MYSQLND_CONN_DATA * mysql);

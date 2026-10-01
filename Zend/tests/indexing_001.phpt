@@ -9,8 +9,8 @@ $testvalues=array(null, 0, 1, true, false,'',' ',0.1,array());
 foreach ($testvalues as $testvalue) {
     try {
         $testvalue['foo']=$array;
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     var_dump($testvalue);
 }
@@ -21,8 +21,8 @@ $testvalues=array(null, 0, 1, true, false,0.1,array());
 foreach ($testvalues as $testvalue) {
     try {
         $testvalue['foo']=&$array;
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     var_dump($testvalue);
 }
@@ -33,8 +33,8 @@ $testvalues=array(null, 0, 1, true, false,0.1,array());
 foreach ($testvalues as $testvalue) {
     try {
         $testvalue[]=$array;
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     var_dump ($testvalue);
 }
@@ -45,8 +45,8 @@ $testvalues=array(null, 0, 1, true, false,0.1,array());
 foreach ($testvalues as $testvalue) {
     try {
         $testvalue[]=&$array;
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     var_dump ($testvalue);
 }
@@ -61,11 +61,11 @@ array(1) {
     int(1)
   }
 }
-Cannot use a scalar value as an array
+Error: Cannot use a scalar value as an array
 int(0)
-Cannot use a scalar value as an array
+Error: Cannot use a scalar value as an array
 int(1)
-Cannot use a scalar value as an array
+Error: Cannot use a scalar value as an array
 bool(true)
 
 Deprecated: Automatic conversion of false to array is deprecated in %s
@@ -76,11 +76,11 @@ array(1) {
     int(1)
   }
 }
-Cannot access offset of type string on string
+TypeError: Cannot access offset of type string on string
 string(0) ""
-Cannot access offset of type string on string
+TypeError: Cannot access offset of type string on string
 string(1) " "
-Cannot use a scalar value as an array
+Error: Cannot use a scalar value as an array
 float(0.1)
 array(1) {
   ["foo"]=>
@@ -98,11 +98,11 @@ array(1) {
     int(1)
   }
 }
-Cannot use a scalar value as an array
+Error: Cannot use a scalar value as an array
 int(0)
-Cannot use a scalar value as an array
+Error: Cannot use a scalar value as an array
 int(1)
-Cannot use a scalar value as an array
+Error: Cannot use a scalar value as an array
 bool(true)
 
 Deprecated: Automatic conversion of false to array is deprecated in %s
@@ -113,7 +113,7 @@ array(1) {
     int(1)
   }
 }
-Cannot use a scalar value as an array
+Error: Cannot use a scalar value as an array
 float(0.1)
 array(1) {
   ["foo"]=>
@@ -130,11 +130,11 @@ array(1) {
     int(1)
   }
 }
-Cannot use a scalar value as an array
+Error: Cannot use a scalar value as an array
 int(0)
-Cannot use a scalar value as an array
+Error: Cannot use a scalar value as an array
 int(1)
-Cannot use a scalar value as an array
+Error: Cannot use a scalar value as an array
 bool(true)
 
 Deprecated: Automatic conversion of false to array is deprecated in %s
@@ -145,7 +145,7 @@ array(1) {
     int(1)
   }
 }
-Cannot use a scalar value as an array
+Error: Cannot use a scalar value as an array
 float(0.1)
 array(1) {
   [0]=>
@@ -163,11 +163,11 @@ array(1) {
     int(1)
   }
 }
-Cannot use a scalar value as an array
+Error: Cannot use a scalar value as an array
 int(0)
-Cannot use a scalar value as an array
+Error: Cannot use a scalar value as an array
 int(1)
-Cannot use a scalar value as an array
+Error: Cannot use a scalar value as an array
 bool(true)
 
 Deprecated: Automatic conversion of false to array is deprecated in %s
@@ -178,7 +178,7 @@ array(1) {
     int(1)
   }
 }
-Cannot use a scalar value as an array
+Error: Cannot use a scalar value as an array
 float(0.1)
 array(1) {
   [0]=>

@@ -7,8 +7,8 @@ phar
 try {
     new PharData(__DIR__ . '/files/disknumber.zip');
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
-phar error: split archives spanning multiple zips cannot be processed in zip-based phar "%sdisknumber.zip"
+UnexpectedValueException: phar error: split archives spanning multiple zips cannot be processed in zip-based phar "%sdisknumber.zip"

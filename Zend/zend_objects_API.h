@@ -71,6 +71,13 @@ static zend_always_inline void zend_object_store_ctor_failed(zend_object *obj)
 
 END_EXTERN_C()
 
+/** Increase the refcount and return the input */
+static zend_always_inline zend_object *zend_object_copy(zend_object *obj)
+{
+	GC_ADDREF(obj);
+	return obj;
+}
+
 static zend_always_inline void zend_object_release(zend_object *obj)
 {
 	if (GC_DELREF(obj) == 0) {

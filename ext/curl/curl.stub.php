@@ -1790,6 +1790,11 @@ const CURLPAUSE_SEND = UNKNOWN;
 const CURLPAUSE_SEND_CONT = UNKNOWN;
 /**
  * @var int
+ * @cvalue CURL_READFUNC_ABORT
+ */
+const CURL_READFUNC_ABORT = UNKNOWN;
+/**
+ * @var int
  * @cvalue CURL_READFUNC_PAUSE
  */
 const CURL_READFUNC_PAUSE = UNKNOWN;

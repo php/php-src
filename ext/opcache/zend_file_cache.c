@@ -22,6 +22,7 @@
 #include "zend_attributes.h"
 #include "zend_system_id.h"
 #include "zend_enum.h"
+#include "zend_partial.h"
 
 #include "php.h"
 #ifdef ZEND_WIN32
@@ -382,6 +383,10 @@ static void zend_file_cache_serialize_ast(zend_ast                 *ast,
 	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
 		zend_ast_fcc *fcc = (zend_ast_fcc*)ast;
 		ZEND_MAP_PTR_INIT(fcc->fptr, NULL);
+		/* Will be reset if needed during unserialize */
+		fcc->attr |= ZEND_PARTIAL_CACHEABLE_IN_SHM;
+		SERIALIZE_STR(fcc->filename);
+		SERIALIZE_STR(fcc->name);
 		if (!IS_SERIALIZED(fcc->args)) {
 			SERIALIZE_PTR(fcc->args);
 			tmp = fcc->args;
@@ -636,6 +641,12 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 					break;
 			}
 #endif
+
+			if (opline->opcode == ZEND_CALLABLE_CONVERT_PARTIAL) {
+				/* Will be reset if needed during unserialize */
+				opline->extended_value |= ZEND_PARTIAL_CACHEABLE_IN_SHM;
+			}
+
 			zend_serialize_opcode_handler(opline);
 			opline++;
 		}
@@ -1308,9 +1319,13 @@ static void zend_file_cache_unserialize_ast(zend_ast                *ast,
 		zend_ast_get_op_array(ast)->op_array = Z_PTR(z);
 	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
 		zend_ast_fcc *fcc = (zend_ast_fcc*)ast;
-		if (!script->corrupted) {
+		if (script->corrupted) {
+			fcc->attr &= ~ZEND_PARTIAL_CACHEABLE_IN_SHM;
+		} else {
 			ZEND_MAP_PTR_NEW(fcc->fptr);
 		}
+		UNSERIALIZE_STR(fcc->filename);
+		UNSERIALIZE_STR(fcc->name);
 		if (!IS_UNSERIALIZED(fcc->args)) {
 			UNSERIALIZE_PTR(fcc->args);
 			zend_file_cache_unserialize_ast(fcc->args, script, buf);
@@ -1541,6 +1556,13 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				zval *literal = RT_CONSTANT(opline, opline->op1);
 				UNSERIALIZE_ATTRIBUTES(Z_PTR_P(literal));
 			}
+
+			if (opline->opcode == ZEND_CALLABLE_CONVERT_PARTIAL) {
+				if (script->corrupted) {
+					opline->extended_value &= ~ZEND_PARTIAL_CACHEABLE_IN_SHM;
+				}
+			}
+
 			zend_deserialize_opcode_handler(opline);
 			opline++;
 		}

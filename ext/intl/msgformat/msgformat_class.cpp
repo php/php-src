@@ -65,6 +65,12 @@ U_CFUNC zend_object *MessageFormatter_object_clone(zend_object *object)
 	/* clone standard parts */
 	zend_objects_clone_members(&new_mfo->zo, &mfo->zo);
 
+	if (mfo->mf_data.orig_format != NULL) {
+		new_mfo->mf_data.orig_format = estrndup(mfo->mf_data.orig_format, mfo->mf_data.orig_format_len);
+		new_mfo->mf_data.orig_format_len = mfo->mf_data.orig_format_len;
+	}
+	new_mfo->mf_data.tz_set = mfo->mf_data.tz_set;
+
 	/* clone formatter object */
 	if (MSG_FORMAT_OBJECT(mfo) != NULL) {
 		UErrorCode error = U_ZERO_ERROR;

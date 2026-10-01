@@ -23,8 +23,8 @@ echo "-- Testing fwrite() with closed/unset file handle --\n";
 fclose($file_handle);
 try {
     var_dump(fwrite($file_handle,"data"));
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done\n";
@@ -40,5 +40,5 @@ unlink( $filename );
 int(0)
 int(0)
 -- Testing fwrite() with closed/unset file handle --
-fwrite(): Argument #1 ($stream) must be an open stream resource
+TypeError: fwrite(): Argument #1 ($stream) must be an open stream resource
 Done

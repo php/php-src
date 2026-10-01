@@ -8,7 +8,7 @@ if (!function_exists("proc_open")) die("skip no proc_open");
 ?>
 --FILE--
 <?php
-$certFile = __DIR__ . DIRECTORY_SEPARATOR . 'session_resumption_serialize.pem.tmp';
+$certFile = __DIR__ . DIRECTORY_SEPARATOR . 'session_resumption_import_export.pem.tmp';
 
 $serverCode = <<<'CODE'
     $flags = STREAM_SERVER_BIND|STREAM_SERVER_LISTEN;
@@ -76,7 +76,7 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --CLEAN--
 <?php
-@unlink(__DIR__ . DIRECTORY_SEPARATOR . 'session_resumption_serialize.pem.tmp');
+@unlink(__DIR__ . DIRECTORY_SEPARATOR . 'session_resumption_import_export.pem.tmp');
 ?>
 --EXPECTF--
 string(%d) "-----BEGIN SSL SESSION PARAMETERS-----

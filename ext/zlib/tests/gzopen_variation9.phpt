@@ -40,4 +40,3 @@ mode=e
 
 Warning: gzopen(): Failed to open stream: %s in %s on line %d
 gzopen=bool(false)
-

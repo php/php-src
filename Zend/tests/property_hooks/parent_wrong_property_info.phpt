@@ -16,10 +16,10 @@ class B extends A {
 $b = new B;
 try {
     var_dump($b->prop);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot access private property A::$prop
+Error: Cannot access private property A::$prop

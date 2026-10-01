@@ -145,6 +145,11 @@ static uint32_t _zend_jit_trace_get_exit_point(const zend_op *to_opline, uint32_
 	}
 	if (JIT_G(current_frame)) {
 		op_array = &JIT_G(current_frame)->func->op_array;
+		if (!(op_array->fn_flags & ZEND_ACC_IMMUTABLE)) {
+			zend_jit_op_array_trace_extension *jit_extension =
+				(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
+			op_array = jit_extension->op_array;
+		}
 		stack_size = op_array->last_var + op_array->T;
 		if (stack_size) {
 			stack = JIT_G(current_frame)->stack;
@@ -933,7 +938,7 @@ static int zend_jit_trace_copy_ssa_var_info(const zend_op_array  *op_array,
 			return 0;
 		}
 		if (opline) {
-			/* Try to find a difinition in SSA dominators tree */
+			/* Try to find a definition in SSA dominators tree */
 			var = tssa->vars[ssa_var].var;
 			uint32_t op_num = opline - op_array->opcodes;
 			uint32_t b = ssa->cfg.map[op_num];
@@ -1162,6 +1167,9 @@ static const zend_op *zend_jit_trace_find_init_fcall_op(zend_jit_trace_rec *p, c
 		const zend_op *opline = NULL;
 		int call_level = 0;
 
+		/* Scan trace buffer forward to find the first recorded opline after
+		 * the sequence of ZEND_JIT_TRACE_INIT_CALL, and keep track of the
+		 * call level. */
 		p++;
 		while (1) {
 			if (p->op == ZEND_JIT_TRACE_VM) {
@@ -1173,8 +1181,9 @@ static const zend_op *zend_jit_trace_find_init_fcall_op(zend_jit_trace_rec *p, c
 			} else {
 				return NULL;
 			}
-			p--;
+			p++;
 		}
+		/* Scan oplines backward to find the init fcall op */
 		if (opline) {
 			while (opline > op_array->opcodes) {
 				opline--;
@@ -7455,7 +7464,7 @@ static zend_vm_opcode_handler_t zend_jit_trace_exit_to_vm(uint32_t trace_num, ui
 
 	name = zend_jit_trace_escape_name(trace_num, exit_num);
 
-	if (!zend_jit_deoptimizer_start(&ctx, name, trace_num, exit_num)) {
+	if (!zend_jit_deoptimizer_start(&ctx, name, trace_num, &zend_jit_traces[trace_num], exit_num)) {
 		zend_string_release(name);
 		return NULL;
 	}
@@ -8716,10 +8725,7 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 				ZEND_UNREACHABLE();
 			}
 		} else if (STACK_FLAGS(stack, i) == ZREG_THIS) {
-			zend_object *obj = Z_OBJ(EX(This));
-
-			GC_ADDREF(obj);
-			ZVAL_OBJ(EX_VAR_NUM(i), obj);
+			ZVAL_OBJ_COPY(EX_VAR_NUM(i), Z_OBJ(EX(This)));
 		} else if (STACK_FLAGS(stack, i) == ZREG_ZVAL_ADDREF) {
 			Z_TRY_ADDREF_P(EX_VAR_NUM(i));
 		} else if (STACK_FLAGS(stack, i) == ZREG_ZVAL_COPY) {
@@ -8730,10 +8736,13 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 				const zend_op *op = t->exit_info[exit_num].opline;
 				ZEND_ASSERT(op);
 				op--;
-				if (op->opcode == ZEND_FETCH_DIM_IS || op->opcode == ZEND_FETCH_OBJ_IS) {
+				if (op->opcode == ZEND_FETCH_DIM_IS) {
+					ZVAL_NULL(EX_VAR_NUM(i));
+				} else if (op->opcode == ZEND_FETCH_OBJ_IS
+				 && (Z_PROP_FLAG_P(val) & (IS_PROP_LAZY|IS_PROP_UNINIT)) == IS_PROP_UNINIT) {
 					ZVAL_NULL(EX_VAR_NUM(i));
 				} else {
-					ZEND_ASSERT(op->opcode == ZEND_FETCH_DIM_R || op->opcode == ZEND_FETCH_LIST_R || op->opcode == ZEND_FETCH_OBJ_R || op->opcode == ZEND_FETCH_DIM_FUNC_ARG || op->opcode == ZEND_FETCH_OBJ_FUNC_ARG);
+					ZEND_ASSERT(op->opcode == ZEND_FETCH_DIM_R || op->opcode == ZEND_FETCH_LIST_R || op->opcode == ZEND_FETCH_OBJ_R || op->opcode == ZEND_FETCH_OBJ_IS || op->opcode == ZEND_FETCH_DIM_FUNC_ARG || op->opcode == ZEND_FETCH_OBJ_FUNC_ARG);
 					repeat_last_opline = 1;
 				}
 			} else {
@@ -8824,7 +8833,7 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 		EX(opline) = opline;
 	}
 
-	if (zend_atomic_bool_load_ex(&EG(vm_interrupt)) || JIT_G(tracing)) {
+	if (atomic_load(&EG(vm_interrupt)) || JIT_G(tracing)) {
 		return 1;
 	/* Lock-free check if the side trace was already JIT-ed or blacklist-ed in another process */
 	} else if (t->exit_info[exit_num].flags & (ZEND_JIT_EXIT_JITED|ZEND_JIT_EXIT_BLACKLISTED)) {

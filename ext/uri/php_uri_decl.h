@@ -1,8 +1,8 @@
 /* This is a generated file, edit php_uri.stub.php instead.
- * Stub hash: bfd9247fa79baf877d600134c9ef615ec5ca9cea */
+ * Stub hash: d96bdceccf7867b022c923bcfaf9f7a1142f0d0b */
 
-#ifndef ZEND_PHP_URI_DECL_bfd9247fa79baf877d600134c9ef615ec5ca9cea_H
-#define ZEND_PHP_URI_DECL_bfd9247fa79baf877d600134c9ef615ec5ca9cea_H
+#ifndef ZEND_PHP_URI_DECL_d96bdceccf7867b022c923bcfaf9f7a1142f0d0b_H
+#define ZEND_PHP_URI_DECL_d96bdceccf7867b022c923bcfaf9f7a1142f0d0b_H
 
 typedef enum zend_enum_Uri_UriComparisonMode {
 	ZEND_ENUM_Uri_UriComparisonMode_IncludeFragment = 1,
@@ -17,9 +17,9 @@ typedef enum zend_enum_Uri_Rfc3986_UriType {
 } zend_enum_Uri_Rfc3986_UriType;
 
 typedef enum zend_enum_Uri_Rfc3986_UriHostType {
-	ZEND_ENUM_Uri_Rfc3986_UriHostType_IPv4 = 1,
-	ZEND_ENUM_Uri_Rfc3986_UriHostType_IPv6 = 2,
-	ZEND_ENUM_Uri_Rfc3986_UriHostType_IPvFuture = 3,
+	ZEND_ENUM_Uri_Rfc3986_UriHostType_IpV4 = 1,
+	ZEND_ENUM_Uri_Rfc3986_UriHostType_IpV6 = 2,
+	ZEND_ENUM_Uri_Rfc3986_UriHostType_IpVFuture = 3,
 	ZEND_ENUM_Uri_Rfc3986_UriHostType_RegisteredName = 4,
 } zend_enum_Uri_Rfc3986_UriHostType;
 
@@ -56,11 +56,24 @@ typedef enum zend_enum_Uri_WhatWg_UrlValidationErrorType {
 } zend_enum_Uri_WhatWg_UrlValidationErrorType;
 
 typedef enum zend_enum_Uri_WhatWg_UrlHostType {
-	ZEND_ENUM_Uri_WhatWg_UrlHostType_IPv4 = 1,
-	ZEND_ENUM_Uri_WhatWg_UrlHostType_IPv6 = 2,
+	ZEND_ENUM_Uri_WhatWg_UrlHostType_IpV4 = 1,
+	ZEND_ENUM_Uri_WhatWg_UrlHostType_IpV6 = 2,
 	ZEND_ENUM_Uri_WhatWg_UrlHostType_Domain = 3,
 	ZEND_ENUM_Uri_WhatWg_UrlHostType_Opaque = 4,
 	ZEND_ENUM_Uri_WhatWg_UrlHostType_Empty = 5,
 } zend_enum_Uri_WhatWg_UrlHostType;
 
-#endif /* ZEND_PHP_URI_DECL_bfd9247fa79baf877d600134c9ef615ec5ca9cea_H */
+typedef enum zend_enum_Uri_WhatWg_UrlPercentEncodingMode {
+	ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_Username = 1,
+	ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_Password = 2,
+	ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_OpaqueHost = 3,
+	ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_Path = 4,
+	ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_OpaquePath = 5,
+	ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_PathSegment = 6,
+	ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_Query = 7,
+	ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_SpecialQuery = 8,
+	ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_FormQuery = 9,
+	ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_Fragment = 10,
+} zend_enum_Uri_WhatWg_UrlPercentEncodingMode;
+
+#endif /* ZEND_PHP_URI_DECL_d96bdceccf7867b022c923bcfaf9f7a1142f0d0b_H */

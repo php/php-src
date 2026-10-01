@@ -508,7 +508,6 @@ PHP_METHOD(Random_Randomizer, __unserialize)
 	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
 	HashTable *d;
 	zval *members_zv;
-	zval *zengine;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ARRAY_HT(d);
@@ -531,12 +530,7 @@ PHP_METHOD(Random_Randomizer, __unserialize)
 		RETURN_THROWS();
 	}
 
-	zengine = zend_read_property(randomizer->std.ce, &randomizer->std, "engine", strlen("engine"), 1, NULL);
-	if (Z_TYPE_P(zengine) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(zengine), random_ce_Random_Engine)) {
-		zend_throw_exception(NULL, "Invalid serialization data for Random\\Randomizer object", 0);
-		RETURN_THROWS();
-	}
-
+	zval *zengine = zend_read_property(randomizer->std.ce, &randomizer->std, "engine", strlen("engine"), /* silent */ true, NULL);
 	randomizer_common_init(randomizer, Z_OBJ_P(zengine));
 }
 /* }}} */

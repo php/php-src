@@ -10,16 +10,16 @@ $src = imagecreatetruecolor(8, 8);
 try {
 	imageaffine($src, $matrix);
 } catch (\ValueError $e) {
-	echo $e->getMessage() . PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 $matrix[0] = 1;
 $matrix[3] = -INF;
 try {
 	imageaffine($src, $matrix);
 } catch (\ValueError $e) {
-	echo $e->getMessage();
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECTF--
-imageaffine(): Argument #2 ($affine) element 0 must be between %s and %d
-imageaffine(): Argument #2 ($affine) element 3 must be between %s and %d
+ValueError: imageaffine(): Argument #2 ($affine) element 0 must be between %s and %d
+ValueError: imageaffine(): Argument #2 ($affine) element 3 must be between %s and %d

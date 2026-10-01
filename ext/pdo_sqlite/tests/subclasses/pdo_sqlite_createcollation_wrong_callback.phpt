@@ -17,8 +17,8 @@ $db->createCollation('NAT', function($a, $b): string { return $a . $b; });
 try {
     $db->query("SELECT c FROM test ORDER BY c COLLATE NAT");
 } catch (\TypeError $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-PDO::query(): Return value of the collation callback must be of type int, string returned
+TypeError: PDO::query(): Return value of the collation callback must be of type int, string returned

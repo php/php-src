@@ -23,5 +23,5 @@ var_dump(exif_read_data(__DIR__."/heic_box_overflow"));
 @unlink(__DIR__."/heic_box_overflow");
 ?>
 --EXPECTF--
-Warning: exif_read_data(heic_box_overflow): Invalid HEIF file in %s on line %d
+Warning: exif_read_data(): Invalid HEIF file in %s on line %d
 bool(false)

@@ -345,18 +345,18 @@ jobs:
         if: ${{ inputs.all_variations }}
         uses: ./.github/actions/test-macos
       - name: Test Tracing JIT
-        if: ${{ matrix.jit }}
+        if: ${{ matrix.arch == 'X64' || !matrix.zts }}
         uses: ./.github/actions/test-macos
         with:
           enableOpcache: true
           jitType: tracing
       - name: Test OpCache
-        if: ${{ inputs.all_variations }}
+        if: ${{ inputs.all_variations || (matrix.arch == 'ARM64' && matrix.zts) }}
         uses: ./.github/actions/test-macos
         with:
           enableOpcache: true
       - name: Test Function JIT
-        if: ${{ inputs.all_variations && matrix.jit }}
+        if: ${{ inputs.all_variations && (matrix.arch == 'X64' || !matrix.zts) }}
         uses: ./.github/actions/test-macos
         with:
           enableOpcache: true
@@ -472,6 +472,7 @@ jobs:
           mysql -uroot -proot -e "SET GLOBAL local_infile = true"
       - name: Enable Opcache
         run: |
+          ${{ !fromJson(inputs.branch).config.integrated_opcache && 'echo zend_extension=opcache.so >> /etc/php.d/opcache.ini' || '' }}
           echo memory_limit=-1 >> /etc/php.d/opcache.ini
           echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
           echo opcache.enable=1 >> /etc/php.d/opcache.ini
@@ -573,6 +574,10 @@ jobs:
           php -r '$c = file_get_contents("src/Symfony/Component/HtmlSanitizer/Tests/HtmlSanitizerCustomTest.php"); $c = str_replace("public function testSanitizeDeepNestedString()", "#[\\PHPUnit\\Framework\\Attributes\\Group('"'"'skip'"'"')]\n    public function testSanitizeDeepNestedString()", $c); file_put_contents("src/Symfony/Component/HtmlSanitizer/Tests/HtmlSanitizerCustomTest.php", $c);'
           # Buggy FFI test in Symfony, see https://github.com/symfony/symfony/issues/47668
           php -r '$c = file_get_contents("src/Symfony/Component/VarDumper/Tests/Caster/FFICasterTest.php"); $c = str_replace("public function testCastNonTrailingCharPointer()", "#[\\PHPUnit\\Framework\\Attributes\\Group('"'"'skip'"'"')]\n    public function testCastNonTrailingCharPointer()", $c); file_put_contents("src/Symfony/Component/VarDumper/Tests/Caster/FFICasterTest.php", $c);'
+          # Causes massive amounts of system calls with USE_ZEND_ALLOC=0, exceeding the timeout
+          if [ -e 'src/Symfony/Component/Console/Tests/Helper/FileInputHelperTest.php' ]; then
+            php -r '$c = file_get_contents("src/Symfony/Component/Console/Tests/Helper/FileInputHelperTest.php"); $c = str_replace("public function testReadWithPasteDetectionAbortsBeyondMaxBytes()", "#[\\PHPUnit\\Framework\\Attributes\\Group('"'"'skip'"'"')]\n    public function testReadWithPasteDetectionAbortsBeyondMaxBytes()", $c); file_put_contents("src/Symfony/Component/Console/Tests/Helper/FileInputHelperTest.php", $c);'
+          fi
           export SYMFONY_DEPRECATIONS_HELPER=max[total]=999
           X=0
           for component in $(find src/Symfony -mindepth 2 -type f -name phpunit.xml.dist -printf '%h\n'); do
@@ -848,12 +853,12 @@ jobs:
       PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
       PHP_BUILD_OBJ_DIR: C:\obj
       PHP_BUILD_CACHE_SDK_DIR: C:\build-cache\sdk
-      PHP_BUILD_SDK_BRANCH: php-sdk-2.7.1
+      PHP_BUILD_SDK_BRANCH: php-sdk-2.8.4
       PHP_BUILD_CRT: ${{ fromJson(inputs.branch).jobs.WINDOWS.config.vs_crt_version }}
       PLATFORM: ${{ matrix.x64 && 'x64' || 'x86' }}
       THREAD_SAFE: "${{ matrix.zts && '1' || '0' }}"
       INTRINSICS: "${{ matrix.zts && 'AVX2' || '' }}"
-      PARALLEL: -j2
+      PARALLEL: ${{ matrix.asan && '-j2' || fromJson(inputs.branch).config.default_run_test_jobs }}
       OPCACHE: "${{ matrix.opcache && '1' || '0' }}"
       ASAN: "${{ matrix.asan && '1' || '0' }}"
       CLANG_TOOLSET: "${{ matrix.clang && '1' || '0' }}"
@@ -915,6 +920,7 @@ jobs:
         with:
           ref: ${{ fromJson(inputs.branch).ref }}
           fetch-depth: 0
+          filter: blob:none
       # ASLR can cause a lot of noise due to missed sse opportunities for memcpy
       # and other operations, so we disable it during benchmarking.
       - name: Disable ASLR
@@ -961,7 +967,7 @@ jobs:
           sudo mkdir -p /etc/php.d
           sudo chmod 777 /etc/php.d
           echo mysqli.default_socket=/var/run/mysqld/mysqld.sock > /etc/php.d/mysqli.ini
-          ${{ !fromJson(inputs.branch).jobs.BENCHMARKING.config.integrated_opcache && 'echo zend_extension=opcache.so >> /etc/php.d/opcache.ini' || '' }}
+          ${{ !fromJson(inputs.branch).config.integrated_opcache && 'echo zend_extension=opcache.so >> /etc/php.d/opcache.ini' || '' }}
           echo opcache.enable=1 >> /etc/php.d/opcache.ini
           echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
       - name: Setup

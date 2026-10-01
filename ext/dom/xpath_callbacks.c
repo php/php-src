@@ -53,9 +53,10 @@ PHP_DOM_EXPORT void php_dom_xpath_callbacks_ctor(php_dom_xpath_callbacks *regist
 PHP_DOM_EXPORT void php_dom_xpath_callbacks_clean_node_list(php_dom_xpath_callbacks *registry)
 {
 	if (registry->node_list) {
-		zend_hash_destroy(registry->node_list);
-		FREE_HASHTABLE(registry->node_list);
+		HashTable *node_list = registry->node_list;
 		registry->node_list = NULL;
+		zend_hash_destroy(node_list);
+		FREE_HASHTABLE(node_list);
 	}
 }
 
@@ -74,18 +75,22 @@ PHP_DOM_EXPORT void php_dom_xpath_callbacks_clean_argument_stack(xmlXPathParserC
 PHP_DOM_EXPORT void php_dom_xpath_callbacks_dtor(php_dom_xpath_callbacks *registry)
 {
 	if (registry->php_ns) {
-		php_dom_xpath_callback_ns_dtor(registry->php_ns);
-		efree(registry->php_ns);
+		php_dom_xpath_callback_ns *php_ns = registry->php_ns;
+		registry->php_ns = NULL;
+		php_dom_xpath_callback_ns_dtor(php_ns);
+		efree(php_ns);
 	}
 	if (registry->namespaces) {
+		HashTable *namespaces = registry->namespaces;
+		registry->namespaces = NULL;
 		php_dom_xpath_callback_ns *ns;
-		ZEND_HASH_MAP_FOREACH_PTR(registry->namespaces, ns) {
+		ZEND_HASH_MAP_FOREACH_PTR(namespaces, ns) {
 			php_dom_xpath_callback_ns_dtor(ns);
 			efree(ns);
 		} ZEND_HASH_FOREACH_END();
 
-		zend_hash_destroy(registry->namespaces);
-		FREE_HASHTABLE(registry->namespaces);
+		zend_hash_destroy(namespaces);
+		FREE_HASHTABLE(namespaces);
 	}
 	php_dom_xpath_callbacks_clean_node_list(registry);
 }
@@ -100,6 +105,12 @@ static void php_dom_xpath_callback_ns_get_gc(php_dom_xpath_callback_ns *ns, zend
 
 PHP_DOM_EXPORT void php_dom_xpath_callbacks_get_gc(php_dom_xpath_callbacks *registry, zend_get_gc_buffer *gc_buffer)
 {
+	if (registry->node_list) {
+		zval *entry;
+		ZEND_HASH_FOREACH_VAL(registry->node_list, entry) {
+			zend_get_gc_buffer_add_zval(gc_buffer, entry);
+		} ZEND_HASH_FOREACH_END();
+	}
 	if (registry->php_ns) {
 		php_dom_xpath_callback_ns_get_gc(registry->php_ns, gc_buffer);
 	}
@@ -113,7 +124,7 @@ PHP_DOM_EXPORT void php_dom_xpath_callbacks_get_gc(php_dom_xpath_callbacks *regi
 
 PHP_DOM_EXPORT HashTable *php_dom_xpath_callbacks_get_gc_for_whole_object(php_dom_xpath_callbacks *registry, zend_object *object, zval **table, int *n)
 {
-	if (registry->php_ns || registry->namespaces) {
+	if (registry->php_ns || registry->namespaces || registry->node_list) {
 		zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
 		php_dom_xpath_callbacks_get_gc(registry, gc_buffer);
 		zend_get_gc_buffer_use(gc_buffer, table, n);
@@ -193,7 +204,7 @@ static zend_result php_dom_xpath_callback_ns_update_method_handler(
 		ZEND_HASH_FOREACH_STR_KEY_VAL(callable_ht, key, entry) {
 			zend_fcall_info_cache* fcc = emalloc(sizeof(*fcc));
 			char *error;
-			if (!zend_is_callable_ex(entry, NULL, 0, NULL, fcc, &error)) {
+			if (!zend_is_callable(entry, fcc, &error)) {
 				zend_argument_type_error(1, "must be an array with valid callbacks as values, %s", error);
 				efree(fcc);
 				efree(error);
@@ -240,7 +251,7 @@ static zend_result php_dom_xpath_callback_ns_update_method_handler(
 		char *error;
 		zval tmp;
 		ZVAL_STR(&tmp, name);
-		if (!zend_is_callable_ex(&tmp, NULL, 0, NULL, fcc, &error)) {
+		if (!zend_is_callable(&tmp, fcc, &error)) {
 			zend_argument_type_error(1, "must be a callable, %s", error);
 			efree(fcc);
 			efree(error);
@@ -401,7 +412,7 @@ static zend_result php_dom_xpath_callback_dispatch(php_dom_xpath_callbacks *xpat
 {
     zval callback_retval;
 
-	if (UNEXPECTED(ns == NULL)) {
+	if (UNEXPECTED(ns == NULL || ns->mode == PHP_DOM_REG_FUNC_MODE_NONE)) {
 		zend_throw_error(NULL, "No callbacks were registered");
 		return FAILURE;
 	}

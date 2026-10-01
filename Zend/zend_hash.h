@@ -312,7 +312,12 @@ static zend_always_inline void ZEND_FASTCALL zend_hash_sort(HashTable *ht, bucke
  * trigger user code. It will ensure the user code cannot free the array during
  * sorting. */
 static zend_always_inline void zend_array_sort(HashTable *ht, bucket_compare_func_t compare_func, bool renumber) {
-	zend_array_sort_ex(ht, zend_sort, compare_func, renumber);
+	/* zend_sort() cannot invoke the comparator for at most one element. */
+	if (ht->nNumOfElements <= 1) {
+		zend_hash_sort_ex(ht, zend_sort, compare_func, renumber);
+	} else {
+		zend_array_sort_ex(ht, zend_sort, compare_func, renumber);
+	}
 }
 
 static zend_always_inline uint32_t zend_hash_num_elements(const HashTable *ht) {

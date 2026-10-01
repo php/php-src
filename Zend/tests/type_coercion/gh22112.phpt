@@ -19,17 +19,17 @@ $nan = fdiv(0, 0);
 
 try {
     take_bool($nan);
-} catch (Exception $e) {
-    echo "bool: ", $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo 'bool: ', $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     take_string($nan);
-} catch (Exception $e) {
-    echo "string: ", $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo 'string: ', $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-bool: unexpected NAN value was coerced to bool
-string: unexpected NAN value was coerced to string
+bool: Exception: unexpected NAN value was coerced to bool
+string: Exception: unexpected NAN value was coerced to string

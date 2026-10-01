@@ -7705,6 +7705,7 @@ func_mode_link ()
       # -tp=*                Portland pgcc target processor selection
       # --sysroot=*          for sysroot support
       # -O*, -g*, -flto*, -fwhopr*, -fuse-linker-plugin GCC link-time optimization
+      # -ffixed-*, -fno-lto  GCC LTO register reservations and cancellation
       # -specs=*             GCC specs files
       # -stdlib=*            select c++ std lib with clang
       # -fdiagnostics-color* simply affects output
@@ -7725,6 +7726,7 @@ func_mode_link ()
       -64|-mips[0-9]|-r[0-9][0-9]*|-xarch=*|-xtarget=*|+DA*|+DD*|-q*|-m*| \
       -t[45]*|-txscale*|-p|-pg|--coverage|-fprofile-*|-F*|@*|-tp=*|--sysroot=*| \
       -O*|-g*|-flto*|-fwhopr*|-fuse-linker-plugin|-fstack-protector*|-no-canonical-prefixes| \
+      -ffixed-*|-fno-lto| \
       -stdlib=*|-rtlib=*|--unwindlib=*| \
       -specs=*|-fsanitize=*|-fno-sanitize*|-shared-libsan|-static-libsan| \
       -ffile-prefix-map=*|-fdebug-prefix-map=*|-fmacro-prefix-map=*|-fprofile-prefix-map=*| \

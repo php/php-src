@@ -39,4 +39,3 @@ include $alias . '/b/c.php';
 Warning: fopen(): Failed to open stream: phar error: write operations disabled by the php.ini setting phar.readonly in %sopen_for_write_existing_b.php on line %d
 bool(false)
 This is b/c
-

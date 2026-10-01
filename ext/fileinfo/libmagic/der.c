@@ -35,7 +35,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: der.c,v 1.28 2024/11/25 22:31:53 christos Exp $")
+FILE_RCSID("@(#)$File: der.c,v 1.29 2026/06/02 16:56:40 christos Exp $")
 #endif
 #else
 #define SIZE_T_FORMAT "z"
@@ -152,7 +152,7 @@ gettag(const uint8_t *c, size_t *p, size_t l)
 {
 	uint32_t tag;
 
-	if (*p >= l)
+	if (c == NULL || *p >= l)
 		return DER_BAD;
 
 	tag = c[(*p)++] & 0x1f;

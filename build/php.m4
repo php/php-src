@@ -1804,7 +1804,7 @@ dnl
 dnl Common setup macro for ICU.
 dnl
 AC_DEFUN([PHP_SETUP_ICU],[
-  PKG_CHECK_MODULES([ICU], [icu-uc >= 57.1 icu-io icu-i18n])
+  PKG_CHECK_MODULES([ICU], [icu-uc >= 57.1 icu-i18n])
 
   PHP_EVAL_INCLINE([$ICU_CFLAGS])
   PHP_EVAL_LIBLINE([$ICU_LIBS], [$1])
@@ -1812,7 +1812,7 @@ AC_DEFUN([PHP_SETUP_ICU],[
   ICU_CFLAGS="$ICU_CFLAGS -DU_NO_DEFAULT_INCLUDE_UTF_HEADERS=1"
   ICU_CXXFLAGS="$ICU_CXXFLAGS -DUNISTR_FROM_CHAR_EXPLICIT=explicit -DUNISTR_FROM_STRING_EXPLICIT=explicit"
 
-  AS_IF([$PKG_CONFIG icu-io --atleast-version=60],
+  AS_IF([$PKG_CONFIG icu-uc --atleast-version=60],
     [ICU_CFLAGS="$ICU_CFLAGS -DU_HIDE_OBSOLETE_UTF_OLD_H=1"])
 ])
 

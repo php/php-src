@@ -13,10 +13,10 @@ class Foo {
 try {
     $i = 42;
     new Foo($i);
-} catch (Error $e) {
-    echo $e->getMessage(), PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot indirectly modify readonly property Foo::$bar
+Error: Cannot indirectly modify readonly property Foo::$bar

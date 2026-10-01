@@ -45,6 +45,7 @@ extern zend_module_entry intl_module_entry;
 
 ZEND_BEGIN_MODULE_GLOBALS(intl)
 	struct UCollator *current_collator;
+	intl_error *current_collator_error;
 	char* default_locale;
 	collator_compare_func_t compare_func;
 	UBreakIterator* grapheme_iterator;
@@ -69,6 +70,15 @@ PHP_MINFO_FUNCTION(intl);
 
 const char *intl_locale_get_default( void );
 char *canonicalize_locale_string(const char* locale);
+
+#define PHP_INTL_FUNCTION_WITH_ERROR_RESET(name) \
+	static void php_intl_##name##_impl(INTERNAL_FUNCTION_PARAMETERS); \
+	U_CFUNC PHP_FUNCTION(name) \
+	{ \
+		intl_error_reset(NULL); \
+		php_intl_##name##_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU); \
+	} \
+	static void php_intl_##name##_impl(INTERNAL_FUNCTION_PARAMETERS)
 
 #define PHP_INTL_VERSION PHP_VERSION
 

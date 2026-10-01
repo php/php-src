@@ -16,7 +16,7 @@ $part = true;
 try {
     var_dump( mb_strstr($haystack, $needle, $part, $encoding) );
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -24,4 +24,4 @@ try {
 *** Testing mb_strstr() : error conditions ***
 
 -- Testing mb_strstr() with unknown encoding --
-mb_strstr(): Argument #4 ($encoding) must be a valid encoding, "unknown-encoding" given
+ValueError: mb_strstr(): Argument #4 ($encoding) must be a valid encoding, "unknown-encoding" given

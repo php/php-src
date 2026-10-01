@@ -27,4 +27,3 @@ Fatal error: Uncaught Error: Attempt to increment/decrement property "y" on int 
 Stack trace:
 #0 {main}
   thrown in %sinc_obj_006.php on line 14
-

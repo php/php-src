@@ -17,9 +17,9 @@ class MyStream {
 stream_wrapper_register('mystream', MyStream::class);
 try {
     var_dump(file_get_contents('mystream://'));
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string

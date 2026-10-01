@@ -23,8 +23,8 @@ $overflow = 4294967296;
 function dump_access(Closure $callback): void {
     try {
         var_dump($callback()?->nodeName);
-    } catch (ValueError $e) {
-        echo $e->getMessage(), PHP_EOL;
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -36,6 +36,6 @@ dump_access(fn() => $doc->doctype->notations[$overflow]);
 ?>
 --EXPECT--
 NULL
-must be between 0 and 2147483647
+ValueError: must be between 0 and 2147483647
 NULL
-must be between 0 and 2147483647
+ValueError: must be between 0 and 2147483647

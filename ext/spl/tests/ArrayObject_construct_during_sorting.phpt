@@ -11,7 +11,7 @@ $ao->uasort(function($a, $b) use ($ao, $other, &$i) {
         try {
             $ao->__construct($other);
         } catch (Error $e) {
-            echo $e->getMessage(), "\n";
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }
     return $a <=> $b;
@@ -20,7 +20,7 @@ var_dump($ao);
 
 ?>
 --EXPECT--
-Modification of ArrayObject during sorting is prohibited
+Error: Modification of ArrayObject during sorting is prohibited
 object(ArrayObject)#1 (1) {
   ["storage":"ArrayObject":private]=>
   array(3) {

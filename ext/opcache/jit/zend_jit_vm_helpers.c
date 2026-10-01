@@ -30,7 +30,7 @@
 #include "zend_jit_internal.h"
 
 #ifdef HAVE_GCC_GLOBAL_REGS
-# pragma GCC diagnostic ignored "-Wvolatile-register-var"
+ZEND_DIAGNOSTIC_IGNORED_START("-Wvolatile-register-var")
 # if defined(__x86_64__)
 register zend_execute_data* volatile execute_data __asm__("%r14");
 register const zend_op* volatile opline __asm__("%r15");
@@ -41,7 +41,7 @@ register const zend_op* volatile opline __asm__("%edi");
 register zend_execute_data* volatile execute_data __asm__("x27");
 register const zend_op* volatile opline __asm__("x28");
 # endif
-# pragma GCC diagnostic warning "-Wvolatile-register-var"
+ZEND_DIAGNOSTIC_IGNORED_END
 #endif
 
 #if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
@@ -680,11 +680,20 @@ static int zend_jit_trace_record_fake_init_call(zend_execute_data *call, zend_ji
 	return zend_jit_trace_record_fake_init_call_ex(call, trace_buffer, idx, is_megamorphic, 0);
 }
 
-static int zend_jit_trace_subtrace(zend_jit_trace_rec *trace_buffer, int start, int end, uint8_t event, const zend_op_array *op_array, const zend_op *opline)
+static int zend_jit_trace_subtrace(zend_execute_data *call, zend_jit_trace_rec *trace_buffer, int start, int end, uint8_t event, const zend_op_array *op_array, const zend_op *opline)
 {
 	int idx;
 
 	TRACE_START(ZEND_JIT_TRACE_START, event, op_array, opline);
+	if (call) {
+		idx = zend_jit_trace_record_fake_init_call(call, trace_buffer, idx, 0);
+		if (idx < 0) {
+			return idx;
+		}
+	}
+	if (idx + (end - start) >= JIT_G(max_trace_length) - 2) {
+		return -1;
+	}
 	memmove(trace_buffer + idx, trace_buffer + start, (end - start) * sizeof(zend_jit_trace_rec));
 	return idx + (end - start);
 }
@@ -1352,8 +1361,13 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 
 				if (opline == last_loop_opline
 				 && level == last_loop_level) {
-					idx = zend_jit_trace_subtrace(trace_buffer,
+					int ret = zend_jit_trace_subtrace(EX(call), trace_buffer,
 						last_loop, idx, ZEND_JIT_TRACE_START_LOOP, op_array, opline);
+					if (ret < 0) {
+						stop = ZEND_JIT_TRACE_STOP_TOO_LONG;
+						break;
+					}
+					idx = ret;
 					start = ZEND_JIT_TRACE_START_LOOP;
 					stop = ZEND_JIT_TRACE_STOP_LOOP;
 					ret_level = 0;

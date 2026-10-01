@@ -21,7 +21,6 @@
 #include <limits.h>
 #include <unicode/msgfmt.h>
 #include <unicode/chariter.h>
-#include <unicode/ustdio.h>
 #include <unicode/timezone.h>
 #include <unicode/datefmt.h>
 #include <unicode/calendar.h>
@@ -407,9 +406,9 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 				continue;
 			}
 
-		   UChar temp[16];
-		   const int32_t len = u_sprintf(temp, "%u", (uint32_t)num_index);
-		   key.append(temp, len);
+		   char temp[16];
+		   const int32_t len = slprintf(temp, sizeof(temp), "%u", (uint32_t)num_index);
+		   key.append(UnicodeString(temp, len, US_INV));
 
 		   storedArgType = (Formattable::Type*)zend_hash_index_find_ptr(types, num_index);
 		} else { //string; assumed to be in UTF-8

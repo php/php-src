@@ -32,7 +32,7 @@ function zip_entry_open($zip_dp, $zip_entry, string $mode = "rb"): bool {}
  * @param resource $zip_entry
  */
 #[\Deprecated(since: '8.0')]
-function zip_entry_close($zip_entry): bool {}
+function zip_entry_close($zip_entry): true {}
 
 /**
  * @param resource $zip_entry

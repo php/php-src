@@ -3,7 +3,7 @@ Test session_start() with flag read_and_close
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --FILE--
 <?php
 

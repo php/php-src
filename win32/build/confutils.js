@@ -58,6 +58,7 @@ var MINRE2C = "1.0.3";
 
 /* Store the enabled extensions (summary + QA check) */
 var extensions_enabled = new Array();
+var cxx_mode_targets = {};
 
 /* Store the SAPI enabled (summary + QA check) */
 var sapi_enabled = new Array();
@@ -93,10 +94,10 @@ if (typeof(CWD) == "undefined") {
 if (!MODE_PHPIZE) {
 	/* defaults; we pick up the precise versions from configure.ac */
 	var PHP_VERSION = 8;
-	var PHP_MINOR_VERSION = 6;
+	var PHP_MINOR_VERSION = 7;
 	var PHP_RELEASE_VERSION = 0;
 	var PHP_EXTRA_VERSION = "";
-	var PHP_VERSION_STRING = "8.6.0";
+	var PHP_VERSION_STRING = "8.7.0";
 }
 
 /* Get version numbers and DEFINE as a string */
@@ -1460,12 +1461,16 @@ function ZEND_EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 	extensions_enabled[extensions_enabled.length - 1][2] = true;
 }
 
-function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
+function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir, cxx_mode)
 {
 	var objs = null;
 	var EXT = extname.toUpperCase();
 	var extname_for_printing;
 	var ldflags;
+
+	if (cxx_mode) {
+		cxx_mode_targets[extname] = true;
+	}
 
 	if (shared == null) {
 		if (force_all_shared()) {
@@ -1620,6 +1625,11 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 
 	sym = target.toUpperCase() + "_GLOBAL_OBJS";
 	flags = "CFLAGS_" + target.toUpperCase() + '_OBJ';
+	var c_flags = ICC_TOOLSET ? " /Qstd=c17" : " /std:c17";
+	if (VS_TOOLSET) {
+		c_flags += " /experimental:c11atomics";
+	}
+	var cxx_flags = " $(CXXFLAGS_" + target.toUpperCase() + ")";
 
 	var bd = get_define('BUILD_DIR');
 	var respd = bd + '\\resp';
@@ -1785,7 +1795,7 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 						"--library=win32\\build\\cppcheck.cfg " +
 						"--library=" + cppcheck_lib + " " +
 						/* "--rule-file=win32\build\cppcheck_rules.xml " + */
-						" --std=c89 --std=c++11 " +
+						" --std=c17 --std=c++11 " +
 						"--quiet --inconclusive --template=vs -j 4 " +
 						"--suppress=unmatchedSuppression " +
 						"--suppressions-list=win32\\build\\cppcheck_suppress.txt ";
@@ -1804,30 +1814,43 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 					var _tmp = src.split("\\");
 					var filename = _tmp.pop();
 					obj = filename.replace(re, ".obj");
+					var lang_flags = cxx_mode_targets[target] || !/\.c$/i.test(src) ? cxx_flags : c_flags;
+					var analyzer_lang_flags = lang_flags.replace(")", "_ANALYZER)");
 
-					MFO.WriteLine("\t" + CMD_MOD1 + "$(CC) $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " /Fo" + sub_build + d + obj);
+					MFO.WriteLine("\t" + CMD_MOD1 + "$(CC)" + lang_flags + " $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " /Fo" + sub_build + d + obj);
 
 					if ("clang" == PHP_ANALYZER) {
-						MFO.WriteLine("\t" + CMD_MOD1 + "\"$(CLANG_CL)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + dir + "\\" + src);
+						MFO.WriteLine("\t" + CMD_MOD1 + "\"$(CLANG_CL)\"" + analyzer_lang_flags + " " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + dir + "\\" + src);
 					} else if ("cppcheck" == PHP_ANALYZER) {
 						MFO.WriteLine("\t\"" + CMD_MOD1 + "$(CPPCHECK)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + analyzer_base_flags + " " + dir + "\\" + src);
 					}else if (PHP_ANALYZER == "pvs") {
-						MFO.WriteLine("\t" + CMD_MOD1 + "\"$(PVS_STUDIO)\" --cl-params $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " --source-file "  + dir + "\\" + src
+						MFO.WriteLine("\t" + CMD_MOD1 + "\"$(PVS_STUDIO)\" --cl-params" + lang_flags + " $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " --source-file "  + dir + "\\" + src
 							+ " --cfg PVS-Studio.conf --errors-off \"V122 V117 V111\" ");
 					}
 				}
 			} else {
 				/* TODO create a response file at least for the source files to work around the cmd line length limit. */
 				var src_line = "";
+				var src_lines = ["", ""];
 				for (var j in srcs_by_dir[k]) {
-					src_line += dir + "\\" + file_list[srcs_by_dir[k][j]] + " ";
+					var source = file_list[srcs_by_dir[k][j]];
+					var source_path = dir + "\\" + source + " ";
+					src_line += source_path;
+					src_lines[!cxx_mode_targets[target] && /\.c$/i.test(source) ? 0 : 1] += source_path;
 				}
 
-				MFO.WriteLine("\t" + CMD_MOD1 + "$(CC) $(" + flags + ") $(CFLAGS) /Fo" + sub_build + d + " $(" + bd_flags_name + ") /c " + src_line);
+				for (var language = 0; language < src_lines.length; language++) {
+					if (src_lines[language]) {
+						var lang_flags = language == 0 ? c_flags : cxx_flags;
+						MFO.WriteLine("\t" + CMD_MOD1 + "$(CC)" + lang_flags + " $(" + flags + ") $(CFLAGS) /Fo" + sub_build + d + " $(" + bd_flags_name + ") /c " + src_lines[language]);
+						if ("clang" == PHP_ANALYZER) {
+							var analyzer_lang_flags = lang_flags.replace(")", "_ANALYZER)");
+							MFO.WriteLine("\t\"$(CLANG_CL)\"" + analyzer_lang_flags + " " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + src_lines[language]);
+						}
+					}
+				}
 
-				if ("clang" == PHP_ANALYZER) {
-					MFO.WriteLine("\t\"$(CLANG_CL)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER)  $(" + bd_flags_name + "_ANALYZER) " + src_line);
-				} else if ("cppcheck" == PHP_ANALYZER) {
+				if ("cppcheck" == PHP_ANALYZER) {
 					MFO.WriteLine("\t\"$(CPPCHECK)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER)  $(" + bd_flags_name + "_ANALYZER) " + analyzer_base_flags + " " + src_line);
 				}
 			}
@@ -2524,7 +2547,7 @@ function handle_analyzer_makefile_flags(fd, key, val)
 		return;
 	}
 
-	if (key.match("CFLAGS")) {
+	if (key.match(/C(?:XX)?FLAGS/)) {
 		var new_val = val;
 		var reg = /\$\(([^\)]+)\)/g;
 		var r;
@@ -3134,7 +3157,7 @@ function toolset_get_compiler_version()
 
 	if (VS_TOOLSET) {
 		version = probe_binary(PHP_CL).substr(0, 5).replace('.', '');
-		if (version < 1920) {
+		if (version < 1950) {
 			ERROR("Building with MSC_VER " + version + " is no longer supported");
 		}
 		return version;

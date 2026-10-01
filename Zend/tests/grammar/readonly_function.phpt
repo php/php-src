@@ -32,7 +32,8 @@ $b->readonly();
 echo $b->readonly, "\n";
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Calling a function "readonly" is deprecated since 8.6 in %s on line %d
 Hi!
 Const hi!
 Static hi!

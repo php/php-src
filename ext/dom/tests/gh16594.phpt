@@ -16,10 +16,10 @@ $v7->appendChild($v1);
 
 try {
     $v1->before($v6);
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Hierarchy Request Error
+DOMException: Hierarchy Request Error

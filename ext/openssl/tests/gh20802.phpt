@@ -26,7 +26,7 @@ $serverCode = <<<'CODE'
 		    ]
 	    ]
     ]);
-    $server = stream_socket_server('tls://127.0.0.1:12443', $errno, $errstr, $flags, $ctx);
+    $server = stream_socket_server('tls://127.0.0.1:0', $errno, $errstr, $flags, $ctx);
     phpt_notify_server_start($server);
     stream_socket_accept($server, 3);
 CODE;
@@ -42,7 +42,7 @@ $ctx = stream_context_create([
 	    'verify_peer'  => false
 	]
     ]);
-    @stream_socket_client("tls://127.0.0.1:12443", $errno, $errstr, 1, $flags, $ctx);
+    @stream_socket_client("tls://{{ ADDR }}", $errno, $errstr, 1, $flags, $ctx);
 CODE;
 
 include 'CertificateGenerator.inc';

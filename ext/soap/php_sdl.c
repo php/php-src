@@ -85,12 +85,10 @@ static sdlTypePtr get_element(sdlPtr sdl, xmlNodePtr node, const xmlChar *type)
 			size_t ns_len = xmlStrlen(nsptr->href);
 			size_t type_len = strlen(cptype);
 			size_t len = ns_len + type_len + 1;
-			char *nscat = emalloc(len + 1);
-
-			memcpy(nscat, nsptr->href, ns_len);
-			nscat[ns_len] = ':';
-			memcpy(nscat+ns_len+1, cptype, type_len);
-			nscat[len] = '\0';
+			char *nscat = zend_cstr_concat3(
+				(const char *) nsptr->href, ns_len,
+				":", 1,
+				cptype, type_len);
 
 			if ((sdl_type = zend_hash_str_find_ptr(sdl->elements, nscat, len)) != NULL) {
 				ret = sdl_type;
@@ -117,13 +115,10 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 	size_t type_len = strlen(type);
 	size_t len = ns_len + type_len + 1;
 
-	nscat = emalloc(len + 1);
-	if (ns) {
-		memcpy(nscat, ns, ns_len);
-	}
-	nscat[ns_len] = ':';
-	memcpy(nscat+ns_len+1, type, type_len);
-	nscat[len] = '\0';
+	nscat = zend_cstr_concat3(
+		ns, ns_len,
+		":", 1,
+		type, type_len);
 
 	enc = get_encoder_ex(sdl, nscat, len);
 
@@ -138,11 +133,10 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 
 		enc_ns_len = sizeof(XSD_NAMESPACE)-1;
 		enc_len = enc_ns_len + type_len + 1;
-		enc_nscat = emalloc(enc_len + 1);
-		memcpy(enc_nscat, XSD_NAMESPACE, sizeof(XSD_NAMESPACE)-1);
-		enc_nscat[enc_ns_len] = ':';
-		memcpy(enc_nscat+enc_ns_len+1, type, type_len);
-		enc_nscat[enc_len] = '\0';
+		enc_nscat = zend_cstr_concat3(
+			XSD_NAMESPACE, enc_ns_len,
+			":", 1,
+			type, type_len);
 
 		enc = get_encoder_ex(NULL, enc_nscat, enc_len);
 		efree(enc_nscat);
@@ -1150,7 +1144,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 	return ctx.sdl;
 }
 
-#define WSDL_CACHE_VERSION 0x10
+#define WSDL_CACHE_VERSION 0x11
 
 #define WSDL_CACHE_GET(ret,type,buf)   memcpy(&ret,*buf,sizeof(type)); *buf += sizeof(type);
 #define WSDL_CACHE_GET_INT(ret,buf)    ret = ((unsigned char)(*buf)[0])|((unsigned char)(*buf)[1]<<8)|((unsigned char)(*buf)[2]<<16)|((unsigned)(*buf)[3]<<24); *buf += 4;
@@ -1407,11 +1401,10 @@ static void sdl_deserialize_encoder(encodePtr enc, sdlTypePtr *types, char **in)
 
 			enc_ns_len = sizeof(XSD_NAMESPACE)-1;
 			enc_len = enc_ns_len + type_len + 1;
-			enc_nscat = emalloc(enc_len + 1);
-			memcpy(enc_nscat, XSD_NAMESPACE, sizeof(XSD_NAMESPACE)-1);
-			enc_nscat[enc_ns_len] = ':';
-			memcpy(enc_nscat+enc_ns_len+1, enc->details.type_str, type_len);
-			enc_nscat[enc_len] = '\0';
+			enc_nscat = zend_cstr_concat3(
+				XSD_NAMESPACE, enc_ns_len,
+				":", 1,
+				enc->details.type_str, type_len);
 
 			real_enc = get_encoder_ex(NULL, enc_nscat, enc_len);
 			efree(enc_nscat);
@@ -2061,7 +2054,7 @@ static void sdl_serialize_soap_body(const sdlSoapBindingFunctionBodyPtr body, co
 				sdlSoapBindingFunctionHeaderPtr tmp2;
 				const zend_string *key_inner;
 
-				ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(body->headers, key_inner, tmp2) {
+				ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(tmp->headerfaults, key_inner, tmp2) {
 					sdl_serialize_key(key_inner, out);
 					WSDL_CACHE_PUT_1(tmp2->use, out);
 					if (tmp2->use == SOAP_ENCODED) {
@@ -3186,8 +3179,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 		unsigned char digest[16];
 		size_t len = strlen(SOAP_GLOBAL(cache_dir));
 		time_t cached;
-		char *user = php_get_current_user();
-		size_t user_len = user ? strlen(user) + 1 : 0;
+		zend_string *user = php_get_current_user();
 
 		/* System architecture identification (see bug #70951) */
 		static const char ids[] = {SIZEOF_ZEND_LONG, SOAP_BIG_ENDIAN};
@@ -3198,13 +3190,13 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 		PHP_MD5Update(&md5_context, ids, sizeof(ids));
 		PHP_MD5Final(digest, &md5_context);
 		make_digest(md5str, digest);
-		key = emalloc(len+sizeof("/wsdl-")-1+user_len+2+sizeof(md5str));
+		key = emalloc(len+sizeof("/wsdl-")-1+ZSTR_LEN(user)+1+2+sizeof(md5str));
 		memcpy(key,SOAP_GLOBAL(cache_dir),len);
 		memcpy(key+len,"/wsdl-",sizeof("/wsdl-")-1);
 		len += sizeof("/wsdl-")-1;
-		if (user_len) {
-			memcpy(key+len, user, user_len-1);
-			len += user_len-1;
+		if (ZSTR_LEN(user)) {
+			memcpy(key+len, ZSTR_VAL(user), ZSTR_LEN(user));
+			len += ZSTR_LEN(user);
 			key[len++] = '-';
 		}
 		if (WSDL_CACHE_VERSION <= 0x9f) {

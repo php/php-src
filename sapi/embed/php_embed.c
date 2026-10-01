@@ -28,10 +28,6 @@ static const char HARDCODED_INI[] =
 	"max_execution_time=0\n"
 	"max_input_time=-1\n\0";
 
-#if defined(PHP_WIN32) && defined(ZTS)
-ZEND_TSRMLS_CACHE_DEFINE()
-#endif
-
 static char* php_embed_read_cookies(void)
 {
 	return NULL;
@@ -146,7 +142,6 @@ EMBED_SAPI_API sapi_module_struct php_embed_module = {
 	php_embed_register_variables,  /* register server variables */
 	php_embed_log_message,         /* Log message */
 	NULL,                          /* Get request time */
-	NULL,                          /* Child terminate */
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 };

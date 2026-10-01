@@ -11,8 +11,8 @@ class Foo {
         $this->bar += 2;
         try {
             $this->bar += 1.5;
-        } catch (TypeError $e) {
-            echo $e->getMessage(), "\n";
+        } catch (Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }
 }
@@ -22,5 +22,5 @@ $foo = new Foo();
 var_dump($foo->bar);
 ?>
 --EXPECT--
-Cannot assign float to property Foo::$bar of type int
+TypeError: Cannot assign float to property Foo::$bar of type int
 int(2)

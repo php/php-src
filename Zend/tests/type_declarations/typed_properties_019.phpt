@@ -14,9 +14,9 @@ $foo = new Foo();
 
 try {
     $foo->inc();
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Cannot increment property Foo::$bar of type int past its maximal value
+TypeError: Cannot increment property Foo::$bar of type int past its maximal value

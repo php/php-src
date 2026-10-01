@@ -12,8 +12,8 @@ if (PHP_OS_FAMILY !== 'Linux' && PHP_OS_FAMILY !== 'Windows') die('skip only for
 try {
     shmop_open(0x100000000, '', 0644, 1);
 } catch (ValueError $exception) {
-    echo $exception->getMessage(), "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-shmop_open(): Argument #1 ($key) is out of range
+ValueError: shmop_open(): Argument #1 ($key) is out of range

@@ -8,11 +8,10 @@ snmp
 <?php
 require_once(__DIR__.'/skipif.inc');
 if (getenv('SKIP_ASAN')) die('skip Timeouts under ASAN');
+if (PHP_OS_FAMILY === 'Windows') die('xfail SNMP tests might possibly fail on Windows');
 ?>
 --ENV--
 MIBS=
---XFAIL--
-SNMP tests might possibly fail on Windows
 --FILE--
 <?php
 require_once(__DIR__.'/snmp_include.inc');

@@ -23,7 +23,14 @@ extern "C" {
 #include "uchar_arginfo.h"
 }
 
-#define IC_METHOD(mname) PHP_METHOD(IntlChar, mname)
+#define IC_METHOD(mname) \
+static void php_intl_IntlChar_##mname##_impl(INTERNAL_FUNCTION_PARAMETERS); \
+PHP_METHOD(IntlChar, mname) \
+{ \
+	intl_error_reset(NULL); \
+	php_intl_IntlChar_##mname##_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU); \
+} \
+static void php_intl_IntlChar_##mname##_impl(INTERNAL_FUNCTION_PARAMETERS)
 
 static inline int convert_cp(UChar32* pcp, const zend_string *string_codepoint, zend_long int_codepoint) {
 	if (string_codepoint != NULL) {
@@ -70,7 +77,6 @@ IC_METHOD(chr) {
 	char buffer[5];
 	int buffer_len = 0;
 
-	intl_error_reset(NULL);
 
 	if (parse_code_point_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, &cp) == FAILURE) {
 		RETURN_NULL();
@@ -91,7 +97,6 @@ IC_METHOD(chr) {
 IC_METHOD(ord) {
 	UChar32 cp;
 
-	intl_error_reset(NULL);
 
 	if (parse_code_point_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, &cp) == FAILURE) {
 		RETURN_NULL();
@@ -108,7 +113,6 @@ IC_METHOD(hasBinaryProperty) {
 	zend_string *string_codepoint;
 	zend_long int_codepoint = 0;
 
-	intl_error_reset(NULL);
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STR_OR_LONG(string_codepoint, int_codepoint)
@@ -130,7 +134,6 @@ IC_METHOD(getIntPropertyValue) {
 	zend_string *string_codepoint;
 	zend_long int_codepoint = 0;
 
-	intl_error_reset(NULL);
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STR_OR_LONG(string_codepoint, int_codepoint)
@@ -149,7 +152,6 @@ IC_METHOD(getIntPropertyValue) {
 IC_METHOD(getIntPropertyMinValue) {
 	zend_long prop;
 
-	intl_error_reset(NULL);
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(prop)
@@ -163,7 +165,6 @@ IC_METHOD(getIntPropertyMinValue) {
 IC_METHOD(getIntPropertyMaxValue) {
 	zend_long prop;
 
-	intl_error_reset(NULL);
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(prop)
@@ -177,7 +178,6 @@ IC_METHOD(getIntPropertyMaxValue) {
 IC_METHOD(getNumericValue) {
 	UChar32 cp;
 
-	intl_error_reset(NULL);
 
 	if (parse_code_point_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, &cp) == FAILURE) {
 		RETURN_NULL();
@@ -188,16 +188,11 @@ IC_METHOD(getNumericValue) {
 /* }}} */
 
 /* {{{ */
-typedef struct _enumCharType_data {
-	zend_fcall_info fci;
-	zend_fcall_info_cache fci_cache;
-} enumCharType_data;
-static UBool enumCharType_callback(enumCharType_data *context,
+static UBool enumCharType_callback(const void *context,
 		UChar32 start, UChar32 limit, UCharCategory type) {
-	zval retval;
+	const zend_fcall_info_cache *fcc = static_cast<const zend_fcall_info_cache *>(context);
 	zval args[3];
 
-	ZVAL_NULL(&retval);
 	/* Note that $start is INclusive, while $limit is EXclusive
 	 * Therefore (0, 32, 15) means CPs 0..31 are of type 15
 	 */
@@ -205,28 +200,19 @@ static UBool enumCharType_callback(enumCharType_data *context,
 	ZVAL_LONG(&args[1], limit);
 	ZVAL_LONG(&args[2], type);
 
-	context->fci.retval = &retval;
-	context->fci.param_count = 3;
-	context->fci.params = args;
-
-	if (zend_call_function(&context->fci, &context->fci_cache) == FAILURE) {
-		intl_error_set_code(NULL, U_INTERNAL_PROGRAM_ERROR);
-		intl_errors_set_custom_msg(NULL, "enumCharTypes callback failed");
-		zval_ptr_dtor(&retval);
-		return 0;
-	}
-	zval_ptr_dtor(&retval);
-	return 1;
+	zend_call_known_fcc(fcc, NULL, 3, args, NULL);
+	return !EG(exception);
 }
 IC_METHOD(enumCharTypes) {
-	enumCharType_data context;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
 
-	intl_error_reset(NULL);
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_FUNC(context.fci, context.fci_cache)
+		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(fci, fcc)
 	ZEND_PARSE_PARAMETERS_END();
-	u_enumCharTypes((UCharEnumTypeRange*)enumCharType_callback, &context);
+	u_enumCharTypes(enumCharType_callback, &fcc);
+	zend_release_fcall_info_cache(&fcc);
 }
 /* }}} */
 
@@ -234,7 +220,6 @@ IC_METHOD(enumCharTypes) {
 IC_METHOD(getBlockCode) {
 	UChar32 cp;
 
-	intl_error_reset(NULL);
 
 	if (parse_code_point_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, &cp) == FAILURE) {
 		RETURN_NULL();
@@ -254,7 +239,6 @@ IC_METHOD(charName) {
 	zend_string *buffer = NULL;
 	int32_t buffer_len;
 
-	intl_error_reset(NULL);
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR_OR_LONG(string_codepoint, int_codepoint)
@@ -286,7 +270,6 @@ IC_METHOD(charFromName) {
 	UChar32 ret;
 	UErrorCode error = U_ZERO_ERROR;
 
-	intl_error_reset(NULL);
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STRING(name, name_len)
@@ -329,7 +312,7 @@ static UBool enumCharNames_callback(enumCharNames_data *context,
 	}
 	zval_ptr_dtor(&retval);
 	zval_ptr_dtor_str(&args[2]);
-	return 1;
+	return !EG(exception);
 }
 IC_METHOD(enumCharNames) {
 	UChar32 start, limit;
@@ -339,7 +322,6 @@ IC_METHOD(enumCharNames) {
 	zend_long nameChoice = U_UNICODE_CHAR_NAME;
 	UErrorCode error = U_ZERO_ERROR;
 
-	intl_error_reset(NULL);
 
 	ZEND_PARSE_PARAMETERS_START(3, 4)
 		Z_PARAM_STR_OR_LONG(string_start, int_start)
@@ -365,7 +347,6 @@ IC_METHOD(getPropertyName) {
 	zend_long nameChoice = U_LONG_PROPERTY_NAME;
 	const char *ret;
 
-	intl_error_reset(NULL);
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_LONG(property)
@@ -389,7 +370,6 @@ IC_METHOD(getPropertyEnum) {
 	char *alias;
 	size_t alias_len;
 
-	intl_error_reset(NULL);
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STRING(alias, alias_len)
@@ -404,7 +384,6 @@ IC_METHOD(getPropertyValueName) {
 	zend_long property, value, nameChoice = U_LONG_PROPERTY_NAME;
 	const char *ret;
 
-	intl_error_reset(NULL);
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_LONG(property)
@@ -430,7 +409,6 @@ IC_METHOD(getPropertyValueEnum) {
 	char *name;
 	size_t name_len;
 
-	intl_error_reset(NULL);
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_LONG(property)
@@ -448,7 +426,6 @@ IC_METHOD(foldCase) {
 	zend_string *string_codepoint;
 	zend_long int_codepoint = 0;
 
-	intl_error_reset(NULL);
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR_OR_LONG(string_codepoint, int_codepoint)
@@ -481,7 +458,6 @@ IC_METHOD(digit) {
 	zend_string *string_codepoint;
 	zend_long int_codepoint = 0;
 
-	intl_error_reset(NULL);
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR_OR_LONG(string_codepoint, int_codepoint)
@@ -507,7 +483,6 @@ IC_METHOD(digit) {
 IC_METHOD(forDigit) {
 	zend_long digit, radix = 10;
 
-	intl_error_reset(NULL);
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_LONG(digit)
@@ -525,7 +500,6 @@ IC_METHOD(charAge) {
 	UVersionInfo version;
 	int i;
 
-	intl_error_reset(NULL);
 
 	if (parse_code_point_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, &cp) == FAILURE) {
 		RETURN_NULL();
@@ -544,7 +518,6 @@ IC_METHOD(getUnicodeVersion) {
 	UVersionInfo version;
 	int i;
 
-	intl_error_reset(NULL);
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -564,7 +537,6 @@ IC_METHOD(getFC_NFKC_Closure) {
 	int32_t closure_len;
 	UErrorCode error = U_ZERO_ERROR;
 
-	intl_error_reset(NULL);
 
 	if (parse_code_point_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, &cp) == FAILURE) {
 		RETURN_NULL();
@@ -594,7 +566,6 @@ IC_METHOD(getFC_NFKC_Closure) {
 #define IC_BOOL_METHOD_CHAR(name) \
 IC_METHOD(name) { \
 	UChar32 cp; \
-	intl_error_reset(NULL); \
 	if (parse_code_point_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, &cp) == FAILURE) { \
 		RETURN_NULL(); \
 	} \
@@ -635,7 +606,6 @@ IC_BOOL_METHOD_CHAR(isJavaIDPart)
 #define IC_INT_METHOD_CHAR(name) \
 IC_METHOD(name) { \
 	UChar32 cp; \
-	intl_error_reset(NULL); \
 	if (parse_code_point_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, &cp) == FAILURE) { \
 		RETURN_NULL(); \
 	} \
@@ -656,7 +626,6 @@ IC_METHOD(name) { \
 	UChar32 cp, ret; \
 	zend_string *string_codepoint; \
 		zend_long int_codepoint = -1; \
-		intl_error_reset(NULL); \
 		ZEND_PARSE_PARAMETERS_START(1, 1) \
 			Z_PARAM_STR_OR_LONG(string_codepoint, int_codepoint) \
 		ZEND_PARSE_PARAMETERS_END(); \

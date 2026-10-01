@@ -7,5 +7,5 @@ exif
 var_dump(count(exif_read_data(__DIR__ . "/bug72603.jpg")));
 ?>
 --EXPECTF--
-Warning: exif_read_data(bug72603.jpg): %s in %s%ebug72603.php on line %d
+Warning: exif_read_data(): %s in %s%ebug72603.php on line %d
 int(%d)

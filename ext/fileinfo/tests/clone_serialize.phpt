@@ -11,17 +11,17 @@ try {
     $finfo2 = clone $finfo;
     var_dump($finfo2->buffer("Test string"));
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $finfo3 = unserialize(serialize($finfo));
     var_dump($finfo3->buffer("Test string"));
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECTF--
 string(%d) "%s"
-Trying to clone an uncloneable object of class finfo
-Serialization of 'finfo' is not allowed
+Error: Trying to clone an uncloneable object of class finfo
+Exception: Serialization of 'finfo' is not allowed

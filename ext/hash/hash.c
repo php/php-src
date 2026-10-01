@@ -17,7 +17,6 @@
 #include <config.h>
 #endif
 
-#include <math.h>
 #include "php_hash.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
@@ -362,7 +361,7 @@ static void php_hash_do_hash(
 	}
 	if (isfilename) {
 		if (zend_char_has_nul_byte(data, data_len)) {
-			zend_argument_value_error(1, "must not contain any null bytes");
+			zend_argument_value_error(2, "must not contain any null bytes");
 			RETURN_THROWS();
 		}
 		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, FG(default_context));
@@ -1033,10 +1032,10 @@ PHP_FUNCTION(hash_pbkdf2)
 	}
 	digest_length = length;
 	if (!raw_output) {
-		digest_length = (zend_long) ceil((float) length / 2.0);
+		digest_length = length / 2 + (length % 2);
 	}
 
-	loops = (zend_long) ceil((float) digest_length / (float) ops->digest_size);
+	loops = (digest_length - 1) / ops->digest_size + 1;
 
 	result = safe_emalloc(loops, ops->digest_size, 0);
 
@@ -1294,11 +1293,17 @@ PHP_FUNCTION(mhash_keygen_s2k)
 		RETURN_THROWS();
 	}
 
-	bytes = (int)l_bytes;
-	if (bytes <= 0){
+	if (l_bytes <= 0) {
 		zend_argument_value_error(4, "must be a greater than 0");
 		RETURN_THROWS();
 	}
+
+	if (ZEND_LONG_INT_OVFL(l_bytes)) {
+		zend_argument_value_error(4, "must be less than or equal to %d", INT_MAX);
+		RETURN_THROWS();
+	}
+
+	bytes = (int)l_bytes;
 
 	salt_len = MIN(salt_len, SALT_SIZE);
 
@@ -1328,7 +1333,7 @@ PHP_FUNCTION(mhash_keygen_s2k)
 				context = php_hash_alloc_context(ops);
 				ops->hash_init(context, NULL);
 
-				key = ecalloc(1, times * block_size);
+				key = ecalloc(times, block_size);
 				digest = emalloc(ops->digest_size + 1);
 
 				for (i = 0; i < times; i++) {

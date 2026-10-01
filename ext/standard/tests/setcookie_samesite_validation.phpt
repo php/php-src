@@ -21,20 +21,20 @@ var_dump(setrawcookie('test', 'value', ['samesite' => 'Lax']));
 // Invalid values
 try {
     setcookie('test', 'value', ['samesite' => 'Invalid']);
-} catch (ValueError $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     setcookie('test', 'value', ['samesite' => "Strict\r\nX-Injected: evil"]);
-} catch (ValueError $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     setrawcookie('test', 'value', ['samesite' => 'Invalid']);
-} catch (ValueError $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -47,6 +47,6 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-setcookie(): "samesite" option must be "Strict", "Lax", "None", or ""
-setcookie(): "samesite" option must be "Strict", "Lax", "None", or ""
-setrawcookie(): "samesite" option must be "Strict", "Lax", "None", or ""
+ValueError: setcookie(): "samesite" option must be "Strict", "Lax", "None", or ""
+ValueError: setcookie(): "samesite" option must be "Strict", "Lax", "None", or ""
+ValueError: setrawcookie(): "samesite" option must be "Strict", "Lax", "None", or ""

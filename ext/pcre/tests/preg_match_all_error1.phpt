@@ -25,7 +25,7 @@ foreach ($regex_array as $regex_value) {
     try {
         var_dump(preg_match_all($regex_value, $subject, $matches1));
     } catch (TypeError $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     var_dump($matches1);
 }
@@ -33,12 +33,11 @@ $regex_value = new stdclass(); //Object
 try {
     var_dump(preg_match_all($regex_value, $subject, $matches));
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($matches);
 ?>
 --EXPECTF--
-
 Warning: preg_match_all(): Delimiter must not be alphanumeric, backslash, or NUL byte in %spreg_match_all_error1.php on line %d
 bool(false)
 NULL
@@ -54,7 +53,7 @@ NULL
 Warning: preg_match_all(): Unknown modifier 'F' in %spreg_match_all_error1.php on line %d
 bool(false)
 NULL
-preg_match_all(): Argument #1 ($pattern) must be of type string, array given
+TypeError: preg_match_all(): Argument #1 ($pattern) must be of type string, array given
 NULL
 int(4)
 array(1) {
@@ -70,5 +69,5 @@ array(1) {
     string(1) "t"
   }
 }
-preg_match_all(): Argument #1 ($pattern) must be of type string, stdClass given
+TypeError: preg_match_all(): Argument #1 ($pattern) must be of type string, stdClass given
 NULL

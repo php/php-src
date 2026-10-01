@@ -19,8 +19,8 @@ var_dump($gen->current());
 
 try {
     $gen->next();
-} catch (Exception $e) {
-    echo 'Caught exception with message "', $e->getMessage(), '"', "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump($gen->current());
@@ -28,5 +28,5 @@ var_dump($gen->current());
 ?>
 --EXPECT--
 string(3) "foo"
-Caught exception with message "test"
+Exception: test
 NULL

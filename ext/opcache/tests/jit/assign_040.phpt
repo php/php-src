@@ -18,10 +18,10 @@ function test() {
 }
 try {
     test();
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
 Warning: Undefined variable $y in %s on line %d
-Cannot assign null to reference held by property Test::$x of type string
+TypeError: Cannot assign null to reference held by property Test::$x of type string

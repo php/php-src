@@ -46,7 +46,7 @@ EOF;
 try {
 	zend_test_compile_string($source_string, "Sources\0string", ZEND_COMPILE_POSITION_AT_OPEN_TAG);
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 zend_test_compile_string(null, null, null);
@@ -65,7 +65,7 @@ string(3) "php"
 string(3) "php"
 string(3) "php"
 string(3) "php"
-zend_test_compile_string(): Argument #2 ($filename) must not contain any null bytes
+ValueError: zend_test_compile_string(): Argument #2 ($filename) must not contain any null bytes
 
 Deprecated: zend_test_compile_string(): Passing null to parameter #1 ($source_string) of type string is deprecated in %s on line %d
 

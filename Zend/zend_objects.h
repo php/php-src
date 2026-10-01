@@ -25,6 +25,7 @@ BEGIN_EXTERN_C()
 ZEND_API void ZEND_FASTCALL zend_object_std_init(zend_object *object, zend_class_entry *ce);
 ZEND_API zend_object* ZEND_FASTCALL zend_objects_new(zend_class_entry *ce);
 ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, const zend_object *old_object);
+ZEND_API void ZEND_FASTCALL zend_object_set_properties_reinitable(zend_object *object, bool reinitable);
 
 ZEND_API void zend_object_std_dtor(zend_object *object);
 ZEND_API void zend_objects_destroy_object(zend_object *object);

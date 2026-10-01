@@ -22,40 +22,40 @@ var_dump(gmp_strval(gmp_powm($n,$e,$m)));
 try {
     var_dump(gmp_powm(5, 11, 0));
 } catch (\DivisionByZeroError $error) {
-    echo $error->getMessage() . \PHP_EOL;
+    echo $error::class, ': ', $error->getMessage(), PHP_EOL;
 }
 try {
     var_dump(gmp_powm(5, "11", gmp_init(0)));
 } catch (\DivisionByZeroError $error) {
-    echo $error->getMessage() . \PHP_EOL;
+    echo $error::class, ': ', $error->getMessage(), PHP_EOL;
 }
 
 try {
     var_dump(gmp_powm(array(),$e,$m));
 } catch (\TypeError $error) {
-    echo $error->getMessage() . \PHP_EOL;
+    echo $error::class, ': ', $error->getMessage(), PHP_EOL;
 }
 try {
     var_dump(gmp_powm($n,array(),$m));
 } catch (\TypeError $error) {
-    echo $error->getMessage() . \PHP_EOL;
+    echo $error::class, ': ', $error->getMessage(), PHP_EOL;
 }
 try {
     var_dump(gmp_powm($n,$error,array()));
 } catch (\TypeError $error) {
-    echo $error->getMessage() . \PHP_EOL;
+    echo $error::class, ': ', $error->getMessage(), PHP_EOL;
 }
 try {
     var_dump(gmp_powm(array(),array(),array()));
 } catch (\TypeError $error) {
-    echo $error->getMessage() . \PHP_EOL;
+    echo $error::class, ': ', $error->getMessage(), PHP_EOL;
 }
 
 try {
     $n = gmp_init("-5");
     var_dump(gmp_powm(10, $n, 10));
 } catch (\ValueError $error) {
-    echo $error->getMessage() . \PHP_EOL;
+    echo $error::class, ': ', $error->getMessage(), PHP_EOL;
 }
 
 $n = gmp_init("0");
@@ -73,13 +73,13 @@ string(3) "533"
 string(3) "331"
 string(3) "171"
 string(3) "371"
-gmp_powm(): Argument #3 ($modulus) Modulo by zero
-gmp_powm(): Argument #3 ($modulus) Modulo by zero
-gmp_powm(): Argument #1 ($num) must be of type GMP|string|int, array given
-gmp_powm(): Argument #2 ($exponent) must be of type GMP|string|int, array given
-gmp_powm(): Argument #2 ($exponent) must be of type GMP|string|int, TypeError given
-gmp_powm(): Argument #1 ($num) must be of type GMP|string|int, array given
-gmp_powm(): Argument #2 ($exponent) must be greater than or equal to 0
+DivisionByZeroError: gmp_powm(): Argument #3 ($modulus) Modulo by zero
+DivisionByZeroError: gmp_powm(): Argument #3 ($modulus) Modulo by zero
+TypeError: gmp_powm(): Argument #1 ($num) must be of type GMP|string|int, array given
+TypeError: gmp_powm(): Argument #2 ($exponent) must be of type GMP|string|int, array given
+TypeError: gmp_powm(): Argument #2 ($exponent) must be of type GMP|string|int, TypeError given
+TypeError: gmp_powm(): Argument #1 ($num) must be of type GMP|string|int, array given
+ValueError: gmp_powm(): Argument #2 ($exponent) must be greater than or equal to 0
 object(GMP)#6 (1) {
   ["num"]=>
   string(1) "1"

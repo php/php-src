@@ -54,8 +54,8 @@ var_dump($foo->a3);
 
 try {
     $foo->f4()->a = 1;
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($foo->o1);
 
@@ -76,7 +76,7 @@ array(0) {
 }
 array(0) {
 }
-Attempt to assign property "a" on null
+Error: Attempt to assign property "a" on null
 NULL
 object(stdClass)#3 (1) {
   ["a"]=>

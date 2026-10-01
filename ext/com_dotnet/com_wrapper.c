@@ -499,11 +499,11 @@ static void generate_dispids(php_dispatchex *disp)
 	}
 }
 
-static php_dispatchex *disp_constructor(zval *object)
+static php_dispatchex *disp_constructor(zend_object *object)
 {
 	php_dispatchex *disp = (php_dispatchex*)CoTaskMemAlloc(sizeof(php_dispatchex));
 
-	trace("constructing a COM wrapper for PHP object %p (%s)\n", object, ZSTR_VAL(Z_OBJCE_P(object)->name));
+	trace("constructing a COM wrapper for PHP object %p (%s)\n", object, ZSTR_VAL(object->ce->name));
 
 	if (disp == NULL)
 		return NULL;
@@ -516,7 +516,7 @@ static php_dispatchex *disp_constructor(zval *object)
 
 
 	if (object) {
-		ZVAL_COPY(&disp->object, object);
+		ZVAL_OBJ_COPY(&disp->object, object);
 	} else {
 		ZVAL_UNDEF(&disp->object);
 	}
@@ -536,7 +536,7 @@ static void disp_destructor(php_dispatchex *disp)
 	CoTaskMemFree(disp);
 }
 
-PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export_as_sink(zval *val, GUID *sinkid,
+PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export_as_sink(zend_object *val, GUID *sinkid,
 	   HashTable *id_to_name)
 {
 	php_dispatchex *disp = disp_constructor(val);
@@ -572,17 +572,13 @@ PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export_as_sink(zval *val, GUID *si
 	return (IDispatch*)disp;
 }
 
-PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export(zval *val)
+PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export(zend_object *val)
 {
 	php_dispatchex *disp = NULL;
 
-	if (Z_TYPE_P(val) != IS_OBJECT) {
-		return NULL;
-	}
-
 	if (php_com_is_valid_object(val)) {
 		/* pass back its IDispatch directly */
-		php_com_dotnet_object *obj = CDNO_FETCH(val);
+		php_com_dotnet_object *obj = (php_com_dotnet_object*)val;
 
 		if (obj == NULL)
 			return NULL;

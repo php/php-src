@@ -17,7 +17,7 @@ foreach (new RecursiveIteratorIterator($a, RecursiveIteratorIterator::LEAVES_ONL
 try {
     $b = new Phar(__DIR__ . '/files/odt.odt');
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
@@ -29,4 +29,4 @@ phar://%sodt.odt%cmeta.xml
 phar://%sodt.odt%cmimetype
 phar://%sodt.odt%csettings.xml
 phar://%sodt.odt%cstyles.xml
-Cannot create phar '%sodt.odt', file extension (or combination) not recognised or the directory does not exist
+UnexpectedValueException: Cannot create phar '%sodt.odt', file extension (or combination) not recognised or the directory does not exist

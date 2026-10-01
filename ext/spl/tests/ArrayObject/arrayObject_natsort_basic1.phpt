@@ -16,7 +16,7 @@ var_dump($ao1);
 try {
     var_dump($ao2->natsort('blah'));
 } catch (ArgumentCountError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($ao2);
 ?>
@@ -38,7 +38,7 @@ object(ArrayObject)#1 (1) {
     string(5) "boo22"
   }
 }
-ArrayObject::natsort() expects exactly 0 arguments, 1 given
+ArgumentCountError: ArrayObject::natsort() expects exactly 0 arguments, 1 given
 object(ArrayObject)#2 (1) {
   ["storage":"ArrayObject":private]=>
   array(5) {

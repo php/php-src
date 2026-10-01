@@ -10,8 +10,8 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 --FILE--
 <?php
 echo "*** Testing file_get_contents() : variation ***\n";
-$mainDir = "fileGetContentsVar7.dir";
-$subDir = "fileGetContentsVar7Sub";
+$mainDir = "fileGetContentsVar7Win32.dir";
+$subDir = "fileGetContentsVar7Win32Sub";
 $absMainDir = __DIR__."\\".$mainDir;
 mkdir($absMainDir);
 $absSubDir = $absMainDir."\\".$subDir;
@@ -41,7 +41,7 @@ $allDirs = array(
   $unixifiedDir,
 );
 
-$filename = 'FileGetContentsVar7.tmp';
+$filename = 'FileGetContentsVar7Win32.tmp';
 $absFile = $absSubDir.'/'.$filename;
 $h = fopen($absFile,"w");
 fwrite($h, "contents read");
@@ -60,11 +60,11 @@ echo "\n*** Done ***\n";
 ?>
 --CLEAN--
 <?php
-$mainDir = "fileGetContentsVar7.dir";
-$subDir = "fileGetContentsVar7Sub";
+$mainDir = "fileGetContentsVar7Win32.dir";
+$subDir = "fileGetContentsVar7Win32Sub";
 $absMainDir = __DIR__."/".$mainDir;
 $absSubDir = $absMainDir."/".$subDir;
-$filename = 'FileGetContentsVar7.tmp';
+$filename = 'FileGetContentsVar7Win32.tmp';
 $absFile = $absSubDir.'/'.$filename;
 unlink($absFile);
 rmdir($absSubDir);

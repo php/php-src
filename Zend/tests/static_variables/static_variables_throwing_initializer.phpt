@@ -10,12 +10,12 @@ function foo($throw) {
 
 try {
     var_dump(foo(true));
-} catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump(foo(false));
 
 ?>
 --EXPECT--
-Throwing from foo()
+Exception: Throwing from foo()
 int(42)

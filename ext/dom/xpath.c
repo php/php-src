@@ -33,6 +33,25 @@
 
 #ifdef LIBXML_XPATH_ENABLED
 
+static dom_object *dom_xpath_intern_from_entry(zval *entry, xmlDocPtr doc)
+{
+	if (Z_TYPE_P(entry) == IS_OBJECT) {
+		dom_object *obj = Z_DOMOBJ_P(entry);
+		if (obj->document && obj->document->ptr == doc) {
+			return obj;
+		}
+	} else if (Z_TYPE_P(entry) == IS_ARRAY) {
+		zval *inner;
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(entry), inner) {
+			dom_object *obj = dom_xpath_intern_from_entry(inner, doc);
+			if (obj) {
+				return obj;
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+	return NULL;
+}
+
 static dom_object *dom_xpath_intern_for_doc(dom_xpath_object *xpath_obj, xmlDocPtr doc)
 {
 	if (xpath_obj->dom.document && xpath_obj->dom.document->ptr == doc) {
@@ -42,8 +61,8 @@ static dom_object *dom_xpath_intern_for_doc(dom_xpath_object *xpath_obj, xmlDocP
 	if (node_list) {
 		zval *entry;
 		ZEND_HASH_PACKED_FOREACH_VAL(node_list, entry) {
-			dom_object *obj = Z_DOMOBJ_P(entry);
-			if (obj->document && obj->document->ptr == doc) {
+			dom_object *obj = dom_xpath_intern_from_entry(entry, doc);
+			if (obj) {
 				return obj;
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -144,6 +163,13 @@ static void dom_xpath_construct(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *
 		RETURN_THROWS();
 	}
 
+	dom_xpath_object *intern = Z_XPATHOBJ_P(ZEND_THIS);
+	if (UNEXPECTED(intern->evaluation_depth > 0)) {
+		zend_throw_error(NULL, "Cannot call %s::__construct() while an XPath evaluation is in progress",
+			ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
+		RETURN_THROWS();
+	}
+
 	DOM_GET_OBJ(docp, doc, xmlDocPtr, docobj);
 
 	xmlXPathContextPtr ctx = xmlXPathNewContext(docp);
@@ -152,7 +178,6 @@ static void dom_xpath_construct(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *
 		RETURN_THROWS();
 	}
 
-	dom_xpath_object *intern = Z_XPATHOBJ_P(ZEND_THIS);
 	xmlXPathContextPtr oldctx = intern->dom.ptr;
 	if (oldctx != NULL) {
 		php_libxml_decrement_doc_ref((php_libxml_node_object *) &intern->dom);
@@ -307,7 +332,9 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 		ctxp->nsNr = in_scope_ns.count;
 	}
 
+	intern->evaluation_depth++;
 	xmlXPathObjectPtr xpathobjp = xmlXPathEvalExpression(BAD_CAST expr, ctxp);
+	intern->evaluation_depth--;
 	ctxp->node = NULL;
 
 	if (register_node_ns && nodep != NULL) {

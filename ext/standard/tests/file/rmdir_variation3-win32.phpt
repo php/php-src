@@ -11,7 +11,7 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 <?php
 echo "*** Testing rmdir() : variation ***\n";
 
-$workDir = "rmdirVar3.tmp";
+$workDir = "rmdirVar3Win32.tmp";
 $subDir = "aSubDir";
 mkdir($workDir);
 $cwd = getcwd();
@@ -62,39 +62,42 @@ foreach($dirs as $dir) {
    }
 }
 
-rmdir($workDir);
-
+?>
+--CLEAN--
+<?php
+@rmdir("rmdirVar3Win32.tmp/aSubDir");
+@rmdir("rmdirVar3Win32.tmp");
 ?>
 --EXPECTF--
 *** Testing rmdir() : variation ***
--- removing rmdirVar3.tmp\aSubDir --
+-- removing rmdirVar3Win32.tmp\aSubDir --
 Directory removed
--- removing .\rmdirVar3.tmp\aSubDir --
+-- removing .\rmdirVar3Win32.tmp\aSubDir --
 Directory removed
--- removing rmdirVar3.tmp\..\rmdirVar3.tmp\aSubDir --
+-- removing rmdirVar3Win32.tmp\..\rmdirVar3Win32.tmp\aSubDir --
 Directory removed
--- removing rmdirVar3.tmp\..\BADDIR\aSubDir --
+-- removing rmdirVar3Win32.tmp\..\BADDIR\aSubDir --
 
 Warning: rmdir(): No such file or directory in %s on line %d
 -- removing BADDIR\aSubDir --
 
 Warning: rmdir(): No such file or directory in %s on line %d
--- removing %s\rmdirVar3.tmp\aSubDir --
+-- removing %s\rmdirVar3Win32.tmp\aSubDir --
 Directory removed
--- removing %s\.\rmdirVar3.tmp\aSubDir --
+-- removing %s\.\rmdirVar3Win32.tmp\aSubDir --
 Directory removed
--- removing %s\rmdirVar3.tmp\..\rmdirVar3.tmp\aSubDir --
+-- removing %s\rmdirVar3Win32.tmp\..\rmdirVar3Win32.tmp\aSubDir --
 Directory removed
 -- removing %s\BADDIR\aSubDir --
 
 Warning: rmdir(): No such file or directory in %s on line %d
--- removing rmdirVar3.tmp\aSubDir\ --
+-- removing rmdirVar3Win32.tmp\aSubDir\ --
 Directory removed
--- removing %s\rmdirVar3.tmp\aSubDir\ --
+-- removing %s\rmdirVar3Win32.tmp\aSubDir\ --
 Directory removed
--- removing rmdirVar3.tmp\\aSubDir --
+-- removing rmdirVar3Win32.tmp\\aSubDir --
 Directory removed
--- removing %s\\rmdirVar3.tmp\\aSubDir --
+-- removing %s\\rmdirVar3Win32.tmp\\aSubDir --
 Directory removed
--- removing /%s/rmdirVar3.tmp/aSubDir --
+-- removing /%s/rmdirVar3Win32.tmp/aSubDir --
 Directory removed

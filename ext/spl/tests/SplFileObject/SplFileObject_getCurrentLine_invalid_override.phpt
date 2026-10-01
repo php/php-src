@@ -14,9 +14,9 @@ $obj = new MySplFileObject(__FILE__);
 try {
     var_dump($obj->current());
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-MySplFileObject::getCurrentLine(): Return value must be of type string, array returned
+TypeError: MySplFileObject::getCurrentLine(): Return value must be of type string, array returned

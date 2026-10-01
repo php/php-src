@@ -13,29 +13,29 @@ $ds = [
 echo "Empty command array:\n";
 try {
     proc_open([], $ds, $pipes);
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 echo "\nNul byte in program name:\n";
 try {
     proc_open(["php\0oops"], $ds, $pipes);
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 echo "\nNul byte in argument:\n";
 try {
     proc_open(["php", "array\0oops"], $ds, $pipes);
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 echo "\nEmpty program name:\n";
 try {
      proc_open([""], $ds, $pipes);
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 echo "\nBasic usage:\n";
@@ -76,16 +76,16 @@ proc_close($proc);
 ?>
 --EXPECT--
 Empty command array:
-proc_open(): Argument #1 ($command) must not be empty
+ValueError: proc_open(): Argument #1 ($command) must not be empty
 
 Nul byte in program name:
-Command array element 1 contains a null byte
+ValueError: Command array element 1 contains a null byte
 
 Nul byte in argument:
-Command array element 2 contains a null byte
+ValueError: Command array element 2 contains a null byte
 
 Empty program name:
-First element must contain a non-empty program name
+ValueError: First element must contain a non-empty program name
 
 Basic usage:
 Hello World!

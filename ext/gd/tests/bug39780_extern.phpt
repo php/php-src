@@ -16,9 +16,9 @@ $im = imagecreatefrompng(__DIR__ . '/bug39780.png');
 var_dump($im);
 ?>
 --EXPECTF--
-Warning: imagecreatefrompng(): gd-png: fatal libpng error: Read Error: truncated data%win %s on line %d
+Warning: imagecreatefrompng(): gd-png:  fatal libpng error: Read Error: truncated data in %s on line %d
 
-Warning: imagecreatefrompng(): gd-png error: setjmp returns error condition %d%win %s on line %d
+Warning: imagecreatefrompng(): gd-png error: setjmp returns error condition in %s on line %d
 
 Warning: imagecreatefrompng(): "%sbug39780.png" is not a valid PNG file in %s on line %d
 bool(false)

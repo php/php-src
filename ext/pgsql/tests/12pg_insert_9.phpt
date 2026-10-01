@@ -65,7 +65,7 @@ $db = pg_connect($conn_str);
 pg_query($db, "DROP TABLE IF EXISTS {$table_name}");
 ?>
 --EXPECTF--
-INSERT INTO "table_12pg_insert_9" ("num","str","bin") VALUES (1234,E'AAA',E'\\x424242');
+INSERT INTO "table_12pg_insert_9" ("num","str","bin") VALUES (1234,'AAA','\\x424242');
 INSERT INTO "table_12pg_insert_9" ("num","str","bin") VALUES ('1234','AAA','BBB');
 object(PgSql\Result)#%d (0) {
 }

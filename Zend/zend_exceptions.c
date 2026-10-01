@@ -462,8 +462,7 @@ ZEND_METHOD(Exception, getCode)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_CODE);
-	ZVAL_DEREF(prop);
-	ZVAL_COPY(return_value, prop);
+	ZVAL_COPY_DEREF(return_value, prop);
 }
 /* }}} */
 
@@ -475,8 +474,7 @@ ZEND_METHOD(Exception, getTrace)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_TRACE);
-	ZVAL_DEREF(prop);
-	ZVAL_COPY(return_value, prop);
+	ZVAL_COPY_DEREF(return_value, prop);
 }
 /* }}} */
 
@@ -488,8 +486,7 @@ ZEND_METHOD(ErrorException, getSeverity)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_SEVERITY);
-	ZVAL_DEREF(prop);
-	ZVAL_COPY(return_value, prop);
+	ZVAL_COPY_DEREF(return_value, prop);
 }
 /* }}} */
 
@@ -637,7 +634,17 @@ ZEND_API zend_string *zend_trace_current_function_args_string(void) {
 	if (execute_data && execute_data->func
 			&& ZEND_USER_CODE(execute_data->func->common.type)
 			&& (execute_data->opline->opcode == ZEND_INCLUDE_OR_EVAL)) {
-		zval *inc_filename = RT_CONSTANT(execute_data->opline, execute_data->opline->op1);
+		zval *inc_filename;
+
+		switch (execute_data->opline->op1_type) {
+			/* op1 may be CONST, TMP or CV; RT_CONSTANT() is only valid for the former. */
+			case IS_CONST:
+				inc_filename = RT_CONSTANT(execute_data->opline, execute_data->opline->op1);
+				break;
+			default:
+				inc_filename = EX_VAR(execute_data->opline->op1.var);
+		}
+
 		smart_str str = {0};
 		build_trace_args(inc_filename, &str);
 		return smart_str_extract(&str);
@@ -736,11 +743,9 @@ ZEND_METHOD(Exception, __toString)
 
 	zend_fcall_info fci;
 	fci.size = sizeof(fci);
-	ZVAL_UNDEF(&fci.function_name);
 	fci.retval = &trace;
 	fci.param_count = 0;
 	fci.params = NULL;
-	fci.object = NULL;
 	fci.named_params = NULL;
 
 	zend_fcall_info_cache fcc;
@@ -755,7 +760,6 @@ ZEND_METHOD(Exception, __toString)
 		zend_long line = zval_get_long(GET_PROPERTY(exception, ZEND_STR_LINE));
 
 		fcc.object = Z_OBJ_P(exception);
-		fcc.calling_scope = Z_OBJCE_P(exception);
 		zend_call_function(&fci, &fcc);
 
 		if (Z_TYPE(trace) != IS_STRING) {

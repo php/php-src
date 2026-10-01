@@ -11,11 +11,11 @@ class ObjectOne {
     public function __construct() {
         global $containers;
         $this->guid = 1;
-        $containers[spl_object_hash($this)] = $this;
+        $containers[spl_object_id($this)] = $this;
     }
     public function __destruct() {
         global $containers;
-        $containers[spl_object_hash($this)] = NULL;
+        $containers[spl_object_id($this)] = NULL;
     }
 }
 

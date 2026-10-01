@@ -13,7 +13,7 @@ $arr = array("x" => 2147483647, "y" => 2147483647, "width" => 10, "height" => 10
 try {
 	imagecrop($img, $arr);
 } catch (\ValueError $e) {
-	echo $e->getMessage() . PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 print_r($arr);
 
@@ -32,7 +32,7 @@ var_dump(imagecrop($img, array("x" => 0, "y" => 0, "width" => 65535, "height" =>
 --EXPECTF--
 object(GdImage)#2 (0) {
 }
-imagecrop(): Argument #2 ($rectangle) overflow with "x" and "width" keys
+ValueError: imagecrop(): Argument #2 ($rectangle) overflow with "x" and "width" keys
 Array
 (
     [x] => 2147483647

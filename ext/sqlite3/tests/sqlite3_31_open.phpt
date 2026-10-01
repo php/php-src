@@ -12,11 +12,11 @@ try {
   $db = new SQLite3(__DIR__ . '/db1.db');
   $db->open(__DIR__ . '/db1.db');
 } catch (Exception $ex) {
-  var_dump($ex->getMessage());
+  echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 
 ?>
 --CLEAN--
 <?php @unlink(__DIR__ . '/db1.db'); ?>
 --EXPECT--
-string(29) "Already initialised DB Object"
+Exception: Already initialised DB Object

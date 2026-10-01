@@ -17,7 +17,7 @@ foreach ($files as $file) {
 	try {
 		$x = unserialize(substr($s, strpos($s, "|") + 1));
 	} catch (Error $e) {
-		echo get_class($e), ': ', $e->getMessage(), "\n";
+		echo $e::class, ': ', $e->getMessage(), "\n";
 	}
 	var_dump($x);
 	echo "\n\n";

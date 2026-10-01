@@ -10,12 +10,12 @@ try {
     var_dump(imagesetstyle($im, array()));
 }
 catch (\Error $ex) {
-    echo $ex->getMessage() . "\n";
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 
 imagesetpixel($im, 0, 0, IMG_COLOR_STYLED);
 ?>
 ====DONE====
 --EXPECT--
-imagesetstyle(): Argument #2 ($style) must not be empty
+ValueError: imagesetstyle(): Argument #2 ($style) must not be empty
 ====DONE====

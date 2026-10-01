@@ -7,17 +7,17 @@ bcmath
 
 try {
     bcdiv('a', '1');
-} catch (\ValueError $e) {
-    echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     bcdiv('1', 'a');
-} catch (\ValueError $e) {
-    echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-bcdiv(): Argument #1 ($num1) is not well-formed
-bcdiv(): Argument #2 ($num2) is not well-formed
+ValueError: bcdiv(): Argument #1 ($num1) is not well-formed
+ValueError: bcdiv(): Argument #2 ($num2) is not well-formed

@@ -59,11 +59,11 @@ string(%d) "Method [ <user, overwrites DateTimeZone, prototype DateTimeZone> sta
 bool(false)
 bool(true)
 string(0) ""
-string(37) "SplFileInfo|FilesystemIterator|string"
-string(191) "Method [ <internal:SPL, overwrites DirectoryIterator, prototype Iterator> public method current ] {
+string(25) "SplFileInfo|static|string"
+string(179) "Method [ <internal:SPL, overwrites DirectoryIterator, prototype Iterator> public method current ] {
 
   - Parameters [0] {
   }
-  - Tentative return [ SplFileInfo|FilesystemIterator|string ]
+  - Tentative return [ SplFileInfo|static|string ]
 }
 "

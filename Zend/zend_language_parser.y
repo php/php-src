@@ -292,7 +292,6 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <num> method_modifiers class_const_modifiers member_modifier optional_cpp_modifiers
 %type <num> class_modifiers class_modifier anonymous_class_modifiers anonymous_class_modifiers_optional use_type backup_fn_flags
 
-%type <ptr> backup_lex_pos
 %type <str> backup_doc_comment
 
 %type <ident> reserved_non_modifiers semi_reserved
@@ -1400,9 +1399,9 @@ inline_function:
 				  NULL,
 				  $5, $7, $11, $8, NULL); CG(extra_fn_flags) = $9; }
 	|	fn returns_ref backup_doc_comment '(' parameter_list ')' return_type
-		T_DOUBLE_ARROW backup_fn_flags backup_lex_pos expr backup_fn_flags
-			{ $$ = zend_ast_create_decl(ZEND_AST_ARROW_FUNC, $2 | $12, $1, $3,
-				  NULL, $5, NULL, $11, $7, NULL);
+		T_DOUBLE_ARROW backup_fn_flags expr backup_fn_flags
+			{ $$ = zend_ast_create_decl(ZEND_AST_ARROW_FUNC, $2 | $11, $1, $3,
+				  NULL, $5, NULL, $10, $7, NULL);
 				  CG(extra_fn_flags) = $9; }
 ;
 
@@ -1420,10 +1419,6 @@ backup_doc_comment:
 
 backup_fn_flags:
 	%prec PREC_ARROW_FUNCTION %empty { $$ = CG(extra_fn_flags); CG(extra_fn_flags) = 0; }
-;
-
-backup_lex_pos:
-	%empty { $$ = LANG_SCNG(yy_text); }
 ;
 
 returns_ref:

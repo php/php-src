@@ -93,13 +93,21 @@ void intl_error_reset(NULL);             /* reset global error */
 void intl_errors_reset(intl_error* err); /* reset global and object error */
 ```
 
-In practice, `intl_errors_reset()` is not used because most classes have also
-plain functions mapped to the same internal functions as their instance methods.
-Fetching of the object is done with `zend_parse_method_parameters()` instead of
-directly using `getThis()`. Therefore, no reference to object is obtained until
-the arguments are fully parsed. Without a reference to the object, there's no
-way to reset the object's internal error code. Instead, resetting of the
-object's internal error code is done upon fetching the object from its zval.
+Procedural functions that reset the global error should normally use
+`PHP_INTL_FUNCTION_WITH_ERROR_RESET(name)`, which resets the global error before
+entering the implementation body.
+Class-specific method helper macros may use the same pattern when all methods
+covered by the macro reset the global error.
+
+`intl_errors_reset()` may be used directly when the object is available before
+argument parsing, for example in methods that only operate on `ZEND_THIS()`.
+For classes that have plain functions mapped to the same internal functions as
+their instance methods, fetching of the object is done with
+`zend_parse_method_parameters()` instead of directly using `getThis()`.
+Therefore, no reference to object is obtained until the arguments are fully
+parsed. Without a reference to the object, there's no way to reset the object's
+internal error code. Instead, resetting of the object's internal error code is
+done upon fetching the object from its zval.
 
 Example:
 

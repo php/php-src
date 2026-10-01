@@ -52,8 +52,11 @@ foreach($dirs as $dir) {
    }
 }
 
-rmdir($workDir);
-
+?>
+--CLEAN--
+<?php
+@rmdir("rmdirVar3.tmp/aSubDir");
+@rmdir("rmdirVar3.tmp");
 ?>
 --EXPECTF--
 *** Testing rmdir() : variation ***

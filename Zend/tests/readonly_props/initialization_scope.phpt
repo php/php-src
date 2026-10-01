@@ -19,8 +19,8 @@ class B extends A {
 $test = new B;
 try {
     $test->prop = 1;
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 $test->initProtected();
 var_dump($test);
@@ -59,7 +59,7 @@ var_dump($test);
 
 ?>
 --EXPECTF--
-Cannot modify protected(set) readonly property A::$prop from global scope
+Error: Cannot modify protected(set) readonly property A::$prop from global scope
 object(B)#%d (1) {
   ["prop"]=>
   int(2)

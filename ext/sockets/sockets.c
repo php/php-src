@@ -567,7 +567,7 @@ static int php_sock_array_to_fd_set(uint32_t arg_num, zval *sock_array, fd_set *
 		num++;
 	} ZEND_HASH_FOREACH_END();
 
-	return num ? 1 : 0;
+	return num;
 }
 /* }}} */
 
@@ -618,7 +618,7 @@ PHP_FUNCTION(socket_select)
 	struct timeval *tv_p = NULL;
 	fd_set			rfds, wfds, efds;
 	PHP_SOCKET		max_fd = 0;
-	int				retval, sets = 0;
+	int				retval, max_set_count = 0;
 	zend_long		sec, usec = 0;
 	bool		sec_is_null = 0;
 
@@ -636,30 +636,39 @@ PHP_FUNCTION(socket_select)
 	FD_ZERO(&efds);
 
 	if (r_array != NULL) {
-		sets += retval = php_sock_array_to_fd_set(1, r_array, &rfds, &max_fd);
+		retval = php_sock_array_to_fd_set(1, r_array, &rfds, &max_fd);
 		if (retval == -1) {
 			RETURN_THROWS();
+		}
+		if (retval > max_set_count) {
+			max_set_count = retval;
 		}
 	}
 	if (w_array != NULL) {
-		sets += retval = php_sock_array_to_fd_set(2, w_array, &wfds, &max_fd);
+		retval = php_sock_array_to_fd_set(2, w_array, &wfds, &max_fd);
 		if (retval == -1) {
 			RETURN_THROWS();
+		}
+		if (retval > max_set_count) {
+			max_set_count = retval;
 		}
 	}
 	if (e_array != NULL) {
-		sets += retval = php_sock_array_to_fd_set(3, e_array, &efds, &max_fd);
+		retval = php_sock_array_to_fd_set(3, e_array, &efds, &max_fd);
 		if (retval == -1) {
 			RETURN_THROWS();
 		}
+		if (retval > max_set_count) {
+			max_set_count = retval;
+		}
 	}
 
-	if (!sets) {
+	if (!max_set_count) {
 		zend_value_error("socket_select(): At least one array argument must be passed");
 		RETURN_THROWS();
 	}
 
-	if (!PHP_SAFE_MAX_FD(max_fd, 0)) {
+	if (!PHP_SAFE_MAX_FD(max_fd, max_set_count)) {
 		RETURN_FALSE;
 	}
 
@@ -2341,13 +2350,26 @@ PHP_FUNCTION(socket_set_option)
 
 #ifdef SO_ATTACH_REUSEPORT_CBPF
 		case SO_ATTACH_REUSEPORT_CBPF: {
+			if (level != SOL_SOCKET) {
+				php_error_docref(NULL, E_WARNING, "Invalid level");
+				RETURN_FALSE;
+			}
+			if (Z_TYPE_P(arg4) != IS_LONG) {
+				zend_argument_type_error(4, "must be of type int when argument #3 ($option) is SO_ATTACH_REUSEPORT_CBPF, %s given", zend_zval_value_name(arg4));
+				RETURN_THROWS();
+			}
 			zend_long cbpf_val = zval_get_long(arg4);
 
 			if (!cbpf_val) {
+#ifdef SO_DETACH_REUSEPORT_BPF
 				ov = 1;
 				optlen = sizeof(ov);
 				opt_ptr = &ov;
-				optname = SO_DETACH_BPF;
+				optname = SO_DETACH_REUSEPORT_BPF;
+#else
+				php_error_docref(NULL, E_WARNING, "Detaching a reuseport CBPF filter is unsupported");
+				RETURN_FALSE;
+#endif
 			} else {
 				uint32_t k = (uint32_t)cbpf_val;
 

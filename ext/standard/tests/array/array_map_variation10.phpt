@@ -18,7 +18,7 @@ echo "-- anonymous function with two parameters and passing one array --\n";
 try {
     var_dump( array_map( function($a, $b) { return array($a, $b); }, $array1));
 } catch (Throwable $e) {
-    echo "Exception: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "-- anonymous function with NULL parameter --\n";
@@ -30,8 +30,8 @@ var_dump( array_map( function($a) { }, $array1));
 echo "-- passing NULL as 'array1' --\n";
 try {
     var_dump( array_map( function($a) { return array($a); }, NULL));
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done";
@@ -63,7 +63,7 @@ array(3) {
   }
 }
 -- anonymous function with two parameters and passing one array --
-Exception: Too few arguments to function {closure:%s:%d}(), 1 passed and exactly 2 expected
+ArgumentCountError: Too few arguments to function {closure:%s:%d}(), 1 passed and exactly 2 expected
 -- anonymous function with NULL parameter --
 array(3) {
   [0]=>
@@ -83,5 +83,5 @@ array(3) {
   NULL
 }
 -- passing NULL as 'array1' --
-array_map(): Argument #2 ($array) must be of type array, null given
+TypeError: array_map(): Argument #2 ($array) must be of type array, null given
 Done

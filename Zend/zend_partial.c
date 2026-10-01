@@ -51,6 +51,7 @@
 #include "zend_closures.h"
 #include "zend_attributes.h"
 #include "zend_exceptions.h"
+#include "zend_partial.h"
 #include "ext/opcache/ZendAccelerator.h"
 
 static zend_always_inline bool Z_IS_PLACEHOLDER_P(const zval *p) {
@@ -63,6 +64,14 @@ static zend_always_inline bool zp_is_static_closure(const zend_function *functio
 
 static zend_always_inline bool zp_is_non_static_closure(const zend_function *function) {
 	return ((function->common.fn_flags & (ZEND_ACC_STATIC|ZEND_ACC_CLOSURE)) == ZEND_ACC_CLOSURE);
+}
+
+/* Whether argument at offset 'offset' is const. Such arguments can be burned into the generated op_array */
+static inline bool zp_is_const_arg(uint32_t const_args, uint32_t offset) {
+	if (offset < sizeof(const_args) * CHAR_BIT) {
+		return const_args & (UINT32_C(1) << offset);
+	}
+	return false;
 }
 
 static zend_never_inline ZEND_COLD void zp_args_underflow(
@@ -178,7 +187,7 @@ static zend_string *zp_get_func_param_name(const zend_function *function, uint32
  * including params and used vars. */
 static zp_names *zp_assign_names(uint32_t argc, zval *argv,
 		zend_function *function, bool variadic_partial,
-		zend_array *extra_named_params)
+		zend_array *extra_named_params, uint32_t const_args)
 {
 	zp_names *names = zend_arena_calloc(&CG(ast_arena),
 			1, zend_safe_address_guarded(argc, sizeof(*names->params), offsetof(zp_names, params)));
@@ -225,7 +234,7 @@ static zp_names *zp_assign_names(uint32_t argc, zval *argv,
 	/* Assign names for pre-bound params (lexical vars).
 	 * There may be clashes, we ensure to generate unique names. */
 	for (uint32_t offset = 0; offset < argc; offset++) {
-		if (Z_IS_PLACEHOLDER_P(&argv[offset]) || Z_ISUNDEF(argv[offset])) {
+		if (Z_IS_PLACEHOLDER_P(&argv[offset]) || Z_ISUNDEF(argv[offset]) || zp_is_const_arg(const_args, offset)) {
 			continue;
 		}
 		uint32_t n = 2;
@@ -463,7 +472,9 @@ static zend_ast *zp_attribute_to_ast(zend_attribute *attribute)
 	if (attribute->argc) {
 		args_ast = zend_ast_create_arg_list(0, ZEND_AST_ARG_LIST);
 		for (uint32_t i = 0; i < attribute->argc; i++) {
-			zend_ast *arg_ast = zend_ast_create_zval(&attribute->args[i].value);
+			zval *zv = &attribute->args[i].value;
+			Z_TRY_ADDREF_P(zv);
+			zend_ast *arg_ast = zend_ast_create_zval(zv);
 			if (attribute->args[i].name) {
 				arg_ast = zend_ast_create(ZEND_AST_NAMED_ARG,
 						zend_ast_create_zval_from_str(
@@ -502,49 +513,6 @@ static zend_ast *zp_param_attributes_to_ast(zend_function *function,
 	return attributes_ast;
 }
 
-static zend_string *zp_pfa_name(const zend_op_array *declaring_op_array,
-		const zend_op *declaring_opline)
-{
-	/* We attempt to generate a name that hints at where the PFA was created,
-	 * similarly to Closures (GH-13550).
-	 * We do not attempt to make the name unique. */
-
-	zend_string *filename = declaring_op_array->filename;
-	uint32_t start_lineno = declaring_opline->lineno;
-
-	zend_string *class = zend_empty_string;
-	zend_string *separator = zend_empty_string;
-	zend_string *function = filename;
-	const char *parens = "";
-
-	if (declaring_op_array->function_name) {
-		function = declaring_op_array->function_name;
-		if (declaring_op_array->fn_flags & ZEND_ACC_CLOSURE) {
-			/* If the parent function is a closure, don't redundantly
-			 * add the classname and parentheses. */
-		} else {
-			parens = "()";
-
-			if (declaring_op_array->scope && declaring_op_array->scope->name) {
-				class = declaring_op_array->scope->name;
-				separator = ZSTR_KNOWN(ZEND_STR_PAAMAYIM_NEKUDOTAYIM);
-			}
-		}
-	}
-
-	zend_string *name = zend_strpprintf_unchecked(
-		0,
-		"{closure:pfa:%S%S%S%s:%" PRIu32 "}",
-		class,
-		separator,
-		function,
-		parens,
-		start_lineno
-	);
-
-	return name;
-}
-
 /* Generate the AST for calling the actual function */
 static zend_ast *zp_compile_forwarding_call(
 	zval *this_ptr, zend_function *function,
@@ -552,7 +520,7 @@ static zend_ast *zp_compile_forwarding_call(
 	zp_names *var_names, bool uses_variadic_placeholder, uint32_t num_args,
 	zend_class_entry *called_scope, zend_type return_type,
 	bool forward_superfluous_args,
-	zend_ast *stmts_ast)
+	zend_ast *stmts_ast, uint32_t const_args)
 {
 	bool is_assert = zend_string_equals(function->common.function_name,
 			ZSTR_KNOWN(ZEND_STR_ASSERT));
@@ -593,6 +561,37 @@ static zend_ast *zp_compile_forwarding_call(
 				default_value_ast = zend_ast_create_zval(&default_value);
 			}
 			args_ast = zend_ast_list_add(args_ast, default_value_ast);
+		} else if (zp_is_const_arg(const_args, offset)) {
+			ZEND_ASSERT(Z_TYPE(argv[offset]) < IS_OBJECT);
+			ZEND_ASSERT(!Z_REFCOUNTED(argv[offset]));
+
+			/* This argument never changes, so we can burn it into the op_array
+			 * and check its type ahead of time.
+			 * Work with a value copy because a scalar type check may coerce this value. */
+			zval value;
+			ZVAL_COPY_VALUE(&value, &argv[offset]);
+
+			zend_arg_info *arg_info;
+			if (offset < function->common.num_args) {
+				arg_info = &function->common.arg_info[offset];
+			} else if (function->common.fn_flags & ZEND_ACC_VARIADIC) {
+				arg_info = &function->common.arg_info[function->common.num_args];
+			} else {
+				arg_info = NULL;
+			}
+			if (arg_info && ZEND_TYPE_IS_SET(arg_info->type)
+					&& UNEXPECTED(!zend_check_type_ex(&arg_info->type, &value,
+						/* current_frame */ true, /* is_internal */ false))) {
+				zend_string *need_msg = zend_type_to_string_resolved(arg_info->type,
+						function->common.scope);
+				zend_argument_type_error_ex(function, offset + 1,
+						"must be of type %s, %s given",
+						ZSTR_VAL(need_msg), zend_zval_value_name(&value));
+				zend_string_release(need_msg);
+				goto error;
+			}
+
+			args_ast = zend_ast_list_add(args_ast, zend_ast_create_zval(&value));
 		} else {
 			args_ast = zend_ast_list_add(args_ast, zend_ast_create(ZEND_AST_VAR,
 						zend_ast_create_zval_from_str(zend_string_copy(var_names->params[offset]))));
@@ -701,17 +700,18 @@ static uint32_t zp_compute_num_required(const zend_function *function,
 static zend_op_array *zp_compile(zval *this_ptr, zend_function *function,
 		uint32_t argc, zval *argv, zend_array *extra_named_params,
 		const zend_array *named_positions,
-		const zend_op_array *declaring_op_array,
-		const zend_op *declaring_opline, void **cache_slot,
-		bool uses_variadic_placeholder) {
+		zend_string *declaring_filename,
+		const uint32_t *declaring_lineno_ptr, void **cache_slot,
+		zend_string *pfa_name, uint32_t flags, uint32_t const_args) {
 
 	zend_op_array *op_array = NULL;
 
 	if (UNEXPECTED(function->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS)) {
-		const char *format = "Cannot call %S() dynamically";
-		zend_throw_error(NULL, format, function->common.function_name);
+		zend_throw_error(NULL, "Cannot call %pS() dynamically", function->common.function_name);
 		return NULL;
 	}
+
+	bool uses_variadic_placeholder = flags & ZEND_PARTIAL_USES_VARIADIC_PLACEHOLDER;
 
 	if (UNEXPECTED(zp_args_check(function, argc, argv, extra_named_params, uses_variadic_placeholder) != SUCCESS)) {
 		ZEND_ASSERT(EG(exception));
@@ -811,7 +811,7 @@ static zend_op_array *zp_compile(zval *this_ptr, zend_function *function,
 	/* Assign variable names */
 
 	zp_names *var_names = zp_assign_names(argc, argv, function,
-			uses_variadic_placeholder, extra_named_params);
+			uses_variadic_placeholder, extra_named_params, const_args);
 
 	/* Generate AST */
 
@@ -865,15 +865,17 @@ static zend_op_array *zp_compile(zval *this_ptr, zend_function *function,
 						default_value_ast, attributes_ast, NULL, NULL);
 
 			} else if (!Z_ISUNDEF(argv[offset])) {
-				// TODO: If the pre-bound parameter is a literal, it can be a
-				// literal in the function body instead of a lexical var.
-				zend_ast *lexical_var_ast = zend_ast_create_zval_from_str(
-						zend_string_copy(var_names->params[offset]));
-				if (zp_arg_must_be_sent_by_ref(function, offset+1)) {
-					lexical_var_ast->attr = ZEND_BIND_REF;
+				if (zp_is_const_arg(const_args, offset)) {
+					/* Will be burned into the op_array */
+				} else {
+					zend_ast *lexical_var_ast = zend_ast_create_zval_from_str(
+							zend_string_copy(var_names->params[offset]));
+					if (zp_arg_must_be_sent_by_ref(function, offset+1)) {
+						lexical_var_ast->attr = ZEND_BIND_REF;
+					}
+					lexical_vars_ast = zend_ast_list_add(
+							lexical_vars_ast, lexical_var_ast);
 				}
-				lexical_vars_ast = zend_ast_list_add(
-						lexical_vars_ast, lexical_var_ast);
 			}
 		}
 
@@ -915,13 +917,13 @@ static zend_op_array *zp_compile(zval *this_ptr, zend_function *function,
 	/**
 	 * Generate function body.
 	 *
-	 * If we may need to forward superflous arguments, do that conditionally, as
+	 * If we may need to forward superfluous arguments, do that conditionally, as
 	 * it's faster:
 	 *
 	 * if (func_num_args() <= n) {
 	 *    // normal call
 	 * } else {
-	 *    // call with superflous arg forwarding
+	 *    // call with superfluous arg forwarding
 	 * }
 	 *
 	 * The func_num_args() call should be compiled to a single FUNC_NUM_ARGS op.
@@ -934,7 +936,7 @@ static zend_op_array *zp_compile(zval *this_ptr, zend_function *function,
 		no_forwarding_ast = zp_compile_forwarding_call(this_ptr, function,
 				argc, argv, extra_named_params,
 				var_names, uses_variadic_placeholder, num_params,
-				called_scope, return_type, false, no_forwarding_ast);
+				called_scope, return_type, false, no_forwarding_ast, const_args);
 
 		if (!no_forwarding_ast) {
 			ZEND_ASSERT(EG(exception));
@@ -944,7 +946,7 @@ static zend_op_array *zp_compile(zval *this_ptr, zend_function *function,
 		forwarding_ast = zp_compile_forwarding_call(this_ptr, function,
 				argc, argv, extra_named_params,
 				var_names, uses_variadic_placeholder, num_params,
-				called_scope, return_type, true, forwarding_ast);
+				called_scope, return_type, true, forwarding_ast, const_args);
 
 		if (!forwarding_ast) {
 			ZEND_ASSERT(EG(exception));
@@ -971,7 +973,7 @@ static zend_op_array *zp_compile(zval *this_ptr, zend_function *function,
 		stmts_ast = zp_compile_forwarding_call(this_ptr, function,
 				argc, argv, extra_named_params,
 				var_names, uses_variadic_placeholder, num_params,
-				called_scope, return_type, false, stmts_ast);
+				called_scope, return_type, false, stmts_ast, const_args);
 
 		if (!stmts_ast) {
 			ZEND_ASSERT(EG(exception));
@@ -1012,12 +1014,9 @@ static zend_op_array *zp_compile(zval *this_ptr, zend_function *function,
 	}
 #endif
 
-	zend_string *pfa_name = zp_pfa_name(declaring_op_array, declaring_opline);
-
-	op_array = zend_accel_compile_pfa(closure_ast, declaring_op_array,
-			declaring_opline, function, pfa_name);
-
-	zend_ast_destroy(closure_ast);
+	/* Takes ownership of closure_ast */
+	op_array = zend_accel_compile_pfa(closure_ast, declaring_filename,
+			declaring_lineno_ptr, function, pfa_name, flags & ZEND_PARTIAL_CACHEABLE_IN_SHM);
 
 clean:
 	zp_names_dtor(var_names, argc);
@@ -1040,9 +1039,9 @@ error:
 static const zend_op_array *zp_get_op_array(zval *this_ptr, zend_function *function,
 		uint32_t argc, zval *argv, zend_array *extra_named_params,
 		const zend_array *named_positions,
-		const zend_op_array *declaring_op_array,
-		const zend_op *declaring_opline, void **cache_slot,
-		bool uses_variadic_placeholder) {
+		zend_string *declaring_filename,
+		const uint32_t *declaring_lineno_ptr, void **cache_slot,
+		zend_string *pfa_name, uint32_t flags, uint32_t const_args) {
 
 	if (EXPECTED(function->type == ZEND_INTERNAL_FUNCTION
 					? cache_slot[0] == function
@@ -1051,13 +1050,13 @@ static const zend_op_array *zp_get_op_array(zval *this_ptr, zend_function *funct
 		return cache_slot[1];
 	}
 
-	const zend_op_array *op_array = zend_accel_pfa_cache_get(declaring_op_array,
-			declaring_opline, function);
+	const zend_op_array *op_array = zend_accel_pfa_cache_get(declaring_lineno_ptr, function,
+			flags & ZEND_PARTIAL_CACHEABLE_IN_SHM);
 
 	if (UNEXPECTED(!op_array)) {
 		op_array = zp_compile(this_ptr, function, argc, argv,
-			extra_named_params, named_positions, declaring_op_array, declaring_opline,
-			cache_slot, uses_variadic_placeholder);
+			extra_named_params, named_positions, declaring_filename, declaring_lineno_ptr,
+			cache_slot, pfa_name, flags, const_args);
 	}
 
 	if (EXPECTED(op_array) && !(function->common.fn_flags & ZEND_ACC_NEVER_CACHE)) {
@@ -1079,7 +1078,7 @@ static void zp_free_unbound_args(uint32_t start, uint32_t argc, zval *argv)
 
 /* Bind pre-bound arguments as lexical vars */
 static void zp_bind(zval *result, zend_function *function, uint32_t argc, zval *argv,
-		zend_array *extra_named_params) {
+		zend_array *extra_named_params, uint32_t const_args) {
 
 	zend_arg_info *arg_infos = function->common.arg_info;
 	uint32_t bind_offset = 0;
@@ -1088,13 +1087,13 @@ static void zp_bind(zval *result, zend_function *function, uint32_t argc, zval *
 		zval var;
 		ZVAL_OBJ(&var, ZEND_CLOSURE_OBJECT(function));
 		Z_ADDREF(var);
-		zend_closure_bind_var_ex(result, bind_offset, &var);
+		zend_closure_bind_var_ex(Z_OBJ_P(result), bind_offset, &var);
 		bind_offset += sizeof(Bucket);
 	}
 
 	for (uint32_t offset = 0; offset < argc; offset++) {
 		zval *var = &argv[offset];
-		if (Z_IS_PLACEHOLDER_P(var) || Z_ISUNDEF_P(var)) {
+		if (Z_IS_PLACEHOLDER_P(var) || Z_ISUNDEF_P(var) || zp_is_const_arg(const_args, offset)) {
 			continue;
 		}
 		zend_arg_info *arg_info;
@@ -1120,7 +1119,7 @@ static void zp_bind(zval *result, zend_function *function, uint32_t argc, zval *
 			return;
 		}
 		ZEND_ASSERT(zp_arg_must_be_sent_by_ref(function, offset+1) ? Z_ISREF_P(var) : !Z_ISREF_P(var));
-		zend_closure_bind_var_ex(result, bind_offset, var);
+		zend_closure_bind_var_ex(Z_OBJ_P(result), bind_offset, var);
 		bind_offset += sizeof(Bucket);
 	}
 
@@ -1128,21 +1127,23 @@ static void zp_bind(zval *result, zend_function *function, uint32_t argc, zval *
 		zval var;
 		ZVAL_ARR(&var, extra_named_params);
 		Z_ADDREF(var);
-		zend_closure_bind_var_ex(result, bind_offset, &var);
+		zend_closure_bind_var_ex(Z_OBJ_P(result), bind_offset, &var);
 	}
 }
 
-void zend_partial_create(zval *result, zval *this_ptr, zend_function *function,
+void zend_partial_create(zval *result, zend_class_entry *scope, zval *this_ptr, zend_function *function,
 		uint32_t argc, zval *argv, zend_array *extra_named_params,
 		const zend_array *named_positions,
-		const zend_op_array *declaring_op_array,
-		const zend_op *declaring_opline, void **cache_slot,
-		bool uses_variadic_placeholder) {
+		zend_string *declaring_filename,
+		const uint32_t *declaring_lineno_ptr, void **cache_slot,
+		zend_string *pfa_name, uint32_t flags, uint32_t const_args) {
+
+	ZEND_ASSERT(pfa_name);
 
 	const zend_op_array *op_array = zp_get_op_array(this_ptr, function, argc, argv,
 			extra_named_params, named_positions,
-			declaring_op_array, declaring_opline,
-			cache_slot, uses_variadic_placeholder);
+			declaring_filename, declaring_lineno_ptr,
+			cache_slot, pfa_name, flags, const_args);
 
 	if (UNEXPECTED(!op_array)) {
 		ZEND_ASSERT(EG(exception));
@@ -1152,7 +1153,7 @@ void zend_partial_create(zval *result, zval *this_ptr, zend_function *function,
 	}
 
 	zend_class_entry *called_scope;
-	zval object;
+	zend_object *object;
 
 	if (Z_TYPE_P(this_ptr) == IS_OBJECT) {
 		called_scope = Z_OBJCE_P(this_ptr);
@@ -1161,16 +1162,24 @@ void zend_partial_create(zval *result, zval *this_ptr, zend_function *function,
 	}
 
 	if (Z_TYPE_P(this_ptr) == IS_OBJECT && !zp_is_static_closure(function)) {
-		ZVAL_COPY_VALUE(&object, this_ptr);
+		object = Z_OBJ_P(this_ptr);
 	} else {
-		ZVAL_UNDEF(&object);
+		object = NULL;
+	}
+
+
+	/* We conveniently use the function's scope for the scope of the generated closure as this allows const exprs
+	 * referencing self:: or parent:: to behave normally without rewriting them.
+	 * This affects method resolution for magic methods, so use the actual scope for them. */
+	if (!(function->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+		scope = function->common.scope;
 	}
 
 	zend_create_partial_closure(result, (zend_function*)op_array,
-			function->common.scope, called_scope, &object,
+			scope, called_scope, object,
 			(function->common.fn_flags & ZEND_ACC_CLOSURE) != 0);
 
-	zp_bind(result, function, argc, argv, extra_named_params);
+	zp_bind(result, function, argc, argv, extra_named_params, const_args);
 }
 
 void zend_partial_op_array_dtor(zval *pDest)

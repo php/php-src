@@ -8,13 +8,13 @@ intl
 try {
     $formatter = new IntlListFormatter('f', IntlListFormatter::TYPE_AND, IntlListFormatter::WIDTH_WIDE);
 } catch(ValueError $exception) {
-    echo $exception->getMessage() . PHP_EOL;
+    echo $exception::class, ': ', $exception->getMessage(), PHP_EOL;
 }
 
 try {
     $formatter = new IntlListFormatter('ro_thisiswaytooooooooooooooooooooooooooooooooooooooooooooolongtobevaliditneedstobeatleast157characterstofailthevalidationinthelistformattercodeimplementation', IntlListFormatter::TYPE_AND, IntlListFormatter::WIDTH_WIDE);
 } catch(ValueError $exception) {
-    echo $exception->getMessage() .  PHP_EOL;
+    echo $exception::class, ': ', $exception->getMessage(), PHP_EOL;
 }
 
 $formatter = new IntlListFormatter('ro', IntlListFormatter::TYPE_AND, IntlListFormatter::WIDTH_WIDE);
@@ -22,17 +22,17 @@ $formatter = new IntlListFormatter('ro', IntlListFormatter::TYPE_AND, IntlListFo
 try {
     echo $formatter->format([new stdClass()]);
 } catch(Error $error) {
-    echo $error->getMessage() . PHP_EOL;
+    echo $error::class, ': ', $error->getMessage(), PHP_EOL;
 }
 
 try {
     echo $formatter->format([1, 2, new stdClass(), 4]);
 } catch(Error $error) {
-    echo $error->getMessage()  . PHP_EOL;
+    echo $error::class, ': ', $error->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-IntlListFormatter::__construct(): Argument #1 ($locale) "f" is invalid
-IntlListFormatter::__construct(): Argument #1 ($locale) must be less than or equal to 156 characters
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
+ValueError: IntlListFormatter::__construct(): Argument #1 ($locale) "f" is invalid
+ValueError: IntlListFormatter::__construct(): Argument #1 ($locale) must be less than or equal to 156 characters
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string

@@ -20,23 +20,43 @@ test();
 ?>
 DONE
 --EXPECTF--
-Warning: Undefined variable $a in %sassign_048.php on line 7
+Warning: unserialize(): Error at offset 0 of 0 bytes in %s on line %d
 
 Warning: Undefined variable $a in %sassign_048.php on line 7
 
-Warning: Undefined variable $a in %sassign_048.php on line 7
+Warning: unserialize(): Error at offset 0 of 0 bytes in %s on line %d
 
 Warning: Undefined variable $a in %sassign_048.php on line 7
 
-Warning: Undefined variable $a in %sassign_048.php on line 7
+Warning: unserialize(): Error at offset 0 of 0 bytes in %s on line %d
 
 Warning: Undefined variable $a in %sassign_048.php on line 7
 
-Warning: Undefined variable $a in %sassign_048.php on line 7
+Warning: unserialize(): Error at offset 0 of 0 bytes in %s on line %d
 
 Warning: Undefined variable $a in %sassign_048.php on line 7
 
+Warning: unserialize(): Error at offset 0 of 0 bytes in %s on line %d
+
 Warning: Undefined variable $a in %sassign_048.php on line 7
+
+Warning: unserialize(): Error at offset 0 of 0 bytes in %s on line %d
+
+Warning: Undefined variable $a in %sassign_048.php on line 7
+
+Warning: unserialize(): Error at offset 0 of 0 bytes in %s on line %d
+
+Warning: Undefined variable $a in %sassign_048.php on line 7
+
+Warning: unserialize(): Error at offset 0 of 0 bytes in %s on line %d
+
+Warning: Undefined variable $a in %sassign_048.php on line 7
+
+Warning: unserialize(): Error at offset 0 of 0 bytes in %s on line %d
+
+Warning: Undefined variable $a in %sassign_048.php on line 7
+
+Warning: unserialize(): Error at offset 0 of 0 bytes in %s on line %d
 
 Warning: Undefined variable $a in %sassign_048.php on line 7
 DONE

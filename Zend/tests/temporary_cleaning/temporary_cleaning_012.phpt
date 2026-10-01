@@ -11,10 +11,10 @@ class Foo {
 
 try {
     Foo::test();
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Access to undeclared static property Foo::$property
+Error: Access to undeclared static property Foo::$property

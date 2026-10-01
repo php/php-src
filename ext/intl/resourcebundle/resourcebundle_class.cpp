@@ -333,7 +333,7 @@ U_CFUNC PHP_FUNCTION( resourcebundle_count )
 }
 
 /* {{{ Get available locales from ResourceBundle name */
-U_CFUNC PHP_FUNCTION( resourcebundle_locales )
+PHP_INTL_FUNCTION_WITH_ERROR_RESET(resourcebundle_locales)
 {
 	char * bundlename;
 	size_t    bundlename_len = 0;
@@ -342,8 +342,6 @@ U_CFUNC PHP_FUNCTION( resourcebundle_locales )
 	int32_t count;
 	UEnumeration *icuenum;
 	UErrorCode   icuerror = U_ZERO_ERROR;
-
-	intl_errors_reset( NULL );
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STRING(bundlename, bundlename_len)

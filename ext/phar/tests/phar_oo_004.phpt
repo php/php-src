@@ -43,13 +43,13 @@ class MyDirectoryIterator extends DirectoryIterator
         return parent::valid();
     }
 
-    function key(): mixed
+    function key(): int
     {
         echo __METHOD__ . "\n";
         return parent::key();
     }
 
-    function current(): mixed
+    function current(): MyDirectoryIterator
     {
         echo __METHOD__ . "\n";
         return parent::current();

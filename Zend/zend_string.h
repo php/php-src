@@ -26,7 +26,7 @@
 
 BEGIN_EXTERN_C()
 
-ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
+ZEND_NORETURN ZEND_API ZEND_COLD void zend_error_noreturn(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 
 #include "zend_multiply.h"
 
@@ -751,6 +751,7 @@ default: ZEND_UNREACHABLE();
 	_(ZEND_STR_8_DOT_3,                "8.3") \
 	_(ZEND_STR_8_DOT_4,                "8.4") \
 	_(ZEND_STR_8_DOT_5,                "8.5") \
+	_(ZEND_STR_8_DOT_6,                "8.6") \
 
 
 typedef enum _zend_known_string_id {

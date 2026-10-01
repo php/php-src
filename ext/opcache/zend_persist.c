@@ -27,6 +27,7 @@
 #include "zend_operators.h"
 #include "zend_interfaces.h"
 #include "zend_attributes.h"
+#include "zend_partial.h"
 
 #ifdef HAVE_JIT
 # include "Optimizer/zend_func_info.h"
@@ -197,6 +198,13 @@ static zend_ast *zend_persist_ast(zend_ast *ast)
 		zend_ast_fcc *copy = zend_shared_memdup(ast, sizeof(zend_ast_fcc));
 		if (!ZCG(current_persistent_script)->corrupted) {
 			ZEND_MAP_PTR_NEW(copy->fptr);
+			copy->attr |= ZEND_PARTIAL_CACHEABLE_IN_SHM;
+		}
+		if (copy->filename) {
+			zend_accel_store_interned_string(copy->filename);
+		}
+		if (copy->name) {
+			zend_accel_store_interned_string(copy->name);
 		}
 		copy->args = zend_persist_ast(copy->args);
 		node = (zend_ast *) copy;
@@ -623,6 +631,12 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 				HashTable *attributes = Z_PTR_P(literal);
 				attributes = zend_persist_attributes(attributes);
 				ZVAL_PTR(literal, attributes);
+			}
+
+			if (opline->opcode == ZEND_CALLABLE_CONVERT_PARTIAL) {
+				if (!ZCG(current_persistent_script)->corrupted) {
+					opline->extended_value |= ZEND_PARTIAL_CACHEABLE_IN_SHM;
+				}
 			}
 		}
 

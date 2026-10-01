@@ -73,7 +73,7 @@ static UBool intl_is_normalized(zend_long form, const UChar *uinput, int32_t uin
 }/*}}}*/
 
 /* {{{ Normalize a string. */
-U_CFUNC PHP_FUNCTION( normalizer_normalize )
+PHP_INTL_FUNCTION_WITH_ERROR_RESET(normalizer_normalize)
 {
 	char*			input = NULL;
 	/* form is optional, defaults to FORM_C */
@@ -92,7 +92,6 @@ U_CFUNC PHP_FUNCTION( normalizer_normalize )
 
 	int32_t			size_needed;
 
-	intl_error_reset( NULL );
 
 	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "s|l",
@@ -202,7 +201,7 @@ U_CFUNC PHP_FUNCTION( normalizer_normalize )
 /* }}} */
 
 /* {{{ Test if a string is in a given normalization form. */
-U_CFUNC PHP_FUNCTION( normalizer_is_normalized )
+PHP_INTL_FUNCTION_WITH_ERROR_RESET(normalizer_is_normalized)
 {
 	char*	 	input = NULL;
 	/* form is optional, defaults to FORM_C */
@@ -215,7 +214,6 @@ U_CFUNC PHP_FUNCTION( normalizer_is_normalized )
 
 	UBool		uret = false;
 
-	intl_error_reset( NULL );
 
 	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "s|l",
@@ -278,7 +276,7 @@ U_CFUNC PHP_FUNCTION( normalizer_is_normalized )
 /* }}} */
 
 /* {{{ Returns the Decomposition_Mapping property for the given UTF-8 encoded code point. */
-U_CFUNC PHP_FUNCTION( normalizer_get_raw_decomposition )
+PHP_INTL_FUNCTION_WITH_ERROR_RESET(normalizer_get_raw_decomposition)
 {
 	char* input = NULL;
 	size_t input_length = 0;
@@ -293,7 +291,6 @@ U_CFUNC PHP_FUNCTION( normalizer_get_raw_decomposition )
 
 	zend_long form = NORMALIZER_DEFAULT;
 
-	intl_error_reset(NULL);
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STRING(input, input_length)

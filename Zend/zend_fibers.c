@@ -358,9 +358,9 @@ ZEND_API void* zend_fiber_stack_base(zend_fiber_stack *stack)
 #endif
 
 #ifdef ZEND_FIBER_UCONTEXT
-static ZEND_NORETURN void zend_fiber_trampoline(void)
+ZEND_NORETURN static void zend_fiber_trampoline(void)
 #else
-static ZEND_NORETURN void zend_fiber_trampoline(boost_context_data data)
+ZEND_NORETURN static void zend_fiber_trampoline(boost_context_data data)
 #endif
 {
 	/* Initialize transfer struct with a copy of passed data. */

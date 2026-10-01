@@ -11,21 +11,21 @@ try {
 	${'---'} = 'abc';
 	var_dump(${'---'});
 	assert(!${'---'});
-} catch (Error $e) {
-	echo $e->getMessage(), PHP_EOL;
+} catch (Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
 	$f = new Foo();
 	var_dump($f->{'---'});
 	assert(!$f->{'---'});
-} catch (Error $e) {
-	echo $e->getMessage(), PHP_EOL;
+} catch (Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 string(3) "abc"
-assert(!${'---'})
+AssertionError: assert(!${'---'})
 string(3) "---"
-assert(!$f->{'---'})
+AssertionError: assert(!$f->{'---'})

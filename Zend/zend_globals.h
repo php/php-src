@@ -26,7 +26,6 @@
 
 #include "zend_globals_macros.h"
 
-#include "zend_atomic.h"
 #include "zend_stack.h"
 #include "zend_ptr_stack.h"
 #include "zend_hash.h"
@@ -242,8 +241,8 @@ struct _zend_executor_globals {
 
 	bool full_tables_cleanup;
 
-	zend_atomic_bool vm_interrupt;
-	zend_atomic_bool timed_out;
+	atomic_bool vm_interrupt;
+	atomic_bool timed_out;
 
 	HashTable autoload_current_classnames;
 
@@ -345,6 +344,13 @@ struct _zend_executor_globals {
 
 	HashTable callable_convert_cache;
 	HashTable partial_function_application_cache;
+	zend_stack lambda_cache;
+
+	zend_vm_stack  vm_stack_page_cache;
+	uint32_t       vm_stack_page_cache_count;
+	/* Fibers use a different page size, so they need a separate cache */
+	zend_vm_stack  fiber_vm_stack_page_cache;
+	uint32_t       fiber_vm_stack_page_cache_count;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };

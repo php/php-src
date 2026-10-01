@@ -18,12 +18,12 @@ foreach ($argslist as $args) {
     try {
         imagecopyresized($image1, $image2, 1, 1, 1, 1, ...$args);
     } catch (ValueError $ex) {
-        echo $ex->getMessage(), PHP_EOL;
+        echo $ex::class, ': ', $ex->getMessage(), PHP_EOL;
     }
 }
 ?>
 --EXPECT--
-imagecopyresized(): Argument #7 ($dst_width) must be greater than 0
-imagecopyresized(): Argument #8 ($dst_height) must be greater than 0
-imagecopyresized(): Argument #9 ($src_width) must be greater than 0
-imagecopyresized(): Argument #10 ($src_height) must be greater than 0
+ValueError: imagecopyresized(): Argument #7 ($dst_width) must be greater than 0
+ValueError: imagecopyresized(): Argument #8 ($dst_height) must be greater than 0
+ValueError: imagecopyresized(): Argument #9 ($src_width) must be greater than 0
+ValueError: imagecopyresized(): Argument #10 ($src_height) must be greater than 0

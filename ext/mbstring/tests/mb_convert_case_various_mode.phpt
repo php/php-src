@@ -18,7 +18,7 @@ var_dump(mb_convert_case('foo BAR Spaß', MB_CASE_FOLD_SIMPLE));
 try {
     var_dump(mb_convert_case('foo BAR Spaß', 100));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "\n-- Greek letter sigma --\n";
@@ -64,7 +64,7 @@ string(13) "FOO BAR SPAß"
 string(13) "foo bar spaß"
 string(13) "Foo Bar Spaß"
 string(13) "foo bar spaß"
-mb_convert_case(): Argument #2 ($mode) must be one of the MB_CASE_* constants
+ValueError: mb_convert_case(): Argument #2 ($mode) must be one of the MB_CASE_* constants
 
 -- Greek letter sigma --
 string(2) "Σ"

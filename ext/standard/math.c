@@ -170,6 +170,10 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 		return value;
 	}
 
+	if (places == 0 && value == trunc(value)) {
+        return value;
+    }
+
 	places = places < INT_MIN+1 ? INT_MIN+1 : places;
 
 	exponent = php_intpow10(abs(places));
@@ -899,6 +903,7 @@ PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
 				num = num * base + c;
 				break;
 			} else {
+				zend_error(E_NOTICE, "Input number is larger than PHP_INT_MAX, precision has been lost in conversion");
 				fnum = (double)num;
 				mode = 1;
 			}

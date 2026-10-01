@@ -12,9 +12,9 @@ if (!function_exists("posix_eaccess")) die("skip only platforms with posix_eacce
 try {
     posix_eaccess(str_repeat('bogus path', 1042));
 } catch (ValueError $e) {
-    echo $e->getMessage() . PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-posix_eaccess(): Argument #1 ($filename) must not be empty
+ValueError: posix_eaccess(): Argument #1 ($filename) must not be empty

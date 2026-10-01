@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - path - URL encoded characters
+Test Uri\WhatWg\Url::withPath() - success - percent-encoded characters
 --FILE--
 <?php
 

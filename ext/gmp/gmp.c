@@ -1082,6 +1082,40 @@ GMP_UNARY_OP_FUNCTION(com);
 /* {{{ Finds next prime of a */
 GMP_UNARY_OP_FUNCTION(nextprime);
 
+#ifdef HAVE___GMPZ_PREVPRIME
+/* {{{ Finds previous prime of a */
+ZEND_FUNCTION(gmp_prevprime)
+{
+	mpz_ptr gmpnum_a, gmpnum_result;
+	zval *definitely_prime = NULL;
+	int res;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_a)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(definitely_prime)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (mpz_cmp_ui(gmpnum_a, 2) <= 0) {
+		/*
+		 * mpz_prevprime() returns 0 when no previous prime exists, which happens
+		 * for operands not greater than 2.
+		 * https://gmplib.org/manual/Number-Theoretic-Functions#index-mpz_005fprevprime
+		 */
+		zend_argument_value_error(1, "must be greater than 2");
+		RETURN_THROWS();
+	}
+
+	INIT_GMP_RETVAL(gmpnum_result);
+	res = mpz_prevprime(gmpnum_result, gmpnum_a);
+	ZEND_ASSERT(res);
+	if (definitely_prime) {
+		ZEND_TRY_ASSIGN_REF_BOOL(definitely_prime, res == 2);
+	}
+}
+/* }}} */
+#endif
+
 /* Add a and b */
 GMP_BINARY_OP_FUNCTION(add);
 /* Subtract b from a */
@@ -1188,6 +1222,39 @@ ZEND_FUNCTION(gmp_powm)
 	mpz_powm(gmpnum_result, gmpnum_base, gmpnum_exp, gmpnum_mod);
 }
 /* }}} */
+
+#ifdef HAVE___GMPZ_POWM_SEC
+/* {{{ Raise base to power exp and take result modulo mod using a side-channel quiet algorithm */
+ZEND_FUNCTION(gmp_powm_sec)
+{
+	mpz_ptr gmpnum_base, gmpnum_exp, gmpnum_mod, gmpnum_result;
+
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_base)
+		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_exp)
+		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_mod)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (mpz_sgn(gmpnum_exp) <= 0) {
+		zend_argument_value_error(2, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(!mpz_odd_p(gmpnum_mod))) {
+		/* Zero is an even modulus, but report it like gmp_powm() does. */
+		if (!mpz_cmp_ui(gmpnum_mod, 0)) {
+			zend_argument_error(zend_ce_division_by_zero_error, 3, "Modulo by zero");
+		} else {
+			zend_argument_value_error(3, "must be odd");
+		}
+		RETURN_THROWS();
+	}
+
+	INIT_GMP_RETVAL(gmpnum_result);
+	mpz_powm_sec(gmpnum_result, gmpnum_base, gmpnum_exp, gmpnum_mod);
+}
+/* }}} */
+#endif
 
 /* {{{ Takes integer part of square root of a */
 ZEND_FUNCTION(gmp_sqrt)

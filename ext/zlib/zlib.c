@@ -779,11 +779,26 @@ PHP_ZLIB_DECODE_FUNC(gzdecode, PHP_ZLIB_ENCODING_GZIP);
 PHP_ZLIB_DECODE_FUNC(gzuncompress, PHP_ZLIB_ENCODING_DEFLATE);
 /* }}} */
 
+ZEND_ATTRIBUTE_NONNULL static zval *zlib_find_option(HashTable *options, const char *name, size_t name_len)
+{
+	zval *option = zend_hash_str_find(options, name, name_len);
+
+	if (!option) {
+		return NULL;
+	}
+
+	ZVAL_DEINDIRECT(option);
+
+	if (UNEXPECTED(Z_TYPE_P(option) == IS_UNDEF)) {
+		return NULL;
+	}
+	return option;
+}
+
 static bool zlib_create_dictionary_string(HashTable *options, char **dict, size_t *dictlen) {
 	zval *option_buffer;
 
-	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("dictionary"))) != NULL) {
-		ZVAL_DEINDIRECT(option_buffer);
+	if (options && (option_buffer = zlib_find_option(options, ZEND_STRL("dictionary"))) != NULL) {
 		ZVAL_DEREF(option_buffer);
 		switch (Z_TYPE_P(option_buffer)) {
 			case IS_STRING: {
@@ -853,14 +868,12 @@ static bool zlib_create_dictionary_string(HashTable *options, char **dict, size_
 ZEND_ATTRIBUTE_NONNULL static bool zlib_get_long_option(HashTable *options, const char *option_name, size_t option_name_len, zend_long *value)
 {
 	bool failed = false;
-	zval *option_buffer = zend_hash_str_find(options, option_name, option_name_len);
+	zval *option_buffer = zlib_find_option(options, option_name, option_name_len);
 
 	if (!option_buffer) {
 		return true;
 	}
 
-	/* The |H ZPP specifier may leave HashTable entries wrapped in IS_INDIRECT. */
-	ZVAL_DEINDIRECT(option_buffer);
 	*value = zval_try_get_long(option_buffer, &failed);
 	if (UNEXPECTED(failed)) {
 		zend_argument_type_error(
@@ -881,10 +894,22 @@ PHP_FUNCTION(inflate_init)
 	zend_long encoding, window = 15;
 	char *dict = NULL;
 	size_t dictlen = 0;
+	zval *options_zv = NULL;
 	HashTable *options = (HashTable *) &zend_empty_array;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|H", &encoding, &options)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|A", &encoding, &options_zv)) {
 		RETURN_THROWS();
+	}
+
+	if (options_zv) {
+		if (Z_TYPE_P(options_zv) == IS_OBJECT) {
+			php_error_docref(NULL, E_DEPRECATED,
+				"Passing an object for argument #2 $option to inflate_init() is deprecated, call get_object_vars() first instead");
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
+		}
+		options = HASH_OF(options_zv);
 	}
 
 	if (!zlib_get_long_option(options, ZEND_STRL("window"), &window)) {
@@ -918,6 +943,7 @@ PHP_FUNCTION(inflate_init)
 	ctx->inflateDictlen = dictlen;
 	ctx->status = Z_OK;
 
+	zend_long orig_encoding = encoding;
 	if (encoding < 0) {
 		encoding += 15 - window;
 	} else {
@@ -931,7 +957,7 @@ PHP_FUNCTION(inflate_init)
 		RETURN_FALSE;
 	}
 
-	if (encoding == PHP_ZLIB_ENCODING_RAW && dictlen > 0) {
+	if (orig_encoding == PHP_ZLIB_ENCODING_RAW && dictlen > 0) {
 		switch (inflateSetDictionary(&ctx->Z, (Bytef *) ctx->inflateDict, ctx->inflateDictlen)) {
 			case Z_OK:
 				efree(ctx->inflateDict);
@@ -1100,10 +1126,22 @@ PHP_FUNCTION(deflate_init)
 	zend_long encoding, level = -1, memory = 8, window = 15, strategy = Z_DEFAULT_STRATEGY;
 	char *dict = NULL;
 	size_t dictlen = 0;
+	zval *options_zv = NULL;
 	HashTable *options = (HashTable*)&zend_empty_array;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|H", &encoding, &options)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|A", &encoding, &options_zv)) {
 		RETURN_THROWS();
+	}
+
+	if (options_zv) {
+		if (Z_TYPE_P(options_zv) == IS_OBJECT) {
+			php_error_docref(NULL, E_DEPRECATED,
+				"Passing an object for argument #2 $option to deflate_init() is deprecated, call get_object_vars() first instead");
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
+		}
+		options = HASH_OF(options_zv);
 	}
 
 	if (!zlib_get_long_option(options, ZEND_STRL("level"), &level)) {

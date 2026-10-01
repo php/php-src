@@ -24,12 +24,10 @@ PHPAPI void make_digest(char *md5str, const unsigned char *digest)
 
 PHPAPI void make_digest_ex(char *md5str, const unsigned char *digest, size_t len)
 {
-	static const char hexits[17] = "0123456789abcdef";
-
-	for (size_t i = 0; i < len; i++) {
-		md5str[i * 2]       = hexits[digest[i] >> 4];
-		md5str[(i * 2) + 1] = hexits[digest[i] &  0x0F];
-	}
+	zend_bin2hex(md5str, digest, len);
+	/* Some callers (e.g. ext/soap's WSDL cache key) memcpy() the whole
+	   buffer including this terminator, so it must still be written here;
+	   zend_bin2hex() itself does not null-terminate. */
 	md5str[len * 2] = '\0';
 }
 

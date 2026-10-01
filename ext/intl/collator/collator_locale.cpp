@@ -48,11 +48,7 @@ U_CFUNC PHP_FUNCTION( collator_get_locale )
 	/* Fetch the object. */
 	COLLATOR_METHOD_FETCH_OBJECT;
 
-	if (!co || !co->ucoll) {
-		intl_error_set_code( nullptr, COLLATOR_ERROR_CODE( co ) );
-		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ), "Object not initialized");
-		zend_throw_error(nullptr, "Object not initialized");
-
+	if (collator_check_initialized(co) == FAILURE) {
 		RETURN_THROWS();
 	}
 

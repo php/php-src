@@ -33,15 +33,15 @@ var_dump( array_map(@$undefined_var, $arr1) );
 echo "-- with empty string --\n";
 try {
     var_dump( array_map("", $arr1, $arr2) );
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "-- with empty array --\n";
 try {
     var_dump( array_map(array(), $arr1, $arr2) );
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done";
@@ -118,7 +118,7 @@ array(2) {
   int(2)
 }
 -- with empty string --
-array_map(): Argument #1 ($callback) must be a valid callback or null, function "" not found or invalid function name
+TypeError: array_map(): Argument #1 ($callback) must be a valid callback or null, function "" not found or invalid function name
 -- with empty array --
-array_map(): Argument #1 ($callback) must be a valid callback or null, array callback must have exactly two members
+TypeError: array_map(): Argument #1 ($callback) must be a valid callback or null, array callback must have exactly two members
 Done

@@ -1,7 +1,7 @@
 /*
  * IR - Lightweight JIT Compilation Framework
  * (CFG - Control Flow Graph)
- * Copyright (C) 2022 Zend by Perforce.
+ * This file is part of the IR Project distributed under the MIT-style LICENSE.
  * Authors: Dmitry Stogov <dmitry@php.net>
  */
 
@@ -119,7 +119,7 @@ static void ir_remove_phis_inputs(ir_ctx *ctx, ir_use_list *use_list, int new_in
 		}
 
 		if (p != q) {
-			use_list->count -= (p - q);
+			use_list->count -= (ir_ref)(p - q);
 			do {
 				*q = IR_UNUSED; /* clenu-op the removed tail */
 				q++;
@@ -994,7 +994,19 @@ static bool ir_dominates(const ir_block *blocks, uint32_t b1, uint32_t b2)
 #define ENTRY_TIME(b) times[(b) * 2]
 #define EXIT_TIME(b)  times[(b) * 2 + 1]
 
-static IR_NEVER_INLINE void ir_collect_irreducible_loops(ir_ctx *ctx, uint32_t *times, ir_worklist *work, ir_list *list)
+#define IRR_FIRST_ENTRY(b) irreducible_loops[(b) * 2]
+#define IRR_NEXT_ENTRY(b)  irreducible_loops[(b) * 2 + 1]
+
+static IR_NEVER_INLINE void ir_push_irreducible_loop_entries(ir_worklist *work, uint32_t *irreducible_loops, uint32_t b)
+{
+	b = IRR_FIRST_ENTRY(b);
+	while (b) {
+		ir_worklist_push(work, b);
+		b = IRR_NEXT_ENTRY(b);
+	}
+}
+
+static IR_NEVER_INLINE uint32_t ir_collect_irreducible_loops(ir_ctx *ctx, uint32_t loops, uint32_t *times, ir_worklist *work, ir_list *list, uint32_t *irreducible_loops)
 {
 	ir_block *blocks = ctx->cfg_blocks;
 	uint32_t *edges = ctx->cfg_edges;
@@ -1021,12 +1033,15 @@ static IR_NEVER_INLINE void ir_collect_irreducible_loops(ir_ctx *ctx, uint32_t *
 		ir_block *bb = &blocks[hdr];
 
 		IR_ASSERT(bb->flags & IR_BB_IRREDUCIBLE_LOOP);
-		IR_ASSERT(!bb->loop_depth);
-		if (!bb->loop_depth) {
+		IR_ASSERT(!(bb->flags & IR_BB_LOOP_HEADER));
+		if (!(bb->flags & IR_BB_LOOP_HEADER)) {
 			/* process irreducible loop */
 
 			bb->flags |= IR_BB_LOOP_HEADER;
-			bb->loop_depth = 1;
+			bb->next_loop = loops;
+			loops = hdr;
+			IRR_FIRST_ENTRY(hdr) = 0;
+
 			if (ctx->ir_base[bb->start].op == IR_MERGE) {
 				ctx->ir_base[bb->start].op = IR_LOOP_BEGIN;
 			}
@@ -1062,18 +1077,22 @@ static IR_NEVER_INLINE void ir_collect_irreducible_loops(ir_ctx *ctx, uint32_t *
 				for (; n > 0; p++, n--) {
 					uint32_t pred = *p;
 					if (!ir_bitset_in(work->visited, pred)) {
-						if (blocks[pred].loop_header) {
-							if (blocks[pred].loop_header == b) continue;
-							do {
-								pred = blocks[pred].loop_header;
-							} while (blocks[pred].loop_header > 0);
+						if (blocks[pred].loop_header == b) continue;
+						while (1) {
+							if (UNEXPECTED(blocks[pred].flags & IR_BB_IRREDUCIBLE_LOOP)) {
+								ir_push_irreducible_loop_entries(work, irreducible_loops, pred);
+							}
+							if (!blocks[pred].loop_header) break;
+							pred = blocks[pred].loop_header;
 						}
 						if (ENTRY_TIME(pred) > ENTRY_TIME(hdr) && EXIT_TIME(pred) < EXIT_TIME(hdr)) {
 							/* "pred" is a descendant of "hdr" */
-								ir_worklist_push(work, pred);
-						} else if (bb->predecessors_count > 1) {
+							ir_worklist_push(work, pred);
+						} else if (bb->predecessors_count > 1 && !(bb->flags & IR_BB_IRREDUCIBLE_ENTRY)) {
 							/* another entry to the irreducible loop */
-							bb->flags |= IR_BB_IRREDUCIBLE_LOOP;
+							bb->flags |= IR_BB_IRREDUCIBLE_ENTRY;
+							IRR_NEXT_ENTRY(b) = IRR_FIRST_ENTRY(hdr);
+							IRR_FIRST_ENTRY(hdr) = b;
 							if (ctx->ir_base[bb->start].op == IR_MERGE) {
 								ctx->ir_base[bb->start].op = IR_LOOP_BEGIN;
 							}
@@ -1083,6 +1102,8 @@ static IR_NEVER_INLINE void ir_collect_irreducible_loops(ir_ctx *ctx, uint32_t *
 			}
 		}
 	}
+
+	return loops;
 }
 
 int ir_find_loops(ir_ctx *ctx)
@@ -1092,6 +1113,8 @@ int ir_find_loops(ir_ctx *ctx)
 	ir_block *blocks = ctx->cfg_blocks;
 	uint32_t *edges = ctx->cfg_edges;
 	ir_worklist work;
+	uint32_t loops = 0; /* linked list of identified loops ordered by dom_depth */
+	uint32_t *irreducible_loops = NULL;
 
 	if (ctx->flags2 & IR_NO_LOOPS) {
 		return 1;
@@ -1163,7 +1186,10 @@ next:
 		IR_ASSERT(bb->dom_depth <= prev_dom_depth);
 
 		if (UNEXPECTED(bb->dom_depth < irreducible_depth)) {
-			ir_collect_irreducible_loops(ctx, times, &work, &irreducible_list);
+			if (!irreducible_loops) {
+				irreducible_loops = ir_mem_malloc(sizeof(uint32_t) * 2 * (ctx->cfg_blocks_count + 1));
+			}
+			loops = ir_collect_irreducible_loops(ctx, loops, times, &work, &irreducible_list, irreducible_loops);
 			irreducible_depth = 0;
 		}
 
@@ -1210,8 +1236,9 @@ next:
 				uint32_t hdr = b;
 
 				bb->flags |= IR_BB_LOOP_HEADER;
+				bb->next_loop = loops;
+				loops = b;
 				ctx->flags2 |= IR_CFG_HAS_LOOPS;
-				bb->loop_depth = 1;
 				if (ctx->ir_base[bb->start].op == IR_MERGE) {
 					ctx->ir_base[bb->start].op = IR_LOOP_BEGIN;
 				}
@@ -1230,10 +1257,16 @@ next:
 						for (; n > 0; p++, n--) {
 							uint32_t pred = *p;
 							if (!ir_bitset_in(work.visited, pred)) {
+								if (UNEXPECTED(blocks[pred].flags & IR_BB_IRREDUCIBLE_LOOP)) {
+									ir_push_irreducible_loop_entries(&work, irreducible_loops, pred);
+								}
 								if (blocks[pred].loop_header) {
 									if (blocks[pred].loop_header == b) continue;
 									do {
 										pred = blocks[pred].loop_header;
+										if (UNEXPECTED(blocks[pred].flags & IR_BB_IRREDUCIBLE_LOOP)) {
+											ir_push_irreducible_loop_entries(&work, irreducible_loops, pred);
+										}
 									} while (blocks[pred].loop_header > 0);
 									ir_worklist_push(&work, pred);
 								} else {
@@ -1250,39 +1283,48 @@ next:
 
 	IR_ASSERT(!irreducible_depth);
 	if (ir_list_capasity(&irreducible_list)) {
+		IR_ASSERT(irreducible_loops);
+		ir_mem_free(irreducible_loops);
 		ir_list_free(&irreducible_list);
 	}
 
-	if (ctx->flags2 & IR_CFG_HAS_LOOPS) {
-		n = ctx->cfg_blocks_count + 1;
-		for (j = 1; j < n; j++) {
-			b = sorted_blocks[j];
-			ir_block *bb = &blocks[b];
-			if (bb->loop_header > 0) {
-				ir_block *loop = &blocks[bb->loop_header];
-				uint32_t loop_depth = loop->loop_depth;
+	if (loops) {
+		ir_block *bb;
 
-				if (bb->flags & IR_BB_LOOP_HEADER) {
-					loop_depth++;
+		/* Set loop_depth for loop headers */
+		b = loops;
+		do {
+			bb = &blocks[b];
+			b = bb->next_loop;
+			IR_ASSERT(bb->flags & IR_BB_LOOP_HEADER);
+			bb->loop_depth = (bb->loop_header) ? blocks[bb->loop_header].loop_depth + 1 : 1;
+		} while (b);
+
+		/* Set loop_depth for loop members */
+		n = ctx->cfg_blocks_count + 1;
+		for (j = 1, bb = blocks + 1; j < n; bb++, j++) {
+			if (bb->loop_header) {
+				if (!(bb->flags & IR_BB_LOOP_HEADER)) {
+					bb->loop_depth = blocks[bb->loop_header].loop_depth;
 				}
-				bb->loop_depth = loop_depth;
-				if (bb->flags & (IR_BB_ENTRY|IR_BB_LOOP_WITH_ENTRY)) {
-					loop->flags |= IR_BB_LOOP_WITH_ENTRY;
-					if (loop_depth > 1) {
-						/* Set IR_BB_LOOP_WITH_ENTRY flag for all the enclosing loops */
-						bb = &blocks[loop->loop_header];
-						while (1) {
-							if (bb->flags & IR_BB_LOOP_WITH_ENTRY) {
-								break;
-							}
-							bb->flags |= IR_BB_LOOP_WITH_ENTRY;
-							if (bb->loop_depth == 1) {
-								break;
-							}
-							bb = &blocks[loop->loop_header];
-						}
+				if (bb->flags & IR_BB_ENTRY) {
+					if (bb->flags & IR_BB_LOOP_HEADER) {
+						bb->flags |= IR_BB_LOOP_WITH_ENTRY;
 					}
+					/* Set IR_BB_LOOP_WITH_ENTRY flag for all the enclosing loops */
+					b = bb->loop_header;
+					do {
+						ir_block *loop = &blocks[b];
+						if (loop->flags & IR_BB_LOOP_WITH_ENTRY) {
+							break;
+						}
+						loop->flags |= IR_BB_LOOP_WITH_ENTRY;
+						b = loop->loop_header;
+					} while (b);
 				}
+			} else if ((bb->flags & (IR_BB_LOOP_HEADER|IR_BB_ENTRY|IR_BB_LOOP_WITH_ENTRY)) ==
+					(IR_BB_LOOP_HEADER|IR_BB_ENTRY)) {
+				bb->flags |= IR_BB_LOOP_WITH_ENTRY;
 			}
 		}
 	}

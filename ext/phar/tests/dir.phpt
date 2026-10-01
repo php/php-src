@@ -71,7 +71,7 @@ Warning: mkdir(): phar error: cannot create directory "fails" in phar "%sok.phar
 
 Warning: mkdir(): phar error: cannot create directory "sub" in phar "%sok.phar", directory already exists in %sdir.php on line %d
 
-Warning: mkdir(): phar error: cannot create directory "sub/directory.txt" in phar "%sok.phar", phar error: path "sub/directory.txt" exists and is a not a directory in %sdir.php on line %d
+Warning: mkdir(): phar error: cannot create directory "sub/directory.txt" in phar "%sok.phar", phar error: path "sub/directory.txt" exists and is not a directory in %sdir.php on line %d
 
 Warning: mkdir(): internal corruption of phar "%soops.phar" (truncated manifest at stub end) in %sdir.php on line %d
 

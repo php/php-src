@@ -40,7 +40,7 @@ try {
         $workdir
     );
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 $phar->stopBuffering();
 
@@ -55,4 +55,4 @@ $workdir = __DIR__.'/getPathname_wrong_type';
 --EXPECTF--
 [ Found: %scontent%chello.txt ]
 [getPathname]
-getPathname() must return a string
+UnexpectedValueException: getPathname() must return a string

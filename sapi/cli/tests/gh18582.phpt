@@ -28,7 +28,6 @@ fclose($fp);
 ?>
 --EXPECTF--
 HTTP/1.1 404 Not Found
-Host: %s
 Date: %s
 Connection: close
 X-Powered-By: %s

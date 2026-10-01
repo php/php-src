@@ -31,21 +31,21 @@ $b = new B();
 
 try {
     $b->prop1 = 0;
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($b->prop1);
 
 try {
     $b->prop2 = 0;
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($b->prop2);
 
 ?>
 --EXPECT--
-Unknown named parameter $unknown
+Error: Unknown named parameter $unknown
 int(42)
-Unknown named parameter $value
+Error: Unknown named parameter $value
 int(42)

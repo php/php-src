@@ -1,5 +1,10 @@
 --TEST--
 PFA variation: variadics, internal function
+--INI--
+opcache.enable=1
+opcache.enable_cli=1
+opcache.optimization_level=-1
+opcache.file_update_protection=0
 --FILE--
 <?php
 $sprintf = sprintf("%d %d %d", 100, ...);
@@ -11,11 +16,6 @@ echo $sprintf(1000, 10000);
 --EXPECTF--
 Closure [ <user> static function {closure:%s:%d} ] {
   @@ %svariation_variadics_002.php 2 - 2
-
-  - Bound Variables [2] {
-      Variable #0 [ $format ]
-      Variable #1 [ $values2 ]
-  }
 
   - Parameters [1] {
     Parameter #0 [ <optional> mixed ...$values ]

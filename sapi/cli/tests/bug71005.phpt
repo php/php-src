@@ -33,7 +33,6 @@ HEADER
 ?>
 --EXPECTF--
 HTTP/1.1 200 OK
-Host: %s
 Date: %s
 Connection: close
 X-Powered-By: PHP/%s

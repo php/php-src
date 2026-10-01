@@ -97,15 +97,15 @@ can be determined using `nproc`.
 PHP ships with an extensive test suite, the command `make test` is used after
 successful compilation of the sources to run this test suite.
 
-It is possible to run tests using multiple cores by setting `-jN` in
-`TEST_PHP_ARGS` or `TESTS`:
+Tests run in parallel by default, using up to 10 detected logical processors.
+Set `-jN` in `TEST_PHP_ARGS` or `TESTS` to override the worker count:
 
 ```shell
 make TEST_PHP_ARGS=-j4 test
 ```
 
-Shall run `make test` with a maximum of 4 concurrent jobs: Generally the maximum
-number of jobs should not exceed the number of cores available.
+This runs `make test` with a maximum of 4 concurrent jobs. Alternatively,
+use `-j1` to run tests sequentially.
 
 Use the `TEST_PHP_ARGS` or `TESTS` variable to test only specific directories:
 

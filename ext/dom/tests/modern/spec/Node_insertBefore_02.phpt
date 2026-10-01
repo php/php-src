@@ -12,13 +12,13 @@ $fragment->appendChild($dom->createElement('a'));
 
 try {
     $dom->insertBefore($fragment, $dom->documentElement);
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo $dom->saveHtml(), "\n";
 
 ?>
 --EXPECT--
-Cannot have more than one element child in a document
+DOMException: Cannot have more than one element child in a document
 <!DOCTYPE html><html><head></head><body></body></html>

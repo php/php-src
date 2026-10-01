@@ -26,8 +26,8 @@ var_dump($attr->newInstance());
 $attr = (new ReflectionClass(Test2::class))->getAttributes()[0];
 try {
     var_dump($attr->newInstance());
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -47,4 +47,4 @@ object(MyAttribute)#1 (3) {
   ["c"]=>
   string(1) "C"
 }
-Named parameter $a overwrites previous argument
+Error: Named parameter $a overwrites previous argument

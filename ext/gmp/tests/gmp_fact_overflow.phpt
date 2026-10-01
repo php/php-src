@@ -8,18 +8,18 @@ gmp
 try {
     var_dump(gmp_fact(gmp_pow(2, 100)));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     var_dump(gmp_fact(gmp_init("18446744073709551616")));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "Done\n";
 ?>
 --EXPECTF--
-gmp_fact(): Argument #1 ($num) must be between 0 and %d
-gmp_fact(): Argument #1 ($num) must be between 0 and %d
+ValueError: gmp_fact(): Argument #1 ($num) must be between 0 and %d
+ValueError: gmp_fact(): Argument #1 ($num) must be between 0 and %d
 Done

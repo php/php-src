@@ -1420,7 +1420,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
 								do {
 									zend_hash_iterators_update(ht, iter_pos, j);
 									iter_pos = zend_hash_iterators_lower_pos(ht, iter_pos + 1);
-								} while (iter_pos < i);
+								} while (iter_pos <= i);
 							}
 							q++;
 							j++;
@@ -2416,7 +2416,7 @@ static zend_always_inline uint32_t zend_array_dup_elements(const HashTable *sour
 			if (EXPECTED(!HT_HAS_ITERATORS(target))) {
 				while (p != end) {
 					if (zend_array_dup_element(source, target, target_idx, p, q, false, static_keys, with_holes)) {
-						if (source->nInternalPointer == idx) {
+						if (UNEXPECTED(target->nInternalPointer > target_idx && target->nInternalPointer <= idx)) {
 							target->nInternalPointer = target_idx;
 						}
 						target_idx++; q++;
@@ -2429,19 +2429,21 @@ static zend_always_inline uint32_t zend_array_dup_elements(const HashTable *sour
 
 				while (p != end) {
 					if (zend_array_dup_element(source, target, target_idx, p, q, false, static_keys, with_holes)) {
-						if (source->nInternalPointer == idx) {
+						if (UNEXPECTED(target->nInternalPointer > target_idx && target->nInternalPointer <= idx)) {
 							target->nInternalPointer = target_idx;
 						}
 						if (UNEXPECTED(idx >= iter_pos)) {
 							do {
 								zend_hash_iterators_update(target, iter_pos, target_idx);
 								iter_pos = zend_hash_iterators_lower_pos(target, iter_pos + 1);
-							} while (iter_pos < idx);
+							} while (iter_pos <= idx);
 						}
 						target_idx++; q++;
 					}
 					idx++; p++;
 				}
+				/* Move past-the-end iterators so they can pick up newly appended elements. */
+				_zend_hash_iterators_update(target, source->nNumUsed, target_idx);
 			}
 			return target_idx;
 		}
@@ -2997,9 +2999,17 @@ static void zend_hash_sort_internal(HashTable *ht, sort_func_t sort, bucket_comp
 
 	IS_CONSISTENT(ht);
 
-	if (!(ht->nNumOfElements>1) && !(renumber && ht->nNumOfElements>0)) {
-		/* Doesn't require sorting */
-		return;
+	if (ht->nNumOfElements <= 1) {
+		if (!renumber || ht->nNumOfElements == 0) {
+			/* Doesn't require sorting */
+			return;
+		}
+		if (sort == zend_sort && HT_IS_PACKED(ht) && HT_IS_WITHOUT_HOLES(ht)) {
+			/* The single element already has the expected index. */
+			ht->nInternalPointer = 0;
+			ht->nNextFreeElement = 1;
+			return;
+		}
 	}
 
 	if (HT_IS_PACKED(ht)) {
@@ -3220,6 +3230,13 @@ ZEND_API int zend_hash_compare(HashTable *ht1, const HashTable *ht2, compare_fun
 	if (ht1 == ht2) {
 		return 0;
 	}
+
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		zend_throw_error(NULL, "Maximum call stack size reached during comparison");
+		return ZEND_UNCOMPARABLE;
+	}
+#endif
 
 	/* It's enough to protect only one of the arrays.
 	 * The second one may be referenced from the first and this may cause

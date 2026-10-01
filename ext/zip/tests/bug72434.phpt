@@ -10,8 +10,8 @@ try {
     $unserialized_payload = unserialize($serialized_payload);
     var_dump($unserialized_payload);
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Unserialization of 'ZipArchive' is not allowed, override __serialize() and __unserialize() to implement it
+Exception: Unserialization of 'ZipArchive' is not allowed, override __serialize() and __unserialize() to implement it

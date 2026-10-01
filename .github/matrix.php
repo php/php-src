@@ -1,7 +1,8 @@
 <?php
 
 const BRANCHES = [
-    ['name' => 'master', 'ref' => 'master', 'version' => [8, 6]],
+    ['name' => 'master', 'ref' => 'master', 'version' => [8, 7]],
+    ['name' => 'PHP-8.6', 'ref' => 'PHP-8.6', 'version' => [8, 6]],
     ['name' => 'PHP-8.5', 'ref' => 'PHP-8.5', 'version' => [8, 5]],
     ['name' => 'PHP-8.4', 'ref' => 'PHP-8.4', 'version' => [8, 4]],
     ['name' => 'PHP-8.3', 'ref' => 'PHP-8.3', 'version' => [8, 3]],
@@ -73,7 +74,7 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
         && ($all_jobs || !$no_jobs || $test_benchmarking)
         // push trigger is restricted to official repository.
         && ($repository === 'php/php-src' || $trigger === 'pull_request')) {
-        $jobs['BENCHMARKING']['config']['integrated_opcache'] = version_compare($php_version, '8.5', '>=');
+        $jobs['BENCHMARKING'] = true;
     }
     if ($all_jobs || $test_community) {
         $jobs['COMMUNITY']['matrix'] = version_compare($php_version, '8.4', '>=')
@@ -127,19 +128,7 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
         $test_arm = version_compare($php_version, '8.4', '>=');
         $jobs['MACOS']['matrix'] = $all_variations
             ? ['arch' => $test_arm ? ['X64', 'ARM64'] : ['X64'], 'debug' => [true, false], 'zts' => [true, false]]
-            : ['include' => [['arch' => $test_arm ? 'ARM64' : 'X64', 'debug' => true, 'zts' => false, 'jit' => true]]];
-        if ($all_variations) {
-            // Set the jit variable on X64 jobs
-            $jobs['MACOS']['matrix']['include'][] = ['arch' => 'X64', 'jit' => true];
-            if ($test_arm) {
-                // Set the jit variable on ARM64 NTS jobs
-                $jobs['MACOS']['matrix']['include'][] = ['arch' => 'ARM64', 'zts' => false, 'jit' => true];
-                // Set the jit variable on ARM64 ZTS jobs on 8.6+
-                if (version_compare($php_version, '8.6', '>=')) {
-                    $jobs['MACOS']['matrix']['include'][] = ['arch' => 'ARM64', 'zts' => true, 'jit' => true];
-                }
-            }
-        }
+            : ['include' => [['arch' => $test_arm ? 'ARM64' : 'X64', 'debug' => true, 'zts' => false]]];
         $jobs['MACOS']['config']['arm64_version'] = version_compare($php_version, '8.4', '>=') ? '15' : '14';
     }
     if ($all_jobs || $test_msan) {
@@ -199,7 +188,9 @@ $repository = $argv[5] ?? null;
 foreach ($branches as &$branch) {
     $php_version = $branch['version'][0] . '.' . $branch['version'][1];
     $branch['jobs'] = select_jobs($repository, $trigger, $nightly, $labels, $php_version, $branch['ref'], $all_variations);
+    $branch['config']['default_run_test_jobs'] = version_compare($php_version, '8.6', '>=') ? '' : '-j2';
     $branch['config']['ubuntu_version'] = version_compare($php_version, '8.5', '>=') ? '24.04' : '22.04';
+    $branch['config']['integrated_opcache'] = version_compare($php_version, '8.5', '>=');
 }
 
 echo "All variations:";

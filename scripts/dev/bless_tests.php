@@ -79,6 +79,9 @@ function normalizeOutput(string $out): string {
     $out = preg_replace("/'(\/|[A-Z]:\\\\)\S+\\.\\.\\.'/", "'%s'", $out);
     $out = preg_replace("/'file:(\/|[A-Z]:\\\\)\S+\\.\\.\\.'/", "'%s'", $out);
     $out = str_replace("\0", '%0', $out);
+    $out = preg_replace('(; .*\.php:\d+-\d+)', '; %s.php:%s', $out);
+    $out = preg_replace('(; \(lines=(\d+), args=(\d+), vars=(\d+), tmps=\d+\))', '; (lines=$1, args=$2, vars=$3, tmps=%d)', $out);
+    $out = preg_replace('((\d{4,}) (INIT_FCALL) (\d+) (\d+))', '$1 $2 $3 %d', $out);
     return $out;
 }
 

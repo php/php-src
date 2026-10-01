@@ -26,7 +26,8 @@ mb_convert_variables("EUC-JP", "Shift_JIS", $test->x);
 
 var_dump($test, $test2);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: mb_convert_variables(): Passing an object for argument #3 $vars to mb_convert_variables() is deprecated, call get_object_vars() first instead in %s on line %d
 object(Test)#1 (2) {
   ["x"]=>
   string(5) "hello"

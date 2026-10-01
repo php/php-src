@@ -14,7 +14,7 @@ require_once 'skipifconnectfailure.inc';
         printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
             $host, $user, $db, $port, $socket);
 
-    if (!$stmt = mysqli_stmt_init($link))
+    if (!$stmt = mysqli_prepare($link, "DO 1"))
         printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
     try {

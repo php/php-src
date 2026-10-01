@@ -37,12 +37,12 @@ ini_set('phar.readonly', 1);
 try {
     $gz->decompress();
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $zip->decompress();
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --CLEAN--
@@ -60,5 +60,5 @@ int(4096)
 %sphar_decompress2.phar
 %sphar_decompress.phar
 %sphar_decompress.hooba.phar
-Cannot decompress phar archive, phar is read-only
-Cannot decompress zip-based archives with whole-archive compression
+UnexpectedValueException: Cannot decompress phar archive, phar is read-only
+UnexpectedValueException: Cannot decompress zip-based archives with whole-archive compression

@@ -29,8 +29,8 @@ function test() {
 
     try {
         C::$prop = 2;
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     var_dump(C::$prop);
 
@@ -39,30 +39,30 @@ function test() {
 
     try {
         ++C::$prop;
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     var_dump(C::$prop);
 
     try {
         C::$prop++;
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     var_dump(C::$prop);
 
     try {
         C::$prop += str_repeat('a', 10);
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     var_dump(C::$prop);
 
     try {
         $ref = &C::$prop;
         $ref++;
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     var_dump(C::$prop);
 
@@ -70,15 +70,15 @@ function test() {
         $ref = 4;
         C::$prop = &$ref;
         $ref++;
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     var_dump(C::$prop);
 
     try {
         C::$prop2[] = 'foo';
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     var_dump(C::$prop2);
 
@@ -97,20 +97,20 @@ test();
 
 ?>
 --EXPECTF--
-Cannot modify private(set) property C::$prop from global scope
+Error: Cannot modify private(set) property C::$prop from global scope
 int(1)
 int(3)
-Cannot indirectly modify private(set) property C::$prop from global scope
+Error: Cannot indirectly modify private(set) property C::$prop from global scope
 int(3)
-Cannot indirectly modify private(set) property C::$prop from global scope
+Error: Cannot indirectly modify private(set) property C::$prop from global scope
 int(3)
-Cannot indirectly modify private(set) property C::$prop from global scope
+Error: Cannot indirectly modify private(set) property C::$prop from global scope
 int(3)
-Cannot indirectly modify private(set) property C::$prop from global scope
+Error: Cannot indirectly modify private(set) property C::$prop from global scope
 int(3)
-Cannot indirectly modify private(set) property C::$prop from global scope
+Error: Cannot indirectly modify private(set) property C::$prop from global scope
 int(3)
-Cannot indirectly modify private(set) property C::$prop2 from global scope
+Error: Cannot indirectly modify private(set) property C::$prop2 from global scope
 array(0) {
 }
 array(1) {
@@ -123,20 +123,20 @@ object(stdClass)#%d (1) {
 }
 
 Repeat:
-Cannot modify private(set) property C::$prop from global scope
+Error: Cannot modify private(set) property C::$prop from global scope
 int(1)
 int(3)
-Cannot indirectly modify private(set) property C::$prop from global scope
+Error: Cannot indirectly modify private(set) property C::$prop from global scope
 int(3)
-Cannot indirectly modify private(set) property C::$prop from global scope
+Error: Cannot indirectly modify private(set) property C::$prop from global scope
 int(3)
-Cannot indirectly modify private(set) property C::$prop from global scope
+Error: Cannot indirectly modify private(set) property C::$prop from global scope
 int(3)
-Cannot indirectly modify private(set) property C::$prop from global scope
+Error: Cannot indirectly modify private(set) property C::$prop from global scope
 int(3)
-Cannot indirectly modify private(set) property C::$prop from global scope
+Error: Cannot indirectly modify private(set) property C::$prop from global scope
 int(3)
-Cannot indirectly modify private(set) property C::$prop2 from global scope
+Error: Cannot indirectly modify private(set) property C::$prop2 from global scope
 array(0) {
 }
 array(1) {

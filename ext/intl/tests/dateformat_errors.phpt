@@ -26,8 +26,8 @@ var_dump(intl_get_error_message());
 
 ?>
 --EXPECT--
-IntlException: IntlDateFormatter::__construct(): Invalid value for calendar type; it must be one of IntlDateFormatter::TRADITIONAL (locale's default calendar) or IntlDateFormatter::GREGORIAN. Alternatively, it can be an IntlCalendar object
+IntlException: IntlDateFormatter::__construct(): Invalid value for calendar type; it must be one of IntlDateFormatter::TRADITIONAL (locale's default calendar) or IntlDateFormatter::GREGORIAN or IntlDateFormatter::PROLEPTIC_GREGORIAN. Alternatively, it can be an IntlCalendar object
 NULL
-string(245) "IntlDateFormatter::create(): Invalid value for calendar type; it must be one of IntlDateFormatter::TRADITIONAL (locale's default calendar) or IntlDateFormatter::GREGORIAN. Alternatively, it can be an IntlCalendar object: U_ILLEGAL_ARGUMENT_ERROR"
+string(287) "IntlDateFormatter::create(): Invalid value for calendar type; it must be one of IntlDateFormatter::TRADITIONAL (locale's default calendar) or IntlDateFormatter::GREGORIAN or IntlDateFormatter::PROLEPTIC_GREGORIAN. Alternatively, it can be an IntlCalendar object: U_ILLEGAL_ARGUMENT_ERROR"
 NULL
-string(234) "datefmt_create(): Invalid value for calendar type; it must be one of IntlDateFormatter::TRADITIONAL (locale's default calendar) or IntlDateFormatter::GREGORIAN. Alternatively, it can be an IntlCalendar object: U_ILLEGAL_ARGUMENT_ERROR"
+string(276) "datefmt_create(): Invalid value for calendar type; it must be one of IntlDateFormatter::TRADITIONAL (locale's default calendar) or IntlDateFormatter::GREGORIAN or IntlDateFormatter::PROLEPTIC_GREGORIAN. Alternatively, it can be an IntlCalendar object: U_ILLEGAL_ARGUMENT_ERROR"

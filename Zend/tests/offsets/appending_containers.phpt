@@ -11,7 +11,7 @@ foreach ($containers as $container) {
         $container[] = 'value';
         var_dump($container);
     } catch (\Throwable $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -30,26 +30,26 @@ array(1) {
   string(5) "value"
 }
 true container:
-Cannot use a scalar value as an array
+Error: Cannot use a scalar value as an array
 4 container:
-Cannot use a scalar value as an array
+Error: Cannot use a scalar value as an array
 5.5 container:
-Cannot use a scalar value as an array
+Error: Cannot use a scalar value as an array
 '10' container:
-[] operator not supported for strings
+Error: [] operator not supported for strings
 '25.5' container:
-[] operator not supported for strings
+Error: [] operator not supported for strings
 'string' container:
-[] operator not supported for strings
+Error: [] operator not supported for strings
 [] container:
 array(1) {
   [0]=>
   string(5) "value"
 }
 STDERR container:
-Cannot use a scalar value as an array
+Error: Cannot use a scalar value as an array
 new stdClass() container:
-Cannot use object of type stdClass as array
+Error: Cannot use object of type stdClass as array
 new ArrayObject() container:
 object(ArrayObject)#2 (1) {
   ["storage":"ArrayObject":private]=>

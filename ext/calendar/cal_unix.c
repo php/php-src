@@ -59,7 +59,7 @@ PHP_FUNCTION(jdtounix)
 		RETURN_THROWS();
 	}
 	if (uday < 2440588 || (uday - 2440588) > (ZEND_LONG_MAX / SECS_PER_DAY)) { /* before beginning of unix epoch or greater than representable */
-		zend_value_error("jday must be between 2440588 and " ZEND_LONG_FMT, ZEND_LONG_MAX / SECS_PER_DAY + 2440588);
+		zend_argument_value_error(1, "jday must be between 2440588 and " ZEND_LONG_FMT, ZEND_LONG_MAX / SECS_PER_DAY + 2440588);
 		RETURN_THROWS();
 	}
 

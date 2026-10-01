@@ -32,7 +32,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: is_csv.c,v 1.15 2024/05/18 15:16:13 christos Exp $")
+FILE_RCSID("@(#)$File: is_csv.c,v 1.16 2026/06/02 17:50:54 christos Exp $")
 #endif
 
 #include <string.h>
@@ -104,7 +104,7 @@ csv_parse(const unsigned char *uc, const unsigned char *ue)
 			nf++;
 			break;
 		case '\n':
-			DPRINTF("%zu %zu %zu\n", nl, nf, tf);
+			DPRINTF("nl=%zu nf=%zu tf=%zu\n", nl, nf, tf);
 			nl++;
 #if CSV_LINES
 			if (nl == CSV_LINES)
@@ -126,7 +126,8 @@ csv_parse(const unsigned char *uc, const unsigned char *ue)
 			break;
 		}
 	}
-	return tf > 1 && nl >= 2;
+	DPRINTF("tf=%zu>1 nl=%zu>=2\n", tf, nl);
+	return tf >= 1 && nl >= 2;
 }
 
 #ifndef TEST

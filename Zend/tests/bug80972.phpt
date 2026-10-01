@@ -19,8 +19,8 @@ try {
     echo 'Float casted to string compile', \PHP_EOL;
     $string[(string) 10e120] = 'E';
     var_dump($string);
-} catch (\TypeError $e) {
-    echo $e->getMessage(), \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 /* This same bug also permits to modify the first byte of a string even if
@@ -29,13 +29,13 @@ try {
     /* This must not affect the string value */
     $string["wrong"] = "f";
 } catch (\Throwable $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($string);
 
 ?>
 --EXPECT--
 Float casted to string compile
-Cannot access offset of type string on string
-Cannot access offset of type string on string
+TypeError: Cannot access offset of type string on string
+TypeError: Cannot access offset of type string on string
 string(34) "Here is some text for good measure"

@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component retrieval - host type - IP future
+Test Uri\Rfc3986\Uri component retrieval - host type - IPvFuture
 --FILE--
 <?php
 
@@ -9,4 +9,4 @@ var_dump($uri->getHostType());
 
 ?>
 --EXPECT--
-enum(Uri\Rfc3986\UriHostType::IPvFuture)
+enum(Uri\Rfc3986\UriHostType::IpVFuture)

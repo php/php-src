@@ -11,19 +11,19 @@ try {
     echo "isset():\n";
     var_dump(isset($container[new stdClass()]));
 } catch (\Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     echo "empty():\n";
     var_dump(empty($container[new stdClass()]));
 } catch (\Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     echo "Coalesce():\n";
     var_dump($container[new stdClass()] ?? 'default');
 } catch (\Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
@@ -32,4 +32,4 @@ bool(false)
 empty():
 bool(true)
 Coalesce():
-Cannot access offset of type stdClass on string
+TypeError: Cannot access offset of type stdClass on string

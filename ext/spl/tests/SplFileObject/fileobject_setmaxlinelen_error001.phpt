@@ -9,9 +9,9 @@ try {
     $s->setMaxLineLen(-1);
 }
 catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-SplFileObject::setMaxLineLen(): Argument #1 ($maxLength) must be greater than or equal to 0
+ValueError: SplFileObject::setMaxLineLen(): Argument #1 ($maxLength) must be greater than or equal to 0

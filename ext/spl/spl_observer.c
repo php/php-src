@@ -23,7 +23,6 @@
 #include "zend_smart_str.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
-#include "zend_attributes.h"
 
 #include "php_spl.h" /* For php_spl_object_hash() */
 #include "spl_observer.h"
@@ -99,7 +98,7 @@ static zend_result spl_object_storage_get_hash(zend_hash_key *key, spl_SplObject
 		ZVAL_OBJ(&param, obj);
 		ZVAL_UNDEF(&rv);
 		spl_object_storage_get_hash_depth++;
-		zend_call_method_with_1_params(&intern->std, intern->std.ce, &intern->fptr_get_hash, "getHash", &rv, &param);
+		zend_call_known_function(intern->fptr_get_hash, &intern->std, intern->std.ce, &rv, 1, &param, NULL);
 		spl_object_storage_get_hash_depth--;
 		if (UNEXPECTED(Z_ISUNDEF(rv))) {
 			/* An exception has occurred */
@@ -151,8 +150,7 @@ static spl_SplObjectStorageElement* spl_object_storage_get(spl_SplObjectStorage 
 static spl_SplObjectStorageElement *spl_object_storage_create_element(zend_object *obj, zval *inf) /* {{{ */
 {
 	spl_SplObjectStorageElement *pelement = emalloc(sizeof(spl_SplObjectStorageElement));
-	pelement->obj = obj;
-	GC_ADDREF(obj);
+	pelement->obj = zend_object_copy(obj);
 	if (inf) {
 		ZVAL_COPY(&pelement->inf, inf);
 	} else {
@@ -224,8 +222,7 @@ static spl_SplObjectStorageElement *spl_object_storage_attach(spl_SplObjectStora
 		return pelement;
 	}
 
-	element.obj = obj;
-	GC_ADDREF(obj);
+	element.obj = zend_object_copy(obj);
 	if (inf) {
 		ZVAL_COPY(&element.inf, inf);
 	} else {
@@ -747,7 +744,11 @@ PHP_METHOD(SplObjectStorage, count)
 	}
 
 	if (mode == PHP_COUNT_RECURSIVE) {
-		RETURN_LONG(php_count_recursive(&intern->storage));
+		zend_long count = php_count_recursive(&intern->storage);
+		if (UNEXPECTED(count < 0)) {
+			RETURN_THROWS();
+		}
+		RETURN_LONG(count);
 	}
 
 	RETURN_LONG(zend_hash_num_elements(&intern->storage));

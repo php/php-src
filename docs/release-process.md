@@ -105,6 +105,7 @@ releases.
     * php-8.4.0 (initial GA)
     * php-8.4.9 (periodic bugfix or security release)
 
+12. Ensure you are familiar with our procedure for [merging upwards][].
 
 ## Packaging a non-stable release (alpha/beta/RC)
 
@@ -321,7 +322,7 @@ slightly different steps. We'll call attention where the steps differ.
     git add main/php_version.h Zend/zend.h configure.ac
     git merge --continue
     ```
-    
+
     Be sure to set up a merge driver for the `NEWS` file as described in
     the [Git FAQ page on the PHP wiki][gitfaq-mandatory].
 
@@ -446,7 +447,7 @@ slightly different steps. We'll call attention where the steps differ.
    # .
    #
    git add -p
-   git add archive/entries/*.xml
+   git add public/archive/entries/*.xml
    git commit --gpg-sign=YOURKEYID -m "Announce PHP X.Y.0RCn"
    git push upstream master
    ```
@@ -543,25 +544,38 @@ slightly different steps. We'll call attention where the steps differ.
 
 ## Packaging a stable release
 
-1. Check out the *patch-level version branch* for the release
-   (e.g., `PHP-8.1.7`).
+1. Check out the *patch-level version branch* for the release.
+
+   ```
+   git switch PHP-X.Y.Z
+   ```
 
    > 💬 **Hint** \
    > You should have created this branch when packaging the non-stable release
    > candidate for this version. If it is for a PHP-X.Y.0 version, then the branch
    > was created as part of the final planned release candidate, PHP-X.Y.0RC4.
 
-2. If a CVE commit needs to be merged to the release, have it committed to
-   the base branches and [merged upwards as usual][] (e.g. commit the CVE fix
-   to 7.2, merge to 7.3, 7.4, etc.). Then, you can cherry-pick it into the
-   patch-level version branch for this release.
+2. If the upcoming release is a security release, you will have been informed
+   about it by the security release manager (SRM) by Tuesday noon (UTC).
 
-   Commit these changes and push the patch-level version branch. Ensure
-   that CI is still passing (see above).
+   > 💬 **Hint** \
+   > If you haven't set up a git remote for the security repo yet, do so:
+   > ```bash
+   > git remote add security git@github.com:php/php-src-security.git
+   > ```
 
-   > 💡 **Tip** \
-   > Don't forget to update `NEWS` manually in an extra commit to the
-   > patch-level version branch.
+   The SRM will provide you with a branch to merge in your
+   *patch-level version branch*.
+
+   ```bash
+   git fetch security
+   git merge security/PHP-X.Y.Z-security
+   git push upstream PHP-X.Y.Z
+   ```
+
+   > 💬 **Hint** \
+   > You do not need to merge this back into PHP-X.Y; the SRM will take care
+   > of it.
 
 3. Run the `./scripts/dev/credits` script in the patch-level version branch,
    and commit the changes in the credits files in `ext/standard`.
@@ -744,9 +758,9 @@ slightly different steps. We'll call attention where the steps differ.
    ./bin/createReleaseEntry -v X.Y.Z -r # --security for security releases
    ```
 
-   This will create a release file (i.e., `releases/X_Y_Z.php`) and a news entry
-   file (i.e., `archive/entries/YYYY-MM-DD-n.xml`), while also updating
-   `archive/archive.xml`.
+   This will create a release file (i.e., `public/releases/X_Y_Z.php`) and a news
+   entry file (i.e., `public/archive/entries/YYYY-MM-DD-n.xml`), while also
+   updating `public/archive/archive.xml`.
 
    Within these files, it will generate standard messages for the new version.
    You may edit the generated files to expand on the base message, if needed.
@@ -762,7 +776,7 @@ slightly different steps. We'll call attention where the steps differ.
    for PHP 8.4) added above the first anchor of the previous version.
 
    ```shell
-   ./bin/news2html 'https://github.com/php/php-src/raw/php-X.Y.Z/NEWS' 'X.Y.Z' 'ChangeLog-X.php'
+   ./bin/news2html 'https://github.com/php/php-src/raw/php-X.Y.Z/NEWS' 'X.Y.Z' 'public/ChangeLog-X.php'
    ```
 8. Update the information in the `$QA_RELEASES` array in `include/release-qa.php`.
 
@@ -778,7 +792,7 @@ slightly different steps. We'll call attention where the steps differ.
 
    ```shell
    git add -p
-   git add archive/entries/*.xml releases/*.php
+   git add public/archive/entries/*.xml public/releases/*.php
    git commit --gpg-sign=YOURKEYID -m "Announce PHP X.Y.Z"
    git push upstream master
    ```
@@ -870,8 +884,8 @@ If you choose to create a patch-level release, follow these steps:
     * Call `php bin/createReleaseEntry -v <version> [ --security ]` in your
       local web-php checkout.
 
-4. Commit all the changes (`include/version.inc`, `archive/archive.xml`,
-   `archive/entries/YYYY-MM-DD-N.xml`).
+4. Commit all the changes (`include/version.inc`, `public/archive/archive.xml`,
+   `public/archive/entries/YYYY-MM-DD-N.xml`).
 
 5. Wait an hour or two, then send a mail to php-announce@lists.php.net,
    php-general@lists.php.net and internals@lists.php.net with a text similar to
@@ -935,10 +949,9 @@ feature development that cannot go into the new version.
 
    * clear the `NEWS`, `UPGRADING`, and `UPGRADING.INTERNALS` files;
    * update the version numbers in `configure.ac`, `main/php_version.h`,
-     `Zend/zend.h`, and `win32/build/confutils.js`;
+     `Zend/zend.h`, and `win32/build/confutils.js`; and
    * update the API version numbers in `Zend/zend_extensions.h`,
-     `Zend/zend_modules.h`, and `main/php.h`; and
-   * add the new branch to the list in `CONTRIBUTING.md`.
+     `Zend/zend_modules.h`, and `main/php.h`.
 
    See [Prepare for PHP 8.2][] and [Prepare for PHP 8.2 (bis)][] for an example
    of what this commit should include.
@@ -1081,7 +1094,7 @@ volunteers to begin the selection process for the next release managers.
 
 4. File a [ticket in the infrastructure](https://github.com/php/infrastructure/issues/new?template=request-release-manager-access.yml)
    project and provide an SSH key, your @php.net email address, your GitHub
-   account name, and your preferred system account name. Preferrably they're
+   account name, and your preferred system account name. Preferably they're
    all the same!
 
 5. Read [Logging into Servers](https://github.com/php/infrastructure/blob/main/docs/ServerAccess.rst#logging-into-servers) to set up
@@ -1182,7 +1195,7 @@ volunteers to begin the selection process for the next release managers.
 [Update NEWS for PHP 8.2.0RC6]: https://github.com/php/php-src/commit/4ccc414961a70200d638ca281a35f893226d74e2
 [PHP 8.3 is now for PHP 8.3.21-dev]: https://github.com/php/php-src/commit/b57f425cfe20a11003253427424cc0517483550b
 [GitHub command line tool]: https://cli.github.com
-[merged upwards as usual]: https://wiki.php.net/vcs/gitworkflow
+[merging upwards]: https://wiki.php.net/vcs/gitworkflow
 [Update versions for PHP 8.1.7]: https://github.com/php/php-src/commit/d35e577a1bd0b35b9386cea97cddc73fd98eed6d
 [Update NEWS for PHP 8.1.7]: https://github.com/php/php-src/commit/b241f07f52ca9f87bf52be81817f475e6e727439
 [Announce PHP 8.1.6]: https://github.com/php/web-php/commit/9f796a96c65f07e45845ec248933bfb0010b94a9

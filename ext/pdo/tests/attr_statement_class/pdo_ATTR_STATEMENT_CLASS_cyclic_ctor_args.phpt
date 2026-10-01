@@ -42,18 +42,18 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 PDOTest::dropTableIfExists($db, "pdo_attr_statement_class_cyclic_ctor_args");
 ?>
---EXPECT--
+--EXPECTF--
 array(1) {
   [0]=>
   string(12) "PDOStatement"
 }
 bool(true)
-object(PDO)#1 (0) {
+object(PDO)#%d (0) {
 }
-object(HoldPdo)#2 (2) {
+object(HoldPdo)#%d (2) {
   ["queryString"]=>
   string(79) "SELECT id, label FROM pdo_attr_statement_class_cyclic_ctor_args ORDER BY id ASC"
   ["v"]=>
-  object(PDO)#1 (0) {
+  object(PDO)#%d (0) {
   }
 }

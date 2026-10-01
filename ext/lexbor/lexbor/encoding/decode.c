@@ -912,6 +912,13 @@ lxb_encoding_decode_iso_2022_jp(lxb_encoding_decode_t *ctx,
                     }
                     LXB_ENCODING_DECODE_ERROR_END();
 
+                    if (ctx->buffer_used >= ctx->buffer_length) {
+                        iso->prepand = iso->lead;
+                        iso->lead = 0x00;
+
+                        return LXB_STATUS_SMALL_BUFFER;
+                    }
+
                     byte = iso->lead;
                     iso->lead = 0x00;
 
@@ -1278,6 +1285,12 @@ lxb_encoding_decode_utf_16(lxb_encoding_decode_t *ctx, bool is_be,
                 ctx->u.lead = lead + 0x01;
             }
             LXB_ENCODING_DECODE_ERROR_END();
+
+            if (ctx->buffer_used >= ctx->buffer_length) {
+                ctx->u.lead = lead + 0x01;
+
+                return LXB_STATUS_SMALL_BUFFER;
+            }
 
             goto lead_state;
         }
@@ -1723,6 +1736,13 @@ lxb_encoding_decode_gb18030(lxb_encoding_decode_t *ctx,
             }
             LXB_ENCODING_DECODE_ERROR_END();
 
+            if (ctx->buffer_used >= ctx->buffer_length) {
+                ctx->prepend = true;
+                ctx->u.gb18030.first = second;
+
+                return LXB_STATUS_SMALL_BUFFER;
+            }
+
             first = second;
 
             goto prepend_first;
@@ -1756,16 +1776,25 @@ lxb_encoding_decode_gb18030(lxb_encoding_decode_t *ctx,
             }
             LXB_ENCODING_DECODE_ERROR_END();
 
-            LXB_ENCODING_DECODE_APPEND_WO_CHECK(ctx, second);
-
-            if (ctx->buffer_used == ctx->buffer_length) {
+            if (ctx->buffer_used >= ctx->buffer_length) {
                 ctx->prepend = true;
-                ctx->have_error = true;
 
                 /* First is a fake for trigger */
                 ctx->u.gb18030.first = 0x01;
                 ctx->u.gb18030.second = second;
                 ctx->u.gb18030.third = third;
+
+                return LXB_STATUS_SMALL_BUFFER;
+            }
+
+            LXB_ENCODING_DECODE_APPEND_WO_CHECK(ctx, second);
+
+            if (ctx->buffer_used >= ctx->buffer_length) {
+                ctx->prepend = true;
+
+                ctx->u.gb18030.first = third;
+                ctx->u.gb18030.second = 0x00;
+                ctx->u.gb18030.third = 0x00;
 
                 return LXB_STATUS_SMALL_BUFFER;
             }

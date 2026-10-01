@@ -9,4 +9,4 @@ var_dump($uri->getHostType());
 
 ?>
 --EXPECT--
-enum(Uri\Rfc3986\UriHostType::IPv4)
+enum(Uri\Rfc3986\UriHostType::IpV4)

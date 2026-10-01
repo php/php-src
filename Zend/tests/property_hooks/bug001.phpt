@@ -20,11 +20,11 @@ $c = new C;
 
 try {
     $c->x = 3;
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 bool(true)
-Cannot write to get-only virtual property C::$x
+Error: Cannot write to get-only virtual property C::$x

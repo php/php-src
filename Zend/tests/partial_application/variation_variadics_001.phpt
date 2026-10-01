@@ -1,5 +1,12 @@
 --TEST--
 PFA variation: variadics, user function
+--INI--
+opcache.enable=1
+opcache.enable_cli=1
+opcache.optimization_level=-1
+opcache.file_update_protection=0
+--ENV--
+A=1
 --FILE--
 <?php
 function foo($a, ...$b) {
@@ -15,11 +22,6 @@ $foo(1000, 10000);
 --EXPECTF--
 Closure [ <user> static function {closure:%s:%d} ] {
   @@ %s 6 - 6
-
-  - Bound Variables [2] {
-      Variable #0 [ $a ]
-      Variable #1 [ $b2 ]
-  }
 
   - Parameters [1] {
     Parameter #0 [ <optional> ...$b ]

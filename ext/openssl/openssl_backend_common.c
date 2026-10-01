@@ -15,7 +15,6 @@
 #include "php_openssl_backend.h"
 
 #include "zend_exceptions.h"
-#include "ext/standard/md5.h" /* For make_digest_ex() */
 #include "ext/standard/base64.h"
 #ifdef PHP_WIN32
 # include "win32/winutil.h"
@@ -611,7 +610,7 @@ zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, bool r
 		ret = zend_string_init((char*)md, n, 0);
 	} else {
 		ret = zend_string_alloc(n * 2, 0);
-		make_digest_ex(ZSTR_VAL(ret), md, n);
+		zend_bin2hex(ZSTR_VAL(ret), md, n);
 		ZSTR_VAL(ret)[n * 2] = '\0';
 	}
 
@@ -750,7 +749,7 @@ int php_openssl_check_cert(X509_STORE *ctx, X509 *x, STACK_OF(X509) *untrustedch
 	csc = X509_STORE_CTX_new();
 	if (csc == NULL) {
 		php_openssl_store_errors();
-		php_error_docref(NULL, E_ERROR, "Memory allocation failure");
+		php_error_docref(NULL, E_WARNING, "Memory allocation failure");
 		return 0;
 	}
 	if (!X509_STORE_CTX_init(csc, ctx, x, untrustedchain)) {
@@ -1974,6 +1973,8 @@ PHP_OPENSSL_API zend_string* php_openssl_encrypt(
 	}
 
 	if (free_password) {
+		/* password points at a heap copy of the symmetric key; scrub it before freeing */
+		ZEND_SECURE_ZERO((void *) password, password_len);
 		efree((void *) password);
 	}
 	if (free_iv) {
@@ -2052,6 +2053,8 @@ PHP_OPENSSL_API zend_string* php_openssl_decrypt(
 	}
 
 	if (free_password) {
+		/* password points at a heap copy of the symmetric key; scrub it before freeing */
+		ZEND_SECURE_ZERO((void *) password, password_len);
 		efree((void *) password);
 	}
 	if (free_iv) {

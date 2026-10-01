@@ -11,13 +11,13 @@ $a = new SimpleXMLElement("<php>testfest</php>");
 
 try {
     $a->addAttribute( "", "" );
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 echo $a->asXML();
 ?>
 --EXPECT--
-SimpleXMLElement::addAttribute(): Argument #1 ($qualifiedName) must not be empty
+ValueError: SimpleXMLElement::addAttribute(): Argument #1 ($qualifiedName) must not be empty
 <?xml version="1.0"?>
 <php>testfest</php>

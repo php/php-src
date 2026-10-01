@@ -78,6 +78,7 @@ const SORT_STRING = UNKNOWN;
  * @var int
  * @cvalue PHP_SORT_LOCALE_STRING
  */
+#[\Deprecated(message: "use one of the Collator::*sort*() methods instead", since: "8.6")]
 const SORT_LOCALE_STRING = UNKNOWN;
 /**
  * @var int
@@ -1504,7 +1505,7 @@ function set_time_limit(int $seconds): bool {}
 
 /* main/SAPI.c */
 
-function header_register_callback(callable $callback): bool {}
+function header_register_callback(callable $callback): true {}
 
 /* main/output.c */
 
@@ -1976,7 +1977,6 @@ function time_nanosleep(int $seconds, int $nanoseconds): array|bool {}
 function time_sleep_until(float $timestamp): bool {}
 #endif
 
-/** @refcount 1 */
 function get_current_user(): string {}
 
 /** @return string|array<int|string, string|array>|false */
@@ -2063,7 +2063,7 @@ function getprotobyname(string $protocol): int|false {}
 function getprotobynumber(int $protocol): string|false {}
 #endif
 
-function register_tick_function(callable $callback, mixed ...$args): bool {}
+function register_tick_function(callable $callback, mixed ...$args): true {}
 
 function unregister_tick_function(callable $callback): void {}
 
@@ -2239,6 +2239,7 @@ function inet_pton(string $ip): string|false {}
 /* metaphone.c */
 
 /** @refcount 1 */
+#[\Deprecated(since: '8.6', message: 'use a userland phonetic matching library instead')]
 function metaphone(string $string, int $max_phonemes = 0): string {}
 
 /* {{{ head.c */
@@ -2320,6 +2321,7 @@ function strcspn(string $string, string $characters, int $offset = 0, ?int $leng
 function nl_langinfo(int $item): string|false {}
 #endif
 
+#[\Deprecated(message: "use Collator::compare() instead", since: "8.6")]
 function strcoll(string $string1, string $string2): int {}
 
 /**
@@ -2329,13 +2331,21 @@ function strcoll(string $string1, string $string2): int {}
  */
 function trim(string $string, string $characters = " \f\n\r\t\v\0"): string {}
 
-/** @compile-time-eval */
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 1}
+ * @frameless-function {"arity": 2}
+ */
 function rtrim(string $string, string $characters = " \f\n\r\t\v\0"): string {}
 
 /** @alias rtrim */
 function chop(string $string, string $characters = " \f\n\r\t\v\0"): string {}
 
-/** @compile-time-eval */
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 1}
+ * @frameless-function {"arity": 2}
+ */
 function ltrim(string $string, string $characters = " \f\n\r\t\v\0"): string {}
 
 /**
@@ -2366,14 +2376,22 @@ function join(string|array $separator, ?array $array = null): string {}
  */
 function strtok(string $string, ?string $token = null): string|false {}
 
-/** @compile-time-eval */
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 1}
+ */
 function strtoupper(string $string): string {}
 
-/** @compile-time-eval */
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 1}
+ */
 function strtolower(string $string): string {}
 
+/** @compile-time-eval */
 function str_increment(string $string): string {}
 
+/** @compile-time-eval */
 function str_decrement(string $string): string {}
 
 /** @refcount 1 */
@@ -2443,7 +2461,10 @@ function str_contains(string $haystack, string $needle): bool {}
  */
 function str_starts_with(string $haystack, string $needle): bool {}
 
-/** @compile-time-eval */
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 2}
+ */
 function str_ends_with(string $haystack, string $needle): bool {}
 
 /**
@@ -2574,7 +2595,6 @@ function parse_str(string $string, &$result): void {}
  */
 function str_getcsv(string $string, string $separator = ",", string $enclosure = "\"", string $escape = "\\"): array {}
 
-/** @refcount 1 */
 function str_repeat(string $string, int $times): string {}
 
 /**
@@ -3635,6 +3655,7 @@ function intval(mixed $value, int $base = 10): int {}
 function floatval(mixed $value): float {}
 
 /** @alias floatval */
+#[\Deprecated(message: "use floatval() instead", since: "8.6")]
 function doubleval(mixed $value): float {}
 
 /**
@@ -3668,9 +3689,11 @@ function is_bool(mixed $value): bool {}
 function is_int(mixed $value): bool {}
 
 /** @alias is_int */
+#[\Deprecated(message: "use is_int() instead", since: "8.6")]
 function is_integer(mixed $value): bool {}
 
 /** @alias is_int */
+#[\Deprecated(message: "use is_int() instead", since: "8.6")]
 function is_long(mixed $value): bool {}
 
 /**
@@ -3679,6 +3702,7 @@ function is_long(mixed $value): bool {}
 function is_float(mixed $value): bool {}
 
 /** @alias is_float */
+#[\Deprecated(message: "use is_float() instead", since: "8.6")]
 function is_double(mixed $value): bool {}
 
 /**

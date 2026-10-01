@@ -39,6 +39,12 @@ struct php_serialize_data {
 
 static void php_array_element_dump(zval *zv, zend_ulong index, zend_string *key, int level) /* {{{ */
 {
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		php_printf("%*cnesting level too deep", level + 1, ' ');
+		return;
+	}
+#endif
 	if (key == NULL) { /* numeric key */
 		php_printf("%*c[" ZEND_LONG_FMT "]=>\n", level + 1, ' ', index);
 	} else { /* string key */
@@ -257,6 +263,12 @@ PHP_FUNCTION(var_dump)
 
 static void zval_array_element_dump(zval *zv, zend_ulong index, zend_string *key, int level) /* {{{ */
 {
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		php_printf("%*cnesting level too deep", level + 1, ' ');
+		return;
+	}
+#endif
 	if (key == NULL) { /* numeric key */
 		php_printf("%*c[" ZEND_LONG_FMT "]=>\n", level + 1, ' ', index);
 	} else { /* string key */
@@ -272,6 +284,12 @@ static void zval_object_property_dump(zend_property_info *prop_info, zval *zv, z
 {
 	const char *prop_name, *class_name;
 
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		php_printf("%*cnesting level too deep", level + 1, ' ');
+		return;
+	}
+#endif
 	if (key == NULL) { /* numeric key */
 		php_printf("%*c[" ZEND_LONG_FMT "]=>\n", level + 1, ' ', index);
 	} else { /* string key */
@@ -1392,10 +1410,6 @@ PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, co
 	zval *retval;
 	HashTable *class_hash = NULL, *prev_class_hash;
 	zend_long prev_max_depth, prev_cur_depth;
-
-	if (buf_len == 0) {
-		RETURN_FALSE;
-	}
 
 	p = (const unsigned char*) buf;
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);

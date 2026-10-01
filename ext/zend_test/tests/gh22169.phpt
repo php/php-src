@@ -19,4 +19,3 @@ var_dump(_ZendTestClass::$escapeInterpolated);
 string(44) "424547494e200a0d090b1b0c5c242241414120454e44"
 string(43) "BEGIN \n\r\t\v\e\f\\\\$\"\101\x41\u{41} END"
 string(14) "begin $ \$ end"
-

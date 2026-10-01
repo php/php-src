@@ -19,7 +19,7 @@ for ($i = 0; $i < count($clients); $i++) {
 // events must be delivered by the following wait() without any duplicates.
 $seen = [];
 for ($round = 1; $round <= 2; $round++) {
-    $watchers = $poll_ctx->wait(0, 100000, 4);
+    $watchers = $poll_ctx->wait(Time\Duration::fromMicroseconds(100000), 4);
     echo "Round $round count: " . count($watchers) . "\n";
     foreach ($watchers as $watcher) {
         $data = $watcher->getData();
@@ -35,7 +35,7 @@ for ($round = 1; $round <= 2; $round++) {
 ksort($seen);
 echo "Seen: " . implode(',', array_keys($seen)) . "\n";
 
-pt_expect_events($poll_ctx->wait(0), []);
+pt_expect_events($poll_ctx->wait(Time\Duration::fromSeconds(0)), []);
 
 ?>
 --EXPECT--

@@ -139,7 +139,11 @@ U_CFUNC int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char 
 			ret_pos = -1;
 			goto finish;
 		}
-		ret_pos = last && offset >= 0 ? uhaystack_len : offset_pos;
+		if (last && offset >= 0) {
+			ret_pos = grapheme_count_graphemes(bi, uhaystack, uhaystack_len);
+		} else {
+			ret_pos = grapheme_count_graphemes(bi, uhaystack, offset_pos);
+		}
 		goto finish;
 	}
 
@@ -194,7 +198,7 @@ U_CFUNC int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char 
 	if(char_pos != USEARCH_DONE && ubrk_isBoundary(bi, char_pos)) {
 		ret_pos = grapheme_count_graphemes(bi, uhaystack,char_pos);
 		if(puchar_pos) {
-			*puchar_pos = char_pos;
+			*puchar_pos = u_countChar32(uhaystack, char_pos);
 		}
 	} else {
 		ret_pos = -1;

@@ -29,7 +29,7 @@ function readline_read_history(?string $filename = null): bool {}
 
 function readline_write_history(?string $filename = null): bool {}
 
-function readline_completion_function(callable $callback): bool {}
+function readline_completion_function(callable $callback): true {}
 
 
 #ifdef HAVE_RL_CALLBACK_READ_CHAR

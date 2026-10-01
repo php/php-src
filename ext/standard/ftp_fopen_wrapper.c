@@ -127,8 +127,6 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 	php_uri *resource = NULL;
 	int result, use_ssl, use_ssl_on_data = 0;
 	char tmp_line[512];
-	char *transport;
-	int transport_len;
 
 	const php_uri_parser *uri_parser = php_stream_context_get_uri_parser("ftp", context);
 	if (uri_parser == NULL) {
@@ -150,7 +148,8 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 	if (resource->port == 0)
 		resource->port = 21;
 
-	transport_len = (int)spprintf(&transport, 0, "tcp://%s:" ZEND_LONG_FMT, ZSTR_VAL(resource->host), resource->port);
+	char *transport;
+	size_t transport_len = spprintf(&transport, 0, "tcp://%s:" ZEND_LONG_FMT, ZSTR_VAL(resource->host), resource->port);
 	stream = php_stream_xport_create(transport, transport_len, REPORT_ERRORS, STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT, NULL, NULL, context, NULL, NULL);
 	efree(transport);
 	if (stream == NULL) {
@@ -420,8 +419,6 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 	zval *tmpzval;
 	bool allow_overwrite = false;
 	int8_t read_write = 0;
-	char *transport;
-	int transport_len;
 	zend_string *error_message = NULL;
 
 	tmp_line[0] = '\0';
@@ -554,7 +551,9 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 	if (hoststart == NULL) {
 		hoststart = ZSTR_VAL(resource->host);
 	}
-	transport_len = (int)spprintf(&transport, 0, "tcp://%s:%d", hoststart, portno);
+
+	char *transport;
+	size_t transport_len = spprintf(&transport, 0, "tcp://%s:%d", hoststart, portno);
 	datastream = php_stream_xport_create(transport, transport_len, REPORT_ERRORS, STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT, NULL, NULL, context, &error_message, NULL);
 	efree(transport);
 	if (datastream == NULL) {
@@ -916,18 +915,14 @@ static int php_stream_ftp_unlink(php_stream_wrapper *wrapper, const char *url, i
 
 	stream = php_ftp_fopen_connect(wrapper, url, "r", 0, NULL, context, NULL, &resource, NULL, NULL);
 	if (!stream) {
-		if (options & REPORT_ERRORS) {
-			php_stream_wrapper_warn(wrapper, context, options, AuthFailed,
-				"Unable to connect to %s", url);
-		}
+		php_stream_wrapper_warn(wrapper, context, options, AuthFailed,
+			"Unable to connect to %s", url);
 		goto unlink_errexit;
 	}
 
 	if (resource->path == NULL) {
-		if (options & REPORT_ERRORS) {
-			php_stream_wrapper_warn(wrapper, context, options, InvalidPath,
-				"Invalid path provided in %s", url);
-		}
+		php_stream_wrapper_warn(wrapper, context, options, InvalidPath,
+			"Invalid path provided in %s", url);
 		goto unlink_errexit;
 	}
 
@@ -936,10 +931,8 @@ static int php_stream_ftp_unlink(php_stream_wrapper *wrapper, const char *url, i
 
 	result = GET_FTP_RESULT(stream);
 	if (result < 200 || result > 299) {
-		if (options & REPORT_ERRORS) {
-			php_stream_wrapper_warn(wrapper, context, options, UnlinkFailed,
-				"Error Deleting file: %s", tmp_line);
-		}
+		php_stream_wrapper_warn(wrapper, context, options, UnlinkFailed,
+			"Error Deleting file: %s", tmp_line);
 		goto unlink_errexit;
 	}
 
@@ -1001,10 +994,8 @@ static int php_stream_ftp_rename(php_stream_wrapper *wrapper, const char *url_fr
 
 	stream = php_ftp_fopen_connect(wrapper, url_from, "r", 0, NULL, context, NULL, NULL, NULL, NULL);
 	if (!stream) {
-		if (options & REPORT_ERRORS) {
-			php_stream_wrapper_warn(wrapper, context, options, AuthFailed,
-				"Unable to connect to %s", ZSTR_VAL(resource_from->host));
-		}
+		php_stream_wrapper_warn(wrapper, context, options, AuthFailed,
+			"Unable to connect to %s", ZSTR_VAL(resource_from->host));
 		goto rename_errexit;
 	}
 
@@ -1013,10 +1004,8 @@ static int php_stream_ftp_rename(php_stream_wrapper *wrapper, const char *url_fr
 
 	result = GET_FTP_RESULT(stream);
 	if (result < 300 || result > 399) {
-		if (options & REPORT_ERRORS) {
-			php_stream_wrapper_warn(wrapper, context, options, RenameFailed,
-				"Error Renaming file: %s", tmp_line);
-		}
+		php_stream_wrapper_warn(wrapper, context, options, RenameFailed,
+			"Error Renaming file: %s", tmp_line);
 		goto rename_errexit;
 	}
 
@@ -1025,10 +1014,8 @@ static int php_stream_ftp_rename(php_stream_wrapper *wrapper, const char *url_fr
 
 	result = GET_FTP_RESULT(stream);
 	if (result < 200 || result > 299) {
-		if (options & REPORT_ERRORS) {
-			php_stream_wrapper_warn(wrapper, context, options, RenameFailed,
-				"Error Renaming file: %s", tmp_line);
-		}
+		php_stream_wrapper_warn(wrapper, context, options, RenameFailed,
+			"Error Renaming file: %s", tmp_line);
 		goto rename_errexit;
 	}
 
@@ -1059,18 +1046,14 @@ static int php_stream_ftp_mkdir(php_stream_wrapper *wrapper, const char *url, in
 
 	stream = php_ftp_fopen_connect(wrapper, url, "r", 0, NULL, context, NULL, &resource, NULL, NULL);
 	if (!stream) {
-		if (options & REPORT_ERRORS) {
-			php_stream_wrapper_warn(wrapper, context, options, AuthFailed,
-				"Unable to connect to %s", url);
-		}
+		php_stream_wrapper_warn(wrapper, context, options, AuthFailed,
+			"Unable to connect to %s", url);
 		goto mkdir_errexit;
 	}
 
 	if (resource->path == NULL) {
-		if (options & REPORT_ERRORS) {
-			php_stream_wrapper_warn(wrapper, context, options, InvalidPath,
-				"Invalid path provided in %s", url);
-		}
+		php_stream_wrapper_warn(wrapper, context, options, InvalidPath,
+			"Invalid path provided in %s", url);
 		goto mkdir_errexit;
 	}
 
@@ -1109,10 +1092,8 @@ static int php_stream_ftp_mkdir(php_stream_wrapper *wrapper, const char *url, in
 					php_stream_printf(stream, "MKD %s\r\n", buf);
 					result = GET_FTP_RESULT(stream);
 					if (result < 200 || result > 299) {
-						if (options & REPORT_ERRORS) {
-							php_stream_wrapper_warn(wrapper, context, options, MkdirFailed,
-								"%s", tmp_line);
-						}
+						php_stream_wrapper_warn(wrapper, context, options, MkdirFailed,
+							"%s", tmp_line);
 						break;
 					}
 				}
@@ -1154,18 +1135,14 @@ static int php_stream_ftp_rmdir(php_stream_wrapper *wrapper, const char *url, in
 
 	stream = php_ftp_fopen_connect(wrapper, url, "r", 0, NULL, context, NULL, &resource, NULL, NULL);
 	if (!stream) {
-		if (options & REPORT_ERRORS) {
-			php_stream_wrapper_warn(wrapper, context, options, AuthFailed,
-				"Unable to connect to %s", url);
-		}
+		php_stream_wrapper_warn(wrapper, context, options, AuthFailed,
+			"Unable to connect to %s", url);
 		goto rmdir_errexit;
 	}
 
 	if (resource->path == NULL) {
-		if (options & REPORT_ERRORS) {
-			php_stream_wrapper_warn(wrapper, context, options, InvalidPath,
-				"Invalid path provided in %s", url);
-		}
+		php_stream_wrapper_warn(wrapper, context, options, InvalidPath,
+			"Invalid path provided in %s", url);
 		goto rmdir_errexit;
 	}
 
@@ -1173,10 +1150,8 @@ static int php_stream_ftp_rmdir(php_stream_wrapper *wrapper, const char *url, in
 	result = GET_FTP_RESULT(stream);
 
 	if (result < 200 || result > 299) {
-		if (options & REPORT_ERRORS) {
-			php_stream_wrapper_warn(wrapper, context, options, RmdirFailed,
-				"%s", tmp_line);
-		}
+		php_stream_wrapper_warn(wrapper, context, options, RmdirFailed,
+			"%s", tmp_line);
 		goto rmdir_errexit;
 	}
 

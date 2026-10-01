@@ -15,8 +15,8 @@ $foo = new Foo();
 
 try {
     $foo->bars[] = 'baz';
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($foo->bars);
 
@@ -25,7 +25,7 @@ var_dump($foo->bars);
 
 ?>
 --EXPECT--
-Cannot indirectly modify private(set) property Foo::$bars from global scope
+Error: Cannot indirectly modify private(set) property Foo::$bars from global scope
 array(0) {
 }
 array(1) {

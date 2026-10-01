@@ -20,12 +20,12 @@ try {
     foreach ($foo->fetch() as &$prop) {
         $prop += 1;
     }
-} catch (Error $e) { echo $e->getMessage(), "\n"; }
+} catch (Throwable $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
 
 var_dump($foo);
 ?>
 --EXPECTF--
-Cannot assign float to reference held by property class@anonymous::$qux of type int
+TypeError: Cannot assign float to reference held by property class@anonymous::$qux of type int
 object(class@anonymous)#1 (4) {
   ["foo"]=>
   int(2)

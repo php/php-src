@@ -78,7 +78,7 @@ for ($i = 0; $i < 4; $i++) {
         );
         $phar->stopBuffering();
     } catch (Throwable $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
         if ($previous = $e->getPrevious()) {
             echo "Previous: ", $previous->getMessage(), "\n";
         }
@@ -101,17 +101,17 @@ $workdir = __DIR__.'/getMTime_errors';
 --- Iteration 0 ---
 [ Found: %shello.txt ]
 [MTime]
-Entry content%chello.txt cannot be created: timestamp is limited to 32-bit
+BadMethodCallException: Entry content%chello.txt cannot be created: timestamp is limited to 32-bit
 --- Iteration 1 ---
 [ Found: %shello.txt ]
 [MTime]
-Entry content%chello.txt cannot be created: getMTime() must return an int
+BadMethodCallException: Entry content%chello.txt cannot be created: getMTime() must return an int
 --- Iteration 2 ---
 [ Found: %shello.txt ]
 [MTime]
-Entry content%chello.txt cannot be created: getMTime() must return an int
+BadMethodCallException: Entry content%chello.txt cannot be created: getMTime() must return an int
 Previous: Throwing an exception inside getMTime()
 --- Iteration 3 ---
 [ Found: %shello.txt ]
 [MTime]
-Entry content%chello.txt cannot be created: getMTime() must return an int
+BadMethodCallException: Entry content%chello.txt cannot be created: getMTime() must return an int

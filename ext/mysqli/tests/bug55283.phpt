@@ -2,15 +2,13 @@
 Bug #55283 (SSL options set by mysqli_ssl_set ignored for MySQLi persistent connections)
 --EXTENSIONS--
 mysqli
+openssl
 --SKIPIF--
 <?php
 require_once 'connect.inc';
 
 if (!defined('MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT'))
     die("skip Requires MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT");
-
-if (!extension_loaded("openssl"))
-    die("skip PHP streams lack support for SSL. mysqli is compiled to use mysqlnd which uses PHP streams in turn.");
 
 if (!($link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)))
     die(sprintf("skip Connect failed, [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));

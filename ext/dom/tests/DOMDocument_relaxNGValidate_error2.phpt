@@ -22,7 +22,7 @@ var_dump($result);
 --EXPECTF--
 Warning: DOMDocument::relaxNGValidate(): I/O %s : failed to load %s
 
-Warning: DOMDocument::relaxNGValidate(): xmlRelaxNGParse: could not load %s/foo.rng in %s on line %d
+Warning: DOMDocument::relaxNGValidate(): xmlRelaxNGParse: could not load %sfoo.rng in %s on line %d
 
 Warning: DOMDocument::relaxNGValidate(): Invalid RelaxNG in %s on line %d
 bool(false)

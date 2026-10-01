@@ -8,8 +8,8 @@ ldap
 try {
     new LDAP\Connection();
 } catch (Error $ex) {
-    echo "Exception: ", $ex->getMessage(), "\n";
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Exception: Cannot directly construct LDAP\Connection, use ldap_connect() instead
+Error: Cannot directly construct LDAP\Connection, use ldap_connect() instead

@@ -55,7 +55,6 @@ Connection: close
 First:1
 Second:2
 
-
 POST / HTTP/1.1
 Host: %s:%d
 Connection: close
@@ -68,7 +67,6 @@ Host: %s:%d
 Connection: close
 First:1
 Second:2
-
 
 POST / HTTP/1.1
 Host: %s:%d

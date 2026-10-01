@@ -40,7 +40,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: is_tar.c,v 1.50 2022/12/26 17:31:14 christos Exp $")
+FILE_RCSID("@(#)$File: is_tar.c,v 1.51 2026/06/02 17:05:51 christos Exp $")
 #endif
 
 #include "magic.h"
@@ -158,14 +158,12 @@ from_oct(const char *where, size_t digs)
 {
 	int	value;
 
-	if (digs == 0)
-		return -1;
-
-	while (isspace(CAST(unsigned char, *where))) {	/* Skip spaces */
+	while (digs > 0 && isspace(CAST(unsigned char, *where))) {	/* Skip spaces */
 		where++;
-		if (digs-- == 0)
-			return -1;		/* All blank field */
+		digs--;
 	}
+	if (digs == 0)
+		return -1;		/* All blank field */
 	value = 0;
 	while (digs > 0 && isodigit(*where)) {	/* Scan til non-octal */
 		value = (value << 3) | (*where++ - '0');

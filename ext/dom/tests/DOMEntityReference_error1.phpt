@@ -6,11 +6,11 @@ dom
 <?php
 try {
     new DOMEntityReference('!');
-} catch (DOMException $e) {
+} catch (Throwable $e) {
     var_dump($e->getCode() === DOM_INVALID_CHARACTER_ERR);
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
 bool(true)
-Invalid Character Error
+DOMException: Invalid Character Error

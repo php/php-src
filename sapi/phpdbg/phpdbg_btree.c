@@ -156,13 +156,18 @@ int phpdbg_btree_insert_or_update(phpdbg_btree *tree, zend_ulong idx, void *ptr,
 		}
 
 		{
-			phpdbg_btree_branch *memory = *branch = pemalloc((i + 2) * sizeof(phpdbg_btree_branch), tree->persistent);
+			phpdbg_btree_branch *memory = pemalloc((i + 2) * sizeof(phpdbg_btree_branch), tree->persistent);
+			phpdbg_btree_branch *node = memory;
 			do {
-				(*branch)->branches[!((idx >> i) % 2)] = NULL;
-				branch = &(*branch)->branches[(idx >> i) % 2];
-				*branch = ++memory;
+				node->branches[!((idx >> i) % 2)] = NULL;
+				node->branches[(idx >> i) % 2] = node + 1;
+				node++;
 			} while (i--);
+			node->result.idx = idx;
+			node->result.ptr = ptr;
+			*branch = memory;
 			tree->count++;
+			return SUCCESS;
 		}
 	} else if (!(flags & PHPDBG_BTREE_UPDATE)) {
 		return FAILURE;

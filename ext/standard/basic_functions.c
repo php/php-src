@@ -31,8 +31,6 @@
 #include "ext/standard/info.h"
 #include "ext/session/php_session.h"
 #include "zend_exceptions.h"
-#include "zend_attributes.h"
-#include "zend_enum.h"
 #include "zend_ini.h"
 #include "zend_operators.h"
 #include "ext/standard/php_dns.h"
@@ -157,7 +155,9 @@ zend_module_entry basic_functions_module = { /* {{{ */
 	PHP_RSHUTDOWN(basic),		/* request shutdown */
 	PHP_MINFO(basic),			/* extension info */
 	PHP_STANDARD_VERSION,		/* extension version */
-	STANDARD_MODULE_PROPERTIES
+	NO_MODULE_GLOBALS,
+	ZEND_MODULE_POST_ZEND_DEACTIVATE_N(streams),
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
 
@@ -465,7 +465,6 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 #endif
 	BASIC_RSHUTDOWN_SUBMODULE(assert)
 	BASIC_RSHUTDOWN_SUBMODULE(url_scanner_ex)
-	BASIC_RSHUTDOWN_SUBMODULE(streams)
 #ifdef PHP_WIN32
 	BASIC_RSHUTDOWN_SUBMODULE(win32_core_globals)
 #endif
@@ -1080,9 +1079,9 @@ PHP_FUNCTION(getopt)
 				if (Z_TYPE_P(args) != IS_ARRAY) {
 					convert_to_array(args);
 				}
-				zend_hash_next_index_insert(Z_ARRVAL_P(args), &val);
+				zend_hash_next_index_insert_new(Z_ARRVAL_P(args), &val);
 			} else {
-				zend_hash_index_update(Z_ARRVAL_P(return_value), opt_name_as_long, &val);
+				zend_hash_index_add_new(Z_ARRVAL_P(return_value), opt_name_as_long, &val);
 			}
 		} else {
 			/* other strings */
@@ -1090,9 +1089,9 @@ PHP_FUNCTION(getopt)
 				if (Z_TYPE_P(args) != IS_ARRAY) {
 					convert_to_array(args);
 				}
-				zend_hash_next_index_insert(Z_ARRVAL_P(args), &val);
+				zend_hash_next_index_insert_new(Z_ARRVAL_P(args), &val);
 			} else {
-				zend_hash_str_add(Z_ARRVAL_P(return_value), optname, optname_len, &val);
+				zend_hash_str_add_new(Z_ARRVAL_P(return_value), optname, optname_len, &val);
 			}
 		}
 
@@ -1255,7 +1254,7 @@ PHP_FUNCTION(get_current_user)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	RETURN_STRING(php_get_current_user());
+	RETURN_STR_COPY(php_get_current_user());
 }
 /* }}} */
 
@@ -1426,20 +1425,20 @@ PHP_FUNCTION(error_get_last)
 		array_init(return_value);
 
 		ZVAL_LONG(&tmp, PG(last_error_type));
-		zend_hash_update(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_TYPE), &tmp);
+		zend_hash_add_new(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_TYPE), &tmp);
 
 		ZVAL_STR_COPY(&tmp, PG(last_error_message));
-		zend_hash_update(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_MESSAGE), &tmp);
+		zend_hash_add_new(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_MESSAGE), &tmp);
 
 		ZVAL_STR_COPY(&tmp, PG(last_error_file));
-		zend_hash_update(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
+		zend_hash_add_new(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
 
-		ZVAL_LONG(&tmp, PG(last_error_lineno));
-		zend_hash_update(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
+		ZVAL_LONG(&tmp, (zend_long)PG(last_error_lineno));
+		zend_hash_add_new(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
 
 		if (!Z_ISUNDEF(EG(last_fatal_error_backtrace))) {
 			ZVAL_COPY(&tmp, &EG(last_fatal_error_backtrace));
-			zend_hash_update(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_TRACE), &tmp);
+			zend_hash_add_new(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_TRACE), &tmp);
 		}
 	}
 }

@@ -633,9 +633,9 @@ PHP_METHOD(Phar, webPhar)
 				IS_STRING == Z_TYPE_P(z_path_info)) {
 				entry_len = Z_STRLEN_P(z_path_info);
 				entry = estrndup(Z_STRVAL_P(z_path_info), entry_len);
-				path_info = emalloc(Z_STRLEN_P(z_script_name) + entry_len + 1);
-				memcpy(path_info, Z_STRVAL_P(z_script_name), Z_STRLEN_P(z_script_name));
-				memcpy(path_info + Z_STRLEN_P(z_script_name), entry, entry_len + 1);
+				path_info = zend_cstr_concat(
+					Z_STRVAL_P(z_script_name), Z_STRLEN_P(z_script_name),
+					entry, entry_len);
 				free_pathinfo = 1;
 			} else {
 				entry_len = 0;
@@ -4136,7 +4136,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result phar_extract_file(bool overwrite, phar
 	}
 
 	if (php_check_open_basedir(fullpath)) {
-		spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", openbasedir/safe mode restrictions in effect", ZSTR_VAL(entry->filename), fullpath);
+		spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", open_basedir restrictions in effect", ZSTR_VAL(entry->filename), fullpath);
 		efree(fullpath);
 		efree(new_state.cwd);
 		return FAILURE;
@@ -4251,7 +4251,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 3, 5) static int extract_helper(const phar_archiv
 			if (FAILURE == phar_extract_file(overwrite, entry, path_to, error)) return -1;
 			extracted++;
 		} ZEND_HASH_FOREACH_END();
-	} else if (ZSTR_LEN(search) > 0 && '/' == ZSTR_VAL(search)[ZSTR_LEN(search) - 1]) {
+	} else if (zend_string_ends_with_literal(search, "/")) {
 		/* ends in "/" -- extract all entries having that prefix */
 		ZEND_HASH_MAP_FOREACH_PTR(&archive->manifest, entry) {
 			if (!zend_string_starts_with(entry->filename, search)) continue;

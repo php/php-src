@@ -21,13 +21,13 @@ fclose($file_handle);
 // read from closed file
 try {
     var_dump( fgets($file_handle) ); // default length
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump( fgets($file_handle, 10) ); // with specific length
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done";
@@ -35,6 +35,6 @@ echo "Done";
 --EXPECT--
 *** Testing fgets() : usage variations ***
 -- Testing fgets() with closed handle --
-fgets(): Argument #1 ($stream) must be an open stream resource
-fgets(): Argument #1 ($stream) must be an open stream resource
+TypeError: fgets(): Argument #1 ($stream) must be an open stream resource
+TypeError: fgets(): Argument #1 ($stream) must be an open stream resource
 Done

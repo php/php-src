@@ -25,6 +25,14 @@ class DummyHandler implements SessionHandlerInterface {
     public function gc($maxlifetime): int|false {
         return true;
     }
+
+    private int $id = 0;
+	public function create_sid(): string {
+	    return ++$this->id;
+	}
+	public function validateId(string $id): bool {
+	    return $id > 0 && $id <= $this->id;
+	}
 }
 
 $initHandler = ini_get('session.save_handler');

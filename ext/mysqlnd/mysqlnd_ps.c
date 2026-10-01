@@ -346,6 +346,9 @@ mysqlnd_stmt_prepare_read_eof(MYSQLND_STMT * s)
 	if (FAIL == (ret = PACKET_READ(conn, &fields_eof))) {
 		if (stmt->result) {
 			stmt->result->m.free_result_contents(stmt->result);
+			/* The memset() below resets the statement, so release what it still owns first. */
+			conn->m->free_reference(conn);
+			mnd_efree(stmt->execute_cmd_buffer.buffer);
 			/* XXX: This will crash, because we will null also the methods.
 				But seems it happens in extreme cases or doesn't. Should be fixed by exporting a function
 				(from mysqlnd_driver.c?) to do the reset.
@@ -510,6 +513,7 @@ mysqlnd_stmt_execute_parse_response(MYSQLND_STMT * const s, enum_mysqlnd_parse_e
 
 		stmt->state = MYSQLND_STMT_EXECUTED;
 		if (conn->last_query_type == QUERY_UPSERT || conn->last_query_type == QUERY_LOAD_LOCAL) {
+			stmt->field_count = conn->field_count;
 			DBG_INF("PASS");
 			DBG_RETURN(PASS);
 		}
@@ -1752,6 +1756,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, close_on_server)(MYSQLND_STMT * const s, bo
 	MYSQLND_STMT_DATA * stmt = s? s->data : NULL;
 	MYSQLND_CONN_DATA * conn = stmt? stmt->conn : NULL;
 	enum_mysqlnd_collected_stats statistic = STAT_LAST;
+	enum_func_status ret = PASS;
 
 	DBG_ENTER("mysqlnd_stmt::close_on_server");
 	if (!stmt || !conn) {
@@ -1789,14 +1794,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, close_on_server)(MYSQLND_STMT * const s, bo
 														STAT_FREE_RESULT_EXPLICIT);
 
 		if (GET_CONNECTION_STATE(&conn->state) == CONN_READY) {
-			enum_func_status ret = FAIL;
-			const size_t stmt_id = stmt->stmt_id;
-
-			ret = conn->command->stmt_close(conn, stmt_id);
-			if (ret == FAIL) {
-				COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);
-				DBG_RETURN(FAIL);
-			}
+			ret = conn->command->stmt_close(conn, stmt->stmt_id);
 		}
 	}
 	switch (stmt->execute_count) {
@@ -1825,7 +1823,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, close_on_server)(MYSQLND_STMT * const s, bo
 		stmt->conn = NULL;
 	}
 
-	DBG_RETURN(PASS);
+	DBG_RETURN(ret);
 }
 /* }}} */
 
@@ -1966,6 +1964,5 @@ MYSQLND_CLASS_METHODS_END;
 void _mysqlnd_init_ps_subsystem(void)
 {
 	mysqlnd_stmt_set_methods(&MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_stmt));
-	_mysqlnd_init_ps_fetch_subsystem();
 }
 /* }}} */

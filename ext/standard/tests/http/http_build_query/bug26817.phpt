@@ -21,6 +21,9 @@ $obj = new test();
 $obj->foo();
 var_dump(http_build_query($obj));
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: http_build_query(): Passing an object for argument #1 $data to http_build_query() is deprecated, call get_object_vars() first instead in %s on line %d
 string(27) "foo=lala&bar=meuh&test=test"
+
+Deprecated: http_build_query(): Passing an object for argument #1 $data to http_build_query() is deprecated, call get_object_vars() first instead in %s on line %d
 string(9) "test=test"

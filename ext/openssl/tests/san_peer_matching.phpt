@@ -54,7 +54,7 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 --EXPECTF--
 resource(%d) of type (stream)
 
-Warning: stream_socket_client(): Unable to locate peer certificate CN in %s on line %d
+Warning: stream_socket_client(): Peer certificate subjectAltName did not match expected name `moar.example.org' in %s on line %d
 
 Warning: stream_socket_client(): Failed to enable crypto in %s on line %d
 

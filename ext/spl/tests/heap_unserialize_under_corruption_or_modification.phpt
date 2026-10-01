@@ -22,9 +22,9 @@ $heap->insert(0);
 try {
     $heap->insert(2);
 } catch (RuntimeException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Heap cannot be changed when it is already being modified.
+RuntimeException: Heap cannot be changed when it is already being modified.

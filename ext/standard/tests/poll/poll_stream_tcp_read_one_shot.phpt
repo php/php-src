@@ -13,18 +13,18 @@ pt_stream_poll_add($poll_ctx, $server1, [Io\Poll\Event::Read, Io\Poll\Event::One
 pt_stream_poll_add($poll_ctx, $client2, [Io\Poll\Event::Read, Io\Poll\Event::OneShot], "client2_data");
 pt_stream_poll_add($poll_ctx, $server2, [Io\Poll\Event::Read, Io\Poll\Event::OneShot], "server2_data");
 
-pt_expect_events($poll_ctx->wait(0), []);
+pt_expect_events($poll_ctx->wait(Time\Duration::fromSeconds(0)), []);
 
 pt_write_sleep($client1, "test data");
 pt_write_sleep($client2, "test data");
-pt_expect_events($poll_ctx->wait(0, 100000), [
+pt_expect_events($poll_ctx->wait(Time\Duration::fromMicroseconds(100000)), [
     ['events' => [Io\Poll\Event::Read], 'data' => 'server1_data', 'read' => 'test data'],
     ['events' => [Io\Poll\Event::Read], 'data' => 'server2_data', 'read' => 'test data']
 ]);
 
 pt_write_sleep($client1, "more data");
 pt_write_sleep($client2, "more data");
-pt_expect_events($poll_ctx->wait(0, 100000), []);
+pt_expect_events($poll_ctx->wait(Time\Duration::fromMicroseconds(100000)), []);
 
 ?>
 --EXPECT--

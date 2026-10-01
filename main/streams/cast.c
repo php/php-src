@@ -188,7 +188,7 @@ void php_stream_mode_sanitize_fdopen_fopencookie(php_stream *stream, char *resul
 }
 /* }}} */
 /* {{{ php_stream_cast */
-PHPAPI zend_result _php_stream_cast(php_stream *stream, int castas, void **ret, int show_err)
+PHPAPI zend_result php_stream_cast(php_stream *stream, int castas, void **ret, int show_err)
 {
 	int flags = castas & PHP_STREAM_CAST_MASK;
 	castas &= ~PHP_STREAM_CAST_MASK;

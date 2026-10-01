@@ -589,6 +589,11 @@ zend_string *php_openssl_dh_compute_key(EVP_PKEY *pkey, char *pub_str, size_t pu
 	}
 
 	BIGNUM *pub = BN_bin2bn((unsigned char*)pub_str, (int)pub_len, NULL);
+	if (pub == NULL) {
+		php_openssl_store_errors();
+		return NULL;
+	}
+
 	zend_string *data = zend_string_alloc(DH_size(dh), 0);
 	int len = DH_compute_key((unsigned char*)ZSTR_VAL(data), pub, dh);
 	BN_free(pub);

@@ -17,7 +17,7 @@ foreach ($cases as $in) {
         SQLite3::escapeString($in);
         echo "FAIL: no exception for ", bin2hex($in), "\n";
     } catch (ValueError $e) {
-        echo "ValueError: ", $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 

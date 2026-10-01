@@ -12,19 +12,19 @@ internal_encoding=EUC-JP
     try {
         var_dump(mb_substr_count("", ""));
     } catch (\ValueError $e) {
-        echo $e->getMessage() . \PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
     try {
         var_dump(mb_substr_count("��", ""));
     } catch (\ValueError $e) {
-        echo $e->getMessage() . \PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
     try {
         // Although the needle below contains 3 bytes, it decodes to zero Unicode codepoints
         // So the needle is actually 'empty', although it doesn't appear so
         var_dump(mb_substr_count("abcdef", "\x1B(B", "ISO-2022-JP"));
     } catch (\ValueError $e) {
-        echo $e->getMessage() . \PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 
     print "== Return value for empty haystack should always be zero ==\n";
@@ -69,9 +69,9 @@ internal_encoding=EUC-JP
 ?>
 --EXPECT--
 == Empty needle should raise an error ==
-mb_substr_count(): Argument #2 ($needle) must not be empty
-mb_substr_count(): Argument #2 ($needle) must not be empty
-mb_substr_count(): Argument #2 ($needle) must not be empty
+ValueError: mb_substr_count(): Argument #2 ($needle) must not be empty
+ValueError: mb_substr_count(): Argument #2 ($needle) must not be empty
+ValueError: mb_substr_count(): Argument #2 ($needle) must not be empty
 == Return value for empty haystack should always be zero ==
 int(0)
 int(0)

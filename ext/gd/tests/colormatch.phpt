@@ -11,11 +11,11 @@ $im2 = imagecreate(5,5);
 try {
     imagecolormatch($im, $im2);
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 echo "ok\n";
 ?>
 --EXPECT--
-imagecolormatch(): Argument #2 ($image2) must have at least one color
+ValueError: imagecolormatch(): Argument #2 ($image2) must have at least one color
 ok

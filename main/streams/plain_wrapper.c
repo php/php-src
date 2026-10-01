@@ -1482,7 +1482,7 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 		}
 
 		int ret = VCWD_MKDIR(dir, (mode_t)mode);
-		if (ret < 0 && (options & REPORT_ERRORS)) {
+		if (ret < 0) {
 			php_stream_wrapper_warn(wrapper, context, options,
 					MkdirFailed, "%s", strerror(errno));
 			return 0;

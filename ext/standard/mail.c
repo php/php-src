@@ -528,7 +528,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 		MAIL_RET(false);
 	}
 
-	if (!sendmail_path) {
+	if (!(sendmail_path && sendmail_path[0] != '\0')) {
 #ifdef PHP_WIN32
 		int tsm_err;
 		char *tsm_errmsg = NULL;
@@ -702,7 +702,7 @@ PHP_MINFO_FUNCTION(mail)
 	const char *sendmail_path = zend_ini_string_literal("sendmail_path");
 
 #ifdef PHP_WIN32
-	if (!sendmail_path) {
+	if (!(sendmail_path && sendmail_path[0] != '\0')) {
 		php_info_print_table_row(2, "Internal Sendmail Support for Windows", "enabled");
 	} else {
 		php_info_print_table_row(2, "Path to sendmail", sendmail_path);

@@ -12,14 +12,14 @@ echo "--- Edge cases ---\n";
 
 try {
     $dom->documentElement->replaceChildren($dom->documentElement);
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $dom->documentElement->firstElementChild->replaceChildren($dom->documentElement);
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "--- Normal cases ---\n";
@@ -60,8 +60,8 @@ echo $dom->saveXML();
 ?>
 --EXPECT--
 --- Edge cases ---
-Hierarchy Request Error
-Hierarchy Request Error
+DOMException: Hierarchy Request Error
+DOMException: Hierarchy Request Error
 --- Normal cases ---
 <?xml version="1.0" standalone="yes"?>
 <!DOCTYPE HTML>

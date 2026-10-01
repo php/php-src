@@ -21,7 +21,6 @@
 #include "php.h"
 
 #include "zend_variables.h"
-#include "zend_attributes.h"
 #include "ext/standard/info.h"
 #include "ext/standard/html.h" /* For php_next_utf8_char() */
 
@@ -1209,8 +1208,7 @@ PHP_FUNCTION(xml_set_object)
 		OBJ_RELEASE(parser->object);
 	}
 
-	parser->object = new_this;
-	GC_ADDREF(parser->object);
+	parser->object = zend_object_copy(new_this);
 
 	RETURN_TRUE;
 }
@@ -1309,6 +1307,12 @@ PHP_FUNCTION(xml_set_element_handler)
 	}
 
 	set_handlers:
+	if (parser->isparsing) {
+		zend_release_fcall_info_cache(&start_fcc);
+		zend_release_fcall_info_cache(&end_fcc);
+		zend_throw_error(NULL, "Cannot change handlers while parsing");
+		RETURN_THROWS();
+	}
 	xml_set_handler(&parser->startElementHandler, &start_fcc);
 	xml_set_handler(&parser->endElementHandler, &end_fcc);
 	XML_SetElementHandler(parser->parser, xml_startElementHandler, xml_endElementHandler);
@@ -1362,6 +1366,11 @@ static void php_xml_set_handler_parse_callable(
 		php_xml_set_handler_parse_callable(INTERNAL_FUNCTION_PARAM_PASSTHRU, &parser, &handler_fcc); \
 		if (EG(exception)) { return; } \
 		ZEND_ASSERT(parser); \
+		if (parser->isparsing) { \
+			zend_release_fcall_info_cache(&handler_fcc); \
+			zend_throw_error(NULL, "Cannot change handlers while parsing"); \
+			RETURN_THROWS(); \
+		} \
 		xml_set_handler(&parser->parser_handler_name, &handler_fcc); \
 		parse_function(parser->parser, c_function); \
 		RETURN_TRUE; \

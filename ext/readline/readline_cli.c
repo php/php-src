@@ -128,7 +128,7 @@ static zend_string *cli_get_prompt(char *block, char prompt) /* {{{ */
 	char *prompt_spec = CLIR_G(prompt) ? CLIR_G(prompt) : DEFAULT_PROMPT;
 	bool unicode_warned = false;
 
-	do {
+	while (*prompt_spec) {
 		if (*prompt_spec == '\\') {
 			switch (prompt_spec[1]) {
 			case '\\':
@@ -196,9 +196,9 @@ static zend_string *cli_get_prompt(char *block, char prompt) /* {{{ */
 				smart_str_appendc(&retval, '?');
 			}
 		}
-	} while (++prompt_spec && *prompt_spec);
-	smart_str_0(&retval);
-	return retval.s;
+		++prompt_spec;
+	}
+	return smart_str_extract(&retval);
 }
 /* }}} */
 
@@ -529,6 +529,7 @@ TODO:
 	} else {
 		char *lc_text;
 		const char *class_name_end;
+		const char *constant_text = text;
 		zend_string *class_name = NULL;
 		zend_class_entry *ce = NULL;
 
@@ -541,6 +542,7 @@ TODO:
 				zend_string_release_ex(class_name, 0);
 				return NULL;
 			}
+			constant_text = class_name_end + 2;
 			lc_text = zend_str_tolower_dup(class_name_end + 2, textlen - 2 - class_name_len);
 			textlen -= (class_name_len + 2);
 		} else {
@@ -557,7 +559,7 @@ TODO:
 				ZEND_FALLTHROUGH;
 			case 2:
 			case 3:
-				retval = cli_completion_generator_define(text, textlen, &cli_completion_state, ce ? &ce->constants_table : EG(zend_constants));
+				retval = cli_completion_generator_define(constant_text, textlen, &cli_completion_state, ce ? &ce->constants_table : EG(zend_constants));
 				if (retval || ce) {
 					break;
 				}
@@ -605,7 +607,7 @@ static int readline_shell_run(void) /* {{{ */
 		zend_file_handle prepend_file;
 
 		zend_stream_init_filename(&prepend_file, PG(auto_prepend_file));
-		zend_execute_scripts(ZEND_REQUIRE, NULL, 1, &prepend_file);
+		zend_execute_script(ZEND_REQUIRE, NULL, &prepend_file);
 		zend_destroy_file_handle(&prepend_file);
 	}
 
@@ -710,7 +712,7 @@ static int readline_shell_run(void) /* {{{ */
 		}
 
 		if (pager_pipe) {
-			fclose(pager_pipe);
+			pclose(pager_pipe);
 			pager_pipe = NULL;
 		}
 

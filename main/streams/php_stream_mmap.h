@@ -56,7 +56,7 @@ typedef struct {
 
 #define PHP_STREAM_MMAP_MAX (512 * 1024 * 1024)
 
-#define php_stream_mmap_supported(stream)	(_php_stream_set_option((stream), PHP_STREAM_OPTION_MMAP_API, PHP_STREAM_MMAP_SUPPORTED, NULL) == 0 ? 1 : 0)
+#define php_stream_mmap_supported(stream)	(php_stream_set_option((stream), PHP_STREAM_OPTION_MMAP_API, PHP_STREAM_MMAP_SUPPORTED, NULL) == 0 ? 1 : 0)
 
 /* Returns 1 if the stream in its current state can be memory mapped,
  * 0 otherwise */
@@ -67,9 +67,7 @@ PHPAPI char *_php_stream_mmap_range(php_stream *stream, size_t offset, size_t le
 #define php_stream_mmap_range(stream, offset, length, mode, mapped_len)	_php_stream_mmap_range((stream), (offset), (length), (mode), (mapped_len))
 
 /* un-maps the last mapped range */
-PHPAPI int _php_stream_mmap_unmap(php_stream *stream);
-#define php_stream_mmap_unmap(stream)				_php_stream_mmap_unmap((stream))
+PHPAPI int php_stream_mmap_unmap(php_stream *stream);
 
-PHPAPI int _php_stream_mmap_unmap_ex(php_stream *stream, zend_off_t readden);
-#define php_stream_mmap_unmap_ex(stream, readden)			_php_stream_mmap_unmap_ex((stream), (readden))
+PHPAPI int php_stream_mmap_unmap_ex(php_stream *stream, zend_off_t readden);
 END_EXTERN_C()

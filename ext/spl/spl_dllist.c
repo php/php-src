@@ -382,7 +382,7 @@ static zend_result spl_dllist_object_count_elements(zend_object *object, zend_lo
 
 	if (intern->fptr_count) {
 		zval rv;
-		zend_call_method_with_0_params(object, intern->std.ce, &intern->fptr_count, "count", &rv);
+		zend_call_known_function(intern->fptr_count, object, intern->std.ce, &rv, 0, NULL, NULL);
 		if (!Z_ISUNDEF(rv)) {
 			*count = zval_get_long(&rv);
 			zval_ptr_dtor(&rv);
@@ -962,12 +962,16 @@ PHP_METHOD(SplDoublyLinkedList, serialize)
 
 	/* elements */
 	while (current) {
+		zval data;
+
 		smart_str_appendc(&buf, ':');
 		next = current->next;
 
 		SPL_LLIST_CHECK_ADDREF(next);
 
-		php_var_serialize(&buf, &current->data, &var_hash);
+		ZVAL_COPY(&data, &current->data);
+		php_var_serialize(&buf, &data, &var_hash);
+		zval_ptr_dtor(&data);
 
 		SPL_LLIST_CHECK_DELREF_EX(next, break;);
 

@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - query - URL encoded characters
+Test Uri\Rfc3986\Uri::withQuery() - success - percent-encoded characters
 --FILE--
 <?php
 

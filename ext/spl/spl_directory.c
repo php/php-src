@@ -22,7 +22,6 @@
 #include "ext/standard/flock_compat.h"
 #include "ext/standard/scanf.h"
 #include "ext/standard/php_string.h" /* For php_basename() */
-#include "zend_attributes.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
 
@@ -39,7 +38,7 @@ static zend_object_handlers spl_filesystem_object_handlers;
 /* includes handler to validate object state when retrieving methods */
 static zend_object_handlers spl_filesystem_object_check_handlers;
 
-/* decalre the class entry */
+/* declare the class entry */
 PHPAPI zend_class_entry *spl_ce_SplFileInfo;
 PHPAPI zend_class_entry *spl_ce_DirectoryIterator;
 PHPAPI zend_class_entry *spl_ce_FilesystemIterator;
@@ -480,7 +479,7 @@ static spl_filesystem_object *spl_filesystem_object_create_info(zend_string *fil
 
 	if (ce->constructor->common.scope != spl_ce_SplFileInfo) {
 		ZVAL_STR(&arg1, file_path);
-		zend_call_method_with_1_params(Z_OBJ_P(return_value), ce, &ce->constructor, "__construct", NULL, &arg1);
+		zend_call_known_function(ce->constructor, Z_OBJ_P(return_value), ce, NULL, 1, &arg1, NULL);
 	} else {
 		spl_filesystem_info_set_filename(intern, file_path);
 	}
@@ -519,7 +518,7 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int num_args, sp
 
 			if (ce->constructor->common.scope != spl_ce_SplFileInfo) {
 				ZVAL_STR(&arg1, source->file_name);
-				zend_call_method_with_1_params(Z_OBJ_P(return_value), ce, &ce->constructor, "__construct", NULL, &arg1);
+				zend_call_known_function(ce->constructor, Z_OBJ_P(return_value), ce, NULL, 1, &arg1, NULL);
 			} else {
 				intern->file_name = zend_string_copy(source->file_name);
 				intern->path = spl_filesystem_object_get_path(source);

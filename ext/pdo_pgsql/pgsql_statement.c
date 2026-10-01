@@ -58,18 +58,74 @@
 #define FIN_CLOSE   0x2
 #define FIN_ABORT   0x4
 
+static bool pgsql_result_status_ok(ExecStatusType status)
+{
+	switch (status) {
+		case PGRES_COMMAND_OK:
+		case PGRES_TUPLES_OK:
+		case PGRES_SINGLE_TUPLE:
+#ifdef HAVE_PG_SET_CHUNKED_ROWS_SIZE
+		case PGRES_TUPLES_CHUNK:
+#endif
+			return true;
+		default:
+			return false;
+	}
+}
+
+#ifndef HAVE_PQCLOSEPORTAL
+static bool pdo_pgsql_try_cmd(const char *cmd, const char *ok_sqlstate, pdo_pgsql_db_handle *H)
+{
+	bool result = false;
+	char *q = NULL;
+	PGresult *res = NULL;
+
+	PGTransactionStatusType status = PQtransactionStatus(H->server);
+
+	switch (status) {
+		case PQTRANS_ACTIVE:
+		case PQTRANS_INERROR:
+			break;
+		case PQTRANS_INTRANS: /* failure must not abort the caller's transaction */
+			/* PQexec does not run the statements following a failed one */
+			spprintf(&q, 0, "SAVEPOINT pdo_pgsql_savepoint; %s; RELEASE SAVEPOINT pdo_pgsql_savepoint;", cmd);
+			res = PQexec(H->server, q);
+
+			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
+				PQclear(PQexec(H->server, "ROLLBACK TO SAVEPOINT pdo_pgsql_savepoint; RELEASE SAVEPOINT pdo_pgsql_savepoint"));
+			}
+
+			break;
+		default:
+			res = PQexec(H->server, cmd);
+	}
+
+	if (PQresultStatus(res) == PGRES_COMMAND_OK) {
+		result = true;
+	} else if (res) {
+		const char *sqlstate = pdo_pgsql_sqlstate(res);
+
+		result = sqlstate && !strcmp(sqlstate, ok_sqlstate);
+	}
+
+	if (q) efree(q);
+	if (res) PQclear(res);
+
+	return result;
+}
+#endif
 
 
 static void pgsql_stmt_finish(pdo_pgsql_stmt *S, int fin_mode)
 {
 	pdo_pgsql_db_handle *H = S->H;
 
-	if (S->is_running_unbuffered && S->result && (fin_mode & FIN_ABORT)) {
+	/* a buffered query may have already drained this statement's stream */
+	if (S->is_running_unbuffered && H->running_stmt == S && S->result && (fin_mode & FIN_ABORT)) {
 		PGcancel *cancel = PQgetCancel(H->server);
 		char errbuf[256];
 		PQcancel(cancel, errbuf, 256);
 		PQfreeCancel(cancel);
-		S->is_running_unbuffered = false;
 	}
 
 	if (S->result) {
@@ -78,7 +134,7 @@ static void pgsql_stmt_finish(pdo_pgsql_stmt *S, int fin_mode)
 		S->result = NULL;
 	}
 
-	if (S->is_running_unbuffered) {
+	if (S->is_running_unbuffered && H->running_stmt == S) {
 		/* https://postgresql.org/docs/current/libpq-async.html:
 		 * "PQsendQuery cannot be called again until PQgetResult has returned NULL"
 		 * And as all single-row functions are connection-wise instead of statement-wise,
@@ -88,8 +144,35 @@ static void pgsql_stmt_finish(pdo_pgsql_stmt *S, int fin_mode)
 		//       instead of discarding results we could store them to their statement
 		//       so that their fetch() will get them (albeit not in lazy mode anymore).
 		while ((S->result = PQgetResult(H->server))) {
+			ExecStatusType status = PQresultStatus(S->result);
+
 			PQclear(S->result);
 			S->result = NULL;
+
+			/* PQgetResult() keeps handing out the same result while the
+			 * connection is copying: only these calls can end it */
+			if (status == PGRES_COPY_IN || status == PGRES_COPY_BOTH) {
+				/* fail a copy in, so that abandoning a statement cannot
+				 * commit it; a replication stream only accepts a clean end */
+				const char *error = status == PGRES_COPY_IN
+					? "COPY terminated by PDO"
+					: NULL;
+
+				if (PQputCopyEnd(H->server, error) < 0) {
+					break;
+				}
+			}
+			if (status == PGRES_COPY_OUT || status == PGRES_COPY_BOTH) {
+				char *buf;
+				int nbytes;
+
+				while ((nbytes = PQgetCopyData(H->server, &buf, 0)) > 0) {
+					PQfreemem(buf);
+				}
+				if (nbytes < -1) {
+					break;
+				}
+			}
 		}
 		S->is_running_unbuffered = false;
 	}
@@ -111,9 +194,6 @@ static void pgsql_stmt_finish(pdo_pgsql_stmt *S, int fin_mode)
 		}
 
 		S->is_prepared = false;
-		if (H->running_stmt == S) {
-			H->running_stmt = NULL;
-		}
 	}
 }
 
@@ -123,6 +203,10 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 	bool server_obj_usable = php_pdo_stmt_valid_db_obj_handle(stmt);
 
 	pgsql_stmt_finish(S, FIN_DISCARD|(server_obj_usable ? FIN_CLOSE|FIN_ABORT : 0));
+
+	if (server_obj_usable && S->H->running_stmt == S) {
+		S->H->running_stmt = NULL;
+	}
 
 	if (S->stmt_name) {
 		efree(S->stmt_name);
@@ -150,15 +234,16 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 	}
 
 	if (S->cursor_name) {
-		if (server_obj_usable) {
+		if (S->is_cursor_declared && server_obj_usable) {
 			pdo_pgsql_db_handle *H = S->H;
-			char *q = NULL;
-			PGresult *res;
-
+#ifndef HAVE_PQCLOSEPORTAL
+			char *q;
 			spprintf(&q, 0, "CLOSE %s", S->cursor_name);
-			res = PQexec(H->server, q);
+			pdo_pgsql_try_cmd(q, "34000", H); /* 34000: invalid_cursor_name */
 			efree(q);
-			if (res) PQclear(res);
+#else
+			PQclear(PQclosePortal(H->server, S->cursor_name));
+#endif
 		}
 		efree(S->cursor_name);
 		S->cursor_name = NULL;
@@ -198,10 +283,25 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt)
 	if (S->cursor_name) {
 		char *q = NULL;
 
-		if (S->is_prepared) {
+		if (S->is_cursor_declared) {
+#ifndef HAVE_PQCLOSEPORTAL
 			spprintf(&q, 0, "CLOSE %s", S->cursor_name);
-			PQclear(PQexec(H->server, q));
+
+			/* 34000: invalid_cursor_name */
+			if (pdo_pgsql_try_cmd(q, "34000", H)) {
+				S->is_cursor_declared = false;
+			}
+
 			efree(q);
+#else
+			PGresult *res = PQclosePortal(H->server, S->cursor_name);
+
+			if (PQresultStatus(res) == PGRES_COMMAND_OK) {
+				S->is_cursor_declared = false;
+			}
+
+			PQclear(res);
+#endif
 		}
 
 		spprintf(&q, 0, "DECLARE %s SCROLL CURSOR WITH HOLD FOR %s", S->cursor_name, ZSTR_VAL(stmt->active_query_string));
@@ -217,7 +317,7 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt)
 		PQclear(S->result);
 
 		/* the cursor was declared correctly */
-		S->is_prepared = true;
+		S->is_cursor_declared = true;
 
 		/* fetch to be able to get the number of tuples later, but don't advance the cursor pointer */
 		spprintf(&q, 0, "FETCH FORWARD 0 FROM %s", S->cursor_name);
@@ -326,8 +426,16 @@ stmt_retry:
 			return 0;
 		}
 		S->is_running_unbuffered = true;
+		/* no matter if they return 0: PQ then transparently fallbacks to full result fetching */
+#ifdef HAVE_PG_SET_CHUNKED_ROWS_SIZE
+		if (S->chunk_size >= 1) {
+			(void)PQsetChunkedRowsMode(H->server, (int)S->chunk_size);
+		} else {
+			(void)PQsetSingleRowMode(H->server);
+		}
+#else
 		(void)PQsetSingleRowMode(H->server);
-		/* no matter if it returns 0: PQ then transparently fallbacks to full result fetching */
+#endif
 
 		/* try a first fetch to at least have column names and so on */
 		S->result = PQgetResult(S->H->server);
@@ -335,7 +443,7 @@ stmt_retry:
 
 	status = PQresultStatus(S->result);
 
-	if (status != PGRES_COMMAND_OK && status != PGRES_TUPLES_OK && status != PGRES_SINGLE_TUPLE) {
+	if (!pgsql_result_status_ok(status)) {
 		pdo_pgsql_error_stmt(stmt, status, pdo_pgsql_sqlstate(S->result));
 		return 0;
 	}
@@ -559,7 +667,7 @@ static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
 			return 0;
 		}
 	} else {
-		if (S->is_running_unbuffered && S->current_row >= stmt->row_count) {
+		if (S->is_running_unbuffered && S->H->running_stmt == S && S->current_row >= stmt->row_count) {
 			ExecStatusType status;
 
 			/* @todo in unbuffered mode, PQ allows multiple queries to be passed:
@@ -579,7 +687,7 @@ static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
 			}
 			status = PQresultStatus(S->result);
 
-			if (status != PGRES_COMMAND_OK && status != PGRES_TUPLES_OK && status != PGRES_SINGLE_TUPLE) {
+			if (!pgsql_result_status_ok(status)) {
 				pdo_pgsql_error_stmt(stmt, status, pdo_pgsql_sqlstate(S->result));
 				return 0;
 			}
@@ -588,12 +696,12 @@ static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
 			S->current_row = 0;
 
 			if (!stmt->row_count) {
-				S->is_running_unbuffered = false;
 				/* libpq requires looping until getResult returns null */
 				pgsql_stmt_finish(S, 0);
 			}
 		}
-		if (S->current_row < stmt->row_count) {
+		/* another statement may have taken over and freed the result */
+		if (S->result && S->current_row < stmt->row_count) {
 			S->current_row++;
 			return 1;
 		} else {
@@ -853,6 +961,12 @@ static int pgsql_stmt_get_attr(pdo_stmt_t *stmt, zend_long attr, zval *val)
 
 				ZVAL_NULL(val);
 			}
+			return 1;
+#endif
+
+#ifdef HAVE_PG_SET_CHUNKED_ROWS_SIZE
+		case PDO_PGSQL_ATTR_CHUNK_SIZE:
+			ZVAL_LONG(val, S->chunk_size);
 			return 1;
 #endif
 

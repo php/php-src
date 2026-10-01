@@ -26,8 +26,8 @@ $obj = New SplFileObject("SPLtest://ftruncate_test");
 try {
     $obj->ftruncate(1);
 } catch (LogicException $e) {
-    echo($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECTF--
-Can't truncate file %s
+LogicException: Can't truncate file %s

@@ -402,11 +402,18 @@ static php_stream_filter *php_bz2_decompress_filter_create(zval *filter_params, 
 			&& Z_TYPE_P(filter_params) != IS_ARRAY
 			&& Z_TYPE_P(filter_params) != IS_OBJECT
 		)) {
-			php_error_docref(NULL, E_WARNING,
+			php_error_docref("filters.compression", E_WARNING,
 				"Filter parameters for bzip2.decompress filter must be of type array|object|bool, %s given",
 				zend_zval_type_name(filter_params)
 			);
 			return NULL;
+		}
+		if (Z_TYPE_P(filter_params) == IS_OBJECT) {
+			php_error_docref("filters.compression", E_DEPRECATED,
+				"Passing an object for filter parameters for bzip2.decompress is deprecated, call get_object_vars() first instead");
+			if (UNEXPECTED(EG(exception))) {
+				return NULL;
+			}
 		}
 
 		if (Z_TYPE_P(filter_params) == IS_TRUE || Z_TYPE_P(filter_params) == IS_FALSE) {
@@ -448,11 +455,18 @@ static php_stream_filter *php_bz2_compress_filter_create(zval *filter_params, bo
 
 	if (filter_params) {
 		if (UNEXPECTED(Z_TYPE_P(filter_params) != IS_ARRAY && Z_TYPE_P(filter_params) != IS_OBJECT)) {
-			php_error_docref(NULL, E_WARNING,
+			php_error_docref("filters.compression", E_WARNING,
 				"Filter parameters for bzip2.compress filter must be of type array|object, %s given",
 				zend_zval_type_name(filter_params)
 			);
 			return NULL;
+		}
+		if (Z_TYPE_P(filter_params) == IS_OBJECT) {
+			php_error_docref("filters.compression", E_DEPRECATED,
+				"Passing an object for filter parameters for bzip2.compress is deprecated, call get_object_vars() first instead");
+			if (UNEXPECTED(EG(exception))) {
+				return NULL;
+			}
 		}
 
 		const HashTable *filter_params_ht = HASH_OF(filter_params);
@@ -468,10 +482,10 @@ static php_stream_filter *php_bz2_compress_filter_create(zval *filter_params, bo
 			/* How much memory to allocate (1 - 9) x 100kb */
 			zend_long blocks = zval_try_get_long(blocks_zv, &failed);
 			if (UNEXPECTED(failed)) {
-				php_error_docref(NULL, E_WARNING, "Number of blocks parameter must be of type int, %s given", zend_zval_type_name(blocks_zv));
+				php_error_docref("filters.compression", E_WARNING, "Number of blocks parameter must be of type int, %s given", zend_zval_type_name(blocks_zv));
 				return NULL;
 			} else if (blocks < 1 || blocks > 9) {
-				php_error_docref(NULL, E_WARNING, "Number of blocks to allocate must be between 1 and 9, " ZEND_LONG_FMT " given", blocks);
+				php_error_docref("filters.compression", E_WARNING, "Number of blocks to allocate must be between 1 and 9, " ZEND_LONG_FMT " given", blocks);
 				return NULL;
 			} else {
 				blockSize100k = (int) blocks;
@@ -485,10 +499,10 @@ static php_stream_filter *php_bz2_compress_filter_create(zval *filter_params, bo
 			/* Work Factor (0 - 250) */
 			zend_long work = zval_try_get_long(work_zv, &failed);
 			if (UNEXPECTED(failed)) {
-				php_error_docref(NULL, E_WARNING, "Work factor parameter must be of type int, %s given", zend_zval_type_name(work_zv));
+				php_error_docref("filters.compression", E_WARNING, "Work factor parameter must be of type int, %s given", zend_zval_type_name(work_zv));
 				return NULL;
 			} else if (work < 0 || work > 250) {
-				php_error_docref(NULL, E_WARNING, "Work factor must be between 0 and 250, " ZEND_LONG_FMT " given", work);
+				php_error_docref("filters.compression", E_WARNING, "Work factor must be between 0 and 250, " ZEND_LONG_FMT " given", work);
 				return NULL;
 			} else {
 				workFactor = (int) work;

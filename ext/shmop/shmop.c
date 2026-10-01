@@ -19,7 +19,6 @@
 
 #include "php.h"
 #include "php_shmop.h"
-#include "Zend/zend_attributes.h"
 
 #include "shmop_arginfo.h"
 

@@ -25,12 +25,12 @@ $filter->other = $storage;
 try {
     $storage->removeAllExcept($filter);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump(count($storage));
 
 ?>
 --EXPECT--
-Modification of SplObjectStorage during getHash() is prohibited
+Error: Modification of SplObjectStorage during getHash() is prohibited
 int(1)

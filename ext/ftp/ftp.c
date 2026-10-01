@@ -308,14 +308,9 @@ bool ftp_login(ftpbuf_t *ftp, const char *user, const size_t user_len, const cha
 
 				case SSL_ERROR_WANT_READ:
 				case SSL_ERROR_WANT_WRITE: {
-						php_pollfd p;
-						int i;
+						int i, events = (err == SSL_ERROR_WANT_READ) ? (POLLIN|POLLPRI) : POLLOUT;
 
-						p.fd = ftp->fd;
-						p.events = (err == SSL_ERROR_WANT_READ) ? (POLLIN|POLLPRI) : POLLOUT;
-						p.revents = 0;
-
-						i = php_poll2(&p, 1, 300);
+						i = php_pollfd_for_ms(ftp->fd, events, 300);
 
 						retry = i > 0;
 					}
@@ -1354,13 +1349,14 @@ static ssize_t my_recv_wrapper_with_restart(php_socket_t fd, void *buf, size_t s
 	return n;
 }
 
-static int single_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t size) {
+static ssize_t single_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t size) {
 #ifdef HAVE_FTP_SSL
 	int err;
 	bool retry = false;
 	SSL *handle = NULL;
 	php_socket_t fd;
 	size_t sent;
+	int ret;
 
 	if (ftp->use_ssl && ftp->fd == s && ftp->ssl_active) {
 		handle = ftp->ssl_handle;
@@ -1373,8 +1369,9 @@ static int single_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t size) {
 	}
 
 	do {
-		sent = SSL_write(handle, buf, size);
-		err = SSL_get_error(handle, sent);
+		sent = 0;
+		ret = SSL_write_ex(handle, buf, size, &sent);
+		err = SSL_get_error(handle, ret);
 
 		switch (err) {
 			case SSL_ERROR_NONE:
@@ -1388,14 +1385,9 @@ static int single_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t size) {
 
 			case SSL_ERROR_WANT_READ:
 			case SSL_ERROR_WANT_CONNECT: {
-					php_pollfd p;
-					int i;
+					int i, events = POLLOUT;
 
-					p.fd = fd;
-					p.events = POLLOUT;
-					p.revents = 0;
-
-					i = php_poll2(&p, 1, 300);
+					i = php_pollfd_for_ms(fd, events, 300);
 
 					retry = i > 0;
 				}
@@ -1521,14 +1513,9 @@ static int my_recv(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 
 				case SSL_ERROR_WANT_READ:
 				case SSL_ERROR_WANT_CONNECT: {
-						php_pollfd p;
-						int i;
+						int i, events = POLLIN|POLLPRI;
 
-						p.fd = fd;
-						p.events = POLLIN|POLLPRI;
-						p.revents = 0;
-
-						i = php_poll2(&p, 1, 300);
+						i = php_pollfd_for_ms(fd, events, 300);
 
 						retry = i > 0;
 					}
@@ -1795,7 +1782,10 @@ data_accepted:
 		/* get the session from the control connection so we can re-use it */
 		session = ftp->last_ssl_session;
 		if (session == NULL) {
-			php_error_docref(NULL, E_WARNING, "data_accept: failed to retrieve the existing SSL session");
+			php_error_docref(NULL, E_WARNING, "data_accept: failed to retrieve the existing SSL session from the control connection. "
+											  "The server does not support TLS session resumption on the data connection, "
+											  "which is necessary to protect against session data stealing. "
+											  "PHP does not support such configuration.");
 			SSL_free(data->ssl_handle);
 			return 0;
 		}
@@ -1825,14 +1815,9 @@ data_accepted:
 
 				case SSL_ERROR_WANT_READ:
 				case SSL_ERROR_WANT_WRITE: {
-						php_pollfd p;
-						int i;
+						int i, events = (err == SSL_ERROR_WANT_READ) ? (POLLIN|POLLPRI) : POLLOUT;
 
-						p.fd = data->fd;
-						p.events = (err == SSL_ERROR_WANT_READ) ? (POLLIN|POLLPRI) : POLLOUT;
-						p.revents = 0;
-
-						i = php_poll2(&p, 1, 300);
+						i = php_pollfd_for_ms(data->fd, events, 300);
 
 						retry = i > 0;
 					}

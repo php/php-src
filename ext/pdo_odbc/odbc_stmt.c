@@ -25,7 +25,7 @@
 #include "php_pdo_odbc_int.h"
 
 /* Buffer size; bigger columns than this become a "long column" */
-#define LONG_COLUMN_BUFFER_SIZE (ZEND_MM_PAGE_SIZE- ZSTR_MAX_OVERHEAD)
+#define LONG_COLUMN_BUFFER_SIZE ((SQLLEN)(ZEND_MM_PAGE_SIZE - ZSTR_MAX_OVERHEAD))
 
 enum pdo_odbc_conv_result {
 	PDO_ODBC_CONV_NOT_REQUIRED,
@@ -35,6 +35,7 @@ enum pdo_odbc_conv_result {
 
 static int pdo_odbc_sqltype_is_unicode(pdo_odbc_stmt *S, SQLSMALLINT sqltype)
 {
+#ifdef PHP_WIN32
 	if (!S->assume_utf8) return 0;
 	switch (sqltype) {
 #ifdef SQL_WCHAR
@@ -52,6 +53,9 @@ static int pdo_odbc_sqltype_is_unicode(pdo_odbc_stmt *S, SQLSMALLINT sqltype)
 		default:
 			return 0;
 	}
+#else
+	return 0;
+#endif
 }
 
 static int pdo_odbc_utf82ucs2(pdo_stmt_t *stmt, int is_unicode, const char *buf,
@@ -544,7 +548,15 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 								break;
 						}
 					} else {
-						P->len = SQL_LEN_DATA_AT_EXEC(Z_STRLEN_P(parameter));
+						zend_ulong ulen;
+						if (pdo_odbc_utf82ucs2(stmt, P->is_unicode,
+									Z_STRVAL_P(parameter),
+									Z_STRLEN_P(parameter),
+									&ulen) == PDO_ODBC_CONV_OK) {
+							P->len = SQL_LEN_DATA_AT_EXEC(ulen);
+						} else {
+							P->len = SQL_LEN_DATA_AT_EXEC(Z_STRLEN_P(parameter));
+						}
 					}
 				}
 				return 1;
@@ -671,7 +683,8 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 	}
 	colsize = displaysize;
 
-	col->maxlen = S->cols[colno].datalen = colsize;
+	S->cols[colno].datalen = colsize;
+	col->maxlen = displaysize;
 	col->name = zend_string_init(S->cols[colno].colname, colnamelen, 0);
 	S->cols[colno].is_unicode = pdo_odbc_sqltype_is_unicode(S, S->cols[colno].coltype);
 
@@ -734,6 +747,10 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pdo
 			goto in_data;
 		}
 
+		if (C->fetched_len < 0 && C->fetched_len != SQL_NO_TOTAL) {
+			goto in_data;
+		}
+
 		if (rc == SQL_SUCCESS_WITH_INFO || rc == SQL_SUCCESS) {
 			/*
 			 * This is a long column.
@@ -757,10 +774,14 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pdo
 			 * changed from 256 byte to LONG_COLUMN_BUFFER_SIZE.
 			 */
 			ssize_t to_fetch_len;
-			if (orig_fetched_len == SQL_NO_TOTAL) {
-				to_fetch_len = C->datalen > (LONG_COLUMN_BUFFER_SIZE - 1) ? (LONG_COLUMN_BUFFER_SIZE - 1) : C->datalen;
-			} else {
+			if (orig_fetched_len == SQL_NO_TOTAL && C->datalen > (LONG_COLUMN_BUFFER_SIZE - 1)) {
+				to_fetch_len = C->datalen;
+			} else if (orig_fetched_len > 0) {
+				/* implicitly not SQL_NO_TOTAL, should be OK */
 				to_fetch_len = orig_fetched_len;
+			} else {
+				/* size must be > 0 to actually get data */
+				to_fetch_len = (LONG_COLUMN_BUFFER_SIZE - 1);
 			}
 			ssize_t to_fetch_byte = to_fetch_len + 1;
 			char *buf2 = emalloc(to_fetch_byte);

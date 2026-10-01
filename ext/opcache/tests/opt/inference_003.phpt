@@ -17,4 +17,3 @@ Fatal error: Uncaught Error: Interface "I" not found in %sinference_003.php:2
 Stack trace:
 #0 {main}
   thrown in %sinference_003.php on line 2
-

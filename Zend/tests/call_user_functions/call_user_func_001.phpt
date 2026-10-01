@@ -24,18 +24,18 @@ namespace testing {
     $class =  __NAMESPACE__ .'\foo';
     try {
         call_user_func(array(new $class, 'priv'), 'foobar');
-    } catch (\TypeError $e) {
-        echo $e->getMessage(), "\n";
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         call_user_func(array(new $class, 'prot'), 'foobar');
-    } catch (\TypeError $e) {
-        echo $e->getMessage(), "\n";
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
 ?>
 --EXPECT--
 string(6) "foobar"
-call_user_func(): Argument #1 ($callback) must be a valid callback, cannot access private method testing\foo::priv()
-call_user_func(): Argument #1 ($callback) must be a valid callback, cannot access protected method testing\foo::prot()
+TypeError: call_user_func(): Argument #1 ($callback) must be a valid callback, cannot access private method testing\foo::priv()
+TypeError: call_user_func(): Argument #1 ($callback) must be a valid callback, cannot access protected method testing\foo::prot()

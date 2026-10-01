@@ -16,5 +16,6 @@ if($result > 0) {
     echo "Pass\n";
 }
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function strcoll() is deprecated since 8.6, use Collator::compare() instead in %s on line %d
 Pass

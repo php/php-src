@@ -8,9 +8,9 @@ $it = $rc->newInstanceWithoutConstructor();
 try {
     foreach ($it as $v) {}
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Object is not initialized
+Error: Object is not initialized

@@ -8,7 +8,7 @@ try {
         ['' => [null]],
     );
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
@@ -17,9 +17,9 @@ try {
         ['foo' => str_repeat('a', 2)],
     );
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Cannot add element to the array as the next element is already occupied
-Cannot add element to the array as the next element is already occupied
+Error: Cannot add element to the array as the next element is already occupied
+Error: Cannot add element to the array as the next element is already occupied

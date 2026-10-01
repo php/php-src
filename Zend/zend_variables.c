@@ -101,19 +101,16 @@ ZEND_API void zval_ptr_safe_dtor(zval *zval_ptr)
 ZEND_API void zval_internal_ptr_dtor(zval *zval_ptr) /* {{{ */
 {
 	if (Z_REFCOUNTED_P(zval_ptr)) {
+		ZEND_ASSERT(Z_TYPE_P(zval_ptr) == IS_STRING && "Internal zval's can't be arrays, objects, resources or reference");
 		zend_refcounted *ref = Z_COUNTED_P(zval_ptr);
 
 		if (GC_DELREF(ref) == 0) {
-			if (Z_TYPE_P(zval_ptr) == IS_STRING) {
-				zend_string *str = (zend_string*)ref;
+			zend_string *str = (zend_string*)ref;
 
-				CHECK_ZVAL_STRING(str);
-				ZEND_ASSERT(!ZSTR_IS_INTERNED(str));
-				ZEND_ASSERT((GC_FLAGS(str) & IS_STR_PERSISTENT));
-				free(str);
-			} else {
-				zend_error_noreturn(E_CORE_ERROR, "Internal zval's can't be arrays, objects, resources or reference");
-			}
+			CHECK_ZVAL_STRING(str);
+			ZEND_ASSERT(!ZSTR_IS_INTERNED(str));
+			ZEND_ASSERT((GC_FLAGS(str) & IS_STR_PERSISTENT));
+			free(str);
 		}
 	}
 }

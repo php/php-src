@@ -14,6 +14,8 @@ function foo() : array {
 foo();
 ?>
 --EXPECTF--
+Deprecated: Returning from a finally block is deprecated in %s on line %d
+
 Fatal error: Uncaught Exception: xxxx in %s:%d
 Stack trace:
 #0 %s(%d): foo()

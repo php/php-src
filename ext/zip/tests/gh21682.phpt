@@ -9,8 +9,8 @@ try {
     serialize($a);
     echo "ERROR: should have thrown\n";
 } catch (\Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Serialization of 'ZipArchive' is not allowed, override __serialize() and __unserialize() to implement it
+Exception: Serialization of 'ZipArchive' is not allowed, override __serialize() and __unserialize() to implement it

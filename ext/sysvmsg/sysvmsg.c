@@ -192,10 +192,21 @@ PHP_FUNCTION(msg_stat_queue)
 /* {{{ Check whether a message queue exists */
 PHP_FUNCTION(msg_queue_exists)
 {
-	zend_long key;
+	zend_long key_arg;
+	key_t key;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &key) == FAILURE)	{
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &key_arg) == FAILURE)	{
 		RETURN_THROWS();
+	}
+
+	key = (key_t) key_arg;
+	if ((zend_long) key != key_arg) {
+		zend_argument_value_error(1, "is out of range");
+		RETURN_THROWS();
+	}
+
+	if (key == IPC_PRIVATE) {
+		RETURN_FALSE;
 	}
 
 	RETURN_BOOL(msgget(key, 0) >= 0);
@@ -205,11 +216,18 @@ PHP_FUNCTION(msg_queue_exists)
 /* {{{ Attach to a message queue */
 PHP_FUNCTION(msg_get_queue)
 {
-	zend_long key;
+	zend_long key_arg;
 	zend_long perms = 0666;
+	key_t key;
 	sysvmsg_queue_t *mq;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &key, &perms) == FAILURE)	{
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &key_arg, &perms) == FAILURE)	{
+		RETURN_THROWS();
+	}
+
+	key = (key_t) key_arg;
+	if ((zend_long) key != key_arg) {
+		zend_argument_value_error(1, "is out of range");
 		RETURN_THROWS();
 	}
 
@@ -217,12 +235,16 @@ PHP_FUNCTION(msg_get_queue)
 	mq = Z_SYSVMSG_QUEUE_P(return_value);
 
 	mq->key = key;
-	mq->id = msgget(key, 0);
+	if (key == IPC_PRIVATE) {
+		mq->id = -1;
+	} else {
+		mq->id = msgget(key, 0);
+	}
 	if (mq->id < 0)	{
 		/* doesn't already exist; create it */
 		mq->id = msgget(key, IPC_CREAT | IPC_EXCL | perms);
 		if (mq->id < 0)	{
-			php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", key, strerror(errno));
+			php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", key_arg, strerror(errno));
 			zval_ptr_dtor(return_value);
 			RETURN_FALSE;
 		}

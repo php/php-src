@@ -44,33 +44,50 @@ ZEND_EXTERN_MODULE_GLOBALS( intl )
 
 static const size_t DEF_SORT_KEYS_BUF_SIZE = 1048576;
 static const size_t DEF_SORT_KEYS_BUF_INCREMENT = 1048576;
-
-static const size_t DEF_SORT_KEYS_INDX_BUF_SIZE = 1048576;
-static const size_t DEF_SORT_KEYS_INDX_BUF_INCREMENT = 1048576;
+static const size_t MIN_SORT_KEYS_BUF_SIZE = 4096;
+static const size_t SORT_KEY_LENGTH_ESTIMATE = 32;
 
 static const size_t DEF_UTF16_BUF_SIZE = 1024;
+
+static void collator_report_sort_error(Collator_object *co, const intl_error *sort_error)
+{
+	if (sort_error->custom_error_message) {
+		intl_errors_set(
+			COLLATOR_ERROR_P(co), sort_error->code,
+			ZSTR_VAL(sort_error->custom_error_message));
+	} else {
+		intl_errors_set_code(COLLATOR_ERROR_P(co), sort_error->code);
+	}
+}
 
 /* {{{ collator_regular_compare_function */
 static int collator_regular_compare_function(zval *result, zval *op1, zval *op2)
 {
 	int rc = SUCCESS;
 	zval str1, str2;
-	zval num1, num2;
-	zval norm1, norm2;
+	zval tmp1, tmp2;
 	zval *num1_p = nullptr, *num2_p = nullptr;
 	zval *norm1_p = nullptr, *norm2_p = nullptr;
-	zval *str1_p, *str2_p;
+	zval *str1_p = nullptr, *str2_p = nullptr;
 
 	ZVAL_NULL(&str1);
 	str1_p  = collator_convert_object_to_string( op1, &str1 );
+	if( str1_p == nullptr ) {
+		return FAILURE;
+	}
+
 	ZVAL_NULL(&str2);
 	str2_p  = collator_convert_object_to_string( op2, &str2 );
+	if( str2_p == nullptr ) {
+		rc = FAILURE;
+		goto cleanup;
+	}
 
 	/* If both args are strings AND either of args is not numeric string
 	 * then use ICU-compare. Otherwise PHP-compare. */
 	if( Z_TYPE_P(str1_p) == IS_STRING && Z_TYPE_P(str2_p) == IS_STRING &&
-		( str1_p == ( num1_p = collator_convert_string_to_number_if_possible( str1_p, &num1 ) ) ||
-		  str2_p == ( num2_p = collator_convert_string_to_number_if_possible( str2_p, &num2 ) ) ) )
+		( str1_p == ( num1_p = collator_convert_string_to_number_if_possible( str1_p, &tmp1 ) ) ||
+		  str2_p == ( num2_p = collator_convert_string_to_number_if_possible( str2_p, &tmp2 ) ) ) )
 	{
 		/* Compare the strings using ICU. */
 		ZEND_ASSERT(INTL_G(current_collator) != nullptr);
@@ -81,44 +98,43 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2)
 	}
 	else
 	{
-		/* num1 is set if str1 and str2 are strings. */
+		/* num1 is set only if str1 and str2 are both numeric strings. */
 		if( num1_p )
 		{
-			if( num1_p == str1_p )
-			{
-				/* str1 is string but not numeric string
-				 * just convert it to utf8.
-				 */
-				norm1_p = collator_convert_zstr_utf16_to_utf8( str1_p, &norm1 );
+			/* str1 is numeric strings => passthru to PHP-compare. */
+			Z_TRY_ADDREF_P(num1_p);
+			norm1_p = num1_p;
 
-				/* num2 is not set but str2 is string => do normalization. */
-				norm2_p = collator_normalize_sort_argument( str2_p, &norm2 );
-			}
-			else
-			{
-				/* str1 is numeric strings => passthru to PHP-compare. */
-				Z_TRY_ADDREF_P(num1_p);
-				norm1_p = num1_p;
-
-				/* str2 is numeric strings => passthru to PHP-compare. */
-				Z_TRY_ADDREF_P(num2_p);
-				norm2_p = num2_p;
-			}
+			/* str2 is numeric strings => passthru to PHP-compare. */
+			Z_TRY_ADDREF_P(num2_p);
+			norm2_p = num2_p;
 		}
 		else
 		{
 			/* num1 is not set if str1 or str2 is not a string => do normalization. */
-			norm1_p = collator_normalize_sort_argument( str1_p, &norm1 );
+			norm1_p = collator_normalize_sort_argument( str1_p, &tmp1 );
+			if( norm1_p == nullptr ) {
+				rc = FAILURE;
+				goto cleanup;
+			}
 
 			/* if num1 is not set then num2 is not set as well => do normalization. */
-			norm2_p = collator_normalize_sort_argument( str2_p, &norm2 );
+			norm2_p = collator_normalize_sort_argument( str2_p, &tmp2 );
+			if( norm2_p == nullptr ) {
+				rc = FAILURE;
+				goto cleanup;
+			}
 		}
 
 		rc = compare_function( result, norm1_p, norm2_p );
-
-		zval_ptr_dtor( norm1_p );
-		zval_ptr_dtor( norm2_p );
 	}
+
+cleanup:
+	if( norm1_p )
+		zval_ptr_dtor( norm1_p );
+
+	if( norm2_p )
+		zval_ptr_dtor( norm2_p );
 
 	if( num1_p )
 		zval_ptr_dtor( num1_p );
@@ -126,8 +142,11 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2)
 	if( num2_p )
 		zval_ptr_dtor( num2_p );
 
-	zval_ptr_dtor( str1_p );
-	zval_ptr_dtor( str2_p );
+	if( str1_p )
+		zval_ptr_dtor( str1_p );
+
+	if( str2_p )
+		zval_ptr_dtor( str2_p );
 
 	return rc;
 }
@@ -170,9 +189,16 @@ static int collator_numeric_compare_function(zval *result, zval *op1, zval *op2)
 */
 static int collator_icu_compare_function(zval *result, zval *op1, zval *op2)
 {
-	int rc = SUCCESS;
 	zend_string *str1 = collator_zval_to_string(op1);
+	if( str1 == nullptr ) {
+		return FAILURE;
+	}
+
 	zend_string *str2 = collator_zval_to_string(op2);
+	if( str2 == nullptr ) {
+		zend_string_release(str1);
+		return FAILURE;
+	}
 
 	/* Compare the strings using ICU. */
 	ZEND_ASSERT(INTL_G(current_collator) != nullptr);
@@ -184,7 +210,7 @@ static int collator_icu_compare_function(zval *result, zval *op1, zval *op2)
 	zend_string_release(str1);
 	zend_string_release(str2);
 
-	return rc;
+	return SUCCESS;
 }
 /* }}} */
 
@@ -196,6 +222,11 @@ static int collator_compare_func(Bucket *f, Bucket *s)
 	zval result;
 	zval *first = &f->val;
 	zval *second = &s->val;
+
+	ZEND_ASSERT(INTL_G(current_collator_error) != nullptr);
+	if( EG(exception) || U_FAILURE( INTL_ERROR_CODE(*INTL_G(current_collator_error)) ) ) {
+		return 0;
+	}
 
 	if( INTL_G(compare_func)( &result, first, second) == FAILURE )
 		return 0;
@@ -260,6 +291,9 @@ static collator_compare_func_t collator_get_compare_function( const zend_long so
 static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 {
 	UCollator*     saved_collator;
+	intl_error*    saved_collator_error;
+	intl_error     sort_error;
+	collator_compare_func_t saved_compare_func;
 	zval*          array            = nullptr;
 	HashTable*     hash             = nullptr;
 	zend_array*    sorted           = nullptr;
@@ -282,9 +316,6 @@ static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 		RETURN_THROWS();
 	}
 
-	/* Set 'compare function' according to sort flags. */
-	INTL_G(compare_func) = collator_get_compare_function( sort_flags );
-
 	hash = Z_ARRVAL_P( array );
 
 	/* Copy array, so the in-place modifications will not be visible to the callback function */
@@ -297,15 +328,38 @@ static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 	}
 	COLLATOR_CHECK_STATUS( co, "Error converting hash from UTF-8 to UTF-16" );
 
+	intl_error_init( &sort_error );
+
 	/* Save specified collator in the request-global (?) variable. */
 	saved_collator = INTL_G( current_collator );
+	saved_collator_error = INTL_G( current_collator_error );
+	saved_compare_func = INTL_G( compare_func );
 	INTL_G( current_collator ) = co->ucoll;
+	INTL_G( current_collator_error ) = &sort_error;
+	INTL_G( compare_func ) = collator_get_compare_function( sort_flags );
 
 	/* Sort specified array. */
 	zend_hash_sort( sorted, collator_compare_func, renumber );
 
 	/* Restore saved collator. */
 	INTL_G( current_collator ) = saved_collator;
+	INTL_G( current_collator_error ) = saved_collator_error;
+	INTL_G( compare_func ) = saved_compare_func;
+
+	if( EG(exception) ) {
+		zend_array_destroy( sorted );
+		intl_error_reset( &sort_error );
+		RETURN_THROWS();
+	}
+
+	if( U_FAILURE( INTL_ERROR_CODE(sort_error) ) ) {
+		zend_array_destroy( sorted );
+		collator_report_sort_error(co, &sort_error);
+		intl_error_reset( &sort_error );
+		RETURN_FALSE;
+	}
+
+	intl_error_reset( &sort_error );
 
 	/* Convert strings in the specified array back to UTF-8. */
 	collator_convert_hash_from_utf16_to_utf8( sorted, COLLATOR_ERROR_CODE_P( co ) );
@@ -350,17 +404,17 @@ U_CFUNC PHP_FUNCTION( collator_sort_with_sort_keys )
 	zval*       hashData             = nullptr;                     /* currently processed item of input hash */
 
 	char*       sortKeyBuf           = nullptr;                     /* buffer to store sort keys */
-	uint32_t    sortKeyBufSize       = DEF_SORT_KEYS_BUF_SIZE;   /* buffer size */
+	uint32_t    sortKeyBufSize       = 0;                        /* buffer size */
 	ptrdiff_t   sortKeyBufOffset     = 0;                        /* pos in buffer to store sort key */
 	uint32_t    sortKeyLen           = 0;                        /* the length of currently processing key */
 	uint32_t    bufLeft              = 0;
 	uint32_t    bufIncrement         = 0;
 
 	collator_sort_key_index_t* sortKeyIndxBuf = nullptr;            /* buffer to store 'indexes' which will be passed to 'qsort' */
-	uint32_t    sortKeyIndxBufSize   = DEF_SORT_KEYS_INDX_BUF_SIZE;
 	uint32_t    sortKeyIndxSize      = sizeof( collator_sort_key_index_t );
 
 	uint32_t    sortKeyCount         = 0;
+	uint32_t    numElements          = 0;
 	uint32_t    j                    = 0;
 
 	UChar*      utf16_buf            = nullptr;                     /* tmp buffer to hold current processing string in utf-16 */
@@ -379,11 +433,7 @@ U_CFUNC PHP_FUNCTION( collator_sort_with_sort_keys )
 	/* Fetch the object. */
 	COLLATOR_METHOD_FETCH_OBJECT;
 
-	if (!co || !co->ucoll) {
-		intl_error_set_code( nullptr, COLLATOR_ERROR_CODE( co ) );
-		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ), "Object not initialized");
-		zend_throw_error(NULL, "Object not initialized");
-
+	if (collator_check_initialized(co) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -395,9 +445,20 @@ U_CFUNC PHP_FUNCTION( collator_sort_with_sort_keys )
 	if( !hash || zend_hash_num_elements( hash ) == 0 )
 		RETURN_TRUE;
 
+	numElements = zend_hash_num_elements( hash );
+
+	if( numElements > DEF_SORT_KEYS_BUF_SIZE / SORT_KEY_LENGTH_ESTIMATE ) {
+		sortKeyBufSize = DEF_SORT_KEYS_BUF_SIZE;
+	} else {
+		sortKeyBufSize = numElements * SORT_KEY_LENGTH_ESTIMATE;
+	}
+	if( sortKeyBufSize < MIN_SORT_KEYS_BUF_SIZE ) {
+		sortKeyBufSize = MIN_SORT_KEYS_BUF_SIZE;
+	}
+
 	/* Create buffers */
-	sortKeyBuf     = reinterpret_cast<char *>(ecalloc( sortKeyBufSize,     sizeof( char    ) ));
-	sortKeyIndxBuf = reinterpret_cast<collator_sort_key_index_t *>(ecalloc( sortKeyIndxBufSize, sizeof( uint8_t ) ));
+	sortKeyBuf     = reinterpret_cast<char *>(ecalloc( sortKeyBufSize, sizeof( char ) ));
+	sortKeyIndxBuf = reinterpret_cast<collator_sort_key_index_t *>(ecalloc( numElements, sortKeyIndxSize ));
 	utf16_buf      = eumalloc( utf16_buf_size );
 
 	/* Iterate through input hash and create a sort key for each value. */
@@ -447,7 +508,15 @@ U_CFUNC PHP_FUNCTION( collator_sort_with_sort_keys )
 		/* check for sortKeyBuf overflow, increasing its size of the buffer if needed */
 		if( sortKeyLen > bufLeft )
 		{
-			bufIncrement = ( sortKeyLen > DEF_SORT_KEYS_BUF_INCREMENT ) ? sortKeyLen : DEF_SORT_KEYS_BUF_INCREMENT;
+			bufIncrement = sortKeyBufSize;
+
+			if( bufIncrement > DEF_SORT_KEYS_BUF_INCREMENT ) {
+				bufIncrement = DEF_SORT_KEYS_BUF_INCREMENT;
+			}
+
+			if( bufIncrement < sortKeyLen ) {
+				bufIncrement = sortKeyLen;
+			}
 
 			sortKeyBufSize += bufIncrement;
 			bufLeft += bufIncrement;
@@ -455,16 +524,6 @@ U_CFUNC PHP_FUNCTION( collator_sort_with_sort_keys )
 			sortKeyBuf = reinterpret_cast<char *>(erealloc( sortKeyBuf, sortKeyBufSize ));
 
 			sortKeyLen = ucol_getSortKey( co->ucoll, utf16_buf, utf16_len, (uint8_t*)sortKeyBuf + sortKeyBufOffset, bufLeft );
-		}
-
-		/*  check sortKeyIndxBuf overflow, increasing its size of the buffer if needed */
-		if( ( sortKeyCount + 1 ) * sortKeyIndxSize > sortKeyIndxBufSize )
-		{
-			bufIncrement = ( sortKeyIndxSize > DEF_SORT_KEYS_INDX_BUF_INCREMENT ) ? sortKeyIndxSize : DEF_SORT_KEYS_INDX_BUF_INCREMENT;
-
-			sortKeyIndxBufSize += bufIncrement;
-
-			sortKeyIndxBuf = reinterpret_cast<collator_sort_key_index_t *>(erealloc( sortKeyIndxBuf, sortKeyIndxBufSize ));
 		}
 
 		sortKeyIndxBuf[sortKeyCount].key = (char*)sortKeyBufOffset;    /* remember just offset, cause address */
@@ -535,11 +594,7 @@ U_CFUNC PHP_FUNCTION( collator_get_sort_key )
 	/* Fetch the object. */
 	COLLATOR_METHOD_FETCH_OBJECT;
 
-	if (!co || !co->ucoll) {
-		intl_error_set_code( nullptr, COLLATOR_ERROR_CODE( co ) );
-		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ), "Object not initialized");
-		zend_throw_error(NULL, "Object not initialized");
-
+	if (collator_check_initialized(co) == FAILURE) {
 		RETURN_THROWS();
 	}
 

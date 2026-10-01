@@ -16,8 +16,8 @@ $b = ZipArchive::OPSYS_DEFAULT;
 try {
     $zip->getExternalAttributesName("", $a, $b);
 } catch(ValueError $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-ZipArchive::getExternalAttributesName(): Argument #1 ($name) must not be empty
+ValueError: ZipArchive::getExternalAttributesName(): Argument #1 ($name) must not be empty

@@ -8,7 +8,7 @@ if (!function_exists("proc_open")) die("skip no proc_open");
 ?>
 --FILE--
 <?php
-$certFile = __DIR__ . DIRECTORY_SEPARATOR . 'session_external_proper.pem.tmp';
+$certFile = __DIR__ . DIRECTORY_SEPARATOR . 'session_external_context_id.pem.tmp';
 
 $serverCode = <<<'CODE'
     $sessionStore = [];
@@ -105,7 +105,7 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --CLEAN--
 <?php
-@unlink(__DIR__ . DIRECTORY_SEPARATOR . 'session_external_proper.pem.tmp');
+@unlink(__DIR__ . DIRECTORY_SEPARATOR . 'session_external_context_id.pem.tmp');
 ?>
 --EXPECTF--
 Client first connection resumed: no

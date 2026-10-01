@@ -8,12 +8,12 @@ try {
 	var_dump("{{$foo}}");
 	var_dump("{$foo}");
 	assert(!"{{$foo}}");
-} catch (Error $e) {
-	echo $e->getMessage(), PHP_EOL;
+} catch (Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 string(5) "{abc}"
 string(3) "abc"
-assert(!"{{$foo}}")
+AssertionError: assert(!"{{$foo}}")

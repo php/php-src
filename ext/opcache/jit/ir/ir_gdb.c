@@ -1,7 +1,7 @@
 /*
  * IR - Lightweight JIT Compilation Framework
  * (GDB interface)
- * Copyright (C) 2022 Zend by Perforce.
+ * This file is part of the IR Project distributed under the MIT-style LICENSE.
  * Authors: Dmitry Stogov <dmitry@php.net>
  *
  * Based on Mike Pall's implementation of GDB interface for LuaJIT.
@@ -198,9 +198,12 @@ static uint32_t ir_gdbjit_strz(ir_gdbjit_ctx *ctx, const char *str)
 {
 	uint8_t *p = ctx->p;
 	uint32_t ofs = (uint32_t)(p - ctx->startp);
-	do {
-		*p++ = (uint8_t)*str;
-	} while (*str++);
+	while (*str) {
+		IR_ASSERT(p < ctx->obj.space + sizeof(ctx->obj.space));
+		*p++ = (uint8_t)*str++;
+	}
+	IR_ASSERT(p < ctx->obj.space + sizeof(ctx->obj.space));
+	*p++ = '\0';
 	ctx->p = p;
 	return ofs;
 }
@@ -209,6 +212,7 @@ static uint32_t ir_gdbjit_strz(ir_gdbjit_ctx *ctx, const char *str)
 static void ir_gdbjit_uleb128(ir_gdbjit_ctx *ctx, uint32_t v)
 {
 	uint8_t *p = ctx->p;
+	IR_ASSERT(p + 5 <= ctx->obj.space + sizeof(ctx->obj.space));
 	for (; v >= 0x80; v >>= 7)
 		*p++ = (uint8_t)((v & 0x7f) | 0x80);
 	*p++ = (uint8_t)v;
@@ -219,6 +223,7 @@ static void ir_gdbjit_uleb128(ir_gdbjit_ctx *ctx, uint32_t v)
 static void ir_gdbjit_sleb128(ir_gdbjit_ctx *ctx, int32_t v)
 {
 	uint8_t *p = ctx->p;
+	IR_ASSERT(p + 5 <= ctx->obj.space + sizeof(ctx->obj.space));
 	for (; (uint32_t)(v+0x40) >= 0x80; v >>= 7)
 		*p++ = (uint8_t)((v & 0x7f) | 0x80);
 	*p++ = (uint8_t)(v & 0x7f);
@@ -229,6 +234,7 @@ static void ir_gdbjit_secthdr(ir_gdbjit_ctx *ctx)
 {
 	ir_elf_sectheader *sect;
 
+	IR_ASSERT(ctx->p < ctx->obj.space + sizeof(ctx->obj.space));
 	*ctx->p++ = '\0';
 
 #define SECTDEF(id, tp, al)                       \
@@ -267,6 +273,7 @@ static void ir_gdbjit_symtab(ir_gdbjit_ctx *ctx)
 {
 	ir_elf_symbol *sym;
 
+	IR_ASSERT(ctx->p < ctx->obj.space + sizeof(ctx->obj.space));
 	*ctx->p++ = '\0';
 
 	sym = &ctx->obj.sym[GDBJIT_SYM_FILE];
@@ -459,6 +466,7 @@ static void ir_gdbjit_initsect(ir_gdbjit_ctx *ctx, int sect)
 static void ir_gdbjit_initsect_done(ir_gdbjit_ctx *ctx, int sect)
 {
 	ctx->obj.sect[sect].size = (uintptr_t)(ctx->p - ctx->startp);
+	IR_ASSERT(ctx->p <= ctx->obj.space + sizeof(ctx->obj.space));
 }
 
 static void ir_gdbjit_buildobj(ir_gdbjit_ctx *ctx, uint32_t sp_offset, uint32_t sp_adjustment)

@@ -16,13 +16,13 @@ foreach ($tests as $label => $test) {
     try {
         $test();
     } catch (ValueError $e) {
-        echo $label, ": ", $e->getMessage(), PHP_EOL;
+        echo $label, ': ', $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 }
 
 ?>
 --EXPECT--
-gmp_init: gmp_init(): Argument #1 ($num) is not an integer string
-gmp_init prefix: gmp_init(): Argument #1 ($num) is not an integer string
-gmp_add: gmp_add(): Argument #1 ($num1) is not an integer string
-constructor: GMP::__construct(): Argument #1 ($num) is not an integer string
+gmp_init: ValueError: gmp_init(): Argument #1 ($num) is not an integer string
+gmp_init prefix: ValueError: gmp_init(): Argument #1 ($num) is not an integer string
+gmp_add: ValueError: gmp_add(): Argument #1 ($num1) is not an integer string
+constructor: ValueError: GMP::__construct(): Argument #1 ($num) is not an integer string

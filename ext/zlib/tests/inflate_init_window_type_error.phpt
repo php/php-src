@@ -8,9 +8,9 @@ zlib
 try {
     inflate_init(ZLIB_ENCODING_DEFLATE, ['window' => []]);
 } catch (TypeError $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-inflate_init(): Argument #2 ($options) the value for option "window" must be of type int, array given
+TypeError: inflate_init(): Argument #2 ($options) the value for option "window" must be of type int, array given

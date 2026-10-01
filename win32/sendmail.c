@@ -216,8 +216,9 @@ PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 	}
 
 	/* Fall back to sendmail_from php.ini setting */
-	if (zend_ini_string_literal("sendmail_from")) {
-		RPath = estrdup(zend_ini_string_literal("sendmail_from"));
+	const char *sendmail_from = zend_ini_string_literal("sendmail_from");
+	if (sendmail_from && sendmail_from[0] != '\0') {
+		RPath = estrdup(sendmail_from);
 	} else if (headers_lc) {
 		int found = 0;
 		const char *lookup = ZSTR_VAL(headers_lc);
@@ -505,14 +506,6 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, const 
 		efree(tempMailTo);
 	}
 
-	if (!Post("DATA\r\n")) {
-		return (FAILED_TO_SEND);
-	}
-	if ((res = Ack(&server_response)) != SUCCESS) {
-		SMTP_ERROR_RESPONSE(server_response);
-		return (res);
-	}
-
 	/* Send mail to all Bcc rcpt's
 	   This is basically a rip of the Cc code above.
 	   Just don't forget to remove the Bcc: from the header afterwards. */
@@ -579,14 +572,21 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, const 
 				   which would look like "\r\n\r\n". */
 				stripped_header = zend_string_concat2(ZSTR_VAL(headers), header_length_prior_to_bcc, pos2 + 2, strlen(pos2) - 2);
 			} else {
-				stripped_header = zend_string_truncate(headers, header_length_prior_to_bcc, false);
-				ZSTR_VAL(stripped_header)[ZSTR_LEN(stripped_header)] = '\0';
+				stripped_header = zend_string_init(ZSTR_VAL(headers), header_length_prior_to_bcc, false);
 			}
 		} else {
 			/* Simplify the code that we create a copy of stripped_header no matter if
 			   we actually strip something or not. So we've a single zend_string_release() later. */
 			stripped_header = zend_string_copy(headers);
 		}
+	}
+
+	if (!Post("DATA\r\n")) {
+		return (FAILED_TO_SEND);
+	}
+	if ((res = Ack(&server_response)) != SUCCESS) {
+		SMTP_ERROR_RESPONSE(server_response);
+		return (res);
 	}
 
 	/* send message header */

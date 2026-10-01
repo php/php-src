@@ -72,12 +72,16 @@ session_unset();
 ?>
 --EXPECTF--
 *** Testing session_set_save_handler() function: class with create_sid ***
+
+Warning: SessionHandler::create_sid(): Parent session handler is not open, defaulting to session_create_id() in %s on line %d
 string(%d) "%s"
 string(4) "user"
 array(1) {
   ["foo"]=>
   string(5) "hello"
 }
+
+Warning: SessionHandler::validateId(): Parent session handler is not open, ignoring ID validation in %s on line %d
 array(1) {
   ["foo"]=>
   string(5) "hello"

@@ -91,13 +91,18 @@ void intl_error_set_custom_msg( intl_error* err, const char* msg)
 		return;
 	}
 
-	zend_string *method_or_func = get_active_function_or_method_name();
-	zend_string *prefixed_message = zend_string_concat3(
-		ZSTR_VAL(method_or_func), ZSTR_LEN(method_or_func),
-		ZEND_STRL("(): "),
-		msg, strlen(msg)
-	);
-	zend_string_release_ex(method_or_func, false);
+	zend_string *prefixed_message;
+	if (zend_is_executing()) {
+		zend_string *method_or_func = get_active_function_or_method_name();
+		prefixed_message = zend_string_concat3(
+				ZSTR_VAL(method_or_func), ZSTR_LEN(method_or_func),
+				ZEND_STRL("(): "),
+				msg, strlen(msg)
+		);
+		zend_string_release_ex(method_or_func, false);
+	} else {
+		prefixed_message = zend_string_init(msg, strlen(msg), false);
+	}
 
 	if( !err ) {
 		if (INTL_G(error_level)) {

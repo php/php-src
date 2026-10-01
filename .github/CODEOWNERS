@@ -47,7 +47,7 @@
 /ext/phar @LamentXU123
 /ext/random @TimWolla @zeriyoshi
 /ext/reflection @DanielEScherzer
-/ext/session @Girgias
+/ext/session @Girgias @jorgsowa
 /ext/simplexml @devnexen
 /ext/soap @devnexen
 /ext/sockets @devnexen

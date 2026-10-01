@@ -9,12 +9,12 @@ class C {
         try {
             $heap->extract();
         } catch (Throwable $e) {
-            echo $e->getMessage(), "\n";
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
         try {
             $heap->insert(1);
         } catch (Throwable $e) {
-            echo $e->getMessage(), "\n";
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
         echo $heap->top(), "\n";
         return "0";
@@ -29,21 +29,21 @@ $heap->insert(new C);
 
 ?>
 --EXPECT--
-Heap cannot be changed when it is already being modified.
-Heap cannot be changed when it is already being modified.
+RuntimeException: Heap cannot be changed when it is already being modified.
+RuntimeException: Heap cannot be changed when it is already being modified.
 0
-Heap cannot be changed when it is already being modified.
-Heap cannot be changed when it is already being modified.
+RuntimeException: Heap cannot be changed when it is already being modified.
+RuntimeException: Heap cannot be changed when it is already being modified.
 0
-Heap cannot be changed when it is already being modified.
-Heap cannot be changed when it is already being modified.
+RuntimeException: Heap cannot be changed when it is already being modified.
+RuntimeException: Heap cannot be changed when it is already being modified.
 0
-Heap cannot be changed when it is already being modified.
-Heap cannot be changed when it is already being modified.
+RuntimeException: Heap cannot be changed when it is already being modified.
+RuntimeException: Heap cannot be changed when it is already being modified.
 0
-Heap cannot be changed when it is already being modified.
-Heap cannot be changed when it is already being modified.
+RuntimeException: Heap cannot be changed when it is already being modified.
+RuntimeException: Heap cannot be changed when it is already being modified.
 0
-Heap cannot be changed when it is already being modified.
-Heap cannot be changed when it is already being modified.
+RuntimeException: Heap cannot be changed when it is already being modified.
+RuntimeException: Heap cannot be changed when it is already being modified.
 0

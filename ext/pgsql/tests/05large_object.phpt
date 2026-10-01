@@ -17,11 +17,6 @@ $oid = pg_lo_create ($db);
 if (!$oid) echo ("pg_lo_create() error\n");
 $handle = pg_lo_open ($db, $oid, "w");
 if (!$handle) echo ("pg_lo_open() error\n");
-try {
-	pg_lo_write ($handle, "large\0object data");
-} catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
-}
 pg_lo_write ($handle, "large object data");
 pg_lo_close ($handle);
 pg_exec ($db, "COMMIT");
@@ -110,7 +105,6 @@ echo "OK";
 ?>
 --EXPECTF--
 create/write/close LO
-pg_lo_write(): Argument #2 ($data) must not contain any null bytes
 open/read/tell/seek/close LO
 string(5) "large"
 int(5)

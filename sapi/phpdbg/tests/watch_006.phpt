@@ -11,7 +11,6 @@ c
 
 
 
-
 q
 --EXPECTF--
 [Successful compilation of %s]
@@ -45,11 +44,6 @@ prompt> [Element 1 has been added to watchpoint]
 1 elements were added to the array
 >00008: $c = [1];
  00009: $b = &$c;
- 00010: 
-prompt> [Breaking on watchpoint $b]
-Old value inaccessible or destroyed
-New value (reference): Array ([0] => 2,[1] => 3)
->00009: $b = &$c;
  00010: 
 prompt> [Breaking on watchpoint $b]
 Old value inaccessible or destroyed

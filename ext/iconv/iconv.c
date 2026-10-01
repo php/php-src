@@ -1102,6 +1102,12 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 					const unsigned char *p;
 					size_t nbytes_required;
 
+					/* Some agents get confused about what char_cnt is; it will
+					 * be at least 4 at this point; if caller messed up and gave
+					 * too short of a max_line_len that was already caught above
+					 * and handled with PHP_ICONV_ERR_TOO_BIG. */
+					ZEND_ASSERT(char_cnt >= 4);
+
 					smart_str_appendc(pretval, 'Q');
 					char_cnt--;
 					smart_str_appendc(pretval, '?');
@@ -2595,20 +2601,20 @@ static zend_result php_iconv_stream_filter_seek(
 		int whence)
 {
 	php_iconv_stream_filter *self = (php_iconv_stream_filter *)Z_PTR(filter->abstract);
+	iconv_t cd;
 
 	/* Reset stub buffer */
 	self->stub_len = 0;
 
-	/* Reset iconv conversion state by closing and reopening the converter */
-	iconv_close(self->cd);
-
-	self->cd = iconv_open(self->to_charset, self->from_charset);
-	if ((iconv_t)-1 == self->cd) {
+	cd = iconv_open(self->to_charset, self->from_charset);
+	if ((iconv_t)-1 == cd) {
 		php_error_docref(NULL, E_WARNING,
 				"iconv stream filter (\"%s\"=>\"%s\"): failed to reset conversion state",
 				self->from_charset, self->to_charset);
 		return FAILURE;
 	}
+	iconv_close(self->cd);
+	self->cd = cd;
 
 	return SUCCESS;
 }

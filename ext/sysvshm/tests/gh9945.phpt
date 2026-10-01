@@ -12,8 +12,8 @@ if (PHP_OS_FAMILY !== 'Linux' && PHP_OS_FAMILY !== 'Windows') die('skip only for
 try {
     shm_attach(0x100000000, 0);
 } catch (ValueError $exception) {
-    echo $exception->getMessage(), "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-shm_attach(): Argument #1 ($key) is out of range
+ValueError: shm_attach(): Argument #1 ($key) is out of range

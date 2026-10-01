@@ -20,7 +20,6 @@
 #include "php.h"
 #include "SAPI.h"
 
-#include "zend_attributes.h"
 #include "zend_variables.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
@@ -619,8 +618,10 @@ php_libxml_output_buffer_create_filename(const char *URI,
 	return ret;
 
 err:
-	/* Similarly to __xmlOutputBufferCreateFilename we should also close the encoder on failure. */
+#if LIBXML_VERSION < 21404
+	/* As of libxml 2.14.4, libxml closes the encoder after this callback fails. */
 	xmlCharEncCloseFunc(encoder);
+#endif
 	return NULL;
 }
 
@@ -1465,6 +1466,7 @@ PHP_LIBXML_API void php_libxml_node_decrement_resource(php_libxml_node_object *o
 				obj_node->_private = NULL;
 			}
 		}
+		object->node = NULL;
 	}
 	if (object != NULL && object->document != NULL) {
 		/* Safe to call as if the resource were freed then doc pointer is NULL */

@@ -15,28 +15,28 @@ set_include_path('test://foo:test://bar');
 
 try {
     require_once 'doesnt_exist.php';
-} catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     require 'doesnt_exist.php';
-} catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     include_once 'doesnt_exist.php';
-} catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     include 'doesnt_exist.php';
-} catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-stat failed
-stat failed
-stat failed
-stat failed
+Exception: stat failed
+Exception: stat failed
+Exception: stat failed
+Exception: stat failed

@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - scheme - unsetting existing
+Test Uri\Rfc3986\Uri::withScheme() - success - unsetting existing
 --FILE--
 <?php
 

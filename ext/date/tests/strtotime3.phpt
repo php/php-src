@@ -36,7 +36,7 @@ $strs = array(
 
 foreach ($strs as $str) {
     $t = strtotime($str, $time);
-    if (is_integer($t)) {
+    if (is_int($t)) {
         var_dump(date(DATE_RFC2822, $t));
     } else {
         var_dump($t);

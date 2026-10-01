@@ -18,7 +18,7 @@ try {
     $r = gmp_divexact("233", "0");
     var_dump(gmp_strval($r));
 } catch (\DivisionByZeroError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $r = gmp_divexact("100", "10");
@@ -42,7 +42,7 @@ echo "Done\n";
 ?>
 --EXPECT--
 string(1) "0"
-gmp_divexact(): Argument #2 ($num2) Division by zero
+DivisionByZeroError: gmp_divexact(): Argument #2 ($num2) Division by zero
 string(2) "10"
 string(3) "512"
 string(19) "5000000000000000000"

@@ -696,9 +696,9 @@ void SdnToJewish(
  * and compare with the original.
  */
 zend_long JewishToSdn(
-						int year,
-						int month,
-						int day)
+						zend_long year,
+						zend_long month,
+						zend_long day)
 {
 	zend_long sdn;
 	int metonicCycle;
@@ -713,11 +713,14 @@ zend_long JewishToSdn(
 	if (year <= 0 || year >= INT_MAX - 1 || day <= 0 || day > 30) {
 		return (0);
 	}
+	/* The check above leaves both year and year + 1 within int range. */
+	int int_year = (int) year;
+
 	switch (month) {
 		case 1:
 		case 2:
 			/* It is Tishri or Heshvan - don't need the year length. */
-			FindStartOfYear(year, &metonicCycle, &metonicYear,
+			FindStartOfYear(int_year, &metonicCycle, &metonicYear,
 							&moladDay, &moladHalakim, &tishri1);
 			if (month == 1) {
 				sdn = tishri1 + day - 1;
@@ -730,7 +733,7 @@ zend_long JewishToSdn(
 			/* It is Kislev - must find the year length. */
 
 			/* Find the start of the year. */
-			FindStartOfYear(year, &metonicCycle, &metonicYear,
+			FindStartOfYear(int_year, &metonicCycle, &metonicYear,
 							&moladDay, &moladHalakim, &tishri1);
 
 			/* Find the end of the year. */
@@ -753,10 +756,10 @@ zend_long JewishToSdn(
 		case 6:
 			/* It is Tevet, Shevat or Adar I - don't need the year length. */
 
-			FindStartOfYear(year + 1, &metonicCycle, &metonicYear,
+			FindStartOfYear(int_year + 1, &metonicCycle, &metonicYear,
 							&moladDay, &moladHalakim, &tishri1After);
 
-			if (monthsPerYear[(year - 1) % 19] == 12) {
+			if (monthsPerYear[(int_year - 1) % 19] == 12) {
 				lengthOfAdarIAndII = 29;
 			} else {
 				lengthOfAdarIAndII = 59;
@@ -773,7 +776,7 @@ zend_long JewishToSdn(
 
 		default:
 			/* It is Adar II or later - don't need the year length. */
-			FindStartOfYear(year + 1, &metonicCycle, &metonicYear,
+			FindStartOfYear(int_year + 1, &metonicCycle, &metonicYear,
 							&moladDay, &moladHalakim, &tishri1After);
 
 			switch (month) {

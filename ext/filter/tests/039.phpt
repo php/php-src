@@ -14,7 +14,7 @@ var_dump(filter_var_array(array(), 1000000));
 try {
     filter_var_array(array(), "");
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 echo "-- (2)\n";
@@ -24,7 +24,7 @@ var_dump(filter_var_array(array(""=>""), 1000000));
 try {
     filter_var_array(array(""=>""), "");
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 echo "-- (3)\n";
@@ -34,7 +34,7 @@ var_dump(filter_var_array(array("aaa"=>"bbb"), 1000000));
 try {
     filter_var_array(array("aaa"=>"bbb"), "");
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 echo "-- (4)\n";
@@ -42,7 +42,7 @@ echo "-- (4)\n";
 try {
     filter_var_array(array(), new stdclass);
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 var_dump(filter_var_array(array(), array()));
@@ -54,12 +54,12 @@ echo "-- (5)\n";
 try {
     filter_var_array(array("var_name"=>""), array("var_name"=>-1, "asdas"=>"asdasd", "qwe"=>"rty", ""=>""));
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 try {
     filter_var_array(array("asdas"=>"text"), array("var_name"=>-1, "asdas"=>"asdasd", "qwe"=>"rty", ""=>""));
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 $a = array(""=>""); $b = -1;
@@ -74,7 +74,7 @@ $a = array(""=>""); $b = "";
 try {
     filter_var_array($a, $b);
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 var_dump($a, $b);
 
@@ -96,7 +96,7 @@ bool(false)
 
 Warning: filter_var_array(): Unknown filter with ID 1000000 in %s on line %d
 bool(false)
-filter_var_array(): Argument #2 ($options) must be of type array|int, string given
+TypeError: filter_var_array(): Argument #2 ($options) must be of type array|int, string given
 -- (2)
 
 Warning: filter_var_array(): Unknown filter with ID -1 in %s on line %d
@@ -104,7 +104,7 @@ bool(false)
 
 Warning: filter_var_array(): Unknown filter with ID 1000000 in %s on line %d
 bool(false)
-filter_var_array(): Argument #2 ($options) must be of type array|int, string given
+TypeError: filter_var_array(): Argument #2 ($options) must be of type array|int, string given
 -- (3)
 
 Warning: filter_var_array(): Unknown filter with ID -1 in %s on line %d
@@ -112,9 +112,9 @@ bool(false)
 
 Warning: filter_var_array(): Unknown filter with ID 1000000 in %s on line %d
 bool(false)
-filter_var_array(): Argument #2 ($options) must be of type array|int, string given
+TypeError: filter_var_array(): Argument #2 ($options) must be of type array|int, string given
 -- (4)
-filter_var_array(): Argument #2 ($options) must be of type array|int, stdClass given
+TypeError: filter_var_array(): Argument #2 ($options) must be of type array|int, stdClass given
 array(0) {
 }
 array(1) {
@@ -134,10 +134,10 @@ array(1) {
 -- (5)
 
 Warning: filter_var_array(): Unknown filter with ID -1 in %s on line %d
-filter_var_array(): Argument #2 ($options) cannot contain empty keys
+ValueError: filter_var_array(): Argument #2 ($options) cannot contain empty keys
 
 Warning: filter_var_array(): Unknown filter with ID 0 in %s on line %d
-filter_var_array(): Argument #2 ($options) cannot contain empty keys
+ValueError: filter_var_array(): Argument #2 ($options) cannot contain empty keys
 
 Warning: filter_var_array(): Unknown filter with ID -1 in %s on line %d
 bool(false)
@@ -154,7 +154,7 @@ array(1) {
   string(0) ""
 }
 int(100000)
-filter_var_array(): Argument #2 ($options) must be of type array|int, string given
+TypeError: filter_var_array(): Argument #2 ($options) must be of type array|int, string given
 array(1) {
   [""]=>
   string(0) ""

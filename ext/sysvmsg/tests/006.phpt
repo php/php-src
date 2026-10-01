@@ -14,7 +14,7 @@ foreach ($tests as $elem) {
     try {
         var_dump(msg_send($queue, 1, $elem, false));
     } catch (TypeError $exception) {
-        echo $exception->getMessage() . "\n";
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
     }
 
     unset($msg);
@@ -57,12 +57,12 @@ bool(true)
 bool(true)
 bool(false)
 Sending/receiving '':
-msg_send(): Argument #3 ($message) must be of type string|int|float|bool, null given
+TypeError: msg_send(): Argument #3 ($message) must be of type string|int|float|bool, null given
 bool(false)
 bool(true)
 bool(false)
 Sending/receiving 'Array':
-msg_send(): Argument #3 ($message) must be of type string|int|float|bool, array given
+TypeError: msg_send(): Argument #3 ($message) must be of type string|int|float|bool, array given
 bool(false)
 bool(false)
 bool(false)

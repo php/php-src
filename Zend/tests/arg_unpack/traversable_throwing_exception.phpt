@@ -21,13 +21,13 @@ function gen() {
 
 try {
     test(1, 2, ...new Foo, ...[3, 4]);
-} catch (Exception $e) { var_dump($e->getMessage()); }
+} catch (Throwable $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
 
 try {
     test(1, 2, ...gen(), ...[3, 4]);
-} catch (Exception $e) { var_dump($e->getMessage()); }
+} catch (Throwable $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
 
 ?>
 --EXPECT--
-string(11) "getIterator"
-string(3) "gen"
+Exception: getIterator
+Exception: gen

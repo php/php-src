@@ -44,7 +44,7 @@ try {
     var_dump(strlen($phar->getStub()));
 
 } catch(Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -957,4 +957,4 @@ __HALT_COMPILER(); ?>
 ============================================================================
 ============================================================================
 int(7052)
-Illegal filename passed in for stub creation, was 401 characters long, and only 400 or less is allowed
+UnexpectedValueException: Illegal filename passed in for stub creation, was 401 characters long, and only 400 or less is allowed

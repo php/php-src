@@ -1,5 +1,7 @@
 /* This is a generated file, edit spl_directory.stub.php instead.
- * Stub hash: 802429d736404c2d66601f640942c827b6e6e94b */
+ * Stub hash: 3313c7bc6d9691a01903e6625630863e2b1e1bf7 */
+
+#include "zend_attributes.h"
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileInfo___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -103,10 +105,11 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DirectoryIterator_valid arginfo_class_SplFileInfo_isWritable
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DirectoryIterator_key, 0, 0, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_DirectoryIterator_key, 0, 0, MAY_BE_LONG|MAY_BE_STRING)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_DirectoryIterator_current arginfo_class_DirectoryIterator_key
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DirectoryIterator_current, 0, 0, SplFileInfo, MAY_BE_STRING|MAY_BE_STATIC)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_DirectoryIterator_next arginfo_class_DirectoryIterator_rewind
 
@@ -125,8 +128,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_FilesystemIterator_key arginfo_class_SplFileInfo_getPath
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_FilesystemIterator_current, 0, 0, SplFileInfo|FilesystemIterator, MAY_BE_STRING)
-ZEND_END_ARG_INFO()
+#define arginfo_class_FilesystemIterator_current arginfo_class_DirectoryIterator_current
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_FilesystemIterator_getFlags, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -438,10 +440,10 @@ static const zend_function_entry class_SplFileObject_methods[] = {
 	ZEND_ME(SplFileObject, valid, arginfo_class_SplFileObject_valid, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplFileObject, fgets, arginfo_class_SplFileObject_fgets, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplFileObject, fread, arginfo_class_SplFileObject_fread, ZEND_ACC_PUBLIC)
-	ZEND_ME(SplFileObject, fgetcsv, arginfo_class_SplFileObject_fgetcsv, ZEND_ACC_PUBLIC)
-	ZEND_ME(SplFileObject, fputcsv, arginfo_class_SplFileObject_fputcsv, ZEND_ACC_PUBLIC)
-	ZEND_ME(SplFileObject, setCsvControl, arginfo_class_SplFileObject_setCsvControl, ZEND_ACC_PUBLIC)
-	ZEND_ME(SplFileObject, getCsvControl, arginfo_class_SplFileObject_getCsvControl, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplFileObject, fgetcsv, arginfo_class_SplFileObject_fgetcsv, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
+	ZEND_ME(SplFileObject, fputcsv, arginfo_class_SplFileObject_fputcsv, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
+	ZEND_ME(SplFileObject, setCsvControl, arginfo_class_SplFileObject_setCsvControl, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
+	ZEND_ME(SplFileObject, getCsvControl, arginfo_class_SplFileObject_getCsvControl, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
 	ZEND_ME(SplFileObject, flock, arginfo_class_SplFileObject_flock, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplFileObject, fflush, arginfo_class_SplFileObject_fflush, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplFileObject, ftell, arginfo_class_SplFileObject_ftell, ZEND_ACC_PUBLIC)
@@ -634,6 +636,23 @@ static zend_class_entry *register_class_SplFileObject(zend_class_entry *class_en
 	zend_string *const_READ_CSV_name = zend_string_init_interned("READ_CSV", sizeof("READ_CSV") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_READ_CSV_name, &const_READ_CSV_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(const_READ_CSV_name, true);
+
+
+	zend_attribute *attribute_Deprecated_func_fgetcsv_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "fgetcsv", sizeof("fgetcsv") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
+	ZVAL_STR(&attribute_Deprecated_func_fgetcsv_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
+	attribute_Deprecated_func_fgetcsv_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+
+	zend_attribute *attribute_Deprecated_func_fputcsv_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "fputcsv", sizeof("fputcsv") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
+	ZVAL_STR(&attribute_Deprecated_func_fputcsv_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
+	attribute_Deprecated_func_fputcsv_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+
+	zend_attribute *attribute_Deprecated_func_setcsvcontrol_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setcsvcontrol", sizeof("setcsvcontrol") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
+	ZVAL_STR(&attribute_Deprecated_func_setcsvcontrol_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
+	attribute_Deprecated_func_setcsvcontrol_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+
+	zend_attribute *attribute_Deprecated_func_getcsvcontrol_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "getcsvcontrol", sizeof("getcsvcontrol") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
+	ZVAL_STR(&attribute_Deprecated_func_getcsvcontrol_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
+	attribute_Deprecated_func_getcsvcontrol_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	return class_entry;
 }

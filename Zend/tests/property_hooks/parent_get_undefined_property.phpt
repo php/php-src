@@ -16,10 +16,10 @@ class C extends P {
 $c = new C();
 try {
     var_dump($c->prop);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Undefined property P::$prop
+Error: Undefined property P::$prop

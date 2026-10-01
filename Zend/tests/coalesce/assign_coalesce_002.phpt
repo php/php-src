@@ -20,8 +20,8 @@ function do_throw($msg) {
 $ary = [];
 try {
     $ary[id($foo)] ??= do_throw("ex1");
-} catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($ary);
 
@@ -46,8 +46,8 @@ class Dtor {
 $ary = new AA;
 try {
     $ary[new Dtor][id($foo)] ??= $bar;
-} catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($foo);
 
@@ -65,20 +65,20 @@ class AA2 implements ArrayAccess {
 $ary = ["foo" => new AA2];
 try {
     $ary[id($foo)][new Dtor] ??= $bar;
-} catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($foo);
 
 ?>
 --EXPECT--
 id(foo)
-ex1
+Exception: ex1
 array(0) {
 }
 id(foo)
-dtor
+Exception: dtor
 string(3) "foo"
 id(foo)
-dtor
+Exception: dtor
 string(3) "foo"

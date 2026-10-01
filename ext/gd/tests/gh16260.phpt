@@ -9,14 +9,14 @@ $im = imagecreatetruecolor(10,10);
 try {
 	imagerotate($im, PHP_INT_MIN, 0);
 } catch (\ValueError $e) {
-	echo $e->getMessage() . PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
 	imagerotate($im, PHP_INT_MAX, 0);
 } catch (\ValueError $e) {
-	echo $e->getMessage();
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 --EXPECTF--
-imagerotate(): Argument #2 ($angle) must be between %s and %s
-imagerotate(): Argument #2 ($angle) must be between %s and %s
+ValueError: imagerotate(): Argument #2 ($angle) must be between %s and %s
+ValueError: imagerotate(): Argument #2 ($angle) must be between %s and %s

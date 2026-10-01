@@ -116,7 +116,7 @@ void scdf_solve(scdf_ctx *scdf, const char *name) {
 		while ((i = zend_bitset_pop_first(scdf->instr_worklist, scdf->instr_worklist_len)) >= 0) {
 			int block_num = ssa->cfg.map[i];
 			if (zend_bitset_in(scdf->executable_blocks, block_num)) {
-				zend_basic_block *block = &ssa->cfg.blocks[block_num];
+				const zend_basic_block *block = &ssa->cfg.blocks[block_num];
 				zend_op *opline = &scdf->op_array->opcodes[i];
 				zend_ssa_op *ssa_op = &ssa->ops[i];
 				if (opline->opcode == ZEND_OP_DATA) {
@@ -136,7 +136,7 @@ void scdf_solve(scdf_ctx *scdf, const char *name) {
 
 		while ((i = zend_bitset_pop_first(scdf->block_worklist, scdf->block_worklist_len)) >= 0) {
 			/* This block is now live. Interpret phis and instructions in it. */
-			zend_basic_block *block = &ssa->cfg.blocks[i];
+			const zend_basic_block *block = &ssa->cfg.blocks[i];
 			const zend_ssa_block *ssa_block = &ssa->blocks[i];
 
 			DEBUG_PRINT("Pop block %d from worklist\n", i);

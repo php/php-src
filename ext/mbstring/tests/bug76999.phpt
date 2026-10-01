@@ -15,7 +15,7 @@ var_dump(mb_regex_set_options("m"));
 try {
     var_dump(mb_regex_set_options("a"));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 var_dump(mb_regex_set_options());
 ?>
@@ -32,7 +32,7 @@ Deprecated: Function mb_regex_set_options() is deprecated since 8.6, because the
 string(3) "imd"
 
 Deprecated: Function mb_regex_set_options() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
-Option "a" is not supported
+ValueError: Option "a" is not supported
 
 Deprecated: Function mb_regex_set_options() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(2) "mr"

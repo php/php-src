@@ -20,8 +20,8 @@ function test($method) {
 
     try {
         $testElement->$method($alone, $container);
-    } catch (\DOMException $e) {
-        echo $e->getMessage(), "\n";
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 
     echo $doc->saveXML();
@@ -34,13 +34,13 @@ test("after");
 test("replaceWith");
 ?>
 --EXPECT--
-Hierarchy Request Error
+DOMException: Hierarchy Request Error
 <?xml version="1.0"?>
-Hierarchy Request Error
+DOMException: Hierarchy Request Error
 <?xml version="1.0"?>
-Hierarchy Request Error
+DOMException: Hierarchy Request Error
 <?xml version="1.0"?>
-Hierarchy Request Error
+DOMException: Hierarchy Request Error
 <?xml version="1.0"?>
-Hierarchy Request Error
+DOMException: Hierarchy Request Error
 <?xml version="1.0"?>

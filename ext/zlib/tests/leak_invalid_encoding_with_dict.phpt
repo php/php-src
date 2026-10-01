@@ -7,14 +7,14 @@ zlib
 try {
 	inflate_init(123456, ["dictionary" => "dict"]);
 } catch (ValueError $e) {
-	echo $e->getMessage(), "\n";
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
 	deflate_init(123456, ["dictionary" => "dict"]);
 } catch (ValueError $e) {
-	echo $e->getMessage(), "\n";
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-inflate_init(): Argument #1 ($encoding) must be one of ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE
-deflate_init(): Argument #1 ($encoding) must be one of ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE
+ValueError: inflate_init(): Argument #1 ($encoding) must be one of ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE
+ValueError: deflate_init(): Argument #1 ($encoding) must be one of ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE

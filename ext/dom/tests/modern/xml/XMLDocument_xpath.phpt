@@ -45,8 +45,8 @@ echo "--- Get a namespace node ---\n";
 // Namespace nodes don't exist in modern day DOM.
 try {
     var_dump($xpath->evaluate("//*/namespace::*"));
-} catch (DOMException $e) {
-    echo $e->getCode(), ": ", $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getCode(), ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -71,4 +71,4 @@ string(4) "data"
 string(11) "Dom\Comment"
 string(9) " comment "
 --- Get a namespace node ---
-9: The namespace axis is not well-defined in the living DOM specification. Use Dom\Element::getInScopeNamespaces() or Dom\Element::getDescendantNamespaces() instead.
+DOMException: 9: The namespace axis is not well-defined in the living DOM specification. Use Dom\Element::getInScopeNamespaces() or Dom\Element::getDescendantNamespaces() instead.

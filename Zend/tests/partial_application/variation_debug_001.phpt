@@ -1,12 +1,19 @@
 --TEST--
 PFA variation: var_dump(), user function
+--INI--
+opcache.enable=1
+opcache.enable_cli=1
+opcache.optimization_level=-1
+opcache.file_update_protection=0
+--ENV--
+A=20
 --FILE--
 <?php
 function bar($a = 1, $b = 2, ...$c) {
 
 }
 
-var_dump(bar(?, new stdClass, 20, new stdClass, four: 4));
+var_dump(bar(?, new stdClass, (int)getenv('A'), new stdClass, four: 4));
 ?>
 --EXPECTF--
 object(Closure)#%d (5) {

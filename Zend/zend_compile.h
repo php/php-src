@@ -207,6 +207,7 @@ typedef struct _zend_oparray_context {
 	zend_string *active_property_info_name;
 	zend_property_hook_kind active_property_hook_kind;
 	bool       in_jmp_frameless_branch;
+	bool       in_finally;
 	bool has_assigned_to_http_response_header;
 } zend_oparray_context;
 
@@ -712,7 +713,7 @@ struct _zend_execute_data {
 	(call)->This.u2.num_args
 
 /* Ensure the correct alignment before slots calculation */
-ZEND_STATIC_ASSERT(ZEND_MM_ALIGNED_SIZE(sizeof(zval)) == sizeof(zval),
+static_assert(ZEND_MM_ALIGNED_SIZE(sizeof(zval)) == sizeof(zval),
                    "zval must be aligned by ZEND_MM_ALIGNMENT");
 /* A number of call frame slots (zvals) reserved for zend_execute_data. */
 #define ZEND_CALL_FRAME_SLOT \
@@ -961,7 +962,6 @@ ZEND_API zend_op_array *compile_filename(int type, zend_string *filename);
 ZEND_API zend_op_array *zend_compile_ast(zend_ast *ast, int type, zend_string *filename);
 ZEND_API zend_ast *zend_compile_string_to_ast(
 		zend_string *code, struct _zend_arena **ast_arena, zend_string *filename);
-ZEND_API zend_result zend_execute_scripts(int type, zval *retval, int file_count, ...);
 ZEND_API zend_result zend_execute_script(int type, zval *retval, zend_file_handle *file_handle);
 ZEND_API zend_result open_file_for_scanning(zend_file_handle *file_handle);
 ZEND_API void init_op_array(zend_op_array *op_array, zend_function_type type, int initial_ops_size);
@@ -1121,7 +1121,6 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 #define ZEND_THROW_IS_EXPR 1u
 
 #define ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS (1<<0)
-#define ZEND_FCALL_USES_VARIADIC_PLACEHOLDER   (1<<1)
 
 /* The send mode, the is_variadic, the is_promoted, and the is_tentative flags are stored as part of zend_type */
 #define _ZEND_SEND_MODE_SHIFT _ZEND_TYPE_EXTRA_FLAGS_SHIFT

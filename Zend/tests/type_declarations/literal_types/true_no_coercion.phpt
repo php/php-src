@@ -7,28 +7,28 @@ function test(true $v) { var_dump($v); }
 
 try {
     test(1);
-} catch (\TypeError $e) {
-    echo $e->getMessage(), \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     test('1');
-} catch (\TypeError $e) {
-    echo $e->getMessage(), \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     test([1]);
-} catch (\TypeError $e) {
-    echo $e->getMessage(), \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     test(new stdClass());
-} catch (\TypeError $e) {
-    echo $e->getMessage(), \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECTF--
-test(): Argument #1 ($v) must be of type true, int given, called in %s on line %d
-test(): Argument #1 ($v) must be of type true, string given, called in %s on line %d
-test(): Argument #1 ($v) must be of type true, array given, called in %s on line %d
-test(): Argument #1 ($v) must be of type true, stdClass given, called in %s on line %d
+TypeError: test(): Argument #1 ($v) must be of type true, int given, called in %s on line %d
+TypeError: test(): Argument #1 ($v) must be of type true, string given, called in %s on line %d
+TypeError: test(): Argument #1 ($v) must be of type true, array given, called in %s on line %d
+TypeError: test(): Argument #1 ($v) must be of type true, stdClass given, called in %s on line %d

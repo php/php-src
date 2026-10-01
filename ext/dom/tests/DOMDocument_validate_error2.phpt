@@ -9,9 +9,9 @@ dom
 <?php
 try {
     DOMDocument::validate();
-} catch (Error $e) {
-    echo $e->getMessage();
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Non-static method DOMDocument::validate() cannot be called statically
+Error: Non-static method DOMDocument::validate() cannot be called statically

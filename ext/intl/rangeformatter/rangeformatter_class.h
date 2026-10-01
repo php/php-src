@@ -15,9 +15,8 @@
 #ifndef RANGEFORMATTER_CLASS_H
 #define RANGEFORMATTER_CLASS_H
 
-#include <unicode/numberrangeformatter.h>
-
 #ifdef __cplusplus
+#include <unicode/numberrangeformatter.h>
 using icu::number::LocalizedNumberRangeFormatter;
 #else
 typedef void LocalizedNumberRangeFormatter;

@@ -25,10 +25,6 @@ $files_arr = array(
   "//fileperms_variation3//fileperms_variation3.tmp",
   "/fileperms_variation3/*.tmp",
   "fileperms_variation3/fileperms*.tmp",
-
-  /* Testing Binary safe */
-  "/fileperms_variation3/fileperms_variation3.tmp".chr(0),
-  "/fileperms_variation3/fileperms_variation3.tmp\0"
 );
 
 $count = 1;
@@ -37,8 +33,8 @@ foreach($files_arr as $file) {
   echo "- Iteration $count -\n";
   try {
     var_dump( fileperms( $file_path."/".$file ) );
-  } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+  } catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
   }
   clearstatcache();
   $count++;
@@ -72,14 +68,6 @@ bool(false)
 - Iteration 6 -
 
 Warning: fileperms(): stat failed for %s/fileperms_variation3/fileperms*.tmp in %s on line %d
-bool(false)
-- Iteration 7 -
-
-Warning: fileperms(): Filename contains null byte in %s on line %d
-bool(false)
-- Iteration 8 -
-
-Warning: fileperms(): Filename contains null byte in %s on line %d
 bool(false)
 
 *** Done ***

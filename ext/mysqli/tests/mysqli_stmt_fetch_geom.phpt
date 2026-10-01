@@ -34,14 +34,8 @@ mysqli
             }
         }
 
-        if (!$stmt = mysqli_stmt_init($link)) {
+        if (!$stmt = mysqli_prepare($link, "SELECT id, label FROM test")) {
             printf("[%04d] [%d] %s\n", $offset + 6, mysqli_errno($link), mysqli_error($link));
-            return false;
-        }
-
-        if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test")) {
-            printf("[%04d] [%d] %s\n", $offset + 7, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
-            mysqli_stmt_close($stmt);
             return false;
         }
 
@@ -78,13 +72,8 @@ mysqli
         mysqli_stmt_close($stmt);
 
         foreach ($rows as $row) {
-            if (!$stmt = mysqli_stmt_init($link)) {
+            if (!$stmt = mysqli_prepare($link, "INSERT INTO test(id, label) VALUES (?, ?)")) {
                 printf("[%04d] [%d] %s\n", $offset + 10, mysqli_errno($link), mysqli_error($link));
-                return false;
-            }
-
-            if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) VALUES (?, ?)")) {
-                printf("[%04d] [%d] %s\n", $offset + 11, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
                 return false;
             }
 

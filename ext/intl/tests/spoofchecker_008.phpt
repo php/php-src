@@ -19,19 +19,19 @@ var_dump($s->isSuspicious("ABC"));
 try {
 	$s->setAllowedChars('[a-z]', 1024);
 } catch (\ValueError $e) {
-	echo $e->getMessage() . PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
 	$s->setAllowedChars("A-Z]");
 } catch (\ValueError $e) {
-	echo $e->getMessage() . PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
 	$s->setAllowedChars("[A-Z");
 } catch (\ValueError $e) {
-	echo $e->getMessage();
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -39,6 +39,6 @@ try {
 bool(true)
 bool(false)
 bool(false)
-Spoofchecker::setAllowedChars(): Argument #2 ($patternOptions) must be a valid pattern option, 0 or (SpoofChecker::IGNORE_SPACE|(<none> or SpoofChecker::CASE_INSENSITIVE%s))
-Spoofchecker::setAllowedChars(): Argument #1 ($pattern) must be a valid regular expression character set pattern
-Spoofchecker::setAllowedChars(): Argument #1 ($pattern) must be a valid regular expression character set pattern
+ValueError: Spoofchecker::setAllowedChars(): Argument #2 ($patternOptions) must be a valid pattern option, 0 or (SpoofChecker::IGNORE_SPACE|(<none> or SpoofChecker::CASE_INSENSITIVE%s))
+ValueError: Spoofchecker::setAllowedChars(): Argument #1 ($pattern) must be a valid regular expression character set pattern
+ValueError: Spoofchecker::setAllowedChars(): Argument #1 ($pattern) must be a valid regular expression character set pattern

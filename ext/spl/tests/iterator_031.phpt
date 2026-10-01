@@ -60,7 +60,7 @@ $ap = new MyAppendIterator;
 try {
     $ap->append($it);
 } catch(\Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $ap->parent__construct();
@@ -68,7 +68,7 @@ $ap->parent__construct();
 try {
     $ap->parent__construct($it);
 } catch(BadMethodCallException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $ap->append($it);
@@ -87,8 +87,8 @@ MyArrayIterator::rewind
 1=>2
 MyAppendIterator::__construct
 MyAppendIterator::append
-The object is in an invalid state as the parent constructor was not called
-AppendIterator::getIterator() must be called exactly once per instance
+Error: The object is in an invalid state as the parent constructor was not called
+BadMethodCallException: AppendIterator::getIterator() must be called exactly once per instance
 MyAppendIterator::append
 MyArrayIterator::rewind
 MyAppendIterator::append

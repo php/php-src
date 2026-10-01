@@ -2036,11 +2036,11 @@ static void exif_error_docref(const char *docref EXIFERR_DC, image_info_type *Im
 		char *buf;
 
 		spprintf(&buf, 0, "%s(%ld): %s", _file, _line, format);
-		php_verror(docref, ImageInfo && ImageInfo->FileName ? ImageInfo->FileName:"", type, buf, args);
+		php_verror(docref, type, buf, args);
 		efree(buf);
 	}
 #else
-	php_verror(docref, ImageInfo && ImageInfo->FileName ? ImageInfo->FileName:"", type, format, args);
+	php_verror(docref, type, format, args);
 #endif
 	va_end(args);
 }
@@ -4412,7 +4412,7 @@ static bool exif_scan_HEIF_header(image_info_type *ImageInfo, unsigned char *buf
 		}
 		if (box.type == FOURCC("meta")) {
 			limit = box.size - box_header_size;
-			if (limit < 36) {
+			if (limit < 36 || limit > ImageInfo->FileSize) {
 				break;
 			}
 			data = (unsigned char *)emalloc(limit);

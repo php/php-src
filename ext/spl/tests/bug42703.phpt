@@ -29,13 +29,13 @@ try {
   }
 }
 catch (Exception $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump($itit->current());
 var_dump($itit->key());
 ?>
 --EXPECT--
-string(3) "boo"
+Exception: boo
 NULL
 NULL

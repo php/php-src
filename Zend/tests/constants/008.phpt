@@ -5,8 +5,8 @@ define() tests
 
 try {
     var_dump(define(array(1,2,3,4,5), 1));
-} catch (TypeError $e) {
-    echo "TypeError: ", $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump(define("TRUE", 1));

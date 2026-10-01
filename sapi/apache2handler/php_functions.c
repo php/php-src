@@ -308,6 +308,8 @@ static const char *php_apache_get_version(void)
 /* {{{ Fetch Apache version */
 PHP_FUNCTION(apache_get_version)
 {
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	const char *apv = php_apache_get_version();
 
 	if (apv && *apv) {
@@ -323,6 +325,8 @@ PHP_FUNCTION(apache_get_modules)
 {
 	int n;
 	char *p;
+
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 

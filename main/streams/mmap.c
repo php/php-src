@@ -34,12 +34,12 @@ PHPAPI char *_php_stream_mmap_range(php_stream *stream, size_t offset, size_t le
 	return NULL;
 }
 
-PHPAPI int _php_stream_mmap_unmap(php_stream *stream)
+PHPAPI int php_stream_mmap_unmap(php_stream *stream)
 {
 	return php_stream_set_option(stream, PHP_STREAM_OPTION_MMAP_API, PHP_STREAM_MMAP_UNMAP, NULL) == PHP_STREAM_OPTION_RETURN_OK;
 }
 
-PHPAPI int _php_stream_mmap_unmap_ex(php_stream *stream, zend_off_t readden)
+PHPAPI int php_stream_mmap_unmap_ex(php_stream *stream, zend_off_t readden)
 {
 	int ret = 1;
 

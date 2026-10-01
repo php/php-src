@@ -15,7 +15,7 @@ function test(string $code, int $flags)
             }
         }
     } catch (ParseError $e) {
-        echo "Parse error: {$e->getMessage()} on line {$e->getLine()}\n";
+        echo $e::class, ': ', $e->getMessage(), ' on line ', $e->getLine(), "\n";
     }
 }
 
@@ -326,11 +326,11 @@ Line 2: T_END_HEREDOC ('  INNER_END')
 
 Test case 5
 
-Parse error: syntax error, unexpected end of file, expecting variable or heredoc end or "${" or "{$" on line 2
+ParseError: syntax error, unexpected end of file, expecting variable or heredoc end or "${" or "{$" on line 2
 
 Test case 6
 
-Parse error: syntax error, unexpected end of file, expecting variable or heredoc end or "${" or "{$" on line 2
+ParseError: syntax error, unexpected end of file, expecting variable or heredoc end or "${" or "{$" on line 2
 
 Test case 7
 
@@ -343,7 +343,7 @@ Line 3: T_END_HEREDOC ('INNER_END')
 
 Test case 8
 
-Parse error: Invalid indentation - tabs and spaces cannot be mixed on line 3
+ParseError: Invalid indentation - tabs and spaces cannot be mixed on line 3
 
 Test case 9
 
@@ -365,7 +365,7 @@ Line 3: T_END_HEREDOC ('  INNER_END')
 
 Test case 11
 
-Parse error: Invalid body indentation level (expecting an indentation level of at least 3) on line 2
+ParseError: Invalid body indentation level (expecting an indentation level of at least 3) on line 2
 
 Test case 12
 
@@ -396,7 +396,7 @@ Line 3: T_END_HEREDOC ('  INNER_END')
 
 Test case 15
 
-Parse error: Invalid body indentation level (expecting an indentation level of at least 3) on line 2
+ParseError: Invalid body indentation level (expecting an indentation level of at least 3) on line 2
 
 Test case 16
 
@@ -409,8 +409,8 @@ Line 3: T_END_HEREDOC ('   INNER_END')
 
 Test case 17
 
-Parse error: syntax error, unexpected end of file, expecting variable or heredoc end or "${" or "{$" on line 4
+ParseError: syntax error, unexpected end of file, expecting variable or heredoc end or "${" or "{$" on line 4
 
 Test case 18
 
-Parse error: syntax error, unexpected end of file, expecting variable or heredoc end or "${" or "{$" on line 4
+ParseError: syntax error, unexpected end of file, expecting variable or heredoc end or "${" or "{$" on line 4

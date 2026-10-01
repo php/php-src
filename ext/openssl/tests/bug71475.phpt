@@ -7,11 +7,11 @@ openssl
 $_ = str_repeat("A", 512);
 try {
     openssl_seal($_, $_, $_, array_fill(0,64,0));
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 DONE
 --EXPECT--
-openssl_seal() expects at least 5 arguments, 4 given
+ArgumentCountError: openssl_seal() expects at least 5 arguments, 4 given
 DONE

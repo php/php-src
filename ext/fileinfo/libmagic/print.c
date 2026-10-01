@@ -32,7 +32,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: print.c,v 1.106 2024/09/01 13:50:01 christos Exp $")
+FILE_RCSID("@(#)$File: print.c,v 1.111 2026/04/19 19:56:49 christos Exp $")
 #endif  /* lint */
 
 #include <string.h>
@@ -227,12 +227,17 @@ file_mdump(struct magic *m)
 		case FILE_DER:
 			(void) fprintf(stderr, "'%s'", m->value.s);
 			break;
+		case FILE_LEGUID:
 		case FILE_GUID:
-			(void) file_print_guid(tbuf, sizeof(tbuf),
+			(void) file_print_leguid(tbuf, sizeof(tbuf),
 			    m->value.guid);
 			(void) fprintf(stderr, "%s", tbuf);
 			break;
-
+		case FILE_BEGUID:
+			(void) file_print_beguid(tbuf, sizeof(tbuf),
+			    m->value.guid);
+			(void) fprintf(stderr, "%s", tbuf);
+			break;
 		default:
 			(void) fprintf(stderr, "*bad type %d*", m->type);
 			break;
@@ -340,9 +345,13 @@ file_fmtdate(char *buf, size_t bsize, uint16_t v)
 	memset(&tm, 0, sizeof(tm));
 	tm.tm_mday = v & 0x1f;
 	tm.tm_mon = ((v >> 5) & 0xf) - 1;
+	// Sanity check because some OS's coredump with invalid values.
+	// Yes, Cygwin I am looking at you!
+	if (tm.tm_mon < 0 || tm.tm_mon > 11)
+		tm.tm_mon = 0;
 	tm.tm_year = (v >> 9) + 80;
 
-	if (strftime(buf, bsize, "%a, %b %d %Y", &tm) == 0)
+	if (strftime(buf, bsize, "%b %d %Y", &tm) == 0)
 		goto out;
 
 	return buf;
