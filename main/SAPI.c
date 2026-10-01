@@ -33,8 +33,6 @@
 
 #include "rfc1867.h"
 
-#include "php_content_types.h"
-
 #ifdef ZTS
 SAPI_API int sapi_globals_id;
 SAPI_API size_t sapi_globals_offset;

@@ -79,7 +79,6 @@
 #include "zend_system_id.h"
 #include "zend_smart_string.h"
 
-#include "php_content_types.h"
 #include "php_ticks.h"
 #include "php_streams.h"
 #include "php_open_temporary_file.h"

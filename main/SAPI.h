@@ -307,6 +307,7 @@ END_EXTERN_C()
 #define DEFAULT_POST_CONTENT_TYPE "application/x-www-form-urlencoded"
 
 BEGIN_EXTERN_C()
+SAPI_API SAPI_POST_HANDLER_FUNC(php_std_post_handler);
 SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data);
 SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data);
 SAPI_API SAPI_INPUT_FILTER_FUNC(php_default_input_filter);
