@@ -20,6 +20,8 @@ PHP                                                                        NEWS
   . Fixed GH-23980 (ZEND_ASSERT violation @ ZEND_INCLUDE_OR_EVAL). (ndossche)
   . Fixed use-after-free when a dl()-loaded extension declares a frameless
     function and a later request calls it. (Ilia Alshanetsky)
+  . Fixed System V shared memory emulation for Windows attaching segments past
+    the end of their mapping. (Ilia Alshanetsky)
 
 - CLI
   . Fix GH-22567 (Windows ZTS CLI SAPI should refresh its TSRMLS cache during
