@@ -3969,27 +3969,17 @@ enum php_openssl_channel_binding_result {
 
 /*
  * Get the NID of the message-digest algorithm used to sign a certificate,
- * or NID_undef if it cannot be determined. The parameter list of
- * X509_get_signature_info() changed between OpenSSL 1.1.1 and 3.0.
+ * or NID_undef if it cannot be determined.
  */
 static int php_openssl_get_cert_signature_md_nid(const X509 *cert) /* {{{ */
 {
-	int md_nid;
-
-#if OPENSSL_VERSION_NUMBER < 0x30000000L
-	int sign_alg, secbits, pkeybits;
-
-	if (!X509_get_signature_info((X509 *)cert, &sign_alg, &md_nid, &secbits, &pkeybits)) {
-		return NID_undef;
-	}
-#else
-	int pkey_nid, secbits;
+	int md_nid, pkey_nid, secbits;
 	uint32_t flags = 0;
 
 	if (!X509_get_signature_info((X509 *)cert, &md_nid, &pkey_nid, &secbits, &flags)) {
 		return NID_undef;
 	}
-#endif
+
 	return md_nid;
 }
 /* }}} */
