@@ -112,6 +112,8 @@ PHP                                                                        NEWS
     arnaud-lb)
   . Fixed bug GH-24063 (OPcache optimizer folds `$cond ? -0.0 : 0.0` into a
     single `-0.0` constant). (lazerg)
+  . Fixed crash when a file cache is reused with a different set of
+    extensions declaring frameless functions. (Ilia Alshanetsky)
 
 - OpenSSL:
   . Fixed stream_socket_enable_crypto() leaving the socket non-blocking
