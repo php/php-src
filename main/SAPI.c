@@ -177,13 +177,6 @@ SAPI_API void sapi_read_post_data(void)
 	} else {
 		/* fallback */
 		SG(request_info).post_entry = NULL;
-		if (UNEXPECTED(!sapi_module.default_post_reader)) {
-			/* this should not happen as there should always be a default_post_reader */
-			SG(request_info).content_type_dup = NULL;
-			sapi_module.sapi_error(E_WARNING, "Unsupported content type:  '%s'", content_type);
-			efree(content_type);
-			return;
-		}
 	}
 	if (oldchar) {
 		*(p-1) = oldchar;
@@ -196,8 +189,11 @@ SAPI_API void sapi_read_post_data(void)
 		post_reader_func();
 	}
 
-	if(sapi_module.default_post_reader) {
-		sapi_module.default_post_reader();
+	if (!strcmp(SG(request_info).request_method, "POST")) {
+		if (NULL == SG(request_info).post_entry) {
+			/* no post handler registered, so we just swallow the data */
+			sapi_read_standard_form_data();
+		}
 	}
 }
 
@@ -955,17 +951,6 @@ SAPI_API void sapi_unregister_post_entry(const sapi_post_entry *post_entry)
 	zend_hash_str_del(&SG(known_post_content_types), post_entry->content_type,
 			post_entry->content_type_len);
 }
-
-
-SAPI_API zend_result sapi_register_default_post_reader(void (*default_post_reader)(void))
-{
-	if (SG(sapi_started) && EG(current_execute_data)) {
-		return FAILURE;
-	}
-	sapi_module.default_post_reader = default_post_reader;
-	return SUCCESS;
-}
-
 
 SAPI_API zend_result sapi_register_treat_data(void (*treat_data)(int arg, char *str, zval *destArray))
 {
