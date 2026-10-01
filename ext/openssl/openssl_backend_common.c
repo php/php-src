@@ -26,10 +26,6 @@
 /* Common */
 #include <time.h>
 
-#if (defined(PHP_WIN32) && defined(_MSC_VER))
-#define timezone _timezone	/* timezone is called _timezone in LibC */
-#endif
-
 
 /* openssl -> PHP "bridging" */
 /* true global; readonly after module startup */
@@ -115,20 +111,12 @@ void php_openssl_add_assoc_asn1_string(zval * val, char * key, const ASN1_STRING
 
 time_t php_openssl_asn1_time_to_time_t(ASN1_UTCTIME * timestr)
 {
-    /*
-     * This is how the time string is formatted:
-     *
-     * snprintf(p, sizeof(p), "%02d%02d%02d%02d%02d%02dZ",ts->tm_year%100,
-     *   ts->tm_mon+1,ts->tm_mday,ts->tm_hour,ts->tm_min,ts->tm_sec);
-     */
-
-	time_t ret;
-	struct tm thetime;
-	char * strbuf;
-	char * thestr;
+	ASN1_TIME *epoch;
 	const char *timestr_data;
-	long gmadjust = 0;
 	size_t timestr_len;
+	int days, secs;
+	int64_t timestamp;
+	time_t ret;
 
 	if (ASN1_STRING_type(timestr) != V_ASN1_UTCTIME && ASN1_STRING_type(timestr) != V_ASN1_GENERALIZEDTIME) {
 		php_error_docref(NULL, E_WARNING, "Illegal ASN1 data type for timestamp");
@@ -143,68 +131,38 @@ time_t php_openssl_asn1_time_to_time_t(ASN1_UTCTIME * timestr)
 		return (time_t)-1;
 	}
 
-	if (timestr_len < 13) {
+	/* OpenSSL < 3.3 accepts a UTCTime without seconds, which RFC 5280 forbids. */
+	if (timestr_len < 13 || (ASN1_STRING_type(timestr) == V_ASN1_GENERALIZEDTIME && timestr_len < 15)) {
 		php_error_docref(NULL, E_WARNING, "Unable to parse time string %.*s correctly", (int)timestr_len, timestr_data);
 		return (time_t)-1;
 	}
 
-	if (ASN1_STRING_type(timestr) == V_ASN1_GENERALIZEDTIME && timestr_len < 15) {
-		php_error_docref(NULL, E_WARNING, "Unable to parse time string %.*s correctly", (int)timestr_len, timestr_data);
+	epoch = ASN1_TIME_set(NULL, 0);
+	if (epoch == NULL) {
+		php_openssl_store_errors();
 		return (time_t)-1;
 	}
 
-	strbuf = estrndup(timestr_data, timestr_len);
-
-	memset(&thetime, 0, sizeof(thetime));
-
-	/* we work backwards so that we can use atoi more easily */
-
-	thestr = strbuf + timestr_len - 3;
-
-	thetime.tm_sec = atoi(thestr);
-	*thestr = '\0';
-	thestr -= 2;
-	thetime.tm_min = atoi(thestr);
-	*thestr = '\0';
-	thestr -= 2;
-	thetime.tm_hour = atoi(thestr);
-	*thestr = '\0';
-	thestr -= 2;
-	thetime.tm_mday = atoi(thestr);
-	*thestr = '\0';
-	thestr -= 2;
-	thetime.tm_mon = atoi(thestr)-1;
-
-	*thestr = '\0';
-	if( ASN1_STRING_type(timestr) == V_ASN1_UTCTIME ) {
-		thestr -= 2;
-		thetime.tm_year = atoi(thestr);
-
-		if (thetime.tm_year < 68) {
-			thetime.tm_year += 100;
-		}
-	} else if( ASN1_STRING_type(timestr) == V_ASN1_GENERALIZEDTIME ) {
-		thestr -= 4;
-		thetime.tm_year = atoi(thestr) - 1900;
-	}
-
-
-	thetime.tm_isdst = -1;
-	ret = mktime(&thetime);
-
-#ifdef HAVE_STRUCT_TM_TM_GMTOFF
-	gmadjust = thetime.tm_gmtoff;
-#else
 	/*
-	 * If correcting for daylight savings time, we set the adjustment to
-	 * the value of timezone - 3600 seconds. Otherwise, we need to overcorrect and
-	 * set the adjustment to the main timezone + 3600 seconds.
+	 * Let the library validate the string and compute the offset from the
+	 * epoch in UTC rather than going through mktime(), which works in local
+	 * time and on Windows cannot represent dates after the year 3000.
 	 */
-	gmadjust = -(thetime.tm_isdst ? (long)timezone - 3600 : (long)timezone);
-#endif
-	ret += gmadjust;
+	if (!ASN1_TIME_diff(&days, &secs, epoch, timestr)) {
+		ASN1_TIME_free(epoch);
+		php_error_docref(NULL, E_WARNING, "Unable to parse time string %.*s correctly", (int)timestr_len, timestr_data);
+		return (time_t)-1;
+	}
+	ASN1_TIME_free(epoch);
 
-	efree(strbuf);
+	/* The days and seconds always have the same sign. */
+	timestamp = (int64_t) days * 86400 + secs;
+
+	ret = (time_t) timestamp;
+	if ((int64_t) ret != timestamp) {
+		/* Does not fit into a 32-bit time_t. */
+		return (time_t)-1;
+	}
 
 	return ret;
 }
