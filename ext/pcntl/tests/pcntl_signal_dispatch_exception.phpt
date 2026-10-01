@@ -23,12 +23,12 @@ posix_kill(posix_getpid(), SIGUSR2);
 try {
     pcntl_signal_dispatch();
 } catch (\Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Handlers called: " . implode(', ', $called) . "\n";
 
 ?>
 --EXPECT--
-Exception in signal handler
+Exception: Exception in signal handler
 Handlers called: SIGUSR1

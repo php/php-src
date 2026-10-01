@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Tom May <tom@go2net.com>                                    |
    |          Gavin Sherry <gavin@linuxworld.com.au>                      |
@@ -84,9 +82,7 @@ ZEND_GET_MODULE(sysvsem)
 zend_class_entry *sysvsem_ce;
 static zend_object_handlers sysvsem_object_handlers;
 
-static inline sysvsem_sem *sysvsem_from_obj(zend_object *obj) {
-	return (sysvsem_sem *)((char *)(obj) - XtOffsetOf(sysvsem_sem, std));
-}
+#define sysvsem_from_obj(obj) ZEND_CONTAINER_OF(obj, sysvsem_sem, std)
 
 #define Z_SYSVSEM_P(zv) sysvsem_from_obj(Z_OBJ_P(zv))
 
@@ -149,7 +145,7 @@ PHP_MINIT_FUNCTION(sysvsem)
 	sysvsem_ce->default_object_handlers = &sysvsem_object_handlers;
 
 	memcpy(&sysvsem_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	sysvsem_object_handlers.offset = XtOffsetOf(sysvsem_sem, std);
+	sysvsem_object_handlers.offset = offsetof(sysvsem_sem, std);
 	sysvsem_object_handlers.free_obj = sysvsem_free_obj;
 	sysvsem_object_handlers.get_constructor = sysvsem_get_constructor;
 	sysvsem_object_handlers.clone_obj = NULL;
@@ -171,14 +167,21 @@ PHP_MINFO_FUNCTION(sysvsem)
 /* {{{ Return an id for the semaphore with the given key, and allow max_acquire (default 1) processes to acquire it simultaneously */
 PHP_FUNCTION(sem_get)
 {
-	zend_long key, max_acquire = 1, perm = 0666;
+	zend_long key_arg, max_acquire = 1, perm = 0666;
 	bool auto_release = true;
+	key_t key;
 	int semid;
 	struct sembuf sop[3];
 	int count;
 	sysvsem_sem *sem_ptr;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "l|llb", &key, &max_acquire, &perm, &auto_release)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "l|llb", &key_arg, &max_acquire, &perm, &auto_release)) {
+		RETURN_THROWS();
+	}
+
+	key = (key_t) key_arg;
+	if ((zend_long) key != key_arg) {
+		zend_argument_value_error(1, "is out of range");
 		RETURN_THROWS();
 	}
 
@@ -190,7 +193,7 @@ PHP_FUNCTION(sem_get)
 
 	semid = semget(key, 3, perm|IPC_CREAT);
 	if (semid == -1) {
-		php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", key, strerror(errno));
+		php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", key_arg, strerror(errno));
 		RETURN_FALSE;
 	}
 
@@ -222,7 +225,7 @@ PHP_FUNCTION(sem_get)
 	sop[2].sem_flg = SEM_UNDO;
 	while (semop(semid, sop, 3) == -1) {
 		if (errno != EINTR) {
-			php_error_docref(NULL, E_WARNING, "Failed acquiring SYSVSEM_SETVAL for key 0x" ZEND_XLONG_FMT ": %s", key, strerror(errno));
+			php_error_docref(NULL, E_WARNING, "Failed acquiring SYSVSEM_SETVAL for key 0x" ZEND_XLONG_FMT ": %s", key_arg, strerror(errno));
 			break;
 		}
 	}
@@ -230,7 +233,7 @@ PHP_FUNCTION(sem_get)
 	/* Get the usage count. */
 	count = semctl(semid, SYSVSEM_USAGE, GETVAL, NULL);
 	if (count == -1) {
-		php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", key, strerror(errno));
+		php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", key_arg, strerror(errno));
 	}
 
 	/* If we are the only user, then take this opportunity to set the max. */
@@ -239,7 +242,7 @@ PHP_FUNCTION(sem_get)
 		union semun semarg;
 		semarg.val = max_acquire;
 		if (semctl(semid, SYSVSEM_SEM, SETVAL, semarg) == -1) {
-			php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", key, strerror(errno));
+			php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", key_arg, strerror(errno));
 		}
 	}
 
@@ -250,7 +253,7 @@ PHP_FUNCTION(sem_get)
 	sop[0].sem_flg = SEM_UNDO;
 	while (semop(semid, sop, 1) == -1) {
 		if (errno != EINTR) {
-			php_error_docref(NULL, E_WARNING, "Failed releasing SYSVSEM_SETVAL for key 0x" ZEND_XLONG_FMT ": %s", key, strerror(errno));
+			php_error_docref(NULL, E_WARNING, "Failed releasing SYSVSEM_SETVAL for key 0x" ZEND_XLONG_FMT ": %s", key_arg, strerror(errno));
 			break;
 		}
 	}

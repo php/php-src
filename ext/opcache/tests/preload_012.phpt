@@ -19,9 +19,9 @@ var_dump(class_exists('Test'));
 try {
     new Test();
 } catch (Throwable $ex) {
-    echo $ex->getMessage() . "\n";
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 ?>
 --EXPECT--
 bool(true)
-Undefined constant Foo::BAR
+Error: Undefined constant Foo::BAR

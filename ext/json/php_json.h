@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Omar Kilani <omar@php.net>                                   |
   |         Jakub Zelenka <bukka@php.net>                                |
@@ -54,6 +52,18 @@ typedef enum {
 	PHP_JSON_ERROR_NON_BACKED_ENUM,
 } php_json_error_code;
 
+typedef struct php_json_error_details {
+	php_json_error_code code;
+	uint64_t line;
+	uint64_t column;
+} php_json_error_details;
+
+static inline void php_json_error_details_clear(php_json_error_details *out) {
+	out->code = PHP_JSON_ERROR_NONE;
+	out->line = 0;
+	out->column = 0;
+}
+
 /* json_decode() options */
 #define PHP_JSON_OBJECT_AS_ARRAY            (1<<0)
 #define PHP_JSON_BIGINT_AS_STRING           (1<<1)
@@ -85,9 +95,7 @@ typedef enum {
 ZEND_BEGIN_MODULE_GLOBALS(json)
 	int encoder_depth;
 	int encode_max_depth;
-	php_json_error_code error_code;
-	size_t error_line;
-	size_t error_column;
+	php_json_error_details error_details;
 ZEND_END_MODULE_GLOBALS(json)
 
 PHP_JSON_API ZEND_EXTERN_MODULE_GLOBALS(json)

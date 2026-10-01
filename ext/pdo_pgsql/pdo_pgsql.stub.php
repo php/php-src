@@ -18,6 +18,11 @@ class Pgsql extends \PDO
     public const int ATTR_RESULT_MEMORY_SIZE = UNKNOWN;
 #endif
 
+#ifdef HAVE_PG_SET_CHUNKED_ROWS_SIZE
+    /** @cvalue PDO_PGSQL_ATTR_CHUNK_SIZE */
+    public const int ATTR_CHUNK_SIZE = UNKNOWN;
+#endif
+
     /** @cvalue PGSQL_TRANSACTION_IDLE */
     #[\Deprecated(since: "8.5", message: "as it has no effect")]
     public const int TRANSACTION_IDLE = UNKNOWN;

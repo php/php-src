@@ -1,6 +1,9 @@
 /* This is a generated file, edit libxml.stub.php instead.
  * Stub hash: 6dceb619736a3de55b84609a9e3aeb13405bbfde */
 
+#include "zend_attributes.h"
+#include "zend_constants.h"
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_libxml_set_streams_context, 0, 1, IS_VOID, 0)
 	ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO()

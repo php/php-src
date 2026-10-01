@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Levi Morrison <levim@php.net>                               |
    |          Sammy Kaye Powers <sammyk@php.net>                          |
@@ -33,8 +32,9 @@ extern ZEND_API bool zend_observer_errors_observed;
 extern ZEND_API bool zend_observer_function_declared_observed;
 extern ZEND_API bool zend_observer_class_linked_observed;
 
-#define ZEND_OBSERVER_HANDLE(function) (ZEND_USER_CODE((function)->type) \
-	? zend_observer_fcall_op_array_extension : zend_observer_fcall_internal_function_extension)
+static zend_always_inline int ZEND_OBSERVER_HANDLE(const zend_function *function) {
+	return ZEND_USER_CODE(function->common.type) ? zend_observer_fcall_op_array_extension : zend_observer_fcall_internal_function_extension;
+}
 
 #define ZEND_OBSERVER_DATA(function) \
 	((zend_observer_fcall_begin_handler *)&ZEND_OP_ARRAY_EXTENSION((&(function)->common), ZEND_OBSERVER_HANDLE(function)))
@@ -45,18 +45,6 @@ extern ZEND_API bool zend_observer_class_linked_observed;
 
 /* Omit zend_observer_fcall_internal_function_extension check, they are set at the same time. */
 #define ZEND_OBSERVER_ENABLED (zend_observer_fcall_op_array_extension != -1)
-
-#define ZEND_OBSERVER_FCALL_BEGIN(execute_data) do { \
-		if (ZEND_OBSERVER_ENABLED) { \
-			zend_observer_fcall_begin(execute_data); \
-		} \
-	} while (0)
-
-#define ZEND_OBSERVER_FCALL_END(execute_data, return_value) do { \
-		if (ZEND_OBSERVER_ENABLED) { \
-			zend_observer_fcall_end(execute_data, return_value); \
-		} \
-	} while (0)
 
 typedef void (*zend_observer_fcall_begin_handler)(zend_execute_data *execute_data);
 typedef void (*zend_observer_fcall_end_handler)(zend_execute_data *execute_data, zval *retval);
@@ -87,6 +75,12 @@ ZEND_API void zend_observer_shutdown(void);
 ZEND_API void ZEND_FASTCALL zend_observer_fcall_begin(zend_execute_data *execute_data);
 /* prechecked: the call is actually observed. */
 ZEND_API void ZEND_FASTCALL zend_observer_fcall_begin_prechecked(zend_execute_data *execute_data, zend_observer_fcall_begin_handler *observer_data);
+
+static zend_always_inline void ZEND_OBSERVER_FCALL_BEGIN(zend_execute_data *execute_data) {
+	if (ZEND_OBSERVER_ENABLED) {
+		zend_observer_fcall_begin(execute_data);
+	}
+}
 
 static zend_always_inline bool zend_observer_handler_is_unobserved(const zend_observer_fcall_begin_handler *handler) {
 	return *handler == ZEND_OBSERVER_NONE_OBSERVED;
@@ -124,6 +118,12 @@ ZEND_API void ZEND_FASTCALL zend_observer_fcall_end_prechecked(zend_execute_data
 static zend_always_inline void zend_observer_fcall_end(zend_execute_data *execute_data, zval *return_value) {
 	if (execute_data == EG(current_observed_frame)) {
 		zend_observer_fcall_end_prechecked(execute_data, return_value);
+	}
+}
+
+static zend_always_inline void ZEND_OBSERVER_FCALL_END(zend_execute_data *execute_data, zval *return_value) {
+	if (ZEND_OBSERVER_ENABLED) {
+		zend_observer_fcall_end(execute_data, return_value);
 	}
 }
 

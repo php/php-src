@@ -3,7 +3,7 @@ Bug #68063 (Empty session IDs do still start sessions)
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --INI--
 session.use_strict_mode=0
 session.sid_length=40

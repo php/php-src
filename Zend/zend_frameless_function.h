@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
 */
 
@@ -65,7 +64,7 @@
 		dest_ht = NULL; \
 		ZVAL_COPY(&str_tmp, arg ## arg_num); \
 		arg ## arg_num = &str_tmp; \
-		if (!zend_flf_parse_arg_str_slow(arg ## arg_num, &dest_str, arg_num)) { \
+		if (!(dest_str = zend_flf_parse_arg_str_slow(arg ## arg_num, arg_num))) { \
 			zend_wrong_parameter_type_error(arg_num, Z_EXPECTED_ARRAY_OR_STRING, arg ## arg_num); \
 			goto flf_clean; \
 		} \

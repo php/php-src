@@ -20,17 +20,17 @@ foreach ([-1, PHP_INT_MAX] as $val) {
         try {
             imagefilter($im, IMG_FILTER_SCATTER, $val, 0);
         } catch (\ValueError $e) {
-            echo $e->getMessage() . PHP_EOL;
+            echo $e::class, ': ', $e->getMessage(), PHP_EOL;
         }
         try {
             imagefilter($im, IMG_FILTER_SCATTER, 0, $val);
         } catch (\ValueError $e) {
-            echo $e->getMessage() . PHP_EOL;
+            echo $e::class, ': ', $e->getMessage(), PHP_EOL;
         }
 }
 ?>
 --EXPECTF--
-imagefilter(): Argument #3 must be between 0 and %d
-imagefilter(): Argument #4 must be between 0 and %d
-imagefilter(): Argument #3 must be between 0 and %d
-imagefilter(): Argument #4 must be between 0 and %d
+ValueError: imagefilter(): Argument #3 must be between 0 and %d
+ValueError: imagefilter(): Argument #4 must be between 0 and %d
+ValueError: imagefilter(): Argument #3 must be between 0 and %d
+ValueError: imagefilter(): Argument #4 must be between 0 and %d

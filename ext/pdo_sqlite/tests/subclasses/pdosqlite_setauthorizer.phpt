@@ -22,7 +22,7 @@ try {
     // This one should fail
     var_dump($db->exec('CREATE TABLE test (a, b);'));
 } catch (\Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 // Test disabling the authorizer
@@ -51,7 +51,7 @@ $db->setAuthorizer(function () {
 try {
     var_dump($db->query('SELECT 1;'));
 } catch (\Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $db->setAuthorizer(function () {
@@ -61,7 +61,7 @@ $db->setAuthorizer(function () {
 try {
     var_dump($db->query('SELECT 1;'));
 } catch (\Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -70,7 +70,7 @@ object(PDOStatement)#%d (1) {
   ["queryString"]=>
   string(9) "SELECT 1;"
 }
-SQLSTATE[HY000]: General error: 23 not authorized
+PDOException: SQLSTATE[HY000]: General error: 23 not authorized
 int(1)
 int(1)
 string(6) "SELECT"
@@ -97,5 +97,5 @@ string(28) "sqlite_master,rootpage,main,"
 string(4) "READ"
 string(28) "sqlite_master,rootpage,main,"
 int(1)
-PDO::query(): Return value of the authorizer callback must be of type int, string returned
-PDO::query(): Return value of the authorizer callback must be one of Pdo\Sqlite::OK, Pdo\Sqlite::DENY, or Pdo\Sqlite::IGNORE
+TypeError: PDO::query(): Return value of the authorizer callback must be of type int, string returned
+ValueError: PDO::query(): Return value of the authorizer callback must be one of Pdo\Sqlite::OK, Pdo\Sqlite::DENY, or Pdo\Sqlite::IGNORE

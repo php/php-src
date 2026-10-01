@@ -19,8 +19,8 @@ var_dump(openssl_x509_export($d, $output4)); // read cert from a resource
 
 try {
     openssl_x509_export($e, $output5); // read an array, fails
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 if (PHP_EOL !== "\n") {
@@ -40,7 +40,7 @@ bool(true)
 Warning: openssl_x509_export(): X.509 Certificate cannot be retrieved in %s on line %d
 bool(false)
 bool(true)
-openssl_x509_export(): Argument #1 ($certificate) must be of type OpenSSLCertificate|string, array given
+TypeError: openssl_x509_export(): Argument #1 ($certificate) must be of type OpenSSLCertificate|string, array given
 int(0)
 int(0)
 int(%d)

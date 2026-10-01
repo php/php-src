@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Mel Dafert (mel@dafert.at)                                  |
    +----------------------------------------------------------------------+
@@ -118,7 +118,8 @@ U_CFUNC PHP_METHOD( IntlDatePatternGenerator, getBestPattern )
 
 	INTL_METHOD_CHECK_STATUS(dtpgo, "Skeleton is not a valid UTF-8 string");
 
-	UnicodeString skeleton = dtpgo->dtpg->getSkeleton(skeleton_uncleaned, DTPATTERNGEN_ERROR_CODE(dtpgo));
+	UnicodeString skeleton = DateTimePatternGenerator::staticGetSkeleton(
+		skeleton_uncleaned, DTPATTERNGEN_ERROR_CODE(dtpgo));
 
 	INTL_METHOD_CHECK_STATUS(dtpgo, "Error getting cleaned skeleton");
 
@@ -131,4 +132,50 @@ U_CFUNC PHP_METHOD( IntlDatePatternGenerator, getBestPattern )
 	INTL_METHOD_CHECK_STATUS(dtpgo, "Error converting result to UTF-8");
 
 	RETVAL_STR(u8str);
+}
+
+template <typename F>
+static void dtpg_get_skeleton(INTERNAL_FUNCTION_PARAMETERS, F&& skeletonfn, const char *errmsg)
+{
+	zend_string *pattern_str;
+	UnicodeString pattern;
+	UErrorCode status = U_ZERO_ERROR;
+
+	intl_error_reset(NULL);
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(pattern_str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	intl_stringFromChar(pattern, ZSTR_VAL(pattern_str), ZSTR_LEN(pattern_str), &status);
+
+	INTL_CHECK_STATUS(status, "Pattern is not a valid UTF-8 string");
+
+	UnicodeString result = skeletonfn(pattern, status);
+
+	INTL_CHECK_STATUS(status, errmsg);
+
+	zend_string *u8str = intl_charFromString(result, &status);
+
+	INTL_CHECK_STATUS(status, "Error converting result to UTF-8");
+
+	RETVAL_STR(u8str);
+}
+
+U_CFUNC PHP_METHOD(IntlDatePatternGenerator, getSkeleton)
+{
+	dtpg_get_skeleton(INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		[](const UnicodeString &pattern, UErrorCode &status) {
+			return DateTimePatternGenerator::staticGetSkeleton(pattern, status);
+		},
+		"Error getting skeleton");
+}
+
+U_CFUNC PHP_METHOD(IntlDatePatternGenerator, getBaseSkeleton)
+{
+	dtpg_get_skeleton(INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		[](const UnicodeString &pattern, UErrorCode &status) {
+			return DateTimePatternGenerator::staticGetBaseSkeleton(pattern, status);
+		},
+		"Error getting base skeleton");
 }

@@ -1,7 +1,7 @@
 /*
  * IR - Lightweight JIT Compilation Framework
  * (IR verification)
- * Copyright (C) 2022 Zend by Perforce.
+ * This file is part of the IR Project distributed under the MIT-style LICENSE.
  * Authors: Dmitry Stogov <dmitry@php.net>
  */
 
@@ -148,6 +148,12 @@ bool ir_check(const ir_ctx *ctx)
 	bool ok = 1;
 	ir_check_ctx check_ctx;
 
+	if (ctx->insns_count < 1 || ctx->ir_base[1].op != IR_START) {
+		fprintf(stderr, "ir_base[1].op invalid opcode (%d)\n",
+			(ctx->insns_count < 1) ? IR_NOP : ctx->ir_base[0].op);
+		ok = 0;
+	}
+
 	check_ctx.arena = NULL;
 	check_ctx.use_set = NULL;
 	check_ctx.input_set = NULL;
@@ -167,7 +173,7 @@ bool ir_check(const ir_ctx *ctx)
 					if (IR_OPND_KIND(flags, j) != IR_OPND_DATA) {
 						fprintf(stderr, "ir_base[%d].ops[%d] reference (%d) must not be constant\n", i, j, use);
 						ok = 0;
-					} else if (use >= ctx->consts_count) {
+					} else if (-use >= ctx->consts_count) {
 						fprintf(stderr, "ir_base[%d].ops[%d] constant reference (%d) is out of range\n", i, j, use);
 						ok = 0;
 					}
@@ -175,6 +181,7 @@ bool ir_check(const ir_ctx *ctx)
 					if (use >= ctx->insns_count) {
 						fprintf(stderr, "ir_base[%d].ops[%d] insn reference (%d) is out of range\n", i, j, use);
 						ok = 0;
+						continue;
 					}
 					use_insn = &ctx->ir_base[use];
 					switch (IR_OPND_KIND(flags, j)) {
@@ -231,7 +238,8 @@ bool ir_check(const ir_ctx *ctx)
 											  || insn->op == IR_SAR
 											  || insn->op == IR_ROL
 											  || insn->op == IR_ROR)
-											 && ir_type_size[use_insn->type] < ir_type_size[insn->type]) {
+											 && IR_IS_TYPE_INT(use_insn->type)
+											 && (IR_IS_TYPE_INT(insn->type) || IR_IS_TYPE_VECTOR(insn->type))) {
 												/* second argument of SHIFT may be incompatible with result */
 												break;
 											}
@@ -297,6 +305,14 @@ bool ir_check(const ir_ctx *ctx)
 								ok = 0;
 							}
 							break;
+						case IR_OPND_CONTROL_GUARD:
+							if (!(ir_op_flags[use_insn->op] & IR_OP_FLAG_BB_START)
+							 && use_insn->op != IR_GUARD
+							 && use_insn->op != IR_GUARD_NOT) {
+								fprintf(stderr, "ir_base[%d].ops[%d] reference (%d) must be BB_START or GUARD\n", i, j, use);
+								ok = 0;
+							}
+							break;
 						default:
 							fprintf(stderr, "ir_base[%d].ops[%d] reference (%d) of unsupported kind\n", i, j, use);
 							ok = 0;
@@ -306,6 +322,8 @@ bool ir_check(const ir_ctx *ctx)
 				/* pass (function returns void) */
 			} else if (insn->op == IR_BEGIN && j == 1) {
 				/* pass (start of unreachable basic block) */
+			} else if (IR_OPND_KIND(flags, j) == IR_OPND_CONTROL_GUARD) {
+				/* reference to control guard is optional */
 			} else if (IR_OPND_KIND(flags, j) != IR_OPND_CONTROL_REF
 					&& (insn->op != IR_SNAPSHOT || j == 1)) {
 				fprintf(stderr, "ir_base[%d].ops[%d] missing reference (%d)\n", i, j, use);
@@ -335,7 +353,7 @@ bool ir_check(const ir_ctx *ctx)
 				if (type != IR_ADDR
 				 && (!IR_IS_TYPE_INT(type) || ir_type_size[type] != ir_type_size[IR_ADDR])) {
 					fprintf(stderr, "ir_base[%d].op2 must have ADDR type (%s)\n",
-						i, ir_type_name[type]);
+						i, IR_IS_TYPE_VECTOR(type) ? "VECTOR" : ir_type_name[type]);
 					ok = 0;
 				}
 				break;
@@ -413,6 +431,7 @@ bool ir_check(const ir_ctx *ctx)
 						}
 						break;
 					case IR_IGOTO:
+					case IR_ASM_GOTO:
 						break;
 					default:
 						/* skip data references */
@@ -464,6 +483,49 @@ bool ir_check(const ir_ctx *ctx)
 //	if (!ok) {
 //		ir_dump_codegen(ctx, stderr);
 //	}
+
+#ifndef IR_CHECK_NO_ABORT
 	IR_ASSERT(ok);
+#endif
+
+	return ok;
+}
+
+bool ir_check_prototype(const ir_ctx *ctx, uint32_t flags, uint8_t ret_type, uint32_t params_count, uint8_t *param_types)
+{
+	bool ok = 1;
+	ir_ref ref = 2;
+	uint32_t n = 0;
+
+	while (ref < ctx->insns_count && ctx->ir_base[ref].op == IR_PARAM) {
+		if (n >= params_count) {
+			fprintf(stderr, "parameter count doesn't match function signature\n");
+			ok = 0;
+			break;
+		} else if (ctx->ir_base[ref].type != param_types[n]) {
+			fprintf(stderr, "parameter %d type doesn't match function signature\n", n);
+			ok = 0;
+		}
+		ref++;
+		n++;
+	}
+
+	if (n < params_count) {
+		fprintf(stderr, "parameter count doesn't match function signature\n");
+		ok = 0;
+	}
+	if ((flags & IR_VARARG_FUNC) != (ctx->flags & IR_VARARG_FUNC)) {
+		fprintf(stderr, "IR_VARARG_FUNC flag doesn't match function signature\n");
+		ok = 0;
+	}
+	if (ret_type != ctx->ret_type) {
+		fprintf(stderr, "return type doesn't match function signature\n");
+		ok = 0;
+	}
+	if ((flags & IR_CALL_CONV_MASK) != (ctx->flags & IR_CALL_CONV_MASK)) {
+		fprintf(stderr, "calling convention doesn't match function signature\n");
+		ok = 0;
+	}
+
 	return ok;
 }

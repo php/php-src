@@ -3,7 +3,7 @@ Test session_encode() function : error functionality
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --FILE--
 <?php
 
@@ -34,7 +34,7 @@ foreach($inputs as $input) {
     try {
         $_SESSION[$input] = "Hello World!";
     } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     var_dump(session_encode());
     var_dump(session_destroy());

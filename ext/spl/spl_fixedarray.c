@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Antony Dovgal <tony@daylessday.org>                          |
   |         Etienne Kneuss <colder@php.net>                              |
@@ -22,7 +20,6 @@
 #include "php.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
-#include "zend_attributes.h"
 
 #include "spl_fixedarray_arginfo.h"
 #include "spl_fixedarray.h"
@@ -55,10 +52,7 @@ typedef struct _spl_fixedarray_it {
 	zend_long            current;
 } spl_fixedarray_it;
 
-static spl_fixedarray_object *spl_fixed_array_from_obj(zend_object *obj)
-{
-	return (spl_fixedarray_object*)((char*)(obj) - XtOffsetOf(spl_fixedarray_object, std));
-}
+#define spl_fixed_array_from_obj(obj) ZEND_CONTAINER_OF(obj, spl_fixedarray_object, std)
 
 #define Z_SPLFIXEDARRAY_P(zv)  spl_fixed_array_from_obj(Z_OBJ_P((zv)))
 
@@ -75,6 +69,14 @@ static bool spl_fixedarray_empty(spl_fixedarray *array)
 	}
 	ZEND_ASSERT(array->size == 0);
 	return true;
+}
+
+/* True while spl_fixedarray_resize() runs. A clear empties the array before
+ * destroying its elements, so emptiness alone cannot tell "never constructed"
+ * from "clear in progress"; re-initialising in that window leaks. */
+static bool spl_fixedarray_resize_in_progress(const spl_fixedarray *array)
+{
+	return array->cached_resize >= 0;
 }
 
 static void spl_fixedarray_default_ctor(spl_fixedarray *array)
@@ -172,25 +174,25 @@ static void spl_fixedarray_resize(spl_fixedarray *array, zend_long size)
 		return;
 	}
 
-	/* first initialization */
-	if (array->size == 0) {
-		spl_fixedarray_init(array, size);
-		return;
-	}
-
 	if (UNEXPECTED(array->cached_resize >= 0)) {
 		/* We're already resizing, so just remember the desired size.
 		 * The resize will happen later. */
 		array->cached_resize = size;
 		return;
 	}
+	/* first initialization */
+	if (array->size == 0) {
+		spl_fixedarray_init(array, size);
+		return;
+	}
+
 	array->cached_resize = size;
 
 	/* clearing the array */
 	if (size == 0) {
+		/* Clears elements and size; resetting them afterwards would leak
+		 * anything a destructor re-installed. */
 		spl_fixedarray_dtor(array);
-		array->elements = NULL;
-		array->size = 0;
 	} else if (size > array->size) {
 		array->elements = safe_erealloc(array->elements, size, sizeof(zval), 0);
 		spl_fixedarray_init_elems(array, array->size, size);
@@ -201,8 +203,12 @@ static void spl_fixedarray_resize(spl_fixedarray *array, zend_long size)
 		array->elements = erealloc(array->elements, sizeof(zval) * size);
 	}
 
-	/* If resized within the destructor, take the last resize command and perform it */
+	/* If resized within the destructor, take the last resize command and
+	 * perform it. The sentinel is still set: re-initialising during a
+	 * resize is refused. */
 	zend_long cached_resize = array->cached_resize;
+	ZEND_ASSERT(cached_resize >= 0);
+
 	array->cached_resize = -1;
 	if (cached_resize != size) {
 		spl_fixedarray_resize(array, cached_resize);
@@ -287,6 +293,9 @@ static zend_object *spl_fixedarray_object_new_ex(zend_class_entry *class_type, z
 	if (orig && clone_orig) {
 		spl_fixedarray_object *other = spl_fixed_array_from_obj(orig);
 		spl_fixedarray_copy_ctor(&intern->array, &other->array);
+	} else {
+		/* The zeroed struct would mean "resizing"; set the sentinel. */
+		spl_fixedarray_default_ctor(&intern->array);
 	}
 
 	if (UNEXPECTED(class_type != spl_ce_SplFixedArray)) {
@@ -548,7 +557,7 @@ PHP_METHOD(SplFixedArray, __construct)
 
 	intern = Z_SPLFIXEDARRAY_P(object);
 
-	if (!spl_fixedarray_empty(&intern->array)) {
+	if (UNEXPECTED(!spl_fixedarray_empty(&intern->array) || spl_fixedarray_resize_in_progress(&intern->array))) {
 		/* called __construct() twice, bail out */
 		return;
 	}
@@ -564,7 +573,7 @@ PHP_METHOD(SplFixedArray, __wakeup)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (intern->array.size == 0) {
+	if (EXPECTED(intern->array.size == 0 && !spl_fixedarray_resize_in_progress(&intern->array))) {
 		int index = 0;
 		int size = zend_hash_num_elements(intern_ht);
 
@@ -624,7 +633,7 @@ PHP_METHOD(SplFixedArray, __unserialize)
 		RETURN_THROWS();
 	}
 
-	if (intern->array.size == 0) {
+	if (EXPECTED(intern->array.size == 0 && !spl_fixedarray_resize_in_progress(&intern->array))) {
 		size = zend_hash_num_elements(data);
 		spl_fixedarray_init_non_empty_struct(&intern->array, size);
 		if (!size) {
@@ -954,7 +963,7 @@ PHP_MINIT_FUNCTION(spl_fixedarray)
 
 	memcpy(&spl_handler_SplFixedArray, &std_object_handlers, sizeof(zend_object_handlers));
 
-	spl_handler_SplFixedArray.offset          = XtOffsetOf(spl_fixedarray_object, std);
+	spl_handler_SplFixedArray.offset          = offsetof(spl_fixedarray_object, std);
 	spl_handler_SplFixedArray.clone_obj       = spl_fixedarray_object_clone;
 	spl_handler_SplFixedArray.read_dimension  = spl_fixedarray_object_read_dimension;
 	spl_handler_SplFixedArray.write_dimension = spl_fixedarray_object_write_dimension;

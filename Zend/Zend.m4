@@ -133,13 +133,13 @@ dnl
 AC_DEFUN([ZEND_INIT], [dnl
 AC_REQUIRE([AC_PROG_CC])
 
-AC_CHECK_HEADERS(m4_normalize([
+AC_CHECK_HEADERS([
   cpuid.h
   libproc.h
-]))
+])
 
 dnl Check for library functions.
-AC_CHECK_FUNCS(m4_normalize([
+AC_CHECK_FUNCS([
   getpid
   gettid
   kill
@@ -148,9 +148,10 @@ AC_CHECK_FUNCS(m4_normalize([
   pthread_attr_getstack
   pthread_get_stackaddr_np
   pthread_getattr_np
+  pthread_getthrds_np
   pthread_stackseg_np
   strnlen
-]))
+])
 
 AC_CHECK_DECL([clock_gettime_nsec_np],
   [AC_DEFINE([HAVE_CLOCK_GETTIME_NSEC_NP], [1],
@@ -317,6 +318,7 @@ int emu(const opcode_handler_t *ip, void *fp) {
   while ((*ip)());
   FP = orig_fp;
   IP = orig_ip;
+  return 0;
 }], [])],
   [php_cv_have_global_register_vars=yes],
   [php_cv_have_global_register_vars=no])
@@ -329,6 +331,24 @@ AS_VAR_IF([php_cv_have_global_register_vars], [yes],
 ])
 AC_MSG_CHECKING([whether to enable global register variables support])
 AC_MSG_RESULT([$ZEND_GCC_GLOBAL_REGS])
+
+dnl GCC doesn't propagate -ffixed-* from LTO objects. Reserve the VM registers
+dnl before LTO code gen to avoid "global register variable follows a function definition"
+AS_VAR_IF([ZEND_GCC_GLOBAL_REGS], [yes], [
+  zend_lto=no
+  for zend_flag in $CC $CFLAGS $LDFLAGS; do
+    AS_CASE([$zend_flag], [-flto|-flto=*], [zend_lto=yes], [-fno-lto], [zend_lto=no])
+  done
+  AS_VAR_IF([zend_lto], [yes], [
+    AS_CASE([$host_cpu],
+      [x86_64*|amd64*], [AS_VAR_APPEND([LDFLAGS], [" -ffixed-r14 -ffixed-r15"])],
+      [x86*|amd*|i?86*|pentium], [AS_VAR_APPEND([LDFLAGS], [" -ffixed-esi -ffixed-edi"])],
+      [aarch64*|arm64*], [AS_VAR_APPEND([LDFLAGS], [" -ffixed-x27 -ffixed-x28"])],
+      [ppc64*|powerpc64*], [AS_VAR_APPEND([LDFLAGS], [" -ffixed-r14 -ffixed-r15"])],
+      [riscv64*], [AS_VAR_APPEND([LDFLAGS], [" -ffixed-x18 -ffixed-x19"])],
+      [AC_MSG_ERROR([Cannot reserve VM registers for LTO, disable LTO or use --disable-gcc-global-regs])])
+  ])
+])
 ])
 
 dnl
@@ -493,7 +513,7 @@ uintptr_t __attribute__((preserve_none,noinline,used)) fun(uintptr_t a, uintptr_
 	return (uintptr_t)const3;
 }
 
-uintptr_t __attribute__((preserve_none)) test(void) {
+uintptr_t __attribute__((preserve_none,noinline)) test(void) {
 	uintptr_t ret;
 
 #if defined(__x86_64__)
@@ -511,7 +531,7 @@ uintptr_t __attribute__((preserve_none)) test(void) {
 #endif
 		: "=a" (ret)
 		: "r" (const1), "r" (const2), "r" (key)
-		: "r12", "r13"
+		: "r12", "r13", "memory", "cc"
 	);
 #elif defined(__aarch64__)
 	__asm__ __volatile__(
@@ -527,7 +547,7 @@ uintptr_t __attribute__((preserve_none)) test(void) {
 		"mov    %0, x0\n"
 		: "=r" (ret)
 		: "r" (const1), "r" (const2), "r" (key)
-		: "x0", "x21", "x22", "x30"
+		: "x0", "x20", "x21", "x30", "memory", "cc"
 	);
 #else
 # error

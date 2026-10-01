@@ -9,9 +9,9 @@ dom
 <?php
 try {
     $fragment = new DOMDocumentFragment("root");
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-DOMDocumentFragment::__construct() expects exactly 0 arguments, 1 given
+ArgumentCountError: DOMDocumentFragment::__construct() expects exactly 0 arguments, 1 given

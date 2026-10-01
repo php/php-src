@@ -139,7 +139,14 @@ $o = zend_object_init_with_constructor("TestUserWithConstructorNoParams");
 var_dump($o);
 unset($o);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Returning a value from a constructor is deprecated in %s on line %d
+
+Deprecated: Returning a value from a constructor is deprecated in %s on line %d
+
+Deprecated: Returning a value from a constructor is deprecated in %s on line %d
+
+Deprecated: Returning a value from a constructor is deprecated in %s on line %d
 Testing impossible initializations
 Error: Cannot instantiate interface _ZendTestInterface
 Error: Cannot instantiate trait _ZendTestTrait
@@ -152,14 +159,14 @@ Testing param passing
 ArgumentCountError: Too few arguments to function TestUserWithConstructorArgs::__construct(), 0 passed and exactly 2 expected
 TypeError: TestUserWithConstructorArgs::__construct(): Argument #1 ($int_param) must be of type int, string given
 Error: Unknown named parameter $unused_param
-object(TestUserWithConstructorArgs)#1 (0) {
+object(TestUserWithConstructorArgs)#%d (0) {
 }
 Destructor for TestUserWithConstructorArgs
 Passing too many args to constructor
-object(TestUserWithConstructorArgs)#1 (0) {
+object(TestUserWithConstructorArgs)#%d (0) {
 }
 Destructor for TestUserWithConstructorArgs
 Testing class with defined constructor and no params
-object(TestUserWithConstructorNoParams)#1 (0) {
+object(TestUserWithConstructorNoParams)#%d (0) {
 }
 Destructor for TestUserWithConstructorNoParams

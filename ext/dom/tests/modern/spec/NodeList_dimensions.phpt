@@ -14,8 +14,8 @@ foreach ($test_values as $value) {
     echo "--- ", json_encode($value), " ---\n";
     try {
         var_dump($children[$value] ? $children[$value]->nodeName : "N/A", isset($children[$value]), empty($children[$value]));
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -58,9 +58,9 @@ string(1) "b"
 bool(true)
 bool(false)
 --- true ---
-Cannot access offset of type bool on Dom\NodeList
+TypeError: Cannot access offset of type bool on Dom\NodeList
 --- null ---
-Cannot access offset of type null on Dom\NodeList
+TypeError: Cannot access offset of type null on Dom\NodeList
 --- "0" ---
 string(1) "a"
 bool(true)
@@ -70,6 +70,6 @@ string(1) "b"
 bool(true)
 bool(false)
 --- "" ---
-Cannot access offset of type string on Dom\NodeList
+TypeError: Cannot access offset of type string on Dom\NodeList
 --- "foo" ---
-Cannot access offset of type string on Dom\NodeList
+TypeError: Cannot access offset of type string on Dom\NodeList

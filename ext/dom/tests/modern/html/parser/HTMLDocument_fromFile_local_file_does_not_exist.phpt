@@ -10,7 +10,7 @@ echo $dom->saveHtml(), "\n";
 
 ?>
 --EXPECTF--
-Warning: Dom\HTMLDocument::createFromFile(%s): Failed to open stream: No such file or directory in %s on line %d
+Warning: Dom\HTMLDocument::createFromFile(): Failed to open stream: No such file or directory in %s on line %d
 
 Fatal error: Uncaught Exception: Cannot open file '%s' in %s:%d
 Stack trace:

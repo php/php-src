@@ -54,14 +54,14 @@ var_dump($avg);
 try {
     $xpath->registerPHPFunctions('non_existent');
     $avg = $xpath->evaluate('number(php:function("non_existent", //def:testnode))');
-} catch (\Error $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $xpath->registerPhpFunctions(['non_existant']);
     $avg = $xpath->evaluate('number(php:function("non_existent", //def:testnode))');
-} catch (\Error $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
@@ -69,5 +69,5 @@ myval
 float(1)
 bool(true)
 float(4)
-DOMXPath::registerPhpFunctions(): Argument #1 ($restrict) must be a callable, function "non_existent" not found or invalid function name
-DOMXPath::registerPhpFunctions(): Argument #1 ($restrict) must be an array with valid callbacks as values, function "non_existant" not found or invalid function name
+TypeError: DOMXPath::registerPhpFunctions(): Argument #1 ($restrict) must be a callable, function "non_existent" not found or invalid function name
+TypeError: DOMXPath::registerPhpFunctions(): Argument #1 ($restrict) must be an array with valid callbacks as values, function "non_existant" not found or invalid function name

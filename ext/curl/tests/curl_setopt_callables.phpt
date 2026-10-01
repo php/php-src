@@ -27,6 +27,7 @@ testOption($ch, CURLOPT_FNMATCH_FUNCTION);
 testOption($ch, CURLOPT_WRITEFUNCTION);
 testOption($ch, CURLOPT_HEADERFUNCTION);
 testOption($ch, CURLOPT_READFUNCTION);
+testOption($ch, CURLOPT_SEEKFUNCTION);
 
 ?>
 --EXPECT--
@@ -42,3 +43,5 @@ TypeError: curl_setopt(): Argument #3 ($value) must be a valid callback for opti
 TypeError: curl_setopt_array(): Argument #2 ($options) must be a valid callback for option CURLOPT_HEADERFUNCTION, function "undefined" not found or invalid function name
 TypeError: curl_setopt(): Argument #3 ($value) must be a valid callback for option CURLOPT_READFUNCTION, function "undefined" not found or invalid function name
 TypeError: curl_setopt_array(): Argument #2 ($options) must be a valid callback for option CURLOPT_READFUNCTION, function "undefined" not found or invalid function name
+TypeError: curl_setopt(): Argument #3 ($value) must be a valid callback for option CURLOPT_SEEKFUNCTION, function "undefined" not found or invalid function name
+TypeError: curl_setopt_array(): Argument #2 ($options) must be a valid callback for option CURLOPT_SEEKFUNCTION, function "undefined" not found or invalid function name

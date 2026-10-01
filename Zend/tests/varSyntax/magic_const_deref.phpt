@@ -8,8 +8,8 @@ function test() {
     var_dump(__FUNCTION__->prop);
     try {
         __FUNCTION__->method();
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -21,4 +21,4 @@ string(1) "t"
 
 Warning: Attempt to read property "prop" on string in %s on line %d
 NULL
-Call to a member function method() on string
+Error: Call to a member function method() on string

@@ -16,7 +16,7 @@ var_dump($zip->close());
 try {
     $phar = new PharData(__DIR__ . '/73809.zip');
 } catch (Exception $ex) {
-    echo $ex->getMessage(), PHP_EOL;
+    echo $ex::class, ': ', $ex->getMessage(), PHP_EOL;
 }
 ?>
 --CLEAN--
@@ -25,4 +25,4 @@ try {
 ?>
 --EXPECTF--
 bool(true)
-phar error: signatures larger than 64 KiB are not supported in zip-based phar "%s"
+UnexpectedValueException: phar error: signatures larger than 64 KiB are not supported in zip-based phar "%s"

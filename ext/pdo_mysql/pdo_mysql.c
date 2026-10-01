@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: George Schlossnagle <george@omniti.com>                      |
   |         Johannes Schlueter <johannes@mysql.com>                      |
@@ -57,31 +55,6 @@ ZEND_DECLARE_MODULE_GLOBALS(pdo_mysql)
 #   define PDO_MYSQL_UNIX_ADDR NULL
 #  endif
 # endif
-#endif
-
-#ifdef PDO_USE_MYSQLND
-#include "ext/mysqlnd/mysqlnd_reverse_api.h"
-static MYSQLND * pdo_mysql_convert_zv_to_mysqlnd(zval * zv)
-{
-	if (Z_TYPE_P(zv) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zv), php_pdo_get_dbh_ce())) {
-		pdo_dbh_t * dbh = Z_PDO_DBH_P(zv);
-
-		ZEND_ASSERT(dbh);
-
-		if (dbh->driver != &pdo_mysql_driver) {
-			php_error_docref(NULL, E_WARNING, "Provided PDO instance is not using MySQL but %s", dbh->driver->driver_name);
-			return NULL;
-		}
-
-		return ((pdo_mysql_db_handle *)dbh->driver_data)->server;
-	}
-	return NULL;
-}
-
-static const MYSQLND_REVERSE_API pdo_mysql_reverse_api = {
-	&pdo_mysql_module_entry,
-	pdo_mysql_convert_zv_to_mysqlnd
-};
 #endif
 
 /* Returns the number of SQL warnings during the execution of the last statement */
@@ -146,10 +119,6 @@ static PHP_MINIT_FUNCTION(pdo_mysql)
 #endif
 #if MYSQL_VERSION_ID >= 80021 || defined(PDO_USE_MYSQLND)
 	REGISTER_PDO_MYSQL_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_LOCAL_INFILE_DIRECTORY", (zend_long)PDO_MYSQL_ATTR_LOCAL_INFILE_DIRECTORY);
-#endif
-
-#ifdef PDO_USE_MYSQLND
-	mysqlnd_reverse_api_register_api(&pdo_mysql_reverse_api);
 #endif
 
 	pdo_mysql_ce = register_class_Pdo_Mysql(pdo_dbh_ce);

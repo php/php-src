@@ -28,7 +28,7 @@ echo file_get_contents($alias . '/internal/file/here');
 try {
 $tar = opendir($alias . '/');
 } catch (Exception $e) {
-echo $e->getMessage()."\n";
+echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 while (false !== ($v = readdir($tar))) {

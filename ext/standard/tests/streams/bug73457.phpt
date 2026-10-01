@@ -19,5 +19,5 @@ $ds=file_get_contents($path);
 var_dump($ds);
 ?>
 --EXPECTF--
-Warning: file_get_contents(ftp://127.0.0.1:%d/bug73457): Failed to open stream: Failed to set up data channel: %s in %s on line %d
+Warning: file_get_contents(): Failed to open stream: Failed to set up data channel: %s in %s on line %d
 bool(false)

@@ -1,15 +1,13 @@
 // Utils for configure script
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Wez Furlong <wez@thebrainroom.com>                           |
   +----------------------------------------------------------------------+
@@ -60,6 +58,7 @@ var MINRE2C = "1.0.3";
 
 /* Store the enabled extensions (summary + QA check) */
 var extensions_enabled = new Array();
+var cxx_mode_targets = {};
 
 /* Store the SAPI enabled (summary + QA check) */
 var sapi_enabled = new Array();
@@ -95,10 +94,10 @@ if (typeof(CWD) == "undefined") {
 if (!MODE_PHPIZE) {
 	/* defaults; we pick up the precise versions from configure.ac */
 	var PHP_VERSION = 8;
-	var PHP_MINOR_VERSION = 6;
+	var PHP_MINOR_VERSION = 7;
 	var PHP_RELEASE_VERSION = 0;
 	var PHP_EXTRA_VERSION = "";
-	var PHP_VERSION_STRING = "8.6.0";
+	var PHP_VERSION_STRING = "8.7.0";
 }
 
 /* Get version numbers and DEFINE as a string */
@@ -1462,12 +1461,16 @@ function ZEND_EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 	extensions_enabled[extensions_enabled.length - 1][2] = true;
 }
 
-function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
+function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir, cxx_mode)
 {
 	var objs = null;
 	var EXT = extname.toUpperCase();
 	var extname_for_printing;
 	var ldflags;
+
+	if (cxx_mode) {
+		cxx_mode_targets[extname] = true;
+	}
 
 	if (shared == null) {
 		if (force_all_shared()) {
@@ -1496,6 +1499,9 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 		ADD_FLAG("CFLAGS_PHP", "/D COMPILE_DL_" + EXT);
 	} else {
 		STDOUT.WriteLine("Enabling extension " + extname_for_printing);
+		/* Statically linked extensions share the engine's _tsrm_ls_cache symbol,
+		 * so in ZTS builds they can read the TSRMLS cache directly. */
+		cflags = "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 " + cflags;
 	}
 
 	MFO.WriteBlankLines(1);
@@ -1619,6 +1625,11 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 
 	sym = target.toUpperCase() + "_GLOBAL_OBJS";
 	flags = "CFLAGS_" + target.toUpperCase() + '_OBJ';
+	var c_flags = ICC_TOOLSET ? " /Qstd=c17" : " /std:c17";
+	if (VS_TOOLSET) {
+		c_flags += " /experimental:c11atomics";
+	}
+	var cxx_flags = " $(CXXFLAGS_" + target.toUpperCase() + ")";
 
 	var bd = get_define('BUILD_DIR');
 	var respd = bd + '\\resp';
@@ -1784,7 +1795,7 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 						"--library=win32\\build\\cppcheck.cfg " +
 						"--library=" + cppcheck_lib + " " +
 						/* "--rule-file=win32\build\cppcheck_rules.xml " + */
-						" --std=c89 --std=c++11 " +
+						" --std=c17 --std=c++11 " +
 						"--quiet --inconclusive --template=vs -j 4 " +
 						"--suppress=unmatchedSuppression " +
 						"--suppressions-list=win32\\build\\cppcheck_suppress.txt ";
@@ -1803,30 +1814,43 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 					var _tmp = src.split("\\");
 					var filename = _tmp.pop();
 					obj = filename.replace(re, ".obj");
+					var lang_flags = cxx_mode_targets[target] || !/\.c$/i.test(src) ? cxx_flags : c_flags;
+					var analyzer_lang_flags = lang_flags.replace(")", "_ANALYZER)");
 
-					MFO.WriteLine("\t" + CMD_MOD1 + "$(CC) $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " /Fo" + sub_build + d + obj);
+					MFO.WriteLine("\t" + CMD_MOD1 + "$(CC)" + lang_flags + " $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " /Fo" + sub_build + d + obj);
 
 					if ("clang" == PHP_ANALYZER) {
-						MFO.WriteLine("\t" + CMD_MOD1 + "\"$(CLANG_CL)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + dir + "\\" + src);
+						MFO.WriteLine("\t" + CMD_MOD1 + "\"$(CLANG_CL)\"" + analyzer_lang_flags + " " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + dir + "\\" + src);
 					} else if ("cppcheck" == PHP_ANALYZER) {
 						MFO.WriteLine("\t\"" + CMD_MOD1 + "$(CPPCHECK)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + analyzer_base_flags + " " + dir + "\\" + src);
 					}else if (PHP_ANALYZER == "pvs") {
-						MFO.WriteLine("\t" + CMD_MOD1 + "\"$(PVS_STUDIO)\" --cl-params $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " --source-file "  + dir + "\\" + src
+						MFO.WriteLine("\t" + CMD_MOD1 + "\"$(PVS_STUDIO)\" --cl-params" + lang_flags + " $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " --source-file "  + dir + "\\" + src
 							+ " --cfg PVS-Studio.conf --errors-off \"V122 V117 V111\" ");
 					}
 				}
 			} else {
 				/* TODO create a response file at least for the source files to work around the cmd line length limit. */
 				var src_line = "";
+				var src_lines = ["", ""];
 				for (var j in srcs_by_dir[k]) {
-					src_line += dir + "\\" + file_list[srcs_by_dir[k][j]] + " ";
+					var source = file_list[srcs_by_dir[k][j]];
+					var source_path = dir + "\\" + source + " ";
+					src_line += source_path;
+					src_lines[!cxx_mode_targets[target] && /\.c$/i.test(source) ? 0 : 1] += source_path;
 				}
 
-				MFO.WriteLine("\t" + CMD_MOD1 + "$(CC) $(" + flags + ") $(CFLAGS) /Fo" + sub_build + d + " $(" + bd_flags_name + ") /c " + src_line);
+				for (var language = 0; language < src_lines.length; language++) {
+					if (src_lines[language]) {
+						var lang_flags = language == 0 ? c_flags : cxx_flags;
+						MFO.WriteLine("\t" + CMD_MOD1 + "$(CC)" + lang_flags + " $(" + flags + ") $(CFLAGS) /Fo" + sub_build + d + " $(" + bd_flags_name + ") /c " + src_lines[language]);
+						if ("clang" == PHP_ANALYZER) {
+							var analyzer_lang_flags = lang_flags.replace(")", "_ANALYZER)");
+							MFO.WriteLine("\t\"$(CLANG_CL)\"" + analyzer_lang_flags + " " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + src_lines[language]);
+						}
+					}
+				}
 
-				if ("clang" == PHP_ANALYZER) {
-					MFO.WriteLine("\t\"$(CLANG_CL)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER)  $(" + bd_flags_name + "_ANALYZER) " + src_line);
-				} else if ("cppcheck" == PHP_ANALYZER) {
+				if ("cppcheck" == PHP_ANALYZER) {
 					MFO.WriteLine("\t\"$(CPPCHECK)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER)  $(" + bd_flags_name + "_ANALYZER) " + analyzer_base_flags + " " + src_line);
 				}
 			}
@@ -2523,7 +2547,7 @@ function handle_analyzer_makefile_flags(fd, key, val)
 		return;
 	}
 
-	if (key.match("CFLAGS")) {
+	if (key.match(/C(?:XX)?FLAGS/)) {
 		var new_val = val;
 		var reg = /\$\(([^\)]+)\)/g;
 		var r;
@@ -3133,7 +3157,7 @@ function toolset_get_compiler_version()
 
 	if (VS_TOOLSET) {
 		version = probe_binary(PHP_CL).substr(0, 5).replace('.', '');
-		if (version < 1920) {
+		if (version < 1950) {
 			ERROR("Building with MSC_VER " + version + " is no longer supported");
 		}
 		return version;
@@ -3177,7 +3201,7 @@ function toolset_get_compiler_name(short)
 		version = probe_binary(PHP_CL).substr(0, 5).replace('.', '');
 
 		if (version >= 1950) {
-			// skip
+			name = short ? "VS18" : "Visual C++ 2026";
 		} else if (version >= 1930) {
 			name = short ? "VS17" : "Visual C++ 2022";
 		} else if (version >= 1920) {
@@ -3363,7 +3387,7 @@ function toolset_setup_common_cflags()
 
 		ADD_FLAG("CFLAGS", "/Zc:wchar_t");
 	} else if (CLANG_TOOLSET) {
-		ADD_FLAG("CFLAGS", "-Wno-deprecated-declarations");
+		ADD_FLAG("CFLAGS", "-Wno-deprecated-declarations -Wno-microsoft-enum-forward-reference");
 		if (TARGET_ARCH == 'x86') {
 			ADD_FLAG('CFLAGS', '-m32');
 		} else {
@@ -3376,6 +3400,10 @@ function toolset_setup_common_cflags()
 
 		var vc_ver = probe_binary(PATH_PROG('cl', null));
 		ADD_FLAG("CFLAGS"," -fms-compatibility -fms-compatibility-version=" + vc_ver + " -fms-extensions");
+
+        if (CLANGVERS >= 1900 && TARGET_ARCH === 'x64') {
+            AC_DEFINE('HAVE_PRESERVE_NONE', 1, 'Whether the compiler supports __attribute__((preserve_none))');
+        }
 	}
 
 	if (!CLANG_TOOLSET) {
@@ -3397,24 +3425,25 @@ function toolset_setup_intrinsic_cflags()
 	/* From oldest to newest. */
 	var scale = new Array("sse", "sse2", "sse3", "ssse3", "sse4.1", "sse4.2", "avx", "avx2", "avx512");
 
-	if (VS_TOOLSET) {
-		if ("disabled" == PHP_NATIVE_INTRINSICS) {
-			ERROR("Can't enable intrinsics, --with-codegen-arch passed with an incompatible option. ")
-		}
+	if ("disabled" == PHP_NATIVE_INTRINSICS) {
+        ERROR("Can't enable intrinsics, --with-codegen-arch passed with an incompatible option. ")
+	}
 
-		if (TARGET_ARCH == 'arm64') {
-			/* arm64 supports neon */
-			configure_subst.Add("PHP_SIMD_SCALE", 'NEON');
-			/* all officially supported arm64 cpu supports crc32 (TODO: to be confirmed) */
-			AC_DEFINE('HAVE_ARCH64_CRC32', 1);
-			return;
-		}
+	if (TARGET_ARCH == 'arm64') {
+		/* arm64 supports neon */
+		configure_subst.Add("PHP_SIMD_SCALE", 'NEON');
+		/* all officially supported arm64 cpu supports crc32 (TODO: to be confirmed) */
+		AC_DEFINE('HAVE_ARCH64_CRC32', 1);
+		return;
+	}
 
-		if ("no" == PHP_NATIVE_INTRINSICS || "yes" == PHP_NATIVE_INTRINSICS) {
-			PHP_NATIVE_INTRINSICS = default_enabled;
-		}
+    // if --enable-native-intrisics is not specified, it's "no" - enable default
+	if ("no" == PHP_NATIVE_INTRINSICS || "yes" == PHP_NATIVE_INTRINSICS) {
+		PHP_NATIVE_INTRINSICS = default_enabled;
+	}
 
-		if ("all" == PHP_NATIVE_INTRINSICS) {
+	if ("all" == PHP_NATIVE_INTRINSICS) {
+		if (VS_TOOLSET) {
 			var list = (new VBArray(avail.Keys())).toArray();
 
 			for (var i in list) {
@@ -3423,45 +3452,60 @@ function toolset_setup_intrinsic_cflags()
 
 			/* All means all. __AVX__, __AVX2__, and __AVX512*__ are defined by compiler. */
 			ADD_FLAG("CFLAGS","/arch:AVX512");
-			configure_subst.Add("PHP_SIMD_SCALE", "AVX512");
-		} else {
-			var list = PHP_NATIVE_INTRINSICS.split(",");
-			var j = 0;
-			for (var k = 0; k < scale.length; k++) {
-				for (var i = 0; i < list.length; i++) {
-					var it = list[i].toLowerCase();
-					if (scale[k] == it) {
-						j = k > j ? k : j;
-					} else if (!avail.Exists(it) && "avx512" != it && "avx2" != it && "avx" != it) {
-						WARNING("Unknown intrinsic name '" + it + "' ignored");
-					}
+		} else if (CLANG_TOOLSET) {
+			ADD_FLAG("CFLAGS","-mavx512f -mavx512cd -mavx512bw -mavx512dq -mavx512vl");
+		}
+		configure_subst.Add("PHP_SIMD_SCALE", "AVX512");
+	} else {
+		var list = PHP_NATIVE_INTRINSICS.split(",");
+		var j = 0;
+		for (var k = 0; k < scale.length; k++) {
+			for (var i = 0; i < list.length; i++) {
+				var it = list[i].toLowerCase();
+				if (scale[k] == it) {
+					j = k > j ? k : j;
+				} else if (!avail.Exists(it) && "avx512" != it && "avx2" != it && "avx" != it) {
+					WARNING("Unknown intrinsic name '" + it + "' ignored");
 				}
 			}
-			if (TARGET_ARCH == 'x86') {
-				/* SSE2 is currently the default on 32-bit. It could change later,
-					for now no need to pass it. But, if SSE only was chosen,
-					/arch:SSE is required. */
-				if ("sse" == scale[j]) {
-					ADD_FLAG("CFLAGS","/arch:SSE");
-				}
+		}
+		if (TARGET_ARCH == 'x86') {
+			/* SSE2 is currently the default on 32-bit. It could change later,
+				for now no need to pass it. But, if SSE only was chosen,
+				/arch:SSE is required. */
+			if ("sse" == scale[j]) {
+				ADD_FLAG("CFLAGS", VS_TOOLSET ? "/arch:SSE" : "-msse");
 			}
-			configure_subst.Add("PHP_SIMD_SCALE", scale[j].toUpperCase());
-			/* There is no explicit way to enable intrinsics between SSE3 and SSE4.2.
-				The declared macros therefore won't affect the code generation,
-				but will enable the guarded code parts. */
-			if ("avx512" == scale[j]) {
-				ADD_FLAG("CFLAGS","/arch:AVX512");
-				j -= 3;
-			} else if ("avx2" == scale[j]) {
-				ADD_FLAG("CFLAGS","/arch:AVX2");
-				j -= 2;
-			} else if ("avx" == scale[j]) {
-				ADD_FLAG("CFLAGS","/arch:AVX");
-				j -= 1;
-			}
+		}
+		configure_subst.Add("PHP_SIMD_SCALE", scale[j].toUpperCase());
+		if ("avx512" == scale[j]) {
+			ADD_FLAG("CFLAGS", VS_TOOLSET ? "/arch:AVX512" : "-mavx512f -mavx512cd -mavx512bw -mavx512dq -mavx512vl");
+			j -= 3;
+		} else if ("avx2" == scale[j]) {
+			ADD_FLAG("CFLAGS", VS_TOOLSET ? "/arch:AVX2" : "-mavx2");
+			j -= 2;
+		} else if ("avx" == scale[j]) {
+			ADD_FLAG("CFLAGS", VS_TOOLSET ? "/arch:AVX" : "-mavx");
+			j -= 1;
+		}
+		if (VS_TOOLSET) {
+			/* MSVC has no explicit way to enable intrinsics between SSE3 and SSE4.2.
+			   The declared macros won't affect code generation, but will enable
+			   the guarded code parts. */
 			for (var i = 0; i <= j; i++) {
 				var it = scale[i];
 				AC_DEFINE(avail.Item(it), 1);
+			}
+		} else if (CLANG_TOOLSET) {
+			/* clang supports -m flags for each SSE level and auto-defines
+			   the corresponding __SSE*__ macros. Pass the highest requested
+			   level; clang implicitly enables all lower levels. */
+			var clang_flag_map = {
+				"sse": "-msse", "sse2": "-msse2", "sse3": "-msse3",
+				"ssse3": "-mssse3", "sse4.1": "-msse4.1", "sse4.2": "-msse4.2"
+			};
+			if (clang_flag_map[scale[j]]) {
+				ADD_FLAG("CFLAGS", clang_flag_map[scale[j]]);
 			}
 		}
 	}
@@ -3502,7 +3546,7 @@ function toolset_setup_common_ldflags()
 function toolset_setup_common_libs()
 {
 	// urlmon.lib ole32.lib oleaut32.lib uuid.lib gdi32.lib winspool.lib comdlg32.lib
-	DEFINE("LIBS", "kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib Dnsapi.lib psapi.lib bcrypt.lib Pathcch.lib");
+	DEFINE("LIBS", "kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib Dnsapi.lib psapi.lib bcrypt.lib Pathcch.lib Mswsock.lib");
 }
 
 function toolset_setup_build_mode()

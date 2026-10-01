@@ -15,15 +15,15 @@ $input = "";
 try {
     var_dump( mb_strtolower($sourcestring, $input) );
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump( mb_strtoupper($sourcestring, $input) );
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-mb_strtolower(): Argument #2 ($encoding) must be a valid encoding, "" given
-mb_strtoupper(): Argument #2 ($encoding) must be a valid encoding, "" given
+ValueError: mb_strtolower(): Argument #2 ($encoding) must be a valid encoding, "" given
+ValueError: mb_strtoupper(): Argument #2 ($encoding) must be a valid encoding, "" given

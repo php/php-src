@@ -1,16 +1,14 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
-   | Authors: Niels Dossche <nielsdos@php.net>                            |
+   | Authors: Nora Dossche  <ndossche@php.net>                            |
    +----------------------------------------------------------------------+
 */
 
@@ -273,7 +271,7 @@ PHP_LIBXML_API zend_string *php_libxml_sniff_charset_from_string(const char *sta
 			/* 11.9.1. Set parameterValue to the result of collecting a sequence of code points that are not ';' */
 			size_t parameter_value_length = collect_a_sequence_of_code_points(start, end, is_not_semicolon);
 			parameter_value = zend_string_init(start, parameter_value_length, false);
-			start += parameter_name_length;
+			start += parameter_value_length;
 
 			/* 11.9.2. Remove trailing HTTP whitespace from parameterValue */
 			while (ZSTR_LEN(parameter_value) > 0 && is_http_whitespace(ZSTR_VAL(parameter_value)[ZSTR_LEN(parameter_value) - 1])) {

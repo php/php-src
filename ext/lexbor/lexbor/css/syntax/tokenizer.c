@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2025 Alexander Borisov
+ * Copyright (C) 2018-2026 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -12,9 +12,10 @@
 
 #include "lexbor/core/array.h"
 
-#define LEXBOR_STR_RES_MAP_LOWERCASE
-#include "lexbor/core/str_res.h"
 
+#ifndef LEXBOR_DISABLE_INTERNAL_EXTERN
+    LXB_EXTERN const lxb_char_t lexbor_str_res_map_lowercase[256];
+#endif
 
 static const lxb_char_t lxb_css_syntax_tokenizer_important[] = "important";
 
@@ -297,7 +298,7 @@ lxb_css_syntax_tokenizer_lookup_important_ch(lxb_css_syntax_tokenizer_t *tkz,
 {
     static const size_t length = sizeof(lxb_css_syntax_tokenizer_important) - 1;
 
-    if (!(end - p >= length
+    if (!(lxb_size(end - p) >= length
            && lexbor_str_data_ncasecmp(p, lxb_css_syntax_tokenizer_important,
                                        length)))
     {

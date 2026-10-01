@@ -13,17 +13,17 @@ printf("0x%08x 0x%08x\n",
 
 try {
     unpack("l", "foo", 10);
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     unpack("l", "foo", -1);
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
 0x01020304 0x05060708
 0x01020304 0x05060708
-unpack(): Argument #3 ($offset) must be contained in argument #2 ($data)
-unpack(): Argument #3 ($offset) must be contained in argument #2 ($data)
+ValueError: unpack(): Argument #3 ($offset) must be contained in argument #2 ($data)
+ValueError: unpack(): Argument #3 ($offset) must be contained in argument #2 ($data)

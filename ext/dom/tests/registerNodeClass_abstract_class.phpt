@@ -13,8 +13,8 @@ $dom = new DOMDocument;
 
 try {
     $dom->registerNodeClass("DOMElement", "Test");
-} catch (ValueError $e) {
-    echo "ValueError: ", $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $dom->createElement("foo");

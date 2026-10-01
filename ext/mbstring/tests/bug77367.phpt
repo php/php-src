@@ -11,5 +11,8 @@ if (!function_exists('mb_split')) die('skip mb_split() not available');
 mb_regex_encoding('UTF-8');
 var_dump(mb_split("\\w", "\xfc"));
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+
+Deprecated: Function mb_split() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 bool(false)

@@ -37,8 +37,8 @@ var_dump(touch("/no/such/file/or/directory"));
 
 try {
     touch("/no/such/file/or/directory", null, 1599492068);
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 echo "Done\n";
@@ -57,5 +57,5 @@ int(100)
 
 Warning: touch(): Unable to create file /no/such/file/or/directory because %s in %s on line %d
 bool(false)
-touch(): Argument #2 ($mtime) cannot be null when argument #3 ($atime) is an integer
+ValueError: touch(): Argument #2 ($mtime) cannot be null when argument #3 ($atime) is an integer
 Done

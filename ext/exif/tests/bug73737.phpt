@@ -8,7 +8,7 @@ exif
     var_dump($exif);
 ?>
 --EXPECTF--
-Warning: exif_thumbnail(bug73737.tiff): Process tag(x0100=ImageWidth): Cannot be empty in %s on line %d
+Warning: exif_thumbnail(): Process tag(x0100=ImageWidth): Cannot be empty in %s on line %d
 
-Warning: exif_thumbnail(bug73737.tiff): Error in TIFF: filesize(x0030) less than start of IFD dir(x10102) in %s line %d
+Warning: exif_thumbnail(): Error in TIFF: filesize(x0030) less than start of IFD dir(x10102) in %s line %d
 bool(false)

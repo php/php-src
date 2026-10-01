@@ -15,11 +15,11 @@ $x = $dom->documentElement->firstChild;
 $x->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:a', '');
 try {
     var_dump($dom->documentElement->innerHTML);
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 string(13) "<x xmlns=""/>"
-The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed

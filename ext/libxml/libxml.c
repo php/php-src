@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Shane Caraveo <shane@php.net>                               |
    |          Wez Furlong <wez@thebrainroom.com>                          |
@@ -22,7 +20,6 @@
 #include "php.h"
 #include "SAPI.h"
 
-#include "zend_attributes.h"
 #include "zend_variables.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
@@ -621,8 +618,10 @@ php_libxml_output_buffer_create_filename(const char *URI,
 	return ret;
 
 err:
-	/* Similarly to __xmlOutputBufferCreateFilename we should also close the encoder on failure. */
+#if LIBXML_VERSION < 21404
+	/* As of libxml 2.14.4, libxml closes the encoder after this callback fails. */
 	xmlCharEncCloseFunc(encoder);
+#endif
 	return NULL;
 }
 
@@ -1467,6 +1466,7 @@ PHP_LIBXML_API void php_libxml_node_decrement_resource(php_libxml_node_object *o
 				obj_node->_private = NULL;
 			}
 		}
+		object->node = NULL;
 	}
 	if (object != NULL && object->document != NULL) {
 		/* Safe to call as if the resource were freed then doc pointer is NULL */

@@ -21,10 +21,10 @@ $test->z =& $r;
 
 try {
     $r = new B;
-} catch (\TypeError $e) {
-    echo $e->getMessage(), \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot assign B to reference held by property Test::$z of type X&Z
+TypeError: Cannot assign B to reference held by property Test::$z of type X&Z

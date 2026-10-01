@@ -102,7 +102,7 @@ foreach($inputs as $key =>$value) {
       try {
         var_dump( class_uses($value, $autoload) );
       } catch (\TypeError $e) {
-          echo $e->getMessage() . \PHP_EOL;
+          echo $e::class, ': ', $e->getMessage(), PHP_EOL;
       }
 };
 
@@ -113,61 +113,61 @@ fclose($res);
 *** Testing class_uses() : variation ***
 
 --int 0--
-class_uses(): Argument #1 ($object_or_class) must be of type object|string, int given
+TypeError: class_uses(): Argument #1 ($object_or_class) must be of type object|string, int given
 
 --int 1--
-class_uses(): Argument #1 ($object_or_class) must be of type object|string, int given
+TypeError: class_uses(): Argument #1 ($object_or_class) must be of type object|string, int given
 
 --int 12345--
-class_uses(): Argument #1 ($object_or_class) must be of type object|string, int given
+TypeError: class_uses(): Argument #1 ($object_or_class) must be of type object|string, int given
 
 --int -12345--
-class_uses(): Argument #1 ($object_or_class) must be of type object|string, int given
+TypeError: class_uses(): Argument #1 ($object_or_class) must be of type object|string, int given
 
 --float 10.5--
-class_uses(): Argument #1 ($object_or_class) must be of type object|string, float given
+TypeError: class_uses(): Argument #1 ($object_or_class) must be of type object|string, float given
 
 --float -10.5--
-class_uses(): Argument #1 ($object_or_class) must be of type object|string, float given
+TypeError: class_uses(): Argument #1 ($object_or_class) must be of type object|string, float given
 
 --float 12.3456789000e10--
-class_uses(): Argument #1 ($object_or_class) must be of type object|string, float given
+TypeError: class_uses(): Argument #1 ($object_or_class) must be of type object|string, float given
 
 --float -12.3456789000e10--
-class_uses(): Argument #1 ($object_or_class) must be of type object|string, float given
+TypeError: class_uses(): Argument #1 ($object_or_class) must be of type object|string, float given
 
 --float .5--
-class_uses(): Argument #1 ($object_or_class) must be of type object|string, float given
+TypeError: class_uses(): Argument #1 ($object_or_class) must be of type object|string, float given
 
 --empty array--
-class_uses(): Argument #1 ($object_or_class) must be of type object|string, array given
+TypeError: class_uses(): Argument #1 ($object_or_class) must be of type object|string, array given
 
 --int indexed array--
-class_uses(): Argument #1 ($object_or_class) must be of type object|string, array given
+TypeError: class_uses(): Argument #1 ($object_or_class) must be of type object|string, array given
 
 --associative array--
-class_uses(): Argument #1 ($object_or_class) must be of type object|string, array given
+TypeError: class_uses(): Argument #1 ($object_or_class) must be of type object|string, array given
 
 --nested arrays--
-class_uses(): Argument #1 ($object_or_class) must be of type object|string, array given
+TypeError: class_uses(): Argument #1 ($object_or_class) must be of type object|string, array given
 
 --uppercase NULL--
-class_uses(): Argument #1 ($object_or_class) must be of type object|string, null given
+TypeError: class_uses(): Argument #1 ($object_or_class) must be of type object|string, null given
 
 --lowercase null--
-class_uses(): Argument #1 ($object_or_class) must be of type object|string, null given
+TypeError: class_uses(): Argument #1 ($object_or_class) must be of type object|string, null given
 
 --lowercase true--
-class_uses(): Argument #1 ($object_or_class) must be of type object|string, true given
+TypeError: class_uses(): Argument #1 ($object_or_class) must be of type object|string, true given
 
 --lowercase false--
-class_uses(): Argument #1 ($object_or_class) must be of type object|string, false given
+TypeError: class_uses(): Argument #1 ($object_or_class) must be of type object|string, false given
 
 --uppercase TRUE--
-class_uses(): Argument #1 ($object_or_class) must be of type object|string, true given
+TypeError: class_uses(): Argument #1 ($object_or_class) must be of type object|string, true given
 
 --uppercase FALSE--
-class_uses(): Argument #1 ($object_or_class) must be of type object|string, false given
+TypeError: class_uses(): Argument #1 ($object_or_class) must be of type object|string, false given
 
 --empty string DQ--
 Error: 2 - class_uses(): Class  does not exist and could not be loaded, %s(%d)
@@ -186,10 +186,10 @@ array(0) {
 }
 
 --undefined var--
-class_uses(): Argument #1 ($object_or_class) must be of type object|string, null given
+TypeError: class_uses(): Argument #1 ($object_or_class) must be of type object|string, null given
 
 --unset var--
-class_uses(): Argument #1 ($object_or_class) must be of type object|string, null given
+TypeError: class_uses(): Argument #1 ($object_or_class) must be of type object|string, null given
 
 --resource--
-class_uses(): Argument #1 ($object_or_class) must be of type object|string, resource given
+TypeError: class_uses(): Argument #1 ($object_or_class) must be of type object|string, resource given

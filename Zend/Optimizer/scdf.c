@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend Engine, Sparse Conditional Data Flow Propagation Framework      |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Nikita Popov <nikic@php.net>                                |
    +----------------------------------------------------------------------+
@@ -118,7 +116,7 @@ void scdf_solve(scdf_ctx *scdf, const char *name) {
 		while ((i = zend_bitset_pop_first(scdf->instr_worklist, scdf->instr_worklist_len)) >= 0) {
 			int block_num = ssa->cfg.map[i];
 			if (zend_bitset_in(scdf->executable_blocks, block_num)) {
-				zend_basic_block *block = &ssa->cfg.blocks[block_num];
+				const zend_basic_block *block = &ssa->cfg.blocks[block_num];
 				zend_op *opline = &scdf->op_array->opcodes[i];
 				zend_ssa_op *ssa_op = &ssa->ops[i];
 				if (opline->opcode == ZEND_OP_DATA) {
@@ -138,7 +136,7 @@ void scdf_solve(scdf_ctx *scdf, const char *name) {
 
 		while ((i = zend_bitset_pop_first(scdf->block_worklist, scdf->block_worklist_len)) >= 0) {
 			/* This block is now live. Interpret phis and instructions in it. */
-			zend_basic_block *block = &ssa->cfg.blocks[i];
+			const zend_basic_block *block = &ssa->cfg.blocks[i];
 			const zend_ssa_block *ssa_block = &ssa->blocks[i];
 
 			DEBUG_PRINT("Pop block %d from worklist\n", i);

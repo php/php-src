@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Georg Richter <georg@php.net>                               |
   |          Andrey Hristov <andrey@php.net>                             |
@@ -144,6 +142,8 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, bool is_real_connect, b
 	{
 		/* already connected, we should close the connection */
 		php_mysqli_close(mysql, MYSQLI_CLOSE_IMPLICIT, mysqli_resource->status);
+		/* the link is not connected anymore, even if the new connection fails */
+		mysqli_resource->status = MYSQLI_STATUS_INITIALIZED;
 	}
 
 	if (strlen(SAFE_STR(hostname)) > 2 && !strncasecmp(hostname, "p:", 2)) {
@@ -365,14 +365,14 @@ PHP_FUNCTION(mysqli_connect_error)
 /* {{{ Fetch a result row as an associative array, a numeric array, or both */
 PHP_FUNCTION(mysqli_fetch_array)
 {
-	php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 0);
+	php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
 /* {{{ Fetch a result row as an associative array */
 PHP_FUNCTION(mysqli_fetch_assoc)
 {
-	php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQLI_ASSOC, 0);
+	php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQLI_ASSOC);
 }
 /* }}} */
 
@@ -527,7 +527,52 @@ PHP_FUNCTION(mysqli_stmt_error_list)
 /* {{{ Fetch a result row as an object */
 PHP_FUNCTION(mysqli_fetch_object)
 {
-	php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQLI_ASSOC, 1);
+	zval *mysql_result;
+	zend_class_entry *ce = NULL;
+	HashTable *ctor_params = NULL;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|Ch", &mysql_result, mysqli_result_class_entry, &ce, &ctor_params) == FAILURE) {
+		RETURN_THROWS();
+	}
+	if (ce == NULL) {
+		ce = zend_standard_class_def;
+	}
+	if (UNEXPECTED(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
+		zend_throw_error(NULL, "Class %s cannot be instantiated", ZSTR_VAL(ce->name));
+		RETURN_THROWS();
+	}
+	if (!ce->constructor && ctor_params && zend_hash_num_elements(ctor_params) > 0) {
+		zend_argument_value_error(ERROR_ARG_POS(3),
+			"must be empty when the specified class (%s) does not have a constructor",
+			ZSTR_VAL(ce->name)
+		);
+		RETURN_THROWS();
+	}
+
+	MYSQL_RES *result;
+	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, MYSQLI_STATUS_VALID);
+
+	zval dataset;
+	php_mysqli_fetch_into_hash_aux(&dataset, result, MYSQLI_ASSOC);
+
+	if (Z_TYPE(dataset) == IS_ARRAY) {
+		object_init_ex(return_value, ce);
+		HashTable *prop_table = zend_symtable_to_proptable(Z_ARR(dataset));
+		zval_ptr_dtor(&dataset);
+		if (!ce->default_properties_count && !ce->__set) {
+			Z_OBJ_P(return_value)->properties = prop_table;
+		} else {
+			zend_merge_properties(return_value, prop_table);
+			zend_array_release(prop_table);
+		}
+
+		if (ce->constructor) {
+			zend_call_known_function(ce->constructor, Z_OBJ_P(return_value), Z_OBJCE_P(return_value),
+				/* retval */ NULL, /* argc */ 0, /* params */ NULL, ctor_params);
+		}
+	} else {
+		RETURN_COPY_VALUE(&dataset);
+	}
 }
 /* }}} */
 

@@ -7,7 +7,7 @@ $interval = new DateInterval('P2D');
 try {
     DatePeriod::__set_state(['start' => null, 'end' => $end, 'current' => null, 'interval' => $interval, 'recurrences' => 2, 'include_start_date' => false, 'include_end_date' => true]);
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--

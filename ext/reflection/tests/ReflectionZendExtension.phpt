@@ -14,8 +14,8 @@ var_dump($reflection->getURL());
 var_dump($reflection->getVersion() === PHP_VERSION);
 ?>
 --EXPECT--
-string(17) "Zend Technologies"
-string(13) "Copyright (c)"
+string(16) "Zend by Perforce"
+string(12) "Copyright ©"
 string(12) "Zend OPcache"
-string(20) "http://www.zend.com/"
+string(21) "https://www.zend.com/"
 bool(true)

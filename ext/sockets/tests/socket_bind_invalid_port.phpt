@@ -8,16 +8,16 @@ sockets
 
     try {
     	socket_bind($s_c, '0.0.0.0', -1);
-    } catch (\ValueError $e) {
-	    echo $e->getMessage() . PHP_EOL;
+    } catch (\Throwable $e) {
+	    echo $e::class, ': ', $e->getMessage(), "\n";
     }
 
     try {
     	socket_bind($s_c, '0.0.0.0', 65536);
-    } catch (\ValueError $e) {
-	    echo $e->getMessage() . PHP_EOL;
+    } catch (\Throwable $e) {
+	    echo $e::class, ': ', $e->getMessage(), "\n";
     }
 ?>
 --EXPECT--
-socket_bind(): Argument #3 ($port) must be between 0 and 65535
-socket_bind(): Argument #3 ($port) must be between 0 and 65535
+ValueError: socket_bind(): Argument #3 ($port) must be between 0 and 65535
+ValueError: socket_bind(): Argument #3 ($port) must be between 0 and 65535

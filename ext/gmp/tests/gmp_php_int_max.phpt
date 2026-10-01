@@ -4,7 +4,7 @@ PHP_INT_MAX tests
 gmp
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE != 8) print "skip";
+if (PHP_INT_SIZE != 8) die("skip");
 ?>
 --FILE--
 <?php

@@ -9,10 +9,10 @@ sockets
 var_dump(socket_strerror(-2147483648));
 try {
 	socket_strerror(2147483648);
-} catch (\ValueError $e) {
-	echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
 string(%d) "%S"
-socket_strerror(): Argument #1 ($error_code) must be between %i and %d
+ValueError: socket_strerror(): Argument #1 ($error_code) must be between %i and %d

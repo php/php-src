@@ -60,6 +60,6 @@ echo $dom->saveXML(), "\n";
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <style xmlns="http://www.w3.org/1999/xhtml">&lt;p&gt;foo&lt;/p&gt;</style>
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<style xmlns="urn:a"><p xmlns="">foo</p></style>
+<style xmlns="urn:a"><p xmlns="http://www.w3.org/1999/xhtml">foo</p></style>
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <textarea xmlns="http://www.w3.org/1999/xhtml">&lt;/textarea&gt;�--&gt;</textarea>

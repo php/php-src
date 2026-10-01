@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Jim Winstead <jimw@php.net>                                 |
    |          Stig Sæther Bakken <ssb@php.net>                            |
@@ -24,6 +22,7 @@
 #include "zend_exceptions.h"
 #include "zend_multiply.h"
 #include "zend_portability.h"
+#include "zend_strtod.h"
 
 #include <float.h>
 #include <math.h>
@@ -170,6 +169,10 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 	if (!zend_finite(value) || value == 0.0) {
 		return value;
 	}
+
+	if (places == 0 && value == trunc(value)) {
+        return value;
+    }
 
 	places = places < INT_MIN+1 ? INT_MIN+1 : places;
 
@@ -861,9 +864,9 @@ PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
 	e = s + ZSTR_LEN(str);
 
 	/* Skip leading whitespace */
-	while (s < e && isspace(*s)) s++;
+	while (s < e && isspace((unsigned char)*s)) s++;
 	/* Skip trailing whitespace */
-	while (s < e && isspace(*(e-1))) e--;
+	while (s < e && isspace((unsigned char)e[-1])) e--;
 
 	if (e - s >= 2) {
 		if (base == 16 && s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) s += 2;
@@ -900,6 +903,7 @@ PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
 				num = num * base + c;
 				break;
 			} else {
+				zend_error(E_NOTICE, "Input number is larger than PHP_INT_MAX, precision has been lost in conversion");
 				fnum = (double)num;
 				mode = 1;
 			}
@@ -1003,7 +1007,7 @@ PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base)
 	if (Z_TYPE_P(arg) == IS_DOUBLE) {
 		double fvalue = floor(Z_DVAL_P(arg)); /* floor it just in case */
 		char *ptr, *end;
-		char buf[(sizeof(double) << 3) + 1];
+		char buf[ZEND_DOUBLE_MAX_LENGTH];
 
 		/* Don't try to convert +/- infinity */
 		if (fvalue == ZEND_INFINITY || fvalue == -ZEND_INFINITY) {
@@ -1176,7 +1180,7 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, const char *de
 	tmpbuf = strpprintf(0, "%.*F", dec, d);
 	if (tmpbuf == NULL) {
 		return NULL;
-	} else if (!isdigit((int)ZSTR_VAL(tmpbuf)[0])) {
+	} else if (!isdigit((unsigned char)ZSTR_VAL(tmpbuf)[0])) {
 		return tmpbuf;
 	}
 
@@ -1416,6 +1420,11 @@ PHP_FUNCTION(number_format)
 		thousand_sep_len = 1;
 	}
 
+	if (UNEXPECTED(dec > INT_MAX || dec < INT_MIN)) {
+		zend_argument_value_error(2, "must be between %d and %d", INT_MIN, INT_MAX);
+		RETURN_THROWS();
+	}
+
 	switch (Z_TYPE_P(num)) {
 		case IS_LONG:
 			RETURN_STR(_php_math_number_format_long(Z_LVAL_P(num), dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
@@ -1430,11 +1439,7 @@ PHP_FUNCTION(number_format)
 				RETURN_STR(_php_math_number_format_long((zend_long)Z_DVAL_P(num), dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
 			}
 
-			if (dec >= 0) {
-				dec_int = ZEND_LONG_INT_OVFL(dec) ? INT_MAX : (int)dec;
-			} else {
-				dec_int = ZEND_LONG_INT_UDFL(dec) ? INT_MIN : (int)dec;
-			}
+			dec_int = (int) dec;
 			RETURN_STR(_php_math_number_format_ex(Z_DVAL_P(num), dec_int, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
 
 		default: ZEND_UNREACHABLE();

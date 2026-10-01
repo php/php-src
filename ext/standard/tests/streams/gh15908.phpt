@@ -26,8 +26,8 @@ stream_wrapper_register("test", "TestStream");
 $f = fopen("test://", "r");
 try {
     file_put_contents(__DIR__."/gh15908.tmp", $f, FILE_USE_INCLUDE_PATH, $f);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --CLEAN--
@@ -35,4 +35,4 @@ try {
 @unlink(__DIR__."/gh15908.tmp");
 ?>
 --EXPECT--
-file_put_contents(): supplied resource is not a valid Stream-Context resource
+TypeError: file_put_contents(): supplied resource is not a valid Stream-Context resource

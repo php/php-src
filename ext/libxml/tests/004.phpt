@@ -17,8 +17,8 @@ $ctxs = array(
 foreach ($ctxs as $ctx) {
     try {
         var_dump(libxml_set_streams_context($ctx));
-    } catch (TypeError $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     $dom = new DOMDocument();
     var_dump($dom->load(__DIR__.'/test.xml'));
@@ -28,15 +28,15 @@ echo "Done\n";
 
 ?>
 --EXPECT--
-libxml_set_streams_context(): Argument #1 ($context) must be of type resource, null given
+TypeError: libxml_set_streams_context(): Argument #1 ($context) must be of type resource, null given
 bool(true)
-libxml_set_streams_context(): Argument #1 ($context) must be of type resource, string given
+TypeError: libxml_set_streams_context(): Argument #1 ($context) must be of type resource, string given
 bool(true)
-libxml_set_streams_context(): Argument #1 ($context) must be of type resource, int given
+TypeError: libxml_set_streams_context(): Argument #1 ($context) must be of type resource, int given
 bool(true)
-libxml_set_streams_context(): Argument #1 ($context) must be of type resource, stdClass given
+TypeError: libxml_set_streams_context(): Argument #1 ($context) must be of type resource, stdClass given
 bool(true)
-libxml_set_streams_context(): Argument #1 ($context) must be of type resource, array given
+TypeError: libxml_set_streams_context(): Argument #1 ($context) must be of type resource, array given
 bool(true)
 NULL
 bool(true)

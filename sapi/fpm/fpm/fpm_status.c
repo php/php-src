@@ -380,44 +380,44 @@ int fpm_status_handle_request(void) /* {{{ */
 			time_format = "%s";
 
 			short_syntax =
-				"# HELP phpfpm_up Could pool %s using a %s PM on PHP-FPM be reached?\n"
 				"# TYPE phpfpm_up gauge\n"
+				"# HELP phpfpm_up Could pool %s using a %s PM on PHP-FPM be reached?\n"
 				"phpfpm_up 1\n"
-				"# HELP phpfpm_start_since The number of seconds since FPM has started.\n"
 				"# TYPE phpfpm_start_since counter\n"
+				"# HELP phpfpm_start_since The number of seconds since FPM has started.\n"
 				"phpfpm_start_since %lu\n"
-				"# HELP phpfpm_accepted_connections The number of requests accepted by the pool.\n"
 				"# TYPE phpfpm_accepted_connections counter\n"
+				"# HELP phpfpm_accepted_connections The number of requests accepted by the pool.\n"
 				"phpfpm_accepted_connections %lu\n"
-				"# HELP phpfpm_listen_queue The number of requests in the queue of pending connections.\n"
 				"# TYPE phpfpm_listen_queue gauge\n"
+				"# HELP phpfpm_listen_queue The number of requests in the queue of pending connections.\n"
 				"phpfpm_listen_queue %d\n"
-				"# HELP phpfpm_max_listen_queue The maximum number of requests in the queue of pending connections since FPM has started.\n"
 				"# TYPE phpfpm_max_listen_queue counter\n"
+				"# HELP phpfpm_max_listen_queue The maximum number of requests in the queue of pending connections since FPM has started.\n"
 				"phpfpm_max_listen_queue %d\n"
 				"# TYPE phpfpm_listen_queue_length gauge\n"
 				"# HELP phpfpm_listen_queue_length The size of the socket queue of pending connections.\n"
 				"phpfpm_listen_queue_length %u\n"
-				"# HELP phpfpm_idle_processes The number of idle processes.\n"
 				"# TYPE phpfpm_idle_processes gauge\n"
+				"# HELP phpfpm_idle_processes The number of idle processes.\n"
 				"phpfpm_idle_processes %d\n"
-				"# HELP phpfpm_active_processes The number of active processes.\n"
 				"# TYPE phpfpm_active_processes gauge\n"
+				"# HELP phpfpm_active_processes The number of active processes.\n"
 				"phpfpm_active_processes %d\n"
-				"# HELP phpfpm_total_processes The number of idle + active processes.\n"
 				"# TYPE phpfpm_total_processes gauge\n"
+				"# HELP phpfpm_total_processes The number of idle + active processes.\n"
 				"phpfpm_total_processes %d\n"
-				"# HELP phpfpm_max_active_processes The maximum number of active processes since FPM has started.\n"
 				"# TYPE phpfpm_max_active_processes counter\n"
+				"# HELP phpfpm_max_active_processes The maximum number of active processes since FPM has started.\n"
 				"phpfpm_max_active_processes %d\n"
-				"# HELP phpfpm_max_children_reached The number of times, the process limit has been reached, when pm tries to start more children (works only for pm 'dynamic' and 'ondemand').\n"
 				"# TYPE phpfpm_max_children_reached counter\n"
+				"# HELP phpfpm_max_children_reached The number of times, the process limit has been reached, when pm tries to start more children (works only for pm 'dynamic' and 'ondemand').\n"
 				"phpfpm_max_children_reached %u\n"
-				"# HELP phpfpm_slow_requests The number of requests that exceeded your 'request_slowlog_timeout' value.\n"
 				"# TYPE phpfpm_slow_requests counter\n"
+				"# HELP phpfpm_slow_requests The number of requests that exceeded your 'request_slowlog_timeout' value.\n"
 				"phpfpm_slow_requests %lu\n"
-				"# HELP phpfpm_memory_peak The memory usage peak since FPM has started.\n"
 				"# TYPE phpfpm_memory_peak gauge\n"
+				"# HELP phpfpm_memory_peak The memory usage peak since FPM has started.\n"
 				"phpfpm_memory_peak %zu\n"
 				"# EOF\n";
 
@@ -522,8 +522,8 @@ int fpm_status_handle_request(void) /* {{{ */
 		if (full_syntax) {
 			unsigned int i;
 			int first;
-			zend_string *tmp_query_string;
-			char *query_string;
+			zend_string *tmp_query_string, *tmp_request_uri_string;
+			char *query_string, *request_uri_string;
 			struct timeval duration, now;
 			float cpu;
 
@@ -548,13 +548,36 @@ int fpm_status_handle_request(void) /* {{{ */
 					}
 				}
 
+				request_uri_string = NULL;
+				tmp_request_uri_string = NULL;
+				if (proc->request_uri[0] != '\0') {
+					if (encode_html) {
+						tmp_request_uri_string = php_escape_html_entities_ex(
+								(const unsigned char *) proc->request_uri,
+								strlen(proc->request_uri), 1, ENT_DISALLOWED | ENT_HTML_DOC_XML1 | ENT_COMPAT,
+								NULL, /* double_encode */ 1, /* quiet */ 0);
+						request_uri_string = ZSTR_VAL(tmp_request_uri_string);
+					} else if (encode_json) {
+						tmp_request_uri_string = php_json_encode_string(proc->request_uri,
+								strlen(proc->request_uri), PHP_JSON_INVALID_UTF8_IGNORE);
+						request_uri_string = ZSTR_VAL(tmp_request_uri_string);
+						/* remove quotes around the string */
+						if (ZSTR_LEN(tmp_request_uri_string) >= 2) {
+							request_uri_string[ZSTR_LEN(tmp_request_uri_string) - 1] = '\0';
+							++request_uri_string;
+						}
+					} else {
+						request_uri_string = proc->request_uri;
+					}
+				}
+
 				query_string = NULL;
 				tmp_query_string = NULL;
 				if (proc->query_string[0] != '\0') {
 					if (encode_html) {
 						tmp_query_string = php_escape_html_entities_ex(
 								(const unsigned char *) proc->query_string,
-								strlen(proc->query_string), 1, ENT_HTML_IGNORE_ERRORS & ENT_COMPAT,
+								strlen(proc->query_string), 1, ENT_DISALLOWED | ENT_HTML_DOC_XML1 | ENT_COMPAT,
 								NULL, /* double_encode */ 1, /* quiet */ 0);
 					} else if (encode_json) {
 						tmp_query_string = php_json_encode_string(proc->query_string,
@@ -593,7 +616,7 @@ int fpm_status_handle_request(void) /* {{{ */
 					proc->requests,
 					(unsigned long) (duration.tv_sec * 1000000UL + duration.tv_usec),
 					proc->request_method[0] != '\0' ? proc->request_method : "-",
-					proc->request_uri[0] != '\0' ? proc->request_uri : "-",
+					request_uri_string ? request_uri_string : "-",
 					query_string ? "?" : "",
 					query_string ? query_string : "",
 					proc->content_length,
@@ -604,6 +627,9 @@ int fpm_status_handle_request(void) /* {{{ */
 				PUTS(buffer);
 				efree(buffer);
 
+				if (tmp_request_uri_string) {
+					zend_string_free(tmp_request_uri_string);
+				}
 				if (tmp_query_string) {
 					zend_string_free(tmp_query_string);
 				}

@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Go Kudo <zeriyoshi@php.net>                                  |
    +----------------------------------------------------------------------+
@@ -510,7 +508,6 @@ PHP_METHOD(Random_Randomizer, __unserialize)
 	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
 	HashTable *d;
 	zval *members_zv;
-	zval *zengine;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ARRAY_HT(d);
@@ -533,12 +530,7 @@ PHP_METHOD(Random_Randomizer, __unserialize)
 		RETURN_THROWS();
 	}
 
-	zengine = zend_read_property(randomizer->std.ce, &randomizer->std, "engine", strlen("engine"), 1, NULL);
-	if (Z_TYPE_P(zengine) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(zengine), random_ce_Random_Engine)) {
-		zend_throw_exception(NULL, "Invalid serialization data for Random\\Randomizer object", 0);
-		RETURN_THROWS();
-	}
-
+	zval *zengine = zend_read_property(randomizer->std.ce, &randomizer->std, "engine", strlen("engine"), /* silent */ true, NULL);
 	randomizer_common_init(randomizer, Z_OBJ_P(zengine));
 }
 /* }}} */

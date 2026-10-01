@@ -20,8 +20,8 @@ var_dump(ini_get('user_agent'));
 
 try {
     ini_set('foo', []);
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -31,4 +31,4 @@ string(1) "1"
 string(0) ""
 string(1) "6"
 string(4) "3.14"
-ini_set(): Argument #2 ($value) must be of type string|int|float|bool|null
+TypeError: ini_set(): Argument #2 ($value) must be of type string|int|float|bool|null

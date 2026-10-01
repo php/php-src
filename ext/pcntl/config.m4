@@ -9,7 +9,7 @@ if test "$PHP_PCNTL" != "no"; then
       [AC_MSG_FAILURE([ext/pcntl: required function $function() not found.])])
   done
 
-  AC_CHECK_FUNCS(m4_normalize([
+  AC_CHECK_FUNCS([
     forkx
     getcpuid
     getpriority
@@ -26,7 +26,7 @@ if test "$PHP_PCNTL" != "no"; then
     waitid
     wait6
     syscall
-  ]))
+  ])
 
   AC_CHECK_FUNCS([WIFCONTINUED],,
     [AC_CHECK_DECL([WIFCONTINUED], [AC_DEFINE([HAVE_WIFCONTINUED], [1])],,
@@ -67,9 +67,6 @@ int main(void) {
   AS_VAR_IF([php_cv_func_sched_getcpu], [yes],
     [AC_DEFINE([HAVE_SCHED_GETCPU], [1],
       [Define to 1 if the 'sched_getcpu' function is properly supported.])])
-
-  AC_CHECK_TYPE([siginfo_t], [PCNTL_CFLAGS="-DHAVE_STRUCT_SIGINFO_T"],,
-    [#include <signal.h>])
 
   PHP_NEW_EXTENSION([pcntl],
     [pcntl.c php_signal.c],

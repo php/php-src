@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Christian Stocker <chregu@php.net>                          |
    |          Rob Richards <rrichards@php.net>                            |
@@ -156,6 +154,7 @@ static xmlAttrPtr dom_element_reflected_attribute_write(dom_object *obj, zval *n
 
 	/* Typed property, so it is a string already */
 	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING);
+	php_libxml_invalidate_node_list_cache(obj->document);
 	return xmlSetNsProp(nodep, NULL, (const xmlChar *) name, (const xmlChar *) Z_STRVAL_P(newval));
 }
 
@@ -466,6 +465,8 @@ PHP_METHOD(DOMElement, setAttribute)
 					break;
 				case XML_NAMESPACE_DECL:
 					RETURN_FALSE;
+				case XML_ATTRIBUTE_DECL:
+					break;
 				default: ZEND_UNREACHABLE();
 			}
 		}
@@ -542,7 +543,7 @@ out:
 	efree(worklist);
 }
 
-static bool dom_remove_attribute(xmlNodePtr thisp, xmlNodePtr attrp)
+static bool dom_remove_attribute(xmlNodePtr thisp, xmlNodePtr attrp, php_libxml_ref_obj *document)
 {
 	ZEND_ASSERT(thisp != NULL);
 	ZEND_ASSERT(attrp != NULL);
@@ -593,8 +594,11 @@ static bool dom_remove_attribute(xmlNodePtr thisp, xmlNodePtr attrp)
 
 			break;
 		}
+		case XML_ATTRIBUTE_DECL:
+			return false;
 		default: ZEND_UNREACHABLE();
 	}
+	php_libxml_invalidate_node_list_cache(document);
 	return true;
 }
 
@@ -620,7 +624,7 @@ PHP_METHOD(DOMElement, removeAttribute)
 		RETURN_FALSE;
 	}
 
-	RETURN_BOOL(dom_remove_attribute(nodep, attrp));
+	RETURN_BOOL(dom_remove_attribute(nodep, attrp, intern->document));
 }
 
 PHP_METHOD(Dom_Element, removeAttribute)
@@ -638,7 +642,7 @@ PHP_METHOD(Dom_Element, removeAttribute)
 
 	attrp = dom_get_attribute_or_nsdecl(intern, nodep, BAD_CAST name, name_len);
 	if (attrp != NULL) {
-		dom_remove_attribute(nodep, attrp);
+		dom_remove_attribute(nodep, attrp, intern->document);
 	}
 }
 /* }}} end dom_element_remove_attribute */
@@ -718,11 +722,17 @@ static void dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAMETERS, 
 	nsp = attrp->ns;
 	if (use_ns && nsp != NULL) {
 		existattrp = xmlHasNsProp(nodep, attrp->name, nsp->href);
+	} else if (nsp == NULL) {
+		existattrp = xmlHasNsProp(nodep, attrp->name, NULL);
 	} else {
 		existattrp = xmlHasProp(nodep, attrp->name);
 	}
 
-	if (existattrp != NULL && existattrp->type != XML_ATTRIBUTE_DECL) {
+	if (existattrp != NULL && existattrp->type == XML_ATTRIBUTE_DECL) {
+		existattrp = NULL;
+	}
+
+	if (existattrp != NULL) {
 		if ((oldobj = php_dom_object_get_data((xmlNodePtr) existattrp)) != NULL &&
 			((php_libxml_node_ptr *)oldobj->ptr)->node == (xmlNodePtr) attrp)
 		{
@@ -790,6 +800,7 @@ static void dom_element_remove_attribute_node(INTERNAL_FUNCTION_PARAMETERS, zend
 		RETURN_FALSE;
 	}
 
+	php_libxml_invalidate_node_list_cache(intern->document);
 	xmlUnlinkNode((xmlNodePtr) attrp);
 
 	DOM_RET_OBJ((xmlNodePtr) attrp, intern);
@@ -1049,6 +1060,10 @@ static void dom_set_attribute_ns_modern(dom_object *intern, xmlNodePtr elemp, ze
 	if (errorcode == 0) {
 		php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(intern);
 		xmlNsPtr ns = php_dom_libxml_ns_mapper_get_ns_raw_prefix_string(ns_mapper, prefix, xmlStrlen(prefix), uri);
+		xmlNodePtr existing = (xmlNodePtr) xmlHasNsProp(elemp, localname, ns == NULL ? NULL : ns->href);
+		if (existing != NULL && existing->type != XML_ATTRIBUTE_DECL) {
+			node_list_unlink(existing->children);
+		}
 		xmlAttrPtr attr = xmlSetNsProp(elemp, ns, localname, BAD_CAST value);
 		if (UNEXPECTED(attr == NULL)) {
 			php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
@@ -1186,6 +1201,7 @@ PHP_METHOD(DOMElement, removeAttributeNS)
 		if (nsptr != NULL) {
 			if (xmlStrEqual(BAD_CAST uri, nsptr->href)) {
 				dom_eliminate_ns(nodep, nsptr);
+				php_libxml_invalidate_node_list_cache(intern->document);
 			} else {
 				return;
 			}
@@ -1200,6 +1216,7 @@ PHP_METHOD(DOMElement, removeAttributeNS)
 		} else {
 			xmlUnlinkNode((xmlNodePtr) attrp);
 		}
+		php_libxml_invalidate_node_list_cache(intern->document);
 	}
 }
 /* }}} end dom_element_remove_attribute_ns */
@@ -1935,8 +1952,7 @@ PHP_METHOD(DOMElement, toggleAttribute)
 
 	/* Step 5 */
 	if (force_is_null || !force) {
-		dom_remove_attribute(thisp, attribute);
-		retval = false;
+		retval = !dom_remove_attribute(thisp, attribute, intern->document);
 		goto out;
 	}
 

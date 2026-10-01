@@ -10,9 +10,9 @@ $r = new ResourceBundle('en_US', BUNDLE);
 try {
     $r->__construct('en_US', BUNDLE);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-ResourceBundle object is already constructed
+Error: ResourceBundle object is already constructed

@@ -58,9 +58,13 @@ function base64_encode_var_dump($regs) {
 echo "Done";
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing mb_ereg() : usage variations ***
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 Regex encoding set to utf-8
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 bool(true)
 array(5) {
   [0]=>
@@ -74,6 +78,8 @@ array(5) {
   [4]=>
   string(4) "ODk="
 }
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 bool(true)
 array(5) {
   [0]=>

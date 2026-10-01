@@ -30,7 +30,7 @@ try {
     // This one should fail
     var_dump($db->querySingle('CREATE TABLE test (a, b);'));
 } catch (\Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -38,4 +38,4 @@ try {
 Trampoline for authorizer
 int(1)
 Trampoline for authorizer
-Unable to prepare statement: not authorized
+SQLite3Exception: Unable to prepare statement: not authorized

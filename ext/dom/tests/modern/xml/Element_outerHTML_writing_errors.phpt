@@ -8,18 +8,18 @@ dom
 $dom = Dom\XMLDocument::createFromString('<root/>');
 try {
     $dom->documentElement->outerHTML = '<x/>';
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $dom = Dom\XMLDocument::createFromString('<root><child/></root>');
 try {
     $dom->documentElement->firstChild->outerHTML = '<!DOCTYPE html>';
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Invalid Modification Error
-XML fragment is not well-formed
+DOMException: Invalid Modification Error
+DOMException: XML fragment is not well-formed

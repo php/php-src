@@ -69,10 +69,14 @@ function base64_encode_var_dump($regs) {
 echo "Done";
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing mb_ereg() : usage variations ***
 
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
 -- Iteration 1 --
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 bool(true)
 array(1) {
   [0]=>
@@ -80,6 +84,8 @@ array(1) {
 }
 
 -- Iteration 2 --
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 bool(true)
 array(1) {
   [0]=>
@@ -87,6 +93,8 @@ array(1) {
 }
 
 -- Iteration 3 --
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 bool(true)
 array(1) {
   [0]=>
@@ -94,12 +102,18 @@ array(1) {
 }
 
 -- Iteration 4 --
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 bool(false)
 
 -- Iteration 5 --
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 bool(false)
 
 -- Iteration 6 --
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 bool(true)
 array(1) {
   [0]=>
@@ -107,6 +121,8 @@ array(1) {
 }
 
 -- Iteration 7 --
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 bool(true)
 array(1) {
   [0]=>
@@ -114,9 +130,13 @@ array(1) {
 }
 
 -- Iteration 8 --
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 bool(false)
 
 -- Iteration 9 --
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 bool(true)
 array(1) {
   [0]=>
@@ -124,6 +144,8 @@ array(1) {
 }
 
 -- Iteration 10 --
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 bool(true)
 array(1) {
   [0]=>
@@ -131,12 +153,18 @@ array(1) {
 }
 
 -- Iteration 11 --
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 bool(false)
 
 -- Iteration 12 --
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 bool(false)
 
 -- Iteration 13 --
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 bool(true)
 array(1) {
   [0]=>

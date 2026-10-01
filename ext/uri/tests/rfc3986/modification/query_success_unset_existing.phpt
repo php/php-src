@@ -1,7 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - query - unsetting existing
---EXTENSIONS--
-uri
+Test Uri\Rfc3986\Uri::withQuery() - success - unsetting existing
 --FILE--
 <?php
 

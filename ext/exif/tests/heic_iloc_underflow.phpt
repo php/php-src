@@ -15,5 +15,5 @@ var_dump(exif_read_data(__DIR__."/heic_iloc_underflow.heic"));
 @unlink(__DIR__."/heic_iloc_underflow.heic");
 ?>
 --EXPECTF--
-Warning: exif_read_data(heic_iloc_underflow.heic): Invalid HEIF file in %s on line %d
+Warning: exif_read_data(): Invalid HEIF file in %s on line %d
 bool(false)

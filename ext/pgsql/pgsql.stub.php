@@ -490,9 +490,6 @@ namespace {
      */
     function pg_jit(?PgSql\Connection $connection = null): array {}
 
-#ifdef HAVE_PG_SERVICE
-    function pg_service(?PgSql\Connection $connection = null): string {}
-#endif
     /**
      * @param PgSql\Connection|string $connection
      * @refcount 1
@@ -956,7 +953,7 @@ namespace {
     function pg_set_chunked_rows_size(PgSql\Connection $connection, int $size): bool {}
 #endif
 #ifdef HAVE_PG_CLOSE_STMT
-    function pg_close_stmt(Pgsql\Connection $connection, string $statement_name): PgSql\Result|false {}
+    function pg_close_stmt(PgSql\Connection $connection, string $statement_name): PgSql\Result|false {}
 #endif
 }
 

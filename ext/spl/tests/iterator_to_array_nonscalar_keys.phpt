@@ -15,7 +15,7 @@ function gen() {
 try {
     var_dump(iterator_to_array(gen()));
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -23,4 +23,4 @@ try {
 Deprecated: Implicit conversion from float 2.5 to int loses precision in %s on line %d
 
 Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
-Cannot access offset of type array on array
+TypeError: Cannot access offset of type array on array

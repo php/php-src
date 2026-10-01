@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Zeev Suraski <zeev@php.net>                                 |
    |          Jouni Ahto <jouni.ahto@exdec.fi>                            |
@@ -37,7 +35,6 @@
 #include "php_pgsql.h"
 #include "php_globals.h"
 #include "zend_exceptions.h"
-#include "zend_attributes.h"
 #include "zend_interfaces.h"
 #include "php_network.h"
 
@@ -153,9 +150,7 @@ static int le_plink;
 static zend_class_entry *pgsql_link_ce, *pgsql_result_ce, *pgsql_lob_ce;
 static zend_object_handlers pgsql_link_object_handlers, pgsql_result_object_handlers, pgsql_lob_object_handlers;
 
-static inline pgsql_link_handle *pgsql_link_from_obj(zend_object *obj) {
-	return (pgsql_link_handle *)((char *)(obj) - XtOffsetOf(pgsql_link_handle, std));
-}
+#define pgsql_link_from_obj(obj) ZEND_CONTAINER_OF(obj, pgsql_link_handle, std)
 
 #define Z_PGSQL_LINK_P(zv) pgsql_link_from_obj(Z_OBJ_P(zv))
 
@@ -209,9 +204,7 @@ static void pgsql_link_free_obj(zend_object *obj)
 	zend_object_std_dtor(&link->std);
 }
 
-static inline pgsql_result_handle *pgsql_result_from_obj(zend_object *obj) {
-	return (pgsql_result_handle *)((char *)(obj) - XtOffsetOf(pgsql_result_handle, std));
-}
+#define pgsql_result_from_obj(obj) ZEND_CONTAINER_OF(obj, pgsql_result_handle, std)
 
 #define Z_PGSQL_RESULT_P(zv) pgsql_result_from_obj(Z_OBJ_P(zv))
 
@@ -246,9 +239,7 @@ static void pgsql_result_free_obj(zend_object *obj)
 	zend_object_std_dtor(&pg_result->std);
 }
 
-static inline pgLofp *pgsql_lob_from_obj(zend_object *obj) {
-	return (pgLofp *)((char *)(obj) - XtOffsetOf(pgLofp, std));
-}
+#define pgsql_lob_from_obj(obj) ZEND_CONTAINER_OF(obj, pgLofp, std)
 
 #define Z_PGSQL_LOB_P(zv) pgsql_lob_from_obj(Z_OBJ_P(zv))
 
@@ -456,19 +447,14 @@ static int PQsocketPoll(int socket, int read, int write, time_t timeout)
 	if (!read && !write)
 		return 0;
 
-	php_pollfd fd;
-	int ts = -1;
-
-	fd.fd = socket;
-	fd.events = POLLERR;
-	fd.revents = 0;
+	int ts = -1, events = 0;
 
 	if (read) {
-		fd.events |= POLLIN;
+		events |= POLLIN;
 	}
 
 	if (write) {
-		fd.events |= POLLOUT;
+		events |= POLLOUT;
 	}
 
 	if (timeout != (time_t)ts) {
@@ -481,7 +467,7 @@ static int PQsocketPoll(int socket, int read, int write, time_t timeout)
 		}
 	}
 
-	return php_poll2(&fd, 1, ts);
+	return php_pollfd_for_ms(socket, events, ts);
 }
 #endif
 
@@ -576,7 +562,7 @@ PHP_MINIT_FUNCTION(pgsql)
 	pgsql_link_ce->default_object_handlers = &pgsql_link_object_handlers;
 
 	memcpy(&pgsql_link_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	pgsql_link_object_handlers.offset = XtOffsetOf(pgsql_link_handle, std);
+	pgsql_link_object_handlers.offset = offsetof(pgsql_link_handle, std);
 	pgsql_link_object_handlers.free_obj = pgsql_link_free_obj;
 	pgsql_link_object_handlers.get_constructor = pgsql_link_get_constructor;
 	pgsql_link_object_handlers.clone_obj = NULL;
@@ -587,7 +573,7 @@ PHP_MINIT_FUNCTION(pgsql)
 	pgsql_result_ce->default_object_handlers = &pgsql_result_object_handlers;
 
 	memcpy(&pgsql_result_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	pgsql_result_object_handlers.offset = XtOffsetOf(pgsql_result_handle, std);
+	pgsql_result_object_handlers.offset = offsetof(pgsql_result_handle, std);
 	pgsql_result_object_handlers.free_obj = pgsql_result_free_obj;
 	pgsql_result_object_handlers.get_constructor = pgsql_result_get_constructor;
 	pgsql_result_object_handlers.clone_obj = NULL;
@@ -598,7 +584,7 @@ PHP_MINIT_FUNCTION(pgsql)
 	pgsql_lob_ce->default_object_handlers = &pgsql_lob_object_handlers;
 
 	memcpy(&pgsql_lob_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	pgsql_lob_object_handlers.offset = XtOffsetOf(pgLofp, std);
+	pgsql_lob_object_handlers.offset = offsetof(pgLofp, std);
 	pgsql_lob_object_handlers.free_obj = pgsql_lob_free_obj;
 	pgsql_lob_object_handlers.get_constructor = pgsql_lob_get_constructor;
 	pgsql_lob_object_handlers.clone_obj = NULL;
@@ -922,7 +908,6 @@ PHP_FUNCTION(pg_close)
 #define PHP_PG_HOST 6
 #define PHP_PG_VERSION 7
 #define PHP_PG_JIT 8
-#define PHP_PG_SERVICE 9
 
 /* php_pgsql_get_link_info */
 static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
@@ -1007,12 +992,6 @@ static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type
 			PQclear(res);
 			return;
 		}
-#if defined(HAVE_PG_SERVICE)
-		case PHP_PG_SERVICE: {
-			result = PQservice(pgsql);
-			break;
-		}
-#endif
 		default: ZEND_UNREACHABLE();
 	}
 	if (result) {
@@ -1068,13 +1047,6 @@ PHP_FUNCTION(pg_jit)
 {
 	php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_JIT);
 }
-
-#if defined(HAVE_PG_SERVICE)
-PHP_FUNCTION(pg_service)
-{
-	php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_SERVICE);
-}
-#endif
 
 /* Returns the value of a server parameter */
 PHP_FUNCTION(pg_parameter_status)
@@ -1230,7 +1202,7 @@ PHP_FUNCTION(pg_query)
 
 /* The char pointer MUST refer to the char* of a zend_string struct */
 static void php_pgsql_zend_string_release_from_char_pointer(char *ptr) {
-	zend_string_release((zend_string*) (ptr - XtOffsetOf(zend_string, val)));
+	zend_string_release((zend_string*) (ptr - offsetof(zend_string, val)));
 }
 
 static void _php_pgsql_free_params(char **params, uint32_t num_params)
@@ -2131,26 +2103,17 @@ PHP_FUNCTION(pg_fetch_object)
 		ce = zend_standard_class_def;
 	}
 
-	if (!ce->constructor && ctor_params && zend_hash_num_elements(ctor_params) > 0) {
-		zend_argument_value_error(3,
-			"must be empty when the specified class (%s) does not have a constructor",
-			ZSTR_VAL(ce->name)
-		);
+	if (UNEXPECTED(object_init_ex(return_value, ce) == FAILURE)) {
 		RETURN_THROWS();
 	}
 
 	zval dataset;
 	if (UNEXPECTED(!php_pgsql_fetch_hash(&dataset, result, row, row_is_null, PGSQL_ASSOC))) {
 		/* Either an exception is thrown, or we return false */
+		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
 
-	// TODO: Check CE is an instantiable class earlier?
-	zend_result obj_initialized = object_init_ex(return_value, ce);
-	if (UNEXPECTED(obj_initialized == FAILURE)) {
-		zval_ptr_dtor(&dataset);
-		RETURN_THROWS();
-	}
 	if (!ce->default_properties_count && !ce->__set) {
 		Z_OBJ_P(return_value)->properties = Z_ARR(dataset);
 	} else {
@@ -2158,10 +2121,32 @@ PHP_FUNCTION(pg_fetch_object)
 		zval_ptr_dtor(&dataset);
 	}
 
-	// TODO: Need to grab constructor via object handler as this allows instantiating internal objects with overridden get_constructor
-	if (ce->constructor) {
-		zend_call_known_function(ce->constructor, Z_OBJ_P(return_value), Z_OBJCE_P(return_value),
+	zend_object *obj = Z_OBJ_P(return_value);
+	const zend_class_entry *old = EG(fake_scope);
+	EG(fake_scope) = ce;
+	zend_function *constructor = obj->handlers->get_constructor(obj);
+	EG(fake_scope) = old;
+
+	if (UNEXPECTED(EG(exception))) {
+		/* visibility error or override refused - VM dtors return_value */
+		return;
+	}
+
+	if (UNEXPECTED(!constructor && ctor_params && zend_hash_num_elements(ctor_params) > 0)) {
+		zend_argument_value_error(4,
+			"must be empty when the specified class (%s) does not have a constructor",
+			ZSTR_VAL(ce->name)
+		);
+		RETURN_THROWS();
+	}
+
+	if (constructor) {
+		zend_call_known_function(constructor, obj, ce,
 			/* retval */ NULL, /* argc */ 0, /* params */ NULL, ctor_params);
+		if (EG(exception)) {
+			zend_object_store_ctor_failed(obj);
+			RETURN_THROWS();
+		}
 	}
 }
 /* }}} */
@@ -2831,7 +2816,7 @@ PHP_FUNCTION(pg_lo_write)
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_OBJECT_OF_CLASS(pgsql_id, pgsql_lob_ce)
-		Z_PARAM_PATH_STR(str)
+		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG_OR_NULL(z_len, z_len_is_null)
 	ZEND_PARSE_PARAMETERS_END();
@@ -3427,15 +3412,13 @@ static zend_result pgsql_copy_from_query(PGconn *pgsql, PGresult *pgsql_result, 
 	}
 
 	int result;
-	if (ZSTR_LEN(tmp) > 0 && ZSTR_VAL(tmp)[ZSTR_LEN(tmp) - 1] != '\n') {
-		char *zquery = emalloc(ZSTR_LEN(tmp) + 2);
-		memcpy(zquery, ZSTR_VAL(tmp), ZSTR_LEN(tmp));
-		zquery[ZSTR_LEN(tmp)] = '\n';
-		zquery[ZSTR_LEN(tmp) + 1] = '\0';
+	if (ZSTR_LEN(tmp) == 0 || zend_string_ends_with_literal(tmp, "\n")) {
+		result = PQputCopyData(pgsql, ZSTR_VAL(tmp), ZSTR_LEN(tmp));
+	} else {
+		char *zquery = zend_cstr_append_char(
+			ZSTR_VAL(tmp), ZSTR_LEN(tmp), '\n');
 		result = PQputCopyData(pgsql, zquery, ZSTR_LEN(tmp) + 1);
 		efree(zquery);
-	} else {
-		result = PQputCopyData(pgsql, ZSTR_VAL(tmp), ZSTR_LEN(tmp));
 	}
 
 	zend_tmp_string_release(tmp_tmp);
@@ -4841,7 +4824,7 @@ static int php_pgsql_convert_match(const zend_string *str, zend_string *regex)
  */
 static zend_string *php_pgsql_add_quotes(zend_string *src)
 {
-	return zend_string_concat3("E'", strlen("E'"), ZSTR_VAL(src), ZSTR_LEN(src), "'", strlen("'"));
+	return zend_string_concat3("'", strlen("'"), ZSTR_VAL(src), ZSTR_LEN(src), "'", strlen("'"));
 }
 /* }}} */
 
@@ -5112,7 +5095,6 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 							zend_string *str;
 							/* PostgreSQL ignores \0 */
 							str = zend_string_alloc(Z_STRLEN_P(val) * 2, 0);
-							/* better to use PGSQLescapeLiteral since PGescapeStringConn does not handle special \ */
 							ZSTR_LEN(str) = PQescapeStringConn(pg_link, ZSTR_VAL(str),
 									Z_STRVAL_P(val), Z_STRLEN_P(val), &escape_err);
 							if (escape_err) {
@@ -5743,8 +5725,9 @@ PHP_FUNCTION(pg_insert)
 	}
 
 	if (option & ~(PGSQL_CONV_OPTS|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_ASYNC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)) {
-		zend_argument_value_error(4, "must be a valid bit mask of PGSQL_CONV_FORCE_NULL, PGSQL_DML_NO_CONV, "
-			"PGSQL_DML_ESCAPE, PGSQL_DML_EXEC, PGSQL_DML_ASYNC, and PGSQL_DML_STRING");
+		zend_argument_value_error(4, "must be a valid bit mask of PGSQL_CONV_IGNORE_DEFAULT, PGSQL_CONV_FORCE_NULL, "
+			"PGSQL_CONV_IGNORE_NOT_NULL, PGSQL_DML_NO_CONV, PGSQL_DML_ESCAPE, PGSQL_DML_EXEC, PGSQL_DML_ASYNC, "
+			"and PGSQL_DML_STRING");
 		RETURN_THROWS();
 	}
 
@@ -5975,8 +5958,9 @@ PHP_FUNCTION(pg_update)
 	}
 
 	if (option & ~(PGSQL_CONV_OPTS|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)) {
-		zend_argument_value_error(5, "must be a valid bit mask of PGSQL_CONV_FORCE_NULL, PGSQL_DML_NO_CONV, "
-			"PGSQL_DML_ESCAPE, PGSQL_DML_EXEC, PGSQL_DML_ASYNC, and PGSQL_DML_STRING");
+		zend_argument_value_error(5, "must be a valid bit mask of PGSQL_CONV_IGNORE_DEFAULT, PGSQL_CONV_FORCE_NULL, "
+			"PGSQL_CONV_IGNORE_NOT_NULL, PGSQL_DML_NO_CONV, PGSQL_DML_ESCAPE, PGSQL_DML_EXEC, "
+			"and PGSQL_DML_STRING");
 		RETURN_THROWS();
 	}
 
@@ -6007,7 +5991,7 @@ PHP_PGSQL_API zend_result php_pgsql_delete(PGconn *pg_link, const zend_string *t
 	ZEND_ASSERT(pg_link != NULL);
 	ZEND_ASSERT(table != NULL);
 	ZEND_ASSERT(Z_TYPE_P(ids_array) == IS_ARRAY);
-	ZEND_ASSERT(!(opt & ~(PGSQL_CONV_FORCE_NULL|PGSQL_DML_EXEC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)));
+	ZEND_ASSERT(!(opt & ~(PGSQL_CONV_FORCE_NULL|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)));
 
 	if (zend_hash_num_elements(Z_ARRVAL_P(ids_array)) == 0) {
 		return FAILURE;
@@ -6077,7 +6061,7 @@ PHP_FUNCTION(pg_delete)
 
 	if (option & ~(PGSQL_CONV_FORCE_NULL|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)) {
 		zend_argument_value_error(4, "must be a valid bit mask of PGSQL_CONV_FORCE_NULL, PGSQL_DML_NO_CONV, "
-			"PGSQL_DML_ESCAPE, PGSQL_DML_EXEC, PGSQL_DML_ASYNC, and PGSQL_DML_STRING");
+			"PGSQL_DML_ESCAPE, PGSQL_DML_EXEC, and PGSQL_DML_STRING");
 		RETURN_THROWS();
 	}
 

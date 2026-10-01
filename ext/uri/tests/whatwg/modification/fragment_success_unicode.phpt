@@ -1,7 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - fragment - unicode characters
---EXTENSIONS--
-uri
+Test Uri\WhatWg\Url::withFragment() - success - Unicode characters
 --FILE--
 <?php
 

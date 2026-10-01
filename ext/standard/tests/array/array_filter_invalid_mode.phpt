@@ -6,7 +6,7 @@ Test array_filter() function : usage variations - mode exception
 try {
     var_dump(array_filter([], mode: 999));
 } catch (Throwable $e) {
-    echo $e::class . ': '.$e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done"

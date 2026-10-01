@@ -3,7 +3,7 @@ Test session_set_cookie_params() function : basic functionality
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --FILE--
 <?php
 
@@ -15,7 +15,7 @@ var_dump(session_set_cookie_params(3600));
 var_dump(session_start());
 var_dump(session_set_cookie_params(1800));
 var_dump(session_destroy());
-var_dump(session_set_cookie_params(1234567890));
+var_dump(session_set_cookie_params(1000000000));
 
 echo "Done";
 ob_end_flush();

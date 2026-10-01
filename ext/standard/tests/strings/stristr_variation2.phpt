@@ -56,8 +56,8 @@ foreach($inputs as $input) {
   echo "-- Iteration $count --\n";
   try {
     var_dump( stristr("Hello World", $input) );
-  } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+  } catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
   }
   $count ++;
 }
@@ -82,11 +82,11 @@ bool(false)
 -- Iteration 7 --
 bool(false)
 -- Iteration 8 --
-stristr(): Argument #2 ($needle) must be of type string, array given
+TypeError: stristr(): Argument #2 ($needle) must be of type string, array given
 -- Iteration 9 --
-stristr(): Argument #2 ($needle) must be of type string, array given
+TypeError: stristr(): Argument #2 ($needle) must be of type string, array given
 -- Iteration 10 --
-stristr(): Argument #2 ($needle) must be of type string, array given
+TypeError: stristr(): Argument #2 ($needle) must be of type string, array given
 -- Iteration 11 --
 bool(false)
 -- Iteration 12 --
@@ -98,4 +98,4 @@ string(11) "Hello World"
 -- Iteration 15 --
 bool(false)
 -- Iteration 16 --
-stristr(): Argument #2 ($needle) must be of type string, resource given
+TypeError: stristr(): Argument #2 ($needle) must be of type string, resource given

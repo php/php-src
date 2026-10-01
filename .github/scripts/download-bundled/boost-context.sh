@@ -5,7 +5,7 @@ cd "$(dirname "$0")/../../.."
 tmp_dir=/tmp/php-src-download-bundled/boost-context
 rm -rf "$tmp_dir"
 
-revision=refs/tags/boost-1.86.0
+revision=refs/tags/boost-1.91.0
 
 git clone --depth 1 --revision="$revision" https://github.com/boostorg/context.git "$tmp_dir"
 
@@ -16,12 +16,14 @@ cd Zend/asm
 
 # remove unneeded files
 rm jump_arm_aapcs_pe_armasm.asm
+rm jump_arm64_aapcs_pe_armclang.S
 rm jump_i386_ms_pe_clang_gas.S
 rm jump_i386_ms_pe_gas.asm
 rm jump_i386_x86_64_sysv_macho_gas.S
 rm jump_ppc32_ppc64_sysv_macho_gas.S
 rm jump_x86_64_ms_pe_clang_gas.S
 rm make_arm_aapcs_pe_armasm.asm
+rm make_arm64_aapcs_pe_armclang.S
 rm make_i386_ms_pe_clang_gas.S
 rm make_i386_ms_pe_gas.asm
 rm make_i386_x86_64_sysv_macho_gas.S

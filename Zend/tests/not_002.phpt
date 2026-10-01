@@ -8,8 +8,8 @@ $b = array(1,2);
 
 try {
     var_dump(~$b);
-} catch (Error $e) {
-    echo "\nException: " . $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $a = ~$b;
@@ -18,7 +18,7 @@ var_dump($a);
 echo "Done\n";
 ?>
 --EXPECTF--
-Exception: Cannot perform bitwise not on array
+TypeError: Cannot perform bitwise not on array
 
 Fatal error: Uncaught TypeError: Cannot perform bitwise not on array in %s:%d
 Stack trace:

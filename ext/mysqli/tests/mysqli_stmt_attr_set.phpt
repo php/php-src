@@ -36,8 +36,7 @@ require_once 'skipifconnectfailure.inc';
     // MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH
     //
     // expecting max_length not to be set and be 0 in all cases
-    $stmt = mysqli_stmt_init($link);
-    $stmt->prepare("SELECT label FROM test");
+    $stmt = $link->prepare("SELECT label FROM test");
     $stmt->execute();
     $stmt->store_result();
     $res = $stmt->result_metadata();
@@ -50,8 +49,7 @@ require_once 'skipifconnectfailure.inc';
     $stmt->close();
 
     // MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH is no longer supported, expect no change in behavior.
-    $stmt = mysqli_stmt_init($link);
-    $stmt->prepare("SELECT label FROM test");
+    $stmt = $link->prepare("SELECT label FROM test");
     var_dump($stmt->attr_set(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, 1));
     $res = $stmt->attr_get(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH);
     if ($res !== 1)
@@ -68,8 +66,7 @@ require_once 'skipifconnectfailure.inc';
     $stmt->close();
 
     // expecting max_length not to be set
-    $stmt = mysqli_stmt_init($link);
-    $stmt->prepare("SELECT label FROM test");
+    $stmt = $link->prepare("SELECT label FROM test");
     $stmt->attr_set(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, 0);
     $res = $stmt->attr_get(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH);
     if ($res !== 0)
@@ -90,8 +87,7 @@ require_once 'skipifconnectfailure.inc';
     //
 
 
-    $stmt = mysqli_stmt_init($link);
-    $stmt->prepare("SELECT id, label FROM test");
+    $stmt = $link->prepare("SELECT id, label FROM test");
 
     // Invalid cursor type
     try {
@@ -108,8 +104,7 @@ require_once 'skipifconnectfailure.inc';
 
     $stmt->close();
 
-    $stmt = mysqli_stmt_init($link);
-    $stmt->prepare("SELECT id, label FROM test");
+    $stmt = $link->prepare("SELECT id, label FROM test");
     $stmt->execute();
     $id = $label = NULL;
     $stmt->bind_result($id, $label);
@@ -120,8 +115,7 @@ require_once 'skipifconnectfailure.inc';
     if (empty($results))
         printf("[015] Results should not be empty, subsequent tests will probably fail!\n");
 
-    $stmt = mysqli_stmt_init($link);
-    $stmt->prepare("SELECT id, label FROM test");
+    $stmt = $link->prepare("SELECT id, label FROM test");
     if (true !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, MYSQLI_CURSOR_TYPE_NO_CURSOR)))
         printf("[016] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
     $stmt->execute();
@@ -137,8 +131,7 @@ require_once 'skipifconnectfailure.inc';
         var_dump($results2);
     }
 
-    $stmt = mysqli_stmt_init($link);
-    $stmt->prepare("SELECT id, label FROM test");
+    $stmt = $link->prepare("SELECT id, label FROM test");
     if (true !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, MYSQLI_CURSOR_TYPE_READ_ONLY)))
         printf("[018] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
     $stmt->execute();
@@ -161,7 +154,8 @@ require_once 'skipifconnectfailure.inc';
 <?php
     require_once 'clean_table.inc';
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mysqli_stmt_init() is deprecated since 8.6, use mysqli_prepare() instead in %s on line %d
 Error: mysqli_stmt object is not fully initialized
 mysqli_stmt_attr_set(): Argument #2 ($attribute) must be either MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH or MYSQLI_STMT_ATTR_CURSOR_TYPE
 mysqli_stmt::attr_set(): Argument #2 ($value) must be 0 or 1 for attribute MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH

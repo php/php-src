@@ -57,7 +57,7 @@ PHP_NEW_EXTENSION([hash], m4_normalize([
     murmur/PMurHash128.c
   ]),
   [no],,
-  [$PHP_HASH_CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
+  [$PHP_HASH_CFLAGS])
 PHP_ADD_BUILD_DIR([$ext_builddir/murmur])
 AS_VAR_IF([SHA3_DIR],,, [PHP_ADD_BUILD_DIR([$ext_builddir/$SHA3_DIR])])
 PHP_INSTALL_HEADERS([ext/hash], m4_normalize([

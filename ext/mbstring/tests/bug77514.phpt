@@ -13,5 +13,6 @@ $a="abc123";
 var_dump(mb_ereg_replace("123","def\\",$a));
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(7) "abcdef\"

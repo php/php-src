@@ -19,13 +19,13 @@ test2(...['b' => 2, 'a' => 1], d: 40);
 
 try {
     test2(...[1, 2], b: 20);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     test2(...[1, 'b' => 2], b: 20);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -54,5 +54,5 @@ int(1)
 int(2)
 int(3)
 int(40)
-Named parameter $b overwrites previous argument
-Named parameter $b overwrites previous argument
+Error: Named parameter $b overwrites previous argument
+Error: Named parameter $b overwrites previous argument

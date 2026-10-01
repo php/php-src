@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
    |          Xinchen Hui <laruence@php.net>                              |
@@ -28,6 +26,7 @@
 #include "zend_execute.h"
 #include "zend_vm.h"
 #include "zend_extensions.h"
+#include "zend_partial.h"
 
 #define DEBUG_COMPACT_LITERALS 0
 
@@ -43,26 +42,27 @@ typedef struct _literal_info {
 		info[n].num_related = (related); \
 	} while (0)
 
-static uint32_t add_static_slot(HashTable     *hash,
-                                zend_op_array *op_array,
-                                uint32_t       op1,
-                                uint32_t       op2,
-                                uint32_t       kind,
-                                uint32_t       *cache_size)
-{
+static uint32_t add_static_slot(
+	HashTable *hash,
+	const zend_op_array *op_array,
+	uint32_t op1,
+	uint32_t op2,
+	uint32_t kind,
+	uint32_t *cache_size
+) {
 	uint32_t ret;
-	zval *class_name = &op_array->literals[op1];
-	zval *prop_name = &op_array->literals[op2];
-	zval *pos, tmp;
+	const zval *class_name = &op_array->literals[op1];
+	const zval *prop_name = &op_array->literals[op2];
 
 	zend_string *key = zend_create_member_string(Z_STR_P(class_name), Z_STR_P(prop_name));
 	ZSTR_H(key) = zend_string_hash_func(key);
 	ZSTR_H(key) += kind;
 
-	pos = zend_hash_find(hash, key);
+	const zval *pos = zend_hash_find(hash, key);
 	if (pos) {
 		ret = Z_LVAL_P(pos);
 	} else {
+		zval tmp;
 		ret = *cache_size;
 		*cache_size += (kind == LITERAL_STATIC_PROPERTY ? 3 : 2) * sizeof(void *);
 		ZVAL_LONG(&tmp, ret);
@@ -79,7 +79,7 @@ static inline void bias_key(zend_string *key, uint32_t bias)
 	ZSTR_H(key) = zend_string_hash_val(key) + bias;
 }
 
-static zend_string *create_str_cache_key(zval *literal, uint8_t num_related)
+static zend_string *create_str_cache_key(const zval *literal, uint8_t num_related)
 {
 	ZEND_ASSERT(Z_TYPE_P(literal) == IS_STRING);
 	if (num_related == 1) {
@@ -121,7 +121,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 	HashTable hash;
 	zend_string *key = NULL;
 	void *checkpoint = zend_arena_checkpoint(ctx->arena);
-	int *const_slot, *class_slot, *func_slot, *bind_var_slot, *property_slot, *method_slot, *jmp_slot;
+	int *const_slot, *class_slot, *func_slot, *bind_var_slot, *property_slot, *method_slot, *jmp_slot, *assign_obj_slots;
 
 	if (op_array->last_literal) {
 		uint32_t j;
@@ -440,14 +440,15 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 		zend_hash_clean(&hash);
 		op_array->last_literal = j;
 
-		const_slot = zend_arena_alloc(&ctx->arena, j * 7 * sizeof(int));
-		memset(const_slot, -1, j * 7 * sizeof(int));
+		const_slot = zend_arena_alloc(&ctx->arena, j * 8 * sizeof(int));
+		memset(const_slot, -1, j * 8 * sizeof(int));
 		class_slot = const_slot + j;
 		func_slot = class_slot + j;
 		bind_var_slot = func_slot + j;
 		property_slot = bind_var_slot + j;
 		method_slot = property_slot + j;
 		jmp_slot = method_slot + j;
+		assign_obj_slots = jmp_slot + j;
 
 		/* Update opcodes to use new literals table */
 		cache_size = zend_op_array_extension_handles * sizeof(void*);
@@ -501,6 +502,19 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					}
 					break;
 				case ZEND_ASSIGN_OBJ:
+					if (opline->op2_type == IS_CONST) {
+						if (opline->op1_type == IS_UNUSED &&
+							assign_obj_slots[opline->op2.constant] >= 0) {
+							opline->extended_value = assign_obj_slots[opline->op2.constant];
+						} else {
+							opline->extended_value = cache_size;
+							cache_size += 3 * sizeof(void *);
+							if (opline->op1_type == IS_UNUSED) {
+								assign_obj_slots[opline->op2.constant] = opline->extended_value;
+							}
+						}
+					}
+					break;
 				case ZEND_ASSIGN_OBJ_REF:
 				case ZEND_FETCH_OBJ_R:
 				case ZEND_FETCH_OBJ_W:
@@ -735,6 +749,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				case ZEND_SEND_VAR_NO_REF_EX:
 				case ZEND_SEND_REF:
 				case ZEND_SEND_FUNC_ARG:
+				case ZEND_SEND_PLACEHOLDER:
 				case ZEND_CHECK_FUNC_ARG:
 					if (opline->op2_type == IS_CONST) {
 						opline->result.num = cache_size;
@@ -742,10 +757,15 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					}
 					break;
 				case ZEND_CALLABLE_CONVERT:
+				case ZEND_DECLARE_LAMBDA_FUNCTION:
 					if (opline->extended_value != (uint32_t)-1) {
 						opline->extended_value = cache_size;
 						cache_size += sizeof(void *);
 					}
+					break;
+				case ZEND_CALLABLE_CONVERT_PARTIAL:
+					opline->extended_value = cache_size | (opline->extended_value & ZEND_PARTIAL_FLAGS);
+					cache_size += 2 * sizeof(void *);
 					break;
 			}
 			opline++;

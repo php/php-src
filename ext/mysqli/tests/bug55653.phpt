@@ -16,11 +16,10 @@ require_once 'skipifconnectfailure.inc';
 
     $in_and_out = "a";
 
-    if (!($stmt = $link->stmt_init()))
+    if (!($stmt = $link->prepare("SELECT ?")))
         printf("[002] [%d] %s\n", $link->errno, $link->error);
 
-    if (!($stmt->prepare("SELECT ?")) ||
-        !($stmt->bind_param("s", $in_and_out)) ||
+    if (!($stmt->bind_param("s", $in_and_out)) ||
         !($stmt->execute()) ||
         !($stmt->bind_result($in_and_out)))
         printf("[003] [%d] %s\n", $stmt->errno, $stmt->error);

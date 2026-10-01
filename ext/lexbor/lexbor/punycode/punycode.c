@@ -138,6 +138,13 @@ lxb_punycode_encode_body(const lxb_codepoint_t *cps, const lxb_codepoint_t *cps_
     }
 
     if (p > buf) {
+        if (p >= end) {
+            p = lxb_punycode_encode_realloc(p, &buf, &end, buffer);
+            if (p == NULL) {
+                return LXB_STATUS_ERROR_MEMORY_ALLOCATION;
+            }
+        }
+
         *p++ = LXB_PUNYCODE_DELIMITER;
     }
 

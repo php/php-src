@@ -68,12 +68,13 @@
  *  -------------------------------------------------  *
  *  | 256 |                                         |  *
  *  -------------------------------------------------  *
- *  | DATA|                                         |  * 
+ *  | DATA|                                         |  *
  *  -------------------------------------------------  *
  *                                                     *
  *******************************************************/
 
 .text
+.private_extern _make_fcontext
 .globl _make_fcontext
 .align 2
 _make_fcontext:
@@ -101,8 +102,8 @@ _make_fcontext:
 
     ; compute address of returned transfer_t
     addi  r0, r3, 252
-    mr    r4, r0 
-    stw   r4, 228(r3) 
+    mr    r4, r0
+    stw   r4, 228(r3)
 
     ; load LR
     mflr  r0

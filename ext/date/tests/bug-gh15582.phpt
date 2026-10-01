@@ -14,7 +14,7 @@ $fusion = $mdtz;
 try {
 	date_create("2005-07-14 22:30:41", $fusion);
 } catch (Error $e) {
-	echo get_class($e), ': ', $e->getMessage(), "\n";
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--

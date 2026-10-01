@@ -1,5 +1,8 @@
 /* This is a generated file, edit hash.stub.php instead.
- * Stub hash: b0fe91da9b0469b44a9647b774b9b00498592e30 */
+ * Stub hash: 6a12624fb384f6b656dbe9265c4f0ea11da7bfea */
+
+#include "zend_attributes.h"
+#include "zend_constants.h"
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_hash, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, algo, IS_STRING, 0)
@@ -220,6 +223,8 @@ static void register_hash_symbols(int module_number)
 	ZVAL_STR(&attribute_Deprecated_func_mhash_keygen_s2k_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_1));
 	attribute_Deprecated_func_mhash_keygen_s2k_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "mhash_keygen_s2k", sizeof("mhash_keygen_s2k") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
 	zend_attribute *attribute_Deprecated_func_mhash_count_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mhash_count", sizeof("mhash_count") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mhash_count_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_1));
 	attribute_Deprecated_func_mhash_count_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
@@ -227,6 +232,8 @@ static void register_hash_symbols(int module_number)
 	zend_attribute *attribute_Deprecated_func_mhash_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mhash", sizeof("mhash") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mhash_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_1));
 	attribute_Deprecated_func_mhash_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "mhash", sizeof("mhash") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 #endif
 }
 

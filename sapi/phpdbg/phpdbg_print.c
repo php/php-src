@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Felipe Pena <felipe@php.net>                                |
    | Authors: Joe Watkins <joe.watkins@live.co.uk>                        |
@@ -155,10 +153,8 @@ PHPDBG_PRINT(method) /* {{{ */
 
 	if (phpdbg_safe_class_lookup(param->method.class, strlen(param->method.class), &ce) == SUCCESS) {
 		zend_function *fbc;
-		zend_string *lcname = zend_string_alloc(strlen(param->method.name), 0);
-		zend_str_tolower_copy(ZSTR_VAL(lcname), param->method.name, ZSTR_LEN(lcname));
 
-		if ((fbc = zend_hash_find_ptr(&ce->function_table, lcname))) {
+		if ((fbc = zend_hash_str_find_ptr_lc(&ce->function_table, param->method.name, strlen(param->method.name)))) {
 			phpdbg_notice("%s Method %s (%d ops)",
 				(fbc->type == ZEND_USER_FUNCTION) ? "User" : "Internal",
 				ZSTR_VAL(fbc->common.function_name),
@@ -168,8 +164,6 @@ PHPDBG_PRINT(method) /* {{{ */
 		} else {
 			phpdbg_error("The method %s::%s could not be found", param->method.class, param->method.name);
 		}
-
-		zend_string_release(lcname);
 	} else {
 		phpdbg_error("The class %s could not be found", param->method.class);
 	}
@@ -183,7 +177,6 @@ PHPDBG_PRINT(func) /* {{{ */
 	zend_function* fbc;
 	const char *func_name = param->str;
 	size_t func_name_len = param->len;
-	zend_string *lcname;
 	/* search active scope if begins with period */
 	if (func_name[0] == '.') {
 		zend_class_entry *scope = zend_get_executed_scope();
@@ -204,11 +197,8 @@ PHPDBG_PRINT(func) /* {{{ */
 		func_table = EG(function_table);
 	}
 
-	lcname = zend_string_alloc(func_name_len, 0);
-	zend_str_tolower_copy(ZSTR_VAL(lcname), func_name, ZSTR_LEN(lcname));
-
 	phpdbg_try_access {
-		if ((fbc = zend_hash_find_ptr(func_table, lcname))) {
+		if ((fbc = zend_hash_str_find_ptr_lc(func_table, func_name, func_name_len))) {
 			phpdbg_notice("%s %s %s (%d ops)",
 				(fbc->type == ZEND_USER_FUNCTION) ? "User" : "Internal",
 				(fbc->common.scope) ? "Method" : "Function",
@@ -222,8 +212,6 @@ PHPDBG_PRINT(func) /* {{{ */
 	} phpdbg_catch_access {
 		phpdbg_error("Couldn't fetch function %.*s, invalid data source", (int) func_name_len, func_name);
 	} phpdbg_end_try_access();
-
-	efree(lcname);
 
 	return SUCCESS;
 } /* }}} */

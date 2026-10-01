@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors:                                                             |
    | Wez Furlong (wez@thebrainroom.com)                                   |
@@ -65,7 +63,8 @@ static const php_stream_filter_ops strfilter_rot13_ops = {
 
 static php_stream_filter *strfilter_rot13_create(const char *filtername, zval *filterparams, bool persistent)
 {
-	return php_stream_filter_alloc(&strfilter_rot13_ops, NULL, persistent, PSFS_SEEKABLE_ALWAYS);
+	return php_stream_filter_alloc(&strfilter_rot13_ops, NULL, persistent,
+			PSFS_SEEKABLE_ALWAYS, PSFS_SEEKABLE_ALWAYS);
 }
 
 static const php_stream_filter_factory strfilter_rot13_factory = {
@@ -149,12 +148,14 @@ static const php_stream_filter_ops strfilter_tolower_ops = {
 
 static php_stream_filter *strfilter_toupper_create(const char *filtername, zval *filterparams, bool persistent)
 {
-	return php_stream_filter_alloc(&strfilter_toupper_ops, NULL, persistent, PSFS_SEEKABLE_ALWAYS);
+	return php_stream_filter_alloc(&strfilter_toupper_ops, NULL, persistent,
+			PSFS_SEEKABLE_ALWAYS, PSFS_SEEKABLE_ALWAYS);
 }
 
 static php_stream_filter *strfilter_tolower_create(const char *filtername, zval *filterparams, bool persistent)
 {
-	return php_stream_filter_alloc(&strfilter_tolower_ops, NULL, persistent, PSFS_SEEKABLE_ALWAYS);
+	return php_stream_filter_alloc(&strfilter_tolower_ops, NULL, persistent,
+			PSFS_SEEKABLE_ALWAYS, PSFS_SEEKABLE_ALWAYS);
 }
 
 static const php_stream_filter_factory strfilter_toupper_factory = {
@@ -250,7 +251,7 @@ static php_conv_err_t php_conv_base64_encode_ctor(php_conv_base64_encode *inst, 
 	inst->line_ccnt = line_len;
 	inst->line_len = line_len;
 	if (lbchars != NULL) {
-		inst->lbchars = (lbchars_dup ? pestrdup(lbchars, persistent) : lbchars);
+		inst->lbchars = (lbchars_dup ? pestrndup(lbchars, lbchars_len, persistent) : lbchars);
 		inst->lbchars_len = lbchars_len;
 	} else {
 		inst->lbchars = NULL;
@@ -874,7 +875,7 @@ static php_conv_err_t php_conv_qprint_encode_ctor(php_conv_qprint_encode *inst, 
 	inst->line_ccnt = line_len;
 	inst->line_len = line_len;
 	if (lbchars != NULL) {
-		inst->lbchars = (lbchars_dup ? pestrdup(lbchars, persistent) : lbchars);
+		inst->lbchars = (lbchars_dup ? pestrndup(lbchars, lbchars_len, persistent) : lbchars);
 		inst->lbchars_len = lbchars_len;
 	} else {
 		inst->lbchars = NULL;
@@ -1002,7 +1003,7 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 					goto out;
 				}
 
-				if (!isxdigit((int) *ps)) {
+				if (!isxdigit(*ps)) {
 					err = PHP_CONV_ERR_INVALID_SEQ;
 					goto out;
 				}
@@ -1103,7 +1104,7 @@ static php_conv_err_t php_conv_qprint_decode_ctor(php_conv_qprint_decode *inst, 
 	inst->next_char = 0;
 	inst->lb_ptr = inst->lb_cnt = 0;
 	if (lbchars != NULL) {
-		inst->lbchars = (lbchars_dup ? pestrdup(lbchars, persistent) : lbchars);
+		inst->lbchars = (lbchars_dup ? pestrndup(lbchars, lbchars_len, persistent) : lbchars);
 		inst->lbchars_len = lbchars_len;
 	} else {
 		inst->lbchars = NULL;
@@ -1574,7 +1575,7 @@ static php_stream_filter_status_t strfilter_convert_filter(
 		php_stream_bucket_delref(bucket);
 	}
 
-	if (flags != PSFS_FLAG_NORMAL) {
+	if (flags & PSFS_FLAG_FLUSH_CLOSE) {
 		if (strfilter_convert_append_bucket(inst, stream, thisfilter,
 				buckets_out, NULL, 0, &consumed,
 				php_stream_is_persistent(stream)) != SUCCESS) {
@@ -1636,7 +1637,7 @@ static const php_stream_filter_ops strfilter_convert_ops = {
 static php_stream_filter *strfilter_convert_create(const char *filtername, zval *filterparams, bool persistent)
 {
 	php_convert_filter *inst;
-
+	php_stream_filter_seekable_t write_seekable;
 	const char *dot;
 	int conv_mode = 0;
 
@@ -1649,6 +1650,10 @@ static php_stream_filter *strfilter_convert_create(const char *filtername, zval 
 		return NULL;
 	}
 	++dot;
+
+	if (php_stream_filter_parse_write_seek_mode(filterparams, &write_seekable) == FAILURE) {
+		return NULL;
+	}
 
 	inst = pemalloc(sizeof(php_convert_filter), persistent);
 
@@ -1669,7 +1674,7 @@ static php_stream_filter *strfilter_convert_create(const char *filtername, zval 
 		return NULL;
 	}
 
-	return php_stream_filter_alloc(&strfilter_convert_ops, inst, persistent, PSFS_SEEKABLE_START);
+	return php_stream_filter_alloc(&strfilter_convert_ops, inst, persistent, PSFS_SEEKABLE_START, write_seekable);
 }
 
 static const php_stream_filter_factory strfilter_convert_factory = {
@@ -1763,7 +1768,7 @@ static php_stream_filter *consumed_filter_create(const char *filtername, zval *f
 	data->offset = ~0;
 	fops = &consumed_filter_ops;
 
-	return php_stream_filter_alloc(fops, data, persistent, PSFS_SEEKABLE_START);
+	return php_stream_filter_alloc(fops, data, persistent, PSFS_SEEKABLE_START, PSFS_SEEKABLE_ALWAYS);
 }
 
 static const php_stream_filter_factory consumed_filter_factory = {
@@ -1805,12 +1810,14 @@ static size_t php_dechunk(char *buf, size_t len, php_chunked_filter_data *data)
 				data->chunk_size = 0;
 			case CHUNK_SIZE:
 				while (p < end) {
+					size_t digit;
+
 					if (*p >= '0' && *p <= '9') {
-						data->chunk_size = (data->chunk_size * 16) + (*p - '0');
+						digit = *p - '0';
 					} else if (*p >= 'A' && *p <= 'F') {
-						data->chunk_size = (data->chunk_size * 16) + (*p - 'A' + 10);
+						digit = *p - 'A' + 10;
 					} else if (*p >= 'a' && *p <= 'f') {
-						data->chunk_size = (data->chunk_size * 16) + (*p - 'a' + 10);
+						digit = *p - 'a' + 10;
 					} else if (data->state == CHUNK_SIZE_START) {
 						data->state = CHUNK_ERROR;
 						break;
@@ -1818,6 +1825,11 @@ static size_t php_dechunk(char *buf, size_t len, php_chunked_filter_data *data)
 						data->state = CHUNK_SIZE_EXT;
 						break;
 					}
+					if (data->chunk_size > (SIZE_MAX / 16)) {
+						data->state = CHUNK_ERROR;
+						break;
+					}
+					data->chunk_size = (data->chunk_size * 16) + digit;
 					data->state = CHUNK_SIZE;
 					p++;
 				}
@@ -1994,7 +2006,7 @@ static php_stream_filter *chunked_filter_create(const char *filtername, zval *fi
 	data->persistent = persistent;
 	fops = &chunked_filter_ops;
 
-	return php_stream_filter_alloc(fops, data, persistent, PSFS_SEEKABLE_START);
+	return php_stream_filter_alloc(fops, data, persistent, PSFS_SEEKABLE_START, PSFS_SEEKABLE_ALWAYS);
 }
 
 static const php_stream_filter_factory chunked_filter_factory = {

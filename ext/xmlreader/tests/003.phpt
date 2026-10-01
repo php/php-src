@@ -70,8 +70,8 @@ while ($reader->read()) {
             var_dump($reader->moveToAttribute('missing-attribute'));
             try {
                 $reader->moveToAttribute('');
-            } catch (ValueError $exception) {
-                echo $exception->getMessage() . "\n";
+            } catch (Throwable $exception) {
+                echo $exception::class, ': ', $exception->getMessage(), "\n";
             }
         }
     }
@@ -88,4 +88,4 @@ num: 1
 idx: 2
 bool(false)
 bool(false)
-XMLReader::moveToAttribute(): Argument #1 ($name) must not be empty
+ValueError: XMLReader::moveToAttribute(): Argument #1 ($name) must not be empty

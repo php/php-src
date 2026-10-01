@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Marcus Boerger <helly@php.net>                              |
@@ -66,6 +65,8 @@ ZEND_API zend_result zend_update_exception_properties(zend_execute_data *execute
 /* show an exception using zend_error(severity,...), severity should be E_ERROR */
 ZEND_API ZEND_COLD zend_result zend_exception_error(zend_object *exception, int severity);
 ZEND_NORETURN void zend_exception_uncaught_error(const char *prefix, ...) ZEND_ATTRIBUTE_FORMAT(printf, 1, 2);
+ZEND_API zend_string *zend_trace_function_args_to_string(const HashTable *frame);
+ZEND_API zend_string *zend_trace_current_function_args_string(void);
 ZEND_API zend_string *zend_trace_to_string(const HashTable *trace, bool include_main);
 
 ZEND_API ZEND_COLD zend_object *zend_create_unwind_exit(void);

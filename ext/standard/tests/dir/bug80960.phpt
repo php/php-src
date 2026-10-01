@@ -11,14 +11,8 @@ opendir("notexist?");
 opendir(str_pad("longname", PHP_MAXPATHLEN - strlen(getcwd()), "_"));
 ?>
 --EXPECTF--
-Warning: opendir(notexist*): %s (code: 123) in %s on line %d
+Warning: opendir(): Failed to open directory: No such file or directory in %s on line %d
 
-Warning: opendir(notexist*): Failed to open directory: No such file or directory in %s on line %d
+Warning: opendir(): Failed to open directory: No such file or directory in %s on line %d
 
-Warning: opendir(notexist?): %s (code: 123) in %s on line %d
-
-Warning: opendir(notexist?): Failed to open directory: No such file or directory in %s on line %d
-
-Warning: opendir(longname%r_+%r): %s (code: 111) in %s on line %d
-
-Warning: opendir(longname%r_+%r): Failed to open directory: Filename too long in %s on line %d
+Warning: opendir(): Failed to open directory: Filename too long in %s on line %d

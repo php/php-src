@@ -5,9 +5,9 @@ bug#44712 (stream_context_set_params segfaults on invalid arguments)
 $ctx = stream_context_get_default();
 try {
     stream_context_set_params($ctx, array("options" => 1));
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Invalid stream/context parameter
+TypeError: Invalid stream/context parameter

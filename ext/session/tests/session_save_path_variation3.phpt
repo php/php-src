@@ -3,7 +3,7 @@ Test session_save_path() function : variation
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --INI--
 session.save_handler=files
 session.gc_probability=0

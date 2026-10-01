@@ -21,4 +21,3 @@ unlink($filename);
 --EXPECT--
 int(0)
 int(0)
-

@@ -19,14 +19,14 @@ B::method();
 
 try {
     invalid();
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     B::invalid();
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -35,5 +35,5 @@ object(B)#1 (0) {
 }
 object(A)#2 (0) {
 }
-Cannot access "self" when no class scope is active
-Cannot access "parent" when current class scope has no parent
+Error: Cannot access "self" when no class scope is active
+Error: Cannot access "parent" when current class scope has no parent

@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Brad Lafountain <rodif_bl@yahoo.com>                        |
   |          Shane Caraveo <shane@caraveo.com>                           |
@@ -35,36 +33,72 @@ static bool is_blank(const xmlChar* str)
 	return true;
 }
 
-/* removes all empty text, comments and other insignificant nodes */
+/* removes all empty text, comments and other insignificant nodes.
+ * Iterative because recursion overflows the stack on a deep document. */
 static void cleanup_xml_node(xmlNodePtr node)
 {
-	xmlNodePtr trav;
-	xmlNodePtr del = NULL;
+	xmlNodePtr parent = node;
+	xmlNodePtr trav = node->children;
 
-	trav = node->children;
 	while (trav != NULL) {
-		if (del != NULL) {
-			xmlUnlinkNode(del);
-			xmlFreeNode(del);
-			del = NULL;
-		}
+		xmlNodePtr next = trav->next;
+
 		if (trav->type == XML_TEXT_NODE) {
 			if (is_blank(trav->content)) {
-				del = trav;
+				xmlUnlinkNode(trav);
+				xmlFreeNode(trav);
 			}
 		} else if ((trav->type != XML_ELEMENT_NODE) &&
 		           (trav->type != XML_CDATA_SECTION_NODE)) {
-			del = trav;
+			xmlUnlinkNode(trav);
+			xmlFreeNode(trav);
 		} else if (trav->children != NULL) {
-			cleanup_xml_node(trav);
+			parent = trav;
+			trav = trav->children;
+			continue;
+		}
+
+		while (next == NULL) {
+			if (parent == node) {
+				return;
+			}
+			next = parent->next;
+			parent = parent->parent;
+		}
+		trav = next;
+	}
+}
+
+#if LIBXML_VERSION < 21300
+static int is_nesting_too_deep(xmlNodePtr node)
+{
+	xmlNodePtr trav = node->children;
+	unsigned int depth = 0;
+
+	while (trav != NULL) {
+		/* An entity reference borrows its declaration as child list, and that
+		 * declaration hangs off the DTD, so descending leaves the document. */
+		if (trav->children != NULL &&
+		    trav->type != XML_ENTITY_REF_NODE &&
+		    trav->type != XML_DTD_NODE) {
+			if (++depth > SOAP_MAX_XML_DEPTH) {
+				return TRUE;
+			}
+			trav = trav->children;
+			continue;
+		}
+		while (trav->next == NULL) {
+			trav = trav->parent;
+			if (trav == node) {
+				return FALSE;
+			}
+			depth--;
 		}
 		trav = trav->next;
 	}
-	if (del != NULL) {
-		xmlUnlinkNode(del);
-		xmlFreeNode(del);
-	}
+	return FALSE;
 }
+#endif
 
 static void soap_ignorableWhitespace(void *ctx, const xmlChar *ch, int len)
 {
@@ -123,6 +157,15 @@ xmlDocPtr soap_xmlParseFile(const char *filename)
 	xmlDocPtr ret = soap_xmlParse_ex(ctxt);
 
 	if (ret) {
+#if LIBXML_VERSION < 21300
+		if (is_nesting_too_deep((xmlNodePtr)ret)) {
+			/* php_sdl.c reports xmlGetLastError() as the reason, and libxml2 did
+			 * not fail here, so drop the error an earlier parse left behind. */
+			xmlResetLastError();
+			xmlFreeDoc(ret);
+			return NULL;
+		}
+#endif
 		cleanup_xml_node((xmlNodePtr)ret);
 	}
 	return ret;
@@ -132,6 +175,13 @@ xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size)
 {
 	xmlParserCtxtPtr ctxt = xmlCreateMemoryParserCtxt(buf, buf_size);
 	xmlDocPtr ret = soap_xmlParse_ex(ctxt);
+
+#if LIBXML_VERSION < 21300
+	if (ret && is_nesting_too_deep((xmlNodePtr)ret)) {
+		xmlFreeDoc(ret);
+		ret = NULL;
+	}
+#endif
 
 /*
 	if (ret) {
@@ -150,7 +200,7 @@ xmlNsPtr node_find_ns(xmlNodePtr node)
 	}
 }
 
-int attr_is_equal_ex(xmlAttrPtr node, const char *name, const char *ns)
+bool attr_is_equal_ex(xmlAttrPtr node, const char *name, const char *ns)
 {
 	if (node->name && strcmp((const char *) node->name, name) == 0) {
 		xmlNsPtr nsPtr = node->ns;
@@ -158,17 +208,17 @@ int attr_is_equal_ex(xmlAttrPtr node, const char *name, const char *ns)
 			if (nsPtr) {
 				return (strcmp((const char *) nsPtr->href, ns) == 0);
 			} else {
-				return FALSE;
+				return false;
 			}
 		} else if (nsPtr) {
-			return FALSE;
+			return false;
 		}
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
-int node_is_equal_ex(xmlNodePtr node, const char *name, const char *ns)
+bool node_is_equal_ex(xmlNodePtr node, const char *name, const char *ns)
 {
 	if (name == NULL || ((node->name) && strcmp((char*)node->name, name) == 0)) {
 		if (ns) {
@@ -176,29 +226,29 @@ int node_is_equal_ex(xmlNodePtr node, const char *name, const char *ns)
 			if (nsPtr) {
 				return strcmp((const char *) nsPtr->href, ns) == 0;
 			} else {
-				return FALSE;
+				return false;
 			}
 		}
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
-int node_is_equal_ex_one_of(xmlNodePtr node, const char *name, const char *const *namespaces)
+bool node_is_equal_ex_one_of(xmlNodePtr node, const char *name, const char *const *namespaces)
 {
 	if ((node->name) && strcmp((char*)node->name, name) == 0) {
 		xmlNsPtr nsPtr = node_find_ns(node);
 		if (nsPtr) {
 			do {
 				if (strcmp((const char *) nsPtr->href, *namespaces) == 0) {
-					return TRUE;
+					return true;
 				}
 				namespaces++;
 			} while (*namespaces != NULL);
 		}
-		return FALSE;
+		return false;
 	}
-	return FALSE;
+	return false;
 }
 
 xmlAttrPtr get_attribute_any_ns(xmlAttrPtr node, const char *name)
@@ -261,6 +311,8 @@ xmlNodePtr get_node_with_attribute_ex(xmlNodePtr node, const char *name, const c
 
 xmlNodePtr get_node_with_attribute_recursive_ex(xmlNodePtr node, const char *name, const char *name_ns, const char *attribute, const char *value, const char *attr_ns)
 {
+	unsigned int depth = 0;
+
 	while (node != NULL) {
 		if (node_is_equal_ex(node, name, name_ns)) {
 			xmlAttrPtr attr = get_attribute_ex(node->properties, attribute, attr_ns);
@@ -268,11 +320,19 @@ xmlNodePtr get_node_with_attribute_recursive_ex(xmlNodePtr node, const char *nam
 				return node;
 			}
 		}
-		if (node->children != NULL) {
-			xmlNodePtr tmp = get_node_with_attribute_recursive_ex(node->children, name, name_ns, attribute, value, attr_ns);
-			if (tmp) {
-				return tmp;
+		if (node->children != NULL &&
+		    node->type != XML_ENTITY_REF_NODE &&
+		    node->type != XML_DTD_NODE) {
+			node = node->children;
+			depth++;
+			continue;
+		}
+		while (node->next == NULL) {
+			if (depth == 0) {
+				return NULL;
 			}
+			node = node->parent;
+			depth--;
 		}
 		node = node->next;
 	}

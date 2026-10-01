@@ -9,7 +9,7 @@ try {
     $hash = unserialize($str);
     hash_update($hash, '');
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
@@ -19,9 +19,9 @@ try {
     $hash = unserialize($str);
     hash_update($hash, '');
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Incomplete or ill-formed serialization data ("xxh32" code -2000)
-Incomplete or ill-formed serialization data ("xxh64" code -2000)
+Exception: Incomplete or ill-formed serialization data ("xxh32" code -2000)
+Exception: Incomplete or ill-formed serialization data ("xxh64" code -2000)

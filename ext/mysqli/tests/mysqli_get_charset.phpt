@@ -72,6 +72,10 @@ require_once 'skipifconnectfailure.inc';
         !is_int($charset->state))
         printf("[022] Expecting int/any, got %s/%s\n", gettype($charset->state), $charset->state);
 
+    $charsetOO = $link->get_charset();
+    if ($charsetOO != $charset)
+        printf("[023] Expecting object/%s, got %s/%s\n", gettype($charset), gettype($charsetOO), $charsetOO);
+
     mysqli_close($link);
 
     try {
@@ -82,6 +86,11 @@ require_once 'skipifconnectfailure.inc';
 
     print "done!";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mysqli_get_charset() is deprecated since 8.6, did you mean mysqli_character_set_name()? in %s on line %d
+
+Deprecated: Method mysqli::get_charset() is deprecated since 8.6, did you mean mysqli_character_set_name()? in %s on line %d
+
+Deprecated: Function mysqli_get_charset() is deprecated since 8.6, did you mean mysqli_character_set_name()? in %s on line %d
 mysqli object is already closed
 done!

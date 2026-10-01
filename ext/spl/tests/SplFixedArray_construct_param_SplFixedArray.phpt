@@ -7,9 +7,9 @@ Philip Norton philipnorton42@gmail.com
 try {
     $array = new SplFixedArray(new SplFixedArray(3));
 } catch (TypeError $iae) {
-    echo "Ok - ".$iae->getMessage().PHP_EOL;
+    echo $iae::class, ': ', $iae->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-Ok - SplFixedArray::__construct(): Argument #1 ($size) must be of type int, SplFixedArray given
+TypeError: SplFixedArray::__construct(): Argument #1 ($size) must be of type int, SplFixedArray given

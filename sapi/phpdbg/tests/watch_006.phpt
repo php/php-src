@@ -1,19 +1,11 @@
 --TEST--
 Test multiple watch elements pointing to the same watchpoint
---SKIPIF--
-<?php
-die("xfail There may be flaws in the implementation of watchpoints that cause failures");
-if (getenv('SKIP_ASAN')) {
-    die("skip intentionally causes segfaults");
-}
-?>
 --PHPDBG--
 b 4
 r
 w $a[0]
 w r $b
 c
-
 
 
 
@@ -52,11 +44,6 @@ prompt> [Element 1 has been added to watchpoint]
 1 elements were added to the array
 >00008: $c = [1];
  00009: $b = &$c;
- 00010: 
-prompt> [Breaking on watchpoint $b]
-Old value inaccessible or destroyed
-New value (reference): Array ([0] => 2,[1] => 3)
->00009: $b = &$c;
  00010: 
 prompt> [Breaking on watchpoint $b]
 Old value inaccessible or destroyed

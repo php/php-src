@@ -4,8 +4,7 @@ PHP_NEW_EXTENSION([json], m4_normalize([
     json_scanner.c
     json.c
   ]),
-  [no],,
-  [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
+  [no])
 PHP_INSTALL_HEADERS([ext/json], m4_normalize([
   php_json_parser.h
   php_json_scanner.h

@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Arnaud Le Blanc <arnaud.lb@gmail.com>                        |
   +----------------------------------------------------------------------+
@@ -51,6 +49,28 @@ PHP_FUNCTION(dl_test_test2)
 	RETURN_STR(retval);
 }
 /* }}}*/
+
+PHP_FUNCTION(dl_test_frameless)
+{
+	zend_long value;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_LONG(value);
+}
+
+ZEND_FRAMELESS_FUNCTION(dl_test_frameless, 1)
+{
+	zend_long value;
+
+	Z_FLF_PARAM_LONG(1, value);
+
+	RETVAL_LONG(value);
+
+flf_clean:;
+}
 
 /* {{{ PHP_DL_TEST_USE_REGISTER_FUNCTIONS_DIRECTLY */
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dl_test_use_register_functions_directly, 0, 0, IS_STRING, 0)

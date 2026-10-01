@@ -24,7 +24,7 @@ default:
 function test_validation($val, $msg) {
     $f = filter_var($val, FILTER_VALIDATE_INT);
     echo "$msg filtered: "; var_dump($f); // filtered value (or false)
-    echo "$msg is_long: "; var_dump(is_long($f)); // test validation
+    echo "$msg is_int: "; var_dump(is_int($f)); // test validation
     echo "$msg equal: "; var_dump($val == $f); // test equality of result
 }
 
@@ -36,14 +36,14 @@ test_validation($underflow, "underflow");
 ?>
 --EXPECTF--
 max filtered: int(%d)
-max is_long: bool(true)
+max is_int: bool(true)
 max equal: bool(true)
 overflow filtered: bool(false)
-overflow is_long: bool(false)
+overflow is_int: bool(false)
 overflow equal: bool(false)
 min filtered: int(-%d)
-min is_long: bool(true)
+min is_int: bool(true)
 min equal: bool(true)
 underflow filtered: bool(false)
-underflow is_long: bool(false)
+underflow is_int: bool(false)
 underflow equal: bool(false)

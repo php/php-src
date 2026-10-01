@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Marcus Boerger <helly@php.net>                              |
@@ -463,8 +462,7 @@ ZEND_METHOD(Exception, getCode)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_CODE);
-	ZVAL_DEREF(prop);
-	ZVAL_COPY(return_value, prop);
+	ZVAL_COPY_DEREF(return_value, prop);
 }
 /* }}} */
 
@@ -476,8 +474,7 @@ ZEND_METHOD(Exception, getTrace)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_TRACE);
-	ZVAL_DEREF(prop);
-	ZVAL_COPY(return_value, prop);
+	ZVAL_COPY_DEREF(return_value, prop);
 }
 /* }}} */
 
@@ -489,8 +486,7 @@ ZEND_METHOD(ErrorException, getSeverity)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_SEVERITY);
-	ZVAL_DEREF(prop);
-	ZVAL_COPY(return_value, prop);
+	ZVAL_COPY_DEREF(return_value, prop);
 }
 /* }}} */
 
@@ -507,7 +503,7 @@ ZEND_METHOD(ErrorException, getSeverity)
 		} \
 	} while (0)
 
-static void _build_trace_args(zval *arg, smart_str *str) /* {{{ */
+static void build_trace_args(zval *arg, smart_str *str) /* {{{ */
 {
 	/* the trivial way would be to do
 	 * convert_to_string(arg);
@@ -517,24 +513,21 @@ static void _build_trace_args(zval *arg, smart_str *str) /* {{{ */
 
 	ZVAL_DEREF(arg);
 
-	if (smart_str_append_zval(str, arg, EG(exception_string_param_max_len)) == SUCCESS) {
-		smart_str_appends(str, ", ");
-	} else {
+	if (smart_str_append_zval(str, arg, EG(exception_string_param_max_len)) != SUCCESS) {
 		switch (Z_TYPE_P(arg)) {
 			case IS_RESOURCE:
 				smart_str_appends(str, "Resource id #");
 				smart_str_append_long(str, Z_RES_HANDLE_P(arg));
-				smart_str_appends(str, ", ");
 				break;
 			case IS_ARRAY:
-				smart_str_appends(str, "Array, ");
+				smart_str_appends(str, "Array");
 				break;
 			case IS_OBJECT: {
 				zend_string *class_name = Z_OBJ_HANDLER_P(arg, get_class_name)(Z_OBJ_P(arg));
 				smart_str_appends(str, "Object(");
 				/* cut off on NULL byte ... class@anonymous */
 				smart_str_appends(str, ZSTR_VAL(class_name));
-				smart_str_appends(str, "), ");
+				smart_str_appends(str, ")");
 				zend_string_release_ex(class_name, 0);
 				break;
 			}
@@ -543,7 +536,30 @@ static void _build_trace_args(zval *arg, smart_str *str) /* {{{ */
 }
 /* }}} */
 
-static void _build_trace_string(smart_str *str, const HashTable *ht, uint32_t num) /* {{{ */
+static void build_trace_args_list(zval *tmp, smart_str *str) /* {{{ */
+{
+	if (UNEXPECTED(Z_TYPE_P(tmp) != IS_ARRAY)) {
+		/* only happens w/ reflection abuse (Zend/tests/bug63762.phpt) */
+		zend_error(E_WARNING, "args element is not an array");
+		return;
+	}
+
+	bool first = true;
+	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(tmp), zend_string *name, zval *arg) {
+		if (!first) {
+			smart_str_appends(str, ", ");
+		}
+		first = false;
+		if (name) {
+			smart_str_append(str, name);
+			smart_str_appends(str, ": ");
+		}
+		build_trace_args(arg, str);
+	} ZEND_HASH_FOREACH_END();
+}
+/* }}} */
+
+static void build_trace_string(smart_str *str, const HashTable *ht, uint32_t num) /* {{{ */
 {
 	zval *file, *tmp;
 
@@ -589,27 +605,63 @@ static void _build_trace_string(smart_str *str, const HashTable *ht, uint32_t nu
 	smart_str_appendc(str, '(');
 	tmp = zend_hash_find_known_hash(ht, ZSTR_KNOWN(ZEND_STR_ARGS));
 	if (tmp) {
-		if (EXPECTED(Z_TYPE_P(tmp) == IS_ARRAY)) {
-			size_t last_len = ZSTR_LEN(str->s);
-			zend_string *name;
-			zval *arg;
-
-			ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(tmp), name, arg) {
-				if (name) {
-					smart_str_append(str, name);
-					smart_str_appends(str, ": ");
-				}
-				_build_trace_args(arg, str);
-			} ZEND_HASH_FOREACH_END();
-
-			if (last_len != ZSTR_LEN(str->s)) {
-				ZSTR_LEN(str->s) -= 2; /* remove last ', ' */
-			}
-		} else {
-			zend_error(E_WARNING, "args element is not an array");
-		}
+		build_trace_args_list(tmp, str);
 	}
 	smart_str_appends(str, ")\n");
+}
+/* }}} */
+
+/* {{{ Gets the function arguments printed as a string from a backtrace frame. */
+ZEND_API zend_string *zend_trace_function_args_to_string(const HashTable *frame) {
+	smart_str str = {0};
+
+	zval *tmp = zend_hash_find_known_hash(frame, ZSTR_KNOWN(ZEND_STR_ARGS));
+	if (tmp) {
+		build_trace_args_list(tmp, &str);
+	}
+
+	return smart_str_extract(&str);
+}
+/* }}} */
+
+/* {{{ Gets the currently executing function's arguments as a string. Used by php_verror. */
+ZEND_API zend_string *zend_trace_current_function_args_string(void) {
+	zend_string *dynamic_params = NULL;
+	/* Special case: require_once/include_once aren't functions, but we
+	 * want to capture their arguments anyways, for i.e. file not found.
+	 */
+	zend_execute_data *execute_data = EG(current_execute_data);
+	if (execute_data && execute_data->func
+			&& ZEND_USER_CODE(execute_data->func->common.type)
+			&& (execute_data->opline->opcode == ZEND_INCLUDE_OR_EVAL)) {
+		zval *inc_filename;
+
+		switch (execute_data->opline->op1_type) {
+			/* op1 may be CONST, TMP or CV; RT_CONSTANT() is only valid for the former. */
+			case IS_CONST:
+				inc_filename = RT_CONSTANT(execute_data->opline, execute_data->opline->op1);
+				break;
+			default:
+				inc_filename = EX_VAR(execute_data->opline->op1.var);
+		}
+
+		smart_str str = {0};
+		build_trace_args(inc_filename, &str);
+		return smart_str_extract(&str);
+	}
+
+	/* get a backtrace to snarf function args */
+	zval backtrace;
+	zend_fetch_debug_backtrace(&backtrace, /* skip_last */ 0, /* options */ 0, /* limit */ 1);
+	/* can fail esp if low memory condition */
+	if (Z_TYPE(backtrace) == IS_ARRAY) {
+		zval *first_frame = zend_hash_index_find(Z_ARRVAL(backtrace), 0);
+		if (first_frame) {
+			dynamic_params = zend_trace_function_args_to_string(Z_ARRVAL_P(first_frame));
+		}
+	}
+	zval_ptr_dtor(&backtrace);
+	return dynamic_params;
 }
 /* }}} */
 
@@ -625,7 +677,7 @@ ZEND_API zend_string *zend_trace_to_string(const HashTable *trace, bool include_
 			continue;
 		}
 
-		_build_trace_string(&str, Z_ARRVAL_P(frame), num++);
+		build_trace_string(&str, Z_ARRVAL_P(frame), num++);
 	} ZEND_HASH_FOREACH_END();
 
 	if (include_main) {
@@ -691,11 +743,9 @@ ZEND_METHOD(Exception, __toString)
 
 	zend_fcall_info fci;
 	fci.size = sizeof(fci);
-	ZVAL_UNDEF(&fci.function_name);
 	fci.retval = &trace;
 	fci.param_count = 0;
 	fci.params = NULL;
-	fci.object = NULL;
 	fci.named_params = NULL;
 
 	zend_fcall_info_cache fcc;
@@ -710,7 +760,6 @@ ZEND_METHOD(Exception, __toString)
 		zend_long line = zval_get_long(GET_PROPERTY(exception, ZEND_STR_LINE));
 
 		fcc.object = Z_OBJ_P(exception);
-		fcc.calling_scope = Z_OBJCE_P(exception);
 		zend_call_function(&fci, &fcc);
 
 		if (Z_TYPE(trace) != IS_STRING) {

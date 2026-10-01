@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Stig Venaas <venaas@uninett.no>                              |
    | Streams work by Wez Furlong <wez@thebrainroom.com>                   |
@@ -26,10 +24,6 @@
 #ifdef PHP_WIN32
 # include <Ws2tcpip.h>
 # include "win32/winutil.h"
-# define O_RDONLY _O_RDONLY
-# include "win32/param.h"
-#else
-#include <sys/param.h>
 #endif
 
 #include <sys/types.h>
@@ -46,7 +40,7 @@
 #endif
 #ifdef HAVE_POLL_H
 #include <poll.h>
-#elif HAVE_SYS_POLL_H
+#elif defined(HAVE_SYS_POLL_H)
 #include <sys/poll.h>
 #endif
 
@@ -449,6 +443,54 @@ ok:
 }
 /* }}} */
 
+PHPAPI void php_network_apply_sockvals(php_socket_t sock, const php_sockvals *sockvals)
+{
+#ifdef SO_LINGER
+	if (sockvals->mask & PHP_SOCKVAL_SO_LINGER) {
+		unsigned short secs = sockvals->linger > USHRT_MAX
+			? USHRT_MAX : (unsigned short)sockvals->linger;
+		struct linger linger_val = {
+			.l_onoff = (sockvals->linger > 0),
+			.l_linger = sockvals->linger > 0 ? secs : 0
+		};
+#ifdef SO_LINGER_SEC
+		setsockopt(sock, SOL_SOCKET, SO_LINGER_SEC, (char*)&linger_val, sizeof(linger_val));
+#else
+		setsockopt(sock, SOL_SOCKET, SO_LINGER, (char*)&linger_val, sizeof(linger_val));
+#endif
+	}
+#endif
+#if defined(TCP_KEEPIDLE)
+	if (sockvals->mask & PHP_SOCKVAL_TCP_KEEPIDLE) {
+		setsockopt(sock, IPPROTO_TCP, TCP_KEEPIDLE, (char*)&sockvals->keepalive.keepidle, sizeof(sockvals->keepalive.keepidle));
+	}
+#elif defined(TCP_KEEPALIVE)
+	if (sockvals->mask & PHP_SOCKVAL_TCP_KEEPIDLE) {
+		setsockopt(sock, IPPROTO_TCP, TCP_KEEPALIVE, (char*)&sockvals->keepalive.keepidle, sizeof(sockvals->keepalive.keepidle));
+	}
+#endif
+#ifdef TCP_KEEPINTVL
+	if (sockvals->mask & PHP_SOCKVAL_TCP_KEEPINTVL) {
+		setsockopt(sock, IPPROTO_TCP, TCP_KEEPINTVL, (char*)&sockvals->keepalive.keepintvl, sizeof(sockvals->keepalive.keepintvl));
+	}
+#endif
+#ifdef TCP_KEEPCNT
+	if (sockvals->mask & PHP_SOCKVAL_TCP_KEEPCNT) {
+		setsockopt(sock, IPPROTO_TCP, TCP_KEEPCNT, (char*)&sockvals->keepalive.keepcnt, sizeof(sockvals->keepalive.keepcnt));
+	}
+#endif
+#ifdef SO_RCVBUF
+	if (sockvals->mask & PHP_SOCKVAL_SO_RCVBUF) {
+		setsockopt(sock, SOL_SOCKET, SO_RCVBUF, (char*)&sockvals->rcvbuf, sizeof(sockvals->rcvbuf));
+	}
+#endif
+#ifdef SO_SNDBUF
+	if (sockvals->mask & PHP_SOCKVAL_SO_SNDBUF) {
+		setsockopt(sock, SOL_SOCKET, SO_SNDBUF, (char*)&sockvals->sndbuf, sizeof(sockvals->sndbuf));
+	}
+#endif
+}
+
 /* Bind to a local IP address.
  * Returns the bound socket, or -1 on failure.
  * */
@@ -539,28 +581,8 @@ php_socket_t php_network_bind_socket_to_local_addr_ex(const char *host, unsigned
 		}
 #endif
 
-		/* Set socket values if provided */
 		if (sockvals != NULL) {
-#if defined(TCP_KEEPIDLE)
-			if (sockvals->mask & PHP_SOCKVAL_TCP_KEEPIDLE) {
-				setsockopt(sock, IPPROTO_TCP, TCP_KEEPIDLE, (char*)&sockvals->keepalive.keepidle, sizeof(sockvals->keepalive.keepidle));
-			}
-#elif defined(TCP_KEEPALIVE)
-			/* macOS uses TCP_KEEPALIVE instead of TCP_KEEPIDLE */
-			if (sockvals->mask & PHP_SOCKVAL_TCP_KEEPIDLE) {
-				setsockopt(sock, IPPROTO_TCP, TCP_KEEPALIVE, (char*)&sockvals->keepalive.keepidle, sizeof(sockvals->keepalive.keepidle));
-			}
-#endif
-#ifdef TCP_KEEPINTVL
-			if (sockvals->mask & PHP_SOCKVAL_TCP_KEEPINTVL) {
-				setsockopt(sock, IPPROTO_TCP, TCP_KEEPINTVL, (char*)&sockvals->keepalive.keepintvl, sizeof(sockvals->keepalive.keepintvl));
-			}
-#endif
-#ifdef TCP_KEEPCNT
-			if (sockvals->mask & PHP_SOCKVAL_TCP_KEEPCNT) {
-				setsockopt(sock, IPPROTO_TCP, TCP_KEEPCNT, (char*)&sockvals->keepalive.keepcnt, sizeof(sockvals->keepalive.keepcnt));
-			}
-#endif
+			php_network_apply_sockvals(sock, sockvals);
 		}
 
 		n = bind(sock, sa, socklen);
@@ -1025,28 +1047,8 @@ php_socket_t php_network_connect_socket_to_host_ex(const char *host, unsigned sh
 		}
 #endif
 
-		/* Set socket values if provided */
 		if (sockvals != NULL) {
-#if defined(TCP_KEEPIDLE)
-			if (sockvals->mask & PHP_SOCKVAL_TCP_KEEPIDLE) {
-				setsockopt(sock, IPPROTO_TCP, TCP_KEEPIDLE, (char*)&sockvals->keepalive.keepidle, sizeof(sockvals->keepalive.keepidle));
-			}
-#elif defined(TCP_KEEPALIVE)
-			/* macOS uses TCP_KEEPALIVE instead of TCP_KEEPIDLE */
-			if (sockvals->mask & PHP_SOCKVAL_TCP_KEEPIDLE) {
-				setsockopt(sock, IPPROTO_TCP, TCP_KEEPALIVE, (char*)&sockvals->keepalive.keepidle, sizeof(sockvals->keepalive.keepidle));
-			}
-#endif
-#ifdef TCP_KEEPINTVL
-			if (sockvals->mask & PHP_SOCKVAL_TCP_KEEPINTVL) {
-				setsockopt(sock, IPPROTO_TCP, TCP_KEEPINTVL, (char*)&sockvals->keepalive.keepintvl, sizeof(sockvals->keepalive.keepintvl));
-			}
-#endif
-#ifdef TCP_KEEPCNT
-			if (sockvals->mask & PHP_SOCKVAL_TCP_KEEPCNT) {
-				setsockopt(sock, IPPROTO_TCP, TCP_KEEPCNT, (char*)&sockvals->keepalive.keepcnt, sizeof(sockvals->keepalive.keepcnt));
-			}
-#endif
+			php_network_apply_sockvals(sock, sockvals);
 		}
 
 		n = php_network_connect_socket(sock, sa, socklen, asynchronous,
@@ -1461,7 +1463,7 @@ static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf
 
 	if (*hstbuflen == 0) {
 		*hstbuflen = 1024;
-		*tmphstbuf = (char *)malloc (*hstbuflen);
+		*tmphstbuf = (char *)pemalloc(*hstbuflen, true);
 	}
 
 	while (( res =
@@ -1469,7 +1471,7 @@ static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf
 		&& (errno == ERANGE)) {
 		/* Enlarge the buffer. */
 		*hstbuflen *= 2;
-		*tmphstbuf = (char *)realloc (*tmphstbuf,*hstbuflen);
+		*tmphstbuf = (char *)perealloc(*tmphstbuf, *hstbuflen, true);
 	}
 
 	if (res != 0) {
@@ -1487,7 +1489,7 @@ static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf
 
 	if (*hstbuflen == 0) {
 		*hstbuflen = 1024;
-		*tmphstbuf = (char *)malloc (*hstbuflen);
+		*tmphstbuf = (char *)pemalloc(*hstbuflen, true);
 	}
 
 	while ((NULL == ( hp =
@@ -1495,7 +1497,7 @@ static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf
 		&& (errno == ERANGE)) {
 		/* Enlarge the buffer. */
 		*hstbuflen *= 2;
-		*tmphstbuf = (char *)realloc (*tmphstbuf,*hstbuflen);
+		*tmphstbuf = (char *)perealloc(*tmphstbuf, *hstbuflen, true);
 	}
 	return hp;
 }
@@ -1505,11 +1507,11 @@ static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf
 {
 	if (*hstbuflen == 0) {
 		*hstbuflen = sizeof(struct hostent_data);
-		*tmphstbuf = (char *)malloc (*hstbuflen);
+		*tmphstbuf = (char *)pemalloc(*hstbuflen, true);
 	} else {
 		if (*hstbuflen < sizeof(struct hostent_data)) {
 			*hstbuflen = sizeof(struct hostent_data);
-			*tmphstbuf = (char *)realloc(*tmphstbuf, *hstbuflen);
+			*tmphstbuf = (char *)perealloc(*tmphstbuf, *hstbuflen, true);
 		}
 	}
 	memset((void *)(*tmphstbuf),0,*hstbuflen);

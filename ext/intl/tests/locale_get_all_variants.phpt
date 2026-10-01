@@ -42,7 +42,7 @@ function ut_main()
     try {
 	    ut_loc_locale_get_all_variants("i-\0tay");
     } catch (\ValueError $e) {
-	    echo $e->getMessage(). PHP_EOL;
+	    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 
     $res_str .= "\n";
@@ -55,8 +55,8 @@ ut_run();
 
 ?>
 --EXPECT--
-Locale::getAllVariants(): Argument #1 ($locale) must not contain any null bytes
-locale_get_all_variants(): Argument #1 ($locale) must not contain any null bytes
+ValueError: Locale::getAllVariants(): Argument #1 ($locale) must not contain any null bytes
+ValueError: locale_get_all_variants(): Argument #1 ($locale) must not contain any null bytes
 sl_IT_nedis_KIRTI : variants 'NEDIS','KIRTI',
 sl_IT_nedis-a-kirti-x-xyz : variants 'NEDIS',
 sl_IT_rozaj : variants 'ROZAJ',

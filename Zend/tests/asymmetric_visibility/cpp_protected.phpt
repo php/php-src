@@ -24,8 +24,8 @@ var_dump($foo->bar);
 
 try {
     $foo->bar = 'baz';
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $foo->setBarPrivate('baz');
@@ -37,6 +37,6 @@ var_dump($foo->bar);
 ?>
 --EXPECT--
 string(3) "bar"
-Cannot modify protected(set) property Foo::$bar from global scope
+Error: Cannot modify protected(set) property Foo::$bar from global scope
 string(3) "baz"
 string(3) "qux"

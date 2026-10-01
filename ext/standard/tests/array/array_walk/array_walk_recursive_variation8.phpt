@@ -22,8 +22,8 @@ var_dump( array_walk_recursive($input, "min"));
 echo "-- With 'echo' language construct --\n";
 try {
     var_dump( array_walk_recursive($input, "echo"));
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done"
@@ -35,5 +35,5 @@ bool(true)
 -- With 'min' built-in function --
 bool(true)
 -- With 'echo' language construct --
-array_walk_recursive(): Argument #2 ($callback) must be a valid callback, function "echo" not found or invalid function name
+TypeError: array_walk_recursive(): Argument #2 ($callback) must be a valid callback, function "echo" not found or invalid function name
 Done

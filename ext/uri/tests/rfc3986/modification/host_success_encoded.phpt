@@ -1,7 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - host - URL encoded characters
---EXTENSIONS--
-uri
+Test Uri\Rfc3986\Uri::withHost() - success - percent-encoded characters
 --FILE--
 <?php
 

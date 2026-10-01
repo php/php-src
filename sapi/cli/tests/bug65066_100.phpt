@@ -28,7 +28,6 @@ HEADER
 ?>
 --EXPECTF--
 HTTP/1.1 100 Continue
-Host: %s
 Date: %s
 Connection: close
 X-Powered-By: PHP/%s

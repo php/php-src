@@ -12,8 +12,8 @@ function test() {
     $e = new Foo();
     try {
         throw new Exception("ops 2");
-    } catch (Exception $e) {
-        echo $e->getMessage()."\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 

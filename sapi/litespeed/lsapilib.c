@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: George Wang <gwang@litespeedtech.com>                        |
    +----------------------------------------------------------------------+
@@ -2213,7 +2211,7 @@ static char * GetHeaderVar( LSAPI_Request * pReq, const char * name )
 
             while(( pKey < pKeyEnd )&&( *p ))
             {
-                char ch = toupper( *pKey );
+                char ch = toupper( (unsigned char)*pKey );
                 if ((ch != *p )||(( *p == '_' )&&( ch != '-')))
                     break;
                 ++p; ++pKey;
@@ -2397,7 +2395,7 @@ int LSAPI_ForeachHeader_r( LSAPI_Request * pReq,
                 if ( ch == '-' )
                     *p++ = '_';
                 else
-                    *p++ = toupper( ch );
+                    *p++ = toupper( (unsigned char)ch );
             }
             *p = 0;
             keyLen += 5;
@@ -2642,7 +2640,7 @@ int LSAPI_ParseSockAddr( const char * pBind, struct sockaddr * pAddr )
     if ( !pBind )
         return -1;
 
-    while( isspace( *pBind ) )
+    while(isspace( (unsigned char)*pBind ) )
         ++pBind;
 
     strncpy(achAddr, pBind, 255);

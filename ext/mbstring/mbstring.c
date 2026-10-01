@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Tsukada Takuya <tsukada@fminn.nagano.nagano.jp>              |
    |         Rui Hirokawa <hirokawa@php.net>                              |
@@ -56,6 +54,7 @@
 #include "mb_gpc.h"
 
 #ifdef HAVE_MBREGEX
+# include "zend_attributes.h"
 # include "php_mbregex.h"
 #endif
 
@@ -625,7 +624,7 @@ static char *php_mb_rfc1867_getword(const zend_encoding *encoding, char **line, 
 
 static char *php_mb_rfc1867_getword_conf(const zend_encoding *encoding, char *str) /* {{{ */
 {
-	while (*str && isspace(*(unsigned char *)str)) {
+	while (*str && isspace((unsigned char)*str)) {
 		++str;
 	}
 
@@ -641,7 +640,7 @@ static char *php_mb_rfc1867_getword_conf(const zend_encoding *encoding, char *st
 	} else {
 		char *strend = str;
 
-		while (*strend && !isspace(*(unsigned char *)strend)) {
+		while (*strend && !isspace((unsigned char)*strend)) {
 			++strend;
 		}
 		return php_mb_rfc1867_substring_conf(encoding, str, strend - str, 0);
@@ -1837,7 +1836,7 @@ static size_t mb_get_strlen(zend_string *string, const mbfl_encoding *encoding)
 	unsigned int char_len = encoding->flag & (MBFL_ENCTYPE_SBCS | MBFL_ENCTYPE_WCS2 | MBFL_ENCTYPE_WCS4);
 	if (char_len) {
 		return ZSTR_LEN(string) / char_len;
-	} else if (php_mb_is_no_encoding_utf8(encoding->no_encoding) && ZSTR_IS_VALID_UTF8(string)) {
+	} else if (php_mb_is_no_encoding_utf8(encoding->no_encoding) && mb_check_str_encoding(string, &mbfl_encoding_utf8)) {
 		return mb_fast_strlen_utf8((unsigned char*)ZSTR_VAL(string), ZSTR_LEN(string));
 	}
 
@@ -1903,6 +1902,9 @@ static unsigned char* offset_to_pointer_utf8(unsigned char *str, unsigned char *
 			}
 			pos += u8_tbl[*pos];
 		}
+		if (pos > end) {
+			pos = end;
+		}
 		return pos;
 	}
 }
@@ -1943,7 +1945,7 @@ static size_t mb_find_strpos(zend_string *haystack, zend_string *needle, const m
 	} else if (offset >= 0) {
 		found_pos = zend_memnrstr((const char*)offset_pointer, ZSTR_VAL(needle_u8), ZSTR_LEN(needle_u8), ZSTR_VAL(haystack_u8) + ZSTR_LEN(haystack_u8));
 	} else {
-		size_t needle_len = pointer_to_offset_utf8((unsigned char*)ZSTR_VAL(needle), (unsigned char*)ZSTR_VAL(needle) + ZSTR_LEN(needle));
+		size_t needle_len = pointer_to_offset_utf8((unsigned char*)ZSTR_VAL(needle_u8), (unsigned char*)ZSTR_VAL(needle_u8) + ZSTR_LEN(needle_u8));
 		offset_pointer = offset_to_pointer_utf8(offset_pointer, (unsigned char*)ZSTR_VAL(haystack_u8) + ZSTR_LEN(haystack_u8), needle_len);
 		if (!offset_pointer) {
 			offset_pointer = (unsigned char*)ZSTR_VAL(haystack_u8) + ZSTR_LEN(haystack_u8);
@@ -3821,7 +3823,7 @@ static bool mb_recursive_find_strings(zval *var, const unsigned char **val_list,
 	return false;
 }
 
-static bool mb_recursive_convert_variable(zval *var, const mbfl_encoding* from_encoding, const mbfl_encoding* to_encoding)
+static bool mb_recursive_convert_variable(uint32_t arg_num, zval *var, const mbfl_encoding* from_encoding, const mbfl_encoding* to_encoding)
 {
 	zval *entry, *orig_var;
 
@@ -3837,6 +3839,15 @@ static bool mb_recursive_convert_variable(zval *var, const mbfl_encoding* from_e
 		zval_ptr_dtor(orig_var);
 		ZVAL_STR(orig_var, ret);
 	} else if (Z_TYPE_P(var) == IS_ARRAY || Z_TYPE_P(var) == IS_OBJECT) {
+		if (Z_TYPE_P(var) == IS_OBJECT) {
+			php_error_docref(NULL, E_DEPRECATED,
+				"Passing an object for argument #%" PRIu32 " $vars to mb_convert_variables() is deprecated, call get_object_vars() first instead",
+				arg_num
+			);
+			if (UNEXPECTED(EG(exception))) {
+				return true;
+			}
+		}
 		HashTable *ht = HASH_OF(var);
 		HashTable *orig_ht = ht;
 
@@ -3873,7 +3884,7 @@ static bool mb_recursive_convert_variable(zval *var, const mbfl_encoding* from_e
 					}
 				}
 
-				if (mb_recursive_convert_variable(entry, from_encoding, to_encoding)) {
+				if (mb_recursive_convert_variable(arg_num, entry, from_encoding, to_encoding)) {
 					if (ht && ht != orig_ht) {
 						GC_TRY_UNPROTECT_RECURSION(ht);
 					}
@@ -3890,6 +3901,14 @@ static bool mb_recursive_convert_variable(zval *var, const mbfl_encoding* from_e
 		}
 		if (orig_ht) {
 			GC_TRY_UNPROTECT_RECURSION(orig_ht);
+		}
+	} else if (Z_TYPE_P(var) != IS_UNDEF) { /* Ignore unset properties */
+		php_error_docref(NULL, E_WARNING,
+			"Argument #%" PRIu32 " must be of type string|array|object or only contain entries of type string|array|object, %s given",
+			arg_num, zend_zval_type_name(var)
+		);
+		if (UNEXPECTED(EG(exception))) {
+			return true;
 		}
 	}
 
@@ -3986,7 +4005,7 @@ PHP_FUNCTION(mb_convert_variables)
 	for (size_t n = 0; n < argc; n++) {
 		zval *zv = &args[n];
 		ZVAL_DEREF(zv);
-		if (mb_recursive_convert_variable(zv, from_encoding, to_encoding)) {
+		if (mb_recursive_convert_variable(n + 3, zv, from_encoding, to_encoding)) {
 			if (!EG(exception)) {
 				php_error_docref(NULL, E_WARNING, "Cannot handle recursive references");
 			}
@@ -4482,12 +4501,14 @@ static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t 
 								fld_val = zend_string_init(token, token_pos, 0);
 							}
 
-							if (fld_name != NULL && fld_val != NULL) {
-								zval val;
-								zend_str_tolower(ZSTR_VAL(fld_name), ZSTR_LEN(fld_name));
-								ZVAL_STR(&val, fld_val);
+							if (fld_name != NULL) {
+								if (fld_val != NULL) {
+									zval val;
+									zend_str_tolower(ZSTR_VAL(fld_name), ZSTR_LEN(fld_name));
+									ZVAL_STR(&val, fld_val);
 
-								zend_hash_update(ht, fld_name, &val);
+									zend_hash_update(ht, fld_name, &val);
+								}
 
 								zend_string_release_ex(fld_name, 0);
 							}
@@ -4528,11 +4549,13 @@ out:
 		if(token && token_pos > 0) {
 			fld_val = zend_string_init(token, token_pos, 0);
 		}
-		if (fld_name != NULL && fld_val != NULL) {
-			zval val;
-			zend_str_tolower(ZSTR_VAL(fld_name), ZSTR_LEN(fld_name));
-			ZVAL_STR(&val, fld_val);
-			zend_hash_update(ht, fld_name, &val);
+		if (fld_name != NULL) {
+			if (fld_val != NULL) {
+				zval val;
+				zend_str_tolower(ZSTR_VAL(fld_name), ZSTR_LEN(fld_name));
+				ZVAL_STR(&val, fld_val);
+				zend_hash_update(ht, fld_name, &val);
+			}
 
 			zend_string_release_ex(fld_name, 0);
 		}
@@ -5883,6 +5906,28 @@ PHP_FUNCTION(mb_chr)
 }
 /* }}} */
 
+static char *php_mb_str_pad_fill(char *buffer, const zend_string *pad, size_t pad_bytes)
+{
+	if (pad_bytes == 0) {
+		return buffer;
+	}
+	if (ZSTR_LEN(pad) == 1) {
+		memset(buffer, ZSTR_VAL(pad)[0], pad_bytes);
+		return buffer + pad_bytes;
+	}
+
+	const char *start = buffer;
+	const char *end = buffer + pad_bytes;
+	buffer = zend_mempcpy(buffer, ZSTR_VAL(pad), ZSTR_LEN(pad));
+
+	/* Double the filled area on each iteration. */
+	while (buffer < end) {
+		size_t len = MIN(buffer - start, end - buffer);
+		buffer = zend_mempcpy(buffer, start, len);
+	}
+	return buffer;
+}
+
 PHP_FUNCTION(mb_str_pad)
 {
 	zend_string *input, *encoding_str = NULL, *pad = ZSTR_CHAR(' ');
@@ -5983,9 +6028,7 @@ PHP_FUNCTION(mb_str_pad)
 	char *buffer = ZSTR_VAL(result);
 
 	/* First we pad the left. */
-	for (size_t i = 0; i < full_left_pad_copies; i++, buffer += ZSTR_LEN(pad)) {
-		memcpy(buffer, ZSTR_VAL(pad), ZSTR_LEN(pad));
-	}
+	buffer = php_mb_str_pad_fill(buffer, pad, full_left_pad_bytes);
 	memcpy(buffer, ZSTR_VAL(remaining_left_pad_str), ZSTR_LEN(remaining_left_pad_str));
 	buffer += ZSTR_LEN(remaining_left_pad_str);
 
@@ -5994,9 +6037,7 @@ PHP_FUNCTION(mb_str_pad)
 	buffer += ZSTR_LEN(input);
 
 	/* Finally, we pad on the right. */
-	for (size_t i = 0; i < full_right_pad_copies; i++, buffer += ZSTR_LEN(pad)) {
-		memcpy(buffer, ZSTR_VAL(pad), ZSTR_LEN(pad));
-	}
+	buffer = php_mb_str_pad_fill(buffer, pad, full_right_pad_bytes);
 	memcpy(buffer, ZSTR_VAL(remaining_right_pad_str), ZSTR_LEN(remaining_right_pad_str));
 
 	ZSTR_VAL(result)[ZSTR_LEN(result)] = '\0';

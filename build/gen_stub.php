@@ -13,6 +13,7 @@ use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\Enum_;
 use PhpParser\Node\Stmt\Interface_;
 use PhpParser\Node\Stmt\Trait_;
+use PhpParser\Node\Stmt\TraitUse;
 use PhpParser\PrettyPrinter\Standard;
 use PhpParser\PrettyPrinterAbstract;
 
@@ -26,6 +27,7 @@ const PHP_82_VERSION_ID = 80200;
 const PHP_83_VERSION_ID = 80300;
 const PHP_84_VERSION_ID = 80400;
 const PHP_85_VERSION_ID = 80500;
+const PHP_86_VERSION_ID = 80600;
 const ALL_PHP_VERSION_IDS = [
     PHP_70_VERSION_ID,
     PHP_80_VERSION_ID,
@@ -34,6 +36,7 @@ const ALL_PHP_VERSION_IDS = [
     PHP_83_VERSION_ID,
     PHP_84_VERSION_ID,
     PHP_85_VERSION_ID,
+    PHP_86_VERSION_ID,
 ];
 
 // file_put_contents() but with a success message printed after saving
@@ -82,7 +85,7 @@ function processDirectory(string $dir, Context $context): array {
         RecursiveIteratorIterator::LEAVES_ONLY
     );
     foreach ($it as $file) {
-        $pathName = $file->getPathName();
+        $pathName = $file->getPathname();
         if (str_ends_with($pathName, '.stub.php')) {
             $pathNames[] = $pathName;
         }
@@ -171,7 +174,7 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
             reportFilePutContents($arginfoFile, $arginfoCode);
             if ($declCode !== '') {
                 reportFilePutContents($declFile, $declCode);
-            } else if (file_exists($declFile)) {
+            } elseif (file_exists($declFile)) {
                 unlink($declFile);
             }
         }
@@ -227,6 +230,57 @@ class Context {
     public array $parsedFiles = [];
 }
 
+// Headers the generated arginfo file needs to be self-contained, each with the
+// preprocessor condition and minimum PHP version its code is guarded by
+class HeaderDependencies {
+    /** @var array<string, list<array{?string, ?int}>> */
+    private array $headers = [];
+
+    public function add(string $header, ?string $cond = null, ?int $minPhpVersionId = null): void {
+        $this->headers[$header][] = [$cond, $minPhpVersionId];
+    }
+
+    public function generateCode(): string {
+        ksort($this->headers);
+
+        $code = "";
+        foreach ($this->headers as $header => $guards) {
+            $conds = [];
+            $minPhpVersionId = null;
+
+            foreach ($guards as [$cond, $versionId]) {
+                // An unconditional use overrides any guarded ones
+                if ($cond === null) {
+                    $conds = null;
+                } elseif ($conds !== null) {
+                    $conds[$cond] = $cond;
+                }
+
+                if ($versionId !== null && ($minPhpVersionId === null || $versionId < $minPhpVersionId)) {
+                    $minPhpVersionId = $versionId;
+                }
+            }
+
+            $include = "#include \"$header\"\n";
+
+            if ($conds) {
+                $cond = count($conds) === 1
+                    ? reset($conds)
+                    : implode(" || ", array_map(static fn (string $cond): string => "($cond)", $conds));
+                $include = "#if $cond\n" . $include . "#endif\n";
+            }
+
+            if ($minPhpVersionId !== null) {
+                $include = "#if (PHP_VERSION_ID >= $minPhpVersionId)\n" . $include . "#endif\n";
+            }
+
+            $code .= $include;
+        }
+
+        return $code;
+    }
+}
+
 class ArrayType extends SimpleType {
 
     public function __construct(
@@ -256,7 +310,7 @@ class ArrayType extends SimpleType {
             return false;
         }
 
-        assert(get_class($other) === self::class);
+        assert($other instanceof self);
 
         return Type::equals($this->keyType, $other->keyType) &&
             Type::equals($this->valueType, $other->valueType);
@@ -861,7 +915,7 @@ class ConstName extends AbstractConstName {
 
     public function getDeclarationName(): string
     {
-        return $this->name->toString();
+        throw new Exception("ConstName does not have a declaration name");
     }
 }
 
@@ -1154,9 +1208,11 @@ class VersionFlags {
 
     /**
      * Keys are the PHP versions, values are arrays of flags
+     * @var array<int, string[]> $flagsByVersion
      */
     private array $flagsByVersion;
 
+    /** @param string[] $baseFlags */
     public function __construct(array $baseFlags) {
         $this->flagsByVersion = [];
         foreach (ALL_PHP_VERSION_IDS as $version) {
@@ -1182,6 +1238,32 @@ class VersionFlags {
         );
     }
 
+    /**
+     * If we have ZEND_ACC2_ flags, represent as 'ZEND_FENTRY_FLAGS(flags1, flags2)'.
+     * Otherwise, represent as just 'flags1' (backwards compatible).
+     */
+    private function formatFlags(array $flags): string {
+        $flags1 = [];
+        $flags2 = [];
+        foreach ($flags as $flag) {
+            if (str_starts_with($flag, 'ZEND_ACC2_')) {
+                $flags2[] = $flag;
+            } else {
+                $flags1[] = $flag;
+            }
+        }
+
+        if ($flags2 !== []) {
+            return sprintf(
+                'ZEND_FENTRY_FLAGS(%s, %s)',
+                $flags1 === [] ? 0 : implode("|", $flags1),
+                implode("|", $flags2),
+            );
+        }
+
+        return implode("|", $flags1);
+    }
+
     public function generateVersionDependentFlagCode(
         string $codeTemplate,
         ?int $phpVersionIdMinimumCompatibility,
@@ -1197,7 +1279,7 @@ class VersionFlags {
             if (empty($flagsByPhpVersions[$currentPhpVersion])) {
                 return '';
             }
-            return sprintf($codeTemplate, implode("|", $flagsByPhpVersions[$currentPhpVersion]));
+            return sprintf($codeTemplate, $this->formatFlags($flagsByPhpVersions[$currentPhpVersion]));
         }
 
         ksort($flagsByPhpVersions);
@@ -1238,7 +1320,7 @@ class VersionFlags {
             reset($flagsByPhpVersions);
             $firstVersion = key($flagsByPhpVersions);
             if ($firstVersion === $phpVersionIdMinimumCompatibility) {
-                return sprintf($codeTemplate, implode("|", reset($flagsByPhpVersions)));
+                return sprintf($codeTemplate, $this->formatFlags(reset($flagsByPhpVersions)));
             }
         }
 
@@ -1251,7 +1333,7 @@ class VersionFlags {
 
             $code .= "$if (PHP_VERSION_ID >= $version)\n";
 
-            $code .= sprintf($codeTemplate, implode("|", $versionFlags));
+            $code .= sprintf($codeTemplate, $this->formatFlags($versionFlags));
             $code .= $endif;
 
             $i++;
@@ -1276,6 +1358,7 @@ class FuncInfo {
         public ?FunctionOrMethodName $alias,
         private readonly bool $isDeprecated,
         private bool $supportsCompileTimeEval,
+        private bool $forbidDynamicCalls,
         public readonly bool $verify,
         public /* readonly */ array $args,
         public /* readonly */ ReturnInfo $return,
@@ -1378,15 +1461,15 @@ class FuncInfo {
             return null;
         }
 
-        $name = $this->alias ?? $this->name;
-
-        return $name->getDeclaration();
+        return ($this->alias ?? $this->name)->getDeclaration();
     }
 
     public function getFramelessDeclaration(): ?string {
         if (empty($this->framelessFunctionInfos)) {
             return null;
         }
+
+        assert($this->name instanceof FunctionName);
 
         $code = '';
         $infos = '';
@@ -1409,6 +1492,7 @@ class FuncInfo {
     }
 
     private function getFramelessFunctionInfosName(): string {
+        assert($this->name instanceof FunctionName);
         return $this->name->getFramelessFunctionInfosName();
     }
 
@@ -1417,6 +1501,7 @@ class FuncInfo {
             if ($this->isMethod()) {
                 throw new Exception('Frameless methods are not supported yet');
             }
+            assert($this->name instanceof FunctionName);
             if ($this->name->getNamespace()) {
                 throw new Exception('Namespaced direct calls to frameless functions are not supported yet');
             }
@@ -1430,11 +1515,12 @@ class FuncInfo {
         $flagsByPhpVersions = $this->getArginfoFlagsByPhpVersions();
 
         if ($this->isMethod()) {
+            assert($this->name instanceof MethodName);
             $zendName = '"' . $this->name->methodName . '"';
             if ($this->alias) {
                 if ($this->alias instanceof MethodName) {
                     $name = "zim_" . $this->alias->getDeclarationClassName() . "_" . $this->alias->methodName;
-                } else if ($this->alias instanceof FunctionName) {
+                } elseif ($this->alias instanceof FunctionName) {
                     $name = "zif_" . $this->alias->getNonNamespacedName();
                 } else {
                     throw new Error("Cannot happen");
@@ -1453,7 +1539,7 @@ class FuncInfo {
                     return rtrim($flagsCode) . "\n";
                 }
             }
-        } else if ($this->name instanceof FunctionName) {
+        } elseif ($this->name instanceof FunctionName) {
             $functionName = $this->name->getFunctionName();
             $declarationName = $this->alias ? $this->alias->getNonNamespacedName() : $this->name->getDeclarationName();
             $name = "zif_$declarationName";
@@ -1572,7 +1658,7 @@ class FuncInfo {
 
         $flags = new VersionFlags($flags);
 
-        if ($this->isMethod() === false && $this->supportsCompileTimeEval) {
+        if (!$this->isMethod() && $this->supportsCompileTimeEval) {
             $flags->addForVersionsAbove("ZEND_ACC_COMPILE_TIME_EVAL", PHP_82_VERSION_ID);
         }
 
@@ -1581,6 +1667,10 @@ class FuncInfo {
             static fn (AttributeInfo $attr): bool => $attr->class === "NoDiscard"
         )) {
             $flags->addForVersionsAbove("ZEND_ACC_NODISCARD", PHP_85_VERSION_ID);
+        }
+
+        if ($this->forbidDynamicCalls) {
+            $flags->addForVersionsAbove("ZEND_ACC2_FORBID_DYN_CALLS", PHP_86_VERSION_ID);
         }
 
         return $flags;
@@ -1842,7 +1932,7 @@ ENDCOMMENT
         $returnType = $this->return->getMethodSynopsisType();
         if ($returnType === null) {
             $returnDescriptionPara->appendChild(new DOMText("Description."));
-        } else if (count($returnType->types) === 1) {
+        } elseif (count($returnType->types) === 1) {
             $type = $returnType->types[0];
 
             $descriptionNode = match ($type->name) {
@@ -2079,7 +2169,7 @@ OUPUT_EXAMPLE
 
                 $methodSynopsis->appendChild($methodparam);
                 foreach ($arg->attributes as $attribute) {
-                    $attribute = $doc->createElement("modifier", "#[\\" . $attribute->class . "]");
+                    $attribute = $doc->createElement("modifier", (string) $attribute);
                     $attribute->setAttribute("role", "attribute");
 
                     $methodparam->appendChild($attribute);
@@ -2223,21 +2313,18 @@ class EvaluatedValue
                     }
 
                     $constType = ($const->phpDocType ?? $const->type)->tryToSimpleType();
-                    if ($constType) {
-                        if ($constType->isBool()) {
-                            return true;
-                        } elseif ($constType->isInt()) {
-                            return 1;
-                        } elseif ($constType->isFloat()) {
-                            return M_PI;
-                        } elseif ($constType->isString()) {
-                            return $const->name;
-                        } elseif ($constType->isArray()) {
-                            return [];
-                        }
+                    if ($constType === null) {
+                        return null;
                     }
 
-                    return null;
+                    return match (true) {
+                        $constType->isBool() => true,
+                        $constType->isInt() => 1,
+                        $constType->isFloat() => M_PI,
+                        $constType->isString() => $const->name,
+                        $constType->isArray() => [],
+                        default => null,
+                    };
                 }
 
                 throw new Exception("Constant " . $constName . " cannot be found");
@@ -2272,9 +2359,9 @@ class EvaluatedValue
         if ($this->type->isNull()) {
             $code .= "\tZVAL_NULL(&$zvalName);\n";
         } elseif ($this->type->isBool()) {
-            if ($cExpr == 'true') {
+            if ($cExpr === 'true') {
                 $code .= "\tZVAL_TRUE(&$zvalName);\n";
-            } elseif ($cExpr == 'false') {
+            } elseif ($cExpr === 'false') {
                 $code .= "\tZVAL_FALSE(&$zvalName);\n";
             } else {
                 $code .= "\tZVAL_BOOL(&$zvalName, $cExpr);\n";
@@ -2294,7 +2381,7 @@ class EvaluatedValue
                 $code .= "\tZVAL_STR(&$zvalName, $forStringDef);\n";
             }
         } elseif ($this->type->isArray()) {
-            if ($cExpr == '[]') {
+            if ($cExpr === '[]') {
                 $code .= "\tZVAL_EMPTY_ARRAY(&$zvalName);\n";
             } else {
                 throw new Exception("Unimplemented default value");
@@ -2311,9 +2398,28 @@ class EvaluatedValue
         // $this->expr has all its PHP constants replaced by C constants
         $prettyPrinter = new Standard;
         $expr = $prettyPrinter->prettyPrintExpr($this->expr);
-        // PHP single-quote to C double-quote string
         if ($this->type->isString()) {
-            $expr = preg_replace("/(^'|'$)/", '"', $expr);
+            // The string in $expr has had the octal, hex, and unicode
+            // backslash sequences already applied for double-quoted strings,
+            // but not the other sequences.
+            //
+            // PHP has single quote strings, C doesn't (they're one char).
+            // Single-quoted strings need handling to replace their escapes
+            // with the double-quoted equivalent; namely single quote escapes.
+            //
+            // Double-quoted strings have similar escape sequences as C does,
+            // so we can pass them through directly. However, C does *not*
+            // support the \$ escape sequence (in ""), so strip that. Variable
+            // interpolation shouldn't be possible in a stub, so we don't need
+            // to worry about mangling such a case.
+            if (preg_match("/(^'|'$)/", $expr)) {
+                $expr = substr($expr, 1, -1); // strip quotes, re-add later
+                $expr = str_replace("\\'", "'", $expr);
+                $expr = addcslashes($expr, "\\\"");
+                $expr = "\"$expr\"";
+            } else {
+                $expr = str_replace('\$', "$", $expr);
+            }
         }
         return $expr[0] == '"' ? $expr : preg_replace('(\bnull\b)', 'NULL', str_replace('\\', '', $expr));
     }
@@ -2354,7 +2460,17 @@ abstract class VariableLike
             $flags = "ZEND_ACC_PRIVATE";
         }
 
-        return new VersionFlags([$flags]);
+        $versionFlags = new VersionFlags([$flags]);
+
+        if ($this->flags & Modifiers::PUBLIC_SET) {
+            $versionFlags->addForVersionsAbove("ZEND_ACC_PUBLIC_SET", PHP_84_VERSION_ID);
+        } elseif ($this->flags & Modifiers::PROTECTED_SET) {
+            $versionFlags->addForVersionsAbove("ZEND_ACC_PROTECTED_SET", PHP_84_VERSION_ID);
+        } elseif ($this->flags & Modifiers::PRIVATE_SET) {
+            $versionFlags->addForVersionsAbove("ZEND_ACC_PRIVATE_SET", PHP_84_VERSION_ID);
+        }
+
+        return $versionFlags;
     }
 
     protected function getTypeCode(string $variableLikeName, string &$code): string
@@ -2375,8 +2491,8 @@ abstract class VariableLike
                     $code .= "\t{$variableLikeType}_{$variableLikeName}_type_list->num_types = $classTypeCount;\n";
 
                     foreach ($arginfoType->classTypes as $k => $classType) {
-                        $escapedClassName = $classType->toEscapedName();
-                        $code .= "\t{$variableLikeType}_{$variableLikeName}_type_list->types[$k] = (zend_type) ZEND_TYPE_INIT_CLASS({$variableLikeType}_{$variableLikeName}_class_{$escapedClassName}, 0, 0);\n";
+                        $varEscapedClassName = $classType->toVarEscapedName();
+                        $code .= "\t{$variableLikeType}_{$variableLikeName}_type_list->types[$k] = (zend_type) ZEND_TYPE_INIT_CLASS({$variableLikeType}_{$variableLikeName}_class_{$varEscapedClassName}, 0, 0);\n";
                     }
 
                     $typeMaskCode = $this->type->toArginfoType()->toTypeMask();
@@ -2450,6 +2566,17 @@ abstract class VariableLike
             $fieldsynopsisElement->appendChild(new DOMText("\n$indentation"));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "private"));
         }
+
+        if ($this->flags & Modifiers::PUBLIC_SET) {
+            $fieldsynopsisElement->appendChild(new DOMText("\n$indentation"));
+            $fieldsynopsisElement->appendChild($doc->createElement("modifier", "public(set)"));
+        } elseif ($this->flags & Modifiers::PROTECTED_SET) {
+            $fieldsynopsisElement->appendChild(new DOMText("\n$indentation"));
+            $fieldsynopsisElement->appendChild($doc->createElement("modifier", "protected(set)"));
+        } elseif ($this->flags & Modifiers::PRIVATE_SET) {
+            $fieldsynopsisElement->appendChild(new DOMText("\n$indentation"));
+            $fieldsynopsisElement->appendChild($doc->createElement("modifier", "private(set)"));
+        }
     }
 
 }
@@ -2505,6 +2632,7 @@ class ConstInfo extends VariableLike
 
     protected function getFieldSynopsisDefaultLinkend(): string
     {
+        assert($this->name instanceof ClassConstName);
         $className = str_replace(["\\", "_"], ["-", "-"], $this->name->class->toLowerString());
 
         return "$className.constants." . strtolower(str_replace("_", "-", trim($this->name->getDeclarationName(), "_")));
@@ -2563,19 +2691,19 @@ class ConstInfo extends VariableLike
         return $this->getPredefinedConstantElement($doc, $indentationLevel, "entry");
     }
 
-    public function discardInfoForOldPhpVersions(?int $phpVersionIdMinimumCompatibility): void {
+    public function discardInfoForOldPhpVersions(?int $minimumPhpVersionIdCompatibility): void {
         $this->type = null;
         $this->flags &= ~Modifiers::FINAL;
         $this->isDeprecated = false;
         $this->attributes = [];
-        $this->phpVersionIdMinimumCompatibility = $phpVersionIdMinimumCompatibility;
+        $this->phpVersionIdMinimumCompatibility = $minimumPhpVersionIdCompatibility;
     }
 
     /** @param array<string, ConstInfo> $allConstInfos */
-    public function getDeclaration(array $allConstInfos): string
+    public function getDeclaration(array $allConstInfos, HeaderDependencies $headerDependencies): string
     {
         $type = $this->phpDocType ?? $this->type;
-        $simpleType = $type ? $type->tryToSimpleType() : null;
+        $simpleType = $type?->tryToSimpleType();
         if ($simpleType && $simpleType->name === "mixed") {
             $simpleType = null;
         }
@@ -2595,15 +2723,17 @@ class ConstInfo extends VariableLike
         if ($this->name instanceof ClassConstName) {
             $code = $this->getClassConstDeclaration($value);
         } else {
-            $code = $this->getGlobalConstDeclaration($value);
+            $code = $this->getGlobalConstDeclaration($value, $headerDependencies);
         }
         $code .= $this->getValueAssertion($value);
 
         return $code;
     }
 
-    private function getGlobalConstDeclaration(EvaluatedValue $value): string
+    private function getGlobalConstDeclaration(EvaluatedValue $value, HeaderDependencies $headerDependencies): string
     {
+        $headerDependencies->add("zend_constants.h", $this->cond);
+
         $constName = str_replace('\\', '\\\\', $this->name->__toString());
         $constValue = $value->value;
         $cExpr = $value->getCExpr();
@@ -2900,6 +3030,13 @@ class StringBuilder {
         '8.5' => 'ZEND_STR_8_DOT_5',
     ];
 
+    // NEW in 8.6
+    private const PHP_86_KNOWN = [
+        "arguments" => "ZEND_STR_ARGUMENTS",
+        "NoDiscard" => "ZEND_STR_NODISCARD",
+        '8.6' => 'ZEND_STR_8_DOT_6',
+    ];
+
     /**
      * Get an array of three strings:
      *   - declaration of zend_string, if needed, or empty otherwise
@@ -2907,10 +3044,10 @@ class StringBuilder {
      *   - freeing the zend_string, if needed
      *
      * @param string $varName
-     * @param string $strContent
+     * @param string $content
      * @param ?int $minPHPCompatibility
      * @param bool $interned
-     * @return string[]
+     * @return array{0: string, 1: string, 2: string}
      */
     public static function getString(
         string $varName,
@@ -2938,6 +3075,10 @@ class StringBuilder {
         }
         $include = self::PHP_80_KNOWN;
         switch ($minPhp) {
+            case PHP_86_VERSION_ID:
+                $include = array_merge($include, self::PHP_86_KNOWN);
+                // Intentional fall through
+
             case PHP_85_VERSION_ID:
                 $include = array_merge($include, self::PHP_85_KNOWN);
                 // Intentional fall through
@@ -3014,11 +3155,11 @@ class PropertyInfo extends VariableLike
         return $this->defaultValueString;
     }
 
-    public function discardInfoForOldPhpVersions(?int $phpVersionIdMinimumCompatibility): void {
+    public function discardInfoForOldPhpVersions(?int $minimumPhpVersionIdCompatibility): void {
         $this->type = null;
         $this->flags &= ~Modifiers::READONLY;
         $this->attributes = [];
-        $this->phpVersionIdMinimumCompatibility = $phpVersionIdMinimumCompatibility;
+        $this->phpVersionIdMinimumCompatibility = $minimumPhpVersionIdCompatibility;
     }
 
     /** @param array<string, ConstInfo> $allConstInfos */
@@ -3138,7 +3279,9 @@ class EnumCaseInfo {
     ) {}
 
     /** @param array<string, ConstInfo> $allConstInfos */
-    public function getDeclaration(array $allConstInfos): string {
+    public function getDeclaration(array $allConstInfos, HeaderDependencies $headerDependencies, ?string $cond = null, ?int $minPhpVersionId = null): string {
+        $headerDependencies->add("zend_enum.h", $cond, $minPhpVersionId);
+
         $escapedName = addslashes($this->name->case);
         if ($this->value === null) {
             return "\n\tzend_enum_add_case_cstr(class_entry, \"$escapedName\", NULL);\n";
@@ -3212,12 +3355,36 @@ class AttributeInfo {
         private readonly array $args,
     ) {}
 
+    public function __toString(): string {
+        $code = '#[\\' . $this->class;
+        if (!empty($this->args)) {
+            $prettyPrinter = new Standard;
+            $args = [];
+            foreach ($this->args as $arg) {
+                $argStr = $prettyPrinter->prettyPrintExpr($arg->value);
+                if ($arg->name !== null) {
+                    $argStr = $arg->name->name . ': ' . $argStr;
+                }
+                $args[] = $argStr;
+            }
+            $code .= '(' . implode(', ', $args) . ')';
+        }
+        $code .= ']';
+        return $code;
+    }
+
     /**
      * @param array<string, ConstInfo> $allConstInfos
      * @param array<string, string> &$declaredStrings Map of string content to
      *   the name of a zend_string already created with that content
      */
-    public function generateCode(string $invocation, string $nameSuffix, array $allConstInfos, ?int $phpVersionIdMinimumCompatibility, array &$declaredStrings = []): string {
+    public function generateCode(string $invocation, string $nameSuffix, array $allConstInfos, ?int $phpVersionIdMinimumCompatibility, HeaderDependencies $headerDependencies, ?string $cond = null, array &$declaredStrings = []): string {
+        $headerDependencies->add(
+            "zend_attributes.h",
+            $cond,
+            $phpVersionIdMinimumCompatibility !== null && $phpVersionIdMinimumCompatibility < PHP_80_VERSION_ID ? PHP_80_VERSION_ID : null
+        );
+
         $escapedAttributeName = strtr($this->class, '\\', '_');
         [$stringInit, $nameCode, $stringRelease] = StringBuilder::getString(
             "attribute_name_{$escapedAttributeName}_$nameSuffix",
@@ -3234,7 +3401,7 @@ class AttributeInfo {
             $initValue = '';
             if ($arg->value instanceof Node\Scalar\String_) {
                 $strVal = $arg->value->value;
-                [$strInit, $strUse, $strRelease] = StringBuilder::getString(
+                [$strInit, $strUse] = StringBuilder::getString(
                     'unused',
                     $strVal,
                     $phpVersionIdMinimumCompatibility
@@ -3260,7 +3427,7 @@ class AttributeInfo {
                 $code .= $initValue;
             }
             if ($arg->name) {
-                [$stringInit, $nameCode, $stringRelease] = StringBuilder::getString(
+                [$stringInit, $nameCode] = StringBuilder::getString(
                     "",
                     $arg->name->name,
                     $phpVersionIdMinimumCompatibility,
@@ -3300,6 +3467,7 @@ class ClassInfo {
      * @param AttributeInfo[] $attributes
      * @param Name[] $extends
      * @param Name[] $implements
+     * @param Name[] $uses
      * @param ConstInfo[] $constInfos
      * @param PropertyInfo[] $propertyInfos
      * @param FuncInfo[] $funcInfos
@@ -3318,17 +3486,19 @@ class ClassInfo {
         private bool $isNotSerializable,
         private readonly array $extends,
         private readonly array $implements,
+        private readonly array $uses,
         public /* readonly */ array $constInfos,
         private /* readonly */ array $propertyInfos,
         public array $funcInfos,
         private readonly array $enumCaseInfos,
+        private readonly bool $generateCNameTable,
         public readonly ?string $cond,
         public ?int $phpVersionIdMinimumCompatibility,
         public readonly bool $isUndocumentable,
     ) {}
 
     /** @param array<string, ConstInfo> $allConstInfos */
-    public function getRegistration(array $allConstInfos): string
+    public function getRegistration(array $allConstInfos, HeaderDependencies $headerDependencies): string
     {
         $params = [];
         foreach ($this->extends as $extends) {
@@ -3336,6 +3506,9 @@ class ClassInfo {
         }
         foreach ($this->implements as $implements) {
             $params[] = "zend_class_entry *class_entry_" . implode("_", $implements->getParts());
+        }
+        foreach ($this->uses as $use) {
+            $params[] = "zend_class_entry *class_entry_" . implode("_", $use->getParts());
         }
 
         $escapedName = implode("_", $this->name->getParts());
@@ -3365,6 +3538,7 @@ class ClassInfo {
             $name = addslashes((string) $this->name);
             $backingType = $this->enumBackingType
                 ? $this->enumBackingType->toTypeCode() : "IS_UNDEF";
+            $headerDependencies->add("zend_enum.h", $this->cond, $php81MinimumCompatibility ? null : PHP_81_VERSION_ID);
             $code .= "\tzend_class_entry *class_entry = zend_register_internal_enum(\"$name\", $backingType, $classMethods);\n";
             if (!$flags->isEmpty()) {
                 $code .= $this->getFlagsByPhpVersion()->generateVersionDependentFlagCode("\tclass_entry->ce_flags = %s;\n", $this->phpVersionIdMinimumCompatibility);
@@ -3434,6 +3608,17 @@ class ClassInfo {
             $code .= "\tzend_class_implements(class_entry, " . count($implements) . ", " . implode(", ", $implements) . ");\n";
         }
 
+        $traits = array_map(
+            function (Name $item) {
+                return "class_entry_" . implode("_", $item->getParts());
+            },
+            $this->uses
+        );
+
+        if (!empty($traits)) {
+            $code .= "\tzend_class_use_internal_traits(class_entry, " . count($traits) . ", " . implode(", ", $traits) . ");\n";
+        }
+
         if ($this->alias) {
             $code .= "\tzend_register_class_alias(\"" . str_replace("\\", "\\\\", $this->alias) . "\", class_entry);\n";
         }
@@ -3441,11 +3626,11 @@ class ClassInfo {
         $code .= generateCodeWithConditions(
             $this->constInfos,
             '',
-            static fn (ConstInfo $const): string => $const->getDeclaration($allConstInfos)
+            static fn (ConstInfo $const): string => $const->getDeclaration($allConstInfos, $headerDependencies)
         );
 
         foreach ($this->enumCaseInfos as $enumCase) {
-            $code .= $enumCase->getDeclaration($allConstInfos);
+            $code .= $enumCase->getDeclaration($allConstInfos, $headerDependencies, $this->cond, $php81MinimumCompatibility ? null : PHP_81_VERSION_ID);
         }
 
         foreach ($this->propertyInfos as $property) {
@@ -3471,6 +3656,8 @@ class ClassInfo {
                     "class_{$escapedName}_$key",
                     $allConstInfos,
                     $this->phpVersionIdMinimumCompatibility,
+                    $headerDependencies,
+                    $this->cond,
                     $declaredStrings
                 );
             }
@@ -3478,19 +3665,19 @@ class ClassInfo {
             $code .= $php80CondEnd;
         }
 
-        if ($attributeInitializationCode = generateConstantAttributeInitialization($this->constInfos, $allConstInfos, $this->phpVersionIdMinimumCompatibility, $this->cond, $declaredStrings)) {
+        if ($attributeInitializationCode = generateConstantAttributeInitialization($this->constInfos, $allConstInfos, $this->phpVersionIdMinimumCompatibility, $headerDependencies, $this->cond, $declaredStrings)) {
             $code .= $php80CondStart;
             $code .= "\n" . $attributeInitializationCode;
             $code .= $php80CondEnd;
         }
 
-        if ($attributeInitializationCode = generatePropertyAttributeInitialization($this->propertyInfos, $allConstInfos, $this->phpVersionIdMinimumCompatibility, $declaredStrings)) {
+        if ($attributeInitializationCode = generatePropertyAttributeInitialization($this->propertyInfos, $allConstInfos, $this->phpVersionIdMinimumCompatibility, $headerDependencies, $this->cond, $declaredStrings)) {
             $code .= $php80CondStart;
             $code .= "\n" . $attributeInitializationCode;
             $code .= $php80CondEnd;
         }
 
-        if ($attributeInitializationCode = generateFunctionAttributeInitialization($this->funcInfos, $allConstInfos, $this->phpVersionIdMinimumCompatibility, $this->cond, $declaredStrings)) {
+        if ($attributeInitializationCode = generateFunctionAttributeInitialization($this->funcInfos, $allConstInfos, $this->phpVersionIdMinimumCompatibility, $headerDependencies, $this->cond, $declaredStrings)) {
             $code .= $php80CondStart;
             $code .= "\n" . $attributeInitializationCode;
             $code .= $php80CondEnd;
@@ -3535,6 +3722,25 @@ class ClassInfo {
         }
 
         $code .= "} {$cEnumName};\n";
+
+        $caseCount = count($this->enumCaseInfos);
+
+        if ($this->generateCNameTable && $caseCount > 0) {
+            $cPrefix = 'ZEND_ENUM_' . str_replace('\\', '_', $this->name->toString());
+            $useGuard = $cPrefix . '_USE_NAME_TABLE';
+
+            $code .= "\n#define {$cPrefix}_CASE_COUNT {$caseCount}\n";
+            $code .= "\n#ifdef {$useGuard}\n";
+            $code .= "static const char *{$cEnumName}_case_names[{$cPrefix}_CASE_COUNT + 1] = {\n";
+
+            foreach ($this->enumCaseInfos as $case) {
+                $cName = $cPrefix . '_' . $case->name->case;
+                $code .= "\t[{$cName}] = \"{$case->name->case}\",\n";
+            }
+
+            $code .= "};\n";
+            $code .= "#endif\n";
+        }
 
         if ($this->cond) {
             $code .= "#endif\n";
@@ -3848,7 +4054,7 @@ class ClassInfo {
             return null;
         }
 
-        $type = $typeOverride !== null ? $typeOverride : $classInfo->type;
+        $type = $typeOverride ?? $classInfo->type;
 
         $ooElement = $doc->createElement("oo$type");
         $ooElement->appendChild(new DOMText("\n$indentation "));
@@ -4081,7 +4287,7 @@ class ClassInfo {
         $indentation = str_repeat(" ", $indentationLevel);
 
         $classSynopsis->appendChild(new DOMText("\n\n$indentation"));
-        $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "$inheritedLabel");
+        $classSynopsisInfo = $doc->createElement("classsynopsisinfo", $inheritedLabel);
         $classSynopsisInfo->setAttribute("role", "comment");
         $classSynopsis->appendChild($classSynopsisInfo);
 
@@ -4122,22 +4328,23 @@ class FileInfo {
             if ($tag->name === 'generate-function-entries') {
                 $this->generateFunctionEntries = true;
                 $this->declarationPrefix = $tag->value ? $tag->value . " " : "";
-            } else if ($tag->name === 'generate-legacy-arginfo') {
+            } elseif ($tag->name === 'generate-legacy-arginfo') {
                 if ($tag->value && !in_array((int) $tag->value, ALL_PHP_VERSION_IDS, true)) {
                     throw new Exception(
                         "Legacy PHP version must be one of: \"" . PHP_70_VERSION_ID . "\" (PHP 7.0), \"" . PHP_80_VERSION_ID . "\" (PHP 8.0), " .
                         "\"" . PHP_81_VERSION_ID . "\" (PHP 8.1), \"" . PHP_82_VERSION_ID . "\" (PHP 8.2), \"" . PHP_83_VERSION_ID . "\" (PHP 8.3), " .
-                        "\"" . PHP_84_VERSION_ID . "\" (PHP 8.4), \"" . PHP_85_VERSION_ID . "\" (PHP 8.5), \"" . $tag->value . "\" provided"
+                        "\"" . PHP_84_VERSION_ID . "\" (PHP 8.4), \"" . PHP_85_VERSION_ID . "\" (PHP 8.5), \"" . PHP_86_VERSION_ID . "\" (PHP 8.6), " .
+                        $tag->value . "\" provided"
                     );
                 }
 
                 $this->minimumPhpVersionIdCompatibility = ($tag->value ? (int) $tag->value : PHP_70_VERSION_ID);
-            } else if ($tag->name === 'generate-class-entries') {
+            } elseif ($tag->name === 'generate-class-entries') {
                 $this->generateClassEntries = true;
                 $this->declarationPrefix = $tag->value ? $tag->value . " " : "";
-            } else if ($tag->name === 'undocumentable') {
+            } elseif ($tag->name === 'undocumentable') {
                 $this->isUndocumentable = true;
-            } else if ($tag->name === 'generate-c-enums') {
+            } elseif ($tag->name === 'generate-c-enums') {
                 $this->generateCEnums = true;
             }
         }
@@ -4218,6 +4425,7 @@ class FileInfo {
     public static function parseStubFile(string $code): FileInfo {
         $parser = new PhpParser\Parser\Php7(new PhpParser\Lexer\Emulative());
         $nodeTraverser = new PhpParser\NodeTraverser;
+        $nodeTraverser->addVisitor(new PhpParser\NodeVisitor\CloningVisitor);
         $nodeTraverser->addVisitor(new PhpParser\NodeVisitor\NameResolver);
         $prettyPrinter = new class extends Standard {
             protected function pName_FullyQualified(Name\FullyQualified $node): string {
@@ -4226,7 +4434,7 @@ class FileInfo {
         };
 
         $stmts = $parser->parse($code);
-        $nodeTraverser->traverse($stmts);
+        $stmts = $nodeTraverser->traverse($stmts);
 
         $fileTags = DocCommentTag::parseDocComments(self::getFileDocComments($stmts));
         $fileInfo = new FileInfo($fileTags);
@@ -4258,6 +4466,11 @@ class FileInfo {
 
             if ($stmt instanceof Stmt\Namespace_) {
                 $this->handleStatements($stmt->stmts, $prettyPrinter);
+                continue;
+            }
+
+            if ($stmt instanceof Stmt\Use_ || $stmt instanceof Stmt\GroupUse) {
+                // use statements are resolved by NameResolver before this point
                 continue;
             }
 
@@ -4299,6 +4512,7 @@ class FileInfo {
                 $propertyInfos = [];
                 $methodInfos = [];
                 $enumCaseInfos = [];
+                $traitUses = [];
                 foreach ($stmt->stmts as $classStmt) {
                     $cond = self::handlePreprocessorConditions($conds, $classStmt);
                     if ($classStmt instanceof Stmt\Nop) {
@@ -4323,7 +4537,7 @@ class FileInfo {
                                 AttributeInfo::createFromGroups($classStmt->attrGroups)
                             );
                         }
-                    } else if ($classStmt instanceof Stmt\Property) {
+                    } elseif ($classStmt instanceof Stmt\Property) {
                         if (!($classStmt->flags & Class_::VISIBILITY_MODIFIER_MASK)) {
                             throw new Exception("Visibility modifier is required");
                         }
@@ -4340,7 +4554,7 @@ class FileInfo {
                                 AttributeInfo::createFromGroups($classStmt->attrGroups)
                             );
                         }
-                    } else if ($classStmt instanceof Stmt\ClassMethod) {
+                    } elseif ($classStmt instanceof Stmt\ClassMethod) {
                         if (!($classStmt->flags & Class_::VISIBILITY_MODIFIER_MASK)) {
                             throw new Exception("Visibility modifier is required");
                         }
@@ -4354,12 +4568,19 @@ class FileInfo {
                             $this->isUndocumentable,
                             $this->getMinimumPhpVersionIdCompatibility()
                         );
-                    } else if ($classStmt instanceof Stmt\EnumCase) {
+                    } elseif ($classStmt instanceof Stmt\EnumCase) {
                         $enumCaseInfos[] = new EnumCaseInfo(
                             new EnumCaseName($className, $classStmt->name->toString()),
                             $classStmt->expr,
                             $classStmt->expr ? $prettyPrinter->prettyPrintExpr($classStmt->expr) : null,
                         );
+                    } elseif ($classStmt instanceof TraitUse) {
+                        if ($classStmt->adaptations) {
+                            throw new Exception("Trait adaptations are not supported");
+                        }
+                        foreach ($classStmt->traits as $trait) {
+                            $traitUses[] = $trait;
+                        }
                     } else {
                         throw new Exception("Not implemented {$classStmt->getType()}");
                     }
@@ -4372,6 +4593,7 @@ class FileInfo {
                     $propertyInfos,
                     $methodInfos,
                     $enumCaseInfos,
+                    $traitUses,
                     $cond,
                     $this->getMinimumPhpVersionIdCompatibility(),
                     $this->isUndocumentable
@@ -4399,22 +4621,22 @@ class FileInfo {
             $text = trim($comment->getText());
             if (preg_match('/^#\s*if\s+(.+)$/', $text, $matches)) {
                 $conds[] = $matches[1];
-            } else if (preg_match('/^#\s*ifdef\s+(.+)$/', $text, $matches)) {
+            } elseif (preg_match('/^#\s*ifdef\s+(.+)$/', $text, $matches)) {
                 $conds[] = "defined($matches[1])";
-            } else if (preg_match('/^#\s*ifndef\s+(.+)$/', $text, $matches)) {
+            } elseif (preg_match('/^#\s*ifndef\s+(.+)$/', $text, $matches)) {
                 $conds[] = "!defined($matches[1])";
-            } else if (preg_match('/^#\s*else$/', $text)) {
+            } elseif (preg_match('/^#\s*else$/', $text)) {
                 if (empty($conds)) {
                     throw new Exception("Encountered else without corresponding #if");
                 }
                 $cond = array_pop($conds);
                 $conds[] = "!($cond)";
-            } else if (preg_match('/^#\s*endif$/', $text)) {
+            } elseif (preg_match('/^#\s*endif$/', $text)) {
                 if (empty($conds)) {
                     throw new Exception("Encountered #endif without corresponding #if");
                 }
                 array_pop($conds);
-            } else if ($text[0] === '#') {
+            } elseif ($text[0] === '#') {
                 throw new Exception("Unrecognized preprocessor directive \"$text\"");
             }
         }
@@ -4423,11 +4645,11 @@ class FileInfo {
     }
 
     /** @param array<string, ConstInfo> $allConstInfos */
-    public function generateClassEntryCode(array $allConstInfos): string {
+    public function generateClassEntryCode(array $allConstInfos, HeaderDependencies $headerDependencies): string {
         $code = "";
 
         foreach ($this->classInfos as $class) {
-            $code .= "\n" . $class->getRegistration($allConstInfos);
+            $code .= "\n" . $class->getRegistration($allConstInfos, $headerDependencies);
         }
 
         return $code;
@@ -4460,6 +4682,7 @@ class FileInfo {
         array $allConstInfos,
         string $stubHash
     ): array {
+        $headerDependencies = new HeaderDependencies();
         $code = "";
 
         $generatedFuncInfos = [];
@@ -4523,8 +4746,8 @@ class FileInfo {
 
         if ($this->generateClassEntries) {
             $declaredStrings = [];
-            $attributeInitializationCode = generateFunctionAttributeInitialization($this->funcInfos, $allConstInfos, $this->getMinimumPhpVersionIdCompatibility(), null, $declaredStrings);
-            $attributeInitializationCode .= generateGlobalConstantAttributeInitialization($this->constInfos, $allConstInfos, $this->getMinimumPhpVersionIdCompatibility(), null, $declaredStrings);
+            $attributeInitializationCode = generateFunctionAttributeInitialization($this->funcInfos, $allConstInfos, $this->getMinimumPhpVersionIdCompatibility(), $headerDependencies, null, $declaredStrings);
+            $attributeInitializationCode .= generateGlobalConstantAttributeInitialization($this->constInfos, $allConstInfos, $this->getMinimumPhpVersionIdCompatibility(), $headerDependencies, null, $declaredStrings);
             if ($attributeInitializationCode) {
                 if (!$php80MinimumCompatibility) {
                     $attributeInitializationCode = "\n#if (PHP_VERSION_ID >= " . PHP_80_VERSION_ID . ")" . $attributeInitializationCode . "#endif\n";
@@ -4538,7 +4761,7 @@ class FileInfo {
                 $code .= generateCodeWithConditions(
                     $this->constInfos,
                     '',
-                    static fn (ConstInfo $constInfo): string => $constInfo->getDeclaration($allConstInfos)
+                    static fn (ConstInfo $constInfo): string => $constInfo->getDeclaration($allConstInfos, $headerDependencies)
                 );
 
                 if ($attributeInitializationCode !== "" && $this->constInfos) {
@@ -4549,7 +4772,7 @@ class FileInfo {
                 $code .= "}\n";
             }
 
-            $code .= $this->generateClassEntryCode($allConstInfos);
+            $code .= $this->generateClassEntryCode($allConstInfos, $headerDependencies);
         }
 
         $hasDeclFile = false;
@@ -4566,9 +4789,12 @@ class FileInfo {
                 . "#endif /* {$headerName} */\n";
         }
 
+        $includeCode = $headerDependencies->generateCode();
+
         $code = "/* This is a generated file, edit {$stubFilenameWithoutExtension}.stub.php instead.\n"
             . " * Stub hash: $stubHash"
             . ($hasDeclFile ? "\n * Has decl header: yes */\n" : " */\n")
+            . ($includeCode !== "" ? "\n" . $includeCode : "")
             . $code;
 
         return [$code, $declCode];
@@ -4610,7 +4836,7 @@ class DocCommentTag {
 
     public function getVariableName(): string {
         $value = $this->value;
-        if ($value === null || strlen($value) === 0) {
+        if ($value === null || $value === '') {
             throw new Exception("@$this->name doesn't have any value");
         }
 
@@ -4733,6 +4959,7 @@ function parseFunctionLike(
         $alias = null;
         $isDeprecated = false;
         $supportsCompileTimeEval = false;
+        $forbidDynamicCalls = false;
         $verify = true;
         $docReturnType = null;
         $tentativeReturnType = false;
@@ -4748,6 +4975,7 @@ function parseFunctionLike(
             $verify = !array_key_exists('no-verify', $tagMap);
             $tentativeReturnType = array_key_exists('tentative-return-type', $tagMap);
             $supportsCompileTimeEval = array_key_exists('compile-time-eval', $tagMap);
+            $forbidDynamicCalls = array_key_exists('forbid-dynamic-calls', $tagMap);
             $isUndocumentable = $isUndocumentable || array_key_exists('undocumentable', $tagMap);
 
             foreach ($tags as $tag) {
@@ -4810,7 +5038,7 @@ function parseFunctionLike(
 
             if ($preferRef) {
                 $sendBy = ArgInfo::SEND_PREFER_REF;
-            } else if ($param->byRef) {
+            } elseif ($param->byRef) {
                 $sendBy = ArgInfo::SEND_BY_REF;
             } else {
                 $sendBy = ArgInfo::SEND_BY_VAL;
@@ -4880,6 +5108,7 @@ function parseFunctionLike(
             $alias,
             $isDeprecated,
             $supportsCompileTimeEval,
+            $forbidDynamicCalls,
             $verify,
             $args,
             $return,
@@ -4897,7 +5126,7 @@ function parseFunctionLike(
 }
 
 /**
- * @param array<int, array<int, AttributeGroup> $attributes
+ * @param array<int, array<int, AttributeGroup>> $attributes
  */
 function parseConstLike(
     PrettyPrinterAbstract $prettyPrinter,
@@ -4990,7 +5219,7 @@ function parseConstLike(
 }
 
 /**
- * @param array<int, array<int, AttributeGroup> $attributes
+ * @param array<int, array<int, AttributeGroup>> $attributes
  */
 function parseProperty(
     Name $class,
@@ -5055,6 +5284,7 @@ function parseProperty(
  * @param PropertyInfo[] $properties
  * @param FuncInfo[] $methods
  * @param EnumCaseInfo[] $enumCases
+ * @param Name[] $traitUses
  */
 function parseClass(
     Name $name,
@@ -5063,6 +5293,7 @@ function parseClass(
     array $properties,
     array $methods,
     array $enumCases,
+    array $traitUses,
     ?string $cond,
     ?int $minimumPhpVersionIdCompatibility,
     bool $isUndocumentable
@@ -5077,6 +5308,7 @@ function parseClass(
     $isStrictProperties = array_key_exists('strict-properties', $tagMap);
     $isNotSerializable = array_key_exists('not-serializable', $tagMap);
     $isUndocumentable = $isUndocumentable || array_key_exists('undocumentable', $tagMap);
+    $generateCNameTable = array_key_exists('c-name-table', $tagMap);
     foreach ($tags as $tag) {
         if ($tag->name === 'alias') {
             $alias = $tag->getValue();
@@ -5105,9 +5337,9 @@ function parseClass(
     } elseif ($class instanceof Interface_) {
         $classKind = "interface";
         $extends = $class->extends;
-    } else if ($class instanceof Trait_) {
+    } elseif ($class instanceof Trait_) {
         $classKind = "trait";
-    } else if ($class instanceof Enum_) {
+    } elseif ($class instanceof Enum_) {
         $classKind = "enum";
         $implements = $class->implements;
     } else {
@@ -5134,10 +5366,12 @@ function parseClass(
         $isNotSerializable,
         $extends,
         $implements,
+        $traitUses,
         $consts,
         $properties,
         $methods,
         $enumCases,
+        $generateCNameTable,
         $cond,
         $minimumPhpVersionIdCompatibility,
         $isUndocumentable
@@ -5231,11 +5465,11 @@ function generateFunctionEntries(?Name $className, array $funcInfos, ?string $co
  * @param array<string, string> &$declaredStrings Map of string content to
  *   the name of a zend_string already created with that content
  */
-function generateFunctionAttributeInitialization(iterable $funcInfos, array $allConstInfos, ?int $phpVersionIdMinimumCompatibility, ?string $parentCond = null, array &$declaredStrings = []): string {
+function generateFunctionAttributeInitialization(iterable $funcInfos, array $allConstInfos, ?int $phpVersionIdMinimumCompatibility, HeaderDependencies $headerDependencies, ?string $parentCond = null, array &$declaredStrings = []): string {
     return generateCodeWithConditions(
         $funcInfos,
         "",
-        static function (FuncInfo $funcInfo) use ($allConstInfos, $phpVersionIdMinimumCompatibility, &$declaredStrings) {
+        static function (FuncInfo $funcInfo) use ($allConstInfos, $phpVersionIdMinimumCompatibility, $headerDependencies, $parentCond, &$declaredStrings) {
             $code = null;
 
             if ($funcInfo->name instanceof MethodName) {
@@ -5259,6 +5493,8 @@ function generateFunctionAttributeInitialization(iterable $funcInfos, array $all
                     "func_" . $funcInfo->name->getNameForAttributes() . "_$key",
                     $allConstInfos,
                     $phpVersionIdMinimumCompatibility,
+                    $headerDependencies,
+                    $funcInfo->cond ?? $parentCond,
                     $useDeclared
                 );
             }
@@ -5270,6 +5506,8 @@ function generateFunctionAttributeInitialization(iterable $funcInfos, array $all
                         "func_{$funcInfo->name->getNameForAttributes()}_arg{$index}_$key",
                         $allConstInfos,
                         $phpVersionIdMinimumCompatibility,
+                        $headerDependencies,
+                        $funcInfo->cond ?? $parentCond,
                         $useDeclared
                     );
                 }
@@ -5291,6 +5529,7 @@ function generateGlobalConstantAttributeInitialization(
     iterable $constInfos,
     array $allConstInfos,
     ?int $phpVersionIdMinimumCompatibility,
+    HeaderDependencies $headerDependencies,
     ?string $parentCond = null,
     array &$declaredStrings = []
 ): string {
@@ -5301,7 +5540,7 @@ function generateGlobalConstantAttributeInitialization(
     $code = generateCodeWithConditions(
         $constInfos,
         "",
-        static function (ConstInfo $constInfo) use ($allConstInfos, $isConditional, &$declaredStrings) {
+        static function (ConstInfo $constInfo) use ($allConstInfos, $isConditional, $headerDependencies, $parentCond, &$declaredStrings) {
             $code = "";
 
             if ($constInfo->attributes === []) {
@@ -5330,6 +5569,8 @@ function generateGlobalConstantAttributeInitialization(
                     $constVarName . "_$key",
                     $allConstInfos,
                     PHP_85_VERSION_ID,
+                    $headerDependencies,
+                    $constInfo->cond ?? $parentCond,
                     $useDeclared
                 );
             }
@@ -5354,13 +5595,14 @@ function generateConstantAttributeInitialization(
     iterable $constInfos,
     array $allConstInfos,
     ?int $phpVersionIdMinimumCompatibility,
+    HeaderDependencies $headerDependencies,
     ?string $parentCond = null,
     array &$declaredStrings = []
 ): string {
     return generateCodeWithConditions(
         $constInfos,
         "",
-        static function (ConstInfo $constInfo) use ($allConstInfos, $phpVersionIdMinimumCompatibility, &$declaredStrings) {
+        static function (ConstInfo $constInfo) use ($allConstInfos, $phpVersionIdMinimumCompatibility, $headerDependencies, $parentCond, &$declaredStrings) {
             $code = null;
 
             // Make sure we don't try and use strings that might only be
@@ -5377,6 +5619,8 @@ function generateConstantAttributeInitialization(
                     "const_" . $constInfo->name->getDeclarationName() . "_$key",
                     $allConstInfos,
                     $phpVersionIdMinimumCompatibility,
+                    $headerDependencies,
+                    $constInfo->cond ?? $parentCond,
                     $useDeclared
                 );
             }
@@ -5397,6 +5641,8 @@ function generatePropertyAttributeInitialization(
     iterable $propertyInfos,
     array $allConstInfos,
     ?int $phpVersionIdMinimumCompatibility,
+    HeaderDependencies $headerDependencies,
+    ?string $cond,
     array &$declaredStrings
 ): string {
     $code = "";
@@ -5407,6 +5653,8 @@ function generatePropertyAttributeInitialization(
                 "property_" . $propertyInfo->name->getDeclarationName() . "_" . $key,
                 $allConstInfos,
                 $phpVersionIdMinimumCompatibility,
+                $headerDependencies,
+                $cond,
                 $declaredStrings
             );
         }
@@ -5447,7 +5695,7 @@ function replacePredefinedConstants(string $targetDirectory, array $constMap, ar
     );
 
     foreach ($it as $file) {
-        $pathName = $file->getPathName();
+        $pathName = $file->getPathname();
         if (!preg_match('/(?:[\w\.]*constants[\w\._]*|tokens).xml$/i', basename($pathName))) {
             continue;
         }
@@ -5628,7 +5876,7 @@ function replaceClassSynopses(
     );
 
     foreach ($it as $file) {
-        $pathName = $file->getPathName();
+        $pathName = $file->getPathname();
         if (!preg_match('/\.xml$/i', $pathName)) {
             continue;
         }
@@ -5781,7 +6029,7 @@ function collectEnumSynopsisItemDescriptions(string $className, DOMElement $syno
             continue;
         }
 
-        $enumCaseName = $enumCaseNames[0]->textContent;
+        $enumCaseName = $enumCaseNames->item(0)->textContent;
 
         $enumCaseDescriptionElements["$className::$enumCaseName"] = $enumItemDescription;
     }
@@ -5845,7 +6093,7 @@ function replaceMethodSynopses(
     );
 
     foreach ($it as $file) {
-        $pathName = $file->getPathName();
+        $pathName = $file->getPathname();
         if (!preg_match('/\.xml$/i', $pathName)) {
             continue;
         }
@@ -6166,7 +6414,7 @@ foreach (array_unique($locations) as $location) {
         if ($fileInfo) {
             $fileInfos[] = $fileInfo;
         }
-    } else if (is_dir($location)) {
+    } elseif (is_dir($location)) {
         array_push($fileInfos, ...processDirectory($location, $context));
     } else {
         echo "$location is neither a file nor a directory.\n";

@@ -41,26 +41,47 @@
 .file "make_arm_aapcs_elf_gas.S"
 .text
 .globl make_fcontext
+.hidden make_fcontext
 .align 2
 .type make_fcontext,%function
 .syntax unified
 make_fcontext:
     @ shift address in A1 to lower 16 byte boundary
+
+    #if __ARM_ARCH >= 7
     bic  a1, a1, #15
+    #else
+    lsrs	a1, a1, #4
+    lsls	a1, a1, #4
+    #endif
 
     @ reserve space for context-data on context-stack
+    #if __ARM_ARCH >= 7
     sub  a1, a1, #124
+    #else
+    subs  a1, #124
+    #endif
 
     @ third arg of make_fcontext() == address of context-function
     str  a3, [a1, #104]
 
     @ compute address of returned transfer_t
+    #if __ARM_ARCH >= 7
     add  a2, a1, #108
+    #else
+    mov  a2, a1
+    adds  a2, #108
+    #endif
     mov  a3, a2
     str  a3, [a1, #64]
 
+
     @ compute abs address of label finish
+    #if __ARM_ARCH >= 7
     adr  a2, finish
+    #else
+    ldr  a2, =finish
+    #endif
     @ save address of finish as return-address for context-function
     @ will be entered after context-function returns
     str  a2, [a1, #100]
@@ -72,7 +93,13 @@ make_fcontext:
 
 finish:
     @ exit code is zero
+    #if __ARM_ARCH >=7
     mov  a1, #0
+    #else
+    movs	r3, #0
+    movs	r0, r3
+    #endif
+
     @ exit application
     bl  _exit@PLT
 .size make_fcontext,.-make_fcontext

@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Thies C. Arntzen <thies@thieso.net>                          |
    +----------------------------------------------------------------------+
@@ -588,9 +586,13 @@ PHP_FUNCTION(scandir)
 		n = php_stream_scandir(dirn, &namelist, context, (void *) php_stream_dirent_alphasort);
 	} else if (flags == PHP_SCANDIR_SORT_NONE) {
 		n = php_stream_scandir(dirn, &namelist, context, NULL);
-	} else {
+	} else if (flags == PHP_SCANDIR_SORT_DESCENDING) {
 		n = php_stream_scandir(dirn, &namelist, context, (void *) php_stream_dirent_alphasortr);
-	}
+	} else {
+		zend_argument_value_error(2, "must be one of the SCANDIR_SORT_ASCENDING, SCANDIR_SORT_DESCENDING, or SCANDIR_SORT_NONE constants");
+		RETURN_THROWS();
+    }
+
 	if (n < 0) {
 		php_error_docref(NULL, E_WARNING, "(errno %d): %s", errno, strerror(errno));
 		RETURN_FALSE;

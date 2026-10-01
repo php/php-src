@@ -3,6 +3,8 @@ on:
   push:
     paths:
       - 'main/network.c'
+      - 'main/io/**'
+      - 'main/php_io.h'
       - 'tests/unit/**'
       - '.github/workflows/unit-tests.yml'
     branches:
@@ -10,6 +12,8 @@ on:
   pull_request:
     paths:
       - 'main/network.c'
+      - 'main/io/**'
+      - 'main/php_io.h'
       - 'tests/unit/**'
       - '.github/workflows/unit-tests.yml'
     branches:

@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Arnaud Le Blanc <arnaud.lb@gmail.com>                       |
    +----------------------------------------------------------------------+
@@ -59,8 +58,8 @@ typedef struct _zend_fcall_info_cache zend_fcall_info_cache;
 
 ZEND_API bool zend_class_can_be_lazy(const zend_class_entry *ce);
 ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
-		zend_class_entry *class_type, zval *initializer_zv,
-		zend_fcall_info_cache *initializer_fcc, zend_lazy_object_flags_t flags);
+		zend_class_entry *reflection_ce, const zval *initializer_zv,
+		const zend_fcall_info_cache *initializer_fcc, zend_lazy_object_flags_t flags);
 ZEND_API zend_object *zend_lazy_object_init(zend_object *obj);
 ZEND_API zend_object *zend_lazy_object_mark_as_initialized(zend_object *obj);
 

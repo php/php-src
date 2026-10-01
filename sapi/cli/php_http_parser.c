@@ -20,11 +20,16 @@
  */
 #include <assert.h>
 #include <stddef.h>
+#include <stdint.h>
 #include "php_http_parser.h"
 
 
 #ifndef MIN
 # define MIN(a,b) ((a) < (b) ? (a) : (b))
+#endif
+
+#ifndef SSIZE_MAX
+# define SSIZE_MAX PTRDIFF_MAX
 #endif
 
 
@@ -82,6 +87,7 @@ static const char *method_strings[] =
   , "POST"
   , "PUT"
   , "PATCH"
+  , "QUERY"
   , "CONNECT"
   , "OPTIONS"
   , "TRACE"
@@ -521,6 +527,7 @@ size_t php_http_parser_execute (php_http_parser *parser,
           case 'N': parser->method = PHP_HTTP_NOTIFY; break;
           case 'O': parser->method = PHP_HTTP_OPTIONS; break;
           case 'P': parser->method = PHP_HTTP_POST; /* or PROPFIND or PROPPATCH or PUT */ break;
+          case 'Q': parser->method = PHP_HTTP_QUERY; break;
           case 'R': parser->method = PHP_HTTP_REPORT; break;
           case 'S': parser->method = PHP_HTTP_SUBSCRIBE; /* or SEARCH */ break;
           case 'T': parser->method = PHP_HTTP_TRACE; break;
@@ -1228,8 +1235,10 @@ size_t php_http_parser_execute (php_http_parser *parser,
           case h_content_length:
             if (ch == ' ') break;
             if (ch < '0' || ch > '9') goto error;
-            parser->content_length *= 10;
-            parser->content_length += ch - '0';
+            if (parser->content_length > (SSIZE_MAX - (ch - '0')) / 10) {
+              goto error;
+            }
+            parser->content_length = parser->content_length * 10 + (ch - '0');
             break;
 
           /* Transfer-Encoding: chunked */
@@ -1335,7 +1344,7 @@ size_t php_http_parser_execute (php_http_parser *parser,
               break;
 
             default:
-              return p - data; /* Error */
+              goto error;
           }
         }
 
@@ -1384,7 +1393,9 @@ size_t php_http_parser_execute (php_http_parser *parser,
 
         to_read = MIN((size_t)(pe - p), (size_t)parser->content_length);
         if (to_read > 0) {
-          if (settings->on_body) settings->on_body(parser, p, to_read);
+          if (settings->on_body && 0 != settings->on_body(parser, p, to_read)) {
+            goto error;
+          }
           p += to_read - 1;
           parser->content_length -= to_read;
           if (parser->content_length == 0) {
@@ -1398,7 +1409,9 @@ size_t php_http_parser_execute (php_http_parser *parser,
       case s_body_identity_eof:
         to_read = pe - p;
         if (to_read > 0) {
-          if (settings->on_body) settings->on_body(parser, p, to_read);
+          if (settings->on_body && 0 != settings->on_body(parser, p, to_read)) {
+            goto error;
+          }
           p += to_read - 1;
         }
         break;
@@ -1433,8 +1446,10 @@ size_t php_http_parser_execute (php_http_parser *parser,
           goto error;
         }
 
-        parser->content_length *= 16;
-        parser->content_length += c;
+        if (parser->content_length > (SSIZE_MAX - c) / 16) {
+          goto error;
+        }
+        parser->content_length = parser->content_length * 16 + c;
         break;
       }
 
@@ -1471,7 +1486,9 @@ size_t php_http_parser_execute (php_http_parser *parser,
         to_read = MIN((size_t)(pe - p), (size_t)(parser->content_length));
 
         if (to_read > 0) {
-          if (settings->on_body) settings->on_body(parser, p, to_read);
+          if (settings->on_body && 0 != settings->on_body(parser, p, to_read)) {
+            goto error;
+          }
           p += to_read - 1;
         }
 

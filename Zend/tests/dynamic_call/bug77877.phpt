@@ -10,14 +10,14 @@ class Foo {
 try {
     array_map([new Foo, 'bar'],[1]);
 } catch (Throwable $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     call_user_func([new Foo, 'bar']);
 } catch (Throwable $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Using $this when not in object context
-Using $this when not in object context
+Error: Using $this when not in object context
+Error: Using $this when not in object context

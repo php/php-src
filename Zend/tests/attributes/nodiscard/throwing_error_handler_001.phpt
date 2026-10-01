@@ -14,8 +14,8 @@ function test(): int {
 
 try {
 	test();
-} catch (ErrorException $e) {
-	echo "Caught: ", $e->getMessage(), PHP_EOL;
+} catch (Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 #[\NoDiscard]
@@ -25,11 +25,11 @@ function test2(): stdClass {
 
 try {
 	test2();
-} catch (ErrorException $e) {
-	echo "Caught: ", $e->getMessage(), PHP_EOL;
+} catch (Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Caught: The return value of function test() should either be used or intentionally ignored by casting it as (void)
-Caught: The return value of function test2() should either be used or intentionally ignored by casting it as (void)
+ErrorException: The return value of function test() should either be used or intentionally ignored by casting it as (void)
+ErrorException: The return value of function test2() should either be used or intentionally ignored by casting it as (void)

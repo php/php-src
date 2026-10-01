@@ -19,14 +19,14 @@ class D extends C {
 $c = new D();
 try {
     unset($c->a);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($c);
 
 ?>
 --EXPECTF--
-Cannot unset private(set) property C::$a from scope D
+Error: Cannot unset private(set) property C::$a from scope D
 object(D)#%d (0) {
   ["a"]=>
   uninitialized(int)

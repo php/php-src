@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2025 Alexander Borisov
+ * Copyright (C) 2018-2026 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -14,12 +14,10 @@
 #ifndef LXB_HTML_INTERFACE_RES_H
 #define LXB_HTML_INTERFACE_RES_H
 
-#endif /* LXB_HTML_INTERFACE_RES_H */
-
 #ifdef LXB_TAG_CONST_VERSION
-#ifndef LXB_TAG_CONST_VERSION_A161EC911182C3254E7A972D5C51DF86
+#ifndef LXB_TAG_CONST_VERSION_5AB3094FB370521074947DC082575715
 #error Mismatched tags version! See "lexbor/tag/const.h".
-#endif /* LXB_TAG_CONST_VERSION_A161EC911182C3254E7A972D5C51DF86 */
+#endif /* LXB_TAG_CONST_VERSION_5AB3094FB370521074947DC082575715 */
 #else
 #error You need to include "lexbor/tag/const.h".
 #endif /* LXB_TAG_CONST_VERSION */
@@ -97,7 +95,9 @@
 #include "lexbor/html/interfaces/progress_element.h"
 #include "lexbor/html/interfaces/quote_element.h"
 #include "lexbor/html/interfaces/script_element.h"
+#include "lexbor/html/interfaces/search_element.h"
 #include "lexbor/html/interfaces/select_element.h"
+#include "lexbor/html/interfaces/selectedcontent_element.h"
 #include "lexbor/html/interfaces/slot_element.h"
 #include "lexbor/html/interfaces/source_element.h"
 #include "lexbor/html/interfaces/span_element.h"
@@ -131,18 +131,6 @@ lxb_dom_element_interface_destroy_wrapper(void *interface)
 }
 
 lxb_inline void *
-lxb_html_unknown_element_interface_create_wrapper(void *interface)
-{
-    return lxb_html_unknown_element_interface_create(interface);
-}
-
-lxb_inline void *
-lxb_html_unknown_element_interface_destroy_wrapper(void *interface)
-{
-    return lxb_html_unknown_element_interface_destroy(interface);
-}
-
-lxb_inline void *
 lxb_html_element_interface_create_wrapper(void *interface)
 {
     return lxb_html_element_interface_create(interface);
@@ -164,6 +152,18 @@ lxb_inline void *
 lxb_dom_text_interface_destroy_wrapper(void *interface)
 {
     return lxb_dom_text_interface_destroy(interface);
+}
+
+lxb_inline void *
+lxb_dom_document_interface_create_wrapper(void *interface)
+{
+    return lxb_dom_document_interface_create(interface);
+}
+
+lxb_inline void *
+lxb_dom_document_interface_destroy_wrapper(void *interface)
+{
+    return lxb_dom_document_interface_destroy(interface);
 }
 
 lxb_inline void *
@@ -212,6 +212,18 @@ lxb_inline void *
 lxb_html_anchor_element_interface_destroy_wrapper(void *interface)
 {
     return lxb_html_anchor_element_interface_destroy(interface);
+}
+
+lxb_inline void *
+lxb_html_unknown_element_interface_create_wrapper(void *interface)
+{
+    return lxb_html_unknown_element_interface_create(interface);
+}
+
+lxb_inline void *
+lxb_html_unknown_element_interface_destroy_wrapper(void *interface)
+{
+    return lxb_html_unknown_element_interface_destroy(interface);
 }
 
 lxb_inline void *
@@ -827,6 +839,18 @@ lxb_html_script_element_interface_destroy_wrapper(void *interface)
 }
 
 lxb_inline void *
+lxb_html_search_element_interface_create_wrapper(void *interface)
+{
+    return lxb_html_search_element_interface_create(interface);
+}
+
+lxb_inline void *
+lxb_html_search_element_interface_destroy_wrapper(void *interface)
+{
+    return lxb_html_search_element_interface_destroy(interface);
+}
+
+lxb_inline void *
 lxb_html_select_element_interface_create_wrapper(void *interface)
 {
     return lxb_html_select_element_interface_create(interface);
@@ -836,6 +860,18 @@ lxb_inline void *
 lxb_html_select_element_interface_destroy_wrapper(void *interface)
 {
     return lxb_html_select_element_interface_destroy(interface);
+}
+
+lxb_inline void *
+lxb_html_selectedcontent_element_interface_create_wrapper(void *interface)
+{
+    return lxb_html_selectedcontent_element_interface_create(interface);
+}
+
+lxb_inline void *
+lxb_html_selectedcontent_element_interface_destroy_wrapper(void *interface)
+{
+    return lxb_html_selectedcontent_element_interface_destroy(interface);
 }
 
 lxb_inline void *
@@ -1019,15 +1055,12 @@ lxb_html_video_element_interface_destroy_wrapper(void *interface)
 }
 
 
-#ifdef LXB_HTML_INTERFACE_RES_CONSTRUCTORS
-#ifndef LXB_HTML_INTERFACE_RES_CONSTRUCTORS_ENABLED
-#define LXB_HTML_INTERFACE_RES_CONSTRUCTORS_ENABLED
 static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_TAG__LAST_ENTRY][LXB_NS__LAST_ENTRY] = 
 {
     /* LXB_TAG__UNDEF */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1037,8 +1070,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG__END_OF_FILE */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1048,52 +1081,52 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG__TEXT */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_text_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_text_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_text_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper
+        (lxb_dom_interface_constructor_f) lxb_dom_text_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_text_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_text_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_text_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_text_interface_create_wrapper
     },
     /* LXB_TAG__DOCUMENT */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_document_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_document_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_document_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper
+        (lxb_dom_interface_constructor_f) lxb_dom_document_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_document_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_document_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_document_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_document_interface_create_wrapper
     },
     /* LXB_TAG__EM_COMMENT */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_comment_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_comment_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_comment_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper
+        (lxb_dom_interface_constructor_f) lxb_dom_comment_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_comment_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_comment_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_comment_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_comment_interface_create_wrapper
     },
     /* LXB_TAG__EM_DOCTYPE */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_document_type_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper
+        (lxb_dom_interface_constructor_f) lxb_dom_document_type_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_document_type_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_document_type_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_document_type_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_document_type_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_document_type_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_document_type_interface_create_wrapper
     },
     /* LXB_TAG_A */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_anchor_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1103,8 +1136,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_ABBR */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1114,8 +1147,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_ACRONYM */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1125,8 +1158,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_ADDRESS */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1136,8 +1169,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_ALTGLYPH */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1147,8 +1180,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_ALTGLYPHDEF */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1158,8 +1191,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_ALTGLYPHITEM */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1169,8 +1202,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_ANIMATECOLOR */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1180,8 +1213,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_ANIMATEMOTION */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1191,8 +1224,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_ANIMATETRANSFORM */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1202,8 +1235,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_ANNOTATION_XML */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1213,8 +1246,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_APPLET */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1224,8 +1257,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_AREA */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_area_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1235,8 +1268,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_ARTICLE */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1246,8 +1279,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_ASIDE */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1257,8 +1290,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_AUDIO */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_audio_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1268,8 +1301,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_B */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1279,8 +1312,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_BASE */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_base_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1290,8 +1323,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_BASEFONT */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1301,8 +1334,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_BDI */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1312,8 +1345,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_BDO */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1323,8 +1356,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_BGSOUND */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1334,8 +1367,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_BIG */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1345,8 +1378,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_BLINK */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1356,8 +1389,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_BLOCKQUOTE */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_quote_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1367,8 +1400,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_BODY */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_body_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1378,8 +1411,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_BR */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_br_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1389,8 +1422,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_BUTTON */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_button_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1400,8 +1433,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_CANVAS */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_canvas_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1411,8 +1444,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_CAPTION */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_table_caption_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1422,8 +1455,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_CENTER */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1433,8 +1466,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_CITE */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1444,8 +1477,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_CLIPPATH */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1455,8 +1488,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_CODE */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1466,8 +1499,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_COL */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_table_col_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1477,8 +1510,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_COLGROUP */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_table_col_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1488,8 +1521,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_DATA */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_data_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1499,8 +1532,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_DATALIST */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_data_list_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1510,8 +1543,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_DD */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1521,8 +1554,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_DEL */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_mod_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1532,8 +1565,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_DESC */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1543,8 +1576,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_DETAILS */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_details_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1554,8 +1587,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_DFN */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1565,8 +1598,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_DIALOG */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_dialog_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1576,8 +1609,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_DIR */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_directory_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1587,8 +1620,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_DIV */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_div_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1598,8 +1631,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_DL */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_d_list_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1609,8 +1642,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_DT */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1620,8 +1653,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_EM */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1631,8 +1664,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_EMBED */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_embed_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1642,8 +1675,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FEBLEND */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1653,8 +1686,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FECOLORMATRIX */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1664,8 +1697,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FECOMPONENTTRANSFER */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1675,8 +1708,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FECOMPOSITE */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1686,8 +1719,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FECONVOLVEMATRIX */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1697,8 +1730,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FEDIFFUSELIGHTING */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1708,8 +1741,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FEDISPLACEMENTMAP */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1719,8 +1752,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FEDISTANTLIGHT */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1730,8 +1763,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FEDROPSHADOW */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1741,8 +1774,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FEFLOOD */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1752,8 +1785,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FEFUNCA */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1763,8 +1796,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FEFUNCB */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1774,8 +1807,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FEFUNCG */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1785,8 +1818,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FEFUNCR */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1796,8 +1829,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FEGAUSSIANBLUR */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1807,8 +1840,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FEIMAGE */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1818,8 +1851,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FEMERGE */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1829,8 +1862,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FEMERGENODE */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1840,8 +1873,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FEMORPHOLOGY */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1851,8 +1884,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FEOFFSET */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1862,8 +1895,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FEPOINTLIGHT */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1873,8 +1906,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FESPECULARLIGHTING */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1884,8 +1917,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FESPOTLIGHT */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1895,8 +1928,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FETILE */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1906,8 +1939,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FETURBULENCE */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1917,8 +1950,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FIELDSET */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_field_set_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1928,8 +1961,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FIGCAPTION */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1939,8 +1972,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FIGURE */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1950,8 +1983,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FONT */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_font_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1961,8 +1994,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FOOTER */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1972,8 +2005,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FOREIGNOBJECT */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1983,8 +2016,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FORM */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_form_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -1994,8 +2027,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FRAME */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_frame_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2005,8 +2038,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_FRAMESET */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_frame_set_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2016,8 +2049,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_GLYPHREF */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2027,8 +2060,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_H1 */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_heading_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2038,8 +2071,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_H2 */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_heading_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2049,8 +2082,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_H3 */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_heading_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2060,8 +2093,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_H4 */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_heading_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2071,8 +2104,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_H5 */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_heading_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2082,8 +2115,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_H6 */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_heading_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2093,8 +2126,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_HEAD */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_head_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2104,8 +2137,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_HEADER */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2115,8 +2148,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_HGROUP */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2126,8 +2159,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_HR */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_hr_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2137,8 +2170,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_HTML */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2148,8 +2181,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_I */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2159,8 +2192,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_IFRAME */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_iframe_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2170,8 +2203,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_IMAGE */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_image_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2181,8 +2214,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_IMG */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_image_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2192,8 +2225,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_INPUT */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_input_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2203,8 +2236,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_INS */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_mod_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2214,8 +2247,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_ISINDEX */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2225,8 +2258,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_KBD */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2236,8 +2269,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_KEYGEN */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2247,8 +2280,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_LABEL */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_label_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2258,8 +2291,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_LEGEND */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_legend_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2269,8 +2302,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_LI */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_li_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2280,8 +2313,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_LINEARGRADIENT */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2291,8 +2324,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_LINK */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_link_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2302,8 +2335,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_LISTING */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_pre_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2313,8 +2346,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_MAIN */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2324,8 +2357,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_MALIGNMARK */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2335,8 +2368,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_MAP */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_map_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2346,8 +2379,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_MARK */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2357,8 +2390,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_MARQUEE */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_marquee_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2368,8 +2401,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_MATH */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2379,8 +2412,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_MENU */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_menu_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2390,8 +2423,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_META */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_meta_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2401,8 +2434,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_METER */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_meter_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2412,8 +2445,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_MFENCED */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2423,8 +2456,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_MGLYPH */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2434,8 +2467,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_MI */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2445,8 +2478,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_MN */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2456,8 +2489,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_MO */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2467,8 +2500,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_MS */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2478,8 +2511,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_MTEXT */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2489,8 +2522,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_MULTICOL */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2500,8 +2533,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_NAV */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2511,8 +2544,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_NEXTID */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2522,8 +2555,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_NOBR */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2533,8 +2566,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_NOEMBED */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2544,8 +2577,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_NOFRAMES */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2555,8 +2588,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_NOSCRIPT */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2566,8 +2599,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_OBJECT */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_object_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2577,8 +2610,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_OL */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_o_list_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2588,8 +2621,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_OPTGROUP */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_opt_group_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2599,8 +2632,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_OPTION */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_option_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2610,8 +2643,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_OUTPUT */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_output_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2621,8 +2654,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_P */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_paragraph_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2632,8 +2665,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_PARAM */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_param_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2643,8 +2676,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_PATH */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2654,8 +2687,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_PICTURE */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_picture_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2665,8 +2698,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_PLAINTEXT */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2676,8 +2709,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_PRE */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_pre_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2687,8 +2720,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_PROGRESS */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_progress_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2698,8 +2731,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_Q */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_quote_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2709,8 +2742,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_RADIALGRADIENT */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2720,8 +2753,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_RB */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2731,8 +2764,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_RP */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2742,8 +2775,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_RT */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2753,8 +2786,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_RTC */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2764,8 +2797,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_RUBY */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2775,8 +2808,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_S */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2786,8 +2819,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_SAMP */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2797,9 +2830,20 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_SCRIPT */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_script_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper
+    },
+    /* LXB_TAG_SEARCH */
+    {
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_html_search_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2808,8 +2852,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_SECTION */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2819,9 +2863,20 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_SELECT */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_select_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper
+    },
+    /* LXB_TAG_SELECTEDCONTENT */
+    {
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_html_selectedcontent_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2830,8 +2885,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_SLOT */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_slot_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2841,8 +2896,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_SMALL */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2852,8 +2907,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_SOURCE */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_source_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2863,8 +2918,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_SPACER */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2874,8 +2929,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_SPAN */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_span_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2885,8 +2940,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_STRIKE */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2896,8 +2951,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_STRONG */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2907,8 +2962,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_STYLE */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_style_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2918,8 +2973,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_SUB */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2929,8 +2984,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_SUMMARY */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2940,8 +2995,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_SUP */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2951,8 +3006,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_SVG */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2962,8 +3017,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_TABLE */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_table_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2973,8 +3028,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_TBODY */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_table_section_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2984,8 +3039,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_TD */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_table_cell_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -2995,8 +3050,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_TEMPLATE */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_template_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -3006,8 +3061,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_TEXTAREA */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_text_area_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -3017,8 +3072,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_TEXTPATH */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -3028,8 +3083,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_TFOOT */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_table_section_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -3039,8 +3094,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_TH */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_table_cell_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -3050,8 +3105,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_THEAD */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_table_section_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -3061,8 +3116,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_TIME */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_time_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -3072,8 +3127,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_TITLE */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_title_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -3083,8 +3138,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_TR */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_table_row_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -3094,8 +3149,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_TRACK */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_track_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -3105,8 +3160,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_TT */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -3116,8 +3171,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_U */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -3127,8 +3182,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_UL */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_u_list_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -3138,8 +3193,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_VAR */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -3149,8 +3204,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_VIDEO */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_video_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -3160,8 +3215,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_WBR */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -3171,8 +3226,8 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
     },
     /* LXB_TAG_XMP */
     {
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
-        (lxb_dom_interface_constructor_f) lxb_html_unknown_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
+        (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_html_pre_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper,
@@ -3181,18 +3236,13 @@ static  lxb_dom_interface_constructor_f lxb_html_interface_res_constructors[LXB_
         (lxb_dom_interface_constructor_f) lxb_dom_element_interface_create_wrapper
     }
 };
-#endif /* LXB_HTML_INTERFACE_RES_CONSTRUCTORS_ENABLED */
-#endif /* LXB_HTML_INTERFACE_RES_CONSTRUCTORS */
 
-#ifdef LXB_HTML_INTERFACE_RES_DESTRUCTOR
-#ifndef LXB_HTML_INTERFACE_RES_DESTRUCTOR_ENABLED
-#define LXB_HTML_INTERFACE_RES_DESTRUCTOR_ENABLED
 static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG__LAST_ENTRY][LXB_NS__LAST_ENTRY] = 
 {
     /* LXB_TAG__UNDEF */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3202,8 +3252,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG__END_OF_FILE */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3213,52 +3263,52 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG__TEXT */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_text_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_text_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_text_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper
+        (lxb_dom_interface_destructor_f) lxb_dom_text_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_text_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_text_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_text_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_text_interface_destroy_wrapper
     },
     /* LXB_TAG__DOCUMENT */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_document_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_document_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_document_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper
+        (lxb_dom_interface_destructor_f) lxb_dom_document_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_document_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_document_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_document_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_document_interface_destroy_wrapper
     },
     /* LXB_TAG__EM_COMMENT */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_comment_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_comment_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_comment_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper
+        (lxb_dom_interface_destructor_f) lxb_dom_comment_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_comment_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_comment_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_comment_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_comment_interface_destroy_wrapper
     },
     /* LXB_TAG__EM_DOCTYPE */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_document_type_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper
+        (lxb_dom_interface_destructor_f) lxb_dom_document_type_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_document_type_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_document_type_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_document_type_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_document_type_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_document_type_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_document_type_interface_destroy_wrapper
     },
     /* LXB_TAG_A */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_anchor_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3268,8 +3318,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_ABBR */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3279,8 +3329,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_ACRONYM */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3290,8 +3340,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_ADDRESS */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3301,8 +3351,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_ALTGLYPH */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3312,8 +3362,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_ALTGLYPHDEF */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3323,8 +3373,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_ALTGLYPHITEM */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3334,8 +3384,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_ANIMATECOLOR */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3345,8 +3395,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_ANIMATEMOTION */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3356,8 +3406,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_ANIMATETRANSFORM */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3367,8 +3417,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_ANNOTATION_XML */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3378,8 +3428,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_APPLET */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3389,8 +3439,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_AREA */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_area_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3400,8 +3450,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_ARTICLE */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3411,8 +3461,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_ASIDE */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3422,8 +3472,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_AUDIO */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_audio_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3433,8 +3483,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_B */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3444,8 +3494,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_BASE */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_base_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3455,8 +3505,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_BASEFONT */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3466,8 +3516,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_BDI */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3477,8 +3527,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_BDO */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3488,8 +3538,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_BGSOUND */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3499,8 +3549,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_BIG */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3510,8 +3560,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_BLINK */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3521,8 +3571,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_BLOCKQUOTE */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_quote_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3532,8 +3582,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_BODY */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_body_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3543,8 +3593,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_BR */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_br_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3554,8 +3604,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_BUTTON */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_button_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3565,8 +3615,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_CANVAS */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_canvas_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3576,8 +3626,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_CAPTION */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_table_caption_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3587,8 +3637,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_CENTER */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3598,8 +3648,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_CITE */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3609,8 +3659,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_CLIPPATH */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3620,8 +3670,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_CODE */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3631,8 +3681,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_COL */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_table_col_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3642,8 +3692,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_COLGROUP */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_table_col_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3653,8 +3703,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_DATA */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_data_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3664,8 +3714,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_DATALIST */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_data_list_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3675,8 +3725,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_DD */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3686,8 +3736,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_DEL */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_mod_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3697,8 +3747,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_DESC */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3708,8 +3758,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_DETAILS */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_details_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3719,8 +3769,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_DFN */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3730,8 +3780,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_DIALOG */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_dialog_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3741,8 +3791,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_DIR */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_directory_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3752,8 +3802,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_DIV */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_div_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3763,8 +3813,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_DL */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_d_list_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3774,8 +3824,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_DT */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3785,8 +3835,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_EM */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3796,8 +3846,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_EMBED */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_embed_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3807,8 +3857,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FEBLEND */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3818,8 +3868,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FECOLORMATRIX */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3829,8 +3879,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FECOMPONENTTRANSFER */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3840,8 +3890,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FECOMPOSITE */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3851,8 +3901,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FECONVOLVEMATRIX */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3862,8 +3912,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FEDIFFUSELIGHTING */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3873,8 +3923,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FEDISPLACEMENTMAP */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3884,8 +3934,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FEDISTANTLIGHT */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3895,8 +3945,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FEDROPSHADOW */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3906,8 +3956,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FEFLOOD */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3917,8 +3967,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FEFUNCA */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3928,8 +3978,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FEFUNCB */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3939,8 +3989,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FEFUNCG */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3950,8 +4000,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FEFUNCR */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3961,8 +4011,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FEGAUSSIANBLUR */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3972,8 +4022,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FEIMAGE */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3983,8 +4033,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FEMERGE */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -3994,8 +4044,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FEMERGENODE */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4005,8 +4055,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FEMORPHOLOGY */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4016,8 +4066,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FEOFFSET */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4027,8 +4077,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FEPOINTLIGHT */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4038,8 +4088,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FESPECULARLIGHTING */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4049,8 +4099,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FESPOTLIGHT */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4060,8 +4110,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FETILE */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4071,8 +4121,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FETURBULENCE */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4082,8 +4132,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FIELDSET */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_field_set_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4093,8 +4143,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FIGCAPTION */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4104,8 +4154,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FIGURE */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4115,8 +4165,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FONT */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_font_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4126,8 +4176,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FOOTER */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4137,8 +4187,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FOREIGNOBJECT */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4148,8 +4198,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FORM */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_form_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4159,8 +4209,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FRAME */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_frame_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4170,8 +4220,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_FRAMESET */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_frame_set_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4181,8 +4231,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_GLYPHREF */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4192,8 +4242,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_H1 */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_heading_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4203,8 +4253,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_H2 */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_heading_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4214,8 +4264,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_H3 */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_heading_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4225,8 +4275,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_H4 */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_heading_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4236,8 +4286,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_H5 */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_heading_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4247,8 +4297,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_H6 */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_heading_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4258,8 +4308,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_HEAD */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_head_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4269,8 +4319,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_HEADER */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4280,8 +4330,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_HGROUP */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4291,8 +4341,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_HR */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_hr_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4302,8 +4352,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_HTML */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4313,8 +4363,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_I */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4324,8 +4374,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_IFRAME */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_iframe_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4335,8 +4385,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_IMAGE */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_image_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4346,8 +4396,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_IMG */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_image_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4357,8 +4407,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_INPUT */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_input_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4368,8 +4418,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_INS */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_mod_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4379,8 +4429,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_ISINDEX */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4390,8 +4440,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_KBD */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4401,8 +4451,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_KEYGEN */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4412,8 +4462,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_LABEL */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_label_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4423,8 +4473,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_LEGEND */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_legend_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4434,8 +4484,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_LI */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_li_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4445,8 +4495,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_LINEARGRADIENT */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4456,8 +4506,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_LINK */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_link_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4467,8 +4517,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_LISTING */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_pre_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4478,8 +4528,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_MAIN */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4489,8 +4539,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_MALIGNMARK */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4500,8 +4550,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_MAP */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_map_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4511,8 +4561,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_MARK */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4522,8 +4572,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_MARQUEE */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_marquee_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4533,8 +4583,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_MATH */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4544,8 +4594,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_MENU */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_menu_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4555,8 +4605,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_META */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_meta_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4566,8 +4616,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_METER */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_meter_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4577,8 +4627,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_MFENCED */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4588,8 +4638,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_MGLYPH */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4599,8 +4649,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_MI */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4610,8 +4660,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_MN */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4621,8 +4671,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_MO */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4632,8 +4682,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_MS */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4643,8 +4693,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_MTEXT */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4654,8 +4704,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_MULTICOL */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4665,8 +4715,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_NAV */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4676,8 +4726,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_NEXTID */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4687,8 +4737,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_NOBR */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4698,8 +4748,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_NOEMBED */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4709,8 +4759,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_NOFRAMES */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4720,8 +4770,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_NOSCRIPT */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4731,8 +4781,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_OBJECT */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_object_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4742,8 +4792,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_OL */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_o_list_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4753,8 +4803,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_OPTGROUP */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_opt_group_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4764,8 +4814,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_OPTION */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_option_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4775,8 +4825,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_OUTPUT */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_output_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4786,8 +4836,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_P */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_paragraph_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4797,8 +4847,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_PARAM */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_param_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4808,8 +4858,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_PATH */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4819,8 +4869,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_PICTURE */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_picture_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4830,8 +4880,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_PLAINTEXT */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4841,8 +4891,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_PRE */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_pre_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4852,8 +4902,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_PROGRESS */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_progress_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4863,8 +4913,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_Q */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_quote_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4874,8 +4924,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_RADIALGRADIENT */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4885,8 +4935,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_RB */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4896,8 +4946,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_RP */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4907,8 +4957,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_RT */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4918,8 +4968,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_RTC */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4929,8 +4979,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_RUBY */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4940,8 +4990,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_S */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4951,8 +5001,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_SAMP */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4962,9 +5012,20 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_SCRIPT */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_script_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper
+    },
+    /* LXB_TAG_SEARCH */
+    {
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_html_search_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4973,8 +5034,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_SECTION */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4984,9 +5045,20 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_SELECT */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_select_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper
+    },
+    /* LXB_TAG_SELECTEDCONTENT */
+    {
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_html_selectedcontent_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -4995,8 +5067,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_SLOT */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_slot_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5006,8 +5078,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_SMALL */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5017,8 +5089,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_SOURCE */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_source_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5028,8 +5100,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_SPACER */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5039,8 +5111,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_SPAN */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_span_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5050,8 +5122,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_STRIKE */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5061,8 +5133,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_STRONG */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5072,8 +5144,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_STYLE */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_style_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5083,8 +5155,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_SUB */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5094,8 +5166,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_SUMMARY */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5105,8 +5177,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_SUP */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5116,8 +5188,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_SVG */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5127,8 +5199,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_TABLE */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_table_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5138,8 +5210,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_TBODY */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_table_section_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5149,8 +5221,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_TD */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_table_cell_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5160,8 +5232,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_TEMPLATE */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_template_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5171,8 +5243,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_TEXTAREA */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_text_area_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5182,8 +5254,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_TEXTPATH */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5193,8 +5265,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_TFOOT */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_table_section_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5204,8 +5276,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_TH */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_table_cell_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5215,8 +5287,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_THEAD */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_table_section_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5226,8 +5298,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_TIME */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_time_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5237,8 +5309,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_TITLE */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_title_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5248,8 +5320,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_TR */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_table_row_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5259,8 +5331,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_TRACK */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_track_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5270,8 +5342,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_TT */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5281,8 +5353,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_U */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5292,8 +5364,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_UL */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_u_list_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5303,8 +5375,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_VAR */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5314,8 +5386,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_VIDEO */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_video_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5325,8 +5397,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_WBR */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5336,8 +5408,8 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
     },
     /* LXB_TAG_XMP */
     {
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
-        (lxb_dom_interface_destructor_f) lxb_html_unknown_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
+        (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_html_pre_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper,
@@ -5346,5 +5418,5 @@ static  lxb_dom_interface_destructor_f lxb_html_interface_res_destructor[LXB_TAG
         (lxb_dom_interface_destructor_f) lxb_dom_element_interface_destroy_wrapper
     }
 };
-#endif /* LXB_HTML_INTERFACE_RES_DESTRUCTOR_ENABLED */
-#endif /* LXB_HTML_INTERFACE_RES_DESTRUCTOR */
+
+#endif /* LXB_HTML_INTERFACE_RES_H */

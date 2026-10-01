@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend Engine, e-SSA based Type & Range Inference                      |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
@@ -2097,9 +2095,8 @@ static void emit_type_narrowing_warning(const zend_op_array *op_array, const zen
 
 ZEND_API uint32_t ZEND_FASTCALL zend_array_type_info(const zval *zv)
 {
-	HashTable *ht = Z_ARRVAL_P(zv);
+	const HashTable *ht = Z_ARRVAL_P(zv);
 	uint32_t tmp = MAY_BE_ARRAY;
-	zend_string *str;
 	zval *val;
 
 	if (Z_REFCOUNTED_P(zv)) {
@@ -2116,7 +2113,7 @@ ZEND_API uint32_t ZEND_FASTCALL zend_array_type_info(const zval *zv)
 			tmp |= 1 << (Z_TYPE_P(val) + MAY_BE_ARRAY_SHIFT);
 		} ZEND_HASH_FOREACH_END();
 	} else {
-		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(ht, str, val) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(ht, const zend_string *str, val) {
 			if (str) {
 				tmp |= MAY_BE_ARRAY_STRING_HASH;
 			} else {
@@ -3905,6 +3902,7 @@ static zend_always_inline zend_result _zend_update_type_info(
 			}
 			break;
 		case ZEND_CALLABLE_CONVERT:
+		case ZEND_CALLABLE_CONVERT_PARTIAL:
 			UPDATE_SSA_TYPE(MAY_BE_OBJECT | MAY_BE_RC1 | MAY_BE_RCN, ssa_op->result_def);
 			UPDATE_SSA_OBJ_TYPE(zend_ce_closure, /* is_instanceof */ false, ssa_op->result_def);
 			break;
@@ -4200,7 +4198,7 @@ static zend_result zend_infer_types_ex(const zend_op_array *op_array, const zend
 		j = zend_bitset_first(worklist, worklist_len);
 		zend_bitset_excl(worklist, j);
 		if (ssa_vars[j].definition_phi) {
-			zend_ssa_phi *p = ssa_vars[j].definition_phi;
+			const zend_ssa_phi *p = ssa_vars[j].definition_phi;
 			if (p->pi >= 0) {
 				zend_class_entry *ce = ssa_var_info[p->sources[0]].ce;
 				bool is_instanceof = ssa_var_info[p->sources[0]].is_instanceof;
@@ -4747,7 +4745,7 @@ static void zend_mark_cv_references(const zend_op_array *op_array, const zend_sc
 {
 	int var, def;
 	const zend_op *opline;
-	zend_arg_info *arg_info;
+	const zend_arg_info *arg_info;
 	uint32_t worklist_len = zend_bitset_len(ssa->vars_count);
 	zend_bitset worklist;
 	ALLOCA_FLAG(use_heap);
@@ -4841,7 +4839,7 @@ static void zend_mark_cv_references(const zend_op_array *op_array, const zend_sc
 		ssa->var_info[var].type |= MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 
 		if (ssa->vars[var].phi_use_chain) {
-			zend_ssa_phi *p = ssa->vars[var].phi_use_chain;
+			const zend_ssa_phi *p = ssa->vars[var].phi_use_chain;
 			do {
 				if (!(ssa->var_info[p->ssa_var].type & MAY_BE_REF)) {
 					zend_bitset_incl(worklist, p->ssa_var);
@@ -4853,7 +4851,7 @@ static void zend_mark_cv_references(const zend_op_array *op_array, const zend_sc
 		if (ssa->vars[var].use_chain >= 0) {
 			int use = ssa->vars[var].use_chain;
 			FOREACH_USE(&ssa->vars[var], use) {
-				zend_ssa_op *op = ssa->ops + use;
+				const zend_ssa_op *op = ssa->ops + use;
 				if (op->op1_use == var && op->op1_def >= 0) {
 					if (!(ssa->var_info[op->op1_def].type & MAY_BE_REF)) {
 						/* Unset breaks references (outside global scope). */
@@ -5232,7 +5230,7 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 					return 1;
 				}
 
-				zend_property_info *prop_info =
+				const zend_property_info *prop_info =
 					zend_hash_find_ptr(&ce->properties_info, prop_name);
 				if (prop_info) {
 					if (ZEND_TYPE_IS_SET(prop_info->type)) {

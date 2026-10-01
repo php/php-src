@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Jakub Zelenka <bukka@php.net>                               |
    +----------------------------------------------------------------------+
@@ -36,6 +34,12 @@
 #include <openssl/ssl.h>
 #include <openssl/pkcs12.h>
 #include <openssl/cms.h>
+
+#if defined(OPENSSL_VERSION_MAJOR) && OPENSSL_VERSION_MAJOR >= 4
+typedef const X509_EXTENSION PHP_OPENSSL_X509_EXTENSION;
+#else
+typedef X509_EXTENSION PHP_OPENSSL_X509_EXTENSION;
+#endif
 
 /* number conversion flags checks */
 #define PHP_OPENSSL_CHECK_NUMBER_CONVERSION(_cond, _name, _arg_num) \
@@ -168,8 +172,8 @@ struct php_x509_request {
 	const EVP_CIPHER * priv_key_encrypt_cipher;
 };
 
-void php_openssl_add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int shortname);
-void php_openssl_add_assoc_asn1_string(zval * val, char * key, ASN1_STRING * str);
+void php_openssl_add_assoc_name_entry(zval * val, char * key, const X509_NAME * name, int shortname);
+void php_openssl_add_assoc_asn1_string(zval * val, char * key, const ASN1_STRING * str);
 time_t php_openssl_asn1_time_to_time_t(ASN1_UTCTIME * timestr);
 int php_openssl_config_check_syntax(const char * section_label, const char * config_filename, const char * section, CONF *config);
 char *php_openssl_conf_get_string(CONF *conf, const char *group, const char *name);
@@ -264,9 +268,10 @@ X509 *php_openssl_x509_from_param(
 X509 *php_openssl_x509_from_zval(
 		zval *val, bool *free_cert, uint32_t arg_num, bool is_from_array, const char *option_name);
 
-zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, bool raw);
+zend_string* php_openssl_x509_fingerprint(
+		X509 *peer, const char *method, bool raw, struct _php_stream *stream);
 
-int openssl_x509v3_subjectAltName(BIO *bio, X509_EXTENSION *extension);
+int openssl_x509v3_subjectAltName(BIO *bio, PHP_OPENSSL_X509_EXTENSION *extension);
 
 STACK_OF(X509) *php_openssl_load_all_certs_from_file(
 		char *cert_file, size_t cert_file_len, uint32_t arg_num);
@@ -348,6 +353,7 @@ struct php_openssl_cipher_mode {
 	bool is_single_run_aead;
 	bool set_tag_length_always;
 	bool set_tag_length_when_encrypting;
+	bool aad_supports_vector;
 	int aead_get_tag_flag;
 	int aead_set_tag_flag;
 	int aead_ivlen_flag;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 Alexander Borisov
+ * Copyright (C) 2018-2026 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -50,7 +50,7 @@ static const lxb_ns_prefix_data_t lxb_ns_prefix_res_data[LXB_NS__LAST_ENTRY] =
     {{.u.short_str = "xmlns", .length = 5, .next = NULL}, LXB_NS_XMLNS, 1, true}
 };
 
-static const lexbor_shs_entry_t lxb_ns_res_shs_data[] = 
+static const lexbor_shs_entry_t lxb_ns_res_shs_data[29] = 
 {
     {NULL, NULL, 28, 0}, {"html", (void *) &lxb_ns_prefix_res_data[2], 4, 0}, 
     {"xmlns", (void *) &lxb_ns_prefix_res_data[7], 5, 0}, {NULL, NULL, 0, 0}, 
@@ -69,7 +69,7 @@ static const lexbor_shs_entry_t lxb_ns_res_shs_data[] =
     {"xml", (void *) &lxb_ns_prefix_res_data[6], 3, 0}
 };
 
-static const lexbor_shs_entry_t lxb_ns_res_shs_link_data[] = 
+static const lexbor_shs_entry_t lxb_ns_res_shs_link_data[23] = 
 {
     {NULL, NULL, 22, 0}, 
     {"http://www.w3.org/1999/xhtml", (void *) &lxb_ns_res_data[2], 28, 0}, 

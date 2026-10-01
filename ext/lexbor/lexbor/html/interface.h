@@ -71,6 +71,7 @@ extern "C" {
 #define lxb_html_interface_quote(obj) ((lxb_html_quote_element_t *) (obj))
 #define lxb_html_interface_script(obj) ((lxb_html_script_element_t *) (obj))
 #define lxb_html_interface_select(obj) ((lxb_html_select_element_t *) (obj))
+#define lxb_html_interface_selectedcontent(obj) ((lxb_html_selectedcontent_element_t *) obj)
 #define lxb_html_interface_slot(obj) ((lxb_html_slot_element_t *) (obj))
 #define lxb_html_interface_source(obj) ((lxb_html_source_element_t *) (obj))
 #define lxb_html_interface_span(obj) ((lxb_html_span_element_t *) (obj))
@@ -146,6 +147,8 @@ typedef struct lxb_html_progress_element lxb_html_progress_element_t;
 typedef struct lxb_html_quote_element lxb_html_quote_element_t;
 typedef struct lxb_html_script_element lxb_html_script_element_t;
 typedef struct lxb_html_select_element lxb_html_select_element_t;
+typedef struct lxb_html_selectedcontent_element lxb_html_selectedcontent_element_t;
+typedef struct lxb_html_search_element lxb_html_search_element_t;
 typedef struct lxb_html_slot_element lxb_html_slot_element_t;
 typedef struct lxb_html_source_element lxb_html_source_element_t;
 typedef struct lxb_html_span_element lxb_html_span_element_t;

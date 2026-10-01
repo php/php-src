@@ -22,10 +22,10 @@ m4_include([Zend/Zend.m4])
 dnl Basic autoconf initialization, generation of config.nice.
 dnl ----------------------------------------------------------------------------
 
-AC_PREREQ([2.68])
-AC_INIT([PHP],[8.6.0-dev],[https://github.com/php/php-src/issues],[php],[https://www.php.net])
+AC_PREREQ([2.71])
+AC_INIT([PHP],[8.7.0-dev],[https://github.com/php/php-src/issues],[php],[https://www.php.net])
 AC_CONFIG_SRCDIR([main/php_version.h])
-AC_CONFIG_MACRO_DIR([build])
+AC_CONFIG_MACRO_DIRS([build])
 AC_CONFIG_AUX_DIR([build])
 AC_PRESERVE_HELP_ORDER
 
@@ -120,11 +120,14 @@ dnl ----------------------------------------------------------------------------
 
 PKG_PROG_PKG_CONFIG
 AC_PROG_CC([cc gcc])
+
+dnl Check if C compiler accepts C11.
+AS_CASE([$ac_prog_cc_stdc], [c99|c89|no],
+  [AC_MSG_ERROR([C compiler would not accept C11 code.])])
+
 PHP_DETECT_ICC
 PHP_DETECT_SUNCC
 
-dnl AC_PROG_CC_C99 is obsolete with autoconf >= 2.70 yet necessary for <= 2.69.
-m4_version_prereq([2.70],,[AC_PROG_CC_C99])
 AC_PROG_CPP
 AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_LN_S
@@ -134,17 +137,6 @@ AS_VAR_IF([cross_compiling], [yes],
     AC_MSG_CHECKING([for native build C compiler])
     AC_MSG_RESULT([$BUILD_CC])],
   [BUILD_CC=$CC])
-
-dnl The macro AC_PROG_CC_C99 sets the shell variable ac_cv_prog_cc_c99 to 'no'
-dnl if the compiler does not support C99.i.e. does not support any of _Bool,
-dnl flexible arrays, inline, long long int, mixed code and declarations,
-dnl named initialization of structs, restrict, varargs macros, variable
-dnl declarations in for loops and variable length arrays.
-dnl
-dnl https://www.gnu.org/software/autoconf/manual/autoconf-2.60/html_node/C-Compiler.html
-if test "$ac_cv_prog_cc_c99" = no; then
-  AC_MSG_ERROR([C compiler would not accept C99 code])
-fi
 
 dnl Support systems with system libraries in e.g. /usr/lib64.
 PHP_ARG_WITH([libdir],
@@ -369,6 +361,9 @@ AC_SEARCH_LIBS([Pgrab], [proc])
 dnl Haiku does not have network api in libc.
 AC_SEARCH_LIBS([setsockopt], [network])
 
+dnl Solaris/illumos provide sendfile() in libsendfile; libc on Linux/FreeBSD.
+AC_SEARCH_LIBS([sendfile], [sendfile])
+
 dnl Check for openpty. It may require linking against libutil or libbsd.
 AC_CHECK_FUNCS([openpty],,
   [AC_SEARCH_LIBS([openpty], [util bsd], [AC_DEFINE([HAVE_OPENPTY], [1])])])
@@ -377,7 +372,7 @@ dnl Then headers.
 dnl ----------------------------------------------------------------------------
 
 dnl QNX requires unix.h to allow functions in libunix to work properly.
-AC_CHECK_HEADERS(m4_normalize([
+AC_CHECK_HEADERS([
   dirent.h
   sys/param.h
   sys/types.h
@@ -425,7 +420,7 @@ AC_CHECK_HEADERS(m4_normalize([
   nmmintrin.h
   wmmintrin.h
   immintrin.h
-]),,, [dnl
+],,, [dnl
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
@@ -444,12 +439,11 @@ AC_CHECK_HEADERS(m4_normalize([
 ])
 
 PHP_FOPENCOOKIE
+PHP_POLL_MECHANISMS
 PHP_BROKEN_GETCWD
 AS_VAR_IF([GCC], [yes], [PHP_BROKEN_GCC_STRLEN_OPT])
 
 dnl Detect the headers required to use makedev, major, and minor.
-dnl Autoconf <= 2.69 didn't check glibc 2.25 deprecated macros in sys/types.h.
-m4_version_prereq([2.70],,[ac_cv_header_sys_types_h_makedev=no])
 AC_HEADER_MAJOR
 
 dnl Checks for typedefs, structures, and compiler characteristics.
@@ -542,7 +536,7 @@ PHP_CHECK_VARIABLE_ATTRIBUTE([aligned])
 dnl Checks for library functions.
 dnl ----------------------------------------------------------------------------
 
-AC_CHECK_FUNCS(m4_normalize([
+AC_CHECK_FUNCS([
   alphasort
   asctime_r
   asprintf
@@ -587,10 +581,12 @@ AC_CHECK_FUNCS(m4_normalize([
   putenv
   reallocarray
   scandir
+  sendfile
   setenv
   setitimer
   shutdown
   sigprocmask
+  splice
   statfs
   statvfs
   std_syslog
@@ -603,7 +599,7 @@ AC_CHECK_FUNCS(m4_normalize([
   usleep
   utime
   vasprintf
-]))
+])
 
 PHP_ARG_ENABLE([system-glob],
   [whether to use the system glob function],
@@ -1218,7 +1214,15 @@ AS_CASE([$host_cpu],
 
 AS_CASE([$host_os],
   [darwin*], [fiber_os="mac"],
-  [aix*|os400*], [fiber_os="aix"],
+  [aix*|os400*], [
+    fiber_os="aix"
+    dnl AIX triplets start w/ powerpc- even though it may be 64-bit (as AIX
+    dnl has a multiple bitness world). Check if the build is 64-bit, or we
+    dnl end up using the wrong fibre asm (w/o forcing a powerpc64 triplet)
+    AS_IF([test "$ac_cv_sizeof_long" -eq 8], [
+      fiber_cpu="ppc64"
+    ], [])
+  ],
   [freebsd*], [fiber_os="freebsd"],
   [midipix], [fiber_os="midipix"],
   [fiber_os="other"]
@@ -1538,8 +1542,10 @@ AS_VAR_IF([PHP_ADDRESS_SANITIZER], [yes],
   ]))])
 
   AX_CHECK_COMPILE_FLAG([-fsanitize=address], [
-    CFLAGS="$CFLAGS -fsanitize=address -DZEND_TRACK_ARENA_ALLOC"
-    CXXFLAGS="$CXXFLAGS -fsanitize=address -DZEND_TRACK_ARENA_ALLOC"
+    CFLAGS="$CFLAGS -fsanitize=address"
+    CXXFLAGS="$CXXFLAGS -fsanitize=address"
+    AC_DEFINE([ZEND_TRACK_ARENA_ALLOC], [1],
+      [Whether to track arena allocations individually for AddressSanitizer.])
   ], [AC_MSG_ERROR([AddressSanitizer is not available])])
 ])
 
@@ -1682,6 +1688,26 @@ PHP_ADD_SOURCES_X([main],
   [PHP_FASTCGI_OBJS],
   [no])
 
+PHP_ADD_SOURCES([main/io], m4_normalize([
+    php_io.c
+    php_io_copy_linux.c
+    php_io_copy_freebsd.c
+    php_io_copy_solaris.c
+    php_io_copy_macos.c
+  ]),
+  [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
+
+PHP_ADD_SOURCES([main/poll], m4_normalize([
+    poll_backend_epoll.c
+    poll_backend_eventport.c
+    poll_backend_kqueue.c
+    poll_backend_poll.c
+    poll_core.c
+    poll_fd_table.c
+    poll_handle.c
+  ]),
+  [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
+
 PHP_ADD_SOURCES([main/streams], m4_normalize([
     cast.c
     filter.c
@@ -1689,6 +1715,7 @@ PHP_ADD_SOURCES([main/streams], m4_normalize([
     memory.c
     mmap.c
     plain_wrapper.c
+    stream_errors.c
     streams.c
     transports.c
     userspace.c
@@ -1730,7 +1757,6 @@ PHP_ADD_SOURCES([Zend], m4_normalize([
     zend_alloc.c
     zend_API.c
     zend_ast.c
-    zend_atomic.c
     zend_attributes.c
     zend_autoload.c
     zend_builtin_functions.c
@@ -1774,6 +1800,7 @@ PHP_ADD_SOURCES([Zend], m4_normalize([
     zend_observer.c
     zend_opcode.c
     zend_operators.c
+    zend_partial.c
     zend_property_hooks.c
     zend_ptr_stack.c
     zend_signal.c
@@ -1804,6 +1831,8 @@ AC_DEFINE([HAVE_BUILD_DEFS_H], [1],
 
 PHP_ADD_BUILD_DIR([
   main
+  main/io
+  main/poll
   main/streams
   scripts
   scripts/man1
@@ -1846,11 +1875,11 @@ cat <<X
 
 +--------------------------------------------------------------------+
 | License:                                                           |
-| This software is subject to the PHP License, available in this     |
-| distribution in the file LICENSE. By continuing this installation  |
-| process, you are bound by the terms of this license agreement.     |
-| If you do not agree with the terms of this license, you must abort |
-| the installation process at this point.                            |
+| This software is subject to the Modified BSD License, available in |
+| this distribution in the file LICENSE. By continuing this          |
+| installation process, you are bound by the terms of this license   |
+| agreement. If you do not agree with the terms of this license, you |
+| must abort the installation process at this point.                 |
 +--------------------------------------------------------------------+
 
 Thank you for using PHP.

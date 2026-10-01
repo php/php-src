@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2025 Alexander Borisov
+ * Copyright (C) 2018-2026 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -7,10 +7,6 @@
 #ifndef LEXBOR_CSS_SYNTAX_TOKEN_RES_H
 #define LEXBOR_CSS_SYNTAX_TOKEN_RES_H
 
-
-#ifdef LXB_CSS_SYNTAX_TOKEN_RES_NAME_SHS_MAP
-#ifndef LXB_CSS_SYNTAX_TOKEN_RES_NAME_SHS_MAP_ENABLED
-#define LXB_CSS_SYNTAX_TOKEN_RES_NAME_SHS_MAP_ENABLED
 static const lexbor_shs_entry_t lxb_css_syntax_token_res_name_shs_map[136] =
 {
     {NULL, NULL, 135, 0}, {NULL, NULL, 0, 0},
@@ -82,9 +78,5 @@ static const lexbor_shs_entry_t lxb_css_syntax_token_res_name_shs_map[136] =
     {NULL, NULL, 0, 0}, {NULL, NULL, 0, 0},
     {NULL, NULL, 0, 0}, {"semicolon", (void *) LXB_CSS_SYNTAX_TOKEN_SEMICOLON, 9, 0}
 };
-
-#endif /* LXB_CSS_SYNTAX_TOKEN_RES_NAME_SHS_MAP_ENABLED */
-#endif /* LXB_CSS_SYNTAX_TOKEN_RES_NAME_SHS_MAP */
-
 
 #endif /* LEXBOR_CSS_SYNTAX_TOKEN_RES_H */

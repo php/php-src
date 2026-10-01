@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Wez Furlong  <wez@thebrainroom.com>                          |
    +----------------------------------------------------------------------+
@@ -118,11 +116,11 @@ static PHP_INI_MH(OnTypeLibFileUpdate)
 		}
 
 		/* Remove leading/training white spaces on search_string */
-		while (isspace(*typelib_name)) {/* Ends on '\0' in worst case */
+		while (isspace((unsigned char)*typelib_name)) {/* Ends on '\0' in worst case */
 			typelib_name ++;
 		}
 		ptr = typelib_name + strlen(typelib_name) - 1;
-		while ((ptr != typelib_name) && isspace(*ptr)) {
+		while ((ptr != typelib_name) && isspace((unsigned char)*ptr)) {
 			*ptr = '\0';
 			ptr--;
 		}

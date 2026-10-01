@@ -100,7 +100,7 @@ foreach($inputs as $key =>$value) {
       try {
           var_dump( mb_substitute_character($value) );
       } catch (\ValueError|\TypeError $e) {
-          echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
+          echo $e::class, ': ', $e->getMessage(), PHP_EOL;
       }
 }
 

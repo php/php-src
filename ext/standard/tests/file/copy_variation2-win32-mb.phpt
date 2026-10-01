@@ -117,13 +117,13 @@ Size of destination file => int(1500)
 
 -- Iteration 5 --
 Copy operation => 
-Warning: copy(%s): %s
+Warning: copy(): %s
 bool(false)
 Existence of destination file => bool(false)
 
 -- Iteration 6 --
 Copy operation => 
-Warning: copy(%s): %s
+Warning: copy(): %s
 bool(false)
 Existence of destination file => bool(false)
 
@@ -150,7 +150,7 @@ Size of destination file => int(1500)
 
 -- Iteration 10 --
 Copy operation => 
-Warning: copy(%s): %s
+Warning: copy(): %s
 bool(false)
 Existence of destination file => bool(false)
 
@@ -191,7 +191,7 @@ Size of destination file => int(1500)
 
 -- Iteration 16 --
 Copy operation => 
-Warning: copy(%s): %s
+Warning: copy(): %s
 bool(false)
 Existence of destination file => bool(false)
 

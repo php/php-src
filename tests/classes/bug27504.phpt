@@ -16,16 +16,16 @@ $foo = new foo();
 try {
     call_user_func_array( array( $foo , 'bar' ) , array( '2' ) );
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $foo->bar('3');
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 Called function foo:bar(1)
-call_user_func_array(): Argument #1 ($callback) must be a valid callback, cannot access private method foo::bar()
-Call to private method foo::bar() from global scope
+TypeError: call_user_func_array(): Argument #1 ($callback) must be a valid callback, cannot access private method foo::bar()
+Error: Call to private method foo::bar() from global scope

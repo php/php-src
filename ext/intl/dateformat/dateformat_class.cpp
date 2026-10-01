@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Kirti Velankar <kirtig@yahoo-inc.com>                       |
    +----------------------------------------------------------------------+
@@ -66,12 +66,19 @@ zend_object *IntlDateFormatter_object_create(zend_class_entry *ce)
 /* {{{ IntlDateFormatter_object_clone */
 zend_object *IntlDateFormatter_object_clone(zend_object *object)
 {
-	IntlDateFormatter_object     *dfo = php_intl_dateformatter_fetch_object(object);
+	const IntlDateFormatter_object     *dfo = php_intl_dateformatter_fetch_object(object);
 	zend_object              *new_obj = IntlDateFormatter_ce_ptr->create_object(object->ce);
 	IntlDateFormatter_object *new_dfo = php_intl_dateformatter_fetch_object(new_obj);
 
 	/* clone standard parts */
 	zend_objects_clone_members(&new_dfo->zo, &dfo->zo);
+
+	new_dfo->date_type = dfo->date_type;
+	new_dfo->time_type = dfo->time_type;
+	new_dfo->calendar = dfo->calendar;
+	if (dfo->requested_locale != NULL) {
+		new_dfo->requested_locale = estrdup(dfo->requested_locale);
+	}
 
 	/* clone formatter object */
 	if (DATE_FORMAT_OBJECT(dfo) != NULL) {
@@ -104,7 +111,7 @@ void dateformat_register_IntlDateFormatter_class( void )
 
 	memcpy(&IntlDateFormatter_handlers, &std_object_handlers,
 		sizeof IntlDateFormatter_handlers);
-	IntlDateFormatter_handlers.offset = XtOffsetOf(IntlDateFormatter_object, zo);
+	IntlDateFormatter_handlers.offset = offsetof(IntlDateFormatter_object, zo);
 	IntlDateFormatter_handlers.clone_obj = IntlDateFormatter_object_clone;
 	IntlDateFormatter_handlers.free_obj = IntlDateFormatter_object_free;
 }

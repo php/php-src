@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Kirti Velankar <kirtig@yahoo-inc.com>                       |
    |          Gustavo Lopes <cataphract@php.net>                          |
@@ -99,7 +99,7 @@ static zend_result datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 		return FAILURE;
 	}
 	if (date_type == UDAT_PATTERN && time_type != UDAT_PATTERN) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "time format must be UDAT_PATTERN if date format is UDAT_PATTERN");
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "datefmt_create: time format must be IntlDateFormatter::PATTERN if date format is IntlDateFormatter::PATTERN");
 		return FAILURE;
 	}
 
@@ -131,7 +131,7 @@ static zend_result datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 
 	if (explicit_tz || calendar_owned ) {
 		//we have an explicit time zone or a non-object calendar
-		timezone = timezone_process_timezone_argument(timezone_object, timezone_string, INTL_DATA_ERROR_P(dfo));
+		timezone = timezone_process_timezone_argument(timezone_object, timezone_string, INTL_DATA_ERROR_P(dfo), 4);
 		if (timezone == nullptr) {
 			goto error;
 		}

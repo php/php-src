@@ -213,15 +213,16 @@ fail:
 }
 
 zend_long JulianToSdn(
-						int inputYear,
-						int inputMonth,
-						int inputDay)
+						zend_long inputYear,
+						zend_long inputMonth,
+						zend_long inputDay)
 {
 	zend_long year;
-	int month;
+	zend_long month;
 
 	/* check for invalid dates */
 	if (inputYear == 0 || inputYear < -4713 ||
+		inputYear > INT_MAX - 4800 ||
 		inputMonth <= 0 || inputMonth > 12 ||
 		inputDay <= 0 || inputDay > 31) {
 		return (0);

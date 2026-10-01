@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VERSION=5.46
+VERSION=5.48
 
 # Go to fileinfo extension directory.
 cd "$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd -P)" || exit

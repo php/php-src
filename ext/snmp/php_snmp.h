@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
   |          Mike Jackson <mhjack@tscnet.com>                            |
@@ -48,24 +46,29 @@ typedef struct _php_snmp_object {
 	struct snmp_session *session;
 	int max_oids;
 	int valueretrieval;
-	int quick_print;
-	int enum_print;
+	bool quick_print;
+	bool enum_print;
+	bool numeric_index;
+	bool numeric_timeticks;
+	bool extended_index;
+	bool dont_print_units;
+	bool escape_quotes;
+	bool print_hex_text;
+	int string_output_format;
 	int oid_output_format;
 	int snmp_errno;
-	int oid_increasing_check;
+	bool oid_increasing_check;
 	int exceptions_enabled;
 	char snmp_errstr[256];
 	zend_object zo;
 } php_snmp_object;
 
-static inline php_snmp_object *php_snmp_fetch_object(zend_object *obj) {
-	return (php_snmp_object *)((char*)(obj) - XtOffsetOf(php_snmp_object, zo));
-}
+#define php_snmp_fetch_object(obj) ZEND_CONTAINER_OF(obj, php_snmp_object, zo)
 
 #define Z_SNMP_P(zv) php_snmp_fetch_object(Z_OBJ_P((zv)))
 
-typedef int (*php_snmp_read_t)(php_snmp_object *snmp_object, zval *retval);
-typedef int (*php_snmp_write_t)(php_snmp_object *snmp_object, zval *newval);
+typedef zend_result (*php_snmp_read_t)(php_snmp_object *snmp_object, zval *retval);
+typedef zend_result (*php_snmp_write_t)(php_snmp_object *snmp_object, zval *newval);
 
 typedef struct _ptp_snmp_prop_handler {
 	const char *name;

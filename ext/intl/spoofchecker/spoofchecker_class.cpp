@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Scott MacVicar <scottmac@php.net>                           |
    +----------------------------------------------------------------------+
@@ -63,7 +63,7 @@ U_CFUNC zend_object *Spoofchecker_object_create(zend_class_entry *ce)
 
 static zend_object *spoofchecker_clone_obj(zend_object *object) /* {{{ */
 {
-	Spoofchecker_object *spoofchecker_orig = php_intl_spoofchecker_fetch_object(object);
+	const Spoofchecker_object *spoofchecker_orig = php_intl_spoofchecker_fetch_object(object);
 	zend_object *new_obj_val               = Spoofchecker_ce_ptr->create_object(object->ce);
 	Spoofchecker_object *spoofchecker_new  = php_intl_spoofchecker_fetch_object(new_obj_val);
 
@@ -98,7 +98,7 @@ U_CFUNC void spoofchecker_register_Spoofchecker_class(void)
 
 	memcpy(&Spoofchecker_handlers, &std_object_handlers,
 		sizeof Spoofchecker_handlers);
-	Spoofchecker_handlers.offset = XtOffsetOf(Spoofchecker_object, zo);
+	Spoofchecker_handlers.offset = offsetof(Spoofchecker_object, zo);
 	Spoofchecker_handlers.clone_obj = spoofchecker_clone_obj;
 	Spoofchecker_handlers.free_obj = Spoofchecker_objects_free;
 }
@@ -132,12 +132,8 @@ U_CFUNC void spoofchecker_object_destroy(Spoofchecker_object* co)
 		co->uspoof = NULL;
 	}
 
-#if U_ICU_VERSION_MAJOR_NUM >= 58
-	if (co->uspoofres) {
-		uspoof_closeCheckResult(co->uspoofres);
-		co->uspoofres = NULL;
-	}
-#endif
+	intl_icu_compat_uspoof_close_check_result(co->uspoofres);
+	co->uspoofres = NULL;
 
 	intl_error_reset(SPOOFCHECKER_ERROR_P(co));
 }

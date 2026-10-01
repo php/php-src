@@ -1,5 +1,7 @@
 /* This is a generated file, edit zend_attributes.stub.php instead.
- * Stub hash: b868cb33f41d9442f42d0cec84e33fcc09f5d88c */
+ * Stub hash: dc2b1de9f4d91162f0e9ab236272f79019c5b5ab */
+
+#include "zend_attributes.h"
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Attribute___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "Attribute::TARGET_ALL")
@@ -230,7 +232,7 @@ static zend_class_entry *register_class_Override(void)
 	zend_string *attribute_name_Attribute_class_Override_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, true);
 	zend_attribute *attribute_Attribute_class_Override_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_Override_0, 1);
 	zend_string_release_ex(attribute_name_Attribute_class_Override_0, true);
-	ZVAL_LONG(&attribute_Attribute_class_Override_0->args[0].value, ZEND_ATTRIBUTE_TARGET_METHOD | ZEND_ATTRIBUTE_TARGET_PROPERTY);
+	ZVAL_LONG(&attribute_Attribute_class_Override_0->args[0].value, ZEND_ATTRIBUTE_TARGET_METHOD | ZEND_ATTRIBUTE_TARGET_PROPERTY | ZEND_ATTRIBUTE_TARGET_CLASS_CONST);
 
 	return class_entry;
 }

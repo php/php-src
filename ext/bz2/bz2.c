@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Sterling Hughes <sterling@php.net>                           |
   +----------------------------------------------------------------------+
@@ -521,11 +519,15 @@ PHP_FUNCTION(bzdecompress)
 	bzs.bzalloc = NULL;
 	bzs.bzfree = NULL;
 
+	if (source_len > UINT_MAX) {
+		zend_argument_value_error(1, "must have a length less than or equal to %u", UINT_MAX);
+		RETURN_THROWS();
+	}
+
 	if (BZ2_bzDecompressInit(&bzs, 0, (int)small) != BZ_OK) {
 		RETURN_FALSE;
 	}
 
-	// TODO Check source string length fits in unsigned int
 	bzs.next_in = source;
 	bzs.avail_in = source_len;
 
@@ -542,7 +544,7 @@ PHP_FUNCTION(bzdecompress)
 			/* no reason to continue if we're going to drop it anyway */
 			break;
 		}
-		dest = zend_string_safe_realloc(dest, 1, bzs.avail_out+1, (size_t) size, 0);
+		dest = zend_string_safe_realloc(dest, 1, (size_t) bzs.avail_out + 1, (size_t) size, 0);
 		bzs.next_out = ZSTR_VAL(dest) + size;
 	}
 

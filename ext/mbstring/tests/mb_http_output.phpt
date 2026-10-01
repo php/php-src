@@ -46,7 +46,7 @@ try {
     $r = mb_http_output('BAD_NAME');
     print 'NG_BAD_SET' . \PHP_EOL;
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 $enc = mb_http_output();
 print "$enc\n";
@@ -64,5 +64,5 @@ UTF-8
 OK_EUC-JP_SET
 EUC-JP
 == INVALID PARAMETER ==
-mb_http_output(): Argument #1 ($encoding) must be a valid encoding, "BAD_NAME" given
+ValueError: mb_http_output(): Argument #1 ($encoding) must be a valid encoding, "BAD_NAME" given
 EUC-JP

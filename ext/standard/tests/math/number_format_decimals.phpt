@@ -29,7 +29,7 @@ $values = array(
     MIN_INT32,
 );
 
-$decimals = array(0, 1, 2, 3, 4, 5, -1, -2, -3, -4, -5, PHP_INT_MIN);
+$decimals = array(0, 1, 2, 3, 4, 5, -1, -2, -3, -4, -5);
 
 foreach ($values as $value) {
     echo 'testing ';
@@ -55,7 +55,6 @@ testing float(1.5151)
 ... with decimal places of -3: string(1) "0"
 ... with decimal places of -4: string(1) "0"
 ... with decimal places of -5: string(1) "0"
-... with decimal places of %i: string(1) "0"
 testing float(15.151)
 ... with decimal places of 0: string(2) "15"
 ... with decimal places of 1: string(4) "15.2"
@@ -68,7 +67,6 @@ testing float(15.151)
 ... with decimal places of -3: string(1) "0"
 ... with decimal places of -4: string(1) "0"
 ... with decimal places of -5: string(1) "0"
-... with decimal places of %i: string(1) "0"
 testing float(151.51)
 ... with decimal places of 0: string(3) "152"
 ... with decimal places of 1: string(5) "151.5"
@@ -81,7 +79,6 @@ testing float(151.51)
 ... with decimal places of -3: string(1) "0"
 ... with decimal places of -4: string(1) "0"
 ... with decimal places of -5: string(1) "0"
-... with decimal places of %i: string(1) "0"
 testing float(1515.1)
 ... with decimal places of 0: string(5) "1,515"
 ... with decimal places of 1: string(7) "1,515.1"
@@ -94,7 +91,6 @@ testing float(1515.1)
 ... with decimal places of -3: string(5) "2,000"
 ... with decimal places of -4: string(1) "0"
 ... with decimal places of -5: string(1) "0"
-... with decimal places of %i: string(1) "0"
 testing int(15151)
 ... with decimal places of 0: string(6) "15,151"
 ... with decimal places of 1: string(8) "15,151.0"
@@ -107,7 +103,6 @@ testing int(15151)
 ... with decimal places of -3: string(6) "15,000"
 ... with decimal places of -4: string(6) "20,000"
 ... with decimal places of -5: string(1) "0"
-... with decimal places of %i: string(1) "0"
 testing float(-1.5151)
 ... with decimal places of 0: string(2) "-2"
 ... with decimal places of 1: string(4) "-1.5"
@@ -120,7 +115,6 @@ testing float(-1.5151)
 ... with decimal places of -3: string(1) "0"
 ... with decimal places of -4: string(1) "0"
 ... with decimal places of -5: string(1) "0"
-... with decimal places of %i: string(1) "0"
 testing float(-15.151)
 ... with decimal places of 0: string(3) "-15"
 ... with decimal places of 1: string(5) "-15.2"
@@ -133,7 +127,6 @@ testing float(-15.151)
 ... with decimal places of -3: string(1) "0"
 ... with decimal places of -4: string(1) "0"
 ... with decimal places of -5: string(1) "0"
-... with decimal places of %i: string(1) "0"
 testing float(-151.51)
 ... with decimal places of 0: string(4) "-152"
 ... with decimal places of 1: string(6) "-151.5"
@@ -146,7 +139,6 @@ testing float(-151.51)
 ... with decimal places of -3: string(1) "0"
 ... with decimal places of -4: string(1) "0"
 ... with decimal places of -5: string(1) "0"
-... with decimal places of %i: string(1) "0"
 testing float(-1515.1)
 ... with decimal places of 0: string(6) "-1,515"
 ... with decimal places of 1: string(8) "-1,515.1"
@@ -159,7 +151,6 @@ testing float(-1515.1)
 ... with decimal places of -3: string(6) "-2,000"
 ... with decimal places of -4: string(1) "0"
 ... with decimal places of -5: string(1) "0"
-... with decimal places of %i: string(1) "0"
 testing int(-15151)
 ... with decimal places of 0: string(7) "-15,151"
 ... with decimal places of 1: string(9) "-15,151.0"
@@ -172,7 +163,6 @@ testing int(-15151)
 ... with decimal places of -3: string(7) "-15,000"
 ... with decimal places of -4: string(7) "-20,000"
 ... with decimal places of -5: string(1) "0"
-... with decimal places of %i: string(1) "0"
 testing int(999)
 ... with decimal places of 0: string(3) "999"
 ... with decimal places of 1: string(5) "999.0"
@@ -185,7 +175,6 @@ testing int(999)
 ... with decimal places of -3: string(5) "1,000"
 ... with decimal places of -4: string(1) "0"
 ... with decimal places of -5: string(1) "0"
-... with decimal places of %i: string(1) "0"
 testing int(-999)
 ... with decimal places of 0: string(4) "-999"
 ... with decimal places of 1: string(6) "-999.0"
@@ -198,7 +187,6 @@ testing int(-999)
 ... with decimal places of -3: string(6) "-1,000"
 ... with decimal places of -4: string(1) "0"
 ... with decimal places of -5: string(1) "0"
-... with decimal places of %i: string(1) "0"
 testing float(999)
 ... with decimal places of 0: string(3) "999"
 ... with decimal places of 1: string(5) "999.0"
@@ -211,7 +199,6 @@ testing float(999)
 ... with decimal places of -3: string(5) "1,000"
 ... with decimal places of -4: string(1) "0"
 ... with decimal places of -5: string(1) "0"
-... with decimal places of %i: string(1) "0"
 testing float(-999)
 ... with decimal places of 0: string(4) "-999"
 ... with decimal places of 1: string(6) "-999.0"
@@ -224,7 +211,6 @@ testing float(-999)
 ... with decimal places of -3: string(6) "-1,000"
 ... with decimal places of -4: string(1) "0"
 ... with decimal places of -5: string(1) "0"
-... with decimal places of %i: string(1) "0"
 testing int(999999)
 ... with decimal places of 0: string(7) "999,999"
 ... with decimal places of 1: string(9) "999,999.0"
@@ -237,7 +223,6 @@ testing int(999999)
 ... with decimal places of -3: string(9) "1,000,000"
 ... with decimal places of -4: string(9) "1,000,000"
 ... with decimal places of -5: string(9) "1,000,000"
-... with decimal places of %i: string(1) "0"
 testing int(-999999)
 ... with decimal places of 0: string(8) "-999,999"
 ... with decimal places of 1: string(10) "-999,999.0"
@@ -250,7 +235,6 @@ testing int(-999999)
 ... with decimal places of -3: string(10) "-1,000,000"
 ... with decimal places of -4: string(10) "-1,000,000"
 ... with decimal places of -5: string(10) "-1,000,000"
-... with decimal places of %i: string(1) "0"
 testing float(999999)
 ... with decimal places of 0: string(7) "999,999"
 ... with decimal places of 1: string(9) "999,999.0"
@@ -263,7 +247,6 @@ testing float(999999)
 ... with decimal places of -3: string(9) "1,000,000"
 ... with decimal places of -4: string(9) "1,000,000"
 ... with decimal places of -5: string(9) "1,000,000"
-... with decimal places of %i: string(1) "0"
 testing float(-999999)
 ... with decimal places of 0: string(8) "-999,999"
 ... with decimal places of 1: string(10) "-999,999.0"
@@ -276,7 +259,6 @@ testing float(-999999)
 ... with decimal places of -3: string(10) "-1,000,000"
 ... with decimal places of -4: string(10) "-1,000,000"
 ... with decimal places of -5: string(10) "-1,000,000"
-... with decimal places of %i: string(1) "0"
 testing int(2147483647)
 ... with decimal places of 0: string(13) "2,147,483,647"
 ... with decimal places of 1: string(15) "2,147,483,647.0"
@@ -289,7 +271,6 @@ testing int(2147483647)
 ... with decimal places of -3: string(13) "2,147,484,000"
 ... with decimal places of -4: string(13) "2,147,480,000"
 ... with decimal places of -5: string(13) "2,147,500,000"
-... with decimal places of %i: string(1) "0"
 testing int(-2147483648)
 ... with decimal places of 0: string(14) "-2,147,483,648"
 ... with decimal places of 1: string(16) "-2,147,483,648.0"
@@ -302,4 +283,3 @@ testing int(-2147483648)
 ... with decimal places of -3: string(14) "-2,147,484,000"
 ... with decimal places of -4: string(14) "-2,147,480,000"
 ... with decimal places of -5: string(14) "-2,147,500,000"
-... with decimal places of %i: string(1) "0"

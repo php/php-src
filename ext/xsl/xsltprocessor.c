@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Christian Stocker <chregu@php.net>                          |
    |          Rob Richards <rrichards@php.net>                            |
@@ -174,6 +172,12 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 		RETURN_THROWS();
 	}
 
+	xsl_object *intern = Z_XSL_P(id);
+	if (UNEXPECTED(intern->transform_depth > 0)) {
+		zend_throw_error(NULL, "Cannot call XSLTProcessor::importStylesheet() while a transformation is in progress");
+		RETURN_THROWS();
+	}
+
 	nodep = php_libxml_import_node(docp);
 	if (nodep == NULL) {
 		zend_argument_type_error(1, "must be a valid XML node");
@@ -218,6 +222,12 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 	newdoc = nodep->doc;
 	php_libxml_node_object *clone_lxml_obj = Z_LIBXML_NODE_P(&clone_zv);
 
+	if (GC_REFCOUNT(clone) > 1 || clone_lxml_obj->document->refcount > 1) {
+		OBJ_RELEASE(clone);
+		zend_argument_value_error(1, "must not have its clone retained by __clone()");
+		RETURN_THROWS();
+	}
+
 	PHP_LIBXML_SANITIZE_GLOBALS(parse);
 	ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 	xmlSubstituteEntitiesDefault(1);
@@ -235,8 +245,6 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 		OBJ_RELEASE(clone);
 		RETURN_FALSE;
 	}
-
-	xsl_object *intern = Z_XSL_P(id);
 
 	/* Detach object */
 	clone_lxml_obj->document->ptr = NULL;
@@ -314,6 +322,8 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 		zend_string_release(name);
 		return NULL;
 	}
+
+	intern->transform_depth++;
 
 	if (intern->profiling) {
 		if (php_check_open_basedir(ZSTR_VAL(intern->profiling))) {
@@ -417,6 +427,8 @@ out:
 	php_libxml_decrement_doc_ref(intern->doc);
 	efree(intern->doc);
 	intern->doc = NULL;
+
+	intern->transform_depth--;
 
 	return newdocp;
 

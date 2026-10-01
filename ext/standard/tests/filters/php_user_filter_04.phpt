@@ -25,4 +25,4 @@ class InvalidSeekFilter extends php_user_filter
 
 ?>
 --EXPECTF--
-Fatal error: Declaration of InvalidSeekFilter::seek($offset): bool must be compatible with php_user_filter::seek(int $offset, int $whence): bool in %s on line %d
+Fatal error: Declaration of InvalidSeekFilter::seek($offset): bool must be compatible with php_user_filter::seek(int $offset, int $whence, int $chain): bool in %s on line %d

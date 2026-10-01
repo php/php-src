@@ -16,9 +16,9 @@ $h = fopen("php://output", "w");
 try {
     CustomXMLWriter::toStream($h);
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-nope
+Error: nope

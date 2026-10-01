@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -104,6 +102,15 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 
 static ZEND_INI_MH(OnUpdateInternedStringsBuffer)
 {
+	if (accel_startup_ok) {
+		if (strcmp(sapi_module.name, "fpm-fcgi") == 0) {
+			zend_accel_error(ACCEL_LOG_WARNING, "opcache.interned_strings_buffer cannot be changed when OPcache is already set up. Are you using php_admin_value[opcache.interned_strings_buffer] in an individual pool's configuration?\n");
+		} else {
+			zend_accel_error(ACCEL_LOG_WARNING, "opcache.interned_strings_buffer cannot be changed when OPcache is already set up.\n");
+		}
+		return FAILURE;
+	}
+
 	zend_long *p = ZEND_INI_GET_ADDR();
 	zend_long size = zend_ini_parse_quantity_warn(new_value, entry->name);
 

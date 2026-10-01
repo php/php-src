@@ -73,6 +73,7 @@
 #  endif
 
 #  include <assert.h>
+#  include <stdint.h>  // SIZE_MAX
 
 static int URI_FUNC(NormalizeSyntaxEngine)(URI_TYPE(Uri) * uri, unsigned int inMask,
                                            unsigned int * outMask,
@@ -254,20 +255,22 @@ URI_FUNC(LowercaseInplaceExceptPercentEncoding)(const URI_CHAR * first,
 static URI_INLINE UriBool URI_FUNC(LowercaseMalloc)(const URI_CHAR ** first,
                                                     const URI_CHAR ** afterLast,
                                                     UriMemoryManager * memory) {
-    int lenInChars;
     const int lowerUpperDiff = (_UT('a') - _UT('A'));
     URI_CHAR * buffer;
-    int i = 0;
+    size_t i = 0;
 
     if ((first == NULL) || (afterLast == NULL) || (*first == NULL)
         || (*afterLast == NULL)) {
         return URI_FALSE;
     }
 
-    lenInChars = (int)(*afterLast - *first);
+    const size_t lenInChars = *afterLast - *first;
     if (lenInChars == 0) {
         return URI_TRUE;
-    } else if (lenInChars < 0) {
+    }
+
+    // Detect and avoid integer overflow
+    if (lenInChars > SIZE_MAX / sizeof(URI_CHAR)) {
         return URI_FALSE;
     }
 
@@ -295,8 +298,8 @@ URI_FUNC(FixPercentEncodingEngine)(const URI_CHAR * inFirst, const URI_CHAR * in
                                    const URI_CHAR * outFirst,
                                    const URI_CHAR ** outAfterLast) {
     URI_CHAR * write = (URI_CHAR *)outFirst;
-    const int lenInChars = (int)(inAfterLast - inFirst);
-    int i = 0;
+    const size_t lenInChars = inAfterLast - inFirst;
+    size_t i = 0;
 
     /* All but last two */
     for (; i + 2 < lenInChars; i++) {
@@ -350,7 +353,6 @@ static URI_INLINE void URI_FUNC(FixPercentEncodingInplace)(const URI_CHAR * firs
 static URI_INLINE UriBool URI_FUNC(FixPercentEncodingMalloc)(const URI_CHAR ** first,
                                                              const URI_CHAR ** afterLast,
                                                              UriMemoryManager * memory) {
-    int lenInChars;
     URI_CHAR * buffer;
 
     /* Death checks */
@@ -360,10 +362,13 @@ static URI_INLINE UriBool URI_FUNC(FixPercentEncodingMalloc)(const URI_CHAR ** f
     }
 
     /* Old text length */
-    lenInChars = (int)(*afterLast - *first);
+    const size_t lenInChars = *afterLast - *first;
     if (lenInChars == 0) {
         return URI_TRUE;
-    } else if (lenInChars < 0) {
+    }
+
+    // Detect and avoid integer overflow
+    if (lenInChars > SIZE_MAX / sizeof(URI_CHAR)) {
         return URI_FALSE;
     }
 

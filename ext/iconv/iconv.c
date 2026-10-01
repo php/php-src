@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Rui Hirokawa <rui_hirokawa@ybb.ne.jp>                       |
    |          Stig Bakken <ssb@php.net>                                   |
@@ -1030,7 +1028,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 
 						if (out_size <= out_reserved) {
 							err = PHP_ICONV_ERR_TOO_BIG;
-							goto out;
+							goto out_try;
 						}
 
 						out_left = out_size - out_reserved;
@@ -1039,22 +1037,22 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 							switch (errno) {
 								case EINVAL:
 									err = PHP_ICONV_ERR_ILLEGAL_CHAR;
-									goto out;
+									goto out_try;
 
 								case EILSEQ:
 									err = PHP_ICONV_ERR_ILLEGAL_SEQ;
-									goto out;
+									goto out_try;
 
 								case E2BIG:
 									if (prev_in_left == in_left) {
 										err = PHP_ICONV_ERR_TOO_BIG;
-										goto out;
+										goto out_try;
 									}
 									break;
 
 								default:
 									err = PHP_ICONV_ERR_UNKNOWN;
-									goto out;
+									goto out_try;
 							}
 						}
 
@@ -1063,7 +1061,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 						if (iconv(cd, NULL, NULL, (char **) &out_p, &out_left) == (size_t)-1) {
 							if (errno != E2BIG) {
 								err = PHP_ICONV_ERR_UNKNOWN;
-								goto out;
+								goto out_try;
 							}
 						} else {
 							break;
@@ -1071,7 +1069,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 
 						if (iconv(cd, NULL, NULL, NULL, NULL) == (size_t)-1) {
 							err = PHP_ICONV_ERR_UNKNOWN;
-							goto out;
+							goto out_try;
 						}
 
 						out_reserved += 4;
@@ -1086,7 +1084,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 					if (char_cnt < ZSTR_LEN(encoded)) {
 						/* something went wrong! */
 						err = PHP_ICONV_ERR_UNKNOWN;
-						goto out;
+						goto out_try;
 					}
 
 					smart_str_append(pretval, encoded);
@@ -1103,6 +1101,12 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 					const char *ini_in_p;
 					const unsigned char *p;
 					size_t nbytes_required;
+
+					/* Some agents get confused about what char_cnt is; it will
+					 * be at least 4 at this point; if caller messed up and gave
+					 * too short of a max_line_len that was already caught above
+					 * and handled with PHP_ICONV_ERR_TOO_BIG. */
+					ZEND_ASSERT(char_cnt >= 4);
 
 					smart_str_appendc(pretval, 'Q');
 					char_cnt--;
@@ -1123,28 +1127,28 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 							switch (errno) {
 								case EINVAL:
 									err = PHP_ICONV_ERR_ILLEGAL_CHAR;
-									goto out;
+									goto out_try;
 
 								case EILSEQ:
 									err = PHP_ICONV_ERR_ILLEGAL_SEQ;
-									goto out;
+									goto out_try;
 
 								case E2BIG:
 									if (prev_in_left == in_left) {
 										err = PHP_ICONV_ERR_UNKNOWN;
-										goto out;
+										goto out_try;
 									}
 									break;
 
 								default:
 									err = PHP_ICONV_ERR_UNKNOWN;
-									goto out;
+									goto out_try;
 							}
 						}
 						if (iconv(cd, NULL, NULL, (char **) &out_p, &out_left) == (size_t)-1) {
 							if (errno != E2BIG) {
 								err = PHP_ICONV_ERR_UNKNOWN;
-								goto out;
+								goto out_try;
 							}
 						}
 
@@ -1179,7 +1183,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 
 					if (iconv(cd, NULL, NULL, NULL, NULL) == (size_t)-1) {
 						err = PHP_ICONV_ERR_UNKNOWN;
-						goto out;
+						goto out_try;
 					}
 
 				} break; /* case PHP_ICONV_ENC_SCHEME_QPRINT: */
@@ -1187,6 +1191,8 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 		} while (in_left > 0);
 
 		smart_str_0(pretval);
+
+out_try: ;
 	} zend_catch {
 		bailout = true;
 	} zend_end_try();
@@ -1278,7 +1284,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 								if (mode & PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR) {
 									err = PHP_ICONV_ERR_SUCCESS;
 								} else {
-									goto out;
+									goto out_try;
 								}
 							}
 							encoded_word = NULL;
@@ -1296,7 +1302,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 						}
 						err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl);
 						if (err != PHP_ICONV_ERR_SUCCESS) {
-							goto out;
+							goto out_try;
 						}
 						encoded_word = NULL;
 						if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
@@ -1326,7 +1332,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 							_php_iconv_appendc(pretval, '?', cd_pl);
 							err = _php_iconv_appendl(pretval, csname, (size_t)((p1 + 1) - csname), cd_pl);
 							if (err != PHP_ICONV_ERR_SUCCESS) {
-								goto out;
+								goto out_try;
 							}
 							csname = NULL;
 							if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
@@ -1342,7 +1348,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 
 						if (csname == NULL) {
 							err = PHP_ICONV_ERR_MALFORMED;
-							goto out;
+							goto out_try;
 						}
 
 						csname_len = (size_t)(p1 - csname);
@@ -1351,7 +1357,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 							if ((mode & PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR)) {
 								err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl);
 								if (err != PHP_ICONV_ERR_SUCCESS) {
-									goto out;
+									goto out_try;
 								}
 								encoded_word = NULL;
 								if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
@@ -1362,7 +1368,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 								break;
 							} else {
 								err = PHP_ICONV_ERR_MALFORMED;
-								goto out;
+								goto out_try;
 							}
 						}
 
@@ -1409,7 +1415,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 
 								err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl);
 								if (err != PHP_ICONV_ERR_SUCCESS) {
-									goto out;
+									goto out_try;
 								}
 
 								/* Let's go back and see if there are further
@@ -1423,7 +1429,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 								} else {
 									err = PHP_ICONV_ERR_CONVERTER;
 								}
-								goto out;
+								goto out_try;
 							}
 						}
 					}
@@ -1447,7 +1453,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 							if ((mode & PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR)) {
 								err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl);
 								if (err != PHP_ICONV_ERR_SUCCESS) {
-									goto out;
+									goto out_try;
 								}
 								encoded_word = NULL;
 								if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
@@ -1458,7 +1464,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 								break;
 							} else {
 								err = PHP_ICONV_ERR_MALFORMED;
-								goto out;
+								goto out_try;
 							}
 					}
 					break;
@@ -1469,7 +1475,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 							/* pass the entire chunk through the converter */
 							err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl);
 							if (err != PHP_ICONV_ERR_SUCCESS) {
-								goto out;
+								goto out_try;
 							}
 							encoded_word = NULL;
 							if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
@@ -1480,7 +1486,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 							break;
 						} else {
 							err = PHP_ICONV_ERR_MALFORMED;
-							goto out;
+							goto out_try;
 						}
 					}
 					encoded_text = p1 + 1;
@@ -1525,7 +1531,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 							/* pass the entire chunk through the converter */
 							err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl);
 							if (err != PHP_ICONV_ERR_SUCCESS) {
-								goto out;
+								goto out_try;
 							}
 							encoded_word = NULL;
 							if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
@@ -1536,7 +1542,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 							break;
 						} else {
 							err = PHP_ICONV_ERR_MALFORMED;
-							goto out;
+							goto out_try;
 						}
 					}
 					scan_stat = 9;
@@ -1564,7 +1570,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 									/* pass the entire chunk through the converter */
 									err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl);
 									if (err != PHP_ICONV_ERR_SUCCESS) {
-										goto out;
+										goto out_try;
 									}
 									scan_stat = 12;
 									break;
@@ -1593,7 +1599,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 									/* pass the entire chunk through the converter */
 									err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl);
 									if (err != PHP_ICONV_ERR_SUCCESS) {
-										goto out;
+										goto out_try;
 									}
 									encoded_word = NULL;
 									if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
@@ -1604,7 +1610,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 									break;
 								} else {
 									err = PHP_ICONV_ERR_UNKNOWN;
-									goto out;
+									goto out_try;
 								}
 							}
 
@@ -1623,7 +1629,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 										break;
 									}
 								} else {
-									goto out;
+									goto out_try;
 								}
 							}
 
@@ -1744,7 +1750,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 					err = PHP_ICONV_ERR_SUCCESS;
 				} else {
 					err = PHP_ICONV_ERR_MALFORMED;
-					goto out;
+					goto out_try;
 				}
 		}
 
@@ -1753,6 +1759,8 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 		}
 
 		smart_str_0(pretval);
+
+out_try: ;
 	} zend_catch {
 		bailout = true;
 	} zend_end_try();
@@ -2593,20 +2601,20 @@ static zend_result php_iconv_stream_filter_seek(
 		int whence)
 {
 	php_iconv_stream_filter *self = (php_iconv_stream_filter *)Z_PTR(filter->abstract);
+	iconv_t cd;
 
 	/* Reset stub buffer */
 	self->stub_len = 0;
 
-	/* Reset iconv conversion state by closing and reopening the converter */
-	iconv_close(self->cd);
-
-	self->cd = iconv_open(self->to_charset, self->from_charset);
-	if ((iconv_t)-1 == self->cd) {
+	cd = iconv_open(self->to_charset, self->from_charset);
+	if ((iconv_t)-1 == cd) {
 		php_error_docref(NULL, E_WARNING,
 				"iconv stream filter (\"%s\"=>\"%s\"): failed to reset conversion state",
 				self->from_charset, self->to_charset);
 		return FAILURE;
 	}
+	iconv_close(self->cd);
+	self->cd = cd;
 
 	return SUCCESS;
 }
@@ -2631,8 +2639,13 @@ static const php_stream_filter_ops php_iconv_stream_filter_ops = {
 static php_stream_filter *php_iconv_stream_filter_factory_create(const char *name, zval *params, bool persistent)
 {
 	php_iconv_stream_filter *inst;
+	php_stream_filter_seekable_t write_seekable;
 	const char *from_charset = NULL, *to_charset = NULL;
 	size_t from_charset_len, to_charset_len;
+
+	if (php_stream_filter_parse_write_seek_mode(params, &write_seekable) == FAILURE) {
+		return NULL;
+	}
 
 	if ((from_charset = strchr(name, '.')) == NULL) {
 		return NULL;
@@ -2661,7 +2674,7 @@ static php_stream_filter *php_iconv_stream_filter_factory_create(const char *nam
 	}
 
 	return php_stream_filter_alloc(&php_iconv_stream_filter_ops, inst, persistent,
-			PSFS_SEEKABLE_START);
+			PSFS_SEEKABLE_START, write_seekable);
 }
 /* }}} */
 

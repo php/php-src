@@ -9,7 +9,7 @@ $utf32 = mb_convert_encoding($utf8, 'UTF-32', 'UTF-8');
 try {
     mb_str_pad($utf32, 5, "1" /* invalid for encoding */, STR_PAD_RIGHT, "UTF-32");
 } catch (ValueError $e) {
-    echo $e::class, ": ", $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--

@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Vadim Savchuk <vsavchuk@productengine.com>                  |
    |          Dmitry Lakhtyuk <dlakhtyuk@productengine.com>               |
@@ -45,6 +45,7 @@ extern zend_module_entry intl_module_entry;
 
 ZEND_BEGIN_MODULE_GLOBALS(intl)
 	struct UCollator *current_collator;
+	intl_error *current_collator_error;
 	char* default_locale;
 	collator_compare_func_t compare_func;
 	UBreakIterator* grapheme_iterator;
@@ -69,6 +70,15 @@ PHP_MINFO_FUNCTION(intl);
 
 const char *intl_locale_get_default( void );
 char *canonicalize_locale_string(const char* locale);
+
+#define PHP_INTL_FUNCTION_WITH_ERROR_RESET(name) \
+	static void php_intl_##name##_impl(INTERNAL_FUNCTION_PARAMETERS); \
+	U_CFUNC PHP_FUNCTION(name) \
+	{ \
+		intl_error_reset(NULL); \
+		php_intl_##name##_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU); \
+	} \
+	static void php_intl_##name##_impl(INTERNAL_FUNCTION_PARAMETERS)
 
 #define PHP_INTL_VERSION PHP_VERSION
 

@@ -1,16 +1,14 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
-   | Author: Stig S�ther Bakken <ssb@php.net>                             |
+   | Author: Stig Sæther Bakken <ssb@php.net>                             |
    +----------------------------------------------------------------------+
  */
 
@@ -20,8 +18,8 @@
 
 #include <locale.h>
 #ifdef ZTS
-#include "ext/standard/php_string.h" /* for localeconv_r() */
-#define LCONV_DECIMAL_POINT (*lconv.decimal_point)
+#include "ext/standard/php_string.h" /* for localeconv_decimal_point() */
+#define LCONV_DECIMAL_POINT localeconv_decimal_point()
 #else
 #define LCONV_DECIMAL_POINT (*lconv->decimal_point)
 #endif
@@ -223,9 +221,7 @@ php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 	char *s = NULL;
 	size_t s_len = 0;
 	bool is_negative = false;
-#ifdef ZTS
-	struct lconv lconv;
-#else
+#ifndef ZTS
 	struct lconv *lconv;
 #endif
 
@@ -258,9 +254,7 @@ php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 		case 'E':
 		case 'f':
 		case 'F':
-#ifdef ZTS
-			localeconv_r(&lconv);
-#else
+#ifndef ZTS
 			lconv = localeconv();
 #endif
 			s = php_conv_fp((fmt == 'f')?'F':fmt, number, 0, precision,
@@ -287,9 +281,7 @@ php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 
 			char decimal_point = '.';
 			if (fmt == 'g' || fmt == 'G') {
-#ifdef ZTS
-				localeconv_r(&lconv);
-#else
+#ifndef ZTS
 				lconv = localeconv();
 #endif
 				decimal_point = LCONV_DECIMAL_POINT;
@@ -376,9 +368,14 @@ php_sprintf_getnumber(char **buffer, size_t *len)
 
 int php_sprintf_get_argnum(char **format, size_t *format_len) {
 	char *temppos = *format;
-	while (isdigit((int) *temppos)) temppos++;
+	while (isdigit((unsigned char)*temppos)) temppos++;
 	if (*temppos != '$') {
 		return ARG_NUM_NEXT;
+	}
+
+	if (UNEXPECTED(temppos == *format)) {
+		zend_value_error("Argument number specifier must not be empty");
+		return ARG_NUM_INVALID;
 	}
 
 	int argnum = php_sprintf_getnumber(format, format_len);
@@ -468,7 +465,7 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 
 			PRINTF_DEBUG(("sprintf: first looking at '%c', inpos=%zu\n",
 						  *format, format - format_orig));
-			if (isalpha((int)*format)) {
+			if (isalpha((unsigned char)*format)) {
 				width = precision = 0;
 				argnum = ARG_NUM_NEXT;
 			} else {
@@ -537,7 +534,7 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 					}
 					width = Z_LVAL_P(tmp);
 					adjusting |= ADJ_WIDTH;
-				} else if (isdigit((int)*format)) {
+				} else if (isdigit((unsigned char)*format)) {
 					PRINTF_DEBUG(("sprintf: getting width\n"));
 					if ((width = php_sprintf_getnumber(&format, &format_len)) < 0) {
 						zend_value_error("Width must be between 0 and %d", INT_MAX);
@@ -582,7 +579,7 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 						precision = Z_LVAL_P(tmp);
 						adjusting |= ADJ_PRECISION;
 						expprec = 1;
-					} else if (isdigit((int)*format)) {
+					} else if (isdigit((unsigned char)*format)) {
 						if ((precision = php_sprintf_getnumber(&format, &format_len)) < 0) {
 							zend_value_error("Precision must be between 0 and %d", INT_MAX);
 							goto fail;

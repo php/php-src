@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2025 Alexander Borisov
+ * Copyright (C) 2019-2026 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -18,7 +18,7 @@ extern "C" {
 
 
 #define LXB_CSS_VERSION_MAJOR 1
-#define LXB_CSS_VERSION_MINOR 3
+#define LXB_CSS_VERSION_MINOR 4
 #define LXB_CSS_VERSION_PATCH 0
 
 #define LXB_CSS_VERSION_STRING                                                 \
@@ -44,6 +44,8 @@ typedef struct lxb_css_parser_error lxb_css_parser_error_t;
 
 typedef struct lxb_css_syntax_tokenizer lxb_css_syntax_tokenizer_t;
 typedef struct lxb_css_syntax_token lxb_css_syntax_token_t;
+
+/* Callbacks. */
 
 typedef bool
 (*lxb_css_parser_state_f)(lxb_css_parser_t *parser,
@@ -81,6 +83,21 @@ typedef struct {
     void                      *initial;
 }
 lxb_css_entry_data_t;
+
+typedef struct {
+    lxb_char_t                        *name;
+    size_t                            length;
+    uintptr_t                         unique;
+
+    /* const lxb_css_syntax_cb_at_rule_t */
+    const void                        *cbs;
+
+    lxb_css_style_create_f            create;
+    lxb_css_style_destroy_f           destroy;
+    lxb_css_style_serialize_f         serialize;
+    void                              *initial;
+}
+lxb_css_entry_at_rule_data_t;
 
 typedef struct {
     lxb_char_t *name;

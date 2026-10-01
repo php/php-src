@@ -50,7 +50,7 @@ foreach ($values as $key => $value) {
         $tidy->parseString($str, $config, 'utf8');
         echo $tidy->value, "\n";
     } catch (Throwable $e) {
-        echo $e::class, ": ", $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 

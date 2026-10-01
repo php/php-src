@@ -119,13 +119,13 @@ string(30) "Syntax error near location 4:2"
 
 Error in string with spaces:
 bool(false)
-int(3)
-string(71) "Control character error, possibly incorrectly encoded near location 1:9"
+int(4)
+string(30) "Syntax error near location 1:9"
 
 Error with whitespace around colon:
 bool(false)
-int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1:12"
+int(4)
+string(31) "Syntax error near location 1:12"
 
 Error with whitespace around comma:
 bool(true)
@@ -154,11 +154,10 @@ string(72) "Control character error, possibly incorrectly encoded near location 
 
 Error in compact JSON:
 bool(false)
-int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1:22"
+int(4)
+string(31) "Syntax error near location 1:22"
 
 Error with regular spaces:
 bool(false)
-int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1:10"
-
+int(4)
+string(31) "Syntax error near location 1:10"

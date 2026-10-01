@@ -22,6 +22,7 @@ imagepng($g, "$cwd/bug48732私はガラスを食べられます.png");
 echo 'Left Bottom: (' . $bbox[0]  . ', ' . $bbox[1] . ')';
 ?>
 --CLEAN--
-<?php @unlink(__DIR__ . '/bug48732私はガラスを食べられます.png'); ?>
+<?php @unlink(__DIR__ . '/bug48732私はガラスを食べられます.png');
+ ?>
 --EXPECT--
-Left Bottom: (0, 46)
+Left Bottom: (0, 40)

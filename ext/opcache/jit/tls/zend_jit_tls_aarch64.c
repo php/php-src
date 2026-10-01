@@ -1,19 +1,17 @@
 /*
- *  +----------------------------------------------------------------------+
- *  | Zend JIT                                                             |
- *  +----------------------------------------------------------------------+
- *  | Copyright (c) The PHP Group                                          |
- *  +----------------------------------------------------------------------+
- *  | This source file is subject to version 3.01 of the PHP license,      |
- *  | that is bundled with this package in the file LICENSE, and is        |
- *  | available through the world-wide-web at the following url:           |
- *  | https://www.php.net/license/3_01.txt                                 |
- *  | If you did not receive a copy of the PHP license and are unable to   |
- *  | obtain it through the world-wide-web, please send a note to          |
- *  | license@php.net so we can mail you a copy immediately.               |
- *  +----------------------------------------------------------------------+
- *  | Authors: Arnaud Le Blanc <arnaud.lb@gmail.com>                       |
- *  +----------------------------------------------------------------------+
+   +----------------------------------------------------------------------+
+   | Zend JIT                                                             |
+   +----------------------------------------------------------------------+
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
+   +----------------------------------------------------------------------+
+   | Authors: Arnaud Le Blanc <arnaud.lb@gmail.com>                       |
+   +----------------------------------------------------------------------+
  */
 
 #include "Zend/zend_portability.h"
@@ -126,7 +124,9 @@ zend_result zend_jit_resolve_tsrm_ls_cache_offsets(
 		"add   %2, x8, x0\n"
 		: "=r" (thread_pointer), "=r" (insn), "=r" (addr)
 		:
-		: "x0", "x1", "x8");
+		/* Resolver call clobbers only a few registers: https://github.com/ARM-software/abi-aa/blob/ee4b3c12d57c8424ff60c2ae56e10690d0604ab6/sysvabi64/sysvabi64.rst#calling-convention.
+		 * We also clobber x8. */
+		: "x0", "x1", "x8", "x30", "cc", "memory");
 
 	ZEND_ASSERT(addr == &_tsrm_ls_cache);
 

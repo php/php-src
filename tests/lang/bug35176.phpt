@@ -10,7 +10,7 @@ require_once('nonexistent.php');
 ?>
 --EXPECTF--
 <br />
-<b>Warning</b>:  require_once(nonexistent.php) [<a href='/function.require-once.html'>function.require-once.html</a>]: Failed to open stream: No such file or directory in <b>%sbug35176.php</b> on line <b>2</b><br />
+<b>Warning</b>:  require_once() [<a href='/function.require-once.html'>function.require-once.html</a>]: Failed to open stream: No such file or directory in <b>%sbug35176.php</b> on line <b>2</b><br />
 <br />
 <b>Fatal error</b>:  Uncaught Error: Failed opening required 'nonexistent.php' (include_path='%s') in %s:%d
 Stack trace:

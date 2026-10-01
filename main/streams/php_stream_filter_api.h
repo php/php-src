@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Wez Furlong <wez@thebrainroom.com>                           |
    | With suggestions from:                                               |
@@ -110,6 +108,7 @@ typedef struct _php_stream_filter_ops {
 
 typedef struct _php_stream_filter_chain {
 	php_stream_filter *head, *tail;
+	zend_long num_filters;
 
 	/* Owning stream */
 	php_stream *stream;
@@ -120,7 +119,8 @@ struct _php_stream_filter {
 	zval abstract; /* for use by filter implementation */
 	php_stream_filter *next;
 	php_stream_filter *prev;
-	php_stream_filter_seekable_t seekable;
+	php_stream_filter_seekable_t read_seekable;
+	php_stream_filter_seekable_t write_seekable;
 	bool is_persistent;
 
 	/* link into stream and chain */
@@ -135,24 +135,25 @@ struct _php_stream_filter {
 
 /* stack filter onto a stream */
 BEGIN_EXTERN_C()
-PHPAPI void _php_stream_filter_prepend(php_stream_filter_chain *chain, php_stream_filter *filter);
+PHPAPI void php_stream_filter_prepend(php_stream_filter_chain *chain, php_stream_filter *filter);
 PHPAPI void php_stream_filter_prepend_ex(php_stream_filter_chain *chain, php_stream_filter *filter);
-PHPAPI void _php_stream_filter_append(php_stream_filter_chain *chain, php_stream_filter *filter);
+PHPAPI void php_stream_filter_append(php_stream_filter_chain *chain, php_stream_filter *filter);
 PHPAPI zend_result php_stream_filter_append_ex(php_stream_filter_chain *chain, php_stream_filter *filter);
-PHPAPI zend_result _php_stream_filter_flush(php_stream_filter *filter, bool finish);
+PHPAPI zend_result php_stream_filter_flush(php_stream_filter *filter, bool finish);
 PHPAPI php_stream_filter *php_stream_filter_remove(php_stream_filter *filter, bool call_dtor);
 PHPAPI void php_stream_filter_free(php_stream_filter *filter);
 PHPAPI php_stream_filter *_php_stream_filter_alloc(const php_stream_filter_ops *fops,
-		void *abstract, bool persistent, php_stream_filter_seekable_t seekable STREAMS_DC);
+		void *abstract, bool persistent, php_stream_filter_seekable_t read_seekable,
+		php_stream_filter_seekable_t write_seekable STREAMS_DC);
+PHPAPI zend_result php_stream_filter_parse_write_seek_mode(const zval *filterparams,
+		php_stream_filter_seekable_t *write_seekable);
+PHPAPI int php_stream_filter_get_chain_type(php_stream *stream, php_stream_filter *filter);
 
 END_EXTERN_C()
-#define php_stream_filter_alloc(fops, thisptr, persistent, seekable) \
-		_php_stream_filter_alloc((fops), (thisptr), (persistent), (seekable) STREAMS_CC)
-#define php_stream_filter_alloc_rel(fops, thisptr, persistent, seekable) \
-	_php_stream_filter_alloc((fops), (thisptr), (persistent), (seekable) STREAMS_REL_CC)
-#define php_stream_filter_prepend(chain, filter) _php_stream_filter_prepend((chain), (filter))
-#define php_stream_filter_append(chain, filter) _php_stream_filter_append((chain), (filter))
-#define php_stream_filter_flush(filter, finish) _php_stream_filter_flush((filter), (finish))
+#define php_stream_filter_alloc(fops, thisptr, persistent, rseek, wseek) \
+		_php_stream_filter_alloc((fops), (thisptr), (persistent), (rseek), (wseek) STREAMS_CC)
+#define php_stream_filter_alloc_rel(fops, thisptr, persistent, rseek, wseek) \
+	_php_stream_filter_alloc((fops), (thisptr), (persistent), (rseek), (wseek) STREAMS_REL_CC)
 
 #define php_stream_is_filtered(stream)	((stream)->readfilters.head || (stream)->writefilters.head)
 

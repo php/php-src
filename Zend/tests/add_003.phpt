@@ -10,8 +10,8 @@ $o->prop = "value";
 
 try {
     var_dump($o + $a);
-} catch (Error $e) {
-    echo "\nException: " . $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $c = $o + $a;
@@ -20,7 +20,7 @@ var_dump($c);
 echo "Done\n";
 ?>
 --EXPECTF--
-Exception: Unsupported operand types: stdClass + array
+TypeError: Unsupported operand types: stdClass + array
 
 Fatal error: Uncaught TypeError: Unsupported operand types: stdClass + array in %s:%d
 Stack trace:

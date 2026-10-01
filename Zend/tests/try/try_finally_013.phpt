@@ -18,6 +18,7 @@ function foo() {
 
 foo();
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Returning from a finally block is deprecated in %s on line %d
 try
 finally

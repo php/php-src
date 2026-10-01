@@ -72,7 +72,7 @@ class MyArrayIterator extends ArrayIterator
             }
             catch (Exception $e)
             {
-                echo $e->getMessage() . "\n";
+                echo $e::class, ': ', $e->getMessage(), "\n";
             }
             if (isset($skip[self::$fail]))
             {
@@ -92,7 +92,7 @@ MyArrayIterator::test('iterator_count', array(3 => 6));
 ?>
 --EXPECT--
 ===iterator_to_array===
-State 7: __destruct()
+Exception: State 7: __destruct()
 array(2) {
   [0]=>
   int(1)
@@ -100,5 +100,5 @@ array(2) {
   int(2)
 }
 ===iterator_count===
-State 7: __destruct()
+Exception: State 7: __destruct()
 int(2)

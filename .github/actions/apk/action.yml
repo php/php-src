@@ -28,7 +28,6 @@ runs:
             curl-dev \
             freetype-dev \
             gettext-dev \
-            gnu-libiconv-dev \
             gmp-dev \
             icu-dev \
             icu-data-full \

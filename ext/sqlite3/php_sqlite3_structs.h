@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Scott MacVicar <scottmac@php.net>                           |
    +----------------------------------------------------------------------+
@@ -50,6 +48,7 @@ typedef struct _php_sqlite3_func {
 	zend_fcall_info_cache func;
 	zend_fcall_info_cache step;
 	zend_fcall_info_cache fini;
+	unsigned int *in_callback_ptr;
 } php_sqlite3_func;
 
 /* Structure for SQLite collation function */
@@ -58,6 +57,7 @@ typedef struct _php_sqlite3_collation {
 
 	zend_string *collation_name;
 	zend_fcall_info_cache cmp_func;
+	unsigned int *in_callback_ptr;
 } php_sqlite3_collation;
 
 /* Structure for SQLite Database object. */
@@ -70,13 +70,13 @@ typedef struct _php_sqlite3_db_object  {
 	php_sqlite3_collation *collations;
 	zend_fcall_info_cache authorizer_fcc;
 
+	unsigned int in_callback;
+
 	zend_llist free_list;
 	zend_object zo;
 } php_sqlite3_db_object;
 
-static inline php_sqlite3_db_object *php_sqlite3_db_from_obj(zend_object *obj) {
-	return (php_sqlite3_db_object*)((char*)(obj) - XtOffsetOf(php_sqlite3_db_object, zo));
-}
+#define php_sqlite3_db_from_obj(obj) ZEND_CONTAINER_OF(obj, php_sqlite3_db_object, zo)
 
 #define Z_SQLITE3_DB_P(zv)  php_sqlite3_db_from_obj(Z_OBJ_P((zv)))
 
@@ -103,9 +103,7 @@ struct _php_sqlite3_result_object  {
 	zend_object zo;
 };
 
-static inline php_sqlite3_result *php_sqlite3_result_from_obj(zend_object *obj) {
-	return (php_sqlite3_result*)((char*)(obj) - XtOffsetOf(php_sqlite3_result, zo));
-}
+#define php_sqlite3_result_from_obj(obj) ZEND_CONTAINER_OF(obj, php_sqlite3_result, zo)
 
 #define Z_SQLITE3_RESULT_P(zv)  php_sqlite3_result_from_obj(Z_OBJ_P((zv)))
 
@@ -121,9 +119,7 @@ struct _php_sqlite3_stmt_object  {
 	zend_object zo;
 };
 
-static inline php_sqlite3_stmt *php_sqlite3_stmt_from_obj(zend_object *obj) {
-	return (php_sqlite3_stmt*)((char*)(obj) - XtOffsetOf(php_sqlite3_stmt, zo));
-}
+#define php_sqlite3_stmt_from_obj(obj) ZEND_CONTAINER_OF(obj, php_sqlite3_stmt, zo)
 
 #define Z_SQLITE3_STMT_P(zv)  php_sqlite3_stmt_from_obj(Z_OBJ_P((zv)))
 

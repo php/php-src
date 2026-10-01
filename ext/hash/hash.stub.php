@@ -83,7 +83,7 @@ function mhash_get_hash_name(int $algo): string|false {}
  * @refcount 1
  */
 #[\Deprecated(since: '8.1')]
-function mhash_keygen_s2k(int $algo, string $password, string $salt, int $length): string|false {}
+function mhash_keygen_s2k(int $algo, #[\SensitiveParameter] string $password, string $salt, int $length): string|false {}
 
 #[\Deprecated(since: '8.1')]
 function mhash_count(): int {}
@@ -92,7 +92,7 @@ function mhash_count(): int {}
  * @refcount 1
  */
 #[\Deprecated(since: '8.1')]
-function mhash(int $algo, string $data, ?string $key = null): string|false {}
+function mhash(int $algo, string $data, #[\SensitiveParameter] ?string $key = null): string|false {}
 #endif
 
 final class HashContext

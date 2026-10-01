@@ -23,10 +23,6 @@ $dirs_arr = array(
   "./is_dir_variation4//",
   ".//is_dir_variation4//",
   "is_dir_vari*",
-
-  /* Testing Binary safe */
-  "./is_dir_variation4/".chr(0),
-  "is_dir_variation4\0"
 );
 
 $count = 1;
@@ -35,8 +31,8 @@ foreach($dirs_arr as $dir) {
   echo "\n-- Iteration $count --\n";
   try {
     var_dump( is_dir($file_path."/".$dir ) );
-  } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+  } catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
   }
   $count++;
 }
@@ -73,12 +69,6 @@ bool(true)
 bool(true)
 
 -- Iteration 8 --
-bool(false)
-
--- Iteration 9 --
-bool(false)
-
--- Iteration 10 --
 bool(false)
 
 *** Done ***

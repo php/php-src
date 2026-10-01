@@ -67,7 +67,7 @@ echo "===NOFUNCTION===\n";
 try {
     spl_autoload_register("unavailable_autoload_function");
 } catch(\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -100,4 +100,4 @@ TestFunc2(TestClass)
 %stestclass.class.inc
 bool(true)
 ===NOFUNCTION===
-spl_autoload_register(): Argument #1 ($callback) must be a valid callback or null, function "unavailable_autoload_function" not found or invalid function name
+TypeError: spl_autoload_register(): Argument #1 ($callback) must be a valid callback or null, function "unavailable_autoload_function" not found or invalid function name

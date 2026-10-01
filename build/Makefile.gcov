@@ -16,23 +16,6 @@ LCOV_EXCLUDES = \
 	'$(top_srcdir)/parse_date.re' \
 	'$(top_srcdir)/parse_iso_intervals.re'
 
-GCOVR_EXCLUDES = \
-	'ext/bcmath/libbcmath/.*' \
-	'ext/date/lib/.*' \
-	'ext/fileinfo/libmagic/.*' \
-	'ext/gd/libgd/.*' \
-	'ext/hash/sha3/.*' \
-	'ext/lexbor/lexbor/.*' \
-	'ext/mbstring/libmbfl/.*' \
-	'ext/opcache/jit/ir/.*' \
-	'ext/pcre/pcre2lib/.*' \
-	'ext/uri/uriparser/.*'
-
-# These patterns have implicit ^/$ anchors.
-GCOVR_EXCLUDE_LINES_BY_PATTERNS = \
-	'.*\b(ZEND_PARSE_PARAMETERS_(START|END|NONE)|Z_PARAM_).*' \
-	'\s*(default:\s*)?ZEND_UNREACHABLE\(\);\s*'
-
 lcov: lcov-html
 
 php_lcov.info:
@@ -56,15 +39,11 @@ gcovr-html:
 	@echo "Generating gcovr HTML"
 	@rm -rf gcovr_html/
 	@mkdir gcovr_html
-	gcovr -sr . -o gcovr_html/index.html --html --html-details --exclude-unreachable-branches --exclude-throw-branches \
-		$(foreach pattern, $(GCOVR_EXCLUDE_LINES_BY_PATTERNS), --exclude-lines-by-pattern $(pattern)) \
-		$(foreach lib, $(GCOVR_EXCLUDES), -e $(lib))
+	gcovr -r . -o gcovr_html/index.html --html --html-details
 
 gcovr-xml:
 	@echo "Generating gcovr XML"
 	@rm -f gcovr.xml
-	gcovr -sr . -o gcovr.xml --xml --exclude-unreachable-branches --exclude-throw-branches \
-		$(foreach pattern, $(GCOVR_EXCLUDE_LINES_BY_PATTERNS), --exclude-lines-by-pattern $(pattern)) \
-		$(foreach lib, $(GCOVR_EXCLUDES), -e $(lib))
+	gcovr -r . -o gcovr.xml --xml
 
 .PHONY: gcovr-html lcov-html php_lcov.info

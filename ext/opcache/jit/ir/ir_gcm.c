@@ -1,7 +1,7 @@
 /*
  * IR - Lightweight JIT Compilation Framework
  * (GCM - Global Code Motion and Scheduler)
- * Copyright (C) 2022 Zend by Perforce.
+ * This file is part of the IR Project distributed under the MIT-style LICENSE.
  * Authors: Dmitry Stogov <dmitry@php.net>
  *
  * The GCM algorithm is based on Cliff Click's publication
@@ -148,7 +148,7 @@ static uint32_t ir_gcm_select_best_block(ir_ctx *ctx, ir_ref ref, uint32_t lca)
 }
 
 #if IR_GCM_SPLIT
-/* Partially Dead Code Elimination through splitting the node and sunking the clones
+/* Partially Dead Code Elimination through splitting the node and sinking the clones
  *
  * This code is based on the Benedikt Meurer's idea first implemented in V8.
  * See: https://codereview.chromium.org/899433005
@@ -216,6 +216,10 @@ static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
 	n = use_list->count;
 	for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
 		use = *p;
+		i = ctx->cfg_map[use];
+		if (!i) {
+			continue;
+		}
 		insn = &ctx->ir_base[use];
 		if (insn->op == IR_PHI) {
 			ir_ref *p = insn->ops + 2; /* PHI data inputs */
@@ -233,10 +237,6 @@ static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
 				}
 			}
 		} else {
-			i = ctx->cfg_map[use];
-			if (!i) {
-				continue;
-			}
 			IR_ASSERT(i > 0 && i <= ctx->cfg_blocks_count);
 			if (!ir_sparse_set_in(&data->totally_useful, i)) {
 				if (i == b) return 0; /* node is totally-useful in the scheduled block */
@@ -309,6 +309,7 @@ static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
 	struct {
 		ir_ref   ref;
 		uint32_t block;
+		uint32_t lca;
 		uint32_t use_count;
 		uint32_t use;
 	} *clones = ir_mem_malloc(sizeof(*clones) * use_list->count);
@@ -344,8 +345,11 @@ static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
 						clone = clones_count++;
 						ir_hashtab_add(&hash, j, clone);
 						clones[clone].block = j;
+						clones[clone].lca = i;
 						clones[clone].use_count = 0;
 						clones[clone].use = (uint32_t)-1;
+					} else {
+						clones[clone].lca = ir_gcm_find_lca(ctx, clones[clone].lca, i);
 					}
 					uses[uses_count].ref = use;
 					uses[uses_count].block = i;
@@ -367,8 +371,11 @@ static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
 				clone = clones_count++;
 				ir_hashtab_add(&hash, j, clone);
 				clones[clone].block = j;
+				clones[clone].lca = i;
 				clones[clone].use_count = 0;
 				clones[clone].use = -1;
+			} else {
+				clones[clone].lca = ir_gcm_find_lca(ctx, clones[clone].lca, i);
 			}
 			uses[uses_count].ref = use;
 			uses[uses_count].block = i;
@@ -377,6 +384,42 @@ static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
 			clones[clone].use = uses_count++;
 		}
 	}
+
+	/* Select best blocks to insert clones */
+	for (i = 0; i < clones_count; i++) {
+		uint32_t b0 = clones[i].block;
+		uint32_t lca = clones[i].lca;
+
+		if (b0 != lca) {
+			ir_block *bb = &ctx->cfg_blocks[lca];
+			uint32_t loop_depth = bb->loop_depth;
+
+			if (loop_depth) {
+				uint32_t b;
+				uint32_t best;
+
+				best = b = lca;
+				do {
+					b = bb->dom_parent;
+					bb = &ctx->cfg_blocks[b];
+					if (bb->loop_depth < loop_depth) {
+						if (!bb->loop_depth) {
+							best = b;
+							break;
+						}
+						loop_depth = bb->loop_depth;
+						best = b;
+					}
+				} while (b != b0);
+				lca = best;
+			}
+			clones[i].block = lca;
+		}
+	}
+
+	// TODO: instead of inserting clone into the block where the expressin is partially available,
+	//       we should insert PHI and the actual clones into the block sources where it's not available
+	//       (similar to SSAPRE)
 
 #ifdef IR_DEBUG
 	if (ctx->flags & IR_DEBUG_GCM_SPLIT) {
@@ -552,7 +595,7 @@ static void ir_gcm_schedule_late(ir_ctx *ctx, ir_ref ref, uint32_t b)
 			ir_use_list *use_list = &ctx->use_lists[ref];
 			ir_ref n, *p, use;
 
-			for (n = use_list->count, p = &ctx->use_edges[use_list->refs]; n < 0; p++, n--) {
+			for (n = use_list->count, p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
 				use = *p;
 				if (ctx->ir_base[use].op == IR_OVERFLOW) {
 					ctx->cfg_map[use] = b;
@@ -778,10 +821,18 @@ static void ir_xlat_binding(ir_ctx *ctx, ir_ref *_xlat)
 	binding->count = n2;
 }
 
-IR_ALWAYS_INLINE ir_ref ir_count_constant(ir_ref *_xlat, ir_ref ref)
+IR_ALWAYS_INLINE ir_ref ir_count_constant(const ir_ctx *ctx, ir_ref *_xlat, ir_ref ref)
 {
 	if (!_xlat[ref]) {
 		_xlat[ref] = ref; /* this is only a "used constant" marker */
+		if (ctx->ir_base[ref].op == IR_LONG_CONST) {
+				ir_ref i, n = IR_ALIGNED_SIZE(ctx->ir_base[ref].long_const_size, sizeof(ir_insn)) / sizeof(ir_insn);
+
+			for (i = 1; i <= n; i++) {
+				_xlat[ref + i] = ref + i; /* this is only a "used constant" marker */
+			}
+			return n + 1;
+		}
 		return 1;
 	}
 	return 0;
@@ -808,7 +859,7 @@ IR_ALWAYS_INLINE bool ir_is_good_bb_order(ir_ctx *ctx, uint32_t b, ir_block *bb,
 				} else if ((bb->flags & IR_BB_LOOP_HEADER)
 				  && (input_b == b || ctx->cfg_blocks[input_b].loop_header == b)) {
 					/* back-edge of reducible loop */
-				} else if ((bb->flags & IR_BB_IRREDUCIBLE_LOOP)
+				} else if (UNEXPECTED(bb->flags & IR_BB_IRREDUCIBLE_LOOP)
 				  && (ctx->cfg_blocks[input_b].loop_header == bb->loop_header)) {
 					/* closing edge of irreducible loop */
 				} else {
@@ -817,6 +868,37 @@ IR_ALWAYS_INLINE bool ir_is_good_bb_order(ir_ctx *ctx, uint32_t b, ir_block *bb,
 			}
 		}
 		return 1;
+	}
+}
+
+static bool ir_belongs_to_loop(ir_ctx *ctx, uint32_t loop_header, uint32_t b)
+{
+	uint32_t loop_depth = ctx->cfg_blocks[loop_header].loop_depth;
+	ir_block *bb = &ctx->cfg_blocks[b];
+
+	if (bb->loop_depth < loop_depth) {
+		return 0;
+	} else if (bb->loop_depth == loop_depth) {
+		if (bb->flags & IR_BB_LOOP_HEADER) {
+			return b == loop_header;
+		} else {
+			return bb->loop_header == loop_header;
+		}
+	} else {
+		while (bb->loop_depth > loop_depth) {
+			b = bb->loop_header;
+			bb = &ctx->cfg_blocks[b];
+		}
+		return bb->loop_header == loop_header;
+	}
+}
+
+static bool ir_is_irreducable_loop_side_entry(ir_ctx *ctx, ir_block *entry, uint32_t from)
+{
+	if (entry->flags & IR_BB_LOOP_HEADER) {
+		return 0;
+	} else {
+		return !ir_belongs_to_loop(ctx, entry->loop_header, from);
 	}
 }
 
@@ -853,10 +935,8 @@ next:
 			succ = ctx->cfg_edges[bb->successors];
 			if (ir_bitset_in(worklist.visited, succ)) {
 				/* already processed */
-			} else if ((ctx->cfg_blocks[succ].flags & IR_BB_IRREDUCIBLE_LOOP)
-					&& ((ctx->cfg_blocks[b].flags & IR_BB_LOOP_HEADER) ?
-						(ctx->cfg_blocks[succ].loop_header != b) :
-						(ctx->cfg_blocks[succ].loop_header != ctx->cfg_blocks[b].loop_header))) {
+			} else if (UNEXPECTED(ctx->cfg_blocks[succ].flags & IR_BB_IRREDUCIBLE_ENTRY)
+					&& ir_is_irreducable_loop_side_entry(ctx, &ctx->cfg_blocks[succ], b)) {
 				/* "side" entry of irreducible loop (ignore) */
 			} else if (ir_worklist_push(&worklist, succ)) {
 				goto next;
@@ -871,10 +951,8 @@ next:
 				succ = *q;
 				if (ir_bitset_in(worklist.visited, succ)) {
 					/* already processed */
-				} else if ((ctx->cfg_blocks[succ].flags & IR_BB_IRREDUCIBLE_LOOP)
-						&& ((ctx->cfg_blocks[b].flags & IR_BB_LOOP_HEADER) ?
-							(ctx->cfg_blocks[succ].loop_header != b) :
-							(ctx->cfg_blocks[succ].loop_header != ctx->cfg_blocks[b].loop_header))) {
+				} else if (UNEXPECTED(ctx->cfg_blocks[succ].flags & IR_BB_IRREDUCIBLE_ENTRY)
+						&& ir_is_irreducable_loop_side_entry(ctx, &ctx->cfg_blocks[succ], b)) {
 					/* "side" entry of irreducible loop (ignore) */
 				} else if (!best) {
 					best = succ;
@@ -1020,7 +1098,7 @@ restart:
 						goto restart;
 					}
 				} else if (input < IR_TRUE) {
-					*consts_count += ir_count_constant(_xlat, input);
+					*consts_count += ir_count_constant(ctx, _xlat, input);
 				}
 			}
 		}
@@ -1117,16 +1195,16 @@ int ir_schedule(ir_ctx *ctx)
 		insn = &ctx->ir_base[i];
 		if (insn->op == IR_BEGIN) {
 			if (insn->op2) {
-				consts_count += ir_count_constant(_xlat, insn->op2);
+				consts_count += ir_count_constant(ctx, _xlat, insn->op2);
 			}
 		} else if (insn->op == IR_CASE_VAL) {
 			IR_ASSERT(insn->op2 < IR_TRUE);
-			consts_count += ir_count_constant(_xlat, insn->op2);
+			consts_count += ir_count_constant(ctx, _xlat, insn->op2);
 		} else if (insn->op == IR_CASE_RANGE) {
 			IR_ASSERT(insn->op2 < IR_TRUE);
-			consts_count += ir_count_constant(_xlat, insn->op2);
+			consts_count += ir_count_constant(ctx, _xlat, insn->op2);
 			IR_ASSERT(insn->op3 < IR_TRUE);
-			consts_count += ir_count_constant(_xlat, insn->op3);
+			consts_count += ir_count_constant(ctx, _xlat, insn->op3);
 		}
 		n = insn->inputs_count;
 		insns_count += ir_insn_inputs_to_len(n);
@@ -1153,7 +1231,7 @@ int ir_schedule(ir_ctx *ctx)
 				for (j = n, p = insn->ops + 2; j > 0; p++, j--) {
 					input = *p;
 					if (input < IR_TRUE) {
-						consts_count += ir_count_constant(_xlat, input);
+						consts_count += ir_count_constant(ctx, _xlat, input);
 					}
 				}
 				i = _next[i];
@@ -1170,11 +1248,11 @@ int ir_schedule(ir_ctx *ctx)
 					ir_ref use = *p;
 					ir_insn *use_insn = &ctx->ir_base[use];
 					if (!_xlat[use] && ctx->cfg_map[use]) {
-						IR_ASSERT(ctx->cfg_map[use] == b);
 						if (use_insn->op == IR_PARAM
 						 || use_insn->op == IR_VAR
 						 || use_insn->op == IR_PI
 						 || use_insn->op == IR_PHI) {
+							IR_ASSERT(ctx->cfg_map[use] == b);
 							if (_prev[use] != phis) {
 								/* remove "use" */
 								_prev[_next[use]] = _prev[use];
@@ -1194,7 +1272,7 @@ int ir_schedule(ir_ctx *ctx)
 								for (j = n, q = use_insn->ops + 2; j > 0; q++, j--) {
 									ir_ref input = *q;
 									if (input < IR_TRUE) {
-										consts_count += ir_count_constant(_xlat, input);
+										consts_count += ir_count_constant(ctx, _xlat, input);
 									}
 								}
 							} else {
@@ -1225,7 +1303,7 @@ int ir_schedule(ir_ctx *ctx)
 		insns_count++;
 		if (IR_INPUT_EDGES_COUNT(ir_op_flags[insn->op]) == 2) {
 			if (insn->op2 < IR_TRUE) {
-				consts_count += ir_count_constant(_xlat, insn->op2);
+				consts_count += ir_count_constant(ctx, _xlat, insn->op2);
 			}
 		}
 	}
@@ -1279,10 +1357,23 @@ int ir_schedule(ir_ctx *ctx)
 		while (i < IR_TRUE) {
 			if (_xlat[i]) {
 				*dst = *src;
-				dst->prev_const = 0;
 				_xlat[i] = j;
-				dst++;
-				j++;
+				if (dst->op == IR_LONG_CONST) {
+					uintptr_t n;
+
+					memset(dst + 1, 0, dst->long_const_size);
+					memcpy(dst + 1, src + 1, dst->long_const_size);
+					n = IR_ALIGNED_SIZE(dst->long_const_size, sizeof(ir_insn)) / sizeof(ir_insn);
+					dst += n + 1;
+					src += n + 1;
+					i += n + 1;
+					j += n + 1;
+					continue;
+				} else {
+					dst->prev_const = 0;
+					dst++;
+					j++;
+				}
 			}
 			src++;
 			i++;

@@ -9,9 +9,9 @@ try {
   // See GH-15918: this *should* fail to not break invariants
   $ao->exchangeArray($fixedArray);
 } catch (InvalidArgumentException $e) {
-  echo $e->getMessage(), "\n";
+  echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
 Deprecated: ArrayObject::exchangeArray(): Using an object as a backing array for ArrayObject is deprecated, as it allows violating class constraints and invariants in %s on line %d
-Overloaded object of type SplFixedArray is not compatible with ArrayObject
+InvalidArgumentException: Overloaded object of type SplFixedArray is not compatible with ArrayObject

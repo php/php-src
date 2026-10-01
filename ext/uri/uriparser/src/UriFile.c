@@ -63,7 +63,8 @@
 #    include <uriparser/Uri.h>
 #  endif
 
-#  include <stdlib.h> /* for size_t, avoiding stddef.h for older MSVCs */
+#  include <stddef.h>  // size_t
+#  include <stdint.h>  // SIZE_MAX
 
 static URI_INLINE int URI_FUNC(FilenameToUriString)(const URI_CHAR * filename,
                                                     URI_CHAR * uriString,
@@ -90,6 +91,11 @@ static URI_INLINE int URI_FUNC(FilenameToUriString)(const URI_CHAR * filename,
                                                              : _UT("file:///");
         const size_t prefixLen = URI_STRLEN(prefix);
 
+        // Detect and avoid integer overflow
+        if (prefixLen > SIZE_MAX / sizeof(URI_CHAR)) {
+            return URI_ERROR_OUTPUT_TOO_LARGE;
+        }
+
         /* Copy prefix */
         memcpy(uriString, prefix, prefixLen * sizeof(URI_CHAR));
         output += prefixLen;
@@ -103,7 +109,13 @@ static URI_INLINE int URI_FUNC(FilenameToUriString)(const URI_CHAR * filename,
             if (lastSep + 1 < input) {
                 if (!fromUnix && absolute && (firstSegment == URI_TRUE)) {
                     /* Quick hack to not convert "C:" to "C%3A" */
-                    const int charsToCopy = (int)(input - (lastSep + 1));
+                    const size_t charsToCopy = input - (lastSep + 1);
+
+                    // Detect and avoid integer overflow
+                    if (charsToCopy > SIZE_MAX / sizeof(URI_CHAR)) {
+                        return URI_ERROR_OUTPUT_TOO_LARGE;
+                    }
+
                     memcpy(output, lastSep + 1, charsToCopy * sizeof(URI_CHAR));
                     output += charsToCopy;
                 } else {

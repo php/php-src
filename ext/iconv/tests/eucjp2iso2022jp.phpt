@@ -7,6 +7,13 @@ iconv
 if (PHP_OS_FAMILY === 'Solaris') {
     die("skip Solaris iconv behaves differently");
 }
+// ISO-2022-JP is a stateful encoding, so the right answer is not
+// unique. In particular, musl (type "unknown") is known to have an
+// inefficient encoding for it that does not agree with the expected
+// output below.
+if (ICONV_IMPL == "unknown") {
+    die("skip byte-comparison of stateful encoding with unknown iconv");
+}
 ?>
 --INI--
 error_reporting=2039

@@ -6,52 +6,52 @@ TypeError for compound assignment operations
 $x = [];
 try {
     $x += "1";
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $x -= "1";
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $x *= "1";
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $x /= "1";
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $x **= "1";
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $x %= "1";
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $x <<= "1";
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $x >>= "1";
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Unsupported operand types: array + string
-Unsupported operand types: array - string
-Unsupported operand types: array * string
-Unsupported operand types: array / string
-Unsupported operand types: array ** string
-Unsupported operand types: array % string
-Unsupported operand types: array << string
-Unsupported operand types: array >> string
+TypeError: Unsupported operand types: array + string
+TypeError: Unsupported operand types: array - string
+TypeError: Unsupported operand types: array * string
+TypeError: Unsupported operand types: array / string
+TypeError: Unsupported operand types: array ** string
+TypeError: Unsupported operand types: array % string
+TypeError: Unsupported operand types: array << string
+TypeError: Unsupported operand types: array >> string

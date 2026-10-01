@@ -10,17 +10,17 @@ echo '10 + "0" = ', gmp_strval(gmp_add(10, '0')), "\n";
 try {
     var_dump(gmp_div(10, 0));
 } catch (\DivisionByZeroError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(gmp_div_qr(10, 0));
 } catch (\DivisionByZeroError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
 10 + 0 = 10
 10 + "0" = 10
-gmp_div(): Argument #2 ($num2) Division by zero
-gmp_div_qr(): Argument #2 ($num2) Division by zero
+DivisionByZeroError: gmp_div(): Argument #2 ($num2) Division by zero
+DivisionByZeroError: gmp_div_qr(): Argument #2 ($num2) Division by zero

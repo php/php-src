@@ -1,18 +1,16 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Christian Stocker <chregu@php.net>                          |
    |          Rob Richards <rrichards@php.net>                            |
-   |          Niels Dossche <nielsdos@php.net>                            |
+   |          Nora Dossche  <ndossche@php.net>                            |
    +----------------------------------------------------------------------+
 */
 
@@ -178,7 +176,8 @@ static void dom_map_get_notation_item(dom_nnodemap_object *map, zend_long index,
 	xmlNodePtr node = map->ht ? php_dom_libxml_hash_iter(map->ht, index) : NULL;
 	if (node) {
 		xmlNotation *notation = (xmlNotation *) node;
-		node = create_notation(notation->name, notation->PublicID, notation->SystemID);
+		xmlDtdPtr dtd = (xmlDtdPtr) dom_object_get_node(map->baseobj);
+		node = create_notation(dtd, notation->name, notation->PublicID, notation->SystemID);
 	}
 	dom_ret_node_to_zobj(map, node, return_value);
 }
@@ -311,9 +310,7 @@ static void dom_map_get_elements_item(dom_nnodemap_object *map, zend_long index,
 
 static void dom_map_collection_named_item_elements_iter(dom_nnodemap_object *map, php_dom_obj_map_collection_iter *iter)
 {
-	if (iter->candidate != iter->basep->children) {
-		iter->candidate = iter->candidate->next;
-	}
+	iter->candidate = iter->candidate ? iter->candidate->next : iter->basep->children;
 	while (iter->candidate && iter->candidate->type != XML_ELEMENT_NODE) {
 		iter->candidate = iter->candidate->next;
 	}
@@ -346,22 +343,20 @@ static void dom_map_get_by_class_name_item(dom_nnodemap_object *map, zend_long i
 	if (nodep && index >= 0) {
 		dom_node_idx_pair start_point = dom_obj_map_get_start_point(map, nodep, index);
 		if (start_point.node) {
-			if (start_point.index > 0) {
-				/* Only start iteration at next point if we actually have an index to seek to. */
-				itemnode = php_dom_next_in_tree_order(start_point.node, nodep);
-			} else {
-				itemnode = start_point.node;
-			}
+			itemnode = start_point.node;
 		} else {
 			itemnode = php_dom_first_child_of_container_node(nodep);
-		}
-
-		do {
-			--start_point.index;
 			while (itemnode != NULL && !dom_matches_class_name(map, itemnode)) {
 				itemnode = php_dom_next_in_tree_order(itemnode, nodep);
 			}
-		} while (start_point.index > 0 && itemnode);
+		}
+
+		for (; start_point.index > 0 && itemnode != NULL; --start_point.index) {
+			itemnode = php_dom_next_in_tree_order(itemnode, nodep);
+			while (itemnode != NULL && !dom_matches_class_name(map, itemnode)) {
+				itemnode = php_dom_next_in_tree_order(itemnode, nodep);
+			}
+		}
 	}
 	dom_ret_node_to_zobj(map, itemnode, return_value);
 	if (itemnode) {
@@ -371,7 +366,8 @@ static void dom_map_get_by_class_name_item(dom_nnodemap_object *map, zend_long i
 
 static void dom_map_collection_named_item_by_tag_name_iter(dom_nnodemap_object *map, php_dom_obj_map_collection_iter *iter)
 {
-	iter->candidate = dom_get_elements_by_tag_name_ns_raw(iter->basep, iter->candidate, map->ns, map->local, map->local_lower, &iter->cur, iter->next);
+	xmlNodePtr nodep = iter->candidate ? iter->candidate : iter->basep->children;
+	iter->candidate = dom_get_elements_by_tag_name_ns_raw(iter->basep, nodep, map->ns, map->local, map->local_lower, &iter->cur, iter->next);
 	iter->next = iter->cur + 1;
 }
 
@@ -506,7 +502,8 @@ static xmlNodePtr dom_map_get_ns_named_item_notation(dom_nnodemap_object *map, c
 {
 	xmlNotationPtr notation = xmlHashLookup(map->ht, BAD_CAST ZSTR_VAL(named));
 	if (notation) {
-		return create_notation(notation->name, notation->PublicID, notation->SystemID);
+		xmlDtdPtr dtd = (xmlDtdPtr) dom_object_get_node(map->baseobj);
+		return create_notation(dtd, notation->name, notation->PublicID, notation->SystemID);
 	}
 	return NULL;
 }
@@ -516,7 +513,11 @@ static xmlNodePtr dom_map_get_ns_named_item_prop(dom_nnodemap_object *map, const
 	xmlNodePtr nodep = dom_object_get_node(map->baseobj);
 	if (nodep) {
 		if (ns) {
-			return (xmlNodePtr) xmlHasNsProp(nodep, BAD_CAST ZSTR_VAL(named), BAD_CAST ns);
+			xmlNodePtr itemnode = (xmlNodePtr) xmlHasNsProp(nodep, BAD_CAST ZSTR_VAL(named), BAD_CAST ns);
+			if (itemnode != NULL && itemnode->type == XML_ATTRIBUTE_DECL) {
+				return NULL;
+			}
+			return itemnode;
 		} else {
 			if (php_dom_follow_spec_intern(map->baseobj)) {
 				return (xmlNodePtr) php_dom_get_attribute_node(nodep, BAD_CAST ZSTR_VAL(named), ZSTR_LEN(named));

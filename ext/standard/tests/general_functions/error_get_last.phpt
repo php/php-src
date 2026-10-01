@@ -6,8 +6,8 @@ error_get_last() tests
 var_dump(error_get_last());
 try {
     var_dump(error_get_last(true));
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump(error_get_last());
 
@@ -19,7 +19,7 @@ echo "Done\n";
 ?>
 --EXPECTF--
 NULL
-error_get_last() expects exactly 0 arguments, 1 given
+ArgumentCountError: error_get_last() expects exactly 0 arguments, 1 given
 NULL
 
 Warning: Undefined variable $b in %s on line %d

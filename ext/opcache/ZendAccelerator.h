@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -200,6 +198,9 @@ typedef struct _zend_accel_globals {
 	bool               counted;   /* the process uses shared memory */
 	bool               enabled;
 	bool               locked;    /* thread obtained exclusive lock */
+#ifdef ZTS
+	uint32_t           unprotect_depth;
+#endif
 	bool               accelerator_enabled; /* accelerator enabled for current request */
 	bool               pcre_reseted;
 	zend_accel_directives   accel_directives;
@@ -335,6 +336,16 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type);
 zend_string* ZEND_FASTCALL accel_new_interned_string(zend_string *str);
 
 uint32_t zend_accel_get_class_name_map_ptr(zend_string *type_name);
+
+const zend_op_array *zend_accel_pfa_cache_get(
+		const uint32_t *declaring_lineno_ptr, const zend_function *called_function, bool cacheable_in_shm);
+
+/* Compiles ast into an op_array, and caches it. Takes ownership of ast. */
+zend_op_array *zend_accel_compile_pfa(zend_ast *ast,
+		zend_string *declaring_filename,
+		const uint32_t *declaring_lineno_ptr,
+		const zend_function *called_function,
+		zend_string *pfa_func_name, bool cacheable_in_shm);
 
 END_EXTERN_C()
 

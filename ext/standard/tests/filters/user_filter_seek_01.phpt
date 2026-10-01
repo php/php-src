@@ -39,7 +39,7 @@ class RotateFilter extends php_user_filter
     
     public function onClose(): void {}
     
-    public function seek(int $offset, int $whence): bool
+    public function seek(int $offset, int $whence, int $chain): bool
     {
         // Stateless filter - always seekable to any position
         return true;

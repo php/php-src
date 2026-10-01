@@ -22,8 +22,8 @@ try {
 
   $T =new Test(throw_exc());
 
-} catch( Exception $e) {
-  echo 'Exception: ' . $e->getMessage() . "\n";
+} catch( Throwable $e) {
+  echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--

@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Sascha Schumann <sascha@schumann.cx>                         |
   |         Yasuo Ohgaki <yohgaki@ohgaki.net>                            |
@@ -85,7 +83,7 @@ static zend_result php_ini_on_update_tags(zend_ini_entry *entry, zend_string *ne
 
 			*val++ = '\0';
 			for (q = key; *q; q++) {
-				*q = tolower(*q);
+				*q = tolower((unsigned char)*q);
 			}
 			keylen = q - key;
 			str = zend_string_init(key, keylen, 1);
@@ -137,7 +135,7 @@ static zend_result php_ini_on_update_hosts(zend_ini_entry *entry, zend_string *n
 		char *q;
 
 		for (q = key; *q; q++) {
-			*q = tolower(*q);
+			*q = tolower((unsigned char)*q);
 		}
 		keylen = q - key;
 		if (keylen > 0) {
@@ -463,7 +461,7 @@ static inline void handle_tag(STD_PARA)
 	}
 	smart_str_appendl(&ctx->tag, start, YYCURSOR - start);
 	for (i = 0; i < ZSTR_LEN(ctx->tag.s); i++)
-		ZSTR_VAL(ctx->tag.s)[i] = tolower((int)(unsigned char)ZSTR_VAL(ctx->tag.s)[i]);
+		ZSTR_VAL(ctx->tag.s)[i] = tolower((unsigned char)ZSTR_VAL(ctx->tag.s)[i]);
     /* intentionally using str_find here, in case the hash value is set, but the string val is changed later */
 	if ((ctx->lookup_data = zend_hash_str_find_ptr(ctx->tags, ZSTR_VAL(ctx->tag.s), ZSTR_LEN(ctx->tag.s))) != NULL) {
 		ok = 1;
@@ -663,7 +661,7 @@ static void php_url_scanner_ex_activate(bool is_session)
 		ctx = &BG(url_adapt_output_ex);
 	}
 
-	memset(ctx, 0, XtOffsetOf(url_adapt_state_ex_t, tags));
+	memset(ctx, 0, offsetof(url_adapt_state_ex_t, tags));
 }
 
 static void php_url_scanner_ex_deactivate(bool is_session)

@@ -17,7 +17,11 @@ odbc_exec($conn, 'INSERT INTO fetch_row VALUES (1), (2)');
 
 $res = odbc_exec($conn, 'SELECT * FROM fetch_row');
 
-var_dump(odbc_fetch_row($res, 0));
+try {
+    var_dump(odbc_fetch_row($res, 0));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 var_dump(odbc_fetch_row($res, null));
 var_dump(odbc_result($res, 'test'));
@@ -39,9 +43,8 @@ require 'config.inc';
 $conn = odbc_connect($dsn, $user, $pass);
 odbc_exec($conn, 'DROP TABLE fetch_row');
 ?>
---EXPECTF--
-Warning: odbc_fetch_row(): Argument #3 ($row) must be greater than or equal to 1 in %s on line %d
-bool(false)
+--EXPECT--
+odbc_fetch_row(): Argument #2 ($row) must be greater than or equal to 1
 bool(true)
 string(1) "1"
 bool(true)

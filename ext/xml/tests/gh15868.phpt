@@ -14,7 +14,7 @@ xml_set_element_handler($parser,
 try {
     xml_parse_into_struct($parser, "<container/>", $values, $tags);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $parser = xml_parser_create();
@@ -27,7 +27,7 @@ xml_set_element_handler($parser,
 try {
     xml_parse_into_struct($parser, "<container/>", $values, $tags);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $parser = xml_parser_create();
@@ -37,10 +37,10 @@ xml_set_character_data_handler($parser, function() {
 try {
     xml_parse_into_struct($parser, "<root><![CDATA[x]]></root>", $values, $tags);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-stop 1
-stop 2
-stop 3
+Error: stop 1
+Error: stop 2
+Error: stop 3

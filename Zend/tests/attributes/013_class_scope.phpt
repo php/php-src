@@ -46,8 +46,8 @@ $attr = $ref->getMethod('foo')->getAttributes()[0];
 
 try {
     $attr->getArguments();
-} catch (\Error $e) {
-    var_dump('ERROR 1', $e->getMessage());
+} catch (\Throwable $e) {
+    echo 'ERROR 1: ', $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "\n";
@@ -108,8 +108,7 @@ Array
     [0] => C2
     [1] => bar
 )
-string(7) "ERROR 1"
-string(28) "Undefined constant self::FOO"
+ERROR 1: Error: Undefined constant self::FOO
 
 bool(true)
 string(3) "bar"

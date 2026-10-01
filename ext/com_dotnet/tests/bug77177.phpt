@@ -2,16 +2,11 @@
 Bug #77177 (Serializing or unserializing COM objects crashes)
 --EXTENSIONS--
 com_dotnet
---SKIPIF--
-<?php
-if (!class_exists("dotnet")) die("skip mscoree not available");
-?>
 --FILE--
 <?php
 $com = new COM("WScript.Shell");
-$dotnet = new DOTNET("mscorlib", "System.Collections.Stack");
 $variant = new VARIANT;
-foreach ([$com, $dotnet, $variant] as $object) {
+foreach ([$com, $variant] as $object) {
     try {
         serialize($object);
     } catch (Exception $ex) {
@@ -19,7 +14,7 @@ foreach ([$com, $dotnet, $variant] as $object) {
     }
 }
 
-$strings = ['C:3:"com":0:{}', 'C:6:"dotnet":0:{}', 'C:7:"variant":0:{}'];
+$strings = ['C:3:"com":0:{}', 'C:7:"variant":0:{}'];
 foreach ($strings as $string) {
     try {
         unserialize($string);
@@ -28,7 +23,7 @@ foreach ($strings as $string) {
     }
 }
 
-$strings = ['O:3:"com":0:{}', 'O:6:"dotnet":0:{}', 'O:7:"variant":0:{}'];
+$strings = ['O:3:"com":0:{}', 'O:7:"variant":0:{}'];
 foreach ($strings as $string) {
     try {
         unserialize($string);
@@ -37,13 +32,10 @@ foreach ($strings as $string) {
     }
 }
 ?>
---EXPECTF--
+--EXPECT--
 Exception: Serialization of 'com' is not allowed
-Exception: Serialization of 'dotnet' is not allowed
 Exception: Serialization of 'variant' is not allowed
 Exception: Unserialization of 'com' is not allowed
-Exception: Unserialization of 'dotnet' is not allowed
 Exception: Unserialization of 'variant' is not allowed
 Exception: Unserialization of 'com' is not allowed
-Exception: Unserialization of 'dotnet' is not allowed
 Exception: Unserialization of 'variant' is not allowed

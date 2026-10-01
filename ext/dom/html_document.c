@@ -1,16 +1,14 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
-   | Authors: Niels Dossche <nielsdos@php.net>                            |
+   | Authors: Nora Dossche  <ndossche@php.net>                            |
    +----------------------------------------------------------------------+
 */
 
@@ -304,7 +302,7 @@ static void dom_lexbor_libxml2_bridge_tree_error_reporter(
 	dom_lexbor_libxml2_bridge_application_data *application_data = application_data_voidptr;
 
 	if (line == 1 && application_data->html_no_implied && error->id == LXB_HTML_RULES_ERROR_UNTOININMO) {
-		/* For no implied mode, we want to mimick libxml's behaviour of not reporting an error for a lacking doctype. */
+		/* For no implied mode, we want to mimic libxml's behaviour of not reporting an error for a lacking doctype. */
 		return;
 	}
 

@@ -137,15 +137,23 @@ Arg value
 bool(false)
 
 Arg value  
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 bool(false)
 
 Arg value  
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 bool(false)
 
 Arg value string 
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 bool(false)
 
 Arg value String 
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 bool(false)
 
 Arg value  

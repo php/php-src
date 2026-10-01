@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Andrey Hristov <andrey@php.net>                             |
   |          Ulf Wendel <uw@php.net>                                     |
@@ -201,7 +199,7 @@ static void _mysqlnd_efree(void *ptr MYSQLND_MEM_D)
 
 #if PHP_DEBUG
 	{
-		char * fn = strrchr(__zend_filename, PHP_DIR_SEPARATOR);
+		const char * fn = strrchr(__zend_filename, PHP_DIR_SEPARATOR);
 		TRACE_ALLOC_INF_FMT("file=%-15s line=%4d", fn? fn + 1:__zend_filename, __zend_lineno);
 	}
 #endif
@@ -232,7 +230,7 @@ static void _mysqlnd_pefree(void *ptr, bool persistent MYSQLND_MEM_D)
 
 #if PHP_DEBUG
 	{
-		char * fn = strrchr(__zend_filename, PHP_DIR_SEPARATOR);
+		const char * fn = strrchr(__zend_filename, PHP_DIR_SEPARATOR);
 		TRACE_ALLOC_INF_FMT("file=%-15s line=%4d", fn? fn + 1:__zend_filename, __zend_lineno);
 	}
 #endif
@@ -264,7 +262,7 @@ static char * _mysqlnd_pememdup(const char * const ptr, size_t length, bool pers
 
 #if PHP_DEBUG
 	{
-		char * fn = strrchr(__zend_filename, PHP_DIR_SEPARATOR);
+		const char * fn = strrchr(__zend_filename, PHP_DIR_SEPARATOR);
 		TRACE_ALLOC_INF_FMT("file=%-15s line=%4d", fn? fn + 1:__zend_filename, __zend_lineno);
 	}
 #endif
@@ -295,7 +293,7 @@ static char * _mysqlnd_pestrndup(const char * const ptr, size_t length, bool per
 
 #if PHP_DEBUG
 	{
-		char * fn = strrchr(__zend_filename, PHP_DIR_SEPARATOR);
+		const char * fn = strrchr(__zend_filename, PHP_DIR_SEPARATOR);
 		TRACE_ALLOC_INF_FMT("file=%-15s line=%4d", fn? fn + 1:__zend_filename, __zend_lineno);
 	}
 #endif
@@ -336,7 +334,7 @@ static char * _mysqlnd_pestrdup(const char * const ptr, bool persistent MYSQLND_
 	TRACE_ALLOC_ENTER(mysqlnd_pestrdup_name);
 #if PHP_DEBUG
 	{
-		char * fn = strrchr(__zend_filename, PHP_DIR_SEPARATOR);
+		const char * fn = strrchr(__zend_filename, PHP_DIR_SEPARATOR);
 		TRACE_ALLOC_INF_FMT("file=%-15s line=%4d", fn? fn + 1:__zend_filename, __zend_lineno);
 	}
 #endif

@@ -8,9 +8,9 @@ sodium
 try {
     sodium_crypto_sign_ed25519_pk_to_curve25519(str_repeat("\x00", SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES));
 } catch (SodiumException $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-conversion failed
+SodiumException: conversion failed

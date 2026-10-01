@@ -64,14 +64,14 @@ $streams = [$readStream];
 $empty = [];
 try {
     stream_select($streams, $streams,$empty, 0);
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 fflush($readStream);
 try {
     fclose($readStream);
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -86,10 +86,10 @@ Warning: fclose(): cannot close the provided stream, as it must not be manually 
 
 Warning: fclose(): cannot close the provided stream, as it must not be manually closed in %s on line %d
 
-Warning: stream_select(): Cannot represent a stream of type user-space as a select()able descriptor in %s on line %d
-
 Warning: fclose(): cannot close the provided stream, as it must not be manually closed in %s on line %d
 
 Warning: stream_select(): Cannot represent a stream of type user-space as a select()able descriptor in %s on line %d
-No stream arrays were passed
-fclose(): Argument #1 ($stream) must be an open stream resource
+
+Warning: stream_select(): Cannot represent a stream of type user-space as a select()able descriptor in %s on line %d
+ValueError: No stream arrays were passed
+TypeError: fclose(): Argument #1 ($stream) must be an open stream resource

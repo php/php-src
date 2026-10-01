@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Christian Stocker <chregu@php.net>                          |
    |          Rob Richards <rrichards@php.net>                            |
@@ -22,8 +20,6 @@
 
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
-#include "zend_enum.h"
-#include "zend_attributes.h"
 #include "php_dom.h"
 #include "obj_map.h"
 #include "nodelist.h"
@@ -147,7 +143,7 @@ static HashTable dom_xpath_prop_handlers;
 
 static zend_object *dom_objects_namespace_node_new(zend_class_entry *class_type);
 static void dom_object_namespace_node_free_storage(zend_object *object);
-static xmlNodePtr php_dom_create_fake_namespace_decl_node_ptr(xmlNodePtr nodep, xmlNsPtr original);
+static xmlNodePtr php_dom_create_fake_namespace_decl_node_ptr(xmlNodePtr nodep, xmlNsPtr original, xmlDocPtr fallback_doc);
 
 typedef zend_result (*dom_read_t)(dom_object *obj, zval *retval);
 typedef zend_result (*dom_write_t)(dom_object *obj, zval *newval);
@@ -414,11 +410,6 @@ zval *dom_write_property(zend_object *object, zend_string *name, zval *value, vo
 	const dom_prop_handler *hnd = dom_get_prop_handler(obj, name, cache_slot);
 
 	if (hnd) {
-		if (UNEXPECTED(!hnd->write_func)) {
-			zend_readonly_property_modification_error_ex(ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
-			return &EG(error_zval);
-		}
-
 		zend_property_info *prop = NULL;
 		if (cache_slot) {
 			ZEND_ASSERT(*cache_slot == obj->prop_handler);
@@ -429,6 +420,16 @@ zval *dom_write_property(zend_object *object, zend_string *name, zval *value, vo
 			if (cache_slot) {
 				*(cache_slot + 2) = prop;
 			}
+		}
+
+		if (UNEXPECTED(!hnd->write_func)) {
+			if (prop && (prop->flags & ZEND_ACC_PPP_SET_MASK) &&
+			    !zend_asymmetric_property_has_set_access(prop)) {
+				zend_asymmetric_visibility_property_modification_error(prop, "modify");
+			} else {
+				zend_readonly_property_modification_error_ex(ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
+			}
+			return &EG(error_zval);
 		}
 
 		ZEND_ASSERT(prop && ZEND_TYPE_IS_SET(prop->type));
@@ -722,7 +723,8 @@ static zend_object *dom_object_namespace_node_clone_obj(zend_object *zobject)
 	xmlNodePtr original_node = dom_object_get_node(&intern->dom);
 	if (original_node != NULL) {
 		ZEND_ASSERT(original_node->type == XML_NAMESPACE_DECL);
-		xmlNodePtr cloned_node = php_dom_create_fake_namespace_decl_node_ptr(original_node->parent, original_node->ns);
+		xmlNodePtr parent = intern->parent_intern ? dom_object_get_node(intern->parent_intern) : NULL;
+		xmlNodePtr cloned_node = php_dom_create_fake_namespace_decl_node_ptr(parent, original_node->ns, original_node->doc);
 		dom_update_refcount_after_clone(&intern->dom, original_node, &clone_intern->dom, cloned_node);
 	}
 
@@ -789,7 +791,7 @@ HashTable *dom_xpath_get_gc(zend_object *object, zval **table, int *n);
 PHP_MINIT_FUNCTION(dom)
 {
 	memcpy(&dom_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	dom_object_handlers.offset = XtOffsetOf(dom_object, std);
+	dom_object_handlers.offset = offsetof(dom_object, std);
 	dom_object_handlers.free_obj = dom_objects_free_storage;
 	dom_object_handlers.read_property = dom_read_property;
 	dom_object_handlers.write_property = dom_write_property;
@@ -834,12 +836,12 @@ PHP_MINIT_FUNCTION(dom)
 	dom_html_collection_object_handlers.get_gc = dom_html_collection_get_gc;
 
 	memcpy(&dom_object_namespace_node_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
-	dom_object_namespace_node_handlers.offset = XtOffsetOf(dom_object_namespace_node, dom.std);
+	dom_object_namespace_node_handlers.offset = offsetof(dom_object_namespace_node, dom.std);
 	dom_object_namespace_node_handlers.free_obj = dom_object_namespace_node_free_storage;
 	dom_object_namespace_node_handlers.clone_obj = dom_object_namespace_node_clone_obj;
 
 	memcpy(&dom_token_list_object_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
-	dom_token_list_object_handlers.offset = XtOffsetOf(dom_token_list_object, dom.std);
+	dom_token_list_object_handlers.offset = offsetof(dom_token_list_object, dom.std);
 	dom_token_list_object_handlers.free_obj = dom_token_list_free_obj;
 	/* The Web IDL (Web Interface Description Language - https://webidl.spec.whatwg.org) has the [SameObject] constraint
 	 * for this object, which is incompatible with cloning because it imposes that there is only one instance
@@ -1330,7 +1332,7 @@ PHP_MINIT_FUNCTION(dom)
 
 #ifdef LIBXML_XPATH_ENABLED
 	memcpy(&dom_xpath_object_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
-	dom_xpath_object_handlers.offset = XtOffsetOf(dom_xpath_object, dom) + XtOffsetOf(dom_object, std);
+	dom_xpath_object_handlers.offset = offsetof(dom_xpath_object, dom) + offsetof(dom_object, std);
 	dom_xpath_object_handlers.free_obj = dom_xpath_objects_free_storage;
 	dom_xpath_object_handlers.get_gc = dom_xpath_get_gc;
 	dom_xpath_object_handlers.clone_obj = NULL;
@@ -1443,14 +1445,13 @@ void node_list_unlink(xmlNodePtr node)
 	dom_object *wrapper;
 
 	while (node != NULL) {
+		xmlNodePtr next = node->next;
 
 		wrapper = php_dom_object_get_data(node);
 
 		if (wrapper != NULL ) {
 			xmlUnlinkNode(node);
-		} else {
-			if (node->type == XML_ENTITY_REF_NODE)
-				break;
+		} else if (node->type != XML_ENTITY_REF_NODE) {
 			node_list_unlink(node->children);
 
 			switch (node->type) {
@@ -1467,7 +1468,7 @@ void node_list_unlink(xmlNodePtr node)
 
 		}
 
-		node = node->next;
+		node = next;
 	}
 }
 /* }}} end node_list_unlink */
@@ -1483,7 +1484,13 @@ void dom_objects_free_storage(zend_object *object)
 	if (ptr != NULL && ptr->node != NULL) {
 		xmlNodePtr node = ptr->node;
 
-		if (node->type != XML_DOCUMENT_NODE && node->type != XML_HTML_DOCUMENT_NODE) {
+		if (node->type == XML_NOTATION_NODE) {
+			unsigned int refcount = php_libxml_decrement_node_ptr((php_libxml_node_object *) intern);
+			php_libxml_decrement_doc_ref((php_libxml_node_object *) intern);
+			if (refcount == 0) {
+				dom_free_notation((xmlEntityPtr) node);
+			}
+		} else if (node->type != XML_DOCUMENT_NODE && node->type != XML_HTML_DOCUMENT_NODE) {
 			php_libxml_node_decrement_resource((php_libxml_node_object *) intern);
 		} else {
 			php_libxml_decrement_node_ptr((php_libxml_node_object *) intern);
@@ -1561,7 +1568,7 @@ zend_object *dom_xpath_objects_new(zend_class_entry *class_type)
 
 /* The char pointer MUST refer to the char* of a zend_string struct */
 static void dom_zend_string_release_from_char_pointer(xmlChar *ptr) {
-	zend_string_release((zend_string*) (ptr - XtOffsetOf(zend_string, val)));
+	zend_string_release((zend_string*) (ptr - offsetof(zend_string, val)));
 }
 
 void dom_nnodemap_objects_free_storage(zend_object *object) /* {{{ */
@@ -1901,9 +1908,26 @@ static void dom_merge_adjacent_exclusive_text_nodes(xmlNodePtr node)
 	}
 }
 
+static zend_always_inline bool dom_normalize_check_stack_limit(void)
+{
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		if (!EG(exception)) {
+			zend_throw_error(NULL, "Maximum call stack size reached. Infinite recursion?");
+		}
+		return true;
+	}
+#endif
+	return false;
+}
+
 /* {{{ void php_dom_normalize_legacy(xmlNodePtr nodep) */
 void php_dom_normalize_legacy(xmlNodePtr nodep)
 {
+	if (UNEXPECTED(dom_normalize_check_stack_limit())) {
+		return;
+	}
+
 	xmlNodePtr child = nodep->children;
 	while(child != NULL) {
 		switch (child->type) {
@@ -1936,6 +1960,10 @@ void php_dom_normalize_legacy(xmlNodePtr nodep)
 /* https://dom.spec.whatwg.org/#dom-node-normalize */
 void php_dom_normalize_modern(xmlNodePtr this)
 {
+	if (UNEXPECTED(dom_normalize_check_stack_limit())) {
+		return;
+	}
+
 	/* for each descendant exclusive Text node node of this: */
 	xmlNodePtr node = this->children;
 	while (node != NULL) {
@@ -2232,15 +2260,16 @@ xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName) {
 }
 /* }}} end dom_get_nsdecl */
 
-static xmlNodePtr php_dom_create_fake_namespace_decl_node_ptr(xmlNodePtr nodep, xmlNsPtr original)
+static xmlNodePtr php_dom_create_fake_namespace_decl_node_ptr(xmlNodePtr nodep, xmlNsPtr original, xmlDocPtr fallback_doc)
 {
 	xmlNodePtr attrp;
+	xmlDocPtr doc = nodep ? nodep->doc : fallback_doc;
 	xmlNsPtr curns = xmlNewNs(NULL, original->href, NULL);
 	if (original->prefix) {
 		curns->prefix = xmlStrdup(original->prefix);
-		attrp = xmlNewDocNode(nodep->doc, NULL, BAD_CAST original->prefix, original->href);
+		attrp = xmlNewDocNode(doc, NULL, BAD_CAST original->prefix, original->href);
 	} else {
-		attrp = xmlNewDocNode(nodep->doc, NULL, BAD_CAST "xmlns", original->href);
+		attrp = xmlNewDocNode(doc, NULL, BAD_CAST "xmlns", original->href);
 	}
 	attrp->type = XML_NAMESPACE_DECL;
 	attrp->parent = nodep;
@@ -2251,7 +2280,7 @@ static xmlNodePtr php_dom_create_fake_namespace_decl_node_ptr(xmlNodePtr nodep, 
 /* Note: Assumes the additional lifetime was already added in the caller. */
 xmlNodePtr php_dom_create_fake_namespace_decl(xmlNodePtr nodep, xmlNsPtr original, zval *return_value, dom_object *parent_intern)
 {
-	xmlNodePtr attrp = php_dom_create_fake_namespace_decl_node_ptr(nodep, original);
+	xmlNodePtr attrp = php_dom_create_fake_namespace_decl_node_ptr(nodep, original, NULL);
 	php_dom_create_object(attrp, return_value, parent_intern);
 	/* This object must exist, because we just created an object for it via php_dom_create_object(). */
 	php_dom_namespace_node_obj_from_obj(Z_OBJ_P(return_value))->parent_intern = parent_intern;

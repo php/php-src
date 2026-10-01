@@ -6,18 +6,18 @@ libxml
 <?php
 try {
     libxml_set_streams_context("a");
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 $fp = fopen("php://input", "r");
 try {
     libxml_set_streams_context($fp);
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo "okey";
 ?>
 --EXPECT--
-libxml_set_streams_context(): Argument #1 ($context) must be of type resource, string given
-libxml_set_streams_context(): supplied resource is not a valid Stream-Context resource
+TypeError: libxml_set_streams_context(): Argument #1 ($context) must be of type resource, string given
+TypeError: libxml_set_streams_context(): supplied resource is not a valid Stream-Context resource
 okey

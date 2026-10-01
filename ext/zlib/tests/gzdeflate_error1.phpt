@@ -17,7 +17,7 @@ $bad_level = 99;
 try {
     var_dump(gzdeflate($data, $bad_level));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "\n-- Testing with incorrect encoding --\n";
@@ -26,7 +26,7 @@ $bad_encoding = 99;
 try {
     var_dump(gzdeflate($data, $level, $bad_encoding));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -34,7 +34,7 @@ try {
 *** Testing gzdeflate() : error conditions ***
 
 -- Testing with incorrect compression level --
-gzdeflate(): Argument #2 ($level) must be between -1 and 9
+ValueError: gzdeflate(): Argument #2 ($level) must be between -1 and 9
 
 -- Testing with incorrect encoding --
-gzdeflate(): Argument #3 ($encoding) must be one of ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE
+ValueError: gzdeflate(): Argument #3 ($encoding) must be one of ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE

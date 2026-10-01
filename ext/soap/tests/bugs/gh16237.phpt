@@ -9,9 +9,9 @@ $server = new SoapServer(null, ['uri'=>"http://testuri.org"]);
 try {
     clone $server;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Trying to clone an uncloneable object of class SoapServer
+Error: Trying to clone an uncloneable object of class SoapServer

@@ -1,5 +1,5 @@
 /* This is a generated file, edit object_handlers.stub.php instead.
- * Stub hash: 81be60f2c465ffe5c036739d072ab80d9c388907 */
+ * Stub hash: 1a70ed60c5af38539b1222a979f97fddf7d1826e */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DoOperationNoCast___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, val, IS_LONG, 0)
@@ -15,10 +15,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_NumericCastableNoOperations___construct, 0,
 	ZEND_ARG_TYPE_MASK(0, val, MAY_BE_LONG|MAY_BE_DOUBLE, NULL)
 ZEND_END_ARG_INFO()
 
+#define arginfo_class_VmInterruptComparable___construct arginfo_class_DoOperationNoCast___construct
+
 static ZEND_METHOD(DoOperationNoCast, __construct);
 static ZEND_METHOD(LongCastableNoOperations, __construct);
 static ZEND_METHOD(FloatCastableNoOperations, __construct);
 static ZEND_METHOD(NumericCastableNoOperations, __construct);
+static ZEND_METHOD(VmInterruptComparable, __construct);
 
 static const zend_function_entry class_DoOperationNoCast_methods[] = {
 	ZEND_ME(DoOperationNoCast, __construct, arginfo_class_DoOperationNoCast___construct, ZEND_ACC_PUBLIC)
@@ -37,6 +40,11 @@ static const zend_function_entry class_FloatCastableNoOperations_methods[] = {
 
 static const zend_function_entry class_NumericCastableNoOperations_methods[] = {
 	ZEND_ME(NumericCastableNoOperations, __construct, arginfo_class_NumericCastableNoOperations___construct, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_VmInterruptComparable_methods[] = {
+	ZEND_ME(VmInterruptComparable, __construct, arginfo_class_VmInterruptComparable___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -99,6 +107,22 @@ static zend_class_entry *register_class_NumericCastableNoOperations(void)
 	ZVAL_UNDEF(&property_val_default_value);
 	zend_string *property_val_name = zend_string_init("val", sizeof("val") - 1, true);
 	zend_declare_typed_property(class_entry, property_val_name, &property_val_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_DOUBLE));
+	zend_string_release_ex(property_val_name, true);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_VmInterruptComparable(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "VmInterruptComparable", class_VmInterruptComparable_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+
+	zval property_val_default_value;
+	ZVAL_UNDEF(&property_val_default_value);
+	zend_string *property_val_name = zend_string_init("val", sizeof("val") - 1, true);
+	zend_declare_typed_property(class_entry, property_val_name, &property_val_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(property_val_name, true);
 
 	return class_entry;

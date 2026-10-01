@@ -49,22 +49,15 @@ memory_limit=83886080
 
     function test_format($link, $format, $from, $order_by, $expected, $offset) {
 
-        if (!$stmt = mysqli_stmt_init($link)) {
-            printf("[%03d] Cannot create PS, [%d] %s\n",
-                $offset,
-                mysqli_errno($link), mysqli_error($link));
-            return false;
-        }
-
         if ($order_by)
             $sql = sprintf('SELECT %s AS _format FROM %s ORDER BY %s', $format, $from, $order_by);
         else
             $sql = sprintf('SELECT %s AS _format FROM %s', $format, $from);
 
-        if (!mysqli_stmt_prepare($stmt, $sql)) {
+        if (!$stmt = mysqli_prepare($link, $sql)) {
             printf("[%03d] Cannot prepare PS, [%d] %s\n",
                 $offset + 1,
-                mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+                mysqli_errno($link), mysqli_error($link));
             return false;
         }
 
@@ -244,13 +237,8 @@ memory_limit=83886080
             }
             krsort($values);
 
-            if (!$stmt = mysqli_stmt_init($link)) {
+            if (!$stmt = mysqli_prepare($link, 'SELECT trend, targetport, FORMAT(trend, 2) FROM test WHERE current_targets > 0 AND trend IS NOT NULL ORDER BY trend DESC LIMIT 100')) {
                 printf("[302] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-                break;
-            }
-
-            if (!mysqli_stmt_prepare($stmt, 'SELECT trend, targetport, FORMAT(trend, 2) FROM test WHERE current_targets > 0 AND trend IS NOT NULL ORDER BY trend DESC LIMIT 100')) {
-                printf("[303] [%d] %s\n", mysqli_stmt_errno($link), mysqli_stmt_error($link));
                 break;
             }
 
@@ -284,13 +272,8 @@ memory_limit=83886080
             mysqli_stmt_close($stmt);
 
             // same but OO interface
-            if (!$stmt = mysqli_stmt_init($link)) {
+            if (!$stmt = $link->prepare('SELECT trend, targetport, FORMAT(trend, 2) FROM test WHERE current_targets > 0 AND trend IS NOT NULL ORDER BY trend DESC LIMIT 100')) {
                 printf("[307] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-                break;
-            }
-
-            if (!$stmt->prepare('SELECT trend, targetport, FORMAT(trend, 2) FROM test WHERE current_targets > 0 AND trend IS NOT NULL ORDER BY trend DESC LIMIT 100')) {
-                printf("[308] [%d] %s\n", mysqli_stmt_errno($link), mysqli_stmt_error($link));
                 break;
             }
 

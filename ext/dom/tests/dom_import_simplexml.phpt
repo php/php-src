@@ -16,8 +16,8 @@ print $dom->ownerDocument->saveXML();
 // This should fail because it has been imported already above in legacy DOM
 try {
     Dom\import_simplexml($s);
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
@@ -32,4 +32,4 @@ try {
   <author>John Steinbeck</author>
  </book>
 </books>
-Dom\import_simplexml(): Argument #1 ($node) must not be already imported as a DOMNode
+TypeError: Dom\import_simplexml(): Argument #1 ($node) must not be already imported as a DOMNode

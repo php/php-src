@@ -13,7 +13,7 @@ $n = gmp_init(-1);
 try {
     gmp_clrbit($n, -1);
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 var_dump(gmp_strval($n));
 
@@ -21,7 +21,7 @@ $n = gmp_init("1000000");
 try {
     gmp_clrbit($n, -1);
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 var_dump(gmp_strval($n));
 
@@ -39,18 +39,18 @@ $n = array();
 try {
     gmp_clrbit($n, 3);
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done\n";
 ?>
 --EXPECTF--
 string(1) "0"
-gmp_clrbit(): Argument #2 ($index) must be between 0 and %d * %d
+ValueError: gmp_clrbit(): Argument #2 ($index) must be between 0 and %d * %d
 string(2) "-1"
-gmp_clrbit(): Argument #2 ($index) must be between 0 and %d * %d
+ValueError: gmp_clrbit(): Argument #2 ($index) must be between 0 and %d * %d
 string(7) "1000000"
 string(7) "1000000"
 string(30) "238462734628347239571822592658"
-gmp_clrbit(): Argument #1 ($num) must be of type GMP, array given
+TypeError: gmp_clrbit(): Argument #1 ($num) must be of type GMP, array given
 Done

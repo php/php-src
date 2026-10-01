@@ -4,7 +4,7 @@ ZendMM Custom Handlers: garbage collection
 zend_test
 --FILE--
 <?php
-$string = str_repeat('String', rand(1,100));
+$string = str_repeat('String', rand(2,100));
 ini_set('zend_test.zend_mm_custom_handlers.enabled', 1);
 unset($string);
 ini_set('zend_test.zend_mm_custom_handlers.enabled', 0);

@@ -12,8 +12,8 @@ $conf = array('config' => __DIR__ . DIRECTORY_SEPARATOR . 'openssl.cnf');
 try {
     var_dump(openssl_csr_new(array(), $a, $conf, array()));
     var_dump($keyFailed);
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 // this leaks
@@ -28,7 +28,7 @@ var_dump(openssl_csr_new(["countryName" => "DE"], $x, $conf + ["x509_extensions"
 ?>
 --EXPECTF--
 Warning: openssl_csr_new(): add1_attr_by_txt challengePassword_min -> 4 (failed; check error queue and value of string_mask OpenSSL option if illegal characters are reported) in %s on line %d
-Key array must be of the form array(0 => key, 1 => phrase)
+ValueError: Key array must be of the form array(0 => key, 1 => phrase)
 object(OpenSSLCertificateSigningRequest)#%d (0) {
 }
 object(OpenSSLCertificateSigningRequest)#%d (0) {

@@ -26,20 +26,20 @@ $dom = new DOMDocument;
 $comment = $dom->createComment("foobarbaz");
 try {
     var_dump($comment->substringData(0, -1));
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo $dom->saveHtml($comment), "\n";
 try {
     var_dump($comment->substringData(2, -(2**32 - 2)));
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo $dom->saveHtml($comment), "\n";
 try {
     var_dump($comment->substringData(-(2**32 - 2), 2));
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo $dom->saveHtml($comment), "\n";
 
@@ -53,9 +53,9 @@ string(2) "ob"
 string(2) "ob"
 <!--foobarbaz-->
 --- Legacy behaviour ---
-Index Size Error
+DOMException: Index Size Error
 <!--foobarbaz-->
-Index Size Error
+DOMException: Index Size Error
 <!--foobarbaz-->
-Index Size Error
+DOMException: Index Size Error
 <!--foobarbaz-->

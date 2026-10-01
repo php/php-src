@@ -123,17 +123,11 @@ class DirectoryIterator extends SplFileInfo implements SeekableIterator
     /** @tentative-return-type */
     public function valid(): bool {}
 
-    /**
-     * @tentative-return-type
-     * @return int
-     */
-    public function key(): mixed {} // TODO change return type to string
+    /** @tentative-return-type */
+    public function key(): int|string {}
 
-    /**
-     * @tentative-return-type
-     * @return DirectoryIterator
-     */
-    public function current(): mixed {} // TODO narrow return type
+    /** @tentative-return-type */
+    public function current(): string|SplFileInfo|static {}
 
     /** @tentative-return-type */
     public function next(): void {}
@@ -181,7 +175,7 @@ class FilesystemIterator extends DirectoryIterator
     public function key(): string {}
 
     /** @tentative-return-type */
-    public function current(): string|SplFileInfo|FilesystemIterator {}
+    public function current(): string|SplFileInfo|static {}
 
     /** @tentative-return-type */
     public function getFlags(): int {}
@@ -245,15 +239,19 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
     public function fread(int $length): string|false {}
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.6')]
     public function fgetcsv(string $separator = ",", string $enclosure = "\"", string $escape = "\\"): array|false {}
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.6')]
     public function fputcsv(array $fields, string $separator = ",", string $enclosure = "\"", string $escape = "\\", string $eol = "\n"): int|false {}
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.6')]
     public function setCsvControl(string $separator = ",", string $enclosure = "\"", string $escape = "\\"): void {}
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.6')]
     public function getCsvControl(): array {}
 
     /**

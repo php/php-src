@@ -10,8 +10,8 @@ $glue = 'string_val';
 
 try {
     var_dump(join($glue));
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done\n";
@@ -20,5 +20,5 @@ echo "Done\n";
 *** Testing join() : error conditions ***
 
 -- Testing join() with less than expected no. of arguments --
-join(): If argument #1 ($separator) is of type string, argument #2 ($array) must be of type array, null given
+TypeError: join(): If argument #1 ($separator) is of type string, argument #2 ($array) must be of type array, null given
 Done

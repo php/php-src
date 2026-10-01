@@ -31,10 +31,10 @@ body:
         Please make sure that the used PHP version [is a supported version](https://www.php.net/supported-versions.php).
       placeholder: |
         PHP 8.5.2 (cli) (built: Jan 21 2026 17:35:28) (NTS)
-        Copyright (c) The PHP Group
+        Copyright © The PHP Group and Contributors
         Built by Ubuntu
-        Zend Engine v4.5.2, Copyright (c) Zend Technologies
-            with Zend OPcache v8.5.2, Copyright (c), by Zend Technologies
+        Zend Engine v4.5.2, Copyright © Zend by Perforce
+            with Zend OPcache v8.5.2, Copyright ©, Zend by Perforce
       render: plain
     validations:
       required: true

@@ -1,7 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - port - adding a new one for a special URL
---EXTENSIONS--
-uri
+Test Uri\WhatWg\Url::withPort() - success - adding a new one for a special URL
 --FILE--
 <?php
 

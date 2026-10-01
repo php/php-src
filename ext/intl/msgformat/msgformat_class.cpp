@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Stanislav Malyshev <stas@zend.com>                          |
    +----------------------------------------------------------------------+
@@ -58,12 +58,18 @@ U_CFUNC zend_object *MessageFormatter_object_create(zend_class_entry *ce)
 /* {{{ MessageFormatter_object_clone */
 U_CFUNC zend_object *MessageFormatter_object_clone(zend_object *object)
 {
-	MessageFormatter_object     *mfo = php_intl_messageformatter_fetch_object(object);
+	const MessageFormatter_object     *mfo = php_intl_messageformatter_fetch_object(object);
 	zend_object             *new_obj = MessageFormatter_ce_ptr->create_object(object->ce);
 	MessageFormatter_object *new_mfo = php_intl_messageformatter_fetch_object(new_obj);
 
 	/* clone standard parts */
 	zend_objects_clone_members(&new_mfo->zo, &mfo->zo);
+
+	if (mfo->mf_data.orig_format != NULL) {
+		new_mfo->mf_data.orig_format = estrndup(mfo->mf_data.orig_format, mfo->mf_data.orig_format_len);
+		new_mfo->mf_data.orig_format_len = mfo->mf_data.orig_format_len;
+	}
+	new_mfo->mf_data.tz_set = mfo->mf_data.tz_set;
 
 	/* clone formatter object */
 	if (MSG_FORMAT_OBJECT(mfo) != NULL) {
@@ -96,7 +102,7 @@ void msgformat_register_class( void )
 
 	memcpy(&MessageFormatter_handlers, &std_object_handlers,
 		sizeof MessageFormatter_handlers);
-	MessageFormatter_handlers.offset = XtOffsetOf(MessageFormatter_object, zo);
+	MessageFormatter_handlers.offset = offsetof(MessageFormatter_object, zo);
 	MessageFormatter_handlers.clone_obj = MessageFormatter_object_clone;
 	MessageFormatter_handlers.free_obj = MessageFormatter_object_free;
 }

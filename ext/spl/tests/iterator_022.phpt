@@ -121,7 +121,7 @@ try
 }
 catch(UnexpectedValueException $e)
 {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -180,4 +180,4 @@ MyRecursiveArrayIterator::valid = false
 RecursiveArrayIteratorIterator::endChildren(1)
 RecursiveArrayIteratorIterator::callHasChildren(0) = yes/yes
 RecursiveArrayIteratorIterator::callGetChildren(skip)
-Objects returned by RecursiveIterator::getChildren() must implement RecursiveIterator
+UnexpectedValueException: Objects returned by RecursiveIterator::getChildren() must implement RecursiveIterator

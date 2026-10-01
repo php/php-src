@@ -9,6 +9,7 @@ if (PHP_SNMP != "no") {
 			EXTENSION('snmp', 'snmp.c');
 			ADD_EXTENSION_DEP('snmp', 'spl');
 			AC_DEFINE('HAVE_SNMP', 1, "Define to 1 if the PHP extension 'snmp' is available.");
+			AC_DEFINE('HAVE_SHUTDOWN_SNMP_LOGGING', 1, "Define to 1 if SNMP library has the 'shutdown_snmp_logging' function.");
 		} else {
 			WARNING("snmp not enabled; libraries and headers not found");
 		}

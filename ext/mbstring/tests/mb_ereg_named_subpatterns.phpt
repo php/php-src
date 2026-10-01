@@ -16,7 +16,10 @@ function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build
     mb_ereg('(\s*)(?<word>\w+)', '  中国', $m);
     var_dump($m);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 array(5) {
   [0]=>
   string(8) "  中国"
@@ -29,6 +32,8 @@ array(5) {
   ["word"]=>
   string(6) "中国"
 }
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 array(5) {
   [0]=>
   string(3) "国"
@@ -41,6 +46,8 @@ array(5) {
   ["word"]=>
   string(3) "国"
 }
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 array(3) {
   [0]=>
   string(8) "  中国"

@@ -2,21 +2,21 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
 */
 
+#include "php_version.h"
 #include "zend.h"
 #include "zend_API.h"
 #include "zend_attributes.h"
@@ -568,13 +568,25 @@ ZEND_FUNCTION(define)
 		Z_PARAM_BOOL(non_cs)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (ZEND_NUM_ARGS() == 3) {
+		zend_error(E_DEPRECATED,
+			"define(): Argument #3 ($case_insensitive) is ignored and treated as false since declaration of case-insensitive constants is no longer supported, passing the argument explicitly is unnecessary"
+		);
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
+	}
+
 	if (zend_memnstr(ZSTR_VAL(name), "::", sizeof("::") - 1, ZSTR_VAL(name) + ZSTR_LEN(name))) {
 		zend_argument_value_error(1, "cannot be a class constant");
 		RETURN_THROWS();
 	}
 
 	if (non_cs) {
-		zend_error(E_WARNING, "define(): Argument #3 ($case_insensitive) is ignored since declaration of case-insensitive constants is no longer supported");
+		zend_error(E_WARNING, "define(): Argument #3 ($case_insensitive) is ignored since declaration of case-insensitive constants is no longer supported, this will be an error in PHP 9.0");
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 	}
 
 	if (Z_TYPE_P(val) == IS_ARRAY && Z_REFCOUNTED_P(val)) {
@@ -702,6 +714,18 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, bool only_subclass) /* {{{ *
 		if (!instance_ce) {
 			RETURN_FALSE;
 		}
+	} else if (Z_TYPE_P(obj) == IS_STRING) {
+		// is_a() uses only_subclass as false, is_subclass_of() uses it as true
+		zend_error(
+			E_DEPRECATED,
+			only_subclass
+				? "Calling is_subclass_of() with a string when $allow_string is false"
+				: "Calling is_a() with a string when $allow_string is false"
+		);
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
+		RETURN_FALSE;
 	} else if (Z_TYPE_P(obj) == IS_OBJECT) {
 		instance_ce = Z_OBJCE_P(obj);
 	} else {
@@ -945,6 +969,11 @@ ZEND_FUNCTION(get_class_methods)
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
 		}
 	} ZEND_HASH_FOREACH_END();
+
+	if (ce == zend_ce_closure) {
+		ZVAL_STR_COPY(&method_name, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE));
+		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
+	}
 }
 /* }}} */
 
@@ -953,7 +982,6 @@ ZEND_FUNCTION(method_exists)
 {
 	zval *klass;
 	zend_string *method_name;
-	zend_string *lcname;
 	zend_class_entry *ce;
 	zend_function *func;
 
@@ -970,13 +998,11 @@ ZEND_FUNCTION(method_exists)
 			RETURN_FALSE;
 		}
 	} else {
-		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_value_name(klass));
+		zend_wrong_parameter_type_error(1, Z_EXPECTED_OBJECT_OR_STRING, klass);
 		RETURN_THROWS();
 	}
 
-	lcname = zend_string_tolower(method_name);
-	func = zend_hash_find_ptr(&ce->function_table, lcname);
-	zend_string_release_ex(lcname, 0);
+	func = zend_hash_find_ptr_lc(&ce->function_table, method_name);
 
 	if (func) {
 		/* Exclude shadow properties when checking a method on a specific class. Include
@@ -1024,7 +1050,7 @@ static void _property_exists(zval *return_value, const zval *object, zend_string
 	} else if (Z_TYPE_P(object) == IS_OBJECT) {
 		ce = Z_OBJCE_P(object);
 	} else {
-		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_value_name(object));
+		zend_wrong_parameter_type_error(1, Z_EXPECTED_OBJECT_OR_STRING, object);
 		RETURN_THROWS();
 	}
 
@@ -1073,7 +1099,6 @@ flf_clean:;
 
 static zend_always_inline void _class_exists_impl(zval *return_value, zend_string *name, bool autoload, int flags, int skip_flags) /* {{{ */
 {
-	zend_string *lcname;
 	const zend_class_entry *ce;
 
 	if (ZSTR_HAS_CE_CACHE(name)) {
@@ -1086,14 +1111,10 @@ static zend_always_inline void _class_exists_impl(zval *return_value, zend_strin
 	if (!autoload) {
 		if (ZSTR_VAL(name)[0] == '\\') {
 			/* Ignore leading "\" */
-			lcname = zend_string_alloc(ZSTR_LEN(name) - 1, 0);
-			zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1);
+			ce = zend_hash_str_find_ptr_lc(EG(class_table), ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1);
 		} else {
-			lcname = zend_string_tolower(name);
+			ce = zend_hash_find_ptr_lc(EG(class_table), name);
 		}
-
-		ce = zend_hash_find_ptr(EG(class_table), lcname);
-		zend_string_release_ex(lcname, 0);
 	} else {
 		ce = zend_lookup_class(name);
 	}
@@ -1175,7 +1196,6 @@ ZEND_FUNCTION(function_exists)
 {
 	zend_string *name;
 	bool exists;
-	zend_string *lcname;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR(name)
@@ -1183,14 +1203,10 @@ ZEND_FUNCTION(function_exists)
 
 	if (ZSTR_VAL(name)[0] == '\\') {
 		/* Ignore leading "\" */
-		lcname = zend_string_alloc(ZSTR_LEN(name) - 1, 0);
-		zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1);
+		exists = zend_hash_str_find_ptr_lc(EG(function_table), ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1) != NULL;
 	} else {
-		lcname = zend_string_tolower(name);
+		exists = zend_hash_find_ptr_lc(EG(function_table), name) != NULL;
 	}
-
-	exists = zend_hash_exists(EG(function_table), lcname);
-	zend_string_release_ex(lcname, 0);
 
 	RETURN_BOOL(exists);
 }
@@ -2203,15 +2219,12 @@ ZEND_FUNCTION(debug_backtrace)
 ZEND_FUNCTION(extension_loaded)
 {
 	zend_string *extension_name;
-	zend_string *lcname;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &extension_name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	lcname = zend_string_tolower(extension_name);
-	RETVAL_BOOL(zend_hash_exists(&module_registry, lcname));
-	zend_string_release_ex(lcname, 0);
+	RETURN_BOOL(zend_hash_find_ptr_lc(&module_registry, extension_name) != NULL);
 }
 /* }}} */
 
@@ -2219,7 +2232,6 @@ ZEND_FUNCTION(extension_loaded)
 ZEND_FUNCTION(get_extension_funcs)
 {
 	zend_string *extension_name;
-	zend_string *lcname;
 	bool array;
 	zend_module_entry *module;
 	zend_function *zif;
@@ -2228,9 +2240,7 @@ ZEND_FUNCTION(get_extension_funcs)
 		RETURN_THROWS();
 	}
 	if (strncasecmp(ZSTR_VAL(extension_name), "zend", sizeof("zend"))) {
-		lcname = zend_string_tolower(extension_name);
-		module = zend_hash_find_ptr(&module_registry, lcname);
-		zend_string_release_ex(lcname, 0);
+		module = zend_hash_find_ptr_lc(&module_registry, extension_name);
 	} else {
 		module = zend_hash_str_find_ptr(&module_registry, "core", sizeof("core") - 1);
 	}

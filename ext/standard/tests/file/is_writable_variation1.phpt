@@ -31,11 +31,6 @@ $files_arr = array(
   "$file_path/is_writable_variation1/*.tmp",
   "$file_path/is_writable_variation1/b*.tmp",
 
-  /* Testing Binary safe */
-  "$file_path/is_writable_variation1".chr(0)."bar.tmp",
-  "$file_path".chr(0)."is_writable_variation1/bar.tmp",
-  "$file_path".chr(0)."is_writable_variation1/bar.tmp",
-
   /* Testing directories */
   ".",  // current directory, exp: bool(true)
   "$file_path/is_writable_variation1"  // temp directory, exp: bool(true)
@@ -47,13 +42,13 @@ foreach($files_arr as $file) {
   echo "-- Iteration $counter --\n";
   try {
     var_dump( is_writable($file) );
-  } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+  } catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
   }
   try {
     var_dump( is_writeable($file) );
-  } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+  } catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
   }
   $counter++;
   clearstatcache();
@@ -87,18 +82,9 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 7 --
-bool(false)
-bool(false)
+bool(true)
+bool(true)
 -- Iteration 8 --
-bool(false)
-bool(false)
--- Iteration 9 --
-bool(false)
-bool(false)
--- Iteration 10 --
-bool(true)
-bool(true)
--- Iteration 11 --
 bool(true)
 bool(true)
 Done

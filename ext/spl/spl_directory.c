@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Marcus Boerger <helly@php.net>                               |
    +----------------------------------------------------------------------+
@@ -24,7 +22,6 @@
 #include "ext/standard/flock_compat.h"
 #include "ext/standard/scanf.h"
 #include "ext/standard/php_string.h" /* For php_basename() */
-#include "zend_attributes.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
 
@@ -41,7 +38,7 @@ static zend_object_handlers spl_filesystem_object_handlers;
 /* includes handler to validate object state when retrieving methods */
 static zend_object_handlers spl_filesystem_object_check_handlers;
 
-/* decalre the class entry */
+/* declare the class entry */
 PHPAPI zend_class_entry *spl_ce_SplFileInfo;
 PHPAPI zend_class_entry *spl_ce_DirectoryIterator;
 PHPAPI zend_class_entry *spl_ce_FilesystemIterator;
@@ -50,11 +47,7 @@ PHPAPI zend_class_entry *spl_ce_GlobIterator;
 PHPAPI zend_class_entry *spl_ce_SplFileObject;
 PHPAPI zend_class_entry *spl_ce_SplTempFileObject;
 
-/* Object helper */
-static inline spl_filesystem_object *spl_filesystem_from_obj(zend_object *obj) /* {{{ */ {
-	return (spl_filesystem_object*)((char*)(obj) - XtOffsetOf(spl_filesystem_object, std));
-}
-/* }}} */
+#define spl_filesystem_from_obj(obj) ZEND_CONTAINER_OF(obj, spl_filesystem_object, std)
 
 /* define an overloaded iterator structure */
 typedef struct {
@@ -190,8 +183,8 @@ static zend_object *spl_filesystem_object_new(zend_class_entry *class_type)
 	intern = emalloc(sizeof(spl_filesystem_object) + zend_object_properties_size(class_type));
 	/* Avoid initializing the entirety of spl_filesystem_object.u.dir.entry. */
 	memset(intern, 0,
-		MAX(XtOffsetOf(spl_filesystem_object, u.dir.entry),
-			XtOffsetOf(spl_filesystem_object, u.file.escape) + sizeof(int)));
+		MAX(offsetof(spl_filesystem_object, u.dir.entry),
+			offsetof(spl_filesystem_object, u.file.escape) + sizeof(int)));
 	/* intern->type = SPL_FS_INFO; done by set 0 */
 	intern->file_class = spl_ce_SplFileObject;
 	intern->info_class = spl_ce_SplFileInfo;
@@ -486,7 +479,7 @@ static spl_filesystem_object *spl_filesystem_object_create_info(zend_string *fil
 
 	if (ce->constructor->common.scope != spl_ce_SplFileInfo) {
 		ZVAL_STR(&arg1, file_path);
-		zend_call_method_with_1_params(Z_OBJ_P(return_value), ce, &ce->constructor, "__construct", NULL, &arg1);
+		zend_call_known_function(ce->constructor, Z_OBJ_P(return_value), ce, NULL, 1, &arg1, NULL);
 	} else {
 		spl_filesystem_info_set_filename(intern, file_path);
 	}
@@ -525,7 +518,7 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int num_args, sp
 
 			if (ce->constructor->common.scope != spl_ce_SplFileInfo) {
 				ZVAL_STR(&arg1, source->file_name);
-				zend_call_method_with_1_params(Z_OBJ_P(return_value), ce, &ce->constructor, "__construct", NULL, &arg1);
+				zend_call_known_function(ce->constructor, Z_OBJ_P(return_value), ce, NULL, 1, &arg1, NULL);
 			} else {
 				intern->file_name = zend_string_copy(source->file_name);
 				intern->path = spl_filesystem_object_get_path(source);
@@ -1813,21 +1806,24 @@ static zend_result spl_filesystem_file_read_ex(spl_filesystem_object *intern, bo
 	}
 
 	if (!buf) {
-		intern->u.file.current_line = ZSTR_EMPTY_ALLOC();
-	} else {
-		if (!csv && SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_DROP_NEW_LINE)) {
-			if (line_len > 0 && buf[line_len - 1] == '\n') {
-				line_len--;
-				if (line_len > 0 && buf[line_len - 1] == '\r') {
-					line_len--;
-				}
-				buf[line_len] = '\0';
-			}
+		if (!silent) {
+			spl_filesystem_file_cannot_read(intern);
 		}
-
-		intern->u.file.current_line = zend_string_init(buf, line_len, /* persistent */ false);
-		efree(buf);
+		return FAILURE;
 	}
+
+	if (!csv && SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_DROP_NEW_LINE)) {
+		if (line_len > 0 && buf[line_len - 1] == '\n') {
+			line_len--;
+			if (line_len > 0 && buf[line_len - 1] == '\r') {
+				line_len--;
+			}
+			buf[line_len] = '\0';
+		}
+	}
+
+	intern->u.file.current_line = zend_string_init(buf, line_len, /* persistent */ false);
+	efree(buf);
 	intern->u.file.current_line_num += line_add;
 
 	return SUCCESS;
@@ -2093,10 +2089,21 @@ PHP_METHOD(SplFileObject, fgets)
 
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
-	if (spl_filesystem_file_read_ex(intern, /* silent */ false, /* line_add */ 1, /* csv */ false) == FAILURE) {
-		RETURN_THROWS();
+	if (intern->u.file.current_line) {
+		RETVAL_STR_COPY(intern->u.file.current_line);
+		spl_filesystem_file_free_line(intern);
+		intern->u.file.current_line_num++;
+	} else {
+		if (spl_filesystem_file_read_ex(intern, /* silent */ true, /* line_add */ 1, /* csv */ false) == FAILURE) {
+			if (php_stream_eof(intern->u.file.stream)) {
+				RETURN_EMPTY_STRING();
+			}
+			spl_filesystem_file_cannot_read(intern);
+			RETURN_THROWS();
+		}
+		RETVAL_STR_COPY(intern->u.file.current_line);
+		spl_filesystem_file_free_line(intern);
 	}
-	RETURN_STR_COPY(intern->u.file.current_line);
 } /* }}} */
 
 /* {{{ Return current line from file */
@@ -2141,6 +2148,14 @@ PHP_METHOD(SplFileObject, next)
 	spl_filesystem_object *intern = spl_filesystem_from_obj(Z_OBJ_P(ZEND_THIS));
 
 	ZEND_PARSE_PARAMETERS_NONE();
+
+	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
+
+	if (!intern->u.file.current_line && Z_ISUNDEF(intern->u.file.current_zval)) {
+		if (spl_filesystem_file_read_line(ZEND_THIS, intern, true) == FAILURE) {
+			return;
+		}
+	}
 
 	spl_filesystem_file_free_line(intern);
 	if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_AHEAD)) {
@@ -2285,6 +2300,8 @@ PHP_METHOD(SplFileObject, fputcsv)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|ssSS", &fields, &delim, &d_len, &enclo, &e_len, &escape_str, &eol) == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
 	if (delim) {
 		if (d_len != 1) {
@@ -2629,7 +2646,7 @@ PHP_METHOD(SplFileObject, seek)
 
 	for (i = 0; i < line_pos; i++) {
 		if (spl_filesystem_file_read_line(ZEND_THIS, intern, true) == FAILURE) {
-			return;
+			break;
 		}
 	}
 	if (line_pos > 0 && !SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_AHEAD)) {
@@ -2648,9 +2665,8 @@ PHP_METHOD(SplFileObject, __toString)
 
 	if (!intern->u.file.current_line) {
 		ZEND_ASSERT(Z_ISUNDEF(intern->u.file.current_zval));
-		zend_result result = spl_filesystem_file_read_line(ZEND_THIS, intern, false);
-		if (UNEXPECTED(result != SUCCESS)) {
-			RETURN_THROWS();
+		if (spl_filesystem_file_read_line(ZEND_THIS, intern, true) == FAILURE) {
+			RETURN_EMPTY_STRING();
 		}
 	}
 
@@ -2665,7 +2681,7 @@ PHP_MINIT_FUNCTION(spl_directory)
 	spl_ce_SplFileInfo->default_object_handlers = &spl_filesystem_object_handlers;
 
 	memcpy(&spl_filesystem_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	spl_filesystem_object_handlers.offset = XtOffsetOf(spl_filesystem_object, std);
+	spl_filesystem_object_handlers.offset = offsetof(spl_filesystem_object, std);
 	spl_filesystem_object_handlers.clone_obj = spl_filesystem_object_clone;
 	spl_filesystem_object_handlers.dtor_obj = spl_filesystem_object_destroy_object;
 	spl_filesystem_object_handlers.free_obj = spl_filesystem_object_free_storage;

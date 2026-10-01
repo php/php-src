@@ -42,7 +42,7 @@ var_dump($phar['b']->isCompressed(Phar::BZ2));
 try {
 $phar->compressFiles(25);
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --CLEAN--
@@ -65,4 +65,4 @@ bool(false)
 string(1) "c"
 bool(true)
 bool(false)
-Unknown compression specified, please pass one of Phar::GZ or Phar::BZ2
+BadMethodCallException: Unknown compression specified, please pass one of Phar::GZ or Phar::BZ2

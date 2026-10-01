@@ -43,9 +43,9 @@ for($count = 0; $count < count($values); $count++) {
   try {
     var_dump( chunk_split($heredoc_str, $values[$count], $ending) );
   } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
   } catch (\ValueError $e) {
-      echo $e->getMessage() . "\n";
+      echo $e::class, ': ', $e->getMessage(), "\n";
   }
 }
 
@@ -53,14 +53,14 @@ for($count = 0; $count < count($values); $count++) {
 --EXPECT--
 *** Testing chunk_split() : different 'chunklen' with heredoc 'str' ***
 -- Iteration 1 --
-chunk_split(): Argument #2 ($length) must be greater than 0
+ValueError: chunk_split(): Argument #2 ($length) must be greater than 0
 -- Iteration 2 --
 string(504) "T:::h:::i:::s:::':::s::: :::h:::e:::r:::e:::d:::o:::c::: :::s:::t:::r:::i:::n:::g::: :::w:::i:::t:::h::: :::	::: :::a:::n:::d::: :::
 ::: :::w:::h:::i:::t:::e::: :::s:::p:::a:::c:::e::: :::c:::h:::a:::r:::.:::
 :::I:::t::: :::h:::a:::s::: :::_:::s:::p:::e:::c:::i:::@:::l::: :::c:::h:::@:::r:::$::: :::2:::2:::2:::2::: :::!:::!:::!:::N:::o:::w::: :::\:::k::: :::a:::s::: :::e:::s:::c:::a:::p:::e::: :::c:::h:::a:::r::: :::t:::o::: :::t:::e:::s:::t:::
 :::c:::h:::u:::n:::k:::_:::s:::p:::l:::i:::t:::(:::):::"
 -- Iteration 3 --
-chunk_split(): Argument #2 ($length) must be greater than 0
+ValueError: chunk_split(): Argument #2 ($length) must be greater than 0
 -- Iteration 4 --
 string(129) "This's heredoc string with 	 and 
  white space char.
@@ -77,6 +77,6 @@ string(129) "This's heredoc string with 	 and
 It has _speci@l ch@r$ 2222 !!!Now \k as escape char to test
 chunk_split():::"
 -- Iteration 7 --
-chunk_split(): Argument #2 ($length) must be of type int, float given
+TypeError: chunk_split(): Argument #2 ($length) must be of type int, float given
 -- Iteration 8 --
-chunk_split(): Argument #2 ($length) must be greater than 0
+ValueError: chunk_split(): Argument #2 ($length) must be greater than 0

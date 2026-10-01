@@ -15,8 +15,8 @@ var_dump(assert_options(ASSERT_CALLBACK));
 
 try {
     assert(false);
-} catch (AssertionError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 echo "\n";
@@ -26,8 +26,8 @@ var_dump(assert_options(ASSERT_CALLBACK));
 
 try {
     assert(false);
-} catch (AssertionError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>
@@ -41,7 +41,7 @@ Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options(
 Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 string(2) "f1"
 foo
-assert(false)
+AssertionError: assert(false)
 
 
 Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
@@ -52,4 +52,4 @@ Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options(
 
 Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 NULL
-assert(false)
+AssertionError: assert(false)

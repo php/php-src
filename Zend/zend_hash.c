@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -1421,7 +1420,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
 								do {
 									zend_hash_iterators_update(ht, iter_pos, j);
 									iter_pos = zend_hash_iterators_lower_pos(ht, iter_pos + 1);
-								} while (iter_pos < i);
+								} while (iter_pos <= i);
 							}
 							q++;
 							j++;
@@ -2417,7 +2416,7 @@ static zend_always_inline uint32_t zend_array_dup_elements(const HashTable *sour
 			if (EXPECTED(!HT_HAS_ITERATORS(target))) {
 				while (p != end) {
 					if (zend_array_dup_element(source, target, target_idx, p, q, false, static_keys, with_holes)) {
-						if (source->nInternalPointer == idx) {
+						if (UNEXPECTED(target->nInternalPointer > target_idx && target->nInternalPointer <= idx)) {
 							target->nInternalPointer = target_idx;
 						}
 						target_idx++; q++;
@@ -2430,19 +2429,21 @@ static zend_always_inline uint32_t zend_array_dup_elements(const HashTable *sour
 
 				while (p != end) {
 					if (zend_array_dup_element(source, target, target_idx, p, q, false, static_keys, with_holes)) {
-						if (source->nInternalPointer == idx) {
+						if (UNEXPECTED(target->nInternalPointer > target_idx && target->nInternalPointer <= idx)) {
 							target->nInternalPointer = target_idx;
 						}
 						if (UNEXPECTED(idx >= iter_pos)) {
 							do {
 								zend_hash_iterators_update(target, iter_pos, target_idx);
 								iter_pos = zend_hash_iterators_lower_pos(target, iter_pos + 1);
-							} while (iter_pos < idx);
+							} while (iter_pos <= idx);
 						}
 						target_idx++; q++;
 					}
 					idx++; p++;
 				}
+				/* Move past-the-end iterators so they can pick up newly appended elements. */
+				_zend_hash_iterators_update(target, source->nNumUsed, target_idx);
 			}
 			return target_idx;
 		}
@@ -2998,9 +2999,17 @@ static void zend_hash_sort_internal(HashTable *ht, sort_func_t sort, bucket_comp
 
 	IS_CONSISTENT(ht);
 
-	if (!(ht->nNumOfElements>1) && !(renumber && ht->nNumOfElements>0)) {
-		/* Doesn't require sorting */
-		return;
+	if (ht->nNumOfElements <= 1) {
+		if (!renumber || ht->nNumOfElements == 0) {
+			/* Doesn't require sorting */
+			return;
+		}
+		if (sort == zend_sort && HT_IS_PACKED(ht) && HT_IS_WITHOUT_HOLES(ht)) {
+			/* The single element already has the expected index. */
+			ht->nInternalPointer = 0;
+			ht->nNextFreeElement = 1;
+			return;
+		}
 	}
 
 	if (HT_IS_PACKED(ht)) {
@@ -3222,6 +3231,13 @@ ZEND_API int zend_hash_compare(HashTable *ht1, const HashTable *ht2, compare_fun
 		return 0;
 	}
 
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		zend_throw_error(NULL, "Maximum call stack size reached during comparison");
+		return ZEND_UNCOMPARABLE;
+	}
+#endif
+
 	/* It's enough to protect only one of the arrays.
 	 * The second one may be referenced from the first and this may cause
 	 * false recursion detection.
@@ -3238,73 +3254,6 @@ ZEND_API int zend_hash_compare(HashTable *ht1, const HashTable *ht2, compare_fun
 	return result;
 }
 
-
-ZEND_API zval* ZEND_FASTCALL zend_hash_minmax(const HashTable *ht, compare_func_t compar, uint32_t flag)
-{
-	uint32_t idx;
-	zval *res;
-
-	IS_CONSISTENT(ht);
-
-	if (ht->nNumOfElements == 0 ) {
-		return NULL;
-	}
-
-	if (HT_IS_PACKED(ht)) {
-		zval *zv;
-
-		idx = 0;
-		while (1) {
-			if (idx == ht->nNumUsed) {
-				return NULL;
-			}
-			if (Z_TYPE(ht->arPacked[idx]) != IS_UNDEF) break;
-			idx++;
-		}
-		res = ht->arPacked + idx;
-		for (; idx < ht->nNumUsed; idx++) {
-			zv = ht->arPacked + idx;
-			if (UNEXPECTED(Z_TYPE_P(zv) == IS_UNDEF)) continue;
-
-			if (flag) {
-				if (compar(res, zv) < 0) { /* max */
-					res = zv;
-				}
-			} else {
-				if (compar(res, zv) > 0) { /* min */
-					res = zv;
-				}
-			}
-		}
-	} else {
-		Bucket *p;
-
-		idx = 0;
-		while (1) {
-			if (idx == ht->nNumUsed) {
-				return NULL;
-			}
-			if (Z_TYPE(ht->arData[idx].val) != IS_UNDEF) break;
-			idx++;
-		}
-		res = &ht->arData[idx].val;
-		for (; idx < ht->nNumUsed; idx++) {
-			p = ht->arData + idx;
-			if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
-
-			if (flag) {
-				if (compar(res, &p->val) < 0) { /* max */
-					res = &p->val;
-				}
-			} else {
-				if (compar(res, &p->val) > 0) { /* min */
-					res = &p->val;
-				}
-			}
-		}
-	}
-	return res;
-}
 
 ZEND_API bool ZEND_FASTCALL _zend_handle_numeric_str_ex(const char *key, size_t length, zend_ulong *idx)
 {

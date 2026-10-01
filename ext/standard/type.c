@@ -1,20 +1,19 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Rasmus Lerdorf <rasmus@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
 #include "php.h"
+#include "zend_interfaces.h"
 
 /* {{{ Returns the type of the variable */
 PHP_FUNCTION(gettype)
@@ -105,7 +104,7 @@ PHP_FUNCTION(settype)
 		convert_to_long(ptr);
 	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_FLOAT))) {
 		convert_to_double(ptr);
-	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_DOUBLE))) { /* deprecated */
+	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_DOUBLE))) {
 		convert_to_double(ptr);
 	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_STRING))) {
 		convert_to_string(ptr);
@@ -151,8 +150,7 @@ PHP_FUNCTION(intval)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(num) != IS_STRING || base == 10) {
-		RETVAL_LONG(zval_get_long(num));
-		return;
+		RETURN_LONG(zval_get_long(num));
 	}
 
 
@@ -160,7 +158,7 @@ PHP_FUNCTION(intval)
 		char *strval = Z_STRVAL_P(num);
 		size_t strlen = Z_STRLEN_P(num);
 
-		while (isspace(*strval) && strlen) {
+		while (isspace((unsigned char)*strval) && strlen) {
 			strval++;
 			strlen--;
 		}
@@ -461,6 +459,18 @@ PHP_FUNCTION(is_countable)
 		Z_PARAM_ZVAL(var)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_BOOL(zend_is_countable(var));
+
+	switch (Z_TYPE_P(var)) {
+		case IS_ARRAY:
+			RETURN_TRUE;
+		case IS_OBJECT:
+			if (Z_OBJ_HT_P(var)->count_elements) {
+				RETURN_TRUE;
+			}
+
+			RETURN_BOOL(zend_class_implements_interface(Z_OBJCE_P(var), zend_ce_countable));
+		default:
+			RETURN_FALSE;
+	}
 }
 /* }}} */

@@ -18,12 +18,12 @@ class T {
 $x = new T;
 try {
     $x->x = 1;
-} catch (\DivisionByZeroError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
 Warning: Undefined variable $undefined in %s on line %d
 
 Warning: Attempt to read property "1" on null in %s on line %d
-Division by zero
+DivisionByZeroError: Division by zero

@@ -16,9 +16,9 @@ $st = $db->prepare('attach database :a AS "db2"');
 $st->execute([':a' => ':memory:']);
 var_dump($db->exec('create table db2.r (id int)'));
 } catch (PDOException $ex) {
-    echo $ex->getMessage(), PHP_EOL;
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 ?>
 --EXPECT--
 int(0)
-SQLSTATE[HY000]: General error: 23 not authorized
+PDOException: SQLSTATE[HY000]: General error: 23 not authorized

@@ -31,13 +31,13 @@ function test($name, $lc, $lp)
         $l = substr($f->getPath(), -1);
         var_dump($l != '/' && $l != '\\' && $l == $lp);
     } catch (LogicException $e) {
-        echo "LogicException: ".$e->getMessage()."\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         $fo = $o->openFile();
         var_dump($fo->getPathName(), $fo->getFileName(), $fo->getPath());
     } catch (LogicException $e) {
-        echo "LogicException: ".$e->getMessage()."\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 

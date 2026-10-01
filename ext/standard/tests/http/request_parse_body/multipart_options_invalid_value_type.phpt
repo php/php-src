@@ -7,8 +7,8 @@ try {
     request_parse_body(options: [
         'max_input_vars' => [],
     ]);
-} catch (Error $e) {
-    echo get_class($e), ': ', $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>

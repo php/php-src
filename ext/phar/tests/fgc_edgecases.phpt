@@ -15,7 +15,7 @@ $pname = 'phar://' . $fname;
 try {
     file_get_contents(array());
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 chdir(__DIR__);
 file_put_contents($fname, "blah\n");
@@ -50,7 +50,7 @@ include $pname . '/foo/hi';
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 <?php unlink(__DIR__ . '/fgc_edgecases.txt'); ?>
 --EXPECTF--
-file_get_contents(): Argument #1 ($filename) must be of type string, array given
+TypeError: file_get_contents(): Argument #1 ($filename) must be of type string, array given
 blah
 <?php
 echo file_get_contents("foo/" . basename(__FILE__));
@@ -90,7 +90,7 @@ echo file_get_contents("./hi");
 echo file_get_contents("./hi", 0, $context, 0, 0);
 ?>
 
-Warning: file_get_contents(phar://%sfgc_edgecases.phar.php/oops): Failed to open stream: phar error: path "oops" is a directory in phar://%sfgc_edgecases.phar.php/foo/hi on line %d
+Warning: file_get_contents(): Failed to open stream: phar error: path "oops" is a directory in phar://%sfgc_edgecases.phar.php/foo/hi on line %d
 
 Warning: file_get_contents(): Failed to seek to position 50000 in the stream in phar://%sfgc_edgecases.phar.php/foo/hi on line %d
 <?php

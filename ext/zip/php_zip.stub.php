@@ -32,7 +32,7 @@ function zip_entry_open($zip_dp, $zip_entry, string $mode = "rb"): bool {}
  * @param resource $zip_entry
  */
 #[\Deprecated(since: '8.0')]
-function zip_entry_close($zip_entry): bool {}
+function zip_entry_close($zip_entry): true {}
 
 /**
  * @param resource $zip_entry
@@ -646,7 +646,7 @@ class ZipArchive implements Countable
     /** @tentative-return-type */
     public function open(string $filename, int $flags = 0): bool|int {}
 
-    public function openString(string $data): bool|int {}
+    public function openString(string $data = '', int $flags = 0): bool|int {}
 
     /**
      * @tentative-return-type
@@ -656,8 +656,14 @@ class ZipArchive implements Countable
     /** @tentative-return-type */
     public function close(): bool {}
 
+    public function closeString(): string|false {}
+
     /** @tentative-return-type */
     public function count(): int {}
+
+    public function __serialize(): array {}
+
+    public function __unserialize(array $data): void {}
 
     /** @tentative-return-type */
     public function getStatusString(): string {}

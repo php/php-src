@@ -34,6 +34,15 @@ class TestSessionHandler implements SessionHandlerInterface
 		echo $data . PHP_EOL;
 		return true;
 	}
+
+    private int $id = 0;
+	public function create_sid(): string {
+	    return ++$this->id;
+	}
+
+	public function validateId(string $id): bool {
+	    return $id > 0 && $id <= $this->id;
+	}
 }
 
 register_shutdown_function(function() {

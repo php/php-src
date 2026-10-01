@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Felipe Pena <felipe@php.net>                                |
    | Authors: Joe Watkins <joe.watkins@live.co.uk>                        |
@@ -50,11 +48,9 @@ extern int phpdbg_startup_run;
 
 #ifdef HAVE_LIBDL
 #ifdef PHP_WIN32
-#include "win32/param.h"
 #include "win32/winutil.h"
 #define GET_DL_ERROR()  php_win_err()
 #else
-#include <sys/param.h>
 #define GET_DL_ERROR()  DL_ERROR()
 #endif
 #endif
@@ -192,7 +188,7 @@ static void phpdbg_line_init(char *cmd, struct phpdbg_init_state *state) {
 
 	state->line++;
 
-	while (cmd_len > 0L && isspace(cmd[cmd_len-1])) {
+	while (cmd_len > 0L && isspace((unsigned char)cmd[cmd_len-1])) {
 		cmd_len--;
 	}
 
@@ -217,9 +213,9 @@ static void phpdbg_line_init(char *cmd, struct phpdbg_init_state *state) {
 
 		if (state->in_code) {
 			if (state->code == NULL) {
-				state->code = malloc(cmd_len + 1);
+				state->code = pemalloc(cmd_len + 1, true);
 			} else {
-				state->code = realloc(state->code, state->code_len + cmd_len + 1);
+				state->code = perealloc(state->code, state->code_len + cmd_len + 1, true);
 			}
 
 			if (state->code) {
@@ -1196,7 +1192,7 @@ static const char *phpdbg_load_module_or_extension(zend_string **path, const cha
 		phpdbg_error("extension_dir ini setting contains a nul byte");
 		return NULL;
 	}
-	if (memchr(ZSTR_VAL(*path), '/', ZSTR_LEN(*path)) != NULL || memchr(ZSTR_VAL(*path), '/', ZSTR_LEN(*path)) != NULL) {
+	if (memchr(ZSTR_VAL(*path), '/', ZSTR_LEN(*path)) != NULL || memchr(ZSTR_VAL(*path), DEFAULT_SLASH, ZSTR_LEN(*path)) != NULL) {
 		/* path is fine */
 	} else if (extension_dir && ZSTR_LEN(extension_dir) > 0) {
 		zend_string *libpath;
@@ -1656,7 +1652,7 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 		}
 
 #ifdef ZEND_WIN32
-		if (zend_atomic_bool_load_ex(&EG(timed_out))) {
+		if (atomic_load(&EG(timed_out))) {
 			zend_timeout();
 		}
 #endif

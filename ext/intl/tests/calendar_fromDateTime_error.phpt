@@ -35,6 +35,6 @@ DateMalformedStringException: Failed to parse time string (foobar) at position 0
 NULL
 string(88) "IntlCalendar::fromDateTime(): DateTime object is unconstructed: U_ILLEGAL_ARGUMENT_ERROR"
 NULL
-string(103) "IntlCalendar::fromDateTime(): object has an time zone offset that's too large: U_ILLEGAL_ARGUMENT_ERROR"
+string(103) "IntlCalendar::fromDateTime(): object has a time zone offset that is too large: U_ILLEGAL_ARGUMENT_ERROR"
 NULL
 string(127) "IntlCalendar::fromDateTime(): time zone id 'WEST' extracted from ext/date DateTimeZone not recognized: U_ILLEGAL_ARGUMENT_ERROR"

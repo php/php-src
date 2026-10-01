@@ -23,7 +23,6 @@
 #ifdef PHP_WIN32
 # include <string.h>
 #else
-# include <sys/param.h>
 # include <sys/types.h>
 # include <string.h>
 #endif

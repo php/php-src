@@ -28,7 +28,7 @@ class CountingFilter extends php_user_filter
     
     public function onClose(): void {}
     
-    public function seek(int $offset, int $whence): bool
+    public function seek(int $offset, int $whence, int $chain): bool
     {
         if ($offset === 0 && $whence === SEEK_SET) {
             $this->count = 0;

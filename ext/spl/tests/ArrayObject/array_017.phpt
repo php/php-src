@@ -152,7 +152,7 @@ array(3) {
     int(5)
   }
   ["$this"]=>
-  object(ArrayObjectEx)#%d (6) {
+  object(ArrayObjectEx)#1 (6) {
     ["pub1"]=>
     int(1)
     ["pro1":protected]=>
@@ -180,6 +180,8 @@ ArrayIteratorEx::__construct()
 
 Deprecated: ArrayIterator::__construct(): Using an object as a backing array for ArrayIterator is deprecated, as it allows violating class constraints and invariants in %s on line %d
 ArrayIteratorEx::dump()
+
+Deprecated: Method ArrayIterator::getFlags() is deprecated since 8.6 in %s on line %d
 array(3) {
   ["Flags"]=>
   int(0)
@@ -197,7 +199,7 @@ array(3) {
     int(5)
   }
   ["$this"]=>
-  object(ArrayIteratorEx)#%d (6) {
+  object(ArrayIteratorEx)#2 (6) {
     ["pub2"]=>
     int(1)
     ["pro2":protected]=>
@@ -209,7 +211,7 @@ array(3) {
     ["dyn2"]=>
     int(5)
     ["storage":"ArrayIterator":private]=>
-    object(ArrayObjectEx)#%d (6) {
+    object(ArrayObjectEx)#1 (6) {
       ["pub1"]=>
       int(1)
       ["pro1":protected]=>
@@ -250,6 +252,8 @@ ArrayIteratorEx::__construct()
 
 Deprecated: ArrayIterator::__construct(): Using an object as a backing array for ArrayIterator is deprecated, as it allows violating class constraints and invariants in %s on line %d
 ArrayIteratorEx::dump()
+
+Deprecated: Method ArrayIterator::getFlags() is deprecated since 8.6 in %s on line %d
 array(3) {
   ["Flags"]=>
   int(0)
@@ -267,7 +271,7 @@ array(3) {
     int(5)
   }
   ["$this"]=>
-  object(ArrayIteratorEx)#%d (6) {
+  object(ArrayIteratorEx)#3 (6) {
     ["pub2"]=>
     int(1)
     ["pro2":protected]=>
@@ -279,7 +283,7 @@ array(3) {
     ["dyn2"]=>
     int(5)
     ["storage":"ArrayIterator":private]=>
-    object(ArrayObjectEx)#%d (6) {
+    object(ArrayObjectEx)#1 (6) {
       ["pub1"]=>
       int(1)
       ["pro1":protected]=>
@@ -323,6 +327,8 @@ bool(true)
 int(1)
 bool(false)
 ArrayIteratorEx::setFlags(2)
+
+Deprecated: Method ArrayIterator::setFlags() is deprecated since 8.6 in %s on line %d
 int(1)
 bool(true)
 ===CHECK===
@@ -345,7 +351,7 @@ array(3) {
     int(5)
   }
   ["$this"]=>
-  object(ArrayObjectEx)#%d (6) {
+  object(ArrayObjectEx)#1 (6) {
     ["pub1"]=>
     int(1)
     ["pro1":protected]=>
@@ -373,6 +379,8 @@ ArrayIteratorEx::__construct()
 
 Deprecated: ArrayIterator::__construct(): Using an object as a backing array for ArrayIterator is deprecated, as it allows violating class constraints and invariants in %s on line %d
 ArrayIteratorEx::dump()
+
+Deprecated: Method ArrayIterator::getFlags() is deprecated since 8.6 in %s on line %d
 array(3) {
   ["Flags"]=>
   int(1)
@@ -390,7 +398,7 @@ array(3) {
     int(5)
   }
   ["$this"]=>
-  object(ArrayIteratorEx)#%d (6) {
+  object(ArrayIteratorEx)#3 (6) {
     ["pub2"]=>
     int(1)
     ["pro2":protected]=>
@@ -402,7 +410,7 @@ array(3) {
     ["dyn2"]=>
     int(5)
     ["storage":"ArrayIterator":private]=>
-    object(ArrayObjectEx)#%d (6) {
+    object(ArrayObjectEx)#1 (6) {
       ["pub1"]=>
       int(1)
       ["pro1":protected]=>
@@ -443,6 +451,8 @@ ArrayIteratorEx::__construct()
 
 Deprecated: ArrayIterator::__construct(): Using an object as a backing array for ArrayIterator is deprecated, as it allows violating class constraints and invariants in %s on line %d
 ArrayIteratorEx::dump()
+
+Deprecated: Method ArrayIterator::getFlags() is deprecated since 8.6 in %s on line %d
 array(3) {
   ["Flags"]=>
   int(1)
@@ -460,7 +470,7 @@ array(3) {
     int(5)
   }
   ["$this"]=>
-  object(ArrayIteratorEx)#%d (6) {
+  object(ArrayIteratorEx)#2 (6) {
     ["pub2"]=>
     int(1)
     ["pro2":protected]=>
@@ -472,7 +482,7 @@ array(3) {
     ["dyn2"]=>
     int(5)
     ["storage":"ArrayIterator":private]=>
-    object(ArrayObjectEx)#%d (6) {
+    object(ArrayObjectEx)#1 (6) {
       ["pub1"]=>
       int(1)
       ["pro1":protected]=>
@@ -516,6 +526,8 @@ bool(true)
 int(1)
 bool(false)
 ArrayIteratorEx::setFlags(3)
+
+Deprecated: Method ArrayIterator::setFlags() is deprecated since 8.6 in %s on line %d
 int(1)
 bool(true)
 #####EXCHANGE#####
@@ -542,7 +554,7 @@ array(3) {
     int(5)
   }
   ["$this"]=>
-  object(ArrayObjectEx)#%d (5) {
+  object(ArrayObjectEx)#1 (5) {
     ["pub1"]=>
     int(1)
     ["pro1":protected]=>
@@ -561,6 +573,8 @@ ArrayIteratorEx::__construct()
 
 Deprecated: ArrayIterator::__construct(): Using an object as a backing array for ArrayIterator is deprecated, as it allows violating class constraints and invariants in %s on line %d
 ArrayIteratorEx::dump()
+
+Deprecated: Method ArrayIterator::getFlags() is deprecated since 8.6 in %s on line %d
 array(3) {
   ["Flags"]=>
   int(0)
@@ -578,7 +592,7 @@ array(3) {
     int(5)
   }
   ["$this"]=>
-  object(ArrayIteratorEx)#%d (6) {
+  object(ArrayIteratorEx)#2 (6) {
     ["pub2"]=>
     int(1)
     ["pro2":protected]=>
@@ -590,7 +604,7 @@ array(3) {
     ["dyn2"]=>
     int(5)
     ["storage":"ArrayIterator":private]=>
-    object(ArrayObjectEx)#%d (5) {
+    object(ArrayObjectEx)#1 (5) {
       ["pub1"]=>
       int(1)
       ["pro1":protected]=>
@@ -622,6 +636,8 @@ ArrayIteratorEx::__construct()
 
 Deprecated: ArrayIterator::__construct(): Using an object as a backing array for ArrayIterator is deprecated, as it allows violating class constraints and invariants in %s on line %d
 ArrayIteratorEx::dump()
+
+Deprecated: Method ArrayIterator::getFlags() is deprecated since 8.6 in %s on line %d
 array(3) {
   ["Flags"]=>
   int(0)
@@ -639,7 +655,7 @@ array(3) {
     int(5)
   }
   ["$this"]=>
-  object(ArrayIteratorEx)#%d (6) {
+  object(ArrayIteratorEx)#3 (6) {
     ["pub2"]=>
     int(1)
     ["pro2":protected]=>
@@ -651,7 +667,7 @@ array(3) {
     ["dyn2"]=>
     int(5)
     ["storage":"ArrayIterator":private]=>
-    object(ArrayObjectEx)#%d (5) {
+    object(ArrayObjectEx)#1 (5) {
       ["pub1"]=>
       int(1)
       ["pro1":protected]=>
@@ -686,6 +702,8 @@ bool(false)
 int(1)
 bool(false)
 ArrayIteratorEx::setFlags(2)
+
+Deprecated: Method ArrayIterator::setFlags() is deprecated since 8.6 in %s on line %d
 int(1)
 bool(true)
 ===CHECK===
@@ -708,7 +726,7 @@ array(3) {
     int(5)
   }
   ["$this"]=>
-  object(ArrayObjectEx)#%d (5) {
+  object(ArrayObjectEx)#1 (5) {
     ["pub1"]=>
     int(1)
     ["pro1":protected]=>
@@ -727,6 +745,8 @@ ArrayIteratorEx::__construct()
 
 Deprecated: ArrayIterator::__construct(): Using an object as a backing array for ArrayIterator is deprecated, as it allows violating class constraints and invariants in %s on line %d
 ArrayIteratorEx::dump()
+
+Deprecated: Method ArrayIterator::getFlags() is deprecated since 8.6 in %s on line %d
 array(3) {
   ["Flags"]=>
   int(1)
@@ -744,7 +764,7 @@ array(3) {
     int(5)
   }
   ["$this"]=>
-  object(ArrayIteratorEx)#%d (6) {
+  object(ArrayIteratorEx)#3 (6) {
     ["pub2"]=>
     int(1)
     ["pro2":protected]=>
@@ -756,7 +776,7 @@ array(3) {
     ["dyn2"]=>
     int(5)
     ["storage":"ArrayIterator":private]=>
-    object(ArrayObjectEx)#%d (5) {
+    object(ArrayObjectEx)#1 (5) {
       ["pub1"]=>
       int(1)
       ["pro1":protected]=>
@@ -788,6 +808,8 @@ ArrayIteratorEx::__construct()
 
 Deprecated: ArrayIterator::__construct(): Using an object as a backing array for ArrayIterator is deprecated, as it allows violating class constraints and invariants in %s on line %d
 ArrayIteratorEx::dump()
+
+Deprecated: Method ArrayIterator::getFlags() is deprecated since 8.6 in %s on line %d
 array(3) {
   ["Flags"]=>
   int(1)
@@ -805,7 +827,7 @@ array(3) {
     int(5)
   }
   ["$this"]=>
-  object(ArrayIteratorEx)#%d (6) {
+  object(ArrayIteratorEx)#2 (6) {
     ["pub2"]=>
     int(1)
     ["pro2":protected]=>
@@ -817,7 +839,7 @@ array(3) {
     ["dyn2"]=>
     int(5)
     ["storage":"ArrayIterator":private]=>
-    object(ArrayObjectEx)#%d (5) {
+    object(ArrayObjectEx)#1 (5) {
       ["pub1"]=>
       int(1)
       ["pro1":protected]=>
@@ -852,5 +874,7 @@ bool(false)
 int(1)
 bool(false)
 ArrayIteratorEx::setFlags(3)
+
+Deprecated: Method ArrayIterator::setFlags() is deprecated since 8.6 in %s on line %d
 int(1)
 bool(true)

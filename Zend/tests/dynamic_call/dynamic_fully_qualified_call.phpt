@@ -6,10 +6,10 @@ Crash when using dynamic call syntax with fully qualified name in a namespace
 namespace Foo;
 try {
     ('\bar')();
-} catch (\Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Call to undefined function bar()
+Error: Call to undefined function bar()

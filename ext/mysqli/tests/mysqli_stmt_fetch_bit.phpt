@@ -29,16 +29,16 @@ if (mysqli_get_server_version($link) < 50003) {
             !mysqli_query($link, $sql = sprintf('CREATE TABLE test(id INT, label BIT(%d)) ENGINE="%s"', $bits, $engine)))
             printf("[002 - %d] [%d] %s\n",$bits, mysqli_errno($link), mysqli_error($link));
 
-        if (!$stmt = mysqli_stmt_init($link))
-            printf("[003 - %d] [%d] %s\n", $bits, mysqli_errno($link), mysqli_error($link));
-
         while ($tests < min($max_value, 20)) {
             $tests++;
             $value = mt_rand(0, $max_value);
             $sql = sprintf("INSERT INTO test(id, label) VALUES (%d, b'%s')", $value, decbin($value));
 
-            if (!mysqli_stmt_prepare($stmt, $sql) ||
-                    !mysqli_stmt_execute($stmt))
+            unset($stmt); // Unset the variable first, otherwise we would get Out of sync error
+            if (!$stmt = mysqli_prepare($link, $sql))
+                printf("[003 - %d] [%d] %s\n", $bits, mysqli_errno($link), mysqli_error($link));
+
+            if (!mysqli_stmt_execute($stmt))
                 printf("[004 - %d] [%d] %s\n", $bits, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
             $id = $_label0 = $label = null;

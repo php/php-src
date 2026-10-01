@@ -9,9 +9,9 @@ $domd = new DOMDocument();
 $xp = new DOMXPath($domd);
 try {
     $xp->query("//foo[contains(text(), " . $xp->quote("tes\x00t") . ")]");
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-DOMXPath::quote(): Argument #1 ($str) must not contain any null bytes
+ValueError: DOMXPath::quote(): Argument #1 ($str) must not contain any null bytes

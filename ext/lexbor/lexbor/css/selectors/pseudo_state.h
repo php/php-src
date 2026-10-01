@@ -77,6 +77,10 @@ LXB_API bool
 lxb_css_selectors_state_pseudo_element_function__undef(lxb_css_parser_t *parser,
     const lxb_css_syntax_token_t *token, void *ctx);
 
+LXB_API bool
+lxb_css_selectors_state_pseudo_class_function_lexbor_contains(lxb_css_parser_t *parser,
+    const lxb_css_syntax_token_t *token, void *ctx);
+
 
 #ifdef __cplusplus
 } /* extern "C" */

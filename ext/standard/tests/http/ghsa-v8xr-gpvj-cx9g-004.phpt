@@ -40,7 +40,7 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --EXPECTF--
 
-Warning: file_get_contents(http://127.0.0.1:%d): Failed to open stream: HTTP invalid response format (folding header at the start)! in %s
+Warning: file_get_contents(): Failed to open stream: HTTP invalid response format (folding header at the start)! in %s
 bool(false)
 array(1) {
   [0]=>

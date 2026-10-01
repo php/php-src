@@ -7,22 +7,22 @@ function test(false $v) { var_dump($v); }
 
 try {
     test(0);
-} catch (\TypeError $e) {
-    echo $e->getMessage(), \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     test('');
-} catch (\TypeError $e) {
-    echo $e->getMessage(), \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     test([]);
-} catch (\TypeError $e) {
-    echo $e->getMessage(), \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECTF--
-test(): Argument #1 ($v) must be of type false, int given, called in %s on line %d
-test(): Argument #1 ($v) must be of type false, string given, called in %s on line %d
-test(): Argument #1 ($v) must be of type false, array given, called in %s on line %d
+TypeError: test(): Argument #1 ($v) must be of type false, int given, called in %s on line %d
+TypeError: test(): Argument #1 ($v) must be of type false, string given, called in %s on line %d
+TypeError: test(): Argument #1 ($v) must be of type false, array given, called in %s on line %d

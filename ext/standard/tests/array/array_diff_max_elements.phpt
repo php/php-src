@@ -7,10 +7,10 @@ $power = 20; // Chosen to be well within a memory_limit
 $arr = range(0, 2**$power);
 try {
     array_diff(...array_fill(0, 2**(32-$power), $arr));
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECTF--
-The total number of elements must be lower than %d
+Error: The total number of elements must be lower than %d

@@ -22,7 +22,7 @@ class MyAutoLoader {
 try {
     spl_autoload_register(array('MyAutoLoader', 'autoLoad'), true);
 } catch(\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 // and
@@ -38,12 +38,12 @@ try
 }
 catch(Exception $e)
 {
-    echo 'Exception: ' . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-spl_autoload_register(): Argument #1 ($callback) must be a valid callback or null, non-static method MyAutoLoader::autoLoad() cannot be called statically
+TypeError: spl_autoload_register(): Argument #1 ($callback) must be a valid callback or null, non-static method MyAutoLoader::autoLoad() cannot be called statically
 MyAutoLoader::autoLoad(TestClass)
 MyAutoLoader::autoThrow(TestClass)
 Exception: Unavailable

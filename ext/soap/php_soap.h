@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Brad Lafountain <rodif_bl@yahoo.com>                        |
   |          Shane Caraveo <shane@caraveo.com>                           |
@@ -77,7 +75,7 @@ struct _soapService {
 
 	struct _soap_functions {
 		HashTable *ft;
-		int functions_all;
+		bool functions_all;
 	} soap_functions;
 
 	struct _soap_class {
@@ -150,6 +148,8 @@ struct _soapService {
 #define SOAP_SSL_METHOD_SSLv3   2
 #define SOAP_SSL_METHOD_SSLv23  3
 
+#define SOAP_MAX_XML_DEPTH 2048
+#define SOAP_MAX_DECODE_DEPTH (SOAP_MAX_XML_DEPTH * 2)
 
 ZEND_BEGIN_MODULE_GLOBALS(soap)
 	HashTable *typemap;
@@ -171,6 +171,7 @@ ZEND_BEGIN_MODULE_GLOBALS(soap)
 	HashTable  wsdl_cache;
 	int        cur_uniq_ref;
 	HashTable *ref_map;
+	unsigned int decode_depth;
 ZEND_END_MODULE_GLOBALS(soap)
 
 extern zend_string *soap_lang_en;
@@ -197,7 +198,7 @@ extern zend_class_entry* soap_sdl_class_entry;
 
 extern HashTable php_soap_defEncNs, php_soap_defEnc, php_soap_defEncIndex;
 
-void add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail, zend_string *lang);
+void add_soap_fault(zval *obj, const char *fault_code, const char *fault_string, zend_string *fault_actor, zval *fault_detail, zend_string *lang);
 
 #define soap_error0(severity, format) \
 	php_error(severity, "SOAP-ERROR: " format)
@@ -260,10 +261,7 @@ typedef struct soap_url_object {
 	zend_object std;
 } soap_url_object;
 
-static inline soap_url_object *soap_url_object_fetch(zend_object *obj)
-{
-	return (soap_url_object *) ((char *) obj - XtOffsetOf(soap_url_object, std));
-}
+#define soap_url_object_fetch(obj) ZEND_CONTAINER_OF(obj, soap_url_object, std)
 
 #define Z_SOAP_URL_P(zv) soap_url_object_fetch(Z_OBJ_P(zv))
 

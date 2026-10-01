@@ -30,7 +30,7 @@ var_dump(gmp_cmp($n1,$n) === 0);
 try {
     var_dump(gmp_cmp(array(),array()));
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "Done\n";
@@ -44,5 +44,5 @@ gmp(1231222, 0): left greater than right
 gmp(0, 345355): right greater than left
 bool(true)
 bool(true)
-gmp_cmp(): Argument #1 ($num1) must be of type GMP|string|int, array given
+TypeError: gmp_cmp(): Argument #1 ($num1) must be of type GMP|string|int, array given
 Done

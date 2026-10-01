@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Alexander Peslyak (Solar Designer) <solar at openwall.com>   |
    |         Lachlan Roche                                                |
@@ -26,12 +24,10 @@ PHPAPI void make_digest(char *md5str, const unsigned char *digest)
 
 PHPAPI void make_digest_ex(char *md5str, const unsigned char *digest, size_t len)
 {
-	static const char hexits[17] = "0123456789abcdef";
-
-	for (size_t i = 0; i < len; i++) {
-		md5str[i * 2]       = hexits[digest[i] >> 4];
-		md5str[(i * 2) + 1] = hexits[digest[i] &  0x0F];
-	}
+	zend_bin2hex(md5str, digest, len);
+	/* Some callers (e.g. ext/soap's WSDL cache key) memcpy() the whole
+	   buffer including this terminator, so it must still be written here;
+	   zend_bin2hex() itself does not null-terminate. */
 	md5str[len * 2] = '\0';
 }
 

@@ -16,14 +16,14 @@ try {
     var_dump($result);
 }
 catch(\Exception $e) {
-    echo "Exception: ".$e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     $result = $db->querySingle("SELECT my_udf_md5('test')");
     var_dump($result);
 }
 catch(\Exception $e) {
-    echo "Exception: ".$e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 $statement = $db->prepare("SELECT my_udf_md5('test')");
 try {
@@ -31,10 +31,12 @@ try {
     var_dump($result);
 }
 catch(\Exception $e) {
-    echo "Exception: ".$e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
 Exception: test exception
+
 Exception: test exception
+
 Exception: test exception

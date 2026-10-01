@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021-2022 Alexander Borisov
+ * Copyright (C) 2021-2026 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -155,15 +155,12 @@ lxb_css_memory_ref_dec_destroy(lxb_css_memory_t *memory)
 
 lxb_status_t
 lxb_css_make_data(lxb_css_parser_t *parser, lexbor_str_t *str,
-                  uintptr_t begin, uintptr_t end)
+                  size_t begin, size_t end)
 {
-    size_t length, offlen, len;
-    const lxb_char_t *pos;
-    const lexbor_str_t *tmp;
+    size_t length;
+    const lxb_char_t *p;
 
-    tmp = &parser->str;
-
-    offlen = begin - parser->offset;
+    p = parser->tkz->in_begin;
     length = end - begin;
 
     if (str->data == NULL) {
@@ -173,31 +170,9 @@ lxb_css_make_data(lxb_css_parser_t *parser, lexbor_str_t *str,
         }
     }
 
-    if (tmp->length > offlen) {
-        len = tmp->length - offlen;
+    memcpy(str->data, p + begin, length);
 
-        if (len >= length) {
-            memcpy(str->data + str->length, tmp->data + offlen, length);
-            goto done;
-        }
-        else {
-            memcpy(str->data + str->length, tmp->data + offlen, len);
-        }
-
-        str->length += len;
-
-        pos = parser->pos;
-        length -= len;
-    }
-    else {
-        pos = parser->pos + (offlen - tmp->length);
-    }
-
-    memcpy(str->data + str->length, pos, length);
-
-done:
-
-    str->length += length;
+    str->length = length;
     str->data[str->length] = '\0';
 
     return LXB_STATUS_OK;

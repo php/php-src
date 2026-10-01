@@ -6,18 +6,18 @@ $GLOBALS must be passed by reference (runtime error)
 function by_ref(&$ref) {}
 try {
     by_ref($GLOBALS);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     by_ref2($GLOBALS);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 function by_ref2(&$ref) {}
 
 ?>
 --EXPECT--
-by_ref(): Argument #1 ($ref) could not be passed by reference
-by_ref2(): Argument #1 ($ref) could not be passed by reference
+Error: by_ref(): Argument #1 ($ref) could not be passed by reference
+Error: by_ref2(): Argument #1 ($ref) could not be passed by reference

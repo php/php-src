@@ -15,6 +15,8 @@ $c = (function () {
 })()[0];
 ?>
 --EXPECTF--
+Deprecated: Returning from a finally block is deprecated in %s on line %d
+
 Warning: Undefined variable $a in %s on line %d
 
 Fatal error: Uncaught Error: Keys must be of type int|string during array unpacking in %s:%d

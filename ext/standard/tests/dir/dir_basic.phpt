@@ -35,8 +35,8 @@ var_dump( $d );
 echo "\nTest read after closing the dir:\n";
 try {
     var_dump( $d->read() );
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 // delete temp files
@@ -79,5 +79,5 @@ object(Directory)#%d (2) {
 }
 
 Test read after closing the dir:
-Directory::read(): cannot use Directory resource after it has been closed
+TypeError: Directory::read(): cannot use Directory resource after it has been closed
 Done

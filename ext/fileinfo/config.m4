@@ -25,6 +25,7 @@ if test "$PHP_FILEINFO" != "no"; then
     libmagic/print.c
     libmagic/readcdf.c
     libmagic/softmagic.c
+    libmagic/swap.c
   "])
 
   AC_CHECK_HEADERS([sys/sysmacros.h])

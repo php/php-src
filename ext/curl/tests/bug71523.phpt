@@ -11,8 +11,10 @@ if (curl_version()['version_number'] === 0x080a00) {
 ?>
 --FILE--
 <?php
+include 'server.inc';
+$host = curl_cli_server_start();
 
-$base = curl_init('http://www.google.com/');
+$base = curl_init($host);
 curl_setopt($base, CURLOPT_RETURNTRANSFER, true);
 $mh = curl_multi_init();
 

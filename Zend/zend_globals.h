@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -27,7 +26,6 @@
 
 #include "zend_globals_macros.h"
 
-#include "zend_atomic.h"
 #include "zend_stack.h"
 #include "zend_ptr_stack.h"
 #include "zend_hash.h"
@@ -224,8 +222,8 @@ struct _zend_executor_globals {
 
 	bool full_tables_cleanup;
 
-	zend_atomic_bool vm_interrupt;
-	zend_atomic_bool timed_out;
+	atomic_bool vm_interrupt;
+	atomic_bool timed_out;
 
 	HashTable autoload_current_classnames;
 
@@ -326,9 +324,23 @@ struct _zend_executor_globals {
 	zend_strtod_state strtod_state;
 
 	HashTable callable_convert_cache;
+	HashTable partial_function_application_cache;
+	zend_stack lambda_cache;
+
+	zend_vm_stack  vm_stack_page_cache;
+	uint32_t       vm_stack_page_cache_count;
+	/* Fibers use a different page size, so they need a separate cache */
+	zend_vm_stack  fiber_vm_stack_page_cache;
+	uint32_t       fiber_vm_stack_page_cache_count;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
+
+#ifdef ZTS
+/* Compile-time offsets of the hot globals, in a reserved region just before *_tsrm_ls_cache. */
+# define ZEND_CG_OFFSET   (-(ptrdiff_t) TSRM_ALIGNED_SIZE(sizeof(zend_compiler_globals)))
+# define ZEND_EG_OFFSET   (ZEND_CG_OFFSET - (ptrdiff_t) TSRM_ALIGNED_SIZE(sizeof(zend_executor_globals)))
+#endif
 
 #define EG_FLAGS_INITIAL				(0)
 #define EG_FLAGS_IN_SHUTDOWN			(1<<0)

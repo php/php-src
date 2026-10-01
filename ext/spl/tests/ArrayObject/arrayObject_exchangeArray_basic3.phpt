@@ -16,7 +16,7 @@ try {
     $copy = $ao->exchangeArray($swapIn);
     $copy['addedToCopy'] = 'added To Copy';
 } catch (Exception $e) {
-    echo "Exception:" . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 $swapIn->addedToSwapIn = 'added To Swap-In';
 $original->addedToOriginal = 'added To Original';
@@ -31,7 +31,7 @@ try {
     $copy = $ao->exchangeArray();
     $copy['addedToCopy'] = 'added To Copy';
 } catch (TypeError $e) {
-    echo "Exception: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 $original->addedToOriginal = 'added To Original';
 var_dump($ao, $original, $copy);
@@ -44,7 +44,7 @@ try {
     $copy = $ao->exchangeArray(null);
     $copy['addedToCopy'] = 'added To Copy';
 } catch (TypeError $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 $original->addedToOriginal = 'added To Original';
 var_dump($ao, $original, $copy);
@@ -92,7 +92,7 @@ array(2) {
 --> exchangeArray() with no arg:
 
 Deprecated: ArrayObject::__construct(): Using an object as a backing array for ArrayObject is deprecated, as it allows violating class constraints and invariants in %s on line %d
-Exception: ArrayObject::exchangeArray() expects exactly 1 argument, 0 given
+ArgumentCountError: ArrayObject::exchangeArray() expects exactly 1 argument, 0 given
 
 Deprecated: Creation of dynamic property C::$addedToOriginal is deprecated in %s on line %d
 
@@ -118,7 +118,7 @@ NULL
 --> exchangeArray() with bad arg type:
 
 Deprecated: ArrayObject::__construct(): Using an object as a backing array for ArrayObject is deprecated, as it allows violating class constraints and invariants in %s on line %d
-ArrayObject::exchangeArray(): Argument #1 ($array) must be of type array, null given
+TypeError: ArrayObject::exchangeArray(): Argument #1 ($array) must be of type array, null given
 
 Deprecated: Creation of dynamic property C::$addedToOriginal is deprecated in %s on line %d
 

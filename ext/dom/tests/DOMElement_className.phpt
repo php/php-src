@@ -28,7 +28,7 @@ var_dump($dom->documentElement->className);
 try {
     $dom->documentElement->className = new MyStringable();
 } catch (Throwable $e) {
-    echo "Error: ", $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($dom->documentElement->className);
 echo $dom->saveXML();
@@ -41,7 +41,7 @@ string(0) ""
 string(2) "é"
 string(0) ""
 string(5) "12345"
-Error: foo
+Exception: foo
 string(5) "12345"
 <?xml version="1.0"?>
 <html class="12345"/>

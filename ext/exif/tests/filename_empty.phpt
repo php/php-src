@@ -8,30 +8,30 @@ exif
 try {
     exif_read_data("");
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     exif_thumbnail("");
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     exif_read_data("foo\0bar");
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     exif_thumbnail("foo\0bar");
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-exif_read_data(): Argument #1 ($file) must not be empty
-exif_thumbnail(): Argument #1 ($file) must not be empty
-exif_read_data(): Argument #1 ($file) must not contain any null bytes
-exif_thumbnail(): Argument #1 ($file) must not contain any null bytes
+ValueError: exif_read_data(): Argument #1 ($file) must not be empty
+ValueError: exif_thumbnail(): Argument #1 ($file) must not be empty
+ValueError: exif_read_data(): Argument #1 ($file) must not contain any null bytes
+ValueError: exif_thumbnail(): Argument #1 ($file) must not contain any null bytes
