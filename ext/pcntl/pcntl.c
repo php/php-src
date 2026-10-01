@@ -760,6 +760,13 @@ PHP_FUNCTION(pcntl_signal)
 		RETURN_THROWS();
 	}
 
+	/* sigaction() always fails for these, and zend_sigaction() turns that into a fatal error */
+	if (signo == SIGKILL || signo == SIGSTOP) {
+		PCNTL_G(last_error) = EINVAL;
+		php_error_docref(NULL, E_WARNING, "Error assigning signal");
+		RETURN_FALSE;
+	}
+
 	if (!PCNTL_G(spares)) {
 		/* since calling malloc() from within a signal handler is not portable,
 		 * pre-allocate a few records for recording signals */
