@@ -44,6 +44,11 @@ const phpdbg_command_t phpdbg_list_commands[] = {
 
 PHPDBG_LIST(lines) /* {{{ */
 {
+	if (!param) {
+		phpdbg_error("A line number or file is required");
+		return SUCCESS;
+	}
+	
 	if (!PHPDBG_G(exec) && !zend_is_executing()) {
 		phpdbg_error("Not executing, and execution context not set");
 		return SUCCESS;
