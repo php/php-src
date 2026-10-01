@@ -16,28 +16,11 @@
 
 #include "php_content_types.h"
 
-/* {{{ php_post_entries[] */
-static const sapi_post_entry php_post_entries[] = {
-	{ DEFAULT_POST_CONTENT_TYPE, sizeof(DEFAULT_POST_CONTENT_TYPE)-1, sapi_read_standard_form_data,	php_std_post_handler },
-	{ MULTIPART_CONTENT_TYPE,    sizeof(MULTIPART_CONTENT_TYPE)-1,    NULL,                         rfc1867_post_handler },
-	{ NULL, 0, NULL, NULL }
-};
-/* }}} */
-
 /* {{{ php_startup_sapi_content_types */
 int php_startup_sapi_content_types(void)
 {
 	sapi_register_treat_data(php_default_treat_data);
 	sapi_register_input_filter(php_default_input_filter, NULL);
-	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ php_setup_sapi_content_types */
-int php_setup_sapi_content_types(void)
-{
-	sapi_register_post_entries(php_post_entries);
-
 	return SUCCESS;
 }
 /* }}} */
