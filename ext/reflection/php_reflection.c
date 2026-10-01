@@ -162,7 +162,8 @@ typedef enum {
 	REF_TYPE_TYPE,
 	REF_TYPE_PROPERTY,
 	REF_TYPE_CLASS_CONSTANT,
-	REF_TYPE_ATTRIBUTE
+	REF_TYPE_ATTRIBUTE,
+	REF_TYPE_REFERENCE,
 } reflection_type_t;
 
 /* Struct for reflection objects */
@@ -259,6 +260,9 @@ static void reflection_free_objects_storage(zend_object *object) /* {{{ */
 				efree(intern->ptr);
 				break;
 			}
+			case REF_TYPE_REFERENCE:
+				zval_ptr_dtor(intern->ptr);
+				efree(intern->ptr);
 			case REF_TYPE_GENERATOR:
 			case REF_TYPE_FIBER:
 			case REF_TYPE_CLASS_CONSTANT:
@@ -7329,8 +7333,10 @@ ZEND_METHOD(ReflectionReference, fromArrayElement)
 
 	object_init_ex(return_value, reflection_reference_ptr);
 	reflection_object *intern = Z_REFLECTION_P(return_value);
-	ZVAL_COPY(&intern->obj, item);
-	intern->ref_type = REF_TYPE_OTHER;
+	zval *ref_container = emalloc(sizeof(zval));
+	ZVAL_COPY(ref_container, item);
+	intern->ref_type = REF_TYPE_REFERENCE;
+	intern->ptr = ref_container;
 }
 /* }}} */
 
@@ -7341,7 +7347,9 @@ ZEND_METHOD(ReflectionReference, getId)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	reflection_object *intern = Z_REFLECTION_P(ZEND_THIS);
-	if (Z_TYPE(intern->obj) != IS_REFERENCE) {
+	zval *ref_container = intern->ptr;
+	ZEND_ASSERT(ref_container);
+	if (Z_TYPE_P(ref_container) != IS_REFERENCE) {
 		zend_throw_exception(reflection_exception_ptr, "Corrupted ReflectionReference object", 0);
 		RETURN_THROWS();
 	}
@@ -7357,7 +7365,7 @@ ZEND_METHOD(ReflectionReference, getId)
 	/* SHA1(ref || key) to avoid directly exposing memory addresses. */
 	PHP_SHA1_CTX context;
 	PHP_SHA1Init(&context);
-	PHP_SHA1Update(&context, (unsigned char *) &Z_REF(intern->obj), sizeof(zend_reference *));
+	PHP_SHA1Update(&context, (unsigned char *) &Z_REF_P(ref_container), sizeof(zend_reference *));
 	PHP_SHA1Update(&context, REFLECTION_G(key), REFLECTION_KEY_LEN);
 	unsigned char digest[20];
 	PHP_SHA1Final(digest, &context);
