@@ -95,11 +95,12 @@ static zend_result spl_object_storage_get_hash(zend_hash_key *key, spl_SplObject
 	if (UNEXPECTED(intern->fptr_get_hash)) {
 		zval param;
 		zval rv;
-		ZVAL_OBJ(&param, obj);
+		ZVAL_OBJ_COPY(&param, obj);
 		ZVAL_UNDEF(&rv);
 		spl_object_storage_get_hash_depth++;
 		zend_call_known_function(intern->fptr_get_hash, &intern->std, intern->std.ce, &rv, 1, &param, NULL);
 		spl_object_storage_get_hash_depth--;
+		zval_ptr_dtor(&param);
 		if (UNEXPECTED(Z_ISUNDEF(rv))) {
 			/* An exception has occurred */
 			return FAILURE;
@@ -276,12 +277,9 @@ static zend_result spl_object_storage_addall(spl_SplObjectStorage *intern, spl_S
 
 	SPL_SAFE_HASH_FOREACH_PTR(&other->storage, element) {
 		zval zv;
-		zend_object *obj = element->obj;
-		GC_ADDREF(obj);
 		ZVAL_COPY(&zv, &element->inf);
-		spl_SplObjectStorageElement *attached = spl_object_storage_attach(intern, obj, &zv);
+		spl_SplObjectStorageElement *attached = spl_object_storage_attach(intern, element->obj, &zv);
 		zval_ptr_dtor(&zv);
-		OBJ_RELEASE(obj);
 		if (UNEXPECTED(!attached)) {
 			return FAILURE;
 		}
@@ -692,22 +690,17 @@ PHP_METHOD(SplObjectStorage, removeAllExcept)
 
 	SPL_SAFE_HASH_FOREACH_PTR(&intern->storage, element) {
 		zend_object *elem_obj = element->obj;
-		GC_ADDREF(elem_obj);
 		bool contains = spl_object_storage_contains(other, elem_obj);
 		if (UNEXPECTED(EG(exception))) {
-			OBJ_RELEASE(elem_obj);
 			RETURN_THROWS();
 		}
 		if (!contains) {
 			if (spl_object_storage_detach(intern, elem_obj) == FAILURE) {
-				OBJ_RELEASE(elem_obj);
 				if (UNEXPECTED(EG(exception))) {
 					RETURN_THROWS();
 				}
-				continue;
 			}
 		}
-		OBJ_RELEASE(elem_obj);
 	} ZEND_HASH_FOREACH_END();
 
 	zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
