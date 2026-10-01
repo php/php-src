@@ -36,6 +36,8 @@ PHP                                                                        NEWS
     (Arnaud)
   . Fixed use-after-free when a dl()-loaded extension declares a frameless
     function and a later request calls it. (Ilia Alshanetsky)
+  . Fixed System V shared memory emulation for Windows attaching segments past
+    the end of their mapping. (Ilia Alshanetsky)
 
 - FFI:
   . Fixed crashes with FFI callbacks created from __call() trampolines
