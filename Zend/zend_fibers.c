@@ -803,7 +803,11 @@ static void zend_fiber_coroutine_entry(void)
 	bool is_bailout = false;
 
 	zend_try {
-		coroutine->fcall->fci.retval = &fiber->result;
+		/* Not &fiber->result: the Fiber object may be dropped while the body
+		 * is parked, and the body still writes its return value on the way
+		 * out. The coroutine outlives the body; the value moves to the fiber
+		 * below if the fiber is still there. */
+		coroutine->fcall->fci.retval = &coroutine->result;
 		zend_call_function(&coroutine->fcall->fci, &coroutine->fcall->fci_cache);
 	} zend_catch {
 		is_bailout = true;
@@ -833,6 +837,9 @@ static void zend_fiber_coroutine_entry(void)
 	zend_coroutine_t *caller = NULL;
 
 	if (fiber != NULL) {
+		ZVAL_COPY_VALUE(&fiber->result, &coroutine->result);
+		ZVAL_UNDEF(&coroutine->result);
+
 		/* The caller's frame may be gone by the time anything looks at this
 		 * stack again. */
 		if (fiber->stack_bottom != NULL) {
