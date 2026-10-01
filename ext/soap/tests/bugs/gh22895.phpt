@@ -13,7 +13,8 @@ class LocalSoapClient extends SoapClient
         $location,
         $action,
         $version,
-        $one_way = false
+        $oneWay = false,
+        $uriParserClass = null
     ): ?string {
         return '';
     }
