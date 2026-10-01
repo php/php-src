@@ -287,13 +287,11 @@ static zend_string *_php_pgsql_trim_message(const char *message)
 
 static void php_pgsql_set_default_link(zend_object *obj)
 {
-	GC_ADDREF(obj);
-
 	if (PGG(default_link) != NULL) {
 		zend_object_release(PGG(default_link));
 	}
 
-	PGG(default_link) = obj;
+	PGG(default_link) = zend_object_copy(obj);
 }
 
 static void _close_pgsql_plink(zend_resource *rsrc)
