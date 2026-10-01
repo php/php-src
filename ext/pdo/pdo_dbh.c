@@ -1467,7 +1467,7 @@ static void dbh_free(pdo_dbh_t *dbh, bool free_persistent)
 {
 	int i;
 
-	if (dbh->query_stmt) {
+	if (dbh->query_stmt && (!dbh->is_persistent || dbh->refcount <= 2)) {
 		zval_ptr_dtor(&dbh->query_stmt_zval);
 		dbh->query_stmt = NULL;
 	}
@@ -1529,7 +1529,7 @@ static void pdo_dbh_free_storage(zend_object *std)
 		dbh->in_txn = false;
 	}
 
-	if (dbh->is_persistent && dbh->methods && dbh->methods->persistent_shutdown) {
+	if (dbh->is_persistent && dbh->refcount <= 2 && dbh->methods && dbh->methods->persistent_shutdown) {
 		dbh->methods->persistent_shutdown(dbh);
 	}
 	zend_object_std_dtor(std);
