@@ -1124,16 +1124,17 @@ static ZEND_STACK_ALIGNED void ts_scheduler_entry(zend_fiber_transfer *transfer)
 	EG(vm_stack) = NULL;
 
 	zend_first_try {
-		ts_vm_stack_start(self);
-
 		ZEND_ASYNC_IN_SCHEDULER_CONTEXT = true;
 
 		/* The main flow bailed out: there is nothing left to schedule, only
-		 * stacks to unwind. */
+		 * stacks to unwind. No VM stack: after an out-of-memory bailout there
+		 * may be no memory left for one. */
 		if (UNEXPECTED(bailout)) {
 			ts_bailout_all();
 			goto done;
 		}
+
+		ts_vm_stack_start(self);
 
 		for (;;) {
 			ts_run_microtasks();
