@@ -23,8 +23,10 @@
 #include "ext/standard/file.h"
 #include "ext/uri/php_uri.h"
 #include "streams/php_streams_int.h"
+#include "main/php_streams.h"
 #include "zend_smart_str.h"
 #include "zend_exceptions.h"
+#include "ext/spl/spl_exceptions.h"
 #include "php_openssl.h"
 #include "php_openssl_backend.h"
 #include "php_io.h"
@@ -35,6 +37,7 @@
 #include <openssl/err.h>
 #include <openssl/bn.h>
 #include <openssl/dh.h>
+#include <openssl/evp.h>
 
 #ifdef PHP_WIN32
 #include "win32/winutil.h"
@@ -3945,6 +3948,228 @@ static const php_stream_ops php_openssl_socket_ops = {
 	php_openssl_sockop_stat,
 	php_openssl_sockop_set_option,
 };
+
+/* Channel binding data types (RFC 5929, RFC 9266), as used for SASL
+ * channel binding (e.g. SCRAM-SHA-*-PLUS, RFC 5802 / RFC 5801). The string
+ * values accepted by stream_get_channel_binding() are the IANA "Channel
+ * Binding" registry names. */
+enum php_openssl_channel_binding_type {
+	PHP_OSSL_CB_TLS_UNIQUE = 0,
+	PHP_OSSL_CB_TLS_SERVER_ENDPOINT,
+	PHP_OSSL_CB_TLS_EXPORTER,
+};
+
+/* Result of php_openssl_netstream_get_channel_binding(). */
+enum php_openssl_channel_binding_result {
+	PHP_OSSL_CB_OK = 0,		/* *out holds a zend_string with the data */
+	PHP_OSSL_CB_NOT_APPLICABLE,	/* *out = NULL (e.g. tls-unique over TLS 1.3) */
+	PHP_OSSL_CB_NOT_TLS,	/* stream is not an active TLS stream */
+	PHP_OSSL_CB_ERROR,		/* an OpenSSL-level failure occurred */
+};
+
+/*
+ * Get the NID of the message-digest algorithm used to sign a certificate,
+ * or NID_undef if it cannot be determined. The parameter list of
+ * X509_get_signature_info() changed between OpenSSL 1.1.1 and 3.0.
+ */
+static int php_openssl_get_cert_signature_md_nid(const X509 *cert) /* {{{ */
+{
+	int md_nid;
+
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
+	int sign_alg, secbits, pkeybits;
+
+	if (!X509_get_signature_info((X509 *)cert, &sign_alg, &md_nid, &secbits, &pkeybits)) {
+		return NID_undef;
+	}
+#else
+	int pkey_nid, secbits;
+	uint32_t flags = 0;
+
+	if (!X509_get_signature_info((X509 *)cert, &md_nid, &pkey_nid, &secbits, &flags)) {
+		return NID_undef;
+	}
+#endif
+	return md_nid;
+}
+/* }}} */
+
+/*
+ * Extract TLS channel binding data from an established openssl stream.
+ *
+ * On success *out is set to a newly-allocated zend_string holding the data
+ * and PHP_OSSL_CB_OK is returned. For a type that is not applicable to the
+ * connection (currently: tls-unique over TLS 1.3) *out is set to NULL and
+ * PHP_OSSL_CB_NOT_APPLICABLE is returned. If the stream is not an active TLS
+ * stream PHP_OSSL_CB_NOT_TLS is returned, and if an OpenSSL call fails
+ * PHP_OSSL_CB_ERROR is returned; in both of these cases *out is set to NULL.
+ */
+static int php_openssl_netstream_get_channel_binding( /* {{{ */
+	php_stream *stream, int type, zend_string **out)
+{
+	unsigned char buf[EVP_MAX_MD_SIZE];
+	size_t len = 0;
+	php_openssl_netstream_data_t *sslsock;
+	SSL *ssl;
+
+	*out = NULL;
+
+	if (stream == NULL || stream->ops != &php_openssl_socket_ops) {
+		return PHP_OSSL_CB_NOT_TLS;
+	}
+	sslsock = (php_openssl_netstream_data_t *)stream->abstract;
+	if (sslsock == NULL || !sslsock->ssl_active || sslsock->ssl_handle == NULL) {
+		return PHP_OSSL_CB_NOT_TLS;
+	}
+	ssl = sslsock->ssl_handle;
+
+	switch (type) {
+	case PHP_OSSL_CB_TLS_UNIQUE:
+		/* RFC 5929 section 3: tls-unique is not defined for TLS 1.3. */
+		if (SSL_version(ssl) >= TLS1_3_VERSION) {
+			return PHP_OSSL_CB_NOT_APPLICABLE;
+		}
+
+		/*
+		 * In TLS 1.2 and earlier both endpoints always transmit a Finished
+		 * message. Pick it so that the client and the server derive the same
+		 * value: in a full handshake that is the client's Finished (the client
+		 * reads it from its own send buffer, the server from its receive
+		 * buffer), and in a resumed handshake the server's Finished. This is
+		 * the same selection CPython's _ssl.get_channel_binding() makes.
+		 */
+		if (sslsock->is_client ^ SSL_session_reused(ssl)) {
+			len = SSL_get_finished(ssl, buf, sizeof(buf));
+		} else {
+			len = SSL_get_peer_finished(ssl, buf, sizeof(buf));
+		}
+		if (len == 0) {
+			return PHP_OSSL_CB_ERROR;
+		}
+		*out = zend_string_init((char *)buf, len, 0);
+		return *out != NULL ? PHP_OSSL_CB_OK : PHP_OSSL_CB_ERROR;
+
+	case PHP_OSSL_CB_TLS_SERVER_ENDPOINT:
+		{
+			X509 *cert = sslsock->is_client ?
+				SSL_get_peer_certificate(ssl) : SSL_get_certificate(ssl);
+			int md_nid, rc;
+			const EVP_MD *md;
+			unsigned int digest_len = 0;
+
+			if (cert == NULL) {
+				return PHP_OSSL_CB_ERROR;
+			}
+
+			md_nid = php_openssl_get_cert_signature_md_nid(cert);
+			/*
+			 * RFC 5929 section 4.1: if the digest used to sign the
+			 * certificate is MD5 or SHA-1, or cannot be determined, use
+			 * SHA-256 instead.
+			 */
+			if (md_nid == NID_md5 || md_nid == NID_sha1 || md_nid == NID_undef) {
+				md_nid = NID_sha256;
+			}
+			md = EVP_get_digestbynid(md_nid);
+			if (md == NULL) {
+				md = EVP_sha256();
+			}
+			rc = X509_digest(cert, md, buf, &digest_len);
+			/*
+			 * SSL_get_peer_certificate() returns a certificate with an
+			 * incremented reference count that we must free;
+			 * SSL_get_certificate() returns the certificate owned by the
+			 * SSL_CTX, which must not be freed.
+			 */
+			if (sslsock->is_client) {
+				X509_free(cert);
+			}
+			if (rc != 1) {
+				return PHP_OSSL_CB_ERROR;
+			}
+			*out = zend_string_init((char *)buf, digest_len, 0);
+			return *out != NULL ? PHP_OSSL_CB_OK : PHP_OSSL_CB_ERROR;
+		}
+
+	case PHP_OSSL_CB_TLS_EXPORTER:
+		/*
+		 * RFC 9266 section 4 / RFC 5705: 32 octets, label
+		 * "EXPORTER-Channel-Binding", empty context. For an empty context the
+		 * use_context flag is immaterial (see tls13_export_keying_material()
+		 * in OpenSSL, which zeroes the context length when it is clear).
+		 */
+		if (SSL_export_keying_material(
+				ssl, buf, 32,
+				"EXPORTER-Channel-Binding", sizeof("EXPORTER-Channel-Binding") - 1,
+				(const unsigned char *)"", 0, 1) != 1) {
+			return PHP_OSSL_CB_ERROR;
+		}
+		*out = zend_string_init((char *)buf, 32, 0);
+		return *out != NULL ? PHP_OSSL_CB_OK : PHP_OSSL_CB_ERROR;
+
+	default:
+		return PHP_OSSL_CB_ERROR;
+	}
+}
+/* }}} */
+
+/* {{{ */
+PHP_FUNCTION(stream_get_channel_binding)
+{
+	php_stream *stream = NULL;
+	zend_string *type = NULL;
+	zend_string *result = NULL;
+	int type_code;
+	int ret;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		PHP_Z_PARAM_STREAM(stream)
+		Z_PARAM_STR(type)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (zend_string_equals_literal(type, "tls-unique")) {
+		type_code = PHP_OSSL_CB_TLS_UNIQUE;
+	} else if (zend_string_equals_literal(type, "tls-server-endpoint")) {
+		type_code = PHP_OSSL_CB_TLS_SERVER_ENDPOINT;
+	} else if (zend_string_equals_literal(type, "tls-exporter")) {
+		type_code = PHP_OSSL_CB_TLS_EXPORTER;
+	} else {
+		zend_value_error(
+			"%s(): argument #2 ($channel_binding_type) \"%s\" is not a known "
+			"channel binding type, expected \"tls-unique\", "
+			"\"tls-server-endpoint\" or \"tls-exporter\"",
+			get_active_function_name(), ZSTR_VAL(type));
+		RETURN_THROWS();
+	}
+
+	ret = php_openssl_netstream_get_channel_binding(stream, type_code, &result);
+	switch (ret) {
+	case PHP_OSSL_CB_OK:
+		RETURN_STR(result);
+	case PHP_OSSL_CB_NOT_APPLICABLE:
+		RETURN_NULL();
+	case PHP_OSSL_CB_NOT_TLS:
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0,
+			"Stream does not have transport encryption enabled");
+		RETURN_THROWS();
+	case PHP_OSSL_CB_ERROR:
+		{
+			unsigned long err = ERR_peek_last_error();
+			if (err != 0) {
+				char errstr[256];
+
+				(void)ERR_error_string_n(err, errstr, sizeof(errstr));
+				zend_throw_exception_ex(spl_ce_RuntimeException, 0,
+					"Failed to get channel binding data: %s", errstr);
+			} else {
+				zend_throw_exception_ex(spl_ce_RuntimeException, 0,
+					"Failed to get channel binding data");
+			}
+		}
+		RETURN_THROWS();
+	}
+}
+/* }}} */
 
 static zend_long php_openssl_get_crypto_method(
 		php_stream_context *ctx, zend_long crypto_method)  /* {{{ */
