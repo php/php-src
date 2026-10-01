@@ -2998,12 +2998,10 @@ ZEND_API void zend_update_current_locale(void) /* {{{ */
 #if defined(ZEND_WIN32) && defined(_MSC_VER)
 	if (MB_CUR_MAX > 1) {
 		unsigned int cp = ___lc_codepage_func();
-		CG(variable_width_locale) = 1;
 		// TODO: EUC-* are also ASCII compatible ???
 		CG(ascii_compatible_locale) =
 			cp == 65001; /* UTF-8 */
 	} else {
-		CG(variable_width_locale) = 0;
 		CG(ascii_compatible_locale) = 1;
 	}
 #elif defined(MB_CUR_MAX)
@@ -3033,7 +3031,6 @@ ZEND_API void zend_update_current_locale(void) /* {{{ */
 			}
 		}
 #endif
-		CG(variable_width_locale) = 1;
 		CG(ascii_compatible_locale) = 0;
 
 		if (charmap) {
@@ -3055,12 +3052,10 @@ ZEND_API void zend_update_current_locale(void) /* {{{ */
 		}
 
 	} else {
-		CG(variable_width_locale) = 0;
 		CG(ascii_compatible_locale) = 1;
 	}
 #else
 	/* We can't determine current charset. Assume the worst case */
-	CG(variable_width_locale) = 1;
 	CG(ascii_compatible_locale) = 0;
 #endif
 }

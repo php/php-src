@@ -35,11 +35,11 @@ typedef void   (*zend_stream_closer_t)(void* handle);
 
 #define ZEND_MMAP_AHEAD 32
 
-typedef enum {
+C23_ENUM(zend_stream_type, uint8_t) {
 	ZEND_HANDLE_FILENAME,
 	ZEND_HANDLE_FP,
 	ZEND_HANDLE_STREAM
-} zend_stream_type;
+};
 
 typedef struct _zend_stream {
 	void        *handle;
@@ -56,7 +56,7 @@ typedef struct _zend_file_handle {
 	} handle;
 	zend_string       *filename;
 	zend_string       *opened_path;
-	uint8_t           type; /* packed zend_stream_type */
+	zend_stream_type  type;
 	bool              primary_script;
 	bool              in_list; /* added into CG(open_file) */
 	char              *buf;
