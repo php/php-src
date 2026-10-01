@@ -304,6 +304,8 @@ END_EXTERN_C()
 #define SAPI_TREAT_DATA_FUNC(treat_data) void treat_data(int arg, char *str, zval* destArray)
 #define SAPI_INPUT_FILTER_FUNC(input_filter) unsigned int input_filter(int arg, const char *var, char **val, size_t val_len, size_t *new_val_len)
 
+#define DEFAULT_POST_CONTENT_TYPE "application/x-www-form-urlencoded"
+
 BEGIN_EXTERN_C()
 SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data);
 SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data);
