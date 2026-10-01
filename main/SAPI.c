@@ -51,7 +51,7 @@ static void sapi_globals_ctor(sapi_globals_struct *sapi_globals)
 {
 	memset(sapi_globals, 0, sizeof(*sapi_globals));
 	zend_hash_init(&sapi_globals->known_post_content_types, 8, NULL, _type_dtor, 1);
-	php_setup_sapi_content_types();
+	sapi_register_post_entries(php_post_entries);
 }
 
 static void sapi_globals_dtor(sapi_globals_struct *sapi_globals)
@@ -914,6 +914,13 @@ SAPI_API zend_result sapi_send_headers(void)
 	return ret;
 }
 
+/* {{{ php_post_entries[] */
+const sapi_post_entry php_post_entries[] = {
+	{ DEFAULT_POST_CONTENT_TYPE, sizeof(DEFAULT_POST_CONTENT_TYPE)-1, sapi_read_standard_form_data,	php_std_post_handler },
+	{ MULTIPART_CONTENT_TYPE,    sizeof(MULTIPART_CONTENT_TYPE)-1,    NULL,                         rfc1867_post_handler },
+	{ NULL, 0, NULL, NULL }
+};
+/* }}} */
 
 SAPI_API zend_result sapi_register_post_entries(const sapi_post_entry *post_entries)
 {

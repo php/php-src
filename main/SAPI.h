@@ -281,6 +281,11 @@ struct _sapi_post_entry {
 	void (*post_handler)(char *content_type_dup, void *arg);
 };
 
+BEGIN_EXTERN_C()
+/* Default POST entries to switch back to when overrode */
+extern SAPI_API const sapi_post_entry php_post_entries[];
+END_EXTERN_C()
+
 /* header_handler() constants */
 #define SAPI_HEADER_ADD			(1<<0)
 
