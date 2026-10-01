@@ -851,6 +851,16 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 				}
 			}
 			op1_type |= flags;
+		} else if (opline->opcode == ZEND_RECV) {
+			/* Record the class of an object passed to a class-typed parameter */
+			ZEND_ASSERT(opline->op1.num <= op_array->num_args);
+			if (ZEND_TYPE_IS_COMPLEX(op_array->arg_info[opline->op1.num - 1].type)) {
+				zval *zv = EX_VAR(opline->result.var);
+
+				if (Z_TYPE_P(zv) == IS_OBJECT) {
+					ce1 = Z_OBJCE_P(zv);
+				}
+			}
 		} else if (opline->op1_type == IS_UNUSED && (op_array->fn_flags & ZEND_ACC_CLOSURE)) {
 			uint32_t op1_flags = ZEND_VM_OP1_FLAGS(zend_get_opcode_flags(opline->opcode));
 			if ((op1_flags & ZEND_VM_OP_MASK) == ZEND_VM_OP_THIS) {
