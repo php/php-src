@@ -1806,8 +1806,7 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 			}
 			break;
 		case PDO_FETCH_INTO:
-			GC_ADDREF(fetch_into);
-			stmt->fetch.into = fetch_into;
+			stmt->fetch.into = zend_object_copy(fetch_into);
 			break;
 		default:
 			break;
