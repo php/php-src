@@ -1493,10 +1493,8 @@ static bool ts_main_suspend(bool is_bailout)
 
 	ZEND_ASYNC_MAIN_COROUTINE = NULL;
 
-	/* If main ever yielded, the loop is parked inside ts_switch_into(main) and
-	 * reads the object when this switch lands there: keep it alive until the
-	 * loop is done. Its handle stays taken, so the loop's own retire of it
-	 * cannot hit another coroutine. */
+	/* The loop may be parked in ts_switch_into(main), which reads the object
+	 * when this switch lands there: hold it until the loop is done. */
 	GC_ADDREF(&main_coro->std);
 	ts_coroutine_retire(main_coro);
 
