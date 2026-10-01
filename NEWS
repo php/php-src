@@ -67,6 +67,9 @@ PHP                                                                        NEWS
     unconstructed Collator. (Ilia Alshanetsky)
   . Fixed grapheme_strstr() and grapheme_stristr() returning incorrect substrings
     when supplementary characters precede the match. (Weilin Du)
+  . Fixed grapheme_strstr() and grapheme_strpos() missing canonically
+    equivalent matches, and grapheme searches reporting ICU errors for empty
+    haystacks. (Weilin Du)
 
 - Lexbor:
   . Merge patches lexbor/lexbor@8a14bc0 and lexbor/lexbor@f67ce4b, fixing a
