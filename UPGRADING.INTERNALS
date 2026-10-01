@@ -65,6 +65,7 @@ PHP 8.7 INTERNALS UPGRADE NOTES
   . The sapi_get_fd() function was removed.
   . The sapi_get_target_uid() function was removed.
   . The sapi_get_target_gid() function was removed.
+  . The sapi_activate_headers_only() function was removed.
   . Removed zend_hrtime_posix_clock_id. zend_hrtime() always uses
     CLOCK_MONOTONIC on POSIX platforms.
   . The INIT_CLASS_ENTRY_INIT_METHODS() macro, which was previously used as
