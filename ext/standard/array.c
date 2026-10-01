@@ -3476,11 +3476,48 @@ PHP_FUNCTION(array_push)
 		Z_PARAM_VARIADIC('+', args, argc)
 	ZEND_PARSE_PARAMETERS_END();
 
+	HashTable *ht = Z_ARRVAL_P(stack);
+
+	/* Pushing nothing must not change the array, not even initialize it. A
+	 * single value is added to an uninitialized array more cheaply by
+	 * zend_hash_next_index_insert(), which initializes it inline. */
+	if (argc > 0 && (HT_IS_PACKED(ht) || (argc > 1 && (HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED)))) {
+		/* Like zend_hash_next_index_insert(), treat ZEND_LONG_MIN (no integer
+		 * key used yet) as 0. */
+		zend_long next_index = ht->nNextFreeElement == ZEND_LONG_MIN ? 0 : ht->nNextFreeElement;
+		bool appends_after_last = next_index == (zend_long) ht->nNumUsed;
+		uint32_t room = ht->nTableSize - ht->nNumUsed;
+
+		/* The values can be stored after the last used slot. Growing an array
+		 * with holes may turn it into a hash, so it must already have room. */
+		if (appends_after_last
+		 && argc <= HT_MAX_SIZE - ht->nNumUsed /* nNumUsed + argc must not wrap */
+		 && (argc <= room || HT_IS_WITHOUT_HOLES(ht))) {
+			if (UNEXPECTED(argc > room)) {
+				zend_hash_extend(ht, ht->nNumUsed + argc, true);
+			} else if (UNEXPECTED(HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED)) {
+				zend_hash_real_init_packed(ht);
+			}
+
+			/* ZEND_HASH_FILL_END() resets the internal pointer, array_push() keeps it. */
+			uint32_t pos = ht->nInternalPointer;
+			ZEND_HASH_FILL_PACKED(ht) {
+				for (uint32_t i = 0; i < argc; i++) {
+					Z_TRY_ADDREF(args[i]);
+					ZEND_HASH_FILL_ADD(&args[i]);
+				}
+			} ZEND_HASH_FILL_END();
+			ht->nInternalPointer = pos;
+
+			RETURN_LONG(zend_hash_num_elements(ht));
+		}
+	}
+
 	/* For each subsequent argument, make it a reference, increase refcount, and add it to the end of the array */
 	for (uint32_t i = 0; i < argc; i++) {
 		Z_TRY_ADDREF(args[i]);
 
-		if (zend_hash_next_index_insert(Z_ARRVAL_P(stack), &args[i]) == NULL) {
+		if (zend_hash_next_index_insert(ht, &args[i]) == NULL) {
 			Z_TRY_DELREF(args[i]);
 			zend_throw_error(NULL, "Cannot add element to the array as the next element is already occupied");
 			RETURN_THROWS();
@@ -3488,7 +3525,7 @@ PHP_FUNCTION(array_push)
 	}
 
 	/* Clean up and return the number of values in the stack */
-	RETVAL_LONG(zend_hash_num_elements(Z_ARRVAL_P(stack)));
+	RETVAL_LONG(zend_hash_num_elements(ht));
 }
 /* }}} */
 
