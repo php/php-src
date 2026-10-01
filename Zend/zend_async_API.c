@@ -525,6 +525,16 @@ ZEND_API bool zend_async_scheduler_register(
 		return false;
 	}
 
+	if (api->version != ZEND_ASYNC_API_VERSION) {
+		zend_error(E_CORE_WARNING,
+				"The module %s cannot register an Async scheduler: it was built for Async API"
+				" version %" PRIu32 ", the core provides %d",
+				module,
+				api->version,
+				ZEND_ASYNC_API_VERSION);
+		return false;
+	}
+
 #ifdef ZTS
 	tsrm_mutex_lock(scheduler_mutex);
 #endif

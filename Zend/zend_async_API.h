@@ -393,16 +393,19 @@ typedef bool (*zend_async_coroutine_remove_awaiting_info_t)(
  * anything it can name. The caller owns the array. */
 typedef zend_array *(*zend_async_coroutine_get_awaiting_info_t)(zend_coroutine_t *coroutine);
 
+/* Date of the last incompatible change to this API: a changed slot signature
+ * or meaning, a reordered field. Appending a slot does not change it. */
+#define ZEND_ASYNC_API_VERSION 20261001
+
 /**
  * Scheduler API bundle. A provider fills the struct and calls
- * zend_async_scheduler_register(). New slots are appended at the end only;
- * `size` lets the core detect how much of the struct the provider knows.
- * ABI compatibility rides on the standard PHP module API (ZEND_MODULE_API_NO),
- * enforced when the provider extension is loaded — there is no separate
- * Async API version.
+ * zend_async_scheduler_register(), which refuses a `version` other than
+ * ZEND_ASYNC_API_VERSION. New slots are appended at the end only; `size`
+ * lets the core detect how much of the struct the provider knows.
  */
 typedef struct _zend_async_scheduler_api_s {
 	size_t size; /* sizeof(zend_async_scheduler_api_t) at provider build time */
+	uint32_t version; /* ZEND_ASYNC_API_VERSION at provider build time */
 
 	zend_async_new_coroutine_t new_coroutine;
 	zend_async_gc_new_coroutine_t gc_new_coroutine;

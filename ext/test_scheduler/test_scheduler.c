@@ -163,6 +163,8 @@ ZEND_DECLARE_MODULE_GLOBALS(test_scheduler)
  * in with test_scheduler.enable=1. */
 PHP_INI_BEGIN()
 	PHP_INI_ENTRY("test_scheduler.enable", "0", PHP_INI_SYSTEM, NULL)
+	/* Tests only: register as if built for this Async API version; 0 is the real one. */
+	PHP_INI_ENTRY("test_scheduler.api_version", "0", PHP_INI_SYSTEM, NULL)
 PHP_INI_END()
 
 /* False when disabled: MINIT registered nothing. */
@@ -1819,8 +1821,9 @@ PHP_METHOD(TestScheduler_Coroutine, getAwaitingInfo)
 /// Module
 ///////////////////////////////////////////////////////////////////
 
-static const zend_async_scheduler_api_t ts_scheduler_api = {
+static zend_async_scheduler_api_t ts_scheduler_api = {
 	.size = sizeof(zend_async_scheduler_api_t),
+	.version = ZEND_ASYNC_API_VERSION,
 	.new_coroutine = ts_new_coroutine,
 	.gc_new_coroutine = ts_gc_new_coroutine,
 	.enqueue_coroutine = ts_enqueue,
@@ -1878,8 +1881,15 @@ PHP_MINIT_FUNCTION(test_scheduler)
 	ts_coroutine_handlers.get_gc = ts_coroutine_object_gc;
 	ts_coroutine_handlers.clone_obj = NULL;
 
+	const zend_long api_version = zend_ini_long(ZEND_STRL("test_scheduler.api_version"), 0);
+
+	if (api_version != 0) {
+		ts_scheduler_api.version = (uint32_t) api_version;
+	}
+
+	/* Refused (the core warned why): stay loaded but inert rather than abort startup. */
 	if (!zend_async_scheduler_register("test_scheduler", &ts_scheduler_api)) {
-		return FAILURE;
+		return SUCCESS;
 	}
 
 	ts_registered = true;
