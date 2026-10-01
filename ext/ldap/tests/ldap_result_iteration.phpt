@@ -16,6 +16,7 @@ foreach ($result as $dn => $entry) {
         $dn,
         $entry,
         ldap_get_values($link, $entry, 'sn'),
+        $entry->getValues('sn'),
     );
 }
 ?>
@@ -36,6 +37,10 @@ array(2) {
   ["count"]=>
   int(1)
 }
+array(1) {
+  [0]=>
+  string(7) "testSN1"
+}
 string(%d) "cn=userB,%s"
 object(LDAP\ResultEntry)#%d (0) {
 }
@@ -44,4 +49,8 @@ array(2) {
   string(7) "testSN2"
   ["count"]=>
   int(1)
+}
+array(1) {
+  [0]=>
+  string(7) "testSN2"
 }

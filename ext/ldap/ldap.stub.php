@@ -877,6 +877,7 @@ namespace LDAP {
      */
     final class ResultEntry
     {
+        public function getValues(): array;
     }
 }
 

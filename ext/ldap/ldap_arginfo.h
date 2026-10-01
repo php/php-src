@@ -1,5 +1,5 @@
 /* This is a generated file, edit ldap.stub.php instead.
- * Stub hash: 224d66c6466af9b094d5c4c77a9e85e051843ff9 */
+ * Stub hash: caa617ad7c91a513a7915e8129d2be4ae123d28c */
 
 #if defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_connect, 0, 0, LDAP\\Connection, MAY_BE_FALSE)
@@ -407,6 +407,9 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_LDAP_Result_count, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_LDAP_ResultEntry_getValues, 0, 0, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
 #if defined(HAVE_ORALDAP)
 ZEND_FUNCTION(ldap_connect);
 #endif
@@ -511,6 +514,7 @@ ZEND_METHOD(LDAP_Result, next);
 ZEND_METHOD(LDAP_Result, rewind);
 ZEND_METHOD(LDAP_Result, valid);
 ZEND_METHOD(LDAP_Result, count);
+ZEND_METHOD(LDAP_ResultEntry, getValues);
 
 static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_ORALDAP)
@@ -628,6 +632,11 @@ static const zend_function_entry class_LDAP_Result_methods[] = {
 	ZEND_ME(LDAP_Result, rewind, arginfo_class_LDAP_Result_rewind, ZEND_ACC_PUBLIC)
 	ZEND_ME(LDAP_Result, valid, arginfo_class_LDAP_Result_valid, ZEND_ACC_PUBLIC)
 	ZEND_ME(LDAP_Result, count, arginfo_class_LDAP_Result_count, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_LDAP_ResultEntry_methods[] = {
+	ZEND_ME(LDAP_ResultEntry, getValues, arginfo_class_LDAP_ResultEntry_getValues, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -911,7 +920,7 @@ static zend_class_entry *register_class_LDAP_ResultEntry(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "LDAP", "ResultEntry", NULL);
+	INIT_NS_CLASS_ENTRY(ce, "LDAP", "ResultEntry", class_LDAP_ResultEntry_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;

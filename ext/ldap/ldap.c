@@ -2339,6 +2339,41 @@ PHP_FUNCTION(ldap_get_attributes)
 /* }}} */
 
 /* {{{ Get all values with lengths from a result entry */
+PHP_METHOD(LDAP_ResultEntry, getValues)
+{
+	ldap_resultdata *ldap_result;
+	ldap_linkdata *ld;
+	ldap_result_entry *resultentry;
+	char *attr;
+	struct berval **ldap_value_len;
+	int num_values, ldap_status_code;
+	size_t attr_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &attr, &attr_len) != SUCCESS) {
+		RETURN_THROWS();
+	}
+
+	resultentry = Z_LDAP_RESULT_ENTRY_P(ZEND_THIS);
+	ldap_result = Z_LDAP_RESULT_P(&resultentry->res);
+	ld = Z_LDAP_LINK_P(&ldap_result->ld);
+	VERIFY_LDAP_LINK_CONNECTED(ld);
+
+	if ((ldap_value_len = ldap_get_values_len(ld->link, resultentry->data, attr)) == NULL) {
+		ldap_status_code = _get_lderrno(ld->link);
+		zend_throw_exception_ex(ldap_exception_ce, ldap_status_code, "Cannot get the value(s) of attribute %s", ldap_err2string(ldap_status_code));
+		RETURN_THROWS();
+	}
+
+	num_values = ldap_count_values_len(ldap_value_len);
+	array_init(return_value);
+
+	for (int i = 0; i < num_values; i++) {
+		add_next_index_stringl(return_value, ldap_value_len[i]->bv_val, ldap_value_len[i]->bv_len);
+	}
+
+	ldap_value_free_len(ldap_value_len);
+}
+
 PHP_FUNCTION(ldap_get_values_len)
 {
 	zval *link, *result_entry;
@@ -2372,7 +2407,6 @@ PHP_FUNCTION(ldap_get_values_len)
 
 	add_assoc_long(return_value, "count", num_values);
 	ldap_value_free_len(ldap_value_len);
-
 }
 /* }}} */
 
