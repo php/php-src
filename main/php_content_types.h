@@ -14,6 +14,5 @@
 #define PHP_CONTENT_TYPES_H
 
 SAPI_API SAPI_POST_HANDLER_FUNC(php_std_post_handler);
-int php_startup_sapi_content_types(void);
 
 #endif /* PHP_CONTENT_TYPES_H */
