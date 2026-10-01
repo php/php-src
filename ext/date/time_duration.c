@@ -142,8 +142,7 @@ ZEND_ATTRIBUTE_NODISCARD static zend_result create_duration(zval *target, zend_u
 	if (DATEG(duration_cache)) {
 		zend_object_release(DATEG(duration_cache));
 	}
-	GC_ADDREF(&obj->std);
-	DATEG(duration_cache) = &obj->std;
+	DATEG(duration_cache) = zend_object_copy(&obj->std);
 
 	return SUCCESS;
 }
