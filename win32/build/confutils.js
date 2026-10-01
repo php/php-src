@@ -3136,7 +3136,7 @@ function toolset_setup_project_tools()
 	}
 
 	// Try locating the manifest tool
-	if (VS_TOOLSET) {
+	if (VS_TOOLSET || CLANG_TOOLSET) {
 		if (!PATH_PROG('mt', WshShell.Environment("Process").Item("PATH"))) {
 			ERROR('mt is required')
 		}
