@@ -120,6 +120,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23899 (Assertion failure when a cancel callback returns an
     invalid type during shutdown). (Weilin Du)
 
+- XML:
+  . Fixed xml_get_current_byte_index() returning negative values for byte
+    indexes beyond 2 GiB on Windows x64. (Marc Bennewitz)
+
 24 Sep 2026, PHP 8.6.0RC2
 
 - Core:
