@@ -3114,6 +3114,12 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *phar, zen
 			phar->fp = newfile;
 		} else if (phar->flags & PHAR_FILE_COMPRESSED_BZ2) {
 			filter = php_stream_filter_create("bzip2.compress", NULL, php_stream_is_persistent(phar->fp));
+
+			if (!filter) {
+				spprintf(error, 4096, "unable to compress all contents of phar \"%s\" using bzip2", ZSTR_VAL(phar->fname));
+				return EOF;
+			}
+
 			php_stream_filter_append(&phar->fp->writefilters, filter);
 			php_stream_copy_to_stream_ex(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
 			php_stream_filter_flush(filter, 1);

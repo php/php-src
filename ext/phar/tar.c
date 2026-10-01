@@ -1382,6 +1382,15 @@ nostub:
 			php_stream_filter *filter;
 
 			filter = php_stream_filter_create("bzip2.compress", NULL, php_stream_is_persistent(phar->fp));
+
+			if (!filter) {
+				/* copy contents uncompressed rather than lose them */
+				php_stream_copy_to_stream_ex(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
+				php_stream_close(newfile);
+				spprintf(error, 4096, "unable to compress all contents of phar \"%s\" using bzip2", ZSTR_VAL(phar->fname));
+				return EOF;
+			}
+
 			php_stream_filter_append(&phar->fp->writefilters, filter);
 			php_stream_copy_to_stream_ex(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
 			php_stream_filter_flush(filter, 1);
