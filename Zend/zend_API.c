@@ -4452,8 +4452,7 @@ ZEND_API void zend_get_callable_zval_from_fcc(const zend_fcall_info_cache *fcc, 
 	} else if (fcc->function_handler->common.scope) {
 		array_init(callable);
 		if (fcc->object) {
-			GC_ADDREF(fcc->object);
-			add_next_index_object(callable, fcc->object);
+			add_next_index_object(callable, zend_object_copy(fcc->object));
 		} else {
 			add_next_index_str(callable, zend_string_copy(fcc->calling_scope->name));
 		}

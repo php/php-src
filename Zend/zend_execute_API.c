@@ -873,8 +873,7 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 	} else {
 		object_or_called_scope = fci_cache->object;
 		call_info = ZEND_CALL_TOP_FUNCTION | ZEND_CALL_DYNAMIC | ZEND_CALL_HAS_THIS;
-		pinned_this = fci_cache->object;
-		GC_ADDREF(pinned_this);
+		pinned_this = zend_object_copy(fci_cache->object);
 	}
 
 	if (UNEXPECTED(func->common.fn_flags & ZEND_ACC_DEPRECATED)) {

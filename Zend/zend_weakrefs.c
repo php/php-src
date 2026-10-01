@@ -488,8 +488,7 @@ static HashTable *zend_weakmap_get_properties_for(zend_object *object, zend_prop
 		zval pair;
 		array_init(&pair);
 
-		GC_ADDREF(obj);
-		add_assoc_object(&pair, "key", obj);
+		add_assoc_object(&pair, "key", zend_object_copy(obj));
 		Z_TRY_ADDREF_P(val);
 		add_assoc_zval(&pair, "value", val);
 
