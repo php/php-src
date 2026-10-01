@@ -784,7 +784,7 @@ function openssl_password_verify(string $algo, #[\SensitiveParameter] string $pa
   *
   * @param resource $stream
   * @param string $channel_binding_type One of "tls-unique",
-  *   "tls-server-endpoint" or "tls-exporter" (the IANA "Channel Binding"
+  *   "tls-server-end-point" or "tls-exporter" (the IANA "Channel Binding"
   *   registry names, RFC 5929 / RFC 9266).
   * @return string|null The channel binding data, or NULL when it is not
   *   applicable to the connection (currently "tls-unique" over TLS 1.3).

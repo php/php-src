@@ -4129,7 +4129,7 @@ PHP_FUNCTION(stream_get_channel_binding)
 
 	if (zend_string_equals_literal(type, "tls-unique")) {
 		type_code = PHP_OSSL_CB_TLS_UNIQUE;
-	} else if (zend_string_equals_literal(type, "tls-server-endpoint")) {
+	} else if (zend_string_equals_literal(type, "tls-server-end-point")) {
 		type_code = PHP_OSSL_CB_TLS_SERVER_ENDPOINT;
 	} else if (zend_string_equals_literal(type, "tls-exporter")) {
 		type_code = PHP_OSSL_CB_TLS_EXPORTER;
@@ -4137,7 +4137,7 @@ PHP_FUNCTION(stream_get_channel_binding)
 		zend_value_error(
 			"%s(): argument #2 ($channel_binding_type) \"%s\" is not a known "
 			"channel binding type, expected \"tls-unique\", "
-			"\"tls-server-endpoint\" or \"tls-exporter\"",
+			"\"tls-server-end-point\" or \"tls-exporter\"",
 			get_active_function_name(), ZSTR_VAL(type));
 		RETURN_THROWS();
 	}

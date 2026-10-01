@@ -27,7 +27,7 @@ $serverCode = <<<'CODE'
         echo "SERVER_EXCEPTION accept failed\n";
         exit(1);
     }
-    foreach (["tls-unique", "tls-server-endpoint", "tls-exporter"] as $t) {
+    foreach (["tls-unique", "tls-server-end-point", "tls-exporter"] as $t) {
         $v = stream_get_channel_binding($conn, $t);
         fwrite($conn, $t . "=" . (is_string($v) ? bin2hex($v) : "") . "\n");
     }
@@ -50,7 +50,7 @@ $clientCode = <<<'CODE'
     }
 
     $my = [];
-    foreach (["tls-unique", "tls-server-endpoint", "tls-exporter"] as $t) {
+    foreach (["tls-unique", "tls-server-end-point", "tls-exporter"] as $t) {
         $my[$t] = stream_get_channel_binding($client, $t);
     }
 
@@ -65,7 +65,7 @@ $clientCode = <<<'CODE'
         $peer[$t] = ($enc === "") ? null : hex2bin($enc);
     }
 
-    foreach (["tls-unique", "tls-server-endpoint", "tls-exporter"] as $t) {
+    foreach (["tls-unique", "tls-server-end-point", "tls-exporter"] as $t) {
         $c = $my[$t];
         $s = $peer[$t];
         $lc = is_string($c) ? strlen($c) : "null";
@@ -80,7 +80,7 @@ $clientCode = <<<'CODE'
     $cert = $opts['ssl']['peer_certificate'] ?? null;
     $fpr = $cert ? openssl_x509_fingerprint($cert, "sha256", true) : null;
     echo "tse_matches_sha256_fingerprint="
-        . var_export($fpr !== null && $my["tls-server-endpoint"] === $fpr, true) . "\n";
+        . var_export($fpr !== null && $my["tls-server-end-point"] === $fpr, true) . "\n";
 
     phpt_notify('server');
     fclose($client);
@@ -99,7 +99,7 @@ ServerClientTestCase::getInstance()->run($clientCode, ['server' => $serverCode])
 ?>
 --EXPECT--
 tls-unique equal=true len_client=null len_server=null
-tls-server-endpoint equal=true len_client=32 len_server=32
+tls-server-end-point equal=true len_client=32 len_server=32
 tls-exporter equal=true len_client=32 len_server=32
 tls_unique_is_null=true
 tse_matches_sha256_fingerprint=true

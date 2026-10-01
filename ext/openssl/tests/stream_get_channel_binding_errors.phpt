@@ -30,7 +30,7 @@ try {
 
 /* A stream without transport encryption -> RuntimeException. */
 $plain = fopen("php://memory", "r");
-foreach (["tls-unique", "tls-server-endpoint", "tls-exporter"] as $t) {
+foreach (["tls-unique", "tls-server-end-point", "tls-exporter"] as $t) {
     try {
         stream_get_channel_binding($plain, $t);
         echo "$t: no error\n";
@@ -45,5 +45,5 @@ ValueError
 ValueError (case sensitive)
 TypeError
 tls-unique: RuntimeException
-tls-server-endpoint: RuntimeException
+tls-server-end-point: RuntimeException
 tls-exporter: RuntimeException
