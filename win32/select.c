@@ -36,11 +36,11 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 	int handle_slot_to_fd[MAXIMUM_WAIT_OBJECTS];
 	int n_handles = 0, i;
 	int num_read_pipes = 0;
-	fd_set sock_read, sock_write, sock_except;
-	fd_set aread, awrite, aexcept;
+	php_growable_fd_set sock_read = {0}, sock_write = {0}, sock_except = {0};
+	php_growable_fd_set aread = {0}, awrite = {0}, aexcept = {0};
 	int sock_max_fd = -1;
 	struct timeval tvslice;
-	int retcode;
+	int retcode = -1;
 
 	/* As max_fd is unsigned, non socket might overflow. */
 	if (max_fd > (php_socket_t)INT_MAX) {
@@ -57,9 +57,9 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 		ms_total += tv->tv_usec / 1000;
 	}
 
-	FD_ZERO(&sock_read);
-	FD_ZERO(&sock_write);
-	FD_ZERO(&sock_except);
+	php_growable_fd_set_init(&sock_read, FD_SETSIZE);
+	php_growable_fd_set_init(&sock_write, FD_SETSIZE);
+	php_growable_fd_set_init(&sock_except, FD_SETSIZE);
 
 	/* build an array of handles for non-sockets */
 	for (i = 0; (uint32_t)i < max_fd; i++) {
@@ -70,21 +70,32 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 			if (getsockopt((SOCKET)i, SOL_SOCKET, SO_TYPE, (char*)&_type, &_len) == 0 || WSAGetLastError() != WSAENOTSOCK) {
 				/* socket */
 				if (SAFE_FD_ISSET(i, rfds)) {
-					FD_SET((uint32_t)i, &sock_read);
+					php_growable_fd_set_add(&sock_read, (SOCKET)(uintptr_t)i);
 				}
 				if (SAFE_FD_ISSET(i, wfds)) {
-					FD_SET((uint32_t)i, &sock_write);
+					php_growable_fd_set_add(&sock_write, (SOCKET)(uintptr_t)i);
 				}
 				if (SAFE_FD_ISSET(i, efds)) {
-					FD_SET((uint32_t)i, &sock_except);
+					php_growable_fd_set_add(&sock_except, (SOCKET)(uintptr_t)i);
 				}
 				if (i > sock_max_fd) {
 					sock_max_fd = i;
 				}
 			} else {
-				handles[n_handles] = (HANDLE)(uintptr_t)_get_osfhandle(i);
-				if (handles[n_handles] != INVALID_HANDLE_VALUE) {
-					if (SAFE_FD_ISSET(i, rfds) && GetFileType(handles[n_handles]) == FILE_TYPE_PIPE) {
+				HANDLE handle = (HANDLE)(uintptr_t)_get_osfhandle(i);
+				if (handle != INVALID_HANDLE_VALUE) {
+					if (n_handles >= MAXIMUM_WAIT_OBJECTS) {
+						/* WaitForMultipleObjects() cannot wait on more than
+						 * MAXIMUM_WAIT_OBJECTS (64) handles at once. Fail
+						 * gracefully (the caller turns -1 into a warning and
+						 * false) instead of overflowing the fixed-size
+						 * handles[]/handle_slot_to_fd[] stack arrays. */
+						errno = EINVAL;
+						retcode = -1;
+						goto cleanup;
+					}
+					handles[n_handles] = handle;
+					if (SAFE_FD_ISSET(i, rfds) && GetFileType(handle) == FILE_TYPE_PIPE) {
 						num_read_pipes++;
 					}
 					handle_slot_to_fd[n_handles] = i;
@@ -95,32 +106,39 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 	}
 
 	if (n_handles == 0) {
-		/* plain sockets only - let winsock handle the whole thing */
-		return select(-1, rfds, wfds, efds, tv);
+		/* plain sockets only - let winsock handle the whole thing. rfds/wfds/efds
+		 * are growable sets, so this is no longer bounded by FD_SETSIZE. */
+		retcode = select(-1, rfds, wfds, efds, tv);
+		goto cleanup;
 	}
 
 	/* mixture of handles and sockets; lets multiplex between
 	 * winsock and waiting on the handles */
 
-	FD_ZERO(&aread);
-	FD_ZERO(&awrite);
-	FD_ZERO(&aexcept);
+	php_growable_fd_set_init(&aread, sock_read.set->fd_count);
+	php_growable_fd_set_init(&awrite, sock_write.set->fd_count);
+	php_growable_fd_set_init(&aexcept, sock_except.set->fd_count);
 
 	limit = GetTickCount64() + ms_total;
 	do {
 		retcode = 0;
 
 		if (sock_max_fd >= 0) {
-			/* overwrite the zero'd sets here; the select call
-			 * will clear those that are not active */
-			aread = sock_read;
-			awrite = sock_write;
-			aexcept = sock_except;
+			/* refresh the working copies; the select call will clear the fds
+			 * that are not active. memcpy (via _copy) instead of struct
+			 * assignment because the sets are dynamically sized. */
+			php_growable_fd_set_copy(&aread, &sock_read);
+			php_growable_fd_set_copy(&awrite, &sock_write);
+			php_growable_fd_set_copy(&aexcept, &sock_except);
 
 			tvslice.tv_sec = 0;
 			tvslice.tv_usec = 100000;
 
-			retcode = select(-1, &aread, &awrite, &aexcept, &tvslice);
+			retcode = select(-1, aread.set, awrite.set, aexcept.set, &tvslice);
+		} else {
+			php_growable_fd_set_zero(&aread);
+			php_growable_fd_set_zero(&awrite);
+			php_growable_fd_set_zero(&aexcept);
 		}
 		if (n_handles > 0) {
 			/* check handles */
@@ -150,16 +168,16 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 								|| !PeekNamedPipe(handles[i], NULL, 0, NULL, &avail_read, NULL)
 								|| avail_read > 0
 							) {
-								FD_SET((uint32_t)handle_slot_to_fd[i], &aread);
+								php_growable_fd_set_add(&aread, (SOCKET)(uintptr_t)handle_slot_to_fd[i]);
 								retcode++;
 							}
 						}
 						if (SAFE_FD_ISSET(handle_slot_to_fd[i], wfds)) {
-							FD_SET((uint32_t)handle_slot_to_fd[i], &awrite);
+							php_growable_fd_set_add(&awrite, (SOCKET)(uintptr_t)handle_slot_to_fd[i]);
 							retcode++;
 						}
 						if (SAFE_FD_ISSET(handle_slot_to_fd[i], efds)) {
-							FD_SET((uint32_t)handle_slot_to_fd[i], &aexcept);
+							php_growable_fd_set_add(&aexcept, (SOCKET)(uintptr_t)handle_slot_to_fd[i]);
 							retcode++;
 						}
 					}
@@ -171,15 +189,29 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 		}
 	} while (retcode == 0 && (ms_total == INFINITE || GetTickCount64() < limit));
 
+	/* Copy the results back into the caller's sets. memcpy (not struct
+	 * assignment) because the sets are dynamically sized; only fd_count + the
+	 * used fd_array entries are written. This never overflows the caller's
+	 * buffer: every fd in a* was present in the corresponding input set, so
+	 * a*->fd_count <= the input fd_count, which the caller's buffer already
+	 * held. */
 	if (rfds) {
-		*rfds = aread;
+		memcpy(rfds, aread.set, PHP_GROWABLE_FD_SET_ALLOC_SIZE(aread.set->fd_count));
 	}
 	if (wfds) {
-		*wfds = awrite;
+		memcpy(wfds, awrite.set, PHP_GROWABLE_FD_SET_ALLOC_SIZE(awrite.set->fd_count));
 	}
 	if (efds) {
-		*efds = aexcept;
+		memcpy(efds, aexcept.set, PHP_GROWABLE_FD_SET_ALLOC_SIZE(aexcept.set->fd_count));
 	}
+
+cleanup:
+	php_growable_fd_set_destroy(&sock_read);
+	php_growable_fd_set_destroy(&sock_write);
+	php_growable_fd_set_destroy(&sock_except);
+	php_growable_fd_set_destroy(&aread);
+	php_growable_fd_set_destroy(&awrite);
+	php_growable_fd_set_destroy(&aexcept);
 
 	return retcode;
 }
