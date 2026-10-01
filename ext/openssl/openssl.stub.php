@@ -777,19 +777,8 @@ function openssl_password_verify(string $algo, #[\SensitiveParameter] string $pa
 #endif
 
  /**
-  * Get TLS channel binding data for the connection behind a stream.
-  *
-  * The binding data is only available once the TLS handshake has completed;
-  * for a stream without transport encryption a RuntimeException is thrown.
-  *
   * @param resource $stream
-  * @param string $channel_binding_type One of "tls-unique",
-  *   "tls-server-end-point" or "tls-exporter" (the IANA "Channel Binding"
-  *   registry names, RFC 5929 / RFC 9266).
-  * @return string|null The channel binding data, or NULL when it is not
-  *   applicable to the connection (currently "tls-unique" over TLS 1.3).
-  * @throws RuntimeException
-  * @throws ValueError
+  * @refcount 1
   */
 function stream_get_channel_binding($stream, string $channel_binding_type): ?string {}
 
