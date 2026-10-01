@@ -3059,7 +3059,7 @@ ZEND_METHOD(ReflectionNamedType, isBuiltin)
 }
 /* }}} */
 
-static void append_type(zval *return_value, zend_type type) {
+static void append_type(HashTable *type_list, zend_type type) {
 	/* Drop iterable BC bit for type list */
 	if (ZEND_TYPE_IS_ITERABLE_FALLBACK(type)) {
 		ZEND_TYPE_FULL_MASK(type) &= ~_ZEND_TYPE_ITERABLE_BIT;
@@ -3067,11 +3067,11 @@ static void append_type(zval *return_value, zend_type type) {
 
 	zval reflection_type;
 	reflection_type_factory(type, &reflection_type, false);
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &reflection_type);
+	zend_hash_next_index_insert(type_list, &reflection_type);
 }
 
-static void append_type_mask(zval *return_value, uint32_t type_mask) {
-	append_type(return_value, (zend_type) ZEND_TYPE_INIT_MASK(type_mask));
+static void append_type_mask(HashTable *type_list, uint32_t type_mask) {
+	append_type(type_list, (zend_type) ZEND_TYPE_INIT_MASK(type_mask));
 }
 
 /* {{{ Returns the types that are part of this union type */
@@ -3084,49 +3084,50 @@ ZEND_METHOD(ReflectionUnionType, getTypes)
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	array_init(return_value);
+	HashTable *return_value_ht = Z_ARR_P(return_value);
 	if (ZEND_TYPE_HAS_LIST(param->type)) {
 		const zend_type *list_type;
 		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(param->type), list_type) {
-			append_type(return_value, *list_type);
+			append_type(return_value_ht, *list_type);
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_HAS_NAME(param->type)) {
 		zend_string *name = ZEND_TYPE_NAME(param->type);
-		append_type(return_value, (zend_type) ZEND_TYPE_INIT_CLASS(name, false, 0));
+		append_type(return_value_ht, (zend_type) ZEND_TYPE_INIT_CLASS(name, false, 0));
 	}
 
 	uint32_t type_mask = ZEND_TYPE_PURE_MASK(param->type);
 	ZEND_ASSERT(!(type_mask & MAY_BE_VOID));
 	ZEND_ASSERT(!(type_mask & MAY_BE_NEVER));
 	if (type_mask & MAY_BE_STATIC) {
-		append_type_mask(return_value, MAY_BE_STATIC);
+		append_type_mask(return_value_ht, MAY_BE_STATIC);
 	}
 	if (type_mask & MAY_BE_CALLABLE) {
-		append_type_mask(return_value, MAY_BE_CALLABLE);
+		append_type_mask(return_value_ht, MAY_BE_CALLABLE);
 	}
 	if (type_mask & MAY_BE_OBJECT) {
-		append_type_mask(return_value, MAY_BE_OBJECT);
+		append_type_mask(return_value_ht, MAY_BE_OBJECT);
 	}
 	if (type_mask & MAY_BE_ARRAY) {
-		append_type_mask(return_value, MAY_BE_ARRAY);
+		append_type_mask(return_value_ht, MAY_BE_ARRAY);
 	}
 	if (type_mask & MAY_BE_STRING) {
-		append_type_mask(return_value, MAY_BE_STRING);
+		append_type_mask(return_value_ht, MAY_BE_STRING);
 	}
 	if (type_mask & MAY_BE_LONG) {
-		append_type_mask(return_value, MAY_BE_LONG);
+		append_type_mask(return_value_ht, MAY_BE_LONG);
 	}
 	if (type_mask & MAY_BE_DOUBLE) {
-		append_type_mask(return_value, MAY_BE_DOUBLE);
+		append_type_mask(return_value_ht, MAY_BE_DOUBLE);
 	}
 	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL) {
-		append_type_mask(return_value, MAY_BE_BOOL);
+		append_type_mask(return_value_ht, MAY_BE_BOOL);
 	} else if (type_mask & MAY_BE_TRUE) {
-		append_type_mask(return_value, MAY_BE_TRUE);
+		append_type_mask(return_value_ht, MAY_BE_TRUE);
 	} else if (type_mask & MAY_BE_FALSE) {
-		append_type_mask(return_value, MAY_BE_FALSE);
+		append_type_mask(return_value_ht, MAY_BE_FALSE);
 	}
 	if (type_mask & MAY_BE_NULL) {
-		append_type_mask(return_value, MAY_BE_NULL);
+		append_type_mask(return_value_ht, MAY_BE_NULL);
 	}
 }
 /* }}} */
@@ -3142,9 +3143,10 @@ ZEND_METHOD(ReflectionIntersectionType, getTypes)
 
 	ZEND_ASSERT(ZEND_TYPE_HAS_LIST(param->type));
 
-	array_init(return_value);
+	array_init_size(return_value, ZEND_TYPE_LIST(param->type)->num_types);
+	HashTable *type_list = Z_ARR_P(return_value);
 	ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(param->type), const zend_type *list_type) {
-		append_type(return_value, *list_type);
+		append_type(type_list, *list_type);
 	} ZEND_TYPE_LIST_FOREACH_END();
 }
 /* }}} */
