@@ -834,8 +834,7 @@ PHP_METHOD(Io_Poll_Context, add)
 
 	/* Store in our watchers map */
 	zval watcher_zv;
-	ZVAL_OBJ(&watcher_zv, &watcher->std);
-	GC_ADDREF(&watcher->std);
+	ZVAL_OBJ_COPY(&watcher_zv, &watcher->std);
 	zend_hash_index_add_new(intern->watchers, (zend_ulong) fd, &watcher_zv);
 
 	watcher->active = true;
@@ -907,11 +906,7 @@ PHP_METHOD(Io_Poll_Context, wait)
 		if (watcher) {
 			watcher->triggered_events = events[i].revents;
 
-			zval watcher_zv;
-			ZVAL_OBJ(&watcher_zv, &watcher->std);
-			GC_ADDREF(&watcher->std);
-
-			add_next_index_zval(return_value, &watcher_zv);
+			add_next_index_object(return_value, zend_object_copy(&watcher->std));
 		}
 	}
 
