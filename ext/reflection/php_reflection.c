@@ -5085,7 +5085,7 @@ ZEND_METHOD(ReflectionClass, newInstanceArgs)
 }
 /* }}} */
 
-static zend_always_inline void reflection_class_new_lazy(INTERNAL_FUNCTION_PARAMETERS,
+static void reflection_class_new_lazy(INTERNAL_FUNCTION_PARAMETERS,
 		int strategy, bool is_reset)
 {
 	const reflection_object *intern;
