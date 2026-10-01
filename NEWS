@@ -44,6 +44,9 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed grapheme_strstr() and grapheme_stristr() returning incorrect substrings
     when supplementary characters precede the match. (Weilin Du)
+  . Fixed grapheme_strstr() and grapheme_strpos() missing canonically
+    equivalent matches, and grapheme searches reporting ICU errors for empty
+    haystacks. (Weilin Du)
 
 - MySQLnd:
   . Fixed field_count not resetting on OK packet. (Kamil Tekiela)
