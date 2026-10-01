@@ -42,11 +42,12 @@ $write_foreign = 0;
 
 for ($i = 0; $i < 100; $i++) {
     $provider->delay = ($i % 50) * 10000;
+    // The provider before the opens: Windows opens a file for the ring only with one in place
+    Io\Hooks\set_hooks($provider);
 
     // An unbuffered read lands in a string the failed fread() frees
     $fp = fopen($src, 'r');
     stream_set_read_buffer($fp, 0);
-    Io\Hooks\set_hooks($provider);
     try {
         @fread($fp, $size);
     } catch (RuntimeException $e) {
@@ -61,8 +62,8 @@ for ($i = 0; $i < 100; $i++) {
     fclose($fp);
 
     // A write sends from a string the failed fwrite() frees
-    $fp = fopen($dst, 'w');
     Io\Hooks\set_hooks($provider);
+    $fp = fopen($dst, 'w');
     try {
         @fwrite($fp, str_repeat('B', $size));
     } catch (RuntimeException $e) {

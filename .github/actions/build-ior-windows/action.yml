@@ -7,7 +7,7 @@ name: Build ior (Windows)
 inputs:
   ref:
     description: The ior commit to build, a full SHA
-    default: 2fb12e8ce012b8753258034de008266152742c13
+    default: 2bfd23198962f5d6a0de8e3aa959998c644d4294
     required: false
   arch:
     description: x64 or x86

@@ -60,6 +60,8 @@ var_dump(fread($r, 5), feof($r));
 echo "-- buffered file --\n";
 $file = __DIR__ . '/ring-orphan-read-commit.txt';
 file_put_contents($file, "hello world");
+// A Files provider at open time: Windows opens the file for the ring only then
+Io\Hooks\set_hooks(new GiveUp($ring, null));
 $fp = fopen($file, 'r');
 orphaned_read($ring, $fp, null, 5);
 var_dump(fread($fp, 11), ftell($fp));
