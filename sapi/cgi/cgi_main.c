@@ -1687,59 +1687,41 @@ static void add_response_header(sapi_header_struct *h, zval *return_value) /* {{
 }
 /* }}} */
 
-zend_result cgi_limit_extensions(char *path) {
+bool cgi_extension_is_allowed(char *path) {
 	const char *allowed_extensions = CGIG(security_limit_extensions);
 	if (!path || !allowed_extensions || strlen(allowed_extensions) == 0) {
 		// No path, or no filter configured
-		return SUCCESS;
+		return true;
 	}
 
 	const char *dot = strrchr(path, '.');
 	if (!dot) {
 		// No file extension
-		return FAILURE;
+		return false;
 	}
 
-#ifndef PHP_WIN32
-	const char dir_separator = '\\';
-#else
-	const char dir_separator = '/';
-#endif
-
-	if (strchr(dot, dir_separator) != NULL) {
-		/* Dot is followed by a directory separator at some point, so this is
-		 * a dot in a directory name, rather than the actual file extension;
-		 * strrchr() above means that this was the last dot, so the actual file
-		 * has no extension. */
-		return FAILURE;
-	}
-
-	/* `dot` is now the pointer to the start of a null-terminated string for
-	 * the file extension, *including* the dot, e.g. `.php`. We need that string
-	 * to be present in the allowed extensions, and
-	 * - preceded by either a space or tab, or be at the start of the string,
-	 *   so that `.template.php` can be allowed without allowing all `.php`
-	 *   files
-	 * - followed by either a space or tab, or be at the end of the string, for
-	 *   the same reason, `.php.trusted` should not allow all of `.php`
-	 */
-	char *next = strstr(allowed_extensions, dot);
-	const size_t extension_len = strlen(dot);
+	/* We want to be able to allow things like `.test.php` (but not all of
+	 * `.php` or `.test`. For each extension in the list, check if the path
+	 * given ends with exactly that. Allowing `.php` allows `.test.php`,
+	 * `.foo.php`, and everything else because dots are valid file name
+	 * characters. */
+	const char *next = allowed_extensions;
+	const size_t path_len = strlen(path);
 	while (next && *next) {
-		/* We have a pointer to within the allowed extensions, which is followed
-		 * by the extension; adding extension_len will bring us to either the
-		 * character after the extension, or the null terminating byte. */
-		char *after = next + extension_len;
-		if (
-			(next == allowed_extensions || (*(next - 1) == ' ') || (*(next - 1) == '\t'))
-			&& (*after == '\0' || *after == ' ' || *after == '\t')
-		) {
-			return SUCCESS;
+		size_t extension_len = strcspn(next, " \t");
+
+		if (extension_len <= path_len) {
+			if (memcmp(path + path_len - extension_len, next, extension_len) == 0) {
+				return true;
+			}
 		}
-		next = strstr(next + 1, dot);
+		next += extension_len;
+		if (*next) {
+			next += strspn(next, " \t");
+		}
 	}
 
-	return FAILURE;
+	return false;
 }
 
 PHP_FUNCTION(apache_response_headers) /* {{{ */
@@ -2533,7 +2515,7 @@ do_repeat:
 				2. we are running as cgi or fastcgi
 			*/
 			if (cgi || fastcgi || SG(request_info).path_translated) {
-				bool limited_extension = (cgi_limit_extensions(SG(request_info).path_translated) == FAILURE);
+				bool limited_extension = !cgi_extension_is_allowed(SG(request_info).path_translated);
 				if (limited_extension || php_fopen_primary_script(&file_handle) == FAILURE) {
 					zend_try {
 						if (limited_extension || errno == EACCES) {
