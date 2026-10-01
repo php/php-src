@@ -1423,8 +1423,7 @@ static void reflection_extension_factory(zval *object, zend_module_entry *module
 }
 /* }}} */
 
-/* {{{ reflection_parameter_factory */
-static void reflection_parameter_factory(zend_function *fptr, zval *closure_object, const zend_arg_info *arg_info, uint32_t offset, bool required, zval *object)
+static void reflection_parameter_factory(zend_function *fptr, zend_object *closure_object, const zend_arg_info *arg_info, uint32_t offset, bool required, zval *object)
 {
 	object_init_ex(object, reflection_parameter_ptr);
 	reflection_object *intern = Z_REFLECTION_P(object);
@@ -1437,13 +1436,12 @@ static void reflection_parameter_factory(zend_function *fptr, zval *closure_obje
 	intern->ref_type = REF_TYPE_PARAMETER;
 	intern->ce = fptr->common.scope;
 	if (closure_object) {
-		ZVAL_OBJ_COPY(&intern->obj, Z_OBJ_P(closure_object));
+		ZVAL_OBJ_COPY(&intern->obj, closure_object);
 	}
 
 	zval *prop_name = reflection_prop_name(object);
 	ZVAL_STR_COPY(prop_name, arg_info->name);
 }
-/* }}} */
 
 typedef enum {
 	NAMED_TYPE = 0,
@@ -1524,8 +1522,7 @@ static void reflection_type_factory(zend_type type, zval *object, bool legacy_be
 }
 /* }}} */
 
-/* {{{ reflection_function_factory */
-static void reflection_function_factory(zend_function *function, zval *closure_object, zval *object)
+static void reflection_function_factory(zend_function *function, zend_object *closure_object, zval *object)
 {
 	object_init_ex(object, reflection_function_ptr);
 	reflection_object *intern = Z_REFLECTION_P(object);
@@ -1533,14 +1530,12 @@ static void reflection_function_factory(zend_function *function, zval *closure_o
 	intern->ref_type = REF_TYPE_FUNCTION;
 	intern->ce = NULL;
 	if (closure_object) {
-		ZVAL_OBJ_COPY(&intern->obj, Z_OBJ_P(closure_object));
+		ZVAL_OBJ_COPY(&intern->obj, closure_object);
 	}
 	ZVAL_STR_COPY(reflection_prop_name(object), function->common.function_name);
 }
-/* }}} */
 
-/* {{{ reflection_method_factory */
-static void reflection_method_factory(zend_class_entry *ce, zend_function *method, zval *closure_object, zval *object)
+static void reflection_method_factory(zend_class_entry *ce, zend_function *method, zend_object *closure_object, zval *object)
 {
 	object_init_ex(object, reflection_method_ptr);
 	reflection_object *intern = Z_REFLECTION_P(object);
@@ -1548,13 +1543,12 @@ static void reflection_method_factory(zend_class_entry *ce, zend_function *metho
 	intern->ref_type = REF_TYPE_FUNCTION;
 	intern->ce = ce;
 	if (closure_object) {
-		ZVAL_OBJ_COPY(&intern->obj, Z_OBJ_P(closure_object));
+		ZVAL_OBJ_COPY(&intern->obj, closure_object);
 	}
 
 	ZVAL_STR_COPY(reflection_prop_name(object), method->common.function_name);
 	ZVAL_STR_COPY(reflection_prop_class(object), method->common.scope->name);
 }
-/* }}} */
 
 /* {{{ reflection_property_factory */
 static void reflection_property_factory(zend_class_entry *ce, zend_string *name, zend_property_info *prop, zval *object)
@@ -2190,7 +2184,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getParameters)
 
 		reflection_parameter_factory(
 			_copy_function(fptr),
-			Z_ISUNDEF(intern->obj) ? NULL : &intern->obj,
+			Z_ISUNDEF(intern->obj) ? NULL : Z_OBJ(intern->obj),
 			arg_info,
 			i,
 			i < fptr->common.required_num_args,
@@ -2349,9 +2343,7 @@ ZEND_METHOD(ReflectionGenerator, getFunction)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (func->common.fn_flags & ZEND_ACC_CLOSURE) {
-		zval closure;
-		ZVAL_OBJ(&closure, ZEND_CLOSURE_OBJECT(func));
-		reflection_function_factory(func, &closure, return_value);
+		reflection_function_factory(func, ZEND_CLOSURE_OBJECT(func), return_value);
 	} else if (func->common.scope) {
 		reflection_method_factory(func->common.scope, func, NULL, return_value);
 	} else {
@@ -2631,9 +2623,9 @@ ZEND_METHOD(ReflectionParameter, getDeclaringFunction)
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	if (!param->fptr->common.scope) {
-		reflection_function_factory(_copy_function(param->fptr), Z_ISUNDEF(intern->obj)? NULL : &intern->obj, return_value);
+		reflection_function_factory(_copy_function(param->fptr), Z_ISUNDEF(intern->obj)? NULL : Z_OBJ(intern->obj), return_value);
 	} else {
-		reflection_method_factory(param->fptr->common.scope, _copy_function(param->fptr), Z_ISUNDEF(intern->obj)? NULL : &intern->obj, return_value);
+		reflection_method_factory(param->fptr->common.scope, _copy_function(param->fptr), Z_ISUNDEF(intern->obj)? NULL : Z_OBJ(intern->obj), return_value);
 	}
 }
 /* }}} */
