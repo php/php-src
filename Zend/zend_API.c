@@ -34,6 +34,7 @@
 #include "zend_enum.h"
 #include "zend_object_handlers.h"
 #include "zend_observer.h"
+#include "zend_system_id.h"
 
 #include <stdarg.h>
 
@@ -3103,6 +3104,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 				}
 				zend_flf_handlers[zend_flf_count] = flf_info->handler;
 				zend_flf_functions[zend_flf_count] = (zend_function *)reg_function;
+				zend_add_system_entropy("frameless", ZSTR_VAL(reg_function->function_name), &flf_info->num_args, sizeof(flf_info->num_args));
 				zend_flf_count++;
 				flf_info++;
 			}
