@@ -64,10 +64,10 @@ ZEND_DECLARE_MODULE_GLOBALS(reflection)
 
 #define REFLECTION_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(reflection, v)
 
-static zend_always_inline zval *reflection_prop_name(zval *object) {
+static zend_always_inline zval *reflection_prop_name(zend_object *object) {
 	/* $name is always in the first property slot. */
-	ZEND_ASSERT(Z_OBJCE_P(object)->default_properties_count >= 1);
-	return &Z_OBJ_P(object)->properties_table[0];
+	ZEND_ASSERT(object->ce->default_properties_count >= 1);
+	return &object->properties_table[0];
 }
 
 static zend_always_inline zval *reflection_prop_class(zend_object *object) {
@@ -1268,7 +1268,7 @@ static void reflection_attribute_factory(zval *object, HashTable *attributes, ze
 	reference->target = target;
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_ATTRIBUTE;
-	ZVAL_STR_COPY(reflection_prop_name(object), data->name);
+	ZVAL_STR_COPY(reflection_prop_name(Z_OBJ_P(object)), data->name);
 }
 /* }}} */
 
@@ -1407,7 +1407,7 @@ PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object)
 	intern->ptr = ce;
 	intern->ref_type = REF_TYPE_OTHER;
 	intern->ce = ce;
-	ZVAL_STR_COPY(reflection_prop_name(object), ce->name);
+	ZVAL_STR_COPY(reflection_prop_name(Z_OBJ_P(object)), ce->name);
 }
 /* }}} */
 
@@ -1419,7 +1419,7 @@ static void reflection_extension_factory(zval *object, zend_module_entry *module
 	intern->ptr = module;
 	intern->ref_type = REF_TYPE_OTHER;
 	intern->ce = NULL;
-	ZVAL_STRING(reflection_prop_name(object), module->name);
+	ZVAL_STRING(reflection_prop_name(Z_OBJ_P(object)), module->name);
 }
 /* }}} */
 
@@ -1439,7 +1439,7 @@ static void reflection_parameter_factory(zend_function *fptr, zend_object *closu
 		ZVAL_OBJ_COPY(&intern->obj, closure_object);
 	}
 
-	zval *prop_name = reflection_prop_name(object);
+	zval *prop_name = reflection_prop_name(Z_OBJ_P(object));
 	ZVAL_STR_COPY(prop_name, arg_info->name);
 }
 
@@ -1532,7 +1532,7 @@ static void reflection_function_factory(zend_function *function, zend_object *cl
 	if (closure_object) {
 		ZVAL_OBJ_COPY(&intern->obj, closure_object);
 	}
-	ZVAL_STR_COPY(reflection_prop_name(object), function->common.function_name);
+	ZVAL_STR_COPY(reflection_prop_name(Z_OBJ_P(object)), function->common.function_name);
 }
 
 static void reflection_method_factory(zend_class_entry *ce, zend_function *method, zend_object *closure_object, zval *object)
@@ -1546,7 +1546,7 @@ static void reflection_method_factory(zend_class_entry *ce, zend_function *metho
 		ZVAL_OBJ_COPY(&intern->obj, closure_object);
 	}
 
-	ZVAL_STR_COPY(reflection_prop_name(object), method->common.function_name);
+	ZVAL_STR_COPY(reflection_prop_name(Z_OBJ_P(object)), method->common.function_name);
 	ZVAL_STR_COPY(reflection_prop_class(Z_OBJ_P(object)), method->common.scope->name);
 }
 
@@ -1562,7 +1562,7 @@ static void reflection_property_factory(zend_class_entry *ce, zend_string *name,
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_PROPERTY;
 	intern->ce = ce;
-	ZVAL_STR_COPY(reflection_prop_name(object), name);
+	ZVAL_STR_COPY(reflection_prop_name(Z_OBJ_P(object)), name);
 	ZVAL_STR_COPY(reflection_prop_class(Z_OBJ_P(object)), prop ? prop->ce->name : ce->name);
 }
 /* }}} */
@@ -1583,7 +1583,7 @@ static void reflection_class_constant_factory(zend_string *name_str, zend_class_
 	intern->ref_type = REF_TYPE_CLASS_CONSTANT;
 	intern->ce = constant->ce;
 
-	ZVAL_STR_COPY(reflection_prop_name(object), name_str);
+	ZVAL_STR_COPY(reflection_prop_name(Z_OBJ_P(object)), name_str);
 	ZVAL_STR_COPY(reflection_prop_class(Z_OBJ_P(object)), constant->ce->name);
 }
 /* }}} */
@@ -1599,7 +1599,7 @@ static void reflection_enum_case_factory(const zend_class_entry *ce, zend_string
 	intern->ref_type = REF_TYPE_CLASS_CONSTANT;
 	intern->ce = constant->ce;
 
-	ZVAL_STR_COPY(reflection_prop_name(object), name_str);
+	ZVAL_STR_COPY(reflection_prop_name(Z_OBJ_P(object)), name_str);
 	ZVAL_STR_COPY(reflection_prop_class(Z_OBJ_P(object)), constant->ce->name);
 }
 
@@ -1709,10 +1709,10 @@ ZEND_METHOD(ReflectionFunction, __construct)
 
 	if (intern->ptr) {
 		zval_ptr_dtor(&intern->obj);
-		zval_ptr_dtor(reflection_prop_name(object));
+		zval_ptr_dtor(reflection_prop_name(Z_OBJ_P(object)));
 	}
 
-	ZVAL_STR_COPY(reflection_prop_name(object), fptr->common.function_name);
+	ZVAL_STR_COPY(reflection_prop_name(Z_OBJ_P(object)), fptr->common.function_name);
 	intern->ptr = fptr;
 	intern->ref_type = REF_TYPE_FUNCTION;
 	if (closure_obj) {
@@ -2552,7 +2552,7 @@ ZEND_METHOD(ReflectionParameter, __construct)
 		ZVAL_UNDEF(&intern->obj);
 	}
 
-	zval *prop_name = reflection_prop_name(object);
+	zval *prop_name = reflection_prop_name(Z_OBJ_P(object));
 	zval_ptr_dtor(prop_name);
 	ZVAL_STR_COPY(prop_name, arg_info[position].name);
 	return;
@@ -3265,11 +3265,11 @@ static void instantiate_reflection_method(INTERNAL_FUNCTION_PARAMETERS, bool is_
 	if (intern->ptr) {
 		ZEND_ASSERT(is_constructor);
 		_free_function(intern->ptr);
-		zval_ptr_dtor(reflection_prop_name(object));
+		zval_ptr_dtor(reflection_prop_name(Z_OBJ_P(object)));
 		zval_ptr_dtor(reflection_prop_class(Z_OBJ_P(object)));
 	}
 
-	ZVAL_STR_COPY(reflection_prop_name(object), mptr->common.function_name);
+	ZVAL_STR_COPY(reflection_prop_name(Z_OBJ_P(object)), mptr->common.function_name);
 	ZVAL_STR_COPY(reflection_prop_class(Z_OBJ_P(object)), mptr->common.scope->name);
 	intern->ptr = mptr;
 	intern->ref_type = REF_TYPE_FUNCTION;
@@ -3787,14 +3787,14 @@ ZEND_METHOD(ReflectionClassConstant, __construct)
 	}
 
 	if (intern->ptr) {
-		zval_ptr_dtor(reflection_prop_name(object));
+		zval_ptr_dtor(reflection_prop_name(Z_OBJ_P(object)));
 		zval_ptr_dtor(reflection_prop_class(Z_OBJ_P(object)));
 	}
 
 	intern->ptr = constant;
 	intern->ref_type = REF_TYPE_CLASS_CONSTANT;
 	intern->ce = constant->ce;
-	ZVAL_STR_COPY(reflection_prop_name(object), constname);
+	ZVAL_STR_COPY(reflection_prop_name(Z_OBJ_P(object)), constname);
 	ZVAL_STR_COPY(reflection_prop_class(Z_OBJ_P(object)), constant->ce->name);
 }
 /* }}} */
@@ -3810,7 +3810,7 @@ ZEND_METHOD(ReflectionClassConstant, __toString)
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	zval *name = reflection_prop_name(ZEND_THIS);
+	zval *name = reflection_prop_name(Z_OBJ_P(ZEND_THIS));
 	if (Z_ISUNDEF_P(name)) {
 		zend_throw_error(NULL,
 			"Typed property ReflectionClassConstant::$name "
@@ -3830,7 +3830,7 @@ ZEND_METHOD(ReflectionClassConstant, getName)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	zval *name = reflection_prop_name(ZEND_THIS);
+	zval *name = reflection_prop_name(Z_OBJ_P(ZEND_THIS));
 	if (Z_ISUNDEF_P(name)) {
 		zend_throw_error(NULL,
 			"Typed property ReflectionClassConstant::$name "
@@ -3933,7 +3933,7 @@ ZEND_METHOD(ReflectionClassConstant, getValue)
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	const zval *name = reflection_prop_name(ZEND_THIS);
+	const zval *name = reflection_prop_name(Z_OBJ_P(ZEND_THIS));
 	if (Z_ISUNDEF_P(name)) {
 		zend_throw_error(NULL,
 			"Typed property ReflectionClassConstant::$name "
@@ -4024,7 +4024,7 @@ static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, bool is_o
 
 	/* Note: class entry name is interned, no need to destroy them */
 	if (arg_obj) {
-		ZVAL_STR_COPY(reflection_prop_name(object), arg_obj->ce->name);
+		ZVAL_STR_COPY(reflection_prop_name(Z_OBJ_P(object)), arg_obj->ce->name);
 		intern->ptr = arg_obj->ce;
 		if (is_object) {
 			zval_ptr_dtor(&intern->obj);
@@ -4039,7 +4039,7 @@ static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, bool is_o
 			RETURN_THROWS();
 		}
 
-		ZVAL_STR_COPY(reflection_prop_name(object), ce->name);
+		ZVAL_STR_COPY(reflection_prop_name(Z_OBJ_P(object)), ce->name);
 		intern->ptr = ce;
 	}
 	intern->ref_type = REF_TYPE_OTHER;
@@ -5654,7 +5654,7 @@ ZEND_METHOD(ReflectionProperty, __construct)
 		}
 	}
 
-	zval *prop_name = reflection_prop_name(object);
+	zval *prop_name = reflection_prop_name(Z_OBJ_P(object));
 	zval_ptr_dtor(prop_name);
 	ZVAL_STR_COPY(prop_name, name);
 	/* Note: class name are always interned, no need to destroy them */
@@ -6870,7 +6870,7 @@ ZEND_METHOD(ReflectionExtension, __construct)
 			"Extension \"%pS\" does not exist", name_str);
 		RETURN_THROWS();
 	}
-	zval *prop_name = reflection_prop_name(object);
+	zval *prop_name = reflection_prop_name(Z_OBJ_P(object));
 	zval_ptr_dtor(prop_name);
 	ZVAL_STRING(prop_name, module->name);
 	intern->ptr = module;
@@ -7170,7 +7170,7 @@ ZEND_METHOD(ReflectionZendExtension, __construct)
 				"Zend Extension \"%pS\" does not exist", name_zstr);
 		RETURN_THROWS();
 	}
-	ZVAL_STRING(reflection_prop_name(object), extension->name);
+	ZVAL_STRING(reflection_prop_name(Z_OBJ_P(object)), extension->name);
 	intern->ptr = extension;
 	intern->ref_type = REF_TYPE_OTHER;
 	intern->ce = NULL;
@@ -7747,7 +7747,7 @@ ZEND_METHOD(ReflectionEnumUnitCase, __construct)
 	GET_REFLECTION_OBJECT_PTR(ref);
 
 	if (!(ZEND_CLASS_CONST_FLAGS(ref) & ZEND_CLASS_CONST_IS_CASE)) {
-		const zval *case_name = reflection_prop_name(ZEND_THIS);
+		const zval *case_name = reflection_prop_name(Z_OBJ_P(ZEND_THIS));
 		zend_throw_exception_ex(reflection_exception_ptr, 0, "Constant %pS::%pS is not a case", ref->ce->name, Z_STR_P(case_name));
 		RETURN_THROWS();
 	}
@@ -7777,7 +7777,7 @@ ZEND_METHOD(ReflectionEnumBackedCase, __construct)
 	GET_REFLECTION_OBJECT_PTR(ref);
 
 	if (ref->ce->enum_backing_type == IS_UNDEF) {
-		const zval *case_name = reflection_prop_name(ZEND_THIS);
+		const zval *case_name = reflection_prop_name(Z_OBJ_P(ZEND_THIS));
 		zend_throw_exception_ex(reflection_exception_ptr, 0, "Enum case %pS::%pS is not a backed case", ref->ce->name, Z_STR_P(case_name));
 		RETURN_THROWS();
 	}
@@ -7977,7 +7977,7 @@ ZEND_METHOD(ReflectionConstant, __construct)
 	intern->ptr = const_;
 	intern->ref_type = REF_TYPE_OTHER;
 
-	zval *name_zv = reflection_prop_name(object);
+	zval *name_zv = reflection_prop_name(Z_OBJ_P(object));
 	zval_ptr_dtor(name_zv);
 	ZVAL_STR_COPY(name_zv, name);
 }
