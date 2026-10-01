@@ -16,11 +16,3 @@
 
 #include "php_content_types.h"
 
-/* {{{ php_startup_sapi_content_types */
-int php_startup_sapi_content_types(void)
-{
-	sapi_register_treat_data(php_default_treat_data);
-	sapi_register_input_filter(php_default_input_filter, NULL);
-	return SUCCESS;
-}
-/* }}} */
