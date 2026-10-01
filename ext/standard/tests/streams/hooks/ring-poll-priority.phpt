@@ -3,7 +3,7 @@ Io\Ring\Engine: stream_select() reports the except set although ior has no prior
 --SKIPIF--
 <?php
 if (!class_exists(Io\Ring\Engine::class)) die("skip Io\\Ring\\Engine not available");
-if (PHP_OS_FAMILY === 'Windows') die("skip no out-of-band data on Windows");
+if (!Io\Poll\Backend::Auto->supportsPriority()) die("skip the poll backend has no priority event");
 ?>
 --FILE--
 <?php

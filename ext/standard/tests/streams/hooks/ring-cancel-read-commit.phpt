@@ -15,7 +15,7 @@ function settle(Io\Ring\Engine $ring): void
 
 function pair()
 {
-    $pair = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
+    $pair = stream_socket_pair(PHP_OS_FAMILY === 'Windows' ? STREAM_PF_INET : STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
     stream_set_timeout($pair[0], 1);
     return $pair;
 }

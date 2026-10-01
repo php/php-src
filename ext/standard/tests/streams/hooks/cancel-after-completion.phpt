@@ -39,7 +39,7 @@ $queues = ['poll' => new Io\Poll\OperationQueue(), 'ring' => new Io\Ring\Engine(
 foreach ($queues as $name => $queue) {
     foreach (['buffered', 'unbuffered'] as $mode) {
         echo "-- $name $mode --\n";
-        [$r, $w] = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
+        [$r, $w] = stream_socket_pair(PHP_OS_FAMILY === 'Windows' ? STREAM_PF_INET : STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
         stream_set_timeout($r, 1);
         if ($mode === 'unbuffered') {
             stream_set_read_buffer($r, 0);

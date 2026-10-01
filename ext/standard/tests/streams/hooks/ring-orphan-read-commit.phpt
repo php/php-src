@@ -44,14 +44,14 @@ function orphaned_read(Io\Ring\Engine $ring, $fp, $peer, int $len): void
 $ring = new Io\Ring\Engine();
 
 echo "-- buffered socket --\n";
-[$r, $w] = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
+[$r, $w] = stream_socket_pair(PHP_OS_FAMILY === 'Windows' ? STREAM_PF_INET : STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
 stream_set_timeout($r, 1);
 orphaned_read($ring, $r, $w, 5);
 fwrite($w, " world");
 var_dump(fread($r, 11));
 
 echo "-- unbuffered socket --\n";
-[$r, $w] = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
+[$r, $w] = stream_socket_pair(PHP_OS_FAMILY === 'Windows' ? STREAM_PF_INET : STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
 stream_set_timeout($r, 1);
 stream_set_read_buffer($r, 0);
 orphaned_read($ring, $r, $w, 5);
