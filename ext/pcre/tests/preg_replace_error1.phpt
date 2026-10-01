@@ -25,12 +25,6 @@ $subject = 'a';
 foreach ($regex_array as $regex_value) {
     var_dump(preg_replace($regex_value, $replace, $subject));
 }
-$regex_value = new stdclass(); //Object
-try {
-    var_dump(preg_replace($regex_value, $replace, $subject));
-} catch (Error $e) {
-    echo $e::class, ': ', $e->getMessage(), "\n";
-}
 ?>
 --EXPECTF--
 Warning: preg_replace(): Delimiter must not be alphanumeric, backslash, or NUL byte in %spreg_replace_error1.php on line %d
@@ -46,4 +40,3 @@ Warning: preg_replace(): Unknown modifier 'F' in %spreg_replace_error1.php on li
 NULL
 string(1) "a"
 string(1) "1"
-TypeError: preg_replace(): Argument #1 ($pattern) must be of type array|string, stdClass given

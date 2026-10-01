@@ -369,10 +369,6 @@ static char *_pcre2_config_str(uint32_t what)
 /* {{{ PHP_MINFO_FUNCTION(pcre) */
 static PHP_MINFO_FUNCTION(pcre)
 {
-#ifdef HAVE_PCRE_JIT_SUPPORT
-	uint32_t flag = 0;
-	char *jit_target = _pcre2_config_str(PCRE2_CONFIG_JITTARGET);
-#endif
 	char *version = _pcre2_config_str(PCRE2_CONFIG_VERSION);
 	char *unicode = _pcre2_config_str(PCRE2_CONFIG_UNICODE_VERSION);
 
@@ -384,6 +380,8 @@ static PHP_MINFO_FUNCTION(pcre)
 	free(unicode);
 
 #ifdef HAVE_PCRE_JIT_SUPPORT
+	uint32_t flag = 0;
+	char *jit_target = _pcre2_config_str(PCRE2_CONFIG_JITTARGET);
 	if (!pcre2_config(PCRE2_CONFIG_JIT, &flag)) {
 		php_info_print_table_row(2, "PCRE JIT Support", flag ? "enabled" : "disabled");
 	} else {
@@ -579,7 +577,11 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 #else
 	uint32_t			 coptions = 0;
 #endif
+#if PCRE2_MAJOR >= 10 && PCRE2_MINOR >= 45
+	uint32_t			 eoptions = PCRE2_EXTRA_NEVER_CALLOUT;
+#else
 	uint32_t			 eoptions = 0;
+#endif
 	PCRE2_UCHAR	         error[128];
 	PCRE2_SIZE           erroffset;
 	int                  errnumber;
@@ -710,7 +712,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 			/* PCRE specific options */
 			case 'A':	coptions |= PCRE2_ANCHORED;		break;
 			case 'D':	coptions |= PCRE2_DOLLAR_ENDONLY;break;
-#ifdef PCRE2_EXTRA_CASELESS_RESTRICT
+#ifdef PCRE2_EXTRA_CASELESS_RESTRICT /* Added in 10.43 (16-February-2024) */
 			case 'r':	eoptions |= PCRE2_EXTRA_CASELESS_RESTRICT; break;
 #endif
 			case 'S':	/* Pass. */					break;
@@ -720,9 +722,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 	/* In  PCRE,  by  default, \d, \D, \s, \S, \w, and \W recognize only ASCII
 	   characters, even in UTF-8 mode. However, this can be changed by setting
 	   the PCRE2_UCP option. */
-#ifdef PCRE2_UCP
 						coptions |= PCRE2_UCP;
-#endif
 						/* The \C escape sequence is unsafe in PCRE2_UTF mode */
 						coptions |= PCRE2_NEVER_BACKSLASH_C;
 				break;
@@ -781,10 +781,15 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 			zend_string_release_ex(key, 0);
 		}
 		const char *err_msg = (const char*) error;
-		if (errnumber == PCRE2_ERROR_BACKSLASH_C_CALLER_DISABLED) {
-			err_msg = "using \\C is incompatible with the 'u' modifier";
-		} else {
-			pcre2_get_error_message(errnumber, error, sizeof(error));
+		switch (errnumber) {
+			case PCRE2_ERROR_BACKSLASH_K_IN_LOOKAROUND:
+				err_msg = "\\K is not allowed in lookarounds";
+				break;
+			case PCRE2_ERROR_BACKSLASH_C_CALLER_DISABLED:
+				err_msg = "using \\C is incompatible with the 'u' modifier";
+				break;
+			default:
+				pcre2_get_error_message(errnumber, error, sizeof(error));
 		}
 		php_error_docref(NULL,E_WARNING, "Compilation failed: %s at offset %zu", err_msg, erroffset);
 		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
