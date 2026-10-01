@@ -46,7 +46,6 @@
 
 #include "php_globals.h"
 #include "rfc1867.h"
-#include "php_content_types.h"
 #include "SAPI.h"
 #include "php_unicode.h"
 #include "TSRM.h"

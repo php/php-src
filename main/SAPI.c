@@ -33,8 +33,6 @@
 
 #include "rfc1867.h"
 
-#include "php_content_types.h"
-
 #ifdef ZTS
 SAPI_API int sapi_globals_id;
 ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR sapi_globals_struct sapi_globals;
