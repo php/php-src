@@ -2312,9 +2312,9 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 				if (EG(exception)) {
 					goto iterator_done;
 				}
-				zend_result status = array_set_zval_key(Z_ARRVAL(array_copy), &key, val);
+				array_set_zval_key(Z_ARRVAL(array_copy), &key, val);
 				zval_ptr_dtor(&key);
-				if (status == FAILURE) {
+				if (EG(exception)) {
 					goto iterator_done;
 				}
 			} else {

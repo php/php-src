@@ -66,6 +66,21 @@ foreach ([$multiple, new ArrayKeyIterator()] as $iterator) {
     }
 }
 
+function gen() {
+    yield 1.5 => new stdClass();
+    yield 2 => new stdClass();
+}
+
+set_error_handler(function ($errno, $errstr) {
+    throw new Exception($errstr);
+});
+try {
+    $client->__soapCall('audit', [new SoapVar(gen(), SOAP_ENC_ARRAY)]);
+} catch (Exception $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+restore_error_handler();
+
 /* A key the encoder can use must still be serialized, without leaking. */
 $client->__soapCall('audit', [new SoapVar(new ArrayIterator(['a' => 1]), SOAP_ENC_ARRAY)]);
 echo $client->__getLastRequest();
@@ -73,5 +88,6 @@ echo $client->__getLastRequest();
 --EXPECT--
 TypeError: Cannot access offset of type array on array
 TypeError: Cannot access offset of type array on array
+Exception: Implicit conversion from float 1.5 to int loses precision
 <?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="urn:audit" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><SOAP-ENV:Body><ns1:audit><param0 SOAP-ENC:arrayType="xsd:int[1]" xsi:type="SOAP-ENC:Array"><item xsi:type="xsd:int">1</item></param0></ns1:audit></SOAP-ENV:Body></SOAP-ENV:Envelope>
