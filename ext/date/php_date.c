@@ -1703,7 +1703,7 @@ static zend_object_iterator *date_object_period_get_iterator(zend_class_entry *c
 	return (zend_object_iterator*)iterator;
 } /* }}} */
 
-static int implement_date_interface_handler(zend_class_entry *interface, zend_class_entry *implementor) /* {{{ */
+static void implement_date_interface_handler(zend_class_entry *interface, zend_class_entry *implementor) /* {{{ */
 {
 	if (implementor->type == ZEND_USER_CLASS &&
 		!instanceof_function(implementor, date_ce_date) &&
@@ -1711,8 +1711,6 @@ static int implement_date_interface_handler(zend_class_entry *interface, zend_cl
 	) {
 		zend_error_noreturn(E_ERROR, "DateTimeInterface can't be implemented by user classes");
 	}
-
-	return SUCCESS;
 } /* }}} */
 
 static int date_interval_has_property(zend_object *object, zend_string *name, int type, void **cache_slot) /* {{{ */

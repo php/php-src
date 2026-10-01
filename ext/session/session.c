@@ -2954,7 +2954,7 @@ static bool session_interfaces_include(const zend_class_entry *ce, const zend_cl
 	return false;
 }
 
-static int session_handler_interface_gets_implemented(zend_class_entry *self, zend_class_entry *class) {
+static void session_handler_interface_gets_implemented(zend_class_entry *self, zend_class_entry *class) {
 	if (!zend_hash_str_exists(&class->function_table, ZEND_STRL("create_sid"))
 		&& !session_interfaces_include(class, php_session_id_iface_entry)) {
 		zend_error(E_WARNING,
@@ -2967,7 +2967,6 @@ static int session_handler_interface_gets_implemented(zend_class_entry *self, ze
 			"Class %s implementing SessionHandlerInterface is missing the validateId() method which will be required in PHP 9.0",
 			ZSTR_VAL(class->name));
 	}
-	return SUCCESS;
 }
 
 static PHP_MINIT_FUNCTION(session)
