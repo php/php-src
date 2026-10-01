@@ -653,8 +653,7 @@ PHP_METHOD(PDO, prepare)
 	stmt->default_fetch_type = dbh->default_fetch_type;
 	stmt->dbh = dbh;
 	/* give it a reference to me */
-	GC_ADDREF(&dbh_obj->std);
-	stmt->database_object_handle = &dbh_obj->std;
+	stmt->database_object_handle = zend_object_copy(&dbh_obj->std);
 
 	if (dbh->methods->preparer(dbh, statement, stmt, options)) {
 		if (Z_TYPE(ctor_args) == IS_ARRAY) {
@@ -1218,8 +1217,7 @@ PHP_METHOD(PDO, query)
 	stmt->default_fetch_type = dbh->default_fetch_type;
 	stmt->dbh = dbh;
 	/* give it a reference to me */
-	GC_ADDREF(&dbh_obj->std);
-	stmt->database_object_handle = &dbh_obj->std;
+	stmt->database_object_handle = zend_object_copy(&dbh_obj->std);
 
 	if (dbh->methods->preparer(dbh, statement, stmt, NULL)) {
 		PDO_STMT_CLEAR_ERR();
