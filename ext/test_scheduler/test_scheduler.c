@@ -1492,6 +1492,12 @@ static bool ts_main_suspend(bool is_bailout)
 	}
 
 	ZEND_ASYNC_MAIN_COROUTINE = NULL;
+
+	/* If main ever yielded, the loop is parked inside ts_switch_into(main) and
+	 * reads the object when this switch lands there: keep it alive until the
+	 * loop is done. Its handle stays taken, so the loop's own retire of it
+	 * cannot hit another coroutine. */
+	GC_ADDREF(&main_coro->std);
 	ts_coroutine_retire(main_coro);
 
 	/* Back on the context the engine owns: the copy the main coroutine ran
@@ -1504,6 +1510,8 @@ static bool ts_main_suspend(bool is_bailout)
 	ZVAL_NULL(&transfer.value);
 
 	zend_fiber_switch_context(&transfer);
+
+	OBJ_RELEASE(&main_coro->std);
 
 	/* The loop is done and has handed control back to EG(main_fiber_context)
 	 * — this stack, right here. Its own coroutine is spent either way. */
