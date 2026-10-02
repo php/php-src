@@ -49,7 +49,7 @@ class test
 
 file_put_contents($filename_bad, $code);
 
-$cmd = "$php -n -d cgi.security_limit_extensions='.test.php .unknown'";
+$cmd = "$php -n -d cgi.security_limit_extensions=" . escapeshellarg('.test.php .unknown');
 run_and_output("$cmd -l $filename_good_escaped $filename_good_escaped");
 run_and_output("$cmd -l $filename_good_escaped some.unknown $filename_good_escaped");
 run_and_output("$cmd -l $filename_good_escaped $filename_bad_escaped $filename_good_escaped");
