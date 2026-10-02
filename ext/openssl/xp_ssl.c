@@ -2244,7 +2244,7 @@ static SSL_SESSION *php_openssl_session_get_cb(SSL *ssl, const unsigned char *se
 			session = obj->session;
 		}
 	} else if (Z_TYPE(retval) != IS_NULL) {
-		zend_type_error("session_get_cb return type must be null or OpenSSLSession");
+		zend_type_error("session_get_cb return type must be null or Openssl\\Session");
 	}
 
 	zval_ptr_dtor(&retval);
@@ -2365,7 +2365,7 @@ static zend_result php_openssl_setup_client_session(php_stream *stream,
 		if (php_openssl_is_session_ce(val)) {
 			enable_client_cache = true;
 		} else if (Z_TYPE_P(val) != IS_NULL) {
-			zend_type_error("session_data must be an OpenSSLSession instance");
+			zend_type_error("session_data must be an Openssl\\Session instance");
 			return FAILURE;
 		}
 	}
@@ -2546,13 +2546,13 @@ static zend_result php_openssl_apply_client_session_data(php_stream *stream,
 			if (!session) {
 				// TODO: Should this be a TypeError?
 				php_stream_warn(stream, Generic,
-						"Invalid OpenSSLSession object, falling back to full handshake");
+						"Invalid Openssl\\Session object, falling back to full handshake");
 				return FAILURE;
 			}
 			/* Object owns the session, we just borrow it */
 			needs_free = false;
 		} else if (Z_TYPE_P(val) != IS_NULL) {
-			zend_type_error("session_data must be an OpenSSLSession instance");
+			zend_type_error("session_data must be an Openssl\\Session instance");
 			return FAILURE;
 		}
 
