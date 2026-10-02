@@ -2544,7 +2544,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						goto done;
 					case ZEND_RECV:
-						if (!zend_jit_recv(&ctx, opline, op_array)) {
+						if (!zend_jit_recv(&ctx, opline, op_array, NULL)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2618,7 +2618,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							/* TODO May need reference unwrapping. */
 							break;
 						}
-						if (!zend_jit_verify_return_type(&ctx, opline, op_array, OP1_INFO())) {
+						if (!zend_jit_verify_return_type(&ctx, opline, op_array, OP1_INFO(), NULL)) {
 							goto jit_failure;
 						}
 						goto done;

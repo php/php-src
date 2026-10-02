@@ -6194,7 +6194,7 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 						ssa_op = orig_ssa_op;
 						goto done;
 					case ZEND_RECV:
-						if (!zend_jit_recv(&ctx, opline, op_array)) {
+						if (!zend_jit_recv(&ctx, opline, op_array, op1_ce)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -6317,7 +6317,7 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 							/* TODO May need reference unwrapping. */
 							break;
 						}
-						if (!zend_jit_verify_return_type(&ctx, opline, op_array, op1_info)) {
+						if (!zend_jit_verify_return_type(&ctx, opline, op_array, op1_info, op1_ce)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -7920,6 +7920,10 @@ static void zend_jit_dump_trace(zend_jit_trace_rec *trace_buffer, zend_ssa *tssa
 					const char *type = ((op3_type & ~IS_TRACE_INDIRECT) == 0) ? "undef" : zend_get_type_by_const(op3_type & ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT));
 					fprintf(stderr, " op3(%s%s)", ref, type);
 				}
+			} else if (opline->opcode == ZEND_RECV && (p+1)->op == ZEND_JIT_TRACE_OP1_TYPE) {
+				/* Class of the received object */
+				p++;
+				fprintf(stderr, " ; arg(object of class %s)", ZSTR_VAL(p->ce->name));
 			}
 			if ((p+1)->op == ZEND_JIT_TRACE_VAL_INFO) {
 				uint8_t val_type;

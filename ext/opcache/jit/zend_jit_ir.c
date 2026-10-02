@@ -10738,22 +10738,102 @@ static int zend_jit_constructor(zend_jit_ctx *jit, const zend_op *opline, const 
 	return 1;
 }
 
-static int zend_jit_verify_arg_type(zend_jit_ctx *jit, const zend_op *opline, zend_arg_info *arg_info, bool check_exception)
+static bool zend_jit_class_is_persistent(const zend_class_entry *ce)
+{
+	if (ce->type == ZEND_INTERNAL_CLASS) {
+#ifdef ZEND_OPCACHE_SHM_REATTACHMENT
+		/* ASLR, see zend_jit_may_be_modified() */
+		return false;
+#else
+		return true;
+#endif
+	}
+	return (ce->ce_flags & ZEND_ACC_IMMUTABLE) != 0;
+}
+
+/* Checks whether a class "ce" always satisfies the type "type".
+ * This must take into account different requests.
+ * Checks against names of parents and interfaces. */
+static bool zend_jit_class_satisfies_type(const zend_class_entry *ce, zend_type type)
+{
+	const zend_type *single_type;
+
+	/* Simplification: skip intersection types */
+	if (!ce || !zend_jit_class_is_persistent(ce) || ZEND_TYPE_IS_INTERSECTION(type)) {
+		return false;
+	}
+
+	ZEND_TYPE_FOREACH(type, single_type) {
+		/* Intersection members of DNF types are not handled */
+		if (ZEND_TYPE_HAS_NAME(*single_type)) {
+			const zend_string *name = ZEND_TYPE_NAME(*single_type);
+
+			for (const zend_class_entry *parent = ce; parent; parent = parent->parent) {
+				if (zend_string_equals_ci(parent->name, name)) {
+					return true;
+				}
+			}
+			for (uint32_t i = 0; i < ce->num_interfaces; i++) {
+				if (zend_string_equals_ci(ce->interfaces[i]->name, name)) {
+					return true;
+				}
+			}
+		}
+	} ZEND_TYPE_FOREACH_END();
+
+	return false;
+}
+
+/* Emit a fast path for an object of the known class "ce".
+ * Leaves the control flow in the "no match" path, and adds the matching path to "end_inputs". */
+static void zend_jit_known_class_type_fast_path(zend_jit_ctx *jit, ir_ref ref, bool is_object, const zend_class_entry *ce, ir_ref *end_inputs)
+{
+	ir_ref not_object = IR_UNUSED, if_ce;
+
+	if (!is_object) {
+		// JIT: Z_TYPE_P(ref) == IS_OBJECT
+		ir_ref if_object = jit_if_Z_TYPE_ref(jit, ref, ir_CONST_U8(IS_OBJECT));
+		ir_IF_FALSE(if_object);
+		not_object = ir_END();
+		ir_IF_TRUE(if_object);
+	}
+
+	// JIT: Z_OBJ_P(ref)->ce == ce
+	if_ce = ir_IF(ir_EQ(
+		ir_LOAD_A(ir_ADD_OFFSET(jit_Z_PTR_ref(jit, ref), offsetof(zend_object, ce))),
+		ir_CONST_ADDR(ce)));
+	ir_IF_TRUE(if_ce);
+	ir_END_list(*end_inputs);
+
+	ir_IF_FALSE(if_ce);
+	if (not_object) {
+		ir_MERGE_WITH(not_object);
+	}
+}
+
+static int zend_jit_verify_arg_type(zend_jit_ctx *jit, const zend_op *opline, zend_arg_info *arg_info, bool check_exception, const zend_class_entry *known_ce)
 {
 	zend_jit_addr res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
 	uint32_t type_mask = ZEND_TYPE_PURE_MASK(arg_info->type) & MAY_BE_ANY;
-	ir_ref ref, fast_path = IR_UNUSED;
+	ir_ref ref, fast_path = IR_UNUSED, end_inputs = IR_UNUSED;
+	uint8_t type = IS_UNKNOWN;
 
 	ref = jit_ZVAL_ADDR(jit, res_addr);
 	if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE
 	 && JIT_G(current_frame)
 	 && JIT_G(current_frame)->prev) {
 		zend_jit_trace_stack *stack = JIT_G(current_frame)->stack;
-		uint8_t type = STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var));
 
+		type = STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var));
 		if (type != IS_UNKNOWN && (type_mask & (1u << type))) {
 			return 1;
 		}
+	}
+
+	if (!ZEND_ARG_SEND_MODE(arg_info)
+	 && (type == IS_UNKNOWN || type == IS_OBJECT)
+	 && zend_jit_class_satisfies_type(known_ce, arg_info->type)) {
+		zend_jit_known_class_type_fast_path(jit, ref, type == IS_OBJECT, known_ce, &end_inputs);
 	}
 
 	if (ZEND_ARG_SEND_MODE(arg_info)) {
@@ -10794,10 +10874,15 @@ static int zend_jit_verify_arg_type(zend_jit_ctx *jit, const zend_op *opline, ze
 		ir_MERGE_WITH(fast_path);
 	}
 
+	if (end_inputs) {
+		ir_END_list(end_inputs);
+		ir_MERGE_list(end_inputs);
+	}
+
 	return 1;
 }
 
-static int zend_jit_recv(zend_jit_ctx *jit, const zend_op *opline, const zend_op_array *op_array)
+static int zend_jit_recv(zend_jit_ctx *jit, const zend_op *opline, const zend_op_array *op_array, const zend_class_entry *known_ce)
 {
 	uint32_t arg_num = opline->op1.num;
 	zend_arg_info *arg_info = NULL;
@@ -10839,7 +10924,7 @@ static int zend_jit_recv(zend_jit_ctx *jit, const zend_op *opline, const zend_op
 	}
 
 	if (arg_info) {
-		if (!zend_jit_verify_arg_type(jit, opline, arg_info, true)) {
+		if (!zend_jit_verify_arg_type(jit, opline, arg_info, true, known_ce)) {
 			return 0;
 		}
 	}
@@ -10908,7 +10993,7 @@ static int zend_jit_recv_init(zend_jit_ctx *jit, const zend_op *opline, const ze
 			if (!ZEND_TYPE_IS_SET(arg_info->type)) {
 				break;
 			}
-			if (!zend_jit_verify_arg_type(jit, opline, arg_info, may_throw)) {
+			if (!zend_jit_verify_arg_type(jit, opline, arg_info, may_throw, NULL)) {
 				return 0;
 			}
 		} while (0);
@@ -10917,14 +11002,22 @@ static int zend_jit_recv_init(zend_jit_ctx *jit, const zend_op *opline, const ze
 	return 1;
 }
 
-static bool zend_jit_verify_return_type(zend_jit_ctx *jit, const zend_op *opline, const zend_op_array *op_array, uint32_t op1_info)
+static bool zend_jit_verify_return_type(zend_jit_ctx *jit, const zend_op *opline, const zend_op_array *op_array, uint32_t op1_info, const zend_class_entry *known_ce)
 {
 	zend_arg_info *arg_info = &op_array->arg_info[-1];
 	ZEND_ASSERT(ZEND_TYPE_IS_SET(arg_info->type));
 	zend_jit_addr op1_addr = OP1_ADDR();
 	bool needs_slow_check = true;
 	uint32_t type_mask = ZEND_TYPE_PURE_MASK(arg_info->type) & MAY_BE_ANY;
-	ir_ref fast_path = IR_UNUSED;
+	ir_ref fast_path = IR_UNUSED, end_inputs = IR_UNUSED;
+
+	if ((op1_info & MAY_BE_OBJECT)
+	 && !(type_mask & MAY_BE_OBJECT)
+	 && Z_MODE(op1_addr) == IS_MEM_ZVAL
+	 && zend_jit_class_satisfies_type(known_ce, arg_info->type)) {
+		zend_jit_known_class_type_fast_path(jit, jit_ZVAL_ADDR(jit, op1_addr),
+			(op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_OBJECT, known_ce, &end_inputs);
+	}
 
 	if (type_mask != 0) {
 		if (((op1_info & MAY_BE_ANY) & type_mask) == 0) {
@@ -10967,6 +11060,11 @@ static bool zend_jit_verify_return_type(zend_jit_ctx *jit, const zend_op *opline
 		if (fast_path) {
 			ir_MERGE_WITH(fast_path);
 		}
+	}
+
+	if (end_inputs) {
+		ir_END_list(end_inputs);
+		ir_MERGE_list(end_inputs);
 	}
 
 	return true;
