@@ -1187,9 +1187,8 @@ PHP_CLI_API int do_php_cli(int argc, char *argv[])
 {
 #if defined(PHP_WIN32)
 	int num_args;
-	wchar_t **argv_wide;
+	wchar_t **argv_wide = NULL;
 	char **argv_save = argv;
-	BOOL using_wide_argv = 0;
 #endif
 
 	int c;
@@ -1207,6 +1206,18 @@ PHP_CLI_API int do_php_cli(int argc, char *argv[])
 	 * in any way.
 	 */
 	argv = save_ps_args(argc, argv);
+
+#ifdef PHP_WIN32
+	if (argv_save != __argv) {
+		for (int i = 0; i < argc; i++) {
+			if (!MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, argv[i], -1, NULL, 0)) {
+				fprintf(stderr, "Invalid UTF-8 in command line argument %d.\n", i);
+				cleanup_ps_args(argv);
+				return 1;
+			}
+		}
+	}
+#endif
 
 #if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
 	php_win32_console_fileno_set_vt100(STDOUT_FILENO, TRUE);
@@ -1333,12 +1344,35 @@ exit_loop:
 #if defined(PHP_WIN32)
 	php_win32_cp_cli_setup();
 	orig_cp = (php_win32_cp_get_orig())->id;
-	/* Ignore the delivered argv and argc, read from W API. This place
-		might be too late though, but this is the earliest place ATW
-		we can access the internal charset information from PHP. */
-	argv_wide = CommandLineToArgvW(GetCommandLineW(), &num_args);
-	PHP_WIN32_CP_W_TO_ANY_ARRAY(argv_wide, num_args, argv, argc)
-	using_wide_argv = 1;
+	/* Embedders supply their own arguments, we mustn't replace them with
+	 * the ones by the host process command line. */
+	if (argv_save == __argv) {
+		/* Ignore the delivered argv and argc, read from W API. This place
+			might be too late though, but this is the earliest place ATW
+			we can access the internal charset information from PHP. */
+		argv_wide = CommandLineToArgvW(GetCommandLineW(), &num_args);
+		PHP_WIN32_CP_W_TO_ANY_ARRAY(argv_wide, num_args, argv, argc)
+	} else if (!php_win32_cp_use_unicode()) {
+		/* Custom arguments are UTF-8, regardless of PHP's configured encoding. */
+		char **converted_argv = calloc((size_t) argc + 1, sizeof(char *));
+		if (!converted_argv) {
+			exit_status = 1;
+			goto out;
+		}
+		argv = converted_argv;
+		for (int i = 0; i < argc; i++) {
+			wchar_t *arg = php_win32_cp_utf8_to_w(argv_save[i]);
+			if (arg) {
+				argv[i] = php_win32_cp_w_to_any(arg);
+				free(arg);
+			}
+			if (!argv[i]) {
+				fprintf(stderr, "Could not convert command line argument %d.\n", i);
+				exit_status = 1;
+				goto out;
+			}
+		}
+	}
 
 	SetConsoleCtrlHandler(php_cli_win32_ctrl_handler, TRUE);
 #endif
@@ -1377,8 +1411,10 @@ out:
 #if defined(PHP_WIN32)
 	(void)php_win32_cp_cli_restore();
 
-	if (using_wide_argv) {
+	if (argv != argv_save) {
 		PHP_WIN32_CP_FREE_ARRAY(argv, argc);
+	}
+	if (argv_wide) {
 		LocalFree(argv_wide);
 	}
 	argv = argv_save;
