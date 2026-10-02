@@ -986,12 +986,10 @@ static ZEND_STACK_ALIGNED void ts_coroutine_entry(zend_fiber_transfer *transfer)
 
 	ZEND_ASSERT(ts != NULL && "A coroutine must be current when its context starts");
 
-	if (UNEXPECTED(transfer->flags & ZEND_FIBER_TRANSFER_FLAG_BAILOUT)) {
-		/* Unwound by ts_bailout_all() before the body ever ran: skip it. */
-		bailout = true;
-		zval_ptr_dtor(&transfer->value);
-		ZVAL_UNDEF(&transfer->value);
-	} else if (UNEXPECTED(transfer->flags & ZEND_FIBER_TRANSFER_FLAG_ERROR)) {
+	/* ts_bailout_all() unwinds only coroutines whose body started. */
+	ZEND_ASSERT(!(transfer->flags & ZEND_FIBER_TRANSFER_FLAG_BAILOUT));
+
+	if (UNEXPECTED(transfer->flags & ZEND_FIBER_TRANSFER_FLAG_ERROR)) {
 		/* Cancelled before the body ever ran. */
 		ts->coro.exception = Z_OBJ(transfer->value);
 		ZVAL_UNDEF(&transfer->value);
@@ -1003,6 +1001,7 @@ static ZEND_STACK_ALIGNED void ts_coroutine_entry(zend_fiber_transfer *transfer)
 
 		zend_first_try {
 			ts_vm_stack_start(ts);
+			ZEND_COROUTINE_SET_STARTED(&ts->coro);
 
 			if (ts->coro.internal_entry != NULL) {
 				ts->coro.internal_entry();
@@ -1089,6 +1088,11 @@ static void ts_bailout_all(void)
 				}
 			}
 			ZEND_HASH_FOREACH_END();
+
+			/* Every coroutine is finished: a queue entry left behind would
+			 * send a loop rebuilt later into a context that never ran. */
+			TSG(queue).head = 0;
+			TSG(queue).count = 0;
 
 			return;
 		}
@@ -1328,6 +1332,7 @@ static ts_coroutine_t *ts_adopt_main_context(void)
 	main_coro->context = *zero_context;
 	main_coro->context_is_main = true;
 	main_coro->context_created = true;
+	ZEND_COROUTINE_SET_STARTED(&main_coro->coro);
 
 	EG(current_fiber_context) = &main_coro->context;
 
@@ -1439,7 +1444,8 @@ static zend_execute_data *ts_coroutine_execute_data(zend_coroutine_t *coroutine)
 
 /* Cancellation is a resume with an error: the coroutine wakes inside the
  * suspend it is parked in, the error is thrown there, and the body unwinds
- * through its own finally blocks. */
+ * through its own finally blocks. A coroutine that has not run yet receives
+ * the error at its first entry and never starts. */
 static bool ts_cancel(
 		zend_coroutine_t *coroutine, zend_object *error, bool transfer_error, const bool is_safely)
 {
@@ -1450,8 +1456,7 @@ static bool ts_cancel(
 	 * here for the coroutine it is already unwinding — re-enqueuing it leaves a
 	 * stale entry that the loop later switches into after the context is gone.
 	 * Cancellation is idempotent: the first graceful exit wins. */
-	if (ZEND_COROUTINE_IS_FINISHED(coroutine) || !ZEND_COROUTINE_IS_STARTED(coroutine)
-			|| ZEND_COROUTINE_IS_CANCELLED(coroutine)) {
+	if (ZEND_COROUTINE_IS_FINISHED(coroutine) || ZEND_COROUTINE_IS_CANCELLED(coroutine)) {
 		if (error != NULL && transfer_error) {
 			OBJ_RELEASE(error);
 		}

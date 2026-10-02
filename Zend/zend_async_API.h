@@ -148,6 +148,12 @@ struct _zend_coroutine_s {
  * object, for a provider whose coroutine and object live in separate
  * allocations. */
 #define ZEND_COROUTINE_F_OBJ_REF (1u << 7)
+/* The body began executing. The status cannot say it: a coroutine waiting for
+ * its first run and one that yielded are both QUEUED. The scheduler sets it immediately before the body's
+ * first instruction, the main coroutine's included, and never for a coroutine
+ * whose first entry carries an error: one cancelled before it ran never
+ * started. */
+#define ZEND_COROUTINE_F_STARTED (1u << 8)
 
 #define ZEND_COROUTINE_IS_CANCELLED(coroutine) \
 	(((coroutine)->flags & ZEND_COROUTINE_F_CANCELLED) != 0)
@@ -159,6 +165,10 @@ struct _zend_coroutine_s {
 
 #define ZEND_COROUTINE_IS_FIBER(coroutine) (((coroutine)->flags & ZEND_COROUTINE_F_FIBER) != 0)
 #define ZEND_COROUTINE_SET_FIBER(coroutine) ((coroutine)->flags |= ZEND_COROUTINE_F_FIBER)
+
+#define ZEND_COROUTINE_IS_STARTED(coroutine) \
+	(((coroutine)->flags & ZEND_COROUTINE_F_STARTED) != 0)
+#define ZEND_COROUTINE_SET_STARTED(coroutine) ((coroutine)->flags |= ZEND_COROUTINE_F_STARTED)
 
 /* The zend_object of a coroutine, or NULL for a plain C coroutine.
  * Embedded model: the object lives at object_offset within the same
@@ -186,8 +196,6 @@ struct _zend_coroutine_s {
 	} while (0)
 
 /* Lifecycle predicates over the packed status. */
-#define ZEND_COROUTINE_IS_STARTED(coroutine) \
-	(ZEND_COROUTINE_STATUS(coroutine) != ZEND_COROUTINE_STATUS_CREATED)
 #define ZEND_COROUTINE_IS_QUEUED(coroutine) \
 	(ZEND_COROUTINE_STATUS(coroutine) == ZEND_COROUTINE_STATUS_QUEUED)
 #define ZEND_COROUTINE_IS_RUNNING(coroutine) \

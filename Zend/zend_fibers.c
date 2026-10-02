@@ -753,8 +753,10 @@ static void zend_fiber_coroutine_dispose(zend_coroutine_t *coroutine)
 /* The fiber lets go of its coroutine. Ownership is one-way (fiber → coroutine,
  * never back), which keeps the fiber collectable. A fiber that dies while its
  * body is still parked cancels it — the body unwinds through its finally
- * blocks, like a force-closed legacy fiber. */
-static void zend_fiber_release_coroutine(zend_fiber *fiber)
+ * blocks, like a force-closed legacy fiber. A body queued but not yet run is
+ * cancelled too, so it never starts; without cancel_unfinished the coroutine
+ * is only released, for one that was never queued. */
+static void zend_fiber_release_coroutine(zend_fiber *fiber, bool cancel_unfinished)
 {
 	zend_coroutine_t *coroutine = fiber->coroutine;
 
@@ -767,8 +769,7 @@ static void zend_fiber_release_coroutine(zend_fiber *fiber)
 	coroutine->extended_data = NULL;
 	fiber->coroutine = NULL;
 
-	if (ZEND_ASYNC_ON && ZEND_COROUTINE_IS_STARTED(coroutine)
-		&& !ZEND_COROUTINE_IS_FINISHED(coroutine)) {
+	if (cancel_unfinished && ZEND_ASYNC_ON && !ZEND_COROUTINE_IS_FINISHED(coroutine)) {
 		ZEND_ASYNC_CANCEL(coroutine, zend_create_graceful_exit(), true);
 	}
 
@@ -1036,7 +1037,7 @@ static void zend_fiber_coroutine_start(zend_fiber *fiber, zval *return_value)
 	fiber->coroutine->fcall = fcall;
 
 	if (UNEXPECTED(!ZEND_ASYNC_ENQUEUE_COROUTINE(fiber->coroutine))) {
-		zend_fiber_release_coroutine(fiber);
+		zend_fiber_release_coroutine(fiber, false);
 		return;
 	}
 
@@ -1109,7 +1110,7 @@ static void zend_fiber_object_destroy(zend_object *object)
 	 * it. The legacy path below never applies (fiber->context uninitialized). */
 	if (fiber->coroutine != NULL) {
 		fiber->flags |= ZEND_FIBER_FLAG_DESTROYED;
-		zend_fiber_release_coroutine(fiber);
+		zend_fiber_release_coroutine(fiber, true);
 		return;
 	}
 
@@ -1161,7 +1162,7 @@ static void zend_fiber_object_free(zend_object *object)
 	/* A fiber that was never suspended (so dtor_obj had nothing to close) can
 	 * still own a coroutine: one that never started, or one that already
 	 * finished. */
-	zend_fiber_release_coroutine(fiber);
+	zend_fiber_release_coroutine(fiber, true);
 
 	zval_ptr_dtor(&fiber->fci.function_name);
 	zval_ptr_dtor(&fiber->result);
