@@ -2952,8 +2952,13 @@ static int php_openssl_handshake_server_early_data(php_stream *stream,
 				zval args[2];
 				ZVAL_RES(&args[0], stream->res);
 				ZVAL_STRINGL(&args[1], (char *) buf, readbytes);
+				bool originally_no_fclose = stream->flags & PHP_STREAM_FLAG_NO_FCLOSE;
+				stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 				zend_call_known_fcc(&sslsock->early_data_callbacks->read_cb,
 						NULL, 2, args, NULL);
+				if (!originally_no_fclose) {
+					stream->flags ^= PHP_STREAM_FLAG_NO_FCLOSE;
+				}
 				zval_ptr_dtor(&args[1]);
 			}
 			continue;
