@@ -7263,6 +7263,13 @@ static int zend_jit_cmp(zend_jit_ctx   *jit,
 	return 1;
 }
 
+static bool zend_jit_is_const_empty_array(zend_jit_addr addr)
+{
+	return Z_MODE(addr) == IS_CONST_ZVAL
+		&& Z_TYPE_P(Z_ZV(addr)) == IS_ARRAY
+		&& zend_hash_num_elements(Z_ARRVAL_P(Z_ZV(addr))) == 0;
+}
+
 static int zend_jit_identical(zend_jit_ctx   *jit,
                               const zend_op  *opline,
                               uint32_t        op1_info,
@@ -7424,6 +7431,14 @@ static int zend_jit_identical(zend_jit_ctx   *jit,
 			zval *val = Z_ZV(op2_addr);
 
 			ref = ir_EQ(jit_Z_TYPE(jit, op1_addr), ir_CONST_U8(Z_TYPE_P(val)));
+		} else if (zend_jit_is_const_empty_array(op1_addr) && (op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY) {
+			// JIT: zend_hash_num_elements(Z_ARRVAL_P(op2)) == 0
+			ref = ir_EQ(ir_LOAD_U32(ir_ADD_OFFSET(jit_Z_PTR(jit, op2_addr), offsetof(HashTable, nNumOfElements))),
+				ir_CONST_U32(0));
+		} else if (zend_jit_is_const_empty_array(op2_addr) && (op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY) {
+			// JIT: zend_hash_num_elements(Z_ARRVAL_P(op1)) == 0
+			ref = ir_EQ(ir_LOAD_U32(ir_ADD_OFFSET(jit_Z_PTR(jit, op1_addr), offsetof(HashTable, nNumOfElements))),
+				ir_CONST_U32(0));
 		} else {
 			if (Z_MODE(op1_addr) == IS_REG) {
 				zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->op1.var);
@@ -7762,8 +7777,20 @@ static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32
 	}
 
 	if (op1_info & (MAY_BE_ANY - (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE))) {
-		jit_SET_EX_OPLINE(jit, opline);
-		ref = ir_CALL_1(IR_BOOL, ir_CONST_FC_FUNC(zend_is_true), jit_ZVAL_ADDR(jit, op1_addr));
+		if ((op1_info & (MAY_BE_ANY - (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE))) == MAY_BE_ARRAY) {
+			/* CV deref handled above. These opcodes only take CONST|TMP|CV operands, and TMPs never hold references. */
+			ZEND_ASSERT(opline->op1_type == IS_CV || !(op1_info & MAY_BE_REF));
+			// JIT: zend_hash_num_elements(Z_ARRVAL_P(op1)) != 0
+			ref = ir_NE(ir_LOAD_U32(ir_ADD_OFFSET(jit_Z_PTR(jit, op1_addr), offsetof(HashTable, nNumOfElements))),
+				ir_CONST_U32(0));
+			if (opline->op1_type == IS_CV) {
+				/* The check above can't throw, and a CV isn't freed. */
+				may_throw = 0;
+			}
+		} else {
+			jit_SET_EX_OPLINE(jit, opline);
+			ref = ir_CALL_1(IR_BOOL, ir_CONST_FC_FUNC(zend_is_true), jit_ZVAL_ADDR(jit, op1_addr));
+		}
 		jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, NULL);
 		if (may_throw) {
 			zend_jit_check_exception_undef_result(jit, opline);
