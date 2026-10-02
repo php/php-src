@@ -2249,7 +2249,12 @@ static SSL_SESSION *php_openssl_session_get_cb(SSL *ssl, const unsigned char *se
 
 	SSL_SESSION *session = NULL;
 
+	bool originally_no_fclose = stream->flags & PHP_STREAM_FLAG_NO_FCLOSE;
+	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 	zend_call_known_fcc(&sslsock->session_callbacks->get_cb, &retval, 2, args, NULL);
+	if (!originally_no_fclose) {
+		stream->flags ^= PHP_STREAM_FLAG_NO_FCLOSE;
+	}
 	zval_ptr_dtor(&args[1]);
 
 	if (php_openssl_is_session_ce(&retval)) {
