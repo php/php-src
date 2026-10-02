@@ -3155,6 +3155,7 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 		/* We will throw if $this doesn't exist, so there's no need to emit a JMP_NULL
 		 * check for a nullsafe access. */
 	} else {
+		uint32_t offset = zend_delayed_compile_begin();
 		zend_short_circuiting_mark_inner(obj_ast);
 		opline = zend_delayed_compile_var(&obj_node, obj_ast, type, 0);
 		if (opline && (opline->opcode == ZEND_FETCH_DIM_W
@@ -3173,7 +3174,8 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 				uint32_t count = zend_stack_count(&CG(delayed_oplines_stack));
 				uint32_t i = count;
 
-				while (i > 0 && oplines[i-1].result_type == IS_TMP_VAR && oplines[i-1].result.var == var) {
+				/* Only consider the oplines delayed while compiling obj_ast. */
+				while (i > offset && oplines[i-1].result_type == IS_TMP_VAR && oplines[i-1].result.var == var) {
 					i--;
 					if (oplines[i].op1_type == IS_TMP_VAR) {
 						var = oplines[i].op1.var;
