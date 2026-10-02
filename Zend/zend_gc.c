@@ -302,6 +302,9 @@ typedef struct _zend_gc_globals {
 	uint32_t dtor_pending;
 	/* Result of the last coroutine-run collection, returned to the waiters. */
 	int gc_collected;
+	/* The last gc_collect_cycles() call only started the GC coroutine: its 0
+	 * counts nothing, so the threshold heuristic must not read it. */
+	bool run_deferred;
 
 #if GC_BENCH
 	uint32_t root_buf_length;
@@ -549,6 +552,7 @@ static void gc_globals_ctor_ex(zend_gc_globals *gc_globals)
 	gc_globals->microtask = NULL;
 	gc_globals->dtor_pending = 0;
 	gc_globals->gc_collected = 0;
+	gc_globals->run_deferred = false;
 
 #if GC_BENCH
 	gc_globals->root_buf_length = 0;
@@ -712,7 +716,12 @@ static zend_never_inline void ZEND_FASTCALL gc_possible_root_when_full(zend_refc
 
 	if (GC_G(gc_enabled) && !GC_G(gc_active)) {
 		GC_ADDREF(ref);
-		gc_adjust_threshold(gc_collect_cycles());
+		GC_G(run_deferred) = false;
+		const int count = gc_collect_cycles();
+		if (!GC_G(run_deferred)) {
+			gc_adjust_threshold(count);
+		}
+
 		if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 			rc_dtor_func(ref);
 			return;
@@ -2208,6 +2217,18 @@ ZEND_API int zend_gc_collect_cycles(void)
 			return 0;
 		}
 
+		/* This stack cannot wait here (a tick function, a signal handler, the
+		 * scheduler's own work): start the run without waiting for it. It
+		 * collects when the scheduler next picks the GC coroutine. */
+		if (UNEXPECTED(zend_fiber_switch_blocked() || ZEND_ASYNC_IN_SCHEDULER_CONTEXT)) {
+			if (GC_G(gc_coroutine) == NULL) {
+				new_gc_coroutine();
+			}
+
+			GC_G(run_deferred) = true;
+			return 0;
+		}
+
 		/* The run executes on the GC coroutine and cannot see this stack:
 		 * shield the caller's live TMPVARs from it for the duration. */
 		if (GC_G(num_roots)) {
@@ -2231,7 +2252,12 @@ ZEND_API int zend_gc_collect_cycles(void)
 		zend_gc_check_root_tmpvars();
 		GC_G(gc_active) = was_active;
 
-		return awaited ? GC_G(gc_collected) : 0;
+		if (UNEXPECTED(!awaited)) {
+			GC_G(run_deferred) = true;
+			return 0;
+		}
+
+		return GC_G(gc_collected);
 	}
 
 	int total_count = 0;
