@@ -36,6 +36,6 @@ $pdo = MySQLPDOTest::factory();
 $pdo->query('DROP FUNCTION IF EXISTS tst');
 $pdo->query('DROP PROCEDURE IF EXISTS tst2');
 ?>
---EXPECT--
-SQLSTATE[22001]: String data, right truncated: 1406 Data too long for column 'tst()' at row 1
+--EXPECTF--
+SQLSTATE[22001]: String data, right truncated: 1406 Data too long for column 'tst()' at row %d
 Ok.
