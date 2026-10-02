@@ -1,5 +1,5 @@
 --TEST--
-test_scheduler: cancel() — catchable at the suspend point, no re-park, first cancel wins
+test_scheduler: cancel() — catchable at the suspend point, first pending cancel wins, a later one is delivered again
 --EXTENSIONS--
 test_scheduler
 --INI--
@@ -18,12 +18,13 @@ $victim = spawn(function () {
         echo "victim caught: ", $e->getMessage(), "\n";
     }
 
-    // Cancelled means done waiting: parking again is refused on the spot.
+    // Cancellation is a request: once delivered, the coroutine may park again
+    // and the next cancel reaches it there.
     try {
         suspend();
         echo "unreachable suspend\n";
     } catch (TestScheduler\CancellationError $e) {
-        echo "victim cannot suspend again\n";
+        echo "victim caught again\n";
     }
 
     return "cleanup done";
@@ -31,7 +32,13 @@ $victim = spawn(function () {
 
 spawn(function () use ($victim) {
     cancel($victim);
-    cancel($victim); // the second one is a no-op
+    cancel($victim); // still pending: the second one is dropped
+
+    // Runs after the victim has caught the first one and parked again.
+    spawn(function () use ($victim) {
+        echo "second cancel\n";
+        cancel($victim);
+    });
 });
 
 echo "await victim: ", await($victim), "\n";
@@ -63,7 +70,8 @@ echo "==DONE==\n";
 ?>
 --EXPECT--
 await victim: victim caught: The coroutine has been cancelled
-victim cannot suspend again
+second cancel
+victim caught again
 cleanup done
 unstarted: The coroutine has been cancelled
 self-cancel caught

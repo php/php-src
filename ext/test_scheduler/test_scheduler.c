@@ -1451,12 +1451,7 @@ static bool ts_cancel(
 {
 	(void) is_safely;
 
-	/* Nothing to unwind, or a cancellation is already in flight. The last case
-	 * matters most: a fiber destroyed from inside its own force-close re-enters
-	 * here for the coroutine it is already unwinding — re-enqueuing it leaves a
-	 * stale entry that the loop later switches into after the context is gone.
-	 * Cancellation is idempotent: the first graceful exit wins. */
-	if (ZEND_COROUTINE_IS_FINISHED(coroutine) || ZEND_COROUTINE_IS_CANCELLED(coroutine)) {
+	if (ZEND_COROUTINE_IS_FINISHED(coroutine)) {
 		if (error != NULL && transfer_error) {
 			OBJ_RELEASE(error);
 		}
@@ -1465,6 +1460,19 @@ static bool ts_cancel(
 	}
 
 	ZEND_COROUTINE_SET_CANCELLED(coroutine);
+
+	/* The coroutine is running, or a cancellation is already in flight. A running one matters most: a fiber destroyed from inside its
+	 * own force-close re-enters here for the coroutine it is already unwinding —
+	 * re-enqueuing it leaves a stale entry that the loop later switches into
+	 * after the context is gone. Until delivered, the first error wins; once
+	 * delivered, F_CANCELLED stays set and a later cancel is delivered again. */
+	if (ZEND_COROUTINE_IS_RUNNING(coroutine) || ts_from_coro(coroutine)->pending_error != NULL) {
+		if (error != NULL && transfer_error) {
+			OBJ_RELEASE(error);
+		}
+
+		return true;
+	}
 
 	return ts_enqueue(coroutine, error, transfer_error);
 }
@@ -1558,12 +1566,6 @@ static bool ts_suspend(bool from_main, bool is_bailout)
 
 	if (UNEXPECTED(ZEND_ASYNC_IN_SCHEDULER_CONTEXT)) {
 		zend_throw_error(NULL, "A coroutine cannot be suspended from the scheduler context");
-		return false;
-	}
-
-	/* Cancelled: never park again, nothing will wake it. */
-	if (UNEXPECTED(ZEND_COROUTINE_IS_CANCELLED(&self->coro))) {
-		zend_throw_exception(ts_ce_cancellation_error, "The coroutine has been cancelled", 0);
 		return false;
 	}
 

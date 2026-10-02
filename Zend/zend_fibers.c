@@ -1373,7 +1373,7 @@ ZEND_METHOD(Fiber, suspend)
 			RETURN_THROWS();
 		}
 
-		if (UNEXPECTED(current->extended_data == NULL || ZEND_COROUTINE_IS_CANCELLED(current))) {
+		if (UNEXPECTED(current->extended_data == NULL)) {
 			zend_throw_error(zend_ce_fiber_error, "Cannot suspend in a force-closed fiber");
 			RETURN_THROWS();
 		}
