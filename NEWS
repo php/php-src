@@ -49,6 +49,8 @@ PHP                                                                        NEWS
   . Fixed grapheme_strstr() and grapheme_strpos() missing canonically
     equivalent matches, and grapheme searches reporting ICU errors for empty
     haystacks. (Weilin Du)
+  . Fixed grapheme_strrpos() and grapheme_strripos() skipping overlapping matches
+    when using a negative offset. (Weilin Du)
 
 - MySQLnd:
   . Fixed field_count not resetting on OK packet. (Kamil Tekiela)
