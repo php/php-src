@@ -305,7 +305,7 @@ static bool php_password_bcrypt_sha256_parse(const zend_string *hash,
 	}
 	p = h + PHP_PASSWORD_BCRYPT_SHA256_PREFIX_LEN;
 
-	if (*p < '0' || *p > '9') {
+	if (*p < '1' || *p > '9') {
 		return false;
 	}
 	c = *p - '0';
