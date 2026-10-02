@@ -240,7 +240,6 @@ const php_password_algo php_password_algo_bcrypt = {
  * SHA256 is taken from the hash extension. */
 
 #define PHP_PASSWORD_BCRYPT_SHA256_PREFIX "$bcrypt-sha256$v=2,t=2b,r="
-#define PHP_PASSWORD_BCRYPT_SHA256_PREFIX_LEN (sizeof(PHP_PASSWORD_BCRYPT_SHA256_PREFIX) - 1)
 
 static bool php_password_b64char(unsigned char c)
 {
@@ -291,24 +290,22 @@ static void php_password_hmac_sha256(const unsigned char *key, size_t key_len,
 static bool php_password_bcrypt_sha256_parse(const zend_string *hash,
 		zend_long *cost, const char **salt, const char **digest)
 {
+	if (!zend_string_starts_with_literal(hash, PHP_PASSWORD_BCRYPT_SHA256_PREFIX)) {
+		return false;
+	}
+
 	const char *h = ZSTR_VAL(hash);
-	const char *p;
 	size_t len = ZSTR_LEN(hash);
-	size_t i;
-	int c;
 
 	if (len < 82 || len > 83) {
 		return false;
 	}
-	if (memcmp(h, PHP_PASSWORD_BCRYPT_SHA256_PREFIX, PHP_PASSWORD_BCRYPT_SHA256_PREFIX_LEN) != 0) {
-		return false;
-	}
-	p = h + PHP_PASSWORD_BCRYPT_SHA256_PREFIX_LEN;
+	const char *p = h + strlen(PHP_PASSWORD_BCRYPT_SHA256_PREFIX);
 
 	if (*p < '1' || *p > '9') {
 		return false;
 	}
-	c = *p - '0';
+	int c = *p - '0';
 	p++;
 	if (*p >= '0' && *p <= '9') {
 		c = c * 10 + (*p - '0');
@@ -322,7 +319,7 @@ static bool php_password_bcrypt_sha256_parse(const zend_string *hash,
 	if (len - (size_t)(p - h) != 54) {
 		return false;
 	}
-	for (i = 0; i < 22; i++) {
+	for (size_t i = 0; i < 22; i++) {
 		if (!php_password_b64char((unsigned char) p[i])) {
 			return false;
 		}
@@ -330,7 +327,7 @@ static bool php_password_bcrypt_sha256_parse(const zend_string *hash,
 	if (p[22] != '$') {
 		return false;
 	}
-	for (i = 0; i < 31; i++) {
+	for (size_t i = 0; i < 31; i++) {
 		if (!php_password_b64char((unsigned char) p[23 + i])) {
 			return false;
 		}
@@ -371,7 +368,7 @@ static bool php_password_bcrypt_sha256_needs_rehash(const zend_string *hash, zen
 	if (!php_password_bcrypt_sha256_parse(hash, &cost, &salt, &digest)) {
 		return true;
 	}
-	if (options && (znew_cost = zend_hash_str_find(options, "cost", sizeof("cost") - 1)) != NULL) {
+	if (options && (znew_cost = zend_hash_str_find(options, "cost", strlen("cost"))) != NULL) {
 		new_cost = zval_get_long(znew_cost);
 	}
 	return cost != new_cost;
@@ -388,7 +385,7 @@ static zend_string *php_password_bcrypt_sha256_hash(const zend_string *password,
 	char out[84];
 	int out_len;
 
-	if (options && (zcost = zend_hash_str_find(options, "cost", sizeof("cost") - 1)) != NULL) {
+	if (options && (zcost = zend_hash_str_find(options, "cost", strlen("cost"))) != NULL) {
 		cost = zval_get_long(zcost);
 	}
 	if (cost < 4 || cost > 31) {
