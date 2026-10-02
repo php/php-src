@@ -913,12 +913,21 @@ static zend_always_inline void zend_call_known_instance_method_with_1_params(
 ZEND_API void zend_call_known_instance_method_with_2_params(
 		zend_function *fn, zend_object *this_ptr, zval *retval_ptr, zval *param1, zval *param2);
 
-/* Call method if it exists. Return FAILURE if method does not exist or call failed.
- * If FAILURE is returned, retval will be UNDEF. As such, destroying retval unconditionally
- * is legal. */
-ZEND_API zend_result zend_call_method_if_exists(
-		zend_object *this_ptr, zend_string *method_name, zval *retval,
-		uint32_t param_count, zval *params);
+/* Call method if it exists.
+ * Return FAILURE if method does not exist.
+ * If FAILURE is returned, retval will be UNDEF, and error will contain the validation failure message if provided.
+ * As such, destroying retval unconditionally is legal.
+ */
+ZEND_API zend_result zend_call_method_if_exists_ex(
+		zend_object *this_ptr, zend_string *method_name, zval *retval_ptr,
+		uint32_t param_count, zval *params, HashTable *named_params, char **error);
+
+static zend_always_inline zend_result zend_call_method_if_exists(
+		zend_object *this_ptr, zend_string *method_name,
+		zval *retval_ptr, uint32_t param_count, zval *params
+) {
+	return zend_call_method_if_exists_ex(this_ptr, method_name, retval_ptr, param_count, params, NULL, NULL);
+}
 
 ZEND_API zend_result zend_delete_global_variable(zend_string *name);
 

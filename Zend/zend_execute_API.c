@@ -1184,21 +1184,21 @@ ZEND_API void zend_call_known_instance_method_with_2_params(
 	zend_call_known_instance_method(fn, this_ptr, retval_ptr, 2, params);
 }
 
-ZEND_API zend_result zend_call_method_if_exists(
-		zend_object *this_ptr, zend_string *method_name, zval *retval,
-		uint32_t param_count, zval *params)
-{
+ZEND_API zend_result zend_call_method_if_exists_ex(
+		zend_object *this_ptr, zend_string *method_name, zval *retval_ptr,
+		uint32_t param_count, zval *params, HashTable *named_params, char **error
+) {
 	zval zval_method;
 	zend_fcall_info_cache fcc;
 
 	ZVAL_STR(&zval_method, method_name);
 
-	if (UNEXPECTED(!zend_is_callable_ex(&zval_method, this_ptr, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL))) {
-		ZVAL_UNDEF(retval);
+	if (UNEXPECTED(!zend_is_callable_ex(&zval_method, this_ptr, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, error))) {
+		ZVAL_UNDEF(retval_ptr);
 		return FAILURE;
 	}
 
-	zend_call_known_fcc(&fcc, retval, param_count, params, NULL);
+	zend_call_known_fcc(&fcc, retval_ptr, param_count, params, named_params);
 	/* Need to free potential trampoline (__call/__callStatic) copied function handler before releasing the closure */
 	zend_release_fcall_info_cache(&fcc);
 	return SUCCESS;

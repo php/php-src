@@ -40,6 +40,8 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 - Added a new zend_object_copy() function which increases the refcount of
   a zend_object* and returns it. Allowing more descriptive code rather than
   doing an assignment followed by GC_ADDREF().
+- Added zend_call_method_if_exists_ex() which accepts named parameters and
+  retrieving the callability failure error message.
 
 ========================
 2. Build system changes
