@@ -1946,25 +1946,21 @@ static void sccp_mark_feasible_successors(
 	scdf_mark_edge_feasible(scdf, block_num, block->successors[s]);
 }
 
-static bool sccp_is_identical(const zval *a, const zval *b);
-
-/* Returns int to be compatible with compare_func_t. */
-static int sccp_is_not_identical(const zval *a, const zval *b)
+/* Unlike zend_is_identical(), this does not treat 0.0 and -0.0 as the same value.
+ * Returns int to be usable as compare_func_t. */
+static int sccp_values_differ(const void *p1, const void *p2)
 {
-	return !sccp_is_identical(a, b);
-}
+	const zval *a = p1;
+	const zval *b = p2;
 
-/* Unlike zend_is_identical(), this does not treat 0.0 and -0.0 as the same value. */
-static bool sccp_is_identical(const zval *a, const zval *b)
-{
 	if (Z_TYPE_P(a) == IS_DOUBLE && Z_TYPE_P(b) == IS_DOUBLE) {
-		return memcmp(&Z_DVAL_P(a), &Z_DVAL_P(b), sizeof(double)) == 0;
+		return memcmp(&Z_DVAL_P(a), &Z_DVAL_P(b), sizeof(double)) != 0;
 	}
 	if (Z_TYPE_P(a) == IS_ARRAY && Z_TYPE_P(b) == IS_ARRAY) {
-		return Z_ARRVAL_P(a) == Z_ARRVAL_P(b)
-			|| zend_hash_compare(Z_ARRVAL_P(a), Z_ARRVAL_P(b), (compare_func_t) sccp_is_not_identical, 1) == 0;
+		return Z_ARRVAL_P(a) != Z_ARRVAL_P(b)
+			&& zend_hash_compare(Z_ARRVAL_P(a), Z_ARRVAL_P(b), sccp_values_differ, 1) != 0;
 	}
-	return zend_is_identical(a, b);
+	return !zend_is_identical(a, b);
 }
 
 static void join_hash_tables(HashTable *ret, HashTable *ht1, HashTable *ht2)
@@ -1979,7 +1975,7 @@ static void join_hash_tables(HashTable *ret, HashTable *ht1, HashTable *ht2)
 		} else {
 			val2 = zend_hash_index_find(ht2, index);
 		}
-		if (val2 && sccp_is_identical(val1, val2)) {
+		if (val2 && !sccp_values_differ(val1, val2)) {
 			if (key) {
 				val1 = zend_hash_add_new(ret, key, val1);
 			} else {
@@ -2047,7 +2043,7 @@ static void join_phi_values(zval *a, zval *b, bool escape) {
 			zval_ptr_dtor_nogc(a);
 			MAKE_BOT(a);
 		}
-	} else if (sccp_is_not_identical(a, b)) {
+	} else if (sccp_values_differ(a, b)) {
 		if (join_partial_arrays(a, b) == FAILURE) {
 			zval_ptr_dtor_nogc(a);
 			MAKE_BOT(a);
