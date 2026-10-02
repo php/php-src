@@ -5,6 +5,8 @@ Basic long path test with file I/O
 if (PHP_OS_FAMILY !== 'Windows') die('skip windows only test');
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
+--CONFLICTS--
+file
 --FILE--
 <?php
 
