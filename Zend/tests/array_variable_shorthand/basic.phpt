@@ -13,6 +13,19 @@ echo json_encode([$condition ? 'bar' :$baz]), "\n";
 echo json_encode([$condition ?:$baz]), "\n";
 echo json_encode([$condition ? 'bar' :$baz, :$x]), "\n";
 
+$a = true;
+$b = 'yes';
+$c = 'no';
+$multiline = [ $a ? $b
+: $c
+];
+echo json_encode($multiline), "\n";
+$a = false;
+$multiline = [ $a ? $b
+: $c
+];
+echo json_encode($multiline), "\n";
+
 $X = 40;
 echo json_encode([:$x, :$X]), "\n";
 echo json_encode([$x = $y]), "\n";
@@ -43,6 +56,8 @@ echo json_encode(array('outer' => [:$x])), "\n";
 [7]
 [7]
 {"0":7,"x":10}
+["yes"]
+["no"]
 {"x":10,"X":40}
 [20]
 int(11)
