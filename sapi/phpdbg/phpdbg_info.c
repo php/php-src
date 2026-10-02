@@ -26,7 +26,7 @@
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 #define PHPDBG_INFO_COMMAND_D(f, h, a, m, l, s, flags) \
-	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[13], flags)
+	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[15], flags)
 
 const phpdbg_command_t phpdbg_info_commands[] = {
 	PHPDBG_INFO_COMMAND_D(break,     "show breakpoints",              'b', info_break,     NULL, 0, PHPDBG_ASYNC_SAFE),
