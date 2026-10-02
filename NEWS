@@ -61,6 +61,8 @@ PHP                                                                        NEWS
     child's shadowing public property). (Ilia Alshanetsky)
   . Fix multiple incorrect DCE due to unsound escape analysis. (ndossche,
     arnaud-lb)
+  . Fixed bug GH-24063 (OPcache optimizer folds `$cond ? -0.0 : 0.0` into a
+    single `-0.0` constant). (lazerg)
 
 - OpenSSL:
   . Fixed stream_socket_enable_crypto() leaving the socket non-blocking
