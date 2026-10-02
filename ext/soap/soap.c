@@ -1367,6 +1367,14 @@ static void _soap_server_exception(soapServicePtr service, sdlFunctionPtr functi
 }
 /* }}} */
 
+static void soap_free_server_object(soapServicePtr service, zval *soap_object)
+{
+	if (service->type == SOAP_CLASS && soap_object && service->soap_class.persistence != SOAP_PERSISTENCE_SESSION) {
+		zval_ptr_dtor(soap_object);
+		ZVAL_UNDEF(soap_object);
+	}
+}
+
 /* {{{ Handles a SOAP request */
 PHP_METHOD(SoapServer, handle)
 {
@@ -1656,20 +1664,12 @@ PHP_METHOD(SoapServer, handle)
 				    instanceof_function(Z_OBJCE(h->retval), soap_fault_class_entry)) {
 					php_output_discard();
 					soap_server_fault_ex(function, &h->retval, h);
-					if (service->type == SOAP_CLASS && soap_obj) {
-						if (service->soap_class.persistence != SOAP_PERSISTENCE_SESSION) {
-							zval_ptr_dtor(soap_obj);
-						}
-					}
+					soap_free_server_object(service, soap_obj);
 					goto fail;
 				} else if (EG(exception)) {
 					php_output_discard();
 					_soap_server_exception(service, function, ZEND_THIS);
-					if (service->type == SOAP_CLASS && soap_obj) {
-						if (service->soap_class.persistence != SOAP_PERSISTENCE_SESSION) {
-							zval_ptr_dtor(soap_obj);
-						}
-					}
+					soap_free_server_object(service, soap_obj);
 					goto fail;
 				}
 			} else if (h->mustUnderstand) {
@@ -1682,12 +1682,7 @@ PHP_METHOD(SoapServer, handle)
 	    ((service->type == SOAP_CLASS || service->type == SOAP_OBJECT) &&
 	     zend_hash_str_exists(function_table, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)-1))) {
 		call_status = call_user_function(NULL, soap_obj, &function_name, &retval, num_params, params);
-		if (service->type == SOAP_CLASS) {
-			if (service->soap_class.persistence != SOAP_PERSISTENCE_SESSION) {
-				zval_ptr_dtor(soap_obj);
-				soap_obj = NULL;
-			}
-		}
+		soap_free_server_object(service, soap_obj);
 	} else {
 		php_error(E_ERROR, "Function '%s' doesn't exist", Z_STRVAL(function_name));
 	}
@@ -1696,11 +1691,7 @@ PHP_METHOD(SoapServer, handle)
 		if (!zend_is_unwind_exit(EG(exception))) {
 			php_output_discard();
 			_soap_server_exception(service, function, ZEND_THIS);
-			if (service->type == SOAP_CLASS) {
-				if (soap_obj && service->soap_class.persistence != SOAP_PERSISTENCE_SESSION) {
-					zval_ptr_dtor(soap_obj);
-				}
-			}
+			soap_free_server_object(service, soap_obj);
 		}
 		goto fail;
 	}
@@ -1736,11 +1727,7 @@ PHP_METHOD(SoapServer, handle)
 	if (EG(exception)) {
 		php_output_discard();
 		_soap_server_exception(service, function, ZEND_THIS);
-		if (service->type == SOAP_CLASS) {
-			if (soap_obj && service->soap_class.persistence != SOAP_PERSISTENCE_SESSION) {
-				zval_ptr_dtor(soap_obj);
-			}
-		}
+		soap_free_server_object(service, soap_obj);
 		goto fail;
 	}
 
