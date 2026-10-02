@@ -182,6 +182,7 @@ PHP                                                                        NEWS
 - SOAP:
   . Fixed bug GH-22895 (Heap use-after-free while encoding a Traversable with
     an illegal key). (David Carlier)
+  . Fixed memory leak when load_wsdl_ex() failed to load. (DanielEScherzer)
 
 - Sockets:
   . Fixed socket_select() silently truncating sets larger than FD_SETSIZE on
