@@ -612,6 +612,14 @@ void gc_reset(void)
 #endif
 	}
 
+	/* A bailout can end the request before the GC coroutines finish, and
+	 * their memory goes with the request: none of these may reach the next. */
+	GC_G(gc_coroutine) = NULL;
+	GC_G(dtor_coroutine) = NULL;
+	GC_G(microtask) = NULL;
+	GC_G(dtor_pending) = 0;
+	GC_G(run_deferred) = false;
+
 	GC_G(activated_at) = zend_hrtime();
 }
 
@@ -2187,6 +2195,27 @@ static void zend_gc_coroutine(void)
 	GC_TRACE("GC coroutine finished");
 }
 
+/* Clears GC_G(gc_coroutine) however the run ends. A bailout skips the tail of
+ * zend_gc_coroutine(), and the next gc_collect_cycles() of the request (a
+ * shutdown function's) would await the stale coroutine instead of collecting. */
+static bool gc_coroutine_finish_handler(
+		zend_coroutine_t *coroutine, zend_coroutine_t *waiter, void *data, const bool is_bailout)
+{
+	(void) waiter;
+	(void) data;
+
+	if (GC_G(gc_coroutine) == coroutine) {
+		GC_G(gc_coroutine) = NULL;
+	}
+
+	/* No iterator resumes after a bailout: drop the hand-off they armed. */
+	if (is_bailout) {
+		gc_disarm_iterator_microtask();
+	}
+
+	return false;
+}
+
 static zend_always_inline zend_coroutine_t *new_gc_coroutine(void)
 {
 	zend_coroutine_t *coroutine = ZEND_ASYNC_GC_NEW_COROUTINE();
@@ -2198,7 +2227,11 @@ static zend_always_inline zend_coroutine_t *new_gc_coroutine(void)
 	coroutine->internal_entry = zend_gc_coroutine;
 	GC_G(gc_coroutine) = coroutine;
 
-	if (UNEXPECTED(!ZEND_ASYNC_ENQUEUE_COROUTINE(coroutine))) {
+	const uint32_t handler_id = ZEND_ASYNC_ADD_FINISH_HANDLER(
+			coroutine, gc_coroutine_finish_handler, NULL, NULL);
+
+	if (UNEXPECTED(handler_id == 0 || !ZEND_ASYNC_ENQUEUE_COROUTINE(coroutine))) {
+		ZEND_ASYNC_REMOVE_FINISH_HANDLER(coroutine, handler_id);
 		GC_G(gc_coroutine) = NULL;
 		return NULL;
 	}
