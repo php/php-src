@@ -26,6 +26,9 @@ PHP                                                                        NEWS
   . Fixed GH-23921 (Fibers start with error_reporting = 0 when the
     error_reporting INI directive is not set). (Girgias)
   . Fixed GH-23980 (ZEND_ASSERT violation @ ZEND_INCLUDE_OR_EVAL). (ndossche)
+  . Fixed memory manager keeping a block reallocated to exactly the size of
+    the next smaller bin in its larger bin, which efree_size() then freed
+    into the wrong one. (Marc Bennewitz)
   . Deprecated using "let" or "is" as the name of a class, function, or
     constant, and as an alias in class_alias() and use declarations. (Girgias)
   . Deprecated using "_" as a constant name and as an alias for a class or

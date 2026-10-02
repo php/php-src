@@ -297,6 +297,8 @@ namespace {
 
     function zend_leak_bytes(int $bytes = 3): void {}
 
+    function zend_test_erealloc_block_size(int $old_size, int $new_size): array {}
+
     function zend_delref(mixed $variable): void {}
 
 	function zend_bool(bool $param): bool {}
