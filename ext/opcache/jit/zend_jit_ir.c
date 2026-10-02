@@ -10440,14 +10440,6 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 						insn->inputs_count = 3;
 						insn->op3 = end;
 						break;
-					} else if (insn->op == IR_LOOP_BEGIN && insn->inputs_count == 3) {
-						ZEND_ASSERT(jit->ctx.ir_base[insn->op3].op == IR_LOOP_END);
-						jit->ctx.ir_base[insn->op3].op = IR_END;
-						ir_MERGE_2(insn->op3, ir_END());
-						end = ir_LOOP_END();
-						insn = &jit->ctx.ir_base[begin];
-						insn->op3 = end;
-						break;
 					}
 				}
 				/* fallback to indirect JMP or RETURN */
