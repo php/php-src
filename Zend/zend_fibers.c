@@ -423,6 +423,14 @@ ZEND_API bool zend_fiber_switch_blocked(void)
 	return zend_fiber_switch_blocking;
 }
 
+/* The Fiber methods switch contexts, which is refused where switching is
+ * blocked and while the scheduler runs its own work: there is no coroutine
+ * to park, and the scheduler would be switched out of its own loop. */
+static zend_always_inline bool zend_fiber_switch_refused(void)
+{
+	return zend_fiber_switch_blocked() || (ZEND_ASYNC_ON && ZEND_ASYNC_IN_SCHEDULER_CONTEXT);
+}
+
 ZEND_API zend_result zend_fiber_init_context(zend_fiber_context *context, void *kind, zend_fiber_coroutine coroutine, size_t stack_size)
 {
 	context->stack = zend_fiber_stack_allocate(stack_size);
@@ -1338,7 +1346,7 @@ ZEND_METHOD(Fiber, start)
 		Z_PARAM_VARIADIC_WITH_NAMED(fiber->fci.params, fiber->fci.param_count, fiber->fci.named_params);
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (UNEXPECTED(zend_fiber_switch_blocked())) {
+	if (UNEXPECTED(zend_fiber_switch_refused())) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot switch fibers in current execution context");
 		RETURN_THROWS();
 	}
@@ -1394,7 +1402,7 @@ ZEND_METHOD(Fiber, suspend)
 			RETURN_THROWS();
 		}
 
-		if (UNEXPECTED(zend_fiber_switch_blocked())) {
+		if (UNEXPECTED(zend_fiber_switch_refused())) {
 			zend_throw_error(zend_ce_fiber_error, "Cannot switch fibers in current execution context");
 			RETURN_THROWS();
 		}
@@ -1421,7 +1429,7 @@ ZEND_METHOD(Fiber, suspend)
 		RETURN_THROWS();
 	}
 
-	if (UNEXPECTED(zend_fiber_switch_blocked())) {
+	if (UNEXPECTED(zend_fiber_switch_refused())) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot switch fibers in current execution context");
 		RETURN_THROWS();
 	}
@@ -1445,7 +1453,7 @@ ZEND_METHOD(Fiber, resume)
 		Z_PARAM_ZVAL(value);
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (UNEXPECTED(zend_fiber_switch_blocked())) {
+	if (UNEXPECTED(zend_fiber_switch_refused())) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot switch fibers in current execution context");
 		RETURN_THROWS();
 	}
@@ -1488,7 +1496,7 @@ ZEND_METHOD(Fiber, throw)
 		Z_PARAM_OBJECT_OF_CLASS(exception, zend_ce_throwable)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (UNEXPECTED(zend_fiber_switch_blocked())) {
+	if (UNEXPECTED(zend_fiber_switch_refused())) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot switch fibers in current execution context");
 		RETURN_THROWS();
 	}
