@@ -1953,13 +1953,18 @@ static int sccp_values_differ(const void *p1, const void *p2)
 	const zval *a = p1;
 	const zval *b = p2;
 
-	if (Z_TYPE_P(a) == IS_DOUBLE && Z_TYPE_P(b) == IS_DOUBLE) {
+	if (Z_TYPE_P(a) != Z_TYPE_P(b)) {
+		return 1;
+	}
+	if (Z_TYPE_P(a) == IS_DOUBLE) {
 		return memcmp(&Z_DVAL_P(a), &Z_DVAL_P(b), sizeof(double)) != 0;
 	}
-	if (Z_TYPE_P(a) == IS_ARRAY && Z_TYPE_P(b) == IS_ARRAY) {
+	if (Z_TYPE_P(a) == IS_ARRAY) {
 		return Z_ARRVAL_P(a) != Z_ARRVAL_P(b)
 			&& zend_hash_compare(Z_ARRVAL_P(a), Z_ARRVAL_P(b), sccp_values_differ, 1) != 0;
 	}
+	ZEND_ASSERT(IS_PARTIAL_ARRAY(a) || IS_PARTIAL_OBJECT(a)
+		|| ((1 << Z_TYPE_P(a)) & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_BOOL|MAY_BE_LONG|MAY_BE_STRING)));
 	return !zend_is_identical(a, b);
 }
 
