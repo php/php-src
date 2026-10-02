@@ -1564,6 +1564,15 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	RETURN_TOKEN_WITH_IDENT(T_BREAK);
 }
 
+/*
+ * The by keyword must be followed by whitespace and a variable
+ * This avoids the BC break of using by in classes, namespaces, functions and constants.
+ */
+<ST_IN_SCRIPTING>"by"{WHITESPACE_OR_COMMENTS}"$" {
+	yyless(2);
+	RETURN_TOKEN_WITH_IDENT(T_BY);
+}
+
 <ST_IN_SCRIPTING>"continue" {
 	RETURN_TOKEN_WITH_IDENT(T_CONTINUE);
 }
