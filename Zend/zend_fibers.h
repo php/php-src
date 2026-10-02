@@ -82,7 +82,7 @@ struct _zend_fiber_context {
 	/* Entrypoint function of the fiber. */
 	zend_fiber_coroutine function;
 
-	/* Cleanup function for fiber. */
+	/* Cleanup function for fiber; it may free the context. */
 	zend_fiber_clean cleanup;
 
 	/* Assigned C stack. */

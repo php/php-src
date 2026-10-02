@@ -482,11 +482,15 @@ ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context)
 {
 	zend_observer_fiber_destroy_notify(context);
 
+	/* Read before the cleanup, which may free the context: a scheduler allocates its contexts
+	 * apart from their stacks. */
+	zend_fiber_stack *stack = context->stack;
+
 	if (context->cleanup) {
 		context->cleanup(context);
 	}
 
-	zend_fiber_stack_free(context->stack);
+	zend_fiber_stack_free(stack);
 }
 
 ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
