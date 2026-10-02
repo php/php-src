@@ -21,6 +21,7 @@ PHP_MSHUTDOWN_FUNCTION(password);
 
 #define PHP_PASSWORD_DEFAULT    PHP_PASSWORD_BCRYPT
 #define PHP_PASSWORD_BCRYPT_COST 12
+#define PHP_PASSWORD_BCRYPT_SHA256_COST 12
 
 #ifdef HAVE_ARGON2LIB
 /**
@@ -44,6 +45,7 @@ typedef struct _php_password_algo {
 } php_password_algo;
 
 extern const php_password_algo php_password_algo_bcrypt;
+extern const php_password_algo php_password_algo_bcrypt_sha256;
 #ifdef HAVE_ARGON2LIB
 extern const php_password_algo php_password_algo_argon2i;
 extern const php_password_algo php_password_algo_argon2id;
