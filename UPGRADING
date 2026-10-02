@@ -33,6 +33,10 @@ PHP 8.7 UPGRADE NOTES
 2. New Features
 ========================================
 
+- Streams:
+  . The so_linger, so_rcvbuf and so_sndbuf stream socket context options are
+    now also applied to unix and unix datagram sockets.
+
 ========================================
 3. Changes in SAPI modules
 ========================================
@@ -85,3 +89,6 @@ PHP 8.7 UPGRADE NOTES
   . Improved performance of array_splice() when inserting without removing
     elements.
   . Improved performance of str_rot13().
+
+- MBString:
+  . Improved performance of mb_strlen for UTF-8 strings.

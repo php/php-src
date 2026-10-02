@@ -769,7 +769,11 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 
 	if (ce->unserialize == NULL) {
 		zend_error(E_WARNING, "Class %s has no unserializer", ZSTR_VAL(ce->name));
-		return 0;
+		/* __PHP_Incomplete_Class has no internal state, an empty instance is safe. */
+		if (ce != PHP_IC_ENTRY) {
+			return 0;
+		}
+		object_init_ex(rval, ce);
 	} else if (ce->unserialize(rval, ce, (const unsigned char*)*p, datalen, (zend_unserialize_data *)var_hash) != SUCCESS) {
 		return 0;
 	}

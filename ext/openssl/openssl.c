@@ -4514,6 +4514,11 @@ static zend_result php_openssl_setup_rsa_pss_salt_length(EVP_PKEY_CTX *pctx, EVP
 		return SUCCESS;
 	}
 
+	/* For AUTO, keep the OpenSSL default salt length. */
+	if (salt_length == RSA_PSS_SALTLEN_AUTO) {
+		return SUCCESS;
+	}
+
 	/* Only apply to RSA keys */
 	if (EVP_PKEY_base_id(pkey) != EVP_PKEY_RSA && EVP_PKEY_base_id(pkey) != EVP_PKEY_RSA_PSS) {
 		return SUCCESS;

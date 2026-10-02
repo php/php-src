@@ -7695,8 +7695,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_USER_CAL
 				call_info |= ZEND_CALL_HAS_THIS;
 			}
 		} else if (fcc.object) {
-			GC_ADDREF(fcc.object); /* For $this pointer */
-			object_or_called_scope = fcc.object;
+			/* For $this pointer */
+			object_or_called_scope = zend_object_copy(fcc.object);
 			call_info |= ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS;
 		}
 
@@ -10470,8 +10470,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_USER_CAL
 				call_info |= ZEND_CALL_HAS_THIS;
 			}
 		} else if (fcc.object) {
-			GC_ADDREF(fcc.object); /* For $this pointer */
-			object_or_called_scope = fcc.object;
+			/* For $this pointer */
+			object_or_called_scope = zend_object_copy(fcc.object);
 			call_info |= ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS;
 		}
 
@@ -13135,8 +13135,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_USER_CAL
 				call_info |= ZEND_CALL_HAS_THIS;
 			}
 		} else if (fcc.object) {
-			GC_ADDREF(fcc.object); /* For $this pointer */
-			object_or_called_scope = fcc.object;
+			/* For $this pointer */
+			object_or_called_scope = zend_object_copy(fcc.object);
 			call_info |= ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS;
 		}
 
@@ -23276,7 +23276,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_BIND_LEXICAL_
 		Z_TRY_ADDREF_P(var);
 	}
 
-	zend_closure_bind_var_ex(closure,
+	zend_closure_bind_var_ex(Z_OBJ_P(closure),
 		(opline->extended_value & ~(ZEND_BIND_REF|ZEND_BIND_IMPLICIT)), var);
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -60556,8 +60556,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_USER_CALL_SPE
 				call_info |= ZEND_CALL_HAS_THIS;
 			}
 		} else if (fcc.object) {
-			GC_ADDREF(fcc.object); /* For $this pointer */
-			object_or_called_scope = fcc.object;
+			/* For $this pointer */
+			object_or_called_scope = zend_object_copy(fcc.object);
 			call_info |= ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS;
 		}
 
@@ -63331,8 +63331,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_USER_CALL_SPE
 				call_info |= ZEND_CALL_HAS_THIS;
 			}
 		} else if (fcc.object) {
-			GC_ADDREF(fcc.object); /* For $this pointer */
-			object_or_called_scope = fcc.object;
+			/* For $this pointer */
+			object_or_called_scope = zend_object_copy(fcc.object);
 			call_info |= ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS;
 		}
 
@@ -65894,8 +65894,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_USER_CALL_SPE
 				call_info |= ZEND_CALL_HAS_THIS;
 			}
 		} else if (fcc.object) {
-			GC_ADDREF(fcc.object); /* For $this pointer */
-			object_or_called_scope = fcc.object;
+			/* For $this pointer */
+			object_or_called_scope = zend_object_copy(fcc.object);
 			call_info |= ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS;
 		}
 
@@ -75935,7 +75935,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_BIND_LEXICAL_SPEC_
 		Z_TRY_ADDREF_P(var);
 	}
 
-	zend_closure_bind_var_ex(closure,
+	zend_closure_bind_var_ex(Z_OBJ_P(closure),
 		(opline->extended_value & ~(ZEND_BIND_REF|ZEND_BIND_IMPLICIT)), var);
 	ZEND_VM_NEXT_OPCODE();
 }

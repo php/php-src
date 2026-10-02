@@ -114,6 +114,9 @@ U_CFUNC int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char 
 	if(puchar_pos) {
 		*puchar_pos = -1;
 	}
+	if (haystack_len == 0 && needle_len > 0) {
+		return -1;
+	}
 	/* convert the strings to UTF-16. */
 
 	status = U_ZERO_ERROR;
@@ -198,7 +201,7 @@ U_CFUNC int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char 
 	if(char_pos != USEARCH_DONE && ubrk_isBoundary(bi, char_pos)) {
 		ret_pos = grapheme_count_graphemes(bi, uhaystack,char_pos);
 		if(puchar_pos) {
-			*puchar_pos = char_pos;
+			*puchar_pos = u_countChar32(uhaystack, char_pos);
 		}
 	} else {
 		ret_pos = -1;

@@ -8725,10 +8725,7 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 				ZEND_UNREACHABLE();
 			}
 		} else if (STACK_FLAGS(stack, i) == ZREG_THIS) {
-			zend_object *obj = Z_OBJ(EX(This));
-
-			GC_ADDREF(obj);
-			ZVAL_OBJ(EX_VAR_NUM(i), obj);
+			ZVAL_OBJ_COPY(EX_VAR_NUM(i), Z_OBJ(EX(This)));
 		} else if (STACK_FLAGS(stack, i) == ZREG_ZVAL_ADDREF) {
 			Z_TRY_ADDREF_P(EX_VAR_NUM(i));
 		} else if (STACK_FLAGS(stack, i) == ZREG_ZVAL_COPY) {

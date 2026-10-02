@@ -1208,8 +1208,7 @@ PHP_FUNCTION(xml_set_object)
 		OBJ_RELEASE(parser->object);
 	}
 
-	parser->object = new_this;
-	GC_ADDREF(parser->object);
+	parser->object = zend_object_copy(new_this);
 
 	RETURN_TRUE;
 }

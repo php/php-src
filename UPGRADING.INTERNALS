@@ -33,6 +33,13 @@ PHP 8.7 INTERNALS UPGRADE NOTES
   zend_is_callable(const zval *callable, zend_fcall_info_cache *fcc, char **error)
   from zend_is_callable(const zval *callable, uint32_t check_flags, zend_string **callable_name).
   This new signature covers the most common parameters used with zend_is_callable_ex().
+- Removed zend_hrtime_posix_clock_id. zend_hrtime() always uses CLOCK_MONOTONIC
+  on POSIX platforms.
+- Function pointer signature for interface_gets_implemented has been made void.
+  Implementations are expected to use zend_error_noreturn upon failure.
+- Added a new zend_object_copy() function which increases the refcount of
+  a zend_object* and returns it. Allowing more descriptive code rather than
+  doing an assignment followed by GC_ADDREF().
 
 ========================
 2. Build system changes
@@ -49,6 +56,12 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 ========================
 3. Module changes
 ========================
+
+- MySQLi:
+  . Removed the reverse API. The mysqlnd_reverse_api.h header, the
+    MYSQLND_REVERSE_API struct and the functions zval_to_mysqlnd(),
+    mysqlnd_reverse_api_register_api() and mysqlnd_reverse_api_get_api_list()
+    no longer exist.
 
 - Standard:
   . php_explode() now takes a HashTable* instead of a zval* to store the
