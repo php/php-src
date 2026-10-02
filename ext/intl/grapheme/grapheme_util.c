@@ -184,6 +184,12 @@ int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle,
 					break;
 				}
 				prev_pos = char_pos;
+				int32_t next_pos = ubrk_following(bi, char_pos);
+				if (next_pos == UBRK_DONE) {
+					break;
+				}
+				usearch_setOffset(src, next_pos, &status);
+				STRPOS_CHECK_STATUS(status, "Invalid search offset");
 			} while(1);
 		}
 	} else {
