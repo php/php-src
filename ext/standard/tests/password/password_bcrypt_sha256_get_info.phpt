@@ -5,7 +5,7 @@ Test password_get_info() with bcrypt-sha256
 //-=-=-=-
 
 // Default cost (12)
-var_dump(password_get_info(password_hash("foo", PASSWORD_BCRYPT_SHA256)));
+var_dump(password_get_info('$bcrypt-sha256$v=2,t=2b,r=12$Ge8FmPKsQyGbz2aS6.c.o4$F.trVwbr/wDlyxMl/H8x1Pj.yiLhmCu'));
 
 // 1-digit cost
 var_dump(password_get_info(password_hash("foo", PASSWORD_BCRYPT_SHA256, ["cost" => 4])));
