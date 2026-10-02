@@ -41,6 +41,11 @@ PHP                                                                        NEWS
   . Fixed OSS-Fuzz #545352966 (default value AST of an SHM-persisted partial).
     (ndossche)
 
+- OpenSSL:
+  . openssl_digest() and openssl_x509_fingerprint() now emit a warning for
+    digest algorithms with no default output length (SHAKE128, SHAKE256 on
+    OpenSSL 3.4 and later) instead of failing silently. (Alexander Danilov)
+
 - PDO:
   . Fixed PDOStatement::getColumnMeta() reading out of bounds for an invalid
     column index. (Ilia Alshanetsky)

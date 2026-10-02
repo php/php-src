@@ -581,6 +581,15 @@ X509 *php_openssl_x509_from_zval(
 	return cert;
 }
 
+static void php_openssl_fingerprint_warn(php_stream *stream, zend_enum_StreamErrorCode code, const char *msg)
+{
+	if (stream != NULL) {
+		php_stream_error(stream, NULL, E_WARNING, true, code, "%s", msg);
+	} else {
+		php_error_docref(NULL, E_WARNING, "%s", msg);
+	}
+}
+
 zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, bool raw, php_stream *stream)
 {
 	unsigned char md[EVP_MAX_MD_SIZE];
@@ -589,19 +598,20 @@ zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, bool r
 	zend_string *ret;
 
 	if (!(mdtype = php_openssl_get_evp_md_by_name(method))) {
-		if (stream != NULL) {
-			php_stream_warn(stream, Generic, "Unknown digest algorithm");
-		} else {
-			php_error_docref(NULL, E_WARNING, "Unknown digest algorithm");
-		}
+		php_openssl_fingerprint_warn(stream, PHP_STREAM_EC(Generic), "Unknown digest algorithm");
 		return NULL;
 	} else if (!X509_digest(peer, mdtype, md, &n)) {
+		bool is_xof = EVP_MD_flags(mdtype) & EVP_MD_FLAG_XOF;
 		php_openssl_release_evp_md(mdtype);
 		php_openssl_store_errors();
-		if (stream != NULL) {
-			php_stream_warn(stream, EncodingFailed, "Could not generate signature");
+		if (is_xof) {
+			php_openssl_fingerprint_warn(
+				stream,
+				PHP_STREAM_EC(Generic),
+			"Unsupported digest algorithm: output length must be specified"
+			);
 		} else {
-			php_error_docref(NULL, E_WARNING, "Could not generate signature");
+			php_openssl_fingerprint_warn(stream, PHP_STREAM_EC(EncodingFailed), "Could not generate signature");
 		}
 		return NULL;
 	}
