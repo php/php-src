@@ -839,6 +839,54 @@ static int php_openssl_compare_func(Bucket *a, Bucket *b)
 	return string_compare_function(&a->val, &b->val);
 }
 
+/* Names come from the legacy OBJ_NAME table to keep them stable, but only those that can be fetched from the configured
+ * libctx are listed. Aliases are not known to the provider, so they are checked through the digest they resolve to */
+static bool php_openssl_md_is_available(const char *name)
+{
+	const EVP_MD *legacy_md;
+	EVP_MD *md;
+
+	ERR_set_mark();
+	md = EVP_MD_fetch(PHP_OPENSSL_LIBCTX, name, PHP_OPENSSL_PROPQ);
+	if (md == NULL) {
+		legacy_md = (const EVP_MD *) OBJ_NAME_get(name, OBJ_NAME_TYPE_MD_METH);
+		if (legacy_md != NULL) {
+			md = EVP_MD_fetch(PHP_OPENSSL_LIBCTX, EVP_MD_get0_name(legacy_md), PHP_OPENSSL_PROPQ);
+		}
+	}
+	/* Failed fetches are expected for unavailable digests, drop only the errors raised here. */
+	ERR_pop_to_mark();
+
+	if (md == NULL) {
+		return false;
+	}
+	EVP_MD_free(md);
+
+	return true;
+}
+
+static void php_openssl_add_available_method_or_alias(const OBJ_NAME *name, void *arg)
+{
+	if (php_openssl_md_is_available(name->name)) {
+		php_openssl_add_method_or_alias(name, arg);
+	}
+}
+
+static void php_openssl_add_available_method(const OBJ_NAME *name, void *arg)
+{
+	if (name->alias == 0 && php_openssl_md_is_available(name->name)) {
+		php_openssl_add_method_or_alias(name, arg);
+	}
+}
+
+void php_openssl_get_md_methods(zval *return_value, bool aliases)
+{
+	array_init(return_value);
+	OBJ_NAME_do_all_sorted(OBJ_NAME_TYPE_MD_METH,
+		aliases ? php_openssl_add_available_method_or_alias : php_openssl_add_available_method,
+		return_value);
+}
+
 void php_openssl_get_cipher_methods(zval *return_value, bool aliases)
 {
 	array_init(return_value);

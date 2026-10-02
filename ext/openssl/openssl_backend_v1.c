@@ -707,6 +707,14 @@ void php_openssl_release_evp_cipher(const EVP_CIPHER *cipher)
 	// Do nothing as the cipher is static
 }
 
+void php_openssl_get_md_methods(zval *return_value, bool aliases)
+{
+	array_init(return_value);
+	OBJ_NAME_do_all_sorted(OBJ_NAME_TYPE_MD_METH,
+		aliases ? php_openssl_add_method_or_alias : php_openssl_add_method,
+		return_value);
+}
+
 void php_openssl_get_cipher_methods(zval *return_value, bool aliases)
 {
 	array_init(return_value);

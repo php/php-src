@@ -1664,14 +1664,6 @@ void php_openssl_add_method(const OBJ_NAME *name, void *arg)
 	}
 }
 
-void php_openssl_get_md_methods(zval *return_value, bool aliases)
-{
-    array_init(return_value);
-	OBJ_NAME_do_all_sorted(OBJ_NAME_TYPE_MD_METH,
-		aliases ? php_openssl_add_method_or_alias: php_openssl_add_method,
-		return_value);
-}
-
 void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, const EVP_CIPHER *cipher_type)
 {
 	int cipher_mode = EVP_CIPHER_mode(cipher_type);
