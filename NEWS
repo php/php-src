@@ -107,6 +107,8 @@ PHP                                                                        NEWS
     sockets. (David Carlier)
   . Fixed bug GH-23905 (Failed seek on php://memory and php://temp streams
     sets the stream position to -1). (Marc Bennewitz)
+  . Fixed a failed seek discarding the read buffer of buffered streams.
+    (Marc Bennewitz)
 
 - Standard:
   . Fixed bug #60110 (fclose(), file_put_contents(), copy() do not return false

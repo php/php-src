@@ -36,6 +36,10 @@ PHP 8.7 UPGRADE NOTES
   . A failed fseek() on php://memory and php://temp streams now leaves the
     stream position unchanged. Previously, ftell() returned false afterwards
     and the stream was moved to its start.
+  . A failed fseek() on buffered streams, such as plain files, now leaves the
+    position of the next read or write unchanged. Previously, the read buffer
+    was discarded, so the next read skipped the buffered data and the next
+    write happened where the stream had read ahead to.
 
 ========================================
 2. New Features
