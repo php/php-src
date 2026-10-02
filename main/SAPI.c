@@ -33,8 +33,6 @@
 
 #include "rfc1867.h"
 
-#include "php_content_types.h"
-
 #ifdef ZTS
 SAPI_API int sapi_globals_id;
 SAPI_API size_t sapi_globals_offset;
@@ -51,7 +49,7 @@ static void sapi_globals_ctor(sapi_globals_struct *sapi_globals)
 {
 	memset(sapi_globals, 0, sizeof(*sapi_globals));
 	zend_hash_init(&sapi_globals->known_post_content_types, 8, NULL, _type_dtor, 1);
-	php_setup_sapi_content_types();
+	sapi_register_post_entries(php_post_entries);
 }
 
 static void sapi_globals_dtor(sapi_globals_struct *sapi_globals)
@@ -177,13 +175,6 @@ SAPI_API void sapi_read_post_data(void)
 	} else {
 		/* fallback */
 		SG(request_info).post_entry = NULL;
-		if (UNEXPECTED(!sapi_module.default_post_reader)) {
-			/* this should not happen as there should always be a default_post_reader */
-			SG(request_info).content_type_dup = NULL;
-			sapi_module.sapi_error(E_WARNING, "Unsupported content type:  '%s'", content_type);
-			efree(content_type);
-			return;
-		}
 	}
 	if (oldchar) {
 		*(p-1) = oldchar;
@@ -196,8 +187,11 @@ SAPI_API void sapi_read_post_data(void)
 		post_reader_func();
 	}
 
-	if(sapi_module.default_post_reader) {
-		sapi_module.default_post_reader();
+	if (!strcmp(SG(request_info).request_method, "POST")) {
+		if (NULL == SG(request_info).post_entry) {
+			/* no post handler registered, so we just swallow the data */
+			sapi_read_standard_form_data();
+		}
 	}
 }
 
@@ -918,6 +912,13 @@ SAPI_API zend_result sapi_send_headers(void)
 	return ret;
 }
 
+/* {{{ php_post_entries[] */
+const sapi_post_entry php_post_entries[] = {
+	{ DEFAULT_POST_CONTENT_TYPE, sizeof(DEFAULT_POST_CONTENT_TYPE)-1, sapi_read_standard_form_data,	php_std_post_handler },
+	{ MULTIPART_CONTENT_TYPE,    sizeof(MULTIPART_CONTENT_TYPE)-1,    NULL,                         rfc1867_post_handler },
+	{ NULL, 0, NULL, NULL }
+};
+/* }}} */
 
 SAPI_API zend_result sapi_register_post_entries(const sapi_post_entry *post_entries)
 {
@@ -955,17 +956,6 @@ SAPI_API void sapi_unregister_post_entry(const sapi_post_entry *post_entry)
 	zend_hash_str_del(&SG(known_post_content_types), post_entry->content_type,
 			post_entry->content_type_len);
 }
-
-
-SAPI_API zend_result sapi_register_default_post_reader(void (*default_post_reader)(void))
-{
-	if (SG(sapi_started) && EG(current_execute_data)) {
-		return FAILURE;
-	}
-	sapi_module.default_post_reader = default_post_reader;
-	return SUCCESS;
-}
-
 
 SAPI_API zend_result sapi_register_treat_data(void (*treat_data)(int arg, char *str, zval *destArray))
 {
