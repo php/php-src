@@ -200,8 +200,8 @@ typedef struct _fcgi_hash {
 typedef struct _fcgi_req_hook 	fcgi_req_hook;
 
 struct _fcgi_req_hook {
-	void(*on_accept)(void);
-	void(*on_read)(void);
+	void(*on_accept)(bool firstAccept);
+	void(*on_read)(bool keptAlive);
 	void(*on_close)(void);
 };
 
@@ -874,7 +874,11 @@ static void fcgi_hook_dummy(void) {
 	return;
 }
 
-fcgi_request *fcgi_init_request(int listen_socket, void(*on_accept)(void), void(*on_read)(void), void(*on_close)(void))
+static void fcgi_hook_dummy_bool(bool) {
+	return;
+}
+
+fcgi_request *fcgi_init_request(int listen_socket, void(*on_accept)(bool), void(*on_read)(bool), void(*on_close)(void))
 {
 	fcgi_request *req = calloc(1, sizeof(fcgi_request));
 	req->listen_socket = listen_socket;
@@ -896,8 +900,8 @@ fcgi_request *fcgi_init_request(int listen_socket, void(*on_accept)(void), void(
 
 	*/
 	req->out_pos = req->out_buf;
-	req->hook.on_accept = on_accept ? on_accept : fcgi_hook_dummy;
-	req->hook.on_read = on_read ? on_read : fcgi_hook_dummy;
+	req->hook.on_accept = on_accept ? on_accept : fcgi_hook_dummy_bool;
+	req->hook.on_read = on_read ? on_read : fcgi_hook_dummy_bool;
 	req->hook.on_close = on_close ? on_close : fcgi_hook_dummy;
 
 #ifdef _WIN32
@@ -1364,6 +1368,8 @@ int fcgi_accept_request(fcgi_request *req)
 	OVERLAPPED ov;
 #endif
 
+	bool keptAlive = false;
+	bool firstAccept = false;
 	while (1) {
 		if (req->fd < 0) {
 			while (1) {
@@ -1371,7 +1377,8 @@ int fcgi_accept_request(fcgi_request *req)
 					return -1;
 				}
 
-				req->hook.on_accept();
+				req->hook.on_accept(firstAccept);
+				firstAccept = keptAlive = false;
 #ifdef _WIN32
 				if (!req->tcp) {
 					pipe = (HANDLE)_get_osfhandle(req->listen_socket);
@@ -1479,7 +1486,8 @@ int fcgi_accept_request(fcgi_request *req)
 		} else if (in_shutdown) {
 			return -1;
 		}
-		req->hook.on_read();
+		req->hook.on_read(keptAlive);
+		keptAlive = true;
 		int read_result = fcgi_read_request(req);
 		if (read_result == 1) {
 #ifdef _WIN32

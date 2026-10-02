@@ -35,7 +35,7 @@ const char *fpm_request_get_stage_name(int stage) {
 	return requests_stages[stage];
 }
 
-void fpm_request_accepting(void)
+void fpm_request_accepting(bool firstAccept)
 {
 	struct fpm_scoreboard_proc_s *proc;
 	struct timeval now;
@@ -54,11 +54,13 @@ void fpm_request_accepting(void)
 	proc->tv = now;
 	fpm_scoreboard_proc_release(proc);
 
-	/* idle++, active-- */
-	fpm_scoreboard_update_commit(1, -1, 0, 0, 0, 0, 0, FPM_SCOREBOARD_ACTION_INC, NULL);
+	if (!firstAccept) {
+		/* idle++, active-- */
+		fpm_scoreboard_update_commit(1, -1, 0, 0, 0, 0, 0, FPM_SCOREBOARD_ACTION_INC, NULL);
+	}
 }
 
-void fpm_request_reading_headers(void)
+void fpm_request_reading_headers(bool keptAlive)
 {
 	struct fpm_scoreboard_proc_s *proc;
 
@@ -98,8 +100,10 @@ void fpm_request_reading_headers(void)
 	proc->content_length = 0;
 	fpm_scoreboard_proc_release(proc);
 
-	/* idle--, active++, request++ */
-	fpm_scoreboard_update_commit(-1, 1, 0, 0, 1, 0, 0, FPM_SCOREBOARD_ACTION_INC, NULL);
+	if (!keptAlive) {
+		/* idle--, active++, request++ */
+		fpm_scoreboard_update_commit(-1, 1, 0, 0, 1, 0, 0, FPM_SCOREBOARD_ACTION_INC, NULL);
+	}
 }
 
 void fpm_request_info(void)
