@@ -1574,6 +1574,9 @@ tail_call:
 				GC_ADDREF(ht);
 				if (GC_REF_CHECK_COLOR(ht, GC_WHITE)) {
 					GC_REF_SET_BLACK(ht);
+					if (!GC_INFO(ht)) {
+						gc_add_garbage((zend_refcounted *)ht);
+					}
 					for (; n != 0; n--) {
 						if (Z_COLLECTABLE_P(zv)) {
 							ref = Z_COUNTED_P(zv);
