@@ -170,6 +170,8 @@ PHP                                                                        NEWS
   . Fixed AArch64 JIT encoding of invalid logical immediates. (jorgsowa)
   . Fixed unsound shift_left_overflows range when shift wraps. (mkrishna793)
   . Fix block pass dropping ZEND_FAST_CALL OP2 definition. (Mrmaxmeier)
+  . Fixed bug GH-23626 (orphaned temporaries cause leaks and assertions).
+    (ndossche, khaledalam)
 
 - OpenSSL:
   . Fixed bug GH-24784 (openssl_pkcs7_read() and openssl_cms_read() overwrite
