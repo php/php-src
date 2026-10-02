@@ -1384,13 +1384,13 @@ static bool ts_enqueue(zend_coroutine_t *coroutine, zend_object *error, bool tra
 {
 	ts_coroutine_t *ts = ts_from_coro(coroutine);
 
-	/* Finished: nothing to run, the enqueue is a no-op. */
 	if (UNEXPECTED(ZEND_COROUTINE_IS_FINISHED(coroutine))) {
 		if (error != NULL && transfer_error) {
 			OBJ_RELEASE(error);
 		}
 
-		return true;
+		zend_throw_error(NULL, "Cannot enqueue a finished coroutine");
+		return false;
 	}
 
 	/* Thrown at the suspension point when the coroutine runs. */

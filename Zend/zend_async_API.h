@@ -257,7 +257,9 @@ typedef zend_coroutine_t *(*zend_async_gc_new_coroutine_t)(void);
  * Enqueuing a fresh coroutine and resuming a suspended one are the same
  * operation. A non-NULL `error` is thrown at the suspension point when the
  * coroutine runs — how cancellation and IO/timeout failures reach waiting
- * code; transfer_error passes ownership of the reference. */
+ * code; transfer_error passes ownership of the reference. A FINISHED
+ * coroutine cannot run again: the call returns false with an Error thrown,
+ * and a transferred `error` is released. */
 typedef bool (*zend_async_enqueue_coroutine_t)(
 		zend_coroutine_t *coroutine, zend_object *error, bool transfer_error);
 /* Yield the current coroutine (-> STATUS_SUSPENDED) and give control to the
