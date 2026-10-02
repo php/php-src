@@ -30,6 +30,8 @@ PHP                                                                        NEWS
     function and a later request calls it. (Ilia Alshanetsky)
   . Fixed System V shared memory emulation for Windows attaching segments past
     the end of their mapping. (Ilia Alshanetsky)
+  . Fixed bug GH-24050 (GC frees an object still held by a resurrected closure
+    when (object) and use share an array). (David Carlier)
 
 - DOM:
   . Fixed use-after-free when re-constructing a DOMXPath whose php:function
