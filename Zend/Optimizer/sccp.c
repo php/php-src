@@ -1954,6 +1954,28 @@ static void sccp_mark_feasible_successors(
 	scdf_mark_edge_feasible(scdf, block_num, block->successors[s]);
 }
 
+/* Unlike zend_is_identical(), this does not treat 0.0 and -0.0 as the same value.
+ * Returns int to be usable as compare_func_t. */
+static int sccp_values_differ(const void *p1, const void *p2)
+{
+	const zval *a = p1;
+	const zval *b = p2;
+
+	if (Z_TYPE_P(a) != Z_TYPE_P(b)) {
+		return 1;
+	}
+	if (Z_TYPE_P(a) == IS_DOUBLE) {
+		return memcmp(&Z_DVAL_P(a), &Z_DVAL_P(b), sizeof(double)) != 0;
+	}
+	if (Z_TYPE_P(a) == IS_ARRAY) {
+		return Z_ARRVAL_P(a) != Z_ARRVAL_P(b)
+			&& zend_hash_compare(Z_ARRVAL_P(a), Z_ARRVAL_P(b), sccp_values_differ, 1) != 0;
+	}
+	ZEND_ASSERT(IS_PARTIAL_ARRAY(a) || IS_PARTIAL_OBJECT(a)
+		|| ((1 << Z_TYPE_P(a)) & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_BOOL|MAY_BE_LONG|MAY_BE_STRING)));
+	return !zend_is_identical(a, b);
+}
+
 static void join_hash_tables(HashTable *ret, HashTable *ht1, HashTable *ht2)
 {
 	zend_ulong index;
@@ -1966,7 +1988,7 @@ static void join_hash_tables(HashTable *ret, HashTable *ht1, HashTable *ht2)
 		} else {
 			val2 = zend_hash_index_find(ht2, index);
 		}
-		if (val2 && zend_is_identical(val1, val2)) {
+		if (val2 && !sccp_values_differ(val1, val2)) {
 			if (key) {
 				val1 = zend_hash_add_new(ret, key, val1);
 			} else {
@@ -2034,7 +2056,7 @@ static void join_phi_values(zval *a, zval *b, bool escape) {
 			zval_ptr_dtor_nogc(a);
 			MAKE_BOT(a);
 		}
-	} else if (!zend_is_identical(a, b)) {
+	} else if (sccp_values_differ(a, b)) {
 		if (join_partial_arrays(a, b) == FAILURE) {
 			zval_ptr_dtor_nogc(a);
 			MAKE_BOT(a);
