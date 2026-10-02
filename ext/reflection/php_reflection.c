@@ -266,6 +266,7 @@ static void reflection_free_objects_storage(zend_object *object) /* {{{ */
 			case REF_TYPE_GENERATOR:
 			case REF_TYPE_FIBER:
 			case REF_TYPE_CLASS_CONSTANT:
+			case REF_TYPE_REFERENCE:
 			case REF_TYPE_OTHER:
 				break;
 		}
