@@ -531,8 +531,13 @@ static bool ts_await(zend_coroutine_t *coroutine)
 	ts_coroutine_t *target = ts_from_coro(coroutine);
 	zend_coroutine_t *self = ZEND_ASYNC_CURRENT_COROUTINE;
 
-	if (UNEXPECTED(self == NULL || ZEND_ASYNC_IN_SCHEDULER_CONTEXT)) {
+	if (UNEXPECTED(self == NULL)) {
 		zend_throw_error(NULL, "await() requires a running coroutine");
+		return false;
+	}
+
+	/* The scheduler's own work cannot wait: the caller goes on without it. */
+	if (UNEXPECTED(ZEND_ASYNC_IN_SCHEDULER_CONTEXT)) {
 		return false;
 	}
 
@@ -1731,6 +1736,11 @@ PHP_FUNCTION(TestScheduler_await)
 	ZEND_PARSE_PARAMETERS_END();
 
 	ts_coroutine_t *target = ts_from_obj(object);
+
+	if (UNEXPECTED(ZEND_ASYNC_IN_SCHEDULER_CONTEXT)) {
+		zend_throw_error(NULL, "await() requires a running coroutine");
+		RETURN_THROWS();
+	}
 
 	if (!ts_await(&target->coro)) {
 		RETURN_THROWS();

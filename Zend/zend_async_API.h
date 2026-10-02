@@ -94,7 +94,7 @@ typedef bool (*zend_coroutine_finish_handler_fn)(
  * scheduler.
  */
 typedef enum {
-	ZEND_COROUTINE_STATUS_CREATED = 0, /* spawned, never executed */
+	ZEND_COROUTINE_STATUS_CREATED = 0, /* allocated, not yet enqueued */
 	ZEND_COROUTINE_STATUS_QUEUED, /* ready, waiting in the run queue */
 	ZEND_COROUTINE_STATUS_RUNNING, /* currently executing */
 	ZEND_COROUTINE_STATUS_SUSPENDED, /* waiting; see awaiting_info */
@@ -103,7 +103,8 @@ typedef enum {
 
 struct _zend_coroutine_s {
 	/* Bits 0-3: zend_coroutine_status (the scheduler is the only writer);
-	 * bits 4+: ZEND_COROUTINE_F_* modifiers. */
+	 * bits 4-15: the core's ZEND_COROUTINE_F_* modifiers; bits 16-31 belong to
+	 * the scheduler. */
 	uint32_t flags;
 	/* Offset of the wrapping zend_object within the allocation, when the
 	 * coroutine is embedded in one (single-allocation pattern: the object
@@ -338,7 +339,9 @@ typedef bool (*zend_async_defer_t)(zend_async_microtask_t *task);
  * waiter bookkeeping (it lives on the awaited coroutine), may wake the waiter
  * with a direct switch instead of the run queue, and marks the outcome as
  * observed. False when the wait was aborted — a cancellation delivered to the
- * waiter, or misuse (no current coroutine, awaiting itself). */
+ * waiter, or misuse (no current coroutine, awaiting itself) — or when the wait
+ * is not possible here (the scheduler is running its own work): false without
+ * an exception, and the caller does not wait. */
 typedef bool (*zend_async_coroutine_await_t)(zend_coroutine_t *coroutine);
 
 /*
@@ -368,11 +371,13 @@ typedef zend_coroutine_t *(*zend_async_coroutine_from_object_t)(zend_object *obj
  */
 typedef zend_coroutine_t *(*zend_async_intercept_fiber_t)(zend_fiber *fiber);
 
-/* The frame a suspended coroutine is parked in, or NULL when it is not
- * suspended (or the provider does not track it). The stack a coroutine runs
- * on belongs to the scheduler, so this is the only way for the engine to
- * reach it — the garbage collector needs it to see the variables alive on
- * that stack, and a backtrace needs it to walk past the coroutine. */
+/* The frame a parked coroutine waits in, or NULL when it is not parked (or the
+ * provider does not track it). Parked means started, not running and not
+ * finished: a coroutine that yielded is QUEUED and still has a frame. The
+ * stack a coroutine runs on belongs to the scheduler, so this is the only way
+ * for the engine to reach it — the garbage collector needs it to see the
+ * variables alive on that stack, and a backtrace needs it to walk past the
+ * coroutine. */
 typedef zend_execute_data *(*zend_async_coroutine_execute_data_t)(zend_coroutine_t *coroutine);
 
 /*
@@ -606,7 +611,7 @@ END_EXTERN_C()
 #define ZEND_ASYNC_CALL_ON_MAIN_STACK(fn, arg) zend_async_call_on_main_stack_fn((fn), (arg))
 #define ZEND_ASYNC_DEFER(task) zend_async_defer_fn(task)
 
-/* The frame a suspended coroutine is parked in, or NULL. */
+/* The frame a parked coroutine waits in, or NULL. */
 #define ZEND_ASYNC_COROUTINE_EXECUTE_DATA(coroutine) \
 	(zend_async_coroutine_execute_data_fn != NULL \
 					? zend_async_coroutine_execute_data_fn(coroutine) \
