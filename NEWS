@@ -29,6 +29,11 @@ PHP                                                                        NEWS
 - MySQLi:
   . Fix GH-22854: Fixed failed assertion when accessing mysqli property after
     failed reconnection. (Kamil Tekiela)
+  . Fixed memory leak when closing a prepared statement after its connection
+    was killed. (Kamil Tekiela)
+
+- MySQLnd:
+  . Fixed field_count not resetting on OK packet. (Kamil Tekiela)
 
 - Opcache:
   . Fixed bug GH-23693 (Tracing JIT produces wrong results for a guard on a
@@ -72,6 +77,12 @@ PHP                                                                        NEWS
 - SQLite:
   . Fixed a crash when SQLite3::close() is called from a userland callback.
     (Ilia Alshanetsky)
+  . Fixed bug GH-22051 (Inconsistent error reporting in SQLite3Result::reset()
+    and SQLite3Result::finalize()). (Ilia Alshanetsky)
+
+- Streams:
+  . Applied the so_linger, so_rcvbuf and so_sndbuf context options to unix
+    sockets. (David Carlier)
 
 - Standard:
   . Fixed bug #60110 (fclose(), file_put_contents(), copy() do not return false

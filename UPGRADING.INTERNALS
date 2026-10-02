@@ -17,20 +17,39 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 - Removed zend_execute_scripts(). Manually call zend_execute_script() in a loop
   instead.
 - Removed ZEND_STATIC_ASSERT(). Use C11 static_assert() directly instead.
+- Removed zend_atomic.h and the zend_atomic_* types and functions.
+  Use the standard C11 atomic_* types and functions instead.
 - The sapi_terminate_process() function was removed.
 - The sapi_force_http_10() function was removed.
 - The sapi_get_fd() function was removed.
 - The sapi_get_target_uid() and sapi_get_target_gid() functions were removed.
 - The ZTS symbols compiler_globals_offset and executor_globals_offset have been
   removed: CG()/EG() now reach the globals through a __thread struct.
+- Removed HAVE_NORETURN and HAVE_NORETURN_ALIAS. ZEND_NORETURN is guaranteed to
+  work.
+- Redefined ZEND_NORETURN to make use of the [[noreturn]] attribute for C++
+  and C23, which means that ZEND_NORETURN needs to come first in the modifier
+  list. Consider using noreturn (C11) / [[noreturn]] (C23) directly if
+  header interoperability is not required.
+- The signature of zend_is_callable() has been changed to
+  zend_is_callable(const zval *callable, zend_fcall_info_cache *fcc, char **error)
+  from zend_is_callable(const zval *callable, uint32_t check_flags, zend_string **callable_name).
+  This new signature covers the most common parameters used with zend_is_callable_ex().
+- Removed zend_hrtime_posix_clock_id. zend_hrtime() always uses CLOCK_MONOTONIC
+  on POSIX platforms.
+- Function pointer signature for interface_gets_implemented has been made void.
+  Implementations are expected to use zend_error_noreturn upon failure.
+- Added a new zend_object_copy() function which increases the refcount of
+  a zend_object* and returns it. Allowing more descriptive code rather than
+  doing an assignment followed by GC_ADDREF().
 
 ========================
 2. Build system changes
 ========================
 
 - Windows build system changes:
-  . C sources are now compiled as C17. MSVC builds require Visual Studio
-    2026 or later and enable /experimental:c11atomics.
+  . C sources are now compiled as C17 and require C11 atomics. MSVC builds require
+    Visual Studio 2026 or later and enable /experimental:c11atomics.
   . C++-only extension compiler flags can be added to CXXFLAGS_<EXTENSION>.
 
 - Unix build system changes:
@@ -43,6 +62,12 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 ========================
 3. Module changes
 ========================
+
+- MySQLi:
+  . Removed the reverse API. The mysqlnd_reverse_api.h header, the
+    MYSQLND_REVERSE_API struct and the functions zval_to_mysqlnd(),
+    mysqlnd_reverse_api_register_api() and mysqlnd_reverse_api_get_api_list()
+    no longer exist.
 
 - Standard:
   . php_explode() now takes a HashTable* instead of a zval* to store the

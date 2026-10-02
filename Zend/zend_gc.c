@@ -1574,6 +1574,9 @@ tail_call:
 				GC_ADDREF(ht);
 				if (GC_REF_CHECK_COLOR(ht, GC_WHITE)) {
 					GC_REF_SET_BLACK(ht);
+					if (!GC_INFO(ht)) {
+						gc_add_garbage((zend_refcounted *)ht);
+					}
 					for (; n != 0; n--) {
 						if (Z_COLLECTABLE_P(zv)) {
 							ref = Z_COUNTED_P(zv);
@@ -1857,12 +1860,12 @@ static void zend_gc_remove_root_tmpvars(void);
 
 static zend_internal_function gc_destructor_fiber;
 
-static ZEND_COLD ZEND_NORETURN void gc_create_destructor_fiber_error(void)
+ZEND_NORETURN static ZEND_COLD void gc_create_destructor_fiber_error(void)
 {
 	zend_error_noreturn(E_ERROR, "Unable to create destructor fiber");
 }
 
-static ZEND_COLD ZEND_NORETURN void gc_start_destructor_fiber_error(void)
+ZEND_NORETURN static ZEND_COLD void gc_start_destructor_fiber_error(void)
 {
 	zend_error_noreturn(E_ERROR, "Unable to start destructor fiber");
 }

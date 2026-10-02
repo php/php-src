@@ -1213,7 +1213,7 @@ static zend_always_inline bool zend_check_type_slow(
 
 	const uint32_t type_mask = ZEND_TYPE_FULL_MASK(*type);
 	if ((type_mask & MAY_BE_CALLABLE) &&
-		zend_is_callable(arg, is_internal ? IS_CALLABLE_SUPPRESS_DEPRECATIONS : 0, NULL)) {
+		zend_is_callable_ex(arg, NULL, is_internal ? IS_CALLABLE_SUPPRESS_DEPRECATIONS : 0, NULL, NULL, NULL)) {
 		return 1;
 	}
 	if ((type_mask & MAY_BE_STATIC) && zend_value_instanceof_static(arg)) {
@@ -4344,8 +4344,8 @@ ZEND_API void ZEND_FASTCALL zend_free_compiled_variables(zend_execute_data *exec
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_fcall_interrupt(zend_execute_data *call)
 {
-	zend_atomic_bool_store_ex(&EG(vm_interrupt), false);
-	if (zend_atomic_bool_load_ex(&EG(timed_out))) {
+	atomic_store(&EG(vm_interrupt), false);
+	if (atomic_load(&EG(timed_out))) {
 		zend_timeout();
 	} else if (zend_interrupt_function) {
 		zend_interrupt_function(call);
@@ -4353,7 +4353,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_fcall_interrupt(zend_execute_data *ca
 }
 
 #define ZEND_VM_INTERRUPT_CHECK() do { \
-		if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) { \
+		if (UNEXPECTED(atomic_load(&EG(vm_interrupt)))) { \
 			ZEND_VM_INTERRUPT(); \
 		} \
 	} while (0)
@@ -4365,14 +4365,14 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_fcall_interrupt(zend_execute_data *ca
 #endif
 
 #define ZEND_VM_LOOP_INTERRUPT_CHECK() do { \
-		if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) { \
+		if (UNEXPECTED(atomic_load(&EG(vm_interrupt)))) { \
 			ZEND_VM_KIND_TAILCALL_SAVE_OPLINE(); \
 			ZEND_VM_LOOP_INTERRUPT(); \
 		} \
 	} while (0)
 
 #define ZEND_VM_FCALL_INTERRUPT_CHECK(call) do { \
-		if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) { \
+		if (UNEXPECTED(atomic_load(&EG(vm_interrupt)))) { \
 			zend_fcall_interrupt(call); \
 		} \
 	} while (0)
@@ -5222,8 +5222,8 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_object(zend_o
 			call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC;
 			if (object) {
 				call_info |= ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS;
-				GC_ADDREF(object); /* For $this pointer */
-				object_or_called_scope = object;
+				/* For $this pointer */
+				object_or_called_scope = zend_object_copy(object);
 			}
 		}
 	} else {
@@ -5311,8 +5311,8 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_array(const z
 				object_or_called_scope = object->ce;
 			} else {
 				call_info |= ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS;
-				GC_ADDREF(object); /* For $this pointer */
-				object_or_called_scope = object;
+				/* For $this pointer */
+				object_or_called_scope = zend_object_copy(object);
 			}
 		}
 	} else {

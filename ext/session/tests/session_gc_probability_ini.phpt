@@ -6,7 +6,7 @@ session.gc_maxlifetime=1
 session
 --SKIPIF--
 <?php
-include('skipif.inc');
+include 'skipif.inc';
 ?>
 --FILE--
 <?php

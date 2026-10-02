@@ -564,18 +564,18 @@ static zval *pdo_stmt_instantiate(pdo_dbh_t *dbh, zval *object, zend_class_entry
 	return object;
 } /* }}} */
 
-static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry *dbstmt_ce, HashTable *ctor_args)
+static void pdo_stmt_construct(const pdo_stmt_t *stmt, zend_object *object, const zend_class_entry *dbstmt_ce, HashTable *ctor_args)
 {
 	zval query_string;
 	zend_string *key;
 
 	ZVAL_STR(&query_string, stmt->query_string);
 	key = ZSTR_INIT_LITERAL("queryString", 0);
-	zend_std_write_property(Z_OBJ_P(object), key, &query_string, NULL);
+	zend_std_write_property(object, key, &query_string, NULL);
 	zend_string_release_ex(key, 0);
 
 	if (dbstmt_ce->constructor) {
-		zend_call_known_function(dbstmt_ce->constructor, Z_OBJ_P(object), Z_OBJCE_P(object), NULL, 0, NULL, ctor_args);
+		zend_call_known_function(dbstmt_ce->constructor, object, object->ce, NULL, 0, NULL, ctor_args);
 	}
 }
 
@@ -631,7 +631,7 @@ PHP_METHOD(PDO, prepare)
 		if ((item = zend_hash_index_find(Z_ARRVAL_P(value), 1)) != NULL) {
 			if (Z_TYPE_P(item) != IS_ARRAY) {
 				zend_type_error("PDO::ATTR_STATEMENT_CLASS constructor_args must be of type ?array, %s given",
-					zend_zval_value_name(value));
+					zend_zval_value_name(item));
 				RETURN_THROWS();
 			}
 			ZVAL_COPY_VALUE(&ctor_args, item);
@@ -653,14 +653,13 @@ PHP_METHOD(PDO, prepare)
 	stmt->default_fetch_type = dbh->default_fetch_type;
 	stmt->dbh = dbh;
 	/* give it a reference to me */
-	GC_ADDREF(&dbh_obj->std);
-	stmt->database_object_handle = &dbh_obj->std;
+	stmt->database_object_handle = zend_object_copy(&dbh_obj->std);
 
 	if (dbh->methods->preparer(dbh, statement, stmt, options)) {
 		if (Z_TYPE(ctor_args) == IS_ARRAY) {
-			pdo_stmt_construct(stmt, return_value, dbstmt_ce, Z_ARRVAL(ctor_args));
+			pdo_stmt_construct(stmt, Z_OBJ_P(return_value), dbstmt_ce, Z_ARRVAL(ctor_args));
 		} else {
-			pdo_stmt_construct(stmt, return_value, dbstmt_ce, /* ctor_args */ NULL);
+			pdo_stmt_construct(stmt, Z_OBJ_P(return_value), dbstmt_ce, /* ctor_args */ NULL);
 		}
 		return;
 	}
@@ -924,17 +923,18 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value, u
 				zend_argument_type_error(value_arg_num, "User-supplied statement class cannot have a public constructor");
 				return false;
 			}
+			item = zend_hash_index_find(Z_ARRVAL_P(value), 1);
+			if (item != NULL && Z_TYPE_P(item) != IS_ARRAY) {
+				zend_argument_type_error(value_arg_num, "PDO::ATTR_STATEMENT_CLASS constructor_args must be of type ?array, %s given",
+					zend_zval_value_name(item));
+				return false;
+			}
 			dbh->def_stmt_ce = pce;
 			if (!Z_ISUNDEF(dbh->def_stmt_ctor_args)) {
 				zval_ptr_dtor(&dbh->def_stmt_ctor_args);
 				ZVAL_UNDEF(&dbh->def_stmt_ctor_args);
 			}
-			if ((item = zend_hash_index_find(Z_ARRVAL_P(value), 1)) != NULL) {
-				if (Z_TYPE_P(item) != IS_ARRAY) {
-					zend_argument_type_error(value_arg_num, "PDO::ATTR_STATEMENT_CLASS constructor_args must be of type ?array, %s given",
-						zend_zval_value_name(value));
-					return false;
-				}
+			if (item != NULL) {
 				ZVAL_COPY(&dbh->def_stmt_ctor_args, item);
 			}
 			return true;
@@ -1217,8 +1217,7 @@ PHP_METHOD(PDO, query)
 	stmt->default_fetch_type = dbh->default_fetch_type;
 	stmt->dbh = dbh;
 	/* give it a reference to me */
-	GC_ADDREF(&dbh_obj->std);
-	stmt->database_object_handle = &dbh_obj->std;
+	stmt->database_object_handle = zend_object_copy(&dbh_obj->std);
 
 	if (dbh->methods->preparer(dbh, statement, stmt, NULL)) {
 		PDO_STMT_CLEAR_ERR();
@@ -1235,9 +1234,9 @@ PHP_METHOD(PDO, query)
 				}
 				if (ret) {
 					if (Z_TYPE(dbh->def_stmt_ctor_args) == IS_ARRAY) {
-						pdo_stmt_construct(stmt, return_value, dbh->def_stmt_ce, Z_ARRVAL(dbh->def_stmt_ctor_args));
+						pdo_stmt_construct(stmt, Z_OBJ_P(return_value), dbh->def_stmt_ce, Z_ARRVAL(dbh->def_stmt_ctor_args));
 					} else {
-						pdo_stmt_construct(stmt, return_value, dbh->def_stmt_ce, /* ctor_args */ NULL);
+						pdo_stmt_construct(stmt, Z_OBJ_P(return_value), dbh->def_stmt_ce, /* ctor_args */ NULL);
 					}
 					return;
 				}

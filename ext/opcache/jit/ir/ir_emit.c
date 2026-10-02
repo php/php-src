@@ -1528,7 +1528,9 @@ static ir_reg _get_free_reg2(ir_ctx *ctx, ir_type type, ir_reg_alloc_simple_data
 
 	reg = IR_REGSET_FIRST(available);
 	if (IR_REGSET_IN(x->preserved_regs, reg)) {
-		IR_REGSET_INCL(ctx->used_preserved_regs, reg);
+		ir_regset tmp = ctx->used_preserved_regs;
+		IR_REGSET_INCL(tmp, reg);
+		ctx->used_preserved_regs = tmp;
 	}
 	return reg;
 }

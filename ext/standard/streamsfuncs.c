@@ -967,7 +967,7 @@ static zend_result parse_context_params(php_stream_context *context, const HashT
 
 		zend_fcall_info_cache *fcc = emalloc(sizeof(*fcc));
 		char *error;
-		if (!zend_is_callable_ex(tmp, NULL, 0, NULL, fcc, &error)) {
+		if (!zend_is_callable(tmp, fcc, &error)) {
 			zend_argument_type_error(1, "must be an array with valid callbacks as values, %s", error);
 			efree(fcc);
 			efree(error);

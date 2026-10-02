@@ -89,8 +89,6 @@
 # define IR_OPCODE_HANDLER_RET IR_ADDR
 #endif
 
-#undef  ir_CONST_ADDR
-#define ir_CONST_ADDR(_addr)    jit_CONST_ADDR(jit, (uintptr_t)(_addr))
 #define ir_CONST_FUNC(_addr)    jit_CONST_FUNC(jit, (uintptr_t)(_addr), 0)
 #define ir_CONST_FC_FUNC(_addr) jit_CONST_FUNC(jit, (uintptr_t)(_addr), IR_FASTCALL_FUNC)
 #define ir_CAST_FC_FUNC(_addr)  ir_fold2(_ir_CTX, IR_OPT(IR_PROTO, IR_ADDR), (_addr), \
@@ -101,7 +99,7 @@
 	ir_proto_0(_ir_CTX, IR_FASTCALL_FUNC, IR_OPCODE_HANDLER_RET))
 
 #define ir_CONST_FUNC_PROTO(_addr, _proto) \
-	jit_CONST_FUNC_PROTO(jit, (uintptr_t)(_addr), (_proto))
+	ir_const_func_addr(_ir_CTX, (uintptr_t)(_addr), (_proto))
 
 #undef  ir_ADD_OFFSET
 #define ir_ADD_OFFSET(_addr, _offset) \
@@ -317,7 +315,6 @@ typedef struct _zend_jit_ctx {
 	int                  delay_var;
 	ir_refs             *delay_refs;
 	ir_ref               eg_exception_addr;
-	HashTable            addr_hash;
 	ir_ref               stub_addr[jit_last_stub];
 } zend_jit_ctx;
 
@@ -532,46 +529,6 @@ static ir_ref jit_TLS_ADDR(zend_jit_ctx *jit, size_t offset)
 }
 #endif
 
-static ir_ref jit_CONST_ADDR(zend_jit_ctx *jit, uintptr_t addr)
-{
-	ir_ref ref;
-	zval *zv;
-
-	if (addr == 0) {
-		return IR_NULL;
-	}
-	zv = zend_hash_index_lookup(&jit->addr_hash, addr);
-	if (Z_TYPE_P(zv) == IS_LONG) {
-		ref = Z_LVAL_P(zv);
-		ZEND_ASSERT(jit->ctx.ir_base[ref].opt == IR_OPT(IR_ADDR, IR_ADDR));
-	} else {
-		ref = ir_unique_const_addr(&jit->ctx, addr);
-		ZVAL_LONG(zv, ref);
-	}
-	return ref;
-}
-
-static ir_ref jit_CONST_FUNC_PROTO(zend_jit_ctx *jit, uintptr_t addr, ir_ref proto)
-{
-	ir_ref ref;
-	ir_insn *insn;
-	zval *zv;
-
-	ZEND_ASSERT(addr != 0);
-	zv = zend_hash_index_lookup(&jit->addr_hash, addr);
-	if (Z_TYPE_P(zv) == IS_LONG) {
-		ref = Z_LVAL_P(zv);
-		ZEND_ASSERT(jit->ctx.ir_base[ref].opt == IR_OPT(IR_FUNC_ADDR, IR_ADDR) && jit->ctx.ir_base[ref].proto == proto);
-	} else {
-		ref = ir_unique_const_addr(&jit->ctx, addr);
-		insn = &jit->ctx.ir_base[ref];
-		insn->optx = IR_OPT(IR_FUNC_ADDR, IR_ADDR);
-		insn->proto = proto;
-		ZVAL_LONG(zv, ref);
-	}
-	return ref;
-}
-
 static ir_ref jit_CONST_FUNC(zend_jit_ctx *jit, uintptr_t addr, uint16_t flags)
 {
 #if defined(IR_TARGET_X86)
@@ -581,7 +538,7 @@ static ir_ref jit_CONST_FUNC(zend_jit_ctx *jit, uintptr_t addr, uint16_t flags)
 	ir_ref proto = 0;
 #endif
 
-	return jit_CONST_FUNC_PROTO(jit, addr, proto);
+	return ir_const_func_addr(&jit->ctx, addr, proto);
 }
 
 static ir_ref jit_CONST_OPCODE_HANDLER_FUNC(zend_jit_ctx *jit, zend_vm_opcode_handler_t handler)
@@ -605,7 +562,7 @@ static ir_ref jit_EG_exception(zend_jit_ctx *jit)
 	ir_ref ref = jit->eg_exception_addr;
 
 	if (UNEXPECTED(!ref)) {
-		ref = ir_unique_const_addr(&jit->ctx, (uintptr_t)&EG(exception));
+		ref = ir_CONST_ADDR(&EG(exception));
 		jit->eg_exception_addr = ref;
 	}
 	return ref;
@@ -617,7 +574,7 @@ static ir_ref jit_STUB_ADDR(zend_jit_ctx *jit, jit_stub_id id)
 	ir_ref ref = jit->stub_addr[id];
 
 	if (UNEXPECTED(!ref)) {
-		ref = ir_unique_const_addr(&jit->ctx, (uintptr_t)zend_jit_stub_handlers[id]);
+		ref = ir_CONST_ADDR(zend_jit_stub_handlers[id]);
 		jit->stub_addr[id] = ref;
 	}
 	return ref;
@@ -626,18 +583,9 @@ static ir_ref jit_STUB_ADDR(zend_jit_ctx *jit, jit_stub_id id)
 static ir_ref jit_STUB_FUNC_ADDR(zend_jit_ctx *jit, jit_stub_id id, uint16_t flags)
 {
 	ir_ref ref = jit->stub_addr[id];
-	ir_insn *insn;
 
 	if (UNEXPECTED(!ref)) {
-		ref = ir_unique_const_addr(&jit->ctx, (uintptr_t)zend_jit_stub_handlers[id]);
-		insn = &jit->ctx.ir_base[ref];
-		insn->optx = IR_OPT(IR_FUNC_ADDR, IR_ADDR);
-#if defined(IR_TARGET_X86)
-		/* TODO: dummy prototype (only flags matter) ??? */
-		insn->proto = flags ? ir_proto_0(&jit->ctx, flags, IR_I32) : 0;
-#else
-		insn->proto = 0;
-#endif
+		ref = jit_CONST_FUNC(jit, (uintptr_t)zend_jit_stub_handlers[id], flags);
 		jit->stub_addr[id] = ref;
 	}
 	return ref;
@@ -2843,7 +2791,6 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 	jit->delay_var = -1;
 	jit->delay_refs = NULL;
 	jit->eg_exception_addr = 0;
-	zend_hash_init(&jit->addr_hash, 64, NULL, NULL, 0);
 	memset(jit->stub_addr, 0, sizeof(jit->stub_addr));
 
 	ir_START();
@@ -2854,7 +2801,6 @@ static int zend_jit_free_ctx(zend_jit_ctx *jit)
 	if (jit->name) {
 		zend_string_release(jit->name);
 	}
-	zend_hash_destroy(&jit->addr_hash);
 	ir_free(&jit->ctx);
 	return 1;
 }

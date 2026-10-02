@@ -633,6 +633,7 @@ static key_t tsrm_choose_random_shm_key(key_t prev_key) {
 TSRM_API int shmget(key_t key, size_t size, int flags)
 {/*{{{*/
 	shm_pair *shm;
+	size_t mapping_size;
 	char shm_segment[sizeof(SEGMENT_PREFIX INT_MIN_AS_STRING)];
 	HANDLE shm_handle = NULL;
 	BOOL created = FALSE;
@@ -648,16 +649,16 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 
 	if (!shm_handle) {
 		if (flags & IPC_CREAT) {
-			if (size == 0 || size > SIZE_MAX - sizeof(shm->descriptor)) {
+			if (size == 0 || size > SIZE_MAX - sizeof(*shm->descriptor)) {
 				return -1;
 			}
-			size += sizeof(shm->descriptor);
+			mapping_size = size + sizeof(*shm->descriptor);
 #if SIZEOF_SIZE_T == 8
-			DWORD high = size >> 32;
-			DWORD low = (DWORD)size;
+			DWORD high = mapping_size >> 32;
+			DWORD low = (DWORD)mapping_size;
 #else
 			DWORD high = 0;
-			DWORD low = size;
+			DWORD low = mapping_size;
 #endif
 			shm_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, high, low, key == IPC_PRIVATE ? NULL : shm_segment);
 			created		= TRUE;
@@ -728,7 +729,7 @@ TSRM_API void *shmat(int key, const void *shmaddr, int flags)
 		return (void*)-1;
 	}
 
-	shm->addr = shm->descriptor + sizeof(shm->descriptor);
+	shm->addr = shm->descriptor + 1;
 	shm->descriptor->shm_atime = time(NULL);
 	shm->descriptor->shm_lpid  = getpid();
 	shm->descriptor->shm_nattch++;

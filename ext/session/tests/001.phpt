@@ -3,7 +3,7 @@ session object serialization
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --INI--
 session.use_cookies=0
 session.cache_limiter=

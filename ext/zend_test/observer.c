@@ -76,7 +76,7 @@ static void observer_begin(zend_execute_data *execute_data)
 	assert_observer_opline(execute_data);
 
 	if (ZT_G(observer_set_vm_interrupt_on_begin)) {
-		zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+		atomic_store(&EG(vm_interrupt), true);
 	}
 
 	if (!ZT_G(observer_show_output)) {

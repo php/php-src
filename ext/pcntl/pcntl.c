@@ -27,6 +27,7 @@
 
 #include "php.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_filestat.h"
 #include "php_signal.h"
 #include "php_ticks.h"
 #include "zend_exceptions.h"
@@ -841,7 +842,7 @@ PHP_FUNCTION(pcntl_signal)
 		RETURN_TRUE;
 	}
 
-	if (!zend_is_callable_ex(handle, NULL, 0, NULL, NULL, NULL)) {
+	if (!zend_is_callable(handle, NULL, NULL)) {
 		PCNTL_G(last_error) = EINVAL;
 
 		zend_argument_type_error(2, "must be of type callable|int, %s given", zend_zval_value_name(handle));
@@ -1345,7 +1346,7 @@ static void pcntl_signal_handler(int signo, siginfo_t *siginfo, void *context)
 	PCNTL_G(tail) = psig;
 	PCNTL_G(pending_signals) = true;
 	if (PCNTL_G(async_signals)) {
-		zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+		atomic_store(&EG(vm_interrupt), true);
 	}
 }
 
@@ -1453,7 +1454,7 @@ void pcntl_signal_dispatch(void)
 		PCNTL_G(tail) = next;
 
 		if (PCNTL_G(async_signals)) {
-			zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+			atomic_store(&EG(vm_interrupt), true);
 		}
 	} else {
 		PCNTL_G(pending_signals) = false;

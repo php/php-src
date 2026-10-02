@@ -8725,10 +8725,7 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 				ZEND_UNREACHABLE();
 			}
 		} else if (STACK_FLAGS(stack, i) == ZREG_THIS) {
-			zend_object *obj = Z_OBJ(EX(This));
-
-			GC_ADDREF(obj);
-			ZVAL_OBJ(EX_VAR_NUM(i), obj);
+			ZVAL_OBJ_COPY(EX_VAR_NUM(i), Z_OBJ(EX(This)));
 		} else if (STACK_FLAGS(stack, i) == ZREG_ZVAL_ADDREF) {
 			Z_TRY_ADDREF_P(EX_VAR_NUM(i));
 		} else if (STACK_FLAGS(stack, i) == ZREG_ZVAL_COPY) {
@@ -8836,7 +8833,7 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 		EX(opline) = opline;
 	}
 
-	if (zend_atomic_bool_load_ex(&EG(vm_interrupt)) || JIT_G(tracing)) {
+	if (atomic_load(&EG(vm_interrupt)) || JIT_G(tracing)) {
 		return 1;
 	/* Lock-free check if the side trace was already JIT-ed or blacklist-ed in another process */
 	} else if (t->exit_info[exit_num].flags & (ZEND_JIT_EXIT_JITED|ZEND_JIT_EXIT_BLACKLISTED)) {

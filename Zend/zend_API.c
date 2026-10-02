@@ -2309,6 +2309,9 @@ ZEND_API zend_result array_set_zval_key(HashTable *ht, zval *key, zval *value) /
 			break;
 		case IS_RESOURCE:
 			zend_use_resource_as_offset(key);
+			if (UNEXPECTED(EG(exception))) {
+				return FAILURE;
+			}
 			result = zend_hash_index_update(ht, Z_RES_HANDLE_P(key), value);
 			break;
 		case IS_FALSE:
@@ -2320,9 +2323,14 @@ ZEND_API zend_result array_set_zval_key(HashTable *ht, zval *key, zval *value) /
 		case IS_LONG:
 			result = zend_hash_index_update(ht, Z_LVAL_P(key), value);
 			break;
-		case IS_DOUBLE:
-			result = zend_hash_index_update(ht, zend_dval_to_lval_safe(Z_DVAL_P(key)), value);
+		case IS_DOUBLE: {
+			zend_long lval = zend_dval_to_lval_safe(Z_DVAL_P(key));
+			if (UNEXPECTED(EG(exception))) {
+				return FAILURE;
+			}
+			result = zend_hash_index_update(ht, lval, value);
 			break;
+		}
 		case IS_NULL:
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 			if (UNEXPECTED(EG(exception))) {
@@ -3088,7 +3096,11 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 		internal_function->prototype = NULL;
 		internal_function->prop_info = NULL;
 		internal_function->attributes = NULL;
-		internal_function->frameless_function_infos = ptr->frameless_function_infos;
+		if (type == MODULE_TEMPORARY) {
+			internal_function->frameless_function_infos = NULL;
+		} else {
+			internal_function->frameless_function_infos = ptr->frameless_function_infos;
+		}
 		if (EG(active)) { // at run-time: this ought to only happen if registered with dl() or somehow temporarily at runtime
 			ZEND_MAP_PTR_INIT(internal_function->run_time_cache, zend_arena_calloc(&CG(arena), 1, zend_internal_run_time_cache_reserved_size()));
 		} else {
@@ -3791,13 +3803,13 @@ static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *sc
 		const zend_class_entry *frame_scope = get_scope(frame);
 		fcc->calling_scope = ce;
 		if (frame_scope && !fcc->object) {
-			zend_object *object = zend_get_this_object(frame);
+			zend_object *this_ptr = zend_get_this_object(frame);
 
-			if (object &&
-			    instanceof_function(object->ce, frame_scope) &&
+			if (this_ptr &&
+			    instanceof_function(this_ptr->ce, frame_scope) &&
 			    instanceof_function(frame_scope, ce)) {
-				fcc->object = object;
-				fcc->called_scope = object->ce;
+				fcc->object = this_ptr;
+				fcc->called_scope = this_ptr->ce;
 			} else {
 				fcc->called_scope = ce;
 			}
@@ -3870,13 +3882,13 @@ static zend_always_inline bool zend_is_method_callable(zend_string *callable, co
 		if (ZSTR_HAS_CE_CACHE(class_name) && ZSTR_GET_CE_CACHE(class_name)) {
 			fcc->calling_scope = ZSTR_GET_CE_CACHE(class_name);
 			if (scope && !fcc->object) {
-				zend_object *object = zend_get_this_object(frame);
+				zend_object *this_ptr = zend_get_this_object(frame);
 
-				if (object &&
-				    instanceof_function(object->ce, scope) &&
+				if (this_ptr &&
+				    instanceof_function(this_ptr->ce, scope) &&
 				    instanceof_function(scope, fcc->calling_scope)) {
-					fcc->object = object;
-					fcc->called_scope = object->ce;
+					fcc->object = this_ptr;
+					fcc->called_scope = this_ptr->ce;
 				} else {
 					fcc->called_scope = fcc->calling_scope;
 				}
@@ -3982,10 +3994,10 @@ get_function_via_handler:
 				retval = true;
 				call_via_handler = (fcc->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) != 0;
 				if (call_via_handler && !fcc->object) {
-					zend_object *object = zend_get_this_object(frame);
-					if (object &&
-					    instanceof_function(object->ce, fcc->calling_scope)) {
-						fcc->object = object;
+					zend_object *this_ptr = zend_get_this_object(frame);
+					if (this_ptr &&
+					    instanceof_function(this_ptr->ce, fcc->calling_scope)) {
+						fcc->object = this_ptr;
 					}
 				}
 			}
@@ -4448,8 +4460,7 @@ ZEND_API void zend_get_callable_zval_from_fcc(const zend_fcall_info_cache *fcc, 
 	} else if (fcc->function_handler->common.scope) {
 		array_init(callable);
 		if (fcc->object) {
-			GC_ADDREF(fcc->object);
-			add_next_index_object(callable, fcc->object);
+			add_next_index_object(callable, zend_object_copy(fcc->object));
 		} else {
 			add_next_index_str(callable, zend_string_copy(fcc->calling_scope->name));
 		}
