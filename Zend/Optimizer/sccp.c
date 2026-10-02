@@ -1948,7 +1948,8 @@ static void sccp_mark_feasible_successors(
 
 static bool sccp_is_identical(const zval *a, const zval *b);
 
-static int sccp_hash_is_not_identical(const zval *a, const zval *b)
+/* Returns int to be compatible with compare_func_t. */
+static int sccp_is_not_identical(const zval *a, const zval *b)
 {
 	return !sccp_is_identical(a, b);
 }
@@ -1961,7 +1962,7 @@ static bool sccp_is_identical(const zval *a, const zval *b)
 	}
 	if (Z_TYPE_P(a) == IS_ARRAY && Z_TYPE_P(b) == IS_ARRAY) {
 		return Z_ARRVAL_P(a) == Z_ARRVAL_P(b)
-			|| zend_hash_compare(Z_ARRVAL_P(a), Z_ARRVAL_P(b), (compare_func_t) sccp_hash_is_not_identical, 1) == 0;
+			|| zend_hash_compare(Z_ARRVAL_P(a), Z_ARRVAL_P(b), (compare_func_t) sccp_is_not_identical, 1) == 0;
 	}
 	return zend_is_identical(a, b);
 }
@@ -2046,7 +2047,7 @@ static void join_phi_values(zval *a, zval *b, bool escape) {
 			zval_ptr_dtor_nogc(a);
 			MAKE_BOT(a);
 		}
-	} else if (!sccp_is_identical(a, b)) {
+	} else if (sccp_is_not_identical(a, b)) {
 		if (join_partial_arrays(a, b) == FAILURE) {
 			zval_ptr_dtor_nogc(a);
 			MAKE_BOT(a);
