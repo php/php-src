@@ -2,7 +2,6 @@
 
 /** @generate-class-entries */
 
-const PASSWORD_DEFAULT = "2y";
 const PASSWORD_BCRYPT = "2y";
 /**
  * @var int
@@ -30,3 +29,6 @@ const PASSWORD_ARGON2_DEFAULT_TIME_COST = UNKNOWN;
  */
 const PASSWORD_ARGON2_DEFAULT_THREADS = UNKNOWN;
 #endif
+
+/** @var string */
+const PASSWORD_DEFAULT = PASSWORD_BCRYPT;
