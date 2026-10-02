@@ -19,6 +19,14 @@ PHP 8.7 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- OpenSSL:
+  . openssl_get_md_methods() now lists only the digest algorithms that are
+    available in the configured OpenSSL library context, as
+    openssl_get_cipher_methods() already does for ciphers. Algorithms from
+    providers that are not loaded (e.g. md4, mdc2 and whirlpool without the
+    legacy provider) are no longer listed with OpenSSL 3. The algorithm names
+    are unchanged.
+
 - PDO:
   . PDOStatement::bindColumn() now throws a ValueError when the column name is
     not present in the result set. It previously reported the condition
