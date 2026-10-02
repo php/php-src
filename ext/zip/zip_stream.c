@@ -162,7 +162,7 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ 
 		return -1;
 	}
 
-	za = zip_open(file_dirname, ZIP_CREATE, &err);
+	za = zip_open(file_dirname, ZIP_RDONLY, &err);
 	if (za) {
 		memset(ssb, 0, sizeof(php_stream_statbuf));
 		if (zip_stat(za, fragment, ZIP_FL_NOCASE, &sb) != 0) {
@@ -332,7 +332,7 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 		return NULL;
 	}
 
-	za = zip_open(file_dirname, ZIP_CREATE, &err);
+	za = zip_open(file_dirname, ZIP_RDONLY, &err);
 	if (za) {
 		zval *tmpzval;
 
