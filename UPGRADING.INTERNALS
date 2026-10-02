@@ -23,6 +23,8 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 - The sapi_force_http_10() function was removed.
 - The sapi_get_fd() function was removed.
 - The sapi_get_target_uid() and sapi_get_target_gid() functions were removed.
+- The ZTS symbols compiler_globals_offset and executor_globals_offset have been
+  removed: CG()/EG() now reach the globals through a __thread struct.
 - Removed HAVE_NORETURN and HAVE_NORETURN_ALIAS. ZEND_NORETURN is guaranteed to
   work.
 - Redefined ZEND_NORETURN to make use of the [[noreturn]] attribute for C++
@@ -52,6 +54,10 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 
 - Unix build system changes:
   . Autoconf minimum required version upgraded to 2.71.
+  . Added --with-tsrm-tls-model (initial-exec, global-dynamic, auto) to pick the
+    TLS model for the ZTS globals cache; auto uses global-dynamic for dlopen()ed
+    SAPIs. Forcing initial-exec there needs a larger static TLS surplus: set
+    GLIBC_TUNABLES=glibc.rtld.optional_static_tls=8192 for the host process.
 
 ========================
 3. Module changes
@@ -80,3 +86,14 @@ PHP 8.7 INTERNALS UPGRADE NOTES
   . The force_http_10 method has been removed.
   . The get_fd method has been removed.
   . The get_target_uid and get_target_gid methods have been removed.
+
+- Per-thread TSRM resources are now released best-effort at normal thread exit,
+  because native TLS resource destructors can only run on their owning thread and
+  tsrm_shutdown() cannot release them afterwards. Prefer explicitly calling ts_free_thread().
+
+- tsrm_shutdown() and the bundled library-unload hooks automatically disarm
+  thread-exit cleanup. Embedders must stop and join all PHP worker threads
+  before calling tsrm_shutdown() or unloading PHP.
+
+- EG, CG, AG and SCNG are now allocated with ts_allocate_tls_id() and live in native
+  __thread storage in ZTS builds.
