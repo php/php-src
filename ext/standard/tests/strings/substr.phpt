@@ -59,6 +59,16 @@ echo "\n*** Omitting length or using NULL length ***\n";
 var_dump (substr("abcdef" , 2) );
 var_dump (substr("abcdef" , 2, NULL) );
 
+/* Very big offset */
+echo "\n*** Very big offset ***\n";
+var_dump (substr("abcdef" , PHP_INT_MAX) );
+var_dump (substr("abcdef" , PHP_INT_MIN) );
+
+/* Very big length */
+echo "\n*** Very big length ***\n";
+var_dump (substr("abcdef" , 0, PHP_INT_MAX) );
+var_dump (substr("abcdef" , 0, PHP_INT_MIN) );
+
 echo"\nDone";
 
 ?>
@@ -172,5 +182,13 @@ string(4) "abcd"
 *** Omitting length or using NULL length ***
 string(4) "cdef"
 string(4) "cdef"
+
+*** Very big offset ***
+string(0) ""
+string(6) "abcdef"
+
+*** Very big length ***
+string(6) "abcdef"
+string(0) ""
 
 Done

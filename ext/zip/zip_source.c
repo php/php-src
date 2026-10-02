@@ -124,10 +124,12 @@ static zip_int64_t php_zip_string_cb(void *userdata, void *data, zip_uint64_t le
 		}
 
 		case ZIP_SOURCE_TELL:
+#if SIZE_MAX > ZIP_INT64_MAX
 			if (ctx->in_offset > ZIP_INT64_MAX) {
 				zip_error_set(&ctx->error, ZIP_ER_TELL, EOVERFLOW);
 				return -1;
 			}
+#endif
 			return (zip_int64_t)ctx->in_offset;
 
 		/* Write ops */
@@ -176,10 +178,12 @@ static zip_int64_t php_zip_string_cb(void *userdata, void *data, zip_uint64_t le
 		}
 
 		case ZIP_SOURCE_TELL_WRITE:
+#if SIZE_MAX > ZIP_INT64_MAX
 			if (ctx->out_offset > ZIP_INT64_MAX) {
 				zip_error_set(&ctx->error, ZIP_ER_TELL, EOVERFLOW);
 				return -1;
 			}
+#endif
 			return (zip_int64_t)ctx->out_offset;
 
 		case ZIP_SOURCE_REMOVE:
