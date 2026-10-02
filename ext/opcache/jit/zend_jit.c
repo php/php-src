@@ -709,7 +709,7 @@ static bool zend_jit_class_may_be_modified(const zend_class_entry *ce, const zen
 	uint32_t i;
 
 	if (ce->type == ZEND_INTERNAL_CLASS) {
-#ifdef _WIN32
+#ifdef ZEND_OPCACHE_SHM_REATTACHMENT
 		/* ASLR */
 		return 1;
 #else
@@ -757,7 +757,7 @@ static bool zend_jit_class_may_be_modified(const zend_class_entry *ce, const zen
 static bool zend_jit_may_be_modified(const zend_function *func, const zend_op_array *called_from)
 {
 	if (func->type == ZEND_INTERNAL_FUNCTION) {
-#ifdef _WIN32
+#ifdef ZEND_OPCACHE_SHM_REATTACHMENT
 		/* ASLR */
 		return 1;
 #else
