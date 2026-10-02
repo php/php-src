@@ -2216,7 +2216,12 @@ static int php_openssl_session_new_cb(SSL *ssl, SSL_SESSION *session)
 	ZVAL_RES(&args[0], stream->res);
 	php_openssl_session_object_init(&args[1], session);
 
+	bool originally_no_fclose = stream->flags & PHP_STREAM_FLAG_NO_FCLOSE;
+	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 	zend_call_known_fcc(&sslsock->session_callbacks->new_cb, NULL, 2, args, NULL);
+	if (!originally_no_fclose) {
+		stream->flags ^= PHP_STREAM_FLAG_NO_FCLOSE;
+	}
 
 	zval_ptr_dtor(&args[1]);
 
