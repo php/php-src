@@ -741,7 +741,7 @@ end:
 	return ret;
 }
 
-int php_openssl_check_cert(X509_STORE *ctx, X509 *x, STACK_OF(X509) *untrustedchain, int purpose)
+int php_openssl_check_cert(X509_STORE *ctx, X509 *x, STACK_OF(X509) *untrustedchain, int purpose, unsigned long verify_flags)
 {
 	int ret=0;
 	X509_STORE_CTX *csc;
@@ -760,6 +760,9 @@ int php_openssl_check_cert(X509_STORE *ctx, X509 *x, STACK_OF(X509) *untrustedch
 	}
 	if (purpose >= 0 && !X509_STORE_CTX_set_purpose(csc, purpose)) {
 		php_openssl_store_errors();
+	}
+	if (verify_flags != 0) {
+		X509_STORE_CTX_set_flags(csc, verify_flags);
 	}
 	ret = X509_verify_cert(csc);
 	if (ret < 0) {
