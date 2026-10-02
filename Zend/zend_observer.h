@@ -46,6 +46,12 @@ static zend_always_inline int ZEND_OBSERVER_HANDLE(const zend_function *function
 /* Omit zend_observer_fcall_internal_function_extension check, they are set at the same time. */
 #define ZEND_OBSERVER_ENABLED (zend_observer_fcall_op_array_extension != -1)
 
+extern ZEND_API zend_llist zend_observer_fiber_switch;
+/* A fiber switch has something to notify: fcall observers whose observed
+ * frame moves with the context, or a registered switch handler. */
+#define ZEND_OBSERVER_FIBER_SWITCH_ENABLED \
+	(ZEND_OBSERVER_ENABLED || zend_observer_fiber_switch.head != NULL)
+
 typedef void (*zend_observer_fcall_begin_handler)(zend_execute_data *execute_data);
 typedef void (*zend_observer_fcall_end_handler)(zend_execute_data *execute_data, zval *retval);
 

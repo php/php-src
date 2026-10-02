@@ -509,7 +509,9 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
 		))
 	) && "Error transfer requires a throwable value");
 
-	zend_observer_fiber_switch_notify(from, to);
+	if (UNEXPECTED(ZEND_OBSERVER_FIBER_SWITCH_ENABLED)) {
+		zend_observer_fiber_switch_notify(from, to);
+	}
 
 	zend_fiber_capture_vm_state(&state);
 
