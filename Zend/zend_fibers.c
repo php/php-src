@@ -873,6 +873,16 @@ static void zend_fiber_coroutine_entry(void)
 		 * exit is a disposal unwind and must not shut anything down. */
 		if (zend_is_unwind_exit(EG(exception))) {
 			ZEND_ASYNC_SHUTDOWN();
+
+			/* The scheduler took the exit over: the body ended, nothing is
+			 * thrown to the caller. */
+			if (EG(exception) == NULL) {
+				if (caller != NULL) {
+					ZEND_ASYNC_ENQUEUE_COROUTINE(caller);
+				}
+
+				return;
+			}
 		}
 
 		if (fiber != NULL) {

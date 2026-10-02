@@ -280,6 +280,9 @@ typedef bool (*zend_async_cancel_t)(
  * Returning NULL is a failure: without a main coroutine there is no flow to
  * run the script in. */
 typedef zend_coroutine_t *(*zend_async_scheduler_launch_t)(void);
+/* exit() unwinds a fiber coroutine: the scheduler decides what happens to the
+ * rest of the application. The unwind_exit stays in EG(exception) for the
+ * scheduler to keep or clear; a cleared one ends the fiber without an error. */
 typedef bool (*zend_async_shutdown_t)(void);
 typedef zend_class_entry *(*zend_async_get_class_ce_t)(zend_async_class type);
 /* Run fn(arg) on the main coroutine's OS-thread stack (FFI/JNI etc.). */
