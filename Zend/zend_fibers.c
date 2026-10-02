@@ -110,6 +110,11 @@ typedef struct _zend_fiber_vm_state {
 	size_t vm_stack_page_size;
 	zend_execute_data *current_execute_data;
 	int error_reporting;
+	/* An EH_THROW window (zend_replace_error_handling) belongs to the code that
+	 * opened it: left global, a fiber suspended inside one turns every warning
+	 * raised elsewhere into an exception of that window's class. */
+	zend_error_handling_t error_handling;
+	zend_class_entry *exception_class;
 	uint32_t jit_trace_num;
 	JMP_BUF *bailout;
 	zend_fiber *active_fiber;
@@ -127,6 +132,8 @@ static zend_always_inline void zend_fiber_capture_vm_state(zend_fiber_vm_state *
 	state->vm_stack_page_size = EG(vm_stack_page_size);
 	state->current_execute_data = EG(current_execute_data);
 	state->error_reporting = EG(error_reporting);
+	state->error_handling = EG(error_handling);
+	state->exception_class = EG(exception_class);
 	state->jit_trace_num = EG(jit_trace_num);
 	state->bailout = EG(bailout);
 	state->active_fiber = EG(active_fiber);
@@ -144,6 +151,8 @@ static zend_always_inline void zend_fiber_restore_vm_state(zend_fiber_vm_state *
 	EG(vm_stack_page_size) = state->vm_stack_page_size;
 	EG(current_execute_data) = state->current_execute_data;
 	EG(error_reporting) = state->error_reporting;
+	EG(error_handling) = state->error_handling;
+	EG(exception_class) = state->exception_class;
 	EG(jit_trace_num) = state->jit_trace_num;
 	EG(bailout) = state->bailout;
 	EG(active_fiber) = state->active_fiber;
@@ -495,6 +504,13 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
 	zend_observer_fiber_switch_notify(from, to);
 
 	zend_fiber_capture_vm_state(&state);
+
+	/* Leave our EH_THROW window behind: it belongs to whoever opened it. A context
+	 * resumed by this switch restores its own below, in its own frame of this
+	 * function; a context entered for the first time never reaches that restore,
+	 * and without this would run inside a window it never opened. */
+	EG(error_handling) = EH_NORMAL;
+	EG(exception_class) = NULL;
 
 	to->status = ZEND_FIBER_STATUS_RUNNING;
 
