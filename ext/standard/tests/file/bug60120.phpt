@@ -14,7 +14,9 @@ if (PHP_OS_FAMILY === 'Windows') die('skip not for Windows');
 error_reporting(E_ALL);
 
 $php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
-$cmd = $php . ' -r "\$in = file_get_contents(\'php://stdin\'); fwrite(STDOUT, \$in); fwrite(STDERR, \$in);"';
+$args = getenv('TEST_PHP_EXTRA_ARGS');
+$cmd = ' -r "\$in = file_get_contents(\'php://stdin\'); fwrite(STDOUT, \$in); fwrite(STDERR, \$in);"';
+$cmd = join(' ', [$php, $args, $cmd]);
 $descriptors = array(array('pipe', 'r'), array('pipe', 'w'), array('pipe', 'w'));
 $stdin = str_repeat('*', 2049 );
 
