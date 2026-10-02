@@ -10741,8 +10741,8 @@ static int zend_jit_constructor(zend_jit_ctx *jit, const zend_op *opline, const 
 static bool zend_jit_class_is_persistent(const zend_class_entry *ce)
 {
 	if (ce->type == ZEND_INTERNAL_CLASS) {
-#ifdef _WIN32
-		/* ASLR, see zend_jit_class_may_be_modified() */
+#ifdef ZEND_OPCACHE_SHM_REATTACHMENT
+		/* ASLR, see zend_jit_may_be_modified() */
 		return false;
 #else
 		return true;
