@@ -10831,7 +10831,6 @@ static int zend_jit_verify_arg_type(zend_jit_ctx *jit, const zend_op *opline, ze
 	}
 
 	if (!ZEND_ARG_SEND_MODE(arg_info)
-	 && (type == IS_UNKNOWN || type == IS_OBJECT)
 	 && zend_jit_class_satisfies_type(known_ce, arg_info->type)) {
 		zend_jit_known_class_type_fast_path(jit, ref, type == IS_OBJECT, known_ce, &end_inputs);
 	}
@@ -10845,7 +10844,8 @@ static int zend_jit_verify_arg_type(zend_jit_ctx *jit, const zend_op *opline, ze
 		}
 	}
 
-	if (type_mask != 0) {
+	/* A known type is not in type_mask here (see above), so the mask check would always fail */
+	if (type_mask != 0 && type == IS_UNKNOWN) {
 		if (is_power_of_two(type_mask)) {
 			uint32_t type_code = concrete_type(type_mask);
 			ir_ref if_ok = jit_if_Z_TYPE_ref(jit, ref, ir_CONST_U8(type_code));
