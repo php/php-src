@@ -1788,10 +1788,18 @@ static unsigned int php_openssl_psk_client_cb(SSL *ssl, const char *hint,
 		return 0;
 	}
 
+	bool originally_no_fclose = stream->flags & PHP_STREAM_FLAG_NO_FCLOSE;
+	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 	zval result;
 	if (php_openssl_call_psk_cb(stream, &sslsock->psk_callbacks->client_cb,
 			NULL, 0, &result) != SUCCESS) {
+		if (!originally_no_fclose) {
+			stream->flags ^= PHP_STREAM_FLAG_NO_FCLOSE;
+		}
 		return 0;
+	}
+	if (!originally_no_fclose) {
+		stream->flags ^= PHP_STREAM_FLAG_NO_FCLOSE;
 	}
 
 	if (Z_TYPE(result) == IS_NULL) {
