@@ -67,6 +67,8 @@ PHP                                                                        NEWS
     single `-0.0` constant). (lazerg)
   . Fixed crash when a file cache is reused with a different set of
     extensions declaring frameless functions. (Ilia Alshanetsky)
+  . Fixed bug GH-23991 (JIT generates invalid IR for multiple recursive calls).
+    (ndossche)
 
 - OpenSSL:
   . Fixed stream_socket_enable_crypto() leaving the socket non-blocking
