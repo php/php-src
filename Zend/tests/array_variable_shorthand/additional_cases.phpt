@@ -14,6 +14,16 @@ echo json_encode(array('name' => 'old', :$name, 'name' => 'last')), "\n";
 $values = [10, 20];
 echo json_encode(array(...$values, :$name)), "\n";
 
+$name = 'new';
+echo json_encode([...['name' => 'old'], :$name]), "\n";
+echo json_encode([:$name, ...['name' => 'later']]), "\n";
+
+$object = new ArrayObject(['name' => 'Ada']);
+[:$name] = $object;
+echo "$name\n";
+list(:$name) = $object;
+echo "$name\n";
+
 function receive_name($name) {
     return $name;
 }
@@ -28,5 +38,9 @@ echo "$name\n";
 {"name":"first"}
 {"name":"last"}
 {"0":10,"1":20,"name":"second"}
-second
+{"name":"new"}
+{"name":"later"}
+Ada
+Ada
+Ada
 nested
