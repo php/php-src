@@ -75,6 +75,9 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug GH-23385 (SplDoublyLinkedList::serialize() use-after-free when
     __serialize() removes an element). (David Carlier)
+  . ArrayObject and ArrayIterator now share the arrays they are given or hand
+    out until one side modifies them. (Nicolas Grekas)
+  . Fixed bug GH-17935 (Assertion failure Zend/zend_hash.c). (Nicolas Grekas)
 
 - SQLite:
   . Fixed a crash when SQLite3::close() is called from a userland callback.

@@ -93,6 +93,11 @@ PHP 8.7 UPGRADE NOTES
 14. Performance Improvements
 ========================================
 
+- SPL:
+  . ArrayObject and ArrayIterator no longer copy the arrays they are given or
+    hand out (constructor, exchangeArray(), getArrayCopy(), clone, array cast)
+    until one side modifies them, unless these arrays hold references.
+
 - Standard:
   . Improved performance of strcspn() and strpbrk() when searching longer strings
     with a single-byte character mask.
