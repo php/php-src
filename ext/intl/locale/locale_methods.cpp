@@ -23,6 +23,7 @@
 #include <unicode/putil.h>
 #include <unicode/ures.h>
 #include <unicode/uenum.h>
+#include <unicode/locid.h>
 
 extern "C" {
 #include "php_intl.h"
@@ -1673,6 +1674,7 @@ U_CFUNC PHP_FUNCTION(locale_accept_from_http)
 	UAcceptResult outResult;
 	HashTable *available_locales = nullptr;
 	std::unique_ptr<const char *[]> available_list;
+	std::unique_ptr<icu::Locale[]> available_canonical;
 	uint32_t available_count = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
@@ -1680,6 +1682,8 @@ U_CFUNC PHP_FUNCTION(locale_accept_from_http)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY_HT_OR_NULL(available_locales)
 	ZEND_PARSE_PARAMETERS_END();
+
+	intl_error_reset( nullptr );
 
 	if (available_locales) {
 		uint32_t i = 0;
@@ -1692,6 +1696,7 @@ U_CFUNC PHP_FUNCTION(locale_accept_from_http)
 		}
 
 		available_list = std::make_unique<const char *[]>(available_count);
+		available_canonical = std::make_unique<icu::Locale[]>(available_count);
 		ZEND_HASH_FOREACH_VAL(available_locales, entry) {
 			ZVAL_DEREF(entry);
 			if (Z_TYPE_P(entry) != IS_STRING) {
@@ -1702,8 +1707,13 @@ U_CFUNC PHP_FUNCTION(locale_accept_from_http)
 				zend_argument_value_error(2, "must not contain any null bytes");
 				RETURN_THROWS();
 			}
-			if (Z_STRLEN_P(entry) > ULOC_FULLNAME_CAPACITY) {
-				zend_argument_value_error(2, "must not contain locales longer than %d characters", ULOC_FULLNAME_CAPACITY);
+			if (Z_STRLEN_P(entry) > INTL_MAX_LOCALE_LEN) {
+				zend_argument_value_error(2, "must not contain locales longer than %d characters", INTL_MAX_LOCALE_LEN);
+				RETURN_THROWS();
+			}
+			available_canonical[i] = icu::Locale(Z_STRVAL_P(entry));
+			if (available_canonical[i].isBogus()) {
+				zend_argument_value_error(2, "must only contain valid locales");
 				RETURN_THROWS();
 			}
 			available_list[i++] = Z_STRVAL_P(entry);
@@ -1741,6 +1751,11 @@ U_CFUNC PHP_FUNCTION(locale_accept_from_http)
 	INTL_CHECK_STATUS(status, "failed to find acceptable locale");
 	if (UNEXPECTED(len < 0 || outResult == ULOC_ACCEPT_FAILED)) {
 		RETURN_FALSE;
+	}
+	for (uint32_t i = 0; i < available_count; i++) {
+		if (strcmp(available_list[i], resultLocale) == 0 || strcmp(available_canonical[i].getName(), resultLocale) == 0) {
+			RETURN_STRING(available_list[i]);
+		}
 	}
 	RETURN_STRINGL(resultLocale, len);
 }
