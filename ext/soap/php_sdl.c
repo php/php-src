@@ -369,7 +369,12 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, bool include
 			xmlAttrPtr tmp = get_attribute(trav->properties, "location");
 			if (tmp) {
 				xmlChar *uri = schema_location_construct_uri(tmp);
-				load_wsdl_ex(this_ptr, (char*)uri, ctx, true);
+				zend_try {
+					load_wsdl_ex(this_ptr, (char*)uri, ctx, true);
+				} zend_catch {
+					xmlFree(uri);
+					zend_bailout();
+				} zend_end_try();
 				xmlFree(uri);
 			}
 

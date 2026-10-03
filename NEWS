@@ -185,6 +185,7 @@ PHP                                                                        NEWS
 - SOAP:
   . Fixed bug GH-22895 (Heap use-after-free while encoding a Traversable with
     an illegal key). (David Carlier)
+  . Fixed memory leak when load_wsdl_ex() failed to load. (DanielEScherzer)
 
 - SQLite:
   . Fixed a crash when SQLite3::close() is called from a userland callback.
