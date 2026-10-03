@@ -1,5 +1,16 @@
 --TEST--
 GH-15866: Core dumped in Zend/zend_generators.c — under test_scheduler
+--DESCRIPTION--
+The expected output departs from the upstream
+Zend/tests/generators/gh15866.phpt. Under a scheduler a fiber parked at
+Fiber::suspend() is not collected by gc_collect_cycles() when the cycle runs
+through its body's closure: the closure sits in the coroutine's fcall, and a
+parked fiber keeps its coroutine out of the collector's view, as the scheduler
+holds references to it the collector cannot count. The fiber goes when the
+scheduler ends it at shutdown, so the generator's and the fiber's finally
+blocks and the destructor follow "==DONE==". The scheduler RFC lists this
+behavior change as "A fiber parked in Fiber::suspend() is ended by the
+scheduler, not collected".
 --EXTENSIONS--
 test_scheduler
 --INI--
