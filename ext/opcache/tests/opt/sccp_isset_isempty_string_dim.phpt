@@ -90,6 +90,11 @@ function empty3() {
     return empty("abc"[$cv]);
 }
 
+function empty_special_case() {
+    $cv = 1;
+    return empty("a0c"[$cv]);
+}
+
 var_dump(isset0());
 var_dump(isset1());
 var_dump(isset2());
@@ -107,11 +112,12 @@ var_dump(empty_1());
 var_dump(empty_2());
 var_dump(empty_3());
 var_dump(empty_4());
+var_dump(empty_special_case());
 
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=81, args=0, vars=0, tmps=%d)
+     ; (lines=86, args=0, vars=0, tmps=%d)
      ; (after optimizer)
      ; %s.php:%s
 0000 INIT_FCALL 1 %d string("var_dump")
@@ -194,7 +200,12 @@ $_main:
 0077 T0 = DO_UCALL
 0078 SEND_VAL T0 1
 0079 DO_ICALL
-0080 RETURN int(1)
+0080 INIT_FCALL 1 %d string("var_dump")
+0081 INIT_FCALL 0 %d string("empty_special_case")
+0082 T0 = DO_UCALL
+0083 SEND_VAL T0 1
+0084 DO_ICALL
+0085 RETURN int(1)
 
 isset_1:
      ; (lines=1, args=0, vars=0, tmps=%d)
@@ -291,6 +302,12 @@ empty3:
      ; (after optimizer)
      ; %s.php:%s
 0000 RETURN bool(true)
+
+empty_special_case:
+     ; (lines=1, args=0, vars=0, tmps=%d)
+     ; (after optimizer)
+     ; %s.php:%s
+0000 RETURN bool(true)
 bool(true)
 bool(true)
 bool(true)
@@ -306,4 +323,5 @@ bool(true)
 bool(false)
 bool(false)
 bool(false)
+bool(true)
 bool(true)

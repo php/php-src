@@ -446,7 +446,7 @@ static inline zend_result ct_eval_isset_dim(zval *result, uint32_t extended_valu
 
 		bool rv = index >= 0 && index < Z_STRLEN_P(op1);
 		if (extended_value & ZEND_ISEMPTY) {
-			rv = !rv;
+			rv = !rv || Z_STRVAL_P(op1)[index] == '0';
 		}
 
 		ZVAL_BOOL(result, rv);
