@@ -208,7 +208,9 @@ struct _zend_coroutine_s {
 
 /**
  * Build a zend_fcall_t from PHP function parameters
- * (Z_PARAM_FUNC + Z_PARAM_VARIADIC_WITH_NAMED).
+ * (Z_PARAM_FUNC + Z_PARAM_VARIADIC_WITH_NAMED). It holds a reference on each
+ * value it copies: function_name, params, named_params and fci.object. A
+ * provider's get_gc reports all four.
  */
 #define ZEND_ASYNC_FCALL_DEFINE(_fcall_var, _src_fci, _src_fcc, _src_args, _src_args_count, _src_named_args) \
 	zend_fcall_t *_fcall_var = ecalloc(1, sizeof(zend_fcall_t)); \
@@ -225,7 +227,11 @@ struct _zend_coroutine_s {
 		_fcall_var->fci.named_params = _src_named_args; \
 		GC_ADDREF(_src_named_args); \
 	} \
-	Z_TRY_ADDREF(_fcall_var->fci.function_name);
+	Z_TRY_ADDREF(_fcall_var->fci.function_name); \
+	/* The object a class-string callable resolved to is in no zval of its own. */ \
+	if (_fcall_var->fci.object != NULL) { \
+		GC_ADDREF(_fcall_var->fci.object); \
+	}
 
 /* The inverse of ZEND_ASYNC_FCALL_DEFINE: releases everything the macro
  * copied and frees the zend_fcall_t. Safe on NULL. */
@@ -238,6 +244,9 @@ struct _zend_coroutine_s {
 				zend_array_release(_fcall->fci.named_params); \
 			} \
 			zval_ptr_dtor(&_fcall->fci.function_name); \
+			if (_fcall->fci.object != NULL) { \
+				OBJ_RELEASE(_fcall->fci.object); \
+			} \
 			efree(_fcall); \
 		} \
 	} while (0)
@@ -413,7 +422,7 @@ typedef zend_array *(*zend_async_coroutine_get_awaiting_info_t)(zend_coroutine_t
 
 /* Date of the last incompatible change to this API: a changed slot signature
  * or meaning, a reordered field. Appending a slot does not change it. */
-#define ZEND_ASYNC_API_VERSION 20261001
+#define ZEND_ASYNC_API_VERSION 20261003
 
 /**
  * Scheduler API bundle. A provider fills the struct and calls

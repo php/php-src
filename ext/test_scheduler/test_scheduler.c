@@ -777,6 +777,10 @@ static HashTable *ts_coroutine_object_gc(zend_object *object, zval **table, int 
 	if (ts->coro.fcall != NULL) {
 		zend_get_gc_buffer_add_zval(buf, &ts->coro.fcall->fci.function_name);
 
+		if (ts->coro.fcall->fci.object != NULL) {
+			zend_get_gc_buffer_add_obj(buf, ts->coro.fcall->fci.object);
+		}
+
 		for (uint32_t i = 0; i < ts->coro.fcall->fci.param_count; i++) {
 			zend_get_gc_buffer_add_zval(buf, &ts->coro.fcall->fci.params[i]);
 		}

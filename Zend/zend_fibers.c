@@ -640,6 +640,21 @@ static void zend_fiber_cleanup(zend_fiber_context *context)
 	fiber->caller = NULL;
 }
 
+/* Releases the callable Fiber::__construct() took: its name and the object it
+ * resolved to. Safe to call twice. */
+static void zend_fiber_release_callable(zend_fiber *fiber)
+{
+	zval_ptr_dtor(&fiber->fci.function_name);
+	ZVAL_UNDEF(&fiber->fci.function_name);
+
+	if (fiber->fci.object != NULL) {
+		zend_object *object = fiber->fci.object;
+		fiber->fci.object = NULL;
+		fiber->fci_cache.object = NULL;
+		OBJ_RELEASE(object);
+	}
+}
+
 static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 {
 	ZEND_ASSERT(Z_TYPE(transfer->value) == IS_NULL && "Initial transfer value to fiber context must be NULL");
@@ -658,8 +673,7 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 		zend_call_function(&fiber->fci, &fiber->fci_cache);
 
 		/* Cleanup callback and unset field to prevent GC / duplicate dtor issues. */
-		zval_ptr_dtor(&fiber->fci.function_name);
-		ZVAL_UNDEF(&fiber->fci.function_name);
+		zend_fiber_release_callable(fiber);
 
 		if (EG(exception)) {
 			if (!(fiber->flags & ZEND_FIBER_FLAG_DESTROYED)
@@ -1204,7 +1218,7 @@ static void zend_fiber_object_free(zend_object *object)
 	 * finished. */
 	zend_fiber_release_coroutine(fiber, true);
 
-	zval_ptr_dtor(&fiber->fci.function_name);
+	zend_fiber_release_callable(fiber);
 	zval_ptr_dtor(&fiber->result);
 	zval_ptr_dtor(&fiber->transfer);
 
@@ -1267,6 +1281,11 @@ static HashTable *zend_fiber_object_gc(zend_object *object, zval **table, int *n
 	if (fiber->coroutine != NULL) {
 		if (ZEND_COROUTINE_IS_FINISHED(fiber->coroutine)) {
 			zend_get_gc_buffer_add_zval(buf, &fiber->fci.function_name);
+
+			if (fiber->fci.object != NULL) {
+				zend_get_gc_buffer_add_obj(buf, fiber->fci.object);
+			}
+
 			zend_get_gc_buffer_add_zval(buf, &fiber->result);
 			zend_get_gc_buffer_add_zval(buf, &fiber->transfer);
 
@@ -1282,6 +1301,11 @@ static HashTable *zend_fiber_object_gc(zend_object *object, zval **table, int *n
 
 		if (fiber->context.status == ZEND_FIBER_STATUS_SUSPENDED) {
 			zend_get_gc_buffer_add_zval(buf, &fiber->fci.function_name);
+
+			if (fiber->fci.object != NULL) {
+				zend_get_gc_buffer_add_obj(buf, fiber->fci.object);
+			}
+
 			zend_get_gc_buffer_add_zval(buf, &fiber->transfer);
 
 			/* The coroutine object stays out of the buffer: the scheduler
@@ -1298,6 +1322,11 @@ static HashTable *zend_fiber_object_gc(zend_object *object, zval **table, int *n
 	}
 
 	zend_get_gc_buffer_add_zval(buf, &fiber->fci.function_name);
+
+	if (fiber->fci.object != NULL) {
+		zend_get_gc_buffer_add_obj(buf, fiber->fci.object);
+	}
+
 	zend_get_gc_buffer_add_zval(buf, &fiber->result);
 	zend_get_gc_buffer_add_zval(buf, &fiber->transfer);
 
@@ -1342,6 +1371,12 @@ ZEND_METHOD(Fiber, __construct)
 
 	// Keep a reference to closures or callable objects while the fiber is running.
 	Z_TRY_ADDREF(fiber->fci.function_name);
+
+	/* The object a class-string callable resolved to ($this of the calling method)
+	 * is in no zval the fiber holds, and the call takes it from here. */
+	if (fiber->fci.object != NULL) {
+		GC_ADDREF(fiber->fci.object);
+	}
 }
 
 ZEND_METHOD(Fiber, start)
