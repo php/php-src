@@ -1498,6 +1498,7 @@ PHPAPI zend_result php_copy_file_ctx(const char *src, const char *dest, int src_
 {
 	php_stream *srcstream = NULL, *deststream = NULL;
 	zend_result ret = FAILURE;
+	bool use_descriptor_identity;
 	php_stream_statbuf src_s, dest_s;
 	int src_stat_flags = (src_flags & STREAM_DISABLE_OPEN_BASEDIR) ? PHP_STREAM_URL_STAT_IGNORE_OPEN_BASEDIR : 0;
 
@@ -1566,17 +1567,36 @@ no_stat:
 	}
 safe_to_copy:
 
+	use_descriptor_identity =
+		php_stream_locate_url_wrapper(src, NULL, 0) == &php_plain_files_wrapper
+		&& php_stream_locate_url_wrapper(dest, NULL, 0) == &php_plain_files_wrapper;
+
 	srcstream = php_stream_open_wrapper_ex(src, "rb", src_flags | REPORT_ERRORS, NULL, ctx);
 
 	if (!srcstream) {
 		return ret;
 	}
 
-	deststream = php_stream_open_wrapper_ex(dest, "wb", REPORT_ERRORS, NULL, ctx);
+	deststream = php_stream_open_wrapper_ex(dest, use_descriptor_identity ? "cb" : "wb", REPORT_ERRORS, NULL, ctx);
 
 	if (deststream) {
+		if (use_descriptor_identity) {
+			if (php_stream_stat(srcstream, &src_s) != SUCCESS
+					|| php_stream_stat(deststream, &dest_s) != SUCCESS) {
+				goto out;
+			}
+			if (src_s.sb.st_ino && src_s.sb.st_ino == dest_s.sb.st_ino
+					&& src_s.sb.st_dev == dest_s.sb.st_dev) {
+				goto out;
+			}
+			if (S_ISREG(dest_s.sb.st_mode)
+					&& php_stream_truncate_set_size(deststream, 0) != PHP_STREAM_OPTION_RETURN_OK) {
+				goto out;
+			}
+		}
 		ret = php_stream_copy_to_stream_ex(srcstream, deststream, PHP_STREAM_COPY_ALL, NULL);
 	}
+out:
 	php_stream_close(srcstream);
 	if (deststream) {
 		php_stream_close(deststream);
