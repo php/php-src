@@ -1536,6 +1536,10 @@ ZEND_API bool zend_inference_propagate_range(const zend_op_array *op_array, cons
 			tmp->min = 0;
 			tmp->max = ZEND_LONG_MAX;
 			return 1;
+		case ZEND_SPACESHIP:
+			tmp->min = -1;
+			tmp->max = 1;
+			return 1;
 		case ZEND_COUNT:
 			/* count() on Countable objects may return negative numbers */
 			tmp->min = ZEND_LONG_MIN;
