@@ -1365,10 +1365,8 @@ static zend_coroutine_t *ts_launch(void)
 /// The Async Core slots
 ///////////////////////////////////////////////////////////////////
 
-static zend_coroutine_t *ts_new_coroutine(size_t extra_size)
+static zend_coroutine_t *ts_new_coroutine(void)
 {
-	(void) extra_size;
-
 	return &ts_coroutine_new()->coro;
 }
 

@@ -251,13 +251,12 @@ struct _zend_coroutine_s {
 /// Scheduler API slots
 ///////////////////////////////////////////////////////////////////
 
-/* Allocate a coroutine in STATUS_CREATED; extra_size bytes are appended
- * for the caller. */
-typedef zend_coroutine_t *(*zend_async_new_coroutine_t)(size_t extra_size);
+/* Allocate a coroutine in STATUS_CREATED. */
+typedef zend_coroutine_t *(*zend_async_new_coroutine_t)(void);
 /* Allocate a coroutine for the engine's own GC bookkeeping (running
  * zend_gc_collect_cycles() and its destructor phase). A separate slot lets a
  * scheduler treat these specially — priority, concurrency limits — if it cares.
- * NULL falls back to new_coroutine(0); see ZEND_ASYNC_GC_NEW_COROUTINE(). */
+ * NULL falls back to new_coroutine(); see ZEND_ASYNC_GC_NEW_COROUTINE(). */
 typedef zend_coroutine_t *(*zend_async_gc_new_coroutine_t)(void);
 /* Put a CREATED/SUSPENDED coroutine into the run queue (-> STATUS_QUEUED).
  * Enqueuing a fresh coroutine and resuming a suspended one are the same
@@ -559,15 +558,14 @@ END_EXTERN_C()
 #define ZEND_ASYNC_INTERNAL_CONTEXT_DESTROY(coroutine) \
 	zend_async_internal_context_destroy(coroutine)
 
-#define ZEND_ASYNC_NEW_COROUTINE() zend_async_new_coroutine_fn(0)
-#define ZEND_ASYNC_NEW_COROUTINE_EX(extra_size) zend_async_new_coroutine_fn(extra_size)
+#define ZEND_ASYNC_NEW_COROUTINE() zend_async_new_coroutine_fn()
 /* A coroutine for the engine's own GC bookkeeping. Falls back to the plain
  * new_coroutine slot when the scheduler does not distinguish them; NULL when
  * the provider cannot mint C coroutines at all. */
 #define ZEND_ASYNC_GC_NEW_COROUTINE() \
 	(zend_async_gc_new_coroutine_fn != NULL \
 					? zend_async_gc_new_coroutine_fn() \
-					: zend_async_new_coroutine_fn != NULL ? zend_async_new_coroutine_fn(0) : NULL)
+					: zend_async_new_coroutine_fn != NULL ? zend_async_new_coroutine_fn() : NULL)
 #define ZEND_ASYNC_ENQUEUE_COROUTINE(coroutine) \
 	zend_async_enqueue_coroutine_fn((coroutine), NULL, false)
 /* Enqueue-with-error: the resume/cancellation delivery channel. */
