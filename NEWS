@@ -18,6 +18,7 @@ PHP                                                                        NEWS
   . Fix throwing behaviour with recursive arrays in VM. (ndossche)
   . Fixed skipped catch block when switching fibers during exception unwinding
     (Nicolas Grekas)
+  . Fix escape analysis for objects implementing ArrayAccess. (ndossche, Arnaud)
 
 - DOM:
   . Fixed bug GH-23352 (UAF reading an attribute value node retained across
