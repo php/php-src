@@ -11,7 +11,7 @@ new class("PHP 7 is better than you, and it knows it ...") {
 };
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Cannot assign string to property class@anonymous::$int of type int in %s:%d
+Fatal error: Uncaught TypeError: Cannot assign string to property class@anonymous%0%s::$int of type int in %s:%d
 Stack trace:
 #0 %s(%d): class@anonymous->__construct('PHP 7 is better...')
 #1 {main}
