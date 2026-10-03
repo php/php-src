@@ -133,6 +133,12 @@ PHP                                                                        NEWS
   . Fixed bug GH-23986 (/proc/self paths resolve to the parent process after
     pcntl_fork()). (Lazizbek Ergashev)
 
+- PCRE:
+  . Applied security fixes to bundled PCRE2 10.44 and disabled its legacy
+    ARM64 SIMD optimization (GHSA-2p8c-ff85-vh9x, GHSA-q8g2-wprr-34m9,
+    GHSA-9qww-pwc4-77qq, GHSA-fmgr-6ggq-9859, GHSA-3r4p-g7gg-ppmf,
+    GHSA-r9hj-j2rw-4q3m, and GHSA-43gg-c3xx-7w7g). (Ilia Alshanetsky)
+
 - PDO:
   . Fixed PDOStatement::getColumnMeta() reading out of bounds for an invalid
     column index. (Ilia Alshanetsky)
