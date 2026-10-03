@@ -1879,7 +1879,9 @@ static inline bool php_mb_is_no_encoding_utf8(enum mbfl_no_encoding no_enc)
 	return (no_enc >= mbfl_no_encoding_utf8 && no_enc <= mbfl_no_encoding_utf8_sb);
 }
 
-static unsigned char* offset_to_pointer_utf8(unsigned char *str, unsigned char *end, ssize_t offset) {
+#define IS_UTF8_CONTINUATION_BYTE(c) (((c) & 0xC0) == 0x80)
+
+static unsigned char* offset_to_pointer_utf8(unsigned char *str, unsigned char *end, ssize_t offset, bool is_valid_utf8) {
 	if (offset < 0) {
 		unsigned char *pos = end;
 		while (offset < 0) {
@@ -1888,7 +1890,7 @@ static unsigned char* offset_to_pointer_utf8(unsigned char *str, unsigned char *
 			}
 
 			unsigned char c = *--pos;
-			if (c < 0x80 || (c & 0xC0) != 0x80) {
+			if (!IS_UTF8_CONTINUATION_BYTE(c)) {
 				offset++;
 			}
 		}
@@ -1896,6 +1898,21 @@ static unsigned char* offset_to_pointer_utf8(unsigned char *str, unsigned char *
 	} else {
 		const unsigned char *u8_tbl = mbfl_encoding_utf8.mblen_table;
 		unsigned char *pos = str;
+		if (is_valid_utf8) {
+			while (offset > 256 && (size_t)(end - pos) >= 256) {
+				offset -= mb_fast_strlen_utf8(pos, 256);
+				pos += 256;
+			}
+			for (; pos < end; pos++) {
+				if (!IS_UTF8_CONTINUATION_BYTE(*pos)) {
+					if (offset == 0) {
+						return pos;
+					}
+					offset--;
+				}
+			}
+			return offset == 0 ? end : NULL;
+		}
 		while (offset-- > 0) {
 			if (pos >= end) {
 				return NULL;
@@ -1928,7 +1945,7 @@ static size_t mb_find_strpos(zend_string *haystack, zend_string *needle, const m
 		needle_u8 = needle;
 	}
 
-	offset_pointer = offset_to_pointer_utf8((unsigned char*)ZSTR_VAL(haystack_u8), (unsigned char*)ZSTR_VAL(haystack_u8) + ZSTR_LEN(haystack_u8), offset);
+	offset_pointer = offset_to_pointer_utf8((unsigned char*)ZSTR_VAL(haystack_u8), (unsigned char*)ZSTR_VAL(haystack_u8) + ZSTR_LEN(haystack_u8), offset, ZSTR_IS_VALID_UTF8(haystack_u8));
 	if (!offset_pointer) {
 		result = MBFL_ERROR_OFFSET;
 		goto out;
@@ -1946,7 +1963,7 @@ static size_t mb_find_strpos(zend_string *haystack, zend_string *needle, const m
 		found_pos = zend_memnrstr((const char*)offset_pointer, ZSTR_VAL(needle_u8), ZSTR_LEN(needle_u8), ZSTR_VAL(haystack_u8) + ZSTR_LEN(haystack_u8));
 	} else {
 		size_t needle_len = pointer_to_offset_utf8((unsigned char*)ZSTR_VAL(needle_u8), (unsigned char*)ZSTR_VAL(needle_u8) + ZSTR_LEN(needle_u8));
-		offset_pointer = offset_to_pointer_utf8(offset_pointer, (unsigned char*)ZSTR_VAL(haystack_u8) + ZSTR_LEN(haystack_u8), needle_len);
+		offset_pointer = offset_to_pointer_utf8(offset_pointer, (unsigned char*)ZSTR_VAL(haystack_u8) + ZSTR_LEN(haystack_u8), needle_len, ZSTR_IS_VALID_UTF8(haystack_u8));
 		if (!offset_pointer) {
 			offset_pointer = (unsigned char*)ZSTR_VAL(haystack_u8) + ZSTR_LEN(haystack_u8);
 		}
@@ -2183,6 +2200,27 @@ static zend_string* mb_get_substr(zend_string *input, size_t from, size_t len, c
 			len = in_len;
 		}
 		return zend_string_init_fast((const char*)in, len);
+	}
+
+	if (php_mb_is_no_encoding_utf8(enc->no_encoding) && ZSTR_IS_VALID_UTF8(input)) {
+		/* Valid UTF-8 can be sliced on codepoint boundaries without decoding it */
+		unsigned char *end = in + in_len;
+		unsigned char *start = offset_to_pointer_utf8(in, end, from, true);
+		if (!start) {
+			return zend_empty_string;
+		}
+		unsigned char *stop = end;
+		if (len < (size_t)(end - start)) {
+			stop = offset_to_pointer_utf8(start, end, len, true);
+			if (!stop) {
+				stop = end;
+			}
+		}
+		zend_string *result = zend_string_init_fast((const char*)start, stop - start);
+		if (!ZSTR_IS_INTERNED(result)) {
+			GC_ADD_FLAGS(result, IS_STR_VALID_UTF8);
+		}
+		return result;
 	}
 
 	return mb_get_substr_slow(in, in_len, from, len, enc);
