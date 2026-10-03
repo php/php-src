@@ -281,6 +281,10 @@ static void php_password_hmac_sha256(const unsigned char *key, size_t key_len,
 	PHP_SHA256Update(&ctx, k_opad, 64);
 	PHP_SHA256Update(&ctx, key_hash, 32);
 	PHP_SHA256Final(digest, &ctx);
+
+	ZEND_SECURE_ZERO(k_ipad, sizeof(k_ipad));
+	ZEND_SECURE_ZERO(k_opad, sizeof(k_opad));
+	ZEND_SECURE_ZERO(key_hash, sizeof(key_hash));
 }
 
 /* Validate a bcrypt-sha256 hash and, on success, extract its cost, salt and
