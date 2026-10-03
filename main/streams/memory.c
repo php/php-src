@@ -127,55 +127,38 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 		case SEEK_CUR:
 			if (offset < 0) {
 				if (ms->fpos < -(size_t)offset) {
-					ms->fpos = 0;
-					*newoffs = -1;
 					return -1;
 				} else {
 					ms->fpos = ms->fpos + offset;
 					*newoffs = ms->fpos;
-					stream->eof = 0;
-					stream->fatal_error = 0;
 					return 0;
 				}
 			} else {
-				stream->eof = 0;
-				stream->fatal_error = 0;
 				ms->fpos = ms->fpos + offset;
 				*newoffs = ms->fpos;
 				return 0;
 			}
 		case SEEK_SET:
 			if (offset < 0) {
-				ms->fpos = 0;
-				*newoffs = -1;
 				return -1;
 			} else {
 				ms->fpos = offset;
 				*newoffs = ms->fpos;
-				stream->eof = 0;
-				stream->fatal_error = 0;
 				return 0;
 			}
 		case SEEK_END:
 			if (offset > 0) {
 				ms->fpos = ZSTR_LEN(ms->data) + offset;
 				*newoffs = ms->fpos;
-				stream->eof = 0;
-				stream->fatal_error = 0;
 				return 0;
 			} else if (ZSTR_LEN(ms->data) < -(size_t)offset) {
-				ms->fpos = 0;
-				*newoffs = -1;
 				return -1;
 			} else {
 				ms->fpos = ZSTR_LEN(ms->data) + offset;
 				*newoffs = ms->fpos;
-				stream->eof = 0;
-				stream->fatal_error = 0;
 				return 0;
 			}
 		default:
-			*newoffs = ms->fpos;
 			return -1;
 	}
 }
@@ -446,10 +429,10 @@ static int php_stream_temp_seek(php_stream *stream, zend_off_t offset, int whenc
 
 	assert(ts != NULL);
 
-	if (!ts->innerstream) {
-		*newoffs = -1;
+	if (UNEXPECTED(!ts->innerstream)) {
 		return -1;
 	}
+
 	ret = php_stream_seek(ts->innerstream, offset, whence);
 	*newoffs = php_stream_tell(ts->innerstream);
 	stream->eof = ts->innerstream->eof;

@@ -120,6 +120,13 @@ PHP 8.6 UPGRADE NOTES
     execution error occurs (e.g. malformed UTF-8 input with the /u modifier).
     This is consistent with other preg_* functions.
 
+- PDO_SQLite:
+  . A failed fseek() on a blob stream opened by Pdo\Sqlite::openBlob() now
+    leaves the stream position unchanged. Previously, ftell() returned false
+    afterwards and the stream was moved to the start or the end of the blob.
+    As a result, an fwrite() after a failed seek past the end now writes at
+    the unchanged position instead of failing.
+
 - PGSQL:
   . pg_fetch_object() now reports the ValueError for a non-empty
     $constructor_args on a class without a constructor on the
@@ -246,6 +253,13 @@ PHP 8.6 UPGRADE NOTES
   . DirectoryIterator::key() now returns int|string,
     and DirectoryIterator::current() returns string|SplFileInfo|static.
 
+- SQLite3:
+  . A failed fseek() on a blob stream opened by SQLite3::openBlob() now leaves
+    the stream position unchanged. Previously, ftell() returned false
+    afterwards and the stream was moved to the start or the end of the blob.
+    As a result, an fwrite() after a failed seek past the end now writes at
+    the unchanged position instead of failing.
+
 - Standard:
   . array_intersect() with at least two arrays now converts values to strings
     while scanning its inputs instead of during sort comparisons. This can
@@ -319,6 +333,15 @@ PHP 8.6 UPGRADE NOTES
     endianness modifier. A name starting with these characters is unaffected
     when a repeater precedes it, as in "s1<value".
     RFC: https://wiki.php.net/rfc/pack-unpack-endianness-signed-integers-support
+
+- Streams:
+  . A failed fseek() on php://memory and php://temp streams now leaves the
+    stream position unchanged. Previously, ftell() returned false afterwards
+    and the stream was moved to its start.
+  . A failed fseek() on buffered streams, such as plain files, now leaves the
+    position of the next read or write unchanged. Previously, the read buffer
+    was discarded, so the next read skipped the buffered data and the next
+    write happened where the stream had read ahead to.
 
 - Sysvshm:
   . shm_attach() now raises a ValueError when the $key argument is outside the

@@ -131,6 +131,20 @@ PHP                                                                        NEWS
   . Fixed bug GH-23899 (Assertion failure when a cancel callback returns an
     invalid type during shutdown). (Weilin Du)
 
+- PDO_SQLite:
+  . Fixed bug GH-23905 (Failed seek on PDO SQLite blob streams sets the stream
+    position to -1). (Marc Bennewitz)
+
+- SQLite3:
+  . Fixed bug GH-23905 (Failed seek on SQLite3 blob streams sets the stream
+    position to -1). (Marc Bennewitz)
+
+- Streams:
+  . Fixed bug GH-23905 (Failed seek on php://memory and php://temp streams
+    sets the stream position to -1). (Marc Bennewitz)
+  . Fixed a failed seek discarding the read buffer of buffered streams.
+    (Marc Bennewitz)
+
 24 Sep 2026, PHP 8.6.0RC2
 
 - Core:
