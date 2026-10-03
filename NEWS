@@ -2,6 +2,12 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.36
 
+- PCRE:
+  . Applied security fixes to bundled PCRE2 10.42 and disabled its legacy
+    ARM64 SIMD optimization (GHSA-2p8c-ff85-vh9x, GHSA-q8g2-wprr-34m9,
+    GHSA-9qww-pwc4-77qq, GHSA-fmgr-6ggq-9859, GHSA-3r4p-g7gg-ppmf,
+    GHSA-r9hj-j2rw-4q3m, and GHSA-43gg-c3xx-7w7g). (Ilia Alshanetsky)
+
 
 24 Sep 2026, PHP 8.3.35
 

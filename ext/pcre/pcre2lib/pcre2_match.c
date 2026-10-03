@@ -597,7 +597,6 @@ heapframe *P = NULL;
 
 heapframe *frames_top;  /* End of frames vector */
 heapframe *assert_accept_frame = NULL;  /* For passing back a frame with captures */
-PCRE2_SIZE heapframes_size;   /* Usable size of frames vector */
 PCRE2_SIZE frame_copy_size;   /* Amount to copy when creating a new frame */
 
 /* Local variables that do not need to be preserved over calls to RRMATCH(). */
@@ -635,13 +634,10 @@ copied when a new frame is created. */
 
 frame_copy_size = frame_size - offsetof(heapframe, eptr);
 
-/* Set up the first frame and the end of the frames vector. We set the local
-heapframes_size to the usuable amount of the vector, that is, a whole number of
-frames. */
+/* Set up the first frame and the end of the frames vector. */
 
 F = match_data->heapframes;
-heapframes_size = (match_data->heapframes_size / frame_size) * frame_size;
-frames_top = (heapframe *)((char *)F + heapframes_size);
+frames_top = (heapframe *)((char *)F + match_data->heapframes_size);
 
 Frdepth = 0;                        /* "Recursion" depth */
 Fcapture_last = 0;                  /* Number of most recent capture */
@@ -662,31 +658,50 @@ MATCH_RECURSE:
 doubling the size, but constrained by the heap limit (which is in KiB). */
 
 N = (heapframe *)((char *)F + frame_size);
-if (N >= frames_top)
+if ((heapframe *)((char *)N + frame_size) >= frames_top)
   {
   heapframe *new;
-  PCRE2_SIZE newsize = match_data->heapframes_size * 2;
+  PCRE2_SIZE newsize;
+  PCRE2_SIZE usedsize = (char *)N - (char *)(match_data->heapframes);
 
-  if (newsize > mb->heap_limit)
+  if (match_data->heapframes_size >= PCRE2_SIZE_MAX / 2)
     {
-    PCRE2_SIZE maxsize = (mb->heap_limit/frame_size) * frame_size;
-    if (match_data->heapframes_size >= maxsize) return PCRE2_ERROR_HEAPLIMIT;
-    newsize = maxsize;
+    if (match_data->heapframes_size == PCRE2_SIZE_MAX - 1)
+      return PCRE2_ERROR_NOMEMORY;
+    newsize = PCRE2_SIZE_MAX - 1;
+    }
+  else
+    newsize = match_data->heapframes_size * 2;
+
+  if (newsize / 1024 >= mb->heap_limit)
+    {
+    PCRE2_SIZE old_size = match_data->heapframes_size / 1024;
+    if (mb->heap_limit <= old_size)
+      return PCRE2_ERROR_HEAPLIMIT;
+    else
+      {
+      PCRE2_SIZE max_delta = 1024 * (mb->heap_limit - old_size);
+      int over_bytes = match_data->heapframes_size % 1024;
+      if (over_bytes) max_delta -= (1024 - over_bytes);
+      newsize = match_data->heapframes_size + max_delta;
+      }
     }
 
+  /* With a heap limit set, the permitted additional size may not be enough for
+  another frame, so do a final check. */
+
+  if (newsize - usedsize < frame_size) return PCRE2_ERROR_HEAPLIMIT;
   new = match_data->memctl.malloc(newsize, match_data->memctl.memory_data);
   if (new == NULL) return PCRE2_ERROR_NOMEMORY;
-  memcpy(new, match_data->heapframes, heapframes_size);
+  memcpy(new, match_data->heapframes, usedsize);
 
-  F = (heapframe *)((char *)new + ((char *)F - (char *)match_data->heapframes));
-  N = (heapframe *)((char *)F + frame_size);
+  N = (heapframe *)((char *)new + usedsize);
+  F = (heapframe *)((char *)N - frame_size);
 
   match_data->memctl.free(match_data->heapframes, match_data->memctl.memory_data);
   match_data->heapframes = new;
   match_data->heapframes_size = newsize;
-
-  heapframes_size = (newsize / frame_size) * frame_size;
-  frames_top = (heapframe *)((char *)new + heapframes_size);
+  frames_top = (heapframe *)((char *)new + newsize);
   }
 
 #ifdef DEBUG_SHOW_RMATCH
@@ -2564,7 +2579,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
     else
       {
       GETCHARINCTEST(fc, Feptr);
-      Feptr = PRIV(extuni)(fc, Feptr, mb->start_subject, mb->end_subject, utf,
+      Feptr = PRIV(extuni)(fc, Feptr, mb->check_subject, mb->end_subject, utf,
         NULL);
       }
     CHECK_PARTIAL();
@@ -2917,7 +2932,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
           else
             {
             GETCHARINCTEST(fc, Feptr);
-            Feptr = PRIV(extuni)(fc, Feptr, mb->start_subject,
+            Feptr = PRIV(extuni)(fc, Feptr, mb->check_subject,
               mb->end_subject, utf, NULL);
             }
           CHECK_PARTIAL();
@@ -3739,7 +3754,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
           else
             {
             GETCHARINCTEST(fc, Feptr);
-            Feptr = PRIV(extuni)(fc, Feptr, mb->start_subject, mb->end_subject,
+            Feptr = PRIV(extuni)(fc, Feptr, mb->check_subject, mb->end_subject,
               utf, NULL);
             }
           CHECK_PARTIAL();
@@ -4320,7 +4335,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
           else
             {
             GETCHARINCTEST(fc, Feptr);
-            Feptr = PRIV(extuni)(fc, Feptr, mb->start_subject, mb->end_subject,
+            Feptr = PRIV(extuni)(fc, Feptr, mb->check_subject, mb->end_subject,
               utf, NULL);
             }
           CHECK_PARTIAL();
@@ -6341,10 +6356,6 @@ PCRE2_SPTR req_cu_ptr;
 PCRE2_SPTR start_partial;
 PCRE2_SPTR match_partial;
 
-#ifdef SUPPORT_JIT
-BOOL use_jit;
-#endif
-
 /* This flag is needed even when Unicode is not supported for convenience
 (it is used by the IS_NEWLINE macro). */
 
@@ -6354,9 +6365,6 @@ BOOL utf = FALSE;
 BOOL ucp = FALSE;
 BOOL allow_invalid;
 uint32_t fragment_options = 0;
-#ifdef SUPPORT_JIT
-BOOL jit_checked_utf = FALSE;
-#endif
 #endif  /* SUPPORT_UNICODE */
 
 PCRE2_SIZE frame_size;
@@ -6417,15 +6425,6 @@ options |= (re->flags & FF) / ((FF & (~FF+1)) / (OO & (~OO+1)));
 #undef FF
 #undef OO
 
-/* If the pattern was successfully studied with JIT support, we will run the
-JIT executable instead of the rest of this function. Most options must be set
-at compile time for the JIT code to be usable. */
-
-#ifdef SUPPORT_JIT
-use_jit = (re->executable_jit != NULL &&
-          (options & ~PUBLIC_JIT_MATCH_OPTIONS) == 0);
-#endif
-
 /* Initialize UTF/UCP parameters. */
 
 #ifdef SUPPORT_UNICODE
@@ -6471,16 +6470,22 @@ match_data->startchar = 0;
 
 /* ============================= JIT matching ============================== */
 
-/* Prepare for JIT matching. Check a UTF string for validity unless no check is
-requested or invalid UTF can be handled. We check only the portion of the
-subject that might be be inspected during matching - from the offset minus the
-maximum lookbehind to the given length. This saves time when a small part of a
-large subject is being matched by the use of a starting offset. Note that the
-maximum lookbehind is a number of characters, not code units. */
+/* If the pattern was successfully studied with JIT support, we will run the
+JIT executable instead of the rest of this function. Most options must be set
+at compile time for the JIT code to be usable. */
 
 #ifdef SUPPORT_JIT
-if (use_jit)
+if (re->executable_jit != NULL &&
+    (options & ~PUBLIC_JIT_MATCH_OPTIONS) == 0 &&
+    PRIV(jit_check_exec)(re->executable_jit, options))
   {
+  /* Prepare for JIT matching. Check a UTF string for validity unless no check
+  is requested or invalid UTF can be handled. We check only the portion of the
+  subject that might be be inspected during matching - from the offset minus
+  the maximum lookbehind to the given length. This saves time when a small part
+  of a large subject is being matched by the use of a starting offset. Note that
+  the maximum lookbehind is a number of characters, not code units. */
+
 #ifdef SUPPORT_UNICODE
   if (utf && (options & PCRE2_NO_UTF_CHECK) == 0 && !allow_invalid)
     {
@@ -6540,16 +6545,12 @@ if (use_jit)
       match_data->startchar += start_match - subject;
       return match_data->rc;
       }
-    jit_checked_utf = TRUE;
     }
 #endif  /* SUPPORT_UNICODE */
 
-  /* If JIT returns BADOPTION, which means that the selected complete or
-  partial matching mode was not compiled, fall through to the interpreter. */
-
   rc = pcre2_jit_match(code, subject, length, start_offset, options,
     match_data, mcontext);
-  if (rc != PCRE2_ERROR_JIT_BADOPTION)
+
     {
     if (rc >= 0 && (options & PCRE2_COPY_MATCHED_SUBJECT) != 0)
       {
@@ -6574,12 +6575,8 @@ this. */
 
 mb->check_subject = subject;
 
-/* If a UTF subject string was not checked for validity in the JIT code above,
-check it here, and handle support for invalid UTF strings. The check above
-happens only when invalid UTF is not supported and PCRE2_NO_CHECK_UTF is unset.
-If we get here in those circumstances, it means the subject string is valid,
-but for some reason JIT matching was not successful. There is no need to check
-the subject again.
+/* Check the validity of UTF subject strings. The check happens only when
+PCRE2_NO_CHECK_UTF is unset.
 
 We check only the portion of the subject that might be be inspected during
 matching - from the offset minus the maximum lookbehind to the given length.
@@ -6591,11 +6588,7 @@ Note also that support for invalid UTF forces a check, overriding the setting
 of PCRE2_NO_CHECK_UTF. */
 
 #ifdef SUPPORT_UNICODE
-if (utf &&
-#ifdef SUPPORT_JIT
-    !jit_checked_utf &&
-#endif
-    ((options & PCRE2_NO_UTF_CHECK) == 0 || allow_invalid))
+if (utf && ((options & PCRE2_NO_UTF_CHECK) == 0 || allow_invalid))
   {
 #if PCRE2_CODE_UNIT_WIDTH != 32
   BOOL skipped_bad_start = FALSE;
@@ -6801,7 +6794,7 @@ the pattern. It is not used at all if there are no capturing parentheses.
 
   frame_size                   is the total size of each frame
   match_data->heapframes       is the pointer to the frames vector
-  match_data->heapframes_size  is the total size of the vector
+  match_data->heapframes_size  is the allocated size of the vector
 
 We must pad the frame_size for alignment to ensure subsequent frames are as
 aligned as heapframe. Whilst ovector is word-aligned due to being a PCRE2_SIZE
@@ -6816,7 +6809,7 @@ frame_size = (offsetof(heapframe, ovector) +
 smaller. */
 
 mb->heap_limit = ((mcontext->heap_limit < re->limit_heap)?
-  mcontext->heap_limit : re->limit_heap) * 1024;
+  mcontext->heap_limit : re->limit_heap);
 
 mb->match_limit = (mcontext->match_limit < re->limit_match)?
   mcontext->match_limit : re->limit_match;
@@ -6827,19 +6820,19 @@ mb->match_limit_depth = (mcontext->depth_limit < re->limit_depth)?
 /* If a pattern has very many capturing parentheses, the frame size may be very
 large. Set the initial frame vector size to ensure that there are at least 10
 available frames, but enforce a minimum of START_FRAMES_SIZE. If this is
-greater than the heap limit, get as large a vector as possible. Always round
-the size to a multiple of the frame size. */
+greater than the heap limit, get as large a vector as possible. */
 
 heapframes_size = frame_size * 10;
 if (heapframes_size < START_FRAMES_SIZE) heapframes_size = START_FRAMES_SIZE;
-if (heapframes_size > mb->heap_limit)
+if (heapframes_size / 1024 > mb->heap_limit)
   {
-  if (frame_size > mb->heap_limit ) return PCRE2_ERROR_HEAPLIMIT;
-  heapframes_size = mb->heap_limit;
+  PCRE2_SIZE max_size = 1024 * mb->heap_limit;
+  if (max_size < frame_size) return PCRE2_ERROR_HEAPLIMIT;
+  heapframes_size = max_size;
   }
 
 /* If an existing frame vector in the match_data block is large enough, we can
-use it.Otherwise, free any pre-existing vector and get a new one. */
+use it. Otherwise, free any pre-existing vector and get a new one. */
 
 if (match_data->heapframes_size < heapframes_size)
   {
@@ -7285,7 +7278,6 @@ for(;;)
   mb->match_call_count = 0;
   mb->end_offset_top = 0;
   mb->skip_arg_count = 0;
-
   rc = match(start_match, mb->start_code, re->top_bracket, frame_size,
     match_data, mb);
 
