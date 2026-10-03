@@ -238,18 +238,15 @@ php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 		precision = MAX_FLOAT_PRECISION;
 	}
 
-	if (zend_isnan(number)) {
-		is_negative = (number<0);
-		php_sprintf_appendstring(buffer, pos, "NaN", 3, 0, padding,
-								 alignment, 3, is_negative, 0, always_sign);
-		return;
-	}
-
-	if (zend_isinf(number)) {
-		is_negative = (number<0);		
-		char *str = is_negative ? "-INF" : "INF";
-		php_sprintf_appendstring(buffer, pos, str, strlen(str), 0, padding,
-								alignment, strlen(str), is_negative, 0, always_sign);
+	if (zend_isnan(number) || zend_isinf(number)) {
+		is_negative = (number < 0);
+		if (zend_isnan(number)) {
+			s = always_sign ? "+NaN" : "NaN";
+		} else {
+			s = is_negative ? "-INF" : (always_sign ? "+INF" : "INF");
+		}
+		php_sprintf_appendstring(buffer, pos, s, width, 0, padding,
+								 alignment, strlen(s), is_negative, 0, always_sign);
 		return;
 	}
 
