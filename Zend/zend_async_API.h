@@ -252,12 +252,18 @@ struct _zend_coroutine_s {
 /// Scheduler API slots
 ///////////////////////////////////////////////////////////////////
 
-/* Allocate a coroutine in STATUS_CREATED. */
+/* Allocate a coroutine in STATUS_CREATED, or NULL when the scheduler cannot.
+ * The scheduler owns the coroutine from its creation: the caller borrows it
+ * until it finishes and takes ZEND_COROUTINE_ADD_REF() to keep it longer. A
+ * coroutine the caller never manages to enqueue stays the scheduler's until the
+ * request ends, and it waits for nothing. */
 typedef zend_coroutine_t *(*zend_async_new_coroutine_t)(void);
 /* Allocate a coroutine for the engine's own GC bookkeeping (running
  * zend_gc_collect_cycles() and its destructor phase). A separate slot lets a
  * scheduler treat these specially — priority, concurrency limits — if it cares.
- * NULL falls back to new_coroutine(); see ZEND_ASYNC_GC_NEW_COROUTINE(). */
+ * NULL falls back to new_coroutine(); see ZEND_ASYNC_GC_NEW_COROUTINE(). A NULL
+ * from this slot is a failure the engine survives, not a way to throttle: a
+ * scheduler that keeps refusing never runs the destructors of garbage cycles. */
 typedef zend_coroutine_t *(*zend_async_gc_new_coroutine_t)(void);
 /* Put a CREATED/SUSPENDED coroutine into the run queue (-> STATUS_QUEUED).
  * Enqueuing a fresh coroutine and resuming a suspended one are the same
