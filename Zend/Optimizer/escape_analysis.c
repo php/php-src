@@ -175,6 +175,9 @@ static bool is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, i
 				 && !ce->__set
 				 && !ce->__isset
 				 && !ce->num_hooked_props
+				 /* ArrayAccess methods receive the object, interfaces of unlinked classes are unknown */
+				 && !ce->arrayaccess_funcs_ptr
+				 && ((ce->ce_flags & ZEND_ACC_LINKED) || !ce->num_interfaces)
 				 && !(ce->ce_flags & forbidden_flags)
 				 && (ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
 					return 1;
