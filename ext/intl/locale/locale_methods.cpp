@@ -22,6 +22,8 @@
 #include <unicode/udata.h>
 #include <unicode/putil.h>
 #include <unicode/ures.h>
+#include <unicode/uenum.h>
+#include <unicode/locid.h>
 
 extern "C" {
 #include "php_intl.h"
@@ -1661,7 +1663,7 @@ PHP_INTL_FUNCTION_WITH_ERROR_RESET(locale_lookup)
 /* }}} */
 
 /* {{{ Tries to find out best available locale based on HTTP "Accept-Language" header */
-U_CFUNC PHP_FUNCTION(locale_accept_from_http)
+PHP_INTL_FUNCTION_WITH_ERROR_RESET(locale_accept_from_http)
 {
 	UEnumeration *available;
 	char *http_accept = nullptr;
@@ -1670,10 +1672,52 @@ U_CFUNC PHP_FUNCTION(locale_accept_from_http)
 	int len;
 	char resultLocale[INTL_MAX_LOCALE_LEN+1];
 	UAcceptResult outResult;
+	HashTable *available_locales = nullptr;
+	std::unique_ptr<const char *[]> available_list;
+	std::unique_ptr<icu::Locale[]> available_canonical;
+	uint32_t available_count = 0;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STRING(http_accept, http_accept_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY_HT_OR_NULL(available_locales)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (available_locales) {
+		uint32_t i = 0;
+		zval *entry;
+
+		available_count = zend_hash_num_elements(available_locales);
+		if (available_count == 0) {
+			zend_argument_must_not_be_empty_error(2);
+			RETURN_THROWS();
+		}
+
+		available_list.reset(new const char *[available_count]);
+		available_canonical.reset(new icu::Locale[available_count]);
+		ZEND_HASH_FOREACH_VAL(available_locales, entry) {
+			ZVAL_DEREF(entry);
+			if (Z_TYPE_P(entry) != IS_STRING) {
+				zend_argument_type_error(2, "must only contain string values");
+				RETURN_THROWS();
+			}
+			if (zend_str_has_nul_byte(Z_STR_P(entry))) {
+				zend_argument_value_error(2, "must not contain any null bytes");
+				RETURN_THROWS();
+			}
+			if (Z_STRLEN_P(entry) > INTL_MAX_LOCALE_LEN) {
+				zend_argument_value_error(2, "must not contain locales longer than %d characters", INTL_MAX_LOCALE_LEN);
+				RETURN_THROWS();
+			}
+			available_canonical[i] = icu::Locale(Z_STRVAL_P(entry));
+			if (available_canonical[i].isBogus()) {
+				zend_argument_value_error(2, "must only contain valid locales");
+				RETURN_THROWS();
+			}
+			available_list[i++] = Z_STRVAL_P(entry);
+		} ZEND_HASH_FOREACH_END();
+	}
+
 	if (UNEXPECTED(http_accept_len > ULOC_FULLNAME_CAPACITY)) {
 		/* check each fragment, if any bigger than capacity, can't do it due to bug #72533 */
 		char *start = http_accept;
@@ -1693,7 +1737,11 @@ U_CFUNC PHP_FUNCTION(locale_accept_from_http)
 		} while(end != nullptr);
 	}
 
-	available = ures_openAvailableLocales(nullptr, &status);
+	if (available_list) {
+		available = uenum_openCharStringsEnumeration(available_list.get(), available_count, &status);
+	} else {
+		available = ures_openAvailableLocales(nullptr, &status);
+	}
 	INTL_CHECK_STATUS(status, "failed to retrieve locale list");
 	len = uloc_acceptLanguageFromHTTP(resultLocale, INTL_MAX_LOCALE_LEN,
 						&outResult, http_accept, available, &status);
@@ -1701,6 +1749,12 @@ U_CFUNC PHP_FUNCTION(locale_accept_from_http)
 	INTL_CHECK_STATUS(status, "failed to find acceptable locale");
 	if (UNEXPECTED(len < 0 || outResult == ULOC_ACCEPT_FAILED)) {
 		RETURN_FALSE;
+	}
+	resultLocale[len] = '\0';
+	for (uint32_t i = 0; i < available_count; i++) {
+		if (strcmp(available_list[i], resultLocale) == 0 || strcmp(available_canonical[i].getName(), resultLocale) == 0) {
+			RETURN_STRING(available_list[i]);
+		}
 	}
 	RETURN_STRINGL(resultLocale, len);
 }

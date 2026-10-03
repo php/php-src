@@ -49,6 +49,14 @@ PHP 8.7 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- Intl:
+  . Locale::acceptFromHttp() and locale_accept_from_http() now accept an
+    optional $availableLocales array argument. When given, the
+    Accept-Language header is matched against these locales instead of all
+    locales known to ICU, and the matching entry is returned as passed.
+    A ValueError is thrown if the array is empty or contains an invalid
+    locale, and a TypeError if it contains a non-string value.
+
 ========================================
 6. New Functions
 ========================================

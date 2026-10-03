@@ -13,6 +13,8 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed Collator attribute and strength methods not rejecting an
     unconstructed Collator. (Ilia Alshanetsky)
+  . Added optional $availableLocales argument to Locale::acceptFromHttp()
+    (GH-24074). (David Carlier)
 
 - Lexbor:
   . Merge patches lexbor/lexbor@8a14bc0 and lexbor/lexbor@f67ce4b, fixing a

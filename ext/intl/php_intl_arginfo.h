@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_intl.stub.php instead.
- * Stub hash: f94e7c9cc372878f1f8bd0e948092ea72076e687 */
+ * Stub hash: bb8c86f1c7f0dcc264e5968fe9548f20ac20908b */
 
 #include "zend_attributes.h"
 #include "zend_constants.h"
@@ -594,6 +594,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_locale_accept_from_http, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, header, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, availableLocales, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_locale_is_right_to_left, 0, 1, _IS_BOOL, 0)
