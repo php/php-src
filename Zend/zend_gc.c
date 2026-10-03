@@ -2152,11 +2152,16 @@ static zend_coroutine_t *gc_spawn_destructors_coroutine(void)
 			coroutine, gc_destructors_finish_handler, GC_G(gc_coroutine), NULL);
 
 	/* Without the handler nobody ever counts this iterator out: treat a failed
-	 * registration like a failed enqueue. */
+	 * registration like a failed enqueue. Either is a refused iterator, handled
+	 * as one that could not be created: the error is cleared, as it belongs to
+	 * no caller (left in the GC coroutine, it would end that coroutine with an
+	 * exception a provider may end the request on), and the run is redone or
+	 * the destructors wait for the next collection. */
 	if (UNEXPECTED(handler_id == 0 || !ZEND_ASYNC_ENQUEUE_COROUTINE(coroutine))) {
 		ZEND_ASYNC_REMOVE_FINISH_HANDLER(coroutine, handler_id);
 		GC_G(dtor_coroutine) = NULL;
 		GC_G(dtor_pending)--;
+		zend_clear_exception();
 		return NULL;
 	}
 
