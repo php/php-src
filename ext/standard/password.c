@@ -426,6 +426,8 @@ static zend_string *php_password_bcrypt_sha256_hash(const zend_string *password,
 
 	zend_string *raw = php_crypt(ZSTR_VAL(key), (int) ZSTR_LEN(key), ZSTR_VAL(setting), (int) ZSTR_LEN(setting), 1);
 	zend_string_release_ex(setting, 0);
+
+	ZEND_SECURE_ZERO(ZSTR_VAL(key), ZSTR_LEN(key));
 	zend_string_release_ex(key, 0);
 
 	if (!raw || ZSTR_LEN(raw) < 60) {
@@ -474,6 +476,8 @@ static bool php_password_bcrypt_sha256_verify(const zend_string *password, const
 
 	zend_string *raw = php_crypt(ZSTR_VAL(key), (int) ZSTR_LEN(key), ZSTR_VAL(setting), (int) ZSTR_LEN(setting), 1);
 	zend_string_release_ex(setting, 0);
+
+	ZEND_SECURE_ZERO(ZSTR_VAL(key), ZSTR_LEN(key));
 	zend_string_release_ex(key, 0);
 
 	if (!raw || ZSTR_LEN(raw) < 60) {
