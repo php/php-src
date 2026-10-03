@@ -1601,6 +1601,12 @@ static bool ts_suspend(bool from_main, bool is_bailout)
 		return false;
 	}
 
+	/* Nothing may have started the loop yet: after the main flow ended it is
+	 * gone, and a destructor can suspend with nothing queued. */
+	if (UNEXPECTED(!ts_scheduler_ensure())) {
+		return false;
+	}
+
 	ZEND_COROUTINE_SET_STATUS(&self->coro, ZEND_COROUTINE_STATUS_SUSPENDED);
 	self->execute_data = EG(current_execute_data);
 	ZEND_ASYNC_CURRENT_COROUTINE = &TSG(scheduler)->coro;
