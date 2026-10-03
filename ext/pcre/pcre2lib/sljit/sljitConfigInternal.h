@@ -27,20 +27,6 @@
 #ifndef SLJIT_CONFIG_INTERNAL_H_
 #define SLJIT_CONFIG_INTERNAL_H_
 
-#if (defined SLJIT_VERBOSE && SLJIT_VERBOSE) \
-	|| (defined SLJIT_DEBUG && SLJIT_DEBUG && (!defined(SLJIT_ASSERT) || !defined(SLJIT_UNREACHABLE)))
-#include <stdio.h>
-#endif
-
-#if (defined SLJIT_DEBUG && SLJIT_DEBUG \
-	&& (!defined(SLJIT_ASSERT) || !defined(SLJIT_UNREACHABLE) || !defined(SLJIT_HALT_PROCESS)))
-#include <stdlib.h>
-#endif
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /*
    SLJIT defines the following architecture dependent types and macros:
 
@@ -64,17 +50,36 @@ extern "C" {
      SLJIT_MASKED_SHIFT : all word shifts are always masked
      SLJIT_MASKED_SHIFT32 : all 32 bit shifts are always masked
      SLJIT_INDIRECT_CALL : see SLJIT_FUNC_ADDR() for more information
+     SLJIT_UPPER_BITS_IGNORED : 32 bit operations ignores the upper bits of source registers
+     SLJIT_UPPER_BITS_ZERO_EXTENDED : 32 bit operations clears the upper bits of destination registers
+     SLJIT_UPPER_BITS_SIGN_EXTENDED : 32 bit operations replicates the sign bit in the upper bits of destination registers
+     SLJIT_UPPER_BITS_PRESERVED : 32 bit operations preserves the upper bits of destination registers
+     SLJIT_SUBC_SETS_SIGNED : SLJIT_SUBC[32] operation always sets the signed result, so setting
+                              the following status flags after a subtract with carry operation is valid:
+                              sljit_set_current_flags(..., SLJIT_CURRENT_FLAGS_SUB | SLJIT_SET_SIG_LESS)
+                              sljit_set_current_flags(..., SLJIT_CURRENT_FLAGS_SUB | SLJIT_SET_SIG_GREATER)
+     SLJIT_SHARED_COMPARISON_FLAGS: the cpu has different instructions for signed and unsigned
+                                    comparisons, which sets the same status flags, so passing SLJIT_LESS
+                                    or SLJIT_SIG_LESS as an argument has the same effect, and this is true
+                                    for all other signed/unsigned comparison type pairs
 
    Constants:
      SLJIT_NUMBER_OF_REGISTERS : number of available registers
      SLJIT_NUMBER_OF_SCRATCH_REGISTERS : number of available scratch registers
      SLJIT_NUMBER_OF_SAVED_REGISTERS : number of available saved registers
      SLJIT_NUMBER_OF_FLOAT_REGISTERS : number of available floating point registers
-     SLJIT_NUMBER_OF_SCRATCH_FLOAT_REGISTERS : number of available floating point scratch registers
-     SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS : number of available floating point saved registers
+     SLJIT_NUMBER_OF_SCRATCH_FLOAT_REGISTERS : number of available scratch floating point registers
+     SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS : number of available saved floating point registers
+     SLJIT_NUMBER_OF_VECTOR_REGISTERS : number of available vector registers
+     SLJIT_NUMBER_OF_SCRATCH_VECTOR_REGISTERS : number of available scratch vector registers
+     SLJIT_NUMBER_OF_SAVED_VECTOR_REGISTERS : number of available saved vector registers
      SLJIT_NUMBER_OF_TEMPORARY_REGISTERS : number of available temporary registers
      SLJIT_NUMBER_OF_TEMPORARY_FLOAT_REGISTERS : number of available temporary floating point registers
+     SLJIT_NUMBER_OF_TEMPORARY_VECTOR_REGISTERS : number of available temporary vector registers
+     SLJIT_SEPARATE_VECTOR_REGISTERS : if this macro is defined, the vector registers do not
+                                       overlap with floating point registers
      SLJIT_WORD_SHIFT : the shift required to apply when accessing a sljit_sw/sljit_uw array by index
+     SLJIT_POINTER_SHIFT : the shift required to apply when accessing a sljit_sp/sljit_up array by index
      SLJIT_F32_SHIFT : the shift required to apply when accessing
                        a single precision floating point array by index
      SLJIT_F64_SHIFT : the shift required to apply when accessing
@@ -98,15 +103,48 @@ extern "C" {
      SLJIT_TMP_R(i) : accessing temporary registers
      SLJIT_TMP_FR0 .. FR9 : accessing temporary floating point registers
      SLJIT_TMP_FR(i) : accessing temporary floating point registers
-     SLJIT_TMP_DEST_REG : a temporary register for results
-     SLJIT_TMP_MEM_REG : a temporary base register for accessing memory
-                         (can be the same as SLJIT_TMP_DEST_REG)
-     SLJIT_TMP_DEST_FREG : a temporary register for float results
+     SLJIT_TMP_VR0 .. VR9 : accessing temporary vector registers
+     SLJIT_TMP_VR(i) : accessing temporary vector registers
+     SLJIT_TMP_DEST_REG : a temporary register for results, see the rules below
+     SLJIT_TMP_DEST_FREG : a temporary register for float results, see the rules below
+     SLJIT_TMP_DEST_VREG : a temporary register for vector results, see the rules below
+     SLJIT_TMP_OPT_REG : an optional temporary register, see the rules below
+     SLJIT_TMP_FLAG_REG : an optional temporary register for storing the value of a flag
      SLJIT_FUNC : calling convention attribute for both calling JIT from C and C calling back from JIT
      SLJIT_W(number) : defining 64 bit constants on 64 bit architectures (platform independent helper)
      SLJIT_F64_SECOND(reg) : provides the register index of the second 32 bit part of a 64 bit
                              floating point register when SLJIT_HAS_F64_AS_F32_PAIR returns non-zero
+
+   Temporary register rules (e.g. SLJIT_TMP_DEST_REG / SLJIT_TMP_OPT_REG):
+     The sljit compiler avoids using temporary registers, but certain instruction
+     forms cannot be generated without them. The number of temporary registers
+     reserved by the compiler depends on the target architecture. An SLJIT_TMP_*
+     name is assigned to some of these registers, which represents their
+     SLJIT_TMP_R(i) index. When such register is optional, it might not be
+     defined on all architectures. For example, the x86-32 code generator does
+     not use any optional temporary registers.
 */
+
+#if (defined SLJIT_VERBOSE && SLJIT_VERBOSE) \
+	|| (defined SLJIT_DEBUG && SLJIT_DEBUG && (!defined(SLJIT_ASSERT) || !defined(SLJIT_UNREACHABLE)))
+#include <stdio.h>
+#endif
+
+#if (defined SLJIT_DEBUG && SLJIT_DEBUG \
+	&& (!defined(SLJIT_ASSERT) || !defined(SLJIT_UNREACHABLE) || !defined(SLJIT_HALT_PROCESS)))
+#include <stdlib.h>
+#endif
+
+#ifdef __APPLE__
+#include <AvailabilityMacros.h>
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= 1050
+#include <libkern/OSCacheControl.h>
+#endif
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /***********************************************************/
 /* Intel Control-flow Enforcement Technology (CET) spport. */
@@ -222,10 +260,6 @@ extern "C" {
 /* Instruction cache flush. */
 /****************************/
 
-#ifdef __APPLE__
-#include <AvailabilityMacros.h>
-#endif
-
 /*
  * TODO:
  *
@@ -271,7 +305,6 @@ extern "C" {
 /* Supported by all macs since Mac OS 10.5.
    However, it does not work on non-jailbroken iOS devices,
    although the compilation is successful. */
-#include <libkern/OSCacheControl.h>
 #define SLJIT_CACHE_FLUSH(from, to) \
 	sys_icache_invalidate((void*)(from), (size_t)((char*)(to) - (char*)(from)))
 
@@ -285,7 +318,7 @@ extern "C" {
 #elif defined(_WIN32)
 
 #define SLJIT_CACHE_FLUSH(from, to) \
-	FlushInstructionCache(GetCurrentProcess(), (void*)(from), (char*)(to) - (char*)(from))
+	FlushInstructionCache(GetCurrentProcess(), (void*)(from), (size_t)((char*)(to) - (char*)(from)))
 
 #elif (defined(__GNUC__) && (__GNUC__ >= 5 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 3))) || defined(__clang__)
 
@@ -339,7 +372,8 @@ typedef int sljit_sw;
 	&& !(defined SLJIT_CONFIG_MIPS_64 && SLJIT_CONFIG_MIPS_64) \
 	&& !(defined SLJIT_CONFIG_RISCV_64 && SLJIT_CONFIG_RISCV_64) \
 	&& !(defined SLJIT_CONFIG_S390X && SLJIT_CONFIG_S390X) \
-	&& !(defined SLJIT_CONFIG_LOONGARCH_64 && SLJIT_CONFIG_LOONGARCH_64)
+	&& !(defined SLJIT_CONFIG_LOONGARCH_64 && SLJIT_CONFIG_LOONGARCH_64) \
+	&& !(defined SLJIT_CONFIG_ALPHA_64 && SLJIT_CONFIG_ALPHA_64)
 #define SLJIT_32BIT_ARCHITECTURE 1
 #define SLJIT_WORD_SHIFT 2
 typedef unsigned int sljit_uw;
@@ -408,6 +442,12 @@ typedef double sljit_f64;
 #define SLJIT_CONV_MAX_FLOAT SLJIT_CONV_RESULT_MAX_INT
 #define SLJIT_CONV_MIN_FLOAT SLJIT_CONV_RESULT_MIN_INT
 #define SLJIT_CONV_NAN_FLOAT SLJIT_CONV_RESULT_ZERO
+#elif (defined SLJIT_CONFIG_ALPHA && SLJIT_CONFIG_ALPHA)
+/* CVTTQ/SVC uses software completion; sljit_emit_fop1_conv_sw_from_f64
+   emits FCMPLT/CMPTEQ + CMOVNE/CMOVEQ fixups to enforce saturation. */
+#define SLJIT_CONV_MAX_FLOAT SLJIT_CONV_RESULT_MAX_INT
+#define SLJIT_CONV_MIN_FLOAT SLJIT_CONV_RESULT_MIN_INT
+#define SLJIT_CONV_NAN_FLOAT SLJIT_CONV_RESULT_ZERO
 #else
 #error "Result for float to integer conversion is not defined"
 #endif
@@ -430,55 +470,6 @@ typedef double sljit_f64;
 /*************************/
 /* Endianness detection. */
 /*************************/
-
-#if !defined(SLJIT_BIG_ENDIAN) && !defined(SLJIT_LITTLE_ENDIAN)
-
-/* These macros are mostly useful for the applications. */
-#if (defined SLJIT_CONFIG_PPC && SLJIT_CONFIG_PPC)
-
-#ifdef __LITTLE_ENDIAN__
-#define SLJIT_LITTLE_ENDIAN 1
-#else
-#define SLJIT_BIG_ENDIAN 1
-#endif
-
-#elif (defined SLJIT_CONFIG_MIPS && SLJIT_CONFIG_MIPS)
-
-#ifdef __MIPSEL__
-#define SLJIT_LITTLE_ENDIAN 1
-#else
-#define SLJIT_BIG_ENDIAN 1
-#endif
-
-#ifndef SLJIT_MIPS_REV
-
-/* Auto detecting mips revision. */
-#if (defined __mips_isa_rev) && (__mips_isa_rev >= 6)
-#define SLJIT_MIPS_REV 6
-#elif defined(__mips_isa_rev) && __mips_isa_rev >= 1
-#define SLJIT_MIPS_REV __mips_isa_rev
-#elif defined(__clang__) \
-	&& (defined(_MIPS_ARCH_OCTEON) || defined(_MIPS_ARCH_P5600))
-/* clang either forgets to define (clang-7) __mips_isa_rev at all
- * or sets it to zero (clang-8,-9) for -march=octeon (MIPS64 R2+)
- * and -march=p5600 (MIPS32 R5).
- * It also sets the __mips macro to 64 or 32 for -mipsN when N <= 5
- * (should be set to N exactly) so we cannot rely on this too.
- */
-#define SLJIT_MIPS_REV 1
-#endif
-
-#endif /* !SLJIT_MIPS_REV */
-
-#elif (defined SLJIT_CONFIG_S390X && SLJIT_CONFIG_S390X)
-
-#define SLJIT_BIG_ENDIAN 1
-
-#else
-#define SLJIT_LITTLE_ENDIAN 1
-#endif
-
-#endif /* !defined(SLJIT_BIG_ENDIAN) && !defined(SLJIT_LITTLE_ENDIAN) */
 
 /* Sanity check. */
 #if (defined SLJIT_BIG_ENDIAN && SLJIT_BIG_ENDIAN) && (defined SLJIT_LITTLE_ENDIAN && SLJIT_LITTLE_ENDIAN)
@@ -553,7 +544,7 @@ determine the next executed instruction after return. */
 #if (defined SLJIT_EXECUTABLE_ALLOCATOR && SLJIT_EXECUTABLE_ALLOCATOR)
 SLJIT_API_FUNC_ATTRIBUTE void* sljit_malloc_exec(sljit_uw size);
 SLJIT_API_FUNC_ATTRIBUTE void sljit_free_exec(void* ptr);
-SLJIT_API_FUNC_ATTRIBUTE void sljit_free_unused_memory_exec(void);
+/* Note: sljitLir.h also defines sljit_free_unused_memory_exec() function. */
 #define SLJIT_BUILTIN_MALLOC_EXEC(size, exec_allocator_data) sljit_malloc_exec(size)
 #define SLJIT_BUILTIN_FREE_EXEC(ptr, exec_allocator_data) sljit_free_exec(ptr)
 
@@ -589,12 +580,14 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void *code);
 #define SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS 0
 #define SLJIT_NUMBER_OF_TEMPORARY_FLOAT_REGISTERS 1
 #define SLJIT_TMP_DEST_REG SLJIT_TMP_R0
-#define SLJIT_TMP_MEM_REG SLJIT_TMP_R0
 #define SLJIT_TMP_DEST_FREG SLJIT_TMP_FR0
-#define SLJIT_LOCALS_OFFSET_BASE (8 * SSIZE_OF(sw))
+#define SLJIT_LOCALS_OFFSET_BASE (8 * (sljit_s32)sizeof(sljit_sw))
 #define SLJIT_PREF_SHIFT_REG SLJIT_R2
 #define SLJIT_MASKED_SHIFT 1
 #define SLJIT_MASKED_SHIFT32 1
+#define SLJIT_UPPER_BITS_IGNORED 1
+#define SLJIT_UPPER_BITS_ZERO_EXTENDED 1
+#define SLJIT_SUBC_SETS_SIGNED 1
 
 #elif (defined SLJIT_CONFIG_X86_64 && SLJIT_CONFIG_X86_64)
 
@@ -609,14 +602,17 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void *code);
 #else /* _WIN64 */
 #define SLJIT_NUMBER_OF_SAVED_REGISTERS 8
 #define SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS 10
-#define SLJIT_LOCALS_OFFSET_BASE (4 * SSIZE_OF(sw))
+#define SLJIT_LOCALS_OFFSET_BASE (4 * (sljit_s32)sizeof(sljit_sw))
 #endif /* !_WIN64 */
 #define SLJIT_TMP_DEST_REG SLJIT_TMP_R0
-#define SLJIT_TMP_MEM_REG SLJIT_TMP_R0
+#define SLJIT_TMP_OPT_REG SLJIT_TMP_R1
 #define SLJIT_TMP_DEST_FREG SLJIT_TMP_FR0
 #define SLJIT_PREF_SHIFT_REG SLJIT_R3
 #define SLJIT_MASKED_SHIFT 1
 #define SLJIT_MASKED_SHIFT32 1
+#define SLJIT_UPPER_BITS_IGNORED 1
+#define SLJIT_UPPER_BITS_ZERO_EXTENDED 1
+#define SLJIT_SUBC_SETS_SIGNED 1
 
 #elif (defined SLJIT_CONFIG_ARM_32 && SLJIT_CONFIG_ARM_32)
 
@@ -627,9 +623,10 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void *code);
 #define SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS 8
 #define SLJIT_NUMBER_OF_TEMPORARY_FLOAT_REGISTERS 2
 #define SLJIT_TMP_DEST_REG SLJIT_TMP_R1
-#define SLJIT_TMP_MEM_REG SLJIT_TMP_R1
+#define SLJIT_TMP_OPT_REG SLJIT_TMP_R0
 #define SLJIT_TMP_DEST_FREG SLJIT_TMP_FR0
 #define SLJIT_LOCALS_OFFSET_BASE 0
+#define SLJIT_SUBC_SETS_SIGNED 1
 
 #elif (defined SLJIT_CONFIG_ARM_64 && SLJIT_CONFIG_ARM_64)
 
@@ -640,11 +637,14 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void *code);
 #define SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS 8
 #define SLJIT_NUMBER_OF_TEMPORARY_FLOAT_REGISTERS 2
 #define SLJIT_TMP_DEST_REG SLJIT_TMP_R0
-#define SLJIT_TMP_MEM_REG SLJIT_TMP_R0
+#define SLJIT_TMP_OPT_REG SLJIT_TMP_R1
 #define SLJIT_TMP_DEST_FREG SLJIT_TMP_FR0
 #define SLJIT_LOCALS_OFFSET_BASE (2 * (sljit_s32)sizeof(sljit_sw))
 #define SLJIT_MASKED_SHIFT 1
 #define SLJIT_MASKED_SHIFT32 1
+#define SLJIT_UPPER_BITS_IGNORED 1
+#define SLJIT_UPPER_BITS_ZERO_EXTENDED 1
+#define SLJIT_SUBC_SETS_SIGNED 1
 
 #elif (defined SLJIT_CONFIG_PPC && SLJIT_CONFIG_PPC)
 
@@ -655,7 +655,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void *code);
 #define SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS 18
 #define SLJIT_NUMBER_OF_TEMPORARY_FLOAT_REGISTERS 2
 #define SLJIT_TMP_DEST_REG SLJIT_TMP_R1
-#define SLJIT_TMP_MEM_REG SLJIT_TMP_R1
+#define SLJIT_TMP_OPT_REG SLJIT_TMP_R0
 #define SLJIT_TMP_DEST_FREG SLJIT_TMP_FR0
 #if (defined SLJIT_CONFIG_PPC_64 && SLJIT_CONFIG_PPC_64) || (defined _AIX)
 #define SLJIT_LOCALS_OFFSET_BASE ((6 + 8) * (sljit_s32)sizeof(sljit_sw))
@@ -665,6 +665,8 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void *code);
 #else
 #define SLJIT_LOCALS_OFFSET_BASE (3 * (sljit_s32)sizeof(sljit_sw))
 #endif /* SLJIT_CONFIG_PPC_64 || _AIX */
+#define SLJIT_UPPER_BITS_IGNORED 1
+#define SLJIT_SHARED_COMPARISON_FLAGS 1
 
 #elif (defined SLJIT_CONFIG_MIPS && SLJIT_CONFIG_MIPS)
 
@@ -682,10 +684,13 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void *code);
 #define SLJIT_NUMBER_OF_TEMPORARY_REGISTERS 5
 #define SLJIT_NUMBER_OF_TEMPORARY_FLOAT_REGISTERS 3
 #define SLJIT_TMP_DEST_REG SLJIT_TMP_R1
-#define SLJIT_TMP_MEM_REG SLJIT_TMP_R1
+#define SLJIT_TMP_OPT_REG SLJIT_TMP_R0
+#define SLJIT_TMP_FLAG_REG SLJIT_TMP_R3
 #define SLJIT_TMP_DEST_FREG SLJIT_TMP_FR0
 #define SLJIT_MASKED_SHIFT 1
 #define SLJIT_MASKED_SHIFT32 1
+#define SLJIT_UPPER_BITS_SIGN_EXTENDED 1
+#define SLJIT_SHARED_COMPARISON_FLAGS 1
 
 #elif (defined SLJIT_CONFIG_RISCV && SLJIT_CONFIG_RISCV)
 
@@ -695,12 +700,21 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void *code);
 #define SLJIT_NUMBER_OF_FLOAT_REGISTERS 30
 #define SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS 12
 #define SLJIT_NUMBER_OF_TEMPORARY_FLOAT_REGISTERS 2
+#define SLJIT_SEPARATE_VECTOR_REGISTERS 1
+#define SLJIT_NUMBER_OF_VECTOR_REGISTERS 30
+#define SLJIT_NUMBER_OF_SAVED_VECTOR_REGISTERS 0
+#define SLJIT_NUMBER_OF_TEMPORARY_VECTOR_REGISTERS 2
 #define SLJIT_TMP_DEST_REG SLJIT_TMP_R1
-#define SLJIT_TMP_MEM_REG SLJIT_TMP_R1
+#define SLJIT_TMP_OPT_REG SLJIT_TMP_R0
+#define SLJIT_TMP_FLAG_REG SLJIT_TMP_R3
 #define SLJIT_TMP_DEST_FREG SLJIT_TMP_FR0
+#define SLJIT_TMP_DEST_VREG SLJIT_TMP_VR0
 #define SLJIT_LOCALS_OFFSET_BASE 0
 #define SLJIT_MASKED_SHIFT 1
 #define SLJIT_MASKED_SHIFT32 1
+#define SLJIT_UPPER_BITS_IGNORED 1
+#define SLJIT_UPPER_BITS_SIGN_EXTENDED 1
+#define SLJIT_SHARED_COMPARISON_FLAGS 1
 
 #elif (defined SLJIT_CONFIG_S390X && SLJIT_CONFIG_S390X)
 
@@ -731,11 +745,14 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void *code);
 #define SLJIT_NUMBER_OF_FLOAT_REGISTERS 15
 #define SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS 8
 #define SLJIT_NUMBER_OF_TEMPORARY_FLOAT_REGISTERS 1
-#define SLJIT_TMP_DEST_REG SLJIT_TMP_R0
-#define SLJIT_TMP_MEM_REG SLJIT_TMP_R2
+#define SLJIT_TMP_DEST_REG SLJIT_TMP_R2
+#define SLJIT_TMP_OPT_REG SLJIT_TMP_R1
 #define SLJIT_TMP_DEST_FREG SLJIT_TMP_FR0
 #define SLJIT_LOCALS_OFFSET_BASE SLJIT_S390X_DEFAULT_STACK_FRAME_SIZE
 #define SLJIT_MASKED_SHIFT 1
+#define SLJIT_UPPER_BITS_IGNORED 1
+#define SLJIT_UPPER_BITS_PRESERVED 1
+#define SLJIT_SHARED_COMPARISON_FLAGS 1
 
 #elif (defined SLJIT_CONFIG_LOONGARCH && SLJIT_CONFIG_LOONGARCH)
 
@@ -746,11 +763,39 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void *code);
 #define SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS 12
 #define SLJIT_NUMBER_OF_TEMPORARY_FLOAT_REGISTERS 2
 #define SLJIT_TMP_DEST_REG SLJIT_TMP_R1
-#define SLJIT_TMP_MEM_REG SLJIT_TMP_R1
+#define SLJIT_TMP_OPT_REG SLJIT_TMP_R0
+#define SLJIT_TMP_FLAG_REG SLJIT_TMP_R3
 #define SLJIT_TMP_DEST_FREG SLJIT_TMP_FR0
 #define SLJIT_LOCALS_OFFSET_BASE 0
 #define SLJIT_MASKED_SHIFT 1
 #define SLJIT_MASKED_SHIFT32 1
+#define SLJIT_UPPER_BITS_SIGN_EXTENDED 1
+#define SLJIT_SHARED_COMPARISON_FLAGS 1
+
+#elif (defined SLJIT_CONFIG_ALPHA && SLJIT_CONFIG_ALPHA)
+
+/* Alpha has 32 general registers (r31 hardwired zero) and 32 float registers
+   (f31 hardwired zero). Reserved: r31 (zero), r30 (sp), r29 (gp, unused by the
+   JIT). Backend temporaries: r24, r25, r26 (ra), r27 (pv), r28 (at). Exposed:
+   17 scratch (r0-r8, r16-r23) + 7 callee-saved (r9-r15). */
+#define SLJIT_NUMBER_OF_REGISTERS 24
+#define SLJIT_NUMBER_OF_SAVED_REGISTERS 7
+#define SLJIT_NUMBER_OF_TEMPORARY_REGISTERS 5
+#define SLJIT_NUMBER_OF_FLOAT_REGISTERS 28
+#define SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS 8
+#define SLJIT_NUMBER_OF_TEMPORARY_FLOAT_REGISTERS 2
+#define SLJIT_TMP_DEST_REG SLJIT_TMP_R1
+#define SLJIT_TMP_OPT_REG SLJIT_TMP_R0
+#define SLJIT_TMP_FLAG_REG SLJIT_TMP_R3
+#define SLJIT_TMP_DEST_FREG SLJIT_TMP_FR0
+/* One word is reserved at the bottom of the frame: CPUs without the FIX
+   extension have no register to register move between the integer and float
+   register files, so values are bounced through this slot instead. */
+#define SLJIT_LOCALS_OFFSET_BASE ((sljit_s32)sizeof(sljit_sw))
+#define SLJIT_MASKED_SHIFT 1
+#define SLJIT_MASKED_SHIFT32 1
+#define SLJIT_UPPER_BITS_SIGN_EXTENDED 1
+#define SLJIT_SHARED_COMPARISON_FLAGS 1
 
 #elif (defined SLJIT_CONFIG_UNSUPPORTED && SLJIT_CONFIG_UNSUPPORTED)
 
@@ -762,11 +807,17 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void *code);
 #define SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS 0
 #define SLJIT_NUMBER_OF_TEMPORARY_FLOAT_REGISTERS 0
 #define SLJIT_TMP_DEST_REG 0
-#define SLJIT_TMP_MEM_REG 0
 #define SLJIT_TMP_DEST_FREG 0
 #define SLJIT_LOCALS_OFFSET_BASE 0
 
 #endif
+
+#if !(defined SLJIT_SEPARATE_VECTOR_REGISTERS && SLJIT_SEPARATE_VECTOR_REGISTERS)
+#define SLJIT_NUMBER_OF_VECTOR_REGISTERS (SLJIT_NUMBER_OF_FLOAT_REGISTERS)
+#define SLJIT_NUMBER_OF_SAVED_VECTOR_REGISTERS (SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS)
+#define SLJIT_NUMBER_OF_TEMPORARY_VECTOR_REGISTERS (SLJIT_NUMBER_OF_TEMPORARY_FLOAT_REGISTERS)
+#define SLJIT_TMP_DEST_VREG (SLJIT_TMP_DEST_FREG)
+#endif /* !SLJIT_SEPARATE_VECTOR_REGISTERS */
 
 #define SLJIT_LOCALS_OFFSET (SLJIT_LOCALS_OFFSET_BASE)
 
@@ -776,12 +827,27 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void *code);
 #define SLJIT_NUMBER_OF_SCRATCH_FLOAT_REGISTERS \
 	(SLJIT_NUMBER_OF_FLOAT_REGISTERS - SLJIT_NUMBER_OF_SAVED_FLOAT_REGISTERS)
 
+#define SLJIT_NUMBER_OF_SCRATCH_VECTOR_REGISTERS \
+	(SLJIT_NUMBER_OF_VECTOR_REGISTERS - SLJIT_NUMBER_OF_SAVED_VECTOR_REGISTERS)
+
+#if (defined SLJIT_UPPER_BITS_ZERO_EXTENDED && SLJIT_UPPER_BITS_ZERO_EXTENDED) \
+	+ (defined SLJIT_UPPER_BITS_SIGN_EXTENDED && SLJIT_UPPER_BITS_SIGN_EXTENDED) \
+	+ (defined SLJIT_UPPER_BITS_PRESERVED && SLJIT_UPPER_BITS_PRESERVED) > 1
+#error "Invalid upper bits defintion"
+#endif
+
+#if (defined SLJIT_UPPER_BITS_PRESERVED && SLJIT_UPPER_BITS_PRESERVED) \
+	&& !(defined SLJIT_UPPER_BITS_IGNORED && SLJIT_UPPER_BITS_IGNORED)
+#error "Upper bits preserved requires bits ignored"
+#endif
+
 /**********************************/
 /* Temporary register management. */
 /**********************************/
 
 #define SLJIT_TMP_REGISTER_BASE (SLJIT_NUMBER_OF_REGISTERS + 2)
 #define SLJIT_TMP_FREGISTER_BASE (SLJIT_NUMBER_OF_FLOAT_REGISTERS + 1)
+#define SLJIT_TMP_VREGISTER_BASE (SLJIT_NUMBER_OF_VECTOR_REGISTERS + 1)
 
 /* WARNING: Accessing temporary registers is not recommended, because they
    are also used by the JIT compiler for various computations. Using them
@@ -815,6 +881,18 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void *code);
 #define SLJIT_TMP_FR9		(SLJIT_TMP_FREGISTER_BASE + 9)
 #define SLJIT_TMP_FR(i)		(SLJIT_TMP_FREGISTER_BASE + (i))
 
+#define SLJIT_TMP_VR0		(SLJIT_TMP_VREGISTER_BASE + 0)
+#define SLJIT_TMP_VR1		(SLJIT_TMP_VREGISTER_BASE + 1)
+#define SLJIT_TMP_VR2		(SLJIT_TMP_VREGISTER_BASE + 2)
+#define SLJIT_TMP_VR3		(SLJIT_TMP_VREGISTER_BASE + 3)
+#define SLJIT_TMP_VR4		(SLJIT_TMP_VREGISTER_BASE + 4)
+#define SLJIT_TMP_VR5		(SLJIT_TMP_VREGISTER_BASE + 5)
+#define SLJIT_TMP_VR6		(SLJIT_TMP_VREGISTER_BASE + 6)
+#define SLJIT_TMP_VR7		(SLJIT_TMP_VREGISTER_BASE + 7)
+#define SLJIT_TMP_VR8		(SLJIT_TMP_VREGISTER_BASE + 8)
+#define SLJIT_TMP_VR9		(SLJIT_TMP_VREGISTER_BASE + 9)
+#define SLJIT_TMP_VR(i)		(SLJIT_TMP_VREGISTER_BASE + (i))
+
 /********************************/
 /* CPU status flags management. */
 /********************************/
@@ -824,7 +902,8 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void *code);
 	|| (defined SLJIT_CONFIG_MIPS && SLJIT_CONFIG_MIPS) \
 	|| (defined SLJIT_CONFIG_RISCV && SLJIT_CONFIG_RISCV) \
 	|| (defined SLJIT_CONFIG_S390X && SLJIT_CONFIG_S390X) \
-	|| (defined SLJIT_CONFIG_LOONGARCH && SLJIT_CONFIG_LOONGARCH)
+	|| (defined SLJIT_CONFIG_LOONGARCH && SLJIT_CONFIG_LOONGARCH) \
+	|| (defined SLJIT_CONFIG_ALPHA && SLJIT_CONFIG_ALPHA)
 #define SLJIT_HAS_STATUS_FLAGS_STATE 1
 #endif
 
@@ -899,6 +978,37 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_sw sljit_exec_offset(void *code);
 	switch(0) { case 0: case ((x) ? 1 : 0): break; }
 
 #endif /* !SLJIT_COMPILE_ASSERT */
+
+#ifndef SLJIT_FALLTHROUGH
+
+#if defined(__cplusplus) && __cplusplus >= 202002L && \
+	defined(__has_cpp_attribute)
+/* Standards-compatible C++ variant. */
+#if __has_cpp_attribute(fallthrough)
+#define SLJIT_FALLTHROUGH [[fallthrough]];
+#endif
+#elif !defined(__cplusplus) && \
+	  defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L && \
+	  defined(__has_c_attribute)
+/* Standards-compatible C variant. */
+#if __has_c_attribute(fallthrough)
+#define SLJIT_FALLTHROUGH [[fallthrough]];
+#endif
+#elif ((defined(__clang__) && __clang_major__ >= 10) || \
+	   (defined(__GNUC__) && __GNUC__ >= 7)) && \
+	  defined(__has_attribute)
+/* Clang and GCC syntax. Rule out old versions because apparently Clang at
+   least has a broken implementation of __has_attribute. */
+#if __has_attribute(fallthrough)
+#define SLJIT_FALLTHROUGH __attribute__((fallthrough));
+#endif
+#endif
+
+#ifndef SLJIT_FALLTHROUGH
+#define SLJIT_FALLTHROUGH
+#endif
+
+#endif /* !SLJIT_FALLTHROUGH */
 
 #ifdef __cplusplus
 } /* extern "C" */
