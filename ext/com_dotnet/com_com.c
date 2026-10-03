@@ -638,7 +638,7 @@ zend_result php_com_do_invoke(php_com_dotnet_object *obj, zend_string *name,
 
 	if (FAILED(hr)) {
 		char *winerr = php_win32_error_to_msg(hr);
-		spprintf(&msg, 0, "Unable to lookup `%s': %s", ZSTR_VAL(name), winerr);
+		spprintf(&msg, 0, "Unable to lookup `%pS': %s", name, winerr);
 		php_win32_error_msg_free(winerr);
 		php_com_throw_exception(hr, msg);
 		efree(msg);
