@@ -240,11 +240,6 @@ static ZEND_COLD void zend_throw_or_error(uint32_t fetch_type, zend_class_entry 
 }
 /* }}} */
 
-static void shutdown_destructors_iterator_entry(void)
-{
-	shutdown_destructors();
-}
-
 /* Torn down mid-pass: reset the cursor and give up on the remaining
  * destructors — dispose may run inside a bailout, no user code from here. */
 static void shutdown_destructors_coroutine_dtor(zend_coroutine_t *coroutine)
@@ -276,7 +271,7 @@ static bool shutdown_destructors_switch_handler(zend_coroutine_t *coroutine, boo
 		return false;
 	}
 
-	iterator->internal_entry = shutdown_destructors_iterator_entry;
+	iterator->internal_entry = shutdown_destructors;
 	iterator->extended_dispose = shutdown_destructors_coroutine_dtor;
 
 	ZEND_ASYNC_ENQUEUE_COROUTINE(iterator);
