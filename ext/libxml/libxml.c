@@ -777,12 +777,26 @@ static xmlParserInputPtr php_libxml_external_entity_loader(const char *URL,
 
 #undef ADD_NULL_OR_STRING_KEY
 
-	zend_call_known_fcc(&LIBXML(entity_loader_callback), &retval, 3, params, /* named_params */ NULL);
+	/* Hold our own reference to the callback for the duration of the call.
+	 * The callback may re-register the loader (e.g. to run a nested parse),
+	 * which frees the global fcc and its bound object; without this copy that
+	 * would be a use-after-free of the executing callback. */
+	zend_fcall_info_cache fcc = LIBXML(entity_loader_callback);
+	/* A trampoline (__call/__callStatic) handler is heap-allocated and shared
+	 * with the global fcc, so re-registering would free it too: copy it. */
+	if (UNEXPECTED(fcc.function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+		fcc.function_handler = emalloc(sizeof(zend_function));
+		memcpy(fcc.function_handler, LIBXML(entity_loader_callback).function_handler, sizeof(zend_function));
+		zend_string_addref(fcc.function_handler->common.function_name);
+	}
+	zend_fcc_addref(&fcc);
+
+	zend_call_known_fcc(&fcc, &retval, 3, params, /* named_params */ NULL);
 
 	if (Z_ISUNDEF(retval)) {
 		php_libxml_ctx_error(context,
 				"Call to user entity loader callback '%s' has failed",
-				ZSTR_VAL(LIBXML(entity_loader_callback).function_handler->common.function_name));
+				ZSTR_VAL(fcc.function_handler->common.function_name));
 	} else {
 		if (Z_TYPE(retval) == IS_STRING) {
 is_string:
@@ -791,7 +805,7 @@ is_string:
 			php_stream *stream = (php_stream*)zend_fetch_resource2_ex(&retval, NULL, php_file_le_stream(), php_file_le_pstream());
 			if (UNEXPECTED(stream == NULL)) {
 				zval callable;
-				zend_get_callable_zval_from_fcc(&LIBXML(entity_loader_callback), &callable);
+				zend_get_callable_zval_from_fcc(&fcc, &callable);
 				zend_string *callable_name = zend_get_callable_name(&callable);
 				zend_string *func_name = get_active_function_or_method_name();
 				zend_type_error(
@@ -853,6 +867,7 @@ is_string:
 		}
 	}
 
+	zend_fcc_dtor(&fcc);
 	zval_ptr_dtor(&params[0]);
 	zval_ptr_dtor(&params[1]);
 	zval_ptr_dtor(&params[2]);
