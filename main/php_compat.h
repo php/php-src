@@ -56,6 +56,7 @@
 #define pcre2_match_data_create_8 php_pcre2_match_data_create
 #define pcre2_match_data_create_from_pattern_8 php_pcre2_match_data_create_from_pattern
 #define pcre2_match_data_free_8 php_pcre2_match_data_free
+#define pcre2_next_match_8 php_pcre2_next_match
 #define pcre2_pattern_info_8 php_pcre2_pattern_info
 #define pcre2_serialize_decode_8 php_pcre2_serialize_decode
 #define pcre2_serialize_encode_8 php_pcre2_serialize_encode
@@ -75,6 +76,8 @@
 #define pcre2_set_newline_8 php_pcre2_set_newline
 #define pcre2_set_parens_nest_limit_8 php_pcre2_set_parens_nest_limit
 #define pcre2_set_offset_limit_8 php_pcre2_set_offset_limit
+#define pcre2_set_optimize_8 php_pcre2_set_optimize
+#define pcre2_set_substitute_case_callout_8 php_pcre2_set_substitute_case_callout
 #define pcre2_substitute_8 php_pcre2_substitute
 #define pcre2_substring_copy_byname_8 php_pcre2_substring_copy_byname
 #define pcre2_substring_copy_bynumber_8 php_pcre2_substring_copy_bynumber

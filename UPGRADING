@@ -119,6 +119,11 @@ PHP 8.6 UPGRADE NOTES
   . preg_grep() now returns false instead of a partial array when a PCRE
     execution error occurs (e.g. malformed UTF-8 input with the /u modifier).
     This is consistent with other preg_* functions.
+  . With the bundled PCRE2 library, case-insensitive matching of \p{Ll},
+    \p{Lu}, and \p{Lt} now matches any cased letter.
+  . A \x escape without a following hexadecimal digit or opening brace now
+    causes a compilation error. Use \x00 to match the NUL character.
+  . Unicode character properties in the bundled library now use Unicode 17.0.
 
 - PGSQL:
   . pg_fetch_object() now reports the ValueError for a non-empty
@@ -957,6 +962,9 @@ PHP 8.6 UPGRADE NOTES
 
 - Opcache:
   . JIT is now supported for ZTS builds on Apple Silicon.
+
+- PCRE:
+  . The bundled PCRE2 library has been upgraded to version 10.49.
 
 ========================================
 10. New Global Constants
