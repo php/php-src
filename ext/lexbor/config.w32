@@ -25,6 +25,10 @@ ADD_SOURCES("ext/lexbor/lexbor/unicode", "idna.c unicode.c","lexbor");
 ADD_SOURCES("ext/lexbor/lexbor/url", "url.c","lexbor");
 ADD_FLAG("CFLAGS_LEXBOR", "/D LEXBOR_BUILDING /utf-8");
 
+if (PHP_SANITIZER == "yes") {
+    ADD_FLAG("CFLAGS_LEXBOR", "/D LEXBOR_HAVE_ADDRESS_SANITIZER=1");
+}
+
 AC_DEFINE("HAVE_LEXBOR", 1, "Define to 1 if the PHP extension 'lexbor' is available.");
 
 PHP_INSTALL_HEADERS("ext/lexbor", "php_lexbor.h lexbor/");
