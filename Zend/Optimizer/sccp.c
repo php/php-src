@@ -399,6 +399,11 @@ static inline zend_result ct_eval_fetch_dim(zval *result, const zval *op1, const
 		if (zval_to_string_offset(&index, op2) == FAILURE) {
 			return FAILURE;
 		}
+
+		if (index < 0) {
+			index += (zend_long) Z_STRLEN_P(op1);
+		}
+
 		if (index >= 0 && index < Z_STRLEN_P(op1)) {
 			ZVAL_CHAR(result, Z_STRVAL_P(op1)[index]);
 			return SUCCESS;
