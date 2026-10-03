@@ -140,7 +140,7 @@ static zend_result mysqli_warning_message(mysqli_object *obj, zval *retval, bool
 
 	if (!obj->ptr || !((MYSQLI_RESOURCE *)(obj->ptr))->ptr) {
 		if (!quiet) {
-			zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(obj->zo.ce->name));
+			zend_throw_error(NULL, "%pS object is already closed", obj->zo.ce->name);
 		}
 
 		return FAILURE;
@@ -160,7 +160,7 @@ static zend_result mysqli_warning_sqlstate(mysqli_object *obj, zval *retval, boo
 
 	if (!obj->ptr || !((MYSQLI_RESOURCE *)(obj->ptr))->ptr) {
 		if (!quiet) {
-			zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(obj->zo.ce->name));
+			zend_throw_error(NULL, "%pS object is already closed", obj->zo.ce->name);
 		}
 
 		return FAILURE;
@@ -180,7 +180,7 @@ static zend_result mysqli_warning_errno(mysqli_object *obj, zval *retval, bool q
 
 	if (!obj->ptr || !((MYSQLI_RESOURCE *)(obj->ptr))->ptr) {
 		if (!quiet) {
-			zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(obj->zo.ce->name));
+			zend_throw_error(NULL, "%pS object is already closed", obj->zo.ce->name);
 		}
 
 		return FAILURE;
