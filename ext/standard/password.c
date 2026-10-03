@@ -424,15 +424,11 @@ static zend_string *php_password_bcrypt_sha256_hash(const zend_string *password,
 
 	/* Relabel the $2y$ result into the bcrypt-sha256 format. The digest is the
 	 * last 31 characters of the 60-byte bcrypt output. */
-	out_len = snprintf(out, sizeof(out), "$bcrypt-sha256$v=2,t=2b,r=%" ZEND_LONG_FMT_SPEC "$%s$%s",
+	result = zend_strpprintf(0, "$bcrypt-sha256$v=2,t=2b,r=%" ZEND_LONG_FMT_SPEC "$%s$%s",
 		cost, ZSTR_VAL(salt), ZSTR_VAL(raw) + (ZSTR_LEN(raw) - 31));
 	zend_string_release_ex(salt, 0);
 	zend_string_free(raw);
 
-	if (out_len <= 0 || (size_t) out_len >= sizeof(out)) {
-		return NULL;
-	}
-	result = zend_string_init(out, (size_t) out_len, 0);
 	return result;
 }
 
@@ -442,11 +438,9 @@ static bool php_password_bcrypt_sha256_verify(const zend_string *password, const
 	const char *salt, *digest;
 	unsigned char mac[32];
 	zend_string *key, *setting, *raw;
+	zend_string *raw_digest, *stored_digest;
 	char setting_prefix[16];
 	size_t prefix_len;
-	const volatile unsigned char *ra, *rb;
-	size_t i;
-	int r;
 	bool ret;
 
 	if (!php_password_bcrypt_sha256_parse(hash, &cost, &salt, &digest)) {
@@ -478,15 +472,15 @@ static bool php_password_bcrypt_sha256_verify(const zend_string *password, const
 	 * salt into 22 base64 chars, and the 4 unused padding bits can change the last
 	 * character), but both encodings decode to the same salt bytes, so the digest
 	 * is identical. */
-	ra = (const volatile unsigned char *)(ZSTR_VAL(raw) + (ZSTR_LEN(raw) - 31));
-	rb = (const volatile unsigned char *)digest;
-	r = 0;
-	for (i = 0; i < 31; i++) {
-		r |= ra[i] ^ rb[i];
-	}
-	ret = (r == 0);
+	raw_digest = zend_string_init(ZSTR_VAL(raw) + (ZSTR_LEN(raw) - 31), 31, 0);
+	stored_digest = zend_string_init(digest, 31, 0);
 
+	ret = (php_safe_bcmp(raw_digest, stored_digest) == 0);
+
+	zend_string_release_ex(raw_digest, 0);
+	zend_string_release_ex(stored_digest, 0);
 	zend_string_free(raw);
+
 	return ret;
 }
 
