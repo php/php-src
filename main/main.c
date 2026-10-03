@@ -52,6 +52,7 @@
 #include "ext/random/php_random_csprng.h"
 #include "ext/random/php_random_zend_utils.h"
 #include "ext/opcache/ZendAccelerator.h"
+#include "ext/user_cache/php_user_cache.h"
 #ifdef HAVE_JIT
 # include "ext/opcache/jit/zend_jit.h"
 #endif
@@ -2763,6 +2764,7 @@ PHPAPI void php_reserve_tsrm_memory(void)
 		TSRM_ALIGNED_SIZE(sizeof(php_core_globals)) +
 		TSRM_ALIGNED_SIZE(sizeof(sapi_globals_struct)) +
 		TSRM_ALIGNED_SIZE(sizeof(zend_accel_globals)) +
+		TSRM_ALIGNED_SIZE(php_ucache_globals_size()) +
 #ifdef HAVE_JIT
 		TSRM_ALIGNED_SIZE(sizeof(zend_jit_globals)) +
 #endif
@@ -2780,6 +2782,8 @@ PHPAPI bool php_tsrm_startup_ex(int expected_threads)
 		TSRM_ALIGNED_SIZE(sizeof(zend_compiler_globals)) +
 		TSRM_ALIGNED_SIZE(sizeof(zend_executor_globals)));
 	(void)ts_resource(0);
+	/* SAPI activate hooks need these globals before MINIT. */
+	php_ucache_globals_startup();
 	return ret;
 }
 

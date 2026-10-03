@@ -26,6 +26,8 @@
 #include "lsapilib.h"
 #include "lsapi_main_arginfo.h"
 
+#include "ext/user_cache/php_user_cache.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -175,6 +177,8 @@ static int sapi_lsapi_deactivate(void)
         efree( SG(request_info).path_translated );
         SG(request_info).path_translated = NULL;
     }
+
+    php_ucache_partition_activate(NULL);
 
     return SUCCESS;
 }
@@ -513,6 +517,15 @@ static void sapi_lsapi_log_message(const char *message, int syslog_type_int)
 }
 /* }}} */
 
+static void lsapi_ucache_activate_request_partition(void)
+{
+    php_ucache_activate_boundary_partition(
+        "litespeed",
+        sapi_lsapi_getenv("DOCUMENT_ROOT", 0),
+        PHP_UCACHE_REASON_LSAPI_BOUNDARY_UNAVAILABLE
+    );
+}
+
 /* Set to 1 to turn on log messages useful during development:
  */
 #if 0
@@ -540,6 +553,9 @@ static int sapi_lsapi_activate(void)
 {
     char *path, *server_name;
     size_t path_len, server_name_len;
+
+    /* Resolve the partition before early returns: sapi_activate() ignores failure. */
+    lsapi_ucache_activate_request_partition();
 
     /* PATH_TRANSLATED should be defined at this stage but better safe than sorry :) */
     if (!SG(request_info).path_translated) {
@@ -1514,6 +1530,10 @@ int main( int argc, char * argv[] )
         tsrm_shutdown();
 #endif
         return FAILURE;
+    }
+
+    if (php_ucache_opt_in(PHP_UCACHE_MODE_REQ) == FAILURE && php_ucache_is_enabled_by_ini()) {
+        php_error_docref(NULL, E_WARNING, "Unable to register UserCache request mode; UserCache will be unavailable");
     }
 
     if ( climode ) {

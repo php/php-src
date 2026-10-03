@@ -44,6 +44,8 @@
 
 #include <locale.h>
 
+#include "ext/user_cache/php_user_cache.h"
+
 #ifdef HAVE_DLFCN_H
 #include <dlfcn.h>
 #endif
@@ -496,7 +498,15 @@ const zend_function_entry server_additional_functions[] = {
 
 static int sapi_cli_server_startup(sapi_module_struct *sapi_module_ptr) /* {{{ */
 {
-	return php_module_startup(sapi_module_ptr, &cli_server_module_entry);
+	if (php_module_startup(sapi_module_ptr, &cli_server_module_entry) == FAILURE) {
+		return FAILURE;
+	}
+
+	if (php_ucache_opt_in(PHP_UCACHE_MODE_REQ) == FAILURE && php_ucache_is_enabled_by_ini()) {
+		php_error_docref(NULL, E_WARNING, "Unable to register UserCache request mode; UserCache will be unavailable");
+	}
+
+	return SUCCESS;
 } /* }}} */
 
 static size_t sapi_cli_server_ub_write(const char *str, size_t str_length) /* {{{ */
@@ -2639,6 +2649,10 @@ static zend_result php_cli_server_ctor(php_cli_server *server, const char *addr,
 		goto out;
 	}
 	server->server_sock = server_sock;
+
+	if (php_ucache_is_enabled_by_ini() && !php_ucache_startup_default_ctx_storage()) {
+		php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR, "UserCache startup failed; UserCache will be unavailable");
+	}
 
 	php_cli_server_startup_workers();
 
