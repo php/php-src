@@ -13,7 +13,7 @@
  */
 
 
-#include "zend.h"
+#include "main/php.h"
 #include "fuzzer.h"
 #include "fuzzer-sapi.h"
 #include "ext/mbstring/mbstring.h"
