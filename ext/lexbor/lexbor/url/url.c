@@ -1753,16 +1753,13 @@ again:
                         break;
                     }
 
-                    if (pswd == NULL || !at_sign) {
-                        tmp = (pswd != NULL) ? pswd - 1 : p;
-
-                        if (tmp > begin) {
-                            status = lxb_url_percent_encode_after_utf_8(begin, tmp,
-                                                        &url->username, url->mraw,
-                                                        LXB_URL_MAP_USERINFO, false);
-                            if (status != LXB_STATUS_OK) {
-                                lxb_url_parse_return(orig_data, buf, status);
-                            }
+                    tmp = (pswd != NULL) ? pswd - 1 : p;
+                    if (tmp > begin) {
+                        status = lxb_url_percent_encode_after_utf_8(begin, tmp,
+                                                    &url->username, url->mraw,
+                                                    LXB_URL_MAP_USERINFO, false);
+                        if (status != LXB_STATUS_OK) {
+                            lxb_url_parse_return(orig_data, buf, status);
                         }
                     }
 
@@ -2341,6 +2338,17 @@ again:
                                                             LXB_URL_MAP_C0, false);
                 if (status != LXB_STATUS_OK) {
                     lxb_url_parse_return(orig_data, buf, status);
+                }
+
+                /* Encode only the space immediately before a query or fragment. */
+                if (p > begin && p[-1] == ' ') {
+                    tmp_str.length--;
+                    if (lexbor_str_append(&tmp_str, url->mraw,
+                                          (const lxb_char_t *) "%20", 3) == NULL)
+                    {
+                        lxb_url_parse_return(orig_data, buf,
+                                             LXB_STATUS_ERROR_MEMORY_ALLOCATION);
+                    }
                 }
 
                 status = lxb_url_path_list_push(url, &tmp_str);
@@ -4907,7 +4915,7 @@ lxb_status_t
 lxb_url_serialize_fragment(const lxb_url_t *url,
                            lexbor_serialize_cb_f cb, void *ctx)
 {
-    if (url->query.data != NULL) {
+    if (url->fragment.data != NULL) {
         return cb(url->fragment.data, url->fragment.length, ctx);
     }
 
@@ -5105,6 +5113,8 @@ lxb_url_search_params_parse(lxb_url_search_params_t *search_params,
         if (status != LXB_STATUS_OK) {
             return status;
         }
+
+        last = entry;
 
         lexbor_str_init(&entry->value, mraw, 0);
         if (entry->value.data == NULL) {

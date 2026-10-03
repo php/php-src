@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Alexander Borisov <lex.borisov@gmail.com>
 Date: Wed, 10 Jun 2026 19:50:10 +0300
-Subject: [PATCH 12/12] Encoding: fixed buffer overflows in malformed decode
+Subject: [PATCH 12/17] Encoding: fixed buffer overflows in malformed decode
  replay.
 
 Fixed out-of-bounds writes in buffering decoders when replacement output

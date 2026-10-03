@@ -1,0 +1,38 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?M=C3=A1t=C3=A9=20Kocsis?= <kocsismate@woohoolabs.com>
+Date: Fri, 11 Sep 2026 21:58:45 +0200
+Subject: [PATCH 16/17] URL: encode opaque path spaces before query and
+ fragment. (#405)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Percent-encode only the space immediately preceding a query or fragment delimiter, while preserving validation errors for every parsed space.
+
+This way, Lexbor will correctly follow "If remaining starts with U+003F (?) or U+0023 (#), then append "%20" to url’s path." in the "opaque path state".
+---
+ source/lexbor/url/url.c | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/source/lexbor/url/url.c b/source/lexbor/url/url.c
+index 654e2e6..98ee304 100644
+--- a/source/lexbor/url/url.c
++++ b/source/lexbor/url/url.c
+@@ -2340,6 +2340,17 @@ again:
+                     lxb_url_parse_return(orig_data, buf, status);
+                 }
+ 
++                /* Encode only the space immediately before a query or fragment. */
++                if (p > begin && p[-1] == ' ') {
++                    tmp_str.length--;
++                    if (lexbor_str_append(&tmp_str, url->mraw,
++                                          (const lxb_char_t *) "%20", 3) == NULL)
++                    {
++                        lxb_url_parse_return(orig_data, buf,
++                                             LXB_STATUS_ERROR_MEMORY_ALLOCATION);
++                    }
++                }
++
+                 status = lxb_url_path_list_push(url, &tmp_str);
+                 if (status != LXB_STATUS_OK) {
+                     lxb_url_parse_return(orig_data, buf, status);
