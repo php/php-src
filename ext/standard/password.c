@@ -294,31 +294,36 @@ static bool php_password_bcrypt_sha256_parse(const zend_string *hash,
 		return false;
 	}
 
-	const char *h = ZSTR_VAL(hash);
-	size_t len = ZSTR_LEN(hash);
+	const char *p;
+	int c;
+	{
+		const char *h = ZSTR_VAL(hash);
+		size_t len = ZSTR_LEN(hash);
 
-	if (len < 82 || len > 83) {
-		return false;
-	}
-	const char *p = h + strlen(PHP_PASSWORD_BCRYPT_SHA256_PREFIX);
+		if (len < 82 || len > 83) {
+			return false;
+		}
+		p = h + strlen(PHP_PASSWORD_BCRYPT_SHA256_PREFIX);
 
-	if (*p < '1' || *p > '9') {
-		return false;
-	}
-	int c = *p - '0';
-	p++;
-	if (*p >= '0' && *p <= '9') {
-		c = c * 10 + (*p - '0');
+		if (*p < '1' || *p > '9') {
+			return false;
+		}
+		c = *p - '0';
 		p++;
-	}
-	if (c < 4 || c > 31 || *p != '$') {
-		return false;
-	}
-	p++;
+		if (*p >= '0' && *p <= '9') {
+			c = c * 10 + (*p - '0');
+			p++;
+		}
+		if (c < 4 || c > 31 || *p != '$') {
+			return false;
+		}
+		p++;
 
-	if (len - (size_t)(p - h) != 54) {
-		return false;
+		if (len - (size_t)(p - h) != 54) {
+			return false;
+		}
 	}
+
 	for (size_t i = 0; i < 22; i++) {
 		if (!php_password_b64char((unsigned char) p[i])) {
 			return false;
@@ -362,38 +367,39 @@ static bool php_password_bcrypt_sha256_needs_rehash(const zend_string *hash, zen
 {
 	zend_long cost;
 	const char *salt, *digest;
-	zval *znew_cost;
-	zend_long new_cost = PHP_PASSWORD_BCRYPT_SHA256_COST;
 
 	if (!php_password_bcrypt_sha256_parse(hash, &cost, &salt, &digest)) {
 		return true;
 	}
-	if (options && (znew_cost = zend_hash_str_find(options, "cost", strlen("cost"))) != NULL) {
-		new_cost = zval_get_long(znew_cost);
+
+	zend_long new_cost = PHP_PASSWORD_BCRYPT_SHA256_COST;
+	if (options) {
+		zval *znew_cost = zend_hash_str_find(options, "cost", strlen("cost"));
+		if (znew_cost != NULL) {
+			new_cost = zval_get_long(znew_cost);
+		}
 	}
+
 	return cost != new_cost;
 }
 
 static zend_string *php_password_bcrypt_sha256_hash(const zend_string *password, zend_array *options)
 {
-	zval *zcost;
 	zend_long cost = PHP_PASSWORD_BCRYPT_SHA256_COST;
-	zend_string *salt, *key, *setting, *raw, *result = NULL;
-	unsigned char mac[32];
-	char setting_prefix[16];
-	size_t prefix_len;
-	char out[84];
-	int out_len;
 
-	if (options && (zcost = zend_hash_str_find(options, "cost", strlen("cost"))) != NULL) {
-		cost = zval_get_long(zcost);
+	if (options) {
+		zval *zcost = zend_hash_str_find(options, "cost", strlen("cost"));
+		if (zcost != NULL) {
+			cost = zval_get_long(zcost);
+		}
 	}
 	if (cost < 4 || cost > 31) {
 		zend_value_error("Invalid bcrypt cost parameter specified: " ZEND_LONG_FMT, cost);
 		return NULL;
 	}
 
-	if (!(salt = php_password_get_salt(NULL, 22, options))) {
+	zend_string *salt = php_password_get_salt(NULL, 22, options);
+	if (!salt) {
 		return NULL;
 	}
 
@@ -401,16 +407,24 @@ static zend_string *php_password_bcrypt_sha256_hash(const zend_string *password,
 	 * base64-encode the 32-byte digest. The resulting 44-byte string is what is
 	 * handed to bcrypt, so any NUL bytes or length beyond 72 in the original
 	 * password are neutralized. */
-	php_password_hmac_sha256((const unsigned char *) ZSTR_VAL(salt), ZSTR_LEN(salt),
-		(const unsigned char *) ZSTR_VAL(password), ZSTR_LEN(password), mac);
+	zend_string *key;
+	{
+		unsigned char mac[32];
+		php_password_hmac_sha256((const unsigned char *) ZSTR_VAL(salt), ZSTR_LEN(salt),
+			(const unsigned char *) ZSTR_VAL(password), ZSTR_LEN(password), mac);
 
-	key = php_base64_encode(mac, sizeof(mac));
-	ZEND_SECURE_ZERO(mac, sizeof(mac));
+		key = php_base64_encode(mac, sizeof(mac));
+		ZEND_SECURE_ZERO(mac, sizeof(mac));
+	}
 
-	prefix_len = snprintf(setting_prefix, sizeof(setting_prefix), "$2y$%02" ZEND_LONG_FMT_SPEC "$", cost);
-	setting = zend_string_concat2(setting_prefix, prefix_len, ZSTR_VAL(salt), ZSTR_LEN(salt));
+	zend_string *setting;
+	{
+		char setting_prefix[16];
+		size_t prefix_len = snprintf(setting_prefix, sizeof(setting_prefix), "$2y$%02" ZEND_LONG_FMT_SPEC "$", cost);
+		setting = zend_string_concat2(setting_prefix, prefix_len, ZSTR_VAL(salt), ZSTR_LEN(salt));
+	}
 
-	raw = php_crypt(ZSTR_VAL(key), (int) ZSTR_LEN(key), ZSTR_VAL(setting), (int) ZSTR_LEN(setting), 1);
+	zend_string *raw = php_crypt(ZSTR_VAL(key), (int) ZSTR_LEN(key), ZSTR_VAL(setting), (int) ZSTR_LEN(setting), 1);
 	zend_string_release_ex(setting, 0);
 	zend_string_release_ex(key, 0);
 
@@ -424,7 +438,7 @@ static zend_string *php_password_bcrypt_sha256_hash(const zend_string *password,
 
 	/* Relabel the $2y$ result into the bcrypt-sha256 format. The digest is the
 	 * last 31 characters of the 60-byte bcrypt output. */
-	result = zend_strpprintf(0, "$bcrypt-sha256$v=2,t=2b,r=%" ZEND_LONG_FMT_SPEC "$%s$%s",
+	zend_string *result = zend_strpprintf(0, "$bcrypt-sha256$v=2,t=2b,r=%" ZEND_LONG_FMT_SPEC "$%s$%s",
 		cost, ZSTR_VAL(salt), ZSTR_VAL(raw) + (ZSTR_LEN(raw) - 31));
 	zend_string_release_ex(salt, 0);
 	zend_string_free(raw);
@@ -436,27 +450,29 @@ static bool php_password_bcrypt_sha256_verify(const zend_string *password, const
 {
 	zend_long cost;
 	const char *salt, *digest;
-	unsigned char mac[32];
-	zend_string *key, *setting, *raw;
-	zend_string *raw_digest, *stored_digest;
-	char setting_prefix[16];
-	size_t prefix_len;
-	bool ret;
 
 	if (!php_password_bcrypt_sha256_parse(hash, &cost, &salt, &digest)) {
 		return false;
 	}
 
-	php_password_hmac_sha256((const unsigned char *) salt, 22,
-		(const unsigned char *) ZSTR_VAL(password), ZSTR_LEN(password), mac);
+	zend_string *key;
+	{
+		unsigned char mac[32];
+		php_password_hmac_sha256((const unsigned char *) salt, 22,
+			(const unsigned char *) ZSTR_VAL(password), ZSTR_LEN(password), mac);
 
-	key = php_base64_encode(mac, sizeof(mac));
-	ZEND_SECURE_ZERO(mac, sizeof(mac));
+		key = php_base64_encode(mac, sizeof(mac));
+		ZEND_SECURE_ZERO(mac, sizeof(mac));
+	}
 
-	prefix_len = snprintf(setting_prefix, sizeof(setting_prefix), "$2y$%02" ZEND_LONG_FMT_SPEC "$", cost);
-	setting = zend_string_concat2(setting_prefix, prefix_len, salt, 22);
+	zend_string *setting;
+	{
+		char setting_prefix[16];
+		size_t prefix_len = snprintf(setting_prefix, sizeof(setting_prefix), "$2y$%02" ZEND_LONG_FMT_SPEC "$", cost);
+		setting = zend_string_concat2(setting_prefix, prefix_len, salt, 22);
+	}
 
-	raw = php_crypt(ZSTR_VAL(key), (int) ZSTR_LEN(key), ZSTR_VAL(setting), (int) ZSTR_LEN(setting), 1);
+	zend_string *raw = php_crypt(ZSTR_VAL(key), (int) ZSTR_LEN(key), ZSTR_VAL(setting), (int) ZSTR_LEN(setting), 1);
 	zend_string_release_ex(setting, 0);
 	zend_string_release_ex(key, 0);
 
@@ -472,10 +488,10 @@ static bool php_password_bcrypt_sha256_verify(const zend_string *password, const
 	 * salt into 22 base64 chars, and the 4 unused padding bits can change the last
 	 * character), but both encodings decode to the same salt bytes, so the digest
 	 * is identical. */
-	raw_digest = zend_string_init(ZSTR_VAL(raw) + (ZSTR_LEN(raw) - 31), 31, 0);
-	stored_digest = zend_string_init(digest, 31, 0);
+	zend_string *raw_digest = zend_string_init(ZSTR_VAL(raw) + (ZSTR_LEN(raw) - 31), 31, 0);
+	zend_string *stored_digest = zend_string_init(digest, 31, 0);
 
-	ret = (php_safe_bcmp(raw_digest, stored_digest) == 0);
+	bool ret = (php_safe_bcmp(raw_digest, stored_digest) == 0);
 
 	zend_string_release_ex(raw_digest, 0);
 	zend_string_release_ex(stored_digest, 0);
