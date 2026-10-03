@@ -80,8 +80,11 @@ typedef zend_string *(*zend_coroutine_awaiting_info_fn)(zend_coroutine_t *corout
  */
 typedef bool (*zend_coroutine_switch_handler_fn)(zend_coroutine_t *coroutine, bool is_enter);
 
-/* Fires exactly once, however the coroutine ends — return, exception,
- * cancellation, bailout unwind. Clearing ->exception here marks it handled.
+/* Fires at most once, however the coroutine ends — return, exception,
+ * cancellation, bailout unwind. A handler that throws may end the notify: the
+ * provider is free to drop the handlers after it, uncalled, so a handler that
+ * must fire belongs on a coroutine whose handlers its owner controls (as the
+ * GC's do). Clearing ->exception here marks it handled.
  * waiter/data are stored at registration and handed back verbatim: waiter is
  * the coroutine parked on this one (NULL when it hides behind data), data is
  * the consumer's context. is_bailout=true: the scheduler is dying — clean own
