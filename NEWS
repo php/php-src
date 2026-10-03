@@ -203,6 +203,8 @@ PHP                                                                        NEWS
     PROCESS_INFORMATION, an indeterminate comspec pointer after a failed
     lookup, and an unchecked CreateFileA() failure. (Ilia Alshanetsky)
   . Fix persistent stream context lifetime during shutdown (Levi Morrison)
+  . Fixed unserialize() of enums sharing its state with the unserialize()
+    calls made by autoloaders. (nicolas-grekas)
 
 - Tidy:
   . Fixed a use-after-free when a tidyNode is used after its document is
