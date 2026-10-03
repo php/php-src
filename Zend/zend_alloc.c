@@ -2311,8 +2311,13 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap)
 						chunk->map[i] = ZEND_MM_SRUN(bin_num);
 					}
 					i += bin_pages[bin_num];
-				} else /* if (info & ZEND_MM_IS_LRUN) */ {
-					i += ZEND_MM_LRUN_PAGES(info);
+				} else {
+					/* An allocated page is either an SRUN or an LRUN; a zeroed
+					 * or corrupted map entry would otherwise stall the scan, as
+					 * ZEND_MM_LRUN_PAGES(0) is 0 and would not advance i. */
+					uint32_t pages_count = ZEND_MM_LRUN_PAGES(info);
+					ZEND_MM_CHECK((info & ZEND_MM_IS_LRUN) && pages_count != 0, "zend_mm_heap corrupted");
+					i += pages_count;
 				}
 			} else {
 				i++;
