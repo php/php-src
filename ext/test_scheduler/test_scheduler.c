@@ -152,6 +152,8 @@ ZEND_BEGIN_MODULE_GLOBALS(test_scheduler)
 	HashTable coroutines;
 	/* The loop. It is not a task, so it lives here and not in the table. */
 	ts_coroutine_t *scheduler;
+	zend_long fail_new_coroutine;
+	zend_long fail_enqueue;
 ZEND_END_MODULE_GLOBALS(test_scheduler)
 
 ZEND_DECLARE_MODULE_GLOBALS(test_scheduler)
@@ -165,6 +167,14 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("test_scheduler.enable", "0", PHP_INI_SYSTEM, NULL)
 	/* Tests only: register as if built for this Async API version; 0 is the real one. */
 	PHP_INI_ENTRY("test_scheduler.api_version", "0", PHP_INI_SYSTEM, NULL)
+	/* Tests only: the n-th new_coroutine or gc_new_coroutine call from now
+	 * returns NULL, as a provider that cannot create a coroutine does; 0 is off. */
+	STD_PHP_INI_ENTRY("test_scheduler.fail_new_coroutine", "0", PHP_INI_ALL, OnUpdateLong,
+			fail_new_coroutine, zend_test_scheduler_globals, test_scheduler_globals)
+	/* Tests only: the n-th enqueue of a coroutine never queued before fails
+	 * with an Error, as a provider that cannot give it a stack does; 0 is off. */
+	STD_PHP_INI_ENTRY("test_scheduler.fail_enqueue", "0", PHP_INI_ALL, OnUpdateLong,
+			fail_enqueue, zend_test_scheduler_globals, test_scheduler_globals)
 PHP_INI_END()
 
 /* False when disabled: MINIT registered nothing. */
@@ -191,6 +201,12 @@ static zend_always_inline ts_coroutine_t *ts_from_coro(zend_coroutine_t *coro)
 }
 
 static bool ts_enqueue(zend_coroutine_t *coroutine, zend_object *error, bool transfer_error);
+
+/* True for the call an armed fault countdown picks; counts the countdown down. */
+static zend_always_inline bool ts_fault_hit(zend_long *countdown)
+{
+	return *countdown > 0 && --(*countdown) == 0;
+}
 
 ///////////////////////////////////////////////////////////////////
 /// Switch/finish handler vectors
@@ -1367,6 +1383,10 @@ static zend_coroutine_t *ts_launch(void)
 
 static zend_coroutine_t *ts_new_coroutine(void)
 {
+	if (UNEXPECTED(ts_fault_hit(&TSG(fail_new_coroutine)))) {
+		return NULL;
+	}
+
 	return &ts_coroutine_new()->coro;
 }
 
@@ -1375,6 +1395,10 @@ static zend_coroutine_t *ts_new_coroutine(void)
  * does would tell them apart here. */
 static zend_coroutine_t *ts_gc_new_coroutine(void)
 {
+	if (UNEXPECTED(ts_fault_hit(&TSG(fail_new_coroutine)))) {
+		return NULL;
+	}
+
 	return &ts_coroutine_new()->coro;
 }
 
@@ -1388,6 +1412,16 @@ static bool ts_enqueue(zend_coroutine_t *coroutine, zend_object *error, bool tra
 		}
 
 		zend_throw_error(NULL, "Cannot enqueue a finished coroutine");
+		return false;
+	}
+
+	if (UNEXPECTED(ZEND_COROUTINE_STATUS(coroutine) == ZEND_COROUTINE_STATUS_CREATED
+			&& ts_fault_hit(&TSG(fail_enqueue)))) {
+		if (error != NULL && transfer_error) {
+			OBJ_RELEASE(error);
+		}
+
+		zend_throw_error(NULL, "Cannot enqueue the coroutine: test_scheduler.fail_enqueue");
 		return false;
 	}
 
