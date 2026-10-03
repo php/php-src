@@ -95,23 +95,23 @@ function test($scope, $class, $prop) {
     try {
         $propertyReflection->setRawValue($object, 42);
     } catch (Throwable $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         var_dump($propertyReflection->getRawValue($object));
     } catch (Throwable $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 
     try {
         $propertyReflection->setRawValueWithoutLazyInitialization($object, 43);
     } catch (Throwable $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         var_dump($propertyReflection->getRawValue($object));
     } catch (Throwable $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     if ($prop === 'privateProp') {
         printf(
@@ -155,15 +155,15 @@ int(43)
 int(42)
 int(43)
 # Accessing Base->virtualProp from scope Base
-Must not write to virtual property Base::$virtualProp
-Must not read from virtual property Base::$virtualProp
-Cannot use setRawValueWithoutLazyInitialization() on virtual property Base::$virtualProp
-Must not read from virtual property Base::$virtualProp
+Error: Must not write to virtual property Base::$virtualProp
+Error: Must not read from virtual property Base::$virtualProp
+ReflectionException: Cannot use setRawValueWithoutLazyInitialization() on virtual property Base::$virtualProp
+Error: Must not read from virtual property Base::$virtualProp
 # Accessing Test->dynamicProp from scope Base
 int(42)
 int(43)
 # Accessing Test->changedProp from scope Base
-May not use setRawValue on static properties
-May not use getRawValue on static properties
-Cannot use setRawValueWithoutLazyInitialization() on static property Test::$changedProp
-May not use getRawValue on static properties
+ReflectionException: May not use setRawValue on static properties
+ReflectionException: May not use getRawValue on static properties
+ReflectionException: Cannot use setRawValueWithoutLazyInitialization() on static property Test::$changedProp
+ReflectionException: May not use getRawValue on static properties

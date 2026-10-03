@@ -18,7 +18,7 @@ function test(string $enumName, string $caseName) {
         $reflectionEnum = new ReflectionEnum($enumName);
         var_dump($reflectionEnum->getCase($caseName));
     } catch (Throwable $e) {
-        echo get_class($e) . ': ' . $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 

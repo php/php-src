@@ -51,8 +51,8 @@ $ctx = stream_context_create(['stream' => [
 $stream = fopen('error-stream://x', 'r', false, $ctx);
 try {
     fread($stream, 1);
-} catch (Error $e) {
-    echo get_class($e), ": ", $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 fclose($stream);
 var_dump($calls > 1);

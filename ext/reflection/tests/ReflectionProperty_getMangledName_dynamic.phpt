@@ -19,8 +19,8 @@ function testDynamicProperty($obj, $property, $description) {
         $array = (array) $obj;
         echo "  Found in array cast: " . (array_key_exists($reflection->getMangledName(), $array) ? "yes" : "no") . "\n";
         echo "\n";
-    } catch (ReflectionException $e) {
-        echo "$description: EXCEPTION - " . $e->getMessage() . "\n\n";
+    } catch (Throwable $e) {
+        echo "$description: ", $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -60,15 +60,15 @@ echo "\n=== Testing ReflectionProperty from class vs instance ===\n";
 try {
     $reflection = new ReflectionProperty('TestClass', 'dynamic');
     echo "This should not be reached\n";
-} catch (ReflectionException $e) {
-    echo "Expected exception for class-based reflection: " . $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo 'class-based reflection: ', $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $reflection = new ReflectionProperty($obj, 'dynamic');
     echo "Instance-based reflection works: " . $reflection->getMangledName() . "\n";
-} catch (ReflectionException $e) {
-    echo "Unexpected exception: " . $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo 'unexpected: ', $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -121,5 +121,5 @@ Regular property:
   getMangledName(): existing
 
 === Testing ReflectionProperty from class vs instance ===
-Expected exception for class-based reflection: Property TestClass::$dynamic does not exist
+class-based reflection: ReflectionException: Property TestClass::$dynamic does not exist
 Instance-based reflection works: dynamic

@@ -40,16 +40,16 @@ echo "Access to parent's private property not in child:\n";
 try {
     $reflection = new ReflectionProperty('ChildClass', 'parentOnly');
     echo "ERROR: Should have failed\n";
-} catch (ReflectionException $e) {
-    echo "Instance-based creation failed as expected: " . $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo 'Instance-based creation failed as expected: ', $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $obj = new ChildClass();
     $reflection = new ReflectionProperty($obj, 'parentOnly');
     echo "ERROR: Should have failed\n";
-} catch (ReflectionException $e) {
-    echo "Object-based creation failed as expected: " . $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo 'Object-based creation failed as expected: ', $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -83,5 +83,5 @@ Mangled name: '%0ChildClass%0private'
 Key exists in array cast: yes
 
 Access to parent's private property not in child:
-Instance-based creation failed as expected: Property ChildClass::$parentOnly does not exist
-Object-based creation failed as expected: Property ChildClass::$parentOnly does not exist
+Instance-based creation failed as expected: ReflectionException: Property ChildClass::$parentOnly does not exist
+Object-based creation failed as expected: ReflectionException: Property ChildClass::$parentOnly does not exist

@@ -54,14 +54,14 @@ var_dump($rp->isInitialized($a));
 
 try {
     var_dump($rp->isInitialized(new stdClass));
-} catch (ReflectionException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump($rp->isInitialized());
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 class WithMagic {
@@ -109,8 +109,8 @@ bool(false)
 bool(false)
 Object type:
 bool(false)
-Given object is not an instance of the class this property was declared in
-ReflectionProperty::isInitialized(): Argument #1 ($object) must be provided for instance properties
+ReflectionException: Given object is not an instance of the class this property was declared in
+TypeError: ReflectionProperty::isInitialized(): Argument #1 ($object) must be provided for instance properties
 Class with __isset:
 bool(false)
 bool(false)

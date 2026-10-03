@@ -8,8 +8,8 @@ $method = $class->getMethod('setTime');
 foreach ($method->getParameters() as $parameter) {
     try {
         var_dump($parameter->isDefaultValueConstant());
-    } catch (ReflectionException $exception) {
-        echo $exception->getMessage() . "\n";
+    } catch (Throwable $exception) {
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
     }
 }
 
@@ -21,14 +21,14 @@ $method = $class->getMethod('listIdentifiers');
 foreach ($method->getParameters() as $parameter) {
     try {
         var_dump($parameter->isDefaultValueConstant());
-    } catch (ReflectionException $exception) {
-        echo $exception->getMessage() . "\n";
+    } catch (Throwable $exception) {
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
     }
 }
 ?>
 --EXPECT--
-Internal error: Failed to retrieve the default value
-Internal error: Failed to retrieve the default value
+ReflectionException: Internal error: Failed to retrieve the default value
+ReflectionException: Internal error: Failed to retrieve the default value
 bool(false)
 bool(false)
 ----------
