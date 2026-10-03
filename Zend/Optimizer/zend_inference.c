@@ -785,6 +785,15 @@ static bool zend_inference_calc_binary_op_range(
 		const zend_op_array *op_array, const zend_ssa *ssa,
 		const zend_op *opline, const zend_ssa_op *ssa_op, uint8_t opcode, zend_ssa_range *tmp) {
 	zend_long op1_min, op2_min, op1_max, op2_max, t1, t2, t3, t4;
+	uint32_t allowed_types = MAY_BE_LONG;
+
+	if (opcode == ZEND_ADD || opcode == ZEND_SUB || opcode == ZEND_MUL || opcode == ZEND_DIV) {
+		allowed_types |= MAY_BE_DOUBLE;
+	}
+	if ((OP1_INFO() & (MAY_BE_ANY | MAY_BE_UNDEF | MAY_BE_REF) & ~allowed_types)
+	 || (OP2_INFO() & (MAY_BE_ANY | MAY_BE_UNDEF | MAY_BE_REF) & ~allowed_types)) {
+		return 0;
+	}
 
 	switch (opcode) {
 		case ZEND_ADD:
@@ -1066,6 +1075,12 @@ static bool zend_inference_calc_binary_op_range(
 	return 0;
 }
 
+static bool zend_inference_has_integer_range(const zend_ssa *ssa, int var)
+{
+	return ssa->var_info[var].has_range
+		&& (ssa->var_info[var].type & (MAY_BE_ANY | MAY_BE_UNDEF | MAY_BE_REF)) == MAY_BE_LONG;
+}
+
 static bool zend_inference_calc_range(const zend_op_array *op_array, const zend_ssa *ssa, int var, int widening, bool narrowing, zend_ssa_range *tmp)
 {
 	uint32_t line;
@@ -1164,7 +1179,7 @@ static bool zend_inference_calc_range(const zend_op_array *op_array, const zend_
 					tmp->underflow = constraint->range.underflow && tmp->underflow;
 					tmp->min = MAX(constraint->range.min, tmp->min);
 #ifdef SYM_RANGE
-				} else if (narrowing && ssa->var_info[constraint->min_ssa_var].has_range) {
+				} else if (narrowing && zend_inference_has_integer_range(ssa, constraint->min_ssa_var)) {
 					tmp->underflow = ssa->var_info[constraint->min_ssa_var].range.underflow && tmp->underflow;
 					if (!add_will_overflow(ssa->var_info[constraint->min_ssa_var].range.min, constraint->range.min)) {
 						tmp->min = MAX(ssa->var_info[constraint->min_ssa_var].range.min + constraint->range.min, tmp->min);
@@ -1175,7 +1190,7 @@ static bool zend_inference_calc_range(const zend_op_array *op_array, const zend_
 					tmp->max = MIN(constraint->range.max, tmp->max);
 					tmp->overflow = constraint->range.overflow && tmp->overflow;
 #ifdef SYM_RANGE
-				} else if (narrowing && ssa->var_info[constraint->max_ssa_var].has_range) {
+				} else if (narrowing && zend_inference_has_integer_range(ssa, constraint->max_ssa_var)) {
 					if (!add_will_overflow(ssa->var_info[constraint->max_ssa_var].range.max, constraint->range.max)) {
 						tmp->max = MIN(ssa->var_info[constraint->max_ssa_var].range.max + constraint->range.max, tmp->max);
 					}
@@ -1187,7 +1202,7 @@ static bool zend_inference_calc_range(const zend_op_array *op_array, const zend_
 					tmp->underflow = constraint->range.underflow;
 					tmp->min = constraint->range.min;
 #ifdef SYM_RANGE
-				} else if (narrowing && ssa->var_info[constraint->min_ssa_var].has_range) {
+				} else if (narrowing && zend_inference_has_integer_range(ssa, constraint->min_ssa_var)) {
 					if (add_will_overflow(ssa->var_info[constraint->min_ssa_var].range.min, constraint->range.min)) {
 						tmp->underflow = 1;
 						tmp->min = ZEND_LONG_MIN;
@@ -1204,7 +1219,7 @@ static bool zend_inference_calc_range(const zend_op_array *op_array, const zend_
 					tmp->max = constraint->range.max;
 					tmp->overflow = constraint->range.overflow;
 #ifdef SYM_RANGE
-				} else if (narrowing && ssa->var_info[constraint->max_ssa_var].has_range) {
+				} else if (narrowing && zend_inference_has_integer_range(ssa, constraint->max_ssa_var)) {
 					if (add_will_overflow(ssa->var_info[constraint->max_ssa_var].range.max, constraint->range.max)) {
 						tmp->overflow = 1;
 						tmp->max = ZEND_LONG_MAX;
@@ -1269,7 +1284,8 @@ ZEND_API bool zend_inference_propagate_range(const zend_op_array *op_array, cons
 
 		case ZEND_BW_NOT:
 			if (ssa_op->result_def == var) {
-				if (OP1_HAS_RANGE()) {
+				if (OP1_HAS_RANGE()
+				 && (OP1_INFO() & (MAY_BE_ANY | MAY_BE_UNDEF | MAY_BE_REF)) == MAY_BE_LONG) {
 					if (OP1_RANGE_UNDERFLOW() ||
 					    OP1_RANGE_OVERFLOW()) {
 						tmp->min = ZEND_LONG_MIN;
@@ -1297,7 +1313,8 @@ ZEND_API bool zend_inference_propagate_range(const zend_op_array *op_array, cons
 				}
 			} else if (ssa_op->result_def == var) {
 				if (opline->extended_value == IS_LONG) {
-					if (OP1_HAS_RANGE()) {
+					if (OP1_HAS_RANGE()
+					 && (OP1_INFO() & (MAY_BE_ANY | MAY_BE_UNDEF | MAY_BE_REF)) == MAY_BE_LONG) {
 						tmp->min = OP1_MIN_RANGE();
 						tmp->max = OP1_MAX_RANGE();
 						return 1;
@@ -1349,7 +1366,8 @@ ZEND_API bool zend_inference_propagate_range(const zend_op_array *op_array, cons
 			break;
 		case ZEND_PRE_INC:
 			if (ssa_op->op1_def == var || ssa_op->result_def == var) {
-				if (OP1_HAS_RANGE()) {
+				if (OP1_HAS_RANGE()
+				 && !(OP1_INFO() & (MAY_BE_ANY | MAY_BE_UNDEF | MAY_BE_REF) & ~(MAY_BE_LONG | MAY_BE_DOUBLE))) {
 					tmp->min = OP1_MIN_RANGE();
 					tmp->max = OP1_MAX_RANGE();
 					tmp->underflow = OP1_RANGE_UNDERFLOW();
@@ -1368,7 +1386,8 @@ ZEND_API bool zend_inference_propagate_range(const zend_op_array *op_array, cons
 			break;
 		case ZEND_PRE_DEC:
 			if (ssa_op->op1_def == var || ssa_op->result_def == var) {
-				if (OP1_HAS_RANGE()) {
+				if (OP1_HAS_RANGE()
+				 && !(OP1_INFO() & (MAY_BE_ANY | MAY_BE_UNDEF | MAY_BE_REF) & ~(MAY_BE_LONG | MAY_BE_DOUBLE))) {
 					tmp->min = OP1_MIN_RANGE();
 					tmp->max = OP1_MAX_RANGE();
 					tmp->underflow = OP1_RANGE_UNDERFLOW();
@@ -1387,7 +1406,8 @@ ZEND_API bool zend_inference_propagate_range(const zend_op_array *op_array, cons
 			break;
 		case ZEND_POST_INC:
 			if (ssa_op->op1_def == var || ssa_op->result_def == var) {
-				if (OP1_HAS_RANGE()) {
+				if (OP1_HAS_RANGE()
+				 && !(OP1_INFO() & (MAY_BE_ANY | MAY_BE_UNDEF | MAY_BE_REF) & ~(MAY_BE_LONG | MAY_BE_DOUBLE))) {
 					tmp->min = OP1_MIN_RANGE();
 					tmp->max = OP1_MAX_RANGE();
 					tmp->underflow = OP1_RANGE_UNDERFLOW();
@@ -1409,7 +1429,8 @@ ZEND_API bool zend_inference_propagate_range(const zend_op_array *op_array, cons
 			break;
 		case ZEND_POST_DEC:
 			if (ssa_op->op1_def == var || ssa_op->result_def == var) {
-				if (OP1_HAS_RANGE()) {
+				if (OP1_HAS_RANGE()
+				 && !(OP1_INFO() & (MAY_BE_ANY | MAY_BE_UNDEF | MAY_BE_REF) & ~(MAY_BE_LONG | MAY_BE_DOUBLE))) {
 					tmp->min = OP1_MIN_RANGE();
 					tmp->max = OP1_MAX_RANGE();
 					tmp->underflow = OP1_RANGE_UNDERFLOW();
@@ -1445,7 +1466,8 @@ ZEND_API bool zend_inference_propagate_range(const zend_op_array *op_array, cons
 			break;
 		case ZEND_ASSIGN:
 			if (ssa_op->op1_def == var || ssa_op->op2_def == var || ssa_op->result_def == var) {
-				if (OP2_HAS_RANGE()) {
+				if (OP2_HAS_RANGE()
+				 && (ssa_op->op2_def == var || !(OP1_INFO() & MAY_BE_REF))) {
 					tmp->min = OP2_MIN_RANGE();
 					tmp->max = OP2_MAX_RANGE();
 					tmp->underflow = OP2_RANGE_UNDERFLOW();
@@ -4879,6 +4901,173 @@ static void zend_mark_cv_references(const zend_op_array *op_array, const zend_sc
 	free_alloca(worklist,  use_heap);
 }
 
+static uint32_t zend_inference_numeric_operand_type(
+		const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline,
+		uint8_t op_type, znode_op op, int use)
+{
+	if (op_type == IS_CONST) {
+		uint8_t type = Z_TYPE_P(CRT_CONSTANT(op));
+		return type == IS_CONSTANT_AST ? MAY_BE_ANY : 1U << type;
+	}
+	return get_ssa_var_info(ssa, use) & (MAY_BE_ANY | MAY_BE_UNDEF);
+}
+
+static uint32_t zend_inference_numeric_type(zend_type type)
+{
+	uint32_t mask = ZEND_TYPE_PURE_MASK(type);
+	return !ZEND_TYPE_IS_COMPLEX(type) && mask && !(mask & ~(MAY_BE_LONG | MAY_BE_DOUBLE))
+		? mask : MAY_BE_ANY;
+}
+
+static uint32_t zend_inference_calc_numeric_type(
+		const zend_op_array *op_array, const zend_ssa *ssa, int var, zend_long optimization_level)
+{
+	const zend_ssa_var *ssa_var = &ssa->vars[var];
+	if (ssa_var->definition_phi) {
+		const zend_ssa_phi *phi = ssa_var->definition_phi;
+		if (phi->pi >= 0) {
+			uint32_t type = ssa->var_info[phi->sources[0]].type;
+			return phi->has_range_constraint ? type : type & phi->constraint.type.type_mask;
+		}
+		uint32_t type = 0;
+		for (uint32_t i = 0; i < ssa->cfg.blocks[phi->block].predecessors_count; i++) {
+			type |= ssa->var_info[phi->sources[i]].type;
+		}
+		return type;
+	}
+	if (ssa_var->definition < 0) {
+		return MAY_BE_ANY;
+	}
+
+	const zend_op *opline = &op_array->opcodes[ssa_var->definition];
+	const zend_ssa_op *ssa_op = &ssa->ops[ssa_var->definition];
+	uint32_t t1 = zend_inference_numeric_operand_type(
+		op_array, ssa, opline, opline->op1_type, opline->op1, ssa_op->op1_use);
+	uint32_t t2 = zend_inference_numeric_operand_type(
+		op_array, ssa, opline, opline->op2_type, opline->op2, ssa_op->op2_use);
+
+	switch (opline->opcode) {
+		case ZEND_ADD:
+		case ZEND_SUB:
+		case ZEND_MUL:
+		case ZEND_DIV:
+		case ZEND_MOD:
+		case ZEND_SL:
+		case ZEND_SR:
+		case ZEND_BW_OR:
+		case ZEND_BW_AND:
+		case ZEND_BW_XOR:
+			if (ssa_op->result_def == var) {
+				return binary_op_result_type(ssa, opline->opcode, t1, t2, -1, optimization_level);
+			}
+			break;
+		case ZEND_BW_NOT:
+			if (ssa_op->result_def == var && !(t1 & (MAY_BE_STRING | MAY_BE_OBJECT))) {
+				return MAY_BE_LONG;
+			}
+			break;
+		case ZEND_ASSIGN_OP:
+			if (opline->extended_value != ZEND_CONCAT && opline->extended_value != ZEND_POW
+			 && !(OP1_INFO() & MAY_BE_REF)
+			 && (ssa_op->op1_def == var || ssa_op->result_def == var)) {
+				return binary_op_result_type(ssa, opline->extended_value, t1, t2, -1, optimization_level);
+			}
+			break;
+		case ZEND_CAST:
+			if (ssa_op->result_def == var) {
+				return 1U << opline->extended_value;
+			}
+			ZEND_FALLTHROUGH;
+		case ZEND_QM_ASSIGN:
+		case ZEND_JMP_SET:
+		case ZEND_COALESCE:
+		case ZEND_COPY_TMP:
+		case ZEND_SEND_VAR:
+		case ZEND_UNSET_DIM:
+		case ZEND_UNSET_OBJ:
+		case ZEND_OP_DATA:
+			return t1;
+		case ZEND_POST_INC:
+		case ZEND_POST_DEC:
+			if (ssa_op->result_def == var) {
+				return t1;
+			}
+			ZEND_FALLTHROUGH;
+		case ZEND_PRE_INC:
+		case ZEND_PRE_DEC:
+			return (t1 & ~(MAY_BE_LONG | MAY_BE_DOUBLE)) ? MAY_BE_ANY
+				: t1 ? t1 | MAY_BE_DOUBLE : 0;
+		case ZEND_ASSIGN:
+			if (ssa_op->op2_def == var || !(OP1_INFO() & MAY_BE_REF)) {
+				return t2;
+			}
+			break;
+		case ZEND_RECV:
+		case ZEND_RECV_INIT:
+			if (op_array->arg_info && opline->op1.num <= op_array->num_args) {
+				return zend_inference_numeric_type(op_array->arg_info[opline->op1.num - 1].type);
+			}
+			break;
+		case ZEND_STRLEN:
+		case ZEND_COUNT:
+		case ZEND_FUNC_NUM_ARGS:
+			return MAY_BE_LONG;
+		case ZEND_DO_FCALL:
+		case ZEND_DO_ICALL:
+		case ZEND_DO_UCALL:
+		case ZEND_DO_FCALL_BY_NAME:
+		case ZEND_FRAMELESS_ICALL_0:
+		case ZEND_FRAMELESS_ICALL_1:
+		case ZEND_FRAMELESS_ICALL_2:
+		case ZEND_FRAMELESS_ICALL_3: {
+			const zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
+			if (ssa_op->result_def != var || !func_info || !func_info->call_map) {
+				break;
+			}
+			const zend_call_info *call_info = func_info->call_map[ssa_var->definition];
+			if (!call_info || call_info->is_prototype) {
+				break;
+			}
+			const zend_function *func = call_info->callee_func;
+			if ((func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)
+			 && !(func->common.fn_flags & (ZEND_ACC_RETURN_REFERENCE | ZEND_ACC_GENERATOR))) {
+				return zend_inference_numeric_type(func->common.arg_info[-1].type);
+			}
+			break;
+		}
+		default:
+			break;
+	}
+	return MAY_BE_ANY;
+}
+
+static void zend_infer_numeric_types(
+		const zend_op_array *op_array, const zend_ssa *ssa, zend_long optimization_level)
+{
+	uint32_t len = zend_bitset_len(ssa->vars_count);
+	ALLOCA_FLAG(use_heap);
+	zend_bitset worklist = ZEND_BITSET_ALLOCA(len, use_heap);
+	zend_bitset_clear(worklist, len);
+	for (int i = op_array->last_var; i < ssa->vars_count; i++) {
+		zend_bitset_incl(worklist, i);
+	}
+
+	int var;
+	WHILE_WORKLIST(worklist, len, var) {
+		if (ssa->var_info[var].type & MAY_BE_REF) {
+			continue;
+		}
+		uint32_t type = ssa->vars[var].alias ? MAY_BE_ANY
+			: zend_inference_calc_numeric_type(op_array, ssa, var, optimization_level);
+		type = (type & (MAY_BE_ANY | MAY_BE_UNDEF)) | ssa->var_info[var].type;
+		if (type != ssa->var_info[var].type) {
+			ssa->var_info[var].type = type;
+			add_usages(op_array, ssa, worklist, var);
+		}
+	} WHILE_WORKLIST_END();
+	free_alloca(worklist, use_heap);
+}
+
 ZEND_API zend_result zend_ssa_inference(zend_arena **arena, const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_long optimization_level) /* {{{ */
 {
 	zend_ssa_var_info *ssa_var_info;
@@ -4910,7 +5099,13 @@ ZEND_API zend_result zend_ssa_inference(zend_arena **arena, const zend_op_array 
 
 	zend_mark_cv_references(op_array, script, ssa);
 
+	zend_infer_numeric_types(op_array, ssa, optimization_level);
 	zend_infer_ranges(op_array, ssa);
+	for (i = op_array->last_var; i < ssa->vars_count; i++) {
+		if (!(ssa_var_info[i].type & MAY_BE_REF)) {
+			ssa_var_info[i].type = 0;
+		}
+	}
 
 	if (zend_infer_types(op_array, script, ssa, optimization_level) == FAILURE) {
 		return FAILURE;
