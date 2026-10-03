@@ -43,6 +43,9 @@ PHP                                                                        NEWS
   . Fixed OSS-Fuzz #545352966 (default value AST of an SHM-persisted partial).
     (ndossche)
 
+- PCRE:
+  . Upgraded bundled PCRE2 to 10.49. (Ilia Alshanetsky)
+
 - PDO:
   . Fixed PDOStatement::getColumnMeta() reading out of bounds for an invalid
     column index. (Ilia Alshanetsky)
