@@ -30,7 +30,7 @@ static zend_llist zend_observer_function_declared_callbacks;
 static zend_llist zend_observer_class_linked_callbacks;
 static zend_llist zend_observer_error_callbacks;
 static zend_llist zend_observer_fiber_init;
-static zend_llist zend_observer_fiber_switch;
+ZEND_API zend_llist zend_observer_fiber_switch;
 static zend_llist zend_observer_fiber_destroy;
 
 int zend_observer_fcall_op_array_extension;
