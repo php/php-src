@@ -1831,6 +1831,9 @@ static zend_always_inline void *zend_mm_realloc_heap(zend_mm_heap *heap, void *p
 		} else {
 			ZEND_MM_CHECK(info & ZEND_MM_IS_LRUN, "zend_mm_heap corrupted");
 			ZEND_MM_CHECK(ZEND_MM_ALIGNED_OFFSET(page_offset, ZEND_MM_PAGE_SIZE) == 0, "zend_mm_heap corrupted");
+			/* The decoded run length drives a free_map reset in the shrink path
+			 * below; an out-of-range count would reach past it into the chunk header. */
+			ZEND_MM_CHECK(page_num + ZEND_MM_LRUN_PAGES(info) <= ZEND_MM_PAGES, "zend_mm_heap corrupted");
 			old_size = ZEND_MM_LRUN_PAGES(info) * ZEND_MM_PAGE_SIZE;
 			if (size > ZEND_MM_MAX_SMALL_SIZE && size <= ZEND_MM_MAX_LARGE_SIZE) {
 				new_size = ZEND_MM_ALIGNED_SIZE_EX(size, ZEND_MM_PAGE_SIZE);
