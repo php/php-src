@@ -191,21 +191,24 @@ static int epoll_backend_wait(
 		backend_data->events_capacity = max_events;
 	}
 
-	int nfds = 0;
+	int nfds;
 #ifdef HAVE_EPOLL_PWAIT2
-	if (EXPECTED(zend_atomic_bool_load_ex(&epoll_pwait2_available))) {
+	if (zend_atomic_bool_load_ex(&epoll_pwait2_available)) {
 		nfds = epoll_pwait2(
 				backend_data->epoll_fd, backend_data->events, max_events, timeout, NULL);
-		if (UNEXPECTED(nfds < 0 && (errno == ENOSYS || errno == ENOTSUP))) {
+		if (nfds < 0 && (errno == ENOSYS || errno == ENOTSUP)) {
 			zend_atomic_bool_store_ex(&epoll_pwait2_available, false);
+			goto epoll_wait_fallback;
 		}
+	} else {
+epoll_wait_fallback:
+		nfds = epoll_wait(backend_data->epoll_fd, backend_data->events, max_events,
+				php_poll_timespec_to_ms(timeout));
 	}
-	if (UNEXPECTED(!zend_atomic_bool_load_ex(&epoll_pwait2_available)))
+#else
+	nfds = epoll_wait(backend_data->epoll_fd, backend_data->events, max_events,
+			php_poll_timespec_to_ms(timeout));
 #endif
-	{
-		int timeout_ms = php_poll_timespec_to_ms(timeout);
-		nfds = epoll_wait(backend_data->epoll_fd, backend_data->events, max_events, timeout_ms);
-	}
 
 	if (nfds > 0) {
 		for (int i = 0; i < nfds; i++) {
