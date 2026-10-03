@@ -2938,17 +2938,18 @@ PHP_METHOD(SoapClient, __getLastResponseHeaders)
 /* {{{ SoapClient::__doRequest() */
 PHP_METHOD(SoapClient, __doRequest)
 {
-	zend_string *buf, *location, *uri_parser_class = NULL;
-	char       *action;
-	size_t     action_size;
+	zend_string *buf;
+	zend_string *location;
+	zend_string *action;
+	zend_string *uri_parser_class = NULL;
 	zend_long  version;
-	bool  one_way = false;
-	zval      *this_ptr = ZEND_THIS;
+	bool one_way = false;
+	zval *this_ptr = ZEND_THIS;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SSsl|bS!",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SSSl|bS!",
 	    &buf,
 	    &location,
-	    &action, &action_size,
+	    &action,
 	    &version, &one_way, &uri_parser_class) == FAILURE) {
 		RETURN_THROWS();
 	}
