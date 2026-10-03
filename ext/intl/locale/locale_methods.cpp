@@ -1663,7 +1663,7 @@ PHP_INTL_FUNCTION_WITH_ERROR_RESET(locale_lookup)
 /* }}} */
 
 /* {{{ Tries to find out best available locale based on HTTP "Accept-Language" header */
-U_CFUNC PHP_FUNCTION(locale_accept_from_http)
+PHP_INTL_FUNCTION_WITH_ERROR_RESET(locale_accept_from_http)
 {
 	UEnumeration *available;
 	char *http_accept = nullptr;
@@ -1682,8 +1682,6 @@ U_CFUNC PHP_FUNCTION(locale_accept_from_http)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY_HT_OR_NULL(available_locales)
 	ZEND_PARSE_PARAMETERS_END();
-
-	intl_error_reset( nullptr );
 
 	if (available_locales) {
 		uint32_t i = 0;
