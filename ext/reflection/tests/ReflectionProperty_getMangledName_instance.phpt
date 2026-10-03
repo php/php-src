@@ -22,8 +22,8 @@ function testFromClass($property) {
         echo "  getName(): " . $reflection->getName() . "\n";
         echo "  getMangledName(): " . $reflection->getMangledName() . "\n";
         echo "\n";
-    } catch (ReflectionException $e) {
-        echo "Property $property from class: EXCEPTION - " . $e->getMessage() . "\n\n";
+    } catch (Throwable $e) {
+        echo "Property $property from class: ", $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -44,8 +44,8 @@ function testFromInstance($obj, $property) {
         $array = (array) $obj;
         echo "  Found in array cast: " . (array_key_exists($reflection->getMangledName(), $array) ? "yes" : "no") . "\n";
         echo "\n";
-    } catch (ReflectionException $e) {
-        echo "Property $property from instance: EXCEPTION - " . $e->getMessage() . "\n\n";
+    } catch (Throwable $e) {
+        echo "Property $property from instance: ", $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -74,8 +74,7 @@ Property private from class:
   getName(): private
   getMangledName(): %0TestClass%0private
 
-Property dynamic from class: EXCEPTION - Property TestClass::$dynamic does not exist
-
+Property dynamic from class: ReflectionException: Property TestClass::$dynamic does not exist
 === Testing ReflectionProperty from INSTANCE ===
 Property public from instance:
   getName(): public

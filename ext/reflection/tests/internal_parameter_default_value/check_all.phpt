@@ -8,8 +8,8 @@ function checkDefaults(ReflectionFunctionAbstract $rf) {
         if ($param->isDefaultValueAvailable()) {
             try {
                 $param->getDefaultValue();
-            } catch (Error $e) {
-                echo "{$rf->getName()}: {$e->getMessage()}\n";
+            } catch (Throwable $e) {
+                echo $rf->getName(), ': ', $e::class, ': ', $e->getMessage(), "\n";
             }
         }
     }

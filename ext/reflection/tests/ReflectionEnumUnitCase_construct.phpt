@@ -15,20 +15,20 @@ var_dump($case->getModifiers());
 
 try {
     new ReflectionEnumUnitCase(Foo::class, 'Baz');
-} catch (\Exception $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     new ReflectionEnumUnitCase(Foo::class, 'Qux');
-} catch (\Exception $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     new ReflectionEnumUnitCase([], 'Foo');
-} catch (Error $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -36,6 +36,6 @@ try {
 string(3) "Bar"
 bool(true)
 int(1)
-Constant Foo::Baz is not a case
-Constant Foo::Qux does not exist
-ReflectionEnumUnitCase::__construct(): Argument #1 ($class) must be of type object|string, array given
+ReflectionException: Constant Foo::Baz is not a case
+ReflectionException: Constant Foo::Qux does not exist
+TypeError: ReflectionEnumUnitCase::__construct(): Argument #1 ($class) must be of type object|string, array given
