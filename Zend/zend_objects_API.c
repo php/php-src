@@ -22,6 +22,7 @@
 #include "zend_variables.h"
 #include "zend_API.h"
 #include "zend_objects_API.h"
+#include "zend_exceptions.h"
 #include "zend_fibers.h"
 #include "zend_async_API.h"
 #include "zend_execute.h"
@@ -108,7 +109,12 @@ static bool zend_objects_store_call_destructors_async_switch_handler(zend_corout
 	iterator->internal_entry = zend_objects_store_call_destructors_async_iterator_entry;
 	iterator->extended_dispose = zend_objects_store_call_destructors_async_coroutine_dtor;
 
-	ZEND_ASYNC_ENQUEUE_COROUTINE(iterator);
+	/* Refused: the driving coroutine finishes the pass itself when it resumes,
+	 * as when no iterator could be created. A switch handler leaves no
+	 * exception behind. */
+	if (UNEXPECTED(!ZEND_ASYNC_ENQUEUE_COROUTINE(iterator))) {
+		zend_clear_exception();
+	}
 
 	return false;
 }

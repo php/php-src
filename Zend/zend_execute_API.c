@@ -274,7 +274,12 @@ static bool shutdown_destructors_switch_handler(zend_coroutine_t *coroutine, boo
 	iterator->internal_entry = shutdown_destructors;
 	iterator->extended_dispose = shutdown_destructors_coroutine_dtor;
 
-	ZEND_ASYNC_ENQUEUE_COROUTINE(iterator);
+	/* Refused: the driving coroutine finishes the pass itself when it resumes,
+	 * as when no iterator could be created. A switch handler leaves no
+	 * exception behind. */
+	if (UNEXPECTED(!ZEND_ASYNC_ENQUEUE_COROUTINE(iterator))) {
+		zend_clear_exception();
+	}
 
 	return false;
 }

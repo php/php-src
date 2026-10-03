@@ -72,7 +72,8 @@ typedef zend_string *(*zend_coroutine_awaiting_info_fn)(zend_coroutine_t *corout
  * (is_enter=false) or back in (is_enter=true). Synchronous on purpose: a
  * microtask runs only on the next tick, which this late in shutdown may never
  * come, so the handler has to react at the switch itself. Return false to drop
- * the handler after this call, true to keep it armed.
+ * the handler after this call, true to keep it armed. A handler leaves no
+ * exception: the switch it runs in carries none to the coroutine entered.
  *
  * Finishing is a separate mechanism (zend_coroutine_finish_handler_fn): one
  * coroutine may have many awaiters, which doesn't fit a switch handler. Both
