@@ -85,6 +85,10 @@ PHP 8.7 UPGRADE NOTES
 14. Performance Improvements
 ========================================
 
+- DOM:
+  . Parsing HTML with Dom\HTMLDocument or innerHTML uses much less memory for
+    small inputs.
+
 - Standard:
   . Improved performance of array_splice() when inserting without removing
     elements.

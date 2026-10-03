@@ -63,14 +63,14 @@ lxb_html_tokenizer_init(lxb_html_tokenizer_t *tkz)
 
     tkz->dobj_token = lexbor_dobject_create();
     status = lexbor_dobject_init(tkz->dobj_token,
-                                 4096, sizeof(lxb_html_token_t));
+                                 16, sizeof(lxb_html_token_t));
     if (status != LXB_STATUS_OK) {
         return status;
     }
 
     /* Init Token Attributes */
     tkz->dobj_token_attr = lexbor_dobject_create();
-    status = lexbor_dobject_init(tkz->dobj_token_attr, 4096,
+    status = lexbor_dobject_init(tkz->dobj_token_attr, 256,
                                  sizeof(lxb_html_token_attr_t));
     if (status != LXB_STATUS_OK) {
         return status;
