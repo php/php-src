@@ -5,10 +5,12 @@ namespace FPM;
 abstract class BaseResponse
 {
     /**
-     * Tester instance
-     * @var Tester
+     * Tester instance. Held weakly so that responses do not form a reference
+     * cycle with the tester, which would keep both alive until the executor
+     * object store shutdown and get reported as a leak by ASAN/Valgrind.
+     * @var \WeakReference<Tester>
      */
-    private Tester $tester;
+    private \WeakReference $tester;
 
     /**
      * @var bool
@@ -20,7 +22,7 @@ abstract class BaseResponse
      */
     public function __construct(Tester $tester)
     {
-        $this->tester = $tester;
+        $this->tester = \WeakReference::create($tester);
     }
 
     /**
@@ -50,7 +52,7 @@ abstract class BaseResponse
         }
         echo $errorMessage;
 
-        $this->tester->printLogs();
+        $this->tester->get()?->printLogs();
 
         return false;
     }
