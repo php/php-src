@@ -1695,8 +1695,8 @@ U_CFUNC PHP_FUNCTION(locale_accept_from_http)
 			RETURN_THROWS();
 		}
 
-		available_list = std::make_unique<const char *[]>(available_count);
-		available_canonical = std::make_unique<icu::Locale[]>(available_count);
+		available_list.reset(new const char *[available_count]);
+		available_canonical.reset(new icu::Locale[available_count]);
 		ZEND_HASH_FOREACH_VAL(available_locales, entry) {
 			ZVAL_DEREF(entry);
 			if (Z_TYPE_P(entry) != IS_STRING) {
@@ -1752,6 +1752,7 @@ U_CFUNC PHP_FUNCTION(locale_accept_from_http)
 	if (UNEXPECTED(len < 0 || outResult == ULOC_ACCEPT_FAILED)) {
 		RETURN_FALSE;
 	}
+	resultLocale[len] = '\0';
 	for (uint32_t i = 0; i < available_count; i++) {
 		if (strcmp(available_list[i], resultLocale) == 0 || strcmp(available_canonical[i].getName(), resultLocale) == 0) {
 			RETURN_STRING(available_list[i]);
