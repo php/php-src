@@ -16,6 +16,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-17626 (JIT corrupts an opline handler when blacklisting a
     root trace at the opcache.jit_max_root_traces limit, causing spurious
     "Too few arguments" errors and crashes). (RV7PR)
+  . Fix type inference of ADD_ARRAY_UNPACK with integer keys. (ndossche)
 
 - SOAP:
   . Fixed use of uninitialized func in do_request() on OOM bailout.
