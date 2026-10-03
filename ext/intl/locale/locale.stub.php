@@ -142,7 +142,7 @@ class Locale
      * @tentative-return-type
      * @alias locale_accept_from_http
      */
-    public static function acceptFromHttp(string $header): string|false {}
+    public static function acceptFromHttp(string $header, ?array $availableLocales = null): string|false {}
 
     /**
      * @alias locale_is_right_to_left

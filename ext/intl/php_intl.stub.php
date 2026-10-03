@@ -503,7 +503,7 @@ function locale_canonicalize(string $locale): ?string {}
 
 function locale_lookup(array $languageTag, string $locale, bool $canonicalize = false, ?string $defaultLocale = null): ?string {}
 
-function locale_accept_from_http(string $header): string|false {}
+function locale_accept_from_http(string $header, ?array $availableLocales = null): string|false {}
 
 function locale_is_right_to_left(string $locale): bool {}
 

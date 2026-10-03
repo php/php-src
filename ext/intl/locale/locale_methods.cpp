@@ -22,6 +22,7 @@
 #include <unicode/udata.h>
 #include <unicode/putil.h>
 #include <unicode/ures.h>
+#include <unicode/uenum.h>
 
 extern "C" {
 #include "php_intl.h"
@@ -1670,10 +1671,45 @@ U_CFUNC PHP_FUNCTION(locale_accept_from_http)
 	int len;
 	char resultLocale[INTL_MAX_LOCALE_LEN+1];
 	UAcceptResult outResult;
+	HashTable *available_locales = nullptr;
+	std::unique_ptr<const char *[]> available_list;
+	uint32_t available_count = 0;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STRING(http_accept, http_accept_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY_HT_OR_NULL(available_locales)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (available_locales) {
+		uint32_t i = 0;
+		zval *entry;
+
+		available_count = zend_hash_num_elements(available_locales);
+		if (available_count == 0) {
+			zend_argument_must_not_be_empty_error(2);
+			RETURN_THROWS();
+		}
+
+		available_list = std::make_unique<const char *[]>(available_count);
+		ZEND_HASH_FOREACH_VAL(available_locales, entry) {
+			ZVAL_DEREF(entry);
+			if (Z_TYPE_P(entry) != IS_STRING) {
+				zend_argument_type_error(2, "must only contain string values");
+				RETURN_THROWS();
+			}
+			if (zend_str_has_nul_byte(Z_STR_P(entry))) {
+				zend_argument_value_error(2, "must not contain any null bytes");
+				RETURN_THROWS();
+			}
+			if (Z_STRLEN_P(entry) > ULOC_FULLNAME_CAPACITY) {
+				zend_argument_value_error(2, "must not contain locales longer than %d characters", ULOC_FULLNAME_CAPACITY);
+				RETURN_THROWS();
+			}
+			available_list[i++] = Z_STRVAL_P(entry);
+		} ZEND_HASH_FOREACH_END();
+	}
+
 	if (UNEXPECTED(http_accept_len > ULOC_FULLNAME_CAPACITY)) {
 		/* check each fragment, if any bigger than capacity, can't do it due to bug #72533 */
 		char *start = http_accept;
@@ -1693,7 +1729,11 @@ U_CFUNC PHP_FUNCTION(locale_accept_from_http)
 		} while(end != nullptr);
 	}
 
-	available = ures_openAvailableLocales(nullptr, &status);
+	if (available_list) {
+		available = uenum_openCharStringsEnumeration(available_list.get(), available_count, &status);
+	} else {
+		available = ures_openAvailableLocales(nullptr, &status);
+	}
 	INTL_CHECK_STATUS(status, "failed to retrieve locale list");
 	len = uloc_acceptLanguageFromHTTP(resultLocale, INTL_MAX_LOCALE_LEN,
 						&outResult, http_accept, available, &status);
