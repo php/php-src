@@ -145,10 +145,6 @@ struct _zend_coroutine_s {
 #define ZEND_COROUTINE_F_CANCELLED (1u << 4) /* cancellation was requested */
 #define ZEND_COROUTINE_F_MAIN (1u << 5) /* the main coroutine */
 #define ZEND_COROUTINE_F_FIBER (1u << 6) /* runs a fiber; extended_data -> zend_fiber */
-/* object_offset points at a stored zend_object* instead of an embedded
- * object, for a provider whose coroutine and object live in separate
- * allocations. */
-#define ZEND_COROUTINE_F_OBJ_REF (1u << 7)
 /* The body began executing. The status cannot say it: a coroutine waiting for
  * its first run and one that yielded are both QUEUED. The scheduler sets it immediately before the body's
  * first instruction, the main coroutine's included, and never for a coroutine
@@ -171,15 +167,12 @@ struct _zend_coroutine_s {
 	(((coroutine)->flags & ZEND_COROUTINE_F_STARTED) != 0)
 #define ZEND_COROUTINE_SET_STARTED(coroutine) ((coroutine)->flags |= ZEND_COROUTINE_F_STARTED)
 
-/* The zend_object of a coroutine, or NULL for a plain C coroutine.
- * Embedded model: the object lives at object_offset within the same
- * allocation. OBJ_REF model: a zend_object* is stored at object_offset. */
+/* The zend_object of a coroutine, or NULL for a plain C coroutine. The object
+ * lives at object_offset within the same allocation. */
 #define ZEND_COROUTINE_OBJECT(coroutine) \
 	((coroutine)->object_offset == 0 \
 					? NULL \
-					: ((coroutine)->flags & ZEND_COROUTINE_F_OBJ_REF) \
-							? *(zend_object **) ((char *) (coroutine) + (coroutine)->object_offset) \
-							: (zend_object *) ((char *) (coroutine) + (coroutine)->object_offset))
+					: (zend_object *) ((char *) (coroutine) + (coroutine)->object_offset))
 
 /* Shared ownership of a coroutine goes through its zend_object. */
 #define ZEND_COROUTINE_ADD_REF(coroutine) \
@@ -295,8 +288,6 @@ typedef zend_coroutine_t *(*zend_async_scheduler_launch_t)(void);
  * scheduler to keep or clear; a cleared one ends the fiber without an error. */
 typedef bool (*zend_async_shutdown_t)(void);
 typedef zend_class_entry *(*zend_async_get_class_ce_t)(zend_async_class type);
-/* Run fn(arg) on the main coroutine's OS-thread stack (FFI/JNI etc.). */
-typedef void (*zend_async_call_on_main_stack_t)(void (*fn)(void *), void *arg);
 
 /*
  * Microtask: a one-shot task executed on the next scheduler tick.
@@ -352,16 +343,6 @@ typedef bool (*zend_async_defer_t)(zend_async_microtask_t *task);
  * is not possible here (the scheduler is running its own work): false without
  * an exception, and the caller does not wait. */
 typedef bool (*zend_async_coroutine_await_t)(zend_coroutine_t *coroutine);
-
-/*
- * Resolve the provider's coroutine object to its coroutine.
- *
- * The coroutine object belongs to the scheduler (its class, its allocation
- * model), so only the scheduler can walk that edge: the core keeps no
- * registry of coroutines. Returns NULL when the object is not one of the
- * scheduler's coroutines.
- */
-typedef zend_coroutine_t *(*zend_async_coroutine_from_object_t)(zend_object *object);
 
 /*
  * Where the engine offers a starting fiber to the scheduler.
@@ -442,9 +423,7 @@ typedef struct _zend_async_scheduler_api_s {
 	zend_async_scheduler_launch_t launch;
 	zend_async_shutdown_t shutdown;
 	zend_async_get_class_ce_t get_class_ce;
-	zend_async_call_on_main_stack_t call_on_main_stack;
 	zend_async_defer_t defer;
-	zend_async_coroutine_from_object_t coroutine_from_object;
 	zend_async_intercept_fiber_t intercept_fiber;
 	zend_async_coroutine_execute_data_t coroutine_execute_data;
 	zend_async_coroutine_add_switch_handler_t add_switch_handler;
@@ -467,9 +446,7 @@ ZEND_API extern zend_async_cancel_t zend_async_cancel_fn;
 ZEND_API extern zend_async_scheduler_launch_t zend_async_scheduler_launch_fn;
 ZEND_API extern zend_async_shutdown_t zend_async_shutdown_fn;
 ZEND_API extern zend_async_get_class_ce_t zend_async_get_class_ce_fn;
-ZEND_API extern zend_async_call_on_main_stack_t zend_async_call_on_main_stack_fn;
 ZEND_API extern zend_async_defer_t zend_async_defer_fn;
-ZEND_API extern zend_async_coroutine_from_object_t zend_async_coroutine_from_object_fn;
 ZEND_API extern zend_async_intercept_fiber_t zend_async_intercept_fiber_fn;
 ZEND_API extern zend_async_coroutine_execute_data_t zend_async_coroutine_execute_data_fn;
 ZEND_API extern zend_async_coroutine_add_switch_handler_t zend_async_coroutine_add_switch_handler_fn;
@@ -481,11 +458,6 @@ ZEND_API extern zend_async_coroutine_add_awaiting_info_t zend_async_coroutine_ad
 ZEND_API extern zend_async_coroutine_remove_awaiting_info_t zend_async_coroutine_remove_awaiting_info_fn;
 ZEND_API extern zend_async_coroutine_get_awaiting_info_t zend_async_coroutine_get_awaiting_info_fn;
 
-/* Resolve a coroutine object to its coroutine through the provider's slot.
- * NULL when no scheduler is registered, when it provides no resolver, or
- * when the object is not one of its coroutines. */
-ZEND_API zend_coroutine_t *zend_async_coroutine_from_object(zend_object *object);
-
 /* Launch the scheduler: calls the launch slot, marks the coroutine it returns
  * as the main one and records it as current. False when no scheduler is
  * registered or it failed to produce a main coroutine. */
@@ -496,7 +468,6 @@ ZEND_API bool zend_async_scheduler_register(
 /* Withdraw the registration and reset every slot to its default. */
 ZEND_API void zend_async_scheduler_unregister(void);
 
-ZEND_API bool zend_async_is_enabled(void);
 /* The module name of the registered scheduler, or NULL when none. */
 ZEND_API const char *zend_async_get_scheduler_module(void);
 
@@ -616,8 +587,6 @@ END_EXTERN_C()
 #define ZEND_ASYNC_SCHEDULER_LAUNCH() zend_async_scheduler_launch()
 #define ZEND_ASYNC_SHUTDOWN() zend_async_shutdown_fn()
 #define ZEND_ASYNC_GET_CE(type) zend_async_get_class_ce_fn(type)
-#define ZEND_ASYNC_GET_EXCEPTION_CE(type) zend_async_get_class_ce_fn(type)
-#define ZEND_ASYNC_CALL_ON_MAIN_STACK(fn, arg) zend_async_call_on_main_stack_fn((fn), (arg))
 #define ZEND_ASYNC_DEFER(task) zend_async_defer_fn(task)
 
 /* The frame a parked coroutine waits in, or NULL. */
@@ -704,7 +673,6 @@ ZEND_API extern zend_async_globals_t zend_async_globals_api;
 #endif
 
 void zend_async_globals_ctor(void);
-void zend_async_globals_dtor(void);
 void zend_async_api_shutdown(void);
 
 END_EXTERN_C()

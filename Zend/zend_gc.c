@@ -2403,7 +2403,7 @@ rerun_gc:
 						should_rerun_gc = false;
 
 						if (instanceof_function(EG(exception)->ce,
-								ZEND_ASYNC_GET_EXCEPTION_CE(ZEND_ASYNC_EXCEPTION_CANCELLATION))) {
+								ZEND_ASYNC_GET_CE(ZEND_ASYNC_EXCEPTION_CANCELLATION))) {
 							zend_clear_exception();
 						}
 					}
