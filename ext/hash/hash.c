@@ -487,13 +487,32 @@ static inline void php_hash_hmac_round(unsigned char *final, const php_hash_ops 
 	ops->hash_final(final, context);
 }
 
+/* Computes HMAC(key, data) using the given hash algorithm and writes the
+ * result into `digest`, which must be at least ops->digest_size bytes.
+ * Intended for internal (C-level) use by other extensions; avoids the
+ * zval/zend_string overhead of the userland hash_hmac() API. */
+PHPAPI void php_hash_hmac(const php_hash_ops *ops, const unsigned char *key, size_t key_len,
+		const unsigned char *data, size_t data_len, unsigned char *digest)
+{
+	void *context = php_hash_alloc_context(ops);
+	unsigned char *K = emalloc(ops->block_size);
+
+	php_hash_hmac_prep_key(K, ops, context, key, key_len);
+	php_hash_hmac_round(digest, ops, context, K, data, data_len);
+
+	php_hash_string_xor_char(K, K, 0x6A, ops->block_size);
+	php_hash_hmac_round(digest, ops, context, K, digest, ops->digest_size);
+
+	ZEND_SECURE_ZERO(K, ops->block_size);
+	efree(K);
+	php_hash_free_context(ops, context);
+}
+
 static void php_hash_do_hash_hmac(
 	zval *return_value, zend_string *algo, char *data, size_t data_len, char *key, size_t key_len, bool raw_output, bool isfilename
 ) /* {{{ */ {
 	zend_string *digest;
-	unsigned char *K;
 	const php_hash_ops *ops;
-	void *context;
 	php_stream *stream = NULL;
 
 	ops = php_hash_fetch_ops(algo);
@@ -514,16 +533,16 @@ static void php_hash_do_hash_hmac(
 		}
 	}
 
-	context = php_hash_alloc_context(ops);
-
-	K = emalloc(ops->block_size);
 	digest = zend_string_alloc(ops->digest_size, 0);
 
-	php_hash_hmac_prep_key(K, ops, context, (unsigned char *) key, key_len);
-
 	if (isfilename) {
+		void *context = php_hash_alloc_context(ops);
+		unsigned char *K = emalloc(ops->block_size);
 		char buf[1024];
 		ssize_t n;
+
+		php_hash_hmac_prep_key(K, ops, context, (unsigned char *) key, key_len);
+
 		ops->hash_init(context, NULL);
 		ops->hash_update(context, K, ops->block_size);
 		while ((n = php_stream_read(stream, buf, sizeof(buf))) > 0) {
@@ -536,20 +555,17 @@ static void php_hash_do_hash_hmac(
 			zend_string_efree(digest);
 			RETURN_FALSE;
 		}
-
 		ops->hash_final((unsigned char *) ZSTR_VAL(digest), context);
+
+		php_hash_string_xor_char(K, K, 0x6A, ops->block_size);
+		php_hash_hmac_round((unsigned char *) ZSTR_VAL(digest), ops, context, K, (unsigned char *) ZSTR_VAL(digest), ops->digest_size);
+
+		ZEND_SECURE_ZERO(K, ops->block_size);
+		efree(K);
+		php_hash_free_context(ops, context);
 	} else {
-		php_hash_hmac_round((unsigned char *) ZSTR_VAL(digest), ops, context, K, (unsigned char *) data, data_len);
+		php_hash_hmac(ops, (unsigned char *) key, key_len, (unsigned char *) data, data_len, (unsigned char *) ZSTR_VAL(digest));
 	}
-
-	php_hash_string_xor_char(K, K, 0x6A, ops->block_size);
-
-	php_hash_hmac_round((unsigned char *) ZSTR_VAL(digest), ops, context, K, (unsigned char *) ZSTR_VAL(digest), ops->digest_size);
-
-	/* Zero the key */
-	ZEND_SECURE_ZERO(K, ops->block_size);
-	efree(K);
-	php_hash_free_context(ops, context);
 
 	if (raw_output) {
 		ZSTR_VAL(digest)[ops->digest_size] = 0;

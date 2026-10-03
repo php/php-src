@@ -24,7 +24,7 @@
 #include "zend_interfaces.h"
 #include "info.h"
 #include "ext/random/php_random_csprng.h"
-#include "ext/hash/php_hash.h" /* Needed for PHP_HASH_API in ext/hash/php_hash_sha.h */
+#include "ext/hash/php_hash.h"
 #include "ext/hash/php_hash_sha.h"
 #include "password_arginfo.h"
 #ifdef HAVE_ARGON2LIB
@@ -249,44 +249,6 @@ static bool php_password_b64char(unsigned char c)
 		(c >= '0' && c <= '9');
 }
 
-static void php_password_hmac_sha256(const unsigned char *key, size_t key_len,
-		const unsigned char *msg, size_t msg_len, unsigned char digest[32])
-{
-	PHP_SHA256_CTX ctx;
-	unsigned char k_ipad[64], k_opad[64], key_hash[32];
-	size_t i;
-
-	/* If the key is longer than the block size (64), hash it first. Our key is
-	 * always the 22-byte salt, so this branch is never taken in practice. */
-	if (key_len > 64) {
-		PHP_SHA256Init(&ctx);
-		PHP_SHA256Update(&ctx, key, key_len);
-		PHP_SHA256Final(key_hash, &ctx);
-		key = key_hash;
-		key_len = 32;
-	}
-
-	for (i = 0; i < 64; i++) {
-		unsigned char k = (i < key_len) ? key[i] : 0;
-		k_ipad[i] = k ^ 0x36;
-		k_opad[i] = k ^ 0x5c;
-	}
-
-	PHP_SHA256Init(&ctx);
-	PHP_SHA256Update(&ctx, k_ipad, 64);
-	PHP_SHA256Update(&ctx, msg, msg_len);
-	PHP_SHA256Final(key_hash, &ctx);
-
-	PHP_SHA256Init(&ctx);
-	PHP_SHA256Update(&ctx, k_opad, 64);
-	PHP_SHA256Update(&ctx, key_hash, 32);
-	PHP_SHA256Final(digest, &ctx);
-
-	ZEND_SECURE_ZERO(k_ipad, sizeof(k_ipad));
-	ZEND_SECURE_ZERO(k_opad, sizeof(k_opad));
-	ZEND_SECURE_ZERO(key_hash, sizeof(key_hash));
-}
-
 /* Validate a bcrypt-sha256 hash and, on success, extract its cost, salt and
  * digest. Layout:
  *   $bcrypt-sha256$v=2,t=2b,r=<cost>$<salt:22>$<digest:31>   (82 or 83 bytes)
@@ -414,7 +376,7 @@ static zend_string *php_password_bcrypt_sha256_hash(const zend_string *password,
 	zend_string *key;
 	{
 		unsigned char mac[32];
-		php_password_hmac_sha256((const unsigned char *) ZSTR_VAL(salt), ZSTR_LEN(salt),
+		php_hash_hmac(&php_hash_sha256_ops, (const unsigned char *) ZSTR_VAL(salt), ZSTR_LEN(salt),
 			(const unsigned char *) ZSTR_VAL(password), ZSTR_LEN(password), mac);
 
 		key = php_base64_encode(mac, sizeof(mac));
@@ -464,7 +426,7 @@ static bool php_password_bcrypt_sha256_verify(const zend_string *password, const
 	zend_string *key;
 	{
 		unsigned char mac[32];
-		php_password_hmac_sha256((const unsigned char *) salt, 22,
+		php_hash_hmac(&php_hash_sha256_ops, (const unsigned char *) salt, 22,
 			(const unsigned char *) ZSTR_VAL(password), ZSTR_LEN(password), mac);
 
 		key = php_base64_encode(mac, sizeof(mac));

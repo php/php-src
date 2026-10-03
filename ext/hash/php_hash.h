@@ -159,6 +159,8 @@ PHP_HASH_API hash_spec_result php_hash_serialize(const php_hashcontext_object *c
 PHP_HASH_API hash_spec_result php_hash_unserialize(php_hashcontext_object *context, zend_long magic, const zval *zv);
 PHP_HASH_API hash_spec_result php_hash_serialize_spec(const php_hashcontext_object *context, zval *zv, const char *spec);
 PHP_HASH_API hash_spec_result php_hash_unserialize_spec(php_hashcontext_object *hash, const zval *zv, const char *spec);
+PHP_HASH_API void php_hash_hmac(const php_hash_ops *ops, const unsigned char *key, size_t key_len,
+		const unsigned char *data, size_t data_len, unsigned char *digest);
 
 static inline void *php_hash_alloc_context(const php_hash_ops *ops) {
 	/* Zero out context memory so serialization doesn't expose internals */
