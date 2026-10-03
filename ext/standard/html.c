@@ -356,6 +356,46 @@ PHPAPI unsigned int php_next_utf8_char(
 }
 /* }}} */
 
+/* {{{ charset_is_utf8
+ * Returns whether a charset name is "utf-8", in any case */
+static zend_always_inline bool charset_is_utf8(const char *charset_hint)
+{
+	return zend_tolower_ascii(charset_hint[0]) == 'u' && zend_tolower_ascii(charset_hint[1]) == 't'
+		&& zend_tolower_ascii(charset_hint[2]) == 'f' && charset_hint[3] == '-' && charset_hint[4] == '8'
+		&& charset_hint[5] == '\0';
+}
+/* }}} */
+
+/* {{{ entity_charset lookup_charset
+ * Returns the charset identifier of a non-empty charset name, or UTF-8 if it is not supported. */
+static zend_never_inline enum entity_charset lookup_charset(const char *charset_hint, bool quiet)
+{
+	const unsigned char first = zend_tolower_ascii(charset_hint[0]);
+
+	/* now walk the charset map and look for the codeset (UTF-8 is resolved by the caller) */
+	for (size_t i = 0; i < sizeof(charset_map)/sizeof(charset_map[0]); i++) {
+		const char *codeset = charset_map[i].codeset;
+
+		if (zend_tolower_ascii(codeset[0]) != first) {
+			continue;
+		}
+		/* compare up to the NUL of codeset: a mismatch stops the loop at the NUL of charset_hint at the latest */
+		for (size_t j = 1; zend_tolower_ascii(charset_hint[j]) == zend_tolower_ascii(codeset[j]); j++) {
+			if (codeset[j] == '\0') {
+				return charset_map[i].charset;
+			}
+		}
+	}
+
+	if (!quiet) {
+		php_error_docref(NULL, E_WARNING, "Charset \"%s\" is not supported, assuming UTF-8",
+				charset_hint);
+	}
+
+	return cs_utf_8;
+}
+/* }}} */
+
 /* {{{ entity_charset determine_charset
  * Returns the charset identifier based on an explicitly provided charset,
  * the internal_encoding and default_charset ini settings, or UTF-8 by default. */
@@ -363,25 +403,17 @@ static enum entity_charset determine_charset(const char *charset_hint, bool quie
 {
 	if (!charset_hint || !*charset_hint) {
 		charset_hint = get_default_charset();
-	}
-
-	if (charset_hint && *charset_hint) {
-		size_t len = strlen(charset_hint);
-		/* now walk the charset map and look for the codeset */
-		for (size_t i = 0; i < sizeof(charset_map)/sizeof(charset_map[0]); i++) {
-			if (len == charset_map[i].codeset_len &&
-			    zend_binary_strcasecmp(charset_hint, len, charset_map[i].codeset, len) == 0) {
-				return charset_map[i].charset;
-			}
-		}
-
-		if (!quiet) {
-			php_error_docref(NULL, E_WARNING, "Charset \"%s\" is not supported, assuming UTF-8",
-					charset_hint);
+		if (!charset_hint) {
+			return cs_utf_8;
 		}
 	}
 
-	return cs_utf_8;
+	/* UTF-8 is the most used charset, and it is not in the charset map */
+	if (charset_is_utf8(charset_hint)) {
+		return cs_utf_8;
+	}
+
+	return lookup_charset(charset_hint, quiet);
 }
 /* }}} */
 
