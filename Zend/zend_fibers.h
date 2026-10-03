@@ -138,10 +138,12 @@ struct _zend_fiber {
 	 * instead of switching contexts here. NULL leaves every one of them on
 	 * the legacy path.
 	 *
-	 * The coroutine owns a reference to the fiber; the fiber holds none back,
-	 * so nothing keeps a cycle alive. When the coroutine finishes, its result
-	 * moves into `result` and this pointer is cleared: from then on a
-	 * terminated coroutine-mode fiber is indistinguishable from a legacy one.
+	 * The fiber holds a reference to the coroutine's object, shared with the
+	 * scheduler; the coroutine points back through `extended_data` without
+	 * one, so nothing keeps a cycle alive. When the coroutine finishes, its
+	 * result moves into `result`; this pointer and its reference stay until
+	 * the Fiber object is destroyed or freed, or its start fails
+	 * (zend_fiber_release_coroutine()).
 	 */
 	zend_coroutine_t *coroutine;
 
