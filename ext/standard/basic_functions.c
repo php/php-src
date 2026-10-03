@@ -33,6 +33,7 @@
 #include "zend_exceptions.h"
 #include "zend_ini.h"
 #include "zend_operators.h"
+#include "zend_async_API.h"
 #include "ext/standard/php_dns.h"
 #include "ext/standard/php_uuencode.h"
 #include "ext/standard/crc32_x86.h"
@@ -1651,6 +1652,13 @@ PHPAPI void php_call_shutdown_functions(void) /* {{{ */
 	if (BG(user_shutdown_function_names)) {
 		zend_try {
 			zend_hash_apply(BG(user_shutdown_function_names), user_shutdown_function_call);
+		} zend_catch {
+			/* The bailout stops here and is not re-raised. The scheduler learns of
+			 * it as of a bailout in the script, so the coroutines queued before it
+			 * do not run after it and the destructors run with a current coroutine. */
+			zend_try {
+				ZEND_ASYNC_RUN_SCHEDULER_AFTER_MAIN(true);
+			} zend_end_try();
 		} zend_end_try();
 	}
 }
