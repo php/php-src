@@ -98,6 +98,8 @@ ZEND_TSRMLS_CACHE_EXTERN();
 #endif
 
 php_stream_transport_factory_func php_openssl_ssl_socket_factory;
+void php_openssl_stream_bio_init(void);
+void php_openssl_stream_bio_shutdown(void);
 
 void php_openssl_store_errors(void);
 void php_openssl_errors_set_mark(void);

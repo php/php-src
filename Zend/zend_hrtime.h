@@ -72,6 +72,7 @@ ZEND_API extern mach_timebase_info_data_t zend_hrtime_timerlib_info;
 
 #endif
 
+#define ZEND_HRTIME_T_MAX UINT64_MAX
 #define ZEND_NANO_IN_SEC UINT64_C(1000000000)
 
 typedef uint64_t zend_hrtime_t;

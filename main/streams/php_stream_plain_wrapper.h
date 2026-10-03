@@ -33,6 +33,12 @@ PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const cha
 PHPAPI php_stream *_php_stream_fopen_from_pipe(FILE *file, const char *mode STREAMS_DC);
 #define php_stream_fopen_from_pipe(file, mode)	_php_stream_fopen_from_pipe((file), (mode) STREAMS_CC)
 
+#ifndef PHP_WIN32
+/* popen(3) keeping the child's pid, so that closing the stream waits for it as an operation */
+PHPAPI php_stream *_php_stream_popen(const char *command, const char *mode STREAMS_DC);
+#define php_stream_popen(command, mode)	_php_stream_popen((command), (mode) STREAMS_CC)
+#endif
+
 PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC);
 #define php_stream_fopen_tmpfile()	_php_stream_fopen_tmpfile(0 STREAMS_CC)
 

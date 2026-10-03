@@ -20,6 +20,8 @@
 #include "php_ini.h"
 #include "streamsfuncs.h"
 #include "php_network.h"
+#include "php_io.h"
+#include "ext/standard/io_poll.h"
 #include "php_string.h"
 #include "streams/php_streams_int.h"
 #ifdef HAVE_UNISTD_H
@@ -89,10 +91,9 @@ PHP_FUNCTION(stream_socket_pair)
 
     array_init(return_value);
 
-	/* set the __exposed flag.
-	 * php_stream_to_zval() does, add_next_index_resource() does not */
-	php_stream_auto_cleanup(s1);
-	php_stream_auto_cleanup(s2);
+	/* What php_stream_to_zval() marks, add_next_index_resource() does not */
+	php_stream_expose(s1);
+	php_stream_expose(s2);
 
 	add_next_index_resource(return_value, s1->res);
 	add_next_index_resource(return_value, s2->res);
@@ -683,6 +684,257 @@ static int stream_array_to_fd_set(const HashTable *stream_array, fd_set *fds, ph
 	return cnt ? 1 : 0;
 }
 
+/* stream_select() under a provider: one Poll member per stream with the
+ * events of the sets it is in, a Timer member for the timeout, and the
+ * reported members put back into the fd sets for the usual filtering. */
+typedef struct php_select_member {
+	php_stream *stream;
+	php_socket_t fd;
+	uint32_t events;
+} php_select_member;
+
+static void stream_array_collect_members(HashTable *stream_array, uint32_t events,
+		php_select_member **members, uint32_t *n, uint32_t *cap)
+{
+	zval *elem;
+	php_stream *stream;
+
+	ZEND_HASH_FOREACH_VAL(stream_array, elem) {
+		php_socket_t this_fd;
+		ZVAL_DEREF(elem);
+		php_stream_from_zval_no_verify(stream, elem);
+		if (stream == NULL) {
+			continue;
+		}
+		if (php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) != SUCCESS || this_fd == -1) {
+			continue;
+		}
+		bool merged = false;
+		for (uint32_t i = 0; i < *n; i++) {
+			if ((*members)[i].fd == this_fd) {
+				(*members)[i].events |= events;
+				merged = true;
+				break;
+			}
+		}
+		if (!merged) {
+			if (*n == *cap) {
+				*cap = *cap ? *cap * 2 : 8;
+				*members = safe_erealloc(*members, *cap, sizeof(**members), 0);
+			}
+			(*members)[*n].stream = stream;
+			(*members)[*n].fd = this_fd;
+			(*members)[*n].events = events;
+			(*n)++;
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+
+/* The wait is an op on every stream of the sets: each is frozen once for
+ * its duration, and kept alive */
+static bool stream_array_freeze(HashTable *stream_array, php_stream ***frozen, uint32_t *n, uint32_t *cap)
+{
+	zval *elem;
+	php_stream *stream;
+
+	ZEND_HASH_FOREACH_VAL(stream_array, elem) {
+		ZVAL_DEREF(elem);
+		php_stream_from_zval_no_verify(stream, elem);
+		if (stream == NULL) {
+			continue;
+		}
+		bool seen = false;
+		for (uint32_t i = 0; i < *n; i++) {
+			if ((*frozen)[i] == stream) {
+				seen = true;
+				break;
+			}
+		}
+		if (seen) {
+			continue;
+		}
+		if (stream->flags & PHP_STREAM_FLAG_IN_USE) {
+			zend_throw_error(NULL, "Concurrent access to a stream");
+			return false;
+		}
+		if (*n == *cap) {
+			*cap = *cap ? *cap * 2 : 8;
+			*frozen = safe_erealloc(*frozen, *cap, sizeof(**frozen), 0);
+		}
+		stream->flags |= PHP_STREAM_FLAG_IN_USE;
+		GC_ADDREF(stream->res);
+		(*frozen)[(*n)++] = stream;
+	} ZEND_HASH_FOREACH_END();
+	return true;
+}
+
+static void stream_select_unfreeze(php_stream **frozen, uint32_t n)
+{
+	for (uint32_t i = 0; i < n; i++) {
+		zend_resource *res = frozen[i]->res;
+		frozen[i]->flags &= ~PHP_STREAM_FLAG_IN_USE;
+		zend_list_delete(res);
+	}
+	if (frozen) {
+		efree(frozen);
+	}
+}
+
+/* Returns the number of ready descriptors, 0 on timeout, -1 with errno */
+static int stream_select_any(zval *r_array, zval *w_array, zval *e_array, struct timeval *tv,
+		fd_set *rfds, fd_set *wfds, fd_set *efds)
+{
+	php_select_member *members = NULL;
+	uint32_t n = 0, cap = 0;
+	bool priority = php_poll_backend_supports_priority(PHP_POLL_BACKEND_AUTO);
+	php_stream **frozen = NULL;
+	uint32_t n_frozen = 0, frozen_cap = 0;
+
+	if ((r_array && !stream_array_freeze(Z_ARRVAL_P(r_array), &frozen, &n_frozen, &frozen_cap))
+			|| (w_array && !stream_array_freeze(Z_ARRVAL_P(w_array), &frozen, &n_frozen, &frozen_cap))
+			|| (e_array && !stream_array_freeze(Z_ARRVAL_P(e_array), &frozen, &n_frozen, &frozen_cap))) {
+		stream_select_unfreeze(frozen, n_frozen);
+		errno = ECANCELED;
+		return -1;
+	}
+
+	if (r_array) {
+		stream_array_collect_members(Z_ARRVAL_P(r_array), PHP_POLL_READ, &members, &n, &cap);
+	}
+	if (w_array) {
+		stream_array_collect_members(Z_ARRVAL_P(w_array), PHP_POLL_WRITE, &members, &n, &cap);
+	}
+	if (e_array) {
+		stream_array_collect_members(Z_ARRVAL_P(e_array), priority ? PHP_POLL_PRI : 0, &members, &n, &cap);
+	}
+
+	/* Syscall first, as for a read: a zero-timeout poll() over the sets answers a select
+	 * with a stream ready now, or one with a zero timeout, without an op, and is the arm-time
+	 * check of members on registered pairs; only a select that really waits builds the Any */
+	bool checked = false;
+	if (n > 0) {
+		php_pollfd stack[16];
+		php_pollfd *fds = n > sizeof(stack) / sizeof(stack[0]) ? safe_emalloc(n, sizeof(*fds), 0) : stack;
+		for (uint32_t i = 0; i < n; i++) {
+			fds[i].fd = members[i].fd;
+			fds[i].events = ((members[i].events & PHP_POLL_READ) ? POLLIN : 0)
+					| ((members[i].events & PHP_POLL_WRITE) ? POLLOUT : 0)
+					| ((members[i].events & PHP_POLL_PRI) ? POLLPRI : 0);
+			fds[i].revents = 0;
+		}
+		int ready = php_poll2(fds, n, 0);
+		int found = 0;
+		if (ready > 0) {
+			for (uint32_t i = 0; i < n; i++) {
+				short revents = fds[i].revents;
+				if (revents & POLLNVAL) {
+					/* The Any reports the descriptor's failure */
+					found = 0;
+					break;
+				}
+				if ((revents & (POLLIN | POLLHUP | POLLERR)) && (members[i].events & PHP_POLL_READ)) {
+					PHP_SAFE_FD_SET(members[i].fd, rfds);
+					found++;
+				}
+				if ((revents & (POLLOUT | POLLERR)) && (members[i].events & PHP_POLL_WRITE)) {
+					PHP_SAFE_FD_SET(members[i].fd, wfds);
+					found++;
+				}
+				if ((revents & POLLPRI) && (members[i].events & PHP_POLL_PRI)) {
+					PHP_SAFE_FD_SET(members[i].fd, efds);
+					found++;
+				}
+			}
+		}
+		if (fds != stack) {
+			efree(fds);
+		}
+		if (found > 0 || (ready == 0 && tv && tv->tv_sec == 0 && tv->tv_usec == 0)) {
+			efree(members);
+			stream_select_unfreeze(frozen, n_frozen);
+			return found;
+		}
+		checked = ready == 0;
+	}
+
+	php_io_op *ops = safe_emalloc(n + 1, sizeof(php_io_op), 0);
+	php_io_op **op_ptrs = safe_emalloc(n + 1, sizeof(php_io_op *), 0);
+	php_io_op_result *results = safe_emalloc(n + 1, sizeof(php_io_op_result), 0);
+	uint32_t n_members = 0;
+
+	for (uint32_t i = 0; i < n; i++) {
+		if (members[i].events == 0) {
+			/* Only in the except set on a backend without priority events */
+			continue;
+		}
+		php_io_op_poll(&ops[n_members], NULL, members[i].fd, members[i].events,
+				php_io_deadline_infinite());
+		/* Frozen by this call, for the handle a provider may ask for */
+		ops[n_members].stream = members[i].stream;
+		if (checked) {
+			ops[n_members].flags |= PHP_IO_OP_F_CHECKED;
+		}
+		op_ptrs[n_members] = &ops[n_members];
+		n_members++;
+	}
+	uint32_t timer_index = UINT32_MAX;
+	if (tv) {
+		php_io_op_timer(&ops[n_members], php_io_deadline_from_timeval(tv));
+		op_ptrs[n_members] = &ops[n_members];
+		timer_index = n_members;
+		n_members++;
+	}
+
+	int ret = 0;
+	if (n_members == 0) {
+		/* Nothing to wait for and no timeout: select() would block forever */
+		errno = EINVAL;
+		ret = -1;
+	} else {
+		php_io_op any;
+		php_io_op_result any_result;
+		php_io_op_any(&any, op_ptrs, n_members, results);
+		if (php_io_run(&any, &any_result) == FAILURE) {
+			errno = ECANCELED;
+			ret = -1;
+		} else if (any_result.status == PHP_IO_INTERRUPTED) {
+			errno = EINTR;
+			ret = -1;
+		} else {
+			for (uint32_t i = 0; i < any.u.any.n_results; i++) {
+				uint32_t index = results[i].index;
+				if (index == timer_index || (results[i].status != PHP_IO_DONE && results[i].status != PHP_IO_READY)) {
+					continue;
+				}
+				/* Counted per set, as select() counts bits */
+				php_socket_t fd = ops[index].fd;
+				uint32_t revents = (uint32_t) results[i].res;
+				if ((revents & (PHP_POLL_READ | PHP_POLL_HUP | PHP_POLL_ERROR)) && (ops[index].u.poll.events & PHP_POLL_READ)) {
+					PHP_SAFE_FD_SET(fd, rfds);
+					ret++;
+				}
+				if ((revents & (PHP_POLL_WRITE | PHP_POLL_ERROR)) && (ops[index].u.poll.events & PHP_POLL_WRITE)) {
+					PHP_SAFE_FD_SET(fd, wfds);
+					ret++;
+				}
+				if ((revents & PHP_POLL_PRI) && (ops[index].u.poll.events & PHP_POLL_PRI)) {
+					PHP_SAFE_FD_SET(fd, efds);
+					ret++;
+				}
+			}
+		}
+	}
+
+	efree(results);
+	efree(op_ptrs);
+	efree(ops);
+	if (members) {
+		efree(members);
+	}
+	stream_select_unfreeze(frozen, n_frozen);
+	return ret;
+}
+
 static int stream_array_from_fd_set(zval *stream_array, const fd_set *fds)
 {
 	zval *elem, *dest_elem;
@@ -883,9 +1135,20 @@ PHP_FUNCTION(stream_select)
 		}
 	}
 
-	retval = php_select(max_fd+1, &rfds, &wfds, &efds, tv_p);
+	if (php_io_hooks_active()) {
+		/* The provider waits: the sets are rebuilt from what it reported */
+		FD_ZERO(&rfds);
+		FD_ZERO(&wfds);
+		FD_ZERO(&efds);
+		retval = stream_select_any(r_array, w_array, e_array, tv_p, &rfds, &wfds, &efds);
+	} else {
+		retval = php_select(max_fd+1, &rfds, &wfds, &efds, tv_p);
+	}
 	php_stream_error_operation_end(context);
 
+	if (retval == -1 && EG(exception)) {
+		RETURN_THROWS();
+	}
 	if (retval == -1) {
 		php_error_docref(NULL, E_WARNING, "Unable to select [%d]: %s (max_fd=" PHP_SOCKET_FMT ")",
 				errno, strerror(errno), max_fd);
@@ -1839,3 +2102,4 @@ PHP_FUNCTION(stream_socket_shutdown)
 }
 /* }}} */
 #endif
+

@@ -36,6 +36,8 @@ runs:
           language-pack-de \
           libgmp-dev \
           libicu-dev \
+          liburing-dev \
+          cmake \
           libtidy-dev \
           libenchant-2-dev \
           libbz2-dev \

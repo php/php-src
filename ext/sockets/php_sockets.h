@@ -25,6 +25,7 @@
 #ifdef HAVE_SOCKETS
 
 #include <php.h>
+#include "php_io_hooks.h"
 #ifdef PHP_WIN32
 # include "windows_common.h"
 #else
@@ -64,12 +65,18 @@ typedef SOCKET PHP_SOCKET;
 
 /* Socket class */
 
+typedef struct _php_socket_poll_handle_data php_socket_poll_handle_data;
+
 typedef struct {
 	PHP_SOCKET	bsd_socket;
 	int			type;
 	int			error;
 	int			blocking;
+	bool		nonblocking_fd; /* blocking is emulated */
+	bool		in_use; /* an operation on it is in flight */
 	zval		zstream;
+	zend_object *weak_handle; /* SocketPollWeakHandle, referenced until the descriptor closes */
+	php_socket_poll_handle_data *strong_handles; /* SocketPollHandle objects, retired with it */
 	zend_object std;
 } php_socket;
 
@@ -82,6 +89,14 @@ extern PHP_SOCKETS_API zend_class_entry *socket_ce;
 #define ENSURE_SOCKET_VALID(php_sock) do { \
 	if (IS_INVALID_SOCKET(php_sock)) { \
 		zend_argument_error(NULL, 1, "has already been closed"); \
+		RETURN_THROWS(); \
+	} \
+} while (0)
+
+/* Not while an operation of another flow is on it */
+#define ENSURE_SOCKET_FREE(php_sock) do { \
+	if ((php_sock)->in_use) { \
+		zend_throw_error(NULL, "Concurrent access to a socket"); \
 		RETURN_THROWS(); \
 	} \
 } while (0)
@@ -123,6 +138,31 @@ enum sockopt_return {
 
 PHP_SOCKETS_API char *sockets_strerror(int error);
 PHP_SOCKETS_API bool socket_import_file_descriptor(PHP_SOCKET socket, php_socket *retsock);
+
+#define PHP_SOCKET_EMULATES_BLOCKING(sock) ((sock)->blocking && (sock)->nonblocking_fd)
+
+/* A call that may block under a provider: the Socket is frozen for it, and its operations carry
+ * the stream it shares its descriptor with or, without one, its handle */
+typedef struct php_socket_op {
+	php_stream *stream;
+	zend_object *handle;
+	bool active; /* a provider is installed */
+} php_socket_op;
+
+typedef struct php_socket_waiter {
+	uint64_t end;
+	int optname;
+	bool started;
+	php_socket_op op;
+	php_deadline deadline; /* the op's, from the first wait */
+} php_socket_waiter;
+
+#define PHP_SOCKET_WAITER(optname) { 0, (optname), false, { NULL, NULL, false }, { 0 } }
+
+/* false with an Error thrown when the Socket is in another operation */
+bool php_socket_op_begin(php_socket *sock, php_socket_op *o);
+void php_socket_op_end(php_socket *sock, php_socket_op *o);
+bool php_socket_wait_retry(php_socket *sock, php_socket_waiter *w, int events, int flags);
 
 #else
 #define phpext_sockets_ptr NULL

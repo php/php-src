@@ -148,6 +148,8 @@ fail:
 #endif
 
 #include "proc_open.h"
+#include "php_io.h"
+#include "ext/standard/io_poll.h"
 
 static int le_proc_open; /* Resource number for `proc` resources */
 
@@ -254,7 +256,8 @@ static pid_t waitpid_cached(php_process_handle *proc, int *wait_status, int opti
 		return proc->child;
 	}
 
-	pid_t wait_pid = waitpid(proc->child, wait_status, options);
+	php_deadline dl = php_io_deadline_infinite();
+	pid_t wait_pid = php_io_waitpid(NULL, proc->child, wait_status, options, &dl);
 
 	/* The "exit" status is the final status of the process.
 	 * If we were to cache the status unconditionally,
@@ -297,13 +300,18 @@ static void proc_open_rsrc_dtor(zend_resource *rsrc)
 	 * But if we're freeing the resource because of GC, don't wait. */
 #ifdef PHP_WIN32
 	if (FG(pclose_wait)) {
-		WaitForSingleObject(proc->childHandle, INFINITE);
-	}
-	GetExitCodeProcess(proc->childHandle, &wstatus);
-	if (wstatus == STILL_ACTIVE) {
-		FG(pclose_ret) = -1;
+		/* The wait is an op, served by a ring or waited for by the core; the handle the
+		 * resource holds keeps the pid valid until the completion arrives */
+		int status = 0;
+		php_deadline dl = php_io_deadline_infinite();
+		if (php_io_waitpid(NULL, (pid_t) proc->child, &status, 0, &dl) == (pid_t) proc->child) {
+			FG(pclose_ret) = status;
+		} else {
+			FG(pclose_ret) = -1;
+		}
 	} else {
-		FG(pclose_ret) = wstatus;
+		GetExitCodeProcess(proc->childHandle, &wstatus);
+		FG(pclose_ret) = wstatus == STILL_ACTIVE ? -1 : (int) wstatus;
 	}
 	CloseHandle(proc->childHandle);
 
@@ -371,6 +379,16 @@ PHP_FUNCTION(proc_terminate)
 /* }}} */
 
 /* {{{ Close a process opened by `proc_open` */
+PHPAPI bool php_proc_open_get_pid(zval *zproc, php_process_id_t *pid)
+{
+	php_process_handle *proc = (php_process_handle*)zend_fetch_resource(Z_RES_P(zproc), "process", le_proc_open);
+	if (proc == NULL) {
+		return false;
+	}
+	*pid = proc->child;
+	return true;
+}
+
 PHP_FUNCTION(proc_close)
 {
 	zval *zproc;
@@ -1413,13 +1431,22 @@ PHP_FUNCTION(proc_open)
 		}
 	}
 
+	/* Signals blocked for a SignalHandle are the parent's business */
+	posix_spawnattr_t attr;
+	sigset_t child_mask;
+	posix_spawnattr_init(&attr);
+	php_io_poll_signal_child_mask(&child_mask);
+	posix_spawnattr_setsigmask(&attr, &child_mask);
+	posix_spawnattr_setflags(&attr, POSIX_SPAWN_SETSIGMASK);
+
 	if (argv) {
-		r = posix_spawnp(&child, ZSTR_VAL(command_str), &factions, NULL, argv, (env.envarray ? env.envarray : environ));
+		r = posix_spawnp(&child, ZSTR_VAL(command_str), &factions, &attr, argv, (env.envarray ? env.envarray : environ));
 	} else {
-		r = posix_spawn(&child, "/bin/sh" , &factions, NULL,
+		r = posix_spawn(&child, "/bin/sh" , &factions, &attr,
 				(char * const[]) {"sh", "-c", ZSTR_VAL(command_str), NULL},
 				env.envarray ? env.envarray : environ);
 	}
+	posix_spawnattr_destroy(&attr);
 	posix_spawn_file_actions_destroy(&factions);
 	if (r != 0) {
 		php_error_docref(NULL, E_WARNING, "posix_spawn() failed: %s", strerror(r));
@@ -1442,6 +1469,11 @@ PHP_FUNCTION(proc_open)
 		if (cwd) {
 			php_ignore_value(chdir(cwd));
 		}
+
+		/* Signals blocked for a SignalHandle are the parent's business */
+		sigset_t child_mask;
+		php_io_poll_signal_child_mask(&child_mask);
+		sigprocmask(SIG_SETMASK, &child_mask, NULL);
 
 		if (argv) {
 			/* execvpe() is non-portable, use environ instead. */

@@ -586,6 +586,7 @@ AC_CHECK_FUNCS([
   setitimer
   shutdown
   sigprocmask
+  sigtimedwait
   splice
   statfs
   statvfs
@@ -620,6 +621,8 @@ AC_FUNC_STRERROR_R
 
 dnl Check for functions inside their belonging headers.
 AC_CHECK_HEADER([sys/prctl.h], [AC_CHECK_FUNCS([prctl])])
+AC_CHECK_HEADERS([sys/signalfd.h sys/pidfd.h])
+AC_CHECK_FUNCS([pidfd_open signalfd pipe2])
 AC_CHECK_HEADER([sys/procctl.h], [AC_CHECK_FUNCS([procctl])])
 
 AX_FUNC_WHICH_GETHOSTBYNAME_R
@@ -750,6 +753,30 @@ end:
 AS_VAR_IF([php_cv_have__asm_goto], [yes],
   [AC_DEFINE([HAVE_ASM_GOTO], [1],
     [Define to 1 if asm goto support is available.])])
+
+dnl Check for the ior library the IO ring is built on.
+PHP_ARG_WITH([ior],
+  [for ior support],
+  [AS_HELP_STRING([[--with-ior[=DIR]]],
+    [Build the IO ring on the ior library, found through pkg-config. The
+    optional DIR is the ior install prefix to take its pkg-config file from])],
+  [no],
+  [no])
+AS_VAR_IF([PHP_IOR], [no],, [
+  php_ior_pkg_config_path=$PKG_CONFIG_PATH
+  AS_VAR_IF([PHP_IOR], [yes],, [
+    PKG_CONFIG_PATH="$PHP_IOR/lib/pkgconfig:$PHP_IOR/lib64/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
+    export PKG_CONFIG_PATH
+  ])
+  PKG_CHECK_MODULES([IOR], [ior])
+  IOR_LIBS=$($PKG_CONFIG --static --libs ior)
+  PKG_CONFIG_PATH=$php_ior_pkg_config_path
+  PHP_EVAL_INCLINE([$IOR_CFLAGS])
+  PHP_EVAL_LIBLINE([$IOR_LIBS])
+  AC_DEFINE([HAVE_IOR], [1], [Define to 1 if the ior library is available.])
+  PHP_ADD_SOURCES([main/io], [php_io_ring.c],
+    [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
+])
 
 dnl Check Valgrind support.
 PHP_ARG_WITH([valgrind],
@@ -1694,6 +1721,8 @@ PHP_ADD_SOURCES([main/io], m4_normalize([
     php_io_copy_freebsd.c
     php_io_copy_solaris.c
     php_io_copy_macos.c
+    php_io_hooks.c
+    php_io_queue_poll.c
   ]),
   [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
@@ -1705,6 +1734,7 @@ PHP_ADD_SOURCES([main/poll], m4_normalize([
     poll_core.c
     poll_fd_table.c
     poll_handle.c
+    poll_source.c
   ]),
   [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 

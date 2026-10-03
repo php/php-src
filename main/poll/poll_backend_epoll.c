@@ -54,6 +54,9 @@ static uint32_t epoll_events_to_native(uint32_t events)
 	if (events & PHP_POLL_ET) {
 		native |= EPOLLET;
 	}
+	if (events & PHP_POLL_PRI) {
+		native |= EPOLLPRI;
+	}
 	return native;
 }
 
@@ -74,6 +77,9 @@ static uint32_t epoll_events_from_native(uint32_t native)
 	}
 	if (native & EPOLLRDHUP) {
 		events |= PHP_POLL_RDHUP;
+	}
+	if (native & EPOLLPRI) {
+		events |= PHP_POLL_PRI;
 	}
 	return events;
 }
@@ -263,6 +269,7 @@ const php_poll_backend_ops php_poll_backend_epoll_ops = {
 	.is_available = epoll_backend_is_available,
 	.get_suitable_max_events = epoll_backend_get_suitable_max_events,
 	.supports_et = true,
+	.supports_priority = true,
 };
 
 #endif /* HAVE_EPOLL */

@@ -102,6 +102,16 @@ typedef struct {
 	HashTable *wrapper_logged_errors;	/* key: wrapper address; value: linked list of error entries */
 	php_stream_error_state stream_error_state;
 	int pclose_wait;
+	struct _php_io_hooks *io_hooks; /* NULL without a provider */
+	uint32_t io_hooks_generation; /* bumped per installed provider */
+	struct _php_io_queue *io_queue; /* core queue, created lazily */
+	pid_t io_queue_pid;
+	struct _php_io_registration *io_registrations;
+	uint32_t io_ops_in_flight;
+	HashTable *io_orphans; /* stream -> queue keeping its ops */
+	HashTable *io_addrinfo;
+	uint32_t io_hooks_locked;
+	bool io_shut_down;
 #ifdef HAVE_GETHOSTBYNAME_R
 	struct hostent tmp_host_info;
 	char *tmp_host_buf;
@@ -116,6 +126,5 @@ extern PHPAPI int file_globals_id;
 #define FG(v) (file_globals.v)
 extern PHPAPI php_file_globals file_globals;
 #endif
-
 
 #endif /* FILE_H */

@@ -17,6 +17,7 @@
 /* {{{ includes */
 #include "php.h"
 #include "php_network.h"
+#include "php_io.h"
 
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
@@ -176,17 +177,20 @@ static zend_string *php_gethostbyaddr(char *ip)
 	memset(&sa4, 0, sizeof(struct sockaddr_in));
 	memset(&sa6, 0, sizeof(struct sockaddr_in6));
 
+	php_deadline deadline;
+	php_deadline_init_infinite(&deadline);
+
 	if (inet_pton(AF_INET6, ip, &sa6.sin6_addr)) {
 		sa6.sin6_family = AF_INET6;
 
-		if (getnameinfo((struct sockaddr *)&sa6, sizeof(sa6), out, sizeof(out), NULL, 0, NI_NAMEREQD) != 0) {
+		if (php_io_getnameinfo((struct sockaddr *)&sa6, sizeof(sa6), NI_NAMEREQD, out, sizeof(out), NULL, 0, &deadline) != 0) {
 			return zend_string_init(ip, strlen(ip), 0);
 		}
 		return zend_string_init(out, strlen(out), 0);
 	} else if (inet_pton(AF_INET, ip, &sa4.sin_addr)) {
 		sa4.sin_family = AF_INET;
 
-		if (getnameinfo((struct sockaddr *)&sa4, sizeof(sa4), out, sizeof(out), NULL, 0, NI_NAMEREQD) != 0) {
+		if (php_io_getnameinfo((struct sockaddr *)&sa4, sizeof(sa4), NI_NAMEREQD, out, sizeof(out), NULL, 0, &deadline) != 0) {
 			return zend_string_init(ip, strlen(ip), 0);
 		}
 		return zend_string_init(out, strlen(out), 0);
@@ -259,23 +263,25 @@ PHP_FUNCTION(gethostbynamel)
 		RETURN_FALSE;
 	}
 
-	hp = php_network_gethostbyname(hostname);
-	if (!hp) {
+	/* A GetAddrInfo op for IPv4 addresses, the same op the streams use */
+	struct addrinfo hints, *res, *ai;
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	php_deadline deadline;
+	php_deadline_init_infinite(&deadline);
+	if (php_io_getaddrinfo(hostname, NULL, &hints, &res, &deadline) != 0 || res == NULL) {
 		RETURN_FALSE;
 	}
 
 	array_init(return_value);
 
-	for (i = 0;; i++) {
-		/* On macos h_addr_list entries may be misaligned. */
+	for (ai = res; ai; ai = ai->ai_next) {
 		const char *ipaddr;
-		struct in_addr *h_addr_entry; /* Don't call this h_addr, it's a macro! */
-		memcpy(&h_addr_entry, &hp->h_addr_list[i], sizeof(struct in_addr *));
-		if (!h_addr_entry) {
-			return;
+		if (ai->ai_family != AF_INET) {
+			continue;
 		}
-
-		in = *h_addr_entry;
+		in = ((struct sockaddr_in *) ai->ai_addr)->sin_addr;
 		if (!(ipaddr = inet_ntop(AF_INET, &in, addr4, INET_ADDRSTRLEN))) {
 			/* unlikely regarding (too) long hostname and protocols but checking still */
 			php_error_docref(NULL, E_WARNING, "Host name to ip failed %s", hostname);
@@ -284,30 +290,37 @@ PHP_FUNCTION(gethostbynamel)
 			add_next_index_string(return_value, ipaddr);
 		}
 	}
+	php_io_freeaddrinfo(res);
+	(void) hp;
+	(void) i;
 }
 /* }}} */
 
 /* {{{ php_gethostbyname */
 static zend_string *php_gethostbyname(char *name)
 {
-	struct hostent *hp;
-	struct in_addr *h_addr_0; /* Don't call this h_addr, it's a macro! */
+	struct addrinfo hints, *res, *ai;
 	struct in_addr in;
 	char addr4[INET_ADDRSTRLEN];
 	const char *address;
 
-	hp = php_network_gethostbyname(name);
-	if (!hp) {
+	/* A GetAddrInfo op for the first IPv4 address, the same op the streams use */
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	php_deadline deadline;
+	php_deadline_init_infinite(&deadline);
+	if (php_io_getaddrinfo(name, NULL, &hints, &res, &deadline) != 0 || res == NULL) {
 		return zend_string_init(name, strlen(name), 0);
 	}
-
-	/* On macos h_addr_list entries may be misaligned. */
-	memcpy(&h_addr_0, &hp->h_addr_list[0], sizeof(struct in_addr *));
-	if (!h_addr_0) {
+	for (ai = res; ai && ai->ai_family != AF_INET; ai = ai->ai_next) {
+	}
+	if (!ai) {
+		php_io_freeaddrinfo(res);
 		return zend_string_init(name, strlen(name), 0);
 	}
-
-	memcpy(&in.s_addr, h_addr_0, sizeof(in.s_addr));
+	in = ((struct sockaddr_in *) ai->ai_addr)->sin_addr;
+	php_io_freeaddrinfo(res);
 
 	if (!(address = inet_ntop(AF_INET, &in, addr4, INET_ADDRSTRLEN))) {
 		return NULL;

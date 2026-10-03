@@ -275,6 +275,12 @@ PHP_FUNCTION(mysqli_close)
 
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_INITIALIZED);
 
+	/* Another fiber is suspended in a call on it, which the close would free */
+	if (mysql->mysql && mysqlnd_conn_is_busy(mysql->mysql->data)) {
+		zend_throw_error(NULL, "Concurrent access to a MySQL connection");
+		RETURN_THROWS();
+	}
+
 	php_mysqli_close(mysql, MYSQLI_CLOSE_EXPLICIT, ((MYSQLI_RESOURCE *)(Z_MYSQLI_P(mysql_link))->ptr)->status);
 	((MYSQLI_RESOURCE *)(Z_MYSQLI_P(mysql_link))->ptr)->status = MYSQLI_STATUS_UNKNOWN;
 
@@ -1469,6 +1475,11 @@ PHP_FUNCTION(mysqli_stmt_close)
 		RETURN_THROWS();
 	}
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
+
+	if (stmt->stmt->data && mysqlnd_conn_is_busy(stmt->stmt->data->conn)) {
+		zend_throw_error(NULL, "Concurrent access to a MySQL connection");
+		RETURN_THROWS();
+	}
 
 	mysqli_stmt_close(stmt->stmt, false);
 	stmt->stmt = NULL;

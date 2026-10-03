@@ -814,6 +814,7 @@ PHP_MINIT_FUNCTION(openssl)
 	/* register a resource id number with OpenSSL so that we can map SSL -> stream structures in
 	 * OpenSSL callbacks */
 	ssl_stream_data_index = SSL_get_ex_new_index(0, "PHP stream index", NULL, NULL, NULL);
+	php_openssl_stream_bio_init();
 
 	php_stream_xport_register("ssl", php_openssl_ssl_socket_factory);
 #if OPENSSL_VERSION_NUMBER < 0x40000000L && !defined(OPENSSL_NO_SSL3)
@@ -885,6 +886,7 @@ PHP_MINFO_FUNCTION(openssl)
 PHP_MSHUTDOWN_FUNCTION(openssl)
 {
 	php_openssl_backend_shutdown();
+	php_openssl_stream_bio_shutdown();
 
 	php_unregister_url_stream_wrapper("https");
 	php_unregister_url_stream_wrapper("ftps");

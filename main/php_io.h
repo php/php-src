@@ -19,6 +19,8 @@
 
 #include "php.h"
 #include "php_network.h"
+#include "php_io_hooks.h"
+#include "php_io_ring.h"
 
 #define PHP_IO_COPY_ALL SIZE_MAX
 
@@ -36,6 +38,9 @@ typedef struct php_io_fd {
 	php_io_fd_type fd_type;
 	struct timeval timeout;
 	unsigned is_blocked:1;
+	/* Windows: the position of a file opened overlapped, which the kernel keeps none for; the
+	 * stream owns it and the copy moves it. NULL for a descriptor with a file position. */
+	zend_off_t *position;
 } php_io_fd;
 
 typedef zend_result (*php_io_copy_fn)(php_io_fd *src, php_io_fd *dest, size_t maxlen, size_t *copied);

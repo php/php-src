@@ -26,6 +26,8 @@
 #endif
 
 #include "php.h"
+#include "php_io.h"
+#include "ext/standard/io_poll.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_filestat.h"
 #include "php_signal.h"
@@ -191,6 +193,7 @@ static void pcntl_siginfo_to_zval(int, siginfo_t*, zval*);
 static void pcntl_signal_dispatch(void);
 static void pcntl_signal_dispatch_tick_function(int dummy_int, void *dummy_pointer);
 static void pcntl_interrupt_function(zend_execute_data *execute_data);
+static bool pcntl_signal_pending(void);
 
 static PHP_GINIT_FUNCTION(pcntl)
 {
@@ -224,6 +227,7 @@ PHP_MINIT_FUNCTION(pcntl)
 	register_pcntl_symbols(module_number);
 	orig_interrupt_function = zend_interrupt_function;
 	zend_interrupt_function = pcntl_interrupt_function;
+	php_io_signal_pending = pcntl_signal_pending;
 
 	return SUCCESS;
 }
@@ -271,7 +275,14 @@ PHP_FUNCTION(pcntl_fork)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
+	if (php_io_ops_in_flight() > 0) {
+		/* An operation submitted to a queue would not be in flight in the child */
+		zend_throw_error(NULL, "Cannot fork while IO operations are in flight");
+		RETURN_THROWS();
+	}
+
 	id = fork();
+	php_io_child_forget(id);
 	if (id == -1) {
 		PCNTL_G(last_error) = errno;
 		switch (errno) {
@@ -384,10 +395,12 @@ PHP_FUNCTION(pcntl_waitpid)
 		memset(&rusage, 0, sizeof(struct rusage));
 		child_id = wait4((pid_t) pid, &status, options, &rusage);
 	} else {
-		child_id = waitpid((pid_t) pid, &status, options);
+		php_deadline dl = php_io_deadline_infinite();
+		child_id = php_io_waitpid(NULL, (pid_t) pid, &status, options, &dl);
 	}
 #else
-	child_id = waitpid((pid_t) pid, &status, options);
+	php_deadline dl = php_io_deadline_infinite();
+	child_id = php_io_waitpid(NULL, (pid_t) pid, &status, options, &dl);
 #endif
 
 	if (child_id < 0) {
@@ -497,13 +510,13 @@ PHP_FUNCTION(pcntl_wait)
 
 		memset(&rusage, 0, sizeof(struct rusage));
 		child_id = wait3(&status, options, &rusage);
-	} else if (options) {
-		child_id = wait3(&status, options, NULL);
 	} else {
-		child_id = wait(&status);
+		php_deadline dl = php_io_deadline_infinite();
+		child_id = php_io_waitpid(NULL, -1, &status, options, &dl);
 	}
 #else
-	child_id = wait(&status);
+	php_deadline dl = php_io_deadline_infinite();
+	child_id = php_io_waitpid(NULL, -1, &status, options, &dl);
 #endif
 	if (child_id < 0) {
 		PCNTL_G(last_error) = errno;
@@ -660,9 +673,32 @@ PHP_FUNCTION(pcntl_wstopsig)
 }
 /* }}} */
 
+/* Signals blocked for a SignalHandle are not the new program's business;
+ * the old mask comes back if the exec fails */
+static void pcntl_exec_set_mask(sigset_t *old_mask)
+{
+	sigset_t mask;
+	php_io_poll_signal_child_mask(&mask);
+#ifdef ZTS
+	pthread_sigmask(SIG_SETMASK, &mask, old_mask);
+#else
+	sigprocmask(SIG_SETMASK, &mask, old_mask);
+#endif
+}
+
+static void pcntl_exec_restore_mask(const sigset_t *old_mask)
+{
+#ifdef ZTS
+	pthread_sigmask(SIG_SETMASK, old_mask, NULL);
+#else
+	sigprocmask(SIG_SETMASK, old_mask, NULL);
+#endif
+}
+
 /* {{{ Executes specified program in current process space as defined by exec(2) */
 PHP_FUNCTION(pcntl_exec)
 {
+	sigset_t old_mask;
 	zval *args = NULL;
 	HashTable *env_vars_ht = NULL;
 	zval *element;
@@ -760,8 +796,10 @@ PHP_FUNCTION(pcntl_exec)
 		} ZEND_HASH_FOREACH_END();
 		*(pair) = NULL;
 
+		pcntl_exec_set_mask(&old_mask);
 		if (execve(path, argv, envp) == -1) {
 			PCNTL_G(last_error) = errno;
+			pcntl_exec_restore_mask(&old_mask);
 			php_error_docref(NULL, E_WARNING, "Error has occurred: (errno %d) %s", errno, strerror(errno));
 		}
 
@@ -771,8 +809,10 @@ cleanup_env_vars:
 		efree(envp);
 	} else {
 
+		pcntl_exec_set_mask(&old_mask);
 		if (execv(path, argv) == -1) {
 			PCNTL_G(last_error) = errno;
+			pcntl_exec_restore_mask(&old_mask);
 			php_error_docref(NULL, E_WARNING, "Error has occurred: (errno %d) %s", errno, strerror(errno));
 		}
 	}
@@ -1029,7 +1069,8 @@ PHP_FUNCTION(pcntl_sigwaitinfo)
 
 	errno = 0;
 	siginfo_t siginfo;
-	int signal_no = sigwaitinfo(&set, &siginfo);
+	php_deadline dl = php_io_deadline_infinite();
+	int signal_no = php_io_sigwait(NULL, &set, &siginfo, &dl);
 	/* sigwaitinfo() never sets errno to EAGAIN according to POSIX */
 	if (signal_no == -1) {
 		PCNTL_G(last_error) = errno;
@@ -1089,10 +1130,11 @@ PHP_FUNCTION(pcntl_sigtimedwait)
 
 	errno = 0;
 	siginfo_t siginfo;
-	struct timespec timeout;
-	timeout.tv_sec  = (time_t) tv_sec;
-	timeout.tv_nsec = tv_nsec;
-	int signal_no = sigtimedwait(&set, &siginfo, &timeout);
+	/* Too far to represent is as good as forever */
+	zend_hrtime_t ns = (zend_hrtime_t) tv_sec >= ZEND_HRTIME_T_MAX / ZEND_NANO_IN_SEC
+			? ZEND_HRTIME_T_MAX : (zend_hrtime_t) tv_sec * ZEND_NANO_IN_SEC + tv_nsec;
+	php_deadline dl = php_io_deadline_from_ns(ns);
+	int signal_no = php_io_sigwait(NULL, &set, &siginfo, &dl);
 	if (signal_no == -1) {
 		if (errno != EAGAIN) {
 			PCNTL_G(last_error) = errno;
@@ -1586,7 +1628,14 @@ PHP_FUNCTION(pcntl_rfork)
 	}
 #endif
 
+	if (php_io_ops_in_flight() > 0) {
+		/* An operation submitted to a queue would not be in flight in the child */
+		zend_throw_error(NULL, "Cannot fork while IO operations are in flight");
+		RETURN_THROWS();
+	}
+
 	pid = rfork(flags);
+	php_io_child_forget(pid);
 
 	if (pid == -1) {
 		PCNTL_G(last_error) = errno;
@@ -1626,7 +1675,14 @@ PHP_FUNCTION(pcntl_forkx)
 		RETURN_THROWS();
 	}
 
+	if (php_io_ops_in_flight() > 0) {
+		/* An operation submitted to a queue would not be in flight in the child */
+		zend_throw_error(NULL, "Cannot fork while IO operations are in flight");
+		RETURN_THROWS();
+	}
+
 	pid = forkx(flags);
+	php_io_child_forget(pid);
 
 	if (pid == -1) {
 		PCNTL_G(last_error) = errno;
@@ -1944,6 +2000,11 @@ PHP_FUNCTION(pcntl_setqos_class)
 	}
 }
 #endif
+
+static bool pcntl_signal_pending(void)
+{
+	return PCNTL_G(pending_signals);
+}
 
 static void pcntl_interrupt_function(zend_execute_data *execute_data)
 {

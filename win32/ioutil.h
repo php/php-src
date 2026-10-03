@@ -326,6 +326,21 @@ zend_always_inline static int php_win32_ioutil_access(const char *path, mode_t m
 	return ret;
 }/*}}}*/
 
+/* An extra open flag, outside the CRT's _O_* range: open the file with
+ * FILE_FLAG_OVERLAPPED so an I/O completion port can complete operations
+ * on it. Such a descriptor keeps no file position: read and write it with
+ * php_win32_ioutil_pread() and php_win32_ioutil_pwrite(), never with the
+ * CRT read() and write(). */
+#define PHP_WIN32_IOUTIL_O_OVERLAPPED 0x00100000
+
+/* ReadFile and WriteFile at an explicit offset, waiting for the result,
+ * on a descriptor opened with PHP_WIN32_IOUTIL_O_OVERLAPPED (a synchronous
+ * one works too). A negative write offset appends. 0 at end of file, -1
+ * with errno on failure. The completion never reaches a completion port
+ * the handle is bound to. */
+PW32IO ssize_t php_win32_ioutil_pread(int fd, void *buf, size_t len, int64_t offset);
+PW32IO ssize_t php_win32_ioutil_pwrite(int fd, const void *buf, size_t len, int64_t offset);
+
 zend_always_inline static int php_win32_ioutil_open(const char *path, int flags, ...)
 {/*{{{*/
 	mode_t mode = 0;

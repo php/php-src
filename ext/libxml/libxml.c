@@ -509,6 +509,10 @@ static void *php_libxml_streams_IO_open_write_wrapper(const char *filename)
 
 static int php_libxml_streams_IO_read(void *context, char *buffer, int len)
 {
+	/* libxml retries a failed read, which must not run on an unwinding fiber */
+	if (EG(exception)) {
+		return -1;
+	}
 	return php_stream_read((php_stream*)context, buffer, len);
 }
 

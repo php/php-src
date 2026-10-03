@@ -1,5 +1,5 @@
 /* This is a generated file, edit sockets.stub.php instead.
- * Stub hash: aceee39bed5332f7f26d5d768976c4d5ab96ab3c */
+ * Stub hash: 343d6854a3102e1f6803f1c656c76bbf172768d0 */
 
 #include "zend_constants.h"
 
@@ -214,6 +214,26 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_socket_wsaprotocol_info_release,
 ZEND_END_ARG_INFO()
 #endif
 
+#define arginfo_class_SocketPollHandle___construct arginfo_socket_export_stream
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_SocketPollHandle_getSocket, 0, 0, Socket, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SocketPollHandle_isValid, 0, 0, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SocketPollWeakHandle___construct, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SocketPollWeakHandle_create, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_OBJ_INFO(0, socket, Socket, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_SocketPollWeakHandle_getSocket, 0, 0, Socket, 1)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_SocketPollWeakHandle_isValid arginfo_class_SocketPollHandle_isValid
+
 ZEND_FUNCTION(socket_select);
 ZEND_FUNCTION(socket_create_listen);
 ZEND_FUNCTION(socket_accept);
@@ -260,6 +280,13 @@ ZEND_FUNCTION(socket_wsaprotocol_info_export);
 ZEND_FUNCTION(socket_wsaprotocol_info_import);
 ZEND_FUNCTION(socket_wsaprotocol_info_release);
 #endif
+ZEND_METHOD(SocketPollHandle, __construct);
+ZEND_METHOD(SocketPollHandle, getSocket);
+ZEND_METHOD(SocketPollHandle, isValid);
+ZEND_METHOD(SocketPollWeakHandle, __construct);
+ZEND_METHOD(SocketPollWeakHandle, create);
+ZEND_METHOD(SocketPollWeakHandle, getSocket);
+ZEND_METHOD(SocketPollWeakHandle, isValid);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(socket_select, arginfo_socket_select)
@@ -310,6 +337,21 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(socket_wsaprotocol_info_import, arginfo_socket_wsaprotocol_info_import)
 	ZEND_FE(socket_wsaprotocol_info_release, arginfo_socket_wsaprotocol_info_release)
 #endif
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_SocketPollHandle_methods[] = {
+	ZEND_ME(SocketPollHandle, __construct, arginfo_class_SocketPollHandle___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(SocketPollHandle, getSocket, arginfo_class_SocketPollHandle_getSocket, ZEND_ACC_PUBLIC)
+	ZEND_ME(SocketPollHandle, isValid, arginfo_class_SocketPollHandle_isValid, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_SocketPollWeakHandle_methods[] = {
+	ZEND_ME(SocketPollWeakHandle, __construct, arginfo_class_SocketPollWeakHandle___construct, ZEND_ACC_PRIVATE)
+	ZEND_ME(SocketPollWeakHandle, create, arginfo_class_SocketPollWeakHandle_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(SocketPollWeakHandle, getSocket, arginfo_class_SocketPollWeakHandle_getSocket, ZEND_ACC_PUBLIC)
+	ZEND_ME(SocketPollWeakHandle, isValid, arginfo_class_SocketPollWeakHandle_isValid, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -1132,6 +1174,28 @@ static zend_class_entry *register_class_AddressInfo(void)
 
 	INIT_CLASS_ENTRY(ce, "AddressInfo", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_SocketPollHandle(zend_class_entry *class_entry_Io_Poll_Handle)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SocketPollHandle", class_SocketPollHandle_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+	zend_class_implements(class_entry, 1, class_entry_Io_Poll_Handle);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_SocketPollWeakHandle(zend_class_entry *class_entry_Io_Poll_WeakHandle)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SocketPollWeakHandle", class_SocketPollWeakHandle_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+	zend_class_implements(class_entry, 1, class_entry_Io_Poll_WeakHandle);
 
 	return class_entry;
 }

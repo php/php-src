@@ -19,12 +19,21 @@
 #include <io.h>
 #include <winsock2.h>
 #include <mswsock.h>
+#include "win32/ioutil.h"
 
+/* A file opened overlapped reads and writes at the position its stream keeps */
 static inline ssize_t php_io_win_read(php_io_fd *fd, char *buf, int len)
 {
 	if (fd->fd_type == PHP_IO_FD_SOCKET) {
 		int result = recv(fd->socket, buf, len, 0);
 		return (result == SOCKET_ERROR) ? -1 : (ssize_t) result;
+	}
+	if (fd->position) {
+		ssize_t result = php_win32_ioutil_pread(fd->fd, buf, len, *fd->position);
+		if (result > 0) {
+			*fd->position += result;
+		}
+		return result;
 	}
 	return (ssize_t) _read(fd->fd, buf, len);
 }
@@ -34,6 +43,13 @@ static inline ssize_t php_io_win_write(php_io_fd *fd, const char *buf, int len)
 	if (fd->fd_type == PHP_IO_FD_SOCKET) {
 		int result = send(fd->socket, buf, len, 0);
 		return (result == SOCKET_ERROR) ? -1 : (ssize_t) result;
+	}
+	if (fd->position) {
+		ssize_t result = php_win32_ioutil_pwrite(fd->fd, buf, len, *fd->position);
+		if (result > 0) {
+			*fd->position += result;
+		}
+		return result;
 	}
 	return (ssize_t) _write(fd->fd, buf, len);
 }
@@ -170,7 +186,8 @@ static ssize_t php_io_win_transmit_file(int src_fd, SOCKET dest_sock, size_t max
 
 zend_result php_io_windows_copy(php_io_fd *src, php_io_fd *dest, size_t maxlen, size_t *copied)
 {
-	if (src->fd_type != PHP_IO_FD_SOCKET && dest->fd_type == PHP_IO_FD_SOCKET) {
+	/* TransmitFile takes the file's own position, which an overlapped file has none of */
+	if (src->fd_type != PHP_IO_FD_SOCKET && dest->fd_type == PHP_IO_FD_SOCKET && !src->position) {
 		ssize_t result = php_io_win_transmit_file(src->fd, dest->socket, maxlen);
 		if (result >= 0) {
 			*copied = (size_t) result;
