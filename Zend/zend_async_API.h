@@ -687,8 +687,6 @@ typedef struct {
 	zend_coroutine_t *coroutine;
 	/* The main coroutine (top-level script on the OS thread stack). */
 	zend_coroutine_t *main_coroutine;
-	/* Number of live (not finished) coroutines. */
-	unsigned int active_coroutine_count;
 	/* True while the scheduler's own machinery runs. */
 	bool in_scheduler_context;
 	/* Uncaught exception carried out of the shutdown drain. */
@@ -729,7 +727,6 @@ END_EXTERN_C()
 #define ZEND_ASYNC_CURRENT_COROUTINE ZEND_ASYNC_G(coroutine)
 #define ZEND_ASYNC_MAIN_COROUTINE ZEND_ASYNC_G(main_coroutine)
 #define ZEND_ASYNC_EXIT_EXCEPTION ZEND_ASYNC_G(exit_exception)
-#define ZEND_ASYNC_ACTIVE_COROUTINE_COUNT ZEND_ASYNC_G(active_coroutine_count)
 #define ZEND_ASYNC_IN_SCHEDULER_CONTEXT ZEND_ASYNC_G(in_scheduler_context)
 
 #endif /* ZEND_ASYNC_API_H */
