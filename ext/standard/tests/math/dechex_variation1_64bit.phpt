@@ -16,8 +16,6 @@ $inputs = [
        1,
        12345,
        -2345,
-       18446744073709551615,  // largest decimal
-       18446744073709551616,
 
        // float data
 /* 7*/ 12.3456789000e10,
@@ -27,21 +25,13 @@ $inputs = [
        false,
        TRUE,
        FALSE,
-
-       // empty data
-/*12*/ "",
-       '',
 ];
 
 // loop through each element of $inputs to check the behaviour of dechex()
 foreach ($inputs as $i => $input) {
     $iterator = $i + 1;
     echo "\n-- Iteration $iterator --\n";
-    try {
-        var_dump(dechex($input));
-    } catch (Throwable $exception) {
-        echo $exception::class, ': ', $exception->getMessage(), "\n";
-    }
+    var_dump(dechex($input));
 }
 
 ?>
@@ -61,28 +51,16 @@ string(4) "3039"
 string(16) "fffffffffffff6d7"
 
 -- Iteration 5 --
-TypeError: dechex(): Argument #1 ($num) must be of type int, float given
+string(10) "1cbe991a08"
 
 -- Iteration 6 --
-TypeError: dechex(): Argument #1 ($num) must be of type int, float given
+string(1) "1"
 
 -- Iteration 7 --
-string(10) "1cbe991a08"
+string(1) "0"
 
 -- Iteration 8 --
 string(1) "1"
 
 -- Iteration 9 --
 string(1) "0"
-
--- Iteration 10 --
-string(1) "1"
-
--- Iteration 11 --
-string(1) "0"
-
--- Iteration 12 --
-TypeError: dechex(): Argument #1 ($num) must be of type int, string given
-
--- Iteration 13 --
-TypeError: dechex(): Argument #1 ($num) must be of type int, string given

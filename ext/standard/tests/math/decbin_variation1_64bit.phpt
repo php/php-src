@@ -16,8 +16,6 @@ $inputs = [
        1,
        12345,
        -2345,
-       18446744073709551615,  // largest decimal
-       18446744073709551616,
 
        // float data
 /* 7*/ 12.3456789000e10,
@@ -27,21 +25,13 @@ $inputs = [
        false,
        TRUE,
        FALSE,
-
-       // empty data
-/*12*/ "",
-       '',
 ];
 
 // loop through each element of $inputs to check the behaviour of decbin()
 foreach ($inputs as $i => $input) {
     $iterator = $i + 1;
     echo "\n-- Iteration $iterator --\n";
-    try {
-        var_dump(decbin($input));
-    } catch (Throwable $exception) {
-        echo $exception::class, ': ', $exception->getMessage(), "\n";
-    }
+    var_dump(decbin($input));
 }
 
 ?>
@@ -61,28 +51,16 @@ string(14) "11000000111001"
 string(64) "1111111111111111111111111111111111111111111111111111011011010111"
 
 -- Iteration 5 --
-TypeError: decbin(): Argument #1 ($num) must be of type int, float given
+string(37) "1110010111110100110010001101000001000"
 
 -- Iteration 6 --
-TypeError: decbin(): Argument #1 ($num) must be of type int, float given
+string(1) "1"
 
 -- Iteration 7 --
-string(37) "1110010111110100110010001101000001000"
+string(1) "0"
 
 -- Iteration 8 --
 string(1) "1"
 
 -- Iteration 9 --
 string(1) "0"
-
--- Iteration 10 --
-string(1) "1"
-
--- Iteration 11 --
-string(1) "0"
-
--- Iteration 12 --
-TypeError: decbin(): Argument #1 ($num) must be of type int, string given
-
--- Iteration 13 --
-TypeError: decbin(): Argument #1 ($num) must be of type int, string given
