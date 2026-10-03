@@ -93,6 +93,10 @@ PHP 8.7 UPGRADE NOTES
 14. Performance Improvements
 ========================================
 
+- Core:
+  . Improved performance of hash table iterators when several are alive, as in
+    nested foreach by reference.
+
 - Standard:
   . Improved performance of strcspn() and strpbrk() when searching longer strings
     with a single-byte character mask.
