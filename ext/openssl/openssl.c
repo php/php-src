@@ -827,10 +827,10 @@ PHP_MINIT_FUNCTION(openssl)
 	php_stream_xport_register("tlsv1.2", php_openssl_ssl_socket_factory);
 	php_stream_xport_register("tlsv1.3", php_openssl_ssl_socket_factory);
 
-#ifndef OPENSSL_NO_DTLS
+#if !defined(OPENSSL_NO_DTLS) && !defined(OPENSSL_NO_DTLS1_2)
 	php_stream_xport_register("dtls", php_openssl_ssl_socket_factory);
 	php_stream_xport_register("dtlsv1.2", php_openssl_ssl_socket_factory);
-#ifdef DTLS1_3_VERSION
+#if defined(DTLS1_3_VERSION) && !defined(OPENSSL_NO_DTLS1_3)
 	php_stream_xport_register("dtlsv1.3", php_openssl_ssl_socket_factory);
 #endif
 	/* override the default udp socket provider */
@@ -911,10 +911,10 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 	php_stream_xport_unregister("tlsv1.2");
 	php_stream_xport_unregister("tlsv1.3");
 
-#ifndef OPENSSL_NO_DTLS
+#if !defined(OPENSSL_NO_DTLS) && !defined(OPENSSL_NO_DTLS1_2)
 	php_stream_xport_unregister("dtls");
 	php_stream_xport_unregister("dtlsv1.2");
-#ifdef DTLS1_3_VERSION
+#if defined(DTLS1_3_VERSION) && !defined(OPENSSL_NO_DTLS1_3)
 	php_stream_xport_unregister("dtlsv1.3");
 #endif
 	/* reinstate the default udp handler */

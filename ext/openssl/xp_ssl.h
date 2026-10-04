@@ -56,11 +56,13 @@
 #define HAVE_TLS13 1
 #endif
 
-#ifndef OPENSSL_NO_DTLS
+/* DTLS 1.0 is deprecated (RFC 8996) and never offered: the streams need DTLS 1.2 */
+#if !defined(OPENSSL_NO_DTLS) && !defined(OPENSSL_NO_DTLS1_2)
 #define HAVE_DTLS 1
 #endif
 
-#if defined(HAVE_DTLS) && defined(DTLS1_3_VERSION)
+/* The version constant is defined even when the protocol is disabled */
+#if defined(HAVE_DTLS) && defined(DTLS1_3_VERSION) && !defined(OPENSSL_NO_DTLS1_3)
 #define HAVE_DTLS13 1
 #endif
 

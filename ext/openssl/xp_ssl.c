@@ -3445,7 +3445,6 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 #endif
 #ifdef HAVE_DTLS
 					case DTLS1_2_VERSION: proto_str = "DTLSv1.2"; break;
-					case DTLS1_VERSION: proto_str = "DTLSv1.0"; break;
 #endif
 #ifdef HAVE_TLS13
 					case TLS1_3_VERSION: proto_str = "TLSv1.3"; break;
