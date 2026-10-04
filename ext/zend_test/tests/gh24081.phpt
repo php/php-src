@@ -3,6 +3,7 @@ GH-24081 (User opcode handlers resume execution against a stale frame under ZEND
 --EXTENSIONS--
 zend_test
 --INI--
+opcache.jit=disable
 zend_test.observer.enabled=1
 zend_test.observer.show_opcode_in_user_handler=ZEND_ADD
 --FILE--
