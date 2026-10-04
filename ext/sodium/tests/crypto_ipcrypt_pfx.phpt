@@ -2,6 +2,7 @@
 Check for libsodium ipcrypt prefix-preserving (pfx)
 --EXTENSIONS--
 sodium
+filter
 --SKIPIF--
 <?php
 if (!defined('SODIUM_CRYPTO_IPCRYPT_KEYBYTES')) print "skip libsodium without ipcrypt (requires >= 1.0.21)";
