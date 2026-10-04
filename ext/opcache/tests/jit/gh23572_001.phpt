@@ -41,7 +41,7 @@ for ($i = 0; $i < 4; $i++) var_dump($a->callSelf());
 for ($i = 0; $i < 4; $i++) var_dump($b->callSelf());
 var_dump($a->callSelf());
 ?>
---EXPECT--
+--EXPECTF--
 string(1) "A"
 string(1) "A"
 string(1) "A"

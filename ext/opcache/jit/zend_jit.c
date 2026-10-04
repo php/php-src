@@ -581,6 +581,10 @@ static zend_class_entry* zend_get_known_class(const zend_op_array *op_array, con
 		}
 	} else {
 		ZEND_ASSERT(op_type == IS_UNUSED);
+		if (op_array->fn_flags & ZEND_ACC_TRAIT_CLONE) {
+			/* self and parent depend on the class using the trait */
+			return NULL;
+		}
 		if ((op.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) {
 			ce = op_array->scope;
 		} else {
