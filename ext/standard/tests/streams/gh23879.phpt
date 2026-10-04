@@ -1,5 +1,5 @@
 --TEST--
-GH-23879 (stream_socket_accept() reports AcceptFailed when a non-blocking listener has no pending connection)
+GH-23879 (stream_socket_accept() reports AcceptFailed when no connection is pending)
 --FILE--
 <?php
 $server = stream_socket_server(
@@ -21,11 +21,8 @@ var_dump(is_resource(stream_socket_accept($server, 1)));
 var_dump(stream_socket_accept($server, 0));
 
 stream_set_blocking($server, true);
-try {
-    stream_socket_accept($server, 0);
-} catch (StreamException $e) {
-    var_dump($e->getErrors()[0]->code);
-}
+var_dump(stream_socket_accept($server, 0.1));
+var_dump(stream_last_errors());
 ?>
 --EXPECT--
 bool(false)
@@ -33,4 +30,6 @@ array(0) {
 }
 bool(true)
 bool(false)
-enum(StreamErrorCode::AcceptFailed)
+bool(false)
+array(0) {
+}

@@ -28,6 +28,8 @@ PHP 8.7 UPGRADE NOTES
   . The number of filters that can be chained in a php://filter URL is limited
     to 16 by default. Set the stream context option max_filter_count to change
     this.
+  . stream_socket_accept() no longer reports an AcceptFailed error when no
+    connection is pending before the timeout. It still returns false.
 
 ========================================
 2. New Features

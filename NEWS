@@ -85,8 +85,8 @@ PHP                                                                        NEWS
 - Streams:
   . Applied the so_linger, so_rcvbuf and so_sndbuf context options to unix
     sockets. (David Carlier)
-  . Fixed bug GH-23879 (stream_socket_accept() reports AcceptFailed when a
-    non-blocking listener has no pending connection). (Lazizbek Ergashev)
+  . stream_socket_accept() no longer reports AcceptFailed on a timeout with no
+    pending connection (GH-23879). (Lazizbek Ergashev)
 
 - Standard:
   . Fixed bug #60110 (fclose(), file_put_contents(), copy() do not return false

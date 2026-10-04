@@ -3557,9 +3557,9 @@ static inline int php_openssl_tcp_sockop_accept(php_stream *stream, php_openssl_
 				}
 			}
 		}
-	} else if (!sock->s.is_blocked && (xparam->outputs.error_code == PHP_TIMEOUT_ERROR_VALUE
-			|| PHP_IS_TRANSIENT_ERROR(xparam->outputs.error_code))) {
-		/* No pending connection is not an error for a non-blocking listener. */
+	} else if (xparam->outputs.error_code == PHP_TIMEOUT_ERROR_VALUE
+			|| PHP_IS_TRANSIENT_ERROR(xparam->outputs.error_code)) {
+		/* No pending connection within the timeout is not an error. */
 		return 0;
 	}
 
