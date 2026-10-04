@@ -3680,8 +3680,7 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 
 #ifdef HAVE_DTLS
 				case STREAM_XPORT_OP_BIND:
-					xparam->outputs.returncode = php_stream_socket_ops.set_option(
-						stream, option, value, ptrparam);
+					php_stream_socket_ops.set_option(stream, option, value, ptrparam);
 					if (xparam->outputs.returncode == 0 && sslsock->s.is_dgram && sslsock->enable_on_connect) {
 						/* A dtls:// server: the port demultiplexes its peers from here on */
 						xparam->outputs.returncode = php_openssl_dtls_listen(stream, sslsock);
