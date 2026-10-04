@@ -45,6 +45,14 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 - The INIT_CLASS_ENTRY_INIT_METHODS() macro, which was previously used as
   part of handling disabled classes, was removed following the removal of
   the `disable_classes` INI setting in PHP 8.5.
+- The php_stream_wrapper.is_url field was replaced by php_stream_wrapper.flags
+  with PHP_STREAM_WRAPPER_FLAG_URL taking the place of is_url set to 1. Wrappers
+  that open the path following their "scheme://" through the stream layer, such
+  as compress.zlib:// and compress.bzip2://, set PHP_STREAM_WRAPPER_FLAG_NESTED
+  and copy PHP_STREAM_FLAG_URL from the inner stream to the stream they return.
+  Use php_stream_wrapper_is_url() to find out whether a path opened by a wrapper
+  is a URL and php_stream_is_url() for an opened stream, instead of reading the
+  field directly.
 
 ========================
 2. Build system changes

@@ -160,8 +160,13 @@ typedef struct _php_stream_wrapper_ops {
 struct _php_stream_wrapper	{
 	const php_stream_wrapper_ops *wops;	/* operations the wrapper can perform */
 	void *abstract;					/* context for the wrapper */
-	int is_url;						/* so that PG(allow_url_fopen) can be respected */
+	uint32_t flags;					/* PHP_STREAM_WRAPPER_FLAG_XXX */
 };
+
+/* remote access, so PG(allow_url_fopen) and PG(allow_url_include) apply */
+#define PHP_STREAM_WRAPPER_FLAG_URL					0x1
+/* the path after "scheme://" is opened through the stream layer, e.g. compress.zlib://http://... */
+#define PHP_STREAM_WRAPPER_FLAG_NESTED				0x2
 
 #define PHP_STREAM_FLAG_NO_SEEK						0x1
 #define PHP_STREAM_FLAG_NO_BUFFER					0x2
@@ -190,6 +195,8 @@ struct _php_stream_wrapper	{
 #define PHP_STREAM_FLAG_NO_RSCR_DTOR_CLOSE			0x200
 
 #define PHP_STREAM_FLAG_NO_IO						0x400
+
+#define PHP_STREAM_FLAG_URL							0x800
 
 #define PHP_STREAM_FLAG_WAS_WRITTEN					0x80000000
 
@@ -619,6 +626,8 @@ PHPAPI zend_result php_register_url_stream_wrapper_volatile(zend_string *protoco
 PHPAPI zend_result php_unregister_url_stream_wrapper_volatile(zend_string *protocol);
 PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC);
 PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const char **path_for_open, int options);
+PHPAPI bool php_stream_wrapper_is_url(const php_stream_wrapper *wrapper, const char *path);
+#define php_stream_is_url(stream)	(((stream)->flags & PHP_STREAM_FLAG_URL) != 0)
 PHPAPI const char *php_stream_locate_eol(php_stream *stream, zend_string *buf);
 
 #define php_stream_open_wrapper(path, mode, options, opened)	_php_stream_open_wrapper_ex((path), (mode), (options), (opened), NULL STREAMS_CC)

@@ -28,6 +28,9 @@ PHP 8.7 UPGRADE NOTES
   . The number of filters that can be chained in a php://filter URL is limited
     to 16 by default. Set the stream context option max_filter_count to change
     this.
+  . stream_is_local() now looks through the compress.zlib:// and
+    compress.bzip2:// wrappers and reports the locality of the wrapped path, so
+    compress.zlib://http://example.com/file.gz is no longer considered local.
 
 ========================================
 2. New Features
