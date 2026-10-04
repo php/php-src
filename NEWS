@@ -128,6 +128,8 @@ PHP                                                                        NEWS
     read failure. (Ilia Alshanetsky)
   . Fixed iptcembed() corrupting JPEG headers when called recursively from an
     output handler. (Ilia Alshanetsky)
+  . Fixed proc_open() leaking descriptor zero when descriptor setup fails.
+    (Ilia Alshanetsky)
 
 - Tidy:
   . Fixed a use-after-free when a tidyNode is used after its document is
