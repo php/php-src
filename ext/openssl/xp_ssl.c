@@ -3909,6 +3909,13 @@ static int php_openssl_sockop_cast(php_stream *stream, int castas, void **ret)  
 			}
 			return SUCCESS;
 
+		case PHP_STREAM_AS_FD_FOR_POLL:
+			/* Descriptor only, OpenSSL pending bytes stay put */
+			if (ret) {
+				*(php_socket_t *)ret = sslsock->s.socket;
+			}
+			return SUCCESS;
+
 		case PHP_STREAM_AS_FD:
 		case PHP_STREAM_AS_SOCKETD:
 			if (sslsock->ssl_active) {

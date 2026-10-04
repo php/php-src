@@ -1434,6 +1434,8 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr)
 
 	switch(castas) {
 	case PHP_STREAM_AS_FD_FOR_SELECT:
+	case PHP_STREAM_AS_FD_FOR_POLL:
+		/* Userland only knows STREAM_CAST_FOR_SELECT */
 		ZVAL_LONG(&args[0], PHP_STREAM_AS_FD_FOR_SELECT);
 		break;
 	default:

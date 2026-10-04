@@ -4417,6 +4417,7 @@ static int php_pgsql_fd_cast(php_stream *stream, int cast_as, void **ret) /* {{{
 
 	switch (cast_as)	{
 		case PHP_STREAM_AS_FD_FOR_SELECT:
+		case PHP_STREAM_AS_FD_FOR_POLL:
 		case PHP_STREAM_AS_FD:
 		case PHP_STREAM_AS_SOCKETD: {
 				int fd_number = PQsocket(pgsql);
