@@ -3192,13 +3192,6 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle) /* {{{
 #endif
 	unsigned i;
 
-	bool port_socket = false;
-#ifdef HAVE_DTLS
-	if (sslsock->port != NULL) {
-		port_socket = php_openssl_dtls_detach(stream, sslsock);
-	}
-#endif
-
 	if (close_handle) {
 		if (sslsock->ssl_active) {
 			SSL_shutdown(sslsock->ssl_handle);
@@ -3209,9 +3202,12 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle) /* {{{
 			SSL_free(sslsock->ssl_handle);
 			sslsock->ssl_handle = NULL;
 		}
-		if (port_socket) {
+#ifdef HAVE_DTLS
+		/* The socket of a dtls:// server belongs to its port, which closes it with its last user */
+		if (sslsock->port != NULL && php_openssl_dtls_detach(stream, sslsock)) {
 			sslsock->s.socket = SOCK_ERR;
 		}
+#endif
 		if (sslsock->ctx) {
 			SSL_CTX_free(sslsock->ctx);
 			sslsock->ctx = NULL;
@@ -3245,6 +3241,11 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle) /* {{{
 		}
 	}
 
+#ifdef HAVE_DTLS
+	if (sslsock->port != NULL) {
+		php_openssl_dtls_detach(stream, sslsock);
+	}
+#endif
 	if (sslsock->conn) {
 		php_openssl_conn_free(sslsock->conn);
 		sslsock->conn = NULL;
