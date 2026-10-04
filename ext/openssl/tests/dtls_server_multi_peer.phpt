@@ -15,7 +15,7 @@ include 'CertificateGenerator.inc';
 
 $serverCode = <<<'CODE'
     $ctx = stream_context_create(['ssl' => ['local_cert' => '%s']]);
-    $server = stream_socket_server('dtls://0.0.0.0:0', $errno, $errstr,
+    $server = stream_socket_server('dtls://127.0.0.1:0', $errno, $errstr,
         STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $ctx);
     phpt_notify_server_start($server);
 
