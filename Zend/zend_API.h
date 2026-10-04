@@ -1584,6 +1584,8 @@ static zend_always_inline zval *zend_try_array_init(zval *zv)
 	_(Z_EXPECTED_OBJECT_OR_CLASS_NAME_OR_NULL, "an object, a valid class name, or null") \
 	_(Z_EXPECTED_OBJECT_OR_STRING,	"of type object|string") \
 	_(Z_EXPECTED_OBJECT_OR_STRING_OR_NULL, "of type object|string|null") \
+	_(Z_EXPECTED_ENUM_OR_LONG, "of type enum|int") \
+	_(Z_EXPECTED_ARRAY_OR_ENUM_OR_LONG, "of type array|enum|int") \
 
 #define Z_EXPECTED_TYPE
 
@@ -2066,6 +2068,22 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 		dest = zend_enum_fetch_case_id(__##dest); \
 	}
 
+#define Z_PARAM_ENUM_OR_LONG(dest, ce) \
+	Z_PARAM_PROLOGUE(0, 0); \
+	if (UNEXPECTED(!zend_parse_arg_enum_or_long(_arg, &dest, ce))) { \
+		_expected_type = Z_EXPECTED_ENUM_OR_LONG; \
+		_error_code = ZPP_ERROR_WRONG_ARG; \
+		break; \
+	}
+
+#define Z_PARAM_ARRAY_HT_OR_ENUM_OR_LONG(dest_ht, dest_long, ce) \
+	Z_PARAM_PROLOGUE(0, 0); \
+	if (UNEXPECTED(!zend_parse_arg_array_ht_or_enum_or_long(_arg, &dest_ht, &dest_long, ce))) { \
+		_expected_type = Z_EXPECTED_ARRAY_OR_ENUM_OR_LONG; \
+		_error_code = ZPP_ERROR_WRONG_ARG; \
+		break; \
+	}
+
 /* old "p" */
 #define Z_PARAM_PATH_EX(dest, dest_len, check_null, deref) \
 		Z_PARAM_PROLOGUE(deref, 0); \
@@ -2482,6 +2500,64 @@ static zend_always_inline bool zend_parse_arg_array_ht_or_long(
 	}
 
 	return 1;
+}
+
+static zend_always_inline bool zend_enum_fetch_long_value(zval *arg, zend_long *dest, zend_class_entry *ce)
+{
+    if (EXPECTED(Z_TYPE_P(arg) != IS_OBJECT)) {
+        *dest = zval_get_long(arg);
+        return 1;
+    }
+
+    if (EXPECTED(instanceof_function(Z_OBJCE_P(arg), ce))) {
+        zend_object *zobj = Z_OBJ_P(arg);
+
+        ZEND_ASSERT(zobj->ce->ce_flags & ZEND_ACC_ENUM);
+        ZEND_ASSERT(zobj->ce->enum_backing_type == IS_LONG);
+
+        zval *value = OBJ_PROP_NUM(zobj, 1);
+
+        if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+            *dest = Z_LVAL_P(value);
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+static zend_always_inline bool zend_parse_arg_enum_or_long(zval *arg, zend_long *dest, zend_class_entry *ce)
+{
+    return zend_enum_fetch_long_value(arg, dest, ce);
+}
+
+static zend_always_inline bool zend_parse_arg_array_ht_or_enum_or_long(
+	zval *arg, HashTable **dest_ht, zend_long *dest_long, zend_class_entry *ce
+) {
+	if (EXPECTED(Z_TYPE_P(arg) == IS_ARRAY)) {
+		*dest_ht = Z_ARRVAL_P(arg);
+		return 1;
+	}
+
+	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG)) {
+		*dest_long = Z_LVAL_P(arg);
+		return 1;
+	}
+
+	if (EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)
+			&& instanceof_function(Z_OBJCE_P(arg), ce)) {
+		zval *value = OBJ_PROP_NUM(Z_OBJ_P(arg), 1);
+
+		ZEND_ASSERT(Z_OBJCE_P(arg)->ce_flags & ZEND_ACC_ENUM);
+		ZEND_ASSERT(Z_OBJCE_P(arg)->enum_backing_type == IS_LONG);
+
+		if (EXPECTED(Z_TYPE_P(value) == IS_LONG)) {
+			*dest_long = Z_LVAL_P(value);
+			return 1;
+		}
+	}
+
+	return 0;
 }
 
 static zend_always_inline bool zend_parse_arg_object(zval *arg, zval **dest, zend_class_entry *ce, bool check_null)

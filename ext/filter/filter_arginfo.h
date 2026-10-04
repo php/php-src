@@ -1,8 +1,10 @@
 /* This is a generated file, edit filter.stub.php instead.
- * Stub hash: bd421586fdc068c456415b597d718787eb140517 */
+ * Stub hash: f12b6f2b9560d0a9be085e020f603163cede9dd2
+ * Has decl header: yes */
 
 #include "zend_attributes.h"
 #include "zend_constants.h"
+#include "zend_enum.h"
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_filter_has_var, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, input_type, IS_LONG, 0)
@@ -12,25 +14,25 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_filter_input, 0, 2, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, var_name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, filter, IS_LONG, 0, "FILTER_DEFAULT")
-	ZEND_ARG_TYPE_MASK(0, options, MAY_BE_ARRAY|MAY_BE_LONG, "0")
+	ZEND_ARG_OBJ_TYPE_MASK(0, filter, Filter\\Filter, MAY_BE_LONG, "Filter\\Filter::DEFAULT")
+	ZEND_ARG_OBJ_TYPE_MASK(0, options, Filter\\Flag, MAY_BE_ARRAY|MAY_BE_LONG, "0")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_filter_var, 0, 1, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, filter, IS_LONG, 0, "FILTER_DEFAULT")
-	ZEND_ARG_TYPE_MASK(0, options, MAY_BE_ARRAY|MAY_BE_LONG, "0")
+	ZEND_ARG_OBJ_TYPE_MASK(0, filter, Filter\\Filter, MAY_BE_LONG, "Filter\\Filter::DEFAULT")
+	ZEND_ARG_OBJ_TYPE_MASK(0, options, Filter\\Flag, MAY_BE_ARRAY|MAY_BE_LONG, "0")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_filter_input_array, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE|MAY_BE_NULL)
 	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
-	ZEND_ARG_TYPE_MASK(0, options, MAY_BE_ARRAY|MAY_BE_LONG, "FILTER_DEFAULT")
+	ZEND_ARG_OBJ_TYPE_MASK(0, options, Filter\\Filter, MAY_BE_ARRAY|MAY_BE_LONG, "Filter\\Filter::DEFAULT")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, add_empty, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_filter_var_array, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_MASK(0, options, MAY_BE_ARRAY|MAY_BE_LONG, "FILTER_DEFAULT")
+	ZEND_ARG_OBJ_TYPE_MASK(0, options, Filter\\Filter, MAY_BE_ARRAY|MAY_BE_LONG, "Filter\\Filter::DEFAULT")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, add_empty, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
@@ -150,6 +152,180 @@ static zend_class_entry *register_class_Filter_FilterFailedException(zend_class_
 
 	INIT_NS_CLASS_ENTRY(ce, "Filter", "FilterFailedException", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Filter_FilterException, 0);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Filter_Filter(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("Filter\\Filter", IS_LONG, NULL);
+
+	zval enum_case_DEFAULT_value;
+	ZVAL_LONG(&enum_case_DEFAULT_value, FILTER_DEFAULT);
+	zend_enum_add_case_cstr(class_entry, "DEFAULT", &enum_case_DEFAULT_value);
+
+	zval enum_case_VALIDATE_BOOL_value;
+	ZVAL_LONG(&enum_case_VALIDATE_BOOL_value, FILTER_VALIDATE_BOOL);
+	zend_enum_add_case_cstr(class_entry, "VALIDATE_BOOL", &enum_case_VALIDATE_BOOL_value);
+
+	zval enum_case_VALIDATE_INT_value;
+	ZVAL_LONG(&enum_case_VALIDATE_INT_value, FILTER_VALIDATE_INT);
+	zend_enum_add_case_cstr(class_entry, "VALIDATE_INT", &enum_case_VALIDATE_INT_value);
+
+	zval enum_case_VALIDATE_FLOAT_value;
+	ZVAL_LONG(&enum_case_VALIDATE_FLOAT_value, FILTER_VALIDATE_FLOAT);
+	zend_enum_add_case_cstr(class_entry, "VALIDATE_FLOAT", &enum_case_VALIDATE_FLOAT_value);
+
+	zval enum_case_VALIDATE_REGEXP_value;
+	ZVAL_LONG(&enum_case_VALIDATE_REGEXP_value, FILTER_VALIDATE_REGEXP);
+	zend_enum_add_case_cstr(class_entry, "VALIDATE_REGEXP", &enum_case_VALIDATE_REGEXP_value);
+
+	zval enum_case_VALIDATE_DOMAIN_value;
+	ZVAL_LONG(&enum_case_VALIDATE_DOMAIN_value, FILTER_VALIDATE_DOMAIN);
+	zend_enum_add_case_cstr(class_entry, "VALIDATE_DOMAIN", &enum_case_VALIDATE_DOMAIN_value);
+
+	zval enum_case_VALIDATE_URL_value;
+	ZVAL_LONG(&enum_case_VALIDATE_URL_value, FILTER_VALIDATE_URL);
+	zend_enum_add_case_cstr(class_entry, "VALIDATE_URL", &enum_case_VALIDATE_URL_value);
+
+	zval enum_case_VALIDATE_EMAIL_value;
+	ZVAL_LONG(&enum_case_VALIDATE_EMAIL_value, FILTER_VALIDATE_EMAIL);
+	zend_enum_add_case_cstr(class_entry, "VALIDATE_EMAIL", &enum_case_VALIDATE_EMAIL_value);
+
+	zval enum_case_VALIDATE_IP_value;
+	ZVAL_LONG(&enum_case_VALIDATE_IP_value, FILTER_VALIDATE_IP);
+	zend_enum_add_case_cstr(class_entry, "VALIDATE_IP", &enum_case_VALIDATE_IP_value);
+
+	zval enum_case_VALIDATE_MAC_value;
+	ZVAL_LONG(&enum_case_VALIDATE_MAC_value, FILTER_VALIDATE_MAC);
+	zend_enum_add_case_cstr(class_entry, "VALIDATE_MAC", &enum_case_VALIDATE_MAC_value);
+
+	zval enum_case_SANITIZE_STRING_value;
+	ZVAL_LONG(&enum_case_SANITIZE_STRING_value, FILTER_SANITIZE_STRING);
+	zend_enum_add_case_cstr(class_entry, "SANITIZE_STRING", &enum_case_SANITIZE_STRING_value);
+
+	zval enum_case_SANITIZE_EMAIL_value;
+	ZVAL_LONG(&enum_case_SANITIZE_EMAIL_value, FILTER_SANITIZE_EMAIL);
+	zend_enum_add_case_cstr(class_entry, "SANITIZE_EMAIL", &enum_case_SANITIZE_EMAIL_value);
+
+	zval enum_case_SANITIZE_URL_value;
+	ZVAL_LONG(&enum_case_SANITIZE_URL_value, FILTER_SANITIZE_URL);
+	zend_enum_add_case_cstr(class_entry, "SANITIZE_URL", &enum_case_SANITIZE_URL_value);
+
+	zval enum_case_SANITIZE_NUMBER_INT_value;
+	ZVAL_LONG(&enum_case_SANITIZE_NUMBER_INT_value, FILTER_SANITIZE_NUMBER_INT);
+	zend_enum_add_case_cstr(class_entry, "SANITIZE_NUMBER_INT", &enum_case_SANITIZE_NUMBER_INT_value);
+
+	zval enum_case_SANITIZE_NUMBER_FLOAT_value;
+	ZVAL_LONG(&enum_case_SANITIZE_NUMBER_FLOAT_value, FILTER_SANITIZE_NUMBER_FLOAT);
+	zend_enum_add_case_cstr(class_entry, "SANITIZE_NUMBER_FLOAT", &enum_case_SANITIZE_NUMBER_FLOAT_value);
+
+	zval enum_case_SANITIZE_SPECIAL_CHARS_value;
+	ZVAL_LONG(&enum_case_SANITIZE_SPECIAL_CHARS_value, FILTER_SANITIZE_SPECIAL_CHARS);
+	zend_enum_add_case_cstr(class_entry, "SANITIZE_SPECIAL_CHARS", &enum_case_SANITIZE_SPECIAL_CHARS_value);
+
+	zval enum_case_SANITIZE_FULL_SPECIAL_CHARS_value;
+	ZVAL_LONG(&enum_case_SANITIZE_FULL_SPECIAL_CHARS_value, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+	zend_enum_add_case_cstr(class_entry, "SANITIZE_FULL_SPECIAL_CHARS", &enum_case_SANITIZE_FULL_SPECIAL_CHARS_value);
+
+	zval enum_case_SANITIZE_ADD_SLASHES_value;
+	ZVAL_LONG(&enum_case_SANITIZE_ADD_SLASHES_value, FILTER_SANITIZE_ADD_SLASHES);
+	zend_enum_add_case_cstr(class_entry, "SANITIZE_ADD_SLASHES", &enum_case_SANITIZE_ADD_SLASHES_value);
+
+	zval enum_case_CALLBACK_value;
+	ZVAL_LONG(&enum_case_CALLBACK_value, FILTER_CALLBACK);
+	zend_enum_add_case_cstr(class_entry, "CALLBACK", &enum_case_CALLBACK_value);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Filter_Flag(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("Filter\\Flag", IS_LONG, NULL);
+
+	zval enum_case_NONE_value;
+	ZVAL_LONG(&enum_case_NONE_value, FILTER_FLAG_NONE);
+	zend_enum_add_case_cstr(class_entry, "NONE", &enum_case_NONE_value);
+
+	zval enum_case_ALLOW_OCTAL_value;
+	ZVAL_LONG(&enum_case_ALLOW_OCTAL_value, FILTER_FLAG_ALLOW_OCTAL);
+	zend_enum_add_case_cstr(class_entry, "ALLOW_OCTAL", &enum_case_ALLOW_OCTAL_value);
+
+	zval enum_case_ALLOW_HEX_value;
+	ZVAL_LONG(&enum_case_ALLOW_HEX_value, FILTER_FLAG_ALLOW_HEX);
+	zend_enum_add_case_cstr(class_entry, "ALLOW_HEX", &enum_case_ALLOW_HEX_value);
+
+	zval enum_case_STRIP_LOW_value;
+	ZVAL_LONG(&enum_case_STRIP_LOW_value, FILTER_FLAG_STRIP_LOW);
+	zend_enum_add_case_cstr(class_entry, "STRIP_LOW", &enum_case_STRIP_LOW_value);
+
+	zval enum_case_STRIP_HIGH_value;
+	ZVAL_LONG(&enum_case_STRIP_HIGH_value, FILTER_FLAG_STRIP_HIGH);
+	zend_enum_add_case_cstr(class_entry, "STRIP_HIGH", &enum_case_STRIP_HIGH_value);
+
+	zval enum_case_STRIP_BACKTICK_value;
+	ZVAL_LONG(&enum_case_STRIP_BACKTICK_value, FILTER_FLAG_STRIP_BACKTICK);
+	zend_enum_add_case_cstr(class_entry, "STRIP_BACKTICK", &enum_case_STRIP_BACKTICK_value);
+
+	zval enum_case_ENCODE_LOW_value;
+	ZVAL_LONG(&enum_case_ENCODE_LOW_value, FILTER_FLAG_ENCODE_LOW);
+	zend_enum_add_case_cstr(class_entry, "ENCODE_LOW", &enum_case_ENCODE_LOW_value);
+
+	zval enum_case_ENCODE_HIGH_value;
+	ZVAL_LONG(&enum_case_ENCODE_HIGH_value, FILTER_FLAG_ENCODE_HIGH);
+	zend_enum_add_case_cstr(class_entry, "ENCODE_HIGH", &enum_case_ENCODE_HIGH_value);
+
+	zval enum_case_ENCODE_AMP_value;
+	ZVAL_LONG(&enum_case_ENCODE_AMP_value, FILTER_FLAG_ENCODE_AMP);
+	zend_enum_add_case_cstr(class_entry, "ENCODE_AMP", &enum_case_ENCODE_AMP_value);
+
+	zval enum_case_NO_ENCODE_QUOTES_value;
+	ZVAL_LONG(&enum_case_NO_ENCODE_QUOTES_value, FILTER_FLAG_NO_ENCODE_QUOTES);
+	zend_enum_add_case_cstr(class_entry, "NO_ENCODE_QUOTES", &enum_case_NO_ENCODE_QUOTES_value);
+
+	zval enum_case_EMPTY_STRING_NULL_value;
+	ZVAL_LONG(&enum_case_EMPTY_STRING_NULL_value, FILTER_FLAG_EMPTY_STRING_NULL);
+	zend_enum_add_case_cstr(class_entry, "EMPTY_STRING_NULL", &enum_case_EMPTY_STRING_NULL_value);
+
+	zval enum_case_ALLOW_FRACTION_value;
+	ZVAL_LONG(&enum_case_ALLOW_FRACTION_value, FILTER_FLAG_ALLOW_FRACTION);
+	zend_enum_add_case_cstr(class_entry, "ALLOW_FRACTION", &enum_case_ALLOW_FRACTION_value);
+
+	zval enum_case_ALLOW_THOUSAND_value;
+	ZVAL_LONG(&enum_case_ALLOW_THOUSAND_value, FILTER_FLAG_ALLOW_THOUSAND);
+	zend_enum_add_case_cstr(class_entry, "ALLOW_THOUSAND", &enum_case_ALLOW_THOUSAND_value);
+
+	zval enum_case_ALLOW_SCIENTIFIC_value;
+	ZVAL_LONG(&enum_case_ALLOW_SCIENTIFIC_value, FILTER_FLAG_ALLOW_SCIENTIFIC);
+	zend_enum_add_case_cstr(class_entry, "ALLOW_SCIENTIFIC", &enum_case_ALLOW_SCIENTIFIC_value);
+
+	zval enum_case_PATH_REQUIRED_value;
+	ZVAL_LONG(&enum_case_PATH_REQUIRED_value, FILTER_FLAG_PATH_REQUIRED);
+	zend_enum_add_case_cstr(class_entry, "PATH_REQUIRED", &enum_case_PATH_REQUIRED_value);
+
+	zval enum_case_QUERY_REQUIRED_value;
+	ZVAL_LONG(&enum_case_QUERY_REQUIRED_value, FILTER_FLAG_QUERY_REQUIRED);
+	zend_enum_add_case_cstr(class_entry, "QUERY_REQUIRED", &enum_case_QUERY_REQUIRED_value);
+
+	zval enum_case_IPV4_value;
+	ZVAL_LONG(&enum_case_IPV4_value, FILTER_FLAG_IPV4);
+	zend_enum_add_case_cstr(class_entry, "IPV4", &enum_case_IPV4_value);
+
+	zval enum_case_IPV6_value;
+	ZVAL_LONG(&enum_case_IPV6_value, FILTER_FLAG_IPV6);
+	zend_enum_add_case_cstr(class_entry, "IPV6", &enum_case_IPV6_value);
+
+	zval enum_case_NO_RES_RANGE_value;
+	ZVAL_LONG(&enum_case_NO_RES_RANGE_value, FILTER_FLAG_NO_RES_RANGE);
+	zend_enum_add_case_cstr(class_entry, "NO_RES_RANGE", &enum_case_NO_RES_RANGE_value);
+
+	zval enum_case_NO_PRIV_RANGE_value;
+	ZVAL_LONG(&enum_case_NO_PRIV_RANGE_value, FILTER_FLAG_NO_PRIV_RANGE);
+	zend_enum_add_case_cstr(class_entry, "NO_PRIV_RANGE", &enum_case_NO_PRIV_RANGE_value);
+
+	zval enum_case_GLOBAL_RANGE_value;
+	ZVAL_LONG(&enum_case_GLOBAL_RANGE_value, FILTER_FLAG_GLOBAL_RANGE);
+	zend_enum_add_case_cstr(class_entry, "GLOBAL_RANGE", &enum_case_GLOBAL_RANGE_value);
 
 	return class_entry;
 }

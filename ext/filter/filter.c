@@ -29,6 +29,9 @@ ZEND_DECLARE_MODULE_GLOBALS(filter)
 #include "filter_arginfo.h"
 #include "zend_exceptions.h"
 
+PHPAPI zend_class_entry *filter_ce;
+PHPAPI zend_class_entry *flag_ce;
+
 typedef struct filter_list_entry {
 	const char *name;
 	int    id;
@@ -163,6 +166,8 @@ PHP_MINIT_FUNCTION(filter)
 
 	php_filter_exception_ce = register_class_Filter_FilterException(zend_ce_exception);
 	php_filter_failed_exception_ce = register_class_Filter_FilterFailedException(php_filter_exception_ce);
+    filter_ce = register_class_Filter_Filter();
+    flag_ce = register_class_Filter_Flag();
 
 	return SUCCESS;
 }
@@ -505,7 +510,10 @@ static void php_filter_call(
 	} else {
 		zval *option;
 		if ((option = zend_hash_str_find(filter_args_ht, "filter", sizeof("filter") - 1)) != NULL) {
-			filter = zval_get_long(option);
+			if (!zend_enum_fetch_long_value(option, &filter, filter_ce)) {
+				/* error */
+				return;
+			}
 		}
 
 		if ((option = zend_hash_str_find_deref(filter_args_ht, "options", sizeof("options") - 1)) != NULL) {
@@ -520,7 +528,7 @@ static void php_filter_call(
 		}
 
 		if ((option = zend_hash_str_find(filter_args_ht, "flags", sizeof("flags") - 1)) != NULL) {
-			filter_flags = zval_get_long(option);
+    		zend_enum_fetch_long_value(option, &filter_flags, flag_ce);
 
 			if (!(filter_flags & FILTER_REQUIRE_ARRAY ||  filter_flags & FILTER_FORCE_ARRAY)) {
 				filter_flags |= FILTER_REQUIRE_SCALAR;
@@ -661,7 +669,7 @@ PHP_FUNCTION(filter_input)
 		Z_PARAM_STR(var)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(filter)
-		Z_PARAM_ARRAY_HT_OR_LONG(filter_args_ht, filter_args_long)
+		Z_PARAM_ARRAY_HT_OR_ENUM_OR_LONG(filter_args_ht, filter_args_long, flag_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!PHP_FILTER_ID_EXISTS(filter)) {
@@ -681,7 +689,7 @@ PHP_FUNCTION(filter_input)
 		} else {
 			zval *option;
 			if ((option = zend_hash_str_find(filter_args_ht, "flags", sizeof("flags") - 1)) != NULL) {
-				filter_flags = zval_get_long(option);
+				zend_enum_fetch_long_value(option, &filter_flags, flag_ce);
 			}
 		}
 
@@ -746,8 +754,8 @@ PHP_FUNCTION(filter_var)
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_ZVAL(data)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(filter)
-		Z_PARAM_ARRAY_HT_OR_LONG(filter_args_ht, filter_args_long)
+		Z_PARAM_ENUM_OR_LONG(filter, filter_ce)
+		Z_PARAM_ARRAY_HT_OR_ENUM_OR_LONG(filter_args_ht, filter_args_long, flag_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!PHP_FILTER_ID_EXISTS(filter)) {
