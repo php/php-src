@@ -1187,8 +1187,9 @@ static void close_all_descriptors(descriptorspec_item *descriptors, int ndesc)
 {
 	for (int i = 0; i < ndesc; i++) {
 		close_descriptor(descriptors[i].childend);
-		if (descriptors[i].parentend)
+		if (descriptors[i].type != DESCRIPTOR_TYPE_STD) {
 			close_descriptor(descriptors[i].parentend);
+		}
 	}
 }
 

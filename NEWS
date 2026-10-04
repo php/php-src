@@ -196,6 +196,8 @@ PHP                                                                        NEWS
     read failure. (Ilia Alshanetsky)
   . Fixed iptcembed() corrupting JPEG headers when called recursively from an
     output handler. (Ilia Alshanetsky)
+  . Fixed proc_open() leaking descriptor zero when descriptor setup fails.
+    (Ilia Alshanetsky)
   . Fixed three Windows-only proc_open() defects: an uninitialized
     PROCESS_INFORMATION, an indeterminate comspec pointer after a failed
     lookup, and an unchecked CreateFileA() failure. (Ilia Alshanetsky)
