@@ -44,9 +44,11 @@ $clientCode = <<<'CODE'
         $total += strlen($chunk);
     }
     var_dump($total);
+    // The inner stream cannot be closed from under the TLS stream
+    var_dump(@fclose($inner));
     fclose($tls);
     var_dump(is_resource($inner));
-    fclose($inner);
+    var_dump(fclose($inner));
 CODE;
 
 include 'ServerClientTestCase.inc';
@@ -61,4 +63,6 @@ bool(true)
 bool(true)
 string(4) "PING"
 int(100000)
+bool(false)
+bool(true)
 bool(true)

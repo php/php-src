@@ -21,8 +21,11 @@ $serverCode = <<<'CODE'
 
     $peers = [];
     for ($i = 0; $i < 3; $i++) {
-        $peers[] = stream_socket_accept($server, 5, $addr);
-        echo "accepted ", $addr === '' ? 'no address' : 'with address', "\n";
+        $peer = stream_socket_accept($server, 5, $addr);
+        if (stream_socket_get_name($peer, true) !== $addr) {
+            echo "peer name mismatch\n";
+        }
+        $peers[] = $peer;
     }
     // Read in reverse order: datagrams for the other peers arrive meanwhile and are queued
     foreach (array_reverse($peers, true) as $i => $peer) {

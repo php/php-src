@@ -830,7 +830,9 @@ PHP_MINIT_FUNCTION(openssl)
 #ifndef OPENSSL_NO_DTLS
 	php_stream_xport_register("dtls", php_openssl_ssl_socket_factory);
 	php_stream_xport_register("dtlsv1.2", php_openssl_ssl_socket_factory);
+#ifdef DTLS1_3_VERSION
 	php_stream_xport_register("dtlsv1.3", php_openssl_ssl_socket_factory);
+#endif
 	/* override the default udp socket provider */
 	php_stream_xport_register("udp", php_openssl_ssl_socket_factory);
 #endif
@@ -912,7 +914,9 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 #ifndef OPENSSL_NO_DTLS
 	php_stream_xport_unregister("dtls");
 	php_stream_xport_unregister("dtlsv1.2");
+#ifdef DTLS1_3_VERSION
 	php_stream_xport_unregister("dtlsv1.3");
+#endif
 	/* reinstate the default udp handler */
 	php_stream_xport_register("udp", php_stream_generic_socket_factory);
 #endif

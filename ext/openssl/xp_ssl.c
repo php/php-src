@@ -3251,6 +3251,7 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle) /* {{{
 		sslsock->conn = NULL;
 	}
 	if (sslsock->inner) {
+		sslsock->inner->flags &= ~PHP_STREAM_FLAG_NO_FCLOSE;
 		if (sslsock->inner->res) {
 			zend_list_delete(sslsock->inner->res);
 		}
@@ -3712,6 +3713,28 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 					}
 					return PHP_STREAM_OPTION_RETURN_OK;
 
+#ifdef HAVE_DTLS
+				case STREAM_XPORT_OP_GET_PEER_NAME:
+					if (sslsock->port != NULL && sslsock->conn != NULL && sslsock->conn->peerlen > 0) {
+						php_network_populate_name_from_sockaddr((struct sockaddr *) &sslsock->conn->peer,
+								sslsock->conn->peerlen,
+								xparam->want_textaddr ? &xparam->outputs.textaddr : NULL,
+								xparam->want_addr ? &xparam->outputs.addr : NULL,
+								xparam->want_addr ? &xparam->outputs.addrlen : NULL);
+						xparam->outputs.returncode = 0;
+						return PHP_STREAM_OPTION_RETURN_OK;
+					}
+					break;
+
+				case STREAM_XPORT_OP_SHUTDOWN:
+					if (sslsock->port != NULL) {
+						/* The socket carries the other peers of the port */
+						xparam->outputs.returncode = 0;
+						return PHP_STREAM_OPTION_RETURN_OK;
+					}
+					break;
+#endif
+
 				case STREAM_XPORT_OP_ACCEPT:
 #ifdef HAVE_DTLS
 					if (sslsock->s.is_dgram) {
@@ -3975,6 +3998,8 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, size_t protolen,
 			if (inner->res) {
 				GC_ADDREF(inner->res);
 			}
+			/* Not from under the stream that carries its ciphertext through it */
+			inner->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 			sslsock->inner = inner;
 		}
 	}
