@@ -57,7 +57,7 @@ function stop_server($proc, $pipes) {
 // 1) with a client certificate -> the handshake succeeds.
 [$proc, $pipes, $port] = start_server($serverCert, $caFile);
 $ctx = stream_context_create(['ssl' => [
-    'verify_peer' => false,
+    'verify_peer' => false, 'verify_peer_name' => false,
     'local_cert' => $clientCert,
 ]]);
 $client = stream_socket_client("dtls://127.0.0.1:$port", $errno, $errstr, 10, STREAM_CLIENT_CONNECT, $ctx);
@@ -69,7 +69,7 @@ stop_server($proc, $pipes);
 
 // 2) without a client certificate -> the server rejects the handshake.
 [$proc, $pipes, $port] = start_server($serverCert, $caFile);
-$ctx = stream_context_create(['ssl' => ['verify_peer' => false]]);
+$ctx = stream_context_create(['ssl' => ['verify_peer' => false, 'verify_peer_name' => false]]);
 $client = @stream_socket_client("dtls://127.0.0.1:$port", $errno, $errstr, 10, STREAM_CLIENT_CONNECT, $ctx);
 var_dump($client === false);
 stop_server($proc, $pipes);

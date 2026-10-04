@@ -71,9 +71,12 @@ $ctx = stream_context_create(['ssl' => [
     'verify_peer' => true,
     'verify_peer_name' => false,
 ]]);
-$client = @stream_socket_client("dtls://127.0.0.1:$port", $errno, $errstr, 10, STREAM_CLIENT_CONNECT, $ctx);
+$warnings = [];
+set_error_handler(function ($no, $str) use (&$warnings) { $warnings[] = $str; return true; });
+$client = stream_socket_client("dtls://127.0.0.1:$port", $errno, $errstr, 10, STREAM_CLIENT_CONNECT, $ctx);
+restore_error_handler();
 var_dump($client === false);
-var_dump(str_contains($errstr, 'verify'));
+var_dump(count(preg_grep('/verif/', $warnings)) > 0);
 stop_server($proc, $pipes);
 
 ?>

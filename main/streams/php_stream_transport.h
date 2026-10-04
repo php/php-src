@@ -174,7 +174,7 @@ typedef enum {
 	STREAM_CRYPTO_METHOD_ANY_CLIENT = ((1 << 1) | (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5) | (1 << 6) | 1),
 	STREAM_CRYPTO_METHOD_DTLSv1_2_CLIENT = (1 << 7 | 1),
 	STREAM_CRYPTO_METHOD_DTLSv1_3_CLIENT = (1 << 8 | 1),
-	STREAM_CRYPTO_METHOD_DTLS_ANY_CLIENT = (1 << 7 | 1),
+	STREAM_CRYPTO_METHOD_DTLS_ANY_CLIENT = ((1 << 7) | (1 << 8) | 1),
 	STREAM_CRYPTO_METHOD_SSLv2_SERVER = (1 << 1),
 	STREAM_CRYPTO_METHOD_SSLv3_SERVER = (1 << 2),
 	/* v23 no longer negotiates SSL2 or SSL3 */
@@ -189,7 +189,7 @@ typedef enum {
 	STREAM_CRYPTO_METHOD_ANY_SERVER = ((1 << 1) | (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5) | (1 << 6)),
 	STREAM_CRYPTO_METHOD_DTLSv1_2_SERVER = (1 << 7),
 	STREAM_CRYPTO_METHOD_DTLSv1_3_SERVER = (1 << 8),
-	STREAM_CRYPTO_METHOD_DTLS_ANY_SERVER = (1 << 7)
+	STREAM_CRYPTO_METHOD_DTLS_ANY_SERVER = ((1 << 7) | (1 << 8))
 } php_stream_xport_crypt_method_t;
 
 /* Flags for crypto status */

@@ -33,7 +33,7 @@ CODE;
 $serverCode = sprintf($serverCode, $certFile);
 
 $clientCode = <<<'CODE'
-    $ctx = stream_context_create(['ssl' => ['verify_peer' => false, 'dtls_link_mtu' => 600]]);
+    $ctx = stream_context_create(['ssl' => ['verify_peer' => false, 'verify_peer_name' => false, 'dtls_link_mtu' => 600]]);
     $client = stream_socket_client('dtls://{{ ADDR }}', $errno, $errstr, 5,
         STREAM_CLIENT_CONNECT, $ctx);
     var_dump($client !== false);

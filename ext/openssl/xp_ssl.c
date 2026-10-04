@@ -27,9 +27,8 @@
 #include "zend_exceptions.h"
 #include "php_openssl.h"
 #include "php_openssl_backend.h"
+#include "xp_ssl.h"
 #include "php_io.h"
-#include "php_network.h"
-#include "xp_common.h"
 #include <openssl/ssl.h>
 #include <openssl/rsa.h>
 #include <openssl/x509.h>
@@ -57,77 +56,6 @@
 #include <arpa/inet.h>
 #endif
 
-/* Flags for determining allowed stream crypto methods */
-#define STREAM_CRYPTO_IS_CLIENT            (1<<0)
-#define STREAM_CRYPTO_METHOD_SSLv2         (1<<1)
-#define STREAM_CRYPTO_METHOD_SSLv3         (1<<2)
-#define STREAM_CRYPTO_METHOD_TLSv1_0       (1<<3)
-#define STREAM_CRYPTO_METHOD_TLSv1_1       (1<<4)
-#define STREAM_CRYPTO_METHOD_TLSv1_2       (1<<5)
-#define STREAM_CRYPTO_METHOD_TLSv1_3       (1<<6)
-
-#ifndef OPENSSL_NO_TLS1_METHOD
-#define HAVE_TLS1 1
-#endif
-
-#ifndef OPENSSL_NO_TLS1_1_METHOD
-#define HAVE_TLS11 1
-#endif
-
-#ifndef OPENSSL_NO_TLS1_2_METHOD
-#define HAVE_TLS12 1
-#endif
-
-#ifndef OPENSSL_NO_TLS1_3
-#define HAVE_TLS13 1
-#endif
-
-#ifndef OPENSSL_NO_ECDH
-#define HAVE_ECDH 1
-#endif
-
-#ifndef OPENSSL_NO_TLSEXT
-#define HAVE_TLS_SNI 1
-#define HAVE_TLS_ALPN 1
-#endif
-
-#ifndef LIBRESSL_VERSION_NUMBER
-#define HAVE_SEC_LEVEL 1
-#endif
-
-#if OPENSSL_VERSION_NUMBER < 0x40000000L && !defined(OPENSSL_NO_SSL3)
-#define HAVE_SSL3 1
-#define PHP_OPENSSL_MIN_PROTO_VERSION STREAM_CRYPTO_METHOD_SSLv3
-#else
-#define PHP_OPENSSL_MIN_PROTO_VERSION STREAM_CRYPTO_METHOD_TLSv1_0
-#endif
-#ifdef HAVE_TLS13
-#define PHP_OPENSSL_MAX_PROTO_VERSION STREAM_CRYPTO_METHOD_TLSv1_3
-#else
-#define PHP_OPENSSL_MAX_PROTO_VERSION STREAM_CRYPTO_METHOD_TLSv1_2
-#endif
-
-/* Simplify ssl context option retrieval */
-#define GET_VER_OPT(_name) \
-	(PHP_STREAM_CONTEXT(stream) && (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", _name)) != NULL)
-#define GET_VER_OPT_STRING(_name, _str) \
-	do { \
-		if (GET_VER_OPT(_name)) { \
-			if (try_convert_to_string(val)) _str = Z_STRVAL_P(val); \
-		} \
-	} while (0)
-#define GET_VER_OPT_STRINGL(_name, _str, _len) \
-	do { \
-		if (GET_VER_OPT(_name)) { \
-			if (try_convert_to_string(val)) { \
-				_str = Z_STRVAL_P(val); \
-				_len = Z_STRLEN_P(val); \
-			} \
-		} \
-	} while (0)
-#define GET_VER_OPT_LONG(_name, _num) \
-	if (GET_VER_OPT(_name)) _num = zval_get_long(val)
-
 #ifdef HAVE_IPV6
 /* Used for IPv6 Address peer verification */
 #define EXPAND_IPV6_ADDRESS(_str, _bytes) \
@@ -149,103 +77,13 @@
 extern php_stream* php_openssl_get_stream_from_ssl_handle(const SSL *ssl);
 extern zend_string* php_openssl_x509_fingerprint(
 		X509 *peer, const char *method, bool raw, php_stream *stream);
-extern int php_openssl_get_ssl_stream_data_index(void);
-static struct timeval php_openssl_subtract_timeval(struct timeval a, struct timeval b);
-static int php_openssl_compare_timeval(struct timeval a, struct timeval b);
 static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, size_t count);
 
 static const php_stream_ops php_openssl_socket_ops;
 
-/* Certificate contexts used for server-side SNI selection */
-typedef struct _php_openssl_sni_cert_t {
-	char *name;
-	SSL_CTX *ctx;
-} php_openssl_sni_cert_t;
-
-/* Provides leaky bucket handhsake renegotiation rate-limiting  */
-typedef struct _php_openssl_handshake_bucket_t {
-	zend_long prev_handshake;
-	zend_long limit;
-	zend_long window;
-	float tokens;
-	unsigned should_close;
-} php_openssl_handshake_bucket_t;
-
-#ifdef HAVE_TLS_ALPN
-/* Holds the available server ALPN protocols for negotiation */
-typedef struct _php_openssl_alpn_ctx_t {
-	unsigned char *data;
-	unsigned short len;
-} php_openssl_alpn_ctx;
-#endif
-
 /* TLS 1.3 PSK ciphersuite IDs */
 static const unsigned char php_openssl_tls13_aes128gcmsha256_id[] = { 0x13, 0x01 };
 static const unsigned char php_openssl_tls13_aes256gcmsha384_id[] = { 0x13, 0x02 };
-
-/* Holds PSK callbacks */
-typedef struct _php_openssl_psk_callbacks_t {
-	int refcount;
-	zend_fcall_info_cache client_cb;
-	zend_fcall_info_cache server_cb;
-} php_openssl_psk_callbacks_t;
-
-#ifdef HAVE_TLS13
-/* TLS 1.3 early data (0-RTT) handshake phase */
-typedef enum {
-	PHP_OPENSSL_EARLY_DATA_NONE = 0,
-	PHP_OPENSSL_EARLY_DATA_ACTIVE,
-	PHP_OPENSSL_EARLY_DATA_DONE,
-} php_openssl_early_data_state_t;
-
-/* Size of the buffer used to drain server-side early data chunk by chunk */
-#define PHP_OPENSSL_EARLY_DATA_CHUNK 16384
-
-/* Holds the server early data callback */
-typedef struct _php_openssl_early_data_callbacks_t {
-	int refcount;
-	zend_fcall_info_cache read_cb;
-} php_openssl_early_data_callbacks_t;
-#endif
-
-/* This implementation is very closely tied to the that of the native
- * sockets implemented in the core.
- * Don't try this technique in other extensions!
- * */
-typedef struct _php_openssl_netstream_data_t {
-	php_netstream_data_t s;
-	SSL *ssl_handle;
-	SSL_CTX *ctx;
-	struct timeval connect_timeout;
-	int enable_on_connect;
-	int is_client;
-	int ssl_active;
-	int last_status;
-	php_stream_xport_crypt_method_t method;
-	php_openssl_handshake_bucket_t *reneg;
-	php_openssl_sni_cert_t *sni_certs;
-	unsigned sni_cert_count;
-#ifdef HAVE_TLS_ALPN
-	php_openssl_alpn_ctx alpn_ctx;
-#endif
-	php_openssl_session_callbacks_t *session_callbacks;
-	php_openssl_psk_callbacks_t *psk_callbacks;
-	/* Identity buffer for TLS 1.3 client PSK whose lifetime outlives the
-	 * psk_use_session_cb call but OpenSSL doesn't free it, so we own it. */
-	unsigned char *psk_identity_buf;
-	size_t psk_identity_len;
-#ifdef HAVE_TLS13
-	/* TLS 1.3 early data (0-RTT) */
-	php_openssl_early_data_callbacks_t *early_data_callbacks;
-	/* Client payload to send as early data, borrowed for the handshake */
-	zend_string *early_data_send;
-	size_t early_data_offset;
-	php_openssl_early_data_state_t early_data_state;
-#endif
-	char *url_name;
-	unsigned state_set:1;
-	unsigned _spare:31;
-} php_openssl_netstream_data_t;
 
 /* it doesn't matter that we do some hash traversal here, since it is done only
  * in an error condition arising from a network connection problem */
@@ -273,9 +111,8 @@ static int php_openssl_is_http_stream_talking_to_iis(php_stream *stream) /* {{{ 
 }
 /* }}} */
 
-static int php_openssl_handle_ssl_error(php_stream *stream, int nr_bytes, bool is_init) /* {{{ */
+bool php_openssl_handle_ssl_error(php_stream *stream, php_openssl_netstream_data_t *sslsock, int nr_bytes)
 {
-	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
 	int err = SSL_get_error(sslsock->ssl_handle, nr_bytes);
 	char esbuf[512];
 	smart_str ebuf = {0};
@@ -292,11 +129,8 @@ static int php_openssl_handle_ssl_error(php_stream *stream, int nr_bytes, bool i
 			/* re-negotiation, or perhaps the SSL layer needs more
 			 * packets: retry in next iteration */
 			errno = EAGAIN;
-			retry = is_init ? true : sslsock->s.is_blocked;
-			if (!retry) {
-				sslsock->last_status = err == SSL_ERROR_WANT_READ ?
-						STREAM_CRYPTO_STATUS_WANT_READ : STREAM_CRYPTO_STATUS_WANT_WRITE;
-			}
+			sslsock->last_status = err == SSL_ERROR_WANT_READ ?
+					STREAM_CRYPTO_STATUS_WANT_READ : STREAM_CRYPTO_STATUS_WANT_WRITE;
 			break;
 		case SSL_ERROR_SYSCALL:
 			if (ERR_peek_error() == 0) {
@@ -360,10 +194,111 @@ static int php_openssl_handle_ssl_error(php_stream *stream, int nr_bytes, bool i
 }
 /* }}} */
 
-/* verify_callback (now php_openssl_verify_callback) is shared with dtls://; see xp_common.c. */
+static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) /* {{{ */
+{
+	php_stream *stream;
+	SSL *ssl;
+	int err, depth, ret;
+	zval *val;
+	zend_ulong allowed_depth = OPENSSL_DEFAULT_STREAM_VERIFY_DEPTH;
 
-/* php_openssl_x509_fingerprint_is_equal() and php_openssl_x509_fingerprint_match()
- * are shared with the dtls:// transport; see xp_common.c. */
+
+	ret = preverify_ok;
+
+	/* determine the status for the current cert */
+	err = X509_STORE_CTX_get_error(ctx);
+	depth = X509_STORE_CTX_get_error_depth(ctx);
+
+	/* conjure the stream & context to use */
+	ssl = X509_STORE_CTX_get_ex_data(ctx, SSL_get_ex_data_X509_STORE_CTX_idx());
+	stream = (php_stream*)SSL_get_ex_data(ssl, php_openssl_get_ssl_stream_data_index());
+
+	/* if allow_self_signed is set, make sure that verification succeeds */
+	if (err == X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT &&
+		GET_VER_OPT("allow_self_signed") &&
+		zend_is_true(val)
+	) {
+		ret = 1;
+	}
+
+	/* check the depth */
+	GET_VER_OPT_LONG("verify_depth", allowed_depth);
+	if ((zend_ulong)depth > allowed_depth) {
+		ret = 0;
+		X509_STORE_CTX_set_error(ctx, X509_V_ERR_CERT_CHAIN_TOO_LONG);
+	}
+
+	return ret;
+}
+/* }}} */
+
+static bool php_openssl_x509_fingerprint_is_equal(php_stream *stream, X509 *peer, const char *method, const zend_string *expected)
+{
+	bool is_equal = false;
+	zend_string *fingerprint = php_openssl_x509_fingerprint(peer, method, false, stream);
+	if (fingerprint) {
+		is_equal = zend_string_equals_ci(fingerprint, expected);
+		zend_string_release_ex(fingerprint, false);
+	}
+
+	return is_equal;
+}
+
+static bool php_openssl_x509_fingerprint_match(php_stream *stream, X509 *peer, const zval *val)
+{
+	if (Z_TYPE_P(val) == IS_STRING) {
+		const char *method = NULL;
+
+		switch (Z_STRLEN_P(val)) {
+			case 32:
+				method = "md5";
+				break;
+
+			case 40:
+				method = "sha1";
+				break;
+		}
+
+		if (UNEXPECTED(method == NULL)) {
+			php_stream_warn(stream, AuthFailed, "peer_fingerprint length doesn't match a md5 or sha1 hash");
+			return false;
+		}
+		if (!php_openssl_x509_fingerprint_is_equal(stream, peer, method, Z_STR_P(val))) {
+			php_stream_warn(stream, AuthFailed, "peer_fingerprint match failure");
+			return false;
+		}
+		return true;
+	} else if (Z_TYPE_P(val) == IS_ARRAY) {
+		zval *current;
+		zend_string *key;
+
+		if (!zend_hash_num_elements(Z_ARRVAL_P(val))) {
+			// TODO: Should this be a ValueError (also must not be empty error)?
+			php_stream_warn(stream, Generic, "Invalid peer_fingerprint array; [algo => fingerprint] form required");
+			return false;
+		}
+
+		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(val), key, current) {
+			if (key == NULL || Z_TYPE_P(current) != IS_STRING) {
+				// TODO: Should this be a ValueError?
+				php_stream_warn(stream, Generic, "Invalid peer_fingerprint array; [algo => fingerprint] form required");
+				return false;
+			}
+			if (!php_openssl_x509_fingerprint_is_equal(stream, peer, ZSTR_VAL(key), Z_STR_P(current))) {
+				php_stream_warn(stream, AuthFailed, "peer_fingerprint match failure");
+				return false;
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		return true;
+	} else {
+		// TODO: Should this be a TypeError?
+		php_stream_warn(stream, Generic,
+			"Invalid peer_fingerprint value; fingerprint string or array of the form [algo => fingerprint] required");
+	}
+
+	return false;
+}
 
 static bool php_openssl_matches_wildcard_name(const char *subjectname, const char *certname) /* {{{ */
 {
@@ -645,23 +580,41 @@ static zend_result php_openssl_apply_peer_verification_policy(SSL *ssl, X509 *pe
 }
 /* }}} */
 
-/* php_openssl_passwd_callback() is shared with the dtls:// transport; see xp_common.c. */
+static int php_openssl_passwd_callback(char *buf, int num, int verify, void *data) /* {{{ */
+{
+	php_stream *stream = (php_stream *)data;
+	zval *val = NULL;
+	char *passphrase = NULL;
+	/* TODO: could expand this to make a callback into PHP user-space */
+
+	GET_VER_OPT_STRING("passphrase", passphrase);
+
+	if (passphrase) {
+		if (Z_STRLEN_P(val) < (size_t)num - 1) {
+			memcpy(buf, Z_STRVAL_P(val), Z_STRLEN_P(val)+1);
+			return (int)Z_STRLEN_P(val);
+		}
+	}
+	return 0;
+}
+/* }}} */
 
 #ifdef PHP_WIN32
 #define RETURN_CERT_VERIFY_FAILURE(code) X509_STORE_CTX_set_error(x509_store_ctx, code); return 0;
-int php_openssl_win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *arg) /* {{{ */
+static int php_openssl_win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *arg) /* {{{ */
 {
 	PCCERT_CONTEXT cert_ctx = NULL;
 	PCCERT_CHAIN_CONTEXT cert_chain_ctx = NULL;
 	X509 *cert = X509_STORE_CTX_get0_cert(x509_store_ctx);
-	SSL *ssl = X509_STORE_CTX_get_ex_data(x509_store_ctx, SSL_get_ex_data_X509_STORE_CTX_idx());
 
 	php_stream *stream;
+	php_openssl_netstream_data_t *sslsock;
 	zval *val;
 	bool is_self_signed = false;
 
 
 	stream = (php_stream*)arg;
+	sslsock = (php_openssl_netstream_data_t*)stream->abstract;
 
 	{ /* First convert the x509 struct back to a DER encoded buffer and let Windows decode it into a form it can work with */
 		unsigned char *der_buf = NULL;
@@ -740,7 +693,7 @@ int php_openssl_win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *a
 		CERT_CHAIN_POLICY_STATUS chain_policy_status = {sizeof(CERT_CHAIN_POLICY_STATUS)};
 		BOOL verify_result;
 
-		ssl_policy_params.dwAuthType = (!SSL_is_server(ssl)) ? AUTHTYPE_SERVER : AUTHTYPE_CLIENT;
+		ssl_policy_params.dwAuthType = (sslsock->is_client) ? AUTHTYPE_SERVER : AUTHTYPE_CLIENT;
 		/* we validate the name ourselves using the peer_name
 		   ctx option, so no need to use a server name here */
 		ssl_policy_params.pwszServerName = NULL;
@@ -775,36 +728,230 @@ int php_openssl_win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *a
 /* }}} */
 #endif
 
-/* php_openssl_load_stream_cafile()/enable/disable_peer_verification() are shared; see xp_common.c. */
+static long php_openssl_load_stream_cafile(X509_STORE *cert_store, const char *cafile) /* {{{ */
+{
+	php_stream *stream;
+	X509 *cert;
+	BIO *buffer;
+	int buffer_active = 0;
+	char *line = NULL;
+	size_t line_len;
+	long certs_added = 0;
 
+	stream = php_stream_open_wrapper(cafile, "rb", 0, NULL);
 
-/* php_openssl_set_local_cert() is shared with the dtls:// transport; see xp_common.c. */
+	if (stream == NULL) {
+		// TODO: no stream and no wrapper, cannot use php_stream_warn(stream, ReadFailed, ...) nor php_stream_wrapper_log_error()
+		php_error(E_WARNING, "failed loading cafile stream: `%s'", cafile);
+		return 0;
+	} else if (stream->wrapper->is_url) {
+		php_stream_warn(stream, PermissionDenied, "remote cafile streams are disabled for security purposes");
+		php_stream_close(stream);
+		return 0;
+	}
 
-static inline int php_openssl_get_min_proto_version_flag(int flags) /* {{{ */
+	cert_start: {
+		line = php_stream_get_line(stream, NULL, 0, &line_len);
+		if (line == NULL) {
+			goto stream_complete;
+		} else if (!strcmp(line, "-----BEGIN CERTIFICATE-----\n") ||
+			!strcmp(line, "-----BEGIN CERTIFICATE-----\r\n")
+		) {
+			buffer = BIO_new(BIO_s_mem());
+			buffer_active = 1;
+			goto cert_line;
+		} else {
+			efree(line);
+			goto cert_start;
+		}
+	}
+
+	cert_line: {
+		BIO_puts(buffer, line);
+		efree(line);
+		line = php_stream_get_line(stream, NULL, 0, &line_len);
+		if (line == NULL) {
+			goto stream_complete;
+		} else if (!strcmp(line, "-----END CERTIFICATE-----") ||
+			!strcmp(line, "-----END CERTIFICATE-----\n") ||
+			!strcmp(line, "-----END CERTIFICATE-----\r\n")
+		) {
+			goto add_cert;
+		} else {
+			goto cert_line;
+		}
+	}
+
+	add_cert: {
+		BIO_puts(buffer, line);
+		efree(line);
+		cert = php_openssl_pem_read_bio_x509(buffer);
+		BIO_free(buffer);
+		buffer_active = 0;
+		if (cert && X509_STORE_add_cert(cert_store, cert)) {
+			++certs_added;
+		}
+		/* TODO: notify user when adding certificate failed? */
+		X509_free(cert);
+		goto cert_start;
+	}
+
+stream_complete:
+	if (certs_added == 0) {
+		php_stream_warn(stream, DecodingFailed, "no valid certs found cafile stream: '%s'", cafile);
+	}
+
+	php_stream_close(stream);
+	if (buffer_active == 1) {
+		BIO_free(buffer);
+	}
+
+	return certs_added;
+}
+/* }}} */
+
+static zend_result php_openssl_enable_peer_verification(SSL_CTX *ctx, php_stream *stream) /* {{{ */
+{
+	zval *val = NULL;
+	const char *cafile = NULL;
+	const char *capath = NULL;
+	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
+
+	GET_VER_OPT_STRING("cafile", cafile);
+	GET_VER_OPT_STRING("capath", capath);
+
+	if (cafile == NULL) {
+		const zend_string *cafile_str = zend_ini_str_literal("openssl.cafile");
+		cafile = ZSTR_LEN(cafile_str) ? ZSTR_VAL(cafile_str) : NULL;
+	} else if (!sslsock->is_client) {
+		/* Servers need to load and assign CA names from the cafile */
+		STACK_OF(X509_NAME) *cert_names = SSL_load_client_CA_file(cafile);
+		if (cert_names != NULL) {
+			SSL_CTX_set_client_CA_list(ctx, cert_names);
+		} else {
+			php_stream_warn(stream, InvalidFormat, "SSL: failed loading CA names from cafile");
+			return FAILURE;
+		}
+	}
+
+	if (capath == NULL) {
+		const zend_string *capath_str = zend_ini_str_literal("openssl.capath");
+		capath = ZSTR_LEN(capath_str) ? ZSTR_VAL(capath_str) : NULL;
+	}
+
+	if (cafile || capath) {
+		if (!SSL_CTX_load_verify_locations(ctx, cafile, capath)) {
+			ERR_clear_error();
+			if (cafile && !php_openssl_load_stream_cafile(SSL_CTX_get_cert_store(ctx), cafile)) {
+				return FAILURE;
+			}
+		}
+	} else {
+#ifdef PHP_WIN32
+		SSL_CTX_set_cert_verify_callback(ctx, php_openssl_win_cert_verify_callback, (void *)stream);
+#else
+		if (sslsock->is_client && !SSL_CTX_set_default_verify_paths(ctx)) {
+			php_stream_warn(stream, ProtocolError,
+				"Unable to set default verify locations and no CA settings specified");
+			return FAILURE;
+		}
+#endif
+	}
+
+	SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, verify_callback);
+
+	return SUCCESS;
+}
+/* }}} */
+
+static void php_openssl_disable_peer_verification(SSL_CTX *ctx, php_stream *stream) /* {{{ */
+{
+	SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
+}
+/* }}} */
+
+static zend_result php_openssl_set_local_cert(SSL_CTX *ctx, php_stream *stream) /* {{{ */
+{
+	zval *val = NULL;
+	char *certfile = NULL;
+	size_t certfile_len;
+
+	GET_VER_OPT_STRINGL("local_cert", certfile, certfile_len);
+
+	if (certfile) {
+		char resolved_path_buff[MAXPATHLEN];
+		const char *private_key = NULL;
+		size_t private_key_len;
+
+		if (!php_openssl_check_path_ex(
+				certfile, certfile_len, resolved_path_buff, 0, false, false,
+				"local_cert in ssl stream context", stream)) {
+			php_stream_warn(stream, NotFound, "Unable to get real path of certificate file `%s'", certfile);
+			return FAILURE;
+		}
+		/* a certificate to use for authentication */
+		if (SSL_CTX_use_certificate_chain_file(ctx, resolved_path_buff) != 1) {
+			php_stream_warn(stream, WriteFailed,
+				"Unable to set local cert chain file `%s'; Check that your cafile/capath "
+				"settings include details of your certificate and its issuer",
+				certfile);
+			return FAILURE;
+		}
+
+		GET_VER_OPT_STRINGL("local_pk", private_key, private_key_len);
+		if (private_key && !php_openssl_check_path_ex(
+				private_key, private_key_len, resolved_path_buff, 0, false, false,
+				"local_pk in ssl stream context", stream)) {
+			php_stream_warn(stream, NotFound, "Unable to get real path of private key file `%s'", private_key);
+			return FAILURE;
+		}
+		if (SSL_CTX_use_PrivateKey_file(ctx, resolved_path_buff, SSL_FILETYPE_PEM) != 1) {
+			php_stream_warn(stream, WriteFailed, "Unable to set private key file `%s'", resolved_path_buff);
+			return FAILURE;
+		}
+		if (!SSL_CTX_check_private_key(ctx)) {
+			php_stream_warn(stream, PermissionDenied, "Private key does not match certificate!");
+		}
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* The version flags of a method: the TLS range, or the DTLS range of a datagram stream */
+static inline int php_openssl_min_version_flag(bool dgram)
+{
+	return dgram ? PHP_OPENSSL_MIN_DTLS_PROTO_VERSION : PHP_OPENSSL_MIN_PROTO_VERSION;
+}
+
+static inline int php_openssl_max_version_flag(bool dgram)
+{
+	return dgram ? PHP_OPENSSL_MAX_DTLS_PROTO_VERSION : PHP_OPENSSL_MAX_PROTO_VERSION;
+}
+
+static inline int php_openssl_get_min_proto_version_flag(int flags, bool dgram)
 {
 	int ver;
-	for (ver = PHP_OPENSSL_MIN_PROTO_VERSION; ver <= PHP_OPENSSL_MAX_PROTO_VERSION; ver <<= 1) {
+	for (ver = php_openssl_min_version_flag(dgram); ver <= php_openssl_max_version_flag(dgram); ver <<= 1) {
 		if (flags & ver) {
 			return ver;
 		}
 	}
-	return PHP_OPENSSL_MAX_PROTO_VERSION;
+	return php_openssl_max_version_flag(dgram);
 }
-/* }}} */
 
-static inline int php_openssl_get_max_proto_version_flag(int flags) /* {{{ */
+static inline int php_openssl_get_max_proto_version_flag(int flags, bool dgram)
 {
 	int ver;
-	for (ver = PHP_OPENSSL_MAX_PROTO_VERSION; ver >= PHP_OPENSSL_MIN_PROTO_VERSION; ver >>= 1) {
+	for (ver = php_openssl_max_version_flag(dgram); ver >= php_openssl_min_version_flag(dgram); ver >>= 1) {
 		if (flags & ver) {
 			return ver;
 		}
 	}
-	return STREAM_CRYPTO_METHOD_TLSv1_3;
+	return php_openssl_max_version_flag(dgram);
 }
-/* }}} */
 
-static inline int php_openssl_map_proto_version(int flag) /* {{{ */
+static inline int php_openssl_map_proto_version(int flag)
 {
 	switch (flag) {
 #ifdef HAVE_TLS13
@@ -821,36 +968,41 @@ static inline int php_openssl_map_proto_version(int flag) /* {{{ */
 		case STREAM_CRYPTO_METHOD_SSLv3:
 			return SSL3_VERSION;
 #endif
+#ifdef HAVE_DTLS13
+		case STREAM_CRYPTO_METHOD_DTLSv1_3:
+			return DTLS1_3_VERSION;
+#endif
+#ifdef HAVE_DTLS
+		case STREAM_CRYPTO_METHOD_DTLSv1_2:
+			return DTLS1_2_VERSION;
+#endif
 		default:
 			return TLS1_2_VERSION;
 	}
 }
-/* }}} */
 
-static int php_openssl_get_min_proto_version(int flags) /* {{{ */
+static int php_openssl_get_min_proto_version(int flags, bool dgram)
 {
-	return php_openssl_map_proto_version(php_openssl_get_min_proto_version_flag(flags));
+	return php_openssl_map_proto_version(php_openssl_get_min_proto_version_flag(flags, dgram));
 }
-/* }}} */
 
-static int php_openssl_get_max_proto_version(int flags) /* {{{ */
+static int php_openssl_get_max_proto_version(int flags, bool dgram)
 {
-	return php_openssl_map_proto_version(php_openssl_get_max_proto_version_flag(flags));
+	return php_openssl_map_proto_version(php_openssl_get_max_proto_version_flag(flags, dgram));
 }
-/* }}} */
 
-static int php_openssl_get_proto_version_flags(int flags, int min, int max) /* {{{ */
+static int php_openssl_get_proto_version_flags(int flags, int min, int max, bool dgram)
 {
 	int ver;
 
 	if (!min) {
-		min = php_openssl_get_min_proto_version_flag(flags);
+		min = php_openssl_get_min_proto_version_flag(flags, dgram);
 	}
 	if (!max) {
-		max = php_openssl_get_max_proto_version_flag(flags);
+		max = php_openssl_get_max_proto_version_flag(flags, dgram);
 	}
 
-	for (ver = PHP_OPENSSL_MIN_PROTO_VERSION; ver <= PHP_OPENSSL_MAX_PROTO_VERSION; ver <<= 1) {
+	for (ver = php_openssl_min_version_flag(dgram); ver <= php_openssl_max_version_flag(dgram); ver <<= 1) {
 		if (ver >= min && ver <= max) {
 			if (!(flags & ver)) {
 				flags |= ver;
@@ -862,7 +1014,6 @@ static int php_openssl_get_proto_version_flags(int flags, int min, int max) /* {
 
 	return flags;
 }
-/* }}} */
 
 static void php_openssl_limit_handshake_reneg(const SSL *ssl) /* {{{ */
 {
@@ -1258,7 +1409,7 @@ static zend_result php_openssl_enable_server_sni(
 
 		if (!verify_peer) {
 			php_openssl_disable_peer_verification(ctx, stream);
-		} else if (FAILURE == php_openssl_enable_peer_verification(ctx, stream, sslsock->is_client)) {
+		} else if (FAILURE == php_openssl_enable_peer_verification(ctx, stream)) {
 			return FAILURE;
 		}
 
@@ -1350,6 +1501,15 @@ static int php_openssl_server_alpn_callback(SSL *ssl_handle,
 /* }}} */
 
 #endif
+
+static int php_openssl_get_ctx_stream_data_index(void)
+{
+	static int ctx_data_index = -1;
+	if (ctx_data_index < 0) {
+		ctx_data_index = SSL_CTX_get_ex_new_index(0, NULL, NULL, NULL, NULL);
+	}
+	return ctx_data_index;
+}
 
 /**
  * Build a SSL_SESSION suitable for use as an external PSK in TLS 1.3.
@@ -1859,6 +2019,180 @@ static bool php_openssl_is_server_early_data_enabled(php_stream *stream)
 #endif
 
 /**
+ * OpenSSL new session callback - called when a new session is established
+ */
+static int php_openssl_session_new_cb(SSL *ssl, SSL_SESSION *session)
+{
+	php_stream *stream = (php_stream *)SSL_get_ex_data(ssl, php_openssl_get_ssl_stream_data_index());
+	if (!stream) {
+		return 0;
+	}
+
+	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t *)stream->abstract;
+	if (!sslsock || !sslsock->session_callbacks) {
+		return 0;
+	}
+
+	/* Increment reference - we're giving ownership to the PHP object */
+	SSL_SESSION_up_ref(session);
+
+	zval args[2];
+
+	ZVAL_RES(&args[0], stream->res);
+	php_openssl_session_object_init(&args[1], session);
+
+	zend_call_known_fcc(&sslsock->session_callbacks->new_cb, NULL, 2, args, NULL);
+
+	zval_ptr_dtor(&args[1]);
+
+	return 0;
+}
+
+/**
+ * OpenSSL get session callback - called when server needs to retrieve a session
+ */
+static SSL_SESSION *php_openssl_session_get_cb(SSL *ssl, const unsigned char *session_id,
+		int session_id_len, int *copy)
+{
+	php_stream *stream = (php_stream *)SSL_get_ex_data(ssl, php_openssl_get_ssl_stream_data_index());
+	if (!stream) {
+		*copy = 0;
+		return NULL;
+	}
+
+	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t *)stream->abstract;
+	if (!sslsock || !sslsock->session_callbacks) {
+		*copy = 0;
+		return NULL;
+	}
+
+	zval args[2];
+	zval retval;
+
+	ZVAL_RES(&args[0], stream->res);
+	ZVAL_STRINGL(&args[1], (char *)session_id, session_id_len);
+
+	SSL_SESSION *session = NULL;
+
+	zend_call_known_fcc(&sslsock->session_callbacks->get_cb, &retval, 2, args, NULL);
+	zval_ptr_dtor(&args[1]);
+
+	if (php_openssl_is_session_ce(&retval)) {
+		/* Get session from object and increment ref since OpenSSL will own it */
+		php_openssl_session_object *obj = Z_OPENSSL_SESSION_P(&retval);
+		if (obj->session) {
+			SSL_SESSION_up_ref(obj->session);
+			session = obj->session;
+		}
+	} else if (Z_TYPE(retval) != IS_NULL) {
+		zend_type_error("session_get_cb return type must be null or OpenSSLSession");
+	}
+
+	zval_ptr_dtor(&retval);
+
+	*copy = 0;
+	return session;
+}
+
+/**
+ * OpenSSL remove session callback - called when a session is evicted from cache
+ */
+static void php_openssl_session_remove_cb(SSL_CTX *ctx, SSL_SESSION *session)
+{
+	php_stream *stream = (php_stream *)SSL_CTX_get_ex_data(ctx, php_openssl_get_ctx_stream_data_index());
+	if (!stream) {
+		return;
+	}
+
+	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t *)stream->abstract;
+	if (!sslsock || !sslsock->session_callbacks) {
+		return;
+	}
+
+	unsigned int session_id_len = 0;
+	const unsigned char *session_id = SSL_SESSION_get_id(session, &session_id_len);
+
+	zval args[2];
+
+	ZVAL_RES(&args[0], stream->res);
+	ZVAL_STRINGL(&args[1], (char *)session_id, session_id_len);
+
+	zend_call_known_fcc(&sslsock->session_callbacks->remove_cb, NULL, 2, args, NULL);
+	zval_ptr_dtor(&args[1]);
+}
+
+
+enum php_openssl_session_callback_type {
+	PHP_OPENSSL_NEW_CB,
+	PHP_OPENSSL_GET_CB,
+	PHP_OPENSSL_REMOVE_CB,
+};
+/**
+ * Validate callable and allocate callback structure if needed.
+ */
+static zend_result php_openssl_validate_and_allocate_session_callback(
+		php_stream *stream,
+		php_openssl_netstream_data_t *sslsock, const zval *callable,
+		enum php_openssl_session_callback_type cb_type, bool is_persistent)
+{
+	char *is_callable_error = NULL;
+	const char *callback_name;
+
+	switch (cb_type) {
+		case PHP_OPENSSL_NEW_CB:
+			callback_name = "session_new_cb";
+			break;
+		case PHP_OPENSSL_GET_CB:
+			callback_name = "session_get_cb";
+			break;
+		case PHP_OPENSSL_REMOVE_CB:
+			callback_name = "session_remove_cb";
+			break;
+	}
+
+	/* Callbacks not supported for persistent streams */
+	if (is_persistent) {
+		php_stream_warn(stream, PersistentNotSupported,
+				"%s is not supported for persistent streams", callback_name);
+		return FAILURE;
+	}
+
+	/* Validate callable */
+	zend_fcall_info_cache fcc;
+	if (!zend_is_callable(callable, &fcc, &is_callable_error)) {
+		if (is_callable_error) {
+			zend_type_error("%s must be a valid callback, %s", callback_name, is_callable_error);
+			efree(is_callable_error);
+		} else {
+			zend_type_error("%s must be a valid callback", callback_name);
+		}
+		return FAILURE;
+	}
+
+	/* Allocate callback structure if not already allocated */
+	if (!sslsock->session_callbacks) {
+		sslsock->session_callbacks = (php_openssl_session_callbacks_t *)pecalloc(
+				1, sizeof(php_openssl_session_callbacks_t), is_persistent);
+		sslsock->session_callbacks->refcount = 1;
+	}
+
+	zend_fcc_addref(&fcc);
+	switch (cb_type) {
+		case PHP_OPENSSL_NEW_CB:
+			sslsock->session_callbacks->new_cb = fcc;
+			break;
+		case PHP_OPENSSL_GET_CB:
+			sslsock->session_callbacks->get_cb = fcc;
+			break;
+		case PHP_OPENSSL_REMOVE_CB:
+			sslsock->session_callbacks->remove_cb = fcc;
+			break;
+	}
+
+	return SUCCESS;
+}
+
+/**
  * Configure session resumption options for client connections
  */
 static zend_result php_openssl_setup_client_session(php_stream *stream,
@@ -1879,7 +2213,7 @@ static zend_result php_openssl_setup_client_session(php_stream *stream,
 
 	if (GET_VER_OPT("session_new_cb")) {
 		if (FAILURE == php_openssl_validate_and_allocate_session_callback(
-				stream, &sslsock->session_callbacks, val, PHP_OPENSSL_NEW_CB, is_persistent)) {
+				stream, sslsock, val, PHP_OPENSSL_NEW_CB, is_persistent)) {
 			return FAILURE;
 		}
 
@@ -1926,7 +2260,7 @@ static zend_result php_openssl_setup_server_session(php_stream *stream,
 	/* Check for session_get_cb first (determines cache mode) */
 	if (GET_VER_OPT("session_get_cb")) {
 		if (FAILURE == php_openssl_validate_and_allocate_session_callback(
-				stream, &sslsock->session_callbacks, val, PHP_OPENSSL_GET_CB, is_persistent)) {
+				stream, sslsock, val, PHP_OPENSSL_GET_CB, is_persistent)) {
 			return FAILURE;
 		}
 		has_get_cb = true;
@@ -1945,7 +2279,7 @@ static zend_result php_openssl_setup_server_session(php_stream *stream,
 	/* Check for session_new_cb */
 	if (GET_VER_OPT("session_new_cb")) {
 		if (FAILURE == php_openssl_validate_and_allocate_session_callback(
-				stream, &sslsock->session_callbacks, val, PHP_OPENSSL_NEW_CB, is_persistent)) {
+				stream, sslsock, val, PHP_OPENSSL_NEW_CB, is_persistent)) {
 			return FAILURE;
 		}
 		has_new_cb = true;
@@ -1966,7 +2300,7 @@ static zend_result php_openssl_setup_server_session(php_stream *stream,
 	/* Check for session_remove_cb (optional) */
 	if (GET_VER_OPT("session_remove_cb")) {
 		if (FAILURE == php_openssl_validate_and_allocate_session_callback(
-				stream, &sslsock->session_callbacks, val, PHP_OPENSSL_REMOVE_CB, is_persistent)) {
+				stream, sslsock, val, PHP_OPENSSL_REMOVE_CB, is_persistent)) {
 			return FAILURE;
 		}
 
@@ -2083,12 +2417,25 @@ static zend_result php_openssl_apply_client_session_data(php_stream *stream,
 	return SUCCESS;
 }
 
-static zend_result php_openssl_create_server_ctx(php_stream *stream,
+zend_result php_openssl_create_server_ctx(php_stream *stream,
 		php_openssl_netstream_data_t *sslsock, int method_flags)
 {
 	zval *val;
 
-	const SSL_METHOD *method = sslsock->is_client ? SSLv23_client_method() : SSLv23_server_method();
+	const SSL_METHOD *method;
+	bool dgram = sslsock->s.is_dgram;
+
+	if (dgram) {
+#ifdef HAVE_DTLS
+		method = sslsock->is_client ? DTLS_client_method() : DTLS_server_method();
+#else
+		php_stream_warn(stream, ProtocolUnsupported,
+			"DTLS support is not compiled into the OpenSSL library against which PHP is linked");
+		return FAILURE;
+#endif
+	} else {
+		method = sslsock->is_client ? SSLv23_client_method() : SSLv23_server_method();
+	}
 	sslsock->ctx = SSL_CTX_new(method);
 
 	if (sslsock->ctx == NULL) {
@@ -2096,13 +2443,13 @@ static zend_result php_openssl_create_server_ctx(php_stream *stream,
 		return FAILURE;
 	}
 
-	SSL_CTX_set_ex_data(sslsock->ctx, php_openssl_get_ctx_stream_index(), stream);
+	SSL_CTX_set_ex_data(sslsock->ctx, php_openssl_get_ctx_stream_data_index(), stream);
 
 	zend_long min_version = 0;
 	zend_long max_version = 0;
 	GET_VER_OPT_LONG("min_proto_version", min_version);
 	GET_VER_OPT_LONG("max_proto_version", max_version);
-	method_flags = php_openssl_get_proto_version_flags(method_flags, min_version, max_version);
+	method_flags = php_openssl_get_proto_version_flags(method_flags, min_version, max_version, dgram);
 	int ssl_ctx_options = SSL_OP_ALL;
 
 	if (GET_VER_OPT("no_ticket") && zend_is_true(val)) {
@@ -2131,7 +2478,7 @@ static zend_result php_openssl_create_server_ctx(php_stream *stream,
 		php_openssl_disable_peer_verification(sslsock->ctx, stream);
 	} else {
 		verify_peer = true;
-		if (FAILURE == php_openssl_enable_peer_verification(sslsock->ctx, stream, sslsock->is_client)) {
+		if (FAILURE == php_openssl_enable_peer_verification(sslsock->ctx, stream)) {
 			return FAILURE;
 		}
 	}
@@ -2208,8 +2555,8 @@ static zend_result php_openssl_create_server_ctx(php_stream *stream,
 
 	SSL_CTX_set_options(sslsock->ctx, ssl_ctx_options);
 
-	SSL_CTX_set_min_proto_version(sslsock->ctx, php_openssl_get_min_proto_version(method_flags));
-	SSL_CTX_set_max_proto_version(sslsock->ctx, php_openssl_get_max_proto_version(method_flags));
+	SSL_CTX_set_min_proto_version(sslsock->ctx, php_openssl_get_min_proto_version(method_flags, dgram));
+	SSL_CTX_set_max_proto_version(sslsock->ctx, php_openssl_get_max_proto_version(method_flags, dgram));
 
 
 	if (sslsock->is_client) {
@@ -2248,8 +2595,74 @@ static zend_result php_openssl_create_server_ctx(php_stream *stream,
 	}
 #endif
 
-	SSL_CTX_set_ex_data(sslsock->ctx, php_openssl_get_ctx_session_callbacks_index(),
-			sslsock->session_callbacks);
+	return SUCCESS;
+}
+
+/* Sets the socket of a datagram transport up for path MTU discovery */
+void php_openssl_dgram_socket_setup(php_socket_t fd)
+{
+#if defined(IP_MTU_DISCOVER) && defined(IP_PMTUDISC_DO)
+	php_sockaddr_storage sa;
+	socklen_t sl = sizeof(sa);
+
+	if (getsockname(fd, (struct sockaddr *) &sa, &sl) != 0) {
+		return;
+	}
+	if (sa.ss_family == AF_INET) {
+		int mode = IP_PMTUDISC_DO;
+		setsockopt(fd, IPPROTO_IP, IP_MTU_DISCOVER, (char *) &mode, sizeof(mode));
+	}
+#if defined(HAVE_IPV6) && defined(IPV6_MTU_DISCOVER) && defined(IPV6_PMTUDISC_DO)
+	else if (sa.ss_family == AF_INET6) {
+		int mode = IPV6_PMTUDISC_DO;
+		setsockopt(fd, IPPROTO_IPV6, IPV6_MTU_DISCOVER, (char *) &mode, sizeof(mode));
+	}
+#endif
+#endif
+}
+
+/* Gives the SSL handle its transport: the ciphertext queues over the stream's socket or inner
+ * stream. The socket stays non-blocking from here on; the stream's mode is emulated by waiting. */
+static zend_result php_openssl_conn_attach(php_stream *stream, php_openssl_netstream_data_t *sslsock)
+{
+	bool persistent = php_stream_is_persistent(stream);
+	zval *val;
+
+	if (sslsock->conn == NULL) {
+		php_openssl_xport *xport;
+
+		if (sslsock->inner != NULL) {
+			xport = php_openssl_xport_new_stream(sslsock->inner, sslsock->s.is_dgram);
+		} else {
+			if (sslsock->s.socket == SOCK_ERR) {
+				php_stream_warn(stream, Generic, "SSL/TLS cannot be set up on a stream without a socket");
+				return FAILURE;
+			}
+			php_set_sock_blocking(sslsock->s.socket, 0);
+			if (sslsock->s.is_dgram) {
+				php_openssl_dgram_socket_setup(sslsock->s.socket);
+			}
+			xport = php_openssl_xport_new_fd(sslsock->s.socket, sslsock->s.is_dgram, persistent);
+		}
+		sslsock->conn = php_openssl_conn_new(xport, stream, persistent);
+		php_openssl_xport_release(xport);
+	}
+
+	if (php_openssl_conn_set_ssl(sslsock->conn, sslsock->ssl_handle) == FAILURE) {
+		php_stream_warn(stream, CreateFailed, "SSL BIO creation failure");
+		return FAILURE;
+	}
+
+#ifdef HAVE_DTLS
+	if (sslsock->s.is_dgram && GET_VER_OPT("dtls_link_mtu")) {
+		zend_long mtu = zval_get_long(val);
+		if (mtu > 0) {
+			DTLS_set_link_mtu(sslsock->ssl_handle, (long) mtu);
+			SSL_set_options(sslsock->ssl_handle, SSL_OP_NO_QUERY_MTU);
+			sslsock->conn->link_mtu = (unsigned) mtu;
+		}
+	}
+#endif
 
 	return SUCCESS;
 }
@@ -2278,7 +2691,8 @@ static zend_result php_openssl_setup_crypto(php_stream *stream,
 	if (cparam->inputs.session) {
 		php_openssl_netstream_data_t *parent_sslsock;
 
-		if (cparam->inputs.session->ops != &php_openssl_socket_ops) {
+		if (cparam->inputs.session->ops != &php_openssl_socket_ops
+				&& cparam->inputs.session->ops != &php_openssl_dgram_socket_ops) {
 			php_stream_warn(stream, SslNotSupported, "Supplied session stream must be an SSL enabled stream");
 		} else if ((parent_sslsock = cparam->inputs.session->abstract)->ctx == NULL) {
 			php_stream_warn(stream, SslNotSupported, "Supplied SSL session stream is not set up");
@@ -2312,8 +2726,8 @@ static zend_result php_openssl_setup_crypto(php_stream *stream,
 
 			SSL_set_ex_data(sslsock->ssl_handle, php_openssl_get_ssl_stream_data_index(), stream);
 
-			if (!SSL_set_fd(sslsock->ssl_handle, sslsock->s.socket)) {
-				php_openssl_handle_ssl_error(stream, 0, true);
+			if (php_openssl_conn_attach(stream, sslsock) == FAILURE) {
+				return FAILURE;
 			}
 
 			if (sslsock->is_client) {
@@ -2348,8 +2762,8 @@ static zend_result php_openssl_setup_crypto(php_stream *stream,
 		return FAILURE;
 	}
 
-	if (!SSL_set_fd(sslsock->ssl_handle, sslsock->s.socket)) {
-		php_openssl_handle_ssl_error(stream, 0, true);
+	if (php_openssl_conn_attach(stream, sslsock) == FAILURE) {
+		return FAILURE;
 	}
 
 	return SUCCESS;
@@ -2409,15 +2823,6 @@ static int php_openssl_capture_peer_certs(php_stream *stream,
 	return cert_captured;
 }
 /* }}} */
-
-static zend_result php_openssl_set_blocking(php_openssl_netstream_data_t *sslsock, int block)
-{
-	zend_result result = php_set_sock_blocking(sslsock->s.socket, block);
-	if (EXPECTED(SUCCESS == result)) {
-		sslsock->s.is_blocked = block;
-	}
-	return result;
-}
 
 #ifdef HAVE_TLS13
 /* Send pending client early data (0-RTT), then connect. Returns like SSL_connect(). */
@@ -2493,20 +2898,149 @@ static int php_openssl_do_handshake(php_stream *stream, php_openssl_netstream_da
 		: SSL_accept(sslsock->ssl_handle);
 }
 
+typedef int (*php_openssl_ssl_op)(php_stream *stream, php_openssl_netstream_data_t *sslsock, void *arg);
+
+static void php_openssl_transport_error(php_stream *stream, const char *what)
+{
+	char *estr = php_socket_strerror(errno, NULL, 0);
+	php_stream_warn(stream, ProtocolError, "SSL: %s failed: %s", what, estr);
+	efree(estr);
+}
+
+/* Runs an SSL call over the transport until it completes: what OpenSSL produced is sent after
+ * every call, the receive queue is filled on WANT_READ and the call repeated. With a deadline
+ * the transport is waited for up to it; without one nothing waits. Returns the SSL result when
+ * positive; 0 with errno EAGAIN and last_status set when the transport would block; -1 with
+ * *timed_out when the deadline passed; otherwise the failed result after reporting the error. */
+static int php_openssl_pump(php_stream *stream, php_openssl_netstream_data_t *sslsock,
+		php_openssl_ssl_op op, void *arg, php_openssl_deadline *dl, bool *timed_out)
+{
+	php_openssl_conn *conn = sslsock->conn;
+	int n;
+
+	*timed_out = false;
+	for (;;) {
+		ERR_clear_error();
+		n = op(stream, sslsock, arg);
+		if (sslsock->reneg && sslsock->reneg->should_close) {
+			/* The renegotiation rate limit closes the connection */
+			php_stream_xport_shutdown(stream, (stream_shutdown_t)SHUT_RDWR);
+			stream->eof = 1;
+			errno = 0;
+			return 0;
+		}
+		int err = n > 0 ? SSL_ERROR_NONE : SSL_get_error(sslsock->ssl_handle, n);
+
+		int flushed = php_openssl_conn_flush(conn, dl);
+		if (flushed < 0) {
+			php_openssl_transport_error(stream, "send");
+			errno = 0;
+			return -1;
+		}
+		if (flushed == 0 && errno == ETIMEDOUT) {
+			*timed_out = true;
+			return -1;
+		}
+		if (n > 0) {
+			return n;
+		}
+
+		if (err == SSL_ERROR_WANT_WRITE) {
+			if (flushed > 0) {
+				continue;
+			}
+			sslsock->last_status = STREAM_CRYPTO_STATUS_WANT_WRITE;
+			errno = EAGAIN;
+			return 0;
+		}
+		if (err == SSL_ERROR_WANT_READ) {
+			int filled = php_openssl_conn_fill(conn, dl);
+			if (filled >= 0) {
+				/* Data, a retransmit or an EOF for OpenSSL to see */
+				continue;
+			}
+			if (errno == EAGAIN) {
+				sslsock->last_status = STREAM_CRYPTO_STATUS_WANT_READ;
+				return 0;
+			}
+			if (errno == ETIMEDOUT) {
+				*timed_out = true;
+				return -1;
+			}
+			php_openssl_transport_error(stream, "recv");
+			errno = 0;
+			return -1;
+		}
+
+		php_openssl_handle_ssl_error(stream, sslsock, n);
+		errno = 0;
+		return n;
+	}
+}
+
+static int php_openssl_op_handshake(php_stream *stream, php_openssl_netstream_data_t *sslsock, void *arg)
+{
+	return php_openssl_do_handshake(stream, sslsock);
+}
+
+typedef struct _php_openssl_io_arg {
+	char *buf;
+	size_t count;
+} php_openssl_io_arg;
+
+static int php_openssl_op_read(php_stream *stream, php_openssl_netstream_data_t *sslsock, void *arg)
+{
+	php_openssl_io_arg *io = arg;
+	return SSL_read(sslsock->ssl_handle, io->buf, (int) io->count);
+}
+
+static int php_openssl_op_write(php_stream *stream, php_openssl_netstream_data_t *sslsock, void *arg)
+{
+	php_openssl_io_arg *io = arg;
+	return SSL_write(sslsock->ssl_handle, io->buf, (int) io->count);
+}
+
+static int php_openssl_op_peek(php_stream *stream, php_openssl_netstream_data_t *sslsock, void *arg)
+{
+	php_openssl_io_arg *io = arg;
+	return SSL_peek(sslsock->ssl_handle, io->buf, (int) io->count);
+}
+
+int php_openssl_handshake_complete(php_stream *stream, php_openssl_netstream_data_t *sslsock)
+{
+	int cert_captured = 0;
+	int n;
+	X509 *peer_cert = SSL_get_peer_certificate(sslsock->ssl_handle);
+
+	if (peer_cert && PHP_STREAM_CONTEXT(stream)) {
+		cert_captured = php_openssl_capture_peer_certs(stream, sslsock, peer_cert);
+	}
+
+	if (FAILURE == php_openssl_apply_peer_verification_policy(sslsock->ssl_handle, peer_cert, stream)) {
+		SSL_shutdown(sslsock->ssl_handle);
+		php_openssl_conn_flush(sslsock->conn, NULL);
+		n = -1;
+	} else {
+		sslsock->ssl_active = 1;
+		n = 1;
+	}
+
+	if (peer_cert && cert_captured == 0) {
+		X509_free(peer_cert);
+	}
+	return n;
+}
+
 static int php_openssl_enable_crypto(php_stream *stream,
 		php_openssl_netstream_data_t *sslsock,
 		php_stream_xport_crypto_param *cparam) /* {{{ */
 {
 	int n;
-	int retry = 1;
-	int cert_captured = 0;
-	X509 *peer_cert;
 
 	sslsock->last_status = STREAM_CRYPTO_STATUS_NONE;
 
 	if (cparam->inputs.activate && !sslsock->ssl_active) {
-		struct timeval start_time, *timeout;
-		bool blocked = sslsock->s.is_blocked, has_timeout = false;
+		bool blocked = sslsock->s.is_blocked;
 
 		if (!sslsock->state_set) {
 #ifdef PHP_OPENSSL_TLS_DEBUG
@@ -2544,94 +3078,42 @@ static int php_openssl_enable_crypto(php_stream *stream,
 			sslsock->state_set = 1;
 		}
 
-		SSL_set_mode(sslsock->ssl_handle, SSL_MODE_RELEASE_BUFFERS);
+		SSL_set_mode(sslsock->ssl_handle, SSL_MODE_RELEASE_BUFFERS
+				| SSL_MODE_ENABLE_PARTIAL_WRITE | SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
 
-		if (SUCCESS == php_openssl_set_blocking(sslsock, 0)) {
-			/* The following mode are added only if we are able to change socket
-			 * to non blocking mode which is also used for read and write */
-			SSL_set_mode(sslsock->ssl_handle, SSL_MODE_ENABLE_PARTIAL_WRITE | SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
+		/* A blocking stream waits for the transport up to its timeout, a non-blocking one
+		 * returns with the WANT status */
+		php_openssl_deadline dl;
+		bool timed_out;
+		php_openssl_deadline_init(&dl,
+				sslsock->is_client ? &sslsock->connect_timeout : &sslsock->s.timeout);
+		n = php_openssl_pump(stream, sslsock, php_openssl_op_handshake, NULL, blocked ? &dl : NULL,
+				&timed_out);
+
+		if (n > 0) {
+			return php_openssl_handshake_complete(stream, sslsock);
+		}
+		if (timed_out) {
+			php_stream_warn(stream, TimeOut, "SSL: Handshake timed out");
+			return -1;
+		}
+		if (errno == EAGAIN) {
+			return 0;
 		}
 
-		timeout = sslsock->is_client ? &sslsock->connect_timeout : &sslsock->s.timeout;
-		has_timeout = !sslsock->s.is_blocked && (timeout->tv_sec > 0 || (timeout->tv_sec == 0 && timeout->tv_usec));
-		/* gettimeofday is not monotonic; using it here is not strictly correct */
-		if (has_timeout) {
-			gettimeofday(&start_time, NULL);
-		}
-
-		do {
-			struct timeval cur_time, elapsed_time;
-
-			ERR_clear_error();
-			n = php_openssl_do_handshake(stream, sslsock);
-
-			if (has_timeout) {
-				gettimeofday(&cur_time, NULL);
-				elapsed_time = php_openssl_subtract_timeval(cur_time, start_time);
-
-				if (php_openssl_compare_timeval( elapsed_time, *timeout) > 0) {
-					php_openssl_set_blocking(sslsock, blocked);
-					php_stream_warn(stream, TimeOut, "SSL: Handshake timed out");
-					return -1;
-				}
-			}
-
-			if (n <= 0) {
-				/* in case of SSL_ERROR_WANT_READ/WRITE, do not retry in non-blocking mode */
-				retry = php_openssl_handle_ssl_error(stream, n, blocked);
-				if (retry) {
-					/* wait until something interesting happens in the socket. It may be a
-					 * timeout. Also consider the unlikely of possibility of a write block  */
-					int err = SSL_get_error(sslsock->ssl_handle, n);
-					struct timeval left_time;
-
-					if (has_timeout) {
-						left_time = php_openssl_subtract_timeval(*timeout, elapsed_time);
-					}
-					php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_READ) ?
-						(POLLIN|POLLPRI) : POLLOUT, has_timeout ? &left_time : NULL);
-				}
-			} else {
-				retry = 0;
-			}
-		} while (retry);
-
-		if (sslsock->s.is_blocked != blocked) {
-			php_openssl_set_blocking(sslsock, blocked);
-		}
-
-		if (n == 1) {
-			peer_cert = SSL_get_peer_certificate(sslsock->ssl_handle);
-			if (peer_cert && PHP_STREAM_CONTEXT(stream)) {
-				cert_captured = php_openssl_capture_peer_certs(stream, sslsock, peer_cert);
-			}
-
-			if (FAILURE == php_openssl_apply_peer_verification_policy(sslsock->ssl_handle, peer_cert, stream)) {
-				SSL_shutdown(sslsock->ssl_handle);
-				n = -1;
-			} else {
-				sslsock->ssl_active = 1;
-			}
-		} else if (errno == EAGAIN) {
-			n = 0;
-		} else {
-			n = -1;
-			/* We want to capture the peer cert even if verification fails*/
-			peer_cert = SSL_get_peer_certificate(sslsock->ssl_handle);
-			if (peer_cert && PHP_STREAM_CONTEXT(stream)) {
-				cert_captured = php_openssl_capture_peer_certs(stream, sslsock, peer_cert);
+		/* Capture the peer certificate even when the handshake failed */
+		X509 *peer_cert = SSL_get_peer_certificate(sslsock->ssl_handle);
+		if (peer_cert) {
+			if (!PHP_STREAM_CONTEXT(stream) || php_openssl_capture_peer_certs(stream, sslsock, peer_cert) == 0) {
+				X509_free(peer_cert);
 			}
 		}
-
-		if (n && peer_cert && cert_captured == 0) {
-			X509_free(peer_cert);
-		}
-
-		return n;
+		return -1;
 
 	} else if (!cparam->inputs.activate && sslsock->ssl_active) {
 		/* deactivate - common for server/client */
 		SSL_shutdown(sslsock->ssl_handle);
+		php_openssl_conn_flush(sslsock->conn, NULL);
 		sslsock->ssl_active = 0;
 	}
 
@@ -2651,220 +3133,56 @@ static ssize_t php_openssl_sockop_write(php_stream *stream, const char *buf, siz
 }
 /* }}} */
 
-/**
- * Factored out common functionality (blocking, timeout, loop management) for read and write.
- * Perform IO (read or write) to an SSL socket. If we have a timeout, we switch to non-blocking mode
- * for the duration of the operation, using select to do our waits. If we time out, or we have an error
- * report that back to PHP
- */
+/* Reads or writes through the TLS layer. A blocking stream waits for the transport up to its
+ * timeout, a non-blocking one returns with the WANT status; a read with data already buffered
+ * only takes what is there. */
 static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, size_t count) /* {{{ */
 {
 	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
 
-	/* Only do this if SSL is active. */
-	if (sslsock->ssl_active) {
-		/* We have already returned some buffered data. Don't retry and don't
-		 * block. We're just trying to fill the buffer more, but the stream might
-		 * be empty, so we don't want to wait in vain. */
-		bool supplemental = stream->has_buffered_data;
-		int retry = !supplemental;
-		struct timeval start_time;
-		struct timeval *timeout = NULL;
-		bool began_blocked = sslsock->s.is_blocked;
-		bool has_timeout = false;
-		int nr_bytes = 0;
-
-		/* prevent overflow in openssl */
-		if (count > INT_MAX) {
-			count = INT_MAX;
+	if (!sslsock->ssl_active) {
+		if (sslsock->inner != NULL) {
+			return read ? php_stream_read(sslsock->inner, buf, count)
+					: php_stream_write(sslsock->inner, buf, count);
 		}
-
-		/* never use a timeout with non-blocking sockets */
-		if (began_blocked && !supplemental) {
-			timeout = &sslsock->s.timeout;
-		}
-
-		if (timeout || supplemental) {
-			php_openssl_set_blocking(sslsock, 0);
-		}
-
-		if (!sslsock->s.is_blocked && timeout && (timeout->tv_sec > 0 || (timeout->tv_sec == 0 && timeout->tv_usec))) {
-			has_timeout = true;
-			/* gettimeofday is not monotonic; using it here is not strictly correct */
-			gettimeofday(&start_time, NULL);
-		}
-
-		/* Main IO loop. */
-		do {
-			struct timeval cur_time, elapsed_time, left_time;
-
-			/* If we have a timeout to check, figure out how much time has elapsed since we started. */
-			if (has_timeout) {
-				gettimeofday(&cur_time, NULL);
-
-				/* Determine how much time we've taken so far. */
-				elapsed_time = php_openssl_subtract_timeval(cur_time, start_time);
-
-				/* and return an error if we've taken too long. */
-				if (php_openssl_compare_timeval(elapsed_time, *timeout) > 0 ) {
-					/* If the socket was originally blocking, set it back. */
-					if (began_blocked) {
-						php_openssl_set_blocking(sslsock, 1);
-					}
-					sslsock->s.timeout_event = true;
-					return -1;
-				}
-			}
-
-			/* Now, do the IO operation. Don't block if we can't complete... */
-			ERR_clear_error();
-			sslsock->last_status = STREAM_CRYPTO_STATUS_NONE;
-			if (read) {
-				nr_bytes = SSL_read(sslsock->ssl_handle, buf, (int)count);
-
-				if (sslsock->reneg && sslsock->reneg->should_close) {
-					/* renegotiation rate limiting triggered */
-					php_stream_xport_shutdown(stream, (stream_shutdown_t)SHUT_RDWR);
-					nr_bytes = 0;
-					stream->eof = 1;
-					 break;
-				}
-			} else {
-				nr_bytes = SSL_write(sslsock->ssl_handle, buf, (int)count);
-			}
-
-			/* Now, how much time until we time out? */
-			if (has_timeout) {
-				left_time = php_openssl_subtract_timeval( *timeout, elapsed_time );
-			}
-
-			/* If we didn't do anything on the last loop (or an error) check to see if we should retry or exit. */
-			if (nr_bytes <= 0) {
-
-				/* Get the error code from SSL, and check to see if it's an error or not. */
-				int err = SSL_get_error(sslsock->ssl_handle, nr_bytes );
-				retry = php_openssl_handle_ssl_error(stream, nr_bytes, false);
-
-				/* If we get this (the above doesn't check) then we'll retry as well. */
-				if (errno == EAGAIN && err == SSL_ERROR_WANT_READ && read) {
-					retry = 1;
-				}
-				if (errno == EAGAIN && err == SSL_ERROR_WANT_WRITE && read == 0) {
-					retry = 1;
-				}
-
-				/* Also, on reads, we may get this condition on an EOF. We should check properly. */
-				if (read) {
-					stream->eof = (retry == 0 && errno != EAGAIN && !SSL_pending(sslsock->ssl_handle));
-				}
-
-				/* Don't loop indefinitely in non-blocking mode if no data is available */
-				if (began_blocked == 0 || supplemental) {
-					break;
-				}
-
-				/* Now, if we have to wait some time, and we're supposed to be blocking, wait for the socket to become
-				 * available. Now, php_pollfd_for uses select to wait up to our time_left value only...
-				 */
-				if (retry) {
-					if (read) {
-						php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_WRITE) ?
-							(POLLOUT|POLLPRI) : (POLLIN|POLLPRI), has_timeout ? &left_time : NULL);
-					} else {
-						php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_READ) ?
-							(POLLIN|POLLPRI) : (POLLOUT|POLLPRI), has_timeout ? &left_time : NULL);
-					}
-				}
-			} else {
-				/* Else, if we got bytes back, check for possible errors. */
-				int err = SSL_get_error(sslsock->ssl_handle, nr_bytes);
-
-				/* If we didn't get any error, then let's return it to PHP. */
-				if (err == SSL_ERROR_NONE) {
-					break;
-				}
-
-				/* Otherwise, we need to wait again (up to time_left or we get an error) */
-				if (began_blocked) {
-					if (read) {
-						php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_WRITE) ?
-							(POLLOUT|POLLPRI) : (POLLIN|POLLPRI), has_timeout ? &left_time : NULL);
-					} else {
-						php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_READ) ?
-							(POLLIN|POLLPRI) : (POLLOUT|POLLPRI), has_timeout ? &left_time : NULL);
-					}
-				} else if (err == SSL_ERROR_WANT_READ) {
-					sslsock->last_status = STREAM_CRYPTO_STATUS_WANT_READ;
-				} else if (err == SSL_ERROR_WANT_WRITE) {
-					sslsock->last_status = STREAM_CRYPTO_STATUS_WANT_WRITE;
-				}
-			}
-
-			/* Finally, we keep going until we got data, and an SSL_ERROR_NONE, unless we had an error. */
-		} while (retry);
-
-		/* Tell PHP if we read / wrote bytes. */
-		if (nr_bytes > 0) {
-			php_stream_notify_progress_increment(PHP_STREAM_CONTEXT(stream), nr_bytes, 0);
-		}
-
-		/* This might be a supplemental read after consuming buffered data. If
-		 * the read returned nothing, ignore status WANT_READ. */
-		if (read &&
-			supplemental &&
-			nr_bytes <= 0 &&
-			sslsock->last_status == STREAM_CRYPTO_STATUS_WANT_READ
-		) {
-			sslsock->last_status = STREAM_CRYPTO_STATUS_NONE;
-		}
-
-		/* And if we were originally supposed to be blocking, let's reset the socket to that. */
-		if (began_blocked) {
-			php_openssl_set_blocking(sslsock, 1);
-		}
-
-		return 0 > nr_bytes ? 0 : nr_bytes;
-	} else {
-		size_t nr_bytes = 0;
-
-		/* This block is if we had no timeout... We will just sit and wait forever on the IO operation. */
-		if (read) {
-			nr_bytes = php_stream_socket_ops.read(stream, buf, count);
-		} else {
-			nr_bytes = php_stream_socket_ops.write(stream, buf, count);
-		}
-
-		return nr_bytes;
-	}
-}
-/* }}} */
-
-static struct timeval php_openssl_subtract_timeval(struct timeval a, struct timeval b) /* {{{ */
-{
-	struct timeval difference;
-
-	difference.tv_sec  = a.tv_sec  - b.tv_sec;
-	difference.tv_usec = a.tv_usec - b.tv_usec;
-
-	if (a.tv_usec < b.tv_usec) {
-		difference.tv_sec  -= 1L;
-		difference.tv_usec += 1000000L;
+		return read ? php_stream_socket_ops.read(stream, buf, count)
+				: php_stream_socket_ops.write(stream, buf, count);
 	}
 
-	return difference;
-}
-/* }}} */
+	bool supplemental = stream->has_buffered_data;
+	bool wait = sslsock->s.is_blocked && !supplemental && !sslsock->peek_only;
+	php_openssl_io_arg io = { buf, count > INT_MAX ? INT_MAX : count };
+	php_openssl_deadline dl;
+	bool timed_out;
+	int n;
 
-static int php_openssl_compare_timeval( struct timeval a, struct timeval b )
-{
-	if (a.tv_sec > b.tv_sec || (a.tv_sec == b.tv_sec && a.tv_usec > b.tv_usec) ) {
-		return 1;
-	} else if( a.tv_sec == b.tv_sec && a.tv_usec == b.tv_usec ) {
-		return 0;
-	} else {
+	sslsock->last_status = STREAM_CRYPTO_STATUS_NONE;
+	sslsock->s.timeout_event = false;
+	php_openssl_deadline_init(&dl, &sslsock->s.timeout);
+	n = php_openssl_pump(stream, sslsock, read ? php_openssl_op_read : php_openssl_op_write, &io,
+			wait ? &dl : NULL, &timed_out);
+
+	if (n > 0) {
+		php_stream_notify_progress_increment(PHP_STREAM_CONTEXT(stream), n, 0);
+		return n;
+	}
+	if (timed_out) {
+		sslsock->s.timeout_event = true;
 		return -1;
 	}
+	if (errno == EAGAIN) {
+		/* A supplemental read that found nothing is not a WANT_READ */
+		if (read && supplemental && sslsock->last_status == STREAM_CRYPTO_STATUS_WANT_READ) {
+			sslsock->last_status = STREAM_CRYPTO_STATUS_NONE;
+		}
+		return 0;
+	}
+	if (read) {
+		stream->eof = !SSL_pending(sslsock->ssl_handle);
+	}
+	return 0;
 }
+/* }}} */
 
 static int php_openssl_sockop_close(php_stream *stream, int close_handle) /* {{{ */
 {
@@ -2874,14 +3192,25 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle) /* {{{
 #endif
 	unsigned i;
 
+	bool port_socket = false;
+#ifdef HAVE_DTLS
+	if (sslsock->port != NULL) {
+		port_socket = php_openssl_dtls_detach(stream, sslsock);
+	}
+#endif
+
 	if (close_handle) {
 		if (sslsock->ssl_active) {
 			SSL_shutdown(sslsock->ssl_handle);
+			php_openssl_conn_flush(sslsock->conn, NULL);
 			sslsock->ssl_active = 0;
 		}
 		if (sslsock->ssl_handle) {
 			SSL_free(sslsock->ssl_handle);
 			sslsock->ssl_handle = NULL;
+		}
+		if (port_socket) {
+			sslsock->s.socket = SOCK_ERR;
 		}
 		if (sslsock->ctx) {
 			SSL_CTX_free(sslsock->ctx);
@@ -2914,6 +3243,17 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle) /* {{{
 			closesocket(sslsock->s.socket);
 			sslsock->s.socket = SOCK_ERR;
 		}
+	}
+
+	if (sslsock->conn) {
+		php_openssl_conn_free(sslsock->conn);
+		sslsock->conn = NULL;
+	}
+	if (sslsock->inner) {
+		if (sslsock->inner->res) {
+			zend_list_delete(sslsock->inner->res);
+		}
+		sslsock->inner = NULL;
 	}
 
 	if (sslsock->sni_certs) {
@@ -2984,6 +3324,15 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle) /* {{{
 
 static int php_openssl_sockop_flush(php_stream *stream) /* {{{ */
 {
+	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
+
+	if (sslsock->conn != NULL) {
+		php_openssl_conn_flush(sslsock->conn, NULL);
+		return 0;
+	}
+	if (sslsock->inner != NULL) {
+		return php_stream_flush(sslsock->inner);
+	}
 	return php_stream_socket_ops.flush(stream);
 }
 /* }}} */
@@ -3084,10 +3433,18 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 			if (sslsock->ssl_active) {
 				zval tmp;
 				char *proto_str;
+				const SSL_CIPHER *cipher;
 
 				array_init(&tmp);
 
 				switch (SSL_version(sslsock->ssl_handle)) {
+#ifdef HAVE_DTLS13
+					case DTLS1_3_VERSION: proto_str = "DTLSv1.3"; break;
+#endif
+#ifdef HAVE_DTLS
+					case DTLS1_2_VERSION: proto_str = "DTLSv1.2"; break;
+					case DTLS1_VERSION: proto_str = "DTLSv1.0"; break;
+#endif
 #ifdef HAVE_TLS13
 					case TLS1_3_VERSION: proto_str = "TLSv1.3"; break;
 #endif
@@ -3104,8 +3461,12 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 					default: proto_str = "UNKNOWN";
 				}
 
+				cipher = SSL_get_current_cipher(sslsock->ssl_handle);
+
 				add_assoc_string(&tmp, "protocol", proto_str);
-				php_openssl_add_crypto_cipher(&tmp, sslsock->ssl_handle);
+				add_assoc_string(&tmp, "cipher_name", (char *) SSL_CIPHER_get_name(cipher));
+				add_assoc_long(&tmp, "cipher_bits", SSL_CIPHER_get_bits(cipher, NULL));
+				add_assoc_string(&tmp, "cipher_version", SSL_CIPHER_get_version(cipher));
 				add_assoc_bool(&tmp, "session_reused", SSL_session_reused(sslsock->ssl_handle));
 
 #ifdef HAVE_TLS13
@@ -3138,6 +3499,30 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 					}
 				}
 #endif
+				/* RFC 5705 exported keying material, requested with keying_material_label and
+				 * keying_material_length */
+				{
+					zval *val;
+					char *km_label = NULL;
+					size_t km_label_len = 0;
+
+					GET_VER_OPT_STRINGL("keying_material_label", km_label, km_label_len);
+					if (km_label != NULL && GET_VER_OPT("keying_material_length")) {
+						zend_long km_len = zval_get_long(val);
+						if (km_len > 0 && km_len <= 1024) {
+							zend_string *km = zend_string_alloc((size_t) km_len, 0);
+							if (SSL_export_keying_material(sslsock->ssl_handle,
+									(unsigned char *) ZSTR_VAL(km), (size_t) km_len,
+									km_label, km_label_len, NULL, 0, 0) == 1) {
+								ZSTR_VAL(km)[km_len] = '\0';
+								add_assoc_str(&tmp, "keying_material", km);
+							} else {
+								zend_string_release(km);
+							}
+						}
+					}
+				}
+
 				add_assoc_zval((zval *)ptrparam, "crypto", &tmp);
 			}
 
@@ -3169,7 +3554,9 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 					tv.tv_usec = 0;
 				}
 
-				if (sslsock->s.socket == -1) {
+				if (sslsock->inner != NULL) {
+					alive = !sslsock->inner->eof;
+				} else if (sslsock->s.socket == -1) {
 					alive = 0;
 				} else if (
 					(
@@ -3183,94 +3570,19 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 					/* the poll() call was skipped if the socket is non-blocking (or MSG_DONTWAIT is available) and if the timeout is zero */
 					/* additionally, we don't use this optimization if SSL is active because in that case, we're not using MSG_DONTWAIT */
 					if (sslsock->ssl_active) {
-						int retry = 1;
-						struct timeval start_time;
-						struct timeval *timeout = NULL;
-						bool began_blocked = sslsock->s.is_blocked;
-						bool has_timeout = false;
+						/* Peek through the TLS layer, waiting up to the timeout on a blocking
+						 * stream; a transport that would block means the peer is there */
+						php_openssl_io_arg io = { &buf, 1 };
+						php_openssl_deadline dl;
+						bool timed_out;
 
-						/* never use a timeout with non-blocking sockets */
-						if (began_blocked) {
-							timeout = &tv;
-						}
-
-						if (timeout) {
-							php_openssl_set_blocking(sslsock, 0);
-						}
-
-						if (!sslsock->s.is_blocked && timeout && (timeout->tv_sec > 0 || (timeout->tv_sec == 0 && timeout->tv_usec))) {
-							has_timeout = true;
-							/* gettimeofday is not monotonic; using it here is not strictly correct */
-							gettimeofday(&start_time, NULL);
-						}
-
-						/* Main IO loop. */
-						do {
-							struct timeval cur_time, elapsed_time, left_time;
-
-							/* If we have a timeout to check, figure out how much time has elapsed since we started. */
-							if (has_timeout) {
-								gettimeofday(&cur_time, NULL);
-
-								/* Determine how much time we've taken so far. */
-								elapsed_time = php_openssl_subtract_timeval(cur_time, start_time);
-
-								/* and return an error if we've taken too long. */
-								if (php_openssl_compare_timeval(elapsed_time, *timeout) > 0 ) {
-									/* If the socket was originally blocking, set it back. */
-									if (began_blocked) {
-										php_openssl_set_blocking(sslsock, 1);
-									}
-									sslsock->s.timeout_event = true;
-									return PHP_STREAM_OPTION_RETURN_ERR;
-								}
-							}
-
-							int n = SSL_peek(sslsock->ssl_handle, &buf, sizeof(buf));
-							/* If we didn't do anything on the last loop (or an error) check to see if we should retry or exit. */
-							if (n <= 0) {
-								/* Now, do the IO operation. Don't block if we can't complete... */
-								int err = SSL_get_error(sslsock->ssl_handle, n);
-								switch (err) {
-									case SSL_ERROR_SYSCALL:
-										retry = php_socket_errno() == EAGAIN;
-										break;
-									case SSL_ERROR_WANT_READ:
-									case SSL_ERROR_WANT_WRITE:
-										retry = 1;
-										break;
-									default:
-										/* any other problem is a fatal error */
-										retry = 0;
-								}
-
-								/* Don't loop indefinitely in non-blocking mode if no data is available */
-								if (!began_blocked || !has_timeout) {
-									alive = retry;
-									break;
-								}
-
-								/* Now, if we have to wait some time, and we're supposed to be blocking, wait for the socket to become
-								* available. Now, php_pollfd_for uses select to wait up to our time_left value only...
-								*/
-								if (retry) {
-									/* Now, how much time until we time out? */
-									left_time = php_openssl_subtract_timeval(*timeout, elapsed_time);
-									if (php_pollfd_for(sslsock->s.socket, PHP_POLLREADABLE|POLLPRI|POLLOUT, has_timeout ? &left_time : NULL) <= 0) {
-										retry = 0;
-										alive = 0;
-									};
-								}
-							} else {
-								retry = 0;
-								alive = 1;
-							}
-							/* Finally, we keep going until there are any data or there is no time to wait. */
-						} while (retry);
-
-						if (began_blocked && !sslsock->s.is_blocked) {
-							// Set it back to blocking
-							php_openssl_set_blocking(sslsock, 1);
+						/* A zero timeout asks without waiting, as the poll above did */
+						bool wait = sslsock->s.is_blocked && (tv.tv_sec > 0 || tv.tv_usec > 0);
+						php_openssl_deadline_init(&dl, &tv);
+						int n = php_openssl_pump(stream, sslsock, php_openssl_op_peek, &io,
+								wait ? &dl : NULL, &timed_out);
+						if (n <= 0) {
+							alive = !timed_out && errno == EAGAIN;
 						}
 					} else {
 #ifdef PHP_WIN32
@@ -3294,6 +3606,22 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 				}
 				return alive ? PHP_STREAM_OPTION_RETURN_OK : PHP_STREAM_OPTION_RETURN_ERR;
 			}
+
+		case PHP_STREAM_OPTION_BLOCKING:
+			if (sslsock->conn != NULL || sslsock->inner != NULL) {
+				/* The socket stays non-blocking under the transport, the mode is the stream's */
+				int oldmode = sslsock->s.is_blocked;
+				sslsock->s.is_blocked = value;
+				return oldmode;
+			}
+			break;
+
+		case PHP_STREAM_OPTION_READ_TIMEOUT:
+			if (sslsock->inner != NULL) {
+				sslsock->s.timeout = *(struct timeval*)ptrparam;
+				return php_stream_set_option(sslsock->inner, option, value, ptrparam);
+			}
+			break;
 
 		case PHP_STREAM_OPTION_CRYPTO_API:
 
@@ -3322,20 +3650,50 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 				case STREAM_XPORT_OP_CONNECT_ASYNC:
 					/* TODO: Async connects need to check the enable_on_connect option when
 					 * we notice that the connect has actually been established */
-					php_stream_socket_ops.set_option(stream, option, value, ptrparam);
+					if (sslsock->inner != NULL) {
+						/* The inner stream is connected already */
+						xparam->outputs.returncode = 0;
+					} else {
+						php_stream_socket_ops.set_option(stream, option, value, ptrparam);
+					}
 
 					if ((sslsock->enable_on_connect) &&
 						((xparam->outputs.returncode == 0) ||
 						(xparam->op == STREAM_XPORT_OP_CONNECT_ASYNC &&
 						xparam->outputs.returncode == 1 && xparam->outputs.error_code == EINPROGRESS)))
 					{
-						if (php_openssl_setup_crypto_on_connect(stream, sslsock->method) < 0) {
+						zval *val;
+						php_stream *session_stream = NULL;
+
+						if (GET_VER_OPT("session_stream")) {
+							php_stream_from_zval_no_verify(session_stream, val);
+						}
+
+						if (php_stream_xport_crypto_setup(stream, sslsock->method, session_stream) < 0 ||
+								php_stream_xport_crypto_enable(stream, 1) < 0) {
+							php_stream_warn(stream, ProtocolError, "Failed to enable crypto");
 							xparam->outputs.returncode = -1;
 						}
 					}
 					return PHP_STREAM_OPTION_RETURN_OK;
 
+#ifdef HAVE_DTLS
+				case STREAM_XPORT_OP_BIND:
+					xparam->outputs.returncode = php_stream_socket_ops.set_option(
+						stream, option, value, ptrparam);
+					if (xparam->outputs.returncode == 0 && sslsock->s.is_dgram && sslsock->enable_on_connect) {
+						/* A dtls:// server: the port demultiplexes its peers from here on */
+						xparam->outputs.returncode = php_openssl_dtls_listen(stream, sslsock);
+					}
+					return PHP_STREAM_OPTION_RETURN_OK;
+#endif
+
 				case STREAM_XPORT_OP_LISTEN:
+					if (sslsock->s.is_dgram) {
+						/* A datagram socket has no backlog */
+						xparam->outputs.returncode = 0;
+						return PHP_STREAM_OPTION_RETURN_OK;
+					}
 					/* Do normal listen first */
 					xparam->outputs.returncode = php_stream_socket_ops.set_option(
 						stream, option, value, ptrparam);
@@ -3355,6 +3713,12 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 					return PHP_STREAM_OPTION_RETURN_OK;
 
 				case STREAM_XPORT_OP_ACCEPT:
+#ifdef HAVE_DTLS
+					if (sslsock->s.is_dgram) {
+						xparam->outputs.returncode = php_openssl_dtls_accept(stream, sslsock, xparam STREAMS_CC);
+						return PHP_STREAM_OPTION_RETURN_OK;
+					}
+#endif
 					/* we need to copy the additional fields that the underlying tcp transport
 					 * doesn't know about */
 					xparam->outputs.returncode = php_openssl_tcp_sockop_accept(stream, sslsock, xparam STREAMS_CC);
@@ -3368,6 +3732,11 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 			}
 	}
 
+	if (sslsock->inner != NULL && option == PHP_STREAM_OPTION_XPORT_API) {
+		/* Names, shutdown and the like belong to the inner stream */
+		return php_stream_set_option(sslsock->inner, option, value, ptrparam);
+	}
+
 	return php_stream_socket_ops.set_option(stream, option, value, ptrparam);
 }
 /* }}} */
@@ -3375,6 +3744,10 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 static int php_openssl_sockop_cast(php_stream *stream, int castas, void **ret)  /* {{{ */
 {
 	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
+
+	if (sslsock->inner != NULL && castas != PHP_STREAM_AS_FD_FOR_SELECT) {
+		return FAILURE;
+	}
 
 	switch(castas)	{
 		case PHP_STREAM_AS_STDIO:
@@ -3392,15 +3765,22 @@ static int php_openssl_sockop_cast(php_stream *stream, int castas, void **ret)  
 
 		case PHP_STREAM_AS_FD_FOR_SELECT:
 			if (ret) {
-				size_t pending;
-				if (stream->writepos == stream->readpos
-					&& sslsock->ssl_active
-					&& (pending = (size_t)SSL_pending(sslsock->ssl_handle)) > 0) {
-						php_stream_fill_read_buffer(stream, pending < stream->chunk_size
+				if (stream->writepos == stream->readpos && sslsock->ssl_active) {
+					/* Bytes OpenSSL decrypted, and ciphertext queued below it, are not visible
+					 * on the descriptor: move what forms a record into the stream buffer */
+					size_t pending = (size_t)SSL_pending(sslsock->ssl_handle);
+					if (pending > 0 || !php_openssl_conn_rx_empty(sslsock->conn)) {
+						sslsock->peek_only = 1;
+						php_stream_fill_read_buffer(stream, pending > 0 && pending < stream->chunk_size
 							? pending
 							: stream->chunk_size);
+						sslsock->peek_only = 0;
+					}
 				}
 
+				if (sslsock->inner != NULL) {
+					return php_stream_cast(sslsock->inner, castas, ret, 0);
+				}
 				*(php_socket_t *)ret = sslsock->s.socket;
 			}
 			return SUCCESS;
@@ -3442,6 +3822,38 @@ static const php_stream_ops php_openssl_socket_ops = {
 	php_openssl_sockop_set_option,
 };
 
+const php_stream_ops php_openssl_dgram_socket_ops = {
+	php_openssl_sockop_write, php_openssl_sockop_read,
+	php_openssl_sockop_close, php_openssl_sockop_flush,
+	"udp_socket/dtls",
+	NULL, /* seek */
+	php_openssl_sockop_cast,
+	php_openssl_sockop_stat,
+	php_openssl_sockop_set_option,
+};
+
+void php_openssl_netstream_share_ctx(php_openssl_netstream_data_t *dst, const php_openssl_netstream_data_t *src)
+{
+	if (src->ctx) {
+		SSL_CTX_up_ref(src->ctx);
+		dst->ctx = src->ctx;
+	}
+	if (src->session_callbacks) {
+		src->session_callbacks->refcount++;
+		dst->session_callbacks = src->session_callbacks;
+	}
+	if (src->psk_callbacks) {
+		src->psk_callbacks->refcount++;
+		dst->psk_callbacks = src->psk_callbacks;
+	}
+#ifdef HAVE_TLS13
+	if (src->early_data_callbacks) {
+		src->early_data_callbacks->refcount++;
+		dst->early_data_callbacks = src->early_data_callbacks;
+	}
+#endif
+}
+
 static zend_long php_openssl_get_crypto_method(
 		php_stream_context *ctx, zend_long crypto_method)  /* {{{ */
 {
@@ -3456,7 +3868,47 @@ static zend_long php_openssl_get_crypto_method(
 }
 /* }}} */
 
-/* php_openssl_get_url_name() is shared with the dtls:// transport; see xp_common.c. */
+static char *php_openssl_get_url_name(const char *resourcename,
+		size_t resourcenamelen, int is_persistent, php_stream_context *context)  /* {{{ */
+{
+	if (!resourcename) {
+		return NULL;
+	}
+
+	const php_uri_parser *uri_parser = php_stream_context_get_uri_parser("ssl", context);
+	if (uri_parser == NULL) {
+		zend_value_error("%s(): Provided stream context has invalid value for the \"uri_parser_class\" option", get_active_function_name());
+		return NULL;
+	}
+
+	php_uri_internal *internal_uri = php_uri_parse(uri_parser, resourcename, resourcenamelen, true);
+	if (internal_uri == NULL) {
+		return NULL;
+	}
+
+	char * url_name = NULL;
+	zval host_zv;
+	zend_result result = php_uri_get_host(internal_uri, PHP_URI_COMPONENT_READ_MODE_RAW, &host_zv);
+	if (result == SUCCESS && Z_TYPE(host_zv) == IS_STRING) {
+		const char * host = Z_STRVAL(host_zv);
+		size_t len = Z_STRLEN(host_zv);
+
+		/* skip trailing dots */
+		while (len && host[len-1] == '.') {
+			--len;
+		}
+
+		if (len) {
+			url_name = pestrndup(host, len, is_persistent);
+		}
+	}
+
+	php_uri_free(internal_uri);
+	zval_ptr_dtor(&host_zv);
+
+	return url_name;
+}
+/* }}} */
 
 php_stream *php_openssl_ssl_socket_factory(const char *proto, size_t protolen,
 		const char *resourcename, size_t resourcenamelen,
@@ -3490,11 +3942,41 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, size_t protolen,
 	/* Initialize context as NULL */
 	sslsock->ctx = NULL;
 
-	stream = php_stream_alloc_rel(&php_openssl_socket_ops, sslsock, persistent_id, "r+");
+	bool dgram = strncmp(proto, "udp", protolen) == 0 || strncmp(proto, "dtls", 4) == 0;
+	sslsock->s.is_dgram = dgram;
+
+	stream = php_stream_alloc_rel(dgram ? &php_openssl_dgram_socket_ops : &php_openssl_socket_ops,
+			sslsock, persistent_id, "r+");
 
 	if (stream == NULL)	{
 		pefree(sslsock, persistent_id ? 1 : 0);
 		return NULL;
+	}
+
+	/* The ciphertext may go through another stream instead of a socket of our own */
+	if (context) {
+		zval *val = php_stream_context_get_option(context, "ssl", "inner_stream");
+		if (val != NULL && Z_TYPE_P(val) != IS_NULL) {
+			php_stream *inner = NULL;
+			if (Z_TYPE_P(val) == IS_RESOURCE) {
+				php_stream_from_zval_no_verify(inner, val);
+			}
+			if (inner == NULL || inner == stream) {
+				php_stream_warn(stream, Generic, "inner_stream must be an open stream");
+				php_stream_close(stream);
+				return NULL;
+			}
+			if (persistent_id) {
+				php_stream_warn(stream, PersistentNotSupported,
+					"inner_stream is not supported for persistent streams");
+				php_stream_close(stream);
+				return NULL;
+			}
+			if (inner->res) {
+				GC_ADDREF(inner->res);
+			}
+			sslsock->inner = inner;
+		}
 	}
 
 	if (strncmp(proto, "ssl", protolen) == 0) {
@@ -3547,6 +4029,36 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, size_t protolen,
 #else
 		php_stream_warn(stream, ProtocolUnsupported,
 			"TLSv1.3 support is not compiled into the OpenSSL library against which PHP is linked");
+		php_stream_close(stream);
+		return NULL;
+#endif
+	} else if (strncmp(proto, "dtls", protolen) == 0) {
+#ifdef HAVE_DTLS
+		sslsock->enable_on_connect = 1;
+		sslsock->method = php_openssl_get_crypto_method(context, STREAM_CRYPTO_METHOD_DTLS_ANY_CLIENT);
+#else
+		php_stream_warn(stream, ProtocolUnsupported,
+			"DTLS support is not compiled into the OpenSSL library against which PHP is linked");
+		php_stream_close(stream);
+		return NULL;
+#endif
+	} else if (strncmp(proto, "dtlsv1.2", protolen) == 0) {
+#ifdef HAVE_DTLS
+		sslsock->enable_on_connect = 1;
+		sslsock->method = STREAM_CRYPTO_METHOD_DTLSv1_2_CLIENT;
+#else
+		php_stream_warn(stream, ProtocolUnsupported,
+			"DTLS support is not compiled into the OpenSSL library against which PHP is linked");
+		php_stream_close(stream);
+		return NULL;
+#endif
+	} else if (strncmp(proto, "dtlsv1.3", protolen) == 0) {
+#ifdef HAVE_DTLS13
+		sslsock->enable_on_connect = 1;
+		sslsock->method = STREAM_CRYPTO_METHOD_DTLSv1_3_CLIENT;
+#else
+		php_stream_warn(stream, ProtocolUnsupported,
+			"DTLSv1.3 support is not compiled into the OpenSSL library against which PHP is linked");
 		php_stream_close(stream);
 		return NULL;
 #endif

@@ -32,7 +32,7 @@ $serverCode = sprintf($serverCode, $certFile);
 
 $clientCode = <<<'CODE'
     $ctx = stream_context_create(['ssl' => [
-        'verify_peer' => false,
+        'verify_peer' => false, 'verify_peer_name' => false,
         'keying_material_label' => 'EXTRACTOR-dtls_srtp',
         'keying_material_length' => 60,
     ]]);

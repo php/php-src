@@ -46,21 +46,25 @@ function stop($proc, $pipes) {
 
 // 1) Full handshake: capture the negotiated session.
 [$proc, $pipes] = start_s_server($certFile, $port);
-$ctx = stream_context_create(['ssl' => ['verify_peer' => false]]);
+$session = null;
+$ctx = stream_context_create(['ssl' => [
+    'verify_peer' => false,
+    'verify_peer_name' => false,
+    'session_new_cb' => function ($stream, $s) use (&$session) { $session = $s; },
+]]);
 $c = stream_socket_client("dtls://127.0.0.1:$port", $errno, $errstr, 5, STREAM_CLIENT_CONNECT, $ctx);
 $crypto = stream_get_meta_data($c)['crypto'];
 var_dump($crypto['session_reused']);
-var_dump($crypto['session'] instanceof Openssl\Session);
-var_dump($crypto['session']->isResumable());
-var_dump(strlen($crypto['session']->export()) > 0);
-$session = $crypto['session'];
+var_dump($session instanceof Openssl\Session);
+var_dump($session->isResumable());
+var_dump(strlen($session->export()) > 0);
 fclose($c);
 stop($proc, $pipes);
 
 // 2) session_data is accepted; against a fresh server it falls back to a full
 //    handshake without error.
 [$proc, $pipes] = start_s_server($certFile, $port);
-$ctx = stream_context_create(['ssl' => ['verify_peer' => false, 'session_data' => $session]]);
+$ctx = stream_context_create(['ssl' => ['verify_peer' => false, 'verify_peer_name' => false, 'session_data' => $session]]);
 $c = stream_socket_client("dtls://127.0.0.1:$port", $errno, $errstr, 5, STREAM_CLIENT_CONNECT, $ctx);
 var_dump($c !== false);
 fclose($c);

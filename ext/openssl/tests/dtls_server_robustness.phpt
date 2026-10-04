@@ -39,7 +39,7 @@ $clientCode = <<<'CODE'
     fclose($junk);
 
     // A real DTLS client must still complete the handshake.
-    $ctx = stream_context_create(['ssl' => ['verify_peer' => false]]);
+    $ctx = stream_context_create(['ssl' => ['verify_peer' => false, 'verify_peer_name' => false]]);
     $client = stream_socket_client('dtls://{{ ADDR }}', $errno, $errstr, 5,
         STREAM_CLIENT_CONNECT, $ctx);
     var_dump($client !== false);

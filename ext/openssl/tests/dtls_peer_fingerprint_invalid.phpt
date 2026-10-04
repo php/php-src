@@ -52,7 +52,7 @@ function connect_fingerprint($port, $fingerprint) {
     $warnings = [];
     set_error_handler(function ($no, $str) use (&$warnings) { $warnings[] = $str; return true; });
     $ctx = stream_context_create(['ssl' => [
-        'verify_peer' => false,
+        'verify_peer' => false, 'verify_peer_name' => false,
         'peer_fingerprint' => $fingerprint,
     ]]);
     $client = stream_socket_client("dtls://127.0.0.1:$port", $errno, $errstr, 10, STREAM_CLIENT_CONNECT, $ctx);

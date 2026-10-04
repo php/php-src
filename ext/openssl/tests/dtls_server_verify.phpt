@@ -42,7 +42,7 @@ include 'ServerClientTestCase.inc';
 
 // 1) The client presents a CA-signed certificate -> the server accepts it.
 $clientOk = sprintf(<<<'CODE'
-    $ctx = stream_context_create(['ssl' => ['local_cert' => '%s', 'verify_peer' => false]]);
+    $ctx = stream_context_create(['ssl' => ['local_cert' => '%s', 'verify_peer' => false, 'verify_peer_name' => false]]);
     $client = stream_socket_client('dtls://{{ ADDR }}', $errno, $errstr, 5,
         STREAM_CLIENT_CONNECT, $ctx);
     var_dump($client !== false);
@@ -50,12 +50,13 @@ $clientOk = sprintf(<<<'CODE'
 CODE, $clientCert);
 ServerClientTestCase::getInstance()->run($clientOk, $serverCode);
 
-// 2) The client presents no certificate -> the handshake is rejected.
+// 2) The client presents no certificate -> the server rejects the connection.
 $clientNoCert = <<<'CODE'
-    $ctx = stream_context_create(['ssl' => ['verify_peer' => false]]);
-    $client = @stream_socket_client('dtls://{{ ADDR }}', $errno, $errstr, 5,
+    $ctx = stream_context_create(['ssl' => ['verify_peer' => false, 'verify_peer_name' => false]]);
+    $client = stream_socket_client('dtls://{{ ADDR }}', $errno, $errstr, 5,
         STREAM_CLIENT_CONNECT, $ctx);
-    var_dump($client === false);
+    var_dump($client !== false);
+    var_dump(fread($client, 8192));
 CODE;
 ServerClientTestCase::getInstance()->run($clientNoCert, $serverCode);
 ?>
@@ -69,3 +70,4 @@ ServerClientTestCase::getInstance()->run($clientNoCert, $serverCode);
 bool(true)
 string(8) "verified"
 bool(true)
+string(0) ""

@@ -50,7 +50,7 @@ while (microtime(true) < $deadline) {
 }
 
 // Self-signed s_server cert: skip verification for this round-trip scenario.
-$ctx = stream_context_create(['ssl' => ['verify_peer' => false]]);
+$ctx = stream_context_create(['ssl' => ['verify_peer' => false, 'verify_peer_name' => false]]);
 $client = $ready
     ? stream_socket_client("dtls://127.0.0.1:$port", $errno, $errstr, 10, STREAM_CLIENT_CONNECT, $ctx)
     : false;

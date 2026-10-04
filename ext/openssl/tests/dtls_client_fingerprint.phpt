@@ -52,6 +52,8 @@ function stop_server($proc, $pipes) {
 // 1) matching fingerprint authenticates the peer on its own (no CA needed).
 [$proc, $pipes, $port] = start_server($certFile);
 $ctx = stream_context_create(['ssl' => [
+    'verify_peer' => false,
+    'verify_peer_name' => false,
     'peer_fingerprint' => ['sha256' => $fingerprint],
 ]]);
 $client = stream_socket_client("dtls://127.0.0.1:$port", $errno, $errstr, 10, STREAM_CLIENT_CONNECT, $ctx);
@@ -64,11 +66,16 @@ stop_server($proc, $pipes);
 // 2) wrong fingerprint -> rejected after the handshake.
 [$proc, $pipes, $port] = start_server($certFile);
 $ctx = stream_context_create(['ssl' => [
+    'verify_peer' => false,
+    'verify_peer_name' => false,
     'peer_fingerprint' => ['sha256' => str_repeat('00', 32)],
 ]]);
-$client = @stream_socket_client("dtls://127.0.0.1:$port", $errno, $errstr, 10, STREAM_CLIENT_CONNECT, $ctx);
+$warnings = [];
+set_error_handler(function ($no, $str) use (&$warnings) { $warnings[] = $str; return true; });
+$client = stream_socket_client("dtls://127.0.0.1:$port", $errno, $errstr, 10, STREAM_CLIENT_CONNECT, $ctx);
+restore_error_handler();
 var_dump($client === false);
-var_dump(str_contains($errstr, 'fingerprint'));
+var_dump(count(preg_grep('/fingerprint/', $warnings)) > 0);
 stop_server($proc, $pipes);
 ?>
 --CLEAN--

@@ -61,7 +61,7 @@ function stop_server($proc, $pipes) {
 
 function connect_with_passphrase($port, $clientCert, $clientKey, $passphrase) {
     $ctx = stream_context_create(['ssl' => [
-        'verify_peer' => false,
+        'verify_peer' => false, 'verify_peer_name' => false,
         'local_cert' => $clientCert,
         'local_pk' => $clientKey,
         'passphrase' => $passphrase,

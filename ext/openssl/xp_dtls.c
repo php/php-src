@@ -9,1146 +9,653 @@
   | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Gianfrancesco Aurecchia <gianfri@aurecchia.com>             |
+  |          Jakub Zelenka <bukka@php.net>                               |
   +----------------------------------------------------------------------+
 */
+
+/* The dtls:// server port. One UDP socket carries every peer of a server: the port receives the
+ * datagrams, routes each to its connection by the peer address, runs the handshakes of new
+ * peers with a cookie exchange, and hands the connections that completed to accept() as
+ * streams. The listener stream and every accepted stream share the port and its socket. */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 
 #include "php.h"
-#include "ext/standard/file.h"
-#include "streams/php_streams_int.h"
 #include "php_openssl.h"
-#include "php_openssl_backend.h"
-#include "php_network.h"
-#include "xp_common.h"
-#ifdef PHP_WIN32
-# include "win32/time.h"
-#endif
+#include "xp_ssl.h"
+
 #include <openssl/ssl.h>
-#include <openssl/bio.h>
 #include <openssl/err.h>
 #include <openssl/hmac.h>
 #include <openssl/rand.h>
 #include <openssl/crypto.h>
 
-#ifndef OPENSSL_NO_DTLS
+#ifdef HAVE_DTLS
 
-/* Index of the php_stream pointer stored on an SSL, so a callback can recover it. */
-extern int php_openssl_get_ssl_stream_data_index(void);
+#define PHP_OPENSSL_DTLS_MAX_PENDING 256
+#define PHP_OPENSSL_DTLS_PENDING_TIMEOUT 30
+/* Datagrams queued for a connection nobody is reading before the port drops the next */
+#define PHP_OPENSSL_DTLS_RX_LIMIT 256
+/* A cookie is a timestamp and an HMAC of it with the peer address */
+#define PHP_OPENSSL_DTLS_COOKIE_TS_LEN 8
+#define PHP_OPENSSL_DTLS_COOKIE_MAC_LEN 32
+#define PHP_OPENSSL_DTLS_COOKIE_LEN (PHP_OPENSSL_DTLS_COOKIE_TS_LEN + PHP_OPENSSL_DTLS_COOKIE_MAC_LEN)
+#define PHP_OPENSSL_DTLS_COOKIE_MAX_AGE 60
 
-/* The base socket data is embedded first so the generic socket option handlers
- * can be reused; the datagram BIO is owned by ssl_handle (freed with it). */
-typedef struct _php_openssl_dtls_data_t {
-	php_netstream_data_t s;
+typedef enum {
+	PHP_OPENSSL_DTLS_PEER_PENDING,
+	PHP_OPENSSL_DTLS_PEER_READY,
+	PHP_OPENSSL_DTLS_PEER_ACCEPTED,
+} php_openssl_dtls_peer_state;
+
+typedef struct _php_openssl_dtls_peer {
+	php_openssl_port *port;
+	php_openssl_conn *conn;
+	SSL *ssl;
+	zend_string *key;
+	zend_hrtime_t created;
+	php_openssl_dtls_peer_state state;
+	/* The accepted stream's data, owner of ssl and conn from then on */
+	php_openssl_netstream_data_t *sslsock;
+	struct _php_openssl_dtls_peer *next;
+} php_openssl_dtls_peer;
+
+struct _php_openssl_port {
+	int refcount;
+	/* The listener while it is open */
+	php_stream *stream;
+	php_openssl_netstream_data_t *listener;
+	php_openssl_xport *xport;
+	php_socket_t fd;
 	SSL_CTX *ctx;
-	SSL *ssl_handle;
-	bool is_server;
-	bool ssl_active;
-	bool enable_on_connect;
-	php_stream_xport_crypt_method_t method;
-	struct timeval connect_timeout;
-	char *url_name;
-	php_openssl_session_callbacks_t *session_callbacks;
-} php_openssl_dtls_data_t;
+	/* Every peer by address */
+	HashTable peers;
+	php_openssl_dtls_peer *pending;
+	size_t pending_count;
+	/* Handshakes completed, oldest first */
+	php_openssl_dtls_peer *ready;
+	php_openssl_dtls_peer *ready_tail;
+	zend_long max_pending;
+	zend_long pending_timeout;
+	unsigned link_mtu;
+	unsigned char cookie_secret[32];
+	bool closed;
+};
 
-static const php_stream_ops php_openssl_dtls_socket_ops;
+static int php_openssl_port_fill(php_openssl_conn *conn, php_openssl_deadline *dl);
 
-/* Read an option from the "ssl" stream context into the local `val`. */
-#define GET_VER_OPT(_name) \
-	(PHP_STREAM_CONTEXT(stream) && (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", _name)) != NULL)
-#define GET_VER_OPT_STRING(_name, _str) \
-	do { \
-		if (GET_VER_OPT(_name)) { \
-			if (try_convert_to_string(val)) _str = Z_STRVAL_P(val); \
-		} \
-	} while (0)
-#define GET_VER_OPT_STRINGL(_name, _str, _len) \
-	do { \
-		if (GET_VER_OPT(_name)) { \
-			if (try_convert_to_string(val)) { \
-				_str = Z_STRVAL_P(val); \
-				_len = Z_STRLEN_P(val); \
-			} \
-		} \
-	} while (0)
+/* Peers */
 
-/* Datagram semantics: like udp:// (and tls://) the stream is buffered, so a read
- * yields the data of a single DTLS record and a write emits one record (atomic,
- * no partial writes). EOF is the peer's close_notify, which UDP need not deliver,
- * so it is best-effort.
- *
- * The socket is non-blocking, so on WANT_* we poll (up to the read timeout when
- * blocking) and retry. */
-static ssize_t php_openssl_dtls_io(bool read, php_stream *stream, char *buf, size_t count)
+static zend_string *php_openssl_dtls_peer_key(const struct sockaddr *peer, socklen_t peerlen)
 {
-	php_openssl_dtls_data_t *dtlssock = (php_openssl_dtls_data_t *)stream->abstract;
+	return zend_string_init((const char *) peer, peerlen, 0);
+}
 
-	/* Plain udp:// (no crypto): read/write the datagram socket directly. */
-	if (!dtlssock->ssl_active) {
-		return read
-			? php_stream_socket_ops.read(stream, buf, count)
-			: php_stream_socket_ops.write(stream, buf, count);
+static void php_openssl_dtls_peer_unlink(php_openssl_dtls_peer **list, php_openssl_dtls_peer *peer)
+{
+	while (*list != NULL && *list != peer) {
+		list = &(*list)->next;
 	}
-
-	SSL *ssl = dtlssock->ssl_handle;
-	if (ssl == NULL) {
-		return -1;
+	if (*list == peer) {
+		*list = peer->next;
 	}
+	peer->next = NULL;
+}
 
-	/* OpenSSL takes an int length. */
-	if (count > INT_MAX) {
-		count = INT_MAX;
-	}
-
-	dtlssock->s.timeout_event = false;
-
-	/* Bound the total time across retries, not each individual poll. */
-	struct timeval deadline;
-	bool has_deadline = false;
-	if (dtlssock->s.is_blocked && (dtlssock->s.timeout.tv_sec > 0 || dtlssock->s.timeout.tv_usec > 0)) {
-		gettimeofday(&deadline, NULL);
-		deadline.tv_sec += dtlssock->s.timeout.tv_sec;
-		deadline.tv_usec += dtlssock->s.timeout.tv_usec;
-		if (deadline.tv_usec >= 1000000) {
-			deadline.tv_sec++;
-			deadline.tv_usec -= 1000000;
-		}
-		has_deadline = true;
-	}
-
-	for (;;) {
-		int events;
-
-		ERR_clear_error();
-		int n = read ? SSL_read(ssl, buf, (int)count) : SSL_write(ssl, buf, (int)count);
-		if (n > 0) {
-			php_stream_notify_progress_increment(PHP_STREAM_CONTEXT(stream), n, 0);
-			return n;
-		}
-		switch (SSL_get_error(ssl, n)) {
-			case SSL_ERROR_WANT_READ:
-				events = POLLIN;
-				break;
-			case SSL_ERROR_WANT_WRITE:
-				events = POLLOUT;
-				break;
-			case SSL_ERROR_ZERO_RETURN:
-				/* Peer sent close_notify. */
-				stream->eof = 1;
-				return 0;
-			default:
-				if (read) {
-					stream->eof = 1;
+/* Frees a peer the port still owns: not accepted, or accepted and now closed by its stream */
+static void php_openssl_dtls_peer_free(php_openssl_port *port, php_openssl_dtls_peer *peer)
+{
+	switch (peer->state) {
+		case PHP_OPENSSL_DTLS_PEER_PENDING:
+			php_openssl_dtls_peer_unlink(&port->pending, peer);
+			port->pending_count--;
+			break;
+		case PHP_OPENSSL_DTLS_PEER_READY:
+			php_openssl_dtls_peer_unlink(&port->ready, peer);
+			if (port->ready == NULL) {
+				port->ready_tail = NULL;
+			} else if (port->ready_tail == peer) {
+				port->ready_tail = port->ready;
+				while (port->ready_tail->next) {
+					port->ready_tail = port->ready_tail->next;
 				}
-				return -1;
-		}
-
-		/* Non-blocking, or a zero read timeout: don't wait, report would-block. */
-		if (!dtlssock->s.is_blocked
-				|| (dtlssock->s.timeout.tv_sec == 0 && dtlssock->s.timeout.tv_usec == 0)) {
-			return 0;
-		}
-
-		int wait_ms = -1;
-		if (has_deadline) {
-			struct timeval now;
-			gettimeofday(&now, NULL);
-			long remaining = (deadline.tv_sec - now.tv_sec) * 1000L
-					+ (deadline.tv_usec - now.tv_usec) / 1000;
-			if (remaining <= 0) {
-				dtlssock->s.timeout_event = true;
-				return -1;
 			}
-			wait_ms = remaining > INT_MAX ? INT_MAX : (int)remaining;
-		}
-
-		int ready = php_pollfd_for_ms(dtlssock->s.socket, events, wait_ms);
-		if (ready == 0) {
-			dtlssock->s.timeout_event = true;
-			return -1;
-		}
-		if (ready < 0) {
-			return -1;
-		}
+			break;
+		case PHP_OPENSSL_DTLS_PEER_ACCEPTED:
+			/* The stream owns the SSL and the connection */
+			peer->ssl = NULL;
+			peer->conn = NULL;
+			break;
 	}
+	if (peer->key) {
+		zend_hash_del(&port->peers, peer->key);
+		zend_string_release(peer->key);
+	}
+	if (peer->ssl) {
+		SSL_free(peer->ssl);
+	}
+	if (peer->conn) {
+		php_openssl_conn_free(peer->conn);
+	}
+	efree(peer);
 }
 
-/* Send one datagram of application data. */
-static ssize_t php_openssl_dtls_sockop_write(php_stream *stream, const char *buf, size_t count)
+static php_openssl_dtls_peer *php_openssl_dtls_peer_of(php_openssl_conn *conn)
 {
-	return php_openssl_dtls_io(false, stream, (char *)buf, count);
+	return (php_openssl_dtls_peer *) conn->owner;
 }
 
-/* Receive one datagram of application data. */
-static ssize_t php_openssl_dtls_sockop_read(php_stream *stream, char *buf, size_t count)
+/* Cookies: HMAC of a timestamp and the peer address, keyed by a secret of the port */
+
+static php_openssl_dtls_peer *php_openssl_dtls_peer_from_ssl(SSL *ssl)
 {
-	return php_openssl_dtls_io(true, stream, buf, count);
+	BIO *bio = SSL_get_rbio(ssl);
+	php_openssl_conn *conn = bio ? BIO_get_data(bio) : NULL;
+	return conn ? php_openssl_dtls_peer_of(conn) : NULL;
 }
 
-/* Free the DTLS objects and close the socket. */
-static int php_openssl_dtls_sockop_close(php_stream *stream, int close_handle)
+static void php_openssl_dtls_cookie_mac(php_openssl_port *port, const php_openssl_conn *conn,
+		const unsigned char *ts, unsigned char *mac)
 {
-	php_openssl_dtls_data_t *dtlssock = (php_openssl_dtls_data_t *)stream->abstract;
+	unsigned char msg[PHP_OPENSSL_DTLS_COOKIE_TS_LEN + sizeof(conn->peer)];
+	unsigned int len = 0;
 
-	if (dtlssock == NULL) {
-		return 0;
-	}
-
-	/* SSL_free also frees the BIO (created BIO_NOCLOSE), so the socket is closed
-	 * separately below. */
-	if (dtlssock->ssl_handle != NULL) {
-		/* Shut down cleanly so a session captured for resumption stays usable;
-		 * an SSL_free on an unfinished exchange marks the session non-resumable. */
-		if (SSL_is_init_finished(dtlssock->ssl_handle)) {
-			SSL_shutdown(dtlssock->ssl_handle);
-		}
-		SSL_free(dtlssock->ssl_handle);
-		dtlssock->ssl_handle = NULL;
-	}
-	if (dtlssock->ctx != NULL) {
-		SSL_CTX_free(dtlssock->ctx);
-		dtlssock->ctx = NULL;
-	}
-
-	if (close_handle && dtlssock->s.socket != SOCK_ERR) {
-		closesocket(dtlssock->s.socket);
-		dtlssock->s.socket = SOCK_ERR;
-	}
-
-	/* Shared between the listener and its connections; free on the last one. */
-	if (dtlssock->session_callbacks && --dtlssock->session_callbacks->refcount == 0) {
-		if (ZEND_FCC_INITIALIZED(dtlssock->session_callbacks->new_cb)) {
-			zend_fcc_dtor(&dtlssock->session_callbacks->new_cb);
-		}
-		if (ZEND_FCC_INITIALIZED(dtlssock->session_callbacks->get_cb)) {
-			zend_fcc_dtor(&dtlssock->session_callbacks->get_cb);
-		}
-		if (ZEND_FCC_INITIALIZED(dtlssock->session_callbacks->remove_cb)) {
-			zend_fcc_dtor(&dtlssock->session_callbacks->remove_cb);
-		}
-		pefree(dtlssock->session_callbacks, 0);
-	}
-	dtlssock->session_callbacks = NULL;
-
-	if (dtlssock->url_name != NULL) {
-		pefree(dtlssock->url_name, php_stream_is_persistent(stream));
-	}
-
-	pefree(dtlssock, php_stream_is_persistent(stream));
-	stream->abstract = NULL;
-
-	return 0;
-}
-
-/* Apply the "ssl" context options to the SSL_CTX: peer verification, ciphers and
- * the local certificate. Set on the context so SSL_new() inherits them. */
-static int php_openssl_dtls_apply_context(php_stream *stream, php_openssl_dtls_data_t *dtlssock)
-{
-	SSL_CTX *ctx = dtlssock->ctx;
-	char *cipherlist = NULL;
-	zval *val;
-
-	/* DTLS 1.0 is deprecated; require DTLS 1.2 or higher. */
-	SSL_CTX_set_min_proto_version(ctx, DTLS1_2_VERSION);
-
-	/* Clients verify the server by default; a server does not request a client
-	 * certificate unless verify_peer is set explicitly. A peer_fingerprint
-	 * authenticates the peer by itself (checked after the handshake), so it
-	 * overrides CA verification. */
-	bool is_server = dtlssock->is_server;
-	bool verify_peer = GET_VER_OPT("verify_peer") ? zend_is_true(val) : !is_server;
-	bool has_fingerprint = GET_VER_OPT("peer_fingerprint");
-	if (!verify_peer || has_fingerprint) {
-		php_openssl_disable_peer_verification(ctx, stream);
-	} else {
-		if (php_openssl_enable_peer_verification(ctx, stream, !is_server) != SUCCESS) {
-			return -1;
-		}
-		if (is_server) {
-			/* A server that verifies peers must require the client certificate. */
-			SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
-					php_openssl_verify_callback);
-		}
-	}
-
-	GET_VER_OPT_STRING("ciphers", cipherlist);
-	if (cipherlist != NULL && SSL_CTX_set_cipher_list(ctx, cipherlist) != 1) {
-		php_stream_warn(stream, CreateFailed, "Failed to set the cipher list");
-		return -1;
-	}
-
-	/* A passphrase for an encrypted private key (used by set_local_cert below). */
-	if (GET_VER_OPT("passphrase")) {
-		SSL_CTX_set_default_passwd_cb_userdata(ctx, stream);
-		SSL_CTX_set_default_passwd_cb(ctx, php_openssl_passwd_callback);
-	}
-
-	/* Local certificate chain and private key as file paths. */
-	if (php_openssl_set_local_cert(ctx, stream) != SUCCESS) {
-		return -1;
-	}
-
-	return 0;
-}
-
-/* Keep the handshake within the path MTU: enable path-MTU discovery so the
- * kernel drops-and-signals oversized datagrams (OpenSSL then shrinks its DTLS
- * MTU and retransmits), and honour an explicit dtls_link_mtu context option. */
-static void php_openssl_dtls_configure_mtu(php_stream *stream, SSL *ssl, php_socket_t fd, int family)
-{
-	zval *val;
-
-#if defined(IP_MTU_DISCOVER) && defined(IP_PMTUDISC_DO)
-	if (family == AF_INET) {
-		int mode = IP_PMTUDISC_DO;
-		setsockopt(fd, IPPROTO_IP, IP_MTU_DISCOVER, (char *)&mode, sizeof(mode));
-	}
-#endif
-#if defined(IPV6_MTU_DISCOVER) && defined(IPV6_PMTUDISC_DO)
-	if (family == AF_INET6) {
-		int mode = IPV6_PMTUDISC_DO;
-		setsockopt(fd, IPPROTO_IPV6, IPV6_MTU_DISCOVER, (char *)&mode, sizeof(mode));
-	}
-#endif
-
-	if (GET_VER_OPT("dtls_link_mtu")) {
-		zend_long mtu = zval_get_long(val);
-		if (mtu > 0) {
-			DTLS_set_link_mtu(ssl, mtu);
-			SSL_set_options(ssl, SSL_OP_NO_QUERY_MTU);
-		}
-	}
-}
-
-/* Create the DTLS context, SSL object and datagram BIO. */
-static int php_openssl_dtls_setup_crypto(php_stream *stream, php_openssl_dtls_data_t *dtlssock,
-		const char *peer_host)
-{
-	BIO *bio;
-	zval *val;
-
-	/* The DTLS I/O loop emulates blocking with poll, so the fd stays non-blocking. */
-	php_set_sock_blocking(dtlssock->s.socket, 0);
-
-	dtlssock->ctx = SSL_CTX_new(DTLS_client_method());
-	if (dtlssock->ctx == NULL) {
-		php_stream_warn(stream, CreateFailed, "DTLS context creation failure");
-		return -1;
-	}
-
-	if (php_openssl_dtls_apply_context(stream, dtlssock) != 0) {
-		SSL_CTX_free(dtlssock->ctx);
-		dtlssock->ctx = NULL;
-		return -1;
-	}
-
-	dtlssock->ssl_handle = SSL_new(dtlssock->ctx);
-	if (dtlssock->ssl_handle == NULL) {
-		php_stream_warn(stream, CreateFailed, "DTLS handle creation failure");
-		SSL_CTX_free(dtlssock->ctx);
-		dtlssock->ctx = NULL;
-		return -1;
-	}
-
-	/* Let the shared verify callback recover the stream (for allow_self_signed etc.). */
-	SSL_set_ex_data(dtlssock->ssl_handle, php_openssl_get_ssl_stream_data_index(), stream);
-
-	/* Resume a previous session (abbreviated handshake) if session_data holds an
-	 * Openssl\Session; SSL_set_session takes its own reference. The client cache
-	 * must be enabled for the session to be offered in the ClientHello. */
-	if (GET_VER_OPT("session_data") && php_openssl_is_session_ce(val)) {
-		SSL_SESSION *session = php_openssl_session_from_zval(val);
-		if (session != NULL) {
-			SSL_CTX_set_session_cache_mode(dtlssock->ctx,
-					SSL_SESS_CACHE_CLIENT | SSL_SESS_CACHE_NO_INTERNAL);
-			SSL_set_session(dtlssock->ssl_handle, session);
-		}
-	}
-
-	/* Hostname verification needs the SSL object; the verify mode is inherited
-	 * from the context. */
-	bool verify_peer = !(GET_VER_OPT("verify_peer") && !zend_is_true(val));
-	bool verify_name = !(GET_VER_OPT("verify_peer_name") && !zend_is_true(val));
-	if (verify_peer && verify_name) {
-		const char *name = peer_host ? peer_host : dtlssock->url_name;
-		GET_VER_OPT_STRING("peer_name", name);
-		if (name != NULL) {
-			/* An IP literal needs IP-address matching, not DNS-name matching. */
-			X509_VERIFY_PARAM *param = SSL_get0_param(dtlssock->ssl_handle);
-			if (X509_VERIFY_PARAM_set1_ip_asc(param, name) != 1) {
-				X509_VERIFY_PARAM_set1_host(param, name, 0);
-			}
-		}
-	}
-
-	bio = BIO_new_dgram(dtlssock->s.socket, BIO_NOCLOSE);
-	if (bio == NULL) {
-		php_stream_warn(stream, CreateFailed, "DTLS datagram BIO creation failure");
-		SSL_free(dtlssock->ssl_handle);
-		dtlssock->ssl_handle = NULL;
-		SSL_CTX_free(dtlssock->ctx);
-		dtlssock->ctx = NULL;
-		return -1;
-	}
-
-	/* A datagram BIO defaults to sendto() with an empty peer, which fails with
-	 * EINVAL on a connected socket; mark it connected so it uses send()/recv(). */
-	{
-		struct sockaddr_storage peer;
-		socklen_t peerlen = sizeof(peer);
-		if (getpeername(dtlssock->s.socket, (struct sockaddr *)&peer, &peerlen) == 0) {
-			BIO_ctrl(bio, BIO_CTRL_DGRAM_SET_CONNECTED, 0, &peer);
-			php_openssl_dtls_configure_mtu(stream, dtlssock->ssl_handle, dtlssock->s.socket,
-					peer.ss_family);
-		}
-	}
-
-	SSL_set_bio(dtlssock->ssl_handle, bio, bio);
-	SSL_set_connect_state(dtlssock->ssl_handle);
-
-	return 0;
-}
-
-/* The socket is non-blocking, so poll between flights and resend on the
- * retransmission timeout. */
-static int php_openssl_dtls_handshake(php_stream *stream, php_openssl_dtls_data_t *dtlssock,
-		struct timeval *timeout, zend_string **error_text)
-{
-	SSL *ssl = dtlssock->ssl_handle;
-
-	/* Always bound the handshake so a silent peer can't make OpenSSL's DTLS timer
-	 * retransmit forever: use the connect timeout, else the default socket timeout. */
-	struct timeval *tmo = timeout;
-	struct timeval deadline;
-	gettimeofday(&deadline, NULL);
-	if (tmo != NULL && (tmo->tv_sec > 0 || tmo->tv_usec > 0)) {
-		deadline.tv_sec += tmo->tv_sec;
-		deadline.tv_usec += tmo->tv_usec;
-		if (deadline.tv_usec >= 1000000) {
-			deadline.tv_sec++;
-			deadline.tv_usec -= 1000000;
-		}
-	} else {
-		deadline.tv_sec += (time_t) FG(default_socket_timeout);
-	}
-
-	for (;;) {
-		ERR_clear_error();
-		int n = SSL_do_handshake(ssl);
-		if (n == 1) {
-			return 0;
-		}
-		int saved_errno = errno;
-
-		int events;
-		switch (SSL_get_error(ssl, n)) {
-			case SSL_ERROR_WANT_READ:
-				events = POLLIN;
-				break;
-			case SSL_ERROR_WANT_WRITE:
-				events = POLLOUT;
-				break;
-			default: {
-				char buf[256] = "";
-				unsigned long ecode = ERR_get_error();
-				if (ecode != 0) {
-					ERR_error_string_n(ecode, buf, sizeof(buf));
-				} else if (saved_errno != 0) {
-					/* SSL_ERROR_SYSCALL with an empty queue: report the syscall. */
-					snprintf(buf, sizeof(buf), "%s", strerror(saved_errno));
-				}
-				if (error_text != NULL) {
-					*error_text = strpprintf(0, "DTLS handshake failed: %s",
-							buf[0] != '\0' ? buf : "unexpected error");
-				}
-				return -1;
-			}
-		}
-
-		struct timeval tv;
-		int wait_ms = DTLSv1_get_timeout(ssl, &tv)
-				? (int)(tv.tv_sec * 1000 + tv.tv_usec / 1000)
-				: -1;
-
-		struct timeval now;
-		gettimeofday(&now, NULL);
-		long remaining = (deadline.tv_sec - now.tv_sec) * 1000L
-				+ (deadline.tv_usec - now.tv_usec) / 1000;
-		if (remaining <= 0) {
-			if (error_text != NULL) {
-				*error_text = ZSTR_INIT_LITERAL("DTLS handshake timed out", 0);
-			}
-			return -1;
-		}
-		if (wait_ms < 0 || wait_ms > remaining) {
-			wait_ms = (int)remaining;
-		}
-
-		int ready = php_pollfd_for_ms(dtlssock->s.socket, events, wait_ms);
-		if (ready == 0) {
-			/* Timer fired: let OpenSSL resend the last flight. */
-			if (DTLSv1_handle_timeout(ssl) < 0) {
-				if (error_text != NULL) {
-					*error_text = ZSTR_INIT_LITERAL("DTLS handshake timed out", 0);
-				}
-				return -1;
-			}
-		} else if (ready < 0) {
-			if (error_text != NULL) {
-				*error_text =
-						ZSTR_INIT_LITERAL("DTLS handshake failed while waiting for the socket", 0);
-			}
-			return -1;
-		}
-	}
-}
-
-/* Verify the peer certificate against the peer_fingerprint option, if set. */
-static int php_openssl_dtls_check_fingerprint(php_stream *stream, php_openssl_dtls_data_t *dtlssock,
-		zend_string **error_text)
-{
-	zval *val;
-	if (!GET_VER_OPT("peer_fingerprint")) {
-		return 0;
-	}
-
-	X509 *peer = SSL_get_peer_certificate(dtlssock->ssl_handle);
-	bool match = peer != NULL && php_openssl_x509_fingerprint_match(stream, peer, val);
-	if (peer != NULL) {
-		X509_free(peer);
-	}
-
-	if (!match) {
-		if (error_text != NULL) {
-			*error_text = ZSTR_INIT_LITERAL("peer_fingerprint match failure", 0);
-		}
-		return -1;
-	}
-
-	return 0;
-}
-
-/* Per-process secret for the DTLSv1_listen cookie (an HMAC of the peer address,
- * so the server stays stateless during the HelloVerifyRequest exchange). */
-#define PHP_OPENSSL_DTLS_COOKIE_SECRET_LEN 16
-static unsigned char php_openssl_dtls_cookie_secret[PHP_OPENSSL_DTLS_COOKIE_SECRET_LEN];
-static bool php_openssl_dtls_cookie_secret_ready = false;
-
-static bool php_openssl_dtls_peer_addr(SSL *ssl, struct sockaddr_storage *peer, socklen_t *peerlen)
-{
-	memset(peer, 0, sizeof(*peer));
-	if (BIO_dgram_get_peer(SSL_get_rbio(ssl), peer) <= 0) {
-		return false;
-	}
-	*peerlen = (peer->ss_family == AF_INET6) ? sizeof(struct sockaddr_in6) : sizeof(struct sockaddr_in);
-	return true;
+	memcpy(msg, ts, PHP_OPENSSL_DTLS_COOKIE_TS_LEN);
+	memcpy(msg + PHP_OPENSSL_DTLS_COOKIE_TS_LEN, &conn->peer, conn->peerlen);
+	HMAC(EVP_sha256(), port->cookie_secret, sizeof(port->cookie_secret), msg,
+			PHP_OPENSSL_DTLS_COOKIE_TS_LEN + conn->peerlen, mac, &len);
 }
 
 static int php_openssl_dtls_cookie_generate(SSL *ssl, unsigned char *cookie, unsigned int *cookie_len)
 {
-	struct sockaddr_storage peer;
-	socklen_t peerlen;
-
-	if (!php_openssl_dtls_cookie_secret_ready) {
-		if (RAND_bytes(php_openssl_dtls_cookie_secret, sizeof(php_openssl_dtls_cookie_secret)) != 1) {
-			return 0;
-		}
-		php_openssl_dtls_cookie_secret_ready = true;
-	}
-	if (!php_openssl_dtls_peer_addr(ssl, &peer, &peerlen)) {
+	php_openssl_dtls_peer *peer = php_openssl_dtls_peer_from_ssl(ssl);
+	if (peer == NULL || peer->conn->peerlen == 0) {
 		return 0;
 	}
 
-	unsigned int len = 0;
-	HMAC(EVP_sha256(), php_openssl_dtls_cookie_secret, sizeof(php_openssl_dtls_cookie_secret),
-			(const unsigned char *)&peer, peerlen, cookie, &len);
-	*cookie_len = len;
+	uint64_t now = (uint64_t) time(NULL);
+	for (int i = 0; i < PHP_OPENSSL_DTLS_COOKIE_TS_LEN; i++) {
+		cookie[i] = (unsigned char) (now >> (8 * (PHP_OPENSSL_DTLS_COOKIE_TS_LEN - 1 - i)));
+	}
+	php_openssl_dtls_cookie_mac(peer->port, peer->conn, cookie, cookie + PHP_OPENSSL_DTLS_COOKIE_TS_LEN);
+	*cookie_len = PHP_OPENSSL_DTLS_COOKIE_LEN;
 	return 1;
 }
 
 static int php_openssl_dtls_cookie_verify(SSL *ssl, const unsigned char *cookie, unsigned int cookie_len)
 {
-	unsigned char expected[EVP_MAX_MD_SIZE];
-	unsigned int len = 0;
-	struct sockaddr_storage peer;
-	socklen_t peerlen;
-
-	if (!php_openssl_dtls_cookie_secret_ready || !php_openssl_dtls_peer_addr(ssl, &peer, &peerlen)) {
+	php_openssl_dtls_peer *peer = php_openssl_dtls_peer_from_ssl(ssl);
+	if (peer == NULL || peer->conn->peerlen == 0 || cookie_len != PHP_OPENSSL_DTLS_COOKIE_LEN) {
 		return 0;
 	}
-	HMAC(EVP_sha256(), php_openssl_dtls_cookie_secret, sizeof(php_openssl_dtls_cookie_secret),
-			(const unsigned char *)&peer, peerlen, expected, &len);
-	/* Constant-time compare: the cookie is derived from a secret HMAC. */
-	return (cookie_len == len && CRYPTO_memcmp(cookie, expected, len) == 0) ? 1 : 0;
+
+	uint64_t ts = 0;
+	for (int i = 0; i < PHP_OPENSSL_DTLS_COOKIE_TS_LEN; i++) {
+		ts = (ts << 8) | cookie[i];
+	}
+	uint64_t now = (uint64_t) time(NULL);
+	if (ts > now || now - ts > PHP_OPENSSL_DTLS_COOKIE_MAX_AGE) {
+		return 0;
+	}
+
+	unsigned char mac[PHP_OPENSSL_DTLS_COOKIE_MAC_LEN];
+	php_openssl_dtls_cookie_mac(peer->port, peer->conn, cookie, mac);
+	return CRYPTO_memcmp(mac, cookie + PHP_OPENSSL_DTLS_COOKIE_TS_LEN, sizeof(mac)) == 0;
 }
 
-/* Configure server-side session resumption from the "ssl" context options. */
-static zend_result php_openssl_dtls_setup_server_session(php_stream *stream,
-		php_openssl_dtls_data_t *dtlssock)
+static int php_openssl_dtls_stateless_cookie_generate(SSL *ssl, unsigned char *cookie, size_t *cookie_len)
+{
+	unsigned int len = 0;
+	int ret = php_openssl_dtls_cookie_generate(ssl, cookie, &len);
+	*cookie_len = len;
+	return ret;
+}
+
+static int php_openssl_dtls_stateless_cookie_verify(SSL *ssl, const unsigned char *cookie, size_t cookie_len)
+{
+	return php_openssl_dtls_cookie_verify(ssl, cookie, (unsigned int) cookie_len);
+}
+
+/* The port */
+
+static void php_openssl_port_release(php_openssl_port *port)
+{
+	if (--port->refcount > 0) {
+		return;
+	}
+	ZEND_ASSERT(port->pending == NULL && port->ready == NULL);
+	zend_hash_destroy(&port->peers);
+	if (port->ctx) {
+		SSL_CTX_free(port->ctx);
+	}
+	php_openssl_xport_release(port->xport);
+	if (port->fd != SOCK_ERR) {
+		closesocket(port->fd);
+	}
+	efree(port);
+}
+
+/* Sends what a pending handshake produced; what the socket refuses waits for the next tick */
+static void php_openssl_dtls_peer_flush(php_openssl_dtls_peer *peer)
+{
+	php_openssl_conn_flush(peer->conn, NULL);
+}
+
+/* Moves a pending handshake as far as the datagrams received let it */
+static void php_openssl_dtls_peer_drive(php_openssl_port *port, php_openssl_dtls_peer *peer)
+{
+	for (;;) {
+		ERR_clear_error();
+		int n = SSL_accept(peer->ssl);
+		int err = n > 0 ? SSL_ERROR_NONE : SSL_get_error(peer->ssl, n);
+		php_openssl_dtls_peer_flush(peer);
+
+		if (n > 0) {
+			php_openssl_dtls_peer_unlink(&port->pending, peer);
+			port->pending_count--;
+			peer->state = PHP_OPENSSL_DTLS_PEER_READY;
+			if (port->ready_tail) {
+				port->ready_tail->next = peer;
+			} else {
+				port->ready = peer;
+			}
+			port->ready_tail = peer;
+			return;
+		}
+		if (err == SSL_ERROR_WANT_READ) {
+			return;
+		}
+		if (err == SSL_ERROR_WANT_WRITE) {
+			if (php_openssl_conn_tx_empty(peer->conn)) {
+				continue;
+			}
+			return;
+		}
+		/* A failed handshake: the peer is forgotten, its next ClientHello starts over */
+		ERR_clear_error();
+		php_openssl_dtls_peer_free(port, peer);
+		return;
+	}
+}
+
+static php_openssl_dtls_peer *php_openssl_dtls_peer_new(php_openssl_port *port,
+		const struct sockaddr *addr, socklen_t addrlen, zend_string *key)
+{
+	php_openssl_dtls_peer *peer = ecalloc(1, sizeof(*peer));
+	peer->port = port;
+	peer->state = PHP_OPENSSL_DTLS_PEER_PENDING;
+	peer->created = zend_hrtime();
+
+	peer->ssl = SSL_new(port->ctx);
+	if (peer->ssl == NULL) {
+		efree(peer);
+		return NULL;
+	}
+	SSL_set_accept_state(peer->ssl);
+	/* A cookie exchange before any state is kept for the peer: HelloVerifyRequest for DTLS 1.2 */
+	SSL_set_options(peer->ssl, SSL_OP_COOKIE_EXCHANGE);
+	SSL_set_mode(peer->ssl, SSL_MODE_RELEASE_BUFFERS | SSL_MODE_ENABLE_PARTIAL_WRITE
+			| SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
+	SSL_set_ex_data(peer->ssl, php_openssl_get_ssl_stream_data_index(), port->stream);
+
+	peer->conn = php_openssl_conn_new(port->xport, port->stream, false);
+	php_openssl_conn_set_peer(peer->conn, addr, addrlen);
+	peer->conn->fill = php_openssl_port_fill;
+	peer->conn->owner = peer;
+	if (php_openssl_conn_set_ssl(peer->conn, peer->ssl) == FAILURE) {
+		SSL_free(peer->ssl);
+		php_openssl_conn_free(peer->conn);
+		efree(peer);
+		return NULL;
+	}
+	if (port->link_mtu) {
+		DTLS_set_link_mtu(peer->ssl, (long) port->link_mtu);
+		SSL_set_options(peer->ssl, SSL_OP_NO_QUERY_MTU);
+		peer->conn->link_mtu = port->link_mtu;
+	}
+
+	peer->key = zend_string_copy(key);
+	zend_hash_add_new_ptr(&port->peers, key, peer);
+	peer->next = port->pending;
+	port->pending = peer;
+	port->pending_count++;
+	return peer;
+}
+
+/* Expired retransmit timers and stale handshakes of the pending peers; true when a timer fired */
+static bool php_openssl_port_tick(php_openssl_port *port)
+{
+	bool progress = false;
+	zend_hrtime_t now = zend_hrtime();
+	zend_hrtime_t max_age = (zend_hrtime_t) port->pending_timeout * ZEND_NANO_IN_SEC;
+	php_openssl_dtls_peer *peer = port->pending;
+
+	while (peer != NULL) {
+		php_openssl_dtls_peer *next = peer->next;
+		if (now - peer->created > max_age) {
+			php_openssl_dtls_peer_free(port, peer);
+		} else {
+			php_openssl_deadline timer;
+			php_openssl_conn_timer_deadline(peer->conn, &timer);
+			if (!timer.infinite && php_openssl_deadline_expired(&timer)
+					&& php_openssl_conn_handle_timeout(peer->conn) > 0) {
+				progress = true;
+			}
+			php_openssl_dtls_peer_flush(peer);
+		}
+		peer = next;
+	}
+	return progress;
+}
+
+/* The earliest retransmit timer of the pending peers */
+static void php_openssl_port_timer_deadline(php_openssl_port *port, php_openssl_deadline *dl)
+{
+	php_openssl_deadline_init_infinite(dl);
+	for (php_openssl_dtls_peer *peer = port->pending; peer != NULL; peer = peer->next) {
+		php_openssl_deadline timer;
+		php_openssl_conn_timer_deadline(peer->conn, &timer);
+		php_openssl_deadline_cap(dl, &timer);
+	}
+	if (port->pending != NULL) {
+		/* Stale handshakes are reaped at the latest when the oldest expires */
+		php_openssl_dtls_peer *oldest = port->pending;
+		while (oldest->next) {
+			oldest = oldest->next;
+		}
+		php_openssl_deadline reap;
+		reap.infinite = false;
+		reap.at = oldest->created + (zend_hrtime_t) port->pending_timeout * ZEND_NANO_IN_SEC;
+		php_openssl_deadline_cap(dl, &reap);
+	}
+}
+
+/* Receives one datagram and gives it to its peer, a new one when unknown; 1 when it did,
+ * -1 with errno EAGAIN when the socket has none */
+static int php_openssl_port_recv(php_openssl_port *port)
+{
+	char buf[PHP_OPENSSL_MAX_DGRAM];
+	php_sockaddr_storage addr;
+	socklen_t addrlen;
+
+	ssize_t n = php_openssl_xport_recv_dgram(port->xport, buf, sizeof(buf), &addr, &addrlen);
+	if (n < 0) {
+		return -1;
+	}
+	if (addrlen == 0) {
+		/* No peer to route by: the transport is connected to one */
+		memset(&addr, 0, sizeof(addr));
+		addrlen = sizeof(addr.ss_family);
+	}
+
+	zend_string *key = php_openssl_dtls_peer_key((const struct sockaddr *) &addr, addrlen);
+	php_openssl_dtls_peer *peer = zend_hash_find_ptr(&port->peers, key);
+	if (peer == NULL) {
+		if (port->closed || (zend_long) port->pending_count >= port->max_pending) {
+			zend_string_release(key);
+			return 1;
+		}
+		peer = php_openssl_dtls_peer_new(port, (const struct sockaddr *) &addr, addrlen, key);
+		if (peer == NULL) {
+			zend_string_release(key);
+			return 1;
+		}
+	}
+	zend_string_release(key);
+
+	if (peer->conn->rxq.count >= PHP_OPENSSL_DTLS_RX_LIMIT) {
+		return 1;
+	}
+	php_openssl_conn_push_dgram(peer->conn, buf, (size_t) n, (const struct sockaddr *) &addr, addrlen);
+	if (peer->state == PHP_OPENSSL_DTLS_PEER_PENDING) {
+		php_openssl_dtls_peer_drive(port, peer);
+	}
+	return 1;
+}
+
+/* Receives for the port, waiting up to the deadline, bounded by the retransmit timers of conn
+ * (when given) and of the pending peers, which it services when they fire. Returns like
+ * php_openssl_conn_fill(). */
+static int php_openssl_port_pump(php_openssl_port *port, php_openssl_conn *conn, php_openssl_deadline *dl)
+{
+	for (;;) {
+		int n = php_openssl_port_recv(port);
+		if (n > 0) {
+			return 1;
+		}
+		if (errno != EAGAIN) {
+			return -1;
+		}
+		if (dl == NULL) {
+			errno = EAGAIN;
+			return -1;
+		}
+
+		php_openssl_deadline wait = *dl;
+		php_openssl_deadline timer;
+		if (conn != NULL) {
+			php_openssl_conn_timer_deadline(conn, &timer);
+			php_openssl_deadline_cap(&wait, &timer);
+		}
+		php_openssl_port_timer_deadline(port, &timer);
+		php_openssl_deadline_cap(&wait, &timer);
+
+		int w = php_openssl_xport_wait(port->xport, PHP_POLLREADABLE, &wait);
+		if (w < 0) {
+			errno = php_socket_errno();
+			return -1;
+		}
+		if (w == 0) {
+			bool progress = php_openssl_port_tick(port);
+			if (conn != NULL) {
+				php_openssl_conn_timer_deadline(conn, &timer);
+				if (!timer.infinite && php_openssl_deadline_expired(&timer)
+						&& php_openssl_conn_handle_timeout(conn) > 0) {
+					progress = true;
+				}
+			}
+			if (progress) {
+				return 1;
+			}
+			if (php_openssl_deadline_expired(dl)) {
+				errno = ETIMEDOUT;
+				return -1;
+			}
+		}
+	}
+}
+
+static int php_openssl_port_fill(php_openssl_conn *conn, php_openssl_deadline *dl)
+{
+	php_openssl_dtls_peer *peer = php_openssl_dtls_peer_of(conn);
+	return php_openssl_port_pump(peer->port, conn, dl);
+}
+
+/* The stream API */
+
+int php_openssl_dtls_listen(php_stream *stream, php_openssl_netstream_data_t *sslsock)
 {
 	zval *val;
-	bool has_get_cb = false, has_new_cb = false, has_session_id_context = false;
-	bool is_persistent = php_stream_is_persistent(stream);
 
-	if (GET_VER_OPT("session_get_cb")) {
-		if (php_openssl_validate_and_allocate_session_callback(
-				stream, &dtlssock->session_callbacks, val, PHP_OPENSSL_GET_CB, is_persistent) == FAILURE) {
-			return FAILURE;
-		}
-		has_get_cb = true;
-	}
-
-	if (GET_VER_OPT("session_id_context")) {
-		if (Z_TYPE_P(val) != IS_STRING || Z_STRLEN_P(val) == 0) {
-			zend_type_error("session_id_context must be a non empty string");
-			return FAILURE;
-		}
-		SSL_CTX_set_session_id_context(dtlssock->ctx,
-				(const unsigned char *)Z_STRVAL_P(val), Z_STRLEN_P(val));
-		has_session_id_context = true;
-	}
-
-	if (GET_VER_OPT("session_new_cb")) {
-		if (php_openssl_validate_and_allocate_session_callback(
-				stream, &dtlssock->session_callbacks, val, PHP_OPENSSL_NEW_CB, is_persistent) == FAILURE) {
-			return FAILURE;
-		}
-		has_new_cb = true;
-	}
-
-	if (has_get_cb && !has_new_cb) {
-		zend_value_error("session_new_cb is required when session_get_cb is provided");
-		return FAILURE;
-	}
-	/* Server-side resumption needs a session id context. */
-	if (has_get_cb && !has_session_id_context) {
-		zend_value_error("session_id_context must be set when session_get_cb is provided");
-		return FAILURE;
-	}
-
-	if (GET_VER_OPT("session_remove_cb")) {
-		if (php_openssl_validate_and_allocate_session_callback(
-				stream, &dtlssock->session_callbacks, val, PHP_OPENSSL_REMOVE_CB, is_persistent) == FAILURE) {
-			return FAILURE;
-		}
-	}
-
-	if (has_get_cb) {
-		/* External cache mode - the callbacks hold the sessions. */
-		SSL_CTX_set_ex_data(dtlssock->ctx, php_openssl_get_ctx_stream_index(), stream);
-		SSL_CTX_set_ex_data(dtlssock->ctx, php_openssl_get_ctx_session_callbacks_index(),
-				dtlssock->session_callbacks);
-		SSL_CTX_set_session_cache_mode(dtlssock->ctx,
-				SSL_SESS_CACHE_SERVER | SSL_SESS_CACHE_NO_INTERNAL);
-		SSL_CTX_sess_set_new_cb(dtlssock->ctx, php_openssl_session_new_cb);
-		SSL_CTX_sess_set_get_cb(dtlssock->ctx, php_openssl_session_get_cb);
-		if (dtlssock->session_callbacks
-				&& ZEND_FCC_INITIALIZED(dtlssock->session_callbacks->remove_cb)) {
-			SSL_CTX_sess_set_remove_cb(dtlssock->ctx, php_openssl_session_remove_cb);
-		}
-		/* Tickets bypass the id-based cache, so disable them here. */
-		SSL_CTX_set_options(dtlssock->ctx, SSL_OP_NO_TICKET);
-		if (GET_VER_OPT("no_ticket") && !zend_is_true(val)) {
-			zend_value_error("Session tickets cannot be enabled when session_get_cb is set");
-			return FAILURE;
-		}
-
-		if (GET_VER_OPT("session_timeout")) {
-			zend_long timeout = zval_get_long(val);
-			if (timeout <= 0) {
-				zend_value_error("session_timeout must be positive");
-				return FAILURE;
-			}
-			SSL_CTX_set_timeout(dtlssock->ctx, timeout);
-		}
-	} else {
-		SSL_CTX_set_session_cache_mode(dtlssock->ctx, SSL_SESS_CACHE_OFF);
-	}
-
-	return SUCCESS;
-}
-
-/* Set up the server SSL_CTX (cert/verify options plus the cookie callbacks that
- * DTLSv1_listen needs for the stateless HelloVerifyRequest exchange). */
-static int php_openssl_dtls_server_ctx(php_stream *stream, php_openssl_dtls_data_t *dtlssock)
-{
-	dtlssock->ctx = SSL_CTX_new(DTLS_server_method());
-	if (dtlssock->ctx == NULL) {
-		php_stream_warn(stream, CreateFailed, "DTLS context creation failure");
+	if (sslsock->port != NULL || sslsock->s.socket == SOCK_ERR) {
 		return -1;
 	}
-	if (php_openssl_dtls_apply_context(stream, dtlssock) != 0) {
-		SSL_CTX_free(dtlssock->ctx);
-		dtlssock->ctx = NULL;
+
+	/* The server's method */
+	sslsock->is_client = 0;
+	sslsock->method &= ~STREAM_CRYPTO_IS_CLIENT;
+	if (!GET_VER_OPT("crypto_method")) {
+		/* Without a listener API of the library a DTLS 1.3 server cannot validate the peer
+		 * address before its first flight, so it is opt-in */
+		sslsock->method &= ~STREAM_CRYPTO_METHOD_DTLSv1_3;
+	}
+	if (sslsock->ctx == NULL && php_openssl_create_server_ctx(stream, sslsock, sslsock->method) == FAILURE) {
 		return -1;
 	}
-	SSL_CTX_set_cookie_generate_cb(dtlssock->ctx, php_openssl_dtls_cookie_generate);
-	SSL_CTX_set_cookie_verify_cb(dtlssock->ctx, php_openssl_dtls_cookie_verify);
-	if (php_openssl_dtls_setup_server_session(stream, dtlssock) == FAILURE) {
-		SSL_CTX_free(dtlssock->ctx);
-		dtlssock->ctx = NULL;
+
+	php_openssl_port *port = ecalloc(1, sizeof(*port));
+	port->refcount = 1;
+	port->stream = stream;
+	port->listener = sslsock;
+	port->fd = sslsock->s.socket;
+	port->max_pending = PHP_OPENSSL_DTLS_MAX_PENDING;
+	port->pending_timeout = PHP_OPENSSL_DTLS_PENDING_TIMEOUT;
+	GET_VER_OPT_LONG("dtls_max_pending", port->max_pending);
+	GET_VER_OPT_LONG("dtls_pending_timeout", port->pending_timeout);
+	if (port->max_pending < 1) {
+		port->max_pending = 1;
+	}
+	if (port->pending_timeout < 1) {
+		port->pending_timeout = 1;
+	}
+	if (GET_VER_OPT("dtls_link_mtu")) {
+		zend_long mtu = zval_get_long(val);
+		if (mtu > 0) {
+			port->link_mtu = (unsigned) mtu;
+		}
+	}
+	if (RAND_bytes(port->cookie_secret, sizeof(port->cookie_secret)) != 1) {
+		php_stream_warn(stream, CreateFailed, "DTLS cookie secret generation failure");
+		efree(port);
 		return -1;
 	}
+	zend_hash_init(&port->peers, 8, NULL, NULL, 0);
+
+	SSL_CTX_up_ref(sslsock->ctx);
+	port->ctx = sslsock->ctx;
+	SSL_CTX_set_cookie_generate_cb(port->ctx, php_openssl_dtls_cookie_generate);
+	SSL_CTX_set_cookie_verify_cb(port->ctx, php_openssl_dtls_cookie_verify);
+	SSL_CTX_set_stateless_cookie_generate_cb(port->ctx, php_openssl_dtls_stateless_cookie_generate);
+	SSL_CTX_set_stateless_cookie_verify_cb(port->ctx, php_openssl_dtls_stateless_cookie_verify);
+
+	php_set_sock_blocking(port->fd, 0);
+	php_openssl_dgram_socket_setup(port->fd);
+	port->xport = php_openssl_xport_new_fd(port->fd, true, false);
+
+	sslsock->port = port;
 	return 0;
 }
 
-/* Accept one peer: run the cookie exchange with DTLSv1_listen, connect the
- * listening socket to that peer, and finish the handshake on it. */
-static int php_openssl_dtls_accept(php_stream *stream, php_openssl_dtls_data_t *listen,
+int php_openssl_dtls_accept(php_stream *stream, php_openssl_netstream_data_t *sslsock,
 		php_stream_xport_param *xparam STREAMS_DC)
 {
-	if (listen->s.socket == SOCK_ERR) {
-		/* The listening socket is handed to the first accepted peer. */
-		php_error_docref(NULL, E_WARNING, "This dtls:// server has already accepted its peer");
-		return -1;
-	}
+	php_openssl_port *port = sslsock->port;
+	php_openssl_deadline dl;
 
-	SSL *ssl = SSL_new(listen->ctx);
-	if (ssl == NULL) {
-		php_stream_warn(stream, CreateFailed, "DTLS handle creation failure");
-		return -1;
-	}
-	BIO *bio = BIO_new_dgram(listen->s.socket, BIO_NOCLOSE);
-	if (bio == NULL) {
-		SSL_free(ssl);
-		return -1;
-	}
-	SSL_set_bio(ssl, bio, bio);
-
-	/* Bound the whole accept by a deadline (not each poll), so a bogus-ClientHello
-	 * flood can't keep DTLSv1_listen() spinning past the timeout; with no timeout
-	 * we block. */
-	struct timeval *tmo = xparam->inputs.timeout;
-	struct timeval deadline;
-	bool has_deadline = tmo != NULL && (tmo->tv_sec > 0 || tmo->tv_usec > 0);
-	if (has_deadline) {
-		gettimeofday(&deadline, NULL);
-		deadline.tv_sec += tmo->tv_sec;
-		deadline.tv_usec += tmo->tv_usec;
-		if (deadline.tv_usec >= 1000000) {
-			deadline.tv_sec++;
-			deadline.tv_usec -= 1000000;
+	xparam->outputs.client = NULL;
+	if (port == NULL) {
+		if (xparam->want_errortext) {
+			xparam->outputs.error_text = ZSTR_INIT_LITERAL("The dtls:// stream is not a server", 0);
 		}
-	}
-
-	BIO_ADDR *client_addr = BIO_ADDR_new();
-	if (client_addr == NULL) {
-		SSL_free(ssl);
 		return -1;
 	}
-	for (;;) {
-		int ret = DTLSv1_listen(ssl, client_addr);
-		if (ret > 0) {
-			break;
-		}
-		if (ret < 0) {
-			BIO_ADDR_free(client_addr);
-			SSL_free(ssl);
-			return -1;
-		}
 
-		int wait_ms = -1;
-		if (has_deadline) {
-			struct timeval now;
-			gettimeofday(&now, NULL);
-			long remaining = (deadline.tv_sec - now.tv_sec) * 1000L
-					+ (deadline.tv_usec - now.tv_usec) / 1000;
-			if (remaining <= 0) {
-				BIO_ADDR_free(client_addr);
-				SSL_free(ssl);
-				return -1;
+	/* No timeout waits for good, a zero one does not wait at all */
+	if (xparam->inputs.timeout != NULL && xparam->inputs.timeout->tv_sec == 0
+			&& xparam->inputs.timeout->tv_usec == 0) {
+		php_openssl_deadline_init_nonblock(&dl);
+	} else {
+		php_openssl_deadline_init(&dl, xparam->inputs.timeout);
+	}
+	while (port->ready == NULL) {
+		if (php_openssl_port_pump(port, NULL, &dl) < 0) {
+			if (errno == ETIMEDOUT) {
+				xparam->outputs.error_code = ETIMEDOUT;
+				if (xparam->want_errortext) {
+					xparam->outputs.error_text = ZSTR_INIT_LITERAL("Accept timed out", 0);
+				}
+			} else {
+				xparam->outputs.error_code = errno;
+				if (xparam->want_errortext) {
+					xparam->outputs.error_text = strpprintf(0, "%s", strerror(errno));
+				}
 			}
-			wait_ms = remaining > INT_MAX ? INT_MAX : (int)remaining;
-		}
-		if (php_pollfd_for_ms(listen->s.socket, POLLIN, wait_ms) <= 0) {
-			BIO_ADDR_free(client_addr);
-			SSL_free(ssl);
 			return -1;
 		}
 	}
 
-	/* Turn the BIO_ADDR the cookie exchange gave us into a sockaddr. */
-	struct sockaddr_storage peer;
-	socklen_t peerlen = 0;
-	int family = BIO_ADDR_family(client_addr);
-	memset(&peer, 0, sizeof(peer));
-	if (family == AF_INET) {
-		struct sockaddr_in *sin = (struct sockaddr_in *)&peer;
-		size_t addrlen = sizeof(sin->sin_addr);
-		sin->sin_family = AF_INET;
-		sin->sin_port = BIO_ADDR_rawport(client_addr);
-		BIO_ADDR_rawaddress(client_addr, &sin->sin_addr, &addrlen);
-		peerlen = sizeof(struct sockaddr_in);
-#ifdef HAVE_STRUCT_SOCKADDR_SA_LEN
-		sin->sin_len = sizeof(struct sockaddr_in);
-#endif
+	/* The oldest completed handshake becomes a stream */
+	php_openssl_dtls_peer *peer = port->ready;
+	port->ready = peer->next;
+	if (port->ready == NULL) {
+		port->ready_tail = NULL;
 	}
-#ifdef HAVE_IPV6
-	else if (family == AF_INET6) {
-		struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)&peer;
-		size_t addrlen = sizeof(sin6->sin6_addr);
-		sin6->sin6_family = AF_INET6;
-		sin6->sin6_port = BIO_ADDR_rawport(client_addr);
-		BIO_ADDR_rawaddress(client_addr, &sin6->sin6_addr, &addrlen);
-		peerlen = sizeof(struct sockaddr_in6);
-#ifdef HAVE_STRUCT_SOCKADDR_SA_LEN
-		sin6->sin6_len = sizeof(struct sockaddr_in6);
-#endif
-	}
-#endif
-	BIO_ADDR_free(client_addr);
-	if (peerlen == 0) {
-		SSL_free(ssl);
-		return -1;
-	}
+	peer->next = NULL;
+	peer->state = PHP_OPENSSL_DTLS_PEER_ACCEPTED;
 
-	/* Connect the listening socket to this peer and hand it to the accepted
-	 * stream. Serving one peer per server stream avoids SO_REUSEPORT (which
-	 * would let another process bind the same port and steal datagrams). */
-	if (connect(listen->s.socket, (struct sockaddr *)&peer, peerlen) != 0) {
-		SSL_free(ssl);
-		return -1;
-	}
-	BIO_ctrl(bio, BIO_CTRL_DGRAM_SET_CONNECTED, 0, &peer);
-	php_openssl_dtls_configure_mtu(stream, ssl, listen->s.socket, peer.ss_family);
+	php_openssl_netstream_data_t *clisockdata = emalloc(sizeof(*clisockdata));
+	memset(clisockdata, 0, sizeof(*clisockdata));
+	memcpy(&clisockdata->s, &sslsock->s, sizeof(clisockdata->s));
+	clisockdata->s.is_blocked = true;
+	clisockdata->connect_timeout = sslsock->connect_timeout;
+	clisockdata->method = sslsock->method;
+	clisockdata->is_client = 0;
+	clisockdata->state_set = 1;
+	clisockdata->ssl_handle = peer->ssl;
+	clisockdata->conn = peer->conn;
+	clisockdata->port = port;
+	port->refcount++;
+	php_openssl_netstream_share_ctx(clisockdata, sslsock);
+	peer->sslsock = clisockdata;
 
-	php_openssl_dtls_data_t *clisock = pemalloc(sizeof(*clisock), 0);
-	memset(clisock, 0, sizeof(*clisock));
-	clisock->s.socket = listen->s.socket;
-	clisock->s.is_blocked = true;
-	clisock->s.timeout.tv_sec = (time_t)FG(default_socket_timeout);
-	clisock->ssl_handle = ssl;
-	clisock->is_server = true;
-
-	/* The socket now belongs to the accepted stream. */
-	listen->s.socket = SOCK_ERR;
-
-	php_stream *clistream = php_stream_alloc_rel(&php_openssl_dtls_socket_ops, clisock, NULL, "r+");
-	if (clistream == NULL) {
-		SSL_free(ssl);
-		closesocket(clisock->s.socket);
-		pefree(clisock, 0);
-		return -1;
-	}
-
-	/* The accepted stream inherits the listener's context (cert options,
-	 * keying material requests, ...). */
+	php_stream *clistream = php_stream_alloc_rel(&php_openssl_dgram_socket_ops, clisockdata, NULL, "r+");
 	clistream->ctx = stream->ctx;
 	if (stream->ctx) {
 		GC_ADDREF(stream->ctx);
 	}
+	peer->conn->stream = clistream;
+	SSL_set_ex_data(peer->ssl, php_openssl_get_ssl_stream_data_index(), clistream);
 
-	/* The connection shares the listener's session callbacks, and the callbacks
-	 * find its stream through the SSL during the handshake. */
-	clisock->session_callbacks = listen->session_callbacks;
-	if (clisock->session_callbacks) {
-		clisock->session_callbacks->refcount++;
-	}
-	SSL_set_ex_data(ssl, php_openssl_get_ssl_stream_data_index(), clistream);
-
-	/* Finish the handshake (SSL_do_handshake performs the accept). */
-	if (php_openssl_dtls_handshake(clistream, clisock,
-			xparam->inputs.timeout,
-			xparam->want_errortext ? &xparam->outputs.error_text : NULL) != 0) {
+	if (php_openssl_handshake_complete(clistream, clisockdata) < 0) {
 		php_stream_close(clistream);
+		if (xparam->want_errortext) {
+			xparam->outputs.error_text = ZSTR_INIT_LITERAL("Cannot enable crypto", 0);
+		}
 		return -1;
 	}
-	clisock->ssl_active = true;
 
+	if (xparam->want_addr || xparam->want_textaddr) {
+		php_network_populate_name_from_sockaddr((struct sockaddr *) &peer->conn->peer,
+				peer->conn->peerlen,
+				xparam->want_textaddr ? &xparam->outputs.textaddr : NULL,
+				xparam->want_addr ? &xparam->outputs.addr : NULL,
+				xparam->want_addr ? &xparam->outputs.addrlen : NULL);
+	}
 	xparam->outputs.client = clistream;
 	return 0;
 }
 
-/* Connect the datagram socket through the generic transport, then run DTLS on
- * top, the way xp_ssl.c layers TLS on a connected tcp:// stream. */
-static int php_openssl_dtls_connect(php_stream *stream, php_openssl_dtls_data_t *dtlssock,
-		php_stream_xport_param *xparam)
+bool php_openssl_dtls_detach(php_stream *stream, php_openssl_netstream_data_t *sslsock)
 {
-	/* The generic ops open and connect the datagram socket (recognised as UDP by
-	 * the "udp_socket" ops label). */
-	php_stream_socket_ops.set_option(stream, PHP_STREAM_OPTION_XPORT_API, 0, xparam);
-	if (xparam->outputs.returncode != 0 || !dtlssock->enable_on_connect) {
-		return xparam->outputs.returncode;
+	php_openssl_port *port = sslsock->port;
+
+	if (port == NULL) {
+		return false;
+	}
+	sslsock->port = NULL;
+
+	if (port->listener == sslsock) {
+		/* The listener is gone: no new peers, and the handshakes under way are dropped */
+		port->closed = true;
+		port->stream = NULL;
+		port->listener = NULL;
+		while (port->pending) {
+			php_openssl_dtls_peer_free(port, port->pending);
+		}
+		while (port->ready) {
+			php_openssl_dtls_peer_free(port, port->ready);
+		}
+	} else if (sslsock->conn != NULL) {
+		php_openssl_dtls_peer *peer = php_openssl_dtls_peer_of(sslsock->conn);
+		if (peer != NULL) {
+			php_openssl_dtls_peer_free(port, peer);
+		}
 	}
 
-	/* Run the handshake here rather than via the crypto ops so the connect timeout
-	 * and the OpenSSL error text still reach the caller. */
-	zend_string **err_text = xparam->want_errortext ? &xparam->outputs.error_text : NULL;
-	if (php_openssl_dtls_setup_crypto(stream, dtlssock, NULL) != 0
-			|| php_openssl_dtls_handshake(stream, dtlssock, &dtlssock->connect_timeout, err_text) != 0
-			|| php_openssl_dtls_check_fingerprint(stream, dtlssock, err_text) != 0) {
-		xparam->outputs.returncode = -1;
-		return -1;
-	}
-
-	dtlssock->ssl_active = true;
-	return 0;
+	php_openssl_port_release(port);
+	return true;
 }
 
-/* Run or tear down the DTLS handshake for stream_socket_enable_crypto(). */
-static int php_openssl_dtls_enable_crypto(php_stream *stream, php_openssl_dtls_data_t *dtlssock,
-		php_stream_xport_crypto_param *cparam)
-{
-	if (cparam->inputs.activate && !dtlssock->ssl_active) {
-		if (dtlssock->ssl_handle == NULL) {
-			php_stream_warn(stream, Generic, "Crypto has not been set up; the setup op must run first");
-			return -1;
-		}
-		if (php_openssl_dtls_handshake(stream, dtlssock, &dtlssock->s.timeout, NULL) != 0) {
-			return -1;
-		}
-		if (php_openssl_dtls_check_fingerprint(stream, dtlssock, NULL) != 0) {
-			return -1;
-		}
-		dtlssock->ssl_active = true;
-		/* 1 (not 0) so stream_socket_enable_crypto() reports success, as xp_ssl.c does. */
-		return 1;
-	} else if (!cparam->inputs.activate && dtlssock->ssl_active) {
-		SSL_shutdown(dtlssock->ssl_handle);
-		dtlssock->ssl_active = false;
-		return 1;
-	}
-
-	return -1;
-}
-
-/* Expose the fd for stream_select(); the raw fd is not handed out otherwise,
- * since DTLS is always encrypted. */
-static int php_openssl_dtls_sockop_cast(php_stream *stream, int castas, void **ret)
-{
-	php_openssl_dtls_data_t *dtlssock = (php_openssl_dtls_data_t *)stream->abstract;
-
-	switch (castas) {
-		case PHP_STREAM_AS_FD_FOR_SELECT:
-			if (ret != NULL) {
-				/* Decrypted data buffered in OpenSSL is invisible to select(), so push
-				 * it into the read buffer.
-				 * TODO: same idiom as php_openssl_sockop_cast() in xp_ssl.c. */
-				size_t pending;
-				if (stream->writepos == stream->readpos
-						&& dtlssock->ssl_handle != NULL
-						&& (pending = (size_t)SSL_pending(dtlssock->ssl_handle)) > 0) {
-					php_stream_fill_read_buffer(stream, pending < stream->chunk_size
-							? pending
-							: stream->chunk_size);
-				}
-				*(php_socket_t *)ret = dtlssock->s.socket;
-			}
-			return SUCCESS;
-
-		default:
-			/* Plain udp:// (no crypto): let the base hand out the fd/stdio. */
-			if (!dtlssock->ssl_active) {
-				return php_stream_socket_ops.cast(stream, castas, ret);
-			}
-			return FAILURE;
-	}
-}
-
-/* Handle transport and stream options. */
-static int php_openssl_dtls_sockop_set_option(php_stream *stream, int option, int value, void *ptrparam)
-{
-	php_openssl_dtls_data_t *dtlssock = (php_openssl_dtls_data_t *)stream->abstract;
-	php_stream_xport_param *xparam;
-
-	switch (option) {
-		case PHP_STREAM_OPTION_META_DATA_API: {
-			if (dtlssock->ssl_handle != NULL) {
-				zval crypto;
-				char *proto_str;
-				zval *val;
-
-				array_init(&crypto);
-				switch (SSL_version(dtlssock->ssl_handle)) {
-					case DTLS1_2_VERSION: proto_str = "DTLSv1.2"; break;
-					case DTLS1_VERSION:   proto_str = "DTLSv1.0"; break;
-					default:              proto_str = "UNKNOWN"; break;
-				}
-				add_assoc_string(&crypto, "protocol", proto_str);
-
-				php_openssl_add_crypto_cipher(&crypto, dtlssock->ssl_handle);
-
-				/* RFC 5705 exported keying material (e.g. DTLS-SRTP keys),
-				 * requested via the keying_material_label/length context options. */
-				char *km_label = NULL;
-				size_t km_label_len = 0;
-				GET_VER_OPT_STRINGL("keying_material_label", km_label, km_label_len);
-				if (km_label != NULL && GET_VER_OPT("keying_material_length")) {
-					zend_long km_len = zval_get_long(val);
-					if (km_len > 0 && km_len <= 1024) {
-						zend_string *km = zend_string_alloc((size_t)km_len, 0);
-						if (SSL_export_keying_material(dtlssock->ssl_handle,
-								(unsigned char *)ZSTR_VAL(km), (size_t)km_len,
-								km_label, km_label_len, NULL, 0, 0) == 1) {
-							ZSTR_VAL(km)[km_len] = '\0';
-							add_assoc_str(&crypto, "keying_material", km);
-						} else {
-							zend_string_release(km);
-						}
-					}
-				}
-
-				/* Expose the negotiated session so the caller can resume it later
-				 * (session_data), and whether this handshake was resumed. */
-				SSL_SESSION *session = SSL_get1_session(dtlssock->ssl_handle);
-				if (session != NULL) {
-					zval zsession;
-					php_openssl_session_object_init(&zsession, session);
-					add_assoc_zval(&crypto, "session", &zsession);
-				}
-				add_assoc_bool(&crypto, "session_reused",
-						SSL_session_reused(dtlssock->ssl_handle) == 1);
-
-				add_assoc_zval((zval *)ptrparam, "crypto", &crypto);
-			}
-			add_assoc_bool((zval *)ptrparam, "timed_out", dtlssock->s.timeout_event);
-			add_assoc_bool((zval *)ptrparam, "blocked", dtlssock->s.is_blocked);
-			add_assoc_bool((zval *)ptrparam, "eof", stream->eof);
-			return PHP_STREAM_OPTION_RETURN_OK;
-		}
-
-		case PHP_STREAM_OPTION_CRYPTO_API: {
-			php_stream_xport_crypto_param *cparam = (php_stream_xport_crypto_param *)ptrparam;
-
-			switch (cparam->op) {
-				case STREAM_XPORT_CRYPTO_OP_SETUP:
-					/* DTLS 1.3 is a defined method but not implemented yet. */
-					if (cparam->inputs.method & STREAM_CRYPTO_METHOD_DTLSv1_3_SERVER) {
-						php_stream_warn(stream, Generic, "DTLS 1.3 is not supported yet");
-						cparam->outputs.returncode = -1;
-						return PHP_STREAM_OPTION_RETURN_OK;
-					}
-					cparam->outputs.returncode =
-							php_openssl_dtls_setup_crypto(stream, dtlssock, NULL);
-					return PHP_STREAM_OPTION_RETURN_OK;
-
-				case STREAM_XPORT_CRYPTO_OP_ENABLE:
-					cparam->outputs.returncode =
-							php_openssl_dtls_enable_crypto(stream, dtlssock, cparam);
-					return PHP_STREAM_OPTION_RETURN_OK;
-
-				case STREAM_XPORT_CRYPTO_OP_GET_STATUS:
-					cparam->outputs.returncode = dtlssock->ssl_active;
-					return PHP_STREAM_OPTION_RETURN_OK;
-
-				default:
-					return PHP_STREAM_OPTION_RETURN_ERR;
-			}
-		}
-
-		case PHP_STREAM_OPTION_XPORT_API:
-			xparam = (php_stream_xport_param *)ptrparam;
-
-			switch (xparam->op) {
-				case STREAM_XPORT_OP_CONNECT:
-				case STREAM_XPORT_OP_CONNECT_ASYNC:
-					xparam->outputs.returncode =
-							php_openssl_dtls_connect(stream, dtlssock, xparam);
-					return PHP_STREAM_OPTION_RETURN_OK;
-
-				case STREAM_XPORT_OP_BIND: {
-					/* s.socktype makes the generic ops bind a SOCK_DGRAM socket. */
-					php_stream_socket_ops.set_option(stream, option, value, ptrparam);
-					if (xparam->outputs.returncode != 0 || !dtlssock->enable_on_connect) {
-						return PHP_STREAM_OPTION_RETURN_OK;
-					}
-					/* dtls:// server: keep the fd non-blocking for the accept timers
-					 * and set up the cookie/handshake context. */
-					php_set_sock_blocking(dtlssock->s.socket, 0);
-					dtlssock->is_server = true;
-					xparam->outputs.returncode = php_openssl_dtls_server_ctx(stream, dtlssock);
-					if (xparam->outputs.returncode != 0) {
-						closesocket(dtlssock->s.socket);
-						dtlssock->s.socket = SOCK_ERR;
-					}
-					return PHP_STREAM_OPTION_RETURN_OK;
-				}
-
-				case STREAM_XPORT_OP_LISTEN:
-					/* DTLS has no socket-level listen; accept uses DTLSv1_listen. */
-					xparam->outputs.returncode = 0;
-					return PHP_STREAM_OPTION_RETURN_OK;
-
-				case STREAM_XPORT_OP_ACCEPT:
-					xparam->outputs.returncode = php_openssl_dtls_accept(stream, dtlssock, xparam STREAMS_CC);
-					return PHP_STREAM_OPTION_RETURN_OK;
-
-				default:
-					/* Local/peer name, shutdown, etc. operate on the socket. */
-					return php_stream_socket_ops.set_option(stream, option, value, ptrparam);
-			}
-
-		case PHP_STREAM_OPTION_BLOCKING: {
-			if (!dtlssock->ssl_active) {
-				/* Plain udp:// socket: let the base handler flip the fd. */
-				return php_stream_socket_ops.set_option(stream, option, value, ptrparam);
-			}
-			/* The fd must stay non-blocking for the DTLS timers, so only track the
-			 * stream-level mode (the base handler would flip the fd too). */
-			int old = dtlssock->s.is_blocked;
-			dtlssock->s.is_blocked = value;
-			return old;
-		}
-	}
-
-	/* Read timeout, liveness check and the rest operate on the embedded base
-	 * socket data, so defer to the generic socket handler. */
-	return php_stream_socket_ops.set_option(stream, option, value, ptrparam);
-}
-
-static const php_stream_ops php_openssl_dtls_socket_ops = {
-	php_openssl_dtls_sockop_write, php_openssl_dtls_sockop_read,
-	php_openssl_dtls_sockop_close, NULL, /* flush */
-	"udp_socket/dtls",
-	NULL, /* seek */
-	php_openssl_dtls_sockop_cast,
-	NULL, /* stat */
-	php_openssl_dtls_sockop_set_option,
-};
-
-/* Allocate a dtls:// stream. */
-php_stream *php_openssl_dtls_socket_factory(const char *proto, size_t protolen,
-		const char *resourcename, size_t resourcenamelen,
-		const char *persistent_id, int options, int flags,
-		struct timeval *timeout,
-		php_stream_context *context STREAMS_DC)
-{
-	php_openssl_dtls_data_t *dtlssock;
-	php_stream *stream;
-
-	dtlssock = pemalloc(sizeof(*dtlssock), persistent_id ? 1 : 0);
-	memset(dtlssock, 0, sizeof(*dtlssock));
-	dtlssock->s.socket = -1;
-	dtlssock->s.is_blocked = true;
-	dtlssock->s.is_dgram = true;
-	dtlssock->s.timeout.tv_sec = (time_t)FG(default_socket_timeout);
-	dtlssock->s.timeout.tv_usec = 0;
-	if (timeout != NULL) {
-		dtlssock->connect_timeout = *timeout;
-	} else {
-		dtlssock->connect_timeout = dtlssock->s.timeout;
-	}
-
-	if (strncmp(proto, "udp", protolen) == 0) {
-		/* Plain udp://: stays a datagram socket until stream_socket_enable_crypto(). */
-		dtlssock->enable_on_connect = 0;
-	} else {
-		/* dtls:// / dtlsv1.2://: run DTLS on connect. */
-		dtlssock->enable_on_connect = 1;
-		dtlssock->method = STREAM_CRYPTO_METHOD_DTLSv1_2_CLIENT;
-	}
-
-	stream = php_stream_alloc_rel(&php_openssl_dtls_socket_ops, dtlssock, persistent_id, "r+");
-	if (stream == NULL) {
-		pefree(dtlssock, persistent_id ? 1 : 0);
-		return NULL;
-	}
-
-	dtlssock->url_name = php_openssl_get_url_name(resourcename, resourcenamelen, persistent_id != NULL, context);
-
-	return stream;
-}
-
-#endif /* OPENSSL_NO_DTLS */
+#endif /* HAVE_DTLS */

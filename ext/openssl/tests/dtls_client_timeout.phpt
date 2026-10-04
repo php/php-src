@@ -14,7 +14,7 @@ $port = (int) substr(strrchr(stream_socket_get_name($sink, false), ':'), 1);
 
 $start = microtime(true);
 $client = @stream_socket_client("dtls://127.0.0.1:$port", $errno, $errstr, 2,
-    STREAM_CLIENT_CONNECT, stream_context_create(['ssl' => ['verify_peer' => false]]));
+    STREAM_CLIENT_CONNECT, stream_context_create(['ssl' => ['verify_peer' => false, 'verify_peer_name' => false]]));
 $elapsed = microtime(true) - $start;
 
 var_dump($client === false);
