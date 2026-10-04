@@ -53,7 +53,7 @@ ZEND_DECLARE_MODULE_GLOBALS(openssl)
 
 #include "openssl_arginfo.h"
 
-/* OpenSSLException class */
+/* Openssl\OpensslException class */
 
 zend_class_entry *php_openssl_exception_ce;
 
@@ -279,7 +279,7 @@ static zend_object *php_openssl_session_create_object(zend_class_entry *class_ty
 static zend_function *php_openssl_session_get_constructor(zend_object *object)
 {
 	zend_throw_error(NULL,
-		"Cannot directly construct OpenSSLSession, use OpenSSLSession::import() or TLS session callbacks");
+		"Cannot directly construct Openssl\\Session, use Openssl\\Session::import() or TLS session callbacks");
 	return NULL;
 }
 
