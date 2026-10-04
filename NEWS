@@ -126,6 +126,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed sha1_file() returning a digest for incomplete data after a stream
     read failure. (Ilia Alshanetsky)
+  . Fixed iptcembed() corrupting JPEG headers when called recursively from an
+    output handler. (Ilia Alshanetsky)
 
 - Tidy:
   . Fixed a use-after-free when a tidyNode is used after its document is
