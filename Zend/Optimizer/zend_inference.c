@@ -2462,7 +2462,7 @@ static const zend_property_info *zend_fetch_static_prop_info(const zend_script *
 	const zend_property_info *prop_info = NULL;
 	if (opline->op1_type == IS_CONST) {
 		zend_class_entry *ce = NULL;
-		if (opline->op2_type == IS_UNUSED) {
+		if (opline->op2_type == IS_UNUSED && !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
 			int fetch_type = opline->op2.num & ZEND_FETCH_CLASS_MASK;
 			switch (fetch_type) {
 				case ZEND_FETCH_CLASS_SELF:
