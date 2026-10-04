@@ -103,6 +103,4 @@ PHP_HASH_API void PHP_SHA512_224InitArgs(PHP_SHA512_CTX *, ZEND_ATTRIBUTE_UNUSED
 #define PHP_SHA512_224Update PHP_SHA512Update
 PHP_HASH_API void PHP_SHA512_224Final(unsigned char[28], PHP_SHA512_CTX *);
 
-extern PHP_HASH_API const php_hash_ops php_hash_sha256_ops;
-
 #endif /* PHP_HASH_SHA_H */

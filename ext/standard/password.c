@@ -375,8 +375,12 @@ static zend_string *php_password_bcrypt_sha256_hash(const zend_string *password,
 	 * password are neutralized. */
 	zend_string *key;
 	{
+		zend_string *sha256 = ZSTR_INIT_LITERAL("sha256", false);
+		const php_hash_ops *php_hash_sha256_ops = php_hash_fetch_ops(sha256);
+		zend_string_release(sha256);
+
 		unsigned char mac[32];
-		php_hash_hmac(&php_hash_sha256_ops, (const unsigned char *) ZSTR_VAL(salt), ZSTR_LEN(salt),
+		php_hash_hmac(php_hash_sha256_ops, (const unsigned char *) ZSTR_VAL(salt), ZSTR_LEN(salt),
 			(const unsigned char *) ZSTR_VAL(password), ZSTR_LEN(password), mac);
 
 		key = php_base64_encode(mac, sizeof(mac));
@@ -425,8 +429,12 @@ static bool php_password_bcrypt_sha256_verify(const zend_string *password, const
 
 	zend_string *key;
 	{
+		zend_string *sha256 = ZSTR_INIT_LITERAL("sha256", false);
+		const php_hash_ops *php_hash_sha256_ops = php_hash_fetch_ops(sha256);
+		zend_string_release(sha256);
+
 		unsigned char mac[32];
-		php_hash_hmac(&php_hash_sha256_ops, (const unsigned char *) salt, 22,
+		php_hash_hmac(php_hash_sha256_ops, (const unsigned char *) salt, 22,
 			(const unsigned char *) ZSTR_VAL(password), ZSTR_LEN(password), mac);
 
 		key = php_base64_encode(mac, sizeof(mac));
