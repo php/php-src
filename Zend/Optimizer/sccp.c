@@ -440,8 +440,22 @@ static inline zend_result ct_eval_isset_dim(zval *result, uint32_t extended_valu
 		}
 		return ct_eval_isset_isempty(result, extended_value, value);
 	} else if (Z_TYPE_P(op1) == IS_STRING) {
-		// TODO
-		return FAILURE;
+		zend_long index;
+		if (zval_to_string_offset(&index, op2) == FAILURE) {
+			return FAILURE;
+		}
+
+		if (index < 0) {
+			index += (zend_long) Z_STRLEN_P(op1);
+		}
+
+		bool rv = index >= 0 && index < Z_STRLEN_P(op1);
+		if (extended_value & ZEND_ISEMPTY) {
+			rv = !rv || Z_STRVAL_P(op1)[index] == '0';
+		}
+
+		ZVAL_BOOL(result, rv);
+		return SUCCESS;
 	} else {
 		ZVAL_BOOL(result, (extended_value & ZEND_ISEMPTY));
 		return SUCCESS;
