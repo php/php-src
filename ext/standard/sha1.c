@@ -82,9 +82,15 @@ PHP_FUNCTION(sha1_file)
 		PHP_SHA1Update(&context, buf, n);
 	}
 
+	bool failed = n < 0 || !php_stream_eof(stream);
+
 	PHP_SHA1Final(digest, &context);
 
 	php_stream_close(stream);
+
+	if (failed) {
+		RETURN_FALSE;
+	}
 
 	if (raw_output) {
 		RETURN_STRINGL((char *) digest, 20);
