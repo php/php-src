@@ -499,6 +499,21 @@ static zend_array *ts_get_awaiting_info(zend_coroutine_t *coroutine)
 	return info;
 }
 
+/* A finished coroutine stays in the table until the loop retires it. */
+static uint32_t ts_get_coroutine_count(void)
+{
+	uint32_t count = 0;
+	ts_coroutine_t *ts;
+
+	ZEND_HASH_FOREACH_PTR(&TSG(coroutines), ts) {
+		if (!ZEND_COROUTINE_IS_FINISHED(&ts->coro)) {
+			count++;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return count;
+}
+
 ///////////////////////////////////////////////////////////////////
 /// Awaiters
 ///////////////////////////////////////////////////////////////////
@@ -1818,6 +1833,13 @@ PHP_FUNCTION(TestScheduler_current)
 	RETURN_OBJ_COPY(ZEND_COROUTINE_OBJECT(coroutine));
 }
 
+PHP_FUNCTION(TestScheduler_coroutineCount)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_LONG(ZEND_ASYNC_GET_COROUTINE_COUNT());
+}
+
 PHP_METHOD(TestScheduler_Coroutine, __construct)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -1903,6 +1925,7 @@ static zend_async_scheduler_api_t ts_scheduler_api = {
 	.add_awaiting_info = ts_add_awaiting_info,
 	.remove_awaiting_info = ts_remove_awaiting_info,
 	.get_awaiting_info = ts_get_awaiting_info,
+	.get_coroutine_count = ts_get_coroutine_count,
 };
 
 static PHP_GINIT_FUNCTION(test_scheduler)

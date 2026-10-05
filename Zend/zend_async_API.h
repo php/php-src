@@ -432,6 +432,10 @@ typedef bool (*zend_async_coroutine_remove_awaiting_info_t)(
  * anything it can name. The caller owns the array. */
 typedef zend_array *(*zend_async_coroutine_get_awaiting_info_t)(zend_coroutine_t *coroutine);
 
+/* The request's coroutines created and not finished yet, the main one
+ * included; a zombie (see `is_safely`) is not counted, as in TrueAsync. */
+typedef uint32_t (*zend_async_get_coroutine_count_t)(void);
+
 /* Raised by one at every incompatible change to this API: a changed slot
  * signature or meaning, a reordered field. Appending a slot does not raise it:
  * `size` tells the core which slots the provider knows. */
@@ -468,6 +472,7 @@ typedef struct _zend_async_scheduler_api_s {
 	zend_async_coroutine_add_awaiting_info_t add_awaiting_info;
 	zend_async_coroutine_remove_awaiting_info_t remove_awaiting_info;
 	zend_async_coroutine_get_awaiting_info_t get_awaiting_info;
+	zend_async_get_coroutine_count_t get_coroutine_count;
 } zend_async_scheduler_api_t;
 
 BEGIN_EXTERN_C()
@@ -493,6 +498,7 @@ ZEND_API extern zend_async_coroutine_await_t zend_async_coroutine_await_fn;
 ZEND_API extern zend_async_coroutine_add_awaiting_info_t zend_async_coroutine_add_awaiting_info_fn;
 ZEND_API extern zend_async_coroutine_remove_awaiting_info_t zend_async_coroutine_remove_awaiting_info_fn;
 ZEND_API extern zend_async_coroutine_get_awaiting_info_t zend_async_coroutine_get_awaiting_info_fn;
+ZEND_API extern zend_async_get_coroutine_count_t zend_async_get_coroutine_count_fn;
 
 /* Resolve a coroutine object to its coroutine through the provider's slot.
  * NULL when no scheduler is registered, when it provides no resolver, or
@@ -691,6 +697,13 @@ END_EXTERN_C()
 					? zend_async_coroutine_get_awaiting_info_fn(coroutine) \
 					: NULL)
 
+/* 0 outside an active request: the provider's RSHUTDOWN may have freed its
+ * table, and the core deactivates before any RSHUTDOWN. */
+#define ZEND_ASYNC_GET_COROUTINE_COUNT() \
+	(ZEND_ASYNC_IS_ACTIVE && zend_async_get_coroutine_count_fn != NULL \
+					? zend_async_get_coroutine_count_fn() \
+					: 0)
+
 ///////////////////////////////////////////////////////////////////
 /// Globals
 ///////////////////////////////////////////////////////////////////
@@ -709,8 +722,6 @@ typedef struct {
 	zend_coroutine_t *coroutine;
 	/* The main coroutine (top-level script on the OS thread stack). */
 	zend_coroutine_t *main_coroutine;
-	/* Number of live (not finished) coroutines. */
-	unsigned int active_coroutine_count;
 	/* True while the scheduler's own machinery runs. */
 	bool in_scheduler_context;
 	/* Uncaught exception carried out of the shutdown drain. */
@@ -756,7 +767,6 @@ END_EXTERN_C()
 #define ZEND_ASYNC_CURRENT_COROUTINE ZEND_ASYNC_G(coroutine)
 #define ZEND_ASYNC_MAIN_COROUTINE ZEND_ASYNC_G(main_coroutine)
 #define ZEND_ASYNC_EXIT_EXCEPTION ZEND_ASYNC_G(exit_exception)
-#define ZEND_ASYNC_ACTIVE_COROUTINE_COUNT ZEND_ASYNC_G(active_coroutine_count)
 #define ZEND_ASYNC_IN_SCHEDULER_CONTEXT ZEND_ASYNC_G(in_scheduler_context)
 
 #endif /* ZEND_ASYNC_API_H */

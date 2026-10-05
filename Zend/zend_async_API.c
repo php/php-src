@@ -506,6 +506,7 @@ ZEND_API zend_async_coroutine_await_t zend_async_coroutine_await_fn = await_stub
 ZEND_API zend_async_coroutine_add_awaiting_info_t zend_async_coroutine_add_awaiting_info_fn = NULL;
 ZEND_API zend_async_coroutine_remove_awaiting_info_t zend_async_coroutine_remove_awaiting_info_fn = NULL;
 ZEND_API zend_async_coroutine_get_awaiting_info_t zend_async_coroutine_get_awaiting_info_fn = NULL;
+ZEND_API zend_async_get_coroutine_count_t zend_async_get_coroutine_count_fn = NULL;
 
 ///////////////////////////////////////////////////////////////////
 /// Registration
@@ -637,6 +638,10 @@ ZEND_API bool zend_async_scheduler_register(
 		zend_async_coroutine_get_awaiting_info_fn = api->get_awaiting_info;
 	}
 
+	if (API_PROVIDES(api, get_coroutine_count)) {
+		zend_async_get_coroutine_count_fn = api->get_coroutine_count;
+	}
+
 	/* The caller's string may be request-local: keep a process copy. */
 	scheduler_module_name = pestrdup(module, 1);
 
@@ -681,6 +686,7 @@ ZEND_API void zend_async_scheduler_unregister(void)
 	zend_async_coroutine_add_awaiting_info_fn = NULL;
 	zend_async_coroutine_remove_awaiting_info_fn = NULL;
 	zend_async_coroutine_get_awaiting_info_fn = NULL;
+	zend_async_get_coroutine_count_fn = NULL;
 
 #ifdef ZTS
 	tsrm_mutex_unlock(scheduler_mutex);

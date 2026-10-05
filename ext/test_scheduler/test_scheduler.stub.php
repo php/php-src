@@ -72,3 +72,6 @@ function await(Coroutine $coroutine): mixed {}
 
 /** The coroutine running right now, or null outside one. */
 function current(): ?Coroutine {}
+
+/** How many coroutines of this request have not finished, the main one included. */
+function coroutineCount(): int {}

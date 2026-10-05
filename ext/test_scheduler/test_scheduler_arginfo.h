@@ -1,5 +1,5 @@
 /* This is a generated file, edit test_scheduler.stub.php instead.
- * Stub hash: 76721ca7326a23b884519baa2b408b3d19b3d0e7 */
+ * Stub hash: 9416e99674964d7bdbe5b2d16a8f041e20307f33 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_TestScheduler_spawn, 0, 1, TestScheduler\\Coroutine, 0)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
@@ -20,6 +20,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_TestScheduler_await, 0, 1, IS_MI
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_TestScheduler_current, 0, 0, TestScheduler\\Coroutine, 1)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_TestScheduler_coroutineCount, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_TestScheduler_Coroutine___construct, 0, 0, 0)
@@ -49,6 +52,7 @@ ZEND_FUNCTION(TestScheduler_resume);
 ZEND_FUNCTION(TestScheduler_cancel);
 ZEND_FUNCTION(TestScheduler_await);
 ZEND_FUNCTION(TestScheduler_current);
+ZEND_FUNCTION(TestScheduler_coroutineCount);
 ZEND_METHOD(TestScheduler_Coroutine, __construct);
 ZEND_METHOD(TestScheduler_Coroutine, isStarted);
 ZEND_METHOD(TestScheduler_Coroutine, isRunning);
@@ -65,6 +69,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("TestScheduler", "cancel"), zif_TestScheduler_cancel, arginfo_TestScheduler_cancel, 0, NULL, NULL)
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("TestScheduler", "await"), zif_TestScheduler_await, arginfo_TestScheduler_await, 0, NULL, NULL)
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("TestScheduler", "current"), zif_TestScheduler_current, arginfo_TestScheduler_current, 0, NULL, NULL)
+	ZEND_RAW_FENTRY(ZEND_NS_NAME("TestScheduler", "coroutineCount"), zif_TestScheduler_coroutineCount, arginfo_TestScheduler_coroutineCount, 0, NULL, NULL)
 	ZEND_FE_END
 };
 
