@@ -644,8 +644,6 @@ ZEND_API bool zend_async_scheduler_register(
 	tsrm_mutex_unlock(scheduler_mutex);
 #endif
 
-	ZEND_ASYNC_INITIALIZE;
-
 	return true;
 }
 
@@ -728,7 +726,7 @@ ZEND_API zend_coroutine_t *zend_async_coroutine_from_object(zend_object *object)
 
 ZEND_API bool zend_async_scheduler_launch(void)
 {
-	if (scheduler_module_name == NULL) {
+	if (!ZEND_ASYNC_IS_READY) {
 		return true;
 	}
 

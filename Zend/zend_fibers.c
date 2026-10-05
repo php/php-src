@@ -1051,9 +1051,9 @@ static bool zend_fiber_adopt(zend_fiber *fiber)
 		return false;
 	}
 
-	/* A registered scheduler launches once, before the script's first line, so
-	 * it is never still READY here; ZEND_ASYNC_INTERCEPT_FIBER() falls back to
-	 * the legacy path on its own if needed. */
+	/* READY without a launch (php -r, phpdbg, preload) is not ACTIVE:
+	 * ZEND_ASYNC_INTERCEPT_FIBER() then returns NULL and the fiber takes the
+	 * legacy path. */
 	zend_coroutine_t *coroutine = ZEND_ASYNC_INTERCEPT_FIBER(fiber);
 
 	if (coroutine == NULL) {

@@ -498,17 +498,21 @@ ZEND_API extern zend_async_coroutine_get_awaiting_info_t zend_async_coroutine_ge
 ZEND_API zend_coroutine_t *zend_async_coroutine_from_object(zend_object *object);
 
 /* Launch the scheduler: calls the launch slot, marks the coroutine it returns
- * as the main one and records it as current. False when no scheduler is
- * registered or it failed to produce a main coroutine. */
+ * as the main one and records it as current. The slot is called only in a
+ * request the provider marked READY (ZEND_ASYNC_INITIALIZE, in its RINIT, or
+ * right before it launches itself at run time); otherwise async stays off for
+ * the request and this returns true, as it does when async is already active.
+ * False when the slot produced no main coroutine. */
 ZEND_API bool zend_async_scheduler_launch(void);
 
 ZEND_API bool zend_async_scheduler_register(
 		const char *module, const zend_async_scheduler_api_t *api);
-/* Withdraw the registration and reset every slot to its default: at process
- * shutdown, or when a scheduler registered at run time fails to launch (the
- * ext-scheduler-hook bridge). */
+/* Withdraw the registration and reset every slot to its default, at process
+ * shutdown. */
 ZEND_API void zend_async_scheduler_unregister(void);
 
+/* True once a scheduler's slots are registered in this process. Whether one
+ * runs in this request is ZEND_ASYNC_IS_ACTIVE. */
 ZEND_API bool zend_async_is_enabled(void);
 /* The module name of the registered scheduler, or NULL when none. */
 ZEND_API const char *zend_async_get_scheduler_module(void);
@@ -730,6 +734,9 @@ END_EXTERN_C()
 #define ZEND_ASYNC_IS_OFF (ZEND_ASYNC_G(state) == ZEND_ASYNC_OFF)
 #define ZEND_ASYNC_IS_READY (ZEND_ASYNC_G(state) == ZEND_ASYNC_READY)
 #define ZEND_ASYNC_ACTIVATE ZEND_ASYNC_G(state) = ZEND_ASYNC_ACTIVE
+/* The provider wants async in this request, set in its RINIT: only then does
+ * the launch point before the script start the scheduler. A provider that
+ * launches itself at run time sets it right before its own launch. */
 #define ZEND_ASYNC_INITIALIZE ZEND_ASYNC_G(state) = ZEND_ASYNC_READY
 /* The coroutines go with the request: code that runs after this (output
  * handlers, RSHUTDOWN, the next request's RINIT) sees no current or main one,
