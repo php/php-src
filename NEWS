@@ -32,6 +32,9 @@ PHP                                                                        NEWS
     the end of their mapping. (Ilia Alshanetsky)
   . Fixed bug GH-24050 (GC frees an object still held by a resurrected closure
     when (object) and use share an array). (David Carlier)
+  . Fixed use-after-free when a Fiber callable resolves to $this of the method
+    creating the Fiber ([A::class, 'm'] or "A::m") and that object dies before
+    the Fiber runs. (Edmond Dantes)
 
 - DOM:
   . Fixed use-after-free when re-constructing a DOMXPath whose php:function

@@ -564,6 +564,19 @@ static void zend_fiber_cleanup(zend_fiber_context *context)
 	fiber->caller = NULL;
 }
 
+static void zend_fiber_release_callable(zend_fiber *fiber)
+{
+	zval_ptr_dtor(&fiber->fci.function_name);
+	ZVAL_UNDEF(&fiber->fci.function_name);
+	fiber->fci_cache = empty_fcall_info_cache;
+
+	if (fiber->fci.object != NULL) {
+		zend_object *object = fiber->fci.object;
+		fiber->fci.object = NULL;
+		OBJ_RELEASE(object);
+	}
+}
+
 static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 {
 	ZEND_ASSERT(Z_TYPE(transfer->value) == IS_NULL && "Initial transfer value to fiber context must be NULL");
@@ -609,8 +622,7 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 		zend_call_function(&fiber->fci, &fiber->fci_cache);
 
 		/* Cleanup callback and unset field to prevent GC / duplicate dtor issues. */
-		zval_ptr_dtor(&fiber->fci.function_name);
-		ZVAL_UNDEF(&fiber->fci.function_name);
+		zend_fiber_release_callable(fiber);
 
 		if (EG(exception)) {
 			if (!(fiber->flags & ZEND_FIBER_FLAG_DESTROYED)
@@ -809,7 +821,7 @@ static void zend_fiber_object_free(zend_object *object)
 {
 	zend_fiber *fiber = (zend_fiber *) object;
 
-	zval_ptr_dtor(&fiber->fci.function_name);
+	zend_fiber_release_callable(fiber);
 	zval_ptr_dtor(&fiber->result);
 
 	zend_object_std_dtor(&fiber->std);
@@ -821,6 +833,11 @@ static HashTable *zend_fiber_object_gc(zend_object *object, zval **table, int *n
 	zend_get_gc_buffer *buf = zend_get_gc_buffer_create();
 
 	zend_get_gc_buffer_add_zval(buf, &fiber->fci.function_name);
+
+	if (fiber->fci.object != NULL) {
+		zend_get_gc_buffer_add_obj(buf, fiber->fci.object);
+	}
+
 	zend_get_gc_buffer_add_zval(buf, &fiber->result);
 
 	if (fiber->context.status != ZEND_FIBER_STATUS_SUSPENDED || fiber->caller != NULL) {
@@ -890,6 +907,11 @@ ZEND_METHOD(Fiber, __construct)
 
 	// Keep a reference to closures or callable objects while the fiber is running.
 	Z_TRY_ADDREF(fiber->fci.function_name);
+
+	/* For [A::class, 'm'] or "A::m" inside a method of A, fci.object is the caller's $this. */
+	if (fiber->fci.object != NULL) {
+		GC_ADDREF(fiber->fci.object);
+	}
 }
 
 ZEND_METHOD(Fiber, start)
