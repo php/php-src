@@ -43,10 +43,19 @@ static void internal_parse_to_timestamp(IntlDateFormatter_object *dfo, const cha
 	/* Convert timezone to UTF-16. */
 	intl_convert_utf8_to_utf16(&text_utf16, &text_utf16_len, text_to_parse, text_len, &INTL_DATA_ERROR_CODE(dfo));
 	INTL_METHOD_CHECK_STATUS(dfo, "Error converting timezone to UTF-16" );
+	if (parse_pos && !intl_convert_utf8_offset_to_utf16(text_to_parse, text_len, parse_pos, &INTL_DATA_ERROR_CODE(dfo))) {
+		if (text_utf16) {
+			efree(text_utf16);
+		}
+		INTL_METHOD_CHECK_STATUS(dfo, "Invalid UTF-8 offset" );
+	}
 
 	if (UNEXPECTED(update_calendar)) {
 		UCalendar *parsed_calendar = (UCalendar *)udat_getCalendar(DATE_FORMAT_OBJECT(dfo));
 		udat_parseCalendar(DATE_FORMAT_OBJECT(dfo), parsed_calendar, text_utf16, text_utf16_len, parse_pos, &INTL_DATA_ERROR_CODE(dfo));
+		if (parse_pos) {
+			*parse_pos = intl_convert_utf16_offset_to_utf8(text_utf16, text_utf16_len, *parse_pos);
+		}
 		if (text_utf16) {
 			efree(text_utf16);
 		}
@@ -54,6 +63,9 @@ static void internal_parse_to_timestamp(IntlDateFormatter_object *dfo, const cha
 		timestamp = ucal_getMillis( parsed_calendar, &INTL_DATA_ERROR_CODE(dfo));
 	} else {
 		timestamp = udat_parse(DATE_FORMAT_OBJECT(dfo), text_utf16, text_utf16_len, parse_pos, &INTL_DATA_ERROR_CODE(dfo));
+		if (parse_pos) {
+			*parse_pos = intl_convert_utf16_offset_to_utf8(text_utf16, text_utf16_len, *parse_pos);
+		}
 		if (text_utf16) {
 			efree(text_utf16);
 		}
@@ -97,9 +109,18 @@ static void internal_parse_to_localtime(IntlDateFormatter_object *dfo, const cha
 	/* Convert timezone to UTF-16. */
 	intl_convert_utf8_to_utf16(&text_utf16, &text_utf16_len, text_to_parse, text_len, &INTL_DATA_ERROR_CODE(dfo));
 	INTL_METHOD_CHECK_STATUS(dfo, "Error converting timezone to UTF-16" );
+	if (parse_pos && !intl_convert_utf8_offset_to_utf16(text_to_parse, text_len, parse_pos, &INTL_DATA_ERROR_CODE(dfo))) {
+		if (text_utf16) {
+			efree(text_utf16);
+		}
+		INTL_METHOD_CHECK_STATUS(dfo, "Invalid UTF-8 offset" );
+	}
 
 	parsed_calendar = (UCalendar *)udat_getCalendar(DATE_FORMAT_OBJECT(dfo));
 	udat_parseCalendar( DATE_FORMAT_OBJECT(dfo), parsed_calendar, text_utf16, text_utf16_len, parse_pos, &INTL_DATA_ERROR_CODE(dfo));
+	if (parse_pos) {
+		*parse_pos = intl_convert_utf16_offset_to_utf8(text_utf16, text_utf16_len, *parse_pos);
+	}
 
 	if (text_utf16) {
 		efree(text_utf16);
