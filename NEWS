@@ -38,6 +38,8 @@ PHP                                                                        NEWS
     function and a later request calls it. (Ilia Alshanetsky)
   . Fixed System V shared memory emulation for Windows attaching segments past
     the end of their mapping. (Ilia Alshanetsky)
+  . Fixed exception thrown by destructor during GC in a Fiber not being rethrown
+    into the frame that triggered the GC. (Nicolas Grekas)
 
 - DOM:
   . Fixed DOMXPath and Dom\XPath losing the context node and in-scope
