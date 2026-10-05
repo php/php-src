@@ -131,7 +131,6 @@ static const opt_struct OPTIONS[] = {
 	{'D', 0, "daemonize"},
 	{'F', 0, "nodaemonize"},
 	{'O', 0, "force-stderr"},
-	{20, 0, "fpm"}, /* "php --fpm", see sapi/cli/php_cli_main.c */
 	{'-', 0, NULL} /* end of args */
 };
 
@@ -1532,7 +1531,7 @@ static zend_module_entry cgi_module_entry = {
 };
 
 /* {{{ do_php_fpm */
-int do_php_fpm(int argc, char *argv[])
+int do_php_fpm(int argc, char *argv[], int first_arg)
 {
 	int exit_status = FPM_EXIT_OK;
 	int c, use_extended_info = 0;
@@ -1593,6 +1592,7 @@ int do_php_fpm(int argc, char *argv[])
 
 	php_ini_builder_init(&ini_builder);
 
+	php_optind = first_arg;
 	while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
 		switch (c) {
 			case 'c':
@@ -1666,9 +1666,6 @@ int do_php_fpm(int argc, char *argv[])
 
 			case 'O': /* force stderr even on non tty */
 				force_stderr = 1;
-				break;
-
-			case 20: /* php --fpm */
 				break;
 
 			default:
