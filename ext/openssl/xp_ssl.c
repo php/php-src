@@ -3243,9 +3243,11 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 					retry = 1;
 				}
 
-				/* Also, on reads, we may get this condition on an EOF. We should check properly. */
+				/* A close_notify marks EOF even if a previous operation left errno as EAGAIN. */
 				if (read) {
-					stream->eof = (retry == 0 && errno != EAGAIN && !SSL_pending(sslsock->ssl_handle));
+					stream->eof = (retry == 0
+						&& (err == SSL_ERROR_ZERO_RETURN || errno != EAGAIN)
+						&& !SSL_pending(sslsock->ssl_handle));
 				}
 
 				/* Don't loop indefinitely in non-blocking mode if no data is available */
