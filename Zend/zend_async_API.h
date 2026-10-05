@@ -290,7 +290,9 @@ typedef bool (*zend_async_enqueue_coroutine_t)(
  * `is_bailout` tells the scheduler the main flow ended with a bailout. */
 typedef bool (*zend_async_suspend_t)(bool from_main, bool is_bailout);
 /* Request cancellation: sets F_CANCELLED and wakes the coroutine with the
- * error. `is_safely` defers delivery until a cancellation-safe point. */
+ * error. With `is_safely` a started coroutine is not interrupted: it becomes a
+ * zombie and runs to its end, and an error handed over with `transfer_error`
+ * is released (TrueAsync's Scope::disposeSafely()). */
 typedef bool (*zend_async_cancel_t)(
 		zend_coroutine_t *coroutine, zend_object *error, bool transfer_error, const bool is_safely);
 /* Start the scheduler and hand the engine the main coroutine: the top-level
@@ -630,6 +632,8 @@ END_EXTERN_C()
 	} while (0)
 #define ZEND_ASYNC_CANCEL(coroutine, error, transfer_error) \
 	zend_async_cancel_fn((coroutine), (error), (transfer_error), false)
+#define ZEND_ASYNC_CANCEL_EX(coroutine, error, transfer_error, is_safely) \
+	zend_async_cancel_fn((coroutine), (error), (transfer_error), (is_safely))
 /* Starts the scheduler and installs the main coroutine it returns. */
 #define ZEND_ASYNC_SCHEDULER_LAUNCH() zend_async_scheduler_launch()
 #define ZEND_ASYNC_SHUTDOWN() zend_async_shutdown_fn()
