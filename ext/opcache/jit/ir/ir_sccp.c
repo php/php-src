@@ -378,7 +378,7 @@ static bool ir_sccp_analyze_phi(const ir_ctx *ctx, ir_sccp_val *_values, ir_bitq
 #endif
 
 	if (!IR_IS_REACHABLE(insn->op1)) {
-		return 0;
+		return false;
 	}
 	n = insn->inputs_count;
 	if (n > 3 && _values[i].op == IR_TOP) {
@@ -441,7 +441,7 @@ static bool ir_sccp_analyze_phi(const ir_ctx *ctx, ir_sccp_val *_values, ir_bitq
 		goto next;
 	}
 
-	return 0;
+	return false;
 
 next:
 	p++;
@@ -515,7 +515,7 @@ next:
 
 make_bottom:
 	IR_MAKE_BOTTOM_EX(i);
-	return 1;
+	return true;
 }
 
 static bool ir_is_dead_load_ex(const ir_ctx *ctx, ir_ref ref, uint32_t flags, const ir_insn *insn)
@@ -525,7 +525,7 @@ static bool ir_is_dead_load_ex(const ir_ctx *ctx, ir_ref ref, uint32_t flags, co
 	} else if (insn->op == IR_ALLOCA || insn->op == IR_BLOCK_BEGIN) {
 		return ctx->use_lists[ref].count == 1;
 	}
-	return 0;
+	return false;
 }
 
 static bool ir_is_dead_load(const ir_ctx *ctx, ir_ref ref)
@@ -535,12 +535,12 @@ static bool ir_is_dead_load(const ir_ctx *ctx, ir_ref ref)
 		uint32_t flags = ir_op_flags[insn->op];
 
 		if ((flags & (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_MASK)) == (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_LOAD)) {
-			return 1;
+			return true;
 		} else if (insn->op == IR_ALLOCA || insn->op == IR_BLOCK_BEGIN) {
-			return 1;
+			return true;
 		}
 	}
-	return 0;
+	return false;
 }
 
 static bool ir_is_dead(const ir_ctx *ctx, ir_ref ref)
@@ -550,7 +550,7 @@ static bool ir_is_dead(const ir_ctx *ctx, ir_ref ref)
 	} else {
 		return ir_is_dead_load(ctx, ref);
 	}
-	return 0;
+	return false;
 }
 
 static bool ir_sccp_is_true(const ir_ctx *ctx, const ir_sccp_val *_values, ir_ref a)
@@ -1078,7 +1078,7 @@ static bool ir_sccp_remove_unfeasible_merge_inputs(ir_ctx *ctx, ir_ref ref, ir_i
 		if (life_inputs != &holder) {
 			ir_mem_free(life_inputs);
 		}
-		return 0;
+		return false;
 	}
 
 	for (i = new_merge_inputs + 1; i <= old_merge_inputs; i++) {
@@ -1170,7 +1170,7 @@ static bool ir_sccp_remove_unfeasible_merge_inputs(ir_ctx *ctx, ir_ref ref, ir_i
 		ir_mem_free(life_inputs);
 	}
 
-	return 1;
+	return true;
 }
 
 static IR_NEVER_INLINE void ir_sccp_transform(ir_ctx *ctx, const ir_sccp_val *_values, ir_bitqueue *worklist, ir_bitqueue *iter_worklist)
@@ -1603,7 +1603,7 @@ static bool ir_may_promote_d2f(const ir_ctx *ctx, ir_ref ref)
 	} else {
 		switch (insn->op) {
 			case IR_FP2FP:
-				return 1;
+				return true;
 //			case IR_INT2FP:
 //				return ctx->use_lists[ref].count == 1;
 			case IR_NEG:
@@ -1623,7 +1623,7 @@ static bool ir_may_promote_d2f(const ir_ctx *ctx, ir_ref ref)
 				break;
 		}
 	}
-	return 0;
+	return false;
 }
 
 static bool ir_may_promote_f2d(const ir_ctx *ctx, ir_ref ref)
@@ -1636,7 +1636,7 @@ static bool ir_may_promote_f2d(const ir_ctx *ctx, ir_ref ref)
 	} else {
 		switch (insn->op) {
 			case IR_FP2FP:
-				return 1;
+				return true;
 //			case IR_INT2FP:
 //				return ctx->use_lists[ref].count == 1;
 			case IR_NEG:
@@ -1656,7 +1656,7 @@ static bool ir_may_promote_f2d(const ir_ctx *ctx, ir_ref ref)
 				break;
 		}
 	}
-	return 0;
+	return false;
 }
 
 static ir_ref ir_promote_d2f(ir_ctx *ctx, ir_ref ref, ir_ref use)
@@ -1873,7 +1873,7 @@ static bool ir_may_promote_trunc(const ir_ctx *ctx, ir_type type, ir_ref ref)
 					for (p = &ctx->use_edges[use_list->refs], n = use_list->count; n > 0; p++, n--) {
 						if (*p != ref) {
 							if (count) {
-								return 0;
+								return false;
 							}
 							count = 1;
 						}
@@ -1883,16 +1883,16 @@ static bool ir_may_promote_trunc(const ir_ctx *ctx, ir_type type, ir_ref ref)
 					input = *p;
 					if (input != ref) {
 						if (!ir_may_promote_trunc(ctx, type, input)) {
-							return 0;
+							return false;
 						}
 					}
 				}
-				return 1;
+				return true;
 			default:
 				break;
 		}
 	}
-	return 0;
+	return false;
 }
 
 static ir_ref ir_promote_i2i(ir_ctx *ctx, ir_type type, ir_ref ref, ir_ref use)
@@ -2183,17 +2183,17 @@ static bool ir_is_loop_invariant(const ir_ctx *ctx, ir_ref ref, ir_ref loop)
 static bool ir_is_cheaper_ext(const ir_ctx *ctx, ir_ref ref, ir_ref loop, ir_ref ext_ref, ir_op op)
 {
 	if (IR_IS_CONST_REF(ref)) {
-		return 1;
+		return true;
 	} else {
 		const ir_insn *insn = &ctx->ir_base[ref];
 
 		if (insn->op == IR_LOAD) {
 			if (ir_is_loop_invariant(ctx, ref, loop)) {
-				return 1;
+				return true;
 			} else {
 				/* ZEXT(LOAD(_, _)) costs the same as LOAD(_, _) */
 				if (ctx->use_lists[ref].count == 2) {
-					return 1;
+					return true;
 				} else if (ctx->use_lists[ref].count == 3) {
 					ir_use_list *use_list = &ctx->use_lists[ref];
 					ir_ref *p, n, use;
@@ -2206,14 +2206,14 @@ static bool ir_is_cheaper_ext(const ir_ctx *ctx, ir_ref ref, ir_ref loop, ir_ref
 							if (use_insn->op != op
 							 && (!(ir_op_flags[use_insn->op] & (IR_OP_FLAG_CONTROL|IR_OP_FLAG_MEM))
 							  || use_insn->op1 != ref)) {
-								return 0;
+								return false;
 							}
 						}
 					}
-					return 1;
+					return true;
 				}
 			}
-			return 0;
+			return false;
 		} else {
 			return ir_is_loop_invariant(ctx, ref, loop);
 		}
@@ -2242,27 +2242,27 @@ static bool ir_try_promote_induction_var_ext(ir_ctx *ctx, ir_ref ext_ref, ir_ref
 				if (use_insn->op >= IR_EQ && use_insn->op <= IR_UGT) {
 					if (use_insn->op1 == phi_ref) {
 						if (IR_IS_TYPE_SIGNED(type) != IR_IS_TYPE_SIGNED(ctx->ir_base[use_insn->op2].type)) {
-							return 0;
+							return false;
 						}
 						if (ir_is_cheaper_ext(ctx, use_insn->op2, ctx->ir_base[phi_ref].op1, ext_ref, op)) {
 							continue;
 					    }
 					} else if (use_insn->op2 == phi_ref) {
 						if (IR_IS_TYPE_SIGNED(type) != IR_IS_TYPE_SIGNED(ctx->ir_base[use_insn->op1].type)) {
-							return 0;
+							return false;
 						}
 						if (ir_is_cheaper_ext(ctx, use_insn->op1, ctx->ir_base[phi_ref].op1, ext_ref, op)) {
 							continue;
 					    }
 					}
-					return 0;
+					return false;
 				} else if (use_insn->op == IR_IF) {
 					continue;
 				} else if (!ext_ref_2 && use_insn->op == op && use_insn->type == type) {
 					ext_ref_2 = use;
 					continue;
 				} else {
-					return 0;
+					return false;
 				}
 			}
 		}
@@ -2281,27 +2281,27 @@ static bool ir_try_promote_induction_var_ext(ir_ctx *ctx, ir_ref ext_ref, ir_ref
 				if (use_insn->op >= IR_EQ && use_insn->op <= IR_UGT) {
 					if (use_insn->op1 == op_ref) {
 						if (IR_IS_TYPE_SIGNED(type) != IR_IS_TYPE_SIGNED(ctx->ir_base[use_insn->op2].type)) {
-							return 0;
+							return false;
 						}
 						if (ir_is_cheaper_ext(ctx, use_insn->op2, ctx->ir_base[phi_ref].op1, ext_ref, op)) {
 							continue;
 					    }
 					} else if (use_insn->op2 == op_ref) {
 						if (IR_IS_TYPE_SIGNED(type) != IR_IS_TYPE_SIGNED(ctx->ir_base[use_insn->op1].type)) {
-							return 0;
+							return false;
 						}
 						if (ir_is_cheaper_ext(ctx, use_insn->op1, ctx->ir_base[phi_ref].op1, ext_ref, op)) {
 							continue;
 					    }
 					}
-					return 0;
+					return false;
 				} else if (use_insn->op == IR_IF) {
 					continue;
 				} else if (!ext_ref_2 && use_insn->op == op && use_insn->type == type) {
 					ext_ref_2 = use;
 					continue;
 				} else {
-					return 0;
+					return false;
 				}
 			}
 		}
@@ -2409,7 +2409,7 @@ static bool ir_try_promote_induction_var_ext(ir_ctx *ctx, ir_ref ext_ref, ir_ref
 		ctx->ir_base[phi_ref].op2 = tmp;
 	}
 
-	return 1;
+	return true;
 }
 
 static bool ir_try_promote_ext(ir_ctx *ctx, ir_ref ext_ref, ir_insn *insn)
@@ -2467,7 +2467,7 @@ static bool ir_try_promote_ext(ir_ctx *ctx, ir_ref ext_ref, ir_insn *insn)
 		ir_iter_replace_insn(ctx, ext_ref, ref);
 	}
 
-	return 0;
+	return false;
 }
 
 static void ir_get_true_false_refs(const ir_ctx *ctx, ir_ref if_ref, ir_ref *if_true_ref, ir_ref *if_false_ref)
@@ -2541,7 +2541,7 @@ static bool ir_try_remove_empty_diamond(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
 		ir_insn *end2 = &ctx->ir_base[end2_ref];
 
 		if (end1->op != IR_END || end2->op != IR_END) {
-			return 0;
+			return false;
 		}
 
 		ir_ref start1_ref = end1->op1, start2_ref = end2->op1;
@@ -2549,7 +2549,7 @@ static bool ir_try_remove_empty_diamond(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
 		ir_insn *start2 = &ctx->ir_base[start2_ref];
 
 		if (start1->op1 != start2->op1) {
-			return 0;
+			return false;
 		}
 
 		ir_ref root_ref = start1->op1;
@@ -2557,7 +2557,7 @@ static bool ir_try_remove_empty_diamond(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
 
 		if (root->op != IR_IF
 		 && !(root->op == IR_SWITCH && ctx->use_lists[root_ref].count == 2)) {
-			return 0;
+			return false;
 		}
 
 		/* Empty Diamond
@@ -2609,7 +2609,7 @@ static bool ir_try_remove_empty_diamond(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
 			ir_bitqueue_add(ctx->iter_worklist, next->op1);
 		}
 
-		return 1;
+		return true;
 	} else {
 		ir_ref i, count = insn->inputs_count, *ops = insn->ops + 1;
 		ir_ref root_ref = IR_UNUSED;
@@ -2621,12 +2621,12 @@ static bool ir_try_remove_empty_diamond(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
 			end_ref = ops[i];
 			end = &ctx->ir_base[end_ref];
 			if (end->op != IR_END) {
-				return 0;
+				return false;
 			}
 			start_ref = end->op1;
 			start = &ctx->ir_base[start_ref];
 			if (start->op != IR_CASE_VAL && start->op != IR_CASE_RANGE && start->op != IR_CASE_DEFAULT) {
-				return 0;
+				return false;
 			}
 			if (ctx->use_lists[start_ref].count != 1) {
 				ir_remove_unused_vars(ctx, start_ref, end_ref);
@@ -2634,10 +2634,10 @@ static bool ir_try_remove_empty_diamond(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
 			if (!root_ref) {
 				root_ref = start->op1;
 				if (ctx->use_lists[root_ref].count != count) {
-					return 0;
+					return false;
 				}
 			} else if (start->op1 != root_ref) {
-				return 0;
+				return false;
 			}
 		}
 
@@ -2674,7 +2674,7 @@ static bool ir_try_remove_empty_diamond(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
 			ir_bitqueue_add(ctx->iter_worklist, next->op1);
 		}
 
-		return 1;
+		return true;
 	}
 }
 
@@ -2695,7 +2695,7 @@ static bool ir_fix_min_max_const(ir_ctx *ctx, ir_insn *cond, ir_ref ref)
 		 && ctx->ir_base[cond->op2].val.u64 == ctx->ir_base[ref].val.u64 - 1
 		 && ctx->ir_base[cond->op2].type == ctx->ir_base[ref].type) {
 			cond->op2 = ref;
-			return 1;
+			return true;
 		}
 	} else if (cond->op == IR_UGE) {
 		/* (x >= 3 ? 2 : x) => (x > 2 ? 2 : x) =>  min(x, 2) */
@@ -2705,7 +2705,7 @@ static bool ir_fix_min_max_const(ir_ctx *ctx, ir_insn *cond, ir_ref ref)
 		 && ctx->ir_base[cond->op2].val.u64 == ctx->ir_base[ref].val.u64 + 1
 		 && ctx->ir_base[cond->op2].type == ctx->ir_base[ref].type) {
 			cond->op2 = ref;
-			return 1;
+			return true;
 		}
 	} else if (cond->op == IR_LE) {
 		/* (x <= 3 ? 4 : x) => (x < 4 ? 4 : x) =>  max(x, 4) */
@@ -2715,7 +2715,7 @@ static bool ir_fix_min_max_const(ir_ctx *ctx, ir_insn *cond, ir_ref ref)
 		 && ctx->ir_base[cond->op2].val.u64 == ctx->ir_base[ref].val.u64 - 1
 		 && ctx->ir_base[cond->op2].type == ctx->ir_base[ref].type) {
 			cond->op2 = ref;
-			return 1;
+			return true;
 		}
 	} else if (cond->op == IR_GE) {
 		/* (x >= 3 ? 2 : x) => (x > 2 ? 2 : x) =>  min(x, 2) */
@@ -2725,10 +2725,10 @@ static bool ir_fix_min_max_const(ir_ctx *ctx, ir_insn *cond, ir_ref ref)
 		 && ctx->ir_base[cond->op2].val.i64 == ctx->ir_base[ref].val.i64 + 1
 		 && ctx->ir_base[cond->op2].type == ctx->ir_base[ref].type) {
 			cond->op2 = ref;
-			return 1;
+			return true;
 		}
 	}
-	return 0;
+	return false;
 }
 
 static bool ir_optimize_phi(ir_ctx *ctx, ir_ref merge_ref, ir_insn *merge, ir_ref ref, ir_insn *insn)
@@ -2857,7 +2857,7 @@ static bool ir_optimize_phi(ir_ctx *ctx, ir_ref merge_ref, ir_insn *merge, ir_re
 						ir_bitqueue_add(ctx->iter_worklist, next->op1);
 					}
 
-					return 1;
+					return true;
 				} else if (is_cmp
 						&& ((ctx->ir_base[insn->op2].op == IR_NEG
 						  && ctx->use_lists[insn->op2].count == 1
@@ -2950,7 +2950,7 @@ static bool ir_optimize_phi(ir_ctx *ctx, ir_ref merge_ref, ir_insn *merge, ir_re
 						ir_bitqueue_add(ctx->iter_worklist, next->op1);
 					}
 
-					return 1;
+					return true;
 				} else if (insn->op2 <= root_ref && insn->op3 <= root_ref
 					&& cond->op != IR_OVERFLOW
 					// TODO: temporary disable IF-conversion for RLOAD.
@@ -3020,13 +3020,13 @@ static bool ir_optimize_phi(ir_ctx *ctx, ir_ref merge_ref, ir_insn *merge, ir_re
 						ir_bitqueue_add(ctx->iter_worklist, next->op1);
 					}
 
-					return 1;
+					return true;
 				}
 			}
 		}
 	}
 
-	return 0;
+	return false;
 }
 
 static bool ir_cmp_is_true(ir_op op, const ir_insn *op1, const ir_insn *op2)
@@ -3071,7 +3071,7 @@ static bool ir_cmp_is_true(ir_op op, const ir_insn *op1, const ir_insn *op2)
 			return op1->val.u64 > op2->val.u64;
 		} else {
 			IR_ASSERT(0);
-			return 0;
+			return false;
 		}
 	} else if (op1->type == IR_DOUBLE) {
 		if (op == IR_EQ) {
@@ -3100,7 +3100,7 @@ static bool ir_cmp_is_true(ir_op op, const ir_insn *op1, const ir_insn *op2)
 			return isnan(op1->val.d) || isnan(op2->val.d);
 		} else {
 			IR_ASSERT(0);
-			return 0;
+			return false;
 		}
 	} else {
 		IR_ASSERT(op1->type == IR_FLOAT);
@@ -3130,7 +3130,7 @@ static bool ir_cmp_is_true(ir_op op, const ir_insn *op1, const ir_insn *op2)
 			return isnan(op1->val.f) || isnan(op2->val.f);
 		} else {
 			IR_ASSERT(0);
-			return 0;
+			return false;
 		}
 	}
 }
@@ -3212,7 +3212,7 @@ static bool ir_try_split_if(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
 						ir_bitqueue_add(ctx->iter_worklist, if_false_ref);
 						ir_bitqueue_add(ctx->iter_worklist, if_true_ref);
 
-						return 1;
+						return true;
 					} else {
 						/* Simple IF Split
 						 *
@@ -3251,7 +3251,7 @@ static bool ir_try_split_if(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
 
 						ir_bitqueue_add(ctx->iter_worklist, if_false_ref);
 
-						return 1;
+						return true;
 					}
 				}
 
@@ -3307,12 +3307,12 @@ static bool ir_try_split_if(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
 					ir_bitqueue_add(ctx->iter_worklist, end2->op1);
 				}
 
-				return 1;
+				return true;
 			}
 		}
 	}
 
-	return 0;
+	return false;
 }
 
 static bool ir_try_split_if_cmp(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
@@ -3404,7 +3404,7 @@ static bool ir_try_split_if_cmp(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
 							ir_bitqueue_add(ctx->iter_worklist, if_false_ref);
 							ir_bitqueue_add(ctx->iter_worklist, if_true_ref);
 
-							return 1;
+							return true;
 						} else {
 							/* IF Split
 							 *
@@ -3447,7 +3447,7 @@ static bool ir_try_split_if_cmp(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
 
 							ir_bitqueue_add(ctx->iter_worklist, if_false_ref);
 
-							return 1;
+							return true;
 						}
 					} else {
 						/* IF Split
@@ -3507,14 +3507,14 @@ static bool ir_try_split_if_cmp(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
 							ir_bitqueue_add(ctx->iter_worklist, end2->op1);
 						}
 
-						return 1;
+						return true;
 					}
 				}
 			}
 		}
 	}
 
-	return 0;
+	return false;
 }
 
 static void ir_iter_optimize_merge(ir_ctx *ctx, ir_ref merge_ref, ir_insn *merge)

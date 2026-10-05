@@ -247,7 +247,7 @@ static bool ir_is_same_mem_var(const ir_ctx *ctx, ir_ref r1, int32_t offset)
 	int32_t o1;
 
 	if (IR_IS_CONST_REF(r1)) {
-		return 0;
+		return false;
 	}
 
 	IR_ASSERT(ctx->vregs[r1]);
@@ -1058,9 +1058,9 @@ static void ir_emit_dessa_moves(ir_ctx *ctx, int b, ir_block *bb)
 /* TAILCALL optimization */
 static bool ir_may_be_local_addr(ir_ctx *ctx, ir_insn *insn)
 {
-	if (insn->op == IR_PARAM) return 0;
+	if (insn->op == IR_PARAM) return false;
 
-	return 1;
+	return true;
 }
 
 static bool ir_try_tailcall(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
@@ -1078,7 +1078,7 @@ static bool ir_try_tailcall(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
 
 			if (rule) {
 				ctx->rules[ref] = rule;
-				return 0;
+				return false;
 			}
 			proto_ref = func->proto;
 		} else if (func->op == IR_FUNC_ADDR) {
@@ -1088,10 +1088,10 @@ static bool ir_try_tailcall(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
 		proto_ref = ctx->ir_base[insn->op2].op2;
 	}
 
-	if (!proto_ref) return 0;
+	if (!proto_ref) return false;
 	proto = (const ir_proto_t *)ir_get_str(ctx, proto_ref);
 
-	if ((proto->flags & IR_CALL_CONV_MASK) != (ctx->flags & IR_CALL_CONV_MASK)) return 0;
+	if ((proto->flags & IR_CALL_CONV_MASK) != (ctx->flags & IR_CALL_CONV_MASK)) return false;
 
 	cc = ir_get_call_conv_dsc(proto ? proto->flags : IR_CC_DEFAULT);
 	copy_stack = 0;
@@ -1101,7 +1101,7 @@ static bool ir_try_tailcall(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
 	}
 
 	// TODO: "params_stack_size" must match the "args_stack_size"
-	if (params_stack_size) return 0;
+	if (params_stack_size) return false;
 
 	/* check for passing addresses of local variable */
 	uint32_t n = insn->inputs_count;
@@ -1110,7 +1110,7 @@ static bool ir_try_tailcall(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
 		if (!IR_IS_CONST_REF(input) && ctx->ir_base[input].type == IR_ADDR) {
 			/* Passing addrss of local varible to TAILCALL is disallowd */
 			if (ir_may_be_local_addr(ctx, &ctx->ir_base[input])) {
-				return 0;
+				return false;
 			}
 		}
 	}
@@ -1134,7 +1134,7 @@ static bool ir_try_tailcall(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
 
 	ctx->rules[ref] = IR_TAILCALL | IR_NO_REG;
 
-	return 1;
+	return true;
 }
 
 #if 0
@@ -1558,19 +1558,19 @@ static bool ir_load_may_reuse_var_slot(ir_ctx *ctx, ir_block *bb, ir_ref var, ir
 	if (n) {
 		for (p = ctx->use_edges + use_list->refs; n > 0; p++, n--) {
 			use = *p;
-			if (use < load || use > bb->end) return 0;
+			if (use < load || use > bb->end) return false;
 			if (use > last_use) last_use = use;
 		}
 		for (i = load + 1, insn = &ctx->ir_base[i]; i < last_use;) {
 			if ((insn->op == IR_VSTORE || insn->op == IR_VSTORE_v) && insn->op2 == var) {
-				return 0;
+				return false;
 			}
 			n = ir_insn_len(insn);
 			i += n;
 			insn += n;
 		}
 	}
-	return 1;
+	return true;
 }
 
 static bool ir_store_may_reuse_var_slot(ir_ctx *ctx, ir_block *bb, ir_ref var, ir_ref store, ir_ref val)
@@ -1578,18 +1578,18 @@ static bool ir_store_may_reuse_var_slot(ir_ctx *ctx, ir_block *bb, ir_ref var, i
 	ir_ref i, n;
 	ir_insn *insn;
 
-	if (val < bb->start && val > store) return 0;
+	if (val < bb->start && val > store) return false;
 
 	for (i = val, insn = &ctx->ir_base[i]; i < store;) {
 		if ((insn->op == IR_VLOAD || insn->op == IR_VLOAD_v || insn->op == IR_VSTORE || insn->op == IR_VSTORE_v)
 		 && insn->op2 == var) {
-			return 0;
+			return false;
 		}
 		n = ir_insn_len(insn);
 		i += n;
 		insn += n;
 	}
-	return 1;
+	return true;
 }
 
 static void ir_add_fusion_data(ir_ctx *ctx, ir_ref ref, ir_ref input, ir_reg_alloc_simple_data *x)

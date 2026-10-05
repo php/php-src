@@ -78,10 +78,10 @@ static bool ir_check_use_list(ir_check_ctx *check_ctx, const ir_ctx *ctx, ir_ref
 	}
 	for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
 		if (*p == to) {
-			return 1;
+			return true;
 		}
 	}
-	return 0;
+	return false;
 }
 
 static bool ir_check_input_list(ir_check_ctx *check_ctx, const ir_ctx *ctx, ir_ref from, ir_ref to)
@@ -115,10 +115,10 @@ static bool ir_check_input_list(ir_check_ctx *check_ctx, const ir_ctx *ctx, ir_r
 	}
 	for (j = 1, p = insn->ops + 1; j <= n; j++, p++) {
 		if (*p == from) {
-			return 1;
+			return true;
 		}
 	}
-	return 0;
+	return false;
 }
 
 static bool ir_check_domination(const ir_ctx *ctx, ir_ref def, ir_ref use)

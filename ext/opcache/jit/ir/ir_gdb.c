@@ -534,7 +534,7 @@ static bool ir_gdb_register_code(const void *object, size_t size)
 
 	entry = malloc(sizeof(ir_gdbjit_code_entry) + size);
 	if (entry == NULL) {
-		return 0;
+		return false;
 	}
 
 	entry->symfile_addr = ((char*)entry) + sizeof(ir_gdbjit_code_entry);
@@ -566,7 +566,7 @@ static bool ir_gdb_register_code(const void *object, size_t size)
 	__jit_debug_descriptor.action_flag = IR_GDBJIT_REGISTER;
 	__jit_debug_register_code();
 
-	return 1;
+	return true;
 }
 
 void ir_gdb_unregister_all(void)
