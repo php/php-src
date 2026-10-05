@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fix function and constant imports in compile_to_ast and add support
     for grouping. (Klaas Skelte van der Werf)
+  . Fixed bug GH-23911 (Cached static closure keeps static:: of the first
+    called class). (Roman Ondráček)
   . Fixed bug GH-24668 (zend_set_local_var() leaks the previous value of an
     existing CV). (yasu20200121web-prog, lazerg)
   . Fixed unmapping of an unrelated range when the aligned chunk mmap fails
