@@ -19,8 +19,16 @@
 int main(int argc, char *argv[])
 {
 #ifdef PHP_CLI_WITH_FPM
-	/* "php --fpm [args]" runs the FPM SAPI. argv is passed as is because FPM
+	/* Running as "php-fpm*" (e.g. a php-fpm symlink to php) or as
+	 * "php --fpm [args]" runs the FPM SAPI. argv is passed as is because FPM
 	 * re-executes it on reload; FPM options start after "--fpm". */
+	if (argc > 0 && argv[0]) {
+		const char *name = strrchr(argv[0], '/');
+		name = name ? name + 1 : argv[0];
+		if (strncmp(name, "php-fpm", strlen("php-fpm")) == 0) {
+			return fpm_main(argc, argv, 1);
+		}
+	}
 	if (argc > 1 && strcmp(argv[1], "--fpm") == 0) {
 		return fpm_main(argc, argv, 2);
 	}

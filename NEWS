@@ -4,7 +4,8 @@ PHP                                                                        NEWS
 
 - CLI:
   . Added the --enable-cli-fpm configure option, which links the FPM SAPI into
-    the php binary so that "php --fpm" runs php-fpm. (Matthieu Napoli)
+    the php binary so that "php --fpm" (or a php-fpm symlink to php) runs
+    php-fpm. (Matthieu Napoli)
 
 - FPM:
   . Use recommended TYPE, HELP order for OpenMetrics metadata.
