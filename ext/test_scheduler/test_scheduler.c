@@ -1478,8 +1478,11 @@ static zend_execute_data *ts_coroutine_execute_data(zend_coroutine_t *coroutine)
  * suspend it is parked in, the error is thrown there, and the body unwinds
  * through its own finally blocks. A coroutine that has not run yet receives
  * the error at its first entry and never starts. */
-static bool ts_cancel(zend_coroutine_t *coroutine, zend_object *error, bool transfer_error)
+static bool ts_cancel(
+		zend_coroutine_t *coroutine, zend_object *error, bool transfer_error, const bool is_safely)
 {
+	(void) is_safely;
+
 	if (ZEND_COROUTINE_IS_FINISHED(coroutine)) {
 		if (error != NULL && transfer_error) {
 			OBJ_RELEASE(error);

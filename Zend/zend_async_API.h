@@ -283,9 +283,9 @@ typedef bool (*zend_async_enqueue_coroutine_t)(
  * `is_bailout` tells the scheduler the main flow ended with a bailout. */
 typedef bool (*zend_async_suspend_t)(bool from_main, bool is_bailout);
 /* Request cancellation: sets F_CANCELLED and wakes the coroutine with the
- * error. */
+ * error. `is_safely` defers delivery until a cancellation-safe point. */
 typedef bool (*zend_async_cancel_t)(
-		zend_coroutine_t *coroutine, zend_object *error, bool transfer_error);
+		zend_coroutine_t *coroutine, zend_object *error, bool transfer_error, const bool is_safely);
 /* Start the scheduler and hand the engine the main coroutine: the top-level
  * script is a coroutine from its first opcode, not a plain flow that becomes
  * one at its first yield. The scheduler creates it (it is the scheduler's own
@@ -413,7 +413,7 @@ typedef zend_array *(*zend_async_coroutine_get_awaiting_info_t)(zend_coroutine_t
 
 /* Date of the last incompatible change to this API: a changed slot signature
  * or meaning, a reordered field. Appending a slot does not change it. */
-#define ZEND_ASYNC_API_VERSION 20261005
+#define ZEND_ASYNC_API_VERSION 20261003
 
 /**
  * Scheduler API bundle. A provider fills the struct and calls
@@ -595,7 +595,7 @@ END_EXTERN_C()
 		} \
 	} while (0)
 #define ZEND_ASYNC_CANCEL(coroutine, error, transfer_error) \
-	zend_async_cancel_fn((coroutine), (error), (transfer_error))
+	zend_async_cancel_fn((coroutine), (error), (transfer_error), false)
 /* Starts the scheduler and installs the main coroutine it returns. */
 #define ZEND_ASYNC_SCHEDULER_LAUNCH() zend_async_scheduler_launch()
 #define ZEND_ASYNC_SHUTDOWN() zend_async_shutdown_fn()
