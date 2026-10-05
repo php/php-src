@@ -1,5 +1,5 @@
 --TEST--
-Io\Terminal\SystemTerminal: readLine nonblocking TTY EAGAIN waiting, partial lines, and EOF contracts
+Io\Terminal\Terminal: readLine nonblocking TTY EAGAIN waiting, partial lines, and EOF contracts
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY === 'Windows') {
@@ -32,7 +32,7 @@ proc_close($proc);
 --FILE--
 <?php
 
-use Io\Terminal\SystemTerminal;
+use Io\Terminal\Terminal;
 
 // 1. Nonblocking TTY, no data initially: must not become EOF/null
 $proc1 = proc_open(
@@ -54,11 +54,9 @@ $proc1 = proc_open(
 
 fgets($pipes1[2]); // Wait for STARTED
 stream_set_blocking($pipes1[1], false);
-$terminal1 = SystemTerminal::fromStreams($pipes1[1]);
+$terminal1 = Terminal::fromStreams($pipes1[1]);
 
 fwrite($pipes1[0], "GO\n");
-// Even though $pipes1[1] is nonblocking and child sleeps 40ms before writing,
-// readLine() waits for readiness and returns the line instead of falsely returning null/EOF.
 var_dump($terminal1->readLine());
 
 fclose($pipes1[0]);
@@ -88,11 +86,9 @@ $proc2 = proc_open(
 
 fgets($pipes2[2]); // Wait for STARTED
 stream_set_blocking($pipes2[1], false);
-$terminal2 = SystemTerminal::fromStreams($pipes2[1]);
+$terminal2 = Terminal::fromStreams($pipes2[1]);
 
 fwrite($pipes2[0], "GO\n");
-// Even though the child pauses after writing "partial_", readLine() must not return
-// partial bytes as a completed line; it waits for the newline and returns the whole line.
 var_dump($terminal2->readLine());
 
 fclose($pipes2[0]);
@@ -115,7 +111,7 @@ fclose($pipes3[0]);
 fclose($pipes3[2]);
 usleep(30000); // Allow child to exit and slave to close
 stream_set_blocking($pipes3[1], false);
-$terminal3 = SystemTerminal::fromStreams($pipes3[1]);
+$terminal3 = Terminal::fromStreams($pipes3[1]);
 
 var_dump($terminal3->readLine());
 
@@ -142,7 +138,7 @@ $proc4 = proc_open(
 
 fgets($pipes4[2]); // Wait for STARTED
 stream_set_blocking($pipes4[1], false);
-$terminal4 = SystemTerminal::fromStreams($pipes4[1]);
+$terminal4 = Terminal::fromStreams($pipes4[1]);
 
 fwrite($pipes4[0], "GO\n");
 usleep(30000); // Allow child to write and exit

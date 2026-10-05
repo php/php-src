@@ -32,7 +32,7 @@ proc_close($proc);
 --FILE--
 <?php
 
-use Io\Terminal\SystemTerminal;
+use Io\Terminal\Terminal;
 use Time\Duration;
 
 // 1. 3-byte UTF-8 (€: \xe2\x82\xac) split across timeout
@@ -64,8 +64,8 @@ $proc1 = proc_open(
 );
 
 $r0 = fgets($pipes1[2]);
-$terminal1 = SystemTerminal::fromStreams($pipes1[0]);
-$terminal1->enableRawMode();
+$terminal1 = Terminal::fromStreams($pipes1[0]);
+$token1 = $terminal1->enableRawMode();
 
 fwrite($pipes1[0], "START\n");
 $r1 = fgets($pipes1[2]);
@@ -117,8 +117,8 @@ $proc2 = proc_open(
 );
 
 $r0 = fgets($pipes2[2]);
-$terminal2 = SystemTerminal::fromStreams($pipes2[0]);
-$terminal2->enableRawMode();
+$terminal2 = Terminal::fromStreams($pipes2[0]);
+$token2 = $terminal2->enableRawMode();
 
 fwrite($pipes2[0], "START\n");
 $r1 = fgets($pipes2[2]);
@@ -173,20 +173,16 @@ $proc3 = proc_open(
 );
 
 $r0 = fgets($pipes3[2]);
-$terminal3 = SystemTerminal::fromStreams($pipes3[0]);
-$terminal3->enableRawMode();
+$terminal3 = Terminal::fromStreams($pipes3[0]);
+$token3 = $terminal3->enableRawMode();
 
 fwrite($pipes3[0], "START\n");
 $r1 = fgets($pipes3[2]);
 
-// Call 1 reads \xf0\x9f, waits for 3rd byte with sequenceTimeout 20ms, times out, retains 2 bytes.
 $k5 = $terminal3->readKey(Duration::fromMilliseconds(30), Duration::fromMilliseconds(20));
 
-// Release child: child sleeps 40ms (> 20ms sequenceTimeout) before writing remaining bytes.
 fwrite($pipes3[0], "GO\n");
 
-// Call 2 resumes sequence with 2 bytes already pending. The first continuation read of this invocation
-// uses overall timeout (1000ms) rather than sequenceTimeout (20ms), successfully waiting for the 40ms delay.
 $k6 = $terminal3->readKey(Duration::fromMilliseconds(1000), Duration::fromMilliseconds(20));
 
 echo "k5 is null: ", var_export($k5 === null, true), PHP_EOL;

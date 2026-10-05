@@ -1,39 +1,39 @@
 --TEST--
-Io\Terminal\SystemTerminal: fromStdio, fromStreams, construction and serialization restrictions
+Io\Terminal\Terminal: fromStdio, fromStreams, construction and serialization restrictions
 --FILE--
 <?php
 
-use Io\Terminal\SystemTerminal;
+use Io\Terminal\Terminal;
 use Io\Terminal\TerminalSize;
-use Io\Terminal\SystemModeToken;
+use Io\Terminal\ModeToken;
 
 // Named constructors
-$t1 = SystemTerminal::fromStdio();
+$t1 = Terminal::fromStdio();
 var_dump($t1);
 
 $fp = fopen('php://temp', 'r+');
-$t2 = SystemTerminal::fromStreams($fp);
+$t2 = Terminal::fromStreams($fp);
 var_dump($t2);
 
 $fpOut = fopen('php://temp', 'r+');
-$t3 = SystemTerminal::fromStreams($fp, $fpOut);
+$t3 = Terminal::fromStreams($fp, $fpOut);
 var_dump($t3);
 
 // Invalid stream arguments
 try {
-    SystemTerminal::fromStreams('invalid');
+    Terminal::fromStreams('invalid');
 } catch (Throwable $e) {
     echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
 try {
-    SystemTerminal::fromStreams($fp, 123);
+    Terminal::fromStreams($fp, 123);
 } catch (Throwable $e) {
     echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
-// Constructor privacy for SystemTerminal and SystemModeToken
-foreach ([SystemTerminal::class, SystemModeToken::class] as $class) {
+// Constructor privacy for Terminal and ModeToken
+foreach ([Terminal::class, ModeToken::class] as $class) {
     try {
         new $class();
     } catch (Throwable $e) {
@@ -79,7 +79,7 @@ foreach ([$t1, $t2] as $obj) {
     }
 }
 
-// Serialization rejection for SystemTerminal
+// Serialization rejection for Terminal
 try {
     serialize($t1);
 } catch (Throwable $e) {
@@ -88,16 +88,16 @@ try {
 
 ?>
 --EXPECT--
-object(Io\Terminal\SystemTerminal)#1 (0) {
+object(Io\Terminal\Terminal)#1 (0) {
 }
-object(Io\Terminal\SystemTerminal)#2 (0) {
+object(Io\Terminal\Terminal)#2 (0) {
 }
-object(Io\Terminal\SystemTerminal)#3 (0) {
+object(Io\Terminal\Terminal)#3 (0) {
 }
-TypeError: Io\Terminal\SystemTerminal::fromStreams(): Argument #1 ($input) must be of type resource, string given
-TypeError: Io\Terminal\SystemTerminal::fromStreams(): Argument #2 ($output) must be of type resource or null, int given
-Error: Call to private Io\Terminal\SystemTerminal::__construct() from global scope
-Error: Call to private Io\Terminal\SystemModeToken::__construct() from global scope
+TypeError: Io\Terminal\Terminal::fromStreams(): Argument #1 ($input) must be of type resource, string given
+TypeError: Io\Terminal\Terminal::fromStreams(): Argument #2 ($output) must be of type resource or null, int given
+Error: Call to private Io\Terminal\Terminal::__construct() from global scope
+Error: Call to private Io\Terminal\ModeToken::__construct() from global scope
 int(80)
 int(24)
 ValueError: Io\Terminal\TerminalSize::__construct(): Argument #1 ($cols) must be greater than 0
@@ -108,6 +108,6 @@ Error: Cannot modify readonly property Io\Terminal\TerminalSize::$cols
 bool(true)
 int(80)
 int(24)
-Error: Trying to clone an uncloneable object of class Io\Terminal\SystemTerminal
-Error: Trying to clone an uncloneable object of class Io\Terminal\SystemTerminal
-Exception: Serialization of 'Io\Terminal\SystemTerminal' is not allowed
+Error: Trying to clone an uncloneable object of class Io\Terminal\Terminal
+Error: Trying to clone an uncloneable object of class Io\Terminal\Terminal
+Exception: Serialization of 'Io\Terminal\Terminal' is not allowed

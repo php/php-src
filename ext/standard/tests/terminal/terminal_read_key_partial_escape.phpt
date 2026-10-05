@@ -33,7 +33,7 @@ proc_close($proc);
 <?php
 
 use Io\Terminal\Key;
-use Io\Terminal\SystemTerminal;
+use Io\Terminal\Terminal;
 use Time\Duration;
 
 // Case 1: Overall deadline 30ms, ESC and [ sent before 30ms, A sent after release.
@@ -67,8 +67,8 @@ $proc1 = proc_open(
 );
 
 $r0 = fgets($pipes1[2]);
-$terminal1 = SystemTerminal::fromStreams($pipes1[0]);
-$terminal1->enableRawMode();
+$terminal1 = Terminal::fromStreams($pipes1[0]);
+$token1 = $terminal1->enableRawMode();
 
 fwrite($pipes1[0], "START\n");
 $r1 = fgets($pipes1[2]);
@@ -122,8 +122,8 @@ $proc2 = proc_open(
 );
 
 $r0 = fgets($pipes2[2]);
-$terminal2 = SystemTerminal::fromStreams($pipes2[0]);
-$terminal2->enableRawMode();
+$terminal2 = Terminal::fromStreams($pipes2[0]);
+$token2 = $terminal2->enableRawMode();
 
 fwrite($pipes2[0], "START\n");
 $r1 = fgets($pipes2[2]);

@@ -1,23 +1,39 @@
 --TEST--
-Io\Terminal\SystemTerminal: enableRawMode throws TerminalException for non-terminal streams
+Io\Terminal\Terminal: no-op raw-mode leases on non-terminal streams
 --FILE--
 <?php
 
-use Io\Terminal\SystemTerminal;
+use Io\Terminal\Terminal;
+use Io\Terminal\ModeToken;
 
 $fp = fopen('php://temp', 'r+');
-$terminal = SystemTerminal::fromStreams($fp);
+$terminal = Terminal::fromStreams($fp);
 
+// Non-terminal stream acquires a valid no-op raw mode lease
+$token = $terminal->enableRawMode();
+var_dump($token instanceof ModeToken);
+
+// getSize() continues to return null on non-terminal streams
+var_dump($terminal->getSize());
+
+// Restoring the token succeeds
+$terminal->restoreMode($token);
+echo "restored non-tty token
+";
+
+// Re-restoring the consumed token throws ValueError
 try {
-    $terminal->enableRawMode();
-    echo "FAIL: enableRawMode on non-terminal did not throw\n";
-} catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    $terminal->restoreMode($token);
+    echo "FAIL: re-restoring consumed non-tty token accepted
+";
+} catch (ValueError $e) {
+    echo "Caught: ", $e->getMessage(), PHP_EOL;
 }
-var_dump($terminal->restoreMode());
 
 fclose($fp);
 ?>
 --EXPECT--
-Io\Terminal\TerminalException: Failed to enable terminal raw mode
-bool(false)
+bool(true)
+NULL
+restored non-tty token
+Caught: Io\Terminal\Terminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token belonging to this terminal
