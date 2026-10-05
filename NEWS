@@ -34,6 +34,8 @@ PHP                                                                        NEWS
     when (object) and use share an array). (David Carlier)
   . Fixed exception thrown by destructor during GC in a Fiber not being rethrown
     into the frame that triggered the GC. (Nicolas Grekas)
+  . Fixed bug GH-24139 (NULL pointer dereference in php_ini.c when
+    expand_filepath() fails). (lazerg)
 
 - DOM:
   . Fixed use-after-free when re-constructing a DOMXPath whose php:function

@@ -563,7 +563,11 @@ int php_init_config(void)
 					fp = VCWD_FOPEN(php_ini_file_name, "r");
 					if (fp) {
 						filename = expand_filepath(php_ini_file_name, NULL);
-						free_filename = true;
+						if (filename) {
+							free_filename = true;
+						} else {
+							filename = php_ini_file_name;
+						}
 					}
 				}
 			}
