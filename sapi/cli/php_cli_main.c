@@ -19,9 +19,10 @@
 int main(int argc, char *argv[])
 {
 #ifdef PHP_CLI_WITH_FPM
-	/* "php --fpm [args]" runs the FPM SAPI, which ignores the "--fpm" option. */
+	/* "php --fpm [args]" runs the FPM SAPI. argv is passed as is because FPM
+	 * re-executes it on reload; FPM options start after "--fpm". */
 	if (argc > 1 && strcmp(argv[1], "--fpm") == 0) {
-		return do_php_fpm(argc, argv);
+		return do_php_fpm(argc, argv, 2);
 	}
 #endif
 	return do_php_cli(argc, argv);
