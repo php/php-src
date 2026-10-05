@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 	/* "php --fpm [args]" runs the FPM SAPI. argv is passed as is because FPM
 	 * re-executes it on reload; FPM options start after "--fpm". */
 	if (argc > 1 && strcmp(argv[1], "--fpm") == 0) {
-		return do_php_fpm(argc, argv, 2);
+		return fpm_main(argc, argv, 2);
 	}
 #endif
 	return do_php_cli(argc, argv);

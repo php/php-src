@@ -1530,8 +1530,8 @@ static zend_module_entry cgi_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-/* {{{ do_php_fpm */
-int do_php_fpm(int argc, char *argv[], int first_arg)
+/* {{{ fpm_main */
+int fpm_main(int argc, char *argv[], int first_arg)
 {
 	int exit_status = FPM_EXIT_OK;
 	int c, use_extended_info = 0;

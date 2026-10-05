@@ -470,7 +470,7 @@ if test "$PHP_FPM" != "no"; then
     [-I$abs_srcdir/sapi/fpm -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
   dnl Everything except the main() entry point, so that the CLI binary can link
-  dnl the same objects for do_php_fpm() (--enable-cli-fpm).
+  dnl the same objects for fpm_main() (--enable-cli-fpm).
   PHP_ADD_SOURCES_X([sapi/fpm],
     [$PHP_FPM_FILES $PHP_FPM_TRACE_FILES $PHP_FPM_SD_FILES],
     [-I$abs_srcdir/sapi/fpm -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1],
