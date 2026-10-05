@@ -439,7 +439,11 @@ static inline zend_result ct_eval_isset_dim(zval *result, uint32_t extended_valu
 	} else if (Z_TYPE_P(op1) == IS_STRING) {
 		// TODO
 		return FAILURE;
+	} else if (IS_PARTIAL_OBJECT(op1)) {
+		/* Objects may implement ArrayAccess or throw. */
+		return FAILURE;
 	} else {
+		ZEND_ASSERT(Z_TYPE_P(op1) <= IS_DOUBLE);
 		ZVAL_BOOL(result, (extended_value & ZEND_ISEMPTY));
 		return SUCCESS;
 	}
