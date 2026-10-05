@@ -1346,32 +1346,34 @@ exit_loop:
 	orig_cp = (php_win32_cp_get_orig())->id;
 	/* Embedders supply their own arguments, we mustn't replace them with
 	 * the ones by the host process command line. */
-	if (argv_save == __argv) {
+	if (argv_save != __argv) {
+		if (!php_win32_cp_use_unicode()) {
+			/* Custom arguments must be passed as UTF-8, convert to PHP's internal encvodingg. */
+			char **converted_argv = calloc((size_t) argc + 1, sizeof(char *));
+			if (!converted_argv) {
+				exit_status = 1;
+				goto out;
+			}
+			argv = converted_argv;
+			for (int i = 0; i < argc; i++) {
+				wchar_t *arg = php_win32_cp_utf8_to_w(argv_save[i]);
+				if (arg) {
+					argv[i] = php_win32_cp_w_to_any(arg);
+					free(arg);
+				}
+				if (!argv[i]) {
+					fprintf(stderr, "Could not convert command line argument %d.\n", i);
+					exit_status = 1;
+					goto out;
+				}
+			}
+		}
+	} else {
 		/* Ignore the delivered argv and argc, read from W API. This place
 			might be too late though, but this is the earliest place ATW
 			we can access the internal charset information from PHP. */
 		argv_wide = CommandLineToArgvW(GetCommandLineW(), &num_args);
 		PHP_WIN32_CP_W_TO_ANY_ARRAY(argv_wide, num_args, argv, argc)
-	} else if (!php_win32_cp_use_unicode()) {
-		/* Custom arguments are UTF-8, regardless of PHP's configured encoding. */
-		char **converted_argv = calloc((size_t) argc + 1, sizeof(char *));
-		if (!converted_argv) {
-			exit_status = 1;
-			goto out;
-		}
-		argv = converted_argv;
-		for (int i = 0; i < argc; i++) {
-			wchar_t *arg = php_win32_cp_utf8_to_w(argv_save[i]);
-			if (arg) {
-				argv[i] = php_win32_cp_w_to_any(arg);
-				free(arg);
-			}
-			if (!argv[i]) {
-				fprintf(stderr, "Could not convert command line argument %d.\n", i);
-				exit_status = 1;
-				goto out;
-			}
-		}
 	}
 
 	SetConsoleCtrlHandler(php_cli_win32_ctrl_handler, TRUE);
