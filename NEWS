@@ -77,6 +77,9 @@ PHP                                                                        NEWS
     haystacks. (Weilin Du)
   . Fixed grapheme_strrpos() and grapheme_strripos() skipping overlapping matches
     when using a negative offset. (Weilin Du)
+  . Fixed IntlDateFormatter::parse(), localtime() and parseToCalendar()
+    treating the offset as UTF-16 code units instead of bytes.
+    (Ilia Alshanetsky)
 
 - Lexbor:
   . Merge patches lexbor/lexbor@8a14bc0 and lexbor/lexbor@f67ce4b, fixing a
