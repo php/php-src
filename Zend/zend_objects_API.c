@@ -100,7 +100,7 @@ static bool zend_objects_store_call_destructors_async_switch_handler(zend_corout
 		return false;
 	}
 
-	zend_coroutine_t *iterator = ZEND_ASYNC_GC_NEW_COROUTINE();
+	zend_coroutine_t *iterator = ZEND_ASYNC_NEW_COROUTINE();
 
 	if (UNEXPECTED(iterator == NULL)) {
 		return false;

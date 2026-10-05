@@ -2137,7 +2137,7 @@ static void gc_destructors_coroutine(void)
 
 static zend_coroutine_t *gc_spawn_destructors_coroutine(void)
 {
-	zend_coroutine_t *coroutine = ZEND_ASYNC_GC_NEW_COROUTINE();
+	zend_coroutine_t *coroutine = ZEND_ASYNC_NEW_COROUTINE();
 
 	if (UNEXPECTED(coroutine == NULL)) {
 		return NULL;
@@ -2223,7 +2223,7 @@ static bool gc_coroutine_finish_handler(
 
 static zend_always_inline zend_coroutine_t *new_gc_coroutine(void)
 {
-	zend_coroutine_t *coroutine = ZEND_ASYNC_GC_NEW_COROUTINE();
+	zend_coroutine_t *coroutine = ZEND_ASYNC_NEW_COROUTINE();
 
 	if (UNEXPECTED(coroutine == NULL)) {
 		return NULL;
