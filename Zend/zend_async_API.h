@@ -39,6 +39,7 @@ typedef void (*zend_coroutine_entry_t)(void);
 
 /* Class/exception registry keys resolved through zend_async_get_class_ce_fn. */
 typedef enum {
+	ZEND_ASYNC_CLASS_NO = 0,
 	ZEND_ASYNC_CLASS_COROUTINE = 1,
 
 	ZEND_ASYNC_EXCEPTION_DEFAULT = 30,
@@ -531,6 +532,25 @@ ZEND_API void zend_async_context_destroy(zend_coroutine_t *coroutine);
 
 END_EXTERN_C()
 
+/* The userland context (NULL coroutine = current, main included). */
+#define ZEND_ASYNC_CONTEXT_GET(coroutine) zend_async_context_get(coroutine)
+#define ZEND_ASYNC_CONTEXT_FIND(coroutine, key) zend_async_context_find((coroutine), (key))
+#define ZEND_ASYNC_CONTEXT_SET(coroutine, key, value) \
+	zend_async_context_set((coroutine), (key), (value))
+#define ZEND_ASYNC_CONTEXT_UNSET(coroutine, key) zend_async_context_unset((coroutine), (key))
+#define ZEND_ASYNC_CONTEXT_DESTROY(coroutine) zend_async_context_destroy(coroutine)
+
+/* The internal context (NULL coroutine = current). */
+#define ZEND_ASYNC_INTERNAL_CONTEXT_KEY_ALLOC(name) zend_async_internal_context_key_alloc(name)
+#define ZEND_ASYNC_INTERNAL_CONTEXT_FIND(coroutine, key) \
+	zend_async_internal_context_find((coroutine), (key))
+#define ZEND_ASYNC_INTERNAL_CONTEXT_SET(coroutine, key, value) \
+	zend_async_internal_context_set((coroutine), (key), (value))
+#define ZEND_ASYNC_INTERNAL_CONTEXT_UNSET(coroutine, key) \
+	zend_async_internal_context_unset((coroutine), (key))
+#define ZEND_ASYNC_INTERNAL_CONTEXT_DESTROY(coroutine) \
+	zend_async_internal_context_destroy(coroutine)
+
 /* NULL when the provider cannot mint C coroutines at all. The engine's own
  * coroutines (the GC run, its destructor phase, the shutdown destructor passes)
  * survive a NULL, but a scheduler that keeps refusing never runs the
@@ -651,6 +671,8 @@ END_EXTERN_C()
 
 #define ZEND_ASYNC_ON (ZEND_ASYNC_G(state) > ZEND_ASYNC_OFF)
 #define ZEND_ASYNC_IS_ACTIVE (ZEND_ASYNC_G(state) == ZEND_ASYNC_ACTIVE)
+#define ZEND_ASYNC_IS_OFF (ZEND_ASYNC_G(state) == ZEND_ASYNC_OFF)
+#define ZEND_ASYNC_IS_READY (ZEND_ASYNC_G(state) == ZEND_ASYNC_READY)
 #define ZEND_ASYNC_ACTIVATE ZEND_ASYNC_G(state) = ZEND_ASYNC_ACTIVE
 #define ZEND_ASYNC_INITIALIZE ZEND_ASYNC_G(state) = ZEND_ASYNC_READY
 /* The coroutines go with the request: code that runs after this (output
