@@ -76,6 +76,8 @@ PHP                                                                        NEWS
   . Fix memory leak by doing early salt validation. (adapik)
   . Fixed openssl_sign() using the maximum RSA-PSS salt length by default
     instead of the OpenSSL default. (adapik)
+  . Fixed feof() on a TLS stream staying false after a close_notify on Windows.
+    (Jakub Zelenka)
 
 - PCNTL:
   . Fixed pcntl_signal_dispatch() dropping the queued signals when it runs while
