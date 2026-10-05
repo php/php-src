@@ -255,7 +255,7 @@ PHP_FUNCTION(curl_multi_exec)
 		}
 	}
 	
-	bool failed = false;
+	bool failed
 
 	still_running = zval_try_get_long(z_still_running, &failed);
 	if (UNEXPECTED(failed)) {
