@@ -1440,7 +1440,6 @@ PHP_METHOD(RecursiveDirectoryIterator, hasChildren)
 PHP_METHOD(RecursiveDirectoryIterator, getChildren)
 {
 	spl_filesystem_object *intern = spl_filesystem_from_obj(Z_OBJ_P(ZEND_THIS));
-	spl_filesystem_object *subdir;
 	char slash = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_UNIXPATHS) ? '/' : DEFAULT_SLASH;
 
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -1450,16 +1449,15 @@ PHP_METHOD(RecursiveDirectoryIterator, getChildren)
 	}
 
 	zval params[2];
-	ZVAL_STR_COPY(&params[0], intern->file_name);
+	ZVAL_STR(&params[0], intern->file_name);
 	ZVAL_LONG(&params[1], intern->flags);
 
-	zend_result is_initialized = object_init_with_constructor(return_value, Z_OBJCE_P(ZEND_THIS), 2, params, NULL);
-	zval_ptr_dtor_str(&params[0]);
-	if (is_initialized == FAILURE) {
+	zend_object *child = zend_object_init_with_constructor(Z_OBJCE_P(ZEND_THIS), 2, params, NULL);
+	if (child == NULL) {
 		RETURN_THROWS();
 	}
 
-	subdir = spl_filesystem_from_obj(Z_OBJ_P(return_value));
+	spl_filesystem_object *subdir = spl_filesystem_from_obj(child);
 	if (subdir) {
 		size_t name_len = strlen(intern->u.dir.entry.d_name);
 		if (intern->u.dir.sub_path && ZSTR_LEN(intern->u.dir.sub_path)) {
@@ -1476,6 +1474,7 @@ PHP_METHOD(RecursiveDirectoryIterator, getChildren)
 		subdir->file_class = intern->file_class;
 		subdir->oth = intern->oth;
 	}
+	RETURN_OBJ(child);
 }
 /* }}} */
 
