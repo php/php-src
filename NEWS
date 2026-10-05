@@ -120,6 +120,8 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed stream_socket_enable_crypto() leaving the socket non-blocking
     after a handshake timeout. (Ilia Alshanetsky)
+  . Fixed feof() on a TLS stream staying false after a close_notify on Windows.
+    (Jakub Zelenka)
 
 - PCNTL:
   . Fixed pcntl_signal_dispatch() dropping the queued signals when it runs while
