@@ -236,6 +236,25 @@ extern zend_class_entry *php_openssl_session_ce;
 void php_openssl_session_object_init(zval *zv, SSL_SESSION *session);
 bool php_openssl_is_session_ce(zval *val);
 SSL_SESSION *php_openssl_session_from_zval(zval *zv);
+int php_openssl_netstream_get_channel_binding(struct _php_stream *stream, int type, zend_string **out);
+
+/* Channel binding data types (RFC 5929, RFC 9266), as used for SASL
+ * channel binding (e.g. SCRAM-SHA-*-PLUS, RFC 5802 / RFC 5801). The string
+ * values accepted by stream_get_channel_binding() are the IANA "Channel
+ * Binding" registry names. */
+enum php_openssl_channel_binding_type {
+	PHP_OSSL_CB_TLS_UNIQUE = 0,
+	PHP_OSSL_CB_TLS_SERVER_ENDPOINT,
+	PHP_OSSL_CB_TLS_EXPORTER,
+};
+
+/* Result of php_openssl_netstream_get_channel_binding(). */
+enum php_openssl_channel_binding_result {
+	PHP_OSSL_CB_OK = 0,		/* *out holds a zend_string with the data */
+	PHP_OSSL_CB_NOT_APPLICABLE,	/* *out = NULL (e.g. tls-unique over TLS 1.3) */
+	PHP_OSSL_CB_NOT_TLS,	/* stream is not an active TLS stream */
+	PHP_OSSL_CB_ERROR,		/* an OpenSSL-level failure occurred */
+};
 
 #if defined(HAVE_OPENSSL_ARGON2)
 

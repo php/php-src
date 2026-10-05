@@ -5104,3 +5104,63 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 	}
 }
 /* }}} */
+
+/* {{{ */
+PHP_FUNCTION(openssl_get_channel_binding)
+{
+	php_stream *stream = NULL;
+	zend_string *type = NULL;
+	zend_string *result = NULL;
+	int type_code;
+	int ret;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		PHP_Z_PARAM_STREAM(stream)
+		Z_PARAM_STR(type)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (zend_string_equals_literal(type, "tls-unique")) {
+		type_code = PHP_OSSL_CB_TLS_UNIQUE;
+	} else if (zend_string_equals_literal(type, "tls-server-end-point")) {
+		type_code = PHP_OSSL_CB_TLS_SERVER_ENDPOINT;
+	} else if (zend_string_equals_literal(type, "tls-exporter")) {
+		type_code = PHP_OSSL_CB_TLS_EXPORTER;
+	} else {
+		zend_value_error(
+			"%s(): argument #2 ($channel_binding_type) \"%s\" is not a known "
+			"channel binding type, expected \"tls-unique\", "
+			"\"tls-server-end-point\" or \"tls-exporter\"",
+			get_active_function_name(), ZSTR_VAL(type));
+		RETURN_THROWS();
+	}
+
+	ret = php_openssl_netstream_get_channel_binding(stream, type_code, &result);
+	switch (ret) {
+		case PHP_OSSL_CB_OK:
+			RETURN_STR(result);
+		case PHP_OSSL_CB_NOT_APPLICABLE:
+			RETURN_NULL();
+		case PHP_OSSL_CB_NOT_TLS:
+			zend_throw_exception_ex(php_openssl_exception_ce, 0,
+				"Stream does not have transport encryption enabled");
+			RETURN_THROWS();
+		case PHP_OSSL_CB_ERROR:
+			{
+				unsigned long err = ERR_peek_last_error();
+				if (err != 0) {
+					char errstr[256];
+
+					(void)ERR_error_string_n(err, errstr, sizeof(errstr));
+					zend_throw_exception_ex(php_openssl_exception_ce, 0,
+						"Failed to get channel binding data: %s", errstr);
+				} else {
+					zend_throw_exception_ex(php_openssl_exception_ce, 0,
+						"Failed to get channel binding data");
+				}
+			}
+			RETURN_THROWS();
+		default:
+			ZEND_UNREACHABLE();
+	}
+}
+/* }}} */
