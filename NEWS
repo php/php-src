@@ -39,6 +39,11 @@ PHP                                                                        NEWS
   . Fixed System V shared memory emulation for Windows attaching segments past
     the end of their mapping. (Ilia Alshanetsky)
 
+- DOM:
+  . Fixed DOMXPath and Dom\XPath losing the context node and in-scope
+    namespaces of an evaluation after a php:function() callback evaluated
+    another expression on the same object. (Ilia Alshanetsky)
+
 - FFI:
   . Fixed crashes with FFI callbacks created from __call() trampolines
     and array callables whose object is released. (Ilia Alshanetsky)
