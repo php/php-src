@@ -36,9 +36,33 @@ class AA implements ArrayAccess {
     }
 }
 
+#[AllowDynamicProperties] class B {}
+#[AllowDynamicProperties]
+class BB implements ArrayAccess {
+    function offsetExists($o): bool {
+        return true;
+    }
+
+    function offsetGet($o): mixed {
+        $this->x = 2;
+        return 1;
+    }
+
+    function offsetSet($o, $v): void {}
+
+    function offsetUnset($o): void {}
+
+    static function f($c) {
+        if ($c) { $o = new B; $o->x = 1; } else { $o = new self; $o->x = 1; }
+        $o[0];
+        return $o->x;
+    }
+}
+
 var_dump(AA::fetch());
 var_dump(AA::isset());
 var_dump(AA::assign());
+var_dump(BB::f(false));
 ?>
 --EXPECT--
 int(2)
@@ -49,3 +73,4 @@ array(2) {
   int(3)
 }
 int(4)
+int(2)
