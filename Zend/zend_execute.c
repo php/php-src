@@ -1849,29 +1849,25 @@ ZEND_COLD static zend_result ZEND_FASTCALL get_deprecation_suffix_from_attribute
 		return SUCCESS;
 	}
 
-	zend_result result = FAILURE;
-
 	zend_string *message = ZSTR_EMPTY_ALLOC();
 	zend_string *since = ZSTR_EMPTY_ALLOC();
 
-	zval obj;
-	ZVAL_UNDEF(&obj);
-	zval *z;
-
 	/* Construct the Deprecated object to correctly handle parameter processing. */
-	if (FAILURE == zend_get_attribute_object(&obj, zend_ce_deprecated, deprecated, scope, NULL)) {
-		goto out;
+	zend_object *obj = zend_get_attribute_object(zend_ce_deprecated, deprecated, scope, NULL);
+	if (obj == NULL) {
+		return FAILURE;
 	}
 
+	zval *z;
 	/* Extract the $message property. */
-	z = zend_read_property_ex(zend_ce_deprecated, Z_OBJ_P(&obj), ZSTR_KNOWN(ZEND_STR_MESSAGE), false, NULL);
+	z = zend_read_property_ex(zend_ce_deprecated, obj, ZSTR_KNOWN(ZEND_STR_MESSAGE), false, NULL);
 	ZEND_ASSERT(z != &EG(uninitialized_zval));
 	if (Z_TYPE_P(z) == IS_STRING) {
 		message = Z_STR_P(z);
 	}
 
 	/* Extract the $since property. */
-	z = zend_read_property_ex(zend_ce_deprecated, Z_OBJ_P(&obj), ZSTR_KNOWN(ZEND_STR_SINCE), false, NULL);
+	z = zend_read_property_ex(zend_ce_deprecated, obj, ZSTR_KNOWN(ZEND_STR_SINCE), false, NULL);
 	ZEND_ASSERT(z != &EG(uninitialized_zval));
 	if (Z_TYPE_P(z) == IS_STRING) {
 		since = Z_STR_P(z);
@@ -1887,13 +1883,8 @@ ZEND_COLD static zend_result ZEND_FASTCALL get_deprecation_suffix_from_attribute
 		message
 	);
 
-	result = SUCCESS;
-
- out:
-
-	zval_ptr_dtor(&obj);
-
-	return result;
+	OBJ_RELEASE(obj);
+	return SUCCESS;
 }
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_function(const zend_function *fbc)
@@ -1940,21 +1931,16 @@ ZEND_COLD static zend_result ZEND_FASTCALL get_nodiscard_suffix_from_attribute(H
 		return SUCCESS;
 	}
 
-	zend_result result = FAILURE;
-
 	zend_string *message = ZSTR_EMPTY_ALLOC();
 
-	zval obj;
-	ZVAL_UNDEF(&obj);
-	zval *z;
-
 	/* Construct the NoDiscard object to correctly handle parameter processing. */
-	if (FAILURE == zend_get_attribute_object(&obj, zend_ce_nodiscard, nodiscard, scope, NULL)) {
-		goto out;
+	zend_object *obj = zend_get_attribute_object(zend_ce_nodiscard, nodiscard, scope, NULL);
+	if (obj == NULL) {
+		return FAILURE;
 	}
 
 	/* Extract the $message property. */
-	z = zend_read_property_ex(zend_ce_nodiscard, Z_OBJ_P(&obj), ZSTR_KNOWN(ZEND_STR_MESSAGE), false, NULL);
+	zval *z = zend_read_property_ex(zend_ce_nodiscard, obj, ZSTR_KNOWN(ZEND_STR_MESSAGE), false, NULL);
 	ZEND_ASSERT(z != &EG(uninitialized_zval));
 	if (Z_TYPE_P(z) == IS_STRING) {
 		message = Z_STR_P(z);
@@ -1968,13 +1954,9 @@ ZEND_COLD static zend_result ZEND_FASTCALL get_nodiscard_suffix_from_attribute(H
 		message
 	);
 
-	result = SUCCESS;
+	OBJ_RELEASE(obj);
 
- out:
-
-	zval_ptr_dtor(&obj);
-
-	return result;
+	return SUCCESS;
 }
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_nodiscard_function(const zend_function *fbc)

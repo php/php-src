@@ -7624,13 +7624,12 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 		RETURN_THROWS();
 	}
 
-	zval obj;
-
-	if (SUCCESS != zend_get_attribute_object(&obj, ce, attr->data, attr->scope, attr->filename)) {
+	zend_object *obj = zend_get_attribute_object(ce, attr->data, attr->scope, attr->filename);
+	if (UNEXPECTED(obj == NULL)) {
 		RETURN_THROWS();
 	}
 
-	RETURN_COPY_VALUE(&obj);
+	RETURN_OBJ(obj);
 }
 
 ZEND_METHOD(ReflectionEnum, __construct)
