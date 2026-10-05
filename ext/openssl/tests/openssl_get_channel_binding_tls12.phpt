@@ -1,5 +1,5 @@
 --TEST--
-stream_get_channel_binding(): TLS 1.2 full handshake, client and server agree
+openssl_get_channel_binding(): TLS 1.2 full handshake, client and server agree
 --EXTENSIONS--
 openssl
 --SKIPIF--
@@ -30,7 +30,7 @@ $serverCode = <<<'CODE'
         exit(1);
     }
     foreach (["tls-unique", "tls-server-end-point", "tls-exporter"] as $t) {
-        $v = stream_get_channel_binding($conn, $t);
+        $v = openssl_get_channel_binding($conn, $t);
         fwrite($conn, $t . "=" . (is_string($v) ? bin2hex($v) : "") . "\n");
     }
     phpt_wait();
@@ -56,7 +56,7 @@ $clientCode = <<<'CODE'
 
     $my = [];
     foreach (["tls-unique", "tls-server-end-point", "tls-exporter"] as $t) {
-        $my[$t] = stream_get_channel_binding($client, $t);
+        $my[$t] = openssl_get_channel_binding($client, $t);
     }
 
     $peer = [];

@@ -4104,7 +4104,7 @@ static int php_openssl_netstream_get_channel_binding( /* {{{ */
 /* }}} */
 
 /* {{{ */
-PHP_FUNCTION(stream_get_channel_binding)
+PHP_FUNCTION(openssl_get_channel_binding)
 {
 	php_stream *stream = NULL;
 	zend_string *type = NULL;

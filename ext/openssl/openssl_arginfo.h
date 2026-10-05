@@ -1,5 +1,5 @@
 /* This is a generated file, edit openssl.stub.php instead.
- * Stub hash: f71f04eb6d0e02d4cb5589e8783b8ca615a2b371 */
+ * Stub hash: 0c7e0942232271e2696203ab80ba01958b46c5ae */
 
 #include "zend_attributes.h"
 #include "zend_constants.h"
@@ -411,7 +411,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_password_verify, 0, 3, _
 ZEND_END_ARG_INFO()
 #endif
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_get_channel_binding, 0, 2, IS_STRING, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_get_channel_binding, 0, 2, IS_STRING, 1)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_TYPE_INFO(0, channel_binding_type, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -521,7 +521,7 @@ ZEND_FUNCTION(openssl_get_cert_locations);
 ZEND_FUNCTION(openssl_password_hash);
 ZEND_FUNCTION(openssl_password_verify);
 #endif
-ZEND_FUNCTION(stream_get_channel_binding);
+ZEND_FUNCTION(openssl_get_channel_binding);
 ZEND_METHOD(Openssl_Psk, __construct);
 ZEND_METHOD(Openssl_Session, export);
 ZEND_METHOD(Openssl_Session, import);
@@ -606,7 +606,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(openssl_password_hash, arginfo_openssl_password_hash)
 	ZEND_FE(openssl_password_verify, arginfo_openssl_password_verify)
 #endif
-	ZEND_FE(stream_get_channel_binding, arginfo_stream_get_channel_binding)
+	ZEND_FE(openssl_get_channel_binding, arginfo_openssl_get_channel_binding)
 	ZEND_FE_END
 };
 

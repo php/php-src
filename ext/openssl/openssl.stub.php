@@ -780,6 +780,6 @@ function openssl_password_verify(string $algo, #[\SensitiveParameter] string $pa
   * @param resource $stream
   * @refcount 1
   */
-function stream_get_channel_binding($stream, string $channel_binding_type): ?string {}
+function openssl_get_channel_binding($stream, string $channel_binding_type): ?string {}
 
 }
