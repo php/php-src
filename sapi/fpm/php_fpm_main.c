@@ -15,5 +15,5 @@
 
 int main(int argc, char *argv[])
 {
-	return do_php_fpm(argc, argv, 1);
+	return fpm_main(argc, argv, 1);
 }
