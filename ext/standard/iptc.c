@@ -175,11 +175,10 @@ static int php_iptc_next_marker(FILE *fp, int spool, unsigned char **spoolbuf, c
 }
 /* }}} */
 
-static char psheader[] = "\xFF\xED\0\0Photoshop 3.0\08BIM\x04\x04\0\0\0\0";
-
 /* {{{ Embed binary IPTC data into a JPEG image. */
 PHP_FUNCTION(iptcembed)
 {
+	char psheader[] = "\xFF\xED\0\0Photoshop 3.0\08BIM\x04\x04\0\0\0\0";
 	char *iptcdata, *jpeg_file;
 	size_t iptcdata_len, jpeg_file_len;
 	zend_long spool = 0;

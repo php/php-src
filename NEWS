@@ -32,6 +32,8 @@ PHP                                                                        NEWS
     the end of their mapping. (Ilia Alshanetsky)
   . Fixed bug GH-24050 (GC frees an object still held by a resurrected closure
     when (object) and use share an array). (David Carlier)
+  . Fixed exception thrown by destructor during GC in a Fiber not being rethrown
+    into the frame that triggered the GC. (Nicolas Grekas)
 
 - DOM:
   . Fixed use-after-free when re-constructing a DOMXPath whose php:function
@@ -48,6 +50,9 @@ PHP                                                                        NEWS
     evaluation). (David Carlier)
   . Fixed bug GH-23897 (php:function() assertion failure after a failed
     registerPHPFunctions()). (David Carlier)
+  . Fixed DOMXPath and Dom\XPath losing the context node and in-scope
+    namespaces of an evaluation after a php:function() callback evaluated
+    another expression on the same object. (Ilia Alshanetsky)
 
 - FFI:
   . Fixed crashes with FFI callbacks created from __call() trampolines
@@ -64,6 +69,9 @@ PHP                                                                        NEWS
     (DanielEScherzer, vapier)
 
 - Intl:
+  . Fixed IntlDateFormatter::parse(), localtime() and parseToCalendar()
+    treating the offset as UTF-16 code units instead of bytes.
+    (Ilia Alshanetsky)
   . Fixed cloning IntlDateFormatter and MessageFormatter losing PHP-side state
     such as dateType, timeType, calendar and the message pattern.
     (Ilia Alshanetsky)
@@ -120,6 +128,8 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed stream_socket_enable_crypto() leaving the socket non-blocking
     after a handshake timeout. (Ilia Alshanetsky)
+  . Fixed feof() on a TLS stream staying false after a close_notify on Windows.
+    (Jakub Zelenka)
 
 - PCNTL:
   . Fixed pcntl_signal_dispatch() dropping the queued signals when it runs while
@@ -199,6 +209,12 @@ PHP                                                                        NEWS
     (Ilia Alshanetsky)
 
 - Standard:
+  . Fixed sha1_file() returning a digest for incomplete data after a stream
+    read failure. (Ilia Alshanetsky)
+  . Fixed iptcembed() corrupting JPEG headers when called recursively from an
+    output handler. (Ilia Alshanetsky)
+  . Fixed proc_open() leaking descriptor zero when descriptor setup fails.
+    (Ilia Alshanetsky)
   . Fixed three Windows-only proc_open() defects: an uninitialized
     PROCESS_INFORMATION, an indeterminate comspec pointer after a failed
     lookup, and an unchecked CreateFileA() failure. (Ilia Alshanetsky)

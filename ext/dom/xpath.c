@@ -293,6 +293,10 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 		RETURN_THROWS();
 	}
 
+	xmlNodePtr old_node = ctxp->node;
+	xmlNsPtr *old_namespaces = ctxp->namespaces;
+	int old_nsNr = ctxp->nsNr;
+
 	ctxp->node = nodep;
 
 	php_dom_in_scope_ns in_scope_ns;
@@ -310,12 +314,12 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 	intern->evaluation_depth++;
 	xmlXPathObjectPtr xpathobjp = xmlXPathEvalExpression(BAD_CAST expr, ctxp);
 	intern->evaluation_depth--;
-	ctxp->node = NULL;
+	ctxp->node = old_node;
+	ctxp->namespaces = old_namespaces;
+	ctxp->nsNr = old_nsNr;
 
 	if (register_node_ns && nodep != NULL) {
 		php_dom_in_scope_ns_destroy(&in_scope_ns);
-		ctxp->namespaces = NULL;
-		ctxp->nsNr = 0;
 	}
 
 	if (! xpathobjp) {
