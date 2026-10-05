@@ -1,5 +1,13 @@
 --TEST--
 Test unfinished fiber with nested try/catch blocks — under test_scheduler
+--DESCRIPTION--
+The expected output departs from the upstream
+Zend/tests/fibers/unfinished-fiber-with-nested-try-catch.phpt. Under a
+scheduler the fiber runs as a coroutine, and destroying the unfinished fiber
+cancels it: the graceful exit is delivered at its Fiber::suspend() when the
+scheduler next runs the coroutine, here after the script. TrueAsync's core
+branch expects the same order in its copy of the upstream test. So "done"
+comes before the finally blocks.
 --SKIPIF--
 <?php
 if (!function_exists("TestScheduler\\spawn")) die("skip test_scheduler runtime required");
@@ -43,7 +51,7 @@ $fiber = new Fiber(function (): void {
 
 $fiber->start();
 
-unset($fiber); // Destroy fiber object, executing finally block.
+unset($fiber); // Destroy fiber object; its finally blocks run after the script.
 
 echo "done\n";
 

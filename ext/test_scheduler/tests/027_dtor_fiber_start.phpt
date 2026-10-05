@@ -1,5 +1,13 @@
 --TEST--
 Fibers in destructors 002: Start in destructor — under test_scheduler
+--DESCRIPTION--
+The expected output departs from the upstream
+Zend/tests/fibers/destructors_002.phpt. Under a scheduler the destructor phase
+of gc_collect_cycles() runs in a coroutine, and a Fiber started there runs as
+a coroutine too: start() queues its body and yields. While the first
+destructor waits for its fiber, the collector goes on with the remaining
+destructors in a new coroutine, so the second destructor starts before the
+first one ends.
 --EXTENSIONS--
 test_scheduler
 --INI--
