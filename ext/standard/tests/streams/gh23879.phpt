@@ -21,15 +21,21 @@ var_dump(is_resource(stream_socket_accept($server, 1)));
 var_dump(stream_socket_accept($server, 0));
 
 stream_set_blocking($server, true);
-var_dump(stream_socket_accept($server, 0.1));
-var_dump(stream_last_errors());
+var_dump(stream_socket_accept($server, 0));
+
+try {
+    stream_socket_accept($server, 0.1);
+} catch (StreamException $e) {
+    echo $e->getMessage(), "\n";
+    echo $e->getErrors()[0]->code->name, "\n";
+}
 ?>
---EXPECT--
+--EXPECTF--
 bool(false)
 array(0) {
 }
 bool(true)
 bool(false)
 bool(false)
-array(0) {
-}
+Accept failed: %s
+TimeOut

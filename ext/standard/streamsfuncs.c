@@ -332,6 +332,8 @@ PHP_FUNCTION(stream_socket_accept)
 		}
 		if (0 != ret) {
 			php_stream_warn(stream, AcceptFailed, "Accept failed: %s", errstr ? ZSTR_VAL(errstr) : "Unknown error");
+		} else if (!tv_pointer || tv.tv_sec || tv.tv_usec) {
+			php_stream_warn(stream, TimeOut, "Accept failed: %s", errstr ? ZSTR_VAL(errstr) : "Unknown error");
 		}
 		RETVAL_FALSE;
 	}

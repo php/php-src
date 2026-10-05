@@ -1080,7 +1080,7 @@ static inline int php_tcp_sockop_accept(php_stream *stream, php_netstream_data_t
 		}
 	} else if (xparam->outputs.error_code == PHP_TIMEOUT_ERROR_VALUE
 			|| PHP_IS_TRANSIENT_ERROR(xparam->outputs.error_code)) {
-		/* No pending connection within the timeout is not an error. */
+		/* No pending connection, the caller decides how to report it. */
 		return 0;
 	}
 
