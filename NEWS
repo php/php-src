@@ -79,6 +79,8 @@ PHP                                                                        NEWS
     extensions declaring frameless functions. (Ilia Alshanetsky)
   . Fixed bug GH-23991 (JIT generates invalid IR for multiple recursive calls).
     (ndossche)
+  . Fix SCCP evaluation of isset()/empty() on dimension of non-escaping object.
+    (ndossche)
 
 - OpenSSL:
   . Fixed stream_socket_enable_crypto() leaving the socket non-blocking
