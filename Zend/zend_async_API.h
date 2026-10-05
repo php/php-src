@@ -654,12 +654,14 @@ END_EXTERN_C()
 #define ZEND_ASYNC_ACTIVATE ZEND_ASYNC_G(state) = ZEND_ASYNC_ACTIVE
 #define ZEND_ASYNC_INITIALIZE ZEND_ASYNC_G(state) = ZEND_ASYNC_READY
 /* The coroutines go with the request: code that runs after this (output
- * handlers, RSHUTDOWN, the next request's RINIT) sees no current or main one. */
+ * handlers, RSHUTDOWN, the next request's RINIT) sees no current or main one,
+ * and no scheduler context a bailout left set. */
 #define ZEND_ASYNC_DEACTIVATE \
 	do { \
 		ZEND_ASYNC_G(state) = ZEND_ASYNC_OFF; \
 		ZEND_ASYNC_G(coroutine) = NULL; \
 		ZEND_ASYNC_G(main_coroutine) = NULL; \
+		ZEND_ASYNC_G(in_scheduler_context) = false; \
 	} while (0)
 
 #define ZEND_ASYNC_CURRENT_COROUTINE ZEND_ASYNC_G(coroutine)
