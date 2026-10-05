@@ -1936,12 +1936,11 @@ ZEND_API zend_object* zend_object_init(zend_class_entry *ce) {
 	return _object_and_properties_init(ce, NULL);
 }
 
-ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *ce, uint32_t param_count, zval *params, HashTable *named_params) /* {{{ */
+ZEND_API zend_object *zend_object_init_with_constructor(zend_class_entry *ce, uint32_t param_count, zval *params, HashTable *named_params) /* {{{ */
 {
 	zend_object *obj = _object_and_properties_init(ce, NULL);
 	if (UNEXPECTED(!obj)) {
-		ZVAL_UNDEF(arg);
-		return FAILURE;
+		return NULL;
 	}
 	zend_function *constructor = obj->handlers->get_constructor(obj);
 	if (constructor == NULL) {
@@ -1955,8 +1954,7 @@ ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *c
 		if (UNEXPECTED(EG(exception))) {
 			zend_object_store_ctor_failed(obj);
 			OBJ_RELEASE(obj);
-			ZVAL_UNDEF(arg);
-			return FAILURE;
+			return NULL;
 		}
 
 		/* Surprisingly, this is the only case where internal classes will allow to pass extra arguments
@@ -1971,11 +1969,9 @@ ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *c
 			/* Do not call destructor, free object, and set arg to IS_UNDEF */
 			zend_object_store_ctor_failed(obj);
 			OBJ_RELEASE(obj);
-			ZVAL_UNDEF(arg);
-			return FAILURE;
+			return NULL;
 		} else {
-			ZVAL_OBJ(arg, obj);
-			return SUCCESS;
+			return obj;
 		}
 	}
 	/* A constructor should not return a value, however if an exception is thrown
@@ -1994,16 +1990,24 @@ ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *c
 		/* Do not call destructor, free object, and set arg to IS_UNDEF */
 		zend_object_store_ctor_failed(obj);
 		OBJ_RELEASE(obj);
-		ZVAL_UNDEF(arg);
-		return FAILURE;
+		return NULL;
 	} else {
 		/* Unlikely, but user constructors may return any value they want */
 		zval_ptr_dtor(&retval);
-		ZVAL_OBJ(arg, obj);
-		return SUCCESS;
+		return obj;
 	}
 }
-/* }}} */
+
+ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *ce, uint32_t param_count, zval *params, HashTable *named_params)
+{
+	zend_object *obj = zend_object_init_with_constructor(ce, param_count, params, named_params);
+	if (UNEXPECTED(obj == NULL)) {
+		ZVAL_UNDEF(arg);
+		return FAILURE;
+	}
+	ZVAL_OBJ(arg, obj);
+	return SUCCESS;
+}
 
 ZEND_API void object_init(zval *arg) /* {{{ */
 {
