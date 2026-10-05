@@ -128,7 +128,7 @@ static bool zend_ssa_is_last_use(const zend_op_array *op_array, const zend_ssa *
 		zend_ssa_phi *phi = ssa->vars[var].phi_use_chain;
 		do {
 			if (!ssa->vars[phi->ssa_var].no_val) {
-				return false;
+				return 0;
 			}
 			phi = zend_ssa_next_use_phi(ssa, var, phi);
 		} while (phi);
@@ -148,14 +148,14 @@ static bool zend_ssa_is_last_use(const zend_op_array *op_array, const zend_ssa *
 		}
 		if (dominates(ssa->cfg.blocks, def_block,
 				(ssa->cfg.blocks[b].flags & ZEND_BB_LOOP_HEADER) ? b : ssa->cfg.blocks[b].loop_header)) {
-			return false;
+			return 0;
 		}
 
 		while (prev_use >= 0 && prev_use != use) {
 			if (b != ssa->cfg.map[prev_use]
 			 && dominates(ssa->cfg.blocks, b, ssa->cfg.map[prev_use])
 			 && !zend_ssa_is_no_val_use(op_array->opcodes + prev_use, ssa->ops + prev_use, var)) {
-				return false;
+				return 0;
 			}
 			prev_use = zend_ssa_next_use(ssa->ops, var, prev_use);
 		}
@@ -163,11 +163,11 @@ static bool zend_ssa_is_last_use(const zend_op_array *op_array, const zend_ssa *
 
 	next_use = zend_ssa_next_use(ssa->ops, var, use);
 	if (next_use < 0) {
-		return true;
+		return 1;
 	} else if (zend_ssa_is_no_val_use(op_array->opcodes + next_use, ssa->ops + next_use, var)) {
-		return true;
+		return 1;
 	}
-	return false;
+	return 0;
 }
 
 static int zend_jit_is_constant_cmp_long_long(const zend_op  *opline,
@@ -515,7 +515,7 @@ static bool zend_jit_may_avoid_refcounting(const zend_op *opline, uint32_t op1_i
 			if (!JIT_G(current_frame) ||
 			    !JIT_G(current_frame)->call->func ||
 			    !TRACE_FRAME_IS_LAST_SEND_BY_VAL(JIT_G(current_frame)->call)) {
-				return false;
+				return 0;
 			}
 			/* break missing intentionally */
 		case ZEND_FETCH_OBJ_R:
@@ -524,26 +524,26 @@ static bool zend_jit_may_avoid_refcounting(const zend_op *opline, uint32_t op1_i
 			 && opline->op2_type == IS_CONST
 			 && Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) == IS_STRING
 			 && Z_STRVAL_P(RT_CONSTANT(opline, opline->op2))[0] != '\0') {
-				return true;
+				return 1;
 			}
 			break;
 		case ZEND_FETCH_DIM_FUNC_ARG:
 			if (!JIT_G(current_frame) ||
 			    !JIT_G(current_frame)->call->func ||
 			    !TRACE_FRAME_IS_LAST_SEND_BY_VAL(JIT_G(current_frame)->call)) {
-				return false;
+				return 0;
 			}
 			/* break missing intentionally */
 		case ZEND_FETCH_DIM_R:
 		case ZEND_FETCH_DIM_IS:
-			return true;
+			return 1;
 		case ZEND_ISSET_ISEMPTY_DIM_OBJ:
 			if (!(opline->extended_value & ZEND_ISEMPTY)) {
-				return true;
+				return 1;
 			}
 			break;
 	}
-	return false;
+	return 0;
 }
 
 static bool zend_jit_is_persistent_constant(zval *key, uint32_t flags)
@@ -677,13 +677,13 @@ static bool zend_may_be_dynamic_property(zend_class_entry *ce, zend_string *memb
 	zend_property_info *info;
 
 	if (!ce || (ce->ce_flags & ZEND_ACC_TRAIT) || (op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
-		return true;
+		return 1;
 	}
 
 	if (!(ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
 		if (ce->info.user.filename != op_array->filename) {
 			/* class declaration might be changed independently */
-			return true;
+			return 1;
 		}
 	}
 
@@ -693,15 +693,15 @@ static bool zend_may_be_dynamic_property(zend_class_entry *ce, zend_string *memb
 	    !IS_VALID_PROPERTY_OFFSET(info->offset) ||
 	    (info->flags & ZEND_ACC_STATIC) ||
 	    info->hooks) {
-		return true;
+		return 1;
 	}
 
 	if (!(info->flags & ZEND_ACC_PUBLIC) &&
 	    (!on_this || info->ce != ce)) {
-		return true;
+		return 1;
 	}
 
-	return false;
+	return 0;
 }
 
 static bool zend_jit_class_may_be_modified(const zend_class_entry *ce, const zend_op_array *called_from)
@@ -711,47 +711,47 @@ static bool zend_jit_class_may_be_modified(const zend_class_entry *ce, const zen
 	if (ce->type == ZEND_INTERNAL_CLASS) {
 #ifdef _WIN32
 		/* ASLR */
-		return true;
+		return 1;
 #else
-		return false;
+		return 0;
 #endif
 	} else if (ce->type == ZEND_USER_CLASS) {
 		if (ce->ce_flags & ZEND_ACC_PRELOADED) {
-			return false;
+			return 0;
 		}
 		if (ce->info.user.filename == called_from->filename) {
 			if (ce->parent
 			 && (!(ce->ce_flags & ZEND_ACC_LINKED)
 			  || zend_jit_class_may_be_modified(ce->parent, called_from))) {
-				return true;
+				return 1;
 			}
 			if (ce->num_interfaces) {
 				if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
-					return true;
+					return 1;
 				}
 				for (i = 0; i < ce->num_interfaces; i++) {
 					if (zend_jit_class_may_be_modified(ce->interfaces[i], called_from)) {
-						return true;
+						return 1;
 					}
 				}
 			}
 			if (ce->num_traits) {
 				if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
-					return true;
+					return 1;
 				}
 				for (i=0; i < ce->num_traits; i++) {
 					zend_class_entry *trait = zend_fetch_class_by_name(ce->trait_names[i].name,
 						ce->trait_names[i].lc_name,
 						ZEND_FETCH_CLASS_TRAIT | ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_SILENT);
 					if (!trait || zend_jit_class_may_be_modified(trait, called_from)) {
-						return true;
+						return 1;
 					}
 				}
 			}
-			return false;
+			return 0;
 		}
 	}
-	return true;
+	return 1;
 }
 
 static bool zend_jit_may_be_modified(const zend_function *func, const zend_op_array *called_from)
@@ -759,21 +759,21 @@ static bool zend_jit_may_be_modified(const zend_function *func, const zend_op_ar
 	if (func->type == ZEND_INTERNAL_FUNCTION) {
 #ifdef _WIN32
 		/* ASLR */
-		return true;
+		return 1;
 #else
-		return false;
+		return 0;
 #endif
 	} else if (func->type == ZEND_USER_FUNCTION) {
 		if (func->common.fn_flags & ZEND_ACC_PRELOADED) {
-			return false;
+			return 0;
 		}
 		if (func->op_array.filename == called_from->filename
 		 && (!func->op_array.scope
 		  || !zend_jit_class_may_be_modified(func->op_array.scope, called_from))) {
-			return false;
+			return 0;
 		}
 	}
-	return true;
+	return 1;
 }
 
 #define OP_RANGE(ssa_op, opN) \
@@ -1388,9 +1388,9 @@ static bool zend_jit_next_is_send_result(const zend_op *opline)
 	 && (opline+1)->op1_type == IS_TMP_VAR
 	 && (opline+1)->op2_type != IS_CONST
 	 && (opline+1)->op1.var == opline->result.var) {
-		return true;
+		return 1;
 	}
-	return false;
+	return 0;
 }
 
 static bool zend_jit_supported_binary_op(uint8_t op, uint32_t op1_info, uint32_t op2_info)

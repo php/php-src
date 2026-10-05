@@ -1540,7 +1540,7 @@ static bool ir_is_merged_loop_back_edge(ir_ctx *ctx, uint32_t hdr, uint32_t b)
 		}
 		return b == hdr;
 	}
-	return false;
+	return 0;
 }
 #endif
 
@@ -1552,13 +1552,13 @@ static bool ir_should_align_loop(ir_ctx *ctx, ir_chain *chains, uint32_t b, ir_b
 	for (; n > 0; p++, n--) {
 		uint32_t pred = *p;
 		if (chains[pred].head) {
-			if (ir_chain_head(chains, pred) == b) return true;
+			if (ir_chain_head(chains, pred) == b) return 1;
 		} else {
-			if (ir_should_align_loop(ctx, chains, b, &ctx->cfg_blocks[pred])) return true;
+			if (ir_should_align_loop(ctx, chains, b, &ctx->cfg_blocks[pred])) return 1;
 		}
 	}
 
-	return false;
+	return 0;
 }
 
 static int ir_schedule_blocks_bottom_up(ir_ctx *ctx)
