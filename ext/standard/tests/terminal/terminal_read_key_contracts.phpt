@@ -91,14 +91,17 @@ var_dump($keyNonTty === "z");
 fclose($fp);
 
 // Contract 5: EOF / stream termination throws TerminalException on real TTY
-fwrite($pipes[0], "exit
-");
-usleep(50000); // give child time to exit
+if (isset($pipes[1]) && is_resource($pipes[1])) fclose($pipes[1]);
+if (isset($pipes[2]) && is_resource($pipes[2])) fclose($pipes[2]);
+proc_terminate($proc);
+$deadline = hrtime(true) + 1_000_000_000;
+while (proc_get_status($proc)['running'] && hrtime(true) < $deadline) {
+    usleep(5000);
+}
 
 try {
     $terminal->readKey(Duration::fromSeconds(1));
-    echo "FAIL: readKey on closed/EOF terminal did not throw
-";
+    echo "FAIL: readKey on closed/EOF terminal did not throw\n";
 } catch (Throwable $e) {
     echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
