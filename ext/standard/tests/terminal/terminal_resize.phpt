@@ -33,7 +33,7 @@ proc_close($proc);
 <?php
 
 use Io\Terminal\Key;
-use Io\Terminal\SystemTerminal;
+use Io\Terminal\Terminal;
 use Time\Duration;
 
 $code = '
@@ -58,7 +58,7 @@ $proc = proc_open(
 );
 
 $r1 = fgets($pipes[2]);
-$terminal = SystemTerminal::fromStreams($pipes[0]);
+$terminal = Terminal::fromStreams($pipes[0]);
 $terminal->enableRawMode();
 
 $s1 = $terminal->getSize();

@@ -1,89 +1,60 @@
 --TEST--
-Io\Terminal\Terminal: mockable terminal boundary and foreign token rejection
+Io\Terminal\Terminal: final class boundary, dependency injection, and testing with streams
 --FILE--
 <?php
 
 use Io\Terminal\Key;
 use Io\Terminal\ModeToken;
-use Io\Terminal\SystemModeToken;
 use Io\Terminal\Terminal;
-use Io\Terminal\SystemTerminal;
 use Io\Terminal\TerminalSize;
 use Time\Duration;
 
-// Verify interface hierarchy
-$rcTerm = new ReflectionClass(SystemTerminal::class);
-var_dump($rcTerm->implementsInterface(Terminal::class));
+// Verify final class design (no interfaces)
+$rcTerm = new ReflectionClass(Terminal::class);
+var_dump($rcTerm->isFinal());
+var_dump($rcTerm->isInterface());
 
-$rcToken = new ReflectionClass(SystemModeToken::class);
-var_dump($rcToken->implementsInterface(ModeToken::class));
+$rcToken = new ReflectionClass(ModeToken::class);
+var_dump($rcToken->isFinal());
+var_dump($rcToken->isInterface());
 
-// Application-level fake
-class FakeModeToken implements ModeToken {}
-
-class FakeTerminal implements Terminal
+// Consumer accepts Terminal directly via dependency injection
+function readUserCommand(Terminal $term): string
 {
-    public bool $isRaw = false;
-
-    public function getSize(): ?TerminalSize
-    {
-        return new TerminalSize(120, 40);
-    }
-
-    public function enableRawMode(): ModeToken
-    {
-        $this->isRaw = true;
-        return new FakeModeToken();
-    }
-
-    public function restoreMode(?ModeToken $mode = null): bool
-    {
-        $this->isRaw = false;
-        return true;
-    }
-
-    public function readKey(
-        ?Duration $timeout = null,
-        ?Duration $sequenceTimeout = null,
-    ): Key|string|null {
-        return Key::Up;
-    }
-
-    public function readLine(): ?string
-    {
-        return "mocked-line";
-    }
-
-    public function readSecret(?Duration $timeout = null): ?string
-    {
-        return "mocked-secret";
-    }
-}
-
-// Application service consuming Terminal
-function promptPassword(Terminal $term): string
-{
-    $size = $term->getSize();
     $token = $term->enableRawMode();
     try {
-        $secret = $term->readSecret(Duration::fromSeconds(5));
-        return sprintf("size=%dx%d secret=%s", $size->cols, $size->rows, $secret ?? 'none');
+        $key = $term->readKey(Duration::fromSeconds(1));
+        if ($key instanceof Key) {
+            return "key:" . $key->name;
+        }
+        return "char:" . ($key ?? "none");
     } finally {
         $term->restoreMode($token);
     }
 }
 
-$fake = new FakeTerminal();
-echo promptPassword($fake), PHP_EOL;
-var_dump($fake->isRaw);
+// Testing with php://memory stream in pure PHP (Larry & Tim testing approach)
+$in = fopen('php://memory', 'w+');
+fwrite($in, "[A"); // Key::Up
+rewind($in);
 
-// Native restoreMode rejects foreign ModeToken implementations
-$fp = fopen('php://temp', 'r+');
-$native = SystemTerminal::fromStreams($fp);
+$term = Terminal::fromStreams($in);
+echo readUserCommand($term), PHP_EOL;
 
+// Non-tty raw mode token is valid ModeToken and restores cleanly
+$memStream = fopen('php://memory', 'w+');
+$memTerm = Terminal::fromStreams($memStream);
+$token = $memTerm->enableRawMode();
+var_dump($token instanceof ModeToken);
+$memTerm->restoreMode($token);
+echo "restored successfully
+";
+
+// Reusing consumed token throws ValueError
 try {
-    $native->restoreMode(new FakeModeToken());
-    echo "FAIL: native accepted foreign ModeToken\n";
+    $memTerm->restoreMode($token);
+    echo "FAIL: accepted consumed token
+";
 } catch (ValueError $e) {
     echo "Caught: ", $e->getMessage(), PHP_EOL;
 }
@@ -91,7 +62,10 @@ try {
 ?>
 --EXPECT--
 bool(true)
-bool(true)
-size=120x40 secret=mocked-secret
 bool(false)
-Caught: Io\Terminal\SystemTerminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token belonging to this terminal
+bool(true)
+bool(false)
+key:Up
+bool(true)
+restored successfully
+Caught: Io\Terminal\Terminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token belonging to this terminal

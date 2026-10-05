@@ -32,7 +32,7 @@ proc_close($proc);
 --FILE--
 <?php
 
-use Io\Terminal\SystemTerminal;
+use Io\Terminal\Terminal;
 use Time\Duration;
 
 function spawn_pty_child(string $childCode): array {
@@ -46,9 +46,9 @@ function spawn_pty_child(string $childCode): array {
         $pipes,
     );
     $started = fgets($pipes[2]);
-    $terminal = SystemTerminal::fromStreams($pipes[0]);
-    $terminal->enableRawMode();
-    return [$proc, $pipes, $terminal];
+    $terminal = Terminal::fromStreams($pipes[0]);
+    $token = $terminal->enableRawMode();
+    return [$proc, $pipes, $terminal, $token];
 }
 
 // Case 1: Complete queued 3-byte UTF-8 (€) with Duration::fromSeconds(0)
@@ -63,7 +63,7 @@ fwrite(STDERR, "READY\n");
 fflush(STDERR);
 fgets(STDIN);
 ';
-[$proc1, $pipes1, $terminal1] = spawn_pty_child($code1);
+[$proc1, $pipes1, $terminal1, $token1] = spawn_pty_child($code1);
 fwrite($pipes1[0], "START\n");
 $r1 = fgets($pipes1[2]);
 
@@ -71,7 +71,7 @@ $k1 = $terminal1->readKey(Duration::fromSeconds(0));
 echo "Case 1: ", var_export($k1 === "€", true), " hex: ", bin2hex($k1), PHP_EOL;
 
 fwrite($pipes1[0], "done\n");
-$terminal1->restoreMode();
+$terminal1->restoreMode($token1);
 unset($terminal1);
 foreach ($pipes1 as $pipe) {
     if (is_resource($pipe)) fclose($pipe);
@@ -90,7 +90,7 @@ fwrite(STDERR, "READY\n");
 fflush(STDERR);
 fgets(STDIN);
 ';
-[$proc2, $pipes2, $terminal2] = spawn_pty_child($code2);
+[$proc2, $pipes2, $terminal2, $token2] = spawn_pty_child($code2);
 fwrite($pipes2[0], "START\n");
 $r2 = fgets($pipes2[2]);
 
@@ -98,7 +98,7 @@ $k2 = $terminal2->readKey(Duration::fromSeconds(0));
 echo "Case 2: ", var_export($k2 === "😀", true), " hex: ", bin2hex($k2), PHP_EOL;
 
 fwrite($pipes2[0], "done\n");
-$terminal2->restoreMode();
+$terminal2->restoreMode($token2);
 unset($terminal2);
 foreach ($pipes2 as $pipe) {
     if (is_resource($pipe)) fclose($pipe);
@@ -123,7 +123,7 @@ fwrite(STDERR, "READY2\n");
 fflush(STDERR);
 fgets(STDIN);
 ';
-[$proc3, $pipes3, $terminal3] = spawn_pty_child($code3);
+[$proc3, $pipes3, $terminal3, $token3] = spawn_pty_child($code3);
 fwrite($pipes3[0], "START\n");
 $r3_1 = fgets($pipes3[2]);
 
@@ -137,7 +137,7 @@ $k3_2 = $terminal3->readKey(Duration::fromSeconds(0));
 echo "Case 3 k3_2 is euro: ", var_export($k3_2 === "€", true), " hex: ", bin2hex($k3_2), PHP_EOL;
 
 fwrite($pipes3[0], "done\n");
-$terminal3->restoreMode();
+$terminal3->restoreMode($token3);
 unset($terminal3);
 foreach ($pipes3 as $pipe) {
     if (is_resource($pipe)) fclose($pipe);
@@ -163,7 +163,7 @@ fwrite(STDERR, "READY2\n");
 fflush(STDERR);
 fgets(STDIN);
 ';
-[$proc4, $pipes4, $terminal4] = spawn_pty_child($code4);
+[$proc4, $pipes4, $terminal4, $token4] = spawn_pty_child($code4);
 fwrite($pipes4[0], "START\n");
 $r4_1 = fgets($pipes4[2]);
 
@@ -173,7 +173,7 @@ echo "Case 4: ", var_export($k4 === "€", true), " hex: ", bin2hex($k4), PHP_EO
 
 $r4_2 = fgets($pipes4[2]);
 fwrite($pipes4[0], "done\n");
-$terminal4->restoreMode();
+$terminal4->restoreMode($token4);
 unset($terminal4);
 foreach ($pipes4 as $pipe) {
     if (is_resource($pipe)) fclose($pipe);
@@ -199,7 +199,7 @@ fwrite(STDERR, "READY2\n");
 fflush(STDERR);
 fgets(STDIN);
 ';
-[$proc5, $pipes5, $terminal5] = spawn_pty_child($code5);
+[$proc5, $pipes5, $terminal5, $token5] = spawn_pty_child($code5);
 fwrite($pipes5[0], "START\n");
 $r5_1 = fgets($pipes5[2]);
 
@@ -209,7 +209,7 @@ echo "Case 5: ", var_export($k5 === "€", true), " hex: ", bin2hex($k5), PHP_EO
 
 $r5_2 = fgets($pipes5[2]);
 fwrite($pipes5[0], "done\n");
-$terminal5->restoreMode();
+$terminal5->restoreMode($token5);
 unset($terminal5);
 foreach ($pipes5 as $pipe) {
     if (is_resource($pipe)) fclose($pipe);

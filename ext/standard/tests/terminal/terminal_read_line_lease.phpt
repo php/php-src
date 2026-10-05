@@ -1,5 +1,5 @@
 --TEST--
-Io\Terminal\SystemTerminal: readLine raw-mode lease conflict, cross-instance validation, and PTY line contracts
+Io\Terminal\Terminal: readLine raw-mode lease conflict, cross-instance validation, and PTY line contracts
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY === 'Windows') {
@@ -32,7 +32,7 @@ proc_close($proc);
 --FILE--
 <?php
 
-use Io\Terminal\SystemTerminal;
+use Io\Terminal\Terminal;
 use Io\Terminal\TerminalException;
 use Time\Duration;
 
@@ -78,8 +78,8 @@ $proc = proc_open(
 
 fgets($pipes[2]); // Wait for STARTED
 
-$t1 = SystemTerminal::fromStreams($pipes[1]);
-$t2 = SystemTerminal::fromStreams($pipes[1]);
+$t1 = Terminal::fromStreams($pipes[1]);
+$t2 = Terminal::fromStreams($pipes[1]);
 
 // 1. Same-instance active raw lease throws TerminalException
 $token = $t1->enableRawMode();
@@ -99,8 +99,8 @@ try {
 }
 
 // 3. Cross-instance restoreMode($token) succeeds and restores mode across wrappers
-$restored = $t2->restoreMode($token);
-var_dump($restored);
+$t2->restoreMode($token);
+echo "restored via t2\n";
 
 // 4. readLine on original wrapper works normally after cross-wrapper restoration
 fwrite($pipes[0], "GO\n");
@@ -112,10 +112,15 @@ fwrite($pipes[0], "GO\n");
 fgets($pipes[2]); // Wait for READY2
 var_dump($t2->readLine());
 
-// 6. No-argument restoreMode() on a wrapper with a stale active token returns false
+// 6. Restoring an already consumed token throws ValueError
 $tokenStale = $t1->enableRawMode();
 $t2->restoreMode($tokenStale);
-var_dump($t1->restoreMode() === false);
+try {
+    $t1->restoreMode($tokenStale);
+    echo "FAIL: stale token was accepted\n";
+} catch (ValueError $e) {
+    echo "Stale token caught: ", $e->getMessage(), PHP_EOL;
+}
 
 // 7. Fragmented UTF-8 prepending: pending UTF-8 bytes from readKey are prepended to readLine
 $token2 = $t1->enableRawMode();
@@ -148,10 +153,10 @@ proc_close($proc);
 --EXPECT--
 Same-instance: Cannot read a line while raw mode is active for this terminal
 Cross-instance: Cannot read a line while raw mode is active for this terminal
-bool(true)
+restored via t2
 string(14) "canonical line"
 string(11) "second line"
-bool(true)
+Stale token caught: Io\Terminal\Terminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token belonging to this terminal
 bool(true)
 string(7) "éclair"
 NULL

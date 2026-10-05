@@ -1,5 +1,5 @@
 --TEST--
-Io\Terminal\SystemTerminal: readKey preserves unsupported CSI sequences
+Io\Terminal\Terminal: readKey preserves unsupported CSI sequences and decodes Insert
 --SKIPIF--
 <?php
 
@@ -39,7 +39,7 @@ proc_close($proc);
 <?php
 
 use Io\Terminal\Key;
-use Io\Terminal\SystemTerminal;
+use Io\Terminal\Terminal;
 use Time\Duration;
 
 $payload = "\x1b[1;5A\x1b[2~\x1bOP\x1b[A";
@@ -55,8 +55,8 @@ $proc = proc_open(
     $pipes,
 );
 
-$terminal = SystemTerminal::fromStreams($pipes[0]);
-$terminal->enableRawMode();
+$terminal = Terminal::fromStreams($pipes[0]);
+$token = $terminal->enableRawMode();
 $timeout = Duration::fromSeconds(1);
 
 foreach (range(1, 4) as $_) {
@@ -81,6 +81,6 @@ proc_close($proc);
 ?>
 --EXPECT--
 1b5b313b3541
-1b5b327e
+Insert
 F1
 Up

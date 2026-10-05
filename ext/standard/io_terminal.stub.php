@@ -23,9 +23,11 @@ namespace Io\Terminal {
         case Home;
         case End;
         case Delete;
+        case Insert;
         case PageUp;
         case PageDown;
         case Resize;
+        case ShiftTab;
         case F1;
         case F2;
         case F3;
@@ -49,33 +51,11 @@ namespace Io\Terminal {
         public function __construct(int $cols, int $rows) {}
     }
 
-    interface ModeToken {}
-
-    interface Terminal
-    {
-        public function getSize(): ?TerminalSize;
-
-        public function enableRawMode(): ModeToken;
-
-        public function restoreMode(?ModeToken $mode = null): bool;
-
-        public function readKey(
-            ?\Time\Duration $timeout = null,
-            ?\Time\Duration $sequenceTimeout = null,
-        ): Key|string|null;
-
-        public function readLine(): ?string;
-
-        public function readSecret(
-            ?\Time\Duration $timeout = null,
-        ): ?string;
-    }
-
     /**
      * @strict-properties
      * @not-serializable
      */
-    final class SystemModeToken implements ModeToken
+    final class ModeToken
     {
         private function __construct() {}
     }
@@ -84,11 +64,11 @@ namespace Io\Terminal {
      * @strict-properties
      * @not-serializable
      */
-    final class SystemTerminal implements Terminal
+    final class Terminal
     {
         private function __construct() {}
 
-        public static function fromStdio(): SystemTerminal {}
+        public static function fromStdio(): Terminal {}
 
         /**
          * @param resource $input
@@ -97,15 +77,15 @@ namespace Io\Terminal {
         public static function fromStreams(
             $input,
             $output = null,
-        ): SystemTerminal {}
+        ): Terminal {}
 
         public function getSize(): ?TerminalSize {}
 
-        public function enableRawMode(): SystemModeToken {}
+        public function enableRawMode(): ModeToken {}
 
         public function restoreMode(
-            ?ModeToken $mode = null,
-        ): bool {}
+            ModeToken $mode,
+        ): void {}
 
         public function readKey(
             ?\Time\Duration $timeout = null,

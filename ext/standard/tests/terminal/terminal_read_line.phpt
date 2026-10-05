@@ -1,20 +1,20 @@
 --TEST--
-Io\Terminal\SystemTerminal: readLine line ending, whitespace, buffering, and EOF stream contracts
+Io\Terminal\Terminal: readLine line ending, whitespace, buffering, and EOF stream contracts
 --FILE--
 <?php
 
 use Io\Terminal\Terminal;
-use Io\Terminal\SystemTerminal;
 
-// Interface verification
-var_dump(is_subclass_of(SystemTerminal::class, Terminal::class));
+// Class reflection
+$rc = new ReflectionClass(Terminal::class);
+var_dump($rc->isFinal());
 $reflection = new ReflectionMethod(Terminal::class, 'readLine');
 var_dump($reflection->getNumberOfParameters());
 var_dump((string) $reflection->getReturnType());
 
 // 1. Argument validation: readLine takes 0 parameters
 $fp = fopen('php://temp', 'r+');
-$terminal = SystemTerminal::fromStreams($fp);
+$terminal = Terminal::fromStreams($fp);
 try {
     $terminal->readLine('extra');
     echo "FAIL: readLine accepted argument\n";
@@ -99,7 +99,7 @@ rewind($fp);
 // Read single character via standard PHP stream function to populate php_stream internal buffer
 $c = fgetc($fp);
 var_dump($c);
-// SystemTerminal::readLine must consume from php_stream buffer, not bypass it
+// Terminal::readLine must consume from php_stream buffer, not bypass it
 var_dump($terminal->readLine());
 var_dump($terminal->readLine());
 var_dump($terminal->readLine()); // EOF
@@ -110,7 +110,7 @@ fclose($fp);
 $mem = fopen('php://memory', 'r+');
 fwrite($mem, "memory line\n");
 rewind($mem);
-$tMem = SystemTerminal::fromStreams($mem);
+$tMem = Terminal::fromStreams($mem);
 var_dump($tMem->readLine());
 fclose($mem);
 
@@ -118,7 +118,7 @@ fclose($mem);
 $fp2 = fopen('php://temp', 'r+');
 fwrite($fp2, "\r\n\r\nline with crlf\r\n\r\n");
 rewind($fp2);
-$t2 = SystemTerminal::fromStreams($fp2);
+$t2 = Terminal::fromStreams($fp2);
 var_dump($t2->readLine());
 var_dump($t2->readLine());
 var_dump($t2->readLine());
@@ -135,13 +135,9 @@ var_dump($t2->readLine());
 var_dump($t2->readLine());
 var_dump($t2->readLine()); // EOF
 
-// 15. Mode restoration & terminal state usability after raw mode attempt
-try {
-    $t2->enableRawMode();
-} catch (Throwable $e) {
-    echo $e->getMessage(), PHP_EOL;
-}
-var_dump($t2->restoreMode());
+// 15. Mode restoration & terminal state usability after raw mode on non-terminal stream
+$token2 = $t2->enableRawMode();
+$t2->restoreMode($token2);
 ftruncate($fp2, 0);
 rewind($fp2);
 fwrite($fp2, "post restoration line\r\n");
@@ -154,7 +150,7 @@ fclose($fp2);
 bool(true)
 int(0)
 string(7) "?string"
-ArgumentCountError: Io\Terminal\SystemTerminal::readLine() expects exactly 0 arguments, 1 given
+ArgumentCountError: Io\Terminal\Terminal::readLine() expects exactly 0 arguments, 1 given
 NULL
 string(5) "hello"
 NULL
@@ -190,6 +186,4 @@ string(12) "🐘🦀🚀"
 string(38) "Hello 👨‍👩‍👧‍👦 Family"
 string(7) "école"
 NULL
-Failed to enable terminal raw mode
-bool(false)
 string(21) "post restoration line"

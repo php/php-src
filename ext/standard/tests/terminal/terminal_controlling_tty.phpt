@@ -1,5 +1,5 @@
 --TEST--
-Io\Terminal\SystemTerminal: /dev/tty controlling terminal identity
+Io\Terminal\Terminal: /dev/tty controlling terminal identity
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY === 'Windows') {
@@ -22,28 +22,37 @@ fclose($fp2);
 --FILE--
 <?php
 
-use Io\Terminal\SystemTerminal;
+use Io\Terminal\Terminal;
 use Io\Terminal\ModeToken;
 
 $ttyFp1 = fopen('/dev/tty', 'r+');
 $ttyFp2 = fopen('/dev/tty', 'r+');
 
-$tTty1 = SystemTerminal::fromStreams($ttyFp1);
-$tTty2 = SystemTerminal::fromStreams($ttyFp2);
+$tTty1 = Terminal::fromStreams($ttyFp1);
+$tTty2 = Terminal::fromStreams($ttyFp2);
 
 $mTty = $tTty1->enableRawMode();
 var_dump($mTty instanceof ModeToken);
 
 // Descriptors to the same controlling terminal share identity
-var_dump($tTty2->restoreMode($mTty));
+$tTty2->restoreMode($mTty);
+echo "restored via tTty2
+";
 
-// Mode was already restored; further restore returns false
-var_dump($tTty1->restoreMode());
+// Mode was already restored; reusing the token throws ValueError
+try {
+    $tTty1->restoreMode($mTty);
+    echo "FAIL: consumed token was accepted
+";
+} catch (ValueError $e) {
+    echo "Caught: ", $e->getMessage(), "
+";
+}
 
 fclose($ttyFp2);
 fclose($ttyFp1);
 ?>
 --EXPECT--
 bool(true)
-bool(true)
-bool(false)
+restored via tTty2
+Caught: Io\Terminal\Terminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token belonging to this terminal

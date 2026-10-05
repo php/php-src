@@ -1,40 +1,41 @@
 --TEST--
-Io\Terminal\SystemTerminal: readKey with Time\Duration timeouts and parameter validation
+Io\Terminal\Terminal: readKey with Time\Duration timeouts and parameter validation
 --FILE--
 <?php
 
-use Io\Terminal\SystemTerminal;
+use Io\Terminal\Terminal;
 use Time\Duration;
 
-$t = SystemTerminal::fromStdio();
+$t = Terminal::fromStdio();
 
 // Negative duration for timeout must throw ValueError
 try {
     $t->readKey(Duration::fromSeconds(1)->negate());
-    echo "FAIL: accepted negative timeout\n";
+    echo "FAIL: accepted negative timeout
+";
 } catch (Throwable $e) {
     echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
 try {
     $t->readKey(Duration::fromSeconds(0), Duration::fromSeconds(1)->negate());
-    echo "FAIL: accepted negative sequence timeout\n";
+    echo "FAIL: accepted negative sequence timeout
+";
 } catch (Throwable $e) {
     echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
-// Non-terminal stream throws TerminalException
+// Non-terminal stream reads keys without throwing
 $fp = fopen('php://temp', 'r+');
-$nonTty = SystemTerminal::fromStreams($fp);
-try {
-    $nonTty->readKey(Duration::fromSeconds(0));
-    echo "FAIL: readKey on non-terminal did not throw\n";
-} catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
-}
+fwrite($fp, "x");
+rewind($fp);
+$nonTty = Terminal::fromStreams($fp);
+$key = $nonTty->readKey(Duration::fromSeconds(0));
+var_dump($key === "x");
+fclose($fp);
 
 ?>
 --EXPECT--
-ValueError: Io\Terminal\SystemTerminal::readKey(): Argument #1 ($timeout) must not be negative
-ValueError: Io\Terminal\SystemTerminal::readKey(): Argument #2 ($sequenceTimeout) must not be negative
-Io\Terminal\TerminalException: Failed to read key: input stream is not a terminal
+ValueError: Io\Terminal\Terminal::readKey(): Argument #1 ($timeout) must not be negative
+ValueError: Io\Terminal\Terminal::readKey(): Argument #2 ($sequenceTimeout) must not be negative
+bool(true)

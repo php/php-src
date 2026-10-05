@@ -1,21 +1,21 @@
 --TEST--
-Io\Terminal\SystemTerminal: readSecret parameter validation and non-tty failure handling
+Io\Terminal\Terminal: readSecret parameter validation and empty non-tty handling
 --FILE--
 <?php
 
-use Io\Terminal\SystemTerminal;
+use Io\Terminal\Terminal;
 use Io\Terminal\TerminalException;
 use Time\Duration;
 
 var_dump(is_subclass_of(TerminalException::class, \Io\IoException::class));
 
 $fp = fopen('php://temp', 'r+');
-$nonTty = SystemTerminal::fromStreams($fp);
+$nonTty = Terminal::fromStreams($fp);
 
-// Non-tty stream throws TerminalException
+// Empty non-tty stream without Enter throws TerminalException
 try {
     $nonTty->readSecret();
-    echo "FAIL: readSecret succeeded on non-tty\n";
+    echo "FAIL: readSecret succeeded on empty non-tty\n";
 } catch (Throwable $e) {
     echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
@@ -44,10 +44,12 @@ try {
     echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
+fclose($fp);
+
 ?>
 --EXPECTF--
 bool(true)
 Io\Terminal\TerminalException: Unable to read secret from terminal
-TypeError: Io\Terminal\SystemTerminal::readSecret(): Argument #1 ($timeout) must be of type ?Time\Duration, string given
-ArgumentCountError: Io\Terminal\SystemTerminal::readSecret() expects at most 1 argument, 2 given
-ValueError: Io\Terminal\SystemTerminal::readSecret(): Argument #1 ($timeout) must not be negative
+TypeError: Io\Terminal\Terminal::readSecret(): Argument #1 ($timeout) must be of type ?Time\Duration, string given
+ArgumentCountError: Io\Terminal\Terminal::readSecret() expects at most 1 argument, 2 given
+ValueError: Io\Terminal\Terminal::readSecret(): Argument #1 ($timeout) must not be negative

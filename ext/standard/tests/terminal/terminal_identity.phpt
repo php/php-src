@@ -1,5 +1,5 @@
 --TEST--
-Io\Terminal\SystemTerminal: POSIX terminal identity and unrelated PTY rejection
+Io\Terminal\Terminal: POSIX terminal identity and unrelated PTY rejection
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY === 'Windows') {
@@ -32,7 +32,7 @@ proc_close($proc);
 --FILE--
 <?php
 
-use Io\Terminal\SystemTerminal;
+use Io\Terminal\Terminal;
 use Io\Terminal\ModeToken;
 
 $proc1 = proc_open(
@@ -55,28 +55,41 @@ $proc2 = proc_open(
     $pipes2,
 );
 
-$t1 = SystemTerminal::fromStreams($pipes1[0]);
-$t1_dup = SystemTerminal::fromStreams($pipes1[1]);
-$t2 = SystemTerminal::fromStreams($pipes2[0]);
+$t1 = Terminal::fromStreams($pipes1[0]);
+$t1_dup = Terminal::fromStreams($pipes1[1]);
+$t2 = Terminal::fromStreams($pipes2[0]);
 
 $m1_dup = $t1->enableRawMode();
 var_dump($m1_dup instanceof ModeToken);
-var_dump($t1_dup->restoreMode($m1_dup));
+$t1_dup->restoreMode($m1_dup);
+echo "restored via t1_dup
+";
 
 $m1 = $t1->enableRawMode();
 try {
     $t2->restoreMode($m1);
-    echo "FAIL: unrelated PTY accepted token\n";
+    echo "FAIL: unrelated PTY accepted token
+";
 } catch (Throwable $e) {
     echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
-var_dump($t1->restoreMode($m1));
-var_dump($t1->restoreMode());
+$t1->restoreMode($m1);
+echo "restored via t1
+";
+
+try {
+    $t1->restoreMode($m1);
+    echo "FAIL: consumed token accepted
+";
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+}
 
 // Descriptor reuse: hold an active token, close the PTY, and open a new PTY that reuses the fd number
 $m_reuse = $t1->enableRawMode();
-fwrite($pipes1[0], "exit\n");
+fwrite($pipes1[0], "exit
+");
 unset($t1, $t1_dup);
 foreach ($pipes1 as $pipe) {
     if (is_resource($pipe)) fclose($pipe);
@@ -92,16 +105,19 @@ $proc3 = proc_open(
     ],
     $pipes3,
 );
-$t3 = SystemTerminal::fromStreams($pipes3[0]);
+$t3 = Terminal::fromStreams($pipes3[0]);
 try {
     $t3->restoreMode($m_reuse);
-    echo "FAIL: reused fd accepted token\n";
+    echo "FAIL: reused fd accepted token
+";
 } catch (Throwable $e) {
     echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
-fwrite($pipes2[0], "exit\n");
-fwrite($pipes3[0], "exit\n");
+fwrite($pipes2[0], "exit
+");
+fwrite($pipes3[0], "exit
+");
 unset($t2, $t3);
 foreach ($pipes2 as $pipe) {
     if (is_resource($pipe)) fclose($pipe);
@@ -114,8 +130,8 @@ proc_close($proc3);
 ?>
 --EXPECT--
 bool(true)
-bool(true)
-ValueError: Io\Terminal\SystemTerminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token belonging to this terminal
-bool(true)
-bool(false)
-ValueError: Io\Terminal\SystemTerminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token belonging to this terminal
+restored via t1_dup
+ValueError: Io\Terminal\Terminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token belonging to this terminal
+restored via t1
+ValueError: Io\Terminal\Terminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token belonging to this terminal
+ValueError: Io\Terminal\Terminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token belonging to this terminal
