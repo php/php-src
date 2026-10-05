@@ -56,6 +56,9 @@ PHP                                                                        NEWS
     haystacks. (Weilin Du)
   . Fixed grapheme_strrpos() and grapheme_strripos() skipping overlapping matches
     when using a negative offset. (Weilin Du)
+  . Fixed IntlDateFormatter::parse(), localtime() and parseToCalendar()
+    treating the offset as UTF-16 code units instead of bytes.
+    (Ilia Alshanetsky)
 
 - MySQLnd:
   . Fixed field_count not resetting on OK packet. (Kamil Tekiela)

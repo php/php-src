@@ -25,48 +25,13 @@
 
 extern "C" {
 #include "php_intl.h"
+#include "intl_convert.h"
 }
 
 #include <locale.h>
 #include <memory>
 
 #define ICU_LOCALE_BUG 1
-
-static bool numfmt_utf8_offset_to_utf16(const char *str, size_t str_len, int32_t *position, UErrorCode *status)
-{
-	int32_t utf16_position;
-
-	if (*position < 0 || (size_t) *position > str_len) {
-		return true;
-	}
-
-	*status = U_ZERO_ERROR;
-	u_strFromUTF8(nullptr, 0, &utf16_position, str, *position, status);
-	if (*status != U_BUFFER_OVERFLOW_ERROR && U_FAILURE(*status)) {
-		return false;
-	}
-	*status = U_ZERO_ERROR;
-
-	*position = utf16_position;
-	return true;
-}
-
-static int32_t numfmt_utf16_offset_to_utf8(const icu::UnicodeString &str, int32_t position)
-{
-	int32_t utf8_position;
-	UErrorCode status = U_ZERO_ERROR;
-
-	if (position < 0 || position > str.length()) {
-		return position;
-	}
-
-	u_strToUTF8(nullptr, 0, &utf8_position, str.getBuffer(), position, &status);
-	if (status != U_BUFFER_OVERFLOW_ERROR && U_FAILURE(status)) {
-		return position;
-	}
-
-	return utf8_position;
-}
 
 /* {{{ Parse a number. */
 U_CFUNC PHP_FUNCTION( numfmt_parse )
@@ -102,7 +67,7 @@ U_CFUNC PHP_FUNCTION( numfmt_parse )
 	icu::UnicodeString ustr;
 	intl_stringFromChar(ustr, str, str_len, &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "String conversion to UTF-16 failed" );
-	if (zposition && !numfmt_utf8_offset_to_utf16(str, str_len, &position, &INTL_DATA_ERROR_CODE(nfo))) {
+	if (zposition && !intl_convert_utf8_offset_to_utf16(str, str_len, &position, &INTL_DATA_ERROR_CODE(nfo))) {
 		INTL_METHOD_CHECK_STATUS(nfo, "Invalid UTF-8 offset");
 	}
 
@@ -162,7 +127,7 @@ U_CFUNC PHP_FUNCTION( numfmt_parse )
 	}
 
 	if (zposition) {
-		position = numfmt_utf16_offset_to_utf8(ustr, position);
+		position = intl_convert_utf16_offset_to_utf8(ustr.getBuffer(), ustr.length(), position);
 		ZEND_TRY_ASSIGN_REF_LONG(zposition, position);
 	}
 
@@ -208,7 +173,7 @@ U_CFUNC PHP_FUNCTION( numfmt_parse_currency )
 			RETURN_THROWS();
 		}
 		position = (int32_t) long_position;
-		if (!numfmt_utf8_offset_to_utf16(str, str_len, &position, &INTL_DATA_ERROR_CODE(nfo))) {
+		if (!intl_convert_utf8_offset_to_utf16(str, str_len, &position, &INTL_DATA_ERROR_CODE(nfo))) {
 			INTL_METHOD_CHECK_STATUS(nfo, "Invalid UTF-8 offset");
 		}
 	}
@@ -222,7 +187,7 @@ U_CFUNC PHP_FUNCTION( numfmt_parse_currency )
 	}
 
 	if(zposition) {
-		position = numfmt_utf16_offset_to_utf8(ustr, pp.getIndex());
+		position = intl_convert_utf16_offset_to_utf8(ustr.getBuffer(), ustr.length(), pp.getIndex());
 		ZEND_TRY_ASSIGN_REF_LONG(zposition, position);
 	}
 
