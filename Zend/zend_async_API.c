@@ -424,11 +424,9 @@ static bool await_stub(zend_coroutine_t *coroutine)
 	return false;
 }
 
-static bool cancel_stub(
-		zend_coroutine_t *coroutine, zend_object *error, bool transfer_error, const bool is_safely)
+static bool cancel_stub(zend_coroutine_t *coroutine, zend_object *error, bool transfer_error)
 {
 	(void) coroutine;
-	(void) is_safely;
 
 	if (error != NULL && transfer_error) {
 		OBJ_RELEASE(error);
