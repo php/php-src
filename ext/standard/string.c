@@ -795,7 +795,7 @@ PHP_FUNCTION(wordwrap)
 			/* when we hit an existing break, copy to new buffer, and
 			 * fix up laststart and lastspace */
 			if (ZSTR_VAL(text)[current] == breakchar[0]
-				&& current + breakchar_len < ZSTR_LEN(text)
+				&& current + breakchar_len <= ZSTR_LEN(text)
 				&& !strncmp(ZSTR_VAL(text) + current, breakchar, breakchar_len)) {
 				memcpy(ZSTR_VAL(newtext) + newtextlen, ZSTR_VAL(text) + laststart, current - laststart + breakchar_len);
 				newtextlen += current - laststart + breakchar_len;
