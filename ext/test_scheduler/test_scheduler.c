@@ -167,7 +167,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("test_scheduler.enable", "0", PHP_INI_SYSTEM, NULL)
 	/* Tests only: register as if built for this Async API version; 0 is the real one. */
 	PHP_INI_ENTRY("test_scheduler.api_version", "0", PHP_INI_SYSTEM, NULL)
-	/* Tests only: the n-th new_coroutine call from now
+	/* Tests only: the n-th new_coroutine or gc_new_coroutine call from now
 	 * returns NULL, as a provider that cannot create a coroutine does; 0 is off. */
 	STD_PHP_INI_ENTRY("test_scheduler.fail_new_coroutine", "0", PHP_INI_ALL, OnUpdateLong,
 			fail_new_coroutine, zend_test_scheduler_globals, test_scheduler_globals)
@@ -1390,6 +1390,18 @@ static zend_coroutine_t *ts_new_coroutine(void)
 	return &ts_coroutine_new()->coro;
 }
 
+/* This reference scheduler treats a GC coroutine exactly like any other:
+ * the FIFO run queue has no notion of priority to give it. A scheduler that
+ * does would tell them apart here. */
+static zend_coroutine_t *ts_gc_new_coroutine(void)
+{
+	if (UNEXPECTED(ts_fault_hit(&TSG(fail_new_coroutine)))) {
+		return NULL;
+	}
+
+	return &ts_coroutine_new()->coro;
+}
+
 static bool ts_enqueue(zend_coroutine_t *coroutine, zend_object *error, bool transfer_error)
 {
 	ts_coroutine_t *ts = ts_from_coro(coroutine);
@@ -1860,6 +1872,7 @@ static zend_async_scheduler_api_t ts_scheduler_api = {
 	.size = sizeof(zend_async_scheduler_api_t),
 	.version = ZEND_ASYNC_API_VERSION,
 	.new_coroutine = ts_new_coroutine,
+	.gc_new_coroutine = ts_gc_new_coroutine,
 	.enqueue_coroutine = ts_enqueue,
 	.suspend = ts_suspend,
 	.launch = ts_launch,

@@ -259,6 +259,13 @@ struct _zend_coroutine_s {
  * coroutine the caller never manages to enqueue stays the scheduler's until the
  * request ends, and it waits for nothing. */
 typedef zend_coroutine_t *(*zend_async_new_coroutine_t)(void);
+/* Allocate a coroutine for the engine's own GC bookkeeping (running
+ * zend_gc_collect_cycles() and its destructor phase). A separate slot lets a
+ * scheduler treat these specially — priority, concurrency limits — if it cares.
+ * NULL falls back to new_coroutine(); see ZEND_ASYNC_GC_NEW_COROUTINE(). A NULL
+ * from this slot is a failure the engine survives, not a way to throttle: a
+ * scheduler that keeps refusing never runs the destructors of garbage cycles. */
+typedef zend_coroutine_t *(*zend_async_gc_new_coroutine_t)(void);
 /* Put a CREATED/SUSPENDED coroutine into the run queue (-> STATUS_QUEUED).
  * Enqueuing a fresh coroutine and resuming a suspended one are the same
  * operation. A non-NULL `error` is thrown at the suspension point when the
@@ -419,6 +426,7 @@ typedef struct _zend_async_scheduler_api_s {
 	uint32_t version; /* ZEND_ASYNC_API_VERSION at provider build time */
 
 	zend_async_new_coroutine_t new_coroutine;
+	zend_async_gc_new_coroutine_t gc_new_coroutine;
 	zend_async_enqueue_coroutine_t enqueue_coroutine;
 	zend_async_suspend_t suspend;
 	zend_async_cancel_t cancel;
@@ -441,6 +449,7 @@ typedef struct _zend_async_scheduler_api_s {
 BEGIN_EXTERN_C()
 
 ZEND_API extern zend_async_new_coroutine_t zend_async_new_coroutine_fn;
+ZEND_API extern zend_async_gc_new_coroutine_t zend_async_gc_new_coroutine_fn;
 ZEND_API extern zend_async_enqueue_coroutine_t zend_async_enqueue_coroutine_fn;
 ZEND_API extern zend_async_suspend_t zend_async_suspend_fn;
 ZEND_API extern zend_async_cancel_t zend_async_cancel_fn;
@@ -559,12 +568,16 @@ END_EXTERN_C()
 #define ZEND_ASYNC_INTERNAL_CONTEXT_DESTROY(coroutine) \
 	zend_async_internal_context_destroy(coroutine)
 
-/* NULL when the provider cannot mint C coroutines at all. The engine's own
- * coroutines (the GC run, its destructor phase, the shutdown destructor passes)
- * survive a NULL, but a scheduler that keeps refusing never runs the
- * destructors of garbage cycles. */
+/* NULL when the provider cannot mint C coroutines at all. */
 #define ZEND_ASYNC_NEW_COROUTINE() \
 	(zend_async_new_coroutine_fn != NULL ? zend_async_new_coroutine_fn() : NULL)
+/* A coroutine for the engine's own GC bookkeeping. Falls back to the plain
+ * new_coroutine slot when the scheduler does not distinguish them; NULL when
+ * the provider cannot mint C coroutines at all. */
+#define ZEND_ASYNC_GC_NEW_COROUTINE() \
+	(zend_async_gc_new_coroutine_fn != NULL \
+					? zend_async_gc_new_coroutine_fn() \
+					: zend_async_new_coroutine_fn != NULL ? zend_async_new_coroutine_fn() : NULL)
 #define ZEND_ASYNC_ENQUEUE_COROUTINE(coroutine) \
 	zend_async_enqueue_coroutine_fn((coroutine), NULL, false)
 /* Enqueue-with-error: the resume/cancellation delivery channel. */

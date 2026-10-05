@@ -465,6 +465,7 @@ static zend_class_entry *get_class_ce_default(zend_async_class type)
 }
 
 ZEND_API zend_async_new_coroutine_t zend_async_new_coroutine_fn = NULL;
+ZEND_API zend_async_gc_new_coroutine_t zend_async_gc_new_coroutine_fn = NULL;
 ZEND_API zend_async_enqueue_coroutine_t zend_async_enqueue_coroutine_fn = enqueue_coroutine_stub;
 ZEND_API zend_async_suspend_t zend_async_suspend_fn = suspend_stub;
 ZEND_API zend_async_cancel_t zend_async_cancel_fn = cancel_stub;
@@ -531,6 +532,10 @@ ZEND_API bool zend_async_scheduler_register(
 
 	if (API_PROVIDES(api, new_coroutine)) {
 		zend_async_new_coroutine_fn = api->new_coroutine;
+	}
+
+	if (API_PROVIDES(api, gc_new_coroutine)) {
+		zend_async_gc_new_coroutine_fn = api->gc_new_coroutine;
 	}
 
 	if (API_PROVIDES(api, enqueue_coroutine)) {
@@ -627,6 +632,7 @@ ZEND_API void zend_async_scheduler_unregister(void)
 	}
 
 	zend_async_new_coroutine_fn = NULL;
+	zend_async_gc_new_coroutine_fn = NULL;
 	zend_async_enqueue_coroutine_fn = enqueue_coroutine_stub;
 	zend_async_suspend_fn = suspend_stub;
 	zend_async_cancel_fn = cancel_stub;
