@@ -155,7 +155,7 @@ typedef zend_string* (*mb_cut_fn)(unsigned char *str, size_t from, size_t len, u
 static inline void mb_convert_buf_init(mb_convert_buf *buf, size_t initsize, uint32_t repl_char, unsigned int err_mode)
 {
 	buf->state = buf->errors = 0;
-	buf->str = emalloc(_ZSTR_STRUCT_SIZE(initsize));
+	buf->str = emalloc(ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(initsize)));
 	buf->out = (unsigned char*)ZSTR_VAL(buf->str);
 	buf->limit = buf->out + initsize;
 	buf->replacement_char = repl_char;
@@ -168,7 +168,7 @@ static inline zend_result mb_convert_buf_ensure(mb_convert_buf *buf, unsigned ch
 	if ((size_t)(*limit - *out) < needed) {
 		size_t oldsize = *limit - (unsigned char*)ZSTR_VAL((buf)->str);
 		size_t newsize = oldsize + MAX(oldsize >> 1, needed);
-		zend_string *newstr = safe_ferealloc((buf)->str, 1, newsize, _ZSTR_STRUCT_SIZE(0), /* fallible */ true);
+		zend_string *newstr = ferealloc((buf)->str, _ZSTR_SAFE_STRUCT_SIZE(1, newsize, 0), /* fallible */ true);
 		if (!newstr) {
 			return FAILURE;
 		}
