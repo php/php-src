@@ -5,10 +5,17 @@ Bug GH-22449: user_filter_factory_create NULL dereference during shutdown
 
 class rotate_filter_nw extends php_user_filter
 {
+    private static bool $done = false;
+
     public function filter($in, $out, &$consumed, $closing): int
     {
+        if (self::$done) {
+            return PSFS_PASS_ON;
+        }
+        self::$done = true;
+
         $stream = fopen('php://memory', 'w+');
-        stream_filter_append($stream, "rotator_notWorking");
+        var_dump(stream_filter_append($stream, "rotator_notWorking") !== false);
 
         return PSFS_PASS_ON;
     }
@@ -21,7 +28,6 @@ stream_filter_append($stream, "rotator_notWorking");
 
 echo "done\n";
 ?>
---EXPECTF--
+--EXPECT--
 done
-
-Warning: stream_filter_append(): Unable to create or locate filter "rotator_notWorking" in %s on line %d
+bool(true)

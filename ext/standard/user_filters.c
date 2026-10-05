@@ -95,7 +95,8 @@ PHP_MINIT_FUNCTION(user_filters)
 	return SUCCESS;
 }
 
-PHP_RSHUTDOWN_FUNCTION(user_filters)
+/* The map must outlive the streams closed during the executor shutdown. */
+ZEND_MODULE_POST_ZEND_DEACTIVATE_D(user_filters)
 {
 	if (BG(user_filter_map)) {
 		zend_hash_destroy(BG(user_filter_map));
@@ -605,8 +606,7 @@ PHP_FUNCTION(stream_filter_register)
 		RETURN_THROWS();
 	}
 
-	/* Register the factory first; if that fails, don't (re)create the map,
-	 * which would leak during shutdown re-registration. */
+	/* Register the factory first so a duplicate name is rejected before the map is touched. */
 	if (php_stream_filter_register_factory_volatile(filtername, &user_filter_factory) == FAILURE) {
 		RETURN_FALSE;
 	}
