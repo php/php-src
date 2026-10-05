@@ -348,7 +348,7 @@ void shutdown_destructors(void) /* {{{ */
 		if (should_continue) {
 			EG(shutdown_context).pass = ZEND_SHUTDOWN_PASS_NONE;
 			EG(shutdown_context).coroutine = NULL;
-			zend_objects_store_call_destructors_async(&EG(objects_store));
+			zend_objects_store_call_destructors_async();
 		}
 	} zend_catch {
 		/* if we couldn't destruct cleanly, mark all objects as destructed anyway */
