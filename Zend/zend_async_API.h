@@ -110,10 +110,8 @@ struct _zend_coroutine_s {
 	 * bits 4-15: the core's ZEND_COROUTINE_F_* modifiers; bits 16-31 belong to
 	 * the scheduler. */
 	uint32_t flags;
-	/* Offset of the wrapping zend_object within the allocation, when the
-	 * coroutine is embedded in one (single-allocation pattern: the object
-	 * and the coroutine share one block, reached via container_of). 0 for
-	 * a plain C coroutine with no PHP object. */
+	/* Offset of the wrapping zend_object within the allocation: a coroutine is
+	 * a PHP object, and the object and the coroutine share one block. Never 0. */
 	uint32_t object_offset;
 	/* Userland entry point. NULL for internal coroutines. */
 	zend_fcall_t *fcall;
@@ -172,26 +170,20 @@ struct _zend_coroutine_s {
 	(((coroutine)->flags & ZEND_COROUTINE_F_STARTED) != 0)
 #define ZEND_COROUTINE_SET_STARTED(coroutine) ((coroutine)->flags |= ZEND_COROUTINE_F_STARTED)
 
-/* The zend_object of a coroutine, or NULL for a plain C coroutine. The object
- * lives at object_offset within the same allocation. */
 #define ZEND_COROUTINE_OBJECT(coroutine) \
-	((coroutine)->object_offset == 0 \
-					? NULL \
-					: (zend_object *) ((char *) (coroutine) + (coroutine)->object_offset))
+	((zend_object *) ((char *) (coroutine) + (coroutine)->object_offset))
 
 /* Shared ownership of a coroutine goes through its zend_object. */
 #define ZEND_COROUTINE_ADD_REF(coroutine) \
 	do { \
-		zend_object *_object = ZEND_COROUTINE_OBJECT(coroutine); \
-		ZEND_ASSERT(_object != NULL && "A coroutine is backed by a zend_object"); \
-		GC_ADDREF(_object); \
+		ZEND_ASSERT((coroutine)->object_offset != 0 && "A coroutine is backed by a zend_object"); \
+		GC_ADDREF(ZEND_COROUTINE_OBJECT(coroutine)); \
 	} while (0)
 
 #define ZEND_COROUTINE_RELEASE(coroutine) \
 	do { \
-		zend_object *_object = ZEND_COROUTINE_OBJECT(coroutine); \
-		ZEND_ASSERT(_object != NULL && "A coroutine is backed by a zend_object"); \
-		OBJ_RELEASE(_object); \
+		ZEND_ASSERT((coroutine)->object_offset != 0 && "A coroutine is backed by a zend_object"); \
+		OBJ_RELEASE(ZEND_COROUTINE_OBJECT(coroutine)); \
 	} while (0)
 
 /* Lifecycle predicates over the packed status. */
