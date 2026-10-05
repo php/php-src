@@ -21,6 +21,8 @@ PHP                                                                        NEWS
     (Jorg Sowa)
   . Fixed bug GH-25061 ($x = $x - 1 on null is optimized to PRE_DEC).
     (Lazizbek Ergashev)
+  . Fixed bug GH-23911 (Don't use static closure cache when called_scope
+    diverges). (Roman Ondráček)
 
 - CLI:
   . Fixed bug GH-24697 (PHP_HTTP_PARSER_STRICT build option doesn't work).
