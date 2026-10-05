@@ -37,7 +37,9 @@ function getOpostState($stream): bool {
     fclose($pipes[1]);
     fclose($pipes[2]);
     proc_close($sub);
-    return strpos($out, " opost") !== false && strpos($out, " -opost") === false;
+    $hasOpost = preg_match('/(?:\s|^)opost(?:\s|$)/', $out) === 1;
+    $hasMinusOpost = preg_match('/(?:\s|^)-opost(?:\s|$)/', $out) === 1;
+    return $hasOpost && !$hasMinusOpost;
 }
 
 function setOpostState($stream, bool $enable): void {
