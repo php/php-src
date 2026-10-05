@@ -9273,8 +9273,9 @@ static zend_op_array *zend_compile_func_decl_ex(
 		 && declaring_op_array->last) {
 			zend_op *declare_lambda_op = &declaring_op_array->opcodes[declaring_op_array->last - 1];
 			if (declare_lambda_op->opcode == ZEND_DECLARE_LAMBDA_FUNCTION) {
+				/* Cache slot pair of called scope and closure. */
 				declare_lambda_op->extended_value = declaring_op_array->cache_size;
-				declaring_op_array->cache_size += sizeof(void *);
+				declaring_op_array->cache_size += 2 * sizeof(void *);
 			}
 		}
 	}
