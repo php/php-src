@@ -431,9 +431,10 @@ typedef bool (*zend_async_coroutine_remove_awaiting_info_t)(
  * anything it can name. The caller owns the array. */
 typedef zend_array *(*zend_async_coroutine_get_awaiting_info_t)(zend_coroutine_t *coroutine);
 
-/* Date of the last incompatible change to this API: a changed slot signature
- * or meaning, a reordered field. Appending a slot does not change it. */
-#define ZEND_ASYNC_API_VERSION 20261003
+/* Raised by one at every incompatible change to this API: a changed slot
+ * signature or meaning, a reordered field. Appending a slot does not raise it:
+ * `size` tells the core which slots the provider knows. */
+#define ZEND_ASYNC_API_VERSION 1
 
 /**
  * Scheduler API bundle. A provider fills the struct and calls
