@@ -1650,7 +1650,7 @@ bool ir_use_list_add(ir_ctx *ctx, ir_ref to, ir_ref ref)
 	if (n < ctx->use_edges_count && ctx->use_edges[n] == IR_UNUSED) {
 		ctx->use_edges[n] = ref;
 		use_list->count++;
-		return false;
+		return 0;
 	} else {
 		size_t old_size = IR_ALIGNED_SIZE(ctx->use_edges_count * sizeof(ir_ref), 4096);
 		size_t new_size = IR_ALIGNED_SIZE((ctx->use_edges_count + use_list->count + 1) * sizeof(ir_ref), 4096);
@@ -1662,13 +1662,13 @@ bool ir_use_list_add(ir_ctx *ctx, ir_ref to, ir_ref ref)
 				ctx->use_edges[n] = ref;
 				use_list->count++;
 				ctx->use_edges_count++;
-				return true;
+				return 1;
 			}
 		} else if (n == ctx->use_edges_count) {
 			ctx->use_edges[n] = ref;
 			use_list->count++;
 			ctx->use_edges_count++;
-			return false;
+			return 0;
 		}
 		if (use_list->count) {
 			memcpy(ctx->use_edges + ctx->use_edges_count, ctx->use_edges + use_list->refs, use_list->count * sizeof(ir_ref));
@@ -1677,7 +1677,7 @@ bool ir_use_list_add(ir_ctx *ctx, ir_ref to, ir_ref ref)
 		ctx->use_edges[use_list->refs + use_list->count] = ref;
 		use_list->count++;
 		ctx->use_edges_count += use_list->count;
-		return true;
+		return 1;
 	}
 }
 
@@ -1908,7 +1908,7 @@ bool ir_hashtab_add(ir_hashtab *tab, uint32_t key, ir_ref val)
 	key |= tab->mask;
 	p->next = ((uint32_t*)data)[(int32_t)key];
 	((uint32_t*)data)[(int32_t)key] = pos;
-	return true;
+	return 1;
 }
 
 static int ir_hashtab_key_cmp(const void *b1, const void *b2)
