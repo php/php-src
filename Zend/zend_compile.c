@@ -5400,15 +5400,7 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 	zend_ast *call_args = zend_partial_apply(callback,
 			zend_ast_create_znode(&value));
 	if (!call_args) {
-		CG(active_op_array)->T--;
-		if (func_node.op_type == IS_CONST) {
-			zval_ptr_dtor_nogc(&func_node.u.constant);
-		}
-		if (class_node.op_type == IS_CONST) {
-			zval_ptr_dtor_nogc(&class_node.u.constant);
-		}
-		/* The callback is not a FCC/PFA, or is not optimizable */
-		return FAILURE;
+		goto fail;
 	}
 
 	zend_op *opline;
@@ -5417,6 +5409,10 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 	zend_compile_expr(&array, args->child[1]);
 	/* array is an argument to both ZEND_TYPE_ASSERT and to ZEND_FE_RESET_R. */
 	if (array.op_type == IS_CONST) {
+		if (Z_TYPE(array.u.constant) != IS_ARRAY) {
+			zval_ptr_dtor_nogc(&array.u.constant);
+			goto fail;
+		}
 		Z_TRY_ADDREF(array.u.constant);
 	}
 
@@ -5497,6 +5493,17 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 	}
 
 	return SUCCESS;
+
+fail:
+	CG(active_op_array)->T--;
+	if (func_node.op_type == IS_CONST) {
+		zval_ptr_dtor_nogc(&func_node.u.constant);
+	}
+	if (class_node.op_type == IS_CONST) {
+		zval_ptr_dtor_nogc(&class_node.u.constant);
+	}
+
+	return FAILURE;
 }
 
 static zend_result zend_try_compile_special_func_ex(znode *result, zend_string *lcname, zend_ast_list *args, uint32_t type, uint32_t lineno) /* {{{ */

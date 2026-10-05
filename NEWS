@@ -34,6 +34,8 @@ PHP                                                                        NEWS
     CLOCK_MONOTONIC_RAW. (nicolas-grekas)
   . Fixed array_map optimization with non-literal function or non-literal args.
     (Arnaud)
+  . Fixed memory leak in array_map() foreach optimization when a constant
+    non-array string argument is passed. (Alexander Danilov)
   . Fixed use-after-free when a dl()-loaded extension declares a frameless
     function and a later request calls it. (Ilia Alshanetsky)
   . Fixed System V shared memory emulation for Windows attaching segments past
