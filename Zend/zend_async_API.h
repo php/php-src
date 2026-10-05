@@ -117,7 +117,8 @@ struct _zend_coroutine_s {
 	uint32_t object_offset;
 	/* Userland entry point. NULL for internal coroutines. */
 	zend_fcall_t *fcall;
-	/* C entry point. NULL for userland coroutines. */
+	/* C entry point. NULL for userland coroutines. May bail out, as PHP code
+	 * may (the shutdown destructors' iterator does). */
 	zend_coroutine_entry_t internal_entry;
 	/* Custom data of the scheduler/extension. Nullable. */
 	void *extended_data;

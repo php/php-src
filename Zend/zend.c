@@ -1344,11 +1344,17 @@ ZEND_API void zend_activate(void) /* {{{ */
 }
 /* }}} */
 
-void zend_call_destructors(void) /* {{{ */
+bool zend_call_destructors(void) /* {{{ */
 {
+	bool bailed_out = false;
+
 	zend_try {
 		shutdown_destructors();
+	} zend_catch {
+		bailed_out = true;
 	} zend_end_try();
+
+	return bailed_out;
 }
 /* }}} */
 

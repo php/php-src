@@ -1928,14 +1928,14 @@ void php_request_shutdown(void *dummy)
 	}
 
 	/* 2. Call all possible __destruct() functions */
-	zend_try {
-		zend_call_destructors();
-	} zend_end_try();
+	const bool destructor_bailed_out = zend_call_destructors();
 
 	/* Before PHP shuts down completely, control goes to the coroutines one
-	 * last time: the destructors above may have spawned or resumed some. */
+	 * last time: the destructors above may have spawned or resumed some.
+	 * After a destructor's bailout every object is marked destructed, so the
+	 * scheduler gets it as a bailout and the queued coroutines do not run. */
 	zend_try {
-		ZEND_ASYNC_RUN_SCHEDULER_AFTER_MAIN(false);
+		ZEND_ASYNC_RUN_SCHEDULER_AFTER_MAIN(destructor_bailed_out);
 
 		/* The final pass may leave an exception in EG with no caller left to
 		 * handle it; report it as php_execute_script() does. */

@@ -354,6 +354,9 @@ void shutdown_destructors(void) /* {{{ */
 		/* if we couldn't destruct cleanly, mark all objects as destructed anyway */
 		zend_objects_store_mark_destructed(&EG(objects_store));
 		EG(shutdown_context).pass = ZEND_SHUTDOWN_PASS_NONE;
+		EG(shutdown_context).coroutine = NULL;
+		/* Re-raised: the scheduler stops the queued coroutines on it. */
+		zend_bailout();
 	} zend_end_try();
 }
 /* }}} */

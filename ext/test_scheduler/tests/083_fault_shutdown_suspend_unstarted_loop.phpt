@@ -29,8 +29,3 @@ Fatal error: Uncaught TestScheduler\CancellationError: Deadlock detected in %s:%
 Stack trace:
 #0 {main}
   thrown in %s on line %d
-
-Fatal error: Uncaught TestScheduler\DeadlockError: Deadlock detected: no active coroutines, 1 coroutines in waiting in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d

@@ -1,5 +1,5 @@
 --TEST--
-Pass-owning shutdown iterator dies mid-pass: warn and give up on the remaining destructors
+test_scheduler: a fatal error in the shutdown iterator during the object-store pass skips the remaining destructors and does not resume the parked main
 --EXTENSIONS--
 test_scheduler
 --INI--
@@ -48,15 +48,3 @@ Fatal::dtor enter
 Deprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in %s on line %d
 
 Fatal error: boom in %s on line %d
-
-Warning: Shutdown destructors coroutine was not finished properly in Unknown on line %d
-
-Fatal error: Uncaught TestScheduler\CancellationError: Deadlock detected in [no active file]:%d
-Stack trace:
-#0 {main}
-  thrown in [no active file] on line %d
-
-Fatal error: Uncaught TestScheduler\DeadlockError: Deadlock detected: no active coroutines, 2 coroutines in waiting in [no active file]:%d
-Stack trace:
-#0 {main}
-  thrown in [no active file] on line %d
