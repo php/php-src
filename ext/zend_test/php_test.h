@@ -55,6 +55,7 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	HashTable *global_weakmap;
 	int replace_zend_execute_ex;
 	int register_passes;
+	bool fatal_error_in_pass;
 	bool print_stderr_mshutdown;
 	zend_long limit_copy_file_range;
 	int observe_opline_in_zendmm;

@@ -79,6 +79,8 @@ PHP                                                                        NEWS
     the end of their mapping. (Ilia Alshanetsky)
   . Fixed exception thrown by destructor during GC in a Fiber not being rethrown
     into the frame that triggered the GC. (Nicolas Grekas)
+  . Fixed warnings being silently dropped after a fatal error during
+    compilation or optimization. (Pierre Tondereau)
 
 - DOM:
   . Fixed use-after-free when re-constructing a DOMXPath whose php:function
