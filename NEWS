@@ -215,6 +215,10 @@ PHP                                                                        NEWS
     lookup, and an unchecked CreateFileA() failure. (Ilia Alshanetsky)
   . Fix persistent stream context lifetime during shutdown (Levi Morrison)
 
+- Streams:
+  . Fixed leaks and data loss when user filter leaves buckets on input
+    brigade. (ndossche, Matthias Goergens, Jakub Zelenka)
+
 - Tidy:
   . Fixed a use-after-free when a tidyNode is used after its document is
     reparsed. (Ilia Alshanetsky)
