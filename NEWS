@@ -215,6 +215,10 @@ PHP                                                                        NEWS
     lookup, and an unchecked CreateFileA() failure. (Ilia Alshanetsky)
   . Fix persistent stream context lifetime during shutdown (Levi Morrison)
 
+- Streams:
+  . Fixed read buffer size not being updated when a flushed read filter grows
+    the buffer in stream_filter_remove(), causing invalid reads. (Jakub Zelenka)
+
 - Tidy:
   . Fixed a use-after-free when a tidyNode is used after its document is
     reparsed. (Ilia Alshanetsky)
