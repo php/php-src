@@ -64,6 +64,13 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_call_destructors(zend_objects_sto
 	}
 }
 
+/* Continue the pass in a fresh coroutine, picking up wherever the
+ * interrupted one left off. */
+static void zend_objects_store_call_destructors_async_iterator_entry(void)
+{
+	zend_objects_store_call_destructors_async(&EG(objects_store));
+}
+
 /* Reset the shutdown cursor if the iterator coroutine is torn down mid-pass
  * (cancelled/errored) instead of finishing normally — otherwise the pass
  * stays marked in flight forever. Dispose may run inside a bailout: no user
@@ -99,7 +106,7 @@ static bool zend_objects_store_call_destructors_async_switch_handler(zend_corout
 		return false;
 	}
 
-	iterator->internal_entry = zend_objects_store_call_destructors_async;
+	iterator->internal_entry = zend_objects_store_call_destructors_async_iterator_entry;
 	iterator->extended_dispose = zend_objects_store_call_destructors_async_coroutine_dtor;
 
 	/* Refused: the driving coroutine finishes the pass itself when it resumes,
@@ -112,12 +119,8 @@ static bool zend_objects_store_call_destructors_async_switch_handler(zend_corout
 	return false;
 }
 
-/* Also the entry of an iterator coroutine: it picks up the pass wherever the
- * interrupted one left off. */
-ZEND_API void zend_objects_store_call_destructors_async(void)
+ZEND_API void ZEND_FASTCALL zend_objects_store_call_destructors_async(zend_objects_store *objects)
 {
-	zend_objects_store *objects = &EG(objects_store);
-
 	if (objects->top <= 1) {
 		return;
 	}
