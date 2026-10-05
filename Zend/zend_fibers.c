@@ -808,8 +808,6 @@ static void zend_fiber_release_coroutine(zend_fiber *fiber, bool cancel_unfinish
 		return;
 	}
 
-	zend_object *coroutine_object = ZEND_COROUTINE_OBJECT(coroutine);
-
 	coroutine->extended_data = NULL;
 	fiber->coroutine = NULL;
 
@@ -817,9 +815,7 @@ static void zend_fiber_release_coroutine(zend_fiber *fiber, bool cancel_unfinish
 		ZEND_ASYNC_CANCEL(coroutine, zend_create_graceful_exit(), true);
 	}
 
-	if (EXPECTED(coroutine_object != NULL)) {
-		OBJ_RELEASE(coroutine_object);
-	}
+	ZEND_COROUTINE_RELEASE(coroutine);
 }
 
 static void zend_fiber_coroutine_entry(void)
@@ -1067,12 +1063,7 @@ static bool zend_fiber_adopt(zend_fiber *fiber)
 
 	/* The fiber shares ownership of the coroutine with the scheduler. Never
 	 * the other way round: see zend_fiber_release_coroutine(). */
-	zend_object *coroutine_object = ZEND_COROUTINE_OBJECT(coroutine);
-
-	if (EXPECTED(coroutine_object != NULL)) {
-		GC_ADDREF(coroutine_object);
-	}
-
+	ZEND_COROUTINE_ADD_REF(coroutine);
 	fiber->coroutine = coroutine;
 
 	return true;
@@ -1289,11 +1280,7 @@ static HashTable *zend_fiber_object_gc(zend_object *object, zval **table, int *n
 			zend_get_gc_buffer_add_zval(buf, &fiber->result);
 			zend_get_gc_buffer_add_zval(buf, &fiber->transfer);
 
-			zend_object *coroutine_object = ZEND_COROUTINE_OBJECT(fiber->coroutine);
-
-			if (EXPECTED(coroutine_object != NULL)) {
-				zend_get_gc_buffer_add_obj(buf, coroutine_object);
-			}
+			zend_get_gc_buffer_add_obj(buf, ZEND_COROUTINE_OBJECT(fiber->coroutine));
 
 			zend_get_gc_buffer_use(buf, table, num);
 			return NULL;
