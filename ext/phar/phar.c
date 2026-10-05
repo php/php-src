@@ -3215,7 +3215,7 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type)
 				zend_file_handle f;
 
 				/* zip or tar-based phar */
-				name = zend_strpprintf(4096, "phar://%s/%s", ZSTR_VAL(file_handle->filename), ".phar/stub.php");
+				name = zend_strpprintf(4096, "phar://%pS/%s", file_handle->filename, ".phar/stub.php");
 				zend_stream_init_filename_ex(&f, name);
 				if (SUCCESS == zend_stream_open_function(&f)) {
 					zend_string_release(f.filename);
