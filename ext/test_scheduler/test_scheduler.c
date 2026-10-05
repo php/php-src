@@ -818,6 +818,15 @@ static HashTable *ts_coroutine_object_gc(zend_object *object, zval **table, int 
 	return NULL;
 }
 
+static zend_coroutine_t *ts_coroutine_from_object(zend_object *object)
+{
+	if (UNEXPECTED(object->ce != ts_ce_coroutine)) {
+		return NULL;
+	}
+
+	return &ts_from_obj(object)->coro;
+}
+
 static ts_coroutine_t *ts_coroutine_new(void)
 {
 	zend_object *object = ts_coroutine_object_create(ts_ce_coroutine);
@@ -1884,6 +1893,7 @@ static zend_async_scheduler_api_t ts_scheduler_api = {
 	.shutdown = ts_shutdown,
 	.cancel = ts_cancel,
 	.get_class_ce = ts_get_class_ce,
+	.coroutine_from_object = ts_coroutine_from_object,
 	.intercept_fiber = ts_intercept_fiber,
 	.coroutine_execute_data = ts_coroutine_execute_data,
 	.defer = ts_defer,
