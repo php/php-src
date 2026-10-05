@@ -613,10 +613,8 @@ ZEND_API bool zend_async_scheduler_register(
 	return true;
 }
 
-/* Withdraw the registration and reset every slot to its default. The slots
- * are process-wide: this runs at process shutdown, or when a just-registered
- * scheduler fails to launch — never per request. The internal-context key
- * registry is NOT touched here. */
+/* The slots are process-wide: never per request. The internal-context key
+ * registry is not touched here. */
 ZEND_API void zend_async_scheduler_unregister(void)
 {
 #ifdef ZTS
