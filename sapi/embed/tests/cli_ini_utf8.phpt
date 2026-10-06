@@ -10,7 +10,7 @@ if (!file_exists(dirname(PHP_BINARY) . '/php_embed_cli_test.exe')) {
 --FILE--
 <?php
 chdir(__DIR__);
-$host = escapeshellarg(dirname(PHP_BINARY) . '/php_embed_cli_test.exe');
+$host = dirname(PHP_BINARY) . '/php_embed_cli_test.exe';
 $prepend = '<?php echo "Prepend works\n";';
 file_put_contents("cli_ini_caf\xc3\xa9.php", $prepend);
 file_put_contents("cli_ini_caf\xc3\xa9\xc3\xa9.php", $prepend);
@@ -45,9 +45,9 @@ $cases = [
         '-d', 'user_agent=${CLI_INI_UTF8}', '-f', 'cli_ini_utf8.php',
     ],
 ];
-foreach ($cases as $mode => $options) {
-    passthru("$host $mode", $status);
-    var_dump($status);
+foreach ($cases as $options) {
+    $process = proc_open([$host, '--', ...$options], [1 => STDOUT, 2 => STDERR], $pipes);
+    var_dump(proc_close($process));
     $process = proc_open([PHP_BINARY, ...$options], [1 => STDOUT, 2 => STDERR], $pipes);
     var_dump(proc_close($process));
 }
