@@ -607,6 +607,19 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 		}
 	}
 	colsize = displaysize;
+	if ( S->cols[colno].coltype == SQL_WCHAR
+#ifdef SQL_WVARCHAR
+		|| S->cols[colno].coltype == SQL_WVARCHAR
+#endif
+#ifdef SQL_WLONGVARCHAR
+		|| S->cols[colno].coltype == SQL_WLONGVARCHAR
+#endif
+	) {
+		/* displaysize is counted by characters;
+		for unicode, each could take up to 4 bytes in UTF-8;
+		see https://www.rfc-editor.org/rfc/rfc3629 */
+		colsize = displaysize * 4;
+	}
 
 	col->maxlen = S->cols[colno].datalen = colsize;
 	col->name = zend_string_init(S->cols[colno].colname, colnamelen, 0);
