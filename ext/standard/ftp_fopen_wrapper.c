@@ -545,7 +545,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 		/* Append */
 		memcpy(tmp_line, "APPE", sizeof("APPE"));
 	}
-	php_stream_printf(stream, "%s %s\r\n", tmp_line, (resource->path != NULL ? ZSTR_VAL(resource->path) : "/"));
+	php_stream_printf(stream, "%s %s\r\n", tmp_line, ZSTR_VAL(resource->path));
 
 	/* open the data channel */
 	if (hoststart == NULL) {
@@ -734,7 +734,7 @@ static php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, const ch
 		goto opendir_errexit;
 	}
 
-	php_stream_printf(stream, "NLST %s\r\n", (resource->path != NULL ? ZSTR_VAL(resource->path) : "/"));
+	php_stream_printf(stream, "NLST %s\r\n", ZSTR_VAL(resource->path));
 
 	result = GET_FTP_RESULT(stream);
 	if (result != 150 && result != 125) {
@@ -800,7 +800,7 @@ static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, const char *url,
 	}
 
 	ssb->sb.st_mode = 0644;									/* FTP won't give us a valid mode, so approximate one based on being readable */
-	php_stream_printf(stream, "CWD %s\r\n", (resource->path != NULL ? ZSTR_VAL(resource->path) : "/")); /* If we can CWD to it, it's a directory (maybe a link, but we can't tell) */
+	php_stream_printf(stream, "CWD %s\r\n", ZSTR_VAL(resource->path)); /* If we can CWD to it, it's a directory (maybe a link, but we can't tell) */
 	result = GET_FTP_RESULT(stream);
 	if (result < 200 || result > 299) {
 		ssb->sb.st_mode |= S_IFREG;
@@ -816,7 +816,7 @@ static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, const char *url,
 		goto stat_errexit;
 	}
 
-	php_stream_printf(stream, "SIZE %s\r\n", (resource->path != NULL ? ZSTR_VAL(resource->path) : "/"));
+	php_stream_printf(stream, "SIZE %s\r\n", ZSTR_VAL(resource->path));
 	result = GET_FTP_RESULT(stream);
 	if (result < 200 || result > 299) {
 		/* Failure either means it doesn't exist
@@ -831,7 +831,7 @@ static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, const char *url,
 		ssb->sb.st_size = atoi(tmp_line + 4);
 	}
 
-	php_stream_printf(stream, "MDTM %s\r\n", (resource->path != NULL ? ZSTR_VAL(resource->path) : "/"));
+	php_stream_printf(stream, "MDTM %s\r\n", ZSTR_VAL(resource->path));
 	result = GET_FTP_RESULT(stream);
 	if (result == 213) {
 		char *p = tmp_line + 4;
@@ -917,12 +917,6 @@ static int php_stream_ftp_unlink(php_stream_wrapper *wrapper, const char *url, i
 	if (!stream) {
 		php_stream_wrapper_warn(wrapper, context, options, AuthFailed,
 			"Unable to connect to %s", url);
-		goto unlink_errexit;
-	}
-
-	if (resource->path == NULL) {
-		php_stream_wrapper_warn(wrapper, context, options, InvalidPath,
-			"Invalid path provided in %s", url);
 		goto unlink_errexit;
 	}
 
@@ -1051,12 +1045,6 @@ static int php_stream_ftp_mkdir(php_stream_wrapper *wrapper, const char *url, in
 		goto mkdir_errexit;
 	}
 
-	if (resource->path == NULL) {
-		php_stream_wrapper_warn(wrapper, context, options, InvalidPath,
-			"Invalid path provided in %s", url);
-		goto mkdir_errexit;
-	}
-
 	if (!recursive) {
 		php_stream_printf(stream, "MKD %s\r\n", ZSTR_VAL(resource->path));
 		result = GET_FTP_RESULT(stream);
@@ -1137,12 +1125,6 @@ static int php_stream_ftp_rmdir(php_stream_wrapper *wrapper, const char *url, in
 	if (!stream) {
 		php_stream_wrapper_warn(wrapper, context, options, AuthFailed,
 			"Unable to connect to %s", url);
-		goto rmdir_errexit;
-	}
-
-	if (resource->path == NULL) {
-		php_stream_wrapper_warn(wrapper, context, options, InvalidPath,
-			"Invalid path provided in %s", url);
 		goto rmdir_errexit;
 	}
 

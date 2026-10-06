@@ -320,7 +320,7 @@ static void zval_object_property_dump(zend_property_info *prop_info, zval *zv, z
 
 PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 {
-	HashTable *myht = NULL;
+	HashTable *myht;
 	zend_string *class_name;
 	zend_ulong index;
 	zend_string *key;
