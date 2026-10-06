@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.27
+?? ??? ????, PHP 8.4.28
+
+
+22 Oct 2026, PHP 8.4.27
 
 - BCMath:
   . Fixed BcMath\Number results that truncate to zero keeping a negative sign
