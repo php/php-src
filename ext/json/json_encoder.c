@@ -22,6 +22,7 @@
 #include "zend_smart_str.h"
 #include "php_json.h"
 #include "php_json_encoder.h"
+#include "php_json_escape_table.h"
 #include "zend_portability.h"
 #include <zend_exceptions.h>
 #include "zend_enum.h"
@@ -384,12 +385,8 @@ zend_result php_json_escape_string(
 	pos = 0;
 
 	do {
-		static const uint32_t charmap[8] = {
-			0xffffffff, 0x500080c4, 0x10000000, 0x00000000,
-			0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff};
-
 		unsigned int us = (unsigned char)s[pos];
-		if (EXPECTED(!ZEND_BIT_TEST(charmap, us))) {
+		if (EXPECTED(!php_json_escape_dirty_table[us])) {
 			pos++;
 			len--;
 			if (len == 0) {
