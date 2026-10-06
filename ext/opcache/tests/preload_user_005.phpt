@@ -1,6 +1,7 @@
 --TEST--
 preload_user=root is allowed under non-cli SAPIs
---INI--
+--ENV--
+ASAN_OPTIONS=detect_leaks=0
 --EXTENSIONS--
 opcache
 posix
