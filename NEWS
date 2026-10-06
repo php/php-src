@@ -140,6 +140,8 @@ PHP                                                                        NEWS
     (ndossche)
   . Fix SCCP evaluation of isset()/empty() on dimension of non-escaping object.
     (ndossche)
+  . Fixed bug GH-20890 (Segfault in zval_undefined_cv with non-simple property
+    hook with minimal tracing JIT). (ndossche)
 
 - OpenSSL:
   . Fixed stream_socket_enable_crypto() leaving the socket non-blocking
