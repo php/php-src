@@ -665,7 +665,7 @@ PHP_METHOD(Phar, webPhar)
 				spprintf(&path_info, 0, "%s%s", testit, path_info);
 				free_pathinfo = 1;
 			} else {
-				path_info = testit;
+				path_info = estrdup(testit);
 				free_pathinfo = 1;
 				entry = estrndup("", 0);
 				entry_len = 0;
