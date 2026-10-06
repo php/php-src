@@ -48,7 +48,7 @@ foo:
 0010 RETURN null
 
 bar:
-     ; (lines=9, args=0, vars=3, tmps=2)
+     ; (lines=9, args=0, vars=3, tmps=2, vars_to_free=0)
      ; (after optimizer)
      ; %s
 0000 T3 = FE_RESET_R CV0($a) 0007

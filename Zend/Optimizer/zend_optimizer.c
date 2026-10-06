@@ -1159,7 +1159,9 @@ static void zend_optimize(zend_op_array      *op_array,
 	if ((ZEND_OPTIMIZER_PASS_13 & ctx->optimization_level) &&
 	    (!(ZEND_OPTIMIZER_PASS_6 & ctx->optimization_level) ||
 	     !(ZEND_OPTIMIZER_PASS_7 & ctx->optimization_level))) {
-		zend_optimizer_compact_vars(op_array);
+		/* Reached only when the DFA pass did not run, so there is no type
+		 * information to decide which CVs need to be destroyed. */
+		zend_optimizer_compact_vars(op_array, NULL);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_13) {
 			zend_dump_op_array(op_array, 0, "after pass 13", NULL);
 		}
@@ -1685,7 +1687,9 @@ ZEND_API void zend_optimize_script(zend_script *script, zend_long optimization_l
 
 		if (ZEND_OPTIMIZER_PASS_13 & optimization_level) {
 			for (i = 0; i < call_graph.op_arrays_count; i++) {
-				zend_optimizer_compact_vars(call_graph.op_arrays[i]);
+				func_info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
+				zend_optimizer_compact_vars(call_graph.op_arrays[i],
+					func_info ? &func_info->ssa : NULL);
 				if (debug_level & ZEND_DUMP_AFTER_PASS_13) {
 					zend_dump_op_array(call_graph.op_arrays[i], 0, "after pass 13", NULL);
 				}
