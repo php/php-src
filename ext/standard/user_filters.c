@@ -161,20 +161,15 @@ static zend_result userfilter_assign_stream(php_stream *stream, zend_object *obj
 }
 
 static php_stream_filter_status_t userfilter_filter(
-			php_stream *stream,
-			php_stream_filter *thisfilter,
-			php_stream_bucket_brigade *buckets_in,
-			php_stream_bucket_brigade *buckets_out,
-			size_t *bytes_consumed,
-			int flags
-			)
-{
+	php_stream *stream,
+	php_stream_filter *thisfilter,
+	php_stream_bucket_brigade *buckets_in,
+	php_stream_bucket_brigade *buckets_out,
+	size_t *bytes_consumed,
+	int flags
+) {
 	int ret = PSFS_ERR_FATAL;
-	zval *obj = &thisfilter->abstract;
-	zval func_name;
-	zval retval;
-	zval args[4];
-	int call_result;
+	zend_object *obj = Z_OBJ(thisfilter->abstract);
 
 	/* the userfilter object probably doesn't exist anymore */
 	if (CG(unclean_shutdown)) {
@@ -186,15 +181,15 @@ static php_stream_filter_status_t userfilter_filter(
 	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 
 	zend_string *stream_name = NULL;
-	if (userfilter_assign_stream(stream, Z_OBJ_P(obj), &stream_name, orig_no_fclose) == FAILURE) {
+	if (userfilter_assign_stream(stream, obj, &stream_name, orig_no_fclose) == FAILURE) {
 		if (buckets_in->head) {
 			php_error_docref(NULL, E_WARNING, "Unprocessed filter buckets remaining on input brigade");
 		}
 		return PSFS_ERR_FATAL;
 	}
 
-	ZVAL_STRINGL(&func_name, "filter", sizeof("filter")-1);
-
+	zval retval;
+	zval args[4];
 	/* Setup calling arguments */
 	ZVAL_RES(&args[0], zend_register_resource(buckets_in, le_bucket_brigade));
 	ZVAL_RES(&args[1], zend_register_resource(buckets_out, le_bucket_brigade));
@@ -208,24 +203,30 @@ static php_stream_filter_status_t userfilter_filter(
 
 	ZVAL_BOOL(&args[3], flags & PSFS_FLAG_FLUSH_CLOSE);
 
-	call_result = call_user_function(NULL,
-			obj,
-			&func_name,
-			&retval,
-			4, args);
+	char *error = NULL;
+	zend_string *func_name = ZSTR_INIT_LITERAL("filter", false);
+	zend_result call_result = zend_call_method_if_exists_ex(obj, func_name, &retval, 4, args, NULL, &error);
+	zend_string_release_ex(func_name, false);
 
-	zval_ptr_dtor(&func_name);
+	/* No need to release args[3] as it is a boolean, delay freeing or args[2] to fetch by-ref value. */
+	zval_ptr_dtor(&args[1]);
+	zval_ptr_dtor(&args[0]);
 
-	if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
+	/* Method does not exist or exception thrown */
+	if (UNEXPECTED(Z_ISUNDEF(retval))) {
+		if (call_result == FAILURE) {
+			zend_throw_error(NULL, "Invalid callback %pS::filter, %s", obj->ce->name, error);
+		}
+	} else {
+		// TODO: TypeError if value is not int?
 		convert_to_long(&retval);
 		ret = (int)Z_LVAL(retval);
-	} else if (call_result == FAILURE) {
-		php_error_docref(NULL, E_WARNING, "Failed to call filter function");
 	}
 
 	if (bytes_consumed) {
 		*bytes_consumed = zval_get_long(&args[2]);
 	}
+	zval_ptr_dtor(&args[2]);
 
 	if (buckets_in->head) {
 		php_error_docref(NULL, E_WARNING, "Unprocessed filter buckets remaining on input brigade");
@@ -238,14 +239,9 @@ static php_stream_filter_status_t userfilter_filter(
 	 * no type hint or be typed as mixed, so we can safely assign null.
 	 */
 	if (stream_name != NULL) {
-		zend_update_property_null(Z_OBJCE_P(obj), Z_OBJ_P(obj), ZSTR_VAL(stream_name), ZSTR_LEN(stream_name));
+		zend_update_property_null(obj->ce, obj, ZSTR_VAL(stream_name), ZSTR_LEN(stream_name));
 		zend_string_release(stream_name);
 	}
-
-	zval_ptr_dtor(&args[3]);
-	zval_ptr_dtor(&args[2]);
-	zval_ptr_dtor(&args[1]);
-	zval_ptr_dtor(&args[0]);
 
 	stream->flags &= ~PHP_STREAM_FLAG_NO_FCLOSE;
 	stream->flags |= orig_no_fclose;
