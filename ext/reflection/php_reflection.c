@@ -7946,11 +7946,16 @@ ZEND_METHOD(ReflectionFiber, getCallable)
 	RETURN_COPY(&fiber->fci.function_name);
 }
 
+static bool reflection_is_read_only_property(zend_object *object, zend_string *name)
+{
+	return zend_hash_exists(&object->ce->properties_info, name)
+		&& (zend_string_equals(name, ZSTR_KNOWN(ZEND_STR_NAME)) || zend_string_equals(name, ZSTR_KNOWN(ZEND_STR_CLASS)));
+}
+
 /* {{{ _reflection_write_property */
 static zval *_reflection_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
-	if (zend_hash_exists(&object->ce->properties_info, name)
-		&& (zend_string_equals(name, ZSTR_KNOWN(ZEND_STR_NAME)) || zend_string_equals(name, ZSTR_KNOWN(ZEND_STR_CLASS))))
+	if (reflection_is_read_only_property(object, name))
 	{
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Cannot set read-only property %s::$%s", ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
@@ -7962,6 +7967,17 @@ static zval *_reflection_write_property(zend_object *object, zend_string *name, 
 	}
 }
 /* }}} */
+
+static zval *_reflection_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot)
+{
+	if (reflection_is_read_only_property(object, name)) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
+			"Cannot set read-only property %s::$%s", ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
+		return &EG(error_zval);
+	}
+
+	return zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
+}
 
 ZEND_METHOD(ReflectionConstant, __construct)
 {
@@ -8107,6 +8123,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	reflection_object_handlers.free_obj = reflection_free_objects_storage;
 	reflection_object_handlers.clone_obj = NULL;
 	reflection_object_handlers.write_property = _reflection_write_property;
+	reflection_object_handlers.get_property_ptr_ptr = _reflection_get_property_ptr_ptr;
 	reflection_object_handlers.get_gc = reflection_get_gc;
 
 	reflection_exception_ptr = register_class_ReflectionException(zend_ce_exception);
