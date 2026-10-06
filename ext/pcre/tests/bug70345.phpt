@@ -19,8 +19,8 @@ preg_match($regex, $subject, $matches);
 var_dump($matches);
 ?>
 --EXPECTF--
-Warning: preg_split(): Compilation failed: \K is not allowed in lookarounds (but see PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK) at offset 9 in %s on line %d
+Warning: preg_split(): Compilation failed: \K is not allowed in lookarounds at offset 9 in %s on line %d
 bool(false)
 
-Warning: preg_match(): Compilation failed: \K is not allowed in lookarounds (but see PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK) at offset 12 in %s on line %d
+Warning: preg_match(): Compilation failed: \K is not allowed in lookarounds at offset 12 in %s on line %d
 NULL
