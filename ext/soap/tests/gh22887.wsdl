@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" name="gh22887" targetNamespace="urn:gh22887"
+             xmlns:tns="urn:gh22887"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:soap-enc="http://www.w3.org/2003/05/soap-encoding">
+ <types>
+  <xsd:schema targetNamespace="urn:gh22887">
+   <xsd:complexType name="ArrayOfString">
+    <xsd:complexContent>
+     <xsd:restriction base="soap-enc:Array">
+      <xsd:attribute ref="soap-enc:itemType" wsdl:itemType="xsd:string"/>
+      <xsd:attribute ref="soap-enc:arraySize" wsdl:arraySize=""/>
+     </xsd:restriction>
+    </xsd:complexContent>
+   </xsd:complexType>
+  </xsd:schema>
+ </types>
+ <message name="testRequest">
+  <part name="value" type="tns:ArrayOfString"/>
+ </message>
+ <message name="testResponse">
+  <part name="return" type="xsd:string"/>
+ </message>
+ <portType name="testPortType">
+  <operation name="test">
+   <input message="tns:testRequest"/>
+   <output message="tns:testResponse"/>
+  </operation>
+ </portType>
+ <binding name="testBinding" type="tns:testPortType">
+  <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+  <operation name="test">
+   <soap:operation soapAction="urn:gh22887#test"/>
+   <input>
+    <soap:body use="encoded" namespace="urn:gh22887" encodingStyle="http://www.w3.org/2003/05/soap-encoding"/>
+   </input>
+   <output>
+    <soap:body use="encoded" namespace="urn:gh22887" encodingStyle="http://www.w3.org/2003/05/soap-encoding"/>
+   </output>
+  </operation>
+ </binding>
+ <service name="testService">
+  <port name="testPort" binding="tns:testBinding">
+   <soap:address location="test://"/>
+  </port>
+ </service>
+</definitions>
