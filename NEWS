@@ -80,6 +80,10 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Fix zend_analyze_calls() call_stack buffer overrun. (Mrmaxmeier)
+
+- Standard:
+  . Fixed bug GH-23898 (stream_filter_register() during shutdown leads to
+    assertion failure or crash in user_filter_factory_create()). (Jakub Zelenka)
   . Fixed bug GH-23679 (Tracing JIT writes a parent private property into a
     child's shadowing public property). (Ilia Alshanetsky)
   . Fix multiple incorrect DCE due to unsound escape analysis. (ndossche,
