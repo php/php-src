@@ -1494,7 +1494,7 @@ PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 }
 /* }}} */
 
-PHP_FUNCTION(apache_request_headers) /* {{{ */
+PHP_FUNCTION(fpm_request_headers) /* {{{ */
 {
 	fcgi_request *request;
 
@@ -1530,8 +1530,8 @@ static zend_module_entry cgi_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-/* {{{ main */
-int main(int argc, char *argv[])
+/* {{{ fpm_main */
+int fpm_main(int argc, char *argv[], int first_arg)
 {
 	int exit_status = FPM_EXIT_OK;
 	int c, use_extended_info = 0;
@@ -1592,6 +1592,7 @@ int main(int argc, char *argv[])
 
 	php_ini_builder_init(&ini_builder);
 
+	php_optind = first_arg;
 	while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
 		switch (c) {
 			case 'c':
