@@ -34,7 +34,7 @@
 #include "win32/signal.h"
 #include "win32/console.h"
 #include <process.h>
-#include <shellapi.h>
+#include <corecrt_startup.h>
 #endif
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -1185,21 +1185,21 @@ err:
 #ifdef PHP_WIN32
 static char **php_cli_utf8_command_line(int *argc)
 {
-	wchar_t **wide = CommandLineToArgvW(GetCommandLineW(), argc);
-	char **args = wide ? calloc((size_t) *argc + 1, sizeof(char *)) : NULL;
+	if (!__wargv && _configure_wide_argv(_crt_argv_unexpanded_arguments)) {
+		return NULL;
+	}
+	*argc = __argc;
+	char **args = calloc((size_t) *argc + 1, sizeof(char *));
 
 	if (args) {
 		for (int i = 0; i < *argc; i++) {
-			args[i] = php_win32_cp_w_to_utf8(wide[i]);
+			args[i] = php_win32_cp_w_to_utf8(__wargv[i]);
 			if (!args[i]) {
 				PHP_WIN32_CP_FREE_ARRAY(args, *argc);
 				args = NULL;
 				break;
 			}
 		}
-	}
-	if (wide) {
-		LocalFree(wide);
 	}
 	return args;
 }
@@ -1210,8 +1210,8 @@ PHP_CLI_API int do_php_cli(int argc, char *argv[])
 {
 #if defined(PHP_WIN32)
 	char **native_argv = NULL;
+	char **converted_argv = NULL;
 	char **argv_save;
-	BOOL using_converted_argv = 0;
 #endif
 
 	int c;
@@ -1383,13 +1383,12 @@ exit_loop:
 	php_win32_cp_cli_setup();
 	orig_cp = (php_win32_cp_get_orig())->id;
 	if (!php_win32_cp_use_unicode()) {
-		char **converted_argv = calloc((size_t) argc + 1, sizeof(char *));
+		converted_argv = calloc((size_t) argc + 1, sizeof(char *));
 		if (!converted_argv) {
 			exit_status = 1;
 			goto out;
 		}
 		argv = converted_argv;
-		using_converted_argv = 1;
 		for (int i = 0; i < argc; i++) {
 			wchar_t *wide = php_win32_cp_utf8_to_w(argv_save[i]);
 			if (wide) {
@@ -1441,8 +1440,8 @@ out:
 #if defined(PHP_WIN32)
 	(void)php_win32_cp_cli_restore();
 
-	if (using_converted_argv) {
-		PHP_WIN32_CP_FREE_ARRAY(argv, argc);
+	if (converted_argv) {
+		PHP_WIN32_CP_FREE_ARRAY(converted_argv, argc);
 	}
 	argv = argv_save;
 #endif

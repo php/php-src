@@ -329,9 +329,6 @@ static const struct php_win32_cp *php_ini_utf8_codepage(HashTable *hash)
 	const char *names[] = {"internal_encoding", "default_charset"};
 	for (int i = 0; i < 2; i++) {
 		zval *value = zend_hash_str_find(hash, names[i], strlen(names[i]));
-		if (!value) {
-			value = zend_hash_str_find(&configuration_hash, names[i], strlen(names[i]));
-		}
 		if (value && Z_TYPE_P(value) == IS_PTR) {
 			value = Z_PTR_P(value);
 		}
@@ -439,7 +436,7 @@ static zend_result php_ini_parse_utf8(const char *entries)
 	char *(*getenv_save)(const char *, size_t) = zend_getenv;
 	zend_hash_init(&ctx.values, 8, NULL, config_zval_dtor, true);
 	zend_llist_init(&ctx.entries, sizeof(php_ini_utf8_entry), php_ini_utf8_entry_dtor, true);
-	ctx.cp = php_ini_utf8_codepage(&ctx.values);
+	ctx.cp = php_ini_utf8_codepage(&configuration_hash);
 	ctx.utf8 = php_win32_cp_get_by_id(CP_UTF8);
 	if (!ctx.cp || !ctx.utf8) {
 		ctx.failed = true;

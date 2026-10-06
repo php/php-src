@@ -61,6 +61,9 @@ int main(int argc, char *argv[])
 	} else if (argc > 1 && strcmp(argv[1], "internal-encoding") == 0) {
 		php_argv[3] = "internal_encoding=Windows-1252";
 		php_argv[10] = "\xe2\x82\xac";
+	} else if (argc > 1 && strcmp(argv[1], "empty-internal-encoding") == 0) {
+		php_argv[3] = "default_charset=Windows-1252\ninternal_encoding=";
+		php_argv[10] = "\xe2\x82\xac";
 	}
 	if (argc > 2 && strcmp(argv[2], "file") == 0) {
 		php_argv[4] = "-f";

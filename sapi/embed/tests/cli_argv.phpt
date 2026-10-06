@@ -10,7 +10,7 @@ if (!file_exists(dirname(PHP_BINARY) . '/php_embed_cli_test.exe')) {
 --FILE--
 <?php
 $host = dirname(PHP_BINARY) . '/php_embed_cli_test.exe';
-foreach (['ignored-host-argument', 'default-charset', 'internal-encoding'] as $mode) {
+foreach (['ignored-host-argument', 'default-charset', 'internal-encoding', 'empty-internal-encoding'] as $mode) {
     passthru(escapeshellarg($host) . ' ' . $mode, $status);
     var_dump($status);
     passthru(escapeshellarg($host) . ' ' . $mode . ' invalid-utf8 2>&1', $status);
@@ -32,6 +32,8 @@ passthru("$native -n -d $prepend -f cli_argv_main.php", $status);
 var_dump($status);
 passthru("$native -n -d default_charset=Windows-1252 -d $prepend -f cli_argv_main.php", $status);
 var_dump($status);
+passthru("$native -n -d default_charset=Windows-1252 -d internal_encoding= -d $prepend -f cli_argv_main.php", $status);
+var_dump($status);
 ?>
 --CLEAN--
 <?php
@@ -42,6 +44,11 @@ unlink(__DIR__ . '/cli_argv_test.ini');
 --EXPECT--
 [5,["636166c3a9","617267756d656e74207769746820737061636573","","f09f9880"]]
 65001
+int(23)
+Invalid UTF-8 in command line argument 7.
+int(1)
+[5,["636166e9","617267756d656e74207769746820737061636573","","80"]]
+1252
 int(23)
 Invalid UTF-8 in command line argument 7.
 int(1)
@@ -71,6 +78,11 @@ Unicode filename works
 Main script works
 65001
 636c695f617267765f636166c3a92e706870
+int(0)
+Unicode filename works
+Main script works
+1252
+636c695f617267765f636166e92e706870
 int(0)
 Unicode filename works
 Main script works

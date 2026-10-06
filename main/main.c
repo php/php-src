@@ -644,7 +644,7 @@ static PHP_INI_MH(OnUpdateInternalEncoding)
 	}
 	if (new_value) {
 #ifdef PHP_WIN32
-		php_win32_cp_do_update(ZSTR_VAL(new_value));
+		php_win32_cp_do_update(NULL);
 #endif
 	}
 	return SUCCESS;
