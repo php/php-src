@@ -3478,12 +3478,9 @@ PHP_FUNCTION(array_push)
 
 	HashTable *ht = Z_ARRVAL_P(stack);
 
-	/* Pushing nothing must not change the array, not even initialize it. A
-	 * single value is added to an uninitialized array more cheaply by
-	 * zend_hash_next_index_insert(), which initializes it inline. */
+	/* Pushing nothing must leave the array untouched. A single value is added
+	 * to an uninitialized array more cheaply by zend_hash_next_index_insert(). */
 	if (argc > 0 && (HT_IS_PACKED(ht) || (argc > 1 && (HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED)))) {
-		/* Like zend_hash_next_index_insert(), treat ZEND_LONG_MIN (no integer
-		 * key used yet) as 0. */
 		zend_long next_index = ht->nNextFreeElement == ZEND_LONG_MIN ? 0 : ht->nNextFreeElement;
 		bool appends_after_last = next_index == (zend_long) ht->nNumUsed;
 		uint32_t room = ht->nTableSize - ht->nNumUsed;
@@ -3495,7 +3492,7 @@ PHP_FUNCTION(array_push)
 		 && (argc <= room || HT_IS_WITHOUT_HOLES(ht))) {
 			if (UNEXPECTED(argc > room)) {
 				zend_hash_extend(ht, ht->nNumUsed + argc, true);
-			} else if (UNEXPECTED(HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED)) {
+			} else if (HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED) {
 				zend_hash_real_init_packed(ht);
 			}
 
@@ -3513,7 +3510,7 @@ PHP_FUNCTION(array_push)
 		}
 	}
 
-	/* For each subsequent argument, make it a reference, increase refcount, and add it to the end of the array */
+	/* Otherwise, insert the values one by one. */
 	for (uint32_t i = 0; i < argc; i++) {
 		Z_TRY_ADDREF(args[i]);
 
