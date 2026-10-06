@@ -151,6 +151,14 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 	size_t path_len;
 	int nesting_level = 0;
 
+#ifdef PHP_WIN32
+	/* Preserve the working-directory permission check for bare NUL. */
+	if ((strcasecmp(path, "NUL") == 0 || strcasecmp(path, "NUL:") == 0)
+			&& php_check_specific_open_basedir(basedir, ".") == 0) {
+		return 0;
+	}
+#endif
+
 	/* Special case basedir==".": Use script-directory */
 	if (strcmp(basedir, ".") || !VCWD_GETCWD(local_open_basedir, MAXPATHLEN)) {
 		/* Else use the unmodified path */
