@@ -580,8 +580,10 @@ static size_t format_converter(buffy * odp, const char *fmt, va_list ap) /* {{{ 
 					} else if (*fmt == '*') {
 						precision = va_arg(ap, int);
 						fmt++;
-						if (precision < -1)
-							precision = -1;
+						if (precision < 0) {
+							adjust_precision = false;
+							precision = 0;
+						}
 					} else
 						precision = 0;
 				} else
