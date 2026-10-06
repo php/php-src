@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed GH-24166 (Double-free in Phar::webPhar() in CGI without PATH_INFO).
     (RigelYoung, Jakub Zelenka)
 
+- Standard:
+  . Fixed chown() and lchown() failing to resolve user names in ZTS builds
+    when getpwnam_r() needs a larger buffer. (Ilia Alshanetsky)
+
 08 Oct 2026, PHP 8.6.0RC3
 
 - BCMath:
