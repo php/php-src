@@ -23,4 +23,6 @@ final class Closure
     public static function fromCallable(callable $callback): Closure {}
 
     public static function getCurrent(): Closure {}
+
+    public function __invoke(mixed ...$values): mixed {}
 }
