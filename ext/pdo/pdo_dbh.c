@@ -424,6 +424,11 @@ PDO_API void php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAMETERS, zen
 
 			if (pdbh) {
 				call_factory = 0;
+
+				pdbh->oracle_nulls = PDO_NULL_NATURAL;
+				pdbh->stringify = false;
+				pdbh->desired_case = PDO_CASE_NATURAL;
+				pdbh->default_fetch_type = PDO_FETCH_BOTH;
 			} else {
 				/* need a brand new pdbh */
 				pdbh = pecalloc(1, sizeof(*pdbh), 1);
