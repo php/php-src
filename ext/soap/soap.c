@@ -2353,7 +2353,6 @@ static bool do_request(zval *this_ptr, xmlDoc *request, const char *location, co
 		return false;
 	}
 
-	ZVAL_UNDEF(&func);
 	ZVAL_UNDEF(&params[0]);
 	ZVAL_UNDEF(&params[1]);
 	ZVAL_UNDEF(&params[2]);
