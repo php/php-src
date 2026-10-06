@@ -186,11 +186,15 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 			php_json_pretty_print_indent(buf, options, encoder);
 
 			if (php_json_escape_string(buf, ZSTR_VAL(prop_info->name), ZSTR_LEN(prop_info->name),
-					options & ~PHP_JSON_NUMERIC_CHECK, encoder) == FAILURE &&
-					(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) &&
-					buf->s) {
-				ZSTR_LEN(buf->s) -= 4;
-				smart_str_appendl(buf, "\"\"", 2);
+					options & ~PHP_JSON_NUMERIC_CHECK, encoder) == FAILURE) {
+				if (!(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
+					PHP_JSON_HASH_UNPROTECT_RECURSION(obj);
+					return FAILURE;
+				}
+				if (buf->s) {
+					ZSTR_LEN(buf->s) -= 4;
+					smart_str_appendl(buf, "\"\"", 2);
+				}
 			}
 
 			smart_str_appendc(buf, ':');
@@ -302,11 +306,17 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 					php_json_pretty_print_indent(buf, options, encoder);
 
 					if (php_json_escape_string(buf, ZSTR_VAL(key), ZSTR_LEN(key),
-								options & ~PHP_JSON_NUMERIC_CHECK, encoder) == FAILURE &&
-							(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) &&
-							buf->s) {
-						ZSTR_LEN(buf->s) -= 4;
-						smart_str_appendl(buf, "\"\"", 2);
+								options & ~PHP_JSON_NUMERIC_CHECK, encoder) == FAILURE) {
+						if (!(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
+							PHP_JSON_HASH_UNPROTECT_RECURSION(recursion_rc);
+							zend_release_properties(prop_ht);
+							zval_ptr_dtor(&tmp);
+							return FAILURE;
+						}
+						if (buf->s) {
+							ZSTR_LEN(buf->s) -= 4;
+							smart_str_appendl(buf, "\"\"", 2);
+						}
 					}
 				} else {
 					if (need_comma) {
