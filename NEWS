@@ -59,6 +59,10 @@ PHP                                                                        NEWS
   . Fixed OSS-Fuzz #545352966 (default value AST of an SHM-persisted partial).
     (ndossche)
 
+- OpenSSL:
+  . openssl_cms_sign() now supports detached signatures with S/MIME encoding
+    (multipart/signed) instead of failing with a warning. (Alexander Danilov)
+
 - PDO:
   . Fixed PDOStatement::getColumnMeta() reading out of bounds for an invalid
     column index. (Ilia Alshanetsky)
