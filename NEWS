@@ -49,6 +49,10 @@ PHP                                                                        NEWS
   . Fixed exception thrown by destructor during GC in a Fiber not being rethrown
     into the frame that triggered the GC. (Nicolas Grekas)
 
+- Curl:
+  . Fixed a leaked CurlHandle and clone accounting when a CURLMOPT_PUSHFUNCTION
+    callback denies the push or throws. (Ilia Alshanetsky)
+
 - DOM:
   . Fixed use-after-free when re-constructing a DOMXPath whose php:function
     registrations are freed while still reachable from the cycle collector.

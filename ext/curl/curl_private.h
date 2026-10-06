@@ -138,6 +138,7 @@ void _php_curl_cleanup_handle(php_curl *);
 void _php_curl_multi_cleanup_list(void *data);
 void _php_curl_verify_handlers(php_curl *ch, bool reporterror);
 void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source);
+void _php_curl_free_instance(php_curl *ch);
 
 /* Consumes `zv` */
 zend_long php_curl_get_long(zval *zv);
