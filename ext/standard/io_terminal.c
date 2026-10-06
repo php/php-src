@@ -917,8 +917,11 @@ static php_io_terminal_shared_mode *php_io_terminal_acquire_raw_mode(
 		}
 		if (is_console) {
 			DWORD current_mode;
-			if (GetConsoleMode(handle, &current_mode) && (current_mode & (ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT)) != 0) {
-				DWORD raw = php_io_terminal_make_raw_mode(current_mode);
+			if (!GetConsoleMode(handle, &current_mode)) {
+				return NULL;
+			}
+			DWORD raw = php_io_terminal_make_raw_mode(current_mode);
+			if (current_mode != raw) {
 				if (!SetConsoleMode(handle, raw)) {
 					return NULL;
 				}
@@ -1396,6 +1399,30 @@ static void php_io_terminal_make_raw_mode(struct termios *mode)
 	mode->c_cc[VTIME] = 0;
 }
 
+static bool php_io_terminal_termios_needs_raw_mode(const struct termios *current, const struct termios *desired)
+{
+	tcflag_t iflag_mask = IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON;
+	tcflag_t lflag_mask = ECHO | ECHONL | ICANON | ISIG | IEXTEN;
+	tcflag_t cflag_mask = CSIZE | PARENB;
+
+	if ((current->c_iflag & iflag_mask) != (desired->c_iflag & iflag_mask)) {
+		return true;
+	}
+	if ((current->c_lflag & lflag_mask) != (desired->c_lflag & lflag_mask)) {
+		return true;
+	}
+	if ((current->c_cflag & cflag_mask) != (desired->c_cflag & cflag_mask)) {
+		return true;
+	}
+	if (current->c_cc[VMIN] != desired->c_cc[VMIN]) {
+		return true;
+	}
+	if (current->c_cc[VTIME] != desired->c_cc[VTIME]) {
+		return true;
+	}
+	return false;
+}
+
 static php_io_terminal_shared_mode *php_io_terminal_acquire_raw_mode(
 	php_io_terminal_native_stream fd,
 	php_stream *stream,
@@ -1411,9 +1438,12 @@ static php_io_terminal_shared_mode *php_io_terminal_acquire_raw_mode(
 		}
 		if (is_tty) {
 			struct termios current_mode;
-			if (tcgetattr(fd, &current_mode) == 0 && (current_mode.c_lflag & (ECHO | ICANON)) != 0) {
-				struct termios raw = current_mode;
-				php_io_terminal_make_raw_mode(&raw);
+			if (tcgetattr(fd, &current_mode) != 0) {
+				return NULL;
+			}
+			struct termios raw = current_mode;
+			php_io_terminal_make_raw_mode(&raw);
+			if (php_io_terminal_termios_needs_raw_mode(&current_mode, &raw)) {
 				if (tcsetattr(fd, TCSANOW, &raw) != 0) {
 					return NULL;
 				}
@@ -2223,9 +2253,13 @@ static zend_string *php_io_terminal_read_stream_key(
 	php_poll_ctx *poll_ctx = NULL;
 
 	if (is_tty) {
-		if (tcgetattr(fd, &mode) == 0 && (mode.c_lflag & (ECHO | ICANON)) != 0) {
-			raw_mode = mode;
-			php_io_terminal_make_raw_mode(&raw_mode);
+		if (tcgetattr(fd, &mode) != 0) {
+			zend_throw_exception(php_io_terminal_exception_ce, "Failed to get terminal mode", 0);
+			return NULL;
+		}
+		raw_mode = mode;
+		php_io_terminal_make_raw_mode(&raw_mode);
+		if (php_io_terminal_termios_needs_raw_mode(&mode, &raw_mode)) {
 			if (tcsetattr(fd, TCSANOW, &raw_mode) == 0) {
 				mode_changed = true;
 			} else {
@@ -2284,12 +2318,7 @@ static zend_string *php_io_terminal_read_stream_key(
 				);
 				break;
 			} else if (read_result == PHP_IO_TERMINAL_READ_EOF) {
-				if (is_tty) {
-					zend_throw_exception(php_io_terminal_exception_ce, "End of file reached on terminal input stream", 0);
-				} else {
-					/* Non-TTY stream at EOF returns null */
-					result = NULL;
-				}
+				zend_throw_exception(php_io_terminal_exception_ce, "End of file reached on terminal input stream", 0);
 				break;
 			} else if (read_result == PHP_IO_TERMINAL_READ_TIMEOUT) {
 				result = NULL;
@@ -2350,12 +2379,14 @@ static zend_string *php_io_terminal_read_stream_secret(
 
 	if (is_tty) {
 		if (tcgetattr(fd, &mode) != 0) {
+			zend_throw_exception(php_io_terminal_exception_ce, "Failed to get terminal mode", 0);
 			return NULL;
 		}
-		if ((mode.c_lflag & (ECHO | ICANON)) != 0) {
-			raw_mode = mode;
-			php_io_terminal_make_raw_mode(&raw_mode);
+		raw_mode = mode;
+		php_io_terminal_make_raw_mode(&raw_mode);
+		if (php_io_terminal_termios_needs_raw_mode(&mode, &raw_mode)) {
 			if (tcsetattr(fd, TCSANOW, &raw_mode) != 0) {
+				zend_throw_exception(php_io_terminal_exception_ce, "Failed to set terminal raw mode", 0);
 				return NULL;
 			}
 			mode_changed = true;
@@ -2683,6 +2714,9 @@ restore:
 	if (mode_changed && tcsetattr(fd, TCSANOW, &mode) != 0) {
 		success = false;
 		*timed_out = false;
+		if (!EG(exception)) {
+			zend_throw_exception(php_io_terminal_exception_ce, "Failed to restore terminal mode", 0);
+		}
 	}
 
 	if (poll_ctx != NULL) {
@@ -3069,7 +3103,7 @@ PHP_METHOD(Io_Terminal_Terminal, readKey)
 					);
 					break;
 				} else if (read_result == PHP_IO_TERMINAL_READ_EOF) {
-					key = NULL;
+					zend_throw_exception(php_io_terminal_exception_ce, "End of file reached on terminal input stream", 0);
 					break;
 				} else if (read_result == PHP_IO_TERMINAL_READ_TIMEOUT) {
 					key = NULL;
