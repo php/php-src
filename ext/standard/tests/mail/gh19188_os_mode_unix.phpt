@@ -7,6 +7,7 @@ if (PHP_OS_FAMILY === 'Windows') die("skip Non-Windows only");
 --INI--
 sendmail_path={MAIL:gh19188_os_mode.out}
 mail.cr_lf_mode=os
+mail.add_x_header=off
 --FILE--
 <?php
 var_dump(mail('user@example.com', 'Test Subject', 'A Message', 'X-Test: os'));
