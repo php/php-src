@@ -786,7 +786,8 @@ PHP_FUNCTION(grapheme_extract)
 		}
 	}
 
-	str_len -= (pstr - str);
+	lstart = pstr - str;
+	str_len -= lstart;
 
 	/* if the string is all ASCII up to size+1 - or str_len whichever is first - then we are done.
 		(size + 1 because the size-th character might be the beginning of a grapheme cluster)
@@ -795,7 +796,7 @@ PHP_FUNCTION(grapheme_extract)
 	if ( -1 != grapheme_ascii_check((unsigned char *)pstr, MIN(size + 1, str_len)) ) {
 		size_t nsize = MIN(size, str_len);
 		if ( NULL != next ) {
-			ZEND_TRY_ASSIGN_REF_LONG(next, start + nsize);
+			ZEND_TRY_ASSIGN_REF_LONG(next, lstart + nsize);
 		}
 		RETURN_STRINGL(pstr, nsize);
 	}
@@ -829,7 +830,7 @@ PHP_FUNCTION(grapheme_extract)
 	ubrk_close(bi);
 
 	if ( NULL != next ) {
-		ZEND_TRY_ASSIGN_REF_LONG(next, start + ret_pos);
+		ZEND_TRY_ASSIGN_REF_LONG(next, lstart + ret_pos);
 	}
 
 	RETURN_STRINGL(((char *)pstr), ret_pos);
