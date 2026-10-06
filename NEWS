@@ -136,6 +136,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-23986 (/proc/self paths resolve to the parent process after
     pcntl_fork()). (Lazizbek Ergashev)
 
+- PCRE:
+  . Upgraded bundled PCRE2 to 10.49. (Ilia Alshanetsky)
+
 - PDO:
   . Fixed PDO::setAttribute() installing a PDO::ATTR_STATEMENT_CLASS class
     whose constructor arguments it rejects. (Ilia Alshanetsky)
