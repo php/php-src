@@ -26,5 +26,5 @@ var_dump(proc_close($proc));
 @unlink(__DIR__ . "/gh24139.ini");
 ?>
 --EXPECT--
-string(2) "ok"
+bool(false)
 int(0)

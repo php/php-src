@@ -566,7 +566,9 @@ int php_init_config(void)
 						if (filename) {
 							free_filename = true;
 						} else {
-							filename = php_ini_file_name;
+							/* Reject the file, like ZTS where VCWD_STAT() already fails */
+							fclose(fp);
+							fp = NULL;
 						}
 					}
 				}
