@@ -46,6 +46,10 @@ PHP                                                                        NEWS
   . Fixed OSS-Fuzz #545352966 (default value AST of an SHM-persisted partial).
     (ndossche)
 
+- OpenSSL:
+  . openssl_get_md_methods() now lists only the digest algorithms available
+    in the configured library context. (Alexander Danilov)
+
 - PDO:
   . Fixed PDOStatement::getColumnMeta() reading out of bounds for an invalid
     column index. (Ilia Alshanetsky)
