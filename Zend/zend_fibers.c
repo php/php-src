@@ -600,13 +600,7 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 		EG(stack_limit) = zend_fiber_stack_limit(fiber->context.stack);
 #endif
 
-		fiber->fci.retval = &fiber->result;
-
-		zend_call_function(&fiber->fci, &fiber->fci_cache);
-
-		/* Cleanup callback and unset field to prevent GC / duplicate dtor issues. */
-		zval_ptr_dtor(&fiber->fci.function_name);
-		ZVAL_UNDEF(&fiber->fci.function_name);
+		zend_call_known_fcc(&fiber->fci_cache, &fiber->result, fiber->param_count, fiber->params, fiber->named_params);
 
 		if (EG(exception)) {
 			if (!(fiber->flags & ZEND_FIBER_FLAG_DESTROYED)
@@ -805,7 +799,9 @@ static void zend_fiber_object_free(zend_object *object)
 {
 	zend_fiber *fiber = (zend_fiber *) object;
 
-	zval_ptr_dtor(&fiber->fci.function_name);
+	if (ZEND_FCC_INITIALIZED(fiber->fci_cache)) {
+		zend_fcc_dtor(&fiber->fci_cache);
+	}
 	zval_ptr_dtor(&fiber->result);
 
 	zend_object_std_dtor(&fiber->std);
@@ -816,7 +812,7 @@ static HashTable *zend_fiber_object_gc(zend_object *object, zval **table, int *n
 	zend_fiber *fiber = (zend_fiber *) object;
 	zend_get_gc_buffer *buf = zend_get_gc_buffer_create();
 
-	zend_get_gc_buffer_add_zval(buf, &fiber->fci.function_name);
+	zend_get_gc_buffer_add_fcc(buf, &fiber->fci_cache);
 	zend_get_gc_buffer_add_zval(buf, &fiber->result);
 
 	if (fiber->context.status != ZEND_FIBER_STATUS_SUSPENDED || fiber->caller != NULL) {
@@ -871,21 +867,19 @@ ZEND_METHOD(Fiber, __construct)
 	zend_fcall_info_cache fcc;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_FUNC(fci, fcc)
+		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(fci, fcc)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_fiber *fiber = (zend_fiber *) Z_OBJ_P(ZEND_THIS);
 
-	if (UNEXPECTED(fiber->context.status != ZEND_FIBER_STATUS_INIT || Z_TYPE(fiber->fci.function_name) != IS_UNDEF)) {
+	if (UNEXPECTED(fiber->context.status != ZEND_FIBER_STATUS_INIT || ZEND_FCC_INITIALIZED(fiber->fci_cache))) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot call constructor twice");
+		/* Release potential trampoline as ZPP will not have freed it. */
+		zend_release_fcall_info_cache(&fcc);
 		RETURN_THROWS();
 	}
 
-	fiber->fci = fci;
-	fiber->fci_cache = fcc;
-
-	// Keep a reference to closures or callable objects while the fiber is running.
-	Z_TRY_ADDREF(fiber->fci.function_name);
+	zend_fcc_dup(&fiber->fci_cache, &fcc);
 }
 
 ZEND_METHOD(Fiber, start)
@@ -893,7 +887,7 @@ ZEND_METHOD(Fiber, start)
 	zend_fiber *fiber = (zend_fiber *) Z_OBJ_P(ZEND_THIS);
 
 	ZEND_PARSE_PARAMETERS_START(0, -1)
-		Z_PARAM_VARIADIC_WITH_NAMED(fiber->fci.params, fiber->fci.param_count, fiber->fci.named_params);
+		Z_PARAM_VARIADIC_WITH_NAMED(fiber->params, fiber->param_count, fiber->named_params);
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (UNEXPECTED(zend_fiber_switch_blocked())) {
