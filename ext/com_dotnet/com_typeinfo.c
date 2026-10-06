@@ -211,7 +211,7 @@ PHP_COM_DOTNET_API zend_result php_com_import_typelib(ITypeLib *TL, int mode, in
 				php_com_zval_from_variant(&value, pVarDesc->lpvarValue, codepage);
 				if ((exists = zend_get_constant(const_name)) != NULL) {
 					if (COMG(autoreg_verbose) && !compare_function(&results, &value, exists)) {
-						php_error_docref(NULL, E_WARNING, "Type library constant %s is already defined", ZSTR_VAL(const_name));
+						php_error_docref(NULL, E_WARNING, "Type library constant %pS is already defined", const_name);
 					}
 					zend_string_release_ex(const_name, /* persistent */ false);
 					ITypeInfo_ReleaseVarDesc(TypeInfo, pVarDesc);
@@ -500,7 +500,7 @@ bool php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, bool p
 			SysFreeString(olename);
 
 			guid_str = php_com_string_from_clsid(&attr->guid, codepage);
-			php_printf("class %s { /* GUID=%s */\n", ZSTR_VAL(ansi_name), ZSTR_VAL(guid_str));
+			php_printf("class %pS { /* GUID=%pS */\n", ansi_name, guid_str);
 			zend_string_release_ex(guid_str, /* persistent */ false);
 			zend_string_release_ex(ansi_name, /* persistent */ false);
 		}
@@ -554,16 +554,16 @@ bool php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, bool p
 						if (olename) {
 							func_desc = php_com_olestring_to_string(olename, codepage);
 							SysFreeString(olename);
-							php_printf("\t/* %s */\n", ZSTR_VAL(func_desc));
+							php_printf("\t/* %pS */\n", func_desc);
 							zend_string_release_ex(func_desc, /* persistent */ false);
 						}
 
-						php_printf("\tvar $%s;\n\n", ZSTR_VAL(ansi_name));
+						php_printf("\tvar $%pS;\n\n", ansi_name);
 
 					} else {
 						/* a function */
 
-						php_printf("\tfunction %s(\n", ZSTR_VAL(ansi_name));
+						php_printf("\tfunction %pS(\n", ansi_name);
 
 						for (j = 0; j < func->cParams; j++) {
 							ELEMDESC *elem = &func->lprgelemdescParam[j];
@@ -587,9 +587,9 @@ bool php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, bool p
 							if (j+1 < (int)cnames) {
 								func_desc = php_com_olestring_to_string(names[j+1], codepage);
 								SysFreeString(names[j+1]);
-								php_printf(" */ %s%s%c\n",
+								php_printf(" */ %s%pS%c\n",
 									elem->tdesc.vt == VT_PTR ? "&$" : "$",
-									ZSTR_VAL(func_desc),
+									func_desc,
 									j == func->cParams - 1 ? ' ' : ','
 								);
 							} else {
@@ -610,7 +610,7 @@ bool php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, bool p
 						if (olename) {
 							func_desc = php_com_olestring_to_string(olename, codepage);
 							SysFreeString(olename);
-							php_printf("\t\t/* %s */\n", ZSTR_VAL(func_desc));
+							php_printf("\t\t/* %pS */\n", func_desc);
 							zend_string_release_ex(func_desc, /* persistent */ false);
 						}
 
