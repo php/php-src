@@ -417,8 +417,8 @@ ZEND_API void zend_declare_class_constant_stringl(zend_class_entry *ce, const ch
 ZEND_API void zend_declare_class_constant_string(zend_class_entry *ce, const char *name, size_t name_length, const char *value);
 
 ZEND_API zend_result zend_update_class_constant(zend_class_constant *c, const zend_string *name, zend_class_entry *scope);
-ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type);
-ZEND_API HashTable *zend_separate_class_constants_table(const zend_class_entry *class_type);
+ZEND_API zend_result zend_update_class_constants(zend_class_entry *ce);
+ZEND_API HashTable *zend_separate_class_constants_table(const zend_class_entry *ce);
 
 static zend_always_inline const HashTable *zend_class_constants_table(const zend_class_entry *ce) {
 	if ((ce->ce_flags & ZEND_ACC_HAS_AST_CONSTANTS) && ZEND_MAP_PTR(ce->mutable_data)) {
@@ -516,9 +516,9 @@ static zend_always_inline void array_init(zval *arg)
 
 ZEND_API void object_init(zval *arg);
 ZEND_API zend_result object_init_ex(zval *arg, zend_class_entry *ce);
-ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *class_type, uint32_t param_count, zval *params, HashTable *named_params);
+ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *ce, uint32_t param_count, zval *params, HashTable *named_params);
 ZEND_API zend_result object_and_properties_init(zval *arg, zend_class_entry *ce, HashTable *properties);
-ZEND_API void object_properties_init(zend_object *object, zend_class_entry *class_type);
+ZEND_API void object_properties_init(zend_object *object, zend_class_entry *ce);
 ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properties);
 ZEND_API void object_properties_load(zend_object *object, const HashTable *properties);
 

@@ -1434,23 +1434,23 @@ ZEND_API void zend_merge_properties(const zval *obj, const HashTable *properties
 }
 /* }}} */
 
-static zend_class_mutable_data *zend_allocate_mutable_data(const zend_class_entry *class_type) /* {{{ */
+static zend_class_mutable_data *zend_allocate_mutable_data(const zend_class_entry *ce) /* {{{ */
 {
 	zend_class_mutable_data *mutable_data;
 
-	ZEND_ASSERT(ZEND_MAP_PTR(class_type->mutable_data) != NULL);
-	ZEND_ASSERT(ZEND_MAP_PTR_GET_IMM(class_type->mutable_data) == NULL);
+	ZEND_ASSERT(ZEND_MAP_PTR(ce->mutable_data) != NULL);
+	ZEND_ASSERT(ZEND_MAP_PTR_GET_IMM(ce->mutable_data) == NULL);
 
 	mutable_data = zend_arena_alloc(&CG(arena), sizeof(zend_class_mutable_data));
 	memset(mutable_data, 0, sizeof(zend_class_mutable_data));
-	mutable_data->ce_flags = class_type->ce_flags;
-	ZEND_MAP_PTR_SET_IMM(class_type->mutable_data, mutable_data);
+	mutable_data->ce_flags = ce->ce_flags;
+	ZEND_MAP_PTR_SET_IMM(ce->mutable_data, mutable_data);
 
 	return mutable_data;
 }
 /* }}} */
 
-ZEND_API HashTable *zend_separate_class_constants_table(const zend_class_entry *class_type) /* {{{ */
+ZEND_API HashTable *zend_separate_class_constants_table(const zend_class_entry *ce) /* {{{ */
 {
 	zend_class_mutable_data *mutable_data;
 	HashTable *constants_table;
@@ -1458,11 +1458,11 @@ ZEND_API HashTable *zend_separate_class_constants_table(const zend_class_entry *
 	zend_class_constant *new_c, *c;
 
 	constants_table = zend_arena_alloc(&CG(arena), sizeof(HashTable));
-	zend_hash_init(constants_table, zend_hash_num_elements(&class_type->constants_table), NULL, NULL, 0);
-	zend_hash_extend(constants_table, zend_hash_num_elements(&class_type->constants_table), 0);
+	zend_hash_init(constants_table, zend_hash_num_elements(&ce->constants_table), NULL, NULL, 0);
+	zend_hash_extend(constants_table, zend_hash_num_elements(&ce->constants_table), 0);
 
-	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&class_type->constants_table, key, c) {
-		if (c->ce == class_type) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&ce->constants_table, key, c) {
+		if (c->ce == ce) {
 			if (Z_TYPE(c->value) == IS_CONSTANT_AST || (ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_DEPRECATED)) {
 				new_c = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
 				memcpy(new_c, c, sizeof(zend_class_constant));
@@ -1478,11 +1478,11 @@ ZEND_API HashTable *zend_separate_class_constants_table(const zend_class_entry *
 		_zend_hash_append_ptr(constants_table, key, c);
 	} ZEND_HASH_FOREACH_END();
 
-	ZEND_ASSERT(ZEND_MAP_PTR(class_type->mutable_data) != NULL);
+	ZEND_ASSERT(ZEND_MAP_PTR(ce->mutable_data) != NULL);
 
-	mutable_data = ZEND_MAP_PTR_GET_IMM(class_type->mutable_data);
+	mutable_data = ZEND_MAP_PTR_GET_IMM(ce->mutable_data);
 	if (!mutable_data) {
-		mutable_data = zend_allocate_mutable_data(class_type);
+		mutable_data = zend_allocate_mutable_data(ce);
 	}
 
 	mutable_data->constants_table = constants_table;
@@ -1542,7 +1542,7 @@ ZEND_API zend_result zend_update_class_constant(zend_class_constant *c, const ze
 	return SUCCESS;
 }
 
-ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
+ZEND_API zend_result zend_update_class_constants(zend_class_entry *ce) /* {{{ */
 {
 	zend_class_mutable_data *mutable_data = NULL;
 	zval *default_properties_table = NULL;
@@ -1551,27 +1551,27 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 	zval *val;
 	uint32_t ce_flags;
 
-	ce_flags = class_type->ce_flags;
+	ce_flags = ce->ce_flags;
 
 	if (ce_flags & ZEND_ACC_CONSTANTS_UPDATED) {
 		return SUCCESS;
 	}
 
-	bool uses_mutable_data = ZEND_MAP_PTR(class_type->mutable_data) != NULL;
+	bool uses_mutable_data = ZEND_MAP_PTR(ce->mutable_data) != NULL;
 	if (uses_mutable_data) {
-		mutable_data = ZEND_MAP_PTR_GET_IMM(class_type->mutable_data);
+		mutable_data = ZEND_MAP_PTR_GET_IMM(ce->mutable_data);
 		if (mutable_data) {
 			ce_flags = mutable_data->ce_flags;
 			if (ce_flags & ZEND_ACC_CONSTANTS_UPDATED) {
 				return SUCCESS;
 			}
 		} else {
-			mutable_data = zend_allocate_mutable_data(class_type);
+			mutable_data = zend_allocate_mutable_data(ce);
 		}
 	}
 
-	if (class_type->parent) {
-		if (UNEXPECTED(zend_update_class_constants(class_type->parent) != SUCCESS)) {
+	if (ce->parent) {
+		if (UNEXPECTED(zend_update_class_constants(ce->parent) != SUCCESS)) {
 			return FAILURE;
 		}
 	}
@@ -1582,17 +1582,17 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 		if (uses_mutable_data) {
 			constants_table = mutable_data->constants_table;
 			if (!constants_table) {
-				constants_table = zend_separate_class_constants_table(class_type);
+				constants_table = zend_separate_class_constants_table(ce);
 			}
 		} else {
-			constants_table = &class_type->constants_table;
+			constants_table = &ce->constants_table;
 		}
 
 		zend_string *name;
 		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(constants_table, name, val) {
 			c = Z_PTR_P(val);
 			if (Z_TYPE(c->value) == IS_CONSTANT_AST) {
-				if (c->ce != class_type) {
+				if (c->ce != ce) {
 					Z_PTR_P(val) = c = zend_hash_find_ptr(CE_CONSTANTS_TABLE(c->ce), name);
 					if (Z_TYPE(c->value) != IS_CONSTANT_AST) {
 						continue;
@@ -1607,24 +1607,24 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 		} ZEND_HASH_FOREACH_END();
 	}
 
-	if (class_type->default_static_members_count) {
-		static_members_table = CE_STATIC_MEMBERS(class_type);
+	if (ce->default_static_members_count) {
+		static_members_table = CE_STATIC_MEMBERS(ce);
 		if (!static_members_table) {
-			zend_class_init_statics(class_type);
-			static_members_table = CE_STATIC_MEMBERS(class_type);
+			zend_class_init_statics(ce);
+			static_members_table = CE_STATIC_MEMBERS(ce);
 		}
 	}
 
-	default_properties_table = class_type->default_properties_table;
+	default_properties_table = ce->default_properties_table;
 	if (uses_mutable_data && (ce_flags & ZEND_ACC_HAS_AST_PROPERTIES)) {
 		zval *src, *dst, *end;
 
 		default_properties_table = mutable_data->default_properties_table;
 		if (!default_properties_table) {
-			default_properties_table = zend_arena_alloc(&CG(arena), sizeof(zval) * class_type->default_properties_count);
-			src = class_type->default_properties_table;
+			default_properties_table = zend_arena_alloc(&CG(arena), sizeof(zval) * ce->default_properties_count);
+			src = ce->default_properties_table;
 			dst = default_properties_table;
-			end = dst + class_type->default_properties_count;
+			end = dst + ce->default_properties_count;
 			do {
 				ZVAL_COPY_PROP(dst, src);
 				src++;
@@ -1639,8 +1639,8 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 
 		/* Use the default properties table to also update initializers of private properties
 		 * that have been shadowed in a child class. */
-		for (uint32_t i = 0; i < class_type->default_properties_count; i++) {
-			prop_info = class_type->properties_info_table[i];
+		for (uint32_t i = 0; i < ce->default_properties_count; i++) {
+			prop_info = ce->properties_info_table[i];
 			if (!prop_info) {
 				continue;
 			}
@@ -1652,8 +1652,8 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 			}
 		}
 
-		if (class_type->default_static_members_count) {
-			ZEND_HASH_MAP_FOREACH_PTR(&class_type->properties_info, prop_info) {
+		if (ce->default_static_members_count) {
+			ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, prop_info) {
 				if (prop_info->flags & ZEND_ACC_STATIC) {
 					val = static_members_table + prop_info->offset;
 					if (Z_TYPE_P(val) == IS_CONSTANT_AST
@@ -1665,8 +1665,8 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 		}
 	}
 
-	if (class_type->type == ZEND_USER_CLASS && class_type->ce_flags & ZEND_ACC_ENUM && class_type->enum_backing_type != IS_UNDEF) {
-		if (zend_enum_build_backed_enum_table(class_type) == FAILURE) {
+	if (ce->type == ZEND_USER_CLASS && ce->ce_flags & ZEND_ACC_ENUM && ce->enum_backing_type != IS_UNDEF) {
+		if (zend_enum_build_backed_enum_table(ce) == FAILURE) {
 			return FAILURE;
 		}
 	}
@@ -1678,21 +1678,21 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 	if (uses_mutable_data) {
 		mutable_data->ce_flags = ce_flags;
 	} else {
-		class_type->ce_flags = ce_flags;
+		ce->ce_flags = ce_flags;
 	}
 
 	return SUCCESS;
 }
 /* }}} */
 
-static zend_always_inline void _object_properties_init(zend_object *object, zend_class_entry *class_type) /* {{{ */
+static zend_always_inline void _object_properties_init(zend_object *object, zend_class_entry *ce) /* {{{ */
 {
-	if (class_type->default_properties_count) {
-		zval *src = CE_DEFAULT_PROPERTIES_TABLE(class_type);
+	if (ce->default_properties_count) {
+		zval *src = CE_DEFAULT_PROPERTIES_TABLE(ce);
 		zval *dst = object->properties_table;
-		zval *end = src + class_type->default_properties_count;
+		zval *end = src + ce->default_properties_count;
 
-		if (UNEXPECTED(class_type->type == ZEND_INTERNAL_CLASS)) {
+		if (UNEXPECTED(ce->type == ZEND_INTERNAL_CLASS)) {
 			/* We don't have to account for refcounting because
 			 * zend_declare_typed_property() disallows refcounted defaults for internal classes. */
 			do {
@@ -1712,10 +1712,10 @@ static zend_always_inline void _object_properties_init(zend_object *object, zend
 }
 /* }}} */
 
-ZEND_API void object_properties_init(zend_object *object, zend_class_entry *class_type) /* {{{ */
+ZEND_API void object_properties_init(zend_object *object, zend_class_entry *ce) /* {{{ */
 {
 	object->properties = NULL;
-	_object_properties_init(object, class_type);
+	_object_properties_init(object, ce);
 }
 /* }}} */
 
@@ -1870,63 +1870,63 @@ ZEND_API void object_properties_load(zend_object *object, const HashTable *prope
  * class and all props being public. If only a subset is given or the class
  * has protected members then you need to merge the properties separately by
  * calling zend_merge_properties(). */
-static zend_always_inline zend_result _object_and_properties_init(zval *arg, zend_class_entry *class_type, HashTable *properties) /* {{{ */
+static zend_always_inline zend_result _object_and_properties_init(zval *arg, zend_class_entry *ce, HashTable *properties) /* {{{ */
 {
-	if (UNEXPECTED(class_type->ce_flags & ZEND_ACC_UNINSTANTIABLE)) {
-		if (class_type->ce_flags & ZEND_ACC_INTERFACE) {
-			zend_throw_error(NULL, "Cannot instantiate interface %s", ZSTR_VAL(class_type->name));
-		} else if (class_type->ce_flags & ZEND_ACC_TRAIT) {
-			zend_throw_error(NULL, "Cannot instantiate trait %s", ZSTR_VAL(class_type->name));
-		} else if (class_type->ce_flags & ZEND_ACC_ENUM) {
-			zend_throw_error(NULL, "Cannot instantiate enum %s", ZSTR_VAL(class_type->name));
+	if (UNEXPECTED(ce->ce_flags & ZEND_ACC_UNINSTANTIABLE)) {
+		if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+			zend_throw_error(NULL, "Cannot instantiate interface %s", ZSTR_VAL(ce->name));
+		} else if (ce->ce_flags & ZEND_ACC_TRAIT) {
+			zend_throw_error(NULL, "Cannot instantiate trait %s", ZSTR_VAL(ce->name));
+		} else if (ce->ce_flags & ZEND_ACC_ENUM) {
+			zend_throw_error(NULL, "Cannot instantiate enum %s", ZSTR_VAL(ce->name));
 		} else {
-			ZEND_ASSERT(class_type->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS));
-			zend_throw_error(NULL, "Cannot instantiate abstract class %s", ZSTR_VAL(class_type->name));
+			ZEND_ASSERT(ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS));
+			zend_throw_error(NULL, "Cannot instantiate abstract class %s", ZSTR_VAL(ce->name));
 		}
 		ZVAL_NULL(arg);
 		Z_OBJ_P(arg) = NULL;
 		return FAILURE;
 	}
 
-	if (UNEXPECTED(!(class_type->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
-		if (UNEXPECTED(zend_update_class_constants(class_type) != SUCCESS)) {
+	if (UNEXPECTED(!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
+		if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
 			ZVAL_NULL(arg);
 			Z_OBJ_P(arg) = NULL;
 			return FAILURE;
 		}
 	}
 
-	if (class_type->create_object == NULL) {
-		zend_object *obj = zend_objects_new(class_type);
+	if (ce->create_object == NULL) {
+		zend_object *obj = zend_objects_new(ce);
 
 		ZVAL_OBJ(arg, obj);
 		if (properties) {
 			object_properties_init_ex(obj, properties);
 		} else {
-			_object_properties_init(obj, class_type);
+			_object_properties_init(obj, ce);
 		}
 	} else {
-		ZVAL_OBJ(arg, class_type->create_object(class_type));
+		ZVAL_OBJ(arg, ce->create_object(ce));
 	}
 	return SUCCESS;
 }
 /* }}} */
 
-ZEND_API zend_result object_and_properties_init(zval *arg, zend_class_entry *class_type, HashTable *properties) /* {{{ */
+ZEND_API zend_result object_and_properties_init(zval *arg, zend_class_entry *ce, HashTable *properties) /* {{{ */
 {
-	return _object_and_properties_init(arg, class_type, properties);
+	return _object_and_properties_init(arg, ce, properties);
 }
 /* }}} */
 
-ZEND_API zend_result object_init_ex(zval *arg, zend_class_entry *class_type) /* {{{ */
+ZEND_API zend_result object_init_ex(zval *arg, zend_class_entry *ce) /* {{{ */
 {
-	return _object_and_properties_init(arg, class_type, NULL);
+	return _object_and_properties_init(arg, ce, NULL);
 }
 /* }}} */
 
-ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *class_type, uint32_t param_count, zval *params, HashTable *named_params) /* {{{ */
+ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *ce, uint32_t param_count, zval *params, HashTable *named_params) /* {{{ */
 {
-	zend_result status = _object_and_properties_init(arg, class_type, NULL);
+	zend_result status = _object_and_properties_init(arg, ce, NULL);
 	if (UNEXPECTED(status == FAILURE)) {
 		ZVAL_UNDEF(arg);
 		return FAILURE;
@@ -1971,7 +1971,7 @@ ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *c
 	zend_call_known_function(
 		constructor,
 		obj,
-		class_type,
+		ce,
 		&retval,
 		param_count,
 		params,
