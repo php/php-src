@@ -1174,6 +1174,21 @@ static int php_io_ring_reg_take(php_io_ring *ring, php_io_ring_reg *rec)
 	return fd;
 }
 
+/* The polls parked on a listener while its multishot accept takes the connections from the kernel:
+ * one buffered, or the multishot gone, makes the listener worth a look */
+static void php_io_ring_reg_wake_polls(php_io_ring *ring, php_io_ring_reg *rec)
+{
+	php_io_ring_req *w = ring->waiting;
+	while (w) {
+		php_io_ring_req *next = w->w_next;
+		if (w->waiting == rec && w->type == PHP_IO_OP_POLL) {
+			php_io_ring_waiter_settle(ring, w);
+			php_io_ring_req_main_cqe(ring, w, (int32_t) IOR_POLL_IN);
+		}
+		w = next;
+	}
+}
+
 /* A connection the multishot accepted: the oldest parked accept takes it, or it is buffered */
 static void php_io_ring_reg_connection(php_io_ring *ring, php_io_ring_reg *rec, int fd)
 {
@@ -1194,6 +1209,7 @@ static void php_io_ring_reg_connection(php_io_ring *ring, php_io_ring_reg *rec, 
 		rec->fds = safe_erealloc(rec->fds, rec->fds_cap, sizeof(*rec->fds), 0);
 	}
 	rec->fds[rec->n_fds++] = fd;
+	php_io_ring_reg_wake_polls(ring, rec);
 	if (rec->accept && rec->n_fds >= PHP_IO_RING_ACCEPT_CAP) {
 		php_io_ring_reg_disarm_accept(ring, rec, true);
 	}
@@ -1215,6 +1231,16 @@ static bool php_io_ring_accept_wait(php_io_ring *ring, php_io_ring_req *req)
 		php_io_ring_accept_complete(ring, req, php_io_ring_reg_take(ring, rec));
 		return true;
 	}
+	if (!php_deadline_is_infinite(&req->deadline) && req->deadline.hrtime <= zend_hrtime()) {
+		/* A non-blocking accept arms no multishot, which would take the connections arriving after
+		 * it out of a select's sight: a direct one is left to the core's accept(), the wait after
+		 * it takes its own entry */
+		if (!(op->flags & PHP_IO_OP_F_AFTER_DRAIN)) {
+			php_io_ring_req_fail(ring, req, ENOTSUP);
+			return true;
+		}
+		return false;
+	}
 	if (!rec->accept && !php_io_ring_reg_arm_accept(ring, rec)) {
 		return false;
 	}
@@ -1229,6 +1255,19 @@ static bool php_io_ring_edge_wait(php_io_ring *ring, php_io_ring_req *req)
 	php_io_op *op = req->op;
 	if (op->type == PHP_IO_OP_ACCEPT) {
 		return php_io_ring_accept_wait(ring, req);
+	}
+	if (op->type == PHP_IO_OP_POLL && (op->u.poll.events & PHP_POLL_READ)) {
+		/* A select's poll on a listener whose multishot accept takes the connections from the
+		 * kernel: answered from the buffer, or by the next connection the multishot takes */
+		php_io_ring_reg *listener = php_io_ring_reg_of(ring, op->registration, op->fd);
+		if (listener && listener->n_fds) {
+			php_io_ring_req_main_cqe(ring, req, (int32_t) IOR_POLL_IN);
+			return true;
+		}
+		if (listener && listener->accept) {
+			php_io_ring_waiter_park(ring, req, listener, IOR_POLL_IN);
+			return true;
+		}
 	}
 	if (op->type != PHP_IO_OP_POLL || !(op->flags & PHP_IO_OP_F_AFTER_DRAIN) || !op->registration
 			|| op->registration->trigger != PHP_IO_TRIGGER_EDGE) {
@@ -1735,6 +1774,7 @@ static void php_io_ring_multishot_cqe(php_io_ring *ring, php_io_ring_req *req, i
 				rec->accept = NULL;
 			}
 			req->reg = NULL;
+			php_io_ring_reg_wake_polls(ring, rec);
 			if (res < 0 && res != -ECANCELED) {
 				/* Refused (an old kernel, -EMFILE): the parked accepts get the error, later
 				 * ones take their own entry */
