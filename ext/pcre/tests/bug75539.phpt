@@ -1,11 +1,5 @@
 --TEST--
 Bug #75539 - Recursive call errors are not reported by preg_last_error()
---SKIPIF--
-<?php
-if (10 == PCRE_VERSION_MAJOR && 37 == PCRE_VERSION_MINOR) {
-    die("skip ");
-}
-?>
 --FILE--
 <?php
 

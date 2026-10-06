@@ -574,11 +574,7 @@ static zend_always_inline size_t calculate_unit_length(const pcre_cache_entry *p
 PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bool locale_aware)
 {
 	pcre2_code			*re = NULL;
-#if 10 == PCRE2_MAJOR && 37 == PCRE2_MINOR && !defined(HAVE_BUNDLED_PCRE)
-	uint32_t			 coptions = PCRE2_NO_START_OPTIMIZE;
-#else
 	uint32_t			 coptions = 0;
-#endif
 	uint32_t			 eoptions = 0;
 	PCRE2_UCHAR	         error[128];
 	PCRE2_SIZE           erroffset;
