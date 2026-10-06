@@ -1723,6 +1723,18 @@ void gdImageEllipse(gdImagePtr im, int mx, int my, int w, int h, int c)
 	b=h>>1;
 	gdImageSetPixel(im,mx+a, my, c);
 	gdImageSetPixel(im,mx-a, my, c);
+
+	if (a <= 0 || b <= 0) {
+		return; 
+	}
+
+	if (a > (INT64_MAX >> 1) / b / b) {
+		return;
+	}
+
+	if (b > (INT64_MAX >> 1) / a / a) {
+		return;
+	}
 	mx1 = mx-a;my1 = my;
 	mx2 = mx+a;my2 = my;
 
@@ -1762,6 +1774,17 @@ void gdImageFilledEllipse (gdImagePtr im, int mx, int my, int w, int h, int c)
 
 	a=w>>1;
 	b=h>>1;
+	if (a <= 0 || b <= 0) {
+		return; 
+	}
+
+	if (a > (INT64_MAX >> 1) / b / b) {
+		return;
+	}
+
+	if (b > (INT64_MAX >> 1) / a / a) {
+		return;
+	}
 
 	for (x = mx-a; x <= mx+a; x++) {
 		gdImageSetPixel(im, x, my, c);
