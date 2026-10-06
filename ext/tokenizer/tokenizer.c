@@ -385,28 +385,26 @@ static bool tokenize(zval *return_value, zend_string *source, zend_class_entry *
 struct event_context {
 	zval *tokens;
 	zend_class_entry *token_class;
+	size_t offset;
 };
 
-static zval *extract_token_id_to_replace(zval *token_zv, const char *text, size_t length) {
-	zval *id_zv, *text_zv;
+static size_t token_source_length(zval *token_zv, zval **id_zv, zend_string **text) {
+	zval *text_zv;
 	ZEND_ASSERT(token_zv);
 	if (Z_TYPE_P(token_zv) == IS_ARRAY) {
-		id_zv = zend_hash_index_find(Z_ARRVAL_P(token_zv), 0);
+		*id_zv = zend_hash_index_find(Z_ARRVAL_P(token_zv), 0);
 		text_zv = zend_hash_index_find(Z_ARRVAL_P(token_zv), 1);
 	} else if (Z_TYPE_P(token_zv) == IS_OBJECT) {
-		id_zv = OBJ_PROP_NUM(Z_OBJ_P(token_zv), 0);
+		*id_zv = OBJ_PROP_NUM(Z_OBJ_P(token_zv), 0);
 		text_zv = OBJ_PROP_NUM(Z_OBJ_P(token_zv), 1);
 	} else {
-		return NULL;
+		*id_zv = NULL;
+		text_zv = token_zv;
 	}
 
-	/* There are multiple candidate tokens to which this feedback may apply,
-	 * check text to make sure this is the right one. */
 	ZEND_ASSERT(Z_TYPE_P(text_zv) == IS_STRING);
-	if (Z_STRLEN_P(text_zv) == length && !memcmp(Z_STRVAL_P(text_zv), text, length)) {
-		return id_zv;
-	}
-	return NULL;
+	*text = Z_STR_P(text_zv);
+	return Z_STRLEN_P(text_zv);
 }
 
 static void on_event(
@@ -426,18 +424,32 @@ static void on_event(
 			}
 			add_token(
 				ctx->tokens, token, (unsigned char *) text, length, line, ctx->token_class, NULL);
+			ctx->offset += length;
 			break;
 		case ON_FEEDBACK: {
 			HashTable *tokens_ht = Z_ARRVAL_P(ctx->tokens);
+			size_t target = (unsigned char *) text - LANG_SCNG(yy_start);
+			size_t offset = ctx->offset;
 			zval *token_zv, *id_zv = NULL;
 			ZEND_HASH_REVERSE_FOREACH_VAL(tokens_ht, token_zv) {
-				id_zv = extract_token_id_to_replace(token_zv, text, length);
-				if (id_zv) {
+				zval *candidate_id;
+				zend_string *candidate_text;
+				size_t candidate_length =
+					token_source_length(token_zv, &candidate_id, &candidate_text);
+				if (offset < candidate_length || offset - candidate_length < target) {
+					break;
+				}
+				offset -= candidate_length;
+				if (offset == target) {
+					ZEND_ASSERT(ZSTR_LEN(candidate_text) == length
+						&& !memcmp(ZSTR_VAL(candidate_text), text, length));
+					id_zv = candidate_id;
 					break;
 				}
 			} ZEND_HASH_FOREACH_END();
-			ZEND_ASSERT(id_zv);
-			ZVAL_LONG(id_zv, token);
+			if (id_zv) {
+				ZVAL_LONG(id_zv, token);
+			}
 			break;
 		}
 		case ON_STOP:
@@ -445,6 +457,7 @@ static void on_event(
 				add_token(ctx->tokens, T_INLINE_HTML, LANG_SCNG(yy_cursor),
 					LANG_SCNG(yy_limit) - LANG_SCNG(yy_cursor), CG(zend_lineno),
 					ctx->token_class, NULL);
+				ctx->offset += LANG_SCNG(yy_limit) - LANG_SCNG(yy_cursor);
 			}
 			break;
 	}
@@ -471,6 +484,7 @@ static bool tokenize_parse(
 
 	ctx.tokens = &token_stream;
 	ctx.token_class = token_class;
+	ctx.offset = 0;
 
 	CG(ast) = NULL;
 	CG(ast_arena) = zend_arena_create(1024 * 32);
