@@ -31,6 +31,31 @@ if (function_exists('pcntl_alarm')) {
     pcntl_alarm(10);
 }
 
+function readLineWithTimeout($stream, int $timeoutSec = 3): ?string {
+    $deadline = hrtime(true) + ($timeoutSec * 1_000_000_000);
+    while (hrtime(true) < $deadline) {
+        $remainingNs = $deadline - hrtime(true);
+        if ($remainingNs <= 0) {
+            break;
+        }
+        $sec = intdiv($remainingNs, 1_000_000_000);
+        $usec = intdiv($remainingNs % 1_000_000_000, 1000);
+        $r = [$stream];
+        $w = null;
+        $e = null;
+        $n = @stream_select($r, $w, $e, $sec, $usec);
+        if ($n === false) {
+            continue;
+        }
+        if ($n > 0) {
+            $line = fgets($stream);
+            return ($line !== false) ? $line : null;
+        }
+        break;
+    }
+    return null;
+}
+
 function runIsolatedChild(string $code, ?string $inputToSend = null): string {
     $descriptors = [
         0 => ['pty'],
@@ -43,28 +68,91 @@ function runIsolatedChild(string $code, ?string $inputToSend = null): string {
         return "FAIL: proc_open failed";
     }
 
+    $cleaned = false;
+    $cleanup = function () use ($proc, &$pipes, &$cleaned): void {
+        if ($cleaned) {
+            return;
+        }
+        $cleaned = true;
+        foreach ($pipes as $p) {
+            if (is_resource($p)) {
+                fclose($p);
+            }
+        }
+        if (is_resource($proc)) {
+            $status = proc_get_status($proc);
+            if ($status['running']) {
+                $exitDeadline = hrtime(true) + 200_000_000;
+                while (proc_get_status($proc)['running'] && hrtime(true) < $exitDeadline) {
+                    usleep(2000);
+                }
+            }
+            $status = proc_get_status($proc);
+            if ($status['running']) {
+                @proc_terminate($proc);
+                $termDeadline = hrtime(true) + 300_000_000;
+                while (proc_get_status($proc)['running'] && hrtime(true) < $termDeadline) {
+                    usleep(2000);
+                }
+                if (proc_get_status($proc)['running'] && defined('SIGKILL')) {
+                    @proc_terminate($proc, SIGKILL);
+                    usleep(2000);
+                }
+            }
+            proc_close($proc);
+        }
+    };
+
     // Readiness synchronization: wait for child to signal READY
-    stream_set_timeout($pipes[1], 3);
-    $ready = fgets($pipes[1]);
-    if (trim($ready) !== 'READY') {
-        foreach ($pipes as $p) { if (is_resource($p)) fclose($p); }
-        proc_terminate($proc);
-        proc_close($proc);
-        return "FAIL: child not ready: " . var_export($ready, true);
+    $ready = readLineWithTimeout($pipes[1], 3);
+    if ($ready === null || trim($ready) !== 'READY') {
+        stream_set_blocking($pipes[2], false);
+        $stderr = stream_get_contents($pipes[2]);
+        $cleanup();
+        return "FAIL: child not ready: " . var_export($ready, true) . (!empty($stderr) ? " (stderr: " . trim($stderr) . ")" : "");
     }
 
     if ($inputToSend !== null) {
-        usleep(50000);
+        $isigDisabled = false;
+        $obsDeadline = hrtime(true) + 1_500_000_000;
+        while (hrtime(true) < $obsDeadline) {
+            $sub = @proc_open(['stty', '-a'], [0 => $pipes[0], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $subPipes);
+            if (is_resource($sub)) {
+                $out = stream_get_contents($subPipes[1]);
+                fclose($subPipes[1]);
+                fclose($subPipes[2]);
+                $exitCode = proc_close($sub);
+                if ($exitCode === 0 && preg_match('/(?:\s|^)-isig(?:\s|$)/', $out) === 1) {
+                    $isigDisabled = true;
+                    break;
+                }
+            }
+            usleep(5000);
+        }
+
+        if (!$isigDisabled) {
+            stream_set_blocking($pipes[2], false);
+            $stderr = stream_get_contents($pipes[2]);
+            $cleanup();
+            return "FAIL: timed out waiting for child to disable ISIG" . (!empty($stderr) ? " (stderr: " . trim($stderr) . ")" : "");
+        }
+
         fwrite($pipes[0], $inputToSend);
         fflush($pipes[0]);
     }
 
-    // Read result
-    $result = fgets($pipes[1]);
+    // Read result with bounded timeout
+    $result = readLineWithTimeout($pipes[1], 3);
+
+    // Drain stderr non-blockingly
+    stream_set_blocking($pipes[2], false);
     $stderr = stream_get_contents($pipes[2]);
 
-    foreach ($pipes as $p) { if (is_resource($p)) fclose($p); }
-    proc_close($proc);
+    $cleanup();
+
+    if ($result === null) {
+        return "FAIL: timed out or EOF reading child result" . (!empty($stderr) ? " (stderr: " . trim($stderr) . ")" : "");
+    }
 
     if (!empty($stderr)) {
         return "STDERR: " . trim($stderr);
