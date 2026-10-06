@@ -10,4 +10,4 @@ $(BUILD_DIR)\ext\standard\basic_functions.obj: $(PHP_SRC_DIR)\Zend\zend_language
 
 $(PHP_SRC_DIR)\ext\standard\tests\helpers\bad_cmd.exe: $(PHP_SRC_DIR)\ext\standard\tests\helpers\bad_cmd.c
 	cd $(PHP_SRC_DIR)\ext\standard\tests\helpers
-	$(PHP_CL) /nologo bad_cmd.c
+	$(PHP_CL) $(BUILD_CFLAGS) /nologo bad_cmd.c
