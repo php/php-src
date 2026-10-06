@@ -1726,6 +1726,68 @@ PHP_FUNCTION(array_search)
 	php_search_array(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
+/* {{{ Searches a portion of the array for a given value and returns the corresponding key if successful */
+PHP_FUNCTION(array_search_range)
+{
+	zval *needle;
+	zend_array *array;
+	zend_long offset = 0;
+	zend_long length = 0;
+	bool strict = false;
+	zend_long max_count;
+	HashTable *ht;
+	zval *entry;
+	zend_string *key_str;
+	zend_ulong num_key;
+	zend_long i = 0;
+	bool found = false;
+
+	ZEND_PARSE_PARAMETERS_START(2, 5)
+		Z_PARAM_ZVAL(needle)
+		Z_PARAM_ARRAY_HT(array)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(offset)
+		Z_PARAM_LONG(length)
+		Z_PARAM_BOOL(strict)
+	ZEND_PARSE_PARAMETERS_END();
+
+	ht = &array->ht;
+
+	if (offset < 0) {
+		offset += zend_hash_num_elements(ht);
+		if (offset < 0) {
+			offset = 0;
+		}
+	}
+
+	if (length < 0) {
+		php_error_docref(NULL, E_WARNING, "Length must be greater than or equal to zero");
+		RETURN_FALSE;
+	}
+
+	max_count = length ? length : zend_hash_num_elements(ht);
+
+	ZEND_HASH_FOREACH_KEY_VAL_IND(ht, num_key, key_str, entry) {
+		if (i >= offset && (i < offset + max_count)) {
+			if (strict ? zend_is_identical(needle, entry) : fast_equal_check_function(needle, entry)) {
+				found = true;
+				break;
+			}
+		}
+		i++;
+	} ZEND_HASH_FOREACH_END();
+
+	if (!found) {
+		RETURN_FALSE;
+	}
+
+	if (key_str) {
+		RETVAL_STR_COPY(key_str);
+	} else {
+		RETVAL_LONG(num_key);
+	}
+}
+/* }}} */
 
 static zend_always_inline bool php_valid_var_name(const zend_string *var_name) /* {{{ */
 {
