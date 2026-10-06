@@ -180,6 +180,9 @@ PHP                                                                        NEWS
     cycle collector. (Ilia Alshanetsky)
   . Fixed PDOStatement::setFetchMode() not applying changes atomically.
     (Ilia Alshanetsky)
+  . Fixed destroying a persistent PDO instance discarding SQLite functions,
+    collations and error information still in use by another instance.
+    (Ilia Alshanetsky)
 
 - PDO_DBLIB:
   . Fixed bug GH-23741 (segfault after a failed query inside a PDO
