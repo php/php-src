@@ -535,6 +535,61 @@ static int zend_closure_compare(zval *o1, zval *o2) /* {{{ */
 }
 /* }}} */
 
+ZEND_API bool zend_fn_closure_equals_ex(
+	const zend_function *fn_a, const zend_object *closure_zobj_a,
+	const zend_function *fn_b, const zend_object *closure_zobj_b
+) {
+	const zend_closure *closure_a = NULL;
+	bool is_closure_a_fake = false;
+
+	const zend_closure *closure_b = NULL;
+	bool is_closure_b_fake = false;
+
+	if (closure_zobj_a) {
+		closure_a = (const zend_closure *) closure_zobj_a;
+		is_closure_a_fake = zend_closure_is_fake(closure_a);
+		fn_a = &closure_a->func;
+	}
+	if (closure_zobj_b) {
+		closure_b = (const zend_closure *) closure_zobj_b;
+		is_closure_b_fake = zend_closure_is_fake(closure_b);
+		fn_b = &closure_b->func;
+	}
+
+	// TODO is this even possible as closure allocates a new zend_function pointer on creation?
+	if (fn_a == fn_b) {
+		return true;
+	}
+
+	if (!is_closure_a_fake && !is_closure_b_fake) {
+		return false;
+	}
+	if ((closure_a && !is_closure_a_fake) || (closure_b && !is_closure_b_fake)) {
+		return false;
+	}
+	if (fn_a->type != fn_b->type ||
+			fn_a->common.scope != fn_b->common.scope ||
+			!zend_string_equals(fn_a->common.function_name, fn_b->common.function_name)) {
+		return false;
+	}
+
+	if (fn_a->type == ZEND_USER_FUNCTION) {
+		return fn_a->op_array.opcodes == fn_b->op_array.opcodes;
+	} else {
+		zif_handler zif_a = fn_a->internal_function.handler;
+		zif_handler zif_b = fn_b->internal_function.handler;
+
+		if (closure_a) {
+			zif_a = closure_a->orig_internal_handler;
+		}
+		if (closure_b) {
+			zif_b = closure_b->orig_internal_handler;
+		}
+
+		return zif_a == zif_b;
+	}
+}
+
 ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *object) /* {{{ */
 {
 	zend_closure *closure = (zend_closure *)object;
