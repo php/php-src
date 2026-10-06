@@ -1585,15 +1585,24 @@ PHP_FUNCTION(openssl_x509_checkpurpose)
 	zend_long purpose;
 	char * untrusted = NULL;
 	size_t untrusted_len = 0;
+	zend_long x509_verify_flags = 0;
+	const zend_long allowed_flags = (zend_long) (X509_V_FLAG_CRL_CHECK
+		| X509_V_FLAG_CRL_CHECK_ALL | X509_V_FLAG_PARTIAL_CHAIN);
 	int ret;
 
-	ZEND_PARSE_PARAMETERS_START(2, 4)
+	ZEND_PARSE_PARAMETERS_START(2, 5)
 		Z_PARAM_OBJ_OF_CLASS_OR_STR(cert_obj, php_openssl_certificate_ce, cert_str)
 		Z_PARAM_LONG(purpose)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY(zcainfo)
 		Z_PARAM_STRING_OR_NULL(untrusted, untrusted_len)
+		Z_PARAM_LONG(x509_verify_flags)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (x509_verify_flags & ~allowed_flags) {
+		zend_argument_value_error(5, "must be a combination of supported flags");
+		RETURN_THROWS();
+	}
 
 	RETVAL_LONG(-1);
 
@@ -1614,7 +1623,8 @@ PHP_FUNCTION(openssl_x509_checkpurpose)
 		goto clean_exit;
 	}
 
-	ret = php_openssl_check_cert(cainfo, cert, untrustedchain, (int)purpose);
+	ret = php_openssl_check_cert(cainfo, cert, untrustedchain, (int)purpose,
+		(unsigned long)x509_verify_flags);
 	if (ret != 0 && ret != 1) {
 		RETVAL_LONG(ret);
 	} else {

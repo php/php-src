@@ -121,6 +121,22 @@ const X509_PURPOSE_OCSP_HELPER = UNKNOWN;
  */
 const X509_PURPOSE_TIMESTAMP_SIGN = UNKNOWN;
 
+/**
+ * @var int
+ * @cvalue X509_V_FLAG_CRL_CHECK
+ */
+const OPENSSL_X509_VERIFY_FLAG_CRL_CHECK = UNKNOWN;
+/**
+ * @var int
+ * @cvalue X509_V_FLAG_CRL_CHECK_ALL
+ */
+const OPENSSL_X509_VERIFY_FLAG_CRL_CHECK_ALL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue X509_V_FLAG_PARTIAL_CHAIN
+ */
+const OPENSSL_X509_VERIFY_FLAG_PARTIAL_CHAIN = UNKNOWN;
+
 /* digest algorithm constants */
 
 /**
@@ -531,7 +547,7 @@ function openssl_x509_verify(OpenSSLCertificate|string $certificate, $public_key
  */
 function openssl_x509_parse(OpenSSLCertificate|string $certificate, bool $short_names = true): array|false {}
 
-function openssl_x509_checkpurpose(OpenSSLCertificate|string $certificate, int $purpose, array $ca_info = [], ?string $untrusted_certificates_file = null): bool|int {}
+function openssl_x509_checkpurpose(OpenSSLCertificate|string $certificate, int $purpose, array $ca_info = [], ?string $untrusted_certificates_file = null, int $x509_verify_flags = 0): bool|int {}
 
 function openssl_x509_read(OpenSSLCertificate|string $certificate): OpenSSLCertificate|false {}
 

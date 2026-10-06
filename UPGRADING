@@ -59,6 +59,13 @@ PHP 8.7 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- OpenSSL:
+  . openssl_x509_checkpurpose() now accepts an $x509_verify_flags parameter,
+    a combination of the new OPENSSL_X509_VERIFY_FLAG_CRL_CHECK,
+    OPENSSL_X509_VERIFY_FLAG_CRL_CHECK_ALL and
+    OPENSSL_X509_VERIFY_FLAG_PARTIAL_CHAIN constants. CRLs are supplied as
+    files in $ca_info. Default behavior is unchanged.
+
 ========================================
 6. New Functions
 ========================================
@@ -78,6 +85,11 @@ PHP 8.7 UPGRADE NOTES
 ========================================
 10. New Global Constants
 ========================================
+
+- OpenSSL:
+  . OPENSSL_X509_VERIFY_FLAG_CRL_CHECK
+  . OPENSSL_X509_VERIFY_FLAG_CRL_CHECK_ALL
+  . OPENSSL_X509_VERIFY_FLAG_PARTIAL_CHAIN
 
 ========================================
 11. Changes to INI File Handling
