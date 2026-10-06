@@ -797,14 +797,27 @@ PHP_FUNCTION(get_browser)
 	}
 
 	HashTable *target_ht = return_array ? Z_ARRVAL_P(return_value) : Z_OBJPROP_P(return_value);
+	if (found_entry->parent) {
+		HashTable visited;
 
-	while (found_entry->parent) {
-		found_entry = zend_hash_find_ptr(bdata->htab, found_entry->parent);
-		if (found_entry == NULL) {
-			break;
+		zend_hash_init(&visited, 8, NULL, NULL, false);
+		zend_hash_index_add_empty_element(&visited, (zend_ulong)(uintptr_t) found_entry);
+
+		while (found_entry->parent) {
+			browscap_entry *parent = zend_hash_find_ptr(bdata->htab, found_entry->parent);
+			if (parent == NULL) {
+				break;
+			}
+
+			if (!zend_hash_index_add_empty_element(&visited, (zend_ulong)(uintptr_t) parent)) {
+				break;
+			}
+
+			found_entry = parent;
+			browscap_entry_add_kv_to_existing_array(bdata, found_entry, target_ht);
 		}
 
-		browscap_entry_add_kv_to_existing_array(bdata, found_entry, target_ht);
+		zend_hash_destroy(&visited);
 	}
 }
 /* }}} */

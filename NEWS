@@ -211,6 +211,8 @@ PHP                                                                        NEWS
     (Ilia Alshanetsky)
 
 - Standard:
+  . Fixed get_browser() hanging on cyclic browscap parent chains.
+    (Ilia Alshanetsky)
   . Fixed sha1_file() returning a digest for incomplete data after a stream
     read failure. (Ilia Alshanetsky)
   . Fixed iptcembed() corrupting JPEG headers when called recursively from an
