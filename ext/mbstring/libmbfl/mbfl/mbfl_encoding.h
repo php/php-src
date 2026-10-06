@@ -167,8 +167,11 @@ static inline zend_result mb_convert_buf_ensure(mb_convert_buf *buf, unsigned ch
 	ZEND_ASSERT(*out <= *limit);
 	if ((size_t)(*limit - *out) < needed) {
 		size_t oldsize = *limit - (unsigned char*)ZSTR_VAL((buf)->str);
-		size_t newsize = oldsize + MAX(oldsize >> 1, needed);
-		zend_string *newstr = ferealloc((buf)->str, _ZSTR_SAFE_STRUCT_SIZE(1, newsize, 0), /* fallible */ true);
+		size_t newsize = zend_string_safe_len(1, oldsize, MAX(oldsize >> 1, needed), /* fallible */ true);
+		if (UNEXPECTED(newsize == SIZE_MAX)) {
+			return FAILURE;
+		}
+		zend_string *newstr = ferealloc((buf)->str, ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(newsize)), /* fallible */ true);
 		if (!newstr) {
 			return FAILURE;
 		}
