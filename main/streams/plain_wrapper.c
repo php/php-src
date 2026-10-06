@@ -583,6 +583,10 @@ static ssize_t php_stdiop_write(php_stream *stream, const char *buf, size_t coun
 				/* TODO: Should this be treated as a proper error or not? */
 				return bytes_written;
 			}
+			if (errno == ECANCELED && EG(exception)) {
+				/* ECANCELED under a pending exception (php_io_hooks.h): the exception reports the failure */
+				return bytes_written;
+			}
 			if (!(stream->flags & PHP_STREAM_FLAG_SUPPRESS_ERRORS)) {
 				char errstr[256];
 				php_stream_notice(stream, WriteFailed,
@@ -675,6 +679,8 @@ static ssize_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 				ret = 0;
 			} else if (errno == EINTR) {
 				/* TODO: Should this be treated as a proper error or not? */
+			} else if (errno == ECANCELED && EG(exception)) {
+				/* ECANCELED under a pending exception (php_io_hooks.h): no notice, the stream is not at its end */
 			} else {
 				if (!(stream->flags & PHP_STREAM_FLAG_SUPPRESS_ERRORS)) {
 					char errstr[256];

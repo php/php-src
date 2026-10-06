@@ -258,9 +258,11 @@ PHPAPI bool php_io_interrupt_pending(void);
 /* Without a provider it waits itself */
 PHPAPI zend_result php_io_run(php_io_op *op, php_io_op_result *result);
 
-/* The wrappers return like the syscall, with errno ETIMEDOUT or ECANCELED. stream may be NULL; a
- * stream is frozen for the call. On Windows php_socket_errno() is the Winsock code, see
- * PHP_IO_SOCK_*. */
+/* The wrappers return like the syscall, with errno ETIMEDOUT or ECANCELED. ECANCELED with
+ * EG(exception) set means the op was abandoned, or never started, because of that exception, and
+ * the exception reports it; without one, the provider completed the op as Cancelled, a failure like
+ * any other errno. stream may be NULL; a stream is frozen for the call. On Windows
+ * php_socket_errno() is the Winsock code, see PHP_IO_SOCK_*. */
 #ifdef PHP_WIN32
 # define PHP_IO_SOCK_ETIMEDOUT WSAETIMEDOUT
 # define PHP_IO_SOCK_ECANCELED WSAECANCELLED

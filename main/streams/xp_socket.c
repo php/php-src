@@ -154,7 +154,8 @@ static ssize_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 	if (nr_bytes < 0) {
 		if (PHP_IS_TRANSIENT_ERROR(err)) {
 			nr_bytes = 0;
-		} else if (err != PHP_IO_SOCK_EINTR) {
+		} else if (err != PHP_IO_SOCK_EINTR && !(err == PHP_IO_SOCK_ECANCELED && EG(exception))) {
+			/* ECANCELED under a pending exception (php_io_hooks.h) does not end the stream */
 			stream->eof = 1;
 		}
 	} else if (nr_bytes == 0) {
