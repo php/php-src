@@ -2430,6 +2430,7 @@ AC_DEFUN([PHP_CHECK_STDINT_TYPES], [
   AC_CHECK_SIZEOF([long long])
   AC_CHECK_SIZEOF([size_t])
   AC_CHECK_SIZEOF([off_t])
+  AC_CHECK_SIZEOF([time_t])
   AC_CHECK_TYPES([int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t, uint32_t, uint64_t], [], [
     AC_MSG_ERROR([One of the intN_t or uintN_t types is not available])
   ], [
