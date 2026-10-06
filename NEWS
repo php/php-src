@@ -66,6 +66,8 @@ PHP                                                                        NEWS
     that is not in the result set. (Ilia Alshanetsky)
   . Fixed bug GH-23962 (Destroying a persistent PDO instance rolls back a
     transaction still in use by another instance). (Lazizbek Ergashev)
+  . Fixed PDOStatement::execute() leaving a partial set of bindings in place
+    when binding its array argument fails. (Ilia Alshanetsky, Kamil Tekiela)
 
 - PGSQL:
   . Fixed pg_lo_write() rejecting data containing null bytes. (Ilia Alshanetsky)
