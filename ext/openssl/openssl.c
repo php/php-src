@@ -4984,6 +4984,9 @@ PHP_FUNCTION(openssl_digest)
 		}
 	} else {
 		php_openssl_store_errors();
+		if (EVP_MD_flags(mdtype) & EVP_MD_FLAG_XOF) {
+			php_error_docref(NULL, E_WARNING, "Unsupported digest algorithm: output length must be specified");
+		}
 		zend_string_release_ex(sigbuf, 0);
 		RETVAL_FALSE;
 	}
