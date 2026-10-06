@@ -17,7 +17,7 @@ var_dump($url->equals(new Uri\WhatWg\Url($url->toAsciiString()), Uri\UriComparis
 
 ?>
 --EXPECTF--
-string(11) "foo:abc  #f"
+string(13) "foo:abc %20#f"
 object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(3) "foo"
@@ -30,7 +30,7 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  string(5) "abc  "
+  string(7) "abc %20"
   ["query"]=>
   NULL
   ["fragment"]=>

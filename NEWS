@@ -62,6 +62,17 @@ PHP                                                                        NEWS
     treating the offset as UTF-16 code units instead of bytes.
     (Ilia Alshanetsky)
 
+- Lexbor:
+  . Merge patches lexbor/lexbor@859f100, lexbor/lexbor@a36e09a,
+    lexbor/lexbor@b0f7412, lexbor/lexbor@1b215a8, lexbor/lexbor@385afff,
+    lexbor/lexbor@e6c068f, lexbor/lexbor@327a8b6, lexbor/lexbor@917742f and
+    lexbor/lexbor@e89c258, fixing dropped usernames containing an at sign,
+    uninitialized memory in IDNA buffer growth, the encoding of a space
+    before a query or fragment in an opaque path, a query or fragment lost
+    after a dot segment in a path, replacement file drive paths, the output
+    encoding used for percent-encoding, the URLSearchParams tail pointer and
+    fragment serialization without a query. (alexandre-daubois)
+
 - MySQLnd:
   . Fixed field_count not resetting on OK packet. (Kamil Tekiela)
   . Fixed memory leak when closing a prepared statement after its connection
