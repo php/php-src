@@ -31,15 +31,23 @@ if (function_exists('pcntl_alarm')) {
     pcntl_alarm(10);
 }
 
-function readLineWithTimeout($stream, int $timeoutSec = 3): ?string {
-    $deadline = hrtime(true) + ($timeoutSec * 1_000_000_000);
-    while (hrtime(true) < $deadline) {
-        $remainingNs = $deadline - hrtime(true);
-        if ($remainingNs <= 0) {
+function getMonotonicTime(): float {
+    $t = hrtime(false);
+    return $t[0] + ($t[1] / 1e9);
+}
+
+function readLineWithTimeout($stream, float $timeoutSec = 3.0): ?string {
+    $deadline = getMonotonicTime() + $timeoutSec;
+    while (getMonotonicTime() < $deadline) {
+        $remaining = $deadline - getMonotonicTime();
+        if ($remaining <= 0) {
             break;
         }
-        $sec = intdiv($remainingNs, 1_000_000_000);
-        $usec = intdiv($remainingNs % 1_000_000_000, 1000);
+        $sec = (int) $remaining;
+        $usec = (int) (($remaining - $sec) * 1_000_000);
+        if ($usec < 0) {
+            $usec = 0;
+        }
         $r = [$stream];
         $w = null;
         $e = null;
@@ -82,16 +90,16 @@ function runIsolatedChild(string $code, ?string $inputToSend = null): string {
         if (is_resource($proc)) {
             $status = proc_get_status($proc);
             if ($status['running']) {
-                $exitDeadline = hrtime(true) + 200_000_000;
-                while (proc_get_status($proc)['running'] && hrtime(true) < $exitDeadline) {
+                $exitDeadline = getMonotonicTime() + 0.2;
+                while (proc_get_status($proc)['running'] && getMonotonicTime() < $exitDeadline) {
                     usleep(2000);
                 }
             }
             $status = proc_get_status($proc);
             if ($status['running']) {
                 @proc_terminate($proc);
-                $termDeadline = hrtime(true) + 300_000_000;
-                while (proc_get_status($proc)['running'] && hrtime(true) < $termDeadline) {
+                $termDeadline = getMonotonicTime() + 0.3;
+                while (proc_get_status($proc)['running'] && getMonotonicTime() < $termDeadline) {
                     usleep(2000);
                 }
                 if (proc_get_status($proc)['running'] && defined('SIGKILL')) {
@@ -104,7 +112,7 @@ function runIsolatedChild(string $code, ?string $inputToSend = null): string {
     };
 
     // Readiness synchronization: wait for child to signal READY
-    $ready = readLineWithTimeout($pipes[1], 3);
+    $ready = readLineWithTimeout($pipes[1], 3.0);
     if ($ready === null || trim($ready) !== 'READY') {
         stream_set_blocking($pipes[2], false);
         $stderr = stream_get_contents($pipes[2]);
@@ -114,8 +122,8 @@ function runIsolatedChild(string $code, ?string $inputToSend = null): string {
 
     if ($inputToSend !== null) {
         $isigDisabled = false;
-        $obsDeadline = hrtime(true) + 1_500_000_000;
-        while (hrtime(true) < $obsDeadline) {
+        $obsDeadline = getMonotonicTime() + 1.5;
+        while (getMonotonicTime() < $obsDeadline) {
             $sub = @proc_open(['stty', '-a'], [0 => $pipes[0], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $subPipes);
             if (is_resource($sub)) {
                 $out = stream_get_contents($subPipes[1]);
@@ -142,7 +150,7 @@ function runIsolatedChild(string $code, ?string $inputToSend = null): string {
     }
 
     // Read result with bounded timeout
-    $result = readLineWithTimeout($pipes[1], 3);
+    $result = readLineWithTimeout($pipes[1], 3.0);
 
     // Drain stderr non-blockingly
     stream_set_blocking($pipes[2], false);
