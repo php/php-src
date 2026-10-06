@@ -1624,10 +1624,7 @@ static int php_io_terminal_read_byte(
 )
 {
 	if (stream != NULL && stream->writepos > stream->readpos) {
-		int old_flags = stream->flags;
-		stream->flags |= PHP_STREAM_FLAG_SUPPRESS_ERRORS;
 		size_t read_bytes = php_stream_read(stream, (char *) byte, 1);
-		stream->flags = old_flags;
 		if (read_bytes == 1) {
 			return PHP_IO_TERMINAL_READ_SUCCESS;
 		}
@@ -1803,11 +1800,6 @@ static int php_io_terminal_read_byte(
 			if (timeout != NULL) {
 				return PHP_IO_TERMINAL_READ_TIMEOUT;
 			}
-#ifdef EIO
-			if (bytes_read < 0 && errno == EIO) {
-				return PHP_IO_TERMINAL_READ_EOF;
-			}
-#endif
 			return bytes_read == 0 ? PHP_IO_TERMINAL_READ_EOF : PHP_IO_TERMINAL_READ_ERROR;
 		}
 
@@ -1881,11 +1873,6 @@ static int php_io_terminal_read_byte(
 		return PHP_IO_TERMINAL_READ_EOF;
 	}
 	if (bytes_read < 0) {
-#ifdef EIO
-		if (errno == EIO) {
-			return PHP_IO_TERMINAL_READ_EOF;
-		}
-#endif
 		return PHP_IO_TERMINAL_READ_ERROR;
 	}
 
@@ -3463,10 +3450,7 @@ static char *php_io_terminal_read_line_posix(
 	bool is_tty = php_io_terminal_native_stream_is_tty(fd);
 	if (!is_tty) {
 		if (stream != NULL) {
-			int old_flags = stream->flags;
-			stream->flags |= PHP_STREAM_FLAG_SUPPRESS_ERRORS;
 			char *buf = php_stream_get_line(stream, NULL, 0, out_len);
-			stream->flags = old_flags;
 			if (buf == NULL) {
 				if (php_stream_eof(stream)) {
 					*is_eof = true;
@@ -3492,8 +3476,6 @@ static char *php_io_terminal_read_line_posix(
 
 	/* Drain any already-buffered bytes from php_stream first */
 	if (stream != NULL && stream->writepos > stream->readpos) {
-		int old_flags = stream->flags;
-		stream->flags |= PHP_STREAM_FLAG_SUPPRESS_ERRORS;
 		while (stream->writepos > stream->readpos) {
 			size_t read_bytes = php_stream_read(stream, &ch, 1);
 			if (read_bytes != 1) {
@@ -3504,7 +3486,6 @@ static char *php_io_terminal_read_line_posix(
 				break;
 			}
 		}
-		stream->flags = old_flags;
 	}
 
 	if (stream != NULL && php_stream_eof(stream)) {
