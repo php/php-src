@@ -333,7 +333,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 					if (ctx->current_section_name != NULL &&
 						zend_string_equals_ci(ctx->current_section_name, Z_STR_P(arg2))
 					) {
-						zend_error(E_CORE_ERROR, "Invalid browscap ini file: "
+						php_error_docref("misc.configuration.php#ini.browscap", E_CORE_ERROR, "Invalid browscap ini file: "
 							"'Parent' value cannot be same as the section name: %s "
 							"(in file %s)", ZSTR_VAL(ctx->current_section_name), zend_ini_string_literal("browscap"));
 						return;
@@ -409,7 +409,7 @@ static zend_result browscap_read_file(const char *filename, browser_data *browda
 
 	fp = VCWD_FOPEN(filename, "r");
 	if (!fp) {
-		zend_error(E_CORE_WARNING, "Cannot open \"%s\" for reading", filename);
+		php_error_docref(NULL, E_CORE_WARNING, "Cannot open \"%s\" for reading", filename);
 		return FAILURE;
 	}
 	zend_stream_init_fp(&fh, fp, filename);
