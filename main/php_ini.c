@@ -339,13 +339,25 @@ static const struct php_win32_cp *php_ini_utf8_codepage(HashTable *hash)
 	return php_win32_cp_get_by_id(CP_UTF8);
 }
 
+static bool php_ini_utf8_extension_path(zend_string *name)
+{
+	return zend_string_equals_literal_ci(name, PHP_EXTENSION_TOKEN)
+		|| zend_string_equals_literal_ci(name, ZEND_EXTENSION_TOKEN)
+		|| zend_string_equals_literal(name, "extension_dir");
+}
+
 static void php_ini_utf8_convert(php_ini_utf8_context *ctx, zval *value, const struct php_win32_cp *from, const struct php_win32_cp *to)
 {
 	if (ctx->failed || Z_TYPE_P(value) != IS_STRING || from == to) {
 		return;
 	}
+	wchar_t *wide = php_win32_cp_conv_ascii_to_w(Z_STRVAL_P(value), Z_STRLEN_P(value), PHP_WIN32_CP_IGNORE_LEN_P);
+	if (wide) {
+		free(wide);
+		return;
+	}
 	size_t length, wide_len;
-	wchar_t *wide = php_win32_cp_conv_to_w(from->id, from->to_w_fl, Z_STRVAL_P(value), Z_STRLEN_P(value), &wide_len);
+	wide = php_win32_cp_conv_to_w(from->id, from->to_w_fl, Z_STRVAL_P(value), Z_STRLEN_P(value), &wide_len);
 	char *bytes = NULL;
 	if (wide) {
 		bytes = php_win32_cp_conv_from_w(to->id, to->from_w_fl, wide, wide_len, &length);
@@ -371,7 +383,9 @@ static zval *php_ini_utf8_get_config(zend_string *name)
 	if (value && Z_TYPE_P(value) == IS_STRING) {
 		zval converted;
 		ZVAL_STR(&converted, zend_string_copy(Z_STR_P(value)));
-		php_ini_utf8_convert(ctx, &converted, ctx->cp, ctx->utf8);
+		const struct php_win32_cp *cp = php_ini_utf8_extension_path(name)
+			? php_win32_cp_get_by_id(CP_ACP) : ctx->cp;
+		php_ini_utf8_convert(ctx, &converted, cp, ctx->utf8);
 		return zend_hash_update(&ctx->values, name, &converted);
 	}
 	return value;
@@ -471,8 +485,11 @@ static zend_result php_ini_parse_utf8(const char *entries)
 	ctx.failed |= !ctx.cp;
 	for (zend_llist_element *element = ctx.entries.head; element && !ctx.failed; element = element->next) {
 		php_ini_utf8_entry *entry = (php_ini_utf8_entry *) element->data;
+		const struct php_win32_cp *value_cp = entry->callback_type == ZEND_INI_PARSER_ENTRY
+			&& php_ini_utf8_extension_path(Z_STR(entry->args[0]))
+			? php_win32_cp_get_by_id(CP_ACP) : ctx.cp;
 		for (int i = 0; i < 3; i++) {
-			php_ini_utf8_convert(&ctx, &entry->args[i], ctx.utf8, ctx.cp);
+			php_ini_utf8_convert(&ctx, &entry->args[i], ctx.utf8, i == 1 ? value_cp : ctx.cp);
 		}
 		if (!ctx.failed) {
 			php_ini_parser_cb(&entry->args[0], Z_ISUNDEF(entry->args[1]) ? NULL : &entry->args[1],
