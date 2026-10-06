@@ -36,8 +36,11 @@ typedef struct {
 	zend_object std;
 } sysvmsg_queue_t;
 
+/* Mirrors struct msgbuf of the system headers, which types mtype as a long.
+ * It is not a zend_long: msgsnd() and msgrcv() split the buffer at the size the
+ * kernel expects, not at the one a PHP integer happens to have. */
 struct php_msgbuf {
-	zend_long mtype;
+	long mtype;
 	char mtext[1];
 };
 
@@ -149,7 +152,17 @@ PHP_FUNCTION(msg_set_queue)
 			stat.msg_perm.mode = zval_get_long(item);
 		}
 		if ((item = zend_hash_str_find(data, ZEND_STRL("msg_qbytes"))) != NULL) {
-			stat.msg_qbytes = zval_get_long(item);
+			zend_long qbytes = zval_get_long(item);
+
+			if (ZEND_LONG_ULONG_UDFL(qbytes)) {
+				zend_argument_value_error(2, "\"msg_qbytes\" must be greater than or equal to 0");
+				RETURN_THROWS();
+			}
+			if (ZEND_LONG_ULONG_OVFL(qbytes)) {
+				zend_argument_value_error(2, "\"msg_qbytes\" must be less than or equal to %lu", ULONG_MAX);
+				RETURN_THROWS();
+			}
+			stat.msg_qbytes = qbytes;
 		}
 		if (msgctl(mq->id, IPC_SET, &stat) == 0) {
 			RETVAL_TRUE;
@@ -290,6 +303,16 @@ PHP_FUNCTION(msg_receive)
 		RETURN_THROWS();
 	}
 
+	if (ZEND_LONG_SIZE_T_OVFL(maxsize)) {
+		zend_argument_value_error(4, "must be less than or equal to %zu", SIZE_MAX);
+		RETURN_THROWS();
+	}
+
+	if (ZEND_LONG_EXCEEDS_LONG(desiredmsgtype)) {
+		zend_argument_value_error(2, "must be between %ld and %ld", LONG_MIN, LONG_MAX);
+		RETURN_THROWS();
+	}
+
 	if (flags != 0) {
 		if (flags & PHP_MSG_EXCEPT) {
 #ifndef MSG_EXCEPT
@@ -363,6 +386,11 @@ PHP_FUNCTION(msg_send)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Olz|bbz",
 				&queue, sysvmsg_queue_ce, &msgtype, &message, &do_serialize, &blocking, &zerror) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (ZEND_LONG_EXCEEDS_LONG(msgtype)) {
+		zend_argument_value_error(2, "must be between %ld and %ld", LONG_MIN, LONG_MAX);
 		RETURN_THROWS();
 	}
 

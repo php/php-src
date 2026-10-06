@@ -923,7 +923,7 @@ PHP_FUNCTION(odbc_prepare)
 			/* Try to set CURSOR_TYPE to dynamic. Driver will replace this with other
 			   type if not possible.
 			*/
-			SQLSetStmtAttr(result->stmt, SQL_ATTR_CURSOR_TYPE, (SQLPOINTER) ODBCG(default_cursortype), 0);
+			SQLSetStmtAttr(result->stmt, SQL_ATTR_CURSOR_TYPE, (SQLPOINTER) (intptr_t) ODBCG(default_cursortype), 0);
 		}
 	} else {
 		result->fetch_abs = 0;
@@ -1183,7 +1183,7 @@ PHP_FUNCTION(odbc_cursor)
 				snprintf(errormsg, sizeof(errormsg), "Failed to fetch error message");
 			}
 			if (!strncmp(state,"S1015",5)) {
-				snprintf(cursorname, max_len+1, "php_curs_" ZEND_ULONG_FMT, (zend_ulong)result->stmt);
+				snprintf(cursorname, max_len+1, "php_curs_" ZEND_ULONG_FMT, (zend_ulong)(uintptr_t)result->stmt);
 				if (SQLSetCursorName(result->stmt, (SQLCHAR *) cursorname, SQL_NTS) != SQL_SUCCESS) {
 					odbc_sql_error(result->conn_ptr, result->stmt, "SQLSetCursorName");
 					RETVAL_FALSE;
@@ -1300,7 +1300,7 @@ PHP_FUNCTION(odbc_exec)
 			/* Try to set CURSOR_TYPE to dynamic. Driver will replace this with other
 			   type if not possible.
 			 */
-			SQLSetStmtAttr(result->stmt, SQL_ATTR_CURSOR_TYPE, (SQLPOINTER) ODBCG(default_cursortype), 0);
+			SQLSetStmtAttr(result->stmt, SQL_ATTR_CURSOR_TYPE, (SQLPOINTER) (intptr_t) ODBCG(default_cursortype), 0);
 		}
 	} else {
 		result->fetch_abs = 0;
@@ -2555,7 +2555,7 @@ PHP_FUNCTION(odbc_setoption)
 				php_error_docref(NULL, E_WARNING, "Unable to set option for persistent connection");
 				RETURN_FALSE;
 			}
-			rc = SQLSetConnectAttr(link->connection->hdbc, pv_opt, (SQLPOINTER) pv_val, 0);
+			rc = SQLSetConnectAttr(link->connection->hdbc, pv_opt, (SQLPOINTER) (intptr_t) pv_val, 0);
 			if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 				odbc_sql_error(link->connection, SQL_NULL_HSTMT, "SetConnectOption");
 				RETURN_FALSE;
@@ -2569,7 +2569,7 @@ PHP_FUNCTION(odbc_setoption)
 			result = Z_ODBC_RESULT_P(pv_handle);
 			CHECK_ODBC_RESULT(result);
 
-			rc = SQLSetStmtAttr(result->stmt, pv_opt, (SQLPOINTER) pv_val, 0);
+			rc = SQLSetStmtAttr(result->stmt, pv_opt, (SQLPOINTER) (intptr_t) pv_val, 0);
 
 			if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 				odbc_sql_error(result->conn_ptr, result->stmt, "SetStmtOption");

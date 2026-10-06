@@ -26,7 +26,7 @@
 #define FILE_NAME "/tmp/fuzzer.php"
 #define MAX_STEPS 1000
 #define MAX_SIZE (8 * 1024)
-#define ZEND_VM_ENTER_BIT 1ULL
+#define ZEND_VM_ENTER_BIT ((uintptr_t) 1)
 
 static uint32_t steps_left;
 static bool bailed_out = false;

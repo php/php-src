@@ -2,7 +2,7 @@
 Hash: hash_pbkdf2() function : output length of PHP_INT_MAX
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE == 4) die("skip this test is not for 32bit platforms");
+if (PHP_SYS_SIZE == 4) die("skip this test is not for 32bit platforms");
 if (getenv("USE_ZEND_ALLOC") === "0") die("skip Zend MM disabled");
 ?>
 --INI--

@@ -5,7 +5,7 @@ soap
 --SKIPIF--
 <?php
 if (!getenv('RUN_RESOURCE_HEAVY_TESTS')) die('skip resource-heavy test');
-if (PHP_INT_SIZE != 8) die("skip: 64-bit only");
+if (PHP_SYS_SIZE != 8) die("skip: 64-bit only");
 ?>
 --INI--
 memory_limit=6144M

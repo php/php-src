@@ -126,9 +126,8 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 	switch(whence) {
 		case SEEK_CUR:
 			if (offset < 0) {
-				if (ms->fpos < -(size_t)offset) {
-					ms->fpos = 0;
-					*newoffs = -1;
+				if (ms->fpos < -(zend_ulong)offset) {
+					*newoffs = ms->fpos;
 					return -1;
 				} else {
 					ms->fpos = ms->fpos + offset;
@@ -137,6 +136,9 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 					stream->fatal_error = 0;
 					return 0;
 				}
+			} else if ((zend_ulong)offset > SIZE_MAX - ms->fpos) {
+				*newoffs = ms->fpos;
+				return -1;
 			} else {
 				stream->eof = 0;
 				stream->fatal_error = 0;
@@ -145,9 +147,8 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 				return 0;
 			}
 		case SEEK_SET:
-			if (offset < 0) {
-				ms->fpos = 0;
-				*newoffs = -1;
+			if (offset < 0 || ZEND_LONG_SIZE_T_OVFL(offset)) {
+				*newoffs = ms->fpos;
 				return -1;
 			} else {
 				ms->fpos = offset;
@@ -158,14 +159,17 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 			}
 		case SEEK_END:
 			if (offset > 0) {
+				if ((zend_ulong)offset > SIZE_MAX - ZSTR_LEN(ms->data)) {
+					*newoffs = ms->fpos;
+					return -1;
+				}
 				ms->fpos = ZSTR_LEN(ms->data) + offset;
 				*newoffs = ms->fpos;
 				stream->eof = 0;
 				stream->fatal_error = 0;
 				return 0;
-			} else if (ZSTR_LEN(ms->data) < -(size_t)offset) {
-				ms->fpos = 0;
-				*newoffs = -1;
+			} else if (ZSTR_LEN(ms->data) < -(zend_ulong)offset) {
+				*newoffs = ms->fpos;
 				return -1;
 			} else {
 				ms->fpos = ZSTR_LEN(ms->data) + offset;
@@ -243,6 +247,8 @@ static int php_stream_memory_set_option(php_stream *stream, int option, int valu
 						if (newsize < ms->fpos) {
 							ms->fpos = newsize;
 						}
+					} else if (UNEXPECTED(newsize > ZSTR_MAX_LEN)) {
+						return PHP_STREAM_OPTION_RETURN_ERR;
 					} else {
 						size_t old_size = ZSTR_LEN(ms->data);
 						ms->data = zend_string_realloc(ms->data, newsize, 0);
