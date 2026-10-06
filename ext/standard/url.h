@@ -26,10 +26,18 @@ typedef struct php_url {
 	zend_string *fragment;
 } php_url;
 
+typedef enum {
+  PHP_URL_ERR_NONE = 0,
+  PHP_URL_ERR_EMPTY_HOST,
+  PHP_URL_ERR_INVALID_PORT,
+  PHP_URL_ERR_PORT_TOO_LONG,
+  PHP_URL_ERR_TRAILING_COLON,
+} php_url_error;
+
 PHPAPI void php_url_free(php_url *theurl);
-PHPAPI php_url *php_url_parse(char const *str);
-PHPAPI php_url *php_url_parse_ex(char const *str, size_t length);
-PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port);
+PHPAPI php_url *php_url_parse(char const *str, php_url_error *url_error);
+PHPAPI php_url *php_url_parse_ex(char const *str, size_t length, php_url_error *url_error);
+PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port, php_url_error *url_error);
 PHPAPI size_t php_url_decode(char *str, size_t len); /* return value: length of decoded string */
 PHPAPI size_t php_url_decode_ex(char *dest, const char *src, size_t src_len);
 PHPAPI size_t php_raw_url_decode(char *str, size_t len); /* return value: length of decoded string */
