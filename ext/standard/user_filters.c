@@ -126,15 +126,15 @@ static void userfilter_dtor(php_stream_filter *thisfilter)
 	zval_ptr_dtor(obj);
 }
 
-static zend_result userfilter_assign_stream(php_stream *stream, zval *obj,
+static zend_result userfilter_assign_stream(php_stream *stream, zend_object *obj,
 		zend_string **stream_name_p, uint32_t orig_no_fclose)
 {
 	/* Give the userfilter class a hook back to the stream */
 	const zend_class_entry *old_scope = EG(fake_scope);
-	EG(fake_scope) = Z_OBJCE_P(obj);
+	EG(fake_scope) = obj->ce;
 
 	zend_string *stream_name = ZSTR_INIT_LITERAL("stream", false);
-	bool stream_property_exists = Z_OBJ_HT_P(obj)->has_property(Z_OBJ_P(obj), stream_name, ZEND_PROPERTY_EXISTS, NULL);
+	bool stream_property_exists = obj->handlers->has_property(obj, stream_name, ZEND_PROPERTY_EXISTS, NULL);
 	if (stream_property_exists) {
 		zval stream_zval;
 		if (EXPECTED(stream->res && stream->res->type >= 0)) {
@@ -142,7 +142,7 @@ static zend_result userfilter_assign_stream(php_stream *stream, zval *obj,
 		} else {
 			ZVAL_NULL(&stream_zval);
 		}
-		zend_update_property_ex(Z_OBJCE_P(obj), Z_OBJ_P(obj), stream_name, &stream_zval);
+		zend_update_property_ex(obj->ce, obj, stream_name, &stream_zval);
 		/* If property update threw an exception, skip filter execution */
 		if (EG(exception)) {
 			EG(fake_scope) = old_scope;
@@ -186,7 +186,7 @@ static php_stream_filter_status_t userfilter_filter(
 	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 
 	zend_string *stream_name = NULL;
-	if (userfilter_assign_stream(stream, obj, &stream_name, orig_no_fclose) == FAILURE) {
+	if (userfilter_assign_stream(stream, Z_OBJ_P(obj), &stream_name, orig_no_fclose) == FAILURE) {
 		if (buckets_in->head) {
 			php_error_docref(NULL, E_WARNING, "Unprocessed filter buckets remaining on input brigade");
 		}
@@ -281,7 +281,7 @@ static zend_result userfilter_seek(
 	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 
 	zend_string *stream_name = NULL;
-	if (userfilter_assign_stream(stream, obj, &stream_name, orig_no_fclose) == FAILURE) {
+	if (userfilter_assign_stream(stream, Z_OBJ_P(obj), &stream_name, orig_no_fclose) == FAILURE) {
 		return FAILURE;
 	}
 
