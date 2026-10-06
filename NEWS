@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20890 (Segfault in zval_undefined_cv with non-simple property
     hook with minimal tracing JIT). (ndossche)
 
+- SOAP:
+  . Fixed use of uninitialized func in do_request() on OOM bailout.
+    (David Carlier)
+
 - Standard:
   . Fixed chown() and lchown() failing to resolve user names in ZTS builds
     when getpwnam_r() needs a larger buffer. (Ilia Alshanetsky)
