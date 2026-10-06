@@ -7968,6 +7968,17 @@ static zval *_reflection_write_property(zend_object *object, zend_string *name, 
 }
 /* }}} */
 
+static zval *_reflection_read_property(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv)
+{
+	/* Don't cache the offset of read-only properties: a by-reference fetch
+	 * sharing the cache slot (FETCH_OBJ_FUNC_ARG) would skip get_property_ptr_ptr. */
+	if (reflection_is_read_only_property(object, name)) {
+		cache_slot = NULL;
+	}
+
+	return zend_std_read_property(object, name, type, cache_slot, rv);
+}
+
 static zval *_reflection_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot)
 {
 	if (reflection_is_read_only_property(object, name)) {
@@ -8122,6 +8133,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	reflection_object_handlers.offset = XtOffsetOf(reflection_object, zo);
 	reflection_object_handlers.free_obj = reflection_free_objects_storage;
 	reflection_object_handlers.clone_obj = NULL;
+	reflection_object_handlers.read_property = _reflection_read_property;
 	reflection_object_handlers.write_property = _reflection_write_property;
 	reflection_object_handlers.get_property_ptr_ptr = _reflection_get_property_ptr_ptr;
 	reflection_object_handlers.get_gc = reflection_get_gc;
