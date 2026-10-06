@@ -2064,6 +2064,8 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		    }
 
 			if (file_handle->opened_path) {
+				zend_shared_alloc_lock();
+
 				bucket = zend_accel_hash_find_entry(&ZCSG(hash), file_handle->opened_path);
 
 				if (bucket) {
@@ -2072,13 +2074,13 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 					if (key && !persistent_script->corrupted) {
 						HANDLE_BLOCK_INTERRUPTIONS();
 						SHM_UNPROTECT();
-						zend_shared_alloc_lock();
 						zend_accel_add_key(key, bucket);
-						zend_shared_alloc_unlock();
 						SHM_PROTECT();
 						HANDLE_UNBLOCK_INTERRUPTIONS();
 					}
 				}
+
+				zend_shared_alloc_unlock();
 			}
 		}
 	}
@@ -2543,15 +2545,19 @@ static zend_string* persistent_zend_resolve_path(zend_string *filename)
 				/* lookup by "not-real" path */
 				key = accel_make_persistent_key(filename);
 				if (key) {
+					zend_shared_alloc_lock();
 					zend_accel_hash_entry *bucket = zend_accel_hash_find_entry(&ZCSG(hash), key);
 					if (bucket != NULL) {
 						zend_persistent_script *persistent_script = (zend_persistent_script *)bucket->data;
 						if (!persistent_script->corrupted) {
 							ZCG(cache_opline) = EG(current_execute_data) ? EG(current_execute_data)->opline : NULL;
 							ZCG(cache_persistent_script) = persistent_script;
-							return zend_string_copy(persistent_script->script.filename);
+							zend_string *str = zend_string_copy(persistent_script->script.filename);
+							zend_shared_alloc_unlock();
+							return str;
 						}
 					}
+					zend_shared_alloc_unlock();
 				} else {
 					ZCG(cache_opline) = NULL;
 					ZCG(cache_persistent_script) = NULL;
@@ -2564,6 +2570,7 @@ static zend_string* persistent_zend_resolve_path(zend_string *filename)
 
 			if (resolved_path) {
 				/* lookup by real path */
+				zend_shared_alloc_lock();
 				zend_accel_hash_entry *bucket = zend_accel_hash_find_entry(&ZCSG(hash), resolved_path);
 				if (bucket) {
 					zend_persistent_script *persistent_script = (zend_persistent_script *)bucket->data;
@@ -2572,19 +2579,19 @@ static zend_string* persistent_zend_resolve_path(zend_string *filename)
 							/* add another "key" for the same bucket */
 							HANDLE_BLOCK_INTERRUPTIONS();
 							SHM_UNPROTECT();
-							zend_shared_alloc_lock();
 							zend_accel_add_key(key, bucket);
-							zend_shared_alloc_unlock();
 							SHM_PROTECT();
 							HANDLE_UNBLOCK_INTERRUPTIONS();
 						} else {
 							ZSTR_LEN(&ZCG(key)) = 0;
 						}
+						zend_shared_alloc_unlock();
 						ZCG(cache_opline) = EG(current_execute_data) ? EG(current_execute_data)->opline : NULL;
 						ZCG(cache_persistent_script) = persistent_script;
 						return resolved_path;
 					}
 				}
+				zend_shared_alloc_unlock();
 			}
 
 			ZCG(cache_opline) = NULL;
