@@ -28,10 +28,10 @@ typedef struct _zend_object zend_object;
 typedef struct _zend_object_iterator zend_object_iterator;
 typedef struct _zval_struct zval;
 
-typedef enum {
+C23_ENUM(zend_property_hook_kind, int8_t) {
 	ZEND_PROPERTY_HOOK_GET = 0,
 	ZEND_PROPERTY_HOOK_SET = 1,
-} zend_property_hook_kind;
+};
 
 ZEND_API zend_object_iterator *zend_hooked_object_get_iterator(zend_class_entry *ce, zval *object, int by_ref);
 ZEND_API zend_array *zend_hooked_object_build_properties(zend_object *zobj);
