@@ -434,7 +434,7 @@ PHPAPI zend_result php_get_uid_by_name(const char *name, uid_t *uid)
 try_again:
 		err = getpwnam_r(name, &pw, pwbuf, pwbuflen, &retpwptr);
 		if (err != 0 || retpwptr == NULL) {
-			if (err == EAGAIN) {
+			if (err == ERANGE) {
 				pwbuflen *= 2;
 				pwbuf = erealloc(pwbuf, pwbuflen);
 				goto try_again;
