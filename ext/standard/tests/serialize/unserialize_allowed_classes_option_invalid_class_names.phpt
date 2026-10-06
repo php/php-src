@@ -40,9 +40,9 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 ValueError: unserialize(): Option "allowed_classes" must be an array of class names, "  whitespace  " given
 ValueError: unserialize(): Option "allowed_classes" must be an array of class names, "name
 with whitespace" given
 ValueError: unserialize(): Option "allowed_classes" must be an array of class names, "$dollars" given
-ValueError: unserialize(): Option "allowed_classes" must be an array of class names, "have" given
+ValueError: unserialize(): Option "allowed_classes" must be an array of class names, "have%0nul_byte" given
