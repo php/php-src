@@ -1647,7 +1647,7 @@ int main(void) {
     CFLAGS="$OLD_CFLAGS"
     if test "$php_cv_ubsan_no_function" = yes; then
       CFLAGS="$CFLAGS -fno-sanitize=function"
-      CXXFLAGS="$CFLAGS -fno-sanitize=function"
+      CXXFLAGS="$CFLAGS -fno-sanitize=function,vptr"
     fi
   ], [AC_MSG_ERROR([UndefinedBehaviorSanitizer is not available])])
 fi
