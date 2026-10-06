@@ -1085,6 +1085,9 @@ static void php_dom_transfer_document_ref_single_aux(xmlNodePtr node, php_libxml
 	if (node->type == XML_ELEMENT_NODE) {
 		for (xmlAttrPtr attr = node->properties; attr != NULL; attr = attr->next) {
 			php_dom_transfer_document_ref_single_node((xmlNodePtr) attr, new_document);
+			for (xmlNodePtr child = attr->children; child; child = child->next) {
+				php_dom_transfer_document_ref_single_node((xmlNodePtr) child, new_document);
+			}
 		}
 	}
 }
