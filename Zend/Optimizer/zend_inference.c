@@ -5234,7 +5234,20 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 					zend_hash_find_ptr(&ce->properties_info, prop_name);
 				if (prop_info) {
 					if (ZEND_TYPE_IS_SET(prop_info->type)) {
-						return 1;
+						uint32_t type_mask = ZEND_TYPE_PURE_MASK(prop_info->type);
+
+						/* The assignment can't fail if the property only accepts a single scalar type
+						 * and the value already has this type: the old value has no destructor.
+						 * If the property holds a reference, all its type sources accept this type because they accept the current value. */
+						if ((prop_info->flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_SET_MASK))
+						 || ZEND_TYPE_IS_COMPLEX(prop_info->type)
+						 /* can't include bool due to references to false or true types. */
+						 || (type_mask & ~(MAY_BE_NULL|MAY_BE_BOOL|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING))
+						 /* single type */
+						 || (type_mask & (type_mask - 1))
+						 || (OP1_DATA_INFO() & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) != type_mask) {
+							return 1;
+						}
 					}
 					return !(prop_info->flags & ZEND_ACC_PUBLIC)
 						&& prop_info->ce != op_array->scope;
