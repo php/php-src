@@ -17281,7 +17281,9 @@ static int zend_jit_trace_handler(zend_jit_ctx *jit, const zend_op_array *op_arr
 		    opline->opcode == ZEND_DO_FCALL_BY_NAME ||
 		    opline->opcode == ZEND_DO_FCALL ||
 		    opline->opcode == ZEND_GENERATOR_CREATE ||
-		    opline->opcode == ZEND_INCLUDE_OR_EVAL) {
+		    opline->opcode == ZEND_INCLUDE_OR_EVAL ||
+		    /* May enter a simple get hook. */
+		    opline->opcode == ZEND_FETCH_OBJ_R) {
 
 			jit_STORE_IP(jit, ir_AND_A(ref, ir_CONST_ADDR(~ZEND_VM_ENTER_BIT)));
 		} else {
