@@ -105,6 +105,9 @@ PHP                                                                        NEWS
 - Streams:
   . Applied the so_linger, so_rcvbuf and so_sndbuf context options to unix
     sockets. (David Carlier)
+  . Improved performance of stream_socket_client() and fsockopen() connects
+    on Windows by avoiding a slow getsockopt(SO_ERROR) call on success
+    (GH-24171). (vibbow)
 
 - Standard:
   . Fixed bug #60110 (fclose(), file_put_contents(), copy() do not return false
