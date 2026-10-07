@@ -2,6 +2,11 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.6.0RC4
 
+- Opcache:
+  . Fixed bug GH-17626 (JIT corrupts an opline handler when blacklisting a
+    root trace at the opcache.jit_max_root_traces limit, causing spurious
+    "Too few arguments" errors and crashes). (RV7PR)
+
 - Phar:
   . Fixed GH-24166 (Double-free in Phar::webPhar() in CGI without PATH_INFO).
     (RigelYoung, Jakub Zelenka)
