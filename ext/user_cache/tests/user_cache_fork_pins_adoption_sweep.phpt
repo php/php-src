@@ -20,7 +20,6 @@ $cache = UserCache\Cache::getPool('fork-adoption-sweep');
 $cache->clear();
 $expected = ['name' => str_repeat('A', 300), 'list' => range(1, 64)];
 $cache->store('cfg', $expected);
-$cfg = $cache->fetch('cfg');
 
 function wait_exit(int $pid): string
 {
@@ -47,33 +46,50 @@ function reclaimed(): int
     return UserCache\Cache::getStatus()->getDeadPinOwnersReclaimed();
 }
 
+function in_pinning_process(callable $body): string
+{
+    $pid = pcntl_fork();
+    if ($pid === 0) {
+        $body();
+        exit(0);
+    }
+
+    return wait_exit($pid);
+}
+
 echo "a sweep during the takeover leaves the child's pins alone:\n";
 $go = tempnam(sys_get_temp_dir(), 'ucache_adopt_go');
 $swept = tempnam(sys_get_temp_dir(), 'ucache_adopt_swept');
 $result = tempnam(sys_get_temp_dir(), 'ucache_adopt_result');
+$report = tempnam(sys_get_temp_dir(), 'ucache_adopt_report');
 $before = reclaimed();
 
-/* The sibling's request-end release runs the dead-pin sweep. */
-$sibling = pcntl_fork();
-if ($sibling === 0) {
-    wait_for_file($go);
-    exit(0);
-}
+$holder = in_pinning_process(function () use ($cache, $expected, $go, $swept, $result, $report) {
+    $cfg = $cache->fetch('cfg');
 
-putenv('USER_CACHE_DEBUG_PAUSE_IN_FORK_ADOPTION=1');
-$child = pcntl_fork();
-if ($child === 0) {
-    wait_for_file($swept);
-    file_put_contents($result, $cfg === $expected ? 'kept' : 'changed');
-    exit(0);
-}
-putenv('USER_CACHE_DEBUG_PAUSE_IN_FORK_ADOPTION');
+    $sibling = pcntl_fork();
+    if ($sibling === 0) {
+        wait_for_file($go);
+        exit(0);
+    }
 
-usleep(500000);
-file_put_contents($go, 'go');
-echo "sibling ", wait_exit($sibling), "\n";
-file_put_contents($swept, 'swept');
-echo "child ", wait_exit($child), "\n";
+    putenv('USER_CACHE_DEBUG_PAUSE_IN_FORK_ADOPTION=1');
+    $child = pcntl_fork();
+    if ($child === 0) {
+        wait_for_file($swept);
+        file_put_contents($result, $cfg === $expected ? 'kept' : 'changed');
+        exit(0);
+    }
+    putenv('USER_CACHE_DEBUG_PAUSE_IN_FORK_ADOPTION');
+
+    usleep(500000);
+    file_put_contents($go, 'go');
+    $sibling_exit = wait_exit($sibling);
+    file_put_contents($swept, 'swept');
+    file_put_contents($report, "sibling $sibling_exit, child " . wait_exit($child));
+});
+echo "holder $holder\n";
+echo file_get_contents($report), "\n";
 echo "child value ", file_get_contents($result), "\n";
 var_dump(reclaimed() - $before);
 var_dump(UserCache\Cache::getStatus()->getGraphPinnedReferences());
@@ -85,6 +101,7 @@ $before = reclaimed();
 
 $parent = pcntl_fork();
 if ($parent === 0) {
+    $cfg = $cache->fetch('cfg');
     putenv('USER_CACHE_DEBUG_PAUSE_BEFORE_FORK_ADOPTION=1');
     $grandchild = pcntl_fork();
     if ($grandchild === 0) {
@@ -99,31 +116,31 @@ if ($parent === 0) {
 wait_for_file($forked);
 posix_kill($parent, SIGKILL);
 echo "parent ", wait_exit($parent), "\n";
-
-$sweeper = pcntl_fork();
-if ($sweeper === 0) {
-    exit(0);
-}
-echo "sweeper ", wait_exit($sweeper), "\n";
+$sweeper = in_pinning_process(fn () => $cache->fetch('cfg'));
+echo "sweeper $sweeper\n";
 echo "grandchild ", wait_for_file($result), "\n";
 var_dump(reclaimed() - $before);
-var_dump($cfg === $expected, $cache->fetch('cfg') === $expected);
+$reader = in_pinning_process(function () use ($cache, $expected) {
+    exit($cache->fetch('cfg') === $expected ? 0 : 1);
+});
+echo "reader $reader\n";
+var_dump(UserCache\Cache::getStatus()->getGraphPinnedReferences());
 
-foreach ([$go, $swept, $result, $forked] as $file) {
+foreach ([$go, $swept, $result, $report, $forked] as $file) {
     unlink($file);
 }
 ?>
 --EXPECT--
 a sweep during the takeover leaves the child's pins alone:
-sibling exit 0
-child exit 0
+holder exit 0
+sibling exit 0, child exit 0
 child value kept
 int(0)
-int(1)
+int(0)
 a takeover after a sweep found the parent dead fails:
 parent signal 9
 sweeper exit 0
 grandchild UserCache: values fetched before fork() could not be retained in the child process; the cache is disabled for the rest of this request
 int(2)
-bool(true)
-bool(true)
+reader exit 0
+int(0)
