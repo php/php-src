@@ -400,6 +400,10 @@ lxb_url_percent_encode_utf_8(const lxb_char_t *data, size_t length,
  * hexadecimal digits. If a code point cannot be represented in the target
  * encoding, its percent-encoded numeric character reference is appended.
  *
+ * The output encoding of the target encoding is used: UTF-16BE, UTF-16LE and
+ * replacement are replaced with UTF-8, see
+ * https://encoding.spec.whatwg.org/#get-an-output-encoding
+ *
  * If encoding is UTF-8, no conversion is performed. If space_as_plus is true,
  * an encoded U+0020 SPACE is replaced with '+' before the map is checked.
  * The input is expected to be valid UTF-8; the function does not validate it.
@@ -893,6 +897,51 @@ lxb_url_search_params_serialize(lxb_url_search_params_t *search_params,
  */
 LXB_API bool
 lxb_url_is_special(const lxb_url_t *url);
+
+/*
+ * Reset the URL path to an empty list.
+ *
+ * Frees the path buffer using url->mraw, resets the segment count and clears
+ * the opaque flag. Does nothing if the path buffer is already NULL.
+ *
+ * @param[in, out] URL object. Not NULL.
+ */
+LXB_API void
+lxb_url_path_set_null(lxb_url_t *url);
+
+/*
+ * Set the host to the empty host.
+ *
+ * Frees any domain or opaque host buffer using mraw and sets the host type
+ * to LXB_URL_HOST_TYPE_EMPTY.
+ *
+ * @param[in, out] Host object. Not NULL.
+ * @param[in] Memory object associated with the host. Not NULL.
+ */
+LXB_API void
+lxb_url_host_set_empty(lxb_url_host_t *host, lexbor_mraw_t *mraw);
+
+/*
+ * Set the URL query to null.
+ *
+ * Frees the query buffer using url->mraw. Does nothing if the query
+ * is already null.
+ *
+ * @param[in, out] URL object. Not NULL.
+ */
+LXB_API void
+lxb_url_query_set_null(lxb_url_t *url);
+
+/*
+ * Set the URL fragment to null.
+ *
+ * Frees the fragment buffer using url->mraw. Does nothing if the
+ * fragment is already null.
+ *
+ * @param[in, out] URL object. Not NULL.
+ */
+LXB_API void
+lxb_url_fragment_set_null(lxb_url_t *url);
 
 /*
  * Inline functions.

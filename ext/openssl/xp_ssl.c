@@ -2396,7 +2396,7 @@ static SSL_SESSION *php_openssl_session_get_cb(SSL *ssl, const unsigned char *se
 			session = obj->session;
 		}
 	} else if (Z_TYPE(retval) != IS_NULL) {
-		zend_type_error("session_get_cb return type must be null or OpenSSLSession");
+		zend_type_error("session_get_cb return type must be null or Openssl\\Session");
 	}
 
 	zval_ptr_dtor(&retval);
@@ -2517,7 +2517,7 @@ static zend_result php_openssl_setup_client_session(php_stream *stream,
 		if (php_openssl_is_session_ce(val)) {
 			enable_client_cache = true;
 		} else if (Z_TYPE_P(val) != IS_NULL) {
-			zend_type_error("session_data must be an OpenSSLSession instance");
+			zend_type_error("session_data must be an Openssl\\Session instance");
 			return FAILURE;
 		}
 	}
@@ -2698,13 +2698,13 @@ static zend_result php_openssl_apply_client_session_data(php_stream *stream,
 			if (!session) {
 				// TODO: Should this be a TypeError?
 				php_stream_warn(stream, Generic,
-						"Invalid OpenSSLSession object, falling back to full handshake");
+						"Invalid Openssl\\Session object, falling back to full handshake");
 				return FAILURE;
 			}
 			/* Object owns the session, we just borrow it */
 			needs_free = false;
 		} else if (Z_TYPE_P(val) != IS_NULL) {
-			zend_type_error("session_data must be an OpenSSLSession instance");
+			zend_type_error("session_data must be an Openssl\\Session instance");
 			return FAILURE;
 		}
 
@@ -3309,6 +3309,7 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 				break;
 			}
 
+			int err = SSL_get_error(sslsock->ssl_handle, nr_bytes);
 			retry = php_openssl_handle_ssl_error(stream, nr_bytes, blocked);
 			if (sslsock->io_cancelled) {
 				/* The wait was cancelled behind a retry: OpenSSL kept its state, the call ends */
@@ -3319,9 +3320,11 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 				WSASetLastError(PHP_IO_SOCK_ECANCELED);
 #endif
 			}
-			/* A cancelled Recv says nothing about the connection */
+			/* A cancelled Recv says nothing about the connection; otherwise EOF unless the SSL
+			 * layer just needs to wait, which errno cannot tell on Windows */
 			if (read && !sslsock->io_cancelled) {
-				stream->eof = (retry == 0 && errno != EAGAIN && !SSL_pending(sslsock->ssl_handle));
+				stream->eof = (retry == 0 && err != SSL_ERROR_WANT_READ && err != SSL_ERROR_WANT_WRITE
+						&& !SSL_pending(sslsock->ssl_handle));
 			}
 			if (retry && php_deadline_to_timeout_ms(&deadline) == 0) {
 				sslsock->deadline = NULL;
@@ -3839,9 +3842,7 @@ static int php_openssl_sockop_cast(php_stream *stream, int castas, void **ret)  
 			return SUCCESS;
 
 		case PHP_STREAM_AS_FD_FOR_POLL:
-			/* Bytes OpenSSL holds decrypted are not readiness of the socket: a
-			 * watcher reports the descriptor, and the stream's unread_bytes stay
-			 * what they were */
+			/* Descriptor only, OpenSSL pending bytes stay put */
 			if (ret) {
 				*(php_socket_t *)ret = sslsock->s.socket;
 			}

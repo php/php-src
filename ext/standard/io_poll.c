@@ -1405,14 +1405,11 @@ PHP_METHOD(Io_Poll_NotifyHandle, clear)
 }
 
 /* Handle interface internal only */
-static int php_stream_poll_handle_implement_interface(zend_class_entry *interface, zend_class_entry *implementor)
+static void php_stream_poll_handle_implement_interface(zend_class_entry *interface, zend_class_entry *implementor)
 {
 	if (implementor->type == ZEND_USER_CLASS) {
 		zend_error_noreturn(E_ERROR, "Io\\Poll\\Handle cannot be implemented by user classes");
-		return FAILURE;
 	}
-
-	return SUCCESS;
 }
 
 /* Object Creation Functions */
@@ -2229,8 +2226,7 @@ PHP_METHOD(Io_Poll_Context, add)
 
 	/* Store in our watchers map */
 	zval watcher_zv;
-	ZVAL_OBJ(&watcher_zv, &watcher->std);
-	GC_ADDREF(&watcher->std);
+	ZVAL_OBJ_COPY(&watcher_zv, &watcher->std);
 	zend_hash_index_add_new(intern->watchers, (zend_ulong) fd, &watcher_zv);
 
 	watcher->active = true;
@@ -2332,11 +2328,7 @@ PHP_METHOD(Io_Poll_Context, wait)
 			}
 			watcher->triggered_events = triggered;
 
-			zval watcher_zv;
-			ZVAL_OBJ(&watcher_zv, &watcher->std);
-			GC_ADDREF(&watcher->std);
-
-			add_next_index_zval(return_value, &watcher_zv);
+			add_next_index_object(return_value, zend_object_copy(&watcher->std));
 		}
 	}
 

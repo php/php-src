@@ -542,13 +542,13 @@ PHP_FUNCTION(mysqli_fetch_object)
 		ce = zend_standard_class_def;
 	}
 	if (UNEXPECTED(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
-		zend_throw_error(NULL, "Class %s cannot be instantiated", ZSTR_VAL(ce->name));
+		zend_throw_error(NULL, "Class %pS cannot be instantiated", ce->name);
 		RETURN_THROWS();
 	}
 	if (!ce->constructor && ctor_params && zend_hash_num_elements(ctor_params) > 0) {
 		zend_argument_value_error(ERROR_ARG_POS(3),
-			"must be empty when the specified class (%s) does not have a constructor",
-			ZSTR_VAL(ce->name)
+			"must be empty when the specified class (%pS) does not have a constructor",
+			ce->name
 		);
 		RETURN_THROWS();
 	}
@@ -707,12 +707,12 @@ static zend_result mysqlnd_zval_array_to_mysqlnd_array(zval *in_array, MYSQLND *
 			MYSQLI_RESOURCE *my_res;
 			mysqli_object *intern = Z_MYSQLI_P(elem);
 			if (!(my_res = (MYSQLI_RESOURCE *)intern->ptr)) {
-				zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(intern->zo.ce->name));
+				zend_throw_error(NULL, "%pS object is already closed", intern->zo.ce->name);
 				return FAILURE;
 		  	}
 			mysql = (MY_MYSQL*) my_res->ptr;
 			if (my_res->status < MYSQLI_STATUS_VALID) {
-				zend_throw_error(NULL, "%s object is not fully initialized", ZSTR_VAL(intern->zo.ce->name));
+				zend_throw_error(NULL, "%pS object is not fully initialized", intern->zo.ce->name);
 				return FAILURE;
 			}
 			(*out_array)[current++] = mysql->mysql;
@@ -741,7 +741,7 @@ static zend_result mysqlnd_zval_array_from_mysqlnd_array(MYSQLND **in_array, zva
 			MYSQLI_RESOURCE *my_res;
 			mysqli_object *intern = Z_MYSQLI_P(elem);
 			if (!(my_res = (MYSQLI_RESOURCE *)intern->ptr)) {
-				zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(intern->zo.ce->name));
+				zend_throw_error(NULL, "%pS object is already closed", intern->zo.ce->name);
 				return FAILURE;
 		  	}
 			mysql = (MY_MYSQL *) my_res->ptr;

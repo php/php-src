@@ -812,7 +812,7 @@ PHP_FUNCTION(wordwrap)
 			/* when we hit an existing break, copy to new buffer, and
 			 * fix up laststart and lastspace */
 			if (ZSTR_VAL(text)[current] == breakchar[0]
-				&& current + breakchar_len < ZSTR_LEN(text)
+				&& current + breakchar_len <= ZSTR_LEN(text)
 				&& !strncmp(ZSTR_VAL(text) + current, breakchar, breakchar_len)) {
 				memcpy(ZSTR_VAL(newtext) + newtextlen, ZSTR_VAL(text) + laststart, current - laststart + breakchar_len);
 				newtextlen += current - laststart + breakchar_len;
@@ -1740,6 +1740,11 @@ static size_t php_strspn_strcspn_common(const char *haystack, const char *charac
 	 * We only compare in this case.
 	 * Empirically tested that the table lookup approach is only beneficial if characters is longer than 1 character. */
 	if (characters_end - characters == 1) {
+		/* Avoid memchr() overhead for short spans and an immediate match. */
+		if (!must_match && haystack_end - haystack >= 16 && *haystack != *characters) {
+			const char *ptr = memchr(haystack, (unsigned char) *characters, haystack_end - haystack);
+			return ptr ? (size_t) (ptr - haystack) : (size_t) (haystack_end - haystack);
+		}
 		const char *ptr = haystack;
 		while (ptr < haystack_end && (*ptr == *characters) == must_match) {
 			ptr++;

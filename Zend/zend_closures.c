@@ -902,8 +902,7 @@ static void zend_create_closure_ex(
 	if (scope) {
 		closure->func.common.fn_flags |= ZEND_ACC_PUBLIC;
 		if (this_ptr && (closure->func.common.fn_flags & ZEND_ACC_STATIC) == 0) {
-			closure->this_ptr = this_ptr;
-			GC_ADDREF(this_ptr);
+			closure->this_ptr = zend_object_copy(this_ptr);
 		}
 	}
 }

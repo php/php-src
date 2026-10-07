@@ -114,6 +114,9 @@ U_CFUNC int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char 
 	if(puchar_pos) {
 		*puchar_pos = -1;
 	}
+	if (haystack_len == 0 && needle_len > 0) {
+		return -1;
+	}
 	/* convert the strings to UTF-16. */
 
 	status = U_ZERO_ERROR;
@@ -189,6 +192,12 @@ U_CFUNC int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char 
 					break;
 				}
 				prev_pos = char_pos;
+				int32_t next_pos = ubrk_following(bi, char_pos);
+				if (next_pos == UBRK_DONE) {
+					break;
+				}
+				usearch_setOffset(src, next_pos, &status);
+				STRPOS_CHECK_STATUS(status, "Invalid search offset");
 			} while(1);
 		}
 	} else {

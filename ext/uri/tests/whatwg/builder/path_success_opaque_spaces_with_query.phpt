@@ -17,7 +17,7 @@ var_dump($url->equals(new Uri\WhatWg\Url($url->toAsciiString())));
 
 ?>
 --EXPECTF--
-string(11) "foo:abc  ?q"
+string(13) "foo:abc %20?q"
 object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(3) "foo"
@@ -30,7 +30,7 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  string(5) "abc  "
+  string(7) "abc %20"
   ["query"]=>
   string(1) "q"
   ["fragment"]=>
@@ -40,7 +40,7 @@ array(2) {
   [0]=>
   object(Uri\WhatWg\UrlValidationError)#%d (%d) {
     ["context"]=>
-    string(2) " ?"
+    string(3) "  ?"
     ["type"]=>
     enum(Uri\WhatWg\UrlValidationErrorType::InvalidUrlUnit)
     ["failure"]=>
@@ -49,7 +49,7 @@ array(2) {
   [1]=>
   object(Uri\WhatWg\UrlValidationError)#%d (%d) {
     ["context"]=>
-    string(3) "  ?"
+    string(2) " ?"
     ["type"]=>
     enum(Uri\WhatWg\UrlValidationErrorType::InvalidUrlUnit)
     ["failure"]=>

@@ -195,8 +195,7 @@ PHP_FUNCTION(assert)
 	}
 
 	if (description_obj) {
-		GC_ADDREF(description_obj);
-		zend_throw_exception_internal(description_obj);
+		zend_throw_exception_internal(zend_object_copy(description_obj));
 		RETURN_THROWS();
 	}
 

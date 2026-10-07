@@ -412,8 +412,15 @@ PHP_FUNCTION(curl_multi_exec)
 			_php_curl_verify_handlers(ch, /* reporterror */ true);
 		}
 	}
+	
+	bool failed;
 
-	still_running = zval_get_long(z_still_running);
+	still_running = zval_try_get_long(z_still_running, &failed);
+	if (UNEXPECTED(failed)) {
+		zend_argument_type_error(2, "must be of type int, %s given", zend_zval_value_name(z_still_running));
+		RETURN_THROWS();
+	}
+	
 	error = curl_multi_perform(mh->multi, &still_running);
 	ZEND_TRY_ASSIGN_REF_LONG(z_still_running, still_running);
 

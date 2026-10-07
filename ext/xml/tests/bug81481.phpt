@@ -13,7 +13,6 @@ require __DIR__ . '/libxml_expat_skipif.inc';
 skipif(want_expat: false);
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 if (PHP_INT_SIZE != 8) die("skip 64-bit only");
-if (PHP_OS_FAMILY == 'Windows') die('skip not for Windows');
 ?>
 --FILE--
 <?php

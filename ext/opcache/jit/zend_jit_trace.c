@@ -348,6 +348,14 @@ static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op 
 			// TODO: recompilation may change target ???
 			return 0;
 #endif
+		case ZEND_FETCH_OBJ_R:
+			if (opline->op2_type == IS_CONST) {
+				const zend_class_entry *ce = opline->op1_type == IS_UNUSED ? op_array->scope : NULL;
+				if (!ce || !(ce->ce_flags & ZEND_ACC_FINAL) || ce->num_hooked_props > 0) {
+					return 1;
+				}
+			}
+			break;
 		case ZEND_RETURN_BY_REF:
 		case ZEND_RETURN:
 			/* return */
@@ -6194,7 +6202,7 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 						ssa_op = orig_ssa_op;
 						goto done;
 					case ZEND_RECV:
-						if (!zend_jit_recv(&ctx, opline, op_array)) {
+						if (!zend_jit_recv(&ctx, opline, op_array, op1_ce)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -6317,7 +6325,7 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 							/* TODO May need reference unwrapping. */
 							break;
 						}
-						if (!zend_jit_verify_return_type(&ctx, opline, op_array, op1_info)) {
+						if (!zend_jit_verify_return_type(&ctx, opline, op_array, op1_info, op1_ce)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -7920,6 +7928,10 @@ static void zend_jit_dump_trace(zend_jit_trace_rec *trace_buffer, zend_ssa *tssa
 					const char *type = ((op3_type & ~IS_TRACE_INDIRECT) == 0) ? "undef" : zend_get_type_by_const(op3_type & ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT));
 					fprintf(stderr, " op3(%s%s)", ref, type);
 				}
+			} else if (opline->opcode == ZEND_RECV && (p+1)->op == ZEND_JIT_TRACE_OP1_TYPE) {
+				/* Class of the received object */
+				p++;
+				fprintf(stderr, " ; arg(object of class %s)", ZSTR_VAL(p->ce->name));
 			}
 			if ((p+1)->op == ZEND_JIT_TRACE_VAL_INFO) {
 				uint8_t val_type;
@@ -8725,10 +8737,7 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 				ZEND_UNREACHABLE();
 			}
 		} else if (STACK_FLAGS(stack, i) == ZREG_THIS) {
-			zend_object *obj = Z_OBJ(EX(This));
-
-			GC_ADDREF(obj);
-			ZVAL_OBJ(EX_VAR_NUM(i), obj);
+			ZVAL_OBJ_COPY(EX_VAR_NUM(i), Z_OBJ(EX(This)));
 		} else if (STACK_FLAGS(stack, i) == ZREG_ZVAL_ADDREF) {
 			Z_TRY_ADDREF_P(EX_VAR_NUM(i));
 		} else if (STACK_FLAGS(stack, i) == ZREG_ZVAL_COPY) {

@@ -22,6 +22,8 @@
  * php zend_vm_gen.php
  */
 
+#include "zend_objects_API.h"
+
 ZEND_VM_HELPER(zend_add_helper, ANY, ANY, zval *op_1, zval *op_2)
 {
 	USE_OPLINE
@@ -4011,8 +4013,8 @@ ZEND_VM_HANDLER(118, ZEND_INIT_USER_CALL, CONST, CONST|TMP|CV, NUM)
 				call_info |= ZEND_CALL_HAS_THIS;
 			}
 		} else if (fcc.object) {
-			GC_ADDREF(fcc.object); /* For $this pointer */
-			object_or_called_scope = fcc.object;
+			/* For $this pointer */
+			object_or_called_scope = zend_object_copy(fcc.object);
 			call_info |= ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS;
 		}
 
@@ -6682,7 +6684,7 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMP|CV, ANY, EVAL, SPEC(OBSERVER
 		}
 	}
 	FREE_OP1();
-	if (OP1_TYPE & IS_CONST) {
+	if (OP1_TYPE & (IS_CONST|IS_CV)) {
 		ZEND_VM_NEXT_OPCODE();
 	} else {
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();

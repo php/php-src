@@ -53,7 +53,7 @@ ZEND_DECLARE_MODULE_GLOBALS(openssl)
 
 #include "openssl_arginfo.h"
 
-/* OpenSSLException class */
+/* Openssl\OpensslException class */
 
 zend_class_entry *php_openssl_exception_ce;
 
@@ -279,7 +279,7 @@ static zend_object *php_openssl_session_create_object(zend_class_entry *class_ty
 static zend_function *php_openssl_session_get_constructor(zend_object *object)
 {
 	zend_throw_error(NULL,
-		"Cannot directly construct OpenSSLSession, use OpenSSLSession::import() or TLS session callbacks");
+		"Cannot directly construct Openssl\\Session, use Openssl\\Session::import() or TLS session callbacks");
 	return NULL;
 }
 
@@ -4513,6 +4513,11 @@ static zend_result php_openssl_setup_rsa_pss_salt_length(EVP_PKEY_CTX *pctx, EVP
 {
 	/* Only apply if using PSS padding */
 	if (padding != RSA_PKCS1_PSS_PADDING) {
+		return SUCCESS;
+	}
+
+	/* For AUTO, keep the OpenSSL default salt length. */
+	if (salt_length == RSA_PSS_SALTLEN_AUTO) {
 		return SUCCESS;
 	}
 

@@ -560,7 +560,13 @@ void php_init_config(void)
 					fp = VCWD_FOPEN(php_ini_file_name, "r");
 					if (fp) {
 						filename = expand_filepath(php_ini_file_name, NULL);
-						free_filename = true;
+						if (filename) {
+							free_filename = true;
+						} else {
+							/* Reject the file, like ZTS where VCWD_STAT() already fails */
+							fclose(fp);
+							fp = NULL;
+						}
 					}
 				}
 			}

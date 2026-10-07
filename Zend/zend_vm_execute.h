@@ -5464,7 +5464,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INCLUDE_OR_EV
 	}
 
 
-	if (IS_CONST & IS_CONST) {
+	if (IS_CONST & (IS_CONST|IS_CV)) {
 		ZEND_VM_NEXT_OPCODE();
 	} else {
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -5551,7 +5551,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INCLUDE_OR_EV
 		}
 	}
 	FREE_OP(opline->op1_type, opline->op1.var);
-	if (opline->op1_type & IS_CONST) {
+	if (opline->op1_type & (IS_CONST|IS_CV)) {
 		ZEND_VM_NEXT_OPCODE();
 	} else {
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -7695,8 +7695,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_USER_CAL
 				call_info |= ZEND_CALL_HAS_THIS;
 			}
 		} else if (fcc.object) {
-			GC_ADDREF(fcc.object); /* For $this pointer */
-			object_or_called_scope = fcc.object;
+			/* For $this pointer */
+			object_or_called_scope = zend_object_copy(fcc.object);
 			call_info |= ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS;
 		}
 
@@ -10470,8 +10470,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_USER_CAL
 				call_info |= ZEND_CALL_HAS_THIS;
 			}
 		} else if (fcc.object) {
-			GC_ADDREF(fcc.object); /* For $this pointer */
-			object_or_called_scope = fcc.object;
+			/* For $this pointer */
+			object_or_called_scope = zend_object_copy(fcc.object);
 			call_info |= ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS;
 		}
 
@@ -13135,8 +13135,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_USER_CAL
 				call_info |= ZEND_CALL_HAS_THIS;
 			}
 		} else if (fcc.object) {
-			GC_ADDREF(fcc.object); /* For $this pointer */
-			object_or_called_scope = fcc.object;
+			/* For $this pointer */
+			object_or_called_scope = zend_object_copy(fcc.object);
 			call_info |= ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS;
 		}
 
@@ -17660,7 +17660,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INCLUDE_OR_EV
 		}
 	}
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-	if (IS_TMP_VAR & IS_CONST) {
+	if (IS_TMP_VAR & (IS_CONST|IS_CV)) {
 		ZEND_VM_NEXT_OPCODE();
 	} else {
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -40438,7 +40438,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INCLUDE_OR_EV
 	}
 
 
-	if (IS_CV & IS_CONST) {
+	if (IS_CV & (IS_CONST|IS_CV)) {
 		ZEND_VM_NEXT_OPCODE();
 	} else {
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -58325,7 +58325,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INCLUDE_OR_EVAL_SP
 	}
 
 
-	if (IS_CONST & IS_CONST) {
+	if (IS_CONST & (IS_CONST|IS_CV)) {
 		ZEND_VM_NEXT_OPCODE();
 	} else {
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -58412,7 +58412,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INCLUDE_OR_EVAL_SP
 		}
 	}
 	FREE_OP(opline->op1_type, opline->op1.var);
-	if (opline->op1_type & IS_CONST) {
+	if (opline->op1_type & (IS_CONST|IS_CV)) {
 		ZEND_VM_NEXT_OPCODE();
 	} else {
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -60556,8 +60556,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_USER_CALL_SPE
 				call_info |= ZEND_CALL_HAS_THIS;
 			}
 		} else if (fcc.object) {
-			GC_ADDREF(fcc.object); /* For $this pointer */
-			object_or_called_scope = fcc.object;
+			/* For $this pointer */
+			object_or_called_scope = zend_object_copy(fcc.object);
 			call_info |= ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS;
 		}
 
@@ -63331,8 +63331,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_USER_CALL_SPE
 				call_info |= ZEND_CALL_HAS_THIS;
 			}
 		} else if (fcc.object) {
-			GC_ADDREF(fcc.object); /* For $this pointer */
-			object_or_called_scope = fcc.object;
+			/* For $this pointer */
+			object_or_called_scope = zend_object_copy(fcc.object);
 			call_info |= ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS;
 		}
 
@@ -65894,8 +65894,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_USER_CALL_SPE
 				call_info |= ZEND_CALL_HAS_THIS;
 			}
 		} else if (fcc.object) {
-			GC_ADDREF(fcc.object); /* For $this pointer */
-			object_or_called_scope = fcc.object;
+			/* For $this pointer */
+			object_or_called_scope = zend_object_copy(fcc.object);
 			call_info |= ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS;
 		}
 
@@ -70419,7 +70419,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INCLUDE_OR_EVAL_SP
 		}
 	}
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-	if (IS_TMP_VAR & IS_CONST) {
+	if (IS_TMP_VAR & (IS_CONST|IS_CV)) {
 		ZEND_VM_NEXT_OPCODE();
 	} else {
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -93097,7 +93097,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INCLUDE_OR_EVAL_SP
 	}
 
 
-	if (IS_CV & IS_CONST) {
+	if (IS_CV & (IS_CONST|IS_CV)) {
 		ZEND_VM_NEXT_OPCODE();
 	} else {
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();

@@ -312,7 +312,7 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(inputs.branch).jobs.MACOS.matrix }}
     name: "MACOS_${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
-    runs-on: macos-${{ matrix.arch == 'X64' && '15-intel' || fromJson(inputs.branch).jobs.MACOS.config.arm64_version }}
+    runs-on: macos-${{ fromJson(inputs.branch).jobs.MACOS.config.version }}${{ matrix.arch == 'X64' && '-intel' || '' }}
     timeout-minutes: 180
     steps:
       - name: git checkout

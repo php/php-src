@@ -22,6 +22,8 @@
 #include "intl_common.h"
 #include "intl_convert.h"
 
+#include <unicode/utf16.h>
+
 /* {{{ intl_convert_utf8_to_utf16
  * Convert given string from UTF-8 to UTF-16 to *target buffer.
  *
@@ -198,3 +200,43 @@ zend_string* intl_convert_utf16_to_utf8(
 	return dst;
 }
 /* }}} */
+
+bool intl_convert_utf8_offset_to_utf16(const char *str, size_t str_len, int32_t *position, UErrorCode *status)
+{
+	int32_t utf16_position;
+
+	if (*position < 0 || (size_t) *position > str_len) {
+		return true;
+	}
+
+	*status = U_ZERO_ERROR;
+	u_strFromUTF8(NULL, 0, &utf16_position, str, *position, status);
+	if (*status != U_BUFFER_OVERFLOW_ERROR && U_FAILURE(*status)) {
+		return false;
+	}
+	*status = U_ZERO_ERROR;
+
+	*position = utf16_position;
+	return true;
+}
+
+int32_t intl_convert_utf16_offset_to_utf8(const UChar *str, int32_t str_len, int32_t position)
+{
+	int32_t utf8_position;
+	UErrorCode status = U_ZERO_ERROR;
+
+	if (position < 0 || position > str_len) {
+		return position;
+	}
+
+	if (position > 0 && position < str_len && U16_IS_LEAD(str[position - 1]) && U16_IS_TRAIL(str[position])) {
+		position--;
+	}
+
+	u_strToUTF8(NULL, 0, &utf8_position, str, position, &status);
+	if (status != U_BUFFER_OVERFLOW_ERROR && U_FAILURE(status)) {
+		return position;
+	}
+
+	return utf8_position;
+}
