@@ -129,7 +129,8 @@ struct _zend_coroutine_s {
 	zend_coroutine_entry_t internal_entry;
 	/* Custom data of the scheduler/extension. Nullable. */
 	void *extended_data;
-	/* Completion result. */
+	/* Completion result. An internal entry may set it too (the GC run stores its
+	 * count); the provider keeps it until the coroutine is freed. */
 	zval result;
 	/* Completion exception. Nullable. */
 	zend_object *exception;
@@ -372,7 +373,10 @@ typedef bool (*zend_async_defer_t)(zend_async_microtask_t *task);
  * observed. False when the wait was aborted — a cancellation delivered to the
  * waiter, or misuse (no current coroutine, awaiting itself) — or when the wait
  * is not possible here (the scheduler is running its own work): false without
- * an exception, and the caller does not wait. */
+ * an exception, and the caller does not wait. The caller holds a reference to
+ * `coroutine` across the call (ZEND_COROUTINE_ADD_REF()); the slot takes none,
+ * so its return releases nothing that could add a GC root or run a
+ * destructor on the waiter. */
 typedef bool (*zend_async_coroutine_await_t)(zend_coroutine_t *coroutine);
 
 /*

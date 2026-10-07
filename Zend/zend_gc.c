@@ -300,8 +300,6 @@ typedef struct _zend_gc_globals {
 	zend_async_microtask_t *microtask;
 	/* How many destructor-coroutines are still outstanding */
 	uint32_t dtor_pending;
-	/* Result of the last coroutine-run collection, returned to the waiters. */
-	int gc_collected;
 	/* A full root buffer asked the GC coroutine for a collection that has not finished yet. */
 	bool adjust_threshold;
 
@@ -550,7 +548,6 @@ static void gc_globals_ctor_ex(zend_gc_globals *gc_globals)
 	gc_globals->dtor_coroutine = NULL;
 	gc_globals->microtask = NULL;
 	gc_globals->dtor_pending = 0;
-	gc_globals->gc_collected = 0;
 	gc_globals->adjust_threshold = false;
 
 #if GC_BENCH
@@ -2212,7 +2209,11 @@ static void zend_gc_coroutine(void)
 	GC_TRACE("GC coroutine started");
 
 	const uint32_t runs = GC_G(gc_runs);
-	GC_G(gc_collected) = zend_gc_collect_cycles();
+	const int count = zend_gc_collect_cycles();
+
+	/* The count goes to the waiters in the run's own result: another run can
+	 * finish before a waiter woken by this one resumes. */
+	ZVAL_LONG(&ZEND_ASYNC_CURRENT_COROUTINE->result, count);
 
 	if (GC_G(adjust_threshold)) {
 		GC_G(adjust_threshold) = false;
@@ -2220,7 +2221,7 @@ static void zend_gc_coroutine(void)
 		/* A run that found the buffer already drained examined nothing, and
 		 * its 0 measures nothing either. */
 		if (EXPECTED(GC_G(gc_runs) != runs)) {
-			gc_adjust_threshold(GC_G(gc_collected));
+			gc_adjust_threshold(count);
 		}
 	}
 
@@ -2308,23 +2309,29 @@ ZEND_API int zend_gc_collect_cycles(void)
 		}
 
 		/* Synchronous for the caller: parked until the run finishes. false
-		 * means this coroutine was cancelled, not that the run failed. */
-		const bool awaited = ZEND_ASYNC_AWAIT(GC_G(gc_coroutine));
+		 * means this coroutine was cancelled, not that the run failed. The
+		 * reference, which the await slot asks of its caller, keeps the
+		 * finished run and its result for the count. */
+		zend_coroutine_t *run = GC_G(gc_coroutine);
+		ZEND_COROUTINE_ADD_REF(run);
+		const bool awaited = ZEND_ASYNC_AWAIT(run);
+
+		/* A run cancelled before it started has no result. */
+		const int count = awaited && Z_TYPE(run->result) == IS_LONG ? (int) Z_LVAL(run->result) : 0;
 
 		/* Re-root the shielded TMPVARs — on the cancelled path too, or they
 		 * fall out of GC tracking. gc_active keeps this walk from starting a
 		 * fresh run; by wake-up one may already be active, so restore rather
-		 * than reset. */
+		 * than reset. The release of the run goes under the same guard: the
+		 * root it adds to a full buffer would start the next run and wait for
+		 * it from here, and that run's release would start another. */
 		bool was_active = GC_G(gc_active);
 		GC_G(gc_active) = 1;
 		zend_gc_check_root_tmpvars();
+		ZEND_COROUTINE_RELEASE(run);
 		GC_G(gc_active) = was_active;
 
-		if (UNEXPECTED(!awaited)) {
-			return 0;
-		}
-
-		return GC_G(gc_collected);
+		return count;
 	}
 
 	int total_count = 0;

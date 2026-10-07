@@ -546,8 +546,8 @@ static void ts_waiters_remove(ts_coroutine_t *target, const ts_coroutine_t *wait
 }
 
 /* The awaiting-info handler ts_await() registers on the waiter: `data` is
- * the awaited coroutine (alive for the whole wait — ts_await() holds a
- * reference). */
+ * the awaited coroutine (alive for the whole wait — ts_await()'s caller
+ * holds a reference). */
 static zend_string *ts_await_awaiting_info(zend_coroutine_t *coroutine, void *data)
 {
 	(void) coroutine;
@@ -555,8 +555,9 @@ static zend_string *ts_await_awaiting_info(zend_coroutine_t *coroutine, void *da
 	return zend_strpprintf(0, "await: coroutine #%u", ((ts_coroutine_t *) data)->std.handle);
 }
 
-/* Park the current coroutine until `coroutine` finishes. The wait holds its
- * own reference: the last outside handle may die while we are parked. */
+/* Park the current coroutine until `coroutine` finishes. The caller holds a
+ * reference to it for the whole wait, as the await slot asks: the userland
+ * await() through its argument. */
 static bool ts_await(zend_coroutine_t *coroutine)
 {
 	ts_coroutine_t *target = ts_from_coro(coroutine);
@@ -577,8 +578,6 @@ static bool ts_await(zend_coroutine_t *coroutine)
 		return false;
 	}
 
-	ZEND_COROUTINE_ADD_REF(coroutine);
-
 	/* A stray resume() can wake us early: park again until it is really over.
 	 * The wake wiped the awaiting info, so each lap registers it anew. */
 	while (!ZEND_COROUTINE_IS_FINISHED(coroutine)) {
@@ -588,12 +587,9 @@ static bool ts_await(zend_coroutine_t *coroutine)
 		if (!ZEND_ASYNC_SUSPEND()) {
 			/* Cancelled while waiting: the outcome is no longer ours. */
 			ts_waiters_remove(target, ts_from_coro(self));
-			ZEND_COROUTINE_RELEASE(coroutine);
 			return false;
 		}
 	}
-
-	ZEND_COROUTINE_RELEASE(coroutine);
 
 	return true;
 }
