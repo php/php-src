@@ -108,6 +108,8 @@ PHP                                                                        NEWS
     haystacks. (Weilin Du)
   . Fixed grapheme_strrpos() and grapheme_strripos() skipping overlapping matches
     when using a negative offset. (Weilin Du)
+  . Fixed grapheme_extract() returning an incorrect next offset when starting
+    inside a multibyte UTF-8 character. (Weilin Du, David Carlier)
 
 - Lexbor:
   . Merge patches lexbor/lexbor@8a14bc0 and lexbor/lexbor@f67ce4b, fixing a
