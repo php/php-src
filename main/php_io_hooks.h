@@ -402,6 +402,10 @@ typedef struct _php_io_queue_ops {
 	/* Bracket a registration; what the queue retains for the pair goes to reg->queue_data */
 	zend_result (*add)(php_io_queue *q, php_io_registration *reg);
 	void (*remove)(php_io_queue *q, php_io_registration *reg);
+	/* Readiness the queue holds for a registered pair itself, which no poll of the descriptor
+	 * reports (the connections a multishot accept took): the events among those asked that it
+	 * answers now. May be NULL. */
+	uint32_t (*held)(php_io_queue *q, php_io_registration *reg, uint32_t events);
 	/* NULL waits for good; the non-blocking deadline is one reap that never blocks */
 	int (*wait)(php_io_queue *q, php_io_queue_completion *out, uint32_t max, const php_deadline *dl);
 	void (*orphan)(php_io_queue *q, php_io_op *op);
@@ -414,12 +418,22 @@ typedef struct _php_io_queue_ops {
 
 struct _php_io_queue {
 	const php_io_queue_ops *ops;
+	uint64_t id; /* the one it leaves on a registration, see php_io_queue_attach() */
+	php_io_queue *prev;
+	php_io_queue *next;
 };
 
 PHPAPI php_io_queue *php_io_queue_create_poll(php_poll_backend_type backend);
 /* Never repeats within a thread: a queue tells its own record on a registration from one a queue
  * before it left there */
 PHPAPI uint64_t php_io_queue_new_id(void);
+/* A queue is found by the id it leaves on a registration from attach() until detach() */
+PHPAPI void php_io_queue_attach(php_io_queue *q, uint64_t id);
+PHPAPI void php_io_queue_detach(php_io_queue *q);
+PHPAPI php_io_queue *php_io_queue_find(uint64_t id);
+/* The events among those asked that the queues of a registrant's pairs hold themselves, for a
+ * readiness check made with a syscall */
+PHPAPI uint32_t php_io_held_events(php_io_registration *regs, uint32_t events);
 
 static inline php_deadline php_io_deadline_from_ms(zend_long ms)
 {

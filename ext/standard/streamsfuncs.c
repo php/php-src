@@ -810,7 +810,9 @@ static int stream_select_any(zval *r_array, zval *w_array, zval *e_array, struct
 
 	/* Syscall first, as for a read: a zero-timeout poll() over the sets answers a select
 	 * with a stream ready now, or one with a zero timeout, without an op, and is the arm-time
-	 * check of members on registered pairs; only a select that really waits builds the Any */
+	 * check of members on registered pairs; only a select that really waits builds the Any.
+	 * What a stream's queue holds itself, the connections a multishot accept took, no poll
+	 * reports and the queue is asked for. */
 	bool checked = false;
 	if (n > 0) {
 		php_pollfd stack[16];
@@ -824,15 +826,18 @@ static int stream_select_any(zval *r_array, zval *w_array, zval *e_array, struct
 		}
 		int ready = php_poll2(fds, n, 0);
 		int found = 0;
-		if (ready > 0) {
+		if (ready >= 0) {
 			for (uint32_t i = 0; i < n; i++) {
-				short revents = fds[i].revents;
+				short revents = ready > 0 ? fds[i].revents : 0;
 				if (revents & POLLNVAL) {
 					/* The Any reports the descriptor's failure */
 					found = 0;
 					break;
 				}
-				if ((revents & (POLLIN | POLLHUP | POLLERR)) && (members[i].events & PHP_POLL_READ)) {
+				uint32_t held = php_io_held_events(members[i].stream->io_registrations,
+						members[i].events);
+				if (((revents & (POLLIN | POLLHUP | POLLERR)) || (held & PHP_POLL_READ))
+						&& (members[i].events & PHP_POLL_READ)) {
 					PHP_SAFE_FD_SET(members[i].fd, rfds);
 					found++;
 				}

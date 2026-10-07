@@ -66,6 +66,8 @@ PHPAPI uint32_t php_io_ring_supported_hook_flags(php_io_ring *ring);
 /* Edge registrations; Level ones never reach the ring */
 PHPAPI zend_result php_io_ring_add(php_io_ring *ring, php_io_registration *reg);
 PHPAPI void php_io_ring_remove(php_io_ring *ring, php_io_registration *reg);
+/* PHP_POLL_READ on a listener with connections its multishot accept buffered */
+PHPAPI uint32_t php_io_ring_held(php_io_ring *ring, php_io_registration *reg, uint32_t events);
 
 /* Created by another process: every operation fails */
 PHPAPI bool php_io_ring_inherited(php_io_ring *ring);

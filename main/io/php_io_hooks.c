@@ -398,6 +398,60 @@ PHPAPI uint64_t php_io_queue_new_id(void)
 	return ++php_io_queue_ids;
 }
 
+ZEND_TLS php_io_queue *php_io_queues = NULL;
+
+PHPAPI void php_io_queue_attach(php_io_queue *q, uint64_t id)
+{
+	q->id = id;
+	q->prev = NULL;
+	q->next = php_io_queues;
+	if (php_io_queues) {
+		php_io_queues->prev = q;
+	}
+	php_io_queues = q;
+}
+
+PHPAPI void php_io_queue_detach(php_io_queue *q)
+{
+	if (q->prev) {
+		q->prev->next = q->next;
+	} else if (php_io_queues == q) {
+		php_io_queues = q->next;
+	}
+	if (q->next) {
+		q->next->prev = q->prev;
+	}
+	q->prev = q->next = NULL;
+}
+
+PHPAPI php_io_queue *php_io_queue_find(uint64_t id)
+{
+	for (php_io_queue *q = php_io_queues; q; q = q->next) {
+		if (q->id == id) {
+			return q;
+		}
+	}
+	return NULL;
+}
+
+/* Only the pairs of the current provider: one an earlier provider registered may sit on a queue
+ * nobody serves any more */
+PHPAPI uint32_t php_io_held_events(php_io_registration *regs, uint32_t events)
+{
+	uint32_t held = 0;
+	for (php_io_registration *reg = regs; reg; reg = reg->next) {
+		if (!(reg->event & events) || reg->generation != FG(io_hooks_generation)
+				|| !reg->queue_data) {
+			continue;
+		}
+		php_io_queue *q = php_io_queue_find(reg->queue_id);
+		if (q && q->ops->held) {
+			held |= q->ops->held(q, reg, events) & reg->event;
+		}
+	}
+	return held;
+}
+
 /* Hooks */
 
 PHPAPI zend_result php_io_hooks_register(php_io_hooks *hooks)

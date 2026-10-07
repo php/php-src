@@ -59,8 +59,9 @@ $scheduler->spawn(function () use ($addr, &$clients) {
 });
 $scheduler->loop();
 
-// A non-blocking accept with nothing pending arms no multishot: the next connection stays in the
-// kernel, where even a select with a zero timeout sees it
+// A non-blocking accept with nothing pending arms the multishot too: the next connection goes to
+// the ring's buffer, which a select with a zero timeout sees through the queue, since its poll() of
+// the listener cannot
 $server = stream_socket_server('tcp://127.0.0.1:0');
 $addr = 'tcp://' . stream_socket_get_name($server, false);
 $scheduler->spawn(function () use ($server, $addr, &$clients) {
@@ -69,6 +70,17 @@ $scheduler->spawn(function () use ($server, $addr, &$clients) {
     usleep(50000);
     stream_set_blocking($server, false);
     echo select_then_accept($server, 0), "\n";
+    // Another stream ready at the poll() does not hide a buffered connection
+    $clients[] = stream_socket_client($addr);
+    usleep(50000);
+    [$a, $b] = stream_socket_pair(PHP_OS_FAMILY === 'Windows' ? STREAM_PF_INET : STREAM_PF_UNIX,
+        STREAM_SOCK_STREAM, 0);
+    fwrite($b, "x");
+    $r = [$server, $a];
+    $w = null;
+    $e = null;
+    var_dump(stream_select($r, $w, $e, 0), count($r));
+    var_dump(@stream_socket_accept($server, 0) !== false);
 });
 $scheduler->loop();
 
@@ -81,3 +93,6 @@ select: 1, at once: true, accepted: true
 select: 1, at once: true, accepted: true
 bool(false)
 select: 1, at once: true, accepted: true
+int(2)
+int(2)
+bool(true)

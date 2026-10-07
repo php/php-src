@@ -1378,6 +1378,24 @@ static void php_socket_select_collect(HashTable *sock_array, uint32_t events,
 	} ZEND_HASH_FOREACH_END();
 }
 
+/* What the queue of the socket's pairs holds itself, on the stream it was imported from or on
+ * its handle: the connections a multishot accept took, which no poll reports */
+static uint32_t php_socket_held_events(php_socket *sock, uint32_t events)
+{
+	if (!Z_ISUNDEF(sock->zstream)) {
+		php_stream *stream = zend_fetch_resource2_ex(&sock->zstream, NULL, php_file_le_stream(),
+				php_file_le_pstream());
+		if (stream) {
+			return php_io_held_events(stream->io_registrations, events);
+		}
+	}
+	if (sock->weak_handle) {
+		php_poll_handle_object *handle = PHP_POLL_HANDLE_OBJ_FROM_ZOBJ(sock->weak_handle);
+		return php_io_held_events(handle->registrations, events);
+	}
+	return 0;
+}
+
 /* Returns the number of ready descriptors, 0 on timeout, -1 with errno */
 static int php_socket_select_any(zval *r_array, zval *w_array, zval *e_array, struct timeval *tv,
 		fd_set *rfds, fd_set *wfds, fd_set *efds)
@@ -1418,14 +1436,16 @@ static int php_socket_select_any(zval *r_array, zval *w_array, zval *e_array, st
 		}
 		int ready = php_poll2(fds, n, 0);
 		int found = 0;
-		if (ready > 0) {
+		if (ready >= 0) {
 			for (uint32_t i = 0; i < n; i++) {
-				short revents = fds[i].revents;
+				short revents = ready > 0 ? fds[i].revents : 0;
 				if (revents & POLLNVAL) {
 					found = 0;
 					break;
 				}
-				if ((revents & (POLLIN | POLLHUP | POLLERR)) && (members[i].events & PHP_POLL_READ)) {
+				uint32_t held = php_socket_held_events(members[i].sock, members[i].events);
+				if (((revents & (POLLIN | POLLHUP | POLLERR)) || (held & PHP_POLL_READ))
+						&& (members[i].events & PHP_POLL_READ)) {
 					PHP_SAFE_FD_SET(members[i].fd, rfds);
 					found++;
 				}

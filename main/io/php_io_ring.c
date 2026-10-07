@@ -377,6 +377,17 @@ PHPAPI void php_io_ring_remove(php_io_ring *ring, php_io_registration *reg)
 	}
 }
 
+/* The connections the multishot accept of a registered listener took are readable, and no poll
+ * of the descriptor reports them once they left the kernel */
+PHPAPI uint32_t php_io_ring_held(php_io_ring *ring, php_io_registration *reg, uint32_t events)
+{
+	if (!(events & PHP_POLL_READ) || php_io_ring_foreign(ring)) {
+		return 0;
+	}
+	php_io_ring_reg *rec = php_io_ring_reg_of(ring, reg, reg->fd);
+	return rec && rec->n_fds ? PHP_POLL_READ : 0;
+}
+
 PHPAPI php_socket_t php_io_ring_notify_fd(php_io_ring *ring)
 {
 	if (php_io_ring_foreign(ring)) {
@@ -1231,16 +1242,6 @@ static bool php_io_ring_accept_wait(php_io_ring *ring, php_io_ring_req *req)
 		php_io_ring_accept_complete(ring, req, php_io_ring_reg_take(ring, rec));
 		return true;
 	}
-	if (!php_deadline_is_infinite(&req->deadline) && req->deadline.hrtime <= zend_hrtime()) {
-		/* A non-blocking accept arms no multishot, which would take the connections arriving after
-		 * it out of a select's sight: a direct one is left to the core's accept(), the wait after
-		 * it takes its own entry */
-		if (!(op->flags & PHP_IO_OP_F_AFTER_DRAIN)) {
-			php_io_ring_req_fail(ring, req, ENOTSUP);
-			return true;
-		}
-		return false;
-	}
 	if (!rec->accept && !php_io_ring_reg_arm_accept(ring, rec)) {
 		return false;
 	}
@@ -1257,8 +1258,8 @@ static bool php_io_ring_edge_wait(php_io_ring *ring, php_io_ring_req *req)
 		return php_io_ring_accept_wait(ring, req);
 	}
 	if (op->type == PHP_IO_OP_POLL && (op->u.poll.events & PHP_POLL_READ)) {
-		/* A select's poll on a listener whose multishot accept takes the connections from the
-		 * kernel: answered from the buffer, or by the next connection the multishot takes */
+		/* A Poll on a listener whose multishot accept takes the connections from the kernel:
+		 * answered from the buffer, or by the next connection the multishot takes */
 		php_io_ring_reg *listener = php_io_ring_reg_of(ring, op->registration, op->fd);
 		if (listener && listener->n_fds) {
 			php_io_ring_req_main_cqe(ring, req, (int32_t) IOR_POLL_IN);
@@ -2207,6 +2208,11 @@ static void php_io_ring_queue_remove(php_io_queue *base, php_io_registration *re
 	php_io_ring_remove(((php_io_ring_queue *) base)->ring, reg);
 }
 
+static uint32_t php_io_ring_queue_held(php_io_queue *base, php_io_registration *reg, uint32_t events)
+{
+	return php_io_ring_held(((php_io_ring_queue *) base)->ring, reg, events);
+}
+
 static bool php_io_ring_queue_take_inline(php_io_queue *base, php_io_op *op, php_io_queue_completion *out)
 {
 	return php_io_ring_take_inline(((php_io_ring_queue *) base)->ring, op, out);
@@ -2235,6 +2241,7 @@ static uint32_t php_io_ring_queue_hook_flags(php_io_queue *base)
 static void php_io_ring_queue_destroy(php_io_queue *base)
 {
 	php_io_ring_queue *q = (php_io_ring_queue *) base;
+	php_io_queue_detach(base);
 	php_io_ring_destroy(q->ring);
 	efree(q);
 }
@@ -2245,6 +2252,7 @@ static const php_io_queue_ops php_io_ring_queue_ops = {
 	.cancel = php_io_ring_queue_cancel,
 	.add = php_io_ring_queue_add,
 	.remove = php_io_ring_queue_remove,
+	.held = php_io_ring_queue_held,
 	.wait = php_io_ring_queue_wait,
 	.orphan = php_io_ring_queue_orphan,
 	.drain = php_io_ring_queue_drain,
@@ -2270,6 +2278,7 @@ PHPAPI php_io_queue *php_io_queue_create_ring(uint32_t entries)
 	}
 	php_io_ring_queue *q = ecalloc(1, sizeof(*q));
 	q->base.ops = &php_io_ring_queue_ops;
+	php_io_queue_attach(&q->base, ring->id);
 	q->ring = ring;
 	ring->queue = &q->base;
 	return &q->base;

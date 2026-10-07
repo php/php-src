@@ -67,7 +67,6 @@ struct _php_io_poll_req {
 
 typedef struct php_io_poll_queue {
 	php_io_queue base;
-	uint64_t id;
 	php_poll_ctx *ctx;
 	HashTable fdregs; /* fd -> php_io_poll_fdreg */
 	HashTable dead; /* records the context may still report */
@@ -143,7 +142,7 @@ static php_io_poll_fdreg *php_io_poll_fdreg_get(php_io_poll_queue *q, int fd, bo
 static zend_always_inline php_io_poll_fdreg *php_io_poll_fdreg_of(php_io_poll_queue *q,
 		php_io_registration *registration, int fd, bool create)
 {
-	if (registration && registration->queue_id == q->id && registration->queue_data) {
+	if (registration && registration->queue_id == q->base.id && registration->queue_data) {
 		return registration->queue_data;
 	}
 	return php_io_poll_fdreg_get(q, fd, create);
@@ -544,7 +543,7 @@ static zend_result php_io_poll_queue_add(php_io_queue *base, php_io_registration
 	}
 	php_io_poll_fdreg *reg = php_io_poll_fdreg_get(q, (int) registration->fd, true);
 	registration->queue_data = reg;
-	registration->queue_id = q->id;
+	registration->queue_id = q->base.id;
 	if (registration->trigger == PHP_IO_TRIGGER_EDGE && q->et) {
 		php_poll_error err;
 		reg->edge |= event;
@@ -718,6 +717,7 @@ static void php_io_poll_queue_destroy(php_io_queue *base)
 {
 	php_io_poll_queue *q = (php_io_poll_queue *) base;
 
+	php_io_queue_detach(base);
 	while (q->outstanding) {
 		php_io_poll_queue_cancel(base, q->outstanding->op);
 	}
@@ -777,7 +777,7 @@ PHPAPI php_io_queue *php_io_queue_create_poll(php_poll_backend_type backend)
 
 	php_io_poll_queue *q = ecalloc(1, sizeof(*q));
 	q->base.ops = &php_io_poll_queue_ops;
-	q->id = php_io_queue_new_id();
+	php_io_queue_attach(&q->base, php_io_queue_new_id());
 	q->ctx = ctx;
 	q->et = php_poll_supports_et(ctx);
 	zend_hash_init(&q->fdregs, 8, NULL, NULL, 0);
