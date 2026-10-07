@@ -143,6 +143,7 @@ static zend_object *socket_create_object(zend_class_entry *class_type) {
 	intern->blocking	 = 1;
 	intern->nonblocking_fd = false;
 	intern->in_use = false;
+	intern->rcvtimeo_known = intern->sndtimeo_known = false;
 	ZVAL_UNDEF(&intern->zstream);
 	intern->weak_handle = NULL;
 	intern->strong_handles = NULL;
@@ -613,7 +614,8 @@ void php_socket_op_end(php_socket *sock, php_socket_op *o)
 	}
 }
 
-/* The op's deadline from the Socket's mode: the blocking call's SO_RCVTIMEO or SO_SNDTIMEO */
+/* The op's deadline from the Socket's mode: the blocking call's SO_RCVTIMEO or SO_SNDTIMEO, read
+ * once per Socket and again after socket_set_option(), since every op would pay the syscall */
 static php_deadline php_socket_op_deadline(php_socket *sock, int optname, int flags)
 {
 	php_deadline dl;
@@ -625,22 +627,27 @@ static php_deadline php_socket_op_deadline(php_socket *sock, int optname, int fl
 		php_deadline_init_nonblock(&dl);
 		return dl;
 	}
-	struct timeval tv = { 0, 0 };
+	bool *known = optname == SO_RCVTIMEO ? &sock->rcvtimeo_known : &sock->sndtimeo_known;
+	struct timeval *tv = optname == SO_RCVTIMEO ? &sock->rcvtimeo : &sock->sndtimeo;
+	if (!*known) {
+		tv->tv_sec = tv->tv_usec = 0;
 #ifdef PHP_WIN32
-	DWORD ms = 0;
-	int optlen = sizeof(ms);
-	if (getsockopt(sock->bsd_socket, SOL_SOCKET, optname, (char *) &ms, &optlen) == 0 && ms > 0) {
-		tv.tv_sec = ms / 1000;
-		tv.tv_usec = (ms % 1000) * 1000;
-	}
+		DWORD ms = 0;
+		int optlen = sizeof(ms);
+		if (getsockopt(sock->bsd_socket, SOL_SOCKET, optname, (char *) &ms, &optlen) == 0 && ms > 0) {
+			tv->tv_sec = ms / 1000;
+			tv->tv_usec = (ms % 1000) * 1000;
+		}
 #else
-	socklen_t optlen = sizeof(tv);
-	if (getsockopt(sock->bsd_socket, SOL_SOCKET, optname, &tv, &optlen) != 0) {
-		tv.tv_sec = tv.tv_usec = 0;
-	}
+		socklen_t optlen = sizeof(*tv);
+		if (getsockopt(sock->bsd_socket, SOL_SOCKET, optname, tv, &optlen) != 0) {
+			tv->tv_sec = tv->tv_usec = 0;
+		}
 #endif
-	if (tv.tv_sec > 0 || tv.tv_usec > 0) {
-		php_deadline_init(&dl, &tv);
+		*known = true;
+	}
+	if (tv->tv_sec > 0 || tv->tv_usec > 0) {
+		php_deadline_init(&dl, tv);
 	} else {
 		php_deadline_init_infinite(&dl);
 	}
@@ -3494,6 +3501,7 @@ default_case:
 		PHP_SOCKET_ERROR(php_sock, "Unable to set socket option", errno);
 		RETURN_FALSE;
 	}
+	php_sock->rcvtimeo_known = php_sock->sndtimeo_known = false;
 
 	RETURN_TRUE;
 }

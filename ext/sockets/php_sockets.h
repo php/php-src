@@ -74,6 +74,10 @@ typedef struct {
 	int			blocking;
 	bool		nonblocking_fd; /* blocking is emulated */
 	bool		in_use; /* an operation on it is in flight */
+	bool		rcvtimeo_known; /* the timeouts below were read, until socket_set_option() */
+	bool		sndtimeo_known;
+	struct timeval rcvtimeo; /* SO_RCVTIMEO and SO_SNDTIMEO, the emulated blocking call's bound */
+	struct timeval sndtimeo;
 	zval		zstream;
 	zend_object *weak_handle; /* SocketPollWeakHandle, referenced until the descriptor closes */
 	php_socket_poll_handle_data *strong_handles; /* SocketPollHandle objects, retired with it */
