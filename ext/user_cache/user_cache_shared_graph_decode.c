@@ -29,9 +29,9 @@
 #endif
 #define UCACHE_DECODE_CLASS_HAS_WAKEUP			((uintptr_t) 1)
 #define UCACHE_DECODE_RESOLVE_KIND_SHIFT		1
-#define UCACHE_DECODE_RESOLVE_KIND_CLASS		((uintptr_t) 1 << UCACHE_DECODE_RESOLVE_KIND_SHIFT)
-#define UCACHE_DECODE_RESOLVE_KIND_ENUM_CASE	((uintptr_t) 2 << UCACHE_DECODE_RESOLVE_KIND_SHIFT)
-#define UCACHE_DECODE_RESOLVE_KIND_MASK			((uintptr_t) 3 << UCACHE_DECODE_RESOLVE_KIND_SHIFT)
+#define UCACHE_DECODE_RESOLVE_KIND_CLASS		((uintptr_t) 0 << UCACHE_DECODE_RESOLVE_KIND_SHIFT)
+#define UCACHE_DECODE_RESOLVE_KIND_ENUM_CASE	((uintptr_t) 1 << UCACHE_DECODE_RESOLVE_KIND_SHIFT)
+#define UCACHE_DECODE_RESOLVE_KIND_MASK			((uintptr_t) 1 << UCACHE_DECODE_RESOLVE_KIND_SHIFT)
 #define UCACHE_DECODE_RESOLVE_TAG_MASK			(UCACHE_DECODE_CLASS_HAS_WAKEUP | UCACHE_DECODE_RESOLVE_KIND_MASK)
 #define UCACHE_VERBATIM_ARR_GC_TYPE_INFO \
 	(GC_ARRAY | ((IS_ARRAY_IMMUTABLE | GC_NOT_COLLECTABLE) << GC_FLAGS_SHIFT))
@@ -134,6 +134,15 @@ struct _ucache_restore_queue {
 	uint32_t capacity;
 	uint32_t next;
 };
+
+static_assert(
+	alignof(zend_class_entry) > UCACHE_DECODE_RESOLVE_TAG_MASK,
+	"resolved class entries must keep their tag bits clear"
+);
+static_assert(
+	alignof(zend_object) > UCACHE_DECODE_RESOLVE_TAG_MASK,
+	"resolved enum cases must keep their tag bits clear"
+);
 
 static void ucache_owned_str_dtor(zval *val);
 static void ucache_decode_shape_proto_dtor(zval *zv);
@@ -377,7 +386,7 @@ static zend_always_inline size_t ucache_decode_node_hdr_size(uint8_t type)
 
 static zend_always_inline uintptr_t ucache_decode_resolved_of_kind(uintptr_t resolved, uintptr_t kind)
 {
-	ZEND_ASSERT(kind != 0 && (kind & ~UCACHE_DECODE_RESOLVE_KIND_MASK) == 0);
+	ZEND_ASSERT((kind & ~UCACHE_DECODE_RESOLVE_KIND_MASK) == 0);
 
 	return (resolved & UCACHE_DECODE_RESOLVE_KIND_MASK) == kind ? resolved : 0;
 }
@@ -422,7 +431,7 @@ static zend_always_inline void ucache_decode_resolve_cache_store(const void *add
 	void *val = (void *) resolved;
 	uint32_t slot;
 
-	ZEND_ASSERT((resolved & UCACHE_DECODE_RESOLVE_KIND_MASK) != 0);
+	ZEND_ASSERT((resolved & ~UCACHE_DECODE_RESOLVE_TAG_MASK) != 0);
 
 	if (UNEXPECTED(frame != NULL)) {
 		if (frame->resolve == NULL) {

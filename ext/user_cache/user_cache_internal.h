@@ -52,9 +52,16 @@
 			_Exit(0); \
 		} \
 	} while (0)
+# define UCACHE_DEBUG_PAUSE(name) \
+	do { \
+		if (UCACHE_DEBUG_FAULT(name)) { \
+			ucache_debug_pause(); \
+		} \
+	} while (0)
 #else
 # define UCACHE_DEBUG_FAULT(name) false
 # define UCACHE_DEBUG_SIMULATE_KILL(name) ((void) 0)
+# define UCACHE_DEBUG_PAUSE(name) ((void) 0)
 #endif
 
 #define UCACHE_MAGIC						0xCAC17E01U
@@ -228,6 +235,8 @@
 #define UCACHE_BLOCK_SIZE_MAX		0xFE000000U
 #if ZEND_DEBUG
 # define UCACHE_DEBUG_BLOCK_MERGE_LIMIT	(64U * 1024U)
+# define UCACHE_DEBUG_PAUSE_US			2000000U
+# define UCACHE_DEBUG_PAUSE_STEP_US		100000U
 #endif
 #define UCACHE_BLOCK_HDR_UNITS		1U
 
@@ -654,6 +663,7 @@ typedef struct {
 } ucache_graph_pin_claim;
 
 typedef struct {
+	ucache_ctx *ctx;
 	ucache_hdr *hdr;
 	uint32_t slot_idx;
 	uint32_t fork_seq;
@@ -915,6 +925,7 @@ bool ucache_wlock_for_entry_mutation(zend_string *key);
 bool ucache_wlock_for_entry_mutations(zend_string **keys, uint32_t count);
 bool ucache_try_wlock_for_entry_mutation(zend_string *key);
 bool ucache_wlock_for_ref_release(bool *recovered);
+bool ucache_rlock_for_pin_adoption(void);
 void ucache_unlock(void);
 void ucache_unlock_if_held(void);
 bool ucache_scalar_write_begin(zend_ulong hash, ucache_hdr **hdr_ptr, uint32_t *stripe_idx);
@@ -1152,6 +1163,16 @@ static zend_always_inline bool ucache_debug_fault(const char *env_name)
 	const char *val = getenv(env_name);
 
 	return val != NULL && val[0] != '\0' && val[0] != '0';
+}
+
+static zend_always_inline void ucache_debug_pause(void)
+{
+	uint32_t waited_us;
+
+	for (waited_us = 0;
+		waited_us < UCACHE_DEBUG_PAUSE_US;
+		waited_us += ucache_sleep_us(UCACHE_DEBUG_PAUSE_STEP_US)
+	);
 }
 #endif
 

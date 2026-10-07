@@ -208,6 +208,9 @@ ok('matrix store', $cache->store('matrix', $matrix));
 ok('matrix first fetch', $cache->fetch('matrix') === $matrix);
 ok('matrix second fetch', $cache->fetch('matrix') === $matrix);
 ok('matrix multiple', $cache->fetchMultiple(['matrix', 'control']) === ['matrix' => $matrix, 'control' => ['control' => true]]);
+
+/* Destroying a deep value recurses once per level: release the cached prototypes on a large fiber stack. */
+in_fiber(fn () => $cache->clear());
 ?>
 --EXPECT--
 nesting depth limit:

@@ -1119,6 +1119,17 @@ bool ucache_wlock_for_ref_release(bool *recovered)
 	return true;
 }
 
+bool ucache_rlock_for_pin_adoption(void)
+{
+	if (!ucache_rlock_impl()) {
+		return false;
+	}
+
+	UC_G(lock_held_is_write) = false;
+
+	return true;
+}
+
 bool ucache_wlock_for_entry_mutations(zend_string **keys, uint32_t count)
 {
 	return ucache_wlock_for_entry_mutations_within(keys, count, ucache_entry_lock_wait_timeout_us());

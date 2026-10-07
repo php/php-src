@@ -712,7 +712,7 @@ static int32_t ucache_fork_transfer_slot_lookup(const ucache_hdr *hdr, uint32_t 
 	return -1;
 }
 
-static int32_t ucache_fork_transfer_slot(ucache_hdr *hdr, int my_pid32, uint32_t fork_seq)
+static int32_t ucache_fork_transfer_slot(ucache_ctx *ctx, ucache_hdr *hdr, int my_pid32, uint32_t fork_seq)
 {
 	ucache_fork_transfer *transfers = UC_G(fork_transfers);
 	int32_t slot_idx = ucache_fork_transfer_slot_lookup(hdr, fork_seq);
@@ -730,6 +730,7 @@ static int32_t ucache_fork_transfer_slot(ucache_hdr *hdr, int my_pid32, uint32_t
 		return -1;
 	}
 
+	transfers[UC_G(fork_transfer_count)].ctx = ctx;
 	transfers[UC_G(fork_transfer_count)].hdr = hdr;
 	transfers[UC_G(fork_transfer_count)].slot_idx = (uint32_t) slot_idx;
 	transfers[UC_G(fork_transfer_count)].fork_seq = fork_seq;
@@ -804,9 +805,49 @@ static void ucache_fork_transfer_slot_release(ucache_fork_transfer *transfer, in
 	ucache_graph_pin_slot *slot = &transfer->hdr->graph_pin_slots[transfer->slot_idx];
 	int expected = my_pid32;
 
-	ucache_atomic_store_64(&slot->owner_start_time, 0);
+	ucache_atomic_cas_64(&slot->owner_start_time, ucache_self_start_time_token(), 0);
 
 	atomic_compare_exchange_strong(&slot->owner_pid, &expected, new_owner);
+}
+
+static bool ucache_fork_transfer_adopt_locked(const ucache_fork_transfer *transfer, int parent_pid32, int my_pid32)
+{
+	ucache_graph_pin_slot *slot = &transfer->hdr->graph_pin_slots[transfer->slot_idx];
+	uint64_t parent_start_time = ucache_atomic_load_64(&slot->owner_start_time);
+	int expected = parent_pid32;
+
+	if (atomic_load(&slot->owner_pid) != parent_pid32 ||
+		!ucache_atomic_cas_64(&slot->owner_start_time, parent_start_time, 0) ||
+		!atomic_compare_exchange_strong(&slot->owner_pid, &expected, my_pid32)
+	) {
+		return false;
+	}
+
+	UCACHE_DEBUG_PAUSE("PAUSE_IN_FORK_ADOPTION");
+
+	ucache_atomic_store_64(&slot->owner_start_time, ucache_self_start_time_token());
+
+	return true;
+}
+
+static bool ucache_fork_transfer_adopt(const ucache_fork_transfer *transfer, int parent_pid32, int my_pid32)
+{
+	ucache_ctx *prev_ctx;
+	bool adopted = false;
+
+	UCACHE_DEBUG_PAUSE("PAUSE_BEFORE_FORK_ADOPTION");
+
+	prev_ctx = ucache_activate_ctx(transfer->ctx);
+
+	if (ucache_rlock_for_pin_adoption()) {
+		adopted = ucache_fork_transfer_adopt_locked(transfer, parent_pid32, my_pid32);
+
+		ucache_unlock();
+	}
+
+	ucache_restore_ctx(prev_ctx);
+
+	return adopted;
 }
 
 static void ucache_sgraph_fork_transfers_settle(bool final)
@@ -1296,6 +1337,8 @@ bool ucache_sgraph_strip_dead_pins_locked(bool force)
 		return false;
 	}
 
+	UCACHE_DEBUG_PAUSE("PAUSE_IN_DEAD_PIN_STRIP");
+
 	if (!ucache_quiesce_graph_payloads_locked()) {
 		return false;
 	}
@@ -1660,7 +1703,7 @@ void ucache_sgraph_refs_transfer_before_fork(void)
 
 		prev_ctx = ucache_activate_ctx(ref->ctx);
 		hdr = ucache_hdr_ptr();
-		slot_idx = ucache_fork_transfer_slot(hdr, my_pid32, fork_seq);
+		slot_idx = ucache_fork_transfer_slot(ref->ctx, hdr, my_pid32, fork_seq);
 		failed = slot_idx < 0 || !ucache_sgraph_transfer_ref(ref->payload_offset, hdr, (uint32_t) slot_idx);
 		ucache_restore_ctx(prev_ctx);
 	}
@@ -1678,11 +1721,10 @@ void ucache_sgraph_fork_transfers_undo(void)
 void ucache_sgraph_refs_adopt_after_fork(void)
 {
 	ucache_fork_transfer *transfers = UC_G(fork_transfers);
-	ucache_graph_pin_slot *slot;
 	ucache_graph_pin_claim claim;
 	uint64_t pid = ucache_cached_pid();
 	uint32_t i, fork_seq = UC_G(fork_seq), expected_count, adopted = 0;
-	int my_pid32 = (int) (uint32_t) pid, parent_pid32 = (int) (uint32_t) UC_G(fork_transfer_pid), expected;
+	int my_pid32 = (int) (uint32_t) pid, parent_pid32 = (int) (uint32_t) UC_G(fork_transfer_pid);
 
 	if (UC_G(sgraph_ref_owner_pid) == pid) {
 		return;
@@ -1703,18 +1745,11 @@ void ucache_sgraph_refs_adopt_after_fork(void)
 	}
 
 	for (i = 0; i < UC_G(fork_transfer_count); i++) {
-		if (transfers[i].fork_seq != fork_seq) {
+		if (transfers[i].fork_seq != fork_seq ||
+			!ucache_fork_transfer_adopt(&transfers[i], parent_pid32, my_pid32)
+		) {
 			continue;
 		}
-
-		slot = &transfers[i].hdr->graph_pin_slots[transfers[i].slot_idx];
-		expected = parent_pid32;
-
-		if (!atomic_compare_exchange_strong(&slot->owner_pid, &expected, my_pid32)) {
-			continue;
-		}
-
-		ucache_atomic_store_64(&slot->owner_start_time, ucache_self_start_time_token());
 
 		if (ucache_graph_pin_slot_find(transfers[i].hdr, false) < 0 &&
 			UC_G(graph_pin_claim_count) < UCACHE_GRAPH_PIN_CLAIM_MAX

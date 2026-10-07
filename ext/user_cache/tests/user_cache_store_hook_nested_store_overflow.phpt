@@ -8,6 +8,7 @@ memory_limit=256M
 --FILE--
 <?php
 const DEPTH = 5000;
+const OVERFLOWING_DEPTH = DEPTH * 20;
 
 /* Fiber stacks give a stack limit that does not depend on the process stack. */
 function in_fiber(string $stackSize, callable $callback): mixed
@@ -86,11 +87,12 @@ $cache->clear();
 NestedStorer::$cache = $cache;
 
 $deep = chain(DEPTH);
+$overflowing = chain(OVERFLOWING_DEPTH);
 $small = ['a' => [1, 2]];
 
 echo "inner overflows, outer overflows:\n";
-NestedStorer::$inner = $deep;
-echo outer_store($cache, 'outer-1', [new NestedStorer(1), $deep], '512K'), "\n";
+NestedStorer::$inner = $overflowing;
+echo outer_store($cache, 'outer-1', [new NestedStorer(1), $overflowing], '512K'), "\n";
 var_dump($cache->has('outer-1'), $cache->has('inner-1'));
 
 echo "inner overflows, outer fits:\n";
@@ -101,11 +103,11 @@ var_dump($fetched[0] instanceof NestedStorer && $fetched[0]->id === 2 && $fetche
 
 echo "inner fits, outer overflows:\n";
 NestedStorer::$inner = $small;
-echo outer_store($cache, 'outer-3', [new NestedStorer(3), $deep], '512K'), "\n";
+echo outer_store($cache, 'outer-3', [new NestedStorer(3), $overflowing], '512K'), "\n";
 var_dump($cache->has('outer-3'), $cache->fetch('inner-3') === $small);
 
 echo "outer overflows before the hook runs:\n";
-echo outer_store($cache, 'outer-4', [$deep, new NestedStorer(4)], '512K'), "\n";
+echo outer_store($cache, 'outer-4', [$overflowing, new NestedStorer(4)], '512K'), "\n";
 var_dump($cache->has('outer-4'), $cache->has('inner-4'));
 
 echo "both fit on a larger stack:\n";
@@ -122,8 +124,12 @@ var_dump(error_get_last());
  * stack and dismantle the local chain from the outside in. */
 in_fiber('32M', fn () => $cache->clear());
 unset($fetched);
+NestedStorer::$inner = null;
 while ($deep instanceof stdClass) {
     $deep = $deep->next;
+}
+while ($overflowing instanceof stdClass) {
+    $overflowing = $overflowing->next;
 }
 ?>
 --EXPECT--
