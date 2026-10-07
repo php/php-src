@@ -1220,14 +1220,13 @@ PHP_CLI_API int do_php_cli(int argc, char *argv[])
 	argv = save_ps_args(argc, argv);
 
 #ifdef PHP_WIN32
-	for (int i = 0; i < argc; i++) {
-		if (!MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, argv[i], -1, NULL, 0)) {
-			fprintf(stderr, "Invalid UTF-8 in command line argument %d.\n", i);
-			cleanup_ps_args(argv);
-			if (native_argv) {
-				PHP_WIN32_CP_FREE_ARRAY(native_argv, argc);
+	if (!native_argv) {
+		for (int i = 0; i < argc; i++) {
+			if (!MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, argv[i], -1, NULL, 0)) {
+				fprintf(stderr, "Invalid UTF-8 in command line argument %d.\n", i);
+				cleanup_ps_args(argv);
+				return 1;
 			}
-			return 1;
 		}
 	}
 #endif
