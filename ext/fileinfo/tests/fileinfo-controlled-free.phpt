@@ -40,6 +40,10 @@ final class AuditFileinfoControlledStream
         return false;
     }
 
+    public function url_stat(string $path, int $flags): array|false {
+        return false;
+    }
+
     public function stream_read(int $count): string
     {
         $data = "%PDF-1.7\n1 0 obj\n<<>>\nendobj\n";
