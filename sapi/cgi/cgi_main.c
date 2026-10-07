@@ -164,6 +164,7 @@ static const opt_struct OPTIONS[] = {
 typedef struct _php_cgi_globals_struct {
 	HashTable user_config_cache;
 	char *redirect_status_env;
+	char *security_limit_extensions;
 	bool rfc2616_headers;
 	bool nph;
 	bool check_shebang_line;
@@ -1505,6 +1506,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("cgi.check_shebang_line",  "1",  PHP_INI_SYSTEM, OnUpdateBool,   check_shebang_line, php_cgi_globals_struct, php_cgi_globals)
 	STD_PHP_INI_BOOLEAN("cgi.force_redirect",      "1",  PHP_INI_SYSTEM, OnUpdateBool,   force_redirect, php_cgi_globals_struct, php_cgi_globals)
 	STD_PHP_INI_ENTRY("cgi.redirect_status_env", NULL, PHP_INI_SYSTEM, OnUpdateString, redirect_status_env, php_cgi_globals_struct, php_cgi_globals)
+	STD_PHP_INI_ENTRY("cgi.security_limit_extensions", ".php .phar", PHP_INI_PERDIR, OnUpdateString, security_limit_extensions, php_cgi_globals_struct, php_cgi_globals)
 	STD_PHP_INI_BOOLEAN("cgi.fix_pathinfo",        "1",  PHP_INI_SYSTEM, OnUpdateBool,   fix_pathinfo, php_cgi_globals_struct, php_cgi_globals)
 	STD_PHP_INI_BOOLEAN("cgi.discard_path",        "0",  PHP_INI_SYSTEM, OnUpdateBool,   discard_path, php_cgi_globals_struct, php_cgi_globals)
 	STD_PHP_INI_BOOLEAN("fastcgi.logging",         "1",  PHP_INI_SYSTEM, OnUpdateBool,   fcgi_logging, php_cgi_globals_struct, php_cgi_globals)
@@ -1524,6 +1526,7 @@ static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals_ptr)
 	php_cgi_globals_ptr->check_shebang_line = 1;
 	php_cgi_globals_ptr->force_redirect = 1;
 	php_cgi_globals_ptr->redirect_status_env = NULL;
+	php_cgi_globals_ptr->security_limit_extensions = NULL;
 	php_cgi_globals_ptr->fix_pathinfo = 1;
 	php_cgi_globals_ptr->discard_path = 0;
 	php_cgi_globals_ptr->fcgi_logging = 1;
@@ -1683,6 +1686,43 @@ static void add_response_header(sapi_header_struct *h, zval *return_value) /* {{
 	}
 }
 /* }}} */
+
+bool cgi_extension_is_allowed(char *path) {
+	const char *allowed_extensions = CGIG(security_limit_extensions);
+	if (!path || !allowed_extensions || strlen(allowed_extensions) == 0) {
+		// No path, or no filter configured
+		return true;
+	}
+
+	const char *dot = strrchr(path, '.');
+	if (!dot) {
+		// No file extension
+		return false;
+	}
+
+	/* We want to be able to allow things like `.test.php` (but not all of
+	 * `.php` or `.test`. For each extension in the list, check if the path
+	 * given ends with exactly that. Allowing `.php` allows `.test.php`,
+	 * `.foo.php`, and everything else because dots are valid file name
+	 * characters. */
+	const char *next = allowed_extensions;
+	const size_t path_len = strlen(path);
+	while (next && *next) {
+		size_t extension_len = strcspn(next, " \t");
+
+		if (extension_len <= path_len) {
+			if (memcmp(path + path_len - extension_len, next, extension_len) == 0) {
+				return true;
+			}
+		}
+		next += extension_len;
+		if (*next) {
+			next += strspn(next, " \t");
+		}
+	}
+
+	return false;
+}
 
 PHP_FUNCTION(apache_response_headers) /* {{{ */
 {
@@ -2475,9 +2515,10 @@ do_repeat:
 				2. we are running as cgi or fastcgi
 			*/
 			if (cgi || fastcgi || SG(request_info).path_translated) {
-				if (php_fopen_primary_script(&file_handle) == FAILURE) {
+				bool limited_extension = !cgi_extension_is_allowed(SG(request_info).path_translated);
+				if (limited_extension || php_fopen_primary_script(&file_handle) == FAILURE) {
 					zend_try {
-						if (errno == EACCES) {
+						if (limited_extension || errno == EACCES) {
 							SG(sapi_headers).http_response_code = 403;
 							PUTS("Access denied.\n");
 						} else {
