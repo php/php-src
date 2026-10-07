@@ -568,8 +568,6 @@ static zend_result cli_seek_file_begin(zend_file_handle *file_handle, char *scri
 }
 /* }}} */
 
-/* An exception left after the scheduler has run (the -r code's own, or a failed launch's) is
- * reported as php_execute_script_ex() reports one that a script file leaves. */
 static void cli_report_exception(void)
 {
 	if (EG(exception)) {
