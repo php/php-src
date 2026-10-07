@@ -72,8 +72,10 @@ namespace Io\Poll {
     }
 
     /**
-     * A deadline in the context, one-shot or periodic. Watched with
-     * Event::Timer; a fired one-shot timer is re-armed by modifyEvents().
+     * A deadline in the context, one-shot or periodic, on the monotonic clock
+     * and counted from add(); a periodic one re-arms from its previous
+     * deadline. Watched with Event::Timer; a fired one-shot timer is re-armed
+     * by modifyEvents(), counted from then.
      * @strict-properties
      * @not-serializable
      */

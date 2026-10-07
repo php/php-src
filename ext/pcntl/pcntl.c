@@ -695,6 +695,25 @@ static void pcntl_exec_restore_mask(const sigset_t *old_mask)
 #endif
 }
 
+/* zend_sigaction() unblocks the signal it installs; one a SignalHandle is watched for stays
+ * blocked, so the handle takes it and the handler waits for the last removal */
+static void pcntl_signal_keep_watched(int signo)
+{
+	sigset_t watched;
+	php_io_poll_signal_watched_mask(&watched);
+	if (sigismember(&watched, signo) != 1) {
+		return;
+	}
+	sigset_t one;
+	sigemptyset(&one);
+	sigaddset(&one, signo);
+#ifdef ZTS
+	pthread_sigmask(SIG_BLOCK, &one, NULL);
+#else
+	sigprocmask(SIG_BLOCK, &one, NULL);
+#endif
+}
+
 /* {{{ Executes specified program in current process space as defined by exec(2) */
 PHP_FUNCTION(pcntl_exec)
 {
@@ -878,6 +897,7 @@ PHP_FUNCTION(pcntl_signal)
 			php_error_docref(NULL, E_WARNING, "Error assigning signal");
 			RETURN_FALSE;
 		}
+		pcntl_signal_keep_watched((int) signo);
 		zend_hash_index_update(&PCNTL_G(php_signal_table), signo, handle);
 		RETURN_TRUE;
 	}
@@ -895,6 +915,7 @@ PHP_FUNCTION(pcntl_signal)
 		php_error_docref(NULL, E_WARNING, "Error assigning signal");
 		RETURN_FALSE;
 	}
+	pcntl_signal_keep_watched((int) signo);
 
 	/* Add the function name to our signal table */
 	handle = zend_hash_index_update(&PCNTL_G(php_signal_table), signo, handle);
@@ -1017,6 +1038,22 @@ PHP_FUNCTION(pcntl_sigprocmask)
 	/* Some error occurred */
 	if (!status) {
 		RETURN_FALSE;
+	}
+
+	/* A signal a SignalHandle is watched for stays blocked, or its source would miss it */
+	if (how != SIG_BLOCK) {
+		sigset_t watched;
+		php_io_poll_signal_watched_mask(&watched);
+		for (unsigned int signo = 1; signo < PCNTL_G(num_signals); ++signo) {
+			if (sigismember(&watched, signo) != 1) {
+				continue;
+			}
+			if (how == SIG_UNBLOCK) {
+				sigdelset(&set, signo);
+			} else {
+				sigaddset(&set, signo);
+			}
+		}
 	}
 
 	if (sigprocmask(how, &set, &old_set) != 0) {

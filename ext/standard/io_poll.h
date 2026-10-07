@@ -51,6 +51,8 @@ PHPAPI void php_io_poll_notify_handle_create_external(zval *dest, php_socket_t f
 #ifndef PHP_WIN32
 /* The current mask without the signals blocked by live SignalHandle objects */
 PHPAPI void php_io_poll_signal_child_mask(sigset_t *mask);
+/* The signals watched handles take, which stay blocked whatever pcntl asks */
+PHPAPI void php_io_poll_signal_watched_mask(sigset_t *set);
 #endif
 /* The stream's StreamPollWeakHandle, created on the first call and kept by the stream: borrowed.
  * expose lets getStream() hand the stream out, and stays set once it was. */

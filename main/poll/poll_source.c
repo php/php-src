@@ -104,14 +104,22 @@ static int php_poll_kqueue_open(void)
 }
 #endif
 
-PHPAPI pid_t php_poll_process_exit_probe(pid_t pid, int *status)
+PHPAPI pid_t php_poll_process_exit_probe(pid_t pid, int fd, int *status)
 {
 	siginfo_t si;
 	int r;
 	/* si_pid is unspecified when nothing changed */
 	memset(&si, 0, sizeof(si));
 	do {
+#if defined(PHP_POLL_PROCESS_SOURCE_PIDFD) && defined(HAVE_DECL_P_PIDFD) && HAVE_DECL_P_PIDFD == 1
+		/* A kernel before 5.4 refuses P_PIDFD with EINVAL */
+		r = fd >= 0 ? waitid(P_PIDFD, (id_t) fd, &si, WEXITED | WNOHANG | WNOWAIT) : -1;
+		if (r == -1 && (fd < 0 || errno == EINVAL)) {
+			r = waitid(P_PID, (id_t) pid, &si, WEXITED | WNOHANG | WNOWAIT);
+		}
+#else
 		r = waitid(P_PID, (id_t) pid, &si, WEXITED | WNOHANG | WNOWAIT);
+#endif
 	} while (r == -1 && errno == EINTR);
 	if (r == -1) {
 		return -1;
@@ -165,7 +173,8 @@ PHPAPI int php_poll_process_source_open(pid_t pid)
 		/* Exited already: a child not collected yet is still waitable,
 		 * and the source reports it at the first wait */
 		int status;
-		if (php_poll_process_exit_probe(pid, &status) == pid && php_poll_kqueue_kick(kq) == SUCCESS) {
+		if (php_poll_process_exit_probe(pid, -1, &status) == pid
+				&& php_poll_kqueue_kick(kq) == SUCCESS) {
 			return kq;
 		}
 		err = ESRCH;

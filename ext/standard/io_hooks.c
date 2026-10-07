@@ -1229,6 +1229,11 @@ PHP_METHOD(Io_Poll_OperationQueue, waitCompletions)
 		max = 4096;
 	}
 
+	/* A handler pending before the wait runs before it, as one that interrupts it does */
+	if (php_io_interrupt_pending()) {
+		RETURN_EMPTY_ARRAY();
+	}
+
 	php_io_queue_completion *completions = safe_emalloc((size_t) max, sizeof(*completions), 0);
 	int n = intern->queue->ops->wait(intern->queue, completions, (uint32_t) max, timeout ? &dl : NULL);
 	if (n < 0) {

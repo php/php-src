@@ -819,7 +819,7 @@ static bool php_io_poll_process_handle_fired(php_poll_handle_object *handle)
 #else
 	if (!data->exited) {
 		int status;
-		pid_t pid = php_poll_process_exit_probe(data->pid, &status);
+		pid_t pid = php_poll_process_exit_probe(data->pid, data->fd, &status);
 		if (pid == data->pid) {
 			data->has_status = true;
 			data->exited = true;
@@ -1003,6 +1003,16 @@ PHPAPI void php_io_poll_signal_child_mask(sigset_t *mask)
 	for (int signo = 1; signo < NSIG; signo++) {
 		if (sigismember(&php_io_poll_signals_blocked_by_handles, signo) == 1) {
 			sigdelset(mask, signo);
+		}
+	}
+}
+
+PHPAPI void php_io_poll_signal_watched_mask(sigset_t *set)
+{
+	sigemptyset(set);
+	for (int signo = 1; signo < NSIG; signo++) {
+		if (php_io_poll_signal_handle_count[signo]) {
+			sigaddset(set, signo);
 		}
 	}
 }
@@ -2296,6 +2306,11 @@ PHP_METHOD(Io_Poll_Context, wait)
 
 	if (php_io_poll_context_deliver_removed(intern) == FAILURE) {
 		RETURN_THROWS();
+	}
+
+	/* A handler pending before the wait runs before it, as one that interrupts it does */
+	if (php_io_interrupt_pending()) {
+		RETURN_EMPTY_ARRAY();
 	}
 
 	php_poll_event *events = safe_emalloc((size_t) max_events, sizeof(*events), 0);
