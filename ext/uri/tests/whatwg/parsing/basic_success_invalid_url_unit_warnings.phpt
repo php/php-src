@@ -35,7 +35,7 @@ array(2) {
   [0]=>
   object(Uri\WhatWg\UrlValidationError)#%d (%d) {
     ["context"]=>
-    string(1) " "
+    string(21) " https://example.org "
     ["type"]=>
     enum(Uri\WhatWg\UrlValidationErrorType::InvalidUrlUnit)
     ["failure"]=>
@@ -44,7 +44,7 @@ array(2) {
   [1]=>
   object(Uri\WhatWg\UrlValidationError)#%d (%d) {
     ["context"]=>
-    string(21) " https://example.org "
+    string(1) " "
     ["type"]=>
     enum(Uri\WhatWg\UrlValidationErrorType::InvalidUrlUnit)
     ["failure"]=>

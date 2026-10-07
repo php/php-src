@@ -326,6 +326,9 @@ PHP 8.6 UPGRADE NOTES
     system.
 
 - URI:
+  . Uri\WhatWg\Url and Uri\WhatWg\UrlBuilder now expose validation errors in
+    encounter order. The order of multiple errors may therefore change in
+    $softErrors and Uri\WhatWg\InvalidUrlException::$errors.
   . Uri\WhatWg\Url::__construct() now sets $softErrors to an empty array when
     URL processing throws an exception, instead of preserving its value.
     URL validation errors remain available in the

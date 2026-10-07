@@ -36,20 +36,20 @@ array(2) {
   [0]=>
   object(Uri\WhatWg\UrlValidationError)#%d (%d) {
     ["context"]=>
-    string(0) ""
-    ["type"]=>
-    enum(Uri\WhatWg\UrlValidationErrorType::HostMissing)
-    ["failure"]=>
-    bool(true)
-  }
-  [1]=>
-  object(Uri\WhatWg\UrlValidationError)#%d (%d) {
-    ["context"]=>
     string(4) "	tps"
     ["type"]=>
     enum(Uri\WhatWg\UrlValidationErrorType::InvalidUrlUnit)
     ["failure"]=>
     bool(false)
+  }
+  [1]=>
+  object(Uri\WhatWg\UrlValidationError)#%d (%d) {
+    ["context"]=>
+    string(0) ""
+    ["type"]=>
+    enum(Uri\WhatWg\UrlValidationErrorType::HostMissing)
+    ["failure"]=>
+    bool(true)
   }
 }
 bool(true)

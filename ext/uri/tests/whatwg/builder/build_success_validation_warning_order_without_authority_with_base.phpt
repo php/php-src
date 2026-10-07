@@ -50,18 +50,18 @@ array(2) {
   [0]=>
   object(Uri\WhatWg\UrlValidationError)#%d (%d) {
     ["context"]=>
-    string(1) "%"
+    string(4) "\bar"
     ["type"]=>
-    enum(Uri\WhatWg\UrlValidationErrorType::InvalidUrlUnit)
+    enum(Uri\WhatWg\UrlValidationErrorType::InvalidReverseSoldius)
     ["failure"]=>
     bool(false)
   }
   [1]=>
   object(Uri\WhatWg\UrlValidationError)#%d (%d) {
     ["context"]=>
-    string(4) "\bar"
+    string(1) "%"
     ["type"]=>
-    enum(Uri\WhatWg\UrlValidationErrorType::InvalidReverseSoldius)
+    enum(Uri\WhatWg\UrlValidationErrorType::InvalidUrlUnit)
     ["failure"]=>
     bool(false)
   }

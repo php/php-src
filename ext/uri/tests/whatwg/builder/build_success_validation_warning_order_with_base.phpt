@@ -47,18 +47,18 @@ array(2) {
   [0]=>
   object(Uri\WhatWg\UrlValidationError)#%d (%d) {
     ["context"]=>
-    string(8) "\newPath"
+    string(0) ""
     ["type"]=>
-    enum(Uri\WhatWg\UrlValidationErrorType::InvalidReverseSoldius)
+    enum(Uri\WhatWg\UrlValidationErrorType::Ipv4EmptyPart)
     ["failure"]=>
     bool(false)
   }
   [1]=>
   object(Uri\WhatWg\UrlValidationError)#%d (%d) {
     ["context"]=>
-    string(0) ""
+    string(8) "\newPath"
     ["type"]=>
-    enum(Uri\WhatWg\UrlValidationErrorType::Ipv4EmptyPart)
+    enum(Uri\WhatWg\UrlValidationErrorType::InvalidReverseSoldius)
     ["failure"]=>
     bool(false)
   }
