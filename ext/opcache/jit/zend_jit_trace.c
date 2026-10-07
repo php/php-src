@@ -1985,6 +1985,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				case ZEND_STRLEN:
 				case ZEND_COUNT:
 				case ZEND_QM_ASSIGN:
+				case ZEND_BW_NOT:
 				case ZEND_FE_RESET_R:
 					ADD_OP1_TRACE_GUARD();
 					break;
@@ -4518,6 +4519,26 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 						 && (res_info & (MAY_BE_ANY|MAY_BE_GUARD)) == (MAY_BE_DOUBLE|MAY_BE_GUARD)
 						 && !(res_info & MAY_BE_STRING)) {
 							ssa->var_info[ssa_op->result_def].type &= ~MAY_BE_GUARD;
+						}
+						goto done;
+					case ZEND_BW_NOT:
+						if (opline->op1_type == IS_CONST) {
+							break;
+						}
+						op1_info = OP1_INFO();
+						CHECK_OP1_TRACE_TYPE();
+						if ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) != MAY_BE_LONG) {
+							break;
+						}
+						res_use_info = zend_jit_trace_type_to_info(
+							STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->result.var)));
+						if (opline->result_type == IS_CV) {
+							res_use_info &= (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE);
+						}
+						if (!zend_jit_bw_not(&ctx, opline,
+								op1_info, OP1_REG_ADDR(),
+								res_use_info, RES_INFO(), RES_REG_ADDR())) {
+							goto jit_failure;
 						}
 						goto done;
 					case ZEND_BW_OR:
