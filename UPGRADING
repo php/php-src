@@ -103,6 +103,9 @@ PHP 8.7 UPGRADE NOTES
   . Improved performance of str_rot13().
   . Improved performance of pack() for large strings using the a, A and Z
     formats.
+  . Improved performance of htmlspecialchars(), htmlentities(),
+    html_entity_decode() and get_html_translation_table(), especially with
+    UTF-8.
 
 - MBString:
   . Improved performance of mb_strlen for UTF-8 strings.
