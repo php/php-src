@@ -12,9 +12,10 @@ $main = "use function TestScheduler\\spawn; spawn(function () { echo 'spawned', 
 $throws = "use function TestScheduler\\spawn; spawn(function () { echo 'spawned', PHP_EOL; }); throw new Exception('from main');";
 $exits = "use function TestScheduler\\spawn; spawn(function () { echo 'spawned', PHP_EOL; }); exit(3);";
 
-$file = __DIR__ . DIRECTORY_SEPARATOR . '091_command_line_code.inc';
-
 foreach (['main' => $main, 'throws' => $throws, 'exits' => $exits] as $name => $code) {
+    /* A file per case: OPcache compares file times in whole seconds, so a child could run
+     * an earlier case's cached script from a path rewritten within the same second. */
+    $file = __DIR__ . DIRECTORY_SEPARATOR . "091_command_line_code_$name.inc";
     file_put_contents($file, "<?php " . $code);
     exec("$php -f " . escapeshellarg($file) . ' 2>&1', $from_file, $file_status);
     exec("$php -r " . escapeshellarg($code) . ' 2>&1', $from_r, $r_status);
@@ -41,7 +42,9 @@ echo "stdin status ", proc_close($process), "\n";
 ?>
 --CLEAN--
 <?php
-@unlink(__DIR__ . '/091_command_line_code.inc');
+foreach (['main', 'throws', 'exits'] as $name) {
+    @unlink(__DIR__ . "/091_command_line_code_$name.inc");
+}
 ?>
 --EXPECT--
 main: -r as a file, status 0
