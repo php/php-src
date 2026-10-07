@@ -68,7 +68,7 @@ struct _php_io_ring_req {
 	php_deadline deadline;
 	php_io_op_result result;
 	int32_t main_res; /* the main cqe's result, -1 until then */
-	ior_timespec ts; /* the timer's or the linked timeout's */
+	ior_timespec ts; /* the linked timeout's */
 	php_io_ring_req *group; /* member: the Any's request */
 	uint32_t index; /* member: position in the Any */
 	bool has_lt; /* a linked timeout was submitted */
@@ -78,6 +78,8 @@ struct _php_io_ring_req {
 	bool cancelled; /* cancel() was called */
 	bool cancel_pending; /* the cancel still needs an entry */
 	bool backlogged; /* waiting for room in the ring */
+	bool timed; /* its deadline is in the wrapper's heap */
+	uint32_t timed_at; /* position there */
 	bool orphaned; /* nobody wants the completion */
 	bool delivered; /* the output went to the op */
 	php_stream *orphan_stream; /* frozen until the record settled */
@@ -86,6 +88,7 @@ struct _php_io_ring_req {
 	bool fired; /* group: in the fired list */
 	bool group_done; /* member: the group folded already */
 	bool multishot; /* an Edge record's multishot poll, without an op */
+	bool sentinel; /* the entry that fires the heap's head for the notification descriptor */
 	php_io_ring_reg *reg; /* multishot: its record, NULL once removed */
 	php_io_ring_reg *waiting; /* a wait parked on an Edge record, without an entry */
 	uint32_t w_mask; /* IOR_POLL_* the parked wait wants */
@@ -133,6 +136,11 @@ struct php_io_ring {
 	php_io_ring_req *bl_tail;
 	HashTable regs; /* fd -> php_io_ring_reg */
 	php_io_ring_req *waiting; /* waits parked on Edge records */
+	php_io_ring_req **timed; /* min-heap of the deadlines the wrapper fires itself */
+	uint32_t n_timed;
+	uint32_t timed_cap;
+	php_io_ring_req *sentinel; /* armed for the heap's head, NULL when none */
+	zend_hrtime_t sentinel_at; /* what it is armed for */
 	php_io_ring_req **ready;
 	uint32_t n_ready;
 	uint32_t ready_cap;
@@ -418,7 +426,8 @@ PHPAPI uint32_t php_io_ring_count_pending(php_io_ring *ring)
 	 * multishot poll owns nothing of a caller's and settles when it can. */
 	uint32_t n = ring->pending;
 	for (php_io_ring_req *r = ring->live; r; r = r->next) {
-		if (r->orphaned && !r->ready && !r->multishot && !php_io_ring_req_settled(r)) {
+		if (r->orphaned && !r->ready && !r->multishot && !r->sentinel
+				&& !php_io_ring_req_settled(r)) {
 			n++;
 		}
 	}
@@ -426,6 +435,8 @@ PHPAPI uint32_t php_io_ring_count_pending(php_io_ring *ring)
 }
 
 static uint32_t php_io_ring_reap(php_io_ring *ring);
+static void php_io_ring_sentinel_arm(php_io_ring *ring);
+static void php_io_ring_req_cancel(php_io_ring *ring, php_io_ring_req *req);
 
 /* Records */
 
@@ -639,11 +650,81 @@ static php_io_ring_req *php_io_ring_req_create(php_io_ring *ring, php_io_op *op,
 static bool php_io_ring_settling(php_io_ring *ring)
 {
 	for (php_io_ring_req *r = ring->live; r; r = r->next) {
-		if (!r->multishot) {
+		if (!r->multishot && !r->sentinel) {
 			return true;
 		}
 	}
 	return false;
+}
+
+/* The deadlines the wrapper fires itself, a min-heap: Timer ops and the ops in the backlog or
+ * parked on a record, which have no entry to link a timeout to; the wait is bounded by the head */
+
+static zend_always_inline void php_io_ring_heap_set(php_io_ring *ring, uint32_t at,
+		php_io_ring_req *req)
+{
+	ring->timed[at] = req;
+	req->timed_at = at;
+}
+
+static void php_io_ring_heap_up(php_io_ring *ring, uint32_t at)
+{
+	php_io_ring_req *req = ring->timed[at];
+	while (at > 0) {
+		uint32_t parent = (at - 1) / 2;
+		if (ring->timed[parent]->deadline.hrtime <= req->deadline.hrtime) {
+			break;
+		}
+		php_io_ring_heap_set(ring, at, ring->timed[parent]);
+		at = parent;
+	}
+	php_io_ring_heap_set(ring, at, req);
+}
+
+static void php_io_ring_heap_down(php_io_ring *ring, uint32_t at)
+{
+	php_io_ring_req *req = ring->timed[at];
+	for (;;) {
+		uint32_t child = at * 2 + 1;
+		if (child >= ring->n_timed) {
+			break;
+		}
+		if (child + 1 < ring->n_timed
+				&& ring->timed[child + 1]->deadline.hrtime < ring->timed[child]->deadline.hrtime) {
+			child++;
+		}
+		if (req->deadline.hrtime <= ring->timed[child]->deadline.hrtime) {
+			break;
+		}
+		php_io_ring_heap_set(ring, at, ring->timed[child]);
+		at = child;
+	}
+	php_io_ring_heap_set(ring, at, req);
+}
+
+static void php_io_ring_heap_push(php_io_ring *ring, php_io_ring_req *req)
+{
+	if (ring->n_timed == ring->timed_cap) {
+		ring->timed_cap = ring->timed_cap ? ring->timed_cap * 2 : 16;
+		ring->timed = safe_erealloc(ring->timed, ring->timed_cap, sizeof(*ring->timed), 0);
+	}
+	req->timed = true;
+	php_io_ring_heap_set(ring, ring->n_timed++, req);
+	php_io_ring_heap_up(ring, req->timed_at);
+	php_io_ring_sentinel_arm(ring);
+}
+
+static void php_io_ring_heap_remove(php_io_ring *ring, php_io_ring_req *req)
+{
+	uint32_t at = req->timed_at;
+	req->timed = false;
+	ring->n_timed--;
+	if (at == ring->n_timed) {
+		return;
+	}
+	php_io_ring_heap_set(ring, at, ring->timed[ring->n_timed]);
+	php_io_ring_heap_up(ring, at);
+	php_io_ring_heap_down(ring, at);
 }
 
 /* Parked waits */
@@ -658,10 +739,16 @@ static void php_io_ring_waiter_park(php_io_ring *ring, php_io_ring_req *req, php
 		ring->waiting->w_prev = req;
 	}
 	ring->waiting = req;
+	if (!php_deadline_is_infinite(&req->deadline)) {
+		php_io_ring_heap_push(ring, req);
+	}
 }
 
 static void php_io_ring_waiter_settle(php_io_ring *ring, php_io_ring_req *req)
 {
+	if (req->timed) {
+		php_io_ring_heap_remove(ring, req);
+	}
 	if (req->w_prev) {
 		req->w_prev->w_next = req->w_next;
 	} else {
@@ -685,10 +772,16 @@ static void php_io_ring_backlog_push(php_io_ring *ring, php_io_ring_req *req)
 		ring->bl_head = req;
 	}
 	ring->bl_tail = req;
+	if (!php_deadline_is_infinite(&req->deadline)) {
+		php_io_ring_heap_push(ring, req);
+	}
 }
 
 static void php_io_ring_backlog_remove(php_io_ring *ring, php_io_ring_req *req)
 {
+	if (req->timed) {
+		php_io_ring_heap_remove(ring, req);
+	}
 	if (req->bl_prev) {
 		req->bl_prev->bl_next = req->bl_next;
 	} else {
@@ -718,6 +811,9 @@ static void php_io_ring_req_free(php_io_ring *ring, php_io_ring_req *req)
 	}
 	if (req->waiting) {
 		php_io_ring_waiter_settle(ring, req);
+	}
+	if (req->timed) {
+		php_io_ring_heap_remove(ring, req);
 	}
 	if (req->reg) {
 		if (req->type == PHP_IO_OP_ACCEPT) {
@@ -881,7 +977,7 @@ static zend_result php_io_ring_submit_one(php_io_ring *ring, php_io_ring_req *re
 {
 	php_io_op *op = req->op;
 	ior_ctx *ctx = ring->ctx;
-	bool link_deadline = !php_deadline_is_infinite(&req->deadline) && req->type != PHP_IO_OP_TIMER;
+	bool link_deadline = !php_deadline_is_infinite(&req->deadline);
 	bool uses_caller = false; /* the backend references buf or fd */
 	ior_sqe *sqes[2];
 	int err = 0;
@@ -891,13 +987,6 @@ static zend_result php_io_ring_submit_one(php_io_ring *ring, php_io_ring_req *re
 		case PHP_IO_OP_POLL:
 			/* ior has no priority event */
 			if (!(ring->features & IOR_FEAT_POLL_ADD) || (req->op->u.poll.events & PHP_POLL_PRI)) {
-				errno = ENOTSUP;
-				return FAILURE;
-			}
-			break;
-		case PHP_IO_OP_TIMER:
-			if (php_deadline_is_infinite(&req->deadline)) {
-				/* Never fires: ior_prep_nop would end it at once */
 				errno = ENOTSUP;
 				return FAILURE;
 			}
@@ -928,10 +1017,6 @@ static zend_result php_io_ring_submit_one(php_io_ring *ring, php_io_ring_req *re
 	switch (req->type) {
 		case PHP_IO_OP_POLL:
 			ior_prep_poll_add(ctx, sqe, (ior_fd_t) op->fd, php_io_ring_poll_mask_to_ior(op->u.poll.events));
-			break;
-		case PHP_IO_OP_TIMER:
-			php_io_ring_deadline_to_ts(&req->deadline, &req->ts);
-			ior_prep_timeout(ctx, sqe, &req->ts, 0, 0);
 			break;
 		case PHP_IO_OP_READ:
 			ior_prep_read(ctx, sqe, php_io_ring_file_fd(op), php_io_ring_io_buf(req, op), php_io_ring_io_len(op),
@@ -1021,6 +1106,37 @@ static bool php_io_ring_submit_cancel(php_io_ring *ring, php_io_ring_req *req)
 	ior_sqe_set_data(ring->ctx, sqe, (void *) ((uintptr_t) req | PHP_IO_RING_TAG_CANCEL));
 	php_io_ring_flush(ring);
 	return true;
+}
+
+/* A provider waiting on the notification descriptor is woken by posted completions only: while
+ * it is in use one entry fires at the heap's head, re-armed when the head moves earlier */
+static void php_io_ring_sentinel_arm(php_io_ring *ring)
+{
+	if (!ring->notify_created || php_io_ring_foreign(ring) || !ring->n_timed) {
+		return;
+	}
+	zend_hrtime_t head = ring->timed[0]->deadline.hrtime;
+	if (ring->sentinel && ring->sentinel_at <= head) {
+		return;
+	}
+	ior_sqe *sqe;
+	if (!php_io_ring_get_sqes(ring, &sqe, 1)) {
+		return;
+	}
+	if (ring->sentinel) {
+		php_io_ring_req_cancel(ring, ring->sentinel);
+	}
+	php_io_ring_req *req = php_io_ring_req_alloc(ring);
+	req->type = PHP_IO_OP_TIMER;
+	req->sentinel = true;
+	req->orphaned = true;
+	req->deadline.hrtime = head;
+	php_io_ring_deadline_to_ts(&req->deadline, &req->ts);
+	ior_prep_timeout(ring->ctx, sqe, &req->ts, 0, 0);
+	ior_sqe_set_data(ring->ctx, sqe, req);
+	ring->sentinel = req;
+	ring->sentinel_at = head;
+	php_io_ring_flush(ring);
 }
 
 /* A completion to hand out: the member fires its group, anything else is ready */
@@ -1301,6 +1417,15 @@ static bool php_io_ring_edge_wait(php_io_ring *ring, php_io_ring_req *req)
  * the op failed, errno set */
 static bool php_io_ring_start(php_io_ring *ring, php_io_ring_req *req)
 {
+	if (req->type == PHP_IO_OP_TIMER) {
+		/* No entry: the heap fires it; one that never fires is refused */
+		if (php_deadline_is_infinite(&req->deadline)) {
+			errno = ENOTSUP;
+			return false;
+		}
+		php_io_ring_heap_push(ring, req);
+		return true;
+	}
 	if (php_io_ring_edge_wait(ring, req)) {
 		return true;
 	}
@@ -1394,6 +1519,11 @@ static void php_io_ring_req_cancel(php_io_ring *ring, php_io_ring_req *req)
 		req->main_done = true;
 		return;
 	}
+	if (req->timed) {
+		php_io_ring_heap_remove(ring, req);
+		req->main_done = true;
+		return;
+	}
 	if (!req->main_done && !req->cancelled) {
 		req->cancelled = true;
 		if (!php_io_ring_submit_cancel(ring, req)) {
@@ -1467,6 +1597,9 @@ static void php_io_ring_req_cancel_or_forget(php_io_ring *ring, php_io_ring_req 
 		}
 		if (req->waiting) {
 			php_io_ring_waiter_settle(ring, req);
+		}
+		if (req->timed) {
+			php_io_ring_heap_remove(ring, req);
 		}
 		req->main_done = true;
 		req->lt_done = true;
@@ -1601,6 +1734,9 @@ static void php_io_ring_req_main_cqe(php_io_ring *ring, php_io_ring_req *req, in
 {
 	req->main_done = true;
 	req->main_res = res;
+	if (req == ring->sentinel) {
+		ring->sentinel = NULL;
+	}
 	if (req->cancel_pending) {
 		req->cancel_pending = false;
 		ring->n_cancel_pending--;
@@ -1867,42 +2003,28 @@ static void php_io_ring_progress(php_io_ring *ring)
 	php_io_ring_reap(ring);
 	php_io_ring_retry_cancels(ring);
 	php_io_ring_flush_backlog(ring);
+	php_io_ring_sentinel_arm(ring);
 	php_io_ring_flush(ring);
 }
 
-/* Ops still in the backlog or parked on a record at their deadline time out
- * here, having no entry to link a timeout to; returns the next such deadline */
+/* The heap's due deadlines: a Timer op completes, a backlogged or parked op times out; returns
+ * the next */
 static zend_hrtime_t php_io_ring_expire(php_io_ring *ring, zend_hrtime_t now)
 {
-	zend_hrtime_t next = ZEND_HRTIME_T_MAX;
-	php_io_ring_req *r = ring->bl_head;
-	while (r) {
-		php_io_ring_req *bl_next = r->bl_next;
-		if (!php_deadline_is_infinite(&r->deadline)) {
-			if (r->deadline.hrtime <= now) {
-				php_io_ring_backlog_remove(ring, r);
-				php_io_ring_req_main_cqe(ring, r, -ETIME);
-			} else if (r->deadline.hrtime < next) {
-				next = r->deadline.hrtime;
-			}
+	while (ring->n_timed && ring->timed[0]->deadline.hrtime <= now) {
+		php_io_ring_req *r = ring->timed[0];
+		if (r->backlogged) {
+			php_io_ring_backlog_remove(ring, r);
+		} else if (r->waiting) {
+			php_io_ring_waiter_settle(ring, r);
+		} else {
+			php_io_ring_heap_remove(ring, r);
 		}
-		r = bl_next;
-	}
-	r = ring->waiting;
-	while (r) {
-		php_io_ring_req *w_next = r->w_next;
-		if (!php_deadline_is_infinite(&r->deadline)) {
-			if (r->deadline.hrtime <= now) {
-				php_io_ring_waiter_settle(ring, r);
-				php_io_ring_req_main_cqe(ring, r, -ETIME);
-			} else if (r->deadline.hrtime < next) {
-				next = r->deadline.hrtime;
-			}
-		}
-		r = w_next;
+		php_io_ring_req_main_cqe(ring, r, -ETIME);
 	}
 	php_io_ring_fold_all(ring);
-	return next;
+	php_io_ring_sentinel_arm(ring);
+	return ring->n_timed ? ring->timed[0]->deadline.hrtime : ZEND_HRTIME_T_MAX;
 }
 
 /* Wait until every orphaned op on the stream settled; other completions
@@ -2085,6 +2207,10 @@ PHPAPI void php_io_ring_destroy(php_io_ring *ring)
 			php_io_ring_waiter_settle(ring, r);
 			r->main_done = true;
 		}
+		if (r->timed) {
+			php_io_ring_heap_remove(ring, r);
+			r->main_done = true;
+		}
 		if (foreign) {
 			r->main_done = true;
 			r->lt_done = true;
@@ -2098,6 +2224,7 @@ PHPAPI void php_io_ring_destroy(php_io_ring *ring)
 	ring->n_ready = 0;
 	ring->n_fired = 0;
 	ring->pending = 0;
+	ring->sentinel = NULL;
 
 	/* Cancel everything in flight and drain until each has completed */
 	for (;;) {
@@ -2136,6 +2263,9 @@ PHPAPI void php_io_ring_destroy(php_io_ring *ring)
 	}
 	if (ring->next_ring) {
 		ring->next_ring->prev_ring = ring->prev_ring;
+	}
+	if (ring->timed) {
+		efree(ring->timed);
 	}
 	if (ring->ready) {
 		efree(ring->ready);
