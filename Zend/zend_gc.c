@@ -2297,14 +2297,14 @@ ZEND_API int zend_gc_collect_cycles(void)
 			return 0;
 		}
 
+		if (GC_G(gc_coroutine) == NULL && UNEXPECTED(new_gc_coroutine() == NULL)) {
+			return 0;
+		}
+
 		/* The run executes on the GC coroutine and cannot see this stack:
 		 * shield the caller's live TMPVARs from it for the duration. */
 		if (GC_G(num_roots)) {
 			zend_gc_remove_root_tmpvars();
-		}
-
-		if (GC_G(gc_coroutine) == NULL && UNEXPECTED(new_gc_coroutine() == NULL)) {
-			return 0;
 		}
 
 		/* Synchronous for the caller: parked until the run finishes. false
