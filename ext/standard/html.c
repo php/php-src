@@ -43,6 +43,8 @@
 #include <locale.h>
 
 #include <zend_hash.h>
+#include "zend_bitset.h"
+#include "zend_simd.h"
 #include "html_tables.h"
 
 /* Macro for disabling flag of translation of non-basic entities where this isn't supported.
@@ -83,6 +85,90 @@ static char *get_default_charset(void) {
 }
 /* }}} */
 
+/* {{{ get_next_char_utf8
+ * UTF-8 case of get_next_char(), for a cursor before the end of str and a status set to SUCCESS */
+static zend_always_inline unsigned int get_next_char_utf8(
+		const unsigned char *str,
+		size_t str_len,
+		size_t *cursor,
+		zend_result *status)
+{
+	size_t pos = *cursor;
+	unsigned int this_char = 0;
+
+	/* We'll follow strategy 2. from section 3.6.1 of UTR #36:
+	 * "In a reported illegal byte sequence, do not include any
+	 *  non-initial byte that encodes a valid character or is a leading
+	 *  byte for a valid sequence." */
+	unsigned char c;
+	c = str[pos];
+	if (c < 0x80) {
+		this_char = c;
+		pos++;
+	} else if (c < 0xc2) {
+		MB_FAILURE(pos, 1);
+	} else if (c < 0xe0) {
+		if (!CHECK_LEN(pos, 2))
+			MB_FAILURE(pos, 1);
+
+		if (!utf8_trail(str[pos + 1])) {
+			MB_FAILURE(pos, utf8_lead(str[pos + 1]) ? 1 : 2);
+		}
+		this_char = ((c & 0x1f) << 6) | (str[pos + 1] & 0x3f);
+		if (this_char < 0x80) { /* non-shortest form */
+			MB_FAILURE(pos, 2);
+		}
+		pos += 2;
+	} else if (c < 0xf0) {
+		size_t avail = str_len - pos;
+
+		if (avail < 3 ||
+				!utf8_trail(str[pos + 1]) || !utf8_trail(str[pos + 2])) {
+			if (avail < 2 || utf8_lead(str[pos + 1]))
+				MB_FAILURE(pos, 1);
+			else if (avail < 3 || utf8_lead(str[pos + 2]))
+				MB_FAILURE(pos, 2);
+			else
+				MB_FAILURE(pos, 3);
+		}
+
+		this_char = ((c & 0x0f) << 12) | ((str[pos + 1] & 0x3f) << 6) | (str[pos + 2] & 0x3f);
+		if (this_char < 0x800) { /* non-shortest form */
+			MB_FAILURE(pos, 3);
+		} else if (this_char >= 0xd800 && this_char <= 0xdfff) { /* surrogate */
+			MB_FAILURE(pos, 3);
+		}
+		pos += 3;
+	} else if (c < 0xf5) {
+		size_t avail = str_len - pos;
+
+		if (avail < 4 ||
+				!utf8_trail(str[pos + 1]) || !utf8_trail(str[pos + 2]) ||
+				!utf8_trail(str[pos + 3])) {
+			if (avail < 2 || utf8_lead(str[pos + 1]))
+				MB_FAILURE(pos, 1);
+			else if (avail < 3 || utf8_lead(str[pos + 2]))
+				MB_FAILURE(pos, 2);
+			else if (avail < 4 || utf8_lead(str[pos + 3]))
+				MB_FAILURE(pos, 3);
+			else
+				MB_FAILURE(pos, 4);
+		}
+
+		this_char = ((c & 0x07) << 18) | ((str[pos + 1] & 0x3f) << 12) | ((str[pos + 2] & 0x3f) << 6) | (str[pos + 3] & 0x3f);
+		if (this_char < 0x10000 || this_char > 0x10FFFF) { /* non-shortest form or outside range */
+			MB_FAILURE(pos, 4);
+		}
+		pos += 4;
+	} else {
+		MB_FAILURE(pos, 1);
+	}
+
+	*cursor = pos;
+	return this_char;
+}
+/* }}} */
+
 /* {{{ get_next_char */
 static inline unsigned int get_next_char(
 		enum entity_charset charset,
@@ -102,76 +188,7 @@ static inline unsigned int get_next_char(
 
 	switch (charset) {
 	case cs_utf_8:
-		{
-			/* We'll follow strategy 2. from section 3.6.1 of UTR #36:
-			 * "In a reported illegal byte sequence, do not include any
-			 *  non-initial byte that encodes a valid character or is a leading
-			 *  byte for a valid sequence." */
-			unsigned char c;
-			c = str[pos];
-			if (c < 0x80) {
-				this_char = c;
-				pos++;
-			} else if (c < 0xc2) {
-				MB_FAILURE(pos, 1);
-			} else if (c < 0xe0) {
-				if (!CHECK_LEN(pos, 2))
-					MB_FAILURE(pos, 1);
-
-				if (!utf8_trail(str[pos + 1])) {
-					MB_FAILURE(pos, utf8_lead(str[pos + 1]) ? 1 : 2);
-				}
-				this_char = ((c & 0x1f) << 6) | (str[pos + 1] & 0x3f);
-				if (this_char < 0x80) { /* non-shortest form */
-					MB_FAILURE(pos, 2);
-				}
-				pos += 2;
-			} else if (c < 0xf0) {
-				size_t avail = str_len - pos;
-
-				if (avail < 3 ||
-						!utf8_trail(str[pos + 1]) || !utf8_trail(str[pos + 2])) {
-					if (avail < 2 || utf8_lead(str[pos + 1]))
-						MB_FAILURE(pos, 1);
-					else if (avail < 3 || utf8_lead(str[pos + 2]))
-						MB_FAILURE(pos, 2);
-					else
-						MB_FAILURE(pos, 3);
-				}
-
-				this_char = ((c & 0x0f) << 12) | ((str[pos + 1] & 0x3f) << 6) | (str[pos + 2] & 0x3f);
-				if (this_char < 0x800) { /* non-shortest form */
-					MB_FAILURE(pos, 3);
-				} else if (this_char >= 0xd800 && this_char <= 0xdfff) { /* surrogate */
-					MB_FAILURE(pos, 3);
-				}
-				pos += 3;
-			} else if (c < 0xf5) {
-				size_t avail = str_len - pos;
-
-				if (avail < 4 ||
-						!utf8_trail(str[pos + 1]) || !utf8_trail(str[pos + 2]) ||
-						!utf8_trail(str[pos + 3])) {
-					if (avail < 2 || utf8_lead(str[pos + 1]))
-						MB_FAILURE(pos, 1);
-					else if (avail < 3 || utf8_lead(str[pos + 2]))
-						MB_FAILURE(pos, 2);
-					else if (avail < 4 || utf8_lead(str[pos + 3]))
-						MB_FAILURE(pos, 3);
-					else
-						MB_FAILURE(pos, 4);
-				}
-
-				this_char = ((c & 0x07) << 18) | ((str[pos + 1] & 0x3f) << 12) | ((str[pos + 2] & 0x3f) << 6) | (str[pos + 3] & 0x3f);
-				if (this_char < 0x10000 || this_char > 0x10FFFF) { /* non-shortest form or outside range */
-					MB_FAILURE(pos, 4);
-				}
-				pos += 4;
-			} else {
-				MB_FAILURE(pos, 1);
-			}
-		}
-		break;
+		return get_next_char_utf8(str, str_len, cursor, status);
 
 	case cs_big5:
 		/* reference http://demo.icu-project.org/icu-bin/convexp?conv=big5 */
@@ -1125,12 +1142,132 @@ static inline void find_entity_for_char_basic(
 }
 /* }}} */
 
-/* {{{ php_escape_html_entities */
-PHPAPI zend_string *php_escape_html_entities_ex(const unsigned char *old, size_t oldlen, int all, int flags, const char *hint_charset, bool double_encode, bool quiet)
+/* Character classes used by html_verbatim_prefix_len(). The quote classes are the flags
+ * that make the quotes encoded. */
+#define HTML_CC_SQUOTE    ENT_HTML_QUOTE_SINGLE /* ' */
+#define HTML_CC_DQUOTE    ENT_HTML_QUOTE_DOUBLE /* " */
+#define HTML_CC_BASIC     4 /* &, < and >, always encoded */
+#define HTML_CC_NON_ASCII 8 /* bytes 0x80-0xFF */
+
+#define N HTML_CC_NON_ASCII
+static const unsigned char html_char_class[256] = {
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, HTML_CC_DQUOTE, 0, 0, 0, HTML_CC_BASIC, HTML_CC_SQUOTE, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, HTML_CC_BASIC, 0, HTML_CC_BASIC, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N,
+	N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N,
+	N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N,
+	N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N,
+	N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N,
+	N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N,
+	N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N,
+	N, N, N, N, N, N, N, N, N, N, N, N, N, N, N, N,
+};
+#undef N
+
+/* {{{ html_skip_utf8_char
+ * Moves *pos after the UTF-8 character at *pos, or returns false if it is invalid */
+static zend_always_inline bool html_skip_utf8_char(const unsigned char *str, size_t str_len, size_t *pos)
 {
-	size_t cursor, maxlen, len;
+	size_t cursor = *pos;
+	zend_result status = SUCCESS;
+
+	get_next_char_utf8(str, str_len, &cursor, &status);
+	if (status == FAILURE) {
+		return false;
+	}
+	*pos = cursor;
+	return true;
+}
+/* }}} */
+
+#ifdef XSSE2
+/* {{{ html_stop_mask
+ * Returns the bit mask of the bytes of in that html_verbatim_prefix_len() stops at. '<' and '>'
+ * differ only by bit 1, and '&' and '\'' only by bit 0, which apos_mask clears when '\'' is
+ * encoded. quot is '"', or '&' when '"' is not encoded, and high is 0x80, or 0 in single-byte
+ * charsets. */
+static zend_always_inline int html_stop_mask(__m128i in, __m128i apos_mask, __m128i quot, __m128i high)
+{
+	__m128i m = _mm_cmpeq_epi8(_mm_and_si128(in, _mm_set1_epi8(~2)), _mm_set1_epi8('<'));
+	m = _mm_or_si128(m, _mm_cmpeq_epi8(_mm_and_si128(in, apos_mask), _mm_set1_epi8('&')));
+	m = _mm_or_si128(m, _mm_or_si128(_mm_cmpeq_epi8(in, quot), _mm_and_si128(in, high)));
+	return _mm_movemask_epi8(m);
+}
+/* }}} */
+#endif
+
+/* {{{ html_verbatim_prefix_len
+ * Returns the length of the longest prefix of old that escape_html_entities_from() copies
+ * unchanged when only the basic entities are encoded and disallowed characters are not
+ * substituted: the prefix contains no character to encode and no invalid multi-byte
+ * sequence, and ends on a character boundary. */
+static zend_always_inline size_t html_verbatim_prefix_len(const unsigned char *old, size_t oldlen, int flags, enum entity_charset charset)
+{
+	/* In all supported charsets, bytes below 0x80 are single-byte characters. Bytes above
+	 * 0x7F are characters of their own in single-byte charsets. In UTF-8 they are validated
+	 * below, and the prefix stops at the first of them in the other multi-byte charsets. */
+	const unsigned char stop = HTML_CC_BASIC
+		| (flags & (ENT_HTML_QUOTE_SINGLE | ENT_HTML_QUOTE_DOUBLE))
+		| (CHARSET_SINGLE_BYTE(charset) ? 0 : HTML_CC_NON_ASCII);
+	size_t pos = 0;
+
+#ifdef XSSE2
+	if (oldlen >= sizeof(__m128i)) {
+		/* Scan blocks of 16 bytes, the last one ending at the end of old */
+		const __m128i apos_mask = (flags & ENT_HTML_QUOTE_SINGLE) ? _mm_set1_epi8(~1) : _mm_set1_epi8(~0);
+		const __m128i quot = (flags & ENT_HTML_QUOTE_DOUBLE) ? _mm_set1_epi8('"') : _mm_set1_epi8('&');
+		const __m128i high = (stop & HTML_CC_NON_ASCII) ? _mm_set1_epi8((char) 0x80) : _mm_setzero_si128();
+		const size_t last = oldlen - sizeof(__m128i);
+
+		while (1) {
+			int mask;
+
+			if (pos < last) {
+				mask = html_stop_mask(_mm_loadu_si128((const __m128i *) (old + pos)), apos_mask, quot, high);
+				if (!mask) {
+					pos += sizeof(__m128i);
+					continue;
+				}
+			} else {
+				/* the last block, whose bytes before pos are already scanned */
+				mask = html_stop_mask(_mm_loadu_si128((const __m128i *) (old + last)), apos_mask, quot, high) >> (pos - last);
+				if (!mask) {
+					return oldlen;
+				}
+			}
+			pos += zend_ulong_ntz(mask);
+			if (old[pos] < 0x80 || charset != cs_utf_8 || !html_skip_utf8_char(old, oldlen, &pos)) {
+				return pos;
+			}
+		}
+	}
+#endif
+
+	while (pos < oldlen && !(html_char_class[old[pos]] & stop)) {
+		pos++;
+	}
+	while (pos < oldlen && old[pos] >= 0x80 && charset == cs_utf_8 && html_skip_utf8_char(old, oldlen, &pos)) {
+		while (pos < oldlen && !(html_char_class[old[pos]] & stop)) {
+			pos++;
+		}
+	}
+
+	return pos;
+}
+/* }}} */
+
+/* {{{ escape_html_entities_from
+ * Encodes old, whose first cursor bytes are known to be copied unchanged */
+static zend_string *escape_html_entities_from(const unsigned char *old, size_t oldlen, size_t cursor, int all, int flags, enum entity_charset charset, bool double_encode)
+{
+	size_t maxlen, len;
 	zend_string *replaced;
-	enum entity_charset charset = determine_charset(hint_charset, quiet);
 	int doctype = flags & ENT_HTML_DOC_TYPE_MASK;
 	entity_table_opt entity_table;
 	const enc_to_uni *to_uni_table = NULL;
@@ -1139,14 +1276,6 @@ PHPAPI zend_string *php_escape_html_entities_ex(const unsigned char *old, size_t
 	const unsigned char *replacement = NULL;
 	size_t replacement_len = 0;
 
-	if (all) { /* replace with all named entities */
-		if (!quiet && CHARSET_PARTIAL_SUPPORT(charset)) {
-			php_error_docref(NULL, E_NOTICE, "Only basic entities "
-				"substitution is supported for multi-byte encodings other than UTF-8; "
-				"functionality is equivalent to htmlspecialchars");
-		}
-		LIMIT_ALL(all, doctype, charset);
-	}
 	entity_table = determine_entity_table(all, doctype);
 	if (all && !CHARSET_UNICODE_COMPAT(charset)) {
 		to_uni_table = enc_to_uni_index[charset];
@@ -1176,8 +1305,8 @@ PHPAPI zend_string *php_escape_html_entities_ex(const unsigned char *old, size_t
 	}
 
 	replaced = zend_string_alloc(maxlen, 0);
-	len = 0;
-	cursor = 0;
+	memcpy(ZSTR_VAL(replaced), old, cursor);
+	len = cursor;
 	while (cursor < oldlen) {
 		const unsigned char *mbsequence = NULL;
 		size_t mbseqlen					= 0,
@@ -1338,6 +1467,38 @@ encode_amp:
 }
 /* }}} */
 
+/* {{{ php_escape_html_entities */
+static zend_always_inline zend_string *escape_html_entities(const unsigned char *old, size_t oldlen, zend_string *old_str, int all, int flags, const char *hint_charset, bool double_encode, bool quiet)
+{
+	enum entity_charset charset = determine_charset(hint_charset, quiet);
+	size_t verbatim_len = 0;
+
+	if (all) { /* replace with all named entities */
+		if (!quiet && CHARSET_PARTIAL_SUPPORT(charset)) {
+			php_error_docref(NULL, E_NOTICE, "Only basic entities "
+				"substitution is supported for multi-byte encodings other than UTF-8; "
+				"functionality is equivalent to htmlspecialchars");
+		}
+		LIMIT_ALL(all, flags & ENT_HTML_DOC_TYPE_MASK, charset);
+	}
+
+	if (!all && !(flags & ENT_HTML_SUBSTITUTE_DISALLOWED_CHARS)) {
+		verbatim_len = html_verbatim_prefix_len(old, oldlen, flags, charset);
+		if (verbatim_len == oldlen) {
+			/* nothing to encode */
+			return old_str ? zend_string_copy(old_str) : zend_string_init((const char *) old, oldlen, 0);
+		}
+	}
+
+	return escape_html_entities_from(old, oldlen, verbatim_len, all, flags, charset, double_encode);
+}
+
+PHPAPI zend_string *php_escape_html_entities_ex(const unsigned char *old, size_t oldlen, int all, int flags, const char *hint_charset, bool double_encode, bool quiet)
+{
+	return escape_html_entities(old, oldlen, NULL, all, flags, hint_charset, double_encode, quiet);
+}
+/* }}} */
+
 /* {{{ php_html_entities */
 static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 {
@@ -1357,8 +1518,8 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 	if (ZSTR_LEN(str) == 0) {
 		RETURN_EMPTY_STRING();
 	}
-	replaced = php_escape_html_entities_ex(
-		(unsigned char*)ZSTR_VAL(str), ZSTR_LEN(str), all, (int) flags,
+	replaced = escape_html_entities(
+		(unsigned char*)ZSTR_VAL(str), ZSTR_LEN(str), str, all, (int) flags,
 		hint_charset ? ZSTR_VAL(hint_charset) : NULL, double_encode, /* quiet */ 0);
 	RETVAL_STR(replaced);
 }
