@@ -36,6 +36,7 @@
 #include "test_arginfo.h"
 #include "zend_call_stack.h"
 #include "zend_exceptions.h"
+#include "zend_system_id.h"
 #include "zend_mm_custom_handlers.h"
 #include <signal.h>
 
@@ -1180,6 +1181,7 @@ static ZEND_METHOD(_ZendTestMagicCallForward, __call)
 }
 
 PHP_INI_BEGIN()
+	PHP_INI_ENTRY("zend_test.register_system_entropy", "0", PHP_INI_SYSTEM, NULL)
 	STD_PHP_INI_BOOLEAN("zend_test.replace_zend_execute_ex", "0", PHP_INI_SYSTEM, OnUpdateBool, replace_zend_execute_ex, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.register_passes", "0", PHP_INI_SYSTEM, OnUpdateBool, register_passes, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.print_stderr_mshutdown", "0", PHP_INI_SYSTEM, OnUpdateBool, print_stderr_mshutdown, zend_zend_test_globals, zend_test_globals)
@@ -1378,6 +1380,10 @@ PHP_MINIT_FUNCTION(zend_test)
 	// Loading via dl() not supported with the observer API
 	if (type != MODULE_TEMPORARY) {
 		REGISTER_INI_ENTRIES();
+		if (INI_BOOL("zend_test.register_system_entropy") &&
+			zend_add_system_entropy("zend_test", "test", ZEND_STRL("test entropy")) == FAILURE) {
+			php_error_docref(NULL, E_WARNING, "Failed to register system entropy");
+		}
 	} else {
 		(void)ini_entries;
 	}
