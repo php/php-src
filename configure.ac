@@ -1650,7 +1650,6 @@ PHP_ADD_SOURCES([main], m4_normalize([
     main.c
     network.c
     output.c
-    php_content_types.c
     php_ini_builder.c
     php_ini.c
     php_glob.c

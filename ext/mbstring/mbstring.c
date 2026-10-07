@@ -46,7 +46,6 @@
 
 #include "php_globals.h"
 #include "rfc1867.h"
-#include "php_content_types.h"
 #include "SAPI.h"
 #include "php_unicode.h"
 #include "TSRM.h"
@@ -205,14 +204,6 @@ zend_module_entry mbstring_module_entry = {
 	PHP_GSHUTDOWN(mbstring),
 	NULL,
 	STANDARD_MODULE_PROPERTIES_EX
-};
-/* }}} */
-
-/* {{{ static sapi_post_entry php_post_entries[] */
-static const sapi_post_entry php_post_entries[] = {
-	{ DEFAULT_POST_CONTENT_TYPE, sizeof(DEFAULT_POST_CONTENT_TYPE)-1, sapi_read_standard_form_data,	php_std_post_handler },
-	{ MULTIPART_CONTENT_TYPE,    sizeof(MULTIPART_CONTENT_TYPE)-1,    NULL,                         rfc1867_post_handler },
-	{ NULL, 0, NULL, NULL }
 };
 /* }}} */
 
