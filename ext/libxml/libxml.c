@@ -485,11 +485,18 @@ static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char
 	}
 
 	php_stream_context *context = php_libxml_get_stream_context();
+	if (context) {
+		/* libxml_set_streams_context() from another fiber would drop it under a waiting open */
+		GC_ADDREF(context->res);
+	}
 
 	php_stream *ret_val = php_stream_open_wrapper_ex(path_to_open, mode, REPORT_ERRORS, NULL, context);
 	if (ret_val) {
 		/* Prevent from closing this by fclose() */
 		ret_val->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
+	}
+	if (context) {
+		zend_list_delete(context->res);
 	}
 	if (is_escaped) {
 		xmlFree(resolved_path);

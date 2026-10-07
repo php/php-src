@@ -1019,6 +1019,9 @@ static bool php_io_result_valid(const php_io_op *op, const php_io_op_result *res
 static zend_result php_io_run_ex(php_io_op *op, php_io_op_result *result)
 {
 	php_io_hooks *hooks = FG(io_hooks);
+	if (hooks && op->stream && (op->stream->flags & PHP_STREAM_FLAG_NO_IO_HOOKS)) {
+		hooks = NULL;
+	}
 	if (hooks && UNEXPECTED(EG(exception))) {
 		/* A provider must not suspend with it pending, or a cancellation is lost */
 		php_io_op_finish(op);

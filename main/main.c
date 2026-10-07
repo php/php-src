@@ -1640,6 +1640,9 @@ PHPAPI zend_result php_stream_open_for_zend_ex(zend_file_handle *handle, int mod
 	opened_path = filename = handle->filename;
 	stream = php_stream_open_wrapper((char *)ZSTR_VAL(filename), "rb", mode | STREAM_OPEN_FOR_ZEND_STREAM, &opened_path);
 	if (stream) {
+		/* A suspension inside the compile would let classes declared meanwhile into the cached
+		 * script */
+		stream->flags |= PHP_STREAM_FLAG_NO_IO_HOOKS;
 		memset(handle, 0, sizeof(zend_file_handle));
 		handle->type = ZEND_HANDLE_STREAM;
 		handle->filename = filename;

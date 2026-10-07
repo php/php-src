@@ -674,6 +674,10 @@ PHP_FUNCTION(hash_init)
 		zend_argument_type_error(1, "must be a valid, non-finalized HashContext"); \
 		RETURN_THROWS(); \
 	} \
+	if (hash->in_use) { \
+		zend_throw_error(NULL, "Concurrent access to a HashContext"); \
+		RETURN_THROWS(); \
+	} \
 }
 
 /* {{{ Pump data into the hashing algorithm */
@@ -713,6 +717,7 @@ PHP_FUNCTION(hash_update_stream)
 	hash = php_hashcontext_from_object(hash_obj);
 	PHP_HASHCONTEXT_VERIFY(hash);
 
+	hash->in_use = true;
 	while (length) {
 		char buf[1024];
 		zend_long toread = 1024;
@@ -723,12 +728,13 @@ PHP_FUNCTION(hash_update_stream)
 		}
 
 		if ((n = php_stream_read(stream, buf, toread)) <= 0) {
-			RETURN_LONG(didread);
+			break;
 		}
 		hash->ops->hash_update(hash->context, (unsigned char *) buf, n);
 		length -= n;
 		didread += n;
 	}
+	hash->in_use = false;
 
 	RETURN_LONG(didread);
 }
@@ -759,9 +765,11 @@ PHP_FUNCTION(hash_update_file)
 		RETURN_FALSE;
 	}
 
+	hash->in_use = true;
 	while ((n = php_stream_read(stream, buf, sizeof(buf))) > 0) {
 		hash->ops->hash_update(hash->context, (unsigned char *) buf, n);
 	}
+	hash->in_use = false;
 	php_stream_close(stream);
 
 	RETURN_BOOL(n >= 0);

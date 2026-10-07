@@ -1448,9 +1448,20 @@ static void php_io_hooks_php_add(php_io_hooks *hooks, php_io_registration *reg)
 	php_io_hooks_php_call(&PHP_IO_HOOKS_PHP(hooks)->add_fcc, NULL, php_io_registration_get_zobj(reg));
 }
 
+/* A stream freed by an unwinding frame ends its registrations with the exception pending, which
+ * would skip the call and leave the pair in the provider's queue, as a destructor runs it */
 static void php_io_hooks_php_remove(php_io_hooks *hooks, php_io_registration *reg)
 {
+	zend_object *old_exception = EG(exception);
+	EG(exception) = NULL;
 	php_io_hooks_php_call(&PHP_IO_HOOKS_PHP(hooks)->remove_fcc, NULL, php_io_registration_get_zobj(reg));
+	if (old_exception) {
+		if (EG(exception)) {
+			zend_exception_set_previous(EG(exception), old_exception);
+		} else {
+			EG(exception) = old_exception;
+		}
+	}
 }
 
 static void php_io_hooks_php_dtor(php_io_hooks *hooks)
