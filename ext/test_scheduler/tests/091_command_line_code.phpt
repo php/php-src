@@ -12,7 +12,7 @@ $main = "use function TestScheduler\\spawn; spawn(function () { echo 'spawned', 
 $throws = "use function TestScheduler\\spawn; spawn(function () { echo 'spawned', PHP_EOL; }); throw new Exception('from main');";
 $exits = "use function TestScheduler\\spawn; spawn(function () { echo 'spawned', PHP_EOL; }); exit(3);";
 
-$file = __DIR__ . '/091_command_line_code.inc';
+$file = __DIR__ . DIRECTORY_SEPARATOR . '091_command_line_code.inc';
 
 foreach (['main' => $main, 'throws' => $throws, 'exits' => $exits] as $name => $code) {
     file_put_contents($file, "<?php " . $code);
