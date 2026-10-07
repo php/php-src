@@ -1208,12 +1208,6 @@ static char **php_cli_utf8_command_line(int *argc)
 /* {{{ do_php_cli */
 PHP_CLI_API int do_php_cli(int argc, char *argv[])
 {
-#if defined(PHP_WIN32)
-	char **native_argv = NULL;
-	char **converted_argv = NULL;
-	char **argv_save;
-#endif
-
 	int c;
 	int exit_status = SUCCESS;
 	int module_started = 0, sapi_started = 0;
@@ -1225,6 +1219,10 @@ PHP_CLI_API int do_php_cli(int argc, char *argv[])
 	sapi_module_struct *sapi_module_ptr = &cli_sapi_module;
 
 #ifdef PHP_WIN32
+	char **native_argv = NULL;
+	char **converted_argv = NULL;
+	char **argv_save;
+
 	if (argv == __argv) {
 		native_argv = php_cli_utf8_command_line(&argc);
 		if (!native_argv) {
