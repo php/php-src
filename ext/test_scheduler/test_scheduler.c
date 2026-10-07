@@ -1415,10 +1415,12 @@ static zend_coroutine_t *ts_new_coroutine(void)
 }
 
 /* This reference scheduler treats a GC coroutine exactly like any other:
- * the FIFO run queue has no notion of priority to give it. A scheduler that
- * does would tell them apart here. */
-static zend_coroutine_t *ts_gc_new_coroutine(void)
+ * the FIFO run queue has no notion of priority, so `priority` is ignored and
+ * the collector's run waits its turn behind the coroutines queued before it. */
+static zend_coroutine_t *ts_gc_new_coroutine(zend_coroutine_priority priority)
 {
+	(void) priority;
+
 	if (UNEXPECTED(ts_fault_hit(&TSG(fail_new_coroutine)))) {
 		return NULL;
 	}

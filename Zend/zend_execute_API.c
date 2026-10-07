@@ -265,7 +265,7 @@ static bool shutdown_destructors_switch_handler(zend_coroutine_t *coroutine, boo
 		return false;
 	}
 
-	zend_coroutine_t *iterator = ZEND_ASYNC_GC_NEW_COROUTINE();
+	zend_coroutine_t *iterator = ZEND_ASYNC_GC_NEW_COROUTINE(ZEND_COROUTINE_NORMAL);
 
 	if (UNEXPECTED(iterator == NULL)) {
 		return false;
