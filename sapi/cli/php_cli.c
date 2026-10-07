@@ -47,6 +47,7 @@
 #include <locale.h>
 #include "zend.h"
 #include "zend_extensions.h"
+#include "zend_async_API.h"
 #include "php_ini.h"
 #include "php_main.h"
 #include "fopen_wrappers.h"
@@ -567,6 +568,76 @@ static zend_result cli_seek_file_begin(zend_file_handle *file_handle, char *scri
 }
 /* }}} */
 
+/* An exception left after the scheduler has run (the -r code's own, or a failed launch's) is
+ * reported as php_execute_script_ex() reports one that a script file leaves. */
+static void cli_report_exception(void)
+{
+	if (EG(exception)) {
+		zend_try {
+			zend_exception_error(EG(exception), E_ERROR);
+		} zend_end_try();
+	}
+}
+
+/* {{{ cli_execute_code
+ * -r code runs as the request's script, as php_execute_script_ex() runs a file: the scheduler
+ * launches before it and runs after it, and an exception it leaves belongs to the main coroutine. */
+static void cli_execute_code(const char *code)
+{
+	zend_try {
+		if (ZEND_ASYNC_SCHEDULER_LAUNCH()) {
+			zend_eval_string_ex(code, NULL, "Command line code", false);
+		}
+
+		ZEND_ASYNC_RUN_SCHEDULER_AFTER_MAIN(false);
+	} zend_catch {
+		ZEND_ASYNC_RUN_SCHEDULER_AFTER_MAIN(true);
+	} zend_end_try();
+
+	cli_report_exception();
+}
+/* }}} */
+
+/* {{{ cli_process_stdin */
+static void cli_process_stdin(const char *exec_begin, const char *exec_run, const char *exec_end,
+		char *script_file, zend_file_handle *file_handle)
+{
+	char *input;
+	size_t len, index = 0;
+	zval argn, argi;
+
+	if (exec_begin) {
+		zend_eval_string_ex(exec_begin, NULL, "Command line begin code", 1);
+	}
+	while (EG(exit_status) == SUCCESS && (input = php_stream_gets(s_in_process, NULL, 0)) != NULL) {
+		len = strlen(input);
+		while (len > 0 && len-- && (input[len]=='\n' || input[len]=='\r')) {
+			input[len] = '\0';
+		}
+		ZVAL_STRINGL(&argn, input, len + 1);
+		zend_hash_str_update(&EG(symbol_table), "argn", sizeof("argn")-1, &argn);
+		ZVAL_LONG(&argi, ++index);
+		zend_hash_str_update(&EG(symbol_table), "argi", sizeof("argi")-1, &argi);
+		if (exec_run) {
+			zend_eval_string_ex(exec_run, NULL, "Command line run code", 1);
+		} else {
+			if (script_file) {
+				if (cli_seek_file_begin(file_handle, script_file) == FAILURE) {
+					EG(exit_status) = 1;
+				} else {
+					CG(skip_shebang) = 1;
+					php_execute_script(file_handle);
+				}
+			}
+		}
+		efree(input);
+	}
+	if (exec_end) {
+		zend_eval_string_ex(exec_end, NULL, "Command line end code", 1);
+	}
+}
+/* }}} */
+
 /*{{{ php_cli_win32_ctrl_handler */
 #if defined(PHP_WIN32)
 BOOL WINAPI php_cli_win32_ctrl_handler(DWORD sig)
@@ -968,54 +1039,31 @@ do_repeat:
 			break;
 		case PHP_CLI_MODE_CLI_DIRECT:
 			cli_register_file_handles();
-			zend_eval_string_ex(exec_direct, NULL, "Command line code", 1);
+			cli_execute_code(exec_direct);
 			break;
 
 		case PHP_CLI_MODE_PROCESS_STDIN:
-			{
-				char *input;
-				size_t len, index = 0;
-				zval argn, argi;
-
-				if (!exec_run && script_file) {
-					zend_string_release_ex(file_handle.filename, 0);
-					file_handle.filename = NULL;
-				}
-
-				cli_register_file_handles();
-
-				if (exec_begin) {
-					zend_eval_string_ex(exec_begin, NULL, "Command line begin code", 1);
-				}
-				while (EG(exit_status) == SUCCESS && (input = php_stream_gets(s_in_process, NULL, 0)) != NULL) {
-					len = strlen(input);
-					while (len > 0 && len-- && (input[len]=='\n' || input[len]=='\r')) {
-						input[len] = '\0';
-					}
-					ZVAL_STRINGL(&argn, input, len + 1);
-					zend_hash_str_update(&EG(symbol_table), "argn", sizeof("argn")-1, &argn);
-					ZVAL_LONG(&argi, ++index);
-					zend_hash_str_update(&EG(symbol_table), "argi", sizeof("argi")-1, &argi);
-					if (exec_run) {
-						zend_eval_string_ex(exec_run, NULL, "Command line run code", 1);
-					} else {
-						if (script_file) {
-							if (cli_seek_file_begin(&file_handle, script_file) == FAILURE) {
-								EG(exit_status) = 1;
-							} else {
-								CG(skip_shebang) = 1;
-								php_execute_script(&file_handle);
-							}
-						}
-					}
-					efree(input);
-				}
-				if (exec_end) {
-					zend_eval_string_ex(exec_end, NULL, "Command line end code", 1);
-				}
-
-				break;
+			if (!exec_run && script_file) {
+				zend_string_release_ex(file_handle.filename, 0);
+				file_handle.filename = NULL;
 			}
+
+			cli_register_file_handles();
+
+			/* -B, every -R line and -E run in one main coroutine, so a coroutine that -B spawns
+			 * runs while the lines are read; the scheduler runs once, after -E. */
+			zend_try {
+				if (ZEND_ASYNC_SCHEDULER_LAUNCH()) {
+					cli_process_stdin(exec_begin, exec_run, exec_end, script_file, &file_handle);
+				}
+
+				ZEND_ASYNC_RUN_SCHEDULER_AFTER_MAIN(false);
+			} zend_catch {
+				ZEND_ASYNC_RUN_SCHEDULER_AFTER_MAIN(true);
+			} zend_end_try();
+
+			cli_report_exception();
+			break;
 
 		case PHP_CLI_MODE_REFLECTION_FUNCTION:
 		case PHP_CLI_MODE_REFLECTION_CLASS:
