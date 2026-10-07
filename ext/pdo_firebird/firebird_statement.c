@@ -304,26 +304,14 @@ static int pdo_firebird_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	struct pdo_column_data *col = &stmt->columns[colno];
 	XSQLVAR *var = &S->out_sqlda.sqlvar[colno];
-	int colname_len;
-	char *cp;
 
 	if ((var->sqltype & ~1) == SQL_TEXT) {
 		var->sqltype = SQL_VARYING | (var->sqltype & 1);
 	}
-	colname_len = (S->H->fetch_table_names && var->relname_length)
-					? (var->aliasname_length + var->relname_length + 1)
-					: (var->aliasname_length);
 	col->precision = -var->sqlscale;
 	col->maxlen = var->sqllen;
-	col->name = zend_string_alloc(colname_len, 0);
-	cp = ZSTR_VAL(col->name);
-	if (colname_len > var->aliasname_length) {
-		memmove(cp, var->relname, var->relname_length);
-		cp += var->relname_length;
-		*cp++ = '.';
-	}
-	memmove(cp, var->aliasname, var->aliasname_length);
-	*(cp+var->aliasname_length) = '\0';
+	col->name = zend_string_init(var->aliasname, var->aliasname_length, 0);
+	col->table = zend_string_init(var->relname, var->relname_length, 0);
 
 	return 1;
 }
