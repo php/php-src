@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.13
 
+- Opcache:
+  . Fixed bug GH-17626 (JIT corrupts an opline handler when blacklisting a
+    root trace at the opcache.jit_max_root_traces limit, causing spurious
+    "Too few arguments" errors and crashes). (RV7PR)
 
 22 Oct 2026, PHP 8.5.12
 
