@@ -173,14 +173,17 @@ ZEND_ATTRIBUTE_NONNULL static bool append_validation_error(
 ZEND_ATTRIBUTE_NONNULL static const char *fill_errors_inner(HashTable *errors)
 {
 	const char *result = NULL;
+	lexbor_plog_t *log = lexbor_parser.log;
+	const size_t length = lexbor_plog_length(log);
 
-	lexbor_plog_entry_t *lxb_error;
-	while ((lxb_error = lexbor_array_obj_pop(&lexbor_parser.log->list)) != NULL) {
+	for (size_t i = 0; i < length; i++) {
+		const lexbor_plog_entry_t *lxb_error = lexbor_array_obj_get(&log->list, i);
 		const char *reason;
-		if (append_validation_error(errors, lxb_error->id, (const char *) lxb_error->data, &reason)) {
+		if (append_validation_error(errors, lxb_error->id, (const char *) lxb_error->data, &reason) && result == NULL) {
 			result = reason;
 		}
 	}
+	lexbor_plog_clean(log);
 
 	return result;
 }
