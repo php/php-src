@@ -18,6 +18,10 @@ PHP                                                                        NEWS
   . Fixed chown() and lchown() failing to resolve user names in ZTS builds
     when getpwnam_r() needs a larger buffer. (Ilia Alshanetsky)
 
+- Streams:
+  . Fixed bug GH-24173 (Sockets from synchronous stream_socket_client() are
+    left in non-blocking mode on Windows). (vibbow)
+
 22 Oct 2026, PHP 8.4.27
 
 - BCMath:
