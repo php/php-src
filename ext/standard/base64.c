@@ -245,9 +245,82 @@ static zend_always_inline size_t neon_base64_decode(const unsigned char *in, siz
 }
 #endif /* defined(__aarch64__) || defined(_M_ARM64) */
 
+/* Decodes whole groups of four alphabet characters and stops before a group that holds
+ * anything else; for a caller at a group boundary with no padding seen yet */
+static zend_always_inline void php_base64_decode_quads(const unsigned char **in, size_t *inl, unsigned char *out, size_t *outl)
+{
+	const unsigned char *c = *in;
+	unsigned char *o = out + *outl;
+	size_t n = *inl;
+
+	while (n >= 4) {
+		int a = base64_reverse_table[c[0]], b = base64_reverse_table[c[1]];
+		int d = base64_reverse_table[c[2]], e = base64_reverse_table[c[3]];
+		if ((a | b | d | e) < 0) {
+			break;
+		}
+		uint32_t v = ((uint32_t) a << 18) | ((uint32_t) b << 12) | ((uint32_t) d << 6) | (uint32_t) e;
+		o[0] = v >> 16;
+		o[1] = v >> 8;
+		o[2] = v;
+		o += 3;
+		c += 4;
+		n -= 4;
+	}
+	*outl = o - out;
+	*in = c;
+	*inl = n;
+}
+
+/* Decodes one character. Only i % 4 is read — the position in the current four-character group;
+ * whole groups decoded by php_base64_decode_quads() keep it aligned. padding counts the '=' seen.
+ * Returns false when strict mode rejects the character. */
+static zend_always_inline bool php_base64_decode_char(int ch, unsigned char *out, size_t *i, size_t *outl, size_t *padding, bool strict)
+{
+	if (ch == base64_pad) {
+		(*padding)++;
+		return true;
+	}
+
+	ch = base64_reverse_table[ch];
+	if (!strict) {
+		/* skip unknown characters and whitespace */
+		if (ch < 0) {
+			return true;
+		}
+	} else {
+		/* skip whitespace */
+		if (ch == -1) {
+			return true;
+		}
+		/* fail on bad characters or if any data follows padding */
+		if (ch == -2 || *padding) {
+			return false;
+		}
+	}
+
+	switch (*i % 4) {
+		case 0:
+			out[*outl] = ch << 2;
+			break;
+		case 1:
+			out[(*outl)++] |= ch >> 4;
+			out[*outl] = (ch & 0x0f) << 4;
+			break;
+		case 2:
+			out[(*outl)++] |= ch >>2;
+			out[*outl] = (ch & 0x03) << 6;
+			break;
+		case 3:
+			out[(*outl)++] |= ch;
+			break;
+	}
+	(*i)++;
+	return true;
+}
+
 static zend_always_inline int php_base64_decode_impl(const unsigned char *in, size_t inl, unsigned char *out, size_t *outl, bool strict) /* {{{ */
 {
-	int ch;
 	size_t i = 0, padding = 0, j = *outl;
 
 #if defined(__aarch64__) || defined(_M_ARM64)
@@ -260,48 +333,19 @@ static zend_always_inline int php_base64_decode_impl(const unsigned char *in, si
 	}
 #endif
 
-	/* run through the whole string, converting as we go */
-	while (inl-- > 0) {
-		ch = *in++;
-		if (ch == base64_pad) {
-			padding++;
-			continue;
-		}
-
-		ch = base64_reverse_table[ch];
-		if (!strict) {
-			/* skip unknown characters and whitespace */
-			if (ch < 0) {
-				continue;
-			}
-		} else {
-			/* skip whitespace */
-			if (ch == -1) {
-				continue;
-			}
-			/* fail on bad characters or if any data follows padding */
-			if (ch == -2 || padding) {
-				goto fail;
+	/* whole groups of four while the input is clean; one character at a time around
+	 * whitespace, padding and invalid bytes, and for the last partial group */
+	while (inl > 0) {
+		if (i % 4 == 0 && !padding) {
+			php_base64_decode_quads(&in, &inl, out, &j);
+			if (!inl) {
+				break;
 			}
 		}
-
-		switch (i % 4) {
-			case 0:
-				out[j] = ch << 2;
-				break;
-			case 1:
-				out[j++] |= ch >> 4;
-				out[j] = (ch & 0x0f) << 4;
-				break;
-			case 2:
-				out[j++] |= ch >>2;
-				out[j] = (ch & 0x03) << 6;
-				break;
-			case 3:
-				out[j++] |= ch;
-				break;
+		if (!php_base64_decode_char(*in++, out, &i, &j, &padding, strict)) {
+			goto fail;
 		}
-		i++;
+		inl--;
 	}
 
 	/* fail if the input is truncated (only one char in last group) */
