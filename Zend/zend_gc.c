@@ -302,9 +302,8 @@ typedef struct _zend_gc_globals {
 	uint32_t dtor_pending;
 	/* Result of the last coroutine-run collection, returned to the waiters. */
 	int gc_collected;
-	/* The last gc_collect_cycles() call only started the GC coroutine: its 0
-	 * counts nothing, so the threshold heuristic must not read it. */
-	bool run_deferred;
+	/* A full root buffer asked the GC coroutine for a collection that has not finished yet. */
+	bool adjust_threshold;
 
 #if GC_BENCH
 	uint32_t root_buf_length;
@@ -552,7 +551,7 @@ static void gc_globals_ctor_ex(zend_gc_globals *gc_globals)
 	gc_globals->microtask = NULL;
 	gc_globals->dtor_pending = 0;
 	gc_globals->gc_collected = 0;
-	gc_globals->run_deferred = false;
+	gc_globals->adjust_threshold = false;
 
 #if GC_BENCH
 	gc_globals->root_buf_length = 0;
@@ -618,7 +617,7 @@ void gc_reset(void)
 	GC_G(dtor_coroutine) = NULL;
 	GC_G(microtask) = NULL;
 	GC_G(dtor_pending) = 0;
-	GC_G(run_deferred) = false;
+	GC_G(adjust_threshold) = false;
 
 	GC_G(activated_at) = zend_hrtime();
 }
@@ -682,6 +681,12 @@ static void gc_grow_root_buffer(void)
 	GC_G(buf_size) = new_size;
 }
 
+/* A collection requested by the current coroutine goes to the GC coroutine instead of running inline. */
+static zend_always_inline bool gc_collect_is_deferred(void)
+{
+	return ZEND_ASYNC_IS_ACTIVE && ZEND_ASYNC_CURRENT_COROUTINE != GC_G(gc_coroutine);
+}
+
 /* Adjust the GC activation threshold given the number of nodes collected by the last run */
 static void gc_adjust_threshold(int count)
 {
@@ -724,10 +729,20 @@ static zend_never_inline void ZEND_FASTCALL gc_possible_root_when_full(zend_refc
 
 	if (GC_G(gc_enabled) && !GC_G(gc_active)) {
 		GC_ADDREF(ref);
-		GC_G(run_deferred) = false;
-		const int count = gc_collect_cycles();
-		if (!GC_G(run_deferred)) {
-			gc_adjust_threshold(count);
+		if (gc_collect_is_deferred()) {
+			/* Every coroutine that finds the buffer full waits for the same run and
+			 * would add a step each: the GC coroutine adjusts once, after the run.
+			 * Set before the call, as the run reads it before the await returns. */
+			GC_G(adjust_threshold) = true;
+			const int count = gc_collect_cycles();
+
+			/* No GC coroutine took the step: it could not be created. */
+			if (UNEXPECTED(GC_G(adjust_threshold) && GC_G(gc_coroutine) == NULL)) {
+				GC_G(adjust_threshold) = false;
+				gc_adjust_threshold(count);
+			}
+		} else {
+			gc_adjust_threshold(gc_collect_cycles());
 		}
 
 		if (UNEXPECTED(GC_DELREF(ref) == 0)) {
@@ -2195,14 +2210,29 @@ static zend_never_inline bool gc_call_destructors_in_coroutine(void)
 static void zend_gc_coroutine(void)
 {
 	GC_TRACE("GC coroutine started");
+
+	const uint32_t runs = GC_G(gc_runs);
 	GC_G(gc_collected) = zend_gc_collect_cycles();
+
+	if (GC_G(adjust_threshold)) {
+		GC_G(adjust_threshold) = false;
+
+		/* A run that found the buffer already drained examined nothing, and
+		 * its 0 measures nothing either. */
+		if (EXPECTED(GC_G(gc_runs) != runs)) {
+			gc_adjust_threshold(GC_G(gc_collected));
+		}
+	}
+
 	GC_G(gc_coroutine) = NULL;
 	GC_TRACE("GC coroutine finished");
 }
 
-/* Clears GC_G(gc_coroutine) however the run ends. A bailout skips the tail of
- * zend_gc_coroutine(), and the next gc_collect_cycles() of the request (a
- * shutdown function's) would await the stale coroutine instead of collecting. */
+/* Clears GC_G(gc_coroutine) and the owed threshold step however the run ends.
+ * A bailout skips the tail of zend_gc_coroutine(): the next gc_collect_cycles()
+ * of the request (a shutdown function's) would await the stale coroutine
+ * instead of collecting, and its run would take the step for a buffer it did
+ * not see. */
 static bool gc_coroutine_finish_handler(
 		zend_coroutine_t *coroutine, zend_coroutine_t *waiter, void *data, const bool is_bailout)
 {
@@ -2211,6 +2241,7 @@ static bool gc_coroutine_finish_handler(
 
 	if (GC_G(gc_coroutine) == coroutine) {
 		GC_G(gc_coroutine) = NULL;
+		GC_G(adjust_threshold) = false;
 	}
 
 	/* No iterator resumes after a bailout: drop the hand-off they armed. */
@@ -2247,7 +2278,7 @@ static zend_always_inline zend_coroutine_t *new_gc_coroutine(void)
 /* Perform a garbage collection run. The default implementation of gc_collect_cycles. */
 ZEND_API int zend_gc_collect_cycles(void)
 {
-	if (UNEXPECTED(ZEND_ASYNC_IS_ACTIVE && ZEND_ASYNC_CURRENT_COROUTINE != GC_G(gc_coroutine))) {
+	if (gc_collect_is_deferred()) {
 		/* Called from inside the active run (a destructor): the run is
 		 * waiting for us, waiting for it back would deadlock. Reentrant
 		 * calls get 0, as ever. */
@@ -2263,7 +2294,6 @@ ZEND_API int zend_gc_collect_cycles(void)
 				new_gc_coroutine();
 			}
 
-			GC_G(run_deferred) = true;
 			return 0;
 		}
 
@@ -2291,7 +2321,6 @@ ZEND_API int zend_gc_collect_cycles(void)
 		GC_G(gc_active) = was_active;
 
 		if (UNEXPECTED(!awaited)) {
-			GC_G(run_deferred) = true;
 			return 0;
 		}
 
