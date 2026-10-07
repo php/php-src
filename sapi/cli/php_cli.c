@@ -1182,29 +1182,6 @@ err:
 }
 /* }}} */
 
-#ifdef PHP_WIN32
-static char **php_cli_utf8_command_line(int *argc)
-{
-	if (!__wargv && _configure_wide_argv(_crt_argv_unexpanded_arguments)) {
-		return NULL;
-	}
-	*argc = __argc;
-	char **args = calloc((size_t) *argc + 1, sizeof(char *));
-
-	if (args) {
-		for (int i = 0; i < *argc; i++) {
-			args[i] = php_win32_cp_w_to_utf8(__wargv[i]);
-			if (!args[i]) {
-				PHP_WIN32_CP_FREE_ARRAY(args, *argc);
-				args = NULL;
-				break;
-			}
-		}
-	}
-	return args;
-}
-#endif
-
 /* {{{ do_php_cli */
 PHP_CLI_API int do_php_cli(int argc, char *argv[])
 {
@@ -1224,7 +1201,10 @@ PHP_CLI_API int do_php_cli(int argc, char *argv[])
 	char **argv_save;
 
 	if (argv == __argv) {
-		native_argv = php_cli_utf8_command_line(&argc);
+		if (!__wargv && _configure_wide_argv(_crt_argv_unexpanded_arguments)) {
+			return 1;
+		}
+		PHP_WIN32_CP_CONVERT_ARRAY(__wargv, __argc, native_argv, argc, php_win32_cp_w_to_utf8)
 		if (!native_argv) {
 			return 1;
 		}
@@ -1381,24 +1361,13 @@ exit_loop:
 	php_win32_cp_cli_setup();
 	orig_cp = (php_win32_cp_get_orig())->id;
 	if (!php_win32_cp_use_unicode()) {
-		converted_argv = calloc((size_t) argc + 1, sizeof(char *));
+		PHP_WIN32_CP_CONVERT_ARRAY(argv_save, argc, converted_argv, argc, php_win32_cp_utf8_to_any)
 		if (!converted_argv) {
+			fprintf(stderr, "Could not convert command line arguments.\n");
 			exit_status = 1;
 			goto out;
 		}
 		argv = converted_argv;
-		for (int i = 0; i < argc; i++) {
-			wchar_t *wide = php_win32_cp_utf8_to_w(argv_save[i]);
-			if (wide) {
-				argv[i] = php_win32_cp_w_to_any(wide);
-				free(wide);
-			}
-			if (!argv[i]) {
-				fprintf(stderr, "Could not convert command line argument %d.\n", i);
-				exit_status = 1;
-				goto out;
-			}
-		}
 	}
 
 	SetConsoleCtrlHandler(php_cli_win32_ctrl_handler, TRUE);
