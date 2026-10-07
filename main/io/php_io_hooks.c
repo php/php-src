@@ -1520,18 +1520,14 @@ PHPAPI php_socket_t php_io_accept(php_stream *stream, php_socket_t fd, struct so
 	return php_io_accept_ex(stream, NULL, fd, addr, addrlen, dl);
 }
 
-/* A non-blocking connect that is under way: EINPROGRESS, EAGAIN on some
- * systems, WSAEWOULDBLOCK on Windows (where EINPROGRESS is defined as it),
- * EALREADY for one started before */
+/* Not EAGAIN: Linux returns it for a connect that did not start (AF_UNIX, full backlog).
+ * On Windows EINPROGRESS is WSAEWOULDBLOCK. */
 #ifdef PHP_WIN32
-# define PHP_IO_IS_EALREADY(err) ((err) == EALREADY || (err) == WSAEALREADY)
+# define PHP_IO_CONNECT_PENDING(err) ((err) == EINPROGRESS || (err) == WSAEALREADY)
 #else
-# define PHP_IO_IS_EALREADY(err) ((err) == EALREADY)
+# define PHP_IO_CONNECT_PENDING(err) ((err) == EINPROGRESS || (err) == EALREADY)
 #endif
-#define PHP_IO_CONNECT_PENDING(err) ((err) == EINPROGRESS || (err) == EAGAIN || (err) == EWOULDBLOCK || PHP_IO_IS_EALREADY(err))
 
-/* The connect is started once; the wait completes as Ready and the result
- * is read from SO_ERROR, or as Done when the provider connected itself */
 PHPAPI int php_io_connect_ex(php_stream *stream, zend_object *handle, php_socket_t fd,
 		const struct sockaddr *addr, socklen_t addrlen, php_deadline *dl)
 {
@@ -1539,7 +1535,8 @@ PHPAPI int php_io_connect_ex(php_stream *stream, zend_object *handle, php_socket
 	php_io_op op;
 	php_io_op_result result;
 	int ret = 0;
-	bool direct = (php_io_hook_flags() & PHP_IO_HOOKS_F_DIRECT_DATA) != 0;
+	/* A Connect op with a zero deadline is cancelled at once and may leave its connect under way */
+	bool direct = (php_io_hook_flags() & PHP_IO_HOOKS_F_DIRECT_DATA) != 0 && dl->hrtime != 0;
 	bool started = false; /* our own connect() is in progress */
 
 	if (php_io_frame_begin(&f, stream) == FAILURE) {
@@ -1560,55 +1557,40 @@ PHPAPI int php_io_connect_ex(php_stream *stream, zend_object *handle, php_socket
 
 	for (;;) {
 		php_io_op_connect(&op, handle, fd, addr, addrlen, *dl);
-		op.stream = stream;
 		if (started) {
-			op.flags |= PHP_IO_OP_F_AFTER_DRAIN;
+			/* Without AFTER_DRAIN: a queue would answer it from the registration's record,
+			 * which may keep the hangup of an earlier failed connect */
+			op.flags |= PHP_IO_OP_F_CONNECT_STARTED;
 		}
+		op.stream = stream;
 		if (php_io_op_register_wait(&op, stream, PHP_POLL_WRITE) == FAILURE
-				|| php_io_run(&op, &result) == FAILURE) {
+				|| php_io_run(&op, &result) == FAILURE
+				|| php_io_run_cancelled(stream, &op, &result)) {
 			php_io_set_errno(ECANCELED);
 			ret = -1;
 			break;
 		}
-		if ((result.status == PHP_IO_READY && !started)
-				|| (result.status == PHP_IO_UNSUPPORTED && direct)) {
-			/* The provider only waited, or does not connect: start it
-			 * ourselves and wait for writability */
-			direct = false;
-			if (connect(fd, addr, addrlen) == 0) {
-				break;
-			}
-			if (!PHP_IO_CONNECT_PENDING(php_socket_errno())) {
-				ret = -1;
-				break;
-			}
-			started = true;
-			continue;
-		}
-		if (started && result.status == PHP_IO_DONE && result.res < 0 && PHP_IO_IS_EALREADY(result.error)) {
-			/* A provider that performs the op found our connect still under
-			 * way: wait for its outcome like after a readiness report */
+		if (started && result.status == PHP_IO_DONE && result.error == EALREADY) {
+			/* A provider that ignores the flag connected again and found ours under way */
 			php_io_op_poll(&op, handle, fd, PHP_POLL_WRITE, *dl);
-			op.flags |= PHP_IO_OP_F_AFTER_DRAIN;
 			op.stream = stream;
 			if (php_io_op_register_wait(&op, stream, PHP_POLL_WRITE) == FAILURE
-					|| php_io_run(&op, &result) == FAILURE) {
+					|| php_io_run(&op, &result) == FAILURE
+					|| php_io_run_cancelled(stream, &op, &result)) {
 				php_io_set_errno(ECANCELED);
 				ret = -1;
 				break;
 			}
-			int n = php_io_poll_result_to_revents(&result, PHP_POLL_WRITE);
-			if (n <= 0) {
+			if (php_io_poll_result_to_revents(&result, PHP_POLL_WRITE) <= 0) {
 				ret = -1;
 				break;
 			}
 			result.status = PHP_IO_READY;
 		}
-		/* A provider that performs the op connects a socket whose connect
-		 * we started already: EISCONN then means it completed meanwhile
-		 * and the outcome is in SO_ERROR, as after a readiness report */
-		if (result.status == PHP_IO_READY
-				|| (started && result.status == PHP_IO_DONE && result.res < 0 && result.error == EISCONN)) {
+		/* Done without an error or with EISCONN: the connect finished (a provider that connected
+		 * again, or answered as a Poll); SO_ERROR has its outcome */
+		if (started && (result.status == PHP_IO_READY
+				|| (result.status == PHP_IO_DONE && (result.error == 0 || result.error == EISCONN)))) {
 			int error = 0;
 			socklen_t len = sizeof(error);
 			if (getsockopt(fd, SOL_SOCKET, SO_ERROR, (char *) &error, &len) != 0) {
@@ -1618,6 +1600,23 @@ PHPAPI int php_io_connect_ex(php_stream *stream, zend_object *handle, php_socket
 				ret = -1;
 			}
 			break;
+		}
+		if (!started && result.status == PHP_IO_DONE && result.error == EALREADY) {
+			/* Left under way by an earlier call's Connect op, cancelled at its deadline */
+			started = true;
+			continue;
+		}
+		if (!started && (result.status == PHP_IO_READY || result.status == PHP_IO_UNSUPPORTED)) {
+			/* The provider only waited, or does not connect */
+			if (connect(fd, addr, addrlen) == 0) {
+				break;
+			}
+			if (!PHP_IO_CONNECT_PENDING(php_socket_errno())) {
+				ret = -1;
+				break;
+			}
+			started = true;
+			continue;
 		}
 		ssize_t r;
 		if (php_io_data_result(&result, &r)) {

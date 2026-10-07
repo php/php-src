@@ -89,6 +89,7 @@ struct _php_io_ring_req {
 	bool group_done; /* member: the group folded already */
 	bool multishot; /* an Edge record's multishot poll, without an op */
 	bool sentinel; /* the entry that fires the heap's head for the notification descriptor */
+	bool connect_wait; /* a Connect the core started: a poll for its outcome */
 	php_io_ring_reg *reg; /* multishot: its record, NULL once removed */
 	php_io_ring_reg *waiting; /* a wait parked on an Edge record, without an entry */
 	uint32_t w_mask; /* IOR_POLL_* the parked wait wants */
@@ -991,12 +992,17 @@ static zend_result php_io_ring_submit_one(php_io_ring *ring, php_io_ring_req *re
 				return FAILURE;
 			}
 			break;
+		case PHP_IO_OP_CONNECT:
+			if ((req->op->flags & PHP_IO_OP_F_CONNECT_STARTED) && !(ring->features & IOR_FEAT_POLL_ADD)) {
+				errno = ENOTSUP;
+				return FAILURE;
+			}
+			break;
 		case PHP_IO_OP_READ:
 		case PHP_IO_OP_WRITE:
 		case PHP_IO_OP_RECV:
 		case PHP_IO_OP_SEND:
 		case PHP_IO_OP_ACCEPT:
-		case PHP_IO_OP_CONNECT:
 		case PHP_IO_OP_GETADDRINFO:
 		case PHP_IO_OP_GETNAMEINFO:
 		case PHP_IO_OP_FSYNC:
@@ -1042,6 +1048,11 @@ static zend_result php_io_ring_submit_one(php_io_ring *ring, php_io_ring_req *re
 			uses_caller = true;
 			break;
 		case PHP_IO_OP_CONNECT:
+			if (op->flags & PHP_IO_OP_F_CONNECT_STARTED) {
+				ior_prep_poll_add(ctx, sqe, (ior_fd_t) op->fd, IOR_POLL_OUT);
+				req->connect_wait = true;
+				break;
+			}
 			ior_prep_connect(ctx, sqe, (ior_fd_t) op->fd, req->u.sock.addr, req->u.sock.addrlen);
 			uses_caller = true;
 			break;
@@ -1690,8 +1701,8 @@ static void php_io_ring_result_from_cqe(php_io_ring_req *req, int32_t res)
 	r->res = res;
 
 	if (res >= 0) {
-		r->status = PHP_IO_DONE;
-		if (req->type == PHP_IO_OP_POLL) {
+		r->status = req->connect_wait ? PHP_IO_READY : PHP_IO_DONE;
+		if (req->type == PHP_IO_OP_POLL || req->connect_wait) {
 			r->res = php_io_ring_poll_mask_from_ior((uint32_t) res);
 		} else if (dns && res != 0) {
 			/* EAI_* codes are the work result as they are */

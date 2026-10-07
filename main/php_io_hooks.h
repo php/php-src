@@ -48,6 +48,10 @@ typedef enum {
 /* POLL: the caller checked readiness at arm time (a zero-timeout poll() found none), so a queue
  * need not check a registered pair again; never answered from recorded readiness */
 #define PHP_IO_OP_F_CHECKED 0x04
+/* CONNECT: the core's connect() is under way, and a second one fails (IOCP's ConnectEx() with
+ * WSAEINVAL); the provider waits for it to finish and completes Ready, leaving SO_ERROR to the
+ * core, or Done with the connect's errno */
+#define PHP_IO_OP_F_CONNECT_STARTED 0x08
 
 typedef enum {
 	PHP_IO_DONE,
