@@ -1325,9 +1325,6 @@ PHP_CLI_API int do_php_cli(int argc, char *argv[])
 exit_loop:
 
 	sapi_module_ptr->ini_defaults = sapi_cli_ini_defaults;
-#ifdef PHP_WIN32
-	sapi_module_ptr->ini_entries_utf8 = true;
-#endif
 	sapi_module_ptr->php_ini_path_override = ini_path_override;
 	sapi_module_ptr->phpinfo_as_text = 1;
 	sapi_module_ptr->php_ini_ignore_cwd = 1;

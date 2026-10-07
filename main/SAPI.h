@@ -288,7 +288,6 @@ struct _sapi_module_struct {
 	unsigned int (*input_filter_init)(void);
 
 	int (*pre_request_init)(void); /* called before activate and before the post data read - used for .user.ini */
-	bool ini_entries_utf8; /* Windows: CLI -d values were supplied as UTF-8 */
 };
 
 struct _sapi_post_entry {
@@ -340,7 +339,6 @@ END_EXTERN_C()
 	NULL, /* ini_entries;            */ \
 	NULL, /* additional_functions    */ \
 	NULL, /* input_filter_init       */ \
-	NULL, /* pre_request_init        */ \
-	false /* ini_entries_utf8        */
+	NULL  /* pre_request_init        */
 
 #endif /* SAPI_H */

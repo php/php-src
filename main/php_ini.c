@@ -26,6 +26,7 @@
 #include "win32/php_registry.h"
 #include "win32/winutil.h"
 #include "win32/codepage.h"
+#include "win32/console.h"
 #endif
 
 #if defined(HAVE_SCANDIR) && defined(HAVE_ALPHASORT) && defined(HAVE_DIRENT_H)
@@ -918,7 +919,7 @@ zend_result php_init_config(void)
 		RESET_ACTIVE_INI_HASH();
 
 #ifdef PHP_WIN32
-		if (sapi_module.ini_entries_utf8) {
+		if (php_win32_console_is_cli_sapi()) {
 			return php_ini_parse_utf8(sapi_module.ini_entries);
 		}
 #endif
