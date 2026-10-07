@@ -326,6 +326,10 @@ PHP 8.6 UPGRADE NOTES
     system.
 
 - URI:
+  . __construct(), parse(), and with*() of Uri\WhatWg\Url, and
+    Uri\WhatWg\UrlBuilder::build() now report validation errors in the order
+    in which they are detected. This reverses the order of multiple errors
+    compared to PHP 8.5.
   . Uri\WhatWg\Url::__construct() now sets $softErrors to an empty array when
     URL processing throws an exception, instead of preserving its value.
     URL validation errors remain available in the

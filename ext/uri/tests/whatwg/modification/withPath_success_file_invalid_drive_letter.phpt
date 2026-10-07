@@ -14,8 +14,8 @@ var_dump($url->withPath("/zz")->getPath());
 string(5) "/c:/x"
 array(2) {
   [0]=>
-  string(14) "InvalidUrlUnit"
-  [1]=>
   string(29) "FileInvalidWindowsDriveLetter"
+  [1]=>
+  string(14) "InvalidUrlUnit"
 }
 string(3) "/zz"
