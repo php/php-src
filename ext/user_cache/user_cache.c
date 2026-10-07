@@ -74,6 +74,7 @@ static ZEND_INI_MH(OnUpdateUserCacheEvictionPolicy);
 static ZEND_INI_MH(OnUpdateUserCacheLockfilePath);
 static ZEND_INI_MH(OnUpdateUserCachePreferredMemoryModel);
 static ZEND_INI_MH(OnUpdateUserCacheEntriesHint);
+static ZEND_INI_MH(OnUpdateUserCacheLockLeaseMax);
 static PHP_MINIT_FUNCTION(user_cache);
 static PHP_MSHUTDOWN_FUNCTION(user_cache);
 static PHP_RINIT_FUNCTION(user_cache);
@@ -81,7 +82,7 @@ static PHP_RSHUTDOWN_FUNCTION(user_cache);
 static PHP_MINFO_FUNCTION(user_cache);
 
 #ifdef ZTS
-static int user_cache_globals_id;
+int user_cache_globals_id;
 #endif
 static HashTable ucache_safe_direct_handler_table;
 static bool ucache_safe_direct_handlers_initialized = false;
@@ -105,6 +106,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("user_cache.eviction_policy",        "lru",  PHP_INI_SYSTEM, OnUpdateUserCacheEvictionPolicy,       eviction_policy, ucache_globals, user_cache_globals)
 	STD_PHP_INI_ENTRY("user_cache.lockfile_path",          "/tmp", PHP_INI_SYSTEM, OnUpdateUserCacheLockfilePath,         lockfile_path,   ucache_globals, user_cache_globals)
 	STD_PHP_INI_ENTRY("user_cache.preferred_memory_model", "",     PHP_INI_SYSTEM, OnUpdateUserCachePreferredMemoryModel, mem_model,    ucache_globals, user_cache_globals)
+	STD_PHP_INI_ENTRY("user_cache.lock_lease_max",         "3600", PHP_INI_SYSTEM, OnUpdateUserCacheLockLeaseMax,         lock_lease_max,  ucache_globals, user_cache_globals)
 PHP_INI_END()
 
 #ifndef ZTS
@@ -245,6 +247,16 @@ static zend_always_inline bool ucache_validate_root_val(zval *val)
 	}
 
 	return true;
+}
+
+static zend_always_inline zend_long ucache_clamp_lock_lease(zend_long lease)
+{
+	zend_long lease_max = UC_G(lock_lease_max);
+
+	return lease_max > 0 && lease > lease_max
+		? lease_max
+		: lease
+	;
 }
 
 #ifndef ZEND_WIN32
@@ -1449,7 +1461,7 @@ static bool ucache_lock_api(
 		return false;
 	}
 
-	return ucache_try_acquire_entry_lock(key, lease);
+	return ucache_try_acquire_entry_lock(key, ucache_clamp_lock_lease(lease));
 }
 
 static bool ucache_unlock_api(zend_string *key)
@@ -3138,8 +3150,34 @@ static ZEND_INI_MH(OnUpdateUserCacheEntriesHint)
 	return SUCCESS;
 }
 
+static ZEND_INI_MH(OnUpdateUserCacheLockLeaseMax)
+{
+	zend_long *p, lease_max;
+
+	p = (zend_long *) ZEND_INI_GET_ADDR();
+	lease_max = ucache_ini_parse_quantity(entry, new_value, stage);
+
+	if (lease_max < 0) {
+		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
+			ucache_warn("user_cache.lock_lease_max must be greater than or equal to 0, " ZEND_LONG_FMT " given", lease_max);
+		}
+
+		return FAILURE;
+	}
+
+	*p = lease_max;
+
+	return SUCCESS;
+}
+
 static PHP_MINIT_FUNCTION(user_cache)
 {
+#ifdef ZTS
+	if (!ucache_globals_allocated()) {
+		php_ucache_globals_startup();
+	}
+#endif
+
 	REGISTER_INI_ENTRIES();
 
 	ucache_minit();

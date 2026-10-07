@@ -192,9 +192,17 @@ function graph_gained_wakeup_leaks_before_prototype(): void
     if ($pid === 0) {
         eval('class LeakHolder { public $ao; public $p = 1; } class LeakingWakeup { public $sib; }');
         $holder = new LeakHolder();
-        $holder->ao = @new ArrayObject(new stdClass());
+        $holder->ao = new ArrayObject([new stdClass()]);
         $leaking = new LeakingWakeup();
         $leaking->sib = $holder;
+        $objectBacked = new LeakHolder();
+        $objectBacked->ao = @new ArrayObject(new stdClass());
+        try {
+            $cache->store('object-backed', ['holder' => $objectBacked]);
+            exit(2);
+        } catch (TypeError $e) {
+            echo $e->getMessage(), "\n";
+        }
         exit($cache->store('k', ['holder' => $holder, 'leaking' => $leaking]) ? 0 : 1);
     }
     pcntl_waitpid($pid, $status);
@@ -204,7 +212,11 @@ function graph_gained_wakeup_leaks_before_prototype(): void
     eval('class LeakHolder { public $ao; public $p = 1; } class LeakingWakeup { public $sib; public function __wakeup(): void { $GLOBALS["leaked_holder"] = $this->sib; $GLOBALS["wakeups"]++; } }');
     $GLOBALS['leaked_holder'] = null;
     $GLOBALS['wakeups'] = 0;
-    set_error_handler(function (): bool {
+    $GLOBALS['deprecations'] = 0;
+    set_error_handler(function (int $errno): bool {
+        if ($errno === E_DEPRECATED) {
+            $GLOBALS['deprecations']++;
+        }
         if ($GLOBALS['leaked_holder'] instanceof LeakHolder) {
             $GLOBALS['leaked_holder']->ao = null;
         }
@@ -216,10 +228,14 @@ function graph_gained_wakeup_leaks_before_prototype(): void
         $fetched = $cache->fetch('k');
     }
 
+    /* An ArrayObject backed by an object was refused at store time, so no deprecation runs user code mid-fetch. */
+    $unstored = $cache->fetch('object-backed', 'unstored');
+
     restore_error_handler();
 
     echo 'wakeups: ', $GLOBALS['wakeups'], "\n";
     var_dump($fetched['holder'] instanceof LeakHolder, $fetched['leaking']->sib === $fetched['holder']);
+    var_dump($unstored, $GLOBALS['deprecations']);
 
     $GLOBALS['leaked_holder'] = null;
 }
@@ -261,7 +277,10 @@ sleep: same as unserialize() ["string","integer"]
 string(5) "seven"
 
 graph gained wakeup leaks before prototype:
+The state of the ArrayObject object cannot be stored in the user cache
 int(0)
 wakeups: 3
 bool(true)
 bool(true)
+string(8) "unstored"
+int(0)

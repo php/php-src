@@ -27,8 +27,8 @@ function prototype_fork_pins(): void
         die("fork failed\n");
     }
     if ($pid === 0) {
-        /* The cold decode first refreshes the graph-reference owner PID. Each
-         * inherited prototype must still acquire its own independent pin. */
+        /* pcntl_fork() hands the parent's pins to the child, so the inherited
+         * prototypes are already held and only the cold key adds a pin. */
         foreach (['cold', 'one', 'two'] as $key) {
             $fetched = $cache->fetch($key);
             echo $key, ' pins: ', UserCache\Cache::getStatus()->getGraphPinnedReferences(), "\n";
@@ -164,9 +164,9 @@ if ($pid > 0) {
 --EXPECT--
 prototype fork pins:
 parent pins: 2
-cold pins: 3
+cold pins: 5
 bool(true)
-one pins: 4
+one pins: 5
 bool(true)
 two pins: 5
 bool(true)

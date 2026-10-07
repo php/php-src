@@ -1326,7 +1326,7 @@ static bool ucache_win32_create_salt(const wchar_t *dir, const wchar_t *path, SE
 		return false;
 	}
 
-	file = CreateFileW(tmp_path, GENERIC_WRITE, 0, attributes, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	file = CreateFileW(tmp_path, GENERIC_WRITE, 0, attributes, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (file == INVALID_HANDLE_VALUE) {
 		return false;
 	}

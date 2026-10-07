@@ -116,16 +116,22 @@ static zend_always_inline void ucache_pool_idx_unlink_locked(
 		uint32_t slot)
 {
 	ucache_pool_links *links = ucache_pool_links_ptr(hdr), *link = &links[slot];
-	uint32_t bucket = ucache_entry_pool_bucket(entry);
+	uint32_t bucket = ucache_entry_pool_bucket(entry), prev = link->prev, next = link->next;
 
-	if (link->prev != 0) {
-		links[ucache_pool_link_ref_slot(link->prev)].next = link->next;
+	ZEND_ASSERT(ucache_pool_link_ref_fits(hdr, prev) && ucache_pool_link_ref_fits(hdr, next));
+
+	if (!ucache_pool_link_ref_fits(hdr, prev) || !ucache_pool_link_ref_fits(hdr, next)) {
+		hdr->pool_bucket_heads[bucket] = 0;
 	} else {
-		hdr->pool_bucket_heads[bucket] = link->next;
-	}
+		if (prev != 0) {
+			links[ucache_pool_link_ref_slot(prev)].next = next;
+		} else {
+			hdr->pool_bucket_heads[bucket] = next;
+		}
 
-	if (link->next != 0) {
-		links[ucache_pool_link_ref_slot(link->next)].prev = link->prev;
+		if (next != 0) {
+			links[ucache_pool_link_ref_slot(next)].prev = prev;
+		}
 	}
 
 	link->prev = 0;

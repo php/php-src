@@ -220,6 +220,31 @@ static zend_always_inline uint64_t ucache_view_committed_bytes(const ucache_stor
 #endif
 }
 
+static zend_always_inline bool ucache_hdr_committed_end_in_seg(
+		const ucache_storage *storage,
+		const ucache_hdr *hdr)
+{
+#ifdef ZEND_WIN32
+	return hdr->committed_end <= storage->size;
+#else
+	(void) storage;
+	(void) hdr;
+
+	return true;
+#endif
+}
+
+static zend_always_inline bool ucache_hdr_data_bounds_match(
+		const ucache_storage *storage,
+		const ucache_hdr *hdr)
+{
+	return (size_t) hdr->data_offset <= storage->size &&
+		hdr->data_size == (uint64_t) (storage->size - hdr->data_offset) &&
+		hdr->next_free <= hdr->data_size &&
+		ucache_hdr_committed_end_in_seg(storage, hdr)
+	;
+}
+
 #ifdef UCACHE_HAVE_BOUNDARY_SHM
 static zend_always_inline ucache_boundary_seg *ucache_boundary_seg_of(const ucache_storage *storage)
 {

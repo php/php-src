@@ -356,7 +356,7 @@ void ucache_collect_pool_status(
 	ucache_pool_status_snapshot *snapshot;
 	zval stale_keys;
 	uint64_t time_base, bucket_epoch;
-	uint32_t bucket, idx;
+	uint32_t bucket, idx, walked = 0;
 	size_t used_size = 0;
 
 	*entry_count = 0;
@@ -411,7 +411,13 @@ void ucache_collect_pool_status(
 		array_init(entry_keys);
 
 		for (idx = hdr->pool_bucket_heads[bucket]; idx != 0; idx = links[idx - 1].next) {
-			ZEND_ASSERT(idx <= hdr->capacity);
+			ZEND_ASSERT(ucache_pool_link_ref_fits(hdr, idx) && walked < hdr->capacity);
+
+			if (!ucache_pool_link_ref_fits(hdr, idx) || walked == hdr->capacity) {
+				break;
+			}
+
+			walked++;
 			entry = &entries[idx - 1];
 			if (ucache_entry_is_used(entry) &&
 				ucache_bytes_in_bounds(hdr, ucache_entry_key_pos(entry), entry->key_len) &&

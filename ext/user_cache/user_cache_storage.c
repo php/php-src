@@ -234,6 +234,23 @@ static void ucache_hdr_layout_memo(
 	*data_offset = storage->data_offset_memo;
 }
 
+static bool ucache_hdr_layout_matches_memo_locked(
+		const ucache_storage *storage,
+		const ucache_hdr *hdr,
+		uint32_t capacity,
+		uint32_t data_offset)
+{
+	return hdr->capacity == capacity &&
+		hdr->data_offset == data_offset &&
+		hdr->entry_lock_capacity == storage->entry_lock_capacity_memo &&
+		hdr->entry_lock_offset == storage->entry_lock_offset_memo &&
+		hdr->free_bins_offset == storage->free_bins_offset_memo &&
+		hdr->free_bin_count == storage->free_bin_count_memo &&
+		hdr->graph_pin_slot_count == ucache_ctx_graph_pin_slot_count(ucache_active_ctx()) &&
+		ucache_hdr_data_bounds_match(storage, hdr)
+	;
+}
+
 static bool ucache_commit_seg_prefix(ucache_startup_warnings *warnings)
 {
 #ifdef ZEND_WIN32
@@ -1082,7 +1099,7 @@ void ucache_release_thread_reader_claims(ucache_globals *globals)
 
 ZEND_API bool php_ucache_is_enabled_by_ini(void)
 {
-	return !ucache_is_disabled_for_sapi() && UC_G(shm_size) != 0;
+	return ucache_globals_allocated() && !ucache_is_disabled_for_sapi() && UC_G(shm_size) != 0;
 }
 
 void ucache_reset_runtime(void)
@@ -1133,14 +1150,7 @@ bool ucache_hdr_init_locked(void)
 	ucache_hdr_layout_memo(storage, &capacity, &data_offset);
 
 	if (hdr->magic == UCACHE_MAGIC) {
-		if (hdr->capacity == capacity &&
-			hdr->data_offset == data_offset &&
-			hdr->entry_lock_capacity == storage->entry_lock_capacity_memo &&
-			hdr->entry_lock_offset == storage->entry_lock_offset_memo &&
-			hdr->free_bins_offset == storage->free_bins_offset_memo &&
-			hdr->free_bin_count == storage->free_bin_count_memo &&
-			hdr->graph_pin_slot_count == ucache_ctx_graph_pin_slot_count(ucache_active_ctx())
-		) {
+		if (ucache_hdr_layout_matches_memo_locked(storage, hdr, capacity, data_offset)) {
 #ifdef UCACHE_HAVE_BOUNDARY_SHM
 			if (ucache_hdr_boundary_lock_file_replaced_locked(hdr)) {
 				ucache_shared_boundary_retire_seg_name();
@@ -1189,13 +1199,7 @@ bool ucache_hdr_adoptable_locked(void)
 	ucache_hdr_layout_memo(storage, &capacity, &data_offset);
 
 	if (hdr->magic != UCACHE_MAGIC ||
-		hdr->capacity != capacity ||
-		hdr->data_offset != data_offset ||
-		hdr->entry_lock_capacity != storage->entry_lock_capacity_memo ||
-		hdr->entry_lock_offset != storage->entry_lock_offset_memo ||
-		hdr->free_bins_offset != storage->free_bins_offset_memo ||
-		hdr->free_bin_count != storage->free_bin_count_memo ||
-		hdr->graph_pin_slot_count != ucache_ctx_graph_pin_slot_count(ucache_active_ctx())
+		!ucache_hdr_layout_matches_memo_locked(storage, hdr, capacity, data_offset)
 	) {
 		return false;
 	}

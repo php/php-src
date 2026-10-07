@@ -16,6 +16,8 @@
 
 #define UCACHE_ENTRY_LOCK_SWEEP_INTERVAL_TICKS	UCACHE_CLOCK_TICKS_PER_SEC
 #define UCACHE_DEFERRED_RELEASE_RETRY_CTXS		16U
+#define UCACHE_ENTRY_LOCK_LEASED_DIVISOR		4U
+#define UCACHE_ENTRY_LOCK_KEY_BYTES_DIVISOR		16U
 
 #ifdef ZTS
 static ucache_entry_lock *ucache_orphaned_entry_lock_releases = NULL;
@@ -233,6 +235,27 @@ static bool ucache_find_entry_lock_record_insert_slot_locked(
 	);
 }
 
+static bool ucache_leased_entry_lock_fits_budget_locked(ucache_hdr *hdr, size_t key_len)
+{
+	const ucache_entry_lock_record *record;
+	uint64_t key_bytes = key_len, now_rel = ucache_time_rel(hdr, ucache_clock_now());
+	uint32_t i, leased = 1;
+
+	for (i = 0; i < hdr->entry_lock_capacity; i++) {
+		record = &ucache_entry_lock_records_ptr(hdr)[i];
+		if (record->state != UCACHE_ENTRY_LOCK_USED || ucache_entry_lock_record_is_stale(record, now_rel)) {
+			continue;
+		}
+
+		key_bytes += record->key_len;
+		leased += record->expires_at != 0;
+	}
+
+	return leased <= hdr->entry_lock_capacity / UCACHE_ENTRY_LOCK_LEASED_DIVISOR &&
+		key_bytes <= hdr->data_size / UCACHE_ENTRY_LOCK_KEY_BYTES_DIVISOR
+	;
+}
+
 static bool ucache_insert_entry_lock_record_locked(
 		ucache_hdr *hdr,
 		uint32_t slot_idx,
@@ -248,6 +271,10 @@ static bool ucache_insert_entry_lock_record_locked(
 		return false;
 	}
 
+	if (lock->lease > 0 && !ucache_leased_entry_lock_fits_budget_locked(hdr, ZSTR_LEN(key))) {
+		return false;
+	}
+
 	key_offset = ucache_alloc_locked(ZSTR_LEN(key), ZSTR_VAL(key), UCACHE_BLOCK_OWNER_NONE);
 	if (key_offset == 0 && hdr->entry_lock_count != 0) {
 		ucache_sweep_entry_locks_locked(hdr, ucache_time_rel(hdr, ucache_clock_now()));
@@ -255,7 +282,7 @@ static bool ucache_insert_entry_lock_record_locked(
 		key_offset = ucache_alloc_locked(ZSTR_LEN(key), ZSTR_VAL(key), UCACHE_BLOCK_OWNER_NONE);
 	}
 
-	if (key_offset == 0) {
+	if (key_offset == 0 && lock->lease == 0) {
 		ucache_write_section_announce(hdr);
 
 		UCACHE_DEBUG_SIMULATE_KILL("EXIT_IN_ENTRY_LOCK_EVICTION");
@@ -1173,7 +1200,7 @@ bool ucache_entry_locks_allow_clear_locked(zend_string *prefix)
 			continue;
 		}
 
-		if (!ucache_entry_lock_record_is_active_locked(record, now)) {
+		if (!ucache_entry_lock_record_is_active_locked(record, now) || record->owner_pid == 0) {
 			ucache_remove_entry_lock_record_locked(record);
 
 			continue;

@@ -1602,9 +1602,14 @@ cleanup:
 
 static bool spl_array_object_serialize_ucache_state(zval *state, const zval *object)
 {
+	const spl_array_object *intern = Z_SPLARRAY_P(object);
 	zval *storage;
 
 	ZVAL_UNDEF(state);
+
+	if (!(intern->ar_flags & SPL_ARRAY_IS_SELF) && Z_TYPE(intern->array) != IS_ARRAY) {
+		return false;
+	}
 
 	spl_array_object_serialize_state((zval *) object, state, /* with_members */ false);
 
@@ -1628,12 +1633,55 @@ static bool spl_array_object_serialize_ucache_state(zval *state, const zval *obj
 
 static PHP_UCACHE_HOT bool spl_array_object_unserialize_ucache_state(zval *object, zval *state)
 {
+	spl_array_object *intern;
+	zend_class_entry *ce_get_iterator = NULL;
+	zend_long flags;
+	zval *flags_zv, *storage_zv, *iterator_class_zv;
+
 	if (Z_TYPE_P(state) != IS_ARRAY) {
 		return false;
 	}
 
-	return spl_array_object_unserialize_state(object, Z_ARRVAL_P(state), /* with_members */ false)
-		&& !EG(exception);
+	flags_zv          = zend_hash_index_find(Z_ARRVAL_P(state), 0);
+	storage_zv        = zend_hash_index_find(Z_ARRVAL_P(state), 1);
+	iterator_class_zv = zend_hash_index_find(Z_ARRVAL_P(state), 2);
+
+	if (flags_zv == NULL || storage_zv == NULL || Z_TYPE_P(flags_zv) != IS_LONG) {
+		return false;
+	}
+
+	flags = Z_LVAL_P(flags_zv) & SPL_ARRAY_CLONE_MASK;
+	if (!(flags & SPL_ARRAY_IS_SELF) && Z_TYPE_P(storage_zv) != IS_ARRAY) {
+		return false;
+	}
+
+	if (iterator_class_zv != NULL && Z_TYPE_P(iterator_class_zv) != IS_NULL) {
+		if (Z_TYPE_P(iterator_class_zv) != IS_STRING) {
+			return false;
+		}
+
+		ce_get_iterator = zend_lookup_class(Z_STR_P(iterator_class_zv));
+		if (ce_get_iterator == NULL || EG(exception) || !instanceof_function(ce_get_iterator, spl_ce_ArrayIterator)) {
+			return false;
+		}
+	}
+
+	intern = Z_SPLARRAY_P(object);
+	intern->ar_flags = (intern->ar_flags & ~SPL_ARRAY_CLONE_MASK) | flags;
+
+	if (ce_get_iterator != NULL) {
+		intern->ce_get_iterator = ce_get_iterator;
+	}
+
+	if (flags & SPL_ARRAY_IS_SELF) {
+		zval_ptr_dtor(&intern->array);
+
+		ZVAL_UNDEF(&intern->array);
+	} else {
+		spl_array_set_array(object, intern, storage_zv, 0L, true);
+	}
+
+	return !EG(exception);
 }
 
 static const php_ucache_safe_direct_handlers spl_array_ucache_handlers = {

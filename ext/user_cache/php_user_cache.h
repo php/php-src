@@ -109,6 +109,10 @@ ZEND_API php_ucache_partition *php_ucache_partition_create(const char *name);
 ZEND_API void php_ucache_partition_set_max_procs(php_ucache_partition *partition, uint32_t max_procs);
 ZEND_API bool php_ucache_partition_startup_storage(php_ucache_partition *partition);
 ZEND_API void php_ucache_partition_activate(php_ucache_partition *partition);
+ZEND_API void php_ucache_partition_detach_all_except(php_ucache_partition *keep);
+ZEND_API void php_ucache_fork_prepare(void);
+ZEND_API void php_ucache_fork_cancel(void);
+ZEND_API void php_ucache_child_init(void);
 ZEND_API void php_ucache_activate_boundary_partition_by_id(
 		const char *sapi_prefix,
 		const char *boundary,

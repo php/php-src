@@ -166,6 +166,25 @@ try {
     echo $e->getMessage(), "\n";
 }
 var_dump($cache->fetch('anonymous-start', 'not stored'));
+
+/* Cursors advanced by an unserialize()d or weekday-relative interval carry that interval's stale relative fields and still restore. */
+echo "\ncursor relative state:\n";
+$unserializedInterval = unserialize(serialize(new DateInterval('P1D')));
+$fromUnserialized = new DatePeriod(new DateTimeImmutable('2026-01-01'), $unserializedInterval, 2);
+foreach ($fromUnserialized as $unused) {
+}
+$cache->store('cursor-unserialized-interval', $fromUnserialized);
+$u = $cache->fetch('cursor-unserialized-interval', 'unrestorable');
+var_dump($u instanceof DatePeriod && serialize($u) === serialize($fromUnserialized));
+var_dump(period_dates($u) === ['2026-01-01', '2026-01-02', '2026-01-03']);
+
+$byWeekday = new DatePeriod(new DateTimeImmutable('2026-01-01'), DateInterval::createFromDateString('next monday'), 2);
+foreach ($byWeekday as $unused) {
+}
+$cache->store('cursor-weekday-interval', $byWeekday);
+$w = $cache->fetch('cursor-weekday-interval', 'unrestorable');
+var_dump($w instanceof DatePeriod && serialize($w) === serialize($byWeekday));
+var_dump(period_dates($w) === period_dates($byWeekday), period_dates($w));
 ?>
 --EXPECT--
 bool(true)
@@ -197,3 +216,17 @@ string(3) "PST"
 bool(true)
 Serialization of 'DateTimeImmutable@anonymous' is not allowed
 string(10) "not stored"
+
+cursor relative state:
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+array(3) {
+  [0]=>
+  string(10) "2026-01-01"
+  [1]=>
+  string(10) "2026-01-05"
+  [2]=>
+  string(10) "2026-01-12"
+}

@@ -193,6 +193,10 @@
 #define UCACHE_GRAPH_PIN_SLOTS_MAX			256U
 #define UCACHE_GRAPH_PIN_WORDS_MAX			(UCACHE_GRAPH_PIN_SLOTS_MAX / 32U)
 #define UCACHE_GRAPH_PIN_CLAIM_MAX			4U
+#define UCACHE_FORK_TRANSFER_MAX			32U
+#define UCACHE_VERBATIM_VERDICT_SETS			256U
+#define UCACHE_VERBATIM_VERDICT_WAYS			4U
+#define UCACHE_PAYLOAD_VERDICT_SETS			64U
 #define UCACHE_GRAPH_PIN_OWNER_ABANDONED	(-2)
 
 #define UCACHE_RECORD_EMPTY	0
@@ -650,6 +654,18 @@ typedef struct {
 } ucache_graph_pin_claim;
 
 typedef struct {
+	ucache_hdr *hdr;
+	uint32_t slot_idx;
+	uint32_t fork_seq;
+} ucache_fork_transfer;
+
+typedef struct {
+	const ucache_ctx *ctx;
+	const void *arr;
+	uint64_t gen;
+} ucache_verbatim_verdict;
+
+typedef struct {
 	uint64_t pid;
 	uint64_t start_time;
 	uint64_t probed_at;
@@ -771,8 +787,15 @@ typedef struct {
 	void *decode_resolve_direct_vals[UCACHE_DECODE_DIRECT_CACHE_SLOTS];
 	const void *decode_shape_proto_direct_keys[UCACHE_DECODE_DIRECT_CACHE_SLOTS];
 	zend_array *decode_shape_proto_direct_vals[UCACHE_DECODE_DIRECT_CACHE_SLOTS];
+	ucache_verbatim_verdict verbatim_verdicts[UCACHE_VERBATIM_VERDICT_SETS * UCACHE_VERBATIM_VERDICT_WAYS];
+	ucache_verbatim_verdict payload_verdicts[UCACHE_PAYLOAD_VERDICT_SETS * UCACHE_VERBATIM_VERDICT_WAYS];
+	uint64_t decode_payload_gen;
 	ucache_reader_claim reader_claims[UCACHE_READER_CLAIM_MAX];
 	ucache_graph_pin_claim graph_pin_claims[UCACHE_GRAPH_PIN_CLAIM_MAX];
+	ucache_fork_transfer fork_transfers[UCACHE_FORK_TRANSFER_MAX];
+	uint32_t fork_transfer_count;
+	uint32_t fork_seq;
+	uint64_t fork_transfer_pid;
 #ifndef ZEND_WIN32
 	zend_ulong entry_lock_owner_pid;
 #endif /* ZEND_WIN32 */
@@ -788,11 +811,13 @@ typedef struct {
 	zend_long shm_size;
 	zend_long entries_hint;
 	zend_long eviction_policy;
+	zend_long lock_lease_max;
 	char *lockfile_path;
 	char *mem_model;
 	uint32_t reader_claim_count;
 	uint32_t graph_pin_claim_count;
 	uint32_t decode_depth;
+	uint32_t decode_nesting;
 	uint32_t restore_hook_calls;
 	uint32_t expired_read_observations;
 	uint32_t expunge_write_ops;
@@ -806,6 +831,9 @@ typedef struct {
 	uint32_t key_record_trim_at;
 	uint8_t decode_resolve_direct_next;
 	uint8_t decode_shape_proto_direct_next;
+	uint8_t verbatim_verdict_next_way;
+	uint8_t payload_verdict_next_way;
+	bool decode_payload_validated;
 	bool write_seq_bumped;
 	bool entry_lock_table_section_open;
 	bool store_defer_unlock;
@@ -823,6 +851,7 @@ typedef struct {
 } ucache_globals;
 
 #ifdef ZTS
+extern int user_cache_globals_id;
 extern size_t user_cache_globals_offset;
 #else
 extern ucache_globals user_cache_globals;
@@ -945,9 +974,9 @@ bool ucache_sgraph_copy_fits_buf(
 		const uint8_t *src_buf,
 		size_t buf_len,
 		size_t src_glen);
-bool ucache_sgraph_decode(const uint8_t *buf, size_t buf_len, zval *dst);
+bool ucache_sgraph_decode(const uint8_t *buf, size_t buf_len, uint64_t gen, zval *dst);
 ucache_sgraph_snapshot *ucache_sgraph_snapshot_create(const uint8_t *buf, size_t buf_len);
-bool ucache_sgraph_decode_snapshot(ucache_sgraph_snapshot *snapshot, zval *dst);
+bool ucache_sgraph_decode_snapshot(ucache_sgraph_snapshot *snapshot, uint64_t gen, zval *dst);
 bool ucache_owned_decode_validate_proc_impl(void);
 const uint32_t *ucache_sgraph_node_sizes(uint32_t *count);
 uint32_t ucache_sgraph_payload_flags(uint32_t payload_offset);
@@ -976,6 +1005,9 @@ bool ucache_sgraph_retire_payload_locked(uint32_t payload_offset);
 uint32_t ucache_req_sgraph_ref_idx(uint32_t payload_offset);
 uint32_t ucache_register_sgraph_ref(uint32_t payload_offset, uint32_t payload_len);
 void ucache_release_req_sgraph_refs(void);
+void ucache_sgraph_refs_transfer_before_fork(void);
+void ucache_sgraph_refs_adopt_after_fork(void);
+void ucache_sgraph_fork_transfers_undo(void);
 void ucache_expunge_expired_at_req_end(void);
 bool ucache_prepare_val(
 		zend_string *key,
@@ -1057,6 +1089,7 @@ void ucache_sgraph_orphan_payload_locked(uint32_t payload_offset);
 void ucache_sgraph_reclaim_orphaned_locked(void);
 bool ucache_sgraph_strip_dead_pins_locked(bool force);
 bool ucache_owner_is_dead(uint64_t owner_pid, uint64_t owner_start_time);
+uint32_t ucache_sleep_us(uint32_t interval_us);
 uint64_t ucache_self_start_time_token(void);
 void ucache_release_thread_graph_pin_claims(ucache_globals *globals);
 ZEND_METHOD(UserCache_CacheStatus, __construct);
@@ -1121,6 +1154,15 @@ static zend_always_inline bool ucache_debug_fault(const char *env_name)
 	return val != NULL && val[0] != '\0' && val[0] != '0';
 }
 #endif
+
+static zend_always_inline bool ucache_globals_allocated(void)
+{
+#ifdef ZTS
+	return user_cache_globals_id != 0;
+#else
+	return true;
+#endif
+}
 
 static zend_always_inline uint32_t ucache_table_hash(zend_ulong hash)
 {
@@ -1392,13 +1434,24 @@ static zend_always_inline size_t ucache_block_total_size(size_t payload_size)
 	return ucache_size_class_round_up(MAX(total, UCACHE_BLOCK_MIN_SIZE));
 }
 
+static zend_always_inline bool ucache_payload_offset_in_used(
+		const ucache_hdr *hdr,
+		uint32_t payload_offset)
+{
+	uint64_t payload_pos = ucache_offset_bytes(payload_offset);
+
+	return payload_pos > hdr->data_offset &&
+		payload_pos < (uint64_t) hdr->data_offset + hdr->next_free
+	;
+}
+
 static zend_always_inline uint32_t ucache_block_payload_capacity(
 		const ucache_hdr *hdr,
 		uint32_t payload_offset)
 {
 	uint32_t size;
 
-	if (payload_offset < UCACHE_BLOCK_HDR_UNITS) {
+	if (!ucache_payload_offset_in_used(hdr, payload_offset)) {
 		return 0;
 	}
 
@@ -1539,6 +1592,11 @@ static zend_always_inline ucache_pool_links *ucache_pool_links_ptr(ucache_hdr *h
 		+ sizeof(ucache_hdr)
 		+ (size_t) hdr->capacity * (sizeof(ucache_entry) + sizeof(uint32_t))
 	);
+}
+
+static zend_always_inline bool ucache_pool_link_ref_fits(const ucache_hdr *hdr, uint32_t ref)
+{
+	return ref <= hdr->capacity;
 }
 
 static zend_always_inline void ucache_pool_bucket_changed_locked(ucache_hdr *hdr, uint32_t bucket)

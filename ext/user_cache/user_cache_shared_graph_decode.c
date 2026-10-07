@@ -19,7 +19,24 @@
 #include "Zend/zend_operators.h"
 
 #define UCACHE_DECODE_CACHE_MAX_ENTRIES			4096U
+#define UCACHE_DECODE_MAX_DEPTH					8192U
+#define UCACHE_VERBATIM_VERDICT_ADDR_SHIFT		4
+#define UCACHE_VERBATIM_VERDICT_ADDR_MIX_SHIFT	14
+#ifdef ZEND_CHECK_STACK_LIMIT
+# define UCACHE_DECODE_COUNTS_NESTING			0
+#else
+# define UCACHE_DECODE_COUNTS_NESTING			1
+#endif
 #define UCACHE_DECODE_CLASS_HAS_WAKEUP			((uintptr_t) 1)
+#define UCACHE_DECODE_RESOLVE_KIND_SHIFT		1
+#define UCACHE_DECODE_RESOLVE_KIND_CLASS		((uintptr_t) 1 << UCACHE_DECODE_RESOLVE_KIND_SHIFT)
+#define UCACHE_DECODE_RESOLVE_KIND_ENUM_CASE	((uintptr_t) 2 << UCACHE_DECODE_RESOLVE_KIND_SHIFT)
+#define UCACHE_DECODE_RESOLVE_KIND_MASK			((uintptr_t) 3 << UCACHE_DECODE_RESOLVE_KIND_SHIFT)
+#define UCACHE_DECODE_RESOLVE_TAG_MASK			(UCACHE_DECODE_CLASS_HAS_WAKEUP | UCACHE_DECODE_RESOLVE_KIND_MASK)
+#define UCACHE_VERBATIM_ARR_GC_TYPE_INFO \
+	(GC_ARRAY | ((IS_ARRAY_IMMUTABLE | GC_NOT_COLLECTABLE) << GC_FLAGS_SHIFT))
+#define UCACHE_VERBATIM_ARR_HT_FLAGS_ALLOWED \
+	(HASH_FLAG_PACKED | HASH_FLAG_STATIC_KEYS | HASH_FLAG_ALLOW_COW_VIOLATION)
 
 #if ZEND_DEBUG
 # define UCACHE_HT_DISALLOW_COW_VIOLATION(ht) HT_FLAGS(ht) &= ~HASH_FLAG_ALLOW_COW_VIOLATION
@@ -77,6 +94,14 @@ typedef struct {
 #endif
 
 typedef struct {
+	const uint8_t *buf;
+	const uint8_t *snapshot_origin;
+	size_t buf_len;
+	HashTable seen;
+	uint32_t depth;
+} ucache_verbatim_check_ctx;
+
+typedef struct {
 	zval obj;
 	zval state;
 } ucache_restore_call;
@@ -114,6 +139,13 @@ static void ucache_owned_str_dtor(zval *val);
 static void ucache_decode_shape_proto_dtor(zval *zv);
 static bool ucache_restore_queue_finish(ucache_restore_queue *queue, bool result);
 static void ucache_restore_queue_destroy(ucache_restore_queue *queue);
+static bool ucache_verbatim_arr_check(ucache_verbatim_check_ctx *ctx, const zend_array *arr);
+static zend_never_inline bool ucache_decode_verbatim_arr_validate(
+		const uint8_t *buf,
+		size_t buf_len,
+		const uint8_t *snapshot_origin,
+		const zend_array *arr,
+		const void *shm_arr);
 static zend_never_inline void ucache_decode_save_maps(void);
 static ZEND_COLD zend_never_inline void ucache_decode_release_keeping_overflow(zval *dst);
 static PHP_UCACHE_HOT bool ucache_sgraph_decode_val(
@@ -221,6 +253,11 @@ static zend_always_inline bool ucache_decode_fail_zval(zval *dst)
 	return false;
 }
 
+static zend_always_inline bool ucache_decode_str_hdr_ok(const zend_string *str)
+{
+	return GC_TYPE(str) == IS_STRING && (GC_FLAGS(str) & IS_STR_INTERNED) != 0;
+}
+
 static zend_always_inline zend_string *ucache_decode_str_at_raw(
 		const uint8_t *buf,
 		size_t buf_len,
@@ -233,7 +270,8 @@ static zend_always_inline zend_string *ucache_decode_str_at_raw(
 	}
 
 	str = (zend_string *) (void *) (buf + offset);
-	if (ZSTR_LEN(str) > buf_len ||
+	if (!ucache_decode_str_hdr_ok(str) ||
+		ZSTR_LEN(str) > buf_len ||
 		!ucache_decode_range_ok(
 			buf_len,
 			offset,
@@ -337,38 +375,54 @@ static zend_always_inline size_t ucache_decode_node_hdr_size(uint8_t type)
 	}
 }
 
-static zend_always_inline void *ucache_decode_resolve_cache_find(const void *addr)
+static zend_always_inline uintptr_t ucache_decode_resolved_of_kind(uintptr_t resolved, uintptr_t kind)
+{
+	ZEND_ASSERT(kind != 0 && (kind & ~UCACHE_DECODE_RESOLVE_KIND_MASK) == 0);
+
+	return (resolved & UCACHE_DECODE_RESOLVE_KIND_MASK) == kind ? resolved : 0;
+}
+
+static zend_always_inline uintptr_t ucache_decode_resolve_cache_find(const void *addr, uintptr_t kind)
 {
 	ucache_owned_decode_frame *frame = UC_G(owned_decode_frame);
+	uintptr_t resolved = 0;
 	uint32_t i;
 
 	if (UNEXPECTED(frame != NULL)) {
-		return frame->resolve != NULL
-			? zend_hash_index_find_ptr(frame->resolve, (zend_ulong) (uintptr_t) addr)
-			: NULL
-		;
+		if (frame->resolve != NULL) {
+			resolved = (uintptr_t) zend_hash_index_find_ptr(frame->resolve, (zend_ulong) (uintptr_t) addr);
+		}
+
+		return ucache_decode_resolved_of_kind(resolved, kind);
 	}
 
 	for (i = 0; i < UCACHE_DECODE_DIRECT_CACHE_SLOTS; i++) {
 		if (UC_G(decode_resolve_direct_keys)[i] == addr) {
-			return UC_G(decode_resolve_direct_vals)[i];
+			resolved = (uintptr_t) UC_G(decode_resolve_direct_vals)[i];
+
+			return ucache_decode_resolved_of_kind(resolved, kind);
 		}
 	}
 
 	if (UC_G(decode_resolve_cache) == NULL) {
-		return NULL;
+		return 0;
 	}
 
-	return zend_hash_index_find_ptr(
+	resolved = (uintptr_t) zend_hash_index_find_ptr(
 		UC_G(decode_resolve_cache),
 		(zend_ulong) (uintptr_t) addr
 	);
+
+	return ucache_decode_resolved_of_kind(resolved, kind);
 }
 
-static zend_always_inline void ucache_decode_resolve_cache_store(const void *addr, void *val)
+static zend_always_inline void ucache_decode_resolve_cache_store(const void *addr, uintptr_t resolved)
 {
 	ucache_owned_decode_frame *frame = UC_G(owned_decode_frame);
+	void *val = (void *) resolved;
 	uint32_t slot;
+
+	ZEND_ASSERT((resolved & UCACHE_DECODE_RESOLVE_KIND_MASK) != 0);
 
 	if (UNEXPECTED(frame != NULL)) {
 		if (frame->resolve == NULL) {
@@ -404,23 +458,41 @@ static zend_always_inline void ucache_decode_resolve_cache_store(const void *add
 
 static zend_always_inline uintptr_t ucache_decode_resolved_class(zend_class_entry *ce)
 {
-	ZEND_ASSERT(((uintptr_t) ce & UCACHE_DECODE_CLASS_HAS_WAKEUP) == 0);
+	uintptr_t resolved = (uintptr_t) ce | UCACHE_DECODE_RESOLVE_KIND_CLASS;
+
+	ZEND_ASSERT(((uintptr_t) ce & UCACHE_DECODE_RESOLVE_TAG_MASK) == 0);
 
 	if (zend_hash_find_known_hash(&ce->function_table, ZSTR_KNOWN(ZEND_STR_WAKEUP)) != NULL) {
-		return (uintptr_t) ce | UCACHE_DECODE_CLASS_HAS_WAKEUP;
+		return resolved | UCACHE_DECODE_CLASS_HAS_WAKEUP;
 	}
 
-	return (uintptr_t) ce;
+	return resolved;
 }
 
 static zend_always_inline zend_class_entry *ucache_decode_resolved_class_entry(uintptr_t resolved)
 {
-	return (zend_class_entry *) (resolved & ~UCACHE_DECODE_CLASS_HAS_WAKEUP);
+	ZEND_ASSERT(resolved == 0 || (resolved & UCACHE_DECODE_RESOLVE_KIND_MASK) == UCACHE_DECODE_RESOLVE_KIND_CLASS);
+
+	return (zend_class_entry *) (resolved & ~UCACHE_DECODE_RESOLVE_TAG_MASK);
 }
 
 static zend_always_inline bool ucache_decode_resolved_class_has_wakeup(uintptr_t resolved)
 {
 	return (resolved & UCACHE_DECODE_CLASS_HAS_WAKEUP) != 0;
+}
+
+static zend_always_inline uintptr_t ucache_decode_resolved_enum_case(zend_object *case_obj)
+{
+	ZEND_ASSERT(((uintptr_t) case_obj & UCACHE_DECODE_RESOLVE_TAG_MASK) == 0);
+
+	return (uintptr_t) case_obj | UCACHE_DECODE_RESOLVE_KIND_ENUM_CASE;
+}
+
+static zend_always_inline zend_object *ucache_decode_resolved_enum_case_obj(uintptr_t resolved)
+{
+	ZEND_ASSERT(resolved == 0 || (resolved & UCACHE_DECODE_RESOLVE_KIND_MASK) == UCACHE_DECODE_RESOLVE_KIND_ENUM_CASE);
+
+	return (zend_object *) (resolved & ~UCACHE_DECODE_RESOLVE_TAG_MASK);
 }
 
 UCACHE_DEFINE_DECODE_MAP(
@@ -438,6 +510,10 @@ UCACHE_DEFINE_DECODE_MAP(
 static zend_always_inline uint32_t ucache_decode_enter(void)
 {
 	uint32_t depth = ++UC_G(decode_depth);
+
+	if (depth == 1) {
+		UC_G(decode_nesting) = 0;
+	}
 
 	zend_fiber_switch_block();
 
@@ -476,6 +552,130 @@ static zend_always_inline bool ucache_decode_leave_impl(uint32_t depth, bool res
 	zend_fiber_switch_unblock();
 
 	return result;
+}
+
+static zend_always_inline bool ucache_decode_nesting_overflowed(uint32_t nesting)
+{
+	if (!UCACHE_DECODE_COUNTS_NESTING || EXPECTED(nesting < UCACHE_DECODE_MAX_DEPTH)) {
+		return false;
+	}
+
+	UC_G(stack_overflowed) = true;
+
+	return true;
+}
+
+static zend_always_inline bool ucache_decode_node_enter(void)
+{
+	if (!UCACHE_DECODE_COUNTS_NESTING) {
+		return true;
+	}
+
+	if (ucache_decode_nesting_overflowed(UC_G(decode_nesting))) {
+		return false;
+	}
+
+	UC_G(decode_nesting)++;
+
+	return true;
+}
+
+static zend_always_inline bool ucache_decode_node_leave(bool result)
+{
+	if (UCACHE_DECODE_COUNTS_NESTING) {
+		ZEND_ASSERT(UC_G(decode_nesting) != 0);
+
+		UC_G(decode_nesting)--;
+	}
+
+	return result;
+}
+
+static zend_always_inline const void *ucache_decode_verbatim_arr_shm_addr(
+		const uint8_t *buf,
+		const uint8_t *snapshot_origin,
+		const zend_array *arr)
+{
+	if (snapshot_origin == NULL) {
+		return arr;
+	}
+
+	return snapshot_origin + ((const uint8_t *) arr - buf);
+}
+
+static zend_always_inline uintptr_t ucache_verdict_set_idx(const void *shm_addr)
+{
+	uintptr_t addr = (uintptr_t) shm_addr;
+
+	return (addr >> UCACHE_VERBATIM_VERDICT_ADDR_SHIFT) ^ (addr >> UCACHE_VERBATIM_VERDICT_ADDR_MIX_SHIFT);
+}
+
+static zend_always_inline bool ucache_verdict_set_find(const ucache_verbatim_verdict *set, const void *shm_addr)
+{
+	const ucache_ctx *ctx = ucache_active_ctx();
+	uint64_t gen = UC_G(decode_payload_gen);
+	uint32_t way;
+
+	for (way = 0; way < UCACHE_VERBATIM_VERDICT_WAYS; way++) {
+		if (set[way].arr == shm_addr && set[way].gen == gen && set[way].ctx == ctx) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+static zend_always_inline void ucache_verdict_set_store(ucache_verbatim_verdict *set, uint8_t *next_way, const void *shm_addr)
+{
+	uint32_t way = *next_way % UCACHE_VERBATIM_VERDICT_WAYS;
+
+	(*next_way)++;
+
+	set[way].ctx = ucache_active_ctx();
+	set[way].arr = shm_addr;
+	set[way].gen = UC_G(decode_payload_gen);
+}
+
+static zend_always_inline ucache_verbatim_verdict *ucache_verbatim_verdict_set(const void *shm_arr)
+{
+	return &UC_G(verbatim_verdicts)[(ucache_verdict_set_idx(shm_arr) & (UCACHE_VERBATIM_VERDICT_SETS - 1)) * UCACHE_VERBATIM_VERDICT_WAYS];
+}
+
+static zend_always_inline ucache_verbatim_verdict *ucache_payload_verdict_set(const void *shm_payload)
+{
+	return &UC_G(payload_verdicts)[(ucache_verdict_set_idx(shm_payload) & (UCACHE_PAYLOAD_VERDICT_SETS - 1)) * UCACHE_VERBATIM_VERDICT_WAYS];
+}
+
+static zend_always_inline bool ucache_verbatim_verdict_find(const void *shm_arr)
+{
+	return ucache_verdict_set_find(ucache_verbatim_verdict_set(shm_arr), shm_arr);
+}
+
+static zend_always_inline void ucache_verbatim_verdict_store(const void *shm_arr)
+{
+	ucache_verdict_set_store(ucache_verbatim_verdict_set(shm_arr), &UC_G(verbatim_verdict_next_way), shm_arr);
+}
+
+static zend_always_inline bool ucache_decode_payload_begin(const void *shm_payload, uint64_t gen)
+{
+	UC_G(decode_payload_gen) = gen;
+	UC_G(decode_payload_validated) = ucache_verdict_set_find(ucache_payload_verdict_set(shm_payload), shm_payload);
+
+	return UC_G(decode_payload_validated);
+}
+
+static zend_always_inline void ucache_decode_payload_end(const void *shm_payload, bool validated, bool result)
+{
+	if (result && !validated) {
+		ucache_verdict_set_store(ucache_payload_verdict_set(shm_payload), &UC_G(payload_verdict_next_way), shm_payload);
+	}
+}
+
+static zend_always_inline const uint8_t *ucache_decode_snapshot_origin(void)
+{
+	ucache_owned_decode_frame *frame = UC_G(owned_decode_frame);
+
+	return frame != NULL && frame->snapshot != NULL ? frame->snapshot->origin : NULL;
 }
 
 static zend_always_inline HashTable *ucache_decode_shape_proto_cache(void)
@@ -562,6 +762,110 @@ static zend_always_inline bool ucache_decode_arr_still_packed_fillable(const Has
 	;
 }
 
+static zend_always_inline const void *ucache_verbatim_resolve_ptr(
+		const ucache_verbatim_check_ctx *ctx,
+		const void *ptr,
+		size_t size,
+		size_t alignment)
+{
+	uintptr_t addr = (uintptr_t) ptr, base;
+	size_t offset;
+
+	if ((addr & (alignment - 1)) != 0) {
+		return NULL;
+	}
+
+	base = (uintptr_t) ctx->buf;
+	if (addr >= base && addr - base <= ctx->buf_len) {
+		offset = (size_t) (addr - base);
+
+		return size <= ctx->buf_len - offset ? ptr : NULL;
+	}
+
+	if (ctx->snapshot_origin == NULL) {
+		return NULL;
+	}
+
+	base = (uintptr_t) ctx->snapshot_origin;
+	if (addr < base || addr - base > ctx->buf_len) {
+		return NULL;
+	}
+
+	offset = (size_t) (addr - base);
+
+	return size <= ctx->buf_len - offset ? ctx->buf + offset : NULL;
+}
+
+static zend_always_inline bool ucache_verbatim_str_check(
+		const ucache_verbatim_check_ctx *ctx,
+		const zend_string *str)
+{
+	const zend_string *hdr;
+
+	hdr = ucache_verbatim_resolve_ptr(ctx, str, _ZSTR_HEADER_SIZE, alignof(zend_string));
+	if (hdr == NULL || !ucache_decode_str_hdr_ok(hdr) || ZSTR_LEN(hdr) > ctx->buf_len) {
+		return false;
+	}
+
+	return ucache_verbatim_resolve_ptr(ctx, str, _ZSTR_STRUCT_SIZE(ZSTR_LEN(hdr)), alignof(zend_string)) != NULL;
+}
+
+static zend_always_inline uint32_t ucache_verbatim_hash_slot(const zend_array *arr, zend_ulong h)
+{
+	uint32_t idx = (uint32_t) h | arr->nTableMask;
+
+	return idx - arr->nTableMask;
+}
+
+static zend_always_inline bool ucache_verbatim_elem_check(
+		ucache_verbatim_check_ctx *ctx,
+		const zval *val)
+{
+	const zend_array *arr;
+
+	switch (Z_TYPE_INFO_P(val)) {
+		case IS_UNDEF:
+		case IS_NULL:
+		case IS_FALSE:
+		case IS_TRUE:
+		case IS_LONG:
+		case IS_DOUBLE:
+			return true;
+		case IS_INTERNED_STRING_EX:
+			return ucache_verbatim_str_check(ctx, Z_STR_P(val));
+		case IS_ARRAY:
+			if (Z_ARR_P(val) == &zend_empty_array) {
+				return true;
+			}
+
+			arr = ucache_verbatim_resolve_ptr(ctx, Z_ARR_P(val), sizeof(zend_array), alignof(zend_array));
+
+			return arr != NULL && ucache_verbatim_arr_check(ctx, arr);
+		default:
+			return false;
+	}
+}
+
+static zend_always_inline bool ucache_decode_verbatim_arr_ok(
+		const uint8_t *buf,
+		size_t buf_len,
+		const uint8_t *snapshot_origin,
+		const zend_array *arr)
+{
+	const void *shm_arr;
+
+	if (EXPECTED(UC_G(decode_payload_validated))) {
+		return true;
+	}
+
+	shm_arr = ucache_decode_verbatim_arr_shm_addr(buf, snapshot_origin, arr);
+	if (ucache_verbatim_verdict_find(shm_arr)) {
+		return true;
+	}
+
+	return ucache_decode_verbatim_arr_validate(buf, buf_len, snapshot_origin, arr, shm_arr);
+}
+
 static zend_always_inline bool ucache_sgraph_decode_simple_val(
 		const uint8_t *buf,
 		size_t buf_len,
@@ -574,9 +878,7 @@ static zend_always_inline bool ucache_sgraph_decode_simple_val(
 
 	switch (gval->type) {
 		case UCACHE_SGRAPH_VAL_UNDEF:
-			ZVAL_UNDEF(dst);
-
-			return true;
+			return false;
 		case UCACHE_SGRAPH_VAL_NULL:
 			ZVAL_NULL(dst);
 
@@ -913,7 +1215,7 @@ static PHP_UCACHE_HOT uintptr_t ucache_decode_lookup_class(
 	}
 
 	key = buf + class_name_offset;
-	resolved = (uintptr_t) ucache_decode_resolve_cache_find(key);
+	resolved = ucache_decode_resolve_cache_find(key, UCACHE_DECODE_RESOLVE_KIND_CLASS);
 	if (resolved != 0) {
 		return resolved;
 	}
@@ -932,7 +1234,7 @@ static PHP_UCACHE_HOT uintptr_t ucache_decode_lookup_class(
 	}
 
 	resolved = ucache_decode_resolved_class(ce);
-	ucache_decode_resolve_cache_store(key, (void *) resolved);
+	ucache_decode_resolve_cache_store(key, resolved);
 
 	return resolved;
 }
@@ -944,14 +1246,14 @@ static PHP_UCACHE_HOT uintptr_t ucache_decode_lookup_state_schema_class(
 {
 	uintptr_t resolved;
 
-	resolved = (uintptr_t) ucache_decode_resolve_cache_find(state_schema);
+	resolved = ucache_decode_resolve_cache_find(state_schema, UCACHE_DECODE_RESOLVE_KIND_CLASS);
 	if (resolved != 0) {
 		return resolved;
 	}
 
 	resolved = ucache_decode_lookup_class(buf, buf_len, state_schema->class_name_offset);
 	if (resolved != 0) {
-		ucache_decode_resolve_cache_store(state_schema, (void *) resolved);
+		ucache_decode_resolve_cache_store(state_schema, resolved);
 	}
 
 	return resolved;
@@ -2265,7 +2567,9 @@ static zend_never_inline bool ucache_sgraph_decode_enum(
 	zend_object *case_obj;
 
 	genum = (const ucache_sgraph_enum *) (buf + gval->offset);
-	case_obj = ucache_decode_resolve_cache_find(genum);
+	case_obj = ucache_decode_resolved_enum_case_obj(
+		ucache_decode_resolve_cache_find(genum, UCACHE_DECODE_RESOLVE_KIND_ENUM_CASE)
+	);
 	if (case_obj == NULL) {
 		ce = ucache_decode_resolved_class_entry(ucache_decode_lookup_class(buf, buf_len, genum->class_name_offset));
 		if (ce == NULL || !(ce->ce_flags & ZEND_ACC_ENUM)) {
@@ -2282,7 +2586,7 @@ static zend_never_inline bool ucache_sgraph_decode_enum(
 			return false;
 		}
 
-		ucache_decode_resolve_cache_store(genum, case_obj);
+		ucache_decode_resolve_cache_store(genum, ucache_decode_resolved_enum_case(case_obj));
 	}
 
 	ZVAL_OBJ(dst, case_obj);
@@ -2328,6 +2632,182 @@ static zend_never_inline bool ucache_sgraph_decode_ref(
 	}
 
 	return true;
+}
+
+static bool ucache_verbatim_hash_chains_check(
+		const zend_array *arr,
+		const uint32_t *hash,
+		const Bucket *buckets)
+{
+	uint32_t slot_count = (uint32_t) -arr->nTableMask;
+	uint32_t slot, idx, bucket_idx, visited = 0;
+
+	for (slot = 0; slot < slot_count; slot++) {
+		idx = hash[slot];
+
+		while (idx != HT_INVALID_IDX) {
+			bucket_idx = HT_HASH_TO_IDX(idx);
+			if (bucket_idx >= arr->nNumUsed ||
+				HT_IDX_TO_HASH(bucket_idx) != idx ||
+				visited == arr->nNumOfElements ||
+				Z_TYPE_INFO(buckets[bucket_idx].val) == IS_UNDEF ||
+				ucache_verbatim_hash_slot(arr, buckets[bucket_idx].h) != slot
+			) {
+				return false;
+			}
+
+			visited++;
+			idx = Z_NEXT(buckets[bucket_idx].val);
+		}
+	}
+
+	return visited == arr->nNumOfElements;
+}
+
+static const uint8_t *ucache_verbatim_arr_data(
+		const ucache_verbatim_check_ctx *ctx,
+		const zend_array *arr)
+{
+	uintptr_t data_addr;
+	size_t hash_size, used_size;
+	bool is_packed;
+
+	if (GC_TYPE_INFO(arr) != UCACHE_VERBATIM_ARR_GC_TYPE_INFO ||
+		GC_REFCOUNT(arr) < 2 ||
+		(HT_FLAGS(arr) & ~UCACHE_VERBATIM_ARR_HT_FLAGS_ALLOWED) != 0 ||
+		!(HT_FLAGS(arr) & HASH_FLAG_STATIC_KEYS) ||
+		arr->nTableSize < HT_MIN_SIZE ||
+		arr->nTableSize > HT_MAX_SIZE ||
+		(arr->nTableSize & (arr->nTableSize - 1)) != 0 ||
+		arr->nNumUsed > arr->nTableSize ||
+		arr->nNumOfElements > arr->nNumUsed
+	) {
+		return NULL;
+	}
+
+	is_packed = HT_IS_PACKED(arr);
+	if (arr->nTableMask != (is_packed ? HT_MIN_MASK : HT_SIZE_TO_MASK(arr->nTableSize))) {
+		return NULL;
+	}
+
+	hash_size = HT_HASH_SIZE(arr->nTableMask);
+	used_size = (size_t) arr->nNumUsed * (is_packed ? sizeof(zval) : sizeof(Bucket));
+	data_addr = (uintptr_t) arr->arData;
+	if (data_addr < hash_size) {
+		return NULL;
+	}
+
+	return ucache_verbatim_resolve_ptr(
+		ctx,
+		(const void *) (data_addr - hash_size),
+		hash_size + used_size,
+		alignof(Bucket)
+	);
+}
+
+static bool ucache_verbatim_arr_check(ucache_verbatim_check_ctx *ctx, const zend_array *arr)
+{
+	const uint8_t *data;
+	const uint32_t *hash;
+	const Bucket *buckets;
+	const zval *packed, *seen;
+	size_t hash_size;
+	uint32_t i, live = 0;
+
+	if (ucache_stack_overflowed() || ucache_decode_nesting_overflowed(ctx->depth)) {
+		return false;
+	}
+
+	if (!ucache_seen_test_and_add(&ctx->seen, arr)) {
+		seen = zend_hash_index_find(&ctx->seen, (zend_ulong) (uintptr_t) arr);
+
+		return seen != NULL && Z_TYPE_P(seen) == IS_TRUE;
+	}
+
+	data = ucache_verbatim_arr_data(ctx, arr);
+	if (data == NULL) {
+		return false;
+	}
+
+	hash = (const uint32_t *) data;
+	hash_size = HT_HASH_SIZE(arr->nTableMask);
+	ctx->depth++;
+
+	if (HT_IS_PACKED(arr)) {
+		if (hash[0] != HT_INVALID_IDX || hash[1] != HT_INVALID_IDX) {
+			return false;
+		}
+
+		packed = (const zval *) (data + hash_size);
+		for (i = 0; i < arr->nNumUsed; i++) {
+			if (!ucache_verbatim_elem_check(ctx, &packed[i])) {
+				return false;
+			}
+
+			if (Z_TYPE_INFO(packed[i]) != IS_UNDEF) {
+				live++;
+			}
+		}
+	} else {
+		buckets = (const Bucket *) (data + hash_size);
+		for (i = 0; i < arr->nNumUsed; i++) {
+			if ((buckets[i].key != NULL && !ucache_verbatim_str_check(ctx, buckets[i].key)) ||
+				!ucache_verbatim_elem_check(ctx, &buckets[i].val)
+			) {
+				return false;
+			}
+
+			if (Z_TYPE_INFO(buckets[i].val) != IS_UNDEF) {
+				live++;
+			}
+		}
+
+		if (!ucache_verbatim_hash_chains_check(arr, hash, buckets)) {
+			return false;
+		}
+	}
+
+	if (live != arr->nNumOfElements) {
+		return false;
+	}
+
+	ctx->depth--;
+
+	ZVAL_TRUE(zend_hash_index_lookup(&ctx->seen, (zend_ulong) (uintptr_t) arr));
+
+	return true;
+}
+
+static zend_never_inline bool ucache_decode_verbatim_arr_validate(
+		const uint8_t *buf,
+		size_t buf_len,
+		const uint8_t *snapshot_origin,
+		const zend_array *arr,
+		const void *shm_arr)
+{
+	ucache_verbatim_check_ctx ctx;
+	bool result;
+
+	if (UCACHE_DEBUG_FAULT("VERBATIM_ARR_INVALID")) {
+		return false;
+	}
+
+	ctx.buf = buf;
+	ctx.snapshot_origin = snapshot_origin;
+	ctx.buf_len = buf_len;
+	ctx.depth = UC_G(decode_nesting);
+
+	zend_hash_init(&ctx.seen, 8, NULL, NULL, 0);
+
+	result = ucache_verbatim_arr_check(&ctx, arr);
+
+	zend_hash_destroy(&ctx.seen);
+
+	if (result) {
+		ucache_verbatim_verdict_store(shm_arr);
+	}
+
+	return result;
 }
 
 static void *ucache_owned_decode_relocate(const void *ptr, size_t size)
@@ -2529,7 +3009,7 @@ static bool ucache_owned_decode_verbatim(zval *dst, const zval *src)
 	return true;
 }
 
-static PHP_UCACHE_HOT bool ucache_sgraph_decode_val(
+static zend_always_inline bool ucache_sgraph_decode_node(
 		const uint8_t *buf,
 		size_t buf_len,
 		const ucache_sgraph_val *gval,
@@ -2538,12 +3018,9 @@ static PHP_UCACHE_HOT bool ucache_sgraph_decode_val(
 	const ucache_sgraph_shaped_arr *gsarr;
 	zend_reference *shared_ref;
 	zend_object *shared_obj;
+	zend_array *arr;
 	zval src;
 	size_t node_hdr_size;
-
-	if (ucache_stack_overflowed()) {
-		return false;
-	}
 
 	node_hdr_size = ucache_decode_node_hdr_size(gval->type);
 	if (node_hdr_size != 0 &&
@@ -2554,6 +3031,7 @@ static PHP_UCACHE_HOT bool ucache_sgraph_decode_val(
 
 	switch (gval->type) {
 		case UCACHE_SGRAPH_VAL_UNDEF:
+			return false;
 		case UCACHE_SGRAPH_VAL_NULL:
 		case UCACHE_SGRAPH_VAL_TRUE:
 		case UCACHE_SGRAPH_VAL_FALSE:
@@ -2575,7 +3053,12 @@ static PHP_UCACHE_HOT bool ucache_sgraph_decode_val(
 					return false;
 				}
 
-				ZVAL_ARR(dst, (zend_array *) (void *) (buf + gval->offset));
+				arr = (zend_array *) (void *) (buf + gval->offset);
+				if (!ucache_decode_verbatim_arr_ok(buf, buf_len, ucache_decode_snapshot_origin(), arr)) {
+					return false;
+				}
+
+				ZVAL_ARR(dst, arr);
 				Z_TYPE_FLAGS_P(dst) = 0;
 				if (UNEXPECTED(UC_G(owned_decode_frame) != NULL)) {
 					ZVAL_COPY_VALUE(&src, dst);
@@ -2587,25 +3070,35 @@ static PHP_UCACHE_HOT bool ucache_sgraph_decode_val(
 
 			return true;
 		case UCACHE_SGRAPH_VAL_DYNAMIC_ARR:
-			return ucache_sgraph_decode_dynamic_arr(buf, buf_len, gval, dst);
+			return ucache_decode_node_enter() &&
+				ucache_decode_node_leave(ucache_sgraph_decode_dynamic_arr(buf, buf_len, gval, dst))
+			;
 		case UCACHE_SGRAPH_VAL_SHAPED_ARR:
 			gsarr = (const ucache_sgraph_shaped_arr *) (buf + gval->offset);
 
-			return ucache_sgraph_decode_shaped_arr(
-				buf,
-				buf_len,
-				gsarr->shape_offset,
-				ucache_sgraph_shaped_arr_vals_offset(gval->offset),
-				gsarr->count,
-				gsarr->next_free,
-				dst
-			);
+			return ucache_decode_node_enter() &&
+				ucache_decode_node_leave(ucache_sgraph_decode_shaped_arr(
+					buf,
+					buf_len,
+					gsarr->shape_offset,
+					ucache_sgraph_shaped_arr_vals_offset(gval->offset),
+					gsarr->count,
+					gsarr->next_free,
+					dst
+				))
+			;
 		case UCACHE_SGRAPH_VAL_OBJ:
-			return ucache_sgraph_decode_obj(buf, buf_len, gval, false, dst);
+			return ucache_decode_node_enter() &&
+				ucache_decode_node_leave(ucache_sgraph_decode_obj(buf, buf_len, gval, false, dst))
+			;
 		case UCACHE_SGRAPH_VAL_SLEEP_OBJ:
-			return ucache_sgraph_decode_obj(buf, buf_len, gval, true, dst);
+			return ucache_decode_node_enter() &&
+				ucache_decode_node_leave(ucache_sgraph_decode_obj(buf, buf_len, gval, true, dst))
+			;
 		case UCACHE_SGRAPH_VAL_SLEEP_SHAPED_OBJ:
-			return ucache_sgraph_decode_sleep_shaped_obj(buf, buf_len, gval, dst);
+			return ucache_decode_node_enter() &&
+				ucache_decode_node_leave(ucache_sgraph_decode_sleep_shaped_obj(buf, buf_len, gval, dst))
+			;
 		case UCACHE_SGRAPH_VAL_OBJ_REF: {
 			shared_obj = ucache_decode_identity_map_find(gval->offset);
 			if (shared_obj == NULL) {
@@ -2619,17 +3112,25 @@ static PHP_UCACHE_HOT bool ucache_sgraph_decode_val(
 			return true;
 		}
 		case UCACHE_SGRAPH_VAL_SAFE_DIRECT_OBJ:
-			return ucache_sgraph_decode_safe_direct_obj(buf, buf_len, gval, dst);
+			return ucache_decode_node_enter() &&
+				ucache_decode_node_leave(ucache_sgraph_decode_safe_direct_obj(buf, buf_len, gval, dst))
+			;
 		case UCACHE_SGRAPH_VAL_SERIALIZED_OBJ:
-			return ucache_sgraph_decode_serialized_obj(buf, buf_len, gval, dst);
+			return ucache_decode_node_enter() &&
+				ucache_decode_node_leave(ucache_sgraph_decode_serialized_obj(buf, buf_len, gval, dst))
+			;
 		case UCACHE_SGRAPH_VAL_SERIALIZED_SHAPED_OBJ:
-			return ucache_sgraph_decode_serialized_shaped_obj(buf, buf_len, gval, dst);
+			return ucache_decode_node_enter() &&
+				ucache_decode_node_leave(ucache_sgraph_decode_serialized_shaped_obj(buf, buf_len, gval, dst))
+			;
 		case UCACHE_SGRAPH_VAL_SERDES_OBJ:
 			return ucache_sgraph_decode_serdes_obj(buf, buf_len, gval, dst);
 		case UCACHE_SGRAPH_VAL_ENUM:
 			return ucache_sgraph_decode_enum(buf, buf_len, gval, dst);
 		case UCACHE_SGRAPH_VAL_REF:
-			return ucache_sgraph_decode_ref(buf, buf_len, gval, dst);
+			return ucache_decode_node_enter() &&
+				ucache_decode_node_leave(ucache_sgraph_decode_ref(buf, buf_len, gval, dst))
+			;
 		case UCACHE_SGRAPH_VAL_REF_REF: {
 			shared_ref = ucache_decode_ref_map_find(gval->offset);
 
@@ -2646,6 +3147,19 @@ static PHP_UCACHE_HOT bool ucache_sgraph_decode_val(
 		default:
 			return false;
 	}
+}
+
+static PHP_UCACHE_HOT bool ucache_sgraph_decode_val(
+		const uint8_t *buf,
+		size_t buf_len,
+		const ucache_sgraph_val *gval,
+		zval *dst)
+{
+	if (ucache_stack_overflowed()) {
+		return false;
+	}
+
+	return ucache_sgraph_decode_node(buf, buf_len, gval, dst);
 }
 
 static bool ucache_sgraph_load_root_val(
@@ -3290,9 +3804,10 @@ void ucache_decode_maps_teardown(void)
 	ucache_decode_ref_map_teardown();
 
 	UC_G(decode_depth) = 0;
+	UC_G(decode_nesting) = 0;
 }
 
-PHP_UCACHE_HOT bool ucache_sgraph_decode(
+static PHP_UCACHE_HOT bool ucache_sgraph_decode_impl(
 		const uint8_t *buf,
 		size_t buf_len,
 		zval *dst)
@@ -3301,6 +3816,7 @@ PHP_UCACHE_HOT bool ucache_sgraph_decode(
 	const uint8_t *gbuf;
 	ucache_sgraph_val root_val;
 	zend_string *str;
+	zend_array *arr;
 	uint32_t depth;
 	bool result;
 
@@ -3348,7 +3864,14 @@ PHP_UCACHE_HOT bool ucache_sgraph_decode(
 				return false;
 			}
 
-			ZVAL_ARR(dst, (zend_array *) (void *) (buf + root_val.offset));
+			arr = (zend_array *) (void *) (buf + root_val.offset);
+			if (!ucache_decode_verbatim_arr_ok(buf, buf_len, NULL, arr)) {
+				ucache_decode_payload_addr_caches_release();
+
+				return false;
+			}
+
+			ZVAL_ARR(dst, arr);
 
 			Z_TYPE_FLAGS_P(dst) = 0;
 
@@ -3373,6 +3896,25 @@ PHP_UCACHE_HOT bool ucache_sgraph_decode(
 	return result;
 }
 
+PHP_UCACHE_HOT bool ucache_sgraph_decode(
+		const uint8_t *buf,
+		size_t buf_len,
+		uint64_t gen,
+		zval *dst)
+{
+	uint64_t prev_gen = UC_G(decode_payload_gen);
+	bool prev_validated = UC_G(decode_payload_validated), validated, result;
+
+	validated = ucache_decode_payload_begin(buf, gen);
+	result = ucache_sgraph_decode_impl(buf, buf_len, dst);
+	ucache_decode_payload_end(buf, validated, result);
+
+	UC_G(decode_payload_validated) = prev_validated;
+	UC_G(decode_payload_gen) = prev_gen;
+
+	return result;
+}
+
 ucache_sgraph_snapshot *ucache_sgraph_snapshot_create(const uint8_t *buf, size_t buf_len)
 {
 	const uint8_t *gbuf;
@@ -3393,7 +3935,18 @@ ucache_sgraph_snapshot *ucache_sgraph_snapshot_create(const uint8_t *buf, size_t
 	return snapshot;
 }
 
-bool ucache_sgraph_decode_snapshot(ucache_sgraph_snapshot *snapshot, zval *dst)
+bool ucache_sgraph_decode_snapshot(ucache_sgraph_snapshot *snapshot, uint64_t gen, zval *dst)
 {
-	return ucache_sgraph_decode_owned(snapshot->data, snapshot->len, snapshot, dst);
+	const uint8_t *origin = snapshot->origin;
+	uint64_t prev_gen = UC_G(decode_payload_gen);
+	bool prev_validated = UC_G(decode_payload_validated), validated, result;
+
+	validated = ucache_decode_payload_begin(origin, gen);
+	result = ucache_sgraph_decode_owned(snapshot->data, snapshot->len, snapshot, dst);
+	ucache_decode_payload_end(origin, validated, result);
+
+	UC_G(decode_payload_validated) = prev_validated;
+	UC_G(decode_payload_gen) = prev_gen;
+
+	return result;
 }

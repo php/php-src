@@ -448,6 +448,38 @@ $queue->hook = static function (StoringQueue $queue): void {
 };
 $queue->insert('b', 2);
 var_dump($cache->has('modified'));
+
+/* ArrayObject and ArrayIterator are cached with array storage only; object-backed storage is refused at store time, so no deprecation can fire mid-fetch */
+echo "\narray storage only:\n";
+$cache = UserCache\Cache::getPool('spl-array-storage-only');
+$deprecations = 0;
+set_error_handler(static function (int $errno) use (&$deprecations): bool {
+    if ($errno !== E_DEPRECATED) {
+        return false;
+    }
+    $deprecations++;
+
+    return true;
+});
+$objectBacked = new ArrayObject((object) ['k' => 1]);
+$objectBackedIterator = new ArrayIterator((object) ['k' => 2]);
+$wrappingOther = new ArrayObject(new ArrayObject(['o' => 3]));
+$self = new ArrayObject();
+$self->exchangeArray($self);
+var_dump($deprecations);
+foreach (['object-backed' => $objectBacked, 'object-backed-iterator' => $objectBackedIterator, 'wrapping-other' => $wrappingOther] as $key => $value) {
+    try {
+        var_dump($cache->store($key, $value));
+    } catch (TypeError $e) {
+        echo $key, ': ', $e->getMessage(), "\n";
+    }
+    var_dump($cache->has($key));
+}
+var_dump($cache->store('self', $self));
+$fetchedSelf = $cache->fetch('self');
+var_dump($fetchedSelf instanceof ArrayObject, serialize($fetchedSelf) === serialize($self));
+var_dump($deprecations);
+restore_error_handler();
 ?>
 --EXPECT--
 bool(true)
@@ -561,3 +593,16 @@ bool(false)
 serialize: RuntimeException: Cannot serialize heap while it is being modified.
 store: RuntimeException: Cannot serialize heap while it is being modified.
 bool(false)
+
+array storage only:
+int(4)
+object-backed: The state of the ArrayObject object cannot be stored in the user cache
+bool(false)
+object-backed-iterator: The state of the ArrayIterator object cannot be stored in the user cache
+bool(false)
+wrapping-other: The state of the ArrayObject object cannot be stored in the user cache
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+int(4)

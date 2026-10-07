@@ -438,16 +438,14 @@ static bool ucache_win32_open_lock_file_at(
 
 	storage->lock_file = php_win32_ioutil_open(
 		lockfile_name,
-		O_RDWR | O_CREAT | O_BINARY | (delete_on_close ? _O_TEMPORARY : 0),
+		O_RDWR | O_CREAT | O_BINARY | (delete_on_close ? _O_TEMPORARY | O_EXCL : 0),
 		0666
 	);
 	if (storage->lock_file < 0) {
 		return false;
 	}
 
-	if (!delete_on_close &&
-		!ucache_win32_owned_by_cur_user((HANDLE) _get_osfhandle(storage->lock_file), SE_FILE_OBJECT)
-	) {
+	if (!ucache_win32_owned_by_cur_user((HANDLE) _get_osfhandle(storage->lock_file), SE_FILE_OBJECT)) {
 		php_win32_ioutil_close(storage->lock_file);
 		storage->lock_file = -1;
 
@@ -1304,4 +1302,9 @@ void ucache_unlock_if_held(void)
 	if (UC_G(lock_held)) {
 		ucache_unlock();
 	}
+}
+
+uint32_t ucache_sleep_us(uint32_t interval_us)
+{
+	return ucache_platform.sleep_us(interval_us);
 }

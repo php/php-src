@@ -124,12 +124,20 @@ static zend_always_inline void ucache_pool_idx_link_locked(
 {
 	ucache_pool_links *links = ucache_pool_links_ptr(hdr);
 	ucache_pool_links *link = &links[slot];
-	uint32_t bucket = ucache_entry_pool_bucket(entry), ref = ucache_pool_link_ref(slot);
+	uint32_t bucket = ucache_entry_pool_bucket(entry), ref = ucache_pool_link_ref(slot),
+		head = hdr->pool_bucket_heads[bucket]
+	;
+
+	ZEND_ASSERT(ucache_pool_link_ref_fits(hdr, head));
+
+	if (!ucache_pool_link_ref_fits(hdr, head)) {
+		head = 0;
+	}
 
 	link->prev = 0;
-	link->next = hdr->pool_bucket_heads[bucket];
-	if (link->next != 0) {
-		links[ucache_pool_link_ref_slot(link->next)].prev = ref;
+	link->next = head;
+	if (head != 0) {
+		links[ucache_pool_link_ref_slot(head)].prev = ref;
 	}
 
 	hdr->pool_bucket_heads[bucket] = ref;
@@ -1104,6 +1112,7 @@ static bool ucache_materialize_sgraph_locked(
 		const ucache_hdr *hdr,
 		uint32_t val_offset,
 		uint32_t val_len,
+		uint64_t gen,
 		zval *return_value,
 		bool *lock_held,
 		bool *private_copy)
@@ -1166,10 +1175,11 @@ static bool ucache_materialize_sgraph_locked(
 	*private_copy = snapshot != NULL;
 
 	result = snapshot != NULL
-		? ucache_sgraph_decode_snapshot(snapshot, return_value)
+		? ucache_sgraph_decode_snapshot(snapshot, gen, return_value)
 		: ucache_sgraph_decode(
 			ucache_ptr_in_hdr(hdr, val_offset),
 			val_len,
+			gen,
 			return_value
 		)
 	;
@@ -2360,6 +2370,7 @@ static bool ucache_fetch_emit_val_locked(
 					hdr,
 					entry->val_offset,
 					val_len,
+					entry->gen,
 					return_value,
 					lock_held,
 					&private_copy
@@ -2673,6 +2684,7 @@ static zend_never_inline ucache_optimistic_result ucache_optimistic_decode_owned
 	decoded = ucache_sgraph_decode(
 		ucache_ptr_in_hdr(hdr, snapshot->val_offset),
 		snapshot->val_len,
+		snapshot->gen,
 		return_value
 	);
 	if (!decoded && Z_TYPE_P(return_value) != IS_UNDEF) {
@@ -2786,6 +2798,7 @@ static ucache_optimistic_result ucache_optimistic_emit_sgraph(
 	if (!ucache_sgraph_decode(
 			ucache_ptr_in_hdr(hdr, snapshot->val_offset),
 			snapshot->val_len,
+			snapshot->gen,
 			return_value
 		)
 	) {
@@ -2975,7 +2988,7 @@ bool ucache_prepare_val(
 {
 	HashTable verbatim_verdicts;
 	size_t verbatim_glen = 0;
-	bool has_verbatim_verdicts = false, result;
+	bool has_verbatim_verdicts = false, result, outer_pass_overflowed = UC_G(stack_overflowed);
 
 	ucache_init_prepared_val(prepared);
 
@@ -3023,6 +3036,10 @@ bool ucache_prepare_val(
 done:
 	if (has_verbatim_verdicts) {
 		zend_hash_destroy(&verbatim_verdicts);
+	}
+
+	if (outer_pass_overflowed) {
+		UC_G(stack_overflowed) = true;
 	}
 
 	return result;
@@ -3363,7 +3380,7 @@ void ucache_delete_by_prefix_locked(zend_string *prefix)
 	ucache_hdr *hdr;
 	ucache_entry *entries, *entry;
 	ucache_pool_links *links;
-	uint32_t bucket, ref, next, slot;
+	uint32_t bucket, ref, next, slot, walked = 0;
 
 	hdr = ucache_hdr_ptr();
 	if (hdr == NULL || !ucache_hdr_adoptable_locked()) {
@@ -3374,7 +3391,17 @@ void ucache_delete_by_prefix_locked(zend_string *prefix)
 	links = ucache_pool_links_ptr(hdr);
 	bucket = (uint32_t) (zend_string_hash_val(prefix) & (UCACHE_POOL_BUCKETS - 1));
 	for (ref = hdr->pool_bucket_heads[bucket]; ref != 0; ref = next) {
-		ZEND_ASSERT(ref <= hdr->capacity);
+		ZEND_ASSERT(ucache_pool_link_ref_fits(hdr, ref) && walked < hdr->capacity);
+
+		if (!ucache_pool_link_ref_fits(hdr, ref) || walked == hdr->capacity) {
+			hdr->pool_bucket_heads[bucket] = 0;
+
+			ucache_pool_bucket_changed_locked(hdr, bucket);
+
+			break;
+		}
+
+		walked++;
 		slot = ucache_pool_link_ref_slot(ref);
 		entry = &entries[slot];
 		next = links[slot].next;

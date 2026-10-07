@@ -18,6 +18,8 @@
 # define UCACHE_DEBUG_RESERVED_DATA_END	(((uint64_t) 1 << 32) - 64 * 1024)
 #endif
 
+#define UCACHE_BLOCK_MIN_UNITS	(UCACHE_BLOCK_MIN_SIZE / UCACHE_OFFSET_UNIT)
+
 #ifdef ZEND_WIN32
 static bool ucache_win32_ensure_committed_locked(ucache_hdr *hdr, uint64_t end_bytes);
 static void ucache_win32_reset_released_tail_locked(ucache_hdr *hdr);
@@ -47,6 +49,44 @@ static zend_always_inline uint32_t ucache_prev_block_size(const ucache_block *bl
 	memcpy(&prev_size, (const uint8_t *) block - sizeof(prev_size), sizeof(prev_size));
 
 	return prev_size;
+}
+
+static zend_always_inline uint32_t ucache_data_start_offset(const ucache_hdr *hdr)
+{
+	return ucache_offset_from_bytes(hdr->data_offset);
+}
+
+static zend_always_inline bool ucache_block_offset_in_used(
+		uint32_t block_offset,
+		uint32_t data_start,
+		uint32_t used_end)
+{
+	return block_offset >= data_start &&
+		(uint64_t) block_offset + UCACHE_BLOCK_MIN_UNITS <= used_end
+	;
+}
+
+static zend_always_inline bool ucache_block_size_fits_used(
+		uint32_t block_offset,
+		uint32_t block_size,
+		uint32_t used_end)
+{
+	return block_size >= UCACHE_BLOCK_MIN_SIZE &&
+		block_size % UCACHE_OFFSET_UNIT == 0 &&
+		(uint64_t) block_offset + block_size / UCACHE_OFFSET_UNIT <= used_end
+	;
+}
+
+static zend_always_inline bool ucache_prev_block_reachable(
+		uint32_t block_offset,
+		uint32_t prev_size,
+		uint32_t data_start)
+{
+	return prev_size >= UCACHE_BLOCK_MIN_SIZE &&
+		prev_size % UCACHE_OFFSET_UNIT == 0 &&
+		block_offset >= data_start &&
+		block_offset - data_start >= prev_size / UCACHE_OFFSET_UNIT
+	;
 }
 
 static zend_always_inline void ucache_block_set_prev_free_locked(
@@ -183,24 +223,30 @@ static void ucache_free_list_remove_locked(ucache_hdr *hdr, uint32_t block_offse
 	ucache_block *block = ucache_block_ptr_in_hdr(hdr, block_offset);
 	ucache_free_links *links = ucache_block_links(block);
 	uint32_t size = ucache_block_size(block), bin = ucache_size_class(size),
+		prev_free = links->prev_free, next_free = links->next_free,
+		data_start = ucache_data_start_offset(hdr), used_end = ucache_used_end_offset_locked(hdr),
 		*bins = ucache_free_bins_ptr(hdr)
 	;
 
 	ZEND_ASSERT(hdr->free_list_bytes >= size && bin < hdr->free_bin_count);
+	ZEND_ASSERT(prev_free == 0 || ucache_block_offset_in_used(prev_free, data_start, used_end));
+	ZEND_ASSERT(next_free == 0 || ucache_block_offset_in_used(next_free, data_start, used_end));
 
-	hdr->free_list_bytes -= size;
+	hdr->free_list_bytes = hdr->free_list_bytes >= size ? hdr->free_list_bytes - size : 0;
 
-	if (links->prev_free != 0) {
-		ucache_free_links_at(hdr, links->prev_free)->next_free = links->next_free;
-	} else {
-		bins[bin] = links->next_free;
+	if (prev_free != 0) {
+		if (ucache_block_offset_in_used(prev_free, data_start, used_end)) {
+			ucache_free_links_at(hdr, prev_free)->next_free = next_free;
+		}
+	} else if (bin < hdr->free_bin_count) {
+		bins[bin] = next_free;
 	}
 
-	if (links->next_free != 0) {
-		ucache_free_links_at(hdr, links->next_free)->prev_free = links->prev_free;
+	if (next_free != 0 && ucache_block_offset_in_used(next_free, data_start, used_end)) {
+		ucache_free_links_at(hdr, next_free)->prev_free = prev_free;
 	}
 
-	if (bins[bin] == 0) {
+	if (bin < hdr->free_bin_count && bins[bin] == 0) {
 		ucache_free_bin_mask_ptr(hdr)[bin / 32U] &= ~(1U << (bin % 32U));
 	}
 
@@ -215,9 +261,25 @@ static void ucache_free_list_insert_locked(
 {
 	ucache_block *block = ucache_block_ptr_in_hdr(hdr, block_offset);
 	ucache_free_links *links = ucache_block_links(block);
-	uint32_t bin = ucache_size_class(size), *bins = ucache_free_bins_ptr(hdr);
+	uint32_t bin = ucache_size_class(size), next_free,
+		data_start = ucache_data_start_offset(hdr), used_end = ucache_used_end_offset_locked(hdr),
+		*bins = ucache_free_bins_ptr(hdr)
+	;
 
 	ZEND_ASSERT((uint64_t) hdr->free_list_bytes + size <= hdr->next_free && bin < hdr->free_bin_count);
+	ZEND_ASSERT(ucache_block_size_fits_used(block_offset, size, used_end));
+
+	if (bin >= hdr->free_bin_count || !ucache_block_size_fits_used(block_offset, size, used_end)) {
+		return;
+	}
+
+	next_free = bins[bin];
+
+	ZEND_ASSERT(next_free == 0 || ucache_block_offset_in_used(next_free, data_start, used_end));
+
+	if (next_free != 0 && !ucache_block_offset_in_used(next_free, data_start, used_end)) {
+		next_free = 0;
+	}
 
 	hdr->free_list_bytes += size;
 
@@ -227,9 +289,9 @@ static void ucache_free_list_insert_locked(
 	memcpy((uint8_t *) block + size - sizeof(uint32_t), &size, sizeof(size));
 
 	links->prev_free = 0;
-	links->next_free = bins[bin];
-	if (links->next_free != 0) {
-		ucache_free_links_at(hdr, links->next_free)->prev_free = block_offset;
+	links->next_free = next_free;
+	if (next_free != 0) {
+		ucache_free_links_at(hdr, next_free)->prev_free = block_offset;
 	}
 
 	bins[bin] = block_offset;
@@ -240,11 +302,29 @@ static void ucache_free_list_insert_locked(
 
 static void ucache_trim_tail_locked(ucache_hdr *hdr, uint32_t block_offset)
 {
-	ucache_block *block = ucache_block_ptr_in_hdr(hdr, block_offset);
+	ucache_block *block = ucache_block_ptr_in_hdr(hdr, block_offset), *prev;
+	uint32_t data_start = ucache_data_start_offset(hdr), prev_size, prev_offset;
 
 	while (ucache_block_prev_is_free(block)) {
-		block_offset -= ucache_offset_from_bytes(ucache_prev_block_size(block));
-		block = ucache_block_ptr_in_hdr(hdr, block_offset);
+		prev_size = ucache_prev_block_size(block);
+
+		ZEND_ASSERT(ucache_prev_block_reachable(block_offset, prev_size, data_start));
+
+		if (!ucache_prev_block_reachable(block_offset, prev_size, data_start)) {
+			break;
+		}
+
+		prev_offset = block_offset - ucache_offset_from_bytes(prev_size);
+		prev = ucache_block_ptr_in_hdr(hdr, prev_offset);
+
+		ZEND_ASSERT(ucache_block_is_free(prev) && ucache_block_size(prev) == prev_size);
+
+		if (!ucache_block_is_free(prev) || ucache_block_size(prev) != prev_size) {
+			break;
+		}
+
+		block_offset = prev_offset;
+		block = prev;
 
 		ucache_free_list_remove_locked(hdr, block_offset);
 	}
@@ -306,10 +386,18 @@ static uint32_t ucache_alloc_from_free_list_locked(
 		uint32_t owner)
 {
 	ucache_block *block, *next;
-	uint32_t block_offset, block_size, remainder, prev_flag, next_offset;
+	uint32_t block_offset, block_size, remainder, prev_flag, next_offset, next_size,
+		data_start = ucache_data_start_offset(hdr), used_end = ucache_used_end_offset_locked(hdr)
+	;
 
 	block_offset = ucache_free_block_at_least_locked(hdr, total_size);
 	if (block_offset == 0) {
+		return 0;
+	}
+
+	ZEND_ASSERT(ucache_block_offset_in_used(block_offset, data_start, used_end));
+
+	if (!ucache_block_offset_in_used(block_offset, data_start, used_end)) {
 		return 0;
 	}
 
@@ -317,21 +405,36 @@ static uint32_t ucache_alloc_from_free_list_locked(
 	block_size = ucache_block_size(block);
 	prev_flag = block->size & UCACHE_BLOCK_PREV_FREE;
 
+	ZEND_ASSERT(ucache_block_is_free(block) && block_size >= total_size);
+	ZEND_ASSERT(ucache_block_size_fits_used(block_offset, block_size, used_end));
+
+	if (!ucache_block_is_free(block) ||
+		block_size < total_size ||
+		!ucache_block_size_fits_used(block_offset, block_size, used_end)
+	) {
+		return 0;
+	}
+
 	ucache_free_list_remove_locked(hdr, block_offset);
 
 	remainder = block_size - total_size;
 	if (remainder >= UCACHE_BLOCK_MIN_SIZE) {
 		next_offset = ucache_offset_after(block_offset, block_size);
 
-		ZEND_ASSERT(next_offset != ucache_used_end_offset_locked(hdr));
+		ZEND_ASSERT(next_offset != used_end);
 
-		next = ucache_block_ptr_in_hdr(hdr, next_offset);
-		if (ucache_block_is_free(next) &&
-			(uint64_t) remainder + ucache_block_size(next) <= ucache_block_merge_limit()
-		) {
-			remainder += ucache_block_size(next);
+		if (next_offset < used_end) {
+			next = ucache_block_ptr_in_hdr(hdr, next_offset);
+			next_size = ucache_block_size(next);
 
-			ucache_free_list_remove_locked(hdr, next_offset);
+			if (ucache_block_is_free(next) &&
+				(uint64_t) remainder + next_size <= ucache_block_merge_limit() &&
+				ucache_block_size_fits_used(next_offset, next_size, used_end)
+			) {
+				remainder += next_size;
+
+				ucache_free_list_remove_locked(hdr, next_offset);
+			}
 		}
 
 		ucache_free_list_insert_locked(hdr, ucache_offset_after(block_offset, total_size), remainder, false);
@@ -382,28 +485,48 @@ uint64_t ucache_committed_bytes_locked(const ucache_hdr *hdr)
 uint32_t ucache_free_locked(uint32_t payload_offset)
 {
 	ucache_hdr *hdr = ucache_hdr_ptr();
-	ucache_block *block, *next;
-	uint32_t block_offset, size, next_offset, next_size, prev_size, used_end, merge_limit = ucache_block_merge_limit();
+	ucache_block *block, *next, *prev;
+	uint32_t block_offset, size, next_offset, next_size, prev_offset, prev_size, data_start, used_end,
+		merge_limit = ucache_block_merge_limit()
+	;
 
 	if (hdr == NULL || payload_offset < UCACHE_BLOCK_HDR_UNITS) {
 		return 0;
 	}
 
 	block_offset = ucache_payload_block_offset(payload_offset);
+	data_start = ucache_data_start_offset(hdr);
+	used_end = ucache_used_end_offset_locked(hdr);
+
+	ZEND_ASSERT(ucache_block_offset_in_used(block_offset, data_start, used_end));
+
+	if (!ucache_block_offset_in_used(block_offset, data_start, used_end)) {
+		return 0;
+	}
+
 	block = ucache_block_ptr_in_hdr(hdr, block_offset);
 	if (ucache_block_is_free(block)) {
 		return 0;
 	}
 
 	size = ucache_block_size(block);
-	used_end = ucache_used_end_offset_locked(hdr);
+
+	ZEND_ASSERT(ucache_block_size_fits_used(block_offset, size, used_end));
+
+	if (!ucache_block_size_fits_used(block_offset, size, used_end)) {
+		return 0;
+	}
 
 	next_offset = ucache_offset_after(block_offset, size);
 	next = (ucache_block *) ((uint8_t *) block + size);
 	if (next_offset < used_end && ucache_block_is_free(next)) {
 		next_size = ucache_block_size(next);
 
-		if ((uint64_t) size + next_size <= merge_limit) {
+		ZEND_ASSERT(ucache_block_size_fits_used(next_offset, next_size, used_end));
+
+		if ((uint64_t) size + next_size <= merge_limit &&
+			ucache_block_size_fits_used(next_offset, next_size, used_end)
+		) {
 			size += next_size;
 
 			ucache_free_list_remove_locked(hdr, next_offset);
@@ -419,12 +542,23 @@ uint32_t ucache_free_locked(uint32_t payload_offset)
 	if (ucache_block_prev_is_free(block)) {
 		prev_size = ucache_prev_block_size(block);
 
-		if ((uint64_t) size + prev_size <= merge_limit) {
-			block_offset -= ucache_offset_from_bytes(prev_size);
-			block = ucache_block_ptr_in_hdr(hdr, block_offset);
-			size += prev_size;
+		ZEND_ASSERT(ucache_prev_block_reachable(block_offset, prev_size, data_start));
 
-			ucache_free_list_remove_locked(hdr, block_offset);
+		if ((uint64_t) size + prev_size <= merge_limit &&
+			ucache_prev_block_reachable(block_offset, prev_size, data_start)
+		) {
+			prev_offset = block_offset - ucache_offset_from_bytes(prev_size);
+			prev = ucache_block_ptr_in_hdr(hdr, prev_offset);
+
+			ZEND_ASSERT(ucache_block_is_free(prev) && ucache_block_size(prev) == prev_size);
+
+			if (ucache_block_is_free(prev) && ucache_block_size(prev) == prev_size) {
+				block_offset = prev_offset;
+				block = prev;
+				size += prev_size;
+
+				ucache_free_list_remove_locked(hdr, block_offset);
+			}
 		}
 	}
 
@@ -435,21 +569,41 @@ uint32_t ucache_free_locked(uint32_t payload_offset)
 
 void ucache_shrink_locked(uint32_t payload_offset, size_t payload_size)
 {
+	ucache_hdr *hdr = ucache_hdr_ptr();
 	ucache_block *block, *tail;
-	uint32_t block_offset = ucache_payload_block_offset(payload_offset), tail_offset, block_size;
+	uint32_t block_offset, tail_offset, block_size, used_end;
 	size_t total_size = ucache_block_total_size(payload_size);
 
-	block = ucache_block_ptr(block_offset);
+	if (hdr == NULL || payload_offset < UCACHE_BLOCK_HDR_UNITS) {
+		return;
+	}
+
+	block_offset = ucache_payload_block_offset(payload_offset);
+	used_end = ucache_used_end_offset_locked(hdr);
+
+	ZEND_ASSERT(ucache_block_offset_in_used(block_offset, ucache_data_start_offset(hdr), used_end));
+
+	if (!ucache_block_offset_in_used(block_offset, ucache_data_start_offset(hdr), used_end)) {
+		return;
+	}
+
+	block = ucache_block_ptr_in_hdr(hdr, block_offset);
 	block_size = ucache_block_size(block);
 
-	if (total_size >= block_size || block_size - total_size < UCACHE_BLOCK_MIN_SIZE) {
+	ZEND_ASSERT(!ucache_block_is_free(block) && ucache_block_size_fits_used(block_offset, block_size, used_end));
+
+	if (ucache_block_is_free(block) ||
+		!ucache_block_size_fits_used(block_offset, block_size, used_end) ||
+		total_size >= block_size ||
+		block_size - total_size < UCACHE_BLOCK_MIN_SIZE
+	) {
 		return;
 	}
 
 	block->size = (uint32_t) total_size | (block->size & UCACHE_BLOCK_PREV_FREE);
 
 	tail_offset = ucache_offset_after(block_offset, total_size);
-	tail = ucache_block_ptr(tail_offset);
+	tail = ucache_block_ptr_in_hdr(hdr, tail_offset);
 	tail->size = block_size - (uint32_t) total_size;
 	tail->owner = UCACHE_BLOCK_OWNER_NONE;
 

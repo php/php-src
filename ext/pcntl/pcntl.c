@@ -29,6 +29,7 @@
 #include "ext/standard/info.h"
 #include "ext/standard/php_filestat.h"
 #include "php_signal.h"
+#include "ext/user_cache/php_user_cache.h"
 #include "php_ticks.h"
 #include "zend_exceptions.h"
 #include "zend_fibers.h"
@@ -271,8 +272,12 @@ PHP_FUNCTION(pcntl_fork)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
+	php_ucache_fork_prepare();
+
 	id = fork();
 	if (id == -1) {
+		php_ucache_fork_cancel();
+
 		PCNTL_G(last_error) = errno;
 		switch (errno) {
 			case EAGAIN:
@@ -1586,9 +1591,13 @@ PHP_FUNCTION(pcntl_rfork)
 	}
 #endif
 
+	php_ucache_fork_prepare();
+
 	pid = rfork(flags);
 
 	if (pid == -1) {
+		php_ucache_fork_cancel();
+
 		PCNTL_G(last_error) = errno;
 		switch (errno) {
 			case EAGAIN:
@@ -1626,9 +1635,13 @@ PHP_FUNCTION(pcntl_forkx)
 		RETURN_THROWS();
 	}
 
+	php_ucache_fork_prepare();
+
 	pid = forkx(flags);
 
 	if (pid == -1) {
+		php_ucache_fork_cancel();
+
 		PCNTL_G(last_error) = errno;
 		switch (errno) {
 			case EAGAIN:

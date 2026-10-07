@@ -5888,10 +5888,16 @@ static bool php_date_period_initialize_from_hash(php_period_obj *period_obj, con
 	return true;
 } /* }}} */
 
-#define PHP_DATE_UCACHE_STATE_TIMEZONE		"timezone"
-#define PHP_DATE_UCACHE_STATE_TIMEZONE_LEN	strlen(PHP_DATE_UCACHE_STATE_TIMEZONE)
-#define PHP_DATE_UCACHE_STATE_CTIME			"ctime"
-#define PHP_DATE_UCACHE_STATE_CTIME_LEN		strlen(PHP_DATE_UCACHE_STATE_CTIME)
+#define PHP_DATE_UCACHE_STATE_TIMEZONE			"timezone"
+#define PHP_DATE_UCACHE_STATE_TIMEZONE_LEN		strlen(PHP_DATE_UCACHE_STATE_TIMEZONE)
+#define PHP_DATE_UCACHE_STATE_CTIME				"ctime"
+#define PHP_DATE_UCACHE_STATE_CTIME_LEN			strlen(PHP_DATE_UCACHE_STATE_CTIME)
+#define PHP_DATE_UCACHE_MAX_ABS_YEAR			292277026596LL
+#define PHP_DATE_UCACHE_MAX_ABS_UTC_OFFSET		(100 * 60 * 60)
+#define PHP_DATE_UCACHE_US_PER_SECOND			1000000
+#define PHP_DATE_UCACHE_MAX_ABS_WEEKDAY			7
+#define PHP_DATE_UCACHE_MAX_WEEKDAY_BEHAVIOR	2
+#define PHP_DATE_UCACHE_REL_UNSET				-1
 
 static void php_date_ucache_copy_rel_time_zero_padded(timelib_rel_time *dst, const timelib_rel_time *src)
 {
@@ -6132,6 +6138,150 @@ static bool php_date_ucache_time_to_hash(
 	return true;
 }
 
+static bool php_date_ucache_flag_is_valid(unsigned int flag)
+{
+	return flag <= 1;
+}
+
+static bool php_date_ucache_rel_time_is_valid(const timelib_rel_time *rel)
+{
+	if (rel->weekday < -PHP_DATE_UCACHE_MAX_ABS_WEEKDAY || rel->weekday > PHP_DATE_UCACHE_MAX_ABS_WEEKDAY ||
+		rel->weekday_behavior < PHP_DATE_UCACHE_REL_UNSET || rel->weekday_behavior > PHP_DATE_UCACHE_MAX_WEEKDAY_BEHAVIOR ||
+		(rel->invert != 0 && rel->invert != 1) ||
+		rel->days < TIMELIB_UNSET ||
+		!php_date_ucache_flag_is_valid(rel->have_weekday_relative) ||
+		!php_date_ucache_flag_is_valid(rel->have_special_relative)
+	) {
+		return false;
+	}
+
+	switch (rel->first_last_day_of) {
+		case PHP_DATE_UCACHE_REL_UNSET:
+		case 0:
+		case TIMELIB_SPECIAL_FIRST_DAY_OF_MONTH:
+		case TIMELIB_SPECIAL_LAST_DAY_OF_MONTH:
+			break;
+		default:
+			return false;
+	}
+
+	switch (rel->special.type) {
+		case 0:
+		case TIMELIB_SPECIAL_WEEKDAY:
+		case TIMELIB_SPECIAL_DAY_OF_WEEK_IN_MONTH:
+		case TIMELIB_SPECIAL_LAST_DAY_OF_WEEK_IN_MONTH:
+			return true;
+		default:
+			return false;
+	}
+}
+
+static timelib_rel_time *php_date_ucache_rel_time_from_hash(const HashTable *props, const char *key, size_t key_len)
+{
+	timelib_rel_time *rel;
+	zval *z_rel;
+
+	z_rel = zend_hash_str_find(props, key, key_len);
+	if (z_rel == NULL || Z_TYPE_P(z_rel) != IS_STRING ||
+		Z_STRLEN_P(z_rel) != sizeof(timelib_rel_time)
+	) {
+		return NULL;
+	}
+
+	rel = timelib_rel_time_ctor();
+
+	memcpy(rel, Z_STRVAL_P(z_rel), sizeof(timelib_rel_time));
+
+	if (!php_date_ucache_rel_time_is_valid(rel)) {
+		timelib_rel_time_dtor(rel);
+
+		return NULL;
+	}
+
+	return rel;
+}
+
+static bool php_date_ucache_time_has_pending_relative(const timelib_time *time)
+{
+	return time->have_relative != 0 ||
+		time->relative.have_weekday_relative != 0 ||
+		time->relative.have_special_relative != 0 ||
+		time->relative.first_last_day_of != 0;
+}
+
+static bool php_date_ucache_time_is_valid(const timelib_time *time)
+{
+	switch (time->zone_type) {
+		case TIMELIB_ZONETYPE_ID:
+		case TIMELIB_ZONETYPE_ABBR:
+			break;
+		case TIMELIB_ZONETYPE_OFFSET:
+			if (time->dst != 0) {
+				return false;
+			}
+			break;
+		default:
+			return false;
+	}
+
+	if (time->is_localtime != 1 ||
+		time->y < -PHP_DATE_UCACHE_MAX_ABS_YEAR || time->y > PHP_DATE_UCACHE_MAX_ABS_YEAR ||
+		time->m < 1 || time->m > 12 ||
+		time->d < 1 || time->d > 31 ||
+		time->h < 0 || time->h > 23 ||
+		time->i < 0 || time->i > 59 ||
+		time->s < 0 || time->s > 59 ||
+		time->us < 0 || time->us >= PHP_DATE_UCACHE_US_PER_SECOND ||
+		time->z <= -PHP_DATE_UCACHE_MAX_ABS_UTC_OFFSET || time->z >= PHP_DATE_UCACHE_MAX_ABS_UTC_OFFSET ||
+		(time->dst != 0 && time->dst != 1) ||
+		!php_date_ucache_flag_is_valid(time->have_time) ||
+		!php_date_ucache_flag_is_valid(time->have_date) ||
+		!php_date_ucache_flag_is_valid(time->have_zone) ||
+		!php_date_ucache_flag_is_valid(time->have_weeknr_day) ||
+		!php_date_ucache_flag_is_valid(time->sse_uptodate) ||
+		!php_date_ucache_flag_is_valid(time->tim_uptodate) ||
+		php_date_ucache_time_has_pending_relative(time)
+	) {
+		return false;
+	}
+
+	return php_date_ucache_rel_time_is_valid(&time->relative);
+}
+
+static bool php_date_ucache_abbr_matches_time(const char *abbr, const timelib_time *time)
+{
+	const char *cursor = abbr;
+	timelib_time probe;
+	timelib_long offset;
+	bool matches;
+	int dst = 0, not_found = 0;
+
+	memset(&probe, 0, sizeof(probe));
+
+	offset = timelib_parse_zone(&cursor, &dst, &probe, &not_found, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
+	matches = !not_found && *cursor == '\0' &&
+		probe.zone_type == TIMELIB_ZONETYPE_ABBR &&
+		offset == time->z && dst == time->dst
+	;
+
+	timelib_free(probe.tz_abbr);
+
+	return matches;
+}
+
+static bool php_date_ucache_state_get_zone_name(const HashTable *props, const char *key, size_t key_len, zend_string **name)
+{
+	return php_date_ucache_state_get_str(props, key, key_len, name) &&
+		ZSTR_LEN(*name) != 0 &&
+		!zend_str_has_nul_byte(*name);
+}
+
+static void php_date_ucache_time_normalize(timelib_time *time)
+{
+	timelib_update_ts(time, time->tz_info);
+	timelib_update_from_sse(time);
+}
+
 static timelib_time *php_date_ucache_time_from_hash(
 		const HashTable *props,
 		const char *ctime_key, size_t ctime_key_len,
@@ -6139,7 +6289,8 @@ static timelib_time *php_date_ucache_time_from_hash(
 {
 	timelib_time *time;
 	timelib_tzinfo *tzi;
-	zval *z_ctime, *z_timezone;
+	zend_string *zone_name;
+	zval *z_ctime;
 
 	z_ctime = zend_hash_str_find(props, ctime_key, ctime_key_len);
 	if (z_ctime == NULL || Z_TYPE_P(z_ctime) != IS_STRING ||
@@ -6154,50 +6305,44 @@ static timelib_time *php_date_ucache_time_from_hash(
 	time->tz_abbr = NULL;
 	time->tz_info = NULL;
 
-	if (!time->is_localtime) {
-		return time;
+	if (!php_date_ucache_time_is_valid(time)) {
+		goto bailout;
 	}
 
 	switch (time->zone_type) {
 		case TIMELIB_ZONETYPE_ID:
-			z_timezone = zend_hash_str_find(props, tz_key, tz_key_len);
-			if (z_timezone == NULL || Z_TYPE_P(z_timezone) != IS_STRING ||
-				UNEXPECTED(zend_str_has_nul_byte(Z_STR_P(z_timezone)))
-			) {
-				timelib_time_dtor(time);
-
-				return NULL;
+			if (!php_date_ucache_state_get_zone_name(props, tz_key, tz_key_len, &zone_name)) {
+				goto bailout;
 			}
 
-			tzi = php_date_parse_tzfile(Z_STRVAL_P(z_timezone), DATE_TIMEZONEDB);
+			tzi = php_date_parse_tzfile(ZSTR_VAL(zone_name), DATE_TIMEZONEDB);
 			if (tzi == NULL) {
-				timelib_time_dtor(time);
-
-				return NULL;
+				goto bailout;
 			}
 			time->tz_info = tzi;
 			break;
-		case TIMELIB_ZONETYPE_OFFSET:
-			break;
 		case TIMELIB_ZONETYPE_ABBR:
-			z_timezone = zend_hash_str_find(props, tz_key, tz_key_len);
-			if (z_timezone == NULL || Z_TYPE_P(z_timezone) != IS_STRING ||
-				UNEXPECTED(zend_str_has_nul_byte(Z_STR_P(z_timezone)))
+			if (!php_date_ucache_state_get_zone_name(props, tz_key, tz_key_len, &zone_name) ||
+				!php_date_ucache_abbr_matches_time(ZSTR_VAL(zone_name), time)
 			) {
-				timelib_time_dtor(time);
-
-				return NULL;
+				goto bailout;
 			}
 
-			time->tz_abbr = timelib_strdup(Z_STRVAL_P(z_timezone));
+			timelib_time_tz_abbr_update(time, ZSTR_VAL(zone_name));
 			break;
 		default:
-			timelib_time_dtor(time);
-
-			return NULL;
+			ZEND_ASSERT(time->zone_type == TIMELIB_ZONETYPE_OFFSET);
+			break;
 	}
 
+	php_date_ucache_time_normalize(time);
+
 	return time;
+
+bailout:
+	timelib_time_dtor(time);
+
+	return NULL;
 }
 
 static bool php_date_serialize_datetime_ucache_state(php_date_obj *dateobj, zval *state)
@@ -6410,135 +6555,150 @@ static bool php_date_unserialize_interval_ucache_state(zval *object, zval *state
 	php_interval_obj *intervalobj;
 	timelib_rel_time *rel;
 	zend_long civil_or_wall, from_string;
-	zend_string *date_string;
-	zval *z_rel;
+	zend_string *date_string = NULL;
+	bool has_date_string;
 
-	z_rel = zend_hash_str_find(Z_ARRVAL_P(state), "rel", strlen("rel"));
-	if (z_rel == NULL || Z_TYPE_P(z_rel) != IS_STRING ||
-		Z_STRLEN_P(z_rel) != sizeof(timelib_rel_time) ||
-		!php_date_ucache_state_get_long(Z_ARRVAL_P(state), "civil_or_wall", strlen("civil_or_wall"), &civil_or_wall) ||
-		!php_date_ucache_state_get_long(Z_ARRVAL_P(state), "from_string", strlen("from_string"), &from_string)
+	if (!php_date_ucache_state_get_long(Z_ARRVAL_P(state), "civil_or_wall", strlen("civil_or_wall"), &civil_or_wall) ||
+		!php_date_ucache_state_get_long(Z_ARRVAL_P(state), "from_string", strlen("from_string"), &from_string) ||
+		(civil_or_wall != 0 && civil_or_wall != PHP_DATE_CIVIL && civil_or_wall != PHP_DATE_WALL) ||
+		(from_string != 0 && from_string != 1)
 	) {
 		return false;
 	}
 
-	rel = timelib_rel_time_ctor();
+	has_date_string = php_date_ucache_state_get_str(Z_ARRVAL_P(state), "date_string", strlen("date_string"), &date_string);
+	if (has_date_string != (from_string == 1)) {
+		return false;
+	}
 
-	memcpy(rel, Z_STRVAL_P(z_rel), sizeof(timelib_rel_time));
+	rel = php_date_ucache_rel_time_from_hash(Z_ARRVAL_P(state), "rel", strlen("rel"));
+	if (rel == NULL) {
+		return false;
+	}
 
 	intervalobj = Z_PHPINTERVAL_P(object);
 	if (intervalobj->diff != NULL) {
 		timelib_rel_time_dtor(intervalobj->diff);
 	}
-	intervalobj->diff = rel;
-	intervalobj->civil_or_wall = (int) civil_or_wall;
-	intervalobj->from_string = from_string != 0;
-
 	if (intervalobj->date_string != NULL) {
 		zend_string_release(intervalobj->date_string);
-
-		intervalobj->date_string = NULL;
 	}
 
-	if (php_date_ucache_state_get_str(Z_ARRVAL_P(state), "date_string", strlen("date_string"), &date_string)) {
-		intervalobj->date_string = zend_string_copy(date_string);
-	} else if (intervalobj->from_string) {
-		return false;
-	}
-
+	intervalobj->diff = rel;
+	intervalobj->civil_or_wall = (int) civil_or_wall;
+	intervalobj->from_string = from_string == 1;
+	intervalobj->date_string = has_date_string ? zend_string_copy(date_string) : NULL;
 	intervalobj->initialized = true;
 
 	return true;
 }
 
-static bool php_date_unserialize_period_ucache_state(zval *object, zval *state)
+static bool php_date_ucache_period_start_ce_is_valid(const zend_class_entry *start_ce)
 {
-	php_period_obj *periodobj;
-	zend_long recurrences, include_start, include_end;
-	zend_class_entry *start_ce;
-	zend_string *start_ce_name;
-	zval *z_rel;
-
-	if (!php_date_ucache_state_get_str(Z_ARRVAL_P(state), "start_ce", strlen("start_ce"), &start_ce_name) ||
-		!php_date_ucache_state_get_long(Z_ARRVAL_P(state), "recurrences", strlen("recurrences"), &recurrences) ||
-		!php_date_ucache_state_get_long(Z_ARRVAL_P(state), "include_start_date", strlen("include_start_date"), &include_start) ||
-		!php_date_ucache_state_get_long(Z_ARRVAL_P(state), "include_end_date", strlen("include_end_date"), &include_end)
-	) {
+	if (!instanceof_function(start_ce, date_ce_date) && !instanceof_function(start_ce, date_ce_immutable)) {
 		return false;
 	}
 
-	if (recurrences < 0 || recurrences > INT_MAX) {
+	return !(start_ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS | ZEND_ACC_NOT_SERIALIZABLE));
+}
+
+static bool php_date_unserialize_period_ucache_state(zval *object, zval *state)
+{
+	const HashTable *props = Z_ARRVAL_P(state);
+	php_period_obj *periodobj;
+	timelib_time *start, *current = NULL, *end = NULL;
+	timelib_rel_time *interval;
+	zend_long recurrences, include_start, include_end;
+	zend_class_entry *start_ce;
+	zend_string *start_ce_name;
+
+	if (!php_date_ucache_state_get_str(props, "start_ce", strlen("start_ce"), &start_ce_name) ||
+		!php_date_ucache_state_get_long(props, "recurrences", strlen("recurrences"), &recurrences) ||
+		!php_date_ucache_state_get_long(props, "include_start_date", strlen("include_start_date"), &include_start) ||
+		!php_date_ucache_state_get_long(props, "include_end_date", strlen("include_end_date"), &include_end) ||
+		recurrences < 0 || recurrences > INT_MAX ||
+		(include_start != 0 && include_start != 1) ||
+		(include_end != 0 && include_end != 1)
+	) {
 		return false;
 	}
 
 	start_ce = zend_lookup_class(start_ce_name);
-	if (start_ce == NULL ||
-		!(instanceof_function(start_ce, date_ce_date) || instanceof_function(start_ce, date_ce_immutable))
-	) {
+	if (start_ce == NULL || !php_date_ucache_period_start_ce_is_valid(start_ce)) {
 		return false;
 	}
 
-	periodobj = Z_PHPPERIOD_P(object);
-
-	if (periodobj->start != NULL) {
-		timelib_time_dtor(periodobj->start);
-	}
-
-	periodobj->start = php_date_ucache_time_from_hash(Z_ARRVAL_P(state),
+	start = php_date_ucache_time_from_hash(props,
 		"start_ctime", strlen("start_ctime"),
 		"start_tz", strlen("start_tz")
 	);
-	if (periodobj->start == NULL) {
+	if (start == NULL) {
 		return false;
 	}
 
-	if (zend_hash_str_exists(Z_ARRVAL_P(state), "current_ctime", strlen("current_ctime"))) {
-		if (periodobj->current != NULL) {
-			timelib_time_dtor(periodobj->current);
-		}
-		periodobj->current = php_date_ucache_time_from_hash(Z_ARRVAL_P(state),
+	if (zend_hash_str_exists(props, "current_ctime", strlen("current_ctime"))) {
+		current = php_date_ucache_time_from_hash(props,
 			"current_ctime", strlen("current_ctime"),
 			"current_tz", strlen("current_tz")
 		);
-		if (periodobj->current == NULL) {
-			return false;
+		if (current == NULL) {
+			goto bailout;
 		}
 	}
 
-	if (zend_hash_str_exists(Z_ARRVAL_P(state), "end_ctime", strlen("end_ctime"))) {
-		if (periodobj->end != NULL) {
-			timelib_time_dtor(periodobj->end);
-		}
-		periodobj->end = php_date_ucache_time_from_hash(Z_ARRVAL_P(state),
+	if (zend_hash_str_exists(props, "end_ctime", strlen("end_ctime"))) {
+		end = php_date_ucache_time_from_hash(props,
 			"end_ctime", strlen("end_ctime"),
 			"end_tz", strlen("end_tz")
 		);
-		if (periodobj->end == NULL) {
-			return false;
+		if (end == NULL) {
+			goto bailout;
 		}
 	}
 
-	z_rel = zend_hash_str_find(Z_ARRVAL_P(state), "interval_rel", strlen("interval_rel"));
-	if (z_rel == NULL || Z_TYPE_P(z_rel) != IS_STRING ||
-		Z_STRLEN_P(z_rel) != sizeof(timelib_rel_time)
-	) {
-		return false;
+	interval = php_date_ucache_rel_time_from_hash(props, "interval_rel", strlen("interval_rel"));
+	if (interval == NULL) {
+		goto bailout;
 	}
 
+	periodobj = Z_PHPPERIOD_P(object);
+	if (periodobj->start != NULL) {
+		timelib_time_dtor(periodobj->start);
+	}
+	if (periodobj->current != NULL) {
+		timelib_time_dtor(periodobj->current);
+	}
+	if (periodobj->end != NULL) {
+		timelib_time_dtor(periodobj->end);
+	}
 	if (periodobj->interval != NULL) {
 		timelib_rel_time_dtor(periodobj->interval);
 	}
-	periodobj->interval = timelib_rel_time_ctor();
 
-	memcpy(periodobj->interval, Z_STRVAL_P(z_rel), sizeof(timelib_rel_time));
-
+	periodobj->start = start;
+	periodobj->current = current;
+	periodobj->end = end;
+	periodobj->interval = interval;
 	periodobj->start_ce = start_ce;
 	periodobj->recurrences = (int) recurrences;
-	periodobj->include_start_date = include_start != 0;
-	periodobj->include_end_date = include_end != 0;
+	periodobj->include_start_date = include_start == 1;
+	periodobj->include_end_date = include_end == 1;
 	periodobj->initialized = true;
 
 	return true;
+
+bailout:
+	timelib_time_dtor(start);
+
+	if (current != NULL) {
+		timelib_time_dtor(current);
+	}
+
+	if (end != NULL) {
+		timelib_time_dtor(end);
+	}
+
+	return false;
 }
 
 static bool php_date_unserialize_ucache_state(zval *object, zval *state)

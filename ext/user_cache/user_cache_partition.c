@@ -716,6 +716,10 @@ ZEND_API bool php_ucache_startup_default_ctx_storage(void)
 
 ZEND_API void php_ucache_partition_activate(php_ucache_partition *partition)
 {
+	if (!ucache_globals_allocated()) {
+		return;
+	}
+
 	if (ucache_partition_switch_is_forbidden() &&
 		partition != (
 			UC_G(exec_active)
@@ -734,6 +738,65 @@ ZEND_API void php_ucache_partition_activate(php_ucache_partition *partition)
 	UC_G(runtime_resolved) = false;
 }
 
+ZEND_API void php_ucache_partition_detach_all_except(php_ucache_partition *keep)
+{
+	php_ucache_partition *partition;
+	ucache_ctx *prev_ctx;
+
+	if (!ucache_globals_allocated()) {
+		return;
+	}
+
+	prev_ctx = UC_G(active_ctx_ptr);
+
+	ucache_boundary_partitions_lock();
+
+	for (partition = ucache_partitions; partition != NULL; partition = partition->next) {
+		if (partition == keep) {
+			continue;
+		}
+
+		ucache_activate_ctx(&partition->ctx);
+		ucache_shutdown_storage();
+	}
+
+	ucache_boundary_partitions_unlock();
+
+	if (keep != NULL) {
+		ucache_activate_ctx(&ucache_ctx_state);
+		ucache_shutdown_storage();
+	}
+
+	ucache_restore_ctx(prev_ctx);
+}
+
+ZEND_API void php_ucache_fork_prepare(void)
+{
+	if (!ucache_globals_allocated() || !UC_G(exec_active) || UC_G(persistent_exec)) {
+		return;
+	}
+
+	ucache_sgraph_refs_transfer_before_fork();
+}
+
+ZEND_API void php_ucache_fork_cancel(void)
+{
+	if (!ucache_globals_allocated()) {
+		return;
+	}
+
+	ucache_sgraph_fork_transfers_undo();
+}
+
+ZEND_API void php_ucache_child_init(void)
+{
+	if (!ucache_globals_allocated()) {
+		return;
+	}
+
+	ucache_sgraph_refs_adopt_after_fork();
+}
+
 ZEND_API void php_ucache_activate_boundary_partition_by_id(
 		const char *sapi_prefix,
 		const char *boundary,
@@ -742,6 +805,10 @@ ZEND_API void php_ucache_activate_boundary_partition_by_id(
 {
 	php_ucache_partition *partition = NULL;
 	bool storage_started;
+
+	if (!ucache_globals_allocated()) {
+		return;
+	}
 
 	if (ucache_partition_switch_is_forbidden()) {
 		zend_throw_error(NULL, "Cannot select a UserCache boundary during a persistent PHP execution");

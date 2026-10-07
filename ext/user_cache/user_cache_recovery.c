@@ -14,6 +14,8 @@
 
 #include "user_cache_storage.h"
 
+#define UCACHE_UNKNOWN_OWNER_EXIT_RECHECK_US	(3U * 1000U)
+
 typedef struct {
 	char *key;
 	uint32_t key_len;
@@ -29,7 +31,13 @@ static bool ucache_owner_is_dead_probe(uint64_t owner_pid, uint64_t owner_start_
 	uint64_t cur_start_time;
 
 	if (ucache_platform.proc_has_exited(owner_pid)) {
-		return true;
+		if (owner_start_time != 0) {
+			return true;
+		}
+
+		ucache_platform.sleep_us(UCACHE_UNKNOWN_OWNER_EXIT_RECHECK_US);
+
+		return ucache_platform.proc_has_exited(owner_pid);
 	}
 
 	if (owner_start_time != 0) {
@@ -99,9 +107,20 @@ static bool ucache_data_region_sane(
 	;
 
 	return (uint64_t) hdr->data_offset >= lock_table_end &&
-		(size_t) hdr->data_offset <= storage->size &&
-		hdr->data_size <= (uint64_t) storage->size - hdr->data_offset
+		ucache_hdr_data_bounds_match(storage, hdr)
 	;
+}
+
+static void ucache_reset_data_region_locked(
+		const ucache_storage *storage,
+		ucache_hdr *hdr)
+{
+	hdr->next_free = 0;
+	hdr->free_list_bytes = 0;
+
+	if ((size_t) hdr->data_offset <= storage->size) {
+		hdr->data_size = (uint64_t) (storage->size - hdr->data_offset);
+	}
 }
 
 static bool ucache_free_bins_layout_sane(
@@ -691,8 +710,8 @@ bool ucache_recover_after_owner_death_locked(void)
 	hdr->tombstone_count = 0;
 	hdr->entry_lock_count = 0;
 	hdr->entry_lock_tombstone_count = 0;
-	hdr->next_free = 0;
-	hdr->free_list_bytes = 0;
+
+	ucache_reset_data_region_locked(storage, hdr);
 
 	if (ucache_free_bins_layout_sane(storage, hdr)) {
 		memset(ucache_free_bins_ptr(hdr), 0, ucache_free_bins_bytes(hdr->free_bin_count));
@@ -719,8 +738,12 @@ bool ucache_owner_is_dead(uint64_t owner_pid, uint64_t owner_start_time)
 	ucache_owner_probe *probe = &UC_G(owner_probes)[owner_pid % UCACHE_OWNER_PROBES];
 	uint64_t now = ucache_clock_now() / UCACHE_CLOCK_TICKS_PER_SEC;
 
-	if (probe->pid == owner_pid && probe->start_time == owner_start_time && probe->probed_at == now) {
-		return probe->dead;
+	if (probe->pid == owner_pid &&
+		probe->start_time == owner_start_time &&
+		probe->probed_at == now &&
+		!probe->dead
+	) {
+		return false;
 	}
 
 	probe->dead = ucache_owner_is_dead_probe(owner_pid, owner_start_time);
