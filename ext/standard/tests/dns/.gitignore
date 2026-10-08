@@ -1,0 +1,6 @@
+!*.sh
+named.conf
+named.pid
+named.log
+managed-keys.*
+*.jnl
