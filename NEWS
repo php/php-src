@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.28
 
+- Core:
+  . Fixed memory leak when an exception already contains the pending exception
+    in its previous chain. (Edmond)
+
 - DOM:
   . Fixed bug GH-23352 (UAF reading an attribute value node retained across
     DOMDocument::adoptNode()). (David Carlier)

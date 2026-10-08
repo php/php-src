@@ -135,6 +135,8 @@ void zend_exception_set_previous(zend_object *exception, zend_object *add_previo
 		}
 		ex = previous;
 	} while (Z_OBJ_P(ex) != add_previous);
+
+	OBJ_RELEASE(add_previous);
 }
 /* }}} */
 
