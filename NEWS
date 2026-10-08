@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed memory leak when an exception already contains the pending exception
     in its previous chain. (Edmond)
+  . Fixed bug GH-23979 (Nullsafe operator must not flush delayed oplines of an
+    enclosing function). (ndossche)
 
 - Opcache:
   . Fixed bug GH-17626 (JIT corrupts an opline handler when blacklisting a
