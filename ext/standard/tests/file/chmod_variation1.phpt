@@ -11,7 +11,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 define("PERMISSIONS_MASK", 0777);
 
-$dirname = __DIR__ . "/" . basename(__FILE__, ".php") . "testdir";
+$dirname = sys_get_temp_dir() . DIRECTORY_SEPARATOR . basename(__FILE__, ".php") . "testdir";
 mkdir($dirname);
 
 for ($perms_to_set = 0777; $perms_to_set >= 0; $perms_to_set--) {
