@@ -1445,7 +1445,9 @@ ZEND_API bool zend_inference_propagate_range(const zend_op_array *op_array, cons
 			break;
 		case ZEND_ASSIGN:
 			if (ssa_op->op1_def == var || ssa_op->op2_def == var || ssa_op->result_def == var) {
-				if (OP2_HAS_RANGE()) {
+				if (OP2_HAS_RANGE()
+				 && (ssa_op->op2_def == var
+				  || (opline->op1_type == IS_CV && !(OP1_INFO() & MAY_BE_REF)))) {
 					tmp->min = OP2_MIN_RANGE();
 					tmp->max = OP2_MAX_RANGE();
 					tmp->underflow = OP2_RANGE_UNDERFLOW();
