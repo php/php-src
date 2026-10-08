@@ -52,6 +52,16 @@ PHP 8.7 UPGRADE NOTES
 3. Changes in SAPI modules
 ========================================
 
+- FPM:
+  . When the CLI SAPI is built, it is also linked into php-fpm. php-fpm then
+    runs as the CLI when invoked under the name "php", optionally followed by
+    a digit (e.g. php, php8.7 or php87), typically through a symlink. Under
+    any other name, php-fpm behaves as before.
+    To ship a single executable for both SAPIs, install the php-fpm binary as
+    php and make php-fpm a symlink to it: PHP_BINARY is resolved to the real
+    file, so scripts that run PHP_BINARY (e.g. to restart themselves) keep
+    running the CLI.
+
 ========================================
 4. Deprecated Functionality
 ========================================

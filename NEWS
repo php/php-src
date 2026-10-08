@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - FPM:
   . Use recommended TYPE, HELP order for OpenMetrics metadata.
     (Marcel Hernandez)
+  . php-fpm now includes the CLI SAPI when it is built, and runs as the CLI
+    when invoked as php (e.g. through a php symlink). (Matthieu Napoli)
 
 - Hash:
   . Fixed mhash_keygen_s2k() truncating a $length above INT_MAX instead of
