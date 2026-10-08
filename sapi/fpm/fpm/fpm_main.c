@@ -1494,7 +1494,7 @@ PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 }
 /* }}} */
 
-PHP_FUNCTION(apache_request_headers) /* {{{ */
+PHP_FUNCTION(fpm_request_headers) /* {{{ */
 {
 	fcgi_request *request;
 
