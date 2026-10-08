@@ -122,7 +122,7 @@ PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *o
 }
 /* }}} */
 
-PHP_HASH_API int php_hash_copy(const void *ops, void *orig_context, void *dest_context) /* {{{ */
+PHP_HASH_API int php_hash_copy(const void *ops, const void *orig_context, void *dest_context) /* {{{ */
 {
 	php_hash_ops *hash_ops = (php_hash_ops *)ops;
 
@@ -498,7 +498,7 @@ static inline void php_hash_hmac_round(unsigned char *final, const php_hash_ops 
 }
 
 static inline void php_hash_hmac_round_with_copy(unsigned char *final, const php_hash_ops *ops, const void *base_context, void *context, const unsigned char *data, const zend_long data_size) {
-	ZEND_ASSERT(SUCCESS == ops->hash_copy(ops, base_context, context));
+	ops->hash_copy(ops, base_context, context);
 	ops->hash_update(context, data, data_size);
 	ops->hash_final(final, context);
 }
