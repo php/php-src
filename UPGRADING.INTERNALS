@@ -57,6 +57,8 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 
 - Unix build system changes:
   . Autoconf minimum required version upgraded to 2.71.
+  . When the CLI SAPI is built, PHP_FPM_OBJS includes PHP_CLI_SHARED_OBJS and
+    PHP_FPM_WITH_CLI is defined, so that php-fpm can run do_php_cli().
 
 ========================
 3. Module changes
