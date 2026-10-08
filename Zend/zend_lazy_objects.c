@@ -264,11 +264,10 @@ ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 
 	if (!obj) {
 		if (UNEXPECTED(reflection_ce->ce_flags & ZEND_ACC_UNINSTANTIABLE)) {
-			zval zobj;
-			/* Call object_init_ex() for the generated exception */
-			zend_result result = object_init_ex(&zobj, reflection_ce);
-			ZEND_ASSERT(result == FAILURE && EG(exception));
-			(void)result;
+			/* Call zend_object_init() for the generated exception */
+			zend_object *dummy_obj = zend_object_init(reflection_ce);
+			ZEND_ASSERT(dummy_obj == NULL && EG(exception));
+			(void)dummy_obj;
 			return NULL;
 		}
 
@@ -763,10 +762,9 @@ zend_object *zend_lazy_object_clone(zend_object *old_obj)
 		ZEND_ASSERT(EG(exception));
 		/* Clone handler must always return an object. It is discarded later due
 		 * to the exception. */
-		zval zv;
-		object_init_ex(&zv, old_obj->ce);
-		GC_ADD_FLAGS(Z_OBJ(zv), IS_OBJ_DESTRUCTOR_CALLED);
-		return Z_OBJ(zv);
+		zend_object *obj = zend_object_init(old_obj->ce);
+		GC_ADD_FLAGS(obj, IS_OBJ_DESTRUCTOR_CALLED);
+		return obj;
 	}
 
 	if (!zend_object_is_lazy_proxy(old_obj)) {

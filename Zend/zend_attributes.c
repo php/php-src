@@ -332,7 +332,7 @@ ZEND_API zend_result zend_get_attribute_value(zval *ret, const zend_attribute *a
 	return SUCCESS;
 }
 
-ZEND_API zend_result zend_get_attribute_object(zval *obj, zend_class_entry *attribute_ce, zend_attribute *attribute_data, zend_class_entry *scope, zend_string *filename)
+ZEND_API zend_object *zend_get_attribute_object(zend_class_entry *attribute_ce, zend_attribute *attribute_data, zend_class_entry *scope, zend_string *filename)
 {
 	zend_execute_data *call = NULL;
 
@@ -373,8 +373,7 @@ ZEND_API zend_result zend_get_attribute_object(zval *obj, zend_class_entry *attr
 
 	zval *args = NULL;
 	HashTable *named_params = NULL;
-
-	zend_result result = FAILURE;
+	zend_object *obj = NULL;
 
 	uint32_t argc = 0;
 	if (attribute_data->argc) {
@@ -383,7 +382,6 @@ ZEND_API zend_result zend_get_attribute_object(zval *obj, zend_class_entry *attr
 		for (uint32_t i = 0; i < attribute_data->argc; i++) {
 			zval val;
 			if (FAILURE == zend_get_attribute_value(&val, attribute_data, i, scope)) {
-				result = FAILURE;
 				goto out;
 			}
 			if (attribute_data->args[i].name) {
@@ -398,9 +396,9 @@ ZEND_API zend_result zend_get_attribute_object(zval *obj, zend_class_entry *attr
 		}
 	}
 
-	result = object_init_with_constructor(obj, attribute_ce, argc, args, named_params);
+	obj = zend_object_init_with_constructor(attribute_ce, argc, args, named_params);
 
- out:
+out:
 	for (uint32_t i = 0; i < argc; i++) {
 		zval_ptr_dtor(&args[i]);
 	}
@@ -416,7 +414,7 @@ ZEND_API zend_result zend_get_attribute_object(zval *obj, zend_class_entry *attr
 		zend_vm_stack_free_call_frame(call);
 	}
 
-	return result;
+	return obj;
 }
 
 static const char *target_names[] = {

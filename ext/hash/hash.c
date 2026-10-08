@@ -631,8 +631,8 @@ PHP_FUNCTION(hash_init)
 		}
 	}
 
-	object_init_ex(return_value, php_hashcontext_ce);
-	hash = php_hashcontext_from_object(Z_OBJ_P(return_value));
+	zend_object *obj = zend_object_init(php_hashcontext_ce);
+	hash = php_hashcontext_from_object(obj);
 
 	context = php_hash_alloc_context(ops);
 	ops->hash_init(context, args);
@@ -666,6 +666,7 @@ PHP_FUNCTION(hash_init)
 		ops->hash_update(context, (unsigned char *) K, ops->block_size);
 		hash->key = (unsigned char *) K;
 	}
+	RETURN_OBJ(obj);
 }
 /* }}} */
 

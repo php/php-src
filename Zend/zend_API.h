@@ -514,11 +514,17 @@ static zend_always_inline void array_init(zval *arg)
 	array_init_size(arg, 0);
 }
 
+static zend_always_inline zend_object* zend_object_init_std(void) {
+	return zend_objects_new(zend_standard_class_def);
+}
+
+ZEND_API zend_object* zend_object_init(zend_class_entry *ce);
+ZEND_API zend_object* zend_object_init_with_constructor(zend_class_entry *ce, uint32_t param_count, zval *params, HashTable *named_params);
 ZEND_API void object_init(zval *arg);
 ZEND_API zend_result object_init_ex(zval *arg, zend_class_entry *ce);
 ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *ce, uint32_t param_count, zval *params, HashTable *named_params);
 ZEND_API zend_result object_and_properties_init(zval *arg, zend_class_entry *ce, HashTable *properties);
-ZEND_API void object_properties_init(zend_object *object, zend_class_entry *ce);
+ZEND_API void object_properties_init(zend_object *object, const zend_class_entry *ce);
 ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properties);
 ZEND_API void object_properties_load(zend_object *object, const HashTable *properties);
 

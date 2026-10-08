@@ -1913,16 +1913,16 @@ static zend_always_inline zend_result gc_call_destructors(uint32_t idx, uint32_t
 
 static zend_fiber *gc_create_destructor_fiber(void)
 {
-	zval zobj;
 	zend_fiber *fiber;
 
 	GC_TRACE("starting destructor fiber");
 
-	if (UNEXPECTED(object_init_ex(&zobj, zend_ce_fiber) == FAILURE)) {
+	zend_object *fiber_zobj = zend_object_init(zend_ce_fiber);
+	if (UNEXPECTED(!fiber_zobj)) {
 		gc_create_destructor_fiber_error();
 	}
 
-	fiber = (zend_fiber *)Z_OBJ(zobj);
+	fiber = (zend_fiber *)fiber_zobj;
 	fiber->fci.size = sizeof(fiber->fci);
 	fiber->fci_cache.function_handler = (zend_function*) &gc_destructor_fiber;
 
