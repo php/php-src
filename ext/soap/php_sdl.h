@@ -74,6 +74,7 @@ typedef struct sdlCtx {
 	HashTable fixupInProgress;
 	php_stream_context *context;
 	zval               old_header;
+	zend_long headers_to_keep; /* Bitmask of WSDL_HEADER_KEEP_* from php_soap.h */
 } sdlCtx;
 
 struct _sdlBinding {
