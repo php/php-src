@@ -200,7 +200,7 @@ static const xmlNode *dom_query_closest(
 				ret = current;
 				break;
 			}
-			current = current->parent;
+			current = php_dom_parent_node(current);
 		}
 	}
 
