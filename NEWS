@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.13
 
+- Core:
+  . Fixed memory leak when an exception already contains the pending exception
+    in its previous chain. (Edmond)
+
 - Opcache:
   . Fixed bug GH-17626 (JIT corrupts an opline handler when blacklisting a
     root trace at the opcache.jit_max_root_traces limit, causing spurious
