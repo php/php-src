@@ -1280,6 +1280,8 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, const char *pa
 		PHP_URL_REDIRECT_MAX, HTTP_WRAPPER_HEADER_INIT, &headers STREAMS_CC);
 
 	if (!Z_ISUNDEF(headers)) {
+		/* A request made from a notification callback may have stored its own headers meanwhile. */
+		zval_ptr_dtor(&BG(last_http_headers));
 		ZVAL_COPY(&BG(last_http_headers), &headers);
 
 		if (FAILURE == zend_set_local_var_str(
