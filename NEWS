@@ -7,6 +7,9 @@ PHP                                                                        NEWS
     in its previous chain. (Edmond)
   . Fixed bug GH-23979 (Nullsafe operator must not flush delayed oplines of an
     enclosing function). (ndossche)
+  . Fixed memory manager keeping a block reallocated to exactly the size of
+    the next smaller bin in its larger bin, which efree_size() then freed
+    into the wrong one. (Marc Bennewitz)
 
 - Opcache:
   . Fixed bug GH-17626 (JIT corrupts an opline handler when blacklisting a

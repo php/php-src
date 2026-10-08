@@ -195,6 +195,37 @@ static ZEND_FUNCTION(zend_leak_bytes)
 	emalloc(leakbytes);
 }
 
+/* Reallocate a block of old_size bytes to new_size bytes and return its block
+ * size, along with the block size of a fresh allocation of new_size bytes. */
+static ZEND_FUNCTION(zend_test_erealloc_block_size)
+{
+	zend_long old_size, new_size;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_LONG(old_size)
+		Z_PARAM_LONG(new_size)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (old_size < 1) {
+		zend_argument_value_error(1, "must be greater than 0");
+		RETURN_THROWS();
+	}
+	if (new_size < 1) {
+		zend_argument_value_error(2, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	void *ptr = erealloc(emalloc(old_size), new_size);
+	void *fresh = emalloc(new_size);
+
+	array_init(return_value);
+	add_next_index_long(return_value, zend_mem_block_size(ptr));
+	add_next_index_long(return_value, zend_mem_block_size(fresh));
+
+	efree(fresh);
+	efree(ptr);
+}
+
 /* Leak a refcounted variable */
 static ZEND_FUNCTION(zend_leak_variable)
 {

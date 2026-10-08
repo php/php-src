@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b9cc27fee1c2d75a13d489f4589956eef7bfedf4 */
+ * Stub hash: 4990c2206809c0737f7c13eb5ea11459437bd144 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
 ZEND_END_ARG_INFO()
@@ -51,6 +51,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_leak_bytes, 0, 0, IS_VOID, 
 ZEND_END_ARG_INFO()
 
 #define arginfo_zend_delref arginfo_zend_leak_variable
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_erealloc_block_size, 0, 2, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, old_size, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, new_size, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_zend_string_or_object, 0, 1, MAY_BE_OBJECT|MAY_BE_STRING)
 	ZEND_ARG_TYPE_MASK(0, param, MAY_BE_OBJECT|MAY_BE_STRING, NULL)
@@ -300,6 +305,7 @@ static ZEND_FUNCTION(zend_terminate_string);
 static ZEND_FUNCTION(zend_leak_variable);
 static ZEND_FUNCTION(zend_leak_bytes);
 static ZEND_FUNCTION(zend_delref);
+static ZEND_FUNCTION(zend_test_erealloc_block_size);
 static ZEND_FUNCTION(zend_string_or_object);
 static ZEND_FUNCTION(zend_string_or_object_or_null);
 static ZEND_FUNCTION(zend_string_or_stdclass);
@@ -432,6 +438,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_leak_variable, arginfo_zend_leak_variable)
 	ZEND_FE(zend_leak_bytes, arginfo_zend_leak_bytes)
 	ZEND_FE(zend_delref, arginfo_zend_delref)
+	ZEND_FE(zend_test_erealloc_block_size, arginfo_zend_test_erealloc_block_size)
 	ZEND_FE(zend_string_or_object, arginfo_zend_string_or_object)
 	ZEND_FE(zend_string_or_object_or_null, arginfo_zend_string_or_object_or_null)
 	ZEND_FE(zend_string_or_stdclass, arginfo_zend_string_or_stdclass)
