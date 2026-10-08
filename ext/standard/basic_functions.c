@@ -964,18 +964,21 @@ PHP_FUNCTION(getopt)
 	) {
 		int pos = 0;
 		zval *entry;
+		zend_array *argv_ht;
 
 		if (Z_TYPE_P(args) != IS_ARRAY) {
 			RETURN_FALSE;
 		}
-		argc = zend_hash_num_elements(Z_ARRVAL_P(args));
+		argv_ht = Z_ARRVAL_P(args);
+		GC_TRY_ADDREF(argv_ht);
+		argc = zend_hash_num_elements(argv_ht);
 
 		/* Attempt to allocate enough memory to hold all of the arguments
 		 * and a trailing NULL */
 		argv = (char **) safe_emalloc(sizeof(char *), (argc + 1), 0);
 
 		/* Iterate over the hash to construct the argv array. */
-		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args), entry) {
+		ZEND_HASH_FOREACH_VAL(argv_ht, entry) {
 			zend_string *tmp_arg_str;
 			zend_string *arg_str = zval_get_tmp_string(entry, &tmp_arg_str);
 
@@ -983,6 +986,7 @@ PHP_FUNCTION(getopt)
 
 			zend_tmp_string_release(tmp_arg_str);
 		} ZEND_HASH_FOREACH_END();
+		GC_TRY_DTOR_NO_REF(argv_ht);
 
 		/* The C Standard requires argv[argc] to be NULL - this might
 		 * keep some getopt implementations happy. */
