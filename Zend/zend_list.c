@@ -54,7 +54,9 @@ ZEND_API zend_result ZEND_FASTCALL zend_list_delete(zend_resource *res)
 ZEND_API void ZEND_FASTCALL zend_list_free(zend_resource *res)
 {
 	ZEND_ASSERT(GC_REFCOUNT(res) == 0);
-	zend_hash_index_del(&EG(regular_list), res->handle);
+	if (zend_hash_index_del(&EG(regular_list), res->handle) == FAILURE) {
+		efree_size(res, sizeof(zend_resource));
+	}
 }
 
 static void zend_resource_dtor(zend_resource *res)
@@ -176,7 +178,11 @@ void list_entry_destructor(zval *zv)
 
 	ZVAL_UNDEF(zv);
 	if (res->type >= 0) {
+		GC_ADDREF(res);
 		zend_resource_dtor(res);
+		if (GC_DELREF(res) != 0) {
+			return;
+		}
 	}
 	efree_size(res, sizeof(zend_resource));
 }
