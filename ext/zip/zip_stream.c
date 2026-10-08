@@ -395,6 +395,6 @@ static const php_stream_wrapper_ops zip_stream_wops = {
 const php_stream_wrapper php_stream_zip_wrapper = {
 	&zip_stream_wops,
 	NULL,
-	0 /* is_url */
+	0 /* flags */
 };
 #endif /* HAVE_ZIP */
