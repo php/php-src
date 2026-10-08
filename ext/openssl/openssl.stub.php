@@ -181,11 +181,13 @@ const PKCS7_CRLFEOL = UNKNOWN;
  * @cvalue PKCS7_NOCRL
  */
 const PKCS7_NOCRL = UNKNOWN;
+#ifdef PKCS7_NO_DUAL_CONTENT
 /**
  * @var int
  * @cvalue PKCS7_NO_DUAL_CONTENT
  */
 const PKCS7_NO_DUAL_CONTENT = UNKNOWN;
+#endif
 
 /**
  * @var int
