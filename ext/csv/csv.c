@@ -560,32 +560,25 @@ PHP_FUNCTION(Csv_collection_to_buffer)
 
 /* Streams opened by this extension are internal implementation details. Every opened stream
  * is also registered in EG(regular_list), where userland can reach it (e.g. via
- * get_resources()) and close it while we still hold a pointer to it. Detach the resource
- * entry so the extension is the sole owner of the stream and php_stream_close() in the
- * owning code path is the only way it is freed. Same approach as ext/mysqlnd. */
+ * get_resources()) and close it while we still hold a pointer to it. Detach the stream from
+ * its resource so the extension is the sole owner of the stream and php_stream_close() in
+ * the owning code path is the only way it is freed. */
 static void php_csv_stream_make_private(php_stream *stream)
 {
 	zend_resource *res = stream->res;
 
 	stream->res = NULL;
 
-	dtor_func_t origin_dtor = EG(regular_list).pDestructor;
-	EG(regular_list).pDestructor = NULL;
-	zend_hash_index_del(&EG(regular_list), res->handle);
-	EG(regular_list).pDestructor = origin_dtor;
-
-	if (GC_DELREF(res) == 0) {
-		efree(res);
-	} else {
-		/* Userland retained a reference to the resource while the stream was being opened
-		 * (e.g. a stream filter's onCreate() calling get_resources()). Turn it into a
-		 * closed resource, the same representation zend_resource_dtor() leaves behind,
-		 * so those references see an invalid stream instead of freed memory. As the
-		 * regular-list bucket is already gone, the zend_resource allocation itself is
-		 * only reclaimed by the memory manager at the end of the request. */
-		res->ptr = NULL;
-		res->type = -1;
-	}
+	/* Turn the resource into a closed one, the same representation zend_resource_dtor()
+	 * leaves behind, so that references userland retained while the stream was being opened
+	 * (e.g. a stream filter's onCreate() calling get_resources()) see an invalid stream
+	 * instead of freed memory. Then drop the stream's own reference: the regular-list entry
+	 * is removed now if it was the last one, or by zend_list_free() once userland releases
+	 * its references. As the type is negative, the list destructor only frees the
+	 * zend_resource itself. */
+	res->ptr = NULL;
+	res->type = -1;
+	zend_list_delete(res);
 }
 
 PHP_FUNCTION(Csv_collection_to_file)
