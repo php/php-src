@@ -340,7 +340,8 @@ static HashTable* rfc4180_string_to_hashtable(
 
 	/* Dereference buffer */
 	const char *row = *buffer;
-	ZEND_ASSERT(row < end_buffer);
+	/* row_to_array('') passes an empty buffer, which is a single empty field */
+	ZEND_ASSERT(row <= end_buffer);
 
 	smart_str field_value = {0};
 
