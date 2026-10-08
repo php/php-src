@@ -98,10 +98,9 @@ typedef struct _php_basic_globals {
 	HashTable url_adapt_output_hosts_ht;
 	HashTable *user_filter_map;
 
-	/* file.c */
-#if defined(_REENTRANT)
+	/* php_mblen() */
 	mbstate_t mblen_state;
-#endif
+	bool mblen_ascii_singletons;
 
 	int umask;
 	zend_long unserialize_max_depth;
