@@ -851,6 +851,12 @@ static HashTable *zend_fiber_object_gc(zend_object *object, zval **table, int *n
 			symTable = zend_unfinished_execution_gc_ex(ex, ex->func && ZEND_USER_CODE(ex->func->type) ? ex->call : NULL, buf, false);
 		}
 		if (symTable) {
+			/* A file included, or code eval'd, from a function runs in its own frame over the
+			 * function's symbol table: adding the table for both frames would count its values twice. */
+			if (symTable == lastSymTable) {
+				continue;
+			}
+
 			if (lastSymTable) {
 				zval *val;
 				ZEND_HASH_FOREACH_VAL(lastSymTable, val) {
