@@ -56,6 +56,9 @@ int fpm_status_export_to_zval(zval *status)
 	int i;
 
 	scoreboard_p = fpm_scoreboard_copy(NULL, 1);
+	if (!scoreboard_p) {
+		return -1;
+	}
 
 	now_epoch = time(NULL);
 	fpm_clock_get(&now);
@@ -180,17 +183,19 @@ int fpm_status_handle_request(void) /* {{{ */
 			sapi_add_header_ex(ZEND_STRL("Expires: Thu, 01 Jan 1970 00:00:00 GMT"), 1, 1);
 			sapi_add_header_ex(ZEND_STRL("Cache-Control: no-cache, no-store, must-revalidate, max-age=0"), 1, 1);
 			PUTS("Internal error. Please review log file for errors.");
+			zend_string_release_ex(_GET_str, 0);
 			return 1;
 		}
 
 		if (scoreboard_p->idle < 0 || scoreboard_p->active < 0) {
-			fpm_scoreboard_free_copy(scoreboard_p);
 			zlog(ZLOG_ERROR, "[pool %s] invalid status values", scoreboard_p->pool);
 			SG(sapi_headers).http_response_code = 500;
 			sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1);
 			sapi_add_header_ex(ZEND_STRL("Expires: Thu, 01 Jan 1970 00:00:00 GMT"), 1, 1);
 			sapi_add_header_ex(ZEND_STRL("Cache-Control: no-cache, no-store, must-revalidate, max-age=0"), 1, 1);
 			PUTS("Internal error. Please review log file for errors.");
+			zend_string_release_ex(_GET_str, 0);
+			fpm_scoreboard_free_copy(scoreboard_p);
 			return 1;
 		}
 
@@ -201,6 +206,7 @@ int fpm_status_handle_request(void) /* {{{ */
 
 		/* handle HEAD */
 		if (SG(request_info).headers_only) {
+			zend_string_release_ex(_GET_str, 0);
 			fpm_scoreboard_free_copy(scoreboard_p);
 			return 1;
 		}
