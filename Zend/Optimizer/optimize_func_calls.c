@@ -246,12 +246,13 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			case ZEND_FETCH_OBJ_FUNC_ARG:
 			case ZEND_FETCH_DIM_FUNC_ARG:
 				if (call_stack[call - 1].func_arg_num != (uint32_t)-1
+						&& call_stack[call - 1].last_check_func_arg_opline != NULL
 						&& has_known_send_mode(&call_stack[call - 1], call_stack[call - 1].func_arg_num)) {
 					if (ARG_SHOULD_BE_SENT_BY_REF(call_stack[call - 1].func, call_stack[call - 1].func_arg_num)) {
 						/* There's no TMP specialization for FETCH_OBJ_W/FETCH_DIM_W. Avoid
 						 * converting it and error at runtime in the FUNC_ARG variant. */
 						if ((opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG || opline->opcode == ZEND_FETCH_DIM_FUNC_ARG)
-						 && (opline->op1_type == IS_TMP_VAR || call_stack[call - 1].last_check_func_arg_opline == NULL)) {
+						 && opline->op1_type == IS_TMP_VAR) {
 							/* Don't remove the associated CHECK_FUNC_ARG opcode. */
 							call_stack[call - 1].last_check_func_arg_opline = NULL;
 							break;
@@ -267,6 +268,8 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 							/* FETCH_DIM_FUNC_ARG supports UNUSED op2, while FETCH_DIM_R does not.
 							 * Performing the replacement would create an invalid opcode. */
 							call_stack[call - 1].try_inline = 0;
+							/* Don't remove the associated CHECK_FUNC_ARG opcode. */
+							call_stack[call - 1].last_check_func_arg_opline = NULL;
 							break;
 						}
 
