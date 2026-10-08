@@ -314,7 +314,12 @@ PHP_FUNCTION(stream_socket_accept)
 
 	php_stream_error_operation_begin();
 
-	if (0 == php_stream_xport_accept(stream, &clistream,
+	php_socket_t fd;
+	if (tv_pointer && tv.tv_sec == 0 && tv.tv_usec == 0
+			&& SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&fd, 0)
+			&& fd != SOCK_ERR && php_pollfd_for_ms(fd, PHP_POLLREADABLE, 0) == 0) {
+		RETVAL_FALSE;
+	} else if (0 == php_stream_xport_accept(stream, &clistream,
 				zpeername ? &peername : NULL,
 				NULL, NULL,
 				tv_pointer, &errstr
