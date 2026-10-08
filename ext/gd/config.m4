@@ -181,6 +181,8 @@ AC_DEFUN([PHP_GD_FREETYPE2],[
     PHP_EVAL_LIBLINE([$FREETYPE2_LIBS], [GD_SHARED_LIBADD])
     AC_DEFINE([HAVE_LIBFREETYPE], [1],
       [Define to 1 if you have the FreeType library.])
+    AC_DEFINE([HAVE_FT2BUILD_H], [1],
+      [Define to 1 if you have the <ft2build.h> header file.])
     AC_DEFINE([HAVE_GD_FREETYPE], [1],
       [Define to 1 if gd extension has FreeType support.])
   ])
