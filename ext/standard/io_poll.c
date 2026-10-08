@@ -20,7 +20,7 @@
 #include "io_poll.h"
 #include "io_poll_arginfo.h"
 #include "io_poll_decl.h"
-#include "ext/date/php_time.h"
+#include "ext/date/time_duration.h"
 
 /* Class entries */
 static zend_class_entry *php_io_poll_backend_class_entry;
