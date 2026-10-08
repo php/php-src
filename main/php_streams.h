@@ -527,6 +527,17 @@ END_EXTERN_C()
 
 #define php_stream_sync_supported(stream)	(php_stream_set_option((stream), PHP_STREAM_OPTION_SYNC_API, PHP_STREAM_SYNC_SUPPORTED, NULL) == PHP_STREAM_OPTION_RETURN_OK ? 1 : 0)
 
+/* Windows: OK for an overlapped proc_open() pipe (php_io_overlapped_pipes), else NOTIMPL.
+ * QUERY: stores in the bool ptrparam whether the descriptor was handed out.
+ * HAND_OUT: another process got the descriptor; the stream's reads and writes stop using a provider.
+ * RELEASE: just before the process is created, the queues let go of the descriptor, so the child's
+ * overlapped I/O does not post to their port. ERR (Error thrown) while another call has an op on
+ * the stream; an orphaned op is waited for first. */
+#define PHP_STREAM_OPTION_OVERLAPPED_PIPE 15
+#define PHP_STREAM_OVERLAPPED_PIPE_QUERY	0
+#define PHP_STREAM_OVERLAPPED_PIPE_HAND_OUT	1
+#define PHP_STREAM_OVERLAPPED_PIPE_RELEASE	2
+
 
 #define PHP_STREAM_OPTION_RETURN_OK			 0 /* option set OK */
 #define PHP_STREAM_OPTION_RETURN_ERR		-1 /* problem setting option */

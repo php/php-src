@@ -92,6 +92,11 @@ struct _php_io_ring_req {
 	bool sentinel; /* the entry that fires the heap's head for the notification descriptor */
 	bool connect_wait; /* a Connect the core started: a poll for its outcome */
 	php_io_ring_reg *reg; /* multishot: its record, NULL once removed */
+#ifdef PHP_WIN32
+	uint32_t pipe_events; /* POLL with PHP_IO_OP_F_PIPE: the PHP_POLL_* it waits for, else 0 */
+	char zero_read_buf; /* a pipe READ poll's zero-byte read: ReadFile() wants a buffer */
+	php_stream *zero_read_stream; /* the stream whose drain waits for that read once it is cancelled */
+#endif
 	php_io_ring_reg *waiting; /* a wait parked on an Edge record, without an entry */
 	uint32_t w_mask; /* IOR_POLL_* the parked wait wants */
 	php_io_ring_req *w_prev; /* the parked waits */
@@ -655,6 +660,11 @@ static php_io_ring_req *php_io_ring_req_create(php_io_ring *ring, php_io_op *op,
 	req->data = data;
 	req->type = op->type;
 	req->deadline = op->deadline;
+#ifdef PHP_WIN32
+	if (op->type == PHP_IO_OP_POLL && (op->flags & PHP_IO_OP_F_PIPE)) {
+		req->pipe_events = op->u.poll.events & (PHP_POLL_READ | PHP_POLL_WRITE);
+	}
+#endif
 	php_io_ring_req_capture(req, op);
 	return req;
 }
@@ -999,6 +1009,11 @@ static zend_result php_io_ring_submit_one(php_io_ring *ring, php_io_ring_req *re
 	/* What has no ring form is refused before an entry is taken */
 	switch (req->type) {
 		case PHP_IO_OP_POLL:
+#ifdef PHP_WIN32
+			if (req->pipe_events) {
+				break;
+			}
+#endif
 			/* ior has no priority event */
 			if (!(ring->features & IOR_FEAT_POLL_ADD) || (req->op->u.poll.events & PHP_POLL_PRI)) {
 				errno = ENOTSUP;
@@ -1035,6 +1050,20 @@ static zend_result php_io_ring_submit_one(php_io_ring *ring, php_io_ring_req *re
 
 	switch (req->type) {
 		case PHP_IO_OP_POLL:
+#ifdef PHP_WIN32
+			if (req->pipe_events & PHP_POLL_WRITE) {
+				/* A pipe has no write readiness: ready at once */
+				ior_prep_nop(ctx, sqe);
+				break;
+			}
+
+			if (req->pipe_events) {
+				/* A zero-byte read completes when data arrives and takes none of it, as libuv's zero
+				 * reads do */
+				ior_prep_read(ctx, sqe, php_io_ring_file_fd(op), &req->zero_read_buf, 0, IOR_OFF_NONE);
+				break;
+			}
+#endif
 			ior_prep_poll_add(ctx, sqe, (ior_fd_t) op->fd, php_io_ring_poll_mask_to_ior(op->u.poll.events));
 			break;
 		case PHP_IO_OP_READ:
@@ -1638,6 +1667,36 @@ static void php_io_ring_req_release(php_io_ring *ring, php_io_ring_req *req)
 	}
 }
 
+#ifdef PHP_WIN32
+/* A cancelled pipe READ poll lasts in the kernel until its cancel completes, and a synchronous read
+ * of the descriptor meanwhile, in this process or one it is handed to, may complete falsely: the
+ * member comes back in flight, and the provider's drain of the stream waits for it
+ * (PHP_IO_OP_F_PIPE) */
+static bool php_io_ring_zero_read_keep(php_io_ring_req *m)
+{
+	if ((m->pipe_events & PHP_POLL_READ) && m->op->stream && !php_io_ring_req_settled(m)) {
+		m->zero_read_stream = m->op->stream;
+		return true;
+	}
+
+	return false;
+}
+#endif
+
+/* php_io_ring_req_release() of an Any's member: a pipe READ poll whose read is still in the kernel
+ * leaves its op in flight, and the waiter drains the stream */
+static void php_io_ring_member_release(php_io_ring *ring, php_io_ring_req *m)
+{
+#ifdef PHP_WIN32
+	php_io_op *const member_op = m->op;
+	const bool zero_read_kept = php_io_ring_zero_read_keep(m);
+#endif
+	php_io_ring_req_release(ring, m);
+#ifdef PHP_WIN32
+	member_op->in_flight = zero_read_kept;
+#endif
+}
+
 /* In a child the record can neither be cancelled nor complete: it is
  * settled here so that the release frees it */
 static void php_io_ring_req_cancel_or_forget(php_io_ring *ring, php_io_ring_req *req)
@@ -1684,7 +1743,7 @@ PHPAPI zend_result php_io_ring_cancel(php_io_ring *ring, php_io_op *op)
 			php_io_ring_req *m = req->members[i];
 			m->group = NULL;
 			php_io_ring_req_cancel_or_forget(ring, m);
-			php_io_ring_req_release(ring, m);
+			php_io_ring_member_release(ring, m);
 		}
 		req->n_members = 0;
 	} else {
@@ -1731,10 +1790,37 @@ PHPAPI bool php_io_ring_orphan(php_io_ring *ring, php_io_op *op)
 
 /* Completion processing */
 
+#ifdef PHP_WIN32
+/* A pipe POLL's NOP or zero-byte read as the IOR_POLL_* mask a poll would give */
+static int32_t php_io_ring_pipe_poll_res(const php_io_ring_req *req, int32_t res)
+{
+	if (res >= 0) {
+		return (int32_t) ((req->pipe_events & PHP_POLL_WRITE) ? IOR_POLL_OUT : IOR_POLL_IN);
+	}
+
+	if (res == -EPIPE) {
+		return (int32_t) (IOR_POLL_IN | IOR_POLL_HUP);
+	}
+
+	if (res == -ETIME || res == -ECANCELED) {
+		return res;
+	}
+
+	/* A read set's write end fails with ERROR_ACCESS_DENIED: an error, as a socket's is reported */
+	return (int32_t) IOR_POLL_ERR;
+}
+#endif
+
 static void php_io_ring_result_from_cqe(php_io_ring_req *req, int32_t res)
 {
 	php_io_op_result *r = &req->result;
 	bool dns = req->type == PHP_IO_OP_GETADDRINFO || req->type == PHP_IO_OP_GETNAMEINFO;
+
+#ifdef PHP_WIN32
+	if (req->pipe_events) {
+		res = php_io_ring_pipe_poll_res(req, res);
+	}
+#endif
 
 	r->index = req->index;
 	r->error = 0;
@@ -1839,6 +1925,40 @@ static void php_io_ring_req_lt_cqe(php_io_ring *ring, php_io_ring_req *req, int3
 	php_io_ring_req_complete(ring, req);
 }
 
+#ifdef PHP_WIN32
+/* A pipe member is ready by the bytes it holds, answered as its zero-byte read would be: WSAPoll
+ * takes sockets only */
+static bool php_io_ring_pipe_peek(php_io_ring_req *m)
+{
+	int32_t res = 0;
+	if (!(m->pipe_events & PHP_POLL_WRITE)) {
+		DWORD avail = 0;
+		if (PeekNamedPipe(php_io_ring_file_fd(m->op), NULL, 0, NULL, &avail, NULL)) {
+			if (avail == 0) {
+				return false;
+			}
+		} else {
+			res = GetLastError() == ERROR_BROKEN_PIPE ? -EPIPE : -EIO;
+		}
+	}
+
+	php_io_ring_result_from_cqe(m, res);
+	return true;
+}
+#endif
+
+/* A member the probe asks php_poll2() about */
+static zend_always_inline bool php_io_ring_probe_polls(const php_io_ring_req *m)
+{
+#ifdef PHP_WIN32
+	if (m->pipe_events) {
+		return false;
+	}
+#endif
+
+	return !m->main_done && m->type == PHP_IO_OP_POLL;
+}
+
 /* Poll members that are ready by now but whose cqe is not there yet (the
  * thread backend posts each from its poller in turn) are reported too */
 static void php_io_ring_group_probe(php_io_ring_req *req, bool *probed)
@@ -1849,7 +1969,13 @@ static void php_io_ring_group_probe(php_io_ring_req *req, bool *probed)
 
 	for (uint32_t i = 0; i < req->n_members; i++) {
 		php_io_ring_req *m = req->members[i];
-		if (!m->main_done && m->type == PHP_IO_OP_POLL) {
+#ifdef PHP_WIN32
+		if (!m->main_done && m->pipe_events) {
+			probed[i] = php_io_ring_pipe_peek(m);
+			continue;
+		}
+#endif
+		if (php_io_ring_probe_polls(m)) {
 			n++;
 		}
 	}
@@ -1862,7 +1988,7 @@ static void php_io_ring_group_probe(php_io_ring_req *req, bool *probed)
 	n = 0;
 	for (uint32_t i = 0; i < req->n_members; i++) {
 		php_io_ring_req *m = req->members[i];
-		if (!m->main_done && m->type == PHP_IO_OP_POLL) {
+		if (php_io_ring_probe_polls(m)) {
 			fds[n].fd = m->op->fd;
 			fds[n].events = (m->op->u.poll.events & PHP_POLL_READ ? POLLIN : 0)
 					| (m->op->u.poll.events & PHP_POLL_WRITE ? POLLOUT : 0);
@@ -1874,7 +2000,7 @@ static void php_io_ring_group_probe(php_io_ring_req *req, bool *probed)
 		n = 0;
 		for (uint32_t i = 0; i < req->n_members; i++) {
 			php_io_ring_req *m = req->members[i];
-			if (!m->main_done && m->type == PHP_IO_OP_POLL) {
+			if (php_io_ring_probe_polls(m)) {
 				short revents = fds[n++].revents;
 				if (revents) {
 					uint32_t mask = (revents & POLLIN ? IOR_POLL_IN : 0) | (revents & POLLOUT ? IOR_POLL_OUT : 0)
@@ -1916,7 +2042,7 @@ static void php_io_ring_group_fold(php_io_ring *ring, php_io_ring_req *req)
 			php_io_ring_req_cancel(ring, m);
 		}
 		m->group = NULL;
-		php_io_ring_req_release(ring, m);
+		php_io_ring_member_release(ring, m);
 	}
 	req->n_members = 0;
 	op->u.any.n_results = n_results;
@@ -2115,6 +2241,12 @@ PHPAPI void php_io_ring_drain(php_io_ring *ring, const void *owner)
 				pending = true;
 				break;
 			}
+#ifdef PHP_WIN32
+			if (r->zero_read_stream == owner) {
+				pending = true;
+				break;
+			}
+#endif
 		}
 		if (!pending) {
 			return;
@@ -2441,6 +2573,16 @@ static uint32_t php_io_ring_queue_hook_flags(php_io_queue *base)
 	return php_io_ring_hook_flags(((php_io_ring_queue *) base)->ring);
 }
 
+#ifdef PHP_WIN32
+/* A failure (an op of the Ring still on the handle, a system before Windows 8.1) leaves it on the
+ * port, where ior drops the other process's packets */
+static void php_io_ring_queue_release(php_io_queue *base, php_socket_t fd)
+{
+	php_io_ring *const ring = ((php_io_ring_queue *) base)->ring;
+	ior_release_handle(ring->ctx, (ior_fd_t) _get_osfhandle((int) fd));
+}
+#endif
+
 static void php_io_ring_queue_destroy(php_io_queue *base)
 {
 	php_io_ring_queue *q = (php_io_ring_queue *) base;
@@ -2462,6 +2604,9 @@ static const php_io_queue_ops php_io_ring_queue_ops = {
 	.count_pending = php_io_ring_queue_count_pending,
 	.hook_flags = php_io_ring_queue_hook_flags,
 	.destroy = php_io_ring_queue_destroy,
+#ifdef PHP_WIN32
+	.release = php_io_ring_queue_release,
+#endif
 };
 
 PHPAPI php_io_ring *php_io_queue_ring(php_io_queue *q)

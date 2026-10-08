@@ -144,7 +144,10 @@ typedef struct {
 	unsigned is_seekable:1;		/* don't try and seek, if not set */
 	unsigned is_overlapped:1;	/* Windows: FILE_FLAG_OVERLAPPED, uses position */
 	unsigned nonblock_ours:1;	/* O_NONBLOCK set for the IO hooks */
-	unsigned _reserved:24;
+	unsigned is_overlapped_pipe:1;	/* Windows: proc_open()'s overlapped named pipe (php_io_pipe_read) */
+	unsigned overlapped_pipe_nonblock:1;	/* Windows overlapped pipe: stream_set_blocking(false) */
+	unsigned is_handed_out:1;	/* Windows overlapped pipe: another process got it, the provider never sees it again */
+	unsigned _reserved:21;
 #ifdef PHP_WIN32
 	zend_off_t position;	/* of the next overlapped read or write */
 	int open_flags;			/* the open()-style flags, for the synchronous reopen */
@@ -199,6 +202,20 @@ static int php_stdiop_make_sync(php_stdio_stream_data *data)
 	data->fd = fd;
 	data->is_overlapped = 0;
 	return fd;
+}
+
+/* A synchronous call on an overlapped pipe may complete falsely while an overlapped one is pending
+ * on it (ReadFile()), so the descriptor goes out only when the stream has no op left */
+static zend_result php_stdiop_pipe_settle(php_stream *stream)
+{
+	if (php_io_stream_busy(stream)) {
+		zend_throw_error(NULL, "Concurrent access to a stream");
+		return FAILURE;
+	}
+
+	/* An orphaned op, already cancelled, is waited for */
+	php_io_stream_settle(stream);
+	return SUCCESS;
 }
 #endif
 
@@ -395,6 +412,19 @@ PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const cha
 	return stream;
 }
 
+#ifdef PHP_WIN32
+PHPAPI php_stream *_php_stream_fopen_from_overlapped_pipe(int fd, const char *mode STREAMS_DC)
+{
+	php_stream *const stream = php_stream_fopen_from_fd_rel(fd, mode, NULL, false);
+
+	if (stream) {
+		((php_stdio_stream_data*)stream->abstract)->is_overlapped_pipe = 1;
+	}
+
+	return stream;
+}
+#endif
+
 PHPAPI php_stream *_php_stream_fopen_from_file(FILE *file, const char *mode STREAMS_DC)
 {
 	php_stream *stream = php_stream_fopen_from_file_int_rel(file, mode);
@@ -561,7 +591,9 @@ static ssize_t php_stdiop_write(php_stream *stream, const char *buf, size_t coun
 
 	if (data->fd >= 0) {
 #ifdef PHP_WIN32
-		if (data->is_overlapped) {
+		if (data->is_overlapped_pipe) {
+			bytes_written = php_io_pipe_write(stream, data->fd, buf, PLAIN_WRAP_BUF_SIZE(count), data->is_handed_out);
+		} else if (data->is_overlapped) {
 			php_deadline deadline;
 			php_deadline_init_infinite(&deadline);
 			bytes_written = php_io_write_at(stream, data->fd, buf, PLAIN_WRAP_BUF_SIZE(count), data->position, &deadline);
@@ -625,7 +657,8 @@ static ssize_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 #ifdef PHP_WIN32
 		php_stdio_stream_data *self = (php_stdio_stream_data*)stream->abstract;
 
-		if ((self->is_pipe || self->is_process_pipe) && !self->is_pipe_blocking) {
+		/* An overlapped pipe waits for data in php_io_pipe_read() */
+		if ((self->is_pipe || self->is_process_pipe) && !self->is_pipe_blocking && !self->is_overlapped_pipe) {
 			HANDLE ph = (HANDLE)_get_osfhandle(data->fd);
 			int retry = 0;
 			DWORD avail_read = 0;
@@ -651,7 +684,16 @@ static ssize_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 		}
 #endif
 #ifdef PHP_WIN32
-		if (data->is_overlapped) {
+		if (data->is_overlapped_pipe) {
+			php_deadline deadline;
+			if (data->overlapped_pipe_nonblock) {
+				php_deadline_init_nonblock(&deadline);
+			} else {
+				php_deadline_init_infinite(&deadline);
+			}
+
+			ret = php_io_pipe_read(stream, data->fd, buf, PLAIN_WRAP_BUF_SIZE(count), &deadline, data->is_handed_out);
+		} else if (data->is_overlapped) {
 			php_deadline deadline;
 			php_deadline_init_infinite(&deadline);
 			ret = php_io_read_at(stream, data->fd, buf, PLAIN_WRAP_BUF_SIZE(count), data->position, &deadline);
@@ -907,6 +949,10 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret)
 				if (data->is_overlapped && php_stdiop_make_sync(data) < 0) {
 					return FAILURE;
 				}
+
+				if (data->is_overlapped_pipe && php_stdiop_pipe_settle(stream) == FAILURE) {
+					return FAILURE;
+				}
 #endif
 
 				if (data->file == NULL) {
@@ -937,6 +983,12 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret)
 			return SUCCESS;
 
 		case PHP_STREAM_AS_FD:
+#ifdef PHP_WIN32
+			if (ret && data->is_overlapped_pipe && php_stdiop_pipe_settle(stream) == FAILURE) {
+				return FAILURE;
+			}
+#endif
+
 			fd = php_stdiop_cast_fd(data);
 			if (SOCK_ERR == fd) {
 				return FAILURE;
@@ -1008,6 +1060,13 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 		case PHP_STREAM_OPTION_BLOCKING:
 			if (fd == -1)
 				return -1;
+#ifdef PHP_WIN32
+			if (data->is_overlapped_pipe) {
+				const int was_blocking = !data->overlapped_pipe_nonblock;
+				data->overlapped_pipe_nonblock = !value;
+				return was_blocking;
+			}
+#endif
 #ifdef O_NONBLOCK
 			if (value && data->nonblock_ours) {
 				return 1;
@@ -1311,6 +1370,26 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 #ifdef PHP_WIN32
 		case PHP_STREAM_OPTION_PIPE_BLOCKING:
 			data->is_pipe_blocking = value;
+			return PHP_STREAM_OPTION_RETURN_OK;
+
+		case PHP_STREAM_OPTION_OVERLAPPED_PIPE:
+			if (!data->is_overlapped_pipe) {
+				return PHP_STREAM_OPTION_RETURN_NOTIMPL;
+			}
+
+			if (value == PHP_STREAM_OVERLAPPED_PIPE_HAND_OUT) {
+				data->is_handed_out = 1;
+			} else if (value == PHP_STREAM_OVERLAPPED_PIPE_RELEASE) {
+				/* An op still on the stream would tie the descriptor to the port again */
+				if (php_stdiop_pipe_settle(stream) == FAILURE) {
+					return PHP_STREAM_OPTION_RETURN_ERR;
+				}
+
+				php_io_queues_release(fd);
+			} else if (value == PHP_STREAM_OVERLAPPED_PIPE_QUERY && ptrparam) {
+				*(bool *) ptrparam = data->is_handed_out;
+			}
+
 			return PHP_STREAM_OPTION_RETURN_OK;
 #endif
 		case PHP_STREAM_OPTION_META_DATA_API:

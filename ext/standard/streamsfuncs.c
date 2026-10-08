@@ -691,9 +691,46 @@ typedef struct php_select_member {
 	php_stream *stream;
 	php_socket_t fd;
 	uint32_t events;
+#ifdef PHP_WIN32
+	bool is_overlapped_pipe; /* PHP_IO_OP_F_PIPE: readable when it holds bytes, no socket poll takes it */
+	bool in_except; /* in the except set: a backend without priority events drops it from events */
+#endif
 } php_select_member;
 
-static void stream_array_collect_members(HashTable *stream_array, uint32_t events,
+#ifdef PHP_WIN32
+/* stream_select_any(): a member no provider can wait for, so php_select() takes the call */
+# define STREAM_SELECT_USE_PHP_SELECT (-2)
+
+/* A pipe has no write readiness: always writable, and in the except set as php_select() answers */
+static void stream_select_report_pipe(const php_select_member *m, fd_set *rfds, fd_set *wfds, fd_set *efds,
+		int *found)
+{
+	if ((m->events & PHP_POLL_READ) && php_io_pipe_readable((int) m->fd)) {
+		PHP_SAFE_FD_SET(m->fd, rfds);
+		(*found)++;
+	}
+
+	if (m->events & PHP_POLL_WRITE) {
+		PHP_SAFE_FD_SET(m->fd, wfds);
+		(*found)++;
+	}
+
+	if (m->in_except) {
+		PHP_SAFE_FD_SET(m->fd, efds);
+		(*found)++;
+	}
+}
+
+static bool stream_select_is_socket(php_socket_t fd)
+{
+	int type;
+	int len = sizeof(type);
+	return getsockopt((SOCKET) fd, SOL_SOCKET, SO_TYPE, (char *) &type, &len) == 0
+			|| WSAGetLastError() != WSAENOTSOCK;
+}
+#endif
+
+static void stream_array_collect_members(HashTable *stream_array, uint32_t events, bool except,
 		php_select_member **members, uint32_t *n, uint32_t *cap)
 {
 	zval *elem;
@@ -713,6 +750,9 @@ static void stream_array_collect_members(HashTable *stream_array, uint32_t event
 		for (uint32_t i = 0; i < *n; i++) {
 			if ((*members)[i].fd == this_fd) {
 				(*members)[i].events |= events;
+#ifdef PHP_WIN32
+				(*members)[i].in_except |= except;
+#endif
 				merged = true;
 				break;
 			}
@@ -725,6 +765,9 @@ static void stream_array_collect_members(HashTable *stream_array, uint32_t event
 			(*members)[*n].stream = stream;
 			(*members)[*n].fd = this_fd;
 			(*members)[*n].events = events;
+#ifdef PHP_WIN32
+			(*members)[*n].in_except = except;
+#endif
 			(*n)++;
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -799,14 +842,34 @@ static int stream_select_any(zval *r_array, zval *w_array, zval *e_array, struct
 	}
 
 	if (r_array) {
-		stream_array_collect_members(Z_ARRVAL_P(r_array), PHP_POLL_READ, &members, &n, &cap);
+		stream_array_collect_members(Z_ARRVAL_P(r_array), PHP_POLL_READ, false, &members, &n, &cap);
 	}
 	if (w_array) {
-		stream_array_collect_members(Z_ARRVAL_P(w_array), PHP_POLL_WRITE, &members, &n, &cap);
+		stream_array_collect_members(Z_ARRVAL_P(w_array), PHP_POLL_WRITE, false, &members, &n, &cap);
 	}
 	if (e_array) {
-		stream_array_collect_members(Z_ARRVAL_P(e_array), priority ? PHP_POLL_PRI : 0, &members, &n, &cap);
+		stream_array_collect_members(Z_ARRVAL_P(e_array), priority ? PHP_POLL_PRI : 0, true, &members, &n, &cap);
 	}
+
+#ifdef PHP_WIN32
+	for (uint32_t i = 0; i < n; i++) {
+		bool handed_out = false;
+		const bool is_overlapped_pipe = php_stream_set_option(members[i].stream,
+				PHP_STREAM_OPTION_OVERLAPPED_PIPE, PHP_STREAM_OVERLAPPED_PIPE_QUERY, &handed_out)
+				== PHP_STREAM_OPTION_RETURN_OK;
+		/* php_select() takes the call when another process holds the pipe, or when no socket poll
+		 * takes the descriptor (an anonymous pipe, a file, a console): WSAPoll() fails as a whole on
+		 * one */
+		if (handed_out || (php_io_overlapped_pipes && !is_overlapped_pipe
+				&& !stream_select_is_socket(members[i].fd))) {
+			efree(members);
+			stream_select_unfreeze(frozen, n_frozen);
+			return STREAM_SELECT_USE_PHP_SELECT;
+		}
+
+		members[i].is_overlapped_pipe = is_overlapped_pipe;
+	}
+#endif
 
 	/* Syscall first, as for a read: a zero-timeout poll() over the sets answers a select
 	 * with a stream ready now, or one with a zero timeout, without an op, and is the arm-time
@@ -817,18 +880,34 @@ static int stream_select_any(zval *r_array, zval *w_array, zval *e_array, struct
 	if (n > 0) {
 		php_pollfd stack[16];
 		php_pollfd *fds = n > sizeof(stack) / sizeof(stack[0]) ? safe_emalloc(n, sizeof(*fds), 0) : stack;
+		uint32_t n_fds = 0;
+		int found = 0;
 		for (uint32_t i = 0; i < n; i++) {
-			fds[i].fd = members[i].fd;
-			fds[i].events = ((members[i].events & PHP_POLL_READ) ? POLLIN : 0)
+#ifdef PHP_WIN32
+			if (members[i].is_overlapped_pipe) {
+				continue;
+			}
+#endif
+
+			fds[n_fds].fd = members[i].fd;
+			fds[n_fds].events = ((members[i].events & PHP_POLL_READ) ? POLLIN : 0)
 					| ((members[i].events & PHP_POLL_WRITE) ? POLLOUT : 0)
 					| ((members[i].events & PHP_POLL_PRI) ? POLLPRI : 0);
-			fds[i].revents = 0;
+			fds[n_fds].revents = 0;
+			n_fds++;
 		}
-		int ready = php_poll2(fds, n, 0);
-		int found = 0;
+		const int ready = n_fds > 0 ? php_poll2(fds, n_fds, 0) : 0;
 		if (ready >= 0) {
-			for (uint32_t i = 0; i < n; i++) {
-				short revents = ready > 0 ? fds[i].revents : 0;
+			for (uint32_t i = 0, polled = 0; i < n; i++) {
+#ifdef PHP_WIN32
+				if (members[i].is_overlapped_pipe) {
+					stream_select_report_pipe(&members[i], rfds, wfds, efds, &found);
+					continue;
+				}
+#endif
+
+				const short revents = ready > 0 ? fds[polled].revents : 0;
+				polled++;
 				if (revents & POLLNVAL) {
 					/* The Any reports the descriptor's failure */
 					found = 0;
@@ -879,6 +958,11 @@ static int stream_select_any(zval *r_array, zval *w_array, zval *e_array, struct
 		if (checked) {
 			ops[n_members].flags |= PHP_IO_OP_F_CHECKED;
 		}
+#ifdef PHP_WIN32
+		if (members[i].is_overlapped_pipe) {
+			ops[n_members].flags |= PHP_IO_OP_F_PIPE;
+		}
+#endif
 		op_ptrs[n_members] = &ops[n_members];
 		n_members++;
 	}
@@ -906,6 +990,22 @@ static int stream_select_any(zval *r_array, zval *w_array, zval *e_array, struct
 			errno = EINTR;
 			ret = -1;
 		} else {
+#ifdef PHP_WIN32
+			for (uint32_t i = 0; i < any.u.any.n_results; i++) {
+				if (results[i].status == PHP_IO_UNSUPPORTED && (ops[results[i].index].flags & PHP_IO_OP_F_PIPE)) {
+					/* No provider waits for this pipe: the thread does, for the time left */
+					if (tv) {
+						const zend_hrtime_t left_ns = php_io_deadline_remaining(&ops[timer_index].deadline,
+								zend_hrtime());
+						tv->tv_sec = (long) (left_ns / ZEND_NANO_IN_SEC);
+						tv->tv_usec = (long) (left_ns % ZEND_NANO_IN_SEC / 1000);
+					}
+
+					ret = STREAM_SELECT_USE_PHP_SELECT;
+					goto done;
+				}
+			}
+#endif
 			for (uint32_t i = 0; i < any.u.any.n_results; i++) {
 				uint32_t index = results[i].index;
 				if (index == timer_index || (results[i].status != PHP_IO_DONE && results[i].status != PHP_IO_READY)) {
@@ -930,6 +1030,9 @@ static int stream_select_any(zval *r_array, zval *w_array, zval *e_array, struct
 		}
 	}
 
+#ifdef PHP_WIN32
+done:
+#endif
 	efree(results);
 	efree(op_ptrs);
 	efree(ops);
@@ -1141,11 +1244,22 @@ PHP_FUNCTION(stream_select)
 	}
 
 	if (php_io_hooks_active()) {
+#ifdef PHP_WIN32
+		const fd_set all_rfds = rfds, all_wfds = wfds, all_efds = efds;
+#endif
 		/* The provider waits: the sets are rebuilt from what it reported */
 		FD_ZERO(&rfds);
 		FD_ZERO(&wfds);
 		FD_ZERO(&efds);
 		retval = stream_select_any(r_array, w_array, e_array, tv_p, &rfds, &wfds, &efds);
+#ifdef PHP_WIN32
+		if (retval == STREAM_SELECT_USE_PHP_SELECT) {
+			rfds = all_rfds;
+			wfds = all_wfds;
+			efds = all_efds;
+			retval = php_select(max_fd+1, &rfds, &wfds, &efds, tv_p);
+		}
+#endif
 	} else {
 		retval = php_select(max_fd+1, &rfds, &wfds, &efds, tv_p);
 	}

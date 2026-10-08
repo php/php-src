@@ -52,6 +52,15 @@ typedef enum {
  * WSAEINVAL); the provider waits for it to finish and completes Ready, leaving SO_ERROR to the
  * core, or Done with the connect's errno */
 #define PHP_IO_OP_F_CONNECT_STARTED 0x08
+/* READ, WRITE, POLL on Windows: fd is the CRT descriptor of an overlapped pipe
+ * (php_io_overlapped_pipes), which no socket poll takes. A provider performs such an op, whatever
+ * its data flags, or answers Unsupported. A READ completes with the bytes there as soon as there
+ * are any, and with 0 or EPIPE at the writer's close; a WRITE to a closed reader fails with EPIPE.
+ * A POLL READ is ready at data, READ | HUP at the writer's close, ERROR on a write end; a POLL
+ * WRITE is ready at once, since a pipe has no write readiness. A POLL READ member of an Any may
+ * come back with in_flight set: its zero-byte read is still in the kernel, and the provider must
+ * drain its stream (the queue's drain) before run() returns. */
+#define PHP_IO_OP_F_PIPE 0x10
 
 typedef enum {
 	PHP_IO_DONE,
@@ -259,6 +268,16 @@ PHPAPI extern bool (*php_io_signal_pending)(void);
 /* Whether a wait woken by a signal gives up rather than restarts */
 PHPAPI bool php_io_interrupt_pending(void);
 
+#ifdef PHP_WIN32
+/* Set at MINIT by the extension that installs the provider: proc_open() then makes overlapped
+ * named pipes, whose ops a provider may perform (PHP_IO_OP_F_PIPE), and php_select() judges every
+ * pipe by its bytes. False keeps anonymous pipes. */
+PHPAPI extern bool php_io_overlapped_pipes;
+/* An overlapped pipe's buffer each way, and the most one write through a provider moves: a
+ * cancelled write leaves the reader an unknown part of it */
+#define PHP_IO_PIPE_BUFFER_SIZE (64 * 1024)
+#endif
+
 /* Without a provider it waits itself */
 PHPAPI zend_result php_io_run(php_io_op *op, php_io_op_result *result);
 
@@ -307,6 +326,20 @@ PHPAPI ssize_t php_io_read_at(php_stream *stream, int fd, void *buf, size_t len,
 		php_deadline *dl);
 PHPAPI ssize_t php_io_write_at(php_stream *stream, int fd, const void *buf, size_t len, int64_t offset,
 		php_deadline *dl);
+#ifdef PHP_WIN32
+/* An overlapped pipe (PHP_IO_OP_F_PIPE). A read returns the bytes there, waiting for some unless dl
+ * is non-blocking (EAGAIN; any other dl waits without limit); 0 is the writer's close. A write
+ * through the provider moves at most PHP_IO_PIPE_BUFFER_SIZE, the thread's write the whole count; a
+ * closed reader is EPIPE. Without hooks, or when the provider answers Unsupported, both block the
+ * thread. no_provider: the descriptor was handed to another process. */
+PHPAPI ssize_t php_io_pipe_read(php_stream *stream, int fd, void *buf, size_t len,
+		const php_deadline *dl, bool no_provider);
+PHPAPI ssize_t php_io_pipe_write(php_stream *stream, int fd, const void *buf, size_t len,
+		bool no_provider);
+/* What a select reports for a pipe in its read set: bytes in it, or a peek failure (the writer's
+ * close, a write end) that the read reports */
+PHPAPI bool php_io_pipe_readable(int fd);
+#endif
 PHPAPI php_socket_t php_io_accept(php_stream *stream, php_socket_t fd, struct sockaddr *addr,
 		socklen_t *addrlen, php_deadline *dl);
 PHPAPI int php_io_connect(php_stream *stream, php_socket_t fd, const struct sockaddr *addr,
@@ -348,6 +381,11 @@ PHPAPI void php_io_child_forget(pid_t pid);
 PHPAPI void php_io_stream_orphan(php_stream *stream, php_io_queue *queue);
 PHPAPI void php_io_stream_unfreeze(php_stream *stream);
 PHPAPI void php_io_stream_drain(php_stream *stream);
+#ifdef PHP_WIN32
+/* php_io_stream_drain() for a stream that lives on: its descriptor goes to the thread or another
+ * process */
+PHPAPI void php_io_stream_settle(php_stream *stream);
+#endif
 PHPAPI void php_io_handle_orphan(zend_object *handle, php_io_queue *queue);
 PHPAPI void php_io_handle_unfreeze(zend_object *handle);
 PHPAPI bool php_io_handle_busy(zend_object *handle);
@@ -418,6 +456,9 @@ typedef struct _php_io_queue_ops {
 	uint32_t (*count_pending)(php_io_queue *q);
 	uint32_t (*hook_flags)(php_io_queue *q);
 	void (*destroy)(php_io_queue *q);
+	/* A descriptor the queue's Read and Write ops use is about to go to another process: the queue's
+	 * backend lets go of it unless an op of the queue is still on it. May be NULL. */
+	void (*release)(php_io_queue *q, php_socket_t fd);
 } php_io_queue_ops;
 
 struct _php_io_queue {
@@ -435,6 +476,8 @@ PHPAPI uint64_t php_io_queue_new_id(void);
 PHPAPI void php_io_queue_attach(php_io_queue *q, uint64_t id);
 PHPAPI void php_io_queue_detach(php_io_queue *q);
 PHPAPI php_io_queue *php_io_queue_find(uint64_t id);
+/* release() on every queue of the thread */
+PHPAPI void php_io_queues_release(php_socket_t fd);
 /* The events among those asked that the queues of a registrant's pairs hold themselves, for a
  * readiness check made with a syscall */
 PHPAPI uint32_t php_io_held_events(php_io_registration *regs, uint32_t events);

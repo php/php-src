@@ -339,6 +339,7 @@ zend_always_inline static int php_win32_ioutil_access(const char *path, mode_t m
  * with errno on failure. The completion never reaches a completion port
  * the handle is bound to. */
 PW32IO ssize_t php_win32_ioutil_pread(int fd, void *buf, size_t len, int64_t offset);
+/* A write to a pipe whose reader closed fails with EPIPE */
 PW32IO ssize_t php_win32_ioutil_pwrite(int fd, const void *buf, size_t len, int64_t offset);
 
 zend_always_inline static int php_win32_ioutil_open(const char *path, int flags, ...)

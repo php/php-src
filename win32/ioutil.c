@@ -1428,6 +1428,13 @@ static ssize_t php_win32_ioutil_overlapped_io(int fd, void *buf, size_t len, int
 	if (ok) {
 		return (ssize_t) done;
 	}
+
+	if (write_op && (err == ERROR_BROKEN_PIPE || err == ERROR_NO_DATA)) {
+		/* A pipe whose reader is gone: pending at the close, or started after it */
+		_set_errno(EPIPE);
+		return -1;
+	}
+
 	if (err == ERROR_HANDLE_EOF || err == ERROR_BROKEN_PIPE) {
 		return 0;
 	}

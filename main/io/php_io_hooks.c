@@ -34,6 +34,9 @@ extern int fdatasync(int);
 
 PHPAPI void (*php_io_op_zobj_detach)(zend_object *zobj) = NULL;
 PHPAPI bool (*php_io_signal_pending)(void) = NULL;
+#ifdef PHP_WIN32
+PHPAPI bool php_io_overlapped_pipes = false;
+#endif
 
 PHPAPI bool php_io_interrupt_pending(void)
 {
@@ -434,6 +437,15 @@ PHPAPI php_io_queue *php_io_queue_find(uint64_t id)
 	return NULL;
 }
 
+PHPAPI void php_io_queues_release(php_socket_t fd)
+{
+	for (php_io_queue *q = php_io_queues; q; q = q->next) {
+		if (q->ops->release) {
+			q->ops->release(q, fd);
+		}
+	}
+}
+
 /* Only the pairs of the current provider: one an earlier provider registered may sit on a queue
  * nobody serves any more */
 PHPAPI uint32_t php_io_held_events(php_io_registration *regs, uint32_t events)
@@ -679,19 +691,31 @@ PHPAPI bool php_io_stream_busy(php_stream *stream)
 	return (stream->flags & PHP_STREAM_FLAG_IN_USE) && !php_io_orphan_find(stream);
 }
 
-/* Called from php_stream_free() with the stream still frozen */
-PHPAPI void php_io_stream_drain(php_stream *stream)
+static void php_io_stream_wait_orphan(php_stream *stream, bool freeing)
 {
 	php_io_orphan *o = php_io_orphan_find(stream);
 	if (!o) {
 		return;
 	}
-	o->freeing = true;
+	o->freeing = freeing;
 	if (o->queue->ops->drain) {
 		o->queue->ops->drain(o->queue, stream);
 	}
 	php_io_stream_unfreeze(stream);
 }
+
+/* Called from php_stream_free() with the stream still frozen */
+PHPAPI void php_io_stream_drain(php_stream *stream)
+{
+	php_io_stream_wait_orphan(stream, true);
+}
+
+#ifdef PHP_WIN32
+PHPAPI void php_io_stream_settle(php_stream *stream)
+{
+	php_io_stream_wait_orphan(stream, false);
+}
+#endif
 
 /* The op of a handle without a stream: its descriptor must stay open until the op settled */
 PHPAPI void php_io_handle_orphan(zend_object *handle, php_io_queue *queue)
@@ -1781,6 +1805,135 @@ PHPAPI ssize_t php_io_write(php_stream *stream, int fd, const void *buf, size_t 
 {
 	return php_io_write_at(stream, fd, buf, len, -1, dl);
 }
+
+#ifdef PHP_WIN32
+/* Any offset >= 0 picks the overlapped call an overlapped handle needs; a pipe ignores the offset */
+#define PHP_IO_PIPE_OFFSET 0
+
+/* Bytes the pipe holds now; *eof at the other end's close */
+static bool php_io_pipe_peek(int fd, DWORD *avail, bool *eof)
+{
+	*avail = 0;
+	*eof = false;
+	const HANDLE h = (HANDLE) _get_osfhandle(fd);
+	if (h == INVALID_HANDLE_VALUE) {
+		php_io_set_errno(EBADF);
+		return false;
+	}
+
+	if (PeekNamedPipe(h, NULL, 0, NULL, avail, NULL)) {
+		return true;
+	}
+
+	const DWORD err = GetLastError();
+	if (err == ERROR_BROKEN_PIPE) {
+		*eof = true;
+		return true;
+	}
+
+	/* ERROR_ACCESS_DENIED: fd is the write end */
+	php_io_set_errno(err == ERROR_ACCESS_DENIED ? EBADF : EIO);
+	return false;
+}
+
+PHPAPI bool php_io_pipe_readable(int fd)
+{
+	DWORD avail;
+	bool eof;
+	return !php_io_pipe_peek(fd, &avail, &eof) || eof || avail > 0;
+}
+
+PHPAPI ssize_t php_io_pipe_read(php_stream *stream, int fd, void *buf, size_t len,
+		const php_deadline *dl, bool no_provider)
+{
+	if (php_io_stream_read_lost(stream)) {
+		return -1;
+	}
+
+	php_io_frame f;
+	php_io_op op;
+	php_io_op_result result;
+	ssize_t ret;
+
+	if (php_io_frame_begin(&f, stream) == FAILURE) {
+		return -1;
+	}
+
+	memset(&op, 0, sizeof(op));
+
+	DWORD avail;
+	bool eof;
+	if (!php_io_pipe_peek(fd, &avail, &eof)) {
+		ret = -1;
+	} else if (eof) {
+		ret = 0;
+	} else if (avail > 0) {
+		/* Never more than is there, so the call does not wait */
+		ret = php_io_read_syscall(fd, buf, MIN(len, avail), PHP_IO_PIPE_OFFSET);
+	} else if (dl->hrtime == 0) {
+		php_io_set_errno(EAGAIN);
+		ret = -1;
+	} else if (no_provider || !FG(io_hooks)) {
+		ret = php_io_read_syscall(fd, buf, len, PHP_IO_PIPE_OFFSET);
+	} else {
+		/* Offset -1: the bytes a cancelled read took are the stream's (php_io_op_read_advances) */
+		php_io_op_read(&op, NULL, fd, buf, len, -1, php_io_deadline_infinite());
+		op.flags |= PHP_IO_OP_F_PIPE | php_io_stream_buf_flag(stream, buf);
+		op.stream = stream;
+		if (php_io_run(&op, &result) == FAILURE || php_io_run_cancelled(stream, &op, &result)) {
+			php_io_set_errno(ECANCELED);
+			ret = -1;
+		} else if (php_io_data_result(&result, &ret)) {
+			if (ret < 0 && errno == EPIPE) {
+				/* The writer closed while the read waited */
+				ret = 0;
+			}
+		} else {
+			/* Unsupported, or a Ready that did not wait: the thread waits for data */
+			ret = php_io_read_syscall(fd, buf, len, PHP_IO_PIPE_OFFSET);
+		}
+	}
+
+	php_io_frame_end(&f, &op);
+	return ret;
+}
+
+PHPAPI ssize_t php_io_pipe_write(php_stream *stream, int fd, const void *buf, size_t len,
+		bool no_provider)
+{
+	php_io_frame f;
+	php_io_op op;
+	php_io_op_result result;
+	ssize_t ret;
+
+	if (php_io_frame_begin(&f, stream) == FAILURE) {
+		return -1;
+	}
+
+	memset(&op, 0, sizeof(op));
+
+	if (no_provider || !FG(io_hooks)) {
+		ret = php_io_write_syscall(fd, (void *) buf, len, PHP_IO_PIPE_OFFSET);
+	} else {
+		const size_t chunk = MIN(len, PHP_IO_PIPE_BUFFER_SIZE);
+		/* Infinite whatever the stream's mode: a pipe write cannot be partial, so it parks until done */
+		php_io_op_write(&op, NULL, fd, buf, chunk, -1, php_io_deadline_infinite());
+		op.flags |= PHP_IO_OP_F_PIPE;
+		op.stream = stream;
+		if (php_io_run(&op, &result) == FAILURE || php_io_run_cancelled(stream, &op, &result)) {
+			php_io_set_errno(ECANCELED);
+			ret = -1;
+		} else if (!php_io_data_result(&result, &ret)) {
+			/* Ready leaves the chunk to the thread, Unsupported the whole count */
+			ret = php_io_write_syscall(fd, (void *) buf, result.status == PHP_IO_READY ? chunk : len,
+					PHP_IO_PIPE_OFFSET);
+		}
+	}
+
+	php_io_frame_end(&f, &op);
+	return ret;
+}
+#endif
 
 PHPAPI int php_io_fsync(php_stream *stream, int fd, bool data_only)
 {
