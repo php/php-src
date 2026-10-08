@@ -122,7 +122,7 @@ PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *o
 }
 /* }}} */
 
-PHP_HASH_API int php_hash_copy(const void *ops, void *orig_context, void *dest_context) /* {{{ */
+PHP_HASH_API int php_hash_copy(const void *ops, const void *orig_context, void *dest_context) /* {{{ */
 {
 	php_hash_ops *hash_ops = (php_hash_ops *)ops;
 
@@ -493,6 +493,12 @@ static inline void php_hash_hmac_prep_key(unsigned char *K, const php_hash_ops *
 static inline void php_hash_hmac_round(unsigned char *final, const php_hash_ops *ops, void *context, const unsigned char *key, const unsigned char *data, const zend_long data_size) {
 	ops->hash_init(context, NULL);
 	ops->hash_update(context, key, ops->block_size);
+	ops->hash_update(context, data, data_size);
+	ops->hash_final(final, context);
+}
+
+static inline void php_hash_hmac_round_with_copy(unsigned char *final, const php_hash_ops *ops, const void *base_context, void *context, const unsigned char *data, const zend_long data_size) {
+	ops->hash_copy(ops, base_context, context);
 	ops->hash_update(context, data, data_size);
 	ops->hash_final(final, context);
 }
@@ -996,7 +1002,7 @@ PHP_FUNCTION(hash_pbkdf2)
 	size_t pass_len, salt_len = 0;
 	bool raw_output = 0;
 	const php_hash_ops *ops;
-	void *context;
+	void *context, *inner_context, *outer_context;
 	HashTable *args = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sssl|lbh", &algo, &pass, &pass_len, &salt, &salt_len, &iterations, &length, &raw_output, &args) == FAILURE) {
@@ -1027,6 +1033,9 @@ PHP_FUNCTION(hash_pbkdf2)
 	context = php_hash_alloc_context(ops);
 	ops->hash_init(context, args);
 
+	inner_context = php_hash_alloc_context(ops);
+	outer_context = php_hash_alloc_context(ops);
+
 	K1 = emalloc(ops->block_size);
 	K2 = emalloc(ops->block_size);
 	digest = emalloc(ops->digest_size);
@@ -1036,6 +1045,12 @@ PHP_FUNCTION(hash_pbkdf2)
 	php_hash_hmac_prep_key(K1, ops, context, (unsigned char *) pass, pass_len);
 	/* Convert K1 to opad -- 0x6A = 0x36 ^ 0x5C */
 	php_hash_string_xor_char(K2, K1, 0x6A, ops->block_size);
+
+	/* Precompute the hash states after absorbing the ipad and opad blocks */
+	ops->hash_init(inner_context, NULL);
+	ops->hash_update(inner_context, K1, ops->block_size);
+	ops->hash_init(outer_context, NULL);
+	ops->hash_update(outer_context, K2, ops->block_size);
 
 	/* Setup Main Loop to build a long enough result */
 	if (length == 0) {
@@ -1065,8 +1080,8 @@ PHP_FUNCTION(hash_pbkdf2)
 		computed_salt[salt_len + 2] = (unsigned char) ((i & 0xFF00) >> 8);
 		computed_salt[salt_len + 3] = (unsigned char) (i & 0xFF);
 
-		php_hash_hmac_round(digest, ops, context, K1, computed_salt, (zend_long) salt_len + 4);
-		php_hash_hmac_round(digest, ops, context, K2, digest, ops->digest_size);
+		php_hash_hmac_round_with_copy(digest, ops, inner_context, context, computed_salt, (zend_long) salt_len + 4);
+		php_hash_hmac_round_with_copy(digest, ops, outer_context, context, digest, ops->digest_size);
 		/* } */
 
 		/* temp = digest */
@@ -1078,8 +1093,8 @@ PHP_FUNCTION(hash_pbkdf2)
 		 */
 		for (j = 1; j < iterations; j++) {
 			/* digest = hash_hmac(digest, password) { */
-			php_hash_hmac_round(digest, ops, context, K1, digest, ops->digest_size);
-			php_hash_hmac_round(digest, ops, context, K2, digest, ops->digest_size);
+			php_hash_hmac_round_with_copy(digest, ops, inner_context, context, digest, ops->digest_size);
+			php_hash_hmac_round_with_copy(digest, ops, outer_context, context, digest, ops->digest_size);
 			/* } */
 			/* temp ^= digest */
 			php_hash_string_xor(temp, temp, digest, ops->digest_size);
@@ -1095,6 +1110,8 @@ PHP_FUNCTION(hash_pbkdf2)
 	efree(K2);
 	efree(computed_salt);
 	efree(context);
+	efree(inner_context);
+	efree(outer_context);
 	efree(digest);
 	efree(temp);
 
