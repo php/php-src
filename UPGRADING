@@ -29,8 +29,7 @@ PHP 8.7 UPGRADE NOTES
     to 16 by default. Set the stream context option max_filter_count to change
     this.
   . stream_socket_accept() no longer reports an error when the timeout is 0
-    and no connection is pending. It still returns false. When a non-zero
-    timeout expires, the error code is now TimeOut instead of AcceptFailed.
+    and no connection is pending. It still returns false.
 
 ========================================
 2. New Features

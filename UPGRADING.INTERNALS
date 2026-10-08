@@ -45,9 +45,6 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 - The INIT_CLASS_ENTRY_INIT_METHODS() macro, which was previously used as
   part of handling disabled classes, was removed following the removal of
   the `disable_classes` INI setting in PHP 8.5.
-- php_stream_xport_accept() now returns 0 with a NULL client when no
-  connection is pending before the timeout. Callers must check the client,
-  not only the return value.
 
 ========================
 2. Build system changes

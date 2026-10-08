@@ -38,4 +38,4 @@ bool(true)
 bool(false)
 bool(false)
 Accept failed: %s
-TimeOut
+AcceptFailed
