@@ -19,6 +19,9 @@ PHP 8.7 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- Curl:
+  . curl_multi_exec() now throws a TypeError when still_running is not an int.
+
 - PDO:
   . PDOStatement::bindColumn() now throws a ValueError when the column name is
     not present in the result set. It previously reported the condition
@@ -33,6 +36,13 @@ PHP 8.7 UPGRADE NOTES
 2. New Features
 ========================================
 
+- Intl:
+  . Locale::acceptFromHttp() and locale_accept_from_http() now accept an
+    optional $availableLocales array argument. When given, the
+    Accept-Language header is matched against these locales instead of all
+    locales known to ICU, and the matching entry is returned as passed.
+    A ValueError is thrown if the array is empty or contains an invalid
+    locale, and a TypeError if it contains a non-string value.
 - Streams:
   . The so_linger, so_rcvbuf and so_sndbuf stream socket context options are
     now also applied to unix and unix datagram sockets.
@@ -48,14 +58,6 @@ PHP 8.7 UPGRADE NOTES
 ========================================
 5. Changed Functions
 ========================================
-
-- Intl:
-  . Locale::acceptFromHttp() and locale_accept_from_http() now accept an
-    optional $availableLocales array argument. When given, the
-    Accept-Language header is matched against these locales instead of all
-    locales known to ICU, and the matching entry is returned as passed.
-    A ValueError is thrown if the array is empty or contains an invalid
-    locale, and a TypeError if it contains a non-string value.
 
 ========================================
 6. New Functions
@@ -97,9 +99,12 @@ PHP 8.7 UPGRADE NOTES
   . Improved performance of strcspn() and strpbrk() when searching longer strings
     with a single-byte character mask.
   . Improved performance of array_push() on packed arrays.
+  . Improved performance of array_chunk() when not preserving keys.
   . Improved performance of array_splice() when inserting without removing
     elements.
   . Improved performance of str_rot13().
+  . Improved performance of pack() for large strings using the a, A and Z
+    formats.
 
 - MBString:
   . Improved performance of mb_strlen for UTF-8 strings.

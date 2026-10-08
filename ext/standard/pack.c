@@ -559,9 +559,12 @@ too_few_args:
 				zend_string *tmp_str;
 				zend_string *str = zval_get_tmp_string(&argv[currentarg++], &tmp_str);
 
-				memset(&ZSTR_VAL(output)[outputpos], (code == 'a' || code == 'Z') ? '\0' : ' ', arg);
-				memcpy(&ZSTR_VAL(output)[outputpos], ZSTR_VAL(str),
-					   (ZSTR_LEN(str) < arg_cp) ? ZSTR_LEN(str) : arg_cp);
+				arg_cp = MIN(ZSTR_LEN(str), arg_cp);
+				if (arg_cp < arg) {
+					memset(&ZSTR_VAL(output)[outputpos + arg_cp],
+						(code == 'a' || code == 'Z') ? '\0' : ' ', arg - arg_cp);
+				}
+				memcpy(&ZSTR_VAL(output)[outputpos], ZSTR_VAL(str), arg_cp);
 
 				outputpos += arg;
 				zend_tmp_string_release(tmp_str);

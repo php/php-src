@@ -2991,7 +2991,8 @@ static void ZEND_FASTCALL zend_jit_inc_typed_prop(zval *var_ptr, zend_property_i
 	zend_execute_data *execute_data = EG(current_execute_data);
 	zval tmp;
 
-	ZVAL_COPY_DEREF(&tmp, var_ptr);
+	ZVAL_DEREF(var_ptr);
+	ZVAL_COPY(&tmp, var_ptr);
 
 	increment_function(var_ptr);
 
@@ -3022,7 +3023,8 @@ static void ZEND_FASTCALL zend_jit_dec_typed_prop(zval *var_ptr, zend_property_i
 	zend_execute_data *execute_data = EG(current_execute_data);
 	zval tmp;
 
-	ZVAL_COPY_DEREF(&tmp, var_ptr);
+	ZVAL_DEREF(var_ptr);
+	ZVAL_COPY(&tmp, var_ptr);
 
 	decrement_function(var_ptr);
 
