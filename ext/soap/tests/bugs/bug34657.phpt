@@ -17,5 +17,5 @@ try {
 ?>
 --EXPECTF--
 SoapFault
-SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://i_dont_exist.com/some.wsdl'%A
+SoapClient::__construct(): Parsing WSDL: Couldn't load from 'http://i_dont_exist.com/some.wsdl'%A
 ok

@@ -47,9 +47,9 @@ echo 'Done.' . PHP_EOL;
   </main:NULL>
 SoapFault:   <!-- init Exception::getMessage() -->
   <Exception::getMessage>
-  </Exception::getMessage:'SOAP-ERROR: Parsing WSDL: %s
+  </Exception::getMessage:'SoapClient::__construct(): Parsing WSDL: %s
 '>
-SOAP-ERROR: Parsing WSDL: %s
+SoapClient::__construct(): Parsing WSDL: %s
 
 Done.
 </file '%s%eobserver_error_%d.php'>

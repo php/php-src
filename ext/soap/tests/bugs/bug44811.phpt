@@ -16,6 +16,6 @@ try {
 die('ok');
 ?>
 --EXPECTF--
-SOAP-ERROR: Parsing WSDL: Couldn't load from 'https://php.net' : %s
+Parsing WSDL: Couldn't load from 'https://php.net' : %s
 
 ok
