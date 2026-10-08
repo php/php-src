@@ -160,8 +160,16 @@ ZEND_API bool zend_async_internal_context_set(
 		return false;
 	}
 
-	Z_TRY_ADDREF_P(value);
-	zend_hash_index_update(&coroutine->internal_context, key, value);
+	/* Copied before the lookup, which may grow the table `value` points into;
+	 * the old value goes last, as its destructor may re-enter the table. */
+	zval new_value, old_value;
+	ZVAL_COPY(&new_value, value);
+
+	zval *slot = zend_hash_index_lookup(&coroutine->internal_context, key);
+
+	ZVAL_COPY_VALUE(&old_value, slot);
+	ZVAL_COPY_VALUE(slot, &new_value);
+	zval_ptr_dtor(&old_value);
 	return true;
 }
 
@@ -236,8 +244,16 @@ ZEND_API void zend_async_context_entry_set(
 		zend_async_context_t *context, zend_string *skey, zend_object *okey, zval *value)
 {
 	if (skey != NULL) {
-		Z_TRY_ADDREF_P(value);
-		zend_hash_update(&context->string_keys, skey, value);
+		/* Copied before the lookup, which may grow the table `value` points into;
+		 * the old value goes last, as its destructor may re-enter the table. */
+		zval new_value, old_value;
+		ZVAL_COPY(&new_value, value);
+
+		zval *slot = zend_hash_lookup(&context->string_keys, skey);
+
+		ZVAL_COPY_VALUE(&old_value, slot);
+		ZVAL_COPY_VALUE(slot, &new_value);
+		zval_ptr_dtor(&old_value);
 		return;
 	}
 
@@ -388,9 +404,12 @@ ZEND_API void zend_async_context_destroy(zend_coroutine_t *coroutine)
 		}
 	}
 
-	if (coroutine->context != NULL) {
-		OBJ_RELEASE(coroutine->context);
+	zend_object *context = coroutine->context;
+
+	/* Unlinked first: the values' destructors may ask for the coroutine's context. */
+	if (context != NULL) {
 		coroutine->context = NULL;
+		OBJ_RELEASE(context);
 	}
 }
 
