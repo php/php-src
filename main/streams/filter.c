@@ -237,7 +237,7 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 		wildname = safe_emalloc(1, n, 3);
 		memcpy(wildname, filtername, n+1);
 		char *new_period = wildname + (period - filtername);
-		while (new_period && !filter) {
+		while (new_period && !filter && !EG(exception)) {
 			ZEND_ASSERT(new_period[0] == '.');
 			new_period[1] = '*';
 			new_period[2] = '\0';
@@ -251,7 +251,7 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 		efree(wildname);
 	}
 
-	if (filter == NULL) {
+	if (filter == NULL && !EG(exception)) {
 		/* TODO: these need correct docrefs */
 		if (factory == NULL)
 			php_error_docref(NULL, E_WARNING, "Unable to locate filter \"%s\"", filtername);
