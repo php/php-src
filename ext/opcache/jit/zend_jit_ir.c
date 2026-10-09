@@ -5987,6 +5987,38 @@ static int zend_jit_long_math(zend_jit_ctx *jit, const zend_op *opline, uint32_t
 	return 1;
 }
 
+static int zend_jit_bw_not(zend_jit_ctx  *jit,
+                           const zend_op *opline,
+                           uint32_t       op1_info,
+                           zend_jit_addr  op1_addr,
+                           uint32_t       res_use_info,
+                           uint32_t       res_info,
+                           zend_jit_addr  res_addr)
+{
+	ir_ref ref;
+
+	ZEND_ASSERT((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG);
+
+	if (Z_MODE(op1_addr) == IS_REG
+	 && Z_LOAD(op1_addr)
+	 && jit->ra[Z_SSA_VAR(op1_addr)].ref == IR_NULL) {
+		/* Force load */
+		zend_jit_use_reg(jit, op1_addr);
+	}
+
+	ref = ir_NOT_L(jit_Z_LVAL(jit, op1_addr));
+	jit_set_Z_LVAL(jit, res_addr, ref);
+	if (Z_MODE(res_addr) != IS_REG) {
+		if (!zend_jit_same_addr(op1_addr, res_addr)) {
+			if ((res_use_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF|MAY_BE_GUARD)) != MAY_BE_LONG) {
+				jit_set_Z_TYPE_INFO(jit, res_addr, IS_LONG);
+			}
+		}
+	}
+
+	return zend_jit_store_var_if_necessary(jit, opline->result.var, res_addr, res_info);
+}
+
 static int zend_jit_concat_helper(zend_jit_ctx   *jit,
                                   const zend_op  *opline,
                                   uint8_t         op1_type,
@@ -17727,6 +17759,13 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 			}
 			return (op1_info & MAY_BE_LONG)
 				&& (op2_info & MAY_BE_LONG);
+		case ZEND_BW_NOT:
+			op1_info = OP1_INFO();
+			if (trace && trace->op1_type != IS_UNKNOWN) {
+				op1_info &= 1U << (trace->op1_type & ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT|IS_TRACE_PACKED));
+			}
+			return opline->op1_type != IS_CONST
+				&& (op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG;
 		case ZEND_PRE_INC:
 		case ZEND_PRE_DEC:
 		case ZEND_POST_INC:

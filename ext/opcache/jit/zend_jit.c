@@ -1665,6 +1665,23 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
+					case ZEND_BW_NOT:
+						if (PROFITABILITY_CHECKS && (!ssa->ops || !ssa->var_info)) {
+							break;
+						}
+						if (opline->op1_type == IS_CONST) {
+							break;
+						}
+						op1_info = OP1_INFO();
+						if ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) != MAY_BE_LONG) {
+							break;
+						}
+						if (!zend_jit_bw_not(&ctx, opline,
+								op1_info, OP1_REG_ADDR(),
+								-1, RES_INFO(), RES_REG_ADDR())) {
+							goto jit_failure;
+						}
+						goto done;
 					case ZEND_BW_OR:
 					case ZEND_BW_AND:
 					case ZEND_BW_XOR:
