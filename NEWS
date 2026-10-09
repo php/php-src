@@ -27,6 +27,10 @@ PHP                                                                        NEWS
   . Fix too wide type inference for ASSIGN_DIM_OP. (ndossche)
   . Fix OSS-Fuzz #568005340 (FETCH_DIM_FUNC_ARG partial conversion). (ndossche)
 
+- OpenSSL:
+  . Fixed bug GH-24220 (Failed listen() on a tcp:// server reported as
+    success with ext/openssl). (Ryosuke Ishibashi)
+
 - Phar:
   . Fixed GH-24166 (Double-free in Phar::webPhar() in CGI without PATH_INFO).
     (RigelYoung, Jakub Zelenka)

@@ -3843,8 +3843,9 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 
 				case STREAM_XPORT_OP_LISTEN:
 					/* Do normal listen first */
-					xparam->outputs.returncode = php_stream_socket_ops.set_option(
-						stream, option, value, ptrparam);
+					if (php_stream_socket_ops.set_option(stream, option, value, ptrparam) != PHP_STREAM_OPTION_RETURN_OK) {
+						xparam->outputs.returncode = -1;
+					}
 
 					if (xparam->outputs.returncode == 0 && sslsock->enable_on_connect) {
 						/* Create SSL_CTX early to share it for session resumption and early data */
