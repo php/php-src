@@ -2505,6 +2505,123 @@ static uint32_t zend_fetch_prop_type(const zend_script *script, const zend_prope
 	return zend_convert_type(script, prop_info->type, pce);
 }
 
+/* Models the coercion that a value of type value_type may be coerced to when assigned to a property
+ * of type prop_type.
+ * In strict mode, only int->float is allowed. Otherwise this follows the zend_verify_weak_scalar_type_hint() rules. */
+static uint32_t scalar_coercion_type(uint32_t value_type, uint32_t prop_type, bool strict)
+{
+	if (strict) {
+		return ((value_type & MAY_BE_LONG) && (prop_type & MAY_BE_DOUBLE)) ? MAY_BE_DOUBLE : 0;
+	}
+
+	/* Coercion to bool requires the full bool type, not just true or false. */
+	bool to_bool = (prop_type & MAY_BE_BOOL) == MAY_BE_BOOL;
+	uint32_t result = 0;
+
+	if (value_type & MAY_BE_BOOL) {
+		if (prop_type & MAY_BE_LONG) {
+			result |= MAY_BE_LONG;
+		} else if (prop_type & MAY_BE_DOUBLE) {
+			result |= MAY_BE_DOUBLE;
+		} else if (prop_type & MAY_BE_STRING) {
+			result |= MAY_BE_STRING;
+		}
+	}
+	if (value_type & MAY_BE_LONG) {
+		if (prop_type & MAY_BE_DOUBLE) {
+			result |= MAY_BE_DOUBLE;
+		} else if (prop_type & MAY_BE_STRING) {
+			result |= MAY_BE_STRING;
+		} else if (to_bool) {
+			result |= MAY_BE_BOOL;
+		}
+	}
+	if (value_type & MAY_BE_DOUBLE) {
+		/* Conversion to int fails for NAN, INF and out of range values. */
+		if (prop_type & MAY_BE_LONG) {
+			result |= MAY_BE_LONG;
+		}
+		if (prop_type & MAY_BE_STRING) {
+			result |= MAY_BE_STRING;
+		} else if (to_bool) {
+			result |= MAY_BE_BOOL;
+		}
+	}
+	if (value_type & MAY_BE_STRING) {
+		/* Conversion to int or float fails for non-numeric strings. */
+		if (prop_type & MAY_BE_LONG) {
+			result |= MAY_BE_LONG;
+		}
+		if (prop_type & MAY_BE_DOUBLE) {
+			result |= MAY_BE_DOUBLE;
+		}
+		if (to_bool) {
+			result |= MAY_BE_BOOL;
+		}
+	}
+	if (value_type & MAY_BE_OBJECT) {
+		/* Objects may be converted to string using __toString(). */
+		if (prop_type & MAY_BE_STRING) {
+			result |= MAY_BE_STRING;
+		}
+	}
+	if (result & MAY_BE_STRING) {
+		/* The only scalar that's refcounted is a string. */
+		result |= MAY_BE_RC1 | MAY_BE_RCN;
+	}
+	return result;
+}
+
+/* The result of a compound assignment to a property must satisfy the property type.
+ * A value that doesn't may be coerced to one of the scalar types of the property. */
+static uint32_t prop_assign_op_result_type(uint32_t tmp, const zend_property_info *prop_info, uint32_t prop_type, bool strict)
+{
+	if (!prop_info) {
+		/* The property may be untyped, or have any type. */
+		if (strict) {
+			if (tmp & MAY_BE_LONG) {
+				return tmp | MAY_BE_DOUBLE;
+			}
+			return tmp;
+		}
+		return tmp | MAY_BE_BOOL | MAY_BE_LONG | MAY_BE_DOUBLE | MAY_BE_STRING | MAY_BE_RC1 | MAY_BE_RCN;
+	}
+	return (tmp & prop_type) | scalar_coercion_type(tmp & ~prop_type & MAY_BE_ANY, prop_type, strict);
+}
+
+/* Whether ASSIGN_OBJ_OP may return the uncoerced result by having overloaded handler. */
+static bool assign_obj_op_may_be_overloaded(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op, const zend_property_info *prop_info)
+{
+	const zend_class_entry *ce;
+	bool is_instanceof;
+
+	if (!prop_info) {
+		return true;
+	}
+
+	if (opline->op1_type == IS_UNUSED) {
+		ce = op_array->scope;
+		is_instanceof = true;
+	} else if (ssa_op->op1_use >= 0) {
+		ce = ssa->var_info[ssa_op->op1_use].ce;
+		is_instanceof = ssa->var_info[ssa_op->op1_use].is_instanceof;
+	} else {
+		return true;
+	}
+
+	/* A child class may add __get() or hooks. */
+	if (!ce
+	 || (is_instanceof && !(ce->ce_flags & ZEND_ACC_FINAL))
+	 || !(ce->ce_flags & ZEND_ACC_LINKED)) {
+		return true;
+	}
+
+	return ce->__get /* Unset property */
+		|| ce->create_object /* Custom handlers */
+		|| prop_info->hooks
+		|| (prop_info->flags & ZEND_ACC_READONLY); /* Reinitialized in __clone() */
+}
+
 static bool result_may_be_separated(zend_ssa *ssa, zend_ssa_op *ssa_op)
 {
 	int tmp_var = ssa_op->result_def;
@@ -2822,43 +2939,16 @@ static zend_always_inline zend_result _zend_update_type_info(
 						/* Typed reference may cause auto conversion */
 						tmp |= MAY_BE_ANY;
 					}
-				} else if (opline->opcode == ZEND_ASSIGN_OBJ_OP) {
-					/* The return value must also satisfy the property type */
-					if (prop_info) {
-						t1 = zend_fetch_prop_type(script, prop_info, &ce);
-						if ((t1 & (MAY_BE_LONG|MAY_BE_DOUBLE)) == MAY_BE_LONG
-						 && (tmp & (MAY_BE_LONG|MAY_BE_DOUBLE)) == MAY_BE_DOUBLE) {
-							/* DOUBLE may be auto-converted to LONG */
-							tmp |= MAY_BE_LONG;
-							tmp &= ~MAY_BE_DOUBLE;
-						} else if ((t1 & (MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING)) == MAY_BE_STRING
-						 && (tmp & (MAY_BE_LONG|MAY_BE_DOUBLE))) {
-							/* LONG/DOUBLE may be auto-converted to STRING */
-							tmp |= MAY_BE_STRING;
-							tmp &= ~(MAY_BE_LONG|MAY_BE_DOUBLE);
-						}
-						tmp &= t1;
+				} else if (opline->opcode == ZEND_ASSIGN_OBJ_OP
+						|| opline->opcode == ZEND_ASSIGN_STATIC_PROP_OP) {
+					/* The return value must also satisfy the property type,
+					 * unless the overloaded handlers return the uncoerced result. */
+					t1 = zend_fetch_prop_type(script, prop_info, &ce);
+					if (opline->opcode == ZEND_ASSIGN_OBJ_OP
+					 && assign_obj_op_may_be_overloaded(op_array, ssa, opline, ssa_op, prop_info)) {
+						tmp |= prop_assign_op_result_type(tmp, prop_info, t1, (op_array->fn_flags & ZEND_ACC_STRICT_TYPES) != 0);
 					} else {
-						tmp |= MAY_BE_LONG | MAY_BE_STRING;
-					}
-				} else if (opline->opcode == ZEND_ASSIGN_STATIC_PROP_OP) {
-					/* The return value must also satisfy the property type */
-					if (prop_info) {
-						t1 = zend_fetch_prop_type(script, prop_info, &ce);
-						if ((t1 & (MAY_BE_LONG|MAY_BE_DOUBLE)) == MAY_BE_LONG
-						 && (tmp & (MAY_BE_LONG|MAY_BE_DOUBLE)) == MAY_BE_DOUBLE) {
-							/* DOUBLE may be auto-converted to LONG */
-							tmp |= MAY_BE_LONG;
-							tmp &= ~MAY_BE_DOUBLE;
-						} else if ((t1 & (MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING)) == MAY_BE_STRING
-						 && (tmp & (MAY_BE_LONG|MAY_BE_DOUBLE))) {
-							/* LONG/DOUBLE may be auto-converted to STRING */
-							tmp |= MAY_BE_STRING;
-							tmp &= ~(MAY_BE_LONG|MAY_BE_DOUBLE);
-						}
-						tmp &= t1;
-					} else {
-						tmp |= MAY_BE_LONG | MAY_BE_STRING;
+						tmp = prop_assign_op_result_type(tmp, prop_info, t1, (op_array->fn_flags & ZEND_ACC_STRICT_TYPES) != 0);
 					}
 				} else {
 					if (tmp & MAY_BE_REF) {
