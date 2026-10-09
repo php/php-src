@@ -37,6 +37,10 @@ PHP                                                                        NEWS
     is called from a progress or cancel callback during close().
     (Ilia Alshanetsky)
 
+- Zlib:
+  . Fixed use-after-free when an error handler removes a failing zlib.inflate
+    filter (GH-24176). (Edmond)
+
 22 Oct 2026, PHP 8.5.12
 
 - BCMath:
