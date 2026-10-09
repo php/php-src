@@ -1402,16 +1402,19 @@ PHPAPI int php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 		}
 		ret = stream->ops->seek(stream, offset, whence, &stream->position);
 
-		if (((stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) || ret == 0) {
-			if (ret == 0) {
-				stream->eof = 0;
-				stream->fatal_error = 0;
-			}
+		if (ret == 0) {
+			stream->eof = 0;
+			stream->fatal_error = 0;
 
 			/* invalidate the buffer contents */
 			stream->readpos = stream->writepos = 0;
 
 			return php_stream_filters_seek_all(stream, is_start_seeking, offset, whence) == SUCCESS ? ret : -1;
+		}
+
+		if ((stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) {
+			/* the stream did not move, so the position and the buffer contents are still valid */
+			return ret;
 		}
 		/* else the stream has decided that it can't support seeking after all;
 		 * fall through to attempt emulation */

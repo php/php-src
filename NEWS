@@ -67,6 +67,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23962 (Destroying a persistent PDO instance rolls back a
     transaction still in use by another instance). (Lazizbek Ergashev)
 
+- PDO_SQLite:
+  . Fixed bug GH-23905 (Failed seek on PDO SQLite blob streams sets the stream
+    position to -1). (Marc Bennewitz)
+
 - PGSQL:
   . Fixed pg_lo_write() rejecting data containing null bytes. (Ilia Alshanetsky)
 
@@ -101,10 +105,16 @@ PHP                                                                        NEWS
     (Ilia Alshanetsky)
   . Fixed bug GH-22051 (Inconsistent error reporting in SQLite3Result::reset()
     and SQLite3Result::finalize()). (Ilia Alshanetsky)
+  . Fixed bug GH-23905 (Failed seek on SQLite3 blob streams sets the stream
+    position to -1). (Marc Bennewitz)
 
 - Streams:
   . Applied the so_linger, so_rcvbuf and so_sndbuf context options to unix
     sockets. (David Carlier)
+  . Fixed bug GH-23905 (Failed seek on php://memory and php://temp streams
+    sets the stream position to -1). (Marc Bennewitz)
+  . Fixed a failed seek discarding the read buffer of buffered streams.
+    (Marc Bennewitz)
 
 - Standard:
   . Fixed bug #60110 (fclose(), file_put_contents(), copy() do not return false
