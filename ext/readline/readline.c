@@ -197,9 +197,7 @@ PHP_FUNCTION(readline_info)
 #else
 				char *copy = strdup(Z_STRVAL_P(value));
 				rl_line_buffer = copy;
-				if (php_readline_custom_line_buffer) {
-					free(php_readline_custom_line_buffer);
-				}
+				free(php_readline_custom_line_buffer);
 				php_readline_custom_line_buffer = copy;
 #endif
 #if !defined(PHP_WIN32)
@@ -272,9 +270,7 @@ PHP_FUNCTION(readline_info)
 				char *copy = strdup(Z_STRVAL_P(value));
 				/* XXX: This store would need to be atomic ideally or use a memory barrier */
 				rl_readline_name = copy;
-				if (php_readline_custom_readline_name) {
-					free(php_readline_custom_readline_name);
-				}
+				free(php_readline_custom_readline_name);
 				php_readline_custom_readline_name = copy;
 			}
 		} else if (zend_string_equals_literal_ci(what, "attempted_completion_over")) {
