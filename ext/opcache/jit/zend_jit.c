@@ -3908,4 +3908,15 @@ void zend_jit_restart(void)
 	}
 }
 
+/* zend_jit_restart() rewinds the buffer to this point: code generated before it
+ * (preloaded functions compiled on script load) must survive restarts */
+void zend_jit_save_restart_point(void)
+{
+	if (dasm_buf) {
+		zend_jit_unprotect();
+		dasm_ptr[1] = dasm_ptr[0];
+		zend_jit_protect();
+	}
+}
+
 #endif /* HAVE_JIT */
