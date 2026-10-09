@@ -417,6 +417,7 @@ static char *_readline_command_generator(const char *text, int state)
 {
 	HashTable  *myht = Z_ARRVAL(_readline_array);
 	zval *entry;
+	size_t text_len = strlen(text);
 
 	if (!state) {
 		zend_hash_internal_pointer_reset(myht);
@@ -426,7 +427,7 @@ static char *_readline_command_generator(const char *text, int state)
 		zend_hash_move_forward(myht);
 
 		convert_to_string(entry);
-		if (strncmp (Z_STRVAL_P(entry), text, strlen(text)) == 0) {
+		if (strncmp (Z_STRVAL_P(entry), text, text_len) == 0) {
 			return (strdup(Z_STRVAL_P(entry)));
 		}
 	}
