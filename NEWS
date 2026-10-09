@@ -19,6 +19,10 @@ PHP                                                                        NEWS
   . Fix too wide type inference for ASSIGN_DIM_OP. (ndossche)
   . Fix OSS-Fuzz #568005340 (FETCH_DIM_FUNC_ARG partial conversion). (ndossche)
 
+- Standard:
+  . Fixed password_get_info() and password_needs_rehash() accepting malformed
+    bcrypt costs. (Ilia Alshanetsky)
+
 - Zip:
   . Fixed use-after-free when re-entering ZipArchive during destruction or
     a close warning, and rejected opening streams while closing. (jvoisin)
