@@ -1219,6 +1219,14 @@ static void zend_fiber_object_destroy(zend_object *object)
 	 * it. The legacy path below never applies (fiber->context uninitialized). */
 	if (fiber->coroutine != NULL) {
 		fiber->flags |= ZEND_FIBER_FLAG_DESTROYED;
+
+		/* Detached from its coroutine, a fiber parked in Fiber::suspend() is
+		 * dead, as the legacy path below leaves it: a destructor may keep the
+		 * object, and the legacy methods have no context to resume. */
+		if (fiber->context.status == ZEND_FIBER_STATUS_SUSPENDED) {
+			fiber->context.status = ZEND_FIBER_STATUS_DEAD;
+		}
+
 		zend_fiber_release_coroutine(fiber, true);
 		return;
 	}
