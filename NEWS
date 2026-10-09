@@ -283,6 +283,10 @@ PHP                                                                        NEWS
   . Fixed convert.quoted-printable-decode decoding lowercase hex digits to
     the wrong byte. (Ilia Alshanetsky)
 
+- Streams:
+  . Fixed leaks and data loss when user filter leaves buckets on input
+    brigade. (ndossche, Matthias Goergens, Jakub Zelenka)
+
 - Tidy:
   . Fixed a use-after-free when a tidyNode is used after its document is
     reparsed. (Ilia Alshanetsky)
