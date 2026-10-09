@@ -13,6 +13,8 @@ PHP                                                                        NEWS
   . Fixed memory manager keeping a block reallocated to exactly the size of
     the next smaller bin in its larger bin, which efree_size() then freed
     into the wrong one. (Marc Bennewitz)
+  . Fixed bug GH-24218 (Invalid opcode for count() of a literal array
+    without SCCP). (lazerg)
 
 - DOM:
   . Fixed bug GH-23352 (UAF reading an attribute value node retained across
@@ -27,6 +29,8 @@ PHP                                                                        NEWS
   . Fix type inference of ADD_ARRAY_UNPACK with integer keys. (ndossche)
   . Fix too wide type inference for ASSIGN_DIM_OP. (ndossche)
   . Fix OSS-Fuzz #568005340 (FETCH_DIM_FUNC_ARG partial conversion). (ndossche)
+  . Fixed bug GH-24218 (Invalid opcode for count() of a literal array when
+    SCCP is disabled). (Lazizbek Ergashev)
 
 - SOAP:
   . Fixed use of uninitialized func in do_request() on OOM bailout.
