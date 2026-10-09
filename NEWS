@@ -3,6 +3,9 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.5.13
 
 - Core:
+  . Fixed bug GH-24184 (System ID not being reinitialized after an Apache
+    graceful restart, potentially causing incompatible OPcache file cache
+    entries to be reused). (Levi Morrison)
   . Fixed memory leak when an exception already contains the pending exception
     in its previous chain. (Edmond)
   . Fixed bug GH-23979 (Nullsafe operator must not flush delayed oplines of an

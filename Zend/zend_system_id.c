@@ -43,6 +43,7 @@ ZEND_API zend_result zend_add_system_entropy(const char *module_name, const char
 
 void zend_startup_system_id(void)
 {
+	finalized = 0;
 	PHP_MD5Init(&context);
 	PHP_MD5Update(&context, PHP_VERSION, sizeof(PHP_VERSION)-1);
 	PHP_MD5Update(&context, ZEND_EXTENSION_BUILD_ID, sizeof(ZEND_EXTENSION_BUILD_ID)-1);
