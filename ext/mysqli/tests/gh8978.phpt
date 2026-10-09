@@ -4,7 +4,17 @@ Bug GH-8267 (Invalid error message when connection via SSL fails)
 mysqli
 --SKIPIF--
 <?php
-require_once 'skipifconnectfailure.inc';
+require_once 'connect.inc';
+
+if (!($link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)))
+    die(sprintf("skip Connect failed, [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
+
+$res = $link->query("SHOW VARIABLES LIKE 'have_ssl'");
+$row = $res ? $res->fetch_row() : null;
+// MySQL 8.4+ no longer has have_ssl so the check is only relevant for older versions and MariaDB
+if ($row && $row[1] !== 'YES') {
+    die('skip Server has no SSL support');
+}
 ?>
 --FILE--
 <?php
