@@ -141,7 +141,7 @@ PHP_FUNCTION(readline)
 
 /* }}} */
 
-#define SAFE_STRING(s) ((s)?(char*)(s):"")
+#define SAFE_STRING(s) ((s)?(s):"")
 
 /* {{{ Gets/sets various internal readline variables. */
 PHP_FUNCTION(readline_info)
@@ -166,7 +166,7 @@ PHP_FUNCTION(readline_info)
 		add_assoc_long(return_value,"done",rl_done);
 		add_assoc_long(return_value,"pending_input",rl_pending_input);
 		add_assoc_string(return_value,"prompt",SAFE_STRING(rl_prompt));
-		add_assoc_string(return_value,"terminal_name",(char *)SAFE_STRING(rl_terminal_name));
+		add_assoc_string(return_value,"terminal_name",SAFE_STRING(rl_terminal_name));
 		add_assoc_str(return_value, "completion_append_character",
 			rl_completion_append_character == 0
 				? ZSTR_EMPTY_ALLOC()
@@ -177,9 +177,9 @@ PHP_FUNCTION(readline_info)
 		add_assoc_long(return_value,"erase_empty_line",rl_erase_empty_line);
 #endif
 #ifndef PHP_WIN32
-		add_assoc_string(return_value,"library_version",(char *)SAFE_STRING(rl_library_version));
+		add_assoc_string(return_value,"library_version",SAFE_STRING(rl_library_version));
 #endif
-		add_assoc_string(return_value,"readline_name",(char *)SAFE_STRING(rl_readline_name));
+		add_assoc_string(return_value,"readline_name",SAFE_STRING(rl_readline_name));
 		add_assoc_long(return_value,"attempted_completion_over",rl_attempted_completion_over);
 	} else {
 		if (zend_string_equals_literal_ci(what,"line_buffer")) {
@@ -231,7 +231,7 @@ PHP_FUNCTION(readline_info)
 		} else if (zend_string_equals_literal_ci(what, "prompt")) {
 			RETVAL_STRING(SAFE_STRING(rl_prompt));
 		} else if (zend_string_equals_literal_ci(what, "terminal_name")) {
-			RETVAL_STRING((char *)SAFE_STRING(rl_terminal_name));
+			RETVAL_STRING(SAFE_STRING(rl_terminal_name));
 		} else if (zend_string_equals_literal_ci(what, "completion_suppress_append")) {
 			oldval = rl_completion_suppress_append;
 			if (value) {
@@ -259,7 +259,7 @@ PHP_FUNCTION(readline_info)
 #endif
 #ifndef PHP_WIN32
 		} else if (zend_string_equals_literal_ci(what,"library_version")) {
-			RETVAL_STRING((char *)SAFE_STRING(rl_library_version));
+			RETVAL_STRING(SAFE_STRING(rl_library_version));
 #endif
 		} else if (zend_string_equals_literal_ci(what, "readline_name")) {
 			RETVAL_STRING(SAFE_STRING(rl_readline_name));
@@ -434,7 +434,7 @@ static char *_readline_command_generator(const char *text, int state)
 static void _readline_string_zval(zval *ret, const char *str)
 {
 	if (str) {
-		ZVAL_STRING(ret, (char*)str);
+		ZVAL_STRING(ret, str);
 	} else {
 		ZVAL_NULL(ret);
 	}
