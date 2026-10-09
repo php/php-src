@@ -33,8 +33,8 @@ set_error_handler(function ($severity, $message, $file, $line) {
 });
 try {
     $Prop2->setValue(\T2::class, 'hi');
-} catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump("T2::self = " . T2::getDataByStatic());
@@ -53,7 +53,7 @@ Deprecated: Calling ReflectionProperty::setValue() with a 1st argument which is 
 Deprecated: Calling ReflectionProperty::setValue() with a 1st argument which is not null or an object is deprecated in %s on line %d
 string(16) "T2::self = hello"
 string(18) "T2::static = hello"
-Calling ReflectionProperty::setValue() with a 1st argument which is not null or an object is deprecated
+Exception: Calling ReflectionProperty::setValue() with a 1st argument which is not null or an object is deprecated
 string(16) "T2::self = hello"
 string(16) "T2::self = hello"
 string(18) "T2::static = hello"

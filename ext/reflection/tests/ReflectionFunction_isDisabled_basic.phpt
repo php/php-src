@@ -10,15 +10,15 @@ disable_functions=is_file
 try {
     $rf = new ReflectionFunction('is_file');
     var_dump($rf->isDisabled());
-} catch (ReflectionException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $rf = new ReflectionFunction('is_string');
 var_dump($rf->isDisabled());
 ?>
 --EXPECTF--
-Function is_file() does not exist
+ReflectionException: Function is_file() does not exist
 
 Deprecated: Method ReflectionFunction::isDisabled() is deprecated since 8.0, as ReflectionFunction can no longer be constructed for disabled functions in %s on line %d
 bool(false)

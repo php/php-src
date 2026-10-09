@@ -22,4 +22,3 @@ Function [ <user> function foo ] {
 Method [ <user> private method foo ] {
   @@ %sbug41061.php 7 - 8
 }
-
