@@ -118,6 +118,7 @@ PHP                                                                        NEWS
     elements. (mehmetcansahin)
   . Enforce max_filter_count: limit the number of filters that can be chained
     in a php://filter URL. (Sjoerd Langkemper)
+  . Improved performance of array_push() on packed arrays. (mehmetcansahin)
   . Improved performance of array_chunk() when not preserving keys.
     (mehmetcansahin)
 
