@@ -287,13 +287,11 @@ static zend_string *_php_pgsql_trim_message(const char *message)
 
 static void php_pgsql_set_default_link(zend_object *obj)
 {
-	GC_ADDREF(obj);
-
 	if (PGG(default_link) != NULL) {
 		zend_object_release(PGG(default_link));
 	}
 
-	PGG(default_link) = obj;
+	PGG(default_link) = zend_object_copy(obj);
 }
 
 static void _close_pgsql_plink(zend_resource *rsrc)
@@ -4419,6 +4417,7 @@ static int php_pgsql_fd_cast(php_stream *stream, int cast_as, void **ret) /* {{{
 
 	switch (cast_as)	{
 		case PHP_STREAM_AS_FD_FOR_SELECT:
+		case PHP_STREAM_AS_FD_FOR_POLL:
 		case PHP_STREAM_AS_FD:
 		case PHP_STREAM_AS_SOCKETD: {
 				int fd_number = PQsocket(pgsql);

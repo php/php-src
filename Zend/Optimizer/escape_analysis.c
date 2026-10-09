@@ -170,6 +170,8 @@ static bool is_allocation_def(const zend_op_array *op_array, const zend_ssa *ssa
 				 && !ce->destructor
 				 && !ce->__get
 				 && !ce->__set
+				 && !ce->__isset
+				 && !ce->num_hooked_props
 				 && !(ce->ce_flags & forbidden_flags)
 				 && (ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
 					return true;
@@ -239,6 +241,8 @@ static bool is_local_def(const zend_op_array *op_array, const zend_ssa *ssa, int
 				 && !ce->destructor
 				 && !ce->__get
 				 && !ce->__set
+				 && !ce->__isset
+				 && !ce->num_hooked_props
 				 && !ce->parent) {
 					return true;
 				}

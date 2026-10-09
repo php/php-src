@@ -111,7 +111,6 @@ void php_clear_stmt_bind(MY_STMT *stmt)
 	if (stmt->stmt) {
 		if (mysqli_stmt_close(stmt->stmt, true)) {
 			php_error_docref(NULL, E_WARNING, "Error occurred while closing statement");
-			return;
 		}
 	}
 
@@ -255,8 +254,8 @@ zval *mysqli_write_property(zend_object *object, zend_string *name, zval *value,
 		const mysqli_prop_handler *hnd = zend_hash_find_ptr(obj->prop_handler, name);
 		if (hnd) {
 			if (!hnd->write_func) {
-				zend_throw_error(NULL, "Cannot write read-only property %s::$%s",
-					ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
+				zend_throw_error(NULL, "Cannot write read-only property %pS::$%pS",
+					object->ce->name, name);
 				return &EG(error_zval);
 			}
 
@@ -392,29 +391,6 @@ PHP_MYSQLI_EXPORT(zend_object *) mysqli_objects_new(zend_class_entry *class_type
 }
 /* }}} */
 
-#include "ext/mysqlnd/mysqlnd_reverse_api.h"
-static MYSQLND *mysqli_convert_zv_to_mysqlnd(zval * zv)
-{
-	if (Z_TYPE_P(zv) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zv), mysqli_link_class_entry)) {
-		MY_MYSQL *mysql;
-		MYSQLI_RESOURCE  *my_res;
-		mysqli_object *intern = Z_MYSQLI_P(zv);
-		if (!(my_res = (MYSQLI_RESOURCE *)intern->ptr)) {
-			/* We know that we have a mysqli object, so this failure should be emitted */
-			zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(intern->zo.ce->name));
-			return NULL;
-		}
-		mysql = (MY_MYSQL *)(my_res->ptr);
-		return mysql ? mysql->mysql : NULL;
-	}
-	return NULL;
-}
-
-static const MYSQLND_REVERSE_API mysqli_reverse_api = {
-	&mysqli_module_entry,
-	mysqli_convert_zv_to_mysqlnd
-};
-
 static PHP_INI_MH(OnUpdateDefaultPort)
 {
 	zend_long value = ZEND_ATOL(ZSTR_VAL(new_value));
@@ -536,8 +512,6 @@ PHP_MINIT_FUNCTION(mysqli)
 	zend_hash_add_ptr(&classes, mysqli_stmt_class_entry->name, &mysqli_stmt_properties);
 
 	register_mysqli_symbols(module_number);
-
-	mysqlnd_reverse_api_register_api(&mysqli_reverse_api);
 
 	return SUCCESS;
 }

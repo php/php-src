@@ -685,6 +685,11 @@ IR_ALWAYS_INLINE ir_mem IR_MEM(ir_reg base, int32_t offset, ir_reg index, int32_
 ||	}
 |.endmacro
 
+/* Zero a register. A 32-bit xor has a shorter encoding and also clears the upper 32 bits. */
+|.macro ASM_REG_ZERO, type, reg
+|	xor Rd(reg), Rd(reg)
+|.endmacro
+
 |.macro ASM_REG_REG_OP2, op, type, op1, op2
 ||	switch (ir_type_size[type]) {
 || 		default:
@@ -1851,9 +1856,10 @@ int ir_get_target_constraints(ir_ctx *ctx, ir_ref ref, ir_target_constraints *co
 			break;
 		case IR_SHIFT:
 			if (rule & IR_FUSED) {
-				flags = IR_OP2_MUST_BE_IN_REG;
+				flags = IR_OP2_MUST_BE_IN_REG | IR_OP2_HINT_NEEDS_HOLE;
 			} else {
-				flags = IR_DEF_REUSES_OP1_REG | IR_DEF_CONFLICTS_WITH_INPUT_REGS | IR_USE_MUST_BE_IN_REG | IR_OP1_SHOULD_BE_IN_REG | IR_OP2_SHOULD_BE_IN_REG;
+				flags = IR_DEF_REUSES_OP1_REG | IR_DEF_CONFLICTS_WITH_INPUT_REGS | IR_USE_MUST_BE_IN_REG |
+					IR_OP1_SHOULD_BE_IN_REG | IR_OP2_SHOULD_BE_IN_REG | IR_OP2_HINT_NEEDS_HOLE;
 			}
 			constraints->hints[1] = IR_REG_NONE;
 			constraints->hints[2] = IR_REG_RCX;
@@ -3268,6 +3274,15 @@ static bool ir_match_has_flags_deps(ir_ctx *ctx, ir_ref ref, ir_ref root)
 	return pos != ref;
 }
 
+static uint32_t ir_match_fuse_load_const_addr(ir_ctx *ctx, ir_ref ref, const ir_insn *addr_insn)
+{
+	if (ir_may_fuse_addr(ctx, addr_insn)) {
+		return IR_FUSED | IR_SIMPLE | IR_LOAD;
+	}
+	/* The address doesn't fit into the displacement. Load it into a temporary register. */
+	return IR_FUSED | (IR_IS_TYPE_INT(ctx->ir_base[ref].type) ? IR_LOAD_INT : IR_LOAD_FP);
+}
+
 static void ir_match_fuse_load(ir_ctx *ctx, ir_ref ref, ir_ref root)
 {
 	if (ir_in_same_block(ctx, ref) &&
@@ -3279,10 +3294,8 @@ static void ir_match_fuse_load(ir_ctx *ctx, ir_ref ref, ir_ref root)
 			ir_insn *addr_insn = &ctx->ir_base[addr_ref];
 
 			if (IR_IS_CONST_REF(addr_ref)) {
-				if (ir_may_fuse_addr(ctx, addr_insn)) {
-					ctx->rules[ref] = IR_FUSED | IR_SIMPLE | IR_LOAD;
-					return;
-				}
+				ctx->rules[ref] = ir_match_fuse_load_const_addr(ctx, ref, addr_insn);
+				return;
 			} else if (addr_insn->op == IR_TLS_ADDR) {
 				// TODO: try to fuse static TLS addr ???
 				return;
@@ -3307,10 +3320,8 @@ static bool ir_match_try_fuse_load(ir_ctx *ctx, ir_ref ref, ir_ref root)
 			ir_insn *addr_insn = &ctx->ir_base[addr_ref];
 
 			if (IR_IS_CONST_REF(addr_ref)) {
-				if (ir_may_fuse_addr(ctx, addr_insn)) {
-					ctx->rules[ref] = IR_FUSED | IR_SIMPLE | IR_LOAD;
-					return 1;
-				}
+				ctx->rules[ref] = ir_match_fuse_load_const_addr(ctx, ref, addr_insn);
+				return 1;
 			} else if (addr_insn->op == IR_TLS_ADDR) {
 				// TODO: try to fuse static TLS addr ???
 				return 0;
@@ -5348,7 +5359,11 @@ static void ir_match_insn2(ir_ctx *ctx, ir_ref ref, uint32_t rule)
 	if (rule == IR_LEA_IB) {
 		if (!ir_match_try_revert_lea_to_add(ctx, ref) && !(ctx->flags & IR_OPT_CODEGEN)) {
 			/* revert to ADD to avoid extra register spill load with -O0 */
-			ctx->rules[ref] = IR_BINOP_INT | IR_MAY_SWAP;
+			ir_insn *insn = &ctx->ir_base[ref];
+
+			if (ctx->ir_base[insn->op1].op != IR_ALLOCA && ctx->ir_base[insn->op2].op != IR_ALLOCA) {
+				ctx->rules[ref] = IR_BINOP_INT | IR_MAY_SWAP;
+			}
 		}
 	}
 }
@@ -5458,7 +5473,7 @@ static void ir_emit_load_imm_int(ir_ctx *ctx, ir_type type, ir_reg reg, int64_t 
 
 	IR_ASSERT(IR_IS_TYPE_INT(type));
 	if (val == 0) {
-		|	ASM_REG_REG_OP xor, type, reg, reg
+		|	ASM_REG_ZERO type, reg
 	} else {
 		ir_emit_mov_imm_int(ctx, type, reg, val);
 	}
@@ -8234,7 +8249,7 @@ static void ir_emit_mul_div_mod(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 			if (ir_type_size[type] == 1) {
 				|	movzx ax, al
 			} else {
-				|	ASM_REG_REG_OP xor, type, IR_REG_RDX, IR_REG_RDX
+				|	ASM_REG_ZERO type, IR_REG_RDX
 			}
 			if (op2_reg != IR_REG_NONE) {
 				|	ASM_REG_OP div, type, op2_reg
@@ -8801,7 +8816,7 @@ static void ir_emit_cmp_int(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	if (IR_IS_CONST_REF(op2) && !IR_IS_SYM_CONST(ctx->ir_base[op2].op) && ctx->ir_base[op2].val.u64 == 0) {
 		if (op == IR_ULT) {
 			/* always false */
-			|	xor Ra(def_reg), Ra(def_reg)
+			|	xor Rd(def_reg), Rd(def_reg)
 			if (IR_REG_SPILLED(ctx->regs[def][0])) {
 				ir_emit_store(ctx, insn->type, def, def_reg);
 			}
@@ -14572,7 +14587,7 @@ static void ir_emit_cmp_i64(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	if (IR_IS_CONST_REF(op2) && !IR_IS_SYM_CONST(ctx->ir_base[op2].op) && ctx->ir_base[op2].val.u64 == 0) {
 		if (op == IR_ULT) {
 			/* always false */
-			|	xor Ra(def_reg), Ra(def_reg)
+			|	xor Rd(def_reg), Rd(def_reg)
 			if (IR_REG_SPILLED(ctx->regs[def][0])) {
 				ir_emit_store(ctx, insn->type, def, def_reg);
 			}
@@ -22205,7 +22220,7 @@ static void ir_emit_vector_binop_expand(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 						} else if (element_size == 1) {
 							|	movzx ax, al
 						} else {
-							|	ASM_REG_REG_OP xor, element_type, IR_REG_RDX, IR_REG_RDX
+							|	ASM_REG_ZERO element_type, IR_REG_RDX
 						}
 						if (IR_IS_TYPE_SIGNED(element_type)) {
 							|	ASM_REG_OP idiv, element_type, tmp2_reg
@@ -22652,7 +22667,7 @@ static void ir_emit_vector_binop_expand(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 					} else if (element_size == 1) {
 						|	movzx ax, al
 					} else {
-						|	ASM_REG_REG_OP xor, element_type, IR_REG_RDX, IR_REG_RDX
+						|	ASM_REG_ZERO element_type, IR_REG_RDX
 					}
 					if (IR_IS_TYPE_SIGNED(element_type)) {
 						|	ASM_MEM_OP idiv, element_type, mem
@@ -25988,8 +26003,10 @@ void ir_fix_stack_frame(ir_ctx *ctx)
 
 #ifdef IR_TARGET_X86
 	if (ctx->flags2 & IR_HAS_MEMCPY) {
-		IR_REGSET_INCL(ctx->used_preserved_regs, IR_REG_RSI);
-		IR_REGSET_INCL(ctx->used_preserved_regs, IR_REG_RDI);
+		ir_regset tmp = ctx->used_preserved_regs;
+		IR_REGSET_INCL(tmp, IR_REG_RSI);
+		IR_REGSET_INCL(tmp, IR_REG_RDI);
+		ctx->used_preserved_regs = tmp;
 	}
 #endif
 

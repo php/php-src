@@ -2007,7 +2007,7 @@ static zend_result php_openssl_validate_and_allocate_psk_callback(
 
 	char *is_callable_error = NULL;
 	zend_fcall_info_cache fcc = {0};
-	if (!zend_is_callable_ex(callable, NULL, 0, NULL, &fcc, &is_callable_error)) {
+	if (!zend_is_callable(callable, &fcc, &is_callable_error)) {
 		if (is_callable_error) {
 			zend_type_error("%s must be a valid callback, %s",
 					callback_name, is_callable_error);
@@ -2130,7 +2130,7 @@ static zend_result php_openssl_setup_server_early_data(php_stream *stream,
 
 		char *is_callable_error = NULL;
 		zend_fcall_info_cache fcc = {0};
-		if (!zend_is_callable_ex(val, NULL, 0, NULL, &fcc, &is_callable_error)) {
+		if (!zend_is_callable(val, &fcc, &is_callable_error)) {
 			if (is_callable_error) {
 				zend_type_error("early_data_cb must be a valid callback, %s", is_callable_error);
 				efree(is_callable_error);
@@ -2244,7 +2244,7 @@ static SSL_SESSION *php_openssl_session_get_cb(SSL *ssl, const unsigned char *se
 			session = obj->session;
 		}
 	} else if (Z_TYPE(retval) != IS_NULL) {
-		zend_type_error("session_get_cb return type must be null or OpenSSLSession");
+		zend_type_error("session_get_cb return type must be null or Openssl\\Session");
 	}
 
 	zval_ptr_dtor(&retval);
@@ -2318,7 +2318,7 @@ static zend_result php_openssl_validate_and_allocate_session_callback(
 
 	/* Validate callable */
 	zend_fcall_info_cache fcc;
-	if (!zend_is_callable_ex(callable, NULL, 0, NULL, &fcc, &is_callable_error)) {
+	if (!zend_is_callable(callable, &fcc, &is_callable_error)) {
 		if (is_callable_error) {
 			zend_type_error("%s must be a valid callback, %s", callback_name, is_callable_error);
 			efree(is_callable_error);
@@ -2365,7 +2365,7 @@ static zend_result php_openssl_setup_client_session(php_stream *stream,
 		if (php_openssl_is_session_ce(val)) {
 			enable_client_cache = true;
 		} else if (Z_TYPE_P(val) != IS_NULL) {
-			zend_type_error("session_data must be an OpenSSLSession instance");
+			zend_type_error("session_data must be an Openssl\\Session instance");
 			return FAILURE;
 		}
 	}
@@ -2546,13 +2546,13 @@ static zend_result php_openssl_apply_client_session_data(php_stream *stream,
 			if (!session) {
 				// TODO: Should this be a TypeError?
 				php_stream_warn(stream, Generic,
-						"Invalid OpenSSLSession object, falling back to full handshake");
+						"Invalid Openssl\\Session object, falling back to full handshake");
 				return FAILURE;
 			}
 			/* Object owns the session, we just borrow it */
 			needs_free = false;
 		} else if (Z_TYPE_P(val) != IS_NULL) {
-			zend_type_error("session_data must be an OpenSSLSession instance");
+			zend_type_error("session_data must be an Openssl\\Session instance");
 			return FAILURE;
 		}
 
@@ -3243,9 +3243,11 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 					retry = 1;
 				}
 
-				/* Also, on reads, we may get this condition on an EOF. We should check properly. */
 				if (read) {
-					stream->eof = (retry == 0 && errno != EAGAIN && !SSL_pending(sslsock->ssl_handle));
+					/* EOF unless the SSL layer just needs to wait. */
+					stream->eof = (retry == 0
+						&& err != SSL_ERROR_WANT_READ && err != SSL_ERROR_WANT_WRITE
+						&& !SSL_pending(sslsock->ssl_handle));
 				}
 
 				/* Don't loop indefinitely in non-blocking mode if no data is available */
@@ -3905,6 +3907,13 @@ static int php_openssl_sockop_cast(php_stream *stream, int castas, void **ret)  
 							: stream->chunk_size);
 				}
 
+				*(php_socket_t *)ret = sslsock->s.socket;
+			}
+			return SUCCESS;
+
+		case PHP_STREAM_AS_FD_FOR_POLL:
+			/* Descriptor only, OpenSSL pending bytes stay put */
+			if (ret) {
 				*(php_socket_t *)ret = sslsock->s.socket;
 			}
 			return SUCCESS;

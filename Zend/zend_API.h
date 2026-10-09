@@ -289,41 +289,6 @@ typedef struct _zend_fcall_info_cache {
 		class_container.info.internal.builtin_functions = functions;	\
 	}
 
-#define INIT_CLASS_ENTRY_INIT_METHODS(class_container, functions) \
-	{															\
-		class_container.default_object_handlers = &std_object_handlers;	\
-		class_container.constructor = NULL;						\
-		class_container.destructor = NULL;						\
-		class_container.clone = NULL;							\
-		class_container.serialize = NULL;						\
-		class_container.unserialize = NULL;						\
-		class_container.create_object = NULL;					\
-		class_container.get_static_method = NULL;				\
-		class_container.__call = NULL;							\
-		class_container.__callstatic = NULL;					\
-		class_container.__tostring = NULL;						\
-		class_container.__get = NULL;							\
-		class_container.__set = NULL;							\
-		class_container.__unset = NULL;							\
-		class_container.__isset = NULL;							\
-		class_container.__debugInfo = NULL;						\
-		class_container.__serialize = NULL;						\
-		class_container.__unserialize = NULL;					\
-		class_container.parent = NULL;							\
-		class_container.num_interfaces = 0;						\
-		class_container.trait_names = NULL;						\
-		class_container.num_traits = 0;							\
-		class_container.trait_aliases = NULL;					\
-		class_container.trait_precedences = NULL;				\
-		class_container.interfaces = NULL;						\
-		class_container.get_iterator = NULL;					\
-		class_container.iterator_funcs_ptr = NULL;				\
-		class_container.arrayaccess_funcs_ptr = NULL;			\
-		class_container.info.internal.module = NULL;			\
-		class_container.info.internal.builtin_functions = functions;	\
-	}
-
-
 #define INIT_NS_CLASS_ENTRY(class_container, ns, class_name, functions) \
 	INIT_CLASS_ENTRY(class_container, ZEND_NS_NAME(ns, class_name), functions)
 
@@ -422,9 +387,9 @@ ZEND_API bool zend_is_callable_at_frame(
 		const zval *callable, zend_object *object, const zend_execute_data *frame,
 		uint32_t check_flags, zend_fcall_info_cache *fcc, char **error);
 ZEND_API bool zend_is_callable_ex(const zval *callable, zend_object *object, uint32_t check_flags, zend_string **callable_name, zend_fcall_info_cache *fcc, char **error);
-static zend_always_inline bool zend_is_callable(const zval *callable, uint32_t check_flags, zend_string **callable_name)
+static zend_always_inline bool zend_is_callable(const zval *callable, zend_fcall_info_cache *fcc, char **error)
 {
-	return zend_is_callable_ex(callable, NULL, check_flags, callable_name, NULL, NULL);
+	return zend_is_callable_ex(callable, NULL, 0, NULL, fcc, error);
 }
 
 ZEND_API const char *zend_get_module_version(const char *module_name);
@@ -452,8 +417,8 @@ ZEND_API void zend_declare_class_constant_stringl(zend_class_entry *ce, const ch
 ZEND_API void zend_declare_class_constant_string(zend_class_entry *ce, const char *name, size_t name_length, const char *value);
 
 ZEND_API zend_result zend_update_class_constant(zend_class_constant *c, const zend_string *name, zend_class_entry *scope);
-ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type);
-ZEND_API HashTable *zend_separate_class_constants_table(const zend_class_entry *class_type);
+ZEND_API zend_result zend_update_class_constants(zend_class_entry *ce);
+ZEND_API HashTable *zend_separate_class_constants_table(const zend_class_entry *ce);
 
 static zend_always_inline const HashTable *zend_class_constants_table(const zend_class_entry *ce) {
 	if ((ce->ce_flags & ZEND_ACC_HAS_AST_CONSTANTS) && ZEND_MAP_PTR(ce->mutable_data)) {
@@ -551,9 +516,9 @@ static zend_always_inline void array_init(zval *arg)
 
 ZEND_API void object_init(zval *arg);
 ZEND_API zend_result object_init_ex(zval *arg, zend_class_entry *ce);
-ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *class_type, uint32_t param_count, zval *params, HashTable *named_params);
+ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *ce, uint32_t param_count, zval *params, HashTable *named_params);
 ZEND_API zend_result object_and_properties_init(zval *arg, zend_class_entry *ce, HashTable *properties);
-ZEND_API void object_properties_init(zend_object *object, zend_class_entry *class_type);
+ZEND_API void object_properties_init(zend_object *object, zend_class_entry *ce);
 ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properties);
 ZEND_API void object_properties_load(zend_object *object, const HashTable *properties);
 
@@ -913,12 +878,21 @@ static zend_always_inline void zend_call_known_instance_method_with_1_params(
 ZEND_API void zend_call_known_instance_method_with_2_params(
 		zend_function *fn, zend_object *this_ptr, zval *retval_ptr, zval *param1, zval *param2);
 
-/* Call method if it exists. Return FAILURE if method does not exist or call failed.
- * If FAILURE is returned, retval will be UNDEF. As such, destroying retval unconditionally
- * is legal. */
-ZEND_API zend_result zend_call_method_if_exists(
-		zend_object *this_ptr, zend_string *method_name, zval *retval,
-		uint32_t param_count, zval *params);
+/* Call method if it exists.
+ * Return FAILURE if method does not exist.
+ * If FAILURE is returned, retval will be UNDEF, and error will contain the validation failure message if provided.
+ * As such, destroying retval unconditionally is legal.
+ */
+ZEND_API zend_result zend_call_method_if_exists_ex(
+		zend_object *this_ptr, zend_string *method_name, zval *retval_ptr,
+		uint32_t param_count, zval *params, HashTable *named_params, char **error);
+
+static zend_always_inline zend_result zend_call_method_if_exists(
+		zend_object *this_ptr, zend_string *method_name,
+		zval *retval_ptr, uint32_t param_count, zval *params
+) {
+	return zend_call_method_if_exists_ex(this_ptr, method_name, retval_ptr, param_count, params, NULL, NULL);
+}
 
 ZEND_API zend_result zend_delete_global_variable(zend_string *name);
 

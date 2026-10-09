@@ -122,15 +122,15 @@ static bool should_overwrite_per_dir_entry(HashTable *target_ht, zval *zv, zend_
 	php_dir_entry *orig_per_dir_entry;
 
 	if ((orig_per_dir_entry = zend_hash_find_ptr(target_ht, hash_key->key)) == NULL) {
-		return 1; /* does not exist in dest, copy from source */
+		return true; /* does not exist in dest, copy from source */
 	}
 
 	if (new_per_dir_entry->status >= orig_per_dir_entry->status) {
 		/* use new entry */
 		phpapdebug((stderr, "ADDING/OVERWRITING %s (%d vs. %d)\n", ZSTR_VAL(hash_key->key), new_per_dir_entry->status, orig_per_dir_entry->status));
-		return 1;
+		return true;
 	} else {
-		return 0;
+		return false;
 	}
 }
 

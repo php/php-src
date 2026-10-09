@@ -1840,8 +1840,7 @@ IR_FOLD(REPLACE(LONG_CONST, _))
 	if (IR_IS_CONST_REF(op3)
 	 && IR_IS_CONST_REF(op2)
 	 && IR_IS_TYPE_INT(op2_insn->type)
-	 && op2_insn->val.i64 >= 0
-	 && op2_insn->val.i64 < IR_VECTOR_LENGTH(op1_insn->type)) {
+	 && op2_insn->val.u64 < (uint64_t)IR_VECTOR_LENGTH(op1_insn->type)) {
 		IR_ASSERT(IR_IS_TYPE_VECTOR(op1_insn->type)
 		  && (IR_VECTOR_BASE_TYPE(op1_insn->type) == op3_insn->type
 		   || (IR_IS_TYPE_INT(IR_VECTOR_BASE_TYPE(op1_insn->type))
@@ -1942,8 +1941,7 @@ IR_FOLD(EXTRACT(LONG_CONST, _))
 {
 	if (IR_IS_CONST_REF(op2)
 	 && IR_IS_TYPE_INT(op2_insn->type)
-	 && op2_insn->val.i64 >= 0
-	 && op2_insn->val.i64 < IR_VECTOR_LENGTH(op1_insn->type)) {
+	 && op2_insn->val.u64 < (uint64_t)IR_VECTOR_LENGTH(op1_insn->type)) {
 		uint32_t idx = op2_insn->val.u32;
 		void *ptr;
 
@@ -3212,7 +3210,7 @@ IR_FOLD(LT(ABS, C_FLOAT))
 IR_FOLD(LT(ABS, C_DOUBLE))
 {
 	if (op2_insn->val.u64 == 0) {
-		/* abs() < 0 => false */
+		/* abs() < 0 => false (abs(INT_MIN) is UB, so this optimization may change the result) */
 		IR_FOLD_COPY(IR_FALSE);
 	}
 	IR_FOLD_NEXT;
@@ -3226,7 +3224,7 @@ IR_FOLD(GE(ABS, C_FLOAT))
 IR_FOLD(GE(ABS, C_DOUBLE))
 {
 	if (op2_insn->val.u64 == 0) {
-		/* abs() >= 0 => true */
+		/* abs() >= 0 => true (abs(INT_MIN) is UB, so this optimization may change the result) */
 		IR_FOLD_COPY(IR_TRUE);
 	}
 	IR_FOLD_NEXT;

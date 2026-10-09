@@ -27,6 +27,7 @@
 
 #include "php.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_filestat.h"
 #include "php_signal.h"
 #include "php_ticks.h"
 #include "zend_exceptions.h"
@@ -841,7 +842,7 @@ PHP_FUNCTION(pcntl_signal)
 		RETURN_TRUE;
 	}
 
-	if (!zend_is_callable_ex(handle, NULL, 0, NULL, NULL, NULL)) {
+	if (!zend_is_callable(handle, NULL, NULL)) {
 		PCNTL_G(last_error) = EINVAL;
 
 		zend_argument_type_error(2, "must be of type callable|int, %s given", zend_zval_value_name(handle));

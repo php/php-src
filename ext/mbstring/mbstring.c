@@ -1836,7 +1836,7 @@ static size_t mb_get_strlen(zend_string *string, const mbfl_encoding *encoding)
 	unsigned int char_len = encoding->flag & (MBFL_ENCTYPE_SBCS | MBFL_ENCTYPE_WCS2 | MBFL_ENCTYPE_WCS4);
 	if (char_len) {
 		return ZSTR_LEN(string) / char_len;
-	} else if (php_mb_is_no_encoding_utf8(encoding->no_encoding) && ZSTR_IS_VALID_UTF8(string)) {
+	} else if (php_mb_is_no_encoding_utf8(encoding->no_encoding) && mb_check_str_encoding(string, &mbfl_encoding_utf8)) {
 		return mb_fast_strlen_utf8((unsigned char*)ZSTR_VAL(string), ZSTR_LEN(string));
 	}
 

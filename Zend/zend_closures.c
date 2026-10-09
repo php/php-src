@@ -399,7 +399,7 @@ static zend_result zend_create_closure_from_callable(zval *return_value, zval *c
 	zend_function *mptr;
 	zend_internal_function call;
 
-	if (!zend_is_callable_ex(callable, NULL, 0, NULL, &fcc, error)) {
+	if (!zend_is_callable(callable, &fcc, error)) {
 		return FAILURE;
 	}
 
@@ -571,9 +571,9 @@ ZEND_API const zend_function *zend_get_closure_method_def(zend_object *obj) /* {
 }
 /* }}} */
 
-ZEND_API zend_object* zend_get_closure_this_ptr(zval *obj) /* {{{ */
+ZEND_API zend_object* zend_get_closure_this_ptr(zend_object *closure_zobj) /* {{{ */
 {
-	zend_closure *closure = (zend_closure *)Z_OBJ_P(obj);
+	zend_closure *closure = (zend_closure *)closure_zobj;
 	return closure->this_ptr;
 }
 /* }}} */
@@ -902,8 +902,7 @@ static void zend_create_closure_ex(
 	if (scope) {
 		closure->func.common.fn_flags |= ZEND_ACC_PUBLIC;
 		if (this_ptr && (closure->func.common.fn_flags & ZEND_ACC_STATIC) == 0) {
-			closure->this_ptr = this_ptr;
-			GC_ADDREF(this_ptr);
+			closure->this_ptr = zend_object_copy(this_ptr);
 		}
 	}
 }
@@ -982,17 +981,17 @@ void zend_closure_from_frame(zval *return_value, const zend_execute_data *call) 
 	}
 } /* }}} */
 
-void zend_closure_bind_var(zval *closure_zv, zend_string *var_name, zval *var) /* {{{ */
+void zend_closure_bind_var(zend_object *closure_zobj, zend_string *var_name, zval *var) /* {{{ */
 {
-	zend_closure *closure = (zend_closure *) Z_OBJ_P(closure_zv);
+	zend_closure *closure = (zend_closure *) closure_zobj;
 	HashTable *static_variables = ZEND_MAP_PTR_GET(closure->func.op_array.static_variables_ptr);
 	zend_hash_update(static_variables, var_name, var);
 }
 /* }}} */
 
-void zend_closure_bind_var_ex(zval *closure_zv, uint32_t offset, zval *val) /* {{{ */
+void zend_closure_bind_var_ex(zend_object *closure_zobj, uint32_t offset, zval *val) /* {{{ */
 {
-	zend_closure *closure = (zend_closure *) Z_OBJ_P(closure_zv);
+	zend_closure *closure = (zend_closure *) closure_zobj;
 	HashTable *static_variables = ZEND_MAP_PTR_GET(closure->func.op_array.static_variables_ptr);
 	zval *var = (zval*)((char*)static_variables->arData + offset);
 	zval_ptr_dtor(var);

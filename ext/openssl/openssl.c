@@ -53,7 +53,7 @@ ZEND_DECLARE_MODULE_GLOBALS(openssl)
 
 #include "openssl_arginfo.h"
 
-/* OpenSSLException class */
+/* Openssl\OpensslException class */
 
 zend_class_entry *php_openssl_exception_ce;
 
@@ -279,7 +279,7 @@ static zend_object *php_openssl_session_create_object(zend_class_entry *class_ty
 static zend_function *php_openssl_session_get_constructor(zend_object *object)
 {
 	zend_throw_error(NULL,
-		"Cannot directly construct OpenSSLSession, use OpenSSLSession::import() or TLS session callbacks");
+		"Cannot directly construct Openssl\\Session, use Openssl\\Session::import() or TLS session callbacks");
 	return NULL;
 }
 
@@ -4514,6 +4514,11 @@ static zend_result php_openssl_setup_rsa_pss_salt_length(EVP_PKEY_CTX *pctx, EVP
 		return SUCCESS;
 	}
 
+	/* For AUTO, keep the OpenSSL default salt length. */
+	if (salt_length == RSA_PSS_SALTLEN_AUTO) {
+		return SUCCESS;
+	}
+
 	/* Only apply to RSA keys */
 	if (EVP_PKEY_base_id(pkey) != EVP_PKEY_RSA && EVP_PKEY_base_id(pkey) != EVP_PKEY_RSA_PSS) {
 		return SUCCESS;
@@ -4555,6 +4560,8 @@ PHP_FUNCTION(openssl_sign)
 		Z_PARAM_LONG(salt_length)
 	ZEND_PARSE_PARAMETERS_END();
 
+	PHP_OPENSSL_CHECK_LONG_TO_INT(salt_length, salt_length, 6);
+
 	pkey = php_openssl_pkey_from_zval(key, 0, "", 0, 3);
 	if (pkey == NULL) {
 		if (!EG(exception)) {
@@ -4573,7 +4580,6 @@ PHP_FUNCTION(openssl_sign)
 		php_error_docref(NULL, E_WARNING, "Unknown digest algorithm");
 		RETURN_FALSE;
 	}
-	PHP_OPENSSL_CHECK_LONG_TO_INT(salt_length, salt_length, 6);
 
 	md_ctx = EVP_MD_CTX_create();
 	size_t siglen;

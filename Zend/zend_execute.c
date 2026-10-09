@@ -1213,7 +1213,7 @@ static zend_always_inline bool zend_check_type_slow(
 
 	const uint32_t type_mask = ZEND_TYPE_FULL_MASK(*type);
 	if ((type_mask & MAY_BE_CALLABLE) &&
-		zend_is_callable(arg, is_internal ? IS_CALLABLE_SUPPRESS_DEPRECATIONS : 0, NULL)) {
+		zend_is_callable_ex(arg, NULL, is_internal ? IS_CALLABLE_SUPPRESS_DEPRECATIONS : 0, NULL, NULL, NULL)) {
 		return 1;
 	}
 	if ((type_mask & MAY_BE_STATIC) && zend_value_instanceof_static(arg)) {
@@ -5222,8 +5222,8 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_object(zend_o
 			call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC;
 			if (object) {
 				call_info |= ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS;
-				GC_ADDREF(object); /* For $this pointer */
-				object_or_called_scope = object;
+				/* For $this pointer */
+				object_or_called_scope = zend_object_copy(object);
 			}
 		}
 	} else {
@@ -5311,8 +5311,8 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_array(const z
 				object_or_called_scope = object->ce;
 			} else {
 				call_info |= ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS;
-				GC_ADDREF(object); /* For $this pointer */
-				object_or_called_scope = object;
+				/* For $this pointer */
+				object_or_called_scope = zend_object_copy(object);
 			}
 		}
 	} else {

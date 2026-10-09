@@ -971,7 +971,7 @@ static zval *bcmath_number_write_property(zend_object *obj, zend_string *name, z
 static void bcmath_number_unset_property(zend_object *obj, zend_string *name, void **cache_slot)
 {
 	if (zend_string_equals(name, ZSTR_KNOWN(ZEND_STR_VALUE)) || zend_string_equals_literal(name, "scale")) {
-		zend_throw_error(NULL, "Cannot unset readonly property %s::$%s", ZSTR_VAL(obj->ce->name), ZSTR_VAL(name));
+		zend_throw_error(NULL, "Cannot unset readonly property %pS::$%pS", obj->ce->name, name);
 		return;
 	}
 
@@ -1058,6 +1058,9 @@ static zend_always_inline void bcmath_number_add_internal(
 	}
 	*ret = bc_add(n1, n2, *scale);
 	(*ret)->n_scale = MIN(*scale, (*ret)->n_scale);
+	if (bc_is_zero(*ret)) {
+		(*ret)->n_sign = PLUS;
+	}
 	bc_rm_trailing_zeros(*ret);
 }
 
@@ -1070,6 +1073,9 @@ static zend_always_inline void bcmath_number_sub_internal(
 	}
 	*ret = bc_sub(n1, n2, *scale);
 	(*ret)->n_scale = MIN(*scale, (*ret)->n_scale);
+	if (bc_is_zero(*ret)) {
+		(*ret)->n_sign = PLUS;
+	}
 	bc_rm_trailing_zeros(*ret);
 }
 
@@ -1086,6 +1092,9 @@ static zend_always_inline zend_result bcmath_number_mul_internal(
 	}
 	*ret = bc_multiply(n1, n2, *scale);
 	(*ret)->n_scale = MIN(*scale, (*ret)->n_scale);
+	if (bc_is_zero(*ret)) {
+		(*ret)->n_sign = PLUS;
+	}
 	bc_rm_trailing_zeros(*ret);
 	return SUCCESS;
 }
@@ -1397,8 +1406,8 @@ failure:
 	Z_PARAM_PROLOGUE(0, 0); \
 	if (UNEXPECTED(!(zend_parse_arg_obj(_arg, &(dest_obj), ce, 0) || \
 		zend_parse_arg_str_or_long(_arg, &(dest_str), &(dest_long), &_dummy, 0, _i)))) { \
-		zend_argument_type_error(_i, "must be of type int, string, or %s, %s given", \
-			ZSTR_VAL(bcmath_number_ce->name), zend_zval_value_name(_arg));             \
+		zend_argument_type_error(_i, "must be of type int, string, or %pS, %s given", \
+			bcmath_number_ce->name, zend_zval_value_name(_arg));             \
 		_error_code = ZPP_ERROR_FAILURE; \
  		break; \
  	}
@@ -1891,7 +1900,7 @@ PHP_METHOD(BcMath_Number, __unserialize)
 	return;
 
 fail:
-	zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(bcmath_number_ce->name));
+	zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %pS object", bcmath_number_ce->name);
 	RETURN_THROWS();
 }
 

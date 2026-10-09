@@ -3,6 +3,7 @@ zend_version() should be evaluated at compile time
 --EXTENSIONS--
 opcache
 --INI--
+opcache.enable=1
 opcache.enable_cli=1
 opcache.opt_debug_level=0x20000
 --FILE--

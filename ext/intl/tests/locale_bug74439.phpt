@@ -33,7 +33,7 @@ foreach ($methods as $method) {
 ?>
 --EXPECT--
 getDefault: 0, 0
-acceptFromHttp: 1, 1
+acceptFromHttp: 2, 1
 canonicalize: 1, 1
 composeLocale: 1, 1
 getAllVariants: 1, 1

@@ -848,6 +848,12 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 		}
 
 		if (!zend_is_callable_ex(&fci->function_name, fci->object, 0, NULL, fci_cache, &error)) {
+			if (EG(exception)) {
+				if (error) {
+					efree(error);
+				}
+				return SUCCESS;
+			}
 			ZEND_ASSERT(error && "Should have error if not callable");
 			zend_string *callable_name
 				= zend_get_callable_name_ex(&fci->function_name, fci->object);
@@ -867,8 +873,7 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 	} else {
 		object_or_called_scope = fci_cache->object;
 		call_info = ZEND_CALL_TOP_FUNCTION | ZEND_CALL_DYNAMIC | ZEND_CALL_HAS_THIS;
-		pinned_this = fci_cache->object;
-		GC_ADDREF(pinned_this);
+		pinned_this = zend_object_copy(fci_cache->object);
 	}
 
 	if (UNEXPECTED(func->common.fn_flags & ZEND_ACC_DEPRECATED)) {
@@ -1179,21 +1184,21 @@ ZEND_API void zend_call_known_instance_method_with_2_params(
 	zend_call_known_instance_method(fn, this_ptr, retval_ptr, 2, params);
 }
 
-ZEND_API zend_result zend_call_method_if_exists(
-		zend_object *this_ptr, zend_string *method_name, zval *retval,
-		uint32_t param_count, zval *params)
-{
+ZEND_API zend_result zend_call_method_if_exists_ex(
+		zend_object *this_ptr, zend_string *method_name, zval *retval_ptr,
+		uint32_t param_count, zval *params, HashTable *named_params, char **error
+) {
 	zval zval_method;
 	zend_fcall_info_cache fcc;
 
 	ZVAL_STR(&zval_method, method_name);
 
-	if (UNEXPECTED(!zend_is_callable_ex(&zval_method, this_ptr, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL))) {
-		ZVAL_UNDEF(retval);
+	if (UNEXPECTED(!zend_is_callable_ex(&zval_method, this_ptr, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, error))) {
+		ZVAL_UNDEF(retval_ptr);
 		return FAILURE;
 	}
 
-	zend_call_known_fcc(&fcc, retval, param_count, params, NULL);
+	zend_call_known_fcc(&fcc, retval_ptr, param_count, params, named_params);
 	/* Need to free potential trampoline (__call/__callStatic) copied function handler before releasing the closure */
 	zend_release_fcall_info_cache(&fcc);
 	return SUCCESS;

@@ -20,7 +20,7 @@
 #include "io_poll.h"
 #include "io_poll_arginfo.h"
 #include "io_poll_decl.h"
-#include "ext/date/php_time.h"
+#include "ext/date/time_duration.h"
 
 /* Class entries */
 static zend_class_entry *php_io_poll_backend_class_entry;
@@ -205,7 +205,7 @@ static php_socket_t php_stream_poll_handle_get_fd(php_poll_handle_object *handle
 		return SOCK_ERR;
 	}
 
-	if (php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
+	if (php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_POLL | PHP_STREAM_CAST_INTERNAL,
 				(void *) &fd, 1)
 					!= SUCCESS
 			|| fd == -1) {
@@ -240,14 +240,11 @@ static php_poll_handle_ops php_stream_poll_handle_ops = {
 };
 
 /* Handle interface internal only */
-static int php_stream_poll_handle_implement_interface(zend_class_entry *interface, zend_class_entry *implementor)
+static void php_stream_poll_handle_implement_interface(zend_class_entry *interface, zend_class_entry *implementor)
 {
 	if (implementor->type == ZEND_USER_CLASS) {
 		zend_error_noreturn(E_ERROR, "Io\\Poll\\Handle cannot be implemented by user classes");
-		return FAILURE;
 	}
-
-	return SUCCESS;
 }
 
 /* Object Creation Functions */
@@ -834,8 +831,7 @@ PHP_METHOD(Io_Poll_Context, add)
 
 	/* Store in our watchers map */
 	zval watcher_zv;
-	ZVAL_OBJ(&watcher_zv, &watcher->std);
-	GC_ADDREF(&watcher->std);
+	ZVAL_OBJ_COPY(&watcher_zv, &watcher->std);
 	zend_hash_index_add_new(intern->watchers, (zend_ulong) fd, &watcher_zv);
 
 	watcher->active = true;
@@ -907,11 +903,7 @@ PHP_METHOD(Io_Poll_Context, wait)
 		if (watcher) {
 			watcher->triggered_events = events[i].revents;
 
-			zval watcher_zv;
-			ZVAL_OBJ(&watcher_zv, &watcher->std);
-			GC_ADDREF(&watcher->std);
-
-			add_next_index_zval(return_value, &watcher_zv);
+			add_next_index_object(return_value, zend_object_copy(&watcher->std));
 		}
 	}
 

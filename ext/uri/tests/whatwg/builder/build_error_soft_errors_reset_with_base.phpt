@@ -21,7 +21,7 @@ var_dump($softErrors);
 ?>
 --EXPECT--
 Uri\WhatWg\InvalidUrlException: The specified path is malformed (MissingSchemeNonRelativeUrl)
-enum(Uri\WhatWg\UrlValidationErrorType::MissingSchemeNonRelativeUrl)
 enum(Uri\WhatWg\UrlValidationErrorType::InvalidUrlUnit)
+enum(Uri\WhatWg\UrlValidationErrorType::MissingSchemeNonRelativeUrl)
 array(0) {
 }
