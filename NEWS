@@ -276,6 +276,10 @@ PHP                                                                        NEWS
   . Fixed convert.quoted-printable-decode decoding lowercase hex digits to
     the wrong byte. (Ilia Alshanetsky)
 
+- Streams:
+  . Fixed bug GH-22063 (Stream filter chain UAF on self-removal during
+    callback). (Ilia Alshanetsky)
+
 - Tidy:
   . Fixed a use-after-free when a tidyNode is used after its document is
     reparsed. (Ilia Alshanetsky)
