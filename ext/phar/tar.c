@@ -144,6 +144,19 @@ static uint32_t phar_tar_checksum(const char *buf, size_t len) /* {{{ */
 }
 /* }}} */
 
+static bool phar_tar_skip(php_stream *fp, uint32_t size, size_t totalsize)
+{
+	zend_off_t offset = php_stream_tell(fp);
+
+	if (offset < 0 || (uint64_t) size > (uint64_t) ZEND_LONG_MAX
+		|| (size_t) offset > totalsize || size > totalsize - (size_t) offset) {
+		return false;
+	}
+
+	return php_stream_seek(fp, size, SEEK_CUR) == 0
+		&& php_stream_tell(fp) == offset + (zend_off_t) size;
+}
+
 bool phar_is_tar(const char *buf, const char *fname) /* {{{ */
 {
 	tar_header *header = (tar_header *) buf;
@@ -260,6 +273,8 @@ zend_result phar_parse_tarfile(
 	char buf[512], *actual_alias = NULL, *p;
 	phar_entry_info entry = {0};
 	size_t pos = 0, read, totalsize;
+	zend_off_t end;
+	php_stream_statbuf ssb;
 	tar_header *hdr;
 	uint32_t sum1, sum2, size, old;
 	phar_archive_data *myphar, *actual;
@@ -270,9 +285,17 @@ zend_result phar_parse_tarfile(
 		*error = NULL;
 	}
 
-	php_stream_seek(fp, 0, SEEK_END);
-	totalsize = php_stream_tell(fp);
-	php_stream_seek(fp, 0, SEEK_SET);
+	if ((php_stream_stat(fp, &ssb) == 0 && ssb.sb.st_size > ZEND_LONG_MAX)
+		|| php_stream_seek(fp, 0, SEEK_END) != 0
+		|| (end = php_stream_tell(fp)) < 0
+		|| php_stream_seek(fp, 0, SEEK_SET) != 0) {
+		if (error) {
+			spprintf(error, 4096, "phar error: tar file \"%s\" exceeds the supported stream offset range", fname);
+		}
+		php_stream_close(fp);
+		return FAILURE;
+	}
+	totalsize = (size_t) end;
 	read = php_stream_read(fp, buf, sizeof(buf));
 
 	if (read != sizeof(buf)) {
@@ -324,7 +347,8 @@ zend_result phar_parse_tarfile(
 			}
 		}
 
-		if (!phar_tar_size(hdr->size, sizeof(hdr->size), &size)) {
+		if (!phar_tar_size(hdr->size, sizeof(hdr->size), &size)
+			|| (uint64_t) size + 511 > (uint64_t) ZEND_LONG_MAX) {
 			if (error) {
 				spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (invalid entry size)", fname);
 			}
@@ -397,12 +421,17 @@ bail:
 				goto bail;
 			}
 			myphar->sig_len = sig_len;
-			php_stream_seek(fp, curloc + 512, SEEK_SET);
+			if (curloc < 0 || (size_t) curloc > totalsize
+				|| totalsize - (size_t) curloc < 512
+				|| php_stream_seek(fp, curloc + 512, SEEK_SET) != 0) {
+				if (error) {
+					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
+				}
+				goto bail;
+			}
 			/* signature checked out, let's ensure this is the last file in the phar */
 			if (((hdr->typeflag == '\0') || (hdr->typeflag == TAR_FILE)) && size > 0) {
-				/* this is not good enough - seek succeeds even on truncated tars */
-				php_stream_seek(fp, 512, SEEK_CUR);
-				if ((uint32_t)php_stream_tell(fp) > totalsize) {
+				if (!phar_tar_skip(fp, 512, totalsize)) {
 					if (error) {
 						spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
 					}
@@ -470,9 +499,7 @@ bail:
 			/* skip blank stuff */
 			size = ((size+511)&~511) - size;
 
-			/* this is not good enough - seek succeeds even on truncated tars */
-			php_stream_seek(fp, size, SEEK_CUR);
-			if ((uint32_t)php_stream_tell(fp) > totalsize) {
+			if (!phar_tar_skip(fp, size, totalsize)) {
 				zend_string_free(entry.filename);
 				if (error) {
 					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
@@ -663,9 +690,7 @@ bail:
 
 		if (phar_tar_type_has_data(hdr->typeflag) && size > 0) {
 next:
-			/* this is not good enough - seek succeeds even on truncated tars */
-			php_stream_seek(fp, size, SEEK_CUR);
-			if ((uint32_t)php_stream_tell(fp) > totalsize) {
+			if (!phar_tar_skip(fp, size, totalsize)) {
 				if (error) {
 					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
 				}
