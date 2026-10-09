@@ -153,6 +153,10 @@ struct _zend_fiber {
 	/* Coroutine mode: the value crossing between the fiber and its awaiter —
 	 * what Fiber::suspend() yields, and what resume() sends back. */
 	zval transfer;
+
+	/* The finish handler start() adds for a body cancelled before it runs;
+	 * 0 once the body runs or the handler has run. */
+	uint32_t start_handler_id;
 };
 
 ZEND_API zend_result zend_fiber_start(zend_fiber *fiber, zval *return_value);

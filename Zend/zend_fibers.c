@@ -826,6 +826,9 @@ static void zend_fiber_coroutine_entry(void)
 
 	ZEND_ASSERT(fiber != NULL && "A fiber coroutine must know its fiber");
 
+	ZEND_ASYNC_REMOVE_FINISH_HANDLER(coroutine, fiber->start_handler_id);
+	fiber->start_handler_id = 0;
+
 	/* Inside the body, Fiber::suspend() and Fiber::getCurrent() must see this
 	 * fiber, exactly as on the legacy path. */
 	EG(active_fiber) = fiber;
@@ -1069,6 +1072,46 @@ static bool zend_fiber_adopt(zend_fiber *fiber)
 	return true;
 }
 
+/* A body cancelled before it ran never reaches the entry point, which is what
+ * wakes the coroutine waiting in start(). This handler ends the fiber instead
+ * and hands the waiter the error, as a body that threw at once would. */
+static bool zend_fiber_coroutine_finished(
+		zend_coroutine_t *coroutine, zend_coroutine_t *waiter, void *data, bool is_bailout)
+{
+	(void) waiter;
+	(void) data;
+
+	zend_fiber *const fiber = coroutine->extended_data;
+
+	if (UNEXPECTED(fiber == NULL || ZEND_COROUTINE_IS_STARTED(coroutine))) {
+		return false;
+	}
+
+	zend_coroutine_t *const caller = fiber->caller_coroutine;
+
+	fiber->start_handler_id = 0;
+	fiber->caller_coroutine = NULL;
+	fiber->execute_data = NULL;
+	fiber->context.status = ZEND_FIBER_STATUS_DEAD;
+
+	zend_object *const exception = coroutine->exception;
+
+	if (EXPECTED(exception != NULL)) {
+		fiber->flags |= ZEND_FIBER_FLAG_THREW;
+	}
+
+	/* Nobody waits, or the scheduler is dying and schedules nothing: the
+	 * exception stays the coroutine's. */
+	if (UNEXPECTED(caller == NULL || is_bailout)) {
+		return false;
+	}
+
+	coroutine->exception = NULL;
+	ZEND_ASYNC_ENQUEUE_WITH_ERROR(caller, exception, true);
+
+	return false;
+}
+
 /* Queue the body and wait for the first yield. */
 static void zend_fiber_coroutine_start(zend_fiber *fiber, zval *return_value)
 {
@@ -1086,6 +1129,8 @@ static void zend_fiber_coroutine_start(zend_fiber *fiber, zval *return_value)
 		return;
 	}
 
+	fiber->start_handler_id =
+			ZEND_ASYNC_ADD_FINISH_HANDLER(fiber->coroutine, zend_fiber_coroutine_finished, NULL, NULL);
 	zend_fiber_await(fiber, return_value);
 }
 
