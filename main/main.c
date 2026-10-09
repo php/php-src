@@ -644,7 +644,7 @@ static PHP_INI_MH(OnUpdateInternalEncoding)
 	}
 	if (new_value) {
 #ifdef PHP_WIN32
-		php_win32_cp_do_update(ZSTR_VAL(new_value));
+		php_win32_cp_do_update(NULL);
 #endif
 	}
 	return SUCCESS;
@@ -2237,8 +2237,11 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	   load zend extensions and register php function extensions
 	   to be loaded later */
 	zend_stream_init();
-	php_init_config();
+	zend_result config_result = php_init_config();
 	zend_stream_shutdown();
+	if (config_result == FAILURE) {
+		return FAILURE;
+	}
 
 	/* Register PHP core ini entries */
 	zend_register_ini_entries_ex(ini_entries, module_number, MODULE_PERSISTENT);
