@@ -15,6 +15,8 @@ PHP                                                                        NEWS
     into the wrong one. (Marc Bennewitz)
   . Fixed bug GH-24081 (User opcode handlers resume execution against a stale
     frame under ZEND_VM_KIND_TAILCALL). (devnexen)
+  . Fixed bug GH-24218 (Invalid opcode for count() of a literal array
+    without SCCP). (lazerg)
 
 - Opcache:
   . Fixed bug GH-17626 (JIT corrupts an opline handler when blacklisting a
