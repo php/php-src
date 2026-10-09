@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   . Fixed memory manager keeping a block reallocated to exactly the size of
     the next smaller bin in its larger bin, which efree_size() then freed
     into the wrong one. (Marc Bennewitz)
+  . Fixed bug GH-24081 (User opcode handlers resume execution against a stale
+    frame under ZEND_VM_KIND_TAILCALL). (devnexen)
 
 - Opcache:
   . Fixed bug GH-17626 (JIT corrupts an opline handler when blacklisting a
