@@ -150,6 +150,10 @@ struct _zend_fiber {
 	/* The coroutine waiting for this fiber to yield or finish. */
 	zend_coroutine_t *caller_coroutine;
 
+	/* The waiter woken by a yield and not yet past it: the yielded value in
+	 * `transfer` is its own until it takes it. */
+	zend_coroutine_t *handoff_coroutine;
+
 	/* Coroutine mode: the value crossing between the fiber and its awaiter —
 	 * what Fiber::suspend() yields, and what resume() sends back. */
 	zval transfer;

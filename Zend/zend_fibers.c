@@ -431,6 +431,22 @@ static zend_always_inline bool zend_fiber_switch_refused(void)
 	return zend_fiber_switch_blocked() || (ZEND_ASYNC_ON && ZEND_ASYNC_IN_SCHEDULER_CONTEXT);
 }
 
+/* Detach the transfer slot's value for a release after the state change: a
+ * destructor run by the release may park or re-enter the fiber's methods. */
+static zend_always_inline void zend_fiber_transfer_take(zend_fiber *fiber, zval *value)
+{
+	ZVAL_COPY_VALUE(value, &fiber->transfer);
+	ZVAL_UNDEF(&fiber->transfer);
+}
+
+/* Resumed and not yet back: a legacy fiber runs on its caller's switch; a
+ * coroutine fiber has a caller waiting for its yield, or one woken by the
+ * yield that has not taken the value yet. */
+static zend_always_inline bool zend_fiber_has_resumer(const zend_fiber *fiber)
+{
+	return fiber->caller != NULL || fiber->caller_coroutine != NULL || fiber->handoff_coroutine != NULL;
+}
+
 /* A fiber run as a coroutine is resumed through the scheduler, and the current
  * coroutine waits for it. Once the scheduler has stopped (its last pass, then
  * the core turning async off before the output handlers), nothing runs the
@@ -886,6 +902,8 @@ static void zend_fiber_coroutine_entry(void)
 			fiber->flags |= ZEND_FIBER_FLAG_BAILOUT;
 			fiber->stack_bottom = NULL;
 			fiber->context.status = ZEND_FIBER_STATUS_DEAD;
+			fiber->caller_coroutine = NULL;
+			fiber->handoff_coroutine = NULL;
 		}
 
 		zend_bailout();
@@ -961,13 +979,26 @@ static void zend_fiber_coroutine_yield(zend_fiber *fiber, zval *value, zval *ret
 {
 	zend_coroutine_t *coroutine = fiber->coroutine;
 
-	if (value != NULL) {
-		ZVAL_COPY(&fiber->transfer, value);
-	} else {
-		ZVAL_NULL(&fiber->transfer);
+	/* The caller is woken once, and till it takes the value no resume() is
+	 * accepted. A body its cancellation ran meanwhile yields to nobody and
+	 * leaves that value alone. */
+	zend_coroutine_t *caller = fiber->caller_coroutine;
+	zval untaken;
+
+	ZVAL_UNDEF(&untaken);
+
+	if (EXPECTED(fiber->handoff_coroutine == NULL)) {
+		zend_fiber_transfer_take(fiber, &untaken);
+
+		if (value != NULL) {
+			ZVAL_COPY(&fiber->transfer, value);
+		} else {
+			ZVAL_NULL(&fiber->transfer);
+		}
+
+		fiber->handoff_coroutine = caller;
 	}
 
-	zend_coroutine_t *caller = fiber->caller_coroutine;
 	fiber->caller_coroutine = NULL;
 	fiber->context.status = ZEND_FIBER_STATUS_SUSPENDED;
 
@@ -981,6 +1012,8 @@ static void zend_fiber_coroutine_yield(zend_fiber *fiber, zval *value, zval *ret
 		ZEND_ASYNC_ENQUEUE_COROUTINE(caller);
 	}
 
+	zval_ptr_dtor(&untaken);
+
 	const bool resumed = ZEND_ASYNC_SUSPEND();
 
 	/* Parked all this time; the Fiber object may not have survived — a fiber
@@ -993,8 +1026,17 @@ static void zend_fiber_coroutine_yield(zend_fiber *fiber, zval *value, zval *ret
 		fiber->context.status = ZEND_FIBER_STATUS_RUNNING;
 	}
 
-	/* throw(), or the cancellation of a dropped fiber, lands here. */
+	/* throw(), or the cancellation of a dropped fiber, lands here. A resume
+	 * value queued before the cancellation stays untaken; a yielded one still
+	 * belongs to its waiter. */
 	if (UNEXPECTED(!resumed)) {
+		if (fiber != NULL && fiber->handoff_coroutine == NULL) {
+			zval unsent;
+
+			zend_fiber_transfer_take(fiber, &unsent);
+			zval_ptr_dtor(&unsent);
+		}
+
 		return;
 	}
 
@@ -1036,16 +1078,40 @@ static zend_result zend_fiber_await(zend_fiber *fiber, zval *return_value)
 	/* Parked until the fiber hands control back. An exception that escaped the
 	 * fiber is delivered here, at the start()/resume() call site. */
 	if (UNEXPECTED(!ZEND_ASYNC_SUSPEND())) {
-		fiber->caller_coroutine = NULL;
+		if (fiber->caller_coroutine == caller) {
+			fiber->caller_coroutine = NULL;
+		}
 
+		/* Woken by a yield and cancelled before taking the value. */
+		zval untaken;
+
+		ZVAL_UNDEF(&untaken);
+
+		if (fiber->handoff_coroutine == caller) {
+			fiber->handoff_coroutine = NULL;
+			zend_fiber_transfer_take(fiber, &untaken);
+		}
+
+		/* A body not run yet links to this frame when it starts; the frame
+		 * is about to unwind. */
 		if (fiber->stack_bottom != NULL) {
 			fiber->stack_bottom->prev_execute_data = NULL;
+		} else {
+			fiber->execute_data = NULL;
 		}
+
+		zval_ptr_dtor(&untaken);
 
 		return FAILURE;
 	}
 
-	fiber->caller_coroutine = NULL;
+	if (fiber->caller_coroutine == caller) {
+		fiber->caller_coroutine = NULL;
+	}
+
+	if (fiber->handoff_coroutine == caller) {
+		fiber->handoff_coroutine = NULL;
+	}
 
 	/* Our frame stops being the fiber's parent the moment it parks again. */
 	if (fiber->stack_bottom != NULL) {
@@ -1560,7 +1626,7 @@ ZEND_METHOD(Fiber, resume)
 
 	fiber = (zend_fiber *) Z_OBJ_P(ZEND_THIS);
 
-	if (UNEXPECTED(fiber->context.status != ZEND_FIBER_STATUS_SUSPENDED || fiber->caller != NULL)) {
+	if (UNEXPECTED(fiber->context.status != ZEND_FIBER_STATUS_SUSPENDED || zend_fiber_has_resumer(fiber))) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot resume a fiber that is not suspended");
 		RETURN_THROWS();
 	}
@@ -1573,14 +1639,35 @@ ZEND_METHOD(Fiber, resume)
 			RETURN_THROWS();
 		}
 
+		/* A value the fiber yielded to nobody goes once the fiber is claimed. */
+		zval untaken;
+
+		zend_fiber_transfer_take(fiber, &untaken);
+
 		if (value != NULL) {
 			ZVAL_COPY(&fiber->transfer, value);
 		} else {
 			ZVAL_NULL(&fiber->transfer);
 		}
 
-		if (UNEXPECTED(!ZEND_ASYNC_ENQUEUE_COROUTINE(fiber->coroutine))
-			|| UNEXPECTED(zend_fiber_await(fiber, return_value) == FAILURE)) {
+		/* Resumed, as a legacy fiber is once resume() switches to it: a body
+		 * still queued with this value takes no other, even when this caller
+		 * stops waiting. */
+		fiber->context.status = ZEND_FIBER_STATUS_RUNNING;
+
+		if (UNEXPECTED(!ZEND_ASYNC_ENQUEUE_COROUTINE(fiber->coroutine))) {
+			zval unsent;
+
+			fiber->context.status = ZEND_FIBER_STATUS_SUSPENDED;
+			zend_fiber_transfer_take(fiber, &unsent);
+			zval_ptr_dtor(&unsent);
+			zval_ptr_dtor(&untaken);
+			RETURN_THROWS();
+		}
+
+		zval_ptr_dtor(&untaken);
+
+		if (UNEXPECTED(zend_fiber_await(fiber, return_value) == FAILURE)) {
 			RETURN_THROWS();
 		}
 
@@ -1610,7 +1697,7 @@ ZEND_METHOD(Fiber, throw)
 
 	fiber = (zend_fiber *) Z_OBJ_P(ZEND_THIS);
 
-	if (UNEXPECTED(fiber->context.status != ZEND_FIBER_STATUS_SUSPENDED || fiber->caller != NULL)) {
+	if (UNEXPECTED(fiber->context.status != ZEND_FIBER_STATUS_SUSPENDED || zend_fiber_has_resumer(fiber))) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot resume a fiber that is not suspended");
 		RETURN_THROWS();
 	}
@@ -1623,8 +1710,14 @@ ZEND_METHOD(Fiber, throw)
 			RETURN_THROWS();
 		}
 
-		if (UNEXPECTED(!ZEND_ASYNC_ENQUEUE_WITH_ERROR(fiber->coroutine, Z_OBJ_P(exception), false))
-			|| UNEXPECTED(zend_fiber_await(fiber, return_value) == FAILURE)) {
+		fiber->context.status = ZEND_FIBER_STATUS_RUNNING;
+
+		if (UNEXPECTED(!ZEND_ASYNC_ENQUEUE_WITH_ERROR(fiber->coroutine, Z_OBJ_P(exception), false))) {
+			fiber->context.status = ZEND_FIBER_STATUS_SUSPENDED;
+			RETURN_THROWS();
+		}
+
+		if (UNEXPECTED(zend_fiber_await(fiber, return_value) == FAILURE)) {
 			RETURN_THROWS();
 		}
 
@@ -1657,7 +1750,7 @@ ZEND_METHOD(Fiber, isSuspended)
 
 	fiber = (zend_fiber *) Z_OBJ_P(ZEND_THIS);
 
-	RETURN_BOOL(fiber->context.status == ZEND_FIBER_STATUS_SUSPENDED && fiber->caller == NULL);
+	RETURN_BOOL(fiber->context.status == ZEND_FIBER_STATUS_SUSPENDED && !zend_fiber_has_resumer(fiber));
 }
 
 ZEND_METHOD(Fiber, isRunning)
@@ -1668,7 +1761,8 @@ ZEND_METHOD(Fiber, isRunning)
 
 	fiber = (zend_fiber *) Z_OBJ_P(ZEND_THIS);
 
-	RETURN_BOOL(fiber->context.status == ZEND_FIBER_STATUS_RUNNING || fiber->caller != NULL);
+	RETURN_BOOL(fiber->context.status == ZEND_FIBER_STATUS_RUNNING
+		|| (fiber->context.status != ZEND_FIBER_STATUS_DEAD && zend_fiber_has_resumer(fiber)));
 }
 
 ZEND_METHOD(Fiber, isTerminated)
