@@ -38,7 +38,7 @@ known:
      ; (lines=10, args=3, vars=3, tmps=%d, ssa_vars=12, no_loops)
      ; (after dfa pass)
      ; %s
-     ; return  []
+     ; return  [[packed, hash] array [long] of [long, double]]
      ; #0.CV0($o) NOVAL [undef]
      ; #1.CV1($x) NOVAL [undef]
      ; #2.CV2($y) NOVAL [undef]
@@ -48,13 +48,13 @@ BB0:
 0000 #3.CV0($o) [object (instanceof C)] = RECV 1
 0001 #4.CV1($x) [double] = RECV 2
 0002 #5.CV2($y) [long] RANGE[MIN..MAX] = RECV 3
-0003 #7.T3 [] = ASSIGN_OBJ_OP (ADD) #3.CV0($o) [object (instanceof C)] -> #6.CV0($o) [object (instanceof C)] string("is")
+0003 #7.T3 [double] = ASSIGN_OBJ_OP (ADD) #3.CV0($o) [object (instanceof C)] -> #6.CV0($o) [object (instanceof C)] string("is")
 0004 OP_DATA #4.CV1($x) [double]
-0005 #8.T4 [] = INIT_ARRAY 2 (packed) #7.T3 [] NEXT
-0006 #10.T5 [double] = ASSIGN_OBJ_OP (BW_OR) #6.CV0($o) [object (instanceof C)] -> #9.CV0($o) NOVAL [object (instanceof C)] string("f")
+0005 #8.T4 [[packed, hash] array [long] of [double]] = INIT_ARRAY 2 (packed) #7.T3 [double] NEXT
+0006 #10.T5 [long, double] = ASSIGN_OBJ_OP (BW_OR) #6.CV0($o) [object (instanceof C)] -> #9.CV0($o) NOVAL [object (instanceof C)] string("f")
 0007 OP_DATA #5.CV2($y) [long] RANGE[MIN..MAX]
-0008 ADD_ARRAY_ELEMENT #10.T5 [double] NEXT #8.T4 [] -> #11.T4 []
-0009 RETURN #11.T4 []
+0008 ADD_ARRAY_ELEMENT #10.T5 [long, double] NEXT #8.T4 [[packed, hash] array [long] of [double]] -> #11.T4 [[packed, hash] array [long] of [long, double]]
+0009 RETURN #11.T4 [[packed, hash] array [long] of [long, double]]
 
 unknown:
      ; (lines=8, args=2, vars=3, tmps=%d, ssa_vars=11, no_loops)

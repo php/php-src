@@ -2589,6 +2589,39 @@ static uint32_t prop_assign_op_result_type(uint32_t tmp, const zend_property_inf
 	return (tmp & prop_type) | scalar_coercion_type(tmp & ~prop_type & MAY_BE_ANY, prop_type, strict);
 }
 
+/* Whether ASSIGN_OBJ_OP may return the uncoerced result by having overloaded handler. */
+static bool assign_obj_op_may_be_overloaded(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op, const zend_property_info *prop_info)
+{
+	const zend_class_entry *ce;
+	bool is_instanceof;
+
+	if (!prop_info) {
+		return true;
+	}
+
+	if (opline->op1_type == IS_UNUSED) {
+		ce = op_array->scope;
+		is_instanceof = true;
+	} else if (ssa_op->op1_use >= 0) {
+		ce = ssa->var_info[ssa_op->op1_use].ce;
+		is_instanceof = ssa->var_info[ssa_op->op1_use].is_instanceof;
+	} else {
+		return true;
+	}
+
+	/* A child class may add __get() or hooks. */
+	if (!ce
+	 || (is_instanceof && !(ce->ce_flags & ZEND_ACC_FINAL))
+	 || !(ce->ce_flags & ZEND_ACC_LINKED)) {
+		return true;
+	}
+
+	return ce->__get /* Unset property */
+		|| ce->create_object /* Custom handlers */
+		|| prop_info->hooks
+		|| (prop_info->flags & ZEND_ACC_READONLY); /* Reinitialized in __clone() */
+}
+
 static bool result_may_be_separated(zend_ssa *ssa, zend_ssa_op *ssa_op)
 {
 	int tmp_var = ssa_op->result_def;
@@ -2908,9 +2941,15 @@ static zend_always_inline zend_result _zend_update_type_info(
 					}
 				} else if (opline->opcode == ZEND_ASSIGN_OBJ_OP
 						|| opline->opcode == ZEND_ASSIGN_STATIC_PROP_OP) {
-					/* The return value must also satisfy the property type */
+					/* The return value must also satisfy the property type,
+					 * unless the overloaded handlers return the uncoerced result. */
 					t1 = zend_fetch_prop_type(script, prop_info, &ce);
-					tmp = prop_assign_op_result_type(tmp, prop_info, t1, (op_array->fn_flags & ZEND_ACC_STRICT_TYPES) != 0);
+					if (opline->opcode == ZEND_ASSIGN_OBJ_OP
+					 && assign_obj_op_may_be_overloaded(op_array, ssa, opline, ssa_op, prop_info)) {
+						tmp |= prop_assign_op_result_type(tmp, prop_info, t1, (op_array->fn_flags & ZEND_ACC_STRICT_TYPES) != 0);
+					} else {
+						tmp = prop_assign_op_result_type(tmp, prop_info, t1, (op_array->fn_flags & ZEND_ACC_STRICT_TYPES) != 0);
+					}
 				} else {
 					if (tmp & MAY_BE_REF) {
 						/* Typed reference may cause auto conversion */
