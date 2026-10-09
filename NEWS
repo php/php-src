@@ -41,6 +41,10 @@ PHP                                                                        NEWS
   . Fixed a duplicate warning when ATTR_STATEMENT_CLASS is rejected on a
     persistent connection. (Ilia Alshanetsky)
 
+- Phar:
+  . Fixed bug GH-24242 (Incorrect handling of large tar entry sizes on
+    32-bit systems). (Pavel Nekrasov, Georgij Tsarin)
+
 - Phpdbg:
   . Fix wrong command names. (ndossche, Weilin Du)
 
