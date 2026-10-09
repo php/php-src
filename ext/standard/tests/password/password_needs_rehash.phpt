@@ -33,6 +33,21 @@ var_dump(password_needs_rehash('$2y$'.$cost.'$MTIzNDU2Nzg5MDEyMzQ1Nej0NmcAWSLR.o
 // Should Issue Needs Rehash, Since Foo is cast to 0...
 var_dump(password_needs_rehash('$2y$10$MTIzNDU2Nzg5MDEyMzQ1Nej0NmcAWSLR.oP7XOR9HD/vjUuOj100y', PASSWORD_BCRYPT, array('cost' => 'foo')));
 
+// Valid cost boundaries
+$suffix = 'MTIzNDU2Nzg5MDEyMzQ1Nej0NmcAWSLR.oP7XOR9HD/vjUuOj100y';
+$costCases = [
+	'valid lower boundary' => ['$2y$04$' . $suffix, 4],
+	'valid upper boundary' => ['$2y$31$' . $suffix, 31],
+	'non-digit' => ['$2y$a0$' . $suffix, 12],
+	'malformed separator' => ['$2y$10x' . $suffix, 10],
+	'below range' => ['$2y$03$' . $suffix, 3],
+	'above range' => ['$2y$32$' . $suffix, 32],
+];
+foreach ($costCases as $description => $case) {
+	echo $description, ': ';
+	var_dump(password_needs_rehash($case[0], PASSWORD_BCRYPT, ['cost' => $case[1]]));
+}
+
 // CRYPT_MD5
 var_dump(password_needs_rehash(crypt('Example', '$1$'), PASSWORD_DEFAULT));
 
@@ -54,6 +69,12 @@ bool(true)
 bool(true)
 bool(false)
 bool(true)
+valid lower boundary: bool(false)
+valid upper boundary: bool(false)
+non-digit: bool(true)
+malformed separator: bool(true)
+below range: bool(true)
+above range: bool(true)
 bool(true)
 bool(true)
 OK!
