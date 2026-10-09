@@ -4,7 +4,7 @@ IO hooks: socket functions issue operations that carry the Socket's handle and r
 sockets
 --SKIPIF--
 <?php
-/* The registrations of the pairs are the point: the ring offers none on IOCP */
+/* The registrations of the pairs are the point: a queue may offer none */
 include __DIR__ . '/../../standard/tests/streams/hooks/scheduler.inc';
 $queue = Scheduler::defaultQueue();
 $caps = $queue instanceof Io\Ring\Engine ? $queue->getSupportedHookCapabilities() : $queue->getHookCapabilities();

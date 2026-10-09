@@ -6,6 +6,11 @@ if (!class_exists(Io\Ring\Engine::class)) die("skip Io\\Ring\\Engine not availab
 if (!in_array(Io\Hooks\Capability::EdgeRegistrations, (new Io\Ring\Engine())->getSupportedHookCapabilities(), true)) {
     die("skip the backend's multishot poll does not report edges");
 }
+if ((new Io\Ring\Engine())->getBackend() === Io\Ring\Backend::Iocp) {
+    // feof()'s zero-timeout poll: ior's IOCP poll does not check readiness at submit, so its
+    // linked zero timeout wins and a closed peer is reported one read late
+    die("skip a zero-timeout poll times out on IOCP before the poller reports");
+}
 ?>
 --FILE--
 <?php

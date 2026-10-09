@@ -4,12 +4,11 @@ IO hooks: a stream freed by an unwinding exception still ends its registrations 
 zend.exception_ignore_args=1
 --SKIPIF--
 <?php
-/* The registrations of the pairs are the point: the ring offers none on IOCP */
+/* The registrations of the pairs are the point: IO_HOOKS_CAPS may leave them out */
 include __DIR__ . '/scheduler.inc';
-$queue = Scheduler::defaultQueue();
-$caps = $queue instanceof Io\Ring\Engine ? $queue->getSupportedHookCapabilities() : $queue->getHookCapabilities();
+$caps = Scheduler::capabilities(Scheduler::defaultQueue());
 if (!in_array(Io\Hooks\Capability::EdgeRegistrations, $caps, true) && !in_array(Io\Hooks\Capability::LevelRegistrations, $caps, true)) {
-    die('skip the queue takes no registrations');
+    die('skip the provider takes no registrations');
 }
 ?>
 --FILE--

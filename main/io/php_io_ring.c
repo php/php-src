@@ -40,8 +40,9 @@ typedef struct _php_io_ring_req php_io_ring_req;
 typedef struct _php_io_ring_reg php_io_ring_reg;
 
 /* An Edge-registered descriptor: what the ring keeps between the waits on it. The first wait after
- * a drain arms a multishot poll whose edges answer the waits parked on the record, or are kept as
- * ready bits for the next one; a Poll op that checks readiness at arm time stays single-shot. */
+ * a drain arms a multishot poll (a one-shot on IOCP, see php_io_ring_reg_arm()) whose edges answer
+ * the waits parked on the record, or are kept as ready bits for the next one; a Poll op that
+ * checks readiness at arm time stays single-shot. */
 struct _php_io_ring_reg {
 	php_socket_t fd;
 	uint32_t edge; /* PHP_POLL_* events registered Edge */
@@ -125,6 +126,7 @@ struct php_io_ring {
 	uint64_t id; /* tells this ring's records on a registration from another's */
 	uint32_t features;
 	bool fd_nonblock;
+	bool oneshot_edges; /* IOCP: a record's poll is one-shot, re-armed by the next wait after a drain */
 	pid_t owner_pid; /* a forked child must not touch the ring */
 	php_io_queue *queue; /* the queue over the ring, if any */
 	php_io_ring *prev_ring; /* the rings of this thread */
@@ -245,6 +247,7 @@ PHPAPI php_io_ring *php_io_ring_create(uint32_t entries, bool fd_nonblock)
 	php_io_rings = ring;
 	ring->ctx = ctx;
 	ring->features = params.features;
+	ring->oneshot_edges = ior_get_backend_type(ctx) == IOR_BACKEND_IOCP;
 	ring->owner_pid = getpid();
 	ring->fd_nonblock = fd_nonblock;
 	ring->cqes_cap = 64;
@@ -288,13 +291,11 @@ PHPAPI uint32_t php_io_ring_supported_hook_flags(php_io_ring *ring)
 {
 	/* Every ior backend keeps a multishot accept, which is what makes a direct
 	 * accept serve a burst in order of arrival rather than one per pass */
-	uint32_t flags = PHP_IO_HOOKS_F_FILES | PHP_IO_HOOKS_F_DIRECT_ACCEPT;
-#ifndef PHP_WIN32
-	/* Edge registrations need a multishot poll that reports edges. IOCP's
-	 * re-reports readiness that persists (ior_prep_poll_multishot), so the
-	 * ring's Edge records would keep completing; not offered there. */
-	flags |= PHP_IO_HOOKS_F_EDGE_REGISTRATIONS;
-#endif
+	/* Edge registrations: a multishot poll reports the edges where the kernel has them, and on
+	 * IOCP a one-shot poll armed by the wait after a drain stands in for the edge (see
+	 * php_io_ring_reg_arm()) */
+	uint32_t flags = PHP_IO_HOOKS_F_FILES | PHP_IO_HOOKS_F_DIRECT_ACCEPT
+			| PHP_IO_HOOKS_F_EDGE_REGISTRATIONS;
 	if (ring->features & IOR_FEAT_NATIVE_ASYNC) {
 		flags |= PHP_IO_HOOKS_F_DIRECT_DATA;
 	}
@@ -1177,7 +1178,10 @@ static void php_io_ring_req_fail(php_io_ring *ring, php_io_ring_req *req, int er
 
 static void php_io_ring_req_main_cqe(php_io_ring *ring, php_io_ring_req *req, int32_t res);
 
-/* The multishot poll of a record: one entry, its edges come back with IOR_CQE_F_MORE */
+/* The poll of a record: one entry, its edges come back with IOR_CQE_F_MORE. Windows has no edge
+ * primitive, and IOCP's multishot re-reports readiness that persists, so there the entry is a
+ * one-shot: its completion is the edge, and the next wait that parks, which only comes after a
+ * drain, arms the next one. What arrived in between is readiness that the level poll reports. */
 static bool php_io_ring_reg_arm(php_io_ring *ring, php_io_ring_reg *rec)
 {
 	ior_sqe *sqe;
@@ -1190,7 +1194,11 @@ static bool php_io_ring_reg_arm(php_io_ring *ring, php_io_ring_reg *rec)
 	req->multishot = true;
 	req->reg = rec;
 	php_deadline_init_infinite(&req->deadline);
-	ior_prep_poll_multishot(ring->ctx, sqe, (ior_fd_t) rec->fd, mask);
+	if (ring->oneshot_edges) {
+		ior_prep_poll_add(ring->ctx, sqe, (ior_fd_t) rec->fd, mask);
+	} else {
+		ior_prep_poll_multishot(ring->ctx, sqe, (ior_fd_t) rec->fd, mask);
+	}
 	ior_sqe_set_data(ring->ctx, sqe, req);
 	rec->poll = req;
 	rec->poll_mask = mask;

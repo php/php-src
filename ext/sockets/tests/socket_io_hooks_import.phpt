@@ -4,7 +4,7 @@ IO hooks: a Socket sharing a stream's descriptor operates on the stream, with th
 sockets
 --SKIPIF--
 <?php
-/* The registrations of the pairs are the point: the ring offers none on IOCP */
+/* The registrations of the pairs are the point: a queue may offer none */
 include __DIR__ . '/../../standard/tests/streams/hooks/scheduler.inc';
 $queue = Scheduler::defaultQueue();
 $caps = $queue instanceof Io\Ring\Engine ? $queue->getSupportedHookCapabilities() : $queue->getHookCapabilities();
