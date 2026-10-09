@@ -181,6 +181,7 @@ U_CFUNC PHP_FUNCTION( numfmt_set_attribute )
 
 	INTL_METHOD_CHECK_STATUS( nfo, "Error setting attribute value" );
 
+	nfo->configuration_version++;
 	RETURN_TRUE;
 }
 /* }}} */
@@ -212,6 +213,7 @@ U_CFUNC PHP_FUNCTION( numfmt_set_text_attribute )
 	unum_setTextAttribute(FORMATTER_UNUM(nfo), static_cast<UNumberFormatTextAttribute>(attribute), svalue.getBuffer(), svalue.length(), &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "Error setting text attribute" );
 
+	nfo->configuration_version++;
 	RETURN_TRUE;
 }
 /* }}} */
@@ -293,6 +295,7 @@ U_CFUNC PHP_FUNCTION( numfmt_set_symbol )
 	unum_setSymbol(FORMATTER_UNUM(nfo), symbol, svalue.getBuffer(), svalue.length(), &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "Error setting symbol value" );
 
+	nfo->configuration_version++;
 	RETURN_TRUE;
 }
 /* }}} */
@@ -363,6 +366,7 @@ U_CFUNC PHP_FUNCTION( numfmt_set_pattern )
 		RETURN_FALSE;
 	}
 
+	nfo->configuration_version++;
 	RETURN_TRUE;
 }
 /* }}} */
