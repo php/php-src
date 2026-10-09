@@ -1178,14 +1178,31 @@ static void php_io_ring_req_fail(php_io_ring *ring, php_io_ring_req *req, int er
 
 static void php_io_ring_req_main_cqe(php_io_ring *ring, php_io_ring_req *req, int32_t res);
 
+/* IOCP: the directions the waits parked on the record drained, the only ones a level poll may be
+ * armed for without reporting at once */
+static uint32_t php_io_ring_reg_parked_mask(php_io_ring *ring, php_io_ring_reg *rec)
+{
+	uint32_t mask = 0;
+	for (php_io_ring_req *w = ring->waiting; w; w = w->w_next) {
+		if (w->waiting == rec && w->type == PHP_IO_OP_POLL) {
+			mask |= w->w_mask;
+		}
+	}
+	return mask;
+}
+
 /* The poll of a record: one entry, its edges come back with IOR_CQE_F_MORE. Windows has no edge
  * primitive, and IOCP's multishot re-reports readiness that persists, so there the entry is a
- * one-shot: its completion is the edge, and the next wait that parks, which only comes after a
- * drain, arms the next one. What arrived in between is readiness that the level poll reports. */
-static bool php_io_ring_reg_arm(php_io_ring *ring, php_io_ring_reg *rec)
+ * one-shot that stands in for the edge: it watches only the directions the parked waits drained
+ * (want is the one being parked), since a level poll of an undrained direction completes at
+ * once, and the next wait that parks, which only comes after a drain, arms the next one. What
+ * arrived in between is readiness the level poll reports. */
+static bool php_io_ring_reg_arm(php_io_ring *ring, php_io_ring_reg *rec, uint32_t want)
 {
 	ior_sqe *sqe;
-	uint32_t mask = php_io_ring_poll_mask_to_ior(rec->edge);
+	uint32_t mask = ring->oneshot_edges
+			? (want | php_io_ring_reg_parked_mask(ring, rec))
+			: php_io_ring_poll_mask_to_ior(rec->edge);
 	if (!php_io_ring_get_sqes(ring, &sqe, 1)) {
 		return false;
 	}
@@ -1421,11 +1438,14 @@ static bool php_io_ring_edge_wait(php_io_ring *ring, php_io_ring_req *req)
 		php_io_ring_req_main_cqe(ring, req, (int32_t) res);
 		return true;
 	}
-	if (rec->poll && rec->poll_mask != php_io_ring_poll_mask_to_ior(rec->edge)) {
-		/* A direction registered since: the new poll reports what is ready now */
+	if (rec->poll && (ring->oneshot_edges
+			? (rec->poll_mask & mask) != mask
+			: rec->poll_mask != php_io_ring_poll_mask_to_ior(rec->edge))) {
+		/* A direction registered since, or on IOCP one drained since: the new poll reports what
+		 * is ready now */
 		php_io_ring_reg_disarm(ring, rec);
 	}
-	if (!rec->poll && !php_io_ring_reg_arm(ring, rec)) {
+	if (!rec->poll && !php_io_ring_reg_arm(ring, rec, mask)) {
 		return false;
 	}
 	php_io_ring_waiter_park(ring, req, rec, mask);
@@ -1907,9 +1927,28 @@ static void php_io_ring_fold_all(php_io_ring *ring)
 	}
 }
 
+/* IOCP: a one-shot answered the waits of the directions it reported; the rest, parked after their
+ * own drains, get the next one, or one spurious wakeup each when no entry can be had */
+static void php_io_ring_reg_rearm_parked(php_io_ring *ring, php_io_ring_reg *rec)
+{
+	uint32_t mask = php_io_ring_reg_parked_mask(ring, rec);
+	if (!mask || php_io_ring_reg_arm(ring, rec, mask)) {
+		return;
+	}
+	php_io_ring_req *w = ring->waiting;
+	while (w) {
+		php_io_ring_req *next = w->w_next;
+		if (w->waiting == rec && w->type == PHP_IO_OP_POLL) {
+			php_io_ring_waiter_settle(ring, w);
+			php_io_ring_req_main_cqe(ring, w, (int32_t) w->w_mask);
+		}
+		w = next;
+	}
+}
+
 /* A multishot poll's completion: an edge of its record, or its last one after a cancel, an error
  * or a full completion queue, after which the record re-arms at the next wait and a possibly
- * missed edge becomes at most one spurious wakeup */
+ * missed edge becomes at most one spurious wakeup; on IOCP every completion is the last one */
 static void php_io_ring_multishot_cqe(php_io_ring *ring, php_io_ring_req *req, int32_t res, bool more)
 {
 	php_io_ring_reg *rec = req->reg;
@@ -1955,6 +1994,9 @@ static void php_io_ring_multishot_cqe(php_io_ring *ring, php_io_ring_req *req, i
 		rec->poll = NULL;
 		req->reg = NULL;
 		php_io_ring_reg_edge(ring, rec, res > 0 ? (uint32_t) res : rec->poll_mask);
+		if (ring->oneshot_edges && !rec->hup) {
+			php_io_ring_reg_rearm_parked(ring, rec);
+		}
 	}
 	req->main_done = true;
 	if (req->cancel_pending) {
