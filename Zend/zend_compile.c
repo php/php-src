@@ -3539,6 +3539,82 @@ static void zend_compile_expr_with_potential_assign_to_self(
 	}
 }
 
+/* Flat unkeyed list and literal without references or spread, one value per target */
+static bool zend_list_assign_from_array_applies(zend_ast *var_ast, zend_ast *expr_ast) /* {{{ */
+{
+	if (expr_ast->kind != ZEND_AST_ARRAY) {
+		return false;
+	}
+
+	const zend_ast_list *targets = zend_ast_get_list(var_ast);
+	const zend_ast_list *values = zend_ast_get_list(expr_ast);
+	if (targets->children == 0 || values->children != targets->children) {
+		return false;
+	}
+
+	for (uint32_t i = 0; i < targets->children; i++) {
+		const zend_ast *target_ast = targets->child[i];
+		const zend_ast *value_ast = values->child[i];
+		if (target_ast == NULL || target_ast->kind != ZEND_AST_ARRAY_ELEM || target_ast->child[1] != NULL || target_ast->attr
+		 || target_ast->child[0]->kind == ZEND_AST_ARRAY) {
+			return false;
+		}
+		if (value_ast == NULL || value_ast->kind != ZEND_AST_ARRAY_ELEM || value_ast->child[1] != NULL || value_ast->attr) {
+			return false;
+		}
+	}
+	return true;
+}
+/* }}} */
+
+/* [$a, $b] = [$b, $a]; with an unused result: assigns the values directly, without the array.
+ * The values are compiled in order, a variable is copied before any assignment, each target is
+ * assigned a copy of its value and the values are freed after all assignments, as the array was */
+static bool zend_try_compile_list_assign_from_array(zend_ast *var_ast, zend_ast *expr_ast) /* {{{ */
+{
+	if (!zend_list_assign_from_array_applies(var_ast, expr_ast)) {
+		return false;
+	}
+
+	const zend_ast_list *targets = zend_ast_get_list(var_ast);
+	const zend_ast_list *values = zend_ast_get_list(expr_ast);
+	uint32_t count = values->children;
+	znode *value_nodes = safe_emalloc(count, sizeof(znode), 0);
+
+	for (uint32_t i = 0; i < count; i++) {
+		znode *value = &value_nodes[i];
+		zend_compile_expr(value, values->child[i]->child[0]);
+		if (value->op_type == IS_CV) {
+			zend_emit_op_tmp(value, ZEND_QM_ASSIGN, value, NULL);
+		}
+	}
+
+	for (uint32_t i = 0; i < count; i++) {
+		znode *value = &value_nodes[i];
+		zend_ast *target_ast = targets->child[i]->child[0];
+		znode copy;
+
+		zend_verify_list_assign_target(target_ast, var_ast->attr);
+		if (value->op_type == IS_CONST) {
+			copy = *value;
+			value->op_type = IS_UNUSED;
+		} else {
+			zend_emit_op_tmp(&copy, ZEND_COPY_TMP, value, NULL);
+		}
+		zend_emit_assign_znode(target_ast, &copy);
+	}
+
+	for (uint32_t i = 0; i < count; i++) {
+		if (value_nodes[i].op_type != IS_UNUSED) {
+			zend_do_free(&value_nodes[i]);
+		}
+	}
+
+	efree(value_nodes);
+	return true;
+}
+/* }}} */
+
 static void zend_compile_assign(znode *result, zend_ast *ast, bool stmt, uint32_t type) /* {{{ */
 {
 	zend_ast *var_ast = ast->child[0];
@@ -3615,6 +3691,10 @@ static void zend_compile_assign(znode *result, zend_ast *ast, bool stmt, uint32_
 				 * self-assignments, this forces the RHS to evaluate first. */
 				zend_emit_op(&expr_node, ZEND_MAKE_REF, &expr_node, NULL);
 			} else {
+				if (stmt && zend_try_compile_list_assign_from_array(var_ast, expr_ast)) {
+					result->op_type = IS_UNUSED;
+					return;
+				}
 				if (expr_ast->kind == ZEND_AST_VAR) {
 					/* list($a, $b) = $a should evaluate the right $a first */
 					znode cv_node;
@@ -6587,7 +6667,8 @@ static void zend_compile_do_while(const zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static void zend_compile_for_expr_list(znode *result, zend_ast *ast) /* {{{ */
+/* An assignment whose result is unused is compiled as a statement */
+static void zend_compile_for_expr_list(znode *result, zend_ast *ast, bool last_result_used) /* {{{ */
 {
 	const zend_ast_list *list;
 	uint32_t i;
@@ -6608,6 +6689,8 @@ static void zend_compile_for_expr_list(znode *result, zend_ast *ast) /* {{{ */
 			zend_compile_void_cast(NULL, expr_ast);
 			result->op_type = IS_CONST;
 			ZVAL_NULL(&result->u.constant);
+		} else if (expr_ast->kind == ZEND_AST_ASSIGN && (i + 1 < list->children || !last_result_used)) {
+			zend_compile_assign(result, expr_ast, /* stmt */ true, BP_VAR_R);
 		} else {
 			zend_compile_expr(result, expr_ast);
 		}
@@ -6625,7 +6708,7 @@ static void zend_compile_for(const zend_ast *ast) /* {{{ */
 	znode result;
 	uint32_t opnum_start, opnum_jmp, opnum_loop;
 
-	zend_compile_for_expr_list(&result, init_ast);
+	zend_compile_for_expr_list(&result, init_ast, false);
 	zend_do_free(&result);
 
 	opnum_jmp = zend_emit_jump(0);
@@ -6636,11 +6719,11 @@ static void zend_compile_for(const zend_ast *ast) /* {{{ */
 	zend_compile_stmt(stmt_ast);
 
 	opnum_loop = get_next_op_number();
-	zend_compile_for_expr_list(&result, loop_ast);
+	zend_compile_for_expr_list(&result, loop_ast, false);
 	zend_do_free(&result);
 
 	zend_update_jump_target_to_next(opnum_jmp);
-	zend_compile_for_expr_list(&result, cond_ast);
+	zend_compile_for_expr_list(&result, cond_ast, true);
 	zend_do_extended_stmt(NULL);
 
 	zend_emit_cond_jump(ZEND_JMPNZ, &result, opnum_start);

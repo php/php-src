@@ -95,6 +95,13 @@ PHP 8.7 UPGRADE NOTES
 14. Performance Improvements
 ========================================
 
+- Core:
+  . A flat unkeyed list assignment from an array literal with one value per
+    target, such as [$a, $b] = [$b, $a], no longer builds the array when the
+    result is unused: the values are evaluated in order, a variable among them
+    is copied, and they are assigned to the targets directly. The values are
+    still released after the last assignment, as the array was.
+
 - Standard:
   . Improved performance of strcspn() and strpbrk() when searching longer strings
     with a single-byte character mask.
