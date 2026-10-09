@@ -130,6 +130,19 @@ static zend_always_inline zend_string *ZSTR_KNOWN(size_t idx) {
 #define ZSTR_MAX_OVERHEAD (ZEND_MM_ALIGNED_SIZE(_ZSTR_HEADER_SIZE + 1))
 #define ZSTR_MAX_LEN (SIZE_MAX - ZSTR_MAX_OVERHEAD)
 
+/* Returns n * m + l. Errors if that overflows or is above ZSTR_MAX_LEN, so
+ * the aligned allocation size of the string can not wrap. */
+static zend_always_inline size_t zend_string_safe_len(size_t n, size_t m, size_t l)
+{
+	bool overflow;
+	size_t len = zend_safe_address(n, m, l, &overflow);
+
+	if (UNEXPECTED(overflow || len > ZSTR_MAX_LEN)) {
+		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", n, m, l);
+	}
+	return len;
+}
+
 #define ZSTR_ALLOCA_ALLOC(str, _len, use_heap) do { \
 	(str) = (zend_string *)do_alloca(ZEND_MM_ALIGNED_SIZE_EX(_ZSTR_STRUCT_SIZE(_len), 8), (use_heap)); \
 	GC_SET_REFCOUNT(str, 1); \
@@ -198,13 +211,7 @@ static zend_always_inline zend_string *zend_string_alloc(size_t len, bool persis
 
 static zend_always_inline zend_string *zend_string_safe_alloc(size_t n, size_t m, size_t l, bool persistent)
 {
-	zend_string *ret = (zend_string *)safe_pemalloc(n, m, ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(l)), persistent);
-
-	GC_SET_REFCOUNT(ret, 1);
-	GC_TYPE_INFO(ret) = GC_STRING | ((persistent ? IS_STR_PERSISTENT : 0) << GC_FLAGS_SHIFT);
-	ZSTR_H(ret) = 0;
-	ZSTR_LEN(ret) = (n * m) + l;
-	return ret;
+	return zend_string_alloc(zend_string_safe_len(n, m, l), persistent);
 }
 
 static zend_always_inline zend_string *zend_string_init(const char *str, size_t len, bool persistent)
@@ -321,22 +328,7 @@ static zend_always_inline zend_string *zend_string_truncate(zend_string *s, size
 
 static zend_always_inline zend_string *zend_string_safe_realloc(zend_string *s, size_t n, size_t m, size_t l, bool persistent)
 {
-	zend_string *ret;
-
-	if (!ZSTR_IS_INTERNED(s)) {
-		if (GC_REFCOUNT(s) == 1) {
-			ret = (zend_string *)safe_perealloc(s, n, m, ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(l)), persistent);
-			ZSTR_LEN(ret) = (n * m) + l;
-			zend_string_forget_hash_val(ret);
-			return ret;
-		}
-	}
-	ret = zend_string_safe_alloc(n, m, l, persistent);
-	memcpy(ZSTR_VAL(ret), ZSTR_VAL(s), MIN((n * m) + l, ZSTR_LEN(s)) + 1);
-	if (!ZSTR_IS_INTERNED(s)) {
-		GC_DELREF(s);
-	}
-	return ret;
+	return zend_string_realloc(s, zend_string_safe_len(n, m, l), persistent);
 }
 
 static zend_always_inline char *zend_cstr_append_char(const char *str, size_t len, char c) {
