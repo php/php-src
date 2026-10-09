@@ -732,7 +732,7 @@ typedef cli_shell_callbacks_t *(__cdecl *get_cli_shell_callbacks)(void);
 		get_cli_shell_callbacks get_callbacks; \
 		HMODULE hMod = GetModuleHandle("php.exe"); \
 		(cb) = NULL; \
-		if (strlen(sapi_module.name) >= 3 && 0 == strncmp("cli", sapi_module.name, 3)) { \
+		if (0 == strncmp("cli", sapi_module.name, 3)) { \
 			get_callbacks = (get_cli_shell_callbacks)GetProcAddress(hMod, "php_cli_get_shell_callbacks"); \
 			if (get_callbacks) { \
 				(cb) = get_callbacks(); \
