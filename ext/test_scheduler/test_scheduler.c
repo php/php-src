@@ -1320,6 +1320,22 @@ done:;
 /// Launch: the script becomes a coroutine
 ///////////////////////////////////////////////////////////////////
 
+/* The loop coroutine has not run to completion yet. */
+static bool ts_scheduler_is_live(const ts_coroutine_t *scheduler)
+{
+	return scheduler->context.status != ZEND_FIBER_STATUS_DEAD
+		&& !ZEND_COROUTINE_IS_FINISHED(&scheduler->coro);
+}
+
+/* Drops the loop coroutine; the next work makes a new one. */
+static void ts_scheduler_release(void)
+{
+	ts_coroutine_t *const scheduler = TSG(scheduler);
+
+	TSG(scheduler) = NULL;
+	OBJ_RELEASE(&scheduler->std);
+}
+
 /* Ensure a loop coroutine to switch into. It runs exactly once and its context
  * dies with it, so a request needing another (destructors that spawn, the
  * post-bailout drain) rebuilds it on demand. Not a task: it stays out of the
@@ -1329,13 +1345,11 @@ static bool ts_scheduler_ensure(void)
 	ts_coroutine_t *scheduler = TSG(scheduler);
 
 	if (scheduler != NULL) {
-		if (scheduler->context.status != ZEND_FIBER_STATUS_DEAD
-			&& !ZEND_COROUTINE_IS_FINISHED(&scheduler->coro)) {
+		if (ts_scheduler_is_live(scheduler)) {
 			return true;
 		}
 
-		TSG(scheduler) = NULL;
-		OBJ_RELEASE(&scheduler->std);
+		ts_scheduler_release();
 	}
 
 	scheduler = ts_from_obj(ts_coroutine_object_create(ts_ce_coroutine));
@@ -1353,6 +1367,32 @@ static bool ts_scheduler_ensure(void)
 	TSG(scheduler) = scheduler;
 
 	return true;
+}
+
+/* Whether a loop would do anything (ts_scheduler_entry): resume a live one,
+ * run a queued coroutine or microtask, or cancel a started coroutine left
+ * parked for the after-main drain. */
+static bool ts_loop_has_work(void)
+{
+	const ts_coroutine_t *const scheduler = TSG(scheduler);
+
+	if (scheduler != NULL && ts_scheduler_is_live(scheduler)) {
+		return true;
+	}
+
+	if (TSG(queue).count > 0 || TSG(microtasks).count > 0) {
+		return true;
+	}
+
+	const ts_coroutine_t *leftover;
+
+	ZEND_HASH_FOREACH_PTR(&TSG(coroutines), leftover) {
+		if (ZEND_COROUTINE_IS_STARTED(&leftover->coro) && !ZEND_COROUTINE_IS_FINISHED(&leftover->coro)) {
+			return true;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return false;
 }
 
 /* Wrap the engine's top-level context (EG(main_fiber_context), the OS thread
@@ -1531,23 +1571,34 @@ static bool ts_cancel(
 	return ts_enqueue(coroutine, error, transfer_error);
 }
 
+/* The last call leaves no current coroutine and async READY, as TrueAsync
+ * leaves them after main. */
+static void ts_async_ready(void)
+{
+	ZEND_ASYNC_CURRENT_COROUTINE = NULL;
+	ZEND_ASYNC_INITIALIZE;
+}
+
 /* index.php is over; main hands off to the loop, which drains and returns
- * here. The old main is then replaced in place (a fresh one re-adopts
- * EG(main_fiber_context)) rather than reset to READY for a lazy relaunch:
- * this late, ts_launch() would copy a mid-unwind context (crash: "Invalid
- * fiber context"). Async stays ACTIVE until the single ZEND_ASYNC_DEACTIVATE
- * in php_request_shutdown(). */
+ * here. Until the last call the old main is then replaced in place (a fresh
+ * one re-adopts EG(main_fiber_context)) rather than reset to READY for a lazy
+ * relaunch: this late, ts_launch() would copy a mid-unwind context (crash:
+ * "Invalid fiber context"). The last call mints no main and returns async to
+ * READY. */
 static bool ts_main_suspend(bool is_bailout)
 {
 	ts_coroutine_t *main_coro = ts_from_coro(ZEND_ASYNC_MAIN_COROUTINE);
 
+	/* Only the call after the destructors comes in the shutdown without a
+	 * bailout: a shutdown function's always brings one. */
+	const bool is_last_call = (EG(flags) & EG_FLAGS_IN_SHUTDOWN) && !is_bailout;
+
 	/* The loop may already have run to completion (a bailout it handed to
-	 * main, say): what is left to drain needs a live one. */
-	if (!ts_scheduler_ensure()) {
+	 * main, say): what is left to drain needs a live one. The last call
+	 * makes one only for work, below. */
+	if (UNEXPECTED(!is_last_call && !ts_scheduler_ensure())) {
 		return false;
 	}
-
-	ts_coroutine_t *scheduler = TSG(scheduler);
 
 	ZEND_COROUTINE_SET_STATUS(&main_coro->coro, ZEND_COROUTINE_STATUS_FINISHED);
 	ts_coroutine_call_finish_handlers(main_coro, is_bailout);
@@ -1571,6 +1622,36 @@ static bool ts_main_suspend(bool is_bailout)
 	/* Back on the context the engine owns: the copy the main coroutine ran
 	 * on describes the same stack, and it dies with the object. */
 	EG(current_fiber_context) = EG(main_fiber_context);
+
+	/* After the last call only main.c's print of an uncaught exception runs
+	 * before async is turned off. A new object there would need a new handle
+	 * in a store that reuses none after the destructors, which a fatal error
+	 * may have left full with no memory to grow it, so the fatal error would
+	 * be printed again. With nothing to drain the call makes no loop and no
+	 * new main; async goes back to READY, so the print takes the synchronous
+	 * paths. */
+	if (is_last_call && !ts_loop_has_work()) {
+		OBJ_RELEASE(&main_coro->std);
+
+		/* A loop that ran to completion goes as in ts_scheduler_ensure(). */
+		if (TSG(scheduler) != NULL) {
+			ts_scheduler_release();
+		}
+
+		ts_async_ready();
+
+		return EG(exception) == NULL;
+	}
+
+	if (UNEXPECTED(is_last_call && !ts_scheduler_ensure())) {
+		OBJ_RELEASE(&main_coro->std);
+		ts_async_ready();
+
+		return false;
+	}
+
+	ts_coroutine_t *scheduler = TSG(scheduler);
+
 	ZEND_ASYNC_CURRENT_COROUTINE = &scheduler->coro;
 
 	zend_fiber_transfer transfer = { .context = &scheduler->context,
@@ -1586,13 +1667,18 @@ static bool ts_main_suspend(bool is_bailout)
 	TSG(scheduler) = NULL;
 	OBJ_RELEASE(&scheduler->std);
 
-	/* A live main coroutine is mandatory past this point: mint the replacement
-	 * before anything else (the bailout re-raise below) runs without one. */
-	ts_coroutine_t *shutdown_coro = ts_adopt_main_context();
-	ZEND_COROUTINE_SET_MAIN(&shutdown_coro->coro);
-	ZEND_COROUTINE_SET_STATUS(&shutdown_coro->coro, ZEND_COROUTINE_STATUS_RUNNING);
-	ZEND_ASYNC_MAIN_COROUTINE = &shutdown_coro->coro;
-	ZEND_ASYNC_CURRENT_COROUTINE = &shutdown_coro->coro;
+	if (is_last_call) {
+		ts_async_ready();
+	} else {
+		/* A live main coroutine is mandatory past this point: mint the
+		 * replacement before anything else (the bailout re-raise below) runs
+		 * without one. */
+		ts_coroutine_t *shutdown_coro = ts_adopt_main_context();
+		ZEND_COROUTINE_SET_MAIN(&shutdown_coro->coro);
+		ZEND_COROUTINE_SET_STATUS(&shutdown_coro->coro, ZEND_COROUTINE_STATUS_RUNNING);
+		ZEND_ASYNC_MAIN_COROUTINE = &shutdown_coro->coro;
+		ZEND_ASYNC_CURRENT_COROUTINE = &shutdown_coro->coro;
+	}
 
 	const bool bailout = (transfer.flags & ZEND_FIBER_TRANSFER_FLAG_BAILOUT) != 0;
 
