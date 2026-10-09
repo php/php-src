@@ -123708,8 +123708,13 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 			}
 			break;
 		case ZEND_COUNT:
+<<<<<<< HEAD
 			if ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) == MAY_BE_ARRAY) {
 				spec = 2571 | SPEC_RULE_OP1;
+=======
+			if (op->op1_type != IS_CONST && (op1_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) == MAY_BE_ARRAY) {
+				spec = 2580 | SPEC_RULE_OP1;
+>>>>>>> PHP-8.5
 			}
 			break;
 		case ZEND_BW_OR:
