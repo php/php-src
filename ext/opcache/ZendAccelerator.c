@@ -4790,6 +4790,9 @@ static zend_result accel_preload(const char *config, bool in_child)
 
 		zend_shared_alloc_save_state();
 		accel_interned_strings_save_state();
+#ifdef HAVE_JIT
+		zend_jit_save_restart_point();
+#endif
 
 		SHM_PROTECT();
 		HANDLE_UNBLOCK_INTERRUPTIONS();
