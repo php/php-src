@@ -2245,7 +2245,7 @@ PHP_MINIT_FUNCTION(zend_test)
 	// Loading via dl() not supported with the observer API
 	if (type != MODULE_TEMPORARY) {
 		REGISTER_INI_ENTRIES();
-		if (INI_BOOL("zend_test.register_system_entropy") &&
+		if (zend_ini_bool_literal("zend_test.register_system_entropy") &&
 			zend_add_system_entropy("zend_test", "test", ZEND_STRL("test entropy")) == FAILURE) {
 			php_error_docref(NULL, E_WARNING, "Failed to register system entropy");
 		}
