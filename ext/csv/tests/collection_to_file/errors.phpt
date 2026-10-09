@@ -41,7 +41,7 @@ echo str_replace("\r\n", "<CRLF>\n", file_get_contents($file));
 --EXPECTF--
 ValueError: Csv\collection_to_file(): Argument #3 ($delimiter) must not be empty
 bool(false)
-Error: Failed to open "%sno_such_dir/out.csv" for writing
+Error: Csv\collection_to_file(): Failed to open stream: No such file or directory
 TypeError: Element 1 of the collection must be an array
 a,b<CRLF>
 ValueError: Element 1 of the collection contains 1 fields compared to 2 fields on previous rows

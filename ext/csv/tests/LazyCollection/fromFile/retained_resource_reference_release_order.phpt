@@ -1,11 +1,10 @@
 --TEST--
 Test Csv\LazyLaxCollection::createFromFile(): several retained references to the internal stream's resource, released in different orders
 --DESCRIPTION--
-Regression test for a leak caught by the debug builds of the GitHub CI on the ext/csv pull
-request: when userland retained a reference to the internal stream's resource while it was
-being opened, the resource was removed from the regular list anyway, so releasing the last
-reference never freed the zend_resource. The resource must instead stay listed as a closed
-resource until its last reference is released, whatever the order of releases.
+Userland can retain references to the resource of the internal stream (here captured while the
+stream is being opened). The stream stays open while the collection is alive, becomes a closed
+resource once the collection is destroyed, and the resource is freed when its last reference
+is released, whatever the order of releases.
 --EXTENSIONS--
 csv
 --FILE--
@@ -31,15 +30,23 @@ $file = __DIR__ . '/retained_resource_reference_release_order.csv';
 file_put_contents($file, "a,b\r\nc,d\r\n");
 
 function open_collection(string $file): array {
+    $before = array_map('intval', get_resources('stream'));
     $collection = Csv\LazyLaxCollection::createFromFile('php://filter/read=grabbing/resource=' . $file);
-    $closed = array_values(array_filter(GrabbingFilter::$grabbed, fn($res) => !is_resource($res)));
+    $internal = array_values(array_filter(GrabbingFilter::$grabbed, fn($res) => !in_array((int) $res, $before, true)));
     GrabbingFilter::$grabbed = [];
-    var_dump(count($closed));
-    return [$collection, $closed[0]];
+    var_dump(count($internal));
+    return [$collection, $internal[0]];
 }
 
-function closed_ids(): array {
-    return array_map('intval', array_values(get_resources('Unknown')));
+/* "stream" while open, "closed" once closed but still referenced, "freed" afterwards */
+function state(int $id): string {
+    if (in_array($id, array_map('intval', get_resources('stream')), true)) {
+        return 'stream';
+    }
+    if (in_array($id, array_map('intval', get_resources('Unknown')), true)) {
+        return 'closed';
+    }
+    return in_array($id, array_map('intval', get_resources()), true) ? 'other' : 'freed';
 }
 
 function iterate(Csv\LazyLaxCollection $collection): void {
@@ -48,42 +55,38 @@ function iterate(Csv\LazyLaxCollection $collection): void {
     }
 }
 
-$baseline = closed_ids();
-
 echo "--- Release one reference, destroy the collection, then release the rest\n";
 [$collection, $a] = open_collection($file);
 $b = $a;
 $holder = new stdClass();
 $holder->res = $a;
 $id = (int) $a;
-var_dump(gettype($a), gettype($b), gettype($holder->res));
-var_dump(in_array($id, closed_ids(), true));
+echo state($id), \PHP_EOL;
 /* get_resources() hands out further references; dropping them must not free it early */
-$again = get_resources('Unknown');
-var_dump(in_array($id, array_map('intval', $again), true));
+$again = get_resources('stream');
 unset($again);
-var_dump(in_array($id, closed_ids(), true));
+echo state($id), \PHP_EOL;
 iterate($collection);
 unset($b);
-var_dump(in_array($id, closed_ids(), true));
+echo state($id), \PHP_EOL;
 unset($collection);
 var_dump(gettype($a), gettype($holder->res));
-var_dump(in_array($id, closed_ids(), true));
+echo state($id), \PHP_EOL;
 unset($holder);
-var_dump(in_array($id, closed_ids(), true));
+echo state($id), \PHP_EOL;
 unset($a);
-var_dump(closed_ids() === $baseline);
+echo state($id), \PHP_EOL;
 
 echo "--- Release every reference before the collection is used\n";
 [$collection, $a] = open_collection($file);
 $b = $a;
 $id = (int) $a;
 unset($a, $b);
-var_dump(in_array($id, closed_ids(), true));
+echo state($id), \PHP_EOL;
 iterate($collection);
 iterate($collection);
 unset($collection);
-var_dump(closed_ids() === $baseline);
+echo state($id), \PHP_EOL;
 
 echo "--- Destroy the collection first, then release references in reverse order\n";
 [$collection, $a] = open_collection($file);
@@ -91,13 +94,13 @@ $refs = [$a, $a, $a];
 $id = (int) $a;
 iterate($collection);
 unset($collection, $a);
-var_dump(in_array($id, closed_ids(), true));
+echo state($id), \PHP_EOL;
 array_pop($refs);
 array_pop($refs);
 var_dump(gettype($refs[0]));
-var_dump(in_array($id, closed_ids(), true));
+echo state($id), \PHP_EOL;
 array_pop($refs);
-var_dump(closed_ids() === $baseline);
+echo state($id), \PHP_EOL;
 
 echo "done\n";
 ?>
@@ -108,34 +111,30 @@ echo "done\n";
 --EXPECT--
 --- Release one reference, destroy the collection, then release the rest
 int(1)
-string(17) "resource (closed)"
-string(17) "resource (closed)"
-string(17) "resource (closed)"
-bool(true)
-bool(true)
-bool(true)
+stream
+stream
 ["a","b"]
 ["c","d"]
-bool(true)
+stream
 string(17) "resource (closed)"
 string(17) "resource (closed)"
-bool(true)
-bool(true)
-bool(true)
+closed
+closed
+freed
 --- Release every reference before the collection is used
 int(1)
-bool(false)
+stream
 ["a","b"]
 ["c","d"]
 ["a","b"]
 ["c","d"]
-bool(true)
+freed
 --- Destroy the collection first, then release references in reverse order
 int(1)
 ["a","b"]
 ["c","d"]
-bool(true)
+closed
 string(17) "resource (closed)"
-bool(true)
-bool(true)
+closed
+freed
 done

@@ -23,28 +23,43 @@ stream_filter_register('grabbing', GrabbingFilter::class);
 $file = __DIR__ . '/retained_resource_reference.csv';
 file_put_contents($file, "a,b\r\nc,d\r\n");
 
+$before = array_map('intval', get_resources('stream'));
 $collection = Csv\LazyLaxCollection::createFromFile('php://filter/read=grabbing/resource=' . $file);
-/* The captured reference to the internal stream must now be a closed resource,
- * not a live handle and not freed memory. */
-$dead = 0;
-foreach ($GLOBALS['grabbed'] as $res) {
-    if (!is_resource($res)) {
-        $dead++;
-    }
-}
-var_dump($dead);
+$internal = array_values(array_filter($GLOBALS['grabbed'], fn($res) => !in_array((int) $res, $before, true)));
+unset($GLOBALS['grabbed']);
+var_dump(count($internal));
+$res = $internal[0];
+unset($internal);
+
+/* The captured reference is the live internal stream, which userland cannot close */
+var_dump(gettype($res));
+var_dump(fclose($res));
 foreach ($collection as $row) {
     echo json_encode($row), \PHP_EOL;
 }
-unset($collection, $GLOBALS['grabbed']);
+/* Destroying the collection closes the stream; the reference sees a closed resource */
+unset($collection);
+var_dump(gettype($res));
+$id = (int) $res;
+var_dump(in_array($id, array_map('intval', get_resources('Unknown')), true));
+/* Releasing the last reference frees the resource */
+unset($res);
+var_dump(in_array($id, array_map('intval', get_resources()), true));
 echo "done", \PHP_EOL;
 ?>
 --CLEAN--
 <?php
 @unlink(__DIR__ . '/retained_resource_reference.csv');
 ?>
---EXPECT--
+--EXPECTF--
 int(1)
+string(8) "resource"
+
+Warning: fclose(): cannot close the provided stream, as it must not be manually closed in %s on line %d
+bool(false)
 ["a","b"]
 ["c","d"]
+string(17) "resource (closed)"
+bool(true)
+bool(false)
 done

@@ -11,4 +11,4 @@ try {
 }
 ?>
 --EXPECTF--
-Error: Failed to open "%sdoes_not_exist.csv" for reading
+Error: Csv\LazyLaxCollection::createFromFile(): Failed to open stream: No such file or directory
