@@ -1290,7 +1290,7 @@ void fcgi_close(fcgi_request *req, int force, int destroy)
 		if (!force) {
 			char buf[8];
 
-			shutdown(req->fd, 1);
+			shutdown(req->fd, SHUT_WR);
 			/* read any remaining data, it may be omitted */
 			while (recv(req->fd, buf, sizeof(buf), 0) > 0) {}
 		}
