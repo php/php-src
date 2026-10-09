@@ -5060,15 +5060,48 @@ static int zend_jit_math_long_long(zend_jit_ctx   *jit,
 					SET_STACK_REF(stack, EX_VAR_TO_NUM(opline->result.var), ir_CONST_DOUBLE((double)ZEND_LONG_MIN - 1.0));
 					exit_point = zend_jit_trace_get_exit_point(opline + 1, 0);
 					SET_STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var), old_res_info);
+				} else if ((op == IR_ADD_OV || op == IR_SUB_OV) && !same_ops && Z_MODE(op1_addr) == IS_REG) {
+					/* Undo the operation on the cold path for deoptimization,
+					 * instead of keeping op1 alive across it.
+					 * This allows reusing its register for the result. */
+					uint32_t op1_var = EX_VAR_TO_NUM(opline->op1.var);
+					ir_ref old_ref = STACK_REF(stack, op1_var);
+
+					ir_ref if_ov = ir_IF(ir_OVERFLOW(ref));
+					ir_IF_TRUE_cold(if_ov);
+
+					/* undo: opposite operation */
+					ir_ref old_op1;
+					if (op == IR_ADD_OV) {
+						old_op1 = ir_SUB_L(ref, op2);
+					} else {
+						old_op1 = ir_ADD_L(ref, op2);
+					}
+
+					SET_STACK_REF_EX(stack, op1_var, old_op1, STACK_FLAGS(stack, op1_var));
+
+					exit_point = zend_jit_trace_get_exit_point(opline, 0);
+					exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+					if (!exit_addr) {
+						return 0;
+					}
+					jit_SIDE_EXIT(jit, ir_CONST_ADDR(exit_addr));
+
+					/* After the snapshot is built. */
+					SET_STACK_REF_EX(stack, op1_var, old_ref, STACK_FLAGS(stack, op1_var));
+					ir_IF_FALSE(if_ov);
+					exit_point = -1;
 				} else {
 					exit_point = zend_jit_trace_get_exit_point(opline, 0);
 				}
 
-				exit_addr = zend_jit_trace_get_exit_addr(exit_point);
-				if (!exit_addr) {
-					return 0;
+				if (exit_point >= 0) {
+					exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+					if (!exit_addr) {
+						return 0;
+					}
+					ir_GUARD_NOT(ir_OVERFLOW(ref), ir_CONST_ADDR(exit_addr));
 				}
-				ir_GUARD_NOT(ir_OVERFLOW(ref), ir_CONST_ADDR(exit_addr));
 				may_overflow = 0;
 			} else if ((res_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
 				int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
