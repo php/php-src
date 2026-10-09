@@ -15,6 +15,7 @@ PHP                                                                        NEWS
     into the wrong one. (Marc Bennewitz)
   . Fixed bug GH-24218 (Invalid opcode for count() of a literal array
     without SCCP). (lazerg)
+  . Fix throwing behaviour with recursive arrays in VM. (ndossche)
 
 - DOM:
   . Fixed bug GH-23352 (UAF reading an attribute value node retained across
