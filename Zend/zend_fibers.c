@@ -1517,7 +1517,9 @@ ZEND_METHOD(Fiber, start)
 		RETURN_THROWS();
 	}
 
-	if (fiber->context.status != ZEND_FIBER_STATUS_INIT) {
+	/* A coroutine fiber stays INIT until its body runs, and a caller cancelled
+	 * meanwhile leaves the body queued. */
+	if (fiber->context.status != ZEND_FIBER_STATUS_INIT || fiber->coroutine != NULL) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot start a fiber that has already been started");
 		RETURN_THROWS();
 	}
@@ -1739,7 +1741,7 @@ ZEND_METHOD(Fiber, isStarted)
 
 	fiber = (zend_fiber *) Z_OBJ_P(ZEND_THIS);
 
-	RETURN_BOOL(fiber->context.status != ZEND_FIBER_STATUS_INIT);
+	RETURN_BOOL(fiber->context.status != ZEND_FIBER_STATUS_INIT || fiber->coroutine != NULL);
 }
 
 ZEND_METHOD(Fiber, isSuspended)
