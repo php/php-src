@@ -219,6 +219,18 @@ PHPAPI void php_io_ring_after_fork(void)
 	}
 }
 
+#ifdef PHP_WIN32
+PHPAPI void php_io_ring_release_handle(void *handle)
+{
+	for (php_io_ring *ring = php_io_rings; ring; ring = ring->next_ring) {
+		if (ring->ctx) {
+			/* -EBUSY with an op in flight, -ENOTSUP before Windows 8.1: the handle stays tied */
+			ior_release_handle(ring->ctx, (ior_fd_t) handle);
+		}
+	}
+}
+#endif
+
 PHPAPI php_io_ring *php_io_ring_create(uint32_t entries, bool fd_nonblock)
 {
 	ior_params params;

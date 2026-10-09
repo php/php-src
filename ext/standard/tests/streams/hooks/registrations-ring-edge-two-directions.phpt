@@ -2,7 +2,7 @@
 Io\Ring\Engine: a wait after a drain on a pair registered in both directions is answered by its own direction
 --SKIPIF--
 <?php
-if (!class_exists(Io\Ring\Engine::class)) die("skip Io\Ring\Engine not available");
+if (!class_exists(Io\Ring\Engine::class)) die("skip Io\\Ring\\Engine not available");
 if (!in_array(Io\Hooks\Capability::EdgeRegistrations, (new Io\Ring\Engine())->getSupportedHookCapabilities(), true)) {
     die("skip the backend's multishot poll does not report edges");
 }
@@ -14,14 +14,16 @@ include __DIR__ . '/scheduler.inc';
 final class Tracing extends Scheduler
 {
     public array $log = [];
+    public bool $quiet = false;
 
     public function run(\Io\Operation $op): \Io\Completion
     {
         $c = parent::run($op);
-        if (!$op instanceof \Io\Operation\Timer) {
+        if (!$this->quiet && !$op instanceof \Io\Operation\Timer) {
             $reg = $op->getRegistration();
+            // The status only: a closed peer is Read|HangUp on one system and HangUp on another
             $this->log[] = substr($op::class, 13) . ($reg ? " on " . $reg->getTrigger()->name : "")
-                . " " . $c->getStatus()->name . " " . implode("|", array_map(fn ($e) => $e->name, $c->getEvents()));
+                . " " . $c->getStatus()->name;
         }
         return $c;
     }
@@ -39,7 +41,7 @@ $ring = new Io\Ring\Engine();
 $scheduler = new Tracing($ring, [Io\Hooks\Capability::EdgeRegistrations]);
 Io\Hooks\set_hooks($scheduler);
 
-$scheduler->spawn(function () use ($addr) {
+$scheduler->spawn(function () use ($addr, $scheduler) {
     // The connect registers the Write pair and the recvfrom the Read pair: the record covers both,
     // and the socket stays writable while the read waits, which must not answer the read's wait
     // (on IOCP a level poll of the undrained direction would complete at once and leave the wait
@@ -48,6 +50,10 @@ $scheduler->spawn(function () use ($addr) {
     stream_set_timeout($client, 2);
     var_dump(stream_socket_recvfrom($client, 10));
     var_dump(stream_socket_recvfrom($client, 10));
+    // The peer's close answers the wait too, and feof() sees it at once
+    var_dump(stream_socket_recvfrom($client, 10));
+    $scheduler->quiet = true;
+    var_dump(feof($client));
     fclose($client);
 });
 $scheduler->spawn(function () use ($server) {
@@ -66,11 +72,14 @@ print_r($scheduler->log);
 --EXPECT--
 string(3) "one"
 string(3) "two"
+string(0) ""
+bool(true)
 Array
 (
     [0] => add Write
-    [1] => Connect on Edge Ready Write
+    [1] => Connect on Edge Ready
     [2] => add Read
-    [3] => Poll on Edge Done Read
-    [4] => Poll on Edge Done Read
+    [3] => Poll on Edge Done
+    [4] => Poll on Edge Done
+    [5] => Poll on Edge Done
 )

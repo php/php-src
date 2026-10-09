@@ -74,6 +74,13 @@ PHPAPI bool php_io_ring_inherited(php_io_ring *ring);
 /* In a forked child: closes the descriptors of every ring of this thread */
 PHPAPI void php_io_ring_after_fork(void);
 
+#ifdef PHP_WIN32
+/* A handle about to be handed to another process is taken off the completion ports of this
+ * thread's rings, which the file object stays tied to otherwise, so that process can tie it to
+ * its own; one with an op in flight stays, and the next op here ties it again */
+PHPAPI void php_io_ring_release_handle(void *handle);
+#endif
+
 PHPAPI php_io_queue *php_io_queue_create_ring(uint32_t entries);
 /* Only for a queue created by php_io_queue_create_ring() */
 PHPAPI php_io_ring *php_io_queue_ring(php_io_queue *q);

@@ -1137,6 +1137,10 @@ static zend_result set_proc_descriptor_from_resource(zval *resource, descriptors
 
 #ifdef PHP_WIN32
 	php_file_descriptor_t fd_t = (php_file_descriptor_t)_get_osfhandle(fd);
+# ifdef HAVE_IOR
+	/* Tied to a ring's completion port by an op on it, the child could not tie it to its own */
+	php_io_ring_release_handle(fd_t);
+# endif
 #else
 	php_file_descriptor_t fd_t = fd;
 #endif
