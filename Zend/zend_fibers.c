@@ -1276,6 +1276,47 @@ static zend_object *zend_fiber_object_create(zend_class_entry *ce)
 	return &fiber->std;
 }
 
+static bool zend_fiber_release_after_body(
+		zend_coroutine_t *coroutine, zend_coroutine_t *waiter, void *data, bool is_bailout)
+{
+	(void) coroutine;
+	(void) waiter;
+	(void) is_bailout;
+
+	zend_fiber *const fiber = data;
+
+	OBJ_RELEASE(&fiber->std);
+
+	return false;
+}
+
+/* A body parked outside Fiber::suspend() (an await, a delay), or running on
+ * this very stack, saved EG(active_fiber) pointing at the fiber, and gets it
+ * back on its next switch in. The object outlives the destructor until the
+ * body ends, as a legacy fiber is held by its resumer while it runs; the body
+ * is cancelled unless it is the one running, and Fiber::suspend() refuses. */
+static bool zend_fiber_keep_until_body_ends(zend_fiber *fiber)
+{
+	zend_coroutine_t *const coroutine = fiber->coroutine;
+
+	if (UNEXPECTED(ZEND_COROUTINE_IS_FINISHED(coroutine))) {
+		return false;
+	}
+
+	if (UNEXPECTED(ZEND_ASYNC_ADD_FINISH_HANDLER(coroutine, zend_fiber_release_after_body, NULL, fiber) == 0)) {
+		return false;
+	}
+
+	GC_ADDREF(&fiber->std);
+
+	/* The scheduler cancels the running coroutine only from its own tick. */
+	if (ZEND_ASYNC_ON && (coroutine != ZEND_ASYNC_CURRENT_COROUTINE || ZEND_ASYNC_IN_SCHEDULER_CONTEXT)) {
+		ZEND_ASYNC_CANCEL(coroutine, zend_create_graceful_exit(), true);
+	}
+
+	return true;
+}
+
 static void zend_fiber_object_destroy(zend_object *object)
 {
 	zend_fiber *fiber = (zend_fiber *) object;
@@ -1291,6 +1332,9 @@ static void zend_fiber_object_destroy(zend_object *object)
 		 * object, and the legacy methods have no context to resume. */
 		if (fiber->context.status == ZEND_FIBER_STATUS_SUSPENDED) {
 			fiber->context.status = ZEND_FIBER_STATUS_DEAD;
+		} else if (fiber->context.status == ZEND_FIBER_STATUS_RUNNING
+				&& zend_fiber_keep_until_body_ends(fiber)) {
+			return;
 		}
 
 		zend_fiber_release_coroutine(fiber, true);
@@ -1575,7 +1619,9 @@ ZEND_METHOD(Fiber, suspend)
 			RETURN_THROWS();
 		}
 
-		if (UNEXPECTED(current->extended_data == NULL)) {
+		const zend_fiber *own = current->extended_data;
+
+		if (UNEXPECTED(own == NULL || (own->flags & ZEND_FIBER_FLAG_DESTROYED))) {
 			zend_throw_error(zend_ce_fiber_error, "Cannot suspend in a force-closed fiber");
 			RETURN_THROWS();
 		}
