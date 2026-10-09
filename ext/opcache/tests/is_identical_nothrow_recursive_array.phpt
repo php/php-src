@@ -25,15 +25,15 @@ $x = [&$x];
 try {
     identical($x, [[]]);
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), "\n";
+    echo $e::class, ": ", $e->getMessage(), " on line ", $e->getLine(), "\n";
 }
 
 try {
     not_identical($x, [[]]);
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), "\n";
+    echo $e::class, ": ", $e->getMessage(), " on line ", $e->getLine(), "\n";
 }
 ?>
 --EXPECT--
-Error: Nesting level too deep - recursive dependency?
-Error: Nesting level too deep - recursive dependency?
+Error: Nesting level too deep - recursive dependency? on line 3
+Error: Nesting level too deep - recursive dependency? on line 9
