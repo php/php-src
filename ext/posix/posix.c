@@ -931,8 +931,16 @@ static void php_posix_passwd_to_array(struct passwd *pw, zval *return_value) /* 
 	} else {
 		add_assoc_null(return_value, "passwd");
 	}
-	add_assoc_long(return_value, "uid", pw->pw_uid);
-	add_assoc_long(return_value, "gid", pw->pw_gid);
+	if (pw->pw_uid > ZEND_LONG_MAX) {
+		add_assoc_double(return_value, "uid", (double) pw->pw_uid);
+	} else {
+		add_assoc_long(return_value, "uid", (zend_long) pw->pw_uid);
+	}
+	if (pw->pw_gid > ZEND_LONG_MAX) {
+		add_assoc_double(return_value, "gid", (double) pw->pw_gid);
+	} else {
+		add_assoc_long(return_value, "gid", (zend_long) pw->pw_gid);
+	}
 	if (pw->pw_gecos) {
 		add_assoc_string(return_value, "gecos", pw->pw_gecos);
 	} else {
