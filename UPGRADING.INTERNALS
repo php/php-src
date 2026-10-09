@@ -75,6 +75,9 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 - Standard:
   . php_explode() now takes a HashTable* instead of a zval* to store the
     resulting parts. It already expected the zval* to be IS_ARRAY.
+  . php_mblen() and php_mb_reset() are inline functions. php_mb_reset() must be
+    called before the first php_mblen() of a string; the conversion state is
+    kept in BG(mblen_state) in NTS builds too.
 
 ========================
 4. OpCode changes

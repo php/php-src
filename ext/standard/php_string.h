@@ -72,8 +72,9 @@ static zend_always_inline int php_mblen_ex(const char *ptr, size_t len, mbstate_
 		return 1;
 	}
 	int result = (int) mbrlen(ptr, len, state);
-	while (result == 0 && *ptr != '\0') {
-		/* A buffered character was flushed without consuming the byte */
+	if (result == 0 && *ptr != '\0') {
+		/* A buffered character was flushed without consuming the byte; decode it from the initial state */
+		memset(state, 0, sizeof(*state));
 		result = (int) mbrlen(ptr, len, state);
 	}
 	return result;

@@ -96,6 +96,9 @@ PHP 8.7 UPGRADE NOTES
 ========================================
 
 - Standard:
+  . Improved performance of fgetcsv(), str_getcsv(), escapeshellarg() and
+    escapeshellcmd() in locales where ASCII characters are single bytes
+    (C, UTF-8 and single-byte locales).
   . Improved performance of strcspn() and strpbrk() when searching longer strings
     with a single-byte character mask.
   . Improved performance of array_chunk() when not preserving keys.
