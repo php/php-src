@@ -46,6 +46,10 @@ PHP 8.7 INTERNALS UPGRADE NOTES
   part of handling disabled classes, was removed following the removal of
   the `disable_classes` INI setting in PHP 8.5.
 
+- On i386 builds using SSE2 floating point math (__SSE2_MATH__ defined),
+  zend_init_fpu() and zend_ensure_fpu_mode() no longer switch the x87 FPU
+  precision. Builds using x87 math are unchanged.
+
 ========================
 2. Build system changes
 ========================

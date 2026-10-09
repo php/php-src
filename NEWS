@@ -2,6 +2,12 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.7.0alpha1
 
+- Core:
+  . On i386 builds compiled with SSE2 floating point math (e.g. gcc
+    -mfpmath=sse, clang), the x87 FPU precision is no longer switched to 53
+    bits. This restores the default extended precision expected by libm
+    (e.g. musl cos(), sin(), tan()). (Andy Postnikov)
+
 - Curl:
   . curl_multi_exec() now throws a TypeError when still_running is not an int. 
     (arshidkv12)

@@ -22,13 +22,17 @@
 ZEND_API void zend_init_fpu(void) /* {{{ */
 {
 #if XPFPA_HAVE_CW
-	XPFPA_DECLARE
-
 	if (!EG(saved_fpu_cw_ptr)) {
 		EG(saved_fpu_cw_ptr) = (void*)&EG(saved_fpu_cw);
 	}
 	XPFPA_STORE_CW(EG(saved_fpu_cw_ptr));
-	XPFPA_SWITCH_DOUBLE();
+#if !defined(__SSE2_MATH__)
+	{
+		XPFPA_DECLARE
+
+		XPFPA_SWITCH_DOUBLE();
+	}
+#endif
 #else
 	EG(saved_fpu_cw_ptr) = NULL;
 #endif
@@ -48,8 +52,10 @@ ZEND_API void zend_shutdown_fpu(void) /* {{{ */
 
 ZEND_API void zend_ensure_fpu_mode(void) /* {{{ */
 {
+#if !defined(__SSE2_MATH__)
 	XPFPA_DECLARE
 
 	XPFPA_SWITCH_DOUBLE();
+#endif
 }
 /* }}} */
