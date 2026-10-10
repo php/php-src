@@ -287,11 +287,13 @@ PHPAPI zend_string *php_escape_shell_cmd(const zend_string *unescaped_cmd)
 
 	cmd = zend_string_safe_alloc(2, l, 0, 0);
 
+	php_mb_reset();
 	for (x = 0, y = 0; x < l; x++) {
 		int mb_len = php_mblen(str + x, (l - x));
 
 		/* skip non-valid multibyte characters */
 		if (mb_len < 0) {
+			php_mb_reset();
 			continue;
 		} else if (mb_len > 1) {
 			memcpy(ZSTR_VAL(cmd) + y, str + x, mb_len);
@@ -400,11 +402,13 @@ PHPAPI zend_string *php_escape_shell_arg(const zend_string *unescaped_arg)
 	ZSTR_VAL(cmd)[y++] = '\'';
 #endif
 
+	php_mb_reset();
 	for (x = 0; x < l; x++) {
 		int mb_len = php_mblen(str + x, (l - x));
 
 		/* skip non-valid multibyte characters */
 		if (mb_len < 0) {
+			php_mb_reset();
 			continue;
 		} else if (mb_len > 1) {
 			memcpy(ZSTR_VAL(cmd) + y, str + x, mb_len);
