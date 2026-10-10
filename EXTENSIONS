@@ -428,8 +428,8 @@ STATUS:              Working
 SINCE:               8.2.0
 -------------------------------------------------------------------------------
 EXTENSION:           readline
-PRIMARY MAINTAINER:  Unknown
-MAINTENANCE:         Unknown
+PRIMARY MAINTAINER:  Weilin Du <weilindu@php.net> (2026 - 2026)
+MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           reflection
