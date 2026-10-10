@@ -520,11 +520,10 @@ static bool php_io_poll_duration_to_ns(php_date_time_duration *d, uint32_t arg_n
 	return true;
 }
 
-static void php_io_poll_ns_to_duration(zval *rv, zend_hrtime_t ns)
+/* FAILURE with an exception thrown */
+static zend_result php_io_poll_ns_to_duration(zval *rv, zend_hrtime_t ns)
 {
-	zval arg;
-	ZVAL_LONG(&arg, (zend_long) MIN(ns, (zend_hrtime_t) ZEND_LONG_MAX));
-	zend_call_method_with_1_params(NULL, php_date_ce_time_duration, NULL, "fromnanoseconds", rv, &arg);
+	return php_date_time_duration_create(rv, ns / ZEND_NANO_IN_SEC, ns % ZEND_NANO_IN_SEC);
 }
 
 PHP_METHOD(Io_Poll_TimerHandle, __construct)
@@ -560,7 +559,9 @@ PHP_METHOD(Io_Poll_TimerHandle, getTimeout)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	php_io_poll_timer_handle_data *data = PHP_POLL_HANDLE_OBJ_FROM_ZV(ZEND_THIS)->handle_data;
-	php_io_poll_ns_to_duration(return_value, data->timeout);
+	if (php_io_poll_ns_to_duration(return_value, data->timeout) == FAILURE) {
+		RETURN_THROWS();
+	}
 }
 
 PHP_METHOD(Io_Poll_TimerHandle, isPeriodic)

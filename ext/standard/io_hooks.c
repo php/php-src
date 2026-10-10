@@ -444,9 +444,10 @@ PHP_METHOD(Io_Operation, getTimeout)
 	}
 
 	zend_hrtime_t remaining = php_io_deadline_remaining(&op->deadline, zend_hrtime());
-	zval ns;
-	ZVAL_LONG(&ns, (zend_long) MIN(remaining, (zend_hrtime_t) ZEND_LONG_MAX));
-	zend_call_method_with_1_params(NULL, php_date_ce_time_duration, NULL, "fromnanoseconds", return_value, &ns);
+	if (php_date_time_duration_create(return_value, remaining / ZEND_NANO_IN_SEC,
+			remaining % ZEND_NANO_IN_SEC) == FAILURE) {
+		RETURN_THROWS();
+	}
 }
 
 PHP_METHOD(Io_Operation, isValid)
