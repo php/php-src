@@ -25,6 +25,7 @@
 #include "spl_fixedarray.h"
 #include "spl_exceptions.h"
 #include "ext/json/php_json.h" /* For php_json_serializable_ce */
+#include "ext/user_cache/php_user_cache.h" /* For user_cache safe direct path */
 
 static zend_object_handlers spl_handler_SplFixedArray;
 PHPAPI zend_class_entry *spl_ce_SplFixedArray;
@@ -666,6 +667,96 @@ PHP_METHOD(SplFixedArray, __unserialize)
 	}
 }
 
+static void spl_fixedarray_object_build_ucache_elements(spl_fixedarray_object *intern, zval *return_value)
+{
+	zend_long i;
+	zval *current;
+
+	array_init_size(return_value, intern->array.size);
+
+	for (i = 0; i < intern->array.size; i++) {
+		current = &intern->array.elements[i];
+
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), current);
+
+		Z_TRY_ADDREF_P(current);
+	}
+}
+
+static bool spl_fixedarray_object_copy_ucache_state(
+		void *ctx,
+		zend_object *new_obj,
+		zend_object *old_obj,
+		php_ucache_safe_direct_clone_val_func_t clone_value)
+{
+	spl_fixedarray_object *old_intern, *new_intern;
+	zend_long size, i;
+	zval cloned_elem;
+
+	old_intern = spl_fixed_array_from_obj(old_obj);
+	new_intern = spl_fixed_array_from_obj(new_obj);
+	if (new_intern->array.size != 0) {
+		return false;
+	}
+	size = old_intern->array.size;
+
+	spl_fixedarray_init(&new_intern->array, size);
+
+	for (i = 0; i < size; i++) {
+		ZVAL_UNDEF(&cloned_elem);
+
+		if (!clone_value(ctx, &cloned_elem, &old_intern->array.elements[i])) {
+			ZEND_ASSERT(Z_TYPE(new_intern->array.elements[i]) == IS_NULL);
+
+			return false;
+		}
+
+		ZVAL_COPY_DEREF(&new_intern->array.elements[i], &cloned_elem);
+
+		zval_ptr_dtor(&cloned_elem);
+	}
+
+	return !EG(exception);
+}
+
+static bool spl_fixedarray_object_serialize_ucache_state(zval *state, const zval *object)
+{
+	spl_fixedarray_object_build_ucache_elements(Z_SPLFIXEDARRAY_P((zval *) object), state);
+
+	return true;
+}
+
+static bool spl_fixedarray_object_unserialize_ucache_state(zval *object, zval *state)
+{
+	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(object);
+	zend_long size;
+	zval *elem;
+
+	if (Z_TYPE_P(state) != IS_ARRAY) {
+		return false;
+	}
+
+	size = zend_hash_num_elements(Z_ARRVAL_P(state));
+	if (intern->array.size == 0 && size != 0) {
+		spl_fixedarray_init_non_empty_struct(&intern->array, size);
+
+		intern->array.size = 0;
+
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(state), elem) {
+			ZVAL_COPY_DEREF(&intern->array.elements[intern->array.size], elem);
+			intern->array.size++;
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	return !EG(exception);
+}
+
+static const php_ucache_safe_direct_handlers spl_fixedarray_ucache_handlers = {
+	.copy = spl_fixedarray_object_copy_ucache_state,
+	.state_serialize = spl_fixedarray_object_serialize_ucache_state,
+	.state_unserialize = spl_fixedarray_object_unserialize_ucache_state,
+};
+
 PHP_METHOD(SplFixedArray, count)
 {
 	zval *object = ZEND_THIS;
@@ -973,6 +1064,8 @@ PHP_MINIT_FUNCTION(spl_fixedarray)
 	spl_handler_SplFixedArray.get_properties_for = spl_fixedarray_object_get_properties_for;
 	spl_handler_SplFixedArray.get_gc          = spl_fixedarray_object_get_gc;
 	spl_handler_SplFixedArray.free_obj        = spl_fixedarray_object_free_storage;
+
+	php_ucache_safe_direct_register_class(spl_ce_SplFixedArray, &spl_fixedarray_ucache_handlers);
 
 	return SUCCESS;
 }

@@ -17,6 +17,7 @@
 #endif
 
 #include "php.h"
+#include "ext/user_cache/php_user_cache.h" /* For user_cache safe direct path */
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 #include "zend_hash.h"
@@ -1045,14 +1046,11 @@ error:
 
 } /* }}} */
 
-/* {{{ */
-PHP_METHOD(SplDoublyLinkedList, __serialize)
+static void spl_dllist_object_serialize_state(zval *object, zval *return_value, bool with_members)
 {
-	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
+	spl_dllist_object *intern = Z_SPLDLLIST_P(object);
 	spl_ptr_llist_element *current = intern->llist->head;
 	zval tmp;
-
-	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 
@@ -1070,9 +1068,22 @@ PHP_METHOD(SplDoublyLinkedList, __serialize)
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
 
 	/* members */
-	ZVAL_ARR(&tmp, zend_proptable_to_symtable(
-		zend_std_get_properties(&intern->std), /* always_duplicate */ 1));
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
+	if (with_members) {
+		ZVAL_ARR(&tmp, zend_proptable_to_symtable(
+			zend_std_get_properties(&intern->std),
+			/* always_duplicate */ 1)
+		);
+
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
+	}
+}
+
+/* {{{ */
+PHP_METHOD(SplDoublyLinkedList, __serialize)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	spl_dllist_object_serialize_state(ZEND_THIS, return_value, /* with_members */ true);
 } /* }}} */
 
 /* {{{ */
@@ -1089,10 +1100,13 @@ PHP_METHOD(SplDoublyLinkedList, __unserialize) {
 	storage_zv = zend_hash_index_find(data, 1);
 	members_zv = zend_hash_index_find(data, 2);
 	if (!flags_zv || !storage_zv || !members_zv ||
-			Z_TYPE_P(flags_zv) != IS_LONG || Z_TYPE_P(storage_zv) != IS_ARRAY ||
-			Z_TYPE_P(members_zv) != IS_ARRAY) {
+		Z_TYPE_P(flags_zv) != IS_LONG || Z_TYPE_P(storage_zv) != IS_ARRAY ||
+		Z_TYPE_P(members_zv) != IS_ARRAY
+	) {
 		zend_throw_exception(spl_ce_UnexpectedValueException,
-			"Incomplete or ill-typed serialization data", 0);
+			"Incomplete or ill-typed serialization data", 0
+		);
+
 		RETURN_THROWS();
 	}
 
@@ -1104,6 +1118,92 @@ PHP_METHOD(SplDoublyLinkedList, __unserialize) {
 
 	object_properties_load(&intern->std, Z_ARRVAL_P(members_zv));
 } /* }}} */
+
+static bool spl_dllist_object_copy_ucache_state(
+		void *ctx,
+		zend_object *new_obj,
+		zend_object *old_obj,
+		php_ucache_safe_direct_clone_val_func_t clone_value)
+{
+	spl_dllist_object *old_intern, *new_intern;
+	spl_ptr_llist_element *current;
+	zval cloned_elem;
+
+	old_intern = spl_dllist_from_obj(old_obj);
+	new_intern = spl_dllist_from_obj(new_obj);
+	if (new_intern->llist->count != 0) {
+		return false;
+	}
+
+	new_intern->flags = old_intern->flags;
+	current = old_intern->llist->head;
+	while (current) {
+		ZVAL_UNDEF(&cloned_elem);
+
+		if (!clone_value(ctx, &cloned_elem, &current->data)) {
+			return false;
+		}
+
+		spl_ptr_llist_push(new_intern->llist, &cloned_elem);
+
+		zval_ptr_dtor(&cloned_elem);
+
+		current = current->next;
+	}
+
+	return !EG(exception);
+}
+
+static bool spl_dllist_object_serialize_ucache_state(zval *state, const zval *object)
+{
+	spl_dllist_object_serialize_state((zval *) object, state, /* with_members */ false);
+
+	return true;
+}
+
+static bool spl_dllist_object_unserialize_ucache_state(zval *object, zval *state)
+{
+	spl_dllist_object *intern = Z_SPLDLLIST_P(object);
+	zend_long flags;
+	zval *flags_zv, *storage_zv, *elem;
+
+	if (Z_TYPE_P(state) != IS_ARRAY) {
+		return false;
+	}
+
+	flags_zv = zend_hash_index_find(Z_ARRVAL_P(state), 0);
+	storage_zv = zend_hash_index_find(Z_ARRVAL_P(state), 1);
+	if (!flags_zv ||
+		!storage_zv ||
+		Z_TYPE_P(flags_zv) != IS_LONG ||
+		Z_TYPE_P(storage_zv) != IS_ARRAY
+	) {
+		return false;
+	}
+
+	flags = Z_LVAL_P(flags_zv);
+	if ((flags & ~(SPL_DLLIST_IT_MASK | SPL_DLLIST_IT_FIX)) != 0) {
+		return false;
+	}
+
+	if (intern->llist->count != 0) {
+		return false;
+	}
+
+	intern->flags = (int) flags;
+
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(storage_zv), elem) {
+		spl_ptr_llist_push(intern->llist, elem);
+	} ZEND_HASH_FOREACH_END();
+
+	return !EG(exception);
+}
+
+static const php_ucache_safe_direct_handlers spl_dllist_ucache_handlers = {
+	.copy = spl_dllist_object_copy_ucache_state,
+	.state_serialize = spl_dllist_object_serialize_ucache_state,
+	.state_unserialize = spl_dllist_object_unserialize_ucache_state,
+};
 
 /* {{{ Inserts a new entry before the specified $index consisting of $newval. */
 PHP_METHOD(SplDoublyLinkedList, add)
@@ -1222,6 +1322,8 @@ PHP_MINIT_FUNCTION(spl_dllist) /* {{{ */
 	spl_ce_SplStack = register_class_SplStack(spl_ce_SplDoublyLinkedList);
 	spl_ce_SplStack->create_object = spl_dllist_object_new;
 	spl_ce_SplStack->get_iterator = spl_dllist_get_iterator;
+
+	php_ucache_safe_direct_register_class(spl_ce_SplDoublyLinkedList, &spl_dllist_ucache_handlers);
 
 	return SUCCESS;
 }
