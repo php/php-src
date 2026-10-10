@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Alexander Borisov <lex.borisov@gmail.com>
 Date: Mon, 7 Sep 2026 22:11:39 +0300
-Subject: [PATCH 18/24] Unicode: fixed uninitialized memory in IDNA buffer
+Subject: [PATCH 18/26] Unicode: fixed uninitialized memory in IDNA buffer
  growth.
 
 When an IDNA buffer outgrew the stack allocation, the move to the heap

@@ -36,6 +36,10 @@ PHP                                                                        NEWS
     after a dot segment in a path, replacement file drive paths, the output
     encoding used for percent-encoding, the URLSearchParams tail pointer and
     fragment serialization without a query. (alexandre-daubois)
+  . Reduced the initial size of the tokenizer pools and of the memory pool
+    caches, saving about 900KB per HTML parse. (Nicolas Grekas)
+  . Fixed lexbor_array_obj_t allocating 8 times the memory it uses.
+    (Nicolas Grekas)
 
 - MBString:
   . Fixed bug GH-23106 (mb_strpos() reads past the end of a haystack ending in

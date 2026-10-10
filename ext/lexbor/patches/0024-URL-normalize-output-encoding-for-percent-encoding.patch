@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Alexander Borisov <lex.borisov@gmail.com>
 Date: Thu, 24 Sep 2026 15:05:51 +0300
-Subject: [PATCH 24/24] URL: normalize output encoding for percent-encoding.
+Subject: [PATCH 24/26] URL: normalize output encoding for percent-encoding.
 
 ---
  source/lexbor/url/url.c | 34 +++++++++++++++++++++++++---------
