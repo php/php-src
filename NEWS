@@ -21,6 +21,8 @@ PHP                                                                        NEWS
   . Fix escape analysis for objects implementing ArrayAccess. (ndossche, Arnaud)
   . Fix UAF for resolved callable zval. (EdmondDantes)
   . Fix memory leak for nested HTTP calls. (EdmondDantes)
+  . Fixed pthread attribute leak in zend_call_stack_get_netbsd_pthread().
+    (David Carlier)
 
 - DOM:
   . Fixed bug GH-23352 (UAF reading an attribute value node retained across
