@@ -45,6 +45,7 @@
 /ext/pgsql @devnexen
 /ext/phar @LamentXU123
 /ext/random @TimWolla @zeriyoshi
+/ext/readline @LamentXU123
 /ext/reflection @DanielEScherzer
 /ext/session @Girgias @jorgsowa
 /ext/simplexml @devnexen
