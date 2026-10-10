@@ -303,6 +303,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	BASIC_MINIT_SUBMODULE(standard_filters)
 	BASIC_MINIT_SUBMODULE(user_filters)
 	BASIC_MINIT_SUBMODULE(poll)
+	BASIC_MINIT_SUBMODULE(terminal)
 	BASIC_MINIT_SUBMODULE(password)
 	BASIC_MINIT_SUBMODULE(image)
 
@@ -380,6 +381,7 @@ PHP_MSHUTDOWN_FUNCTION(basic) /* {{{ */
 	BASIC_MSHUTDOWN_SUBMODULE(crypt)
 	BASIC_MSHUTDOWN_SUBMODULE(password)
 	BASIC_MSHUTDOWN_SUBMODULE(image)
+	BASIC_MSHUTDOWN_SUBMODULE(terminal)
 
 	return SUCCESS;
 }
@@ -411,6 +413,7 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 	PHP_RINIT(filestat)(INIT_FUNC_ARGS_PASSTHRU);
 	BASIC_RINIT_SUBMODULE(dir)
 	BASIC_RINIT_SUBMODULE(url_scanner_ex)
+	BASIC_RINIT_SUBMODULE(terminal)
 
 	/* Initialize memory for last http headers */
 	ZVAL_UNDEF(&BG(last_http_headers));
@@ -477,6 +480,7 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 
 	BASIC_RSHUTDOWN_SUBMODULE(user_filters)
 	BASIC_RSHUTDOWN_SUBMODULE(browscap)
+	BASIC_RSHUTDOWN_SUBMODULE(terminal)
 
 	/* Free last http headers */
 	zval_ptr_dtor(&BG(last_http_headers));
