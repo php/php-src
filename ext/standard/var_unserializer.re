@@ -1384,7 +1384,9 @@ object ":" uiv ":" ["]	{
 		goto fail;
 	}
 
+	BG(serialize_lock)++;
 	zend_class_entry *ce = zend_lookup_class(enum_name);
+	BG(serialize_lock)--;
 	if (!ce) {
 		php_error_docref(NULL, E_WARNING, "Class '%s' not found", ZSTR_VAL(enum_name));
 		goto fail;
@@ -1413,7 +1415,10 @@ object ":" uiv ":" ["]	{
 
 	zval *value = &c->value;
 	if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
-		if (zval_update_constant_ex(value, c->ce) == FAILURE) {
+		BG(serialize_lock)++;
+		zend_result result = zval_update_constant_ex(value, c->ce);
+		BG(serialize_lock)--;
+		if (result == FAILURE) {
 			return 0;
 		}
 	}

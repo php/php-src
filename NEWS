@@ -291,6 +291,8 @@ PHP                                                                        NEWS
     (Nicolas Grekas)
   . Fixed convert.quoted-printable-decode decoding lowercase hex digits to
     the wrong byte. (Ilia Alshanetsky)
+  . Fixed unserialize() of enums sharing its state with the unserialize()
+    calls made by autoloaders. (nicolas-grekas)
 
 - Tidy:
   . Fixed a use-after-free when a tidyNode is used after its document is
