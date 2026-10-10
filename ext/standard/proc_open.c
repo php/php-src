@@ -492,8 +492,6 @@ SECURITY_ATTRIBUTES php_proc_open_security = {
 	.bInheritHandle = TRUE
 };
 
-# define pipe(pair)		(CreatePipe(&pair[0], &pair[1], &php_proc_open_security, 0) ? 0 : -1)
-
 # define COMSPEC_NT	"cmd.exe"
 
 static inline HANDLE dup_handle(HANDLE src, BOOL inherit, BOOL closeorig)
@@ -533,9 +531,7 @@ typedef struct _descriptorspec_item {
 	php_file_descriptor_t parentend; /* FD # opened for use in parent
 	                                  * (for pipes only; will be 0 otherwise) */
 	int mode_flags;                  /* mode for opening FDs: r/o, r/w, binary (on Win32), etc */
-#ifdef PHP_WIN32
-	bool overlapped;                 /* a pipe whose parent end is an overlapped named pipe (php_io_pipe_create) */
-#endif
+	bool overlapped;                 /* a pipe whose parent end a provider performs ops on (php_io_pipe_create) */
 } descriptorspec_item;
 
 static zend_string *get_valid_arg_string(zval *zv, uint32_t elem_num) {
@@ -916,10 +912,9 @@ static php_file_descriptor_t make_descriptor_cloexec(php_file_descriptor_t fd)
 #endif
 }
 
-#ifdef PHP_WIN32
-/* PHP_STREAM_OPTION_OVERLAPPED_PIPE on every stream of the spec, up to the first that fails (only
- * RELEASE can); one closed meanwhile is skipped */
-static zend_result set_passed_streams_pipe_option(const HashTable *descriptorspec, int value)
+/* The streams of the spec, which the child gets: released before it is made, up to the first that
+ * fails, and marked handed out after; one closed meanwhile is skipped */
+static zend_result passed_streams_release(const HashTable *descriptorspec, bool handed_out)
 {
 	zval *descitem;
 
@@ -930,29 +925,25 @@ static zend_result set_passed_streams_pipe_option(const HashTable *descriptorspe
 		}
 
 		php_stream *const passed = (php_stream *) zend_fetch_resource(Z_RES_P(descitem), NULL, php_file_le_stream());
-		if (passed && php_stream_set_option(passed, PHP_STREAM_OPTION_OVERLAPPED_PIPE, value, NULL)
-				== PHP_STREAM_OPTION_RETURN_ERR) {
+		if (!passed) {
+			continue;
+		}
+		if (handed_out) {
+			php_io_pipe_stream_handed_out(passed);
+		} else if (php_io_pipe_stream_release(passed) == FAILURE) {
 			return FAILURE;
 		}
 	} ZEND_HASH_FOREACH_END();
 
 	return SUCCESS;
 }
-#endif
 
 static zend_result set_proc_descriptor_to_pipe(descriptorspec_item *desc, zend_string *zmode)
 {
 	php_file_descriptor_t newpipe[2];
 	const bool parent_reads = zend_string_starts_with_literal(zmode, "w");
 
-#ifdef PHP_WIN32
-	desc->overlapped = php_io_pipe_wanted();
-	const bool failed = desc->overlapped ? php_io_pipe_create(newpipe, parent_reads) == FAILURE
-			: pipe(newpipe) != 0;
-#else
-	const bool failed = pipe(newpipe) != 0;
-#endif
-	if (failed) {
+	if (php_io_pipe_create(newpipe, parent_reads, &desc->overlapped) == FAILURE) {
 		php_error_docref(NULL, E_WARNING, "Unable to create pipe %s", strerror(errno));
 		return FAILURE;
 	}
@@ -972,8 +963,7 @@ static zend_result set_proc_descriptor_to_pipe(descriptorspec_item *desc, zend_s
 	desc->parentend = make_descriptor_cloexec(desc->parentend);
 
 #ifdef PHP_WIN32
-	/* An overlapped pipe's reads and writes bypass the CRT's text mode */
-	if ((ZSTR_LEN(zmode) >= 2 && ZSTR_VAL(zmode)[1] == 'b') || desc->overlapped)
+	if (ZSTR_LEN(zmode) >= 2 && ZSTR_VAL(zmode)[1] == 'b')
 		desc->mode_flags |= O_BINARY;
 #endif
 
@@ -1380,6 +1370,12 @@ PHP_FUNCTION(proc_open)
 		ndesc++;
 	} ZEND_HASH_FOREACH_END();
 
+	/* After the descriptor loop, which may run PHP code: another coroutine's op there would tie a
+	 * stream's descriptor to its queue again */
+	if (passed_streams_release(descriptorspec, false) == FAILURE) {
+		goto exit_fail;
+	}
+
 #ifdef PHP_WIN32
 	if (cwd == NULL) {
 		char *getcwd_result = VCWD_GETCWD(cur_cwd, MAXPATHLEN);
@@ -1392,12 +1388,6 @@ PHP_FUNCTION(proc_open)
 	cwdw = php_win32_cp_any_to_w(cwd);
 	if (!cwdw) {
 		php_error_docref(NULL, E_WARNING, "CWD conversion failed");
-		goto exit_fail;
-	}
-
-	/* Not in the descriptor loop above, which runs PHP code: another coroutine's read there would
-	 * tie the pipe to a completion port again */
-	if (set_passed_streams_pipe_option(descriptorspec, PHP_STREAM_OVERLAPPED_PIPE_RELEASE) == FAILURE) {
 		goto exit_fail;
 	}
 
@@ -1457,12 +1447,6 @@ PHP_FUNCTION(proc_open)
 	childHandle = pi.hProcess;
 	child       = pi.dwProcessId;
 	CloseHandle(pi.hThread);
-
-	/* The child holds the descriptors of the streams passed to it: the parent's own calls on an
-	 * overlapped pipe among them stop using the provider for good, since a child may bind the pipe
-	 * to its own port with FILE_SKIP_COMPLETION_PORT_ON_SUCCESS, as libuv does, and a Ring op that
-	 * completes at once would then never post. */
-	set_passed_streams_pipe_option(descriptorspec, PHP_STREAM_OVERLAPPED_PIPE_HAND_OUT);
 #elif defined(USE_POSIX_SPAWN)
 	posix_spawn_file_actions_t factions;
 	int r;
@@ -1553,6 +1537,9 @@ PHP_FUNCTION(proc_open)
 
 	/* We forked/spawned and this is the parent */
 
+	/* The child holds the descriptors of the streams passed to it */
+	passed_streams_release(descriptorspec, true);
+
 	pipes = zend_try_array_init(pipes);
 	if (!pipes) {
 		goto exit_fail;
@@ -1601,14 +1588,10 @@ PHP_FUNCTION(proc_open)
 					break;
 			}
 
+			stream = php_io_pipe_stream(descriptors[i].parentend, descriptors[i].mode_flags, mode_string,
+					descriptors[i].overlapped);
 #ifdef PHP_WIN32
-			const int parent_fd = _open_osfhandle((intptr_t)descriptors[i].parentend, descriptors[i].mode_flags);
-			stream = descriptors[i].overlapped
-					? php_stream_fopen_from_overlapped_pipe(parent_fd, mode_string)
-					: php_stream_fopen_from_fd(parent_fd, mode_string, NULL);
 			php_stream_set_option(stream, PHP_STREAM_OPTION_PIPE_BLOCKING, blocking_pipes, NULL);
-#else
-			stream = php_stream_fopen_from_fd(descriptors[i].parentend, mode_string, NULL);
 #endif
 		} else if (descriptors[i].type == DESCRIPTOR_TYPE_SOCKET) {
 			stream = php_stream_sock_open_from_socket((php_socket_t) descriptors[i].parentend, NULL);

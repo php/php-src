@@ -55,4 +55,26 @@ PHPAPI php_io *php_io_get(void);
 /* Copies up to maxlen bytes from src to dest; *copied is set even on FAILURE */
 PHPAPI zend_result php_io_copy(php_io_fd *src, php_io_fd *dest, size_t maxlen, size_t *copied);
 
+/* A pipe between the process and a child, as proc_open() makes it */
+#ifdef PHP_WIN32
+typedef HANDLE php_io_pipe_handle;
+#else
+typedef int php_io_pipe_handle;
+#endif
+/* pair as pipe() fills it, the read end then the write end; parent_reads says which is the
+ * process's. *overlapped: Windows made the process's end an overlapped named pipe, whose ops a
+ * provider performs (one is installed, or PHP_IO_OVERLAPPED_PIPES=1 is set). errno on failure. */
+PHPAPI zend_result php_io_pipe_create(php_io_pipe_handle pair[2], bool parent_reads, bool *overlapped);
+/* The stream over the process's end; mode_flags as open() takes them (O_RDONLY or O_WRONLY, and
+ * O_BINARY on Windows) */
+PHPAPI php_stream *php_io_pipe_stream(php_io_pipe_handle end, int mode_flags, const char *mode, bool overlapped);
+/* A stream whose descriptor a child is about to get: the queues let go of it, so the child can
+ * tie it to its own completion port (Windows; nothing elsewhere). FAILURE with an exception thrown
+ * when a call of this process has an op on the stream. No PHP code may run between this and the
+ * child's creation. */
+PHPAPI zend_result php_io_pipe_stream_release(php_stream *stream);
+/* ...and once the child has it: the process's own calls on an overlapped pipe stop using a
+ * provider, whose completion the child may have turned off for the file object */
+PHPAPI void php_io_pipe_stream_handed_out(php_stream *stream);
+
 #endif /* PHP_IO_H */

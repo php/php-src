@@ -271,11 +271,8 @@ PHPAPI bool php_io_interrupt_pending(void);
 #ifdef PHP_WIN32
 /* proc_open() makes an overlapped named pipe, whose ops a provider may perform (PHP_IO_OP_F_PIPE),
  * when a provider is installed at the time, the rule files follow, or with PHP_IO_OVERLAPPED_PIPES=1
- * in the environment; an anonymous pipe otherwise */
+ * in the environment; an anonymous pipe otherwise (php_io_pipe_create() in php_io.h) */
 PHPAPI bool php_io_pipe_wanted(void);
-/* pair as pipe() fills it, the read end then the write end; the parent's end is the overlapped one,
- * the child's synchronous and inheritable. errno on failure. */
-PHPAPI zend_result php_io_pipe_create(HANDLE pair[2], bool parent_reads);
 /* An overlapped pipe's buffer each way, and the most one write through a provider moves: a
  * cancelled write leaves the reader an unknown part of it */
 #define PHP_IO_PIPE_BUFFER_SIZE (64 * 1024)
