@@ -71,21 +71,21 @@ There are some functions that do not require the use of either the FCI or the FC
 
    -  -  .. code:: c
 
-            zend_is_callable(
-                zval *callable,
-                uint32_t check_flags,
-                zend_string **callable_name
+            bool zend_is_callable(
+                const zval *callable,
+                zend_fcall_info_cache *fcc,
+                char **error
             )
 
       -  Check if the ``callable`` zval is a PHP callable. Returns true if it is, false otherwise.
-         ``check_flags`` is a bit mask of ``IS_CALLABLE_CHECK_SYNTAX_ONLY`` and
-         ``IS_CALLABLE_SUPPRESS_DEPRECATIONS``, generally should be left to 0. ``callable_name`` is
-         an optional out parameter, it will be set to the string representation of the ``callable``
-         zval, set even in case of failure.
+         ``fcc`` is an out parameter constructing the FCC struct, see below for details. ``error``
+         is an optional out parameter holding the error message if ``callable`` is not a PHP
+         callable. Note: the signature used to be ``bool zend_is_callable(zval *callable, uint32_t
+         check_flags, zend_string **callable_name)`` prior to PHP 8.7.
 
    -  -  .. code:: c
 
-            zend_is_callable_ex(
+            bool zend_is_callable_ex(
                 zval *callable,
                 zend_object *object,
                 uint32_t check_flags,
@@ -96,9 +96,10 @@ There are some functions that do not require the use of either the FCI or the FC
 
       -  Same as ``zend_is_callable()`` with additional arguments. ``object`` if ``callable`` is a
          string, this ``zend_object*`` represents the class instance to check if such a method
-         exists. ``fcc`` is an out parameter constructing the FCC struct, see below for details.
-         ``error`` is an optional out parameter holding the error message if ``callable`` is not a
-         PHP callable.
+         exists. ``check_flags`` is a bit mask of ``IS_CALLABLE_CHECK_SYNTAX_ONLY`` and
+         ``IS_CALLABLE_SUPPRESS_DEPRECATIONS``, generally should be left to 0. ``callable_name`` is
+         an optional out parameter, it will be set to the string representation of the ``callable``
+         zval, set even in case of failure.
 
    -  -  .. code:: c
 
@@ -189,10 +190,10 @@ There are some functions that do not require the use of either the FCI or the FC
                 zval *params
             )
 
-      -  Returns ``FAILURE`` if the ``method_name`` does not exists on the object,
-         ``SUCCESS`` otherwise.
-         The retval *will* be UNDEF if the return value is ``FAILURE```, as such the
-         retval can be unconditionally destroyed. However it may also be UNDEF in an exception was thrown.
+      -  Returns ``FAILURE`` if the ``method_name`` does not exists on the object, ``SUCCESS``
+         otherwise. The retval *will* be UNDEF if the return value is ``FAILURE```, as such the
+         retval can be unconditionally destroyed. However it may also be UNDEF in an exception was
+         thrown.
 
    -  -  .. code:: c
 
@@ -205,11 +206,11 @@ There are some functions that do not require the use of either the FCI or the FC
                 params
             )
 
-      -  Deprecated API. Checks that ``function_name`` (and optionally ``object``) is a valid PHP callable via
-         ``zend_is_callable_ex()`` and calls it with the given parameters and return value.
-         ``function_table`` is ignored and should always be ``NULL``. It is recommended to instead
-         use ``zend_is_callable_ex()`` to fetch an FCC and call it with ``zend_call_known_fcc()``,
-         see below for more details.
+      -  Deprecated API. Checks that ``function_name`` (and optionally ``object``) is a valid PHP
+         callable via ``zend_is_callable_ex()`` and calls it with the given parameters and return
+         value. ``function_table`` is ignored and should always be ``NULL``. It is recommended to
+         instead use ``zend_is_callable()`` to fetch an FCC and call it with
+         ``zend_call_known_fcc()``, see below for more details.
 
    -  -  .. code:: c
 
@@ -266,16 +267,17 @@ There are some functions that do not require the use of either the FCI or the FC
    didn't exist.
 
 FCCs are the goto structure to handle and store PHP callables as most of the time they don't need
-any reference counting. The one exception is the FCC represents a trampoline. A trampoline is a call
-to a non existing class method handled by the ``__call()`` or ``__callStatic()`` magic methods. When
-a trampoline is created it allocates a ``zend_function`` struct with the op array copied, and freed
-when called. However the ``f`` ZPP argument specifier will *free* the trampoline and assign ``NULL``
-to ``function_handler``, making the FCC uninitialized. The trampoline can be manually fetched by
-using ``zend_is_callable_ex()`` or to prevent ZPP from freeing it one can use the ``F`` argument
-specifier`. However, in that case careful consideration need to be done to free the potential
-trampoline in any failure path, including ZPP failure.
+any reference counting. The one exception is when the FCC represents a trampoline. A trampoline is a
+heap-allocated `zend_function*`, the most common trampolines are calls to a non existing class
+method handled by the ``__call()`` or ``__callStatic()`` magic methods. A trampoline releases the
+``zend_function*`` when it is called, as the op array will be consumed. However the ``f`` ZPP
+argument specifier will *free* the trampoline and assign ``NULL`` to ``function_handler``, making
+the FCC uninitialized. The trampoline can be manually fetched by using ``zend_is_callable()`` or to
+prevent ZPP from freeing it one can use the ``F`` argument specifier`. However, in that case careful
+consideration need to be done to free the potential trampoline in any failure path, including ZPP
+failure.
 
-The *only* case where an FCC will be uninitialized is if the function is a trampoline, i.e. when the
+The *only* case where an FCC may be uninitialized is if the function is a trampoline, i.e. when the
 method of a class does not exist but is handled by the magic methods
 ``__call()``/``__callStatic()``. This is because a trampoline is freed by ZPP as it is a newly
 allocated ``zend_function`` struct with the op array copied, and is freed when called. To retrieve
