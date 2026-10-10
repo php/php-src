@@ -62,6 +62,10 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 3. Module changes
 ========================
 
+- Date:
+  . Added php_date_time_duration_create() to create Time\Duration objects
+    without going through the userland API.
+
 - MySQLi:
   . Removed the reverse API. The mysqlnd_reverse_api.h header, the
     MYSQLND_REVERSE_API struct and the functions zval_to_mysqlnd(),

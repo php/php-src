@@ -2318,7 +2318,9 @@ ZEND_API int ZEND_FASTCALL numeric_compare_function(const zval *op1, const zval 
 
 ZEND_API zend_result ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
-	ZVAL_LONG(result, zend_compare(op1, op2));
+	int rv = zend_compare(op1, op2);
+	ZEND_ASSERT(-1 <= rv && rv <= 1);
+	ZVAL_LONG(result, rv);
 	return SUCCESS;
 }
 /* }}} */

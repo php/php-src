@@ -16,27 +16,12 @@ if (!($link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)))
 if (false === strpos($link->host_info, 'TCP/IP'))
     die(sprintf("skip SSL only supported on TCP/IP"));
 
-$row = NULL;
-if ($res = $link->query('SHOW VARIABLES LIKE "have_ssl"')) {
-    $row = $res->fetch_row();
-} else {
-    if ($link->errno == 1064 && ($res = $link->query("SHOW VARIABLES"))) {
-        while ($row = $res->fetch_row())
-            if ($row[0] == 'have_ssl')
-                break;
-    } else {
-        die(sprintf("skip Failed to test for MySQL SSL support, [%d] %s", $link->errno, $link->error));
-    }
+$res = $link->query('SHOW VARIABLES LIKE "have_ssl"');
+$row = $res ? $res->fetch_row() : null;
+// MySQL 8.4+ no longer has have_ssl so the check is only relevant for older versions and MariaDB
+if ($row && $row[1] !== 'YES') {
+    die('skip Server has no SSL support');
 }
-
-
-if (empty($row))
-    die(sprintf("skip Failed to test for MySQL SSL support, [%d] %s", $link->errno, $link->error));
-
-if (($row[1] == 'NO') || ($row[1] == 'DISABLED'))
-    die(sprintf("skip MySQL has no SSL support, [%d] %s", $link->errno, $link->error));
-
-$link->close();
 ?>
 --FILE--
 <?php

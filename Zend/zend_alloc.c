@@ -1786,8 +1786,9 @@ static zend_always_inline void *zend_mm_realloc_heap(zend_mm_heap *heap, void *p
 
 				/* Check if requested size fits into current bin */
 				if (size <= old_size) {
-					/* Check if truncation is necessary */
-					if (old_bin_num > 0 && size < bin_data_size[old_bin_num - 1]) {
+					/* Check if truncation is necessary. A size that fits the
+					 * bin below moves there, as efree_size() maps it to that bin. */
+					if (old_bin_num > 0 && size <= bin_data_size[old_bin_num - 1]) {
 						/* truncation */
 						ret = zend_mm_alloc_small(heap, ZEND_MM_SMALL_SIZE_TO_BIN(size) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 						copy_size = use_copy_size ? MIN(size, copy_size) : size;

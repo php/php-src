@@ -21,7 +21,7 @@
 #include "io_poll.h"
 #include "io_poll_arginfo.h"
 #include "io_poll_decl.h"
-#include "ext/date/php_time.h"
+#include "ext/date/time_duration.h"
 #include "zend_interfaces.h"
 
 #include "php_io.h"

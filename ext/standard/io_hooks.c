@@ -21,7 +21,7 @@
 #include "ext/standard/file.h"
 #include "ext/standard/io_poll.h"
 #include "ext/standard/io_hooks.h"
-#include "ext/date/php_time.h"
+#include "ext/date/time_duration.h"
 #include "io_hooks_arginfo.h"
 #include <signal.h>
 #include "io_hooks_decl.h"

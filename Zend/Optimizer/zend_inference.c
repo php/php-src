@@ -1536,6 +1536,10 @@ ZEND_API bool zend_inference_propagate_range(const zend_op_array *op_array, cons
 			tmp->min = 0;
 			tmp->max = ZEND_LONG_MAX;
 			return 1;
+		case ZEND_SPACESHIP:
+			tmp->min = -1;
+			tmp->max = 1;
+			return 1;
 		case ZEND_COUNT:
 			/* count() on Countable objects may return negative numbers */
 			tmp->min = ZEND_LONG_MIN;
@@ -2806,11 +2810,11 @@ static zend_always_inline zend_result _zend_update_type_info(
 						 * null will be returned. */
 						tmp |= MAY_BE_NULL;
 					}
-					if (t2 & (MAY_BE_ARRAY | MAY_BE_OBJECT)) {
+					if (OP2_INFO() & (MAY_BE_ARRAY | MAY_BE_OBJECT)) {
 						/* Arrays and objects cannot be used as keys. */
 						tmp |= MAY_BE_NULL;
 					}
-					if (t1 & (MAY_BE_ANY - (MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_ARRAY))) {
+					if (OP1_INFO() & (MAY_BE_ANY - (MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_ARRAY))) {
 						/* null and false are implicitly converted to array, anything else
 						 * results in a null return value. */
 						tmp |= MAY_BE_NULL;
@@ -3451,7 +3455,11 @@ static zend_always_inline zend_result _zend_update_type_info(
 		case ZEND_ADD_ARRAY_UNPACK:
 			tmp = ssa_var_info[ssa_op->result_use].type;
 			ZEND_ASSERT(tmp & MAY_BE_ARRAY);
-			tmp |= t1 & (MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF);
+			if (t1 & MAY_BE_ARRAY_KEY_LONG) {
+				/* Integer keys are appended without copying the hash/packed layout of the source array. */
+				tmp |= MAY_BE_HASH_ONLY(tmp) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
+			}
+			tmp |= t1 & (MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF);
 			if (t1 & MAY_BE_OBJECT) {
 				tmp |= MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY;
 			}

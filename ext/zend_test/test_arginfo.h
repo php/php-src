@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: 2b25ec2985ed2c14165625a0603ad2a122a255c7
+ * Stub hash: 0d233e99eed49cad1bb8e52c28d14ba2a6054b03
  * Has decl header: yes */
 
 #include "zend_attributes.h"
@@ -58,6 +58,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_leak_bytes, 0, 0, IS_VOID, 
 ZEND_END_ARG_INFO()
 
 #define arginfo_zend_delref arginfo_zend_leak_variable
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_erealloc_block_size, 0, 2, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, old_size, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, new_size, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_bool, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, param, _IS_BOOL, 0)
@@ -441,6 +446,7 @@ static ZEND_FUNCTION(zend_terminate_string);
 static ZEND_FUNCTION(zend_leak_variable);
 static ZEND_FUNCTION(zend_leak_bytes);
 static ZEND_FUNCTION(zend_delref);
+static ZEND_FUNCTION(zend_test_erealloc_block_size);
 static ZEND_FUNCTION(zend_bool);
 static ZEND_FUNCTION(zend_bool_or_null);
 static ZEND_FUNCTION(zend_bool_slow_zpp);
@@ -618,6 +624,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_leak_variable, arginfo_zend_leak_variable)
 	ZEND_FE(zend_leak_bytes, arginfo_zend_leak_bytes)
 	ZEND_FE(zend_delref, arginfo_zend_delref)
+	ZEND_FE(zend_test_erealloc_block_size, arginfo_zend_test_erealloc_block_size)
 	ZEND_FE(zend_bool, arginfo_zend_bool)
 	ZEND_FE(zend_bool_or_null, arginfo_zend_bool_or_null)
 	ZEND_FE(zend_bool_slow_zpp, arginfo_zend_bool_slow_zpp)

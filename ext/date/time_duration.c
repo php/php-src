@@ -18,6 +18,7 @@
 
 #include "php_date.h"
 #include "php_time.h"
+#include "time_duration.h"
 
 #define NANOS_IN_SEC 1000000000
 #define NANOS_IN_MICRO 1000
@@ -113,7 +114,7 @@ ZEND_ATTRIBUTE_NODISCARD static inline zend_result sync_properties(php_date_time
 	return SUCCESS;
 }
 
-ZEND_ATTRIBUTE_NODISCARD static zend_result create_duration(zval *target, zend_ulong seconds, zend_ulong nanoseconds)
+ZEND_ATTRIBUTE_NODISCARD PHPAPI zend_result php_date_time_duration_create(zval *target, zend_ulong seconds, zend_ulong nanoseconds)
 {
 	ZEND_ASSERT(nanoseconds < NANOS_IN_SEC);
 
@@ -217,7 +218,7 @@ PHP_METHOD(Time_Duration, fromSeconds)
 		RETURN_THROWS();
 	}
 
-	if (create_duration(return_value, seconds, nanoseconds) == FAILURE) {
+	if (php_date_time_duration_create(return_value, seconds, nanoseconds) == FAILURE) {
 		RETURN_THROWS();
 	}
 }
@@ -233,7 +234,7 @@ PHP_METHOD(Time_Duration, fromNanoseconds)
 	zend_ulong seconds = nanoseconds / NANOS_IN_SEC;
 	nanoseconds %= NANOS_IN_SEC;
 
-	if (create_duration(return_value, seconds, nanoseconds) == FAILURE) {
+	if (php_date_time_duration_create(return_value, seconds, nanoseconds) == FAILURE) {
 		RETURN_THROWS();
 	}
 }
@@ -249,7 +250,7 @@ PHP_METHOD(Time_Duration, fromMicroseconds)
 	zend_ulong seconds = microseconds / MICROS_IN_SEC;
 	zend_ulong nanoseconds = (microseconds % MICROS_IN_SEC) * NANOS_IN_MICRO;
 
-	if (create_duration(return_value, seconds, nanoseconds) == FAILURE) {
+	if (php_date_time_duration_create(return_value, seconds, nanoseconds) == FAILURE) {
 		RETURN_THROWS();
 	}
 }
@@ -265,7 +266,7 @@ PHP_METHOD(Time_Duration, fromMilliseconds)
 	zend_ulong seconds = milliseconds / MILLIS_IN_SEC;
 	zend_ulong nanoseconds = (milliseconds % MILLIS_IN_SEC) * NANOS_IN_MILLI;
 
-	if (create_duration(return_value, seconds, nanoseconds) == FAILURE) {
+	if (php_date_time_duration_create(return_value, seconds, nanoseconds) == FAILURE) {
 		RETURN_THROWS();
 	}
 }
@@ -283,7 +284,7 @@ PHP_METHOD(Time_Duration, fromMinutes)
 		RETURN_THROWS();
 	}
 
-	if (create_duration(return_value, minutes * 60, /* nanoseconds */ 0) == FAILURE) {
+	if (php_date_time_duration_create(return_value, minutes * 60, /* nanoseconds */ 0) == FAILURE) {
 		RETURN_THROWS();
 	}
 }
@@ -301,7 +302,7 @@ PHP_METHOD(Time_Duration, fromHours)
 		RETURN_THROWS();
 	}
 
-	if (create_duration(return_value, hours * 3600, /* nanoseconds */ 0) == FAILURE) {
+	if (php_date_time_duration_create(return_value, hours * 3600, /* nanoseconds */ 0) == FAILURE) {
 		RETURN_THROWS();
 	}
 }
@@ -359,7 +360,7 @@ PHP_METHOD(Time_Duration, absolute)
 		RETURN_COPY(ZEND_THIS);
 	}
 
-	if (create_duration(return_value, original->duration.seconds, original->duration.nanoseconds) == FAILURE) {
+	if (php_date_time_duration_create(return_value, original->duration.seconds, original->duration.nanoseconds) == FAILURE) {
 		RETURN_THROWS();
 	}
 }

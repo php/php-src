@@ -412,7 +412,15 @@ static int cli_is_valid_code(char *code, size_t len, zend_string **prompt) /* {{
 }
 /* }}} */
 
-static char *cli_completion_generator_ht(const char *text, size_t textlen, int *state, HashTable *ht, void **pData) /* {{{ */
+typedef enum {
+	CLI_COMPLETION_VARIABLE,
+	CLI_COMPLETION_INI,
+	CLI_COMPLETION_FUNCTION,
+	CLI_COMPLETION_CONSTANT,
+	CLI_COMPLETION_CLASS,
+} cli_completion_type;
+
+static char *cli_completion_generator_ht(const char *text, size_t textlen, int *state, HashTable *ht, cli_completion_type type) /* {{{ */
 {
 	zend_string *name;
 	zend_ulong number;
@@ -421,14 +429,48 @@ static char *cli_completion_generator_ht(const char *text, size_t textlen, int *
 		zend_hash_internal_pointer_reset(ht);
 		(*state)++;
 	}
-	while(zend_hash_has_more_elements(ht) == SUCCESS) {
+	while (zend_hash_has_more_elements(ht) == SUCCESS) {
 		zend_hash_get_current_key(ht, &name, &number);
 		if (!textlen || !strncmp(ZSTR_VAL(name), text, textlen)) {
-			if (pData) {
-				*pData = zend_hash_get_current_data_ptr(ht);
+			char prefix = '\0';
+			char append_character = '\0';
+
+			switch (type) {
+				case CLI_COMPLETION_VARIABLE:
+					prefix = '$';
+					break;
+				case CLI_COMPLETION_INI:
+					prefix = '#';
+					append_character = '=';
+					break;
+				case CLI_COMPLETION_FUNCTION: {
+					zend_function *func = zend_hash_get_current_data_ptr(ht);
+					name = func->common.function_name;
+					append_character = '(';
+					break;
+				}
+				case CLI_COMPLETION_CLASS: {
+					zend_class_entry *ce = zend_hash_get_current_data_ptr(ht);
+					name = ce->name;
+					break;
+				}
+				case CLI_COMPLETION_CONSTANT:
+					break;
 			}
+
 			zend_hash_move_forward(ht);
-			return ZSTR_VAL(name);
+			/* The line editing library takes ownership of the candidate. */
+			size_t prefix_len = prefix ? 1 : 0;
+			char *retval = malloc(prefix_len + ZSTR_LEN(name) + 1);
+			if (!retval) {
+				return NULL;
+			}
+			if (prefix) {
+				retval[0] = prefix;
+			}
+			memcpy(retval + prefix_len, ZSTR_VAL(name), ZSTR_LEN(name) + 1);
+			rl_completion_append_character = append_character;
+			return retval;
 		}
 		if (zend_hash_move_forward(ht) == FAILURE) {
 			break;
@@ -436,71 +478,6 @@ static char *cli_completion_generator_ht(const char *text, size_t textlen, int *
 	}
 	(*state)++;
 	return NULL;
-} /* }}} */
-
-static char *cli_completion_generator_var(const char *text, size_t textlen, int *state) /* {{{ */
-{
-	char *retval, *tmp;
-	zend_array *symbol_table = &EG(symbol_table);
-
-	tmp = retval = cli_completion_generator_ht(text + 1, textlen - 1, state, symbol_table, NULL);
-	if (retval) {
-		retval = malloc(strlen(tmp) + 2);
-		retval[0] = '$';
-		strcpy(&retval[1], tmp);
-		rl_completion_append_character = '\0';
-	}
-	return retval;
-} /* }}} */
-
-static char *cli_completion_generator_ini(const char *text, size_t textlen, int *state) /* {{{ */
-{
-	char *retval, *tmp;
-
-	tmp = retval = cli_completion_generator_ht(text + 1, textlen - 1, state, EG(ini_directives), NULL);
-	if (retval) {
-		retval = malloc(strlen(tmp) + 2);
-		retval[0] = '#';
-		strcpy(&retval[1], tmp);
-		rl_completion_append_character = '=';
-	}
-	return retval;
-} /* }}} */
-
-static char *cli_completion_generator_func(const char *text, size_t textlen, int *state, HashTable *ht) /* {{{ */
-{
-	zend_function *func;
-	char *retval = cli_completion_generator_ht(text, textlen, state, ht, (void**)&func);
-	if (retval) {
-		rl_completion_append_character = '(';
-		retval = strdup(ZSTR_VAL(func->common.function_name));
-	}
-
-	return retval;
-} /* }}} */
-
-static char *cli_completion_generator_class(const char *text, size_t textlen, int *state) /* {{{ */
-{
-	zend_class_entry *ce;
-	char *retval = cli_completion_generator_ht(text, textlen, state, EG(class_table), (void**)&ce);
-	if (retval) {
-		rl_completion_append_character = '\0';
-		retval = strdup(ZSTR_VAL(ce->name));
-	}
-
-	return retval;
-} /* }}} */
-
-static char *cli_completion_generator_define(const char *text, size_t textlen, int *state, HashTable *ht) /* {{{ */
-{
-	zend_class_entry **pce;
-	char *retval = cli_completion_generator_ht(text, textlen, state, ht, (void**)&pce);
-	if (retval) {
-		rl_completion_append_character = '\0';
-		retval = strdup(retval);
-	}
-
-	return retval;
 } /* }}} */
 
 static int cli_completion_state;
@@ -523,9 +500,9 @@ TODO:
 		cli_completion_state = 0;
 	}
 	if (text[0] == '$') {
-		retval = cli_completion_generator_var(text, textlen, &cli_completion_state);
+		retval = cli_completion_generator_ht(text + 1, textlen - 1, &cli_completion_state, &EG(symbol_table), CLI_COMPLETION_VARIABLE);
 	} else if (text[0] == '#' && text[1] != '[') {
-		retval = cli_completion_generator_ini(text, textlen, &cli_completion_state);
+		retval = cli_completion_generator_ht(text + 1, textlen - 1, &cli_completion_state, EG(ini_directives), CLI_COMPLETION_INI);
 	} else {
 		char *lc_text;
 		const char *class_name_end;
@@ -552,21 +529,21 @@ TODO:
 		switch (cli_completion_state) {
 			case 0:
 			case 1:
-				retval = cli_completion_generator_func(lc_text, textlen, &cli_completion_state, ce ? &ce->function_table : EG(function_table));
+				retval = cli_completion_generator_ht(lc_text, textlen, &cli_completion_state, ce ? &ce->function_table : EG(function_table), CLI_COMPLETION_FUNCTION);
 				if (retval) {
 					break;
 				}
 				ZEND_FALLTHROUGH;
 			case 2:
 			case 3:
-				retval = cli_completion_generator_define(constant_text, textlen, &cli_completion_state, ce ? &ce->constants_table : EG(zend_constants));
+				retval = cli_completion_generator_ht(constant_text, textlen, &cli_completion_state, ce ? &ce->constants_table : EG(zend_constants), CLI_COMPLETION_CONSTANT);
 				if (retval || ce) {
 					break;
 				}
 				ZEND_FALLTHROUGH;
 			case 4:
 			case 5:
-				retval = cli_completion_generator_class(lc_text, textlen, &cli_completion_state);
+				retval = cli_completion_generator_ht(lc_text, textlen, &cli_completion_state, EG(class_table), CLI_COMPLETION_CLASS);
 				break;
 			default:
 				break;

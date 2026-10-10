@@ -36,6 +36,7 @@
 #include "tmp_methods_arginfo.h"
 #include "zend_call_stack.h"
 #include "zend_exceptions.h"
+#include "zend_system_id.h"
 #include "zend_mm_custom_handlers.h"
 #include "ext/uri/php_uri.h"
 #include "zend_observer.h"
@@ -195,6 +196,37 @@ static ZEND_FUNCTION(zend_leak_bytes)
 	}
 
 	emalloc(leakbytes);
+}
+
+/* Reallocate a block of old_size bytes to new_size bytes and return its block
+ * size, along with the block size of a fresh allocation of new_size bytes. */
+static ZEND_FUNCTION(zend_test_erealloc_block_size)
+{
+	zend_long old_size, new_size;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_LONG(old_size)
+		Z_PARAM_LONG(new_size)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (old_size < 1) {
+		zend_argument_value_error(1, "must be greater than 0");
+		RETURN_THROWS();
+	}
+	if (new_size < 1) {
+		zend_argument_value_error(2, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	void *ptr = erealloc(emalloc(old_size), new_size);
+	void *fresh = emalloc(new_size);
+
+	array_init(return_value);
+	add_next_index_long(return_value, zend_mem_block_size(ptr));
+	add_next_index_long(return_value, zend_mem_block_size(fresh));
+
+	efree(fresh);
+	efree(ptr);
 }
 
 /* Leak a refcounted variable */
@@ -2006,6 +2038,7 @@ static ZEND_METHOD(_ZendTestMagicCallForward, __call)
 }
 
 PHP_INI_BEGIN()
+	PHP_INI_ENTRY("zend_test.register_system_entropy", "0", PHP_INI_SYSTEM, NULL)
 	STD_PHP_INI_BOOLEAN("zend_test.replace_zend_execute_ex", "0", PHP_INI_SYSTEM, OnUpdateBool, replace_zend_execute_ex, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.register_passes", "0", PHP_INI_SYSTEM, OnUpdateBool, register_passes, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.print_stderr_mshutdown", "0", PHP_INI_SYSTEM, OnUpdateBool, print_stderr_mshutdown, zend_zend_test_globals, zend_test_globals)
@@ -2212,6 +2245,10 @@ PHP_MINIT_FUNCTION(zend_test)
 	// Loading via dl() not supported with the observer API
 	if (type != MODULE_TEMPORARY) {
 		REGISTER_INI_ENTRIES();
+		if (zend_ini_bool_literal("zend_test.register_system_entropy") &&
+			zend_add_system_entropy("zend_test", "test", ZEND_STRL("test entropy")) == FAILURE) {
+			php_error_docref(NULL, E_WARNING, "Failed to register system entropy");
+		}
 	} else {
 		(void)ini_entries;
 	}
