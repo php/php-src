@@ -32,6 +32,9 @@ PHP                                                                        NEWS
   . Fix OSS-Fuzz #568005340 (FETCH_DIM_FUNC_ARG partial conversion). (ndossche)
   . Fix exception checks due to NAN warnings and object empty()'s. (ndossche)
 
+- Phpdbg:
+  . Fix wrong command names. (ndossche, Weilin Du)
+
 - Standard:
   . Fixed password_get_info() and password_needs_rehash() accepting malformed
     bcrypt costs. (Ilia Alshanetsky)
