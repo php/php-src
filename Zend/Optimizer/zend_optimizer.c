@@ -563,7 +563,7 @@ bool zend_optimizer_update_op2_const(zend_op_array *op_array,
 		case ZEND_POST_DEC_OBJ:
 			TO_STRING_NOWARN(val);
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
-			opline->extended_value = alloc_cache_slots(op_array, 3);
+			opline->extended_value = alloc_cache_slots(op_array, 3) | (opline->extended_value & ZEND_FETCH_OBJ_FLAGS);
 			break;
 		case ZEND_ASSIGN_OBJ_OP:
 			TO_STRING_NOWARN(val);
