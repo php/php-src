@@ -47,6 +47,10 @@ PHP                                                                        NEWS
   . Fixed password_get_info() and password_needs_rehash() accepting malformed
     bcrypt costs. (Ilia Alshanetsky)
 
+- Windows:
+  . Fixed DOS device prefixed paths not being canonicalized, so junctions were
+    not resolved and open_basedir saw a different path. (Jakub Zelenka)
+
 - Zip:
   . Fixed use-after-free when re-entering ZipArchive during destruction or
     a close warning, and rejected opening streams while closing. (jvoisin)
