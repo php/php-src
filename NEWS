@@ -18,6 +18,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-24218 (Invalid opcode for count() of a literal array
     without SCCP). (lazerg)
 
+- FPM:
+  . Fixed bug GH-24229 (fcgi_close() passes shutdown() a literal 1, which is
+    SHUT_RD in WASI). (Ryosuke Ishibashi)
+
 - Opcache:
   . Fixed bug GH-17626 (JIT corrupts an opline handler when blacklisting a
     root trace at the opcache.jit_max_root_traces limit, causing spurious
