@@ -121,6 +121,9 @@ static ZEND_FUNCTION(zend_test_void_return)
 static void pass1(zend_script *script, void *context)
 {
 	php_printf("pass1\n");
+	if (ZT_G(fatal_error_in_pass)) {
+		zend_error_noreturn(E_ERROR, "Fatal error in pass1");
+	}
 }
 
 static void pass2(zend_script *script, void *context)
@@ -1361,6 +1364,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("zend_test.register_system_entropy", "0", PHP_INI_SYSTEM, NULL)
 	STD_PHP_INI_BOOLEAN("zend_test.replace_zend_execute_ex", "0", PHP_INI_SYSTEM, OnUpdateBool, replace_zend_execute_ex, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.register_passes", "0", PHP_INI_SYSTEM, OnUpdateBool, register_passes, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_BOOLEAN("zend_test.fatal_error_in_pass", "0", PHP_INI_ALL, OnUpdateBool, fatal_error_in_pass, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.print_stderr_mshutdown", "0", PHP_INI_SYSTEM, OnUpdateBool, print_stderr_mshutdown, zend_zend_test_globals, zend_test_globals)
 #ifdef HAVE_COPY_FILE_RANGE
 	STD_PHP_INI_ENTRY("zend_test.limit_copy_file_range", "-1", PHP_INI_ALL, OnUpdateLong, limit_copy_file_range, zend_zend_test_globals, zend_test_globals)
