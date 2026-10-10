@@ -53,6 +53,10 @@ PHP                                                                        NEWS
   . Fixed use-after-free when an error handler removes a failing zlib.inflate
     filter (GH-24176). (Edmond)
 
+- Streams:
+  . Fixed bug GH-24173 (Sockets from synchronous stream_socket_client() are
+    left in non-blocking mode on Windows). (vibbow)
+
 22 Oct 2026, PHP 8.4.27
 
 - BCMath:
