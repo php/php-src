@@ -30,6 +30,7 @@ PHP                                                                        NEWS
   . Fix type inference of ADD_ARRAY_UNPACK with integer keys. (ndossche)
   . Fix too wide type inference for ASSIGN_DIM_OP. (ndossche)
   . Fix OSS-Fuzz #568005340 (FETCH_DIM_FUNC_ARG partial conversion). (ndossche)
+  . Fix exception checks due to NAN warnings and object empty()'s. (ndossche)
 
 - Standard:
   . Fixed password_get_info() and password_needs_rehash() accepting malformed
