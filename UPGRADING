@@ -27,6 +27,12 @@ PHP 8.7 UPGRADE NOTES
     not present in the result set. It previously reported the condition
     through PDO::ATTR_ERRMODE and returned false.
 
+- PDO_PGSQL:
+  . Binding a string containing a null byte to a non-LOB parameter, or passing
+    one to PDO::quote(), now fails according to PDO::ATTR_ERRMODE. The value
+    was previously truncated silently at the first null byte. Strings bound
+    as PDO::PARAM_LOB are unaffected.
+
 - Standard:
   . The number of filters that can be chained in a php://filter URL is limited
     to 16 by default. Set the stream context option max_filter_count to change
