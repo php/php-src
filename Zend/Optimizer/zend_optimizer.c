@@ -342,7 +342,8 @@ bool zend_optimizer_update_op1_const(zend_op_array *op_array,
 			drop_leading_backslash(val);
 			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
 			if (opline->op2_type != IS_CONST) {
-				opline->extended_value = alloc_cache_slots(op_array, 1);
+				/* Like the compiler, reserve both slots, op2 may still become CONST. */
+				opline->extended_value = alloc_cache_slots(op_array, 2);
 			}
 			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 			break;
@@ -546,6 +547,13 @@ bool zend_optimizer_update_op2_const(zend_op_array *op_array,
 			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 			if (opline->op1_type != IS_CONST) {
 				opline->result.num = alloc_cache_slots(op_array, 2);
+			}
+			break;
+		case ZEND_FETCH_CLASS_CONSTANT:
+			REQUIRES_STRING(val);
+			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
+			if (opline->op1_type != IS_CONST) {
+				opline->extended_value = alloc_cache_slots(op_array, 2);
 			}
 			break;
 		case ZEND_ASSIGN_OBJ:
