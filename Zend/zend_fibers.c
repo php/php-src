@@ -775,6 +775,7 @@ static void zend_fiber_object_destroy(zend_object *object)
 	}
 
 	zend_object *exception = EG(exception);
+	const zend_op *opline_before_exception = EG(opline_before_exception);
 	EG(exception) = NULL;
 
 	zval graceful_exit;
@@ -783,6 +784,8 @@ static void zend_fiber_object_destroy(zend_object *object)
 	fiber->flags |= ZEND_FIBER_FLAG_DESTROYED;
 
 	zend_fiber_transfer transfer = zend_fiber_resume_internal(fiber, &graceful_exit, true);
+
+	EG(opline_before_exception) = opline_before_exception;
 
 	zval_ptr_dtor(&graceful_exit);
 
