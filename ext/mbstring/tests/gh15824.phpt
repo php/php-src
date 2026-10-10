@@ -17,8 +17,8 @@ var_dump(mb_detect_encoding("\x9D", 'US-ASCII, CP1254, cyrillic', false));
 echo "== mime name ==\n";
 var_dump(mb_detect_encoding('abc', 'ANSI_X3.4-1968, ISO-8859-1'));
 var_dump(mb_detect_encoding('abc', 'CP50220, ANSI_X3.4-1968'));
-/* last comma is not mistake, intentionally */
-var_dump(mb_detect_encoding(bin2hex('1b24422422242424262428242a1b2842'), 'CP50220, ANSI_X3.4-1968,', false));
+
+var_dump(mb_detect_encoding(bin2hex('1b24422422242424262428242a1b2842'), 'CP50220, ANSI_X3.4-1968', false));
 var_dump(mb_detect_encoding('😄', 'US-ASCII, UTF-8-Mobile#KDDI-B, UTF-8'));
 ?>
 --EXPECT--
