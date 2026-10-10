@@ -14,6 +14,8 @@ PHP                                                                        NEWS
     the next smaller bin in its larger bin, which efree_size() then freed
     into the wrong one. (Marc Bennewitz)
   . Fix throwing behaviour with recursive arrays in VM. (ndossche)
+  . Fixed array_map() optimization not resolving the class name of a static
+    first-class callable. (claudiodekker)
 
 - FPM:
   . Fixed bug GH-24229 (fcgi_close() passes shutdown() a literal 1, which is
