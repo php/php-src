@@ -11894,29 +11894,27 @@ static int zend_jit_rope(zend_jit_ctx *jit, const zend_op *opline, uint32_t op2_
 	return 1;
 }
 
-static int zend_jit_zval_copy_deref_reg(zend_jit_ctx *jit, zend_jit_addr res_addr, uint32_t res_info, zend_jit_addr val_addr, ir_ref type, ir_ref *values)
+/* If exit_addr is set, the value may also be IS_UNDEF */
+static int zend_jit_zval_copy_deref_reg(zend_jit_ctx *jit, zend_jit_addr res_addr, uint32_t res_info, zend_jit_addr val_addr, ir_ref type, ir_ref *values, const void *exit_addr)
 {
 	ir_ref if_type, val;
 
 	if (res_info == MAY_BE_LONG) {
 		if_type = ir_IF(ir_EQ(type, ir_CONST_U32(IS_LONG)));
-		ir_IF_TRUE(if_type);
-		val = jit_ZVAL_ADDR(jit, val_addr);
-		ir_END_PHI_list(*values, val);
-		ir_IF_FALSE(if_type);
-		val = ir_ADD_OFFSET(jit_Z_PTR(jit, val_addr), offsetof(zend_reference, val));
-		ir_END_PHI_list(*values, val);
 	} else if (res_info == MAY_BE_DOUBLE) {
 		if_type = ir_IF(ir_EQ(type, ir_CONST_U32(IS_DOUBLE)));
-		ir_IF_TRUE(if_type);
-		val = jit_ZVAL_ADDR(jit, val_addr);
-		ir_END_PHI_list(*values, val);
-		ir_IF_FALSE(if_type);
-		val = ir_ADD_OFFSET(jit_Z_PTR(jit, val_addr), offsetof(zend_reference, val));
-		ir_END_PHI_list(*values, val);
 	} else {
 		ZEND_UNREACHABLE();
 	}
+	ir_IF_TRUE(if_type);
+	val = jit_ZVAL_ADDR(jit, val_addr);
+	ir_END_PHI_list(*values, val);
+	ir_IF_FALSE(if_type);
+	if (exit_addr) {
+		ir_GUARD(ir_EQ(type, ir_CONST_U32(IS_REFERENCE_EX)), ir_CONST_ADDR(exit_addr));
+	}
+	val = ir_ADD_OFFSET(jit_Z_PTR(jit, val_addr), offsetof(zend_reference, val));
+	ir_END_PHI_list(*values, val);
 	return 1;
 }
 
@@ -14390,6 +14388,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 	ir_ref end_inputs = IR_UNUSED;
 	ir_ref slow_inputs = IR_UNUSED;
 	ir_ref end_values = IR_UNUSED;
+	const void *undef_exit_addr = NULL;
 
 	ZEND_ASSERT(opline->op2_type == IS_CONST);
 	ZEND_ASSERT(op1_info & MAY_BE_OBJECT);
@@ -14644,8 +14643,15 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 				if (!exit_addr) {
 					return 0;
 				}
-				prop_type_ref = jit_Z_TYPE_INFO(jit, prop_addr);
-				ir_GUARD(prop_type_ref, ir_CONST_ADDR(exit_addr));
+				if (opline->opcode != ZEND_FETCH_OBJ_W
+				 && !(res_info & MAY_BE_GUARD)
+				 && Z_MODE(res_addr) == IS_REG) {
+					/* perform IS_UNDEF check together with the dereference of the result */
+					undef_exit_addr = exit_addr;
+				} else {
+					prop_type_ref = jit_Z_TYPE_INFO(jit, prop_addr);
+					ir_GUARD(prop_type_ref, ir_CONST_ADDR(exit_addr));
+				}
 			}
 		} else {
 			prop_type_ref = jit_Z_TYPE_INFO(jit, prop_addr);
@@ -14759,7 +14765,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 		} else if (Z_MODE(res_addr) == IS_REG) {
 			prop_type_ref = jit_Z_TYPE_INFO(jit, prop_addr);
 
-			if (!zend_jit_zval_copy_deref_reg(jit, res_addr, res_info & ~MAY_BE_GUARD, prop_addr, prop_type_ref, &end_values)) {
+			if (!zend_jit_zval_copy_deref_reg(jit, res_addr, res_info & ~MAY_BE_GUARD, prop_addr, prop_type_ref, &end_values, undef_exit_addr)) {
 				return 0;
 			}
 		} else {
