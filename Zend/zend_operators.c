@@ -1198,6 +1198,30 @@ static zend_never_inline void ZEND_FASTCALL add_function_array(zval *result, con
 		/* $a += $a */
 		return;
 	}
+	if (zend_hash_num_elements(Z_ARRVAL_P(op2)) == 0 &&
+	    Z_ARRVAL_P(op1)->nInternalPointer < Z_ARRVAL_P(op1)->nNumUsed) {
+		/* $a += [] or $a + [] */
+		if (result != op1) {
+			ZVAL_COPY(result, op1);
+		}
+		return;
+	}
+	if (zend_hash_num_elements(Z_ARRVAL_P(op1)) == 0 &&
+	    zend_hash_num_elements(Z_ARRVAL_P(op2)) != 0) {
+		const HashTable *src = Z_ARRVAL_P(op2);
+		zend_long next_free = HT_IS_PACKED(src) ? (zend_long) src->nNumUsed : ZEND_LONG_MIN;
+		if (Z_ARRVAL_P(op1)->nNextFreeElement == ZEND_LONG_MIN &&
+		    src->nInternalPointer == 0 &&
+		    src->nNextFreeElement == next_free) {
+			/* [] + $a or $a += $b with an empty $a */
+			zend_array *old = result == op1 ? Z_ARR_P(result) : NULL;
+			ZVAL_COPY(result, op2);
+			if (old) {
+				zend_array_release(old);
+			}
+			return;
+		}
+	}
 	if (result != op1) {
 		ZVAL_ARR(result, zend_array_dup(Z_ARR_P(op1)));
 	} else {
