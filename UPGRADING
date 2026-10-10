@@ -27,6 +27,13 @@ PHP 8.7 UPGRADE NOTES
     not present in the result set. It previously reported the condition
     through PDO::ATTR_ERRMODE and returned false.
 
+- PGSQL:
+  . pg_query_params(), pg_execute(), pg_send_query_params() and
+    pg_send_execute() now throw a ValueError when a parameter string contains
+    a null byte, as do pg_escape_string(), pg_escape_literal() and
+    pg_escape_identifier() for their $string argument. The value was
+    previously truncated silently at the first null byte.
+
 - Standard:
   . The number of filters that can be chained in a php://filter URL is limited
     to 16 by default. Set the stream context option max_filter_count to change
