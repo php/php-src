@@ -14,12 +14,12 @@ $ctx = new Io\Poll\Context();
 $handle = new Io\Poll\SignalHandle([SIGTERM]);
 $watcher = $ctx->add($handle, [Io\Poll\Event::Signal]);
 
-// /proc reports the mask the child runs with; SIGTERM is bit 15
+// A PHP child reports whether it runs with SIGTERM blocked
 $blocked = function (string $out): bool {
-    return (hexdec(trim(substr($out, strpos($out, "SigBlk:") + 7))) >> (SIGTERM - 1)) & 1;
+    return trim($out) === '1';
 };
-$cmd = 'grep SigBlk /proc/self/status';
-if (!is_readable('/proc/self/status')) die("skip no /proc/self/status");
+$cmd = escapeshellarg(PHP_BINARY) . ' -r '
+    . escapeshellarg('pcntl_sigprocmask(SIG_BLOCK, [SIGUSR2], $mask); echo (int) in_array(SIGTERM, $mask);');
 
 var_dump($blocked(shell_exec($cmd)));
 exec($cmd, $lines);
