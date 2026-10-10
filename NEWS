@@ -37,6 +37,10 @@ PHP                                                                        NEWS
   . Fixed incorrect handling of non-ASCII pending_input bytes in readline_info(),
     which could cause readline() to return false prematurely. (Weilin Du)
 
+- Standard:
+  . Fixed bug GH-21992 (symlink() on dangling symlink returns true and creates
+    link at wrong location). (Jakub Zelenka)
+
 - Streams:
   . Fixed bug GH-22063 (Stream filter chain UAF on self-removal during
     callback). (Ilia Alshanetsky)
