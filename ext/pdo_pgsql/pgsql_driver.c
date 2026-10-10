@@ -446,6 +446,16 @@ static zend_string* pgsql_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquo
 			PQfreemem(escaped);
 			break;
 		default:
+			if (UNEXPECTED(zend_str_has_nul_byte(unquoted))) {
+				if (dbh->error_mode == PDO_ERRMODE_EXCEPTION) {
+					zend_throw_exception_ex(
+						php_pdo_get_exception(), 0, "Pgsql PDO::quote does not support null bytes");
+				} else if (dbh->error_mode == PDO_ERRMODE_WARNING) {
+					php_error_docref(NULL, E_WARNING, "Pgsql PDO::quote does not support null bytes");
+				}
+
+				return NULL;
+			}
 			quoted = safe_emalloc(2, ZSTR_LEN(unquoted), 3);
 			quoted[0] = '\'';
 			quotedlen = PQescapeStringConn(H->server, quoted + 1, ZSTR_VAL(unquoted), ZSTR_LEN(unquoted), &err);
