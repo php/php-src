@@ -24,10 +24,21 @@ class A {
         $name = "CONSTANT";
         return $c::{$name};
     }
+
+    static function class1() {
+        $name = "class";
+        return A::{$name};
+    }
+
+    static function class2() {
+        $c = "A";
+        $name = "CLASS";
+        return $c::{$name};
+    }
 }
 
 $a = new A;
-var_dump($a->func(), A::both_const());
+var_dump($a->func(), A::both_const(), A::class1(), A::class2());
 
 ?>
 --EXPECT--
@@ -38,3 +49,5 @@ array(2) {
   string(2) "AX"
 }
 string(2) "AX"
+string(1) "A"
+string(1) "A"

@@ -551,6 +551,10 @@ bool zend_optimizer_update_op2_const(zend_op_array *op_array,
 			break;
 		case ZEND_FETCH_CLASS_CONSTANT:
 			REQUIRES_STRING(val);
+			/* The magic "class" constant is only handled for non-CONST op2. */
+			if (zend_string_equals_literal_ci(Z_STR_P(val), "class")) {
+				return 0;
+			}
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 			if (opline->op1_type != IS_CONST) {
 				opline->extended_value = alloc_cache_slots(op_array, 2);
