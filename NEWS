@@ -28,6 +28,9 @@ PHP                                                                        NEWS
   . Fix OSS-Fuzz #568005340 (FETCH_DIM_FUNC_ARG partial conversion). (ndossche)
   . Fix exception checks due to NAN warnings and object empty()'s. (ndossche)
 
+- Phpdbg:
+  . Fix wrong command names. (ndossche, Weilin Du)
+
 - Phar:
   . Fixed GH-24166 (Double-free in Phar::webPhar() in CGI without PATH_INFO).
     (RigelYoung, Jakub Zelenka)
