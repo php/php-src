@@ -45021,7 +45021,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_IS_IDENTICAL_
 {
 	/* This is declared below the specializations for MAY_BE_LONG/MAY_BE_DOUBLE so those will be used instead if possible. */
 	/* This optimizes $x === SOME_CONST_EXPR and $x === $y for non-refs and non-undef, which can't throw. */
-	/* (Infinite recursion when comparing arrays is an uncatchable fatal error) */
+	/* Comparing two arrays that may contain arrays is excluded, as recursion throws an Error. */
 	USE_OPLINE
 	zval *op1, *op2;
 	bool result;
@@ -53653,7 +53653,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_IS_IDENTICAL_
 {
 	/* This is declared below the specializations for MAY_BE_LONG/MAY_BE_DOUBLE so those will be used instead if possible. */
 	/* This optimizes $x === SOME_CONST_EXPR and $x === $y for non-refs and non-undef, which can't throw. */
-	/* (Infinite recursion when comparing arrays is an uncatchable fatal error) */
+	/* Comparing two arrays that may contain arrays is excluded, as recursion throws an Error. */
 	USE_OPLINE
 	zval *op1, *op2;
 	bool result;
@@ -97682,7 +97682,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_IS_IDENTICAL_NOTHR
 {
 	/* This is declared below the specializations for MAY_BE_LONG/MAY_BE_DOUBLE so those will be used instead if possible. */
 	/* This optimizes $x === SOME_CONST_EXPR and $x === $y for non-refs and non-undef, which can't throw. */
-	/* (Infinite recursion when comparing arrays is an uncatchable fatal error) */
+	/* Comparing two arrays that may contain arrays is excluded, as recursion throws an Error. */
 	USE_OPLINE
 	zval *op1, *op2;
 	bool result;
@@ -106212,7 +106212,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_IS_IDENTICAL_NOTHR
 {
 	/* This is declared below the specializations for MAY_BE_LONG/MAY_BE_DOUBLE so those will be used instead if possible. */
 	/* This optimizes $x === SOME_CONST_EXPR and $x === $y for non-refs and non-undef, which can't throw. */
-	/* (Infinite recursion when comparing arrays is an uncatchable fatal error) */
+	/* Comparing two arrays that may contain arrays is excluded, as recursion throws an Error. */
 	USE_OPLINE
 	zval *op1, *op2;
 	bool result;
@@ -123537,7 +123537,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 					break;
 				}
 				spec = 3102 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
-			} else if (op->op1_type == IS_CV && (op->op2_type & (IS_CONST|IS_CV)) && !(op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) && !(op2_info & (MAY_BE_UNDEF|MAY_BE_REF))) {
+			} else if (op->op1_type == IS_CV && (op->op2_type & (IS_CONST|IS_CV)) && !(op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) && !(op2_info & (MAY_BE_UNDEF|MAY_BE_REF)) && !((op1_info & op2_info) & MAY_BE_ARRAY_OF_ARRAY)) {
 				spec = 3108 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
@@ -123560,7 +123560,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 					break;
 				}
 				spec = 3105 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
-			} else if (op->op1_type == IS_CV && (op->op2_type & (IS_CONST|IS_CV)) && !(op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) && !(op2_info & (MAY_BE_UNDEF|MAY_BE_REF))) {
+			} else if (op->op1_type == IS_CV && (op->op2_type & (IS_CONST|IS_CV)) && !(op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) && !(op2_info & (MAY_BE_UNDEF|MAY_BE_REF)) && !((op1_info & op2_info) & MAY_BE_ARRAY_OF_ARRAY)) {
 				spec = 3113 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			}
 			break;

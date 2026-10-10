@@ -13,6 +13,7 @@ PHP                                                                        NEWS
   . Fixed memory manager keeping a block reallocated to exactly the size of
     the next smaller bin in its larger bin, which efree_size() then freed
     into the wrong one. (Marc Bennewitz)
+  . Fix throwing behaviour with recursive arrays in VM. (ndossche)
 
 - FPM:
   . Fixed bug GH-24229 (fcgi_close() passes shutdown() a literal 1, which is
