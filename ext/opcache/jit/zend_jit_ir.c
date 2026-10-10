@@ -7735,6 +7735,8 @@ static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32
 		ir_IF_TRUE_cold(if_val);
 		jit_SET_EX_OPLINE(jit, opline);
 		ir_CALL(IR_VOID, ir_CONST_FC_FUNC(zend_jit_nan_coerced_to_type_warning));
+		/* The warning may be turned into an exception by an error handler */
+		zend_jit_check_exception_undef_result(jit, opline);
 		ir_MERGE_WITH_EMPTY_FALSE(if_val);
 
 		ref = ir_NE(dval, ir_CONST_DOUBLE(0.0));
