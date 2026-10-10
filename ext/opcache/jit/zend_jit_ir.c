@@ -8349,8 +8349,27 @@ static int zend_jit_isset_isempty_cv(zend_jit_ctx *jit, const zend_op *opline, u
 	uint32_t true_label = -1, false_label = -1;
 	ir_ref end_inputs = IR_UNUSED, true_inputs = IR_UNUSED, false_inputs = IR_UNUSED;
 
-	// TODO: support for empty() ???
-	ZEND_ASSERT(opline->extended_value != MAY_BE_RESOURCE);
+	if (opline->extended_value & ZEND_ISEMPTY) {
+		/* empty($cv) is !$cv, except that an undefined CV doesn't emit a warning.
+		 * Treat UNDEF as NULL: both are falsy and have a type below IS_TRUE. */
+		uint8_t branch_opcode;
+
+		if (op1_info & MAY_BE_UNDEF) {
+			op1_info = (op1_info & ~MAY_BE_UNDEF) | MAY_BE_NULL;
+		}
+		if (!smart_branch_opcode) {
+			branch_opcode = ZEND_BOOL_NOT;
+		} else if (smart_branch_opcode == ZEND_JMPZ) {
+			branch_opcode = ZEND_JMPNZ;
+		} else if (smart_branch_opcode == ZEND_JMPNZ) {
+			branch_opcode = ZEND_JMPZ;
+		} else {
+			ZEND_UNREACHABLE();
+		}
+		/* zend_is_true() may call an object's cast handler. */
+		return zend_jit_bool_jmpznz(jit, opline, op1_info, op1_addr, res_addr,
+			target_label, target_label2, (op1_info & MAY_BE_OBJECT) != 0, branch_opcode, exit_addr);
+	}
 
 	if (smart_branch_opcode && !exit_addr) {
 		if (smart_branch_opcode == ZEND_JMPZ) {
