@@ -1,5 +1,9 @@
 --TEST--
 GH-24173 (Timed writes on socket streams must not block past the timeout)
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY !== 'Windows') die('skip Windows only');
+?>
 --FILE--
 <?php
 $srv = stream_socket_server('tcp://127.0.0.1:0', $errno, $errstr);
