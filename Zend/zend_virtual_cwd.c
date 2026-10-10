@@ -1029,6 +1029,22 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 #endif
 
 #ifdef ZEND_WIN32
+	/* Strip the DOS device prefix from \\.\C:\ and \\?\C:\ paths and rewrite
+	 * \\?\UNC\ paths to \\server\share\, so they resolve like plain paths. */
+	if (path_length > 4 && IS_SLASH(path[0]) && IS_SLASH(path[1])
+			&& (path[2] == '.' || path[2] == '?') && IS_SLASH(path[3])) {
+		if (path_length > 6 && isalpha((unsigned char)path[4]) && path[5] == ':' && IS_SLASH(path[6])) {
+			path += 4;
+			path_length -= 4;
+		} else if (path_length > 8 && strncasecmp(path + 4, "UNC", 3) == 0 && IS_SLASH(path[7])) {
+			resolved_path[0] = DEFAULT_SLASH;
+			resolved_path[1] = DEFAULT_SLASH;
+			memcpy(resolved_path + 2, path + 8, path_length - 8 + 1);
+			path = resolved_path;
+			path_length -= 6;
+		}
+	}
+
 	switch (php_win32_ioutil_path_kind_a(path, path_length)) {
 		case PHP_WIN32_IOUTIL_PATH_RESERVED:
 			SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_NAME);
@@ -1103,7 +1119,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 			resolved_path[2] = DEFAULT_SLASH;
 			memcpy(resolved_path + 3, path + 2, path_length - 1);
 			path_length++;
-		} else
+		} else if (path != resolved_path) /* already rewritten from \\?\UNC\ */
 #endif
 		memcpy(resolved_path, path, path_length + 1);
 	}
