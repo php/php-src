@@ -8555,7 +8555,7 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 			if_enough_stack = ir_IF(ref);
 			ir_IF_FALSE_cold(if_enough_stack);
 
-#ifdef _WIN32
+#ifdef ZEND_OPCACHE_SHM_REATTACHMENT
 			if (0) {
 #else
 			if (opline->opcode == ZEND_INIT_FCALL && func && func->type == ZEND_INTERNAL_FUNCTION) {
@@ -8604,7 +8604,7 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 		// JIT: ZEND_SET_CALL_INFO(call, 0, call_info);
 		ir_STORE(jit_CALL(rx, This.u1.type_info), ir_CONST_U32(IS_UNDEF | ZEND_CALL_NESTED_FUNCTION));
 	}
-#ifdef _WIN32
+#ifdef ZEND_OPCACHE_SHM_REATTACHMENT
 	if (0) {
 #else
 	if (opline->opcode == ZEND_INIT_FCALL && func && func->type == ZEND_INTERNAL_FUNCTION) {
@@ -8741,7 +8741,7 @@ static int zend_jit_func_guard(zend_jit_ctx *jit, ir_ref func_ref, const zend_fu
 				ir_LOAD_A(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, opcodes))),
 				ir_CONST_ADDR(opcodes)),
 			ir_CONST_ADDR(exit_addr));
-#ifdef ZEND_WIN32
+#ifdef ZEND_OPCACHE_SHM_REATTACHMENT
 	} else if (func->type == ZEND_INTERNAL_FUNCTION) {
 		// ASLR may cause different addresses in different workers. Check for the internal function handler.
 		// JIT: if (call->func.internal_function.handler != handler) goto exit_addr;
@@ -8814,7 +8814,7 @@ static int zend_jit_init_fcall(zend_jit_ctx *jit, const zend_op *opline, uint32_
 	if (!func
 	 && trace
 	 && trace->op == ZEND_JIT_TRACE_INIT_CALL) {
-#ifdef _WIN32
+#ifdef ZEND_OPCACHE_SHM_REATTACHMENT
 		/* ASLR */
 		if (trace->func->type != ZEND_INTERNAL_FUNCTION) {
 			func = (zend_function*)trace->func;
@@ -8824,7 +8824,7 @@ static int zend_jit_init_fcall(zend_jit_ctx *jit, const zend_op *opline, uint32_
 #endif
 	}
 
-#ifdef _WIN32
+#ifdef ZEND_OPCACHE_SHM_REATTACHMENT
 	if (0) {
 #else
 	if (opline->opcode == ZEND_INIT_FCALL
@@ -10065,7 +10065,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 	if (trace && !func) {
 		if (trace->op == ZEND_JIT_TRACE_DO_ICALL) {
 			ZEND_ASSERT(!trace->func || trace->func->type == ZEND_INTERNAL_FUNCTION);
-#ifndef ZEND_WIN32
+#ifndef ZEND_OPCACHE_SHM_REATTACHMENT
 			// TODO: ASLR may cause different addresses in different workers ???
 			func = trace->func;
 			if (JIT_G(current_frame) &&
