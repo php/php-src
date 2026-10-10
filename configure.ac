@@ -1722,6 +1722,7 @@ PHP_ADD_SOURCES([main/io], m4_normalize([
     php_io_copy_solaris.c
     php_io_copy_macos.c
     php_io_hooks.c
+    php_io_pipe.c
     php_io_queue_poll.c
   ]),
   [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])

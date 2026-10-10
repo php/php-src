@@ -527,7 +527,7 @@ END_EXTERN_C()
 
 #define php_stream_sync_supported(stream)	(php_stream_set_option((stream), PHP_STREAM_OPTION_SYNC_API, PHP_STREAM_SYNC_SUPPORTED, NULL) == PHP_STREAM_OPTION_RETURN_OK ? 1 : 0)
 
-/* Windows: OK for an overlapped proc_open() pipe (php_io_overlapped_pipes), else NOTIMPL.
+/* Windows: OK for an overlapped proc_open() pipe (php_io_pipe_wanted()), else NOTIMPL.
  * QUERY: stores in the bool ptrparam whether the descriptor was handed out.
  * HAND_OUT: another process got the descriptor; the stream's reads and writes stop using a provider.
  * RELEASE: just before the process is created, the queues let go of the descriptor, so the child's

@@ -34,9 +34,6 @@ extern int fdatasync(int);
 
 PHPAPI void (*php_io_op_zobj_detach)(zend_object *zobj) = NULL;
 PHPAPI bool (*php_io_signal_pending)(void) = NULL;
-#ifdef PHP_WIN32
-PHPAPI bool php_io_overlapped_pipes = false;
-#endif
 
 PHPAPI bool php_io_interrupt_pending(void)
 {
@@ -437,11 +434,11 @@ PHPAPI php_io_queue *php_io_queue_find(uint64_t id)
 	return NULL;
 }
 
-PHPAPI void php_io_queues_release(php_socket_t fd)
+PHPAPI void php_io_queues_release(void *handle)
 {
 	for (php_io_queue *q = php_io_queues; q; q = q->next) {
 		if (q->ops->release) {
-			q->ops->release(q, fd);
+			q->ops->release(q, handle);
 		}
 	}
 }
@@ -1810,39 +1807,6 @@ PHPAPI ssize_t php_io_write(php_stream *stream, int fd, const void *buf, size_t 
 /* Any offset >= 0 picks the overlapped call an overlapped handle needs; a pipe ignores the offset */
 #define PHP_IO_PIPE_OFFSET 0
 
-/* Bytes the pipe holds now; *eof at the other end's close */
-static bool php_io_pipe_peek(int fd, DWORD *avail, bool *eof)
-{
-	*avail = 0;
-	*eof = false;
-	const HANDLE h = (HANDLE) _get_osfhandle(fd);
-	if (h == INVALID_HANDLE_VALUE) {
-		php_io_set_errno(EBADF);
-		return false;
-	}
-
-	if (PeekNamedPipe(h, NULL, 0, NULL, avail, NULL)) {
-		return true;
-	}
-
-	const DWORD err = GetLastError();
-	if (err == ERROR_BROKEN_PIPE) {
-		*eof = true;
-		return true;
-	}
-
-	/* ERROR_ACCESS_DENIED: fd is the write end */
-	php_io_set_errno(err == ERROR_ACCESS_DENIED ? EBADF : EIO);
-	return false;
-}
-
-PHPAPI bool php_io_pipe_readable(int fd)
-{
-	DWORD avail;
-	bool eof;
-	return !php_io_pipe_peek(fd, &avail, &eof) || eof || avail > 0;
-}
-
 PHPAPI ssize_t php_io_pipe_read(php_stream *stream, int fd, void *buf, size_t len,
 		const php_deadline *dl, bool no_provider)
 {
@@ -1864,7 +1828,9 @@ PHPAPI ssize_t php_io_pipe_read(php_stream *stream, int fd, void *buf, size_t le
 	DWORD avail;
 	bool eof;
 	if (!php_io_pipe_peek(fd, &avail, &eof)) {
-		ret = -1;
+		/* The write end (EBADF) reads as empty, as an anonymous pipe's did: its peek failed too,
+		 * and the read was cut to the zero bytes it reported */
+		ret = errno == EBADF ? 0 : -1;
 	} else if (eof) {
 		ret = 0;
 	} else if (avail > 0) {

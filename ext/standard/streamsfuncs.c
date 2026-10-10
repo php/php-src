@@ -860,8 +860,7 @@ static int stream_select_any(zval *r_array, zval *w_array, zval *e_array, struct
 		/* php_select() takes the call when another process holds the pipe, or when no socket poll
 		 * takes the descriptor (an anonymous pipe, a file, a console): WSAPoll() fails as a whole on
 		 * one */
-		if (handed_out || (php_io_overlapped_pipes && !is_overlapped_pipe
-				&& !stream_select_is_socket(members[i].fd))) {
+		if (handed_out || (!is_overlapped_pipe && !stream_select_is_socket(members[i].fd))) {
 			efree(members);
 			stream_select_unfreeze(frozen, n_frozen);
 			return STREAM_SELECT_USE_PHP_SELECT;

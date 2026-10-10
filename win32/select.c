@@ -42,9 +42,10 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 	int sock_max_fd = -1;
 	struct timeval tvslice;
 	int retcode;
-	/* With php_io_overlapped_pipes every pipe is judged by its bytes: an overlapped pipe's handle
-	 * is signaled whatever it holds, so it stays out of the wait; a pipe is always writable and,
-	 * as a signaled handle was, always in the except set. Each set holds up to FD_SETSIZE. */
+	/* A pipe is judged by its bytes: its handle is signaled whatever it holds (an overlapped one
+	 * from proc_open() cannot even be told from an anonymous one here), so it stays out of the
+	 * wait; a pipe is always writable and, as a signaled handle was, always in the except set.
+	 * Each set holds up to FD_SETSIZE. */
 	int pipe_fds[3 * FD_SETSIZE];
 	int n_pipes = 0, pipes_ready;
 	fd_set pipe_read, pipe_write, pipe_except;
@@ -91,7 +92,7 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 				}
 			} else {
 				handles[n_handles] = (HANDLE)(uintptr_t)_get_osfhandle(i);
-				if (php_io_overlapped_pipes && handles[n_handles] != INVALID_HANDLE_VALUE
+				if (handles[n_handles] != INVALID_HANDLE_VALUE
 						&& GetFileType(handles[n_handles]) == FILE_TYPE_PIPE) {
 					pipe_fds[n_pipes++] = i;
 				} else if (handles[n_handles] != INVALID_HANDLE_VALUE) {

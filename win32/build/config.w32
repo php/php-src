@@ -309,7 +309,7 @@ ADD_FLAG("CFLAGS_BD_MAIN_POLL", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
  * included as <ior.h>, the way its pkg-config file sets the include path. */
 ARG_WITH("ior", "Build the IO ring on the ior library, optionally from the given install prefix", "no");
 
-var main_io_sources = "php_io.c php_io_copy_windows.c php_io_hooks.c php_io_queue_poll.c";
+var main_io_sources = "php_io.c php_io_copy_windows.c php_io_hooks.c php_io_pipe.c php_io_queue_poll.c";
 if (PHP_IOR != "no") {
 	var ior_prefix = PHP_IOR != "yes" ? PHP_IOR : null;
 	var ior_include = (ior_prefix ? ior_prefix + "\\include\\ior;" : "") + PHP_PHP_BUILD + "\\include\\ior";

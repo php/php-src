@@ -1385,7 +1385,7 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 					return PHP_STREAM_OPTION_RETURN_ERR;
 				}
 
-				php_io_queues_release(fd);
+				php_io_queues_release((void *) _get_osfhandle(fd));
 			} else if (value == PHP_STREAM_OVERLAPPED_PIPE_QUERY && ptrparam) {
 				*(bool *) ptrparam = data->is_handed_out;
 			}

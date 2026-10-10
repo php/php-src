@@ -34,7 +34,7 @@ PHPAPI php_stream *_php_stream_fopen_from_pipe(FILE *file, const char *mode STRE
 #define php_stream_fopen_from_pipe(file, mode)	_php_stream_fopen_from_pipe((file), (mode) STREAMS_CC)
 
 #ifdef PHP_WIN32
-/* The parent's end of an overlapped named pipe proc_open() made (php_io_overlapped_pipes) */
+/* The parent's end of an overlapped named pipe proc_open() made (php_io_pipe_wanted()) */
 PHPAPI php_stream *_php_stream_fopen_from_overlapped_pipe(int fd, const char *mode STREAMS_DC);
 #define php_stream_fopen_from_overlapped_pipe(fd, mode)	_php_stream_fopen_from_overlapped_pipe((fd), (mode) STREAMS_CC)
 #endif

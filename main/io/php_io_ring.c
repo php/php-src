@@ -224,17 +224,6 @@ PHPAPI void php_io_ring_after_fork(void)
 	}
 }
 
-#ifdef PHP_WIN32
-PHPAPI void php_io_ring_release_handle(void *handle)
-{
-	for (php_io_ring *ring = php_io_rings; ring; ring = ring->next_ring) {
-		if (ring->ctx) {
-			/* -EBUSY with an op in flight, -ENOTSUP before Windows 8.1: the handle stays tied */
-			ior_release_handle(ring->ctx, (ior_fd_t) handle);
-		}
-	}
-}
-#endif
 
 PHPAPI php_io_ring *php_io_ring_create(uint32_t entries, bool fd_nonblock)
 {
@@ -2576,10 +2565,12 @@ static uint32_t php_io_ring_queue_hook_flags(php_io_queue *base)
 #ifdef PHP_WIN32
 /* A failure (an op of the Ring still on the handle, a system before Windows 8.1) leaves it on the
  * port, where ior drops the other process's packets */
-static void php_io_ring_queue_release(php_io_queue *base, php_socket_t fd)
+static void php_io_ring_queue_release(php_io_queue *base, void *handle)
 {
 	php_io_ring *const ring = ((php_io_ring_queue *) base)->ring;
-	ior_release_handle(ring->ctx, (ior_fd_t) _get_osfhandle((int) fd));
+	if (ring->ctx) {
+		ior_release_handle(ring->ctx, (ior_fd_t) handle);
+	}
 }
 #endif
 
