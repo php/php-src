@@ -103,33 +103,63 @@ PHPAPI int php_flock(int fd, int operation)
 	HANDLE hdl = (HANDLE) _get_osfhandle(fd);
 	DWORD low = 0xFFFFFFFF, high = 0xFFFFFFFF;
 	OVERLAPPED offset = {0, 0, {{0}}, NULL};
+	HANDLE event;
+	DWORD flags;
+	DWORD done;
 	DWORD err;
+	BOOL ok;
 
 	if (INVALID_HANDLE_VALUE == hdl) {
 		_set_errno(EBADF);
 		return -1;              /* error in file descriptor */
 	}
-	/* bug for bug compatible with Unix */
-	UnlockFileEx(hdl, 0, low, high, &offset);
+
 	switch (operation & ~LOCK_NB) {    /* translate to LockFileEx() op */
 		case LOCK_EX:           /* exclusive */
-			if (LockFileEx(hdl, LOCKFILE_EXCLUSIVE_LOCK +
-						((operation & LOCK_NB) ? LOCKFILE_FAIL_IMMEDIATELY : 0),
-						   0, low, high, &offset))
-				return 0;
+			flags = LOCKFILE_EXCLUSIVE_LOCK;
 			break;
 		case LOCK_SH:           /* shared */
-			if (LockFileEx(hdl, ((operation & LOCK_NB) ? LOCKFILE_FAIL_IMMEDIATELY : 0),
-						   0, low, high, &offset))
-				return 0;
+			flags = 0;
 			break;
 		case LOCK_UN:           /* unlock */
-			return 0;           /* always succeeds */
-		default:                /* default */
+			flags = 0;
 			break;
+		default:                /* default */
+			_set_errno(EINVAL);
+			return -1;
+	}
+	if (operation & LOCK_NB) {
+		flags |= LOCKFILE_FAIL_IMMEDIATELY;
 	}
 
-	err = GetLastError();
+	/* A handle opened for overlapped I/O completes a lock request
+	 * asynchronously: wait for it on an event. The low bit keeps the
+	 * completion off an I/O completion port the handle is bound to. */
+	event = CreateEventW(NULL, TRUE, FALSE, NULL);
+	if (!event) {
+		_set_errno(ENOMEM);
+		return -1;
+	}
+	offset.hEvent = (HANDLE) ((ULONG_PTR) event | 1);
+
+	/* bug for bug compatible with Unix */
+	UnlockFileEx(hdl, 0, low, high, &offset);
+	if ((operation & ~LOCK_NB) == LOCK_UN) {
+		CloseHandle(event);
+		return 0;               /* always succeeds */
+	}
+
+	ok = LockFileEx(hdl, flags, 0, low, high, &offset);
+	err = ok ? ERROR_SUCCESS : GetLastError();
+	if (!ok && err == ERROR_IO_PENDING) {
+		ok = GetOverlappedResult(hdl, &offset, &done, TRUE);
+		err = ok ? ERROR_SUCCESS : GetLastError();
+	}
+	CloseHandle(event);
+	if (ok) {
+		return 0;
+	}
+
 	if (ERROR_LOCK_VIOLATION == err || ERROR_SHARING_VIOLATION == err) {
 		_set_errno(EWOULDBLOCK);
 	} else {

@@ -17,6 +17,7 @@
  */
 
 #include "zend_exceptions.h"
+#include "zend_hrtime.h"
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -26,6 +27,7 @@
 #include "php_network.h"
 #include "ext/standard/file.h"
 #include "ext/standard/info.h"
+#include "ext/standard/io_poll.h"
 #include "php_ini.h"
 #ifdef PHP_WIN32
 # include "windows_common.h"
@@ -124,6 +126,10 @@ static PHP_RSHUTDOWN_FUNCTION(sockets);
 
 zend_class_entry *socket_ce;
 static zend_object_handlers socket_object_handlers;
+zend_class_entry *socket_poll_handle_ce;
+zend_class_entry *socket_poll_weak_handle_ce;
+static zend_object_handlers socket_poll_handle_object_handlers;
+static zend_object_handlers socket_poll_weak_handle_object_handlers;
 
 static zend_object *socket_create_object(zend_class_entry *class_type) {
 	php_socket *intern = zend_object_alloc(sizeof(php_socket), class_type);
@@ -135,9 +141,278 @@ static zend_object *socket_create_object(zend_class_entry *class_type) {
 	intern->type		 = PF_UNSPEC;
 	intern->error		 = 0;
 	intern->blocking	 = 1;
+	intern->nonblocking_fd = false;
+	intern->in_use = false;
+	intern->rcvtimeo_known = intern->sndtimeo_known = false;
 	ZVAL_UNDEF(&intern->zstream);
+	intern->weak_handle = NULL;
+	intern->strong_handles = NULL;
 
 	return &intern->std;
+}
+
+/* SocketPollHandle keeps its Socket and is retired with the descriptor; SocketPollWeakHandle is
+ * the Socket's one handle, created by its operations and registrations or by create(), kept by the
+ * Socket until the descriptor closes and invalid from then on */
+
+struct _php_socket_poll_handle_data {
+	php_socket *sock; /* referenced */
+	php_poll_handle_object *handle;
+	bool linked; /* on the Socket's list, until the descriptor closes */
+	php_socket_poll_handle_data *prev;
+	php_socket_poll_handle_data *next;
+};
+
+typedef struct php_socket_poll_weak_handle_data {
+	php_socket *sock; /* not referenced, NULL once the descriptor closed */
+} php_socket_poll_weak_handle_data;
+
+static php_socket_t socket_poll_handle_get_fd(php_poll_handle_object *handle)
+{
+	php_socket_poll_handle_data *data = handle->handle_data;
+	if (!data || IS_INVALID_SOCKET(data->sock)) {
+		return SOCK_ERR;
+	}
+	return (php_socket_t) data->sock->bsd_socket;
+}
+
+static int socket_poll_handle_is_valid(php_poll_handle_object *handle)
+{
+	return socket_poll_handle_get_fd(handle) != SOCK_ERR;
+}
+
+static void socket_poll_handle_unlink(php_socket_poll_handle_data *data)
+{
+	if (!data->linked) {
+		return;
+	}
+	data->linked = false;
+	if (data->prev) {
+		data->prev->next = data->next;
+	} else {
+		data->sock->strong_handles = data->next;
+	}
+	if (data->next) {
+		data->next->prev = data->prev;
+	}
+}
+
+static void socket_poll_handle_cleanup(php_poll_handle_object *handle)
+{
+	php_socket_poll_handle_data *data = handle->handle_data;
+	if (data) {
+		socket_poll_handle_unlink(data);
+		OBJ_RELEASE(&data->sock->std);
+		efree(data);
+		handle->handle_data = NULL;
+	}
+}
+
+static php_poll_handle_ops socket_poll_handle_ops = {
+	.get_fd = socket_poll_handle_get_fd,
+	.is_valid = socket_poll_handle_is_valid,
+	.cleanup = socket_poll_handle_cleanup,
+};
+
+static zend_object *socket_poll_handle_create_object(zend_class_entry *ce)
+{
+	php_poll_handle_object *intern = php_poll_handle_object_create(
+			sizeof(php_poll_handle_object), ce, &socket_poll_handle_ops);
+	intern->std.handlers = &socket_poll_handle_object_handlers;
+	return &intern->std;
+}
+
+static HashTable *socket_poll_handle_get_gc(zend_object *object, zval **table, int *n)
+{
+	php_poll_handle_object *intern = PHP_POLL_HANDLE_OBJ_FROM_ZOBJ(object);
+	php_socket_poll_handle_data *data = intern->handle_data;
+	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
+	if (data) {
+		zend_get_gc_buffer_add_obj(gc_buffer, &data->sock->std);
+	}
+	zend_get_gc_buffer_use(gc_buffer, table, n);
+	return NULL;
+}
+
+static php_socket_t socket_poll_weak_handle_get_fd(php_poll_handle_object *handle)
+{
+	php_socket_poll_weak_handle_data *data = handle->handle_data;
+	if (!data || !data->sock || IS_INVALID_SOCKET(data->sock)) {
+		return SOCK_ERR;
+	}
+	return (php_socket_t) data->sock->bsd_socket;
+}
+
+static int socket_poll_weak_handle_is_valid(php_poll_handle_object *handle)
+{
+	return socket_poll_weak_handle_get_fd(handle) != SOCK_ERR;
+}
+
+static void socket_poll_weak_handle_cleanup(php_poll_handle_object *handle)
+{
+	php_socket_poll_weak_handle_data *data = handle->handle_data;
+	if (data) {
+		/* Freed by the object store before the Socket let go of it */
+		if (data->sock) {
+			data->sock->weak_handle = NULL;
+		}
+		efree(data);
+		handle->handle_data = NULL;
+	}
+}
+
+static php_poll_handle_ops socket_poll_weak_handle_ops = {
+	.get_fd = socket_poll_weak_handle_get_fd,
+	.is_valid = socket_poll_weak_handle_is_valid,
+	.cleanup = socket_poll_weak_handle_cleanup,
+};
+
+static zend_object *socket_poll_weak_handle_create_object(zend_class_entry *ce)
+{
+	php_poll_handle_object *intern = php_poll_handle_object_create(
+			sizeof(php_poll_handle_object), ce, &socket_poll_weak_handle_ops);
+	intern->std.handlers = &socket_poll_weak_handle_object_handlers;
+	return &intern->std;
+}
+
+/* The Socket's handle, created on the first call and kept by the Socket: borrowed */
+static zend_object *php_socket_get_weak_handle(php_socket *sock)
+{
+	if (!sock->weak_handle) {
+		zval handle_zv;
+		object_init_ex(&handle_zv, socket_poll_weak_handle_ce);
+		php_poll_handle_object *intern = PHP_POLL_HANDLE_OBJ_FROM_ZV(&handle_zv);
+		php_socket_poll_weak_handle_data *data = emalloc(sizeof(*data));
+		data->sock = sock;
+		intern->handle_data = data;
+		/* Every Socket is a script's */
+		intern->flags |= PHP_POLL_HANDLE_F_EXPOSED;
+		sock->weak_handle = Z_OBJ(handle_zv);
+	}
+	return sock->weak_handle;
+}
+
+/* In an op, or its descriptor still used by an op whose frame is gone */
+static bool php_socket_busy(php_socket *sock)
+{
+	return sock->in_use || (sock->weak_handle && php_io_handle_busy(sock->weak_handle));
+}
+
+/* Before the descriptor closes */
+static void php_socket_drain(php_socket *sock)
+{
+	if (sock->weak_handle) {
+		php_io_handle_drain(sock->weak_handle);
+	}
+}
+
+/* While the descriptor is still open: the handles stop reporting, the registrations end with the
+ * provider's remove() per pair, then the Socket drops its handle */
+static void php_socket_release_io(php_socket *sock)
+{
+	while (sock->strong_handles) {
+		php_socket_poll_handle_data *data = sock->strong_handles;
+		socket_poll_handle_unlink(data);
+		/* Retiring the watchers may drop the last reference to the handle */
+		php_poll_handle_invalidate(&data->handle->std);
+	}
+	zend_object *handle_obj = sock->weak_handle;
+	if (handle_obj) {
+		php_poll_handle_object *handle = PHP_POLL_HANDLE_OBJ_FROM_ZOBJ(handle_obj);
+		((php_socket_poll_weak_handle_data *) handle->handle_data)->sock = NULL;
+		php_poll_handle_invalidate(handle_obj);
+		php_io_unregister_all(&handle->registrations);
+		/* A remove() that closed the Socket again let go of it already */
+		if (sock->weak_handle == handle_obj) {
+			sock->weak_handle = NULL;
+			OBJ_RELEASE(handle_obj);
+		}
+	}
+}
+
+PHP_METHOD(SocketPollHandle, __construct)
+{
+	zval *zsocket;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(zsocket, socket_ce)
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_poll_handle_object *intern = PHP_POLL_HANDLE_OBJ_FROM_ZV(ZEND_THIS);
+	if (intern->handle_data) {
+		zend_throw_error(NULL, "%pS object is already constructed", Z_OBJCE_P(ZEND_THIS)->name);
+		RETURN_THROWS();
+	}
+	php_socket *sock = Z_SOCKET_P(zsocket);
+	ENSURE_SOCKET_VALID(sock);
+
+	php_socket_poll_handle_data *data = emalloc(sizeof(*data));
+	data->sock = sock;
+	data->handle = intern;
+	data->linked = true;
+	data->prev = NULL;
+	data->next = sock->strong_handles;
+	if (data->next) {
+		data->next->prev = data;
+	}
+	sock->strong_handles = data;
+	GC_ADDREF(&sock->std);
+	intern->handle_data = data;
+}
+
+PHP_METHOD(SocketPollHandle, getSocket)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	php_socket_poll_handle_data *data = PHP_POLL_HANDLE_OBJ_FROM_ZV(ZEND_THIS)->handle_data;
+	RETURN_OBJ_COPY(&data->sock->std);
+}
+
+PHP_METHOD(SocketPollHandle, isValid)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	php_poll_handle_object *intern = PHP_POLL_HANDLE_OBJ_FROM_ZV(ZEND_THIS);
+	RETURN_BOOL(intern->ops->is_valid(intern));
+}
+
+PHP_METHOD(SocketPollWeakHandle, __construct)
+{
+	zend_throw_error(NULL, "Direct instantiation of %pS is not allowed, use %pS::create instead",
+			Z_OBJCE_P(ZEND_THIS)->name, Z_OBJCE_P(ZEND_THIS)->name);
+}
+
+PHP_METHOD(SocketPollWeakHandle, create)
+{
+	zval *zsocket;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(zsocket, socket_ce)
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_socket *sock = Z_SOCKET_P(zsocket);
+	ENSURE_SOCKET_VALID(sock);
+	RETURN_OBJ_COPY(php_socket_get_weak_handle(sock));
+}
+
+/* Not while the Socket is in an operation */
+PHP_METHOD(SocketPollWeakHandle, getSocket)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	php_socket_poll_weak_handle_data *data = PHP_POLL_HANDLE_OBJ_FROM_ZV(ZEND_THIS)->handle_data;
+	if (!data || !data->sock || php_socket_busy(data->sock)) {
+		RETURN_NULL();
+	}
+	RETURN_OBJ_COPY(&data->sock->std);
+}
+
+PHP_METHOD(SocketPollWeakHandle, isValid)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	php_poll_handle_object *intern = PHP_POLL_HANDLE_OBJ_FROM_ZV(ZEND_THIS);
+	RETURN_BOOL(intern->ops->is_valid(intern));
 }
 
 static zend_function *socket_get_constructor(zend_object *object) {
@@ -145,10 +420,14 @@ static zend_function *socket_get_constructor(zend_object *object) {
 	return NULL;
 }
 
+static void php_socket_release_io(php_socket *sock);
+
 static void socket_free_obj(zend_object *object)
 {
 	php_socket *socket = socket_from_obj(object);
 
+	php_socket_drain(socket);
+	php_socket_release_io(socket);
 	if (Z_ISUNDEF(socket->zstream)) {
 		if (!IS_INVALID_SOCKET(socket)) {
 			close(socket->bsd_socket);
@@ -212,8 +491,15 @@ static void address_info_free_obj(zend_object *object)
 
 /* Module registration */
 
+/* The poll handle interfaces are ext/standard's, so it starts first */
+static const zend_module_dep sockets_deps[] = {
+	ZEND_MOD_REQUIRED("standard")
+	ZEND_MOD_END
+};
+
 zend_module_entry sockets_module_entry = {
-	STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER_EX, NULL,
+	sockets_deps,
 	"sockets",
 	ext_functions,
 	PHP_MINIT(sockets),
@@ -236,6 +522,317 @@ zend_module_entry sockets_module_entry = {
 #endif
 ZEND_GET_MODULE(sockets)
 #endif
+
+#ifdef PHP_WIN32
+# define PHP_SOCKET_WAIT_TIMEOUT WSAETIMEDOUT
+#else
+# define PHP_SOCKET_WAIT_TIMEOUT EAGAIN
+#endif
+
+/* Waits for a Socket that emulates blocking mode, bounded by its SO_RCVTIMEO
+ * or SO_SNDTIMEO like the blocking call. false with errno set on failure. */
+static bool php_socket_wait(php_socket *sock, php_socket_waiter *w, int events)
+{
+	if (!w->started) {
+		w->started = true;
+		w->end = 0;
+#ifdef PHP_WIN32
+		DWORD ms = 0;
+		int optlen = sizeof(ms);
+		if (getsockopt(sock->bsd_socket, SOL_SOCKET, w->optname, (char *) &ms, &optlen) == 0 && ms > 0) {
+			w->end = zend_hrtime() + (uint64_t) ms * 1000000;
+		}
+#else
+		struct timeval tv;
+		socklen_t optlen = sizeof(tv);
+		if (getsockopt(sock->bsd_socket, SOL_SOCKET, w->optname, &tv, &optlen) == 0
+				&& (tv.tv_sec > 0 || tv.tv_usec > 0)) {
+			w->end = zend_hrtime() + (uint64_t) tv.tv_sec * ZEND_NANO_IN_SEC + (uint64_t) tv.tv_usec * 1000;
+		}
+#endif
+	}
+
+	for (;;) {
+		int timeout = -1;
+		if (w->end) {
+			uint64_t now = zend_hrtime();
+			uint64_t ms = now < w->end ? (w->end - now + 999999) / 1000000 : 0;
+			timeout = ms > INT_MAX ? INT_MAX : (int) ms;
+		}
+		int n = php_pollfd_for_ms(sock->bsd_socket, events, timeout);
+		if (n > 0) {
+			return true;
+		}
+		if (n == 0) {
+			set_errno(PHP_SOCKET_WAIT_TIMEOUT);
+			return false;
+		}
+		/* a timed call fails on a signal, otherwise only when PHP has work for it */
+		if (errno != EINTR || w->end || atomic_load(&EG(vm_interrupt))) {
+			return false;
+		}
+	}
+}
+
+/* Under a provider a blocking point is an operation that may suspend: the descriptor is made
+ * non-blocking once, so no syscall blocks and the Socket emulates its mode from then on, the Socket
+ * is frozen for the call, and the op carries the stream the Socket shares its descriptor with or
+ * the Socket's own handle. Without a provider the call proceeds as before. */
+bool php_socket_op_begin(php_socket *sock, php_socket_op *o)
+{
+	o->stream = NULL;
+	o->handle = NULL;
+	o->active = php_io_hooks_active();
+	if (php_socket_busy(sock)) {
+		o->active = false;
+		zend_throw_error(NULL, "Concurrent access to a socket");
+		set_errno(ECANCELED);
+		return false;
+	}
+	if (!o->active) {
+		return true;
+	}
+	if (sock->blocking && !sock->nonblocking_fd
+			&& php_set_sock_blocking(sock->bsd_socket, 0) == SUCCESS) {
+		sock->nonblocking_fd = true;
+	}
+	if (!Z_ISUNDEF(sock->zstream)) {
+		o->stream = zend_fetch_resource2_ex(&sock->zstream, NULL, php_file_le_stream(),
+				php_file_le_pstream());
+	}
+	if (!o->stream) {
+		o->handle = php_socket_get_weak_handle(sock);
+	}
+	sock->in_use = true;
+	return true;
+}
+
+void php_socket_op_end(php_socket *sock, php_socket_op *o)
+{
+	if (o->active) {
+		sock->in_use = false;
+	}
+}
+
+/* The op's deadline from the Socket's mode: the blocking call's SO_RCVTIMEO or SO_SNDTIMEO, read
+ * once per Socket and again after socket_set_option(), since every op would pay the syscall */
+static php_deadline php_socket_op_deadline(php_socket *sock, int optname, int flags)
+{
+	php_deadline dl;
+	if (!sock->blocking
+#ifdef MSG_DONTWAIT
+			|| (flags & MSG_DONTWAIT)
+#endif
+	) {
+		php_deadline_init_nonblock(&dl);
+		return dl;
+	}
+	bool *known = optname == SO_RCVTIMEO ? &sock->rcvtimeo_known : &sock->sndtimeo_known;
+	struct timeval *tv = optname == SO_RCVTIMEO ? &sock->rcvtimeo : &sock->sndtimeo;
+	if (!*known) {
+		tv->tv_sec = tv->tv_usec = 0;
+#ifdef PHP_WIN32
+		DWORD ms = 0;
+		int optlen = sizeof(ms);
+		if (getsockopt(sock->bsd_socket, SOL_SOCKET, optname, (char *) &ms, &optlen) == 0 && ms > 0) {
+			tv->tv_sec = ms / 1000;
+			tv->tv_usec = (ms % 1000) * 1000;
+		}
+#else
+		socklen_t optlen = sizeof(*tv);
+		if (getsockopt(sock->bsd_socket, SOL_SOCKET, optname, tv, &optlen) != 0) {
+			tv->tv_sec = tv->tv_usec = 0;
+		}
+#endif
+		*known = true;
+	}
+	if (tv->tv_sec > 0 || tv->tv_usec > 0) {
+		php_deadline_init(&dl, tv);
+	} else {
+		php_deadline_init_infinite(&dl);
+	}
+	return dl;
+}
+
+/* An op that timed out fails like the blocking call */
+static zend_always_inline void php_socket_op_errno(ssize_t n)
+{
+	if (n < 0 && errno == PHP_IO_SOCK_ETIMEDOUT) {
+		set_errno(PHP_SOCKET_WAIT_TIMEOUT);
+	}
+}
+
+bool php_socket_wait_retry(php_socket *sock, php_socket_waiter *w, int events, int flags)
+{
+	if (!PHP_SOCKET_EMULATES_BLOCKING(sock)) {
+		return false;
+	}
+	if (!PHP_IS_TRANSIENT_ERROR(errno)) {
+		return false;
+	}
+#ifdef MSG_DONTWAIT
+	if (flags & MSG_DONTWAIT) {
+		return false;
+	}
+#endif
+	if (w->op.active) {
+		/* A readiness op after the drain; the deadline is the call's, not the wait's */
+		if (!w->started) {
+			w->started = true;
+			w->deadline = php_socket_op_deadline(sock, w->optname, flags);
+		}
+		int n = php_io_poll_ex(w->op.stream, w->op.handle, sock->bsd_socket,
+				(events & POLLIN) ? PHP_POLL_READ : PHP_POLL_WRITE, &w->deadline, PHP_IO_OP_F_AFTER_DRAIN);
+		if (n == 0) {
+			set_errno(PHP_SOCKET_WAIT_TIMEOUT);
+		}
+		return n > 0;
+	}
+	return php_socket_wait(sock, w, events);
+}
+
+static ssize_t php_socket_recv_once(php_socket *sock, php_socket_op *o, char *buf, size_t len,
+		int flags)
+{
+	if (!o->active) {
+		return recv(sock->bsd_socket, buf, len, flags);
+	}
+	php_deadline dl = php_socket_op_deadline(sock, SO_RCVTIMEO, flags);
+	ssize_t n = php_io_recv_ex(o->stream, o->handle, sock->bsd_socket, buf, len, flags, &dl);
+	php_socket_op_errno(n);
+	return n;
+}
+
+static ssize_t php_socket_send_once(php_socket *sock, php_socket_op *o, const char *buf, size_t len,
+		int flags)
+{
+	if (!o->active) {
+		return send(sock->bsd_socket, buf, len, flags);
+	}
+	php_deadline dl = php_socket_op_deadline(sock, SO_SNDTIMEO, flags);
+	ssize_t n = php_io_send_ex(o->stream, o->handle, sock->bsd_socket, buf, len, flags, &dl);
+	php_socket_op_errno(n);
+	return n;
+}
+
+static ssize_t php_socket_recv(php_socket *sock, char *buf, size_t len, int flags)
+{
+	php_socket_waiter w = PHP_SOCKET_WAITER(SO_RCVTIMEO);
+	size_t got = 0;
+	ssize_t n;
+#ifdef PHP_WIN32
+	/* Winsock refuses MSG_WAITALL on a non-blocking socket (WSAEOPNOTSUPP);
+	 * the loop below provides it for a Socket that emulates blocking mode */
+	int call_flags = sock->nonblocking_fd ? flags & ~MSG_WAITALL : flags;
+#else
+	int call_flags = flags;
+#endif
+
+	if (!php_socket_op_begin(sock, &w.op)) {
+		return -1;
+	}
+	for (;;) {
+		n = php_socket_recv_once(sock, &w.op, buf + got, len - got, call_flags);
+		if (n > 0) {
+			got += n;
+			if (got < len && (flags & MSG_WAITALL) && !(flags & MSG_PEEK) && PHP_SOCKET_EMULATES_BLOCKING(sock)) {
+				continue;
+			}
+			break;
+		}
+		if (n == 0 || w.op.active || !php_socket_wait_retry(sock, &w, PHP_POLLREADABLE, flags)) {
+			break;
+		}
+	}
+	php_socket_op_end(sock, &w.op);
+	return got > 0 ? (ssize_t) got : n;
+}
+
+/* Only for a Socket that emulates blocking mode: sends everything on a
+ * stream socket like the blocking call */
+static ssize_t php_socket_send_all(php_socket *sock, php_socket_op *o, const char *buf, size_t len,
+		int flags)
+{
+	php_socket_waiter w = PHP_SOCKET_WAITER(SO_SNDTIMEO);
+	size_t sent = 0;
+	ssize_t n;
+
+	w.op = *o;
+	for (;;) {
+		n = php_socket_send_once(sock, o, buf + sent, len - sent, flags);
+		if (n > 0) {
+			sent += n;
+			if (sent == len) {
+				break;
+			}
+#ifdef MSG_DONTWAIT
+			if (flags & MSG_DONTWAIT) {
+				break;
+			}
+#endif
+			continue;
+		}
+		if (n == 0 || o->active || !php_socket_wait_retry(sock, &w, POLLOUT, flags)) {
+			break;
+		}
+	}
+	return sent > 0 ? (ssize_t) sent : n;
+}
+
+static int php_socket_connect(php_socket *sock, const struct sockaddr *addr, socklen_t addrlen)
+{
+	php_socket_op o;
+	if (!php_socket_op_begin(sock, &o)) {
+		return -1;
+	}
+	if (o.active) {
+		php_deadline dl = php_socket_op_deadline(sock, SO_SNDTIMEO, 0);
+		int ret = php_io_connect_ex(o.stream, o.handle, sock->bsd_socket, addr, addrlen, &dl);
+		php_socket_op_end(sock, &o);
+		php_socket_op_errno(ret);
+		if (ret != 0 && errno == PHP_SOCKET_WAIT_TIMEOUT) {
+			set_errno(EINPROGRESS);
+		}
+		return ret;
+	}
+	int ret = connect(sock->bsd_socket, addr, addrlen);
+	if (ret == 0 || !PHP_SOCKET_EMULATES_BLOCKING(sock)) {
+		return ret;
+	}
+#ifdef PHP_WIN32
+	if (errno != WSAEWOULDBLOCK) {
+		return ret;
+	}
+	/* a failed connect is reported in the except set */
+	int events = POLLOUT | POLLPRI;
+#else
+	if (errno != EINPROGRESS) {
+		return ret;
+	}
+	int events = POLLOUT;
+#endif
+
+	php_socket_waiter w = PHP_SOCKET_WAITER(SO_SNDTIMEO);
+	if (!php_socket_wait(sock, &w, events)) {
+#ifndef PHP_WIN32
+		if (errno == EAGAIN) {
+			errno = EINPROGRESS;
+		}
+#endif
+		return -1;
+	}
+
+	int err = 0;
+	socklen_t errlen = sizeof(err);
+	if (getsockopt(sock->bsd_socket, SOL_SOCKET, SO_ERROR, (char *) &err, &errlen) != 0) {
+		return -1;
+	}
+	if (err) {
+		set_errno(err);
+		return -1;
+	}
+	return 0;
+}
 
 static bool php_open_listen_sock(php_socket *sock, unsigned short port, int backlog) /* {{{ */
 {
@@ -273,24 +870,69 @@ static bool php_open_listen_sock(php_socket *sock, unsigned short port, int back
 
 static bool php_accept_connect(php_socket *in_sock, php_socket *out_sock, struct sockaddr *la, socklen_t *la_len) /* {{{ */
 {
+	php_socket_op o;
+	if (!php_socket_op_begin(in_sock, &o)) {
+		return false;
+	}
+	if (o.active) {
+		php_deadline dl = php_socket_op_deadline(in_sock, SO_RCVTIMEO, 0);
+		out_sock->bsd_socket = php_io_accept_ex(o.stream, o.handle, in_sock->bsd_socket, la, la_len, &dl);
+		php_socket_op_end(in_sock, &o);
+		if (IS_INVALID_SOCKET(out_sock)) {
+			if (EG(exception)) {
+				return false;
+			}
+			php_socket_op_errno(-1);
+			PHP_SOCKET_ERROR(out_sock, "unable to accept incoming connection", errno);
+			return false;
+		}
+#ifndef PHP_WIN32
+		int mode = fcntl(out_sock->bsd_socket, F_GETFD);
+		if (mode >= 0 && !(mode & FD_CLOEXEC)) {
+			fcntl(out_sock->bsd_socket, F_SETFD, mode | FD_CLOEXEC);
+		}
+#endif
+		if (!in_sock->blocking) {
+			php_set_sock_blocking(out_sock->bsd_socket, 0);
+		}
+		out_sock->error = 0;
+		out_sock->blocking = 1;
+		out_sock->type = la->sa_family;
+		return true;
+	}
 #if defined(HAVE_ACCEPT4)
 	int flags = SOCK_CLOEXEC;
 	if (!in_sock->blocking) {
 		flags |= SOCK_NONBLOCK;
 	}
 
-	out_sock->bsd_socket = accept4(in_sock->bsd_socket, la, la_len, flags);
+	php_socket_waiter w = PHP_SOCKET_WAITER(SO_RCVTIMEO);
+	socklen_t la_size = *la_len;
+	do {
+		*la_len = la_size;
+		out_sock->bsd_socket = accept4(in_sock->bsd_socket, la, la_len, flags);
+	} while (IS_INVALID_SOCKET(out_sock) && php_socket_wait_retry(in_sock, &w, PHP_POLLREADABLE, 0));
 
 	if (IS_INVALID_SOCKET(out_sock)) {
 		PHP_SOCKET_ERROR(out_sock, "unable to accept incoming connection", errno);
 		return false;
 	}
 #else
-	out_sock->bsd_socket = accept(in_sock->bsd_socket, la, la_len);
+	php_socket_waiter w = PHP_SOCKET_WAITER(SO_RCVTIMEO);
+	socklen_t la_size = *la_len;
+	do {
+		*la_len = la_size;
+		out_sock->bsd_socket = accept(in_sock->bsd_socket, la, la_len);
+	} while (IS_INVALID_SOCKET(out_sock) && php_socket_wait_retry(in_sock, &w, PHP_POLLREADABLE, 0));
 
 	if (IS_INVALID_SOCKET(out_sock)) {
 		PHP_SOCKET_ERROR(out_sock, "unable to accept incoming connection", errno);
 		return false;
+	}
+
+	/* the accepted socket may inherit the mode the stream gave the listening one */
+	if (in_sock->nonblocking_fd) {
+		php_set_sock_blocking(out_sock->bsd_socket, in_sock->blocking);
 	}
 
 #if !defined(PHP_WIN32)
@@ -334,12 +976,16 @@ static int php_read(php_socket *sock, void *buf, size_t maxlen, int flags)
 	char *t = (char *) buf;
 
 #ifndef PHP_WIN32
-	m = fcntl(sock->bsd_socket, F_GETFL);
-	if (m < 0) {
-		return m;
+	if (sock->nonblocking_fd) {
+		nonblock = !sock->blocking;
+	} else {
+		m = fcntl(sock->bsd_socket, F_GETFL);
+		if (m < 0) {
+			return m;
+		}
+		nonblock = (m & O_NONBLOCK);
+		m = 0;
 	}
-	nonblock = (m & O_NONBLOCK);
-	m = 0;
 #else
 	nonblock = !sock->blocking;
 #endif
@@ -366,7 +1012,7 @@ static int php_read(php_socket *sock, void *buf, size_t maxlen, int flags)
 		}
 
 		if (n < maxlen) {
-			m = recv(sock->bsd_socket, (void *) t, 1, flags);
+			m = php_socket_recv(sock, t, 1, flags);
 		}
 
 		if (errno != 0 && errno != ESPIPE && errno != EAGAIN) {
@@ -500,6 +1146,25 @@ static PHP_MINIT_FUNCTION(sockets)
 	address_info_object_handlers.clone_obj = NULL;
 	address_info_object_handlers.compare = zend_objects_not_comparable;
 
+	socket_poll_handle_ce = register_class_SocketPollHandle(php_io_poll_handle_class_entry);
+	socket_poll_handle_ce->create_object = socket_poll_handle_create_object;
+	memcpy(&socket_poll_handle_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	socket_poll_handle_object_handlers.offset = offsetof(php_poll_handle_object, std);
+	socket_poll_handle_object_handlers.free_obj = php_poll_handle_object_free;
+	socket_poll_handle_object_handlers.get_gc = socket_poll_handle_get_gc;
+	socket_poll_handle_object_handlers.clone_obj = NULL;
+	socket_poll_handle_ce->default_object_handlers = &socket_poll_handle_object_handlers;
+
+	socket_poll_weak_handle_ce = register_class_SocketPollWeakHandle(
+			php_io_poll_weak_handle_class_entry);
+	socket_poll_weak_handle_ce->create_object = socket_poll_weak_handle_create_object;
+	memcpy(&socket_poll_weak_handle_object_handlers, &std_object_handlers,
+			sizeof(zend_object_handlers));
+	socket_poll_weak_handle_object_handlers.offset = offsetof(php_poll_handle_object, std);
+	socket_poll_weak_handle_object_handlers.free_obj = php_poll_handle_object_free;
+	socket_poll_weak_handle_object_handlers.clone_obj = NULL;
+	socket_poll_weak_handle_ce->default_object_handlers = &socket_poll_weak_handle_object_handlers;
+
 	register_sockets_symbols(module_number);
 
 	php_socket_sendrecvmsg_init(INIT_FUNC_ARGS_PASSTHRU);
@@ -610,6 +1275,288 @@ static void php_sock_array_from_fd_set(zval *sock_array, fd_set *fds) /* {{{ */
 }
 /* }}} */
 
+/* Under a provider socket_select() is what stream_select() is: a zero-timeout poll() over the
+ * sets first, then one Any op of a Poll member per Socket and a Timer member for the timeout, with
+ * every Socket of the sets frozen for the wait, and the stream a Socket shares its descriptor
+ * with frozen and carried like the Socket's own operations carry it. */
+
+typedef struct php_socket_select_member {
+	php_socket *sock;
+	php_socket_t fd;
+	uint32_t events;
+} php_socket_select_member;
+
+typedef struct php_socket_select_frozen {
+	php_socket **socks;
+	php_stream **streams;
+	uint32_t n_socks, cap_socks, n_streams, cap_streams;
+} php_socket_select_frozen;
+
+static bool php_socket_select_freeze(HashTable *sock_array, php_socket_select_frozen *fz)
+{
+	ZEND_HASH_FOREACH_VAL(sock_array, zval *element) {
+		ZVAL_DEREF(element);
+		php_socket *sock = Z_SOCKET_P(element);
+		bool seen = false;
+		for (uint32_t i = 0; i < fz->n_socks; i++) {
+			if (fz->socks[i] == sock) {
+				seen = true;
+				break;
+			}
+		}
+		if (seen) {
+			continue;
+		}
+		if (php_socket_busy(sock)) {
+			zend_throw_error(NULL, "Concurrent access to a socket");
+			return false;
+		}
+		php_stream *stream = NULL;
+		if (!Z_ISUNDEF(sock->zstream)) {
+			stream = zend_fetch_resource2_ex(&sock->zstream, NULL, php_file_le_stream(),
+					php_file_le_pstream());
+		}
+		if (stream) {
+			if (stream->flags & PHP_STREAM_FLAG_IN_USE) {
+				zend_throw_error(NULL, "Concurrent access to a stream");
+				return false;
+			}
+			if (fz->n_streams == fz->cap_streams) {
+				fz->cap_streams = fz->cap_streams ? fz->cap_streams * 2 : 8;
+				fz->streams = safe_erealloc(fz->streams, fz->cap_streams, sizeof(*fz->streams), 0);
+			}
+			stream->flags |= PHP_STREAM_FLAG_IN_USE;
+			GC_ADDREF(stream->res);
+			fz->streams[fz->n_streams++] = stream;
+		}
+		if (fz->n_socks == fz->cap_socks) {
+			fz->cap_socks = fz->cap_socks ? fz->cap_socks * 2 : 8;
+			fz->socks = safe_erealloc(fz->socks, fz->cap_socks, sizeof(*fz->socks), 0);
+		}
+		sock->in_use = true;
+		fz->socks[fz->n_socks++] = sock;
+	} ZEND_HASH_FOREACH_END();
+	return true;
+}
+
+static void php_socket_select_unfreeze(php_socket_select_frozen *fz)
+{
+	for (uint32_t i = 0; i < fz->n_socks; i++) {
+		fz->socks[i]->in_use = false;
+	}
+	for (uint32_t i = 0; i < fz->n_streams; i++) {
+		zend_resource *res = fz->streams[i]->res;
+		fz->streams[i]->flags &= ~PHP_STREAM_FLAG_IN_USE;
+		zend_list_delete(res);
+	}
+	if (fz->socks) {
+		efree(fz->socks);
+	}
+	if (fz->streams) {
+		efree(fz->streams);
+	}
+}
+
+static void php_socket_select_collect(HashTable *sock_array, uint32_t events,
+		php_socket_select_member **members, uint32_t *n, uint32_t *cap)
+{
+	ZEND_HASH_FOREACH_VAL(sock_array, zval *element) {
+		ZVAL_DEREF(element);
+		php_socket *sock = Z_SOCKET_P(element);
+		php_socket_t fd = (php_socket_t) sock->bsd_socket;
+		bool merged = false;
+		for (uint32_t i = 0; i < *n; i++) {
+			if ((*members)[i].fd == fd) {
+				(*members)[i].events |= events;
+				merged = true;
+				break;
+			}
+		}
+		if (!merged) {
+			if (*n == *cap) {
+				*cap = *cap ? *cap * 2 : 8;
+				*members = safe_erealloc(*members, *cap, sizeof(**members), 0);
+			}
+			(*members)[*n].sock = sock;
+			(*members)[*n].fd = fd;
+			(*members)[*n].events = events;
+			(*n)++;
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+
+/* What the queue of the socket's pairs holds itself, on the stream it was imported from or on
+ * its handle: the connections a multishot accept took, which no poll reports */
+static uint32_t php_socket_held_events(php_socket *sock, uint32_t events)
+{
+	if (!Z_ISUNDEF(sock->zstream)) {
+		php_stream *stream = zend_fetch_resource2_ex(&sock->zstream, NULL, php_file_le_stream(),
+				php_file_le_pstream());
+		if (stream) {
+			return php_io_held_events(stream->io_registrations, events);
+		}
+	}
+	if (sock->weak_handle) {
+		php_poll_handle_object *handle = PHP_POLL_HANDLE_OBJ_FROM_ZOBJ(sock->weak_handle);
+		return php_io_held_events(handle->registrations, events);
+	}
+	return 0;
+}
+
+/* Returns the number of ready descriptors, 0 on timeout, -1 with errno */
+static int php_socket_select_any(zval *r_array, zval *w_array, zval *e_array, struct timeval *tv,
+		fd_set *rfds, fd_set *wfds, fd_set *efds)
+{
+	php_socket_select_member *members = NULL;
+	uint32_t n = 0, cap = 0;
+	bool priority = php_poll_backend_supports_priority(PHP_POLL_BACKEND_AUTO);
+	php_socket_select_frozen fz = { NULL, NULL, 0, 0, 0, 0 };
+
+	if ((r_array && !php_socket_select_freeze(Z_ARRVAL_P(r_array), &fz))
+			|| (w_array && !php_socket_select_freeze(Z_ARRVAL_P(w_array), &fz))
+			|| (e_array && !php_socket_select_freeze(Z_ARRVAL_P(e_array), &fz))) {
+		php_socket_select_unfreeze(&fz);
+		set_errno(ECANCELED);
+		return -1;
+	}
+
+	if (r_array) {
+		php_socket_select_collect(Z_ARRVAL_P(r_array), PHP_POLL_READ, &members, &n, &cap);
+	}
+	if (w_array) {
+		php_socket_select_collect(Z_ARRVAL_P(w_array), PHP_POLL_WRITE, &members, &n, &cap);
+	}
+	if (e_array) {
+		php_socket_select_collect(Z_ARRVAL_P(e_array), priority ? PHP_POLL_PRI : 0, &members, &n, &cap);
+	}
+
+	bool checked = false;
+	if (n > 0) {
+		php_pollfd stack[16];
+		php_pollfd *fds = n > sizeof(stack) / sizeof(stack[0]) ? safe_emalloc(n, sizeof(*fds), 0) : stack;
+		for (uint32_t i = 0; i < n; i++) {
+			fds[i].fd = members[i].fd;
+			fds[i].events = ((members[i].events & PHP_POLL_READ) ? POLLIN : 0)
+					| ((members[i].events & PHP_POLL_WRITE) ? POLLOUT : 0)
+					| ((members[i].events & PHP_POLL_PRI) ? POLLPRI : 0);
+			fds[i].revents = 0;
+		}
+		int ready = php_poll2(fds, n, 0);
+		int found = 0;
+		if (ready >= 0) {
+			for (uint32_t i = 0; i < n; i++) {
+				short revents = ready > 0 ? fds[i].revents : 0;
+				if (revents & POLLNVAL) {
+					found = 0;
+					break;
+				}
+				uint32_t held = php_socket_held_events(members[i].sock, members[i].events);
+				if (((revents & (POLLIN | POLLHUP | POLLERR)) || (held & PHP_POLL_READ))
+						&& (members[i].events & PHP_POLL_READ)) {
+					PHP_SAFE_FD_SET(members[i].fd, rfds);
+					found++;
+				}
+				if ((revents & (POLLOUT | POLLERR)) && (members[i].events & PHP_POLL_WRITE)) {
+					PHP_SAFE_FD_SET(members[i].fd, wfds);
+					found++;
+				}
+				if ((revents & POLLPRI) && (members[i].events & PHP_POLL_PRI)) {
+					PHP_SAFE_FD_SET(members[i].fd, efds);
+					found++;
+				}
+			}
+		}
+		if (fds != stack) {
+			efree(fds);
+		}
+		if (found > 0 || (ready == 0 && tv && tv->tv_sec == 0 && tv->tv_usec == 0)) {
+			efree(members);
+			php_socket_select_unfreeze(&fz);
+			return found;
+		}
+		checked = ready == 0;
+	}
+
+	php_io_op *ops = safe_emalloc(n + 1, sizeof(php_io_op), 0);
+	php_io_op **op_ptrs = safe_emalloc(n + 1, sizeof(php_io_op *), 0);
+	php_io_op_result *results = safe_emalloc(n + 1, sizeof(php_io_op_result), 0);
+	uint32_t n_members = 0;
+
+	for (uint32_t i = 0; i < n; i++) {
+		if (members[i].events == 0) {
+			continue;
+		}
+		php_socket *sock = members[i].sock;
+		php_stream *stream = NULL;
+		if (!Z_ISUNDEF(sock->zstream)) {
+			stream = zend_fetch_resource2_ex(&sock->zstream, NULL, php_file_le_stream(),
+					php_file_le_pstream());
+		}
+		php_io_op_poll(&ops[n_members], stream ? NULL : php_socket_get_weak_handle(sock), members[i].fd,
+				members[i].events, php_io_deadline_infinite());
+		ops[n_members].stream = stream;
+		if (checked) {
+			ops[n_members].flags |= PHP_IO_OP_F_CHECKED;
+		}
+		op_ptrs[n_members] = &ops[n_members];
+		n_members++;
+	}
+	uint32_t timer_index = UINT32_MAX;
+	if (tv) {
+		php_io_op_timer(&ops[n_members], php_io_deadline_from_timeval(tv));
+		op_ptrs[n_members] = &ops[n_members];
+		timer_index = n_members;
+		n_members++;
+	}
+
+	int ret = 0;
+	if (n_members == 0) {
+		set_errno(EINVAL);
+		ret = -1;
+	} else {
+		php_io_op any;
+		php_io_op_result any_result;
+		php_io_op_any(&any, op_ptrs, n_members, results);
+		if (php_io_run(&any, &any_result) == FAILURE) {
+			set_errno(ECANCELED);
+			ret = -1;
+		} else if (any_result.status == PHP_IO_INTERRUPTED) {
+			set_errno(EINTR);
+			ret = -1;
+		} else {
+			for (uint32_t i = 0; i < any.u.any.n_results; i++) {
+				uint32_t index = results[i].index;
+				if (index == timer_index || (results[i].status != PHP_IO_DONE && results[i].status != PHP_IO_READY)) {
+					continue;
+				}
+				php_socket_t fd = ops[index].fd;
+				uint32_t revents = (uint32_t) results[i].res;
+				if ((revents & (PHP_POLL_READ | PHP_POLL_HUP | PHP_POLL_ERROR)) && (ops[index].u.poll.events & PHP_POLL_READ)) {
+					PHP_SAFE_FD_SET(fd, rfds);
+					ret++;
+				}
+				if ((revents & (PHP_POLL_WRITE | PHP_POLL_ERROR)) && (ops[index].u.poll.events & PHP_POLL_WRITE)) {
+					PHP_SAFE_FD_SET(fd, wfds);
+					ret++;
+				}
+				if ((revents & PHP_POLL_PRI) && (ops[index].u.poll.events & PHP_POLL_PRI)) {
+					PHP_SAFE_FD_SET(fd, efds);
+					ret++;
+				}
+			}
+		}
+	}
+
+	efree(results);
+	efree(op_ptrs);
+	efree(ops);
+	if (members) {
+		efree(members);
+	}
+	php_socket_select_unfreeze(&fz);
+	return ret;
+}
+
 /* {{{ Runs the select() system call on the sets mentioned with a timeout specified by tv_sec and tv_usec */
 PHP_FUNCTION(socket_select)
 {
@@ -686,7 +1633,17 @@ PHP_FUNCTION(socket_select)
 		tv_p = &tv;
 	}
 
-	retval = select(max_fd+1, &rfds, &wfds, &efds, tv_p);
+	if (php_io_hooks_active()) {
+		FD_ZERO(&rfds);
+		FD_ZERO(&wfds);
+		FD_ZERO(&efds);
+		retval = php_socket_select_any(r_array, w_array, e_array, tv_p, &rfds, &wfds, &efds);
+		if (retval == -1 && EG(exception)) {
+			RETURN_THROWS();
+		}
+	} else {
+		retval = select(max_fd+1, &rfds, &wfds, &efds, tv_p);
+	}
 
 	if (retval == -1) {
 		SOCKETS_G(last_error) = errno;
@@ -752,6 +1709,9 @@ PHP_FUNCTION(socket_accept)
 
 	if (!php_accept_connect(php_sock, new_sock, (struct sockaddr*)&sa, &php_sa_len)) {
 		zval_ptr_dtor(return_value);
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
 		RETURN_FALSE;
 	}
 }
@@ -781,6 +1741,12 @@ PHP_FUNCTION(socket_set_nonblock)
 				RETURN_TRUE;
 			}
 		}
+	}
+
+	/* A descriptor switched for a provider keeps its mode: the change is logical */
+	if (php_sock->nonblocking_fd && Z_ISUNDEF(php_sock->zstream)) {
+		php_sock->blocking = 0;
+		RETURN_TRUE;
 	}
 
 	if (php_set_sock_blocking(php_sock->bsd_socket, 0) == SUCCESS) {
@@ -819,6 +1785,11 @@ PHP_FUNCTION(socket_set_block)
 				RETURN_TRUE;
 			}
 		}
+	}
+
+	if (php_sock->nonblocking_fd && Z_ISUNDEF(php_sock->zstream)) {
+		php_sock->blocking = 1;
+		RETURN_TRUE;
 	}
 
 	if (php_set_sock_blocking(php_sock->bsd_socket, 1) == SUCCESS) {
@@ -866,7 +1837,10 @@ PHP_FUNCTION(socket_close)
 
 	php_socket *socket = Z_SOCKET_P(arg1);
 	ENSURE_SOCKET_VALID(socket);
+	ENSURE_SOCKET_FREE(socket);
 
+	php_socket_drain(socket);
+	php_socket_release_io(socket);
 	if (!Z_ISUNDEF(socket->zstream)) {
 		php_stream *stream = NULL;
 		php_stream_from_zval_no_verify(stream, &socket->zstream);
@@ -918,13 +1892,27 @@ PHP_FUNCTION(socket_write)
 		length = str_len;
 	}
 
+	php_socket_op o;
+	if (!php_socket_op_begin(php_sock, &o)) {
+		RETURN_THROWS();
+	}
+	if (PHP_SOCKET_EMULATES_BLOCKING(php_sock)) {
+		retval = php_socket_send_all(php_sock, &o, str, MIN(length, str_len), 0);
+	} else if (o.active) {
+		retval = php_socket_send_once(php_sock, &o, str, MIN(length, str_len), 0);
+	} else {
 #ifndef PHP_WIN32
-	retval = write(php_sock->bsd_socket, str, MIN(length, str_len));
+		retval = write(php_sock->bsd_socket, str, MIN(length, str_len));
 #else
-	retval = send(php_sock->bsd_socket, str, min(length, str_len), 0);
+		retval = send(php_sock->bsd_socket, str, min(length, str_len), 0);
 #endif
+	}
+	php_socket_op_end(php_sock, &o);
 
 	if (retval < 0) {
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
 		PHP_SOCKET_ERROR(php_sock, "unable to write to socket", errno);
 		RETURN_FALSE;
 	}
@@ -962,10 +1950,14 @@ PHP_FUNCTION(socket_read)
 	if (type == PHP_NORMAL_READ) {
 		retval = php_read(php_sock, ZSTR_VAL(tmpbuf), length, 0);
 	} else {
-		retval = recv(php_sock->bsd_socket, ZSTR_VAL(tmpbuf), length, 0);
+		retval = php_socket_recv(php_sock, ZSTR_VAL(tmpbuf), length, 0);
 	}
 
 	if (retval == -1) {
+		if (EG(exception)) {
+			zend_string_efree(tmpbuf);
+			RETURN_THROWS();
+		}
 		/* if the socket is in non-blocking mode and there's no data to read,
 		don't output any error, as this is a normal situation, and not an error */
 		if (PHP_IS_TRANSIENT_ERROR(errno)) {
@@ -1244,7 +2236,7 @@ PHP_FUNCTION(socket_connect)
 				RETURN_FALSE;
 			}
 
-			retval = connect(php_sock->bsd_socket, (struct sockaddr *)&sin6, sizeof(struct sockaddr_in6));
+			retval = php_socket_connect(php_sock, (struct sockaddr *)&sin6, sizeof(struct sockaddr_in6));
 			break;
 		}
 #endif
@@ -1263,7 +2255,7 @@ PHP_FUNCTION(socket_connect)
 				RETURN_FALSE;
 			}
 
-			retval = connect(php_sock->bsd_socket, (struct sockaddr *)&sin, sizeof(struct sockaddr_in));
+			retval = php_socket_connect(php_sock, (struct sockaddr *)&sin, sizeof(struct sockaddr_in));
 			break;
 		}
 
@@ -1277,7 +2269,7 @@ PHP_FUNCTION(socket_connect)
 
 			s_un.sun_family = AF_UNIX;
 			memcpy(&s_un.sun_path, ZSTR_VAL(addr), ZSTR_LEN(addr));
-			retval = connect(php_sock->bsd_socket, (struct sockaddr *) &s_un,
+			retval = php_socket_connect(php_sock, (struct sockaddr *) &s_un,
 				(socklen_t)(offsetof(struct sockaddr_un, sun_path) + ZSTR_LEN(addr)));
 			break;
 		}
@@ -1288,6 +2280,9 @@ PHP_FUNCTION(socket_connect)
 		}
 
 	if (retval != 0) {
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
 		PHP_SOCKET_ERROR(php_sock, "unable to connect", errno);
 		RETURN_FALSE;
 	}
@@ -1445,7 +2440,7 @@ PHP_FUNCTION(socket_recv)
 
 	recv_buf = zend_string_alloc(len, 0);
 
-	if ((retval = recv(php_sock->bsd_socket, ZSTR_VAL(recv_buf), len, flags)) < 1) {
+	if ((retval = php_socket_recv(php_sock, ZSTR_VAL(recv_buf), len, flags)) < 1) {
 		zend_string_efree(recv_buf);
 		ZEND_TRY_ASSIGN_REF_NULL(buf);
 	} else {
@@ -1455,6 +2450,9 @@ PHP_FUNCTION(socket_recv)
 	}
 
 	if (retval == -1) {
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
 		PHP_SOCKET_ERROR(php_sock, "Unable to read from socket", errno);
 		RETURN_FALSE;
 	}
@@ -1487,9 +2485,23 @@ PHP_FUNCTION(socket_send)
 		RETURN_THROWS();
 	}
 
-	retval = send(php_sock->bsd_socket, buf, (buf_len < (size_t)len ? buf_len : (size_t)len), flags);
+	php_socket_op o;
+	if (!php_socket_op_begin(php_sock, &o)) {
+		RETURN_THROWS();
+	}
+	if (PHP_SOCKET_EMULATES_BLOCKING(php_sock)) {
+		retval = php_socket_send_all(php_sock, &o, buf, (buf_len < (size_t)len ? buf_len : (size_t)len), flags);
+	} else if (o.active) {
+		retval = php_socket_send_once(php_sock, &o, buf, (buf_len < (size_t)len ? buf_len : (size_t)len), flags);
+	} else {
+		retval = send(php_sock->bsd_socket, buf, (buf_len < (size_t)len ? buf_len : (size_t)len), flags);
+	}
+	php_socket_op_end(php_sock, &o);
 
 	if (retval == (size_t)-1) {
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
 		PHP_SOCKET_ERROR(php_sock, "Unable to write to socket", errno);
 		RETURN_FALSE;
 	}
@@ -1517,6 +2529,7 @@ PHP_FUNCTION(socket_recvfrom)
 	zend_long			length, flags;
 	const char			*address;
 	zend_string			*recv_buf;
+	php_socket_waiter	w = PHP_SOCKET_WAITER(SO_RCVTIMEO);
 
 	ZEND_PARSE_PARAMETERS_START(5, 6)
 		Z_PARAM_OBJECT_OF_CLASS(zsocket, socket_ce)
@@ -1579,9 +2592,18 @@ PHP_FUNCTION(socket_recvfrom)
 			memset(&s_un, 0, slen);
 			s_un.sun_family = AF_UNIX;
 
-			retval = recvfrom(php_sock->bsd_socket, ZSTR_VAL(recv_buf), length, flags, (struct sockaddr *)&s_un, (socklen_t *)&slen);
+			if (!php_socket_op_begin(php_sock, &w.op)) {
+				RETURN_THROWS();
+			}
+			do {
+				retval = recvfrom(php_sock->bsd_socket, ZSTR_VAL(recv_buf), length, flags, (struct sockaddr *)&s_un, (socklen_t *)&slen);
+			} while (retval == -1 && php_socket_wait_retry(php_sock, &w, PHP_POLLREADABLE, flags));
+			php_socket_op_end(php_sock, &w.op);
 
 			if (retval < 0) {
+				if (EG(exception)) {
+					RETURN_THROWS();
+				}
 				PHP_SOCKET_ERROR(php_sock, "Unable to recvfrom", errno);
 				zend_string_efree(recv_buf);
 				RETURN_FALSE;
@@ -1607,9 +2629,18 @@ PHP_FUNCTION(socket_recvfrom)
 				RETURN_THROWS();
 			}
 
-			retval = recvfrom(php_sock->bsd_socket, ZSTR_VAL(recv_buf), length, flags, (struct sockaddr *)&sin, (socklen_t *)&slen);
+			if (!php_socket_op_begin(php_sock, &w.op)) {
+				RETURN_THROWS();
+			}
+			do {
+				retval = recvfrom(php_sock->bsd_socket, ZSTR_VAL(recv_buf), length, flags, (struct sockaddr *)&sin, (socklen_t *)&slen);
+			} while (retval == -1 && php_socket_wait_retry(php_sock, &w, PHP_POLLREADABLE, flags));
+			php_socket_op_end(php_sock, &w.op);
 
 			if (retval < 0) {
+				if (EG(exception)) {
+					RETURN_THROWS();
+				}
 				PHP_SOCKET_ERROR(php_sock, "Unable to recvfrom", errno);
 				zend_string_efree(recv_buf);
 				RETURN_FALSE;
@@ -1638,9 +2669,18 @@ PHP_FUNCTION(socket_recvfrom)
 				RETURN_THROWS();
 			}
 
-			retval = recvfrom(php_sock->bsd_socket, ZSTR_VAL(recv_buf), length, flags, (struct sockaddr *)&sin6, (socklen_t *)&slen);
+			if (!php_socket_op_begin(php_sock, &w.op)) {
+				RETURN_THROWS();
+			}
+			do {
+				retval = recvfrom(php_sock->bsd_socket, ZSTR_VAL(recv_buf), length, flags, (struct sockaddr *)&sin6, (socklen_t *)&slen);
+			} while (retval == -1 && php_socket_wait_retry(php_sock, &w, PHP_POLLREADABLE, flags));
+			php_socket_op_end(php_sock, &w.op);
 
 			if (retval < 0) {
+				if (EG(exception)) {
+					RETURN_THROWS();
+				}
 				PHP_SOCKET_ERROR(php_sock, "unable to recvfrom", errno);
 				zend_string_efree(recv_buf);
 				RETURN_FALSE;
@@ -1662,9 +2702,18 @@ PHP_FUNCTION(socket_recvfrom)
 			slen = sizeof(sll);
 			memset(&sll, 0, slen);
 
-			retval = recvfrom(php_sock->bsd_socket, ZSTR_VAL(recv_buf), length, flags, (struct sockaddr *)&sll, (socklen_t *)&slen);
+			if (!php_socket_op_begin(php_sock, &w.op)) {
+				RETURN_THROWS();
+			}
+			do {
+				retval = recvfrom(php_sock->bsd_socket, ZSTR_VAL(recv_buf), length, flags, (struct sockaddr *)&sll, (socklen_t *)&slen);
+			} while (retval == -1 && php_socket_wait_retry(php_sock, &w, PHP_POLLREADABLE, flags));
+			php_socket_op_end(php_sock, &w.op);
 
 			if (retval < 0) {
+				if (EG(exception)) {
+					RETURN_THROWS();
+				}
 				PHP_SOCKET_ERROR(php_sock, "unable to recvfrom", errno);
 				zend_string_efree(recv_buf);
 				RETURN_FALSE;
@@ -1712,6 +2761,7 @@ PHP_FUNCTION(socket_sendto)
 	int					retval;
 	size_t              buf_len;
 	zend_long			len, flags, port = 0;
+	php_socket_waiter	w = PHP_SOCKET_WAITER(SO_SNDTIMEO);
 	bool           port_is_null = 1;
 	char				*buf;
 	zend_string *addr;
@@ -1757,7 +2807,13 @@ PHP_FUNCTION(socket_sendto)
 			s_un.sun_family = AF_UNIX;
 			memcpy(s_un.sun_path, ZSTR_VAL(addr), ZSTR_LEN(addr) + 1);
 
-			retval = sendto(php_sock->bsd_socket, buf, ((size_t)len > buf_len) ? buf_len : (size_t)len,	flags, (struct sockaddr *) &s_un, SUN_LEN(&s_un));
+			if (!php_socket_op_begin(php_sock, &w.op)) {
+				RETURN_THROWS();
+			}
+			do {
+				retval = sendto(php_sock->bsd_socket, buf, ((size_t)len > buf_len) ? buf_len : (size_t)len,	flags, (struct sockaddr *) &s_un, SUN_LEN(&s_un));
+			} while (retval == -1 && php_socket_wait_retry(php_sock, &w, POLLOUT, flags));
+			php_socket_op_end(php_sock, &w.op);
 			break;
 
 		case AF_INET:
@@ -1774,7 +2830,13 @@ PHP_FUNCTION(socket_sendto)
 				RETURN_FALSE;
 			}
 
-			retval = sendto(php_sock->bsd_socket, buf, ((size_t)len > buf_len) ? buf_len : (size_t)len, flags, (struct sockaddr *) &sin, sizeof(sin));
+			if (!php_socket_op_begin(php_sock, &w.op)) {
+				RETURN_THROWS();
+			}
+			do {
+				retval = sendto(php_sock->bsd_socket, buf, ((size_t)len > buf_len) ? buf_len : (size_t)len, flags, (struct sockaddr *) &sin, sizeof(sin));
+			} while (retval == -1 && php_socket_wait_retry(php_sock, &w, POLLOUT, flags));
+			php_socket_op_end(php_sock, &w.op);
 			break;
 #ifdef HAVE_IPV6
 		case AF_INET6:
@@ -1791,7 +2853,13 @@ PHP_FUNCTION(socket_sendto)
 				RETURN_FALSE;
 			}
 
-			retval = sendto(php_sock->bsd_socket, buf, ((size_t)len > buf_len) ? buf_len : (size_t)len, flags, (struct sockaddr *) &sin6, sizeof(sin6));
+			if (!php_socket_op_begin(php_sock, &w.op)) {
+				RETURN_THROWS();
+			}
+			do {
+				retval = sendto(php_sock->bsd_socket, buf, ((size_t)len > buf_len) ? buf_len : (size_t)len, flags, (struct sockaddr *) &sin6, sizeof(sin6));
+			} while (retval == -1 && php_socket_wait_retry(php_sock, &w, POLLOUT, flags));
+			php_socket_op_end(php_sock, &w.op);
 			break;
 #endif
 #ifdef AF_PACKET
@@ -1805,7 +2873,13 @@ PHP_FUNCTION(socket_sendto)
 			sll.sll_family = AF_PACKET;
 			sll.sll_ifindex = (int)port;
 
-			retval = sendto(php_sock->bsd_socket, buf, ((size_t)len > buf_len) ? buf_len : (size_t)len, flags, (struct sockaddr *)&sll, sizeof(sll));
+			if (!php_socket_op_begin(php_sock, &w.op)) {
+				RETURN_THROWS();
+			}
+			do {
+				retval = sendto(php_sock->bsd_socket, buf, ((size_t)len > buf_len) ? buf_len : (size_t)len, flags, (struct sockaddr *)&sll, sizeof(sll));
+			} while (retval == -1 && php_socket_wait_retry(php_sock, &w, POLLOUT, flags));
+			php_socket_op_end(php_sock, &w.op);
 			break;
 #endif
 		default:
@@ -1814,6 +2888,9 @@ PHP_FUNCTION(socket_sendto)
 	}
 
 	if (retval == -1) {
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
 		PHP_SOCKET_ERROR(php_sock, "Unable to write to socket", errno);
 		RETURN_FALSE;
 	}
@@ -2424,6 +3501,7 @@ default_case:
 		PHP_SOCKET_ERROR(php_sock, "Unable to set socket option", errno);
 		RETURN_FALSE;
 	}
+	php_sock->rcvtimeo_known = php_sock->sndtimeo_known = false;
 
 	RETURN_TRUE;
 }
@@ -2519,6 +3597,7 @@ PHP_FUNCTION(socket_shutdown)
 
 	php_sock = Z_SOCKET_P(arg1);
 	ENSURE_SOCKET_VALID(php_sock);
+	ENSURE_SOCKET_FREE(php_sock);
 
 	if (how_shutdown < SHUT_RD || how_shutdown > SHUT_RDWR) {
 		zend_argument_value_error(2, "must be one of SHUT_RD, SHUT_WR or SHUT_RDWR");
@@ -2675,16 +3754,22 @@ PHP_FUNCTION(socket_import_stream)
 		RETURN_FALSE;
 	}
 
+	/* socket streams keep the descriptor non-blocking and report their own mode */
+	zval meta;
+	array_init(&meta);
+	if (php_stream_set_option(stream, PHP_STREAM_OPTION_META_DATA_API, 0, &meta) == PHP_STREAM_OPTION_RETURN_OK) {
+		zval *blocked = zend_hash_str_find(Z_ARRVAL(meta), "blocked", sizeof("blocked") - 1);
 #ifdef PHP_WIN32
-	/* on windows, check if the stream is a socket stream and read its
-	 * private data; otherwise assume it's in non-blocking mode */
-	if (php_stream_is(stream, PHP_STREAM_IS_SOCKET)) {
-		retsock->blocking =
-				((php_netstream_data_t *)stream->abstract)->is_blocked;
-	} else {
-		retsock->blocking = 1;
-	}
+		retsock->blocking = blocked ? zend_is_true(blocked) : 1;
+		retsock->nonblocking_fd = blocked != NULL;
+#else
+		if (blocked && !retsock->blocking) {
+			retsock->blocking = zend_is_true(blocked);
+			retsock->nonblocking_fd = true;
+		}
 #endif
+	}
+	zval_ptr_dtor(&meta);
 
 	/* hold a zval reference to the stream (holding a php_stream* directly could
 	 * also be done, but this makes socket_export_stream a bit simpler) */
@@ -2783,6 +3868,16 @@ PHP_FUNCTION(socket_export_stream)
 	stream_data->is_blocked = socket->blocking;
 	stream_data->timeout.tv_sec = FG(default_socket_timeout);
 	stream_data->timeout.tv_usec = 0;
+	stream_data->restore_blocking = false;
+	php_netstream_set_nonblocking(stream_data);
+#ifdef PHP_WIN32
+	stream_data->restore_blocking = socket->blocking;
+#endif
+	socket->nonblocking_fd = true;
+	/* The stream is the registrant from now on */
+	if (socket->weak_handle) {
+		php_io_unregister_all(&PHP_POLL_HANDLE_OBJ_FROM_ZOBJ(socket->weak_handle)->registrations);
+	}
 
 	php_stream_to_zval(stream, &socket->zstream);
 

@@ -37,6 +37,9 @@ static uint32_t poll_events_to_native(uint32_t events)
 	if (events & PHP_POLL_HUP) {
 		native |= POLLHUP;
 	}
+	if (events & PHP_POLL_PRI) {
+		native |= POLLPRI;
+	}
 	return native;
 }
 
@@ -57,6 +60,9 @@ static uint32_t poll_events_from_native(uint32_t native)
 	}
 	if (native & POLLNVAL) {
 		events |= PHP_POLL_ERROR; /* Map invalid FD to error */
+	}
+	if (native & POLLPRI) {
+		events |= PHP_POLL_PRI;
 	}
 	return events;
 }
@@ -172,6 +178,11 @@ static bool poll_build_fds_callback(int fd, php_poll_fd_entry *entry, void *user
 {
 	poll_build_context *ctx = (poll_build_context *) user_data;
 
+	/* A fired one-shot registration stays disarmed until it is modified */
+	if (entry->events == 0) {
+		return true;
+	}
+
 	ctx->fds[ctx->index].fd = fd;
 	ctx->fds[ctx->index].events
 			= poll_events_to_native(entry->events & ~(PHP_POLL_ET | PHP_POLL_ONESHOT));
@@ -179,6 +190,18 @@ static bool poll_build_fds_callback(int fd, php_poll_fd_entry *entry, void *user
 	ctx->index++;
 
 	return true;
+}
+
+/* Nothing armed: wait out the timeout the way poll(2) does with an empty
+ * set, so a signal interrupts it and no timeout blocks like the other
+ * backends do */
+static int poll_backend_wait_nothing(php_poll_ctx *ctx, const struct timespec *timeout)
+{
+	if (poll(NULL, 0, php_poll_timespec_to_ms(timeout)) < 0) {
+		php_poll_set_current_errno_error(ctx);
+		return -1;
+	}
+	return 0;
 }
 
 static int poll_backend_wait(
@@ -189,10 +212,7 @@ static int poll_backend_wait(
 
 	int fd_count = php_poll_fd_table_count(backend_data->fd_table);
 	if (fd_count == 0) {
-		if (timeout != NULL && (timeout->tv_sec > 0 || timeout->tv_nsec > 0)) {
-			nanosleep(timeout, NULL);
-		}
-		return 0;
+		return poll_backend_wait_nothing(ctx, timeout);
 	}
 
 	/* Ensure temp_fds array is large enough */
@@ -210,6 +230,10 @@ static int poll_backend_wait(
 	/* Build struct pollfd array from fd_table */
 	poll_build_context build_ctx = { .fds = backend_data->temp_fds, .index = 0 };
 	php_poll_fd_table_foreach(backend_data->fd_table, poll_build_fds_callback, &build_ctx);
+	fd_count = build_ctx.index;
+	if (fd_count == 0) {
+		return poll_backend_wait_nothing(ctx, timeout);
+	}
 
 	/* Convert timespec to milliseconds (poll() only supports ms resolution) */
 	int timeout_ms = php_poll_timespec_to_ms(timeout);
@@ -230,26 +254,26 @@ static int poll_backend_wait(
 		if (pfd->revents != 0) {
 			php_poll_fd_entry *entry = php_poll_fd_table_find(backend_data->fd_table, pfd->fd);
 			if (entry) {
-				/* Handle POLLNVAL by automatically removing the invalid FD */
-				if (pfd->revents & POLLNVAL) {
-					php_poll_fd_table_remove(backend_data->fd_table, pfd->fd);
-					continue; /* Don't report this event */
-				}
-
 				events[event_count].fd = pfd->fd;
 				events[event_count].events = entry->events;
 				events[event_count].revents = poll_events_from_native(pfd->revents);
 				events[event_count].data = entry->data;
 				event_count++;
+				if (pfd->revents & POLLNVAL) {
+					/* Not an open descriptor: reported once as an error, then
+					 * disarmed like a fired one-shot until it is modified */
+					entry->events = 0;
+				}
 			}
 		}
 	}
 
-	/* Handle oneshot removals */
+	/* A fired one-shot registration is disarmed, not dropped, so that a
+	 * modify can re-arm it as on epoll */
 	for (int i = 0; i < event_count; i++) {
 		php_poll_fd_entry *entry = php_poll_fd_table_find(backend_data->fd_table, events[i].fd);
 		if (entry && (entry->events & PHP_POLL_ONESHOT) && events[i].revents != 0) {
-			php_poll_fd_table_remove(backend_data->fd_table, events[i].fd);
+			entry->events = 0;
 		}
 	}
 
@@ -285,6 +309,12 @@ const php_poll_backend_ops php_poll_backend_poll_ops = {
 	.is_available = poll_backend_is_available,
 	.get_suitable_max_events = poll_backend_get_suitable_max_events,
 	.supports_et = false,
+#ifdef __APPLE__
+	/* Darwin's poll() never reports POLLPRI for urgent data */
+	.supports_priority = false,
+#else
+	.supports_priority = true,
+#endif
 };
 
 #endif

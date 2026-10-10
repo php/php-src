@@ -249,6 +249,27 @@ static int _php_stream_free_persistent(zval *zv, void *pStream)
 
 static int php_stream_flush_ex(php_stream *stream, bool closing);
 
+/* While the descriptor is still open: the watchers and the handle stop reporting, the
+ * registrations end with the provider's remove() per pair, then the stream drops its handle */
+static void php_stream_release_io(php_stream *stream)
+{
+	zend_object *handle_obj = stream->weak_poll_handle;
+
+	if (stream->poll_watchers) {
+		php_io_poll_stream_notify_close(stream);
+	}
+	if (handle_obj) {
+		php_stream_poll_weak_handle_notify(handle_obj);
+	}
+	if (stream->io_registrations) {
+		php_io_unregister_all(&stream->io_registrations);
+	}
+	if (handle_obj) {
+		stream->weak_poll_handle = NULL;
+		OBJ_RELEASE(handle_obj);
+	}
+}
+
 PHPAPI int php_stream_free(php_stream *stream, int close_options) /* {{{ */
 {
 	int ret = 1;
@@ -283,6 +304,13 @@ PHPAPI int php_stream_free(php_stream *stream, int close_options) /* {{{ */
 	}
 
 #endif
+
+	/* Only the resource destructor cannot be refused; it runs with the resource cleared */
+	if (UNEXPECTED(php_io_stream_busy(stream)) && !((close_options & PHP_STREAM_FREE_RSRC_DTOR)
+			&& stream->res && stream->res->type < 0)) {
+		zend_throw_error(NULL, "Concurrent access to a stream");
+		return EOF;
+	}
 
 	if (stream->in_free) {
 		/* hopefully called recursively from the enclosing stream; the pointer was NULLed below */
@@ -333,6 +361,12 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 		(close_options & PHP_STREAM_FREE_RSRC_DTOR) == 0);
 #endif
 
+	/* An operation a queue kept past its frame must settle before the flush
+	 * reuses the stream and the close frees the buffer */
+	if ((close_options & PHP_STREAM_FREE_CALL_DTOR) && (stream->flags & PHP_STREAM_FLAG_IN_USE)) {
+		php_io_stream_drain(stream);
+	}
+
 	int flush_result;
 	if (stream->flags & PHP_STREAM_FLAG_WAS_WRITTEN || stream->writefilters.head) {
 		/* make sure everything is saved */
@@ -369,10 +403,7 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 			return ret;
 		}
 
-		/* Watchers must unregister while the fd is still open */
-		if (stream->poll_watchers) {
-			php_io_poll_stream_notify_close(stream);
-		}
+		php_stream_release_io(stream);
 
 		ret = stream->ops->close(stream, preserve_handle ? 0 : 1);
 		if (!ret) {
@@ -389,9 +420,7 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 	}
 
 	if (close_options & PHP_STREAM_FREE_RELEASE_STREAM) {
-		if (stream->poll_watchers) {
-			php_io_poll_stream_notify_close(stream);
-		}
+		php_stream_release_io(stream);
 
 		while (stream->readfilters.head) {
 			if (stream->readfilters.head->res != NULL) {
@@ -619,6 +648,16 @@ out_is_eof:
 		php_stream_notify_completed(PHP_STREAM_CONTEXT(stream));
 	}
 	return retval;
+}
+
+PHPAPI void php_stream_read_buffer_commit(php_stream *stream, size_t len)
+{
+	if (len == 0) {
+		stream->eof = 1;
+		return;
+	}
+	ZEND_ASSERT(stream->readbuf && stream->writepos + len <= stream->readbuflen);
+	stream->writepos += len;
 }
 
 PHPAPI ssize_t php_stream_read(php_stream *stream, char *buf, size_t size)
@@ -1684,10 +1723,16 @@ PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *de
 			src->writepos == src->readpos && dest->writepos == dest->readpos &&
 			!php_stream_is_filtered(src) && !php_stream_is_filtered(dest) &&
 			!php_stream_has_notifier(src) && !php_stream_has_notifier(dest)) {
-		php_io_fd src_copy_fd, dest_copy_fd;
+		php_io_fd src_copy_fd = {0}, dest_copy_fd = {0};
 
 		if (php_stream_cast(src, PHP_STREAM_AS_FD_FOR_COPY, (void *) &src_copy_fd, 0) == SUCCESS &&
 				php_stream_cast(dest, PHP_STREAM_AS_FD_FOR_COPY, (void *) &dest_copy_fd, 0) == SUCCESS) {
+
+			/* Waits on a socket or pipe belong to the provider */
+			if (php_io_hooks_active()
+					&& (src_copy_fd.fd_type != PHP_IO_FD_FILE || dest_copy_fd.fd_type != PHP_IO_FD_FILE)) {
+				goto fallback;
+			}
 
 			/* copy_file_range does not work with O_APPEND */
 			if (src_copy_fd.fd_type == PHP_IO_FD_FILE && dest_copy_fd.fd_type == PHP_IO_FD_FILE) {
@@ -1733,6 +1778,13 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 static void stream_resource_regular_dtor(zend_resource *rsrc)
 {
 	php_stream *stream = (php_stream*)rsrc->ptr;
+	/* zend_list_close() while an op is suspended on the stream: the frame
+	 * holds a reference, and the resource stays open */
+	if (UNEXPECTED(php_io_stream_busy(stream)) && stream->res && GC_REFCOUNT(stream->res) > 0) {
+		stream->res->type = rsrc->type;
+		stream->res->ptr = stream;
+		return;
+	}
 	/* set the return value for pclose */
 	FG(pclose_ret) = php_stream_free(stream, PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_RSRC_DTOR);
 }
@@ -2439,3 +2491,5 @@ overflow:
 	efree(vector);
 	return -1;
 }
+/* }}} */
+

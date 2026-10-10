@@ -191,6 +191,18 @@ struct _php_stream_wrapper	{
 
 #define PHP_STREAM_FLAG_NO_IO						0x400
 
+/* An operation on the stream is in flight: passing it to a function throws */
+#define PHP_STREAM_FLAG_IN_USE						0x800
+
+/* the IO hooks register no pair for it: every wait stays one-shot */
+#define PHP_STREAM_FLAG_NO_IO_REGISTRATION				0x1000
+
+/* Set by php_stream_mark_read_lost() */
+#define PHP_STREAM_FLAG_READ_LOST					0x2000
+
+/* The IO hooks never see its operations: a file an include compiles from */
+#define PHP_STREAM_FLAG_NO_IO_HOOKS					0x4000
+
 #define PHP_STREAM_FLAG_WAS_WRITTEN					0x80000000
 
 struct _php_stream  {
@@ -207,6 +219,7 @@ struct _php_stream  {
 	uint16_t in_free:2;			/* to prevent recursion during free */
 	uint16_t eof:1;
 	uint16_t __exposed:1;	/* non-zero if exposed as a zval somewhere */
+	uint16_t userland:1;	/* handed to a script as a resource (php_stream_to_zval) */
 
 	/* so we know how to clean it up correctly.  This should be set to
 	 * PHP_STREAM_FCLOSE_XXX as appropriate */
@@ -249,9 +262,14 @@ struct _php_stream  {
 
 	struct _php_stream *enclosing_stream; /* this is a private stream owned by enclosing_stream */
 
+	/* StreamPollWeakHandle singleton, referenced by the stream until php_stream_free() */
+	zend_object *weak_poll_handle;
+
 	zend_llist *error_list;
 
 	HashTable *poll_watchers; /* Io\Poll watchers notified before the stream is closed */
+
+	struct _php_io_registration *io_registrations; /* IO hooks registrations, ended before the close */
 }; /* php_stream */
 
 #define PHP_STREAM_CONTEXT(stream) \
@@ -275,7 +293,9 @@ END_EXTERN_C()
 /* use this to assign the stream to a zval and tell the stream that is
  * has been exported to the engine; it will expect to be closed automatically
  * when the resources are auto-destructed */
-#define php_stream_to_zval(stream, zval)	{ ZVAL_RES(zval, (stream)->res); (stream)->__exposed = 1; }
+/* the stream is in a script's hands: a StreamPollWeakHandle may hand it back */
+#define php_stream_expose(stream)	{ (stream)->__exposed = 1; (stream)->userland = 1; }
+#define php_stream_to_zval(stream, zval)	{ ZVAL_RES(zval, (stream)->res); php_stream_expose(stream); }
 
 #define php_stream_from_zval(xstr, pzval)	do { \
 	if (((xstr) = (php_stream*)zend_fetch_resource2_ex((pzval), \
@@ -310,6 +330,10 @@ static zend_always_inline bool php_stream_zend_parse_arg_into_stream(
 		 * as we want to be able to specify the argument number in the type error */
 		if (EXPECTED(res->type == php_file_le_stream() || res->type == php_file_le_pstream())) {
 			*destination_stream_ptr = (php_stream*)res->ptr;
+			if (UNEXPECTED((*destination_stream_ptr)->flags & PHP_STREAM_FLAG_IN_USE)) {
+				zend_throw_error(NULL, "Concurrent access to a stream");
+				return false;
+			}
 			return true;
 		} else {
 			zend_argument_type_error(arg_num, "must be an open stream resource");
@@ -372,6 +396,18 @@ PHPAPI ssize_t php_stream_write(php_stream *stream, const char *buf, size_t coun
 #define php_stream_write_string(stream, str)	php_stream_write(stream, str, strlen(str))
 
 PHPAPI zend_result php_stream_fill_read_buffer(php_stream *stream, size_t size);
+
+/* Where the next buffered read lands */
+static zend_always_inline unsigned char *php_stream_read_buffer_tail(php_stream *stream)
+{
+	return stream->readbuf ? stream->readbuf + stream->writepos : NULL;
+}
+/* Bytes a read placed at the tail; 0 is EOF */
+PHPAPI void php_stream_read_buffer_commit(php_stream *stream, size_t len);
+
+/* Bytes were lost: every later read fails */
+#define php_stream_mark_read_lost(stream) ((stream)->flags |= PHP_STREAM_FLAG_READ_LOST)
+#define php_stream_is_read_lost(stream) (((stream)->flags & PHP_STREAM_FLAG_READ_LOST) != 0)
 
 PHPAPI ssize_t php_stream_printf(php_stream *stream, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
 
@@ -490,6 +526,17 @@ END_EXTERN_C()
 #define PHP_STREAM_SYNC_FDSYNC 2
 
 #define php_stream_sync_supported(stream)	(php_stream_set_option((stream), PHP_STREAM_OPTION_SYNC_API, PHP_STREAM_SYNC_SUPPORTED, NULL) == PHP_STREAM_OPTION_RETURN_OK ? 1 : 0)
+
+/* Windows: OK for an overlapped proc_open() pipe (php_io_pipe_wanted()), else NOTIMPL.
+ * QUERY: stores in the bool ptrparam whether the descriptor was handed out.
+ * HAND_OUT: another process got the descriptor; the stream's reads and writes stop using a provider.
+ * RELEASE: just before the process is created, the queues let go of the descriptor, so the child's
+ * overlapped I/O does not post to their port. ERR (Error thrown) while another call has an op on
+ * the stream; an orphaned op is waited for first. */
+#define PHP_STREAM_OPTION_OVERLAPPED_PIPE 15
+#define PHP_STREAM_OVERLAPPED_PIPE_QUERY	0
+#define PHP_STREAM_OVERLAPPED_PIPE_HAND_OUT	1
+#define PHP_STREAM_OVERLAPPED_PIPE_RELEASE	2
 
 
 #define PHP_STREAM_OPTION_RETURN_OK			 0 /* option set OK */

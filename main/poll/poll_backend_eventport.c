@@ -52,6 +52,9 @@ static int eventport_events_to_native(uint32_t events)
 	if (events & PHP_POLL_RDHUP) {
 		native |= POLLHUP; /* Map RDHUP to HUP */
 	}
+	if (events & PHP_POLL_PRI) {
+		native |= POLLPRI;
+	}
 	return native;
 }
 
@@ -73,6 +76,9 @@ static uint32_t eventport_events_from_native(int native)
 	}
 	if (native & POLLNVAL) {
 		events |= PHP_POLL_ERROR;
+	}
+	if (native & POLLPRI) {
+		events |= PHP_POLL_PRI;
 	}
 	return events;
 }
@@ -223,10 +229,10 @@ static bool eventport_associate_callback(int fd, php_poll_fd_entry *entry, void 
 {
 	eventport_associate_ctx *assoc_ctx = (eventport_associate_ctx *) user_data;
 
-	/* Only associate if marked as needing association */
-	if (entry->last_revents == EVENTPORT_NEEDS_ASSOC) {
-		int native_events = eventport_events_to_native(entry->events);
-
+	/* Only associate if marked as needing association; with no events the
+	 * port would still report hangups and errors, so it waits for a modify */
+	int native_events = eventport_events_to_native(entry->events);
+	if (entry->last_revents == EVENTPORT_NEEDS_ASSOC && native_events != 0) {
 		if (port_associate(assoc_ctx->backend_data->port_fd, PORT_SOURCE_FD, fd, native_events,
 					entry->data)
 				== -1) {
@@ -397,7 +403,8 @@ const php_poll_backend_ops php_poll_backend_eventport_ops = {
 	.wait = eventport_backend_wait,
 	.is_available = eventport_backend_is_available,
 	.get_suitable_max_events = eventport_backend_get_suitable_max_events,
-	.supports_et = false /* Event ports are level-triggered only */
+	.supports_et = false, /* Event ports are level-triggered only */
+	.supports_priority = true
 };
 
 #endif /* HAVE_EVENT_PORTS */

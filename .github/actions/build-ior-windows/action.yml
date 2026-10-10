@@ -1,0 +1,64 @@
+name: Build ior (Windows)
+# Temporary, for the IO hooks proof of concept only, like build-ior: builds a
+# pinned commit of ior into a cached prefix laid out as win32/build/config.w32
+# expects (include\ior\ior.h, lib\ior.lib) and exports it as IOR_PREFIX, which
+# build_task.bat passes as --with-ior. The CI builds of PHP are release builds
+# (/MD), so ior is built Release against the same DLL runtime.
+inputs:
+  ref:
+    description: The ior commit to build, a full SHA
+    default: 9a7d0967401724e0c69a56e7de706f78e2283441
+    required: false
+  arch:
+    description: x64 or x86
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: ior cache key
+      id: key
+      shell: pwsh
+      env:
+        IOR_REF: ${{ inputs.ref }}
+        IOR_ARCH: ${{ inputs.arch }}
+      run: |
+        "key=ior-$env:RUNNER_OS-$env:ImageOS-$env:PHP_BUILD_CRT-$env:IOR_ARCH-$env:IOR_REF" >> $env:GITHUB_OUTPUT
+    - name: Restore ior
+      id: cache
+      uses: actions/cache@v5
+      with:
+        path: C:\ior
+        key: ${{ steps.key.outputs.key }}
+    - name: Build ior
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: pwsh
+      env:
+        IOR_REF: ${{ inputs.ref }}
+        IOR_ARCH: ${{ inputs.arch }}
+      run: |
+        $ErrorActionPreference = 'Stop'
+        $PSNativeCommandUseErrorActionPreference = $true
+        Set-PSDebug -Trace 1
+        $prefix = 'C:\ior'
+        $src = Join-Path $env:RUNNER_TEMP 'ior-src'
+        foreach ($dir in @($src, $prefix)) {
+          if (Test-Path $dir) { Remove-Item -Recurse -Force $dir }
+        }
+        git init -q $src
+        git -C $src fetch --depth 1 https://github.com/libior/ior.git $env:IOR_REF
+        git -C $src checkout -q FETCH_HEAD
+        $platform = if ($env:IOR_ARCH -eq 'x86') { 'Win32' } else { 'x64' }
+        # Static library, IOCP backend; tests and bench would need cmocka
+        cmake -S $src -B "$src\build" -A $platform `
+          -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL `
+          -DIOR_BUILD_TESTS=OFF `
+          -DIOR_BUILD_BENCH=OFF
+        cmake --build "$src\build" --config Release --parallel
+        cmake --install "$src\build" --config Release --prefix $prefix
+    - name: Export the ior prefix
+      shell: pwsh
+      run: |
+        if (-not (Test-Path 'C:\ior\include\ior\ior.h') -or -not (Test-Path 'C:\ior\lib\ior.lib')) {
+          throw 'ior install prefix is incomplete'
+        }
+        "IOR_PREFIX=C:\ior" >> $env:GITHUB_ENV

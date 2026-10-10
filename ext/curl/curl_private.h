@@ -26,6 +26,8 @@
 #include <curl/curl.h>
 #include <curl/multi.h>
 
+#include "main/php_deadline.h"
+
 #define CURLOPT_RETURNTRANSFER 19913
 #define CURLOPT_BINARYTRANSFER 19914 /* For Backward compatibility */
 #define PHP_CURL_STDOUT 0
@@ -109,12 +111,20 @@ typedef struct {
 	struct _php_curl_send_headers header;
 	struct _php_curl_error        err;
 	bool                     in_callback;
+	bool                     in_exec;
 	uint32_t*                     clone;
 	zval                          postfields;
 	/* For CURLOPT_PRIVATE */
 	zval private_data;
 	/* CurlShareHandle object set using CURLOPT_SHARE. */
 	struct _php_curlsh *share;
+	/* Sockets libcurl wants watched, keyed by curl_socket_t */
+	HashTable *io_sockets;
+	struct _php_curl_socket_entry *io_removed;
+	php_deadline io_timer;
+	/* Private multi handle driving curl_exec() */
+	CURLM *multi;
+	long maxconnects;
 	zend_object                   std;
 } php_curl;
 
@@ -148,6 +158,7 @@ void _php_curl_cleanup_handle(php_curl *);
 void _php_curl_multi_cleanup_list(void *data);
 void _php_curl_verify_handlers(php_curl *ch, bool reporterror);
 void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source);
+bool php_curl_check_not_in_exec(php_curl *ch);
 
 /* Consumes `zv` */
 zend_long php_curl_get_long(zval *zv);

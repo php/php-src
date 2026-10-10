@@ -120,6 +120,14 @@ static zend_result wsapoll_backend_add(php_poll_ctx *ctx, int fd, uint32_t event
 		return FAILURE;
 	}
 
+	/* WSAPoll() fails as a whole on a descriptor that is not a socket */
+	int type;
+	int type_len = sizeof(type);
+	if (getsockopt((SOCKET) fd, SOL_SOCKET, SO_TYPE, (char *) &type, &type_len) != 0) {
+		php_poll_set_error(ctx, WSAGetLastError() == WSAENOTSOCK ? PHP_POLL_ERR_NOSUPPORT : PHP_POLL_ERR_INVALID);
+		return FAILURE;
+	}
+
 	php_poll_fd_entry *entry = php_poll_fd_table_get_new(backend_data->fd_table, fd);
 	if (!entry) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
@@ -177,6 +185,11 @@ static bool wsapoll_build_fds_callback(int fd, php_poll_fd_entry *entry, void *u
 {
 	wsapoll_build_context *ctx = (wsapoll_build_context *) user_data;
 
+	/* Disarmed: WSAPoll() would still report hangups and errors */
+	if (entry->events == 0) {
+		return true;
+	}
+
 	ctx->fds[ctx->index].fd = (SOCKET) fd;
 	ctx->fds[ctx->index].events
 			= (SHORT) wsapoll_events_to_native(entry->events & ~(PHP_POLL_ET | PHP_POLL_ONESHOT));
@@ -184,6 +197,18 @@ static bool wsapoll_build_fds_callback(int fd, php_poll_fd_entry *entry, void *u
 	ctx->index++;
 
 	return true;
+}
+
+static int wsapoll_backend_wait_nothing(const struct timespec *timeout)
+{
+	if (timeout != NULL && (timeout->tv_sec > 0 || timeout->tv_nsec > 0)) {
+		/* Convert to milliseconds, rounding up */
+		int sleep_ms = php_poll_timespec_to_ms(timeout);
+		if (sleep_ms > 0) {
+			Sleep(sleep_ms);
+		}
+	}
+	return 0;
 }
 
 static int wsapoll_backend_wait(
@@ -194,14 +219,7 @@ static int wsapoll_backend_wait(
 
 	int fd_count = php_poll_fd_table_count(backend_data->fd_table);
 	if (fd_count == 0) {
-		if (timeout != NULL && (timeout->tv_sec > 0 || timeout->tv_nsec > 0)) {
-			/* Convert to milliseconds, rounding up */
-			int sleep_ms = php_poll_timespec_to_ms(timeout);
-			if (sleep_ms > 0) {
-				Sleep(sleep_ms);
-			}
-		}
-		return 0;
+		return wsapoll_backend_wait_nothing(timeout);
 	}
 
 	/* Ensure temp_fds array is large enough */
@@ -219,6 +237,10 @@ static int wsapoll_backend_wait(
 	/* Build WSAPOLLFD array from fd_table */
 	wsapoll_build_context build_ctx = { .fds = backend_data->temp_fds, .index = 0 };
 	php_poll_fd_table_foreach(backend_data->fd_table, wsapoll_build_fds_callback, &build_ctx);
+	fd_count = build_ctx.index;
+	if (fd_count == 0) {
+		return wsapoll_backend_wait_nothing(timeout);
+	}
 
 	/* Convert timespec to milliseconds (WSAPoll only supports ms resolution, round up) */
 	int timeout_ms = php_poll_timespec_to_ms(timeout);
@@ -233,16 +255,10 @@ static int wsapoll_backend_wait(
 
 		switch (wsa_error) {
 			case WSAENOTSOCK:
-				/* Special case: all sockets in array are invalid
-				 * WSAPoll fails entirely, but we should clean up and return 0
-				 * This differs from Unix poll() which would report POLLNVAL per socket */
-
-				/* Remove all invalid sockets from fd_table */
-				for (int i = 0; i < fd_count; i++) {
-					int fd = (int) backend_data->temp_fds[i].fd;
-					php_poll_fd_table_remove(backend_data->fd_table, fd);
-				}
-				return 0;
+				/* A registered socket was closed and its handle reused by
+				 * something else; add() refuses what is not a socket */
+				error_code = PHP_POLL_ERR_INVALID;
+				break;
 			case WSAENOBUFS:
 				error_code = PHP_POLL_ERR_NOMEM;
 				break;
@@ -271,12 +287,6 @@ static int wsapoll_backend_wait(
 			int fd = (int) pfd->fd;
 			php_poll_fd_entry *entry = php_poll_fd_table_find(backend_data->fd_table, fd);
 			if (entry) {
-				/* WSAPoll-specific handling of POLLNVAL */
-				if (pfd->revents & POLLNVAL) {
-					php_poll_fd_table_remove(backend_data->fd_table, fd);
-					continue; /* Do not report this event */
-				}
-
 				/* Convert WSAPoll events to PHP poll events */
 				uint32_t converted_events = wsapoll_events_from_native(pfd->revents);
 
@@ -285,6 +295,11 @@ static int wsapoll_backend_wait(
 				events[event_count].revents = converted_events;
 				events[event_count].data = entry->data;
 				event_count++;
+				if (pfd->revents & POLLNVAL) {
+					/* Not an open socket: reported once as an error, then
+					 * disarmed until it is modified */
+					entry->events = 0;
+				}
 			}
 		}
 	}
@@ -330,6 +345,7 @@ const php_poll_backend_ops php_poll_backend_wsapoll_ops = {
 	.is_available = wsapoll_backend_is_available,
 	.get_suitable_max_events = wsapoll_backend_get_suitable_max_events,
 	.supports_et = false,
+	.supports_priority = false,
 };
 
 #endif /* PHP_WIN32 */

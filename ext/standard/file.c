@@ -804,7 +804,9 @@ PHP_FUNCTION(popen)
 {
 	char *command, *mode;
 	size_t command_len, mode_len;
+#ifdef PHP_WIN32
 	FILE *fp;
+#endif
 	php_stream *stream;
 	char *posix_mode;
 
@@ -834,6 +836,10 @@ PHP_FUNCTION(popen)
 		RETURN_THROWS();
 	}
 
+#ifndef PHP_WIN32
+	php_stream_error_operation_begin();
+	stream = php_stream_popen(command, mode);
+#else
 	fp = VCWD_POPEN(command, posix_mode);
 	if (!fp) {
 		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
@@ -843,6 +849,7 @@ PHP_FUNCTION(popen)
 
 	php_stream_error_operation_begin();
 	stream = php_stream_fopen_from_pipe(fp, mode);
+#endif
 
 	if (stream == NULL)	{
 		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));

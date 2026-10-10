@@ -298,11 +298,33 @@ AC_DEFINE('HAVE_STRNLEN', 1);
 
 AC_DEFINE('ZEND_CHECK_STACK_LIMIT', 1)
 
-ADD_SOURCES("main/io", "php_io.c php_io_copy_windows.c");
-ADD_FLAG("CFLAGS_BD_MAIN_IO", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
-
-ADD_SOURCES("main/poll", "poll_backend_wsapoll.c poll_core.c poll_fd_table.c poll_handle.c");
+ADD_SOURCES("main/poll", "poll_backend_wsapoll.c poll_core.c poll_fd_table.c poll_handle.c poll_source.c");
 ADD_FLAG("CFLAGS_BD_MAIN_POLL", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+
+/* Temporary, for the IO hooks proof of concept: the ring (php_io_ring.c) is
+ * built on the ior library, which is not bundled yet. --with-ior=<prefix>
+ * takes an install prefix (cmake --install <build> --prefix <dir>) holding
+ * include\ior\ior.h and lib\ior.lib, a bare --with-ior looks in the
+ * dependencies (--with-php-build) and the usual places. The header is
+ * included as <ior.h>, the way its pkg-config file sets the include path. */
+ARG_WITH("ior", "Build the IO ring on the ior library, optionally from the given install prefix", "no");
+
+var main_io_sources = "php_io.c php_io_copy_windows.c php_io_hooks.c php_io_pipe.c php_io_pipe_windows.c php_io_queue_poll.c";
+if (PHP_IOR != "no") {
+	var ior_prefix = PHP_IOR != "yes" ? PHP_IOR : null;
+	var ior_include = (ior_prefix ? ior_prefix + "\\include\\ior;" : "") + PHP_PHP_BUILD + "\\include\\ior";
+	if (CHECK_LIB("ior.lib", null, ior_prefix) &&
+		CHECK_HEADER("ior.h", "CFLAGS", ior_include)) {
+		AC_DEFINE("HAVE_IOR", 1, "Define to 1 if the ior library is available.");
+		main_io_sources += " php_io_ring.c";
+	} else if (ior_prefix) {
+		ERROR("ior not found in " + ior_prefix + ": it needs include\\ior\\ior.h and lib\\ior.lib there");
+	} else {
+		ERROR("ior not found in " + PHP_PHP_BUILD + " (include\\ior\\ior.h, lib\\ior.lib); pass --with-ior=<prefix> for another install prefix");
+	}
+}
+ADD_SOURCES("main/io", main_io_sources);
+ADD_FLAG("CFLAGS_BD_MAIN_IO", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
 ADD_SOURCES("main/streams", "streams.c stream_errors.c cast.c memory.c filter.c plain_wrapper.c \
 	userspace.c transports.c xp_socket.c mmap.c glob_wrapper.c");

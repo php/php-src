@@ -57,7 +57,17 @@ typedef struct php_poll_backend_ops {
 
 	/* Backend supports edge triggering natively */
 	bool supports_et;
+
+	/* Backend reports priority data (POLLPRI) */
+	bool supports_priority;
 } php_poll_backend_ops;
+
+struct php_poll_timer {
+	zend_hrtime_t deadline;
+	zend_hrtime_t period;
+	void *data;
+	uint32_t heap_idx; /* UINT32_MAX while disarmed */
+};
 
 /* Main poll context */
 struct php_poll_ctx {
@@ -75,6 +85,14 @@ struct php_poll_ctx {
 
 	/* Backend-specific data */
 	void *backend_data;
+
+	/* A forked child must not touch the backend it shares with the parent */
+	pid_t owner_pid;
+
+	/* Deadline heap of the armed timers */
+	php_poll_timer **timers;
+	uint32_t timer_count;
+	uint32_t timer_cap;
 };
 
 /* Generic FD entry structure */
@@ -156,6 +174,18 @@ static inline bool php_poll_is_timeout_error(void)
 static inline void php_poll_set_error(php_poll_ctx *ctx, php_poll_error error)
 {
 	ctx->last_error = error;
+}
+
+/* Nanoseconds of a relative timeout, saturating instead of wrapping */
+static inline zend_hrtime_t php_poll_timespec_to_ns(const struct timespec *timeout)
+{
+	if (timeout == NULL || timeout->tv_sec < 0) {
+		return ZEND_HRTIME_T_MAX;
+	}
+	if ((zend_hrtime_t) timeout->tv_sec >= ZEND_HRTIME_T_MAX / ZEND_NANO_IN_SEC) {
+		return ZEND_HRTIME_T_MAX;
+	}
+	return (zend_hrtime_t) timeout->tv_sec * ZEND_NANO_IN_SEC + (zend_hrtime_t) timeout->tv_nsec;
 }
 
 static inline int php_poll_timespec_to_ms(const struct timespec *timeout)

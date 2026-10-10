@@ -418,7 +418,9 @@ PHP_NEW_EXTENSION([standard], m4_normalize([
     image.c
     incomplete_class.c
     info.c
+    io_hooks.c
     io_poll.c
+    io_ring.c
     iptc.c
     levenshtein.c
     libavifinfo/avifinfo.c
