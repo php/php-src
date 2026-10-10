@@ -28,9 +28,9 @@ There is a set of common parameters used within the callable APIs which are:
       -  The function pointer to call, usually stored in ``EG(function_table)`` for global functions
          or ``zend_class_entry->function_table`` for class methods.
 
-   -  -  ``object``
+   -  -  ``this_ptr``
       -  ``zend_object*``
-      -  Generally object pointer representing ``$this``.
+      -  Object pointer representing ``$this``.
 
    -  -  ``called_scope``
       -  ``zend_class_entry*``
@@ -38,8 +38,7 @@ There is a set of common parameters used within the callable APIs which are:
 
    -  -  ``retval``
       -  ``zval*``
-      -  zval pointer where the return value of the called function will be stored. Usually
-         mandatory.
+      -  zval pointer where the return value of the called function will be stored.
 
    -  -  ``param_count``
       -  ``uint32_t``
@@ -105,7 +104,7 @@ There are some functions that do not require the use of either the FCI or the FC
 
             zend_call_known_function(
                 zend_function *fn,
-                zend_object *object,
+                zend_object *this_ptr,
                 zend_class_entry *called_scope,
                 zval *retval,
                 uint32_t param_count,
@@ -114,7 +113,7 @@ There are some functions that do not require the use of either the FCI or the FC
             )
 
       -  Call a known function with given parameters. ``retval`` may be ``NULL`` in which case the
-         return value of the function is discarded. If ``object`` is ``NULL`` it must be a global
+         return value of the function is discarded. If ``this_ptr`` is ``NULL`` it must be a global
          function or static method. ``called_scope`` must *not* be ``NULL`` if ``fn`` is a method
          (instanced or static).
 
@@ -122,7 +121,7 @@ There are some functions that do not require the use of either the FCI or the FC
 
             zend_call_known_function_ex(
                 zend_function *fn,
-                zend_object *object,
+                zend_object *this_ptr,
                 zend_class_entry *called_scope,
                 zval *retval,
                 uint32_t param_count,
@@ -138,20 +137,20 @@ There are some functions that do not require the use of either the FCI or the FC
 
             zend_call_known_instance_method(
                 zend_function *fn,
-                zend_object *object,
+                zend_object *this_ptr,
                 zval *retval,
                 uint32_t param_count,
                 zval *params
             )
 
       -  Same as ``zend_call_known_function()``, where the ``called_scope`` is derived from
-         ``object->ce``.
+         ``this_ptr->ce``.
 
    -  -  .. code:: c
 
             zend_call_known_instance_method_with_0_params(
                 zend_function *fn,
-                zend_object *object,
+                zend_object *this_ptr,
                 zval *retval,
             )
 
@@ -161,7 +160,7 @@ There are some functions that do not require the use of either the FCI or the FC
 
             zend_call_known_instance_method_with_1_params(
                 zend_function *fn,
-                zend_object *object,
+                zend_object *this_ptr,
                 zval *retval,
                 zval *param
             )
@@ -172,7 +171,7 @@ There are some functions that do not require the use of either the FCI or the FC
 
             zend_call_known_instance_method_with_2_params(
                 zend_function *fn,
-                zend_object *object,
+                zend_object *this_ptr,
                 zval *retval,
                 zval *param1,
                 zval *param2
@@ -183,16 +182,17 @@ There are some functions that do not require the use of either the FCI or the FC
    -  -  .. code:: c
 
             zend_call_method_if_exists(
-                zend_object *object,
+                zend_object *this_ptr,
                 zend_string *method_name,
                 zval *retval,
                 uint32_t param_count,
                 zval *params
             )
 
-      -  Returns ``SUCCESS`` if the ``method_name`` exists on the object and the call succeeds,
-         ``FAILURE`` otherwise. If ``FAILURE`` is returned the retval *will* be UNDEF, as such the
-         retval can be unconditionally destroyed.
+      -  Returns ``FAILURE`` if the ``method_name`` does not exists on the object,
+         ``SUCCESS`` otherwise.
+         The retval *will* be UNDEF if the return value is ``FAILURE```, as such the
+         retval can be unconditionally destroyed. However it may also be UNDEF in an exception was thrown.
 
    -  -  .. code:: c
 
@@ -205,7 +205,7 @@ There are some functions that do not require the use of either the FCI or the FC
                 params
             )
 
-      -  Deprecated API. Checks that ``function_name`` is a valid PHP callable via
+      -  Deprecated API. Checks that ``function_name`` (and optionally ``object``) is a valid PHP callable via
          ``zend_is_callable_ex()`` and calls it with the given parameters and return value.
          ``function_table`` is ignored and should always be ``NULL``. It is recommended to instead
          use ``zend_is_callable_ex()`` to fetch an FCC and call it with ``zend_call_known_fcc()``,
@@ -235,7 +235,7 @@ There are some functions that do not require the use of either the FCI or the FC
        zend_function *function_handler;
        zend_class_entry *calling_scope;
        zend_class_entry *called_scope;
-       zend_object *object; /* Object representing $this, only needed for instanced methods */
+       zend_object *object; /* Pointer for object representing $this */
        zend_object *closure; /* Closure reference, only if the callable *is* the object */
    } zend_fcall_info_cache;
 
