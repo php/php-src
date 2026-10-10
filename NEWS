@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.7.0alpha1
 
+- Core:
+  . Fixed bug GH-23617 (Inconsistent past-the-end array internal pointers after
+    compaction). (Dmitry Rantovov)
+
 - Curl:
   . curl_multi_exec() now throws a TypeError when still_running is not an int. 
     (arshidkv12)
