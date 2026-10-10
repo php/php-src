@@ -70,6 +70,7 @@
 #include "zend_compile.h"
 #include "zend_errors.h"
 #include "zend_fibers.h"
+#include "zend_async_API.h"
 #include "zend_hrtime.h"
 #include "zend_portability.h"
 #include "zend_types.h"
@@ -293,6 +294,14 @@ typedef struct _zend_gc_globals {
 	uint32_t dtor_end;
 	zend_fiber *dtor_fiber;
 	bool dtor_fiber_running;
+
+	zend_coroutine_t *gc_coroutine;
+	zend_coroutine_t *dtor_coroutine;
+	zend_async_microtask_t *microtask;
+	/* How many destructor-coroutines are still outstanding */
+	uint32_t dtor_pending;
+	/* A full root buffer asked the GC coroutine for a collection that has not finished yet. */
+	bool adjust_threshold;
 
 #if GC_BENCH
 	uint32_t root_buf_length;
@@ -535,6 +544,11 @@ static void gc_globals_ctor_ex(zend_gc_globals *gc_globals)
 	gc_globals->dtor_end = 0;
 	gc_globals->dtor_fiber = NULL;
 	gc_globals->dtor_fiber_running = false;
+	gc_globals->gc_coroutine = NULL;
+	gc_globals->dtor_coroutine = NULL;
+	gc_globals->microtask = NULL;
+	gc_globals->dtor_pending = 0;
+	gc_globals->adjust_threshold = false;
 
 #if GC_BENCH
 	gc_globals->root_buf_length = 0;
@@ -593,6 +607,14 @@ void gc_reset(void)
 		GC_G(zval_marked_grey) = 0;
 #endif
 	}
+
+	/* A bailout can end the request before the GC coroutines finish, and
+	 * their memory goes with the request: none of these may reach the next. */
+	GC_G(gc_coroutine) = NULL;
+	GC_G(dtor_coroutine) = NULL;
+	GC_G(microtask) = NULL;
+	GC_G(dtor_pending) = 0;
+	GC_G(adjust_threshold) = false;
 
 	GC_G(activated_at) = zend_hrtime();
 }
@@ -656,6 +678,12 @@ static void gc_grow_root_buffer(void)
 	GC_G(buf_size) = new_size;
 }
 
+/* A collection requested by the current coroutine goes to the GC coroutine instead of running inline. */
+static zend_always_inline bool gc_collect_is_deferred(void)
+{
+	return ZEND_ASYNC_IS_ACTIVE && ZEND_ASYNC_CURRENT_COROUTINE != GC_G(gc_coroutine);
+}
+
 /* Adjust the GC activation threshold given the number of nodes collected by the last run */
 static void gc_adjust_threshold(int count)
 {
@@ -698,7 +726,22 @@ static zend_never_inline void ZEND_FASTCALL gc_possible_root_when_full(zend_refc
 
 	if (GC_G(gc_enabled) && !GC_G(gc_active)) {
 		GC_ADDREF(ref);
-		gc_adjust_threshold(gc_collect_cycles());
+		if (gc_collect_is_deferred()) {
+			/* Every coroutine that finds the buffer full waits for the same run and
+			 * would add a step each: the GC coroutine adjusts once, after the run.
+			 * Set before the call, as the run reads it before the await returns. */
+			GC_G(adjust_threshold) = true;
+			const int count = gc_collect_cycles();
+
+			/* No GC coroutine took the step: it could not be created. */
+			if (UNEXPECTED(GC_G(adjust_threshold) && GC_G(gc_coroutine) == NULL)) {
+				GC_G(adjust_threshold) = false;
+				gc_adjust_threshold(count);
+			}
+		} else {
+			gc_adjust_threshold(gc_collect_cycles());
+		}
+
 		if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 			rc_dtor_func(ref);
 			return;
@@ -1875,6 +1918,7 @@ static zend_always_inline zend_result gc_call_destructors(uint32_t idx, uint32_t
 {
 	gc_root_buffer *current;
 	zend_refcounted *p;
+	zend_coroutine_t *coroutine = ZEND_ASYNC_IS_ACTIVE ? ZEND_ASYNC_CURRENT_COROUTINE : NULL;
 
 	/* The root buffer might be reallocated during destructors calls,
 	 * make sure to reload pointers as necessary. */
@@ -1888,7 +1932,7 @@ static zend_always_inline zend_result gc_call_destructors(uint32_t idx, uint32_t
 			 * could have already been invoked indirectly by some other
 			 * destructor. */
 			if (!(OBJ_FLAGS(p) & IS_OBJ_DESTRUCTOR_CALLED)) {
-				if (fiber != NULL) {
+				if (fiber != NULL || coroutine != NULL) {
 					GC_G(dtor_idx) = idx;
 				}
 				zend_object *obj = (zend_object*)p;
@@ -1900,6 +1944,14 @@ static zend_always_inline zend_result gc_call_destructors(uint32_t idx, uint32_t
 				GC_DELREF(obj);
 				if (UNEXPECTED(fiber != NULL && GC_G(dtor_fiber) != fiber)) {
 					/* We resumed after suspension */
+					gc_check_possible_root((zend_refcounted*)&obj->gc);
+					return FAILURE;
+				}
+				if (UNEXPECTED(coroutine != NULL && coroutine != ZEND_ASYNC_CURRENT_COROUTINE)) {
+					/* The destructor suspended: this iterator is parked inside
+					 * it. Stop here with the cursor persisted — the armed
+					 * microtask spawns a fresh iterator to carry on (see
+					 * gc_destructors_iterator_microtask). */
 					gc_check_possible_root((zend_refcounted*)&obj->gc);
 					return FAILURE;
 				}
@@ -2000,9 +2052,298 @@ static zend_never_inline void gc_call_destructors_in_fiber(void)
 	}
 }
 
+///
+/// GC destructors coroutine
+///
+/// The destructor phase runs in a coroutine (async active), so a destructor
+/// may spawn and await its own work. It is a concurrent iterator over the
+/// garbage buffer, driven by a re-arming microtask:
+///
+///   - an iterator coroutine walks the buffer (gc_call_destructors),
+///     advancing GC_G(dtor_idx);
+///   - it arms GC_G(microtask) first. If a destructor suspends, the parked
+///     iterator can't advance itself, so the microtask fires next tick and
+///     spawns a fresh one to resume from GC_G(dtor_idx) (already-run
+///     destructors skip via IS_OBJ_DESTRUCTOR_CALLED);
+///   - an iterator that finishes its range without suspending cancels it.
+///
+/// GC_G(dtor_pending) counts outstanding iterators (this API has no scope):
+/// GC_G(gc_coroutine) resumes only once all have finished, including any that
+/// suspended and came back.
+///
+
+static zend_coroutine_t *gc_spawn_destructors_coroutine(void);
+
+/* Counts a finished iterator out; wakes the GC coroutine once the last one is
+ * gone. The hand-off itself is the microtask's job, not this one's. */
+static bool gc_destructors_finish_handler(
+		zend_coroutine_t *coroutine, zend_coroutine_t *waiter, void *data, const bool is_bailout)
+{
+	(void) coroutine;
+	(void) waiter;
+	(void) data;
+
+	GC_G(dtor_pending)--;
+
+	if (GC_G(dtor_pending) == 0) {
+		GC_G(dtor_coroutine) = NULL;
+
+		if (!is_bailout && GC_G(gc_coroutine) != NULL) {
+			ZEND_ASYNC_ENQUEUE_COROUTINE(GC_G(gc_coroutine));
+		}
+	}
+
+	return false;
+}
+
+static void gc_destructors_iterator_microtask(zend_async_microtask_t *task)
+{
+	if (UNEXPECTED(gc_spawn_destructors_coroutine() == NULL)) {
+		ZEND_ASYNC_MICROTASK_CANCEL(task);
+	}
+}
+
+static void gc_destructors_microtask_dtor(zend_async_microtask_t *task)
+{
+	if (GC_G(microtask) == task) {
+		GC_G(microtask) = NULL;
+	}
+}
+
+static void gc_arm_iterator_microtask(void)
+{
+	if (GC_G(microtask) == NULL) {
+		zend_async_microtask_t *task = ecalloc(1, sizeof(zend_async_microtask_t));
+		task->handler = gc_destructors_iterator_microtask;
+		task->dtor = gc_destructors_microtask_dtor;
+		task->ref_count = 1;
+		GC_G(microtask) = task;
+	}
+
+	GC_G(microtask)->is_cancelled = 0;
+	ZEND_ASYNC_MICROTASK_ADDREF(GC_G(microtask));
+
+	if (UNEXPECTED(!ZEND_ASYNC_DEFER(GC_G(microtask)))) {
+		ZEND_ASYNC_MICROTASK_RELEASE(GC_G(microtask));
+	}
+}
+
+/* Cancel and drop the iterator microtask: the iteration finished on its own. */
+static void gc_disarm_iterator_microtask(void)
+{
+	if (GC_G(microtask) != NULL) {
+		zend_async_microtask_t *task = GC_G(microtask);
+		GC_G(microtask) = NULL;
+		ZEND_ASYNC_MICROTASK_CANCEL(task);
+		ZEND_ASYNC_MICROTASK_RELEASE(task);
+	}
+}
+
+static void gc_destructors_coroutine(void)
+{
+	GC_TRACE("GC destructors coroutine started");
+
+	gc_arm_iterator_microtask();
+
+	gc_call_destructors(GC_G(dtor_idx), GC_G(dtor_end), NULL);
+
+	/* A destructor suspended and the microtask has already spawned a fresh
+	 * iterator that superseded us: leave the microtask armed and bow out —
+	 * this one's only remaining job is to finish and be counted out. */
+	if (EXPECTED(!EG(exception)) && GC_G(dtor_coroutine) != ZEND_ASYNC_CURRENT_COROUTINE) {
+		return;
+	}
+
+	gc_disarm_iterator_microtask();
+}
+
+static zend_coroutine_t *gc_spawn_destructors_coroutine(void)
+{
+	zend_coroutine_t *coroutine = ZEND_ASYNC_GC_NEW_COROUTINE(ZEND_COROUTINE_NORMAL);
+
+	if (UNEXPECTED(coroutine == NULL)) {
+		return NULL;
+	}
+
+	coroutine->internal_entry = gc_destructors_coroutine;
+	GC_G(dtor_coroutine) = coroutine;
+	GC_G(dtor_pending)++;
+
+	/* waiter is diagnostic only; the handler works off GC_G. */
+	const uint32_t handler_id = ZEND_ASYNC_ADD_FINISH_HANDLER(
+			coroutine, gc_destructors_finish_handler, GC_G(gc_coroutine), NULL);
+
+	/* Without the handler nobody ever counts this iterator out: treat a failed
+	 * registration like a failed enqueue. Either is a refused iterator, handled
+	 * as one that could not be created: the error is cleared, as it belongs to
+	 * no caller (left in the GC coroutine, it would end that coroutine with an
+	 * exception a provider may end the request on), and the run is redone or
+	 * the destructors wait for the next collection. */
+	if (UNEXPECTED(handler_id == 0 || !ZEND_ASYNC_ENQUEUE_COROUTINE(coroutine))) {
+		ZEND_ASYNC_REMOVE_FINISH_HANDLER(coroutine, handler_id);
+		GC_G(dtor_coroutine) = NULL;
+		GC_G(dtor_pending)--;
+		zend_clear_exception();
+		return NULL;
+	}
+
+	return coroutine;
+}
+
+/*
+ * Start the destructor phase as a coroutine and wait for the iterator chain
+ * to finish. Calling this blocks GC execution (by suspending GC_G(gc_coroutine),
+ * itself a coroutine) until every destructor has run.
+ */
+static zend_never_inline bool gc_call_destructors_in_coroutine(void)
+{
+	GC_G(dtor_idx) = GC_FIRST_ROOT;
+	GC_G(dtor_end) = GC_G(first_unused);
+
+	if (UNEXPECTED(gc_spawn_destructors_coroutine() == NULL)) {
+		return false;
+	}
+
+	return ZEND_ASYNC_SUSPEND();
+}
+
+///
+/// GC coroutine
+///
+/// The run lives in a coroutine (the destructor phase suspends into it). A
+/// caller that is not that coroutine starts one and blocks until it finishes.
+///
+
+static void zend_gc_coroutine(void)
+{
+	GC_TRACE("GC coroutine started");
+
+	const uint32_t runs = GC_G(gc_runs);
+	const int count = zend_gc_collect_cycles();
+
+	/* The count goes to the waiters in the run's own result: another run can
+	 * finish before a waiter woken by this one resumes. */
+	ZVAL_LONG(&ZEND_ASYNC_CURRENT_COROUTINE->result, count);
+
+	if (GC_G(adjust_threshold)) {
+		GC_G(adjust_threshold) = false;
+
+		/* A run that found the buffer already drained examined nothing, and
+		 * its 0 measures nothing either. */
+		if (EXPECTED(GC_G(gc_runs) != runs)) {
+			gc_adjust_threshold(count);
+		}
+	}
+
+	GC_G(gc_coroutine) = NULL;
+	GC_TRACE("GC coroutine finished");
+}
+
+/* Clears GC_G(gc_coroutine) and the owed threshold step however the run ends.
+ * A bailout skips the tail of zend_gc_coroutine(): the next gc_collect_cycles()
+ * of the request (a shutdown function's) would await the stale coroutine
+ * instead of collecting, and its run would take the step for a buffer it did
+ * not see. */
+static bool gc_coroutine_finish_handler(
+		zend_coroutine_t *coroutine, zend_coroutine_t *waiter, void *data, const bool is_bailout)
+{
+	(void) waiter;
+	(void) data;
+
+	if (GC_G(gc_coroutine) == coroutine) {
+		GC_G(gc_coroutine) = NULL;
+		GC_G(adjust_threshold) = false;
+	}
+
+	/* No iterator resumes after a bailout: drop the hand-off they armed. */
+	if (is_bailout) {
+		gc_disarm_iterator_microtask();
+	}
+
+	return false;
+}
+
+static zend_always_inline zend_coroutine_t *new_gc_coroutine(void)
+{
+	zend_coroutine_t *coroutine = ZEND_ASYNC_GC_NEW_COROUTINE(ZEND_COROUTINE_HI_PRIORITY);
+
+	if (UNEXPECTED(coroutine == NULL)) {
+		return NULL;
+	}
+
+	coroutine->internal_entry = zend_gc_coroutine;
+	GC_G(gc_coroutine) = coroutine;
+
+	const uint32_t handler_id = ZEND_ASYNC_ADD_FINISH_HANDLER(
+			coroutine, gc_coroutine_finish_handler, NULL, NULL);
+
+	if (UNEXPECTED(handler_id == 0 || !ZEND_ASYNC_ENQUEUE_COROUTINE(coroutine))) {
+		ZEND_ASYNC_REMOVE_FINISH_HANDLER(coroutine, handler_id);
+		GC_G(gc_coroutine) = NULL;
+		return NULL;
+	}
+
+	return coroutine;
+}
+
 /* Perform a garbage collection run. The default implementation of gc_collect_cycles. */
 ZEND_API int zend_gc_collect_cycles(void)
 {
+	if (gc_collect_is_deferred()) {
+		/* Called from inside the active run (a destructor): the run is
+		 * waiting for us, waiting for it back would deadlock. Reentrant
+		 * calls get 0, as ever. */
+		if (GC_G(gc_active)) {
+			return 0;
+		}
+
+		/* This stack cannot wait here (a tick function, a signal handler, the
+		 * scheduler's own work): start the run without waiting for it. It
+		 * collects when the scheduler next picks the GC coroutine. */
+		if (UNEXPECTED(zend_fiber_switch_blocked() || ZEND_ASYNC_IN_SCHEDULER_CONTEXT)) {
+			if (GC_G(gc_coroutine) == NULL) {
+				new_gc_coroutine();
+			}
+
+			return 0;
+		}
+
+		if (GC_G(gc_coroutine) == NULL && UNEXPECTED(new_gc_coroutine() == NULL)) {
+			return 0;
+		}
+
+		/* The run executes on the GC coroutine and cannot see this stack:
+		 * shield the caller's live TMPVARs from it for the duration. */
+		if (GC_G(num_roots)) {
+			zend_gc_remove_root_tmpvars();
+		}
+
+		/* Synchronous for the caller: parked until the run finishes. false
+		 * means this coroutine was cancelled, not that the run failed. The
+		 * reference, which the await slot asks of its caller, keeps the
+		 * finished run and its result for the count. */
+		zend_coroutine_t *run = GC_G(gc_coroutine);
+		ZEND_COROUTINE_ADD_REF(run);
+		const bool awaited = ZEND_ASYNC_AWAIT(run);
+
+		/* A run cancelled before it started has no result. */
+		const int count = awaited && Z_TYPE(run->result) == IS_LONG ? (int) Z_LVAL(run->result) : 0;
+
+		/* Re-root the shielded TMPVARs — on the cancelled path too, or they
+		 * fall out of GC tracking. gc_active keeps this walk from starting a
+		 * fresh run; by wake-up one may already be active, so restore rather
+		 * than reset. The release of the run goes under the same guard: the
+		 * root it adds to a full buffer would start the next run and wait for
+		 * it from here, and that run's release would start another. */
+		bool was_active = GC_G(gc_active);
+		GC_G(gc_active) = 1;
+		zend_gc_check_root_tmpvars();
+		ZEND_COROUTINE_RELEASE(run);
+		GC_G(gc_active) = was_active;
+
+		return count;
+	}
+
 	int total_count = 0;
 	bool should_rerun_gc = false;
 	bool did_rerun_gc = false;
@@ -2101,8 +2442,35 @@ rerun_gc:
 
 			/* Actually call destructors. */
 			zend_hrtime_t dtor_start_time = zend_hrtime();
-			if (EXPECTED(!EG(active_fiber))) {
+			const bool is_async = ZEND_ASYNC_IS_ACTIVE;
+			if (EXPECTED(!EG(active_fiber) && !is_async)) {
 				gc_call_destructors(GC_FIRST_ROOT, end, NULL);
+			} else if (is_async) {
+				if (UNEXPECTED(!gc_call_destructors_in_coroutine())) {
+					if (EG(exception)) {
+						/* No rerun: a cancelled coroutine cannot park again, and
+						 * a rerun would leave a stray iterator over a reset
+						 * buffer. */
+						should_rerun_gc = false;
+
+						if (instanceof_function(EG(exception)->ce,
+								ZEND_ASYNC_GET_CE(ZEND_ASYNC_EXCEPTION_CANCELLATION))) {
+							zend_clear_exception();
+						}
+					}
+
+					/* Clean up GC_DTOR_GARBAGE tags left behind: the iterator
+					 * may have stopped partway through the buffer. */
+					idx = GC_G(dtor_idx);
+					current = GC_IDX2PTR(idx);
+					while (idx != end) {
+						if (GC_IS_DTOR_GARBAGE(current->ref)) {
+							current->ref = GC_GET_PTR(current->ref);
+						}
+						current++;
+						idx++;
+					}
+				}
 			} else {
 				gc_call_destructors_in_fiber();
 			}

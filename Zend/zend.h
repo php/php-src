@@ -327,7 +327,7 @@ ZEND_API ZEND_COLD void zend_output_debug_string(bool trigger_break, const char 
 
 ZEND_API void zend_activate(void);
 ZEND_API void zend_deactivate(void);
-ZEND_API void zend_call_destructors(void);
+ZEND_API bool zend_call_destructors(void);
 ZEND_API void zend_activate_modules(void);
 ZEND_API void zend_deactivate_modules(void);
 ZEND_API void zend_post_deactivate_modules(void);

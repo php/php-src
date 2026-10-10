@@ -87,6 +87,8 @@
 #include "SAPI.h"
 #include "rfc1867.h"
 
+#include "zend_async_API.h"
+
 #include "main_arginfo.h"
 /* }}} */
 
@@ -1926,9 +1928,24 @@ void php_request_shutdown(void *dummy)
 	}
 
 	/* 2. Call all possible __destruct() functions */
+	const bool destructor_bailed_out = zend_call_destructors();
+
+	/* Before PHP shuts down completely, control goes to the coroutines one
+	 * last time: the destructors above may have spawned or resumed some.
+	 * After a destructor's bailout every object is marked destructed, so the
+	 * scheduler gets it as a bailout and the queued coroutines do not run. */
 	zend_try {
-		zend_call_destructors();
+		ZEND_ASYNC_RUN_SCHEDULER_AFTER_MAIN(destructor_bailed_out);
+
+		/* The final pass may leave an exception in EG with no caller left to
+		 * handle it; report it as php_execute_script() does. */
+		if (UNEXPECTED(EG(exception))) {
+			zend_exception_error(EG(exception), E_ERROR);
+		}
 	} zend_end_try();
+
+	/* From here on everything runs synchronously. */
+	ZEND_ASYNC_DEACTIVATE;
 
 	/* 3. Flush all output buffers */
 	zend_try {
@@ -2177,6 +2194,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	php_startup_ticks();
 #endif
 	gc_globals_ctor();
+	zend_async_globals_ctor();
 
 	zend_observer_startup();
 #if ZEND_DEBUG
@@ -2497,6 +2515,8 @@ void php_module_shutdown(void)
 
 	module_initialized = false;
 
+	zend_async_api_shutdown();
+
 #ifndef ZTS
 	core_globals_dtor(&core_globals);
 	gc_globals_dtor();
@@ -2583,6 +2603,8 @@ PHPAPI bool php_execute_script_ex(zend_file_handle *primary_file, zval *retval)
 			zend_set_timeout(zend_ini_long_literal("max_execution_time"), false);
 		}
 
+		result = ZEND_ASYNC_SCHEDULER_LAUNCH();
+
 		if (prepend_file_p && result) {
 			result = zend_execute_script(ZEND_REQUIRE, NULL, prepend_file_p) == SUCCESS;
 		}
@@ -2592,7 +2614,10 @@ PHPAPI bool php_execute_script_ex(zend_file_handle *primary_file, zval *retval)
 		if (append_file_p && result) {
 			result = zend_execute_script(ZEND_REQUIRE, NULL, append_file_p) == SUCCESS;
 		}
+
+		ZEND_ASYNC_RUN_SCHEDULER_AFTER_MAIN(false);
 	} zend_catch {
+		ZEND_ASYNC_RUN_SCHEDULER_AFTER_MAIN(true);
 		result = false;
 	} zend_end_try();
 
@@ -2766,7 +2791,7 @@ PHPAPI void php_reserve_tsrm_memory(void)
 #ifdef HAVE_JIT
 		TSRM_ALIGNED_SIZE(sizeof(zend_jit_globals)) +
 #endif
-		0
+		TSRM_ALIGNED_SIZE(sizeof(zend_async_globals_t))
 	);
 }
 /* }}} */
