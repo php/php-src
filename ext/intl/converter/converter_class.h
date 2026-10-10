@@ -34,7 +34,7 @@ typedef struct _php_converter_object {
 } php_converter_object;
 
 static inline php_converter_object *php_converter_fetch_object(zend_object *obj) {
-	return (php_converter_object *)((char*)(obj) - offsetof(php_converter_object, obj));
+	return ZEND_CONTAINER_OF(obj, php_converter_object, obj);
 }
 #define Z_INTL_CONVERTER_P(zv) php_converter_fetch_object(Z_OBJ_P(zv))
 
