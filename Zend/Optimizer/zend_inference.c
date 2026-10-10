@@ -1297,7 +1297,7 @@ ZEND_API bool zend_inference_propagate_range(const zend_op_array *op_array, cons
 				}
 			} else if (ssa_op->result_def == var) {
 				if (opline->extended_value == IS_LONG) {
-					if (OP1_HAS_RANGE()) {
+					if (OP1_HAS_RANGE() && !OP1_RANGE_UNDERFLOW() && !OP1_RANGE_OVERFLOW()) {
 						tmp->min = OP1_MIN_RANGE();
 						tmp->max = OP1_MAX_RANGE();
 						return 1;
@@ -1562,7 +1562,9 @@ ZEND_API bool zend_inference_propagate_range(const zend_op_array *op_array, cons
 				}
 				if (call_info->callee_func->type == ZEND_USER_FUNCTION) {
 					func_info = ZEND_FUNC_INFO(&call_info->callee_func->op_array);
-					if (func_info && func_info->return_info.has_range) {
+					if (func_info
+					 && func_info->return_info.has_range
+					 && !(func_info->return_info.type & (MAY_BE_ANY | MAY_BE_UNDEF | MAY_BE_REF) & ~MAY_BE_LONG)) {
 						*tmp = func_info->return_info.range;
 						return 1;
 					}
@@ -4887,16 +4889,217 @@ static void zend_mark_cv_references(const zend_op_array *op_array, const zend_sc
 	free_alloca(worklist,  use_heap);
 }
 
+static bool zend_inference_is_long_only(const zend_ssa *ssa, int var)
+{
+	return !(ssa->var_info[var].type & (MAY_BE_ANY | MAY_BE_UNDEF | MAY_BE_REF) & ~MAY_BE_LONG);
+}
+
+static bool zend_drop_non_long_pi_ranges(zend_ssa *ssa)
+{
+	bool dropped = false;
+
+	for (int i = 0; i < ssa->vars_count; i++) {
+		zend_ssa_phi *p = ssa->vars[i].definition_phi;
+		zend_ssa_range_constraint *constraint;
+
+		if (!p || p->pi < 0 || !p->has_range_constraint || !ssa->var_info[i].has_range) {
+			continue;
+		}
+		constraint = &p->constraint.range;
+		if (constraint->min_ssa_var < 0
+		 && constraint->max_ssa_var < 0
+		 && constraint->range.underflow
+		 && constraint->range.overflow
+		 && constraint->negative == NEG_NONE) {
+			continue;
+		}
+		if (zend_inference_is_long_only(ssa, p->sources[0])
+		 && (constraint->min_ssa_var < 0 || zend_inference_is_long_only(ssa, constraint->min_ssa_var))
+		 && (constraint->max_ssa_var < 0 || zend_inference_is_long_only(ssa, constraint->max_ssa_var))) {
+			continue;
+		}
+		constraint->min_var = -1;
+		constraint->max_var = -1;
+		constraint->min_ssa_var = -1;
+		constraint->max_ssa_var = -1;
+		constraint->range.underflow = true;
+		constraint->range.min = ZEND_LONG_MIN;
+		constraint->range.max = ZEND_LONG_MAX;
+		constraint->range.overflow = true;
+		constraint->negative = NEG_NONE;
+		dropped = true;
+	}
+	return dropped;
+}
+
+static bool zend_range_may_coerce(const zend_ssa *ssa, const zend_bitset tainted, int var, uint32_t mask)
+{
+	const zend_ssa_var_info *info;
+
+	if (var < 0 || !zend_bitset_in(tainted, var)) {
+		return false;
+	}
+	info = &ssa->var_info[var];
+	return info->has_range
+		&& (info->type & mask)
+		&& ((!info->range.underflow && info->range.min != ZEND_LONG_MIN)
+		 || (!info->range.overflow && info->range.max != ZEND_LONG_MAX));
+}
+
+static bool zend_range_is_flagged(const zend_ssa *ssa, int var)
+{
+	return var >= 0
+		&& ssa->var_info[var].has_range
+		&& (ssa->var_info[var].range.underflow || ssa->var_info[var].range.overflow);
+}
+
+static bool zend_pi_narrows_min(const zend_ssa *ssa, const zend_ssa_phi *p)
+{
+	const zend_ssa_range *range = &ssa->var_info[p->ssa_var].range;
+	const zend_ssa_var_info *src = &ssa->var_info[p->sources[0]];
+
+	return !range->underflow && (!src->has_range || src->range.underflow || range->min > src->range.min);
+}
+
+static bool zend_pi_narrows_max(const zend_ssa *ssa, const zend_ssa_phi *p)
+{
+	const zend_ssa_range *range = &ssa->var_info[p->ssa_var].range;
+	const zend_ssa_var_info *src = &ssa->var_info[p->sources[0]];
+
+	return !range->overflow && (!src->has_range || src->range.overflow || range->max < src->range.max);
+}
+
+static bool zend_ssa_range_coercion_unsafe(const zend_op_array *op_array, const zend_ssa *ssa)
+{
+	const uint32_t non_long = (MAY_BE_ANY | MAY_BE_UNDEF | MAY_BE_REF) & ~MAY_BE_LONG;
+	const uint32_t non_number = non_long & ~MAY_BE_DOUBLE;
+	int worklist_len = zend_bitset_len(ssa->vars_count);
+	bool tainted_any = false, unsafe = false;
+	zend_bitset tainted, worklist;
+	int j;
+	ALLOCA_FLAG(use_heap);
+
+	tainted = do_alloca(sizeof(zend_ulong) * worklist_len * 2, use_heap);
+	worklist = tainted + worklist_len;
+	memset(tainted, 0, sizeof(zend_ulong) * worklist_len * 2);
+
+	for (j = 0; j < ssa->vars_count; j++) {
+		const zend_ssa_phi *p = ssa->vars[j].definition_phi;
+
+		if (p && p->pi >= 0 && p->has_range_constraint && ssa->var_info[j].has_range
+		 && (ssa->var_info[p->sources[0]].type & non_long)
+		 && (zend_pi_narrows_min(ssa, p) || zend_pi_narrows_max(ssa, p))) {
+			zend_bitset_incl(tainted, j);
+			zend_bitset_incl(worklist, j);
+			tainted_any = true;
+		}
+	}
+
+#define TAINT_VAR(_var) do { \
+		if (!zend_bitset_in(tainted, _var)) { \
+			zend_bitset_incl(tainted, _var); \
+			zend_bitset_incl(worklist, _var); \
+		} \
+	} while (0)
+
+	WHILE_WORKLIST(worklist, worklist_len, j) {
+		FOR_EACH_VAR_USAGE(j, TAINT_VAR);
+	} WHILE_WORKLIST_END();
+
+#undef TAINT_VAR
+
+	for (uint32_t i = 0; tainted_any && i < op_array->last; i++) {
+		const zend_op *opline = &op_array->opcodes[i];
+		const zend_ssa_op *ssa_op = &ssa->ops[i];
+		uint8_t opcode = opline->opcode == ZEND_ASSIGN_OP ? opline->extended_value : opline->opcode;
+		uint32_t mask = non_long;
+
+		switch (opcode) {
+			case ZEND_ADD:
+			case ZEND_SUB:
+			case ZEND_PRE_INC:
+			case ZEND_PRE_DEC:
+			case ZEND_POST_INC:
+			case ZEND_POST_DEC:
+				unsafe = zend_range_may_coerce(ssa, tainted, ssa_op->op1_use, non_number)
+					|| zend_range_may_coerce(ssa, tainted, ssa_op->op2_use, non_number);
+				break;
+			case ZEND_CAST:
+				if (opline->extended_value != IS_LONG) {
+					break;
+				}
+				ZEND_FALLTHROUGH;
+			case ZEND_MUL:
+			case ZEND_DIV:
+			case ZEND_MOD:
+			case ZEND_SL:
+			case ZEND_SR:
+			case ZEND_BW_OR:
+			case ZEND_BW_AND:
+			case ZEND_BW_NOT:
+				if (opcode == ZEND_MUL || opcode == ZEND_DIV) {
+					mask = non_number;
+				}
+				unsafe = ((opcode == ZEND_DIV || opcode == ZEND_MOD)
+					&& zend_range_may_coerce(ssa, tainted, ssa_op->op2_use, non_number))
+					|| (!zend_range_is_flagged(ssa, ssa_op->op1_use)
+					 && !zend_range_is_flagged(ssa, ssa_op->op2_use)
+					 && (zend_range_may_coerce(ssa, tainted, ssa_op->op1_use, mask)
+					  || zend_range_may_coerce(ssa, tainted, ssa_op->op2_use, mask)));
+				break;
+		}
+		if (unsafe) {
+			break;
+		}
+	}
+
+	for (j = 0; !unsafe && j < ssa->vars_count; j++) {
+		const zend_ssa_phi *p = ssa->vars[j].definition_phi;
+		const zend_ssa_range_constraint *constraint;
+		int bound;
+
+		if (!p || p->pi < 0 || !p->has_range_constraint || !ssa->var_info[j].has_range) {
+			continue;
+		}
+		constraint = &p->constraint.range;
+		bound = constraint->min_ssa_var;
+		if (bound >= 0
+		 && ((ssa->var_info[bound].type & non_number)
+		  || ((ssa->var_info[bound].type & MAY_BE_DOUBLE)
+		   && (zend_bitset_in(tainted, bound) || ssa->var_info[bound].range.underflow)))
+		 && zend_pi_narrows_min(ssa, p)) {
+			unsafe = true;
+		}
+		bound = constraint->max_ssa_var;
+		if (bound >= 0
+		 && ((ssa->var_info[bound].type & non_number)
+		  || ((ssa->var_info[bound].type & MAY_BE_DOUBLE)
+		   && (zend_bitset_in(tainted, bound) || ssa->var_info[bound].range.overflow)))
+		 && zend_pi_narrows_max(ssa, p)) {
+			unsafe = true;
+		}
+	}
+
+	free_alloca(tainted, use_heap);
+	return unsafe;
+}
+
 ZEND_API zend_result zend_ssa_inference(zend_arena **arena, const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_long optimization_level) /* {{{ */
 {
 	zend_ssa_var_info *ssa_var_info;
+	zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
+	zend_ssa_var_info return_info;
 	int i;
 
 	if (!ssa->var_info) {
 		ssa->var_info = zend_arena_calloc(arena, ssa->vars_count, sizeof(zend_ssa_var_info));
 	}
 	ssa_var_info = ssa->var_info;
+	if (func_info) {
+		return_info = func_info->return_info;
+	}
 
+restart:
 	if (!op_array->function_name) {
 		for (i = 0; i < op_array->last_var; i++) {
 			ssa_var_info[i].type = MAY_BE_UNDEF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY  | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
@@ -4922,6 +5125,14 @@ ZEND_API zend_result zend_ssa_inference(zend_arena **arena, const zend_op_array 
 
 	if (zend_infer_types(op_array, script, ssa, optimization_level) == FAILURE) {
 		return FAILURE;
+	}
+
+	if (zend_ssa_range_coercion_unsafe(op_array, ssa) && zend_drop_non_long_pi_ranges(ssa)) {
+		memset(ssa_var_info, 0, sizeof(zend_ssa_var_info) * ssa->vars_count);
+		if (func_info) {
+			func_info->return_info = return_info;
+		}
+		goto restart;
 	}
 
 	return SUCCESS;
