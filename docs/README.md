@@ -27,12 +27,4 @@ your browser.
 
 ## Formatting
 
-The files in this documentation are formatted using the
-[``rstfmt``](https://github.com/dzhu/rstfmt) tool.
-
-```bash
-rstfmt -w 100 source
-```
-
-This tool is not perfect. It breaks on custom directives, so we might switch to
-either a fork or something else in the future.
+Formatting is temporarily not enforced during the Markdown migration.
