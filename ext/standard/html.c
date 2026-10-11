@@ -84,7 +84,7 @@ static char *get_default_charset(void) {
 /* }}} */
 
 /* {{{ get_next_char */
-static inline unsigned int get_next_char(
+static zend_always_inline unsigned int get_next_char(
 		enum entity_charset charset,
 		const unsigned char *str,
 		size_t str_len,
@@ -1125,6 +1125,12 @@ static inline void find_entity_for_char_basic(
 }
 /* }}} */
 
+/* ASCII other than the characters htmlspecialchars() can escape */
+static zend_always_inline bool is_non_special_ascii(unsigned char c)
+{
+	return c < 0x80 && c != '&' && c != '"' && c != '\'' && c != '<' && c != '>';
+}
+
 /* {{{ php_escape_html_entities */
 PHPAPI zend_string *php_escape_html_entities_ex(const unsigned char *old, size_t oldlen, int all, int flags, const char *hint_charset, bool double_encode, bool quiet)
 {
@@ -1178,12 +1184,36 @@ PHPAPI zend_string *php_escape_html_entities_ex(const unsigned char *old, size_t
 	replaced = zend_string_alloc(maxlen, 0);
 	len = 0;
 	cursor = 0;
+	/* htmlspecialchars() without ENT_DISALLOWED leaves such ASCII as is */
+	const bool copy_ascii_runs = !all && !(flags & ENT_HTML_SUBSTITUTE_DISALLOWED_CHARS);
+
 	while (cursor < oldlen) {
 		const unsigned char *mbsequence = NULL;
 		size_t mbseqlen					= 0,
 		       cursor_before			= cursor;
 		zend_result status				= SUCCESS;
-		unsigned int this_char			= get_next_char(charset, old, oldlen, &cursor, &status);
+		unsigned int this_char			= old[cursor];
+
+		if (this_char >= 0x80) {
+			this_char = get_next_char(charset, old, oldlen, &cursor, &status);
+		} else if (copy_ascii_runs && is_non_special_ascii(this_char)) {
+			/* The run can be as long as the rest of the input */
+			if (maxlen - len < oldlen - cursor + 40) {
+				replaced = zend_string_safe_realloc(replaced, maxlen, 1, oldlen - cursor + 128, 0);
+				maxlen += oldlen - cursor + 128;
+			}
+			const unsigned char *in = &old[cursor], *const end = &old[oldlen];
+			char *out = &ZSTR_VAL(replaced)[len];
+			do {
+				*out++ = *in++;
+			} while (in < end && is_non_special_ascii(*in));
+			len = out - ZSTR_VAL(replaced);
+			cursor = in - old;
+			continue;
+		} else {
+			/* ASCII is a single byte in every charset */
+			cursor++;
+		}
 
 		/* guarantee we have at least 40 bytes to write.
 		 * In HTML5, entities may take up to 33 bytes */
