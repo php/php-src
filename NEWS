@@ -40,8 +40,8 @@ PHP                                                                        NEWS
     when getpwnam_r() needs a larger buffer. (Ilia Alshanetsky)
   . Fixed password_get_info() and password_needs_rehash() accepting malformed
     bcrypt costs. (Ilia Alshanetsky)
-  . Fixed bug GH-24256 (fclose() returns false with stream wrappers that do
-    not implement stream_flush()). (Lazizbek Ergashev)
+  . Fixed bug GH-24256 (fclose() returns false for stream wrappers without
+    stream_flush()). (Lazizbek Ergashev)
 
 - Zip:
   . Fixed use-after-free when re-entering ZipArchive during destruction or
