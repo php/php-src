@@ -294,6 +294,7 @@ PHP                                                                        NEWS
     (Nicolas Grekas)
   . Fixed convert.quoted-printable-decode decoding lowercase hex digits to
     the wrong byte. (Ilia Alshanetsky)
+  . Fixed boolean key handling in array_combine(). (arshidkv12)
 
 - Tidy:
   . Fixed a use-after-free when a tidyNode is used after its document is

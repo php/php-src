@@ -7187,6 +7187,11 @@ PHP_FUNCTION(array_combine)
 				if (Z_TYPE_P(entry_keys) == IS_LONG) {
 					entry_values = zend_hash_index_update(Z_ARRVAL_P(return_value),
 						Z_LVAL_P(entry_keys), entry_values);
+				} else if (Z_TYPE_P(entry_keys) == IS_FALSE || Z_TYPE_P(entry_keys) == IS_TRUE) {
+					entry_values = zend_hash_index_update(Z_ARRVAL_P(return_value),
+						Z_TYPE_P(entry_keys) == IS_TRUE ? 1 : 0,
+						entry_values
+					);
 				} else {
 					zend_string *tmp_key;
 					zend_string *key = zval_get_tmp_string(entry_keys, &tmp_key);
