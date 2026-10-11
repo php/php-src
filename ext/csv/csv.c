@@ -102,6 +102,14 @@ PHP_MINFO_FUNCTION(csv)
 		zend_string_release(enclosure);																			\
 		RETURN_THROWS();																						\
 	}																											\
+																												\
+	if (UNEXPECTED(!csv_dialect_is_unambiguous(delimiter, enclosure, eol_sequence,								\
+			delimiter_arg_num, enclosure_arg_num, eol_arg_num))) {												\
+		zend_string_release(eol_sequence);																		\
+		zend_string_release(delimiter);																			\
+		zend_string_release(enclosure);																			\
+		RETURN_THROWS();																						\
+	}																											\
 }
 
 static bool zend_string_contains(const zend_string *haystack, const zend_string *needle) {
@@ -131,6 +139,117 @@ static bool csv_enclosure_overlaps_itself(const zend_string *enclosure) {
 		}
 	}
 	return false;
+}
+
+/**
+ * Whether the token may occur at the start of the bytes of a followed by the bytes of b, i.e.
+ * whether they agree as far as both go. A token extending past b counts as occurring, as the
+ * bytes following b are not known.
+ */
+static bool csv_token_may_occur(
+	const char *token,
+	size_t token_len,
+	const char *a,
+	size_t a_len,
+	const char *b,
+	size_t b_len
+) {
+	if (a_len >= token_len) {
+		return !memcmp(token, a, token_len);
+	}
+	return !memcmp(token, a, a_len) && !memcmp(token + a_len, b, MIN(token_len - a_len, b_len));
+}
+
+/**
+ * Rejects the dialects in which some rows cannot be written in a way that reads them back,
+ * whatever the writer does; identical tokens are rejected beforehand. At a token position the
+ * parser tries the enclosure, then the delimiter, then the EOL sequence, so it is ambiguous:
+ *  - a token starting with a token that is tried before it, as it is never matched (e.g. the
+ *    delimiter "--" with the enclosure "-");
+ *  - an enclosure that is the delimiter or the EOL sequence repeated, even partially (e.g. the
+ *    delimiter "xy" with the enclosure "xyx"): such a separator followed by the opening
+ *    enclosure of the next field starts with the enclosure;
+ *  - likewise a delimiter starting with the EOL sequence and continuing like the enclosure, as
+ *    the EOL sequence before an enclosed field is read as a delimiter;
+ *  - an enclosure overlapping itself (see csv_enclosure_overlaps_itself()) whose occurrence
+ *    straddling the closing enclosure may be followed by a token: the parser would end the field
+ *    there or read a doubled enclosure (e.g. the enclosure "aba" with the delimiter "ba": the
+ *    field "\nab" is written "aba\nababa", with "aba" also occurring right before "ba").
+ * Fields are written so that every other dialect reads them back, see csv_field_needs_enclosure().
+ */
+static bool csv_dialect_is_unambiguous(
+	const zend_string *delimiter,
+	const zend_string *enclosure,
+	const zend_string *eol_sequence,
+	uint32_t delimiter_arg_num,
+	uint32_t enclosure_arg_num,
+	uint32_t eol_arg_num
+) {
+	if (UNEXPECTED(zend_string_starts_with(delimiter, enclosure))) {
+		zend_argument_value_error(delimiter_arg_num, "must not start with argument #%"PRIu32" ($enclosure)",
+			enclosure_arg_num);
+		return false;
+	}
+	if (UNEXPECTED(zend_string_starts_with(eol_sequence, enclosure))) {
+		zend_argument_value_error(eol_arg_num, "must not start with argument #%"PRIu32" ($enclosure)",
+			enclosure_arg_num);
+		return false;
+	}
+	if (UNEXPECTED(zend_string_starts_with(eol_sequence, delimiter))) {
+		zend_argument_value_error(eol_arg_num, "must not start with argument #%"PRIu32" ($delimiter)",
+			delimiter_arg_num);
+		return false;
+	}
+
+	size_t enclosure_len = ZSTR_LEN(enclosure);
+	if (UNEXPECTED(zend_string_starts_with(enclosure, delimiter)
+		&& !memcmp(ZSTR_VAL(enclosure) + ZSTR_LEN(delimiter), ZSTR_VAL(enclosure), enclosure_len - ZSTR_LEN(delimiter)))) {
+		zend_argument_value_error(enclosure_arg_num, "is ambiguous with argument #%"PRIu32" ($delimiter)",
+			delimiter_arg_num);
+		return false;
+	}
+	if (UNEXPECTED(zend_string_starts_with(enclosure, eol_sequence)
+		&& !memcmp(ZSTR_VAL(enclosure) + ZSTR_LEN(eol_sequence), ZSTR_VAL(enclosure), enclosure_len - ZSTR_LEN(eol_sequence)))) {
+		zend_argument_value_error(enclosure_arg_num, "is ambiguous with argument #%"PRIu32" ($eolSequence)",
+			eol_arg_num);
+		return false;
+	}
+	if (UNEXPECTED(zend_string_starts_with(delimiter, eol_sequence)
+		&& csv_token_may_occur(ZSTR_VAL(delimiter) + ZSTR_LEN(eol_sequence), ZSTR_LEN(delimiter) - ZSTR_LEN(eol_sequence),
+			ZSTR_VAL(enclosure), enclosure_len, "", 0))) {
+		zend_argument_value_error(delimiter_arg_num, "is ambiguous with argument #%"PRIu32" ($enclosure)",
+			enclosure_arg_num);
+		return false;
+	}
+
+	/* The enclosure first, then the separators that may follow a closing enclosure */
+	const zend_string *tokens[3] = {enclosure, delimiter, eol_sequence};
+	const uint32_t token_arg_nums[3] = {enclosure_arg_num, delimiter_arg_num, eol_arg_num};
+	const char *token_names[3] = {"$enclosure", "$delimiter", "$eolSequence"};
+	/* An occurrence of the enclosure starting shift bytes before the closing one overlaps it if the
+	 * enclosure repeats itself shift bytes later; the closing enclosure then continues for shift
+	 * bytes after that occurrence */
+	for (size_t shift = 1; shift < enclosure_len; shift++) {
+		if (memcmp(ZSTR_VAL(enclosure), ZSTR_VAL(enclosure) + shift, enclosure_len - shift)) {
+			continue;
+		}
+		const char *remainder = ZSTR_VAL(enclosure) + enclosure_len - shift;
+		for (int separator = 1; separator < 3; separator++) {
+			for (int token = 0; token < 3; token++) {
+				if (csv_token_may_occur(ZSTR_VAL(tokens[token]), ZSTR_LEN(tokens[token]), remainder, shift,
+						ZSTR_VAL(tokens[separator]), ZSTR_LEN(tokens[separator]))) {
+					/* Name the token read in place of the closing enclosure, or the separator
+					 * when that token is the enclosure itself */
+					int culprit = token != 0 ? token : separator;
+					zend_argument_value_error(enclosure_arg_num, "is ambiguous with argument #%"PRIu32" (%s)",
+						token_arg_nums[culprit], token_names[culprit]);
+					return false;
+				}
+			}
+		}
+	}
+
+	return true;
 }
 
 static bool csv_is_at_end_of_field(
@@ -187,6 +306,69 @@ static zend_always_inline void csv_add_field(HashTable *row, smart_str *field_va
 	zend_hash_next_index_insert_new(row, &tmp);
 }
 
+/* Whether token starts with separator and continues like the field followed by next_separator */
+static bool csv_separator_and_field_may_start_token(
+	const zend_string *token,
+	const zend_string *separator,
+	const zend_string *field,
+	const zend_string *next_separator
+) {
+	return ZSTR_LEN(token) > ZSTR_LEN(separator)
+		&& zend_string_starts_with(token, separator)
+		&& csv_token_may_occur(ZSTR_VAL(token) + ZSTR_LEN(separator), ZSTR_LEN(token) - ZSTR_LEN(separator),
+			ZSTR_VAL(field), ZSTR_LEN(field), ZSTR_VAL(next_separator), ZSTR_LEN(next_separator));
+}
+
+/**
+ * Whether a field must be enclosed to be read back as is. Written as is, the parser reads the
+ * field as the bytes up to the first token it matches, so the field must be enclosed if it contains
+ * CR or LF, or if a token may occur:
+ *  - inside it, or starting in it and extending into the separator that follows it (the delimiter,
+ *    or the EOL sequence after the last field), e.g. the field "-" before the delimiter "--";
+ *  - at the separator before it, for a token that the parser tries before that separator, e.g.
+ *    the enclosure "-x" where the delimiter "-" is followed by the field "x".
+ * As the bytes after the following separator are not known, a token extending past it counts as
+ * occurring. The separator before the first field is taken to be the EOL sequence ending a
+ * previous row. For the usual single byte tokens, this amounts to the field containing a token.
+ * csv_dialect_is_unambiguous() rejects the dialects in which enclosing is not enough.
+ */
+static bool csv_field_needs_enclosure(
+	const zend_string *field,
+	const zend_string *previous_separator,
+	const zend_string *next_separator,
+	const zend_string *delimiter,
+	const zend_string *enclosure,
+	const zend_string *eol_sequence
+) {
+	const char *value = ZSTR_VAL(field);
+	size_t value_len = ZSTR_LEN(field);
+
+	if (memchr(value, '\n', value_len) || memchr(value, '\r', value_len)) {
+		return true;
+	}
+
+	const zend_string *tokens[3] = {enclosure, delimiter, eol_sequence};
+	for (int i = 0; i < 3; i++) {
+		size_t token_len = ZSTR_LEN(tokens[i]);
+		if (zend_string_contains(field, tokens[i])) {
+			return true;
+		}
+		for (size_t position = value_len >= token_len ? value_len - token_len + 1 : 0; position < value_len; position++) {
+			if (csv_token_may_occur(ZSTR_VAL(tokens[i]), token_len, value + position, value_len - position,
+					ZSTR_VAL(next_separator), ZSTR_LEN(next_separator))) {
+				return true;
+			}
+		}
+	}
+
+	/* The enclosure is tried before the delimiter, and both before the EOL sequence */
+	if (csv_separator_and_field_may_start_token(enclosure, previous_separator, field, next_separator)) {
+		return true;
+	}
+	return previous_separator == eol_sequence
+		&& csv_separator_and_field_may_start_token(delimiter, eol_sequence, field, next_separator);
+}
+
 /**
  * Follows RFC4180 https://tools.ietf.org/html/rfc4180
  * The terminology can be slightly confusing here as what PHP considers the 'enclosure' is what is used
@@ -209,8 +391,6 @@ static zend_string* hashtable_to_rfc4180_string(
 
 	nb_fields = zend_hash_num_elements(fields);
 	ZEND_HASH_FOREACH_VAL(fields, tmp_field_zval) {
-		bool escape_field = false;
-		bool enclosure_within_filed = false;
 		zend_string *tmp_field_str;
 		zend_string *field_str = zval_try_get_tmp_string(tmp_field_zval, &tmp_field_str);
 		if (UNEXPECTED(field_str == NULL)) {
@@ -218,24 +398,13 @@ static zend_string* hashtable_to_rfc4180_string(
 			return NULL;
 		}
 
-		/*
-		 * A field must be escaped (enclosed) if it contains the delimiter OR a Carriage Return (\r)
-		 * OR a Line Feed (\n) OR the field escape sequence (i.e. enclosure parameter) OR the custom EOL sequence
-		 */
-		if (
-			memchr(ZSTR_VAL(field_str), '\n', ZSTR_LEN(field_str))
-			|| memchr(ZSTR_VAL(field_str), '\r', ZSTR_LEN(field_str))
-			|| zend_string_contains(field_str, delimiter)
-			|| zend_string_contains(field_str, eol_sequence)
-		) {
-			escape_field = true;
-		}
+		bool escape_field = csv_field_needs_enclosure(field_str,
+			fields_iterated == 0 ? eol_sequence : delimiter,
+			fields_iterated + 1 == nb_fields ? eol_sequence : delimiter,
+			delimiter, enclosure, eol_sequence);
 		/* If the field escape sequence (i.e. enclosure parameter) is within the field it needs to be
 		 * duplicated within the field. */
-		if (zend_string_contains(field_str, enclosure)) {
-			escape_field = true;
-			enclosure_within_filed = true;
-		}
+		bool enclosure_within_filed = escape_field && zend_string_contains(field_str, enclosure);
 
 		if (escape_field) {
 			smart_str_append(&row, enclosure);
