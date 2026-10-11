@@ -5125,7 +5125,7 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 				return 0;
 			}
 			/* empty() casts to bool: objects may have a cast handler */
-			return (t1 & (MAY_BE_OBJECT|MAY_BE_DOUBLE));
+			return (t1 & MAY_BE_OBJECT);
 		case ZEND_BOOL_XOR:
 			return (t1 & MAY_BE_OBJECT) || (t2 & MAY_BE_OBJECT);
 		case ZEND_IS_EQUAL:
