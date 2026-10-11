@@ -11246,7 +11246,7 @@ static int zend_jit_leave_func(zend_jit_ctx         *jit,
 	// JIT: EG(vm_stack_top) = (zval*)execute_data
 	ir_STORE(jit_EG(vm_stack_top), jit_FP(jit));
 
-	// JITL execute_data = EX(prev_execute_data)
+	// JIT: execute_data = EX(prev_execute_data)
 	jit_STORE_FP(jit, ir_LOAD_A(jit_EX(prev_execute_data)));
 
 	if (!left_frame) {

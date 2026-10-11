@@ -2936,7 +2936,7 @@ done:
 
 		bool left_frame = false;
 		if (op_array->last_var > 100) {
-			/* To many CVs to unroll */
+			/* Too many CVs to unroll */
 			if (!zend_jit_free_cvs(&ctx)) {
 				goto jit_failure;
 			}

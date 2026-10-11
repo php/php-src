@@ -5625,7 +5625,7 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 								goto jit_failure;
 							}
 							if (op_array->last_var > 100) {
-								/* To many CVs to unroll */
+								/* Too many CVs to unroll */
 								if (!zend_jit_free_cvs(&ctx)) {
 									goto jit_failure;
 								}
