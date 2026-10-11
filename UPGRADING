@@ -72,6 +72,8 @@ PHP 8.7 UPGRADE NOTES
   . Added IntlNumberFormatter class to format a number with a given locale
     and ICU number skeleton, which also covers measurement units, e.g.
     "measure-unit/speed-kilometer-per-hour unit-width-full-name".
+    IntlNumberFormatter::format() accepts an int, a float or a numeric
+    string, the latter being formatted as a decimal of arbitrary precision.
     It is supported from icu 63.
 
 ========================================
