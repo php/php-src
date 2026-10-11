@@ -32,6 +32,10 @@ PHP                                                                        NEWS
   . Fix OSS-Fuzz #568005340 (FETCH_DIM_FUNC_ARG partial conversion). (ndossche)
   . Fix exception checks due to NAN warnings and object empty()'s. (ndossche)
 
+- PDO:
+  . Fixed a duplicate warning when ATTR_STATEMENT_CLASS is rejected on a
+    persistent connection. (Ilia Alshanetsky)
+
 - Phpdbg:
   . Fix wrong command names. (ndossche, Weilin Du)
 
