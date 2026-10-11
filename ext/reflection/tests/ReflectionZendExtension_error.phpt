@@ -8,10 +8,10 @@ opcache
 <?php
 try {
     new ReflectionZendExtension('zend_opcache');
-} catch (ReflectionException $e) {
-    echo $e->getMessage();
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Zend Extension "zend_opcache" does not exist
+ReflectionException: Zend Extension "zend_opcache" does not exist

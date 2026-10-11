@@ -81,13 +81,13 @@ foreach($pc as $p1) {
 echo "===PROBLEMS===\n";
 try {
     var_dump(property_exists(NULL, 'empty'));
-} catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(property_exists(25,'empty'));
-} catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump(property_exists('',''));
 var_dump(property_exists('A',''));
@@ -211,8 +211,8 @@ bool(true)
 obj(C)::$e
 bool(false)
 ===PROBLEMS===
-property_exists(): Argument #1 ($object_or_class) must be of type object|string, null given
-property_exists(): Argument #1 ($object_or_class) must be of type object|string, int given
+TypeError: property_exists(): Argument #1 ($object_or_class) must be of type object|string, null given
+TypeError: property_exists(): Argument #1 ($object_or_class) must be of type object|string, int given
 bool(false)
 bool(false)
 bool(false)

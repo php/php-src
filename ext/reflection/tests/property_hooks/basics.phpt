@@ -44,8 +44,8 @@ var_dump($s = $rp2->getHook(PropertyHookType::Set));
 var_dump($g->invoke($test));
 try {
     $s->invoke($test, 42);
-} catch (ReflectionException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 $s->invoke($test, 42);
 var_dump($test->prop2);
