@@ -1,5 +1,5 @@
 /* This is a generated file, edit numberformatter.stub.php instead.
- * Stub hash: f29b6ea3231370e69a03ef6c39902b175163647a */
+ * Stub hash: f99ec6e872e46e2274887cc608eb336417c52c78 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlNumberFormatter___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -10,7 +10,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_IntlNumberFormatter_createF
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_IntlNumberFormatter_format, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_MASK(0, value, MAY_BE_DOUBLE|MAY_BE_LONG, NULL)
+	ZEND_ARG_TYPE_MASK(0, value, MAY_BE_DOUBLE|MAY_BE_LONG|MAY_BE_STRING, NULL)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_IntlNumberFormatter_getErrorCode, 0, 0, IS_LONG, 0)

@@ -11,7 +11,7 @@ final class IntlNumberFormatter {
 
     public static function createFromSkeleton(string $skeleton, string $locale): ?IntlNumberFormatter {}
 
-    public function format(float|int $value): string|false {}
+    public function format(float|int|string $value): string|false {}
 
     public function getErrorCode(): int {}
 

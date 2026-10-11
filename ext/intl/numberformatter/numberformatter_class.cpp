@@ -111,7 +111,7 @@ U_CFUNC PHP_METHOD(IntlNumberFormatter, format)
 	NUMBERFORMATTER_METHOD_INIT_VARS;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_NUMBER(value)
+		Z_PARAM_NUMBER_OR_STR(value)
 	ZEND_PARSE_PARAMETERS_END();
 
 	object = ZEND_THIS;
@@ -120,7 +120,17 @@ U_CFUNC PHP_METHOD(IntlNumberFormatter, format)
 	UErrorCode status = U_ZERO_ERROR;
 	UnicodeString result;
 
-	if (Z_TYPE_P(value) == IS_DOUBLE) {
+	if (Z_TYPE_P(value) == IS_STRING) {
+		if (UNEXPECTED(zend_str_has_nul_byte(Z_STR_P(value)))) {
+			zend_argument_value_error(1, "must not contain any null bytes");
+			RETURN_THROWS();
+		}
+		if (UNEXPECTED(Z_STRLEN_P(value) > INT32_MAX)) {
+			zend_argument_value_error(1, "is too long");
+			RETURN_THROWS();
+		}
+		result = NUMBERFORMATTER_OBJECT(nfo)->formatDecimal(icu::StringPiece(Z_STRVAL_P(value), static_cast<int32_t>(Z_STRLEN_P(value))), status).toString(status);
+	} else if (Z_TYPE_P(value) == IS_DOUBLE) {
 		result = NUMBERFORMATTER_OBJECT(nfo)->formatDouble(Z_DVAL_P(value), status).toString(status);
 	} else {
 		result = NUMBERFORMATTER_OBJECT(nfo)->formatInt(static_cast<int64_t>(Z_LVAL_P(value)), status).toString(status);

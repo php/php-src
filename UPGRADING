@@ -68,6 +68,12 @@ PHP 8.7 UPGRADE NOTES
 7. New Classes and Interfaces
 ========================================
 
+- Intl:
+  . Added IntlNumberFormatter class to format a number with a given locale
+    and ICU number skeleton, which also covers measurement units, e.g.
+    "measure-unit/speed-kilometer-per-hour unit-width-full-name".
+    It is supported from icu 63.
+
 ========================================
 8. Removed Extensions and SAPIs
 ========================================

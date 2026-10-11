@@ -21,6 +21,9 @@ var_dump(intl_get_error_message());
 var_dump(IntlNumberFormatter::createFromSkeleton('', 'ro_' . str_repeat('a', 160)));
 var_dump(intl_get_error_message());
 
+var_dump(IntlNumberFormatter::createFromSkeleton("percent\xFF", 'en_US'));
+var_dump(intl_get_error_message());
+
 $formatter = IntlNumberFormatter::createFromSkeleton('', 'en_US');
 
 var_dump(intl_get_error_code());
@@ -68,9 +71,11 @@ NULL
 string(107) "IntlNumberFormatter::createFromSkeleton(): Number formatter creation failed: U_NUMBER_SKELETON_SYNTAX_ERROR"
 NULL
 string(132) "IntlNumberFormatter::createFromSkeleton(): Locale string too long, should be no longer than 156 characters: U_ILLEGAL_ARGUMENT_ERROR"
+NULL
+string(100) "IntlNumberFormatter::createFromSkeleton(): Error converting skeleton to UTF-16: U_INVALID_CHAR_FOUND"
 int(0)
 IntlException: IntlNumberFormatter::createFromSkeleton(): Number formatter creation failed
 Error: Call to private IntlNumberFormatter::__construct() from global scope
 ValueError: IntlNumberFormatter::createFromSkeleton(): Argument #2 ($locale) "invalid-language" is invalid
-TypeError: IntlNumberFormatter::format(): Argument #1 ($value) must be of type int|float, array given
+TypeError: IntlNumberFormatter::format(): Argument #1 ($value) must be of type string|int|float, array given
 Error: Trying to clone an uncloneable object of class IntlNumberFormatter
