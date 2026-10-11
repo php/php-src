@@ -54,6 +54,7 @@ PHP                                                                        NEWS
   . Fixed field_count not resetting on OK packet. (Kamil Tekiela)
 
 - Opcache:
+  . Fixed bug GH-24088 (Range inference optimizer bug). (Ilia Alshanetsky)
   . Fixed bug GH-23693 (Tracing JIT produces wrong results for a guard on a
     loop-invariant addition). (Ilia Alshanetsky)
   . Fixed OSS-Fuzz #545352966 (default value AST of an SHM-persisted partial).
