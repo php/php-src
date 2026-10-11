@@ -42,6 +42,7 @@
 #include "locale/locale_class.h"
 
 #include "listformatter/listformatter_class.h"
+#include "numberformatter/numberformatter_class.h"
 #include "rangeformatter/rangeformatter_class.h"
 
 #include "dateformat/dateformat.h"
@@ -190,6 +191,9 @@ PHP_MINIT_FUNCTION( intl )
 	listformatter_register_class(  );
 
 #if U_ICU_VERSION_MAJOR_NUM >= 63
+	/* Register 'IntlNumberFormatter' PHP class */
+	numberformatter_register_class( );
+
 	/* Register 'NumberRangeFormatter' PHP class */
 	rangeformatter_register_class( );
 #endif
