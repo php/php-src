@@ -443,7 +443,7 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 }
 /* }}} */
 
-static bool _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue, zval *return_value) /* {{{ */
+static bool _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue) /* {{{ */
 {
 	CURLMcode error = CURLM_OK;
 
@@ -521,7 +521,7 @@ PHP_FUNCTION(curl_multi_setopt)
 
 	mh = Z_CURL_MULTI_P(z_mh);
 
-	RETURN_BOOL(_php_curl_multi_setopt(mh, options, zvalue, return_value));
+	RETURN_BOOL(_php_curl_multi_setopt(mh, options, zvalue));
 }
 /* }}} */
 
