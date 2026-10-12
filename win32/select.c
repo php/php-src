@@ -73,20 +73,18 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 		fd_set *in_sets[3];
 		php_growable_fd_set *sock_sets[3];
 		int set_dirs[3];
-		int s;
 
 		in_sets[0] = rfds; sock_sets[0] = &sock_read;   set_dirs[0] = PHP_SELECT_SET_READ;
 		in_sets[1] = wfds; sock_sets[1] = &sock_write;  set_dirs[1] = PHP_SELECT_SET_WRITE;
 		in_sets[2] = efds; sock_sets[2] = &sock_except; set_dirs[2] = PHP_SELECT_SET_EXCEPT;
 
-		for (s = 0; s < 3; s++) {
+		for (int s = 0; s < 3; s++) {
 			fd_set *set = in_sets[s];
-			u_int k;
 
 			if (set == NULL) {
 				continue;
 			}
-			for (k = 0; k < set->fd_count; k++) {
+			for (u_int k = 0; k < set->fd_count; k++) {
 				php_socket_t fd = set->fd_array[k];
 				int _type;
 				int _len = sizeof(_type);
