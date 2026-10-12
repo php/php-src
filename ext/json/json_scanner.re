@@ -269,7 +269,9 @@ std:
 			PHP_JSON_CONDITION_SET(JS);
 			return PHP_JSON_T_EOI;
 		}
-		PHP_JSON_CONDITION_GOTO(COMMENT_LINE);
+		s->token = s->cursor - 1;
+		s->errcode = PHP_JSON_ERROR_CTRL_CHAR;
+		return PHP_JSON_T_ERROR;
 	}
 	<COMMENT_LINE>UTF8       { PHP_JSON_CONDITION_GOTO(COMMENT_LINE); }
 	<COMMENT_LINE>ANY        {
@@ -297,7 +299,9 @@ std:
 			s->errcode = PHP_JSON_ERROR_SYNTAX;
 			return PHP_JSON_T_ERROR;
 		}
-		PHP_JSON_CONDITION_GOTO(COMMENT_BLOCK);
+		s->token = s->cursor - 1;
+		s->errcode = PHP_JSON_ERROR_CTRL_CHAR;
+		return PHP_JSON_T_ERROR;
 	}
 	<COMMENT_BLOCK>UTF8      { PHP_JSON_CONDITION_GOTO(COMMENT_BLOCK); }
 	<COMMENT_BLOCK>ANY       {
