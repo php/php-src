@@ -400,6 +400,11 @@ namespace {
      * @cvalue SOAP_USE_XSI_ARRAY_TYPE
      */
     const SOAP_USE_XSI_ARRAY_TYPE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SOAP_USE_DATETIME_OBJECT
+     */
+    const SOAP_USE_DATETIME_OBJECT = UNKNOWN;
 
     /**
      * @var int

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions name="GetCurrentDate"
+  targetNamespace="http://localhost"
+  xmlns:tns="http://localhost"
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
+  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+
+  <wsdl:message name="GetCurrentDateRequest" />
+  <wsdl:message name="GetCurrentDateResponse">
+    <wsdl:part name="currentDate" type="xsd:datetime" />
+  </wsdl:message>
+
+  <wsdl:portType name="GetCurrentDatePortType">
+    <wsdl:operation name="getCurrentDate">
+      <wsdl:input message="tns:GetCurrentDateRequest" />
+      <wsdl:output message="tns:GetCurrentDateResponse" />
+    </wsdl:operation>
+  </wsdl:portType>
+
+  <wsdl:binding name="GetCurrentDateBinding" type="tns:GetCurrentDatePortType">
+    <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="getCurrentDate">
+      <soap:operation soapAction="http://localhost#getCurrentDate" />
+      <wsdl:input>
+        <soap:body use="encoded" namespace="urn:xmethods-delayed-quotes"
+          encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="encoded" namespace="urn:xmethods-delayed-quotes"
+          encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+
+  <wsdl:service name="GetCurrentDateService">
+    <wsdl:port name="GetCurrentDatePortType" binding="tns:GetCurrentDateBinding">
+      <soap:address location="http://localhost/server.php" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
