@@ -594,6 +594,16 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 						S->param_formats[param->paramno] = 0;
 					} else {
 						convert_to_string(parameter);
+
+						if (UNEXPECTED(PDO_PARAM_TYPE(param->param_type) != PDO_PARAM_LOB &&
+						    zend_str_has_nul_byte(Z_STR_P(parameter)))) {
+							char *tmp;
+							spprintf(&tmp, 0, "parameter " ZEND_LONG_FMT " must not contain any null bytes", param->paramno + 1);
+							pdo_pgsql_error_stmt_msg(stmt, 0, "HY000", tmp);
+							efree(tmp);
+							return 0;
+						}
+
 						S->param_values[param->paramno] = Z_STRVAL_P(parameter);
 						S->param_lengths[param->paramno] = Z_STRLEN_P(parameter);
 						S->param_formats[param->paramno] = 0;
