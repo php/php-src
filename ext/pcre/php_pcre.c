@@ -2401,21 +2401,13 @@ PHP_FUNCTION(preg_replace_callback)
 	/* Get function parameters and do error-checking. */
 	ZEND_PARSE_PARAMETERS_START(3, 6)
 		Z_PARAM_ARRAY_HT_OR_STR(regex_ht, regex_str)
-		Z_PARAM_FUNC(fci, fcc)
+		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(fci, fcc)
 		Z_PARAM_ARRAY_HT_OR_STR(subject_ht, subject_str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(limit)
 		Z_PARAM_ZVAL(zcount)
 		Z_PARAM_LONG(flags)
-	ZEND_PARSE_PARAMETERS_END();
-
-	/* Refetch trampolines once here */
-	bool has_trampoline = false;
-	if (!ZEND_FCC_INITIALIZED(fcc)) {
-		zend_is_callable(&fci.function_name, &fcc, NULL);
-		has_trampoline = true;
-		zend_fcc_addref(&fcc);
-	}
+	ZEND_PARSE_PARAMETERS_END_EX(goto free_trampoline);
 
 	replace_count = php_preg_replace_func_impl(return_value, regex_str, regex_ht,
 		&fcc,
@@ -2423,9 +2415,9 @@ PHP_FUNCTION(preg_replace_callback)
 	if (zcount) {
 		ZEND_TRY_ASSIGN_REF_LONG(zcount, replace_count);
 	}
-	if (has_trampoline) {
-		zend_fcc_dtor(&fcc);
-	}
+
+free_trampoline:
+	zend_release_fcall_info_cache(&fcc);
 }
 /* }}} */
 
