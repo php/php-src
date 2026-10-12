@@ -555,7 +555,6 @@ extern "C++" {
 #define ZEND_STRS(str)		(str), (sizeof(str))
 #define ZEND_NORMALIZE_BOOL(n)			\
 	((n) ? (((n)<0) ? -1 : 1) : 0)
-#define ZEND_TRUTH(x)		((x) ? 1 : 0)
 
 /**
  * Do a three-way comparison of two integers and returns -1, 0 or 1
