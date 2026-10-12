@@ -64,8 +64,8 @@ var_dump(json_validate(
 try {
     json_decode('[1,,]', true, 512,
         JSON_ALLOW_TRAILING_COMMAS | JSON_THROW_ON_ERROR);
-} catch (JsonException $e) {
-    echo $e->getCode(), ': ', $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getCode(), ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -93,4 +93,4 @@ bool(false)
 bool(true)
 bool(false)
 bool(false)
-4: Syntax error near location 1:4
+JsonException: 4: Syntax error near location 1:4
