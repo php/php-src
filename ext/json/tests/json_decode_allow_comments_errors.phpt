@@ -19,6 +19,7 @@ decode_error("# comment\n1");
 decode_error('/');
 decode_error('tr/* comment */ue');
 decode_error('1e/* comment */2');
+decode_error('1./**/5');
 decode_error('-/* comment */1');
 decode_error('{"a" /* missing colon */ 1}');
 
@@ -27,6 +28,7 @@ decode_error('/* outer /* inner */ */ 1');
 
 /* Unterminated block comments report their opening delimiter. */
 decode_error('/* unterminated');
+decode_error('/*/1');
 decode_error("{\n  \"a\": 1,\n  /* unterminated\n  still open");
 
 /* An embedded NUL is a control character error, also inside comments. */
@@ -70,11 +72,15 @@ NULL
 NULL
 4: Syntax error near location 1:2
 NULL
+4: Syntax error near location 1:2
+NULL
 4: Syntax error near location 1:1
 NULL
 4: Syntax error near location 1:26
 NULL
 4: Syntax error near location 1:22
+NULL
+4: Syntax error near location 1:1
 NULL
 4: Syntax error near location 1:1
 NULL

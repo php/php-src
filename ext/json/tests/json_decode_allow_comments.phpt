@@ -33,6 +33,15 @@ decode_and_validate("4// EOF");
 decode_and_validate("// U+2028 \u{2028} and U+2029 \u{2029}\n6");
 decode_and_validate("// controls: a\x01\x0cb\n7");
 
+/* Delimiters can touch. The '*' of an opener does not also close the comment. */
+decode_and_validate('/**/1');
+decode_and_validate('/***/1');
+decode_and_validate('/*/ */1');
+
+/* A comment can directly follow a float or an exponent. */
+decode_and_validate('1.5/*x*/');
+decode_and_validate('1e5//x');
+
 /* Comment delimiters inside strings are ordinary string content. */
 decode_and_validate('["//", "/* not a comment */", "https://php.net/a/*b*/"]');
 
@@ -62,6 +71,16 @@ bool(true)
 6
 bool(true)
 7
+bool(true)
+1
+bool(true)
+1
+bool(true)
+1
+bool(true)
+1.5
+bool(true)
+100000
 bool(true)
 ["//","/* not a comment */","https://php.net/a/*b*/"]
 bool(true)
