@@ -437,7 +437,9 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 	zval_ptr_dtor_nogc(&headers);
 
 	if (!Z_ISUNDEF(retval)) {
-		if (CURL_PUSH_DENY != php_curl_get_long(&retval)) {
+		bool failed;
+		zend_long ret = php_curl_get_long(&retval, &failed);
+		if (!failed && CURL_PUSH_DENY != ret) {
 		    rval = CURL_PUSH_OK;
 			zend_llist_add_element(&mh->easyh, &pz_ch);
 		} else {

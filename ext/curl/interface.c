@@ -606,8 +606,8 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 			php_curl_call_callback(ch, &write_handler->fcc, &retval, /* argc */ 2, argv);
 			if (!Z_ISUNDEF(retval)) {
 				_php_curl_verify_handlers(ch, /* reporterror */ true);
-				/* TODO Check callback returns an int or something castable to int */
-				length = php_curl_get_long(&retval);
+				bool failed;
+				length = php_curl_get_long(&retval, &failed);
 			} else {
 				length = -1;
 			}
@@ -643,8 +643,8 @@ static int curl_fnmatch(void *ctx, const char *pattern, const char *string)
 
 	if (!Z_ISUNDEF(retval)) {
 		_php_curl_verify_handlers(ch, /* reporterror */ true);
-		/* TODO Check callback returns an int or something castable to int */
-		rval = php_curl_get_long(&retval);
+		bool failed;
+		rval = php_curl_get_long(&retval, &failed);
 	}
 	zval_ptr_dtor(&argv[0]);
 	zval_ptr_dtor(&argv[1]);
@@ -681,8 +681,9 @@ static int curl_progress(void *clientp, double dltotal, double dlnow, double ult
 
 	if (!Z_ISUNDEF(retval)) {
 		_php_curl_verify_handlers(ch, /* reporterror */ true);
-		/* TODO Check callback returns an int or something castable to int */
-		if (0 == php_curl_get_long(&retval)) {
+		bool failed;
+		zend_long ret = php_curl_get_long(&retval, &failed);
+		if (0 == ret) {
 			rval = 0; // ok
 		}
 	}
@@ -720,8 +721,8 @@ static int curl_xferinfo(void *clientp, curl_off_t dltotal, curl_off_t dlnow, cu
 
 	if (!Z_ISUNDEF(retval)) {
 		_php_curl_verify_handlers(ch, /* reporterror */ true);
-		/* TODO Check callback returns an int or something castable to int */
-		if (0 == php_curl_get_long(&retval)) {
+		bool failed;
+		if (0 == php_curl_get_long(&retval, &failed)) {
 			rval = 0; // ok
 		}
 	}
@@ -964,9 +965,9 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 
 			php_curl_call_callback(ch, &write_handler->fcc, &retval, /* argc */ 2, argv);
 			if (!Z_ISUNDEF(retval)) {
-				// TODO: Check for valid int type for return value
 				_php_curl_verify_handlers(ch, /* reporterror */ true);
-				length = php_curl_get_long(&retval);
+				bool failed;
+				length = php_curl_get_long(&retval, &failed);
 			} else {
 				length = -1;
 			}
@@ -1334,12 +1335,12 @@ void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
 	(*source->clone)++;
 }
 
-zend_long php_curl_get_long(zval *zv)
+zend_long php_curl_get_long(zval *zv, bool *failed)
 {
 	if (EXPECTED(Z_TYPE_P(zv) == IS_LONG)) {
 		return Z_LVAL_P(zv);
 	} else {
-		zend_long ret = zval_get_long(zv);
+		zend_long ret = zval_try_get_long(zv, failed);
 		zval_ptr_dtor(zv);
 		return ret;
 	}
