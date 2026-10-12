@@ -390,16 +390,18 @@ PDO_API void php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAMETERS, zen
 			if (Z_TYPE_P(v) == IS_STRING &&
 				!is_numeric_string(Z_STRVAL_P(v), Z_STRLEN_P(v), NULL, NULL, 0) && Z_STRLEN_P(v) > 0) {
 				/* user specified key */
-				plen = spprintf(&hashkey, 0, "PDO:DBH:DSN=%s:%s:%s:%s", data_source,
-						username ? username : "",
-						password ? password : "",
-						Z_STRVAL_P(v));
+				plen = spprintf(&hashkey, 0, "PDO:DBH:DSN=%zu:%s:%zu:%s:%zu:%s:%zu:%s",
+						strlen(data_source), data_source,
+						username ? strlen(username) : 0, username ? username : "",
+						password ? strlen(password) : 0, password ? password : "",
+						Z_STRLEN_P(v), Z_STRVAL_P(v));
 				is_persistent = 1;
 			} else {
 				is_persistent = zval_get_long(v) ? 1 : 0;
-				plen = spprintf(&hashkey, 0, "PDO:DBH:DSN=%s:%s:%s", data_source,
-						username ? username : "",
-						password ? password : "");
+				plen = spprintf(&hashkey, 0, "PDO:DBH:DSN=%zu:%s:%zu:%s:%zu:%s",
+						strlen(data_source), data_source,
+						username ? strlen(username) : 0, username ? username : "",
+						password ? strlen(password) : 0, password ? password : "");
 			}
 		}
 
