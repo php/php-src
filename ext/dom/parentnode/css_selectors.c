@@ -239,7 +239,7 @@ void dom_parent_node_query_selector_all(xmlNodePtr thisp, dom_object *intern, zv
 		selectors_str,
 		dom_query_selector_find_array_callback,
 		&ctx,
-		LXB_SELECTORS_OPT_DEFAULT
+		LXB_SELECTORS_OPT_MATCH_FIRST
 	) != LXB_STATUS_OK) {
 		zend_array_destroy(list);
 		RETURN_THROWS();
