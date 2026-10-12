@@ -1241,10 +1241,12 @@ ZEND_API bool zend_is_valid_class_name(const zend_string *name) {
 	for (size_t i = 0; i < ZSTR_LEN(name); i++) {
 		unsigned char c = ZSTR_VAL(name)[i];
 		if (!ZEND_BIT_TEST(valid_chars, c)) {
-			return 0;
+			return false;
 		}
 	}
-	return 1;
+
+	/* An empty string is *not* a valid class name */
+	return ZSTR_LEN(name);
 }
 
 ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *key, uint32_t flags) /* {{{ */
