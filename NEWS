@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.7.0alpha1
 
 - Curl:
-  . curl_multi_exec() now throws a TypeError when still_running is not an int. 
+  . curl_multi_exec() now throws a TypeError when still_running is not an int.
     (arshidkv12)
 
 - FPM:
@@ -43,6 +43,7 @@ PHP                                                                        NEWS
   . Updated Unicode data tables to Unicode 18.0 (Yuya Hamada)
   . Fixed mbstring functions emitting surrogates in UTF-8 output and flagging
     it as valid UTF-8. (Nicolas Grekas)
+  . Fixed bug GH-23958 (truncated encoding names resolving to full names). (Kamil Tekiela)
 
 - MySQLi:
   . Fix GH-22854: Fixed failed assertion when accessing mysqli property after
