@@ -252,15 +252,14 @@ std:
 		s->errcode = PHP_JSON_ERROR_UTF8;
 		return PHP_JSON_T_ERROR;
 	}
-	<COMMENT_LINE>"\r\n"    {
+	<COMMENT_LINE>NL         {
 		s->line++;
 		s->line_start = s->cursor;
 		PHP_JSON_CONDITION_SET(JS);
 		goto std;
 	}
-	<COMMENT_LINE>[\r\n]     {
-		s->line++;
-		s->line_start = s->cursor;
+	<COMMENT_LINE>"\r"       {
+		/* A bare CR ends the comment but is whitespace, as in the JS condition. */
 		PHP_JSON_CONDITION_SET(JS);
 		goto std;
 	}
@@ -285,12 +284,7 @@ std:
 		PHP_JSON_CONDITION_SET(JS);
 		goto std;
 	}
-	<COMMENT_BLOCK>"\r\n"    {
-		s->line++;
-		s->line_start = s->cursor;
-		PHP_JSON_CONDITION_GOTO(COMMENT_BLOCK);
-	}
-	<COMMENT_BLOCK>[\r\n]    {
+	<COMMENT_BLOCK>NL        {
 		s->line++;
 		s->line_start = s->cursor;
 		PHP_JSON_CONDITION_GOTO(COMMENT_BLOCK);
