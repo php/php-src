@@ -15,6 +15,7 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 ========================
 
 - Removed the ZEND_LOG_XOR() macro.
+- Removed the ZEND_TRUTH() macro.
 - Removed zend_execute_scripts(). Manually call zend_execute_script() in a loop
   instead.
 - Removed ZEND_STATIC_ASSERT(). Use C11 static_assert() directly instead.
