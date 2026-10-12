@@ -47,9 +47,16 @@ ZEND_API void zend_init_code_execute_data(zend_execute_data *execute_data, zend_
 ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value);
 ZEND_API void execute_ex(zend_execute_data *execute_data);
 ZEND_API void execute_internal(zend_execute_data *execute_data, zval *return_value);
+
 ZEND_API bool zend_is_valid_class_name(const zend_string *name);
-ZEND_API zend_class_entry *zend_lookup_class(zend_string *name);
+ZEND_API zend_class_entry *zend_lookup_class_with_flags(zend_string *name, uint32_t flags);
 ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *lcname, uint32_t flags);
+
+static zend_always_inline zend_class_entry *zend_lookup_class(zend_string *name) /* {{{ */
+{
+	return zend_lookup_class_with_flags(name, 0);
+}
+
 ZEND_API zend_class_entry *zend_get_called_scope(const zend_execute_data *ex);
 ZEND_API zend_object *zend_get_this_object(const zend_execute_data *ex);
 ZEND_API zend_result zend_eval_string(const char *str, zval *retval_ptr, const char *string_name);

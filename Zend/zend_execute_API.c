@@ -1345,11 +1345,10 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 }
 /* }}} */
 
-ZEND_API zend_class_entry *zend_lookup_class(zend_string *name) /* {{{ */
+ZEND_API zend_class_entry *zend_lookup_class_with_flags(zend_string *name, uint32_t flags)
 {
-	return zend_lookup_class_ex(name, NULL, 0);
+	return zend_lookup_class_ex(name, NULL, flags);
 }
-/* }}} */
 
 ZEND_API zend_class_entry *zend_get_called_scope(const zend_execute_data *ex) /* {{{ */
 {
