@@ -153,6 +153,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-24488 (GC double-frees the SimpleXMLElement properties
     table). (evankford)
 
+- SPL:
+  . Fixed bug GH-24264 (Unwind/GracefulExit discarded in spl_iterators.c).
+    (Lazizbek Ergashev)
+
 - Standard:
   . Fixed bug GH-24308 (Request shutdown calls closelog() even when syslog
     was not opened by PHP). (lazerg)
