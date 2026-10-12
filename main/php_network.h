@@ -284,14 +284,56 @@ static zend_always_inline void php_growable_fd_set_reserve(php_growable_fd_set *
 
 static zend_always_inline void php_growable_fd_set_add(php_growable_fd_set *s, php_socket_t fd)
 {
-	/* Without the duplicate scan of winsock's FD_SET(): callers add each socket once */
+	/* Appends without the duplicate scan of winsock's FD_SET(); the set is
+	 * de-duplicated in one pass later by php_growable_fd_set_sort_unique(). */
 	php_growable_fd_set_reserve(s, s->set->fd_count + 1);
 	s->set->fd_array[s->set->fd_count++] = fd;
 }
 
+static zend_always_inline int php_growable_fd_set_cmp(const void *a, const void *b)
+{
+	SOCKET x = *(const SOCKET *) a;
+	SOCKET y = *(const SOCKET *) b;
+	return (x > y) - (x < y);
+}
+
+/* Sorts the sockets ascending and drops duplicates. This makes select() count a
+ * socket listed more than once (e.g. stream_select([$a, $a], ...)) a single time
+ * - as the POSIX bitset does - and lets php_growable_fd_set_isset() binary-search
+ * instead of scanning, so a whole stream_select() call is O(n log n), not O(n^2). */
+static zend_always_inline void php_growable_fd_set_sort_unique(php_growable_fd_set *s)
+{
+	u_int n = s->set->fd_count;
+	if (n < 2) {
+		return;
+	}
+	qsort(s->set->fd_array, n, sizeof(SOCKET), php_growable_fd_set_cmp);
+	u_int w = 1;
+	for (u_int r = 1; r < n; r++) {
+		if (s->set->fd_array[r] != s->set->fd_array[w - 1]) {
+			s->set->fd_array[w++] = s->set->fd_array[r];
+		}
+	}
+	s->set->fd_count = w;
+}
+
+/* Binary search; the set must have been sorted by php_growable_fd_set_sort_unique(). */
 static zend_always_inline bool php_growable_fd_set_isset(const php_growable_fd_set *s, php_socket_t fd)
 {
-	return FD_ISSET(fd, s->set);
+	SOCKET target = (SOCKET) fd;
+	u_int lo = 0, hi = s->set->fd_count;
+	while (lo < hi) {
+		u_int mid = lo + (hi - lo) / 2;
+		SOCKET v = s->set->fd_array[mid];
+		if (v < target) {
+			lo = mid + 1;
+		} else if (v > target) {
+			hi = mid;
+		} else {
+			return true;
+		}
+	}
+	return false;
 }
 
 static zend_always_inline void php_growable_fd_set_zero(php_growable_fd_set *s)
