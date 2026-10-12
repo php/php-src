@@ -5,26 +5,25 @@ JSON_ALLOW_COMMENTS interactions with malformed UTF-8 flags
 
 function show_decode(string $json, int $flags): void {
     var_dump(json_decode($json, true, 512, JSON_ALLOW_COMMENTS | $flags));
-    echo json_last_error(), "\n";
+    echo json_last_error(), ': ', json_last_error_msg(), "\n";
 }
 
-$badBlockComment = "/* bad: \x80 */ [\"a\x80b\"]";
-$badLineComment = "// bad: \x80\n1";
+function show_validate(string $json, int $flags): void {
+    var_dump(json_validate($json, 512, JSON_ALLOW_COMMENTS | $flags));
+    echo json_last_error(), ': ', json_last_error_msg(), "\n";
+}
 
-show_decode($badBlockComment, 0);
-show_decode($badBlockComment, JSON_INVALID_UTF8_IGNORE);
-show_decode($badBlockComment, JSON_INVALID_UTF8_SUBSTITUTE);
-show_decode($badLineComment, 0);
-show_decode($badLineComment, JSON_INVALID_UTF8_IGNORE);
+/* The invalid byte is only in the comment, so each result comes from the comment. */
+$badBlockComment = "/* bad: \x80 */ [\"ab\"]";
+$badLineComment = "// bad: \x80\n[\"ab\"]";
 
-var_dump(json_validate($badBlockComment, 512, JSON_ALLOW_COMMENTS));
-echo json_last_error(), "\n";
-var_dump(json_validate(
-    $badBlockComment,
-    512,
-    JSON_ALLOW_COMMENTS | JSON_INVALID_UTF8_IGNORE
-));
-echo json_last_error(), "\n";
+foreach ([$badBlockComment, $badLineComment] as $json) {
+    show_decode($json, 0);
+    show_decode($json, JSON_INVALID_UTF8_IGNORE);
+    show_decode($json, JSON_INVALID_UTF8_SUBSTITUTE);
+    show_validate($json, 0);
+    show_validate($json, JSON_INVALID_UTF8_IGNORE);
+}
 
 try {
     json_decode($badLineComment, flags: JSON_ALLOW_COMMENTS | JSON_THROW_ON_ERROR);
@@ -35,23 +34,35 @@ try {
 ?>
 --EXPECT--
 NULL
-5
+5: Malformed UTF-8 characters, possibly incorrectly encoded near location 1:9
 array(1) {
   [0]=>
   string(2) "ab"
 }
-0
+0: No error
 array(1) {
   [0]=>
-  string(5) "a�b"
+  string(2) "ab"
 }
-0
-NULL
-5
-int(1)
-0
+0: No error
 bool(false)
-5
+5: Malformed UTF-8 characters, possibly incorrectly encoded near location 1:9
 bool(true)
-0
+0: No error
+NULL
+5: Malformed UTF-8 characters, possibly incorrectly encoded near location 1:9
+array(1) {
+  [0]=>
+  string(2) "ab"
+}
+0: No error
+array(1) {
+  [0]=>
+  string(2) "ab"
+}
+0: No error
+bool(false)
+5: Malformed UTF-8 characters, possibly incorrectly encoded near location 1:9
+bool(true)
+0: No error
 JsonException: 5: Malformed UTF-8 characters, possibly incorrectly encoded near location 1:9
