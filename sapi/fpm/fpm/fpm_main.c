@@ -653,8 +653,6 @@ static void php_cgi_ini_activate_user_config(char *path, int path_len, const cha
 	if (request_time > entry->expires) {
 		char * real_path;
 		int real_path_len;
-		char *s1, *s2;
-		int s_len;
 
 		/* Clear the expired config */
 		zend_hash_clean(entry->user_config);
@@ -669,22 +667,8 @@ static void php_cgi_ini_activate_user_config(char *path, int path_len, const cha
 			path_len = real_path_len;
 		}
 
-		if (path_len > doc_root_len) {
-			s1 = (char *) doc_root;
-			s2 = path;
-			s_len = doc_root_len;
-		} else {
-			s1 = path;
-			s2 = (char *) doc_root;
-			s_len = path_len;
-		}
-
-		/* we have to test if path is part of DOCUMENT_ROOT.
-		  if it is inside the docroot, we scan the tree up to the docroot
-			to find more user.ini, if not we only scan the current path.
-		  */
-		if (strncmp(s1, s2, s_len) == 0) {
-			ptr = s2 + doc_root_len;
+		if (path_len > doc_root_len && strncmp(path, doc_root, doc_root_len) == 0) {
+			ptr = path + doc_root_len;
 			while ((ptr = strchr(ptr, DEFAULT_SLASH)) != NULL) {
 				*ptr = 0;
 				php_parse_user_ini_file(path, PG(user_ini_filename), entry->user_config);
