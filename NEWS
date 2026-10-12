@@ -23,6 +23,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-24229 (fcgi_close() passes shutdown() a literal 1, which is
     SHUT_RD in WASI). (Ryosuke Ishibashi)
 
+- MBString:
+  . Fixed bug GH-23958 (truncated encoding names resolving to full names). (Kamil Tekiela)
+
 - Opcache:
   . Fixed bug GH-17626 (JIT corrupts an opline handler when blacklisting a
     root trace at the opcache.jit_max_root_traces limit, causing spurious
