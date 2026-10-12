@@ -17,6 +17,6 @@ fclose($stream);
 ?>
 --EXPECT--
 int(-1)
-bool(false)
+int(0)
 int(-1)
-bool(false)
+int(0)

@@ -802,11 +802,17 @@ static int php_userstreamop_seek(php_stream *stream, zend_off_t offset, int when
 	if (call_result == SUCCESS && Z_TYPE(retval) == IS_LONG) {
 		*newoffs = Z_LVAL(retval);
 		ret = 0;
-	} else if (UNEXPECTED(call_result == FAILURE)) {
-		php_stream_warn(stream, NotImplemented,
-				"%s::" USERSTREAM_TELL " is not implemented!", ZSTR_VAL(us->wrapper->ce->name));
-		ret = -1;
 	} else {
+		if (UNEXPECTED(call_result == FAILURE)) {
+			php_stream_warn(stream, NotImplemented,
+					"%s::" USERSTREAM_TELL " is not implemented!", ZSTR_VAL(us->wrapper->ce->name));
+		}
+
+		/* the stream has moved although the seek failed, so the buffered data
+		 * of the old position is no longer valid */
+		stream->eof = 0;
+		stream->fatal_error = 0;
+		stream->readpos = stream->writepos = 0;
 		ret = -1;
 	}
 

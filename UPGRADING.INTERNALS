@@ -45,6 +45,9 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 - The INIT_CLASS_ENTRY_INIT_METHODS() macro, which was previously used as
   part of handling disabled classes, was removed following the removal of
   the `disable_classes` INI setting in PHP 8.5.
+- php_stream_seek() no longer discards the read buffer when the seek handler
+  of php_stream_ops fails. A seek handler must therefore leave both its own
+  position and the returned new offset unchanged on failure.
 
 ========================
 2. Build system changes
