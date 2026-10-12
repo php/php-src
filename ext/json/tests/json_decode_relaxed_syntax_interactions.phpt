@@ -23,14 +23,20 @@ var_dump(json_decode($nested, true, 2, RELAXED));
 echo json_last_error(), ': ', json_last_error_msg(), "\n";
 var_dump(json_validate($nested, 3, RELAXED));
 
-/* A trailing-comma reduction must not replace a more specific scanner error. */
-foreach ([
-    "[1,\x01]",
-    "[1,\x80]",
-    '[1,"\\ud834"]',
-] as $json) {
-    var_dump(json_decode($json, true, 512, RELAXED));
-    echo json_last_error(), ': ', json_last_error_msg(), "\n";
+/* A trailing-comma reduction must not replace a more specific scanner error.
+ * Without the flag, the reduction also runs when the scanner reports an error. */
+foreach ([0, RELAXED] as $flags) {
+    foreach ([
+        "[1,\x01]",
+        "[1,\x80]",
+        '[1,"\\ud834"]',
+        "{\"a\":1,\x01}",
+    ] as $json) {
+        var_dump(json_decode($json, true, 512, $flags));
+        echo json_last_error(), ': ', json_last_error_msg(), "\n";
+        var_dump(json_validate($json, 512, $flags));
+        echo json_last_error(), ': ', json_last_error_msg(), "\n";
+    }
 }
 
 /* json_validate() accepts only its documented combinations. */
@@ -68,10 +74,36 @@ NULL
 bool(true)
 NULL
 3: Control character error, possibly incorrectly encoded near location 1:4
+bool(false)
+3: Control character error, possibly incorrectly encoded near location 1:4
 NULL
+5: Malformed UTF-8 characters, possibly incorrectly encoded near location 1:4
+bool(false)
 5: Malformed UTF-8 characters, possibly incorrectly encoded near location 1:4
 NULL
 10: Single unpaired UTF-16 surrogate in unicode escape near location 1:4
+bool(false)
+10: Single unpaired UTF-16 surrogate in unicode escape near location 1:4
+NULL
+3: Control character error, possibly incorrectly encoded near location 1:8
+bool(false)
+3: Control character error, possibly incorrectly encoded near location 1:8
+NULL
+3: Control character error, possibly incorrectly encoded near location 1:4
+bool(false)
+3: Control character error, possibly incorrectly encoded near location 1:4
+NULL
+5: Malformed UTF-8 characters, possibly incorrectly encoded near location 1:4
+bool(false)
+5: Malformed UTF-8 characters, possibly incorrectly encoded near location 1:4
+NULL
+10: Single unpaired UTF-16 surrogate in unicode escape near location 1:4
+bool(false)
+10: Single unpaired UTF-16 surrogate in unicode escape near location 1:4
+NULL
+3: Control character error, possibly incorrectly encoded near location 1:8
+bool(false)
+3: Control character error, possibly incorrectly encoded near location 1:8
 bool(true)
 bool(true)
 ValueError: 0: json_validate(): Argument #3 ($flags) must be a valid flag (allowed flags: JSON_INVALID_UTF8_IGNORE, JSON_ALLOW_COMMENTS, JSON_ALLOW_TRAILING_COMMAS)
