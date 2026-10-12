@@ -25,6 +25,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-24229 (fcgi_close() passes shutdown() a literal 1, which is
     SHUT_RD in WASI). (Ryosuke Ishibashi)
 
+- MBString:
+  . Fixed bug GH-23958 (truncated encoding names resolving to full names). (Kamil Tekiela)
+
 - Opcache:
   . Fixed bug GH-20890 (Segfault in zval_undefined_cv with non-simple property
     hook with minimal tracing JIT). (ndossche)
@@ -168,7 +171,6 @@ PHP                                                                        NEWS
     a truncated UTF-8 sequence). (Lazizbek Ergashev)
   . Fixed mbstring functions emitting surrogates in UTF-8 output and flagging
     it as valid UTF-8. (Nicolas Grekas)
-  . Fixed bug GH-23958 (truncated encoding names resolving to full names). (Kamil Tekiela)
 
 - MySQLi:
   . Fix GH-22854: Fixed failed assertion when accessing mysqli property after
