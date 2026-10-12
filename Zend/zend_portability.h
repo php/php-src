@@ -556,7 +556,6 @@ extern "C++" {
 #define ZEND_NORMALIZE_BOOL(n)			\
 	((n) ? (((n)<0) ? -1 : 1) : 0)
 #define ZEND_TRUTH(x)		((x) ? 1 : 0)
-#define ZEND_LOG_XOR(a, b)		(ZEND_TRUTH(a) ^ ZEND_TRUTH(b))
 
 /**
  * Do a three-way comparison of two integers and returns -1, 0 or 1
