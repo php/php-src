@@ -9,13 +9,13 @@ function decode_error(string $json, int $flags = JSON_ALLOW_COMMENTS): void {
 }
 
 /* Strict parsing is unchanged. */
-decode_error('// comment\n1', 0);
+decode_error("// comment\n1", 0);
 decode_error('/* comment */ 1', 0);
 
 /* Comments are trivia, not values or token fragments. */
 decode_error('// comment only');
 decode_error('/* comment only */');
-decode_error('# comment\n1');
+decode_error("# comment\n1");
 decode_error('/');
 decode_error('tr/* comment */ue');
 decode_error('1e/* comment */2');
