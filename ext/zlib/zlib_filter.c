@@ -90,11 +90,12 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 				exit_status = PSFS_PASS_ON;
 			} else if (status != Z_OK && status != Z_BUF_ERROR) {
 				/* Something bad happened */
-				php_error_docref(NULL, E_NOTICE, "zlib: %s", zError(status));
 				php_stream_bucket_delref(bucket);
 				/* reset these because despite the error the filter may be used again */
 				data->strm.next_in = data->inbuf;
 				data->strm.avail_in = 0;
+				/* Last: an error handler may remove this filter and free data. */
+				php_error_docref(NULL, E_NOTICE, "zlib: %s", zError(status));
 				return PSFS_ERR_FATAL;
 			}
 			desired -= data->strm.avail_in; /* desired becomes what we consumed this round through */

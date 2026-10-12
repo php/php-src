@@ -638,6 +638,15 @@ static char * php_zipobj_get_zip_comment(ze_zip_object *obj, int *len) /* {{{ */
 }
 /* }}} */
 
+static bool php_zipobj_closing(ze_zip_object *obj)
+{
+	if (obj->archive && obj->archive->close) {
+		zend_throw_error(NULL, "Already being closed");
+		return true;
+	}
+	return false;
+}
+
 #ifdef HAVE_GLOB /* {{{ */
 #ifndef GLOB_ONLYDIR
 #define GLOB_ONLYDIR (1<<30)
@@ -1089,6 +1098,10 @@ static void _php_zip_progress_callback_free(void *ptr)
 {
 	php_zip_archive *archive = ptr;
 
+	if (UNEXPECTED(!EG(active))) {
+		return;
+	}
+
 	if (!Z_ISUNDEF(archive->progress_callback)) {
 		zval_ptr_dtor(&archive->progress_callback);
 		ZVAL_UNDEF(&archive->progress_callback);
@@ -1100,6 +1113,10 @@ static void _php_zip_progress_callback_free(void *ptr)
 static void _php_zip_cancel_callback_free(void *ptr)
 {
 	php_zip_archive *archive = ptr;
+
+	if (UNEXPECTED(!EG(active))) {
+		return;
+	}
 
 	if (!Z_ISUNDEF(archive->cancel_callback)) {
 		zval_ptr_dtor(&archive->cancel_callback);
@@ -1132,7 +1149,12 @@ void php_zip_archive_release(php_zip_archive *archive)
 	}
 
 	if (archive->za) {
-		if (zip_close(archive->za) != 0) {
+		/* Guard against a re-entrant close() or open() from a progress/cancel
+		 * callback fired during zip_close(), which would run a nested zip_close()
+		 * on the same archive (see ZipArchive::close()). */
+		archive->close = true;
+		int err = zip_close(archive->za);
+		if (err != 0) {
 			php_error_docref(NULL, E_WARNING, "Cannot destroy the zip context: %s", zip_strerror(archive->za));
 			zip_discard(archive->za);
 		}
@@ -1164,6 +1186,7 @@ static void php_zip_object_detach_archive(ze_zip_object *ze_obj, struct zip *rel
 	ZEND_ASSERT(ze_obj->archive != NULL);
 	ZEND_ASSERT(ze_obj->archive->za == released_za);
 	ze_obj->archive->za = NULL;
+	ze_obj->archive->close = false;
 	php_zip_archive_release(ze_obj->archive);
 	ze_obj->archive = NULL;
 }
@@ -1582,9 +1605,8 @@ PHP_METHOD(ZipArchive, open)
 
 	if (ze_obj->archive) {
 		/* we already have an opened zip, free it */
-		if (ze_obj->archive->close) {
+		if (php_zipobj_closing(ze_obj)) {
 			efree(resolved_path);
-			zend_throw_error(NULL, "Already being closed");
 			RETURN_THROWS();
 		}
 		intern = ze_obj->archive->za;
@@ -1647,6 +1669,10 @@ PHP_METHOD(ZipArchive, setPassword)
 
 	ZIP_FROM_OBJECT(intern, self);
 
+	if (php_zipobj_closing(Z_ZIP_P(self))) {
+		RETURN_THROWS();
+	}
+
 	if (password_len < 1) {
 		RETURN_FALSE;
 	}
@@ -1676,14 +1702,12 @@ PHP_METHOD(ZipArchive, close)
 
 	ze_obj = Z_ZIP_P(self);
 
-	if (ze_obj->archive->close) {
-		zend_throw_error(NULL, "Already being closed");
+	if (php_zipobj_closing(ze_obj)) {
 		RETURN_THROWS();
 	}
 
 	ze_obj->archive->close = true;
 	err = zip_close(intern);
-	ze_obj->archive->close = false;
 	if (err) {
 		php_error_docref(NULL, E_WARNING, "%s", zip_strerror(intern));
 		/* Save error for property reader */
@@ -1823,6 +1847,10 @@ PHP_METHOD(ZipArchive, addEmptyDir)
 
 	ZIP_FROM_OBJECT(intern, self);
 
+	if (php_zipobj_closing(Z_ZIP_P(self))) {
+		RETURN_THROWS();
+	}
+
 	if (dirname_len<1) {
 		RETURN_FALSE;
 	}
@@ -1878,6 +1906,10 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 		RETURN_THROWS();
 	}
 	if (options && zend_hash_num_elements(options) > 0 && (php_zip_parse_options(options, &opts) < 0)) {
+		RETURN_THROWS();
+	}
+
+	if (php_zipobj_closing(Z_ZIP_P(self))) {
 		RETURN_THROWS();
 	}
 
@@ -2015,6 +2047,10 @@ PHP_METHOD(ZipArchive, addFile)
 		entry_name_len = ZSTR_LEN(filename);
 	}
 
+	if (php_zipobj_closing(Z_ZIP_P(self))) {
+		RETURN_THROWS();
+	}
+
 	if (php_zip_add_file(Z_ZIP_P(self), ZSTR_VAL(filename), ZSTR_LEN(filename),
 			entry_name, entry_name_len, offset_start, offset_len, -1, flags) < 0) {
 		RETURN_FALSE;
@@ -2048,6 +2084,10 @@ PHP_METHOD(ZipArchive, replaceFile)
 		RETURN_THROWS();
 	}
 
+	if (php_zipobj_closing(Z_ZIP_P(self))) {
+		RETURN_THROWS();
+	}
+
 	if (php_zip_add_file(Z_ZIP_P(self), ZSTR_VAL(filename), ZSTR_LEN(filename),
 			NULL, 0, offset_start, offset_len, index, flags) < 0) {
 		RETURN_FALSE;
@@ -2077,6 +2117,10 @@ PHP_METHOD(ZipArchive, addFromString)
 	}
 
 	ZIP_FROM_OBJECT(intern, self);
+
+	if (php_zipobj_closing(Z_ZIP_P(self))) {
+		RETURN_THROWS();
+	}
 
 	ze_obj = Z_ZIP_P(self);
 	archive = ze_obj->archive;
@@ -2220,6 +2264,10 @@ PHP_METHOD(ZipArchive, setArchiveComment)
 
 	ZIP_FROM_OBJECT(intern, self);
 
+	if (php_zipobj_closing(Z_ZIP_P(self))) {
+		RETURN_THROWS();
+	}
+
 	if (comment_len > 0xffff) {
 		zend_argument_value_error(1, "must be less than 65535 bytes");
 		RETURN_THROWS();
@@ -2268,6 +2316,10 @@ PHP_METHOD(ZipArchive, setArchiveFlag)
 
 	ZIP_FROM_OBJECT(intern, self);
 
+	if (php_zipobj_closing(Z_ZIP_P(self))) {
+		RETURN_THROWS();
+	}
+
 	if (zip_set_archive_flag(intern, flag, (int)value)) {
 		RETURN_FALSE;
 	} else {
@@ -2311,6 +2363,10 @@ PHP_METHOD(ZipArchive, setCommentName)
 
 	ZIP_FROM_OBJECT(intern, self);
 
+	if (php_zipobj_closing(Z_ZIP_P(self))) {
+		RETURN_THROWS();
+	}
+
 	if (comment_len > 0xffff) {
 		zend_argument_value_error(2, "must be less than 65535 bytes");
 		RETURN_THROWS();
@@ -2341,6 +2397,10 @@ PHP_METHOD(ZipArchive, setCommentIndex)
 	}
 
 	ZIP_FROM_OBJECT(intern, self);
+
+	if (php_zipobj_closing(Z_ZIP_P(self))) {
+		RETURN_THROWS();
+	}
 
 	if (comment_len > 0xffff) {
 		zend_argument_value_error(2, "must be less than 65535 bytes");
@@ -2374,6 +2434,10 @@ PHP_METHOD(ZipArchive, setExternalAttributesName)
 
 	ZIP_FROM_OBJECT(intern, self);
 
+	if (php_zipobj_closing(Z_ZIP_P(self))) {
+		RETURN_THROWS();
+	}
+
 	if (name_len == 0) {
 		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
@@ -2406,6 +2470,10 @@ PHP_METHOD(ZipArchive, setExternalAttributesIndex)
 	}
 
 	ZIP_FROM_OBJECT(intern, self);
+
+	if (php_zipobj_closing(Z_ZIP_P(self))) {
+		RETURN_THROWS();
+	}
 
 	PHP_ZIP_STAT_INDEX(intern, index, 0, sb);
 	if (zip_file_set_external_attributes(intern, (zip_uint64_t)index,
@@ -2502,6 +2570,10 @@ PHP_METHOD(ZipArchive, setEncryptionName)
 
 	ZIP_FROM_OBJECT(intern, self);
 
+	if (php_zipobj_closing(Z_ZIP_P(self))) {
+		RETURN_THROWS();
+	}
+
 	if (name_len == 0) {
 		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
@@ -2540,6 +2612,10 @@ PHP_METHOD(ZipArchive, setEncryptionIndex)
 	}
 
 	ZIP_FROM_OBJECT(intern, self);
+
+	if (php_zipobj_closing(Z_ZIP_P(self))) {
+		RETURN_THROWS();
+	}
 
 	if (UNEXPECTED(zip_file_set_encryption(intern, index, ZIP_EM_NONE, NULL) < 0)) {
 		php_error_docref(NULL, E_WARNING, "password reset failed");
@@ -2629,6 +2705,10 @@ PHP_METHOD(ZipArchive, setCompressionName)
 
 	ZIP_FROM_OBJECT(intern, this);
 
+	if (php_zipobj_closing(Z_ZIP_P(this))) {
+		RETURN_THROWS();
+	}
+
 	if (name_len == 0) {
 		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
@@ -2663,6 +2743,10 @@ PHP_METHOD(ZipArchive, setCompressionIndex)
 
 	ZIP_FROM_OBJECT(intern, this);
 
+	if (php_zipobj_closing(Z_ZIP_P(this))) {
+		RETURN_THROWS();
+	}
+
 	if (zip_set_file_compression(intern, (zip_uint64_t)index,
 			(zip_int32_t)comp_method, (zip_uint32_t)comp_flags) != 0) {
 		RETURN_FALSE;
@@ -2688,6 +2772,10 @@ PHP_METHOD(ZipArchive, setMtimeName)
 	}
 
 	ZIP_FROM_OBJECT(intern, this);
+
+	if (php_zipobj_closing(Z_ZIP_P(this))) {
+		RETURN_THROWS();
+	}
 
 	if (name_len == 0) {
 		zend_argument_must_not_be_empty_error(1);
@@ -2723,6 +2811,10 @@ PHP_METHOD(ZipArchive, setMtimeIndex)
 
 	ZIP_FROM_OBJECT(intern, this);
 
+	if (php_zipobj_closing(Z_ZIP_P(this))) {
+		RETURN_THROWS();
+	}
+
 	if (zip_file_set_mtime(intern, (zip_uint64_t)index,
 			(time_t)mtime, (zip_uint32_t)flags) != 0) {
 		RETURN_FALSE;
@@ -2744,6 +2836,10 @@ PHP_METHOD(ZipArchive, deleteIndex)
 	}
 
 	ZIP_FROM_OBJECT(intern, self);
+
+	if (php_zipobj_closing(Z_ZIP_P(self))) {
+		RETURN_THROWS();
+	}
 
 	if (index < 0) {
 		RETURN_FALSE;
@@ -2771,6 +2867,10 @@ PHP_METHOD(ZipArchive, deleteName)
 	}
 
 	ZIP_FROM_OBJECT(intern, self);
+
+	if (php_zipobj_closing(Z_ZIP_P(self))) {
+		RETURN_THROWS();
+	}
 
 	if (name_len < 1) {
 		RETURN_FALSE;
@@ -2803,6 +2903,10 @@ PHP_METHOD(ZipArchive, renameIndex)
 
 	ZIP_FROM_OBJECT(intern, self);
 
+	if (php_zipobj_closing(Z_ZIP_P(self))) {
+		RETURN_THROWS();
+	}
+
 	if (new_name_len == 0) {
 		zend_argument_must_not_be_empty_error(2);
 		RETURN_THROWS();
@@ -2830,6 +2934,10 @@ PHP_METHOD(ZipArchive, renameName)
 	}
 
 	ZIP_FROM_OBJECT(intern, self);
+
+	if (php_zipobj_closing(Z_ZIP_P(self))) {
+		RETURN_THROWS();
+	}
 
 	if (new_name_len == 0) {
 		zend_argument_must_not_be_empty_error(2);
@@ -2859,6 +2967,10 @@ PHP_METHOD(ZipArchive, unchangeIndex)
 
 	ZIP_FROM_OBJECT(intern, self);
 
+	if (php_zipobj_closing(Z_ZIP_P(self))) {
+		RETURN_THROWS();
+	}
+
 	if (index < 0) {
 		RETURN_FALSE;
 	}
@@ -2886,6 +2998,10 @@ PHP_METHOD(ZipArchive, unchangeName)
 
 	ZIP_FROM_OBJECT(intern, self);
 
+	if (php_zipobj_closing(Z_ZIP_P(self))) {
+		RETURN_THROWS();
+	}
+
 	if (name_len < 1) {
 		RETURN_FALSE;
 	}
@@ -2912,6 +3028,10 @@ PHP_METHOD(ZipArchive, unchangeAll)
 
 	ZIP_FROM_OBJECT(intern, self);
 
+	if (php_zipobj_closing(Z_ZIP_P(self))) {
+		RETURN_THROWS();
+	}
+
 	if (zip_unchange_all(intern) != 0) {
 		RETURN_FALSE;
 	} else {
@@ -2931,6 +3051,10 @@ PHP_METHOD(ZipArchive, unchangeArchive)
 	}
 
 	ZIP_FROM_OBJECT(intern, self);
+
+	if (php_zipobj_closing(Z_ZIP_P(self))) {
+		RETURN_THROWS();
+	}
 
 	if (zip_unchange_archive(intern) != 0) {
 		RETURN_FALSE;
@@ -3160,6 +3284,11 @@ static void php_zip_get_stream(INTERNAL_FUNCTION_PARAMETERS, int type, bool acce
 
 	ZIP_FROM_OBJECT(intern, self);
 
+	if (Z_ZIP_P(self)->archive->close) {
+		zend_throw_error(NULL, "Already being closed");
+		RETURN_THROWS();
+	}
+
 	if (type) {
 		PHP_ZIP_STAT_PATH(intern, ZSTR_VAL(filename), ZSTR_LEN(filename), flags, sb);
 	} else {
@@ -3222,6 +3351,10 @@ PHP_METHOD(ZipArchive, registerProgressCallback)
 
 	ZIP_FROM_OBJECT(intern, self);
 
+	if (php_zipobj_closing(Z_ZIP_P(self))) {
+		RETURN_THROWS();
+	}
+
 	archive = Z_ZIP_P(self)->archive;
 
 	/* register */
@@ -3263,6 +3396,10 @@ PHP_METHOD(ZipArchive, registerCancelCallback)
 	}
 
 	ZIP_FROM_OBJECT(intern, self);
+
+	if (php_zipobj_closing(Z_ZIP_P(self))) {
+		RETURN_THROWS();
+	}
 
 	archive = Z_ZIP_P(self)->archive;
 

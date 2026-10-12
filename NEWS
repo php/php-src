@@ -1,10 +1,82 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.27
+?? ??? ????, PHP 8.4.28
+
+- Core:
+  . Fixed bug GH-24184 (System ID not being reinitialized after an Apache
+    graceful restart, potentially causing incompatible OPcache file cache
+    entries to be reused). (Levi Morrison)
+  . Fixed memory leak when an exception already contains the pending exception
+    in its previous chain. (Edmond)
+  . Fixed bug GH-23979 (Nullsafe operator must not flush delayed oplines of an
+    enclosing function). (ndossche)
+  . Fixed memory manager keeping a block reallocated to exactly the size of
+    the next smaller bin in its larger bin, which efree_size() then freed
+    into the wrong one. (Marc Bennewitz)
+  . Fixed bug GH-24218 (Invalid opcode for count() of a literal array
+    without SCCP). (lazerg)
+  . Fix throwing behaviour with recursive arrays in VM. (ndossche)
+
+- DOM:
+  . Fixed bug GH-23352 (UAF reading an attribute value node retained across
+    DOMDocument::adoptNode()). (David Carlier)
+
+- FPM:
+  . Fixed bug GH-24229 (fcgi_close() passes shutdown() a literal 1, which is
+    SHUT_RD in WASI). (Ryosuke Ishibashi)
+
+- MBString:
+  . Fixed bug GH-23958 (truncated encoding names resolving to full names). (Kamil Tekiela)
+
+- Opcache:
+  . Fixed bug GH-20890 (Segfault in zval_undefined_cv with non-simple property
+    hook with minimal tracing JIT). (ndossche)
+  . Fixed bug GH-17626 (JIT corrupts an opline handler when blacklisting a
+    root trace at the opcache.jit_max_root_traces limit, causing spurious
+    "Too few arguments" errors and crashes). (RV7PR)
+  . Fix type inference of ADD_ARRAY_UNPACK with integer keys. (ndossche)
+  . Fix too wide type inference for ASSIGN_DIM_OP. (ndossche)
+  . Fix OSS-Fuzz #568005340 (FETCH_DIM_FUNC_ARG partial conversion). (ndossche)
+  . Fixed bug GH-24218 (Invalid opcode for count() of a literal array when
+    SCCP is disabled). (Lazizbek Ergashev)
+
+- PDO:
+  . Fixed a duplicate warning when ATTR_STATEMENT_CLASS is rejected on a
+    persistent connection. (Ilia Alshanetsky)
+
+- Phpdbg:
+  . Fix wrong command names. (ndossche, Weilin Du)
+
+- SOAP:
+  . Fixed use of uninitialized func in do_request() on OOM bailout.
+    (David Carlier)
+
+- Standard:
+  . Fixed chown() and lchown() failing to resolve user names in ZTS builds
+    when getpwnam_r() needs a larger buffer. (Ilia Alshanetsky)
+  . Fixed password_get_info() and password_needs_rehash() accepting malformed
+    bcrypt costs. (Ilia Alshanetsky)
+
+- Zip:
+  . Fixed use-after-free when re-entering ZipArchive during destruction or
+    a close warning, and rejected opening streams while closing. (jvoisin)
+  . Fixed a use-after-free when a ZipArchive method that modifies the archive
+    is called from a progress or cancel callback during close().
+    (Ilia Alshanetsky)
+
+- Zlib:
+  . Fixed use-after-free when an error handler removes a failing zlib.inflate
+    filter (GH-24176). (Edmond)
+
+22 Oct 2026, PHP 8.4.27
 
 - BCMath:
   . Fixed BcMath\Number results that truncate to zero keeping a negative sign
     and comparing less than zero. (Ilia Alshanetsky)
+
+- BZ2:
+  . Fixed double close of the descriptor and use-after-free of the inner
+    stream when bzopen() is given a stream resource. (Jakub Zelenka)
 
 - CLI
   . Fix GH-22567 (Windows ZTS CLI SAPI should refresh its TSRMLS cache during
@@ -34,6 +106,8 @@ PHP                                                                        NEWS
     when (object) and use share an array). (David Carlier)
   . Fixed exception thrown by destructor during GC in a Fiber not being rethrown
     into the frame that triggered the GC. (Nicolas Grekas)
+  . Fixed bug GH-24139 (NULL pointer dereference in php_ini.c when
+    expand_filepath() fails). (lazerg)
 
 - DOM:
   . Fixed use-after-free when re-constructing a DOMXPath whose php:function
@@ -84,6 +158,8 @@ PHP                                                                        NEWS
     haystacks. (Weilin Du)
   . Fixed grapheme_strrpos() and grapheme_strripos() skipping overlapping matches
     when using a negative offset. (Weilin Du)
+  . Fixed grapheme_extract() returning an incorrect next offset when starting
+    inside a multibyte UTF-8 character. (Weilin Du, David Carlier)
 
 - Lexbor:
   . Merge patches lexbor/lexbor@8a14bc0 and lexbor/lexbor@f67ce4b, fixing a

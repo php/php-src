@@ -900,7 +900,6 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /
 				pdo_raise_impl_error(dbh, NULL, "HY000",
 					"PDO::ATTR_STATEMENT_CLASS cannot be used with persistent PDO instances"
 					);
-				PDO_HANDLE_DBH_ERR();
 				return false;
 			}
 			if (Z_TYPE_P(value) != IS_ARRAY) {
