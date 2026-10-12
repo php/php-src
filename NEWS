@@ -14,6 +14,8 @@ PHP                                                                        NEWS
     the next smaller bin in its larger bin, which efree_size() then freed
     into the wrong one. (Marc Bennewitz)
   . Fix throwing behaviour with recursive arrays in VM. (ndossche)
+  . Fixed skipped catch block when switching fibers during exception unwinding
+    (Nicolas Grekas)
 
 - FPM:
   . Fixed bug GH-24229 (fcgi_close() passes shutdown() a literal 1, which is
