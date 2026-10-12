@@ -16,6 +16,7 @@ PHP                                                                        NEWS
   . Fix throwing behaviour with recursive arrays in VM. (ndossche)
   . Fixed skipped catch block when switching fibers during exception unwinding
     (Nicolas Grekas)
+  . Fix escape analysis for objects implementing ArrayAccess. (ndossche, Arnaud)
 
 - FPM:
   . Fixed bug GH-24229 (fcgi_close() passes shutdown() a literal 1, which is
