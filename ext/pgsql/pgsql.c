@@ -1213,7 +1213,7 @@ static void _php_pgsql_free_params(char **params, uint32_t num_params)
 	efree(params);
 }
 
-static char **php_pgsql_make_arguments(const HashTable *param_arr, int *num_params)
+static char **php_pgsql_make_arguments(const HashTable *param_arr, int *num_params, uint32_t arg_num)
 {
 	/* This conversion is safe because of the limit of number of elements in a table. */
 	*num_params = (int) zend_hash_num_elements(param_arr);
@@ -1227,6 +1227,12 @@ static char **php_pgsql_make_arguments(const HashTable *param_arr, int *num_para
 		} else {
 			zend_string *param_str = zval_try_get_string(tmp);
 			if (!param_str) {
+				_php_pgsql_free_params(params, i);
+				return NULL;
+			}
+			if (UNEXPECTED(zend_str_has_nul_byte(param_str))) {
+				zend_argument_value_error(arg_num, "must not contain strings with any null bytes");
+				zend_string_release(param_str);
 				_php_pgsql_free_params(params, i);
 				return NULL;
 			}
@@ -1290,7 +1296,7 @@ PHP_FUNCTION(pg_query_params)
 		php_error_docref(NULL, E_NOTICE, "Found results on this connection. Use pg_get_result() to get these results first");
 	}
 
-	params = php_pgsql_make_arguments(Z_ARRVAL_P(pv_param_arr), &num_params);
+	params = php_pgsql_make_arguments(Z_ARRVAL_P(pv_param_arr), &num_params, ZEND_NUM_ARGS());
 	if (UNEXPECTED(!params)) {
 		RETURN_THROWS();
 	}
@@ -1473,7 +1479,7 @@ PHP_FUNCTION(pg_execute)
 		php_error_docref(NULL, E_NOTICE, "Found results on this connection. Use pg_get_result() to get these results first");
 	}
 
-	params = php_pgsql_make_arguments(Z_ARRVAL_P(pv_param_arr), &num_params);
+	params = php_pgsql_make_arguments(Z_ARRVAL_P(pv_param_arr), &num_params, ZEND_NUM_ARGS());
 	if (UNEXPECTED(!params)) {
 		RETURN_THROWS();
 	}
@@ -3544,7 +3550,7 @@ PHP_FUNCTION(pg_escape_string)
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
 			ZEND_PARSE_PARAMETERS_START(1, 1)
-				Z_PARAM_STR(from)
+				Z_PARAM_PATH_STR(from)
 			ZEND_PARSE_PARAMETERS_END();
 
 			link = FETCH_DEFAULT_LINK();
@@ -3552,7 +3558,7 @@ PHP_FUNCTION(pg_escape_string)
 		default:
 			ZEND_PARSE_PARAMETERS_START(2, 2)
 				Z_PARAM_OBJECT_OF_CLASS(pgsql_link, pgsql_link_ce)
-				Z_PARAM_STR(from)
+				Z_PARAM_PATH_STR(from)
 			ZEND_PARSE_PARAMETERS_END();
 
 			link = Z_PGSQL_LINK_P(pgsql_link);
@@ -3656,7 +3662,7 @@ static void php_pgsql_escape_internal(INTERNAL_FUNCTION_PARAMETERS, int escape_l
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
 			ZEND_PARSE_PARAMETERS_START(1, 1)
-				Z_PARAM_STR(from)
+				Z_PARAM_PATH_STR(from)
 			ZEND_PARSE_PARAMETERS_END();
 
 			link = FETCH_DEFAULT_LINK();
@@ -3666,7 +3672,7 @@ static void php_pgsql_escape_internal(INTERNAL_FUNCTION_PARAMETERS, int escape_l
 		default:
 			ZEND_PARSE_PARAMETERS_START(2, 2)
 				Z_PARAM_OBJECT_OF_CLASS(pgsql_link, pgsql_link_ce)
-				Z_PARAM_STR(from)
+				Z_PARAM_PATH_STR(from)
 			ZEND_PARSE_PARAMETERS_END();
 
 			link = Z_PGSQL_LINK_P(pgsql_link);
@@ -4041,7 +4047,7 @@ PHP_FUNCTION(pg_send_query_params)
 			"There are results on this connection. Call pg_get_result() until it returns FALSE");
 	}
 
-	params = php_pgsql_make_arguments(Z_ARRVAL_P(pv_param_arr), &num_params);
+	params = php_pgsql_make_arguments(Z_ARRVAL_P(pv_param_arr), &num_params, ZEND_NUM_ARGS());
 	if (UNEXPECTED(!params)) {
 		RETURN_THROWS();
 	}
@@ -4196,7 +4202,7 @@ PHP_FUNCTION(pg_send_execute)
 			"There are results on this connection. Call pg_get_result() until it returns FALSE");
 	}
 
-	params = php_pgsql_make_arguments(Z_ARRVAL_P(pv_param_arr), &num_params);
+	params = php_pgsql_make_arguments(Z_ARRVAL_P(pv_param_arr), &num_params, ZEND_NUM_ARGS());
 	if (UNEXPECTED(!params)) {
 		RETURN_THROWS();
 	}
