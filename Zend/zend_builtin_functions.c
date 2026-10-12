@@ -736,7 +736,7 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, bool only_subclass) /* {{{ *
 		RETURN_TRUE;
 	}
 
-	const zend_class_entry *ce = zend_lookup_class_ex(class_name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+	const zend_class_entry *ce = zend_lookup_class_with_flags(class_name, ZEND_FETCH_CLASS_NO_AUTOLOAD);
 	if (!ce) {
 		RETURN_FALSE;
 	}
@@ -1227,7 +1227,7 @@ ZEND_FUNCTION(class_alias)
 		Z_PARAM_BOOL(autoload)
 	ZEND_PARSE_PARAMETERS_END();
 
-	ce = zend_lookup_class_ex(class_name, NULL, !autoload ? ZEND_FETCH_CLASS_NO_AUTOLOAD : 0);
+	ce = zend_lookup_class_with_flags(class_name, !autoload ? ZEND_FETCH_CLASS_NO_AUTOLOAD : 0);
 
 	if (ce) {
 		if (zend_register_class_alias_ex(ZSTR_VAL(alias_name), ZSTR_LEN(alias_name), ce, false) == SUCCESS) {

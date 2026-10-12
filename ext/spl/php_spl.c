@@ -40,7 +40,7 @@ ZEND_TLS zend_string *spl_autoload_extensions;
 
 static zend_class_entry * spl_find_ce_by_name(zend_string *name, bool autoload)
 {
-	zend_class_entry *ce = zend_lookup_class_ex(name, NULL, autoload ? 0 : ZEND_FETCH_CLASS_NO_AUTOLOAD);
+	zend_class_entry *ce = zend_lookup_class_with_flags(name, autoload ? 0 : ZEND_FETCH_CLASS_NO_AUTOLOAD);
 	if (ce == NULL) {
 		php_error_docref(NULL, E_WARNING, "Class %s does not exist%s", ZSTR_VAL(name), autoload ? " and could not be loaded" : "");
 		return NULL;

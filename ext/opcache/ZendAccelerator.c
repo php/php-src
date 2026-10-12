@@ -2512,7 +2512,7 @@ static zend_always_inline zend_inheritance_cache_entry* zend_accel_inheritance_c
 			}
 			if (found && entry->dependencies) {
 				for (i = 0; i < entry->dependencies_count; i++) {
-					const zend_class_entry *dependency_ce = zend_lookup_class_ex(entry->dependencies[i].name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+					const zend_class_entry *dependency_ce = zend_lookup_class_with_flags(entry->dependencies[i].name, ZEND_FETCH_CLASS_NO_AUTOLOAD);
 
 					if (dependency_ce != entry->dependencies[i].ce) {
 						if (!dependency_ce) {
@@ -2560,7 +2560,7 @@ static zend_class_entry* zend_accel_inheritance_cache_get(zend_class_entry *ce, 
 			}
 
 			for (uint32_t i = 0; i < entry->dependencies_count; i++) {
-				const zend_class_entry *dependency_ce = zend_lookup_class_ex(entry->dependencies[i].name, NULL, 0);
+				const zend_class_entry *dependency_ce = zend_lookup_class(entry->dependencies[i].name);
 
 				if (dependency_ce == NULL) {
 					return NULL;

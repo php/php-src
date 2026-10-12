@@ -275,8 +275,8 @@ static zend_class_entry *lookup_class_ex(
 		return ce;
 	}
 
-	ce = zend_lookup_class_ex(
-	    name, NULL, ZEND_FETCH_CLASS_ALLOW_UNLINKED | ZEND_FETCH_CLASS_NO_AUTOLOAD);
+	ce = zend_lookup_class_with_flags(
+	    name, ZEND_FETCH_CLASS_ALLOW_UNLINKED | ZEND_FETCH_CLASS_NO_AUTOLOAD);
 
 	if (!CG(in_compilation) || in_preload) {
 		if (ce) {
@@ -319,7 +319,7 @@ static bool unlinked_instanceof(const zend_class_entry *ce1, const zend_class_en
 		if (ce1->ce_flags & ZEND_ACC_RESOLVED_PARENT) {
 			parent_ce = ce1->parent;
 		} else {
-			parent_ce = zend_lookup_class_ex(ce1->parent_name, NULL,
+			parent_ce = zend_lookup_class_with_flags(ce1->parent_name,
 				ZEND_FETCH_CLASS_ALLOW_UNLINKED | ZEND_FETCH_CLASS_NO_AUTOLOAD);
 		}
 

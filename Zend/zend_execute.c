@@ -992,7 +992,7 @@ static const zend_class_entry *resolve_single_class_type(zend_string *name, cons
 	} else if (zend_string_equals_ci(name, ZSTR_KNOWN(ZEND_STR_PARENT))) {
 		return self_ce->parent;
 	} else {
-		return zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+		return zend_lookup_class_with_flags(name, ZEND_FETCH_CLASS_NO_AUTOLOAD);
 	}
 }
 
@@ -1003,7 +1003,7 @@ static zend_always_inline const zend_class_entry *zend_ce_from_type(
 	if (ZSTR_HAS_CE_CACHE(name)) {
 		zend_class_entry *ce = ZSTR_GET_CE_CACHE(name);
 		if (!ce) {
-			ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+			ce = zend_lookup_class_with_flags(name, ZEND_FETCH_CLASS_NO_AUTOLOAD);
 		}
 		return ce;
 	}
@@ -1142,7 +1142,7 @@ static zend_always_inline zend_class_entry *zend_fetch_ce_from_type(
 	if (ZSTR_HAS_CE_CACHE(name)) {
 		ce = ZSTR_GET_CE_CACHE(name);
 		if (!ce) {
-			ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+			ce = zend_lookup_class_with_flags(name, ZEND_FETCH_CLASS_NO_AUTOLOAD);
 			if (UNEXPECTED(!ce)) {
 				/* Cannot resolve */
 				return NULL;

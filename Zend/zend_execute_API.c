@@ -1799,7 +1799,7 @@ check_fetch_type:
 			break;
 	}
 
-	ce = zend_lookup_class_ex(class_name, NULL, fetch_type);
+	ce = zend_lookup_class_with_flags(class_name, fetch_type);
 	if (!ce) {
 		report_class_fetch_error(class_name, fetch_type);
 		return NULL;
@@ -1833,7 +1833,7 @@ zend_class_entry *zend_fetch_class_with_scope(
 		default: ZEND_UNREACHABLE();
 	}
 
-	ce = zend_lookup_class_ex(class_name, NULL, fetch_type);
+	ce = zend_lookup_class_with_flags(class_name, fetch_type);
 	if (!ce) {
 		report_class_fetch_error(class_name, fetch_type);
 		return NULL;

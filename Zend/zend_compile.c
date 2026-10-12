@@ -10059,8 +10059,8 @@ static void zend_compile_class_decl(znode *result, const zend_ast *ast, bool top
 	 && !(CG(compiler_options) & ZEND_COMPILE_WITHOUT_EXECUTION)) {
 		if (toplevel) {
 			if (extends_ast) {
-				zend_class_entry *parent_ce = zend_lookup_class_ex(
-					ce->parent_name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+				zend_class_entry *parent_ce = zend_lookup_class_with_flags(
+					ce->parent_name, ZEND_FETCH_CLASS_NO_AUTOLOAD);
 
 				if (parent_ce
 				 && !zend_compile_ignore_class(parent_ce, ce->info.user.filename)) {
