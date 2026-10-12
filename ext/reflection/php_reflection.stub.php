@@ -22,7 +22,7 @@ interface Reflector extends Stringable
 /** @not-serializable */
 abstract class ReflectionFunctionAbstract implements Reflector
 {
-    public string $name;
+    public readonly string $name;
 
     /** @implementation-alias ReflectionClass::__clone */
     private function __clone(): void {}
@@ -179,7 +179,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract
     /** @cvalue ZEND_ACC_FINAL */
     public const int IS_FINAL = UNKNOWN;
 
-    public string $class;
+    public readonly string $class;
 
     public function __construct(object|string $objectOrMethod, ?string $method = null) {}
 
@@ -254,7 +254,7 @@ class ReflectionClass implements Reflector
     /** @cvalue ZEND_LAZY_OBJECT_SKIP_DESTRUCTOR */
     public const int SKIP_DESTRUCTOR = UNKNOWN;
 
-    public string $name;
+    public readonly string $name;
 
     private function __clone(): void {}
 
@@ -473,8 +473,8 @@ class ReflectionProperty implements Reflector
     /** @cvalue ZEND_ACC_FINAL */
     public const int IS_FINAL = UNKNOWN;
 
-    public string $name;
-    public string $class;
+    public readonly string $name;
+    public readonly string $class;
 
     /** @implementation-alias ReflectionClass::__clone */
     private function __clone(): void {}
@@ -592,8 +592,8 @@ class ReflectionClassConstant implements Reflector
     /** @cvalue ZEND_ACC_FINAL */
     public const int IS_FINAL = UNKNOWN;
 
-    public string $name;
-    public string $class;
+    public readonly string $name;
+    public readonly string $class;
 
     /** @implementation-alias ReflectionClass::__clone */
     private function __clone(): void {}
@@ -642,7 +642,7 @@ class ReflectionClassConstant implements Reflector
 /** @not-serializable */
 class ReflectionParameter implements Reflector
 {
-    public string $name;
+    public readonly string $name;
 
     /** @implementation-alias ReflectionClass::__clone */
     private function __clone(): void {}
@@ -756,7 +756,7 @@ class ReflectionIntersectionType extends ReflectionType
 /** @not-serializable */
 class ReflectionExtension implements Reflector
 {
-    public string $name;
+    public readonly string $name;
 
     /** @implementation-alias ReflectionClass::__clone */
     private function __clone(): void {}
@@ -802,7 +802,7 @@ class ReflectionExtension implements Reflector
 /** @not-serializable */
 class ReflectionZendExtension implements Reflector
 {
-    public string $name;
+    public readonly string $name;
 
     /** @implementation-alias ReflectionClass::__clone */
     private function __clone(): void {}
@@ -846,7 +846,7 @@ class ReflectionAttribute implements Reflector
     /** @cvalue REFLECTION_ATTRIBUTE_IS_INSTANCEOF */
     public const int IS_INSTANCEOF = UNKNOWN;
 
-    public string $name;
+    public readonly string $name;
 
     public function getName(): string {}
     public function inNamespace(): bool {}
@@ -918,7 +918,7 @@ final class ReflectionFiber
  */
 class ReflectionConstant implements Reflector
 {
-    public string $name;
+    public readonly string $name;
 
     public function __construct(string $name) {}
 
