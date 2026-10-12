@@ -1228,12 +1228,13 @@ ZEND_API bool zend_is_valid_class_name(const zend_string *name) {
 	return ZSTR_LEN(name);
 }
 
-ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *key, uint32_t flags) /* {{{ */
+ZEND_ATTRIBUTE_NONNULL ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *lc_name, uint32_t flags) /* {{{ */
 {
 	zend_class_entry *ce = NULL;
-	zend_string *lc_name;
 	zend_string *autoload_name;
 	uint32_t ce_cache = 0;
+
+	ZEND_ASSERT(ZSTR_VAL(lc_name)[0] != '\\' && "lowercase name must not start with \\");
 
 	if (ZSTR_HAS_CE_CACHE(name) && ZSTR_VALID_CE_CACHE(name)) {
 		ce_cache = GC_REFCOUNT(name);
@@ -1243,30 +1244,10 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 		}
 	}
 
-	if (key) {
-		lc_name = key;
-	} else {
-		if (!ZSTR_LEN(name)) {
-			return NULL;
-		}
-
-		if (ZSTR_VAL(name)[0] == '\\') {
-			if (ZSTR_LEN(name) == 1) {
-				/* A lone namespace separator names no class, e.g. is_callable('\::method'). */
-				return NULL;
-			}
-			lc_name = zend_string_alloc(ZSTR_LEN(name) - 1, 0);
-			zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1);
-		} else {
-			lc_name = zend_string_tolower(name);
-		}
-	}
-
+	/* Note: we do not validate the class name because of anonymous classes
+	 * having a name that is not compatible by the rules of zend_is_valid_class_name() */
 	ce = zend_hash_find_ptr(EG(class_table), lc_name);
 	if (ce) {
-		if (!key) {
-			zend_string_release_ex(lc_name, 0);
-		}
 		if (UNEXPECTED(!(ce->ce_flags & ZEND_ACC_LINKED))) {
 			if ((flags & ZEND_FETCH_CLASS_ALLOW_UNLINKED) ||
 				((flags & ZEND_FETCH_CLASS_ALLOW_NEARLY_LINKED) &&
@@ -1289,31 +1270,21 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 		return ce;
 	}
 
+	if (UNEXPECTED(!zend_is_valid_class_name(lc_name))) {
+		return NULL;
+	}
+	ZEND_ASSERT(zend_is_valid_class_name(name) && "If lowercase name is valid the name must also be so");
+
 	/* The compiler is not-reentrant. Make sure we autoload only during run-time. */
 	if ((flags & ZEND_FETCH_CLASS_NO_AUTOLOAD) || zend_is_compiling()) {
-		if (!key) {
-			zend_string_release_ex(lc_name, 0);
-		}
 		return NULL;
 	}
 
 	if (!zend_autoload) {
-		if (!key) {
-			zend_string_release_ex(lc_name, 0);
-		}
-		return NULL;
-	}
-
-	/* Verify class name before passing it to the autoloader. */
-	if (!key && !ZSTR_HAS_CE_CACHE(name) && !zend_is_valid_class_name(name)) {
-		zend_string_release_ex(lc_name, 0);
 		return NULL;
 	}
 
 	if (zend_hash_add_empty_element(&EG(autoload_current_classnames), lc_name) == NULL) {
-		if (!key) {
-			zend_string_release_ex(lc_name, 0);
-		}
 		return NULL;
 	}
 
@@ -1334,9 +1305,6 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 	zend_string_release_ex(autoload_name, 0);
 	zend_hash_del(&EG(autoload_current_classnames), lc_name);
 
-	if (!key) {
-		zend_string_release_ex(lc_name, 0);
-	}
 	if (ce) {
 		ZEND_ASSERT(!CG(in_compilation));
 		if (ce_cache) {
@@ -1349,7 +1317,16 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 
 ZEND_API zend_class_entry *zend_lookup_class_with_flags(zend_string *name, uint32_t flags)
 {
-	return zend_lookup_class_ex(name, NULL, flags);
+	zend_string *lc_name;
+	if (ZSTR_VAL(name)[0] == '\\') {
+		lc_name = zend_string_alloc(ZSTR_LEN(name) - 1, false);
+		zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1);
+	} else {
+		lc_name = zend_string_tolower(name);
+	}
+	zend_class_entry *ce = zend_lookup_class_ex(name, lc_name, flags);
+	zend_string_release_ex(lc_name, false);
+	return ce;
 }
 
 ZEND_API zend_class_entry *zend_get_called_scope(const zend_execute_data *ex) /* {{{ */

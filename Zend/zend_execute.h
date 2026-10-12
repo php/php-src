@@ -50,7 +50,7 @@ ZEND_API void execute_internal(zend_execute_data *execute_data, zval *return_val
 
 ZEND_API bool zend_is_valid_class_name(const zend_string *name);
 ZEND_API zend_class_entry *zend_lookup_class_with_flags(zend_string *name, uint32_t flags);
-ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *lcname, uint32_t flags);
+ZEND_ATTRIBUTE_NONNULL ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *lc_name, uint32_t flags);
 
 static zend_always_inline zend_class_entry *zend_lookup_class(zend_string *name) /* {{{ */
 {
