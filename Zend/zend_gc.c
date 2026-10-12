@@ -2389,6 +2389,9 @@ ZEND_API int zend_gc_collect_cycles(void)
 
 		/* The run executes on the GC coroutine and cannot see this stack:
 		 * shield the caller's live TMPVARs from it for the duration. */
+		zend_execute_data *const frame = EG(current_execute_data);
+		const zend_op *const shielded_at = frame != NULL ? frame->opline : NULL;
+
 		if (GC_G(num_roots)) {
 			zend_gc_remove_root_tmpvars();
 		}
@@ -2412,7 +2415,19 @@ ZEND_API int zend_gc_collect_cycles(void)
 		 * it from here, and that run's release would start another. */
 		bool was_active = GC_G(gc_active);
 		GC_G(gc_active) = 1;
-		zend_gc_check_root_tmpvars();
+
+		/* A cancellation thrown at the await puts the frame on the exception
+		 * op, where the walk finds no live range: it walks where the shield
+		 * did. Nothing between the two frees a TMPVAR. With no frame there is
+		 * nothing to walk. */
+		if (EXPECTED(frame != NULL)) {
+			const zend_op *const resumed_at = frame->opline;
+
+			frame->opline = shielded_at;
+			zend_gc_check_root_tmpvars();
+			frame->opline = resumed_at;
+		}
+
 		ZEND_COROUTINE_RELEASE(run);
 		GC_G(gc_active) = was_active;
 
