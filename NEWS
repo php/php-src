@@ -44,6 +44,10 @@ PHP                                                                        NEWS
   . Fixed GH-24166 (Double-free in Phar::webPhar() in CGI without PATH_INFO).
     (RigelYoung, Jakub Zelenka)
 
+- Readline:
+  . Fixed a crash in readline_info() when completion_append_character
+    contains a non-ASCII byte. (Weilin Du)
+
 - Session:
   . Fixed session_write_close() keeping the save handler open when the
     session data cannot be encoded. (Ilia Alshanetsky)
