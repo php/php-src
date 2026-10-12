@@ -43,8 +43,8 @@ var_dump(json_validate(
 foreach ([JSON_BIGINT_AS_STRING, JSON_INVALID_UTF8_SUBSTITUTE] as $invalidFlag) {
     try {
         json_validate('{}', flags: RELAXED | $invalidFlag);
-    } catch (ValueError $e) {
-        echo get_class($e), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getCode(), ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -74,5 +74,5 @@ NULL
 10: Single unpaired UTF-16 surrogate in unicode escape near location 1:4
 bool(true)
 bool(true)
-ValueError
-ValueError
+ValueError: 0: json_validate(): Argument #3 ($flags) must be a valid flag (allowed flags: JSON_INVALID_UTF8_IGNORE, JSON_ALLOW_COMMENTS, JSON_ALLOW_TRAILING_COMMAS)
+ValueError: 0: json_validate(): Argument #3 ($flags) must be a valid flag (allowed flags: JSON_INVALID_UTF8_IGNORE, JSON_ALLOW_COMMENTS, JSON_ALLOW_TRAILING_COMMAS)

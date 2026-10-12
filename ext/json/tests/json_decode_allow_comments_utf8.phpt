@@ -28,8 +28,8 @@ echo json_last_error(), "\n";
 
 try {
     json_decode($badLineComment, flags: JSON_ALLOW_COMMENTS | JSON_THROW_ON_ERROR);
-} catch (JsonException $e) {
-    echo $e->getCode(), ': ', $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getCode(), ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -54,4 +54,4 @@ bool(false)
 5
 bool(true)
 0
-5: Malformed UTF-8 characters, possibly incorrectly encoded near location 1:9
+JsonException: 5: Malformed UTF-8 characters, possibly incorrectly encoded near location 1:9

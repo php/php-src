@@ -32,8 +32,8 @@ decode_error("{\n  \"a\": 1,\n  /* unterminated\n  still open");
 try {
     json_decode("[1,\n /* unterminated", true, 512,
         JSON_ALLOW_COMMENTS | JSON_THROW_ON_ERROR);
-} catch (JsonException $e) {
-    echo get_class($e), ': ', $e->getCode(), ': ', $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getCode(), ': ', $e->getMessage(), "\n";
 }
 
 ?>
