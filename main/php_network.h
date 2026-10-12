@@ -319,8 +319,15 @@ typedef struct {
 	fd_set *set;
 } php_growable_fd_set;
 
-# define PHP_GROWABLE_FD_SET_WORD_BITS (CHAR_BIT * sizeof(unsigned long))
-/* select() operates on whole long-sized words so the size must be a multiple of sizeof(long) */
+/* Use the platform's fd_mask: on big-endian systems the bit positions depend on the word size */
+# ifdef NFDBITS
+typedef fd_mask php_growable_fd_mask;
+#  define PHP_GROWABLE_FD_SET_WORD_BITS NFDBITS
+# else
+typedef unsigned long php_growable_fd_mask;
+#  define PHP_GROWABLE_FD_SET_WORD_BITS (CHAR_BIT * sizeof(unsigned long))
+# endif
+/* select() operates on whole words so the size must be a multiple of sizeof(php_growable_fd_mask) */
 # define PHP_GROWABLE_FD_SET_SIZE(nfds) (ZEND_MM_ALIGNED_SIZE_EX((size_t)(nfds), PHP_GROWABLE_FD_SET_WORD_BITS) / CHAR_BIT)
 
 static zend_always_inline void php_growable_fd_set_init(php_growable_fd_set *s, unsigned int capacity)
@@ -344,13 +351,13 @@ static zend_always_inline void php_growable_fd_set_reserve(php_growable_fd_set *
 static zend_always_inline void php_growable_fd_set_add(php_growable_fd_set *s, php_socket_t fd)
 {
 	php_growable_fd_set_reserve(s, fd + 1);
-	((unsigned long *) s->set)[fd / PHP_GROWABLE_FD_SET_WORD_BITS] |= 1UL << (fd % PHP_GROWABLE_FD_SET_WORD_BITS);
+	((php_growable_fd_mask *) s->set)[fd / PHP_GROWABLE_FD_SET_WORD_BITS] |= (php_growable_fd_mask) (1UL << (fd % PHP_GROWABLE_FD_SET_WORD_BITS));
 }
 
 static zend_always_inline bool php_growable_fd_set_isset(const php_growable_fd_set *s, php_socket_t fd)
 {
 	return (size_t) fd < s->size * CHAR_BIT
-		&& (((const unsigned long *) s->set)[fd / PHP_GROWABLE_FD_SET_WORD_BITS] >> (fd % PHP_GROWABLE_FD_SET_WORD_BITS)) & 1;
+		&& (((const php_growable_fd_mask *) s->set)[fd / PHP_GROWABLE_FD_SET_WORD_BITS] >> (fd % PHP_GROWABLE_FD_SET_WORD_BITS)) & 1;
 }
 
 static zend_always_inline void php_growable_fd_set_destroy(php_growable_fd_set *s)
