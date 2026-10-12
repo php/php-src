@@ -290,7 +290,8 @@ typedef zend_coroutine_t *(*zend_async_gc_new_coroutine_t)(zend_coroutine_priori
  * coroutine runs — how cancellation and IO/timeout failures reach waiting
  * code; transfer_error passes ownership of the reference. A FINISHED
  * coroutine cannot run again: the call returns false with an Error thrown,
- * and a transferred `error` is released. */
+ * and a transferred `error` is released. Every other refusal also returns
+ * false with an Error thrown and a transferred `error` released. */
 typedef bool (*zend_async_enqueue_coroutine_t)(
 		zend_coroutine_t *coroutine, zend_object *error, bool transfer_error);
 /* Yield the current coroutine (-> STATUS_SUSPENDED) and give control to the

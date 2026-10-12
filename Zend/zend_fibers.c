@@ -964,7 +964,21 @@ static void zend_fiber_coroutine_entry(void)
 		GC_ADDREF(exception);
 		zend_clear_exception();
 
-		ZEND_ASYNC_ENQUEUE_WITH_ERROR(caller, exception, true);
+		/* A refused wake leaves the body's error to the coroutine, under the
+		 * refusal, as when nobody is waiting. An exit stays the coroutine's
+		 * own: chained, it would be dropped and the exit lost. */
+		if (UNEXPECTED(!ZEND_ASYNC_ENQUEUE_WITH_ERROR(caller, exception, false))) {
+			if (UNEXPECTED(zend_is_unwind_exit(exception) || zend_is_graceful_exit(exception))) {
+				OBJ_RELEASE(EG(exception));
+				EG(exception) = exception;
+			} else {
+				zend_exception_set_previous(EG(exception), exception);
+			}
+
+			return;
+		}
+
+		OBJ_RELEASE(exception);
 		return;
 	}
 
@@ -983,6 +997,14 @@ static void zend_fiber_coroutine_yield(zend_fiber *fiber, zval *value, zval *ret
 	 * accepted. A body its cancellation ran meanwhile yields to nobody and
 	 * leaves that value alone. */
 	zend_coroutine_t *caller = fiber->caller_coroutine;
+
+	/* Refused, the wake throws here and the body goes on instead of parking
+	 * with the error pending, which the next coroutine to run would meet. The
+	 * caller stays parked until the body yields or ends again. */
+	if (EXPECTED(caller != NULL) && UNEXPECTED(!ZEND_ASYNC_ENQUEUE_COROUTINE(caller))) {
+		return;
+	}
+
 	zval untaken;
 
 	ZVAL_UNDEF(&untaken);
@@ -1006,10 +1028,6 @@ static void zend_fiber_coroutine_yield(zend_fiber *fiber, zval *value, zval *ret
 	 * in between, and it must end at our own root frame. */
 	if (fiber->stack_bottom != NULL) {
 		fiber->stack_bottom->prev_execute_data = NULL;
-	}
-
-	if (caller != NULL) {
-		ZEND_ASYNC_ENQUEUE_COROUTINE(caller);
 	}
 
 	zval_ptr_dtor(&untaken);
@@ -1209,13 +1227,23 @@ static void zend_fiber_coroutine_start(zend_fiber *fiber, zval *return_value)
 
 	fiber->coroutine->fcall = fcall;
 
-	if (UNEXPECTED(!ZEND_ASYNC_ENQUEUE_COROUTINE(fiber->coroutine))) {
+	/* Without the handler a body cancelled before it runs would leave this
+	 * caller parked for good: a refused one fails the start, as a refused
+	 * enqueue does. */
+	fiber->start_handler_id =
+			ZEND_ASYNC_ADD_FINISH_HANDLER(fiber->coroutine, zend_fiber_coroutine_finished, NULL, NULL);
+
+	if (UNEXPECTED(fiber->start_handler_id == 0)) {
+		zend_throw_error(zend_ce_fiber_error, "Cannot start the fiber: the scheduler refused to report its end");
+	}
+
+	if (UNEXPECTED(fiber->start_handler_id == 0 || !ZEND_ASYNC_ENQUEUE_COROUTINE(fiber->coroutine))) {
+		ZEND_ASYNC_REMOVE_FINISH_HANDLER(fiber->coroutine, fiber->start_handler_id);
+		fiber->start_handler_id = 0;
 		zend_fiber_release_coroutine(fiber, false);
 		return;
 	}
 
-	fiber->start_handler_id =
-			ZEND_ASYNC_ADD_FINISH_HANDLER(fiber->coroutine, zend_fiber_coroutine_finished, NULL, NULL);
 	zend_fiber_await(fiber, return_value);
 }
 
