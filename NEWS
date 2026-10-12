@@ -23,6 +23,8 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-23352 (UAF reading an attribute value node retained across
     DOMDocument::adoptNode()). (David Carlier)
+  . Fixed bug GH-24260 (querySelectorAll() returns duplicate elements for
+    selector lists). (fivefilters)
 
 - FPM:
   . Fixed bug GH-24229 (fcgi_close() passes shutdown() a literal 1, which is
