@@ -102,7 +102,7 @@ U_CFUNC PHP_METHOD(IntlNumberFormatter, createFromSkeleton)
 	INTL_CHECK_STATUS_OR_NULL(status, "Number formatter creation failed");
 
 	object_init_ex(return_value, IntlNumberFormatter_ce_ptr);
-	NUMBERFORMATTER_OBJECT(Z_INTL_INTLNUMBERFORMATTER_P(return_value)) = new LocalizedNumberFormatter(nf.locale(icu::Locale(locale)));
+	NUMBERFORMATTER_OBJECT(Z_INTL_INTLNUMBERFORMATTER_P(return_value)) = new LocalizedNumberFormatter(nf.locale(icu::Locale::createCanonical(locale)));
 }
 
 U_CFUNC PHP_METHOD(IntlNumberFormatter, format)
