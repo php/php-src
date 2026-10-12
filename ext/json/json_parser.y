@@ -121,17 +121,7 @@ members:
 				}
 			}
 	|	member
-	|	member ','
-			{
-				if (!(parser->scanner.options & PHP_JSON_ALLOW_TRAILING_COMMAS)) {
-					if (!parser->scanner.errcode) {
-						parser->scanner.errcode = PHP_JSON_ERROR_SYNTAX;
-					}
-					zval_ptr_dtor_nogc(&$1);
-					YYERROR;
-				}
-				ZVAL_COPY_VALUE(&$$, &$1);
-			}
+	|	member trailing_comma
 ;
 
 member:
@@ -192,17 +182,7 @@ elements:
 				}
 			}
 	|	element
-	|	element ','
-			{
-				if (!(parser->scanner.options & PHP_JSON_ALLOW_TRAILING_COMMAS)) {
-					if (!parser->scanner.errcode) {
-						parser->scanner.errcode = PHP_JSON_ERROR_SYNTAX;
-					}
-					zval_ptr_dtor_nogc(&$1);
-					YYERROR;
-				}
-				ZVAL_COPY_VALUE(&$$, &$1);
-			}
+	|	element trailing_comma
 ;
 
 element:
@@ -221,6 +201,18 @@ element:
 					YYERROR;
 				}
 				ZVAL_COPY_VALUE(&$$, &$1);
+			}
+;
+
+trailing_comma:
+		','
+			{
+				if (!(parser->scanner.options & PHP_JSON_ALLOW_TRAILING_COMMAS)) {
+					/* This rule also reduces on an error token from the scanner,
+					 * so keep the scanner's error code. */
+					php_json_yyerror(parser, NULL);
+					YYERROR;
+				}
 			}
 ;
 
