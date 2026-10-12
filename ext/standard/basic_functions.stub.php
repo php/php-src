@@ -2194,7 +2194,10 @@ function hrtime(bool $as_number = false): array|int|float|false {}
 
 /* md5.c */
 
-/** @refcount 1 */
+/**
+ * @refcount 1
+ * @compile-time-eval
+ */
 function md5(string $string, bool $binary = false): string {}
 
 /** @refcount 1 */
@@ -2214,7 +2217,10 @@ function getlastmod(): int|false {}
 
 /* sha1.c */
 
-/** @refcount 1 */
+/**
+ * @refcount 1
+ * @compile-time-eval
+ */
 function sha1(string $string, bool $binary = false): string {}
 
 /** @refcount 1 */

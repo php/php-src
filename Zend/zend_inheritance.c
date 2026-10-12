@@ -390,8 +390,8 @@ static void track_class_dependency(zend_class_entry *ce, zend_string *class_name
 		return;
 	}
 
-#ifndef ZEND_WIN32
-	/* On non-Windows systems, internal classes are always the same,
+#ifndef ZEND_OPCACHE_SHM_REATTACHMENT
+	/* On systems without reattachment, internal classes are always the same,
 	 * so there is no need to explicitly track them. */
 	if (ce->type == ZEND_INTERNAL_CLASS) {
 		return;
@@ -3619,7 +3619,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 		}
 	}
 
-#ifndef ZEND_WIN32
+#ifndef ZEND_OPCACHE_SHM_REATTACHMENT
 	if (ce->ce_flags & ZEND_ACC_ENUM) {
 		/* We will add internal methods. */
 		is_cacheable = false;

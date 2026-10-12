@@ -29,6 +29,7 @@ if (PHP_INTL != "no") {
 				", "intl");
 		ADD_SOURCES(configure_module_dirname + "/converter", "\
 				converter.cpp \
+				converter_class.cpp \
 				", "intl");
 		ADD_SOURCES(configure_module_dirname + "/formatter", "\
 				formatter_attr.cpp \

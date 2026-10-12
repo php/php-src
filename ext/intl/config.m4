@@ -32,6 +32,7 @@ if test "$PHP_INTL" != "no"; then
     common/common_error.cpp \
     dateformat/dateformat_class.cpp \
     converter/converter.cpp \
+    converter/converter_class.cpp \
     dateformat/dateformat.cpp \
     dateformat/dateformat_attr.cpp \
     dateformat/dateformat_attrcpp.cpp \

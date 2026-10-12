@@ -5145,7 +5145,7 @@ static void reflection_class_new_lazy(INTERNAL_FUNCTION_PARAMETERS,
 		zend_is_callable(&fci.function_name, &fcc, NULL);
 	}
 
-	obj = zend_object_make_lazy(obj, ce, &fci.function_name, &fcc,
+	obj = zend_object_make_lazy(obj, ce, &fcc,
 			strategy | options);
 
 	if (!obj) {
@@ -5277,7 +5277,7 @@ ZEND_METHOD(ReflectionClass, getLazyInitializer)
 		RETURN_NULL();
 	}
 
-	RETURN_ZVAL(zend_lazy_object_get_initializer_zv(object), true, false);
+	zend_lazy_object_get_initializer_callback(object, return_value);
 }
 /* }}} */
 

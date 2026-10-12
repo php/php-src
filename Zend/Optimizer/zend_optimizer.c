@@ -108,7 +108,7 @@ zend_result zend_optimizer_eval_special_func_call(
 
 		if (func && func->type == ZEND_INTERNAL_FUNCTION
 				&& func->module->type == MODULE_PERSISTENT
-#ifdef ZEND_WIN32
+#ifdef ZEND_OPCACHE_SHM_REATTACHMENT
 				&& func->module->handle == NULL
 #endif
 		) {
@@ -129,7 +129,7 @@ zend_result zend_optimizer_eval_special_func_call(
 		}
 
 		if (m->type == MODULE_PERSISTENT
-#ifdef ZEND_WIN32
+#ifdef ZEND_OPCACHE_SHM_REATTACHMENT
 			&& m->handle == NULL
 #endif
 		) {

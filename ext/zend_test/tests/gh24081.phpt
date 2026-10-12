@@ -5,6 +5,7 @@ zend_test
 --INI--
 opcache.jit=disable
 zend_test.observer.enabled=1
+zend_test.observer.show_output=1
 zend_test.observer.show_opcode_in_user_handler=ZEND_ADD
 --FILE--
 <?php

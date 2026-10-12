@@ -7735,6 +7735,8 @@ static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32
 		ir_IF_TRUE_cold(if_val);
 		jit_SET_EX_OPLINE(jit, opline);
 		ir_CALL(IR_VOID, ir_CONST_FC_FUNC(zend_jit_nan_coerced_to_type_warning));
+		/* The warning may be turned into an exception by an error handler */
+		zend_jit_check_exception_undef_result(jit, opline);
 		ir_MERGE_WITH_EMPTY_FALSE(if_val);
 
 		ref = ir_NE(dval, ir_CONST_DOUBLE(0.0));
@@ -8555,7 +8557,7 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 			if_enough_stack = ir_IF(ref);
 			ir_IF_FALSE_cold(if_enough_stack);
 
-#ifdef _WIN32
+#ifdef ZEND_OPCACHE_SHM_REATTACHMENT
 			if (0) {
 #else
 			if (opline->opcode == ZEND_INIT_FCALL && func && func->type == ZEND_INTERNAL_FUNCTION) {
@@ -8604,7 +8606,7 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 		// JIT: ZEND_SET_CALL_INFO(call, 0, call_info);
 		ir_STORE(jit_CALL(rx, This.u1.type_info), ir_CONST_U32(IS_UNDEF | ZEND_CALL_NESTED_FUNCTION));
 	}
-#ifdef _WIN32
+#ifdef ZEND_OPCACHE_SHM_REATTACHMENT
 	if (0) {
 #else
 	if (opline->opcode == ZEND_INIT_FCALL && func && func->type == ZEND_INTERNAL_FUNCTION) {
@@ -8741,7 +8743,7 @@ static int zend_jit_func_guard(zend_jit_ctx *jit, ir_ref func_ref, const zend_fu
 				ir_LOAD_A(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, opcodes))),
 				ir_CONST_ADDR(opcodes)),
 			ir_CONST_ADDR(exit_addr));
-#ifdef ZEND_WIN32
+#ifdef ZEND_OPCACHE_SHM_REATTACHMENT
 	} else if (func->type == ZEND_INTERNAL_FUNCTION) {
 		// ASLR may cause different addresses in different workers. Check for the internal function handler.
 		// JIT: if (call->func.internal_function.handler != handler) goto exit_addr;
@@ -8814,7 +8816,7 @@ static int zend_jit_init_fcall(zend_jit_ctx *jit, const zend_op *opline, uint32_
 	if (!func
 	 && trace
 	 && trace->op == ZEND_JIT_TRACE_INIT_CALL) {
-#ifdef _WIN32
+#ifdef ZEND_OPCACHE_SHM_REATTACHMENT
 		/* ASLR */
 		if (trace->func->type != ZEND_INTERNAL_FUNCTION) {
 			func = (zend_function*)trace->func;
@@ -8824,7 +8826,7 @@ static int zend_jit_init_fcall(zend_jit_ctx *jit, const zend_op *opline, uint32_
 #endif
 	}
 
-#ifdef _WIN32
+#ifdef ZEND_OPCACHE_SHM_REATTACHMENT
 	if (0) {
 #else
 	if (opline->opcode == ZEND_INIT_FCALL
@@ -10065,7 +10067,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 	if (trace && !func) {
 		if (trace->op == ZEND_JIT_TRACE_DO_ICALL) {
 			ZEND_ASSERT(!trace->func || trace->func->type == ZEND_INTERNAL_FUNCTION);
-#ifndef ZEND_WIN32
+#ifndef ZEND_OPCACHE_SHM_REATTACHMENT
 			// TODO: ASLR may cause different addresses in different workers ???
 			func = trace->func;
 			if (JIT_G(current_frame) &&
@@ -11244,7 +11246,7 @@ static int zend_jit_leave_func(zend_jit_ctx         *jit,
 	// JIT: EG(vm_stack_top) = (zval*)execute_data
 	ir_STORE(jit_EG(vm_stack_top), jit_FP(jit));
 
-	// JITL execute_data = EX(prev_execute_data)
+	// JIT: execute_data = EX(prev_execute_data)
 	jit_STORE_FP(jit, ir_LOAD_A(jit_EX(prev_execute_data)));
 
 	if (!left_frame) {

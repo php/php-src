@@ -1464,9 +1464,7 @@ PHPDBG_COMMAND(clear) /* {{{ */
 
 PHPDBG_COMMAND(list) /* {{{ */
 {
-	if (!param) {
-		return PHPDBG_LIST_HANDLER(lines)(PHPDBG_COMMAND_ARGS);
-	} else switch (param->type) {
+	switch (param->type) {
 		case NUMERIC_PARAM:
 			return PHPDBG_LIST_HANDLER(lines)(PHPDBG_COMMAND_ARGS);
 
