@@ -84,6 +84,16 @@ PHP 8.7 UPGRADE NOTES
     A ValueError is thrown if the array is empty or contains an invalid
     locale, and a TypeError if it contains a non-string value.
 
+- JSON:
+  . json_decode() and json_validate() can now accept comments and trailing
+    commas. JSON_ALLOW_COMMENTS accepts "//" line comments and "/* */"
+    block comments wherever whitespace is allowed. Block comments do not
+    nest. A line comment ends at LF, CR, CRLF, or the end of the input.
+    A NUL byte in a comment is a control character error.
+    JSON_ALLOW_TRAILING_COMMAS accepts one comma after the last element of
+    a non-empty array or the last member of a non-empty object. Without
+    these flags, parsing does not change.
+
 - Streams:
   . The so_linger, so_rcvbuf and so_sndbuf stream socket context options are
     now also applied to unix and unix datagram sockets.
@@ -99,6 +109,13 @@ PHP 8.7 UPGRADE NOTES
 ========================================
 5. Changed Functions
 ========================================
+
+- JSON:
+  . json_decode() now accepts the JSON_ALLOW_COMMENTS and
+    JSON_ALLOW_TRAILING_COMMAS flags.
+  . json_validate() now accepts the JSON_ALLOW_COMMENTS and
+    JSON_ALLOW_TRAILING_COMMAS flags, in addition to
+    JSON_INVALID_UTF8_IGNORE.
 
 - Standard:
   . stream_select() no longer fails once a watched descriptor exceeds
@@ -148,6 +165,10 @@ PHP 8.7 UPGRADE NOTES
 ========================================
 10. New Global Constants
 ========================================
+
+- JSON:
+  . JSON_ALLOW_COMMENTS.
+  . JSON_ALLOW_TRAILING_COMMAS.
 
 ========================================
 11. Changes to INI File Handling
