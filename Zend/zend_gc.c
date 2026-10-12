@@ -2156,8 +2156,6 @@ static zend_coroutine_t *gc_spawn_destructors_coroutine(void)
 	}
 
 	coroutine->internal_entry = gc_destructors_coroutine;
-	GC_G(dtor_coroutine) = coroutine;
-	GC_G(dtor_pending)++;
 
 	/* waiter is diagnostic only; the handler works off GC_G. */
 	const uint32_t handler_id = ZEND_ASYNC_ADD_FINISH_HANDLER(
@@ -2171,11 +2169,14 @@ static zend_coroutine_t *gc_spawn_destructors_coroutine(void)
 	 * the destructors wait for the next collection. */
 	if (UNEXPECTED(handler_id == 0 || !ZEND_ASYNC_ENQUEUE_COROUTINE(coroutine))) {
 		ZEND_ASYNC_REMOVE_FINISH_HANDLER(coroutine, handler_id);
-		GC_G(dtor_coroutine) = NULL;
-		GC_G(dtor_pending)--;
 		zend_clear_exception();
 		return NULL;
 	}
+
+	/* Set after the hand-off succeeds: a refused one leaves the parked
+	 * iterator in charge, the one that disarms the microtask when it ends. */
+	GC_G(dtor_coroutine) = coroutine;
+	GC_G(dtor_pending)++;
 
 	return coroutine;
 }
