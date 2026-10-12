@@ -18,6 +18,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-24218 (Invalid opcode for count() of a literal array
     without SCCP). (lazerg)
   . Fix throwing behaviour with recursive arrays in VM. (ndossche)
+  . Fixed skipped catch block when switching fibers during exception unwinding
+    (Nicolas Grekas)
 
 - FPM:
   . Fixed bug GH-24229 (fcgi_close() passes shutdown() a literal 1, which is
