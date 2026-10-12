@@ -18,6 +18,11 @@ try {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
+    call_user_func(array('\\', 'bar'));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+try {
     call_user_func(array($foo, 'bar'));
 } catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
@@ -33,6 +38,7 @@ try {
 string(3) "foo"
 TypeError: call_user_func(): Argument #1 ($callback) must be a valid callback, class "foo" not found
 TypeError: call_user_func(): Argument #1 ($callback) must be a valid callback, class "" not found
+TypeError: call_user_func(): Argument #1 ($callback) must be a valid callback, class "\" not found
 
 Warning: Undefined variable $foo in %s on line %d
 TypeError: call_user_func(): Argument #1 ($callback) must be a valid callback, first array member is not a valid class name or object

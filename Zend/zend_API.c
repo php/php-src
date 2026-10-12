@@ -3743,8 +3743,25 @@ static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *sc
 	zend_string *lcname;
 	ALLOCA_FLAG(use_heap);
 
-	ZSTR_ALLOCA_ALLOC(lcname, name_len, use_heap);
-	zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(name), name_len);
+	if (UNEXPECTED(ZSTR_LEN(name) == 0)) {
+		if (error) {
+			*error = estrdup("class \"\" not found");
+		}
+		return false;
+	}
+	if (ZSTR_VAL(name)[0] == '\\') {
+		if (UNEXPECTED(ZSTR_LEN(name) == 1)) {
+			if (error) {
+				*error = estrdup("class \"\\\" not found");
+			}
+			return false;
+		}
+		ZSTR_ALLOCA_ALLOC(lcname, name_len-1, use_heap);
+		zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(name)+1, name_len-1);
+	} else {
+		ZSTR_ALLOCA_ALLOC(lcname, name_len, use_heap);
+		zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(name), name_len);
+	}
 
 	*strict_class = false;
 	if (zend_string_equals(lcname, ZSTR_KNOWN(ZEND_STR_SELF))) {
@@ -3801,7 +3818,7 @@ static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *sc
 			*strict_class = true;
 			ret = true;
 		}
-	} else if ((ce = zend_lookup_class(name)) != NULL) {
+	} else if ((ce = zend_lookup_class_ex(name, lcname, 0)) != NULL) {
 		const zend_class_entry *frame_scope = get_scope(frame);
 		fcc->calling_scope = ce;
 		if (frame_scope && !fcc->object) {
@@ -3821,7 +3838,7 @@ static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *sc
 		*strict_class = true;
 		ret = true;
 	} else {
-		if (error) zend_spprintf(error, 0, "class \"%.*s\" not found", (int)name_len, ZSTR_VAL(name));
+		if (error) zend_spprintf(error, 0, "class \"%pS\" not found", name);
 	}
 	ZSTR_ALLOCA_FREE(lcname, use_heap);
 	/* User error handlers may throw from deprecations above; do not report callable as valid. */

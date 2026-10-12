@@ -1242,6 +1242,8 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 	}
 
 	if (key) {
+		ZEND_ASSERT(ZSTR_LEN(name) != 0 && "Must not be an empty class name");
+		ZEND_ASSERT((ZSTR_VAL(name)[0] != '\\' || ZSTR_LEN(name) > 1) && "Class name must not be \"\\\"");
 		lc_name = key;
 	} else {
 		if (!ZSTR_LEN(name)) {
