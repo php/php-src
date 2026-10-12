@@ -3555,9 +3555,11 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 	ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_LINKED));
 
 	if (ce->parent_name) {
+		zend_string *lc_name = lc_parent_name ? zend_string_copy(lc_parent_name) : zend_string_tolower(ce->parent_name);
 		parent = zend_fetch_class_by_name(
-			ce->parent_name, lc_parent_name,
+			ce->parent_name, lc_name,
 			ZEND_FETCH_CLASS_ALLOW_NEARLY_LINKED | ZEND_FETCH_CLASS_EXCEPTION);
+		zend_string_release(lc_name);
 		if (!parent) {
 			check_unrecoverable_load_failure(ce);
 			return NULL;

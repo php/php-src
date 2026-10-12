@@ -1841,9 +1841,9 @@ zend_class_entry *zend_fetch_class_with_scope(
 	return ce;
 }
 
-zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, zend_string *key, uint32_t fetch_type) /* {{{ */
+ZEND_ATTRIBUTE_NONNULL ZEND_API zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, zend_string *lcname, uint32_t fetch_type) /* {{{ */
 {
-	zend_class_entry *ce = zend_lookup_class_ex(class_name, key, fetch_type);
+	zend_class_entry *ce = zend_lookup_class_ex(class_name, lcname, fetch_type);
 	if (!ce) {
 		report_class_fetch_error(class_name, fetch_type);
 		return NULL;
