@@ -48,6 +48,10 @@ PHP                                                                        NEWS
   . Fixed use of uninitialized func in do_request() on OOM bailout.
     (David Carlier)
 
+- SPL:
+  . Fixed bug GH-24264 (Unwind/GracefulExit discarded in spl_iterators.c).
+    (Lazizbek Ergashev)
+
 - Standard:
   . Fixed chown() and lchown() failing to resolve user names in ZTS builds
     when getpwnam_r() needs a larger buffer. (Ilia Alshanetsky)

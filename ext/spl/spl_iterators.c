@@ -251,6 +251,11 @@ static void spl_recursive_it_get_current_key(zend_object_iterator *iter, zval *k
 	}
 }
 
+static bool spl_can_catch_exception(void)
+{
+	return !zend_is_unwind_exit(EG(exception)) && !zend_is_graceful_exit(EG(exception));
+}
+
 static void spl_recursive_it_move_forward_ex(spl_recursive_it_object *object, zval *zthis)
 {
 	zend_object_iterator      *iterator;
@@ -271,7 +276,7 @@ next_step:
 			case RS_NEXT:
 				iterator->funcs->move_forward(iterator);
 				if (EG(exception)) {
-					if (!(object->flags & RIT_CATCH_GET_CHILD)) {
+					if (!(object->flags & RIT_CATCH_GET_CHILD) || !spl_can_catch_exception()) {
 						return;
 					} else {
 						zend_clear_exception();
@@ -308,7 +313,7 @@ next_step:
 					zend_call_method_with_0_params(obj, ce, cache, "haschildren", &retval);
 				}
 				if (EG(exception)) {
-					if (!(object->flags & RIT_CATCH_GET_CHILD)) {
+					if (!(object->flags & RIT_CATCH_GET_CHILD) || !spl_can_catch_exception()) {
 						object->iterators[object->level].state = RS_NEXT;
 						return;
 					} else {
@@ -344,7 +349,7 @@ next_step:
 				}
 				object->iterators[object->level].state = RS_NEXT;
 				if (EG(exception)) {
-					if (!(object->flags & RIT_CATCH_GET_CHILD)) {
+					if (!(object->flags & RIT_CATCH_GET_CHILD) || !spl_can_catch_exception()) {
 						return;
 					} else {
 						zend_clear_exception();
@@ -373,7 +378,7 @@ next_step:
 				}
 
 				if (EG(exception)) {
-					if (!(object->flags & RIT_CATCH_GET_CHILD)) {
+					if (!(object->flags & RIT_CATCH_GET_CHILD) || !spl_can_catch_exception()) {
 						return;
 					} else {
 						zend_clear_exception();
@@ -417,7 +422,7 @@ next_step:
 				if (object->beginChildren) {
 					zend_call_method_with_0_params(Z_OBJ_P(zthis), object->ce, &object->beginChildren, "beginchildren", NULL);
 					if (EG(exception)) {
-						if (!(object->flags & RIT_CATCH_GET_CHILD)) {
+						if (!(object->flags & RIT_CATCH_GET_CHILD) || !spl_can_catch_exception()) {
 							return;
 						} else {
 							zend_clear_exception();
@@ -431,7 +436,7 @@ next_step:
 			if (object->endChildren) {
 				zend_call_method_with_0_params(Z_OBJ_P(zthis), object->ce, &object->endChildren, "endchildren", NULL);
 				if (EG(exception)) {
-					if (!(object->flags & RIT_CATCH_GET_CHILD)) {
+					if (!(object->flags & RIT_CATCH_GET_CHILD) || !spl_can_catch_exception()) {
 						return;
 					} else {
 						zend_clear_exception();
@@ -2300,7 +2305,7 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern)
 			zend_call_method_with_0_params(Z_OBJ(intern->inner.zobject), intern->inner.ce, NULL, "haschildren", &retval);
 			if (EG(exception)) {
 				zval_ptr_dtor(&retval);
-				if (intern->u.caching.flags & CIT_CATCH_GET_CHILD) {
+				if ((intern->u.caching.flags & CIT_CATCH_GET_CHILD) && spl_can_catch_exception()) {
 					zend_clear_exception();
 				} else {
 					return;
@@ -2316,7 +2321,7 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern)
 					zend_call_method_with_0_params(Z_OBJ(intern->inner.zobject), intern->inner.ce, NULL, "getchildren", &args[0]);
 					if (EG(exception)) {
 						zval_ptr_dtor(&args[0]);
-						if (intern->u.caching.flags & CIT_CATCH_GET_CHILD) {
+						if ((intern->u.caching.flags & CIT_CATCH_GET_CHILD) && spl_can_catch_exception()) {
 							zend_clear_exception();
 						} else {
 							return;
@@ -2333,7 +2338,7 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern)
 						);
 						zval_ptr_dtor(&args[0]);
 						if (is_initialized == FAILURE) {
-							if (intern->u.caching.flags & CIT_CATCH_GET_CHILD) {
+							if ((intern->u.caching.flags & CIT_CATCH_GET_CHILD) && spl_can_catch_exception()) {
 								zend_clear_exception();
 							} else {
 								return;
