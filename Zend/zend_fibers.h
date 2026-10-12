@@ -40,6 +40,8 @@ typedef enum {
 	ZEND_FIBER_FLAG_THREW     = 1 << 0,
 	ZEND_FIBER_FLAG_BAILOUT   = 1 << 1,
 	ZEND_FIBER_FLAG_DESTROYED = 1 << 2,
+	/* The destructor ran while the body ran: the body's end releases the object. */
+	ZEND_FIBER_FLAG_HELD_BY_BODY = 1 << 3,
 } zend_fiber_flag;
 
 typedef enum {

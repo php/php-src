@@ -853,6 +853,22 @@ static void zend_fiber_release_coroutine(zend_fiber *fiber, bool cancel_unfinish
 	ZEND_COROUTINE_RELEASE(coroutine);
 }
 
+/* The body has ended: a fiber its destructor kept for it (zend_fiber_keep_until_body_ends)
+ * goes now. Unlinked first, so that its free does not cancel this coroutine, which is still
+ * running. */
+static void zend_fiber_release_held(zend_fiber *fiber)
+{
+	if (EXPECTED(fiber == NULL || !(fiber->flags & ZEND_FIBER_FLAG_HELD_BY_BODY))) {
+		return;
+	}
+
+	fiber->flags &= ~ZEND_FIBER_FLAG_HELD_BY_BODY;
+	zend_fiber_release_coroutine(fiber, false);
+	OBJ_RELEASE(&fiber->std);
+}
+
+static void zend_fiber_coroutine_hand_back(zend_coroutine_t *coroutine, zend_fiber *fiber);
+
 static void zend_fiber_coroutine_entry(void)
 {
 	zend_coroutine_t *coroutine = ZEND_ASYNC_CURRENT_COROUTINE;
@@ -906,6 +922,7 @@ static void zend_fiber_coroutine_entry(void)
 			fiber->handoff_coroutine = NULL;
 		}
 
+		zend_fiber_release_held(fiber);
 		zend_bailout();
 	}
 
@@ -913,6 +930,14 @@ static void zend_fiber_coroutine_entry(void)
 	 * the coroutine that owns the body, not the object. */
 	fiber = coroutine->extended_data;
 
+	zend_fiber_coroutine_hand_back(coroutine, fiber);
+	zend_fiber_release_held(fiber);
+}
+
+/* The body's outcome goes to the fiber and to the coroutine waiting in start(),
+ * resume() or throw(), if any. */
+static void zend_fiber_coroutine_hand_back(zend_coroutine_t *coroutine, zend_fiber *fiber)
+{
 	zend_coroutine_t *caller = NULL;
 
 	if (fiber != NULL) {
@@ -1304,20 +1329,6 @@ static zend_object *zend_fiber_object_create(zend_class_entry *ce)
 	return &fiber->std;
 }
 
-static bool zend_fiber_release_after_body(
-		zend_coroutine_t *coroutine, zend_coroutine_t *waiter, void *data, bool is_bailout)
-{
-	(void) coroutine;
-	(void) waiter;
-	(void) is_bailout;
-
-	zend_fiber *const fiber = data;
-
-	OBJ_RELEASE(&fiber->std);
-
-	return false;
-}
-
 /* A body parked outside Fiber::suspend() (an await, a delay), or running on
  * this very stack, saved EG(active_fiber) pointing at the fiber, and gets it
  * back on its next switch in. The object outlives the destructor until the
@@ -1331,10 +1342,9 @@ static bool zend_fiber_keep_until_body_ends(zend_fiber *fiber)
 		return false;
 	}
 
-	if (UNEXPECTED(ZEND_ASYNC_ADD_FINISH_HANDLER(coroutine, zend_fiber_release_after_body, NULL, fiber) == 0)) {
-		return false;
-	}
-
+	/* zend_fiber_release_held() at the body's end lets it go: no handler the
+	 * scheduler could refuse. */
+	fiber->flags |= ZEND_FIBER_FLAG_HELD_BY_BODY;
 	GC_ADDREF(&fiber->std);
 
 	/* The scheduler cancels the running coroutine only from its own tick. */
