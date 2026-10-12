@@ -2078,8 +2078,14 @@ static bool gc_destructors_finish_handler(
 	if (GC_G(dtor_pending) == 0) {
 		GC_G(dtor_coroutine) = NULL;
 
-		if (!is_bailout && GC_G(gc_coroutine) != NULL) {
-			ZEND_ASYNC_ENQUEUE_COROUTINE(GC_G(gc_coroutine));
+		/* A refused wake's error belongs to no caller, as a refused
+		 * iterator's does. The GC coroutine stays parked inside its run, so
+		 * the collector is off for the rest of the request, and whoever waits
+		 * for the run stays parked: the scheduler reports a deadlock only
+		 * once nothing else can run. */
+		if (EXPECTED(!is_bailout && GC_G(gc_coroutine) != NULL)
+				&& UNEXPECTED(!ZEND_ASYNC_ENQUEUE_COROUTINE(GC_G(gc_coroutine)))) {
+			zend_clear_exception();
 		}
 	}
 
@@ -2113,8 +2119,11 @@ static void gc_arm_iterator_microtask(void)
 	GC_G(microtask)->is_cancelled = 0;
 	ZEND_ASYNC_MICROTASK_ADDREF(GC_G(microtask));
 
+	/* Refused, no hand-off: a destructor that waits holds up the rest until it
+	 * returns. The error belongs to no caller, as a refused iterator's. */
 	if (UNEXPECTED(!ZEND_ASYNC_DEFER(GC_G(microtask)))) {
 		ZEND_ASYNC_MICROTASK_RELEASE(GC_G(microtask));
+		zend_clear_exception();
 	}
 }
 
@@ -2292,8 +2301,16 @@ ZEND_API int zend_gc_collect_cycles(void)
 		 * scheduler's own work): start the run without waiting for it. It
 		 * collects when the scheduler next picks the GC coroutine. */
 		if (UNEXPECTED(zend_fiber_switch_blocked() || ZEND_ASYNC_IN_SCHEDULER_CONTEXT)) {
+			/* A refused run's error belongs to no caller here: left pending, it
+			 * would surface in the tick function or the scheduler's own work.
+			 * One that wraps an exception the caller had stays, or the clear
+			 * would take that exception with it. */
 			if (GC_G(gc_coroutine) == NULL) {
-				new_gc_coroutine();
+				const bool had_exception = EG(exception) != NULL;
+
+				if (UNEXPECTED(new_gc_coroutine() == NULL) && EXPECTED(!had_exception)) {
+					zend_clear_exception();
+				}
 			}
 
 			return 0;
