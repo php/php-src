@@ -1956,6 +1956,7 @@ static zend_never_inline void gc_call_destructors_in_fiber(void)
 	GC_G(dtor_end) = GC_G(first_unused);
 
 	zend_object *exception = NULL;
+	const zend_op *opline_before_exception = EG(opline_before_exception);
 	remember_prev_exception(&exception);
 	zend_object *old_exception = exception;
 
@@ -1992,6 +1993,7 @@ static zend_never_inline void gc_call_destructors_in_fiber(void)
 	}
 
 	EG(exception) = exception;
+	EG(opline_before_exception) = opline_before_exception;
 
 	/* Destructors ran in another fiber, out of reach of zend_call_function()'s rethrow */
 	if (exception && !old_exception && EG(current_execute_data) && EG(current_execute_data)->func
