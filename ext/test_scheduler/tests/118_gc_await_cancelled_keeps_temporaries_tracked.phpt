@@ -30,26 +30,13 @@ function make(): Node {
     return $node;
 }
 
-$objects = [];
-for ($i = 0; $i < 12000; $i++) {
-    $objects[] = new stdClass;
-}
-
-$target = TestScheduler\spawn(function () use ($objects) {
+$target = TestScheduler\spawn(function () {
     $canceller = new Canceller();
     $canceller->self = $canceller;
     unset($canceller);
 
-    // Two short of a full buffer: the assignment below adds the last root
-    // while the result of make() is a live temporary.
-    $i = 0;
-    while (gc_status()['roots'] < gc_status()['threshold'] - 2) {
-        $copy = $objects[$i++];
-        unset($copy);
-    }
-
-    $last = $objects[$i];
-    $result = make() <=> ($last = null);
+    // The result of make() is a live temporary while the call waits for the run.
+    $result = make() <=> gc_collect_cycles();
 });
 
 try {

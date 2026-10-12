@@ -44,6 +44,6 @@ try {
 var_dump(gc_collect_cycles());
 ?>
 --EXPECT--
-destructor
 caught thrown
-int(0)
+destructor
+int(1)

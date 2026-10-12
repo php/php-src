@@ -190,6 +190,9 @@
 
 #define GC_THRESHOLD_DEFAULT (10000 + GC_FIRST_ROOT)
 #define GC_THRESHOLD_STEP    10000
+
+/* Roots a full buffer may gain past a queued run before the coroutine adding them waits for it. */
+#define GC_QUEUED_RUN_WAIT_ROOTS (10 * GC_THRESHOLD_STEP)
 #define GC_THRESHOLD_MAX     1000000000
 #define GC_THRESHOLD_TRIGGER 100
 
@@ -302,6 +305,9 @@ typedef struct _zend_gc_globals {
 	uint32_t dtor_pending;
 	/* A full root buffer asked the GC coroutine for a collection that has not finished yet. */
 	bool adjust_threshold;
+	/* The coroutine counting roots past the queued run, and num_roots when it began. */
+	zend_coroutine_t *queued_run_counter;
+	uint32_t queued_run_roots;
 
 #if GC_BENCH
 	uint32_t root_buf_length;
@@ -549,6 +555,8 @@ static void gc_globals_ctor_ex(zend_gc_globals *gc_globals)
 	gc_globals->microtask = NULL;
 	gc_globals->dtor_pending = 0;
 	gc_globals->adjust_threshold = false;
+	gc_globals->queued_run_counter = NULL;
+	gc_globals->queued_run_roots = 0;
 
 #if GC_BENCH
 	gc_globals->root_buf_length = 0;
@@ -615,6 +623,8 @@ void gc_reset(void)
 	GC_G(microtask) = NULL;
 	GC_G(dtor_pending) = 0;
 	GC_G(adjust_threshold) = false;
+	GC_G(queued_run_counter) = NULL;
+	GC_G(queued_run_roots) = 0;
 
 	GC_G(activated_at) = zend_hrtime();
 }
@@ -763,6 +773,40 @@ static void gc_restore_exception(zend_object *exception, const zend_op *opline_b
 	}
 }
 
+static void gc_queue_run(void);
+
+/* Compared, never dereferenced: at worst a coroutine allocated where a freed one was
+ * carries its count on and waits early. */
+static zend_always_inline void gc_count_roots_from_here(void)
+{
+	GC_G(queued_run_counter) = ZEND_ASYNC_CURRENT_COROUTINE;
+	GC_G(queued_run_roots) = GC_G(num_roots);
+}
+
+/* The coroutine that fills the buffer does not wait for the run, as in TrueAsync:
+ * a wait at a release lets other coroutines run inside C code that holds what
+ * they change, and takes a cancellation there. One that keeps adding roots
+ * without yielding, as a loop that makes garbage does, waits once it is far past
+ * the queued run. An unwind may have dropped the reference, and the run parks
+ * this frame: the exception and its throw position are held across it, as
+ * zend_objects_destroy_object() holds them across a destructor, or the code that
+ * runs meanwhile overwrites the position. */
+static void gc_wait_for_queued_run(void)
+{
+	zend_object *const held_exception = EG(exception);
+	const zend_op *held_opline_before_exception = NULL;
+
+	if (UNEXPECTED(held_exception != NULL)) {
+		gc_hold_exception(&held_opline_before_exception);
+	}
+
+	gc_collect_cycles();
+
+	if (UNEXPECTED(held_exception != NULL)) {
+		gc_restore_exception(held_exception, held_opline_before_exception);
+	}
+}
+
 /* Perform a GC run and then add a node as a possible root. */
 static zend_never_inline void ZEND_FASTCALL gc_possible_root_when_full(zend_refcounted *ref)
 {
@@ -774,39 +818,17 @@ static zend_never_inline void ZEND_FASTCALL gc_possible_root_when_full(zend_refc
 
 	if (GC_G(gc_enabled) && !GC_G(gc_active)) {
 		GC_ADDREF(ref);
-		if (gc_collect_is_deferred()) {
-			/* Every coroutine that finds the buffer full waits for the same run and
-			 * would add a step each: the GC coroutine adjusts once, after the run.
-			 * Set before the call, as the run reads it before the await returns. */
-			GC_G(adjust_threshold) = true;
-
-			/* An unwind may have dropped the reference, and the run parks this
-			 * frame: the exception and its throw position are held across it,
-			 * as zend_objects_destroy_object() holds them across a destructor,
-			 * or the code that runs meanwhile overwrites the position. */
-			zend_object *const held_exception = EG(exception);
-			const zend_op *held_opline_before_exception = NULL;
-
-			if (UNEXPECTED(held_exception != NULL)) {
-				gc_hold_exception(&held_opline_before_exception);
-			}
-
-			const int count = gc_collect_cycles();
-
-			/* No GC coroutine took the step: it could not be created. The
-			 * refusal's error belongs to no caller, as this code only dropped
-			 * a reference. */
-			if (UNEXPECTED(GC_G(adjust_threshold) && GC_G(gc_coroutine) == NULL)) {
-				GC_G(adjust_threshold) = false;
-				zend_clear_exception();
-				gc_adjust_threshold(count);
-			}
-
-			if (UNEXPECTED(held_exception != NULL)) {
-				gc_restore_exception(held_exception, held_opline_before_exception);
-			}
-		} else {
+		if (!gc_collect_is_deferred()) {
 			gc_adjust_threshold(gc_collect_cycles());
+		} else if (!GC_G(adjust_threshold)) {
+			gc_queue_run();
+		} else if (GC_G(queued_run_counter) != ZEND_ASYNC_CURRENT_COROUTINE) {
+			/* Only the roots of one coroutine count: one that added a single root waits for nobody else's. */
+			gc_count_roots_from_here();
+		} else if (UNEXPECTED(GC_G(num_roots) >= GC_G(queued_run_roots) + GC_QUEUED_RUN_WAIT_ROOTS)) {
+			gc_wait_for_queued_run();
+			/* However the wait ended, a cancelled one included, the next is as far away again. */
+			gc_count_roots_from_here();
 		}
 
 		if (UNEXPECTED(GC_DELREF(ref) == 0)) {
@@ -2351,6 +2373,41 @@ static zend_always_inline zend_coroutine_t *new_gc_coroutine(void)
 	}
 
 	return coroutine;
+}
+
+/* Asks a run for a full buffer without waiting for it, queuing one unless an
+ * explicit call did; the run takes the threshold step. A refused coroutine takes
+ * the step here, or every root would try again. Its error belongs to no caller,
+ * as this code only dropped a reference: an exception in flight is held across
+ * the attempt, or the error would wrap it. */
+static void gc_queue_run(void)
+{
+	if (GC_G(gc_coroutine) == NULL) {
+		zend_object *const held_exception = EG(exception);
+		const zend_op *held_opline_before_exception = NULL;
+
+		if (UNEXPECTED(held_exception != NULL)) {
+			gc_hold_exception(&held_opline_before_exception);
+		}
+
+		const bool queued = new_gc_coroutine() != NULL;
+
+		if (UNEXPECTED(!queued)) {
+			zend_clear_exception();
+		}
+
+		if (UNEXPECTED(held_exception != NULL)) {
+			gc_restore_exception(held_exception, held_opline_before_exception);
+		}
+
+		if (UNEXPECTED(!queued)) {
+			gc_adjust_threshold(0);
+			return;
+		}
+	}
+
+	GC_G(adjust_threshold) = true;
+	gc_count_roots_from_here();
 }
 
 /* Perform a garbage collection run. The default implementation of gc_collect_cycles. */
