@@ -296,7 +296,9 @@ typedef bool (*zend_async_enqueue_coroutine_t)(
 		zend_coroutine_t *coroutine, zend_object *error, bool transfer_error);
 /* Yield the current coroutine (-> STATUS_SUSPENDED) and give control to the
  * scheduler. Returns after somebody enqueues the coroutine; a delivered error
- * is rethrown inside it, so the caller checks EG(exception) as usual.
+ * is rethrown inside it, so the caller checks EG(exception) as usual. The
+ * caller has no exception pending: an unwind that parks holds its exception
+ * and throw position itself, as the GC's automatic run does.
  * `from_main` = true is the after-main handoff: the main script (or its
  * destructors) has finished and remaining coroutines get to run;
  * `is_bailout` tells the scheduler the main flow ended with a bailout. */

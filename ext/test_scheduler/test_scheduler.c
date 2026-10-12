@@ -1785,6 +1785,9 @@ static bool ts_suspend(bool from_main, bool is_bailout)
 		return false;
 	}
 
+	/* The switch does not carry EG(exception): the caller parks with none. */
+	ZEND_ASSERT(EG(exception) == NULL);
+
 	ZEND_COROUTINE_SET_STATUS(&self->coro, ZEND_COROUTINE_STATUS_SUSPENDED);
 	self->execute_data = EG(current_execute_data);
 	ZEND_ASYNC_CURRENT_COROUTINE = &TSG(scheduler)->coro;

@@ -715,6 +715,54 @@ static void gc_adjust_threshold(int count)
 	}
 }
 
+/* zend_objects_destroy_object()'s hold of a pending exception, without its
+ * move of the frame back to the throwing opline: nothing runs on this stack
+ * meanwhile, and the GC's TMPVAR walks would take the live ranges an unwind
+ * already freed as live. The cost: on the exception op the walks skip the
+ * frame, so a TMPVAR it still holds is not shielded from the run, and a
+ * cycle only it kept waits for the request's end. */
+static void gc_hold_exception(const zend_op **opline_before_exception)
+{
+	zend_execute_data *const execute_data = EG(current_execute_data);
+
+	if (EXPECTED(execute_data != NULL)) {
+		if (EXPECTED(execute_data->func != NULL && ZEND_USER_CODE(execute_data->func->common.type))) {
+			zend_rethrow_exception(execute_data);
+		}
+
+		*opline_before_exception = EG(opline_before_exception);
+	}
+
+	EG(exception) = NULL;
+}
+
+/* A delivered error (a cancellation of the waiting coroutine) is thrown over
+ * the held exception. An exit wins either way: it ends the request whatever
+ * else is pending, and an exit marker carries no $previous. */
+static void gc_restore_exception(zend_object *exception, const zend_op *opline_before_exception)
+{
+	zend_execute_data *const execute_data = EG(current_execute_data);
+
+	if (EXPECTED(execute_data != NULL)) {
+		if (EXPECTED(execute_data->func != NULL && ZEND_USER_CODE(execute_data->func->common.type))) {
+			execute_data->opline = EG(exception_op);
+		}
+
+		EG(opline_before_exception) = opline_before_exception;
+	}
+
+	if (EXPECTED(EG(exception) == NULL)) {
+		EG(exception) = exception;
+	} else if (UNEXPECTED(zend_is_unwind_exit(exception) || zend_is_graceful_exit(exception))) {
+		OBJ_RELEASE(EG(exception));
+		EG(exception) = exception;
+	} else if (UNEXPECTED(zend_is_unwind_exit(EG(exception)) || zend_is_graceful_exit(EG(exception)))) {
+		OBJ_RELEASE(exception);
+	} else {
+		zend_exception_set_previous(EG(exception), exception);
+	}
+}
+
 /* Perform a GC run and then add a node as a possible root. */
 static zend_never_inline void ZEND_FASTCALL gc_possible_root_when_full(zend_refcounted *ref)
 {
@@ -731,12 +779,31 @@ static zend_never_inline void ZEND_FASTCALL gc_possible_root_when_full(zend_refc
 			 * would add a step each: the GC coroutine adjusts once, after the run.
 			 * Set before the call, as the run reads it before the await returns. */
 			GC_G(adjust_threshold) = true;
+
+			/* An unwind may have dropped the reference, and the run parks this
+			 * frame: the exception and its throw position are held across it,
+			 * as zend_objects_destroy_object() holds them across a destructor,
+			 * or the code that runs meanwhile overwrites the position. */
+			zend_object *const held_exception = EG(exception);
+			const zend_op *held_opline_before_exception = NULL;
+
+			if (UNEXPECTED(held_exception != NULL)) {
+				gc_hold_exception(&held_opline_before_exception);
+			}
+
 			const int count = gc_collect_cycles();
 
-			/* No GC coroutine took the step: it could not be created. */
+			/* No GC coroutine took the step: it could not be created. The
+			 * refusal's error belongs to no caller, as this code only dropped
+			 * a reference. */
 			if (UNEXPECTED(GC_G(adjust_threshold) && GC_G(gc_coroutine) == NULL)) {
 				GC_G(adjust_threshold) = false;
+				zend_clear_exception();
 				gc_adjust_threshold(count);
+			}
+
+			if (UNEXPECTED(held_exception != NULL)) {
+				gc_restore_exception(held_exception, held_opline_before_exception);
 			}
 		} else {
 			gc_adjust_threshold(gc_collect_cycles());
