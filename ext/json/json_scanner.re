@@ -102,8 +102,8 @@ void php_json_scanner_init(php_json_scanner *s, const char *str, size_t str_len,
 
 int php_json_scan(php_json_scanner *s)
 {
-	/* Comments are fully consumed before returning, so their opener location can remain local. */
-	php_json_ctype *comment_token = s->cursor;
+	/* Line of the last block comment opener, for an unterminated comment.
+	 * s->token keeps the opener position while in COMMENT_BLOCK. */
 	php_json_ctype *comment_line_start = s->line_start;
 	uint64_t comment_line = s->line;
 
@@ -220,7 +220,6 @@ std:
 			s->errcode = PHP_JSON_ERROR_SYNTAX;
 			return PHP_JSON_T_ERROR;
 		}
-		comment_token = s->token;
 		comment_line_start = s->line_start;
 		comment_line = s->line;
 		PHP_JSON_CONDITION_SET_AND_GOTO(COMMENT_BLOCK);
@@ -293,7 +292,6 @@ std:
 	}
 	<COMMENT_BLOCK>EOI       {
 		if (s->limit < s->cursor) {
-			s->token = comment_token;
 			s->line_start = comment_line_start;
 			s->line = comment_line;
 			s->errcode = PHP_JSON_ERROR_SYNTAX;
