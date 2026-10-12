@@ -154,6 +154,11 @@ ZEND_BEGIN_MODULE_GLOBALS(test_scheduler)
 	ts_coroutine_t *scheduler;
 	zend_long fail_new_coroutine;
 	zend_long fail_enqueue;
+	zend_long fail_wake;
+	zend_long fail_cancel;
+	zend_long fail_finish_handler;
+	zend_long fail_defer;
+	zend_long fail_launch;
 ZEND_END_MODULE_GLOBALS(test_scheduler)
 
 ZEND_DECLARE_MODULE_GLOBALS(test_scheduler)
@@ -175,6 +180,27 @@ PHP_INI_BEGIN()
 	 * with an Error, as a provider that cannot give it a stack does; 0 is off. */
 	STD_PHP_INI_ENTRY("test_scheduler.fail_enqueue", "0", PHP_INI_ALL, OnUpdateLong,
 			fail_enqueue, zend_test_scheduler_globals, test_scheduler_globals)
+	/* Tests only: the n-th enqueue of a coroutine past CREATED (the wake of a
+	 * suspended one, a repeat for a queued or running one) fails with an Error;
+	 * 0 is off. */
+	STD_PHP_INI_ENTRY("test_scheduler.fail_wake", "0", PHP_INI_ALL, OnUpdateLong,
+			fail_wake, zend_test_scheduler_globals, test_scheduler_globals)
+	/* Tests only: the n-th cancel of an unfinished coroutine fails with an
+	 * Error and changes nothing, whatever the coroutine's status; 0 is off. */
+	STD_PHP_INI_ENTRY("test_scheduler.fail_cancel", "0", PHP_INI_ALL, OnUpdateLong,
+			fail_cancel, zend_test_scheduler_globals, test_scheduler_globals)
+	/* Tests only: the n-th finish handler added returns 0, a refused add, with
+	 * no error; 0 is off. */
+	STD_PHP_INI_ENTRY("test_scheduler.fail_finish_handler", "0", PHP_INI_ALL, OnUpdateLong,
+			fail_finish_handler, zend_test_scheduler_globals, test_scheduler_globals)
+	/* Tests only: the n-th microtask deferred is not queued and an Error is
+	 * thrown; 0 is off. */
+	STD_PHP_INI_ENTRY("test_scheduler.fail_defer", "0", PHP_INI_ALL, OnUpdateLong,
+			fail_defer, zend_test_scheduler_globals, test_scheduler_globals)
+	/* Tests only: the n-th launch returns no main coroutine and throws
+	 * nothing; 0 is off. */
+	STD_PHP_INI_ENTRY("test_scheduler.fail_launch", "0", PHP_INI_ALL, OnUpdateLong,
+			fail_launch, zend_test_scheduler_globals, test_scheduler_globals)
 PHP_INI_END()
 
 /* False when disabled: MINIT registered nothing. */
@@ -345,6 +371,10 @@ static uint32_t ts_add_finish_handler(zend_coroutine_t *coroutine, zend_coroutin
 		zend_coroutine_t *waiter, void *data)
 {
 	ts_coroutine_t *ts = ts_from_coro(coroutine);
+
+	if (UNEXPECTED(ts_fault_hit(&TSG(fail_finish_handler)))) {
+		return 0;
+	}
 
 	if (ts->finish_handlers == NULL) {
 		ts->finish_handlers = ecalloc(1, sizeof(ts_finish_handlers_vector_t));
@@ -688,6 +718,11 @@ static void ts_run_microtasks(void)
 
 static bool ts_defer(zend_async_microtask_t *task)
 {
+	if (UNEXPECTED(ts_fault_hit(&TSG(fail_defer)))) {
+		zend_throw_error(NULL, "Cannot defer the microtask: test_scheduler.fail_defer");
+		return false;
+	}
+
 	ts_microtask_fifo_push(&TSG(microtasks), task);
 
 	return true;
@@ -1070,6 +1105,17 @@ static ZEND_STACK_ALIGNED void ts_coroutine_entry(zend_fiber_transfer *transfer)
 	 * ordinary suspend that is coming back. */
 	ts_coroutine_call_finish_handlers(ts, bailout);
 
+	/* An error a finish handler leaves is this coroutine's, not the next one's
+	 * to meet at its suspend point; one the body ended with comes first. */
+	if (UNEXPECTED(EG(exception) != NULL)) {
+		if (EXPECTED(ts->coro.exception == NULL)) {
+			ts->coro.exception = EG(exception);
+			GC_ADDREF(ts->coro.exception);
+		}
+
+		zend_clear_exception();
+	}
+
 	/* Everybody parked in await() runs again; the exception, if any, is
 	 * theirs to rethrow rather than an unhandled one. On a bailout the queue
 	 * is dead — ts_bailout_all() unwinds the waiters itself. */
@@ -1428,6 +1474,10 @@ static ts_coroutine_t *ts_adopt_main_context(void)
  * replacement in place instead. */
 static zend_coroutine_t *ts_launch(void)
 {
+	if (UNEXPECTED(ts_fault_hit(&TSG(fail_launch)))) {
+		return NULL;
+	}
+
 	ts_coroutine_t *main_coro = ts_adopt_main_context();
 
 	if (!ts_scheduler_ensure()) {
@@ -1477,17 +1527,44 @@ static bool ts_enqueue(zend_coroutine_t *coroutine, zend_object *error, bool tra
 		return false;
 	}
 
-	if (UNEXPECTED(ZEND_COROUTINE_STATUS(coroutine) == ZEND_COROUTINE_STATUS_CREATED
-			&& ts_fault_hit(&TSG(fail_enqueue)))) {
-		if (error != NULL && transfer_error) {
+	const bool is_created = ZEND_COROUTINE_STATUS(coroutine) == ZEND_COROUTINE_STATUS_CREATED;
+
+	if (UNEXPECTED(ts_fault_hit(is_created ? &TSG(fail_enqueue) : &TSG(fail_wake)))) {
+		if (UNEXPECTED(error != NULL && transfer_error)) {
 			OBJ_RELEASE(error);
 		}
 
-		zend_throw_error(NULL, "Cannot enqueue the coroutine: test_scheduler.fail_enqueue");
+		zend_throw_error(NULL, "Cannot enqueue the coroutine: test_scheduler.%s",
+				is_created ? "fail_enqueue" : "fail_wake");
 		return false;
 	}
 
-	/* Thrown at the suspension point when the coroutine runs. */
+	/* The script may be long over: a destructor cancelling a suspended fiber,
+	 * or a fresh Fiber::start() from one, still needs a live loop. Only the
+	 * loop is rebuilt on demand (the main identity never is — see ts_launch()). */
+	if (UNEXPECTED(!ts_scheduler_ensure())) {
+		if (UNEXPECTED(error != NULL && transfer_error)) {
+			OBJ_RELEASE(error);
+		}
+
+		return false;
+	}
+
+	if (!ts->context_created && !ts_context_create(ts, ts_coroutine_entry, EG(fiber_stack_size))) {
+		if (UNEXPECTED(error != NULL && transfer_error)) {
+			OBJ_RELEASE(error);
+		}
+
+		/* zend_fiber_init_context() already threw (e.g. a stack too small):
+		 * don't bury that with a second error the caller can't catch. */
+		if (!EG(exception)) {
+			zend_throw_error(NULL, "Failed to create a fiber context for the coroutine");
+		}
+		return false;
+	}
+
+	/* Thrown at the suspension point when the coroutine runs. Stored only
+	 * once nothing can refuse: a refused wake leaves no error behind. */
 	if (error != NULL) {
 		if (ts->pending_error != NULL) {
 			OBJ_RELEASE(ts->pending_error);
@@ -1500,24 +1577,8 @@ static bool ts_enqueue(zend_coroutine_t *coroutine, zend_object *error, bool tra
 		}
 	}
 
-	/* The script may be long over: a destructor cancelling a suspended fiber,
-	 * or a fresh Fiber::start() from one, still needs a live loop. Only the
-	 * loop is rebuilt on demand (the main identity never is — see ts_launch()). */
-	if (UNEXPECTED(!ts_scheduler_ensure())) {
-		return false;
-	}
-
 	if (ZEND_COROUTINE_IS_QUEUED(coroutine)) {
 		return true;
-	}
-
-	if (!ts->context_created && !ts_context_create(ts, ts_coroutine_entry, EG(fiber_stack_size))) {
-		/* zend_fiber_init_context() already threw (e.g. a stack too small):
-		 * don't bury that with a second error the caller can't catch. */
-		if (!EG(exception)) {
-			zend_throw_error(NULL, "Failed to create a fiber context for the coroutine");
-		}
-		return false;
 	}
 
 	/* Runnable again: every wait description is stale — drop them all. */
@@ -1551,6 +1612,15 @@ static bool ts_cancel(
 		}
 
 		return true;
+	}
+
+	if (UNEXPECTED(ts_fault_hit(&TSG(fail_cancel)))) {
+		if (UNEXPECTED(error != NULL && transfer_error)) {
+			OBJ_RELEASE(error);
+		}
+
+		zend_throw_error(NULL, "Cannot cancel the coroutine: test_scheduler.fail_cancel");
+		return false;
 	}
 
 	ZEND_COROUTINE_SET_CANCELLED(coroutine);
