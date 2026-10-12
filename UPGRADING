@@ -106,5 +106,9 @@ PHP 8.7 UPGRADE NOTES
   . Improved performance of pack() for large strings using the a, A and Z
     formats.
 
+- JSON:
+  . Improved performance of json_encode() for strings with non-ASCII
+    characters.
+
 - MBString:
   . Improved performance of mb_strlen for UTF-8 strings.
