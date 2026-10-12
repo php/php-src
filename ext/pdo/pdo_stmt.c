@@ -1668,6 +1668,10 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 	zend_object *old_into = NULL;
 	HashTable *old_ctor_args = NULL;
 
+	if ((mode & ~PDO_FETCH_FLAGS) == PDO_FETCH_USE_DEFAULT) {
+		mode = stmt->dbh->default_fetch_type;
+	}
+
 	flags = mode & PDO_FETCH_FLAGS;
 
 	if (!pdo_verify_fetch_mode(stmt->dbh->default_fetch_type, mode, mode_arg_num, false)) {
