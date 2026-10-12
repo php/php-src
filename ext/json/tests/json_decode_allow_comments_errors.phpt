@@ -29,6 +29,21 @@ decode_error('/* outer /* inner */ */ 1');
 decode_error('/* unterminated');
 decode_error("{\n  \"a\": 1,\n  /* unterminated\n  still open");
 
+/* An embedded NUL is a control character error, also inside comments. */
+foreach ([
+    "[1, // a\x00b\n 2]",
+    "[1, /* a\x00b */ 2]",
+    "[1, /* x\n a\x00b */ 2]",
+    "[1, /* a\x00b",
+    "[1, // a\x00",
+] as $json) {
+    decode_error($json);
+    var_dump(json_validate($json, 512, JSON_ALLOW_COMMENTS));
+    echo json_last_error(), ": ", json_last_error_msg(), "\n";
+}
+decode_error("[1, // a\x00b\n 2]", JSON_ALLOW_COMMENTS | JSON_INVALID_UTF8_IGNORE);
+decode_error("[1, /* a\x00b */ 2]", JSON_ALLOW_COMMENTS | JSON_INVALID_UTF8_SUBSTITUTE);
+
 try {
     json_decode("[1,\n /* unterminated", true, 512,
         JSON_ALLOW_COMMENTS | JSON_THROW_ON_ERROR);
@@ -64,4 +79,28 @@ NULL
 4: Syntax error near location 1:1
 NULL
 4: Syntax error near location 3:3
+NULL
+3: Control character error, possibly incorrectly encoded near location 1:9
+bool(false)
+3: Control character error, possibly incorrectly encoded near location 1:9
+NULL
+3: Control character error, possibly incorrectly encoded near location 1:9
+bool(false)
+3: Control character error, possibly incorrectly encoded near location 1:9
+NULL
+3: Control character error, possibly incorrectly encoded near location 2:3
+bool(false)
+3: Control character error, possibly incorrectly encoded near location 2:3
+NULL
+3: Control character error, possibly incorrectly encoded near location 1:9
+bool(false)
+3: Control character error, possibly incorrectly encoded near location 1:9
+NULL
+3: Control character error, possibly incorrectly encoded near location 1:9
+bool(false)
+3: Control character error, possibly incorrectly encoded near location 1:9
+NULL
+3: Control character error, possibly incorrectly encoded near location 1:9
+NULL
+3: Control character error, possibly incorrectly encoded near location 1:9
 JsonException: 4: Syntax error near location 2:2

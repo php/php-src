@@ -31,13 +31,14 @@ decode_and_validate("// CR\r2");
 decode_and_validate("// CRLF\r\n3");
 decode_and_validate("4// EOF");
 decode_and_validate("// U+2028 \u{2028} and U+2029 \u{2029}\n6");
-decode_and_validate("// embedded NUL: a\x00b\n7");
+decode_and_validate("// controls: a\x01\x0cb\n7");
 
 /* Comment delimiters inside strings are ordinary string content. */
 decode_and_validate('["//", "/* not a comment */", "https://php.net/a/*b*/"]');
 
-/* Valid Unicode, Unicode line separators, controls, and NUL are comment text. */
-decode_and_validate("/* héllo \u{2028} world \u{2029} \x01\x0c\x00 */ 5");
+/* Valid Unicode, Unicode line separators, and controls other than NUL are
+ * comment text. */
+decode_and_validate("/* héllo \u{2028} world \u{2029} \x01\x0c */ 5");
 decode_and_validate('/* ' . str_repeat('x', 65536) . ' */ 8');
 
 ?>
