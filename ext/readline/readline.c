@@ -195,7 +195,7 @@ PHP_FUNCTION(readline_info)
 					memcpy(rl_line_buffer, Z_STRVAL_P(value), Z_STRLEN_P(value) + 1);
 				}
 #else
-				char *copy = strdup(Z_STRVAL_P(value));
+				char *copy = strndup(Z_STRVAL_P(value), Z_STRLEN_P(value));
 				rl_line_buffer = copy;
 				free(php_readline_custom_line_buffer);
 				php_readline_custom_line_buffer = copy;
@@ -267,7 +267,7 @@ PHP_FUNCTION(readline_info)
 				if (!try_convert_to_string(value)) {
 					RETURN_THROWS();
 				}
-				char *copy = strdup(Z_STRVAL_P(value));
+				char *copy = strndup(Z_STRVAL_P(value), Z_STRLEN_P(value));
 				/* XXX: This store would need to be atomic ideally or use a memory barrier */
 				rl_readline_name = copy;
 				free(php_readline_custom_readline_name);
@@ -423,8 +423,8 @@ static char *_readline_command_generator(const char *text, int state)
 		zend_hash_move_forward(myht);
 
 		convert_to_string(entry);
-		if (strncmp (Z_STRVAL_P(entry), text, text_len) == 0) {
-			return (strdup(Z_STRVAL_P(entry)));
+		if (zend_string_equals_cstr(Z_STR_P(entry), text, text_len) == 0) {
+			return strndup(Z_STRVAL_P(entry), Z_STRLEN_P(entry));
 		}
 	}
 
