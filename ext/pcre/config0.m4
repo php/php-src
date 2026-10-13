@@ -14,7 +14,7 @@ PHP_ARG_WITH([pcre-jit],,
 
 if test "$PHP_EXTERNAL_PCRE" != "no"; then
 
-  PKG_CHECK_MODULES([PCRE2], [libpcre2-8 >= 10.30])
+  PKG_CHECK_MODULES([PCRE2], [libpcre2-8 >= 10.42])
 
   PHP_EVAL_INCLINE($PCRE2_CFLAGS)
   PHP_EVAL_LIBLINE($PCRE2_LIBS)
