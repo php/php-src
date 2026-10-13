@@ -9365,7 +9365,7 @@ static int zend_jit_init_static_method_call(zend_jit_ctx         *jit,
 					ir_LOAD_A(ir_ADD_OFFSET(ir_LOAD_A(jit_EX(This.value.ref)), offsetof(zend_object, ce))));
 				ir_IF_FALSE(if_object);
 				ir_END_PHI_list(values, ir_LOAD_A(jit_EX(This.value.ref)));
-				ir_PHI_list(values);
+				scope_ref = ir_PHI_list(values);
 			} else {
 				scope_ref = ir_LOAD_A(ir_ADD_OFFSET(ir_LOAD_A(jit_EX(This.value.ref)), offsetof(zend_object, ce)));
 			}

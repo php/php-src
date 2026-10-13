@@ -37,6 +37,8 @@ PHP                                                                        NEWS
   . Fix too wide type inference for ASSIGN_DIM_OP. (ndossche)
   . Fix OSS-Fuzz #568005340 (FETCH_DIM_FUNC_ARG partial conversion). (ndossche)
   . Fix exception checks due to NAN warnings and object empty()'s. (ndossche)
+  . Fixed bug GH-24270 (JIT loses the called scope of self:: and parent:: calls
+    in closures). (RV7PR)
 
 - PDO:
   . Fixed a duplicate warning when ATTR_STATEMENT_CLASS is rejected on a
