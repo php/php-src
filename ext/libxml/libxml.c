@@ -1137,6 +1137,9 @@ PHP_FUNCTION(libxml_use_internal_errors)
 			zend_llist_destroy(LIBXML(error_list));
 			efree(LIBXML(error_list));
 			LIBXML(error_list) = NULL;
+			/* libxml_get_last_error() falls back to libxml's own last error
+			 * once the list is gone, so it must not outlive the cleared list. */
+			xmlResetLastError();
 		}
 	} else {
 		xmlSetStructuredErrorFunc(NULL, php_libxml_structured_error_handler);

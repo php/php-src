@@ -40,6 +40,10 @@ PHP                                                                        NEWS
     encoding used for percent-encoding, the URLSearchParams tail pointer and
     fragment serialization without a query. (alexandre-daubois)
 
+- LibXML:
+  . Clear the libxml last error in libxml_use_internal_errors(false).
+    (lacatoire)
+
 - MBString:
   . Fixed bug GH-23106 (mb_strpos() reads past the end of a haystack ending in
     a truncated UTF-8 sequence). (Lazizbek Ergashev)
