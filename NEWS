@@ -41,6 +41,8 @@ PHP                                                                        NEWS
 - PDO:
   . Fixed a duplicate warning when ATTR_STATEMENT_CLASS is rejected on a
     persistent connection. (Ilia Alshanetsky)
+  . Fixed constructor option errors naming argument #3 ($password) instead
+    of argument #4 ($options). (Ilia Alshanetsky)
 
 - Phpdbg:
   . Fix wrong command names. (ndossche, Weilin Du)

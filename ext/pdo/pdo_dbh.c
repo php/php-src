@@ -516,7 +516,7 @@ options:
 				ZVAL_DEREF(attr_value);
 
 				/* TODO: Should the constructor fail when the attribute cannot be set? */
-				pdo_dbh_attribute_set(dbh, long_key, attr_value, 3);
+				pdo_dbh_attribute_set(dbh, long_key, attr_value, 4);
 			} ZEND_HASH_FOREACH_END();
 		}
 
