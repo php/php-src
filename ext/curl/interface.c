@@ -199,6 +199,14 @@ void _php_curl_verify_handlers(php_curl *ch, bool reporterror) /* {{{ */
 }
 /* }}} */
 
+/* fclose() frees the FILE* even while the handle holds the stream; under
+ * IO hooks another fiber may close it while curl_exec() waits */
+static bool php_curl_stream_closed(zval *stream)
+{
+	return Z_TYPE_P(stream) == IS_RESOURCE
+		&& zend_fetch_resource2_ex(stream, NULL, php_file_le_stream(), php_file_le_pstream()) == NULL;
+}
+
 /* {{{ curl_module_entry */
 static const zend_module_dep curl_deps[] = {
 	ZEND_MOD_REQUIRED("standard")
@@ -614,6 +622,10 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 			PHPWRITE(data, length);
 			break;
 		case PHP_CURL_FILE:
+			if (UNEXPECTED(php_curl_stream_closed(&write_handler->stream))) {
+				return 0;
+			}
+
 			return fwrite(data, size, nmemb, write_handler->fp);
 		case PHP_CURL_RETURN:
 			if (length > 0) {
@@ -863,6 +875,10 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 
 	switch (read_handler->method) {
 		case PHP_CURL_DIRECT:
+			if (UNEXPECTED(php_curl_stream_closed(&read_handler->stream))) {
+				return CURL_READFUNC_ABORT;
+			}
+
 			if (read_handler->fp) {
 				length = fread(data, size, nmemb, read_handler->fp);
 			}
@@ -978,6 +994,10 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 			}
 			break;
 		case PHP_CURL_FILE:
+			if (UNEXPECTED(php_curl_stream_closed(&write_handler->stream))) {
+				return 0;
+			}
+
 			return fwrite(data, size, nmemb, write_handler->fp);
 		case PHP_CURL_USER: {
 			zval argv[2];
@@ -2809,6 +2829,12 @@ static CURLcode php_curl_exec_multi(php_curl *ch)
 		zend_result rc = php_io_run(&any, &any_result);
 		ch->in_exec = false;
 
+		/* libcurl writes CURLOPT_STDERR's FILE* itself, even while it removes a
+		 * cancelled transfer: swap a closed one before libcurl runs again */
+		if (php_curl_stream_closed(&ch->handlers.std_err)) {
+			curl_easy_setopt(ch->cp, CURLOPT_STDERR, stderr);
+		}
+
 		if (rc == FAILURE) {
 			/* Cancelled or the provider threw: the transfer did not finish */
 			result = CURLE_ABORTED_BY_CALLBACK;
@@ -2911,6 +2937,8 @@ PHP_FUNCTION(curl_exec)
 	SAVE_CURL_ERROR(ch, error);
 
 	if (error != CURLE_OK) {
+		/* A stream closed during the transfer failed it */
+		_php_curl_verify_handlers(ch, /* reporterror */ true);
 		smart_str_free(&ch->handlers.write->buf);
 		RETURN_FALSE;
 	}
