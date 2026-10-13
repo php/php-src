@@ -502,12 +502,10 @@ static ir_ref jit_TLS_ADDR(zend_jit_ctx *jit, size_t offset)
 	ZEND_ASSERT(jit->ctx.control);
 	if (tsrm_ls_cache_tcb_offset) {
 		return ir_TLS_ADDR(-1, tsrm_ls_cache_tcb_offset + offset);
-	} else if (tsrm_tls_index != -1) {
-		return ir_TLS_ADDR(tsrm_tls_index, tsrm_tls_offset + offset);
 	}
 
 	if (jit->tls) {
-		/* Reuse the fallback call within a basic block. */
+		/* Reuse the TLS lookup within a basic block. */
 		ir_insn *insn;
 		ir_ref ref = jit->ctx.control;
 
@@ -523,7 +521,11 @@ static ir_ref jit_TLS_ADDR(zend_jit_ctx *jit, size_t offset)
 		}
 	}
 
-	jit->tls = ir_CALL(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_get_tsrm_ls_cache));
+	if (tsrm_tls_index != -1) {
+		jit->tls = ir_TLS_ADDR(tsrm_tls_index, tsrm_tls_offset);
+	} else {
+		jit->tls = ir_CALL(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_get_tsrm_ls_cache));
+	}
 
 	return ir_ADD_OFFSET(jit->tls, offset);
 }
