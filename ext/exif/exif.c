@@ -1337,7 +1337,7 @@ static HashTable *exif_make_tag_ht(tag_info_type *tag_table)
 	zend_hash_init(ht, 0, NULL, NULL, 1);
 	while (tag_table->Tag != TAG_END_OF_LIST) {
 		if (!zend_hash_index_add_ptr(ht, tag_table->Tag, tag_table->Desc)) {
-			zend_error(E_CORE_ERROR, "Duplicate tag %x", tag_table->Tag);
+			php_error_docref(NULL, E_CORE_ERROR, "Duplicate tag %x", tag_table->Tag);
 		}
 		tag_table++;
 	}
