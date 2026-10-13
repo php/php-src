@@ -373,8 +373,8 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 			php_stream_wrapper *wrap;
 			php_stream_statbuf ssb;
 
-			// Implementation is used for both finfo_file() and mimetype_emu()
-			int buffer_param_num = (mimetype_emu ? 1 : 2);
+			// Implementation is used for finfo_file(), finfo::file() and mimetype_emu()
+			int buffer_param_num = (mimetype_emu || hasThis() ? 1 : 2);
 			if (buffer == NULL || buffer_len == 0) {
 				zend_argument_must_not_be_empty_error(buffer_param_num);
 				goto clean;

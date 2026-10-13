@@ -30,6 +30,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-24229 (fcgi_close() passes shutdown() a literal 1, which is
     SHUT_RD in WASI). (Ryosuke Ishibashi)
 
+- Fileinfo:
+  . Fixed bug GH-24289 (finfo::file() reports the wrong argument number for
+    an invalid $filename). (Lazizbek Ergashev)
+
 - MBString:
   . Fixed bug GH-23958 (truncated encoding names resolving to full names). (Kamil Tekiela)
 
