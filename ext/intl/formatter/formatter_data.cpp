@@ -44,16 +44,3 @@ void formatter_data_free( formatter_data* nf_data )
 	intl_error_reset( &nf_data->error );
 }
 /* }}} */
-
-/* {{{ formatter_data* formatter_data_create()
- * Alloc mem for formatter_data and initialize it with default values.
- */
-formatter_data* formatter_data_create( void )
-{
-	formatter_data* nf_data = reinterpret_cast<formatter_data *>(ecalloc( 1, sizeof(formatter_data) ));
-
-	formatter_data_init( nf_data );
-
-	return nf_data;
-}
-/* }}} */

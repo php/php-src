@@ -42,7 +42,6 @@ typedef struct {
 #ifdef __cplusplus
 extern "C" {
 #endif
-msgformat_data* msgformat_data_create( void );
 void msgformat_data_init( msgformat_data* mf_data );
 void msgformat_data_free( msgformat_data* mf_data );
 #ifdef __cplusplus

@@ -49,17 +49,6 @@ static void intl_free_custom_error_msg( intl_error* err )
 }
 /* }}} */
 
-/* {{{ Create and initialize  internals of 'intl_error'. */
-intl_error* intl_error_create( void )
-{
-	intl_error* err = ecalloc( 1, sizeof( intl_error ) );
-
-	intl_error_init( err );
-
-	return err;
-}
-/* }}} */
-
 /* {{{ Initialize internals of 'intl_error'. */
 void intl_error_init( intl_error* err )
 {

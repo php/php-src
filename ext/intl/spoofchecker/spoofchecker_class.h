@@ -55,7 +55,6 @@ extern "C" {
 #endif
 void spoofchecker_register_Spoofchecker_class(void);
 
-void spoofchecker_object_init(Spoofchecker_object* co);
 void spoofchecker_object_destroy(Spoofchecker_object* co);
 #ifdef __cplusplus
 }

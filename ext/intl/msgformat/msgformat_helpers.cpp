@@ -74,13 +74,6 @@ using icu::MessagePattern;
 using icu::MessageFormatAdapter;
 using icu::FieldPosition;
 
-U_CFUNC int32_t umsg_format_arg_count(UMessageFormat *fmt)
-{
-	int32_t fmt_count = 0;
-	MessageFormatAdapter::phpGetArgTypeList(*(const MessageFormat*)fmt, fmt_count);
-	return fmt_count;
-}
-
 static void arg_types_dtor(zval *el) {
 	efree(Z_PTR_P(el));
 }

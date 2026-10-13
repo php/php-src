@@ -45,16 +45,3 @@ void dateformat_data_free( dateformat_data* datef_data )
 	intl_error_reset( &datef_data->error );
 }
 /* }}} */
-
-/* {{{ dateformat_data* dateformat_data_create()
- * Allocate memory for dateformat_data and initialize it with default values.
- */
-dateformat_data* dateformat_data_create( void )
-{
-	dateformat_data* datef_data = reinterpret_cast<dateformat_data *>(ecalloc( 1, sizeof(dateformat_data) ));
-
-	dateformat_data_init( datef_data );
-
-	return datef_data;
-}
-/* }}} */

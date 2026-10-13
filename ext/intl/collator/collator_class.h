@@ -69,7 +69,6 @@ static zend_always_inline zend_result collator_check_initialized(Collator_object
 extern "C" {
 #endif
 void collator_register_Collator_symbols(int module_number);
-void collator_object_init( Collator_object* co );
 void collator_object_destroy( Collator_object* co );
 #ifdef __cplusplus
 }

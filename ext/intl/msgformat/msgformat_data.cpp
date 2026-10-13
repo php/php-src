@@ -64,19 +64,6 @@ U_CFUNC void msgformat_data_free(msgformat_data* mf_data)
 }
 /* }}} */
 
-/* {{{ msgformat_data* msgformat_data_create()
- * Allocate memory for msgformat_data and initialize it with default values.
- */
-msgformat_data* msgformat_data_create( void )
-{
-	msgformat_data* mf_data = reinterpret_cast<msgformat_data *>(ecalloc( 1, sizeof(msgformat_data) ));
-
-	msgformat_data_init( mf_data );
-
-	return mf_data;
-}
-/* }}} */
-
 #ifdef MSG_FORMAT_QUOTE_APOS
 int msgformat_fix_quotes(UChar **spattern, uint32_t *spattern_len, UErrorCode *ec)
 {

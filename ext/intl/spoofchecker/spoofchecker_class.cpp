@@ -104,20 +104,6 @@ U_CFUNC void spoofchecker_register_Spoofchecker_class(void)
 }
 /* }}} */
 
-/* {{{ void spoofchecker_object_init( Spoofchecker_object* co )
- * Initialize internals of Spoofchecker_object.
- * Must be called before any other call to 'spoofchecker_object_...' functions.
- */
-U_CFUNC void spoofchecker_object_init(Spoofchecker_object* co)
-{
-	if (!co) {
-		return;
-	}
-
-	intl_error_init(SPOOFCHECKER_ERROR_P(co));
-}
-/* }}} */
-
 /* {{{ void spoofchecker_object_destroy( Spoofchecker_object* co )
  * Clean up mem allocted by internals of Spoofchecker_object
  */
