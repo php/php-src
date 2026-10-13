@@ -250,8 +250,8 @@ static int php_stream_flush_ex(php_stream *stream, bool closing);
 PHPAPI int php_stream_free(php_stream *stream, int close_options) /* {{{ */
 {
 	int ret = 1;
-	int preserve_handle = close_options & PHP_STREAM_FREE_PRESERVE_HANDLE ? 1 : 0;
-	int release_cast = 1;
+	bool preserve_handle = (close_options & PHP_STREAM_FREE_PRESERVE_HANDLE) ? true : false;
+	bool release_cast = true;
 	php_stream_context *context;
 
 	/* During shutdown resources may be released before other resources still holding them.
@@ -270,7 +270,7 @@ PHPAPI int php_stream_free(php_stream *stream, int close_options) /* {{{ */
 
 	if ((stream->flags & PHP_STREAM_FLAG_NO_CLOSE) ||
 			((stream->flags & PHP_STREAM_FLAG_NO_RSCR_DTOR_CLOSE) && (close_options & PHP_STREAM_FREE_RSRC_DTOR))) {
-		preserve_handle = 1;
+		preserve_handle = true;
 	}
 
 #if STREAM_DEBUG
@@ -322,7 +322,7 @@ PHPAPI int php_stream_free(php_stream *stream, int close_options) /* {{{ */
 			return 0;
 		}
 		/* otherwise, make sure that we don't close the FILE* from a cast */
-		release_cast = 0;
+		release_cast = false;
 	}
 
 #if STREAM_DEBUG
@@ -372,7 +372,7 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 			php_io_poll_stream_notify_close(stream);
 		}
 
-		ret = stream->ops->close(stream, preserve_handle ? 0 : 1);
+		ret = stream->ops->close(stream, !preserve_handle);
 		if (!ret) {
 			ret = flush_result;
 		}
@@ -866,11 +866,11 @@ PHPAPI char *php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
 	size_t avail = 0;
 	size_t current_buf_size = 0;
 	size_t total_copied = 0;
-	int grow_mode = 0;
+	bool grow_mode = false;
 	char *bufstart = buf;
 
 	if (buf == NULL) {
-		grow_mode = 1;
+		grow_mode = true;
 	} else if (maxlen == 0) {
 		return NULL;
 	}
@@ -895,14 +895,14 @@ PHPAPI char *php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
 			size_t cpysz = 0;
 			char *readptr;
 			const char *eol;
-			int done = 0;
+			bool done = false;
 
 			readptr = (char*)stream->readbuf + stream->readpos;
 			eol = php_stream_locate_eol(stream, NULL);
 
 			if (eol) {
 				cpysz = eol - readptr + 1;
-				done = 1;
+				done = true;
 			} else {
 				cpysz = avail;
 			}
@@ -924,7 +924,7 @@ PHPAPI char *php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
 			} else {
 				if (cpysz >= maxlen - 1) {
 					cpysz = maxlen - 1;
-					done = 1;
+					done = true;
 				}
 			}
 
