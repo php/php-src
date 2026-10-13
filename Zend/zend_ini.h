@@ -82,6 +82,7 @@ ZEND_API zend_result zend_alter_ini_entry(zend_string *name, zend_string *new_va
 ZEND_API zend_result zend_alter_ini_entry_ex(zend_string *name, zend_string *new_value, int modify_type, int stage, bool force_change);
 ZEND_API zend_result zend_alter_ini_entry_chars(zend_string *name, const char *value, size_t value_length, int modify_type, int stage);
 ZEND_API zend_result zend_alter_ini_entry_chars_ex(zend_string *name, const char *value, size_t value_length, int modify_type, int stage, bool force_change);
+ZEND_API zend_result zend_alter_ini_entry_str_ex(const char *name, size_t name_length, zend_string *new_value, int modify_type, int stage, bool force_change);
 ZEND_API zend_result zend_restore_ini_entry(zend_string *name, int stage);
 ZEND_API void display_ini_entries(zend_module_entry *module);
 
@@ -99,6 +100,10 @@ ZEND_API bool zend_ini_parse_bool(const zend_string *str);
 #define zend_ini_double_literal(name) zend_ini_double((name), sizeof("" name) - 1, false)
 #define zend_ini_str_literal(name) zend_ini_str((name), sizeof("" name) - 1, false)
 #define zend_ini_string_literal(name) zend_ini_string((name), sizeof("" name) - 1, false)
+#define zend_alter_ini_entry_literal(name, new_value, modify_type, stage) \
+	zend_alter_ini_entry_str_ex((name), sizeof("" name) - 1, (new_value), (modify_type), (stage), false)
+#define zend_alter_ini_entry_literal_ex(name, new_value, modify_type, stage, force_change) \
+	zend_alter_ini_entry_str_ex((name), sizeof("" name) - 1, (new_value), (modify_type), (stage), (force_change))
 
 /**
  * Parses an ini quantity

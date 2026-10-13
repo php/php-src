@@ -2270,7 +2270,6 @@ PHP_FUNCTION(iconv_set_encoding)
 	zend_string *type;
 	zend_string *charset;
 	zend_result retval;
-	zend_string *name;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &type, &charset) == FAILURE) {
 		RETURN_THROWS();
@@ -2282,17 +2281,14 @@ PHP_FUNCTION(iconv_set_encoding)
 	}
 
 	if(zend_string_equals_literal_ci(type, "input_encoding")) {
-		name = ZSTR_INIT_LITERAL("iconv.input_encoding", 0);
+		retval = zend_alter_ini_entry_literal("iconv.input_encoding", charset, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 	} else if(zend_string_equals_literal_ci(type, "output_encoding")) {
-		name = ZSTR_INIT_LITERAL("iconv.output_encoding", 0);
+		retval = zend_alter_ini_entry_literal("iconv.output_encoding", charset, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 	} else if(zend_string_equals_literal_ci(type, "internal_encoding")) {
-		name = ZSTR_INIT_LITERAL("iconv.internal_encoding", 0);
+		retval = zend_alter_ini_entry_literal("iconv.internal_encoding", charset, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 	} else {
 		RETURN_FALSE;
 	}
-
-	retval = zend_alter_ini_entry(name, charset, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
-	zend_string_release_ex(name, 0);
 
 	RETURN_BOOL(retval == SUCCESS);
 }

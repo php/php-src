@@ -47,6 +47,10 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 - The INIT_CLASS_ENTRY_INIT_METHODS() macro, which was previously used as
   part of handling disabled classes, was removed following the removal of
   the `disable_classes` INI setting in PHP 8.5.
+- Added zend_alter_ini_entry_str_ex(), which looks up the INI entry by a
+  `const char *` name and length instead of a zend_string, along with the
+  zend_alter_ini_entry_literal() and zend_alter_ini_entry_literal_ex() macros.
+  Prefer these over allocating a temporary zend_string for a known INI name.
 
 ========================
 2. Build system changes

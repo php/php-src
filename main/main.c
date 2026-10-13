@@ -1585,9 +1585,7 @@ PHP_FUNCTION(set_time_limit)
 	}
 
 	zend_string *time = zend_long_to_str(new_timeout);
-	zend_string *key = ZSTR_INIT_LITERAL("max_execution_time", false);
-	RETVAL_BOOL(zend_alter_ini_entry_ex(key, time, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, false) == SUCCESS);
-	zend_string_release_ex(key, false);
+	RETVAL_BOOL(zend_alter_ini_entry_literal("max_execution_time", time, PHP_INI_USER, PHP_INI_STAGE_RUNTIME) == SUCCESS);
 	zend_string_release_ex(time, false);
 }
 /* }}} */

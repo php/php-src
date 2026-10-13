@@ -863,11 +863,9 @@ PHP_FUNCTION(bcscale)
 			RETURN_THROWS();
 		}
 
-		zend_string *ini_name = ZSTR_INIT_LITERAL("bcmath.scale", 0);
 		zend_string *new_scale_str = zend_long_to_str(new_scale);
-		zend_alter_ini_entry(ini_name, new_scale_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		zend_alter_ini_entry_literal("bcmath.scale", new_scale_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 		zend_string_release(new_scale_str);
-		zend_string_release(ini_name);
 	}
 
 	RETURN_LONG(old_scale);

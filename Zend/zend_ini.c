@@ -240,9 +240,7 @@ ZEND_API zend_result zend_register_ini_entries_ex(const zend_ini_entry_def *ini_
 		p->module_number = module_number;
 
 		if (zend_hash_add_ptr(directives, p->name, (void*)p) == NULL) {
-			if (p->name) {
-				zend_string_release_ex(p->name, true);
-			}
+			zend_string_release_ex(p->name, true);
 			pefree(p, true);
 			zend_unregister_ini_entries_ex(module_number, module_type);
 			return FAILURE;
@@ -359,16 +357,11 @@ ZEND_API zend_result zend_alter_ini_entry_chars_ex(zend_string *name, const char
 }
 /* }}} */
 
-ZEND_API zend_result zend_alter_ini_entry_ex(zend_string *name, zend_string *new_value, int modify_type, int stage, bool force_change) /* {{{ */
+static zend_result zend_alter_ini_entry_impl(zend_ini_entry *ini_entry, zend_string *new_value, int modify_type, int stage, bool force_change)
 {
-	zend_ini_entry *ini_entry;
 	zend_string *duplicate;
 	uint8_t modifiable;
 	bool modified;
-
-	if ((ini_entry = zend_hash_find_ptr(EG(ini_directives), name)) == NULL) {
-		return FAILURE;
-	}
 
 	modifiable = ini_entry->modifiable;
 	modified = ini_entry->modified;
@@ -415,7 +408,29 @@ ZEND_API zend_result zend_alter_ini_entry_ex(zend_string *name, zend_string *new
 
 	return SUCCESS;
 }
+
+ZEND_API zend_result zend_alter_ini_entry_ex(zend_string *name, zend_string *new_value, int modify_type, int stage, bool force_change) /* {{{ */
+{
+	zend_ini_entry *ini_entry = zend_hash_find_ptr(EG(ini_directives), name);
+
+	if (ini_entry == NULL) {
+		return FAILURE;
+	}
+
+	return zend_alter_ini_entry_impl(ini_entry, new_value, modify_type, stage, force_change);
+}
 /* }}} */
+
+ZEND_API zend_result zend_alter_ini_entry_str_ex(const char *name, size_t name_length, zend_string *new_value, int modify_type, int stage, bool force_change)
+{
+	zend_ini_entry *ini_entry = zend_hash_str_find_ptr(EG(ini_directives), name, name_length);
+
+	if (ini_entry == NULL) {
+		return FAILURE;
+	}
+
+	return zend_alter_ini_entry_impl(ini_entry, new_value, modify_type, stage, force_change);
+}
 
 ZEND_API zend_result zend_restore_ini_entry(zend_string *name, int stage) /* {{{ */
 {
@@ -428,7 +443,7 @@ ZEND_API zend_result zend_restore_ini_entry(zend_string *name, int stage) /* {{{
 
 	if (EG(modified_ini_directives)) {
 		if (zend_restore_ini_entry_cb(ini_entry, stage) == SUCCESS) {
-			zend_hash_del(EG(modified_ini_directives), name);
+			zend_hash_del(EG(modified_ini_directives), ini_entry->name);
 		} else {
 			return FAILURE;
 		}

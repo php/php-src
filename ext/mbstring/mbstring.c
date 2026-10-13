@@ -1217,15 +1217,12 @@ PHP_FUNCTION(mb_language)
 	if (name == NULL) {
 		RETVAL_STRING(mbfl_no_language2name(MBSTRG(language)));
 	} else {
-		zend_string *ini_name = ZSTR_INIT_LITERAL("mbstring.language", false);
-		if (FAILURE == zend_alter_ini_entry(ini_name, name, PHP_INI_USER, PHP_INI_STAGE_RUNTIME)) {
+		if (FAILURE == zend_alter_ini_entry_literal("mbstring.language", name, PHP_INI_USER, PHP_INI_STAGE_RUNTIME)) {
 			zend_argument_value_error(1, "must be a valid language, \"%s\" given", ZSTR_VAL(name));
-			zend_string_release_ex(ini_name, false);
 			RETURN_THROWS();
 		}
 		// TODO Make return void
 		RETVAL_TRUE;
-		zend_string_release_ex(ini_name, false);
 	}
 }
 /* }}} */
