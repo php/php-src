@@ -121,6 +121,8 @@ typedef struct {
 	/* Sockets libcurl wants watched, keyed by curl_socket_t */
 	HashTable *io_sockets;
 	struct _php_curl_socket_entry *io_removed;
+	/* Thrown inside a libcurl callback (the provider's remove()), rethrown by the reconcile */
+	zend_object *callback_exception;
 	php_deadline io_timer;
 	/* Private multi handle driving curl_exec() */
 	CURLM *multi;

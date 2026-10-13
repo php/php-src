@@ -1188,6 +1188,7 @@ void init_curl_handle(php_curl *ch)
 	ZVAL_UNDEF(&ch->postfields);
 	ch->io_sockets = NULL;
 	ch->io_removed = NULL;
+	ch->callback_exception = NULL;
 	php_deadline_init_infinite(&ch->io_timer);
 	ch->multi = NULL;
 	ch->in_exec = false;
@@ -2524,6 +2525,67 @@ static void php_curl_socket_entry_free(php_curl_socket_entry *e)
 	efree(e);
 }
 
+/* Ends a removed socket's registrations while its number is still its own:
+ * once libcurl closes it, a descriptor a callback opens may take the number,
+ * and a provider that finds records by descriptor would end that one's. Runs
+ * inside libcurl, so the provider runs as a curl callback does, and its
+ * exception is kept for the reconcile; one a curl callback left pending stays. */
+static void php_curl_socket_entry_unregister(php_curl *ch, php_curl_socket_entry *e)
+{
+	zend_object *pending = EG(exception);
+	bool was_in_callback = ch->in_callback;
+
+	EG(exception) = NULL;
+	ch->in_callback = true;
+	php_io_unregister_all(&PHP_POLL_HANDLE_OBJ_FROM_ZOBJ(e->handle)->registrations);
+	ch->in_callback = was_in_callback;
+
+	zend_object *thrown = EG(exception);
+	if (thrown != NULL && !zend_is_unwind_exit(thrown) && !zend_is_graceful_exit(thrown)) {
+		GC_ADDREF(thrown);
+		zend_clear_exception();
+		if (ch->callback_exception) {
+			zend_exception_set_previous(thrown, ch->callback_exception);
+		}
+		ch->callback_exception = thrown;
+	}
+
+	if (pending) {
+		if (EG(exception)) {
+			/* exit() in the provider: the exit goes on */
+			OBJ_RELEASE(pending);
+		} else {
+			EG(exception) = pending;
+		}
+	}
+}
+
+/* Ends the registrations of every socket still reported, before
+ * curl_multi_cleanup() closes them, outside libcurl */
+static void php_curl_socket_table_unregister(php_curl *ch)
+{
+	if (ch->io_sockets) {
+		ZEND_HASH_FOREACH_PTR(ch->io_sockets, php_curl_socket_entry *e) {
+			php_io_unregister_all(&PHP_POLL_HANDLE_OBJ_FROM_ZOBJ(e->handle)->registrations);
+		} ZEND_HASH_FOREACH_END();
+	}
+}
+
+/* Throws the exception a remove() inside libcurl kept; a transfer that
+ * completed in that same libcurl call keeps its result */
+static bool php_curl_rethrow_callback_exception(php_curl *ch)
+{
+	zend_object *thrown = ch->callback_exception;
+
+	if (thrown == NULL) {
+		return false;
+	}
+
+	ch->callback_exception = NULL;
+	zend_throw_exception_internal(thrown);
+	return true;
+}
+
 /* CURLMOPT_SOCKETFUNCTION: bookkeeping only, never a provider call. On
  * CURL_POLL_REMOVE the handle is invalidated here, inside the callback,
  * because libcurl closes the socket right after. */
@@ -2534,6 +2596,7 @@ static int php_curl_socket_callback(CURL *easy, curl_socket_t s, int what, void 
 
 	if (what == CURL_POLL_REMOVE) {
 		if (e) {
+			php_curl_socket_entry_unregister(ch, e);
 			php_curl_socket_entry_invalidate(e);
 			zend_hash_index_del(ch->io_sockets, (zend_ulong)s);
 			e->next_removed = ch->io_removed;
@@ -2587,6 +2650,10 @@ static zend_result php_curl_socket_reconcile(php_curl *ch)
 	/* An exception a curl callback left pending does not stop the transfer */
 	zend_object *pending = EG(exception);
 
+	if (php_curl_rethrow_callback_exception(ch)) {
+		return FAILURE;
+	}
+
 	while (ch->io_removed) {
 		php_curl_socket_entry *e = ch->io_removed;
 		ch->io_removed = e->next_removed;
@@ -2625,6 +2692,11 @@ static zend_result php_curl_socket_reconcile(php_curl *ch)
  * multi handle. */
 static void php_curl_socket_table_free(php_curl *ch)
 {
+	/* Left only by a bailout before the reconcile: the request has ended */
+	if (ch->callback_exception) {
+		OBJ_RELEASE(ch->callback_exception);
+		ch->callback_exception = NULL;
+	}
 	while (ch->io_removed) {
 		php_curl_socket_entry *e = ch->io_removed;
 		ch->io_removed = e->next_removed;
@@ -3246,6 +3318,7 @@ static void curl_free_obj(zend_object *object)
 	_php_curl_verify_handlers(ch, /* reporterror */ false);
 
 	if (ch->multi) {
+		php_curl_socket_table_unregister(ch);
 		/* Sends CURL_POLL_REMOVE for every socket still reported */
 		curl_multi_cleanup(ch->multi);
 		ch->multi = NULL;
