@@ -1260,7 +1260,7 @@ PHP_FUNCTION(unpack)
 						if (type == 'l') {
 							v = (int32_t) x;
 						} else {
-							v = x;
+							v = (zend_long) x;
 						}
 
 						ZVAL_LONG(&val, v);
