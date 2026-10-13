@@ -617,9 +617,7 @@ mysqlnd_pam_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self,
 	zend_uchar * ret = NULL;
 
 	/* copy pass*/
-	if (passwd && passwd_len) {
-		ret = (zend_uchar*) zend_strndup(passwd, passwd_len);
-	}
+	ret = (zend_uchar*) zend_strndup(passwd, passwd_len);
 	/*
 	  Trailing null required. bug#78680
 	  https://dev.mysql.com/doc/dev/mysql-server/latest/page_protocol_connection_phase_authentication_methods_clear_text_password.html
