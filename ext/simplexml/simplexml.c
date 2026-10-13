@@ -51,6 +51,7 @@ static zval *php_sxe_iterator_current_data(zend_object_iterator *iter);
 static void php_sxe_iterator_current_key(zend_object_iterator *iter, zval *key);
 static void php_sxe_iterator_move_forward(zend_object_iterator *iter);
 static void php_sxe_iterator_rewind(zend_object_iterator *iter);
+static HashTable *php_sxe_iterator_get_gc(zend_object_iterator *iter, zval **table, int *n);
 static zend_result sxe_object_cast_ex(zend_object *readobj, zval *writeobj, int type);
 
 static void sxe_unlink_node(xmlNodePtr node)
@@ -1195,10 +1196,14 @@ next_iter:
 
 static HashTable *sxe_get_gc(zend_object *object, zval **table, int *n) /* {{{ */ {
 	php_sxe_object *sxe;
-	sxe = php_sxe_fetch_object(object);
+	zend_get_gc_buffer *gc_buffer;
 
-	*table = NULL;
-	*n = 0;
+	sxe = php_sxe_fetch_object(object);
+	gc_buffer = zend_get_gc_buffer_create();
+	zend_get_gc_buffer_add_zval(gc_buffer, &sxe->iter.data);
+	zend_get_gc_buffer_add_zval(gc_buffer, &sxe->tmp);
+	zend_get_gc_buffer_use(gc_buffer, table, n);
+
 	return sxe->properties;
 }
 /* }}} */
@@ -2372,7 +2377,7 @@ static const zend_object_iterator_funcs php_sxe_iterator_funcs = { /* {{{ */
 	php_sxe_iterator_move_forward,
 	php_sxe_iterator_rewind,
 	NULL,
-	NULL, /* get_gc */
+	php_sxe_iterator_get_gc,
 };
 /* }}} */
 
@@ -2578,6 +2583,13 @@ static void php_sxe_iterator_rewind(zend_object_iterator *iter) /* {{{ */
 	php_sxe_reset_iterator(sxe);
 }
 /* }}} */
+
+static HashTable *php_sxe_iterator_get_gc(zend_object_iterator *iter, zval **table, int *n)
+{
+	*table = &iter->data;
+	*n = 1;
+	return NULL;
+}
 
 void *simplexml_export_node(zval *object) /* {{{ */
 {
