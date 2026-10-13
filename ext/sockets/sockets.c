@@ -1710,6 +1710,7 @@ PHP_FUNCTION(socket_accept)
 	if (!php_accept_connect(php_sock, new_sock, (struct sockaddr*)&sa, &php_sa_len)) {
 		zval_ptr_dtor(return_value);
 		if (EG(exception)) {
+			ZVAL_UNDEF(return_value);
 			RETURN_THROWS();
 		}
 		RETURN_FALSE;
