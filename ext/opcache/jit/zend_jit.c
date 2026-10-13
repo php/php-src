@@ -3723,10 +3723,7 @@ void zend_jit_startup(void *buf, size_t size, bool reattached)
 
 	zend_jit_trace_startup(reattached);
 
-	zend_jit_unprotect();
-	/* save JIT buffer pos */
-	dasm_ptr[1] = dasm_ptr[0];
-	zend_jit_protect();
+	zend_jit_save_restart_point();
 }
 
 void zend_jit_shutdown(void)
@@ -3908,11 +3905,11 @@ void zend_jit_restart(void)
 	}
 }
 
-/* zend_jit_restart() rewinds the buffer to this point: code generated before it
- * (preloaded functions compiled on script load) must survive restarts */
+/* Saves the current JIT buffer position as the one zend_jit_restart() rewinds to,
+ * so that the code generated so far is kept across restarts */
 void zend_jit_save_restart_point(void)
 {
-	if (dasm_buf) {
+	if (dasm_ptr) {
 		zend_jit_unprotect();
 		dasm_ptr[1] = dasm_ptr[0];
 		zend_jit_protect();
