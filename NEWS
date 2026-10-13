@@ -86,6 +86,8 @@ PHP                                                                        NEWS
     session.use_strict_mode rejects the supplied ID. (Ilia Alshanetsky)
   . Fixed exceptions from user-defined create_sid() handlers being replaced
     by return-value validation errors. (Ilia Alshanetsky)
+  . Fixed calling SessionHandler::open() twice without an intervening
+    close() when re-initializing an active session. (Ilia Alshanetsky)
 
 - SimpleXML:
   . Fixed bug GH-12171 (SimpleXML property-proxy equality ignores element
