@@ -465,9 +465,12 @@ struct _pdo_dbh_t {
 	/* bitmap for pdo_param_event(s) to skip in dispatch_param_event */
 	unsigned skip_param_evt:7;
 
+	/* set while the constructor runs; rejects reentrant (re)construction */
+	unsigned is_constructing:1;
+
 	/* the sum of the number of bits here and the bit fields preceding should
 	 * equal 32 */
-	unsigned _reserved_flags:14;
+	unsigned _reserved_flags:13;
 
 	/* data source string used to open this handle */
 	const char *data_source;
