@@ -149,7 +149,7 @@ static void ps_files_close(ps_files *data)
 static void ps_files_open(ps_files *data, /* const */ zend_string *key)
 {
 	char buf[MAXPATHLEN];
-#if !defined(O_NOFOLLOW) || !defined(PHP_WIN32)
+#ifndef PHP_WIN32
 	struct stat sbuf = {0};
 #endif
 	int ret;
@@ -175,16 +175,7 @@ static void ps_files_open(ps_files *data, /* const */ zend_string *key)
 		data->last_key = zend_string_copy(key);
 
 		/* O_NOFOLLOW to prevent us from following evil symlinks */
-#ifdef O_NOFOLLOW
 		data->fd = VCWD_OPEN_MODE(buf, O_CREAT | O_RDWR | O_BINARY | O_NOFOLLOW, data->filemode);
-#else
-		/* Check to make sure that the opened file is not outside of allowable dirs.
-		   This is not 100% safe but it's hard to do something better without O_NOFOLLOW */
-		if (PG(open_basedir) && lstat(buf, &sbuf) == 0 && S_ISLNK(sbuf.st_mode) && php_check_open_basedir(buf)) {
-			return;
-		}
-		data->fd = VCWD_OPEN_MODE(buf, O_CREAT | O_RDWR | O_BINARY, data->filemode);
-#endif
 
 		if (data->fd != -1) {
 #ifndef PHP_WIN32
