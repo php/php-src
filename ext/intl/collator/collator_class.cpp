@@ -82,19 +82,6 @@ U_CFUNC void collator_register_Collator_symbols(int module_number)
 }
 /* }}} */
 
-/* {{{ void collator_object_init( Collator_object* co )
- * Initialize internals of Collator_object.
- * Must be called before any other call to 'collator_object_...' functions.
- */
-U_CFUNC void collator_object_init( Collator_object* co )
-{
-	if( !co )
-		return;
-
-	intl_error_init( COLLATOR_ERROR_P( co ) );
-}
-/* }}} */
-
 /* {{{ void collator_object_destroy( Collator_object* co )
  * Clean up mem allocted by internals of Collator_object
  */

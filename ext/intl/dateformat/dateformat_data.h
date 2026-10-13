@@ -37,7 +37,6 @@ typedef struct {
 #ifdef __cplusplus
 extern "C" {
 #endif
-dateformat_data* dateformat_data_create( void );
 void dateformat_data_init( dateformat_data* datef_data );
 void dateformat_data_free( dateformat_data* datef_data );
 #ifdef __cplusplus

@@ -28,7 +28,6 @@ typedef struct {
 	UErrorCode   code;
 } intl_error;
 
-intl_error* intl_error_create( void );
 void        intl_error_init( intl_error* err );
 void        intl_error_reset( intl_error* err );
 void        intl_error_set_code( intl_error* err, UErrorCode err_code );
