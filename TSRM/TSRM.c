@@ -242,7 +242,14 @@ static void tsrm_exit_key_set(tsrm_tls_entry *thread_resources)
 	}
 }
 # else
-#  define tsrm_exit_key_set(what)	do { if (tsrm_thread_exit_armed) { pthread_setspecific(tsrm_exit_key, (void*)(what)); } } while (0)
+static void tsrm_exit_key_set(tsrm_tls_entry *thread_resources)
+{
+	if (!tsrm_thread_exit_armed) {
+		return;
+	}
+
+	pthread_setspecific(tsrm_exit_key, thread_resources);
+}
 # endif
 #endif
 
