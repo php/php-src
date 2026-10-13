@@ -385,9 +385,9 @@ PHP_FUNCTION(proc_close)
 		RETURN_THROWS();
 	}
 
-	FG(pclose_wait) = 1; /* See comment in `proc_open_rsrc_dtor` */
+	FG(pclose_wait) = true; /* See comment in `proc_open_rsrc_dtor` */
 	zend_list_close(Z_RES_P(zproc));
-	FG(pclose_wait) = 0;
+	FG(pclose_wait) = false;
 	RETURN_LONG(FG(pclose_ret));
 }
 /* }}} */
