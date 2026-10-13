@@ -26,7 +26,6 @@ extern "C" {
 #include <unicode/uchar.h>
 #include <unicode/ucasemap.h>
 #include <unicode/udisplaycontext.h>
-#include <unicode/unum.h>
 #include <unicode/ureldatefmt.h>
 #include <unicode/unistr.h>
 
@@ -95,7 +94,6 @@ static zend_object *reldateformatter_create_object(zend_class_entry *class_type)
 
 	zend_object_std_init(&obj->zo, class_type);
 	object_properties_init(&obj->zo, class_type);
-	obj->zo.handlers = &reldateformatter_handlers;
 
 	return &obj->zo;
 }
