@@ -9,6 +9,10 @@ var_dump(password_needs_rehash('', PASSWORD_BCRYPT));
 var_dump(password_needs_rehash('', 1));
 var_dump(password_needs_rehash('', '2y'));
 
+// Plausible-looking, but malformed hashes
+var_dump(password_needs_rehash('$2y$04$MTIzNDU2Nzg5MDEyMzQ1NEj0NmcAWSLR.oP7XOR9HD/vjUuOj100y', PASSWORD_BCRYPT));
+var_dump(password_needs_rehash('$2y$04$MTIzNDU2Nzg5MDEyMzQ1Nej0NmcAWSLR+oP7XOR9HD/vjUuOj100y', PASSWORD_BCRYPT));
+
 // Valid, as it's an unknown algorithm
 var_dump(password_needs_rehash('', PASSWORD_DEFAULT));
 var_dump(password_needs_rehash('', 0));
@@ -57,6 +61,8 @@ var_dump(password_needs_rehash(crypt('Example', '$6$rounds=5000$aa$'), PASSWORD_
 echo "OK!";
 ?>
 --EXPECT--
+bool(true)
+bool(true)
 bool(true)
 bool(true)
 bool(true)
