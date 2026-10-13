@@ -21,6 +21,8 @@ PHP 8.7 UPGRADE NOTES
 
 - Curl:
   . curl_multi_exec() now throws a TypeError when still_running is not an int.
+  . The CURLOPT_WRITEFUNCTION callback should return an integer. Returning other 
+    types may trigger implicit conversion deprecations or conversion failures.
 
 - PDO:
   . PDOStatement::bindColumn() now throws a ValueError when the column name is

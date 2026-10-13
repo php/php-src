@@ -150,7 +150,7 @@ void _php_curl_verify_handlers(php_curl *ch, bool reporterror);
 void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source);
 
 /* Consumes `zv` */
-zend_long php_curl_get_long(zval *zv);
+zend_long php_curl_get_long(zval *zv, bool *failed);
 
 #define curl_from_obj(obj) ZEND_CONTAINER_OF(obj, php_curl, std)
 

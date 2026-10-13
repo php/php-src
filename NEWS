@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Curl:
   . curl_multi_exec() now throws a TypeError when still_running is not an int.
     (arshidkv12)
+  . curl_write(): Check whether the PHP_CURL_USER callback returns an integer
 
 - FPM:
   . Use recommended TYPE, HELP order for OpenMetrics metadata.
