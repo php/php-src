@@ -59,7 +59,7 @@ array(9) {
   ["pid"]=>
   int(%d)
   ["cached"]=>
-  bool(false)
+  bool(true)
   ["running"]=>
   bool(false)
   ["signaled"]=>

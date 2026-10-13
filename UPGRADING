@@ -31,6 +31,16 @@ PHP 8.7 UPGRADE NOTES
   . The number of filters that can be chained in a php://filter URL is limited
     to 16 by default. Set the stream context option max_filter_count to change
     this.
+  . On Unix systems, proc_close() now reports termination by a signal as
+    128 + the signal number, following the shell convention, instead of the
+    raw wait status (e.g. 137 instead of 9 for SIGKILL). This also applies when
+    proc_get_status() observed the termination first; previously proc_close()
+    returned -1 in that case. Normal exit codes are unchanged.
+  . On Unix systems, proc_get_status() now also caches the status of a child
+    terminated by a signal, as it does for normal exits since PHP 8.3.
+    Repeated calls keep reporting "signaled" => true and the "termsig" value,
+    and "cached" is true. Previously, calls after the first one reported
+    "signaled" => false and "termsig" => 0.
 
 ========================================
 2. New Features
