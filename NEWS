@@ -22,6 +22,10 @@ PHP                                                                        NEWS
     (Nicolas Grekas)
   . Fix escape analysis for objects implementing ArrayAccess. (ndossche, Arnaud)
 
+- Fileinfo:
+  . Fixed bug GH-24289 (finfo::file() reports the wrong argument number for
+    an invalid $filename). (Lazizbek Ergashev)
+
 - FPM:
   . Fixed bug GH-24229 (fcgi_close() passes shutdown() a literal 1, which is
     SHUT_RD in WASI). (Ryosuke Ishibashi)
