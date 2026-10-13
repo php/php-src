@@ -27,6 +27,11 @@ PHP 8.7 UPGRADE NOTES
     not present in the result set. It previously reported the condition
     through PDO::ATTR_ERRMODE and returned false.
 
+- Reflection:
+  . Modifying the $name or $class property of a Reflection object through
+    compound assignment, increment/decrement or by reference now throws a
+    ReflectionException, like a plain assignment already did.
+
 - Standard:
   . The number of filters that can be chained in a php://filter URL is limited
     to 16 by default. Set the stream context option max_filter_count to change
