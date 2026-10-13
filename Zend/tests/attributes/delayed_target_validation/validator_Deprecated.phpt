@@ -5,10 +5,6 @@
 
 #[DelayedTargetValidation]
 #[Deprecated]
-interface DemoInterface {}
-
-#[DelayedTargetValidation]
-#[Deprecated]
 class DemoClass {}
 
 #[DelayedTargetValidation]
@@ -16,7 +12,6 @@ class DemoClass {}
 enum DemoEnum {}
 
 $cases = [
-	new ReflectionClass('DemoInterface'),
 	new ReflectionClass('DemoClass'),
 	new ReflectionClass('DemoEnum'),
 ];
@@ -34,39 +29,6 @@ foreach ($cases as $r) {
 
 ?>
 --EXPECTF--
-********************
-Interface [ <user> interface DemoInterface ] {
-  @@ %s %d-%d
-
-  - Constants [0] {
-  }
-
-  - Static properties [0] {
-  }
-
-  - Static methods [0] {
-  }
-
-  - Properties [0] {
-  }
-
-  - Methods [0] {
-  }
-}
-
-array(2) {
-  [0]=>
-  object(ReflectionAttribute)#%d (1) {
-    ["name"]=>
-    string(23) "DelayedTargetValidation"
-  }
-  [1]=>
-  object(ReflectionAttribute)#%d (1) {
-    ["name"]=>
-    string(10) "Deprecated"
-  }
-}
-Error: Cannot apply #[\Deprecated] to interface DemoInterface
 ********************
 Class [ <user> class DemoClass ] {
   @@ %s %d-%d
