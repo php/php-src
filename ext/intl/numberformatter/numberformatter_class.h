@@ -48,9 +48,6 @@ typedef struct {
 
 #define NUMBERFORMATTER_OBJECT(nfo) (nfo)->nf_data.unumf
 
-#define NUMBERFORMATTER_METHOD_INIT_VARS    INTL_METHOD_INIT_VARS(IntlNumberFormatter, nfo)
-#define NUMBERFORMATTER_METHOD_FETCH_OBJECT INTL_METHOD_FETCH_OBJECT(INTL_INTLNUMBERFORMATTER, nfo)
-
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -50,11 +50,15 @@ try {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
+IntlNumberFormatter::createFromSkeleton('invalid skeleton here', 'ro');
+
 try {
     $formatter->format([]);
 } catch (TypeError $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
+
+var_dump(intl_get_error_code());
 
 try {
     clone $formatter;
@@ -78,4 +82,5 @@ IntlException: IntlNumberFormatter::createFromSkeleton(): Number formatter creat
 Error: Call to private IntlNumberFormatter::__construct() from global scope
 ValueError: IntlNumberFormatter::createFromSkeleton(): Argument #2 ($locale) "invalid-language" is invalid
 TypeError: IntlNumberFormatter::format(): Argument #1 ($value) must be of type string|int|float, array given
+int(65811)
 Error: Trying to clone an uncloneable object of class IntlNumberFormatter

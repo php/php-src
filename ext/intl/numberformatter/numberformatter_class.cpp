@@ -108,14 +108,13 @@ U_CFUNC PHP_METHOD(IntlNumberFormatter, createFromSkeleton)
 U_CFUNC PHP_METHOD(IntlNumberFormatter, format)
 {
 	zval *value;
-	NUMBERFORMATTER_METHOD_INIT_VARS;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_NUMBER_OR_STR(value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	object = ZEND_THIS;
-	NUMBERFORMATTER_METHOD_FETCH_OBJECT;
+	IntlNumberFormatter_object *nfo = Z_INTL_INTLNUMBERFORMATTER_P(ZEND_THIS);
+	intl_errors_reset(INTL_DATA_ERROR_P(nfo));
 
 	UErrorCode status = U_ZERO_ERROR;
 	UnicodeString result;
