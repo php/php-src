@@ -28,6 +28,8 @@ PHP                                                                        NEWS
     (David Carlier)
   . Fix function and constant imports in compile_to_ast and add support
     for grouping. (Klaas Skelte van der Werf)
+  . Fixed bug GH-24265 (Unwind/GracefulExit discarded in
+    zend_fiber_execute()). (David Carlier)
 
 - Date:
   . Fixed bug GH-20503 (Assertion failure with ext/date DateInterval property
