@@ -256,10 +256,10 @@ static pid_t waitpid_cached(php_process_handle *proc, int *wait_status, int opti
 
 	pid_t wait_pid = waitpid(proc->child, wait_status, options);
 
-	/* The "exit" status is the final status of the process.
+	/* The "exit" and "terminated by signal" statuses are final statuses of the process.
 	 * If we were to cache the status unconditionally,
 	 * we would return stale statuses in the future after the process continues. */
-	if (wait_pid > 0 && WIFEXITED(*wait_status)) {
+	if (wait_pid > 0 && (WIFEXITED(*wait_status) || WIFSIGNALED(*wait_status))) {
 		proc->has_cached_exit_wait_status = true;
 		proc->cached_exit_wait_status_value = *wait_status;
 	}
