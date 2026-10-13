@@ -12,6 +12,9 @@ inputs:
 runs:
   using: composite
   steps:
+    # Temporary for the IO hooks proof of concept, see the action
+    - name: Build ior
+      uses: ./.github/actions/build-ior
     - shell: bash
       run: |
         set -x
@@ -78,6 +81,7 @@ runs:
           ${{ inputs.skipSlow == 'false' && '--with-pdo-odbc=unixODBC,/usr' || '' }} \
           --with-config-file-path=/etc \
           --with-config-file-scan-dir=/etc/php.d \
+          --with-ior \
           ${{ inputs.skipSlow == 'false' && '--with-pdo-firebird' || '' }} \
           ${{ inputs.skipSlow == 'false' && '--with-pdo-dblib' || '' }} \
           --enable-werror \

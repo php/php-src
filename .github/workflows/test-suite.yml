@@ -871,6 +871,11 @@ jobs:
           ref: ${{ fromJson(inputs.branch).ref }}
       - name: Setup
         uses: ./.github/actions/setup-windows
+      - name: Build ior
+        if: ${{ matrix.ior }}
+        uses: ./.github/actions/build-ior-windows
+        with:
+          arch: ${{ matrix.x64 && 'x64' || 'x86' }}
       - name: Build
         run: .github/scripts/windows/build.bat
       - name: Test

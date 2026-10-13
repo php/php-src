@@ -336,6 +336,10 @@ PW32IO BOOL php_win32_ioutil_posix_to_open_opts(int flags, mode_t mode, php_iout
 		opts->attributes &= ~FILE_FLAG_OVERLAPPED;
 	}*/
 
+	if (flags & PHP_WIN32_IOUTIL_O_OVERLAPPED) {
+		opts->attributes |= FILE_FLAG_OVERLAPPED;
+	}
+
 	/* Setting this flag makes it possible to open a directory. */
 	/* XXX not being done as this means a behavior change. Should be evaluated properly. */
 	/* opts->attributes |= FILE_FLAG_BACKUP_SEMANTICS; */
@@ -391,7 +395,7 @@ PW32IO int php_win32_ioutil_open_w(const wchar_t *path, int flags, ...)
 		return -1;
 	}
 
-	fd = _open_osfhandle((intptr_t) file, flags);
+	fd = _open_osfhandle((intptr_t) file, flags & ~PHP_WIN32_IOUTIL_O_OVERLAPPED);
 	if (fd < 0) {
 		DWORD error = GetLastError();
 
@@ -1375,4 +1379,80 @@ PW32IO ssize_t php_win32_ioutil_readlink_w(const wchar_t *path, wchar_t *buf, si
 	CloseHandle(h);
 
 	return ret;
+}/*}}}*/
+
+/* Overlapped read and write at an offset, see ioutil.h */
+static ssize_t php_win32_ioutil_overlapped_io(int fd, void *buf, size_t len, int64_t offset, bool write_op)
+{/*{{{*/
+	HANDLE h = (HANDLE) _get_osfhandle(fd);
+	if (h == INVALID_HANDLE_VALUE) {
+		_set_errno(EBADF);
+		return -1;
+	}
+
+	OVERLAPPED ov;
+	memset(&ov, 0, sizeof(ov));
+	if (offset < 0) {
+		/* Append, for WriteFile; ReadFile rejects it */
+		ov.Offset = 0xFFFFFFFF;
+		ov.OffsetHigh = 0xFFFFFFFF;
+	} else {
+		ov.Offset = (DWORD) ((uint64_t) offset & 0xFFFFFFFF);
+		ov.OffsetHigh = (DWORD) ((uint64_t) offset >> 32);
+	}
+
+	/* One event per thread, the call blocks until the operation completes; the system resets it
+	 * as each operation starts. Kept for the thread's lifetime, it is not worth a syscall per op. */
+	static __declspec(thread) HANDLE event = NULL;
+	if (!event) {
+		event = CreateEventW(NULL, TRUE, FALSE, NULL);
+		if (!event) {
+			SET_ERRNO_FROM_WIN32_CODE(GetLastError());
+			return -1;
+		}
+	}
+	/* The low bit keeps the completion off a port the handle is bound to */
+	ov.hEvent = (HANDLE) ((ULONG_PTR) event | 1);
+
+	DWORD want = len > INT_MAX ? INT_MAX : (DWORD) len;
+	DWORD done = 0;
+	BOOL ok = write_op
+			? WriteFile(h, buf, want, NULL, &ov)
+			: ReadFile(h, buf, want, NULL, &ov);
+	DWORD err = ok ? ERROR_SUCCESS : GetLastError();
+	if (ok || err == ERROR_IO_PENDING) {
+		ok = GetOverlappedResult(h, &ov, &done, TRUE);
+		err = ok ? ERROR_SUCCESS : GetLastError();
+	}
+
+	if (ok) {
+		return (ssize_t) done;
+	}
+
+	if (write_op && (err == ERROR_BROKEN_PIPE || err == ERROR_NO_DATA)) {
+		/* A pipe whose reader is gone: pending at the close, or started after it */
+		_set_errno(EPIPE);
+		return -1;
+	}
+
+	if (err == ERROR_HANDLE_EOF || err == ERROR_BROKEN_PIPE) {
+		return 0;
+	}
+	if (err == ERROR_ACCESS_DENIED) {
+		/* The handle was not opened for this direction: EBADF, as the CRT reports it */
+		_set_errno(EBADF);
+		return -1;
+	}
+	SET_ERRNO_FROM_WIN32_CODE(err);
+	return -1;
+}/*}}}*/
+
+PW32IO ssize_t php_win32_ioutil_pread(int fd, void *buf, size_t len, int64_t offset)
+{/*{{{*/
+	return php_win32_ioutil_overlapped_io(fd, buf, len, offset, false);
+}/*}}}*/
+
+PW32IO ssize_t php_win32_ioutil_pwrite(int fd, const void *buf, size_t len, int64_t offset)
+{/*{{{*/
+	return php_win32_ioutil_overlapped_io(fd, (void *) buf, len, offset, true);
 }/*}}}*/

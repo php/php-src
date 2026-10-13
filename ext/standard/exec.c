@@ -109,7 +109,6 @@ static size_t handle_line(int type, zval *array, char *buf, size_t bufl) {
  */
 PHPAPI int php_exec(int type, const char *cmd, zval *array, zval *return_value)
 {
-	FILE *fp;
 	char *buf;
 	int pclose_return;
 	char *b, *d=NULL;
@@ -120,16 +119,20 @@ PHPAPI int php_exec(int type, const char *cmd, zval *array, zval *return_value)
 #endif
 
 #ifdef PHP_WIN32
-	fp = VCWD_POPEN(cmd, "rb");
-#else
-	fp = VCWD_POPEN(cmd, "r");
-#endif
+	FILE *fp = VCWD_POPEN(cmd, "rb");
 	if (!fp) {
 		php_error_docref(NULL, E_WARNING, "Unable to fork [%s]", cmd);
 		goto err;
 	}
-
 	stream = php_stream_fopen_from_pipe(fp, "rb");
+#else
+	/* The signals blocked for a SignalHandle stay out of the child, as for popen() */
+	stream = php_stream_popen(cmd, "r");
+	if (!stream) {
+		php_error_docref(NULL, E_WARNING, "Unable to fork [%s]", cmd);
+		goto err;
+	}
+#endif
 
 	buf = (char *) emalloc(EXEC_INPUT_BUF);
 	buflen = EXEC_INPUT_BUF;
@@ -495,7 +498,6 @@ PHP_FUNCTION(escapeshellarg)
 /* {{{ Execute command via shell and return complete output as string */
 PHP_FUNCTION(shell_exec)
 {
-	FILE *in;
 	char *command;
 	size_t command_len;
 	zend_string *ret;
@@ -511,15 +513,19 @@ PHP_FUNCTION(shell_exec)
 	}
 
 #ifdef PHP_WIN32
-	if ((in=VCWD_POPEN(command, "rt"))==NULL) {
-#else
-	if ((in=VCWD_POPEN(command, "r"))==NULL) {
-#endif
+	FILE *in = VCWD_POPEN(command, "rt");
+	if (!in) {
 		php_error_docref(NULL, E_WARNING, "Unable to execute '%s'", command);
 		RETURN_FALSE;
 	}
-
 	stream = php_stream_fopen_from_pipe(in, "rb");
+#else
+	stream = php_stream_popen(command, "r");
+	if (!stream) {
+		php_error_docref(NULL, E_WARNING, "Unable to execute '%s'", command);
+		RETURN_FALSE;
+	}
+#endif
 	ret = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0);
 	php_stream_close(stream);
 

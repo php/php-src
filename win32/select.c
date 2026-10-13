@@ -14,6 +14,7 @@
 
 #include "php.h"
 #include "php_network.h"
+#include "php_io_hooks.h"
 #include "win32/time.h"
 
 /* Win32 select() will only work with sockets, so we roll our own implementation here.
@@ -41,6 +42,14 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 	int sock_max_fd = -1;
 	struct timeval tvslice;
 	int retcode;
+	/* A pipe is judged by its bytes: its handle is signaled whatever it holds (an overlapped one
+	 * from proc_open() cannot even be told from an anonymous one here), so it stays out of the
+	 * wait; a pipe is always writable and, as a signaled handle was, always in the except set.
+	 * Each set holds up to FD_SETSIZE. */
+	int pipe_fds[3 * FD_SETSIZE];
+	int n_pipes = 0, pipes_ready;
+	fd_set pipe_read, pipe_write, pipe_except;
+	DWORD slice_ms;
 
 	/* As max_fd is unsigned, non socket might overflow. */
 	if (max_fd > (php_socket_t)INT_MAX) {
@@ -83,7 +92,10 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 				}
 			} else {
 				handles[n_handles] = (HANDLE)(uintptr_t)_get_osfhandle(i);
-				if (handles[n_handles] != INVALID_HANDLE_VALUE) {
+				if (handles[n_handles] != INVALID_HANDLE_VALUE
+						&& GetFileType(handles[n_handles]) == FILE_TYPE_PIPE) {
+					pipe_fds[n_pipes++] = i;
+				} else if (handles[n_handles] != INVALID_HANDLE_VALUE) {
 					if (SAFE_FD_ISSET(i, rfds) && GetFileType(handles[n_handles]) == FILE_TYPE_PIPE) {
 						num_read_pipes++;
 					}
@@ -94,7 +106,7 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 		}
 	}
 
-	if (n_handles == 0) {
+	if (n_handles == 0 && n_pipes == 0) {
 		/* plain sockets only - let winsock handle the whole thing */
 		return select(-1, rfds, wfds, efds, tv);
 	}
@@ -110,6 +122,30 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 	do {
 		retcode = 0;
 
+		pipes_ready = 0;
+		FD_ZERO(&pipe_read);
+		FD_ZERO(&pipe_write);
+		FD_ZERO(&pipe_except);
+		for (i = 0; i < n_pipes; i++) {
+			if (SAFE_FD_ISSET(pipe_fds[i], rfds) && php_io_pipe_readable(pipe_fds[i])) {
+				FD_SET((uint32_t)pipe_fds[i], &pipe_read);
+				pipes_ready++;
+			}
+
+			if (SAFE_FD_ISSET(pipe_fds[i], wfds)) {
+				FD_SET((uint32_t)pipe_fds[i], &pipe_write);
+				pipes_ready++;
+			}
+
+			if (SAFE_FD_ISSET(pipe_fds[i], efds)) {
+				FD_SET((uint32_t)pipe_fds[i], &pipe_except);
+				pipes_ready++;
+			}
+		}
+
+		/* With pipes to peek again, the other waits are short; the timer tick rounds 1 ms up */
+		slice_ms = pipes_ready > 0 ? 0 : (n_pipes > 0 ? 1 : 100);
+
 		if (sock_max_fd >= 0) {
 			/* overwrite the zero'd sets here; the select call
 			 * will clear those that are not active */
@@ -118,7 +154,7 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 			aexcept = sock_except;
 
 			tvslice.tv_sec = 0;
-			tvslice.tv_usec = 100000;
+			tvslice.tv_usec = slice_ms * 1000;
 
 			retcode = select(-1, &aread, &awrite, &aexcept, &tvslice);
 		}
@@ -126,7 +162,7 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 			/* check handles */
 			DWORD wret;
 
-			wret = WaitForMultipleObjects(n_handles, handles, FALSE, retcode > 0 ? 0 : 100);
+			wret = WaitForMultipleObjects(n_handles, handles, FALSE, retcode > 0 ? 0 : slice_ms);
 
 			if (wret == WAIT_TIMEOUT) {
 				/* set retcode to 0; this is the default.
@@ -166,6 +202,27 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 				}
 			}
 		}
+
+		/* After a failed select(), aread and awrite still hold the socket sets, so the failure stays
+		 * the answer */
+		if (pipes_ready > 0 && retcode >= 0) {
+			for (i = 0; i < n_pipes; i++) {
+				if (FD_ISSET(pipe_fds[i], &pipe_read)) {
+					FD_SET((uint32_t)pipe_fds[i], &aread);
+				}
+
+				if (FD_ISSET(pipe_fds[i], &pipe_write)) {
+					FD_SET((uint32_t)pipe_fds[i], &awrite);
+				}
+
+				if (FD_ISSET(pipe_fds[i], &pipe_except)) {
+					FD_SET((uint32_t)pipe_fds[i], &aexcept);
+				}
+			}
+
+			retcode += pipes_ready;
+		}
+
 		if (retcode == 0 && num_read_pipes == n_handles && sock_max_fd < 0) {
 			usleep(100);
 		}

@@ -97,6 +97,9 @@ PHPAPI MYSQLND * mysqlnd_connection_connect(MYSQLND * conn,
 
 PHPAPI void mysqlnd_debug(const char *mode);
 
+/* An operation of another flow is on the connection's stream */
+PHPAPI bool mysqlnd_conn_is_busy(const MYSQLND_CONN_DATA *conn);
+
 /* Query */
 #define mysqlnd_fetch_into(result, flags, ret_val)	(result)->m.fetch_into((result), (flags), (ret_val) ZEND_FILE_LINE_CC)
 #define mysqlnd_fetch_row_c(result)						(result)->m.fetch_row_c((result))

@@ -19,6 +19,7 @@
 #endif
 
 #include "php.h"
+#include "php_io.h"
 #include "Zend/zend_smart_str.h"
 
 #include "curl_private.h"
@@ -88,6 +89,10 @@ PHP_FUNCTION(curl_multi_add_handle)
 
 	mh = Z_CURL_MULTI_P(z_mh);
 	ch = Z_CURL_P(z_ch);
+
+	if (!php_curl_check_not_in_exec(ch)) {
+		RETURN_THROWS();
+	}
 
 	_php_curl_verify_handlers(ch, /* reporterror */ true);
 
@@ -194,6 +199,101 @@ PHP_FUNCTION(curl_multi_get_handles)
 	}
 }
 
+typedef struct php_curl_multi_fd {
+	php_socket_t fd;
+	uint32_t events;
+} php_curl_multi_fd;
+
+/* The descriptors curl_multi_wait() would poll, for an Any op */
+static CURLMcode php_curl_multi_get_fds(CURLM *multi, php_curl_multi_fd **fds_out, uint32_t *n_out)
+{
+	php_curl_multi_fd *fds = NULL;
+	uint32_t n = 0;
+
+#if LIBCURL_VERSION_NUM >= 0x080800 /* Available since 8.8.0 */
+	/* Grow on CURLM_OUT_OF_MEMORY: older versions do not report the count needed */
+	unsigned int size = 8, count = 0;
+	struct curl_waitfd *wfds;
+	CURLMcode error;
+	for (;;) {
+		wfds = safe_emalloc(size, sizeof(struct curl_waitfd), 0);
+		error = curl_multi_waitfds(multi, wfds, size, &count);
+		if (error != CURLM_OUT_OF_MEMORY || size > UINT_MAX / 2) {
+			break;
+		}
+		efree(wfds);
+		size *= 2;
+	}
+	if (error != CURLM_OK) {
+		efree(wfds);
+		return error;
+	}
+	if (count > 0) {
+		fds = safe_emalloc(count, sizeof(*fds), 0);
+	}
+	for (unsigned int i = 0; i < count; i++) {
+		uint32_t events = ((wfds[i].events & (CURL_WAIT_POLLIN | CURL_WAIT_POLLPRI)) ? PHP_POLL_READ : 0)
+			| ((wfds[i].events & CURL_WAIT_POLLOUT) ? PHP_POLL_WRITE : 0);
+		fds[n].fd = (php_socket_t) wfds[i].fd;
+		fds[n].events = events ? events : PHP_POLL_READ;
+		n++;
+	}
+	efree(wfds);
+#else
+	fd_set rfds, wfds, efds;
+	int maxfd = -1;
+	FD_ZERO(&rfds);
+	FD_ZERO(&wfds);
+	FD_ZERO(&efds);
+	CURLMcode error = curl_multi_fdset(multi, &rfds, &wfds, &efds, &maxfd);
+	if (error != CURLM_OK) {
+		return error;
+	}
+	if (maxfd >= 0) {
+# ifdef PHP_WIN32
+		/* A Windows fd_set is a list of SOCKETs, not a bitmap indexed by them */
+		fd_set *sets[] = { &rfds, &wfds, &efds };
+		fds = safe_emalloc((size_t) rfds.fd_count + wfds.fd_count + efds.fd_count, sizeof(*fds), 0);
+		for (int s = 0; s < 3; s++) {
+			for (u_int i = 0; i < sets[s]->fd_count; i++) {
+				php_socket_t sock = (php_socket_t) sets[s]->fd_array[i];
+				uint32_t j = 0;
+				while (j < n && fds[j].fd != sock) {
+					j++;
+				}
+				if (j == n) {
+					fds[n].fd = sock;
+					fds[n].events = 0;
+					n++;
+				}
+				fds[j].events |= s == 0 ? PHP_POLL_READ : (s == 1 ? PHP_POLL_WRITE : 0);
+			}
+		}
+		for (uint32_t j = 0; j < n; j++) {
+			if (!fds[j].events) {
+				fds[j].events = PHP_POLL_READ;
+			}
+		}
+# else
+		fds = safe_emalloc((size_t) maxfd + 1, sizeof(*fds), 0);
+		for (int fd = 0; fd <= maxfd; fd++) {
+			uint32_t events = (FD_ISSET(fd, &rfds) ? PHP_POLL_READ : 0) | (FD_ISSET(fd, &wfds) ? PHP_POLL_WRITE : 0);
+			if (!events && !FD_ISSET(fd, &efds)) {
+				continue;
+			}
+			fds[n].fd = (php_socket_t) fd;
+			fds[n].events = events ? events : PHP_POLL_READ;
+			n++;
+		}
+# endif
+	}
+#endif
+
+	*fds_out = fds;
+	*n_out = n;
+	return CURLM_OK;
+}
+
 /* {{{ Get all the sockets associated with the cURL extension, which can then be "selected" */
 PHP_FUNCTION(curl_multi_select)
 {
@@ -214,6 +314,64 @@ PHP_FUNCTION(curl_multi_select)
 	if (!(timeout >= 0.0 && timeout <= (INT_MAX / 1000.0))) {
 		zend_argument_value_error(2, "must be between 0 and %f", INT_MAX / 1000.0);
 		RETURN_THROWS();
+	}
+
+	if (php_io_hooks_active()) {
+		/* An Any over the multi's descriptors, bounded by the shorter of the
+		 * caller's timeout and libcurl's own. These sockets have no handle:
+		 * a user multi handle installs no socket callback that could keep
+		 * one, so a provider that needs identity completes it Unsupported and
+		 * the core waits itself. */
+		php_curl_multi_fd *fds = NULL;
+		uint32_t n_fds = 0;
+		error = php_curl_multi_get_fds(mh->multi, &fds, &n_fds);
+		if (CURLM_OK != error) {
+			SAVE_CURLM_ERROR(mh, error);
+			RETURN_LONG(-1);
+		}
+		/* curl_multi_wait() does not wait without descriptors either */
+		if (n_fds == 0) {
+			RETURN_LONG(0);
+		}
+		long wait_ms = (long) (timeout * 1000.0);
+		long curl_ms = -1;
+		if (curl_multi_timeout(mh->multi, &curl_ms) == CURLM_OK && curl_ms >= 0 && curl_ms < wait_ms) {
+			wait_ms = curl_ms;
+		}
+
+		php_io_op *ops = safe_emalloc(n_fds + 1, sizeof(php_io_op), 0);
+		php_io_op **op_ptrs = safe_emalloc(n_fds + 1, sizeof(php_io_op *), 0);
+		php_io_op_result *results = safe_emalloc(n_fds + 1, sizeof(php_io_op_result), 0);
+		uint32_t n = 0;
+		for (; n < n_fds; n++) {
+			php_io_op_poll(&ops[n], NULL, fds[n].fd, fds[n].events, php_io_deadline_infinite());
+			op_ptrs[n] = &ops[n];
+		}
+		if (fds) {
+			efree(fds);
+		}
+		php_io_op_timer(&ops[n], php_io_deadline_from_ms(wait_ms));
+		op_ptrs[n] = &ops[n];
+		uint32_t timer_index = n++;
+
+		php_io_op any;
+		php_io_op_result any_result;
+		php_io_op_any(&any, op_ptrs, n, results);
+		zend_result rc = php_io_run(&any, &any_result);
+		if (rc == SUCCESS) {
+			for (uint32_t i = 0; i < any.u.any.n_results; i++) {
+				if (results[i].index != timer_index && (results[i].status == PHP_IO_DONE || results[i].status == PHP_IO_READY)) {
+					numfds++;
+				}
+			}
+		}
+		efree(results);
+		efree(op_ptrs);
+		efree(ops);
+		if (rc == FAILURE) {
+			RETURN_LONG(-1);
+		}
+		RETURN_LONG(numfds);
 	}
 
 	error = curl_multi_wait(mh->multi, NULL, 0, (int) (timeout * 1000.0), &numfds);

@@ -6,6 +6,9 @@ inputs:
 runs:
   using: composite
   steps:
+    # Temporary for the IO hooks proof of concept, see the action
+    - name: Build ior
+      uses: ./.github/actions/build-ior
     - shell: bash
       run: |
         set -x
@@ -53,6 +56,7 @@ runs:
           --enable-sockets \
           --with-bz2="$BREW_OPT"/bzip2 \
           --with-openssl \
+          --with-ior \
           --with-gmp="$BREW_OPT"/gmp \
           --with-iconv="$BREW_OPT"/libiconv \
           --enable-bcmath \

@@ -148,6 +148,8 @@ fail:
 #endif
 
 #include "proc_open.h"
+#include "php_io.h"
+#include "ext/standard/io_poll.h"
 
 static int le_proc_open; /* Resource number for `proc` resources */
 
@@ -254,7 +256,8 @@ static pid_t waitpid_cached(php_process_handle *proc, int *wait_status, int opti
 		return proc->child;
 	}
 
-	pid_t wait_pid = waitpid(proc->child, wait_status, options);
+	php_deadline dl = php_io_deadline_infinite();
+	pid_t wait_pid = php_io_waitpid(NULL, proc->child, wait_status, options, &dl);
 
 	/* The "exit" status is the final status of the process.
 	 * If we were to cache the status unconditionally,
@@ -297,13 +300,18 @@ static void proc_open_rsrc_dtor(zend_resource *rsrc)
 	 * But if we're freeing the resource because of GC, don't wait. */
 #ifdef PHP_WIN32
 	if (FG(pclose_wait)) {
-		WaitForSingleObject(proc->childHandle, INFINITE);
-	}
-	GetExitCodeProcess(proc->childHandle, &wstatus);
-	if (wstatus == STILL_ACTIVE) {
-		FG(pclose_ret) = -1;
+		/* The wait is an op, served by a ring or waited for by the core; the handle the
+		 * resource holds keeps the pid valid until the completion arrives */
+		int status = 0;
+		php_deadline dl = php_io_deadline_infinite();
+		if (php_io_waitpid(NULL, (pid_t) proc->child, &status, 0, &dl) == (pid_t) proc->child) {
+			FG(pclose_ret) = status;
+		} else {
+			FG(pclose_ret) = -1;
+		}
 	} else {
-		FG(pclose_ret) = wstatus;
+		GetExitCodeProcess(proc->childHandle, &wstatus);
+		FG(pclose_ret) = wstatus == STILL_ACTIVE ? -1 : (int) wstatus;
 	}
 	CloseHandle(proc->childHandle);
 
@@ -371,6 +379,16 @@ PHP_FUNCTION(proc_terminate)
 /* }}} */
 
 /* {{{ Close a process opened by `proc_open` */
+PHPAPI bool php_proc_open_get_pid(zval *zproc, php_process_id_t *pid)
+{
+	php_process_handle *proc = (php_process_handle*)zend_fetch_resource(Z_RES_P(zproc), "process", le_proc_open);
+	if (proc == NULL) {
+		return false;
+	}
+	*pid = proc->child;
+	return true;
+}
+
 PHP_FUNCTION(proc_close)
 {
 	zval *zproc;
@@ -474,8 +492,6 @@ SECURITY_ATTRIBUTES php_proc_open_security = {
 	.bInheritHandle = TRUE
 };
 
-# define pipe(pair)		(CreatePipe(&pair[0], &pair[1], &php_proc_open_security, 0) ? 0 : -1)
-
 # define COMSPEC_NT	"cmd.exe"
 
 static inline HANDLE dup_handle(HANDLE src, BOOL inherit, BOOL closeorig)
@@ -515,6 +531,7 @@ typedef struct _descriptorspec_item {
 	php_file_descriptor_t parentend; /* FD # opened for use in parent
 	                                  * (for pipes only; will be 0 otherwise) */
 	int mode_flags;                  /* mode for opening FDs: r/o, r/w, binary (on Win32), etc */
+	bool overlapped;                 /* a pipe whose parent end a provider performs ops on (php_io_pipe_create) */
 } descriptorspec_item;
 
 static zend_string *get_valid_arg_string(zval *zv, uint32_t elem_num) {
@@ -895,18 +912,45 @@ static php_file_descriptor_t make_descriptor_cloexec(php_file_descriptor_t fd)
 #endif
 }
 
+/* The streams of the spec, which the child gets: released before it is made, up to the first that
+ * fails, and marked handed out after; one closed meanwhile is skipped */
+static zend_result passed_streams_release(const HashTable *descriptorspec, bool handed_out)
+{
+	zval *descitem;
+
+	ZEND_HASH_FOREACH_VAL(descriptorspec, descitem) {
+		ZVAL_DEREF(descitem);
+		if (Z_TYPE_P(descitem) != IS_RESOURCE) {
+			continue;
+		}
+
+		php_stream *const passed = (php_stream *) zend_fetch_resource(Z_RES_P(descitem), NULL, php_file_le_stream());
+		if (!passed) {
+			continue;
+		}
+		if (handed_out) {
+			php_io_pipe_stream_handed_out(passed);
+		} else if (php_io_pipe_stream_release(passed) == FAILURE) {
+			return FAILURE;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return SUCCESS;
+}
+
 static zend_result set_proc_descriptor_to_pipe(descriptorspec_item *desc, zend_string *zmode)
 {
 	php_file_descriptor_t newpipe[2];
+	const bool parent_reads = zend_string_starts_with_literal(zmode, "w");
 
-	if (pipe(newpipe)) {
+	if (php_io_pipe_create(newpipe, parent_reads, &desc->overlapped) == FAILURE) {
 		php_error_docref(NULL, E_WARNING, "Unable to create pipe %s", strerror(errno));
 		return FAILURE;
 	}
 
 	desc->type = DESCRIPTOR_TYPE_PIPE;
 
-	if (!zend_string_starts_with_literal(zmode, "w")) {
+	if (!parent_reads) {
 		desc->parentend = newpipe[1];
 		desc->childend = newpipe[0];
 		desc->mode_flags = O_WRONLY;
@@ -1326,6 +1370,12 @@ PHP_FUNCTION(proc_open)
 		ndesc++;
 	} ZEND_HASH_FOREACH_END();
 
+	/* After the descriptor loop, which may run PHP code: another coroutine's op there would tie a
+	 * stream's descriptor to its queue again */
+	if (passed_streams_release(descriptorspec, false) == FAILURE) {
+		goto exit_fail;
+	}
+
 #ifdef PHP_WIN32
 	if (cwd == NULL) {
 		char *getcwd_result = VCWD_GETCWD(cur_cwd, MAXPATHLEN);
@@ -1414,13 +1464,22 @@ PHP_FUNCTION(proc_open)
 		}
 	}
 
+	/* Signals blocked for a SignalHandle are the parent's business */
+	posix_spawnattr_t attr;
+	sigset_t child_mask;
+	posix_spawnattr_init(&attr);
+	php_io_poll_signal_child_mask(&child_mask);
+	posix_spawnattr_setsigmask(&attr, &child_mask);
+	posix_spawnattr_setflags(&attr, POSIX_SPAWN_SETSIGMASK);
+
 	if (argv) {
-		r = posix_spawnp(&child, ZSTR_VAL(command_str), &factions, NULL, argv, (env.envarray ? env.envarray : environ));
+		r = posix_spawnp(&child, ZSTR_VAL(command_str), &factions, &attr, argv, (env.envarray ? env.envarray : environ));
 	} else {
-		r = posix_spawn(&child, "/bin/sh" , &factions, NULL,
+		r = posix_spawn(&child, "/bin/sh" , &factions, &attr,
 				(char * const[]) {"sh", "-c", ZSTR_VAL(command_str), NULL},
 				env.envarray ? env.envarray : environ);
 	}
+	posix_spawnattr_destroy(&attr);
 	posix_spawn_file_actions_destroy(&factions);
 	if (r != 0) {
 		php_error_docref(NULL, E_WARNING, "posix_spawn() failed: %s", strerror(r));
@@ -1443,6 +1502,11 @@ PHP_FUNCTION(proc_open)
 		if (cwd) {
 			php_ignore_value(chdir(cwd));
 		}
+
+		/* Signals blocked for a SignalHandle are the parent's business */
+		sigset_t child_mask;
+		php_io_poll_signal_child_mask(&child_mask);
+		sigprocmask(SIG_SETMASK, &child_mask, NULL);
 
 		if (argv) {
 			/* execvpe() is non-portable, use environ instead. */
@@ -1472,6 +1536,9 @@ PHP_FUNCTION(proc_open)
 #endif
 
 	/* We forked/spawned and this is the parent */
+
+	/* The child holds the descriptors of the streams passed to it */
+	passed_streams_release(descriptorspec, true);
 
 	pipes = zend_try_array_init(pipes);
 	if (!pipes) {
@@ -1521,12 +1588,10 @@ PHP_FUNCTION(proc_open)
 					break;
 			}
 
+			stream = php_io_pipe_stream(descriptors[i].parentend, descriptors[i].mode_flags, mode_string,
+					descriptors[i].overlapped);
 #ifdef PHP_WIN32
-			stream = php_stream_fopen_from_fd(_open_osfhandle((intptr_t)descriptors[i].parentend,
-						descriptors[i].mode_flags), mode_string, NULL);
 			php_stream_set_option(stream, PHP_STREAM_OPTION_PIPE_BLOCKING, blocking_pipes, NULL);
-#else
-			stream = php_stream_fopen_from_fd(descriptors[i].parentend, mode_string, NULL);
 #endif
 		} else if (descriptors[i].type == DESCRIPTOR_TYPE_SOCKET) {
 			stream = php_stream_sock_open_from_socket((php_socket_t) descriptors[i].parentend, NULL);

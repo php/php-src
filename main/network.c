@@ -64,6 +64,7 @@
 #endif
 
 #include "ext/standard/file.h"
+#include "php_io.h"
 
 #ifdef PHP_WIN32
 # include "win32/time.h"
@@ -183,7 +184,9 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 	hints.ai_family = ipv6_borked ? AF_INET : AF_UNSPEC;
 # endif
 
-	if ((n = getaddrinfo(host, NULL, &hints, &res))) {
+	php_deadline deadline;
+	php_deadline_init_infinite(&deadline);
+	if ((n = php_io_getaddrinfo(host, NULL, &hints, &res, &deadline))) {
 # if defined(PHP_WIN32)
 		char *gai_error = php_win32_error_to_msg(n);
 # elif defined(HAVE_GAI_STRERROR)
@@ -233,7 +236,7 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 		sap++;
 	} while ((sai = sai->ai_next) != NULL);
 
-	freeaddrinfo(res);
+	php_io_freeaddrinfo(res);
 #else
 	if (!inet_pton(AF_INET, host, &in)) {
 		if(strlen(host) > MAXFQDNLEN) {
@@ -326,8 +329,9 @@ static inline void php_network_set_limit_time(struct timeval *limit_time,
  * Optionally, the connect can be made asynchronously, which will implicitly
  * enable non-blocking mode on the socket.
  * */
-/* {{{ php_network_connect_socket */
-PHPAPI int php_network_connect_socket(php_socket_t sockfd,
+/* {{{ php_network_connect_socket_stream */
+PHPAPI int php_network_connect_socket_stream(php_stream *stream,
+		php_socket_t sockfd,
 		const struct sockaddr *addr,
 		socklen_t addrlen,
 		int asynchronous,
@@ -336,98 +340,45 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 		int *error_code)
 {
 	php_non_blocking_flags_t orig_flags;
-	int n;
 	int error = 0;
-	socklen_t len;
 	int ret = 0;
 
 	SET_SOCKET_BLOCKING_MODE(sockfd, orig_flags);
 
-	if ((n = connect(sockfd, addr, addrlen)) != 0) {
-		error = php_socket_errno();
-
-		if (error_code) {
-			*error_code = error;
-		}
-
-		if (error != EINPROGRESS) {
-			if (error_string) {
-				*error_string = php_socket_error_str(error);
+	if (asynchronous) {
+		/* Started here, completed by the caller's own readiness wait */
+		if (connect(sockfd, addr, addrlen) != 0) {
+			error = php_socket_errno();
+			if (error_code) {
+				*error_code = error;
 			}
-
-			return -1;
-		}
-		if (asynchronous && error == EINPROGRESS) {
-			/* this is fine by us */
-			return 0;
-		}
-	}
-
-	if (n == 0) {
-		goto ok;
-	}
-# ifdef PHP_WIN32
-	/* The documentation for connect() says in case of non-blocking connections
-	 * the select function reports success in the writefds set and failure in
-	 * the exceptfds set. Indeed, using PHP_POLLREADABLE results in select
-	 * failing only due to the timeout and not immediately as would be
-	 * expected when a connection is actively refused. This way,
-	 * php_pollfd_for will return a mask with POLLOUT if the connection
-	 * is successful and with POLLPRI otherwise. */
-	int events = POLLOUT|POLLPRI;
-#else
-	int events = PHP_POLLREADABLE|POLLOUT;
-#endif
-	struct timeval working_timeout;
-#ifdef HAVE_GETTIMEOFDAY
-	struct timeval limit_time, time_now;
-#endif
-	if (timeout) {
-		memcpy(&working_timeout, timeout, sizeof(working_timeout));
-#ifdef HAVE_GETTIMEOFDAY
-		php_network_set_limit_time(&limit_time, &working_timeout);
-#endif
-	}
-
-	while (true) {
-		n = php_pollfd_for(sockfd, events, timeout ? &working_timeout : NULL);
-		if (n < 0) {
-			if (errno == EINTR) {
-#ifdef HAVE_GETTIMEOFDAY
-				if (timeout) {
-					gettimeofday(&time_now, NULL);
-
-					if (!timercmp(&time_now, &limit_time, <)) {
-						/* time limit expired; no need for another poll */
-						error = PHP_TIMEOUT_ERROR_VALUE;
-						break;
-					} else {
-						/* work out remaining time */
-						sub_times(limit_time, time_now, &working_timeout);
-					}
+			if (error != EINPROGRESS) {
+				if (error_string) {
+					*error_string = php_socket_error_str(error);
 				}
-#endif
-				continue;
-			}
-			ret = -1;
-		} else if (n == 0) {
-			error = PHP_TIMEOUT_ERROR_VALUE;
-		} else {
-			len = sizeof(error);
-			/* BSD-derived systems set errno correctly.
-			 * Solaris returns -1 from getsockopt in case of error. */
-			if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (char*)&error, &len) != 0) {
-				ret = -1;
+				return -1;
 			}
 		}
-		break;
+		if (error_code) {
+			*error_code = 0;
+		}
+		return 0;
 	}
 
-ok:
-	if (!asynchronous) {
-		/* back to blocking mode */
-		RESTORE_SOCKET_BLOCKING_MODE(sockfd, orig_flags);
+	/* A Connect op: the connect and the wait for its outcome, on the
+	 * provider when one is installed */
+	php_deadline deadline;
+	deadline = php_io_deadline_from_timeval(timeout);
+	if (php_io_connect(stream, sockfd, addr, addrlen, &deadline) != 0) {
+		error = php_socket_errno();
+		if (error == ETIMEDOUT) {
+			error = PHP_TIMEOUT_ERROR_VALUE;
+		}
+		ret = -1;
 	}
+
+	/* back to blocking mode */
+	RESTORE_SOCKET_BLOCKING_MODE(sockfd, orig_flags);
 
 	if (error_code) {
 		*error_code = error;
@@ -440,6 +391,18 @@ ok:
 		}
 	}
 	return ret;
+}
+
+PHPAPI int php_network_connect_socket(php_socket_t sockfd,
+		const struct sockaddr *addr,
+		socklen_t addrlen,
+		int asynchronous,
+		struct timeval *timeout,
+		zend_string **error_string,
+		int *error_code)
+{
+	return php_network_connect_socket_stream(NULL, sockfd, addr, addrlen, asynchronous, timeout,
+			error_string, error_code);
 }
 /* }}} */
 
@@ -831,7 +794,8 @@ PHPAPI int php_network_get_sock_name(php_socket_t sock,
  * version of the address will be emalloc'd and returned.
  * */
 
-PHPAPI php_socket_t php_network_accept_incoming_ex(php_socket_t srvsock,
+PHPAPI php_socket_t php_network_accept_incoming_stream_ex(php_stream *stream,
+		php_socket_t srvsock,
 		zend_string **textaddr,
 		struct sockaddr **addr,
 		socklen_t *addrlen,
@@ -842,42 +806,73 @@ PHPAPI php_socket_t php_network_accept_incoming_ex(php_socket_t srvsock,
 		)
 {
 	php_socket_t clisock = -1;
-	int error = 0, n;
+	int error = 0;
 	php_sockaddr_storage sa;
 	socklen_t sl;
 
-	n = php_pollfd_for(srvsock, PHP_POLLREADABLE, timeout);
-
-	if (n == 0) {
-		error = PHP_TIMEOUT_ERROR_VALUE;
-	} else if (n == -1) {
-		error = php_socket_errno();
-	} else {
+	if (php_io_hooks_active()) {
+		php_deadline deadline;
+		deadline = php_io_deadline_from_timeval(timeout);
 		sl = sizeof(sa);
-
-		clisock = accept(srvsock, (struct sockaddr*)&sa, &sl);
-
-		if (clisock != SOCK_ERR) {
-			php_network_populate_name_from_sockaddr((struct sockaddr*)&sa, sl,
-					textaddr,
-					addr, addrlen
-					);
-#ifdef TCP_NODELAY
-			if (PHP_SOCKVAL_IS_SET(sockvals, PHP_SOCKVAL_TCP_NODELAY)) {
-				int tcp_nodelay = 1;
-				setsockopt(clisock, IPPROTO_TCP, TCP_NODELAY, (char*)&tcp_nodelay, sizeof(tcp_nodelay));
+		if (stream) {
+			/* A listener shared with other processes: a provider's multishot accept would
+			 * pull connections into this one, so the pair stays unregistered and its
+			 * accepts one-shot. Read here, under both the plain and the TLS transport. */
+			zval *opt = PHP_STREAM_CONTEXT(stream)
+					? php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "accept_multishot") : NULL;
+			if (opt && !zend_is_true(opt)) {
+				stream->flags |= PHP_STREAM_FLAG_NO_IO_REGISTRATION;
+			} else {
+				stream->flags &= ~PHP_STREAM_FLAG_NO_IO_REGISTRATION;
 			}
+		}
+		clisock = php_io_accept(stream, srvsock, (struct sockaddr*)&sa, &sl, &deadline);
+
+		if (clisock == SOCK_ERR) {
+			error = php_socket_errno();
+			if (error == ETIMEDOUT) {
+				error = PHP_TIMEOUT_ERROR_VALUE;
+			}
+		}
+	} else {
+		/* Without a provider a signal interrupts the wait */
+		do {
+			error = 0;
+			int n = php_pollfd_for(srvsock, PHP_POLLREADABLE, timeout);
+			if (n == 0) {
+				error = PHP_TIMEOUT_ERROR_VALUE;
+				break;
+			}
+			if (n < 0) {
+				error = php_socket_errno();
+				break;
+			}
+			sl = sizeof(sa);
+			clisock = accept(srvsock, (struct sockaddr*)&sa, &sl);
+			if (clisock == SOCK_ERR) {
+				error = php_socket_errno();
+			}
+		} while (clisock == SOCK_ERR && PHP_IS_TRANSIENT_ERROR(error));
+	}
+
+	if (clisock != SOCK_ERR) {
+		php_network_populate_name_from_sockaddr((struct sockaddr*)&sa, sl,
+				textaddr,
+				addr, addrlen
+				);
+#ifdef TCP_NODELAY
+		if (PHP_SOCKVAL_IS_SET(sockvals, PHP_SOCKVAL_TCP_NODELAY)) {
+			int tcp_nodelay = 1;
+			setsockopt(clisock, IPPROTO_TCP, TCP_NODELAY, (char*)&tcp_nodelay, sizeof(tcp_nodelay));
+		}
 #endif
 #ifdef TCP_KEEPALIVE
-			/* MacOS does not inherit TCP_KEEPALIVE so it needs to be set */
-			if (PHP_SOCKVAL_IS_SET(sockvals, PHP_SOCKVAL_TCP_KEEPIDLE)) {
-				setsockopt(clisock, IPPROTO_TCP, TCP_KEEPALIVE,
-						(char*)&sockvals->keepalive.keepidle, sizeof(sockvals->keepalive.keepidle));
-			}
-#endif
-		} else {
-			error = php_socket_errno();
+		/* MacOS does not inherit TCP_KEEPALIVE so it needs to be set */
+		if (PHP_SOCKVAL_IS_SET(sockvals, PHP_SOCKVAL_TCP_KEEPIDLE)) {
+			setsockopt(clisock, IPPROTO_TCP, TCP_KEEPALIVE,
+					(char*)&sockvals->keepalive.keepidle, sizeof(sockvals->keepalive.keepidle));
 		}
+#endif
 	}
 
 	if (error_code) {
@@ -890,7 +885,22 @@ PHPAPI php_socket_t php_network_accept_incoming_ex(php_socket_t srvsock,
 	return clisock;
 }
 
-PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
+PHPAPI php_socket_t php_network_accept_incoming_ex(php_socket_t srvsock,
+		zend_string **textaddr,
+		struct sockaddr **addr,
+		socklen_t *addrlen,
+		struct timeval *timeout,
+		zend_string **error_string,
+		int *error_code,
+		php_sockvals *sockvals
+		)
+{
+	return php_network_accept_incoming_stream_ex(NULL, srvsock, textaddr, addr, addrlen, timeout, error_string,
+			error_code, sockvals);
+}
+
+PHPAPI php_socket_t php_network_accept_incoming_stream(php_stream *stream,
+		php_socket_t srvsock,
 		zend_string **textaddr,
 		struct sockaddr **addr,
 		socklen_t *addrlen,
@@ -902,8 +912,22 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 {
 	php_sockvals sockvals = { .mask = tcp_nodelay ? PHP_SOCKVAL_TCP_NODELAY : 0 };
 
-	return php_network_accept_incoming_ex(srvsock, textaddr, addr, addrlen, timeout, error_string,
+	return php_network_accept_incoming_stream_ex(stream, srvsock, textaddr, addr, addrlen, timeout, error_string,
 			error_code, &sockvals);
+}
+
+PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
+		zend_string **textaddr,
+		struct sockaddr **addr,
+		socklen_t *addrlen,
+		struct timeval *timeout,
+		zend_string **error_string,
+		int *error_code,
+		int tcp_nodelay
+		)
+{
+	return php_network_accept_incoming_stream(NULL, srvsock, textaddr, addr, addrlen, timeout, error_string,
+			error_code, tcp_nodelay);
 }
 
 /* Connect to a remote host using an interruptible connect with optional timeout.
@@ -911,7 +935,7 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
  * enable non-blocking mode on the socket.
  * Returns the connected (or connecting) socket, or -1 on failure.
  * */
-php_socket_t php_network_connect_socket_to_host_ex(const char *host, unsigned short port,
+php_socket_t php_network_connect_socket_to_host_stream(php_stream *stream, php_socket_t *current, const char *host, unsigned short port,
 		int socktype, int asynchronous, struct timeval *timeout, zend_string **error_string,
 		int *error_code, const char *bindto, unsigned short bindport, long sockopts, php_sockvals *sockvals
 		)
@@ -1051,12 +1075,19 @@ php_socket_t php_network_connect_socket_to_host_ex(const char *host, unsigned sh
 			php_network_apply_sockvals(sock, sockvals);
 		}
 
-		n = php_network_connect_socket(sock, sa, socklen, asynchronous,
+		/* The stream's handle resolves its descriptor while the connect waits */
+		if (current) {
+			*current = sock;
+		}
+		n = php_network_connect_socket_stream(stream, sock, sa, socklen, asynchronous,
 				timeout ? &working_timeout : NULL,
 				error_string, error_code);
 
 		if (n != -1) {
 			goto connected;
+		}
+		if (current) {
+			*current = SOCK_ERR;
 		}
 
 		/* adjust timeout for next attempt */
@@ -1087,6 +1118,10 @@ php_socket_t php_network_connect_socket_to_host_ex(const char *host, unsigned sh
 		}
 #endif
 
+		/* The next attempt's socket must not inherit this one's records */
+		if (stream && stream->io_registrations) {
+			php_io_unregister_all(&stream->io_registrations);
+		}
 		closesocket(sock);
 	}
 	sock = -1;
@@ -1103,8 +1138,17 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 		int *error_code, const char *bindto, unsigned short bindport, long sockopts
 		)
 {
-	return php_network_connect_socket_to_host_ex(host, port, socktype, asynchronous, timeout,
+	return php_network_connect_socket_to_host_stream(NULL, NULL, host, port, socktype, asynchronous, timeout,
 			error_string, error_code, bindto, bindport, sockopts, NULL);
+}
+
+php_socket_t php_network_connect_socket_to_host_ex(const char *host, unsigned short port,
+		int socktype, int asynchronous, struct timeval *timeout, zend_string **error_string,
+		int *error_code, const char *bindto, unsigned short bindport, long sockopts, php_sockvals *sockvals
+		)
+{
+	return php_network_connect_socket_to_host_stream(NULL, NULL, host, port, socktype, asynchronous, timeout,
+			error_string, error_code, bindto, bindport, sockopts, sockvals);
 }
 
 /* {{{ php_any_addr
@@ -1291,6 +1335,7 @@ PHPAPI php_stream *_php_stream_sock_open_from_socket(php_socket_t socket, const 
 	sock->timeout.tv_sec = FG(default_socket_timeout);
 	sock->timeout.tv_usec = 0;
 	sock->socket = socket;
+	php_netstream_set_nonblocking(sock);
 
 	stream = php_stream_alloc_rel(&php_stream_generic_socket_ops, sock, persistent_id, "r+");
 
@@ -1351,6 +1396,40 @@ PHPAPI zend_result php_set_sock_blocking(php_socket_t socketd, bool block)
 	}
 #endif
 	return ret;
+}
+
+PHPAPI void php_netstream_set_nonblocking(php_netstream_data_t *sock)
+{
+	if (sock->socket == SOCK_ERR) {
+		return;
+	}
+#ifdef PHP_WIN32
+	/* The mode of a socket cannot be queried, sockets start blocking */
+	if (php_set_sock_blocking(sock->socket, false) == SUCCESS) {
+		sock->restore_blocking = true;
+	}
+#else
+	sock->restore_pid = getpid();
+	int flags = fcntl(sock->socket, F_GETFL);
+	if (flags == -1 || (flags & O_NONBLOCK)) {
+		return;
+	}
+	if (fcntl(sock->socket, F_SETFL, flags | O_NONBLOCK) == 0) {
+		sock->restore_blocking = true;
+	}
+#endif
+}
+
+PHPAPI void php_netstream_restore_blocking(php_netstream_data_t *sock)
+{
+	if (sock->restore_blocking && sock->socket != SOCK_ERR
+#ifndef PHP_WIN32
+			&& sock->restore_pid == getpid()
+#endif
+	) {
+		php_set_sock_blocking(sock->socket, true);
+	}
+	sock->restore_blocking = false;
 }
 
 PHPAPI void _php_emit_fd_setsize_warning(int max_fd)

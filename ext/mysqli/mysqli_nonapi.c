@@ -140,6 +140,10 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, bool is_real_connect, b
 	if (mysql->mysql && mysqli_resource &&
 		(mysqli_resource->status > MYSQLI_STATUS_INITIALIZED))
 	{
+		if (mysqlnd_conn_is_busy(mysql->mysql->data)) {
+			zend_throw_error(NULL, "Concurrent access to a MySQL connection");
+			RETURN_THROWS();
+		}
 		/* already connected, we should close the connection */
 		php_mysqli_close(mysql, MYSQLI_CLOSE_IMPLICIT, mysqli_resource->status);
 		/* the link is not connected anymore, even if the new connection fails */

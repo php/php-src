@@ -45,6 +45,10 @@
 
 #ifdef PHP_WIN32
 # include "win32/sendmail.h"
+#else
+# include <fcntl.h>
+# include <spawn.h>
+# include "ext/standard/io_poll.h"
 #endif
 
 #define SKIP_LONG_HEADER_SEP(str, pos)																	\
@@ -432,6 +436,61 @@ static int php_mail_detect_multiple_crlf(const char *hdr) {
 
 
 /* {{{ php_mail */
+#ifndef PHP_WIN32
+/* popen(cmd, "w") without the signals that SignalHandle objects blocked */
+static FILE *php_mail_popen(const char *cmd, pid_t *pid)
+{
+	int fds[2];
+	if (pipe(fds) != 0) {
+		return NULL;
+	}
+	fcntl(fds[1], F_SETFD, FD_CLOEXEC);
+
+	posix_spawn_file_actions_t actions;
+	posix_spawnattr_t attr;
+	sigset_t mask;
+	posix_spawn_file_actions_init(&actions);
+	if (fds[0] != STDIN_FILENO) {
+		posix_spawn_file_actions_adddup2(&actions, fds[0], STDIN_FILENO);
+		posix_spawn_file_actions_addclose(&actions, fds[0]);
+	}
+	posix_spawnattr_init(&attr);
+	php_io_poll_signal_child_mask(&mask);
+	posix_spawnattr_setsigmask(&attr, &mask);
+	posix_spawnattr_setflags(&attr, POSIX_SPAWN_SETSIGMASK);
+	int r = posix_spawn(pid, "/bin/sh", &actions, &attr,
+			(char * const[]) {"sh", "-c", (char *) cmd, NULL}, environ);
+	posix_spawnattr_destroy(&attr);
+	posix_spawn_file_actions_destroy(&actions);
+	close(fds[0]);
+	if (r != 0) {
+		close(fds[1]);
+		errno = r;
+		return NULL;
+	}
+
+	FILE *fp = fdopen(fds[1], "w");
+	if (!fp) {
+		close(fds[1]);
+		waitpid(*pid, NULL, 0);
+		return NULL;
+	}
+	errno = 0;
+	return fp;
+}
+
+static int php_mail_pclose(FILE *fp, pid_t pid)
+{
+	int status;
+	pid_t r;
+	fclose(fp);
+	do {
+		r = waitpid(pid, &status, 0);
+	} while (r == -1 && errno == EINTR);
+	return r == -1 ? -1 : status;
+}
+#endif
+
 PHPAPI bool php_mail(const char *to, const char *subject, const char *message, const char *headers, const zend_string *extra_cmd)
 {
 	FILE *sendmail;
@@ -571,7 +630,8 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 	 * (e.g. the shell can't be executed) we explicitly set it to 0 to be
 	 * sure we don't catch any older errno value. */
 	errno = 0;
-	sendmail = popen(sendmail_cmd, "w");
+	pid_t sendmail_pid = 0;
+	sendmail = php_mail_popen(sendmail_cmd, &sendmail_pid);
 #endif
 	if (extra_cmd != NULL) {
 		efree(sendmail_cmd);
@@ -582,7 +642,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 #ifndef PHP_WIN32
 		if (EACCES == errno) {
 			php_error_docref(NULL, E_WARNING, "Permission denied: unable to execute shell to run mail delivery binary '%s'", sendmail_path);
-			pclose(sendmail);
+			php_mail_pclose(sendmail, sendmail_pid);
 #if PHP_SIGCHILD
 			/* Restore handler in case of error on Windows
 			   Not sure if this applicable on Win but just in case. */
@@ -646,7 +706,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 		}
 #endif
 #else
-		int wstatus = pclose(sendmail);
+		int wstatus = php_mail_pclose(sendmail, sendmail_pid);
 #if PHP_SIGCHILD
 		if (sig_handler) {
 			signal(SIGCHLD, sig_handler);

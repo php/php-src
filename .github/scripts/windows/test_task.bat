@@ -154,6 +154,18 @@ nmake test TESTS="%OPCACHE_OPTS% -g FAIL,BORK,LEAK,XLEAK %ASAN_OPTS% --no-progre
 
 set EXIT_CODE=%errorlevel%
 
+rem The IO hooks tests again, on the ring built on ior
+if "%IOR_PREFIX%" neq "" (
+	set IO_HOOKS_QUEUE=ring
+	nmake test TESTS="-g FAIL,BORK,LEAK,XLEAK --no-progress -q --offline --show-diff --set-timeout 120 --temp-source c:\tests_tmp --temp-target c:\tests_tmp %PARALLEL% ext\standard\tests\streams\hooks ext\standard\tests\poll ext\openssl\tests\stream_io_hooks.phpt ext\curl\tests"
+	if errorlevel 1 set EXIT_CODE=3
+	set IO_HOOKS_CAPS=files,directData,directAccept
+	nmake test TESTS="-g FAIL,BORK,LEAK,XLEAK --no-progress -q --offline --show-diff --set-timeout 120 --temp-source c:\tests_tmp --temp-target c:\tests_tmp %PARALLEL% ext\standard\tests\streams\hooks ext\openssl\tests\stream_io_hooks.phpt ext\curl\tests"
+	if errorlevel 1 set EXIT_CODE=3
+	set IO_HOOKS_CAPS=
+	set IO_HOOKS_QUEUE=
+)
+
 nmake unregister_comtest
 taskkill /f /im snmpd.exe
 

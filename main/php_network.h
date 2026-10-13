@@ -299,12 +299,29 @@ PHPAPI php_socket_t php_network_connect_socket_to_host_ex(const char *host, unsi
 		int *error_code, const char *bindto, unsigned short bindport, long sockopts, php_sockvals *sockvals
 		);
 
+/* The *_stream variants take the socket's stream, or NULL, for the IO hooks. current, if not NULL,
+ * holds the socket while the connect waits. */
+PHPAPI php_socket_t php_network_connect_socket_to_host_stream(php_stream *stream, php_socket_t *current,
+		const char *host, unsigned short port,
+		int socktype, int asynchronous, struct timeval *timeout, zend_string **error_string,
+		int *error_code, const char *bindto, unsigned short bindport, long sockopts, php_sockvals *sockvals
+		);
+
 PHPAPI php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short port,
 		int socktype, int asynchronous, struct timeval *timeout, zend_string **error_string,
 		int *error_code, const char *bindto, unsigned short bindport, long sockopts
 		);
 
 PHPAPI int php_network_connect_socket(php_socket_t sockfd,
+		const struct sockaddr *addr,
+		socklen_t addrlen,
+		int asynchronous,
+		struct timeval *timeout,
+		zend_string **error_string,
+		int *error_code);
+
+PHPAPI int php_network_connect_socket_stream(php_stream *stream,
+		php_socket_t sockfd,
 		const struct sockaddr *addr,
 		socklen_t addrlen,
 		int asynchronous,
@@ -343,6 +360,28 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 		int tcp_nodelay
 		);
 
+PHPAPI php_socket_t php_network_accept_incoming_stream_ex(php_stream *stream,
+		php_socket_t srvsock,
+		zend_string **textaddr,
+		struct sockaddr **addr,
+		socklen_t *addrlen,
+		struct timeval *timeout,
+		zend_string **error_string,
+		int *error_code,
+		php_sockvals *sockvals
+		);
+
+PHPAPI php_socket_t php_network_accept_incoming_stream(php_stream *stream,
+		php_socket_t srvsock,
+		zend_string **textaddr,
+		struct sockaddr **addr,
+		socklen_t *addrlen,
+		struct timeval *timeout,
+		zend_string **error_string,
+		int *error_code,
+		int tcp_nodelay
+		);
+
 PHPAPI int php_network_get_sock_name(php_socket_t sock,
 		zend_string **textaddr,
 		struct sockaddr **addr,
@@ -365,8 +404,19 @@ struct _php_netstream_data_t	{
 	bool timeout_event;
 	struct timeval timeout;
 	size_t ownsize;
+	/* the descriptor was blocking before the stream made it non-blocking */
+	bool restore_blocking;
+#ifndef PHP_WIN32
+	/* the process that changed the mode; a forked child leaves it alone */
+	pid_t restore_pid;
+#endif
 };
 typedef struct _php_netstream_data_t php_netstream_data_t;
+
+BEGIN_EXTERN_C()
+PHPAPI void php_netstream_set_nonblocking(php_netstream_data_t *sock);
+PHPAPI void php_netstream_restore_blocking(php_netstream_data_t *sock);
+END_EXTERN_C()
 PHPAPI extern const php_stream_ops php_stream_socket_ops;
 extern const php_stream_ops php_stream_generic_socket_ops;
 #define PHP_STREAM_IS_SOCKET	(&php_stream_socket_ops)

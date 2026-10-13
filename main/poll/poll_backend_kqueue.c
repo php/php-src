@@ -97,6 +97,18 @@ static void kqueue_backend_cleanup(php_poll_ctx *ctx)
 	}
 }
 
+/* kqueue has no filter for hangups and errors alone: they come as EV_EOF
+ * and EV_ERROR on the read filter, watched edge-triggered so that unread
+ * data nobody asked about does not report it over and over */
+static uint32_t kqueue_filter_events(uint32_t events)
+{
+	if (!(events & (PHP_POLL_READ | PHP_POLL_WRITE))
+			&& (events & (PHP_POLL_HUP | PHP_POLL_ERROR | PHP_POLL_RDHUP))) {
+		events |= PHP_POLL_READ | PHP_POLL_ET;
+	}
+	return events;
+}
+
 static zend_result kqueue_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
 {
 	kqueue_backend_data_t *backend_data = (kqueue_backend_data_t *) ctx->backend_data;
@@ -112,6 +124,7 @@ static zend_result kqueue_backend_add(php_poll_ctx *ctx, int fd, uint32_t events
 
 	struct kevent changes[2]; /* Max 2 changes: read + write */
 	int change_count = 0;
+	events = kqueue_filter_events(events);
 
 	uint16_t flags = EV_ADD | EV_ENABLE;
 	if (events & PHP_POLL_ONESHOT) {
@@ -170,6 +183,7 @@ static zend_result kqueue_backend_modify(php_poll_ctx *ctx, int fd, uint32_t eve
 	int delete_count = 0;
 	int add_count = 0;
 	int successful_deletes = 0;
+	events = kqueue_filter_events(events);
 
 	uint16_t add_flags = EV_ADD | EV_ENABLE;
 	if (events & PHP_POLL_ONESHOT) {
@@ -264,6 +278,12 @@ static zend_result kqueue_backend_remove(php_poll_ctx *ctx, int fd)
 	int result = kevent(backend_data->kqueue_fd, &change, 1, NULL, 0, NULL);
 	if (result == 0) {
 		successful_deletes++;
+	} else if (errno == EBADF) {
+		/* Closed while registered: close() already dropped its filters */
+		if (!ctx->raw_events && zend_hash_index_del(backend_data->fd_tracking, fd) == SUCCESS) {
+			backend_data->fd_count--;
+		}
+		return SUCCESS;
 	} else if (!php_poll_is_not_found_error()) {
 		php_poll_set_current_errno_error(ctx);
 		return FAILURE;
@@ -514,7 +534,8 @@ const php_poll_backend_ops php_poll_backend_kqueue_ops = {
 	.wait = kqueue_backend_wait,
 	.is_available = kqueue_backend_is_available,
 	.get_suitable_max_events = kqueue_backend_get_suitable_max_events,
-	.supports_et = true
+	.supports_et = true,
+	.supports_priority = false
 };
 
 

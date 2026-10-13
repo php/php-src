@@ -111,6 +111,8 @@ PHPAPI php_basic_globals basic_globals;
 #include "streamsfuncs.h"
 #include "zend_frameless_function.h"
 #include "basic_functions_arginfo.h"
+#include "io_hooks.h"
+#include "php_io.h"
 
 #if __has_feature(memory_sanitizer)
 # include <sanitizer/msan_interface.h>
@@ -338,6 +340,8 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 
 	BASIC_MINIT_SUBMODULE(stream_errors)
 	BASIC_MINIT_SUBMODULE(user_streams)
+	BASIC_MINIT_SUBMODULE(io_hooks)
+	BASIC_MINIT_SUBMODULE(io_ring)
 
 	php_register_url_stream_wrapper("php", &php_stream_php_wrapper);
 	php_register_url_stream_wrapper("file", &php_plain_files_wrapper);
@@ -424,6 +428,17 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 	/* Default to global filters only */
 	FG(stream_filters) = NULL;
 
+	FG(io_hooks) = NULL;
+	FG(io_queue) = NULL;
+	FG(io_queue_pid) = 0;
+	FG(io_hooks_generation) = 0;
+	FG(io_registrations) = NULL;
+	FG(io_ops_in_flight) = 0;
+	FG(io_orphans) = NULL;
+	FG(io_addrinfo) = NULL;
+	FG(io_hooks_locked) = 0;
+	FG(io_shut_down) = false;
+
 	return SUCCESS;
 }
 /* }}} */
@@ -483,6 +498,9 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 
 	BG(page_uid) = -1;
 	BG(page_gid) = -1;
+
+	php_io_hooks_request_shutdown();
+
 	return SUCCESS;
 }
 /* }}} */
@@ -1118,6 +1136,23 @@ PHP_FUNCTION(flush)
 }
 /* }}} */
 
+/* Sleeps for ns nanoseconds; FAILURE when cancelled. *elapsed is the time
+ * slept when a signal interrupted the sleep, 0 when it completed. */
+static zend_result php_sleep_ns(zend_hrtime_t ns, zend_hrtime_t *elapsed)
+{
+	zend_hrtime_t start = zend_hrtime();
+	bool interrupted;
+
+	*elapsed = 0;
+	if (php_io_sleep(php_io_deadline_from_ns(ns), &interrupted) == FAILURE) {
+		return FAILURE;
+	}
+	if (interrupted) {
+		*elapsed = MAX(zend_hrtime() - start, 1);
+	}
+	return SUCCESS;
+}
+
 /* {{{ Delay for a given number of seconds */
 PHP_FUNCTION(sleep)
 {
@@ -1137,7 +1172,16 @@ PHP_FUNCTION(sleep)
 		RETURN_THROWS();
 	}
 
-	RETURN_LONG(php_sleep((unsigned int)num));
+	zend_hrtime_t ns = (zend_hrtime_t) num * ZEND_NANO_IN_SEC, elapsed;
+	if (php_sleep_ns(ns, &elapsed) == FAILURE) {
+		RETURN_THROWS();
+	}
+	if (elapsed == 0 || elapsed >= ns) {
+		RETURN_LONG(0);
+	}
+
+	/* The seconds left, rounded like sleep(3) */
+	RETURN_LONG((zend_long) ((ns - elapsed + ZEND_NANO_IN_SEC / 2) / ZEND_NANO_IN_SEC));
 }
 /* }}} */
 
@@ -1155,9 +1199,10 @@ PHP_FUNCTION(usleep)
 		RETURN_THROWS();
 	}
 
-#ifdef HAVE_USLEEP
-	usleep((unsigned int)num);
-#endif
+	zend_hrtime_t elapsed;
+	if (php_sleep_ns((zend_hrtime_t) num * 1000, &elapsed) == FAILURE) {
+		RETURN_THROWS();
+	}
 }
 /* }}} */
 
@@ -1166,7 +1211,6 @@ PHP_FUNCTION(usleep)
 PHP_FUNCTION(time_nanosleep)
 {
 	zend_long tv_sec, tv_nsec;
-	struct timespec php_req, php_rem;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_LONG(tv_sec)
@@ -1181,23 +1225,33 @@ PHP_FUNCTION(time_nanosleep)
 		zend_argument_value_error(2, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
-
-	php_req.tv_sec = (time_t) tv_sec;
-	php_req.tv_nsec = (long)tv_nsec;
-	if (!nanosleep(&php_req, &php_rem)) {
-		RETURN_TRUE;
-	} else if (errno == EINTR) {
-		array_init(return_value);
-		MSAN_UNPOISON(php_rem);
-		add_assoc_long_ex(return_value, "seconds", sizeof("seconds")-1, php_rem.tv_sec);
-		add_assoc_long_ex(return_value, "nanoseconds", sizeof("nanoseconds")-1, php_rem.tv_nsec);
-		return;
-	} else if (errno == EINVAL) {
+	if (tv_nsec > 999999999) {
 		zend_value_error("Nanoseconds was not in the range 0 to 999 999 999 or seconds was negative");
 		RETURN_THROWS();
 	}
 
-	RETURN_FALSE;
+	zend_hrtime_t ns = (zend_ulong) tv_sec >= (ZEND_HRTIME_T_MAX - tv_nsec) / ZEND_NANO_IN_SEC
+			? ZEND_HRTIME_T_MAX : (zend_hrtime_t) tv_sec * ZEND_NANO_IN_SEC + tv_nsec;
+	zend_hrtime_t elapsed;
+	if (php_sleep_ns(ns, &elapsed) == FAILURE) {
+		RETURN_THROWS();
+	}
+	if (elapsed == 0) {
+		RETURN_TRUE;
+	}
+
+	zend_long rem_sec = tv_sec - (zend_long) (elapsed / ZEND_NANO_IN_SEC);
+	zend_long rem_nsec = tv_nsec - (zend_long) (elapsed % ZEND_NANO_IN_SEC);
+	if (rem_nsec < 0) {
+		rem_nsec += ZEND_NANO_IN_SEC;
+		rem_sec--;
+	}
+	if (rem_sec < 0) {
+		rem_sec = rem_nsec = 0;
+	}
+	array_init(return_value);
+	add_assoc_long_ex(return_value, "seconds", sizeof("seconds")-1, rem_sec);
+	add_assoc_long_ex(return_value, "nanoseconds", sizeof("nanoseconds")-1, rem_nsec);
 }
 /* }}} */
 
@@ -1206,7 +1260,6 @@ PHP_FUNCTION(time_sleep_until)
 {
 	double target_secs;
 	struct timeval tm;
-	struct timespec php_req, php_rem;
 	uint64_t current_ns, target_ns, diff_ns;
 	const uint64_t ns_per_sec = 1000000000;
 	const double top_target_sec = (double)(UINT64_MAX / ns_per_sec);
@@ -1232,17 +1285,14 @@ PHP_FUNCTION(time_sleep_until)
 	}
 
 	diff_ns = target_ns - current_ns;
-	php_req.tv_sec = (time_t) (diff_ns / ns_per_sec);
-	php_req.tv_nsec = (long) (diff_ns % ns_per_sec);
 
-	while (nanosleep(&php_req, &php_rem)) {
-		if (errno == EINTR) {
-			php_req.tv_sec = php_rem.tv_sec;
-			php_req.tv_nsec = php_rem.tv_nsec;
-		} else {
-			RETURN_FALSE;
+	php_deadline dl = php_io_deadline_from_ns((zend_hrtime_t) diff_ns);
+	bool interrupted;
+	do {
+		if (php_io_sleep(dl, &interrupted) == FAILURE) {
+			RETURN_THROWS();
 		}
-	}
+	} while (interrupted);
 
 	RETURN_TRUE;
 }

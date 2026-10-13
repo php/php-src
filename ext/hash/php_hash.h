@@ -67,6 +67,7 @@ struct _php_hashcontext_object {
 
 	zend_long options;
 	unsigned char *key;
+	bool in_use; /* a stream feeds it: the read may suspend the fiber */
 
 	zend_object std;
 };

@@ -1,5 +1,5 @@
 /* This is a generated file, edit io_poll.stub.php instead.
- * Stub hash: 2f52b00fd6dfc62291e0dd288ffd68547b29bdaa
+ * Stub hash: 6f07caa9eee191556bcc187e460a698963e8381e
  * Has decl header: yes */
 
 #include "zend_enum.h"
@@ -12,8 +12,53 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Io_Poll_Backend_supportsEdgeTriggering arginfo_class_Io_Poll_Backend_isAvailable
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Io_Poll_Watcher___construct, 0, 0, 0)
+#define arginfo_class_Io_Poll_Backend_supportsPriority arginfo_class_Io_Poll_Backend_isAvailable
+
+#define arginfo_class_Io_Poll_Backend_supportsProcessHandles arginfo_class_Io_Poll_Backend_isAvailable
+
+#define arginfo_class_Io_Poll_Backend_supportsSignalHandles arginfo_class_Io_Poll_Backend_isAvailable
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Io_Poll_TimerHandle___construct, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, timeout, Time\\Duration, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, periodic, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Io_Poll_TimerHandle_getTimeout, 0, 0, Time\\Duration, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Io_Poll_TimerHandle_isPeriodic arginfo_class_Io_Poll_Backend_isAvailable
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Io_Poll_SignalHandle___construct, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, signals, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Io_Poll_SignalHandle_getSignals arginfo_class_Io_Poll_Backend_getAvailableBackends
+
+#define arginfo_class_Io_Poll_SignalHandle_getDelivered arginfo_class_Io_Poll_Backend_getAvailableBackends
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Io_Poll_ProcessHandle___construct, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, pid, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Io_Poll_ProcessHandle_fromProcess, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_INFO(0, process)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Io_Poll_ProcessHandle_getPid, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Io_Poll_ProcessHandle_getStatus, 0, 0, IS_LONG, 1)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Io_Poll_NotifyHandle___construct, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Io_Poll_NotifyHandle_notify, 0, 0, IS_VOID, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Io_Poll_NotifyHandle_clear arginfo_class_Io_Poll_NotifyHandle_notify
+
+#define arginfo_class_Io_Poll_Watcher___construct arginfo_class_Io_Poll_NotifyHandle___construct
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Io_Poll_Watcher_getHandle, 0, 0, Io\\Poll\\Handle, 0)
 ZEND_END_ARG_INFO()
@@ -44,8 +89,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Io_Poll_Watcher_modifyData
 	ZEND_ARG_TYPE_INFO(0, data, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Io_Poll_Watcher_remove, 0, 0, IS_VOID, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_Io_Poll_Watcher_remove arginfo_class_Io_Poll_NotifyHandle_notify
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Io_Poll_Context___construct, 0, 0, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, backend, Io\\Poll\\Backend, 0, "Io\\Poll\\Backend::Auto")
@@ -65,17 +109,49 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Io_Poll_Context_getBackend, 0, 0, Io\\Poll\\Backend, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Io_Poll_Context_onWatcherRemoved, 0, 0, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, callback, IS_CALLABLE, 1, "null")
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_StreamPollWeakHandle___construct arginfo_class_Io_Poll_NotifyHandle___construct
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_StreamPollWeakHandle_create, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_INFO(0, stream)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_StreamPollWeakHandle_getStream arginfo_class_Io_Poll_Watcher_getData
+
+#define arginfo_class_StreamPollWeakHandle_isExposed arginfo_class_Io_Poll_Backend_isAvailable
+
+#define arginfo_class_StreamPollWeakHandle_isValid arginfo_class_Io_Poll_Backend_isAvailable
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_StreamPollHandle___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, stream)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_StreamPollHandle_getStream arginfo_class_Io_Poll_Watcher___construct
+#define arginfo_class_StreamPollHandle_getStream arginfo_class_Io_Poll_NotifyHandle___construct
 
 #define arginfo_class_StreamPollHandle_isValid arginfo_class_Io_Poll_Backend_isAvailable
 
 ZEND_METHOD(Io_Poll_Backend, getAvailableBackends);
 ZEND_METHOD(Io_Poll_Backend, isAvailable);
 ZEND_METHOD(Io_Poll_Backend, supportsEdgeTriggering);
+ZEND_METHOD(Io_Poll_Backend, supportsPriority);
+ZEND_METHOD(Io_Poll_Backend, supportsProcessHandles);
+ZEND_METHOD(Io_Poll_Backend, supportsSignalHandles);
+ZEND_METHOD(Io_Poll_TimerHandle, __construct);
+ZEND_METHOD(Io_Poll_TimerHandle, getTimeout);
+ZEND_METHOD(Io_Poll_TimerHandle, isPeriodic);
+ZEND_METHOD(Io_Poll_SignalHandle, __construct);
+ZEND_METHOD(Io_Poll_SignalHandle, getSignals);
+ZEND_METHOD(Io_Poll_SignalHandle, getDelivered);
+ZEND_METHOD(Io_Poll_ProcessHandle, __construct);
+ZEND_METHOD(Io_Poll_ProcessHandle, fromProcess);
+ZEND_METHOD(Io_Poll_ProcessHandle, getPid);
+ZEND_METHOD(Io_Poll_ProcessHandle, getStatus);
+ZEND_METHOD(Io_Poll_NotifyHandle, __construct);
+ZEND_METHOD(Io_Poll_NotifyHandle, notify);
+ZEND_METHOD(Io_Poll_NotifyHandle, clear);
 ZEND_METHOD(Io_Poll_Watcher, __construct);
 ZEND_METHOD(Io_Poll_Watcher, getHandle);
 ZEND_METHOD(Io_Poll_Watcher, getWatchedEvents);
@@ -91,6 +167,12 @@ ZEND_METHOD(Io_Poll_Context, __construct);
 ZEND_METHOD(Io_Poll_Context, add);
 ZEND_METHOD(Io_Poll_Context, wait);
 ZEND_METHOD(Io_Poll_Context, getBackend);
+ZEND_METHOD(Io_Poll_Context, onWatcherRemoved);
+ZEND_METHOD(StreamPollWeakHandle, __construct);
+ZEND_METHOD(StreamPollWeakHandle, create);
+ZEND_METHOD(StreamPollWeakHandle, getStream);
+ZEND_METHOD(StreamPollWeakHandle, isExposed);
+ZEND_METHOD(StreamPollWeakHandle, isValid);
 ZEND_METHOD(StreamPollHandle, __construct);
 ZEND_METHOD(StreamPollHandle, getStream);
 ZEND_METHOD(StreamPollHandle, isValid);
@@ -99,6 +181,38 @@ static const zend_function_entry class_Io_Poll_Backend_methods[] = {
 	ZEND_ME(Io_Poll_Backend, getAvailableBackends, arginfo_class_Io_Poll_Backend_getAvailableBackends, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Io_Poll_Backend, isAvailable, arginfo_class_Io_Poll_Backend_isAvailable, ZEND_ACC_PUBLIC)
 	ZEND_ME(Io_Poll_Backend, supportsEdgeTriggering, arginfo_class_Io_Poll_Backend_supportsEdgeTriggering, ZEND_ACC_PUBLIC)
+	ZEND_ME(Io_Poll_Backend, supportsPriority, arginfo_class_Io_Poll_Backend_supportsPriority, ZEND_ACC_PUBLIC)
+	ZEND_ME(Io_Poll_Backend, supportsProcessHandles, arginfo_class_Io_Poll_Backend_supportsProcessHandles, ZEND_ACC_PUBLIC)
+	ZEND_ME(Io_Poll_Backend, supportsSignalHandles, arginfo_class_Io_Poll_Backend_supportsSignalHandles, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Io_Poll_TimerHandle_methods[] = {
+	ZEND_ME(Io_Poll_TimerHandle, __construct, arginfo_class_Io_Poll_TimerHandle___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(Io_Poll_TimerHandle, getTimeout, arginfo_class_Io_Poll_TimerHandle_getTimeout, ZEND_ACC_PUBLIC)
+	ZEND_ME(Io_Poll_TimerHandle, isPeriodic, arginfo_class_Io_Poll_TimerHandle_isPeriodic, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Io_Poll_SignalHandle_methods[] = {
+	ZEND_ME(Io_Poll_SignalHandle, __construct, arginfo_class_Io_Poll_SignalHandle___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(Io_Poll_SignalHandle, getSignals, arginfo_class_Io_Poll_SignalHandle_getSignals, ZEND_ACC_PUBLIC)
+	ZEND_ME(Io_Poll_SignalHandle, getDelivered, arginfo_class_Io_Poll_SignalHandle_getDelivered, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Io_Poll_ProcessHandle_methods[] = {
+	ZEND_ME(Io_Poll_ProcessHandle, __construct, arginfo_class_Io_Poll_ProcessHandle___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(Io_Poll_ProcessHandle, fromProcess, arginfo_class_Io_Poll_ProcessHandle_fromProcess, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Io_Poll_ProcessHandle, getPid, arginfo_class_Io_Poll_ProcessHandle_getPid, ZEND_ACC_PUBLIC)
+	ZEND_ME(Io_Poll_ProcessHandle, getStatus, arginfo_class_Io_Poll_ProcessHandle_getStatus, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Io_Poll_NotifyHandle_methods[] = {
+	ZEND_ME(Io_Poll_NotifyHandle, __construct, arginfo_class_Io_Poll_NotifyHandle___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(Io_Poll_NotifyHandle, notify, arginfo_class_Io_Poll_NotifyHandle_notify, ZEND_ACC_PUBLIC)
+	ZEND_ME(Io_Poll_NotifyHandle, clear, arginfo_class_Io_Poll_NotifyHandle_clear, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -122,6 +236,16 @@ static const zend_function_entry class_Io_Poll_Context_methods[] = {
 	ZEND_ME(Io_Poll_Context, add, arginfo_class_Io_Poll_Context_add, ZEND_ACC_PUBLIC)
 	ZEND_ME(Io_Poll_Context, wait, arginfo_class_Io_Poll_Context_wait, ZEND_ACC_PUBLIC)
 	ZEND_ME(Io_Poll_Context, getBackend, arginfo_class_Io_Poll_Context_getBackend, ZEND_ACC_PUBLIC)
+	ZEND_ME(Io_Poll_Context, onWatcherRemoved, arginfo_class_Io_Poll_Context_onWatcherRemoved, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_StreamPollWeakHandle_methods[] = {
+	ZEND_ME(StreamPollWeakHandle, __construct, arginfo_class_StreamPollWeakHandle___construct, ZEND_ACC_PRIVATE)
+	ZEND_ME(StreamPollWeakHandle, create, arginfo_class_StreamPollWeakHandle_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(StreamPollWeakHandle, getStream, arginfo_class_StreamPollWeakHandle_getStream, ZEND_ACC_PUBLIC)
+	ZEND_ME(StreamPollWeakHandle, isExposed, arginfo_class_StreamPollWeakHandle_isExposed, ZEND_ACC_PUBLIC)
+	ZEND_ME(StreamPollWeakHandle, isValid, arginfo_class_StreamPollWeakHandle_isValid, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -179,6 +303,16 @@ static zend_class_entry *register_class_Io_Poll_Event(void)
 
 	zend_enum_add_case_cstr(class_entry, "EdgeTriggered", NULL);
 
+	zend_enum_add_case_cstr(class_entry, "Priority", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Timer", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Notify", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Signal", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Process", NULL);
+
 	return class_entry;
 }
 
@@ -188,6 +322,61 @@ static zend_class_entry *register_class_Io_Poll_Handle(void)
 
 	INIT_NS_CLASS_ENTRY(ce, "Io\\Poll", "Handle", NULL);
 	class_entry = zend_register_internal_interface(&ce);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Io_Poll_WeakHandle(zend_class_entry *class_entry_Io_Poll_Handle)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Io\\Poll", "WeakHandle", NULL);
+	class_entry = zend_register_internal_interface(&ce);
+	zend_class_implements(class_entry, 1, class_entry_Io_Poll_Handle);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Io_Poll_TimerHandle(zend_class_entry *class_entry_Io_Poll_Handle)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Io\\Poll", "TimerHandle", class_Io_Poll_TimerHandle_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+	zend_class_implements(class_entry, 1, class_entry_Io_Poll_Handle);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Io_Poll_SignalHandle(zend_class_entry *class_entry_Io_Poll_Handle)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Io\\Poll", "SignalHandle", class_Io_Poll_SignalHandle_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+	zend_class_implements(class_entry, 1, class_entry_Io_Poll_Handle);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Io_Poll_ProcessHandle(zend_class_entry *class_entry_Io_Poll_Handle)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Io\\Poll", "ProcessHandle", class_Io_Poll_ProcessHandle_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+	zend_class_implements(class_entry, 1, class_entry_Io_Poll_Handle);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Io_Poll_NotifyHandle(zend_class_entry *class_entry_Io_Poll_Handle)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Io\\Poll", "NotifyHandle", class_Io_Poll_NotifyHandle_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+	zend_class_implements(class_entry, 1, class_entry_Io_Poll_Handle);
 
 	return class_entry;
 }
@@ -380,6 +569,17 @@ static zend_class_entry *register_class_Io_Poll_InvalidHandleException(zend_clas
 
 	INIT_NS_CLASS_ENTRY(ce, "Io\\Poll", "InvalidHandleException", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Io_Poll_PollException, 0);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_StreamPollWeakHandle(zend_class_entry *class_entry_Io_Poll_WeakHandle)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "StreamPollWeakHandle", class_StreamPollWeakHandle_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+	zend_class_implements(class_entry, 1, class_entry_Io_Poll_WeakHandle);
 
 	return class_entry;
 }

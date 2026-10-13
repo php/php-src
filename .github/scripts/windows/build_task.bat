@@ -27,6 +27,7 @@ if "%THREAD_SAFE%" equ "0" set ADD_CONF=%ADD_CONF% --disable-zts
 if "%INTRINSICS%" neq "" set ADD_CONF=%ADD_CONF% --enable-native-intrinsics=%INTRINSICS%
 if "%ASAN%" equ "1" set ADD_CONF=%ADD_CONF% --enable-sanitizer --enable-debug-pack
 if "%CLANG_TOOLSET%" equ "1" set ADD_CONF=%ADD_CONF% --with-toolset=clang
+if "%IOR_PREFIX%" neq "" set ADD_CONF=%ADD_CONF% --with-ior=%IOR_PREFIX%
 
 rem C4018: comparison: signed/unsigned mismatch
 rem C4146: unary minus operator applied to unsigned type

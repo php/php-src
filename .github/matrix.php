@@ -141,7 +141,7 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
         $jobs['SOLARIS'] = true;
     }
     if ($all_jobs || !$no_jobs || $test_windows) {
-        $matrix = [['asan' => false, 'opcache' => true, 'x64' => true, 'zts' => true]];
+        $matrix = [['asan' => false, 'opcache' => true, 'x64' => true, 'zts' => true, 'ior' => true]];
         if ($all_variations) {
             $matrix[] = ['asan' => true, 'opcache' => true, 'x64' => true, 'zts' => true];
             $matrix[] = ['asan' => false, 'opcache' => false, 'x64' => false, 'zts' => false];

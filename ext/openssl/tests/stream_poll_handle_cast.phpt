@@ -31,16 +31,17 @@ $clientCode = <<<'CODE'
     ]]);
     $sock = stream_socket_client("tls://{{ ADDR }}", $errno, $errstr, 2, STREAM_CLIENT_CONNECT, $clientCtx);
 
-    /* 10 of 100 bytes read, 90 stay inside OpenSSL */
+    /* Unbuffered: 10 bytes leave 90 decrypted inside OpenSSL, none in the stream */
     stream_set_read_buffer($sock, 0);
     var_dump(strlen(fread($sock, 10)));
 
-    /* Adding the handle must not move them into the stream buffer */
+    /* Adding the handle casts for the descriptor: the select cast would move the 90
+     * bytes into the stream buffer here, the poll cast leaves them where they are */
     $ctx = new Io\Poll\Context();
-    $w = $ctx->add(new StreamPollHandle($sock), [Io\Poll\Event::Read]);
+    $w = $ctx->add(StreamPollWeakHandle::create($sock), [Io\Poll\Event::Read]);
     var_dump(stream_get_meta_data($sock)['unread_bytes']);
 
-    /* Not readiness of the socket */
+    /* Bytes OpenSSL holds are not readiness of the socket */
     var_dump(count($ctx->wait(Time\Duration::fromMilliseconds(100))));
     var_dump(strlen(fread($sock, 90)));
 

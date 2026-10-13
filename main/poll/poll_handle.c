@@ -66,6 +66,9 @@ PHPAPI php_poll_handle_object *php_poll_handle_object_create(
 
 	intern->ops = ops ? ops : &php_poll_handle_default_ops;
 	intern->handle_data = NULL;
+	intern->watching = NULL;
+	intern->flags = 0;
+	intern->registrations = NULL;
 
 	return intern;
 }
@@ -78,6 +81,17 @@ PHPAPI void php_poll_handle_object_free(zend_object *obj)
 	if (intern->ops && intern->ops->cleanup) {
 		intern->ops->cleanup(intern);
 	}
+
+	if (intern->watching) {
+		zend_hash_destroy(intern->watching);
+		efree(intern->watching);
+		/* The cycle collector frees the objects of a cycle in any order, and
+		 * a context freed later still unwatches through its watchers */
+		intern->watching = NULL;
+	}
+
+	/* Registrations hold a reference on the handle, so none can be left */
+	ZEND_ASSERT(intern->registrations == NULL);
 
 	zend_object_std_dtor(&intern->std);
 }

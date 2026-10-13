@@ -1,0 +1,54 @@
+name: Build ior
+# Temporary, for the IO hooks proof of concept only: the ring (main/io/php_io_ring.c)
+# is built on the ior library, which will be bundled with php-src once the
+# design settles. Until then CI builds a pinned commit of it into a cached
+# prefix that ./configure finds through pkg-config (--with-ior).
+inputs:
+  ref:
+    description: The ior commit to build, a full SHA
+    default: 9a7d0967401724e0c69a56e7de706f78e2283441
+    required: false
+runs:
+  using: composite
+  steps:
+    - name: ior cache key
+      id: key
+      shell: bash
+      env:
+        IOR_REF: ${{ inputs.ref }}
+      run: |
+        echo "key=ior-${RUNNER_OS}-${RUNNER_ARCH}-${ImageOS:-unknown}-${IOR_REF}" >> "$GITHUB_OUTPUT"
+    - name: Restore ior
+      id: cache
+      uses: actions/cache@v5
+      with:
+        path: ~/ior
+        key: ${{ steps.key.outputs.key }}
+    - name: Build ior
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      env:
+        IOR_REF: ${{ inputs.ref }}
+      run: |
+        set -x
+        IOR_PREFIX="$HOME/ior"
+        IOR_SRC="$RUNNER_TEMP/ior-src"
+        rm -rf "$IOR_SRC" "$IOR_PREFIX"
+        git init -q "$IOR_SRC"
+        git -C "$IOR_SRC" fetch --depth 1 https://github.com/libior/ior.git "$IOR_REF"
+        git -C "$IOR_SRC" checkout -q FETCH_HEAD
+        # Both Linux backends in one library, so IOR_BACKEND=threads can
+        # select the thread pool at run time; a no-op elsewhere
+        cmake -S "$IOR_SRC" -B "$IOR_SRC/build" \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_INSTALL_PREFIX="$IOR_PREFIX" \
+          -DIOR_WITH_THREADS=ON \
+          -DIOR_BUILD_TESTS=OFF \
+          -DIOR_BUILD_BENCH=OFF
+        cmake --build "$IOR_SRC/build" --parallel
+        cmake --install "$IOR_SRC/build"
+    - name: Point pkg-config at ior
+      shell: bash
+      run: |
+        IOR_PREFIX="$HOME/ior"
+        echo "PKG_CONFIG_PATH=$IOR_PREFIX/lib/pkgconfig:$IOR_PREFIX/lib64/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}" >> "$GITHUB_ENV"
