@@ -599,7 +599,7 @@ int ir_disasm(const char    *name,
 			}
 			if (p != q && *(q-1) == '-') {
 				q--;
-				addr = (uint32_t)(-(int64_t)addr);
+				addr = (uint32_t)(0 - addr);
 			}
 			if (addr >= (uint64_t)(uintptr_t)start && addr < (uint64_t)(uintptr_t)orig_end) {
 				entry = ir_hashtab_find(&labels, (uint32_t)((uintptr_t)addr - (uintptr_t)start));

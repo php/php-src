@@ -975,11 +975,14 @@ IR_ALWAYS_INLINE bool ir_ref_is_true(const ir_ctx *ctx, ir_ref ref)
 #define IR_OP_FLAG_TERMINATOR     (1<<14)
 #define IR_OP_FLAG_PINNED         (1<<15)
 
-#define IR_OP_FLAG_MEM_LOAD       ((0<<6)|(0<<7))
-#define IR_OP_FLAG_MEM_STORE      ((0<<6)|(1<<7))
-#define IR_OP_FLAG_MEM_CALL       ((1<<6)|(0<<7))
-#define IR_OP_FLAG_MEM_ALLOC      ((1<<6)|(1<<7))
+#define IR_OP_FLAG_MEM_CALL       ((0<<6)|(0<<7))
+#define IR_OP_FLAG_MEM_LOAD       ((0<<6)|(1<<7)) /* no side effect (may be removed if not used) */
+#define IR_OP_FLAG_MEM_STORE      ((1<<6)|(0<<7))
+#define IR_OP_FLAG_MEM_ALLOC      ((1<<6)|(1<<7)) /* no side effect (may be removed if not used) */
 #define IR_OP_FLAG_MEM_MASK       ((1<<6)|(1<<7))
+
+#define IR_OP_FLAG_NO_SIDE_EFFECT ((0<<6)|(1<<7))
+
 
 #define IR_OPND_UNUSED            0x0U
 #define IR_OPND_DATA              0x1U
@@ -990,7 +993,7 @@ IR_ALWAYS_INLINE bool ir_ref_is_true(const ir_ctx *ctx, ir_ref ref)
 #define IR_OPND_CONTROL_GUARD     0x6U
 #define IR_OPND_STR               0x7U
 #define IR_OPND_NUM               0x8U
-#define IR_OPND_PROB              0x9U
+#define IR_OPND_OPT               0x9U /* optional number (flags, branch propability, align, size+align) */
 #define IR_OPND_PROTO             0xaU
 
 #define IR_OP_FLAGS(op_flags, op1_flags, op2_flags, op3_flags) \
@@ -1324,6 +1327,11 @@ struct _ir_live_range {
 #define IR_LIVE_INTERVAL_SPLIT_CHILD     (1<<8)
 #define IR_LIVE_INTERVAL_TWO_REGS        (1<<9)
 
+/* macros to encode and decode stack offset stored in ctx->vregs[] */
+#define IR_VREG_IS_STACK_SLOT(vreg)      ((vreg) < 0)
+#define IR_VREG_TO_STACK_SLOT(vreg)      ((vreg) + 0x40000000)
+#define IR_STACK_SLOT_TO_VREG(offset)    ((int32_t)0xc0000000 + (offset))
+
 struct _ir_live_interval {
 	uint8_t           type;
 	int8_t            reg;
@@ -1478,8 +1486,7 @@ typedef struct _ir_reg_alloc_data {
 	ir_live_interval **handled;
 } ir_reg_alloc_data;
 
-int32_t ir_allocate_spill_slot(ir_ctx *ctx, ir_type type);
-int32_t ir_allocate_big_spill_slot(ir_ctx *ctx, int32_t size);
+int32_t ir_allocate_spill_slot(ir_ctx *ctx, size_t size, size_t align);
 void ir_dump_reg(const ir_ctx *ctx, int8_t reg, ir_ref ref, bool store, FILE *f);
 
 IR_ALWAYS_INLINE void ir_set_alocated_reg(ir_ctx *ctx, ir_ref ref, int op_num, int8_t reg)
