@@ -1,5 +1,5 @@
 --TEST--
-curl_exec() under io_hooks: a CURLOPT_STDERR stream closed while the transfer waits is not written to
+curl_exec() under io_hooks: a CURLOPT_STDERR stream closed while the transfer waits is not written to and is reported
 --EXTENSIONS--
 curl
 --FILE--
@@ -42,4 +42,5 @@ $scheduler->loop();
 ?>
 --EXPECTF--
 %A< HTTP/1.0 200 OK%A
+Warning: curl_exec(): CURLOPT_STDERR resource has gone away, resetting to stderr in %s on line %d
 string(5) "hello"

@@ -2936,9 +2936,10 @@ PHP_FUNCTION(curl_exec)
 	}
 	SAVE_CURL_ERROR(ch, error);
 
+	/* A stream closed during the transfer failed it, or outlived it */
+	_php_curl_verify_handlers(ch, /* reporterror */ true);
+
 	if (error != CURLE_OK) {
-		/* A stream closed during the transfer failed it */
-		_php_curl_verify_handlers(ch, /* reporterror */ true);
 		smart_str_free(&ch->handlers.write->buf);
 		RETURN_FALSE;
 	}
