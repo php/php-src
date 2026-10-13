@@ -33,6 +33,10 @@ PHP                                                                        NEWS
 - MBString:
   . Fixed bug GH-23958 (truncated encoding names resolving to full names). (Kamil Tekiela)
 
+- MySQLnd:
+  . Fixed bug GH-24293 (Segfault on connect with an empty password to a
+    MariaDB PAM account). (lazerg)
+
 - Opcache:
   . Fixed bug GH-20890 (Segfault in zval_undefined_cv with non-simple property
     hook with minimal tracing JIT). (ndossche)
