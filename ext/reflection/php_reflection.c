@@ -7933,7 +7933,7 @@ ZEND_METHOD(ReflectionFiber, getCallable)
 		RETURN_THROWS();
 	}
 
-	RETURN_COPY(&fiber->fci.function_name);
+	zend_get_callable_zval_from_fcc(&fiber->fci_cache, return_value);
 }
 
 /* {{{ _reflection_write_property */
