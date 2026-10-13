@@ -107,7 +107,7 @@ PHPAPI php_stream *php_stream_encloses(php_stream *enclosing, php_stream *enclos
 	return orig;
 }
 
-PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream **stream)
+PHPAPI php_stream_persistent_status php_stream_from_persistent_id(const char *persistent_id, php_stream **stream)
 {
 	zend_resource *le;
 
