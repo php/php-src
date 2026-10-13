@@ -184,6 +184,10 @@ typedef struct {
 # define tsrm_tls_set(what)		TlsSetValue(tls_key, (void*)(what))
 # define tsrm_tls_get()			TlsGetValue(tls_key)
 
+/* TlsAlloc() does not provide thread-exit callbacks with parameters, which we rely on here..
+ * This calls ts_free_thread() if the SAPI has not done so explicitly,
+ * cleaning up EG(persistent_list) and other TSRM resources on the owning
+ * thread before its native TLS is released. */
 static void tsrm_exit_key_set(tsrm_tls_entry *thread_resources)
 {
 	tsrm_thread_exit_data *data;
