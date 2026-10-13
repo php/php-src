@@ -1185,6 +1185,23 @@ function my_mysqli_test_cached_sha2_switch_unterminated(my_mysqli_fake_server_co
     $conn->read(65536);
 }
 
+function my_mysqli_test_auth_switch_clear_password(my_mysqli_fake_server_conn $conn): void
+{
+    $p = new my_mysqli_fake_packet();
+    $p->packet_length = "2b0000";
+    $p->packet_number = "02";
+    $p->response_code = "fe";
+    $p->auth_plugin_name = bin2hex('mysql_clear_password' . chr(0));
+    // servers always send a fresh scramble with the switch request
+    $p->auth_plugin_data = "473e3f6047257c676c6b55463f49335f686c643100";
+
+    $conn->send_server_greetings();
+    $conn->read();
+    $conn->send($p->to_bytes(), "Auth Switch Request [mysql_clear_password]");
+    $conn->read();
+    $conn->send($conn->packet_generator->server_ok("04")->to_bytes(), "Server OK");
+}
+
 function my_mysqli_test_chg_user_response_empty(my_mysqli_fake_server_conn $conn): void
 {
     $p = $conn->packet_generator->server_ok("01");
