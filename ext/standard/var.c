@@ -473,41 +473,35 @@ static void buffer_append_spaces(smart_str *buf, int num_spaces)
 	memset(target, ' ', num_spaces);
 }
 
-static size_t php_var_export_compute_escaped_string_len(const char *str, size_t len, bool escape_nul)
-{
-	size_t i, escaped_len = len;
-	for (i = 0; i < len; ++i) {
-		char c = str[i];
-		if (c == '\'' || c == '\\') {
-			escaped_len += 1;
-		} else if (escape_nul && c == '\0') {
-			escaped_len += 11;
-		}
-	}
-	return escaped_len;
-}
+/* Bytes that var_export() escapes in a single-quoted literal: 1 for ' and \, 2 for NUL.
+ * The second table leaves NUL as is (property names). */
+static const unsigned char php_var_export_escape_class[2][256] = {
+	{ ['\0'] = 2, ['\''] = 1, ['\\'] = 1 },
+	{ ['\''] = 1, ['\\'] = 1 },
+};
 
 static void php_var_export_append_escaped(smart_str *buf, const char *str, size_t len, bool escape_nul)
 {
-	size_t escaped_len = php_var_export_compute_escaped_string_len(str, len, escape_nul);
+	const unsigned char *s = (const unsigned char *) str;
+	const unsigned char *escape_class = php_var_export_escape_class[!escape_nul];
+	size_t run = 0;
 
 	smart_str_appendc(buf, '\'');
-	if (escaped_len == len) {
-		smart_str_appendl(buf, str, len);
-	} else {
-		char *target = smart_str_extend(buf, escaped_len);
-		for (size_t i = 0; i < len; i++) {
-			char c = str[i];
-			if (c == '\'' || c == '\\') {
-				*target++ = '\\';
-				*target++ = c;
-			} else if (escape_nul && c == '\0') {
-				target = zend_mempcpy(target, "' . \"\\0\" . '", 12);
-			} else {
-				*target++ = c;
-			}
+	for (size_t i = 0; i < len; i++) {
+		unsigned char k = escape_class[s[i]];
+		if (EXPECTED(k == 0)) {
+			continue;
 		}
+		smart_str_appendl(buf, str + run, i - run);
+		if (k == 1) {
+			smart_str_appendc(buf, '\\');
+			smart_str_appendc(buf, (char) s[i]);
+		} else {
+			smart_str_appendl(buf, "' . \"\\0\" . '", 12);
+		}
+		run = i + 1;
 	}
+	smart_str_appendl(buf, str + run, len - run);
 	smart_str_appendc(buf, '\'');
 }
 
