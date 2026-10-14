@@ -5375,7 +5375,15 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 
 	/* Evaluate class name */
 	znode class_node;
-	if (callback->kind == ZEND_AST_STATIC_CALL) {
+	if (callback->kind == ZEND_AST_STATIC_CALL
+	 && callback->child[0]->kind == ZEND_AST_ZVAL
+	 && Z_TYPE_P(zend_ast_get_zval(callback->child[0])) == IS_STRING
+	 && zend_get_class_fetch_type(zend_ast_get_str(callback->child[0])) == ZEND_FETCH_CLASS_DEFAULT) {
+		/* Resolve the name against the namespace and imports, as compiling it
+		 * as an expression would yield the unresolved string. */
+		class_node.op_type = IS_CONST;
+		ZVAL_STR(&class_node.u.constant, zend_resolve_class_name_ast(callback->child[0]));
+	} else if (callback->kind == ZEND_AST_STATIC_CALL) {
 		znode result;
 		zend_compile_expr(&result, callback->child[0]);
 		if (result.op_type == IS_CONST || result.op_type == IS_TMP_VAR) {
