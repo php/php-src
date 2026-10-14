@@ -7,6 +7,7 @@ include "skipif.inc";
 --FILE--
 <?php
 $php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
+$args = getenv('TEST_PHP_EXTRA_ARGS');
 
 // There are 3 types of option errors:
 // 1 : in flags
@@ -16,7 +17,7 @@ $php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
 // colon in flags
 ob_start();
-passthru("$php -a:Z 2>&1", $exitCode);
+passthru("$php $args -a:Z 2>&1", $exitCode);
 $output = ob_get_contents();
 ob_end_clean();
 
@@ -28,7 +29,7 @@ echo $lines[0], "\n",
 
 // option not found
 ob_start();
-passthru("$php -Z 2>&1", $exitCode);
+passthru("$php $args -Z 2>&1", $exitCode);
 $output = ob_get_contents();
 ob_end_clean();
 
@@ -40,7 +41,7 @@ echo $lines[0], "\n",
 
 // no argument for option
 ob_start();
-passthru("$php --memory-limit=1G 2>&1", $exitCode);
+passthru("$php $args --memory-limit=1G 2>&1", $exitCode);
 $output = ob_get_contents();
 ob_end_clean();
 
@@ -52,7 +53,7 @@ echo $lines[0], "\n",
 
 // Successful execution
 ob_start();
-passthru("$php -dmemory-limit=1G -v", $exitCode);
+passthru("$php $args -dmemory-limit=1G -v", $exitCode);
 $output = ob_get_contents();
 ob_end_clean();
 
