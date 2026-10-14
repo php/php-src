@@ -166,6 +166,9 @@ ZEND_API ZEND_COLD void zend_throw_exception_internal(zend_object *exception) /*
 #endif /* HAVE_DTRACE */
 
 	if (exception != NULL) {
+#ifdef ZEND_DEBUG
+		ZEND_ASSERT(zend_is_unwind_exit(exception) || zend_is_graceful_exit(exception) || instanceof_function(exception->ce, zend_ce_throwable));
+#endif
 		const zend_object *previous = EG(exception);
 		if (previous && zend_is_unwind_exit(previous)) {
 			/* Don't replace unwinding exception with different exception. */
