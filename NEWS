@@ -91,6 +91,7 @@ PHP                                                                        NEWS
 - PDO_PGSQL:
   . Improved performance of the SQL parser that handles placeholders.
     (brainexe)
+  . Improved performance of fetching integer columns. (brainexe)
 
 - PGSQL:
   . Fixed pg_lo_write() rejecting data containing null bytes. (Ilia Alshanetsky)

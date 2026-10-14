@@ -176,3 +176,4 @@ PHP 8.7 UPGRADE NOTES
 - PDO_PGSQL:
   . Improved performance of the SQL parser that handles placeholders in
     PDO::prepare() and, with emulated prepares, PDOStatement::execute().
+  . Improved performance of fetching integer columns.
