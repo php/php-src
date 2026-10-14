@@ -370,6 +370,14 @@ static const uint32_t bin_data_size[] = {
 	ZEND_MM_BINS_INFO(_BIN_DATA_SIZE, x, y)
 };
 
+/* Reallocation keeps a small block in place down to one byte above the size of
+ * the bin below it, as efree_size() maps that size to the bin below. */
+#define _BIN_KEEP_SIZE(num, size, elements, pages, x, y) (size) + 1,
+static const uint32_t bin_keep_size[] = {
+	0,
+	ZEND_MM_BINS_INFO(_BIN_KEEP_SIZE, x, y)
+};
+
 #define _BIN_DATA_ELEMENTS(num, size, elements, pages, x, y) elements,
 static const uint32_t bin_elements[] = {
 	ZEND_MM_BINS_INFO(_BIN_DATA_ELEMENTS, x, y)
@@ -1788,7 +1796,7 @@ static zend_always_inline void *zend_mm_realloc_heap(zend_mm_heap *heap, void *p
 				if (size <= old_size) {
 					/* Check if truncation is necessary. A size that fits the
 					 * bin below moves there, as efree_size() maps it to that bin. */
-					if (old_bin_num > 0 && size <= bin_data_size[old_bin_num - 1]) {
+					if (UNEXPECTED(size < bin_keep_size[old_bin_num])) {
 						/* truncation */
 						ret = zend_mm_alloc_small(heap, ZEND_MM_SMALL_SIZE_TO_BIN(size) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 						copy_size = use_copy_size ? MIN(size, copy_size) : size;
