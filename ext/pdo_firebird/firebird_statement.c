@@ -766,9 +766,9 @@ static int pdo_firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param
 									*(FB_BOOLEAN*)var->sqldata = (dval != 0) ? FB_TRUE : FB_FALSE;
 									break;
 								default:
-									if (!zend_binary_strncasecmp(Z_STRVAL_P(parameter), Z_STRLEN_P(parameter), "true", 4, 4)) {
+									if (zend_string_equals_literal_ci(Z_STR_P(parameter), "true")) {
 										*(FB_BOOLEAN*)var->sqldata = FB_TRUE;
-									} else if (!zend_binary_strncasecmp(Z_STRVAL_P(parameter), Z_STRLEN_P(parameter), "false", 5, 5)) {
+									} else if (zend_string_equals_literal_ci(Z_STR_P(parameter), "false")) {
 										*(FB_BOOLEAN*)var->sqldata = FB_FALSE;
 									} else {
 										const char *msg = "Cannot convert string to boolean";
