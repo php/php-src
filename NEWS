@@ -17,6 +17,8 @@ PHP                                                                        NEWS
   . Fixed skipped catch block when switching fibers during exception unwinding
     (Nicolas Grekas)
   . Fix escape analysis for objects implementing ArrayAccess. (ndossche, Arnaud)
+  . Fixed array_map() optimization not resolving the class name of a static
+    first-class callable. (Claudio Dekker)
 
 - Fileinfo:
   . Fixed bug GH-24289 (finfo::file() reports the wrong argument number for
