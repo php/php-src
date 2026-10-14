@@ -5110,21 +5110,19 @@ PHP_FUNCTION(openssl_get_channel_binding)
 {
 	php_stream *stream = NULL;
 	zend_string *type = NULL;
-	zend_string *result = NULL;
-	int type_code;
-	int ret;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		PHP_Z_PARAM_STREAM(stream)
 		Z_PARAM_STR(type)
 	ZEND_PARSE_PARAMETERS_END();
 
+	php_openssl_channel_binding_type_t type_code;
 	if (zend_string_equals_literal(type, "tls-unique")) {
-		type_code = PHP_OSSL_CB_TLS_UNIQUE;
+		type_code = PHP_OPENSSL_CHANNEL_BINDING_TYPE_TLS_UNIQUE;
 	} else if (zend_string_equals_literal(type, "tls-server-end-point")) {
-		type_code = PHP_OSSL_CB_TLS_SERVER_ENDPOINT;
+		type_code = PHP_OPENSSL_CHANNEL_BINDING_TYPE_TLS_SERVER_ENDPOINT;
 	} else if (zend_string_equals_literal(type, "tls-exporter")) {
-		type_code = PHP_OSSL_CB_TLS_EXPORTER;
+		type_code = PHP_OPENSSL_CHANNEL_BINDING_TYPE_TLS_EXPORTER;
 	} else {
 		zend_value_error(
 			"%s(): argument #2 ($channel_binding_type) \"%s\" is not a known "
@@ -5134,17 +5132,18 @@ PHP_FUNCTION(openssl_get_channel_binding)
 		RETURN_THROWS();
 	}
 
-	ret = php_openssl_netstream_get_channel_binding(stream, type_code, &result);
+	zend_string *result = NULL;
+	php_openssl_channel_binding_result_t ret = php_openssl_netstream_get_channel_binding(stream, type_code, &result);
 	switch (ret) {
-		case PHP_OSSL_CB_OK:
+		case PHP_OPENSSL_CHANNEL_BINDING_RESULT_OK:
 			RETURN_STR(result);
-		case PHP_OSSL_CB_NOT_APPLICABLE:
+		case PHP_OPENSSL_CHANNEL_BINDING_RESULT_NOT_APPLICABLE:
 			RETURN_NULL();
-		case PHP_OSSL_CB_NOT_TLS:
+		case PHP_OPENSSL_CHANNEL_BINDING_RESULT_NOT_TLS:
 			zend_throw_exception_ex(php_openssl_exception_ce, 0,
 				"Stream does not have transport encryption enabled");
 			RETURN_THROWS();
-		case PHP_OSSL_CB_ERROR:
+		case PHP_OPENSSL_CHANNEL_BINDING_RESULT_ERROR:
 			{
 				unsigned long err = ERR_peek_last_error();
 				if (err != 0) {

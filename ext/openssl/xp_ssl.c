@@ -3969,14 +3969,14 @@ static int php_openssl_get_cert_signature_md_nid(const X509 *cert) /* {{{ */
  * Extract TLS channel binding data from an established openssl stream.
  *
  * On success *out is set to a newly-allocated zend_string holding the data
- * and PHP_OSSL_CB_OK is returned. For a type that is not applicable to the
+ * and PHP_OPENSSL_CHANNEL_BINDING_RESULT_OK is returned. For a type that is not applicable to the
  * connection (currently: tls-unique over TLS 1.3) *out is set to NULL and
- * PHP_OSSL_CB_NOT_APPLICABLE is returned. If the stream is not an active TLS
- * stream PHP_OSSL_CB_NOT_TLS is returned, and if an OpenSSL call fails
- * PHP_OSSL_CB_ERROR is returned; in both of these cases *out is set to NULL.
+ * PHP_OPENSSL_CHANNEL_BINDING_RESULT_NOT_APPLICABLE is returned. If the stream is not an active TLS
+ * stream PHP_OPENSSL_CHANNEL_BINDING_RESULT_NOT_TLS is returned, and if an OpenSSL call fails
+ * PHP_OPENSSL_CHANNEL_BINDING_RESULT_ERROR is returned; in both of these cases *out is set to NULL.
  */
-int php_openssl_netstream_get_channel_binding( /* {{{ */
-	php_stream *stream, int type, zend_string **out)
+php_openssl_channel_binding_result_t php_openssl_netstream_get_channel_binding( /* {{{ */
+	php_stream *stream, php_openssl_channel_binding_type_t type, zend_string **out)
 {
 	unsigned char buf[EVP_MAX_MD_SIZE];
 	size_t len = 0;
@@ -3986,19 +3986,19 @@ int php_openssl_netstream_get_channel_binding( /* {{{ */
 	*out = NULL;
 
 	if (stream == NULL || stream->ops != &php_openssl_socket_ops) {
-		return PHP_OSSL_CB_NOT_TLS;
+		return PHP_OPENSSL_CHANNEL_BINDING_RESULT_NOT_TLS;
 	}
 	sslsock = (php_openssl_netstream_data_t *)stream->abstract;
 	if (sslsock == NULL || !sslsock->ssl_active || sslsock->ssl_handle == NULL) {
-		return PHP_OSSL_CB_NOT_TLS;
+		return PHP_OPENSSL_CHANNEL_BINDING_RESULT_NOT_TLS;
 	}
 	ssl = sslsock->ssl_handle;
 
 	switch (type) {
-	case PHP_OSSL_CB_TLS_UNIQUE:
+	case PHP_OPENSSL_CHANNEL_BINDING_TYPE_TLS_UNIQUE:
 		/* RFC 5929 section 3: tls-unique is not defined for TLS 1.3. */
 		if (SSL_version(ssl) >= TLS1_3_VERSION) {
-			return PHP_OSSL_CB_NOT_APPLICABLE;
+			return PHP_OPENSSL_CHANNEL_BINDING_RESULT_NOT_APPLICABLE;
 		}
 
 		/*
@@ -4015,12 +4015,12 @@ int php_openssl_netstream_get_channel_binding( /* {{{ */
 			len = SSL_get_peer_finished(ssl, buf, sizeof(buf));
 		}
 		if (len == 0) {
-			return PHP_OSSL_CB_ERROR;
+			return PHP_OPENSSL_CHANNEL_BINDING_RESULT_ERROR;
 		}
 		*out = zend_string_init((char *)buf, len, 0);
-		return *out != NULL ? PHP_OSSL_CB_OK : PHP_OSSL_CB_ERROR;
+		return *out != NULL ? PHP_OPENSSL_CHANNEL_BINDING_RESULT_OK : PHP_OPENSSL_CHANNEL_BINDING_RESULT_ERROR;
 
-	case PHP_OSSL_CB_TLS_SERVER_ENDPOINT:
+	case PHP_OPENSSL_CHANNEL_BINDING_TYPE_TLS_SERVER_ENDPOINT:
 		{
 			X509 *cert = sslsock->is_client ?
 				SSL_get_peer_certificate(ssl) : SSL_get_certificate(ssl);
@@ -4029,7 +4029,7 @@ int php_openssl_netstream_get_channel_binding( /* {{{ */
 			unsigned int digest_len = 0;
 
 			if (cert == NULL) {
-				return PHP_OSSL_CB_ERROR;
+				return PHP_OPENSSL_CHANNEL_BINDING_RESULT_ERROR;
 			}
 
 			md_nid = php_openssl_get_cert_signature_md_nid(cert);
@@ -4056,13 +4056,13 @@ int php_openssl_netstream_get_channel_binding( /* {{{ */
 				X509_free(cert);
 			}
 			if (rc != 1) {
-				return PHP_OSSL_CB_ERROR;
+				return PHP_OPENSSL_CHANNEL_BINDING_RESULT_ERROR;
 			}
 			*out = zend_string_init((char *)buf, digest_len, 0);
-			return *out != NULL ? PHP_OSSL_CB_OK : PHP_OSSL_CB_ERROR;
+			return *out != NULL ? PHP_OPENSSL_CHANNEL_BINDING_RESULT_OK : PHP_OPENSSL_CHANNEL_BINDING_RESULT_ERROR;
 		}
 
-	case PHP_OSSL_CB_TLS_EXPORTER:
+	case PHP_OPENSSL_CHANNEL_BINDING_TYPE_TLS_EXPORTER:
 		/*
 		 * RFC 9266 section 4 / RFC 5705: 32 octets, label
 		 * "EXPORTER-Channel-Binding", empty context. For an empty context the
@@ -4073,13 +4073,13 @@ int php_openssl_netstream_get_channel_binding( /* {{{ */
 				ssl, buf, 32,
 				"EXPORTER-Channel-Binding", sizeof("EXPORTER-Channel-Binding") - 1,
 				(const unsigned char *)"", 0, 1) != 1) {
-			return PHP_OSSL_CB_ERROR;
+			return PHP_OPENSSL_CHANNEL_BINDING_RESULT_ERROR;
 		}
 		*out = zend_string_init((char *)buf, 32, 0);
-		return *out != NULL ? PHP_OSSL_CB_OK : PHP_OSSL_CB_ERROR;
+		return *out != NULL ? PHP_OPENSSL_CHANNEL_BINDING_RESULT_OK : PHP_OPENSSL_CHANNEL_BINDING_RESULT_ERROR;
 
 	default:
-		return PHP_OSSL_CB_ERROR;
+		return PHP_OPENSSL_CHANNEL_BINDING_RESULT_ERROR;
 	}
 }
 /* }}} */
