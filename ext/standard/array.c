@@ -6072,6 +6072,18 @@ static zend_always_inline bool php_array_values_are_all_long(HashTable *ht)
 	return true;
 }
 
+static zend_always_inline bool php_array_first_value_is_long(HashTable *ht)
+{
+	zval *value;
+
+	ZEND_HASH_FOREACH_VAL(ht, value) {
+		ZVAL_DEREF(value);
+		return Z_TYPE_P(value) == IS_LONG;
+	} ZEND_HASH_FOREACH_END();
+
+	return false;
+}
+
 static zend_never_inline bool php_array_diff_long(zval *args, uint32_t argc, uint32_t exclude_count, zval *return_value)
 {
 	zend_bitset exclude;
@@ -6082,12 +6094,7 @@ static zend_never_inline bool php_array_diff_long(zval *args, uint32_t argc, uin
 	const uint64_t max_range = (uint64_t) exclude_count * 8;
 	uint32_t range, bitset_len;
 	uint32_t i;
-
-	/* The copy loop below cannot cheaply undo a partially built result, so
-	 * the first array must be checked upfront. */
-	if (!php_array_values_are_all_long(Z_ARRVAL(args[0]))) {
-		return false;
-	}
+	ALLOCA_FLAG(use_heap);
 
 	/* Check the value types and determine whether the values are dense enough
 	 * for a bitset. Limiting the range to eight bits per exclude element keeps
@@ -6111,9 +6118,16 @@ static zend_never_inline bool php_array_diff_long(zval *args, uint32_t argc, uin
 		} ZEND_HASH_FOREACH_END();
 	}
 
+	/* Checked after the exclude arrays, whose type and range checks can rule
+	 * the bitset out after a few values. The copy loop below cannot cheaply undo
+	 * a partially built result, so the first array must be checked before it. */
+	if (!php_array_values_are_all_long(Z_ARRVAL(args[0]))) {
+		return false;
+	}
+
 	range = (uint32_t) span + 1;
 	bitset_len = zend_bitset_len(range);
-	exclude = safe_emalloc(bitset_len, ZEND_BITSET_ELM_SIZE, 0);
+	exclude = ZEND_BITSET_ALLOCA(bitset_len, use_heap);
 	zend_bitset_clear(exclude, bitset_len);
 
 	for (i = 1; i < argc; i++) {
@@ -6140,7 +6154,7 @@ static zend_never_inline bool php_array_diff_long(zval *args, uint32_t argc, uin
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	efree(exclude);
+	free_alloca(exclude, use_heap);
 	return true;
 }
 
@@ -6244,7 +6258,8 @@ PHP_FUNCTION(array_diff)
 		RETURN_THROWS();
 	}
 
-	if (php_array_diff_long(args, argc, (uint32_t)num, return_value)) {
+	if (php_array_first_value_is_long(Z_ARRVAL(args[0]))
+			&& php_array_diff_long(args, argc, (uint32_t)num, return_value)) {
 		return;
 	}
 

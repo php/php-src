@@ -43,6 +43,16 @@ for ($i = 1; $i <= 256; $i++) {
     $sparseValues[] = $i * 65536;
 }
 var_dump(array_diff([1, 2], $sparseValues) === [1, 2]);
+
+$wideExclude = [];
+for ($i = 0; $i < 100; $i++) {
+    $wideExclude[] = $i * 7;
+}
+$wideInput = range(-1, 700);
+var_dump(array_diff($wideInput, $wideExclude) === array_filter(
+    $wideInput,
+    fn($v) => $v < 0 || $v > 693 || $v % 7 !== 0,
+));
 ?>
 --EXPECT--
 {"0":1,"2":3}
@@ -60,4 +70,5 @@ bool(true)
 []
 {"0":1,"2":3}
 int(9)
+bool(true)
 bool(true)
