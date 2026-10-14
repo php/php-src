@@ -78,44 +78,6 @@ static zend_string* php_password_get_salt(zval *unused_, size_t required_salt_le
 
 /* bcrypt implementation */
 
-static bool php_password_bcrypt_salt_to64(const char *in, const size_t in_len, const size_t out_len, char *out) /* {{{ */
-{
-	if (in_len != 16 || out_len != 22) {
-		zend_value_error("Unexpected bcrypt salt size");
-		return false;
-	}
-
-	zend_string *buffer = php_base64_encode_ex((const unsigned char*) in, in_len, PHP_BASE64_NO_PADDING);
-	if (!buffer) {
-		return false;
-	}
-
-	if (ZSTR_LEN(buffer) != out_len || ZSTR_VAL(buffer)[out_len] == '=') {
-		zend_string_free(buffer);
-		return false;
-	}
-
-	char *str = ZSTR_VAL(buffer);
-	for (size_t i = 0; i < out_len; i++) {
-		out[i] = (str[i] == '+') ? '.' : str[i];
-	}
-	zend_string_free(buffer);
-
-	/* Bcrypt handles the last byte differently.
-	 * It's more complicated than this, but easy with the fixed length.
-	 */
-	switch (out[21]) {
-		case 'A': out[21] = '.'; break;
-		case 'Q': out[21] = 'O'; break;
-		case 'g': out[21] = 'e'; break;
-		case 'w': out[21] = 'u'; break;
-		default: break;
-	}
-	out[out_len] = 0;
-	return true;
-}
-/* }}} */
-
 static bool php_password_bcrypt_get_cost(const zend_string *hash, zend_long *cost) {
 	const char *h = ZSTR_VAL(hash);
 
@@ -188,9 +150,8 @@ static bool php_password_bcrypt_verify(const zend_string *password, const zend_s
 }
 
 static zend_string* php_password_bcrypt_hash(const zend_string *password, zend_array *options) {
-	char salt64[23];
 	char hash[30];
-	zend_string *result, *salt;
+	zend_string *result, *salt, *salt64;
 	zval *zcost;
 	zend_long cost = PHP_PASSWORD_BCRYPT_COST;
 
@@ -212,15 +173,31 @@ static zend_string* php_password_bcrypt_hash(const zend_string *password, zend_a
 		return NULL;
 	}
 
-	if (!php_password_bcrypt_salt_to64(ZSTR_VAL(salt), ZSTR_LEN(salt), sizeof(salt64)-1, salt64)) {
-		zend_string_free(salt);
-		return NULL;
+	salt64 = php_base64_encode_ex((const unsigned char*) ZSTR_VAL(salt), ZSTR_LEN(salt), PHP_BASE64_NO_PADDING);
+	zend_string_free(salt);
+	ZEND_ASSERT(salt64 != NULL && ZSTR_LEN(salt64) == 22);
+
+	char *ptr = ZSTR_VAL(salt64);
+	for (size_t i = 0, len = ZSTR_LEN(salt64)-1; i < len; i++) {
+		if (ptr[i] == '+') {
+			ptr[i] = '.';
+		}
+	}
+	/* Bcrypt handles the last byte differently.
+	 * It's more complicated than this, but easy with the fixed length. */
+	switch (ptr[21]) {
+		case 'A': ptr[21] = '.'; break;
+		case 'Q': ptr[21] = 'O'; break;
+		case 'g': ptr[21] = 'e'; break;
+		case 'w': ptr[21] = 'u'; break;
+		default:
+			zend_string_free(salt64);
+			return NULL;
 	}
 
-	zend_string_free(salt);
-	if (snprintf(hash, sizeof(hash), "$2y$%02" ZEND_LONG_FMT_SPEC "$%.22s", cost, salt64) != 29 || hash[29] != 0) {
-		return NULL;
-	}
+	snprintf(hash, sizeof(hash), "$2y$%02" ZEND_LONG_FMT_SPEC "$%.22s", cost, ZSTR_VAL(salt64));
+	ZEND_ASSERT(hash[28] == ptr[21] && hash[29] == 0);
+	zend_string_free(salt64);
 
 	/* This cast is safe, since both values are defined here in code and cannot overflow */
 	result = php_crypt(ZSTR_VAL(password), (int)ZSTR_LEN(password), hash, (int)sizeof(hash)-1, 1);
