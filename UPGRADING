@@ -115,6 +115,8 @@ PHP 8.7 UPGRADE NOTES
   . Improved performance of htmlspecialchars(), htmlentities(),
     html_entity_decode() and get_html_translation_table(), especially with
     UTF-8.
+  . htmlspecialchars() returns its input without copying it when nothing needs
+    encoding.
 
 - MBString:
   . Improved performance of mb_strlen for UTF-8 strings.
