@@ -68,14 +68,6 @@ static zend_string* php_password_make_salt(size_t length) /* {{{ */
 }
 /* }}} */
 
-static zend_string* php_password_get_salt(zval *unused_, size_t required_salt_len, HashTable *options) {
-	if (options && zend_hash_str_exists(options, "salt", sizeof("salt") - 1)) {
-		php_error_docref(NULL, E_WARNING, "The \"salt\" option has been ignored, since providing a custom salt is no longer supported");
-	}
-
-	return php_password_make_salt(required_salt_len);
-}
-
 /* bcrypt implementation */
 
 static bool php_password_bcrypt_get_cost(const zend_string *hash, zend_long *cost) {
@@ -169,7 +161,7 @@ static zend_string* php_password_bcrypt_hash(const zend_string *password, zend_a
 		return NULL;
 	}
 
-	if (!(salt = php_password_get_salt(NULL, Z_UL(16), options))) {
+	if (!(salt = php_password_make_salt(16))) {
 		return NULL;
 	}
 
@@ -326,7 +318,7 @@ static zend_string *php_password_argon2_hash(const zend_string *password, zend_a
 		return NULL;
 	}
 
-	if (!(salt = php_password_get_salt(NULL, Z_UL(16), options))) {
+	if (!(salt = php_password_make_salt(16))) {
 		return NULL;
 	}
 
@@ -637,6 +629,10 @@ PHP_FUNCTION(password_hash)
 	if (!algo) {
 		zend_argument_value_error(2, "must be a valid password hashing algorithm");
 		RETURN_THROWS();
+	}
+
+	if (options && zend_hash_str_exists(options, "salt", sizeof("salt") - 1)) {
+		php_error_docref(NULL, E_WARNING, "The \"salt\" option has been ignored, since providing a custom salt is no longer supported");
 	}
 
 	digest = algo->hash(password, options);
