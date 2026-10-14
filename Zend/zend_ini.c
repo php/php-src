@@ -286,7 +286,7 @@ ZEND_API zend_result zend_register_ini_entries(const zend_ini_entry_def *ini_ent
 
 ZEND_API void zend_unregister_ini_entries_ex(int module_number, int module_type) /* {{{ */
 {
-	static HashTable *ini_directives;
+	HashTable *ini_directives;
 
 	if (module_type == MODULE_TEMPORARY) {
 		ini_directives = EG(ini_directives);
