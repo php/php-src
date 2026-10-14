@@ -25,7 +25,7 @@ PHP_BUILD=$(PHP_BUILD)
 !if "$(PHP_SIMD_SCALE)" == ""
 SIMD_SUFFIX=
 !else
-!if "$(PHP_SIMD_SCALE)" == "SSE2"
+!if "$(PHP_SIMD_SCALE)" == "SSE2" || "$(PHP_SIMD_SCALE)" == "NEON"
 SIMD_SUFFIX=
 !else
 SIMD_SUFFIX=-$(PHP_SIMD_SCALE)
