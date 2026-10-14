@@ -200,7 +200,7 @@ ZEND_API void zend_ini_sort_entries(void) /* {{{ */
 /*
  * Registration / unregistration
  */
-ZEND_API zend_result zend_register_ini_entries_ex(const zend_ini_entry_def *ini_entry, int module_number, int module_type) /* {{{ */
+ZEND_API zend_result zend_register_ini_entries_ex(const zend_ini_entry_def *ini_entry, int module_number, int module_type)
 {
 	zend_ini_entry *p;
 	zval *default_value;
@@ -266,7 +266,6 @@ ZEND_API zend_result zend_register_ini_entries_ex(const zend_ini_entry_def *ini_
 	}
 	return SUCCESS;
 }
-/* }}} */
 
 ZEND_API zend_result zend_register_ini_entries(const zend_ini_entry_def *ini_entry, int module_number) /* {{{ */
 {
@@ -283,7 +282,7 @@ ZEND_API zend_result zend_register_ini_entries(const zend_ini_entry_def *ini_ent
 }
 /* }}} */
 
-ZEND_API void zend_unregister_ini_entries_ex(int module_number, int module_type) /* {{{ */
+ZEND_API void zend_unregister_ini_entries_ex(int module_number, int module_type)
 {
 	HashTable *ini_directives;
 
@@ -295,7 +294,6 @@ ZEND_API void zend_unregister_ini_entries_ex(int module_number, int module_type)
 
 	zend_hash_apply_with_argument(ini_directives, zend_remove_ini_entries, (void *) &module_number);
 }
-/* }}} */
 
 ZEND_API void zend_unregister_ini_entries(int module_number) /* {{{ */
 {
@@ -414,7 +412,7 @@ ZEND_API zend_result zend_alter_ini_entry_ex(zend_string *name, zend_string *new
 }
 /* }}} */
 
-ZEND_API zend_result zend_restore_ini_entry(zend_string *name, int stage) /* {{{ */
+ZEND_API zend_result zend_restore_ini_entry(zend_string *name, int stage)
 {
 	zend_ini_entry *ini_entry;
 
@@ -433,7 +431,6 @@ ZEND_API zend_result zend_restore_ini_entry(zend_string *name, int stage) /* {{{
 
 	return SUCCESS;
 }
-/* }}} */
 
 ZEND_API zend_result zend_ini_register_displayer(const char *name, uint32_t name_length, void (*displayer)(zend_ini_entry *ini_entry, int type)) /* {{{ */
 {
