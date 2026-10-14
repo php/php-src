@@ -240,7 +240,6 @@ ZEND_API zend_result zend_register_ini_entries_ex(const zend_ini_entry_def *ini_
 		p->module_number = module_number;
 
 		if (zend_hash_add_ptr(directives, p->name, (void*)p) == NULL) {
-			zend_string_release_ex(p->name, true);
 			pefree(p, true);
 			zend_unregister_ini_entries_ex(module_number, module_type);
 			return FAILURE;
