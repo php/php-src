@@ -32,6 +32,7 @@ int pdo_pgsql_scanner(pdo_scanner_t *s)
 	SPECIALS	= [$eE:?"'/-];
 	MULTICHAR	= [:]{2,};
 	ANYNOEOF	= [\001-\377];
+	TEXTCHR		= ANYNOEOF\SPECIALS;
 	*/
 
 	/*!re2c
@@ -45,6 +46,7 @@ int pdo_pgsql_scanner(pdo_scanner_t *s)
 		QUESTION								{ RET(PDO_PARSER_BIND_POS); }
 		SPECIALS								{ SKIP_ONE(PDO_PARSER_TEXT); }
 		COMMENTS								{ RET(PDO_PARSER_TEXT); }
-		(ANYNOEOF\SPECIALS)+ 					{ RET(PDO_PARSER_TEXT); }
+		/* Plain text may contain e/E, as long as it doesn't end with one, which could start an E'...' string */
+		([eE]* TEXTCHR)+						{ RET(PDO_PARSER_TEXT); }
 	*/
 }
