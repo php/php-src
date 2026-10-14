@@ -624,7 +624,7 @@ PHP_FUNCTION(stream_get_wrappers)
 /* }}} */
 
 /* {{{ stream_select related functions */
-static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, php_socket_t *max_fd)
+static int stream_array_to_fd_set(zval *stream_array, php_growable_fd_set *fds, php_socket_t *max_fd)
 {
 	zval *elem;
 	php_stream *stream;
@@ -652,7 +652,7 @@ static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, php_socket_t 
 		 * */
 		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) && this_fd != -1) {
 
-			PHP_SAFE_FD_SET(this_fd, fds);
+			php_growable_fd_set_add(fds, this_fd);
 
 			if (this_fd > *max_fd) {
 				*max_fd = this_fd;
@@ -663,7 +663,7 @@ static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, php_socket_t 
 	return cnt ? 1 : 0;
 }
 
-static int stream_array_from_fd_set(zval *stream_array, fd_set *fds)
+static int stream_array_from_fd_set(zval *stream_array, const php_growable_fd_set *fds)
 {
 	zval *elem, *dest_elem;
 	HashTable *ht;
@@ -691,7 +691,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds)
 		 * is not displayed.
 		 */
 		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) && this_fd != SOCK_ERR) {
-			if (PHP_SAFE_FD_ISSET(this_fd, fds)) {
+			if (php_growable_fd_set_isset(fds, this_fd)) {
 				if (!key) {
 					dest_elem = zend_hash_index_update(ht, num_ind, elem);
 				} else {
@@ -767,13 +767,12 @@ PHP_FUNCTION(stream_select)
 {
 	zval *r_array, *w_array, *e_array;
 	struct timeval tv, *tv_p = NULL;
-	fd_set rfds, wfds, efds;
+	php_growable_fd_set rfds, wfds, efds;
 	php_socket_t max_fd = 0;
 	int retval, sets = 0;
 	zend_long sec, usec = 0;
 	bool secnull;
 	bool usecnull = 1;
-	int set_count, max_set_count = 0;
 
 	ZEND_PARSE_PARAMETERS_START(4, 5)
 		Z_PARAM_ARRAY_EX2(r_array, 1, 1, 0)
@@ -784,44 +783,30 @@ PHP_FUNCTION(stream_select)
 		Z_PARAM_LONG_OR_NULL(usec, usecnull)
 	ZEND_PARSE_PARAMETERS_END();
 
-	FD_ZERO(&rfds);
-	FD_ZERO(&wfds);
-	FD_ZERO(&efds);
+	/* The sets grow as streams are added, past FD_SETSIZE */
+	php_growable_fd_set_init(&rfds, FD_SETSIZE);
+	php_growable_fd_set_init(&wfds, FD_SETSIZE);
+	php_growable_fd_set_init(&efds, FD_SETSIZE);
 
 	if (r_array != NULL) {
-		set_count = stream_array_to_fd_set(r_array, &rfds, &max_fd);
-		if (set_count > max_set_count)
-			max_set_count = set_count;
-		sets += set_count;
+		sets += stream_array_to_fd_set(r_array, &rfds, &max_fd);
 	}
-
 	if (w_array != NULL) {
-		set_count = stream_array_to_fd_set(w_array, &wfds, &max_fd);
-		if (set_count > max_set_count)
-			max_set_count = set_count;
-		sets += set_count;
+		sets += stream_array_to_fd_set(w_array, &wfds, &max_fd);
 	}
-
 	if (e_array != NULL) {
-		set_count = stream_array_to_fd_set(e_array, &efds, &max_fd);
-		if (set_count > max_set_count)
-			max_set_count = set_count;
-		sets += set_count;
+		sets += stream_array_to_fd_set(e_array, &efds, &max_fd);
 	}
 
 	if (!sets) {
 		zend_value_error("No stream arrays were passed");
-		RETURN_THROWS();
-	}
-
-	if (!PHP_SAFE_MAX_FD(max_fd, max_set_count)) {
-		RETURN_FALSE;
+		goto cleanup;
 	}
 
 	if (secnull && !usecnull) {
 		if (usec != 0) {
 			zend_argument_value_error(5, "must be null when argument #4 ($seconds) is null");
-			RETURN_THROWS();
+			goto cleanup;
 		}
 	}
 
@@ -829,10 +814,10 @@ PHP_FUNCTION(stream_select)
 	if (!secnull) {
 		if (sec < 0) {
 			zend_argument_value_error(4, "must be greater than or equal to 0");
-			RETURN_THROWS();
+			goto cleanup;
 		} else if (usec < 0) {
 			zend_argument_value_error(5, "must be greater than or equal to 0");
-			RETURN_THROWS();
+			goto cleanup;
 		}
 
 		/* Windows, Solaris and BSD do not like microsecond values which are >= 1 sec */
@@ -855,23 +840,36 @@ PHP_FUNCTION(stream_select)
 				zval_ptr_dtor(e_array);
 				ZVAL_EMPTY_ARRAY(e_array);
 			}
-			RETURN_LONG(retval);
+			RETVAL_LONG(retval);
+			goto cleanup;
 		}
 	}
 
-	retval = php_select(max_fd+1, &rfds, &wfds, &efds, tv_p);
+#ifndef PHP_WIN32
+	/* select() reads max_fd + 1 bits of each set */
+	php_growable_fd_set_reserve(&rfds, max_fd + 1);
+	php_growable_fd_set_reserve(&wfds, max_fd + 1);
+	php_growable_fd_set_reserve(&efds, max_fd + 1);
+#endif
+	retval = php_select(max_fd + 1, rfds.set, wfds.set, efds.set, tv_p);
 
 	if (retval == -1) {
 		php_error_docref(NULL, E_WARNING, "Unable to select [%d]: %s (max_fd=%d)",
 				errno, strerror(errno), max_fd);
-		RETURN_FALSE;
+		RETVAL_FALSE;
+		goto cleanup;
 	}
 
 	if (r_array != NULL) stream_array_from_fd_set(r_array, &rfds);
 	if (w_array != NULL) stream_array_from_fd_set(w_array, &wfds);
 	if (e_array != NULL) stream_array_from_fd_set(e_array, &efds);
 
-	RETURN_LONG(retval);
+	RETVAL_LONG(retval);
+
+cleanup:
+	php_growable_fd_set_destroy(&rfds);
+	php_growable_fd_set_destroy(&wfds);
+	php_growable_fd_set_destroy(&efds);
 }
 /* }}} */
 

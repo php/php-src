@@ -279,6 +279,15 @@ PHP                                                                        NEWS
     objects). (Labish Bardiya)
   . Fix use-after-free in Randomizer::shuffleArray() when the engine throws.
     (Marti2203)
+  . Fixed stream_select() aborting the whole call once any watched stream's
+    descriptor exceeded FD_SETSIZE; it no longer imposes that limit, so watching
+    many descriptors no longer requires rebuilding with --enable-fd-setsize.
+    (Frode Børli)
+  . Fixed stream_select() on Windows capping the number of watched sockets at
+    FD_SETSIZE; the winsock fd_set now grows on demand. (Frode Børli)
+  . Fixed stream_select() on Windows overflowing a fixed 64-entry stack array
+    (crashing with a stack buffer overrun) when passed more than 64 pipe or file
+    handles; it now fails gracefully instead. (Frode Børli)
 
 - Streams:
   . Fixed bug GH-24508 (HTTP wrapper leaks the dechunk filter when header
