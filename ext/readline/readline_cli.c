@@ -26,7 +26,6 @@
 #include "zend_hash.h"
 
 #include "SAPI.h"
-#include <locale.h>
 #include "zend.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
@@ -45,7 +44,6 @@
 
 #include "zend_compile.h"
 #include "zend_execute.h"
-#include "zend_highlight.h"
 #include "zend_exceptions.h"
 
 #include "sapi/cli/cli.h"
@@ -472,9 +470,7 @@ static char *cli_completion_generator_ht(const char *text, size_t textlen, int *
 			rl_completion_append_character = append_character;
 			return retval;
 		}
-		if (zend_hash_move_forward(ht) == FAILURE) {
-			break;
-		}
+		zend_hash_move_forward(ht);
 	}
 	(*state)++;
 	return NULL;
