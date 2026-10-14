@@ -1277,16 +1277,15 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, const char *pa
 
 	ZVAL_UNDEF(&headers);
 
-	zval_ptr_dtor(&BG(last_http_headers));
-	ZVAL_UNDEF(&BG(last_http_headers));
-
 	stream = php_stream_url_wrap_http_ex(
 		wrapper, path, mode, options, opened_path, context,
 		PHP_URL_REDIRECT_MAX, HTTP_WRAPPER_HEADER_INIT, &headers STREAMS_CC);
 
-	if (!Z_ISUNDEF(headers)) {
-		ZVAL_COPY(&BG(last_http_headers), &headers);
+	/* After the request: one made from its notification callback may have stored its own headers here. */
+	zval_ptr_dtor(&BG(last_http_headers));
+	ZVAL_COPY(&BG(last_http_headers), &headers);
 
+	if (!Z_ISUNDEF(headers)) {
 		if (FAILURE == zend_set_local_var_str(
 				"http_response_header", sizeof("http_response_header")-1, &headers, 0)) {
 			zval_ptr_dtor(&headers);
