@@ -5116,7 +5116,7 @@ PHP_FUNCTION(openssl_get_channel_binding)
 		Z_PARAM_STR(type)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_openssl_channel_binding_type_t type_code;
+	php_openssl_channel_binding_type type_code;
 	if (zend_string_equals_literal(type, "tls-unique")) {
 		type_code = PHP_OPENSSL_CHANNEL_BINDING_TYPE_TLS_UNIQUE;
 	} else if (zend_string_equals_literal(type, "tls-server-end-point")) {
@@ -5133,7 +5133,7 @@ PHP_FUNCTION(openssl_get_channel_binding)
 	}
 
 	zend_string *result = NULL;
-	php_openssl_channel_binding_result_t ret = php_openssl_netstream_get_channel_binding(stream, type_code, &result);
+	php_openssl_channel_binding_result ret = php_openssl_netstream_get_channel_binding(stream, type_code, &result);
 	switch (ret) {
 		case PHP_OPENSSL_CHANNEL_BINDING_RESULT_OK:
 			RETURN_STR(result);

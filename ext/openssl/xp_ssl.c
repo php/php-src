@@ -3975,8 +3975,8 @@ static int php_openssl_get_cert_signature_md_nid(const X509 *cert) /* {{{ */
  * stream PHP_OPENSSL_CHANNEL_BINDING_RESULT_NOT_TLS is returned, and if an OpenSSL call fails
  * PHP_OPENSSL_CHANNEL_BINDING_RESULT_ERROR is returned; in both of these cases *out is set to NULL.
  */
-php_openssl_channel_binding_result_t php_openssl_netstream_get_channel_binding( /* {{{ */
-	php_stream *stream, php_openssl_channel_binding_type_t type, zend_string **out)
+php_openssl_channel_binding_result php_openssl_netstream_get_channel_binding( /* {{{ */
+	php_stream *stream, php_openssl_channel_binding_type type, zend_string **out)
 {
 	unsigned char buf[EVP_MAX_MD_SIZE];
 	size_t len = 0;
