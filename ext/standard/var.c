@@ -555,6 +555,8 @@ PHPAPI zend_result php_var_export_ex(zval *struc, int level, smart_str *buf) /* 
 	zend_string *key;
 	zval *val;
 
+	ZEND_ASSERT(level >= 0);
+
 again:
 	switch (Z_TYPE_P(struc)) {
 		case IS_FALSE:
