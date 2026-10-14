@@ -407,7 +407,7 @@ The FCC API is defined in ``Zend/zend_API.h``.
    Mandatory field, the number of arguments that will be provided to this call to the function.
 
 ``consumed_args``:
-   Specifies positional arguments whose ownership is transfered to the function being called. This
+   Specifies positional arguments whose ownership is transferred to the function being called. This
    is used as an optimization to avoid an unnecessary ``Z_ADDREF_P()``/``zval_ptr_dtor()`` when the
    value is not used after the call. Only one argument can be specified at once with
    ``zend_fci_consumed_arg(n)`` (zero-based), and the value must not be a reference. Must be set to
