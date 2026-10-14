@@ -20,6 +20,7 @@
 #define ZEND_FIBERS_H
 
 #include "zend_API.h"
+#include "zend_async_API.h"
 #include "zend_types.h"
 
 #define ZEND_FIBER_GUARD_PAGES 1
@@ -39,6 +40,8 @@ typedef enum {
 	ZEND_FIBER_FLAG_THREW     = 1 << 0,
 	ZEND_FIBER_FLAG_BAILOUT   = 1 << 1,
 	ZEND_FIBER_FLAG_DESTROYED = 1 << 2,
+	/* The destructor ran while the body ran: the body's end releases the object. */
+	ZEND_FIBER_FLAG_HELD_BY_BODY = 1 << 3,
 } zend_fiber_flag;
 
 typedef enum {
@@ -82,7 +85,7 @@ struct _zend_fiber_context {
 	zend_fiber_coroutine function;
 
 	/* Cleanup function for fiber. */
-	zend_fiber_clean cleanup;
+	zend_fiber_clean cleanup; /* may free the context */
 
 	/* Assigned C stack. */
 	zend_fiber_stack *stack;
@@ -128,6 +131,38 @@ struct _zend_fiber {
 
 	/* Storage for fiber return value. */
 	zval result;
+
+	/*
+	 * Coroutine mode: set when a scheduler adopted this fiber at its start.
+	 * The body then runs as a coroutine of that scheduler, on the context the
+	 * scheduler hands it — `context` above stays untouched, and start(),
+	 * resume(), throw() and Fiber::suspend() route through the scheduler
+	 * instead of switching contexts here. NULL leaves every one of them on
+	 * the legacy path.
+	 *
+	 * The fiber holds a reference to the coroutine's object, shared with the
+	 * scheduler; the coroutine points back through `extended_data` without
+	 * one, so nothing keeps a cycle alive. When the coroutine finishes, its
+	 * result moves into `result`; this pointer and its reference stay until
+	 * the Fiber object is destroyed or freed, or its start fails
+	 * (zend_fiber_release_coroutine()).
+	 */
+	zend_coroutine_t *coroutine;
+
+	/* The coroutine waiting for this fiber to yield or finish. */
+	zend_coroutine_t *caller_coroutine;
+
+	/* The waiter woken by a yield and not yet past it: the yielded value in
+	 * `transfer` is its own until it takes it. */
+	zend_coroutine_t *handoff_coroutine;
+
+	/* Coroutine mode: the value crossing between the fiber and its awaiter —
+	 * what Fiber::suspend() yields, and what resume() sends back. */
+	zval transfer;
+
+	/* The finish handler start() adds for a body cancelled before it runs;
+	 * 0 once the body runs or the handler has run. */
+	uint32_t start_handler_id;
 };
 
 ZEND_API zend_result zend_fiber_start(zend_fiber *fiber, zval *return_value);
@@ -138,6 +173,13 @@ ZEND_API void zend_fiber_suspend(zend_fiber *fiber, zval *value, zval *return_va
 ZEND_API zend_result zend_fiber_init_context(zend_fiber_context *context, void *kind, zend_fiber_coroutine coroutine, size_t stack_size);
 ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context);
 ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer);
+/* Install a fresh VM stack for a fiber-context body (root frame from
+ * `root_function`, linked to the switching-in frame). The stack stays
+ * reachable through EG(vm_stack) while the body runs and must be captured at
+ * completion and released with zend_fiber_vm_stack_free(). */
+ZEND_API zend_execute_data *zend_fiber_vm_stack_start(
+		zend_fiber_context *context, zend_function *root_function);
+ZEND_API void zend_fiber_vm_stack_free(zend_vm_stack stack);
 #ifdef ZEND_CHECK_STACK_LIMIT
 ZEND_API void* zend_fiber_stack_limit(zend_fiber_stack *stack);
 ZEND_API void* zend_fiber_stack_base(zend_fiber_stack *stack);
