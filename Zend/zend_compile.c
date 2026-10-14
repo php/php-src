@@ -304,9 +304,7 @@ static zend_always_inline uint8_t zend_lookup_builtin_type_by_name(const zend_st
 	const builtin_type_info *info = &builtin_types[0];
 
 	for (; info->name; ++info) {
-		if (ZSTR_LEN(name) == info->name_len
-			&& zend_binary_strcasecmp(ZSTR_VAL(name), ZSTR_LEN(name), info->name, info->name_len) == 0
-		) {
+		if (zend_string_equals_cstr_ci(name, info->name, info->name_len)) {
 			return info->type;
 		}
 	}
