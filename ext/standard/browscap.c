@@ -700,7 +700,6 @@ PHP_FUNCTION(get_browser)
 	bool return_array = 0;
 	browser_data *bdata;
 	browscap_entry *found_entry = NULL;
-	HashTable *agent_ht;
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
@@ -783,15 +782,7 @@ PHP_FUNCTION(get_browser)
 
 	zend_string_release_ex(lookup_browser_name, false);
 
-	agent_ht = browscap_entry_to_array(bdata, found_entry);
-
-	if (return_array) {
-		RETVAL_ARR(agent_ht);
-	} else {
-		object_and_properties_init(return_value, zend_standard_class_def, agent_ht);
-	}
-
-	HashTable *target_ht = return_array ? Z_ARRVAL_P(return_value) : Z_OBJPROP_P(return_value);
+	HashTable *agent_ht = browscap_entry_to_array(bdata, found_entry);
 
 	while (found_entry->parent) {
 		found_entry = zend_hash_find_ptr(bdata->htab, found_entry->parent);
@@ -799,7 +790,13 @@ PHP_FUNCTION(get_browser)
 			break;
 		}
 
-		browscap_entry_add_kv_to_existing_array(bdata, found_entry, target_ht);
+		browscap_entry_add_kv_to_existing_array(bdata, found_entry, agent_ht);
+	}
+
+	if (return_array) {
+		RETVAL_ARR(agent_ht);
+	} else {
+		object_and_properties_init(return_value, zend_standard_class_def, agent_ht);
 	}
 }
 /* }}} */

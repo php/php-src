@@ -499,8 +499,6 @@ static void php_rl_callback_handler(char *the_line)
 	zval params[1];
 	zval dummy;
 
-	ZVAL_NULL(&dummy);
-
 	_readline_string_zval(&params[0], the_line);
 
 	call_user_function(NULL, NULL, &_prepped_callback, &dummy, 1, params);

@@ -125,6 +125,8 @@ PHP                                                                        NEWS
     in a php://filter URL. (Sjoerd Langkemper)
   . Improved performance of array_chunk() when not preserving keys.
     (mehmetcansahin)
+  . Improved performance of resolving the charset of HTML functions,
+    especially UTF-8. (Nicolas Grekas)
   . Improved performance of htmlspecialchars() when nothing needs encoding.
     (Nicolas Grekas)
 

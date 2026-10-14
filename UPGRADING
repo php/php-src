@@ -27,6 +27,13 @@ PHP 8.7 UPGRADE NOTES
     not present in the result set. It previously reported the condition
     through PDO::ATTR_ERRMODE and returned false.
 
+- Session:
+  . Setting session.cookie_path to a value containing one of ";\r\n", or
+    session.cookie_domain to a value containing one of ",; \t\r\n\013\014",
+    now emits a warning and leaves the setting unchanged. Previously such a
+    value was appended to the Set-Cookie header verbatim, which let an
+    application terminate one attribute and append further ones.
+
 - Standard:
   . The number of filters that can be chained in a php://filter URL is limited
     to 16 by default. Set the stream context option max_filter_count to change
@@ -105,6 +112,9 @@ PHP 8.7 UPGRADE NOTES
   . Improved performance of str_rot13().
   . Improved performance of pack() for large strings using the a, A and Z
     formats.
+  . Improved performance of htmlspecialchars(), htmlentities(),
+    html_entity_decode() and get_html_translation_table(), especially with
+    UTF-8.
   . htmlspecialchars() returns its input without copying it when nothing needs
     encoding.
 
