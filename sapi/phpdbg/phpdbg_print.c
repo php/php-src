@@ -24,7 +24,7 @@
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 #define PHPDBG_PRINT_COMMAND_D(f, h, a, m, l, s, flags) \
-	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[8], flags)
+	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[10], flags)
 
 const phpdbg_command_t phpdbg_print_commands[] = {
 	PHPDBG_PRINT_COMMAND_D(exec,       "print out the instructions in the main execution context", 'e', print_exec,   NULL, 0, PHPDBG_ASYNC_SAFE),

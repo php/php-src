@@ -269,6 +269,25 @@ static bool is_local_def(const zend_op_array *op_array, const zend_ssa *ssa, int
 }
 /* }}} */
 
+/* ArrayAccess methods receive the object, so dimension accesses on it let it escape. */
+static bool may_be_array_access(const zend_ssa_var_info *info) /* {{{ */
+{
+	if (!(info->type & MAY_BE_OBJECT)) {
+		return false;
+	}
+
+	const zend_class_entry *ce = info->ce;
+	if (!ce || info->is_instanceof) {
+		return true;
+	}
+	if (ce->ce_flags & ZEND_ACC_LINKED) {
+		return ce->arrayaccess_funcs_ptr != NULL;
+	}
+	/* The interfaces of unlinked classes are not known yet. */
+	return ce->num_interfaces || ce->parent_name;
+}
+/* }}} */
+
 static bool is_escape_use(const zend_op_array *op_array, const zend_ssa *ssa, int use, int var) /* {{{ */
 {
 	const zend_ssa_op *ssa_op = ssa->ops + use;
@@ -288,18 +307,22 @@ static bool is_escape_use(const zend_op_array *op_array, const zend_ssa *ssa, in
 				}
 				break;
 			case ZEND_ISSET_ISEMPTY_DIM_OBJ:
-			case ZEND_ISSET_ISEMPTY_PROP_OBJ:
 			case ZEND_FETCH_DIM_R:
-			case ZEND_FETCH_OBJ_R:
 			case ZEND_FETCH_DIM_IS:
+			case ZEND_ASSIGN_DIM_OP:
+			case ZEND_ASSIGN_DIM:
+				if (may_be_array_access(&ssa->var_info[ssa_op->op1_use])) {
+					return true;
+				}
+				break;
+			case ZEND_ISSET_ISEMPTY_PROP_OBJ:
+			case ZEND_FETCH_OBJ_R:
 			case ZEND_FETCH_OBJ_IS:
 				break;
 			case ZEND_ASSIGN_OP:
 				return true;
-			case ZEND_ASSIGN_DIM_OP:
 			case ZEND_ASSIGN_OBJ_OP:
 			case ZEND_ASSIGN_STATIC_PROP_OP:
-			case ZEND_ASSIGN_DIM:
 			case ZEND_ASSIGN_OBJ:
 				break;
 			case ZEND_ASSIGN_OBJ_REF:

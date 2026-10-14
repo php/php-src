@@ -7774,6 +7774,8 @@ static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32
 		ir_IF_TRUE_cold(if_val);
 		jit_SET_EX_OPLINE(jit, opline);
 		ir_CALL(IR_VOID, ir_CONST_FC_FUNC(zend_jit_nan_coerced_to_type_warning));
+		/* The warning may be turned into an exception by an error handler */
+		zend_jit_check_exception_undef_result(jit, opline);
 		ir_MERGE_WITH_EMPTY_FALSE(if_val);
 
 		ref = ir_NE(dval, ir_CONST_DOUBLE(0.0));
@@ -9363,7 +9365,7 @@ static int zend_jit_init_static_method_call(zend_jit_ctx         *jit,
 					ir_LOAD_A(ir_ADD_OFFSET(ir_LOAD_A(jit_EX(This.value.ref)), offsetof(zend_object, ce))));
 				ir_IF_FALSE(if_object);
 				ir_END_PHI_list(values, ir_LOAD_A(jit_EX(This.value.ref)));
-				ir_PHI_list(values);
+				scope_ref = ir_PHI_list(values);
 			} else {
 				scope_ref = ir_LOAD_A(ir_ADD_OFFSET(ir_LOAD_A(jit_EX(This.value.ref)), offsetof(zend_object, ce)));
 			}

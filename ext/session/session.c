@@ -526,6 +526,7 @@ static void php_session_save_current_state(bool write)
 				/* Not being able to encode the session data means there is some kind of issue that prevents a write
 				 * (e.g. a key containing the '|' character with the default serialization) */
 				if (UNEXPECTED(val == NULL)) {
+					PS(mod)->s_close(&PS(mod_data));
 					return;
 				}
 
@@ -2402,7 +2403,13 @@ PHP_FUNCTION(session_regenerate_id)
 			RETURN_FALSE;
 		}
 	}
+
 	PS(mod)->s_close(&PS(mod_data));
+
+	if (PS(session_status) != php_session_active) {
+		php_error_docref(NULL, E_WARNING, "Session ID cannot be regenerated because the save handler closed the session");
+		RETURN_FALSE;
+	}
 
 	/* New session data */
 	if (PS(session_vars)) {

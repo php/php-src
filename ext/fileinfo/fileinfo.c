@@ -297,7 +297,7 @@ PHP_FUNCTION(finfo_file)
 	struct magic_set *magic = Z_FINFO_P(self)->magic;
 
 	if (UNEXPECTED(ZSTR_LEN(path) == 0)) {
-		zend_argument_must_not_be_empty_error(2);
+		zend_argument_must_not_be_empty_error(hasThis() ? 1 : 2);
 		RETURN_THROWS();
 	}
 	php_stream_context *context = php_stream_context_from_zval(zcontext, false);
