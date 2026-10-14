@@ -27,6 +27,11 @@
 #define DEFAULT_SHORT_OPEN_TAG "1"
 
 /* Platform-Specific Configuration. Should not be changed. */
+/* Match -ffp-contract=off on toolsets that enable ARM64 contractions by default. */
+#if defined(_MSC_VER) && _MSC_VER < 1930 && defined(_M_ARM64) && !defined(__clang__)
+# pragma fp_contract(off)
+#endif
+
 /* Alignment for Zend memory allocator */
 #define ZEND_MM_ALIGNMENT (size_t)8
 #define ZEND_MM_ALIGNMENT_LOG2 (size_t)3
