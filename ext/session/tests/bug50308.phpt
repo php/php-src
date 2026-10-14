@@ -5,8 +5,6 @@ session
 --SKIPIF--
 <?php include 'skipif.inc'; ?>
 --INI--
-session.name=PHPSESSID
-session.save_handler=files
 session.use_trans_sid=1
 session.use_only_cookies=0
 --FILE--

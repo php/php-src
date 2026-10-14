@@ -6,7 +6,6 @@ session
 <?php include 'skipif.inc'; ?>
 --INI--
 session.use_cookies=0
-session.use_only_cookies=1
 --FILE--
 <?php
 

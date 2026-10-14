@@ -7,7 +7,6 @@ session
 --INI--
 session.use_strict_mode=0
 session.sid_length=40
-session.sid_bits_per_character=4
 --FILE--
 <?php
 // Empty session ID may happen by browser bugs

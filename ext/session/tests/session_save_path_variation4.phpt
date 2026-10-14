@@ -6,9 +6,6 @@ session
 <?php include 'skipif.inc';?>
 --INI--
 open_basedir=.
-session.save_handler=files
-session.save_path=
-session.name=PHPSESSID
 --FILE--
 <?php
 

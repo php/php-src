@@ -2,8 +2,6 @@
 Test session_save_path() function : basic functionality
 --INI--
 session.gc_probability=0
-session.save_path=
-session.name=PHPSESSID
 --EXTENSIONS--
 session
 --SKIPIF--

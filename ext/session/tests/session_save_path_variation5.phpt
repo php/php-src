@@ -7,10 +7,6 @@ session
 if(substr(PHP_OS, 0, 3) == "WIN")
     die("skip Not for Windows");
 ?>
---INI--
-session.save_handler=files
-session.save_path=
-session.name=PHPSESSID
 --FILE--
 <?php
 

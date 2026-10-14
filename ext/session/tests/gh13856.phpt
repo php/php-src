@@ -3,10 +3,7 @@ GH-13856 (Member access within null pointer of type 'ps_files' in ext/session/mo
 --EXTENSIONS--
 session
 --INI--
-session.save_handler=files
 open_basedir=.
-error_reporting=E_ALL
-session.save_path=
 --FILE--
 <?php
 session_set_save_handler(new \SessionHandler(), true);

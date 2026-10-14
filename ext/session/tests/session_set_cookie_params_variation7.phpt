@@ -1,10 +1,6 @@
 --TEST--
 Test session_set_cookie_params() function : array parameter variation
 --INI--
-session.cookie_lifetime=0
-session.cookie_path="/"
-session.cookie_domain=""
-session.cookie_secure=0
 session.cookie_httponly=0
 session.cookie_samesite=""
 --EXTENSIONS--

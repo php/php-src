@@ -9,8 +9,6 @@ session.use_cookies=0
 session.use_strict_mode=0
 session.cache_limiter=
 session.serialize_handler=php_serialize
-session.save_handler=files
-error_reporting=E_ALL
 --FILE--
 <?php
 session_start();

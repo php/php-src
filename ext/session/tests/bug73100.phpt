@@ -2,9 +2,6 @@
 Bug #73100 (session_destroy null dereference in ps_files_path_create)
 --EXTENSIONS--
 session
---INI--
-session.save_path=
-session.save_handler=files
 --FILE--
 <?php
 ob_start();

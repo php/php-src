@@ -5,7 +5,6 @@ session
 --SKIPIF--
 <?php include 'skipif.inc'; ?>
 --INI--
-session.save_handler=files
 session.gc_probability=0
 --FILE--
 <?php

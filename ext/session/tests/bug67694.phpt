@@ -1,9 +1,6 @@
 --TEST--
 Bug #67694 Regression in session_regenerate_id()
 --INI--
-session.save_handler = files
-session.name=PHPSESSID
-session.auto_start = 0
 session.use_cookies = 0
 session.cache_limiter =
 date.timezone = UTC

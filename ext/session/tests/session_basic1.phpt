@@ -2,12 +2,8 @@
 Test basic function : variation1
 --INI--
 session.use_strict_mode=0
-session.save_handler=files
-session.gc_probability=1
 session.gc_divisor=1000
 session.gc_maxlifetime=300
-session.save_path=
-session.name=PHPSESSID
 --EXTENSIONS--
 session
 --SKIPIF--

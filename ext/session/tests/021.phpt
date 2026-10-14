@@ -11,9 +11,6 @@ session.use_strict_mode=0
 session.cache_limiter=
 session.use_trans_sid=1
 url_rewriter.tags="a=href,area=href,frame=src,input=src,form=,fieldset="
-session.name=PHPSESSID
-session.serialize_handler=php
-session.save_handler=files
 --FILE--
 <?php
 

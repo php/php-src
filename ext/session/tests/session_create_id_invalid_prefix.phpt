@@ -1,8 +1,5 @@
 --TEST--
 Test session_create_id() function : invalid prefix
---INI--
-session.save_handler=files
-session.sid_length=32
 --EXTENSIONS--
 session
 --SKIPIF--
