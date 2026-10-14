@@ -107,6 +107,8 @@ PHP 8.7 UPGRADE NOTES
   . Improved performance of strcspn() and strpbrk() when searching longer strings
     with a single-byte character mask.
   . Improved performance of array_chunk() when not preserving keys.
+  . Improved performance of array_diff() for integer-only arrays when the
+    values to exclude are densely distributed.
   . Improved performance of array_splice() when inserting without removing
     elements.
   . Improved performance of str_rot13().
