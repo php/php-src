@@ -38,11 +38,11 @@
 
 #ifdef HAVE_RL_CALLBACK_READ_CHAR
 
-static zval _prepped_callback;
+static zend_fcall_info_cache _prepped_callback;
 
 #endif
 
-static zval _readline_completion;
+static zend_fcall_info_cache _readline_completion;
 static zval _readline_array;
 
 ZEND_TLS char *php_readline_custom_readline_name = NULL;
@@ -81,9 +81,9 @@ PHP_MINIT_FUNCTION(readline)
 		/* libedit don't need this call which set the tty in cooked mode */
 	using_history();
 #endif
-	ZVAL_UNDEF(&_readline_completion);
+	_readline_completion = empty_fcall_info_cache;
 #ifdef HAVE_RL_CALLBACK_READ_CHAR
-	ZVAL_UNDEF(&_prepped_callback);
+	_prepped_callback = empty_fcall_info_cache;
 #endif
 
 	register_readline_symbols(module_number);
@@ -98,13 +98,13 @@ PHP_MSHUTDOWN_FUNCTION(readline)
 
 PHP_RSHUTDOWN_FUNCTION(readline)
 {
-	zval_ptr_dtor(&_readline_completion);
-	ZVAL_UNDEF(&_readline_completion);
+	if (ZEND_FCC_INITIALIZED(_readline_completion)) {
+		zend_fcc_dtor(&_readline_completion);
+	}
 #ifdef HAVE_RL_CALLBACK_READ_CHAR
-	if (Z_TYPE(_prepped_callback) != IS_UNDEF) {
+	if (ZEND_FCC_INITIALIZED(_prepped_callback)) {
 		rl_callback_handler_remove();
-		zval_ptr_dtor(&_prepped_callback);
-		ZVAL_UNDEF(&_prepped_callback);
+		zend_fcc_dtor(&_prepped_callback);
 	}
 #endif
 
@@ -449,24 +449,25 @@ char **php_readline_completion_cb(const char *text, int start, int end)
 	ZVAL_LONG(&params[1], start);
 	ZVAL_LONG(&params[2], end);
 
-	if (call_user_function(NULL, NULL, &_readline_completion, &_readline_array, 3, params) == SUCCESS) {
-		if (Z_TYPE(_readline_array) == IS_ARRAY) {
-			SEPARATE_ARRAY(&_readline_array);
-			if (zend_hash_num_elements(Z_ARRVAL(_readline_array))) {
-				matches = rl_completion_matches(text,_readline_command_generator);
-			} else {
-				/* libedit will read matches[2] */
-				matches = calloc(3, sizeof(char *));
-				if (!matches) {
-					goto out;
-				}
-				matches[0] = strdup("");
+	zend_call_known_fcc(&_readline_completion, &_readline_array, 3, params, NULL);
+	zval_ptr_dtor(&params[0]);
+
+	if (Z_TYPE(_readline_array) == IS_ARRAY) {
+		SEPARATE_ARRAY(&_readline_array);
+		if (zend_hash_num_elements(Z_ARRVAL(_readline_array))) {
+			matches = rl_completion_matches(text,_readline_command_generator);
+		} else {
+			/* libedit will read matches[2] */
+			matches = calloc(3, sizeof(char *));
+			if (!matches) {
+				goto out;
 			}
+			matches[0] = strdup("");
 		}
 	}
+	// TODO: TypeError if return value is not array?
 
 out:
-	zval_ptr_dtor(&params[0]);
 	zval_ptr_dtor(&_readline_array);
 
 	return matches;
@@ -477,12 +478,14 @@ PHP_FUNCTION(readline_completion_function)
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "f", &fci, &fcc)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "F", &fci, &fcc)) {
 		RETURN_THROWS();
 	}
 
-	zval_ptr_dtor(&_readline_completion);
-	ZVAL_COPY(&_readline_completion, &fci.function_name);
+	if (ZEND_FCC_INITIALIZED(_readline_completion)) {
+		zend_fcc_dtor(&_readline_completion);
+	}
+	zend_fcc_dup(&_readline_completion, &fcc);
 
 	/* NOTE: The rl_attempted_completion_function variable (and others) are part of the readline library, not php */
 	rl_attempted_completion_function = php_readline_completion_cb;
@@ -497,14 +500,12 @@ PHP_FUNCTION(readline_completion_function)
 static void php_rl_callback_handler(char *the_line)
 {
 	zval params[1];
-	zval dummy;
 
 	_readline_string_zval(&params[0], the_line);
 
-	call_user_function(NULL, NULL, &_prepped_callback, &dummy, 1, params);
+	zend_call_known_fcc(&_prepped_callback, NULL, 1, params, NULL);
 
 	zval_ptr_dtor(&params[0]);
-	zval_ptr_dtor(&dummy);
 }
 
 /* {{{ Initializes the readline callback interface and terminal, prints the prompt and returns immediately */
@@ -515,16 +516,16 @@ PHP_FUNCTION(readline_callback_handler_install)
 	zend_fcall_info_cache fcc;
 	size_t prompt_len;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "sf", &prompt, &prompt_len, &fci, &fcc)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "sF", &prompt, &prompt_len, &fci, &fcc)) {
 		RETURN_THROWS();
 	}
 
-	if (Z_TYPE(_prepped_callback) != IS_UNDEF) {
+	if (ZEND_FCC_INITIALIZED(_prepped_callback)) {
 		rl_callback_handler_remove();
-		zval_ptr_dtor(&_prepped_callback);
+		zend_fcc_dtor(&_prepped_callback);
 	}
 
-	ZVAL_COPY(&_prepped_callback, &fci.function_name);
+	zend_fcc_dup(&_prepped_callback, &fcc);
 
 	rl_callback_handler_install(prompt, php_rl_callback_handler);
 
@@ -537,7 +538,7 @@ PHP_FUNCTION(readline_callback_read_char)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (Z_TYPE(_prepped_callback) != IS_UNDEF) {
+	if (ZEND_FCC_INITIALIZED(_prepped_callback)) {
 		rl_callback_read_char();
 	}
 }
@@ -548,10 +549,10 @@ PHP_FUNCTION(readline_callback_handler_remove)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (Z_TYPE(_prepped_callback) != IS_UNDEF) {
+	if (ZEND_FCC_INITIALIZED(_prepped_callback)) {
 		rl_callback_handler_remove();
-		zval_ptr_dtor(&_prepped_callback);
-		ZVAL_UNDEF(&_prepped_callback);
+		zend_fcc_dtor(&_prepped_callback);
+		_prepped_callback = empty_fcall_info_cache;
 		RETURN_TRUE;
 	}
 	RETURN_FALSE;
