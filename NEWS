@@ -21,6 +21,8 @@ PHP                                                                        NEWS
   . Fixed skipped catch block when switching fibers during exception unwinding
     (Nicolas Grekas)
   . Fix escape analysis for objects implementing ArrayAccess. (ndossche, Arnaud)
+  . Fix UAF for resolved callable zval. (EdmondDantes)
+  . Fix memory leak for nested HTTP calls. (EdmondDantes)
 
 - Fileinfo:
   . Fixed bug GH-24289 (finfo::file() reports the wrong argument number for
