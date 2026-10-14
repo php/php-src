@@ -95,12 +95,11 @@ static zend_result spl_object_storage_get_hash(zend_hash_key *key, spl_SplObject
 	if (UNEXPECTED(intern->fptr_get_hash)) {
 		zval param;
 		zval rv;
-		ZVAL_OBJ_COPY(&param, obj);
+		ZVAL_OBJ(&param, obj);
 		ZVAL_UNDEF(&rv);
 		spl_object_storage_get_hash_depth++;
 		zend_call_known_function(intern->fptr_get_hash, &intern->std, intern->std.ce, &rv, 1, &param, NULL);
 		spl_object_storage_get_hash_depth--;
-		zval_ptr_dtor(&param);
 		if (UNEXPECTED(Z_ISUNDEF(rv))) {
 			/* An exception has occurred */
 			return FAILURE;
@@ -1382,6 +1381,9 @@ static void spl_multiple_iterator_get_all(spl_SplObjectStorage *intern, int get_
 		zend_object *it = element->obj;
 		zval inf;
 		ZVAL_COPY(&inf, &element->inf);
+
+		/* We need to increase the refcount of $this, as we call two methods and it may be freed by any of it */
+		GC_ADDREF(it);
 		zend_call_known_instance_method_with_0_params(it->ce->iterator_funcs_ptr->zf_valid, it, &retval);
 
 		if (!Z_ISUNDEF(retval)) {
@@ -1397,12 +1399,14 @@ static void spl_multiple_iterator_get_all(spl_SplObjectStorage *intern, int get_
 			} else {
 				zend_call_known_instance_method_with_0_params(it->ce->iterator_funcs_ptr->zf_key, it, &retval);
 			}
+			OBJ_RELEASE(it);
 			if (Z_ISUNDEF(retval)) {
 				zval_ptr_dtor(&inf);
 				zend_throw_exception(spl_ce_RuntimeException, "Failed to call sub iterator method", 0);
 				return;
 			}
 		} else if (intern->flags & MIT_NEED_ALL) {
+			OBJ_RELEASE(it);
 			zval_ptr_dtor(&inf);
 			if (SPL_MULTIPLE_ITERATOR_GET_ALL_CURRENT == get_type) {
 				zend_throw_exception(spl_ce_RuntimeException, "Called current() with non valid sub iterator", 0);
@@ -1411,6 +1415,7 @@ static void spl_multiple_iterator_get_all(spl_SplObjectStorage *intern, int get_
 			}
 			return;
 		} else {
+			OBJ_RELEASE(it);
 			ZVAL_NULL(&retval);
 		}
 
