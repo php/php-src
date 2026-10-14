@@ -5,7 +5,6 @@ session
 --SKIPIF--
 <?php include 'skipif.inc'; ?>
 --INI--
-session.save_handler=files
 session.auto_start=1
 session.use_only_cookies=0
 --FILE--

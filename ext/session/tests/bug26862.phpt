@@ -5,9 +5,6 @@ session
 --SKIPIF--
 <?php include 'skipif.inc'; ?>
 --INI--
-html_errors=0
-session.use_trans_sid=0
-session.save_handler=files
 session.trans_sid_tags="a=href,area=href,frame=src,form="
 url_rewriter.tags="a=href,area=href,frame=src,form="
 --FILE--

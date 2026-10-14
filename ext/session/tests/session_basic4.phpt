@@ -4,12 +4,8 @@ Test basic function : variation4 use_trans_sid
 session.use_strict_mode=0
 session.use_only_cookies=0
 session.use_trans_sid=1
-session.save_handler=files
-session.gc_probability=1
 session.gc_divisor=1000
 session.gc_maxlifetime=300
-session.save_path=
-session.name=PHPSESSID
 session.trans_sid_tags="a=href,area=href,frame=src,form="
 url_rewriter.tags="a=href,area=href,frame=src,form="
 --EXTENSIONS--

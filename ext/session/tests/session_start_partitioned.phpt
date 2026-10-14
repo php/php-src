@@ -2,9 +2,6 @@
 session_start() with partitioned cookies
 --INI--
 session.use_strict_mode=0
-session.save_handler=files
-session.save_path=
-session.cookie_secure=0
 session.cookie_partitioned=0
 --EXTENSIONS--
 session

@@ -5,10 +5,6 @@ session
 --SKIPIF--
 <?php include 'skipif.inc'; ?>
 --INI--
-session.cookie_lifetime=0
-session.cookie_path="/"
-session.cookie_domain=""
-session.cookie_secure=0
 session.cookie_partitioned=0
 session.cookie_httponly=0
 session.cookie_samesite=""

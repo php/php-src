@@ -4,10 +4,6 @@ Test session_abort() function : basic functionality
 session
 --SKIPIF--
 <?php include 'skipif.inc'; ?>
---INI--
-session.save_path=
-session.name=PHPSESSID
-session.save_handler=files
 --FILE--
 <?php
 

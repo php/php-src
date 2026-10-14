@@ -6,9 +6,6 @@ session
 <?php include 'skipif.inc'; ?>
 --INI--
 display_startup_errors=0
-session.save_handler=files
-session.auto_start=0
-session.use_cookies=1
 session.use_only_cookies=0
 session.use_trans_sid=1
 session.use_strict_mode=0

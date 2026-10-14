@@ -2,19 +2,11 @@
 session rfc1867 sid get
 --INI--
 display_startup_errors=0
-file_uploads=1
 upload_max_filesize=1024
-session.save_path=
-session.name=PHPSESSID
 session.use_strict_mode=0
-session.use_cookies=1
 session.use_only_cookies=0
-session.upload_progress.enabled=1
 session.upload_progress.cleanup=0
-session.upload_progress.prefix=upload_progress_
-session.upload_progress.name=PHP_SESSION_UPLOAD_PROGRESS
 session.upload_progress.freq=0
-session.save_handler=files
 --EXTENSIONS--
 session
 --SKIPIF--

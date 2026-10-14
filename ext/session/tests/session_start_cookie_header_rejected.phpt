@@ -1,8 +1,6 @@
 --TEST--
 session_start() when the SAPI rejects the session cookie header
 --INI--
-session.save_handler=files
-session.name=PHPSESSID
 session.gc_probability=0
 --EXTENSIONS--
 session
