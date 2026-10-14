@@ -96,6 +96,8 @@ PHP                                                                        NEWS
 - SOAP:
   . Fixed the SOAP client accepting a response body shorter than its
     Content-Length and reusing the connection. (Ilia Alshanetsky)
+  . Fixed bug GH-24315 (Harden SoapClient cross-origin redirect handling).
+    (Ilia Alshanetsky)
 
 - SPL:
   . Fixed bug GH-23385 (SplDoublyLinkedList::serialize() use-after-free when

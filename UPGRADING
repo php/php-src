@@ -27,6 +27,14 @@ PHP 8.7 UPGRADE NOTES
     not present in the result set. It previously reported the condition
     through PDO::ATTR_ERRMODE and returned false.
 
+- SOAP:
+  . SoapClient no longer follows an HTTP redirect to a different origin
+    (scheme, host, or port) and throws a SoapFault instead. Previously the
+    request body and the configured credentials and headers were resent to
+    the new origin. A redirect from http to https on the same host is still
+    followed. Set the new follow_cross_origin_redirects option to true to
+    restore the previous behavior.
+
 - Session:
   . Setting session.cookie_path to a value containing one of ";\r\n", or
     session.cookie_domain to a value containing one of ",; \t\r\n\013\014",

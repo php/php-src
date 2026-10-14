@@ -2325,6 +2325,12 @@ PHP_METHOD(SoapClient, __construct)
 			ZVAL_FALSE(Z_CLIENT_KEEP_ALIVE_P(this_ptr));
 		}
 
+		if ((tmp = zend_hash_str_find(ht, "follow_cross_origin_redirects", sizeof("follow_cross_origin_redirects")-1)) != NULL &&
+				(Z_TYPE_P(tmp) == IS_TRUE ||
+				 (Z_TYPE_P(tmp) == IS_LONG && Z_LVAL_P(tmp) == 1))) {
+			ZVAL_TRUE(Z_CLIENT_FOLLOW_CROSS_ORIGIN_REDIRECTS_P(this_ptr));
+		}
+
 		if ((tmp = zend_hash_str_find(ht, "ssl_method", sizeof("ssl_method")-1)) != NULL &&
 			Z_TYPE_P(tmp) == IS_LONG) {
 			ZVAL_LONG(Z_CLIENT_SSL_METHOD_P(this_ptr), Z_LVAL_P(tmp));

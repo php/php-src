@@ -1,5 +1,5 @@
 /* This is a generated file, edit soap.stub.php instead.
- * Stub hash: 14c74a5d6f547837f536920d5abb741e2b6e4373 */
+ * Stub hash: dc9b0248aab9416e55d8b201fece34a9eb9b7f35 */
 
 #include "zend_attributes.h"
 #include "zend_constants.h"
@@ -747,6 +747,12 @@ static zend_class_entry *register_class_SoapClient(void)
 	zend_string *property___last_response_headers_name = zend_string_init("__last_response_headers", sizeof("__last_response_headers") - 1, true);
 	zend_declare_typed_property(class_entry, property___last_response_headers_name, &property___last_response_headers_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
 	zend_string_release_ex(property___last_response_headers_name, true);
+
+	zval property__follow_cross_origin_redirects_default_value;
+	ZVAL_FALSE(&property__follow_cross_origin_redirects_default_value);
+	zend_string *property__follow_cross_origin_redirects_name = zend_string_init("_follow_cross_origin_redirects", sizeof("_follow_cross_origin_redirects") - 1, true);
+	zend_declare_typed_property(class_entry, property__follow_cross_origin_redirects_name, &property__follow_cross_origin_redirects_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release_ex(property__follow_cross_origin_redirects_name, true);
 
 	return class_entry;
 }
