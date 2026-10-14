@@ -507,17 +507,14 @@ static void php_var_export_append_escaped(smart_str *buf, const char *str, size_
 
 static zend_result php_array_element_export(zval *zv, zend_ulong index, zend_string *key, int level, smart_str *buf) /* {{{ */
 {
+	buffer_append_spaces(buf, level + 1);
 	if (key == NULL) { /* numeric key */
-		buffer_append_spaces(buf, level+1);
 		smart_str_append_long(buf, (zend_long) index);
-		smart_str_appendl(buf, " => ", 4);
-
 	} else { /* string key */
-		buffer_append_spaces(buf, level + 1);
-
 		php_var_export_append_escaped(buf, ZSTR_VAL(key), ZSTR_LEN(key), /* escape_nul */ true);
-		smart_str_appendl(buf, " => ", 4);
 	}
+	smart_str_appendl(buf, " => ", 4);
+
 	zend_result result = php_var_export_ex(zv, level + 2, buf);
 
 	smart_str_appendc(buf, ',');
