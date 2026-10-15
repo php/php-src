@@ -52,6 +52,8 @@ PHP                                                                        NEWS
     which could cause readline() to return false prematurely. (Weilin Du)
 
 - Streams:
+  . Fixed in-place URL decoding of interned strings in the HTTP and FTP
+    wrappers. (Alejandro Pacheco)
   . Fixed bug GH-22063 (Stream filter chain UAF on self-removal during
     callback). (Ilia Alshanetsky)
   . Fixed leaks and data loss when user filter leaves buckets on input

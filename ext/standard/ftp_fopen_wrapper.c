@@ -133,6 +133,24 @@ static int php_stream_ftp_stream_close(php_stream_wrapper *wrapper, php_stream *
 }
 /* }}} */
 
+/* The components of a php_uri may be interned or shared, so they are decoded into a new string. */
+static zend_string *php_ftp_url_decode(const zend_string *component)
+{
+	zend_string *decoded = zend_string_alloc(ZSTR_LEN(component), false);
+	ZSTR_LEN(decoded) = php_raw_url_decode_ex(ZSTR_VAL(decoded), ZSTR_VAL(component), ZSTR_LEN(component));
+	return decoded;
+}
+
+static bool php_ftp_has_cntrl(const zend_string *str)
+{
+	for (size_t i = 0; i < ZSTR_LEN(str); i++) {
+		if (iscntrl((unsigned char) ZSTR_VAL(str)[i])) {
+			return true;
+		}
+	}
+	return false;
+}
+
 /* {{{ php_ftp_fopen_connect */
 static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char *path, const char *mode, int options,
 										 zend_string **opened_path, php_stream_context *context, php_stream **preuseid,
@@ -243,24 +261,18 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 #endif
 	}
 
-#define PHP_FTP_CNTRL_CHK(val, val_len, err_msg) {	\
-	unsigned char *s = (unsigned char *) val, *e = (unsigned char *) s + val_len;	\
-	while (s < e) {	\
-		if (iscntrl((unsigned char)*s)) {	\
-			php_stream_wrapper_log_error(wrapper, options, err_msg, val);	\
-			goto connect_errexit;	\
-		}	\
-		s++;	\
-	}	\
-}
-
 	/* send the user name */
 	if (resource->user != NULL) {
-		ZSTR_LEN(resource->user) = php_raw_url_decode(ZSTR_VAL(resource->user), ZSTR_LEN(resource->user));
+		zend_string *user = php_ftp_url_decode(resource->user);
 
-		PHP_FTP_CNTRL_CHK(ZSTR_VAL(resource->user), ZSTR_LEN(resource->user), "Invalid login %s")
+		if (php_ftp_has_cntrl(user)) {
+			php_stream_wrapper_log_error(wrapper, options, "Invalid login %s", ZSTR_VAL(user));
+			zend_string_efree(user);
+			goto connect_errexit;
+		}
 
-		php_stream_printf(stream, "USER %s\r\n", ZSTR_VAL(resource->user));
+		php_stream_printf(stream, "USER %s\r\n", ZSTR_VAL(user));
+		zend_string_efree(user);
 	} else {
 		php_stream_write_string(stream, "USER anonymous\r\n");
 	}
@@ -273,11 +285,16 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 		php_stream_notify_info(context, PHP_STREAM_NOTIFY_AUTH_REQUIRED, tmp_line, 0);
 
 		if (resource->password != NULL) {
-			ZSTR_LEN(resource->password) = php_raw_url_decode(ZSTR_VAL(resource->password), ZSTR_LEN(resource->password));
+			zend_string *password = php_ftp_url_decode(resource->password);
 
-			PHP_FTP_CNTRL_CHK(ZSTR_VAL(resource->password), ZSTR_LEN(resource->password), "Invalid password %s")
+			if (php_ftp_has_cntrl(password)) {
+				php_stream_wrapper_log_error(wrapper, options, "Invalid password %s", ZSTR_VAL(password));
+				zend_string_efree(password);
+				goto connect_errexit;
+			}
 
-			php_stream_printf(stream, "PASS %s\r\n", ZSTR_VAL(resource->password));
+			php_stream_printf(stream, "PASS %s\r\n", ZSTR_VAL(password));
+			zend_string_efree(password);
 		} else {
 			/* if the user has configured who they are,
 			   send that as the password */
