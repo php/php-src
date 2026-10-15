@@ -599,9 +599,13 @@ extern "C++" {
 #endif
 
 /* Only use ifunc resolvers if we have __builtin_cpu_supports() and __builtin_cpu_init(),
- * otherwise the use of zend_cpu_supports() may not be safe inside ifunc resolvers. */
+ * otherwise the use of zend_cpu_supports() may not be safe inside ifunc resolvers.
+ * Not with clang on 32-bit x86 either: it calls an ifunc defined in the same
+ * translation unit directly (R_386_PC32) instead of through the PLT, which the
+ * linker rejects for position-independent output ("unsupported non-PIC call to IFUNC"). */
 #if defined(HAVE_FUNC_ATTRIBUTE_IFUNC) && defined(HAVE_FUNC_ATTRIBUTE_TARGET) && \
-	defined(PHP_HAVE_BUILTIN_CPU_SUPPORTS) && defined(PHP_HAVE_BUILTIN_CPU_INIT)
+	defined(PHP_HAVE_BUILTIN_CPU_SUPPORTS) && defined(PHP_HAVE_BUILTIN_CPU_INIT) && \
+	!(defined(__clang__) && defined(__i386__))
 # define ZEND_INTRIN_HAVE_IFUNC_TARGET 1
 #endif
 
