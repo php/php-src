@@ -229,9 +229,9 @@ PHP_FUNCTION(finfo_set_flags)
 }
 /* }}} */
 
-static const char* php_fileinfo_from_path(struct magic_set *magic, const zend_string *path, php_stream_context *context)
+static const char* php_fileinfo_from_path(struct magic_set *magic, const zval *self, const zend_string *path, php_stream_context *context)
 {
-	ZEND_ASSERT(magic != NULL);
+	ZEND_ASSERT((magic != NULL) ^ (self != NULL));
 	ZEND_ASSERT(path);
 	ZEND_ASSERT(ZSTR_LEN(path) != 0);
 	ZEND_ASSERT(!zend_str_has_nul_byte(path));
@@ -266,6 +266,9 @@ static const char* php_fileinfo_from_path(struct magic_set *magic, const zend_st
 		}
 	}
 	if (!ret_val) {
+		if (magic == NULL) {
+			magic = Z_FINFO_P(self)->magic;
+		}
 		ret_val = magic_stream(magic, stream);
 		if (UNEXPECTED(ret_val == NULL)) {
 			php_error_docref(NULL, E_WARNING, "Failed identify data %d:%s", magic_errno(magic), magic_error(magic));
@@ -313,7 +316,13 @@ PHP_FUNCTION(finfo_file)
 		magic_setflags(magic, options);
 	}
 
-	const char *ret_val = php_fileinfo_from_path(magic, path, context);
+	const char *ret_val = php_fileinfo_from_path(NULL, self, path, context);
+
+	if (!Z_FINFO_P(self)->magic) {
+		zend_throw_error(NULL, "Invalid finfo object");
+		RETURN_THROWS();
+	}
+	magic = Z_FINFO_P(self)->magic;
 
 	/* Restore options */
 	if (options) {
@@ -425,7 +434,7 @@ PHP_FUNCTION(mime_content_type)
 	const char *ret_val;
 	if (path) {
 		php_stream_context *context = php_stream_context_get_default(false);
-		ret_val = php_fileinfo_from_path(magic, path, context);
+		ret_val = php_fileinfo_from_path(magic, NULL, path, context);
 	} else {
 		/* remember stream position for restoration */
 		zend_off_t current_stream_pos = php_stream_tell(stream);
