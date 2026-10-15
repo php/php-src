@@ -187,7 +187,7 @@ const POSIX_RLIMIT_NPTS = UNKNOWN;
 #ifdef HAVE_SETRLIMIT
 /**
  * @var int
- * @cvalue RLIM_INFINITY
+ * @cvalue PHP_POSIX_RLIM_INFINITY
  */
 const POSIX_RLIMIT_INFINITY = UNKNOWN;
 #endif

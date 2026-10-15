@@ -51,6 +51,10 @@
 #define POSIX_PID_MAX INT_MAX
 #endif
 
+/* RLIM_INFINITY does not fit into a 32-bit zend_long if rlim_t is 64-bit.
+ * posix_setrlimit() maps -1 to RLIM_INFINITY, so use that in this case. */
+#define PHP_POSIX_RLIM_INFINITY (RLIM_INFINITY > ZEND_LONG_MAX ? -1 : (zend_long) RLIM_INFINITY)
+
 #include "posix_arginfo.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(posix)
