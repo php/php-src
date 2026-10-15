@@ -4514,7 +4514,6 @@ PHP_FUNCTION(sodium_crypto_xof_shake128_update)
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		RETURN_THROWS();
 	}
-	RETURN_TRUE;
 }
 
 PHP_FUNCTION(sodium_crypto_xof_shake128_squeeze)
@@ -4618,7 +4617,6 @@ PHP_FUNCTION(sodium_crypto_xof_shake256_update)
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		RETURN_THROWS();
 	}
-	RETURN_TRUE;
 }
 
 PHP_FUNCTION(sodium_crypto_xof_shake256_squeeze)
@@ -4721,7 +4719,6 @@ PHP_FUNCTION(sodium_crypto_xof_turboshake128_update)
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		RETURN_THROWS();
 	}
-	RETURN_TRUE;
 }
 
 PHP_FUNCTION(sodium_crypto_xof_turboshake128_squeeze)
@@ -4825,7 +4822,6 @@ PHP_FUNCTION(sodium_crypto_xof_turboshake256_update)
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		RETURN_THROWS();
 	}
-	RETURN_TRUE;
 }
 
 PHP_FUNCTION(sodium_crypto_xof_turboshake256_squeeze)

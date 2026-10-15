@@ -938,7 +938,7 @@ function sodium_crypto_xof_shake128(int $length, string $message): string {}
 
 function sodium_crypto_xof_shake128_init(?int $domain = null): SodiumCryptoXofShake128State {}
 
-function sodium_crypto_xof_shake128_update(SodiumCryptoXofShake128State $state, string $message): true {}
+function sodium_crypto_xof_shake128_update(SodiumCryptoXofShake128State $state, string $message): void {}
 
 function sodium_crypto_xof_shake128_squeeze(SodiumCryptoXofShake128State $state, int $length): string {}
 
@@ -954,7 +954,7 @@ function sodium_crypto_xof_shake256(int $length, string $message): string {}
 
 function sodium_crypto_xof_shake256_init(?int $domain = null): SodiumCryptoXofShake256State {}
 
-function sodium_crypto_xof_shake256_update(SodiumCryptoXofShake256State $state, string $message): true {}
+function sodium_crypto_xof_shake256_update(SodiumCryptoXofShake256State $state, string $message): void {}
 
 function sodium_crypto_xof_shake256_squeeze(SodiumCryptoXofShake256State $state, int $length): string {}
 
@@ -970,7 +970,7 @@ function sodium_crypto_xof_turboshake128(int $length, string $message): string {
 
 function sodium_crypto_xof_turboshake128_init(?int $domain = null): SodiumCryptoXofTurboshake128State {}
 
-function sodium_crypto_xof_turboshake128_update(SodiumCryptoXofTurboshake128State $state, string $message): true {}
+function sodium_crypto_xof_turboshake128_update(SodiumCryptoXofTurboshake128State $state, string $message): void {}
 
 function sodium_crypto_xof_turboshake128_squeeze(SodiumCryptoXofTurboshake128State $state, int $length): string {}
 
@@ -986,7 +986,7 @@ function sodium_crypto_xof_turboshake256(int $length, string $message): string {
 
 function sodium_crypto_xof_turboshake256_init(?int $domain = null): SodiumCryptoXofTurboshake256State {}
 
-function sodium_crypto_xof_turboshake256_update(SodiumCryptoXofTurboshake256State $state, string $message): true {}
+function sodium_crypto_xof_turboshake256_update(SodiumCryptoXofTurboshake256State $state, string $message): void {}
 
 function sodium_crypto_xof_turboshake256_squeeze(SodiumCryptoXofTurboshake256State $state, int $length): string {}
 
