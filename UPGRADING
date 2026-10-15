@@ -949,6 +949,9 @@ PHP 8.6 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+- Curl:
+  . The Curl extension now requires at least libcurl 7.61.1.
+
 - Fileinfo:
   . Upgraded to file 5.48.
     Custom compiled magic databases from older file versions must be regenerated.
