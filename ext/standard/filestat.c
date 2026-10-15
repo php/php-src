@@ -355,7 +355,7 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 #else
 	if (group_str) {
 		if (php_get_gid_by_name(ZSTR_VAL(group_str), &gid) != SUCCESS) {
-			php_error_docref(NULL, E_WARNING, "Unable to find gid for %s", ZSTR_VAL(group_str));
+			php_error_docref(NULL, E_WARNING, "Unable to find gid for %pS", group_str);
 			RETURN_FALSE;
 		}
 	} else {
@@ -493,7 +493,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 
 	if (user_str) {
 		if (php_get_uid_by_name(ZSTR_VAL(user_str), &uid) != SUCCESS) {
-			php_error_docref(NULL, E_WARNING, "Unable to find uid for %s", ZSTR_VAL(user_str));
+			php_error_docref(NULL, E_WARNING, "Unable to find uid for %pS", user_str);
 			RETURN_FALSE;
 		}
 	} else {
@@ -808,7 +808,7 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 		 || wrapper->wops->url_stat(wrapper, local, flags | PHP_STREAM_URL_STAT_IGNORE_OPEN_BASEDIR, &ssb, NULL)) {
 			/* Error Occurred */
 			if (!IS_EXISTS_CHECK(type)) {
-				php_error_docref(NULL, E_WARNING, "%sstat failed for %s", IS_LINK_OPERATION(type) ? "L" : "", ZSTR_VAL(filename));
+				php_error_docref(NULL, E_WARNING, "%sstat failed for %pS", IS_LINK_OPERATION(type) ? "L" : "", filename);
 			}
 			RETURN_FALSE;
 		}
