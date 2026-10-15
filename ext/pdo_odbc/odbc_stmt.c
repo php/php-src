@@ -676,12 +676,24 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 			NULL, 0, NULL, &displaysize);
 
 	if (rc != SQL_SUCCESS) {
-		pdo_odbc_stmt_error("SQLColAttribute");
+		pdo_odbc_stmt_error("SQLColAttribute: SQL_DESC_DISPLAY_SIZE");
 		if (rc != SQL_SUCCESS_WITH_INFO) {
 			return 0;
 		}
 	}
 	colsize = displaysize;
+
+	char table_name[128]; /* same as colname */
+	SQLSMALLINT table_name_len = 0;
+	rc = SQLColAttribute(S->stmt, colno+1,
+			SQL_DESC_TABLE_NAME, /* XXX: SQL_DESC_BASE_TABLE_NAME? */
+			&table_name, sizeof(table_name),
+			&table_name_len, NULL);
+
+	/* an error here is non-fatal, proceed regardless */
+	if ((rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO) && table_name_len > 0) {
+		col->table = zend_string_init(table_name, table_name_len, 0);
+	}
 
 	S->cols[colno].datalen = colsize;
 	col->maxlen = displaysize;
