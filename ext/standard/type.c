@@ -98,13 +98,11 @@ PHP_FUNCTION(settype)
 	} else {
 		ptr = Z_REFVAL_P(var);
 	}
-	if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_INTEGER))) {
+	if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_INTEGER))
+			|| zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_INT))) {
 		convert_to_long(ptr);
-	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_INT))) {
-		convert_to_long(ptr);
-	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_FLOAT))) {
-		convert_to_double(ptr);
-	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_DOUBLE))) {
+	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_FLOAT))
+			|| zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_DOUBLE))) {
 		convert_to_double(ptr);
 	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_STRING))) {
 		convert_to_string(ptr);
@@ -112,9 +110,8 @@ PHP_FUNCTION(settype)
 		convert_to_array(ptr);
 	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_OBJECT))) {
 		convert_to_object(ptr);
-	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_BOOL))) {
-		convert_to_boolean(ptr);
-	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_BOOLEAN))) {
+	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_BOOL))
+			|| zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_BOOLEAN))) {
 		convert_to_boolean(ptr);
 	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_NULL_LOWERCASE))) {
 		convert_to_null(ptr);
