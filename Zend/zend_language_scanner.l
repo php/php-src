@@ -657,7 +657,15 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type)
 			zend_begin_record_errors();
 		}
 
-		op_array = zend_compile(ZEND_USER_FUNCTION);
+		zend_try {
+			op_array = zend_compile(ZEND_USER_FUNCTION);
+		} zend_catch {
+			if (!orig_record_errors) {
+				EG(record_errors) = false;
+				zend_free_recorded_errors();
+			}
+			zend_bailout();
+		} zend_end_try();
 
 		if (!orig_record_errors) {
 			zend_emit_recorded_errors();
