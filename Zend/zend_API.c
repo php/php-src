@@ -1873,16 +1873,7 @@ ZEND_API void object_properties_load(zend_object *object, const HashTable *prope
 static zend_always_inline zend_result _object_and_properties_init(zval *arg, zend_class_entry *ce, HashTable *properties) /* {{{ */
 {
 	if (UNEXPECTED(ce->ce_flags & ZEND_ACC_UNINSTANTIABLE)) {
-		if (ce->ce_flags & ZEND_ACC_INTERFACE) {
-			zend_throw_error(NULL, "Cannot instantiate interface %s", ZSTR_VAL(ce->name));
-		} else if (ce->ce_flags & ZEND_ACC_TRAIT) {
-			zend_throw_error(NULL, "Cannot instantiate trait %s", ZSTR_VAL(ce->name));
-		} else if (ce->ce_flags & ZEND_ACC_ENUM) {
-			zend_throw_error(NULL, "Cannot instantiate enum %s", ZSTR_VAL(ce->name));
-		} else {
-			ZEND_ASSERT(ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS));
-			zend_throw_error(NULL, "Cannot instantiate abstract class %s", ZSTR_VAL(ce->name));
-		}
+		zend_cannot_instantiate_class(ce);
 		ZVAL_NULL(arg);
 		Z_OBJ_P(arg) = NULL;
 		return FAILURE;
