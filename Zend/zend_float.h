@@ -61,9 +61,9 @@ END_EXTERN_C()
     no reason to use it on x86_64.
 
  General:
-  - It would be nice if one could detect whether SSE if used for math via some
-    funky compiler defines and if so, make the macros go to NOPs. Any ideas
-    on how to do that?
+  - If __SSE2_MATH__ is defined (SSE2 floating point math), zend_init_fpu()
+    and zend_ensure_fpu_mode() in zend_float.c skip the precision switch. The
+    XPFPA_* macros are not changed, so the EG layout does not depend on it.
 
  MS Visual C:
   - Since MSVC users typically don't use autoconf or CMake, we will detect
