@@ -260,11 +260,7 @@ ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 
 	if (!obj) {
 		if (UNEXPECTED(reflection_ce->ce_flags & ZEND_ACC_UNINSTANTIABLE)) {
-			zval zobj;
-			/* Call object_init_ex() for the generated exception */
-			zend_result result = object_init_ex(&zobj, reflection_ce);
-			ZEND_ASSERT(result == FAILURE && EG(exception));
-			(void)result;
+			zend_cannot_instantiate_class(reflection_ce);
 			return NULL;
 		}
 

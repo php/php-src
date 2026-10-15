@@ -211,3 +211,18 @@ ZEND_API ZEND_COLD zend_property_info *zend_get_property_info_for_slot_slow(zend
 	} ZEND_HASH_FOREACH_END();
 	return NULL;
 }
+
+ZEND_API ZEND_COLD zend_never_inline void zend_cannot_instantiate_class(
+	const zend_class_entry *ce
+) {
+	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_UNINSTANTIABLE);
+	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+		zend_throw_error(NULL, "Cannot instantiate interface %s", ZSTR_VAL(ce->name));
+	} else if (ce->ce_flags & ZEND_ACC_TRAIT) {
+		zend_throw_error(NULL, "Cannot instantiate trait %s", ZSTR_VAL(ce->name));
+	} else if (ce->ce_flags & ZEND_ACC_ENUM) {
+		zend_throw_error(NULL, "Cannot instantiate enum %s", ZSTR_VAL(ce->name));
+	} else if (ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
+		zend_throw_error(NULL, "Cannot instantiate abstract class %s", ZSTR_VAL(ce->name));
+	}
+}

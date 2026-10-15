@@ -160,4 +160,6 @@ static zend_always_inline bool zend_check_method_accessible(const zend_function 
 	return true;
 }
 
+ZEND_API ZEND_COLD zend_never_inline void zend_cannot_instantiate_class(const zend_class_entry *ce);
+
 #endif /* ZEND_OBJECTS_H */
