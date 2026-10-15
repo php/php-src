@@ -184,7 +184,7 @@ code_changed:
 	uintptr_t offset;
 
 	if (memcmp(&code[9], "\x48\x8d\x80", 3) == 0) {
-		// local-exec, leaq any(%rax),$rax
+		// local-exec, leaq any(%rax),%rax
 		offset = (uintptr_t)displacement;
 	} else if (memcmp(&code[9], "\x48\x03\x05", 3) == 0) {
 		// initial-exec, addq any(%rip),%rax
