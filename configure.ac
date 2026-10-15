@@ -891,7 +891,7 @@ AS_VAR_IF([PHP_THREAD_SAFETY], [yes], [
 
   AS_VAR_IF([php_tsrm_dlopened_sapi], [yes], [
     php_tsrm_tls_model=
-    for flag in $CFLAGS; do
+    for flag in $CFLAGS $EXTRA_CFLAGS; do
       AS_CASE([$flag], [-ftls-model=*], [php_tsrm_tls_model=$flag])
     done
 
