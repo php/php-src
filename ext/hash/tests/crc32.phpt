@@ -102,6 +102,36 @@ echo hash('crc32c', '12345678901234561234567890123456123456789012345612345678901
 echo hash('crc32c', '123456789012345612345678901234561234567890123456123456789012345612345678901234561234567890123456123456789012345612345678901234561234567890123456'), "\n";
 echo hash('crc32c', '123456789012345612345678901234561234567890123456123456789012345612345678901234561234567890123456123456789012345612345678901234561234567890123456abc'), "\n";
 
+echo "crc32-iso-hdlc\n";
+echo hash('crc32-iso-hdlc', ''), "\n";
+echo hash('crc32-iso-hdlc', 'a'), "\n";
+echo hash('crc32-iso-hdlc', 'abc'), "\n";
+echo hash('crc32-iso-hdlc', 'message digest'), "\n";
+echo hash('crc32-iso-hdlc', 'abcdefghijklmnopqrstuvwxyz'), "\n";
+echo hash('crc32-iso-hdlc', 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'), "\n";
+echo hash('crc32-iso-hdlc', '12345678901234567890123456789012345678901234567890123456789012345678901234567890'), "\n";
+echo hash('crc32-iso-hdlc', '123456789'), "\n";
+
+echo "crc32-iscsi\n";
+echo hash('crc32-iscsi', ''), "\n";
+echo hash('crc32-iscsi', 'a'), "\n";
+echo hash('crc32-iscsi', 'abc'), "\n";
+echo hash('crc32-iscsi', 'message digest'), "\n";
+echo hash('crc32-iscsi', 'abcdefghijklmnopqrstuvwxyz'), "\n";
+echo hash('crc32-iscsi', 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'), "\n";
+echo hash('crc32-iscsi', '12345678901234567890123456789012345678901234567890123456789012345678901234567890'), "\n";
+echo hash('crc32-iscsi', '123456789'), "\n";
+
+echo "crc32-php\n";
+echo hash('crc32-php', ''), "\n";
+echo hash('crc32-php', 'a'), "\n";
+echo hash('crc32-php', 'abc'), "\n";
+echo hash('crc32-php', 'message digest'), "\n";
+echo hash('crc32-php', 'abcdefghijklmnopqrstuvwxyz'), "\n";
+echo hash('crc32-php', 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'), "\n";
+echo hash('crc32-php', '12345678901234567890123456789012345678901234567890123456789012345678901234567890'), "\n";
+echo hash('crc32-php', '123456789'), "\n";
+
 ?>
 --EXPECT--
 crc32
@@ -201,3 +231,30 @@ a0e3e317
 c292a38d
 e3e558ec
 b6c5e13e
+crc32-iso-hdlc
+00000000
+e8b7be43
+352441c2
+20159d7f
+4c2750bd
+1fc2e6d2
+7ca94a72
+cbf43926
+crc32-iscsi
+00000000
+c1d04330
+364b3fb7
+02bd79d0
+9ee6ef25
+a245d57d
+477a6781
+e3069283
+crc32-php
+00000000
+6b9b9319
+73bb8c64
+5703c9bf
+9693bf77
+882174a0
+96790816
+181989fc
