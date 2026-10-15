@@ -42,6 +42,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-24289 (finfo::file() reports the wrong argument number for
     an invalid $filename). (Lazizbek Ergashev)
 
+- FTP:
+  . Fix double free in ext/ftp data_accept() on accept failure. (alepacheco)
+
 - MBString:
   . Fixed bug GH-23958 (truncated encoding names resolving to full names). (Kamil Tekiela)
 
