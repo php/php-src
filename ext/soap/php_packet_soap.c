@@ -261,7 +261,15 @@ bool parse_packet_soap(zval *this_ptr, zend_string *buffer, sdlFunctionPtr fn, z
 				master_to_zval_with_doc_cleanup(&details, NULL, tmp, response);
 			}
 		}
-		add_soap_fault(this_ptr, faultcode, faultstring ? ZSTR_VAL(faultstring) : NULL, faultactor, &details, lang);
+		if (SOAP_ENCODING_ERROR_THROWN()) {
+			/* Decoding the fault failed, the client reports that error instead */
+			zval_ptr_dtor(&details);
+		} else {
+			add_soap_fault(this_ptr, faultcode, faultstring ? ZSTR_VAL(faultstring) : NULL, faultactor, &details, lang);
+			if (Z_REFCOUNTED(details)) {
+				Z_DELREF(details);
+			}
+		}
 		if (faultstring) {
 			zend_string_release_ex(faultstring, 0);
 		}
@@ -269,9 +277,6 @@ bool parse_packet_soap(zval *this_ptr, zend_string *buffer, sdlFunctionPtr fn, z
 			zend_string_release_ex(faultactor, 0);
 		}
 		zend_string_release_ex(lang, false);
-		if (Z_REFCOUNTED(details)) {
-			Z_DELREF(details);
-		}
 		xmlFreeDoc(response);
 		return false;
 	}
@@ -442,10 +447,21 @@ bool parse_packet_soap(zval *this_ptr, zend_string *buffer, sdlFunctionPtr fn, z
 					smart_str_free(&key);
 				}
 				master_to_zval_with_doc_cleanup(&val, enc, trav, response);
+				if (SOAP_ENCODING_ERROR_THROWN()) {
+					/* The trace of the SoapFault shares the array of output headers */
+					zval_ptr_dtor(&val);
+					break;
+				}
 				add_assoc_zval(soap_headers, (const char*)trav->name, &val);
 			}
 			trav = trav->next;
 		}
+	}
+
+	if (SOAP_ENCODING_ERROR_THROWN()) {
+		/* The result is incomplete */
+		zval_ptr_dtor(return_value);
+		ZVAL_NULL(return_value);
 	}
 
 	xmlFreeDoc(response);
