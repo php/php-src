@@ -95,9 +95,8 @@ if test "$PHP_APXS2" != "no"; then
   PHP_SUBST([LIBPHP_CFLAGS])
 
   dnl httpd dlopen's libphp.so without linking against it, so we must
-  dnl use global-dynamic by default (_tsrm_ls_cache overflows the default
-  dnl static TLS surplus). Force --with-tsrm-tls-model=initial-exec to
-  dnl override this behaviour, see UPGRADING.INTERNALS
+  dnl use global-dynamic by default. Use -ftls-model=initial-exec to
+  dnl override the compiler choice, see UPGRADING.INTERNALS
   php_tsrm_dlopened_sapi=yes
 
   php_sapi_apache2handler_type=shared

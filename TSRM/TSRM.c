@@ -855,8 +855,8 @@ TSRM_API void *tsrm_get_ls_cache(void)
 /* Returns offset of tsrm_ls_cache slot from Thread Control Block address */
 TSRM_API size_t tsrm_get_ls_cache_tcb_offset(void)
 {/*{{{*/
-#if defined(TSRM_TLS_MODEL_GLOBAL_DYNAMIC)
-	/* No constant TCB offset under global-dynamic, can't use fast path */
+#if defined(TSRM_TLS_MODEL_USE_DEFAULT) && defined(__PIC__) && !defined(__PIE__)
+	/* The compiler may use dynamic TLS. Do not force a static TLS relocation. */
 	return 0;
 #elif defined(__APPLE__) && defined(__x86_64__)
     // TODO: Implement support for fast JIT ZTS code ???
