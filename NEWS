@@ -106,6 +106,9 @@ PHP                                                                        NEWS
   . SoapClient no longer bails out on WSDL and XML schema errors, which kept
     the cycle collector disabled for the rest of the request (GH-10026).
     (Valery Ivashchanka)
+  . SoapClient no longer bails out on errors in encoding a request or decoding
+    a response, which kept the cycle collector disabled for the rest of the
+    request (GH-10026). (Valery Ivashchanka)
 
 - SPL:
   . Fixed bug GH-23385 (SplDoublyLinkedList::serialize() use-after-free when

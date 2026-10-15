@@ -2027,6 +2027,24 @@ ZEND_COLD void soap_throw_error(const char *format, ...) /* {{{ */
 }
 /* }}} */
 
+/* Encoding errors are thrown only where a fatal error used to become a SoapFault: in a call of a SoapClient that uses
+ * exceptions. Only the first one is thrown, the encoding that is still running after it reports nothing. */
+soap_encoding_error_mode soap_get_encoding_error_mode(void) /* {{{ */
+{
+	zval *client = &SOAP_GLOBAL(error_object);
+
+	if (!Z_OBJ_P(client) ||
+	    !instanceof_function(Z_OBJCE_P(client), soap_class_entry) ||
+	    Z_TYPE_P(Z_CLIENT_EXCEPTIONS_P(client)) == IS_FALSE) {
+		return SOAP_ENCODING_ERROR_FATAL;
+	}
+	if (EG(exception) && instanceof_function(EG(exception)->ce, soap_fault_class_entry)) {
+		return SOAP_ENCODING_ERROR_IGNORE;
+	}
+	return SOAP_ENCODING_ERROR_THROW;
+}
+/* }}} */
+
 /* SoapServer and SoapClient with the "exceptions" option disabled report
  * errors as fatal errors. Turns the SoapFault thrown by soap_throw_error()
  * into the same fatal error that soap_errorN(E_ERROR, ...) raises. */
@@ -2587,6 +2605,7 @@ static void do_soap_call(zend_execute_data *execute_data,
 		SOAP_GLOBAL(features) = 0;
 	}
 
+	ZVAL_NULL(&response);
 	zend_try {
 	 	if (sdl != NULL) {
 			fn = get_function(sdl, ZSTR_VAL(function), ZSTR_LEN(function));
@@ -2610,10 +2629,14 @@ static void do_soap_call(zend_execute_data *execute_data,
 				if (binding->bindingType == BINDING_SOAP) {
 					sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)fn->bindingAttributes;
 					request = serialize_function_call(this_ptr, fn, NULL, fnb->input.ns, real_args, arg_count, soap_version, soap_headers);
-					ret = do_request(this_ptr, request, location_c_str, fnb->soapAction, soap_version, one_way, &response);
+					if (!SOAP_ENCODING_ERROR_THROWN()) {
+						ret = do_request(this_ptr, request, location_c_str, fnb->soapAction, soap_version, one_way, &response);
+					}
 				} else {
 	 				request = serialize_function_call(this_ptr, fn, NULL, sdl->target_ns, real_args, arg_count, soap_version, soap_headers);
-					ret = do_request(this_ptr, request, location_c_str, NULL, soap_version, one_way, &response);
+					if (!SOAP_ENCODING_ERROR_THROWN()) {
+						ret = do_request(this_ptr, request, location_c_str, NULL, soap_version, one_way, &response);
+					}
 				}
 
 				xmlFreeDoc(request);
@@ -2667,7 +2690,9 @@ static void do_soap_call(zend_execute_data *execute_data,
 				}
 				smart_str_0(&action);
 
-				ret = do_request(this_ptr, request, ZSTR_VAL(location), ZSTR_VAL(action.s), soap_version, 0, &response);
+				if (!SOAP_ENCODING_ERROR_THROWN()) {
+					ret = do_request(this_ptr, request, ZSTR_VAL(location), ZSTR_VAL(action.s), soap_version, 0, &response);
+				}
 
 		 		smart_str_free(&action);
 				xmlFreeDoc(request);
