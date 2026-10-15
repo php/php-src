@@ -69,6 +69,13 @@ static ssize_t php_sockop_write(php_stream *stream, const char *buf, size_t coun
 	else
 		ptimeout = &sock->timeout;
 
+#ifdef PHP_WIN32
+	/* There is no MSG_DONTWAIT on Windows, so switch to non-blocking mode for a
+	 * timed write; otherwise send() could block past the timeout. */
+	bool restore_blocking = sock->is_blocked && ptimeout
+		&& php_set_sock_blocking(sock->socket, 0) == SUCCESS;
+#endif
+
 retry:
 	didwrite = send(sock->socket, buf, XP_SOCK_BUF_SIZE(count), (sock->is_blocked && ptimeout) ? MSG_DONTWAIT : 0);
 
@@ -112,6 +119,12 @@ retry:
 			efree(estr);
 		}
 	}
+
+#ifdef PHP_WIN32
+	if (restore_blocking) {
+		php_set_sock_blocking(sock->socket, 1);
+	}
+#endif
 
 	if (didwrite > 0) {
 		php_stream_notify_progress_increment(PHP_STREAM_CONTEXT(stream), didwrite, 0);
