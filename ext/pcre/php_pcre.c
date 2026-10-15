@@ -2316,6 +2316,16 @@ static void _preg_replace_common(
 		RETURN_THROWS();
 	}
 
+	if (regex_ht) {
+		GC_TRY_ADDREF(regex_ht);
+	}
+	if (replace_ht) {
+		GC_TRY_ADDREF(replace_ht);
+	}
+	if (subject_ht) {
+		GC_TRY_ADDREF(subject_ht);
+	}
+
 	if (subject_str) {
 		old_replace_count = replace_count;
 		result = php_replace_in_subject(regex_str, regex_ht, replace_str, replace_ht,
@@ -2369,6 +2379,16 @@ static void _preg_replace_common(
 
 	if (zcount) {
 		ZEND_TRY_ASSIGN_REF_LONG(zcount, replace_count);
+	}
+
+	if (regex_ht) {
+		GC_TRY_DTOR_NO_REF(regex_ht);
+	}
+	if (replace_ht) {
+		GC_TRY_DTOR_NO_REF(replace_ht);
+	}
+	if (subject_ht) {
+		GC_TRY_DTOR_NO_REF(subject_ht);
 	}
 }
 
