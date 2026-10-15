@@ -200,9 +200,6 @@ END_EXTERN_C()
 #define UNREGISTER_INI_ENTRIES() zend_unregister_ini_entries_ex(module_number, type)
 #define DISPLAY_INI_ENTRIES() display_ini_entries(zend_module)
 
-#define REGISTER_INI_DISPLAYER(name, displayer) zend_ini_register_displayer((name), strlen(name), displayer)
-#define REGISTER_INI_BOOLEAN(name) REGISTER_INI_DISPLAYER(name, zend_ini_boolean_displayer_cb)
-
 /* Standard message handlers */
 BEGIN_EXTERN_C()
 ZEND_API ZEND_INI_MH(OnUpdateBool);
