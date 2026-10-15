@@ -671,7 +671,7 @@ PHP_FUNCTION(exp)
 		Z_PARAM_DOUBLE(num)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_DOUBLE(exp(num));
+	RETURN_DOUBLE(zend_exp(num));
 }
 /* }}} */
 
