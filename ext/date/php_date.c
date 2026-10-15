@@ -2232,6 +2232,12 @@ static HashTable *date_object_get_properties_interval(zend_object *object) /* {{
 		return props;
 	}
 
+	/* The table may still be held elsewhere (e.g. json_encode() walking a cycle), so separate it before writing */
+	if (UNEXPECTED(GC_REFCOUNT(props) > 1)) {
+        GC_TRY_DELREF(props);
+		props = object->properties = zend_array_dup(props);
+	}
+
 	date_interval_object_to_hash(intervalobj, props);
 
 	return props;
