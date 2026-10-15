@@ -15823,11 +15823,12 @@ static int zend_jit_incdec_obj(zend_jit_ctx         *jit,
 		}
 
 		if (var_info & (MAY_BE_ANY - MAY_BE_LONG)) {
-			if (var_info & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
-				may_throw = 1;
-			}
 			if (if_long) {
 				ir_IF_FALSE_cold(if_long);
+			}
+			if (var_info & (MAY_BE_ANY - (MAY_BE_LONG|MAY_BE_DOUBLE))) {
+				may_throw = 1;
+				jit_SET_EX_OPLINE(jit, opline);
 			}
 			if (opline->opcode == ZEND_POST_INC_OBJ || opline->opcode == ZEND_POST_DEC_OBJ) {
 				jit_ZVAL_COPY(jit, res_addr, -1, var_addr, var_info, 1);
