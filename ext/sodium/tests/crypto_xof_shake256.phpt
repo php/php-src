@@ -67,5 +67,5 @@ bool(true)
 string(64) "483366601360a8771c6863080cc4114d8db44530f8f1e1ee4f94ea37e78b5739"
 string(64) "483366601360a8771c6863080cc4114d8db44530f8f1e1ee4f94ea37e78b5739"
 string(64) "1259d63c872d50fee4500685419f489966971c0a77e2058fab0e48dfb12d24bc"
-sodium_crypto_xof_shake256(): Argument #1 ($length) must be a positive integer
-sodium_crypto_xof_shake256_squeeze(): Argument #2 ($length) must be a positive integer
+sodium_crypto_xof_shake256(): Argument #1 ($length) must be greater than 0
+sodium_crypto_xof_shake256_squeeze(): Argument #2 ($length) must be greater than 0

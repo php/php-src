@@ -4453,8 +4453,8 @@ PHP_FUNCTION(sodium_crypto_xof_shake128)
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
-	if (out_len <= 0 || out_len > ZSTR_MAX_LEN) {
-		zend_argument_error(sodium_exception_ce, 1, "must be a positive integer");
+	if (out_len <= 0) {
+		zend_argument_error(sodium_exception_ce, 1, "must be greater than 0");
 		RETURN_THROWS();
 	}
 	out = zend_string_alloc((size_t) out_len, 0);
@@ -4527,8 +4527,8 @@ PHP_FUNCTION(sodium_crypto_xof_shake128_squeeze)
 		RETURN_THROWS();
 	}
 
-	if (out_len <= 0 || out_len > ZSTR_MAX_LEN) {
-		zend_argument_error(sodium_exception_ce, 2, "must be a positive integer");
+	if (out_len <= 0) {
+		zend_argument_error(sodium_exception_ce, 2, "must be greater than 0");
 		RETURN_THROWS();
 	}
 
@@ -4556,8 +4556,8 @@ PHP_FUNCTION(sodium_crypto_xof_shake256)
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
-	if (out_len <= 0 || out_len > ZSTR_MAX_LEN) {
-		zend_argument_error(sodium_exception_ce, 1, "must be a positive integer");
+	if (out_len <= 0) {
+		zend_argument_error(sodium_exception_ce, 1, "must be greater than 0");
 		RETURN_THROWS();
 	}
 	out = zend_string_alloc((size_t) out_len, 0);
@@ -4629,8 +4629,8 @@ PHP_FUNCTION(sodium_crypto_xof_shake256_squeeze)
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
-	if (out_len <= 0 || out_len > ZSTR_MAX_LEN) {
-		zend_argument_error(sodium_exception_ce, 2, "must be a positive integer");
+	if (out_len <= 0) {
+		zend_argument_error(sodium_exception_ce, 2, "must be greater than 0");
 		RETURN_THROWS();
 	}
 
@@ -4658,8 +4658,8 @@ PHP_FUNCTION(sodium_crypto_xof_turboshake128)
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
-	if (out_len <= 0 || out_len > ZSTR_MAX_LEN) {
-		zend_argument_error(sodium_exception_ce, 1, "must be a positive integer");
+	if (out_len <= 0) {
+		zend_argument_error(sodium_exception_ce, 1, "must be greater than 0");
 		RETURN_THROWS();
 	}
 	out = zend_string_alloc((size_t) out_len, 0);
@@ -4732,8 +4732,8 @@ PHP_FUNCTION(sodium_crypto_xof_turboshake128_squeeze)
 		RETURN_THROWS();
 	}
 
-	if (out_len <= 0 || out_len > ZSTR_MAX_LEN) {
-		zend_argument_error(sodium_exception_ce, 2, "must be a positive integer");
+	if (out_len <= 0) {
+		zend_argument_error(sodium_exception_ce, 2, "must be greater than 0");
 		RETURN_THROWS();
 	}
 	
@@ -4761,8 +4761,8 @@ PHP_FUNCTION(sodium_crypto_xof_turboshake256)
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
-	if (out_len <= 0 || out_len > ZSTR_MAX_LEN) {
-		zend_argument_error(sodium_exception_ce, 1, "must be a positive integer");
+	if (out_len <= 0) {
+		zend_argument_error(sodium_exception_ce, 1, "must be greater than 0");
 		RETURN_THROWS();
 	}
 	out = zend_string_alloc((size_t) out_len, 0);
@@ -4835,8 +4835,8 @@ PHP_FUNCTION(sodium_crypto_xof_turboshake256_squeeze)
 		RETURN_THROWS();
 	}
 
-	if (out_len <= 0 || out_len > ZSTR_MAX_LEN) {
-		zend_argument_error(sodium_exception_ce, 2, "must be a positive integer");
+	if (out_len <= 0) {
+		zend_argument_error(sodium_exception_ce, 2, "must be greater than 0");
 		RETURN_THROWS();
 	}
 

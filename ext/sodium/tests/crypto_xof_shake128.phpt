@@ -90,7 +90,7 @@ string(64) "5881092dd818bf5cf8a3ddb793fbcba74097d5c526a6d35f97b83351940f2cc8"
 string(64) "5881092dd818bf5cf8a3ddb793fbcba74097d5c526a6d35f97b83351940f2cc8"
 string(64) "f3a3a89c329e644a7d2351744d9a28c953698b64102e912085ce1f6d79fa311e"
 bool(true)
-sodium_crypto_xof_shake128(): Argument #1 ($length) must be a positive integer
-sodium_crypto_xof_shake128(): Argument #1 ($length) must be a positive integer
+sodium_crypto_xof_shake128(): Argument #1 ($length) must be greater than 0
+sodium_crypto_xof_shake128(): Argument #1 ($length) must be greater than 0
 sodium_crypto_xof_shake128_init(): Argument #1 ($domain) must be between 0x01 and 0x7f
 sodium_crypto_xof_shake128_init(): Argument #1 ($domain) must be between 0x01 and 0x7f
