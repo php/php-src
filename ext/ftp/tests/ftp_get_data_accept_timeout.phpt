@@ -28,12 +28,12 @@ ftp_close($ftp);
 bool(true)
 bool(true)
 
-Warning: ftp_get(): Connection timed out in %s on line %d
+Warning: ftp_get(): %s timed out in %s on line %d
 
 Warning: ftp_get(): File status okay; about to open data connection. in %s on line %d
 bool(false)
 
-Warning: ftp_nb_get(): Connection timed out in %s on line %d
+Warning: ftp_nb_get(): %s timed out in %s on line %d
 
 Warning: ftp_nb_get(): File status okay; about to open data connection. in %s on line %d
 bool(true)
