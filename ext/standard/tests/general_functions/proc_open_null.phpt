@@ -5,7 +5,7 @@ Null pipes in proc_open()
 
 $php = getenv('TEST_PHP_EXECUTABLE');
 $args = getenv('TEST_PHP_EXTRA_ARGS');
-$cmd = "$php $args -r 'echo \"Test\"; fprintf(STDERR, \"Error\");'";
+$cmd = "$php $args -r \"echo 'Test'; fprintf(STDERR, 'Error');\"";
 
 $proc = proc_open($cmd, [1 => ['null'], 2 => ['pipe', 'w']], $pipes);
 var_dump($pipes);
