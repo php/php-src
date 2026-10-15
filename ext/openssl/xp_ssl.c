@@ -1788,10 +1788,18 @@ static unsigned int php_openssl_psk_client_cb(SSL *ssl, const char *hint,
 		return 0;
 	}
 
+	bool originally_no_fclose = stream->flags & PHP_STREAM_FLAG_NO_FCLOSE;
+	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 	zval result;
 	if (php_openssl_call_psk_cb(stream, &sslsock->psk_callbacks->client_cb,
 			NULL, 0, &result) != SUCCESS) {
+		if (!originally_no_fclose) {
+			stream->flags ^= PHP_STREAM_FLAG_NO_FCLOSE;
+		}
 		return 0;
+	}
+	if (!originally_no_fclose) {
+		stream->flags ^= PHP_STREAM_FLAG_NO_FCLOSE;
 	}
 
 	if (Z_TYPE(result) == IS_NULL) {
@@ -1962,10 +1970,18 @@ static int php_openssl_psk_find_session_cb(SSL *ssl, const unsigned char *identi
 		return 1;
 	}
 
+	bool originally_no_fclose = stream->flags & PHP_STREAM_FLAG_NO_FCLOSE;
+	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 	zval result;
 	if (php_openssl_call_psk_cb(stream, &sslsock->psk_callbacks->server_cb,
 			identity, identity_len, &result) != SUCCESS) {
+		if (!originally_no_fclose) {
+			stream->flags ^= PHP_STREAM_FLAG_NO_FCLOSE;
+		}
 		return 0;
+	}
+	if (!originally_no_fclose) {
+		stream->flags ^= PHP_STREAM_FLAG_NO_FCLOSE;
 	}
 
 	if (Z_TYPE(result) == IS_NULL) {
@@ -2200,7 +2216,12 @@ static int php_openssl_session_new_cb(SSL *ssl, SSL_SESSION *session)
 	ZVAL_RES(&args[0], stream->res);
 	php_openssl_session_object_init(&args[1], session);
 
+	bool originally_no_fclose = stream->flags & PHP_STREAM_FLAG_NO_FCLOSE;
+	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 	zend_call_known_fcc(&sslsock->session_callbacks->new_cb, NULL, 2, args, NULL);
+	if (!originally_no_fclose) {
+		stream->flags ^= PHP_STREAM_FLAG_NO_FCLOSE;
+	}
 
 	zval_ptr_dtor(&args[1]);
 
@@ -2233,7 +2254,12 @@ static SSL_SESSION *php_openssl_session_get_cb(SSL *ssl, const unsigned char *se
 
 	SSL_SESSION *session = NULL;
 
+	bool originally_no_fclose = stream->flags & PHP_STREAM_FLAG_NO_FCLOSE;
+	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 	zend_call_known_fcc(&sslsock->session_callbacks->get_cb, &retval, 2, args, NULL);
+	if (!originally_no_fclose) {
+		stream->flags ^= PHP_STREAM_FLAG_NO_FCLOSE;
+	}
 	zval_ptr_dtor(&args[1]);
 
 	if (php_openssl_is_session_ce(&retval)) {
@@ -2952,8 +2978,13 @@ static int php_openssl_handshake_server_early_data(php_stream *stream,
 				zval args[2];
 				ZVAL_RES(&args[0], stream->res);
 				ZVAL_STRINGL(&args[1], (char *) buf, readbytes);
+				bool originally_no_fclose = stream->flags & PHP_STREAM_FLAG_NO_FCLOSE;
+				stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 				zend_call_known_fcc(&sslsock->early_data_callbacks->read_cb,
 						NULL, 2, args, NULL);
+				if (!originally_no_fclose) {
+					stream->flags ^= PHP_STREAM_FLAG_NO_FCLOSE;
+				}
 				zval_ptr_dtor(&args[1]);
 			}
 			continue;
