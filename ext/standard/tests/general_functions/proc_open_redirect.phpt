@@ -26,7 +26,7 @@ try {
 }
 
 echo "\nWith pipe:\n";
-$cmd = "$php $args -r 'echo \"Test\n\"; fprintf(STDERR, \"Error\");'";
+$cmd = "$php $args -r \"echo 'Test', chr(10); fprintf(STDERR, 'Error');\"";
 $proc = proc_open($cmd, [1 => ['pipe', 'w'], 2 => ['redirect', 1]], $pipes);
 var_dump($pipes);
 var_dump(stream_get_contents($pipes[1]));
