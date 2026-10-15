@@ -1290,11 +1290,7 @@ PHP_FUNCTION(unpack)
 							x = php_pack_reverse_int64(x);
 						}
 
-						if (type == 'q') {
-							v = (int64_t) x;
-						} else {
-							v = x;
-						}
+						v = x;
 
 						ZVAL_LONG(&val, v);
 						break;
