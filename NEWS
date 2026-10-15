@@ -20,6 +20,10 @@ PHP                                                                        NEWS
   . Fixed array_map() optimization not resolving the class name of a static
     first-class callable. (Claudio Dekker)
 
+- Date:
+  . Fixed bug GH-20503 (Assertion failure with ext/date DateInterval property
+    hash construction). (heathdutton)
+
 - Fileinfo:
   . Fixed bug GH-24289 (finfo::file() reports the wrong argument number for
     an invalid $filename). (Lazizbek Ergashev)
