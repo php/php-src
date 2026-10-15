@@ -73,6 +73,10 @@ PHP                                                                        NEWS
   . Fixed password_get_info() and password_needs_rehash() accepting malformed
     bcrypt costs. (Ilia Alshanetsky)
 
+- Tidy:
+  . Fixed tidy_repair_string(), tidy_repair_file(), tidy::repairString() and
+    tidy::repairFile() rejecting null for $encoding. (lacatoire)
+
 - Zip:
   . Fixed use-after-free when re-entering ZipArchive during destruction or
     a close warning, and rejected opening streams while closing. (jvoisin)

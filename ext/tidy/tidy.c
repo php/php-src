@@ -261,7 +261,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, bool is_file)
 			Z_PARAM_PATH_STR(arg1)
 			Z_PARAM_OPTIONAL
 			Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(config_ht, config_str)
-			Z_PARAM_STRING(enc, enc_len)
+			Z_PARAM_STRING_OR_NULL(enc, enc_len)
 			Z_PARAM_BOOL(use_include_path)
 		ZEND_PARSE_PARAMETERS_END();
 
@@ -273,7 +273,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, bool is_file)
 			Z_PARAM_STR(arg1)
 			Z_PARAM_OPTIONAL
 			Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(config_ht, config_str)
-			Z_PARAM_STRING(enc, enc_len)
+			Z_PARAM_STRING_OR_NULL(enc, enc_len)
 		ZEND_PARSE_PARAMETERS_END();
 
 		data = arg1;
