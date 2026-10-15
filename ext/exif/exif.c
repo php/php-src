@@ -2948,6 +2948,28 @@ static void exif_thumbnail_build(image_info_type *ImageInfo) {
 }
 /* }}} */
 
+static void exif_thumbnail_extract_from_stream(image_info_type *ImageInfo)
+{
+	size_t fgot;
+
+	if (ImageInfo->Thumbnail.offset > ImageInfo->FileSize
+	 || ImageInfo->Thumbnail.size > ImageInfo->FileSize - ImageInfo->Thumbnail.offset) {
+		EXIF_ERRLOG_THUMBEOF(ImageInfo)
+		return;
+	}
+
+	ImageInfo->Thumbnail.data = safe_emalloc(ImageInfo->Thumbnail.size, 1, 0);
+	php_stream_seek(ImageInfo->infile, ImageInfo->Thumbnail.offset, SEEK_SET);
+	fgot = exif_read_from_stream_file_looped(ImageInfo->infile, ImageInfo->Thumbnail.data, ImageInfo->Thumbnail.size);
+	if (fgot != ImageInfo->Thumbnail.size) {
+		EXIF_ERRLOG_THUMBEOF(ImageInfo)
+		efree(ImageInfo->Thumbnail.data);
+		ImageInfo->Thumbnail.data = NULL;
+	} else {
+		exif_thumbnail_build(ImageInfo);
+	}
+}
+
 /* {{{ exif_thumbnail_extract
  * Grab the thumbnail, corrected */
 static void exif_thumbnail_extract(image_info_type *ImageInfo, const exif_offset_info *info) {
@@ -4041,7 +4063,7 @@ static bool exif_process_IFD_in_TIFF_impl(image_info_type *ImageInfo, size_t dir
 {
 	int i, sn, num_entries, sub_section_index = 0;
 	unsigned char *dir_entry;
-	size_t ifd_size, dir_size, entry_offset, next_offset, entry_length, entry_value=0, fgot;
+	size_t ifd_size, dir_size, entry_offset, next_offset, entry_length, entry_value=0;
 	int entry_tag , entry_type;
 	tag_table_type tag_table = exif_get_tag_table(section_index);
 
@@ -4202,17 +4224,7 @@ static bool exif_process_IFD_in_TIFF_impl(image_info_type *ImageInfo, size_t dir
 								exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "%s THUMBNAIL @0x%04X + 0x%04X", ImageInfo->Thumbnail.data ? "Ignore" : "Read", ImageInfo->Thumbnail.offset, ImageInfo->Thumbnail.size);
 #endif
 								if (!ImageInfo->Thumbnail.data) {
-									ImageInfo->Thumbnail.data = safe_emalloc(ImageInfo->Thumbnail.size, 1, 0);
-									php_stream_seek(ImageInfo->infile, ImageInfo->Thumbnail.offset, SEEK_SET);
-									fgot = exif_read_from_stream_file_looped(ImageInfo->infile, ImageInfo->Thumbnail.data, ImageInfo->Thumbnail.size);
-									if (fgot != ImageInfo->Thumbnail.size) {
-										EXIF_ERRLOG_THUMBEOF(ImageInfo)
-										efree(ImageInfo->Thumbnail.data);
-
-										ImageInfo->Thumbnail.data = NULL;
-									} else {
-										exif_thumbnail_build(ImageInfo);
-									}
+									exif_thumbnail_extract_from_stream(ImageInfo);
 								}
 							}
 						}
@@ -4242,16 +4254,7 @@ static bool exif_process_IFD_in_TIFF_impl(image_info_type *ImageInfo, size_t dir
 					exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "%s THUMBNAIL @0x%04X + 0x%04X", ImageInfo->Thumbnail.data ? "Ignore" : "Read", ImageInfo->Thumbnail.offset, ImageInfo->Thumbnail.size);
 #endif
 					if (!ImageInfo->Thumbnail.data && ImageInfo->Thumbnail.offset && ImageInfo->Thumbnail.size && ImageInfo->read_thumbnail) {
-						ImageInfo->Thumbnail.data = safe_emalloc(ImageInfo->Thumbnail.size, 1, 0);
-						php_stream_seek(ImageInfo->infile, ImageInfo->Thumbnail.offset, SEEK_SET);
-						fgot = exif_read_from_stream_file_looped(ImageInfo->infile, ImageInfo->Thumbnail.data, ImageInfo->Thumbnail.size);
-						if (fgot != ImageInfo->Thumbnail.size) {
-							EXIF_ERRLOG_THUMBEOF(ImageInfo)
-							efree(ImageInfo->Thumbnail.data);
-							ImageInfo->Thumbnail.data = NULL;
-						} else {
-							exif_thumbnail_build(ImageInfo);
-						}
+						exif_thumbnail_extract_from_stream(ImageInfo);
 					}
 #ifdef EXIF_DEBUG
 					exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Read next IFD (THUMBNAIL) done");
