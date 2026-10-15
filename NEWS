@@ -55,6 +55,10 @@ PHP                                                                        NEWS
 - Phpdbg:
   . Fix wrong command names. (ndossche, Weilin Du)
 
+- OpenSSL:
+  . Fixed bug GH-24220 (Failed listen() on a tcp:// server reported as
+    success with ext/openssl). (Ryosuke Ishibashi)
+
 - Phar:
   . Fixed GH-24166 (Double-free in Phar::webPhar() in CGI without PATH_INFO).
     (RigelYoung, Jakub Zelenka)
