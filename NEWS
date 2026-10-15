@@ -77,6 +77,8 @@ PHP                                                                        NEWS
 - SOAP:
   . Fixed use of uninitialized func in do_request() on OOM bailout.
     (David Carlier)
+  . Fixed SoapClient not restoring EG(vm_stack_top) after catching a bailout
+    from a call that grew the VM stack. (Valery Ivashchanka)
 
 - Session:
   . Fixed session data loss in the files save handler when writing the session
