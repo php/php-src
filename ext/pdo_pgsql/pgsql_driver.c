@@ -1512,11 +1512,11 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{
 
 	/* support both full connection string & connection string + login and/or password */
 	if (tmp_user) {
-		smart_str_append_printf(&conn_str, " user='%s'", ZSTR_VAL(tmp_user));
+		smart_str_append_printf(&conn_str, " user='%pS'", tmp_user);
 	}
 
 	if (tmp_pass) {
-		smart_str_append_printf(&conn_str, " password='%s'", ZSTR_VAL(tmp_pass));
+		smart_str_append_printf(&conn_str, " password='%pS'", tmp_pass);
 	}
 	smart_str_0(&conn_str);
 
