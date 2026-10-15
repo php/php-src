@@ -68,6 +68,8 @@ var_dump($objs[0]->pu, $objs[1]->pu, $objs[2]->pu, $objs[3]->pu);
 --EXPECT--
 Decrement on non-numeric string has no effect and is deprecated on line 9
 Decrement on non-numeric string has no effect and is deprecated on line 9
+Increment on non-numeric string is deprecated, use str_increment() instead on line 14
+Increment on non-numeric string is deprecated, use str_increment() instead on line 14
 Decrement on type bool has no effect, this will change in the next major version of PHP on line 9
 Decrement on type bool has no effect, this will change in the next major version of PHP on line 9
 Increment on type bool has no effect, this will change in the next major version of PHP on line 14
@@ -76,6 +78,8 @@ Cannot decrement array on line 9
 Cannot increment array on line 14
 Decrement on non-numeric string has no effect and is deprecated on line 9
 Decrement on non-numeric string has no effect and is deprecated on line 9
+Increment on non-numeric string is deprecated, use str_increment() instead on line 14
+Increment on non-numeric string is deprecated, use str_increment() instead on line 14
 Decrement on type bool has no effect, this will change in the next major version of PHP on line 9
 Decrement on type bool has no effect, this will change in the next major version of PHP on line 9
 Increment on type bool has no effect, this will change in the next major version of PHP on line 14
@@ -84,6 +88,8 @@ Cannot decrement array on line 9
 Cannot increment array on line 14
 Decrement on non-numeric string has no effect and is deprecated on line 9
 Decrement on non-numeric string has no effect and is deprecated on line 9
+Increment on non-numeric string is deprecated, use str_increment() instead on line 14
+Increment on non-numeric string is deprecated, use str_increment() instead on line 14
 Decrement on type bool has no effect, this will change in the next major version of PHP on line 9
 Decrement on type bool has no effect, this will change in the next major version of PHP on line 9
 Increment on type bool has no effect, this will change in the next major version of PHP on line 14
@@ -92,6 +98,8 @@ Cannot decrement array on line 9
 Cannot increment array on line 14
 Decrement on non-numeric string has no effect and is deprecated on line 9
 Decrement on non-numeric string has no effect and is deprecated on line 9
+Increment on non-numeric string is deprecated, use str_increment() instead on line 14
+Increment on non-numeric string is deprecated, use str_increment() instead on line 14
 Decrement on type bool has no effect, this will change in the next major version of PHP on line 9
 Decrement on type bool has no effect, this will change in the next major version of PHP on line 9
 Increment on type bool has no effect, this will change in the next major version of PHP on line 14
