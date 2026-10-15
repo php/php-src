@@ -142,6 +142,14 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 		return NULL;
 	}
 
+	/* Searching for a substring is a bit expensive, and this is just a
+	 * hardening assertion to confirm php_uri_parse_to_struct() stripped any
+	 * CRLF sequence, only run in debug mode. */
+#if ZEND_DEBUG
+	char *pos = strstr(ZSTR_VAL(resource->path), "\r\n");
+	ZEND_ASSERT(pos == NULL);
+#endif
+
 	use_ssl = resource->scheme && (ZSTR_LEN(resource->scheme) > 3) && ZSTR_VAL(resource->scheme)[3] == 's';
 
 	/* use port 21 if one wasn't specified */
