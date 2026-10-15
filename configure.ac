@@ -890,8 +890,17 @@ AS_VAR_IF([PHP_THREAD_SAFETY], [yes], [
   AC_MSG_RESULT([yes])
 
   AS_VAR_IF([php_tsrm_dlopened_sapi], [yes], [
-    AC_DEFINE([TSRM_TLS_MODEL_USE_DEFAULT], [1],
-      [Define to 1 to use the compiler's default TLS model.])
+    php_tsrm_tls_model=
+    for flag in $CFLAGS; do
+      AS_CASE([$flag], [-ftls-model=*], [php_tsrm_tls_model=$flag])
+    done
+
+    dnl Define TSRM_TLS_MODEL_USE_DEFAULT to avoid forcing static TLS in dlopened SAPIs.
+    dnl Omit it for explicit initial-exec to enable the TCB offset fast path.
+    AS_IF([test "$php_tsrm_tls_model" != "-ftls-model=initial-exec"], [
+      AC_DEFINE([TSRM_TLS_MODEL_USE_DEFAULT], [1],
+        [Define to 1 to use the compiler's default TLS model.])
+    ])
   ])
 ])
 
