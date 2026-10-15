@@ -98,7 +98,7 @@ static void to64(char *s, int32_t v, int n)
  */
 char * php_md5_crypt_r(const char *pw, const char *salt, char *out)
 {
-	ZEND_TLS char passwd[MD5_HASH_MAX_LEN], *p;
+	char *passwd = out, *p;
 	const char *sp, *ep;
 	unsigned char final[16];
 	unsigned int i, sl, pwl;

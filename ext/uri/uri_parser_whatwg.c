@@ -22,10 +22,19 @@
 #include <arpa/inet.h>
 #endif
 
-ZEND_TLS lexbor_mraw_t lexbor_mraw = {0};
-ZEND_TLS lxb_url_parser_t lexbor_parser = {0};
-ZEND_TLS lxb_unicode_idna_t lexbor_idna = {0};
-ZEND_TLS uint8_t lexbor_custom_url_map[256] = {0};
+typedef struct {
+	lexbor_mraw_t mraw;
+	lxb_url_parser_t parser;
+	lxb_unicode_idna_t idna;
+	uint8_t custom_url_map[256];
+} php_uri_whatwg_globals;
+
+ZEND_TLS php_uri_whatwg_globals *whatwg_globals = NULL;
+
+#define lexbor_mraw (whatwg_globals->mraw)
+#define lexbor_parser (whatwg_globals->parser)
+#define lexbor_idna (whatwg_globals->idna)
+#define lexbor_custom_url_map (whatwg_globals->custom_url_map)
 
 static const size_t lexbor_mraw_byte_size = 8192;
 
@@ -560,6 +569,8 @@ static zend_result php_uri_parser_whatwg_fragment_write(void *uri, const zval *v
 
 PHP_RINIT_FUNCTION(uri_parser_whatwg)
 {
+	whatwg_globals = ecalloc(1, sizeof(*whatwg_globals));
+
 	lxb_status_t status = lexbor_mraw_init(&lexbor_mraw, lexbor_mraw_byte_size);
 	if (status != LXB_STATUS_OK) {
 		goto fail;
@@ -591,17 +602,27 @@ PHP_RINIT_FUNCTION(uri_parser_whatwg)
 	lexbor_mraw_destroy(&lexbor_mraw, false);
 	memset(&lexbor_mraw, 0, sizeof(lexbor_mraw));
 
+	efree(whatwg_globals);
+	whatwg_globals = NULL;
+
 	return FAILURE;
 }
 
 ZEND_MODULE_POST_ZEND_DEACTIVATE_D(uri_parser_whatwg)
 {
+	if (whatwg_globals == NULL) {
+		return SUCCESS;
+	}
+
 	lxb_unicode_idna_destroy(&lexbor_idna, false);
 	memset(&lexbor_idna, 0, sizeof(lexbor_idna));
 	lxb_url_parser_destroy(&lexbor_parser, false);
 	memset(&lexbor_parser, 0, sizeof(lexbor_parser));
 	lexbor_mraw_destroy(&lexbor_mraw, false);
 	memset(&lexbor_mraw, 0, sizeof(lexbor_mraw));
+
+	efree(whatwg_globals);
+	whatwg_globals = NULL;
 
 	return SUCCESS;
 }
