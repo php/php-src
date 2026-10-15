@@ -115,6 +115,7 @@ static inline void php_rinit_session_globals(void)
 	PS(session_status) = php_session_none;
 	PS(in_save_handler) = false;
 	PS(set_handler) = false;
+	PS(handler_bailout) = false;
 	PS(mod_data) = NULL;
 	PS(mod_user_is_open) = false;
 	PS(mod_user_uses_object_methods_as_handlers) = false;
@@ -421,6 +422,7 @@ static zend_result php_session_initialize(void)
 	zend_string *val = NULL;
 
 	PS(session_status) = php_session_active;
+	PS(handler_bailout) = false;
 
 	if (!PS(mod)) {
 		PS(session_status) = php_session_disabled;
@@ -1783,8 +1785,18 @@ PHPAPI zend_result php_session_start(void)
 PHPAPI bool php_session_flush(bool write)
 {
 	if (PS(session_status) == php_session_active) {
-		php_session_save_current_state(write);
+		bool bailout = false;
+		zend_try {
+			php_session_save_current_state(write && !PS(handler_bailout));
+		} zend_catch {
+			bailout = true;
+		} zend_end_try();
+		if (bailout) {
+			PS(handler_bailout) = true;
+			zend_bailout();
+		}
 		PS(session_status) = php_session_none;
+		PS(handler_bailout) = false;
 		return true;
 	}
 	return false;
@@ -2374,6 +2386,11 @@ PHP_FUNCTION(session_regenerate_id)
 		RETURN_FALSE;
 	}
 
+	if (PS(handler_bailout)) {
+		php_error_docref(NULL, E_WARNING, "Session ID cannot be regenerated after a fatal error in session handling");
+		RETURN_FALSE;
+	}
+
 	/* Process old session data */
 	if (del_ses) {
 		if (PS(mod)->s_destroy(&PS(mod_data), PS(id)) == FAILURE) {
@@ -2928,6 +2945,7 @@ static PHP_GINIT_FUNCTION(ps)
 	ps_globals->mod_user_uses_object_methods_as_handlers = false;
 	ps_globals->session_vars = NULL;
 	ps_globals->set_handler = false;
+	ps_globals->handler_bailout = false;
 	ps_globals->session_started_filename = NULL;
 	ps_globals->session_started_lineno = 0;
 	/* Unset user defined handlers */

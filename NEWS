@@ -66,6 +66,8 @@ PHP                                                                        NEWS
 - Session:
   . Fixed session_write_close() keeping the save handler open when the
     session data cannot be encoded. (Ilia Alshanetsky)
+  . Fixed bug GH-15529 (session save handler wrongly reported as recursive
+    after a fatal error inside a handler callback). (Ilia Alshanetsky)
 
 - Standard:
   . Fixed chown() and lchown() failing to resolve user names in ZTS builds
