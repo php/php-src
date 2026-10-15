@@ -315,6 +315,11 @@ PHP_METHOD(Time_Duration, fromIso8601DurationString)
 		Z_PARAM_STR(specification);
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (zend_str_has_nul_byte(specification)) {
+		throw_timelib_error(TIMELIB_ERROR_ISO8601_DURATION_PARSE_FAILURE);
+		RETURN_THROWS();
+	}
+
 	int error;
 	timelib_duration *d = timelib_duration_create_from_iso8601string(ZSTR_VAL(specification), &error);
 	if (error != TIMELIB_ERROR_NO_ERROR) {
