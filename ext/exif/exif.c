@@ -4092,7 +4092,7 @@ static bool exif_process_IFD_in_TIFF_impl(image_info_type *ImageInfo, size_t dir
 					/*The next line would break the image on writeback: */
 					/* php_ifd_set16u(dir_entry+2, entry_type, ImageInfo->motorola_intel);*/
 				}
-				entry_length = php_ifd_get32u(dir_entry+4, ImageInfo->motorola_intel) * php_tiff_bytes_per_format[entry_type];
+				entry_length = (int64_t)php_ifd_get32u(dir_entry+4, ImageInfo->motorola_intel) * php_tiff_bytes_per_format[entry_type];
 				if (entry_length <= 4) {
 					switch(entry_type) {
 						case TAG_FMT_USHORT:
