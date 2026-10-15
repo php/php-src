@@ -125,9 +125,10 @@ static bool php_password_bcrypt_get_cost(zend_array *options, zend_long *cost) {
 static bool php_password_bcrypt_parse(const zend_string *hash, zend_long *cost) {
 	unsigned int c = 0;
 	int r = 0;
+	const char *h = ZSTR_VAL(hash);
 
-	if (ZSTR_LEN(hash) == 60 && ZSTR_VAL(hash)[5] != '$' &&
-		1 == sscanf(ZSTR_VAL(hash), "$2y$%2u$%*21[./A-Za-z0-9]%*1[.Oeu]%*31[./A-Za-z0-9]%n", &c, &r) &&
+	if (ZSTR_LEN(hash) == 60 && ZEND_IS_DIGIT(h[4]) && ZEND_IS_DIGIT(h[5]) &&
+		1 == sscanf(h, "$2y$%2u$%*21[./A-Za-z0-9]%*1[.Oeu]%*31[./A-Za-z0-9]%n", &c, &r) &&
 		r == 60 && c >= 4 && c <= 31
 	) {
 		if (cost != NULL) {

@@ -30,6 +30,10 @@ $invalidHashes = [
 	'malformed salt segment' => '$2y$04$MTIzNDU2Nzg5MDEyMzQ1NEj0NmcAWSLR.oP7XOR9HD/vjUuOj100y',
 	'malformed hash segment' => '$2y$04$MTIzNDU2Nzg5MDEyMzQ1Nej0NmcAWSLR+oP7XOR9HD/vjUuOj100y',
 	'malicious misalignment' => '$2y$4$MTIzNDU2Nzg5MDEyMzQ1Neej0NmcAWSLR+oP7XOR9HD/vjUuOj100y',
+	'minus sign' => '$2y$-4$' . $suffix,
+	'plus sign' => '$2y$+4$' . $suffix,
+	'newline' => '$2y$'."\n".'4$' . $suffix,
+	'space' => '$2y$ 4$' . $suffix,
 ];
 
 foreach ($invalidHashes as $description => $hash) {
@@ -99,4 +103,8 @@ missing separator: unknown, options 0
 malformed salt segment: unknown, options 0
 malformed hash segment: unknown, options 0
 malicious misalignment: unknown, options 0
+minus sign: unknown, options 0
+plus sign: unknown, options 0
+newline: unknown, options 0
+space: unknown, options 0
 OK!
