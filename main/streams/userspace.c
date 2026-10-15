@@ -741,7 +741,13 @@ static int php_userstreamop_flush(php_stream *stream)
 	zend_result call_result = zend_call_method_if_exists(Z_OBJ(us->object), func_name, &retval, 0, NULL);
 	zend_string_release_ex(func_name, false);
 
-	int ret = call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF && zend_is_true(&retval) ? 0 : -1;
+	int ret;
+	if (call_result == FAILURE) {
+		/* stream_flush is optional, so a missing one is not an error when closing */
+		ret = stream->in_free ? 0 : -1;
+	} else {
+		ret = Z_TYPE(retval) != IS_UNDEF && zend_is_true(&retval) ? 0 : -1;
+	}
 
 	zval_ptr_dtor(&retval);
 
