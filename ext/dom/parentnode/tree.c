@@ -465,7 +465,7 @@ static zend_result dom_sanity_check_node_list_types(zval *nodes, uint32_t nodesc
 			const zend_class_entry *ce = Z_OBJCE(nodes[i]);
 
 			if (!instanceof_function(ce, node_ce)) {
-				zend_argument_type_error(i + 1, "must be of type %s|string, %s given", ZSTR_VAL(node_ce->name), zend_zval_type_name(&nodes[i]));
+				zend_argument_type_error(i + 1, "must be of type %pS|string, %s given", node_ce->name, zend_zval_type_name(&nodes[i]));
 				return FAILURE;
 			}
 		} else if (type == IS_STRING) {
@@ -474,7 +474,7 @@ static zend_result dom_sanity_check_node_list_types(zval *nodes, uint32_t nodesc
 				return FAILURE;
 			}
 		} else {
-			zend_argument_type_error(i + 1, "must be of type %s|string, %s given", ZSTR_VAL(node_ce->name), zend_zval_type_name(&nodes[i]));
+			zend_argument_type_error(i + 1, "must be of type %pS|string, %s given", node_ce->name, zend_zval_type_name(&nodes[i]));
 			return FAILURE;
 		}
 	}
