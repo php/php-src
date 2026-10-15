@@ -181,6 +181,10 @@ php_apache_sapi_read_post(char *buf, size_t count_bytes)
 	apr_bucket_brigade *brigade;
 	apr_status_t status;
 
+	if (!ctx) {
+		return 0;
+	}
+
 	r = ctx->r;
 	brigade = ctx->brigade;
 	len = count_bytes;
@@ -213,6 +217,10 @@ static zend_stat_t*
 php_apache_sapi_get_stat(void)
 {
 	php_struct *ctx = SG(server_context);
+
+	if (!ctx) {
+		return NULL;
+	}
 
 #ifdef PHP_WIN32
 	ctx->finfo.st_uid = 0;
