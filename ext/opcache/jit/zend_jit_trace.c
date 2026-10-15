@@ -2074,10 +2074,6 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					ADD_OP1_TRACE_GUARD();
 					break;
 				case ZEND_ISSET_ISEMPTY_CV:
-					if ((opline->extended_value & ZEND_ISEMPTY)) {
-						// TODO: support for empty() ???
-						break;
-					}
 					ADD_OP1_TRACE_GUARD();
 					break;
 				case ZEND_IN_ARRAY:
@@ -5682,7 +5678,7 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 								op1_info, OP1_REG_ADDR(), RES_REG_ADDR(),
 								-1, -1,
 								zend_may_throw(opline, ssa_op, op_array, ssa),
-								opline->opcode, NULL)) {
+								opline->opcode, NULL, true)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -5752,7 +5748,7 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 								op1_info, OP1_REG_ADDR(), res_addr,
 								-1, -1,
 								zend_may_throw(opline, ssa_op, op_array, ssa),
-								smart_branch_opcode, exit_addr)) {
+								smart_branch_opcode, exit_addr, true)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -5784,10 +5780,6 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 						}
 						goto done;
 					case ZEND_ISSET_ISEMPTY_CV:
-						if ((opline->extended_value & ZEND_ISEMPTY)) {
-							// TODO: support for empty() ???
-							break;
-						}
 						op1_info = OP1_INFO();
 						op1_addr = OP1_REG_ADDR();
 						if (orig_op1_type != IS_UNKNOWN

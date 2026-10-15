@@ -7519,7 +7519,7 @@ static int zend_jit_identical(zend_jit_ctx   *jit,
 	return 1;
 }
 
-static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1_info, zend_jit_addr op1_addr, zend_jit_addr res_addr, uint32_t target_label, uint32_t target_label2, int may_throw, uint8_t branch_opcode, const void *exit_addr)
+static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1_info, zend_jit_addr op1_addr, zend_jit_addr res_addr, uint32_t target_label, uint32_t target_label2, int may_throw, uint8_t branch_opcode, const void *exit_addr, bool warn_undef)
 {
 	uint32_t true_label = -1;
 	uint32_t false_label = -1;
@@ -7570,7 +7570,7 @@ static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32
 		if (!(op1_info & ((MAY_BE_UNDEF|MAY_BE_ANY)-MAY_BE_TRUE))) {
 			always_true = true;
 		} else if (!(op1_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE)))) {
-			if (opline->op1_type == IS_CV && (op1_info & MAY_BE_UNDEF)) {
+			if (opline->op1_type == IS_CV && (op1_info & MAY_BE_UNDEF) && warn_undef) {
 				ref = jit_ZVAL_ADDR(jit, op1_addr);
 				zend_jit_zval_check_undef(jit, ref, opline->op1.var, opline, false);
 			}
@@ -7615,7 +7615,7 @@ static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32
 
 			ir_IF_TRUE_cold(if_type);
 
-			if (op1_info & MAY_BE_UNDEF) {
+			if ((op1_info & MAY_BE_UNDEF) && warn_undef) {
 				zend_jit_type_check_undef(jit,
 					type,
 					opline->op1.var,
@@ -8351,8 +8351,23 @@ static int zend_jit_isset_isempty_cv(zend_jit_ctx *jit, const zend_op *opline, u
 	uint32_t true_label = -1, false_label = -1;
 	ir_ref end_inputs = IR_UNUSED, true_inputs = IR_UNUSED, false_inputs = IR_UNUSED;
 
-	// TODO: support for empty() ???
-	ZEND_ASSERT(opline->extended_value != MAY_BE_RESOURCE);
+	if (opline->extended_value & ZEND_ISEMPTY) {
+		/* empty($cv) is !$cv, except that an undefined CV doesn't emit a warning. */
+		uint8_t branch_opcode;
+
+		if (!smart_branch_opcode) {
+			branch_opcode = ZEND_BOOL_NOT;
+		} else if (smart_branch_opcode == ZEND_JMPZ) {
+			branch_opcode = ZEND_JMPNZ;
+		} else if (smart_branch_opcode == ZEND_JMPNZ) {
+			branch_opcode = ZEND_JMPZ;
+		} else {
+			ZEND_UNREACHABLE();
+		}
+		/* zend_is_true() may call an object's cast handler. */
+		return zend_jit_bool_jmpznz(jit, opline, op1_info, op1_addr, res_addr,
+			target_label, target_label2, (op1_info & MAY_BE_OBJECT) != 0, branch_opcode, exit_addr, false);
+	}
 
 	if (smart_branch_opcode && !exit_addr) {
 		if (smart_branch_opcode == ZEND_JMPZ) {

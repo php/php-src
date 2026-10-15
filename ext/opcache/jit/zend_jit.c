@@ -2305,7 +2305,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 								OP1_INFO(), OP1_REG_ADDR(), RES_REG_ADDR(),
 								-1, -1,
 								zend_may_throw(opline, ssa_op, op_array, ssa),
-								opline->opcode, NULL)) {
+								opline->opcode, NULL, true)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2331,15 +2331,11 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 								OP1_INFO(), OP1_REG_ADDR(), res_addr,
 								ssa->cfg.blocks[b].successors[0], ssa->cfg.blocks[b].successors[1],
 								zend_may_throw(opline, ssa_op, op_array, ssa),
-								opline->opcode, NULL)) {
+								opline->opcode, NULL, true)) {
 							goto jit_failure;
 						}
 						goto done;
 					case ZEND_ISSET_ISEMPTY_CV:
-						if ((opline->extended_value & ZEND_ISEMPTY)) {
-							// TODO: support for empty() ???
-							break;
-						}
 						if ((opline->result_type & IS_TMP_VAR)
 						 && (i + 1) <= end
 						 && ((opline+1)->opcode == ZEND_JMPZ
