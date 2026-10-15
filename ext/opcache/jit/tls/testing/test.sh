@@ -136,8 +136,8 @@ dl_def_static_user_no_surplus() {
 
   rm -f main
 
-  $CC $CFLAGS -ggdb3 -fPIC -o tls.o -c $TLSC
-  $CC $CFLAGS -ggdb3 -fPIC -o user.o -c user.c
+  $CC $CFLAGS -DTSRM_TLS_MODEL_USE_DEFAULT -ggdb3 -fPIC -o tls.o -c $TLSC
+  $CC $CFLAGS -DTSRM_TLS_MODEL_USE_DEFAULT -ggdb3 -fPIC -o user.o -c user.c
   $CC $CFLAGS -DNO_SURPLUS -ggdb3 -fPIC -o def.o -c def.c
   $CC $CFLAGS $LDFLAGS -shared -o libdef.so def.o user.o tls.o
 
@@ -151,8 +151,8 @@ dl_def_shared_user_no_surplus() {
 
   rm -f main
 
-  $CC $CFLAGS -ggdb3 -fPIC -o tls.o -c $TLSC
-  $CC $CFLAGS -ggdb3 -fPIC -o user.o -c user.c
+  $CC $CFLAGS -DTSRM_TLS_MODEL_USE_DEFAULT -ggdb3 -fPIC -o tls.o -c $TLSC
+  $CC $CFLAGS -DTSRM_TLS_MODEL_USE_DEFAULT -ggdb3 -fPIC -o user.o -c user.c
   $CC $CFLAGS $LDFLAGS -shared -o libuser.so user.o tls.o
 
   $CC $CFLAGS -DNO_SURPLUS -ggdb3 -fPIC -o def.o -c def.c
