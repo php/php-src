@@ -250,31 +250,34 @@ typedef struct _php_userstream_data php_userstream_data_t;
 static zend_object* user_stream_create_object(struct php_user_stream_wrapper *uwrap, php_stream_context *context)
 {
 	ZEND_ASSERT((uwrap->ce->ce_flags & ZEND_ACC_UNINSTANTIABLE) == 0);
+	zend_class_entry *ce = uwrap->ce;
 
-	zval object;
 	/* create an instance of our class */
-	if (object_init_ex(&object, uwrap->ce) == FAILURE) {
+	zend_object *object = zend_object_init(ce);
+	if (object == NULL) {
 		return NULL;
 	}
 
 	if (context) {
 		GC_ADDREF(context->res);
-		add_property_resource(&object, "context", context->res);
+		zval tmp;
+		ZVAL_RES(&tmp, context->res);
+		zend_update_property(ce, object, ZEND_STRL("context"), &tmp);
 	} else {
-		add_property_null(&object, "context");
+		zend_update_property_null(ce, object, ZEND_STRL("context"));
 	}
 
 	if (EG(exception) != NULL) {
-		zval_ptr_dtor(&object);
+		OBJ_RELEASE(object);
 		return NULL;
 	}
 
 	if (uwrap->ce->constructor) {
 		zend_call_known_instance_method_with_0_params(
-			uwrap->ce->constructor, Z_OBJ(object), NULL);
+			uwrap->ce->constructor, object, NULL);
 	}
 
-	return Z_OBJ(object);
+	return object;
 }
 
 static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *filename, const char *mode,

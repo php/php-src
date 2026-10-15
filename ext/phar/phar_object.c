@@ -1945,7 +1945,6 @@ static zend_object *phar_rename_archive(phar_archive_data **sphar, char *ext) /*
 	phar_archive_data *phar = *sphar;
 	char *basename = NULL, *basepath = NULL;
 	char *newname = NULL;
-	zval ret, arg1;
 	zend_class_entry *ce;
 	char *error = NULL;
 	const char *pcr_error;
@@ -2179,12 +2178,9 @@ its_ok:
 		ce = phar_ce_archive;
 	}
 
+	zval arg1;
 	ZVAL_STR(&arg1, phar->fname);
-	zend_result result = object_init_with_constructor(&ret, ce, 1, &arg1, NULL);
-	if (SUCCESS != result) {
-		return NULL;
-	}
-	return Z_OBJ(ret);
+	return zend_object_init_with_constructor(ce, 1, &arg1, NULL);
 
 err_reused_oldpath:
 	if (pphar == phar) {

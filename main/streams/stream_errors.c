@@ -386,24 +386,23 @@ static void php_stream_throw_exception_with_errors(const php_stream_error_entry 
 		return;
 	}
 
-	zval ex;
-	object_init_ex(&ex, php_ce_stream_exception);
+	zend_object *ex = zend_object_init(php_ce_stream_exception);
 
 	/* Set message from first error */
-	zend_update_property_str(php_ce_stream_exception, Z_OBJ(ex), ZEND_STRL("message"),
+	zend_update_property_str(php_ce_stream_exception, ex, ZEND_STRL("message"),
 			first_error->message);
 
 	/* Set code from first error */
-	zend_update_property_long(php_ce_stream_exception, Z_OBJ(ex), ZEND_STRL("code"),
+	zend_update_property_long(php_ce_stream_exception, ex, ZEND_STRL("code"),
 			(zend_long) first_error->code);
 
 	/* Build errors array and set it */
 	zval errors_array;
 	php_stream_error_create_array(&errors_array, first_error);
-	zend_update_property(php_ce_stream_exception, Z_OBJ(ex), ZEND_STRL("errors"), &errors_array);
+	zend_update_property(php_ce_stream_exception, ex, ZEND_STRL("errors"), &errors_array);
 	zval_ptr_dtor(&errors_array);
 
-	zend_throw_exception_object(&ex);
+	zend_throw_exception_internal(ex);
 }
 
 static void php_stream_report_errors(const php_stream_context *context, const php_stream_error_entry *first_error,
