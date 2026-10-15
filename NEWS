@@ -24,6 +24,10 @@ PHP                                                                        NEWS
   . Fix UAF for resolved callable zval. (EdmondDantes)
   . Fix memory leak for nested HTTP calls. (EdmondDantes)
 
+- Date:
+  . Fixed bug GH-20503 (Assertion failure with ext/date DateInterval property
+    hash construction). (heathdutton)
+
 - Fileinfo:
   . Fixed bug GH-24289 (finfo::file() reports the wrong argument number for
     an invalid $filename). (Lazizbek Ergashev)
