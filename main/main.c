@@ -79,7 +79,6 @@
 #include "zend_system_id.h"
 #include "zend_smart_string.h"
 
-#include "php_content_types.h"
 #include "php_ticks.h"
 #include "php_streams.h"
 #include "php_open_temporary_file.h"
@@ -2275,7 +2274,9 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	zuv.html_errors = 1;
 	php_startup_auto_globals();
 	zend_set_utility_values(&zuv);
-	php_startup_sapi_content_types();
+
+	sapi_register_treat_data(php_default_treat_data);
+	sapi_register_input_filter(php_default_input_filter, NULL);
 
 	/* Begin to fingerprint the process state */
 	zend_startup_system_id();
