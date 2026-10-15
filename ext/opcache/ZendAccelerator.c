@@ -2906,9 +2906,7 @@ ZEND_RINIT_FUNCTION(zend_accelerator)
 			ZCG(root_hash) = buf.st_ino;
 			if (sizeof(buf.st_ino) > sizeof(ZCG(root_hash))) {
 				if (ZCG(root_hash) != buf.st_ino) {
-					zend_string *key = ZSTR_INIT_LITERAL("opcache.enable", 0);
-					zend_alter_ini_entry_chars(key, "0", 1, ZEND_INI_SYSTEM, ZEND_INI_STAGE_RUNTIME);
-					zend_string_release_ex(key, 0);
+					zend_alter_ini_entry_literal("opcache.enable", ZSTR_CHAR('0'), ZEND_INI_SYSTEM, ZEND_INI_STAGE_RUNTIME);
 					zend_accel_error(ACCEL_LOG_WARNING, "Can't cache files in chroot() directory with too big inode");
 					return SUCCESS;
 				}

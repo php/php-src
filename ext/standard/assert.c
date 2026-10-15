@@ -261,7 +261,6 @@ PHP_FUNCTION(assert_options)
 	zend_long what;
 	bool oldint;
 	uint32_t ac = ZEND_NUM_ARGS();
-	zend_string *key;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_LONG(what)
@@ -278,9 +277,7 @@ PHP_FUNCTION(assert_options)
 				RETURN_THROWS();
 			}
 
-			key = ZSTR_INIT_LITERAL("assert.active", 0);
-			zend_alter_ini_entry_ex(key, value_str, PHP_INI_USER, ZEND_INI_STAGE_ASSERT_OPTIONS, 0);
-			zend_string_release_ex(key, 0);
+			zend_alter_ini_entry_literal("assert.active", value_str, PHP_INI_USER, ZEND_INI_STAGE_ASSERT_OPTIONS);
 			zend_string_release_ex(value_str, 0);
 		}
 		RETURN_LONG(oldint);
@@ -293,9 +290,7 @@ PHP_FUNCTION(assert_options)
 				RETURN_THROWS();
 			}
 
-			key = ZSTR_INIT_LITERAL("assert.bail", 0);
-			zend_alter_ini_entry_ex(key, value_str, PHP_INI_USER, ZEND_INI_STAGE_ASSERT_OPTIONS, 0);
-			zend_string_release_ex(key, 0);
+			zend_alter_ini_entry_literal("assert.bail", value_str, PHP_INI_USER, ZEND_INI_STAGE_ASSERT_OPTIONS);
 			zend_string_release_ex(value_str, 0);
 		}
 		RETURN_LONG(oldint);
@@ -308,9 +303,7 @@ PHP_FUNCTION(assert_options)
 				RETURN_THROWS();
 			}
 
-			key = ZSTR_INIT_LITERAL("assert.warning", 0);
-			zend_alter_ini_entry_ex(key, value_str, PHP_INI_USER, ZEND_INI_STAGE_ASSERT_OPTIONS, 0);
-			zend_string_release_ex(key, 0);
+			zend_alter_ini_entry_literal("assert.warning", value_str, PHP_INI_USER, ZEND_INI_STAGE_ASSERT_OPTIONS);
 			zend_string_release_ex(value_str, 0);
 		}
 		RETURN_LONG(oldint);
@@ -342,10 +335,8 @@ PHP_FUNCTION(assert_options)
 				RETURN_THROWS();
 			}
 
-			key = ZSTR_INIT_LITERAL("assert.exception", 0);
-			zend_alter_ini_entry_ex(key, val, PHP_INI_USER, ZEND_INI_STAGE_ASSERT_OPTIONS, 0);
+			zend_alter_ini_entry_literal("assert.exception", val, PHP_INI_USER, ZEND_INI_STAGE_ASSERT_OPTIONS);
 			zend_string_release_ex(val, 0);
-			zend_string_release_ex(key, 0);
 		}
 		RETURN_LONG(oldint);
 

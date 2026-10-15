@@ -794,10 +794,7 @@ SAPI_API zend_result sapi_header_op(sapi_header_op_enum op, void *arg)
 				 * to disable compression altogether. This contributes to making scripts
 				 * portable between setups that have and don't have zlib compression
 				 * enabled globally. See req #44164 */
-				zend_string *key = ZSTR_INIT_LITERAL("zlib.output_compression", 0);
-				zend_alter_ini_entry_chars(key,
-					"0", sizeof("0") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
-				zend_string_release_ex(key, 0);
+				zend_alter_ini_entry_literal("zlib.output_compression", ZSTR_CHAR('0'), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 			} else if (!strcasecmp(header_line, "Location")) {
 				if ((SG(sapi_headers).http_response_code < 300 ||
 					SG(sapi_headers).http_response_code > 399) &&

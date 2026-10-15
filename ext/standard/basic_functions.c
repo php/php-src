@@ -2054,7 +2054,6 @@ PHP_FUNCTION(ini_restore)
 PHP_FUNCTION(set_include_path)
 {
 	zend_string *new_value;
-	zend_string *key;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_PATH_STR(new_value)
@@ -2068,13 +2067,10 @@ PHP_FUNCTION(set_include_path)
 		RETVAL_FALSE;
 	}
 
-	key = ZSTR_INIT_LITERAL("include_path", 0);
-	if (zend_alter_ini_entry_ex(key, new_value, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0) == FAILURE) {
-		zend_string_release_ex(key, 0);
+	if (zend_alter_ini_entry_literal("include_path", new_value, PHP_INI_USER, PHP_INI_STAGE_RUNTIME) == FAILURE) {
 		zval_ptr_dtor_str(return_value);
 		RETURN_FALSE;
 	}
-	zend_string_release_ex(key, 0);
 }
 /* }}} */
 
@@ -2147,9 +2143,7 @@ PHP_FUNCTION(ignore_user_abort)
 	old_setting = (unsigned short)PG(ignore_user_abort);
 
 	if (!arg_is_null) {
-		zend_string *key = ZSTR_INIT_LITERAL("ignore_user_abort", 0);
-		zend_alter_ini_entry_chars(key, arg ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
-		zend_string_release_ex(key, 0);
+		zend_alter_ini_entry_literal("ignore_user_abort", arg ? ZSTR_CHAR('1') : ZSTR_CHAR('0'), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 	}
 
 	RETURN_LONG(old_setting);

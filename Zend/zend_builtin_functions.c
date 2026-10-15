@@ -185,26 +185,18 @@ ZEND_FUNCTION(gc_enabled)
 /* {{{ Activates the circular reference collector */
 ZEND_FUNCTION(gc_enable)
 {
-	zend_string *key;
-
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	key = ZSTR_INIT_LITERAL("zend.enable_gc", 0);
-	zend_alter_ini_entry_chars(key, "1", sizeof("1")-1, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
-	zend_string_release_ex(key, 0);
+	zend_alter_ini_entry_literal("zend.enable_gc", ZSTR_CHAR('1'), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
 }
 /* }}} */
 
 /* {{{ Deactivates the circular reference collector */
 ZEND_FUNCTION(gc_disable)
 {
-	zend_string *key;
-
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	key = ZSTR_INIT_LITERAL("zend.enable_gc", 0);
-	zend_alter_ini_entry_chars(key, "0", sizeof("0")-1, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
-	zend_string_release_ex(key, 0);
+	zend_alter_ini_entry_literal("zend.enable_gc", ZSTR_CHAR('0'), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
 }
 /* }}} */
 
