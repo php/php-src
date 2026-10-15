@@ -23,6 +23,9 @@ PHP                                                                        NEWS
   . Fix memory leak for nested HTTP calls. (EdmondDantes)
   . Fixed pthread attribute leak in zend_call_stack_get_netbsd_pthread().
     (David Carlier)
+  . Fixed bug GH-24321 (ZTS: global_map_ptr_last survives zend_shutdown(),
+    so an in-process engine restart keeps growing the map_ptr table).
+    (David Carlier)
 
 - Date:
   . Fixed bug GH-20503 (Assertion failure with ext/date DateInterval property
