@@ -156,7 +156,7 @@ zend_module_entry basic_functions_module = { /* {{{ */
 	PHP_MINFO(basic),			/* extension info */
 	PHP_STANDARD_VERSION,		/* extension version */
 	NO_MODULE_GLOBALS,
-	ZEND_MODULE_POST_ZEND_DEACTIVATE_N(streams),
+	ZEND_MODULE_POST_ZEND_DEACTIVATE_N(basic),
 	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
@@ -475,7 +475,6 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 		BG(user_tick_functions) = NULL;
 	}
 
-	BASIC_RSHUTDOWN_SUBMODULE(user_filters)
 	BASIC_RSHUTDOWN_SUBMODULE(browscap)
 
 	/* Free last http headers */
@@ -486,6 +485,13 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 	return SUCCESS;
 }
 /* }}} */
+
+ZEND_MODULE_POST_ZEND_DEACTIVATE_D(basic)
+{
+	ZEND_MODULE_POST_ZEND_DEACTIVATE_N(user_filters)();
+
+	return ZEND_MODULE_POST_ZEND_DEACTIVATE_N(streams)();
+}
 
 PHP_MINFO_FUNCTION(basic) /* {{{ */
 {
