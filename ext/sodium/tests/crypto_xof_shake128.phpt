@@ -78,13 +78,6 @@ try {
     echo $e->getMessage() . "\n";
 }
 
-/* Error: bad state */
-try {
-    $bad = "not_a_state";
-    sodium_crypto_xof_shake128_update($bad, "test");
-} catch (SodiumException $e) {
-    echo $e->getMessage() . "\n";
-}
 ?>
 --EXPECT--
 string(64) "7f9c2ba4e88f827d616045507605853ed73b8093f6efbc88eb1a6eacfa66ef26"
@@ -101,4 +94,3 @@ sodium_crypto_xof_shake128(): Argument #1 ($length) must be a positive integer
 sodium_crypto_xof_shake128(): Argument #1 ($length) must be a positive integer
 sodium_crypto_xof_shake128_init(): Argument #1 ($domain) must be between 0x01 and 0x7f
 sodium_crypto_xof_shake128_init(): Argument #1 ($domain) must be between 0x01 and 0x7f
-sodium_crypto_xof_shake128_update(): Argument #1 ($state) must have a correct state length

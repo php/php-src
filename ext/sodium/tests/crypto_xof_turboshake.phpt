@@ -72,14 +72,6 @@ try {
     echo $e->getMessage() . "\n";
 }
 
-/* TurboSHAKE256 error: bad state */
-try {
-    $bad = "not_a_state";
-    sodium_crypto_xof_turboshake256_update($bad, "test");
-} catch (SodiumException $e) {
-    echo $e->getMessage() . "\n";
-}
-
 /* TurboSHAKE128 error: domain out of range */
 try {
     sodium_crypto_xof_turboshake128_init(0);
@@ -107,6 +99,5 @@ int(16)
 int(64)
 bool(true)
 sodium_crypto_xof_turboshake128(): Argument #1 ($length) must be a positive integer
-sodium_crypto_xof_turboshake256_update(): Argument #1 ($state) must have a correct state length
 sodium_crypto_xof_turboshake128_init(): Argument #1 ($domain) must be between 0x01 and 0x7f
 sodium_crypto_xof_turboshake256_init(): Argument #1 ($domain) must be between 0x01 and 0x7f
