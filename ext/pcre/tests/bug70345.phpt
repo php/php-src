@@ -1,10 +1,5 @@
 --TEST--
 Bug #70345 (Multiple vulnerabilities related to PCRE functions)
---SKIPIF--
-<?php
-if (PCRE_VERSION_MAJOR == 10 && PCRE_VERSION_MINOR < 38) {
-    die("skip old pcre version");
-}
 --FILE--
 <?php
 $regex = '/(?=xyz\K)/';
