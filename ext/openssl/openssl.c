@@ -3512,8 +3512,11 @@ PHP_FUNCTION(openssl_cms_verify)
 	}
 	if (sigfile && (flags & CMS_DETACHED)) {
 		if (encoding == ENCODING_SMIME)  {
-			php_error_docref(NULL, E_WARNING,
-					 "Detached signatures not possible with S/MIME encoding");
+			php_error_docref(
+				NULL,
+				E_WARNING,
+				"A separate signature file cannot be used with S/MIME encoding, the signature is read from the message"
+			);
 			goto clean_exit;
 		}
 		sigbio = php_openssl_bio_new_file(sigfile, sigfile_len, 1, PHP_OPENSSL_BIO_MODE_R(flags));
@@ -4012,10 +4015,8 @@ PHP_FUNCTION(openssl_cms_sign)
 		goto clean_exit;
 	}
 
-	if ((encoding & ENCODING_SMIME) && (flags & CMS_DETACHED)) {
-		php_error_docref(NULL,
-				 E_WARNING, "Detached signatures not possible with S/MIME encoding");
-		goto clean_exit;
+	if (encoding == ENCODING_SMIME && (flags & CMS_DETACHED)) {
+		flags |= CMS_STREAM;
 	}
 
 	/* a CMS struct will not be complete if either CMS_PARTIAL or CMS_STREAM is set.
