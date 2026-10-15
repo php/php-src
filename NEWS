@@ -69,6 +69,8 @@ PHP                                                                        NEWS
 - SOAP:
   . Fixed use of uninitialized func in do_request() on OOM bailout.
     (David Carlier)
+  . Fixed bug GH-10026 (Garbage collection stops after exception in
+    SoapClient). (ndossche, Valery Ivashchanka)
 
 - Standard:
   . Fixed chown() and lchown() failing to resolve user names in ZTS builds

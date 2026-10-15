@@ -163,6 +163,7 @@ ZEND_BEGIN_MODULE_GLOBALS(soap)
 	char*      error_code;
 	zval       error_object;
 	bool       use_soap_error_handler;
+	bool       error_is_own; /* error raised by ext/soap itself via soap_errorN() */
 	char       cache_mode;
 	char       cache_enabled;
 	char*      cache_dir;
@@ -201,16 +202,32 @@ extern zend_class_entry* soap_sdl_class_entry;
 void add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail);
 
 #define soap_error0(severity, format) \
-	php_error(severity, "SOAP-ERROR: " format)
+	do { \
+		SOAP_GLOBAL(error_is_own) = true; \
+		php_error(severity, "SOAP-ERROR: " format); \
+		SOAP_GLOBAL(error_is_own) = false; \
+	} while (0)
 
 #define soap_error1(severity, format, param1) \
-	php_error(severity, "SOAP-ERROR: " format, param1)
+	do { \
+		SOAP_GLOBAL(error_is_own) = true; \
+		php_error(severity, "SOAP-ERROR: " format, param1); \
+		SOAP_GLOBAL(error_is_own) = false; \
+	} while (0)
 
 #define soap_error2(severity, format, param1, param2) \
-	php_error(severity, "SOAP-ERROR: " format, param1, param2)
+	do { \
+		SOAP_GLOBAL(error_is_own) = true; \
+		php_error(severity, "SOAP-ERROR: " format, param1, param2); \
+		SOAP_GLOBAL(error_is_own) = false; \
+	} while (0)
 
 #define soap_error3(severity, format, param1, param2, param3) \
-	php_error(severity, "SOAP-ERROR: " format, param1, param2, param3)
+	do { \
+		SOAP_GLOBAL(error_is_own) = true; \
+		php_error(severity, "SOAP-ERROR: " format, param1, param2, param3); \
+		SOAP_GLOBAL(error_is_own) = false; \
+	} while (0)
 
 static zend_always_inline zval *php_soap_deref(zval *zv) {
 	if (UNEXPECTED(Z_TYPE_P(zv) == IS_REFERENCE)) {

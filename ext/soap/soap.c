@@ -123,7 +123,7 @@ static void soap_error_handler(int error_num, zend_string *error_filename, uint3
 	Z_OBJ(SOAP_GLOBAL(error_object)) = _old_error_object;\
 	SOAP_GLOBAL(soap_version) = _old_soap_version;\
 	if (_bailout) {\
-		zend_bailout();\
+		zend_bailout_without_gc_protect();\
 	}
 
 #define FETCH_THIS_SDL(ss) \
@@ -443,6 +443,7 @@ static void php_soap_init_globals(zend_soap_globals *soap_globals)
 	soap_globals->defEncNs = defEncNs;
 	soap_globals->typemap = NULL;
 	soap_globals->use_soap_error_handler = 0;
+	soap_globals->error_is_own = false;
 	soap_globals->error_code = NULL;
 	ZVAL_OBJ(&soap_globals->error_object, NULL);
 	soap_globals->sdl = NULL;
@@ -1008,7 +1009,7 @@ PHP_METHOD(SoapServer, __construct)
 		} zend_catch {
 			xmlCharEncCloseFunc(service->encoding);
 			service->encoding = NULL;
-			zend_bailout();
+			zend_bailout_without_gc_protect();
 		} zend_end_try();
 		if (service->uri == NULL) {
 			if (service->sdl->target_ns) {
@@ -1435,7 +1436,7 @@ PHP_METHOD(SoapServer, handle)
 	} zend_catch {
 		/* Avoid leaking persistent memory */
 		xmlFreeDoc(doc_request);
-		zend_bailout();
+		zend_bailout_without_gc_protect();
 	} zend_end_try();
 
 	xmlFreeDoc(doc_request);
@@ -1858,7 +1859,7 @@ static ZEND_NORETURN void soap_server_fault(char* code, char* string, char *acto
 }
 /* }}} */
 
-static zend_never_inline ZEND_COLD void soap_real_error_handler(int error_num, zend_string *error_filename, const uint32_t error_lineno, zend_string *message) /* {{{ */
+static zend_never_inline ZEND_COLD void soap_real_error_handler(int error_num, zend_string *error_filename, const uint32_t error_lineno, zend_string *message, bool error_is_own) /* {{{ */
 {
 	bool _old_in_compilation;
 	zend_execute_data *_old_current_execute_data;
@@ -1884,6 +1885,12 @@ static zend_never_inline ZEND_COLD void soap_real_error_handler(int error_num, z
 			add_soap_fault_ex(&fault, &SOAP_GLOBAL(error_object), code, ZSTR_VAL(message), NULL, NULL);
 			Z_ADDREF(fault);
 			zend_throw_exception_object(&fault);
+			if (error_is_own) {
+				/* ext/soap raised this error itself at a known point, so execution
+				 * can safely continue after the fault is caught. Engine fatal errors
+				 * (e.g. memory exhaustion, timeouts) keep the GC protected. */
+				zend_bailout_without_gc_protect();
+			}
 			zend_bailout();
 		} else if (!use_exceptions ||
 		           !SOAP_GLOBAL(error_code) ||
@@ -1954,10 +1961,15 @@ static zend_never_inline ZEND_COLD void soap_real_error_handler(int error_num, z
 
 static void soap_error_handler(int error_num, zend_string *error_filename, const uint32_t error_lineno, zend_string *message) /* {{{ */
 {
+	bool error_is_own = SOAP_GLOBAL(error_is_own);
+
+	/* Consume the flag right away: any error raised while handling this one
+	 * (e.g. memory exhaustion) is not a SOAP error. */
+	SOAP_GLOBAL(error_is_own) = false;
 	if (EXPECTED(!SOAP_GLOBAL(use_soap_error_handler))) {
 		old_error_handler(error_num, error_filename, error_lineno, message);
 	} else {
-		soap_real_error_handler(error_num, error_filename, error_lineno, message);
+		soap_real_error_handler(error_num, error_filename, error_lineno, message, error_is_own);
 	}
 }
 /* }}} */
@@ -2286,7 +2298,7 @@ static bool do_request(zval *this_ptr, xmlDoc *request, const char *location, co
 	zval_ptr_dtor(&params[0]);
 	xmlFree(buf);
 	if (_bailout) {
-		zend_bailout();
+		zend_bailout_without_gc_protect();
 	}
 	if (ret && Z_TYPE_P(Z_CLIENT_SOAP_FAULT_P(this_ptr)) == IS_OBJECT) {
 		ret = false;
@@ -2429,7 +2441,7 @@ static void do_soap_call(zend_execute_data *execute_data,
 					encode_finish();
 					if (parse_bailout) {
 						zval_ptr_dtor(&response);
-						zend_bailout();
+						zend_bailout_without_gc_protect();
 					}
 				}
 
@@ -2483,7 +2495,7 @@ static void do_soap_call(zend_execute_data *execute_data,
 					encode_finish();
 					if (parse_bailout) {
 						zval_ptr_dtor(&response);
-						zend_bailout();
+						zend_bailout_without_gc_protect();
 					}
 				}
 
@@ -2531,7 +2543,7 @@ static void do_soap_call(zend_execute_data *execute_data,
 		if (request) {
 			xmlFreeDoc(request);
 		}
-		zend_bailout();
+		zend_bailout_without_gc_protect();
 	}
 	SOAP_CLIENT_END_CODE();
 }
@@ -3907,7 +3919,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, const char *fu
 	} zend_catch {
 		/* Avoid persistent memory leak. */
 		xmlFreeDoc(doc);
-		zend_bailout();
+		zend_bailout_without_gc_protect();
 	} zend_end_try();
 
 	if (function && function->responseName == NULL &&
@@ -4113,7 +4125,7 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 	} zend_catch {
 		/* Avoid persistent memory leak. */
 		xmlFreeDoc(doc);
-		zend_bailout();
+		zend_bailout_without_gc_protect();
 	} zend_end_try();
 
 	return doc;

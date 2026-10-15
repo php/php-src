@@ -368,7 +368,7 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include)
 					load_wsdl_ex(this_ptr, (char*)uri, ctx, 1);
 				} zend_catch {
 					xmlFree(uri);
-					zend_bailout();
+					zend_bailout_without_gc_protect();
 				} zend_end_try();
 				xmlFree(uri);
 			}
@@ -1148,7 +1148,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 	} zend_catch {
 		/* Avoid persistent memory leak. */
 		zend_hash_destroy(&ctx.docs);
-		zend_bailout();
+		zend_bailout_without_gc_protect();
 	} zend_end_try();
 
 	zend_hash_destroy(&ctx.messages);

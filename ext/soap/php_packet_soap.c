@@ -36,7 +36,7 @@ static void master_to_zval_with_doc_cleanup(zval *ret, encodePtr encode, xmlNode
 			zval_ptr_dtor(ret);
 		}
 		xmlFreeDoc(doc);
-		zend_bailout();
+		zend_bailout_without_gc_protect();
 	}
 }
 
