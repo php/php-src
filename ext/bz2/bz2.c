@@ -194,7 +194,12 @@ PHP_BZ2_API php_stream *_php_stream_bz2open_from_BZFILE(BZFILE *bz,
 	}
 	self->bz_file = bz;
 
-	return php_stream_alloc_rel(&php_stream_bz2io_ops, self, 0, mode);
+	php_stream *stream = php_stream_alloc_rel(&php_stream_bz2io_ops, self, 0, mode);
+	if (stream && innerstream) {
+		stream->flags |= innerstream->flags & PHP_STREAM_FLAG_URL;
+	}
+
+	return stream;
 }
 
 PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
@@ -293,7 +298,7 @@ static const php_stream_wrapper_ops bzip2_stream_wops = {
 static const php_stream_wrapper php_stream_bzip2_wrapper = {
 	&bzip2_stream_wops,
 	NULL,
-	0 /* is_url */
+	PHP_STREAM_WRAPPER_FLAG_NESTED
 };
 
 static void php_bz2_error(INTERNAL_FUNCTION_PARAMETERS, int);
