@@ -40,8 +40,8 @@ $ctx = stream_context_create(['stream' => [
 $stream = fopen('error-stream://x', 'r', false, $ctx);
 try {
     var_dump(fread($stream, 1));
-} catch (RuntimeException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump(count(stream_last_errors()));
 fclose($stream);
@@ -49,14 +49,14 @@ fclose($stream);
 $stream = fopen('error-stream://x', 'r', false, $ctx);
 try {
     var_dump(fread($stream, 1));
-} catch (RuntimeException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump(count(stream_last_errors()));
 fclose($stream);
 ?>
 --EXPECT--
-handler: UserspaceInvalidReturn
+RuntimeException: handler: UserspaceInvalidReturn
 int(1)
-handler: UserspaceInvalidReturn
+RuntimeException: handler: UserspaceInvalidReturn
 int(1)

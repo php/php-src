@@ -10,8 +10,8 @@ var_dump(mb_strrpos("AA\xf0\x90", "A", 3));
 var_dump(mb_strrpos("AA\xf0\x90", "A", -1));
 try {
     mb_strpos("AA\xf0\x90", "xyz", 4);
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
@@ -19,4 +19,4 @@ bool(false)
 bool(false)
 bool(false)
 int(1)
-mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)

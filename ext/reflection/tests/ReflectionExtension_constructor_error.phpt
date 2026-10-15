@@ -7,25 +7,25 @@ Leon Luijkx <leon@phpgg.nl>
 <?php
 try {
     $obj = new ReflectionExtension();
-} catch (TypeError $re) {
-    echo "Ok - ".$re->getMessage().PHP_EOL;
+} catch (Throwable $re) {
+    echo $re::class, ': ', $re->getMessage(), "\n";
 }
 
 try {
     $obj = new ReflectionExtension('foo', 'bar');
-} catch (TypeError $re) {
-    echo "Ok - ".$re->getMessage().PHP_EOL;
+} catch (Throwable $re) {
+    echo $re::class, ': ', $re->getMessage(), "\n";
 }
 
 try {
     $obj = new ReflectionExtension([]);
-} catch (TypeError $re) {
-    echo "Ok - ".$re->getMessage().PHP_EOL;
+} catch (Throwable $re) {
+    echo $re::class, ': ', $re->getMessage(), "\n";
 }
 
 
 ?>
 --EXPECT--
-Ok - ReflectionExtension::__construct() expects exactly 1 argument, 0 given
-Ok - ReflectionExtension::__construct() expects exactly 1 argument, 2 given
-Ok - ReflectionExtension::__construct(): Argument #1 ($name) must be of type string, array given
+ArgumentCountError: ReflectionExtension::__construct() expects exactly 1 argument, 0 given
+ArgumentCountError: ReflectionExtension::__construct() expects exactly 1 argument, 2 given
+TypeError: ReflectionExtension::__construct(): Argument #1 ($name) must be of type string, array given

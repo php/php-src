@@ -14,9 +14,9 @@ $g->next();
 
 try {
     $r->getTrace();
-} catch (ReflectionException $e) {
-    echo $e->getMessage();
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Cannot fetch information from a closed Generator
+ReflectionException: Cannot fetch information from a closed Generator
