@@ -180,6 +180,8 @@ PHP                                                                        NEWS
     tidy::repairFile() rejecting null for $encoding. (lacatoire)
 
 - Zip:
+  . Excluded libzip 1.12.0 due to a regression preventing additions and
+    replacements in torrentzip archives. (Weilin Du)
   . Fixed use-after-free when re-entering ZipArchive during destruction or
     a close warning, and rejected opening streams while closing. (jvoisin)
   . Fixed a use-after-free when a ZipArchive method that modifies the archive
