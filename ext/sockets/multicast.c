@@ -81,7 +81,7 @@ zend_result php_string_to_if_index(const char *val, unsigned *out)
 
 static zend_result php_get_if_index_from_zval(zval *val, unsigned *out)
 {
-	int ret;
+	zend_result ret;
 
 	if (Z_TYPE_P(val) == IS_LONG) {
 		if (Z_LVAL_P(val) < 0 || (zend_ulong)Z_LVAL_P(val) > UINT_MAX) {
