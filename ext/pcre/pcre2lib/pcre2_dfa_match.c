@@ -399,8 +399,8 @@ return (mb->callout)(cb, mb->callout_data);
 
 /* This function is called when internal_dfa_match() is about to be called
 recursively and there is insufficient working space left in the current
-workspace block. If there's an existing next block, use it; otherwise get a new
-block unless the heap limit is reached.
+workspace block. If there's a sufficiently large next block, use it; get a new
+block unless the heap limit is (or has been) reached.
 
 Arguments:
   rwsptr     pointer to block pointer (updated)
@@ -416,9 +416,17 @@ more_workspace(RWS_anchor **rwsptr, unsigned int ovecsize, dfa_match_block *mb)
 {
 RWS_anchor *rws = *rwsptr;
 RWS_anchor *new;
+uint32_t requested;
+
+requested = RWS_RSIZE + ovecsize + RWS_ANCHOR_SIZE;
 
 if (rws->next != NULL)
   {
+  /* Although the initial block is large, and subsequent ones try to double, the
+  heap limit may cause the last one to be smaller; in this case, we have already
+  hit the heap limit and allocating a larger block will not be possible. */
+  if (rws->next->size < requested)
+    return PCRE2_ERROR_HEAPLIMIT;
   new = rws->next;
   }
 
@@ -428,14 +436,30 @@ overflow. */
 
 else
   {
-  uint32_t newsize = (rws->size >= UINT32_MAX/(sizeof(int)*2))? UINT32_MAX/sizeof(int) : rws->size * 2;
+  uint32_t newsize = (rws->size >= (UINT32_MAX/sizeof(int))/2)?
+    UINT32_MAX/sizeof(int) : rws->size * 2;
   uint32_t newsizeK = newsize/(1024/sizeof(int));
 
-  if (newsizeK + mb->heap_used > mb->heap_limit)
-    newsizeK = (uint32_t)(mb->heap_limit - mb->heap_used);
-  newsize = newsizeK*(1024/sizeof(int));
+  /* Clamp the allocation to the remaining heap allowance with care for overflows */
 
-  if (newsize < RWS_RSIZE + ovecsize + RWS_ANCHOR_SIZE)
+  if (mb->heap_used >= mb->heap_limit)
+    {
+    newsize = 0;
+    newsizeK = 0;
+    }
+  else
+    {
+    PCRE2_SIZE availableK = mb->heap_limit - mb->heap_used;
+    /* newsize always capped at UINT32_MAX/sizeof(int), so newsizeK also capped;
+    and - if availableK is smaller - then multiplication to form newsize is safe */
+    if (newsizeK > availableK)
+      {
+      newsize = (uint32_t)(availableK*(1024/sizeof(int)));
+      newsizeK = availableK;
+      }
+    }
+
+  if (newsize < requested)
     return PCRE2_ERROR_HEAPLIMIT;
   new = mb->memctl.malloc(newsize*sizeof(int), mb->memctl.memory_data);
   if (new == NULL) return PCRE2_ERROR_NOMEMORY;
