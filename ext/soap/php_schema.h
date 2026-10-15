@@ -17,8 +17,9 @@
 #ifndef PHP_SCHEMA_H
 #define PHP_SCHEMA_H
 
-int load_schema(sdlCtx *ctx, xmlNodePtr schema);
-void schema_pass2(sdlCtx *ctx);
+bool load_schema(sdlCtx *ctx, xmlNodePtr schema);
+bool schema_pass2(sdlCtx *ctx);
+void schema_free_ctx(sdlCtx *ctx);
 
 xmlChar *schema_location_construct_uri(const xmlAttr *attribute);
 
