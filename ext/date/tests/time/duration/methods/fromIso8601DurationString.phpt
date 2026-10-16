@@ -34,10 +34,14 @@ $specifications = [
     'P1DT0S',
     '2000-01-01T00:00:00Z',
     '2000-01-01T00:00:00Z/PT1H',
+
+    "PT5S\0garbage",
+    "PT5S\0",
+    "\0PT5S",
 ];
 
 foreach ($specifications as $specification) {
-    printf("%-25s: ", $specification);
+    printf("%-25s: ", addcslashes($specification, "\0"));
 
     try {
         echo f(Time\Duration::fromIso8601DurationString($specification)), PHP_EOL;
@@ -72,3 +76,6 @@ P1M                      : Time\TimeException: The ISO 8601 duration string may 
 P1DT0S                   : Time\TimeException: The ISO 8601 duration string may only contain the time (T) aspect
 2000-01-01T00:00:00Z     : Time\TimeException: The ISO 8601 duration string is missing the period (P) aspect
 2000-01-01T00:00:00Z/PT1H: Time\TimeException: The ISO 8601 duration string may only contain the period (P) aspect
+PT5S\000garbage          : Time\TimeException: The ISO 8601 duration string could not be parsed
+PT5S\000                 : Time\TimeException: The ISO 8601 duration string could not be parsed
+\000PT5S                 : Time\TimeException: The ISO 8601 duration string could not be parsed
