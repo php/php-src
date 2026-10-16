@@ -1234,6 +1234,7 @@ void zend_shutdown(void) /* {{{ */
 #endif
 	zend_map_ptr_static_last = 0;
 	zend_map_ptr_static_size = 0;
+	global_map_ptr_last = 0;
 
 	zend_destroy_rsrc_list_dtors();
 
