@@ -24,6 +24,9 @@ foreach ($algos as $algo) {
   var_dump(password_get_info($hash)['algo']);
 }
 
+// Bug where libargon2 implementation unintentionally used less entropy through already base64-encoded salt
+var_dump(strspn(base64_decode(explode("$", $hash)[4]), "./ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789") !== 16);
+
 echo "OK!";
 ?>
 --EXPECT--
@@ -39,4 +42,5 @@ bool(true)
 string(8) "argon2id"
 bool(true)
 string(8) "argon2id"
+bool(true)
 OK!
