@@ -13,13 +13,11 @@
  */
 
 #include "transliterator_class.h"
-extern "C" {
 #include "php_intl.h"
 #include "intl_error.h"
 #include "intl_convert.h"
 #include "intl_data.h"
 #include "transliterator_arginfo.h"
-}
 
 #include <unicode/utrans.h>
 

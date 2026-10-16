@@ -26,8 +26,8 @@
 
 #include "../common/common_date.h"
 
-extern "C" {
 #include "../php_intl.h"
+extern "C" {
 #include <ext/date/php_date.h>
 }
 #define USE_TIMEZONE_POINTER 1
