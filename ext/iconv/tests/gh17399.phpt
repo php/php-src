@@ -10,4 +10,4 @@ $options = [
 iconv_mime_encode('Subject', 'test', $options);
 ?>
 --EXPECTF--
-Fatal error: Allowed memory size of %d bytes exhausted %s in %s on line %d
+Fatal error: %r(Allowed memory size of \d+ bytes exhausted .*|Possible integer overflow in memory allocation .*)%r in %s on line %d

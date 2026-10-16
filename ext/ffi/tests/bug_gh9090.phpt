@@ -31,7 +31,7 @@ $func_ptrs = [
 $func_argvs = [
     [ 'bug_gh9090_void_none',         [ ]                           ],
     [ 'bug_gh9090_void_int_char',     [ 42, "hello" ]               ],
-    [ 'bug_gh9090_void_int_char_var', [ 42, "d=%d s=%s", -1, "ok" ] ],
+    [ 'bug_gh9090_void_int_char_var', [ 42, PHP_INT_SIZE === 8 ? "d=%lld s=%s" : "d=%d s=%s", -1, "ok" ] ],
 ];
 
 foreach ($func_ptrs as $func_ptr) {

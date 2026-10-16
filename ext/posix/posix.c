@@ -46,9 +46,11 @@
 #if (defined(__sun) && !defined(_LP64)) || defined(_AIX)
 #define POSIX_PID_MIN LONG_MIN
 #define POSIX_PID_MAX LONG_MAX
+#define POSIX_PID_FMT "%ld"
 #else
 #define POSIX_PID_MIN INT_MIN
 #define POSIX_PID_MAX INT_MAX
+#define POSIX_PID_FMT "%d"
 #endif
 
 #include "posix_arginfo.h"
@@ -125,8 +127,8 @@ ZEND_GET_MODULE(posix)
 	RETURN_TRUE;
 
 #define PHP_POSIX_CHECK_PID(pid, arg, lower, upper)										\
-	if (pid < lower || pid > upper) {										\
-		zend_argument_value_error(arg, "must be between " ZEND_LONG_FMT " and " ZEND_LONG_FMT, lower, upper);	\
+	if (UNEXPECTED(pid < lower || pid > upper)) {										\
+		zend_argument_value_error(arg, "must be between " POSIX_PID_FMT " and " POSIX_PID_FMT, lower, upper);	\
 		RETURN_THROWS();											\
 	}
 

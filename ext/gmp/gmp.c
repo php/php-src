@@ -34,6 +34,14 @@
 # define mpz_fits_si_p mpz_fits_slong_p
 #endif
 
+#ifndef GMP_SI_MAX
+# define GMP_SI_MAX ((mp_limb_signed_t) (GMP_NUMB_MAX >> 1))
+#endif
+
+#ifndef GMP_SI_MIN
+# define GMP_SI_MIN (-GMP_SI_MAX - 1)
+#endif
+
 #define GMP_ROUND_ZERO      0
 #define GMP_ROUND_PLUSINF   1
 #define GMP_ROUND_MINUSINF  2
@@ -104,6 +112,66 @@ PHP_GMP_API zend_class_entry *php_gmp_class_entry(void) {
 #define GET_GMP_FROM_ZVAL(zval) \
 	GET_GMP_OBJECT_FROM_OBJ(Z_OBJ_P(zval))->num
 
+#if GMP_NUMB_BITS < SIZEOF_ZEND_LONG*8
+static void gmp_set_zlong(mpz_t z, zend_long zlong) {
+	if (zlong <= GMP_SI_MAX && zlong >= GMP_SI_MIN) {
+		mpz_set_si(z, zlong);
+	} else {
+		/* mpz_import() takes no sign from the data, so the magnitude has to be
+		 * formed first. Negating in unsigned arithmetic keeps ZEND_LONG_MIN
+		 * well defined. */
+		zend_ulong magnitude = zlong >= 0 ? (zend_ulong) zlong : -(zend_ulong) zlong;
+
+		mpz_import(z, 1, 1, sizeof(magnitude), 0, 0, &magnitude);
+		if (zlong < 0) {
+			mpz_neg(z, z);
+		}
+	}
+}
+
+static int gmp_fits_zlong_p(mpz_t z) {
+	int result = 1;
+	mpz_t min_max;
+
+	if (mpz_cmp_si(z, GMP_SI_MAX) > 0) {
+		mpz_init(min_max);
+		gmp_set_zlong(min_max, ZEND_LONG_MAX);
+		result = mpz_cmp(z, min_max) <= 0;
+		mpz_clear(min_max);
+	} else if (mpz_cmp_si(z, GMP_SI_MIN) < 0) {
+		mpz_init(min_max);
+		gmp_set_zlong(min_max, ZEND_LONG_MIN);
+		result = mpz_cmp(z, min_max) >= 0;
+		mpz_clear(min_max);
+	}
+
+	return result;
+}
+
+static zend_long gmp_get_zlong(mpz_t z) {
+	zend_ulong result = 0;
+	mpz_t z_tmp;
+
+	if (mpz_cmp_si(z, GMP_SI_MAX) <= 0 && mpz_cmp_si(z, GMP_SI_MIN) >= 0) {
+		return mpz_get_si(z);
+	}
+
+	mpz_init(z_tmp);
+	/* The floored remainder is never negative, so this is the two's complement
+	 * image of the low SIZEOF_ZEND_LONG * 8 bits. mpz_export() writes nothing
+	 * at all when that is zero, hence the initialisation of result above. */
+	mpz_fdiv_r_2exp(z_tmp, z, SIZEOF_ZEND_LONG * 8);
+	mpz_export(&result, NULL, 1, sizeof(result), 0, 0, z_tmp);
+	mpz_clear(z_tmp);
+
+	return (zend_long) result;
+}
+#else
+# define gmp_set_zlong(z, l) mpz_set_si(z, l)
+# define gmp_fits_zlong_p(z) mpz_fits_si_p(z)
+# define gmp_get_zlong(z) mpz_get_si(z)
+#endif
+
 static void gmp_strval(zval *result, mpz_t gmpnum, int base);
 static zend_result convert_zstr_to_gmp(mpz_t gmp_number, const zend_string *val, zend_long base, uint32_t arg_pos);
 
@@ -127,7 +195,7 @@ static bool gmp_zend_parse_arg_into_mpz_ex(
 	}
 
 	if (Z_TYPE_P(arg) == IS_LONG) {
-		mpz_set_si(*destination_mpz_ptr, Z_LVAL_P(arg));
+		gmp_set_zlong(*destination_mpz_ptr, Z_LVAL_P(arg));
 		return true;
 	}
 
@@ -143,7 +211,7 @@ static bool gmp_zend_parse_arg_into_mpz_ex(
 			return false;
 		}
 
-		mpz_set_si(*destination_mpz_ptr, lval);
+		gmp_set_zlong(*destination_mpz_ptr, lval);
 
 		return true;
 	}
@@ -241,7 +309,7 @@ static zend_result gmp_cast_object(zend_object *readobj, zval *writeobj, int typ
 		return SUCCESS;
 	case IS_LONG:
 		gmpnum = GET_GMP_OBJECT_FROM_OBJ(readobj)->num;
-		ZVAL_LONG(writeobj, mpz_get_si(gmpnum));
+		ZVAL_LONG(writeobj, gmp_get_zlong(gmpnum));
 		return SUCCESS;
 	case IS_DOUBLE:
 		gmpnum = GET_GMP_OBJECT_FROM_OBJ(readobj)->num;
@@ -249,8 +317,8 @@ static zend_result gmp_cast_object(zend_object *readobj, zval *writeobj, int typ
 		return SUCCESS;
 	case _IS_NUMBER:
 		gmpnum = GET_GMP_OBJECT_FROM_OBJ(readobj)->num;
-		if (mpz_fits_si_p(gmpnum)) {
-			ZVAL_LONG(writeobj, mpz_get_si(gmpnum));
+		if (gmp_fits_zlong_p(gmpnum)) {
+			ZVAL_LONG(writeobj, gmp_get_zlong(gmpnum));
 		} else {
 			ZVAL_DOUBLE(writeobj, mpz_get_d(gmpnum));
 		}
@@ -732,7 +800,7 @@ static zend_result gmp_initialize_number(mpz_ptr gmp_number, const zend_string *
 		return convert_zstr_to_gmp(gmp_number, arg_str, base, 1);
 	}
 
-	mpz_set_si(gmp_number, arg_l);
+	gmp_set_zlong(gmp_number, arg_l);
 	return SUCCESS;
 }
 
@@ -882,7 +950,7 @@ ZEND_FUNCTION(gmp_intval)
 		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETVAL_LONG(mpz_get_si(gmpnum));
+	RETVAL_LONG(gmp_get_zlong(gmpnum));
 }
 /* }}} */
 
@@ -1610,8 +1678,13 @@ ZEND_FUNCTION(gmp_random_range)
 }
 /* }}} */
 
+#if SIZEOF_SIZE_T >= SIZEOF_ZEND_LONG
+# define GMP_SAFE_BITINDEX_MAX ((mp_bitcnt_t)INT_MAX * GMP_NUMB_BITS)
+#else
+# define GMP_SAFE_BITINDEX_MAX ((mp_bitcnt_t)INT_MAX * GMP_NUMB_BITS - 1)
+#endif
 static bool gmp_is_bit_index_valid(zend_long index) {
-	return index >= 0 && (index / GMP_NUMB_BITS < INT_MAX);
+	return index >= 0 && (zend_ulong)index <= GMP_SAFE_BITINDEX_MAX;
 }
 
 /* {{{ Sets or clear bit in a */
@@ -1627,7 +1700,7 @@ ZEND_FUNCTION(gmp_setbit)
 	}
 
 	if (!gmp_is_bit_index_valid(index)) {
-		zend_argument_value_error(2, "must be between 0 and %d * %d", INT_MAX, GMP_NUMB_BITS);
+		zend_argument_value_error(2, "must be between 0 and %lu", GMP_SAFE_BITINDEX_MAX);
 		RETURN_THROWS();
 	}
 
@@ -1653,7 +1726,7 @@ ZEND_FUNCTION(gmp_clrbit)
 	}
 
 	if (!gmp_is_bit_index_valid(index)) {
-		zend_argument_value_error(2, "must be between 0 and %d * %d", INT_MAX, GMP_NUMB_BITS);
+		zend_argument_value_error(2, "must be between 0 and %lu", GMP_SAFE_BITINDEX_MAX);
 		RETURN_THROWS();
 	}
 
@@ -1674,7 +1747,7 @@ ZEND_FUNCTION(gmp_testbit)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!gmp_is_bit_index_valid(index)) {
-		zend_argument_value_error(2, "must be between 0 and %d * %d", INT_MAX, GMP_NUMB_BITS);
+		zend_argument_value_error(2, "must be between 0 and %lu", GMP_SAFE_BITINDEX_MAX);
 		RETURN_THROWS();
 	}
 
@@ -1686,12 +1759,21 @@ ZEND_FUNCTION(gmp_testbit)
 ZEND_FUNCTION(gmp_popcount)
 {
 	mpz_ptr gmpnum_a;
+	mp_bitcnt_t result;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_a)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_LONG(mpz_popcount(gmpnum_a));
+	result = mpz_popcount(gmpnum_a);
+
+#if SIZEOF_SIZE_T <= SIZEOF_ZEND_LONG
+	if (SIZE_MAX == result) {
+		RETURN_LONG(-1);
+	}
+#endif
+
+	RETURN_LONG(result);
 }
 /* }}} */
 
@@ -1699,13 +1781,22 @@ ZEND_FUNCTION(gmp_popcount)
 ZEND_FUNCTION(gmp_hamdist)
 {
 	mpz_ptr gmpnum_a, gmpnum_b;
+	mp_bitcnt_t result;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_a)
 		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_b)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_LONG(mpz_hamdist(gmpnum_a, gmpnum_b));
+	result = mpz_hamdist(gmpnum_a, gmpnum_b);
+
+#if SIZEOF_SIZE_T <= SIZEOF_ZEND_LONG
+	if (SIZE_MAX == result) {
+		RETURN_LONG(-1);
+	}
+#endif
+
+	RETURN_LONG(result);
 }
 /* }}} */
 
@@ -1714,6 +1805,7 @@ ZEND_FUNCTION(gmp_scan0)
 {
 	mpz_ptr gmpnum_a;
 	zend_long start;
+	mp_bitcnt_t result;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_a)
@@ -1721,11 +1813,19 @@ ZEND_FUNCTION(gmp_scan0)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!gmp_is_bit_index_valid(start)) {
-		zend_argument_value_error(2, "must be between 0 and %d * %d", INT_MAX, GMP_NUMB_BITS);
+		zend_argument_value_error(2, "must be between 0 and %lu", GMP_SAFE_BITINDEX_MAX);
 		RETURN_THROWS();
 	}
 
-	RETURN_LONG(mpz_scan0(gmpnum_a, start));
+	result = mpz_scan0(gmpnum_a, start);
+
+#if SIZEOF_SIZE_T <= SIZEOF_ZEND_LONG
+	if (SIZE_MAX == result) {
+		RETURN_LONG(-1);
+	}
+#endif
+
+	RETURN_LONG(result);
 }
 /* }}} */
 
@@ -1734,6 +1834,8 @@ ZEND_FUNCTION(gmp_scan1)
 {
 	mpz_ptr gmpnum_a;
 	zend_long start;
+	mp_bitcnt_t result;
+
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_a)
@@ -1741,11 +1843,19 @@ ZEND_FUNCTION(gmp_scan1)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!gmp_is_bit_index_valid(start)) {
-		zend_argument_value_error(2, "must be between 0 and %d * %d", INT_MAX, GMP_NUMB_BITS);
+		zend_argument_value_error(2, "must be between 0 and %lu", GMP_SAFE_BITINDEX_MAX);
 		RETURN_THROWS();
 	}
 
-	RETURN_LONG(mpz_scan1(gmpnum_a, start));
+	result = mpz_scan1(gmpnum_a, start);
+
+#if SIZEOF_SIZE_T <= SIZEOF_ZEND_LONG
+	if (SIZE_MAX == result) {
+		RETURN_LONG(-1);
+	}
+#endif
+
+	RETURN_LONG(result);
 }
 /* }}} */
 

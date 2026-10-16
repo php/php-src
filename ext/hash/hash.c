@@ -978,8 +978,8 @@ PHP_FUNCTION(hash_pbkdf2)
 	zend_string *returnval, *algo;
 	char *salt, *pass = NULL;
 	unsigned char *computed_salt, *digest, *temp, *result, *K1, *K2 = NULL;
-	zend_long loops, i, j, iterations, digest_length = 0, length = 0;
-	size_t pass_len, salt_len = 0;
+	zend_long j, iterations, length = 0;
+	size_t loops, i, digest_length = 0, pass_len, salt_len = 0;
 	bool raw_output = false;
 	const php_hash_ops *ops;
 	void *context;
@@ -1010,6 +1010,11 @@ PHP_FUNCTION(hash_pbkdf2)
 		RETURN_THROWS();
 	}
 
+	if (ZEND_LONG_ZSTR_LEN_OVFL(length)) {
+		zend_argument_value_error(5, "must be less than or equal to %zu", ZSTR_MAX_LEN);
+		RETURN_THROWS();
+	}
+
 	context = php_hash_alloc_context(ops);
 	ops->hash_init(context, args);
 
@@ -1030,9 +1035,9 @@ PHP_FUNCTION(hash_pbkdf2)
 			length = length * 2;
 		}
 	}
-	digest_length = length;
+	digest_length = (size_t) length;
 	if (!raw_output) {
-		digest_length = length / 2 + (length % 2);
+		digest_length = (size_t) (length / 2 + (length % 2));
 	}
 
 	loops = (digest_length - 1) / ops->digest_size + 1;

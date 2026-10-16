@@ -127,12 +127,12 @@ PHPAPI time_t php_time(void);
 /* Backwards compatibility wrapper */
 PHPAPI zend_long php_parse_date(const char *string, zend_long *now);
 PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, bool gmt);
-PHPAPI bool php_idate(char format, time_t ts, bool localtime, int *result);
+PHPAPI bool php_idate(char format, zend_long ts, bool localtime, int *result);
 
 #define _php_strftime php_strftime
 
 PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, bool gm);
-PHPAPI zend_string *php_format_date(const char *format, size_t format_len, time_t ts, bool localtime);
+PHPAPI zend_string *php_format_date(const char *format, size_t format_len, zend_long ts, bool localtime);
 PHPAPI zend_string *php_format_date_obj(const char *format, size_t format_len, const php_date_obj *date_obj);
 
 /* Mechanism to set new TZ database */

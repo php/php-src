@@ -383,11 +383,13 @@ struct _zend_string {
 	char              val[1];
 };
 
-typedef struct _Bucket {
+/* ZEND_BIND_* stores byte offsets into arData in opline extended values, with
+ * flags encoded in the low three bits. */
+typedef ZEND_SET_ALIGNED(8, struct _Bucket {
 	zval              val;
 	zend_ulong        h;                /* hash value (or numeric index)   */
 	zend_string      *key;              /* string key or NULL for numerics */
-} Bucket;
+}) Bucket;
 
 typedef struct _zend_array HashTable;
 

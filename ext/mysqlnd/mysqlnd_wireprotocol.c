@@ -1127,7 +1127,7 @@ php_mysqlnd_rset_header_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	zend_uchar * const buf = (zend_uchar *) pfc->cmd_buffer.buffer;
 	const zend_uchar * p = buf;
 	const zend_uchar * const begin = buf;
-	size_t len;
+	zend_ulong len;
 	MYSQLND_OPTIONAL_UINT64_T len_ll;
 
 	DBG_ENTER("php_mysqlnd_rset_header_read");
@@ -1204,11 +1204,11 @@ php_mysqlnd_rset_header_read(MYSQLND_CONN_DATA * conn, void * _packet)
 				/* This checks both whether reading the len was successful
 				 * and that the len is not greater than the packet size */
 				if (packet->header.size - (p - buf) < len) {
-					size_t local_file_name_over_read = ((p - buf) - packet->header.size) + len;
-					DBG_ERR_FMT("RSET_HEADER packet additional data length is past %zu bytes the packet size",
+					zend_ulong local_file_name_over_read = len - (packet->header.size - (p - buf));
+					DBG_ERR_FMT("RSET_HEADER packet additional data length is past " ZEND_ULONG_FMT " bytes the packet size",
 						local_file_name_over_read);
 					php_error_docref(NULL, E_WARNING,
-						"RSET_HEADER packet additional data length is past %zu bytes the packet size",
+						"RSET_HEADER packet additional data length is past " ZEND_ULONG_FMT " bytes the packet size",
 						local_file_name_over_read);
 					DBG_RETURN(FAIL);
 				}

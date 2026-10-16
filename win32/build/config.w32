@@ -64,6 +64,21 @@ DEFINE("BASE_INCLUDES", "/I . /I main /I Zend /I TSRM /I ext ");
 
 toolset_setup_common_cflags();
 
+/* Mirrors ZEND_CHECK_INT64 in Zend/Zend.m4: a 64bit zend_long is the default
+ * on 64bit targets. buildconf hoists the option declaration to the top of the
+ * generated configure.js, ahead of the assignment of X64, so the default is
+ * spelled 'auto' and resolved here. The command line flag is needed next to
+ * the config header define because not every translation unit reaches
+ * zend_long.h through it. */
+ARG_ENABLE('zend-int64', 'Enable 64bit integer support (enabled by default on 64bit arch)', 'auto');
+if (PHP_ZEND_INT64 == 'auto') {
+	PHP_ZEND_INT64 = X64 ? 'yes' : 'no';
+}
+if (PHP_ZEND_INT64 == 'yes') {
+	AC_DEFINE('ZEND_INT64', 1, 'Define to 1 if zend_long as int64 is supported and enabled.');
+	ADD_FLAG('CFLAGS', '/D ZEND_INT64');
+}
+
 if (VS_TOOLSET) {
 	ARG_WITH('mp', 'Tell Visual Studio use up to [n,auto,disable] processes for compilation', 'auto');
 	var PHP_MP_DISABLED = true;

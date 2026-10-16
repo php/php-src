@@ -2035,7 +2035,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             out($f,"# define ZEND_VM_ENTER()           opline = EG(current_execute_data)->opline; ZEND_VM_ENTER_EX()\n");
                             out($f,"# define ZEND_VM_LEAVE()           return  2\n");
                             out($f,"#else\n");
-                            out($f,"# define ZEND_VM_ENTER_BIT         1ULL\n");
+                            out($f,"# define ZEND_VM_ENTER_BIT         ((uintptr_t) 1)\n");
                             out($f,"# define ZEND_VM_ENTER_EX()        return (zend_op*)((uintptr_t)opline | ZEND_VM_ENTER_BIT)\n");
                             out($f,"# define ZEND_VM_ENTER()           execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_ENTER_EX()\n");
                             out($f,"# define ZEND_VM_LEAVE()           return (zend_op*)((uintptr_t)opline | ZEND_VM_ENTER_BIT)\n");

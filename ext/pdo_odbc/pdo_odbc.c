@@ -96,7 +96,7 @@ PHP_MINIT_FUNCTION(pdo_odbc)
 	}
 
 	if (pdo_odbc_pool_on != SQL_CP_OFF) {
-		SQLSetEnvAttr(SQL_NULL_HANDLE, SQL_ATTR_CONNECTION_POOLING, (void*)pdo_odbc_pool_on, 0);
+		SQLSetEnvAttr(SQL_NULL_HANDLE, SQL_ATTR_CONNECTION_POOLING, (void*)(uintptr_t)pdo_odbc_pool_on, 0);
 	}
 #endif
 

@@ -82,7 +82,7 @@ PHPAPI bool php_is_valid_samesite_value(zend_string *value)
 }
 
 #define ILLEGAL_COOKIE_CHARACTER "\",\", \";\", \" \", \"\\t\", \"\\r\", \"\\n\", \"\\013\", or \"\\014\""
-PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t expires,
+PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, zend_long expires,
 	zend_string *path, zend_string *domain, bool secure, bool httponly,
 	zend_string *samesite, bool partitioned, bool url_encode)
 {
@@ -115,7 +115,8 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 			get_active_function_name());
 		return FAILURE;
 	}
-#ifdef ZEND_ENABLE_ZVAL_LONG64
+
+#if SIZEOF_ZEND_LONG >= 8
 	if (expires >= 253402300800) {
 		zend_value_error("%s(): \"expires\" option cannot have a year greater than 9999",
 			get_active_function_name());
@@ -156,7 +157,7 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 		}
 
 		if (expires > 0) {
-			double diff;
+			zend_long diff;
 
 			smart_str_appends(&buf, COOKIE_EXPIRES);
 			dt = php_format_date("D, d M Y H:i:s \\G\\M\\T", sizeof("D, d M Y H:i:s \\G\\M\\T")-1, expires, 0);
@@ -164,13 +165,15 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 			smart_str_append(&buf, dt);
 			zend_string_free(dt);
 
-			diff = difftime(expires, php_time());
+			/* Not difftime(): its arguments are time_t, which is narrower than
+			 * zend_long where ZEND_INT64 is enabled on a 32bit platform. */
+			diff = expires - (zend_long) php_time();
 			if (diff < 0) {
 				diff = 0;
 			}
 
 			smart_str_appends(&buf, COOKIE_MAX_AGE);
-			smart_str_append_long(&buf, (zend_long) diff);
+			smart_str_append_long(&buf, diff);
 		}
 	}
 

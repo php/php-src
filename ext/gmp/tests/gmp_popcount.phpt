@@ -4,7 +4,6 @@ gmp_popcount() basic tests
 gmp
 --FILE--
 <?php
-
 var_dump(gmp_popcount(-1));
 var_dump(gmp_popcount(0));
 var_dump(gmp_popcount(12123));
