@@ -84,15 +84,6 @@ typedef enum {
 #define HT_DEC_ITERATORS_COUNT(ht) \
 	HT_SET_ITERATORS_COUNT(ht, HT_ITERATORS_COUNT(ht) - 1)
 
-extern ZEND_API const HashTable zend_empty_array;
-
-#define ZVAL_EMPTY_ARRAY(z) do {						\
-		zval *__z = (z);								\
-		Z_ARR_P(__z) = (zend_array*)&zend_empty_array;	\
-		Z_TYPE_INFO_P(__z) = IS_ARRAY; \
-	} while (0)
-
-
 typedef struct _zend_hash_key {
 	zend_ulong h;
 	zend_string *key;
@@ -101,6 +92,13 @@ typedef struct _zend_hash_key {
 typedef bool (*merge_checker_func_t)(HashTable *target_ht, zval *source_data, zend_hash_key *hash_key, void *pParam);
 
 BEGIN_EXTERN_C()
+extern ZEND_API const HashTable zend_empty_array;
+
+#define ZVAL_EMPTY_ARRAY(z) do {						\
+		zval *__z = (z);								\
+		Z_ARR_P(__z) = (zend_array*)&zend_empty_array;	\
+		Z_TYPE_INFO_P(__z) = IS_ARRAY; \
+	} while (0)
 
 /* startup/shutdown */
 ZEND_API void ZEND_FASTCALL _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, bool persistent);
