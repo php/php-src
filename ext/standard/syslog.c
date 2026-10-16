@@ -32,8 +32,6 @@
 #include "basic_functions.h"
 #include "php_ext_syslog.h"
 
-ZEND_TLS bool syslog_called;
-
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(syslog)
 {
@@ -43,9 +41,8 @@ PHP_MINIT_FUNCTION(syslog)
 
 PHP_RSHUTDOWN_FUNCTION(syslog)
 {
-	if (PG(have_called_openlog) || syslog_called) {
+	if (PG(have_called_openlog)) {
 		php_closelog();
-		syslog_called = false;
 	}
 	if (BG(syslog_device)) {
 		free(BG(syslog_device));
@@ -107,7 +104,9 @@ PHP_FUNCTION(syslog)
 		Z_PARAM_STR(message)
 	ZEND_PARSE_PARAMETERS_END();
 
-	syslog_called = true;
+	if (!PG(have_called_openlog)) {
+		php_openlog(PG(syslog_ident), 0, PG(syslog_facility));
+	}
 	php_syslog_str(priority, message);
 	RETURN_TRUE;
 }
