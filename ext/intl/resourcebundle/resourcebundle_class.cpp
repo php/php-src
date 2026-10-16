@@ -16,16 +16,11 @@
 #include <unicode/ures.h>
 #include <unicode/uenum.h>
 
-
-extern "C" {
-#include <zend.h>
 #include <php.h>
-}
 
 #include <Zend/zend_exceptions.h>
 #include <Zend/zend_interfaces.h>
 
-extern "C" {
 #include "php_intl.h"
 #include "intl_data.h"
 #include "intl_common.h"
@@ -33,7 +28,6 @@ extern "C" {
 #include "resourcebundle/resourcebundle_iterator.h"
 #include "resourcebundle/resourcebundle_class.h"
 #include "resourcebundle/resourcebundle_arginfo.h"
-}
 
 zend_class_entry *ResourceBundle_ce_ptr = NULL;
 
