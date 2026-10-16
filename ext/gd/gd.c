@@ -1425,6 +1425,7 @@ PHP_FUNCTION(imagecreatefromstring)
 
 	if (ZSTR_LEN(data) > INT_MAX) {
 		zend_argument_value_error(1, "is too long");
+		RETURN_THROWS();
 	}
 
 	imtype = _php_image_type(data);
