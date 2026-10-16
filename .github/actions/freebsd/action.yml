@@ -12,7 +12,7 @@ runs:
     - name: FreeBSD
       uses: vmactions/freebsd-vm@v1
       with:
-        release: '13.5'
+        release: '14.4'
         usesh: true
         copyback: false
         disable-cache: true
