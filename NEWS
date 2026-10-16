@@ -36,6 +36,8 @@ PHP                                                                        NEWS
 - GD:
   . Fixed use-after-free when drawing with a brush or tile image that was
     released after imagesetbrush() or imagesettile(). (lacatoire)
+  . Fixed the argument blamed by the imagepolygon(), imageopenpolygon() and
+    imagefilledpolygon() too few points error. (lacatoire)
 
 - MBString:
   . Fixed stack overflow in mb_check_encoding() and mb_convert_encoding() with

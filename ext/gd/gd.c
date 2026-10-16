@@ -2897,7 +2897,12 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 
 	nelem = zend_hash_num_elements(Z_ARRVAL_P(POINTS));
 	if (npoints < 3) {
-		zend_argument_value_error(3, "must be greater than or equal to 3");
+		if (COL_IS_NULL) {
+			/* The count comes from the array, argument #3 is the color */
+			zend_argument_value_error(2, "must have at least 3 points");
+		} else {
+			zend_argument_value_error(3, "must be greater than or equal to 3");
+		}
 		RETURN_THROWS();
 	}
 
