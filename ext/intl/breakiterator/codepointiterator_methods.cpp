@@ -14,10 +14,8 @@
 
 #include "codepointiterator_internal.h"
 
-extern "C" {
 #define USE_BREAKITERATOR_POINTER 1
 #include "breakiterator_class.h"
-}
 
 using PHP::CodePointBreakIterator;
 
