@@ -2181,8 +2181,7 @@ propagate_arg:
 							ZEND_ASSERT(frame->call->func->op_array.arg_info);
 							arg_info = &frame->call->func->op_array.arg_info[opline->op2.num - 1];
 							if (ZEND_TYPE_IS_SET(arg_info->type)) {
-								zend_class_entry *ce;
-								uint32_t tmp = zend_fetch_arg_info_type(script, &frame->call->func->op_array, arg_info, &ce);
+								uint32_t tmp = zend_fetch_arg_info_type(script, NULL, arg_info, NULL);
 								info &= tmp;
 								if (!info) {
 									break;
@@ -2685,12 +2684,9 @@ propagate_arg:
 					opline->opcode == ZEND_DO_FCALL_BY_NAME);
 
 				if (opline->result_type != IS_UNDEF) {
-					zend_class_entry *ce;
 					const zend_function *func = p->func;
 					zend_arg_info *ret_info = func->common.arg_info - 1;
-					const zend_op_array *callee_op_array =
-						(func->common.type != ZEND_INTERNAL_FUNCTION) ? &func->op_array : NULL;
-					uint32_t ret_type = zend_fetch_arg_info_type(script, callee_op_array, ret_info, &ce);
+					uint32_t ret_type = zend_fetch_arg_info_type(NULL, NULL, ret_info, NULL);
 
 					ssa_var_info[ssa_ops[idx-1].result_def].type &= ret_type;
 				}

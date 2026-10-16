@@ -47,6 +47,10 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 - The INIT_CLASS_ENTRY_INIT_METHODS() macro, which was previously used as
   part of handling disabled classes, was removed following the removal of
   the `disable_classes` INI setting in PHP 8.5.
+- zend_fetch_arg_info_type() now takes an additional const zend_op_array*
+  parameter after the script. It is used to resolve class names against the
+  op_array's scope and filename. NULL may be passed if no op_array is
+  available.
 
 ========================
 2. Build system changes

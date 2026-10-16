@@ -4531,7 +4531,7 @@ uint32_t zend_get_return_info_from_signature_only(
 		(use_tentative_return_info || !ZEND_ARG_TYPE_IS_TENTATIVE(func->common.arg_info - 1))
 	) {
 		const zend_arg_info *ret_info = func->common.arg_info - 1;
-		const zend_op_array *op_array = (func->common.type != ZEND_INTERNAL_FUNCTION) ? (const zend_op_array *) func : NULL;
+		const zend_op_array *op_array = ZEND_USER_CODE(func->type) ? &func->op_array : NULL;
 		type = zend_fetch_arg_info_type(script, op_array, ret_info, ce);
 		*ce_is_instanceof = ce != NULL;
 	} else {
