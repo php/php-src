@@ -200,6 +200,36 @@ extern HashTable php_soap_defEncNs, php_soap_defEnc, php_soap_defEncIndex;
 
 void add_soap_fault(zval *obj, const char *fault_code, const char *fault_string, zend_string *fault_actor, zval *fault_detail, zend_string *lang);
 
+ZEND_COLD void soap_throw_error(const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 1, 2);
+
+typedef enum {
+	SOAP_ENCODING_ERROR_FATAL,
+	SOAP_ENCODING_ERROR_THROW,
+	SOAP_ENCODING_ERROR_IGNORE,
+} soap_encoding_error_mode;
+
+soap_encoding_error_mode soap_get_encoding_error_mode(void);
+
+/* Reports an error in encoding or decoding a value. It is a fatal error, as with soap_errorN(E_ERROR, ...), except in a
+ * call of a SoapClient that uses exceptions: there it is thrown as a SoapFault and does not bail out, so the encoder
+ * must return a value its callers can handle. The call discards the result once encoding is done. */
+#define soap_encoding_error(...) do { \
+		switch (soap_get_encoding_error_mode()) { \
+			case SOAP_ENCODING_ERROR_FATAL: \
+				php_error(E_ERROR, "SOAP-ERROR: " __VA_ARGS__); \
+				break; \
+			case SOAP_ENCODING_ERROR_THROW: \
+				soap_throw_error(__VA_ARGS__); \
+				break; \
+			case SOAP_ENCODING_ERROR_IGNORE: \
+				break; \
+		} \
+	} while (0)
+
+/* An encoding error has been thrown as a SoapFault: the rest of the call is skipped */
+#define SOAP_ENCODING_ERROR_THROWN() \
+	(UNEXPECTED(EG(exception)) && soap_get_encoding_error_mode() == SOAP_ENCODING_ERROR_IGNORE)
+
 #define soap_error0(severity, format) \
 	php_error(severity, "SOAP-ERROR: " format)
 
