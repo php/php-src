@@ -6,5 +6,15 @@ var PHP_EMBED_PGO = false;
 
 if (PHP_EMBED != "no") {
 	SAPI('embed', 'php_embed.c', 'php' + PHP_VERSION + 'embed.lib', '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
+	if (PHP_EMBED == "static") {
+		// Static embed mode: php<N>embed.lib is intended to contain PHP
+		// core, extensions and the embed SAPI in a single static library
+		// (no php<N>.dll at runtime). php_embed.c must reach PHP/Zend/
+		// SAPI/TSRM symbols directly rather than through dllimport thunks.
+		ADD_FLAG('CFLAGS_EMBED',
+			'/D PHP_EMBED_STATIC' +
+			' /D PHP_EXPORTS /D LIBZEND_EXPORTS' +
+			' /D SAPI_EXPORTS /D TSRM_EXPORTS');
+	}
 	PHP_INSTALL_HEADERS("sapi/embed", "php_embed.h");
 }
