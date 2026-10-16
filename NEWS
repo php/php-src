@@ -25,6 +25,8 @@ PHP                                                                        NEWS
     (David Carlier)
 
 - Date:
+  . Fixed bug GH-20503 (Assertion failure with ext/date DateInterval property
+    hash construction). (heathdutton)
   . Fixed bug GH-24350 (MINIT reads a stale external tz database after an
     in-process module restart). (Lazizbek Ergashev)
 
@@ -60,6 +62,8 @@ PHP                                                                        NEWS
   . Fix OSS-Fuzz #568005340 (FETCH_DIM_FUNC_ARG partial conversion). (ndossche)
   . Fixed bug GH-24218 (Invalid opcode for count() of a literal array when
     SCCP is disabled). (Lazizbek Ergashev)
+  . Fixed bug GH-24337 (JIT: segfault when decrementing a non-numeric string
+    property). (Lazizbek Ergashev)
 
 - PDO:
   . Fixed a duplicate warning when ATTR_STATEMENT_CLASS is rejected on a
@@ -76,11 +80,19 @@ PHP                                                                        NEWS
   . Fixed use of uninitialized func in do_request() on OOM bailout.
     (David Carlier)
 
+- Session:
+  . Fixed session data loss in the files save handler when writing the session
+    file fails after it was already truncated. (Ilia Alshanetsky)
+
 - Standard:
   . Fixed chown() and lchown() failing to resolve user names in ZTS builds
     when getpwnam_r() needs a larger buffer. (Ilia Alshanetsky)
   . Fixed password_get_info() and password_needs_rehash() accepting malformed
     bcrypt costs. (Ilia Alshanetsky)
+
+- Tidy:
+  . Fixed tidy_repair_string(), tidy_repair_file(), tidy::repairString() and
+    tidy::repairFile() rejecting null for $encoding. (lacatoire)
 
 - Zip:
   . Fixed use-after-free when re-entering ZipArchive during destruction or
