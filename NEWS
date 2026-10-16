@@ -75,6 +75,10 @@ PHP                                                                        NEWS
 - Phpdbg:
   . Fix wrong command names. (ndossche, Weilin Du)
 
+- POSIX:
+  . Fixed posix_setrlimit() rejecting POSIX_RLIMIT_INFINITY on Solaris.
+    (Jorg Sowa)
+
 - Readline:
   . Fixed a crash in readline_info() when completion_append_character
     contains a non-ASCII byte. (Weilin Du)
