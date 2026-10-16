@@ -77,6 +77,9 @@ PHP                                                                        NEWS
 - SOAP:
   . Fixed use of uninitialized func in do_request() on OOM bailout.
     (David Carlier)
+  . Fixed SoapClient writing to the output headers array, which the exception
+    trace shares, after decoding a response header threw an exception.
+    (Valery Ivashchanka)
 
 - Session:
   . Fixed session data loss in the files save handler when writing the session
