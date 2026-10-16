@@ -18,4 +18,4 @@ try {
 
 ?>
 --EXPECT--
-Error: Call to undefined function strpos()
+Error: Call to undefined function strpos() (did you mean stripos?)

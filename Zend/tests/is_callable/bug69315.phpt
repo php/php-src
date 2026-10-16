@@ -43,7 +43,7 @@ try {
 bool(false)
 bool(false)
 Error: Call to undefined function strlen()
-Error: Call to undefined function defined()
+Error: Call to undefined function defined() (did you mean define?)
 Error: Call to undefined function constant()
 Error: Call to undefined function call_user_func()
 Error: Call to undefined function is_string()
