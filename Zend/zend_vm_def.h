@@ -8420,8 +8420,16 @@ ZEND_VM_HANDLER(142, ZEND_DECLARE_LAMBDA_FUNCTION, UNUSED, NUM, NUM|CACHE_SLOT)
 	zend_object *object;
 	zend_class_entry *called_scope;
 
+	if (Z_TYPE(EX(This)) == IS_OBJECT) {
+		called_scope = Z_OBJCE(EX(This));
+	} else {
+		called_scope = Z_CE(EX(This));
+	}
+
 	if (opline->extended_value != (uint32_t)-1) {
-		zend_object *closure = CACHED_PTR(opline->extended_value);
+		/* The closure is bound to the called scope, so it may only be reused
+		 * for the same called scope. */
+		zend_object *closure = CACHED_POLYMORPHIC_PTR(opline->extended_value, called_scope);
 		if (closure) {
 			ZVAL_OBJ_COPY(EX_VAR(opline->result.var), closure);
 			ZEND_VM_NEXT_OPCODE();
@@ -8429,25 +8437,23 @@ ZEND_VM_HANDLER(142, ZEND_DECLARE_LAMBDA_FUNCTION, UNUSED, NUM, NUM|CACHE_SLOT)
 	}
 
 	func = (zend_function *) EX(func)->op_array.dynamic_func_defs[opline->op2.num];
-	if (Z_TYPE(EX(This)) == IS_OBJECT) {
-		called_scope = Z_OBJCE(EX(This));
-		if (UNEXPECTED((func->common.fn_flags & ZEND_ACC_STATIC) ||
-				(EX(func)->common.fn_flags & ZEND_ACC_STATIC))) {
-			object = NULL;
-		} else {
-			object = Z_OBJ(EX(This));
-		}
+	if (Z_TYPE(EX(This)) == IS_OBJECT
+	 && EXPECTED(!(func->common.fn_flags & ZEND_ACC_STATIC))
+	 && EXPECTED(!(EX(func)->common.fn_flags & ZEND_ACC_STATIC))) {
+		object = Z_OBJ(EX(This));
 	} else {
-		called_scope = Z_CE(EX(This));
 		object = NULL;
 	}
 	SAVE_OPLINE();
 	zend_create_closure(EX_VAR(opline->result.var), func,
 		EX(func)->op_array.scope, called_scope, object);
-	if (opline->extended_value != (uint32_t)-1) {
+	/* Only fill an empty cache slot. Replacing a cached closure on a called
+	 * scope mismatch would grow EG(lambda_cache) without bounds. */
+	if (opline->extended_value != (uint32_t)-1
+	 && !CACHED_PTR(opline->extended_value + sizeof(void *))) {
 		zend_object *closure = Z_OBJ_P(EX_VAR(opline->result.var));
 		GC_ADDREF(closure);
-		CACHE_PTR(opline->extended_value, closure);
+		CACHE_POLYMORPHIC_PTR(opline->extended_value, called_scope, closure);
 		zend_stack_push(&EG(lambda_cache), &closure);
 	}
 	ZEND_VM_NEXT_OPCODE();
