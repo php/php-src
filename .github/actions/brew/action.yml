@@ -6,6 +6,8 @@ runs:
       run: |
         set -x
 
+        brew update
+
         # Patch brew to overwrite always
         formula_installer="$(brew --repo)"/Library/Homebrew/formula_installer.rb
         code=" keg.link\(verbose: verbose\?"
