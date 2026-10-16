@@ -12,17 +12,13 @@
    +----------------------------------------------------------------------+
 */
 
-extern "C" {
 #include "php.h"
-}
 
 #include <unicode/listformatter.h>
 #include <unicode/locid.h>
 #include "../intl_convertcpp.h"
 
-extern "C" {
 #include "php_intl.h"
-}
 #include "listformatter_class.h"
 #include "listformatter_arginfo.h"
 
@@ -210,7 +206,7 @@ PHP_METHOD(IntlListFormatter, getErrorMessage)
     RETURN_STR(message);
 }
 
-void listformatter_register_class(void)
+U_CFUNC void listformatter_register_class(void)
 {
     zend_class_entry *class_entry = register_class_IntlListFormatter();
     class_entry->create_object = listformatter_create_object;
