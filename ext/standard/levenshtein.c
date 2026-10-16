@@ -80,10 +80,14 @@ PHP_FUNCTION(levenshtein)
 	zend_long cost_rep = 1;
 	zend_long cost_del = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS|lll", &string1, &string2, &cost_ins, &cost_rep, &cost_del) == FAILURE) {
-		RETURN_THROWS();
-	}
-
+	ZEND_PARSE_PARAMETERS_START(2, 5)
+		Z_PARAM_STR(string1)
+		Z_PARAM_STR(string2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(cost_ins)
+		Z_PARAM_LONG(cost_rep)
+		Z_PARAM_LONG(cost_del)
+	ZEND_PARSE_PARAMETERS_END();
 
 	RETURN_LONG(reference_levdist(string1, string2, cost_ins, cost_rep, cost_del));
 }
