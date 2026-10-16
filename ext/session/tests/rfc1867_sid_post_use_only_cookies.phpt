@@ -1,5 +1,5 @@
 --TEST--
-session rfc1867 upload progress does not use form SID when use_only_cookies=1
+session rfc1867 upload progress ignores session ID from POST data with default session.use_only_cookies
 --INI--
 upload_max_filesize=1024
 session.upload_progress.cleanup=0
