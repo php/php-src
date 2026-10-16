@@ -37,7 +37,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	memcpy(data, Data, Size);
 	data[Size] = '\0';
 
-	int options[12] = {
+	static const int options[] = {
 		0,
 		PHP_JSON_OBJECT_AS_ARRAY,
 		PHP_JSON_OBJECT_AS_ARRAY | PHP_JSON_BIGINT_AS_STRING,
@@ -49,13 +49,20 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 		PHP_JSON_BIGINT_AS_STRING | PHP_JSON_INVALID_UTF8_IGNORE,
 		PHP_JSON_BIGINT_AS_STRING | PHP_JSON_INVALID_UTF8_SUBSTITUTE,
 		PHP_JSON_INVALID_UTF8_IGNORE,
-		PHP_JSON_INVALID_UTF8_SUBSTITUTE
+		PHP_JSON_INVALID_UTF8_SUBSTITUTE,
+		PHP_JSON_ALLOW_COMMENTS,
+		PHP_JSON_ALLOW_TRAILING_COMMAS,
+		PHP_JSON_ALLOW_COMMENTS | PHP_JSON_ALLOW_TRAILING_COMMAS,
+		PHP_JSON_OBJECT_AS_ARRAY | PHP_JSON_BIGINT_AS_STRING
+			| PHP_JSON_ALLOW_COMMENTS | PHP_JSON_ALLOW_TRAILING_COMMAS,
+		PHP_JSON_ALLOW_COMMENTS | PHP_JSON_ALLOW_TRAILING_COMMAS | PHP_JSON_INVALID_UTF8_IGNORE,
+		PHP_JSON_ALLOW_COMMENTS | PHP_JSON_ALLOW_TRAILING_COMMAS | PHP_JSON_INVALID_UTF8_SUBSTITUTE,
 	};
 
-	for (int index = 0; index < 12; ++index) {
+	for (size_t i = 0; i < sizeof(options) / sizeof(options[0]); ++i) {
 		zval result;
 		php_json_parser parser;
-		php_json_parser_init(&parser, &result, data, Size, options[index], 10);
+		php_json_parser_init(&parser, &result, data, Size, options[i], 10);
 		if (php_json_yyparse(&parser) == SUCCESS) {
 			zval_ptr_dtor(&result);
 		}

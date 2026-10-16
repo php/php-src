@@ -36,10 +36,10 @@ string(8) "No error"
 Error: 0 json_validate(): Argument #2 ($depth) must be greater than 0
 int(0)
 string(8) "No error"
-Error: 0 json_validate(): Argument #3 ($flags) must be a valid flag (allowed flags: JSON_INVALID_UTF8_IGNORE)
+Error: 0 json_validate(): Argument #3 ($flags) must be a valid flag (allowed flags: JSON_INVALID_UTF8_IGNORE, JSON_ALLOW_COMMENTS, JSON_ALLOW_TRAILING_COMMAS)
 int(0)
 string(8) "No error"
-Error: 0 json_validate(): Argument #3 ($flags) must be a valid flag (allowed flags: JSON_INVALID_UTF8_IGNORE)
+Error: 0 json_validate(): Argument #3 ($flags) must be a valid flag (allowed flags: JSON_INVALID_UTF8_IGNORE, JSON_ALLOW_COMMENTS, JSON_ALLOW_TRAILING_COMMAS)
 int(0)
 string(8) "No error"
 bool(false)
