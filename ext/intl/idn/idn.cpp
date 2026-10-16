@@ -18,17 +18,13 @@
 #include <config.h>
 #endif
 
-extern "C" {
 #include "../php_intl.h"
-}
 #include <unicode/uidna.h>
 #include <unicode/ustring.h>
 
 #include "idn.h"
 
-extern "C" {
 #include "intl_error.h"
-}
 /* }}} */
 
 enum {
