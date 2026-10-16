@@ -13,11 +13,9 @@
  */
 
 #include "spoofchecker_class.h"
-extern "C" {
 #include "spoofchecker_arginfo.h"
 #include "php_intl.h"
 #include "intl_error.h"
-}
 
 #include <unicode/uspoof.h>
 
@@ -28,8 +26,7 @@ static zend_object_handlers Spoofchecker_handlers;
  * Auxiliary functions needed by objects of 'Spoofchecker' class
  */
 
-/* {{{ Spoofchecker_objects_free */
-U_CFUNC void Spoofchecker_objects_free(zend_object *object)
+static void Spoofchecker_objects_free(zend_object *object)
 {
 	Spoofchecker_object* co = php_intl_spoofchecker_fetch_object(object);
 
@@ -37,10 +34,8 @@ U_CFUNC void Spoofchecker_objects_free(zend_object *object)
 
 	spoofchecker_object_destroy(co);
 }
-/* }}} */
 
-/* {{{ Spoofchecker_object_create */
-U_CFUNC zend_object *Spoofchecker_object_create(zend_class_entry *ce)
+static zend_object *Spoofchecker_object_create(zend_class_entry *ce)
 {
 	Spoofchecker_object*     intern;
 
@@ -51,7 +46,6 @@ U_CFUNC zend_object *Spoofchecker_object_create(zend_class_entry *ce)
 
 	return &intern->zo;
 }
-/* }}} */
 
 /*
  * 'Spoofchecker' class registration structures & functions
