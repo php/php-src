@@ -4014,8 +4014,12 @@ PHP_FUNCTION(imagecropauto)
 			break;
 
 		case GD_CROP_THRESHOLD:
-			if (color < 0 || (!gdImageTrueColor(im) && color >= gdImageColorsTotal(im))) {
+			if (color < 0) {
 				zend_argument_value_error(4, "must be greater than or equal to 0 when using the threshold mode");
+				RETURN_THROWS();
+			}
+			if (!gdImageTrueColor(im) && color >= gdImageColorsTotal(im)) {
+				zend_argument_value_error(4, "must be a valid color index of the image when using the threshold mode");
 				RETURN_THROWS();
 			}
 			im_crop = gdImageCropThreshold(im, color, (float) threshold);
