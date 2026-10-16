@@ -2202,7 +2202,7 @@ static zend_string* mb_get_substr(zend_string *input, size_t from, size_t len, c
 		return zend_string_init_fast((const char*)in, len);
 	}
 
-	if (php_mb_is_no_encoding_utf8(enc->no_encoding) && ZSTR_IS_VALID_UTF8(input)) {
+	if (enc == &mbfl_encoding_utf8 && ZSTR_IS_VALID_UTF8(input)) {
 		/* Valid UTF-8 can be sliced on codepoint boundaries without decoding it */
 		unsigned char *end = in + in_len;
 		unsigned char *start = offset_to_pointer_utf8(in, end, from, true);
