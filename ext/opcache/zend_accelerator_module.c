@@ -611,7 +611,12 @@ static int accelerator_get_scripts(zval *return_value)
 
 	array_init(return_value);
 	for (i = 0; i<ZCSG(hash).max_num_entries; i++) {
-		for (cache_entry = ZCSG(hash).hash_table[i]; cache_entry; cache_entry = cache_entry->next) {
+		cache_entry = ZCSG(hash).hash_table[i];
+		if (cache_entry) {
+			/* Lock-free reader, see zend_accel_hash_find_ex(). */
+			ZEND_ATOMIC_FENCE_ACQUIRE();
+		}
+		for (; cache_entry; cache_entry = cache_entry->next) {
 			zend_persistent_script *script;
 			char *str;
 			size_t len;

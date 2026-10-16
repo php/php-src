@@ -97,6 +97,10 @@ zend_accel_hash_entry* zend_accel_hash_update(zend_accel_hash *accel_hash, zend_
 		if (entry->hash_value == hash_value
 		 && zend_string_equals(entry->key, key)) {
 
+			/* Lookups are lock-free: order the initialization of whatever the new
+			 * data points to before the pointer update (writer side only; readers
+			 * rely on the address dependency when following data). */
+			ZEND_ATOMIC_FENCE_RELEASE();
 			if (entry->indirect) {
 				if (indirect_bucket) {
 					entry->data = indirect_bucket;
@@ -134,6 +138,10 @@ zend_accel_hash_entry* zend_accel_hash_update(zend_accel_hash *accel_hash, zend_
 	entry->hash_value = hash_value;
 	entry->key = key;
 	entry->next = accel_hash->hash_table[index];
+	/* Lookups are lock-free: the entry must be fully initialized before it
+	 * becomes reachable from the bucket, otherwise a concurrent reader can see
+	 * a matching hash_value with a NULL key (weakly ordered CPUs, e.g. aarch64). */
+	ZEND_ATOMIC_FENCE_RELEASE();
 	accel_hash->hash_table[index] = entry;
 	return entry;
 }
@@ -151,6 +159,11 @@ static zend_always_inline void* zend_accel_hash_find_ex(zend_accel_hash *accel_h
 	index = hash_value % accel_hash->max_num_entries;
 
 	entry = accel_hash->hash_table[index];
+	if (entry) {
+		/* Order the bucket read before the entry field reads; pairs with the
+		 * release fence before the bucket store in zend_accel_hash_update(). */
+		ZEND_ATOMIC_FENCE_ACQUIRE();
+	}
 	while (entry) {
 		if (entry->hash_value == hash_value
 		 && zend_string_equals(entry->key, key)) {
