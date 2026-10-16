@@ -1,15 +1,37 @@
 --TEST--
-Attempt to instantiate an LDAP\Connection directly
+new \LDAP\Connection() - Variation
 --EXTENSIONS--
 ldap
 --FILE--
 <?php
+$constructorCalls = [
+    // no hostname, no port
+    [],
+    // URI
+    ["ldap://hostname:389"],
+    // ldaps URI
+    ["ldaps://hostname:689"],
+    // URI no port
+    ["ldap://hostname"],
+];
 
-try {
-    new LDAP\Connection();
-} catch (Error $ex) {
-    echo $ex::class, ': ', $ex->getMessage(), "\n";
+foreach ($constructorCalls as $parameters) {
+    $link = new \LDAP\Connection(...$parameters);
+    var_dump($link);
+    ldap_get_option($link, LDAP_OPT_HOST_NAME, $hostname);
+    var_dump($hostname);
 }
 ?>
---EXPECT--
-Error: Cannot directly construct LDAP\Connection, use ldap_connect() instead
+--EXPECTF--
+object(LDAP\Connection)#%d (0) {
+}
+string(%d) "%s:%d"
+object(LDAP\Connection)#%d (0) {
+}
+string(12) "hostname:389"
+object(LDAP\Connection)#%d (0) {
+}
+string(12) "hostname:689"
+object(LDAP\Connection)#%d (0) {
+}
+string(12) "hostname:389"
