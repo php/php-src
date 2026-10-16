@@ -23,6 +23,8 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug GH-20503 (Assertion failure with ext/date DateInterval property
     hash construction). (heathdutton)
+  . Fixed bug GH-24350 (MINIT reads a stale external tz database after an
+    in-process module restart). (Lazizbek Ergashev)
 
 - Fileinfo:
   . Fixed bug GH-24289 (finfo::file() reports the wrong argument number for
