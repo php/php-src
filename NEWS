@@ -42,6 +42,10 @@ PHP                                                                        NEWS
   . Fixed stack overflow in filter_var() and filter_var_array() with deeply
     nested arrays. (Eyüp Can Akman)
 
+- GD:
+  . Fixed imagecreatefromstring() continuing to decode after throwing for a
+    string longer than INT_MAX. (lacatoire)
+
 - MBString:
   . Fixed stack overflow in mb_check_encoding() and mb_convert_encoding() with
     deeply nested arrays. (Eyüp Can Akman)
