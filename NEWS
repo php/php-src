@@ -95,6 +95,8 @@ PHP                                                                        NEWS
     when getpwnam_r() needs a larger buffer. (Ilia Alshanetsky)
   . Fixed password_get_info() and password_needs_rehash() accepting malformed
     bcrypt costs. (Ilia Alshanetsky)
+  . Fixed bug GH-24308 (Request shutdown calls closelog() even when syslog
+    was not opened by PHP). (lazerg)
 
 - Tidy:
   . Fixed tidy_repair_string(), tidy_repair_file(), tidy::repairString() and
