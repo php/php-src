@@ -175,8 +175,15 @@ PHP_METHOD(Time_Duration, __unserialize)
 		goto fail;
 	}
 
-	/* Verify that both properties are positive, since the timelib_duration_ctor_static() takes unsigned. */
+	/* Verify that both properties are non-negative, since the timelib_duration_ctor_static() takes
+	 * unsigned. */
 	if (Z_LVAL_P(seconds) < 0 || Z_LVAL_P(nanoseconds) < 0) {
+		goto fail;
+	}
+
+	/* timelib_duration_ctor_static() takes a uint32_t for nanoseconds, so larger values would
+	 * implicitly wrap around instead of being rejected. */
+	if (Z_LVAL_P(nanoseconds) >= NANOS_IN_SEC) {
 		goto fail;
 	}
 
@@ -188,6 +195,10 @@ PHP_METHOD(Time_Duration, __unserialize)
 
 	if (!duration_representable(&duration->duration)) {
 		throw_out_of_range_exception();
+		goto fail;
+	}
+
+	if ((Z_TYPE_P(negative) == IS_TRUE) != duration->duration.negative) {
 		goto fail;
 	}
 

@@ -47,6 +47,20 @@ try {
 }
 
 try {
+    // Nanoseconds that would be truncated to a valid value by a 32-bit conversion (2^32 + 5).
+    unserialize('O:13:"Time\Duration":3:{s:7:"seconds";i:1;s:11:"nanoseconds";i:4294967301;s:8:"negative";b:0;}');
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+
+try {
+    // A negative zero duration is rejected.
+    unserialize('O:13:"Time\Duration":3:{s:7:"seconds";i:0;s:11:"nanoseconds";i:0;s:8:"negative";b:1;}');
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+
+try {
     Time\Duration::fromSeconds(1, 1)
         ->__unserialize([
             'seconds' => 2,
@@ -63,6 +77,8 @@ string(85) "O:13:"Time\Duration":3:{s:7:"seconds";i:1;s:11:"nanoseconds";i:2;s:8
          -1.000000002
 string(85) "O:13:"Time\Duration":3:{s:7:"seconds";i:1;s:11:"nanoseconds";i:2;s:8:"negative";b:1;}"
          -2.000000004
+Exception: Invalid serialization data for Time\Duration object
+Exception: Invalid serialization data for Time\Duration object
 Exception: Invalid serialization data for Time\Duration object
 Exception: Invalid serialization data for Time\Duration object
 Exception: Invalid serialization data for Time\Duration object
