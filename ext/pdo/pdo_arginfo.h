@@ -1,5 +1,6 @@
 /* This is a generated file, edit pdo.stub.php instead.
  * Stub hash: dc41dddeea1ae117c6f2f3447afb29bf6623b757 */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pdo_drivers, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -30,3 +31,5 @@ static zend_class_entry *register_class_PDOException(zend_class_entry *class_ent
 
 	return class_entry;
 }
+
+END_EXTERN_C()

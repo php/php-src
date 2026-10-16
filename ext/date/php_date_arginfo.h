@@ -3,6 +3,7 @@
 
 #include "zend_attributes.h"
 #include "zend_constants.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -1354,3 +1355,5 @@ static zend_class_entry *register_class_DateMalformedPeriodStringException(zend_
 
 	return class_entry;
 }
+
+END_EXTERN_C()

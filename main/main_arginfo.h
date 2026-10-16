@@ -2,6 +2,7 @@
  * Stub hash: 22b4c7412680888c122886bccd21e3d38953ce33 */
 
 #include "zend_constants.h"
+BEGIN_EXTERN_C()
 
 static void register_main_symbols(int module_number)
 {
@@ -87,3 +88,5 @@ static void register_main_symbols(int module_number)
 	REGISTER_STRING_CONSTANT("PHP_SAPI", sapi_module.name, CONST_PERSISTENT | CONST_NO_FILE_CACHE);
 	REGISTER_STRING_CONSTANT("PHP_BINARY", PG(php_binary) ? PG(php_binary) : "", CONST_PERSISTENT | CONST_NO_FILE_CACHE);
 }
+
+END_EXTERN_C()

@@ -2,6 +2,7 @@
  * Stub hash: 0ceb50047401c4b9e878c09cc518eacc274f7fff */
 
 #include "zend_constants.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_json_encode, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
@@ -103,3 +104,5 @@ static zend_class_entry *register_class_JsonException(zend_class_entry *class_en
 
 	return class_entry;
 }
+
+END_EXTERN_C()

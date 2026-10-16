@@ -5,6 +5,7 @@
 #include "zend_attributes.h"
 #include "zend_constants.h"
 #include "zend_enum.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -4150,3 +4151,5 @@ static zend_class_entry *register_class_RoundingMode(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

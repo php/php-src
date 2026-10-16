@@ -4,6 +4,7 @@
 #if SODIUM_LIBRARY_VERSION_MAJOR > 9 || (SODIUM_LIBRARY_VERSION_MAJOR == 9 && SODIUM_LIBRARY_VERSION_MINOR >= 6)
 #include "zend_constants.h"
 #endif
+BEGIN_EXTERN_C()
 
 static void register_sodium_pwhash_symbols(int module_number)
 {
@@ -16,3 +17,5 @@ static void register_sodium_pwhash_symbols(int module_number)
 	REGISTER_STRING_CONSTANT("PASSWORD_ARGON2_PROVIDER", "sodium", CONST_PERSISTENT);
 #endif
 }
+
+END_EXTERN_C()

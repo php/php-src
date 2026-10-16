@@ -2,6 +2,7 @@
  * Stub hash: 5d7145b7bc305bb50b45e75c02740206148223b1 */
 
 #include "zend_attributes.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_clone, 0, 1, IS_OBJECT, 0)
 	ZEND_ARG_TYPE_INFO(0, object, IS_OBJECT, 0)
@@ -411,3 +412,5 @@ static zend_class_entry *register_class_stdClass(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

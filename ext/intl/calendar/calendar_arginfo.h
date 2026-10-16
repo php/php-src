@@ -1,5 +1,6 @@
 /* This is a generated file, edit calendar.stub.php instead.
  * Stub hash: 2fc12d1fde65efbec4305f4934a3f4b25282a552 */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -573,3 +574,5 @@ static zend_class_entry *register_class_IntlGregorianCalendar(zend_class_entry *
 
 	return class_entry;
 }
+
+END_EXTERN_C()

@@ -2,6 +2,7 @@
  * Stub hash: 9dfd8bcf8946cbee550c9a46da07c424c3505408 */
 
 #include "zend_attributes.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplObserver_update, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, subject, SplSubject, 0)
@@ -319,3 +320,5 @@ static zend_class_entry *register_class_MultipleIterator(zend_class_entry *class
 
 	return class_entry;
 }
+
+END_EXTERN_C()

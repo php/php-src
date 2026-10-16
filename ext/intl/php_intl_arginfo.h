@@ -3,6 +3,7 @@
 
 #include "zend_attributes.h"
 #include "zend_constants.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_OBJ_TYPE_MASK(0, timezone, IntlTimeZone|DateTimeZone, MAY_BE_STRING|MAY_BE_NULL, "null")
@@ -1282,3 +1283,5 @@ static zend_class_entry *register_class_IntlException(zend_class_entry *class_en
 
 	return class_entry;
 }
+
+END_EXTERN_C()

@@ -3,6 +3,7 @@
 
 #include "zend_attributes.h"
 #include "zend_constants.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_use_soap_error_handler, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enable, _IS_BOOL, 0, "true")
@@ -750,3 +751,5 @@ static zend_class_entry *register_class_SoapClient(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

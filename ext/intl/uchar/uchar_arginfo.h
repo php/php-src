@@ -1,5 +1,6 @@
 /* This is a generated file, edit uchar.stub.php instead.
  * Stub hash: 58fb5f326ee08cca73977720d3b055b0118d78bb */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlChar_hasBinaryProperty, 0, 2, _IS_BOOL, 1)
 	ZEND_ARG_TYPE_MASK(0, codepoint, MAY_BE_LONG|MAY_BE_STRING, NULL)
@@ -4309,3 +4310,5 @@ static zend_class_entry *register_class_IntlChar(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

@@ -1,5 +1,6 @@
 /* This is a generated file, edit pdo_stmt.stub.php instead.
  * Stub hash: 6a5b332ba4bfeceaca6aad734d38dabb66d82c97 */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PDOStatement_bindColumn, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_MASK(0, column, MAY_BE_STRING|MAY_BE_LONG, NULL)
@@ -164,3 +165,5 @@ static zend_class_entry *register_class_PDORow(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

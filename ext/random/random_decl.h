@@ -3,6 +3,7 @@
 
 #ifndef ZEND_RANDOM_DECL_245fb5b66e540814c8595a06182886aee3e32f2c_H
 #define ZEND_RANDOM_DECL_245fb5b66e540814c8595a06182886aee3e32f2c_H
+BEGIN_EXTERN_C()
 
 typedef enum zend_enum_Random_IntervalBoundary {
 	ZEND_ENUM_Random_IntervalBoundary_ClosedOpen = 1,
@@ -11,4 +12,5 @@ typedef enum zend_enum_Random_IntervalBoundary {
 	ZEND_ENUM_Random_IntervalBoundary_OpenOpen = 4,
 } zend_enum_Random_IntervalBoundary;
 
+END_EXTERN_C()
 #endif /* ZEND_RANDOM_DECL_245fb5b66e540814c8595a06182886aee3e32f2c_H */

@@ -1,5 +1,6 @@
 /* This is a generated file, edit php_functions.stub.php instead.
  * Stub hash: 130666f6f971fe7b43a450d922e4b3d092e78667 */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_apache_lookup_uri, 0, 1, MAY_BE_OBJECT|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -60,3 +61,5 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(apache_get_modules, arginfo_apache_get_modules)
 	ZEND_FE_END
 };
+
+END_EXTERN_C()

@@ -2,6 +2,7 @@
  * Stub hash: ed5b1e4e5dda6a65ce336fc4daa975520c354f17 */
 
 #include "zend_constants.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_msg_get_queue, 0, 1, SysvMessageQueue, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, key, IS_LONG, 0)
@@ -82,3 +83,5 @@ static zend_class_entry *register_class_SysvMessageQueue(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

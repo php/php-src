@@ -1,5 +1,6 @@
 /* This is a generated file, edit locale.stub.php instead.
  * Stub hash: 2f2de79772630fd0a2399b88120bd968bfed1144 */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Locale_getDefault, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -211,3 +212,5 @@ static zend_class_entry *register_class_Locale(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

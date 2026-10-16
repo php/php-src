@@ -7,6 +7,7 @@
 #if (PHP_VERSION_ID >= 80100)
 #include "zend_enum.h"
 #endif
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
 ZEND_END_ARG_INFO()
@@ -1758,3 +1759,5 @@ static zend_class_entry *register_class_ZendTestNS2_ZendSubNS_Foo(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

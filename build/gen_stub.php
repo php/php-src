@@ -4785,7 +4785,9 @@ class FileInfo {
                 . "\n"
                 . "#ifndef {$headerName}\n"
                 . "#define {$headerName}\n"
+                . "BEGIN_EXTERN_C()\n"
                 . $declCode . "\n"
+                . "END_EXTERN_C()\n"
                 . "#endif /* {$headerName} */\n";
         }
 
@@ -4795,7 +4797,9 @@ class FileInfo {
             . " * Stub hash: $stubHash"
             . ($hasDeclFile ? "\n * Has decl header: yes */\n" : " */\n")
             . ($includeCode !== "" ? "\n" . $includeCode : "")
-            . $code;
+            . "BEGIN_EXTERN_C()\n"
+            . $code . "\n"
+            . "END_EXTERN_C()\n";
 
         return [$code, $declCode];
     }

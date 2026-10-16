@@ -1,5 +1,6 @@
 /* This is a generated file, edit iterators.stub.php instead.
  * Stub hash: f9558686a7393ddd4ba3302e811f70d4496317ee */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ZendTest_Iterators_TraversableTest___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -26,3 +27,5 @@ static zend_class_entry *register_class_ZendTest_Iterators_TraversableTest(zend_
 
 	return class_entry;
 }
+
+END_EXTERN_C()

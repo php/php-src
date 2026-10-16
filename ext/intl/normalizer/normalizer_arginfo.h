@@ -1,5 +1,6 @@
 /* This is a generated file, edit normalizer.stub.php instead.
  * Stub hash: 908a9587edd132a41100be09c9908e088f3fa055 */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_Normalizer_normalize, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -96,3 +97,5 @@ static zend_class_entry *register_class_Normalizer(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

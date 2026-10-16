@@ -1,5 +1,6 @@
 /* This is a generated file, edit pgsql_driver.stub.php instead.
  * Stub hash: 30c01b4d2e7f836b81a31dc0c1a115883eb41568 */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PDO_PGSql_Ext_pgsqlCopyFromArray, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, tableName, IS_STRING, 0)
@@ -68,3 +69,5 @@ static const zend_function_entry class_PDO_PGSql_Ext_methods[] = {
 	ZEND_ME(PDO_PGSql_Ext, pgsqlGetPid, arginfo_class_PDO_PGSql_Ext_pgsqlGetPid, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+END_EXTERN_C()

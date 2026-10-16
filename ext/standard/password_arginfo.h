@@ -2,6 +2,7 @@
  * Stub hash: 589ff98a8fd6883f11558d4984b89a0467e756e0 */
 
 #include "zend_constants.h"
+BEGIN_EXTERN_C()
 
 static void register_password_symbols(int module_number)
 {
@@ -17,3 +18,5 @@ static void register_password_symbols(int module_number)
 #endif
 	REGISTER_STRING_CONSTANT("PASSWORD_DEFAULT", "2y", CONST_PERSISTENT);
 }
+
+END_EXTERN_C()

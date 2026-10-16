@@ -1,5 +1,6 @@
 /* This is a generated file, edit time.stub.php instead.
  * Stub hash: 71349e499ff03529323bede7eb1e680637e81c85 */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Time_Duration___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -135,3 +136,5 @@ static zend_class_entry *register_class_Time_Duration(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

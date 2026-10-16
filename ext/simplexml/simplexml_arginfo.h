@@ -1,5 +1,6 @@
 /* This is a generated file, edit simplexml.stub.php instead.
  * Stub hash: 83f1bd204b309a4558c1b09128fe29f972f54252 */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_simplexml_load_file, 0, 1, SimpleXMLElement, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -181,3 +182,5 @@ static zend_class_entry *register_class_SimpleXMLIterator(zend_class_entry *clas
 
 	return class_entry;
 }
+
+END_EXTERN_C()

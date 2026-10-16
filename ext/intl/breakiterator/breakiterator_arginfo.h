@@ -1,5 +1,6 @@
 /* This is a generated file, edit breakiterator.stub.php instead.
  * Stub hash: 14892bbc6f25c04c109ddbbe140a4b1f575cafd6 */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_IntlBreakIterator_createCharacterInstance, 0, 0, IntlBreakIterator, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 1, "null")
@@ -295,3 +296,5 @@ static zend_class_entry *register_class_IntlCodePointBreakIterator(zend_class_en
 
 	return class_entry;
 }
+
+END_EXTERN_C()
