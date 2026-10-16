@@ -3378,6 +3378,10 @@ static void zend_jit_setup(bool reattached)
 #endif
 
 #ifdef ZTS
+# ifdef ZEND_OPCACHE_SHM_REATTACHMENT
+	/* Different processes may load TLS variables in a different order, so we
+	 * can not rely on offsets. We will fallback to runtime resolution. */
+# else
 	zend_result result = zend_jit_resolve_tsrm_ls_cache_offsets(
 		&tsrm_ls_cache_tcb_offset,
 		&tsrm_tls_index,
@@ -3387,6 +3391,7 @@ static void zend_jit_setup(bool reattached)
 		zend_accel_error(ACCEL_LOG_INFO,
 				"Could not get _tsrm_ls_cache offsets, will fallback to runtime resolution");
 	}
+# endif
 #endif
 
 #if !defined(ZEND_WIN32) && !defined(IR_TARGET_AARCH64)
