@@ -48,6 +48,7 @@ typedef struct php_struct {
 void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf);
 void *create_php_config(apr_pool_t *p, char *dummy);
 char *get_php_config(void *conf, char *name, size_t name_len);
+bool get_php_admin_config(void *conf, const char *name, size_t name_len, const char **value, size_t *value_len);
 void apply_config(void *);
 extern const command_rec php_dir_cmds[];
 void php_ap2_register_hook(apr_pool_t *p);

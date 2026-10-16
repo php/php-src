@@ -25,16 +25,6 @@
 
 #include "Zend/zend_exceptions.h"
 
-static inline uint64_t splitmix64(uint64_t *seed)
-{
-	uint64_t r;
-
-	r = (*seed += 0x9e3779b97f4a7c15ULL);
-	r = (r ^ (r >> 30)) * 0xbf58476d1ce4e5b9ULL;
-	r = (r ^ (r >> 27)) * 0x94d049bb133111ebULL;
-	return (r ^ (r >> 31));
-}
-
 ZEND_ATTRIBUTE_CONST static inline uint64_t rotl(const uint64_t x, int k)
 {
 	return (x << k) | (x >> (64 - k));
@@ -92,10 +82,10 @@ PHPAPI inline void php_random_xoshiro256starstar_seed64(php_random_status_state_
 {
 	uint64_t s[4];
 
-	s[0] = splitmix64(&seed);
-	s[1] = splitmix64(&seed);
-	s[2] = splitmix64(&seed);
-	s[3] = splitmix64(&seed);
+	s[0] = php_random_splitmix64(&seed);
+	s[1] = php_random_splitmix64(&seed);
+	s[2] = php_random_splitmix64(&seed);
+	s[3] = php_random_splitmix64(&seed);
 
 	php_random_xoshiro256starstar_seed256(state, s[0], s[1], s[2], s[3]);
 }

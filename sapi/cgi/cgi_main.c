@@ -63,6 +63,7 @@
 #include "ext/standard/php_standard.h"
 #include "ext/standard/dl_arginfo.h"
 #include "ext/standard/url.h"
+#include "ext/user_cache/php_user_cache.h"
 
 #ifdef PHP_WIN32
 # include <io.h>
@@ -778,6 +779,33 @@ static void sapi_cgi_log_message(const char *message, int syslog_type_int)
 	}
 }
 
+static const char *cgi_ucache_document_root(void)
+{
+	const char *document_root;
+	fcgi_request *request;
+
+	if (SG(server_context) != NULL && SG(server_context) != (void *) 1) {
+		request = (fcgi_request*) SG(server_context);
+		if (fcgi_has_env(request)) {
+			document_root = fcgi_getenv(request, "DOCUMENT_ROOT", sizeof("DOCUMENT_ROOT") - 1);
+			if (document_root != NULL) {
+				return document_root;
+			}
+		}
+	}
+
+	return getenv("DOCUMENT_ROOT");
+}
+
+static void cgi_ucache_activate_request_partition(void)
+{
+	php_ucache_activate_boundary_partition(
+		"cgi-fcgi",
+		cgi_ucache_document_root(),
+		PHP_UCACHE_REASON_CGI_BOUNDARY_UNAVAILABLE
+	);
+}
+
 /* {{{ php_cgi_ini_activate_user_config */
 static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const char *doc_root, size_t doc_root_len)
 {
@@ -860,6 +888,9 @@ static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const 
 
 static int sapi_cgi_activate(void)
 {
+	/* Resolve the partition before early returns: sapi_activate() ignores failure. */
+	cgi_ucache_activate_request_partition();
+
 	/* PATH_TRANSLATED should be defined at this stage but better safe than sorry :) */
 	if (!SG(request_info).path_translated) {
 		return FAILURE;
@@ -963,12 +994,23 @@ static int sapi_cgi_deactivate(void)
 			sapi_cgi_flush(SG(server_context));
 		}
 	}
+
+	php_ucache_partition_activate(NULL);
+
 	return SUCCESS;
 }
 
 static int php_cgi_startup(sapi_module_struct *sapi_module_ptr)
 {
-	return php_module_startup(sapi_module_ptr, &cgi_module_entry);
+	if (php_module_startup(sapi_module_ptr, &cgi_module_entry) == FAILURE) {
+		return FAILURE;
+	}
+
+	if (php_ucache_opt_in(PHP_UCACHE_MODE_REQ) == FAILURE && php_ucache_is_enabled_by_ini()) {
+		php_error_docref(NULL, E_WARNING, "Unable to register UserCache request mode; UserCache will be unavailable");
+	}
+
+	return SUCCESS;
 }
 
 /* {{{ sapi_module_struct cgi_sapi_module */

@@ -34,6 +34,14 @@ PHPAPI int php_var_unserialize(zval *rval, const unsigned char **p, const unsign
 PHPAPI int php_var_unserialize_ref(zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash);
 PHPAPI int php_var_unserialize_intern(zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash);
 
+/* The __sleep()/__serialize() steps of serialize(), for extensions that encode
+ * objects themselves: call_sleep returns the name array to release, or NULL
+ * after the native warning; get_sleep_props initializes ht with the named
+ * properties (values addref'd) using the same lookup and warnings. */
+PHPAPI HashTable *php_var_serialize_call_sleep(zend_object *obj, zend_function *fn);
+PHPAPI zend_result php_var_serialize_get_sleep_props(HashTable *ht, zval *struc, HashTable *sleep_retval);
+PHPAPI zend_result php_var_serialize_call_magic_serialize(zval *retval, zval *obj);
+
 PHPAPI php_serialize_data_t php_var_serialize_init(void);
 PHPAPI void php_var_serialize_destroy(php_serialize_data_t d);
 PHPAPI php_unserialize_data_t php_var_unserialize_init(void);
