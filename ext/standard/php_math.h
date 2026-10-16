@@ -22,7 +22,7 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, const char *de
 PHPAPI zend_string *_php_math_number_format_long(zend_long num, zend_long dec, const char *dec_point, size_t dec_point_len, const char *thousand_sep, size_t thousand_sep_len);
 PHPAPI zend_string * _php_math_longtobase(zend_long arg, int base);
 PHPAPI zend_long _php_math_basetolong(zval *arg, int base);
-PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret);
+PHPAPI zend_result _php_math_basetozval(zend_string *str, int base, zval *ret);
 PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base);
 
 #include <math.h>

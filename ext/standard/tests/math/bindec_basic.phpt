@@ -29,50 +29,32 @@ $values = array(111000111,
                 );
 
 for ($i = 0; $i < count($values); $i++) {
-    $res = bindec($values[$i]);
-    var_dump($res);
+    try {
+        $res = bindec($values[$i]);
+        var_dump($res);
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage() . "\n";
+    }
 }
 ?>
 --EXPECTF--
 int(455)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(0)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(32766)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(5)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(129)
+Exception: Invalid characters passed for attempted conversion
+Exception: Invalid characters passed for attempted conversion
+Exception: Invalid characters passed for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 int(455)
 int(224)
 int(2147483647)
 
 Notice: Input number is larger than PHP_INT_MAX, precision has been lost in conversion in %s on line %d
 float(2147483648)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(129)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(0)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(13)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(13)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(26)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(6)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(0)
+Exception: Invalid characters passed for attempted conversion
+Exception: Invalid characters passed for attempted conversion
+Exception: Invalid characters passed for attempted conversion
+Exception: Invalid characters passed for attempted conversion
+Exception: Invalid characters passed for attempted conversion
+Exception: Invalid characters passed for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 int(1)
 int(0)
