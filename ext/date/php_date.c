@@ -448,12 +448,13 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(date)
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(date)
 {
+	php_date_global_timezone_db = NULL;
+	php_date_global_timezone_db_enabled = 0;
+
 	REGISTER_INI_ENTRIES();
 	date_register_classes();
 	register_php_date_symbols(module_number);
 
-	php_date_global_timezone_db = NULL;
-	php_date_global_timezone_db_enabled = 0;
 	DATEG(last_errors) = NULL;
 	return SUCCESS;
 }
