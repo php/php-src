@@ -2648,6 +2648,11 @@ ZEND_API bool ZEND_FASTCALL instanceof_function_slow(const zend_class_entry *ins
 		}
 		return 0;
 	} else {
+		/* A final class cannot be extended, and an enum is always final, so ce
+		 * cannot be an ancestor of instance_ce. */
+		if (ce->ce_flags & (ZEND_ACC_FINAL|ZEND_ACC_ENUM)) {
+			return 0;
+		}
 		while (1) {
 			instance_ce = instance_ce->parent;
 			if (instance_ce == ce) {
