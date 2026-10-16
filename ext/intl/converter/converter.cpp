@@ -22,12 +22,10 @@
 
 #include "converter_class.h"
 
-extern "C" {
 #include "converter.h"
 #include "php_intl.h"
 #include "../intl_error.h"
 #include "../intl_common.h"
-}
 
 #define CONV_GET(pzv)  (Z_INTL_CONVERTER_P((pzv)))
 #define THROW_UFAILURE(obj, error) php_converter_throw_failure(obj, error, \
