@@ -56,6 +56,8 @@ PHP                                                                        NEWS
     in closures). (RV7PR)
   . Fixed bug GH-24337 (JIT: segfault when decrementing a non-numeric string
     property). (Lazizbek Ergashev)
+  . Fixed bug GH-24185 (Windows ZTS: random access violations with OPcache JIT
+    in multi-process setups). (Arnaud, ndossche)
 
 - PDO:
   . Fixed a duplicate warning when ATTR_STATEMENT_CLASS is rejected on a
