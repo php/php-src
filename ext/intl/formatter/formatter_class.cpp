@@ -35,7 +35,7 @@ static zend_object_handlers NumberFormatter_handlers;
  */
 
 /* {{{ NumberFormatter_objects_free */
-U_CFUNC void NumberFormatter_object_free( zend_object *object )
+static void NumberFormatter_object_free( zend_object *object )
 {
 	NumberFormatter_object* nfo = php_intl_number_format_fetch_object(object);
 
@@ -46,7 +46,7 @@ U_CFUNC void NumberFormatter_object_free( zend_object *object )
 /* }}} */
 
 /* {{{ NumberFormatter_object_create */
-U_CFUNC zend_object *NumberFormatter_object_create(zend_class_entry *ce)
+static zend_object *NumberFormatter_object_create(zend_class_entry *ce)
 {
 	NumberFormatter_object*     intern;
 
@@ -61,7 +61,7 @@ U_CFUNC zend_object *NumberFormatter_object_create(zend_class_entry *ce)
 /* }}} */
 
 /* {{{ NumberFormatter_object_clone */
-U_CFUNC zend_object *NumberFormatter_object_clone(zend_object *object)
+static zend_object *NumberFormatter_object_clone(zend_object *object)
 {
 	const NumberFormatter_object     *nfo = php_intl_number_format_fetch_object(object);
 	zend_object            *new_obj = NumberFormatter_ce_ptr->create_object(object->ce);

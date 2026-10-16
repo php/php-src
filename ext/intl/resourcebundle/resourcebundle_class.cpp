@@ -239,7 +239,7 @@ static zval *resource_bundle_array_fetch(
 /* }}} */
 
 /* {{{ resourcebundle_array_get */
-U_CFUNC zval *resourcebundle_array_get(zend_object *object, zval *offset, int type, zval *rv)
+static zval *resourcebundle_array_get(zend_object *object, zval *offset, int type, zval *rv)
 {
 	if (offset == NULL) {
 		zend_throw_error(NULL, "Cannot apply [] to ResourceBundle object");
