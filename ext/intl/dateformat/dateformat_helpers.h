@@ -22,9 +22,7 @@
 #include <unicode/calendar.h>
 #include <unicode/datefmt.h>
 
-extern "C" {
 #include "../php_intl.h"
-}
 
 using icu::Locale;
 using icu::Calendar;

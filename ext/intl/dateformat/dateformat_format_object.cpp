@@ -23,13 +23,14 @@
 
 #include "../intl_convertcpp.h"
 
-extern "C" {
 #include "../php_intl.h"
 #include "../locale/locale.h"
 #define USE_CALENDAR_POINTER 1
 #include "../calendar/calendar_class.h"
-#include <ext/date/php_date.h>
 #include "../common/common_date.h"
+
+extern "C" {
+#include <ext/date/php_date.h>
 }
 
 using icu::Locale;

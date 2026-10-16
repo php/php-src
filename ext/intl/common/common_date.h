@@ -17,10 +17,8 @@
 
 #include <unicode/umachine.h>
 
-U_CDECL_BEGIN
 #include <php.h>
 #include "../intl_error.h"
-U_CDECL_END
 
 #ifdef __cplusplus
 

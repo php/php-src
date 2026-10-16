@@ -16,12 +16,13 @@
 
 #include <unicode/calendar.h>
 
-extern "C" {
 #include "../php_intl.h"
 #define USE_CALENDAR_POINTER 1
 #include "../calendar/calendar_class.h"
+
+U_CDECL_BEGIN
 #include <ext/date/php_date.h>
-}
+U_CDECL_END
 
 using icu::TimeZone;
 using icu::UnicodeString;
