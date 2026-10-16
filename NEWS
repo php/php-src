@@ -27,6 +27,8 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug GH-20503 (Assertion failure with ext/date DateInterval property
     hash construction). (heathdutton)
+  . Fixed bug GH-24350 (MINIT reads a stale external tz database after an
+    in-process module restart). (Lazizbek Ergashev)
 
 - DOM:
   . Fixed bug GH-23352 (UAF reading an attribute value node retained across
