@@ -1752,7 +1752,7 @@ static databuf_t* data_accept(databuf_t *data, ftpbuf_t *ftp)
 	data->listener = -1;
 
 	if (data->fd == -1) {
-		efree(data);
+		/* data is still owned by ftp->data, the caller's data_close() frees it */
 		return NULL;
 	}
 

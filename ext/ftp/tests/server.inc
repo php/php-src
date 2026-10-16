@@ -328,6 +328,11 @@ if ($pid) {
                 break;
             }
         }elseif (preg_match('/^RETR ([\/]*[\w\h]+)/', $buf, $matches)) {
+            if ($matches[1] === "no_data_connection") {
+                // Never open the active data connection.
+                fputs($s, "150 File status okay; about to open data connection.\r\n");
+                continue;
+            }
             if(!empty($pasv)){
                 $fs = $pasvs;
             }

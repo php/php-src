@@ -32,6 +32,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-24229 (fcgi_close() passes shutdown() a literal 1, which is
     SHUT_RD in WASI). (Ryosuke Ishibashi)
 
+- FTP:
+  . Fix double free in ext/ftp data_accept() on accept failure. (alepacheco)
+
 - MBString:
   . Fixed bug GH-23958 (truncated encoding names resolving to full names). (Kamil Tekiela)
 
