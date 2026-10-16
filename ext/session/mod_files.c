@@ -175,7 +175,11 @@ static void ps_files_open(ps_files *data, /* const */ zend_string *key)
 		data->last_key = zend_string_copy(key);
 
 		/* O_NOFOLLOW to prevent us from following evil symlinks */
-		data->fd = VCWD_OPEN_MODE(buf, O_CREAT | O_RDWR | O_BINARY | O_NOFOLLOW, data->filemode);
+		int flags = O_CREAT | O_RDWR | O_BINARY | O_NOFOLLOW;
+#ifdef O_CLOEXEC
+		flags |= O_CLOEXEC;
+#endif
+		data->fd = VCWD_OPEN_MODE(buf, flags, data->filemode);
 
 		if (data->fd != -1) {
 #ifndef PHP_WIN32
@@ -198,7 +202,7 @@ static void ps_files_open(ps_files *data, /* const */ zend_string *key)
 				ret = flock(data->fd, LOCK_EX);
 			} while (ret == -1 && errno == EINTR);
 
-#ifdef F_SETFD
+#if defined(F_SETFD) && !defined(O_CLOEXEC)
 # ifndef FD_CLOEXEC
 #  define FD_CLOEXEC 1
 # endif
