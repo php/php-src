@@ -3,6 +3,7 @@
 
 #include "zend_attributes.h"
 #include "zend_constants.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_export_to_file, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, certificate, OpenSSLCertificate, MAY_BE_STRING, NULL)
@@ -918,3 +919,5 @@ static zend_class_entry *register_class_OpenSSLAsymmetricKey(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

@@ -1,5 +1,6 @@
 /* This is a generated file, edit transliterator.stub.php instead.
  * Stub hash: 300bcc64e5ddaf469bfe4a12e65a6677bf2aea88 */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Transliterator___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -80,3 +81,5 @@ static zend_class_entry *register_class_Transliterator(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

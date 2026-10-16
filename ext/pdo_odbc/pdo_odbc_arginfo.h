@@ -2,6 +2,7 @@
  * Stub hash: 9136c911494c9e3462c49b3e58f4bcc15ebb2a9c */
 
 #include "zend_constants.h"
+BEGIN_EXTERN_C()
 
 static void register_pdo_odbc_symbols(int module_number)
 {
@@ -47,3 +48,5 @@ static zend_class_entry *register_class_Pdo_Odbc(zend_class_entry *class_entry_P
 
 	return class_entry;
 }
+
+END_EXTERN_C()

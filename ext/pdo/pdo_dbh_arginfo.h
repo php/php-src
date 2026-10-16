@@ -2,6 +2,7 @@
  * Stub hash: 006be61b2c519e7d9ca997a7f12135eb3e0f3500 */
 
 #include "zend_attributes.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDO___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, dsn, IS_STRING, 0)
@@ -569,3 +570,5 @@ static zend_class_entry *register_class_PDO(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

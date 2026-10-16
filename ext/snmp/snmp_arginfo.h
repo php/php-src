@@ -5,6 +5,7 @@
 #include "zend_attributes.h"
 #include "zend_constants.h"
 #include "zend_enum.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmpget, 0, 3, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
@@ -597,3 +598,5 @@ static zend_class_entry *register_class_Snmp_StringOutput(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

@@ -2,6 +2,7 @@
  * Stub hash: 7a1ba6bc8ec95e846ec89060b30f54d2c32486ef */
 
 #include "zend_constants.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_tidy_parse_string, 0, 1, tidy, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -544,3 +545,5 @@ static zend_class_entry *register_class_tidyNode(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

@@ -3,6 +3,7 @@
 
 #include "zend_attributes.h"
 #include "zend_constants.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_libxml_set_streams_context, 0, 1, IS_VOID, 0)
 	ZEND_ARG_INFO(0, context)
@@ -135,3 +136,5 @@ static zend_class_entry *register_class_LibXMLError(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

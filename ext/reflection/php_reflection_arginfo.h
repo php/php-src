@@ -4,6 +4,7 @@
 
 #include "zend_attributes.h"
 #include "zend_enum.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -1938,3 +1939,5 @@ static zend_class_entry *register_class_ReflectionConstant(zend_class_entry *cla
 
 	return class_entry;
 }
+
+END_EXTERN_C()

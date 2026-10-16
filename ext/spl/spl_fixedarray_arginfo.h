@@ -2,6 +2,7 @@
  * Stub hash: 0c838fed60b29671fe04e63315ab662d8cb16f0c */
 
 #include "zend_attributes.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFixedArray___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, size, IS_LONG, 0, "0")
@@ -108,3 +109,5 @@ static zend_class_entry *register_class_SplFixedArray(zend_class_entry *class_en
 
 	return class_entry;
 }
+
+END_EXTERN_C()

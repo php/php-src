@@ -1,5 +1,6 @@
 /* This is a generated file, edit php_xmlwriter.stub.php instead.
  * Stub hash: 27ddfb10eeeda8acfa744751fdcdd030a207f899 */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_xmlwriter_open_uri, 0, 1, XMLWriter, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
@@ -488,3 +489,5 @@ static zend_class_entry *register_class_XMLWriter(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

@@ -2,6 +2,7 @@
  * Stub hash: cb1005b601e72e8d36d0f6aa5d08872f5c7ea2e6 */
 
 #include "zend_constants.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XSLTProcessor_importStylesheet, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, stylesheet, IS_OBJECT, 0)
@@ -145,3 +146,5 @@ static zend_class_entry *register_class_XSLTProcessor(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

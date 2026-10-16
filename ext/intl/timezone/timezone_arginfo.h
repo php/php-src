@@ -1,5 +1,6 @@
 /* This is a generated file, edit timezone.stub.php instead.
  * Stub hash: 22e652c6a05ade0a6fd3119e4742cd260ba27146 */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlTimeZone___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -234,3 +235,5 @@ static zend_class_entry *register_class_IntlTimeZone(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

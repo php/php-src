@@ -1,5 +1,6 @@
 /* This is a generated file, edit cgi_main.stub.php instead.
  * Stub hash: df963adc6bc610cdd31861036889141fa9464ded */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_apache_child_terminate, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -22,3 +23,5 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(apache_response_headers, arginfo_apache_response_headers)
 	ZEND_FE_END
 };
+
+END_EXTERN_C()

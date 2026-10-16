@@ -1,5 +1,6 @@
 /* This is a generated file, edit bz2.stub.php instead.
  * Stub hash: c2c8e0fe1e3244c8cadafe60b65b7235c105b3c9 */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_bzopen, 0, 0, 2)
 	ZEND_ARG_INFO(0, file)
@@ -70,3 +71,5 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(bzdecompress, arginfo_bzdecompress)
 	ZEND_FE_END
 };
+
+END_EXTERN_C()

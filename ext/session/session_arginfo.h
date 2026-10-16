@@ -2,6 +2,7 @@
  * Stub hash: 5109ef5c81733a112fe20d2626b8572d0969973c */
 
 #include "zend_constants.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_session_name, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, name, IS_STRING, 1, "null")
@@ -277,3 +278,5 @@ static zend_class_entry *register_class_SessionHandler(zend_class_entry *class_e
 
 	return class_entry;
 }
+
+END_EXTERN_C()

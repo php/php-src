@@ -1,5 +1,6 @@
 /* This is a generated file, edit zend_closures.stub.php instead.
  * Stub hash: e0626e52adb2d38dad1140c1a28cc7774cc84500 */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Closure___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -53,3 +54,5 @@ static zend_class_entry *register_class_Closure(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

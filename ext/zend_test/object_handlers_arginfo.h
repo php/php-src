@@ -1,5 +1,6 @@
 /* This is a generated file, edit object_handlers.stub.php instead.
  * Stub hash: 1a70ed60c5af38539b1222a979f97fddf7d1826e */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DoOperationNoCast___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, val, IS_LONG, 0)
@@ -185,3 +186,5 @@ static zend_class_entry *register_class_DimensionHandlersNoArrayAccess(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

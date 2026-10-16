@@ -3,6 +3,7 @@
 
 #include "zend_attributes.h"
 #include "zend_constants.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_aead_aes256gcm_is_available, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
@@ -1397,3 +1398,5 @@ static zend_class_entry *register_class_SodiumException(zend_class_entry *class_
 
 	return class_entry;
 }
+
+END_EXTERN_C()

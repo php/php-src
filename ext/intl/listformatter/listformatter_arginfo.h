@@ -1,5 +1,6 @@
 /* This is a generated file, edit listformatter.stub.php instead.
  * Stub hash: cdbbdb55d1e53f422c5854460c3c6cc3d01360d7 */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlListFormatter___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
@@ -97,3 +98,5 @@ static zend_class_entry *register_class_IntlListFormatter(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()
