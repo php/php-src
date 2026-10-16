@@ -15,8 +15,6 @@
 #ifndef FORMATTER_FORMAT_H
 #define FORMATTER_FORMAT_H
 
-#include <php.h>
-
 #define FORMAT_TYPE_DEFAULT	0
 #define FORMAT_TYPE_INT32	1
 #define FORMAT_TYPE_INT64	2
