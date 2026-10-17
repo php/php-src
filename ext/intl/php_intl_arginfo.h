@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_intl.stub.php instead.
- * Stub hash: bb8c86f1c7f0dcc264e5968fe9548f20ac20908b */
+ * Stub hash: c54e9724edabab5a6531e535f2226f512a904c8e */
 
 #include "zend_attributes.h"
 #include "zend_constants.h"
@@ -814,6 +814,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_transliterator_create_inverse, 0,
 	ZEND_ARG_OBJ_INFO(0, transliterator, Transliterator, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_transliterator_to_rules, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_OBJ_INFO(0, transliterator, Transliterator, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, escapeUnprintable, _IS_BOOL, 0, "false")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_transliterator_transliterate, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_TYPE_MASK(0, transliterator, Transliterator, MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -1018,6 +1023,7 @@ ZEND_FUNCTION(transliterator_create);
 ZEND_FUNCTION(transliterator_create_from_rules);
 ZEND_FUNCTION(transliterator_list_ids);
 ZEND_FUNCTION(transliterator_create_inverse);
+ZEND_FUNCTION(transliterator_to_rules);
 ZEND_FUNCTION(transliterator_transliterate);
 ZEND_FUNCTION(transliterator_get_error_code);
 ZEND_FUNCTION(transliterator_get_error_message);
@@ -1212,6 +1218,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(transliterator_create_from_rules, arginfo_transliterator_create_from_rules)
 	ZEND_FE(transliterator_list_ids, arginfo_transliterator_list_ids)
 	ZEND_FE(transliterator_create_inverse, arginfo_transliterator_create_inverse)
+	ZEND_FE(transliterator_to_rules, arginfo_transliterator_to_rules)
 	ZEND_FE(transliterator_transliterate, arginfo_transliterator_transliterate)
 	ZEND_FE(transliterator_get_error_code, arginfo_transliterator_get_error_code)
 	ZEND_FE(transliterator_get_error_message, arginfo_transliterator_get_error_message)

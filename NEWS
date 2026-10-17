@@ -18,6 +18,7 @@ PHP                                                                        NEWS
     throwing a ValueError. (Marc Bennewitz)
 
 - Intl:
+  . Added Transliterator::toRules() and transliterator_to_rules(). (Weilin Du)
   . Fixed Collator attribute and strength methods not rejecting an
     unconstructed Collator. (Ilia Alshanetsky)
   . Added optional $availableLocales argument to Locale::acceptFromHttp()
