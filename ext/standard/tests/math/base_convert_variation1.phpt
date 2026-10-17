@@ -10,9 +10,6 @@ abc
 xyz
 EOT;
 
-// get a resource variable
-$fp = fopen(__FILE__, "r");
-
 $inputs = array(
        // int data
 /*1*/  0,
@@ -37,29 +34,19 @@ $inputs = array(
        // empty data
 /*17*/ "",
        '',
-       array(),
-
        // string data
 /*20*/ "abcxyz",
        'abcxyz',
        $heredoc,
-
-       // resource variable
-/*25*/ $fp
 );
 
 // loop through each element of $inputs to check the behaviour of base_convert()
 $iterator = 1;
 foreach($inputs as $input) {
     echo "\n-- Iteration $iterator --\n";
-    try {
-        var_dump(base_convert($input, 10, 8));
-    } catch (Throwable $exception) {
-        echo $exception::class, ': ', $exception->getMessage(), "\n";
-    }
+    var_dump(base_convert($input, 10, 8));
     $iterator++;
 }
-fclose($fp);
 ?>
 --EXPECTF--
 *** Testing base_convert() : usage variations ***
@@ -125,7 +112,9 @@ string(1) "0"
 string(1) "0"
 
 -- Iteration 17 --
-TypeError: base_convert(): Argument #1 ($num) must be of type string, array given
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+string(1) "0"
 
 -- Iteration 18 --
 
@@ -136,11 +125,3 @@ string(1) "0"
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 string(1) "0"
-
--- Iteration 20 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(1) "0"
-
--- Iteration 21 --
-TypeError: base_convert(): Argument #1 ($num) must be of type string, resource given

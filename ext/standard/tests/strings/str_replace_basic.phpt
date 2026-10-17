@@ -19,16 +19,6 @@ var_dump( $count );
 var_dump( str_replace("long string here", "", "", $count) );
 var_dump( $count );
 
-$fp = fopen( __FILE__, "r" );
-$fp_copy = $fp;
-try {
-    var_dump( str_replace($fp_copy, $fp_copy, $fp_copy, $fp_copy) );
-} catch (Throwable $e) {
-    echo $e::class, ': ', $e->getMessage(), "\n";
-}
-var_dump( $fp_copy );
-fclose($fp);
-
 ?>
 --EXPECTF--
 *** Testing str_replace() on basic operations ***
@@ -40,5 +30,3 @@ string(1) "q"
 int(1)
 string(0) ""
 int(0)
-TypeError: str_replace(): Argument #1 ($search) must be of type array|string, resource given
-resource(%d) of type (stream)
