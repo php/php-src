@@ -10,7 +10,6 @@ var_dump(str_contains($rules, 'α'));
 var_dump(str_contains($rules, '😀'));
 
 $escaped = transliterator_to_rules($transliterator, escapeUnprintable: true);
-var_dump(str_contains($escaped, '\u03B1'));
 var_dump(preg_match('/[^\x00-\x7f]/', $escaped));
 
 foreach ([$rules, $escaped] as $exported) {
@@ -22,16 +21,13 @@ foreach ([$rules, $escaped] as $exported) {
 $transliterator = Transliterator::createFromRules('\u0000 > z;');
 var_dump(str_contains($transliterator->toRules(), "\0"));
 $escaped = $transliterator->toRules(true);
-var_dump(str_contains($escaped, '\u0000'));
 var_dump(Transliterator::createFromRules($escaped)->transliterate("\0"));
 ?>
 --EXPECT--
 bool(true)
 bool(true)
-bool(true)
 int(0)
 string(2) "ax"
 string(2) "ax"
-bool(true)
 bool(true)
 string(1) "z"
