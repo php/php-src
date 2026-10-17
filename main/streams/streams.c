@@ -1655,7 +1655,7 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 }
 
 /* Returns SUCCESS/FAILURE and sets *len to the number of bytes moved */
-PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size_t maxlen, size_t *len STREAMS_DC)
+static zend_result php_stream_copy_to_stream_impl(php_stream *src, php_stream *dest, size_t maxlen, size_t *len)
 {
 	char buf[CHUNK_SIZE];
 	size_t haveread = 0;
@@ -1848,6 +1848,25 @@ PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *de
 
 	*len = haveread;
 	return SUCCESS;
+}
+
+PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size_t maxlen, size_t *len STREAMS_DC)
+{
+	/* Writing to dest or reading from src may run PHP code (a user wrapper or
+	 * filter) that would otherwise close either stream under the copy. */
+	uint32_t src_no_fclose = src->flags & PHP_STREAM_FLAG_NO_FCLOSE;
+	uint32_t dest_no_fclose = dest->flags & PHP_STREAM_FLAG_NO_FCLOSE;
+	src->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
+	dest->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
+
+	zend_result ret = php_stream_copy_to_stream_impl(src, dest, maxlen, len);
+
+	src->flags &= ~PHP_STREAM_FLAG_NO_FCLOSE;
+	src->flags |= src_no_fclose;
+	dest->flags &= ~PHP_STREAM_FLAG_NO_FCLOSE;
+	dest->flags |= dest_no_fclose;
+
+	return ret;
 }
 
 /* Returns the number of bytes moved.
