@@ -4138,6 +4138,16 @@ static void zend_jit_check_exception_undef_result(zend_jit_ctx *jit, const zend_
 			(opline->result_type & (IS_TMP_VAR|IS_VAR)) ? jit_stub_exception_handler_undef : jit_stub_exception_handler));
 }
 
+static void zend_jit_vm_interrupt_check_fcall(zend_jit_ctx *jit, const zend_op *opline)
+{
+	ir_ref vm_interrupt = ir_IF(ir_LOAD_U8(jit_EG(vm_interrupt)));
+	ir_IF_TRUE_cold(vm_interrupt);
+	jit_SET_EX_OPLINE(jit, opline);
+	ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_fcall_interrupt), jit_FP(jit));
+	zend_jit_check_exception_undef_result(jit, opline);
+	ir_MERGE_WITH_EMPTY_FALSE(vm_interrupt);
+}
+
 static void zend_jit_type_check_undef(zend_jit_ctx  *jit,
                                       ir_ref         type,
                                       uint32_t       var,
