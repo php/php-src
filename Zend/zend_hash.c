@@ -632,7 +632,7 @@ ZEND_API HashPosition ZEND_FASTCALL zend_hash_iterator_pos_ex(uint32_t idx, zval
 	ZEND_ASSERT(idx != (uint32_t)-1);
 	if (UNEXPECTED(iter->ht != ht) && !zend_hash_iterator_find_copy_pos(idx, ht)) {
 		if (EXPECTED(iter->ht) && EXPECTED(iter->ht != HT_POISONED_PTR)
-				&& EXPECTED(!HT_ITERATORS_OVERFLOW(ht))) {
+				&& EXPECTED(!HT_ITERATORS_OVERFLOW(iter->ht))) {
 			HT_DEC_ITERATORS_COUNT(iter->ht);
 		}
 
