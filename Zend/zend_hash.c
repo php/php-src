@@ -534,25 +534,26 @@ static void zend_hash_remove_iterator_copies(uint32_t idx) {
 
 ZEND_API uint32_t ZEND_FASTCALL zend_hash_iterator_add(HashTable *ht, HashPosition pos)
 {
-	HashTableIterator *iter = EG(ht_iterators);
-	HashTableIterator *end  = iter + EG(ht_iterators_count);
-	uint32_t idx;
+	/* Slots below the hint are in use, start looking for a free one from there */
+	uint32_t idx = EG(ht_iterators_free_hint);
+	HashTableIterator *iter;
 
 	if (EXPECTED(!HT_ITERATORS_OVERFLOW(ht))) {
 		HT_INC_ITERATORS_COUNT(ht);
 	}
-	while (iter != end) {
+	while (idx < EG(ht_iterators_count)) {
+		iter = EG(ht_iterators) + idx;
 		if (iter->ht == NULL) {
 			iter->ht = ht;
 			iter->pos = pos;
-			idx = iter - EG(ht_iterators);
 			iter->next_copy = idx;
+			EG(ht_iterators_free_hint) = idx + 1;
 			if (idx + 1 > EG(ht_iterators_used)) {
 				EG(ht_iterators_used) = idx + 1;
 			}
 			return idx;
 		}
-		iter++;
+		idx++;
 	}
 	if (EG(ht_iterators) == EG(ht_iterators_slots)) {
 		EG(ht_iterators) = emalloc(sizeof(HashTableIterator) * (EG(ht_iterators_count) + 8));
@@ -568,6 +569,7 @@ ZEND_API uint32_t ZEND_FASTCALL zend_hash_iterator_add(HashTable *ht, HashPositi
 	idx = iter - EG(ht_iterators);
 	iter->next_copy = idx;
 	EG(ht_iterators_used) = idx + 1;
+	EG(ht_iterators_free_hint) = idx + 1;
 	return idx;
 }
 
@@ -663,6 +665,9 @@ ZEND_API void ZEND_FASTCALL zend_hash_iterator_del(uint32_t idx)
 		HT_DEC_ITERATORS_COUNT(iter->ht);
 	}
 	iter->ht = NULL;
+	if (idx < EG(ht_iterators_free_hint)) {
+		EG(ht_iterators_free_hint) = idx;
+	}
 
 	if (UNEXPECTED(iter->next_copy != idx)) {
 		zend_hash_remove_iterator_copies(idx);
