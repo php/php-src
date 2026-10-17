@@ -2582,9 +2582,80 @@ ZEND_API ZEND_COLD zval* ZEND_FASTCALL zend_undefined_index_write(HashTable *ht,
 	return retval;
 }
 
+static zval *zend_find_similar_entry(const HashTable *ht, const char *lcname, size_t lcname_len)
+{
+	if (lcname_len < 3) {
+		return NULL;
+	}
+
+	size_t threshold = lcname_len >= 8 ? 2 : 1;
+	zend_long best_dist = threshold + 1;
+	zval *best = NULL;
+
+	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(ht, zend_string *key, zval *val) {
+		if (!key || ZSTR_VAL(key)[0] == '\0' || Z_TYPE_P(val) == IS_ALIAS_PTR) {
+			continue;
+		}
+		if (ZSTR_LEN(key) > lcname_len + threshold || lcname_len > ZSTR_LEN(key) + threshold) {
+			continue;
+		}
+		zend_long dist = zend_levenshtein(lcname, lcname_len, ZSTR_VAL(key), ZSTR_LEN(key), 1, 1, 1);
+		if (dist > 0 && dist < best_dist) {
+			best_dist = dist;
+			best = val;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return best;
+}
+
+zend_string *zend_find_similar_function(const char *lcname, size_t lcname_len)
+{
+	const zval *zv = zend_find_similar_entry(EG(function_table), lcname, lcname_len);
+	return zv ? Z_FUNC_P(zv)->common.function_name : NULL;
+}
+
+zend_string *zend_find_similar_class(const zend_string *class_name)
+{
+	zend_string *lc_name = zend_string_alloc(ZSTR_LEN(class_name), 0);
+	zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(class_name), ZSTR_LEN(class_name));
+	const zval *zv = zend_find_similar_entry(EG(class_table), ZSTR_VAL(lc_name), ZSTR_LEN(lc_name));
+	zend_string_release(lc_name);
+	return zv ? Z_CE_P(zv)->name : NULL;
+}
+
+static zend_string *zend_find_similar_method(const zend_class_entry *ce, const zend_string *method)
+{
+	zend_string *lc_method = zend_string_alloc(ZSTR_LEN(method), 0);
+	zend_str_tolower_copy(ZSTR_VAL(lc_method), ZSTR_VAL(method), ZSTR_LEN(method));
+	const zval *zv = zend_find_similar_entry(&ce->function_table, ZSTR_VAL(lc_method), ZSTR_LEN(lc_method));
+	zend_string_release(lc_method);
+	return zv ? Z_FUNC_P(zv)->common.function_name : NULL;
+}
+
 ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_method(const zend_class_entry *ce, const zend_string *method)
 {
-	zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(ce->name), ZSTR_VAL(method));
+	zend_string *suggestion = zend_find_similar_method(ce, method);
+	if (suggestion) {
+		zend_throw_error(NULL, "Call to undefined method %s::%s() (did you mean %s?)", ZSTR_VAL(ce->name), ZSTR_VAL(method), ZSTR_VAL(suggestion));
+	} else {
+		zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(ce->name), ZSTR_VAL(method));
+	}
+}
+
+/* op2 is followed by the lowercased name and, for INIT_NS_FCALL_BY_NAME, the global fallback */
+ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_function_error(const zend_op *opline)
+{
+	const zval *function_name = RT_CONSTANT(opline, opline->op2);
+	zend_string *suggestion = zend_find_similar_function(Z_STRVAL_P(function_name + 1), Z_STRLEN_P(function_name + 1));
+	if (!suggestion && opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
+		suggestion = zend_find_similar_function(Z_STRVAL_P(function_name + 2), Z_STRLEN_P(function_name + 2));
+	}
+	if (suggestion) {
+		zend_throw_error(NULL, "Call to undefined function %s() (did you mean %s?)", Z_STRVAL_P(function_name), ZSTR_VAL(suggestion));
+	} else {
+		zend_throw_error(NULL, "Call to undefined function %s()", Z_STRVAL_P(function_name));
+	}
 }
 
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_invalid_method_call(const zval *object, const zval *function_name)
@@ -5185,7 +5256,19 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_s
 	} else {
 		fbc = zend_fetch_function(function);
 		if (UNEXPECTED(fbc == NULL)) {
-			zend_throw_error(NULL, "Call to undefined function %s()", ZSTR_VAL(function));
+			if (ZSTR_VAL(function)[0] == '\\') {
+				lcname = zend_string_alloc(ZSTR_LEN(function) - 1, 0);
+				zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(function) + 1, ZSTR_LEN(function) - 1);
+			} else {
+				lcname = zend_string_tolower(function);
+			}
+			zend_string *suggestion = zend_find_similar_function(ZSTR_VAL(lcname), ZSTR_LEN(lcname));
+			if (suggestion) {
+				zend_throw_error(NULL, "Call to undefined function %s() (did you mean %s?)", ZSTR_VAL(function), ZSTR_VAL(suggestion));
+			} else {
+				zend_throw_error(NULL, "Call to undefined function %s()", ZSTR_VAL(function));
+			}
+			zend_string_release_ex(lcname, 0);
 			return NULL;
 		}
 		called_scope = NULL;
