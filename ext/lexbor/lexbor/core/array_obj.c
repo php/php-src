@@ -29,8 +29,7 @@ lexbor_array_obj_init(lexbor_array_obj_t *array,
     array->size = size;
     array->struct_size = struct_size;
 
-    array->list = lexbor_malloc(sizeof(uint8_t *)
-                                * (array->size * struct_size));
+    array->list = lexbor_malloc(array->size * struct_size);
     if (array->list == NULL) {
         return LXB_STATUS_ERROR_MEMORY_ALLOCATION;
     }
@@ -77,8 +76,7 @@ lexbor_array_obj_expand(lexbor_array_obj_t *array, size_t up_to)
 
     new_size = array->length + up_to;
 
-    list = lexbor_realloc(array->list, sizeof(uint8_t *)
-                          * (new_size * array->struct_size));
+    list = lexbor_realloc(array->list, new_size * array->struct_size);
     if (list == NULL) {
         return NULL;
     }
@@ -170,8 +168,7 @@ lexbor_array_obj_delete(lexbor_array_obj_t *array, size_t begin, size_t length)
 
     memmove(&array->list[ begin * array->struct_size ],
             &array->list[ end_len * array->struct_size ],
-            sizeof(uint8_t *)
-            * ((array->length - end_len) * array->struct_size));
+            (array->length - end_len) * array->struct_size);
 
     array->length -= length;
 }
