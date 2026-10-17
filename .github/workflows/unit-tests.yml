@@ -5,6 +5,7 @@ on:
       - 'main/network.c'
       - 'main/io/**'
       - 'main/php_io.h'
+      - 'sapi/embed/**'
       - 'tests/unit/**'
       - '.github/workflows/unit-tests.yml'
     branches:
@@ -14,6 +15,7 @@ on:
       - 'main/network.c'
       - 'main/io/**'
       - 'main/php_io.h'
+      - 'sapi/embed/**'
       - 'tests/unit/**'
       - '.github/workflows/unit-tests.yml'
     branches:
