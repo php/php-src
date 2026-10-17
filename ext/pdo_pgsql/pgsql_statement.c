@@ -753,8 +753,17 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pd
 #if SIZEOF_ZEND_LONG >= 8
 			case INT8OID:
 #endif
-				ZVAL_LONG(result, ZEND_ATOL(ptr));
+			{
+				/* PostgreSQL sends integers in canonical decimal form, which the numeric array key
+				 * parser handles without the overhead of strtoll() */
+				zend_ulong lval;
+				if (EXPECTED(ZEND_HANDLE_NUMERIC_STR(ptr, len, lval))) {
+					ZVAL_LONG(result, (zend_long) lval);
+				} else {
+					ZVAL_LONG(result, ZEND_ATOL(ptr));
+				}
 				break;
+			}
 			case FLOAT4OID:
 			case FLOAT8OID:
                 if (strncmp(ptr, "Infinity", len) == 0) {
