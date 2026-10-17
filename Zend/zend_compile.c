@@ -8226,23 +8226,12 @@ static void zend_compile_attributes(
 
 	if (*attributes != NULL) {
 		/* Allow delaying target validation for forward compatibility. */
-		const zend_attribute *delayed_target_validation = NULL;
-		if (target == ZEND_ATTRIBUTE_TARGET_PARAMETER) {
-			ZEND_ASSERT(offset >= 1);
-			/* zend_get_parameter_attribute_str will add 1 too */
-			delayed_target_validation = zend_get_parameter_attribute_str(
-				*attributes,
-				"delayedtargetvalidation",
-				strlen("delayedtargetvalidation"),
-				offset - 1
-			);
-		} else {
-			delayed_target_validation = zend_get_attribute_str(
-				*attributes,
-				"delayedtargetvalidation",
-				strlen("delayedtargetvalidation")
-			);
-		}
+		const zend_attribute *delayed_target_validation = zend_get_attribute_str_ex(
+			*attributes,
+			"delayedtargetvalidation",
+			strlen("delayedtargetvalidation"),
+			offset
+		);
 		/* Validate attributes in a secondary loop (needed to detect repeated attributes). */
 		ZEND_HASH_PACKED_FOREACH_PTR(*attributes, attr) {
 			if (attr->offset != offset || NULL == (config = zend_internal_attribute_get(attr->lcname))) {
@@ -10447,16 +10436,16 @@ static void zend_compile_const_decl(zend_ast *ast) /* {{{ */
 		);
 	}
 
-	HashTable *attributes = NULL;
-	zend_compile_attributes(&attributes, list->child[1], 0, ZEND_ATTRIBUTE_TARGET_CONST, 0);
+	/* Constants can only be declared at the top level, so the attributes of
+	 * all constants of a file are stored in the attributes table of the main op_array. */
+	HashTable **attributes = &CG(active_op_array)->attributes;
+	ZEND_ASSERT(!CG(active_op_array)->function_name);
+	uint32_t offset = *attributes ? zend_hash_num_elements(*attributes) : 0;
+	zend_compile_attributes(attributes, list->child[1], offset, ZEND_ATTRIBUTE_TARGET_CONST, 0);
 
 	ZEND_ASSERT(last_op != NULL);
 	last_op->opcode = ZEND_DECLARE_ATTRIBUTED_CONST;
-	znode attribs_node;
-	attribs_node.op_type = IS_CONST;
-	ZVAL_PTR(&attribs_node.u.constant, attributes);
-	zend_emit_op_data(&attribs_node);
-	CG(active_op_array)->fn_flags |= ZEND_ACC_PTR_OPS;
+	last_op->extended_value = offset;
 }
 /* }}}*/
 

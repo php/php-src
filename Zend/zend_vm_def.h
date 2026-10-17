@@ -8373,46 +8373,41 @@ ZEND_VM_HANDLER(143, ZEND_DECLARE_CONST, CONST, CONST)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(210, ZEND_DECLARE_ATTRIBUTED_CONST, CONST, CONST)
+ZEND_VM_HANDLER(210, ZEND_DECLARE_ATTRIBUTED_CONST, CONST, CONST, NUM)
 {
 	USE_OPLINE
 	zval *name;
 	zval *val;
-	zend_constant c, *registered;
+	zend_attributed_constant c;
+	zend_constant *registered;
 
 	SAVE_OPLINE();
 	name  = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	val   = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	ZVAL_COPY(&c.value, val);
-	if (Z_OPT_TYPE(c.value) == IS_CONSTANT_AST) {
-		if (UNEXPECTED(zval_update_constant_ex(&c.value, EX(func)->op_array.scope) != SUCCESS)) {
-			zval_ptr_dtor_nogc(&c.value);
+	ZVAL_COPY(&c.constant.value, val);
+	if (Z_OPT_TYPE(c.constant.value) == IS_CONSTANT_AST) {
+		if (UNEXPECTED(zval_update_constant_ex(&c.constant.value, EX(func)->op_array.scope) != SUCCESS)) {
+			zval_ptr_dtor_nogc(&c.constant.value);
 			FREE_OP1();
 			FREE_OP2();
 			HANDLE_EXCEPTION();
 		}
 	}
 	/* non persistent, case sensitive */
-	ZEND_CONSTANT_SET_FLAGS(&c, 0, PHP_USER_CONSTANT);
-	c.name = zend_string_copy(Z_STR_P(name));
+	ZEND_CONSTANT_SET_FLAGS(&c.constant, CONST_ATTRIBUTED, PHP_USER_CONSTANT);
+	c.constant.name = zend_string_copy(Z_STR_P(name));
+	c.attributes_offset = opline->extended_value;
 
-	registered = zend_register_constant(&c);
-	if (registered == NULL) {
-		FREE_OP1();
-		FREE_OP2();
-		/* two opcodes used, second one is the data with attributes */
-		ZEND_VM_NEXT_OPCODE_EX(1, 2);
+	registered = zend_register_constant(&c.constant);
+	if (registered != NULL) {
+		/* The attributes are stored in the main op_array, see zend_compile_const_decl() */
+		zend_constant_add_attributes(registered, EX(func)->op_array.attributes);
 	}
-
-	HashTable *attributes = Z_PTR_P(GET_OP_DATA_ZVAL_PTR(BP_VAR_R));
-	ZEND_ASSERT(attributes != NULL);
-	zend_constant_add_attributes(registered, attributes);
 
 	FREE_OP1();
 	FREE_OP2();
-	/* two opcodes used, second one is the data with attributes */
-	ZEND_VM_NEXT_OPCODE_EX(1, 2);
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 ZEND_VM_HANDLER(142, ZEND_DECLARE_LAMBDA_FUNCTION, UNUSED, NUM, NUM|CACHE_SLOT)

@@ -247,13 +247,6 @@ static void zend_file_cache_unserialize_func(zval                    *zv,
                                              zend_persistent_script  *script,
                                              void                    *buf);
 
-static void zend_file_cache_serialize_attribute(zval                     *zv,
-                                                zend_persistent_script   *script,
-                                                zend_file_cache_metainfo *info,
-                                                void                     *buf);
-
-static void zend_file_cache_unserialize_attribute(zval *zv, zend_persistent_script *script, void *buf);
-
 static void *zend_file_cache_serialize_interned(zend_string              *str,
                                                 zend_file_cache_metainfo *info)
 {
@@ -444,9 +437,6 @@ static void zend_file_cache_serialize_zval(zval                     *zv,
 			/* Used by static properties. */
 			SERIALIZE_PTR(Z_INDIRECT_P(zv));
 			break;
-		case IS_PTR:
-			/* Used by attributes on constants, will be handled separately */
-			break;
 		default:
 			ZEND_ASSERT(Z_TYPE_P(zv) < IS_STRING);
 			break;
@@ -566,13 +556,6 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 		UNSERIALIZE_PTR(opline);
 		end = opline + op_array->last;
 		while (opline < end) {
-			if (opline->opcode == ZEND_OP_DATA
-				&& (opline-1)->opcode == ZEND_DECLARE_ATTRIBUTED_CONST
-			) {
-				zval *literal = RT_CONSTANT(opline, opline->op1);
-				SERIALIZE_ATTRIBUTES(Z_PTR_P(literal));
-			}
-
 #if ZEND_USE_ABS_CONST_ADDR
 			if (opline->op1_type == IS_CONST) {
 				SERIALIZE_PTR(opline->op1.zv);
@@ -1376,9 +1359,6 @@ static void zend_file_cache_unserialize_zval(zval                    *zv,
 			/* Used by static properties. */
 			UNSERIALIZE_PTR(Z_INDIRECT_P(zv));
 			break;
-		case IS_PTR:
-			/* Used by attributes on constants, will be handled separately */
-			break;
 		default:
 			ZEND_ASSERT(Z_TYPE_P(zv) < IS_STRING);
 			break;
@@ -1549,13 +1529,6 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 					break;
 			}
 #endif
-
-			if (opline->opcode == ZEND_OP_DATA
-				&& (opline-1)->opcode == ZEND_DECLARE_ATTRIBUTED_CONST
-			) {
-				zval *literal = RT_CONSTANT(opline, opline->op1);
-				UNSERIALIZE_ATTRIBUTES(Z_PTR_P(literal));
-			}
 
 			if (opline->opcode == ZEND_CALLABLE_CONVERT_PARTIAL) {
 				if (script->corrupted) {

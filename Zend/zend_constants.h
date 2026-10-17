@@ -27,6 +27,7 @@
 #define CONST_DEPRECATED		(1<<2)				/* Deprecated */
 #define CONST_OWNED				(1<<3)				/* constant should be destroyed together with class */
 #define CONST_RECURSIVE			(1<<4)				/* Recursion protection for constant evaluation */
+#define CONST_ATTRIBUTED		(1<<5)				/* Allocated as zend_attributed_constant */
 
 #define CONST_IS_RECURSIVE(c) (Z_CONSTANT_FLAGS((c)->value) & CONST_RECURSIVE)
 #define CONST_PROTECT_RECURSION(c) \
@@ -44,6 +45,7 @@ typedef struct _zend_constant {
 	zval value;
 	zend_string *name;
 	zend_string *filename;
+	/* May be shared with other constants, see zend_attributed_constant. */
 	HashTable *attributes;
 } zend_constant;
 
@@ -57,6 +59,21 @@ typedef struct _zend_constant {
 		Z_CONSTANT_FLAGS((c)->value) = \
 			((_flags) & 0xff) | ((_module_number) << 8); \
 	} while (0)
+
+/* User constants declared with attributes.
+ * This is a type specialization of the zend_constant type. */
+typedef struct zend_attributed_constant {
+	zend_constant constant;
+	/* Offset into the attributes able of the main op_array of the declaring file. */
+	uint32_t attributes_offset;
+} zend_attributed_constant;
+
+static zend_always_inline uint32_t zend_constant_attributes_offset(const zend_constant *c)
+{
+	return (ZEND_CONSTANT_FLAGS(c) & CONST_ATTRIBUTED)
+		? ((const zend_attributed_constant *) c)->attributes_offset
+		: 0;
+}
 
 #define REGISTER_NULL_CONSTANT(name, flags)  zend_register_null_constant((name), sizeof(name)-1, (flags), module_number)
 #define REGISTER_BOOL_CONSTANT(name, bval, flags)  zend_register_bool_constant((name), sizeof(name)-1, (bval), (flags), module_number)

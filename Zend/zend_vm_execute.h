@@ -8301,16 +8301,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_DECLARE_ATTRI
 	USE_OPLINE
 	zval *name;
 	zval *val;
-	zend_constant c, *registered;
+	zend_attributed_constant c;
+	zend_constant *registered;
 
 	SAVE_OPLINE();
 	name  = RT_CONSTANT(opline, opline->op1);
 	val   = RT_CONSTANT(opline, opline->op2);
 
-	ZVAL_COPY(&c.value, val);
-	if (Z_OPT_TYPE(c.value) == IS_CONSTANT_AST) {
-		if (UNEXPECTED(zval_update_constant_ex(&c.value, EX(func)->op_array.scope) != SUCCESS)) {
-			zval_ptr_dtor_nogc(&c.value);
+	ZVAL_COPY(&c.constant.value, val);
+	if (Z_OPT_TYPE(c.constant.value) == IS_CONSTANT_AST) {
+		if (UNEXPECTED(zval_update_constant_ex(&c.constant.value, EX(func)->op_array.scope) != SUCCESS)) {
+			zval_ptr_dtor_nogc(&c.constant.value);
 
 
 
@@ -8319,28 +8320,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_DECLARE_ATTRI
 		}
 	}
 	/* non persistent, case sensitive */
-	ZEND_CONSTANT_SET_FLAGS(&c, 0, PHP_USER_CONSTANT);
-	c.name = zend_string_copy(Z_STR_P(name));
+	ZEND_CONSTANT_SET_FLAGS(&c.constant, CONST_ATTRIBUTED, PHP_USER_CONSTANT);
+	c.constant.name = zend_string_copy(Z_STR_P(name));
+	c.attributes_offset = opline->extended_value;
 
-	registered = zend_register_constant(&c);
-	if (registered == NULL) {
-
-
-
-
-		/* two opcodes used, second one is the data with attributes */
-		ZEND_VM_NEXT_OPCODE_EX(1, 2);
+	registered = zend_register_constant(&c.constant);
+	if (registered != NULL) {
+		/* The attributes are stored in the main op_array, see zend_compile_const_decl() */
+		zend_constant_add_attributes(registered, EX(func)->op_array.attributes);
 	}
 
-	HashTable *attributes = Z_PTR_P(get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1));
-	ZEND_ASSERT(attributes != NULL);
-	zend_constant_add_attributes(registered, attributes);
 
 
 
-
-	/* two opcodes used, second one is the data with attributes */
-	ZEND_VM_NEXT_OPCODE_EX(1, 2);
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_YIELD_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -61164,16 +61157,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DECLARE_ATTRIBUTED
 	USE_OPLINE
 	zval *name;
 	zval *val;
-	zend_constant c, *registered;
+	zend_attributed_constant c;
+	zend_constant *registered;
 
 	SAVE_OPLINE();
 	name  = RT_CONSTANT(opline, opline->op1);
 	val   = RT_CONSTANT(opline, opline->op2);
 
-	ZVAL_COPY(&c.value, val);
-	if (Z_OPT_TYPE(c.value) == IS_CONSTANT_AST) {
-		if (UNEXPECTED(zval_update_constant_ex(&c.value, EX(func)->op_array.scope) != SUCCESS)) {
-			zval_ptr_dtor_nogc(&c.value);
+	ZVAL_COPY(&c.constant.value, val);
+	if (Z_OPT_TYPE(c.constant.value) == IS_CONSTANT_AST) {
+		if (UNEXPECTED(zval_update_constant_ex(&c.constant.value, EX(func)->op_array.scope) != SUCCESS)) {
+			zval_ptr_dtor_nogc(&c.constant.value);
 
 
 
@@ -61182,28 +61176,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DECLARE_ATTRIBUTED
 		}
 	}
 	/* non persistent, case sensitive */
-	ZEND_CONSTANT_SET_FLAGS(&c, 0, PHP_USER_CONSTANT);
-	c.name = zend_string_copy(Z_STR_P(name));
+	ZEND_CONSTANT_SET_FLAGS(&c.constant, CONST_ATTRIBUTED, PHP_USER_CONSTANT);
+	c.constant.name = zend_string_copy(Z_STR_P(name));
+	c.attributes_offset = opline->extended_value;
 
-	registered = zend_register_constant(&c);
-	if (registered == NULL) {
-
-
-
-
-		/* two opcodes used, second one is the data with attributes */
-		ZEND_VM_NEXT_OPCODE_EX(1, 2);
+	registered = zend_register_constant(&c.constant);
+	if (registered != NULL) {
+		/* The attributes are stored in the main op_array, see zend_compile_const_decl() */
+		zend_constant_add_attributes(registered, EX(func)->op_array.attributes);
 	}
 
-	HashTable *attributes = Z_PTR_P(get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1));
-	ZEND_ASSERT(attributes != NULL);
-	zend_constant_add_attributes(registered, attributes);
 
 
 
-
-	/* two opcodes used, second one is the data with attributes */
-	ZEND_VM_NEXT_OPCODE_EX(1, 2);
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_YIELD_SPEC_CONST_CONST_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)

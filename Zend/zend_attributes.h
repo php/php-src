@@ -64,7 +64,9 @@ typedef struct _zend_attribute {
 	zend_string *validation_error;
 	uint32_t flags;
 	uint32_t lineno;
-	/* Parameter offsets start at 1, everything else uses 0. */
+	/* Parameter offsets start at 1.
+	 * User constants use their own offset in the shared table of the main op_array (see zend_attributed_constant).
+	 * Everything else uses 0. */
 	uint32_t offset;
 	uint32_t argc;
 	zend_attribute_arg args[1];
@@ -78,6 +80,8 @@ typedef struct _zend_internal_attribute {
 
 ZEND_API zend_attribute *zend_get_attribute(const HashTable *attributes, const zend_string *lcname);
 ZEND_API zend_attribute *zend_get_attribute_str(const HashTable *attributes, const char *str, size_t len);
+/* Raw offset, i.e. not adjusted for parameters. */
+ZEND_API zend_attribute *zend_get_attribute_str_ex(const HashTable *attributes, const char *str, size_t len, uint32_t offset);
 
 ZEND_API zend_attribute *zend_get_parameter_attribute(const HashTable *attributes, const zend_string *lcname, uint32_t offset);
 ZEND_API zend_attribute *zend_get_parameter_attribute_str(const HashTable *attributes, const char *str, size_t len, uint32_t offset);
