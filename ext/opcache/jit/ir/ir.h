@@ -65,6 +65,8 @@ extern "C" {
 #   define IR_TARGET_TRIPLET "x86-freebsd-sysv"
 #  elif defined(__NetBSD__)
 #   define IR_TARGET_TRIPLET "x86-netbsd-sysv"
+#  elif defined(__OpenBSD__)
+#   define IR_TARGET_TRIPLET "x86-openbsd-sysv"
 #  else
 #   define IR_TARGET_TRIPLET "x86-unknown-sysv"
 #  endif
@@ -79,6 +81,8 @@ extern "C" {
 #   define IR_TARGET_TRIPLET "x86_64-freebsd-sysv"
 #  elif defined(__NetBSD__)
 #   define IR_TARGET_TRIPLET "x86_64-netbsd-sysv"
+#  elif defined(__OpenBSD__)
+#   define IR_TARGET_TRIPLET "x86_64-openbsd-sysv"
 #  else
 #   define IR_TARGET_TRIPLET "x86_64-unknown-sysv"
 #  endif
@@ -93,6 +97,8 @@ extern "C" {
 #   define IR_TARGET_TRIPLET "aarch64-freebsd-sysv"
 #  elif defined(__NetBSD__)
 #   define IR_TARGET_TRIPLET "aarch64-netbsd-sysv"
+#  elif defined(__OpenBSD__)
+#   define IR_TARGET_TRIPLET "aarch64-openbsd-sysv"
 #  else
 #   define IR_TARGET_TRIPLET "aarch64-unknown-sysv"
 #  endif
@@ -256,9 +262,9 @@ typedef enum _ir_type {
  * E     - control   IR_OP_FLAG_CONTROL + IR_OP_FLAG_BB_END
  * T     - control   IR_OP_FLAG_CONTROL + IR_OP_FLAG_BB_END + IR_OP_FLAG_TERMINATOR
  * l     - load      IR_OP_FLAG_MEM + IR_OP_FLAG_MEM_LOAD
- * s     - store     IR_OP_FLAG_MEM + IR_OP_FLAG_STORE
- * x     - call      IR_OP_FLAG_MEM + IR_OP_FLAG_CALL
- * a     - alloc     IR_OP_FLAG_MEM + IR_OP_FLAG_ALLOC
+ * s     - store     IR_OP_FLAG_MEM + IR_OP_FLAG_MEM_STORE
+ * x     - call      IR_OP_FLAG_MEM + IR_OP_FLAG_MEM_CALL
+ * a     - alloc     IR_OP_FLAG_MEM + IR_OP_FLAG_MEM_ALLOC
  * 0-3   - number of input edges
  * N     - number of arguments is defined in the insn->inputs_count (MERGE, PHI, CALL)
  * X1-X3 - number of extra data ops
@@ -279,6 +285,7 @@ typedef enum _ir_type {
  * num - number: argument number (PARAM)
  * prb - branch probability 1-99 (0 - unspecified): (IF_TRUE, IF_FALSE, CASE_VAL, CASE_DEFAULT)
  * opt - optional number
+ * alg - optional alignment
  * pro - function prototype
  * lbl - label used as value (a reference to constant): (BEGIN)
  *
@@ -389,7 +396,7 @@ typedef enum _ir_type {
 	\
 	/* data ops                                                         */ \
 	_(PARAM,        p1X2, reg, str, num) /* incoming parameter proj.    */ \
-	_(VAR,	        p1X1, reg, str, ___) /* local variable              */ \
+	_(VAR,	        p1X2, reg, str, alg) /* local variable              */ \
 	_(FUNC_ADDR,    r0,   ___, ___, ___) /* constant func ref           */ \
 	_(FUNC,         r0,   ___, ___, ___) /* constant func ref           */ \
 	_(SYM,          r0,   ___, ___, ___) /* constant symbol ref         */ \
@@ -402,10 +409,10 @@ typedef enum _ir_type {
 	_(TAILCALL,     xN,   src, def, def) /* CALL+RETURN                 */ \
 	\
 	/* memory reference and load/store ops                              */ \
-	_(ALLOCA,       a2,   src, def, ___) /* alloca(def)                 */ \
-	_(AFREE,        a2,   src, def, ___) /* revert alloca(def)          */ \
+	_(ALLOCA,       a2X1, src, def, alg) /* alloca(def)                 */ \
+	_(AFREE,        s2,   src, def, ___) /* revert alloca(def)          */ \
 	_(BLOCK_BEGIN,  a1,   src, ___, ___) /* stacksave                   */ \
-	_(BLOCK_END,    a2,   src, def, ___) /* stackrestore                */ \
+	_(BLOCK_END,    s2,   src, def, ___) /* stackrestore                */ \
 	_(VLOAD,        l2,   src, var, ___) /* load value of local var     */ \
 	_(VLOAD_v,      l2,   src, var, ___) /* volatile variant of VLOAD   */ \
 	_(VSTORE,       s3,   src, var, def) /* store value to local var    */ \
@@ -712,7 +719,6 @@ typedef struct _ir_code_buffer {
 typedef struct {
 	int   size;
 	int   align;
-	int   offset;
 } ir_value_param;
 
 typedef struct _ir_bitqueue ir_bitqueue;
@@ -747,8 +753,8 @@ struct _ir_ctx {
 	uint32_t          *cfg_map;                 /* map of instructions to basic block number */
 	uint32_t          *cfg_schedule;            /* BB order for code generation */
 	uint32_t          *rules;                   /* array of target specific code-generation rules (for each instruction) */
-	uint32_t          *vregs;
-	ir_ref             vregs_count;
+	int32_t           *vregs;                   /* map of insns to virtual regs (positive) or stack slots (negative) */
+	int32_t            vregs_count;
 	ir_str             func_name;               /* Function name (should be set through ir_string()/ir_stringl()) */
 	int32_t            spill_base;              /* base register for special spill area (e.g. PHP VM frame pointer) */
 	uint64_t           fixed_regset;            /* fixed registers, excluded for regular register allocation */
