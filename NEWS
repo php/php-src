@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed GHSA-62xp-839h-2637 (IPv6 ACL bypass in FastCGI listen.allowed_clients
     due to partial address comparison). (CVE-2026-91768) (Alexandre Daubois)
 
+- Hash:
+  . Improved performance of hash_pbkdf2. (Sjoerd Langkemper)
+
 - MySQLnd:
   . Fixed GHSA-r6x9-5r99-36j7 (Various packet overreads in mysqlnd wire
     protocol). (CVE-2025-1218) (Jakub Zelenka, Nora Dossche)
