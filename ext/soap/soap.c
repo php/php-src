@@ -69,6 +69,7 @@ static void delete_service(soapServicePtr service);
 static void delete_argv(struct _soap_class *class);
 
 static void soap_error_handler(int error_num, zend_string *error_filename, uint32_t error_lineno, zend_string *message);
+ZEND_NORETURN static ZEND_COLD void soap_fault_to_error(char *code);
 
 #define SOAP_SERVER_BEGIN_CODE() \
 	bool _old_handler = SOAP_GLOBAL(use_soap_error_handler);\
@@ -1108,6 +1109,9 @@ PHP_METHOD(SoapServer, __construct)
 	if (wsdl) {
 		zend_try {
 			service->sdl = get_sdl(ZEND_THIS, ZSTR_VAL(wsdl), cache_wsdl);
+			if (service->sdl == NULL) {
+				soap_fault_to_error("WSDL");
+			}
 		} zend_catch {
 			xmlCharEncCloseFunc(service->encoding);
 			service->encoding = NULL;
@@ -1990,6 +1994,58 @@ ZEND_NORETURN static void soap_server_fault_en(const char *code, const char *str
 	soap_server_fault(code, string, NULL, NULL, NULL, soap_lang_en);
 }
 
+/* Throws a SoapFault for an error detected by ext/soap itself, with the same
+ * "SOAP-ERROR: " message that soap_errorN() produces.
+ * Unlike soap_errorN(E_ERROR, ...) this does not bail out: the caller must
+ * release what it owns and report the failure to its own caller. */
+ZEND_COLD void soap_throw_error(const char *format, ...) /* {{{ */
+{
+	va_list args;
+	zend_string *details, *message;
+	zval fault;
+	const char *code = SOAP_GLOBAL(error_code);
+
+	va_start(args, format);
+	details = zend_vstrpprintf(0, format, args);
+	va_end(args);
+	message = zend_string_concat2(ZEND_STRL("SOAP-ERROR: "), ZSTR_VAL(details), ZSTR_LEN(details));
+	zend_string_release(details);
+
+	if (code == NULL) {
+		code = "Client";
+	}
+
+	if (Z_OBJ(SOAP_GLOBAL(error_object))) {
+		add_soap_fault_ex_en(&fault, &SOAP_GLOBAL(error_object), code, ZSTR_VAL(message));
+		Z_ADDREF(fault);
+	} else {
+		ZVAL_NULL(&fault);
+		set_soap_fault(&fault, NULL, code, ZSTR_VAL(message), NULL, NULL, NULL, soap_lang_en);
+	}
+	zend_string_release(message);
+	zend_throw_exception_object(&fault);
+}
+/* }}} */
+
+/* SoapServer and SoapClient with the "exceptions" option disabled report
+ * errors as fatal errors. Turns the SoapFault thrown by soap_throw_error()
+ * into the same fatal error that soap_errorN(E_ERROR, ...) raises. */
+ZEND_NORETURN static ZEND_COLD void soap_fault_to_error(char *code) /* {{{ */
+{
+	zval fault;
+	zend_string *message;
+
+	ZEND_ASSERT(EG(exception) != NULL && instanceof_function(EG(exception)->ce, soap_fault_class_entry));
+	ZVAL_OBJ(&fault, EG(exception));
+	message = zval_get_string(Z_FAULT_STRING_P(&fault));
+	zend_clear_exception();
+
+	SOAP_GLOBAL(error_code) = code;
+	php_error(E_ERROR, "%s", ZSTR_VAL(message));
+	ZEND_UNREACHABLE();
+}
+/* }}} */
+
 static zend_never_inline ZEND_COLD void soap_real_error_handler(int error_num, zend_string *error_filename, const uint32_t error_lineno, zend_string *message) /* {{{ */
 {
 	bool _old_in_compilation;
@@ -2345,6 +2401,13 @@ PHP_METHOD(SoapClient, __construct)
 		SOAP_GLOBAL(soap_version) = soap_version;
 
 		sdl = get_sdl(this_ptr, ZSTR_VAL(wsdl), cache_wsdl);
+		if (sdl == NULL) {
+			if (Z_TYPE_P(Z_CLIENT_EXCEPTIONS_P(this_ptr)) == IS_FALSE) {
+				soap_fault_to_error("WSDL");
+			}
+			SOAP_GLOBAL(soap_version) = old_soap_version;
+			goto end;
+		}
 
 		zval *sdl_zval = Z_CLIENT_SDL_P(this_ptr);
 		if (Z_TYPE_P(sdl_zval) == IS_OBJECT) {
@@ -2362,6 +2425,7 @@ PHP_METHOD(SoapClient, __construct)
 		soap_client_object_fetch(Z_OBJ_P(this_ptr))->typemap = soap_create_typemap(sdl, typemap_ht);
 	}
 
+end: ;
 	SOAP_CLIENT_END_CODE();
 }
 /* }}} */
