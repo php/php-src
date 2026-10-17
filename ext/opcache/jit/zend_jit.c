@@ -695,6 +695,11 @@ static bool zend_may_be_dynamic_property(zend_class_entry *ce, zend_string *memb
 
 #include "jit/zend_jit_ir.c"
 
+#if defined(IR_TARGET_AARCH64)
+/* Stub addresses as generated at startup. Veneers overwrite zend_jit_stub_handlers[], and they are lost on restart. */
+static void *zend_jit_stub_handlers_saved[sizeof(zend_jit_stubs) / sizeof(zend_jit_stubs[0])];
+#endif
+
 #if defined(__clang__)
 # pragma clang diagnostic pop
 #endif
@@ -3726,6 +3731,9 @@ void zend_jit_startup(void *buf, size_t size, bool reattached)
 	zend_jit_unprotect();
 	/* save JIT buffer pos */
 	dasm_ptr[1] = dasm_ptr[0];
+#if defined(IR_TARGET_AARCH64)
+	memcpy(zend_jit_stub_handlers_saved, zend_jit_stub_handlers, sizeof(zend_jit_stub_handlers_saved));
+#endif
 	zend_jit_protect();
 }
 
@@ -3889,6 +3897,11 @@ void zend_jit_restart(void)
 
 		/* restore JIT buffer pos */
 		dasm_ptr[0] = dasm_ptr[1];
+#if defined(IR_TARGET_AARCH64)
+		/* Veneers lived in the code that was just discarded */
+		memcpy(zend_jit_stub_handlers, zend_jit_stub_handlers_saved, sizeof(zend_jit_stub_handlers_saved));
+		memset(zend_jit_stub_handlers + (sizeof(zend_jit_stubs) / sizeof(zend_jit_stubs[0])), 0, sizeof(zend_jit_stub_handlers_saved));
+#endif
 
 		zend_jit_trace_restart();
 
