@@ -2,6 +2,7 @@
  * Stub hash: c50ad88a1603d7805b7b77b60bd9c9bf0aa0a008 */
 
 #include "zend_attributes.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_MASK(0, array, MAY_BE_ARRAY|MAY_BE_OBJECT, "[]")
@@ -359,3 +360,5 @@ static zend_class_entry *register_class_RecursiveArrayIterator(zend_class_entry 
 
 	return class_entry;
 }
+
+END_EXTERN_C()

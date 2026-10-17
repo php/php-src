@@ -14,12 +14,10 @@
 
 #include <unicode/unum.h>
 
-extern "C" {
 #include "msgformat_class.h"
 #include "php_intl.h"
 #include "msgformat_data.h"
 #include "msgformat_arginfo.h"
-}
 
 #include <zend_exceptions.h>
 

@@ -55,10 +55,12 @@ typedef struct {
 		RETURN_THROWS(); \
 	}
 
+BEGIN_EXTERN_C()
 void dateformat_register_IntlDatePatternGenerator_class(void);
 
 extern zend_class_entry *IntlDatePatternGenerator_ce_ptr;
 
 extern zend_object_handlers IntlDatePatternGenerator_handlers;
+END_EXTERN_C()
 
 #endif /* #ifndef DATEPATTERNGENERATOR_CLASS_H */

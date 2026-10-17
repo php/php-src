@@ -43,6 +43,7 @@ extern zend_module_entry intl_module_entry;
 #include "TSRM.h"
 #endif
 
+BEGIN_EXTERN_C()
 ZEND_BEGIN_MODULE_GLOBALS(intl)
 	struct UCollator *current_collator;
 	intl_error *current_collator_error;
@@ -70,6 +71,8 @@ PHP_MINFO_FUNCTION(intl);
 
 const char *intl_locale_get_default( void );
 char *canonicalize_locale_string(const char* locale);
+
+END_EXTERN_C()
 
 #define PHP_INTL_FUNCTION_WITH_ERROR_RESET(name) \
 	static void php_intl_##name##_impl(INTERNAL_FUNCTION_PARAMETERS); \

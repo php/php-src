@@ -31,14 +31,12 @@
 #include "../intl_convertcpp.h"
 #include "../common/common_date.h"
 
-extern "C" {
 #include "php_intl.h"
 #include "msgformat_class.h"
 #include "msgformat_helpers.h"
 #include "intl_convert.h"
 #define USE_TIMEZONE_POINTER
 #include "../timezone/timezone_class.h"
-}
 
 U_NAMESPACE_BEGIN
 /**
@@ -351,7 +349,7 @@ static void umsg_set_timezone(MessageFormatter_object *mfo,
   }
 }
 
-U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
+void umsg_format_helper(MessageFormatter_object *mfo,
 								HashTable *args,
 								UChar **formatted,
 								int32_t *formatted_len)
@@ -607,7 +605,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 
 #define cleanup_zvals() for(int j=i;j>=0;j--) { zval_ptr_dtor((*args)+i); }
 
-U_CFUNC void umsg_parse_helper(UMessageFormat *fmt, int *count, zval **args, UChar *source, int32_t source_len, UErrorCode *status)
+void umsg_parse_helper(UMessageFormat *fmt, int *count, zval **args, UChar *source, int32_t source_len, UErrorCode *status)
 {
     UnicodeString srcString(source, source_len);
     Formattable *fargs = ((const MessageFormat*)fmt)->parse(srcString, *count, *status);

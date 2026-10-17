@@ -23,11 +23,9 @@
 
 #include <unicode/uenum.h>
 
-extern "C" {
 #include "php_intl.h"
 #include "intl_data.h"
 #include "intl_convert.h"
-}
 #include "transliterator.h"
 #include "transliterator_class.h"
 

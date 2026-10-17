@@ -17,15 +17,9 @@
 
 #include "formatter_data.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 #include "intl_common.h"
 #include "intl_error.h"
 #include "intl_data.h"
-#ifdef __cplusplus
-}
-#endif
 
 typedef struct {
 	formatter_data  nf_data;
@@ -35,14 +29,10 @@ typedef struct {
 #define php_intl_number_format_fetch_object(obj) ZEND_CONTAINER_OF(obj, NumberFormatter_object, zo)
 #define Z_INTL_NUMBERFORMATTER_P(zv) php_intl_number_format_fetch_object(Z_OBJ_P(zv))
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+BEGIN_EXTERN_C()
 void formatter_register_class( void );
 extern zend_class_entry *NumberFormatter_ce_ptr;
-#ifdef __cplusplus
-}
-#endif
+END_EXTERN_C()
 
 /* Auxiliary macros */
 

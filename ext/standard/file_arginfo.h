@@ -3,6 +3,7 @@
 
 #include "zend_attributes.h"
 #include "zend_constants.h"
+BEGIN_EXTERN_C()
 
 static void register_file_symbols(int module_number)
 {
@@ -139,3 +140,5 @@ static void register_file_symbols(int module_number)
 	ZVAL_STR_COPY(&attribute_Deprecated_const_FILE_BINARY_0->args[1].value, attribute_Deprecated_const_FILE_TEXT_0_arg1_str);
 	attribute_Deprecated_const_FILE_BINARY_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
+
+END_EXTERN_C()

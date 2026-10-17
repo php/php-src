@@ -2,6 +2,7 @@
  * Stub hash: e7f250077b6721539caee96afe4ed392396018f9 */
 
 #include "zend_attributes.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_shmop_open, 0, 4, Shmop, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, key, IS_LONG, 0)
@@ -71,3 +72,5 @@ static zend_class_entry *register_class_Shmop(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

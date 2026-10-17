@@ -1,5 +1,6 @@
 /* This is a generated file, edit breakiterator_iterators.stub.php instead.
  * Stub hash: 5dc9ab2cc5862b2082fb9cd5cec909298921b115 */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_IntlPartsIterator_getBreakIterator, 0, 0, IntlBreakIterator, 0)
 ZEND_END_ARG_INFO()
@@ -43,3 +44,5 @@ static zend_class_entry *register_class_IntlPartsIterator(zend_class_entry *clas
 
 	return class_entry;
 }
+
+END_EXTERN_C()

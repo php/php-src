@@ -1,5 +1,6 @@
 /* This is a generated file, edit curl_file.stub.php instead.
  * Stub hash: 0d09bd2f3b0a155cef25ca343319ecf470424d71 */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CURLFile___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -104,3 +105,5 @@ static zend_class_entry *register_class_CURLStringFile(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

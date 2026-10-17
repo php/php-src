@@ -1,5 +1,6 @@
 /* This is a generated file, edit opcache.stub.php instead.
  * Stub hash: a8de025fa96a78db3a26d53a18bb2b365d094eca */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_opcache_reset, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
@@ -48,3 +49,5 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(opcache_is_script_cached_in_file_cache, arginfo_opcache_is_script_cached_in_file_cache)
 	ZEND_FE_END
 };
+
+END_EXTERN_C()

@@ -2,6 +2,7 @@
  * Stub hash: aceee39bed5332f7f26d5d768976c4d5ab96ab3c */
 
 #include "zend_constants.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -1135,3 +1136,5 @@ static zend_class_entry *register_class_AddressInfo(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

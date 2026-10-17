@@ -21,10 +21,8 @@
 #include <unicode/unistr.h>
 #endif
 
-extern "C" {
 #include "php_intl.h"
 #include "intl_convert.h"
-}
 #include "spoofchecker_class.h"
 
 /* {{{ Checks if a given text contains any suspicious characters */

@@ -24,7 +24,7 @@ extern "C" {
 }
 
 /* {{{ ResourceBundle_extract_value */
-U_CFUNC void resourcebundle_extract_value( zval *return_value, ResourceBundle_object *source )
+void resourcebundle_extract_value( zval *return_value, ResourceBundle_object *source )
 {
 	UResType               restype;
 	const UChar*           ufield;

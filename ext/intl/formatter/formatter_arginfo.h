@@ -2,6 +2,7 @@
  * Stub hash: d886941aa76837aed1da08845dbaff9442107203 */
 
 #include "zend_attributes.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_NumberFormatter___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
@@ -634,3 +635,5 @@ static zend_class_entry *register_class_NumberFormatter(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

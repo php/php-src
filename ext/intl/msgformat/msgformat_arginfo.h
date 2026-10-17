@@ -1,5 +1,6 @@
 /* This is a generated file, edit msgformat.stub.php instead.
  * Stub hash: d595f5c582996ebb96ab39df8cb56c4cf6c8dfcf */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_MessageFormatter___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
@@ -82,3 +83,5 @@ static zend_class_entry *register_class_MessageFormatter(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

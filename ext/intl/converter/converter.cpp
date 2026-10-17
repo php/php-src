@@ -22,12 +22,10 @@
 
 #include "converter_class.h"
 
-extern "C" {
 #include "converter.h"
 #include "php_intl.h"
 #include "../intl_error.h"
 #include "../intl_common.h"
-}
 
 #define CONV_GET(pzv)  (Z_INTL_CONVERTER_P((pzv)))
 #define THROW_UFAILURE(obj, error) php_converter_throw_failure(obj, error, \
@@ -91,7 +89,7 @@ static void php_converter_default_callback(zval *return_value, zval *zobj, zend_
 /* }}} */
 
 /* {{{ */
-PHP_METHOD(UConverter, toUCallback) {
+U_CFUNC PHP_METHOD(UConverter, toUCallback) {
 	zend_long reason;
 	zend_string *source, *codeUnits;
 	zval *error;
@@ -108,7 +106,7 @@ PHP_METHOD(UConverter, toUCallback) {
 /* }}} */
 
 /* {{{ */
-PHP_METHOD(UConverter, fromUCallback) {
+U_CFUNC PHP_METHOD(UConverter, fromUCallback) {
 	zend_long reason;
 	zval *source, *error;
 	zend_long codePoint;
@@ -403,14 +401,14 @@ static void php_converter_do_set_encoding(UConverter **pcnv, INTERNAL_FUNCTION_P
 /* }}} */
 
 /* {{{ */
-PHP_METHOD(UConverter, setSourceEncoding) {
+U_CFUNC PHP_METHOD(UConverter, setSourceEncoding) {
 	php_converter_object *objval = CONV_GET(ZEND_THIS);
 	php_converter_do_set_encoding(&(objval->src), INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
 /* {{{ */
-PHP_METHOD(UConverter, setDestinationEncoding) {
+U_CFUNC PHP_METHOD(UConverter, setDestinationEncoding) {
 	php_converter_object *objval = CONV_GET(ZEND_THIS);
 	php_converter_do_set_encoding(&(objval->dest), INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
@@ -439,14 +437,14 @@ static void php_converter_do_get_encoding(php_converter_object *objval, UConvert
 /* }}} */
 
 /* {{{ */
-PHP_METHOD(UConverter, getSourceEncoding) {
+U_CFUNC PHP_METHOD(UConverter, getSourceEncoding) {
 	php_converter_object *objval = CONV_GET(ZEND_THIS);
 	php_converter_do_get_encoding(objval, objval->src, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
 /* {{{ */
-PHP_METHOD(UConverter, getDestinationEncoding) {
+U_CFUNC PHP_METHOD(UConverter, getDestinationEncoding) {
 	php_converter_object *objval = CONV_GET(ZEND_THIS);
 	php_converter_do_get_encoding(objval, objval->dest, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
@@ -474,21 +472,21 @@ static void php_converter_do_get_type(php_converter_object *objval, UConverter *
 /* }}} */
 
 /* {{{ */
-PHP_METHOD(UConverter, getSourceType) {
+U_CFUNC PHP_METHOD(UConverter, getSourceType) {
 	php_converter_object *objval = CONV_GET(ZEND_THIS);
 	php_converter_do_get_type(objval, objval->src, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
 /* {{{ */
-PHP_METHOD(UConverter, getDestinationType) {
+U_CFUNC PHP_METHOD(UConverter, getDestinationType) {
 	php_converter_object *objval = CONV_GET(ZEND_THIS);
 	php_converter_do_get_type(objval, objval->dest, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
 /* {{{ */
-PHP_METHOD(UConverter, __construct) {
+U_CFUNC PHP_METHOD(UConverter, __construct) {
 	php_converter_object *objval = CONV_GET(ZEND_THIS);
 	char *src = "utf-8";
 	size_t src_len = sizeof("utf-8") - 1;
@@ -522,7 +520,7 @@ cleanup:
 /* }}} */
 
 /* {{{ */
-PHP_METHOD(UConverter, setSubstChars) {
+U_CFUNC PHP_METHOD(UConverter, setSubstChars) {
 	php_converter_object *objval = CONV_GET(ZEND_THIS);
 	char *chars;
 	size_t chars_len;
@@ -563,7 +561,7 @@ PHP_METHOD(UConverter, setSubstChars) {
 /* }}} */
 
 /* {{{ */
-PHP_METHOD(UConverter, getSubstChars) {
+U_CFUNC PHP_METHOD(UConverter, getSubstChars) {
 	php_converter_object *objval = CONV_GET(ZEND_THIS);
 	char chars[127];
 	int8_t chars_len = sizeof(chars);
@@ -659,7 +657,7 @@ static void php_converter_set_subst_chars(UConverter *cnv, const zend_string *su
 
 /* {{{ */
 #define UCNV_REASON_CASE(v) case (UCNV_ ## v) : RETURN_STRINGL( "REASON_" #v , sizeof( "REASON_" #v ) - 1);
-PHP_METHOD(UConverter, reasonText) {
+U_CFUNC PHP_METHOD(UConverter, reasonText) {
 	zend_long reason;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -682,7 +680,7 @@ PHP_METHOD(UConverter, reasonText) {
 /* }}} */
 
 /* {{{ */
-PHP_METHOD(UConverter, convert) {
+U_CFUNC PHP_METHOD(UConverter, convert) {
 	php_converter_object *objval = CONV_GET(ZEND_THIS);
 	char *str;
 	size_t str_len;
@@ -709,7 +707,7 @@ PHP_METHOD(UConverter, convert) {
 /* }}} */
 
 /* {{{ */
-PHP_METHOD(UConverter, transcode) {
+U_CFUNC PHP_METHOD(UConverter, transcode) {
 	char *str, *src, *dest;
 	size_t str_len, src_len, dest_len;
 	zval *options = nullptr;
@@ -769,7 +767,7 @@ PHP_METHOD(UConverter, transcode) {
 /* }}} */
 
 /* {{{ */
-PHP_METHOD(UConverter, getErrorCode) {
+U_CFUNC PHP_METHOD(UConverter, getErrorCode) {
 	php_converter_object *objval = CONV_GET(ZEND_THIS);
 
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -779,7 +777,7 @@ PHP_METHOD(UConverter, getErrorCode) {
 /* }}} */
 
 /* {{{ */
-PHP_METHOD(UConverter, getErrorMessage) {
+U_CFUNC PHP_METHOD(UConverter, getErrorMessage) {
 	php_converter_object *objval = CONV_GET(ZEND_THIS);
 
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -794,7 +792,7 @@ PHP_METHOD(UConverter, getErrorMessage) {
 /* }}} */
 
 /* {{{ */
-PHP_METHOD(UConverter, getAvailable) {
+U_CFUNC PHP_METHOD(UConverter, getAvailable) {
 	int32_t i,
 			count = ucnv_countAvailable();
 
@@ -812,7 +810,7 @@ PHP_METHOD(UConverter, getAvailable) {
 /* }}} */
 
 /* {{{ */
-PHP_METHOD(UConverter, getAliases) {
+U_CFUNC PHP_METHOD(UConverter, getAliases) {
 	char *name;
 	size_t name_len;
 	UErrorCode error = U_ZERO_ERROR;
@@ -847,7 +845,7 @@ PHP_METHOD(UConverter, getAliases) {
 /* }}} */
 
 /* {{{ */
-PHP_METHOD(UConverter, getStandards) {
+U_CFUNC PHP_METHOD(UConverter, getStandards) {
 	uint16_t i, count;
 
 	ZEND_PARSE_PARAMETERS_NONE();

@@ -5,6 +5,7 @@
 #include "zend_attributes.h"
 #include "zend_constants.h"
 #include "zend_enum.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_dom_import_simplexml, 0, 1, DOMAttr|DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -3629,3 +3630,5 @@ static zend_class_entry *register_class_Dom_XPath(void)
 	return class_entry;
 }
 #endif
+
+END_EXTERN_C()

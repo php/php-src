@@ -2,6 +2,7 @@
  * Stub hash: cbe3c5f4c35d93f90c3e7164bdfc4e2fefc88c83 */
 
 #include "zend_constants.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
@@ -249,3 +250,5 @@ static zend_class_entry *register_class_Collator(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

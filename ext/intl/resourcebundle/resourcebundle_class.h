@@ -18,14 +18,10 @@
 #include <unicode/ures.h>
 
 #include <zend.h>
-#ifdef __cplusplus
-extern "C" {
-#endif
+
 #include "php.h"
 #include "intl_error.h"
-#ifdef __cplusplus
-}
-#endif
+
 
 typedef struct {
 	intl_error      error;

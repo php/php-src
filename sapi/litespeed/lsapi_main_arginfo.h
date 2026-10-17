@@ -1,5 +1,6 @@
 /* This is a generated file, edit lsapi_main.stub.php instead.
  * Stub hash: 3419f4e77bd091e09e0cfc55d81f443d5a3396ff */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_litespeed_request_headers, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -33,3 +34,5 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(litespeed_finish_request, arginfo_litespeed_finish_request)
 	ZEND_FE_END
 };
+
+END_EXTERN_C()

@@ -15,11 +15,9 @@
 
 #include "collator.h"
 #include "collator_class.h"
-extern "C" {
 #include "php_intl.h"
 #include "intl_error.h"
 #include "collator_arginfo.h"
-}
 #include "collator_sort.h"
 #include "collator_convert.h"
 

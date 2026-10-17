@@ -15,12 +15,10 @@
 #include <unicode/rbbi.h>
 #include <memory>
 
-extern "C" {
 #define USE_BREAKITERATOR_POINTER 1
 #include "breakiterator_class.h"
 #include <zend_exceptions.h>
 #include <limits.h>
-}
 
 #include "../intl_convertcpp.h"
 #include "../intl_common.h"

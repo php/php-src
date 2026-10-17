@@ -2,6 +2,7 @@
  * Stub hash: dc2b1de9f4d91162f0e9ab236272f79019c5b5ab */
 
 #include "zend_attributes.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Attribute___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "Attribute::TARGET_ALL")
@@ -293,3 +294,5 @@ static zend_class_entry *register_class_DelayedTargetValidation(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

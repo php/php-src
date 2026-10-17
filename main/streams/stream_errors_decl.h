@@ -3,6 +3,7 @@
 
 #ifndef ZEND_STREAM_ERRORS_DECL_d3087b608996f81bf0dd19c25792feec9744e768_H
 #define ZEND_STREAM_ERRORS_DECL_d3087b608996f81bf0dd19c25792feec9744e768_H
+BEGIN_EXTERN_C()
 
 typedef enum zend_enum_StreamErrorCode {
 	ZEND_ENUM_StreamErrorCode_None = 1,
@@ -184,4 +185,5 @@ typedef enum zend_enum_StreamErrorStore {
 	ZEND_ENUM_StreamErrorStore_All = 5,
 } zend_enum_StreamErrorStore;
 
+END_EXTERN_C()
 #endif /* ZEND_STREAM_ERRORS_DECL_d3087b608996f81bf0dd19c25792feec9744e768_H */

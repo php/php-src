@@ -1,5 +1,6 @@
 /* This is a generated file, edit php_xmlreader.stub.php instead.
  * Stub hash: 11cf6e4c523d9ebbe2775d5bd127be303402336f */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XMLReader_close, 0, 0, IS_TRUE, 0)
 ZEND_END_ARG_INFO()
@@ -392,3 +393,5 @@ static zend_class_entry *register_class_XMLReader(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

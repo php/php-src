@@ -1,5 +1,6 @@
 /* This is a generated file, edit bcmath.stub.php instead.
  * Stub hash: 687d6fb392a9b0c1329152cc0f62341a73e427f4 */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcadd, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, num1, IS_STRING, 0)
@@ -214,3 +215,5 @@ static zend_class_entry *register_class_BcMath_Number(zend_class_entry *class_en
 
 	return class_entry;
 }
+
+END_EXTERN_C()

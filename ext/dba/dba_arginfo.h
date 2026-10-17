@@ -4,6 +4,7 @@
 #if defined(DBA_LMDB)
 #include "zend_constants.h"
 #endif
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_dba_popen, 0, 2, Dba\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
@@ -116,3 +117,5 @@ static zend_class_entry *register_class_Dba_Connection(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

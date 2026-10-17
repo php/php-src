@@ -21,13 +21,11 @@
 #include <unicode/unistr.h>
 #endif
 
-extern "C" {
 #include "php_intl.h"
 #include <unicode/unorm2.h>
 #include "normalizer.h"
 #include "normalizer_class.h"
 #include "intl_convert.h"
-}
 #include <unicode/utf8.h>
 
 

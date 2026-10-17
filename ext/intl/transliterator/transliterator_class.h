@@ -17,14 +17,8 @@
 
 #include <php.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 #include "intl_common.h"
 #include "intl_error.h"
-#ifdef __cplusplus
-}
-#endif
 
 #include <unicode/utrans.h>
 
