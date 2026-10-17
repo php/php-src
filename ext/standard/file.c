@@ -845,6 +845,11 @@ PHP_FUNCTION(pclose)
 
 	PHP_STREAM_FROM_ZVAL(stream, res);
 
+	if ((stream->flags & PHP_STREAM_FLAG_NO_FCLOSE) != 0) {
+		php_error_docref(NULL, E_WARNING, ZEND_LONG_FMT " is not a valid stream resource", stream->res->handle);
+		RETURN_LONG(-1);
+	}
+
 	FG(pclose_wait) = 1;
 	zend_list_close(stream->res);
 	FG(pclose_wait) = 0;
