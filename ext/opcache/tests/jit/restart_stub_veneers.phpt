@@ -85,8 +85,9 @@ $ini = '-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.jit=tracing -d op
     . ' -d opcache.jit_max_root_traces=100000 -d opcache.jit_max_side_traces=100000'
     . ' -d opcache.jit_max_exit_counters=65536 -d opcache.validate_timestamps=0'
     . ' -d opcache.file_update_protection=0 -d error_reporting=' . (E_ALL & ~E_DEPRECATED);
-if (file_exists(ini_get('extension_dir') . '/opcache.' . PHP_SHLIB_SUFFIX)) {
-    $ini .= ' -d zend_extension=opcache.' . PHP_SHLIB_SUFFIX;
+$ext = ini_get('extension_dir');
+if (file_exists($ext . DIRECTORY_SEPARATOR . (PHP_OS_FAMILY === 'Windows' ? 'php_opcache.dll' : 'opcache.so'))) {
+    $ini .= ' -d extension_dir=' . $ext . ' -d zend_extension=opcache';
 }
 php_cli_server_start($ini);
 
