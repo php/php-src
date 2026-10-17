@@ -40,24 +40,20 @@ static zend_string *get_known_string_by_property_name(php_uri_property_name prop
 	}
 }
 
-zend_result php_uri_pass_errors_by_ref_and_free(zval *errors_zv, zval *errors)
+ZEND_ATTRIBUTE_NONNULL_ARGS(2) zend_result php_uri_pass_errors_by_ref_and_free(zval *errors_zv, HashTable *errors)
 {
-	ZEND_ASSERT(Z_TYPE_P(errors) == IS_UNDEF || Z_TYPE_P(errors) == IS_ARRAY);
+	zval errors_tmp;
+	ZVAL_ARR(&errors_tmp, errors);
 
-	/* There was no error during parsing */
-	if (Z_ISUNDEF_P(errors)) {
-		return SUCCESS;
-	}
-
-	/* The errors parameter is an array, but the pass-by ref argument stored by
-	 * errors_zv was not passed - the URI implementation either doesn't support
-	 * returning additional error information, or the caller is not interested in it */
+	/* The pass-by ref argument stored by errors_zv was not passed - the URI
+	 * implementation either doesn't support returning additional error information,
+	 * or the caller is not interested in it */
 	if (errors_zv == NULL) {
-		zval_ptr_dtor(errors);
+		zval_ptr_dtor(&errors_tmp);
 		return SUCCESS;
 	}
 
-	ZEND_TRY_ASSIGN_REF_TMP(errors_zv, errors);
+	ZEND_TRY_ASSIGN_REF_TMP(errors_zv, &errors_tmp);
 	if (EG(exception)) {
 		return FAILURE;
 	}
