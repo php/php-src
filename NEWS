@@ -77,6 +77,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23962 (Destroying a persistent PDO instance rolls back a
     transaction still in use by another instance). (Lazizbek Ergashev)
 
+- PDO_PGSQL:
+  . Improved performance of the SQL parser that handles placeholders.
+    (brainexe)
+
 - PGSQL:
   . Fixed pg_lo_write() rejecting data containing null bytes. (Ilia Alshanetsky)
 

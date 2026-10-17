@@ -134,3 +134,7 @@ PHP 8.7 UPGRADE NOTES
 
 - MBString:
   . Improved performance of mb_strlen for UTF-8 strings.
+
+- PDO_PGSQL:
+  . Improved performance of the SQL parser that handles placeholders in
+    PDO::prepare() and, with emulated prepares, PDOStatement::execute().
