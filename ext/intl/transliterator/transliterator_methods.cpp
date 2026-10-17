@@ -222,6 +222,42 @@ U_CFUNC PHP_FUNCTION( transliterator_create_inverse )
 }
 /* }}} */
 
+/* {{{ Export the rules used to recreate a transliterator. */
+U_CFUNC PHP_FUNCTION( transliterator_to_rules )
+{
+	bool escape_unprintable = false;
+	TRANSLITERATOR_METHOD_INIT_VARS;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|b",
+			&object, Transliterator_ce_ptr, &escape_unprintable) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	TRANSLITERATOR_METHOD_FETCH_OBJECT;
+
+	int32_t rules_len = utrans_toRules(to->utrans, escape_unprintable, nullptr, 0,
+		TRANSLITERATOR_ERROR_CODE_P(to));
+	if (TRANSLITERATOR_ERROR_CODE(to) == U_BUFFER_OVERFLOW_ERROR) {
+		TRANSLITERATOR_ERROR_CODE(to) = U_ZERO_ERROR;
+	}
+	INTL_METHOD_CHECK_STATUS(to, "Failed to export transliterator rules");
+
+	int32_t capacity = rules_len < INT32_MAX ? rules_len + 1 : rules_len;
+	UChar *rules = reinterpret_cast<UChar *>(safe_emalloc(capacity, sizeof(UChar), 0));
+	rules_len = utrans_toRules(to->utrans, escape_unprintable, rules, capacity,
+		TRANSLITERATOR_ERROR_CODE_P(to));
+	if (U_FAILURE(TRANSLITERATOR_ERROR_CODE(to))) {
+		efree(rules);
+		INTL_METHOD_CHECK_STATUS(to, "Failed to export transliterator rules");
+	}
+	if (TRANSLITERATOR_ERROR_CODE(to) == U_STRING_NOT_TERMINATED_WARNING) {
+		TRANSLITERATOR_ERROR_CODE(to) = U_ZERO_ERROR;
+	}
+
+	INTL_METHOD_RETVAL_UTF8(to, rules, rules_len, 1);
+}
+/* }}} */
+
 /* {{{ Return an array with the registered transliterator IDs. */
 PHP_INTL_FUNCTION_WITH_ERROR_RESET(transliterator_list_ids)
 {

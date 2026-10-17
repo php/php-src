@@ -85,6 +85,11 @@ PHP 8.7 UPGRADE NOTES
 6. New Functions
 ========================================
 
+- Intl:
+  . Added Transliterator::toRules() and transliterator_to_rules() to export
+    rules that can be used to recreate a transliterator. The optional
+    $escapeUnprintable argument escapes unprintable characters when true.
+
 ========================================
 7. New Classes and Interfaces
 ========================================

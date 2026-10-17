@@ -1,5 +1,5 @@
 /* This is a generated file, edit transliterator.stub.php instead.
- * Stub hash: 300bcc64e5ddaf469bfe4a12e65a6677bf2aea88 */
+ * Stub hash: 54eab5ebc2589b5f0a22998979c7409da1a9bfb1 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Transliterator___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -15,6 +15,10 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_Transliterator_cr
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_Transliterator_createInverse, 0, 0, Transliterator, 1)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_Transliterator_toRules, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, escapeUnprintable, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_Transliterator_listIDs, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
@@ -36,6 +40,7 @@ ZEND_METHOD(Transliterator, __construct);
 ZEND_FUNCTION(transliterator_create);
 ZEND_FUNCTION(transliterator_create_from_rules);
 ZEND_FUNCTION(transliterator_create_inverse);
+ZEND_FUNCTION(transliterator_to_rules);
 ZEND_FUNCTION(transliterator_list_ids);
 ZEND_FUNCTION(transliterator_transliterate);
 ZEND_FUNCTION(transliterator_get_error_code);
@@ -46,6 +51,7 @@ static const zend_function_entry class_Transliterator_methods[] = {
 	ZEND_RAW_FENTRY("create", zif_transliterator_create, arginfo_class_Transliterator_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_RAW_FENTRY("createFromRules", zif_transliterator_create_from_rules, arginfo_class_Transliterator_createFromRules, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_RAW_FENTRY("createInverse", zif_transliterator_create_inverse, arginfo_class_Transliterator_createInverse, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("toRules", zif_transliterator_to_rules, arginfo_class_Transliterator_toRules, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("listIDs", zif_transliterator_list_ids, arginfo_class_Transliterator_listIDs, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_RAW_FENTRY("transliterate", zif_transliterator_transliterate, arginfo_class_Transliterator_transliterate, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getErrorCode", zif_transliterator_get_error_code, arginfo_class_Transliterator_getErrorCode, ZEND_ACC_PUBLIC, NULL, NULL)
