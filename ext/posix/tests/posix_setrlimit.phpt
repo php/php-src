@@ -32,5 +32,5 @@ try {
 --EXPECT--
 bool(true)
 ValueError: posix_setrlimit(): Argument #2 ($soft_limit) must be lower or equal to 128
-ValueError: posix_setrlimit(): Argument #2 ($soft_limit) must be greater or equal to -1
-ValueError: posix_setrlimit(): Argument #3 ($hard_limit) must be greater or equal to -1
+ValueError: posix_setrlimit(): Argument #2 ($soft_limit) must be greater than or equal to -1, or POSIX_RLIMIT_INFINITY
+ValueError: posix_setrlimit(): Argument #3 ($hard_limit) must be greater than or equal to -1, or POSIX_RLIMIT_INFINITY
