@@ -37,6 +37,7 @@ typedef struct work_list_item {
     uintptr_t current_active_namespace;
     xmlNodePtr lxml_parent;
     xmlNsPtr lxml_ns;
+    bool in_template;
 } work_list_item;
 
 static void lexbor_libxml2_bridge_work_list_item_push(
@@ -44,7 +45,8 @@ static void lexbor_libxml2_bridge_work_list_item_push(
     lxb_dom_node_t *node,
     uintptr_t current_active_namespace,
     xmlNodePtr lxml_parent,
-    xmlNsPtr lxml_ns
+    xmlNsPtr lxml_ns,
+    bool in_template
 )
 {
     work_list_item *item = (work_list_item *) lexbor_array_obj_push_wo_cls(array);
@@ -52,6 +54,7 @@ static void lexbor_libxml2_bridge_work_list_item_push(
     item->current_active_namespace = current_active_namespace;
     item->lxml_parent = lxml_parent;
     item->lxml_ns = lxml_ns;
+    item->in_template = in_template;
 }
 
 static unsigned short sanitize_line_nr(size_t line)
@@ -107,6 +110,7 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
     xmlNodePtr root,
     bool compact_text_nodes,
     bool create_default_ns,
+    bool in_template_contents,
     php_dom_private_data *private_data
 )
 {
@@ -122,13 +126,14 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
     lexbor_array_obj_init(&work_list, WORK_LIST_INIT_SIZE, sizeof(work_list_item));
 
     for (lxb_dom_node_t *node = start_node; node != NULL; node = node->prev) {
-        lexbor_libxml2_bridge_work_list_item_push(&work_list, node, LXB_NS__UNDEF, root, NULL);
+        lexbor_libxml2_bridge_work_list_item_push(&work_list, node, LXB_NS__UNDEF, root, NULL, in_template_contents);
     }
 
     work_list_item *current_stack_item;
     while ((current_stack_item = lexbor_array_obj_pop(&work_list)) != NULL) {
         lxb_dom_node_t *node = current_stack_item->node;
         xmlNodePtr lxml_parent = current_stack_item->lxml_parent;
+        bool in_template = current_stack_item->in_template;
 
         /* CDATA section and processing instructions don't occur in parsed HTML documents.
          * The historical types are not emitted by the parser either. */
@@ -171,7 +176,9 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
 			 * Other types of nodes contain their children directly. */
 			xmlNodePtr lxml_child_parent = lxml_element;
 			lxb_dom_node_t *child_node = element->node.last_child;
+			bool child_in_template = in_template;
 			if (lxb_html_tree_node_is(&element->node, LXB_TAG_TEMPLATE)) {
+				child_in_template = true;
 				if (create_default_ns) {
 					lxml_child_parent = xmlNewDocFragment(lxml_doc);
 					if (UNEXPECTED(lxml_child_parent == NULL)) {
@@ -196,7 +203,8 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
                     child_node,
                     entering_namespace,
                     lxml_child_parent,
-                    current_lxml_ns
+                    current_lxml_ns,
+                    child_in_template
                 );
             }
 
@@ -273,7 +281,7 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
 
                 /* xmlIsID does some other stuff too that is irrelevant here. */
                 if (local_name_length == 2 && local_name[0] == 'i' && local_name[1] == 'd' && lxml_attr->ns == NULL) {
-                    if (xmlAddID(NULL, lxml_doc, value, lxml_attr) == 0) {
+                    if (in_template || xmlAddID(NULL, lxml_doc, value, lxml_attr) == 0) {
                         /* If the ID already exists, the ID attribute still needs to be marked as an ID. */
                         lxml_attr->atype = XML_ATTRIBUTE_ID;
                     }
@@ -367,6 +375,7 @@ lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_document(
         (xmlNodePtr) lxml_doc,
         compact_text_nodes,
         create_default_ns,
+        false,
         private_data
     );
     if (status != LEXBOR_LIBXML2_BRIDGE_STATUS_OK) {
@@ -383,6 +392,7 @@ lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_fragment(
     xmlNodePtr *fragment_out,
     bool compact_text_nodes,
     bool create_default_ns,
+    bool in_template_contents,
 	php_dom_private_data *private_data
 )
 {
@@ -396,6 +406,7 @@ lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_fragment(
         fragment,
         compact_text_nodes,
         create_default_ns,
+        in_template_contents,
         private_data
     );
     if (status != LEXBOR_LIBXML2_BRIDGE_STATUS_OK) {
