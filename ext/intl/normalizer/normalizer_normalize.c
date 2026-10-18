@@ -148,7 +148,10 @@ PHP_FUNCTION( normalizer_normalize )
 
 	/* Allocate memory for the destination buffer for normalization */
 	uret_len = uinput_len * expansion_factor;
-	uret_buf = eumalloc( uret_len + 1 );
+	uret_buf = safe_femalloc(uret_len + 1, sizeof(UChar), 0, /* fallible */ true);
+	if (!uret_buf) {
+		RETURN_OOM();
+	}
 
 	/* normalize */
 #if U_ICU_VERSION_MAJOR_NUM < 56
@@ -173,7 +176,11 @@ PHP_FUNCTION( normalizer_normalize )
 		 * uret_buf =  eurealloc(uret_buf, size_needed + 1);
 		 */
 		efree( uret_buf );
-		uret_buf = eumalloc( size_needed + 1 );
+		uret_buf = safe_femalloc(size_needed + 1, sizeof(UChar), 0, /* fallible */ true);
+		if (!uret_buf) {
+			efree(uinput);
+			RETURN_OOM();
+		}
 		uret_len = size_needed;
 
 		status = U_ZERO_ERROR;

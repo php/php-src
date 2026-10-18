@@ -98,7 +98,11 @@ int mbfl_memory_device_output(int c, void *data)
 		}
 
 		size_t newlen = device->length + device->allocsz;
-		device->buffer = erealloc(device->buffer, newlen);
+		unsigned char *newbuffer = safe_ferealloc(device->buffer, 1, newlen, 0, /* fallible */ true);
+		if (!newbuffer) {
+			return -1;
+		}
+		device->buffer = newbuffer;
 		device->length = newlen;
 	}
 
@@ -123,7 +127,11 @@ int mbfl_memory_device_strncat(mbfl_memory_device *device, const char *psrc, siz
 		}
 
 		size_t newlen = device->length + len + MBFL_MEMORY_DEVICE_ALLOC_SIZE;
-		device->buffer = erealloc(device->buffer, newlen);
+		unsigned char *newbuffer = safe_ferealloc(device->buffer, 1, newlen, 0, /* fallible */ true);
+		if (!newbuffer) {
+			return -1;
+		}
+		device->buffer = newbuffer;
 		device->length = newlen;
 	}
 
@@ -175,7 +183,12 @@ int mbfl_wchar_device_output(int c, void *data)
 			return -1;
 		}
 
-		device->buffer = erealloc(device->buffer, newlen * sizeof(int));
+		unsigned int * newbuffer = safe_ferealloc(device->buffer, newlen, sizeof(int), 0, /* fallible */ true);
+		if (!newbuffer) {
+			return -1;
+		}
+
+		device->buffer = newbuffer;
 		device->length = newlen;
 	}
 

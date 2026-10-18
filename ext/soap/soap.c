@@ -1842,7 +1842,10 @@ static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeade
 
 	xmlFreeDoc(doc_return);
 	xmlFree(buf);
-	zend_clear_exception();
+
+	if (!ZEND_HAS_OOM()) {
+		zend_clear_exception();
+	}
 }
 /* }}} */
 
@@ -1874,7 +1877,9 @@ static zend_never_inline ZEND_COLD void soap_real_error_handler(int error_num, z
 	    instanceof_function(Z_OBJCE(SOAP_GLOBAL(error_object)), soap_class_entry)) {
 		bool use_exceptions =
 			Z_TYPE_P(Z_CLIENT_EXCEPTIONS_P(&SOAP_GLOBAL(error_object))) != IS_FALSE;
-		if ((error_num & E_FATAL_ERRORS) && use_exceptions) {
+		if (ZEND_HAS_OOM()) {
+			old_error_handler(error_num, error_filename, error_lineno, message);
+		} else if ((error_num & E_FATAL_ERRORS) && use_exceptions) {
 			zval fault;
 			char *code = SOAP_GLOBAL(error_code);
 			if (code == NULL) {
@@ -3079,7 +3084,12 @@ static void deserialize_parameters(xmlNodePtr params, sdlFunctionPtr function, u
 		    strcmp((char *)params->name, function->functionName) == 0) {
 			num_of_params = 0;
 		} else if (num_of_params > 0) {
-			tmp_parameters = safe_emalloc(num_of_params, sizeof(zval), 0);
+			tmp_parameters = safe_femalloc(num_of_params, sizeof(zval), 0, /* fallible */ true);
+			if (!tmp_parameters) {
+				*parameters = NULL;
+				*num_params = 0;
+				return;
+			}
 
 			trav = params;
 			while (trav != 0 && cur_param < num_of_params) {
@@ -3097,6 +3107,15 @@ static void deserialize_parameters(xmlNodePtr params, sdlFunctionPtr function, u
 					}
 					master_to_zval(&tmp_parameters[cur_param], enc, trav);
 					cur_param++;
+					if (ZEND_HAS_OOM()) {
+						for (int i = 0; i < cur_param; i++) {
+							zval_ptr_dtor(&tmp_parameters[i]);
+						}
+						efree(tmp_parameters);
+						*parameters = NULL;
+						*num_params = 0;
+						return;
+					}
 				}
 				trav = trav->next;
 			}
@@ -3386,6 +3405,10 @@ static sdlFunctionPtr deserialize_function_call(sdlPtr sdl, xmlDocPtr request, c
 					last->next = h;
 				}
 				last = h;
+			}
+			if (ZEND_HAS_OOM()) {
+				encode_finish();
+				return NULL;
 			}
 ignore_header:
 			trav = trav->next;
@@ -4177,7 +4200,7 @@ static xmlNodePtr serialize_zval(zval *val, sdlParamPtr param, const char *param
 	}
 	xmlParam = master_to_xml(enc, val, style, parent);
 	zval_ptr_dtor(&defval);
-	if (xmlParam != NULL) { 
+	if (xmlParam != NULL) {
 		if (xmlParam->name == NULL || strcmp((char*)xmlParam->name, "BOGUS") == 0) {
 			xmlNodeSetName(xmlParam, BAD_CAST(paramName));
 		}

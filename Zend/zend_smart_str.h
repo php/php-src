@@ -24,7 +24,9 @@
 BEGIN_EXTERN_C()
 
 ZEND_API void ZEND_FASTCALL smart_str_erealloc(smart_str *str, size_t len);
+ZEND_API bool ZEND_FASTCALL smart_str_ferealloc(smart_str *str, size_t len, bool fallible);
 ZEND_API void ZEND_FASTCALL smart_str_realloc(smart_str *str, size_t len);
+ZEND_API bool ZEND_FASTCALL smart_str_frealloc(smart_str *str, size_t len, bool fallible);
 ZEND_API void ZEND_FASTCALL smart_str_append_escaped(smart_str *str, const char *s, size_t l);
 /* If zero_fraction is true, then a ".0" will be added to numbers that would not otherwise
  * have a fractional part and look like integers. */
@@ -37,7 +39,7 @@ ZEND_API void ZEND_FASTCALL smart_str_append_scalar(smart_str *str, const zval *
 ZEND_API zend_result ZEND_FASTCALL smart_str_append_zval(smart_str *dest, const zval *value, size_t truncate);
 END_EXTERN_C()
 
-static zend_always_inline size_t smart_str_alloc(smart_str *str, size_t len, bool persistent) {
+static zend_always_inline size_t smart_str_falloc(smart_str *str, size_t len, bool persistent, bool fallible) {
 	if (UNEXPECTED(!str->s)) {
 		goto do_smart_str_realloc;
 	} else {
@@ -45,20 +47,42 @@ static zend_always_inline size_t smart_str_alloc(smart_str *str, size_t len, boo
 		if (UNEXPECTED(len >= str->a)) {
 do_smart_str_realloc:
 			if (persistent) {
-				smart_str_realloc(str, len);
+				bool success = smart_str_frealloc(str, len, fallible);
+				if (ZEND_CONST_COND(fallible, true) && !success) {
+					ZEND_ASSERT(fallible);
+					return (size_t)-1;
+				}
 			} else {
-				smart_str_erealloc(str, len);
+				bool success = smart_str_ferealloc(str, len, fallible);
+				if (ZEND_CONST_COND(fallible, true) && !success) {
+					ZEND_ASSERT(fallible);
+					return (size_t)-1;
+				}
 			}
 		}
 	}
 	return len;
 }
 
-static zend_always_inline char* smart_str_extend_ex(smart_str *dest, size_t len, bool persistent) {
-	size_t new_len = smart_str_alloc(dest, len, persistent);
+static zend_always_inline size_t smart_str_alloc(smart_str *str, size_t len, bool persistent) {
+	size_t result = smart_str_falloc(str, len, persistent, /* fallible */ false);
+	ZEND_ASSERT(result != (size_t)-1);
+	return result;
+}
+
+static zend_always_inline char* smart_str_fextend_ex(smart_str *dest, size_t len, bool persistent, bool fallible) {
+	size_t new_len = smart_str_falloc(dest, len, persistent, fallible);
+	if (ZEND_CONST_COND(fallible, true) && new_len == (size_t)-1) {
+		return NULL;
+	}
+	ZEND_ASSERT(new_len != (size_t)-1);
 	char *ret = ZSTR_VAL(dest->s) + ZSTR_LEN(dest->s);
 	ZSTR_LEN(dest->s) = new_len;
 	return ret;
+}
+
+static zend_always_inline char* smart_str_extend_ex(smart_str *dest, size_t len, bool persistent) {
+	return smart_str_fextend_ex(dest, len, persistent, /* fallible */ false);
 }
 
 static zend_always_inline char* smart_str_extend(smart_str *dest, size_t length)
@@ -126,10 +150,19 @@ static zend_always_inline void smart_str_appendc_ex(smart_str *dest, char ch, bo
 	ZSTR_LEN(dest->s) = new_len;
 }
 
-static zend_always_inline void smart_str_appendl_ex(smart_str *dest, const char *str, size_t len, bool persistent) {
-	size_t new_len = smart_str_alloc(dest, len, persistent);
+static zend_always_inline bool smart_str_fappendl_ex(smart_str *dest, const char *str, size_t len, bool persistent, bool fallible) {
+	size_t new_len = smart_str_falloc(dest, len, persistent, fallible);
+	if (ZEND_CONST_COND(fallible, true) && new_len == (size_t)-1) {
+		return false;
+	}
+	ZEND_ASSERT(new_len != (size_t)-1);
 	memcpy(ZSTR_VAL(dest->s) + ZSTR_LEN(dest->s), str, len);
 	ZSTR_LEN(dest->s) = new_len;
+	return true;
+}
+
+static zend_always_inline void smart_str_appendl_ex(smart_str *dest, const char *str, size_t len, bool persistent) {
+	smart_str_fappendl_ex(dest, str, len, persistent, /* fallible */ false);
 }
 
 static zend_always_inline void smart_str_append_ex(smart_str *dest, const zend_string *src, bool persistent) {

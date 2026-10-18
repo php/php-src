@@ -1287,7 +1287,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_RETV
 	fbc->internal_function.handler(call, ret);
 
 #if ZEND_DEBUG
-	if (!EG(exception) && call->func) {
+	if (!EG(exception) && !ZEND_HAS_OOM() && call->func) {
 		if (should_throw) {
 			zend_internal_call_arginfo_violation(call->func);
 		}
@@ -1351,7 +1351,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_RETV
 	fbc->internal_function.handler(call, ret);
 
 #if ZEND_DEBUG
-	if (!EG(exception) && call->func) {
+	if (!EG(exception) && !ZEND_HAS_OOM() && call->func) {
 		if (should_throw) {
 			zend_internal_call_arginfo_violation(call->func);
 		}
@@ -1416,7 +1416,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_OBS
 	fbc->internal_function.handler(call, ret);
 
 #if ZEND_DEBUG
-	if (!EG(exception) && call->func) {
+	if (!EG(exception) && !ZEND_HAS_OOM() && call->func) {
 		if (should_throw) {
 			zend_internal_call_arginfo_violation(call->func);
 		}
@@ -1584,7 +1584,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 		fbc->internal_function.handler(call, ret);
 
 #if ZEND_DEBUG
-		if (!EG(exception) && call->func) {
+		if (!EG(exception) && !ZEND_HAS_OOM() && call->func) {
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
@@ -1686,7 +1686,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 		fbc->internal_function.handler(call, ret);
 
 #if ZEND_DEBUG
-		if (!EG(exception) && call->func) {
+		if (!EG(exception) && !ZEND_HAS_OOM() && call->func) {
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
@@ -1790,7 +1790,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_
 		fbc->internal_function.handler(call, ret);
 
 #if ZEND_DEBUG
-		if (!EG(exception) && call->func) {
+		if (!EG(exception) && !ZEND_HAS_OOM() && call->func) {
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
@@ -1910,7 +1910,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 		}
 
 #if ZEND_DEBUG
-		if (!EG(exception) && call->func && !(call->func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE)) {
+		if (!EG(exception) && !ZEND_HAS_OOM() && call->func && !(call->func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE)) {
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
@@ -2028,7 +2028,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 		}
 
 #if ZEND_DEBUG
-		if (!EG(exception) && call->func && !(call->func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE)) {
+		if (!EG(exception) && !ZEND_HAS_OOM() && call->func && !(call->func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE)) {
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
@@ -2147,7 +2147,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_OBS
 		}
 
 #if ZEND_DEBUG
-		if (!EG(exception) && call->func && !(call->func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE)) {
+		if (!EG(exception) && !ZEND_HAS_OOM() && call->func && !(call->func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE)) {
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
@@ -3253,9 +3253,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(
 {
 	const zend_op *throw_op = EG(opline_before_exception);
 
-	/* Exception was thrown before executing any op */
+	/* Exception was thrown before executing any op, or between two ops (see
+	 * zend_handle_delayed_oom()). */
 	if (UNEXPECTED(!throw_op)) {
-		ZEND_VM_TAIL_CALL(zend_dispatch_try_catch_finally_helper_SPEC(-1, 0 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+		free_unfinished_calls(execute_data);
+		ZEND_VM_TAIL_CALL(zend_dispatch_try_catch_finally_helper_SPEC(-1, -1 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	}
 
 	uint32_t throw_op_num = throw_op - EX(func)->op_array.opcodes;
@@ -3525,7 +3527,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CALL_TRAMPOLINE_SPEC_HANDLER(Z
 		}
 
 #if ZEND_DEBUG
-		if (!EG(exception) && call->func) {
+		if (!EG(exception) && !ZEND_HAS_OOM() && call->func) {
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
@@ -3668,7 +3670,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CALL_TRAMPOLINE_SPEC_OBSERVER_
 		}
 
 #if ZEND_DEBUG
-		if (!EG(exception) && call->func) {
+		if (!EG(exception) && !ZEND_HAS_OOM() && call->func) {
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
@@ -3745,6 +3747,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_2_SPEC_HANDLER
 		ZVAL_UNDEF(EX_VAR(opline->op1.var));
 	}
 	FREE_OP(opline->op2_type, opline->op2.var);
+	ZEND_VM_FCALL_INTERRUPT_CHECK(execute_data);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -3779,6 +3782,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_2_SPEC_OBSERVE
 		ZVAL_UNDEF(EX_VAR(opline->op1.var));
 	}
 	FREE_OP(opline->op2_type, opline->op2.var);
+	ZEND_VM_FCALL_INTERRUPT_CHECK(execute_data);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -3819,6 +3823,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_3_SPEC_HANDLER
 		ZVAL_UNDEF(EX_VAR(opline->op2.var));
 	}
 	FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
+	ZEND_VM_FCALL_INTERRUPT_CHECK(execute_data);
 	ZEND_VM_NEXT_OPCODE_EX(1, 2);
 }
 
@@ -3859,6 +3864,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_3_SPEC_OBSERVE
 		ZVAL_UNDEF(EX_VAR(opline->op2.var));
 	}
 	FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
+	ZEND_VM_FCALL_INTERRUPT_CHECK(execute_data);
 	ZEND_VM_NEXT_OPCODE_EX(1, 2);
 }
 
@@ -3876,6 +3882,9 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_interrupt_he
 	SAVE_OPLINE();
 	if (zend_atomic_bool_load_ex(&EG(timed_out))) {
 		zend_timeout();
+	} else if (ZEND_HAS_OOM()) {
+		zend_handle_delayed_oom();
+		HANDLE_EXCEPTION();
 	} else if (zend_interrupt_function) {
 		zend_interrupt_function(execute_data);
 		if (EG(exception)) {
@@ -4274,6 +4283,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_1_SPEC_UNUSED_
 		function(result, arg1);
 	}
 	FREE_OP(opline->op1_type, opline->op1.var);
+	ZEND_VM_FCALL_INTERRUPT_CHECK(execute_data);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -4300,6 +4310,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_1_SPEC_OBSERVE
 		function(result, arg1);
 	}
 	FREE_OP(opline->op1_type, opline->op1.var);
+	ZEND_VM_FCALL_INTERRUPT_CHECK(execute_data);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -20659,6 +20670,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_END_SPEC_TMP_CONST_HANDLE
 	zval *var, *ret;
 	uint32_t i;
 
+	SAVE_OPLINE();
 	rope = (zend_string**)EX_VAR(opline->op1.var);
 	if (IS_CONST == IS_CONST) {
 		var = RT_CONSTANT(opline, opline->op2);
@@ -21137,6 +21149,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_END_SPEC_TMP_TMPVAR_HANDL
 	zval *var, *ret;
 	uint32_t i;
 
+	SAVE_OPLINE();
 	rope = (zend_string**)EX_VAR(opline->op1.var);
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 		var = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
@@ -21999,6 +22012,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_END_SPEC_TMP_CV_HANDLER(Z
 	zval *var, *ret;
 	uint32_t i;
 
+	SAVE_OPLINE();
 	rope = (zend_string**)EX_VAR(opline->op1.var);
 	if (IS_CV == IS_CONST) {
 		var = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
@@ -38407,6 +38421,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_0_SPEC_UNUSED_
 		zend_frameless_function_0 function = (zend_frameless_function_0)ZEND_FLF_HANDLER(opline);
 		function(EX_VAR(opline->result.var));
 	}
+	ZEND_VM_FCALL_INTERRUPT_CHECK(execute_data);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -38427,6 +38442,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_0_SPEC_OBSERVE
 		zend_frameless_function_0 function = (zend_frameless_function_0)ZEND_FLF_HANDLER(opline);
 		function(EX_VAR(opline->result.var));
 	}
+	ZEND_VM_FCALL_INTERRUPT_CHECK(execute_data);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 

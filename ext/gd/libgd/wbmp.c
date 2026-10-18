@@ -196,7 +196,7 @@ readwbmp (int (*getin) (void *in), void *in, Wbmp ** return_wbmp)
       return (-1);
     }
 
-  if ((wbmp->bitmap = (int *) safe_emalloc((size_t)wbmp->width * wbmp->height, sizeof(int), 0)) == NULL)
+  if ((wbmp->bitmap = (int *) safe_femalloc((size_t)wbmp->width * wbmp->height, sizeof(int), 0, /* fallible */ 1)) == NULL)
     {
       gdFree (wbmp);
       return (-1);

@@ -642,7 +642,10 @@ static zend_string* php_converter_do_convert(UConverter *dest_cnv,
 		THROW_UFAILURE(objval, "ucnv_toUChars", error);
 		return NULL;
 	}
-	temp = safe_emalloc(sizeof(UChar), temp_len, sizeof(UChar));
+	temp = safe_femalloc(sizeof(UChar), temp_len, sizeof(UChar), /* fallible */ true);
+	if (!temp) {
+		return NULL;
+	}
 
 	/* Convert to intermediate UChar* array */
 	error = U_ZERO_ERROR;
@@ -662,7 +665,11 @@ static zend_string* php_converter_do_convert(UConverter *dest_cnv,
 		return NULL;
 	}
 
-	ret = zend_string_alloc(ret_len, 0);
+	ret = zend_string_falloc(ret_len, /* persistent */ false, /* fallible */ true);
+	if (!ret) {
+		efree(temp);
+		return NULL;
+	}
 
 	/* Convert to final encoding */
 	error = U_ZERO_ERROR;

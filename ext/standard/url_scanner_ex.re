@@ -683,6 +683,13 @@ static void php_url_scanner_ex_deactivate(bool is_session)
 	smart_str_free(&ctx->attr_val);
 }
 
+void php_url_scanner_early_rinit(void)
+{
+	/* See php_basic_early_rinit() */
+	php_url_scanner_ex_activate(1);
+	php_url_scanner_ex_activate(0);
+}
+
 static inline void php_url_scanner_session_handler_impl(char *output, size_t output_len, char **handled_output, size_t *handled_output_len, int mode, bool is_session)
 {
 	size_t len;
