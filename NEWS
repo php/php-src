@@ -85,6 +85,8 @@ PHP                                                                        NEWS
     zend_jit_assign_dim_op()). (waroad)
   . Fixed bug GH-24398 (JIT: minimal JIT segfault when a hooked property is
     passed to a run-time-resolved function). (waroad)
+  . Fixed bug GH-24389 (Tracing JIT: type guard on entry of an inlined call
+    exits with an uninitialized opline). (waroad)
 
 - PDO:
   . Fixed invalid ATTR_ORACLE_NULLS values being accepted and truncated.
