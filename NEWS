@@ -38,6 +38,8 @@ PHP                                                                        NEWS
     DOMDocument::adoptNode()). (David Carlier)
   . Fixed bug GH-24260 (querySelectorAll() returns duplicate elements for
     selector lists). (fivefilters)
+  . Fixed bug GH-23334 (Use-after-free in php_dom_free_templated_content()).
+    (David Carlier, ndossche)
 
 - FPM:
   . Fixed bug GH-24229 (fcgi_close() passes shutdown() a literal 1, which is
