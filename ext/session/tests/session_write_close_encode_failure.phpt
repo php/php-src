@@ -3,7 +3,12 @@ session_write_close() closes the save handler when encoding the session data fai
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php
+include('skipif.inc');
+if (PHP_OS_FAMILY === "Solaris") {
+    die("skip flock() is emulated with per-process fcntl() locks on Solaris");
+}
+?>
 --INI--
 session.use_cookies=0
 session.cache_limiter=
