@@ -2,8 +2,6 @@
 spoofchecker suspicious character checker
 --EXTENSIONS--
 intl
---SKIPIF--
-<?php if(!class_exists("Spoofchecker")) print 'skip'; ?>
 --FILE--
 <?php
 

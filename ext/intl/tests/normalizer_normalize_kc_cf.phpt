@@ -2,8 +2,6 @@
 normalize() NFKC_Casefold
 --EXTENSIONS--
 intl
---SKIPIF--
-<?php if (!defined('Normalizer::FORM_KC_CF')) print 'skip Normalizer::FORM_KC_CF constant not defined'; ?>
 --FILE--
 <?php
 

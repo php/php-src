@@ -2,11 +2,6 @@
 IDN UTS #46 API error tests
 --EXTENSIONS--
 intl
---SKIPIF--
-<?php
-    if (!defined('INTL_IDNA_VARIANT_UTS46'))
-        die('skip no UTS #46 API');
-?>
 --FILE--
 <?php
 echo "=> PHP level errors", "\n";

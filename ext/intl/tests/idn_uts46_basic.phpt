@@ -2,11 +2,6 @@
 IDN UTS #46 API basic tests
 --EXTENSIONS--
 intl
---SKIPIF--
-<?php
-    if (!defined('INTL_IDNA_VARIANT_UTS46'))
-        die('skip no UTS #46 API');
-?>
 --FILE--
 <?php
 $utf8dn = "www.fußball.com";
