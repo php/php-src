@@ -501,6 +501,18 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 }
 /* }}} */
 
+/* Called from php_request_startup(), before any request data is processed. */
+PHPAPI void php_basic_early_rinit(void)
+{
+	/* The session upload progress handler (un)serializes the session and
+	 * registers the session id with the URL rewriter from
+	 * php_hash_environment(), before RINIT. */
+	BG(serialize_lock) = 0;
+	memset(&BG(serialize), 0, sizeof(BG(serialize)));
+	memset(&BG(unserialize), 0, sizeof(BG(unserialize)));
+	php_url_scanner_early_rinit();
+}
+
 PHP_MINFO_FUNCTION(basic) /* {{{ */
 {
 	php_info_print_table_start();

@@ -76,6 +76,7 @@
 #define TIMELIB_RELATIVE       310
 
 #define TIMELIB_ERROR          999
+#define TIMELIB_MAX_ERRORS     1000
 
 /* Some compilers like AIX, defines uchar in sys/types.h */
 #undef uchar
@@ -363,6 +364,10 @@ static timelib_error_message *alloc_error_message(timelib_error_message **messag
 
 static void add_warning(Scanner *s, int error_code, const char *error)
 {
+	if (s->errors->warning_count >= TIMELIB_MAX_ERRORS) {
+		return;
+	}
+
 	timelib_error_message *message = alloc_error_message(&s->errors->warning_messages, &s->errors->warning_count);
 
 	message->error_code = error_code;
@@ -373,6 +378,10 @@ static void add_warning(Scanner *s, int error_code, const char *error)
 
 static void add_error(Scanner *s, int error_code, const char *error)
 {
+	if (s->errors->error_count >= TIMELIB_MAX_ERRORS) {
+		return;
+	}
+
 	timelib_error_message *message = alloc_error_message(&s->errors->error_messages, &s->errors->error_count);
 
 	message->error_code = error_code;
@@ -383,6 +392,10 @@ static void add_error(Scanner *s, int error_code, const char *error)
 
 static void add_pbf_warning(Scanner *s, int error_code, const char *error, const char *sptr, const char *cptr)
 {
+	if (s->errors->warning_count >= TIMELIB_MAX_ERRORS) {
+		return;
+	}
+
 	timelib_error_message *message = alloc_error_message(&s->errors->warning_messages, &s->errors->warning_count);
 
 	message->error_code = error_code;
@@ -393,6 +406,10 @@ static void add_pbf_warning(Scanner *s, int error_code, const char *error, const
 
 static void add_pbf_error(Scanner *s, int error_code, const char *error, const char *sptr, const char *cptr)
 {
+	if (s->errors->error_count >= TIMELIB_MAX_ERRORS) {
+		return;
+	}
+
 	timelib_error_message *message = alloc_error_message(&s->errors->error_messages, &s->errors->error_count);
 
 	message->error_code = error_code;

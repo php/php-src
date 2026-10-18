@@ -186,7 +186,11 @@ gdImagePtr gdImageCreate (int sx, int sy)
 	im = (gdImage *) gdCalloc(1, sizeof(gdImage));
 
 	/* Row-major ever since gd 1.3 */
-	im->pixels = (unsigned char **) gdMalloc(sizeof(unsigned char *) * sy);
+	im->pixels = (unsigned char **) gdFMalloc(sizeof(unsigned char *) * sy);
+	if (im->pixels == NULL) {
+		gdFree(im);
+		return NULL;
+	}
 	im->polyInts = 0;
 	im->polyAllocated = 0;
 	im->brush = 0;
@@ -194,7 +198,15 @@ gdImagePtr gdImageCreate (int sx, int sy)
 	im->style = 0;
 	for (i = 0; i < sy; i++) {
 		/* Row-major ever since gd 1.3 */
-		im->pixels[i] = (unsigned char *) gdCalloc(sx, sizeof(unsigned char));
+		im->pixels[i] = (unsigned char *) gdFCalloc(sx, sizeof(unsigned char));
+		if (im->pixels[i] == NULL) {
+			while (i > 0) {
+				gdFree(im->pixels[--i]);
+			}
+			gdFree(im->pixels);
+			gdFree(im);
+			return NULL;
+		}
 	}
 	im->sx = sx;
 	im->sy = sy;
@@ -239,14 +251,26 @@ gdImagePtr gdImageCreateTrueColor (int sx, int sy)
 
 	im = (gdImage *) gdMalloc(sizeof(gdImage));
 	memset(im, 0, sizeof(gdImage));
-	im->tpixels = (int **) gdMalloc(sizeof(int *) * sy);
+	im->tpixels = (int **) gdFMalloc(sizeof(int *) * sy);
+	if (im->tpixels == NULL) {
+		gdFree(im);
+		return NULL;
+	}
 	im->polyInts = 0;
 	im->polyAllocated = 0;
 	im->brush = 0;
 	im->tile = 0;
 	im->style = 0;
 	for (i = 0; i < sy; i++) {
-		im->tpixels[i] = (int *) gdCalloc(sx, sizeof(int));
+		im->tpixels[i] = (int *) gdFCalloc(sx, sizeof(int));
+		if (im->tpixels[i] == NULL) {
+			while (i > 0) {
+				gdFree(im->tpixels[--i]);
+			}
+			gdFree(im->tpixels);
+			gdFree(im);
+			return NULL;
+		}
 	}
 	im->sx = sx;
 	im->sy = sy;
@@ -3106,7 +3130,7 @@ int gdImagePaletteToTrueColor(gdImagePtr src)
 		const unsigned int sy = gdImageSY(src);
 		const unsigned int sx = gdImageSX(src);
 
-		src->tpixels = (int **) gdMalloc(sizeof(int *) * sy);
+		src->tpixels = (int **) gdFMalloc(sizeof(int *) * sy);
 		if (src->tpixels == NULL) {
 			return 0;
 		}
@@ -3116,7 +3140,7 @@ int gdImagePaletteToTrueColor(gdImagePtr src)
 			int * dst_row;
 
 			/* no need to calloc it, we overwrite all pxl anyway */
-			src->tpixels[y] = (int *) gdMalloc(sx * sizeof(int));
+			src->tpixels[y] = (int *) gdFMalloc(sx * sizeof(int));
 			if (src->tpixels[y] == NULL) {
 				goto clean_on_error;
 			}
@@ -3156,5 +3180,6 @@ clean_on_error:
 		gdFree(src->tpixels[yy]);
 	}
 	gdFree(src->tpixels);
+	src->tpixels = NULL;
 	return 0;
 }

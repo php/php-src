@@ -229,60 +229,84 @@ static inline unsigned php_unicode_tofold_simple(unsigned code, enum mbfl_no_enc
 	return code;
 }
 
-static inline void php_unicode_tolower_full(unsigned code, enum mbfl_no_encoding enc,
+static inline int php_unicode_tolower_full(unsigned code, enum mbfl_no_encoding enc,
 	mbfl_convert_filter* next_filter) {
 	code = php_unicode_tolower_raw(code, enc);
 	if (UNEXPECTED(code > 0xffffff)) {
 		unsigned len = code >> 24;
 		const unsigned *p = &_uccase_extra_table[code & 0xffffff];
 		while (len--) {
-			(next_filter->filter_function)(*++p, next_filter);
+			if ((next_filter->filter_function)(*++p, next_filter) < 0) {
+				return -1;
+			}
 		}
 	} else {
-		(next_filter->filter_function)(code, next_filter);
+		if ((next_filter->filter_function)(code, next_filter) < 0) {
+			return -1;
+		}
 	}
+
+	return 0;
 }
 
-static inline void php_unicode_toupper_full(unsigned code, enum mbfl_no_encoding enc,
+static inline int php_unicode_toupper_full(unsigned code, enum mbfl_no_encoding enc,
 	mbfl_convert_filter* next_filter) {
 	code = php_unicode_toupper_raw(code, enc);
 	if (UNEXPECTED(code > 0xffffff)) {
 		unsigned len = code >> 24;
 		const unsigned *p = &_uccase_extra_table[code & 0xffffff];
 		while (len--) {
-			(next_filter->filter_function)(*++p, next_filter);
+			if ((next_filter->filter_function)(*++p, next_filter) < 0) {
+				return -1;
+			}
 		}
 	} else {
-		(next_filter->filter_function)(code, next_filter);
+		if ((next_filter->filter_function)(code, next_filter) < 0) {
+			return -1;
+		}
 	}
+
+	return 0;
 }
 
-static inline void php_unicode_totitle_full(unsigned code, enum mbfl_no_encoding enc,
+static inline int php_unicode_totitle_full(unsigned code, enum mbfl_no_encoding enc,
 	mbfl_convert_filter* next_filter) {
 	code = php_unicode_totitle_raw(code, enc);
 	if (UNEXPECTED(code > 0xffffff)) {
 		unsigned len = code >> 24;
 		const unsigned *p = &_uccase_extra_table[code & 0xffffff];
 		while (len--) {
-			(next_filter->filter_function)(*++p, next_filter);
+			if ((next_filter->filter_function)(*++p, next_filter) < 0) {
+				return -1;
+			}
 		}
 	} else {
-		(next_filter->filter_function)(code, next_filter);
+		if ((next_filter->filter_function)(code, next_filter) < 0) {
+			return -1;
+		}
 	}
+
+	return 0;
 }
 
-static inline void php_unicode_tofold_full(unsigned code, enum mbfl_no_encoding enc,
+static inline int php_unicode_tofold_full(unsigned code, enum mbfl_no_encoding enc,
 	mbfl_convert_filter* next_filter) {
 	code = php_unicode_tofold_raw(code, enc);
 	if (UNEXPECTED(code > 0xffffff)) {
 		unsigned len = code >> 24;
 		const unsigned *p = &_uccase_extra_table[code & 0xffffff];
 		while (len--) {
-			(next_filter->filter_function)(*++p, next_filter);
+			if ((next_filter->filter_function)(*++p, next_filter) < 0) {
+				return -1;
+			}
 		}
 	} else {
-		(next_filter->filter_function)(code, next_filter);
+		if ((next_filter->filter_function)(code, next_filter) < 0) {
+			return -1;
+		}
 	}
+
+	return 0;
 }
 
 struct convert_case_data {
@@ -300,36 +324,36 @@ static int convert_case_filter(int c, void *void_data)
 	/* Handle invalid characters early, as we assign special meaning to
 	 * codepoints above 0xffffff. */
 	if (UNEXPECTED((unsigned) c > 0xffffff)) {
-		(*data->next_filter->filter_function)(c, data->next_filter);
-		return 0;
+		return (*data->next_filter->filter_function)(c, data->next_filter);
 	}
 
+	int res;
 	switch (data->case_mode) {
 		case PHP_UNICODE_CASE_UPPER_SIMPLE:
 			code = php_unicode_toupper_simple(c, data->no_encoding);
-			(data->next_filter->filter_function)(code, data->next_filter);
+			res = (data->next_filter->filter_function)(code, data->next_filter);
 			break;
 
 		case PHP_UNICODE_CASE_UPPER:
-			php_unicode_toupper_full(c, data->no_encoding, data->next_filter);
+			res = php_unicode_toupper_full(c, data->no_encoding, data->next_filter);
 			break;
 
 		case PHP_UNICODE_CASE_LOWER_SIMPLE:
 			code = php_unicode_tolower_simple(c, data->no_encoding);
-			(data->next_filter->filter_function)(code, data->next_filter);
+			res = (data->next_filter->filter_function)(code, data->next_filter);
 			break;
 
 		case PHP_UNICODE_CASE_LOWER:
-			php_unicode_tolower_full(c, data->no_encoding, data->next_filter);
+			res = php_unicode_tolower_full(c, data->no_encoding, data->next_filter);
 			break;
 
 		case PHP_UNICODE_CASE_FOLD:
-			php_unicode_tofold_full(c, data->no_encoding, data->next_filter);
+			res = php_unicode_tofold_full(c, data->no_encoding, data->next_filter);
 			break;
 
 		case PHP_UNICODE_CASE_FOLD_SIMPLE:
 			code = php_unicode_tofold_simple(c, data->no_encoding);
-			(data->next_filter->filter_function)(code, data->next_filter);
+			res = (data->next_filter->filter_function)(code, data->next_filter);
 			break;
 
 		case PHP_UNICODE_CASE_TITLE_SIMPLE:
@@ -338,16 +362,16 @@ static int convert_case_filter(int c, void *void_data)
 			if (data->title_mode) {
 				if (data->case_mode == PHP_UNICODE_CASE_TITLE_SIMPLE) {
 					code = php_unicode_tolower_simple(c, data->no_encoding);
-					(data->next_filter->filter_function)(code, data->next_filter);
+					res = (data->next_filter->filter_function)(code, data->next_filter);
 				} else {
-					php_unicode_tolower_full(c, data->no_encoding, data->next_filter);
+					res = php_unicode_tolower_full(c, data->no_encoding, data->next_filter);
 				}
 			} else {
 				if (data->case_mode == PHP_UNICODE_CASE_TITLE_SIMPLE) {
 					code = php_unicode_totitle_simple(c, data->no_encoding);
-					(data->next_filter->filter_function)(code, data->next_filter);
+					res = (data->next_filter->filter_function)(code, data->next_filter);
 				} else {
-					php_unicode_totitle_full(c, data->no_encoding, data->next_filter);
+					res = php_unicode_totitle_full(c, data->no_encoding, data->next_filter);
 				}
 			}
 			if (!php_unicode_is_case_ignorable(c)) {
@@ -358,7 +382,7 @@ static int convert_case_filter(int c, void *void_data)
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
-	return 0;
+	return res;
 }
 
 MBSTRING_API char *php_unicode_convert_case(

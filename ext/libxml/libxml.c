@@ -554,6 +554,10 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx, const c
 	char *buf;
 	int len, len_iter, output = 0;
 
+	if (ZEND_HAS_OOM()) {
+		return;
+	}
+
 	len = vspprintf(&buf, 0, *msg, ap);
 	len_iter = len;
 
@@ -1019,10 +1023,10 @@ PHP_FUNCTION(libxml_get_errors)
 
 	if (LIBXML(error_list)) {
 
-		array_init(return_value);
+		array_init_size(return_value, zend_llist_count(LIBXML(error_list)));
 		error = zend_llist_get_first(LIBXML(error_list));
 
-		while (error != NULL) {
+		while (error != NULL && !ZEND_HAS_OOM()) {
 			zval z_error;
 
 			object_init_ex(&z_error, libxmlerror_class_entry);
