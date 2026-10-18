@@ -10,11 +10,12 @@ if (PHP_OS_FAMILY !== 'Windows') die('skip Windows only');
 ffi.enable=1
 --FILE--
 <?php
-$ffi = FFI::cdef(<<<'C'
-    typedef void (__stdcall *PAPCFUNC)(uintptr_t);
-    void * __stdcall GetCurrentThread(void);
-    unsigned long __stdcall QueueUserAPC(PAPCFUNC callback, void *thread, uintptr_t data);
-    unsigned long __stdcall SleepEx(unsigned long milliseconds, int alertable);
+$callconv = PHP_INT_SIZE === 4 ? '__stdcall' : '';
+$ffi = FFI::cdef(<<<C
+    typedef void ($callconv *PAPCFUNC)(uintptr_t);
+    void * $callconv GetCurrentThread(void);
+    unsigned long $callconv QueueUserAPC(PAPCFUNC callback, void *thread, uintptr_t data);
+    unsigned long $callconv SleepEx(unsigned long milliseconds, int alertable);
 C, 'kernel32.dll');
 
 $called = 0;
