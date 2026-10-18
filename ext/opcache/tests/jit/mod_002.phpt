@@ -32,6 +32,7 @@ var_dump(modNeg33(125));
 var_dump(modNeg33(-125));
 try {
     var_dump(modNeg1(125));
+    var_dump(modNeg1(PHP_INT_MIN));
 } catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
@@ -48,5 +49,6 @@ int(-26)
 int(-29)
 int(26)
 int(-26)
+int(0)
 int(0)
 DivisionByZeroError: Modulo by zero
