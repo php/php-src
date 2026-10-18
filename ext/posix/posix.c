@@ -1215,7 +1215,14 @@ PHP_FUNCTION(posix_getrlimit)
 #endif /* HAVE_GETRLIMIT */
 
 #ifdef HAVE_SETRLIMIT
-/* {{{ Set system resource consumption limits (POSIX.1-2001) */
+/* Solaris defines RLIM_INFINITY as (rlim_t)-3, so POSIX_RLIMIT_INFINITY is below -1 */
+#ifdef __sun
+# define POSIX_RLIM_VALID(v) ((v) >= -1 || (v) == (zend_long) RLIM_INFINITY)
+#else
+# define POSIX_RLIM_VALID(v) ((v) >= -1)
+#endif
+
+/* Set system resource consumption limits (POSIX.1-2001) */
 PHP_FUNCTION(posix_setrlimit)
 {
 	struct rlimit rl;
@@ -1227,12 +1234,12 @@ PHP_FUNCTION(posix_setrlimit)
 		Z_PARAM_LONG(max)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (cur < -1) {
+	if (!POSIX_RLIM_VALID(cur)) {
 		zend_argument_value_error(2, "must be greater or equal to -1");
 		RETURN_THROWS();
 	}
 
-	if (max < -1) {
+	if (!POSIX_RLIM_VALID(max)) {
 		zend_argument_value_error(3, "must be greater or equal to -1");
 		RETURN_THROWS();
 	}
@@ -1252,7 +1259,6 @@ PHP_FUNCTION(posix_setrlimit)
 
 	RETURN_TRUE;
 }
-/* }}} */
 
 #endif /* HAVE_SETRLIMIT */
 
