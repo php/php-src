@@ -4,9 +4,9 @@ Stream errors: operations refused by the depth limit keep the stack consistent
 zend.max_allowed_stack_size=-1
 --SKIPIF--
 <?php
-if (getenv('SKIP_MSAN')) {
+if (getenv('SKIP_ASAN')) {
     if (!function_exists('posix_setrlimit') || !defined('POSIX_RLIMIT_STACK')) {
-        die('skip MSan needs a larger C stack');
+        die('skip ASan/MSan needs a larger C stack');
     }
     [, $hard] = posix_getrlimit(POSIX_RLIMIT_STACK);
     if (($hard !== 'unlimited' && $hard < 32 * 1024 * 1024)
@@ -17,8 +17,8 @@ if (getenv('SKIP_MSAN')) {
 ?>
 --FILE--
 <?php
-// MSan needs more stack to reach the stream error operation limit.
-if (getenv('SKIP_MSAN') && function_exists('posix_setrlimit') && defined('POSIX_RLIMIT_STACK')) {
+// ASan/MSan needs more stack to reach the stream error operation limit.
+if (getenv('SKIP_ASAN') && function_exists('posix_setrlimit') && defined('POSIX_RLIMIT_STACK')) {
     [$soft, $hard] = posix_getrlimit(POSIX_RLIMIT_STACK);
     if ($soft !== 'unlimited' && $soft < 32 * 1024 * 1024
         && ($hard === 'unlimited' || $hard >= 32 * 1024 * 1024)) {
