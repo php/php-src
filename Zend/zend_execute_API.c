@@ -385,6 +385,12 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 #endif
 	} else {
 		zend_hash_discard(EG(zend_constants), EG(persistent_constants_count));
+		/* may be used by zend_error_zstr_at before init_executor */
+		ZVAL_UNDEF(&EG(user_error_handler));
+		ZVAL_UNDEF(&EG(user_exception_handler));
+		memset(&EG(user_error_handlers_error_reporting), 0, sizeof(EG(user_error_handlers_error_reporting)));
+		memset(&EG(user_error_handlers), 0, sizeof(EG(user_error_handlers)));
+		memset(&EG(user_exception_handlers), 0, sizeof(EG(user_exception_handlers)));
 	}
 
 	zend_objects_store_free_object_storage(&EG(objects_store), fast_shutdown);
@@ -406,6 +412,13 @@ void shutdown_executor(void) /* {{{ */
 
 	zend_shutdown_executor_values(fast_shutdown);
 
+	/* may be used by zend_error_zstr_at before init_executor */
+	EG(record_errors) = false;
+	EG(num_errors) = 0;
+	EG(errors) = NULL;
+	EG(error_handling) = EH_NORMAL;
+	EG(exception) = NULL;
+
 	zend_weakrefs_shutdown();
 	zend_max_execution_timer_shutdown();
 	zend_fiber_shutdown();
@@ -422,6 +435,8 @@ void shutdown_executor(void) /* {{{ */
 		 */
 		zend_hash_discard(EG(function_table), EG(persistent_functions_count));
 		zend_hash_discard(EG(class_table), EG(persistent_classes_count));
+		EG(objects_store).object_buckets = NULL;
+		EG(objects_store).top = 1;
 	} else {
 		zend_vm_stack_destroy();
 

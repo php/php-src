@@ -26,5 +26,3 @@ echo 'You should not see this.';
   <foo>
 
 Fatal error: Allowed memory size of 2097152 bytes exhausted%s(tried to allocate %d bytes) in %s on line %d
-  </foo:NULL>
-</file '%s%eobserver_error_%d.php'>
