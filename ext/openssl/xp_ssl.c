@@ -1203,23 +1203,27 @@ static void php_openssl_limit_handshake_reneg(const SSL *ssl) /* {{{ */
 	/* The token level exceeds our allowed limit */
 	if (sslsock->reneg->tokens > sslsock->reneg->limit) {
 		zval *val;
-
-
 		sslsock->reneg->should_close = 1;
 
 		if (PHP_STREAM_CONTEXT(stream) && (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream),
 				"ssl", "reneg_limit_callback")) != NULL
 		) {
+			zend_fcall_info_cache fcc;
+
+			if (!zend_is_callable(val, &fcc, NULL)) {
+				php_stream_warn(stream, UserspaceCallFailed, "SSL: failed invoking reneg limit notification callback");
+				return;
+			}
 			zval param, retval;
 
 			php_stream_to_zval(stream, &param);
 
 			/* Closing the stream inside this callback would segfault! */
 			stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
-			if (FAILURE == call_user_function(NULL, NULL, val, &retval, 1, &param)) {
-				php_stream_warn(stream, UserspaceCallFailed, "SSL: failed invoking reneg limit notification callback");
-			}
+			zend_call_known_fcc(&fcc, &retval, 1, &param, NULL);
 			stream->flags ^= PHP_STREAM_FLAG_NO_FCLOSE;
+			/* Release potential trampoline */
+			zend_release_fcall_info_cache(&fcc);
 
 			/* If the reneg_limit_callback returned true don't auto-close */
 			if (Z_TYPE(retval) == IS_TRUE) {
