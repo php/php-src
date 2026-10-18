@@ -8,6 +8,9 @@ if (!function_exists("proc_open")) {
 if (!@is_dir("/proc/self/fd")) {
     die("skip requires /proc/self/fd");
 }
+if (PHP_OS_FAMILY === "Solaris") {
+    die("skip /proc/self/fd entries are not symlinks on Solaris");
+}
 ?>
 --FILE--
 <?php
