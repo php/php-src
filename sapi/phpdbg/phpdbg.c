@@ -1448,7 +1448,7 @@ phpdbg_main:
 
 		if (php_request_startup() == FAILURE) {
 			PUTS("Could not startup");
-			return 1;
+			goto phpdbg_out;
 		}
 
 #ifndef _WIN32

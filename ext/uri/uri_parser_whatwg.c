@@ -42,17 +42,22 @@ static zend_always_inline void zval_string_or_null_to_lexbor_str(zval *value, le
 	}
 }
 
-static zend_always_inline void zval_long_or_null_to_lexbor_str(zval *value, lexbor_str_t *lexbor_str)
+static zend_always_inline bool zval_long_or_null_to_lexbor_str(zval *value, lexbor_str_t *lexbor_str)
 {
 	if (Z_TYPE_P(value) == IS_LONG) {
 		ZVAL_STR(value, zend_long_to_str(Z_LVAL_P(value)));
-		lexbor_str_init_append(lexbor_str, lexbor_parser.mraw, (const lxb_char_t *) Z_STRVAL_P(value), Z_STRLEN_P(value));
+		const lxb_char_t *appended = lexbor_str_init_append(lexbor_str, lexbor_parser.mraw, (const lxb_char_t *) Z_STRVAL_P(value), Z_STRLEN_P(value));
 		zval_ptr_dtor_str(value);
+		if (UNEXPECTED(appended == NULL)) {
+			return false;
+		}
 	} else {
 		ZEND_ASSERT(Z_ISNULL_P(value));
 		lexbor_str->data = (lxb_char_t *) "";
 		lexbor_str->length = 0;
 	}
+
+	return true;
 }
 
 /**
@@ -209,6 +214,10 @@ static const char *fill_errors(zval *errors)
 		}
 
 		add_next_index_zval(errors, &error);
+
+		if (ZEND_HAS_OOM()) {
+			break;
+		}
 	}
 
 	return result;
@@ -216,8 +225,19 @@ static const char *fill_errors(zval *errors)
 
 static void throw_invalid_url_exception_during_write(zval *errors, const char *component)
 {
+	if (ZEND_HAS_OOM()) {
+		zend_handle_delayed_oom();
+		return;
+	}
+
 	zval err;
 	const char *reason = fill_errors(&err);
+	if (ZEND_HAS_OOM()) {
+		zval_ptr_dtor(&err);
+		zend_handle_delayed_oom();
+		return;
+	}
+
 	zend_object *exception = zend_throw_exception_ex(
 		php_uri_ce_whatwg_invalid_url_exception,
 		0,
@@ -352,6 +372,10 @@ static zend_result php_uri_parser_whatwg_host_read(void *uri, php_uri_component_
 		smart_str host_str = {0};
 
 		lxb_url_serialize_host_ipv4(lexbor_uri->host.u.ipv4, serialize_to_smart_str_callback, &host_str);
+		if (ZEND_HAS_OOM()) {
+			smart_str_free(&host_str);
+			return FAILURE;
+		}
 
 		ZVAL_NEW_STR(retval, smart_str_extract(&host_str));
 	} else if (lexbor_uri->host.type == LXB_URL_HOST_TYPE_IPV6) {
@@ -360,6 +384,10 @@ static zend_result php_uri_parser_whatwg_host_read(void *uri, php_uri_component_
 		smart_str_appendc(&host_str, '[');
 		lxb_url_serialize_host_ipv6(lexbor_uri->host.u.ipv6, serialize_to_smart_str_callback, &host_str);
 		smart_str_appendc(&host_str, ']');
+		if (ZEND_HAS_OOM()) {
+			smart_str_free(&host_str);
+			return FAILURE;
+		}
 
 		ZVAL_NEW_STR(retval, smart_str_extract(&host_str));
 	} else if (lexbor_uri->host.type == LXB_URL_HOST_TYPE_EMPTY) {
@@ -370,6 +398,10 @@ static zend_result php_uri_parser_whatwg_host_read(void *uri, php_uri_component_
 				smart_str host_str = {0};
 				lxb_url_serialize_host_unicode(&lexbor_idna, &lexbor_uri->host, serialize_to_smart_str_callback, &host_str);
 				lxb_unicode_idna_clean(&lexbor_idna);
+				if (ZEND_HAS_OOM()) {
+					smart_str_free(&host_str);
+					return FAILURE;
+				}
 
 				ZVAL_STR(retval, smart_str_extract(&host_str));
 				break;
@@ -424,7 +456,11 @@ static zend_result php_uri_parser_whatwg_port_write(void *uri, zval *value, zval
 	lxb_url_t *lexbor_uri = uri;
 	lexbor_str_t str = {0};
 
-	zval_long_or_null_to_lexbor_str(value, &str);
+	if (UNEXPECTED(!zval_long_or_null_to_lexbor_str(value, &str))) {
+		ZEND_ASSERT(ZEND_HAS_OOM());
+		zend_handle_delayed_oom();
+		return FAILURE;
+	}
 
 	lxb_url_parser_clean(&lexbor_parser);
 
@@ -583,9 +619,21 @@ lxb_url_t *php_uri_parser_whatwg_parse_ex(const char *uri_str, size_t uri_str_le
 
 	lxb_url_t *url = lxb_url_parse(&lexbor_parser, lexbor_base_url, (unsigned char *) uri_str, uri_str_len);
 
+	if (ZEND_HAS_OOM()) {
+		zend_handle_delayed_oom();
+		return url;
+	}
+
 	if ((url == NULL && !silent) || errors != NULL) {
 		zval err;
 		const char *reason = fill_errors(&err);
+		if (ZEND_HAS_OOM()) {
+			zval_ptr_dtor(&err);
+			zend_handle_delayed_oom();
+
+			return url;
+		}
+
 		if (url == NULL && !silent) {
 			zend_object *exception = zend_throw_exception_ex(php_uri_ce_whatwg_invalid_url_exception, 0, "The specified URI is malformed%s%s%s", reason ? " (" : "", reason ? reason : "", reason ? ")" : "");
 			zend_update_property(exception->ce, exception, ZEND_STRL("errors"), &err);
@@ -631,6 +679,11 @@ static zend_string *php_uri_parser_whatwg_to_string(void *uri, php_uri_recomposi
 			lxb_url_serialize(lexbor_uri, serialize_to_smart_str_callback, &uri_str, exclude_fragment);
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+
+	if (ZEND_HAS_OOM()) {
+		smart_str_free(&uri_str);
+		return NULL;
 	}
 
 	return smart_str_extract(&uri_str);

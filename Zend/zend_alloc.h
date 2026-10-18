@@ -37,6 +37,20 @@
 #define ZEND_MM_ALIGNED_SIZE_EX(size, alignment) \
 	(((size) + ((alignment) - 1)) & ~((alignment) - 1))
 
+typedef enum _zend_oom_state {
+	ZEND_OOM_STATE_NONE = 0,
+	ZEND_OOM_STATE_PENDING,
+	ZEND_OOM_STATE_HANDLING,
+	ZEND_OOM_STATE_HANDLED
+} zend_oom_state;
+
+typedef struct _zend_oom_info {
+	zend_oom_state state;
+	uint32_t lineno;
+	zend_string *message;
+	zend_string *filename;
+} zend_oom_info;
+
 typedef struct _zend_leak_info {
 	void *addr;
 	size_t size;
@@ -45,6 +59,8 @@ typedef struct _zend_leak_info {
 	uint32_t lineno;
 	uint32_t orig_lineno;
 } zend_leak_info;
+
+#define ZEND_HAS_OOM() (UNEXPECTED(EG(delayed_oom).state != ZEND_OOM_STATE_NONE))
 
 #if ZEND_DEBUG
 typedef struct _zend_mm_debug_info {
@@ -215,7 +231,40 @@ ZEND_API ZEND_ATTRIBUTE_MALLOC char * __zend_strdup(const char *s);
 #define perealloc2_recoverable_rel(ptr, size, copy_size, persistent) ((persistent)?realloc((ptr), (size)):erealloc2_recoverable_rel((ptr), (size), (copy_size)))
 #define pestrdup_rel(s, persistent) ((persistent)?strdup(s):estrdup_rel(s))
 
+/* Fallible allocation.
+ * These functions return NULL if allocation would exceed memory limit. */
+
+ZEND_API ZEND_ATTRIBUTE_MALLOC void*  ZEND_FASTCALL _femalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_ALLOC_SIZE(1);
+ZEND_API ZEND_ATTRIBUTE_MALLOC void*  ZEND_FASTCALL _fecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_ALLOC_SIZE2(1,2);
+ZEND_API void*  ZEND_FASTCALL _ferealloc(void *ptr, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_ALLOC_SIZE(2);
+ZEND_API void*  ZEND_FASTCALL _ferealloc2(void *ptr, size_t size, size_t copy_size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_ALLOC_SIZE(2);
+ZEND_API ZEND_ATTRIBUTE_MALLOC void*  ZEND_FASTCALL _safe_femalloc(size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
+ZEND_API void*  ZEND_FASTCALL _safe_ferealloc(void *ptr, size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
+
+#define femalloc(size, fallible) \
+	((fallible)?_femalloc((size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC):_emalloc((size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC))
+#define fecalloc(nmemb, size, fallible) \
+	((fallible)?_fecalloc((nmemb), (size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC):_ecalloc((nmemb), (size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC))
+#define ferealloc(ptr, size, fallible) \
+	((fallible)?_ferealloc((ptr), (size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC):_erealloc((ptr), (size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC))
+#define ferealloc2(ptr, size, copy_size, fallible) \
+	((fallible)?_ferealloc2((ptr), (size), (copy_size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC):_erealloc2((ptr), (size), (copy_size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC))
+#define safe_femalloc(nmemb, size, offset, fallible) \
+	((fallible)?_safe_femalloc((nmemb), (size), (offset) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC):_safe_emalloc((nmemb), (size), (offset) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC))
+#define safe_ferealloc(ptr, nmemb, size, offset, fallible) \
+	((fallible)?_safe_ferealloc((ptr), (nmemb), (size), (offset) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC):_safe_erealloc((ptr), (nmemb), (size), (offset) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC))
+
+#define fpemalloc(size, persistent, fallible) \
+	((persistent)?__zend_malloc(size ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC):femalloc(size, fallible))
+#define fperealloc(ptr, size, persistent, fallible) ((persistent)?__zend_realloc((ptr), (size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC):ferealloc((ptr), (size), (fallible)))
+#define fperealloc2(ptr, size, copy_size, persistent, fallible) ((persistent)?__zend_realloc((ptr), (size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC):ferealloc2((ptr), (size), (copy_size), (fallible)))
+#define safe_fpemalloc(nmemb, size, offset, persistent, fallible) \
+	((persistent)?_safe_malloc(nmemb, size, offset):safe_femalloc(nmemb, size, offset, fallible))
+#define safe_fperealloc(ptr, nmemb, size, offset, persistent, fallible) \
+	((persistent)?_safe_realloc(ptr, nmemb, size, offset):safe_ferealloc(ptr, nmemb, size, offset, fallible))
+
 ZEND_API zend_result zend_set_memory_limit(size_t memory_limit);
+ZEND_API zend_result zend_set_memory_hard_limit_percent(zend_long percent);
 ZEND_API bool zend_alloc_in_memory_limit_error_reporting(void);
 
 ZEND_API void start_memory_manager(void);
@@ -269,6 +318,9 @@ ZEND_API zend_mm_heap *zend_mm_get_heap(void);
 
 ZEND_API size_t zend_mm_gc(zend_mm_heap *heap);
 
+ZEND_API bool zend_mm_is_fallible(void);
+ZEND_API void zend_mm_set_fallible(bool fallible);
+
 #define ZEND_MM_CUSTOM_HEAP_NONE  0
 #define ZEND_MM_CUSTOM_HEAP_STD   1
 #define ZEND_MM_CUSTOM_HEAP_DEBUG 2
@@ -318,6 +370,17 @@ ZEND_API zend_mm_storage *zend_mm_get_storage(zend_mm_heap *heap);
 ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_handlers *handlers, void *data, size_t data_size);
 
 ZEND_API void zend_mm_refresh_key_child(zend_mm_heap *heap);
+
+ZEND_API ZEND_COLD void zend_mm_delayed_error_or_panic(bool delay, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
+ZEND_API void ZEND_FASTCALL zend_handle_delayed_oom(void);
+ZEND_COLD void zend_mm_oom_info_dtor(zend_oom_info *info);
+
+/* Exit status of a process that stopped because of ZEND_MM_MAX_ALLOCS, so that
+ * it can be told apart from an ordinary fatal error. */
+#define ZEND_MM_MAX_ALLOCS_EXIT_STATUS 121
+
+ZEND_API void zend_mm_set_max_allocs(uint64_t max_allocs);
+ZEND_API bool zend_mm_max_allocs_hit(void);
 
 /*
 

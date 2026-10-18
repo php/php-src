@@ -1,12 +1,5 @@
 --TEST--
 Fiber::getReturn() after bailout
---SKIPIF--
-<?php
-$zend_mm_enabled = getenv("USE_ZEND_ALLOC");
-if ($zend_mm_enabled === "0") {
-    die("skip Zend MM disabled");
-}
-?>
 --FILE--
 <?php
 
@@ -16,13 +9,13 @@ register_shutdown_function(static function (): void {
 });
 
 $fiber = new Fiber(static function (): void {
-    str_repeat('X', PHP_INT_MAX);
+    var_dump(new class { public function __debugInfo() { return ''; } }); // cause a bailout
 });
 $fiber->start();
 
 ?>
 --EXPECTF--
-Fatal error: Allowed memory size of %d bytes exhausted%s(tried to allocate %d bytes) %sget-return-after-bailout.php on line %d
+Fatal error: __debuginfo() must return an array in %s on line %d
 
 Fatal error: Uncaught FiberError: Cannot get fiber return value: The fiber exited with a fatal error in %sget-return-after-bailout.php:%d
 Stack trace:

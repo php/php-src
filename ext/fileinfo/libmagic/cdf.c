@@ -93,9 +93,44 @@ file_private union {
 			    CDF_TOLE8(CAST(uint64_t, x))))
 #define CDF_GETUINT32(x, y)	cdf_getuint32(x, y)
 
-#define CDF_MALLOC(n) emalloc(n)
-#define CDF_REALLOC(p, n) erealloc(p, n)
-#define CDF_CALLOC(n, u) ecalloc(n, u)
+#define CDF_MALLOC(n) cdf_malloc(__FILE__, __LINE__, (n))
+#define CDF_REALLOC(p, n) cdf_realloc(__FILE__, __LINE__, (p), (n))
+#define CDF_CALLOC(n, u) cdf_calloc(__FILE__, __LINE__, (n), (u))
+
+/*ARGSUSED*/
+static void *
+cdf_malloc(const char *file,
+    size_t line, size_t n)
+{
+	DPRINTF(("%s,%" SIZE_T_FORMAT "u: %s %" SIZE_T_FORMAT "u\n",
+	    file, line, __func__, n));
+	return femalloc(n, /* fallible */ true);
+}
+
+/*ARGSUSED*/
+static void *
+cdf_realloc(const char *file,
+    size_t line, void *p, size_t n)
+{
+	DPRINTF(("%s,%" SIZE_T_FORMAT "u: %s %" SIZE_T_FORMAT "u\n",
+	    file, line, __func__, n));
+	return safe_ferealloc(p, 1, n, 0, /* fallible */ true);
+}
+
+/*ARGSUSED*/
+static void *
+cdf_calloc(const char *file,
+    size_t line, size_t n, size_t u)
+{
+	DPRINTF(("%s,%" SIZE_T_FORMAT "u: %s %" SIZE_T_FORMAT "u %"
+	    SIZE_T_FORMAT "u\n", file, line, __func__, n, u));
+	void *data = safe_femalloc(n, u, 0, /* fallible */ true);
+	if (!data) {
+		return NULL;
+	}
+	memset(data, 0, n * u);
+	return data;
+}
 
 #if defined(HAVE_BYTESWAP_H)
 # define _cdf_tole2(x)	bswap_16(x)

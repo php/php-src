@@ -30,22 +30,22 @@ struct php_uri_parser_rfc3986_uris {
 
 static void *php_uri_parser_rfc3986_memory_manager_malloc(UriMemoryManager *memory_manager, size_t size)
 {
-	return emalloc(size);
+	return femalloc(size, /* fallible */ true);
 }
 
 static void *php_uri_parser_rfc3986_memory_manager_calloc(UriMemoryManager *memory_manager, size_t nmemb, size_t size)
 {
-	return ecalloc(nmemb, size);
+	return fecalloc(nmemb, size, /* fallible */ true);
 }
 
 static void *php_uri_parser_rfc3986_memory_manager_realloc(UriMemoryManager *memory_manager, void *ptr, size_t size)
 {
-	return erealloc(ptr, size);
+	return safe_ferealloc(ptr, 1, size, 0, /* fallible */ true);
 }
 
 static void *php_uri_parser_rfc3986_memory_manager_reallocarray(UriMemoryManager *memory_manager, void *ptr, size_t nmemb, size_t size)
 {
-	return safe_erealloc(ptr, nmemb, size, 0);
+	return safe_ferealloc(ptr, nmemb, size, 0, /* fallible */ true);
 }
 
 static void php_uri_parser_rfc3986_memory_manager_destroy(UriMemoryManager *memory_manager, void *ptr)
@@ -67,6 +67,16 @@ static const UriMemoryManager php_uri_parser_rfc3986_memory_manager = {
  * const struct with a non-const pointer for convenience. */
 static UriMemoryManager* const mm = (UriMemoryManager*)&php_uri_parser_rfc3986_memory_manager;
 
+static bool handle_pending_oom(void)
+{
+	if (ZEND_HAS_OOM()) {
+		zend_handle_delayed_oom();
+		return true;
+	}
+
+	return false;
+}
+
 static inline size_t get_text_range_length(const UriTextRangeA *range)
 {
 	return range->afterLast - range->first;
@@ -77,17 +87,28 @@ static inline bool has_text_range(const UriTextRangeA *range)
 	return range->first != NULL && range->afterLast != NULL;
 }
 
-ZEND_ATTRIBUTE_NONNULL static void copy_uri(UriUriA *new_uriparser_uri, const UriUriA *uriparser_uri)
+/* Returns false when the copy could not be allocated. */
+ZEND_ATTRIBUTE_NONNULL static bool copy_uri(UriUriA *new_uriparser_uri, const UriUriA *uriparser_uri)
 {
 	int result = uriCopyUriMmA(new_uriparser_uri, uriparser_uri, mm);
-	ZEND_ASSERT(result == URI_SUCCESS);
+	ZEND_ASSERT(result == URI_SUCCESS || result == URI_ERROR_MALLOC);
+
+	return result == URI_SUCCESS;
 }
 
+/* Returns NULL when the normalized form could not be allocated. */
 ZEND_ATTRIBUTE_NONNULL static UriUriA *get_normalized_uri(php_uri_parser_rfc3986_uris *uriparser_uris) {
 	if (!uriparser_uris->normalized_uri_initialized) {
-		copy_uri(&uriparser_uris->normalized_uri, &uriparser_uris->uri);
+		if (UNEXPECTED(!copy_uri(&uriparser_uris->normalized_uri, &uriparser_uris->uri))) {
+			return NULL;
+		}
 		int result = uriNormalizeSyntaxExMmA(&uriparser_uris->normalized_uri, (unsigned int)-1, mm);
-		ZEND_ASSERT(result == URI_SUCCESS);
+		ZEND_ASSERT(result == URI_SUCCESS || result == URI_ERROR_MALLOC);
+		if (UNEXPECTED(result != URI_SUCCESS)) {
+			uriFreeUriMembersMmA(&uriparser_uris->normalized_uri, mm);
+			memset(&uriparser_uris->normalized_uri, 0, sizeof(uriparser_uris->normalized_uri));
+			return NULL;
+		}
 		uriparser_uris->normalized_uri_initialized = true;
 	}
 
@@ -115,6 +136,9 @@ ZEND_ATTRIBUTE_NONNULL static UriUriA *get_uri_for_writing(php_uri_parser_rfc398
 ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_scheme_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(uri, read_mode);
+	if (UNEXPECTED(uriparser_uri == NULL)) {
+		return FAILURE;
+	}
 
 	if (has_text_range(&uriparser_uri->scheme)) {
 		ZVAL_STRINGL(retval, uriparser_uri->scheme.first, get_text_range_length(&uriparser_uri->scheme));
@@ -143,6 +167,10 @@ static zend_result php_uri_parser_rfc3986_scheme_write(void *uri, zval *value, z
 			zend_throw_exception(php_uri_ce_invalid_uri_exception, "The specified scheme is malformed", 0);
 			return FAILURE;
 		default:
+			if (handle_pending_oom()) {
+				return FAILURE;
+			}
+
 			/* This should be unreachable in practice. */
 			zend_throw_exception(php_uri_ce_error, "Failed to update the scheme", 0);
 			return FAILURE;
@@ -152,6 +180,9 @@ static zend_result php_uri_parser_rfc3986_scheme_write(void *uri, zval *value, z
 ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_userinfo_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(uri, read_mode);
+	if (UNEXPECTED(uriparser_uri == NULL)) {
+		return FAILURE;
+	}
 
 	if (has_text_range(&uriparser_uri->userInfo)) {
 		ZVAL_STRINGL(retval, uriparser_uri->userInfo.first, get_text_range_length(&uriparser_uri->userInfo));
@@ -183,6 +214,10 @@ zend_result php_uri_parser_rfc3986_userinfo_write(void *uri, zval *value, zval *
 			zend_throw_exception(php_uri_ce_invalid_uri_exception, "The specified userinfo is malformed", 0);
 			return FAILURE;
 		default:
+			if (handle_pending_oom()) {
+				return FAILURE;
+			}
+
 			/* This should be unreachable in practice. */
 			zend_throw_exception(php_uri_ce_error, "Failed to update the userinfo", 0);
 			return FAILURE;
@@ -192,6 +227,9 @@ zend_result php_uri_parser_rfc3986_userinfo_write(void *uri, zval *value, zval *
 ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_username_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(uri, read_mode);
+	if (UNEXPECTED(uriparser_uri == NULL)) {
+		return FAILURE;
+	}
 
 	if (has_text_range(&uriparser_uri->userInfo)) {
 		size_t length = get_text_range_length(&uriparser_uri->userInfo);
@@ -214,6 +252,9 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_username_read(v
 ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_password_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(uri, read_mode);
+	if (UNEXPECTED(uriparser_uri == NULL)) {
+		return FAILURE;
+	}
 
 	if (has_text_range(&uriparser_uri->userInfo)) {
 		const char *c = memchr(uriparser_uri->userInfo.first, ':', get_text_range_length(&uriparser_uri->userInfo));
@@ -233,6 +274,9 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_password_read(v
 ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_host_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(uri, read_mode);
+	if (UNEXPECTED(uriparser_uri == NULL)) {
+		return FAILURE;
+	}
 
 	if (has_text_range(&uriparser_uri->hostText)) {
 		if (uriparser_uri->hostData.ip6 != NULL || uriparser_uri->hostData.ipFuture.first != NULL) {
@@ -278,6 +322,10 @@ static zend_result php_uri_parser_rfc3986_host_write(void *uri, zval *value, zva
 			zend_throw_exception(php_uri_ce_invalid_uri_exception, "The specified host is malformed", 0);
 			return FAILURE;
 		default:
+			if (handle_pending_oom()) {
+				return FAILURE;
+			}
+
 			/* This should be unreachable in practice. */
 			zend_throw_exception(php_uri_ce_error, "Failed to update the host", 0);
 			return FAILURE;
@@ -305,6 +353,9 @@ ZEND_ATTRIBUTE_NONNULL static zend_long port_str_to_zend_long_checked(const char
 ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_port_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(uri, read_mode);
+	if (UNEXPECTED(uriparser_uri == NULL)) {
+		return FAILURE;
+	}
 
 	if (has_text_range(&uriparser_uri->portText) && get_text_range_length(&uriparser_uri->portText) > 0) {
 		ZVAL_LONG(retval, port_str_to_zend_long_checked(uriparser_uri->portText.first, get_text_range_length(&uriparser_uri->portText)));
@@ -338,6 +389,10 @@ static zend_result php_uri_parser_rfc3986_port_write(void *uri, zval *value, zva
 			zend_throw_exception(php_uri_ce_invalid_uri_exception, "The specified port is malformed", 0);
 			return FAILURE;
 		default:
+			if (handle_pending_oom()) {
+				return FAILURE;
+			}
+
 			/* This should be unreachable in practice. */
 			zend_throw_exception(php_uri_ce_error, "Failed to update the port", 0);
 			return FAILURE;
@@ -347,6 +402,9 @@ static zend_result php_uri_parser_rfc3986_port_write(void *uri, zval *value, zva
 ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_path_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(uri, read_mode);
+	if (UNEXPECTED(uriparser_uri == NULL)) {
+		return FAILURE;
+	}
 
 	if (uriparser_uri->pathHead != NULL) {
 		smart_str str = {0};
@@ -390,6 +448,10 @@ static zend_result php_uri_parser_rfc3986_path_write(void *uri, zval *value, zva
 			zend_throw_exception(php_uri_ce_invalid_uri_exception, "The specified path is malformed", 0);
 			return FAILURE;
 		default:
+			if (handle_pending_oom()) {
+				return FAILURE;
+			}
+
 			/* This should be unreachable in practice. */
 			zend_throw_exception(php_uri_ce_error, "Failed to update the path", 0);
 			return FAILURE;
@@ -399,6 +461,9 @@ static zend_result php_uri_parser_rfc3986_path_write(void *uri, zval *value, zva
 ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_query_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(uri, read_mode);
+	if (UNEXPECTED(uriparser_uri == NULL)) {
+		return FAILURE;
+	}
 
 	if (has_text_range(&uriparser_uri->query)) {
 		ZVAL_STRINGL(retval, uriparser_uri->query.first, get_text_range_length(&uriparser_uri->query));
@@ -427,6 +492,10 @@ static zend_result php_uri_parser_rfc3986_query_write(void *uri, zval *value, zv
 			zend_throw_exception(php_uri_ce_invalid_uri_exception, "The specified query is malformed", 0);
 			return FAILURE;
 		default:
+			if (handle_pending_oom()) {
+				return FAILURE;
+			}
+
 			/* This should be unreachable in practice. */
 			zend_throw_exception(php_uri_ce_error, "Failed to update the query", 0);
 			return FAILURE;
@@ -436,6 +505,9 @@ static zend_result php_uri_parser_rfc3986_query_write(void *uri, zval *value, zv
 ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_fragment_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(uri, read_mode);
+	if (UNEXPECTED(uriparser_uri == NULL)) {
+		return FAILURE;
+	}
 
 	if (has_text_range(&uriparser_uri->fragment)) {
 		ZVAL_STRINGL(retval, uriparser_uri->fragment.first, get_text_range_length(&uriparser_uri->fragment));
@@ -464,6 +536,10 @@ static zend_result php_uri_parser_rfc3986_fragment_write(void *uri, zval *value,
 			zend_throw_exception(php_uri_ce_invalid_uri_exception, "The specified fragment is malformed", 0);
 			return FAILURE;
 		default:
+			if (handle_pending_oom()) {
+				return FAILURE;
+			}
+
 			/* This should be unreachable in practice. */
 			zend_throw_exception(php_uri_ce_error, "Failed to update the fragment", 0);
 			return FAILURE;
@@ -485,7 +561,7 @@ php_uri_parser_rfc3986_uris *php_uri_parser_rfc3986_parse_ex(const char *uri_str
 	/* Parse the URI. */
 	int result = uriParseSingleUriExMmA(&uri, uri_str, uri_str + uri_str_len, NULL, mm);
 	if (result != URI_SUCCESS) {
-		if (!silent) {
+		if (!handle_pending_oom() && !silent) {
 			switch (result) {
 				case URI_ERROR_SYNTAX:
 					zend_throw_exception(php_uri_ce_invalid_uri_exception, "The specified URI is malformed", 0);
@@ -507,7 +583,7 @@ php_uri_parser_rfc3986_uris *php_uri_parser_rfc3986_parse_ex(const char *uri_str
 		 * since the target and source URLs must be distinct. */
 		int result = uriAddBaseUriExMmA(&tmp, &uri, &uriparser_base_urls->uri, URI_RESOLVE_STRICTLY, mm);
 		if (result != URI_SUCCESS) {
-			if (!silent) {
+			if (!handle_pending_oom() && !silent) {
 				switch (result) {
 					case URI_ERROR_ADDBASE_REL_BASE:
 						zend_throw_exception(php_uri_ce_invalid_uri_exception, "The specified base URI must be absolute", 0);
@@ -528,7 +604,15 @@ php_uri_parser_rfc3986_uris *php_uri_parser_rfc3986_parse_ex(const char *uri_str
 	}
 
 	/* Make the resulting URI independent of the 'uri_str'. */
-	uriMakeOwnerMmA(&uri, mm);
+	if (UNEXPECTED(uriMakeOwnerMmA(&uri, mm) != URI_SUCCESS)) {
+		/* The only documented failure is a failed allocation, and the caller
+		 * expects either a URI or a reported error. */
+		if (!handle_pending_oom() && !silent) {
+			zend_throw_exception(php_uri_ce_error, "Failed to parse the specified URI", 0);
+		}
+
+		goto fail;
+	}
 
 	if (has_text_range(&uri.portText) && get_text_range_length(&uri.portText) > 0) {
 		if (port_str_to_zend_long_checked(uri.portText.first, get_text_range_length(&uri.portText)) == -1) {
@@ -562,7 +646,10 @@ ZEND_ATTRIBUTE_NONNULL static void *php_uri_parser_rfc3986_clone(void *uri)
 	const php_uri_parser_rfc3986_uris *uriparser_uris = uri;
 
 	php_uri_parser_rfc3986_uris *new_uriparser_uris = uriparser_create_uris();
-	copy_uri(&new_uriparser_uris->uri, &uriparser_uris->uri);
+	if (UNEXPECTED(!copy_uri(&new_uriparser_uris->uri, &uriparser_uris->uri))) {
+		efree(new_uriparser_uris);
+		return NULL;
+	}
 	/* Do not copy the normalized URI: The expected action after cloning is
 	 * modifying the cloned URI (which will invalidate the cached normalized
 	 * URI). */
@@ -579,6 +666,9 @@ ZEND_ATTRIBUTE_NONNULL static zend_string *php_uri_parser_rfc3986_to_string(void
 		uriparser_uri = &uriparser_uris->uri;
 	} else {
 		uriparser_uri = get_normalized_uri(uriparser_uris);
+		if (UNEXPECTED(uriparser_uri == NULL)) {
+			return NULL;
+		}
 	}
 
 	int charsRequired = 0;

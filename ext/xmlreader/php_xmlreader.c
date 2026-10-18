@@ -91,7 +91,7 @@ static int xmlreader_property_reader(xmlreader_object *obj, xmlreader_prop_handl
 	switch (hnd->type) {
 		case IS_STRING:
 			if (retchar) {
-				ZVAL_STRING(rv, (char *) retchar);
+				ZVAL_FSTRING(rv, (char *) retchar);
 			} else {
 				ZVAL_EMPTY_STRING(rv);
 			}
@@ -456,7 +456,7 @@ static void php_xmlreader_string_arg(INTERNAL_FUNCTION_PARAMETERS, xmlreader_rea
 		retchar = (char *)internal_function(intern->ptr, (const unsigned char *)name);
 	}
 	if (retchar) {
-		RETVAL_STRING(retchar);
+		RETVAL_FSTRING(retchar);
 		xmlFree(retchar);
 		return;
 	} else {
@@ -506,7 +506,7 @@ static void php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAMETERS, xmlreader_
 		retchar = (char *)internal_function(intern->ptr);
 	}
 	if (retchar) {
-		RETVAL_STRING(retchar);
+		RETVAL_FSTRING(retchar);
 		xmlFree(retchar);
 		return;
 	} else {
@@ -616,7 +616,7 @@ PHP_METHOD(XMLReader, getAttributeNo)
 		retchar = (char *)xmlTextReaderGetAttributeNo(intern->ptr, attr_pos);
 	}
 	if (retchar) {
-		RETVAL_STRING(retchar);
+		RETVAL_FSTRING(retchar);
 		xmlFree(retchar);
 	}
 }
@@ -651,7 +651,7 @@ PHP_METHOD(XMLReader, getAttributeNs)
 		retchar = (char *)xmlTextReaderGetAttributeNs(intern->ptr, (xmlChar *)name, (xmlChar *)ns_uri);
 	}
 	if (retchar) {
-		RETVAL_STRING(retchar);
+		RETVAL_FSTRING(retchar);
 		xmlFree(retchar);
 	}
 }

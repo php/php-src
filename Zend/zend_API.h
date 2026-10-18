@@ -537,7 +537,45 @@ ZEND_API const char *zend_get_type_by_const(int type);
 
 #define array_init(arg)				ZVAL_ARR((arg), zend_new_array(0))
 #define array_init_size(arg, size)	ZVAL_ARR((arg), zend_new_array(size))
+#define array_init_singleton(arg)	ZVAL_ARR((arg), zend_new_array_singleton())
+
+/* Fallible array_init()/object_init(): on failure return false and leave arg as
+ * IS_NULL, so arg stays safe to destroy. */
+static zend_always_inline bool _array_finit(zval *arg, size_t size)
+{
+	zend_array *ht = zend_fnew_array(size);
+	if (UNEXPECTED(ht == NULL)) {
+		ZVAL_NULL(arg);
+		return false;
+	}
+	ZVAL_ARR(arg, ht);
+	return true;
+}
+
+static zend_always_inline bool _array_finit_ex(zval *arg, size_t size, bool packed)
+{
+	zend_array *ht = zend_fnew_array(size);
+	if (UNEXPECTED(ht == NULL)) {
+		ZVAL_NULL(arg);
+		return false;
+	}
+	if (UNEXPECTED(zend_hash_real_finit(ht, packed, /* fallible */ true) == FAILURE)) {
+		efree(ht);
+		ZVAL_NULL(arg);
+		return false;
+	}
+	ZVAL_ARR(arg, ht);
+	return true;
+}
+
+#define array_finit(arg)			_array_finit((arg), 0)
+#define array_finit_size(arg, size)	_array_finit((arg), (size))
+#define array_finit_size_ex(arg, size, packed)  _array_finit_ex((arg), (size), (packed))
+#define array_finit_size_packed(arg, size)	    _array_finit_ex((arg), (size), /* packed */ true)
+#define array_finit_size_mixed(arg, size)	    _array_finit_ex((arg), (size), /* packed */ false)
+
 ZEND_API void object_init(zval *arg);
+ZEND_API bool object_finit(zval *arg);
 ZEND_API zend_result object_init_ex(zval *arg, zend_class_entry *ce);
 ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *class_type, uint32_t param_count, zval *params, HashTable *named_params);
 ZEND_API zend_result object_and_properties_init(zval *arg, zend_class_entry *ce, HashTable *properties);
@@ -959,10 +997,25 @@ static zend_always_inline bool zend_char_has_nul_byte(const char *s, size_t know
 		ZVAL_NEW_STR(z, zend_string_init(s, l, 0));		\
 	} while (0)
 
+/* Fallible variant of ZVAL_STRINGL() to be used when 's' is not managed by zend_alloc */
+static zend_always_inline bool ZVAL_FSTRINGL(zval *z, const char *s, size_t l) {
+	zend_string *str = zend_string_finit(s, l, /* persistent */ false, /* fallible */ true);
+	if (UNEXPECTED(!str)) {
+		ZVAL_INTERNED_STR(z, ZSTR_EMPTY_ALLOC());
+		return false;
+	}
+	ZVAL_NEW_STR(z, str);
+	return true;
+}
+
 #define ZVAL_STRING(z, s) do {					\
 		const char *_s = (s);					\
 		ZVAL_STRINGL(z, _s, strlen(_s));		\
 	} while (0)
+
+static zend_always_inline bool ZVAL_FSTRING(zval *z, const char *s) {
+	return ZVAL_FSTRINGL(z, s, strlen(s));
+}
 
 #define ZVAL_EMPTY_STRING(z) do {				\
 		ZVAL_INTERNED_STR(z, ZSTR_EMPTY_ALLOC());		\
@@ -1024,6 +1077,8 @@ static zend_always_inline bool zend_char_has_nul_byte(const char *s, size_t know
 #define RETVAL_STRINGL(s, l)			ZVAL_STRINGL(return_value, s, l)
 #define RETVAL_STRING_FAST(s)			ZVAL_STRING_FAST(return_value, s)
 #define RETVAL_STRINGL_FAST(s, l)		ZVAL_STRINGL_FAST(return_value, s, l)
+#define RETVAL_FSTRING(s)				ZVAL_FSTRING(return_value, s)
+#define RETVAL_FSTRINGL(s, l)			ZVAL_FSTRINGL(return_value, s, l)
 #define RETVAL_EMPTY_STRING()			ZVAL_EMPTY_STRING(return_value)
 #define RETVAL_CHAR(c)		            ZVAL_CHAR(return_value, c)
 #define RETVAL_RES(r)					ZVAL_RES(return_value, r)
@@ -1050,6 +1105,8 @@ static zend_always_inline bool zend_char_has_nul_byte(const char *s, size_t know
 #define RETURN_STRINGL(s, l) 			do { RETVAL_STRINGL(s, l); return; } while (0)
 #define RETURN_STRING_FAST(s) 			do { RETVAL_STRING_FAST(s); return; } while (0)
 #define RETURN_STRINGL_FAST(s, l)		do { RETVAL_STRINGL_FAST(s, l); return; } while (0)
+#define RETURN_FSTRING(s) 			    do { RETVAL_FSTRING(s); return; } while (0)
+#define RETURN_FSTRINGL(s, l)			do { RETVAL_FSTRINGL(s, l); return; } while (0)
 #define RETURN_EMPTY_STRING() 			do { RETVAL_EMPTY_STRING(); return; } while (0)
 #define RETURN_CHAR(c)		            do { RETVAL_CHAR(c); return; } while (0)
 #define RETURN_RES(r)					do { RETVAL_RES(r); return; } while (0)
@@ -1064,6 +1121,7 @@ static zend_always_inline bool zend_char_has_nul_byte(const char *s, size_t know
 #define RETURN_FALSE					do { RETVAL_FALSE; return; } while (0)
 #define RETURN_TRUE						do { RETVAL_TRUE; return; } while (0)
 #define RETURN_THROWS()					do { ZEND_ASSERT(EG(exception)); (void) return_value; return; } while (0)
+#define RETURN_OOM()                    do { ZEND_ASSERT(ZEND_HAS_OOM()); (void) return_value; return; } while (0)
 
 #define HASH_OF(p) (Z_TYPE_P(p)==IS_ARRAY ? Z_ARRVAL_P(p) : ((Z_TYPE_P(p)==IS_OBJECT ? Z_OBJ_HT_P(p)->get_properties(Z_OBJ_P(p)) : NULL)))
 #define ZVAL_IS_NULL(z) (Z_TYPE_P(z) == IS_NULL)

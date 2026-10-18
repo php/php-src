@@ -730,6 +730,10 @@ static inline void mb_regex_substitute(
 	eos = replace + replace_len;
 
 	while (p < eos) {
+		if (ZEND_HAS_OOM()) {
+			return;
+		}
+
 		clen = (int) php_mb_mbchar_bytes(p, enc);
 		if (clen != 1 || p == eos || p[0] != '\\') {
 			/* skip anything that's not an ascii backslash */
@@ -1235,6 +1239,10 @@ PHP_FUNCTION(mb_split)
 			pos++;
 		}
 		onig_region_free(regs, 0);
+		if (ZEND_HAS_OOM()) {
+			err = -2;
+			break;
+		}
 	}
 
 	onig_region_free(regs, 1);

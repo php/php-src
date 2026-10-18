@@ -1504,9 +1504,17 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 					}
 
 					if (http_buf) {
-						http_buf = zend_string_safe_realloc(http_buf, 1, http_buf_size, buf_size, false);
+						zend_string *new_http_buf = zend_string_safe_frealloc(http_buf, 1, http_buf_size, buf_size, /* persistent */ false, /* fallible */ true);
+						if (UNEXPECTED(!new_http_buf)) {
+							zend_string_release_ex(http_buf, false);
+							return NULL;
+						}
+						http_buf = new_http_buf;
 					} else {
-						http_buf = zend_string_alloc(buf_size, 0);
+						http_buf = zend_string_falloc(buf_size, /* persistent */ false, /* fallible */ true);
+						if (UNEXPECTED(!http_buf)) {
+							return NULL;
+						}
 					}
 
 					while (len_size < buf_size) {
@@ -1566,7 +1574,10 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 		if (header_length < 0 || header_length >= ZSTR_MAX_LEN) {
 			return NULL;
 		}
-		http_buf = zend_string_alloc(header_length, 0);
+		http_buf = zend_string_falloc(header_length, /* persistent */ false, /* fallible */ true);
+		if (UNEXPECTED(!http_buf)) {
+			return NULL;
+		}
 		while (http_buf_size < header_length) {
 			ssize_t len_read = php_stream_read(stream, http_buf->val + http_buf_size, header_length - http_buf_size);
 			if (len_read <= 0) {
@@ -1582,7 +1593,12 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 					zend_string_efree(http_buf);
 					return NULL;
 				}
-				http_buf = zend_string_realloc(http_buf, http_buf_size + 4096, false);
+				zend_string *new_http_buf = zend_string_safe_frealloc(http_buf, 1, http_buf_size, 4096, /* persistent */ false, /* fallible */ true);
+				if (UNEXPECTED(!new_http_buf)) {
+					zend_string_release_ex(http_buf, false);
+					return NULL;
+				}
+				http_buf = new_http_buf;
 			} else {
 				http_buf = zend_string_alloc(4096, 0);
 			}
@@ -1615,6 +1631,10 @@ static zend_string *get_http_headers(php_stream *stream)
 
 		/* add header to collection */
 		smart_str_appends(&tmp_response, headerbuf);
+
+		if (ZEND_HAS_OOM()) {
+			break;
+		}
 	}
 
 	smart_str_free(&tmp_response);

@@ -335,31 +335,78 @@ static HashTable *zend_persist_attributes(HashTable *attributes)
 	return ptr;
 }
 
-uint32_t zend_accel_get_class_name_map_ptr(zend_string *type_name)
+/* We delay the publishing of CE cache slots until after ZCSG(map_ptr_last) is
+ * published.
+ * CE cache slots stored in interned strings are immediately visible to other
+ * processes, so if we fail to update ZCSG(map_ptr_last) after publishing a
+ * slot (due to a bailout/exit), that slot may be re-allocated for something
+ * else by other processes. */
+void zend_accel_pending_ce_cache_begin(void)
+{
+	ZEND_ASSERT(ZCG(locked));
+
+	/* A persist window left through a bailout caught by the caller (e.g.
+	 * opcache_compile_file()) never published its slots. Drop them. */
+	zend_accel_pending_ce_cache_discard();
+
+	ZCG(pending_ce_cache) = emalloc(sizeof(HashTable));
+	zend_hash_init(ZCG(pending_ce_cache), 8, NULL, NULL, 0);
+}
+
+void zend_accel_pending_ce_cache_commit(void)
+{
+	ZEND_ASSERT(ZCG(pending_ce_cache));
+	/* Every pending slot must be covered by ZCSG(map_ptr_last) */
+	ZEND_ASSERT(ZCSG(map_ptr_last) == CG(map_ptr_last));
+
+	ZEND_HASH_FOREACH_NUM_KEY_VAL(ZCG(pending_ce_cache), zend_ulong h, zval *zv) {
+		zend_string *type_name = (zend_string*)(uintptr_t)h;
+
+		ZEND_ASSERT(!ZSTR_HAS_CE_CACHE(type_name));
+		GC_SET_REFCOUNT(type_name, (uint32_t)Z_LVAL_P(zv));
+		GC_ADD_FLAGS(type_name, IS_STR_CLASS_NAME_MAP_PTR);
+	} ZEND_HASH_FOREACH_END();
+
+	zend_accel_pending_ce_cache_discard();
+}
+
+void zend_accel_pending_ce_cache_discard(void)
+{
+	if (ZCG(pending_ce_cache)) {
+		zend_hash_destroy(ZCG(pending_ce_cache));
+		efree(ZCG(pending_ce_cache));
+		ZCG(pending_ce_cache) = NULL;
+	}
+}
+
+void zend_accel_get_class_name_map_ptr(zend_string *type_name)
 {
 	uint32_t ret;
+	zval *slot;
 
 	if (zend_string_equals_ci(type_name, ZSTR_KNOWN(ZEND_STR_SELF)) ||
 			zend_string_equals_ci(type_name, ZSTR_KNOWN(ZEND_STR_PARENT))) {
-		return 0;
+		return;
 	}
 
 	/* We use type.name.gc.refcount to keep map_ptr of corresponding type */
 	if (ZSTR_HAS_CE_CACHE(type_name)) {
-		return GC_REFCOUNT(type_name);
+		return;
 	}
 
 	if ((GC_FLAGS(type_name) & GC_IMMUTABLE)
 	 && (GC_FLAGS(type_name) & IS_STR_PERMANENT)) {
+		ZEND_ASSERT(ZCG(pending_ce_cache) && "Must be called inside a persist window");
+		slot = zend_hash_index_lookup(ZCG(pending_ce_cache), (zend_ulong)(uintptr_t)type_name);
+		if (Z_TYPE_P(slot) != IS_NULL) {
+			/* Already allocated earlier in this window */
+			return;
+		}
 		do {
 			ret = ZEND_MAP_PTR_NEW_OFFSET();
 		} while (ret <= 2);
-		GC_SET_REFCOUNT(type_name, ret);
-		GC_ADD_FLAGS(type_name, IS_STR_CLASS_NAME_MAP_PTR);
-		return ret;
+		ZVAL_LONG(slot, ret);
 	}
-
-	return 0;
 }
 
 static void zend_persist_type(zend_type *type) {
@@ -1456,6 +1503,9 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 #endif
 
 	zend_map_ptr_extend(ZCSG(map_ptr_last));
+	if (for_shm) {
+		zend_accel_pending_ce_cache_begin();
+	}
 
 	zend_accel_persist_class_table(&script->script.class_table);
 	zend_hash_persist(&script->script.function_table);
@@ -1483,6 +1533,7 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	if (for_shm) {
 		ZCSG(map_ptr_last) = CG(map_ptr_last);
 		ZCSG(map_ptr_static_last) = zend_map_ptr_static_last;
+		zend_accel_pending_ce_cache_commit();
 	}
 
 #ifdef HAVE_JIT

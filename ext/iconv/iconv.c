@@ -364,7 +364,9 @@ static php_iconv_err_t _php_iconv_appendl(smart_str *d, const char *s, size_t l,
 	if (in_p != NULL) {
 		while (in_left > 0) {
 			out_left = buf_growth;
-			smart_str_alloc(d, out_left, 0);
+			if (UNEXPECTED(smart_str_falloc(d, out_left, 0, /* fallible */ true) == (size_t)-1)) {
+				return PHP_ICONV_ERR_ALLOC;
+			}
 
 			out_p = ZSTR_VAL((d)->s) + ZSTR_LEN((d)->s);
 
@@ -389,7 +391,9 @@ static php_iconv_err_t _php_iconv_appendl(smart_str *d, const char *s, size_t l,
 	} else {
 		for (;;) {
 			out_left = buf_growth;
-			smart_str_alloc(d, out_left, 0);
+			if (UNEXPECTED(smart_str_falloc(d, out_left, 0, /* fallible */ true) == (size_t)-1)) {
+				return PHP_ICONV_ERR_ALLOC;
+			}
 
 			out_p = ZSTR_VAL((d)->s) + ZSTR_LEN((d)->s);
 
@@ -442,7 +446,7 @@ PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len, 
 	char *out_p;
 	size_t bsz, result = 0;
 	php_iconv_err_t retval = PHP_ICONV_ERR_SUCCESS;
-	zend_string *out_buf;
+	zend_string *out_buf = NULL;
 	bool ignore_ilseq = _php_check_ignore(out_charset);
 
 	*out = NULL;
@@ -462,7 +466,12 @@ PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len, 
 	bsz = out_left;
 
 	zend_try {
-		out_buf = zend_string_alloc(bsz, 0);
+		out_buf = zend_string_falloc(bsz, 0, /* fallible */ true);
+		if (UNEXPECTED(out_buf == NULL)) {
+			result = -1;
+			errno = 0;
+			goto fail;
+		}
 		out_p = ZSTR_VAL(out_buf);
 
 		while (in_left > 0) {
@@ -484,7 +493,13 @@ PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len, 
 					/* converted string is longer than out buffer */
 					bsz += in_len;
 
-					out_buf = zend_string_extend(out_buf, bsz, 0);
+					zend_string *grown = zend_string_fextend(out_buf, bsz, 0, /* fallible */ true);
+					if (UNEXPECTED(grown == NULL)) {
+						result = -1;
+						errno = 0;
+						goto fail;
+					}
+					out_buf = grown;
 					out_p = ZSTR_VAL(out_buf);
 					out_p += out_size;
 					out_left = bsz - out_size;
@@ -506,7 +521,13 @@ PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len, 
 
 				if (errno == E2BIG) {
 					bsz += 16;
-					out_buf = zend_string_extend(out_buf, bsz, 0);
+					zend_string *grown = zend_string_fextend(out_buf, bsz, 0, /* fallible */ true);
+					if (UNEXPECTED(grown == NULL)) {
+						result = -1;
+						errno = 0;
+						goto fail;
+					}
+					out_buf = grown;
 					out_p = ZSTR_VAL(out_buf);
 					out_p += out_size;
 					out_left = bsz - out_size;
@@ -515,6 +536,7 @@ PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len, 
 				}
 			}
 		}
+fail:;
 	} zend_catch {
 		iconv_close(cd);
 		zend_bailout();
@@ -539,7 +561,9 @@ PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len, 
 
 			default:
 				/* other error */
-				zend_string_efree(out_buf);
+				if (out_buf) {
+					zend_string_efree(out_buf);
+				}
 				return PHP_ICONV_ERR_UNKNOWN;
 		}
 	}
@@ -978,7 +1002,11 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 	}
 
 	zend_try {
-		buf = safe_emalloc(1, max_line_len, 5);
+		buf = safe_femalloc(1, max_line_len, 5, /* fallible */ true);
+		if (UNEXPECTED(buf == NULL)) {
+			err = PHP_ICONV_ERR_ALLOC;
+			goto out_try;
+		}
 
 		char_cnt = max_line_len;
 
@@ -1184,7 +1212,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 
 				} break; /* case PHP_ICONV_ENC_SCHEME_QPRINT: */
 			}
-		} while (in_left > 0);
+		} while (in_left > 0 && !ZEND_HAS_OOM());
 
 		smart_str_0(pretval);
 
@@ -2158,7 +2186,7 @@ PHP_FUNCTION(iconv_mime_decode_headers)
 
 	enc_str_tmp = ZSTR_VAL(encoded_str);
 	enc_str_len_tmp = ZSTR_LEN(encoded_str);
-	while (enc_str_len_tmp > 0) {
+	while (enc_str_len_tmp > 0 && !ZEND_HAS_OOM()) {
 		smart_str decoded_header = {0};
 		char *header_name = NULL;
 		size_t header_name_len = 0;
@@ -2563,9 +2591,11 @@ static php_stream_filter_status_t php_iconv_stream_filter_do_filter(
 
 		php_stream_bucket_unlink(bucket);
 
-		if (php_iconv_stream_filter_append_bucket(self, stream, filter,
-				buckets_out, bucket->buf, bucket->buflen, &consumed,
-				php_stream_is_persistent(stream)) != SUCCESS) {
+		/* The conversion may grow the input several times over. */
+		if (!ZEND_HAS_OOM()
+				&& php_iconv_stream_filter_append_bucket(self, stream, filter,
+					buckets_out, bucket->buf, bucket->buflen, &consumed,
+					php_stream_is_persistent(stream)) != SUCCESS) {
 			php_stream_bucket_delref(bucket);
 			return PSFS_ERR_FATAL;
 		}

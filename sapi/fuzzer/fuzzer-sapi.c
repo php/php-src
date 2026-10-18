@@ -214,6 +214,8 @@ void fuzzer_request_shutdown(void)
 			EG(exception) = NULL;
 		}
 
+		zend_mm_oom_info_dtor(&EG(delayed_oom));
+
 		/* Some fuzzers (like unserialize) may create circular structures. Make sure we free them.
 		 * Two calls are performed to handle objects with destructors. */
 		zend_gc_collect_cycles();
@@ -293,6 +295,12 @@ int fuzzer_do_request_from_buffer(
 		if (op_array) {
 			if (execute) {
 				zend_execute(op_array, NULL);
+			}
+			if (ZEND_HAS_OOM()) {
+				zend_handle_delayed_oom();
+			}
+			if (EG(exception)) {
+				zend_exception_error(EG(exception), E_WARNING);
 			}
 			zend_destroy_static_vars(op_array);
 			destroy_op_array(op_array);

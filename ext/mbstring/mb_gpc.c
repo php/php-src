@@ -185,8 +185,15 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 	}
 	num *= 2; /* need space for variable name and value */
 
-	val_list = (char **)ecalloc(num, sizeof(char *));
-	len_list = (size_t *)ecalloc(num, sizeof(size_t));
+	val_list = (char **)fecalloc(num, sizeof(char *), /* fallible */ true);
+	if (!val_list) {
+		goto out;
+	}
+
+	len_list = (size_t *)fecalloc(num, sizeof(size_t), /* fallible */ true);
+	if (!len_list) {
+		goto out;
+	}
 
 	/* split and decode the query */
 	n = 0;
@@ -267,6 +274,11 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 			n++;
 		}
 		efree(val);
+
+		if (ZEND_HAS_OOM()) {
+			from_encoding = NULL;
+			goto out;
+		}
 	}
 
 out:

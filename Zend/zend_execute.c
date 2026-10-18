@@ -4291,6 +4291,8 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_fcall_interrupt(zend_execute_data *ca
 	zend_atomic_bool_store_ex(&EG(vm_interrupt), false);
 	if (zend_atomic_bool_load_ex(&EG(timed_out))) {
 		zend_timeout();
+	} else if (ZEND_HAS_OOM()) {
+		zend_handle_delayed_oom();
 	} else if (zend_interrupt_function) {
 		zend_interrupt_function(call);
 	}
@@ -4887,6 +4889,18 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 	}
 }
 /* }}} */
+
+/* Same as cleanup_unfinished_calls(), but only free the call frames. */
+static void free_unfinished_calls(zend_execute_data *execute_data)
+{
+	zend_execute_data *call = EX(call);
+
+	while (UNEXPECTED(call != NULL)) {
+		EX(call) = call->prev_execute_data;
+		zend_vm_stack_free_call_frame(call);
+		call = EX(call);
+	}
+}
 
 static void cleanup_live_vars(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num) /* {{{ */
 {

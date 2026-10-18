@@ -2164,7 +2164,10 @@ static int exif_file_sections_realloc(image_info_type *ImageInfo, int section_in
 		EXIF_ERRLOG_FSREALLOC(ImageInfo)
 		return -1;
 	}
-	tmp = safe_erealloc(ImageInfo->file.list[section_index].data, 1, size, 0);
+	tmp = safe_ferealloc(ImageInfo->file.list[section_index].data, 1, size, 0, /* fallible */ true);
+	if (!tmp) {
+		return -1;
+	}
 	ImageInfo->file.list[section_index].data = tmp;
 	ImageInfo->file.list[section_index].size = size;
 	return 0;
@@ -2276,7 +2279,11 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 				break;
 			}
 			if (length>1) {
-				info_value->list = safe_emalloc(length, sizeof(image_info_value), 0);
+				info_value->list = safe_femalloc(length, sizeof(image_info_value), 0, /* fallible */ true);
+				if (!info_value->list) {
+					info_data->length = 0;
+					return;
+				}
 			} else {
 				info_value = &info_data->value;
 			}
@@ -2461,12 +2468,12 @@ static void exif_iif_free(image_info_type *image_info, int section_index) {
 
 /* {{{ add_assoc_image_info
  * Add image_info to associative array value. */
-static void add_assoc_image_info(zval *value, int sub_array, image_info_type *image_info, int section_index)
+static zend_result add_assoc_image_info(zval *value, int sub_array, image_info_type *image_info, int section_index)
 {
 	int idx = 0, unknown = 0;
 
 	if (!image_info->info_list[section_index].count) {
-		return;
+		return SUCCESS;
 	}
 
 	zval tmpi;
@@ -2607,6 +2614,12 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 								}
 								break;
 						}
+						if (ZEND_HAS_OOM()) {
+							if (l > 1) {
+								zval_ptr_dtor(&array);
+							}
+							goto failure;
+						}
 					}
 					if (l > 1) {
 						add_assoc_zval(&tmpi, name, &array);
@@ -2615,10 +2628,20 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 				}
 			}
 		}
+		if (ZEND_HAS_OOM()) {
+			goto failure;
+		}
 	}
 	if (sub_array) {
 		add_assoc_zval(value, exif_get_sectionname(section_index), &tmpi);
 	}
+	return ZEND_HAS_OOM() ? FAILURE : SUCCESS;
+
+failure:
+	if (sub_array) {
+		zval_ptr_dtor(&tmpi);
+	}
+	return FAILURE;
 }
 /* }}} */
 
@@ -2886,6 +2909,10 @@ static void exif_thumbnail_build(image_info_type *ImageInfo) {
 	if (!ImageInfo->read_thumbnail || !ImageInfo->Thumbnail.offset || !ImageInfo->Thumbnail.size) {
 		return; /* ignore this call */
 	}
+	/* new_size below sums the accumulated tag values, so stop once over the limit. */
+	if (ZEND_HAS_OOM()) {
+		return;
+	}
 #ifdef EXIF_DEBUG
 	exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Thumbnail: filetype = %d", ImageInfo->Thumbnail.filetype);
 #endif
@@ -2961,6 +2988,17 @@ static void exif_thumbnail_build(image_info_type *ImageInfo) {
 	}
 }
 /* }}} */
+
+/* Rejects a thumbnail whose data is not actually present in the file. */
+static bool exif_thumbnail_in_file(image_info_type *ImageInfo)
+{
+	if (ImageInfo->Thumbnail.size > ImageInfo->FileSize
+	 || ImageInfo->Thumbnail.offset > ImageInfo->FileSize - ImageInfo->Thumbnail.size) {
+		EXIF_ERRLOG_THUMBEOF(ImageInfo)
+		return false;
+	}
+	return true;
+}
 
 /* {{{ exif_thumbnail_extract
  * Grab the thumbnail, corrected */
@@ -3311,7 +3349,10 @@ static bool exif_process_IFD_TAG_impl(image_info_type *ImageInfo, char *dir_entr
 			}
 			if (byte_count>sizeof(cbuf)) {
 				/* mark as outside range and get buffer */
-				value_ptr = safe_emalloc(byte_count, 1, 0);
+				value_ptr = safe_femalloc(byte_count, 1, 0, /* fallible */ true);
+				if (!value_ptr) {
+					return false;
+				}
 				outside = value_ptr;
 			} else {
 				/* In most cases we only access a small range so
@@ -3603,6 +3644,10 @@ static bool exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, co
 		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "corrupt EXIF header: maximum directory nesting level reached");
 		return false;
 	}
+	/* Each tag may retain up to FileSize bytes, so stop once over the limit. */
+	if (ZEND_HAS_OOM()) {
+		return false;
+	}
 	ImageInfo->ifd_nesting_level++;
 	result = exif_process_IFD_TAG_impl(ImageInfo, dir_entry, info, displacement, section_index, ReadNextIFD, tag_table);
 	ImageInfo->ifd_nesting_level--;
@@ -3802,6 +3847,10 @@ static bool exif_scan_JPEG_header(image_info_type *ImageInfo)
 	jpeg_sof_info sof_info;
 
 	while (true) {
+		/* Every section is retained, so stop once over the limit. */
+		if (ZEND_HAS_OOM()) {
+			return false;
+		}
 #ifdef EXIF_DEBUG
 		fpos = php_stream_tell(ImageInfo->infile);
 		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Needing section %d @ 0x%08X", ImageInfo->file.count, fpos);
@@ -4211,8 +4260,11 @@ static bool exif_process_IFD_in_TIFF_impl(image_info_type *ImageInfo, size_t dir
 #ifdef EXIF_DEBUG
 								exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "%s THUMBNAIL @0x%04X + 0x%04X", ImageInfo->Thumbnail.data ? "Ignore" : "Read", ImageInfo->Thumbnail.offset, ImageInfo->Thumbnail.size);
 #endif
-								if (!ImageInfo->Thumbnail.data) {
-									ImageInfo->Thumbnail.data = safe_emalloc(ImageInfo->Thumbnail.size, 1, 0);
+								if (!ImageInfo->Thumbnail.data && exif_thumbnail_in_file(ImageInfo)) {
+									ImageInfo->Thumbnail.data = safe_femalloc(ImageInfo->Thumbnail.size, 1, 0, /* fallible */ true);
+									if (!ImageInfo->Thumbnail.data) {
+										return false;
+									}
 									php_stream_seek(ImageInfo->infile, ImageInfo->Thumbnail.offset, SEEK_SET);
 									size_t fgot = exif_read_from_stream_file_looped(ImageInfo->infile, ImageInfo->Thumbnail.data, ImageInfo->Thumbnail.size);
 									if (fgot != ImageInfo->Thumbnail.size) {
@@ -4251,8 +4303,12 @@ static bool exif_process_IFD_in_TIFF_impl(image_info_type *ImageInfo, size_t dir
 #ifdef EXIF_DEBUG
 					exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "%s THUMBNAIL @0x%04X + 0x%04X", ImageInfo->Thumbnail.data ? "Ignore" : "Read", ImageInfo->Thumbnail.offset, ImageInfo->Thumbnail.size);
 #endif
-					if (!ImageInfo->Thumbnail.data && ImageInfo->Thumbnail.offset && ImageInfo->Thumbnail.size && ImageInfo->read_thumbnail) {
-						ImageInfo->Thumbnail.data = safe_emalloc(ImageInfo->Thumbnail.size, 1, 0);
+					if (!ImageInfo->Thumbnail.data && ImageInfo->Thumbnail.offset && ImageInfo->Thumbnail.size && ImageInfo->read_thumbnail
+					 && exif_thumbnail_in_file(ImageInfo)) {
+						ImageInfo->Thumbnail.data = safe_femalloc(ImageInfo->Thumbnail.size, 1, 0, /* fallible */ true);
+						if (!ImageInfo->Thumbnail.data) {
+							return false;
+						}
 						php_stream_seek(ImageInfo->infile, ImageInfo->Thumbnail.offset, SEEK_SET);
 						size_t fgot = exif_read_from_stream_file_looped(ImageInfo->infile, ImageInfo->Thumbnail.data, ImageInfo->Thumbnail.size);
 						if (fgot != ImageInfo->Thumbnail.size) {
@@ -4290,6 +4346,9 @@ static bool exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offs
 		return false;
 	}
 	if (ImageInfo->ifd_nesting_level > MAX_IFD_NESTING_LEVEL) {
+		return false;
+	}
+	if (ZEND_HAS_OOM()) {
 		return false;
 	}
 	ImageInfo->ifd_nesting_level++;
@@ -4862,19 +4921,21 @@ PHP_FUNCTION(exif_read_data)
 	exif_error_docref(NULL EXIFERR_CC, &ImageInfo, E_NOTICE, "Adding image infos");
 #endif
 
-	add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_FILE      );
-	add_assoc_image_info(return_value, 1,          &ImageInfo, SECTION_COMPUTED  );
-	add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_ANY_TAG   );
-	add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_IFD0      );
-	add_assoc_image_info(return_value, 1,          &ImageInfo, SECTION_THUMBNAIL );
-	add_assoc_image_info(return_value, 1,          &ImageInfo, SECTION_COMMENT   );
-	add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_EXIF      );
-	add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_GPS       );
-	add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_INTEROP   );
-	add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_FPIX      );
-	add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_APP12     );
-	add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_WINXP     );
-	add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_MAKERNOTE );
+	if (UNEXPECTED(add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_FILE) == FAILURE
+	 || add_assoc_image_info(return_value, 1,          &ImageInfo, SECTION_COMPUTED  ) == FAILURE
+	 || add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_ANY_TAG   ) == FAILURE
+	 || add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_IFD0      ) == FAILURE
+	 || add_assoc_image_info(return_value, 1,          &ImageInfo, SECTION_THUMBNAIL ) == FAILURE
+	 || add_assoc_image_info(return_value, 1,          &ImageInfo, SECTION_COMMENT   ) == FAILURE
+	 || add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_EXIF      ) == FAILURE
+	 || add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_GPS       ) == FAILURE
+	 || add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_INTEROP   ) == FAILURE
+	 || add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_FPIX      ) == FAILURE
+	 || add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_APP12     ) == FAILURE
+	 || add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_WINXP     ) == FAILURE
+	 || add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_MAKERNOTE ) == FAILURE)) {
+		goto oom;
+	}
 
 #ifdef EXIF_DEBUG
 	exif_error_docref(NULL EXIFERR_CC, &ImageInfo, E_NOTICE, "Discarding info");
@@ -4885,6 +4946,13 @@ PHP_FUNCTION(exif_read_data)
 #ifdef EXIF_DEBUG
 	php_error_docref1(NULL, (Z_TYPE_P(stream) == IS_RESOURCE ? "<stream>" : Z_STRVAL_P(stream)), E_NOTICE, "Done");
 #endif
+	return;
+
+oom:
+	exif_discard_imageinfo(&ImageInfo);
+	zval_ptr_dtor(return_value);
+	ZVAL_NULL(return_value);
+	RETURN_OOM();
 }
 /* }}} */
 
@@ -4948,7 +5016,7 @@ PHP_FUNCTION(exif_thumbnail)
 	exif_error_docref(NULL EXIFERR_CC, &ImageInfo, E_NOTICE, "Returning thumbnail(%d)", ImageInfo.Thumbnail.size);
 #endif
 
-	RETVAL_STRINGL(ImageInfo.Thumbnail.data, ImageInfo.Thumbnail.size);
+	RETVAL_FSTRINGL(ImageInfo.Thumbnail.data, ImageInfo.Thumbnail.size);
 	if ((z_width || z_height) && (!ImageInfo.Thumbnail.width || !ImageInfo.Thumbnail.height)) {
 		if (!exif_scan_thumbnail(&ImageInfo)) {
 			ImageInfo.Thumbnail.width = ImageInfo.Thumbnail.height = 0;
