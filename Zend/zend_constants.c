@@ -570,7 +570,6 @@ ZEND_API zend_constant *zend_register_constant(zend_constant *c)
 }
 
 void zend_constant_add_attributes(zend_constant *c, HashTable *attributes) {
-	ZEND_ASSERT(attributes != NULL);
 	GC_TRY_ADDREF(attributes);
 	c->attributes = attributes;
 
