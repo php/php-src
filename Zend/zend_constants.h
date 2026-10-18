@@ -114,7 +114,7 @@ ZEND_API zend_constant *zend_register_double_constant(const char *name, size_t n
 ZEND_API zend_constant *zend_register_string_constant(const char *name, size_t name_len, const char *strval, int flags, int module_number);
 ZEND_API zend_constant *zend_register_stringl_constant(const char *name, size_t name_len, const char *strval, size_t strlen, int flags, int module_number);
 ZEND_API zend_constant *zend_register_constant(zend_constant *c);
-void ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2) zend_constant_add_attributes(zend_constant *c, HashTable *attributes);
+void ZEND_ATTRIBUTE_NONNULL zend_constant_add_attributes(zend_constant *c, HashTable *attributes);
 #ifdef ZTS
 void zend_copy_constants(HashTable *target, HashTable *source);
 #endif
