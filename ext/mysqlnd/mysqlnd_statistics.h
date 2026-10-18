@@ -17,19 +17,12 @@
 #define MYSQLND_STATISTICS_H
 
 #ifdef ZTS
-#define MYSQLND_STATS_LOCK(stats) tsrm_mutex_lock((stats)->LOCK_access)
-#define MYSQLND_STATS_UNLOCK(stats) tsrm_mutex_unlock((stats)->LOCK_access)
-#else
-#define MYSQLND_STATS_LOCK(stats)
-#define MYSQLND_STATS_UNLOCK(stats)
-#endif
-
 #define MYSQLND_STATS_UPDATE_VALUE(stats, statistic, value) \
-	{ \
-			MYSQLND_STATS_LOCK(stats); \
-			(stats)->values[(statistic)] += (value); \
-			MYSQLND_STATS_UNLOCK(_p_s); \
-	}
+	atomic_fetch_add_explicit(&(stats)->values[(statistic)], (value), memory_order_relaxed)
+#else
+#define MYSQLND_STATS_UPDATE_VALUE(stats, statistic, value) \
+	((stats)->values[(statistic)] += (value))
+#endif
 
 #define MYSQLND_DEC_STATISTIC(enabler, stats, statistic) \
  { \
