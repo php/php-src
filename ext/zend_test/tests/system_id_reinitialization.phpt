@@ -2,8 +2,10 @@
 System ID reinitialization accepts extension entropy after engine restart
 --SKIPIF--
 <?php
-if (!extension_loaded('zend_test')) die('skip zend_test extension required');
+if (ini_get('opcache.file_cache')) die('skip different include behaviour with file_cache');
 ?>
+--EXTENSIONS--
+zend_test
 --INI--
 zend_test.register_system_entropy=1
 --PHPDBG--
