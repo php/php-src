@@ -5,6 +5,7 @@ zip
 --SKIPIF--
 <?php
 if (version_compare(ZipArchive::LIBZIP_VERSION, '1.10.0', '<')) die('skip libzip < 1.10.0');
+if (version_compare(ZipArchive::LIBZIP_VERSION, '1.12.0', '=')) die('skip libzip = 1.12.0 due to torrentzip bug fixed in 1.12.1');
 ?>
 --FILE--
 <?php
