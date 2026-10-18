@@ -26,6 +26,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-24321 (ZTS: global_map_ptr_last survives zend_shutdown(),
     so an in-process engine restart keeps growing the map_ptr table).
     (David Carlier)
+  . Fix function and constant imports in compile_to_ast and add support
+    for grouping. (Klaas Skelte van der Werf)
 
 - Date:
   . Fixed bug GH-20503 (Assertion failure with ext/date DateInterval property
