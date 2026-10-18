@@ -312,7 +312,7 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(inputs.branch).jobs.MACOS.matrix }}
     name: "MACOS_${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
-    runs-on: macos-${{ fromJson(inputs.branch).jobs.MACOS.config.version }}${{ matrix.arch == 'X64' && '-intel' || '' }}
+    runs-on: macos-${{ fromJson(inputs.branch).jobs.MACOS.config.version }}
     timeout-minutes: 180
     steps:
       - name: git checkout
@@ -345,18 +345,18 @@ jobs:
         if: ${{ inputs.all_variations }}
         uses: ./.github/actions/test-macos
       - name: Test Tracing JIT
-        if: ${{ matrix.arch == 'X64' || !matrix.zts }}
+        if: ${{ !matrix.zts }}
         uses: ./.github/actions/test-macos
         with:
           enableOpcache: true
           jitType: tracing
       - name: Test OpCache
-        if: ${{ inputs.all_variations || (matrix.arch == 'ARM64' && matrix.zts) }}
+        if: ${{ inputs.all_variations || matrix.zts }}
         uses: ./.github/actions/test-macos
         with:
           enableOpcache: true
       - name: Test Function JIT
-        if: ${{ inputs.all_variations && (matrix.arch == 'X64' || !matrix.zts) }}
+        if: ${{ inputs.all_variations && !matrix.zts }}
         uses: ./.github/actions/test-macos
         with:
           enableOpcache: true
