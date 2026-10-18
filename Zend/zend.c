@@ -737,6 +737,8 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 		compiler_globals->map_ptr_base = ZEND_MAP_PTR_BIASED_BASE(base);
 		memset(base, 0, compiler_globals->map_ptr_last * sizeof(void*));
 	}
+
+	compiler_globals->interned_strings_fallible = false;
 }
 /* }}} */
 
@@ -809,6 +811,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	executor_globals->pid = 0;
 	executor_globals->oldact = (struct sigaction){0};
 #endif
+	memset(&executor_globals->delayed_oom, 0, sizeof(executor_globals->delayed_oom));
 }
 /* }}} */
 
@@ -1307,6 +1310,8 @@ ZEND_API void zend_deactivate(void) /* {{{ */
 		zend_map_ptr_reset();
 	}
 
+	zend_mm_oom_info_dtor(&EG(delayed_oom));
+
 #if GC_BENCH
 	fprintf(stderr, "GC Statistics\n");
 	fprintf(stderr, "-------------\n");
@@ -1396,7 +1401,7 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 	}
 
 	/* Report about uncaught exception in case of fatal errors */
-	if (EG(exception)) {
+	if (EG(exception) && EXPECTED(EG(delayed_oom).state != ZEND_OOM_STATE_HANDLING)) {
 		zend_execute_data *ex;
 		const zend_op *opline;
 
@@ -1842,6 +1847,9 @@ ZEND_API zend_result zend_execute_scripts(int type, zval *retval, int file_count
 		}
 		if (op_array) {
 			zend_execute(op_array, retval);
+			if (ZEND_HAS_OOM()) {
+				zend_handle_delayed_oom();
+			}
 			zend_exception_restore();
 			if (UNEXPECTED(EG(exception))) {
 				if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {

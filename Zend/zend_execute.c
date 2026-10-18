@@ -4342,6 +4342,18 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 }
 /* }}} */
 
+/* Same as cleanup_unfinished_calls(), but only free the call frames. */
+static void free_unfinished_calls(zend_execute_data *execute_data)
+{
+	zend_execute_data *call = EX(call);
+
+	while (UNEXPECTED(call != NULL)) {
+		EX(call) = call->prev_execute_data;
+		zend_vm_stack_free_call_frame(call);
+		call = EX(call);
+	}
+}
+
 static const zend_live_range *find_live_range(const zend_op_array *op_array, uint32_t op_num, uint32_t var_num) /* {{{ */
 {
 	int i;

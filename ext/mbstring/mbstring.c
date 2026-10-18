@@ -1670,7 +1670,9 @@ static int mbfl_split_output(int c, void *data)
 {
 	struct mbfl_split_params *params = (struct mbfl_split_params *)data; /* cast passed data */
 
-	(*params->next_filter->filter_function)(c, params->next_filter); /* decoder filter */
+	if (UNEXPECTED((*params->next_filter->filter_function)(c, params->next_filter) < 0)) { /* decoder filter */
+		return -1;
+	}
 
 	if (params->split_length == ++params->mb_chunk_length) { /* if current chunk size reached defined chunk size or last char reached */
 		mbfl_convert_filter_flush(params->next_filter);/* concatenate separate decoded chars to the solid string */
@@ -1680,6 +1682,9 @@ static int mbfl_split_output(int c, void *data)
 		add_next_index_stringl(params->return_value, (const char *)chunk->val, chunk->len); /* add chunk to the array */
 		efree(chunk->val);
 		params->mb_chunk_length = 0; /* reset mb_chunk size */
+		if (ZEND_HAS_OOM()) {
+			return -1;
+		}
 	}
 
 	return 0;
@@ -1738,7 +1743,9 @@ PHP_FUNCTION(mb_str_split)
 		char unsigned const *mbtab = mbfl_encoding->mblen_table;
 
 		/* assume that we have 1-bytes characters */
-		array_init_size(return_value, (string.len + split_length) / split_length); /* round up */
+		if (UNEXPECTED(!array_finit_size_packed(return_value, (string.len + split_length) / split_length /* round up */))) {
+			return;
+		}
 
 		while (p < last) { /* split cycle work until the cursor has reached the last byte */
 			char const *chunk_p = p; /* chunk first byte pointer */
@@ -1752,6 +1759,9 @@ PHP_FUNCTION(mb_str_split)
 			}
 			if (p >= last) chunk_len -= p - last; /* check if chunk is in bounds */
 			add_next_index_stringl(return_value, chunk_p, chunk_len);
+			if (ZEND_HAS_OOM()) {
+				break;
+			}
 		}
 		return;
 	} else {
@@ -1759,11 +1769,15 @@ PHP_FUNCTION(mb_str_split)
 		mbfl_convert_filter *filter, *decoder;
 
 		/* assume that we have 1-bytes characters */
-		array_init_size(return_value, (string.len + split_length) / split_length); /* round up */
+		if (UNEXPECTED(!array_finit_size_packed(return_value, (string.len + split_length) / split_length /* round up */))) {
+			return;
+		}
 
 		/* decoder filter to decode wchar to encoding */
 		mbfl_memory_device device;
-		mbfl_memory_device_init(&device, split_length + 1, 0);
+		/* clamp init size to avoid over allocation */
+		size_t init_size = MIN(ZSTR_LEN(str), split_length) + 1;
+		mbfl_memory_device_init(&device, init_size, 0);
 
 		decoder = mbfl_convert_filter_new(
 				&mbfl_encoding_wchar,
@@ -1794,10 +1808,15 @@ PHP_FUNCTION(mb_str_split)
 		ZEND_ASSERT(filter != NULL);
 
 		while (p < last - 1) { /* cycle each byte except last with callback function */
-			(*filter->filter_function)(*p++, filter);
+			if (UNEXPECTED((*filter->filter_function)(*p++, filter) < 0)) {
+				return;
+			}
 		}
 		params.mb_chunk_length = split_length - 1; /* force to finish current chunk */
-		(*filter->filter_function)(*p++, filter); /* process last char */
+		/* process last char */
+		if (UNEXPECTED((*filter->filter_function)(*p++, filter) < 0)) {
+			return;
+		}
 
 		mbfl_convert_filter_delete(decoder);
 		mbfl_convert_filter_delete(filter);
@@ -1807,12 +1826,17 @@ PHP_FUNCTION(mb_str_split)
 
 	/* first scenario: 1,2,4-bytes fixed width encodings (tail part) */
 	chunks = (mb_len + split_length - 1) / split_length; /* (round up idiom) */
-	array_init_size(return_value, chunks);
+	if (UNEXPECTED(!array_finit_size_packed(return_value, chunks))) {
+		return;
+	}
 	if (chunks != 0) {
 		zend_long i;
 
 		for (i = 0; i < chunks - 1; p += chunk_len, ++i) {
 			add_next_index_stringl(return_value, p, chunk_len);
+			if (ZEND_HAS_OOM()) {
+				return;
+			}
 		}
 		add_next_index_stringl(return_value, p, last - p);
 	}
@@ -2068,13 +2092,13 @@ static void php_mb_strstr_variants(INTERNAL_FUNCTION_PARAMETERS, unsigned int va
 			ret = mbfl_substr(&haystack, &result, 0, n);
 			ZEND_ASSERT(ret != NULL);
 			// TODO: avoid reallocation ???
-			RETVAL_STRINGL((char *)ret->val, ret->len);
+			RETVAL_FSTRINGL((char *)ret->val, ret->len);
 			efree(ret->val);
 		} else {
 			ret = mbfl_substr(&haystack, &result, n, MBFL_SUBSTR_UNTIL_END);
 			ZEND_ASSERT(ret != NULL);
 			// TODO: avoid reallocation ???
-			RETVAL_STRINGL((char *)ret->val, ret->len);
+			RETVAL_FSTRINGL((char *)ret->val, ret->len);
 			efree(ret->val);
 		}
 	} else {
@@ -2145,10 +2169,13 @@ PHP_FUNCTION(mb_substr_count)
 
 	size_t n = mbfl_substr_count(&haystack, &needle);
 	/* An error can only occur if needle is empty,
-	 * an encoding error happens (which should not happen at this stage and is a bug)
-	 * or the haystack is more than sizeof(size_t) bytes
-	 * If one of these things occur this is a bug and should be flagged as such */
-	ZEND_ASSERT(!mbfl_is_error(n));
+	 * an encoding error happens (which should not happen at this stage and is a bug),
+	 * the haystack is more than sizeof(size_t) bytes,
+	 * or on OOM.
+	 * If one of these things other than OOM occur this is a bug and should be flagged as such */
+	if (mbfl_is_error(n)) {
+		RETURN_OOM();
+	}
 	RETVAL_LONG(n);
 }
 /* }}} */
@@ -2224,7 +2251,7 @@ PHP_FUNCTION(mb_substr)
 	ZEND_ASSERT(ret != NULL);
 
 	// TODO: avoid reallocation ???
-	RETVAL_STRINGL((char *)ret->val, ret->len); /* the string is already strdup()'ed */
+	RETVAL_FSTRINGL((char *)ret->val, ret->len); /* the string is already strdup()'ed */
 	efree(ret->val);
 }
 /* }}} */
@@ -2281,10 +2308,12 @@ PHP_FUNCTION(mb_strcut)
 	}
 
 	ret = mbfl_strcut(&string, &result, from, len);
-	ZEND_ASSERT(ret != NULL);
+	if (UNEXPECTED(ret == NULL)) {
+		RETURN_OOM();
+	}
 
 	// TODO: avoid reallocation ???
-	RETVAL_STRINGL((char *)ret->val, ret->len); /* the string is already strdup()'ed */
+	RETVAL_FSTRINGL((char *)ret->val, ret->len); /* the string is already strdup()'ed */
 	efree(ret->val);
 }
 /* }}} */
@@ -2499,7 +2528,9 @@ dont_restart_conversion:
 
 append_trim_marker:
 	if (ZSTR_LEN(marker) > 0) {
-		MB_CONVERT_BUF_ENSURE((&buf), buf.out, buf.limit, ZSTR_LEN(marker));
+		if (UNEXPECTED(mb_convert_buf_ensure(&buf, &buf.out, &buf.limit, ZSTR_LEN(marker)) == FAILURE)) {
+			return mb_convert_buf_result(&buf);
+		}
 		memcpy(buf.out, ZSTR_VAL(marker), ZSTR_LEN(marker));
 		buf.out += ZSTR_LEN(marker);
 	}
@@ -3044,7 +3075,9 @@ PHP_FUNCTION(mb_encode_mimeheader)
 
 	mbfl_string_init(&result);
 	ret = mbfl_mime_header_encode(&string, &result, charset, transenc, linefeed, indent);
-	ZEND_ASSERT(ret != NULL);
+	if (UNEXPECTED(ret == NULL)) {
+		RETURN_OOM();
+	}
 	// TODO: avoid reallocation ???
 	RETVAL_STRINGL((char *)ret->val, ret->len);	/* the string is already strdup()'ed */
 	efree(ret->val);
@@ -3066,7 +3099,10 @@ PHP_FUNCTION(mb_decode_mimeheader)
 	string.val = (unsigned char*)string_val;
 	mbfl_string_init(&result);
 	ret = mbfl_mime_header_decode(&string, &result, MBSTRG(current_internal_encoding));
-	ZEND_ASSERT(ret != NULL);
+	if (UNEXPECTED(ret == NULL)) {
+		RETURN_OOM();
+	}
+
 	// TODO: avoid reallocation ???
 	RETVAL_STRINGL((char *)ret->val, ret->len);	/* the string is already strdup()'ed */
 	efree(ret->val);
@@ -3301,6 +3337,9 @@ static int mb_recursive_convert_variable(mbfl_buffer_converter *convd, zval *var
 			// TODO: avoid reallocation ???
 			ZVAL_STRINGL(orig_var, (const char *) ret->val, ret->len);
 			efree(ret->val);
+		}
+		if (ZEND_HAS_OOM()) {
+			return 1;
 		}
 	} else if (Z_TYPE_P(var) == IS_ARRAY || Z_TYPE_P(var) == IS_OBJECT) {
 		if (Z_TYPE_P(var) == IS_ARRAY) {

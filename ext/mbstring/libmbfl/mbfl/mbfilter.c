@@ -95,6 +95,8 @@
 
 #include "rare_cp_bitvec.h"
 
+#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
+
 /*
  *  buffering converter
  */
@@ -327,7 +329,8 @@ int mbfl_encoding_detector_feed(mbfl_encoding_detector *identd, mbfl_string *str
 			mbfl_convert_filter *filter = identd->filter_list[i];
 			mbfl_encoding_detector_data *data = &identd->filter_data[i];
 			if (!data->num_illegalchars) {
-				(*filter->filter_function)(*p, filter);
+				int ret = (*filter->filter_function)(*p, filter);
+				ZEND_ASSERT(ret >= 0);
 				if (data->num_illegalchars) {
 					bad++;
 				}
@@ -757,7 +760,7 @@ collector_substr(int c, void* data)
 	}
 
 	if (pc->output >= pc->start) {
-		(*pc->next_filter->filter_function)(c, pc->next_filter);
+		CK((*pc->next_filter->filter_function)(c, pc->next_filter));
 	}
 
 	pc->output++;
@@ -858,11 +861,17 @@ mbfl_substr(
 		mbfl_convert_filter *decoder;
 		mbfl_convert_filter *encoder;
 
+		size_t init_size;
 		if (length == MBFL_SUBSTR_UNTIL_END) {
 			length = mbfl_strlen(string) - from;
+			init_size = length;
+		} else {
+			/* clamp init size to avoid over allocation */
+			init_size = MIN(string->len, length);
 		}
 
-		mbfl_memory_device_init(&device, length + 1, 0);
+		init_size += 1;
+		mbfl_memory_device_init(&device, init_size, 0);
 		mbfl_string_init(result);
 		result->encoding = string->encoding;
 		/* output code filter */
@@ -1030,13 +1039,17 @@ mbfl_strcut(
 			return NULL;
 		}
 
-		mbfl_memory_device_init(&device, length + 8, 0);
+		/* clamp init size to avoid over allocation */
+		size_t init_size = MIN(string->len, length) + 8;
+		mbfl_memory_device_init(&device, init_size, 0);
 
 		p = string->val;
 
 		/* search start position */
 		for (q = string->val + from; p < q; p++) {
-			(*encoder->filter_function)(*p, encoder);
+			if ((*encoder->filter_function)(*p, encoder) < 0) {
+				goto err;
+			}
 		}
 
 		/* switch the drain direction */
@@ -1060,7 +1073,9 @@ mbfl_strcut(
 			/* output a little shorter than "length" */
 			/* XXX: the constant "20" was determined purely on the heuristics. */
 			for (r = p + length - 20; p < r; p++) {
-				(*encoder->filter_function)(*p, encoder);
+				if ((*encoder->filter_function)(*p, encoder) < 0) {
+					goto err_prev_bk;
+				}
 			}
 
 			/* if the offset of the resulting string exceeds the length,
@@ -1124,7 +1139,9 @@ mbfl_strcut(
 
 		/* detect end position */
 		while (p < q) {
-			(*encoder->filter_function)(*p, encoder);
+			if ((*encoder->filter_function)(*p, encoder) < 0) {
+				goto err_bk;
+			}
 
 			if (device.pos > length) {
 				/* restore filter */
@@ -1196,6 +1213,31 @@ mbfl_strcut(
 
 		mbfl_convert_filter_delete(encoder);
 		mbfl_convert_filter_delete(decoder);
+
+		return result;
+
+		/* Conversion failed, which for these filters means the output device
+		 * could not be grown. Release the saved filter state which the normal
+		 * exit path would have released, then everything else. */
+err_bk:
+		if (bk.decoder.filter_dtor)
+			bk.decoder.filter_dtor(&bk.decoder);
+		if (bk.encoder.filter_dtor)
+			bk.encoder.filter_dtor(&bk.encoder);
+		goto err;
+
+err_prev_bk:
+		if (_bk.decoder.filter_dtor)
+			_bk.decoder.filter_dtor(&_bk.decoder);
+		if (_bk.encoder.filter_dtor)
+			_bk.encoder.filter_dtor(&_bk.encoder);
+
+err:
+		mbfl_convert_filter_delete(encoder);
+		mbfl_convert_filter_delete(decoder);
+		mbfl_memory_device_clear(&device);
+
+		return NULL;
 	}
 
 	return result;
@@ -1236,7 +1278,7 @@ mime_header_encoder_block_collector(int c, void *data)
 		pe->prevpos = pe->outdev.pos;
 		mbfl_convert_filter_copy(pe->conv2_filter, pe->conv2_filter_backup);
 		mbfl_convert_filter_copy(pe->encod_filter, pe->encod_filter_backup);
-		(*pe->conv2_filter->filter_function)(c, pe->conv2_filter);
+		CK((*pe->conv2_filter->filter_function)(c, pe->conv2_filter));
 		(*pe->conv2_filter->filter_flush)(pe->conv2_filter);
 		(*pe->encod_filter->filter_flush)(pe->encod_filter);
 		n = pe->outdev.pos - pe->linehead + pe->firstindent;
@@ -1263,6 +1305,8 @@ mime_header_encoder_block_collector(int c, void *data)
 		pe->status2 = 1;
 		break;
 	}
+
+	CK(c);
 
 	return 0;
 }
@@ -1294,7 +1338,7 @@ mime_header_encoder_collector(int c, void *data)
 
 	switch (pe->status1) {
 	case 11:	/* encoded word */
-		(*pe->block_filter->filter_function)(c, pe->block_filter);
+		CK((*pe->block_filter->filter_function)(c, pe->block_filter));
 		break;
 
 	default:	/* ASCII */
@@ -1327,7 +1371,7 @@ mime_header_encoder_collector(int c, void *data)
 				}
 				mbfl_convert_filter_devcat(pe->block_filter, &pe->tmpdev);
 				mbfl_memory_device_reset(&pe->tmpdev);
-				(*pe->block_filter->filter_function)(c, pe->block_filter);
+				CK((*pe->block_filter->filter_function)(c, pe->block_filter));
 				pe->status1 = 11;
 			}
 		}
@@ -1500,7 +1544,10 @@ mbfl_mime_header_encode(
 	n = string->len;
 	p = string->val;
 	while (n > 0) {
-		(*pe->conv1_filter->filter_function)(*p++, pe->conv1_filter);
+		if (UNEXPECTED((*pe->conv1_filter->filter_function)(*p++, pe->conv1_filter) < 0)) {
+			mime_header_encoder_delete(pe);
+			return NULL;
+		}
 		n--;
 	}
 
@@ -1547,7 +1594,7 @@ mime_header_decoder_collector(int c, void* data)
 			} else if (c == 0x0d || c == 0x0a) {	/* CR or LF */
 				pd->status = 9;
 			} else {
-				(*pd->conv1_filter->filter_function)(c, pd->conv1_filter);
+				CK((*pd->conv1_filter->filter_function)(c, pd->conv1_filter));
 				pd->status = 0;
 			}
 		}
@@ -1619,7 +1666,7 @@ mime_header_decoder_collector(int c, void* data)
 		if (c == 0x3f) {		/* ? */
 			pd->status = 6;
 		} else {
-			(*pd->deco_filter->filter_function)(c, pd->deco_filter);
+			CK((*pd->deco_filter->filter_function)(c, pd->deco_filter));
 		}
 		break;
 	case 6:		/* check end position */
@@ -1630,9 +1677,9 @@ mime_header_decoder_collector(int c, void* data)
 			mbfl_convert_filter_reset(pd->conv1_filter, &mbfl_encoding_ascii, &mbfl_encoding_wchar);
 			pd->status = 7;
 		} else {
-			(*pd->deco_filter->filter_function)(0x3f, pd->deco_filter);
+			CK((*pd->deco_filter->filter_function)(0x3f, pd->deco_filter));
 			if (c != 0x3f) {		/* ? */
-				(*pd->deco_filter->filter_function)(c, pd->deco_filter);
+				CK((*pd->deco_filter->filter_function)(c, pd->deco_filter));
 				pd->status = 5;
 			}
 		}
@@ -1658,7 +1705,7 @@ mime_header_decoder_collector(int c, void* data)
 				if (pd->status == 8) {
 					mbfl_memory_device_output(0x20, &pd->tmpdev);	/* SPACE */
 				} else {
-					(*pd->conv1_filter->filter_function)(0x20, pd->conv1_filter);
+					CK((*pd->conv1_filter->filter_function)(0x20, pd->conv1_filter));
 				}
 				mbfl_memory_device_output(c, &pd->tmpdev);
 				pd->status = 1;
@@ -1678,7 +1725,7 @@ mime_header_decoder_collector(int c, void* data)
 			mbfl_memory_device_output(c, &pd->tmpdev);
 			pd->status = 1;
 		} else {
-			(*pd->conv1_filter->filter_function)(c, pd->conv1_filter);
+			CK((*pd->conv1_filter->filter_function)(c, pd->conv1_filter));
 		}
 		break;
 	}
@@ -1773,7 +1820,10 @@ mbfl_mime_header_decode(
 	n = string->len;
 	p = string->val;
 	while (n > 0) {
-		mime_header_decoder_collector(*p++, pd);
+		if (UNEXPECTED(mime_header_decoder_collector(*p++, pd) < 0)) {
+			mime_header_decoder_delete(pd);
+			return NULL;
+		}
 		n--;
 	}
 

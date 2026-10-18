@@ -159,15 +159,29 @@ static inline void mb_convert_buf_init(mb_convert_buf *buf, size_t initsize, uin
 	buf->error_mode = err_mode;
 }
 
+static inline zend_result mb_convert_buf_ensure(mb_convert_buf *buf, unsigned char **out, unsigned char **limit, size_t needed)
+{
+	ZEND_ASSERT(*out <= *limit);
+	if ((*limit - *out) < needed) {
+		size_t oldsize = *limit - (unsigned char*)ZSTR_VAL(buf->str);
+		size_t newsize = oldsize + MAX(oldsize >> 1, needed);
+		zend_string *newstr = safe_ferealloc(buf->str, 1, newsize, _ZSTR_STRUCT_SIZE(0), /* fallible */ true);
+		if (!newstr) {
+			/* An earlier growth may have moved the buffer. */
+			buf->out = *out;
+			buf->limit = *limit;
+			return FAILURE;
+		}
+		*out = (unsigned char*)ZSTR_VAL(newstr) + (*out - (unsigned char*)ZSTR_VAL(buf->str));
+		*limit = (unsigned char*)ZSTR_VAL(newstr) + newsize;
+		buf->str = newstr;
+	}
+	return SUCCESS;
+}
+
 #define MB_CONVERT_BUF_ENSURE(buf, out, limit, needed) \
-	ZEND_ASSERT(out <= limit); \
-	if ((limit - out) < (needed)) { \
-		size_t oldsize = limit - (unsigned char*)ZSTR_VAL(buf->str); \
-		size_t newsize = oldsize + MAX(oldsize >> 1, needed); \
-		zend_string *newstr = erealloc(buf->str, _ZSTR_STRUCT_SIZE(newsize)); \
-		out = (unsigned char*)ZSTR_VAL(newstr) + (out - (unsigned char*)ZSTR_VAL(buf->str)); \
-		limit = (unsigned char*)ZSTR_VAL(newstr) + newsize; \
-		buf->str = newstr; \
+	if (UNEXPECTED(mb_convert_buf_ensure((buf), &(out), &(limit), (needed)) == FAILURE)) { \
+		return; \
 	}
 
 #define MB_CONVERT_BUF_STORE(buf, _out, _limit) buf->out = _out; buf->limit = _limit

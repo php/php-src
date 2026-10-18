@@ -282,6 +282,30 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 }
 /* }}} */
 
+static PHP_INI_MH(OnChangeMemoryHardLimitPercent)
+{
+	zend_long value;
+	if (new_value) {
+		value = zend_ini_parse_quantity_warn(new_value, entry->name);
+	} else {
+		value = -1; /* default: 200% if memory limit < 1G, fixed 1G buffer otherwise */
+	}
+
+	if (value < 100 && value != -1) {
+		zend_error(E_WARNING, "memory_hard_limit_percent must be >= 100, or -1");
+		return FAILURE;
+	}
+
+	if (zend_set_memory_hard_limit_percent(value) == FAILURE) {
+		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
+			zend_error(E_WARNING, "Failed to set memory_hard_limit_percent to " ZEND_LONG_FMT, value);
+			return FAILURE;
+		}
+	}
+
+	return SUCCESS;
+}
+
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnSetLogFilter)
 {
@@ -741,6 +765,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("mail.log",					NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateMailLog,			mail_log,			php_core_globals,	core_globals)
 	PHP_INI_ENTRY("browscap",					NULL,		PHP_INI_SYSTEM,		OnChangeBrowscap)
 	PHP_INI_ENTRY("memory_limit",				"128M",		PHP_INI_ALL,		OnChangeMemoryLimit)
+	PHP_INI_ENTRY("memory_hard_limit_percent",	NULL,		PHP_INI_ALL,		OnChangeMemoryHardLimitPercent)
 	PHP_INI_ENTRY("precision",					"14",		PHP_INI_ALL,		OnSetPrecision)
 	PHP_INI_ENTRY("sendmail_from",				NULL,		PHP_INI_ALL,		NULL)
 	PHP_INI_ENTRY("sendmail_path",	DEFAULT_SENDMAIL_PATH,	PHP_INI_SYSTEM,		NULL)
@@ -945,6 +970,10 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 	char *origin;
 	zend_string *message;
 	int is_function = 0;
+
+	if (ZEND_HAS_OOM()) {
+		return;
+	}
 
 	/* get error text into buffer and escape for html if necessary */
 	buffer_len = (int)vspprintf(&buffer, 0, format, args);
@@ -1272,7 +1301,10 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 		PG(last_error_lineno) = error_lineno;
 	}
 
-	if (zend_alloc_in_memory_limit_error_reporting()) {
+	/* Discarding the output buffers frees every handler on the stack, which is
+	 * not safe while one of them is running */
+	if (zend_alloc_in_memory_limit_error_reporting()
+			&& !(php_output_get_status() & PHP_OUTPUT_LOCKED)) {
 		php_output_discard_all();
 	}
 
@@ -1388,7 +1420,7 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 		case E_PARSE:
 		case E_COMPILE_ERROR:
 		case E_USER_ERROR:
-			EG(exit_status) = 255;
+			EG(exit_status) = zend_mm_max_allocs_hit() ? ZEND_MM_MAX_ALLOCS_EXIT_STATUS : 255;
 			if (module_initialized) {
 				if (!PG(display_errors) &&
 				    !SG(headers_sent) &&
@@ -1781,6 +1813,7 @@ zend_result php_request_startup(void)
 		PG(in_user_include) = 0;
 
 		zend_activate();
+		php_basic_early_rinit();
 		sapi_activate();
 
 #ifdef ZEND_SIGNALS
@@ -1826,6 +1859,11 @@ zend_result php_request_startup(void)
 
 	SG(sapi_started) = 1;
 
+	char *max = getenv("ZEND_MM_MAX_ALLOCS");
+	if (max) {
+		zend_mm_set_max_allocs(ZEND_ATOL(max));
+	}
+
 	return retval;
 }
 /* }}} */
@@ -1836,6 +1874,7 @@ void php_request_shutdown(void *dummy)
 	bool report_memleaks;
 
 	EG(flags) |= EG_FLAGS_IN_SHUTDOWN;
+	EG(delayed_oom).state = ZEND_OOM_STATE_NONE;
 
 	report_memleaks = PG(report_memleaks);
 
@@ -1892,6 +1931,8 @@ void php_request_shutdown(void *dummy)
 
 		for (i=0; i<NUM_TRACK_VARS; i++) {
 			zval_ptr_dtor(&PG(http_globals)[i]);
+			/* May be accessed before php_request_startup() */
+			ZVAL_UNDEF(&PG(http_globals)[i]);
 		}
 	} zend_end_try();
 
@@ -1924,9 +1965,11 @@ void php_request_shutdown(void *dummy)
 	/* 15. Free Willy (here be crashes) */
 	zend_arena_destroy(CG(arena));
 	zend_interned_strings_deactivate();
+	clear_last_error();
 	zend_try {
 		shutdown_memory_manager(CG(unclean_shutdown) || !report_memleaks, 0);
 	} zend_end_try();
+	EG(delayed_oom).state = ZEND_OOM_STATE_NONE;
 
 	/* Reset memory limit, as the reset during INI_STAGE_DEACTIVATE may have failed.
 	 * At this point, no memory beyond a single chunk should be in use. */
@@ -1947,6 +1990,9 @@ void php_request_shutdown(void *dummy)
 #ifdef HAVE_DTRACE
 	DTRACE_REQUEST_SHUTDOWN(SAFE_FILENAME(SG(request_info).path_translated), SAFE_FILENAME(SG(request_info).request_uri), (char *)SAFE_FILENAME(SG(request_info).request_method));
 #endif /* HAVE_DTRACE */
+
+	/* May be accessed before php_request_startup() */
+	PG(modules_activated) = 0;
 }
 /* }}} */
 

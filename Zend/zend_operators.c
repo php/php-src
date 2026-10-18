@@ -2854,7 +2854,7 @@ ZEND_API char* ZEND_FASTCALL zend_str_toupper_dup_ex(const char *source, size_t 
 }
 /* }}} */
 
-ZEND_API zend_string* ZEND_FASTCALL zend_string_tolower_ex(zend_string *str, bool persistent) /* {{{ */
+static zend_always_inline zend_string* ZEND_FASTCALL _zend_string_ftolower_ex(zend_string *str, bool persistent, bool fallible)
 {
 	size_t length = ZSTR_LEN(str);
 	unsigned char *p = (unsigned char *) ZSTR_VAL(str);
@@ -2865,7 +2865,10 @@ ZEND_API zend_string* ZEND_FASTCALL zend_string_tolower_ex(zend_string *str, boo
 	while (p + BLOCKCONV_STRIDE <= end) {
 		BLOCKCONV_LOAD(p);
 		if (BLOCKCONV_FOUND()) {
-			zend_string *res = zend_string_alloc(length, persistent);
+			zend_string *res = zend_string_falloc(length, persistent, fallible);
+			if (ZEND_CONST_COND(fallible, true) && UNEXPECTED(!res)) {
+				return NULL;
+			}
 			memcpy(ZSTR_VAL(res), ZSTR_VAL(str), p - (unsigned char *) ZSTR_VAL(str));
 			unsigned char *q = (unsigned char*) ZSTR_VAL(res) + (p - (unsigned char*) ZSTR_VAL(str));
 
@@ -2886,7 +2889,10 @@ ZEND_API zend_string* ZEND_FASTCALL zend_string_tolower_ex(zend_string *str, boo
 
 	while (p < end) {
 		if (*p != zend_tolower_ascii(*p)) {
-			zend_string *res = zend_string_alloc(length, persistent);
+			zend_string *res = zend_string_falloc(length, persistent, fallible);
+			if (ZEND_CONST_COND(fallible, true) && UNEXPECTED(!res)) {
+				return NULL;
+			}
 			memcpy(ZSTR_VAL(res), ZSTR_VAL(str), p - (unsigned char*) ZSTR_VAL(str));
 
 			unsigned char *q = (unsigned char*) ZSTR_VAL(res) + (p - (unsigned char*) ZSTR_VAL(str));
@@ -2901,7 +2907,17 @@ ZEND_API zend_string* ZEND_FASTCALL zend_string_tolower_ex(zend_string *str, boo
 
 	return zend_string_copy(str);
 }
+
+ZEND_API zend_string* ZEND_FASTCALL zend_string_tolower_ex(zend_string *str, bool persistent) /* {{{ */
+{
+	return _zend_string_ftolower_ex(str, persistent, /* fallible */ false);
+}
 /* }}} */
+
+ZEND_API zend_string* ZEND_FASTCALL zend_string_ftolower_ex(zend_string *str, bool persistent)
+{
+	return _zend_string_ftolower_ex(str, persistent, /* fallible */ true);
+}
 
 ZEND_API zend_string* ZEND_FASTCALL zend_string_toupper_ex(zend_string *str, bool persistent) /* {{{ */
 {

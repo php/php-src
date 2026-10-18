@@ -75,6 +75,10 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 		bucket = php_stream_bucket_make_writeable(buckets_in->head);
 
 		while (bin < (unsigned int) bucket->buflen && !data->finished) {
+			/* Output is unbounded relative to the input. */
+			if (ZEND_HAS_OOM()) {
+				break;
+			}
 
 			desired = bucket->buflen - bin;
 			if (desired > data->inbuf_len) {
@@ -121,7 +125,7 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 	if (!data->finished && flags & PSFS_FLAG_FLUSH_CLOSE) {
 		/* Spit it out! */
 		status = Z_OK;
-		while (status == Z_OK) {
+		while (status == Z_OK && !ZEND_HAS_OOM()) {
 			status = inflate(&(data->strm), Z_FINISH);
 			if (data->strm.avail_out < data->outbuf_len) {
 				size_t bucketlen = data->outbuf_len - data->strm.avail_out;

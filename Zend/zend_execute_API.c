@@ -393,10 +393,24 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 		}
 #endif
 	} else {
+		/* may be used by zend_error_zstr_at before init_executor */
+		ZVAL_UNDEF(&EG(user_error_handler));
+		ZVAL_UNDEF(&EG(user_exception_handler));
+		memset(&EG(user_error_handlers_error_reporting), 0, sizeof(EG(user_error_handlers_error_reporting)));
+		memset(&EG(user_error_handlers), 0, sizeof(EG(user_error_handlers)));
+		memset(&EG(user_exception_handlers), 0, sizeof(EG(user_exception_handlers)));
+
 		zend_hash_discard(EG(zend_constants), EG(persistent_constants_count));
 	}
 
 	zend_objects_store_free_object_storage(&EG(objects_store), fast_shutdown);
+
+	/* may be used by zend_error_zstr_at before init_executor */
+	EG(record_errors) = false;
+	EG(num_errors) = 0;
+	EG(errors) = NULL;
+	EG(error_handling) = EH_NORMAL;
+	EG(exception) = NULL;
 }
 
 void shutdown_executor(void) /* {{{ */
@@ -431,6 +445,8 @@ void shutdown_executor(void) /* {{{ */
 		 */
 		zend_hash_discard(EG(function_table), EG(persistent_functions_count));
 		zend_hash_discard(EG(class_table), EG(persistent_classes_count));
+		EG(objects_store).object_buckets = NULL;
+		EG(objects_store).top = 1;
 	} else {
 		zend_vm_stack_destroy();
 
@@ -761,7 +777,11 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 	if (!EG(active)) {
 		return FAILURE; /* executor is already inactive */
 	}
-
+	if (ZEND_HAS_OOM()) {
+		/* Callers expect SUCCESS || EG(exception), so let's throw right now */
+		zend_handle_delayed_oom();
+		return FAILURE;
+	}
 	if (EG(exception)) {
 		if (fci_cache) {
 			zend_release_fcall_info_cache(fci_cache);
@@ -965,7 +985,7 @@ cleanup_args:
 		}
 
 #if ZEND_DEBUG
-		if (!EG(exception) && call->func) {
+		if (!EG(exception) && !ZEND_HAS_OOM() && call->func) {
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
@@ -986,21 +1006,24 @@ cleanup_args:
 			zval_ptr_dtor(fci->retval);
 			ZVAL_UNDEF(fci->retval);
 		}
+	}
 
-		/* This flag is regularly checked while running user functions, but not internal
-		 * So see whether interrupt flag was set while the function was running... */
-		if (zend_atomic_bool_exchange_ex(&EG(vm_interrupt), false)) {
-			if (zend_atomic_bool_load_ex(&EG(timed_out))) {
-				zend_timeout();
-			} else if (zend_interrupt_function) {
-				zend_interrupt_function(EG(current_execute_data));
-			}
-		}
-
-		if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS)) {
-			OBJ_RELEASE(Z_OBJ(call->This));
+	if (UNEXPECTED(zend_atomic_bool_exchange_ex(&EG(vm_interrupt), false))) {
+		if (zend_atomic_bool_load_ex(&EG(timed_out))) {
+			zend_timeout();
+		} else if (ZEND_HAS_OOM()) {
+			zend_handle_delayed_oom();
+			zval_ptr_dtor(fci->retval);
+			ZVAL_UNDEF(fci->retval);
+		} else if (zend_interrupt_function) {
+			zend_interrupt_function(EG(current_execute_data));
 		}
 	}
+
+	if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS)) {
+		OBJ_RELEASE(Z_OBJ(call->This));
+	}
+
 	EG(fake_scope) = orig_fake_scope;
 
 	zend_vm_stack_free_call_frame(call);

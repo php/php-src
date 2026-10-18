@@ -114,6 +114,12 @@ ZEND_METHOD(SensitiveParameter, __construct)
 	ZEND_PARSE_PARAMETERS_NONE();
 }
 
+void zend_sensitive_parameter_value_init(zend_object *obj, zval *value)
+{
+	ZEND_ASSERT(obj->ce == zend_ce_sensitive_parameter_value);
+	zend_update_property(zend_ce_sensitive_parameter_value, obj, "value", strlen("value"), value);
+}
+
 ZEND_METHOD(SensitiveParameterValue, __construct)
 {
 	zval *value;
@@ -122,7 +128,7 @@ ZEND_METHOD(SensitiveParameterValue, __construct)
 		Z_PARAM_ZVAL(value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_update_property(zend_ce_sensitive_parameter_value, Z_OBJ_P(ZEND_THIS), "value", strlen("value"), value);
+	zend_sensitive_parameter_value_init(Z_OBJ_P(ZEND_THIS), value);
 }
 
 ZEND_METHOD(SensitiveParameterValue, getValue)

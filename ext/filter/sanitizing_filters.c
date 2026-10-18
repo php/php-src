@@ -23,7 +23,7 @@ typedef unsigned long filter_map[256];
 /* }}} */
 
 /* {{{ HELPER FUNCTIONS */
-static void php_filter_encode_html(zval *value, const unsigned char *chars)
+static bool php_filter_encode_html(zval *value, const unsigned char *chars)
 {
 	smart_str str = {0};
 	size_t len = Z_STRLEN_P(value);
@@ -31,7 +31,7 @@ static void php_filter_encode_html(zval *value, const unsigned char *chars)
 	unsigned char *e = s + len;
 
 	if (Z_STRLEN_P(value) == 0) {
-		return;
+		return true;
 	}
 
 	while (s < e) {
@@ -44,10 +44,18 @@ static void php_filter_encode_html(zval *value, const unsigned char *chars)
 			smart_str_appendc(&str, *s);
 		}
 		s++;
+
+		if (ZEND_HAS_OOM()) {
+			smart_str_free(&str);
+			zval_ptr_dtor(value);
+			ZVAL_EMPTY_STRING(value);
+			return false;
+		}
 	}
 
 	zval_ptr_dtor(value);
 	ZVAL_STR(value, smart_str_extract(&str));
+	return true;
 }
 
 static const unsigned char hexchars[] = "0123456789ABCDEF";
@@ -72,7 +80,12 @@ static void php_filter_encode_url(zval *value, const unsigned char* chars, const
 		tmp[*s++] = '\0';
 	}
 
-	str = zend_string_safe_alloc(Z_STRLEN_P(value), 3, 0, 0);
+	str = zend_string_safe_falloc(Z_STRLEN_P(value), 3, 0, /* persistent */ false, /* fallible */ true);
+	if (!str) {
+		zval_ptr_dtor(value);
+		ZVAL_EMPTY_STRING(value);
+		return;
+	}
 	p = (unsigned char *) ZSTR_VAL(str);
 	s = (unsigned char *) Z_STRVAL_P(value);
 	e = s + Z_STRLEN_P(value);
@@ -190,7 +203,9 @@ void php_filter_string(PHP_INPUT_FILTER_PARAM_DECL)
 		memset(enc + 127, 1, sizeof(enc) - 127);
 	}
 
-	php_filter_encode_html(value, enc);
+	if (!php_filter_encode_html(value, enc)) {
+		return;
+	}
 
 	/* strip tags, implicitly also removes \0 chars */
 	new_len = php_strip_tags_ex(Z_STRVAL_P(value), Z_STRLEN_P(value), NULL, 0, 1);
