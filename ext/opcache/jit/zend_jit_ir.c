@@ -5772,6 +5772,9 @@ static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
 				if (Z_MODE(res_addr) == IS_REG) {
 					ref = ir_CONST_LONG(0); // dead code
 				}
+			} else if (op2_lval == -1) {
+				/* Prevent overflow error/crash if op1 == LONG_MIN */
+				ref = ir_CONST_LONG(0);
 			} else if (zend_long_is_power_of_two(op2_lval) && op1_range && op1_range->min >= 0) {
 				ref = ir_AND_L(jit_Z_LVAL(jit, op1_addr), ir_CONST_LONG(op2_lval - 1));
 			} else {
