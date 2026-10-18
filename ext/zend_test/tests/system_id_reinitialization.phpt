@@ -4,8 +4,6 @@ System ID reinitialization accepts extension entropy after engine restart
 <?php
 if (!extension_loaded('zend_test')) die('skip zend_test extension required');
 ?>
---EXTENSIONS--
-zend_test
 --INI--
 zend_test.register_system_entropy=1
 --PHPDBG--
