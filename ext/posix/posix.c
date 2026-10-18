@@ -1235,12 +1235,12 @@ PHP_FUNCTION(posix_setrlimit)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!POSIX_RLIM_VALID(cur)) {
-		zend_argument_value_error(2, "must be greater or equal to -1");
+		zend_argument_value_error(2, "must be greater than or equal to -1, or POSIX_RLIMIT_INFINITY");
 		RETURN_THROWS();
 	}
 
 	if (!POSIX_RLIM_VALID(max)) {
-		zend_argument_value_error(3, "must be greater or equal to -1");
+		zend_argument_value_error(3, "must be greater than or equal to -1, or POSIX_RLIMIT_INFINITY");
 		RETURN_THROWS();
 	}
 
