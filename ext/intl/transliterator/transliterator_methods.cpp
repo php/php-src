@@ -22,6 +22,8 @@
 #endif
 
 #include <unicode/uenum.h>
+#include <unicode/translit.h>
+#include "../intl_convertcpp.h"
 
 extern "C" {
 #include "php_intl.h"
@@ -219,6 +221,33 @@ U_CFUNC PHP_FUNCTION( transliterator_create_inverse )
 	transliterator_object_construct( object, utrans, TRANSLITERATOR_ERROR_CODE_P( to ) );
 	/* no need to close the transliterator manually on construction error */
 	INTL_METHOD_CHECK_STATUS_OR_NULL( to, "internal constructor call failed" );
+}
+/* }}} */
+
+/* {{{ Export the rules used to recreate a transliterator. */
+U_CFUNC PHP_FUNCTION( transliterator_to_rules )
+{
+	bool escape_unprintable = false;
+	TRANSLITERATOR_METHOD_INIT_VARS;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|b",
+			&object, Transliterator_ce_ptr, &escape_unprintable) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	TRANSLITERATOR_METHOD_FETCH_OBJECT;
+
+	UnicodeString rules;
+	reinterpret_cast<const icu::Transliterator *>(to->utrans)->toRules(rules, escape_unprintable);
+
+	zend_string *u8str = intl_charFromString(rules, TRANSLITERATOR_ERROR_CODE_P(to));
+	if (!u8str) {
+		if (U_SUCCESS(TRANSLITERATOR_ERROR_CODE(to))) {
+			TRANSLITERATOR_ERROR_CODE(to) = U_MEMORY_ALLOCATION_ERROR;
+		}
+		INTL_METHOD_CHECK_STATUS(to, "Failed to export transliterator rules");
+	}
+	RETURN_STR(u8str);
 }
 /* }}} */
 
