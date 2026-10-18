@@ -136,6 +136,8 @@ PHP                                                                        NEWS
     cannot describe a parameter). (Ilia Alshanetsky)
 
 - Opcache:
+  . Fixed bug GH-24397 (Assertion failure when dumping JIT IR).
+    (Ilia Alshanetsky)
   . Fixed tracing JIT returning a wrapped integer instead of a float on
     integer overflow after an integer was compared with a float or
     numeric-string literal. (Ilia Alshanetsky)
