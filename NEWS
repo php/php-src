@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.7.0alpha1
 
+- Core:
+  . Improved performance of hash table iterators when several are alive, as in
+    nested foreach by reference. (Nicolas Grekas)
+
 - Curl:
   . curl_multi_exec() now throws a TypeError when still_running is not an int.
     (arshidkv12)
