@@ -166,10 +166,14 @@ SAPI_API void sapi_handle_post(void *arg)
 		SG(request_info).post_entry->post_handler(SG(request_info).content_type_dup, arg);
 		efree(SG(request_info).content_type_dup);
 		SG(request_info).content_type_dup = NULL;
+
+		if (ZEND_HAS_OOM()) {
+			zend_handle_delayed_oom();
+		}
 	}
 }
 
-static void sapi_read_post_data(void)
+SAPI_API void sapi_read_post_data(void)
 {
 	sapi_post_entry *post_entry;
 	uint32_t content_type_length = (uint32_t)strlen(SG(request_info).content_type);
@@ -1023,7 +1027,7 @@ SAPI_API zend_stat_t *sapi_get_stat(void)
 SAPI_API char *sapi_getenv(const char *name, size_t name_len)
 {
 	char *value, *tmp;
-	
+
 	if (!sapi_module.getenv) {
 		return NULL;
 	}

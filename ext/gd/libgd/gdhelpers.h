@@ -13,8 +13,10 @@ extern char *gd_strtok_r(char *s, char *sep, char **state);
 	free memory allocated by these functions with the
 	right version of free(). */
 #define gdCalloc(nmemb, size)	ecalloc(nmemb, size)
+#define gdFCalloc(nmemb, size)	fecalloc(nmemb, size, true)
 #define gdMalloc(size)		emalloc(size)
 #define gdRealloc(ptr, size)	erealloc(ptr, size)
+#define gdFMalloc(size)		femalloc(size, true)
 #define gdEstrdup(ptr)		estrdup(ptr)
 #define gdFree(ptr)		efree(ptr)
 #define gdPMalloc(ptr)		pemalloc(ptr, 1)
@@ -48,4 +50,3 @@ int overflow2(int a, int b);
 #define DPI2DPM(dpi)   (unsigned int)((dpi)/0.0254 + 0.5)
 
 #endif /* GDHELPERS_H */
-

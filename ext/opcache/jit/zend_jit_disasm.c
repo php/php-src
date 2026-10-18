@@ -581,6 +581,7 @@ static int zend_jit_disasm_init(void)
 	REGISTER_EG(vm_interrupt);
 	REGISTER_EG(exception_op);
 	REGISTER_EG(timed_out);
+	REGISTER_EG(delayed_oom);
 	REGISTER_EG(current_execute_data);
 	REGISTER_EG(vm_stack_top);
 	REGISTER_EG(vm_stack_end);

@@ -216,13 +216,17 @@ mbfl_strcut(
 			return NULL;
 		}
 
-		mbfl_memory_device_init(&device, length + 8, 0);
+		/* clamp init size to avoid over allocation */
+		size_t init_size = MIN(string->len, length) + 8;
+		mbfl_memory_device_init(&device, init_size, 0);
 
 		p = string->val;
 
 		/* search start position */
 		for (q = string->val + from; p < q; p++) {
-			(*encoder->filter_function)(*p, encoder);
+			if ((*encoder->filter_function)(*p, encoder) < 0) {
+				goto err;
+			}
 		}
 
 		/* switch the drain direction */
@@ -246,7 +250,9 @@ mbfl_strcut(
 			/* output a little shorter than "length" */
 			/* XXX: the constant "20" was determined purely on the heuristics. */
 			for (r = p + length - 20; p < r; p++) {
-				(*encoder->filter_function)(*p, encoder);
+				if ((*encoder->filter_function)(*p, encoder) < 0) {
+					goto err_prev_bk;
+				}
 			}
 
 			/* if the offset of the resulting string exceeds the length,
@@ -310,7 +316,9 @@ mbfl_strcut(
 
 		/* detect end position */
 		while (p < q) {
-			(*encoder->filter_function)(*p, encoder);
+			if ((*encoder->filter_function)(*p, encoder) < 0) {
+				goto err_bk;
+			}
 
 			if (device.pos > length) {
 				/* restore filter */
@@ -382,6 +390,31 @@ mbfl_strcut(
 
 		mbfl_convert_filter_delete(encoder);
 		mbfl_convert_filter_delete(decoder);
+
+		return result;
+
+		/* Conversion failed, which for these filters means the output device
+		 * could not be grown. Release the saved filter state which the normal
+		 * exit path would have released, then everything else. */
+err_bk:
+		if (bk.decoder.filter_dtor)
+			bk.decoder.filter_dtor(&bk.decoder);
+		if (bk.encoder.filter_dtor)
+			bk.encoder.filter_dtor(&bk.encoder);
+		goto err;
+
+err_prev_bk:
+		if (_bk.decoder.filter_dtor)
+			_bk.decoder.filter_dtor(&_bk.decoder);
+		if (_bk.encoder.filter_dtor)
+			_bk.encoder.filter_dtor(&_bk.encoder);
+
+err:
+		mbfl_convert_filter_delete(encoder);
+		mbfl_convert_filter_delete(decoder);
+		mbfl_memory_device_clear(&device);
+
+		return NULL;
 	}
 
 	return result;

@@ -316,8 +316,11 @@ static void xml_parser_free_ltags(xml_parser *parser)
 {
 	if (parser->ltags) {
 		int inx;
-		for (inx = 0; ((inx < parser->level) && (inx < XML_MAXLEVEL)); inx++)
-			efree(parser->ltags[ inx ]);
+		for (inx = 0; ((inx < parser->level) && (inx < XML_MAXLEVEL)); inx++) {
+			if (parser->ltags[ inx ]) {
+				efree(parser->ltags[ inx ]);
+			}
+		}
 		efree(parser->ltags);
 	}
 }
@@ -610,6 +613,11 @@ static zval *xml_get_ctag(xml_parser *parser)
 	return NULL;
 }
 
+static zend_always_inline bool xml_handler_aborted(void)
+{
+	return EG(exception) != NULL || ZEND_HAS_OOM();
+}
+
 /* {{{ _xml_startElementHandler() */
 void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Char **attributes)
 {
@@ -619,6 +627,10 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 	zval retval, args[3];
 
 	if (!parser) {
+		return;
+	}
+
+	if (UNEXPECTED(xml_handler_aborted())) {
 		return;
 	}
 
@@ -643,6 +655,14 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 			attributes += 2;
 
 			zend_string_release_ex(att, 0);
+
+			if (ZEND_HAS_OOM()) {
+				zend_string_release_ex(tag_name, false);
+				zval_ptr_dtor(&args[0]);
+				zval_ptr_dtor(&args[1]);
+				zval_ptr_dtor(&args[2]);
+				return;
+			}
 		}
 
 		xml_call_handler(parser, &parser->startElementHandler, parser->startElementPtr, 3, args, &retval);
@@ -683,6 +703,13 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 				attributes += 2;
 
 				zend_string_release_ex(att, 0);
+
+				if (ZEND_HAS_OOM()) {
+					zend_string_release_ex(tag_name, false);
+					zval_ptr_dtor(&tag);
+					zval_ptr_dtor(&atr);
+					return;
+				}
 			}
 
 			if (atcnt) {
@@ -719,6 +746,10 @@ void _xml_endElementHandler(void *userData, const XML_Char *name)
 	xml_parser *parser = (xml_parser *)userData;
 
 	if (!parser) {
+		return;
+	}
+
+	if (UNEXPECTED(xml_handler_aborted())) {
 		return;
 	}
 
@@ -764,6 +795,7 @@ void _xml_endElementHandler(void *userData, const XML_Char *name)
 
 	if ((parser->ltags) && (parser->level <= XML_MAXLEVEL)) {
 		efree(parser->ltags[parser->level-1]);
+		parser->ltags[parser->level-1] = NULL;
 	}
 
 	parser->level--;
@@ -776,6 +808,10 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 	xml_parser *parser = (xml_parser *)userData;
 
 	if (!parser) {
+		return;
+	}
+
+	if (UNEXPECTED(xml_handler_aborted())) {
 		return;
 	}
 

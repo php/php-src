@@ -192,6 +192,10 @@ namespace {
 
     function zend_leak_bytes(int $bytes = 3): void {}
 
+    function zend_test_emalloc(int $size): void {}
+
+    function zend_test_callback(callable $callback): void {}
+
     function zend_string_or_object(object|string $param): object|string {}
 
     function zend_string_or_object_or_null(object|string|null $param): object|string|null {}
@@ -267,6 +271,11 @@ function zend_test_override_libxml_global_state(): void {}
 
     /** @compile-time-eval */
     function zend_test_gh19792(): void {}
+
+    /* @param resource $stream */
+    function zend_test_handle_post_data(mixed $stream, string $content_type, int $content_length): void {}
+
+    function zend_new_singleton_array(): array {}
 }
 
 namespace ZendTestNS {

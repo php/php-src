@@ -1794,6 +1794,18 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 	|	//zend_timeout();
 	|	EXT_CALL zend_timeout, TMP1
 	|1:
+	|	//} else if (ZEND_HAS_OOM()) {
+	ZEND_ASSERT(XtOffsetOf(zend_oom_info, state) == 0);
+	|	MEM_LOAD_8_ZTS ldrb, TMP1w, executor_globals, delayed_oom, TMP1
+	|	cbz TMP1w, >1
+	|	//zend_handle_delayed_oom();
+	|	EXT_CALL zend_handle_delayed_oom, TMP1
+	|	EXT_CALL zend_jit_exception_in_interrupt_handler_helper, TMP1
+	|	//ZEND_VM_ENTER();
+	|	//execute_data = EG(current_execute_data);
+	|	MEM_LOAD_64_ZTS ldr, FP, executor_globals, current_execute_data, TMP1
+	|	LOAD_IP
+	|1:
 	|	//} else if (zend_interrupt_function) {
 	if (zend_interrupt_function) {
 		|	//zend_interrupt_function(execute_data);

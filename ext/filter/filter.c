@@ -332,17 +332,25 @@ static unsigned int php_sapi_filter(int arg, const char *var, char **val, size_t
 
 	if (array_ptr) {
 		/* Store the RAW variable internally */
-		ZVAL_STRINGL(&raw_var, *val, val_len);
+		if (UNEXPECTED(!ZVAL_FSTRINGL(&raw_var, *val, val_len))) {
+			return 0;
+		}
 		php_register_variable_ex(var, &raw_var, array_ptr);
+		if (ZEND_HAS_OOM()) {
+			return 0;
+		}
 	}
 
 	if (val_len) {
 		/* Register mangled variable */
+		if (UNEXPECTED(!ZVAL_FSTRINGL(&new_var, *val, val_len))) {
+			return 0;
+		}
 		if (IF_G(default_filter) != FILTER_UNSAFE_RAW) {
-			ZVAL_STRINGL(&new_var, *val, val_len);
 			php_zval_filter(&new_var, IF_G(default_filter), IF_G(default_filter_flags), NULL, NULL, 0);
-		} else {
-			ZVAL_STRINGL(&new_var, *val, val_len);
+			if (ZEND_HAS_OOM()) {
+				return 0;
+			}
 		}
 	} else { /* empty string */
 		ZVAL_EMPTY_STRING(&new_var);
@@ -358,7 +366,18 @@ static unsigned int php_sapi_filter(int arg, const char *var, char **val, size_t
 		}
 		efree(*val);
 		if (Z_STRLEN(new_var)) {
-			*val = estrndup(Z_STRVAL(new_var), Z_STRLEN(new_var));
+			*val = femalloc(Z_STRLEN(new_var) + 1, /* fallible */ true);
+			if (UNEXPECTED(!*val)) {
+				/* The caller frees *val either way, so leave it pointing at
+				 * something. */
+				*val = estrdup("");
+				if (new_val_len) {
+					*new_val_len = 0;
+				}
+				zval_ptr_dtor(&new_var);
+				return 0;
+			}
+			memcpy(*val, Z_STRVAL(new_var), Z_STRLEN(new_var) + 1);
 		} else {
 			*val = estrdup("");
 		}

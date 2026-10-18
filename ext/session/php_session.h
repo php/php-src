@@ -200,6 +200,8 @@ typedef struct _php_ps_globals {
 	bool in_save_handler; /* state if session is in save handler or not */
 	bool set_handler;     /* state if session module i setting handler or not */
 	zend_string *session_vars; /* serialized original session data */
+
+	bool in_rfc1867_update;    /* php_session_rfc1867_update() is running */
 } php_ps_globals;
 
 typedef php_ps_globals zend_ps_globals;
