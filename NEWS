@@ -1,6 +1,17 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.34
+?? ??? ????, PHP 8.2.36
+
+
+
+21 Oct 2026, PHP 8.2.35
+
+- Core:
+  . Fixed GHSA-w8hw-w9fx-j79w, GHSA-6wmf-4rv5-p3rp (Avoid state corruption via
+    bailout). (CVE-2026-109618, CVE-2026-109619) (Arnaud, ilutov, Jakub Zelenka,
+    ndossche, Nicolas Grekas)
+
+24 Sep 2026, PHP 8.2.34
 
 - Filter:
   . Fixed GHSA-ch8v-r6jh-4vvr (FILTER_SANITIZE_ENCODED does not encode 0xFF).
