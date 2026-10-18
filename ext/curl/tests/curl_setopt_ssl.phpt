@@ -75,7 +75,7 @@ if ($process === false) {
 try {
     // Wait until OpenSSL is actually listening before making the first request.
     $ready = false;
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 150; $i++) {
         $connection = @stream_socket_client("tcp://127.0.0.1:$port", $errno, $errstr, 0.05);
         if ($connection !== false) {
             fclose($connection);
@@ -85,7 +85,7 @@ try {
         if (!proc_get_status($process)['running']) {
             break;
         }
-        usleep(50000);
+        usleep(20000);
     }
     if (!$ready) {
         stream_set_blocking($pipes[2], false);
