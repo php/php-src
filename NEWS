@@ -99,6 +99,8 @@ PHP                                                                        NEWS
     exits with an uninitialized opline). (waroad)
   . Fixed use-after-free in JIT ASSIGN_DIM_OP when concatenating into an
     empty array element. (jorgsowa)
+  . Fixed bug GH-24396 (Assertion failure in zend_jit_def_reg() "reg forwarding"
+    with chained Pi nodes). (ndossche)
 
 - PDO:
   . Fixed invalid ATTR_ORACLE_NULLS values being accepted and truncated.
