@@ -72,7 +72,9 @@ void php_dom_private_data_destroy(php_dom_private_data *data)
 
 static void php_dom_free_templated_content(php_dom_private_data *private_data, xmlNodePtr base)
 {
-	/* Note: it's possible to have nested template content. */
+	/* Note: it's not possible to obtain a userland reference to these yet, so we can just free them without worrying
+	 *       about their proxies.
+	 * Note 2: it's possible to have nested template content. */
 
 	if (zend_hash_num_elements(private_data->template_fragments) > 0) {
 		/* There's more templated content, try to free it. */
@@ -86,13 +88,7 @@ static void php_dom_free_templated_content(php_dom_private_data *private_data, x
 		}
 	}
 
-	php_libxml_node_free_list(base->children);
-
-	if (!base->_private) {
-		xmlFreeNode(base);
-	} else {
-		base->parent = NULL;
-	}
+	xmlFreeNode(base);
 }
 
 void php_dom_add_templated_content(php_dom_private_data *private_data, const xmlNode *template_node, xmlNodePtr fragment)
