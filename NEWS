@@ -59,6 +59,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-24185 (Windows ZTS: random access violations with OPcache JIT
     in multi-process setups). (Arnaud, ndossche)
   . Fix SIGFPE on LONG_MIN % -1 with a constant divisor. (waroad)
+  . Fixed bug GH-24388 (Tracing JIT: segfault when a trace runs out of side
+    exits). (Lazizbek Ergashev)
 
 - PDO:
   . Fixed a duplicate warning when ATTR_STATEMENT_CLASS is rejected on a
