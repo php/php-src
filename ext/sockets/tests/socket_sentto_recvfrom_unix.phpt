@@ -10,7 +10,9 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 ?>
 --FILE--
 <?php
-    $socket = socket_create(AF_UNIX, SOCK_DGRAM, SOL_UDP); // cause warning
+    // Whether this conflicting combination emits a warning is platform-dependent
+    // (FreeBSD 14 accepts it), so suppress it.
+    @socket_create(AF_UNIX, SOCK_DGRAM, SOL_UDP);
     $socket = socket_create(AF_UNIX, SOCK_DGRAM, 0);
     if (!$socket) {
         die('Unable to create AF_UNIX socket');
@@ -51,7 +53,6 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
     @unlink($address);
 ?>
 --EXPECTF--
-Warning: socket_create(): Unable to create socket [%d]: Protocol not supported in %s on line %d
 bool(false)
 bool(false)
 Received Ping!
