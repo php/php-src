@@ -640,6 +640,8 @@ function transliterator_list_ids(): array|false {}
 
 function transliterator_create_inverse(Transliterator $transliterator): ?Transliterator {}
 
+function transliterator_to_rules(Transliterator $transliterator, bool $escapeUnprintable = false): string|false {}
+
 function transliterator_transliterate(Transliterator|string $transliterator, string $string, int $start = 0, int $end = -1): string|false {}
 
 function transliterator_get_error_code(Transliterator $transliterator): int {}
