@@ -2508,10 +2508,9 @@ PHP_FUNCTION(parse_ini_file)
 		RETURN_THROWS();
 	}
 
-	/* Sanity check */
 	if (UNEXPECTED(scanner_mode != ZEND_INI_SCANNER_NORMAL && scanner_mode != ZEND_INI_SCANNER_RAW && scanner_mode != ZEND_INI_SCANNER_TYPED)) {
-		php_error_docref(NULL, E_WARNING, "Invalid scanner mode");
-		RETURN_FALSE;
+		zend_argument_value_error(3, "must be one of INI_SCANNER_NORMAL, INI_SCANNER_RAW, or INI_SCANNER_TYPED");
+		RETURN_THROWS();
 	}
 
 	/* Set callback function */
@@ -2550,10 +2549,9 @@ PHP_FUNCTION(parse_ini_string)
 		Z_PARAM_LONG(scanner_mode)
 	ZEND_PARSE_PARAMETERS_END();
 
-	/* Sanity check */
 	if (UNEXPECTED(scanner_mode != ZEND_INI_SCANNER_NORMAL && scanner_mode != ZEND_INI_SCANNER_RAW && scanner_mode != ZEND_INI_SCANNER_TYPED)) {
-		php_error_docref(NULL, E_WARNING, "Invalid scanner mode");
-		RETURN_FALSE;
+		zend_argument_value_error(3, "must be one of INI_SCANNER_NORMAL, INI_SCANNER_RAW, or INI_SCANNER_TYPED");
+		RETURN_THROWS();
 	}
 
 	if (INT_MAX - str_len < ZEND_MMAP_AHEAD) {
