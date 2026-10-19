@@ -36,6 +36,10 @@ PHP                                                                        NEWS
 - CLI:
   . Fixed bug GH-24697 (PHP_HTTP_PARSER_STRICT build option doesn't work).
     (ndossche, devnexen)
+
+- Curl:
+  . Fix use-after-free of CURLOPT_STDERR stream on cloned curl handle.
+    (lacatoire)
     
 - Date:
   . Fixed bug GH-20503 (Assertion failure with ext/date DateInterval property
