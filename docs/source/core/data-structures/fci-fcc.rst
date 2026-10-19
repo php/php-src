@@ -80,8 +80,9 @@ There are some functions that do not require the use of either the FCI or the FC
       -  Check if the ``callable`` zval is a PHP callable. Returns true if it is, false otherwise.
          ``fcc`` is an out parameter constructing the FCC struct, see below for details. ``error``
          is an optional out parameter holding the error message if ``callable`` is not a PHP
-         callable. Note: the signature used to be ``bool zend_is_callable(zval *callable, uint32_t
-         check_flags, zend_string **callable_name)`` prior to PHP 8.7.
+         callable. If ``error`` is non-NULL and false is returned it is *always* populated. Note:
+         the signature used to be ``bool zend_is_callable(zval *callable, uint32_t check_flags,
+         zend_string **callable_name)`` prior to PHP 8.7.
 
    -  -  .. code:: c
 
