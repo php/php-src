@@ -15,6 +15,7 @@
 #include <config.w32.h>
 
 #include <php.h>
+#include <TSRM/TSRM_atexit.h>
 
 #ifdef HAVE_LIBXML
 #include <libxml/threads.h>
@@ -33,7 +34,7 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID dummy)
 
 #ifdef ZTS
 	if (reason == DLL_PROCESS_DETACH && dummy == NULL) {
-		tsrm_thread_exit_disarm();
+		tsrm_atexit_disarm();
 	}
 #endif
 
