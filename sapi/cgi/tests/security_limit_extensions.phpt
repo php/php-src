@@ -12,7 +12,7 @@ reset_env_vars();
 
 function check_file(string $path, ?string $limit = null) {
     $php = get_cgi_path();
-    $ini = ($limit === null) ? '' : "-d cgi.security_limit_extensions='$limit'";
+    $ini = ($limit === null) ? '' : "-d cgi.security_limit_extensions=\"$limit\"";
     echo "$path, ini=$ini:\n";
     echo trim(shell_exec("\"$php\" -n $ini -l \"$path\""));
     echo "\n\n";
@@ -56,23 +56,23 @@ Access denied.
 
 
 Configured extensions:
-%ssecurity_limit_extensions.php, ini=-d cgi.security_limit_extensions='.inc .phar .php':
+%ssecurity_limit_extensions.php, ini=-d cgi.security_limit_extensions=".inc .phar .php":
 No syntax errors detected in %ssecurity_limit_extensions.php
 
-%ssecurity_limit_extensions.php, ini=-d cgi.security_limit_extensions='.inc	  	.phar 		 .php':
+%ssecurity_limit_extensions.php, ini=-d cgi.security_limit_extensions=".inc	  	.phar 		 .php":
 No syntax errors detected in %ssecurity_limit_extensions.php
 
 
 
 Multiple parts to extension:
-%ssecurity_limit_extensions.php, ini=-d cgi.security_limit_extensions='.test.php':
+%ssecurity_limit_extensions.php, ini=-d cgi.security_limit_extensions=".test.php":
 Access denied.
 
-%smissing.test.php, ini=-d cgi.security_limit_extensions='.test.php':
+%smissing.test.php, ini=-d cgi.security_limit_extensions=".test.php":
 No input file specified.
 
 
 
 Allowed longer than path, then .php:
-%ssecurity_limit_extensions.php, ini=-d cgi.security_limit_extensions='.x%rx+%ryz .php':
+%ssecurity_limit_extensions.php, ini=-d cgi.security_limit_extensions=".x%rx+%ryz .php":
 No syntax errors detected in %ssecurity_limit_extensions.php
