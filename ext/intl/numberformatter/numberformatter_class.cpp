@@ -128,6 +128,10 @@ U_CFUNC PHP_METHOD(IntlNumberFormatter, format)
 			zend_argument_value_error(1, "is too long");
 			RETURN_THROWS();
 		}
+		if (UNEXPECTED(strpbrk(Z_STRVAL_P(value), "eE"))) {
+			intl_errors_set(INTL_DATA_ERROR_P(nfo), U_DECIMAL_NUMBER_SYNTAX_ERROR, "Number formatting failed");
+			RETURN_FALSE;
+		}
 		result = NUMBERFORMATTER_OBJECT(nfo)->formatDecimal(icu::StringPiece(Z_STRVAL_P(value), static_cast<int32_t>(Z_STRLEN_P(value))), status).toString(status);
 	} else if (Z_TYPE_P(value) == IS_DOUBLE) {
 		result = NUMBERFORMATTER_OBJECT(nfo)->formatDouble(Z_DVAL_P(value), status).toString(status);
