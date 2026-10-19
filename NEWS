@@ -108,6 +108,8 @@ PHP                                                                        NEWS
     file fails after it was already truncated. (Ilia Alshanetsky)
 
 - Standard:
+  . Fixed __unserialize() and __wakeup() being called for objects with a missing
+    closing brace. (Ilia Alshanetsky)
   . Fixed bug GH-24399 (usleep() and time_nanosleep() ignore queued APCs on
     Windows). (Nicolas Grekas)
   . Fixed chown() and lchown() failing to resolve user names in ZTS builds
