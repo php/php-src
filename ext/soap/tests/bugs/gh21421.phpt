@@ -15,7 +15,7 @@ $client = new SoapClient(NULL, $options);
 var_dump($client);
 ?>
 --EXPECTF--
-object(SoapClient)#%d (35) {
+object(SoapClient)#%d (36) {
   ["uri":"SoapClient":private]=>
   string(26) "http://schemas.nothing.com"
   ["style":"SoapClient":private]=>
@@ -87,4 +87,6 @@ object(SoapClient)#%d (35) {
   NULL
   ["__last_response_headers":"SoapClient":private]=>
   NULL
+  ["_keep_headers":"SoapClient":private]=>
+  int(0)
 }
