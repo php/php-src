@@ -200,6 +200,8 @@ extern HashTable php_soap_defEncNs, php_soap_defEnc, php_soap_defEncIndex;
 
 void add_soap_fault(zval *obj, const char *fault_code, const char *fault_string, zend_string *fault_actor, zval *fault_detail, zend_string *lang);
 
+ZEND_COLD void soap_throw_error(const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 1, 2);
+
 #define soap_error0(severity, format) \
 	php_error(severity, "SOAP-ERROR: " format)
 
