@@ -719,6 +719,12 @@ PHP_FUNCTION(socket_create_listen)
 		RETURN_THROWS();
 	}
 
+	/* $backlog is narrowed to int by listen(), a value outside of its range would wrap */
+	if (ZEND_LONG_EXCEEDS_INT(backlog)) {
+		zend_argument_value_error(2, "must be between %d and %d", INT_MIN, INT_MAX);
+		RETURN_THROWS();
+	}
+
 	object_init_ex(return_value, socket_ce);
 	php_sock = Z_SOCKET_P(return_value);
 
@@ -843,6 +849,11 @@ PHP_FUNCTION(socket_listen)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(backlog)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (ZEND_LONG_EXCEEDS_INT(backlog)) {
+		zend_argument_value_error(2, "must be between %d and %d", INT_MIN, INT_MAX);
+		RETURN_THROWS();
+	}
 
 	php_sock = Z_SOCKET_P(arg1);
 	ENSURE_SOCKET_VALID(php_sock);
