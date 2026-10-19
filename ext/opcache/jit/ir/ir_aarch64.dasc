@@ -6041,10 +6041,10 @@ static void ir_emit_switch(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn)
 	}
 
 	/* Generate a table jmp or a sequence of calls */
-	if (!has_case_range && count > 2 && (max.i64-min.i64) < count * 8) {
-		int *labels = ir_mem_malloc(sizeof(int) * (max.i64 - min.i64 + 1));
+	if (!has_case_range && count > 2 && (max.u64 - min.u64) < (uint64_t)count * 8) {
+		int *labels = ir_mem_malloc(sizeof(int) * (size_t)(max.u64 - min.u64 + 1));
 
-		for (i = 0; i <= (max.i64 - min.i64); i++) {
+		for (i = 0; i <= (int)(max.u64 - min.u64); i++) {
 			labels[i] = default_label;
 		}
 		p = &ctx->cfg_edges[bb->successors];
@@ -6055,7 +6055,7 @@ static void ir_emit_switch(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn)
 				val = &ctx->ir_base[use_insn->op2];
 				IR_ASSERT(!IR_IS_SYM_CONST(val->op));
 				label = ir_skip_empty_target_blocks(ctx, use_block);
-				labels[val->val.i64 - min.i64] = label;
+				labels[val->val.u64 - min.u64] = label;
 			}
 		}
 
@@ -6101,7 +6101,7 @@ static void ir_emit_switch(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn)
 		}
 		|.align 8
 		|1:
-		for (i = 0; i <= (max.i64 - min.i64); i++) {
+		for (i = 0; i <= (int)(max.u64 - min.u64); i++) {
 			int b = labels[i];
 			if (b) {
 				ir_block *bb = &ctx->cfg_blocks[b];

@@ -81,7 +81,7 @@ IR_FOLD(LT(C_U64, C_U64))
 
 IR_FOLD(LT(C_ADDR, C_ADDR))
 {
-	IR_FOLD_BOOL(op1_insn->val.addr < op2_insn->val.addr);
+	IR_FOLD_BOOL((intptr_t)op1_insn->val.addr < (intptr_t)op2_insn->val.addr);
 }
 
 IR_FOLD(LT(C_CHAR, C_CHAR))
@@ -126,7 +126,7 @@ IR_FOLD(GE(C_U64, C_U64))
 
 IR_FOLD(GE(C_ADDR, C_ADDR))
 {
-	IR_FOLD_BOOL(op1_insn->val.addr >= op2_insn->val.addr);
+	IR_FOLD_BOOL((intptr_t)op1_insn->val.addr >= (intptr_t)op2_insn->val.addr);
 }
 
 IR_FOLD(GE(C_CHAR, C_CHAR))
@@ -171,7 +171,7 @@ IR_FOLD(LE(C_U64, C_U64))
 
 IR_FOLD(LE(C_ADDR, C_ADDR))
 {
-	IR_FOLD_BOOL(op1_insn->val.addr <= op2_insn->val.addr);
+	IR_FOLD_BOOL((intptr_t)op1_insn->val.addr <= (intptr_t)op2_insn->val.addr);
 }
 
 IR_FOLD(LE(C_CHAR, C_CHAR))
@@ -217,7 +217,7 @@ IR_FOLD(GT(C_U64, C_U64))
 
 IR_FOLD(GT(C_ADDR, C_ADDR))
 {
-	IR_FOLD_BOOL(op1_insn->val.addr > op2_insn->val.addr);
+	IR_FOLD_BOOL((intptr_t)op1_insn->val.addr > (intptr_t)op2_insn->val.addr);
 }
 
 
