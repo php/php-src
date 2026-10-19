@@ -321,12 +321,6 @@ if ($pid) {
         }elseif (preg_match('/^RETR ([\/]*[\w\h]+)/', $buf, $matches)) {
             switch($matches[1]){
 
-                case "pasv":
-                    with_data_connection(function ($fs) {
-                        //the data connection is handled in another forked process
-                        // called from outside this while loop
-                    });
-                    break;
                 case "a story":
                     with_data_connection(function ($fs) {
                         fputs($fs, "For sale: baby shoes, never worn.\r\n");
