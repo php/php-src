@@ -2,8 +2,6 @@
 Spoofchecker double construction should not be allowed
 --EXTENSIONS--
 intl
---SKIPIF--
-<?php if (!class_exists("Spoofchecker")) print "skip"; ?>
 --FILE--
 <?php
 $checker = new Spoofchecker();

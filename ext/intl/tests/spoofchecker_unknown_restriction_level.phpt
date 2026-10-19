@@ -2,10 +2,6 @@
 Spoofchecker attempting to pass an unknown restriction level
 --EXTENSIONS--
 intl
---SKIPIF--
-<?php
-if (!class_exists("Spoofchecker")) print 'skip';
-?>
 --FILE--
 <?php
 

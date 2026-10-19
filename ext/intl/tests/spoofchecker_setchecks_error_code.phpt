@@ -2,8 +2,6 @@
 Spoofchecker::setChecks() records the ICU error code
 --EXTENSIONS--
 intl
---SKIPIF--
-<?php if (!class_exists("Spoofchecker")) print 'skip'; ?>
 --FILE--
 <?php
 
