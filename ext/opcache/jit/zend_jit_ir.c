@@ -6164,6 +6164,13 @@ static int zend_jit_assign_op(zend_jit_ctx   *jit,
 		ir_ref if_op1_typed = IR_UNUSED;
 		binary_op_type binary_op = get_binary_op(opline->extended_value);
 
+		if (Z_MODE(op2_addr) == IS_REG
+		 && Z_LOAD(op2_addr)
+		 && jit->ra[Z_SSA_VAR(op2_addr)].ref == IR_NULL) {
+			/* Force load, so that the register is defined on all paths */
+			zend_jit_use_reg(jit, op2_addr);
+		}
+
 		ref = jit_ZVAL_ADDR(jit, op1_addr);
 		if_op1_ref = jit_if_Z_TYPE_ref(jit, ref, ir_CONST_U8(IS_REFERENCE));
 		ir_IF_FALSE(if_op1_ref);

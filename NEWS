@@ -69,6 +69,8 @@ PHP                                                                        NEWS
     case 0). (ndossche)
   . Fixed bug GH-24206 (Tracing JIT loses loop-carried CV when its loop PHI
     is reloaded from memory). (ndossche)
+  . Fixed bug GH-24386 (JIT: register operand must be loaded before the typed
+    reference check). (ndossche)
 
 - PDO:
   . Fixed a duplicate warning when ATTR_STATEMENT_CLASS is rejected on a
