@@ -35,6 +35,7 @@
 #include "zend_exceptions.h"
 #include "ext/random/php_random.h"
 #include "zend_frameless_function.h"
+#include "zend_fibers.h"
 
 /* {{{ defines */
 
@@ -807,8 +808,11 @@ static int php_array_user_compare(Bucket *a, Bucket *b) /* {{{ */
 	old_user_compare_fci_cache = BG(user_compare_fci_cache); \
 	ARRAYG(compare_deprecation_thrown) = 0; \
 	BG(user_compare_fci_cache) = empty_fcall_info_cache; \
+	/* The comparator is restored in LIFO order, which a fiber switch breaks. */ \
+	zend_fiber_switch_block(); \
 
 #define PHP_ARRAY_CMP_FUNC_RESTORE() \
+	zend_fiber_switch_unblock(); \
 	BG(user_compare_fci) = old_user_compare_fci; \
 	BG(user_compare_fci_cache) = old_user_compare_fci_cache; \
 
@@ -6379,6 +6383,7 @@ PHP_FUNCTION(array_multisort)
 	func[num_arrays - 1] = php_get_data_compare_func_unstable(sort_type, sort_order != PHP_SORT_ASC);
 	bucket_compare_func_t *old_multisort_func = ARRAYG(multisort_func);
 	ARRAYG(multisort_func) = func;
+	zend_fiber_switch_block();
 
 	/* Create the indirection array. This array is of size MxN, where
 	 * M is the number of entries in each input array and N is the number
@@ -6470,6 +6475,7 @@ clean_up:
 	efree(indirect);
 	efree(func);
 	efree(arrays);
+	zend_fiber_switch_unblock();
 	ARRAYG(multisort_func) = old_multisort_func;
 }
 /* }}} */
