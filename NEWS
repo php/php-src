@@ -83,6 +83,8 @@ PHP                                                                        NEWS
     reference check). (ndossche)
 
 - PDO:
+  . Fixed invalid ATTR_ORACLE_NULLS values being accepted and truncated.
+    (Ilia Alshanetsky)
   . Fixed a duplicate warning when ATTR_STATEMENT_CLASS is rejected on a
     persistent connection. (Ilia Alshanetsky)
 
