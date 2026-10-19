@@ -522,9 +522,28 @@ static ir_ref jit_TLS(zend_jit_ctx *jit)
 	if (tsrm_ls_cache_tcb_offset == 0 && tsrm_tls_index == -1) {
 		jit->tls = ir_CALL(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_get_tsrm_ls_cache));
 	} else {
+# ifdef ZEND_OPCACHE_SHM_REATTACHMENT
+		/* Different processes may load TLS variables in a different order, so
+		 * they may have a different module index. Fetch the module index at
+		 * runtime from tsrm_tls_index. Its address is stable as it's in the same
+		 * module as execute_ex (whose address is checked before SHM reattachment). */
+
+#  ifdef _WIN64
+		const int offset = 0x58;
+#  else
+		const int offset = 0x2c;
+#  endif
+
+		/* NtCurrentTeb()->ThreadLocalStoragePointer */
+		ir_ref tls_array = ir_TLS_ADDR(-1, offset);
+
+		ir_ref index = ir_LOAD_A(ir_CONST_ADDR(&tsrm_tls_index));
+		jit->tls = ir_LOAD_A(ir_ADD_OFFSET(ir_LOAD_A(ir_ADD_A(tls_array, index)), tsrm_tls_offset));
+# else
 		jit->tls = ir_TLS(
 				tsrm_ls_cache_tcb_offset ? tsrm_ls_cache_tcb_offset : tsrm_tls_index,
 				tsrm_ls_cache_tcb_offset ? IR_NULL : tsrm_tls_offset);
+# endif
 	}
 
 	return jit->tls;
@@ -3432,10 +3451,6 @@ static void zend_jit_setup(bool reattached)
 #endif
 
 #ifdef ZTS
-# ifdef ZEND_OPCACHE_SHM_REATTACHMENT
-	/* Different processes may load TLS variables in a different order, so we
-	 * can not rely on offsets. We will fallback to runtime resolution. */
-# else
 	zend_result result = zend_jit_resolve_tsrm_ls_cache_offsets(
 		&tsrm_ls_cache_tcb_offset,
 		&tsrm_tls_index,
@@ -3445,7 +3460,6 @@ static void zend_jit_setup(bool reattached)
 		zend_accel_error(ACCEL_LOG_INFO,
 				"Could not get _tsrm_ls_cache offsets, will fallback to runtime resolution");
 	}
-# endif
 #endif
 
 #if !defined(ZEND_WIN32) && !defined(IR_TARGET_AARCH64)
