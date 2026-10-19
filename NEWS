@@ -44,6 +44,8 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed bug GH-24229 (fcgi_close() passes shutdown() a literal 1, which is
     SHUT_RD in WASI). (Ryosuke Ishibashi)
+  . Fixed bug GH-21974 (Crash on worker shutdown in ZTS builds when
+    disable_functions is set in a pool configuration). (Sree24-ui)
 
 - Fileinfo:
   . Fixed bug GH-24289 (finfo::file() reports the wrong argument number for
