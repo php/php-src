@@ -16301,15 +16301,22 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 	if (opline->op1_type == IS_CONST) {
 		zval *zv = RT_CONSTANT(opline, opline->op1);
 		zval *jump_zv = NULL;
+		const zend_op *target;
 		int b;
 
+		/* Wrong type for SWITCH_LONG/SWITCH_STRING falls back to the ZEND_CASE chain */
+		target = ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value);
 		if (opline->opcode == ZEND_SWITCH_LONG) {
 			if (Z_TYPE_P(zv) == IS_LONG) {
 				jump_zv = zend_hash_index_find(jumptable, Z_LVAL_P(zv));
+			} else {
+				target = opline + 1;
 			}
 		} else if (opline->opcode == ZEND_SWITCH_STRING) {
 			if (Z_TYPE_P(zv) == IS_STRING) {
 				jump_zv = zend_hash_find_known_hash(jumptable, Z_STR_P(zv));
+			} else {
+				target = opline + 1;
 			}
 		} else if (opline->opcode == ZEND_MATCH) {
 			if (Z_TYPE_P(zv) == IS_LONG) {
@@ -16320,21 +16327,13 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 		} else {
 			ZEND_UNREACHABLE();
 		}
+		if (jump_zv != NULL) {
+			target = ZEND_OFFSET_TO_OPLINE(opline, Z_LVAL_P(jump_zv));
+		}
 		if (next_opline) {
-			const zend_op *target;
-
-			if (jump_zv != NULL) {
-				target = ZEND_OFFSET_TO_OPLINE(opline, Z_LVAL_P(jump_zv));
-			} else {
-				target = ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value);
-			}
 			ZEND_ASSERT(target == next_opline);
 		} else {
-			if (jump_zv != NULL) {
-				b = ssa->cfg.map[ZEND_OFFSET_TO_OPLINE(opline, Z_LVAL_P(jump_zv)) - op_array->opcodes];
-			} else {
-				b = ssa->cfg.map[ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value) - op_array->opcodes];
-			}
+			b = ssa->cfg.map[target - op_array->opcodes];
 			_zend_jit_add_predecessor_ref(jit, b, jit->b, ir_END());
 			jit->b = -1;
 		}

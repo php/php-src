@@ -61,6 +61,8 @@ PHP                                                                        NEWS
   . Fix SIGFPE on LONG_MIN % -1 with a constant divisor. (waroad)
   . Fixed bug GH-24388 (Tracing JIT: segfault when a trace runs out of side
     exits). (Lazizbek Ergashev)
+  . Fixed bug GH-24391 (JIT switch on constant null takes default instead of
+    case 0). (ndossche)
 
 - PDO:
   . Fixed a duplicate warning when ATTR_STATEMENT_CLASS is rejected on a
