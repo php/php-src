@@ -1420,9 +1420,9 @@ PHP_FUNCTION(stream_set_timeout)
 {
 	zval *socket;
 	zend_long seconds, microseconds = 0;
+	int64_t normalized_seconds, additional_seconds;
 	struct timeval t;
 	php_stream *stream;
-	int argc = ZEND_NUM_ARGS();
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_RESOURCE(socket)
@@ -1433,24 +1433,25 @@ PHP_FUNCTION(stream_set_timeout)
 
 	php_stream_from_zval(stream, socket);
 
+	additional_seconds = microseconds / 1000000;
+	if ((additional_seconds > 0 && seconds > INT64_MAX - additional_seconds)
+			|| (additional_seconds < 0 && seconds < INT64_MIN - additional_seconds)) {
+		zend_argument_value_error(2, "is out of range when combined with argument #3 ($microseconds)");
+		RETURN_THROWS();
+	}
+	normalized_seconds = (int64_t) seconds + additional_seconds;
+	const int64_t max_seconds = (UINT64_C(1) << (sizeof(t.tv_sec) * CHAR_BIT - 1)) - 1;
+	if (normalized_seconds > max_seconds || normalized_seconds < -max_seconds - 1) {
+		zend_argument_value_error(2, "is out of range when combined with argument #3 ($microseconds)");
+		RETURN_THROWS();
+	}
+
 #ifdef PHP_WIN32
-	t.tv_sec = (long)seconds;
-
-	if (argc == 3) {
-		t.tv_usec = (long)(microseconds % 1000000);
-		t.tv_sec +=(long)(microseconds / 1000000);
-	} else {
-		t.tv_usec = 0;
-	}
+	t.tv_sec = (long)normalized_seconds;
+	t.tv_usec = (long)(microseconds % 1000000);
 #else
-	t.tv_sec = seconds;
-
-	if (argc == 3) {
-		t.tv_usec = microseconds % 1000000;
-		t.tv_sec += microseconds / 1000000;
-	} else {
-		t.tv_usec = 0;
-	}
+	t.tv_sec = normalized_seconds;
+	t.tv_usec = microseconds % 1000000;
 #endif
 
 	if (PHP_STREAM_OPTION_RETURN_OK == php_stream_set_option(stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &t)) {

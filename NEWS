@@ -96,6 +96,8 @@ PHP                                                                        NEWS
     file fails after it was already truncated. (Ilia Alshanetsky)
 
 - Standard:
+  . Fixed stream_set_timeout() overflowing the platform timeout range when
+    combining seconds and microseconds. (Ilia Alshanetsky)
   . Fixed chown() and lchown() failing to resolve user names in ZTS builds
     when getpwnam_r() needs a larger buffer. (Ilia Alshanetsky)
   . Fixed password_get_info() and password_needs_rehash() accepting malformed
