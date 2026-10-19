@@ -8,7 +8,7 @@ opcache
 server
 --FILE--
 <?php
-$root  = str_replace('.php', "", __FILE__);
+$root  = __DIR__ . '/' . basename(__FILE__, '.php');
 $base  = basename( $root );
 
 file_put_contents( "$root-Officials.inc", '<?php
