@@ -127,10 +127,6 @@ typedef struct {
 # define tsrm_tls_set(what)		TlsSetValue(tls_key, (void*)(what))
 # define tsrm_tls_get()			TlsGetValue(tls_key)
 
-/* TlsAlloc() does not provide thread-exit callbacks with parameters.
- * This calls ts_free_thread() if the SAPI has not done so explicitly,
- * cleaning up EG(persistent_list) and other TSRM resources on the owning
- * thread before its native TLS is released. */
 static void tsrm_exit_key_set(tsrm_tls_entry *thread_resources)
 {
 	tsrm_thread_exit_data *data;
@@ -319,6 +315,10 @@ TSRM_API bool tsrm_startup(int expected_threads, int expected_resources, int deb
 
 #ifdef TSRM_WIN32
 	tsrm_dll_shutdown_in_progress = (BOOLEAN (NTAPI *)(void)) (void *) GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "RtlDllShutdownInProgress");
+	/* Use FlsAlloc() because TlsAlloc() does not provide a thread-exit callback
+	 * parameter. The callback calls ts_free_thread() if the SAPI has not done so
+	 * explicitly, cleaning up EG(persistent_list) and other TSRM resources on the
+	 * owning thread before its native TLS is released. */
 	tsrm_exit_key = tsrm_dll_shutdown_in_progress ? FlsAlloc(tsrm_thread_exit_handler) : FLS_OUT_OF_INDEXES;
 	tsrm_thread_exit_armed = tsrm_exit_key != FLS_OUT_OF_INDEXES;
 #elif defined(__APPLE__)
