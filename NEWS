@@ -102,6 +102,8 @@ PHP                                                                        NEWS
     bcrypt costs. (Ilia Alshanetsky)
   . Fixed proc_open() null descriptor not being inheritable on Windows.
     (Jorg Sowa)
+  . Don't share the unserialize() context with enum autoloaders.
+    (Nicolas Grekas)
 
 - Tidy:
   . Fixed tidy_repair_string(), tidy_repair_file(), tidy::repairString() and
