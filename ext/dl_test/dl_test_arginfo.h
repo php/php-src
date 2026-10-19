@@ -1,5 +1,5 @@
 /* This is a generated file, edit dl_test.stub.php instead.
- * Stub hash: f935fbfb32fd8d960437269566d6bcaa3be7b6b0 */
+ * Stub hash: 6f3b106c9f5e6d4b0a69451827c10ad6dad0d8f7 */
 
 #include "zend_constants.h"
 
@@ -75,6 +75,12 @@ static zend_class_entry *register_class_DlTestSuperClass(void)
 	zend_string *property_a_name = zend_string_init("a", sizeof("a") - 1, true);
 	zend_declare_typed_property(class_entry, property_a_name, &property_a_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(property_a_name, true);
+
+	zval property_temporary_default_value;
+	ZVAL_LONG(&property_temporary_default_value, 0);
+	zend_string *property_temporary_name = zend_string_init("temporary", sizeof("temporary") - 1, true);
+	zend_declare_typed_property(class_entry, property_temporary_name, &property_temporary_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release_ex(property_temporary_name, true);
 
 	return class_entry;
 }
