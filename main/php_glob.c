@@ -567,7 +567,10 @@ static int glob0(const Char *pattern, php_glob_t *pglob, struct glob_lim *limitp
 		switch (c) {
 		case LBRACKET:
 			c = *qpatnext;
-			/* Like fnmatch(), treat a leading '^' as '!' */
+			/*
+			 * Not in OpenBSD's glob(), keep it when syncing: like fnmatch(),
+			 * treat a leading '^' as '!'.
+			 */
 			if (c == CIRCUMFLEX)
 				c = NOT;
 			if (c == NOT)
