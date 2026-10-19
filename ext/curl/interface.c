@@ -1574,14 +1574,18 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 			zval *current_element;
 
 			ZEND_HASH_FOREACH_VAL(HASH_OF(current), current_element) {
-				add_simple_field(mime, string_key, current_element);
+				if ((form_error = add_simple_field(mime, string_key, current_element)) != CURLE_OK && error == CURLE_OK) {
+					error = form_error;
+				}
 			} ZEND_HASH_FOREACH_END();
 
 			zend_string_release_ex(string_key, 0);
 			continue;
 		}
 
-		add_simple_field(mime, string_key, current);
+		if ((form_error = add_simple_field(mime, string_key, current)) != CURLE_OK && error == CURLE_OK) {
+			error = form_error;
+		}
 
 		zend_string_release_ex(string_key, 0);
 	} ZEND_HASH_FOREACH_END();

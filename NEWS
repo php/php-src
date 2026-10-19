@@ -27,6 +27,10 @@ PHP                                                                        NEWS
     so an in-process engine restart keeps growing the map_ptr table).
     (David Carlier)
 
+- Curl:
+  . Fixed curl_setopt() ignoring errors while building multipart POST fields.
+    (Ilia Alshanetsky)
+
 - Date:
   . Fixed bug GH-20503 (Assertion failure with ext/date DateInterval property
     hash construction). (heathdutton)
