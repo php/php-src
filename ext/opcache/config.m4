@@ -48,6 +48,7 @@ AS_VAR_IF([PHP_OPCACHE_JIT], [yes], [
     jit/ir/ir_patch.c
     jit/ir/ir_perf.c
     jit/ir/ir_ra.c
+    jit/ir/ir_ra_simple.c
     jit/ir/ir_save.c
     jit/ir/ir_sccp.c
     jit/ir/ir_strtab.c

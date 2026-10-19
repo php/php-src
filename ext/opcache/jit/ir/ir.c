@@ -1301,6 +1301,11 @@ ir_ref ir_fold(ir_ctx *ctx, uint32_t opt, ir_ref op1, ir_ref op2, ir_ref op3)
 	if (UNEXPECTED(!(ctx->flags & IR_OPT_FOLDING))) {
 		if ((opt & IR_OPT_OP_MASK) == IR_PHI) {
 			opt |= (3 << IR_OPT_INPUTS_SHIFT);
+		} else if ((ir_op_flags[(opt & IR_OPT_OP_MASK)] & IR_OP_FLAG_COMMUTATIVE)
+		 && op1 < op2
+		 && IR_IS_CONST_REF(op1)) {
+			/* Move constants to op2 for better instruction selection with (this is for -O0) */
+			SWAP_REFS(op1, op2);
 		}
 		return ir_emit(ctx, opt, op1, op2, op3);
 	}

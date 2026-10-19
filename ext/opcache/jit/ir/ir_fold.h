@@ -3945,7 +3945,9 @@ IR_FOLD(MUL(MUL, C_ADDR))
 {
 	if (IR_IS_CONST_REF(op1_insn->op2) && !IR_IS_SYM_CONST(ctx->ir_base[op1_insn->op2].op)) {
 		/* (x * c1) * c2  => x * (c1 * c2) */
+		uint32_t shift = (8 - ir_type_size[op2_insn->type]) * 8;
 		val.u64 = ctx->ir_base[op1_insn->op2].val.u64 * op2_insn->val.u64;
+		val.u64 = (val.u64 << shift) >> shift;
 		op1 = op1_insn->op1;
 		op2 = ir_const(ctx, val, op2_insn->type);
 		IR_FOLD_RESTART;
@@ -3960,7 +3962,9 @@ IR_FOLD(MUL(MUL, C_I64))
 {
 	if (IR_IS_CONST_REF(op1_insn->op2) && !IR_IS_SYM_CONST(ctx->ir_base[op1_insn->op2].op)) {
 		/* (x * c1) * c2  => x * (c1 * c2) */
-		val.i64 = ctx->ir_base[op1_insn->op2].val.u64 * op2_insn->val.u64;
+		uint32_t shift = (8 - ir_type_size[op2_insn->type]) * 8;
+		val.u64 = ctx->ir_base[op1_insn->op2].val.u64 * op2_insn->val.u64;
+		val.i64 = (int64_t)(val.u64 << shift) >> shift;
 		op1 = op1_insn->op1;
 		op2 = ir_const(ctx, val, op2_insn->type);
 		IR_FOLD_RESTART;

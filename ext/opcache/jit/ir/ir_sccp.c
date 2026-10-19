@@ -3028,26 +3028,70 @@ static bool ir_cmp_is_true(ir_op op, const ir_insn *op1, const ir_insn *op2)
 		} else if (op == IR_LT) {
 			if (IR_IS_TYPE_SIGNED(op1->type)) {
 				return op1->val.i64 < op2->val.i64;
+			} else if (op1->type == IR_TYPE_ADDR) {
+				return op1->val.addr < op2->val.addr;
+			} else if (ir_type_size[op1->type] == 8) {
+				return op1->val.i64 < op2->val.i64;
+			} else if (ir_type_size[op1->type] == 4) {
+				return op1->val.i32 < op2->val.i32;
+			} else if (ir_type_size[op1->type] == 4) {
+				return op1->val.i16 < op2->val.i16;
+			} else if (ir_type_size[op1->type] == 1) {
+				return op1->val.i8 < op2->val.i8;
 			} else {
-				return op1->val.u64 < op2->val.u64;
+				IR_ASSERT(0);
+				return 0;
 			}
 		} else if (op == IR_GE) {
 			if (IR_IS_TYPE_SIGNED(op1->type)) {
 				return op1->val.i64 >= op2->val.i64;
+			} else if (op1->type == IR_TYPE_ADDR) {
+				return op1->val.addr >= op2->val.addr;
+			} else if (ir_type_size[op1->type] == 8) {
+				return op1->val.i64 >= op2->val.i64;
+			} else if (ir_type_size[op1->type] == 4) {
+				return op1->val.i32 >= op2->val.i32;
+			} else if (ir_type_size[op1->type] == 4) {
+				return op1->val.i16 >= op2->val.i16;
+			} else if (ir_type_size[op1->type] == 1) {
+				return op1->val.i8 >= op2->val.i8;
 			} else {
-				return op1->val.u64 >= op2->val.u64;
+				IR_ASSERT(0);
+				return 0;
 			}
 		} else if (op == IR_LE) {
 			if (IR_IS_TYPE_SIGNED(op1->type)) {
 				return op1->val.i64 <= op2->val.i64;
+			} else if (op1->type == IR_TYPE_ADDR) {
+				return op1->val.addr <= op2->val.addr;
+			} else if (ir_type_size[op1->type] == 8) {
+				return op1->val.i64 <= op2->val.i64;
+			} else if (ir_type_size[op1->type] == 4) {
+				return op1->val.i32 <= op2->val.i32;
+			} else if (ir_type_size[op1->type] == 4) {
+				return op1->val.i16 <= op2->val.i16;
+			} else if (ir_type_size[op1->type] == 1) {
+				return op1->val.i8 <= op2->val.i8;
 			} else {
-				return op1->val.u64 <= op2->val.u64;
+				IR_ASSERT(0);
+				return 0;
 			}
 		} else if (op == IR_GT) {
 			if (IR_IS_TYPE_SIGNED(op1->type)) {
 				return op1->val.i64 > op2->val.i64;
+			} else if (op1->type == IR_TYPE_ADDR) {
+				return op1->val.addr > op2->val.addr;
+			} else if (ir_type_size[op1->type] == 8) {
+				return op1->val.i64 > op2->val.i64;
+			} else if (ir_type_size[op1->type] == 4) {
+				return op1->val.i32 > op2->val.i32;
+			} else if (ir_type_size[op1->type] == 4) {
+				return op1->val.i16 > op2->val.i16;
+			} else if (ir_type_size[op1->type] == 1) {
+				return op1->val.i8 > op2->val.i8;
 			} else {
-				return op1->val.u64 > op2->val.u64;
+				IR_ASSERT(0);
+				return 0;
 			}
 		} else if (op == IR_ULT) {
 			return op1->val.u64 < op2->val.u64;

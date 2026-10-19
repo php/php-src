@@ -17,6 +17,9 @@
 # if defined(__FreeBSD__) || defined(__DragonFly__)
 #  include <sys/sysctl.h>
 # endif
+# if defined(__OpenBSD__)
+#  include <sys/param.h>
+# endif
 #endif
 
 #include "ir.h"
@@ -786,6 +789,12 @@ static void ir_elf_load_symbols(void)
 	size_t pathlen = sizeof(path);
 	int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1};
 	if (sysctl(mib, 4, path, &pathlen, NULL, 0) == -1) {
+		return;
+	}
+	int fd = open(path, O_RDONLY);
+#elif defined(__OpenBSD__) && OpenBSD >= 202610
+	char path[PATH_MAX];
+	if (getexecpath(path, sizeof(path)) == -1) {
 		return;
 	}
 	int fd = open(path, O_RDONLY);

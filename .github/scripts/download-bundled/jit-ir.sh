@@ -5,7 +5,7 @@ cd "$(dirname "$0")/../../.."
 tmp_dir=/tmp/php-src-download-bundled/jit-ir
 rm -rf "$tmp_dir"
 
-revision=ed32c881a0d7c14ce7ace6ac00dead75647b69c6
+revision=563b51a8c2c07aadb13db897abc04b5cf08d151b
 
 git clone --depth 1 --revision="$revision" https://github.com/dstogov/ir.git "$tmp_dir"
 

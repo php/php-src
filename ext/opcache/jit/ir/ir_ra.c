@@ -798,18 +798,25 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 					} else {
 						if (insn->op == IR_PARAM) {
 							/* We may reuse parameter stack slot for spilling */
-							ctx->live_intervals[v]->flags |= IR_LIVE_INTERVAL_MEM_PARAM;
-#if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
-							if (param_ival->use_pos) {
-								ir_use_pos *use_pos = param_ival->use_pos;
-								ir_ref use = IR_LIVE_POS_TO_REF(use_pos->pos);
-								ir_insn *use_insn = &ctx->ir_base[use];
-								if (use_insn->op == IR_VSTORE) {
-									/* skip VSTORE (VAR is going to be remapped to PARAM on x86) */
-									param_ival->use_pos = use_pos->next;
+							ir_live_interval *param_ival = ctx->live_intervals[v];
+
+							param_ival->flags |= IR_LIVE_INTERVAL_MEM_PARAM;
+							if (ctx->rules && ctx->use_lists[ref].count > 0) {
+								ir_ref use = ctx->use_edges[ctx->use_lists[ref].refs];
+								if (use < bb->end) {
+									ir_insn *use_insn = &ctx->ir_base[use];
+									if (use_insn->op == IR_VSTORE
+									 && !(ctx->rules[use] & IR_SKIPPED)
+									 /* first use of VAR is VSTORE(_, VAR, PARAM) */
+									 && ctx->use_edges[ctx->use_lists[use_insn->op2].refs] == use) {
+										IR_ASSERT(use_insn->op3 == ref);
+										/* skip VSTORE (VAR is going to be remapped to PARAM) */
+										param_ival->flags |= IR_LIVE_INTERVAL_VAR_MEM_PARAM;
+										param_ival->use_pos = NULL;
+										ctx->rules[use] = IR_SKIPPED | IR_NOP;
+									}
 								}
 							}
-#endif
 						}
 						def_pos = IR_DEF_LIVE_POS_FROM_REF(ref);
 					}
@@ -1512,17 +1519,22 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 							ir_live_interval *param_ival = ctx->live_intervals[v];
 
 							param_ival->flags |= IR_LIVE_INTERVAL_MEM_PARAM;
-#if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
-							if (param_ival->use_pos) {
-								ir_use_pos *use_pos = param_ival->use_pos;
-								ir_ref use = IR_LIVE_POS_TO_REF(use_pos->pos);
-								ir_insn *use_insn = &ctx->ir_base[use];
-								if (use_insn->op == IR_VSTORE) {
-									/* skip VSTORE (VAR is going to be remapped to PARAM on x86) */
-									param_ival->use_pos = use_pos->next;
+							if (ctx->rules && ctx->use_lists[ref].count > 0) {
+								ir_ref use = ctx->use_edges[ctx->use_lists[ref].refs];
+								if (use < bb->end) {
+									ir_insn *use_insn = &ctx->ir_base[use];
+									if (use_insn->op == IR_VSTORE
+									 && !(ctx->rules[use] & IR_SKIPPED)
+									 /* first use of VAR is VSTORE(_, VAR, PARAM) */
+									 && ctx->use_edges[ctx->use_lists[use_insn->op2].refs] == use) {
+										IR_ASSERT(use_insn->op3 == ref);
+										/* skip VSTORE (VAR is going to be remapped to PARAM) */
+										param_ival->flags |= IR_LIVE_INTERVAL_VAR_MEM_PARAM;
+										param_ival->use_pos = NULL;
+										ctx->rules[use] = IR_SKIPPED | IR_NOP;
+									}
 								}
 							}
-#endif
 						}
 						def_pos = IR_DEF_LIVE_POS_FROM_REF(ref);
 					}
@@ -2267,6 +2279,12 @@ int ir_compute_dessa_moves(ir_ctx *ctx)
 					use = *p;
 					insn = &ctx->ir_base[use];
 					if (insn->op == IR_PHI) {
+						if (ctx->use_lists[use].count == 0) {
+							ctx->rules[use] = IR_SKIPPED | IR_NOP;
+							ctx->vregs[use] = 0;
+							continue;
+						}
+						IR_ASSERT(ctx->vregs[use] > 0);
 						for (j = 2; j <= k; j++) {
 							ir_ref input = ir_insn_op(insn, j);
 
@@ -4355,19 +4373,6 @@ static bool needs_spill_load(ir_ctx *ctx, ir_live_interval *ival, ir_use_pos *us
 	return use_pos->next && use_pos->next->op_num != 0;
 }
 
-static void ir_set_fused_reg(ir_ctx *ctx, ir_ref root, ir_ref ref_and_op, int8_t reg)
-{
-	char key[10];
-
-	if (!ctx->fused_regs) {
-		ctx->fused_regs = ir_mem_malloc(sizeof(ir_strtab));
-		ir_strtab_init(ctx->fused_regs, 8, 128);
-	}
-	memcpy(key, &root, sizeof(ir_ref));
-	memcpy(key + 4, &ref_and_op, sizeof(ir_ref));
-	ir_strtab_lookup(ctx->fused_regs, key, 8, 0x10000000 | (uint8_t)reg);
-}
-
 static void assign_regs(ir_ctx *ctx)
 {
 	ir_ref i;
@@ -4548,7 +4553,7 @@ static void assign_regs(ir_ctx *ctx)
 											old_reg = ir_get_alocated_reg(ctx, -use_pos->hint_ref, use_pos->op_num);
 											if ((old_reg != IR_REG_NONE && reg != old_reg) || reg == IR_REG_NONE) {
 												ctx->rules[-use_pos->hint_ref] |= IR_FUSED_REG;
-												ir_set_fused_reg(ctx, ref, -use_pos->hint_ref * sizeof(ir_ref) + use_pos->op_num, reg);
+												ir_set_fused_reg(ctx, ref, -use_pos->hint_ref, use_pos->op_num, reg);
 												use_pos = use_pos->next;
 												continue;
 											}
@@ -4574,7 +4579,7 @@ static void assign_regs(ir_ctx *ctx)
 								} else if (use_pos->hint_ref < 0 && !(use_pos->flags & IR_PHI_USE)) {
 									IR_ASSERT(ctx->rules[-use_pos->hint_ref] & IR_FUSED);
 									ctx->rules[-use_pos->hint_ref] |= IR_FUSED_REG;
-									ir_set_fused_reg(ctx, ref, -use_pos->hint_ref * sizeof(ir_ref) + use_pos->op_num, IR_REG_NONE);
+									ir_set_fused_reg(ctx, ref, -use_pos->hint_ref, use_pos->op_num, IR_REG_NONE);
 								}
 								use_pos = use_pos->next;
 							}
@@ -4603,7 +4608,7 @@ static void assign_regs(ir_ctx *ctx)
 					if (IR_IS_CONST_REF(ops[ival->tmp_op_num])) {
 						/* constant rematerialization */
 						reg |= IR_REG_SPILL_LOAD;
-					} else if (ctx->rules[ops[ival->tmp_op_num]] == (IR_SKIPPED|IR_FUSED|IR_SIMPLE|IR_ALLOCA)
+					} else if (ctx->rules[ops[ival->tmp_op_num]] == IR_STATIC_ALLOCA
 							&& IR_OPND_KIND(ir_op_flags[insn->op], ival->tmp_op_num) == IR_OPND_DATA) {
 						/* local address rematerialization */
 						reg |= IR_REG_SPILL_LOAD;
