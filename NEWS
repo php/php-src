@@ -32,6 +32,7 @@ PHP                                                                        NEWS
   . Fixed a double-free when Calendar::createInstance() or
     IntlCalendar::fromDateTime() fails after adopting a TimeZone.
     (Ilia Alshanetsky)
+  . Added IntlNumberFormatter::createFromSkeleton() (GH-24165). (David Carlier)
 
 - Lexbor:
   . Merge patches lexbor/lexbor@8a14bc0 and lexbor/lexbor@f67ce4b, fixing a

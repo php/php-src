@@ -48,6 +48,7 @@ if test "$PHP_INTL" != "no"; then
     grapheme/grapheme_string.cpp \
     grapheme/grapheme_util.cpp \
     msgformat/msgformat_helpers.cpp \
+    numberformatter/numberformatter_class.cpp \
     rangeformatter/rangeformatter_class.cpp \
     timezone/timezone_class.cpp \
     timezone/timezone_methods.cpp \
@@ -126,6 +127,7 @@ if test "$PHP_INTL" != "no"; then
     $ext_builddir/listformatter
     $ext_builddir/msgformat
     $ext_builddir/normalizer
+    $ext_builddir/numberformatter
     $ext_builddir/rangeformatter
     $ext_builddir/resourcebundle
     $ext_builddir/spoofchecker
