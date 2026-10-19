@@ -64,6 +64,28 @@ PHPAPI int gettimeofday(struct timeval *time_Info, struct timezone *timezone_Inf
 	return 0;
 }/*}}}*/
 
+static DWORD wait_timer_alertable(HANDLE timer)
+{/*{{{*/
+	DWORD result;
+
+#ifdef ZTS
+	/* Threads that PHP does not manage have no executor globals, and their APCs cannot run PHP code */
+	if (!tsrm_is_managed_thread()) {
+		return WaitForSingleObjectEx(timer, INFINITE, TRUE);
+	}
+#endif
+
+	/* APCs can run PHP code that bails out. Close the timer before propagating the bailout. */
+	zend_try {
+		result = WaitForSingleObjectEx(timer, INFINITE, TRUE);
+	} zend_catch {
+		CloseHandle(timer);
+		zend_bailout();
+	} zend_end_try();
+
+	return result;
+}/*}}}*/
+
 PHPAPI int usleep(unsigned int useconds)
 {/*{{{*/
 	HANDLE timer;
@@ -74,7 +96,7 @@ PHPAPI int usleep(unsigned int useconds)
 
 	timer = CreateWaitableTimer(NULL, TRUE, NULL);
 	SetWaitableTimer(timer, &due, 0, NULL, NULL, 0);
-	result = WaitForSingleObjectEx(timer, INFINITE, TRUE);
+	result = wait_timer_alertable(timer);
 	CloseHandle(timer);
 	if (result == WAIT_IO_COMPLETION) {
 		errno = EINTR;
@@ -88,6 +110,14 @@ PHPAPI int nanosleep( const struct timespec * rqtp, struct timespec * rmtp )
 	if (rqtp->tv_nsec > 999999999) {
 		/* The time interval specified 1,000,000 or more microseconds. */
 		errno = EINVAL;
+		return -1;
+	}
+	/* Run already queued APCs first, so that their runtime doesn't count as time slept */
+	if (SleepEx(0, TRUE) == WAIT_IO_COMPLETION) {
+		if (rmtp != NULL) {
+			*rmtp = *rqtp;
+		}
+		errno = EINTR;
 		return -1;
 	}
 	zend_hrtime_t start = zend_hrtime();

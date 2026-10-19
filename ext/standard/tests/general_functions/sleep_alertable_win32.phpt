@@ -11,43 +11,50 @@ ffi.enable=1
 --FILE--
 <?php
 $callconv = PHP_INT_SIZE === 4 ? '__stdcall' : '';
+// kernel32.dll exports undecorated names: resolve them with the default
+// calling convention, then cast them to their actual calling convention
+$kernel32 = FFI::cdef(<<<C
+    void *GetCurrentThread(void);
+    unsigned long QueueUserAPC(void *callback, void *thread, uintptr_t data);
+    unsigned long SleepEx(unsigned long milliseconds, int alertable);
+C, 'kernel32.dll');
 $ffi = FFI::cdef(<<<C
     typedef void ($callconv *PAPCFUNC)(uintptr_t);
-    void * $callconv GetCurrentThread(void);
-    unsigned long $callconv QueueUserAPC(PAPCFUNC callback, void *thread, uintptr_t data);
-    unsigned long $callconv SleepEx(unsigned long milliseconds, int alertable);
-C, 'kernel32.dll');
+    typedef void *($callconv *GetCurrentThread_t)(void);
+    typedef unsigned long ($callconv *QueueUserAPC_t)(PAPCFUNC callback, void *thread, uintptr_t data);
+    typedef unsigned long ($callconv *SleepEx_t)(unsigned long milliseconds, int alertable);
+C);
+$GetCurrentThread = $ffi->cast('GetCurrentThread_t', $kernel32->GetCurrentThread);
+$QueueUserAPC = $ffi->cast('QueueUserAPC_t', $kernel32->QueueUserAPC);
+$SleepEx = $ffi->cast('SleepEx_t', $kernel32->SleepEx);
 
 $called = 0;
 $callback = static function (int $data) use (&$called): void {
     $called = $data;
+    // The time spent in APCs is not time slept
+    usleep(300000);
 };
 
 echo "usleep()\n";
-var_dump($ffi->QueueUserAPC($callback, $ffi->GetCurrentThread(), 1) !== 0);
+var_dump($QueueUserAPC($callback, $GetCurrentThread(), 1) !== 0);
 var_dump(usleep(1000000));
 var_dump($called === 1);
 
 echo "time_nanosleep()\n";
-var_dump($ffi->QueueUserAPC($callback, $ffi->GetCurrentThread(), 2) !== 0);
-$remaining = time_nanosleep(2, 0);
+var_dump($QueueUserAPC($callback, $GetCurrentThread(), 2) !== 0);
+var_dump(time_nanosleep(2, 0));
 var_dump($called === 2);
-var_dump(is_array($remaining));
-if (is_array($remaining)) {
-    var_dump($remaining['seconds'] >= 0 && $remaining['seconds'] <= 2);
-    var_dump($remaining['nanoseconds'] >= 0 && $remaining['nanoseconds'] < 1000000000);
-    var_dump($remaining['seconds'] > 0 || $remaining['nanoseconds'] > 0);
-    var_dump($remaining['seconds'] < 2 || $remaining['nanoseconds'] === 0);
-}
 
 echo "time_sleep_until()\n";
-var_dump($ffi->QueueUserAPC($callback, $ffi->GetCurrentThread(), 3) !== 0);
-$deadline = microtime(true) + 0.1;
+var_dump($QueueUserAPC($callback, $GetCurrentThread(), 3) !== 0);
+$deadline = microtime(true) + 0.5;
 var_dump(time_sleep_until($deadline));
 var_dump($called === 3);
-var_dump(microtime(true) + 0.002 >= $deadline);
+$now = microtime(true);
+var_dump($now + 0.002 >= $deadline);
+var_dump($now < $deadline + 0.25);
 
-$ffi->SleepEx(0, 1);
+$SleepEx(0, 1);
 ?>
 --EXPECT--
 usleep()
@@ -56,13 +63,15 @@ NULL
 bool(true)
 time_nanosleep()
 bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
+array(2) {
+  ["seconds"]=>
+  int(2)
+  ["nanoseconds"]=>
+  int(0)
+}
 bool(true)
 time_sleep_until()
+bool(true)
 bool(true)
 bool(true)
 bool(true)
