@@ -22,6 +22,7 @@ class DlTest {
 
 class DlTestSuperClass {
     public int $a;
+    public int $temporary = 0;
     public function test(string $str = ""): string {}
 }
 
