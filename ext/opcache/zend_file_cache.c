@@ -580,11 +580,7 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 #endif
 		while (opline < end) {
 #ifdef HAVE_JIT
-			zend_vm_opcode_handler_t handler = zend_jit_get_original_handler(
-				original, (uint32_t)(opline - start_opline));
-			if (handler) {
-				opline->handler = handler;
-			}
+			zend_jit_restore_original_handler(original, (uint32_t)(opline - start_opline), opline);
 #endif
 			if (opline->opcode == ZEND_OP_DATA
 				&& (opline-1)->opcode == ZEND_DECLARE_ATTRIBUTED_CONST

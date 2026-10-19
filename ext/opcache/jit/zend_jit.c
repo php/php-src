@@ -3323,18 +3323,20 @@ static int zend_jit_setup_hot_counters(zend_op_array *op_array)
 	return SUCCESS;
 }
 
-zend_vm_opcode_handler_t zend_jit_get_original_handler(const zend_op_array *op_array, uint32_t index)
+void zend_jit_restore_original_handler(const zend_op_array *op_array, uint32_t index, zend_op *opline)
 {
 	zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
 
 	if (func_info) {
 		if (func_info->flags & ZEND_FUNC_JIT_ON_HOT_TRACE) {
 			zend_jit_op_array_trace_extension *ext = (zend_jit_op_array_trace_extension*)func_info;
-			return ext->trace_info[index].orig_handler;
+			opline->handler = ext->trace_info[index].orig_handler;
+			return;
 		}
 		if (func_info->flags & ZEND_FUNC_JIT_ON_HOT_COUNTERS) {
 			zend_jit_op_array_hot_extension *ext = (zend_jit_op_array_hot_extension*)func_info;
-			return ext->orig_handlers[index];
+			opline->handler = ext->orig_handlers[index];
+			return;
 		}
 		if (func_info->flags & (ZEND_FUNC_JIT_ON_FIRST_EXEC | ZEND_FUNC_JIT_ON_PROF_REQUEST)) {
 			zend_jit_op_array_extension *ext = (zend_jit_op_array_extension*)func_info;
@@ -3347,7 +3349,10 @@ zend_vm_opcode_handler_t zend_jit_get_original_handler(const zend_op_array *op_a
 					entry++;
 				}
 			}
-			return index == entry ? ext->orig_handler : NULL;
+			if (index == entry) {
+				opline->handler = ext->orig_handler;
+				return;
+			}
 		}
 	}
 
@@ -3355,12 +3360,8 @@ zend_vm_opcode_handler_t zend_jit_get_original_handler(const zend_op_array *op_a
 	 * handlers need to be rebuilt; other VM handlers may be specialized. */
 	if (dasm_buf && (uintptr_t)op_array->opcodes[index].handler >= (uintptr_t)dasm_buf
 			&& (uintptr_t)op_array->opcodes[index].handler < (uintptr_t)dasm_end) {
-		zend_op opline = op_array->opcodes[index];
-		ZEND_VM_SET_OPCODE_HANDLER(&opline);
-		return opline.handler;
+		ZEND_VM_SET_OPCODE_HANDLER(opline);
 	}
-
-	return NULL;
 }
 
 #include "jit/zend_jit_trace.c"

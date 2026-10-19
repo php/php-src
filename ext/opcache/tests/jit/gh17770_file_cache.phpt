@@ -34,6 +34,10 @@ $source = <<<'PHP'
 function gh17770_value(int $value): int {
     return $value + 2;
 }
+function gh17770_array($values): int {
+    $values[0] = 42;
+    return $values[0];
+}
 class Gh17770Box {
     public function value(): int {
         return gh17770_value(40);
@@ -44,6 +48,7 @@ for ($i = 0; $i < 1000; $i++) {
     $box->value();
 }
 echo $box->value(), "\n";
+echo gh17770_array([]), "\n";
 PHP;
 
 function runScript(string $script, string $cache, string $jit, bool $cacheOnly): void {
@@ -74,7 +79,7 @@ function runScript(string $script, string $cache, string $jit, bool $cacheOnly):
     fclose($pipes[1]);
     fclose($pipes[2]);
     $status = proc_close($process);
-    if ($status !== 0 || $output !== ($cacheOnly ? "42\n0\n" : "42\n1\n") || $errors !== '') {
+    if ($status !== 0 || $output !== ($cacheOnly ? "42\n42\n0\n" : "42\n42\n1\n") || $errors !== '') {
         throw new RuntimeException("JIT $jit, file_cache_only=" . (int) $cacheOnly
             . ": exit=$status, output=" . var_export($output, true) . ", errors=$errors");
     }
