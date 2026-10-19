@@ -2008,13 +2008,9 @@ static zend_result php_openssl_validate_and_allocate_psk_callback(
 	char *is_callable_error = NULL;
 	zend_fcall_info_cache fcc = {0};
 	if (!zend_is_callable(callable, &fcc, &is_callable_error)) {
-		if (is_callable_error) {
-			zend_type_error("%s must be a valid callback, %s",
-					callback_name, is_callable_error);
-			efree(is_callable_error);
-		} else {
-			zend_type_error("%s must be a valid callback", callback_name);
-		}
+		zend_type_error("%s must be a valid callback, %s",
+				callback_name, is_callable_error);
+		efree(is_callable_error);
 		return FAILURE;
 	}
 
@@ -2131,12 +2127,8 @@ static zend_result php_openssl_setup_server_early_data(php_stream *stream,
 		char *is_callable_error = NULL;
 		zend_fcall_info_cache fcc = {0};
 		if (!zend_is_callable(val, &fcc, &is_callable_error)) {
-			if (is_callable_error) {
-				zend_type_error("early_data_cb must be a valid callback, %s", is_callable_error);
-				efree(is_callable_error);
-			} else {
-				zend_type_error("early_data_cb must be a valid callback");
-			}
+			zend_type_error("early_data_cb must be a valid callback, %s", is_callable_error);
+			efree(is_callable_error);
 			return FAILURE;
 		}
 
@@ -2319,12 +2311,8 @@ static zend_result php_openssl_validate_and_allocate_session_callback(
 	/* Validate callable */
 	zend_fcall_info_cache fcc;
 	if (!zend_is_callable(callable, &fcc, &is_callable_error)) {
-		if (is_callable_error) {
-			zend_type_error("%s must be a valid callback, %s", callback_name, is_callable_error);
-			efree(is_callable_error);
-		} else {
-			zend_type_error("%s must be a valid callback", callback_name);
-		}
+		zend_type_error("%s must be a valid callback, %s", callback_name, is_callable_error);
+		efree(is_callable_error);
 		return FAILURE;
 	}
 

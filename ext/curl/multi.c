@@ -485,7 +485,7 @@ static bool _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue
 			}
 
 			char *error_str = NULL;
-			if (UNEXPECTED(!zend_is_callable_ex(zvalue, /* object */ NULL, /* check_flags */ 0, /* callable_name */ NULL, &mh->handlers.server_push, /* error */ &error_str))) {
+			if (UNEXPECTED(!zend_is_callable(zvalue, &mh->handlers.server_push, &error_str))) {
 				if (!EG(exception)) {
 					zend_argument_type_error(2, "must be a valid callback for option CURLMOPT_PUSHFUNCTION, %s", error_str);
 				}
