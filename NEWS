@@ -160,6 +160,8 @@ PHP                                                                        NEWS
     (Lazizbek Ergashev)
 
 - Standard:
+  . Fixed __unserialize() and __wakeup() being called for objects with a missing
+    closing brace. (Ilia Alshanetsky)
   . Fixed bug GH-24308 (Request shutdown calls closelog() even when syslog
     was not opened by PHP). (lazerg)
   . Fixed bug GH-24399 (usleep() and time_nanosleep() ignore queued APCs on
