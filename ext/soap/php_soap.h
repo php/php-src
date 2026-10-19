@@ -255,6 +255,7 @@ static zend_always_inline zval *php_soap_deref(zval *zv) {
 #define Z_CLIENT_LAST_RESPONSE_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 32)
 #define Z_CLIENT_LAST_REQUEST_HEADERS_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 33)
 #define Z_CLIENT_LAST_RESPONSE_HEADERS_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 34)
+#define Z_CLIENT_FOLLOW_CROSS_ORIGIN_REDIRECTS_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 35)
 
 typedef struct soap_url_object {
 	php_uri *uri;

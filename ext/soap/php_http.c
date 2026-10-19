@@ -347,6 +347,28 @@ static bool in_domain(const zend_string *host, const zend_string *domain)
 	}
 }
 
+static bool is_allowed_redirect(const php_uri *from, const php_uri *to)
+{
+	if (to->scheme == NULL || to->host == NULL) {
+		return true;
+	}
+
+	if (!zend_string_equals_ci(from->host, to->host)) {
+		return false;
+	}
+
+	zend_long to_port = to->port;
+	if (to_port == 0) {
+		to_port = zend_string_equals_literal(to->scheme, "https") ? 443 : 80;
+	}
+
+	if (zend_string_equals(from->scheme, to->scheme)) {
+		return from->port == to_port;
+	}
+
+	return zend_string_equals_literal(from->scheme, "http") && zend_string_equals_literal(to->scheme, "https") && to_port == 443;
+}
+
 bool make_http_soap_request(
 	zval *this_ptr, zend_string *buf, zend_string *location, char *soapaction,
 	int soap_version, zend_string *uri_parser_class, zval *return_value
@@ -1191,6 +1213,15 @@ try_again:
 						}
 					}
 				}
+
+				if (Z_TYPE_P(Z_CLIENT_FOLLOW_CROSS_ORIGIN_REDIRECTS_P(this_ptr)) != IS_TRUE && !is_allowed_redirect(uri, new_uri)) {
+					php_uri_struct_free(new_uri);
+					add_soap_fault(this_ptr, "HTTP", "Redirection to a different origin is not allowed", NULL, NULL, soap_lang_en);
+					smart_str_free(&soap_headers_z);
+					efree(http_msg);
+					return false;
+				}
+
 				uri = new_uri;
 
 				if (--redirect_max < 1) {
