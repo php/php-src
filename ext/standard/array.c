@@ -5082,13 +5082,13 @@ out:
 }
 /* }}} */
 
-static int zval_compare(zval *first, zval *second) /* {{{ */
+static bool zval_is_equal(zval *first, zval *second)
 {
-	return string_compare_function(first, second);
+	return string_compare_function(first, second) == 0;
 }
-/* }}} */
 
-static int zval_user_compare(zval *a, zval *b) /* {{{ */
+/* Note this assumes the user callback follows the same semantics of other compare functions so 0 means equal */
+static bool zval_is_user_equal(zval *a, zval *b)
 {
 	zval args[2];
 	zval retval;
@@ -5102,15 +5102,14 @@ static int zval_user_compare(zval *a, zval *b) /* {{{ */
 
 	zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache));
 	zend_long ret = php_get_long(&retval);
-	return ZEND_NORMALIZE_BOOL(ret);
+	return ZEND_NORMALIZE_BOOL(ret) == 0;
 }
-/* }}} */
 
 static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_type) /* {{{ */
 {
 	uint32_t argc, i;
 	zval *args;
-	int (*intersect_data_compare_func)(zval *, zval *) = NULL;
+	bool (*intersect_data_compare_func)(zval *, zval *) = NULL;
 	bool ok;
 	zval *val, *data;
 	char *param_spec;
@@ -5122,14 +5121,14 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 	if (data_compare_type == INTERSECT_COMP_DATA_USER) {
 		/* INTERSECT_COMP_DATA_USER - array_uintersect_assoc() */
 		param_spec = "+f";
-		intersect_data_compare_func = zval_user_compare;
+		intersect_data_compare_func = zval_is_user_equal;
 	} else {
 		/* 	INTERSECT_COMP_DATA_NONE - array_intersect_key()
 			INTERSECT_COMP_DATA_INTERNAL - array_intersect_assoc() */
 		param_spec = "+";
 
 		if (data_compare_type == INTERSECT_COMP_DATA_INTERNAL) {
-			intersect_data_compare_func = zval_compare;
+			intersect_data_compare_func = zval_is_equal;
 		}
 	}
 
@@ -5156,7 +5155,7 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 			for (i = 1; i < argc; i++) {
 				if ((data = zend_hash_index_find(Z_ARRVAL(args[i]), h)) == NULL ||
 					(intersect_data_compare_func &&
-					intersect_data_compare_func(val, data) != 0)
+					intersect_data_compare_func(val, data) == false)
 				) {
 					ok = false;
 					break;
@@ -5171,7 +5170,7 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 			for (i = 1; i < argc; i++) {
 				if ((data = zend_hash_find_known_hash(Z_ARRVAL(args[i]), key)) == NULL ||
 					(intersect_data_compare_func &&
-					intersect_data_compare_func(val, data) != 0)
+					intersect_data_compare_func(val, data) == false)
 				) {
 					ok = false;
 					break;
@@ -5720,7 +5719,7 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 {
 	uint32_t argc, i;
 	zval *args;
-	int (*diff_data_compare_func)(zval *, zval *) = NULL;
+	bool (*diff_data_compare_func)(zval *, zval *) = NULL;
 	bool ok;
 	zval *val, *data;
 	zend_string *key;
@@ -5732,13 +5731,13 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "+f", &args, &argc, &BG(user_compare_fci), &BG(user_compare_fci_cache)) == FAILURE) {
 			RETURN_THROWS();
 		}
-		diff_data_compare_func = zval_user_compare;
+		diff_data_compare_func = zval_is_user_equal;
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
 			RETURN_THROWS();
 		}
 		if (data_compare_type == DIFF_COMP_DATA_INTERNAL) {
-			diff_data_compare_func = zval_compare;
+			diff_data_compare_func = zval_is_equal;
 		}
 	}
 
@@ -5761,7 +5760,7 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 			for (i = 1; i < argc; i++) {
 				if ((data = zend_hash_index_find(Z_ARRVAL(args[i]), h)) != NULL &&
 					(!diff_data_compare_func ||
-					diff_data_compare_func(val, data) == 0)
+					diff_data_compare_func(val, data) == true)
 				) {
 					ok = false;
 					break;
@@ -5776,7 +5775,7 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 			for (i = 1; i < argc; i++) {
 				if ((data = zend_hash_find_known_hash(Z_ARRVAL(args[i]), key)) != NULL &&
 					(!diff_data_compare_func ||
-					diff_data_compare_func(val, data) == 0)
+					diff_data_compare_func(val, data) == true)
 				) {
 					ok = false;
 					break;
