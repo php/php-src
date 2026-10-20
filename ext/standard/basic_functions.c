@@ -32,6 +32,7 @@
 #include "ext/session/php_session.h"
 #include "zend_exceptions.h"
 #include "zend_ini.h"
+#include "zend_hrtime.h"
 #include "zend_operators.h"
 #include "ext/standard/php_dns.h"
 #include "ext/standard/php_uuencode.h"
@@ -1209,8 +1210,9 @@ PHP_FUNCTION(time_sleep_until)
 {
 	double target_secs;
 	struct timeval tm;
-	struct timespec php_req, php_rem;
+	struct timespec php_req;
 	uint64_t current_ns, target_ns, diff_ns;
+	zend_hrtime_t start;
 	const uint64_t ns_per_sec = 1000000000;
 	const double top_target_sec = (double)(UINT64_MAX / ns_per_sec);
 
@@ -1221,6 +1223,7 @@ PHP_FUNCTION(time_sleep_until)
 	if (gettimeofday((struct timeval *) &tm, NULL) != 0) {
 		RETURN_FALSE;
 	}
+	start = zend_hrtime();
 
 	if (UNEXPECTED(!(target_secs >= 0 && target_secs <= top_target_sec))) {
 		zend_argument_value_error(1, "must be between 0 and %" PRIu64, (uint64_t)top_target_sec);
@@ -1238,13 +1241,17 @@ PHP_FUNCTION(time_sleep_until)
 	php_req.tv_sec = (time_t) (diff_ns / ns_per_sec);
 	php_req.tv_nsec = (long) (diff_ns % ns_per_sec);
 
-	while (nanosleep(&php_req, &php_rem)) {
-		if (errno == EINTR) {
-			php_req.tv_sec = php_rem.tv_sec;
-			php_req.tv_nsec = php_rem.tv_nsec;
-		} else {
+	while (nanosleep(&php_req, NULL)) {
+		if (errno != EINTR) {
 			RETURN_FALSE;
 		}
+		zend_hrtime_t elapsed = zend_hrtime() - start;
+		if (elapsed >= diff_ns) {
+			break;
+		}
+		uint64_t remaining_ns = diff_ns - elapsed;
+		php_req.tv_sec = (time_t) (remaining_ns / ns_per_sec);
+		php_req.tv_nsec = (long) (remaining_ns % ns_per_sec);
 	}
 
 	RETURN_TRUE;
