@@ -5082,19 +5082,25 @@ out:
 }
 /* }}} */
 
-static bool zval_is_equal(zval *first, zval *second)
+static bool zval_is_equal(zval *val, zval *data)
 {
-	return string_compare_function(first, second) == 0;
+	if (!data) {
+		return false;
+	}
+	return string_compare_function(val, data) == 0;
 }
 
 /* Note this assumes the user callback follows the same semantics of other compare functions so 0 means equal */
-static bool zval_is_user_equal(zval *a, zval *b)
+static bool zval_is_user_equal(zval *val, zval *data)
 {
+	if (!data) {
+		return false;
+	}
 	zval args[2];
 	zval retval;
 
-	ZVAL_COPY_VALUE(&args[0], a);
-	ZVAL_COPY_VALUE(&args[1], b);
+	ZVAL_COPY_VALUE(&args[0], val);
+	ZVAL_COPY_VALUE(&args[1], data);
 
 	BG(user_compare_fci).param_count = 2;
 	BG(user_compare_fci).params = args;
@@ -5106,7 +5112,7 @@ static bool zval_is_user_equal(zval *a, zval *b)
 }
 
 static bool zval_always_true(zval *val, zval *data) {
-	return true;
+	return data;
 }
 
 typedef bool (*php_diff_intersect_equality_fn)(zval *, zval *);
@@ -5159,9 +5165,8 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 		if (key == NULL) {
 			ok = true;
 			for (i = 1; i < argc; i++) {
-				if ((data = zend_hash_index_find(Z_ARRVAL(args[i]), h)) == NULL ||
-					callback(val, data) == false
-				) {
+				data = zend_hash_index_find(Z_ARRVAL(args[i]), h);
+				if (callback(val, data) == false) {
 					ok = false;
 					break;
 				}
@@ -5173,9 +5178,8 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 		} else {
 			ok = true;
 			for (i = 1; i < argc; i++) {
-				if ((data = zend_hash_find_known_hash(Z_ARRVAL(args[i]), key)) == NULL ||
-					callback(val, data) == false
-				) {
+				data = zend_hash_find_known_hash(Z_ARRVAL(args[i]), key);
+				if (callback(val, data) == false) {
 					ok = false;
 					break;
 				}
@@ -5762,9 +5766,8 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 		if (key == NULL) {
 			ok = true;
 			for (i = 1; i < argc; i++) {
-				if ((data = zend_hash_index_find(Z_ARRVAL(args[i]), h)) != NULL &&
-					callback(val, data) == true
-				) {
+				data = zend_hash_index_find(Z_ARRVAL(args[i]), h);
+				if (callback(val, data) == true) {
 					ok = false;
 					break;
 				}
@@ -5776,9 +5779,8 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 		} else {
 			ok = true;
 			for (i = 1; i < argc; i++) {
-				if ((data = zend_hash_find_known_hash(Z_ARRVAL(args[i]), key)) != NULL &&
-					callback(val, data) == true
-				) {
+				data = zend_hash_find_known_hash(Z_ARRVAL(args[i]), key);
+				if (callback(val, data) == true) {
 					ok = false;
 					break;
 				}
