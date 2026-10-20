@@ -126,6 +126,12 @@ PHP 8.7 UPGRADE NOTES
 13. Other Changes
 ========================================
 
+- Core:
+  . Errors for undefined functions, undefined methods and classes, interfaces
+    or traits that were not found now suggest a similarly named one, e.g.
+    'Call to undefined function strlenn() (did you mean strlen?)'. Code that
+    matches on the exact error message may need to be updated.
+
 ========================================
 14. Performance Improvements
 ========================================

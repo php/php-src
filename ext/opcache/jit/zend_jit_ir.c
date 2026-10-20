@@ -2121,21 +2121,8 @@ static int zend_jit_undefined_function_stub(zend_jit_ctx *jit)
 {
 	// JIT: load EX(opline)
 	ir_ref ref = ir_LOAD_A(jit_FP(jit));
-	ir_ref arg3 = ir_LOAD_U32(ir_ADD_OFFSET(ref, offsetof(zend_op, op2.constant)));
 
-	if (sizeof(void*) == 8) {
-		arg3 = ir_LOAD_A(ir_ADD_A(ref, ir_SEXT_A(arg3)));
-	} else {
-		arg3 = ir_LOAD_A(arg3);
-	}
-	arg3 = ir_ADD_OFFSET(arg3, offsetof(zend_string, val));
-
-	ir_CALL_3(IR_VOID,
-		ir_CONST_FUNC_PROTO(zend_throw_error,
-			ir_proto_2(&jit->ctx, IR_VARARG_FUNC, IR_VOID, IR_ADDR, IR_ADDR)),
-		IR_NULL,
-		ir_CONST_ADDR("Call to undefined function %s()"),
-		arg3);
+	ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_undefined_function_error), ref);
 
 	ir_IJMP(jit_STUB_ADDR(jit, jit_stub_exception_handler));
 

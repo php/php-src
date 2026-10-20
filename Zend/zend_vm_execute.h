@@ -769,11 +769,9 @@ static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_F
 static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV  zend_undefined_function_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zval *function_name;
 
 	SAVE_OPLINE();
-	function_name = RT_CONSTANT(opline, opline->op2);
-	zend_throw_error(NULL, "Call to undefined function %s()", Z_STRVAL_P(function_name));
+	zend_undefined_function_error(opline);
 	HANDLE_EXCEPTION();
 }
 
@@ -53782,11 +53780,9 @@ static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_C
 static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV  zend_undefined_function_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zval *function_name;
 
 	SAVE_OPLINE();
-	function_name = RT_CONSTANT(opline, opline->op2);
-	zend_throw_error(NULL, "Call to undefined function %s()", Z_STRVAL_P(function_name));
+	zend_undefined_function_error(opline);
 	HANDLE_EXCEPTION();
 }
 

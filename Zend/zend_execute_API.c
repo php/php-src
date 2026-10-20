@@ -1752,12 +1752,15 @@ static ZEND_COLD void report_class_fetch_error(const zend_string *class_name, ui
 		return;
 	}
 
-	if ((fetch_type & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_INTERFACE) {
-		zend_throw_or_error(fetch_type, NULL, "Interface \"%s\" not found", ZSTR_VAL(class_name));
-	} else if ((fetch_type & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_TRAIT) {
-		zend_throw_or_error(fetch_type, NULL, "Trait \"%s\" not found", ZSTR_VAL(class_name));
+	uint32_t mask = fetch_type & ZEND_FETCH_CLASS_MASK;
+	const char *kind = mask == ZEND_FETCH_CLASS_INTERFACE ? "Interface"
+	                 : mask == ZEND_FETCH_CLASS_TRAIT     ? "Trait"
+	                 :                                      "Class";
+	zend_string *suggestion = zend_find_similar_class(class_name);
+	if (suggestion) {
+		zend_throw_or_error(fetch_type, NULL, "%s \"%s\" not found (did you mean \"%s\"?)", kind, ZSTR_VAL(class_name), ZSTR_VAL(suggestion));
 	} else {
-		zend_throw_or_error(fetch_type, NULL, "Class \"%s\" not found", ZSTR_VAL(class_name));
+		zend_throw_or_error(fetch_type, NULL, "%s \"%s\" not found", kind, ZSTR_VAL(class_name));
 	}
 }
 
