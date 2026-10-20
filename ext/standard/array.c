@@ -5091,22 +5091,16 @@ static bool zval_is_equal(zval *val, zval *data)
 }
 
 /* Note this assumes the user callback follows the same semantics of other compare functions so 0 means equal */
-static bool zval_is_user_equal(zval *val, zval *data)
+static bool zval_is_user_equal(zval *data, zend_fcall_info_cache *fcc, zval *args)
 {
 	if (!data) {
 		return false;
 	}
-	zval args[2];
 	zval retval;
 
-	ZVAL_COPY_VALUE(&args[0], val);
 	ZVAL_COPY_VALUE(&args[1], data);
+	zend_call_known_fcc(fcc, &retval, 2, args, NULL);
 
-	BG(user_compare_fci).param_count = 2;
-	BG(user_compare_fci).params = args;
-	BG(user_compare_fci).retval = &retval;
-
-	zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache));
 	zend_long ret = php_get_long(&retval);
 	return ZEND_NORMALIZE_BOOL(ret) == 0;
 }
@@ -5156,16 +5150,8 @@ static void php_array_diff_intersect_key(INTERNAL_FUNCTION_PARAMETERS, php_diff_
 {
 	uint32_t argc;
 	zval *args;
-	char *param_spec;
 
-	if (callback == zval_is_user_equal) {
-		/* array_uintersect_assoc() or array_udiff_assoc() */
-		param_spec = "+f";
-	} else {
-		param_spec = "+";
-	}
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), param_spec, &args, &argc, &BG(user_compare_fci), &BG(user_compare_fci_cache)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -5178,6 +5164,68 @@ static void php_array_diff_intersect_key(INTERNAL_FUNCTION_PARAMETERS, php_diff_
 
 	array_init(return_value);
 	php_check_and_populate_array_matching_condition(Z_ARR_P(return_value), argc, args, callback, callback_result);
+}
+
+ZEND_ATTRIBUTE_NONNULL static void php_check_and_populate_array_matching_condition_user_fn(
+	HashTable *ht,
+	uint32_t argc, zval *args,
+	zend_fcall_info_cache *fcc, bool callback_result
+) {
+	/* Iterate over keys of the first array, to compute keys that are in all of the other arrays. */
+	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(args[0]), zend_ulong h, zend_string *key, zval *val) {
+		zval params[2];
+		ZVAL_COPY_VALUE(&params[0], val);
+		zval *data;
+
+		if (Z_ISREF_P(val) && Z_REFCOUNT_P(val) == 1) {
+			val = Z_REFVAL_P(val);
+		}
+		if (key == NULL) {
+			for (uint32_t i = 1; i < argc; i++) {
+				data = zend_hash_index_find(Z_ARRVAL(args[i]), h);
+				if (zval_is_user_equal(data, fcc, params) == callback_result) {
+					goto next;
+				}
+			}
+			Z_TRY_ADDREF_P(val);
+			zend_hash_index_add_new(ht, h, val);
+		} else {
+			for (uint32_t i = 1; i < argc; i++) {
+				data = zend_hash_find_known_hash(Z_ARRVAL(args[i]), key);
+				if (zval_is_user_equal(data, fcc, params) == callback_result) {
+					goto next;
+				}
+			}
+			Z_TRY_ADDREF_P(val);
+			zend_hash_add_new(ht, key, val);
+		}
+		next:
+	} ZEND_HASH_FOREACH_END();
+}
+
+static void php_array_diff_intersect_key_user_fn(INTERNAL_FUNCTION_PARAMETERS, bool callback_result)
+{
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+	uint32_t argc;
+	zval *args;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+F", &args, &argc, &fci, &fcc) == FAILURE) {
+		zend_release_fcall_info_cache(&fcc);
+		RETURN_THROWS();
+	}
+
+	for (uint32_t i = 0; i < argc; i++) {
+		if (Z_TYPE(args[i]) != IS_ARRAY) {
+			zend_argument_type_error(i + 1, "must be of type array, %s given", zend_zval_value_name(&args[i]));
+			zend_release_fcall_info_cache(&fcc);
+			RETURN_THROWS();
+		}
+	}
+
+	array_init(return_value);
+	php_check_and_populate_array_matching_condition_user_fn(Z_ARR_P(return_value), argc, args, &fcc, callback_result);
+	zend_release_fcall_info_cache(&fcc);
 }
 
 /* Returns the entries of arr1 that have keys which are present in all the other arguments.
@@ -5195,14 +5243,6 @@ PHP_FUNCTION(array_intersect_assoc)
 	php_array_diff_intersect_key(INTERNAL_FUNCTION_PARAM_PASSTHRU, zval_is_equal, false);
 }
 
-/* Returns the entries of arr1 that have values which are present in all the other arguments.
- * Keys are used to do more restrictive check.
- * Data is compared by using a user-supplied callback. */
-PHP_FUNCTION(array_uintersect_assoc)
-{
-	php_array_diff_intersect_key(INTERNAL_FUNCTION_PARAM_PASSTHRU, zval_is_user_equal, false);
-}
-
 /* Returns the entries of arr1 that have keys which are not present in any of the others arguments.
  * This function is like array_diff() but works on the keys instead of the values.
  * The associativity is preserved. */
@@ -5217,11 +5257,19 @@ PHP_FUNCTION(array_diff_assoc)
 	php_array_diff_intersect_key(INTERNAL_FUNCTION_PARAM_PASSTHRU, zval_is_equal, true);
 }
 
+/* Returns the entries of arr1 that have values which are present in all the other arguments.
+ * Keys are used to do more restrictive check.
+ * Data is compared by using a user-supplied callback. */
+PHP_FUNCTION(array_uintersect_assoc)
+{
+	php_array_diff_intersect_key_user_fn(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
+}
+
 /* Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal.
  * Keys are compared by user supplied function. */
 PHP_FUNCTION(array_udiff_assoc)
 {
-	php_array_diff_intersect_key(INTERNAL_FUNCTION_PARAM_PASSTHRU, zval_is_user_equal, true);
+	php_array_diff_intersect_key_user_fn(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 
 static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_compare_type, int key_compare_type) /* {{{ */
