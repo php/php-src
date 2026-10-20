@@ -12,7 +12,7 @@
 
 #include "TSRM_atexit.h"
 
-#if defined(ZTS) && !defined(TSRM_WIN32) && defined(__APPLE__)
+#if defined(ZTS) && defined(__APPLE__)
 
 #include <mach-o/dyld.h>
 #include <stdio.h>
@@ -70,4 +70,4 @@ static void __attribute__((destructor)) tsrm_thread_exit_unload(void)
 }
 #endif
 
-#endif /* ZTS && !TSRM_WIN32 && __APPLE__ */
+#endif /* ZTS && __APPLE__ */
