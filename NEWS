@@ -104,6 +104,8 @@ PHP                                                                        NEWS
     (Jorg Sowa)
   . Don't share the unserialize() context with enum autoloaders.
     (Nicolas Grekas)
+  . Fixed bug GH-24399 (usleep() and time_nanosleep() ignore queued APCs on
+    Windows). (Nicolas Grekas)
 
 - Tidy:
   . Fixed tidy_repair_string(), tidy_repair_file(), tidy::repairString() and
