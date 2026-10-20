@@ -107,6 +107,7 @@
 
 #include "charclass.h"
 
+#define	CIRCUMFLEX	'^'
 #define	DOLLAR		'$'
 #define	DOT		'.'
 #define	EOS		'\0'
@@ -566,6 +567,12 @@ static int glob0(const Char *pattern, php_glob_t *pglob, struct glob_lim *limitp
 		switch (c) {
 		case LBRACKET:
 			c = *qpatnext;
+			/*
+			 * Not in OpenBSD's glob(), keep it when syncing: like fnmatch(),
+			 * treat a leading '^' as '!'.
+			 */
+			if (c == CIRCUMFLEX)
+				c = NOT;
 			if (c == NOT)
 				++qpatnext;
 			if (*qpatnext == EOS ||
