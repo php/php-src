@@ -8,8 +8,13 @@ echo "*** Testing parse_ini_file() : error conditions ***\n";
 echo "\n-- Testing parse_ini_file() function with invalid scanner mode --\n";
 $filename = 'string_val';
 $process_sections = true;
-$scanner_mode = 10;
-var_dump( parse_ini_file($filename, $process_sections, $scanner_mode) );
+
+try {
+	$scanner_mode = 10;
+	var_dump( parse_ini_file($filename, $process_sections, $scanner_mode) );
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
 
 echo "\n-- Testing parse_ini_file() function with a non-existent file --\n";
 $filename = __FILE__ . 'invalidfilename';
@@ -21,9 +26,7 @@ echo "Done";
 *** Testing parse_ini_file() : error conditions ***
 
 -- Testing parse_ini_file() function with invalid scanner mode --
-
-Warning: parse_ini_file(): Invalid scanner mode in %s on line %d
-bool(false)
+ValueError: parse_ini_file(): Argument #3 ($scanner_mode) must be one of INI_SCANNER_NORMAL, INI_SCANNER_RAW, or INI_SCANNER_TYPED
 
 -- Testing parse_ini_file() function with a non-existent file --
 
