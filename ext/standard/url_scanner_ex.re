@@ -191,9 +191,10 @@ alphadash = ([a-zA-Z] | "-");
 static inline void append_modified_url(smart_str *url, smart_str *dest, smart_str *url_app, const char *separator, int type)
 {
 	php_url *url_parts;
+	bool has_port;
 
 	smart_str_0(url); /* FIXME: Bug #70480 php_url_parse_ex() crashes by processing chars exceed len */
-	url_parts = php_url_parse_ex(ZSTR_VAL(url->s), ZSTR_LEN(url->s));
+	url_parts = php_url_parse_ex2(ZSTR_VAL(url->s), ZSTR_LEN(url->s), &has_port);
 
 	/* Ignore malformed URLs */
 	if (!url_parts) {
@@ -261,7 +262,7 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 	if (url_parts->host) {
 		smart_str_appends(dest, ZSTR_VAL(url_parts->host));
 	}
-	if (url_parts->port) {
+	if (has_port) {
 		smart_str_appendc(dest, ':');
 		smart_str_append_unsigned(dest, (long)url_parts->port);
 	}
