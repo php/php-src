@@ -19,7 +19,7 @@ Stack trace:
 #1 %s(%d): Test::test()
 #2 {main}
 
-Next TypeError: call_user_func(): Argument #1 ($callback) must be a valid callback, (null) in %s:%d
+Next TypeError: call_user_func(): Argument #1 ($callback) must be a valid callback, cannot use "self"/"parent"/"static" in callables in %s:%d
 Stack trace:
 #0 %s(%d): Test::test()
 #1 {main}

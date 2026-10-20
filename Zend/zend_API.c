@@ -3817,6 +3817,11 @@ static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *sc
 	ZSTR_ALLOCA_FREE(lcname, use_heap);
 	/* User error handlers may throw from deprecations above; do not report callable as valid. */
 	if (UNEXPECTED(EG(exception))) {
+		/* We allocate an error string that will not be used as callers of zend_is_callable() expect an
+		 * error to be assigned on failure */
+		if (error && *error == NULL) {
+			*error = estrdup("cannot use \"self\"/\"parent\"/\"static\" in callables");
+		}
 		return false;
 	}
 	return ret;
