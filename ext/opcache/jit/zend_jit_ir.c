@@ -360,6 +360,8 @@ static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
 
 static ir_ref jit_CONST_FUNC(zend_jit_ctx *jit, uintptr_t addr, uint16_t flags);
 
+static ir_ref jit_ADD_OFFSET(zend_jit_ctx *jit, ir_ref addr, uintptr_t offset);
+
 static void zend_jit_preserve_parent_regs(zend_jit_ctx *jit,
                                           zend_ssa *ssa,
                                           zend_jit_trace_info *parent,
