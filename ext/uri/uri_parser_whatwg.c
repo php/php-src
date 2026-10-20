@@ -1136,14 +1136,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 	}
 
 	if (Z_TYPE_P(query) == IS_STRING) {
-		lxb_url_query_set_null(lexbor_url);
-		zend_result result;
-		if (Z_STRLEN_P(query) == 0) {
-			lexbor_str_init(&lexbor_url->query, lexbor_url->mraw, 1);
-			result = SUCCESS;
-		} else {
-			result = php_uri_parser_whatwg_query_write(lexbor_url, query, NULL);
-		}
+		zend_result result = php_uri_parser_whatwg_query_write(lexbor_url, query, NULL);
 		php_uri_parser_whatwg_build_errors(Z_ARRVAL(errors));
 		if (result == FAILURE) {
 			goto failure;
@@ -1151,14 +1144,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 	}
 
 	if (Z_TYPE_P(fragment) == IS_STRING) {
-		lxb_url_fragment_set_null(lexbor_url);
-		zend_result result;
-		if (Z_STRLEN_P(fragment) == 0) {
-			lexbor_str_init(&lexbor_url->fragment, lexbor_url->mraw, 1);
-			result = SUCCESS;
-		} else {
-			result = php_uri_parser_whatwg_fragment_write(lexbor_url, fragment, NULL);
-		}
+		zend_result result = php_uri_parser_whatwg_fragment_write(lexbor_url, fragment, NULL);
 		php_uri_parser_whatwg_build_errors(Z_ARRVAL(errors));
 		if (result == FAILURE) {
 			goto failure;
@@ -1206,9 +1192,9 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_whatwg_build_path(
 
 		/* The opaque path parser needs the following delimiter to encode the
 		 * immediately preceding space, while still reporting all space errors. */
-		if (Z_TYPE_P(query) != IS_NULL) {
+		if (Z_TYPE_P(query) == IS_STRING && Z_STRLEN_P(query) > 0) {
 			smart_str_appendc(&opaque_path, '?');
-		} else if (Z_TYPE_P(fragment) != IS_NULL) {
+		} else if (Z_TYPE_P(fragment) == IS_STRING && Z_STRLEN_P(fragment) > 0) {
 			smart_str_appendc(&opaque_path, '#');
 		}
 
@@ -1324,30 +1310,16 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_wh
 		goto failure;
 	}
 
-	if (Z_TYPE_P(query) == IS_STRING && Z_STRLEN_P(query) == 0) {
-		/* The URL API setter treats an empty string as removal. The builder
-		 * distinguishes an empty component from an absent one. */
-		lexbor_str_destroy(&lexbor_url->query, lexbor_url->mraw, false);
-		lexbor_str_init(&lexbor_url->query, lexbor_url->mraw, 1);
-	} else {
-		result = php_uri_parser_whatwg_query_write(lexbor_url, query, NULL);
-		php_uri_parser_whatwg_build_errors(Z_ARRVAL(errors));
-		if (result == FAILURE) {
-			goto failure;
-		}
+	result = php_uri_parser_whatwg_query_write(lexbor_url, query, NULL);
+	php_uri_parser_whatwg_build_errors(Z_ARRVAL(errors));
+	if (result == FAILURE) {
+		goto failure;
 	}
 
-	if (Z_TYPE_P(fragment) == IS_STRING && Z_STRLEN_P(fragment) == 0) {
-		/* The URL API setter treats an empty string as removal. The builder
-		 * distinguishes an empty component from an absent one. */
-		lexbor_str_destroy(&lexbor_url->fragment, lexbor_url->mraw, false);
-		lexbor_str_init(&lexbor_url->fragment, lexbor_url->mraw, 1);
-	} else {
-		result = php_uri_parser_whatwg_fragment_write(lexbor_url, fragment, NULL);
-		php_uri_parser_whatwg_build_errors(Z_ARRVAL(errors));
-		if (result == FAILURE) {
-			goto failure;
-		}
+	result = php_uri_parser_whatwg_fragment_write(lexbor_url, fragment, NULL);
+	php_uri_parser_whatwg_build_errors(Z_ARRVAL(errors));
+	if (result == FAILURE) {
+		goto failure;
 	}
 
 	if (php_uri_pass_errors_by_ref_and_free(soft_errors_zv, Z_ARRVAL(errors)) == FAILURE) {
