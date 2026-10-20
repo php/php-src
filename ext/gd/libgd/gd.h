@@ -632,7 +632,7 @@ void gdImageJpegCtx(gdImagePtr im, gdIOCtx *out, int quality);
  */
 #define gdWebpLossless 101
 
-void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quality);
+bool gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quality);
 
 /* Best to free this memory with gdFree(), not free() */
 void *gdImageJpegPtr(gdImagePtr im, int *size, int quality);
