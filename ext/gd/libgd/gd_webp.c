@@ -101,7 +101,11 @@ gdImagePtr gdImageCreateFromWebpCtx (gdIOCtx * infile)
 	return im;
 }
 
-bool gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
+void gdImageWebpCtx(gdImagePtr im, gdIOCtx *outfile, int quality){
+    gdImageWebpCtxEx(im, outfile, quality);
+}
+
+bool gdImageWebpCtxEx (gdImagePtr im, gdIOCtx * outfile, int quality)
 {
 	uint8_t *argb;
 	int x, y;
