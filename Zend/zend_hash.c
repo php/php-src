@@ -1257,8 +1257,9 @@ ZEND_API uint32_t ZEND_FASTCALL zend_hash_next_index_insert_copies(HashTable *ht
 		zend_long next = ht->nNextFreeElement == ZEND_LONG_MIN ? 0 : ht->nNextFreeElement;
 		bool appends_after_last = next == (zend_long) ht->nNumUsed;
 		uint32_t room = ht->nTableSize - ht->nNumUsed;
-		/* Growing a packed array with holes may convert it to a hash, which
-		 * the one-by-one path below handles. */
+		/* Whether a packed array with holes stays packed when it grows
+		 * depends on how full it is (see _zend_hash_index_add_or_update_i()),
+		 * so those go through the one-by-one path below. */
 		bool can_grow = HT_IS_WITHOUT_HOLES(ht) && count <= HT_MAX_SIZE - ht->nNumUsed;
 
 		if (appends_after_last && (count <= room || can_grow)) {
