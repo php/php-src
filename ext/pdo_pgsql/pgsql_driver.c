@@ -1398,11 +1398,13 @@ static void pdo_pgsql_request_shutdown(pdo_dbh_t *dbh)
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 
 	if(H->server) {
-		res = PQexec(H->server, "DISCARD ALL");
+		res = PQexec(H->server, "CLOSE ALL; SET SESSION AUTHORIZATION DEFAULT; RESET ALL; UNLISTEN *; "
+			"SELECT pg_advisory_unlock_all(); DISCARD TEMP; DISCARD SEQUENCES");
 
-		if(res) {
-			PQclear(res);
+		if (PQresultStatus(res) != PGRES_COMMAND_OK && PQstatus(H->server) == CONNECTION_OK) {
+			PQreset(H->server);
 		}
+		PQclear(res);
 	}
 }
 
