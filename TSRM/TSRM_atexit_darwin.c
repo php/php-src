@@ -15,6 +15,7 @@
 #if defined(ZTS) && !defined(TSRM_WIN32) && defined(__APPLE__)
 
 #include <mach-o/dyld.h>
+#include <stdio.h>
 
 static bool tsrm_thread_exit_armed = false;
 static pthread_key_t tsrm_exit_key;
@@ -31,7 +32,11 @@ static void tsrm_thread_exit_handler(void *arg)
 
 void tsrm_atexit(void)
 {
-	tsrm_thread_exit_armed = pthread_key_create(&tsrm_exit_key, NULL) == 0;
+	int error = pthread_key_create(&tsrm_exit_key, NULL);
+	tsrm_thread_exit_armed = error == 0;
+	if (!tsrm_thread_exit_armed) {
+		fprintf(stderr, "TSRM: pthread_key_create() failed (error %d); automatic thread cleanup is disabled\n", error);
+	}
 }
 
 void tsrm_atexit_set_data(tsrm_tls_entry *thread_resources)

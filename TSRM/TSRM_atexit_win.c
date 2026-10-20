@@ -14,6 +14,7 @@
 
 #if defined(ZTS) && defined(TSRM_WIN32)
 
+#include <stdio.h>
 #include <stdlib.h>
 
 TSRMLS_CACHE_EXTERN();
@@ -22,6 +23,10 @@ static bool tsrm_thread_exit_armed = false;
 static DWORD tsrm_exit_key = FLS_OUT_OF_INDEXES;
 static BOOLEAN (NTAPI *tsrm_dll_shutdown_in_progress)(void);
 
+/* FLS is per-fiber, but TSRM resources are per-thread. Another fiber can free
+ * and reallocate the resources while this fiber retains its FLS value. Keep a
+ * separate record so callbacks can distinguish stale FLS values even if the
+ * resource allocation reuses the same address. */
 typedef struct {
 	tsrm_tls_entry *thread_resources;
 } tsrm_thread_exit_data;
@@ -61,6 +66,11 @@ void tsrm_atexit(void)
 	 * owning thread before its native TLS is released. */
 	tsrm_exit_key = tsrm_dll_shutdown_in_progress ? FlsAlloc(tsrm_thread_exit_handler) : FLS_OUT_OF_INDEXES;
 	tsrm_thread_exit_armed = tsrm_exit_key != FLS_OUT_OF_INDEXES;
+	if (!tsrm_thread_exit_armed) {
+		fprintf(stderr, "TSRM: %s failed (error %lu); automatic thread cleanup is disabled\n",
+			tsrm_dll_shutdown_in_progress ? "FlsAlloc()" : "RtlDllShutdownInProgress lookup",
+			(unsigned long) GetLastError());
+	}
 }
 
 void tsrm_atexit_set_data(tsrm_tls_entry *thread_resources)
