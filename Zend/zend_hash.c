@@ -1246,6 +1246,49 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_next_index_insert_new(HashTable *ht, zval
 	return _zend_hash_index_add_or_update_i(ht, ht->nNextFreeElement, pData, HASH_ADD | HASH_ADD_NEW | HASH_ADD_NEXT);
 }
 
+ZEND_API uint32_t ZEND_FASTCALL zend_hash_next_index_insert_copies(HashTable *ht, zval *values, uint32_t count)
+{
+	IS_CONSISTENT(ht);
+	HT_ASSERT_RC1(ht);
+
+	/* Several values can be stored directly after the last used slot of a
+	 * packed or uninitialized array. */
+	if (count > 1 && (HT_IS_PACKED(ht) || (HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED))) {
+		zend_long next = ht->nNextFreeElement == ZEND_LONG_MIN ? 0 : ht->nNextFreeElement;
+		bool appends_after_last = next == (zend_long) ht->nNumUsed;
+		uint32_t room = ht->nTableSize - ht->nNumUsed;
+		/* Whether a packed array with holes stays packed when it grows
+		 * depends on how full it is (see _zend_hash_index_add_or_update_i()),
+		 * so those go through the one-by-one path below. */
+		bool can_grow = HT_IS_WITHOUT_HOLES(ht) && count <= HT_MAX_SIZE - ht->nNumUsed;
+
+		if (appends_after_last && (count <= room || can_grow)) {
+			if (count > room) {
+				zend_hash_extend(ht, ht->nNumUsed + count, true);
+			} else if (HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED) {
+				zend_hash_real_init_packed_ex(ht);
+			}
+
+			zval *zv = ht->arPacked + ht->nNumUsed;
+			for (uint32_t i = 0; i < count; i++) {
+				ZVAL_COPY(&zv[i], &values[i]);
+			}
+			ht->nNumUsed += count;
+			ht->nNumOfElements += count;
+			ht->nNextFreeElement = ht->nNumUsed;
+			return count;
+		}
+	}
+
+	for (uint32_t i = 0; i < count; i++) {
+		if (!_zend_hash_index_add_or_update_i(ht, ht->nNextFreeElement, &values[i], HASH_ADD | HASH_ADD_NEXT)) {
+			return i;
+		}
+		Z_TRY_ADDREF(values[i]);
+	}
+	return count;
+}
+
 ZEND_API zval* ZEND_FASTCALL zend_hash_index_lookup(HashTable *ht, zend_ulong h)
 {
 	return _zend_hash_index_add_or_update_i(ht, h, NULL, HASH_LOOKUP);

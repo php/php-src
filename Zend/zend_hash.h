@@ -136,6 +136,11 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_index_add_new(HashTable *ht, zend_ulong h
 ZEND_API zval* ZEND_FASTCALL zend_hash_index_update(HashTable *ht, zend_ulong h, zval *pData);
 ZEND_API zval* ZEND_FASTCALL zend_hash_next_index_insert(HashTable *ht, zval *pData);
 ZEND_API zval* ZEND_FASTCALL zend_hash_next_index_insert_new(HashTable *ht, zval *pData);
+/* Inserts the count values in order like zend_hash_next_index_insert(), and
+ * adds a reference to each inserted value (like ZVAL_COPY()). Returns the
+ * number of inserted values, which is less than count only if an insertion
+ * failed; the values after it are then not inserted. */
+ZEND_API uint32_t ZEND_FASTCALL zend_hash_next_index_insert_copies(HashTable *ht, zval *values, uint32_t count);
 
 ZEND_API zval* ZEND_FASTCALL zend_hash_index_add_empty_element(HashTable *ht, zend_ulong h);
 ZEND_API zval* ZEND_FASTCALL zend_hash_add_empty_element(HashTable *ht, zend_string *key);

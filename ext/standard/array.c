@@ -3476,15 +3476,17 @@ PHP_FUNCTION(array_push)
 		Z_PARAM_VARIADIC('+', args, argc)
 	ZEND_PARSE_PARAMETERS_END();
 
-	/* For each subsequent argument, make it a reference, increase refcount, and add it to the end of the array */
-	for (uint32_t i = 0; i < argc; i++) {
-		Z_TRY_ADDREF(args[i]);
-
-		if (zend_hash_next_index_insert(Z_ARRVAL_P(stack), &args[i]) == NULL) {
-			Z_TRY_DELREF(args[i]);
+	/* A single value is added faster by zend_hash_next_index_insert(). */
+	if (argc == 1) {
+		Z_TRY_ADDREF(args[0]);
+		if (zend_hash_next_index_insert(Z_ARRVAL_P(stack), &args[0]) == NULL) {
+			Z_TRY_DELREF(args[0]);
 			zend_throw_error(NULL, "Cannot add element to the array as the next element is already occupied");
 			RETURN_THROWS();
 		}
+	} else if (zend_hash_next_index_insert_copies(Z_ARRVAL_P(stack), args, argc) < argc) {
+		zend_throw_error(NULL, "Cannot add element to the array as the next element is already occupied");
+		RETURN_THROWS();
 	}
 
 	/* Clean up and return the number of values in the stack */
