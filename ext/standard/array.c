@@ -5124,7 +5124,6 @@ ZEND_ATTRIBUTE_NONNULL static void php_check_and_populate_array_matching_conditi
 ) {
 	/* Iterate over keys of the first array, to compute keys that are in all of the other arrays. */
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(args[0]), zend_ulong h, zend_string *key, zval *val) {
-		bool ok = true;
 		zval *data;
 
 		if (Z_ISREF_P(val) && Z_REFCOUNT_P(val) == 1) {
@@ -5134,27 +5133,22 @@ ZEND_ATTRIBUTE_NONNULL static void php_check_and_populate_array_matching_conditi
 			for (uint32_t i = 1; i < argc; i++) {
 				data = zend_hash_index_find(Z_ARRVAL(args[i]), h);
 				if (callback(val, data) == callback_result) {
-					ok = false;
-					break;
+					goto next;
 				}
 			}
-			if (ok) {
-				Z_TRY_ADDREF_P(val);
-				zend_hash_index_add_new(ht, h, val);
-			}
+			Z_TRY_ADDREF_P(val);
+			zend_hash_index_add_new(ht, h, val);
 		} else {
 			for (uint32_t i = 1; i < argc; i++) {
 				data = zend_hash_find_known_hash(Z_ARRVAL(args[i]), key);
 				if (callback(val, data) == callback_result) {
-					ok = false;
-					break;
+					goto next;
 				}
 			}
-			if (ok) {
-				Z_TRY_ADDREF_P(val);
-				zend_hash_add_new(ht, key, val);
-			}
+			Z_TRY_ADDREF_P(val);
+			zend_hash_add_new(ht, key, val);
 		}
+		next:
 	} ZEND_HASH_FOREACH_END();
 }
 
