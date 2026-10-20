@@ -3,7 +3,7 @@ $session_array = explode(";", session_encode()); should not segfault
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --INI--
 session.use_cookies=0
 session.cache_limiter=
@@ -11,7 +11,7 @@ session.cache_limiter=
 <?php
 error_reporting(E_ALL);
 
-$session_array = explode(";", @session_encode());
+$session_array = explode(";", (string)@session_encode());
 print "I live\n";
 ?>
 --EXPECT--

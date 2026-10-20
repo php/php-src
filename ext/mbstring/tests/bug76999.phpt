@@ -15,13 +15,24 @@ var_dump(mb_regex_set_options("m"));
 try {
     var_dump(mb_regex_set_options("a"));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 var_dump(mb_regex_set_options());
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_regex_set_options() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+
+Deprecated: Function mb_regex_set_options() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(2) "pr"
+
+Deprecated: Function mb_regex_set_options() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(2) "mr"
+
+Deprecated: Function mb_regex_set_options() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(3) "imd"
-Option "a" is not supported
+
+Deprecated: Function mb_regex_set_options() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+ValueError: Option "a" is not supported
+
+Deprecated: Function mb_regex_set_options() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(2) "mr"

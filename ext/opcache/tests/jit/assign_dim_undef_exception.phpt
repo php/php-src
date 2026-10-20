@@ -23,15 +23,15 @@ function test3() {
 }
 try {
     test1();
-} catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     test2();
-} catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Undefined variable $undef
-Undefined variable $undef
+Exception: Undefined variable $undef
+Exception: Undefined variable $undef

@@ -23,9 +23,9 @@ for ($i = 0; $i < 2; $i++) {
         ],
     );
     // Avoid interned
-    $dbh->setAttribute(PDO::FB_ATTR_DATE_FORMAT, str_repeat('Y----m----d', random_int(1, 1)));
-    $dbh->setAttribute(PDO::FB_ATTR_TIME_FORMAT, str_repeat('H::::i::::s', random_int(1, 1)));
-    $dbh->setAttribute(PDO::FB_ATTR_TIMESTAMP_FORMAT, str_repeat('Y----m----d....H::::i::::s', random_int(1, 1)));
+    $dbh->setAttribute(Pdo\Firebird::ATTR_DATE_FORMAT, str_repeat('Y----m----d', random_int(1, 1)));
+    $dbh->setAttribute(Pdo\Firebird::ATTR_TIME_FORMAT, str_repeat('H::::i::::s', random_int(1, 1)));
+    $dbh->setAttribute(Pdo\Firebird::ATTR_TIMESTAMP_FORMAT, str_repeat('Y----m----d....H::::i::::s', random_int(1, 1)));
     unset($dbh);
 }
 

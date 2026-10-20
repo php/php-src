@@ -44,6 +44,7 @@
 .file "make_x86_64_sysv_elf_gas.S"
 .text
 .globl make_fcontext
+.hidden make_fcontext
 .type make_fcontext,@function
 .align 16
 make_fcontext:
@@ -76,7 +77,7 @@ make_fcontext:
 #if defined(BOOST_CONTEXT_TLS_STACK_PROTECTOR)
     /* save stack guard */
     movq  %fs:0x28, %rcx    /* read stack guard from TLS record */
-    movq  %rcx, 0x8(%rsp)   /* save stack guard */
+    movq  %rcx, 0x8(%rax)   /* save stack guard */
 #endif
 
     /* compute abs address of label trampoline */
@@ -90,35 +91,6 @@ make_fcontext:
     /* save address of finish as return-address for context-function */
     /* will be entered after context-function returns */
     movq  %rcx, 0x38(%rax)
-
-#if BOOST_CONTEXT_SHADOW_STACK
-    /* Populate the shadow stack and normal stack */
-    /* get original SSP */
-    rdsspq  %r8
-    /* restore new shadow stack */
-    rstorssp  -0x8(%r9)
-    /* save the restore token on the original shadow stack */
-    saveprevssp
-    /* push the address of "jmp trampoline" to the new shadow stack */
-    /* as well as the stack */
-    call  1f
-    jmp  trampoline
-1:
-    /* save address of "jmp trampoline" as return-address */
-    /* for context-function */
-    pop 0x38(%rax)
-    /* Get the new SSP.  */
-    rdsspq  %r9
-    /* restore original shadow stack */
-    rstorssp  -0x8(%r8)
-    /* save the restore token on the new shadow stack.  */
-    saveprevssp
-
-    /* reserve space for the new SSP */
-    leaq  -0x8(%rax), %rax
-    /* save the new SSP to this fcontext */
-    movq  %r9, (%rax)
-#endif
 
 #if BOOST_CONTEXT_SHADOW_STACK
     /* Populate the shadow stack */
@@ -161,6 +133,8 @@ make_fcontext:
     ret /* return pointer to context-data */
 
 trampoline:
+    .cfi_startproc
+    .cfi_undefined rip
     /* store return address on stack */
     /* fix stack alignment */
     _CET_ENDBR
@@ -175,6 +149,7 @@ trampoline:
 #endif
     /* jump to context-function */
     jmp *%rbx
+    .cfi_endproc
 
 finish:
     _CET_ENDBR

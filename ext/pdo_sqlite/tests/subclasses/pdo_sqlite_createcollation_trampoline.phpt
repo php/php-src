@@ -9,7 +9,7 @@ $db = new Pdo\Sqlite('sqlite::memory:');
 
 $db->query('CREATE TABLE test_pdo_sqlite_createcollation_trampoline (s VARCHAR(4))');
 
-$stmt = $db->query('INSERT INTO test_pdo_sqlite_createcollation_trampoline VALUES ("a1"), ("a10"), ("a2")');
+$stmt = $db->query("INSERT INTO test_pdo_sqlite_createcollation_trampoline VALUES ('a1'), ('a10'), ('a2')");
 
 class TrampolineTest {
     public function __call(string $name, array $arguments) {

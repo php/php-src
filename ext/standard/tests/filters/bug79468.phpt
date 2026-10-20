@@ -13,9 +13,9 @@ fwrite($fp, "This is ");
 fclose($fp);
 try {
     stream_filter_remove($rot13_filter);
-} catch (\Throwable $e) {
-    var_dump($e->getMessage());
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-string(79) "stream_filter_remove(): supplied resource is not a valid stream filter resource"
+TypeError: stream_filter_remove(): supplied resource is not a valid stream filter resource

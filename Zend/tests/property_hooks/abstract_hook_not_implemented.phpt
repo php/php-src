@@ -14,4 +14,4 @@ class B extends A {}
 
 ?>
 --EXPECTF--
-Fatal error: Class B contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (A::$prop::get) in %s on line %d
+Fatal error: Class B contains 1 abstract method and must therefore be declared abstract or implement the remaining method (A::$prop::get) in %s on line %d

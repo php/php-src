@@ -3,7 +3,7 @@ a script should not be able to modify session.use_trans_sid
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --INI--
 session.use_trans_sid=0
 session.use_cookies=0
@@ -35,8 +35,8 @@ session_destroy();
 --EXPECTF--
 <a href="/link">
 
-Warning: ini_set(): Session ini settings cannot be changed when a session is active in %s on line %d
+Warning: ini_set(): Session ini settings cannot be changed when a session is active (started from %s on line %d) in %s on line %d
 <a href="/link">
 
-Warning: ini_set(): Session ini settings cannot be changed when a session is active in %s on line %d
+Warning: ini_set(): Session ini settings cannot be changed when a session is active (started from %s on line %d) in %s on line %d
 <a href="/link">

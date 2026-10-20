@@ -11,21 +11,21 @@ class Bar {}
 $bar = "Bar";
 try {
     assert(new \stdClass instanceof $bar);
-} catch (\AssertionError $e) {
-    echo 'assert(): ', $e->getMessage(), ' failed', PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     assert(new \stdClass instanceof Bar);
-} catch (\AssertionError $e) {
-    echo 'assert(): ', $e->getMessage(), ' failed', PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     assert(new \stdClass instanceof \Foo\Bar);
-} catch (\AssertionError $e) {
-    echo 'assert(): ', $e->getMessage(), ' failed', PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-assert(): assert(new \stdClass() instanceof $bar) failed
-assert(): assert(new \stdClass() instanceof Bar) failed
-assert(): assert(new \stdClass() instanceof \Foo\Bar) failed
+AssertionError: assert(new \stdClass() instanceof $bar)
+AssertionError: assert(new \stdClass() instanceof Bar)
+AssertionError: assert(new \stdClass() instanceof \Foo\Bar)

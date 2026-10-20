@@ -42,12 +42,12 @@ var_dump($ffi->new("int[_c4]"));
 try {
     var_dump($ffi->new("enum _e"));
 } catch (Throwable $e) {
-    echo get_class($e) . ": " . $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump($ffi->new("f"));
 } catch (Throwable $e) {
-    echo get_class($e) . ": " . $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo "ok\n";
 ?>

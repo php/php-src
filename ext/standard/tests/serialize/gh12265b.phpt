@@ -41,7 +41,7 @@ printf("serialized original:    %s\n", $sc);
 printf("serialized temp    :    %s\n", $stc);
 
 ?>
---EXPECT--
+--EXPECTF--
 serialized original:    O:1:"B":1:{s:1:"a";O:1:"A":1:{s:1:"x";r:1;}}
 serialized temp    :    O:1:"B":1:{s:1:"a";O:1:"A":1:{s:1:"x";r:1;}}
 serialized original:    O:1:"C":1:{s:1:"b";O:1:"B":1:{s:1:"a";O:1:"A":1:{s:1:"x";r:2;}}}

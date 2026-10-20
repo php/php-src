@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Wez Furlong <wez@php.net>                                    |
   |         Marcus Boerger <helly@php.net>                               |
@@ -115,11 +113,9 @@ PDO_API zend_result php_pdo_register_driver(const pdo_driver_t *driver) /* {{{ *
 	if (driver->api_version != PDO_DRIVER_API) {
 		zend_error_noreturn(E_ERROR, "PDO: driver %s requires PDO API version " ZEND_ULONG_FMT "; this is PDO version %d",
 			driver->driver_name, driver->api_version, PDO_DRIVER_API);
-		return FAILURE;
 	}
 	if (!zend_hash_str_exists(&module_registry, "pdo", sizeof("pdo") - 1)) {
 		zend_error_noreturn(E_ERROR, "The PDO extension must be loaded first in order to load PDO drivers");
-		return FAILURE;	/* NOTREACHED */
 	}
 
 	return zend_hash_str_add_ptr(&pdo_driver_hash, driver->driver_name, driver->driver_name_len, (void*)driver) != NULL ? SUCCESS : FAILURE;
@@ -141,7 +137,6 @@ PDO_API zend_result php_pdo_register_driver_specific_ce(const pdo_driver_t *driv
 {
 	if (!zend_hash_str_exists(&module_registry, "pdo", sizeof("pdo") - 1)) {
 		zend_error_noreturn(E_ERROR, "The PDO extension must be loaded first in order to load PDO drivers");
-		return FAILURE;	/* NOTREACHED */
 	}
 
 	return zend_hash_str_add_ptr(&pdo_driver_specific_ce_hash, driver->driver_name,

@@ -15,8 +15,8 @@ var_dump(openssl_seal($a, $b, $c, $d, $method));
 
 try {
     var_dump(openssl_seal($a, $a, $a, array(), $method));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 // tests with cert
@@ -30,8 +30,8 @@ var_dump(openssl_seal($data, $sealed, $ekeys, array($pub_key, $wrong), $method))
 
 try {
     var_dump(openssl_seal($data, $sealed, $ekeys, array(), $method));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump(openssl_seal($data, $sealed, $ekeys, array($wrong), $method));
@@ -40,13 +40,13 @@ var_dump(openssl_seal($data, $sealed, $ekeys, array($wrong), $method));
 --EXPECTF--
 Warning: openssl_seal(): Not a public key (1th member of pubkeys) in %s on line %d
 bool(false)
-openssl_seal(): Argument #4 ($public_key) must not be empty
+ValueError: openssl_seal(): Argument #4 ($public_key) must not be empty
 int(32)
 int(32)
 
 Warning: openssl_seal(): Not a public key (2th member of pubkeys) in %s on line %d
 bool(false)
-openssl_seal(): Argument #4 ($public_key) must not be empty
+ValueError: openssl_seal(): Argument #4 ($public_key) must not be empty
 
 Warning: openssl_seal(): Not a public key (1th member of pubkeys) in %s on line %d
 bool(false)

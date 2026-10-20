@@ -109,12 +109,13 @@ HDRS;
                 $out .= fread($fp, 1024);
             }
 
-            $pos = strpos($out, "<env:Text>");
+            $marker = '<env:Text xml:lang="en">';
+            $pos = strpos($out, $marker);
             if (false === $pos) {
                 echo $out;
                 goto cleanup;
             }
-            $pos0 = $pos + strlen("<env:Text>");
+            $pos0 = $pos + strlen($marker);
             $pos = strpos($out, "</env:Text>");
             if (false === $pos) {
                 echo $out;
@@ -135,43 +136,42 @@ cleanup:
 --EXPECT--
 Iteration 0
 
-Function 'CATALOG' doesn't exist
+Cannot call method stdClass::CATALOG(): class stdClass does not have a method "CATALOG"
 
-Function 'CATALOG' doesn't exist
+Cannot call method stdClass::CATALOG(): class stdClass does not have a method "CATALOG"
 
 Iteration 1
 
-Function 'CATALOG' doesn't exist
+Cannot call method stdClass::CATALOG(): class stdClass does not have a method "CATALOG"
 
-Function 'CATALOG' doesn't exist
+Cannot call method stdClass::CATALOG(): class stdClass does not have a method "CATALOG"
 
 Iteration 2
 
-Function 'CATALOG' doesn't exist
+Cannot call method stdClass::CATALOG(): class stdClass does not have a method "CATALOG"
 
-Function 'CATALOG' doesn't exist
+Cannot call method stdClass::CATALOG(): class stdClass does not have a method "CATALOG"
 
 Iteration 3
 
-Function 'CATALOG' doesn't exist
+Cannot call method stdClass::CATALOG(): class stdClass does not have a method "CATALOG"
 
-Function 'CATALOG' doesn't exist
+Cannot call method stdClass::CATALOG(): class stdClass does not have a method "CATALOG"
 
 Iteration 4
 
-Function 'CATALOG' doesn't exist
+Cannot call method stdClass::CATALOG(): class stdClass does not have a method "CATALOG"
 
-Function 'CATALOG' doesn't exist
+Cannot call method stdClass::CATALOG(): class stdClass does not have a method "CATALOG"
 
 Iteration 5
 
-Function 'CATALOG' doesn't exist
+Cannot call method stdClass::CATALOG(): class stdClass does not have a method "CATALOG"
 
-Function 'CATALOG' doesn't exist
+Cannot call method stdClass::CATALOG(): class stdClass does not have a method "CATALOG"
 
 Iteration 6
 
-Function 'CATALOG' doesn't exist
+Cannot call method stdClass::CATALOG(): class stdClass does not have a method "CATALOG"
 
-Function 'CATALOG' doesn't exist
-
+Cannot call method stdClass::CATALOG(): class stdClass does not have a method "CATALOG"

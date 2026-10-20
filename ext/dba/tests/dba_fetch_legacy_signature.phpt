@@ -24,7 +24,7 @@ set_error_handler(function ($severity, $message, $file, $line) {
 try {
     dba_fetch("key1", 0, $db);
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 dba_close($db);
 
@@ -41,4 +41,4 @@ Using handler: "%s"
 Deprecated: Calling dba_fetch() with $dba at the 3rd parameter is deprecated in %s on line %d
 This is a test insert
 This is a test insert
-Calling dba_fetch() with $dba at the 3rd parameter is deprecated
+Exception: Calling dba_fetch() with $dba at the 3rd parameter is deprecated

@@ -16,7 +16,7 @@ $s = shm_attach($key, 1024);
 try {
     shm_put_var($s, 1, "test string");
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 var_dump(shm_remove_var($s, -10));

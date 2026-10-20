@@ -10,6 +10,9 @@ Simone Gentili (sensorario@gmail.com)
 if(in_array(PHP_OS_FAMILY, ['BSD', 'Darwin', 'Solaris', 'Linux'])){
     if (!file_exists("/etc/services")) die("skip reason: missing /etc/services");
 }
+if (PHP_OS_FAMILY === 'Solaris') {
+    die("skip Solaris has incomplete /etc/services");
+}
 if (getenv('SKIP_MSAN')) die('skip msan missing interceptor for getservbyname()');
 ?>
 --FILE--

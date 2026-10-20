@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Christian Stocker <chregu@php.net>                          |
    |          Rob Richards <rrichards@php.net>                            |
@@ -58,8 +56,8 @@ zend_result dom_document_preserve_whitespace_read(dom_object *obj, zval *retval)
 zend_result dom_document_preserve_whitespace_write(dom_object *obj, zval *newval);
 zend_result dom_document_recover_read(dom_object *obj, zval *retval);
 zend_result dom_document_recover_write(dom_object *obj, zval *newval);
-zend_result dom_document_substitue_entities_read(dom_object *obj, zval *retval);
-zend_result dom_document_substitue_entities_write(dom_object *obj, zval *newval);
+zend_result dom_document_substitute_entities_read(dom_object *obj, zval *retval);
+zend_result dom_document_substitute_entities_write(dom_object *obj, zval *newval);
 
 /* html5 document properties */
 zend_result dom_html_document_encoding_write(dom_object *obj, zval *retval);
@@ -86,6 +84,8 @@ zend_result dom_element_id_write(dom_object *obj, zval *newval);
 zend_result dom_element_schema_type_info_read(dom_object *obj, zval *retval);
 zend_result dom_element_inner_html_read(dom_object *obj, zval *retval);
 zend_result dom_element_inner_html_write(dom_object *obj, zval *newval);
+zend_result dom_element_outer_html_read(dom_object *obj, zval *retval);
+zend_result dom_element_outer_html_write(dom_object *obj, zval *newval);
 zend_result dom_element_class_list_read(dom_object *obj, zval *retval);
 zend_result dom_modern_element_substituted_node_value_read(dom_object *obj, zval *retval);
 zend_result dom_modern_element_substituted_node_value_write(dom_object *obj, zval *newval);
@@ -108,6 +108,7 @@ zend_result dom_modern_entity_reference_child_nodes_read(dom_object *obj, zval *
 zend_result dom_namednodemap_length_read(dom_object *obj, zval *retval);
 
 /* parent node properties */
+zend_result dom_parent_node_children_read(dom_object *obj, zval *retval);
 zend_result dom_parent_node_first_element_child_read(dom_object *obj, zval *retval);
 zend_result dom_parent_node_last_element_child_read(dom_object *obj, zval *retval);
 zend_result dom_parent_node_child_element_count(dom_object *obj, zval *retval);

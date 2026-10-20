@@ -88,17 +88,17 @@ file in root
 
 --c--
 
-Warning: fopen(c\fopen_variation10.tmp): Failed to open stream: No such file or directory in %s on line %d
+Warning: fopen(): Failed to open stream: No such file or directory in %s on line %d
 file not opened for read
 
 --\--
 
-Warning: fopen(\\fopen_variation10.tmp): Failed to open stream: No such file or directory in %s on line %d
+Warning: fopen(): Failed to open stream: No such file or directory in %s on line %d
 file not opened for read
 
 --/--
 
-Warning: fopen(/\fopen_variation10.tmp): Failed to open stream: No such file or directory in %s on line %d
+Warning: fopen(): Failed to open stream: No such file or directory in %s on line %d
 file not opened for read
 
 --c:fopen10.tmpdirTwo--
@@ -106,7 +106,7 @@ file in fopen10.tmpdirTwo
 
 --c:adir--
 
-Warning: fopen(c:adir\fopen_variation10.tmp): Failed to open stream: No such file or directory in %s on line %d
+Warning: fopen(): Failed to open stream: No such file or directory in %s on line %d
 file not opened for read
 
 --c:\/--
@@ -126,5 +126,5 @@ file in fopen10.tmpDir
 
 --/sortout--
 
-Warning: fopen(/sortout\fopen_variation10.tmp): Failed to open stream: No such file or directory in %s on line %d
+Warning: fopen(): Failed to open stream: No such file or directory in %s on line %d
 file not opened for read

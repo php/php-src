@@ -24,7 +24,7 @@ var_dump(
 );
 ?>
 --EXPECTF--
-Deprecated: Constant MT_RAND_PHP is deprecated in %s on line %d
+Deprecated: Constant MT_RAND_PHP is deprecated since 8.3, as it uses a biased non-standard variant of Mt19937 in %s on line %d
 
 Deprecated: The MT_RAND_PHP variant of Mt19937 is deprecated in %s on line %d
 string(11) "found key 0"

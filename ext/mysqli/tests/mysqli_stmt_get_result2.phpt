@@ -15,44 +15,42 @@ require_once 'skipifconnectfailure.inc';
     */
     require 'table.inc';
 
-    if (!$stmt = mysqli_stmt_init($link))
+    if (!$stmt = mysqli_prepare($link, "SELECT id, label FROM test ORDER BY id ASC LIMIT 1"))
         printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-    if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test ORDER BY id ASC LIMIT 1"))
-        printf("[005] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+    if (!mysqli_stmt_execute($stmt))
+        printf("[006] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
-        if (!mysqli_stmt_execute($stmt))
-            printf("[006] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+    if (!is_object($res = mysqli_stmt_get_result($stmt)) || 'mysqli_result' != get_class($res)) {
+        printf("[007] Expecting object/mysqli_result got %s/%s, [%d] %s\n",
+            gettype($res), $res, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+    }
+    while ($row = mysqli_fetch_assoc($res))
+        var_dump($row);
+    var_dump(mysqli_fetch_assoc($res));
+    mysqli_free_result($res);
 
-        if (!is_object($res = mysqli_stmt_get_result($stmt)) || 'mysqli_result' != get_class($res)) {
-            printf("[007] Expecting object/mysqli_result got %s/%s, [%d] %s\n",
-                gettype($res), $res, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
-        }
-        while ($row = mysqli_fetch_assoc($res))
-            var_dump($row);
-        var_dump(mysqli_fetch_assoc($res));
-        mysqli_free_result($res);
+    if (false !== ($res = mysqli_stmt_get_result($stmt))) {
+        printf("[008] boolean/false got %s/%s, [%d] %s\n",
+            gettype($res), $res, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+    }
 
-        if (false !== ($res = mysqli_stmt_get_result($stmt))) {
-            printf("[008] boolean/false got %s/%s, [%d] %s\n",
-                gettype($res), $res, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
-        }
-
-        mysqli_stmt_execute($stmt);
-        if (!is_object($res = mysqli_stmt_get_result($stmt)) || 'mysqli_result' != get_class($res)) {
-            printf("[009] Expecting object/mysqli_result got %s/%s, [%d] %s\n",
-                gettype($res), $res, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
-        }
-        while ($row = mysqli_fetch_assoc($res))
-            var_dump($row);
-        var_dump(mysqli_fetch_assoc($res));
-        mysqli_free_result($res);
+    mysqli_stmt_execute($stmt);
+    if (!is_object($res = mysqli_stmt_get_result($stmt)) || 'mysqli_result' != get_class($res)) {
+        printf("[009] Expecting object/mysqli_result got %s/%s, [%d] %s\n",
+            gettype($res), $res, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+    }
+    while ($row = mysqli_fetch_assoc($res))
+        var_dump($row);
+    var_dump(mysqli_fetch_assoc($res));
+    mysqli_free_result($res);
 
     mysqli_stmt_close($stmt);
 
-    if (!($stmt = mysqli_stmt_init($link)) ||
-        !mysqli_stmt_prepare($stmt, "SELECT id, label FROM test ORDER BY id ASC LIMIT 2") ||
-        !mysqli_stmt_execute($stmt))
+    if (!$stmt = mysqli_prepare($link, "SELECT id, label FROM test ORDER BY id ASC LIMIT 2"))
+        printf("[010] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+    if (!mysqli_stmt_execute($stmt))
         printf("[010] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     $id = $label = null;
@@ -69,9 +67,10 @@ require_once 'skipifconnectfailure.inc';
 
     mysqli_stmt_close($stmt);
 
-    if (!($stmt = mysqli_stmt_init($link)) ||
-        !mysqli_stmt_prepare($stmt, "SELECT id, label FROM test ORDER BY id ASC LIMIT 2") ||
-        !mysqli_stmt_execute($stmt))
+    if (!$stmt = mysqli_prepare($link, "SELECT id, label FROM test ORDER BY id ASC LIMIT 2"))
+        printf("[014] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+    if (!mysqli_stmt_execute($stmt))
         printf("[014] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     if (!is_object($res = mysqli_stmt_get_result($stmt)) || 'mysqli_result' != get_class($res)) {
@@ -88,9 +87,10 @@ require_once 'skipifconnectfailure.inc';
 
     mysqli_stmt_close($stmt);
 
-    if (!($stmt = mysqli_stmt_init($link)) ||
-        !mysqli_stmt_prepare($stmt, "SELECT id, label FROM test ORDER BY id ASC LIMIT 2") ||
-        !mysqli_stmt_execute($stmt))
+    if (!$stmt = mysqli_prepare($link, "SELECT id, label FROM test ORDER BY id ASC LIMIT 2"))
+        printf("[018] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+    if (!mysqli_stmt_execute($stmt))
         printf("[018] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     if (!is_object($res = mysqli_stmt_get_result($stmt)) || 'mysqli_result' != get_class($res)) {
@@ -109,9 +109,10 @@ require_once 'skipifconnectfailure.inc';
 
     mysqli_stmt_close($stmt);
 
-    if (!($stmt = mysqli_stmt_init($link)) ||
-        !mysqli_stmt_prepare($stmt, "SELECT id, label FROM test ORDER BY id ASC LIMIT 2") ||
-        !mysqli_stmt_execute($stmt))
+    if (!$stmt = mysqli_prepare($link, "SELECT id, label FROM test ORDER BY id ASC LIMIT 2"))
+        printf("[022] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+    if (!mysqli_stmt_execute($stmt))
         printf("[022] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     if (!is_object($res = mysqli_stmt_get_result($stmt)) || 'mysqli_result' != get_class($res)) {

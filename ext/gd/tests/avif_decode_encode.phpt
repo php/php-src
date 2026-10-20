@@ -14,7 +14,7 @@ gd
 --FILE--
 <?php
 
-    require_once __DIR__ . '/similarity.inc';
+    require_once __DIR__ . '/func.inc';
 
     $infile = __DIR__  . '/girl.avif';
     $outfile = __DIR__  . '/test.avif';
@@ -39,7 +39,7 @@ gd
     try {
     	imageavif($img, $outfile, 1234);
     } catch (\ValueError $e) {
-        echo $e->getMessage() . PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 
     echo 'Encoding AVIF with illegal speed: ';
@@ -47,7 +47,7 @@ gd
     try {
     	imageavif($img, $outfile, 70, 1234);
     } catch (\ValueError $e) {
-        echo $e->getMessage() . PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 
     echo 'Encoding AVIF losslessly... ';
@@ -58,8 +58,8 @@ gd
 
     // Note we could also forgive a certain number of pixel differences.
     // With the current test image, we just didn't need to.
-    echo 'How many pixels are different in the two images? ';
-    print_r(calc_image_dissimilarity($img, $img_from_avif));
+    echo 'What is the mean squared error of the two images? ',
+        mse($img, $img_from_avif);
 
     unlink($outfile);
 
@@ -75,8 +75,8 @@ Default AVIF encoding: ok
 Encoding AVIF at quality 70: ok
 Encoding AVIF at quality 70 with speed 5: ok
 Encoding AVIF with default quality: ok
-Encoding AVIF with illegal quality: imageavif(): Argument #3 ($quality) must be between -1 and 100
-Encoding AVIF with illegal speed: imageavif(): Argument #4 ($speed) must be between -1 and 10
+Encoding AVIF with illegal quality: ValueError: imageavif(): Argument #3 ($quality) must be between -1 and 100
+Encoding AVIF with illegal speed: ValueError: imageavif(): Argument #4 ($speed) must be between -1 and 10
 Encoding AVIF losslessly... ok
 Decoding the AVIF we just wrote...
-How many pixels are different in the two images? 0
+What is the mean squared error of the two images? 0

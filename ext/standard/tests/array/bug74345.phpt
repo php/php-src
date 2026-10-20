@@ -15,13 +15,13 @@ array_map($cb, []);
 array_map($cb, [], []);
 try {
     array_map($cb, null);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     array_map($cb, null, null);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 array_filter([], $cb);
 array_reduce([], $cb);
@@ -33,14 +33,14 @@ usort($array, $cb);
 
 try {
     preg_replace_callback('/./', $cb, new stdClass);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 ===DONE===
 --EXPECT--
-array_map(): Argument #2 ($array) must be of type array, null given
-array_map(): Argument #2 ($array) must be of type array, null given
-preg_replace_callback(): Argument #3 ($subject) must be of type array|string, stdClass given
+TypeError: array_map(): Argument #2 ($array) must be of type array, null given
+TypeError: array_map(): Argument #2 ($array) must be of type array, null given
+TypeError: preg_replace_callback(): Argument #3 ($subject) must be of type array|string, stdClass given
 ===DONE===

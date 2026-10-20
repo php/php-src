@@ -78,9 +78,7 @@ function test_image_equals_file(string $filename, GdImage $actual): void
         save_actual_image($actual);
         return;
     }
-    $actual = test_to_truecolor($actual);
     $expected = imagecreatefrompng($filename);
-    $expected = test_to_truecolor($expected);
     test_image_equals_image($expected, $actual, true);
 }
 
@@ -95,6 +93,7 @@ function test_image_equals_file(string $filename, GdImage $actual): void
  */
 function test_image_equals_image(GdImage $expected, GdImage $actual, bool $save_actual = false): void
 {
+    assert(imageistruecolor($expected) && imageistruecolor($actual));
     $exp_x = imagesx($expected);
     $exp_y = imagesy($expected);
     $act_x = imagesx($actual);
@@ -127,34 +126,12 @@ function test_image_equals_image(GdImage $expected, GdImage $actual, bool $save_
 }
 
 /**
- * Returns the truecolor version of an image.
- *
- * @param resource $image
- * @return resource
- */
-function test_to_truecolor($image)
-{
-    if (imageistruecolor($image)) {
-        return $image;
-    } else {
-        $width = imagesx($image);
-        $height = imagesy($image);
-        $result = imagecreatetruecolor($width, $height);
-        imagecopy($result, $image, 0,0, 0,0, $width, $height);
-        return $result;
-    }
-}
-
-/**
  * Saves an actual image to disk.
  *
  * The image is saved right beside the temporary .php test file with the
  * extension .out.png.
- *
- * @param resource $image
- * @return void
  */
-function save_actual_image($image)
+function save_actual_image(GdImage $image): void
 {
     $pathinfo = pathinfo($_SERVER['SCRIPT_FILENAME']);
     $filename = "{$pathinfo['dirname']}/{$pathinfo['filename']}.out.png";
@@ -178,3 +155,23 @@ function trycatch_dump(...$tests) {
     }
 }
 
+/**
+ * Calculate the mean squared error (in range 0..255**2)
+ */
+function mse(GdImage $image1, GdImage $image2): float
+{
+    assert(imageistruecolor($image1) && imageistruecolor($image2));
+    assert(imagesx($image1) === imagesx($image2) && imagesy($image1) === imagesy($image2));
+    $e = $count = 0;
+    for ($j = 0, $m = imagesy($image1); $j < $m; $j++) {
+        for ($i = 0, $n = imagesx($image1); $i < $n; $i++) {
+            $c1 = imagecolorat($image1, $i, $j);
+            $c2 = imagecolorat($image2, $i, $j);
+            $e += ((($c1 >> 16) & 255) - (($c2 >> 16) & 255)) ** 2
+                + ((($c1 >>  8) & 255) - (($c2 >>  8) & 255)) ** 2
+                + ((($c1 >>  0) & 255) - (($c2 >>  0) & 255)) ** 2;
+            $count += 3;
+        }
+    }
+    return $e / $count;
+}

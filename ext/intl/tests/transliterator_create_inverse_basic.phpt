@@ -5,8 +5,6 @@ intl
 --FILE--
 <?php
 
-ini_set("intl.error_level", E_WARNING);
-
 $tr = Transliterator::create("Katakana-Latin");
 $orstr = "オーシャンビュー";
 $new_str = $tr->transliterate($orstr);

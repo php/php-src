@@ -12,17 +12,17 @@ var_dump(new GMP("12", 4));
 try {
     var_dump(new GMP("12", 999));
 } catch (ValueError $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(new GMP("", 10));
 } catch (ValueError $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(new GMP("hello"));
 } catch (ValueError $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
@@ -46,6 +46,6 @@ object(GMP)#1 (1) {
   ["num"]=>
   string(1) "6"
 }
-GMP::__construct(): Argument #2 ($base) must be 0 or between 2 and 62
-GMP::__construct(): Argument #1 ($num) is not an integer string
-GMP::__construct(): Argument #1 ($num) is not an integer string
+ValueError: GMP::__construct(): Argument #2 ($base) must be 0 or between 2 and 62
+ValueError: GMP::__construct(): Argument #1 ($num) is not an integer string
+ValueError: GMP::__construct(): Argument #1 ($num) is not an integer string

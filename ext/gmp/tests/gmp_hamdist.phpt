@@ -19,17 +19,17 @@ var_dump(gmp_hamdist($n, $n1));
 try {
     var_dump(gmp_hamdist($n, array()));
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(gmp_hamdist(array(), $n));
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(gmp_hamdist(array(), array()));
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "Done\n";
@@ -42,7 +42,7 @@ int(-1)
 int(43)
 int(0)
 int(26)
-gmp_hamdist(): Argument #2 ($num2) must be of type GMP|string|int, array given
-gmp_hamdist(): Argument #1 ($num1) must be of type GMP|string|int, array given
-gmp_hamdist(): Argument #1 ($num1) must be of type GMP|string|int, array given
+TypeError: gmp_hamdist(): Argument #2 ($num2) must be of type GMP|string|int, array given
+TypeError: gmp_hamdist(): Argument #1 ($num1) must be of type GMP|string|int, array given
+TypeError: gmp_hamdist(): Argument #1 ($num1) must be of type GMP|string|int, array given
 Done

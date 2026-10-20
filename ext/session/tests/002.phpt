@@ -3,7 +3,7 @@ session_unset() without a initialized session
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --FILE--
 <?php
 error_reporting(E_ALL);

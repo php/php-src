@@ -16,7 +16,7 @@ $db->exec("CREATE TABLE gh23444 (v NVARCHAR(100))");
 // 13 bytes as UTF-8, so an unconverted parameter is an odd number of bytes
 $string = "\u{6e2c}\u{8a66}\u{4e2d}\u{1f418}";
 
-$db->setAttribute(PDO::ODBC_ATTR_ASSUME_UTF8, true);
+$db->setAttribute(Pdo\Odbc::ATTR_ASSUME_UTF8, true);
 $stmt = $db->prepare("INSERT INTO gh23444 VALUES(?)");
 $stmt->execute([$string]);
 

@@ -3,7 +3,7 @@ Test session_name() function : variation
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --INI--
 session.name=blah
 --FILE--

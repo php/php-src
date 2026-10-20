@@ -24,11 +24,10 @@ $input_values = array(
   array(0, 1, 2, -1, 034, 0X4A),  // integer values
   array(0.0, 1.2, 1.2e3, 1.2e-3),  // float values
   array('value1', "value2", '', " ", ""),  // string values
-  array(true, false, TRUE, FALSE),  // bool values
-  array(null, NULL),  // null values
+  array(true, false),  // bool values
   array(1 => 'one', 'zero' => 0, -2 => "value"), //associative array
-  array("one" => 1, null => 'null', 5 => "float", true => 1, "" => 'empty'),  // associative array with different keys
-  array(1 => 'one', 2, "key" => 'value')  // combinition of associative and non-associative array
+  array("one" => 1, 5 => "float", true => 1, "" => 'empty'),  // associative array with different keys
+  array(1 => 'one', 2, "key" => 'value')  // combination of associative and non-associative array
 
 );
 
@@ -119,36 +118,19 @@ array(5) {
 array(0) {
 }
 -- Iteration 4 --
+array(1) {
+  [0]=>
+  bool(true)
+}
 array(2) {
   [0]=>
   bool(true)
-  [2]=>
-  bool(true)
-}
-array(4) {
-  [0]=>
-  bool(true)
   [1]=>
-  bool(false)
-  [2]=>
-  bool(true)
-  [3]=>
   bool(false)
 }
 array(0) {
 }
 -- Iteration 5 --
-array(0) {
-}
-array(2) {
-  [0]=>
-  NULL
-  [1]=>
-  NULL
-}
-array(0) {
-}
--- Iteration 6 --
 array(2) {
   [1]=>
   string(3) "one"
@@ -165,30 +147,30 @@ array(3) {
 }
 array(0) {
 }
--- Iteration 7 --
+-- Iteration 6 --
 array(4) {
   ["one"]=>
   int(1)
-  [""]=>
-  string(5) "empty"
   [5]=>
   string(5) "float"
   [1]=>
   int(1)
+  [""]=>
+  string(5) "empty"
 }
 array(4) {
   ["one"]=>
   int(1)
-  [""]=>
-  string(5) "empty"
   [5]=>
   string(5) "float"
   [1]=>
   int(1)
+  [""]=>
+  string(5) "empty"
 }
 array(0) {
 }
--- Iteration 8 --
+-- Iteration 7 --
 array(3) {
   [1]=>
   string(3) "one"

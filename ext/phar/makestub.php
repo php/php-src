@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 $s = str_replace("\r", '', file_get_contents(dirname(__FILE__) . '/shortarc.php'));
 
@@ -34,22 +35,22 @@ $stub = '/*
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension generated stub         |
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Gregory Beaver <cellog@php.net>                             |
   +----------------------------------------------------------------------+
 */
 
-static inline void phar_get_stub(const char *index_php, const char *web, size_t *len, char **stub, const int name_len, const int web_len)
+static inline zend_string *phar_get_stub(const char *index_php, const char *web, size_t name_len, size_t web_len)
 {
+	/* Do NOT modify this file directly!
+	 * Instead modify shortarc.php to change PHP code or makestub.php to change C code and then use makestub.php to generate this file. */
 ';
 $s1split = str_split($s1, 2046);
 $s3split = str_split($s3, 2046);
@@ -88,9 +89,9 @@ foreach ($s3split as $i => $chunk) {
     $stub .= "\tstatic const char newstub3_" . $i . '[] = "' . $chunk . '";
 ';
 }
-$stub .= "\n\tstatic const int newstub_len = " . $slen . ";
+$stub .= "\n\tstatic const size_t newstub_len = " . $slen . ";
 
-\t*len = spprintf(stub, name_len + web_len + newstub_len, \"%s%s" . str_repeat('%s', $s1count) . '%s%s%d'
+\treturn strpprintf(name_len + web_len + newstub_len, \"%s%s" . str_repeat('%s', $s1count) . '%s%s%zu'
     . str_repeat('%s', $s3count) . '", newstub0, web';
 foreach ($s1split as $i => $unused) {
     $stub .= ', newstub1_' . $i;

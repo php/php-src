@@ -48,6 +48,14 @@ class MySession2 extends SessionHandler {
         }
         return true;
     }
+
+    private int $id = 0;
+	public function create_sid(): string {
+	    return ++$this->id;
+	}
+	public function validateId(string $id): bool {
+	    return $id > 0 && $id <= $this->id;
+	}
 }
 
 $handler = new MySession2;

@@ -15,8 +15,8 @@ $iter->current()->setTimestamp(0);
 var_dump($iter->current());
 
 ?>
---EXPECT--
-object(DateTime)#9 (3) {
+--EXPECTF--
+object(DateTime)#%d (3) {
   ["date"]=>
   string(26) "2018-12-31 00:00:00.000000"
   ["timezone_type"]=>
@@ -24,7 +24,7 @@ object(DateTime)#9 (3) {
   ["timezone"]=>
   string(3) "UTC"
 }
-object(DateTime)#9 (3) {
+object(DateTime)#%d (3) {
   ["date"]=>
   string(26) "2018-12-31 00:00:00.000000"
   ["timezone_type"]=>
@@ -32,7 +32,7 @@ object(DateTime)#9 (3) {
   ["timezone"]=>
   string(3) "UTC"
 }
-object(DateTime)#9 (3) {
+object(DateTime)#%d (3) {
   ["date"]=>
   string(26) "2018-12-31 00:00:00.000000"
   ["timezone_type"]=>

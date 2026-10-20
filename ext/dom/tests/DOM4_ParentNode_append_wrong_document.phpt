@@ -18,8 +18,8 @@ function test($method) {
     try {
         $element->$method($dom2->documentElement->firstChild);
         echo "FAIL";
-    } catch (DOMException $e) {
-        echo $e->getMessage() . "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -27,5 +27,5 @@ test("append");
 test("prepend");
 ?>
 --EXPECT--
-Wrong Document Error
-Wrong Document Error
+DOMException: Wrong Document Error
+DOMException: Wrong Document Error

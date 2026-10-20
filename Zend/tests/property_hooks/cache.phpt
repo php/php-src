@@ -18,15 +18,15 @@ function doTest(Test $test) {
     $test->prop = [];
     try {
         $test->prop[] = 1;
-    } catch (\Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     isset($test->prop);
     isset($test->prop[0]);
     try {
         unset($test->prop);
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -46,10 +46,10 @@ Test::$prop::get
 Test::$prop::set
 Test::$prop::set
 Test::$prop::get
-Indirect modification of Test::$prop is not allowed
+Error: Indirect modification of Test::$prop is not allowed
 Test::$prop::get
 Test::$prop::get
-Cannot unset hooked property Test::$prop
+Error: Cannot unset hooked property Test::$prop
 
 Test::$prop::set
 Test::$prop::get
@@ -58,7 +58,7 @@ Test::$prop::get
 Test::$prop::set
 Test::$prop::set
 Test::$prop::get
-Indirect modification of Test::$prop is not allowed
+Error: Indirect modification of Test::$prop is not allowed
 Test::$prop::get
 Test::$prop::get
-Cannot unset hooked property Test::$prop
+Error: Cannot unset hooked property Test::$prop

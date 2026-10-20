@@ -19,13 +19,13 @@ for ($i = 0; $i < 5; $i++) {
 		C::$a + C::$a;
 		posix_kill(posix_getpid(), SIGTERM) + C::$cond;
 	} catch (Throwable $ex) {
-		echo get_class($ex) , " : " , $ex->getMessage() , "\n";
+		echo $ex::class, ': ', $ex->getMessage(), "\n";
 	}
 }
 ?>
 --EXPECT--
-Exception : Signal
-Exception : Signal
-Exception : Signal
-Exception : Signal
-Exception : Signal
+Exception: Signal
+Exception: Signal
+Exception: Signal
+Exception: Signal
+Exception: Signal

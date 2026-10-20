@@ -32,8 +32,6 @@ if (isset($matches[1]) && $matches[1] > 2000) {
 } else {
     echo "The images are similar.\n";
 }
-
-imagedestroy($im);
 ?>
 --EXPECT--
 The images are similar.

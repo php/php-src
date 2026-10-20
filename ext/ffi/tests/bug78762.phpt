@@ -6,9 +6,9 @@ ffi
 <?php
 try {
     FFI::cdef()->cast('char[10]', FFI::cdef()->new('char[1]'));
-} catch (FFI\Exception $ex) {
-    echo $ex->getMessage(), PHP_EOL;
+} catch (Throwable $ex) {
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-attempt to cast to larger type
+FFI\Exception: attempt to cast to larger type

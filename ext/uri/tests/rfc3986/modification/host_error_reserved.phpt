@@ -1,0 +1,16 @@
+--TEST--
+Test Uri\Rfc3986\Uri::withHost() - error - reserved characters
+--FILE--
+<?php
+
+$uri = Uri\Rfc3986\Uri::parse("https://example.com");
+
+try {
+    $uri->withHost("ex#mple.com");
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+
+?>
+--EXPECT--
+Uri\InvalidUriException: The specified host is malformed

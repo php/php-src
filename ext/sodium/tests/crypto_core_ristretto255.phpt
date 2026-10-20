@@ -78,7 +78,7 @@ $s = sodium_crypto_core_ristretto255_random();
 try {
     $multL = sodium_crypto_scalarmult_ristretto255($s, $L);
 } catch (SodiumException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 $s2 = sodium_crypto_scalarmult_ristretto255($r, $s);
 
@@ -128,6 +128,6 @@ bool(false)
 bool(false)
 string(64) "3066f82a1a747d45120d1740f14358531a8f04bbffe6a819f86dfe50f44a0a46"
 bool(true)
-Result is identity element
+SodiumException: Result is identity element
 bool(true)
 bool(true)

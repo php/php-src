@@ -76,6 +76,7 @@ $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test_subclass');
 ?>
 --EXPECTF--
+Deprecated: Returning a value from a constructor is deprecated in %s on line %d
 __construct('%S', '%S', %s)
 
 Deprecated: Callables of the form ["MyPDO", "parent::__construct"] are deprecated in %s on line %d

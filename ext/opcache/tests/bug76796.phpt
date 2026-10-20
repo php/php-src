@@ -12,10 +12,10 @@ opcache
 
 try {
     var_dump(strpos('foo', 'bar'));
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Call to undefined function strpos()
+Error: Call to undefined function strpos()

@@ -11,8 +11,8 @@ $a[0] = &$a;
 try {
 	pcntl_sigwaitinfo($a,$a);
 } catch(\TypeError $e) {
-	echo $e->getMessage();
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-pcntl_sigwaitinfo(): Argument #1 ($signals) signals must be of type int, array given
+TypeError: pcntl_sigwaitinfo(): Argument #1 ($signals) signals must be of type int, array given

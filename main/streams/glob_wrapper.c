@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
@@ -17,24 +15,10 @@
 #include "php.h"
 #include "php_streams_int.h"
 
-#ifdef HAVE_GLOB
-# ifndef PHP_WIN32
-#  include <glob.h>
-# else
-#  include "win32/glob.h"
-# endif
-#endif
-
-#ifdef HAVE_GLOB
-#ifndef GLOB_ONLYDIR
-#define GLOB_ONLYDIR (1<<30)
-#define GLOB_FLAGMASK (~GLOB_ONLYDIR)
-#else
-#define GLOB_FLAGMASK (~0)
-#endif
+#include "php_glob.h"
 
 typedef struct {
-	glob_t   glob;
+	php_glob_t glob;
 	size_t   index;
 	int      flags;
 	char     *path;
@@ -147,7 +131,7 @@ static ssize_t php_glob_stream_read(php_stream *stream, char *buf, size_t count)
 		if (pglob->index < (size_t) glob_result_count) {
 			index = pglob->open_basedir_used && pglob->open_basedir_indexmap ?
 					pglob->open_basedir_indexmap[pglob->index] : pglob->index;
-			php_glob_stream_path_split(pglob, pglob->glob.gl_pathv[index], pglob->flags & GLOB_APPEND, &path);
+			php_glob_stream_path_split(pglob, pglob->glob.gl_pathv[index], pglob->flags & PHP_GLOB_APPEND, &path);
 			++pglob->index;
 			PHP_STRLCPY(ent->d_name, path, sizeof(ent->d_name), strlen(path));
 			ent->d_type = DT_UNKNOWN;
@@ -170,7 +154,7 @@ static int php_glob_stream_close(php_stream *stream, int close_handle)  /* {{{ *
 
 	if (pglob) {
 		pglob->index = 0;
-		globfree(&pglob->glob);
+		php_globfree(&pglob->glob);
 		if (pglob->path) {
 			efree(pglob->path);
 		}
@@ -250,9 +234,9 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, const cha
 
 	pglob = ecalloc(1, sizeof(*pglob));
 
-	if (0 != (ret = glob(pattern, pglob->flags & GLOB_FLAGMASK, NULL, &pglob->glob))) {
-#ifdef GLOB_NOMATCH
-		if (GLOB_NOMATCH != ret)
+	if (0 != (ret = php_glob(pattern, pglob->flags & PHP_GLOB_FLAGMASK, NULL, &pglob->glob))) {
+#ifdef PHP_GLOB_NOMATCH
+		if (PHP_GLOB_NOMATCH != ret)
 #endif
 		{
 			efree(pglob);
@@ -302,7 +286,7 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, const cha
 	pglob->pattern_len = strlen(pos);
 	pglob->pattern = estrndup(pos, pglob->pattern_len);
 
-	pglob->flags |= GLOB_APPEND;
+	pglob->flags |= PHP_GLOB_APPEND;
 
 	if (pglob->glob.gl_pathc) {
 		php_glob_stream_path_split(pglob, pglob->glob.gl_pathv[0], 1, &tmp);
@@ -333,4 +317,3 @@ const php_stream_wrapper  php_glob_stream_wrapper = {
 	NULL,
 	0
 };
-#endif /* HAVE_GLOB */

@@ -26,7 +26,7 @@ $zip = new ZipArchive;
 try {
     $zip->open('');
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 if (!$zip->open($dirname . 'test.zip')) {
@@ -42,5 +42,5 @@ if ($zip->status == ZIPARCHIVE::ER_OK) {
 --EXPECT--
 ER_OPEN: ok
 create: ok
-ZipArchive::open(): Argument #1 ($filename) must not be empty
+ValueError: ZipArchive::open(): Argument #1 ($filename) must not be empty
 OK

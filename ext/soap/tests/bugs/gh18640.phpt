@@ -9,7 +9,7 @@ YuanchengJiang
 $wsdl = __DIR__."/bug35142.wsdl";
 
 class TestSoapClient extends SoapClient {
-    function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
+    function __doRequest($request, $location, $action, $version, $one_way = 0, ?string $uriParserClass = null): ?string {
         var_dump($request);
         return '';
     }

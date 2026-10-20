@@ -16,8 +16,8 @@ $storage[Foo::Baz] = 'Baz';
 var_dump($storage[Foo::Bar]);
 var_dump($storage[Foo::Baz]);
 
-var_dump($storage->contains(Foo::Bar));
-var_dump($storage->contains(Foo::Qux));
+var_dump($storage->offsetExists(Foo::Bar));
+var_dump($storage->offsetExists(Foo::Qux));
 
 $serialized = serialize($storage);
 var_dump($serialized);

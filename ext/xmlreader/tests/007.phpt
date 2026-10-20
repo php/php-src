@@ -44,8 +44,8 @@ $reader->XML($xmlstring);
 
 try {
     $reader->setRelaxNGSchema('');
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 $reader->close();
@@ -53,4 +53,4 @@ $reader->close();
 --EXPECT--
 file relaxNG: ok
 string relaxNG: ok
-XMLReader::setRelaxNGSchema(): Argument #1 ($filename) must not be empty
+ValueError: XMLReader::setRelaxNGSchema(): Argument #1 ($filename) must not be empty

@@ -1,7 +1,7 @@
 /*
  * IR - Lightweight JIT Compilation Framework
  * (IR construction, folding, utilities)
- * Copyright (C) 2022 Zend by Perforce.
+ * This file is part of the IR Project distributed under the MIT-style LICENSE.
  * Authors: Dmitry Stogov <dmitry@php.net>
  *
  * The logical IR representation is based on Cliff Click's Sea of Nodes.
@@ -42,7 +42,7 @@
 # include <valgrind/valgrind.h>
 #endif
 
-#define IR_TYPE_FLAGS(name, type, field, flags) ((flags)|sizeof(type)),
+#define IR_TYPE_FLAGS(name, type, field, flags) (flags),
 #define IR_TYPE_NAME(name, type, field, flags)  #name,
 #define IR_TYPE_CNAME(name, type, field, flags) #type,
 #define IR_TYPE_SIZE(name, type, field, flags)  sizeof(type),
@@ -114,10 +114,44 @@ void ir_print_escaped_str(const char *s, size_t len, FILE *f)
 	}
 }
 
-void ir_print_const(const ir_ctx *ctx, const ir_insn *insn, FILE *f, bool quoted)
+static void ir_print_double(double v, FILE *f)
 {
 	char buf[128];
 
+	if (isnan(v)) {
+		fprintf(f, "nan");
+	} else {
+		snprintf(buf, sizeof(buf), "%g", v);
+		if (strtod(buf, NULL) != v) {
+			snprintf(buf, sizeof(buf), "%.53e", v);
+			if (strtod(buf, NULL) != v) {
+				IR_ASSERT(0 && "can't format double");
+			}
+		}
+		fprintf(f, "%s", buf);
+	}
+}
+
+static void ir_print_float(float v, FILE *f)
+{
+	char buf[128];
+
+	if (isnan(v)) {
+		fprintf(f, "nan");
+	} else {
+		snprintf(buf, sizeof(buf), "%g", v);
+		if (strtod(buf, NULL) != v) {
+			snprintf(buf, sizeof(buf), "%.24e", v);
+			if (strtod(buf, NULL) != v) {
+				IR_ASSERT(0 && "can't format float");
+			}
+		}
+		fprintf(f, "%s", buf);
+	}
+}
+
+void ir_print_const(const ir_ctx *ctx, const ir_insn *insn, FILE *f, bool quoted)
+{
 	if (insn->op == IR_FUNC || insn->op == IR_SYM || insn->op == IR_LABEL) {
 		fprintf(f, "%s", ir_get_str(ctx, insn->val.name));
 		return;
@@ -134,6 +168,95 @@ void ir_print_const(const ir_ctx *ctx, const ir_insn *insn, FILE *f, bool quoted
 		}
 		return;
 	}
+
+	if (IR_IS_TYPE_VECTOR(insn->type)) {
+		ir_type t = IR_VECTOR_BASE_TYPE(insn->type);
+		uint32_t n = IR_VECTOR_LENGTH(insn->type);
+		const void *p = insn + 1;
+
+		fprintf(f, "{");
+		switch (t) {
+			case IR_I8:
+			case IR_CHAR:
+				fprintf(f, "%d", *(int8_t*)p);
+				while (--n) {
+					p = (char*)p + sizeof(int8_t);;
+					fprintf(f, ", %d", *(int8_t*)p);
+				}
+				break;
+			case IR_I16:
+				fprintf(f, "%d", *(int16_t*)p);
+				while (--n) {
+					p = (char*)p + sizeof(int16_t);
+					fprintf(f, ", %d", *(int16_t*)p);
+				}
+				break;
+			case IR_I32:
+				fprintf(f, "%d", *(int32_t*)p);
+				while (--n) {
+					p = (char*)p + sizeof(int32_t);
+					fprintf(f, ", %d", *(int32_t*)p);
+				}
+				break;
+			case IR_I64:
+				fprintf(f, "%" PRIi64, *(int64_t*)p);
+				while (--n) {
+					p = (char*)p + sizeof(int64_t);
+					fprintf(f, ", %" PRIi64, *(int64_t*)p);
+				}
+				break;
+			case IR_U8:
+				fprintf(f, "%u", *(uint8_t*)p);
+				while (--n) {
+					p = (char*)p + sizeof(uint8_t);
+					fprintf(f, ", %u", *(uint8_t*)p);
+				}
+				break;
+			case IR_U16:
+				fprintf(f, "%u", *(uint16_t*)p);
+				while (--n) {
+					p = (char*)p + sizeof(uint16_t);
+					fprintf(f, ", %u", *(uint16_t*)p);
+				}
+				break;
+			case IR_U32:
+				fprintf(f, "%u", *(uint32_t*)p);
+				while (--n) {
+					p = (char*)p + sizeof(uint32_t);
+					fprintf(f, ", %u", *(uint32_t*)p);
+				}
+				break;
+			case IR_U64:
+				fprintf(f, "%" PRIu64, *(uint64_t*)p);
+				while (--n) {
+					p = (char*)p + sizeof(uint64_t);
+					fprintf(f, ", %" PRIu64, *(uint64_t*)p);
+				}
+				break;
+			case IR_DOUBLE:
+				ir_print_double(*(double*)p, f);
+				while (--n) {
+					p = (char*)p + sizeof(double);
+					fprintf(f, ", ");
+					ir_print_double(*(double*)p, f);
+				}
+				break;
+			case IR_FLOAT:
+				ir_print_float(*(float*)p, f);
+				while (--n) {
+					p = (char*)p + sizeof(float);
+					fprintf(f, ", ");
+					ir_print_float(*(float*)p, f);
+				}
+				break;
+			default:
+				IR_ASSERT(0);
+				break;
+		}
+		fprintf(f, "}");
+		return;
+	}
+
 	IR_ASSERT(IR_IS_CONST_OP(insn->op) || insn->op == IR_FUNC_ADDR);
 	switch (insn->type) {
 		case IR_BOOL:
@@ -190,32 +313,10 @@ void ir_print_const(const ir_ctx *ctx, const ir_insn *insn, FILE *f, bool quoted
 			fprintf(f, "%" PRIi64, insn->val.i64);
 			break;
 		case IR_DOUBLE:
-			if (isnan(insn->val.d)) {
-				fprintf(f, "nan");
-			} else {
-				snprintf(buf, sizeof(buf), "%g", insn->val.d);
-				if (strtod(buf, NULL) != insn->val.d) {
-					snprintf(buf, sizeof(buf), "%.53e", insn->val.d);
-					if (strtod(buf, NULL) != insn->val.d) {
-						IR_ASSERT(0 && "can't format double");
-					}
-				}
-				fprintf(f, "%s", buf);
-			}
+			ir_print_double(insn->val.d, f);
 			break;
 		case IR_FLOAT:
-			if (isnan(insn->val.f)) {
-				fprintf(f, "nan");
-			} else {
-				snprintf(buf, sizeof(buf), "%g", insn->val.f);
-				if (strtod(buf, NULL) != insn->val.f) {
-					snprintf(buf, sizeof(buf), "%.24e", insn->val.f);
-					if (strtod(buf, NULL) != insn->val.f) {
-						IR_ASSERT(0 && "can't format float");
-					}
-				}
-				fprintf(f, "%s", buf);
-			}
+			ir_print_float(insn->val.f, f);
 			break;
 		default:
 			IR_ASSERT(0);
@@ -464,6 +565,9 @@ void ir_free(ir_ctx *ctx)
 	}
 	if (ctx->regs) {
 		ir_mem_free(ctx->regs);
+		if (ctx->tmp_regs) {
+			ir_mem_free(ctx->tmp_regs);
+		}
 		if (ctx->fused_regs) {
 			ir_strtab_free(ctx->fused_regs);
 			ir_mem_free(ctx->fused_regs);
@@ -500,7 +604,7 @@ ir_ref ir_unique_const_addr(ir_ctx *ctx, uintptr_t addr)
 
 IR_ALWAYS_INLINE uintptr_t ir_const_hash(ir_val val, uint32_t optx)
 {
-	return (val.u64 ^ (val.u64 >> 32) ^ optx);
+	return (uintptr_t)(val.u64 ^ (val.u64 >> 32) ^ optx);
 }
 
 static IR_NEVER_INLINE void ir_const_hash_rehash(ir_ctx *ctx)
@@ -514,11 +618,18 @@ static IR_NEVER_INLINE void ir_const_hash_rehash(ir_ctx *ctx)
 	}
 	ctx->const_hash_mask = (ctx->const_hash_mask + 1) * 2 - 1;
 	ctx->const_hash = ir_mem_calloc(ctx->const_hash_mask + 1, sizeof(ir_ref));
-	for (ref = IR_TRUE - 1; ref > -ctx->consts_count; ref--) {
-		insn = &ctx->ir_base[ref];
-		hash = ir_const_hash(insn->val, insn->optx) & ctx->const_hash_mask;
-		insn->prev_const = ctx->const_hash[hash];
-		ctx->const_hash[hash] = ref;
+	for (ref = 1 - ctx->consts_count, insn = ctx->ir_base + ref; ref < IR_TRUE; ref++, insn++) {
+		if (insn->op == IR_LONG_CONST) {
+			hash = insn->val.u64;
+			insn->prev_const = ctx->const_hash[hash & ctx->const_hash_mask];
+			ctx->const_hash[hash & ctx->const_hash_mask] = ref;
+			ref += IR_ALIGNED_SIZE(insn->long_const_size, sizeof(ir_insn)) / sizeof(ir_insn);
+			insn += IR_ALIGNED_SIZE(insn->long_const_size, sizeof(ir_insn)) / sizeof(ir_insn);
+		} else {
+			hash = ir_const_hash(insn->val, insn->optx) & ctx->const_hash_mask;
+			insn->prev_const = ctx->const_hash[hash];
+			ctx->const_hash[hash] = ref;
+		}
 	}
 }
 
@@ -660,7 +771,7 @@ ir_ref ir_const_addr(ir_ctx *ctx, uintptr_t c)
 	return ir_const(ctx, val, IR_ADDR);
 }
 
-ir_ref ir_const_func_addr(ir_ctx *ctx, uintptr_t c, ir_ref proto)
+ir_ref ir_const_func_addr(ir_ctx *ctx, uintptr_t c, ir_str proto)
 {
 	if (c == 0) {
 		return IR_NULL;
@@ -671,7 +782,7 @@ ir_ref ir_const_func_addr(ir_ctx *ctx, uintptr_t c, ir_ref proto)
 	return ir_const_ex(ctx, val, IR_ADDR, IR_OPTX(IR_FUNC_ADDR, IR_ADDR, proto));
 }
 
-ir_ref ir_const_func(ir_ctx *ctx, ir_ref str, ir_ref proto)
+ir_ref ir_const_func(ir_ctx *ctx, ir_str str, ir_str proto)
 {
 	ir_val val;
 	val.u64 = str;
@@ -679,28 +790,114 @@ ir_ref ir_const_func(ir_ctx *ctx, ir_ref str, ir_ref proto)
 	return ir_const_ex(ctx, val, IR_ADDR, IR_OPTX(IR_FUNC, IR_ADDR, proto));
 }
 
-ir_ref ir_const_sym(ir_ctx *ctx, ir_ref str)
+ir_ref ir_const_sym(ir_ctx *ctx, ir_str str)
 {
 	ir_val val;
 	val.u64 = str;
 	return ir_const_ex(ctx, val, IR_ADDR, IR_OPTX(IR_SYM, IR_ADDR, 0));
 }
 
-ir_ref ir_const_str(ir_ctx *ctx, ir_ref str)
+ir_ref ir_const_str(ir_ctx *ctx, ir_str str)
 {
 	ir_val val;
 	val.u64 = str;
 	return ir_const_ex(ctx, val, IR_ADDR, IR_OPTX(IR_STR, IR_ADDR, 0));
 }
 
-ir_ref ir_const_label(ir_ctx *ctx, ir_ref str)
+ir_ref ir_const_label(ir_ctx *ctx, ir_str str)
 {
 	ir_val val;
 	val.u64 = str;
 	return ir_const_ex(ctx, val, IR_ADDR, IR_OPTX(IR_LABEL, IR_ADDR, 0));
 }
 
-ir_ref ir_str(ir_ctx *ctx, const char *s)
+ir_ref ir_long_const(ir_ctx *ctx, ir_type type, size_t size)
+{
+	ir_ref ref = ctx->consts_count;
+	ir_insn *insn;
+
+	IR_ASSERT(size <= 0xfff0);
+
+	ref = ctx->consts_count + IR_ALIGNED_SIZE(size, sizeof(ir_insn)) / sizeof(ir_insn);
+	while (UNEXPECTED(ref >= ctx->consts_limit)) {
+		ir_grow_bottom(ctx);
+	}
+	ctx->consts_count = ref + 1;
+	ref = -ref;
+
+	insn = &ctx->ir_base[ref];
+	insn->optx = IR_OPTX(IR_LONG_CONST, type, size);
+	insn->op1 = IR_UNUSED;
+	insn->val.u64 = 0;
+
+	ctx->flags2 |= IR_HAS_LONG_CONSTANTS;
+
+	return ref;
+}
+
+void *ir_long_const_ptr(ir_ctx *ctx, ir_ref ref)
+{
+	IR_ASSERT(IR_IS_CONST_REF(ref));
+	return (void*)&ctx->ir_base[ref + 1];
+}
+
+IR_ALWAYS_INLINE uintptr_t ir_long_const_hash(uint32_t optx, const void *ptr, size_t len)
+{
+	size_t i;
+	const uint8_t *str = ptr;
+	uint32_t h = 5381;
+
+    for (i = 0; i < len; i++) {
+        h = ((h << 5) + h) + *str;
+        str++;
+    }
+	return (uintptr_t)(h ^ optx);
+}
+
+ir_ref ir_long_const_commit(ir_ctx *ctx, ir_ref const_ref)
+{
+	ir_ref ref;
+	uintptr_t hash, n;
+	ir_insn *insn = &ctx->ir_base[const_ref];
+	uint32_t optx = insn->optx;
+	size_t size = insn->long_const_size;
+	const void *ptr = insn + 1;
+
+	IR_ASSERT(ctx->consts_count == 1 - const_ref && "ir_long_const_commit() argument must be result of the last ir_long_const()");
+
+	/* check if we already have the same constant */
+	hash = ir_long_const_hash(optx, ptr, size);
+	ref = ctx->const_hash[hash & ctx->const_hash_mask];
+	while (ref) {
+		insn = &ctx->ir_base[ref];
+		if (insn->val.u64 == hash && insn->optx == optx && memcmp(ptr, insn + 1, size) == 0) {
+			/* rollback */
+			ctx->consts_count -= (IR_ALIGNED_SIZE(size, sizeof(ir_insn)) / sizeof(ir_insn)) + 1;
+			return ref;
+		}
+		ref = insn->prev_const;
+	}
+
+	if ((uintptr_t)ctx->consts_count > ctx->const_hash_mask) {
+		ir_const_hash_rehash(ctx);
+	}
+
+	n = hash & ctx->const_hash_mask;
+	insn = &ctx->ir_base[const_ref];
+	insn->prev_const = ctx->const_hash[n];
+	insn->val.u64 = hash;
+	ctx->const_hash[n] = const_ref;
+
+	return const_ref;
+}
+
+ir_ref ir_const_vector(ir_ctx *ctx, ir_type type)
+{
+	IR_ASSERT(IR_IS_TYPE_VECTOR(type));
+	return ir_long_const(ctx, type, IR_VECTOR_SIZE(type));
+}
+
+ir_str ir_string(ir_ctx *ctx, const char *s)
 {
 	size_t len;
 
@@ -712,7 +909,7 @@ ir_ref ir_str(ir_ctx *ctx, const char *s)
 	return ir_strtab_lookup(&ctx->strtab, s, (uint32_t)len, ir_strtab_count(&ctx->strtab) + 1);
 }
 
-ir_ref ir_strl(ir_ctx *ctx, const char *s, size_t len)
+ir_str ir_stringl(ir_ctx *ctx, const char *s, size_t len)
 {
 	if (!ctx->strtab.data) {
 		ir_strtab_init(&ctx->strtab, 64, 4096);
@@ -721,29 +918,35 @@ ir_ref ir_strl(ir_ctx *ctx, const char *s, size_t len)
 	return ir_strtab_lookup(&ctx->strtab, s, (uint32_t)len, ir_strtab_count(&ctx->strtab) + 1);
 }
 
-const char *ir_get_str(const ir_ctx *ctx, ir_ref idx)
+const char *ir_get_str(const ir_ctx *ctx, ir_str idx)
 {
+	if (IR_IS_EXT_STR(idx)) {
+		return ctx->loader->get_str(ctx->loader, idx);
+	}
 	IR_ASSERT(ctx->strtab.data);
 	return ir_strtab_str(&ctx->strtab, idx - 1);
 }
 
-const char *ir_get_strl(const ir_ctx *ctx, ir_ref idx, size_t *len)
+const char *ir_get_strl(const ir_ctx *ctx, ir_str idx, size_t *len)
 {
+	if (IR_IS_EXT_STR(idx)) {
+		return ctx->loader->get_strl(ctx->loader, idx, len);
+	}
 	IR_ASSERT(ctx->strtab.data);
 	return ir_strtab_strl(&ctx->strtab, idx - 1, len);
 }
 
-ir_ref ir_proto_0(ir_ctx *ctx, uint8_t flags, ir_type ret_type)
+ir_str ir_proto_0(ir_ctx *ctx, uint8_t flags, ir_type ret_type)
 {
 	ir_proto_t proto;
 
 	proto.flags = flags;
 	proto.ret_type = ret_type;
 	proto.params_count = 0;
-	return ir_strl(ctx, (const char *)&proto, offsetof(ir_proto_t, param_types) + 0);
+	return ir_stringl(ctx, (const char *)&proto, offsetof(ir_proto_t, param_types) + 0);
 }
 
-ir_ref ir_proto_1(ir_ctx *ctx, uint8_t flags, ir_type ret_type, ir_type t1)
+ir_str ir_proto_1(ir_ctx *ctx, uint8_t flags, ir_type ret_type, ir_type t1)
 {
 	ir_proto_t proto;
 
@@ -751,10 +954,10 @@ ir_ref ir_proto_1(ir_ctx *ctx, uint8_t flags, ir_type ret_type, ir_type t1)
 	proto.ret_type = ret_type;
 	proto.params_count = 1;
 	proto.param_types[0] = t1;
-	return ir_strl(ctx, (const char *)&proto, offsetof(ir_proto_t, param_types) + 1);
+	return ir_stringl(ctx, (const char *)&proto, offsetof(ir_proto_t, param_types) + 1);
 }
 
-ir_ref ir_proto_2(ir_ctx *ctx, uint8_t flags, ir_type ret_type, ir_type t1, ir_type t2)
+ir_str ir_proto_2(ir_ctx *ctx, uint8_t flags, ir_type ret_type, ir_type t1, ir_type t2)
 {
 	ir_proto_t proto;
 
@@ -763,10 +966,10 @@ ir_ref ir_proto_2(ir_ctx *ctx, uint8_t flags, ir_type ret_type, ir_type t1, ir_t
 	proto.params_count = 2;
 	proto.param_types[0] = t1;
 	proto.param_types[1] = t2;
-	return ir_strl(ctx, (const char *)&proto, offsetof(ir_proto_t, param_types) + 2);
+	return ir_stringl(ctx, (const char *)&proto, offsetof(ir_proto_t, param_types) + 2);
 }
 
-ir_ref ir_proto_3(ir_ctx *ctx, uint8_t flags, ir_type ret_type, ir_type t1, ir_type t2, ir_type t3)
+ir_str ir_proto_3(ir_ctx *ctx, uint8_t flags, ir_type ret_type, ir_type t1, ir_type t2, ir_type t3)
 {
 	ir_proto_t proto;
 
@@ -776,10 +979,10 @@ ir_ref ir_proto_3(ir_ctx *ctx, uint8_t flags, ir_type ret_type, ir_type t1, ir_t
 	proto.param_types[0] = t1;
 	proto.param_types[1] = t2;
 	proto.param_types[2] = t3;
-	return ir_strl(ctx, (const char *)&proto, offsetof(ir_proto_t, param_types) + 3);
+	return ir_stringl(ctx, (const char *)&proto, offsetof(ir_proto_t, param_types) + 3);
 }
 
-ir_ref ir_proto_4(ir_ctx *ctx, uint8_t flags, ir_type ret_type, ir_type t1, ir_type t2, ir_type t3,
+ir_str ir_proto_4(ir_ctx *ctx, uint8_t flags, ir_type ret_type, ir_type t1, ir_type t2, ir_type t3,
                                                                 ir_type t4)
 {
 	ir_proto_t proto;
@@ -791,10 +994,10 @@ ir_ref ir_proto_4(ir_ctx *ctx, uint8_t flags, ir_type ret_type, ir_type t1, ir_t
 	proto.param_types[1] = t2;
 	proto.param_types[2] = t3;
 	proto.param_types[3] = t4;
-	return ir_strl(ctx, (const char *)&proto, offsetof(ir_proto_t, param_types) + 4);
+	return ir_stringl(ctx, (const char *)&proto, offsetof(ir_proto_t, param_types) + 4);
 }
 
-ir_ref ir_proto_5(ir_ctx *ctx, uint8_t flags, ir_type ret_type, ir_type t1, ir_type t2, ir_type t3,
+ir_str ir_proto_5(ir_ctx *ctx, uint8_t flags, ir_type ret_type, ir_type t1, ir_type t2, ir_type t3,
                                                                 ir_type t4, ir_type t5)
 {
 	ir_proto_t proto;
@@ -807,10 +1010,10 @@ ir_ref ir_proto_5(ir_ctx *ctx, uint8_t flags, ir_type ret_type, ir_type t1, ir_t
 	proto.param_types[2] = t3;
 	proto.param_types[3] = t4;
 	proto.param_types[4] = t5;
-	return ir_strl(ctx, (const char *)&proto, offsetof(ir_proto_t, param_types) + 5);
+	return ir_stringl(ctx, (const char *)&proto, offsetof(ir_proto_t, param_types) + 5);
 }
 
-ir_ref ir_proto(ir_ctx *ctx, uint8_t flags, ir_type ret_type, uint32_t params_count, uint8_t *param_types)
+ir_str ir_proto(ir_ctx *ctx, uint8_t flags, ir_type ret_type, uint32_t params_count, uint8_t *param_types)
 {
 	ir_proto_t *proto = alloca(offsetof(ir_proto_t, param_types) + params_count);
 
@@ -821,7 +1024,7 @@ ir_ref ir_proto(ir_ctx *ctx, uint8_t flags, ir_type ret_type, uint32_t params_co
 	if (params_count) {
 		memcpy(proto->param_types, param_types, params_count);
 	}
-	return ir_strl(ctx, (const char *)proto, offsetof(ir_proto_t, param_types) + params_count);
+	return ir_stringl(ctx, (const char *)proto, offsetof(ir_proto_t, param_types) + params_count);
 }
 
 /* IR construction */
@@ -896,8 +1099,12 @@ IR_ALWAYS_INLINE ir_ref _ir_fold_cast(ir_ctx *ctx, ir_ref ref, ir_type type)
 		return ref;
 	} else if (IR_IS_CONST_REF(ref) && !IR_IS_SYM_CONST(ctx->ir_base[ref].op)) {
 		return ir_const(ctx, ctx->ir_base[ref].val, type);
-	} else {
+	} else if (EXPECTED(!ctx->use_lists)) {
 		return ir_emit1(ctx, IR_OPT(IR_BITCAST, type), ref);
+	} else {
+		ir_ref ret = ir_emit1(ctx, IR_OPTX(IR_BITCAST, type, 1), ref);
+		ir_use_list_add(ctx, ref, ret);
+		return ret;
 	}
 }
 
@@ -1063,12 +1270,27 @@ ir_fold_copy:
 		return IR_FOLD_DO_COPY;
 	}
 ir_fold_const:
-	if (!ctx->use_lists) {
-		return ir_const(ctx, val, IR_OPT_TYPE(opt));
-	} else {
-		ctx->fold_insn.opt = IR_OPT(IR_OPT_TYPE(opt), IR_OPT_TYPE(opt));
-		ctx->fold_insn.val.u64 = val.u64;
-		return IR_FOLD_DO_CONST;
+	{
+		ir_type type = IR_OPT_TYPE(opt);
+
+		/* Extend a narrow integer result to its type width so no
+		 * fold rule sees garbage in the upper bits. */
+		if (IR_IS_TYPE_INT(type) && ir_type_size[type] < 8) {
+			uint32_t shift = (8 - ir_type_size[type]) * 8;
+			if (IR_IS_TYPE_SIGNED(type)) {
+				val.i64 = (int64_t)(val.u64 << shift) >> shift;
+			} else {
+				val.u64 = (val.u64 << shift) >> shift;
+			}
+		}
+
+		if (!ctx->use_lists) {
+			return ir_const(ctx, val, type);
+		} else {
+			ctx->fold_insn.opt = IR_OPT(type, type);
+			ctx->fold_insn.val.u64 = val.u64;
+			return IR_FOLD_DO_CONST;
+		}
 	}
 }
 
@@ -1159,13 +1381,25 @@ ir_ref ir_get_op(const ir_ctx *ctx, ir_ref ref, int32_t n)
 ir_ref ir_param(ir_ctx *ctx, ir_type type, ir_ref region, const char *name, int pos)
 {
 	IR_ASSERT(ctx->ir_base[region].op == IR_START);
-	return ir_emit(ctx, IR_OPT(IR_PARAM, type), region, ir_str(ctx, name), pos);
+	return ir_emit(ctx, IR_OPT(IR_PARAM, type), region, ir_string(ctx, name), pos);
+}
+
+ir_ref ir_param_ex(ir_ctx *ctx, ir_type type, ir_ref region, ir_str name, int pos)
+{
+	IR_ASSERT(ctx->ir_base[region].op == IR_START);
+	return ir_emit(ctx, IR_OPT(IR_PARAM, type), region, name, pos);
 }
 
 ir_ref ir_var(ir_ctx *ctx, ir_type type, ir_ref region, const char *name)
 {
 	IR_ASSERT(IR_IS_BB_START(ctx->ir_base[region].op));
-	return ir_emit(ctx, IR_OPT(IR_VAR, type), region, ir_str(ctx, name), IR_UNUSED);
+	return ir_emit(ctx, IR_OPT(IR_VAR, type), region, ir_string(ctx, name), IR_UNUSED);
+}
+
+ir_ref ir_var_ex(ir_ctx *ctx, ir_type type, ir_ref region, ir_str name)
+{
+	IR_ASSERT(IR_IS_BB_START(ctx->ir_base[region].op));
+	return ir_emit(ctx, IR_OPT(IR_VAR, type), region, name, IR_UNUSED);
 }
 
 ir_ref ir_bind(ir_ctx *ctx, ir_ref var, ir_ref def)
@@ -1287,7 +1521,7 @@ void ir_build_def_use_lists(ir_ctx *ctx)
 					/* form a linked list of "uses" (like in binsort) */
 					linked_lists[linked_lists_top] = i; /* store the "use" */
 					linked_lists[linked_lists_top + 1] = use_list->refs; /* store list next */
-					use_list->refs = -(linked_lists_top + 1); /* store a head of the list using a negative number */
+					use_list->refs = -(ir_ref)(linked_lists_top + 1); /* store a head of the list using a negative number */
 					linked_lists_top += 2;
 					use_list->count++;
 				}
@@ -1298,7 +1532,8 @@ void ir_build_def_use_lists(ir_ctx *ctx)
 		insn += n;
 	}
 
-	ctx->use_edges_count = edges_count;
+	IR_ASSERT(edges_count <= 0x7fffffff);
+	ctx->use_edges_count = (ir_ref)edges_count;
 	edges = ir_mem_malloc(IR_ALIGNED_SIZE(edges_count * sizeof(ir_ref), 4096));
 	for (use_list = lists + ctx->insns_count - 1; use_list != lists; use_list--) {
 		n = use_list->refs;
@@ -1311,7 +1546,7 @@ void ir_build_def_use_lists(ir_ctx *ctx)
 			}
 			IR_ASSERT(n > 0);
 			edges[--edges_count] = n;
-			use_list->refs = edges_count;
+			use_list->refs = (ir_ref)edges_count;
 		}
 	}
 
@@ -1339,7 +1574,7 @@ void ir_use_list_remove_all(ir_ctx *ctx, ir_ref from, ir_ref ref)
 		}
 	}
 	if (p != q) {
-		use_list->count -= (p - q);
+		use_list->count -= (ir_ref)(p - q);
 		do {
 			*q = IR_UNUSED;
 			q++;
@@ -1981,133 +2216,146 @@ typedef enum _ir_alias {
 	IR_MUST_ALIAS =  1,
 } ir_alias;
 
-#if 0
-static ir_alias ir_check_aliasing(ir_ctx *ctx, ir_ref addr1, ir_ref addr2)
+IR_ALWAYS_INLINE const ir_insn *ir_decompose_addr(const ir_ctx *ctx, ir_ref addr, ir_ref *base, ir_ref *index, intptr_t *offset)
 {
-	ir_insn *insn1, *insn2;
+	const ir_insn *insn = &ctx->ir_base[addr];
+	ir_ref idx = IR_UNUSED;
+	intptr_t off = 0;
 
-	if (addr1 == addr2) {
-		return IR_MUST_ALIAS;
+	while (1) {
+		if (insn->op == IR_ADD) {
+			ir_ref op1 = insn->op1;
+			ir_ref op2 = insn->op2;
+			const ir_insn *op1_insn = &ctx->ir_base[op1];
+			const ir_insn *op2_insn = &ctx->ir_base[op2];
+
+			if ((op2_insn->type == IR_ADDR && op1_insn->type != IR_ADDR)
+			 || op2_insn->op == IR_SYM
+			 || op2_insn->op == IR_ALLOCA
+			 || op2_insn->op == IR_VADDR) {
+				const ir_insn *tmp = op1_insn;
+				op1_insn = op2_insn;
+				op2_insn = tmp;
+				SWAP_REFS(op1, op2);
+		    }
+			if (IR_IS_CONST_REF(op2) && !IR_IS_SYM_CONST(op2_insn->op)) {
+				off += op2_insn->val.addr;
+				addr = op1;
+				insn = op1_insn;
+			} else if (!idx) {
+				addr = op1;
+				insn = op1_insn;
+				idx = op2;
+			} else {
+				goto exit;
+			}
+		} else if (insn->op == IR_SUB
+		 && IR_IS_CONST_REF(insn->op2)
+		 && !IR_IS_SYM_CONST(ctx->ir_base[insn->op2].op)) {
+			off -= ctx->ir_base[insn->op2].val.addr;
+			addr = insn->op1;
+			insn = &ctx->ir_base[insn->op1];
+		} else {
+			break;
+		}
 	}
 
-	insn1 = &ctx->ir_base[addr1];
-	insn2 = &ctx->ir_base[addr2];
-	if (insn1->op == IR_ADD && IR_IS_CONST_REF(insn1->op2)) {
-		if (insn1->op1 == addr2) {
-			uintptr_t offset1 = ctx->ir_base[insn1->op2].val.u64;
-			return (offset1 != 0) ? IR_MUST_ALIAS : IR_NO_ALIAS;
-		} else if (insn2->op == IR_ADD && IR_IS_CONST_REF(insn1->op2) && insn1->op1 == insn2->op1) {
-			if (insn1->op2 == insn2->op2) {
-				return IR_MUST_ALIAS;
-			} else if (IR_IS_CONST_REF(insn1->op2) && IR_IS_CONST_REF(insn2->op2)) {
-				uintptr_t offset1 = ctx->ir_base[insn1->op2].val.u64;
-				uintptr_t offset2 = ctx->ir_base[insn2->op2].val.u64;
+	if (idx) {
+		while (1) {
+			const ir_insn *insn = &ctx->ir_base[idx];
 
-				return (offset1 == offset2) ? IR_MUST_ALIAS : IR_NO_ALIAS;
+			if (insn->op == IR_ADD) {
+				if (IR_IS_CONST_REF(insn->op2)
+				 && !IR_IS_SYM_CONST(ctx->ir_base[insn->op2].op)) {
+					off += ctx->ir_base[insn->op2].val.addr;
+					idx = insn->op1;
+				} else {
+					break;
+				}
+			} else if (insn->op == IR_SUB
+			 && IR_IS_CONST_REF(insn->op2)
+			 && !IR_IS_SYM_CONST(ctx->ir_base[insn->op2].op)) {
+				off -= ctx->ir_base[insn->op2].val.addr;
+				idx = insn->op1;
+			} else {
+				break;
 			}
 		}
-	} else if (insn2->op == IR_ADD && IR_IS_CONST_REF(insn2->op2)) {
-		if (insn2->op1 == addr1) {
-			uintptr_t offset2 = ctx->ir_base[insn2->op2].val.u64;
+	}
 
-			return (offset2 != 0) ? IR_MUST_ALIAS : IR_NO_ALIAS;
+exit:
+	*base = addr;
+	*index = idx;
+	*offset = off;
+
+	return insn;
+}
+
+IR_ALWAYS_INLINE const ir_insn *ir_get_base_addr(const ir_ctx *ctx, const ir_insn *insn)
+{
+	while (1) {
+		if (insn->op == IR_ADD) {
+			ir_ref op1 = insn->op1;
+			ir_ref op2 = insn->op2;
+			const ir_insn *op1_insn = &ctx->ir_base[op1];
+			const ir_insn *op2_insn = &ctx->ir_base[op2];
+
+			if (op2_insn->op == IR_SYM || op2_insn->op == IR_ALLOCA || op2_insn->op == IR_VADDR) {
+				return op2_insn;
+			} else if (op2_insn->type == IR_ADDR && op1_insn->type != IR_ADDR) {
+				insn = op2_insn;
+		    } else {
+				insn = op1_insn;
+			}
+		} else if (insn->op == IR_SUB) {
+			insn = &ctx->ir_base[insn->op1];
+		} else {
+			break;
 		}
 	}
-	return IR_MAY_ALIAS;
+	return insn;
 }
-#endif
 
-ir_alias ir_check_partial_aliasing(const ir_ctx *ctx, ir_ref addr1, ir_ref addr2, ir_type type1, ir_type type2)
+static ir_alias ir_check_aliasing(const ir_ctx *ctx, ir_ref addr1, ir_ref addr2, ir_type type1, ir_type type2)
 {
 	const ir_insn *insn1, *insn2;
-	ir_ref base1, base2, off1, off2;
+	ir_ref base1, base2, index1, index2;
+	intptr_t offset1, offset2;
 
 	/* this must be already check */
 	IR_ASSERT(addr1 != addr2);
 
-	insn1 = &ctx->ir_base[addr1];
-	insn2 = &ctx->ir_base[addr2];
-	if (insn1->op != IR_ADD) {
-		base1 = addr1;
-		off1 = IR_UNUSED;
-	} else if (ctx->ir_base[insn1->op2].op == IR_SYM
-			|| ctx->ir_base[insn1->op2].op == IR_ALLOCA
-			|| ctx->ir_base[insn1->op2].op == IR_VADDR) {
-		base1 = insn1->op2;
-		off1 = insn1->op1;
-	} else {
-		base1 = insn1->op1;
-		off1 = insn1->op2;
-	}
-	if (insn2->op != IR_ADD) {
-		base2 = addr2;
-		off2 = IR_UNUSED;
-	} else if (ctx->ir_base[insn2->op2].op == IR_SYM
-			|| ctx->ir_base[insn2->op2].op == IR_ALLOCA
-			|| ctx->ir_base[insn2->op2].op == IR_VADDR) {
-		base2 = insn2->op2;
-		off2 = insn2->op1;
-	} else {
-		base2 = insn2->op1;
-		off2 = insn2->op2;
-	}
-	if (base1 == base2) {
-		uintptr_t offset1, offset2;
+	/* check if addresses overlap */
+	insn1 = ir_decompose_addr(ctx, addr1, &base1, &index1, &offset1);
+	insn2 = ir_decompose_addr(ctx, addr2, &base2, &index2, &offset2);
 
-		if (!off1) {
-			offset1 = 0;
-		} else if (IR_IS_CONST_REF(off1) && !IR_IS_SYM_CONST(ctx->ir_base[off1].op)) {
-			offset1 = ctx->ir_base[off1].val.addr;
-		} else {
+	if (base1 == base2) {
+		if (index1 != index2) {
 			return IR_MAY_ALIAS;
-		}
-		if (!off2) {
-			offset2 = 0;
-		} else if (IR_IS_CONST_REF(off2) && !IR_IS_SYM_CONST(ctx->ir_base[off2].op)) {
-			offset2 = ctx->ir_base[off2].val.addr;
-		} else {
-			return IR_MAY_ALIAS;
-		}
-		if (offset1 == offset2) {
+		} else if (offset1 == offset2) {
 			return IR_MUST_ALIAS;
 		} else if (offset1 < offset2) {
-			return offset1 + ir_type_size[type1] <= offset2 ? IR_NO_ALIAS : IR_MUST_ALIAS;
+			return offset1 + (intptr_t)ir_get_type_size(type1) <= offset2 ? IR_NO_ALIAS : IR_MUST_ALIAS;
 		} else {
-			return offset2 + ir_type_size[type2] <= offset1 ? IR_NO_ALIAS : IR_MUST_ALIAS;
-		}
-	} else {
-		insn1 = &ctx->ir_base[base1];
-		insn2 = &ctx->ir_base[base2];
-		while (insn1->op == IR_ADD) {
-			insn1 = &ctx->ir_base[insn1->op2];
-			if (insn1->op == IR_SYM
-			 || insn1->op == IR_ALLOCA
-			 || insn1->op == IR_VADDR) {
-				break;
-			} else {
-				insn1 = &ctx->ir_base[insn1->op1];
-			}
-		}
-		while (insn2->op == IR_ADD) {
-			insn2 = &ctx->ir_base[insn2->op2];
-			if (insn2->op == IR_SYM
-			 || insn2->op == IR_ALLOCA
-			 || insn2->op == IR_VADDR) {
-				break;
-			} else {
-				insn2 = &ctx->ir_base[insn2->op1];
-			}
-		}
-		if (insn1 == insn2) {
-			return IR_MAY_ALIAS;
-		}
-		if ((insn1->op == IR_ALLOCA && (insn2->op == IR_ALLOCA || insn2->op == IR_VADDR || insn2->op == IR_SYM || insn2->op == IR_PARAM))
-		 || (insn1->op == IR_VADDR && (insn2->op == IR_ALLOCA || insn2->op == IR_VADDR || insn2->op == IR_SYM || insn2->op == IR_PARAM))
-		 || (insn1->op == IR_SYM && (insn2->op == IR_ALLOCA || insn2->op == IR_VADDR || insn2->op == IR_SYM))
-		 || (insn1->op == IR_PARAM && (insn2->op == IR_ALLOCA || insn2->op == IR_VADDR))) {
-			return IR_NO_ALIAS;
+			return offset2 + (intptr_t)ir_get_type_size(type2) <= offset1 ? IR_NO_ALIAS : IR_MUST_ALIAS;
 		}
 	}
+
+	/* check if addresses lay in different memory areas (e.g. local variables cannot alias with arguments) */
+	insn1 = ir_get_base_addr(ctx, insn1);
+	insn2 = ir_get_base_addr(ctx, insn2);
+
+	if (insn1 == insn2 || insn1->type != IR_ADDR || insn2->type != IR_ADDR) {
+		return IR_MAY_ALIAS;
+	}
+
+	if ((insn1->op == IR_ALLOCA && (insn2->op == IR_ALLOCA || insn2->op == IR_VADDR || insn2->op == IR_SYM || insn2->op == IR_PARAM))
+	 || (insn1->op == IR_VADDR && (insn2->op == IR_ALLOCA || insn2->op == IR_VADDR || insn2->op == IR_SYM || insn2->op == IR_PARAM))
+	 || (insn1->op == IR_SYM && (insn2->op == IR_ALLOCA || insn2->op == IR_VADDR || insn2->op == IR_SYM))
+	 || (insn1->op == IR_PARAM && (insn2->op == IR_ALLOCA || insn2->op == IR_VADDR))) {
+		return IR_NO_ALIAS;
+	}
+
 	return IR_MAY_ALIAS;
 }
 
@@ -2122,9 +2370,9 @@ IR_ALWAYS_INLINE ir_ref ir_find_aliasing_load_i(const ir_ctx *ctx, ir_ref ref, i
 			if (insn->op2 == addr) {
 				if (insn->type == type) {
 					return ref; /* load forwarding (L2L) */
-				} else if (ir_type_size[insn->type] == ir_type_size[type]) {
+				} else if (ir_get_type_size(insn->type) == ir_get_type_size(type)) {
 					return ref; /* load forwarding with bitcast (L2L) */
-				} else if (ir_type_size[insn->type] > ir_type_size[type]
+				} else if (ir_get_type_size(insn->type) > ir_get_type_size(type)
 						&& IR_IS_TYPE_INT(type) && IR_IS_TYPE_INT(insn->type)) {
 					return ref; /* partial load forwarding (L2L) */
 				}
@@ -2139,15 +2387,15 @@ IR_ALWAYS_INLINE ir_ref ir_find_aliasing_load_i(const ir_ctx *ctx, ir_ref ref, i
 					return IR_UNUSED;
 				} else if (type2 == type) {
 					return insn->op3; /* store forwarding (S2L) */
-				} else if (ir_type_size[type2] == ir_type_size[type]) {
+				} else if (ir_get_type_size(type2) == ir_get_type_size(type)) {
 					return insn->op3; /* store forwarding with bitcast (S2L) */
-				} else if (ir_type_size[type2] > ir_type_size[type]
+				} else if (ir_get_type_size(type2) > ir_get_type_size(type)
 						&& IR_IS_TYPE_INT(type) && IR_IS_TYPE_INT(type2)) {
 					return insn->op3; /* partial store forwarding (S2L) */
 				} else {
 					return IR_UNUSED;
 				}
-			} else if (ir_check_partial_aliasing(ctx, addr, insn->op2, type, type2) != IR_NO_ALIAS) {
+			} else if (ir_check_aliasing(ctx, addr, insn->op2, type, type2) != IR_NO_ALIAS) {
 				return IR_UNUSED;
 			}
 		} else if (insn->op == IR_RSTORE) {
@@ -2198,9 +2446,9 @@ IR_ALWAYS_INLINE ir_ref ir_find_aliasing_vload_i(const ir_ctx *ctx, ir_ref ref, 
 			if (insn->op2 == var) {
 				if (insn->type == type) {
 					return ref; /* load forwarding (L2L) */
-				} else if (ir_type_size[insn->type] == ir_type_size[type]) {
+				} else if (ir_get_type_size(insn->type) > ir_get_type_size(type)) {
 					return ref; /* load forwarding with bitcast (L2L) */
-				} else if (ir_type_size[insn->type] > ir_type_size[type]
+				} else if (ir_get_type_size(insn->type) > ir_get_type_size(type)
 						&& IR_IS_TYPE_INT(type) && IR_IS_TYPE_INT(insn->type)) {
 					return ref; /* partial load forwarding (L2L) */
 				}
@@ -2211,9 +2459,9 @@ IR_ALWAYS_INLINE ir_ref ir_find_aliasing_vload_i(const ir_ctx *ctx, ir_ref ref, 
 			if (insn->op2 == var) {
 				if (type2 == type) {
 					return insn->op3; /* store forwarding (S2L) */
-				} else if (ir_type_size[type2] == ir_type_size[type]) {
+				} else if (ir_get_type_size(type2) == ir_get_type_size(type)) {
 					return insn->op3; /* store forwarding with bitcast (S2L) */
-				} else if (ir_type_size[type2] > ir_type_size[type]
+				} else if (ir_get_type_size(type2) > ir_get_type_size(type)
 						&& IR_IS_TYPE_INT(type) && IR_IS_TYPE_INT(type2)) {
 					return insn->op3; /* partial store forwarding (S2L) */
 				} else {
@@ -2303,9 +2551,15 @@ IR_ALWAYS_INLINE ir_ref ir_find_aliasing_store_i(ir_ctx *ctx, ir_ref ref, ir_ref
 								ir_use_list_replace_one(ctx, prev, ref, next);
 								if (!IR_IS_CONST_REF(insn->op2)) {
 									ir_use_list_remove_one(ctx, insn->op2, ref);
+									if (ctx->iter_worklist && ctx->use_lists[insn->op2].count == 0) {
+										ir_bitqueue_add(ctx->iter_worklist, insn->op2);
+									}
 								}
 								if (!IR_IS_CONST_REF(insn->op3)) {
 									ir_use_list_remove_one(ctx, insn->op3, ref);
+									if (ctx->iter_worklist && ctx->use_lists[insn->op3].count == 0) {
+										ir_bitqueue_add(ctx->iter_worklist, insn->op3);
+									}
 								}
 								insn->op1 = IR_UNUSED;
 							}
@@ -2330,7 +2584,7 @@ IR_ALWAYS_INLINE ir_ref ir_find_aliasing_store_i(ir_ctx *ctx, ir_ref ref, ir_ref
 			}
 			type2 = insn->type;
 check_aliasing:
-			if (ir_check_partial_aliasing(ctx, addr, insn->op2, type, type2) != IR_NO_ALIAS) {
+			if (ir_check_aliasing(ctx, addr, insn->op2, type, type2) != IR_NO_ALIAS) {
 				break;
 			}
 		} else if (insn->op == IR_GUARD || insn->op == IR_GUARD_NOT) {
@@ -2406,6 +2660,9 @@ IR_ALWAYS_INLINE ir_ref ir_find_aliasing_vstore_i(ir_ctx *ctx, ir_ref ref, ir_re
 							}
 							if (!IR_IS_CONST_REF(insn->op3)) {
 								ir_use_list_remove_one(ctx, insn->op3, ref);
+								if (ctx->iter_worklist && ctx->use_lists[insn->op3].count == 0) {
+									ir_bitqueue_add(ctx->iter_worklist, insn->op3);
+								}
 							}
 							insn->op1 = IR_UNUSED;
 						}
@@ -3299,7 +3556,7 @@ ir_ref _ir_VLOAD(ir_ctx *ctx, ir_type type, ir_ref var)
 
 			if (insn->type == type) {
 				return ref;
-			} else if (ir_type_size[insn->type] == ir_type_size[type]) {
+			} else if (ir_get_type_size(insn->type) == ir_get_type_size(type)) {
 				return ir_fold1(ctx, IR_OPT(IR_BITCAST, type), ref); /* load forwarding with bitcast (L2L) */
 			} else {
 				return ir_fold1(ctx, IR_OPT(IR_TRUNC, type), ref); /* partial load forwarding (L2L) */
@@ -3333,10 +3590,10 @@ void _ir_VSTORE_v(ir_ctx *ctx, ir_ref var, ir_ref val)
 	ctx->control = ir_emit3(ctx, IR_VSTORE_v, ctx->control, var, val);
 }
 
-ir_ref _ir_TLS(ir_ctx *ctx, ir_ref index, ir_ref offset)
+ir_ref _ir_TLS_ADDR(ir_ctx *ctx, ir_ref index, ir_ref offset)
 {
 	IR_ASSERT(ctx->control);
-	return ctx->control = ir_emit3(ctx, IR_OPT(IR_TLS, IR_ADDR), ctx->control, index, offset);
+	return ctx->control = ir_emit3(ctx, IR_OPT(IR_TLS_ADDR, IR_ADDR), ctx->control, index, offset);
 }
 
 ir_ref _ir_RLOAD(ir_ctx *ctx, ir_type type, ir_ref reg)
@@ -3366,7 +3623,7 @@ ir_ref _ir_LOAD(ir_ctx *ctx, ir_type type, ir_ref addr)
 
 			if (insn->type == type) {
 				return ref;
-			} else if (ir_type_size[insn->type] == ir_type_size[type]) {
+			} else if (ir_get_type_size(insn->type) == ir_get_type_size(type)) {
 				return ir_fold1(ctx, IR_OPT(IR_BITCAST, type), ref); /* load forwarding with bitcast (L2L) */
 			} else {
 				return ir_fold1(ctx, IR_OPT(IR_TRUNC, type), ref); /* partial load forwarding (L2L) */

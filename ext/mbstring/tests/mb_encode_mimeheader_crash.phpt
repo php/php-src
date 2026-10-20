@@ -11,11 +11,11 @@ function_exists('mb_encode_mimeheader') or die("skip mb_encode_mimeheader() is n
 try {
     var_dump(mb_encode_mimeheader("abc", "UTF7-IMAP", "Q"));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "Done\n";
 ?>
 --EXPECT--
-mb_encode_mimeheader(): Argument #2 ($charset) "UTF7-IMAP" cannot be used for MIME header encoding
+ValueError: mb_encode_mimeheader(): Argument #2 ($charset) "UTF7-IMAP" cannot be used for MIME header encoding
 Done

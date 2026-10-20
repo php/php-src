@@ -12,11 +12,12 @@ if test "$PHP_POSIX" = "yes"; then
     [$ext_shared],,
     [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
-  AC_CHECK_FUNCS(m4_normalize([
+  AC_CHECK_FUNCS([
     ctermid
     eaccess
     getgrgid_r
     getgroups
+    getlogin
     getpgid
     getrlimit
     getsid
@@ -27,7 +28,7 @@ if test "$PHP_POSIX" = "yes"; then
     seteuid
     setrlimit
     setsid
-  ]))
+  ])
 
   dnl Check for makedev. If it's defined as a macro, AC_CHECK_FUNCS won't work.
   dnl Required headers are included by the AC_HEADER_MAJOR logic.
@@ -43,7 +44,8 @@ if test "$PHP_POSIX" = "yes"; then
 
 dnl Skip pathconf and fpathconf check on musl libc due to limited implementation
 dnl (first argument is not validated and has different error).
-  AS_IF([command -v ldd >/dev/null && ldd --version 2>&1 | grep ^musl >/dev/null 2>&1],
+  PHP_C_STANDARD_LIBRARY
+  AS_VAR_IF([php_cv_c_standard_library], [musl],
     [],
     [AC_CHECK_FUNCS([pathconf fpathconf])])
 

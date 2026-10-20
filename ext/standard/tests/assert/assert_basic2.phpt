@@ -30,7 +30,7 @@ Deprecated: PHP Startup: assert.callback INI setting is deprecated in Unknown on
 
 Deprecated: PHP Startup: assert.exception INI setting is deprecated in Unknown on line 0
 
-Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
 
 Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 string(2) "f1"
@@ -38,12 +38,12 @@ f1 called
 
 Warning: assert(): assert(0) failed in %s on line %d
 
-Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
 
 Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 string(2) "f1"
 
-Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
 
 Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 string(2) "f2"

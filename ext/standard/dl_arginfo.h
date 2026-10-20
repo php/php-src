@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit dl.stub.php instead.
  * Stub hash: 7dac6edd98e3e17669ae4bf0be7db89678059ca0 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dl, 0, 1, _IS_BOOL, 0)

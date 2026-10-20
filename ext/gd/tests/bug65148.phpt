@@ -37,10 +37,8 @@ foreach ($interpolations as $name => $interpolation) {
   $t = imagecolorallocatealpha($img, 0, 0, 0, 127);
   $imgr = imagerotate($img, -5, $t);
   $results[$name] = array('x' => imagesx($imgr), 'y' => imagesy($imgr));
-  imagedestroy($imgr);
 }
 
-imagedestroy($img);
 print_r($results);
 ?>
 --EXPECT--
@@ -48,128 +46,128 @@ Array
 (
     [IMG_BELL] => Array
         (
-            [x] => 40
-            [y] => 23
+            [x] => 42
+            [y] => 24
         )
 
     [IMG_BESSEL] => Array
         (
-            [x] => 40
-            [y] => 23
+            [x] => 42
+            [y] => 24
         )
 
     [IMG_BICUBIC] => Array
         (
-            [x] => 40
-            [y] => 23
+            [x] => 42
+            [y] => 24
         )
 
     [IMG_BICUBIC_FIXED] => Array
         (
-            [x] => 40
-            [y] => 23
+            [x] => 42
+            [y] => 24
         )
 
     [IMG_BILINEAR_FIXED] => Array
         (
-            [x] => 40
-            [y] => 23
+            [x] => 42
+            [y] => 24
         )
 
     [IMG_BLACKMAN] => Array
         (
-            [x] => 40
-            [y] => 23
+            [x] => 42
+            [y] => 24
         )
 
     [IMG_BOX] => Array
         (
-            [x] => 40
-            [y] => 23
+            [x] => 42
+            [y] => 24
         )
 
     [IMG_BSPLINE] => Array
         (
-            [x] => 40
-            [y] => 23
+            [x] => 42
+            [y] => 24
         )
 
     [IMG_CATMULLROM] => Array
         (
-            [x] => 40
-            [y] => 23
+            [x] => 42
+            [y] => 24
         )
 
     [IMG_GAUSSIAN] => Array
         (
-            [x] => 40
-            [y] => 23
+            [x] => 42
+            [y] => 24
         )
 
     [IMG_GENERALIZED_CUBIC] => Array
         (
-            [x] => 40
-            [y] => 23
+            [x] => 42
+            [y] => 24
         )
 
     [IMG_HERMITE] => Array
         (
-            [x] => 40
-            [y] => 23
+            [x] => 42
+            [y] => 24
         )
 
     [IMG_HAMMING] => Array
         (
-            [x] => 40
-            [y] => 23
+            [x] => 42
+            [y] => 24
         )
 
     [IMG_HANNING] => Array
         (
-            [x] => 40
-            [y] => 23
+            [x] => 42
+            [y] => 24
         )
 
     [IMG_MITCHELL] => Array
         (
-            [x] => 40
-            [y] => 23
+            [x] => 42
+            [y] => 24
         )
 
     [IMG_POWER] => Array
         (
-            [x] => 40
-            [y] => 23
+            [x] => 42
+            [y] => 24
         )
 
     [IMG_QUADRATIC] => Array
         (
-            [x] => 40
-            [y] => 23
+            [x] => 42
+            [y] => 24
         )
 
     [IMG_SINC] => Array
         (
-            [x] => 40
-            [y] => 23
+            [x] => 42
+            [y] => 24
         )
 
     [IMG_NEAREST_NEIGHBOUR] => Array
         (
-            [x] => 40
-            [y] => 23
+            [x] => 42
+            [y] => 24
         )
 
     [IMG_WEIGHTED4] => Array
         (
-            [x] => 40
-            [y] => 23
+            [x] => 42
+            [y] => 24
         )
 
     [IMG_TRIANGLE] => Array
         (
-            [x] => 40
-            [y] => 23
+            [x] => 42
+            [y] => 24
         )
 
 )

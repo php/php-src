@@ -15,10 +15,10 @@ $node_in_doc2 = $doc2->createElement("bar");
 
 try {
     $node_in_doc2->insertBefore($node_in_doc1);
-} catch(DOMException $e) {
-    echo $e->getMessage();
+} catch(Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Wrong Document Error
+DOMException: Wrong Document Error

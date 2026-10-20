@@ -8,9 +8,9 @@ gmp
 try {
     var_dump(gmp_testbit("abc", 1));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-gmp_testbit(): Argument #1 ($num) is not an integer string
+ValueError: gmp_testbit(): Argument #1 ($num) is not an integer string

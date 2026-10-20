@@ -30,8 +30,8 @@ $keys = [
 foreach ($keys as $key) {
     try {
         var_dump($str[$key]);
-    } catch (\TypeError $e) {
-        echo $e->getMessage() . \PHP_EOL;
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -39,29 +39,29 @@ echo "Done\n";
 ?>
 --EXPECTF--
 string(1) "l"
-Cannot access offset of type string on string
+TypeError: Cannot access offset of type string on string
 string(1) "l"
-Cannot access offset of type string on string
+TypeError: Cannot access offset of type string on string
 string(1) "l"
-Cannot access offset of type string on string
+TypeError: Cannot access offset of type string on string
 string(1) "l"
-Cannot access offset of type string on string
+TypeError: Cannot access offset of type string on string
 
 Warning: Illegal string offset "7str" in %s on line %d
 string(1) "l"
-Cannot access offset of type string on string
+TypeError: Cannot access offset of type string on string
 
 Warning: Illegal string offset "  7str" in %s on line %d
 string(1) "l"
-Cannot access offset of type string on string
+TypeError: Cannot access offset of type string on string
 
 Warning: Illegal string offset "  7  str" in %s on line %d
 string(1) "l"
-Cannot access offset of type string on string
+TypeError: Cannot access offset of type string on string
 
 Warning: Illegal string offset "7  str" in %s on line %d
 string(1) "l"
-Cannot access offset of type string on string
+TypeError: Cannot access offset of type string on string
 
 Warning: Illegal string offset "0xC" in %s on line %d
 string(1) "T"

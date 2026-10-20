@@ -83,12 +83,12 @@ bool(true)
 
 -- Iteration 5 --
 
-Warning: rename(%s/renameVar12/renameVar12Sub/..///renameVar12Sub//..//../renameVar12Sub/renameMe.tmp,%s/renameVar12/renameVar12Sub/..///renameVar12Sub//..//../renameVar12Sub/IwasRenamed.tmp): The system cannot find the path specified (code: 3) in %s on line %d
+Warning: rename(): The system cannot find the path specified (code: 3) in %s on line %d
 bool(false)
 
 -- Iteration 6 --
 
-Warning: rename(%s/renameVar12/renameVar12Sub/BADDIR/renameMe.tmp,%s/renameVar12/renameVar12Sub/BADDIR/IwasRenamed.tmp): The system cannot find the path specified (code: 3) in %s on line %d
+Warning: rename(): The system cannot find the path specified (code: 3) in %s on line %d
 bool(false)
 
 -- Iteration 7 --
@@ -109,7 +109,7 @@ bool(true)
 
 -- Iteration 11 --
 
-Warning: rename(BADDIR/renameMe.tmp,BADDIR/IwasRenamed.tmp): The system cannot find the path specified (code: 3) in %s on line %d
+Warning: rename(): The system cannot find the path specified (code: 3) in %s on line %d
 bool(false)
 
 *** Done ***

@@ -59,7 +59,7 @@ int(9)
 offset inside a character:
 bool(false)
 int(1)
-string(42) "Invalid UTF-8 offset: U_INVALID_CHAR_FOUND"
+string(70) "IntlDateFormatter::parse(): Invalid UTF-8 offset: U_INVALID_CHAR_FOUND"
 partial match inside a surrogate pair:
 bool(false)
 int(3)

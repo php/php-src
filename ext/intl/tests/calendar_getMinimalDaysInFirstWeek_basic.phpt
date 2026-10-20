@@ -2,10 +2,10 @@
 IntlCalendar::getMinimalDaysInFirstWeek() basic test
 --EXTENSIONS--
 intl
+--INI--
+intl.default_locale=nl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "nl");
 
 $intlcal = IntlCalendar::createInstance('UTC');
 var_dump($intlcal->getMinimalDaysInFirstWeek());

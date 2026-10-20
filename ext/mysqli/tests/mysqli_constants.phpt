@@ -47,6 +47,7 @@ $expected_constants = array(
     "MYSQLI_SERVER_QUERY_NO_GOOD_INDEX_USED"=> true,
     "MYSQLI_SERVER_QUERY_NO_INDEX_USED"	=> true,
     "MYSQLI_OPT_LOAD_DATA_LOCAL_DIR"    => true,
+    "MYSQLI_OPT_COMPRESS"               => true,
     "MYSQLI_IS_MARIADB"                 => true,
 
     "MYSQLI_TYPE_DECIMAL"				=> true,

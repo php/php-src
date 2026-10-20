@@ -2,10 +2,10 @@
 IntlBreakIterator::getPartsIterator(): argument variations
 --EXTENSIONS--
 intl
+--INI--
+intl.default_locale=pt_PT
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "pt_PT");
 
 $text = 'foo bar tao';
 

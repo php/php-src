@@ -57,5 +57,5 @@ $link->close();
 unlink('bug77956.data');
 ?>
 --EXPECT--
-[006] [2000] LOAD DATA LOCAL INFILE is forbidden, check related settings like mysqli.allow_local_infile|mysqli.local_infile_directory or PDO::MYSQL_ATTR_LOCAL_INFILE|PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY
+[006] [2000] LOAD DATA LOCAL INFILE is forbidden, check related settings like mysqli.allow_local_infile|mysqli.local_infile_directory or Pdo\Mysql::ATTR_LOCAL_INFILE|Pdo\Mysql::ATTR_LOCAL_INFILE_DIRECTORY
 done

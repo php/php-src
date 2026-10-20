@@ -7,10 +7,10 @@ bcmath
 
 try {
     bcsqrt('a');
-} catch (\ValueError $e) {
-    echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-bcsqrt(): Argument #1 ($num) is not well-formed
+ValueError: bcsqrt(): Argument #1 ($num) is not well-formed

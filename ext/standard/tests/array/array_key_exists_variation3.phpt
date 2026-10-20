@@ -19,8 +19,8 @@ foreach($keys as $key) {
     echo "Pass float as \$key:\n";
     try {
         var_dump(array_key_exists($key, $search));
-    } catch (TypeError $exception) {
-        echo $exception->getMessage() . "\n";
+    } catch (Throwable $exception) {
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
     }
     echo "Cast float to int:\n";
     var_dump(array_key_exists((int)$key, $search));

@@ -15,8 +15,8 @@ var_dump(new Point);
 $point = new Point(1.0, 2.0, 3.0);
 try {
     $point->x = 4.0;
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($point);
 
@@ -30,7 +30,7 @@ object(Point)#1 (3) {
   ["z"]=>
   float(0)
 }
-Cannot modify readonly property Point::$x
+Error: Cannot modify readonly property Point::$x
 object(Point)#1 (3) {
   ["x"]=>
   float(1)

@@ -5,7 +5,7 @@ sockets
 --FILE--
 <?php
 
-$domain = (strtoupper(substr(PHP_OS, 0, 3) == 'WIN') ? STREAM_PF_INET : STREAM_PF_UNIX);
+$domain = PHP_OS_FAMILY == 'Windows' ? STREAM_PF_INET : STREAM_PF_UNIX;
 $s = stream_socket_pair($domain, STREAM_SOCK_STREAM, 0);
 
 $s0 = reset($s);

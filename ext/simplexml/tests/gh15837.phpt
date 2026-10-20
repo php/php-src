@@ -2,6 +2,8 @@
 GH-15837 (Segmentation fault in ext/simplexml/simplexml.c)
 --CREDITS--
 YuanchengJiang
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 $xml =<<<EOF

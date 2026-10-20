@@ -10,7 +10,7 @@ try {
     session_set_save_handler(new \SessionHandler(), true);
     session_start();
 } catch (Throwable $e) {
-    echo $e::class . ': ' . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo "ok";
 ?>

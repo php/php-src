@@ -13,8 +13,14 @@ if (!file_exists("/dev/null")) {
 ?>
 --FILE--
 <?php
+$devnull = "/dev/null";
+// On Solaris, /dev/null is symlink
+if (is_link($devnull)) {
+    $devnull = readlink($devnull);
+    if ($devnull[0] != '/') $devnull = dirname("/dev/null") . '/' . $devnull;
+}
 echo "-- Checking for char --\n";
-print( filetype("/dev/null") )."\n";
+print(filetype($devnull)) . "\n";
 ?>
 --EXPECT--
 -- Checking for char --

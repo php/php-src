@@ -1,5 +1,6 @@
 --TEST--
-stream_isatty(): casting stream does not emit data loss and should not emit warnings
+stream_isatty(): casting stream does not emit data loss and should not emit warnings.
+--DESCRIPTION--
 Bug GH-10092 (Internal stream casting should not emit lost bytes warning twice)
 --SKIPIF--
 <?php

@@ -20,11 +20,11 @@ class TrampolineTest {
 
 var_dump($db->createFunction('strtoupper', [new TrampolineTest(), 'strtoupper']));
 
-foreach ($db->query('SELECT strtoupper("test")') as $row) {
+foreach ($db->query("SELECT strtoupper('test')") as $row) {
     var_dump($row);
 }
 
-foreach ($db->query('SELECT strtoupper("test")') as $row) {
+foreach ($db->query("SELECT strtoupper('test')") as $row) {
     var_dump($row);
 }
 
@@ -33,14 +33,14 @@ foreach ($db->query('SELECT strtoupper("test")') as $row) {
 bool(true)
 Trampoline for strtoupper
 array(2) {
-  ["strtoupper("test")"]=>
+  ["strtoupper('test')"]=>
   string(4) "TEST"
   [0]=>
   string(4) "TEST"
 }
 Trampoline for strtoupper
 array(2) {
-  ["strtoupper("test")"]=>
+  ["strtoupper('test')"]=>
   string(4) "TEST"
   [0]=>
   string(4) "TEST"

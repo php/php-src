@@ -11,6 +11,6 @@ Done
 --EXPECTF--
 Test
 
-Warning: exif_read_data(bug62523_3.jpg): File not supported in %sbug62523_3.php on line %d
+Warning: exif_read_data(): File not supported in %sbug62523_3.php on line %d
 bool(false)
 Done

@@ -42,4 +42,4 @@ resource(%d) of type (stream)
 string(%d) "%s"
 
 -- Call to rewinddir() --
-rewinddir(): %s is not a valid Directory resource
+rewinddir(): Argument #1 ($dir_handle) must be an open stream resource

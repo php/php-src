@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Georg Richter <georg@php.net>                                |
   +----------------------------------------------------------------------+
@@ -120,12 +118,10 @@ PHP_METHOD(mysqli_warning, next)
 	MYSQLI_WARNING 	*w;
 	mysqli_object *obj = Z_MYSQLI_P(ZEND_THIS);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (obj->ptr) {
-		MYSQLI_FETCH_RESOURCE(w, MYSQLI_WARNING *, ZEND_THIS, "mysqli_warning", MYSQLI_STATUS_VALID);
+		MYSQLI_FETCH_RESOURCE(w, MYSQLI_WARNING *, ZEND_THIS, MYSQLI_STATUS_VALID);
 
 		if (w && w->next) {
 			w = w->next;
@@ -144,7 +140,7 @@ static zend_result mysqli_warning_message(mysqli_object *obj, zval *retval, bool
 
 	if (!obj->ptr || !((MYSQLI_RESOURCE *)(obj->ptr))->ptr) {
 		if (!quiet) {
-			zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(obj->zo.ce->name));
+			zend_throw_error(NULL, "%pS object is already closed", obj->zo.ce->name);
 		}
 
 		return FAILURE;
@@ -164,7 +160,7 @@ static zend_result mysqli_warning_sqlstate(mysqli_object *obj, zval *retval, boo
 
 	if (!obj->ptr || !((MYSQLI_RESOURCE *)(obj->ptr))->ptr) {
 		if (!quiet) {
-			zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(obj->zo.ce->name));
+			zend_throw_error(NULL, "%pS object is already closed", obj->zo.ce->name);
 		}
 
 		return FAILURE;
@@ -184,7 +180,7 @@ static zend_result mysqli_warning_errno(mysqli_object *obj, zval *retval, bool q
 
 	if (!obj->ptr || !((MYSQLI_RESOURCE *)(obj->ptr))->ptr) {
 		if (!quiet) {
-			zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(obj->zo.ce->name));
+			zend_throw_error(NULL, "%pS object is already closed", obj->zo.ce->name);
 		}
 
 		return FAILURE;

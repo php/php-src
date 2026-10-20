@@ -2,8 +2,6 @@
 Grapheme searches handle an empty haystack without ICU errors
 --EXTENSIONS--
 intl
---INI--
-intl.error_level=2
 --FILE--
 <?php
 foreach ([0, 1] as $useExceptions) {

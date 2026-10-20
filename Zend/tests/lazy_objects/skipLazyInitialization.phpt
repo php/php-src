@@ -198,10 +198,10 @@ getValue(): string(5) "value"
 ## Property [ public static $static = 'static' ]
 
 skipInitializerForProperty():
-ReflectionException: Can not use skipLazyInitialization on static property A::$static
+ReflectionException: Cannot use skipLazyInitialization() on static property A::$static
 
 setRawValueWithoutLazyInitialization():
-ReflectionException: Can not use setRawValueWithoutLazyInitialization on static property A::$static
+ReflectionException: Cannot use setRawValueWithoutLazyInitialization() on static property A::$static
 
 ## Property [ public $noDefault = NULL ]
 
@@ -227,7 +227,7 @@ getValue(): NULL
 setRawValueWithoutLazyInitialization():
 getValue(): string(5) "value"
 
-## Property [ public $hooked = NULL ]
+## Property [ public $hooked = NULL { get; set; } ]
 
 skipInitializerForProperty():
 getValue(): NULL
@@ -235,13 +235,13 @@ getValue(): NULL
 setRawValueWithoutLazyInitialization():
 getValue(): string(5) "value"
 
-## Property [ public $virtual ]
+## Property [ public virtual $virtual { get; set; } ]
 
 skipInitializerForProperty():
-ReflectionException: Can not use skipLazyInitialization on virtual property A::$virtual
+ReflectionException: Cannot use skipLazyInitialization() on virtual property A::$virtual
 
 setRawValueWithoutLazyInitialization():
-ReflectionException: Can not use setRawValueWithoutLazyInitialization on virtual property A::$virtual
+ReflectionException: Cannot use setRawValueWithoutLazyInitialization() on virtual property A::$virtual
 
 ## Property [ $dynamicProp ]
 
@@ -295,10 +295,10 @@ getValue(): string(5) "value"
 ## Property [ public static $static = 'static' ]
 
 skipInitializerForProperty():
-ReflectionException: Can not use skipLazyInitialization on static property A::$static
+ReflectionException: Cannot use skipLazyInitialization() on static property A::$static
 
 setRawValueWithoutLazyInitialization():
-ReflectionException: Can not use setRawValueWithoutLazyInitialization on static property A::$static
+ReflectionException: Cannot use setRawValueWithoutLazyInitialization() on static property A::$static
 
 ## Property [ public $noDefault = NULL ]
 
@@ -324,7 +324,7 @@ getValue(): NULL
 setRawValueWithoutLazyInitialization():
 getValue(): string(5) "value"
 
-## Property [ public $hooked = NULL ]
+## Property [ public $hooked = NULL { get; set; } ]
 
 skipInitializerForProperty():
 getValue(): NULL
@@ -332,13 +332,13 @@ getValue(): NULL
 setRawValueWithoutLazyInitialization():
 getValue(): string(5) "value"
 
-## Property [ public $virtual ]
+## Property [ public virtual $virtual { get; set; } ]
 
 skipInitializerForProperty():
-ReflectionException: Can not use skipLazyInitialization on virtual property A::$virtual
+ReflectionException: Cannot use skipLazyInitialization() on virtual property A::$virtual
 
 setRawValueWithoutLazyInitialization():
-ReflectionException: Can not use setRawValueWithoutLazyInitialization on virtual property A::$virtual
+ReflectionException: Cannot use setRawValueWithoutLazyInitialization() on virtual property A::$virtual
 
 ## Property [ $dynamicProp ]
 

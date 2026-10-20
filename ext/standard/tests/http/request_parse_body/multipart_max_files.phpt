@@ -23,7 +23,7 @@ file data
 try {
     [$_POST, $_FILES] = request_parse_body();
 } catch (Throwable $e) {
-    echo get_class($e), ': ', $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump($_POST, $_FILES);

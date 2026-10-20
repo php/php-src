@@ -21,10 +21,10 @@ $c->init();
 
 try {
     foreach ($c as &$prop) {}
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECTF--
-Cannot acquire reference to readonly property C::$prop
+Error: Cannot acquire reference to readonly property C::$prop

@@ -4,9 +4,9 @@ FE_FETCH op2 is a def and needs special live range handling
 <?php
 try {
     foreach (["test"] as $k => func()[]) {}
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Call to undefined function func()
+Error: Call to undefined function func()

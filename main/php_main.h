@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -28,13 +26,20 @@ BEGIN_EXTERN_C()
  * extensions which want to know the version of PHP at run-time, rather than
  * the version they were built with at compile-time.
  */
-PHPAPI const char *php_version(void);
+ZEND_ATTRIBUTE_CONST PHPAPI const char *php_version(void);
 
 /* Returns the PHP version id the engine was built with. This is useful for
  * extensions which want to know the version of PHP at run-time, rather than
  * the version they were built with at compile-time.
  */
-PHPAPI unsigned int php_version_id(void);
+ZEND_ATTRIBUTE_CONST PHPAPI unsigned int php_version_id(void);
+
+/* Returns the build provider specified at build time. NULL is returned if
+ * no build provider was specified. This is useful for extensions which want
+ * to know the origin of a PHP binary at run-time, for example to provide
+ * statistics.
+ */
+ZEND_ATTRIBUTE_CONST PHPAPI const char *php_build_provider(void);
 
 /* Prints the PHP version string for the -v option. It's in main/ so that
  * it can be shared between SAPIs.
@@ -42,6 +47,7 @@ PHPAPI unsigned int php_version_id(void);
 PHPAPI char *php_get_version(sapi_module_struct *sapi_module);
 PHPAPI void php_print_version(sapi_module_struct *sapi_module);
 
+PHPAPI void php_child_init(void);
 PHPAPI zend_result php_request_startup(void);
 PHPAPI void php_request_shutdown(void *dummy);
 PHPAPI zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_module);

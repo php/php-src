@@ -3,7 +3,7 @@ Test session_status() function : disabled
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --INI--
 session.save_handler=non-existent
 --FILE--

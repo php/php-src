@@ -12,5 +12,6 @@ function_exists('mb_ereg_replace') or die("skip mb_ereg_replace() is not availab
   $a="abc122222222223";
   echo mb_ereg_replace("1(2*)3","\\1def\\1",$a);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 abc2222222222def2222222222

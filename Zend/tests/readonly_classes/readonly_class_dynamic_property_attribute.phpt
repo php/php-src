@@ -10,4 +10,4 @@ readonly class Foo
 
 ?>
 --EXPECTF--
-Fatal error: Cannot apply #[AllowDynamicProperties] to readonly class Foo in %s on line %d
+Fatal error: Cannot apply #[\AllowDynamicProperties] to readonly class Foo in %s on line %d

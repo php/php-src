@@ -22,11 +22,11 @@ for ($i = 0; $i < 2; $i++) {
         $o = new B();
         var_dump($o->foo);
     } catch (Throwable $e) {
-        echo $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 ?>
 --EXPECT--
 int(5)
-Cannot assign int to property B::$foo of type string
-Cannot assign int to property B::$foo of type string
+TypeError: Cannot assign int to property B::$foo of type string
+TypeError: Cannot assign int to property B::$foo of type string

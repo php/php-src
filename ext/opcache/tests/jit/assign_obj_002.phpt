@@ -23,8 +23,8 @@ function test2() {
 test();
 try {
     test2();
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
@@ -32,4 +32,4 @@ Warning: Undefined variable $undef in %s on line %d
 NULL
 
 Warning: Undefined variable $undef in %s on line %d
-Cannot assign null to property Test::$prop2 of type int
+TypeError: Cannot assign null to property Test::$prop2 of type int

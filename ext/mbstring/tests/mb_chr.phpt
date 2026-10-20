@@ -15,34 +15,34 @@ var_dump(
 try {
     var_dump( mb_chr(0xd800, "typo") );
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump( mb_chr(0xd800, "pass") );
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump( mb_chr(0xd800, "jis") );
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump( mb_chr(0xd800, "cp50222") );
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump( mb_chr(0xd800, "utf-7") );
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 mb_internal_encoding("utf-7");
 try {
     var_dump( mb_chr(0xd800) );
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -51,9 +51,9 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-mb_chr(): Argument #2 ($encoding) must be a valid encoding, "typo" given
-mb_chr(): Argument #2 ($encoding) must be a valid encoding, "pass" given
-mb_chr() does not support the "JIS" encoding
-mb_chr() does not support the "CP50222" encoding
-mb_chr() does not support the "UTF-7" encoding
-mb_chr() does not support the "UTF-7" encoding
+ValueError: mb_chr(): Argument #2 ($encoding) must be a valid encoding, "typo" given
+ValueError: mb_chr(): Argument #2 ($encoding) must be a valid encoding, "pass" given
+ValueError: mb_chr() does not support the "JIS" encoding
+ValueError: mb_chr() does not support the "CP50222" encoding
+ValueError: mb_chr() does not support the "UTF-7" encoding
+ValueError: mb_chr() does not support the "UTF-7" encoding

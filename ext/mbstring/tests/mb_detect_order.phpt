@@ -38,7 +38,7 @@ print "== INVALID PARAMETER ==\n";
 try {
     var_dump(mb_detect_order('BAD_NAME'));
 } catch (\ValueError $e) {
-     echo $e->getMessage() . \PHP_EOL;
+     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 var_dump(mb_detect_order());
 
@@ -46,7 +46,7 @@ $a[] = 'BAD_NAME';
 try {
     var_dump(mb_detect_order($a));
 } catch (\ValueError $e) {
-     echo $e->getMessage() . \PHP_EOL;
+     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 var_dump(mb_detect_order());
 
@@ -59,7 +59,7 @@ SJIS, EUC-JP, JIS, UTF-8
 OK_ARRAY
 ASCII, JIS, EUC-JP, UTF-8
 == INVALID PARAMETER ==
-mb_detect_order(): Argument #1 ($encoding) contains invalid encoding "BAD_NAME"
+ValueError: mb_detect_order(): Argument #1 ($encoding) contains invalid encoding "BAD_NAME"
 array(4) {
   [0]=>
   string(5) "ASCII"
@@ -70,7 +70,7 @@ array(4) {
   [3]=>
   string(5) "UTF-8"
 }
-mb_detect_order(): Argument #1 ($encoding) contains invalid encoding "BAD_NAME"
+ValueError: mb_detect_order(): Argument #1 ($encoding) contains invalid encoding "BAD_NAME"
 array(4) {
   [0]=>
   string(5) "ASCII"

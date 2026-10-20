@@ -35,7 +35,7 @@
 
 #define TIMELIB_LLABS(y) (y < 0 ? (y * -1) : y)
 
-const char *timelib_error_messages[10] = {
+const char *timelib_error_messages[18] = {
 	"No error",
 	"Cannot allocate buffer for parsing",
 	"Corrupt tzfile: The transitions in the file don't always increase",
@@ -45,7 +45,15 @@ const char *timelib_error_messages[10] = {
 	"No timezone with this name could be found",
 	"A 'slim' timezone file has been detected",
 	"The embedded POSIX string is not valid",
-	"The embedded POSIX string is empty"
+	"The embedded POSIX string is empty",
+	"Seconds value out of range",
+	"Nanoseconds value out of range",
+	"Division by zero",
+	"Integer Overflow",
+	"The ISO 8601 duration string may only contain the period (P) aspect",
+	"The ISO 8601 duration string is missing the period (P) aspect",
+	"The ISO 8601 duration string may only contain the time (T) aspect",
+	"The ISO 8601 duration string could not be parsed",
 };
 
 const char *timelib_get_error_message(int error_code)

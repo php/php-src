@@ -196,7 +196,7 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
     public function setMetadata(mixed $metadata): void {}
 
     /** @tentative-return-type */
-    public function setSignatureAlgorithm(int $algo, ?string $privateKey = null): void {}
+    public function setSignatureAlgorithm(int $algo, #[\SensitiveParameter] ?string $privateKey = null): void {}
 
     /**
      * @param resource|string $stub
@@ -470,7 +470,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
      * @tentative-return-type
      * @implementation-alias Phar::setSignatureAlgorithm
      */
-    public function setSignatureAlgorithm(int $algo, ?string $privateKey = null): void {}
+    public function setSignatureAlgorithm(int $algo, #[\SensitiveParameter] ?string $privateKey = null): void {}
 
     /**
      * @param resource|string $stub

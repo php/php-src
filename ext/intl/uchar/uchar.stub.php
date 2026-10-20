@@ -183,10 +183,8 @@ class IntlChar
     public const int PROPERTY_SENTENCE_BREAK = UNKNOWN;
     /** @cvalue UCHAR_WORD_BREAK */
     public const int PROPERTY_WORD_BREAK = UNKNOWN;
-#if U_ICU_VERSION_MAJOR_NUM >= 52
     /** @cvalue UCHAR_BIDI_PAIRED_BRACKET_TYPE */
     public const int PROPERTY_BIDI_PAIRED_BRACKET_TYPE = UNKNOWN;
-#endif
     /** @cvalue UCHAR_INT_LIMIT */
     public const int PROPERTY_INT_LIMIT = UNKNOWN;
     /** @cvalue UCHAR_GENERAL_CATEGORY_MASK */
@@ -229,10 +227,8 @@ class IntlChar
     public const int PROPERTY_UNICODE_1_NAME = UNKNOWN;
     /** @cvalue UCHAR_UPPERCASE_MAPPING */
     public const int PROPERTY_UPPERCASE_MAPPING = UNKNOWN;
-#if U_ICU_VERSION_MAJOR_NUM >= 52
     /** @cvalue UCHAR_BIDI_PAIRED_BRACKET */
     public const int PROPERTY_BIDI_PAIRED_BRACKET = UNKNOWN;
-#endif
     /** @cvalue UCHAR_STRING_LIMIT */
     public const int PROPERTY_STRING_LIMIT = UNKNOWN;
     /** @cvalue UCHAR_SCRIPT_EXTENSIONS */
@@ -347,7 +343,6 @@ class IntlChar
     public const int CHAR_DIRECTION_DIR_NON_SPACING_MARK = UNKNOWN;
     /** @cvalue U_BOUNDARY_NEUTRAL */
     public const int CHAR_DIRECTION_BOUNDARY_NEUTRAL = UNKNOWN;
-#if U_ICU_VERSION_MAJOR_NUM >= 52
     /** @cvalue U_FIRST_STRONG_ISOLATE */
     public const int CHAR_DIRECTION_FIRST_STRONG_ISOLATE = UNKNOWN;
     /** @cvalue U_LEFT_TO_RIGHT_ISOLATE */
@@ -356,7 +351,6 @@ class IntlChar
     public const int CHAR_DIRECTION_RIGHT_TO_LEFT_ISOLATE = UNKNOWN;
     /** @cvalue U_POP_DIRECTIONAL_ISOLATE */
     public const int CHAR_DIRECTION_POP_DIRECTIONAL_ISOLATE = UNKNOWN;
-#endif
     /** @cvalue U_CHAR_DIRECTION_COUNT */
     public const int CHAR_DIRECTION_CHAR_DIRECTION_COUNT = UNKNOWN;
 
@@ -806,7 +800,6 @@ class IntlChar
     public const int BLOCK_CODE_SUNDANESE_SUPPLEMENT = UNKNOWN;
     /** @cvalue UBLOCK_TAKRI */
     public const int BLOCK_CODE_TAKRI = UNKNOWN;
-#if U_ICU_VERSION_MAJOR_NUM >= 54
     /** @cvalue UBLOCK_BASSA_VAH */
     public const int BLOCK_CODE_BASSA_VAH = UNKNOWN;
     /** @cvalue UBLOCK_CAUCASIAN_ALBANIAN */
@@ -871,7 +864,6 @@ class IntlChar
     public const int BLOCK_CODE_TIRHUTA = UNKNOWN;
     /** @cvalue UBLOCK_WARANG_CITI */
     public const int BLOCK_CODE_WARANG_CITI = UNKNOWN;
-#endif
     /** @cvalue UBLOCK_COUNT */
     public const int BLOCK_CODE_COUNT = UNKNOWN;
     /** @cvalue UBLOCK_INVALID_CODE */
@@ -879,7 +871,6 @@ class IntlChar
 
     /* UBidiPairedBracketType - http://icu-project.org/apiref/icu4c/uchar_8h.html#af954219aa1df452657ec355221c6703d */
 
-#if U_ICU_VERSION_MAJOR_NUM >= 52
     /** @cvalue U_BPT_NONE */
     public const int BPT_NONE = UNKNOWN;
     /** @cvalue U_BPT_OPEN */
@@ -888,7 +879,6 @@ class IntlChar
     public const int BPT_CLOSE = UNKNOWN;
     /** @cvalue U_BPT_COUNT */
     public const int BPT_COUNT = UNKNOWN;
-#endif
 
     /* UEastAsianWidth - http://icu-project.org/apiref/icu4c/uchar_8h.html#a95cc2ca2f9cfd6d0c63eee2c65951333 */
 
@@ -1107,7 +1097,6 @@ class IntlChar
     public const int JG_NYA = UNKNOWN;
     /** @cvalue U_JG_ROHINGYA_YEH */
     public const int JG_ROHINGYA_YEH = UNKNOWN;
-#if U_ICU_VERSION_MAJOR_NUM >= 54
     /** @cvalue U_JG_MANICHAEAN_ALEPH */
     public const int JG_MANICHAEAN_ALEPH = UNKNOWN;
     /** @cvalue U_JG_MANICHAEAN_AYIN */
@@ -1164,7 +1153,6 @@ class IntlChar
     public const int JG_MANICHAEAN_ZAYIN = UNKNOWN;
     /** @cvalue U_JG_STRAIGHT_WAW */
     public const int JG_STRAIGHT_WAW = UNKNOWN;
-#endif
     /** @cvalue U_JG_COUNT */
     public const int JG_COUNT = UNKNOWN;
 
@@ -1229,14 +1217,12 @@ class IntlChar
     public const int WB_NEWLINE = UNKNOWN;
     /** @cvalue U_WB_REGIONAL_INDICATOR */
     public const int WB_REGIONAL_INDICATOR = UNKNOWN;
-#if U_ICU_VERSION_MAJOR_NUM >= 52
     /** @cvalue U_WB_HEBREW_LETTER */
     public const int WB_HEBREW_LETTER = UNKNOWN;
     /** @cvalue U_WB_SINGLE_QUOTE */
     public const int WB_SINGLE_QUOTE = UNKNOWN;
     /** @cvalue U_WB_DOUBLE_QUOTE */
     public const int WB_DOUBLE_QUOTE = UNKNOWN;
-#endif
     /** @cvalue U_WB_COUNT */
     public const int WB_COUNT = UNKNOWN;
 
@@ -1441,10 +1427,8 @@ class IntlChar
     /** @tentative-return-type */
     public static function forDigit(int $digit, int $base = 10): int {}
 
-#if U_ICU_VERSION_MAJOR_NUM >= 52
     /** @tentative-return-type */
     public static function getBidiPairedBracket(int|string $codepoint): int|string|null {}
-#endif
 
     /** @tentative-return-type */
     public static function getBlockCode(int|string $codepoint): ?int {}

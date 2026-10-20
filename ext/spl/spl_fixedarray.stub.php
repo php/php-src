@@ -55,5 +55,8 @@ class SplFixedArray implements IteratorAggregate, ArrayAccess, Countable, JsonSe
 
     public function getIterator(): Iterator {}
 
+    /**
+     * @implementation-alias SplFixedArray::toArray
+     */
     public function jsonSerialize(): array {}
 }

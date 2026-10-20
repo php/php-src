@@ -10,4 +10,4 @@ class MyDateTimeZone extends DateTimeZone
 }
 ?>
 --EXPECTF--
-Fatal error: Declaration of MyDateTimeZone::getTransitions(): array|false must be compatible with DateTimeZone::getTransitions(int $timestampBegin = PHP_INT_MIN, int $timestampEnd = PHP_INT_MAX): array|false in %s on line %d
+Fatal error: Declaration of MyDateTimeZone::getTransitions(): array|false must be compatible with DateTimeZone::getTransitions(int $timestampBegin = PHP_INT_MIN, int $timestampEnd = 2147483647): array|false in %s on line %d

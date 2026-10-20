@@ -11,4 +11,7 @@ unset(Foo::Bar->value);
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use temporary expression in write context in %s on line %d
+Fatal error: Uncaught Error: Cannot unset readonly property Foo::$value in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

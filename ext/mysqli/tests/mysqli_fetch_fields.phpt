@@ -15,9 +15,7 @@ require_once 'skipifconnectfailure.inc';
     // Make sure that client, connection and result charsets are all the
     // same. Not sure whether this is strictly necessary.
     if (!mysqli_set_charset($link, 'utf8'))
-        printf("[%d] %s\n", mysqli_errno($link), mysqli_errno($link));
-
-    $charsetInfo = mysqli_get_charset($link);
+        printf("[%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
     if (!$res = mysqli_query($link, "SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 1")) {
         printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -26,16 +24,6 @@ require_once 'skipifconnectfailure.inc';
     $fields = mysqli_fetch_fields($res);
     foreach ($fields as $k => $field) {
         var_dump($field);
-        switch ($k) {
-            case 1:
-                /* label column, result set charset */
-                if ($field->charsetnr != $charsetInfo->number) {
-                    printf("[004] Expecting charset %s/%d got %d\n",
-                        $charsetInfo->charset,
-                        $charsetInfo->number, $field->charsetnr);
-                }
-                break;
-        }
     }
 
     mysqli_free_result($res);

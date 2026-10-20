@@ -17,11 +17,11 @@ function test($x) {
 $x = new ReflectionFunction('str_pad');
 try {
     test($x);
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 DONE
 --EXPECT--
-str_pad() expects at least 2 arguments, 1 given
+ArgumentCountError: str_pad() expects at least 2 arguments, 1 given
 DONE

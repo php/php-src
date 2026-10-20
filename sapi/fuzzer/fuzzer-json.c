@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Johannes Schlüter <johanes@php.net>                         |
    |          Stanislav Malyshev <stas@php.net>                           |
@@ -26,6 +24,7 @@
 #include <stdlib.h>
 
 #include "fuzzer-sapi.h"
+#include "ext/json/php_json.h"
 #include "ext/json/php_json_parser.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
@@ -38,10 +37,25 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	memcpy(data, Data, Size);
 	data[Size] = '\0';
 
-	for (int option = 0; option <=1; ++option) {
+	int options[12] = {
+		0,
+		PHP_JSON_OBJECT_AS_ARRAY,
+		PHP_JSON_OBJECT_AS_ARRAY | PHP_JSON_BIGINT_AS_STRING,
+		PHP_JSON_OBJECT_AS_ARRAY | PHP_JSON_BIGINT_AS_STRING | PHP_JSON_INVALID_UTF8_IGNORE,
+		PHP_JSON_OBJECT_AS_ARRAY | PHP_JSON_BIGINT_AS_STRING | PHP_JSON_INVALID_UTF8_SUBSTITUTE,
+		PHP_JSON_OBJECT_AS_ARRAY | PHP_JSON_INVALID_UTF8_IGNORE,
+		PHP_JSON_OBJECT_AS_ARRAY | PHP_JSON_INVALID_UTF8_SUBSTITUTE,
+		PHP_JSON_BIGINT_AS_STRING,
+		PHP_JSON_BIGINT_AS_STRING | PHP_JSON_INVALID_UTF8_IGNORE,
+		PHP_JSON_BIGINT_AS_STRING | PHP_JSON_INVALID_UTF8_SUBSTITUTE,
+		PHP_JSON_INVALID_UTF8_IGNORE,
+		PHP_JSON_INVALID_UTF8_SUBSTITUTE
+	};
+
+	for (int index = 0; index < 12; ++index) {
 		zval result;
 		php_json_parser parser;
-		php_json_parser_init(&parser, &result, data, Size, option, 10);
+		php_json_parser_init(&parser, &result, data, Size, options[index], 10);
 		if (php_json_yyparse(&parser) == SUCCESS) {
 			zval_ptr_dtor(&result);
 		}

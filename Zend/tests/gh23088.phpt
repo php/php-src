@@ -24,17 +24,17 @@ for ($i = 0; $i < 20000; $i++) {
 
 try {
     var_dump($a == $b);
-} catch (Error $e) {
-    echo $e->getMessage(), PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump($a === $b);
-} catch (Error $e) {
-    echo $e->getMessage(), PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Maximum call stack size reached during comparison
-Maximum call stack size reached during comparison
+Error: Maximum call stack size reached during comparison
+Error: Maximum call stack size reached during comparison

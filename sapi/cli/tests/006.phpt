@@ -17,9 +17,11 @@ date.timezone=UTC
 
 $php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
-var_dump(`$php -n --re unknown`);
-var_dump(`$php -n --re ""`);
-var_dump(`$php -n --re pcre`);
+var_dump(shell_exec("$php -n --re unknown"));
+var_dump(shell_exec(<<<SHELL
+$php -n --re ""
+SHELL));
+var_dump(shell_exec("$php -n --re pcre"));
 
 echo "Done\n";
 ?>
@@ -61,7 +63,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
     Constant [ <persistent> string PCRE_VERSION ] { %s }
     Constant [ <persistent> int PCRE_VERSION_MAJOR ] { %d }
     Constant [ <persistent> int PCRE_VERSION_MINOR ] { %d }
-    Constant [ <persistent> bool PCRE_JIT_SUPPORT ] { %d }
+    Constant [ <persistent> bool PCRE_JIT_SUPPORT ] { %s }
   }
 
   - Functions {

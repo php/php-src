@@ -4,15 +4,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Zeev Suraski <zeev@php.net>                                 |
    |          Jani Taskinen <jani@php.net>                                |
@@ -57,7 +56,7 @@ static int get_int_val(zval *op) {
 			zend_string_free(Z_STR_P(op));
 			return val;
 		}
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 }
 
@@ -152,7 +151,7 @@ static void zend_ini_get_constant(zval *result, zval *name)
 		   	&& (c = zend_get_constant(Z_STR_P(name))) != 0) {
 		if (Z_TYPE_P(c) != IS_STRING) {
 			ZVAL_COPY_OR_DUP(&tmp, c);
-			if (Z_OPT_CONSTANT(tmp)) {
+			if (Z_OPT_TYPE(tmp) == IS_CONSTANT_AST) {
 				zval_update_constant_ex(&tmp, NULL);
 			}
 			convert_to_string(&tmp);
@@ -205,7 +204,7 @@ static ZEND_COLD void ini_error(const char *msg)
 		error_buf_len = 128 + (int)strlen(msg) + (int)strlen(currently_parsed_filename); /* should be more than enough */
 		error_buf = (char *) emalloc(error_buf_len);
 
-		sprintf(error_buf, "%s in %s on line %d\n", msg, currently_parsed_filename, zend_ini_scanner_get_lineno());
+		sprintf(error_buf, "%s in %s on line %" PRIu32 "\n", msg, currently_parsed_filename, zend_ini_scanner_get_lineno());
 	} else {
 		error_buf = estrdup("Invalid configuration directive\n");
 	}
@@ -222,8 +221,7 @@ static ZEND_COLD void ini_error(const char *msg)
 }
 /* }}} */
 
-/* {{{ zend_parse_ini_file() */
-ZEND_API zend_result zend_parse_ini_file(zend_file_handle *fh, bool unbuffered_errors, int scanner_mode, zend_ini_parser_cb_t ini_parser_cb, void *arg)
+ZEND_API zend_result zend_parse_ini_file(zend_file_handle *fh, bool unbuffered_errors, zend_ini_scanner_mode scanner_mode, zend_ini_parser_cb_t ini_parser_cb, void *arg)
 {
 	int retval;
 	zend_ini_parser_param ini_parser_param;
@@ -247,10 +245,8 @@ ZEND_API zend_result zend_parse_ini_file(zend_file_handle *fh, bool unbuffered_e
 		return FAILURE;
 	}
 }
-/* }}} */
 
-/* {{{ zend_parse_ini_string() */
-ZEND_API zend_result zend_parse_ini_string(const char *str, bool unbuffered_errors, int scanner_mode, zend_ini_parser_cb_t ini_parser_cb, void *arg)
+ZEND_API zend_result zend_parse_ini_string(const char *str, bool unbuffered_errors, zend_ini_scanner_mode scanner_mode, zend_ini_parser_cb_t ini_parser_cb, void *arg)
 {
 	int retval;
 	zend_ini_parser_param ini_parser_param;
@@ -259,9 +255,7 @@ ZEND_API zend_result zend_parse_ini_string(const char *str, bool unbuffered_erro
 	ini_parser_param.arg = arg;
 	CG(ini_parser_param) = &ini_parser_param;
 
-	if (zend_ini_prepare_string_for_scanning(str, scanner_mode) == FAILURE) {
-		return FAILURE;
-	}
+	zend_ini_prepare_string_for_scanning(str, scanner_mode);
 
 	CG(ini_parser_unbuffered_errors) = unbuffered_errors;
 	retval = ini_parse();
@@ -274,7 +268,6 @@ ZEND_API zend_result zend_parse_ini_string(const char *str, bool unbuffered_erro
 		return FAILURE;
 	}
 }
-/* }}} */
 
 /* {{{ zval_ini_dtor() */
 static void zval_ini_dtor(zval *zv)

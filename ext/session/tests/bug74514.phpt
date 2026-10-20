@@ -4,7 +4,7 @@ Bug #74514 5 session functions incorrectly warn when calling in read-only/getter
 session
 --SKIPIF--
 <?php
-include('skipif.inc');
+include 'skipif.inc';
 ?>
 --FILE--
 <?php

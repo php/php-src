@@ -75,7 +75,11 @@ $all_system_locales = list_system_locales();
 echo "Setting system locale(LC_ALL) to ";
 foreach($common_locales as $value) {
   // check if a commonly used locale is installed in the system
-  if(in_array($value, $all_system_locales)){
+  // Solaris uses .UTF-8 canonical form, so normalize
+  $normalized = preg_replace('/\.utf8$/i', '.UTF-8', $value);
+
+  if (in_array($value, $all_system_locales) ||
+      in_array($normalized, $all_system_locales)) {
     echo "$value\n"; // print, this is found
     // set the found locale as current locale
     var_dump(setlocale(LC_ALL, $value ));

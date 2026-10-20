@@ -15,15 +15,37 @@ var_dump(pathinfo($testfile, PATHINFO_BASENAME));
 var_dump(pathinfo($testfile, PATHINFO_FILENAME));
 var_dump(pathinfo($testfile, PATHINFO_EXTENSION));
 var_dump(pathinfo($testfile, PATHINFO_DIRNAME));
-var_dump(pathinfo($testfile, PATHINFO_EXTENSION|PATHINFO_FILENAME|PATHINFO_DIRNAME));
-var_dump(pathinfo($testfile, PATHINFO_EXTENSION|PATHINFO_FILENAME|PATHINFO_BASENAME));
-var_dump(pathinfo($testfile, PATHINFO_EXTENSION|PATHINFO_FILENAME));
-var_dump(pathinfo($testfile, PATHINFO_EXTENSION|PATHINFO_BASENAME));
-var_dump(pathinfo($testfile, PATHINFO_FILENAME|PATHINFO_DIRNAME));
-var_dump(pathinfo($testfile, PATHINFO_FILENAME|PATHINFO_BASENAME));
-var_dump(pathinfo($testfile, PATHINFO_DIRNAME|PATHINFO_EXTENSION));
-var_dump(pathinfo($testfile, PATHINFO_DIRNAME|PATHINFO_BASENAME));
 
+try {
+	pathinfo($testfile, PATHINFO_EXTENSION|PATHINFO_FILENAME|PATHINFO_DIRNAME);
+} catch (Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
+}
+try {
+	pathinfo($testfile, PATHINFO_EXTENSION|PATHINFO_FILENAME);
+} catch (Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
+}
+try {
+	pathinfo($testfile, PATHINFO_EXTENSION|PATHINFO_DIRNAME);
+} catch (Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
+}
+try {
+	pathinfo($testfile, PATHINFO_FILENAME|PATHINFO_BASENAME);
+} catch (Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
+}
+try {
+	pathinfo($testfile, PATHINFO_DIRNAME|PATHINFO_EXTENSION);
+} catch (Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
+}
+try {
+	pathinfo($testfile, PATHINFO_DIRNAME|PATHINFO_BASENAME);
+} catch (Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
+}
 
 ?>
 --EXPECTF--
@@ -62,11 +84,9 @@ string(6) "inet.h"
 string(4) "inet"
 string(1) "h"
 string(17) "/usr/include/arpa"
-string(17) "/usr/include/arpa"
-string(6) "inet.h"
-string(1) "h"
-string(6) "inet.h"
-string(17) "/usr/include/arpa"
-string(6) "inet.h"
-string(17) "/usr/include/arpa"
-string(17) "/usr/include/arpa"
+ValueError: pathinfo(): Argument #2 ($flags) must be only one of the PATHINFO_* constants
+ValueError: pathinfo(): Argument #2 ($flags) must be only one of the PATHINFO_* constants
+ValueError: pathinfo(): Argument #2 ($flags) must be only one of the PATHINFO_* constants
+ValueError: pathinfo(): Argument #2 ($flags) must be only one of the PATHINFO_* constants
+ValueError: pathinfo(): Argument #2 ($flags) must be only one of the PATHINFO_* constants
+ValueError: pathinfo(): Argument #2 ($flags) must be only one of the PATHINFO_* constants

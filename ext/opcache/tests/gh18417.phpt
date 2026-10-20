@@ -23,7 +23,6 @@ $proc = proc_open([
     PHP_BINARY,
     "-n",
     "-d", "extension_dir=$extension_dir",
-    "-d", "zend_extension=opcache",
     "-d", "opcache.memory_consumption=$new_memory_consumption",
     "-d", "opcache.enable=1",
     "-d", "opcache.enable_cli=1",

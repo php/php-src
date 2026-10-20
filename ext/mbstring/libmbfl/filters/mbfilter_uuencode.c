@@ -287,6 +287,9 @@ static void mb_wchar_to_uuencode(uint32_t *in, size_t len, mb_convert_buf *buf, 
 		if (n_cached_bits) {
 			len_byte -= (n_cached_bits == 2) ? 1 : 2;
 		}
+		/* The byte we are writing to must be part of the same buffer */
+		ZEND_ASSERT(len_byte >= (unsigned char *)ZSTR_VAL(buf->str));
+		ZEND_ASSERT(len_byte < limit);
 		*len_byte = MIN(bytes_encoded + len + (n_cached_bits ? (n_cached_bits == 2 ? 1 : 2) : 0), 45) + 32;
 
 		if (n_cached_bits) {

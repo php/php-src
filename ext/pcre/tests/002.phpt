@@ -6,7 +6,7 @@ preg_* with bogus vals
 try {
     preg_match_all('//', '', $dummy, 0xdead);
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 var_dump(preg_quote(''));
@@ -17,7 +17,7 @@ var_dump(preg_replace('/(.)/e', 'for ($', 'abc'));
 
 ?>
 --EXPECTF--
-preg_match_all(): Argument #4 ($flags) must be a PREG_* constant
+ValueError: preg_match_all(): Argument #4 ($flags) must be a PREG_* constant
 string(0) ""
 string(12) "a${1b${1c${1"
 

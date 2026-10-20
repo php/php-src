@@ -10,23 +10,23 @@ bcmath
 <?php
 try {
     bcdiv('10.99', '0');
-} catch (DivisionByZeroError $ex) {
-    echo $ex->getMessage(), PHP_EOL;
+} catch (Throwable $ex) {
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 
 try {
     bcdiv('10.99', '0.00');
-} catch (DivisionByZeroError $ex) {
-    echo $ex->getMessage(), PHP_EOL;
+} catch (Throwable $ex) {
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 
 try {
     bcdiv('10.99', '-0.00');
-} catch (DivisionByZeroError $ex) {
-    echo $ex->getMessage(), PHP_EOL;
+} catch (Throwable $ex) {
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Division by zero
-Division by zero
-Division by zero
+DivisionByZeroError: Division by zero
+DivisionByZeroError: Division by zero
+DivisionByZeroError: Division by zero

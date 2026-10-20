@@ -26,7 +26,6 @@ $ch = curl_init();
 curl_setopt($ch, CURLOPT_WRITEFUNCTION, 'curl_callback');
 curl_setopt($ch, CURLOPT_URL, 'file://' . $log_file);
 curl_exec($ch);
-curl_close($ch);
 
 // cleanup
 unlink($log_file);

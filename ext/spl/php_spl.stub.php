@@ -39,9 +39,11 @@ function spl_autoload_unregister(callable $callback): bool {}
  * @return array<string, string>
  * @refcount 1
  */
+#[\Deprecated(message: "use ReflectionExtension::getClassNames() instead", since: "8.6")]
 function spl_classes(): array {}
 
 /** @refcount 1 */
+#[\Deprecated(message: "consider using spl_object_id() instead", since: "8.6")]
 function spl_object_hash(object $object): string {}
 
 function spl_object_id(object $object): int {}

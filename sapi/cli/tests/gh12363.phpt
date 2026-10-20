@@ -31,9 +31,7 @@ fclose($fp);
 ?>
 --EXPECTF--
 HTTP/1.1 200 OK
-Host: %s
 Connection: close
 X-Powered-By: %s
 Date: Mon, 25 Mar 1985 00:20:00 GMT
 Content-type: text/html; charset=UTF-8
-

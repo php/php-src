@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Wez Furlong <wez@php.net>                                    |
   +----------------------------------------------------------------------+
@@ -61,6 +59,9 @@ zend_ulong pdo_odbc_pool_on = SQL_CP_OFF;
 zend_ulong pdo_odbc_pool_mode = SQL_CP_ONE_PER_HENV;
 #endif
 
+#define REGISTER_PDO_ODBC_CLASS_CONST_LONG_DEPRECATED_ALIAS_85(base_name, value) \
+		REGISTER_PDO_CLASS_CONST_LONG_DEPRECATED_ALIAS_85(base_name, "ODBC_", "Pdo\\Odbc::", value)
+
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(pdo_odbc)
 {
@@ -101,11 +102,11 @@ PHP_MINIT_FUNCTION(pdo_odbc)
 
 	register_pdo_odbc_symbols(module_number);
 
-	REGISTER_PDO_CLASS_CONST_LONG("ODBC_ATTR_USE_CURSOR_LIBRARY", PDO_ODBC_ATTR_USE_CURSOR_LIBRARY);
-	REGISTER_PDO_CLASS_CONST_LONG("ODBC_ATTR_ASSUME_UTF8", PDO_ODBC_ATTR_ASSUME_UTF8);
-	REGISTER_PDO_CLASS_CONST_LONG("ODBC_SQL_USE_IF_NEEDED", SQL_CUR_USE_IF_NEEDED);
-	REGISTER_PDO_CLASS_CONST_LONG("ODBC_SQL_USE_DRIVER", SQL_CUR_USE_DRIVER);
-	REGISTER_PDO_CLASS_CONST_LONG("ODBC_SQL_USE_ODBC", SQL_CUR_USE_ODBC);
+	REGISTER_PDO_ODBC_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_USE_CURSOR_LIBRARY", PDO_ODBC_ATTR_USE_CURSOR_LIBRARY);
+	REGISTER_PDO_ODBC_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_ASSUME_UTF8", PDO_ODBC_ATTR_ASSUME_UTF8);
+	REGISTER_PDO_ODBC_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("SQL_USE_IF_NEEDED", SQL_CUR_USE_IF_NEEDED);
+	REGISTER_PDO_ODBC_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("SQL_USE_DRIVER", SQL_CUR_USE_DRIVER);
+	REGISTER_PDO_ODBC_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("SQL_USE_ODBC", SQL_CUR_USE_ODBC);
 
 	pdo_odbc_ce = register_class_Pdo_Odbc(pdo_dbh_ce);
 	pdo_odbc_ce->create_object = pdo_dbh_new;

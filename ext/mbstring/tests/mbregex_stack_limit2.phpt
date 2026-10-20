@@ -6,7 +6,7 @@ iconv
 --SKIPIF--
 <?php
 if (!function_exists('mb_ereg_replace')) die('skip mb_ereg_replace not available');
-if (version_compare(MB_ONIGURUMA_VERSION, '6.9.3') < 0) {
+if (@version_compare(MB_ONIGURUMA_VERSION, '6.9.3') < 0) {
     die('skip requires Oniguruma 6.9.3');
 }
 ?>
@@ -28,6 +28,10 @@ var_dump(mb_trim_regex(str_repeat(' ', 10000)));
 echo 'OK';
 ?>
 --EXPECTF--
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+
 Warning: mb_ereg_replace(): mbregex search failure in php_mbereg_replace_exec(): match-stack limit over in %s on line %d
+
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(0) ""
 OK

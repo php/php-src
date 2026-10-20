@@ -2,11 +2,11 @@
 Test mb_strrichr() function : usage variation - multiple needles
 --EXTENSIONS--
 mbstring
+--INI--
+internal_encoding=UTF-8
 --FILE--
 <?php
 echo "*** Testing mb_strrichr() : basic functionality ***\n";
-
-mb_internal_encoding('UTF-8');
 
 //ascii mixed case, multiple needles
 $string_ascii = 'abcDef zBcDyx';

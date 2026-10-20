@@ -44,8 +44,8 @@ for( $i=0; $i<count($names_arr); $i++ ) {
         } else {
             echo "Failed to write data to: '$names_arr[$i]'\n";
         }
-    } catch (\TypeError|\ValueError $e) {
-        echo get_class($e) . ': ' . $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -75,11 +75,11 @@ ValueError: file_put_contents(): Argument #1 ($filename) must not contain any nu
 TypeError: file_put_contents(): Argument #1 ($filename) must be of type string, array given
 -- Iteration 7 --
 
-Warning: file_put_contents(%sdir): Failed to open stream: %s in %s on line %d
+Warning: file_put_contents(): Failed to open stream: %s in %s on line %d
 Failed to write data to: '%sir'
 -- Iteration 8 --
 
-Warning: file_put_contents(%sphp): Failed to open stream: %s in %s on line %d
+Warning: file_put_contents(): Failed to open stream: %s in %s on line %d
 Failed to write data to: '%sphp'
 
 *** Done ***

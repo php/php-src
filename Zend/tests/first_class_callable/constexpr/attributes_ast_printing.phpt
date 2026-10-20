@@ -1,0 +1,33 @@
+--TEST--
+AST printing for FCC in attributes
+--FILE--
+<?php
+
+// Do not use `false &&` to fully evaluate the function / class definition.
+
+try {
+    \assert(
+        !
+        #[Attr(strrev(...))]
+        function () { }
+    );
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+
+try {
+    \assert(
+        !
+        new #[Attr(strrev(...))]
+        class {}
+    );
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+
+?>
+--EXPECT--
+AssertionError: assert(!#[Attr(strrev(...))] function () {
+})
+AssertionError: assert(!new #[Attr(strrev(...))] class {
+})

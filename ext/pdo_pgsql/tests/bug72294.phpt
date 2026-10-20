@@ -1,7 +1,6 @@
 --TEST--
 Bug #72294 Segmentation fault/invalid pointer in connection with pgsql_stmt_dtor
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

@@ -9,7 +9,7 @@ var_dump(getimagesize(__DIR__ . "/32x256.ico"));
 ===DONE===
 --EXPECT--
 *** Testing getimagesize() : 256px ico ***
-array(6) {
+array(8) {
   [0]=>
   int(32)
   [1]=>
@@ -22,5 +22,9 @@ array(6) {
   int(8)
   ["mime"]=>
   string(24) "image/vnd.microsoft.icon"
+  ["width_unit"]=>
+  string(2) "px"
+  ["height_unit"]=>
+  string(2) "px"
 }
 ===DONE===

@@ -2,6 +2,12 @@
 Fileinfo run upstream tests
 --EXTENSIONS--
 fileinfo
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY === 'Solaris') {
+    die("skip timezone-dependent libmagic output differs on Solaris");
+}
+?>
 --ENV--
 TZ=UTC
 --FILE--
@@ -18,7 +24,6 @@ foreach($lst as $p) {
 	if ($i !== $exp) {
 		echo "'$p' failed\nexp: '$exp'\ngot: '$i'\n";
 	} 
-	finfo_close($finfo);
 }
 
 echo "==DONE==";

@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -87,7 +85,7 @@
 */
 
 #define N             624                 /* length of state vector */
-ZEND_STATIC_ASSERT(
+static_assert(
 	N == sizeof(((php_random_status_state_mt19937*)0)->state) / sizeof(((php_random_status_state_mt19937*)0)->state[0]),
 	"Assumed length of Mt19937 state vector does not match actual size."
 );
@@ -324,8 +322,7 @@ PHP_METHOD(Random_Engine_Mt19937, __serialize)
 	array_init(return_value);
 
 	/* members */
-	ZVAL_ARR(&t, zend_std_get_properties(&engine->std));
-	Z_TRY_ADDREF(t);
+	ZVAL_EMPTY_ARRAY(&t);
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &t);
 
 	/* state */
@@ -351,30 +348,30 @@ PHP_METHOD(Random_Engine_Mt19937, __unserialize)
 
 	/* Verify the expected number of elements, this implicitly ensures that no additional elements are present. */
 	if (zend_hash_num_elements(d) != 2) {
-		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(engine->std.ce->name));
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %pS object", engine->std.ce->name);
 		RETURN_THROWS();
 	}
 
 	/* members */
 	t = zend_hash_index_find(d, 0);
 	if (!t || Z_TYPE_P(t) != IS_ARRAY) {
-		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(engine->std.ce->name));
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %pS object", engine->std.ce->name);
 		RETURN_THROWS();
 	}
 	object_properties_load(&engine->std, Z_ARRVAL_P(t));
 	if (EG(exception)) {
-		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(engine->std.ce->name));
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %pS object", engine->std.ce->name);
 		RETURN_THROWS();
 	}
 
 	/* state */
 	t = zend_hash_index_find(d, 1);
 	if (!t || Z_TYPE_P(t) != IS_ARRAY) {
-		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(engine->std.ce->name));
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %pS object", engine->std.ce->name);
 		RETURN_THROWS();
 	}
 	if (!engine->engine.algo->unserialize(engine->engine.state, Z_ARRVAL_P(t))) {
-		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(engine->std.ce->name));
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %pS object", engine->std.ce->name);
 		RETURN_THROWS();
 	}
 }

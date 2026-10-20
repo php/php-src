@@ -14,12 +14,12 @@ $n = str_repeat("\0", SODIUM_CRYPTO_SCALARMULT_RISTRETTO255_SCALARBYTES);
 try {
     $p = sodium_crypto_scalarmult_ristretto255_base($n);
 } catch (SodiumException $ex) {
-    echo $ex->getMessage(), "\n";
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 try {
     $p2 = sodium_crypto_scalarmult_ristretto255($n, $b);
 } catch (SodiumException $ex) {
-    echo $ex->getMessage(), "\n";
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 
 for ($i = 1; $i < 16; $i++) {
@@ -33,13 +33,13 @@ for ($i = 1; $i < 16; $i++) {
 try {
     sodium_crypto_scalarmult(substr($n, 1), $p);
 } catch (SodiumException $ex) {
-    echo $ex->getMessage(), "\n";
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-sodium_crypto_scalarmult_ristretto255_base(): Argument #1 ($n) must not be zero
-Result is identity element
+SodiumException: sodium_crypto_scalarmult_ristretto255_base(): Argument #1 ($n) must not be zero
+SodiumException: Result is identity element
 string(64) "e2f2ae0a6abc4e71a884a961c500515f58e30b6aa582dd8db6a65945e08d2d76"
 string(64) "6a493210f7499cd17fecb510ae0cea23a110e8d5b901f8acadd3095c73a3b919"
 string(64) "94741f5d5d52755ece4f23f044ee27d5d1ea1e2bd196b462166b16152a9d0259"
@@ -55,4 +55,4 @@ string(64) "e4549ee16b9aa03099ca208c67adafcafa4c3f3e4e5303de6026e3ca8ff84460"
 string(64) "aa52e000df2e16f55fb1032fc33bc42742dad6bd5a8fc0be0167436c5948501f"
 string(64) "46376b80f409b29dc2b5f6f0c52591990896e5716f41477cd30085ab7f10301e"
 string(64) "e0c418f7c8d9c4cdd7395b93ea124f3ad99021bb681dfc3302a9d99a2e53e64e"
-sodium_crypto_scalarmult(): Argument #1 ($n) must be SODIUM_CRYPTO_SCALARMULT_SCALARBYTES bytes long
+SodiumException: sodium_crypto_scalarmult(): Argument #1 ($n) must be SODIUM_CRYPTO_SCALARMULT_SCALARBYTES bytes long

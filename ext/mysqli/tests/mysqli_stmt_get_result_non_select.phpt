@@ -15,14 +15,13 @@ require_once 'skipifconnectfailure.inc';
     */
     require 'table.inc';
 
-    if (!$stmt = mysqli_stmt_init($link))
-        printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
     if (mysqli_query($link, 'PREPARE mystmt FROM "SHOW ENGINES"')) {
         mysqli_query($link, 'DEALLOCATE PREPARE mystmt');
 
-        if (!$stmt->prepare('SHOW ENGINES') ||
-            !$stmt->execute())
+        if (!$stmt = mysqli_prepare($link, "SHOW ENGINES"))
+            printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+        if (!$stmt->execute())
             printf("[002] [%d] %s\n", $stmt->errno, $stmt->error);
 
         if (!$res = $stmt->get_result())
@@ -48,8 +47,10 @@ require_once 'skipifconnectfailure.inc';
     if (mysqli_query($link, 'PREPARE mystmt FROM "DESCRIBE test id"')) {
         mysqli_query($link, 'DEALLOCATE PREPARE mystmt');
 
-        if (!$stmt->prepare('DESCRIBE test id') ||
-            !$stmt->execute())
+        if (!$stmt = mysqli_prepare($link, "DESCRIBE test id"))
+            printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+        if (!mysqli_stmt_execute($stmt))
             printf("[006] [%d] %s\n", $stmt->errno, $stmt->error);
 
         if (!$res = $stmt->get_result())
@@ -67,8 +68,10 @@ require_once 'skipifconnectfailure.inc';
     if (mysqli_query($link, 'PREPARE mystmt FROM "EXPLAIN SELECT id FROM test"')) {
         mysqli_query($link, 'DEALLOCATE PREPARE mystmt');
 
-        if (!$stmt->prepare('EXPLAIN SELECT id FROM test') ||
-            !$stmt->execute())
+        if (!$stmt = mysqli_prepare($link, "EXPLAIN SELECT id FROM test"))
+            printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+        if (!$stmt->execute())
             printf("[009] [%d] %s\n", $stmt->errno, $stmt->error);
 
         if (!$res = $stmt->get_result())

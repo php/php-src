@@ -10,7 +10,7 @@ pcntl_signal(SIGTERM, function ($signo) {});
 try {
 	$a = [1, posix_kill(posix_getpid(), SIGTERM), 2];
 } catch (Throwable $ex) {
-	echo get_class($ex) , " : " , $ex->getMessage() , "\n";
+	echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 var_dump($a);
 ?>

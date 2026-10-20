@@ -1,5 +1,5 @@
 --TEST--
-dom: Bug #79968 - Crash when calling before without valid hierachy
+dom: Bug #79968 - Crash when calling before without valid hierarchy
 --EXTENSIONS--
 dom
 --FILE--

@@ -28,7 +28,6 @@ HEADER
 ?>
 --EXPECTF--
 HTTP/1.1 401 Unauthorized
-Host: %s
 Date: %s
 Connection: close
 X-Powered-By: PHP/%s

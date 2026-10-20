@@ -44,8 +44,6 @@ require_once 'skipifconnectfailure.inc';
 
     var_dump($id);
     mysqli_stmt_close($stmt);
-    if (!$stmt = mysqli_stmt_init($link))
-        printf("[010] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
     if (!mysqli_query($link, "DROP TABLE IF EXISTS test"))
         printf("[011] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -53,8 +51,8 @@ require_once 'skipifconnectfailure.inc';
     if (!mysqli_query($link, "CREATE TABLE test(id INT NOT NULL AUTO_INCREMENT, label BLOB, PRIMARY KEY(id))"))
         printf("[012] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-    if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(label) VALUES (?)"))
-        printf("[013] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+    if (!($stmt = mysqli_prepare($link, "INSERT INTO test(label) VALUES (?)")))
+        printf("[013] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
     $label = null;
     if (!mysqli_stmt_bind_param($stmt, "b", $label))
@@ -98,7 +96,8 @@ require_once 'skipifconnectfailure.inc';
 <?php
     require_once 'clean_table.inc';
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mysqli_stmt_init() is deprecated since 8.6, use mysqli_prepare() instead in %s on line %d
 mysqli_stmt object is not fully initialized
 int(1)
 mysqli_stmt object is already closed

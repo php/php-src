@@ -15,8 +15,8 @@ try {
 	// which is not supposed to happen
 	var_dump(imagesx($im));
 } catch (\ValueError $e) {
-	echo $e->getMessage();
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECTF--
-imagescale(): Argument #2 ($width) must be between 1 and %d
+ValueError: imagescale(): Argument #2 ($width) must be between 1 and %d

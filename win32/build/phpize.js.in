@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Pierre Joye <pierre1@php.net>                                |
   +----------------------------------------------------------------------+
@@ -17,6 +15,7 @@
 // This generates a configure script for win32 build
 
 var STDOUT = WScript.StdOut;
+var STDERR = WScript.StdErr;
 
 var FSO = WScript.CreateObject("Scripting.FileSystemObject");
 var C = FSO.CreateTextFile("configure.js", true);
@@ -202,6 +201,13 @@ function buildconf_process_args()
 if (buildconf_process_args() == 0) {
 	WScript.Quit(3);
 }
+
+if (!FSO.FileExists("config.w32")) {
+	STDERR.WriteLine("Cannot find config.w32");
+	STDERR.WriteLine("Must be run from the root of the extension source");
+	WScript.Quit(10);
+}
+
 STDOUT.WriteLine("Rebuilding configure.js");
 STDOUT.WriteLine(PHP_DIR);
 

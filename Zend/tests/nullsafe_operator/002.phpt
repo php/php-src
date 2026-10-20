@@ -6,37 +6,37 @@ Test nullsafe strict type check
 try {
     false?->bar();
 } catch (Throwable $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     []?->bar();
 } catch (Throwable $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     (0)?->bar();
 } catch (Throwable $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     (0.0)?->bar();
 } catch (Throwable $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     ''?->bar();
 } catch (Throwable $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-string(40) "Call to a member function bar() on false"
-string(40) "Call to a member function bar() on array"
-string(38) "Call to a member function bar() on int"
-string(40) "Call to a member function bar() on float"
-string(41) "Call to a member function bar() on string"
+Error: Call to a member function bar() on false
+Error: Call to a member function bar() on array
+Error: Call to a member function bar() on int
+Error: Call to a member function bar() on float
+Error: Call to a member function bar() on string

@@ -35,48 +35,409 @@ output_handler=
         do_tests( $enc, 'x' );
     }
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_regex_set_options() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_init() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (EUC-JP) (10) ¡¦¢Ï
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_init() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (EUC-JP) (5) abcde
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (EUC-JP) (14) abdeabcf
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (EUC-JP) (22) abc
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (EUC-JP) (31) abcd
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_init() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (EUC-JP) (5) ¢Ï¡¦
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (EUC-JP) (10) ¡¦¢Ï
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_init() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (EUC-JP) (5) abcde
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (EUC-JP) (14) abdeabcf
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (EUC-JP) (22) abc
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (EUC-JP) (31) abcd
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_init() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (Shift_JIS) (10) ¡¦¢Ï
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_init() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (Shift_JIS) (5) abcde
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (Shift_JIS) (14) abdeabcf
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (Shift_JIS) (22) abc
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (Shift_JIS) (31) abcd
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_init() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (Shift_JIS) (5) ¢Ï¡¦
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (Shift_JIS) (10) ¡¦¢Ï
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_init() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (Shift_JIS) (5) abcde
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (Shift_JIS) (14) abdeabcf
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (Shift_JIS) (22) abc
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (Shift_JIS) (31) abcd
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_init() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (SJIS) (10) ¡¦¢Ï
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_init() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (SJIS) (5) abcde
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (SJIS) (14) abdeabcf
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (SJIS) (22) abc
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (SJIS) (31) abcd
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_init() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (SJIS) (5) ¢Ï¡¦
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (SJIS) (10) ¡¦¢Ï
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_init() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (SJIS) (5) abcde
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (SJIS) (14) abdeabcf
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (SJIS) (22) abc
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (SJIS) (31) abcd
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_init() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (UTF-8) (14) ¡¦¢Ï
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_init() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (UTF-8) (5) abcde
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (UTF-8) (14) abdeabcf
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (UTF-8) (22) abc
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (UTF-8) (31) abcd
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_init() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (UTF-8) (7) ¢Ï¡¦
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (UTF-8) (14) ¡¦¢Ï
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_init() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (UTF-8) (5) abcde
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (UTF-8) (14) abdeabcf
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (UTF-8) (22) abc
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
+
+Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d
 (UTF-8) (31) abcd
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s line %d

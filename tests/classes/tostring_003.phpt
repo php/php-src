@@ -24,11 +24,11 @@ try
 }
 catch(Exception $e)
 {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 ====DONE====
 --EXPECT--
-string(5) "Damn!"
+Exception: Damn!
 ====DONE====

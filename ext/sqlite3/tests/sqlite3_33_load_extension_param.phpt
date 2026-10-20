@@ -21,9 +21,9 @@ $db = new SQLite3(':memory:');
 try {
   $db->loadExtension("");
 } catch (\Throwable $ex) {
-  var_dump($ex->getMessage());
+  echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 
 ?>
 --EXPECTF--
-string(63) "SQLite3::loadExtension(): Argument #1 ($name) must not be empty"
+ValueError: SQLite3::loadExtension(): Argument #1 ($name) must not be empty

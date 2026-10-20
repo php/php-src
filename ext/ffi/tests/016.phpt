@@ -10,19 +10,19 @@ try {
     FFI::cdef("struct X {void x();};");
     echo "ok\n";
 } catch (Throwable $e) {
-    echo get_class($e) . ": " . $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     FFI::cdef("struct X {struct X x;};");
     echo "ok\n";
 } catch (Throwable $e) {
-    echo get_class($e) . ": " . $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     FFI::cdef("struct X {struct X *ptr;};");
     echo "ok\n";
 } catch (Throwable $e) {
-    echo get_class($e) . ": " . $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 ok

@@ -65,7 +65,7 @@ function normalizeOutput(string $out): string {
     $out = preg_replace('/in (\/|[A-Z]:\\\\)\S+ on line \d+/m', 'in %s on line %d', $out);
     $out = preg_replace('/in (\/|[A-Z]:\\\\)\S+:\d+/m', 'in %s:%d', $out);
     $out = preg_replace('/\{closure:(\/|[A-Z]:\\\\)\S+:\d+\}/', '{closure:%s:%d}', $out);
-    $out = preg_replace('/object\(([A-Za-z0-9]*)\)#\d+/', 'object($1)#%d', $out);
+    $out = preg_replace('/object\(([A-Za-z0-9\\\\]*)\)#\d+/', 'object($1)#%d', $out);
     $out = preg_replace('/^#(\d+) (\/|[A-Z]:\\\\)\S+\(\d+\):/m', '#$1 %s(%d):', $out);
     $out = preg_replace('/Resource id #\d+/', 'Resource id #%d', $out);
     $out = preg_replace('/resource\(\d+\) of type/', 'resource(%d) of type', $out);
@@ -74,7 +74,14 @@ function normalizeOutput(string $out): string {
         'Resource ID#%d used as offset, casting to integer (%d)',
         $out);
     $out = preg_replace('/string\(\d+\) "([^"]*%d)/', 'string(%d) "$1', $out);
+    // Inside of strings, replace absolute paths that have been truncated with
+    // any string. These tend to contain homedirs with usernames, not good.
+    $out = preg_replace("/'(\/|[A-Z]:\\\\)\S+\\.\\.\\.'/", "'%s'", $out);
+    $out = preg_replace("/'file:(\/|[A-Z]:\\\\)\S+\\.\\.\\.'/", "'%s'", $out);
     $out = str_replace("\0", '%0', $out);
+    $out = preg_replace('(; .*\.php:\d+-\d+)', '; %s.php:%s', $out);
+    $out = preg_replace('(; \(lines=(\d+), args=(\d+), vars=(\d+), tmps=\d+\))', '; (lines=$1, args=$2, vars=$3, tmps=%d)', $out);
+    $out = preg_replace('((\d{4,}) (INIT_FCALL) (\d+) (\d+))', '$1 $2 $3 %d', $out);
     return $out;
 }
 
@@ -124,7 +131,7 @@ function insertOutput(string $phpt, string $out): string {
 }
 
 /**
- * Implementation of the the Myers diff algorithm.
+ * Implementation of the Myers diff algorithm.
  *
  * Myers, Eugene W. "An O (ND) difference algorithm and its variations."
  * Algorithmica 1.1 (1986): 251-266.

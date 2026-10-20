@@ -3,7 +3,7 @@ rewriter handles form and fieldset tags correctly
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --INI--
 session.use_cookies=0
 session.use_only_cookies=0

@@ -29,7 +29,7 @@ Warning: dba_open(): Driver initialization failed for handler: tcadb in %s on li
 Opening DB failed
 Mode parameter is "rd":
 
-Warning: dba_open(tcadb_not_existing.tch): Failed to open stream: No such file or directory in %s on line %d
+Warning: dba_open(): Failed to open stream: No such file or directory in %s on line %d
 Opening DB failed
 Mode parameter is "r-":
 
@@ -37,7 +37,7 @@ Warning: dba_open(): Driver initialization failed for handler: tcadb in %s on li
 Opening DB failed
 Mode parameter is "r":
 
-Warning: dba_open(tcadb_not_existing.tch): Failed to open stream: No such file or directory in %s on line %d
+Warning: dba_open(): Failed to open stream: No such file or directory in %s on line %d
 Opening DB failed
 Mode parameter is "wl":
 
@@ -45,7 +45,7 @@ Warning: dba_open(): Driver initialization failed for handler: tcadb in %s on li
 Opening DB failed
 Mode parameter is "wd":
 
-Warning: dba_open(tcadb_not_existing.tch): Failed to open stream: No such file or directory in %s on line %d
+Warning: dba_open(): Failed to open stream: No such file or directory in %s on line %d
 Opening DB failed
 Mode parameter is "w-":
 
@@ -53,7 +53,7 @@ Warning: dba_open(): Driver initialization failed for handler: tcadb in %s on li
 Opening DB failed
 Mode parameter is "w":
 
-Warning: dba_open(tcadb_not_existing.tch): Failed to open stream: No such file or directory in %s on line %d
+Warning: dba_open(): Failed to open stream: No such file or directory in %s on line %d
 Opening DB failed
 Mode parameter is "cl":
 This is a test insert

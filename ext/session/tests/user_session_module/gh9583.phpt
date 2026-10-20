@@ -5,6 +5,8 @@ session
 --FILE--
 <?php
 
+ob_start();
+
 class SessionHandlerTester implements \SessionHandlerInterface
 {
 
@@ -38,6 +40,14 @@ echo "\n";
 
 ?>
 --EXPECTF--
+Warning: Class SessionHandlerTester implementing SessionHandlerInterface is missing the create_sid() method which will be required in PHP 9.0 in %s on line %d
+
+Warning: Class SessionHandlerTester implementing SessionHandlerInterface is missing the validateId() method which will be required in PHP 9.0 in %s on line %d
+
+Deprecated: session_set_save_handler(): Providing an object to argument #1 ($sessionhandler) which does not have the create_sid() method defined is deprecated in %s on line %d
+
+Deprecated: session_set_save_handler(): Providing an object to argument #1 ($sessionhandler) which does not have the validateId() method defined is deprecated in %s on line %d
+
 validateId() is commented out
 
 Session ID:%s

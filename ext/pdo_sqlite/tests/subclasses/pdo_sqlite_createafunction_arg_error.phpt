@@ -18,32 +18,32 @@ class TrampolineTest {
 try {
     $db->createFunction(null, [new TrampolineTest(), 'strtoupper']);
 } catch (Throwable $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $db->createFunction('strtoupper', null);
 } catch (Throwable $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $db->createFunction('strtoupper', [new TrampolineTest(), 'strtoupper'], null);
 } catch (Throwable $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $db->createFunction('strtoupper', [new TrampolineTest(), 'strtoupper'], 1, null);
 } catch (Throwable $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo 'done!';
 ?>
 --EXPECT--
-Pdo\Sqlite::createFunction(): Argument #1 ($function_name) must be of type string, null given
-Pdo\Sqlite::createFunction(): Argument #2 ($callback) must be a valid callback, no array or string given
-Pdo\Sqlite::createFunction(): Argument #3 ($num_args) must be of type int, null given
-Pdo\Sqlite::createFunction(): Argument #4 ($flags) must be of type int, null given
+TypeError: Pdo\Sqlite::createFunction(): Argument #1 ($function_name) must be of type string, null given
+TypeError: Pdo\Sqlite::createFunction(): Argument #2 ($callback) must be a valid callback, no array or string given
+TypeError: Pdo\Sqlite::createFunction(): Argument #3 ($num_args) must be of type int, null given
+TypeError: Pdo\Sqlite::createFunction(): Argument #4 ($flags) must be of type int, null given
 done!

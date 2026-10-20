@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Pierre A. Joye <pierre@php.net>                             |
    +----------------------------------------------------------------------+
@@ -22,23 +20,6 @@
 #include <Ws2tcpip.h>
 
 #include "php_dns.h"
-
-#define PHP_DNS_NUM_TYPES	12	/* Number of DNS Types Supported by PHP currently */
-
-#define PHP_DNS_A      0x00000001
-#define PHP_DNS_NS     0x00000002
-#define PHP_DNS_CNAME  0x00000010
-#define PHP_DNS_SOA    0x00000020
-#define PHP_DNS_PTR    0x00000800
-#define PHP_DNS_HINFO  0x00001000
-#define PHP_DNS_MX     0x00004000
-#define PHP_DNS_TXT    0x00008000
-#define PHP_DNS_A6     0x01000000
-#define PHP_DNS_SRV    0x02000000
-#define PHP_DNS_NAPTR  0x04000000
-#define PHP_DNS_AAAA   0x08000000
-#define PHP_DNS_ANY    0x10000000
-#define PHP_DNS_ALL    (PHP_DNS_A|PHP_DNS_NS|PHP_DNS_CNAME|PHP_DNS_SOA|PHP_DNS_PTR|PHP_DNS_HINFO|PHP_DNS_MX|PHP_DNS_TXT|PHP_DNS_A6|PHP_DNS_SRV|PHP_DNS_NAPTR|PHP_DNS_AAAA)
 
 PHP_FUNCTION(dns_get_mx) /* {{{ */
 {
@@ -133,11 +114,7 @@ PHP_FUNCTION(dns_check_record)
 
 	status = DnsQuery_A(hostname, type, DNS_QUERY_STANDARD, NULL, &pResult, NULL);
 
-	if (status) {
-		RETURN_FALSE;
-	}
-
-	RETURN_TRUE;
+	RETURN_BOOL(!status);
 }
 /* }}} */
 
@@ -277,7 +254,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, bool raw
 
 				for(i=0; i < 8; i++) {
 					if (out[i] != 0) {
-						if (tp > (uint8_t *)buf) {
+						if (tp > buf) {
 							in_v6_break = 0;
 							tp[0] = ':';
 							tp++;
@@ -358,7 +335,7 @@ PHP_FUNCTION(dns_get_record)
 	zend_long type_param = PHP_DNS_ANY;
 	zval *authns = NULL, *addtl = NULL;
 	int type, type_to_fetch, first_query = 1, store_results = 1;
-	bool raw = 0;
+	bool raw = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|lz!z!b",
 			&hostname, &hostname_len, &type_param, &authns, &addtl, &raw) == FAILURE) {

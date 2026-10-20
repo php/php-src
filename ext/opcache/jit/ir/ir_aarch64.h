@@ -1,7 +1,7 @@
 /*
  * IR - Lightweight JIT Compilation Framework
  * (Aarch64 CPU specific definitions)
- * Copyright (C) 2022 Zend by Perforce.
+ * This file is part of the IR Project distributed under the MIT-style LICENSE.
  * Authors: Dmitry Stogov <dmitry@php.net>
  */
 
@@ -43,43 +43,43 @@
 	_(X31,  x31,  w31) \
 
 # define IR_FP_REGS(_) \
-	_(V0,   d0,   s0,   h0,   b0) \
-	_(V1,   d1,   s1,   h1,   b1) \
-	_(V2,   d2,   s2,   h2,   b2) \
-	_(V3,   d3,   s3,   h3,   b3) \
-	_(V4,   d4,   s4,   h4,   b4) \
-	_(V5,   d5,   s5,   h5,   b5) \
-	_(V6,   d6,   s6,   h6,   b6) \
-	_(V7,   d7,   s7,   h7,   b7) \
-	_(V8,   d8,   s8,   h8,   b8) \
-	_(V9,   d9,   s9,   h9,   b9) \
-	_(V10,  d10,  s10,  h10,  b10) \
-	_(V11,  d11,  s11,  h11,  b11) \
-	_(V12,  d12,  s12,  h12,  b12) \
-	_(V13,  d13,  s13,  h13,  b13) \
-	_(V14,  d14,  s14,  h14,  b14) \
-	_(V15,  d15,  s15,  h15,  b15) \
-	_(V16,  d16,  s16,  h16,  b16) \
-	_(V17,  d17,  s17,  h17,  b17) \
-	_(V18,  d18,  s18,  h18,  b18) \
-	_(V19,  d19,  s19,  h19,  b19) \
-	_(V20,  d20,  s20,  h20,  b20) \
-	_(V21,  d21,  s21,  h21,  b21) \
-	_(V22,  d22,  s22,  h22,  b22) \
-	_(V23,  d23,  s23,  h23,  b23) \
-	_(V24,  d24,  s24,  h24,  b24) \
-	_(V25,  d25,  s25,  h25,  b25) \
-	_(V26,  d26,  s26,  h26,  b26) \
-	_(V27,  d27,  s27,  h27,  b27) \
-	_(V28,  d28,  s28,  h28,  b28) \
-	_(V29,  d29,  s29,  h29,  b29) \
-	_(V30,  d30,  s30,  h30,  b30) \
-	_(V31,  d31,  s31,  h31,  b31) \
+	_(V0,   d0,   s0,   h0,   b0,   v0) \
+	_(V1,   d1,   s1,   h1,   b1,   v1) \
+	_(V2,   d2,   s2,   h2,   b2,   v2) \
+	_(V3,   d3,   s3,   h3,   b3,   v3) \
+	_(V4,   d4,   s4,   h4,   b4,   v4) \
+	_(V5,   d5,   s5,   h5,   b5,   v5) \
+	_(V6,   d6,   s6,   h6,   b6,   v6) \
+	_(V7,   d7,   s7,   h7,   b7,   v7) \
+	_(V8,   d8,   s8,   h8,   b8,   v8) \
+	_(V9,   d9,   s9,   h9,   b9,   v9) \
+	_(V10,  d10,  s10,  h10,  b10,  v10) \
+	_(V11,  d11,  s11,  h11,  b11,  v11) \
+	_(V12,  d12,  s12,  h12,  b12,  v12) \
+	_(V13,  d13,  s13,  h13,  b13,  v13) \
+	_(V14,  d14,  s14,  h14,  b14,  v14) \
+	_(V15,  d15,  s15,  h15,  b15,  v15) \
+	_(V16,  d16,  s16,  h16,  b16,  v16) \
+	_(V17,  d17,  s17,  h17,  b17,  v17) \
+	_(V18,  d18,  s18,  h18,  b18,  v18) \
+	_(V19,  d19,  s19,  h19,  b19,  v19) \
+	_(V20,  d20,  s20,  h20,  b20,  v20) \
+	_(V21,  d21,  s21,  h21,  b21,  v21) \
+	_(V22,  d22,  s22,  h22,  b22,  v22) \
+	_(V23,  d23,  s23,  h23,  b23,  v23) \
+	_(V24,  d24,  s24,  h24,  b24,  v24) \
+	_(V25,  d25,  s25,  h25,  b25,  v25) \
+	_(V26,  d26,  s26,  h26,  b26,  v26) \
+	_(V27,  d27,  s27,  h27,  b27,  v27) \
+	_(V28,  d28,  s28,  h28,  b28,  v28) \
+	_(V29,  d29,  s29,  h29,  b29,  v29) \
+	_(V30,  d30,  s30,  h30,  b30,  v30) \
+	_(V31,  d31,  s31,  h31,  b31,  v31) \
 
 #define IR_GP_REG_ENUM(code, name64, name32) \
 	IR_REG_ ## code,
 
-#define IR_FP_REG_ENUM(code, name64, name32, name16, name8) \
+#define IR_FP_REG_ENUM(code, name64, name32, name16, name8, name_vec) \
 	IR_REG_ ## code,
 
 enum _ir_reg {

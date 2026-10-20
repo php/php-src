@@ -54,7 +54,7 @@ echo "Count throws an exception:\n";
 try {
     echo count(new throwException);
 } catch (Exception $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -70,4 +70,4 @@ int(1)
 Count returns an array:
 int(1)
 Count throws an exception:
-Thrown from count
+Exception: Thrown from count

@@ -24,8 +24,6 @@ echo curl_getinfo($ch, CURLINFO_HEADER_OUT);
 curl_setopt($ch, CURLOPT_ACCEPT_ENCODING, NULL);
 curl_exec($ch);
 echo curl_getinfo($ch, CURLINFO_HEADER_OUT);
-
-curl_close($ch);
 ?>
 --EXPECTF--
 GET /get.inc?test= HTTP/1.1

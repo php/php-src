@@ -8,7 +8,7 @@ session.save_handler=files
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --COOKIE--
 PHPSESSID=bug72940test
 --GET--
@@ -34,12 +34,12 @@ session_destroy();
 --EXPECTF--
 Deprecated: ini_set(): Disabling session.use_only_cookies INI setting is deprecated in %s on line 6
 
-Deprecated: Constant SID is deprecated in %s on line 8
+Deprecated: Constant SID is deprecated since 8.4, as GET/POST sessions were deprecated in %s on line %d
 string(12) "bug72940test"
 string(0) ""
 
 Deprecated: ini_set(): Disabling session.use_only_cookies INI setting is deprecated in %s on line 13
 
-Deprecated: Constant SID is deprecated in %s on line 15
+Deprecated: Constant SID is deprecated since 8.4, as GET/POST sessions were deprecated in %s on line %d
 string(11) "bug72940get"
 string(21) "PHPSESSID=bug72940get"

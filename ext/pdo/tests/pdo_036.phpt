@@ -17,7 +17,7 @@ try {
     $x->queryString = "SELECT 2";
     var_dump($x);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $instance = new reflectionclass('pdorow');
@@ -34,7 +34,7 @@ object(PDOStatement)#2 (1) {
   ["queryString"]=>
   string(8) "SELECT 1"
 }
-Property queryString is read only
+Error: Property queryString is read only
 
 Fatal error: Uncaught PDOException: You may not create a PDORow manually in %spdo_036.php:%d
 Stack trace:

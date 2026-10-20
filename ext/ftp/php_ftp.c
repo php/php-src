@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andrew Skalski <askalski@chek.com>                          |
    |          Stefan Esser <sesser@php.net> (resume functions)            |
@@ -29,7 +27,6 @@
 
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
-#include "Zend/zend_attributes.h"
 #include "Zend/zend_exceptions.h"
 
 #include "php_ftp.h"
@@ -42,9 +39,7 @@ static zend_class_entry *php_ftp_ce = NULL;
 static zend_object_handlers ftp_object_handlers;
 
 zend_module_entry php_ftp_module_entry = {
-	STANDARD_MODULE_HEADER_EX,
-	NULL,
-	NULL,
+	STANDARD_MODULE_HEADER,
 	"ftp",
 	ext_functions,
 	PHP_MINIT(ftp),
@@ -105,7 +100,7 @@ PHP_MINIT_FUNCTION(ftp)
 	php_ftp_ce->create_object = ftp_object_create;
 
 	memcpy(&ftp_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	ftp_object_handlers.offset = XtOffsetOf(php_ftp_object, std);
+	ftp_object_handlers.offset = offsetof(php_ftp_object, std);
 	ftp_object_handlers.get_constructor = ftp_object_get_constructor;
 	ftp_object_handlers.free_obj = ftp_object_destroy;
 	ftp_object_handlers.clone_obj = NULL;
@@ -169,7 +164,7 @@ PHP_FUNCTION(ftp_connect)
 	ftp->usepasvaddress = FTP_DEFAULT_USEPASVADDRESS;
 #ifdef HAVE_FTP_SSL
 	/* disable ssl */
-	ftp->use_ssl = 0;
+	ftp->use_ssl = false;
 #endif
 
 	object_init_ex(return_value, php_ftp_ce);
@@ -210,7 +205,7 @@ PHP_FUNCTION(ftp_ssl_connect)
 	ftp->autoseek = FTP_DEFAULT_AUTOSEEK;
 	ftp->usepasvaddress = FTP_DEFAULT_USEPASVADDRESS;
 	/* enable ssl */
-	ftp->use_ssl = 1;
+	ftp->use_ssl = true;
 
 	object_init_ex(return_value, php_ftp_ce);
 	ftp_object_from_zend_object(Z_OBJ_P(return_value))->ftp = ftp;
@@ -402,7 +397,7 @@ PHP_FUNCTION(ftp_rmdir)
 	}
 	GET_FTPBUF(ftp, z_ftp);
 
-	/* remove directorie */
+	/* remove directories */
 	if (!ftp_rmdir(ftp, dir, dir_len)) {
 		if (*ftp->inbuf) {
 			php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
@@ -444,7 +439,7 @@ PHP_FUNCTION(ftp_alloc)
 {
 	zval		*z_ftp, *zresponse = NULL;
 	ftpbuf_t	*ftp;
-	zend_long		size, ret;
+	zend_long		size;
 	zend_string	*response = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ol|z", &z_ftp, php_ftp_ce, &size, &zresponse) == FAILURE) {
@@ -452,17 +447,13 @@ PHP_FUNCTION(ftp_alloc)
 	}
 	GET_FTPBUF(ftp, z_ftp);
 
-	ret = ftp_alloc(ftp, size, zresponse ? &response : NULL);
+	bool ret = ftp_alloc(ftp, size, zresponse ? &response : NULL);
 
 	if (response) {
 		ZEND_TRY_ASSIGN_REF_STR(zresponse, response);
 	}
 
-	if (!ret) {
-		RETURN_FALSE;
-	}
-
-	RETURN_TRUE;
+	RETURN_BOOL(ret);
 }
 /* }}} */
 
@@ -499,7 +490,7 @@ PHP_FUNCTION(ftp_rawlist)
 	ftpbuf_t	*ftp;
 	char		**llist, **ptr, *dir;
 	size_t		dir_len;
-	bool	recursive = 0;
+	bool	recursive = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os|b", &z_ftp, php_ftp_ce, &dir, &dir_len, &recursive) == FAILURE) {
 		RETURN_THROWS();
@@ -578,7 +569,7 @@ PHP_FUNCTION(ftp_systype)
 /* {{{ Retrieves a file from the FTP server and writes it to an open file */
 PHP_FUNCTION(ftp_fget)
 {
-	zval		*z_ftp, *z_file;
+	zval		*z_ftp;
 	ftpbuf_t	*ftp;
 	ftptype_t	xtype;
 	php_stream	*stream;
@@ -586,11 +577,16 @@ PHP_FUNCTION(ftp_fget)
 	size_t		file_len;
 	zend_long		mode=FTPTYPE_IMAGE, resumepos=0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ors|ll", &z_ftp, php_ftp_ce, &z_file, &file, &file_len, &mode, &resumepos) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 5)
+		Z_PARAM_OBJECT_OF_CLASS(z_ftp, php_ftp_ce)
+		PHP_Z_PARAM_STREAM(stream)
+		Z_PARAM_STRING(file, file_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(mode)
+		Z_PARAM_LONG(resumepos)
+	ZEND_PARSE_PARAMETERS_END();
+
 	GET_FTPBUF(ftp, z_ftp);
-	php_stream_from_res(stream, Z_RES_P(z_file));
 	XTYPE(xtype, mode);
 
 	/* ignore autoresume if autoseek is switched off */
@@ -619,10 +615,10 @@ PHP_FUNCTION(ftp_fget)
 }
 /* }}} */
 
-/* {{{ Retrieves a file from the FTP server asynchronly and writes it to an open file */
+/* {{{ Retrieves a file from the FTP server asynchronously and writes it to an open file */
 PHP_FUNCTION(ftp_nb_fget)
 {
-	zval		*z_ftp, *z_file;
+	zval		*z_ftp;
 	ftpbuf_t	*ftp;
 	ftptype_t	xtype;
 	php_stream	*stream;
@@ -630,11 +626,16 @@ PHP_FUNCTION(ftp_nb_fget)
 	size_t		file_len;
 	zend_long		mode=FTPTYPE_IMAGE, resumepos=0, ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ors|ll", &z_ftp, php_ftp_ce, &z_file, &file, &file_len, &mode, &resumepos) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 5)
+		Z_PARAM_OBJECT_OF_CLASS(z_ftp, php_ftp_ce)
+		PHP_Z_PARAM_STREAM(stream)
+		Z_PARAM_STRING(file, file_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(mode)
+		Z_PARAM_LONG(resumepos)
+	ZEND_PARSE_PARAMETERS_END();
+
 	GET_FTPBUF(ftp, z_ftp);
-	php_stream_from_res(stream, Z_RES_P(z_file));
 	XTYPE(xtype, mode);
 
 	/* ignore autoresume if autoseek is switched off */
@@ -654,8 +655,8 @@ PHP_FUNCTION(ftp_nb_fget)
 
 	/* configuration */
 	if (ftp->in_use) {
-		php_error_docref(NULL, E_WARNING, "FTP\\Connection is already in use");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Cannot start a transfer while another transfer is in progress");
+		RETURN_THROWS();
 	}
 
 	ftp->direction = 0;   /* recv */
@@ -684,11 +685,8 @@ PHP_FUNCTION(ftp_pasv)
 	}
 	GET_FTPBUF(ftp, z_ftp);
 
-	if (!ftp_pasv(ftp, pasv ? 1 : 0)) {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(ftp_pasv(ftp, pasv ? 1 : 0));
 
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -772,8 +770,8 @@ PHP_FUNCTION(ftp_nb_get)
 	}
 	GET_FTPBUF(ftp, z_ftp);
 	if (ftp->in_use) {
-		php_error_docref(NULL, E_WARNING, "FTP\\Connection is already in use");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Cannot start a transfer while another transfer is in progress");
+		RETURN_THROWS();
 	}
 	XTYPE(xtype, mode);
 
@@ -808,8 +806,8 @@ PHP_FUNCTION(ftp_nb_get)
 	}
 
 	/* configuration */
-	ftp->direction = 0;   /* recv */
-	ftp->closestream = 1; /* do close */
+	ftp->direction = false;   /* recv */
+	ftp->closestream = true; /* do close */
 
 	if ((ret = ftp_nb_get(ftp, outstream, remote, remote_len, xtype, resumepos)) == PHP_FTP_FAILED) {
 		ftp->stream = NULL;
@@ -869,7 +867,7 @@ PHP_FUNCTION(ftp_nb_continue)
 /* {{{ Stores a file from an open file to the FTP server */
 PHP_FUNCTION(ftp_fput)
 {
-	zval		*z_ftp, *z_file;
+	zval		*z_ftp;
 	ftpbuf_t	*ftp;
 	ftptype_t	xtype;
 	size_t		remote_len;
@@ -877,11 +875,16 @@ PHP_FUNCTION(ftp_fput)
 	php_stream	*stream;
 	char		*remote;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Osr|ll", &z_ftp, php_ftp_ce, &remote, &remote_len, &z_file, &mode, &startpos) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 5)
+		Z_PARAM_OBJECT_OF_CLASS(z_ftp, php_ftp_ce)
+		Z_PARAM_STRING(remote, remote_len)
+		PHP_Z_PARAM_STREAM(stream)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(mode)
+		Z_PARAM_LONG(startpos)
+	ZEND_PARSE_PARAMETERS_END();
+
 	GET_FTPBUF(ftp, z_ftp);
-	php_stream_from_zval(stream, z_file);
 	XTYPE(xtype, mode);
 
 	/* ignore autoresume if autoseek is switched off */
@@ -916,7 +919,7 @@ PHP_FUNCTION(ftp_fput)
 /* {{{ Stores a file from an open file to the FTP server nbronly */
 PHP_FUNCTION(ftp_nb_fput)
 {
-	zval		*z_ftp, *z_file;
+	zval		*z_ftp;
 	ftpbuf_t	*ftp;
 	ftptype_t	xtype;
 	size_t		remote_len;
@@ -925,11 +928,16 @@ PHP_FUNCTION(ftp_nb_fput)
 	php_stream	*stream;
 	char		*remote;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Osr|ll", &z_ftp, php_ftp_ce, &remote, &remote_len, &z_file, &mode, &startpos) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 5)
+		Z_PARAM_OBJECT_OF_CLASS(z_ftp, php_ftp_ce)
+		Z_PARAM_STRING(remote, remote_len)
+		PHP_Z_PARAM_STREAM(stream)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(mode)
+		Z_PARAM_LONG(startpos)
+	ZEND_PARSE_PARAMETERS_END();
+
 	GET_FTPBUF(ftp, z_ftp);
-	php_stream_from_res(stream, Z_RES_P(z_file));
 	XTYPE(xtype, mode);
 
 	/* ignore autoresume if autoseek is switched off */
@@ -952,12 +960,12 @@ PHP_FUNCTION(ftp_nb_fput)
 
 	/* configuration */
 	if (ftp->in_use) {
-		php_error_docref(NULL, E_WARNING, "FTP\\Connection is already in use");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Cannot start a transfer while another transfer is in progress");
+		RETURN_THROWS();
 	}
 
-	ftp->direction = 1;   /* send */
-	ftp->closestream = 0; /* do not close */
+	ftp->direction = true;   /* send */
+	ftp->closestream = false; /* do not close */
 
 	if (((ret = ftp_nb_put(ftp, remote, remote_len, stream, xtype, startpos)) == PHP_FTP_FAILED)) {
 		if (*ftp->inbuf) {
@@ -1098,13 +1106,13 @@ PHP_FUNCTION(ftp_nb_put)
 
 	if (ftp->in_use) {
 		php_stream_close(instream);
-		php_error_docref(NULL, E_WARNING, "FTP\\Connection is already in use");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Cannot start a transfer while another transfer is in progress");
+		RETURN_THROWS();
 	}
 
 	/* configuration */
-	ftp->direction = 1;   /* send */
-	ftp->closestream = 1; /* do close */
+	ftp->direction = true;   /* send */
+	ftp->closestream = true; /* do close */
 
 	ret = ftp_nb_put(ftp, remote, remote_len, instream, xtype, startpos);
 
@@ -1286,7 +1294,6 @@ PHP_FUNCTION(ftp_set_option)
 			}
 			ftp->timeout_sec = Z_LVAL_P(z_value);
 			RETURN_TRUE;
-			break;
 		case PHP_FTP_OPT_AUTOSEEK:
 			if (Z_TYPE_P(z_value) != IS_TRUE && Z_TYPE_P(z_value) != IS_FALSE) {
 				zend_argument_type_error(3, "must be of type bool for the FTP_AUTOSEEK option, %s given", zend_zval_value_name(z_value));
@@ -1294,7 +1301,6 @@ PHP_FUNCTION(ftp_set_option)
 			}
 			ftp->autoseek = Z_TYPE_P(z_value) == IS_TRUE ? 1 : 0;
 			RETURN_TRUE;
-			break;
 		case PHP_FTP_OPT_USEPASVADDRESS:
 			if (Z_TYPE_P(z_value) != IS_TRUE && Z_TYPE_P(z_value) != IS_FALSE) {
 				zend_argument_type_error(3, "must be of type bool for the FTP_USEPASVADDRESS option, %s given", zend_zval_value_name(z_value));
@@ -1302,11 +1308,9 @@ PHP_FUNCTION(ftp_set_option)
 			}
 			ftp->usepasvaddress = Z_TYPE_P(z_value) == IS_TRUE ? 1 : 0;
 			RETURN_TRUE;
-			break;
 		default:
 			zend_argument_value_error(2, "must be one of FTP_TIMEOUT_SEC, FTP_AUTOSEEK, or FTP_USEPASVADDRESS");
 			RETURN_THROWS();
-			break;
 	}
 }
 /* }}} */
@@ -1326,13 +1330,10 @@ PHP_FUNCTION(ftp_get_option)
 	switch (option) {
 		case PHP_FTP_OPT_TIMEOUT_SEC:
 			RETURN_LONG(ftp->timeout_sec);
-			break;
 		case PHP_FTP_OPT_AUTOSEEK:
 			RETURN_BOOL(ftp->autoseek);
-			break;
 		case PHP_FTP_OPT_USEPASVADDRESS:
 			RETURN_BOOL(ftp->usepasvaddress);
-			break;
 		default:
 			zend_argument_value_error(2, "must be one of FTP_TIMEOUT_SEC, FTP_AUTOSEEK, or FTP_USEPASVADDRESS");
 			RETURN_THROWS();

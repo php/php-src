@@ -32,8 +32,8 @@ function testError($dom, $namespaceURI, $qualifiedName)
     echo "($ns_readable, \"$qualifiedName\"): ";
     try {
         $dom->createElementNS($namespaceURI, $qualifiedName);
-    } catch (DOMException $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -89,8 +89,8 @@ namespaceURI: string(36) "http://www.w3.org/XML/1998/namespace"
 <xml>&amp;hello</xml>
 
 --- Error cases ---
-(NULL, "prefix:name"): Namespace Error
-("", "prefix:name"): Namespace Error
-("urn:foo", "@"): Invalid Character Error
-("http://www.w3.org/2000/xmlns/", "svg"): Namespace Error
-("urn:foo", "xml:xml"): Namespace Error
+(NULL, "prefix:name"): DOMException: Namespace Error
+("", "prefix:name"): DOMException: Namespace Error
+("urn:foo", "@"): DOMException: Invalid Character Error
+("http://www.w3.org/2000/xmlns/", "svg"): DOMException: Namespace Error
+("urn:foo", "xml:xml"): DOMException: Namespace Error

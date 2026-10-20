@@ -5,8 +5,6 @@ intl
 --FILE--
 <?php
 
-ini_set("intl.error_level", E_WARNING);
-
 var_dump(grapheme_strpos("😀x", ""));
 var_dump(grapheme_strpos("😀x", "", 0));
 var_dump(grapheme_strpos("😀x", "", 1));

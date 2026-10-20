@@ -5,7 +5,7 @@ ARG_WITH("iconv", "iconv support", "yes");
 if (PHP_ICONV != "no") {
 	if ((CHECK_LIB("libiconv_a.lib", "iconv", PHP_ICONV) || CHECK_LIB("libiconv.lib", "iconv", PHP_ICONV) ||
 			CHECK_LIB("iconv_a.lib", "iconv", PHP_ICONV) || CHECK_LIB("iconv.lib", "iconv", PHP_ICONV)) &&
-		CHECK_HEADER_ADD_INCLUDE("iconv.h", "CFLAGS_ICONV", PHP_ICONV)) {
+		CHECK_HEADER("iconv.h", "CFLAGS_ICONV", PHP_ICONV)) {
 
 		EXTENSION("iconv", "iconv.c", PHP_ICONV_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 

@@ -17,5 +17,12 @@ function show_outputa($prepend, $output) {
 show_outputa('Files: ', `cd .`); // this works as expected
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: The backtick (`) operator is deprecated, use shell_exec() instead in %s on line %d
+
+Deprecated: The backtick (`) operator is deprecated, use shell_exec() instead in %s on line %d
+
+Deprecated: The backtick (`) operator is deprecated, use shell_exec() instead in %s on line %d
+
+Deprecated: The backtick (`) operator is deprecated, use shell_exec() instead in %s on line %d
 Okey

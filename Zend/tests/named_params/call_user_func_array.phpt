@@ -17,13 +17,13 @@ namespace {
     call_user_func_array($test_variadic, ['A', 'c' => 'C']);
     try {
         call_user_func_array($test, ['d' => 'D']);
-    } catch (\Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         call_user_func_array($test, ['c' => 'C', 'A']);
-    } catch (\Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     echo "\n";
 }
@@ -35,13 +35,13 @@ namespace Foo {
     call_user_func_array($test_variadic, ['A', 'c' => 'C']);
     try {
         call_user_func_array($test, ['d' => 'D']);
-    } catch (\Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         call_user_func_array($test, ['c' => 'C', 'A']);
-    } catch (\Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -56,8 +56,8 @@ array(2) {
   ["c"]=>
   string(1) "C"
 }
-Unknown named parameter $d
-Cannot use positional argument after named argument
+Error: Unknown named parameter $d
+Error: Cannot use positional argument after named argument
 
 a = A, b = B, c = c
 a = A, b = B, c = c
@@ -68,5 +68,5 @@ array(2) {
   ["c"]=>
   string(1) "C"
 }
-Unknown named parameter $d
-Cannot use positional argument after named argument
+Error: Unknown named parameter $d
+Error: Cannot use positional argument after named argument

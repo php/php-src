@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: George Schlossnagle <george@omniti.com>                      |
   |         Johannes Schlueter <johannes@mysql.com>                      |
@@ -59,31 +57,6 @@ ZEND_DECLARE_MODULE_GLOBALS(pdo_mysql)
 # endif
 #endif
 
-#ifdef PDO_USE_MYSQLND
-#include "ext/mysqlnd/mysqlnd_reverse_api.h"
-static MYSQLND * pdo_mysql_convert_zv_to_mysqlnd(zval * zv)
-{
-	if (Z_TYPE_P(zv) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zv), php_pdo_get_dbh_ce())) {
-		pdo_dbh_t * dbh = Z_PDO_DBH_P(zv);
-
-		ZEND_ASSERT(dbh);
-
-		if (dbh->driver != &pdo_mysql_driver) {
-			php_error_docref(NULL, E_WARNING, "Provided PDO instance is not using MySQL but %s", dbh->driver->driver_name);
-			return NULL;
-		}
-
-		return ((pdo_mysql_db_handle *)dbh->driver_data)->server;
-	}
-	return NULL;
-}
-
-static const MYSQLND_REVERSE_API pdo_mysql_reverse_api = {
-	&pdo_mysql_module_entry,
-	pdo_mysql_convert_zv_to_mysqlnd
-};
-#endif
-
 /* Returns the number of SQL warnings during the execution of the last statement */
 PHP_METHOD(Pdo_Mysql, getWarningCount)
 {
@@ -112,41 +85,40 @@ PHP_INI_END()
 
 /* true global environment */
 
+#define REGISTER_PDO_MYSQL_CLASS_CONST_LONG_DEPRECATED_ALIAS_85(base_name, value) \
+		REGISTER_PDO_CLASS_CONST_LONG_DEPRECATED_ALIAS_85(base_name, "MYSQL_", "Pdo\\Mysql::", value)
+
 /* {{{ PHP_MINIT_FUNCTION */
 static PHP_MINIT_FUNCTION(pdo_mysql)
 {
 	REGISTER_INI_ENTRIES();
 
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_USE_BUFFERED_QUERY", (zend_long)PDO_MYSQL_ATTR_USE_BUFFERED_QUERY);
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_LOCAL_INFILE", (zend_long)PDO_MYSQL_ATTR_LOCAL_INFILE);
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_INIT_COMMAND", (zend_long)PDO_MYSQL_ATTR_INIT_COMMAND);
+	REGISTER_PDO_MYSQL_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_USE_BUFFERED_QUERY", (zend_long)PDO_MYSQL_ATTR_USE_BUFFERED_QUERY);
+	REGISTER_PDO_MYSQL_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_LOCAL_INFILE", (zend_long)PDO_MYSQL_ATTR_LOCAL_INFILE);
+	REGISTER_PDO_MYSQL_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_INIT_COMMAND", (zend_long)PDO_MYSQL_ATTR_INIT_COMMAND);
 #ifndef PDO_USE_MYSQLND
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_MAX_BUFFER_SIZE", (zend_long)PDO_MYSQL_ATTR_MAX_BUFFER_SIZE);
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_READ_DEFAULT_FILE", (zend_long)PDO_MYSQL_ATTR_READ_DEFAULT_FILE);
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_READ_DEFAULT_GROUP", (zend_long)PDO_MYSQL_ATTR_READ_DEFAULT_GROUP);
+	REGISTER_PDO_MYSQL_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_MAX_BUFFER_SIZE", (zend_long)PDO_MYSQL_ATTR_MAX_BUFFER_SIZE);
+	REGISTER_PDO_MYSQL_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_READ_DEFAULT_FILE", (zend_long)PDO_MYSQL_ATTR_READ_DEFAULT_FILE);
+	REGISTER_PDO_MYSQL_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_READ_DEFAULT_GROUP", (zend_long)PDO_MYSQL_ATTR_READ_DEFAULT_GROUP);
 #endif
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_COMPRESS", (zend_long)PDO_MYSQL_ATTR_COMPRESS);
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_DIRECT_QUERY", (zend_long)PDO_MYSQL_ATTR_DIRECT_QUERY);
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_FOUND_ROWS", (zend_long)PDO_MYSQL_ATTR_FOUND_ROWS);
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_IGNORE_SPACE", (zend_long)PDO_MYSQL_ATTR_IGNORE_SPACE);
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_KEY", (zend_long)PDO_MYSQL_ATTR_SSL_KEY);
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_CERT", (zend_long)PDO_MYSQL_ATTR_SSL_CERT);
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_CA", (zend_long)PDO_MYSQL_ATTR_SSL_CA);
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_CAPATH", (zend_long)PDO_MYSQL_ATTR_SSL_CAPATH);
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_CIPHER", (zend_long)PDO_MYSQL_ATTR_SSL_CIPHER);
+	REGISTER_PDO_MYSQL_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_COMPRESS", (zend_long)PDO_MYSQL_ATTR_COMPRESS);
+	REGISTER_PDO_MYSQL_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_DIRECT_QUERY", (zend_long)PDO_ATTR_EMULATE_PREPARES);
+	REGISTER_PDO_MYSQL_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_FOUND_ROWS", (zend_long)PDO_MYSQL_ATTR_FOUND_ROWS);
+	REGISTER_PDO_MYSQL_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_IGNORE_SPACE", (zend_long)PDO_MYSQL_ATTR_IGNORE_SPACE);
+	REGISTER_PDO_MYSQL_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_SSL_KEY", (zend_long)PDO_MYSQL_ATTR_SSL_KEY);
+	REGISTER_PDO_MYSQL_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_SSL_CERT", (zend_long)PDO_MYSQL_ATTR_SSL_CERT);
+	REGISTER_PDO_MYSQL_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_SSL_CA", (zend_long)PDO_MYSQL_ATTR_SSL_CA);
+	REGISTER_PDO_MYSQL_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_SSL_CAPATH", (zend_long)PDO_MYSQL_ATTR_SSL_CAPATH);
+	REGISTER_PDO_MYSQL_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_SSL_CIPHER", (zend_long)PDO_MYSQL_ATTR_SSL_CIPHER);
 #if MYSQL_VERSION_ID > 50605 || defined(PDO_USE_MYSQLND)
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SERVER_PUBLIC_KEY", (zend_long)PDO_MYSQL_ATTR_SERVER_PUBLIC_KEY);
+	REGISTER_PDO_MYSQL_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_SERVER_PUBLIC_KEY", (zend_long)PDO_MYSQL_ATTR_SERVER_PUBLIC_KEY);
 #endif
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_MULTI_STATEMENTS", (zend_long)PDO_MYSQL_ATTR_MULTI_STATEMENTS);
+	REGISTER_PDO_MYSQL_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_MULTI_STATEMENTS", (zend_long)PDO_MYSQL_ATTR_MULTI_STATEMENTS);
 #ifdef PDO_USE_MYSQLND
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_VERIFY_SERVER_CERT", (zend_long)PDO_MYSQL_ATTR_SSL_VERIFY_SERVER_CERT);
+	REGISTER_PDO_MYSQL_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_SSL_VERIFY_SERVER_CERT", (zend_long)PDO_MYSQL_ATTR_SSL_VERIFY_SERVER_CERT);
 #endif
 #if MYSQL_VERSION_ID >= 80021 || defined(PDO_USE_MYSQLND)
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_LOCAL_INFILE_DIRECTORY", (zend_long)PDO_MYSQL_ATTR_LOCAL_INFILE_DIRECTORY);
-#endif
-
-#ifdef PDO_USE_MYSQLND
-	mysqlnd_reverse_api_register_api(&pdo_mysql_reverse_api);
+	REGISTER_PDO_MYSQL_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_LOCAL_INFILE_DIRECTORY", (zend_long)PDO_MYSQL_ATTR_LOCAL_INFILE_DIRECTORY);
 #endif
 
 	pdo_mysql_ce = register_class_Pdo_Mysql(pdo_dbh_ce);

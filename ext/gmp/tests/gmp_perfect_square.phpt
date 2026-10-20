@@ -24,7 +24,7 @@ var_dump(gmp_perfect_square($n));
 try {
     var_dump(gmp_perfect_square(array()));
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "Done\n";
@@ -41,5 +41,5 @@ bool(false)
 bool(false)
 bool(true)
 bool(false)
-gmp_perfect_square(): Argument #1 ($num) must be of type GMP|string|int, array given
+TypeError: gmp_perfect_square(): Argument #1 ($num) must be of type GMP|string|int, array given
 Done

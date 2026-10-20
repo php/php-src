@@ -64,15 +64,15 @@ var_dump(string_add_val());
 echo "Testing int with default null constant" . PHP_EOL;
 try {
     var_dump(int_val_default_null());
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Testing int with null null constant" . PHP_EOL;
 try {
     var_dump(int_val_default_null(null));
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Testing nullable int with default null constant" . PHP_EOL;
@@ -96,9 +96,9 @@ float(10.7)
 Testing string add val
 string(14) "this is a test"
 Testing int with default null constant
-int_val_default_null(): Argument #1 ($a) must be of type int, null given, called in %s on line %d
+TypeError: int_val_default_null(): Argument #1 ($a) must be of type int, null given, called in %s on line %d
 Testing int with null null constant
-int_val_default_null(): Argument #1 ($a) must be of type int, null given, called in %s on line %d
+TypeError: int_val_default_null(): Argument #1 ($a) must be of type int, null given, called in %s on line %d
 Testing nullable int with default null constant
 NULL
 Testing nullable int with null null constant

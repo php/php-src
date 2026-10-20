@@ -8,14 +8,14 @@ CC=clang CXX=clang++ \
 ./configure \
     --disable-all \
     --enable-fuzzer \
-    --with-pic \
+    --enable-pic \
     --enable-debug-assertions \
     --enable-address-sanitizer \
     --enable-exif \
     --enable-mbstring
 ```
 
-The `--with-pic` option is required to avoid a linking failure. The `--enable-debug-assertions` option can be used to enable debug assertions despite the use of a release build.
+The `--enable-pic` option is required to avoid a linking failure. The `--enable-debug-assertions` option can be used to enable debug assertions despite the use of a release build.
 
 You can combine fuzzing with `--enable-address-sanitizer`, `--enable-undefined-sanitizer` or `--enable-memory-sanitizer`. The first two options can also be used together.
 
@@ -31,8 +31,8 @@ When running `make` it creates these binaries in `sapi/fuzzer/`:
 * `php-fuzz-mbstring`: Fuzzing `mb_convert_encoding()` (requires `--enable-mbstring`)
 * `php-fuzz-mbregex`: Fuzzing `mb_ereg[i]()` (requires --enable-mbstring)
 * `php-fuzz-execute`: Fuzzing the executor
-* `php-fuzz-function-jit`: Fuzzing the function JIT (requires --enable-opcache)
-* `php-fuzz-tracing-jit`: Fuzzing the tracing JIT (requires --enable-opcache)
+* `php-fuzz-function-jit`: Fuzzing the function JIT
+* `php-fuzz-tracing-jit`: Fuzzing the tracing JIT
 
 Some fuzzers have a seed corpus in `sapi/fuzzer/corpus`. You can use it as follows:
 

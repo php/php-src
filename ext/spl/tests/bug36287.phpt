@@ -3,7 +3,7 @@ Bug #36287 (Segfault with SplFileInfo conversion)
 --FILE--
 <?php
 
-$it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator("."), true);
+$it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator("."), RecursiveIteratorIterator::SELF_FIRST);
 
 $idx = 0;
 foreach($it as $file)

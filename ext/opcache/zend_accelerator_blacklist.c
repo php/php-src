@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -30,13 +28,7 @@
 # define REGEX_MODE (REG_EXTENDED|REG_NOSUB)
 #endif
 
-#ifdef HAVE_GLOB
-#ifdef PHP_WIN32
-#include "win32/glob.h"
-#else
-#include <glob.h>
-#endif
-#endif
+#include "php_glob.h"
 
 #include "ext/pcre/php_pcre.h"
 
@@ -211,7 +203,7 @@ void zend_accel_blacklist_shutdown(zend_blacklist *blacklist)
 		return;
 	}
 
-	zend_blacklist_entry *p = blacklist->entries, *end = blacklist->entries + blacklist->pos;
+	const zend_blacklist_entry *p = blacklist->entries, *end = blacklist->entries + blacklist->pos;
 	while (p<end) {
 		free(p->path);
 		p++;
@@ -233,7 +225,7 @@ static inline void zend_accel_blacklist_allocate(zend_blacklist *blacklist)
 {
 	if (blacklist->pos == blacklist->size) {
 		blacklist->size += ZEND_BLACKLIST_BLOCK_SIZE;
-		blacklist->entries = (zend_blacklist_entry *) realloc(blacklist->entries, sizeof(zend_blacklist_entry)*blacklist->size);
+		blacklist->entries = (zend_blacklist_entry *) perealloc(blacklist->entries, sizeof(zend_blacklist_entry)*blacklist->size, true);
 	}
 }
 
@@ -320,16 +312,15 @@ static void zend_accel_blacklist_loadone(zend_blacklist *blacklist, char *filena
 
 void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 {
-#ifdef HAVE_GLOB
-	glob_t globbuf;
+	php_glob_t globbuf;
 	int    ret;
 	unsigned int i;
 
-	memset(&globbuf, 0, sizeof(glob_t));
+	memset(&globbuf, 0, sizeof(globbuf));
 
-	ret = glob(filename, 0, NULL, &globbuf);
-#ifdef GLOB_NOMATCH
-	if (ret == GLOB_NOMATCH || !globbuf.gl_pathc) {
+	ret = php_glob(filename, 0, NULL, &globbuf);
+#ifdef PHP_GLOB_NOMATCH
+	if (ret == PHP_GLOB_NOMATCH || !globbuf.gl_pathc) {
 #else
 	if (!globbuf.gl_pathc) {
 #endif
@@ -338,22 +329,19 @@ void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 		for(i=0 ; i<globbuf.gl_pathc; i++) {
 			zend_accel_blacklist_loadone(blacklist, globbuf.gl_pathv[i]);
 		}
-		globfree(&globbuf);
+		php_globfree(&globbuf);
 	}
-#else
-	zend_accel_blacklist_loadone(blacklist, filename);
-#endif
 	zend_accel_blacklist_update_regexp(blacklist);
 }
 
-bool zend_accel_blacklist_is_blacklisted(zend_blacklist *blacklist, char *verify_path, size_t verify_path_len)
+bool zend_accel_blacklist_is_blacklisted(const zend_blacklist *blacklist, const char *verify_path, size_t verify_path_len)
 {
 	int ret = 0;
-	zend_regexp_list *regexp_list_it = blacklist->regexp_list;
+	const zend_regexp_list *regexp_list_it = blacklist->regexp_list;
 	pcre2_match_context *mctx = php_pcre_mctx();
 
 	if (regexp_list_it == NULL) {
-		return 0;
+		return false;
 	}
 	while (regexp_list_it != NULL) {
 		pcre2_match_data *match_data = php_pcre_create_match_data(0, regexp_list_it->re);
@@ -373,7 +361,7 @@ bool zend_accel_blacklist_is_blacklisted(zend_blacklist *blacklist, char *verify
 	return ret;
 }
 
-void zend_accel_blacklist_apply(zend_blacklist *blacklist, blacklist_apply_func_arg_t func, void *argument)
+void zend_accel_blacklist_apply(const zend_blacklist *blacklist, blacklist_apply_func_arg_t func, void *argument)
 {
 	int i;
 

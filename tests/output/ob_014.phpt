@@ -7,9 +7,9 @@ echo "foo\n";
 try {
     ob_end_flush();
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
 foo
-str_rot13() expects exactly 1 argument, 2 given
+ArgumentCountError: str_rot13() expects exactly 1 argument, 2 given

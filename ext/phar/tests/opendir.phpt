@@ -35,8 +35,8 @@ opendir('phar://hi.phar');
 --EXPECTF--
 file1.txtfile2.txtfile3.txt
 
-Warning: opendir(phar://): Failed to open directory: phar error: no directory in "phar://", must have at least phar:/// for root directory (always use full path to a new phar)
+Warning: opendir(): Failed to open directory: phar error: no directory in "phar://", must have at least phar:/// for root directory (always use full path to a new phar)
 phar url "phar://" is unknown in %sopendir.php on line %d
 
-Warning: opendir(phar://hi.phar): Failed to open directory: phar error: invalid url or non-existent phar "phar://hi.phar"
+Warning: opendir(): Failed to open directory: phar error: invalid url or non-existent phar "phar://hi.phar"
 phar url "phar://hi.phar" is unknown in %sopendir.php on line %d

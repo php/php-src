@@ -1,7 +1,6 @@
 --TEST--
 PDO PgSQL Bug #66584 (Segmentation fault on statement deallocation)
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

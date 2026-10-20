@@ -25,35 +25,35 @@ clean_creation_tests($handler);
 === OPENING NON-EXISTING FILE ===
 Mode parameter is "rl":
 
-Warning: dba_open(inifile_not_existing.db): Failed to open stream: No such file or directory in %s on line %d
+Warning: dba_open(): Failed to open stream: No such file or directory in %s on line %d
 Opening DB failed
 Mode parameter is "rd":
 
-Warning: dba_open(inifile_not_existing.db): Failed to open stream: No such file or directory in %s on line %d
+Warning: dba_open(): Failed to open stream: No such file or directory in %s on line %d
 Opening DB failed
 Mode parameter is "r-":
 
-Warning: dba_open(inifile_not_existing.db): Failed to open stream: No such file or directory in %s on line %d
+Warning: dba_open(): Failed to open stream: No such file or directory in %s on line %d
 Opening DB failed
 Mode parameter is "r":
 
-Warning: dba_open(inifile_not_existing.db): Failed to open stream: No such file or directory in %s on line %d
+Warning: dba_open(): Failed to open stream: No such file or directory in %s on line %d
 Opening DB failed
 Mode parameter is "wl":
 
-Warning: dba_open(inifile_not_existing.db): Failed to open stream: No such file or directory in %s on line %d
+Warning: dba_open(): Failed to open stream: No such file or directory in %s on line %d
 Opening DB failed
 Mode parameter is "wd":
 
-Warning: dba_open(inifile_not_existing.db): Failed to open stream: No such file or directory in %s on line %d
+Warning: dba_open(): Failed to open stream: No such file or directory in %s on line %d
 Opening DB failed
 Mode parameter is "w-":
 
-Warning: dba_open(inifile_not_existing.db): Failed to open stream: No such file or directory in %s on line %d
+Warning: dba_open(): Failed to open stream: No such file or directory in %s on line %d
 Opening DB failed
 Mode parameter is "w":
 
-Warning: dba_open(inifile_not_existing.db): Failed to open stream: No such file or directory in %s on line %d
+Warning: dba_open(): Failed to open stream: No such file or directory in %s on line %d
 Opening DB failed
 Mode parameter is "cl":
 This is a test insert

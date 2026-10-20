@@ -12,8 +12,8 @@ echo "--- Edge cases ---\n";
 
 try {
     $dom->createElement('free')->insertAdjacentText("bogus", "bogus");
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 function testNormalCases($dom, $uppercase) {
@@ -56,7 +56,7 @@ var_dump($AText->textContent);
 ?>
 --EXPECT--
 --- Edge cases ---
-Syntax Error
+DOMException: Syntax Error
 --- Normal cases uppercase ---
 <?xml version="1.0"?>
 <container>A<p>foo</p></container>

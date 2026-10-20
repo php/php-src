@@ -3,7 +3,7 @@ Test session_commit() function : variation
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --INI--
 session.auto_start=1
 --FILE--

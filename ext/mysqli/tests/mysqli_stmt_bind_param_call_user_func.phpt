@@ -11,11 +11,8 @@ require_once 'skipifconnectfailure.inc';
     require 'connect.inc';
     require 'table.inc';
 
-    if (!$stmt = mysqli_stmt_init($link))
+    if (!$stmt = mysqli_prepare($link, 'SELECT id, label FROM test WHERE id = ?'))
         printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-    if (!mysqli_stmt_prepare($stmt, 'SELECT id, label FROM test WHERE id = ?'))
-        printf("[002] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     $id = 1;
     if (!mysqli_stmt_bind_param($stmt, 'i', $id) ||
@@ -32,11 +29,8 @@ require_once 'skipifconnectfailure.inc';
     var_dump($label);
 
     mysqli_stmt_close($stmt);
-    if (!$stmt = mysqli_stmt_init($link))
+    if (!$stmt = mysqli_prepare($link, 'SELECT id, label FROM test WHERE id = ?'))
         printf("[005] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-    if (!mysqli_stmt_prepare($stmt, 'SELECT id, label FROM test WHERE id = ?'))
-        printf("[006] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     $types = 'i';
     $id = 1;
@@ -61,11 +55,8 @@ require_once 'skipifconnectfailure.inc';
     var_dump($label);
 
     mysqli_stmt_close($stmt);
-    if (!$stmt = mysqli_stmt_init($link))
+    if (!$stmt = mysqli_prepare($link, 'SELECT id, label FROM test WHERE id = ?'))
         printf("[010] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-    if (!mysqli_stmt_prepare($stmt, 'SELECT id, label FROM test WHERE id = ?'))
-        printf("[011] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     $types = 'i';
     $id = 1;
@@ -89,11 +80,8 @@ require_once 'skipifconnectfailure.inc';
     var_dump($label);
 
     mysqli_stmt_close($stmt);
-    if (!$stmt = mysqli_stmt_init($link))
+    if (!$stmt = mysqli_prepare($link, 'SELECT id, label FROM test WHERE id = ?'))
         printf("[015] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-    if (!mysqli_stmt_prepare($stmt, 'SELECT id, label FROM test WHERE id = ?'))
-        printf("[016] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     $types = 'i';
     $id = 1;
@@ -117,11 +105,8 @@ require_once 'skipifconnectfailure.inc';
     var_dump($label);
 
     mysqli_stmt_close($stmt);
-    if (!$stmt = mysqli_stmt_init($link))
+    if (!$stmt = mysqli_prepare($link, 'SELECT id, label FROM test WHERE id = ?'))
         printf("[020] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-    if (!mysqli_stmt_prepare($stmt, 'SELECT id, label FROM test WHERE id = ?'))
-        printf("[021] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     $id = 1;
     $params = array(
@@ -144,11 +129,8 @@ require_once 'skipifconnectfailure.inc';
     var_dump($label);
 
     mysqli_stmt_close($stmt);
-    if (!$stmt = mysqli_stmt_init($link))
+    if (!$stmt = mysqli_prepare($link, 'SELECT id, label FROM test WHERE id = ?'))
         printf("[025] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-    if (!mysqli_stmt_prepare($stmt, 'SELECT id, label FROM test WHERE id = ?'))
-        printf("[026] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     $types = 'i';
     $id = 1;
@@ -173,11 +155,8 @@ require_once 'skipifconnectfailure.inc';
     var_dump($label);
 
     mysqli_stmt_close($stmt);
-    if (!$stmt = mysqli_stmt_init($link))
+    if (!$stmt = mysqli_prepare($link, 'SELECT id, label FROM test WHERE id = ?'))
         printf("[025] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-    if (!mysqli_stmt_prepare($stmt, 'SELECT id, label FROM test WHERE id = ?'))
-        printf("[026] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     $types = 'i';
     $id = 1;
@@ -202,11 +181,8 @@ require_once 'skipifconnectfailure.inc';
     var_dump($label);
 
     mysqli_stmt_close($stmt);
-    if (!$stmt = mysqli_stmt_init($link))
+    if (!$stmt = mysqli_prepare($link, 'SELECT id, label FROM test WHERE id = ?'))
         printf("[030] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-    if (!mysqli_stmt_prepare($stmt, 'SELECT id, label FROM test WHERE id = ?'))
-        printf("[031] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     $types = 'i';
     $id = 1;
@@ -231,11 +207,8 @@ require_once 'skipifconnectfailure.inc';
     var_dump($label);
 
     mysqli_stmt_close($stmt);
-    if (!$stmt = mysqli_stmt_init($link))
+    if (!$stmt = mysqli_prepare($link, 'SELECT id, label FROM test WHERE id = ?'))
         printf("[035] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-    if (!mysqli_stmt_prepare($stmt, 'SELECT id, label FROM test WHERE id = ?'))
-        printf("[036] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     $id = 1;
     $params = array(
@@ -259,11 +232,8 @@ require_once 'skipifconnectfailure.inc';
     var_dump($label);
 
     mysqli_stmt_close($stmt);
-    if (!$stmt = mysqli_stmt_init($link))
+    if (!$stmt = mysqli_prepare($link, 'SELECT id, label FROM test WHERE id = ?'))
         printf("[040] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-    if (!mysqli_stmt_prepare($stmt, 'SELECT id, label FROM test WHERE id = ?'))
-        printf("[041] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     $id = 1;
     if (!call_user_func_array('mysqli_stmt_bind_param', array($stmt, 'i', &$id)))
@@ -285,11 +255,8 @@ require_once 'skipifconnectfailure.inc';
     // Any of those shall fail - see also bugs.php.net/43568
     //
     mysqli_stmt_close($stmt);
-    if (!$stmt = mysqli_stmt_init($link))
+    if (!$stmt = mysqli_prepare($link, 'SELECT id, label FROM test WHERE id = ?'))
         printf("[045] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-    if (!mysqli_stmt_prepare($stmt, 'SELECT id, label FROM test WHERE id = ?'))
-        printf("[046] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     $id = 1;
     $params = array(
@@ -303,11 +270,8 @@ require_once 'skipifconnectfailure.inc';
         printf("[048] [%d] (Message might vary with MySQL Server version, e.g. No data supplied for parameters in prepared statement)\n", mysqli_stmt_errno($stmt));
 
     mysqli_stmt_close($stmt);
-    if (!$stmt = mysqli_stmt_init($link))
+    if (!$stmt = mysqli_prepare($link, 'SELECT id, label FROM test WHERE id = ?'))
         printf("[049] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-    if (!mysqli_stmt_prepare($stmt, 'SELECT id, label FROM test WHERE id = ?'))
-        printf("[050] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     $id = 1;
     $params = array(

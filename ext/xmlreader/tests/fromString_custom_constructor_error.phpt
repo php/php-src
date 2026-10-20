@@ -13,8 +13,8 @@ class CustomXMLReader extends XMLReader {
 try {
     CustomXMLReader::fromString("<root/>");
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-nope
+Error: nope

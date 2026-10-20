@@ -17,8 +17,8 @@ function test() {
 try {
     @test();
 } catch (Throwable $e) {
-	echo $e->getMessage() . "\n";
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Bit shift by negative number
+ArithmeticError: Bit shift by negative number

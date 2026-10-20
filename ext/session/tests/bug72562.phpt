@@ -3,7 +3,7 @@ Bug #72562: Use After Free in unserialize() with Unexpected Session Deserializat
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --FILE--
 <?php
 

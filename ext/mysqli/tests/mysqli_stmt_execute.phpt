@@ -54,11 +54,8 @@ require_once 'skipifconnectfailure.inc';
 
     // calling reset between executions
     mysqli_stmt_close($stmt);
-    if (!$stmt = mysqli_stmt_init($link))
+    if (!$stmt = mysqli_prepare($link, "SELECT id FROM test ORDER BY id LIMIT ?"))
         printf("[013] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-    if (!mysqli_stmt_prepare($stmt, "SELECT id FROM test ORDER BY id LIMIT ?"))
-        printf("[014] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     $limit = 1;
     if (!mysqli_stmt_bind_param($stmt, "i", $limit))
@@ -91,11 +88,8 @@ require_once 'skipifconnectfailure.inc';
         printf("[022] Expecting int/1 got %s/%s\n", gettype($id), $id);
 
     mysqli_stmt_close($stmt);
-    if (!$stmt = mysqli_stmt_init($link))
+    if (!$stmt = mysqli_prepare($link, "SELECT id FROM test ORDER BY id LIMIT 1"))
         printf("[023] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-    if (!mysqli_stmt_prepare($stmt, "SELECT id FROM test ORDER BY id LIMIT 1"))
-        printf("[024] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     if (true !== ($tmp = mysqli_stmt_execute($stmt)))
         printf("[025] Expecting boolean/true, got %s/%s. [%d] %s\n",
@@ -128,7 +122,8 @@ require_once 'skipifconnectfailure.inc';
 <?php
 require_once 'clean_table.inc';
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mysqli_stmt_init() is deprecated since 8.6, use mysqli_prepare() instead in %s on line %d
 mysqli_stmt object is not fully initialized
 mysqli_stmt object is not fully initialized
 bool(true)

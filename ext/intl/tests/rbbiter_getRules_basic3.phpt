@@ -2,12 +2,12 @@
 IntlRuleBasedBreakIterator::getRules(): basic test icu >= 68.1
 --EXTENSIONS--
 intl
+--INI--
+intl.default_locale=pt_PT
 --SKIPIF--
 <?php if (version_compare(INTL_ICU_VERSION, '68.1') < 0) die('skip for ICU >= 68.1'); ?>
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "pt_PT");
 
 $rules = <<<RULES
 \$LN = [[:letter:] [:number:]];

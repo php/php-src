@@ -10,5 +10,4 @@ $resource = end($resources);
 fclose($resource);
 ?>
 --EXPECTF--
-
-Warning: fclose(): %d is not a valid stream resource in %s on line %d
+Warning: fclose(): cannot close the provided stream, as it must not be manually closed in %s on line %d

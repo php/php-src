@@ -8,9 +8,9 @@ $imp = new DOMImplementation;
 $dom = $imp->createDocument("", "");
 try {
     $dom->encoding = null;
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Invalid document encoding
+ValueError: Invalid document encoding

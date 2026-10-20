@@ -24,19 +24,23 @@ var_dump(array_column($a, null, 'a'));
 
 try {
     var_dump(array_column([['a' => new stdClass]], null, 'a'));
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(array_column([['a' => []]], null, 'a'));
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 
 Deprecated: Implicit conversion from float 7.38 to int loses precision in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 array(8) {
   [10]=>
   array(1) {
@@ -79,5 +83,5 @@ array(8) {
     NULL
   }
 }
-Cannot access offset of type stdClass on array
-Cannot access offset of type array on array
+TypeError: Cannot access offset of type stdClass on array
+TypeError: Cannot access offset of type array on array

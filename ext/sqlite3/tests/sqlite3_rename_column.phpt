@@ -14,7 +14,7 @@ if (SQLite3::version()['versionNumber'] < 3025000) {
 $db = new SQLite3(':memory:');
 
 $db->exec('CREATE TABLE tbl (orig text)');
-$db->exec('insert into tbl values ("one"), ("two")');
+$db->exec("insert into tbl values ('one'), ('two')");
 
 $res1 = $db->prepare('select * from tbl')->execute();
 $res2 = $db->prepare('select * from tbl')->execute();

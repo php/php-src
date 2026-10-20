@@ -1,5 +1,5 @@
 --TEST--
-Bug #62384 (Attempting to invoke a Closure more than once causes segfaul)
+Bug #62384 (Attempting to invoke a Closure more than once causes segfault)
 --FILE--
 <?php
 

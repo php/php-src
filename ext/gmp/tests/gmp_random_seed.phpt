@@ -110,7 +110,7 @@ var_dump(gmp_strval(gmp_random_range(-10000, 0)));
 try {
     var_dump(gmp_random_seed('not a number'));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 
@@ -173,5 +173,5 @@ string(301) "7240560133683902061389868703829443708354917824328579773726122219756
 string(4) "9636"
 string(5) "-9848"
 string(5) "-9648"
-gmp_random_seed(): Argument #1 ($seed) is not an integer string
+ValueError: gmp_random_seed(): Argument #1 ($seed) is not an integer string
 Done

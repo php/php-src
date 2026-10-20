@@ -36,8 +36,8 @@ foreach ($new->getElementsByTagName('child') as $child) {
 echo $new->saveXml(), "\n";
 
 ?>
---EXPECT--
-object(Dom\NamedNodeMap)#5 (1) {
+--EXPECTF--
+object(Dom\NamedNodeMap)#%d (1) {
   ["length"]=>
   int(2)
 }
@@ -47,7 +47,7 @@ namespaceURI: string(29) "http://www.w3.org/2000/xmlns/"
 name: string(1) "a"
 prefix: NULL
 namespaceURI: NULL
-object(Dom\NamedNodeMap)#3 (1) {
+object(Dom\NamedNodeMap)#%d (1) {
   ["length"]=>
   int(3)
 }

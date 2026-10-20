@@ -51,6 +51,13 @@ if test "$PHP_SNMP" != "no"; then
     [AC_MSG_FAILURE([SNMP sanity check failed.])],
     [$SNMP_SHARED_LIBADD])
 
+  dnl Check whether netsnmp_init_mib() exists.
+  PHP_CHECK_LIBRARY([$SNMP_LIBNAME], [netsnmp_init_mib],
+    [AC_DEFINE([HAVE_NETSNMP_INIT_MIB], [1],
+      [Define to 1 if the Net-SNMP library has the 'netsnmp_init_mib' function.])],
+    [],
+    [$SNMP_SHARED_LIBADD])
+
   dnl Check whether shutdown_snmp_logging() exists.
   PHP_CHECK_LIBRARY([$SNMP_LIBNAME], [shutdown_snmp_logging],
     [AC_DEFINE([HAVE_SHUTDOWN_SNMP_LOGGING], [1],

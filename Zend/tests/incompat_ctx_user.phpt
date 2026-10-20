@@ -13,8 +13,8 @@ $b = new B;
 try {
     $b->bar();
 } catch (Throwable $e) {
-    echo "Exception: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Exception: Non-static method A::foo() cannot be called statically
+Error: Non-static method A::foo() cannot be called statically

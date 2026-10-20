@@ -7,7 +7,7 @@ tidy
 --FILE--
 <?php
 $buffer = '<html></html>';
-$config = array('doctype' => 'php');
+$config = array('doctype' => 'auto');
 
 $tidy = tidy_parse_string($buffer, $config);
 var_dump(tidy_config_count($tidy));

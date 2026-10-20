@@ -17,10 +17,10 @@ $encoding = 'unknown-encoding';
 try {
     var_dump( mb_strpos($haystack, $needle, $offset, $encoding) );
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
 *** Testing mb_strpos() : error conditions ***
-mb_strpos(): Argument #4 ($encoding) must be a valid encoding, "unknown-encoding" given
+ValueError: mb_strpos(): Argument #4 ($encoding) must be a valid encoding, "unknown-encoding" given

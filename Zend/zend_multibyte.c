@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at                              |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Masaki Fujimoto <fujimoto@php.net>                          |
    |          Rui Hirokawa <hirokawa@php.net>                             |
@@ -35,7 +34,7 @@ static const char *dummy_encoding_name_getter(const zend_encoding *encoding)
 
 static bool dummy_encoding_lexer_compatibility_checker(const zend_encoding *encoding)
 {
-	return 0;
+	return false;
 }
 
 static const zend_encoding *dummy_encoding_detector(const unsigned char *string, size_t length, const zend_encoding **list, size_t list_size)
@@ -114,8 +113,8 @@ ZEND_API zend_result zend_multibyte_set_functions(const zend_multibyte_functions
 	 * populated, we need to reinitialize script_encoding here.
 	 */
 	{
-		const char *value = zend_ini_string("zend.script_encoding", sizeof("zend.script_encoding") - 1, 0);
-		zend_multibyte_set_script_encoding_by_string(value, strlen(value));
+		const zend_string *value = zend_ini_str_literal("zend.script_encoding");
+		zend_multibyte_set_script_encoding_by_string(ZSTR_VAL(value), ZSTR_LEN(value));
 	}
 	return SUCCESS;
 }
@@ -195,7 +194,7 @@ ZEND_API zend_result zend_multibyte_set_script_encoding_by_string(const char *ne
 		return SUCCESS;
 	}
 
-	if (FAILURE == zend_multibyte_parse_encoding_list(new_value, new_value_length, &list, &size, 1)) {
+	if (FAILURE == zend_multibyte_parse_encoding_list(new_value, new_value_length, &list, &size, true)) {
 		return FAILURE;
 	}
 

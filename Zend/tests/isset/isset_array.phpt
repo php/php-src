@@ -1,0 +1,52 @@
+--TEST--
+Using isset() with arrays
+--FILE--
+<?php
+
+$array = [
+    0 => true,
+    "a" => true,
+];
+
+var_dump(isset($array[0]));
+
+var_dump(isset($array["a"]));
+
+var_dump(isset($array[false]));
+
+var_dump(isset($array[0.6]));
+
+var_dump(isset($array[true]));
+
+var_dump(isset($array[null]));
+
+var_dump(isset($array[STDIN]));
+
+try {
+    isset($array[[]]);
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
+}
+
+try {
+    isset($array[new stdClass()]);
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
+}
+?>
+--EXPECTF--
+bool(true)
+bool(true)
+bool(true)
+
+Deprecated: Implicit conversion from float 0.6 to int loses precision in %s on line %d
+bool(true)
+bool(false)
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+bool(false)
+
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
+bool(false)
+TypeError: Cannot access offset of type array in isset or empty
+TypeError: Cannot access offset of type stdClass in isset or empty

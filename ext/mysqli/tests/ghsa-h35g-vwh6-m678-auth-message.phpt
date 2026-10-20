@@ -18,7 +18,7 @@ try {
     $info = mysqli_info($conn);
     var_dump($info);
 } catch (Exception $e) {
-    echo $e->getMessage() . PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $process->terminate();
@@ -33,5 +33,5 @@ print "done!";
 [*] Sending - Malicious OK Auth Response [Extract heap through buffer over-read]: 0900000200000002000000fcff
 
 Warning: mysqli::__construct(): OK packet message length is past the packet size in %s on line %d
-Unknown error while trying to connect via tcp://127.0.0.1:%d
+mysqli_sql_exception: Unknown error while trying to connect via tcp://127.0.0.1:%d
 done!

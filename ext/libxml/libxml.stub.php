@@ -182,6 +182,6 @@ function libxml_clear_errors(): void {}
 #[\Deprecated(since: '8.0', message: 'as external entity loading is disabled by default')]
 function libxml_disable_entity_loader(bool $disable = true): bool {}
 
-function libxml_set_external_entity_loader(?callable $resolver_function): bool {}
+function libxml_set_external_entity_loader(?callable $resolver_function): true {}
 
 function libxml_get_external_entity_loader(): ?callable {}

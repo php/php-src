@@ -35,7 +35,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: encoding.c,v 1.42 2022/12/26 17:31:14 christos Exp $")
+FILE_RCSID("@(#)$File: encoding.c,v 1.45 2026/06/02 17:19:02 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -83,6 +83,8 @@ file_encoding(struct magic_set *ms, const struct buffer *b,
 	file_unichar_t *udefbuf;
 	size_t udeflen;
 
+	if (buf == NULL)
+		return 0;
 	if (ubuf == NULL)
 		ubuf = &udefbuf;
 	if (ulen == NULL)
@@ -237,11 +239,15 @@ file_encoding(struct magic_set *ms, const struct buffer *b,
 #define I 2   /* character appears in ISO-8859 text */
 #define X 3   /* character appears in non-ISO extended ASCII (Mac, IBM PC) */
 
+/*
+ * SUB (substitute character ^Z) was used as EOF in DOS and early Windows
+ * NEL (next line 0x85) is considered in ECMAScript as whitespace
+ */
 file_private char text_chars[256] = {
 	/*                  BEL BS HT LF VT FF CR    */
 	F, F, F, F, F, F, F, T, T, T, T, T, T, T, F, F,  /* 0x0X */
-	/*                              ESC          */
-	F, F, F, F, F, F, F, F, F, F, F, T, F, F, F, F,  /* 0x1X */
+	/*                           SUB ESC          */
+	F, F, F, F, F, F, F, F, F, F, T, T, F, F, F, F,  /* 0x1X */
 	T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T,  /* 0x2X */
 	T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T,  /* 0x3X */
 	T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T,  /* 0x4X */
@@ -334,7 +340,7 @@ static const uint8_t first[] = {
 
 // acceptRange gives the range of valid values for the second byte in a UTF-8
 // sequence.
-struct accept_range {
+static struct accept_range {
 	uint8_t lo; // lowest value for second byte.
 	uint8_t hi; // highest value for second byte.
 } accept_ranges[16] = {

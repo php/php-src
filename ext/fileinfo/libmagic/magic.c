@@ -28,7 +28,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: magic.c,v 1.121 2023/02/09 17:45:19 christos Exp $")
+FILE_RCSID("@(#)$File: magic.c,v 1.128 2026/05/09 22:34:30 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -330,38 +330,66 @@ magic_version(void)
 	return MAGIC_VERSION;
 }
 
+file_public ssize_t
+magic_getmaxparam(int param)
+{
+	switch (param) {
+	case MAGIC_PARAM_INDIR_MAX:
+	case MAGIC_PARAM_NAME_MAX:
+	case MAGIC_PARAM_ELF_PHNUM_MAX:
+	case MAGIC_PARAM_ELF_SHNUM_MAX:
+	case MAGIC_PARAM_ELF_SHSIZE_MAX:
+	case MAGIC_PARAM_ELF_NOTES_MAX:
+	case MAGIC_PARAM_REGEX_MAX:
+		return 0xffff;
+	case MAGIC_PARAM_BYTES_MAX:
+	case MAGIC_PARAM_ENCODING_MAX:
+	case MAGIC_PARAM_MAGWARN_MAX:
+		return 0x7fffffff;
+	default:
+		errno = EINVAL;
+		return -1;
+	}
+}
+
 file_public int
 magic_setparam(struct magic_set *ms, int param, const void *val)
 {
-	if (ms == NULL)
+	if (ms == NULL || val == NULL) {
+		errno = EFAULT;
 		return -1;
+	}
+	const size_t v = *CAST(const size_t *, val);
 	switch (param) {
 	case MAGIC_PARAM_INDIR_MAX:
-		ms->indir_max = CAST(uint16_t, *CAST(const size_t *, val));
+		ms->indir_max = CAST(uint16_t, v);
 		return 0;
 	case MAGIC_PARAM_NAME_MAX:
-		ms->name_max = CAST(uint16_t, *CAST(const size_t *, val));
+		ms->name_max = CAST(uint16_t, v);
 		return 0;
 	case MAGIC_PARAM_ELF_PHNUM_MAX:
-		ms->elf_phnum_max = CAST(uint16_t, *CAST(const size_t *, val));
+		ms->elf_phnum_max = CAST(uint16_t, v);
 		return 0;
 	case MAGIC_PARAM_ELF_SHNUM_MAX:
-		ms->elf_shnum_max = CAST(uint16_t, *CAST(const size_t *, val));
+		ms->elf_shnum_max = CAST(uint16_t, v);
 		return 0;
 	case MAGIC_PARAM_ELF_SHSIZE_MAX:
-		ms->elf_shsize_max = *CAST(const size_t *, val);
+		ms->elf_shsize_max = v;
 		return 0;
 	case MAGIC_PARAM_ELF_NOTES_MAX:
-		ms->elf_notes_max = CAST(uint16_t, *CAST(const size_t *, val));
+		ms->elf_notes_max = CAST(uint16_t, v);
 		return 0;
 	case MAGIC_PARAM_REGEX_MAX:
-		ms->regex_max = CAST(uint16_t, *CAST(const size_t *, val));
+		ms->regex_max = CAST(uint16_t, v);
 		return 0;
 	case MAGIC_PARAM_BYTES_MAX:
-		ms->bytes_max = *CAST(const size_t *, val);
+		ms->bytes_max = v;
 		return 0;
 	case MAGIC_PARAM_ENCODING_MAX:
-		ms->encoding_max = *CAST(const size_t *, val);
+		ms->encoding_max = v;
+		return 0;
+	case MAGIC_PARAM_MAGWARN_MAX:
+		ms->magwarn_max = v;
 		return 0;
 	default:
 		errno = EINVAL;
@@ -372,8 +400,10 @@ magic_setparam(struct magic_set *ms, int param, const void *val)
 file_public int
 magic_getparam(struct magic_set *ms, int param, void *val)
 {
-	if (ms == NULL)
+	if (ms == NULL || val == NULL) {
+		errno = EFAULT;
 		return -1;
+	}
 	switch (param) {
 	case MAGIC_PARAM_INDIR_MAX:
 		*CAST(size_t *, val) = ms->indir_max;
@@ -401,6 +431,9 @@ magic_getparam(struct magic_set *ms, int param, void *val)
 		return 0;
 	case MAGIC_PARAM_ENCODING_MAX:
 		*CAST(size_t *, val) = ms->encoding_max;
+		return 0;
+	case MAGIC_PARAM_MAGWARN_MAX:
+		*CAST(size_t *, val) = ms->magwarn_max;
 		return 0;
 	default:
 		errno = EINVAL;

@@ -4,9 +4,6 @@ IntlCalendar::setTimeZone(): different ways to specify time zone
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "nl");
-date_default_timezone_set('Europe/Amsterdam');
 
 $intlcal = new IntlGregorianCalendar();
 $intlcal->setTimeZone('Europe/Paris');

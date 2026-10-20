@@ -9,9 +9,9 @@ try {
     {
     }
 } catch (OutOfBoundsException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECTF--
-Seek position %d is out of range
+OutOfBoundsException: Seek position %d is out of range

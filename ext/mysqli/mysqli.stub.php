@@ -58,6 +58,11 @@ const MYSQLI_OPT_INT_AND_FLOAT_NATIVE = UNKNOWN;
  * @cvalue MYSQL_OPT_SSL_VERIFY_SERVER_CERT
  */
 const MYSQLI_OPT_SSL_VERIFY_SERVER_CERT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQL_OPT_COMPRESS
+ */
+const MYSQLI_OPT_COMPRESS = UNKNOWN;
 
 /**
  * @var int
@@ -136,8 +141,8 @@ const MYSQLI_ASYNC = UNKNOWN;
 /**
  * @var int
  * @cvalue MYSQLI_STORE_RESULT_COPY_DATA
- * @deprecated
  */
+#[\Deprecated(since: '8.4', message: 'as the mysqli_store_result() parameter is unused since 8.1')]
 const MYSQLI_STORE_RESULT_COPY_DATA = UNKNOWN;
 
 /* for mysqli_fetch_assoc */
@@ -423,14 +428,14 @@ const MYSQLI_SET_CHARSET_NAME = UNKNOWN;
 /**
  * @var int
  * @cvalue MYSQL_NO_DATA
- * @deprecated
  */
+#[\Deprecated(since: '8.1', message: 'as it was unused')]
 const MYSQLI_NO_DATA = UNKNOWN;
 /**
  * @var int
  * @cvalue MYSQL_DATA_TRUNCATED
- * @deprecated
  */
+#[\Deprecated(since: '8.1', message: 'as it was unused')]
 const MYSQLI_DATA_TRUNCATED = UNKNOWN;
 
 /* reporting */
@@ -469,87 +474,87 @@ const MYSQLI_DEBUG_TRACE_ENABLED = UNKNOWN;
 /**
  * @var int
  * @cvalue SERVER_QUERY_NO_GOOD_INDEX_USED
- * @deprecated
  */
+#[\Deprecated(since: '8.1', message: 'as it was unused')]
 const MYSQLI_SERVER_QUERY_NO_GOOD_INDEX_USED = UNKNOWN;
 /**
  * @var int
  * @cvalue SERVER_QUERY_NO_INDEX_USED
- * @deprecated
  */
+#[\Deprecated(since: '8.1', message: 'as it was unused')]
 const MYSQLI_SERVER_QUERY_NO_INDEX_USED = UNKNOWN;
 /**
  * @var int
  * @cvalue SERVER_QUERY_WAS_SLOW
- * @deprecated
  */
+#[\Deprecated(since: '8.1', message: 'as it was unused')]
 const MYSQLI_SERVER_QUERY_WAS_SLOW = UNKNOWN;
 /**
  * @var int
  * @cvalue SERVER_PS_OUT_PARAMS
- * @deprecated
  */
+#[\Deprecated(since: '8.1', message: 'as it was unused')]
 const MYSQLI_SERVER_PS_OUT_PARAMS = UNKNOWN;
 
 /**
  * @var int
  * @cvalue REFRESH_GRANT
- * @deprecated
  */
+#[\Deprecated(since: '8.4', message: 'as mysqli_refresh() is deprecated')]
 const MYSQLI_REFRESH_GRANT = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_LOG
- * @deprecated
  */
+#[\Deprecated(since: '8.4', message: 'as mysqli_refresh() is deprecated')]
 const MYSQLI_REFRESH_LOG = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_TABLES
- * @deprecated
  */
+#[\Deprecated(since: '8.4', message: 'as mysqli_refresh() is deprecated')]
 const MYSQLI_REFRESH_TABLES = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_HOSTS
- * @deprecated
  */
+#[\Deprecated(since: '8.4', message: 'as mysqli_refresh() is deprecated')]
 const MYSQLI_REFRESH_HOSTS = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_STATUS
- * @deprecated
  */
+#[\Deprecated(since: '8.4', message: 'as mysqli_refresh() is deprecated')]
 const MYSQLI_REFRESH_STATUS = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_THREADS
- * @deprecated
  */
+#[\Deprecated(since: '8.4', message: 'as mysqli_refresh() is deprecated')]
 const MYSQLI_REFRESH_THREADS = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_SLAVE
- * @deprecated
  */
+#[\Deprecated(since: '8.4', message: 'as mysqli_refresh() is deprecated')]
 const MYSQLI_REFRESH_REPLICA = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_SLAVE
- * @deprecated
  */
+#[\Deprecated(since: '8.4', message: 'as mysqli_refresh() is deprecated')]
 const MYSQLI_REFRESH_SLAVE = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_MASTER
- * @deprecated
  */
+#[\Deprecated(since: '8.4', message: 'as mysqli_refresh() is deprecated')]
 const MYSQLI_REFRESH_MASTER = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_BACKUP_LOG
- * @deprecated
  */
+#[\Deprecated(since: '8.4', message: 'as mysqli_refresh() is deprecated')]
 const MYSQLI_REFRESH_BACKUP_LOG = UNKNOWN;
 
 /**
@@ -589,10 +594,7 @@ const MYSQLI_TRANS_COR_RELEASE = UNKNOWN;
  */
 const MYSQLI_TRANS_COR_NO_RELEASE = UNKNOWN;
 
-/**
- * @var bool
- * @deprecated
- */
+#[\Deprecated(since: '8.2', message: 'as it is always false')]
 const MYSQLI_IS_MARIADB = false;
 
 final class mysqli_driver
@@ -795,6 +797,7 @@ class mysqli
      * @tentative-return-type
      * @alias mysqli_get_charset
      */
+    #[\Deprecated(since: '8.6', message: 'did you mean mysqli_character_set_name()?')]
     public function get_charset(): ?object {}
 
     /**
@@ -905,6 +908,11 @@ class mysqli
     public function real_escape_string(string $string): string {}
 
     /**
+     * @alias mysqli_quote_string
+     */
+    public function quote_string(string $string): string {}
+
+    /**
      * @tentative-return-type
      * @alias mysqli_reap_async_query
      */
@@ -988,6 +996,7 @@ class mysqli
      * @tentative-return-type
      * @alias mysqli_stmt_init
      */
+    #[\Deprecated(since: '8.6', message: 'use mysqli::prepare() instead')]
     public function stmt_init(): mysqli_stmt|false {}
 
     /**
@@ -1383,6 +1392,7 @@ function mysqli_error_list(mysqli $mysql): array {}
 function mysqli_stmt_execute(mysqli_stmt $statement, ?array $params = null): bool {}
 
 /** @alias mysqli_stmt_execute */
+#[\Deprecated(since: '8.5', message: "use mysqli_stmt_execute() instead")]
 function mysqli_execute(mysqli_stmt $statement, ?array $params = null): bool {}
 
 function mysqli_execute_query(mysqli $mysql, string $query, ?array $params = null): mysqli_result|bool {}
@@ -1455,6 +1465,7 @@ function mysqli_get_connection_stats(mysqli $mysql): array {}
 function mysqli_get_client_stats(): array {}
 
 /** @refcount 1 */
+#[\Deprecated(since: '8.6', message: 'did you mean mysqli_character_set_name()?')]
 function mysqli_get_charset(mysqli $mysql): ?object {}
 
 /** @refcount 1 */
@@ -1544,6 +1555,8 @@ function mysqli_real_escape_string(mysqli $mysql, string $string): string {}
 /** @alias mysqli_real_escape_string */
 function mysqli_escape_string(mysqli $mysql, string $string): string {}
 
+function mysqli_quote_string(mysqli $mysql, string $string): string {}
+
 function mysqli_real_query(mysqli $mysql, string $query): bool {}
 
 /** @refcount 1 */
@@ -1598,6 +1611,7 @@ function mysqli_stmt_get_result(mysqli_stmt $statement): mysqli_result|false {}
 function mysqli_stmt_get_warnings(mysqli_stmt $statement): mysqli_warning|false {}
 
 /** @refcount 1 */
+#[\Deprecated(since: '8.6', message: 'use mysqli_prepare() instead')]
 function mysqli_stmt_init(mysqli $mysql): mysqli_stmt|false {}
 
 /** @refcount 1 */

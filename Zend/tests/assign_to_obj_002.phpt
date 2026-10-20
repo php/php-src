@@ -5,8 +5,8 @@ Assign to $this leaks when $this not defined
 
 try {
     $this->a = new stdClass;
-} catch (Error $e) { echo $e->getMessage(), "\n"; }
+} catch (Throwable $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
 
 ?>
 --EXPECT--
-Using $this when not in object context
+Error: Using $this when not in object context

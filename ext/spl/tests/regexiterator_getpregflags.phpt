@@ -26,8 +26,8 @@ $r = new TestRegexIterator(new myIterator, $rege);
 
 $r->setPregFlags(PREG_OFFSET_CAPTURE);
 
-echo is_long($r->getPregFlags());
+var_dump(is_int($r->getPregFlags()));
 
 ?>
 --EXPECT--
-1
+bool(true)

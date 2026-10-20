@@ -27,10 +27,10 @@ var_dump(opendir('idonotexist'));
 
 -- Pass a non-existent absolute path: --
 
-Warning: opendir(%s/idonotexist): Failed to open directory: %s in %s on line %d
+Warning: opendir(): Failed to open directory: %s in %s on line %d
 bool(false)
 
 -- Pass a non-existent relative path: --
 
-Warning: opendir(idonotexist): Failed to open directory: %s in %s on line %d
+Warning: opendir(): Failed to open directory: %s in %s on line %d
 bool(false)

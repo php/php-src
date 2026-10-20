@@ -2,7 +2,7 @@
 SplFileObject::fscanf function - basic functionality test
 --FILE--
 <?php
-$obj = New SplFileObject(__DIR__.'/SplFileObject_testinput.csv');
+$obj = New SplFileObject(__DIR__.'/SplFileObject_testinput.txt');
 var_dump($obj->fscanf('%s'));
 ?>
 --EXPECT--

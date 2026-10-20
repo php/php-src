@@ -267,4 +267,3 @@ string(41) "array (
   0 => 'string',
   1 => 'test',
 )"
-

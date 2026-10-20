@@ -87,12 +87,12 @@ string(%d) "contents read"
 
 -- Iteration 5 --
 
-Warning: file_get_contents(%sfileGetContentsVar7Win32.dir\fileGetContentsVar7Win32Sub\..\\\fileGetContentsVar7Win32Sub\\..\\..\fileGetContentsVar7Win32Sub\FileGetContentsVar7Win32.tmp): Failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 6 --
 
-Warning: file_get_contents(%sfileGetContentsVar7Win32.dir\fileGetContentsVar7Win32Sub\BADDIR\FileGetContentsVar7Win32.tmp): Failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 7 --
@@ -109,7 +109,7 @@ string(%d) "contents read"
 
 -- Iteration 11 --
 
-Warning: file_get_contents(BADDIR\FileGetContentsVar7Win32.tmp): Failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 12 --

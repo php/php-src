@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Sascha Schumann <sascha@schumann.cx>                         |
    +----------------------------------------------------------------------+
@@ -37,7 +35,6 @@
 #include "http_log.h"
 #include "http_main.h"
 #include "util_script.h"
-#include "http_core.h"
 
 #ifdef PHP_AP_DEBUG
 #define phpapdebug(a) fprintf a
@@ -125,15 +122,15 @@ static bool should_overwrite_per_dir_entry(HashTable *target_ht, zval *zv, zend_
 	php_dir_entry *orig_per_dir_entry;
 
 	if ((orig_per_dir_entry = zend_hash_find_ptr(target_ht, hash_key->key)) == NULL) {
-		return 1; /* does not exist in dest, copy from source */
+		return true; /* does not exist in dest, copy from source */
 	}
 
 	if (new_per_dir_entry->status >= orig_per_dir_entry->status) {
 		/* use new entry */
 		phpapdebug((stderr, "ADDING/OVERWRITING %s (%d vs. %d)\n", ZSTR_VAL(hash_key->key), new_per_dir_entry->status, orig_per_dir_entry->status));
-		return 1;
+		return true;
 	} else {
-		return 0;
+		return false;
 	}
 }
 

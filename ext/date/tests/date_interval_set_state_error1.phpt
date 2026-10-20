@@ -14,7 +14,7 @@ try {
         ]
     );
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump($interval);
@@ -43,7 +43,7 @@ object(DateInterval)#%d (%d) {
   ["from_string"]=>
   bool(false)
 }
-Unknown or bad format (wrong) at position 0 (w) while unserializing: The timezone could not be found in the database
+Error: Unknown or bad format (wrong) at position 0 (w) while unserializing: The timezone could not be found in the database
 object(DateInterval)#%d (%d) {
   ["y"]=>
   int(1)

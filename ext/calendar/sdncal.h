@@ -69,17 +69,17 @@
 
 /* Gregorian calendar conversions. */
 void SdnToGregorian(zend_long sdn, int *pYear, int *pMonth, int *pDay);
-zend_long GregorianToSdn(int year, int month, int day);
+zend_long GregorianToSdn(zend_long year, zend_long month, zend_long day);
 extern const char * const MonthNameShort[13];
 extern const char * const MonthNameLong[13];
 
 /* Julian calendar conversions. */
 void SdnToJulian(zend_long sdn, int *pYear, int *pMonth, int *pDay);
-zend_long JulianToSdn(int year, int month, int day);
+zend_long JulianToSdn(zend_long year, zend_long month, zend_long day);
 
 /* Jewish calendar conversions. */
 void SdnToJewish(zend_long sdn, int *pYear, int *pMonth, int *pDay);
-zend_long JewishToSdn(int year, int month, int day);
+zend_long JewishToSdn(zend_long year, zend_long month, zend_long day);
 extern const char * const JewishMonthName[14];
 extern const char * const JewishMonthNameLeap[14];
 extern const char * const JewishMonthHebName[14];
@@ -88,7 +88,7 @@ extern const int monthsPerYear[19];
 
 /* French republic calendar conversions. */
 void SdnToFrench(zend_long sdn, int *pYear, int *pMonth, int *pDay);
-zend_long FrenchToSdn(int inputYear, int inputMonth, int inputDay);
+zend_long FrenchToSdn(zend_long inputYear, zend_long inputMonth, zend_long inputDay);
 extern const char * const FrenchMonthName[14];
 
 /* Islamic calendar conversions. */

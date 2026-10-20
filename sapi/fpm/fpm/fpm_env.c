@@ -20,47 +20,6 @@ static size_t fpm_env_argv_len = 0;
 #endif
 #endif
 
-#ifndef HAVE_SETENV
-# ifdef (__sparc__ || __sparc)
-int setenv(char *name, char *value, int clobber) /* {{{ */
-{
-	char   *malloc();
-	char   *getenv();
-	char   *cp;
-
-	if (clobber == 0 && getenv(name) != 0) {
-		return 0;
-	}
-
-	size_t length = strlen(name) + strlen(value) + 2;
-	if ((cp = malloc(length)) == 0) {
-		return 1;
-	}
-	snprintf(cp, length, "%s=%s", name, value);
-	return putenv(cp);
-}
-/* }}} */
-# else
-int setenv(char *name, char *value, int overwrite) /* {{{ */
-{
-	int name_len = strlen(name);
-	int value_len = strlen(value);
-	char *var = alloca(name_len + 1 + value_len + 1);
-
-	memcpy(var, name, name_len);
-
-	var[name_len] = '=';
-
-	memcpy(var + name_len + 1, value, value_len);
-
-	var[name_len + 1 + value_len] = '\0';
-
-	return putenv(var);
-}
-/* }}} */
-# endif
-#endif
-
 #ifndef HAVE_CLEARENV
 void clearenv(void)
 {
@@ -81,40 +40,6 @@ void clearenv(void)
 	}
 
 }
-#endif
-
-#ifndef HAVE_UNSETENV
-void unsetenv(const char *name) /* {{{ */
-{
-	if(getenv(name) != NULL) {
-		int ct = 0;
-		int del = 0;
-
-		while(environ[ct] != NULL) {
-			if (nvmatch(name, environ[ct]) != 0) del=ct; /* <--- WTF?! */
-			{ ct++; } /* <--- WTF?! */
-		}
-		/* isn't needed free here?? */
-		environ[del] = environ[ct-1];
-		environ[ct-1] = NULL;
-	}
-}
-/* }}} */
-
-static char * nvmatch(char *s1, char *s2) /* {{{ */
-{
-	while(*s1 == *s2++)
-	{
-		if(*s1++ == '=') {
-			return s2;
-		}
-	}
-	if(*s1 == '\0' && *(s2-1) == '=') {
-		return s2;
-	}
-	return NULL;
-}
-/* }}} */
 #endif
 
 void fpm_env_setproctitle(char *title) /* {{{ */

@@ -9,5 +9,5 @@ gd
 var_dump( imageloadfont('\src\invalidfile.font') );
 ?>
 --EXPECTF--
-Warning: imageloadfont(\src\invalidfile.font): Failed to open stream: No such file or directory in %s on line %d
+Warning: imageloadfont(): Failed to open stream: No such file or directory in %s on line %d
 bool(false)

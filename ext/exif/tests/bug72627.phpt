@@ -4,15 +4,15 @@ Bug #72627 (Memory Leakage In exif_process_IFD_in_TIFF)
 exif
 --FILE--
 <?php
-    $exif = exif_read_data(__DIR__ . '/bug72627.tiff',0,0,true);
+    $exif = exif_read_data(__DIR__ . '/bug72627.tiff',0,false,true);
     var_dump($exif);
 ?>
 --EXPECTF--
-Warning: exif_read_data(%s): Thumbnail goes IFD boundary or end of file reached in %sbug72627.php on line %d
+Warning: exif_read_data(): Thumbnail goes IFD boundary or end of file reached in %sbug72627.php on line %d
 
-Warning: exif_read_data(%s): Error in TIFF: filesize(x04E2) less than start of IFD dir(x829A0004) in %sbug72627.php on line %d
+Warning: exif_read_data(): Error in TIFF: filesize(x04E2) less than start of IFD dir(x829A0004) in %sbug72627.php on line %d
 
-Warning: exif_read_data(%s): Thumbnail goes IFD boundary or end of file reached in %sbug72627.php on line %d
+Warning: exif_read_data(): Thumbnail goes IFD boundary or end of file reached in %sbug72627.php on line %d
 array(11) {
   ["FileName"]=>
   string(13) "bug72627.tiff"

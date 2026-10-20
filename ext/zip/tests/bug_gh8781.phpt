@@ -16,4 +16,3 @@ var_dump(is_file($file));
 --EXPECT--
 bool(true)
 bool(false)
-

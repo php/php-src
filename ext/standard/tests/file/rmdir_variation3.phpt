@@ -52,8 +52,11 @@ foreach($dirs as $dir) {
    }
 }
 
-rmdir($workDir);
-
+?>
+--CLEAN--
+<?php
+@rmdir("rmdirVar3.tmp/aSubDir");
+@rmdir("rmdirVar3.tmp");
 ?>
 --EXPECTF--
 *** Testing rmdir() : variation ***
@@ -65,10 +68,10 @@ Directory removed
 Directory removed
 -- removing rmdirVar3.tmp/../BADDIR/aSubDir --
 
-Warning: rmdir(rmdirVar3.tmp/../BADDIR/aSubDir): No such file or directory in %s on line %d
+Warning: rmdir(): No such file or directory in %s on line %d
 -- removing BADDIR/aSubDir --
 
-Warning: rmdir(BADDIR/aSubDir): No such file or directory in %s on line %d
+Warning: rmdir(): No such file or directory in %s on line %d
 -- removing %s/rmdirVar3.tmp/aSubDir --
 Directory removed
 -- removing %s/./rmdirVar3.tmp/aSubDir --
@@ -77,7 +80,7 @@ Directory removed
 Directory removed
 -- removing %s/BADDIR/aSubDir --
 
-Warning: rmdir(%s/BADDIR/aSubDir): No such file or directory in %s on line %d
+Warning: rmdir(): No such file or directory in %s on line %d
 -- removing rmdirVar3.tmp/aSubDir/ --
 Directory removed
 -- removing %s/rmdirVar3.tmp/aSubDir/ --

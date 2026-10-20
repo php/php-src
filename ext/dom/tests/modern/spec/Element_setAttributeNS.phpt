@@ -20,8 +20,8 @@ echo "--- name validation ---\n";
 
 try {
     $container->setAttributeNS("urn:a", "a:b:c", "");
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "--- ns attributes with same namespace but different prefix ---\n";
@@ -53,7 +53,7 @@ string(5) "xmlns"
 string(9) "xmlns:foo"
 string(29) "http://www.w3.org/2000/xmlns/"
 --- name validation ---
-Invalid Character Error
+DOMException: Invalid Character Error
 --- ns attributes with same namespace but different prefix ---
 <container y:foo="2"></container>
 Attr: y:foo

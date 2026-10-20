@@ -33,7 +33,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: is_simh.c,v 1.10 2023/07/27 19:39:55 christos Exp $")
+FILE_RCSID("@(#)$File: is_simh.c,v 1.11 2025/05/31 23:31:45 christos Exp $")
 #endif
 
 #include <string.h>
@@ -91,15 +91,18 @@ swap4(uint32_t sv)
 
 
 static uint32_t
-getlen(const unsigned char **uc)
+getlen(const unsigned char **uc, int *err)
 {
 	uint32_t n;
 	memcpy(&n, *uc, sizeof(n));
+	*err = 0;
 	*uc += sizeof(n);
 	if (NEED_SWAP)
 		n = swap4(n);
 	if (n == 0xffffffff)	/* check for End of Medium */
 		return n;
+	/* Check bits 25 to 28 are not used */
+	*err = ((n & 0x00ffffff) != (n & 0x0fffffff));
 	n &= 0x00ffffff;	/* keep only the record len */
 	if (n & 1)
 		n++;
@@ -112,11 +115,14 @@ simh_parse(const unsigned char *uc, const unsigned char *ue)
 	uint32_t nbytes, cbytes;
 	const unsigned char *orig_uc = uc;
 	size_t nt = 0, nr = 0;
+	int err = 0;
 
 	(void)memcpy(simh_bo.s, "\01\02\03\04", 4);
 
 	while (ue - uc >= CAST(ptrdiff_t, sizeof(nbytes))) {
-		nbytes = getlen(&uc);
+		nbytes = getlen(&uc, &err);
+		if (err)
+			return 0;
 		if ((nt > 0 || nr > 0) && nbytes == 0xFFFFFFFF)
 			/* EOM after at least one record or tapemark */
 			break;
@@ -132,7 +138,9 @@ simh_parse(const unsigned char *uc, const unsigned char *ue)
 		uc += nbytes;
 		if (ue - uc < CAST(ptrdiff_t, sizeof(nbytes)))
 			break;
-		cbytes = getlen(&uc);
+		cbytes = getlen(&uc, &err);
+		if (err)
+			return 0;
 		if (nbytes != cbytes)
 			return 0;
 		nr++;

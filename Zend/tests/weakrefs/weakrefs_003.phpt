@@ -10,19 +10,19 @@ unset($wr->disallow);
 
 try {
     $wr->disallow = "writes";
-} catch (Error $ex) {
-    var_dump($ex->getMessage());
+} catch (Throwable $ex) {
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 
 try {
     $disallow = &$wr->disallowed;
-} catch (Error $ex) {
-    var_dump($ex->getMessage());
+} catch (Throwable $ex) {
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
 Warning: Undefined property: WeakReference::$disallow in %s on line %d
 NULL
 bool(false)
-string(55) "Cannot create dynamic property WeakReference::$disallow"
-string(57) "Cannot create dynamic property WeakReference::$disallowed"
+Error: Cannot create dynamic property WeakReference::$disallow
+Error: Cannot create dynamic property WeakReference::$disallowed

@@ -8,4 +8,3 @@ var_dump(new DOMText()->wholeText);
 ?>
 --EXPECT--
 string(0) ""
-

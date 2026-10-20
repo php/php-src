@@ -11,20 +11,20 @@ try
 {
     bar('first try');
 }
-catch (Exception $e)
+catch (Throwable $e)
 {
-    print $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try
 {
     call_user_func('bar','second try');
 }
-catch (Exception $e)
+catch (Throwable $e)
 {
-    print $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-This is an exception from bar(first try).
-This is an exception from bar(second try).
+Exception: This is an exception from bar(first try).
+Exception: This is an exception from bar(second try).

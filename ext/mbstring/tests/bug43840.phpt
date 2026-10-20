@@ -21,13 +21,13 @@ foreach($offsets as $i) {
     try {
         var_dump( mb_strpos($string_mb, $needle, $i, 'UTF-8') );
     } catch (\ValueError $e) {
-        echo $e->getMessage() . \PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
     echo"--ASCII String:--\n";
     try {
         var_dump(mb_strpos('This is na English ta', 'a', $i));
     } catch (\ValueError $e) {
-        echo $e->getMessage() . \PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 }
 ?>
@@ -46,18 +46,18 @@ bool(false)
 
 -- Offset is 22 --
 --Multibyte String:--
-mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --ASCII String:--
-mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 -- Offset is 53 --
 --Multibyte String:--
-mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --ASCII String:--
-mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 -- Offset is 54 --
 --Multibyte String:--
-mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --ASCII String:--
-mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)

@@ -125,6 +125,10 @@ function gmp_pow(GMP|int|string $num, int $exponent): GMP {}
 
 function gmp_powm(GMP|int|string $num, GMP|int|string $exponent, GMP|int|string $modulus): GMP {}
 
+#ifdef HAVE___GMPZ_POWM_SEC
+function gmp_powm_sec(GMP|int|string $num, GMP|int|string $exponent, GMP|int|string $modulus): GMP {}
+#endif
+
 function gmp_perfect_square(GMP|int|string $num): bool {}
 
 function gmp_perfect_power(GMP|int|string $num): bool {}
@@ -182,5 +186,10 @@ function gmp_popcount(GMP|int|string $num): int {}
 function gmp_hamdist(GMP|int|string $num1, GMP|int|string $num2): int {}
 
 function gmp_nextprime(GMP|int|string $num): GMP {}
+
+#ifdef HAVE___GMPZ_PREVPRIME
+/** @param bool $definitely_prime */
+function gmp_prevprime(GMP|int|string $num, &$definitely_prime = null): GMP {}
+#endif
 
 function gmp_binomial(GMP|int|string $n, int $k): GMP {}

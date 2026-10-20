@@ -14,11 +14,11 @@ $options = ['flags' => FILTER_FLAG_ALLOW_THOUSAND, 'options' => ['thousand' => '
 try {
     filter_var('12345', FILTER_VALIDATE_FLOAT, $options);
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 float(1000)
 float(1234.567)
-filter_var(): "thousand" option must not be empty
+ValueError: filter_var(): "thousand" option must not be empty

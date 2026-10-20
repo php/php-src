@@ -7,6 +7,7 @@ ev 1 + 2
 c
 q
 --EXPECTF--
+Deprecated: Returning from a finally block is deprecated in %s on line %d
 [Successful compilation of %s]
 prompt> handle first
 [Uncaught Error in %s on line 16: Call to undefined function foo()]
@@ -22,6 +23,8 @@ Stack trace:
 #0 %s(22): {closure:%s:%d}()
 #1 {main}
 [Script ended normally]
+
+Deprecated: Returning from a finally block is deprecated in %s on line %d
 prompt> 
 --FILE--
 <?php

@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Marcus Boerger <helly@php.net>                               |
    +----------------------------------------------------------------------+
@@ -90,7 +88,7 @@
 #include <locale.h>
 #ifdef ZTS
 #include "ext/standard/php_string.h"
-#define LCONV_DECIMAL_POINT (*lconv.decimal_point)
+#define LCONV_DECIMAL_POINT localeconv_decimal_point()
 #else
 #define LCONV_DECIMAL_POINT (*lconv->decimal_point)
 #endif
@@ -198,9 +196,7 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 	char num_buf[NUM_BUF_SIZE];
 	char char_buf[2];			/* for printing %% and %<unknown> */
 
-#ifdef ZTS
-	struct lconv lconv;
-#else
+#ifndef ZTS
 	struct lconv *lconv = NULL;
 #endif
 
@@ -313,19 +309,11 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 					break;
 				case 'j':
 					fmt++;
-#if SIZEOF_INTMAX_T
 					modifier = LM_INTMAX_T;
-#else
-					modifier = LM_SIZE_T;
-#endif
 					break;
 				case 't':
 					fmt++;
-#if SIZEOF_PTRDIFF_T
 					modifier = LM_PTRDIFF_T;
-#else
-					modifier = LM_SIZE_T;
-#endif
 					break;
 				case 'p':
 				{
@@ -372,6 +360,7 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 					break;
 				}
 				case 'S': {
+format_zend_string:;
 					zend_string *str = va_arg(ap, zend_string*);
 					s_len = ZSTR_LEN(str);
 					s = ZSTR_VAL(str);
@@ -398,16 +387,12 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 							i_num = (int64_t) va_arg(ap, unsigned long long int);
 							break;
 #endif
-#if SIZEOF_INTMAX_T
 						case LM_INTMAX_T:
 							i_num = (int64_t) va_arg(ap, uintmax_t);
 							break;
-#endif
-#if SIZEOF_PTRDIFF_T
 						case LM_PTRDIFF_T:
 							i_num = (int64_t) va_arg(ap, ptrdiff_t);
 							break;
-#endif
 					}
 					/*
 					 * The rest also applies to other integer formats, so fall
@@ -430,27 +415,19 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 								i_num = (int64_t) va_arg(ap, long int);
 								break;
 							case LM_SIZE_T:
-#if SIZEOF_SSIZE_T
 								i_num = (int64_t) va_arg(ap, ssize_t);
-#else
-								i_num = (int64_t) va_arg(ap, size_t);
-#endif
 								break;
 #if SIZEOF_LONG_LONG
 							case LM_LONG_LONG:
 								i_num = (int64_t) va_arg(ap, long long int);
 								break;
 #endif
-#if SIZEOF_INTMAX_T
 							case LM_INTMAX_T:
 								i_num = (int64_t) va_arg(ap, intmax_t);
 								break;
-#endif
-#if SIZEOF_PTRDIFF_T
 							case LM_PTRDIFF_T:
 								i_num = (int64_t) va_arg(ap, ptrdiff_t);
 								break;
-#endif
 						}
 					}
 					s = ap_php_conv_10(i_num, (*fmt) == 'u', &is_negative,
@@ -486,16 +463,12 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 							ui_num = (uint64_t) va_arg(ap, unsigned long long int);
 							break;
 #endif
-#if SIZEOF_INTMAX_T
 						case LM_INTMAX_T:
 							ui_num = (uint64_t) va_arg(ap, uintmax_t);
 							break;
-#endif
-#if SIZEOF_PTRDIFF_T
 						case LM_PTRDIFF_T:
 							ui_num = (uint64_t) va_arg(ap, ptrdiff_t);
 							break;
-#endif
 					}
 					s = ap_php_conv_p2(ui_num, 3, *fmt,
 								&num_buf[NUM_BUF_SIZE], &s_len);
@@ -526,16 +499,12 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 							ui_num = (uint64_t) va_arg(ap, unsigned long long int);
 							break;
 #endif
-#if SIZEOF_INTMAX_T
 						case LM_INTMAX_T:
 							ui_num = (uint64_t) va_arg(ap, uintmax_t);
 							break;
-#endif
-#if SIZEOF_PTRDIFF_T
 						case LM_PTRDIFF_T:
 							ui_num = (uint64_t) va_arg(ap, ptrdiff_t);
 							break;
-#endif
 					}
 					s = ap_php_conv_p2(ui_num, 4, *fmt,
 								&num_buf[NUM_BUF_SIZE], &s_len);
@@ -586,9 +555,7 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 						s = "inf";
 						s_len = 3;
 					} else {
-#ifdef ZTS
-						localeconv_r(&lconv);
-#else
+#ifndef ZTS
 						if (!lconv) {
 							lconv = localeconv();
 						}
@@ -644,9 +611,7 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 					/*
 					 * * We use &num_buf[ 1 ], so that we have room for the sign
 					 */
-#ifdef ZTS
-					localeconv_r(&lconv);
-#else
+#ifndef ZTS
 					if (!lconv) {
 						lconv = localeconv();
 					}
@@ -695,6 +660,24 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 					 * we print "%p" to indicate that we don't handle "%p".
 					 */
 				case 'p':
+					/* %p[alnum]+ extensions */
+					switch (*(fmt+1)) {
+						case 'S':
+							/* zend_string* */
+							fmt++;
+							goto format_zend_string;
+						case 'p':
+							/* pointer */
+							fmt++;
+							break;
+						default:
+							if (isalnum(*(fmt+1))) {
+								zend_error_noreturn(E_CORE_ERROR,
+									"Invalid printf specifier \"p%c\"", *(fmt+1));
+							}
+							break;
+					}
+					/* Normal %p */
 					if (sizeof(char *) <= sizeof(uint64_t)) {
 						ui_num = (uint64_t)((size_t) va_arg(ap, char *));
 						s = ap_php_conv_p2(ui_num, 4, 'x',

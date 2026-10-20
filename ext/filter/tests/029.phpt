@@ -17,19 +17,19 @@ var_dump(filter_var("", FILTER_CALLBACK, array("options"=>"test")));
 try {
     filter_var("qwe", FILTER_CALLBACK, array("options"=>"no such func"));
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     filter_var("qwe", FILTER_CALLBACK, array("options"=>""));
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     filter_var("qwe", FILTER_CALLBACK);
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 /* Simple class method callback */
@@ -68,7 +68,7 @@ function test3($var) {
 try {
     var_dump(filter_var("data", FILTER_CALLBACK, array("options"=>"test3")));
 } catch (Exception $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done\n";
@@ -77,9 +77,9 @@ echo "Done\n";
 string(4) "DATA"
 string(46) "~!@#$%^&*()_QWERTYUIOPASDFGHJKLZXCVBNM<>>?"}{:"
 string(0) ""
-filter_var(): Option must be a valid callback
-filter_var(): Option must be a valid callback
-filter_var(): Option must be a valid callback
+TypeError: filter_var(): Option must be a valid callback
+TypeError: filter_var(): Option must be a valid callback
+TypeError: filter_var(): Option must be a valid callback
 string(4) "data"
 string(46) "~!@#$%^&*()_qwertyuiopasdfghjklzxcvbnm<>>?"}{:"
 string(0) ""
@@ -95,5 +95,5 @@ NULL
 
 Warning: test2(): Argument #1 ($var) must be passed by reference, value given in %s on line %d
 NULL
-string(4) "test"
+Exception: test
 Done

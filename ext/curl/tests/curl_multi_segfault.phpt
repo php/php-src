@@ -47,7 +47,6 @@ if (false === getenv('PHP_CURL_FTP_REMOTE_PASSWD'))  exit("skip PHP_CURL_FTP_REM
 
   var_dump(is_string(curl_multi_getcontent($ch)));
   curl_multi_remove_handle($cmh, $ch);
-  curl_close($ch);
   curl_multi_close($cmh);
 ?>
 --EXPECT--

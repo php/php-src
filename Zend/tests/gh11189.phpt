@@ -18,6 +18,7 @@ ob_start(function() {
         $a[] = 2;
     }
     fwrite(STDOUT, "Success");
+    return '';
 });
 
 $a = [];

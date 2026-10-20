@@ -10,10 +10,10 @@ function foo(): mixed
 
 try {
     foo();
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-foo(): Return value must be of type mixed, none returned
+TypeError: foo(): Return value must be of type mixed, none returned

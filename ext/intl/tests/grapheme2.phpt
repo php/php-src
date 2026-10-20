@@ -590,6 +590,8 @@ function ut_main()
         array( $char_a_ring_nfd . "bcde" . $char_a_ring_nfd . "f", 4, 5, 11, "de" . $char_a_ring_nfd . "f" ),
         array( $char_a_ring_nfd . "bcde" . $char_a_ring_nfd . "f", 4, -6, 11, "de" . $char_a_ring_nfd . "f" ),
 
+        array( "\x95\x00a\x85b", 1, 0, 2, "\x00" ),
+
         array( $char_a_ring_nfd . $char_o_diaeresis_nfd . $char_o_diaeresis_nfd, 3, $char_a_ring_nfd . $char_o_diaeresis_nfd . $char_o_diaeresis_nfd ),
         array( $char_a_ring_nfd . $char_o_diaeresis_nfd . $char_o_diaeresis_nfd, 2, $char_a_ring_nfd . $char_o_diaeresis_nfd ),
         array( $char_a_ring_nfd . $char_o_diaeresis_nfd . "c", 1, $char_a_ring_nfd . "" ),
@@ -1134,6 +1136,7 @@ extract from "a%CC%8Abcde" "2" graphemes - grapheme_extract starting at byte pos
 extract from "a%CC%8Abcde" "2" graphemes - grapheme_extract starting at byte position -7 with $next = a%CC%8Ab == a%CC%8Ab $next=4 == 4 
 extract from "a%CC%8Abcdea%CC%8Af" "4" graphemes - grapheme_extract starting at byte position 5 with $next = dea%CC%8Af == dea%CC%8Af $next=11 == 11 
 extract from "a%CC%8Abcdea%CC%8Af" "4" graphemes - grapheme_extract starting at byte position -6 with $next = dea%CC%8Af == dea%CC%8Af $next=11 == 11 
+extract from "%95%00a%85b" "1" graphemes - grapheme_extract starting at byte position 0 with $next = %00 == %00 $next=2 == 2 
 extract from "a%CC%8Ao%CC%88o%CC%88" "3" graphemes - grapheme_extract = a%CC%8Ao%CC%88o%CC%88 == a%CC%8Ao%CC%88o%CC%88
 extract from "a%CC%8Ao%CC%88o%CC%88" "2" graphemes - grapheme_extract = a%CC%8Ao%CC%88 == a%CC%8Ao%CC%88
 extract from "a%CC%8Ao%CC%88c" "1" graphemes - grapheme_extract = a%CC%8A == a%CC%8A

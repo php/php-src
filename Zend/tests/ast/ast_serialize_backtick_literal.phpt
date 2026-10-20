@@ -7,10 +7,10 @@ zend.assertions=1
 
 try {
     assert(false && `echo -n ""`);
-} catch (AssertionError $e) {
-    echo 'assert(): ', $e->getMessage(), ' failed', PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-assert(): assert(false && `echo -n ""`) failed
+AssertionError: assert(false && `echo -n ""`)

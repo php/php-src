@@ -3,7 +3,7 @@ Test session_save_path() function : variation
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc');?>
+<?php include 'skipif.inc';?>
 --INI--
 open_basedir=.
 session.save_handler=files
@@ -16,14 +16,9 @@ ob_start();
 
 echo "*** Testing session_save_path() : variation ***\n";
 $initdir = __DIR__;
-$sessions = ($initdir."/session_save_path_variation4");
+$sessions = $initdir . "/session_save_path_variation4";
 
 chdir($initdir);
-
-// Delete the existing directory
-if (file_exists($sessions) === TRUE) {
-    @rmdir($sessions);
-}
 
 var_dump(mkdir($sessions));
 var_dump(chdir($sessions));
@@ -39,9 +34,7 @@ ob_end_flush();
 ?>
 --CLEAN--
 <?php
-$initdir = __DIR__;
-$sessions = ($initdir."/session_save_path_variation4");
-rmdir($sessions);
+rmdir(__DIR__ . "/session_save_path_variation4");
 ?>
 --EXPECTF--
 *** Testing session_save_path() : variation ***

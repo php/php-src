@@ -13,6 +13,7 @@ class FailingHandler implements SessionHandlerInterface, SessionIdInterface
     public function write($id, $data): bool { return true; }
     public function destroy($id): bool { return true; }
     public function gc($max_lifetime): int|false { return 0; }
+    public function validateId($id): bool { return true; }
 
     #[ReturnTypeWillChange]
     public function create_sid()

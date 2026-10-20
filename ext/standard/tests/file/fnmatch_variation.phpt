@@ -64,8 +64,8 @@ for( $i = 0; $i<count($pattern_arr); $i++ ) {
   echo "-- Iteration $i --\n";
   try {
     var_dump( fnmatch($pattern_arr[$i], $file_name) );
-  } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+  } catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
   }
 }
 unlink($file_name);
@@ -80,8 +80,8 @@ function match_( $pattern, $string ) {
     for( $j = 0; $j<count($string); $j++ ) {
       try {
         var_dump( fnmatch($pattern[$i], $string[$j]) );
-      } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+      } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
       }
     }
   }
@@ -185,9 +185,9 @@ bool(false)
 -- Iteration 22 --
 bool(false)
 -- Iteration 23 --
-fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+ValueError: fnmatch(): Argument #1 ($pattern) must not contain any null bytes
 -- Iteration 24 --
-fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+ValueError: fnmatch(): Argument #1 ($pattern) must not contain any null bytes
 -- Iteration 25 --
 bool(false)
 -- Iteration 26 --
@@ -261,44 +261,44 @@ bool(true)
 --- With Strings ---
 -- Iteration 0 --
 bool(true)
-fnmatch(): Argument #2 ($filename) must not contain any null bytes
+ValueError: fnmatch(): Argument #2 ($filename) must not contain any null bytes
 bool(true)
-fnmatch(): Argument #2 ($filename) must not contain any null bytes
+ValueError: fnmatch(): Argument #2 ($filename) must not contain any null bytes
 bool(false)
 bool(true)
 -- Iteration 1 --
-fnmatch(): Argument #1 ($pattern) must not contain any null bytes
-fnmatch(): Argument #1 ($pattern) must not contain any null bytes
-fnmatch(): Argument #1 ($pattern) must not contain any null bytes
-fnmatch(): Argument #1 ($pattern) must not contain any null bytes
-fnmatch(): Argument #1 ($pattern) must not contain any null bytes
-fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+ValueError: fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+ValueError: fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+ValueError: fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+ValueError: fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+ValueError: fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+ValueError: fnmatch(): Argument #1 ($pattern) must not contain any null bytes
 -- Iteration 2 --
 bool(true)
-fnmatch(): Argument #2 ($filename) must not contain any null bytes
+ValueError: fnmatch(): Argument #2 ($filename) must not contain any null bytes
 bool(true)
-fnmatch(): Argument #2 ($filename) must not contain any null bytes
+ValueError: fnmatch(): Argument #2 ($filename) must not contain any null bytes
 bool(false)
 bool(true)
 -- Iteration 3 --
-fnmatch(): Argument #1 ($pattern) must not contain any null bytes
-fnmatch(): Argument #1 ($pattern) must not contain any null bytes
-fnmatch(): Argument #1 ($pattern) must not contain any null bytes
-fnmatch(): Argument #1 ($pattern) must not contain any null bytes
-fnmatch(): Argument #1 ($pattern) must not contain any null bytes
-fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+ValueError: fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+ValueError: fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+ValueError: fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+ValueError: fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+ValueError: fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+ValueError: fnmatch(): Argument #1 ($pattern) must not contain any null bytes
 -- Iteration 4 --
 bool(false)
-fnmatch(): Argument #2 ($filename) must not contain any null bytes
+ValueError: fnmatch(): Argument #2 ($filename) must not contain any null bytes
 bool(false)
-fnmatch(): Argument #2 ($filename) must not contain any null bytes
+ValueError: fnmatch(): Argument #2 ($filename) must not contain any null bytes
 bool(true)
 bool(false)
 -- Iteration 5 --
 bool(true)
-fnmatch(): Argument #2 ($filename) must not contain any null bytes
+ValueError: fnmatch(): Argument #2 ($filename) must not contain any null bytes
 bool(true)
-fnmatch(): Argument #2 ($filename) must not contain any null bytes
+ValueError: fnmatch(): Argument #2 ($filename) must not contain any null bytes
 bool(false)
 bool(true)
 
@@ -397,22 +397,22 @@ bool(true)
 --- With NULL ---
 -- Iteration 0 --
 bool(true)
-fnmatch(): Argument #2 ($filename) must not contain any null bytes
+ValueError: fnmatch(): Argument #2 ($filename) must not contain any null bytes
 bool(false)
 bool(false)
 -- Iteration 1 --
-fnmatch(): Argument #1 ($pattern) must not contain any null bytes
-fnmatch(): Argument #1 ($pattern) must not contain any null bytes
-fnmatch(): Argument #1 ($pattern) must not contain any null bytes
-fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+ValueError: fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+ValueError: fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+ValueError: fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+ValueError: fnmatch(): Argument #1 ($pattern) must not contain any null bytes
 -- Iteration 2 --
 bool(false)
-fnmatch(): Argument #2 ($filename) must not contain any null bytes
+ValueError: fnmatch(): Argument #2 ($filename) must not contain any null bytes
 bool(true)
 bool(false)
 -- Iteration 3 --
 bool(false)
-fnmatch(): Argument #2 ($filename) must not contain any null bytes
+ValueError: fnmatch(): Argument #2 ($filename) must not contain any null bytes
 bool(false)
 bool(true)
 

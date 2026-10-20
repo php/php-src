@@ -1,7 +1,6 @@
 --TEST--
 GitHub #7723 (Fix error message allocation of PDO PgSQL)
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Ard Biesheuvel <abies@php.net>                               |
   +----------------------------------------------------------------------+
@@ -55,11 +53,14 @@ zend_module_entry pdo_firebird_module_entry = { /* {{{ */
 ZEND_GET_MODULE(pdo_firebird)
 #endif
 
+#define REGISTER_PDO_FB_CLASS_CONST_LONG_DEPRECATED_ALIAS_85(base_name, value) \
+		REGISTER_PDO_CLASS_CONST_LONG_DEPRECATED_ALIAS_85(base_name, "FB_", "Pdo\\Firebird::", value)
+
 PHP_MINIT_FUNCTION(pdo_firebird) /* {{{ */
 {
-	REGISTER_PDO_CLASS_CONST_LONG("FB_ATTR_DATE_FORMAT", (zend_long) PDO_FB_ATTR_DATE_FORMAT);
-	REGISTER_PDO_CLASS_CONST_LONG("FB_ATTR_TIME_FORMAT", (zend_long) PDO_FB_ATTR_TIME_FORMAT);
-	REGISTER_PDO_CLASS_CONST_LONG("FB_ATTR_TIMESTAMP_FORMAT", (zend_long) PDO_FB_ATTR_TIMESTAMP_FORMAT);
+	REGISTER_PDO_FB_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_DATE_FORMAT", (zend_long) PDO_FB_ATTR_DATE_FORMAT);
+	REGISTER_PDO_FB_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_TIME_FORMAT", (zend_long) PDO_FB_ATTR_TIME_FORMAT);
+	REGISTER_PDO_FB_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_TIMESTAMP_FORMAT", (zend_long) PDO_FB_ATTR_TIMESTAMP_FORMAT);
 
 	if (FAILURE == php_pdo_register_driver(&pdo_firebird_driver)) {
 		return FAILURE;
@@ -103,9 +104,7 @@ PHP_MINFO_FUNCTION(pdo_firebird) /* {{{ */
 
 PHP_METHOD(Pdo_Firebird, getApiVersion)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(FB_API_VER);
 }

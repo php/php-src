@@ -3,7 +3,7 @@ Bug #53141 (autoload misbehaves if called from closing session)
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --FILE--
 <?php
 spl_autoload_register(function ($class) {
@@ -13,10 +13,10 @@ spl_autoload_register(function ($class) {
 
 class Foo
 {
-    function __sleep()
+    function __serialize()
     {
         new Bar;
-        return array();
+        return [];
     }
 }
 

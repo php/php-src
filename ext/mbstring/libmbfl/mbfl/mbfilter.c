@@ -103,7 +103,6 @@ mbfl_strcut(
     size_t from,
     size_t length)
 {
-	const mbfl_encoding *encoding = string->encoding;
 	mbfl_memory_device device;
 
 	if (from >= string->len) {
@@ -113,145 +112,97 @@ mbfl_strcut(
 	mbfl_string_init(result);
 	result->encoding = string->encoding;
 
-	if ((encoding->flag & (MBFL_ENCTYPE_SBCS | MBFL_ENCTYPE_WCS2 | MBFL_ENCTYPE_WCS4)) || encoding->mblen_table != NULL) {
-		const unsigned char *start = NULL;
-		const unsigned char *end = NULL;
-		unsigned char *w;
-		size_t sz;
+	mbfl_convert_filter *encoder     = NULL;
+	mbfl_convert_filter *decoder     = NULL;
+	const unsigned char *p, *q, *r;
+	struct {
+		mbfl_convert_filter encoder;
+		mbfl_convert_filter decoder;
+		const unsigned char *p;
+		size_t pos;
+	} bk, _bk;
 
-		if (encoding->flag & MBFL_ENCTYPE_WCS2) {
-			from &= -2;
+	/* output code filter */
+	if (!(decoder = mbfl_convert_filter_new(
+			&mbfl_encoding_wchar,
+			string->encoding,
+			mbfl_memory_device_output, 0, &device))) {
+		return NULL;
+	}
 
-			if (length >= string->len - from) {
-				length = string->len - from;
-			}
+	/* wchar filter */
+	if (!(encoder = mbfl_convert_filter_new(
+			string->encoding,
+			&mbfl_encoding_wchar,
+			mbfl_filter_output_null,
+			NULL, NULL))) {
+		mbfl_convert_filter_delete(decoder);
+		return NULL;
+	}
 
-			start = string->val + from;
-			end   = start + (length & -2);
-		} else if (encoding->flag & MBFL_ENCTYPE_WCS4) {
-			from &= -4;
+	mbfl_memory_device_init(&device, length + 8, 0);
 
-			if (length >= string->len - from) {
-				length = string->len - from;
-			}
+	p = string->val;
 
-			start = string->val + from;
-			end   = start + (length & -4);
-		} else if ((encoding->flag & MBFL_ENCTYPE_SBCS)) {
-			if (length >= string->len - from) {
-				length = string->len - from;
-			}
+	/* search start position */
+	for (q = string->val + from; p < q; p++) {
+		(*encoder->filter_function)(*p, encoder);
+	}
 
-			start = string->val + from;
-			end = start + length;
-		} else if (encoding->mblen_table != NULL) {
-			const unsigned char *mbtab = encoding->mblen_table;
-			const unsigned char *p, *q;
-			int m;
+	/* switch the drain direction */
+	encoder->output_function = (output_function_t)decoder->filter_function;
+	encoder->flush_function = (flush_function_t)decoder->filter_flush;
+	encoder->data = decoder;
 
-			/* search start position */
-			for (m = 0, p = string->val, q = p + from;
-					p < q; p += (m = mbtab[*p]));
+	q = string->val + string->len;
 
-			if (p > q) {
-				p -= m;
-			}
+	/* save the encoder, decoder state and the pointer */
+	mbfl_convert_filter_copy(decoder, &_bk.decoder);
+	mbfl_convert_filter_copy(encoder, &_bk.encoder);
+	_bk.p = p;
+	_bk.pos = device.pos;
 
-			start = p;
+	if (length > q - p) {
+		length = q - p;
+	}
 
-			/* search end position */
-			if (length >= string->len - (start - string->val)) {
-				end = string->val + string->len;
-			} else {
-				for (q = p + length; p < q; p += (m = mbtab[*p]));
-
-				if (p > q) {
-					p -= m;
-				}
-				end = p;
-			}
-		} else {
-			/* never reached */
-			return NULL;
-		}
-
-		/* allocate memory and copy string */
-		sz = end - start;
-		w = ecalloc(sz + 8, sizeof(unsigned char));
-
-		memcpy(w, start, sz);
-		w[sz] = '\0';
-		w[sz + 1] = '\0';
-		w[sz + 2] = '\0';
-		w[sz + 3] = '\0';
-
-		result->val = w;
-		result->len = sz;
-	} else {
-		mbfl_convert_filter *encoder     = NULL;
-		mbfl_convert_filter *decoder     = NULL;
-		const unsigned char *p, *q, *r;
-		struct {
-			mbfl_convert_filter encoder;
-			mbfl_convert_filter decoder;
-			const unsigned char *p;
-			size_t pos;
-		} bk, _bk;
-
-		/* output code filter */
-		if (!(decoder = mbfl_convert_filter_new(
-				&mbfl_encoding_wchar,
-				string->encoding,
-				mbfl_memory_device_output, 0, &device))) {
-			return NULL;
-		}
-
-		/* wchar filter */
-		if (!(encoder = mbfl_convert_filter_new(
-				string->encoding,
-				&mbfl_encoding_wchar,
-				mbfl_filter_output_null,
-				NULL, NULL))) {
-			mbfl_convert_filter_delete(decoder);
-			return NULL;
-		}
-
-		mbfl_memory_device_init(&device, length + 8, 0);
-
-		p = string->val;
-
-		/* search start position */
-		for (q = string->val + from; p < q; p++) {
+	if (length >= 20) {
+		/* output a little shorter than "length" */
+		/* XXX: the constant "20" was determined purely on the heuristics. */
+		for (r = p + length - 20; p < r; p++) {
 			(*encoder->filter_function)(*p, encoder);
 		}
 
-		/* switch the drain direction */
-		encoder->output_function = (output_function_t)decoder->filter_function;
-		encoder->flush_function = (flush_function_t)decoder->filter_flush;
-		encoder->data = decoder;
+		/* if the offset of the resulting string exceeds the length,
+		 * then restore the state */
+		if (device.pos > length) {
+			p = _bk.p;
+			device.pos = _bk.pos;
+			if (decoder->filter_dtor)
+				decoder->filter_dtor(decoder);
+			if (encoder->filter_dtor)
+				encoder->filter_dtor(encoder);
+			mbfl_convert_filter_copy(&_bk.decoder, decoder);
+			mbfl_convert_filter_copy(&_bk.encoder, encoder);
+			bk = _bk;
+		} else {
+			/* save the encoder, decoder state and the pointer */
+			mbfl_convert_filter_copy(decoder, &bk.decoder);
+			mbfl_convert_filter_copy(encoder, &bk.encoder);
+			bk.p = p;
+			bk.pos = device.pos;
 
-		q = string->val + string->len;
-
-		/* save the encoder, decoder state and the pointer */
-		mbfl_convert_filter_copy(decoder, &_bk.decoder);
-		mbfl_convert_filter_copy(encoder, &_bk.encoder);
-		_bk.p = p;
-		_bk.pos = device.pos;
-
-		if (length > q - p) {
-			length = q - p;
-		}
-
-		if (length >= 20) {
-			/* output a little shorter than "length" */
-			/* XXX: the constant "20" was determined purely on the heuristics. */
-			for (r = p + length - 20; p < r; p++) {
-				(*encoder->filter_function)(*p, encoder);
-			}
+			/* flush the stream */
+			(*encoder->filter_flush)(encoder);
 
 			/* if the offset of the resulting string exceeds the length,
 			 * then restore the state */
 			if (device.pos > length) {
+				if (bk.decoder.filter_dtor)
+					bk.decoder.filter_dtor(&bk.decoder);
+				if (bk.encoder.filter_dtor)
+					bk.encoder.filter_dtor(&bk.encoder);
+
 				p = _bk.p;
 				device.pos = _bk.pos;
 				if (decoder->filter_dtor)
@@ -262,86 +213,11 @@ mbfl_strcut(
 				mbfl_convert_filter_copy(&_bk.encoder, encoder);
 				bk = _bk;
 			} else {
-				/* save the encoder, decoder state and the pointer */
-				mbfl_convert_filter_copy(decoder, &bk.decoder);
-				mbfl_convert_filter_copy(encoder, &bk.encoder);
-				bk.p = p;
-				bk.pos = device.pos;
-
-				/* flush the stream */
-				(*encoder->filter_flush)(encoder);
-
-				/* if the offset of the resulting string exceeds the length,
-				 * then restore the state */
-				if (device.pos > length) {
-					if (bk.decoder.filter_dtor)
-						bk.decoder.filter_dtor(&bk.decoder);
-					if (bk.encoder.filter_dtor)
-						bk.encoder.filter_dtor(&bk.encoder);
-
-					p = _bk.p;
-					device.pos = _bk.pos;
-					if (decoder->filter_dtor)
-						decoder->filter_dtor(decoder);
-					if (encoder->filter_dtor)
-						encoder->filter_dtor(encoder);
-					mbfl_convert_filter_copy(&_bk.decoder, decoder);
-					mbfl_convert_filter_copy(&_bk.encoder, encoder);
-					bk = _bk;
-				} else {
-					if (_bk.decoder.filter_dtor)
-						_bk.decoder.filter_dtor(&_bk.decoder);
-					if (_bk.encoder.filter_dtor)
-						_bk.encoder.filter_dtor(&_bk.encoder);
-
-					p = bk.p;
-					device.pos = bk.pos;
-					if (decoder->filter_dtor)
-						decoder->filter_dtor(decoder);
-					if (encoder->filter_dtor)
-						encoder->filter_dtor(encoder);
-					mbfl_convert_filter_copy(&bk.decoder, decoder);
-					mbfl_convert_filter_copy(&bk.encoder, encoder);
-				}
-			}
-		} else {
-			bk = _bk;
-		}
-
-		/* detect end position */
-		while (p < q) {
-			(*encoder->filter_function)(*p, encoder);
-
-			if (device.pos > length) {
-				/* restore filter */
-				p = bk.p;
-				device.pos = bk.pos;
-				if (decoder->filter_dtor)
-					decoder->filter_dtor(decoder);
-				if (encoder->filter_dtor)
-					encoder->filter_dtor(encoder);
-				mbfl_convert_filter_copy(&bk.decoder, decoder);
-				mbfl_convert_filter_copy(&bk.encoder, encoder);
-				break;
-			}
-
-			p++;
-
-			/* backup current state */
-			mbfl_convert_filter_copy(decoder, &_bk.decoder);
-			mbfl_convert_filter_copy(encoder, &_bk.encoder);
-			_bk.pos = device.pos;
-			_bk.p = p;
-
-			(*encoder->filter_flush)(encoder);
-
-			if (device.pos > length) {
 				if (_bk.decoder.filter_dtor)
 					_bk.decoder.filter_dtor(&_bk.decoder);
 				if (_bk.encoder.filter_dtor)
 					_bk.encoder.filter_dtor(&_bk.encoder);
 
-				/* restore filter */
 				p = bk.p;
 				device.pos = bk.pos;
 				if (decoder->filter_dtor)
@@ -350,39 +226,86 @@ mbfl_strcut(
 					encoder->filter_dtor(encoder);
 				mbfl_convert_filter_copy(&bk.decoder, decoder);
 				mbfl_convert_filter_copy(&bk.encoder, encoder);
-				break;
 			}
+		}
+	} else {
+		bk = _bk;
+	}
 
-			if (bk.decoder.filter_dtor)
-				bk.decoder.filter_dtor(&bk.decoder);
-			if (bk.encoder.filter_dtor)
-				bk.encoder.filter_dtor(&bk.encoder);
+	/* detect end position */
+	while (p < q) {
+		(*encoder->filter_function)(*p, encoder);
 
-			p = _bk.p;
-			device.pos = _bk.pos;
+		if (device.pos > length) {
+			/* restore filter */
+			p = bk.p;
+			device.pos = bk.pos;
 			if (decoder->filter_dtor)
 				decoder->filter_dtor(decoder);
 			if (encoder->filter_dtor)
 				encoder->filter_dtor(encoder);
-			mbfl_convert_filter_copy(&_bk.decoder, decoder);
-			mbfl_convert_filter_copy(&_bk.encoder, encoder);
-
-			bk = _bk;
+			mbfl_convert_filter_copy(&bk.decoder, decoder);
+			mbfl_convert_filter_copy(&bk.encoder, encoder);
+			break;
 		}
 
-		decoder->illegal_mode = MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE;
+		p++;
+
+		/* backup current state */
+		mbfl_convert_filter_copy(decoder, &_bk.decoder);
+		mbfl_convert_filter_copy(encoder, &_bk.encoder);
+		_bk.pos = device.pos;
+		_bk.p = p;
+
 		(*encoder->filter_flush)(encoder);
+
+		if (device.pos > length) {
+			if (_bk.decoder.filter_dtor)
+				_bk.decoder.filter_dtor(&_bk.decoder);
+			if (_bk.encoder.filter_dtor)
+				_bk.encoder.filter_dtor(&_bk.encoder);
+
+			/* restore filter */
+			p = bk.p;
+			device.pos = bk.pos;
+			if (decoder->filter_dtor)
+				decoder->filter_dtor(decoder);
+			if (encoder->filter_dtor)
+				encoder->filter_dtor(encoder);
+			mbfl_convert_filter_copy(&bk.decoder, decoder);
+			mbfl_convert_filter_copy(&bk.encoder, encoder);
+			break;
+		}
 
 		if (bk.decoder.filter_dtor)
 			bk.decoder.filter_dtor(&bk.decoder);
 		if (bk.encoder.filter_dtor)
 			bk.encoder.filter_dtor(&bk.encoder);
 
-		result = mbfl_memory_device_result(&device, result);
+		p = _bk.p;
+		device.pos = _bk.pos;
+		if (decoder->filter_dtor)
+			decoder->filter_dtor(decoder);
+		if (encoder->filter_dtor)
+			encoder->filter_dtor(encoder);
+		mbfl_convert_filter_copy(&_bk.decoder, decoder);
+		mbfl_convert_filter_copy(&_bk.encoder, encoder);
 
-		mbfl_convert_filter_delete(encoder);
-		mbfl_convert_filter_delete(decoder);
+		bk = _bk;
 	}
+
+	decoder->illegal_mode = MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE;
+	(*encoder->filter_flush)(encoder);
+
+	if (bk.decoder.filter_dtor)
+		bk.decoder.filter_dtor(&bk.decoder);
+	if (bk.encoder.filter_dtor)
+		bk.encoder.filter_dtor(&bk.encoder);
+
+	result = mbfl_memory_device_result(&device, result);
+
+	mbfl_convert_filter_delete(encoder);
+	mbfl_convert_filter_delete(decoder);
 
 	return result;
 }

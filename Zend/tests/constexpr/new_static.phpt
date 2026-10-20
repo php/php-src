@@ -1,5 +1,5 @@
 --TEST--
-Static in new is not supported
+Static in new is supported
 --FILE--
 <?php
 

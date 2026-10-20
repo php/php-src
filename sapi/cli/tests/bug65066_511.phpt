@@ -28,7 +28,6 @@ HEADER
 ?>
 --EXPECTF--
 HTTP/1.1 511 Network Authentication Required
-Host: %s
 Date: %s
 Connection: close
 X-Powered-By: PHP/%s

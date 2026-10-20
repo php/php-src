@@ -49,8 +49,8 @@ foreach($glues as $glue) {
   echo "-- Iteration $counter --\n";
   try {
        var_dump(implode($glue, $pieces));
-  } catch (TypeError $exception) {
-      echo $exception->getMessage() . "\n";
+  } catch (Throwable $exception) {
+      echo $exception::class, ': ', $exception->getMessage(), "\n";
   }
   $counter++;
 }
@@ -59,8 +59,8 @@ foreach($glues as $glue) {
 echo "\n*** Testing implode() on empty string ***\n";
 try {
     implode("");
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 /* checking sub-arrays */
@@ -69,13 +69,13 @@ $sub_array = array(array(1,2,3,4), array(1 => "one", 2 => "two"), "PHP", 50);
 var_dump(implode("TEST", $sub_array));
 try {
    var_dump(implode(array(1, 2, 3, 4), $sub_array));
-} catch (TypeError $exception) {
-  echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+  echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 try {
    var_dump(implode(2, $sub_array));
-} catch (TypeError $exception) {
-  echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+  echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 echo "\n*** Testing implode() on objects ***\n";
@@ -185,7 +185,7 @@ string(35) "2101-639111PHP111 1string%0with%0...%0"
 -- Iteration 3 --
 string(27) "20-6391PHP string%0with%0...%0"
 -- Iteration 4 --
-implode(): Argument #1 ($separator) must be of type string, array given
+TypeError: implode(): Argument #1 ($separator) must be of type string, array given
 -- Iteration 5 --
 string(27) "20-6391PHP string%0with%0...%0"
 -- Iteration 6 --
@@ -198,7 +198,7 @@ string(35) "2000-639010PHP000 0string%0with%0...%0"
 string(43) "2\00\0-639\01\0PHP\0\0\0 \0string%0with%0...%0"
 
 *** Testing implode() on empty string ***
-implode(): If argument #1 ($separator) is of type string, argument #2 ($array) must be of type array, null given
+TypeError: implode(): If argument #1 ($separator) is of type string, argument #2 ($array) must be of type array, null given
 
 *** Testing implode() on sub-arrays ***
 
@@ -206,7 +206,7 @@ Warning: Array to string conversion in %s on line %d
 
 Warning: Array to string conversion in %s on line %d
 string(27) "ArrayTESTArrayTESTPHPTEST50"
-implode(): Argument #1 ($separator) must be of type string, array given
+TypeError: implode(): Argument #1 ($separator) must be of type string, array given
 
 Warning: Array to string conversion in %s
 

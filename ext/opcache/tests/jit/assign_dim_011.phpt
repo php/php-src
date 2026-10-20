@@ -14,11 +14,11 @@ set_error_handler(function($code, $msg) use(&$my_var) {
 try {
     $my_var[] = "";
 } catch (Throwable $e) {
-    echo "Exception: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 DONE
 --EXPECT--
 Err: Automatic conversion of false to array is deprecated
-Exception: Cannot use a scalar value as an array
+Error: Cannot use a scalar value as an array
 DONE

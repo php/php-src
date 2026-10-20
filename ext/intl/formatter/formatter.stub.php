@@ -11,6 +11,10 @@ class NumberFormatter
     public const int PATTERN_DECIMAL = UNKNOWN;
     /** @cvalue UNUM_DECIMAL */
     public const int DECIMAL = UNKNOWN;
+    /** @cvalue UNUM_DECIMAL_COMPACT_SHORT */
+    public const int DECIMAL_COMPACT_SHORT = UNKNOWN;
+    /** @cvalue UNUM_DECIMAL_COMPACT_LONG */
+    public const int DECIMAL_COMPACT_LONG = UNKNOWN;
     /** @cvalue UNUM_CURRENCY */
     public const int CURRENCY = UNKNOWN;
     /** @cvalue UNUM_PERCENT */
@@ -27,10 +31,16 @@ class NumberFormatter
     public const int PATTERN_RULEBASED = UNKNOWN;
     /** @cvalue UNUM_IGNORE */
     public const int IGNORE = UNKNOWN;
-#if U_ICU_VERSION_MAJOR_NUM >= 53
+    /** @cvalue UNUM_CURRENCY_ISO */
+    public const int CURRENCY_ISO = UNKNOWN;
+    /** @cvalue UNUM_CURRENCY_PLURAL */
+    public const int CURRENCY_PLURAL = UNKNOWN;
     /** @cvalue UNUM_CURRENCY_ACCOUNTING */
     public const int CURRENCY_ACCOUNTING = UNKNOWN;
-#endif
+    /** @cvalue UNUM_CASH_CURRENCY */
+    public const int CASH_CURRENCY = UNKNOWN;
+    /** @cvalue UNUM_CURRENCY_STANDARD */
+    public const int CURRENCY_STANDARD = UNKNOWN;
     /** @cvalue UNUM_DEFAULT */
     public const int DEFAULT_STYLE = UNKNOWN;
 

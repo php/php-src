@@ -32,7 +32,7 @@ CloseDuringNbWrite::$ftp = $ftp;
 try {
     @ftp_nb_get($ftp, 'reentrantnb://sink', 'a story.txt', FTP_BINARY);
 } catch (\Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ftp_close($ftp);
@@ -40,5 +40,5 @@ echo "closed\n";
 ?>
 --EXPECT--
 bool(true)
-Cannot close FTP\Connection while a transfer is in progress
+Error: Cannot close FTP\Connection while a transfer is in progress
 closed

@@ -22,13 +22,13 @@ try {
 
         return false;
     })());
-} catch (Error $e) {
-    echo $e->getMessage();
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-assert(function () {
+AssertionError: assert((function () {
     enum Foo {
         case Bar;
     }
@@ -45,4 +45,4 @@ assert(function () {
     }
 
     return false;
-}())
+})())

@@ -4,7 +4,6 @@ grapheme_strpos() uses Unicode matching for non-ASCII needles in ASCII haystacks
 intl
 --INI--
 intl.use_exceptions=1
-intl.error_level=2
 --FILE--
 <?php
 foreach ([

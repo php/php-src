@@ -4,7 +4,7 @@ Bug #74941 session_start() triggers a warning after headers have been sent but c
 session
 --SKIPIF--
 <?php
-include('skipif.inc');
+include 'skipif.inc';
 ?>
 --FILE--
 <?php

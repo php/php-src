@@ -39,22 +39,22 @@ bzclose($fd2);
 try {
     var_dump(bzread($fd2));
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(bzerror($fd2));
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(bzerrstr($fd2));
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(bzerrno($fd2));
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done\n";
@@ -112,8 +112,8 @@ array(2) {
 }
 string(10) "DATA_ERROR"
 int(-4)
-bzread(): supplied resource is not a valid stream resource
-bzerror(): supplied resource is not a valid stream resource
-bzerrstr(): supplied resource is not a valid stream resource
-bzerrno(): supplied resource is not a valid stream resource
+TypeError: bzread(): Argument #1 ($bz) must be an open stream resource
+TypeError: bzerror(): Argument #1 ($bz) must be an open stream resource
+TypeError: bzerrstr(): Argument #1 ($bz) must be an open stream resource
+TypeError: bzerrno(): Argument #1 ($bz) must be an open stream resource
 Done

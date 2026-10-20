@@ -3,7 +3,7 @@ Test session_cache_limiter() function : variation
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --INI--
 session.cache_limiter=nocache
 --FILE--
@@ -30,7 +30,7 @@ string(7) "nocache"
 bool(true)
 string(7) "nocache"
 
-Warning: session_cache_limiter(): Session cache limiter cannot be changed when a session is active in %s on line %d
+Warning: session_cache_limiter(): Session cache limiter cannot be changed when a session is active (started from %s on line %d) in %s on line %d
 bool(false)
 string(7) "nocache"
 bool(true)

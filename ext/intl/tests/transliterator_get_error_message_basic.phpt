@@ -1,26 +1,23 @@
 --TEST--
-Transliterator::getErrorMessage (basic)
+Transliterator::getErrorMessage() and Transliterator::getErrorCode()(basic)
 --EXTENSIONS--
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 $t = Transliterator::create("[\p{Bidi_Mirrored}] Hex");
 var_dump($t->transliterate("\x8F"));
-echo transliterator_get_error_message($t), "\n";
 
-echo $t->getErrorMessage(), "\n";
+echo transliterator_get_error_code($t), ': ', transliterator_get_error_message($t), "\n";
+
+echo $t->getErrorCode(), ': ', $t->getErrorMessage(), "\n";
 
 var_dump($t->transliterate(""));
-echo $t->getErrorMessage(), "\n";
+echo $t->getErrorCode(), ': ', $t->getErrorMessage(), "\n";
 
-echo "Done.\n";
 ?>
---EXPECTF--
-Warning: Transliterator::transliterate(): String conversion of string to UTF-16 failed in %s on line %d
+--EXPECT--
 bool(false)
-String conversion of string to UTF-16 failed: U_INVALID_CHAR_FOUND
-String conversion of string to UTF-16 failed: U_INVALID_CHAR_FOUND
+10: Transliterator::transliterate(): String conversion of string to UTF-16 failed: U_INVALID_CHAR_FOUND
+10: Transliterator::transliterate(): String conversion of string to UTF-16 failed: U_INVALID_CHAR_FOUND
 string(0) ""
-U_ZERO_ERROR
-Done.
+0: U_ZERO_ERROR

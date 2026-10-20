@@ -10,7 +10,7 @@ is a very common test
 for all languages
 
 EOT;
-$dirname = 'readgzfile_temp';
+$dirname = 'readgzfile_basic_temp';
 $filename = $dirname.'/readgzfile_basic.txt.gz';
 mkdir($dirname);
 $h = gzopen($filename, 'w');
@@ -19,9 +19,11 @@ gzclose($h);
 
 
 var_dump(readgzfile( $filename ) );
-
-unlink($filename);
-rmdir($dirname);
+?>
+--CLEAN--
+<?php
+@unlink('readgzfile_basic_temp/readgzfile_basic.txt.gz');
+@rmdir('readgzfile_basic_temp');
 ?>
 --EXPECT--
 hello world

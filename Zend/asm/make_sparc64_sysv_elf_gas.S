@@ -45,7 +45,7 @@ make_fcontext:
 	add	%l0, (trampoline - 1b - 8), %l0
 	stx	%l0, [%i0 + I7]
 
-	# Save framepointer to first stack frame but first substract the BIAS
+	# Save framepointer to first stack frame but first subtract the BIAS
 	add	%i0, CC64FSZ - BIAS, %l0
 	stx	%l0, [%i0 + SP]
 

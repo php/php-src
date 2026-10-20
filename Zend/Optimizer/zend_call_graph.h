@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend Engine, Call Graph                                              |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
@@ -39,12 +37,12 @@ struct _zend_call_info {
 	bool               named_args;   /* Function has named arguments */
 	bool               is_prototype; /* An overridden child method may be called */
 	bool               is_frameless; /* A frameless function sends arguments through operands */
-	int                     num_args;	/* Number of arguments, excluding named and variadic arguments */
+	uint32_t           num_args;	/* Number of arguments, excluding named and variadic arguments */
 	zend_send_arg_info      arg_info[1];
 };
 
 struct _zend_func_info {
-	int                     num;
+	uint32_t                num;
 	uint32_t                flags;
 	zend_ssa                ssa;          /* Static Single Assignment Form  */
 	zend_call_info         *caller_info;  /* where this function is called from */
@@ -54,7 +52,7 @@ struct _zend_func_info {
 };
 
 typedef struct _zend_call_graph {
-	int                     op_arrays_count;
+	uint32_t                op_arrays_count;
 	zend_op_array         **op_arrays;
 	zend_func_info         *func_infos;
 } zend_call_graph;
@@ -63,7 +61,7 @@ BEGIN_EXTERN_C()
 
 ZEND_API void zend_build_call_graph(zend_arena **arena, zend_script *script, zend_call_graph *call_graph);
 ZEND_API void zend_analyze_call_graph(zend_arena **arena, zend_script *script, zend_call_graph *call_graph);
-ZEND_API zend_call_info **zend_build_call_map(zend_arena **arena, zend_func_info *info, const zend_op_array *op_array);
+ZEND_API zend_call_info **zend_build_call_map(zend_arena **arena, const zend_func_info *info, const zend_op_array *op_array);
 ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t build_flags, zend_op_array *op_array, zend_func_info *func_info);
 
 END_EXTERN_C()

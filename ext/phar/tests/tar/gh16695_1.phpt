@@ -24,5 +24,5 @@ var_dump($buffer);
 --EXPECTF--
 int(512)
 
-Warning: file_get_contents(%stls): Failed to open stream: phar error: path "tls" is a directory in %s on line %d
+Warning: file_get_contents(): Failed to open stream: phar error: path "tls" is a directory in %s on line %d
 bool(false)

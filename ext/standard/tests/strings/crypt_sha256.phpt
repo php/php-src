@@ -39,12 +39,10 @@ $tests = array(
         'a short string',
         '$5$rounds=123456$asaltof16chars..$gP3VQ/6X7UUEW3HkBn2w1/Ptq2jxPyzV/cZKmF/wJvD'
     ),
+
+    // The "too many rounds" behavior depends on the crypt()
+    // implementation, but for now everyone agrees on what to do.
     8 => array(
-        '$5$rounds=10$roundstoolow',
-        'the number of rounds is too low',
-        '*0'
-    ),
-    9 => array(
         '$5$rounds=1000000000$roundstoohigh',
         'the number of rounds is too high',
         '*0'

@@ -6,8 +6,6 @@ date.timezone=Atlantic/Azores
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "nl");
 
 $intlcal = new IntlGregorianCalendar(2012, 1, 28);
 var_dump($intlcal->roll(IntlCalendar::FIELD_DAY_OF_MONTH, 2));

@@ -4,10 +4,11 @@ Bug #74892 Url Rewriting (trans_sid) not working on urls that start with #
 session.use_cookies=0
 session.use_only_cookies=0
 session.use_trans_sid=1
+session.use_strict_mode=0
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --FILE--
 <?php
 ob_start();

@@ -11,8 +11,8 @@ try {
 var_dump(new Phar('bug77143.phar',0,'project.phar'));
 echo "OK\n";
 } catch(UnexpectedValueException $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECTF--
-internal corruption of phar "%sbug77143.phar" (truncated manifest header)
+UnexpectedValueException: internal corruption of phar "%sbug77143.phar" (truncated manifest header)

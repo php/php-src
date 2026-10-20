@@ -27,7 +27,6 @@ class Test {
     }
 }
 
-// TODO Rename pdo_fetch_class_change_ctor_two table to pdo_fetch_class_change_ctor_two in PHP-8.4
 $db->exec('CREATE TABLE pdo_fetch_class_change_ctor_two(id int NOT NULL PRIMARY KEY, val1 VARCHAR(10), val2 VARCHAR(10))');
 $db->exec("INSERT INTO pdo_fetch_class_change_ctor_two VALUES(1, 'A', 'alpha')");
 $db->exec("INSERT INTO pdo_fetch_class_change_ctor_two VALUES(2, 'B', 'beta')");
@@ -37,7 +36,12 @@ $db->exec("INSERT INTO pdo_fetch_class_change_ctor_two VALUES(4, 'D', 'delta')")
 $stmt = $db->prepare('SELECT val1, val2 FROM pdo_fetch_class_change_ctor_two');
 
 $stmt->execute();
-var_dump($stmt->fetchObject('Test', [$stmt]));
+
+try {
+    var_dump($stmt->fetchObject('Test', [$stmt]));
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), \PHP_EOL;
+}
 
 ?>
 --CLEAN--
@@ -51,9 +55,4 @@ object(PDOStatement)#%s (1) {
   ["queryString"]=>
   string(54) "SELECT val1, val2 FROM pdo_fetch_class_change_ctor_two"
 }
-object(Test)#%s (2) {
-  ["val1"]=>
-  string(1) "A"
-  ["val2"]=>
-  string(5) "alpha"
-}
+Error: Cannot change default fetch mode while fetching

@@ -25,7 +25,7 @@ foreach ([0.1, 0.5, 1.0, 10.0] as $threshold) {
 
 ?>
 --EXPECT--
-size: 247*247
-size: 237*237
-size: 229*229
-size: 175*175
+size: 255*255
+size: 253*253
+size: 253*253
+size: 225*225

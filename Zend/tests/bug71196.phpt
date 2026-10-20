@@ -5,9 +5,9 @@ Bug #71196 (Memory leak with out-of-order live ranges)
 try  {
         $a = "1";
         [1, (y().$a.$a) . ($a.$a)];
-} catch (Error $e) {
-        var_dump($e->getMessage());
+} catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-string(30) "Call to undefined function y()"
+Error: Call to undefined function y()

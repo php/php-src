@@ -30,6 +30,6 @@ bool(true)
 
 Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
 
-Warning: session_set_save_handler(): Session save handler cannot be changed when a session is active in %s on line %d
+Warning: session_set_save_handler(): Session save handler cannot be changed when a session is active (started from %s on line %d) in %s on line %d
 bool(false)
 bool(true)

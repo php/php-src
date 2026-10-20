@@ -17,12 +17,13 @@ function foo ($a) {
 
 try {
    var_dump(foo("para"));
-} catch (Exception $e) {
+} catch (Throwable $e) {
     "caught exception" . PHP_EOL;
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Returning from a finally block is deprecated in %s on line %d
 string(4) "para"
 string(7) "finally"
 string(6) "return"

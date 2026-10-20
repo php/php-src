@@ -36,16 +36,16 @@ if (MySQLPDOTest::isPDOMySQLnd())
     $pass = PDO_MYSQL_TEST_PASS;
 
     $valid_options = [];
-    $valid_options[PDO::MYSQL_ATTR_MAX_BUFFER_SIZE] = 'PDO::MYSQL_ATTR_MAX_BUFFER_SIZE';
-    $valid_options[PDO::MYSQL_ATTR_INIT_COMMAND] = 'PDO::MYSQL_ATTR_INIT_COMMAND';
-    $valid_options[PDO::MYSQL_ATTR_READ_DEFAULT_FILE] = 'PDO::MYSQL_ATTR_READ_DEFAULT_FILE';
-    $valid_options[PDO::MYSQL_ATTR_READ_DEFAULT_GROUP] = 'PDO::MYSQL_ATTR_READ_DEFAULT_GROUP';
+    $valid_options[Pdo\Mysql::ATTR_MAX_BUFFER_SIZE] = 'Pdo\Mysql::ATTR_MAX_BUFFER_SIZE';
+    $valid_options[Pdo\Mysql::ATTR_INIT_COMMAND] = 'Pdo\Mysql::ATTR_INIT_COMMAND';
+    $valid_options[Pdo\Mysql::ATTR_READ_DEFAULT_FILE] = 'Pdo\Mysql::ATTR_READ_DEFAULT_FILE';
+    $valid_options[Pdo\Mysql::ATTR_READ_DEFAULT_GROUP] = 'Pdo\Mysql::ATTR_READ_DEFAULT_GROUP';
 
-    $defaults[PDO::MYSQL_ATTR_MAX_BUFFER_SIZE] = 1048576;
+    $defaults[Pdo\Mysql::ATTR_MAX_BUFFER_SIZE] = 1048576;
     /* TODO getAttribute() does not handle it */
-    $defaults[PDO::MYSQL_ATTR_INIT_COMMAND] = '';
-    $defaults[PDO::MYSQL_ATTR_READ_DEFAULT_FILE] = false;
-    $defaults[PDO::MYSQL_ATTR_READ_DEFAULT_GROUP] = false;
+    $defaults[Pdo\Mysql::ATTR_INIT_COMMAND] = '';
+    $defaults[Pdo\Mysql::ATTR_READ_DEFAULT_FILE] = false;
+    $defaults[Pdo\Mysql::ATTR_READ_DEFAULT_GROUP] = false;
 
     $db = new PDO($dsn, $user, $pass);
     foreach ($valid_options as $option => $name) {
@@ -60,19 +60,19 @@ if (MySQLPDOTest::isPDOMySQLnd())
         }
     }
 
-    set_option_and_check(26, PDO::MYSQL_ATTR_READ_DEFAULT_FILE, true, 'PDO::MYSQL_ATTR_READ_DEFAULT_FILE');
-    set_option_and_check(27, PDO::MYSQL_ATTR_READ_DEFAULT_FILE, false, 'PDO::MYSQL_ATTR_READ_DEFAULT_FILE');
+    set_option_and_check(26, Pdo\Mysql::ATTR_READ_DEFAULT_FILE, true, 'Pdo\Mysql::ATTR_READ_DEFAULT_FILE');
+    set_option_and_check(27, Pdo\Mysql::ATTR_READ_DEFAULT_FILE, false, 'Pdo\Mysql::ATTR_READ_DEFAULT_FILE');
 
-    set_option_and_check(30, PDO::MYSQL_ATTR_MAX_BUFFER_SIZE, -1, 'PDO::MYSQL_ATTR_MAX_BUFFER_SIZE', true);
-    set_option_and_check(31, PDO::MYSQL_ATTR_MAX_BUFFER_SIZE, PHP_INT_MAX, 'PDO::MYSQL_ATTR_MAX_BUFFER_SIZE');
-    set_option_and_check(32, PDO::MYSQL_ATTR_MAX_BUFFER_SIZE, 1, 'PDO::MYSQL_ATTR_MAX_BUFFER_SIZE');
+    set_option_and_check(30, Pdo\Mysql::ATTR_MAX_BUFFER_SIZE, -1, 'Pdo\Mysql::ATTR_MAX_BUFFER_SIZE', true);
+    set_option_and_check(31, Pdo\Mysql::ATTR_MAX_BUFFER_SIZE, PHP_INT_MAX, 'Pdo\Mysql::ATTR_MAX_BUFFER_SIZE');
+    set_option_and_check(32, Pdo\Mysql::ATTR_MAX_BUFFER_SIZE, 1, 'Pdo\Mysql::ATTR_MAX_BUFFER_SIZE');
 
     print "done!\n";
 ?>
 --EXPECT--
-Failed to getAttribute() for PDO::MYSQL_ATTR_INIT_COMMAND
-Failed to getAttribute() for PDO::MYSQL_ATTR_READ_DEFAULT_FILE
-Failed to getAttribute() for PDO::MYSQL_ATTR_READ_DEFAULT_GROUP
-Failed to getAttribute() for PDO::MYSQL_ATTR_READ_DEFAULT_FILE
-Failed to getAttribute() for PDO::MYSQL_ATTR_READ_DEFAULT_FILE
+Failed to getAttribute() for Pdo\Mysql::ATTR_INIT_COMMAND
+Failed to getAttribute() for Pdo\Mysql::ATTR_READ_DEFAULT_FILE
+Failed to getAttribute() for Pdo\Mysql::ATTR_READ_DEFAULT_GROUP
+Failed to getAttribute() for Pdo\Mysql::ATTR_READ_DEFAULT_FILE
+Failed to getAttribute() for Pdo\Mysql::ATTR_READ_DEFAULT_FILE
 done!

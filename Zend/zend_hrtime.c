@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Niklas Keller <kelunik@php.net>                              |
    | Author: Anatol Belski <ab@php.net>                                   |
@@ -33,7 +31,7 @@
 
 ZEND_API double zend_hrtime_timer_scale = .0;
 
-#elif ZEND_HRTIME_PLATFORM_APPLE
+#elif ZEND_HRTIME_PLATFORM_APPLE_MACH_ABSOLUTE
 
 # include <mach/mach_time.h>
 # include <string.h>
@@ -62,9 +60,21 @@ void zend_startup_hrtime(void)
 		zend_hrtime_timer_scale = (double)ZEND_NANO_IN_SEC / (zend_hrtime_t)tf.QuadPart;
 	}
 
-#elif ZEND_HRTIME_PLATFORM_APPLE
+#elif ZEND_HRTIME_PLATFORM_APPLE_MACH_ABSOLUTE
 
 	mach_timebase_info(&zend_hrtime_timerlib_info);
+
+#elif ZEND_HRTIME_PLATFORM_POSIX
+
+	struct timespec ts;
+
+	if (EXPECTED(0 == clock_gettime(CLOCK_MONOTONIC, &ts))) {
+		return;
+	}
+
+	// zend_error mechanism is not initialized at that point
+	fprintf(stderr, "No working CLOCK_MONOTONIC found, this should never happen\n");
+	abort();
 
 #endif
 }

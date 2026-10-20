@@ -10,6 +10,7 @@ runs:
       run: |
         set -x
 
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/lib/i386-linux-gnu/pkgconfig"
         ./buildconf --force
         export CFLAGS="-m32 -msse2"
         export CXXFLAGS="-m32 -msse2"
@@ -26,6 +27,7 @@ runs:
             --with-pgsql \
             --with-pdo-pgsql \
             --with-pdo-sqlite \
+            --with-pdo-firebird \
             --without-pear \
             --enable-gd \
             --with-jpeg \
@@ -33,12 +35,10 @@ runs:
             --with-freetype \
             --with-xpm \
             --enable-exif \
-            --with-zip \
             --with-zlib \
             --enable-soap \
             --enable-xmlreader \
             --with-xsl \
-            --with-tidy \
             --enable-sysvsem \
             --enable-sysvshm \
             --enable-shmop \

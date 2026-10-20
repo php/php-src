@@ -21,5 +21,6 @@ try {
     echo 'done!';
 }
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Method PDO::sqliteCreateAggregate() is deprecated since 8.5, use Pdo\Sqlite::createAggregate() instead in %s on line %d
 done!

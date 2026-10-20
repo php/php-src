@@ -24,7 +24,7 @@ var_dump($date->format(DateTime::RSS));
 var_dump($date->format(DateTime::W3C));
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing date_format() : basic functionality - formatting constants ***
 string(25) "2005-07-14T22:30:41+01:00"
 string(34) "Thursday, 14-Jul-2005 22:30:41 BST"
@@ -34,6 +34,8 @@ string(29) "Thu, 14 Jul 05 22:30:41 +0100"
 string(32) "Thursday, 14-Jul-05 22:30:41 BST"
 string(29) "Thu, 14 Jul 05 22:30:41 +0100"
 string(31) "Thu, 14 Jul 2005 22:30:41 +0100"
+
+Deprecated: Constant DateTimeInterface::RFC7231 is deprecated since 8.5, as this format ignores the associated timezone and always uses GMT in %s on line %d
 string(29) "Thu, 14 Jul 2005 22:30:41 GMT"
 string(31) "Thu, 14 Jul 2005 22:30:41 +0100"
 string(25) "2005-07-14T22:30:41+01:00"

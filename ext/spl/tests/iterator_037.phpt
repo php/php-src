@@ -10,7 +10,7 @@ function test($ar, $flags)
     try {
         $it->setFlags($flags);
     } catch (\ValueError $e) {
-        echo 'Exception: ' . $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
         var_dump($it->getFlags());
         return;
     }
@@ -21,7 +21,7 @@ function test($ar, $flags)
             var_dump((string)$it);
         }
     } catch (Exception $e) {
-        echo 'Exception: ' . $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -66,7 +66,7 @@ try
 }
 catch (Exception $e)
 {
-    echo 'Exception: ' . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try
 {
@@ -75,7 +75,7 @@ try
 }
 catch (Exception $e)
 {
-    echo 'Exception: ' . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -101,20 +101,20 @@ string(3) "0:1"
 string(3) "1:2"
 string(3) "2:3"
 ===3===
-Exception: CachingIterator::setFlags(): Argument #1 ($flags) must contain only one of CachingIterator::CALL_TOSTRING, CachingIterator::TOSTRING_USE_KEY, CachingIterator::TOSTRING_USE_CURRENT, or CachingIterator::TOSTRING_USE_INNER
+ValueError: CachingIterator::setFlags(): Argument #1 ($flags) must contain only one of CachingIterator::CALL_TOSTRING, CachingIterator::TOSTRING_USE_KEY, CachingIterator::TOSTRING_USE_CURRENT, or CachingIterator::TOSTRING_USE_INNER
 int(0)
 ===5===
-Exception: CachingIterator::setFlags(): Argument #1 ($flags) must contain only one of CachingIterator::CALL_TOSTRING, CachingIterator::TOSTRING_USE_KEY, CachingIterator::TOSTRING_USE_CURRENT, or CachingIterator::TOSTRING_USE_INNER
+ValueError: CachingIterator::setFlags(): Argument #1 ($flags) must contain only one of CachingIterator::CALL_TOSTRING, CachingIterator::TOSTRING_USE_KEY, CachingIterator::TOSTRING_USE_CURRENT, or CachingIterator::TOSTRING_USE_INNER
 int(0)
 ===9===
-Exception: CachingIterator::setFlags(): Argument #1 ($flags) must contain only one of CachingIterator::CALL_TOSTRING, CachingIterator::TOSTRING_USE_KEY, CachingIterator::TOSTRING_USE_CURRENT, or CachingIterator::TOSTRING_USE_INNER
+ValueError: CachingIterator::setFlags(): Argument #1 ($flags) must contain only one of CachingIterator::CALL_TOSTRING, CachingIterator::TOSTRING_USE_KEY, CachingIterator::TOSTRING_USE_CURRENT, or CachingIterator::TOSTRING_USE_INNER
 int(0)
 ===6===
-Exception: CachingIterator::setFlags(): Argument #1 ($flags) must contain only one of CachingIterator::CALL_TOSTRING, CachingIterator::TOSTRING_USE_KEY, CachingIterator::TOSTRING_USE_CURRENT, or CachingIterator::TOSTRING_USE_INNER
+ValueError: CachingIterator::setFlags(): Argument #1 ($flags) must contain only one of CachingIterator::CALL_TOSTRING, CachingIterator::TOSTRING_USE_KEY, CachingIterator::TOSTRING_USE_CURRENT, or CachingIterator::TOSTRING_USE_INNER
 int(0)
 ===10===
-Exception: CachingIterator::setFlags(): Argument #1 ($flags) must contain only one of CachingIterator::CALL_TOSTRING, CachingIterator::TOSTRING_USE_KEY, CachingIterator::TOSTRING_USE_CURRENT, or CachingIterator::TOSTRING_USE_INNER
+ValueError: CachingIterator::setFlags(): Argument #1 ($flags) must contain only one of CachingIterator::CALL_TOSTRING, CachingIterator::TOSTRING_USE_KEY, CachingIterator::TOSTRING_USE_CURRENT, or CachingIterator::TOSTRING_USE_INNER
 int(0)
 ===X===
-Exception: Unsetting flag CALL_TO_STRING is not possible
-Exception: Unsetting flag TOSTRING_USE_INNER is not possible
+InvalidArgumentException: Unsetting flag CALL_TO_STRING is not possible
+InvalidArgumentException: Unsetting flag TOSTRING_USE_INNER is not possible

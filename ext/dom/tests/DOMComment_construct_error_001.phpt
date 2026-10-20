@@ -9,9 +9,9 @@ dom
 <?php
 try {
     $comment = new DOMComment("comment1", "comment2");
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-DOMComment::__construct() expects at most 1 argument, 2 given
+ArgumentCountError: DOMComment::__construct() expects at most 1 argument, 2 given

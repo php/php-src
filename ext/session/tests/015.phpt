@@ -3,7 +3,7 @@ use_trans_sid should not affect SID
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --INI--
 session.use_trans_sid=1
 session.use_cookies=0
@@ -31,5 +31,5 @@ Deprecated: PHP Startup: Disabling session.use_only_cookies INI setting is depre
 
 Deprecated: PHP Startup: Enabling session.use_trans_sid INI setting is deprecated in Unknown on line 0
 
-Deprecated: Constant SID is deprecated in %s on line 6
+Deprecated: Constant SID is deprecated since 8.4, as GET/POST sessions were deprecated in %s on line %d
 <a href="/link?PHPSESSID=test015&PHPSESSID=test015">

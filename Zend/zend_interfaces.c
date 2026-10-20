@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
@@ -257,12 +256,12 @@ ZEND_API zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *c
 /* }}} */
 
 /* {{{ zend_implement_traversable */
-static int zend_implement_traversable(zend_class_entry *interface, zend_class_entry *class_type)
+static void zend_implement_traversable(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	/* Abstract class can implement Traversable only, in which case the extending class must
 	 * implement Iterator or IteratorAggregate. */
 	if (class_type->ce_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) {
-		return SUCCESS;
+		return;
 	}
 
 	/* Check that class_type implements at least one of 'IteratorAggregate' or 'Iterator' */
@@ -270,7 +269,7 @@ static int zend_implement_traversable(zend_class_entry *interface, zend_class_en
 		ZEND_ASSERT(class_type->ce_flags & ZEND_ACC_RESOLVED_INTERFACES);
 		for (uint32_t i = 0; i < class_type->num_interfaces; i++) {
 			if (class_type->interfaces[i] == zend_ce_aggregate || class_type->interfaces[i] == zend_ce_iterator) {
-				return SUCCESS;
+				return;
 			}
 		}
 	}
@@ -280,12 +279,11 @@ static int zend_implement_traversable(zend_class_entry *interface, zend_class_en
 		ZSTR_VAL(zend_ce_traversable->name),
 		ZSTR_VAL(zend_ce_iterator->name),
 		ZSTR_VAL(zend_ce_aggregate->name));
-	return FAILURE;
 }
 /* }}} */
 
 /* {{{ zend_implement_aggregate */
-static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entry *class_type)
+static void zend_implement_aggregate(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	if (zend_class_implements_interface(class_type, zend_ce_iterator)) {
 		zend_error_noreturn(E_ERROR,
@@ -310,24 +308,23 @@ static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entr
 		/* get_iterator was explicitly assigned for an internal class. */
 		if (!class_type->parent || class_type->parent->get_iterator != class_type->get_iterator) {
 			ZEND_ASSERT(class_type->type == ZEND_INTERNAL_CLASS);
-			return SUCCESS;
+			return;
 		}
 
 		/* The getIterator() method has not been overwritten, use inherited get_iterator(). */
 		if (funcs_ptr->zf_new_iterator->common.scope != class_type) {
-			return SUCCESS;
+			return;
 		}
 
 		/* getIterator() has been overwritten, switch to zend_user_it_get_new_iterator. */
 	}
 
 	class_type->get_iterator = zend_user_it_get_new_iterator;
-	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ zend_implement_iterator */
-static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry *class_type)
+static void zend_implement_iterator(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	if (zend_class_implements_interface(class_type, zend_ce_aggregate)) {
 		zend_error_noreturn(E_ERROR,
@@ -359,7 +356,7 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 		if (!class_type->parent || class_type->parent->get_iterator != class_type->get_iterator) {
 			/* get_iterator was explicitly assigned for an internal class. */
 			ZEND_ASSERT(class_type->type == ZEND_INTERNAL_CLASS);
-			return SUCCESS;
+			return;
 		}
 
 		/* None of the Iterator methods have been overwritten, use inherited get_iterator(). */
@@ -368,7 +365,7 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 				funcs_ptr->zf_key->common.scope != class_type &&
 				funcs_ptr->zf_current->common.scope != class_type &&
 				funcs_ptr->zf_next->common.scope != class_type) {
-			return SUCCESS;
+			return;
 		}
 
 		/* One of the Iterator methods has been overwritten,
@@ -376,12 +373,11 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 	}
 
 	class_type->get_iterator = zend_user_it_get_iterator;
-	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ zend_implement_arrayaccess */
-static int zend_implement_arrayaccess(zend_class_entry *interface, zend_class_entry *class_type)
+static void zend_implement_arrayaccess(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	ZEND_ASSERT(!class_type->arrayaccess_funcs_ptr && "ArrayAccess funcs already set?");
 	zend_class_arrayaccess_funcs *funcs_ptr = class_type->type == ZEND_INTERNAL_CLASS
@@ -397,8 +393,6 @@ static int zend_implement_arrayaccess(zend_class_entry *interface, zend_class_en
 		&class_type->function_table, "offsetset", sizeof("offsetset") - 1);
 	funcs_ptr->zf_offsetunset = zend_hash_str_find_ptr(
 		&class_type->function_table, "offsetunset", sizeof("offsetunset") - 1);
-
-	return SUCCESS;
 }
 /* }}} */
 
@@ -412,13 +406,12 @@ ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, size_t *b
 	zend_call_method_with_0_params(
 		Z_OBJ_P(object), Z_OBJCE_P(object), NULL, "serialize", &retval);
 
-	if (Z_TYPE(retval) == IS_UNDEF || EG(exception)) {
+	if (Z_TYPE(retval) == IS_UNDEF) {
 		result = FAILURE;
 	} else {
 		switch(Z_TYPE(retval)) {
 		case IS_NULL:
 			/* we could also make this '*buf_len = 0' but this allows to skip variables */
-			zval_ptr_dtor(&retval);
 			return FAILURE;
 		case IS_STRING:
 			*buffer = (unsigned char*)estrndup(Z_STRVAL(retval), Z_STRLEN(retval));
@@ -462,12 +455,12 @@ ZEND_API int zend_user_unserialize(zval *object, zend_class_entry *ce, const uns
 /* }}} */
 
 /* {{{ zend_implement_serializable */
-static int zend_implement_serializable(zend_class_entry *interface, zend_class_entry *class_type)
+static void zend_implement_serializable(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	if (class_type->parent
 		&& (class_type->parent->serialize || class_type->parent->unserialize)
 		&& !zend_class_implements_interface(class_type->parent, zend_ce_serializable)) {
-		return FAILURE;
+		zend_error_noreturn(E_CORE_ERROR, "%s %s could not implement interface %s", zend_get_object_type_uc(class_type), ZSTR_VAL(class_type->name), ZSTR_VAL(interface->name));
 	}
 	if (!class_type->serialize) {
 		class_type->serialize = zend_user_serialize;
@@ -483,7 +476,6 @@ static int zend_implement_serializable(zend_class_entry *interface, zend_class_e
 				"During inheritance of %s, while implementing Serializable", ZSTR_VAL(class_type->name));
 		}
 	}
-	return SUCCESS;
 }
 /* }}}*/
 
@@ -497,7 +489,7 @@ static zend_object *zend_internal_iterator_create(zend_class_entry *ce) {
 	zend_internal_iterator *intern = emalloc(sizeof(zend_internal_iterator));
 	zend_object_std_init(&intern->std, ce);
 	intern->iter = NULL;
-	intern->rewind_called = 0;
+	intern->rewind_called = false;
 	return &intern->std;
 }
 
@@ -538,7 +530,7 @@ static zend_internal_iterator *zend_internal_iterator_fetch(zval *This) {
 static zend_result zend_internal_iterator_ensure_rewound(zend_internal_iterator *intern) {
 	if (!intern->rewind_called) {
 		zend_object_iterator *iter = intern->iter;
-		intern->rewind_called = 1;
+		intern->rewind_called = true;
 		if (iter->funcs->rewind) {
 			iter->funcs->rewind(iter);
 			if (UNEXPECTED(EG(exception))) {
@@ -631,7 +623,7 @@ ZEND_METHOD(InternalIterator, rewind) {
 		RETURN_THROWS();
 	}
 
-	intern->rewind_called = 1;
+	intern->rewind_called = true;
 	if (!intern->iter->funcs->rewind) {
 		/* Allow calling rewind() if no iteration has happened yet,
 		 * even if the iterator does not support rewinding. */

@@ -21,8 +21,8 @@ $exploit = unserialize($ser);
 try {
 $exploit->blahblah();
 } catch(SoapFault $e) {
-    echo $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-looks like we got no XML document
+SoapFault: looks like we got no XML document

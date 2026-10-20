@@ -59,7 +59,7 @@ echo "driver warnings: $warnings\n";
 var_dump($stmt->fetchColumn());
 
 ?>
---EXPECT--
+--EXPECTF--
 string(5) "first"
 Error: Object of class stdClass could not be converted to string
 bool(false)
@@ -69,6 +69,8 @@ array(2) {
   [1]=>
   int(2)
 }
+
+Deprecated: Method PDO::sqliteCreateFunction() is deprecated since 8.5, use Pdo\Sqlite::createFunction() instead in %s on line %d
 string(5) "first"
 RuntimeException: execution failed
 bool(false)

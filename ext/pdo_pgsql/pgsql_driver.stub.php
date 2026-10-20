@@ -8,7 +8,7 @@
  */
 class PDO_PGSql_Ext {
     /** @tentative-return-type */
-    public function pgsqlCopyFromArray(string $tableName, array $rows, string $separator = "\t", string $nullAs = "\\\\N", ?string $fields = null): bool {}
+    public function pgsqlCopyFromArray(string $tableName, array | Traversable $rows, string $separator = "\t", string $nullAs = "\\\\N", ?string $fields = null): bool {}
 
     /** @tentative-return-type */
     public function pgsqlCopyFromFile(string $tableName, string $filename, string $separator = "\t", string $nullAs = "\\\\N", ?string $fields = null): bool {}

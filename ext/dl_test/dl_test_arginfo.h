@@ -1,5 +1,7 @@
-/* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0ab7bc0f3289a77ecb1850a1cc7056b7c5297fda */
+/* This is a generated file, edit dl_test.stub.php instead.
+ * Stub hash: 6f3b106c9f5e6d4b0a69451827c10ad6dad0d8f7 */
+
+#include "zend_constants.h"
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dl_test_test1, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -46,6 +48,11 @@ static const zend_function_entry class_DlTestSuperClass_methods[] = {
 	ZEND_FE_END
 };
 
+static void register_dl_test_symbols(int module_number)
+{
+	REGISTER_LONG_CONSTANT("DL_TEST_CONST", 42, CONST_PERSISTENT);
+}
+
 static zend_class_entry *register_class_DlTest(void)
 {
 	zend_class_entry ce, *class_entry;
@@ -65,9 +72,15 @@ static zend_class_entry *register_class_DlTestSuperClass(void)
 
 	zval property_a_default_value;
 	ZVAL_UNDEF(&property_a_default_value);
-	zend_string *property_a_name = zend_string_init("a", sizeof("a") - 1, 1);
+	zend_string *property_a_name = zend_string_init("a", sizeof("a") - 1, true);
 	zend_declare_typed_property(class_entry, property_a_name, &property_a_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_a_name);
+	zend_string_release_ex(property_a_name, true);
+
+	zval property_temporary_default_value;
+	ZVAL_LONG(&property_temporary_default_value, 0);
+	zend_string *property_temporary_name = zend_string_init("temporary", sizeof("temporary") - 1, true);
+	zend_declare_typed_property(class_entry, property_temporary_name, &property_temporary_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release_ex(property_temporary_name, true);
 
 	return class_entry;
 }
@@ -88,7 +101,6 @@ static zend_class_entry *register_class_DlTestAliasedClass(void)
 
 	INIT_CLASS_ENTRY(ce, "DlTestAliasedClass", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
-	zend_register_class_alias("DlTestClassAlias", class_entry);
 
 	return class_entry;
 }

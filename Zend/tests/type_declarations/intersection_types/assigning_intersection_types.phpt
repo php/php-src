@@ -28,8 +28,8 @@ $tc = new TestChild();
 $o = new A();
 try {
     $o->prop = $tp;
-} catch (TypeError $e) {
-    echo $e->getMessage(), \PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $o->prop = $tc;
@@ -46,7 +46,7 @@ var_dump($r);
 
 ?>
 --EXPECTF--
-Cannot assign TestParent to property A::$prop of type X&Y&Z
+TypeError: Cannot assign TestParent to property A::$prop of type X&Y&Z
 object(TestChild)#%d (0) {
 }
 object(TestParent)#%d (0) {

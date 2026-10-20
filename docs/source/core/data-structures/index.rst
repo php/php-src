@@ -8,5 +8,7 @@
    zval
    reference-counting
    zend_string
+   zend_constant
+   fci-fcc
 
 This section provides an overview of the core data structures used in php-src.

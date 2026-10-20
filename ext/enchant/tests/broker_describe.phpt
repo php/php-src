@@ -41,7 +41,7 @@ if($broker) {
 
     }
     } else {
-        echo "failed, brocker describe array \n";
+        echo "failed, broker describe array \n";
     }
 
     @enchant_broker_free($broker);

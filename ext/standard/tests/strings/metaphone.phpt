@@ -8,8 +8,8 @@ var_dump(metaphone(-1));
 
 try {
     var_dump(metaphone("valid phrase", -1));
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump(metaphone("valid phrase", 0));
 var_dump(metaphone("valid phrase", 10000));
@@ -27,14 +27,31 @@ foreach($array as $str) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function metaphone() is deprecated since 8.6, use a userland phonetic matching library instead in %s on line %d
 string(0) ""
+
+Deprecated: Function metaphone() is deprecated since 8.6, use a userland phonetic matching library instead in %s on line %d
 string(0) ""
-metaphone(): Argument #2 ($max_phonemes) must be greater than or equal to 0
+
+Deprecated: Function metaphone() is deprecated since 8.6, use a userland phonetic matching library instead in %s on line %d
+ValueError: metaphone(): Argument #2 ($max_phonemes) must be greater than or equal to 0
+
+Deprecated: Function metaphone() is deprecated since 8.6, use a userland phonetic matching library instead in %s on line %d
 string(6) "FLTFRS"
+
+Deprecated: Function metaphone() is deprecated since 8.6, use a userland phonetic matching library instead in %s on line %d
 string(6) "FLTFRS"
+
+Deprecated: Function metaphone() is deprecated since 8.6, use a userland phonetic matching library instead in %s on line %d
 string(26) "0FLFRWRTKRFLNKHTLSLN0KLTR0"
+
+Deprecated: Function metaphone() is deprecated since 8.6, use a userland phonetic matching library instead in %s on line %d
 string(56) "BT0XTFHRRHLTNTRTRNTPSNKLWRNRFTBF0MSWPNK0FNRKW0TSFSTLWNKS"
+
+Deprecated: Function metaphone() is deprecated since 8.6, use a userland phonetic matching library instead in %s on line %d
 string(69) "ANT0NTWSKNFLYNKBKTMRTRW00SPTF0R0FSRNNTBHNTT0WNTRRTWLFNK0TTMRXSBRNTBLK"
+
+Deprecated: Function metaphone() is deprecated since 8.6, use a userland phonetic matching library instead in %s on line %d
 string(56) "0NKTWSTSFRS0YKLTPRSFNT0TSTNTMNSF0MNTNSWSTPLTW00FTFLMNLFT"
 Done

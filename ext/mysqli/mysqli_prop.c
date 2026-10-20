@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Georg Richter <georg@php.net>                                |
   |         Andrey Hristov <andrey@php.net>                              |
@@ -37,7 +35,7 @@
 MYSQL *p; \
 if (!obj->ptr || !(MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr) { \
 	if (!quiet) { \
-		zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(obj->zo.ce->name)); \
+		zend_throw_error(NULL, "%pS object is already closed", obj->zo.ce->name); \
 	} \
 	return FAILURE; \
 } else { \
@@ -45,7 +43,7 @@ if (!obj->ptr || !(MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr) { \
 	p = (MYSQL *)((MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr)->mysql;\
 	if (!p) { \
 		if (!quiet) { \
-			zend_throw_error(NULL, "%s object is not fully initialized", ZSTR_VAL(obj->zo.ce->name)); \
+			zend_throw_error(NULL, "%pS object is not fully initialized", obj->zo.ce->name); \
 		} \
 		return FAILURE; \
 	} \
@@ -55,7 +53,7 @@ if (!obj->ptr || !(MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr) { \
 MYSQL_RES *p; \
 if (!obj->ptr) { \
 	if (!quiet) { \
-		zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(obj->zo.ce->name)); \
+		zend_throw_error(NULL, "%pS object is already closed", obj->zo.ce->name); \
 	} \
 	return FAILURE; \
 } else { \
@@ -67,7 +65,7 @@ if (!obj->ptr) { \
 MYSQL_STMT *p; \
 if (!obj->ptr) { \
 	if (!quiet) { \
-		zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(obj->zo.ce->name)); \
+		zend_throw_error(NULL, "%pS object is already closed", obj->zo.ce->name); \
 	} \
 	return FAILURE; \
 } else { \

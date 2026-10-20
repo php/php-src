@@ -57,30 +57,30 @@ var_dump(bin2hex(gmp_export(0xff)));
 try {
     var_dump(gmp_export(123, -1));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(gmp_export(123, 0));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 // Invalid options
 try {
     var_dump(gmp_export(123, 1, GMP_MSW_FIRST | GMP_LSW_FIRST));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(gmp_export(123, 1, GMP_BIG_ENDIAN | GMP_LITTLE_ENDIAN));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
 bool(true)
 string(2) "ff"
-gmp_export(): Argument #2 ($word_size) must be greater than or equal to 1
-gmp_export(): Argument #2 ($word_size) must be greater than or equal to 1
-gmp_export(): Argument #3 ($flags) cannot use multiple word order options
-gmp_export(): Argument #3 ($flags) cannot use multiple endian options
+ValueError: gmp_export(): Argument #2 ($word_size) must be greater than or equal to 1
+ValueError: gmp_export(): Argument #2 ($word_size) must be greater than or equal to 1
+ValueError: gmp_export(): Argument #3 ($flags) cannot use multiple word order options
+ValueError: gmp_export(): Argument #3 ($flags) cannot use multiple endian options

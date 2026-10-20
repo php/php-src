@@ -8,7 +8,7 @@ class Menu extends ArrayObject
     function getIterator(): RecursiveArrayIterator
     {
         echo __METHOD__ . "\n";
-        return new RecursiveArrayIterator($this);
+        return new RecursiveArrayIterator($this->getArrayCopy());
     }
 }
 
@@ -42,7 +42,18 @@ class MenuOutput extends RecursiveIteratorIterator
     }
 }
 
-$arr = array("a", array("ba", array("bba", "bbb"), array(array("bcaa"))), array("ca"), "d");
+$arr = [
+    "a",
+    [
+        "ba",
+        ["bba", "bbb"],
+        [
+            ["bcaa"]
+        ]
+    ],
+    ["ca"],
+    "d",
+];
 $obj = new Menu($arr);
 $rit = new MenuOutput($obj);
 foreach($rit as $k=>$v)

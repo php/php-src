@@ -11,8 +11,8 @@ $n = "-1";
 try {
     $n <<= $n;
     var_dump($n);
-} catch (ArithmeticError $e) {
-    echo "\nException: " . $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $n = "65";
@@ -23,16 +23,16 @@ $n = "-1";
 try {
   $n >>= $n;
   var_dump($n);
-} catch (ArithmeticError $e) {
-    echo "\nException: " . $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $n = "0";
 try{
   $n %= $n;
   var_dump($n);
-} catch (DivisionByZeroError $e) {
-    echo "\nException: " . $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $n = "-1";
@@ -41,11 +41,8 @@ var_dump($n);
 ?>
 --EXPECT--
 int(0)
-
-Exception: Bit shift by negative number
+ArithmeticError: Bit shift by negative number
 int(0)
-
-Exception: Bit shift by negative number
-
-Exception: Modulo by zero
+ArithmeticError: Bit shift by negative number
+DivisionByZeroError: Modulo by zero
 int(0)

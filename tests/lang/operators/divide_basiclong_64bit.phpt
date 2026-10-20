@@ -28,7 +28,7 @@ foreach ($longVals as $longVal) {
         try {
             var_dump($longVal/$otherVal);
         } catch (\Throwable $e) {
-            echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
+            echo $e::class, ': ', $e->getMessage(), PHP_EOL;
         }
     }
 }

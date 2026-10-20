@@ -71,15 +71,23 @@ function base64_encode_var_dump($regs) {
     }
 }
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing mb_ereg() : basic functionality ***
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 Regex encoding set to utf-8
 
 **-- ASCII String --**
 -- Without $regs argument--
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 bool(true)
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 bool(true)
 --With $regs argument --
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 bool(true)
 array(2) {
   [0]=>
@@ -87,6 +95,8 @@ array(2) {
   [1]=>
   string(24) "VGhpcyBpcyBhbiBFbmdsaXM="
 }
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 bool(true)
 array(1) {
   [0]=>
@@ -95,9 +105,15 @@ array(1) {
 
 **-- Multibyte String --**
 -- Without $regs argument --
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 bool(true)
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 bool(false)
 -- With $regs argument --
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 bool(true)
 array(3) {
   [0]=>
@@ -107,6 +123,8 @@ array(3) {
   [2]=>
   string(8) "MTIzNA=="
 }
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 bool(false)
 array(0) {
 }

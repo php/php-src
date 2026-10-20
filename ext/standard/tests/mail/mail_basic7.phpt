@@ -43,50 +43,50 @@ $message = 'A Message';
 
 try {
     mail($to, $subject, $message, ['orig-date' => array('foo1')]);
-} catch (TypeError|ValueError $exception) {
-    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     mail($to, $subject, $message, ['from' => array('foo2')]);
-} catch (TypeError|ValueError $exception) {
-    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     mail($to, $subject, $message, ['sender' => array('foo3')]);
-} catch (TypeError|ValueError $exception) {
-    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     mail($to, $subject, $message, ['reply-to' => array('foo4')]);
-} catch (TypeError|ValueError $exception) {
-    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     mail($to, $subject, $message, ['to' => array('foo5')]);
-} catch (TypeError|ValueError $exception) {
-    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     mail($to, $subject, $message, ['bcc' => array('foo6')]);
-} catch (TypeError|ValueError $exception) {
-    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     mail($to, $subject, $message, ['message-id' => array('foo7')]);
-} catch (TypeError|ValueError $exception) {
-    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     mail($to, $subject, $message, ['in-reply-to'=> array('foo8')]);
-} catch (TypeError|ValueError $exception) {
-    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 echo "\n\n************* TEST ******************\n";
@@ -98,44 +98,44 @@ $message = 'A Message';
 
 try {
     mail($to, $subject, $message, ['foo1' => array('foo2'=>'bar1')]);
-} catch (TypeError|ValueError $exception) {
-    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     mail($to, $subject, $message, ['foo2' => array('foo2', array('foo3'))]);
-} catch (TypeError|ValueError $exception) {
-    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     mail($to, $subject, $message, ['foo3' => array(123)]);
-} catch (TypeError|ValueError $exception) {
-    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     mail($to, $subject, $message, ['foo4' => array(123.456)]);
-} catch (TypeError|ValueError $exception) {
-    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     mail($to, $subject, $message, ['foo5' => array(FALSE)]);
-} catch (TypeError|ValueError $exception) {
-    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     mail($to, $subject, $message, ['foo6' => array(NULL)]);
-} catch (TypeError|ValueError $exception) {
-    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     mail($to, $subject, $message, ['foo7' => array(new StdClass)]);
-} catch (TypeError|ValueError $exception) {
-    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 echo "\n\n************* TEST ******************\n";
@@ -150,50 +150,50 @@ $outFile = "mailBasic7.out";
 
 try {
     mail($to, $subject, $message, ['*:foo1' => array('bar1')]);
-} catch (TypeError|ValueError $exception) {
-    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     mail($to, $subject, $message, ['foo2:::' => array('bar1')]);
-} catch (TypeError|ValueError $exception) {
-    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     mail($to, $subject, $message, ['foo3()' => array('bar1')]);
-} catch (TypeError|ValueError $exception) {
-    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     mail($to, $subject, $message, ['foo4@' => array('bar1')]);
-} catch (TypeError|ValueError $exception) {
-    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     mail($to, $subject, $message, ['foo5|' => array('bar1')]);
-} catch (TypeError|ValueError $exception) {
-    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     mail($to, $subject, $message, ["\0foo6" => array('bar1')]);
-} catch (TypeError|ValueError $exception) {
-    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     mail($to, $subject, $message, ["foo7\0" => array('bar1')]);
-} catch (TypeError|ValueError $exception) {
-    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     mail($to, $subject, $message, ["foo8" => array()]);
-} catch (TypeError|ValueError $exception) {
-    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 var_dump(mail($to, $subject, $message, ["foo9" => '%&$#!']));
@@ -202,8 +202,8 @@ unlink($outFile);
 
 try {
     mail($to, $subject, $message, ["foo10" => "abc\0\tdef"]);
-} catch (TypeError|ValueError $exception) {
-    echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>

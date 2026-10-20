@@ -4,8 +4,6 @@ IntlCalendar::isEquivalentTo() basic test
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "nl");
 
 $intlcal1 = IntlCalendar::createInstance('Europe/Amsterdam');
 $intlcal2 = IntlCalendar::createInstance('Europe/Lisbon');

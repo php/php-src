@@ -11,9 +11,9 @@ $priorityQueue = new SplPriorityQueue();
 try {
     $priorityQueue->top();
 } catch (RuntimeException $e) {
-    echo "Exception: ".$e->getMessage().PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-Exception: Can't peek at an empty heap
+RuntimeException: Can't peek at an empty heap

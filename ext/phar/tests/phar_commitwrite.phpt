@@ -27,7 +27,7 @@ unlink(__DIR__ . '/phar_commitwrite.phar');
 __HALT_COMPILER();
 ?>
 --EXPECTF--
-int(6641)
+int(6659)
 string(%d) "<?php
 spl_autoload_register(function($class) {
     include 'phar://' . str_replace('_', '/', $class);

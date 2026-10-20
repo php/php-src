@@ -4,7 +4,7 @@ Test function gzseek() by seeking out of bounds
 zlib
 --FILE--
 <?php
-$f = __DIR__."/004.txt.gz";
+$f = __DIR__."/data/test.txt.gz";
 $h = gzopen($f, 'r');
 
 var_dump(gzseek($h, -100, SEEK_CUR));

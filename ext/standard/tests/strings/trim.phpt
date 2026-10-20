@@ -18,9 +18,15 @@ var_dump("ABC" === trim("ABC\x50\xC1\x60\x90","\x50..\xC1"));
 var_dump("ABC\x50\xC1" === trim("ABC\x50\xC1\x60\x90","\x51..\xC0"));
 var_dump("ABC\x50" === trim("ABC\x50\xC1\x60\x90","\x51..\xC1"));
 var_dump("ABC" === trim("ABC\x50\xC1\x60\x90","\x50..\xC1"));
+var_dump("ABC" ===  trim("\fABC\f"));
+var_dump("ABC" === ltrim("\fABC"));
+var_dump("ABC" === rtrim("ABC\f"));
 
 ?>
 --EXPECT--
+bool(true)
+bool(true)
+bool(true)
 bool(true)
 bool(true)
 bool(true)

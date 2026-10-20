@@ -29,17 +29,17 @@ echo "not reached\n";
 --EXPECTF--
 Deprecated: PHP Startup: assert.exception INI setting is deprecated in Unknown on line 0
 
-Deprecated: Constant ASSERT_ACTIVE is deprecated in %s on line %d
+Deprecated: Constant ASSERT_ACTIVE is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
 
 Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 
-Deprecated: Constant ASSERT_ACTIVE is deprecated in %s on line %d
+Deprecated: Constant ASSERT_ACTIVE is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
 
 Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 
 Warning: assert(): assert(0) failed in %s on line %d
 
-Deprecated: Constant ASSERT_BAIL is deprecated in %s on line %d
+Deprecated: Constant ASSERT_BAIL is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
 
 Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 

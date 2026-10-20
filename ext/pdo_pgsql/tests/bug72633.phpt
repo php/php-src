@@ -1,7 +1,6 @@
 --TEST--
 PDO PgSQL Bug #72633 (Postgres PDO lastInsertId() should work without specifying a sequence)
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

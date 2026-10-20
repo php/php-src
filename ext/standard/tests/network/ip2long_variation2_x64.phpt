@@ -9,6 +9,7 @@ Test ip2long() function : usage variation 2, 64 bit
 */
 if(PHP_OS == 'Darwin') die("skip - inet_pton behaves differently on Darwin");
 if(PHP_OS == 'OpenBSD') die("skip - inet_pton accepts leading zeros on OpenBSD");
+if(PHP_OS_FAMILY === 'Solaris') die("skip - Solaris inet_aton accepts invalid octal as decimal");
 if(PHP_INT_SIZE != 8) {die('skip 64 bit only');}
 ?>
 --FILE--

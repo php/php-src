@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Marcus Boerger <helly@php.net>                               |
    |         Johannes Schlueter <johannes@php.net>                        |
@@ -28,7 +26,6 @@
 #include "zend_hash.h"
 
 #include "SAPI.h"
-#include <locale.h>
 #include "zend.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
@@ -47,7 +44,6 @@
 
 #include "zend_compile.h"
 #include "zend_execute.h"
-#include "zend_highlight.h"
 #include "zend_exceptions.h"
 
 #include "sapi/cli/cli.h"
@@ -414,7 +410,15 @@ static int cli_is_valid_code(char *code, size_t len, zend_string **prompt) /* {{
 }
 /* }}} */
 
-static char *cli_completion_generator_ht(const char *text, size_t textlen, int *state, HashTable *ht, void **pData) /* {{{ */
+typedef enum {
+	CLI_COMPLETION_VARIABLE,
+	CLI_COMPLETION_INI,
+	CLI_COMPLETION_FUNCTION,
+	CLI_COMPLETION_CONSTANT,
+	CLI_COMPLETION_CLASS,
+} cli_completion_type;
+
+static char *cli_completion_generator_ht(const char *text, size_t textlen, int *state, HashTable *ht, cli_completion_type type) /* {{{ */
 {
 	zend_string *name;
 	zend_ulong number;
@@ -423,86 +427,53 @@ static char *cli_completion_generator_ht(const char *text, size_t textlen, int *
 		zend_hash_internal_pointer_reset(ht);
 		(*state)++;
 	}
-	while(zend_hash_has_more_elements(ht) == SUCCESS) {
+	while (zend_hash_has_more_elements(ht) == SUCCESS) {
 		zend_hash_get_current_key(ht, &name, &number);
 		if (!textlen || !strncmp(ZSTR_VAL(name), text, textlen)) {
-			if (pData) {
-				*pData = zend_hash_get_current_data_ptr(ht);
+			char prefix = '\0';
+			char append_character = '\0';
+
+			switch (type) {
+				case CLI_COMPLETION_VARIABLE:
+					prefix = '$';
+					break;
+				case CLI_COMPLETION_INI:
+					prefix = '#';
+					append_character = '=';
+					break;
+				case CLI_COMPLETION_FUNCTION: {
+					zend_function *func = zend_hash_get_current_data_ptr(ht);
+					name = func->common.function_name;
+					append_character = '(';
+					break;
+				}
+				case CLI_COMPLETION_CLASS: {
+					zend_class_entry *ce = zend_hash_get_current_data_ptr(ht);
+					name = ce->name;
+					break;
+				}
+				case CLI_COMPLETION_CONSTANT:
+					break;
 			}
+
 			zend_hash_move_forward(ht);
-			return ZSTR_VAL(name);
+			/* The line editing library takes ownership of the candidate. */
+			size_t prefix_len = prefix ? 1 : 0;
+			char *retval = malloc(prefix_len + ZSTR_LEN(name) + 1);
+			if (!retval) {
+				return NULL;
+			}
+			if (prefix) {
+				retval[0] = prefix;
+			}
+			memcpy(retval + prefix_len, ZSTR_VAL(name), ZSTR_LEN(name) + 1);
+			rl_completion_append_character = append_character;
+			return retval;
 		}
-		if (zend_hash_move_forward(ht) == FAILURE) {
-			break;
-		}
+		zend_hash_move_forward(ht);
 	}
 	(*state)++;
 	return NULL;
-} /* }}} */
-
-static char *cli_completion_generator_var(const char *text, size_t textlen, int *state) /* {{{ */
-{
-	char *retval, *tmp;
-	zend_array *symbol_table = &EG(symbol_table);
-
-	tmp = retval = cli_completion_generator_ht(text + 1, textlen - 1, state, symbol_table, NULL);
-	if (retval) {
-		retval = malloc(strlen(tmp) + 2);
-		retval[0] = '$';
-		strcpy(&retval[1], tmp);
-		rl_completion_append_character = '\0';
-	}
-	return retval;
-} /* }}} */
-
-static char *cli_completion_generator_ini(const char *text, size_t textlen, int *state) /* {{{ */
-{
-	char *retval, *tmp;
-
-	tmp = retval = cli_completion_generator_ht(text + 1, textlen - 1, state, EG(ini_directives), NULL);
-	if (retval) {
-		retval = malloc(strlen(tmp) + 2);
-		retval[0] = '#';
-		strcpy(&retval[1], tmp);
-		rl_completion_append_character = '=';
-	}
-	return retval;
-} /* }}} */
-
-static char *cli_completion_generator_func(const char *text, size_t textlen, int *state, HashTable *ht) /* {{{ */
-{
-	zend_function *func;
-	char *retval = cli_completion_generator_ht(text, textlen, state, ht, (void**)&func);
-	if (retval) {
-		rl_completion_append_character = '(';
-		retval = strdup(ZSTR_VAL(func->common.function_name));
-	}
-
-	return retval;
-} /* }}} */
-
-static char *cli_completion_generator_class(const char *text, size_t textlen, int *state) /* {{{ */
-{
-	zend_class_entry *ce;
-	char *retval = cli_completion_generator_ht(text, textlen, state, EG(class_table), (void**)&ce);
-	if (retval) {
-		rl_completion_append_character = '\0';
-		retval = strdup(ZSTR_VAL(ce->name));
-	}
-
-	return retval;
-} /* }}} */
-
-static char *cli_completion_generator_define(const char *text, size_t textlen, int *state, HashTable *ht) /* {{{ */
-{
-	zend_class_entry **pce;
-	char *retval = cli_completion_generator_ht(text, textlen, state, ht, (void**)&pce);
-	if (retval) {
-		rl_completion_append_character = '\0';
-		retval = strdup(retval);
-	}
-
-	return retval;
 } /* }}} */
 
 static int cli_completion_state;
@@ -525,9 +496,9 @@ TODO:
 		cli_completion_state = 0;
 	}
 	if (text[0] == '$') {
-		retval = cli_completion_generator_var(text, textlen, &cli_completion_state);
+		retval = cli_completion_generator_ht(text + 1, textlen - 1, &cli_completion_state, &EG(symbol_table), CLI_COMPLETION_VARIABLE);
 	} else if (text[0] == '#' && text[1] != '[') {
-		retval = cli_completion_generator_ini(text, textlen, &cli_completion_state);
+		retval = cli_completion_generator_ht(text + 1, textlen - 1, &cli_completion_state, EG(ini_directives), CLI_COMPLETION_INI);
 	} else {
 		char *lc_text;
 		const char *class_name_end;
@@ -554,21 +525,21 @@ TODO:
 		switch (cli_completion_state) {
 			case 0:
 			case 1:
-				retval = cli_completion_generator_func(lc_text, textlen, &cli_completion_state, ce ? &ce->function_table : EG(function_table));
+				retval = cli_completion_generator_ht(lc_text, textlen, &cli_completion_state, ce ? &ce->function_table : EG(function_table), CLI_COMPLETION_FUNCTION);
 				if (retval) {
 					break;
 				}
 				ZEND_FALLTHROUGH;
 			case 2:
 			case 3:
-				retval = cli_completion_generator_define(constant_text, textlen, &cli_completion_state, ce ? &ce->constants_table : EG(zend_constants));
+				retval = cli_completion_generator_ht(constant_text, textlen, &cli_completion_state, ce ? &ce->constants_table : EG(zend_constants), CLI_COMPLETION_CONSTANT);
 				if (retval || ce) {
 					break;
 				}
 				ZEND_FALLTHROUGH;
 			case 4:
 			case 5:
-				retval = cli_completion_generator_class(lc_text, textlen, &cli_completion_state);
+				retval = cli_completion_generator_ht(lc_text, textlen, &cli_completion_state, EG(class_table), CLI_COMPLETION_CLASS);
 				break;
 			default:
 				break;
@@ -609,7 +580,7 @@ static int readline_shell_run(void) /* {{{ */
 		zend_file_handle prepend_file;
 
 		zend_stream_init_filename(&prepend_file, PG(auto_prepend_file));
-		zend_execute_scripts(ZEND_REQUIRE, NULL, 1, &prepend_file);
+		zend_execute_script(ZEND_REQUIRE, NULL, &prepend_file);
 		zend_destroy_file_handle(&prepend_file);
 	}
 
@@ -714,7 +685,7 @@ static int readline_shell_run(void) /* {{{ */
 		}
 
 		if (pager_pipe) {
-			fclose(pager_pipe);
+			pclose(pager_pipe);
 			pager_pipe = NULL;
 		}
 
@@ -734,7 +705,7 @@ typedef cli_shell_callbacks_t *(__cdecl *get_cli_shell_callbacks)(void);
 		get_cli_shell_callbacks get_callbacks; \
 		HMODULE hMod = GetModuleHandle("php.exe"); \
 		(cb) = NULL; \
-		if (strlen(sapi_module.name) >= 3 && 0 == strncmp("cli", sapi_module.name, 3)) { \
+		if (0 == strncmp("cli", sapi_module.name, 3)) { \
 			get_callbacks = (get_cli_shell_callbacks)GetProcAddress(hMod, "php_cli_get_shell_callbacks"); \
 			if (get_callbacks) { \
 				(cb) = get_callbacks(); \

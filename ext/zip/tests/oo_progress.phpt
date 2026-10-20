@@ -1,5 +1,5 @@
 --TEST--
-registerProgressCallback
+ZipArchive::registerProgressCallback() with a normal callback
 --EXTENSIONS--
 zip
 --SKIPIF--
@@ -13,8 +13,6 @@ date.timezone=UTC
 <?php
 $dirname = dirname(__FILE__) . '/';
 $file = $dirname . '__tmp_oo_progress.zip';
-
-@unlink($file);
 
 $zip = new ZipArchive;
 if (!$zip->open($file, ZIPARCHIVE::CREATE)) {
@@ -32,6 +30,13 @@ var_dump($zip->close());
 unlink($file);
 ?>
 Done
+--CLEAN--
+<?php
+$dirname = dirname(__FILE__) . '/';
+$file = $dirname . '__tmp_oo_progress.zip';
+
+@unlink($file);
+?>
 --EXPECT--
 bool(true)
 bool(true)

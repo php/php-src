@@ -7,8 +7,8 @@ phar
 try {
 Phar::mapPhar('hio');
 } catch (Exception $e) {
-echo $e->getMessage();
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-__HALT_COMPILER(); must be declared in a phar
+PharException: __HALT_COMPILER(); must be declared in a phar

@@ -10,8 +10,7 @@ PHP_NEW_EXTENSION([spl], m4_normalize([
     spl_iterators.c
     spl_observer.c
   ]),
-  [no],,
-  [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
+  [no])
 PHP_INSTALL_HEADERS([ext/spl], m4_normalize([
   php_spl.h
   spl_array.h

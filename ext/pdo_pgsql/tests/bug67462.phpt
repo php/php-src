@@ -1,7 +1,6 @@
 --TEST--
 PDO PgSQL Bug #67462 (PDO_PGSQL::beginTransaction() wrongly throws exception when not in transaction)
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

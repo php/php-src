@@ -23,16 +23,16 @@ json_validate_trycatchdump("[\"\xc1\xc1\",\"a\"]", 512, JSON_INVALID_UTF8_IGNORE
 Testing Invalid UTF-8
 bool(false)
 int(5)
-string(56) "Malformed UTF-8 characters, possibly incorrectly encoded"
+string(74) "Malformed UTF-8 characters, possibly incorrectly encoded near location 1:1"
 bool(false)
 int(5)
-string(56) "Malformed UTF-8 characters, possibly incorrectly encoded"
+string(74) "Malformed UTF-8 characters, possibly incorrectly encoded near location 1:1"
 bool(false)
 int(5)
-string(56) "Malformed UTF-8 characters, possibly incorrectly encoded"
+string(74) "Malformed UTF-8 characters, possibly incorrectly encoded near location 1:1"
 bool(false)
 int(5)
-string(56) "Malformed UTF-8 characters, possibly incorrectly encoded"
+string(74) "Malformed UTF-8 characters, possibly incorrectly encoded near location 1:2"
 bool(true)
 int(0)
 string(8) "No error"

@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -72,23 +70,23 @@ zend_accel_hash_entry* zend_accel_hash_update(
 		void                   *data);
 
 void* zend_accel_hash_find(
-		zend_accel_hash        *accel_hash,
+		const zend_accel_hash        *accel_hash,
 		zend_string            *key);
 
 zend_accel_hash_entry* zend_accel_hash_find_entry(
+		const zend_accel_hash        *accel_hash,
+		zend_string            *key);
+
+zend_result zend_accel_hash_unlink(
 		zend_accel_hash        *accel_hash,
 		zend_string            *key);
 
-int zend_accel_hash_unlink(
-		zend_accel_hash        *accel_hash,
-		zend_string            *key);
-
-static inline bool zend_accel_hash_is_full(zend_accel_hash *accel_hash)
+static inline bool zend_accel_hash_is_full(const zend_accel_hash *accel_hash)
 {
 	if (accel_hash->num_entries == accel_hash->max_num_entries) {
-		return 1;
+		return true;
 	} else {
-		return 0;
+		return false;
 	}
 }
 

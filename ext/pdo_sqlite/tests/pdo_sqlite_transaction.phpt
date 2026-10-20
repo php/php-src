@@ -14,7 +14,7 @@ $db->query('CREATE TABLE test_pdo_sqlite_transaction (id INT AUTO INCREMENT, nam
 $db->commit();
 
 $db->beginTransaction();
-$db->query('INSERT INTO test_pdo_sqlite_transaction VALUES (NULL, "PHP"), (NULL, "PHP6")');
+$db->query("INSERT INTO test_pdo_sqlite_transaction VALUES (NULL, 'PHP'), (NULL, 'PHP6')");
 $db->rollback();
 
 $r = $db->query('SELECT COUNT(*) FROM test_pdo_sqlite_transaction');

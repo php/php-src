@@ -32,9 +32,9 @@ $r = $dd->loadXML($xml);
 try {
     var_dump($dd->validate());
 } catch (\Throwable $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-string(122) "DOMDocument::validate(): The user entity loader callback "Handler::handle" has returned a resource, but it is not a stream"
+TypeError: DOMDocument::validate(): The user entity loader callback "Handler::handle" has returned a resource, but it is not a stream

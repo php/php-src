@@ -15,7 +15,7 @@ try {
     $a = new Phar(dirname(__FILE__) . '/files/bz2_alias.phar.zip');
     var_dump($a->getAlias());
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--

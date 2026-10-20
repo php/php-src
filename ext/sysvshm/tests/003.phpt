@@ -18,13 +18,13 @@ var_dump(shm_detach($s));
 try {
     shm_detach($s);
 } catch (Error $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     shm_remove($s);
 } catch (Error $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 echo "Done\n";
@@ -39,6 +39,6 @@ shm_remove($s);
 ?>
 --EXPECT--
 bool(true)
-Shared memory block has already been destroyed
-Shared memory block has already been destroyed
+Error: Shared memory block has already been destroyed
+Error: Shared memory block has already been destroyed
 Done

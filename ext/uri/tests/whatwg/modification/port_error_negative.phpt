@@ -1,0 +1,16 @@
+--TEST--
+Test Uri\WhatWg\Url::withPort() - error - negative number
+--FILE--
+<?php
+
+$url = Uri\WhatWg\Url::parse("https://example.com");
+
+try {
+    $url->withPort(-1);
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+
+?>
+--EXPECT--
+Uri\WhatWg\InvalidUrlException: The specified port is malformed

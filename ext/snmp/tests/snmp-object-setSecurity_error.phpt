@@ -53,7 +53,11 @@ try {
 
 var_dump($session->setSecurity('authPriv', 'MD5', $auth_pass, 'AES', ''));
 var_dump($session->setSecurity('authPriv', 'MD5', $auth_pass, 'AES', 'ty'));
-var_dump($session->setSecurity('authPriv', 'MD5', $auth_pass, 'AES', 'test12345', 'context', 'dsa'));
+try {
+    var_dump($session->setSecurity('authPriv', 'MD5', $auth_pass, 'AES', 'test12345', 'context', 'dsa'));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 var_dump($session->close());
 
@@ -68,15 +72,13 @@ bool(false)
 
 Warning: SNMP::setSecurity(): Error generating a key for authentication pass phrase 'te': Generic error (The supplied password length is too short.) in %s on line %d
 bool(false)
-Security protocol must be one of "DES", "AES128", or "AES"
-Security protocol must be one of "DES", "AES128", or "AES"
+Security protocol must be one of %s
+Security protocol must be one of %s
 
 Warning: SNMP::setSecurity(): Error generating a key for privacy pass phrase '': Generic error (The supplied password length is too short.) in %s on line %d
 bool(false)
 
 Warning: SNMP::setSecurity(): Error generating a key for privacy pass phrase 'ty': Generic error (The supplied password length is too short.) in %s on line %d
 bool(false)
-
-Warning: SNMP::setSecurity(): Bad engine ID value 'dsa' in %s on line %d
-bool(false)
+SNMP::setSecurity(): Argument #7 ($contextEngineId) must be a valid context engine ID
 bool(true)

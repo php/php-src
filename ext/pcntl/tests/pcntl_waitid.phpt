@@ -26,10 +26,12 @@ if ($pid == -1) {
 } else {
     pcntl_signal(SIGUSR1, function ($_signo, $_siginfo) { exit(42); });
     posix_kill(posix_getpid(), SIGSTOP);
-    pcntl_signal_dispatch();
-    sleep(42);
-    pcntl_signal_dispatch();
-    exit(6);
+    $nanoseconds = 100;
+    while (true) {
+        pcntl_signal_dispatch();
+        time_nanosleep(0, $nanoseconds);
+        $nanoseconds *= 2;
+    }
 }
 ?>
 --EXPECTF--

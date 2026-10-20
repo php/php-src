@@ -11,9 +11,9 @@ $element = $dom->createElement('test');
 
 try {
     $element->remove();
-} catch (DOMException $e) {
-    echo $e->getMessage();
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Not Found Error
+DOMException: Not Found Error

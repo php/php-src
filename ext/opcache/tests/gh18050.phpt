@@ -3,6 +3,7 @@ GH-18050: Frameless calls break IN_ARRAY optimization
 --EXTENSIONS--
 opcache
 --INI--
+opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=-1
 opcache.opt_debug_level=0x20000
@@ -55,8 +56,7 @@ test:
 0012 DO_ICALL
 0013 T1 = IN_ARRAY 1 CV0($v) array(...)
 0014 JMPZ T1 0016
-0015 ECHO string("True
-")
+0015 ECHO string("True\n")
 0016 RETURN null
 bool(true)
 bool(true)

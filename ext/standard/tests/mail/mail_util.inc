@@ -143,7 +143,7 @@ class MailBox
 
         $this->mailConnecter->send(self::SEARCH, "UID SEARCH SUBJECT \"{$subject}\"");
         $res = $this->mailConnecter->getResponse(self::SEARCH);
-        preg_match('/SEARCH ([0-9 ]+)/is', $res, $matches);
+        preg_match('/SEARCH ([0-9 ]+)/i', $res, $matches);
         return isset($matches[1]) ? explode(' ', trim($matches[1])) : [];
     }
 
@@ -166,8 +166,7 @@ class MailBox
             if (!$line) {
                 continue;
             }
-            $items = explode(':', $line);
-            preg_match('/^(.+?):(.+?)$/', $line, $matches);
+            preg_match('/^(.+?):(.+)$/', $line, $matches);
             $key = trim($matches[1] ?? '');
             $val = trim($matches[2] ?? '');
             if (!$key || !$val || $val === self::FETCH_HEADERS.' OK UID completed' || $val === ')') {

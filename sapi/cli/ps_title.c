@@ -284,7 +284,7 @@ clobber_error:
  * and the init function was called.
  * Otherwise returns NOT_AVAILABLE or NOT_INITIALIZED
  */
-int is_ps_title_available(void)
+ps_title_status is_ps_title_available(void)
 {
 #ifdef PS_USE_NONE
     return PS_TITLE_NOT_AVAILABLE; /* disabled functionality */
@@ -304,7 +304,7 @@ int is_ps_title_available(void)
 /*
  * Convert error codes into error strings
  */
-const char* ps_title_errno(int rc)
+const char* ps_title_errno(ps_title_status rc)
 {
     switch(rc)
     {
@@ -320,11 +320,16 @@ const char* ps_title_errno(int rc)
     case PS_TITLE_BUFFER_NOT_AVAILABLE:
         return "Buffer not contiguous";
 
-#ifdef PS_USE_WIN32
+    case PS_TITLE_TOO_LONG:
+        // TODO Indicate max length?
+        return "Too long";
+
     case PS_TITLE_WINDOWS_ERROR:
+#ifdef PS_USE_WIN32
         snprintf(windows_error_details, sizeof(windows_error_details), "Windows error code: %lu", GetLastError());
         return windows_error_details;
 #endif
+        return "Windows error";
     }
 
     return "Unknown error code";
@@ -337,14 +342,19 @@ const char* ps_title_errno(int rc)
  * save_ps_args() was not called.
  * Else returns 0 on success.
  */
-int set_ps_title(const char* title)
+ps_title_status set_ps_title(const char *title, size_t title_len)
 {
-    int rc = is_ps_title_available();
+    if (title_len >= ps_buffer_size) {
+        return PS_TITLE_TOO_LONG;
+    }
+
+    ps_title_status rc = is_ps_title_available();
     if (rc != PS_TITLE_SUCCESS)
         return rc;
 
-    size_t title_len = strlcpy(ps_buffer, title, ps_buffer_size);
-    ps_buffer_cur_len = (title_len >= ps_buffer_size) ? ps_buffer_size - 1 : title_len;
+    /* Include final null byte */
+    memcpy(ps_buffer, title, title_len+1);
+    ps_buffer_cur_len = title_len;
 
 #ifdef PS_USE_SETPROCTITLE
     setproctitle("%s", ps_buffer);
@@ -394,9 +404,9 @@ int set_ps_title(const char* title)
  * length into *displen.
  * The return code indicates the error.
  */
-int get_ps_title(size_t *displen, const char** string)
+ps_title_status get_ps_title(size_t *displen, const char** string)
 {
-    int rc = is_ps_title_available();
+    ps_title_status rc = is_ps_title_available();
     if (rc != PS_TITLE_SUCCESS)
         return rc;
 

@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend Engine, SSA validation                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Nikita Popov <nikic@php.net>                                |
    +----------------------------------------------------------------------+
@@ -25,20 +23,20 @@ static inline bool is_in_use_chain(zend_ssa *ssa, int var, int check) {
 	int use;
 	FOREACH_USE(&ssa->vars[var], use) {
 		if (use == check) {
-			return 1;
+			return true;
 		}
 	} FOREACH_USE_END();
-	return 0;
+	return false;
 }
 
 static inline bool is_in_phi_use_chain(zend_ssa *ssa, int var, zend_ssa_phi *check) {
 	zend_ssa_phi *phi;
 	FOREACH_PHI_USE(&ssa->vars[var], phi) {
 		if (phi == check) {
-			return 1;
+			return true;
 		}
 	} FOREACH_PHI_USE_END();
-	return 0;
+	return false;
 }
 
 static inline bool is_used_by_op(zend_ssa *ssa, int op, int check) {
@@ -59,30 +57,29 @@ static inline bool is_in_phi_sources(zend_ssa *ssa, zend_ssa_phi *phi, int check
 	int source;
 	FOREACH_PHI_SOURCE(phi, source) {
 		if (source == check) {
-			return 1;
+			return true;
 		}
 	} FOREACH_PHI_SOURCE_END();
-	return 0;
+	return false;
 }
 
 static inline bool is_in_predecessors(zend_cfg *cfg, zend_basic_block *block, int check) {
-	int i, *predecessors = &cfg->predecessors[block->predecessor_offset];
-	for (i = 0; i < block->predecessors_count; i++) {
+	int *predecessors = &cfg->predecessors[block->predecessor_offset];
+	for (uint32_t i = 0; i < block->predecessors_count; i++) {
 		if (predecessors[i] == check) {
-			return 1;
+			return true;
 		}
 	}
-	return 0;
+	return false;
 }
 
 static inline bool is_in_successors(zend_basic_block *block, int check) {
-	int s;
-	for (s = 0; s < block->successors_count; s++) {
+	for (uint32_t s = 0; s < block->successors_count; s++) {
 		if (block->successors[s] == check) {
-			return 1;
+			return true;
 		}
 	}
-	return 0;
+	return false;
 }
 
 static inline bool is_var_type(uint8_t type) {
@@ -329,7 +326,7 @@ void ssa_verify_integrity(zend_op_array *op_array, zend_ssa *ssa, const char *ex
 
 	/* Phis */
 	FOREACH_PHI(phi) {
-		unsigned num_sources = NUM_PHI_SOURCES(phi);
+		uint32_t num_sources = NUM_PHI_SOURCES(phi);
 		for (i = 0; i < num_sources; i++) {
 			int source = phi->sources[i];
 			if (source < 0) {
@@ -360,7 +357,7 @@ void ssa_verify_integrity(zend_op_array *op_array, zend_ssa *ssa, const char *ex
 	for (i = 0; i < cfg->blocks_count; i++) {
 		zend_basic_block *block = &cfg->blocks[i];
 		int *predecessors = &cfg->predecessors[block->predecessor_offset];
-		int s, j;
+		uint32_t j;
 
 		if (i != 0 && block->start < (block-1)->start + (block-1)->len) {
 			FAIL("Block %d start %d smaller previous end %d\n",
@@ -384,7 +381,7 @@ void ssa_verify_integrity(zend_op_array *op_array, zend_ssa *ssa, const char *ex
 			continue;
 		}
 
-		for (s = 0; s < block->successors_count; s++) {
+		for (uint32_t s = 0; s < block->successors_count; s++) {
 			zend_basic_block *next_block;
 			if (block->successors[s] < 0) {
 				FAIL("Successor number %d of %d negative", s, i);
@@ -400,7 +397,6 @@ void ssa_verify_integrity(zend_op_array *op_array, zend_ssa *ssa, const char *ex
 
 		for (j = 0; j < block->predecessors_count; j++) {
 			if (predecessors[j] >= 0) {
-				int k;
 				zend_basic_block *prev_block = &cfg->blocks[predecessors[j]];
 				if (!(prev_block->flags & ZEND_BB_REACHABLE)) {
 					FAIL("Predecessor %d of %d not reachable\n", predecessors[j], i);
@@ -408,7 +404,7 @@ void ssa_verify_integrity(zend_op_array *op_array, zend_ssa *ssa, const char *ex
 				if (!is_in_successors(prev_block, i)) {
 					FAIL("Block %d successors missing %d\n", predecessors[j], i);
 				}
-				for (k = 0; k < block->predecessors_count; k++) {
+				for (uint32_t k = 0; k < block->predecessors_count; k++) {
 					if (k != j && predecessors[k] == predecessors[j]) {
 						FAIL("Block %d has duplicate predecessor %d\n", i, predecessors[j]);
 					}

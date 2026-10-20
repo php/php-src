@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Hartmut Holzgraefe <hholzgra@php.net>                        |
    +----------------------------------------------------------------------+
@@ -82,10 +80,14 @@ PHP_FUNCTION(levenshtein)
 	zend_long cost_rep = 1;
 	zend_long cost_del = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS|lll", &string1, &string2, &cost_ins, &cost_rep, &cost_del) == FAILURE) {
-		RETURN_THROWS();
-	}
-
+	ZEND_PARSE_PARAMETERS_START(2, 5)
+		Z_PARAM_STR(string1)
+		Z_PARAM_STR(string2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(cost_ins)
+		Z_PARAM_LONG(cost_rep)
+		Z_PARAM_LONG(cost_del)
+	ZEND_PARSE_PARAMETERS_END();
 
 	RETURN_LONG(reference_levdist(string1, string2, cost_ins, cost_rep, cost_del));
 }

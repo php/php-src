@@ -7,29 +7,29 @@ function dummy($a) {
 
 try {
     chr(0)[0][] = 1;
-} catch (Error $e) {
-    var_dump($e->getMessage());
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     unset(chr(0)[0][0]);
-} catch (Error $e) {
-    var_dump($e->getMessage());
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 eval("function runtimetest(&\$a) {} ");
 try {
     runtimetest(chr(0)[0]);
-} catch (Error $e) {
-    var_dump($e->getMessage());
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     ++chr(0)[0];
-} catch (Error $e) {
-    var_dump($e->getMessage());
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-string(36) "Cannot use string offset as an array"
-string(36) "Cannot use string offset as an array"
-string(47) "Cannot create references to/from string offsets"
-string(41) "Cannot increment/decrement string offsets"
+Error: Cannot use string offset as an array
+Error: Cannot use string offset as an array
+Error: Cannot create references to/from string offsets
+Error: Cannot increment/decrement string offsets

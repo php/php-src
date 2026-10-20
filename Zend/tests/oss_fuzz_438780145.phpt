@@ -20,6 +20,8 @@ test();
 
 ?>
 --EXPECTF--
+Deprecated: Returning from a finally block is deprecated in %s on line %d
+
 Fatal error: Uncaught TypeError: test(): Return value must be of type int, string returned in %s:%d
 Stack trace:
 #0 %s(%d): test()

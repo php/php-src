@@ -4,9 +4,6 @@ PDO_Firebird: Bug #76488 PDO Firebird does not support boolean datatype in input
 pdo_firebird
 --SKIPIF--
 <?php require('skipif.inc'); ?>
---XLEAK--
-A bug in firebird causes a memory leak when calling `isc_attach_database()`.
-See https://github.com/FirebirdSQL/firebird/issues/7849
 --FILE--
 <?php
 

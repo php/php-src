@@ -4,7 +4,7 @@ Test compress.zlib:// scheme with the file_get_contents
 zlib
 --FILE--
 <?php
-$inputFileName = __DIR__."/004.txt.gz";
+$inputFileName = __DIR__."/data/test.txt.gz";
 $srcFile = "compress.zlib://$inputFileName";
 readfile($srcFile);
 ?>

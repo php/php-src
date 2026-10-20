@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Christian Stocker <chregu@php.net>                          |
    |          Rob Richards <rrichards@php.net>                            |
@@ -22,7 +20,9 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "obj_map.h"
 #include "dom_properties.h"
+#include "internal_helpers.h"
 
 /* {{{ name	string
 readonly=yes
@@ -32,7 +32,11 @@ Since:
 zend_result dom_documenttype_name_read(dom_object *obj, zval *retval)
 {
 	DOM_PROP_NODE(xmlDtdPtr, dtdptr, obj);
-	ZVAL_STRING(retval, dtdptr->name ? (char *) (dtdptr->name) : "");
+	if (dtdptr->name) {
+		ZVAL_STRING(retval, (const char *) dtdptr->name);
+	} else {
+		ZVAL_EMPTY_STRING(retval);
+	}
 	return SUCCESS;
 }
 
@@ -47,12 +51,12 @@ zend_result dom_documenttype_entities_read(dom_object *obj, zval *retval)
 {
 	DOM_PROP_NODE(xmlDtdPtr, dtdptr, obj);
 
-	php_dom_create_iterator(retval, DOM_DTD_NAMEDNODEMAP, instanceof_function(obj->std.ce, dom_modern_documenttype_class_entry));
+	object_init_ex(retval, dom_get_dtd_namednodemap_ce(instanceof_function(obj->std.ce, dom_modern_documenttype_class_entry)));
 
 	xmlHashTable *entityht = (xmlHashTable *) dtdptr->entities;
 
 	dom_object *intern = Z_DOMOBJ_P(retval);
-	dom_namednode_iter(obj, XML_ENTITY_NODE, intern, entityht, NULL, 0, NULL, 0);
+	php_dom_create_obj_map(obj, intern, entityht, NULL, NULL, &php_dom_obj_map_entities);
 
 	return SUCCESS;
 }
@@ -68,12 +72,12 @@ zend_result dom_documenttype_notations_read(dom_object *obj, zval *retval)
 {
 	DOM_PROP_NODE(xmlDtdPtr, dtdptr, obj);
 
-	php_dom_create_iterator(retval, DOM_DTD_NAMEDNODEMAP, instanceof_function(obj->std.ce, dom_modern_documenttype_class_entry));
+	object_init_ex(retval, dom_get_dtd_namednodemap_ce(instanceof_function(obj->std.ce, dom_modern_documenttype_class_entry)));
 
 	xmlHashTable *notationht = (xmlHashTable *) dtdptr->notations;
 
 	dom_object *intern = Z_DOMOBJ_P(retval);
-	dom_namednode_iter(obj, XML_NOTATION_NODE, intern, notationht, NULL, 0, NULL, 0);
+	php_dom_create_obj_map(obj, intern, notationht, NULL, NULL, &php_dom_obj_map_notations);
 
 	return SUCCESS;
 }

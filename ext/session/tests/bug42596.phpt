@@ -5,7 +5,7 @@ session
 --SKIPIF--
 <?php
     if(substr(PHP_OS, 0, 3) == "WIN") die("skip not for Windows");
-    include('skipif.inc');
+    include 'skipif.inc';
 ?>
 --INI--
 session.use_cookies=0
@@ -17,20 +17,22 @@ session.serialize_handler=php
 session.save_handler=files
 --FILE--
 <?php
-$sessdir = __DIR__.'/bug42596/';
-@rmdir($sessdir);
+$sessdir = __DIR__ . '/bug42596/';
 mkdir($sessdir);
-$save_path = '0;0777;'.$sessdir;
 umask(0);
-session_save_path($save_path);
+session_save_path('0;0777;' . $sessdir);
 session_start();
 echo "hello world\n";
 session_write_close();
 
 foreach (glob($sessdir. "*") as $sessfile) {
   var_dump(decoct(fileperms($sessfile)));
-  unlink($sessfile);
 }
+?>
+--CLEAN--
+<?php
+$sessdir = __DIR__ . '/bug42596/';
+array_map('unlink', glob($sessdir . '*'));
 rmdir($sessdir);
 ?>
 --EXPECT--

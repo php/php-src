@@ -123,7 +123,7 @@ array(2) {
     }
   }
 }
-TypeError: PDO::ATTR_STATEMENT_CLASS constructor_args must be of type ?array, string given
+TypeError: PDO::setAttribute(): Argument #2 ($value) PDO::ATTR_STATEMENT_CLASS constructor_args must be of type ?array, string given
 array(2) {
   [0]=>
   string(13) "PDOStatementX"

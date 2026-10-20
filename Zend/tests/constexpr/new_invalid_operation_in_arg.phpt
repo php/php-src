@@ -1,5 +1,5 @@
 --TEST--
-Invalid operation in new arg in const expr
+Valid operation in new arg in const expr
 --FILE--
 <?php
 

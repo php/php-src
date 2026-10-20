@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -47,7 +45,7 @@ static void *mapping_base;
 static void zend_win_error_message(int type, char *msg, int err)
 {
 	HANDLE h;
-	char *ev_msgs[2];
+	const char *ev_msgs[2];
 	char *buf = php_win32_error_to_msg(err);
 
 	h = RegisterEventSource(NULL, TEXT(ACCEL_EVENT_SOURCE));
@@ -94,7 +92,7 @@ void zend_shared_alloc_create_lock(void)
 {
 	memory_mutex = CreateMutex(NULL, FALSE, create_name_with_username(ACCEL_MUTEX_NAME, 0));
 	if (!memory_mutex) {
-		zend_accel_error(ACCEL_LOG_FATAL, "Cannot create mutex (error %u)", GetLastError());
+		zend_accel_error(ACCEL_LOG_FATAL, "Cannot create mutex (error %lu)", GetLastError());
 		return;
 	}
 	ReleaseMutex(memory_mutex);
@@ -288,7 +286,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	} else {
 		char *s = ZCG(accel_directives).mmap_base;
 
-		/* skip leading 0x, %p assumes hexdecimal format anyway */
+		/* skip leading 0x, %p assumes hexadecimal format anyway */
 		if (*s == '0' && *(s + 1) == 'x') {
 			s += 2;
 		}

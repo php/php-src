@@ -7,10 +7,10 @@ enum Foo {}
 
 try {
     new Foo();
-} catch (\Error $e) {
-    echo $e->getMessage();
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot instantiate enum Foo
+Error: Cannot instantiate enum Foo

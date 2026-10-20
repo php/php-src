@@ -10,7 +10,7 @@ var_dump($dom);
 
 ?>
 --EXPECT--
-object(Dom\XMLDocument)#1 (32) {
+object(Dom\XMLDocument)#1 (33) {
   ["xmlEncoding"]=>
   string(5) "UTF-8"
   ["xmlStandalone"]=>
@@ -35,6 +35,8 @@ object(Dom\XMLDocument)#1 (32) {
   NULL
   ["documentElement"]=>
   NULL
+  ["children"]=>
+  string(22) "(object value omitted)"
   ["firstElementChild"]=>
   NULL
   ["lastElementChild"]=>

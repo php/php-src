@@ -48,4 +48,3 @@ Ok
     </foo>
   </outer>
 </file '%s'>
-

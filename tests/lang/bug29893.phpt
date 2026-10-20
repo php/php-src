@@ -6,8 +6,8 @@ $base = 50;
 try {
     $base[$base] -= 0;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Cannot use a scalar value as an array
+Error: Cannot use a scalar value as an array

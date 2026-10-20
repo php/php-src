@@ -27,7 +27,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: apptype.c,v 1.17 2022/12/26 17:31:14 christos Exp $")
+FILE_RCSID("@(#)$File: apptype.c,v 1.18 2024/12/08 18:59:04 christos Exp $")
 #endif /* lint */
 
 #include <stdlib.h>
@@ -42,8 +42,7 @@ FILE_RCSID("@(#)$File: apptype.c,v 1.17 2022/12/26 17:31:14 christos Exp $")
 typedef ULONG   APPTYPE;
 
 file_protected int
-file_os2_apptype(struct magic_set *ms, const char *fn, const void *buf,
-    size_t nb)
+file_os2_apptype(struct magic_set *ms, const char *fn, const struct buffer *b)
 {
 	APPTYPE         rc, type;
 	char            path[_MAX_PATH], drive[_MAX_DRIVE], dir[_MAX_DIR],
@@ -69,7 +68,7 @@ file_os2_apptype(struct magic_set *ms, const char *fn, const void *buf,
 			file_error(ms, errno, "cannot open tmp file `%s'", path);
 			return -1;
 		}
-		if (fwrite(buf, 1, nb, fp) != nb) {
+		if (fwrite(b->fbuf, 1, b->flen, fp) != b->flen) {
 			file_error(ms, errno, "cannot write tmp file `%s'",
 			    path);
 			(void)fclose(fp);
@@ -129,7 +128,7 @@ file_os2_apptype(struct magic_set *ms, const char *fn, const void *buf,
 		 * ".com".
 		 */
 		if (stricmp(ext, ".com") == 0)
-			if (strncmp((const char *)buf, "MZ", 2))
+			if (strncmp((const char *)b->fbuf, "MZ", 2))
 				return (0);
 		if (file_printf(ms, "DOS executable") == -1)
 			return -1;

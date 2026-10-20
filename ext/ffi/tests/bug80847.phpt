@@ -9,7 +9,6 @@ if (PHP_OS_FAMILY == 'Windows' && ((1 << 31) > 0)) die('xfail libffi doesn\'t pr
 ?>
 --FILE--
 <?php
-require_once('utils.inc');
 $header = <<<HEADER
     typedef struct bug80847_01 {
         uint64_t b;
@@ -23,15 +22,7 @@ $header = <<<HEADER
 	bug80847_02 ffi_bug80847(bug80847_02 s);
 HEADER;
 
-if (PHP_OS_FAMILY !== 'Windows') {
-    $ffi = FFI::cdef($header);
-} else {
-    try {
-        $ffi = FFI::cdef($header, 'php_zend_test.dll');
-    } catch (FFI\Exception $ex) {
-        $ffi = FFI::cdef($header, ffi_get_php_dll_name());
-    }
-}
+$ffi = FFI::cdef($header);
 $x = $ffi->new('bug80847_02');
 $x->a->b = 42;
 $x->a->c = 42.5;

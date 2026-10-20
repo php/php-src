@@ -8,22 +8,22 @@ foreach ([-NAN, NAN, INF, -INF] as $offset) {
 }
 ?>
 --EXPECTF--
-Deprecated: Constant SUNFUNCS_RET_STRING is deprecated in %s on line %d
+Deprecated: Constant SUNFUNCS_RET_STRING is deprecated since 8.4, as date_sunrise() and date_sunset() were deprecated in 8.1 in %s on line %d
 
 Deprecated: Function date_sunrise() is deprecated since 8.1, use date_sun_info() instead in %s on line %d
 bool(false)
 
-Deprecated: Constant SUNFUNCS_RET_STRING is deprecated in %s on line %d
+Deprecated: Constant SUNFUNCS_RET_STRING is deprecated since 8.4, as date_sunrise() and date_sunset() were deprecated in 8.1 in %s on line %d
 
 Deprecated: Function date_sunrise() is deprecated since 8.1, use date_sun_info() instead in %s on line %d
 bool(false)
 
-Deprecated: Constant SUNFUNCS_RET_STRING is deprecated in %s on line %d
+Deprecated: Constant SUNFUNCS_RET_STRING is deprecated since 8.4, as date_sunrise() and date_sunset() were deprecated in 8.1 in %s on line %d
 
 Deprecated: Function date_sunrise() is deprecated since 8.1, use date_sun_info() instead in %s on line %d
 bool(false)
 
-Deprecated: Constant SUNFUNCS_RET_STRING is deprecated in %s on line %d
+Deprecated: Constant SUNFUNCS_RET_STRING is deprecated since 8.4, as date_sunrise() and date_sunset() were deprecated in 8.1 in %s on line %d
 
 Deprecated: Function date_sunrise() is deprecated since 8.1, use date_sun_info() instead in %s on line %d
 bool(false)

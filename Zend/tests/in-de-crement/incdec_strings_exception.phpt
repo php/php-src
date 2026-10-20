@@ -28,44 +28,48 @@ $values = [
 foreach ($values as $value) {
     try {
         $value++;
-    } catch (\Exception $e) {
-        echo $e->getMessage(), PHP_EOL;
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     var_dump($value);
     try {
         $value--;
-    } catch (\Exception $e) {
-        echo $e->getMessage(), PHP_EOL;
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     var_dump($value);
 }
 ?>
 --EXPECT--
-Deprecated: Increment on non-alphanumeric string is deprecated
+Exception: Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead
 string(0) ""
-Deprecated: Decrement on empty string is deprecated as non-numeric
+Exception: Deprecated: Decrement on empty string is deprecated as non-numeric
 string(0) ""
-Deprecated: Increment on non-alphanumeric string is deprecated
+Exception: Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead
 string(1) " "
-Deprecated: Decrement on non-numeric string has no effect and is deprecated
+Exception: Deprecated: Decrement on non-numeric string has no effect and is deprecated
 string(1) " "
-string(4) "199B"
-Deprecated: Decrement on non-numeric string has no effect and is deprecated
-string(4) "199B"
-string(4) "A200"
-Deprecated: Decrement on non-numeric string has no effect and is deprecated
-string(4) "A200"
-string(4) "200A"
-Deprecated: Decrement on non-numeric string has no effect and is deprecated
-string(4) "200A"
-string(4) "Z200"
-Deprecated: Decrement on non-numeric string has no effect and is deprecated
-string(4) "Z200"
-Deprecated: Increment on non-alphanumeric string is deprecated
+Exception: Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead
+string(4) "199A"
+Exception: Deprecated: Decrement on non-numeric string has no effect and is deprecated
+string(4) "199A"
+Exception: Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead
+string(4) "A199"
+Exception: Deprecated: Decrement on non-numeric string has no effect and is deprecated
+string(4) "A199"
+Exception: Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead
+string(4) "199Z"
+Exception: Deprecated: Decrement on non-numeric string has no effect and is deprecated
+string(4) "199Z"
+Exception: Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead
+string(4) "Z199"
+Exception: Deprecated: Decrement on non-numeric string has no effect and is deprecated
+string(4) "Z199"
+Exception: Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead
 string(11) "Hello world"
-Deprecated: Decrement on non-numeric string has no effect and is deprecated
+Exception: Deprecated: Decrement on non-numeric string has no effect and is deprecated
 string(11) "Hello world"
-Deprecated: Increment on non-alphanumeric string is deprecated
+Exception: Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead
 string(4) "🐘"
-Deprecated: Decrement on non-numeric string has no effect and is deprecated
+Exception: Deprecated: Decrement on non-numeric string has no effect and is deprecated
 string(4) "🐘"

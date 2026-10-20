@@ -25,7 +25,6 @@ var_dump(curl_setopt($ch, CURLOPT_PROTOCOLS_STR, "FilE,DICT"));
 var_dump(curl_setopt($ch, CURLOPT_PROTOCOLS_STR, "DICT"));
 var_dump(curl_setopt($ch, CURLOPT_REDIR_PROTOCOLS_STR, "HTTP"));
 curl_exec($ch);
-curl_close($ch);
 ?>
 --EXPECTF--
 Warning: curl_setopt(): The FILE protocol cannot be activated when an open_basedir is set in %s on line %d

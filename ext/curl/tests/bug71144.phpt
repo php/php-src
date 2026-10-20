@@ -1,5 +1,5 @@
 --TEST--
-Bug #71144 (Sementation fault when using cURL with ZTS)
+Bug #71144 (Segmentation fault when using cURL with ZTS)
 --DESCRIPTION--
 Since Curl 7.62, CURLOPT_DNS_USE_GLOBAL_CACHE has no effect, and is
 silently ignored.

@@ -17,10 +17,10 @@ $encoding = 'unknown-encoding';
 try {
     var_dump(mb_strlen($string, $encoding));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
 *** Testing mb_strlen() : error ***
-mb_strlen(): Argument #2 ($encoding) must be a valid encoding, "unknown-encoding" given
+ValueError: mb_strlen(): Argument #2 ($encoding) must be a valid encoding, "unknown-encoding" given

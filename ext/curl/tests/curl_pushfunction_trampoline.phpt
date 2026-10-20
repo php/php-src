@@ -2,7 +2,6 @@
 Test trampoline for curl option CURLMOPT_PUSHFUNCTION
 --EXTENSIONS--
 curl
---XLEAK--
 --SKIPIF--
 <?php
 include 'skipif-nocaddy.inc';
@@ -48,7 +47,6 @@ do {
             if ($handle !== null) {
 		        $responses[] = curl_multi_getcontent($info['handle']);
                 curl_multi_remove_handle($mh, $handle);
-                curl_close($handle);
             }
         }
     } while ($info);

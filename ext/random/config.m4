@@ -32,10 +32,10 @@ PHP_NEW_EXTENSION([random], m4_normalize([
     randomizer.c
     zend_utils.c
   ]),
-  [no],,
-  [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
+  [no])
 PHP_INSTALL_HEADERS([ext/random], m4_normalize([
   php_random_csprng.h
   php_random_uint128.h
   php_random.h
+  random_decl.h
 ]))

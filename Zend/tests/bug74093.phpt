@@ -14,9 +14,10 @@ max_execution_time=1
 hard_timeout=1
 --FILE--
 <?php
-$a1 = range(1, 3000000);
-$a2 = range(100000, 3999999);
-array_intersect($a1, $a2);
+$values = range(1, 6000000);
+/* array_intersect() now uses a linear-time hash implementation. Use a large
+ * internal string sort to retain the hard-timeout workload. */
+sort($values, SORT_STRING);
 ?>
 --EXPECTF--
 Fatal error: Maximum execution time of 1+1 seconds exceeded %s

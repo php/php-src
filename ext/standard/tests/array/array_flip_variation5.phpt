@@ -3,39 +3,35 @@ Test array_flip() function : usage variations - 'input' argument with repeatitiv
 --FILE--
 <?php
 /*
-* Using different types of repeatitive keys as well as values for 'input' array
+* Using different types of repetitive keys as well as values for 'input' array
 */
 
-echo "*** Testing array_flip() : 'input' array with repeatitive keys/values ***\n";
+echo "*** Testing array_flip() : 'input' array with repetitive keys/values ***\n";
 
-// array with numeric key repeatition
+// array with numeric key repetition
 $input = array(1 => 'value', 2 => 'VALUE', 1 => "VaLuE", 3 => 4, 3 => 5);
 var_dump( array_flip($input) );
 
-// array with string key repeatition
+// array with string key repetition
 $input = array("key" => 1, "two" => 'TWO', 'three' => 3, 'key' => "FOUR");
 var_dump( array_flip($input) );
 
-// array with bool key repeatition
+// array with bool key repetition
 $input = array(true => 1, false => 0, TRUE => -1);
 var_dump( array_flip($input) );
 
-// array with null key repeatition
-$input = array(null => "Hello", NULL => 0);
-var_dump( array_flip($input) );
-
-// array with numeric value repeatition
+// array with numeric value repetition
 $input = array('one' => 1, 'two' => 2, 3 => 1, "index" => 1);
 var_dump( array_flip($input) );
 
-//array with string value repeatition
+//array with string value repetition
 $input = array('key1' => "value1", "key2" => '2', 'key3' => 'value1');
 var_dump( array_flip($input) );
 
 echo "Done"
 ?>
 --EXPECT--
-*** Testing array_flip() : 'input' array with repeatitive keys/values ***
+*** Testing array_flip() : 'input' array with repetitive keys/values ***
 array(3) {
   ["VaLuE"]=>
   int(1)
@@ -57,10 +53,6 @@ array(2) {
   int(1)
   [0]=>
   int(0)
-}
-array(1) {
-  [0]=>
-  string(0) ""
 }
 array(2) {
   [1]=>

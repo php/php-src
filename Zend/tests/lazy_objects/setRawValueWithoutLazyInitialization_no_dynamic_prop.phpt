@@ -38,6 +38,6 @@ test('Proxy', $obj);
 ?>
 --EXPECT--
 # Ghost
-ReflectionException: Can not use setRawValueWithoutLazyInitialization on dynamic property C::$dyn
+ReflectionException: Cannot use setRawValueWithoutLazyInitialization() on dynamic property C::$dyn
 # Proxy
-ReflectionException: Can not use setRawValueWithoutLazyInitialization on dynamic property C::$dyn
+ReflectionException: Cannot use setRawValueWithoutLazyInitialization() on dynamic property C::$dyn

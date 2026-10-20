@@ -34,6 +34,7 @@ file_put_contents('php://fd/2', "Goes to stderrFile\n");
 
 ob_start(function ($buffer) use ($stdoutStream) {
     fwrite($stdoutStream, $buffer);
+    return '';
 }, 1);
 
 print "stdoutFile:\n";

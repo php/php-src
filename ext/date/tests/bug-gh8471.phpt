@@ -8,7 +8,7 @@ $mutable = $reflection->newInstanceWithoutConstructor();
 try {
 	$immutable = \DateTimeImmutable::createFromMutable($mutable);
 } catch (Throwable $t) {
-	echo $t->getMessage(), "\n";
+	echo $t::class, ': ', $t->getMessage(), "\n";
 }
 
 
@@ -18,7 +18,7 @@ $mutable = $reflection->newInstanceWithoutConstructor();
 try {
 	$immutable = \DateTimeImmutable::createFromInterface($mutable);
 } catch (Throwable $t) {
-	echo $t->getMessage(), "\n";
+	echo $t::class, ': ', $t->getMessage(), "\n";
 }
 
 
@@ -28,7 +28,7 @@ $immutable = $reflection->newInstanceWithoutConstructor();
 try {
 	$mutable = \DateTime::createFromImmutable($immutable);
 } catch (Throwable $t) {
-	echo $t->getMessage(), "\n";
+	echo $t::class, ': ', $t->getMessage(), "\n";
 }
 
 
@@ -38,13 +38,13 @@ $immutable = $reflection->newInstanceWithoutConstructor();
 try {
 	$mutable = \DateTime::createFromInterface($immutable);
 } catch (Throwable $t) {
-	echo $t->getMessage(), "\n";
+	echo $t::class, ': ', $t->getMessage(), "\n";
 }
 
 
 ?>
 --EXPECTF--
-Object of type DateTime has not been correctly initialized by calling parent::__construct() in its constructor
-Object of type DateTime has not been correctly initialized by calling parent::__construct() in its constructor
-Object of type DateTimeImmutable has not been correctly initialized by calling parent::__construct() in its constructor
-Object of type DateTimeImmutable has not been correctly initialized by calling parent::__construct() in its constructor
+DateObjectError: Object of type DateTime has not been correctly initialized by calling parent::__construct() in its constructor
+DateObjectError: Object of type DateTime has not been correctly initialized by calling parent::__construct() in its constructor
+DateObjectError: Object of type DateTimeImmutable has not been correctly initialized by calling parent::__construct() in its constructor
+DateObjectError: Object of type DateTimeImmutable has not been correctly initialized by calling parent::__construct() in its constructor

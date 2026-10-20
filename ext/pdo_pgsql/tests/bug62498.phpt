@@ -1,7 +1,6 @@
 --TEST--
 PDO PgSQL Bug #62498 (pdo_pgsql inefficient when getColumnMeta() is used), 64-bit
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -27,7 +26,6 @@
 
 #include "zend_globals_macros.h"
 
-#include "zend_atomic.h"
 #include "zend_stack.h"
 #include "zend_ptr_stack.h"
 #include "zend_hash.h"
@@ -40,6 +38,7 @@
 #include "zend_multiply.h"
 #include "zend_arena.h"
 #include "zend_call_stack.h"
+#include "zend_ini_scanner.h"
 #include "zend_max_execution_timer.h"
 #include "zend_strtod.h"
 #include "zend_lazy_objects.h"
@@ -74,12 +73,19 @@ typedef struct _zend_vm_stack *zend_vm_stack;
 typedef struct _zend_ini_entry zend_ini_entry;
 typedef struct _zend_fiber_context zend_fiber_context;
 typedef struct _zend_fiber zend_fiber;
+typedef struct _zend_error_info zend_error_info;
 
 typedef enum {
 	ZEND_MEMOIZE_NONE,
 	ZEND_MEMOIZE_COMPILE,
 	ZEND_MEMOIZE_FETCH,
 } zend_memoize_mode;
+
+typedef struct zend_err_buf {
+	uint32_t size;
+	uint32_t capacity;
+	zend_error_info **errors;
+} zend_err_buf;
 
 struct _zend_compiler_globals {
 	zend_stack loop_var_stack;
@@ -88,7 +94,7 @@ struct _zend_compiler_globals {
 
 	zend_string *compiled_filename;
 
-	int zend_lineno;
+	uint32_t zend_lineno;
 
 	zend_op_array *active_op_array;
 
@@ -182,6 +188,10 @@ struct _zend_executor_globals {
 	JMP_BUF *bailout;
 
 	int error_reporting;
+
+	bool fatal_error_backtrace_on;
+	zval last_fatal_error_backtrace;
+
 	int exit_status;
 
 	HashTable *function_table;	/* function symbol table */
@@ -194,13 +204,13 @@ struct _zend_executor_globals {
 	size_t         vm_stack_page_size;
 
 	struct _zend_execute_data *current_execute_data;
-	zend_class_entry *fake_scope; /* used to avoid checks accessing properties */
+	const zend_class_entry *fake_scope; /* used to avoid checks accessing properties */
 
 	uint32_t jit_trace_num; /* Used by tracing JIT to reference the currently running trace */
 
 	zend_execute_data *current_observed_frame;
 
-	int ticks_count;
+	uint32_t ticks_count;
 
 	zend_long precision;
 
@@ -213,10 +223,10 @@ struct _zend_executor_globals {
 
 	bool full_tables_cleanup;
 
-	zend_atomic_bool vm_interrupt;
-	zend_atomic_bool timed_out;
+	atomic_bool vm_interrupt;
+	atomic_bool timed_out;
 
-	HashTable *in_autoload;
+	HashTable autoload_current_classnames;
 
 	zend_long hard_timeout;
 	void *stack_base;
@@ -251,7 +261,7 @@ struct _zend_executor_globals {
 
 	zend_objects_store objects_store;
 	zend_lazy_objects_store lazy_objects_store;
-	zend_object *exception, *prev_exception;
+	zend_object *exception;
 	const zend_op *opline_before_exception;
 	zend_op exception_op[3];
 
@@ -291,10 +301,10 @@ struct _zend_executor_globals {
 	size_t fiber_stack_size;
 
 	/* If record_errors is enabled, all emitted diagnostics will be recorded,
-	 * in addition to being processed as usual. */
+	 * and their processing is delayed until zend_emit_recorded_errors()
+	 * is called or a fatal diagnostic is emitted. */
 	bool record_errors;
-	uint32_t num_errors;
-	zend_error_info **errors;
+	zend_err_buf errors;
 
 	/* Override filename or line number of thrown errors and exceptions */
 	zend_string *filename_override;
@@ -314,8 +324,24 @@ struct _zend_executor_globals {
 
 	zend_strtod_state strtod_state;
 
+	HashTable callable_convert_cache;
+	HashTable partial_function_application_cache;
+	zend_stack lambda_cache;
+
+	zend_vm_stack  vm_stack_page_cache;
+	uint32_t       vm_stack_page_cache_count;
+	/* Fibers use a different page size, so they need a separate cache */
+	zend_vm_stack  fiber_vm_stack_page_cache;
+	uint32_t       fiber_vm_stack_page_cache_count;
+
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
+
+#ifdef ZTS
+/* Compile-time offsets of the hot globals, in a reserved region just before *_tsrm_ls_cache. */
+# define ZEND_CG_OFFSET   (-(ptrdiff_t) TSRM_ALIGNED_SIZE(sizeof(zend_compiler_globals)))
+# define ZEND_EG_OFFSET   (ZEND_CG_OFFSET - (ptrdiff_t) TSRM_ALIGNED_SIZE(sizeof(zend_executor_globals)))
+#endif
 
 #define EG_FLAGS_INITIAL				(0)
 #define EG_FLAGS_IN_SHUTDOWN			(1<<0)
@@ -327,19 +353,18 @@ struct _zend_ini_scanner_globals {
 	zend_file_handle *yy_out;
 
 	unsigned int yy_leng;
+	int yy_state;
 	const unsigned char *yy_start;
 	const unsigned char *yy_text;
 	const unsigned char *yy_cursor;
 	const unsigned char *yy_marker;
 	const unsigned char *yy_limit;
-	int yy_state;
 	zend_stack state_stack;
 
 	zend_string *filename;
-	int lineno;
+	uint32_t lineno;
 
-	/* Modes are: ZEND_INI_SCANNER_NORMAL, ZEND_INI_SCANNER_RAW, ZEND_INI_SCANNER_TYPED */
-	int scanner_mode;
+	zend_ini_scanner_mode scanner_mode;
 };
 
 typedef enum {
@@ -353,18 +378,18 @@ struct _zend_php_scanner_globals {
 	zend_file_handle *yy_out;
 
 	unsigned int yy_leng;
+	int yy_state;
 	unsigned char *yy_start;
 	unsigned char *yy_text;
 	unsigned char *yy_cursor;
 	unsigned char *yy_marker;
 	unsigned char *yy_limit;
-	int yy_state;
 	zend_stack state_stack;
 	zend_ptr_stack heredoc_label_stack;
 	zend_stack nest_location_stack; /* for syntax error reporting */
 	bool heredoc_scan_ahead;
-	int heredoc_indentation;
 	bool heredoc_indentation_uses_spaces;
+	int heredoc_indentation;
 
 	/* original (unfiltered) script */
 	unsigned char *script_org;

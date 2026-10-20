@@ -258,6 +258,23 @@ const STREAM_CRYPTO_PROTO_TLSv1_3 = UNKNOWN;
 
 /**
  * @var int
+ * @cvalue STREAM_CRYPTO_STATUS_NONE
+ */
+const STREAM_CRYPTO_STATUS_NONE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue STREAM_CRYPTO_STATUS_WANT_READ
+ */
+const STREAM_CRYPTO_STATUS_WANT_READ = UNKNOWN;
+/**
+ * @var int
+ * @cvalue STREAM_CRYPTO_STATUS_WANT_WRITE
+ */
+const STREAM_CRYPTO_STATUS_WANT_WRITE = UNKNOWN;
+
+
+/**
+ * @var int
  * @cvalue STREAM_SHUT_RD
  */
 const STREAM_SHUT_RD = UNKNOWN;
@@ -444,15 +461,10 @@ const FILE_APPEND = UNKNOWN;
  */
 const FILE_NO_DEFAULT_CONTEXT = UNKNOWN;
 
-/**
- * @var int
- * @deprecated
- */
+#[\Deprecated(since: '8.1', message: 'as the constant has no effect')]
 const FILE_TEXT = 0;
-/**
- * @var int
- * @deprecated
- */
+
+#[\Deprecated(since: '8.1', message: 'as the constant has no effect')]
 const FILE_BINARY = 0;
 
 #ifdef HAVE_FNMATCH

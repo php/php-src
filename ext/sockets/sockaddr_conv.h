@@ -1,3 +1,17 @@
+/*
+   +----------------------------------------------------------------------+
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
+   +----------------------------------------------------------------------+
+   | Authors: Gustavo Lopes    <cataphract@php.net>                       |
+   +----------------------------------------------------------------------+
+ */
+
 #ifndef PHP_SOCKADR_CONV_H
 #define PHP_SOCKADR_CONV_H
 
@@ -16,16 +30,16 @@
  * The IPv6 literal can be a IPv4 mapped address (like ::ffff:127.0.0.1).
  * If the hostname yields no IPv6 addresses, a mapped IPv4 address may be returned (AI_V4MAPPED)
  */
-int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_sock);
+int php_set_inet6_addr(struct sockaddr_in6 *sin6, zend_string *string, php_socket *php_sock);
 
 /*
  * Convert an IPv4 literal or a hostname into a sockaddr_in.
  */
-int php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket *php_sock);
+int php_set_inet_addr(struct sockaddr_in *sin, zend_string *string, php_socket *php_sock);
 
 /*
  * Calls either php_set_inet6_addr() or php_set_inet_addr(), depending on the type of the socket.
  */
-int php_set_inet46_addr(php_sockaddr_storage *ss, socklen_t *ss_len, char *string, php_socket *php_sock);
+int php_set_inet46_addr(php_sockaddr_storage *ss, socklen_t *ss_len, zend_string *string, php_socket *php_sock);
 
 #endif

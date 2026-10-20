@@ -13,17 +13,17 @@ foreach ($baseNumbers as $baseNumber) {
     foreach ($exponents as $exponent) {
         try {
             echo bcpow($baseNumber, $exponent), "\n";
-        } catch (Error $e) {
-            echo $e->getMessage(), "\n";
+        } catch (Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }
 }
 
 ?>
 --EXPECT--
-Negative power of zero
-Negative power of zero
-Negative power of zero
-Negative power of zero
-Negative power of zero
-Negative power of zero
+DivisionByZeroError: Negative power of zero
+DivisionByZeroError: Negative power of zero
+DivisionByZeroError: Negative power of zero
+DivisionByZeroError: Negative power of zero
+DivisionByZeroError: Negative power of zero
+DivisionByZeroError: Negative power of zero

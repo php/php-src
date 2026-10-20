@@ -70,8 +70,12 @@ var_dump($_SESSION);
 <?php
 @unlink(session_save_path().'/u_sess_PHPSESSIDsession_set_save_handler_iface_003');
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing session_set_save_handler() function: id interface ***
+
+Warning: Class MySession2 implementing SessionHandlerInterface is missing the validateId() method which will be required in PHP 9.0 in %s on line %d
+
+Deprecated: session_set_save_handler(): Providing an object to argument #1 ($sessionhandler) which does not have the validateId() method defined is deprecated in %s on line %d
 string(34) "session_set_save_handler_iface_003"
 string(4) "user"
 array(1) {

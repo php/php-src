@@ -9,10 +9,6 @@ Test array_reverse() function : usage variations - different array values for 'a
 
 echo "*** Testing array_reverse() : usage variations ***\n";
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 //get a resource variable
 $fp = fopen(__FILE__, "r");
 
@@ -46,11 +42,11 @@ $arrays = array (
        array("one" => 1, 2 => "two", 4 => "four"),  //mixed
 
        // associative array, containing null/empty/boolean values as key/value
-/*13*/ array(NULL => "NULL", null => "null", "NULL" => NULL, "null" => null),
+/*13*/
        array(true => "true", false => "false", "false" => false, "true" => true),
        array("" => "emptyd", '' => 'emptys', "emptyd" => "", 'emptys' => ''),
-       array(1 => '', 2 => "", 3 => NULL, 4 => null, 5 => false, 6 => true),
-       array('' => 1, "" => 2, NULL => 3, null => 4, false => 5, true => 6),
+       array(1 => '', 2 => "", 5 => false, 6 => true),
+       array('' => 1, "" => 2, false => 5, true => 6),
 
        // array with repetitive keys
 /*18*/ array("One" => 1, "two" => 2, "One" => 10, "two" => 20, "three" => 3)
@@ -404,141 +400,101 @@ array(3) {
 }
 -- Iteration 13 --
 - with default argument -
-array(3) {
-  ["null"]=>
-  NULL
-  ["NULL"]=>
-  NULL
-  [""]=>
-  string(4) "null"
+array(4) {
+  ["true"]=>
+  bool(true)
+  ["false"]=>
+  bool(false)
+  [0]=>
+  string(5) "false"
+  [1]=>
+  string(4) "true"
 }
 - with $preserve keys = true -
-array(3) {
-  ["null"]=>
-  NULL
-  ["NULL"]=>
-  NULL
-  [""]=>
-  string(4) "null"
+array(4) {
+  ["true"]=>
+  bool(true)
+  ["false"]=>
+  bool(false)
+  [0]=>
+  string(5) "false"
+  [1]=>
+  string(4) "true"
 }
 - with $preserve_keys = false -
-array(3) {
-  ["null"]=>
-  NULL
-  ["NULL"]=>
-  NULL
-  [""]=>
-  string(4) "null"
+array(4) {
+  ["true"]=>
+  bool(true)
+  ["false"]=>
+  bool(false)
+  [0]=>
+  string(5) "false"
+  [1]=>
+  string(4) "true"
 }
 -- Iteration 14 --
 - with default argument -
-array(4) {
-  ["true"]=>
-  bool(true)
-  ["false"]=>
-  bool(false)
-  [0]=>
-  string(5) "false"
-  [1]=>
-  string(4) "true"
+array(3) {
+  ["emptys"]=>
+  string(0) ""
+  ["emptyd"]=>
+  string(0) ""
+  [""]=>
+  string(6) "emptys"
 }
 - with $preserve keys = true -
-array(4) {
-  ["true"]=>
-  bool(true)
-  ["false"]=>
-  bool(false)
-  [0]=>
-  string(5) "false"
-  [1]=>
-  string(4) "true"
+array(3) {
+  ["emptys"]=>
+  string(0) ""
+  ["emptyd"]=>
+  string(0) ""
+  [""]=>
+  string(6) "emptys"
 }
 - with $preserve_keys = false -
-array(4) {
-  ["true"]=>
-  bool(true)
-  ["false"]=>
-  bool(false)
-  [0]=>
-  string(5) "false"
-  [1]=>
-  string(4) "true"
+array(3) {
+  ["emptys"]=>
+  string(0) ""
+  ["emptyd"]=>
+  string(0) ""
+  [""]=>
+  string(6) "emptys"
 }
 -- Iteration 15 --
 - with default argument -
-array(3) {
-  ["emptys"]=>
-  string(0) ""
-  ["emptyd"]=>
-  string(0) ""
-  [""]=>
-  string(6) "emptys"
-}
-- with $preserve keys = true -
-array(3) {
-  ["emptys"]=>
-  string(0) ""
-  ["emptyd"]=>
-  string(0) ""
-  [""]=>
-  string(6) "emptys"
-}
-- with $preserve_keys = false -
-array(3) {
-  ["emptys"]=>
-  string(0) ""
-  ["emptyd"]=>
-  string(0) ""
-  [""]=>
-  string(6) "emptys"
-}
--- Iteration 16 --
-- with default argument -
-array(6) {
+array(4) {
   [0]=>
   bool(true)
   [1]=>
   bool(false)
   [2]=>
-  NULL
-  [3]=>
-  NULL
-  [4]=>
   string(0) ""
-  [5]=>
+  [3]=>
   string(0) ""
 }
 - with $preserve keys = true -
-array(6) {
+array(4) {
   [6]=>
   bool(true)
   [5]=>
   bool(false)
-  [4]=>
-  NULL
-  [3]=>
-  NULL
   [2]=>
   string(0) ""
   [1]=>
   string(0) ""
 }
 - with $preserve_keys = false -
-array(6) {
+array(4) {
   [0]=>
   bool(true)
   [1]=>
   bool(false)
   [2]=>
-  NULL
-  [3]=>
-  NULL
-  [4]=>
   string(0) ""
-  [5]=>
+  [3]=>
   string(0) ""
 }
--- Iteration 17 --
+-- Iteration 16 --
 - with default argument -
 array(3) {
   [0]=>
@@ -546,7 +502,7 @@ array(3) {
   [1]=>
   int(5)
   [""]=>
-  int(4)
+  int(2)
 }
 - with $preserve keys = true -
 array(3) {
@@ -555,7 +511,7 @@ array(3) {
   [0]=>
   int(5)
   [""]=>
-  int(4)
+  int(2)
 }
 - with $preserve_keys = false -
 array(3) {
@@ -564,9 +520,9 @@ array(3) {
   [1]=>
   int(5)
   [""]=>
-  int(4)
+  int(2)
 }
--- Iteration 18 --
+-- Iteration 17 --
 - with default argument -
 array(3) {
   ["three"]=>

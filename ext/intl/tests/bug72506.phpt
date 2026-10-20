@@ -5,10 +5,6 @@ Actually, the $info array should be populated for these cases, but at least it's
 not clear yet with which values exactly.
 --EXTENSIONS--
 intl
---SKIPIF--
-<?php
-if (!defined('INTL_IDNA_VARIANT_UTS46')) die('skip no UTS #46 API');
-?>
 --FILE--
 <?php
 // ASCII domain name with 255 characters

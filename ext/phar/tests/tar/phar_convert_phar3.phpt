@@ -46,13 +46,13 @@ unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
 ?>
 --EXPECT--
 bool(false)
-int(6641)
+int(6659)
 bool(true)
 string(60) "<?php // tar-based phar archive stub file
 __HALT_COMPILER();"
 bool(true)
 int(8192)
-int(6641)
+int(6659)
 bool(true)
 bool(true)
-int(6641)
+int(6659)

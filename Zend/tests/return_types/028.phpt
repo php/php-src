@@ -11,10 +11,10 @@ function foo(): stdClass {
 
 try {
     foo();
-} catch (Error $e) {
-    echo $e->getMessage(), " in ", $e->getFile(), " on line ", $e->getLine();
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), ' in ', $e->getFile(), ' on line ', $e->getLine(), "\n";
 }
 
 ?>
 --EXPECTF--
-foo(): Return value must be of type stdClass, array returned in %s on line %d
+TypeError: foo(): Return value must be of type stdClass, array returned in %s on line %d

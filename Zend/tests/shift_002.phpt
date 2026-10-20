@@ -13,8 +13,8 @@ var_dump($s);
 try {
     $s1 >>= 1;
     var_dump($s1);
-} catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $s2 >>= 3;
@@ -24,7 +24,7 @@ echo "Done\n";
 ?>
 --EXPECTF--
 int(30)
-Unsupported operand types: string >> int
+TypeError: Unsupported operand types: string >> int
 
 Warning: A non-numeric value encountered in %s on line %d
 int(5668)

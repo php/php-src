@@ -13,9 +13,9 @@ class Foo {
 
 try {
     Foo::bar();
-} catch (TypeError $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Foo::bar(): never-returning method must not implicitly return
+TypeError: Foo::bar(): never-returning method must not implicitly return

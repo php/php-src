@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions
+    name="TestService"
+    targetNamespace="urn:TestService"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:tns="urn:TestService"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
+
+    <wsdl:types>
+        <xsd:schema targetNamespace="urn:TestService">
+            <xsd:element name="helloIn">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="name" type="xsd:string" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="helloOut">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="message" type="xsd:string" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="goodbyeIn">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="name" type="xsd:string" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="goodbyeOut">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="message" type="xsd:string" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:schema>
+    </wsdl:types>
+
+    <wsdl:message name="helloRequest">
+        <wsdl:part element="tns:helloIn" name="helloIn" />
+    </wsdl:message>
+    <wsdl:message name="helloResponse">
+        <wsdl:part element="tns:helloOut" name="helloOut" />
+    </wsdl:message>
+    <wsdl:message name="goodbyeRequest">
+        <wsdl:part element="tns:goodbyeIn" name="goodbyeIn" />
+    </wsdl:message>
+    <wsdl:message name="goodbyeResponse">
+        <wsdl:part element="tns:goodbyeOut" name="goodbyeOut" />
+    </wsdl:message>
+
+    <wsdl:portType name="TestServicePortType">
+        <wsdl:operation name="hello">
+            <wsdl:input  message="tns:helloRequest"   name="helloRequest" />
+            <wsdl:output message="tns:helloResponse"  name="helloResponse" />
+        </wsdl:operation>
+        <wsdl:operation name="goodbye">
+            <wsdl:input  message="tns:goodbyeRequest"  name="goodbyeRequest" />
+            <wsdl:output message="tns:goodbyeResponse" name="goodbyeResponse" />
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <wsdl:binding name="TestServiceBinding" type="tns:TestServicePortType">
+        <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+        <wsdl:operation name="hello">
+            <wsdlsoap:operation soapAction="" />
+            <wsdl:input name="helloRequest">
+                <wsdlsoap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output name="helloResponse">
+                <wsdlsoap:body use="literal" />
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="goodbye">
+            <wsdlsoap:operation soapAction="" />
+            <wsdl:input name="goodbyeRequest">
+                <wsdlsoap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output name="goodbyeResponse">
+                <wsdlsoap:body use="literal" />
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <wsdl:service name="TestService">
+        <wsdl:port name="TestServicePort" binding="tns:TestServiceBinding">
+            <wsdlsoap:address location="http://localhost/server.php" />
+        </wsdl:port>
+    </wsdl:service>
+
+</wsdl:definitions>

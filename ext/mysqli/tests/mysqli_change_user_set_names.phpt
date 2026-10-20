@@ -125,11 +125,12 @@ require_once 'skipifconnectfailure.inc';
     if (!is_object($charset = mysqli_get_charset($link)))
         printf("[013] Expecting object/std_class, got %s/%s\n", gettype($charset), $charset);
 
-    if ($charset->charset != $defaults['charset_connection'])
+    if ($charset->charset != $defaults['charset_connection'] || $link->character_set_name() != $defaults['charset_connection'])
         printf("[014] Expecting connection charset to be %s got %s\n",
             $defaults['charset_connection'],
             $charset->charset);
 
+    // Remove the following test when removing mysqli_get_charset() in PHP 9.0.0
     if ($charset->collation != $defaults['collation_connection'])
         printf("[015] Expecting collation to be %s got %s\n",
             $defaults['collation_connection'],
@@ -138,5 +139,6 @@ require_once 'skipifconnectfailure.inc';
     mysqli_close($link);
     print "done!";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mysqli_get_charset() is deprecated since 8.6, did you mean mysqli_character_set_name()? in %s on line %d
 done!

@@ -83,7 +83,7 @@ Read [%s,PHPT-%d]
 GC [0]
 1 deleted
 bool(true)
-Write [%s,PHPT-%d,]
+Update [%s,PHPT-%d]
 Close [%s,PHPSESSID]
 bool(true)
 string(%d) "PHPT-%d"
@@ -97,6 +97,6 @@ GC [0]
 bool(true)
 Destroy [%s,PHPT-%d]
 
-Warning: unlink(%s): No such file or directory in %s on line %d
+Warning: unlink(): No such file or directory in %s on line %d
 Close [%s,PHPSESSID]
 bool(true)

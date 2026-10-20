@@ -20,7 +20,7 @@ test(new ArrayIterator([1, 2, 3]));
 try {
     test(1);
 } catch (Throwable $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
@@ -47,4 +47,4 @@ object(ArrayIterator)#1 (1) {
     int(3)
   }
 }
-test(): Argument #1 ($iterable) must be of type Traversable|array, int given, called in %s on line %d
+TypeError: test(): Argument #1 ($iterable) must be of type Traversable|array, int given, called in %s on line %d

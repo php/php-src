@@ -14,12 +14,12 @@ unset($c->a);
 
 try {
     (++$c->a);
-} catch (\TypeError $e) {
-    echo $e->getMessage(), PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($c->a);
 ?>
 --EXPECT--
-Cannot increment stdClass
+TypeError: Cannot increment stdClass
 object(stdClass)#2 (0) {
 }

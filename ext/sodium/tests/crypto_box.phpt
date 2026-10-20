@@ -49,7 +49,7 @@ try {
       substr($alice_to_bob_kp, 1)
   );
 } catch (SodiumException $ex) {
-    echo $ex->getMessage(), PHP_EOL;
+    echo $ex::class, ': ', $ex->getMessage(), PHP_EOL;
 }
 
 sodium_memzero($alice_box_kp);
@@ -142,7 +142,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-sodium_crypto_box(): Argument #3 ($key_pair) must be SODIUM_CRYPTO_BOX_KEYPAIRBYTES bytes long
+SodiumException: sodium_crypto_box(): Argument #3 ($key_pair) must be SODIUM_CRYPTO_BOX_KEYPAIRBYTES bytes long
 bool(true)
 string(17) "Hi, this is Alice"
 string(21) "Hi Alice! This is Bob"

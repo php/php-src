@@ -11,7 +11,7 @@ ffi.enable=1
     try {
         var_dump(FFI::sizeof($ffi->new("struct {}")));
     } catch (Throwable $e) {
-        echo get_class($e) . ": " . $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     var_dump(FFI::sizeof($ffi->new("struct {int a}")));
     var_dump(FFI::sizeof($ffi->new("struct {int a; int b}")));

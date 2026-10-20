@@ -125,23 +125,23 @@ try {
     // We also suppress the deprecation for negative width as of PHP 8.3
     var_dump(@mb_strimwidth($euc_jp, 0, -100,'...','EUC-JP'));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(mb_strimwidth($euc_jp, 100, 10,'...','EUC-JP'));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(mb_strimwidth($euc_jp, -100, 10,'...','EUC-JP'));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     // We also suppress the deprecation for negative width as of PHP 8.3
     var_dump(@mb_strimwidth($euc_jp, -10, -21,'...','EUC-JP'));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "\n== Other ==\n";
@@ -254,10 +254,10 @@ start=15 width=-5 result=[a1a3 45 55 43 2d 4a 50 a4f2 bbc8 a4c3 a4c6 a4a4 a4de a
 start=-30 width=-25 result=[a4cf c6fc cbdc b8ec a4c7 a4b9 a1a3 45 55 43 2d 4a 50 a4f2 bbc8 a4c3 2e 2e 2e] length=19 width=29
 start=39 width=10 result=[] length=0 width=0
 start=-10 width=-12 result=[a1a3 c6fc 2e 2e 2e] length=5 width=7
-mb_strimwidth(): Argument #3 ($width) is out of range
-mb_strimwidth(): Argument #2 ($start) is out of range
-mb_strimwidth(): Argument #2 ($start) is out of range
-mb_strimwidth(): Argument #3 ($width) is out of range
+ValueError: mb_strimwidth(): Argument #3 ($width) is out of range
+ValueError: mb_strimwidth(): Argument #2 ($start) is out of range
+ValueError: mb_strimwidth(): Argument #2 ($start) is out of range
+ValueError: mb_strimwidth(): Argument #3 ($width) is out of range
 
 == Other ==
 start=1 width=0 result=[2e 2e 2e] length=3 width=3

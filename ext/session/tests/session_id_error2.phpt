@@ -3,7 +3,7 @@ Test session_id() function : error functionality
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --FILE--
 <?php
 
@@ -31,7 +31,7 @@ string(4) "test"
 string(10) "1234567890"
 bool(true)
 
-Warning: session_id(): Session ID cannot be changed when a session is active in %s on line %d
+Warning: session_id(): Session ID cannot be changed when a session is active (started from %s on line %d) in %s on line %d
 bool(false)
 bool(true)
 string(0) ""

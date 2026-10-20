@@ -1,5 +1,5 @@
 --TEST--
-FFI 303: FFI preloading flob
+FFI 303: FFI preloading glob
 --EXTENSIONS--
 ffi
 --SKIPIF--

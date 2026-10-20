@@ -17,11 +17,11 @@ gzclose($h);
 try {
     var_dump(gzeof($h));
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 unlink($filename);
 ?>
 --EXPECT--
 bool(false)
 bool(false)
-gzeof(): supplied resource is not a valid stream resource
+TypeError: gzeof(): Argument #1 ($stream) must be an open stream resource

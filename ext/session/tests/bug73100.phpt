@@ -15,14 +15,14 @@ var_dump(session_destroy());
 try {
     session_module_name("user");
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 ===DONE===
 --EXPECTF--
 bool(true)
 
-Warning: session_module_name(): Session save handler module cannot be changed when a session is active in %s on line %d
+Warning: session_module_name(): Session save handler module cannot be changed when a session is active (started from %s on line %d) in %s on line %d
 bool(true)
-session_module_name(): Argument #1 ($module) cannot be "user"
+ValueError: session_module_name(): Argument #1 ($module) must not be "user"
 ===DONE===

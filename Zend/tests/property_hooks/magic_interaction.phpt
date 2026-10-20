@@ -18,24 +18,24 @@ class B extends A {
         echo __METHOD__, "($name)\n";
         try {
             $this->$name;
-        } catch (Error $e) {
-            echo $e->getMessage(), "\n";
+        } catch (Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }
     public function __set($name, $value) {
         echo __METHOD__, "($name, $value)\n";
         try {
             $this->$name = $value;
-        } catch (Error $e) {
-            echo $e->getMessage(), "\n";
+        } catch (Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }
     public function __isset($name) {
         echo __METHOD__, "($name)\n";
         try {
             var_dump(isset($this->$name));
-        } catch (Error $e) {
-            echo $e->getMessage(), "\n";
+        } catch (Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }
     public function __unset($name) {
@@ -49,8 +49,8 @@ var_dump(isset($b->prop));
 $b->prop = 1;
 try {
     unset($b->prop);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -59,4 +59,4 @@ A::$prop::get
 A::$prop::get
 bool(true)
 A::$prop::set
-Cannot unset hooked property B::$prop
+Error: Cannot unset hooked property B::$prop

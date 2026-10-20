@@ -8,10 +8,10 @@ dom
 $dom = Dom\XMLDocument::createFromString('<root a="b"/>');
 try {
     $dom->documentElement->removeAttributeNode($dom->createAttribute('test'));
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Not Found Error
+DOMException: Not Found Error

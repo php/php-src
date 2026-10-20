@@ -1,5 +1,5 @@
 --TEST--
-GH-15851: Access on NULL when printing backtrace with freed generator
+GH-15851: Access on NULL when printing backtrace during cleanup of nested generator frame
 --FILE--
 <?php
 

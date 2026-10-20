@@ -18,13 +18,13 @@ if (MYSQLPDOTest::isPDOMySQLnd())
 
     try {
         printf("Native PS...\n");
-        $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 0);
-        if (0 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
+        $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 0);
+        if (0 != $db->getAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY))
             printf("[004] Unable to turn off emulated prepared statements\n");
 
         printf("Buffered...\n");
         MySQLPDOTest::createTestTable($table, $db);
-        $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+        $db->setAttribute(Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, true);
         $stmt = $db->query("SELECT id, label FROM {$table} WHERE id = 1");
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
         $stmt = $db->query("SELECT id, label FROM {$table} WHERE id = 1");
@@ -32,7 +32,7 @@ if (MYSQLPDOTest::isPDOMySQLnd())
 
         printf("Unbuffered...\n");
         MySQLPDOTest::createTestTable($table, $db);
-        $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+        $db->setAttribute(Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, false);
         $stmt = $db->query("SELECT id, label FROM {$table} WHERE id = 1");
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
         /*

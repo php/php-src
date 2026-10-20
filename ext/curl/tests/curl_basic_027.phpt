@@ -29,7 +29,6 @@ var_dump(curl_setopt($ch, CURLOPT_SSH_HOSTKEYFUNCTION, function ($ch, $keytype, 
     return CURLKHMATCH_OK;
 }));
 curl_exec($ch);
-curl_close($ch);
 ?>
 --EXPECT--
 bool(true)

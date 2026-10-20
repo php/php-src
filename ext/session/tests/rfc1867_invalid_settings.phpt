@@ -7,7 +7,7 @@ error_log=
 session
 --SKIPIF--
 <?php
-include('skipif.inc');
+include 'skipif.inc';
 ?>
 --FILE--
 <?php

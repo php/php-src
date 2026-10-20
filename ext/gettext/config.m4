@@ -27,7 +27,7 @@ if test "$PHP_GETTEXT" != "no"; then
       dnl If libintl.h is provided by libc, it's possible that libc is musl.
       dnl The gettext family of functions under musl ignores the codeset
       dnl suffix on directories like "en_US.UTF-8"; instead they look only
-      dnl in "en_US". To accomodate that, we symlink some test data from one
+      dnl in "en_US". To accommodate that, we symlink some test data from one
       dnl to the other.
       AC_MSG_NOTICE([symlinking en_US.UTF-8 messages to en_US in case you are on musl])
       _linkdest="${srcdir%/}"/ext/gettext/tests/locale/en_US

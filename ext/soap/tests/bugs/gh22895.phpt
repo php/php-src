@@ -13,7 +13,8 @@ class LocalSoapClient extends SoapClient
         $location,
         $action,
         $version,
-        $one_way = false
+        $oneWay = false,
+        $uriParserClass = null
     ): ?string {
         return '';
     }
@@ -74,7 +75,7 @@ function gen($key) {
 set_error_handler(function ($errno, $errstr) {
     throw new Exception($errstr);
 });
-foreach ([1.5, STDIN] as $key) {
+foreach ([1.5, STDIN, null] as $key) {
     try {
         $client->__soapCall('audit', [new SoapVar(gen($key), SOAP_ENC_ARRAY)]);
     } catch (Exception $e) {
@@ -92,5 +93,6 @@ TypeError: Cannot access offset of type array on array
 TypeError: Cannot access offset of type array on array
 Exception: Implicit conversion from float 1.5 to int loses precision
 Exception: Resource ID#%d used as offset, casting to integer (%d)
+Exception: Using null as an array offset is deprecated, use an empty string instead
 <?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="urn:audit" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><SOAP-ENV:Body><ns1:audit><param0 SOAP-ENC:arrayType="xsd:int[1]" xsi:type="SOAP-ENC:Array"><item xsi:type="xsd:int">1</item></param0></ns1:audit></SOAP-ENV:Body></SOAP-ENV:Envelope>

@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Marcus Boerger <helly@php.net>                               |
    +----------------------------------------------------------------------+
@@ -20,15 +18,14 @@
 #include <stdlib.h>
 #include "php_getopt.h"
 
-#define OPTERRCOLON (1)
-#define OPTERRNF (2)
-#define OPTERRARG (3)
+#define OPTERRCOLON 1
+#define OPTERRNF 2
+#define OPTERRARG 3
 
 // Print error message to stderr and return -2 to distinguish it from '?' command line option.
 static int php_opt_error(int argc, char * const *argv, int optint, int optchr, int err, int show_err) /* {{{ */
 {
-	if (show_err)
-	{
+	if (show_err) {
 		fprintf(stderr, "Error in argument %d, char %d: ", optint, optchr+1);
 		switch(err)
 		{
@@ -59,8 +56,11 @@ PHPAPI int php_getopt(int argc, char* const *argv, const opt_struct opts[], char
 	static char **prev_optarg = NULL;
 
 	php_optidx = -1;
+	if (optarg) {
+		*optarg = NULL;
+	}
 
-	if(prev_optarg && prev_optarg != optarg) {
+	if (prev_optarg && prev_optarg != optarg) {
 		/* reset the state */
 		optchr = 0;
 		dash = 0;
@@ -68,20 +68,18 @@ PHPAPI int php_getopt(int argc, char* const *argv, const opt_struct opts[], char
 	prev_optarg = optarg;
 
 	if (*optind >= argc) {
-		return(EOF);
+		return EOF;
 	}
 	if (!dash) {
-		if ((argv[*optind][0] !=  '-')) {
-			return(EOF);
-		} else {
-			if (!argv[*optind][1])
-			{
-				/*
-				* use to specify stdin. Need to let pgm process this and
-				* the following args
-				*/
-				return(EOF);
-			}
+		if (argv[*optind][0] !=  '-') {
+			return EOF;
+		}
+		if (!argv[*optind][1]) {
+			/*
+			* use to specify stdin. Need to let pgm process this and
+			* the following args
+			*/
+			return EOF;
 		}
 	}
 	if ((argv[*optind][0] == '-') && (argv[*optind][1] == '-')) {
@@ -91,7 +89,7 @@ PHPAPI int php_getopt(int argc, char* const *argv, const opt_struct opts[], char
 		/* '--' indicates end of args if not followed by a known long option name */
 		if (argv[*optind][2] == '\0') {
 			(*optind)++;
-			return(EOF);
+			return EOF;
 		}
 
 		arg_start = 2;
@@ -108,7 +106,7 @@ PHPAPI int php_getopt(int argc, char* const *argv, const opt_struct opts[], char
 			php_optidx++;
 			if (opts[php_optidx].opt_char == '-') {
 				(*optind)++;
-				return(php_opt_error(argc, argv, *optind-1, optchr, OPTERRARG, show_err));
+				return php_opt_error(argc, argv, *optind-1, optchr, OPTERRARG, show_err);
 			} else if (opts[php_optidx].opt_name && !strncmp(&argv[*optind][2], opts[php_optidx].opt_name, arg_end) && arg_end == strlen(opts[php_optidx].opt_name)) {
 				break;
 			}
@@ -126,7 +124,7 @@ PHPAPI int php_getopt(int argc, char* const *argv, const opt_struct opts[], char
 		if (argv[*optind][optchr] == ':') {
 			dash = 0;
 			(*optind)++;
-			return (php_opt_error(argc, argv, *optind-1, optchr, OPTERRCOLON, show_err));
+			return php_opt_error(argc, argv, *optind-1, optchr, OPTERRCOLON, show_err);
 		}
 		arg_start = 1 + optchr;
 	}
@@ -144,7 +142,7 @@ PHPAPI int php_getopt(int argc, char* const *argv, const opt_struct opts[], char
 					optchr++;
 					arg_start++;
 				}
-				return(php_opt_error(argc, argv, errind, errchr, OPTERRNF, show_err));
+				return php_opt_error(argc, argv, errind, errchr, OPTERRNF, show_err);
 			} else if (argv[*optind][optchr] == opts[php_optidx].opt_char) {
 				break;
 			}
@@ -159,7 +157,7 @@ PHPAPI int php_getopt(int argc, char* const *argv, const opt_struct opts[], char
 			if (*optind == argc) {
 				/* Was the value required or is it optional? */
 				if (opts[php_optidx].need_param == 1) {
-					return(php_opt_error(argc, argv, *optind-1, optchr, OPTERRARG, show_err));
+					return php_opt_error(argc, argv, *optind-1, optchr, OPTERRARG, show_err);
 				}
 			/* Optional value is not supported with -<arg> <val> style */
 			} else if (opts[php_optidx].need_param == 1) {
@@ -177,8 +175,7 @@ PHPAPI int php_getopt(int argc, char* const *argv, const opt_struct opts[], char
 	} else {
 		/* multiple options specified as one (exclude long opts) */
 		if (arg_start >= 2 && !((argv[*optind][0] == '-') && (argv[*optind][1] == '-'))) {
-			if (!argv[*optind][optchr+1])
-			{
+			if (!argv[*optind][optchr+1]) {
 				dash = 0;
 				(*optind)++;
 			} else {
@@ -190,6 +187,6 @@ PHPAPI int php_getopt(int argc, char* const *argv, const opt_struct opts[], char
 		return opts[php_optidx].opt_char;
 	}
 	assert(0);
-	return(0);	/* never reached */
+	return 0;	/* never reached */
 }
 /* }}} */

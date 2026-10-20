@@ -18,7 +18,6 @@ class XML_Parser
         $parser = xml_parser_create();
         xml_set_processing_instruction_handler($parser, $this->PIHandler(...));
         xml_parse($parser, $data, true);
-        xml_parser_free($parser);
     }
 
 

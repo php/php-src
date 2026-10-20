@@ -6,18 +6,18 @@ $wr = WeakReference::create(new stdClass);
 
 try {
     serialize($wr);
-} catch (Exception $ex) {
-    var_dump($ex->getMessage());
+} catch (Throwable $ex) {
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 
 $wrs = 'O:13:"WeakReference":0:{}';
 
 try {
 	var_dump(unserialize($wrs));
-} catch (Exception $ex) {
-    var_dump($ex->getMessage());
+} catch (Throwable $ex) {
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-string(47) "Serialization of 'WeakReference' is not allowed"
-string(49) "Unserialization of 'WeakReference' is not allowed"
+Exception: Serialization of 'WeakReference' is not allowed
+Exception: Unserialization of 'WeakReference' is not allowed

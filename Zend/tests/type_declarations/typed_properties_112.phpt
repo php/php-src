@@ -10,10 +10,10 @@ $foo = new Foo();
 
 try {
     $foo->value = false;
-} catch (\TypeError $e) {
-    echo $e->getMessage();
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot assign false to property Foo::$value of type true
+TypeError: Cannot assign false to property Foo::$value of type true

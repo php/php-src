@@ -189,6 +189,7 @@ function xml_get_current_column_number(XMLParser $parser): int {}
 
 function xml_get_current_byte_index(XMLParser $parser): int {}
 
+#[\Deprecated(since: '8.5', message: "as it has no effect since PHP 8.0")]
 function xml_parser_free(XMLParser $parser): bool {}
 
 /** @param string|int|bool $value */

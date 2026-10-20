@@ -11,17 +11,17 @@ $list = $element->classList;
 
 try {
     $list->toggle("\0");
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $list->toggle("a b");
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Dom\TokenList::toggle(): Argument #1 ($token) must not contain any null bytes
-The token must not contain any ASCII whitespace
+ValueError: Dom\TokenList::toggle(): Argument #1 ($token) must not contain any null bytes
+DOMException: The token must not contain any ASCII whitespace

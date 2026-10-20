@@ -7,11 +7,11 @@ function test($a = 1, $b) {
 }
 try {
     test(b: 2);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECTF--
 Deprecated: test(): Optional parameter $a declared before required parameter $b is implicitly treated as a required parameter in %s on line %d
-test(): Argument #1 ($a) not passed
+ArgumentCountError: test(): Argument #1 ($a) not passed

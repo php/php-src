@@ -25,6 +25,11 @@
 #define DEFAULT_SHORT_OPEN_TAG "1"
 
 /* Platform-Specific Configuration. Should not be changed. */
+/* Match -ffp-contract=off on toolsets that enable ARM64 contractions by default. */
+#if defined(_MSC_VER) && _MSC_VER < 1930 && defined(_M_ARM64) && !defined(__clang__)
+# pragma fp_contract(off)
+#endif
+
 /* Alignment for Zend memory allocator */
 #define ZEND_MM_ALIGNMENT (size_t)8
 #define ZEND_MM_ALIGNMENT_LOG2 (size_t)3
@@ -38,8 +43,6 @@
 #define STDIN_FILENO 0
 #define STDOUT_FILENO 1
 #define STDERR_FILENO 2
-#undef HAVE_ADABAS
-#undef HAVE_SOLID
 #undef HAVE_SYMLINK
 
 /* its in win32/time.c */
@@ -59,7 +62,6 @@
 #undef HAVE_STRUCT_STAT_ST_BLKSIZE
 #undef HAVE_STRUCT_STAT_ST_BLOCKS
 #define HAVE_STRUCT_STAT_ST_RDEV 1
-#define HAVE_GETLOGIN 1
 #define HAVE_SHUTDOWN 1
 #define HAVE_STRCASECMP 1
 #define HAVE_UTIME 1
@@ -79,20 +81,16 @@
 /* int and long are still 32bit in 64bit compiles */
 #define SIZEOF_INT 4
 #define SIZEOF_LONG 4
-/* MSVC.6/NET don't allow 'long long' or know 'intmax_t' */
+/* MSVC.6/NET don't allow 'long long' */
 #define SIZEOF_LONG_LONG 8 /* defined as __int64 */
-#define SIZEOF_INTMAX_T 0
 #define ssize_t SSIZE_T
 #ifdef _WIN64
 # define SIZEOF_SIZE_T 8
-# define SIZEOF_PTRDIFF_T 8
 #else
 # define SIZEOF_SIZE_T 4
-# define SIZEOF_PTRDIFF_T 4
 #endif
 #define SIZEOF_OFF_T 4
 #define HAVE_FNMATCH
-#define HAVE_GLOB
 #define PHP_SHLIB_SUFFIX "dll"
 #define PHP_SHLIB_EXT_PREFIX "php_"
 

@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Niklas Keller <kelunik@php.net>                              |
    | Author: Anatol Belski <ab@php.net>                                   |
@@ -31,9 +29,9 @@
 	} while (0)
 #endif
 #define PHP_RETURN_HRTIME(t) do { \
-	char _a[ZEND_LTOA_BUF_LEN]; \
+	char _a[65]; \
 	double _d; \
-	HRTIME_U64A(t, _a, ZEND_LTOA_BUF_LEN); \
+	HRTIME_U64A(t, _a, sizeof(_a)); \
 	_d = zend_strtod(_a, NULL); \
 	RETURN_DOUBLE(_d); \
 	} while (0)
@@ -58,10 +56,10 @@ PHP_FUNCTION(hrtime)
 	if (UNEXPECTED(get_as_num)) {
 		PHP_RETURN_HRTIME(t);
 	} else {
-		array_init_size(return_value, 2);
-		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
-		add_next_index_long(return_value, (zend_long)(t / (zend_hrtime_t)ZEND_NANO_IN_SEC));
-		add_next_index_long(return_value, (zend_long)(t % (zend_hrtime_t)ZEND_NANO_IN_SEC));
+		zval first, second;
+		ZVAL_LONG(&first, (zend_long)(t / (zend_hrtime_t)ZEND_NANO_IN_SEC));
+		ZVAL_LONG(&second, (zend_long)(t % (zend_hrtime_t)ZEND_NANO_IN_SEC));
+		RETURN_ARR(zend_new_pair(&first, &second));
 	}
 #else
 	RETURN_FALSE;

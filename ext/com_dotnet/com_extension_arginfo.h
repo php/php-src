@@ -1,5 +1,7 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit com_extension.stub.php instead.
  * Stub hash: 9b2eea541946c291eb002ee98997f3dcad8bdfce */
+
+#include "zend_constants.h"
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_variant_set, 0, 2, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, variant, variant, 0)
@@ -281,8 +283,6 @@ static void register_com_extension_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("MK_E_UNAVAILABLE", PHP_MK_E_UNAVAILABLE, CONST_PERSISTENT);
 #if SIZEOF_ZEND_LONG == 8
 	REGISTER_LONG_CONSTANT("VT_UI8", VT_UI8, CONST_PERSISTENT);
-#endif
-#if SIZEOF_ZEND_LONG == 8
 	REGISTER_LONG_CONSTANT("VT_I8", VT_I8, CONST_PERSISTENT);
 #endif
 }

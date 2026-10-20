@@ -6,8 +6,6 @@ date.timezone=Atlantic/Azores
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "nl");
 
 $intlcal = IntlCalendar::createInstance();
 var_dump($intlcal->getWeekendTransition(IntlCalendar::DOW_SUNDAY));

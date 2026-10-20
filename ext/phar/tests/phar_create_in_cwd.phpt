@@ -22,7 +22,7 @@ __HALT_COMPILER();
 ?>");
     var_dump($p->getStub());
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --CLEAN--
@@ -30,7 +30,7 @@ __HALT_COMPILER();
 unlink(__DIR__ . '/phar_create_in_cwd.phar');
 ?>
 --EXPECTF--
-int(6641)
+int(6659)
 string(%d) "<?php
 spl_autoload_register(function($class) {
     include 'phar://' . str_replace('_', '/', $class);

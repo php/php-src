@@ -5,10 +5,10 @@ Bug #79777: String cast exception during die should be handled gracefully
 
 try {
     die(new stdClass);
-} catch (TypeError $e) {
-    echo $e->getMessage(), PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-exit(): Argument #1 ($status) must be of type string|int, stdClass given
+TypeError: exit(): Argument #1 ($status) must be of type string|int, stdClass given

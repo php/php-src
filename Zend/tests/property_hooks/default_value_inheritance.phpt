@@ -28,14 +28,14 @@ function test(P $p) {
     var_dump($p->a);
     try {
         var_dump($p->b);
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     var_dump($p->c);
     try {
         var_dump($p->d);
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -45,10 +45,10 @@ test(new GC);
 ?>
 --EXPECT--
 NULL
-Typed property C::$b must not be accessed before initialization
+Error: Typed property C::$b must not be accessed before initialization
 int(2)
 int(2)
 NULL
-Typed property GC::$b must not be accessed before initialization
+Error: Typed property GC::$b must not be accessed before initialization
 NULL
-Typed property GC::$d must not be accessed before initialization
+Error: Typed property GC::$d must not be accessed before initialization

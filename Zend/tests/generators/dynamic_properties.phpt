@@ -10,10 +10,10 @@ function gen() {
 $gen = gen();
 try {
     $gen->prop = new stdClass;
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot create dynamic property Generator::$prop
+Error: Cannot create dynamic property Generator::$prop

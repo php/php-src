@@ -17,7 +17,7 @@ session.save_handler=files
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --COOKIE--
 PHPSESSID=_
 --POST_RAW--
@@ -45,10 +45,6 @@ var_dump(basename(__FILE__) == $_POST[ini_get("session.upload_progress.name")]);
 var_dump($_FILES);
 var_dump($_SESSION["upload_progress_" . basename(__FILE__)]);
 session_destroy();
-?>
---CLEAN--
-<?php
-@unlink(__DIR__ . DIRECTORY_SEPARATOR . "rfc1867_sid_invalid.post.txt");
 ?>
 --EXPECTF--
 Warning: PHP Request Startup: Session ID is too long or contains illegal characters. Only the A-Z, a-z, 0-9, "-", and "," characters are allowed in Unknown on line 0

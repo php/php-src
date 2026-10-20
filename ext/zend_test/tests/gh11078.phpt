@@ -6,6 +6,7 @@ zend_test
 <?php
 if (getenv('USE_ZEND_ALLOC') === '0') die('skip Zend MM disabled');
 if (PHP_OS_FAMILY === 'Windows') die('skip Windows does not support generic stream casting');
+if (PHP_OS_FAMILY === 'Solaris') die('skip Solaris does not support generic stream casting');
 ?>
 --FILE--
 <?php

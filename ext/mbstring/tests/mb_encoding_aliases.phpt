@@ -13,7 +13,7 @@ var_dump(mb_encoding_aliases("8bit"));
 try {
     var_dump(mb_encoding_aliases("BAD"));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
@@ -47,4 +47,4 @@ array(1) {
   [0]=>
   string(6) "binary"
 }
-mb_encoding_aliases(): Argument #1 ($encoding) must be a valid encoding, "BAD" given
+ValueError: mb_encoding_aliases(): Argument #1 ($encoding) must be a valid encoding, "BAD" given

@@ -11,21 +11,21 @@ chdir(__DIR__);
 try {
     $db = new PDO('sqlite:../not_in_open_basedir.sqlite');
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $db = new PDO('sqlite:file:../not_in_open_basedir.sqlite');
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $db = new PDO('sqlite:file:../not_in_open_basedir.sqlite?mode=ro');
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-open_basedir prohibits opening ../not_in_open_basedir.sqlite
-open_basedir prohibits opening file:../not_in_open_basedir.sqlite
-open_basedir prohibits opening file:../not_in_open_basedir.sqlite?mode=ro
+PDOException: open_basedir prohibits opening ../not_in_open_basedir.sqlite
+PDOException: open_basedir prohibits opening file:../not_in_open_basedir.sqlite
+PDOException: open_basedir prohibits opening file:../not_in_open_basedir.sqlite?mode=ro

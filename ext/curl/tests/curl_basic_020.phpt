@@ -14,7 +14,6 @@ curl
   curl_setopt($ch, CURLOPT_URL, $url);
   curl_exec($ch);
   var_dump(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-  curl_close($ch);
 ?>
 --EXPECT--
 Hello World!

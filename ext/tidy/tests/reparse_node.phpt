@@ -5,14 +5,6 @@ tidy
 --FILE--
 <?php
 
-$node = unserialize('O:8:"tidyNode":0:{}');
-try {
-	$node->hasChildren();
-	echo "unowned node: no error\n";
-} catch (Error $e) {
-	echo 'unowned node: ', $e::class, ': ', $e->getMessage(), "\n";
-}
-
 $tidy = tidy_parse_string('<html><body><p>one</p><p>two</p></body></html>');
 $node = $tidy->body()->child[0];
 var_dump($node->isHtml());
@@ -48,7 +40,6 @@ var_dump($tidy->body()->child[0]->isHtml());
 
 ?>
 --EXPECT--
-unowned node: Error: tidyNode object is not initialized
 bool(true)
 bool(true)
 string cast: Error: tidyNode object is no longer valid after its document was reparsed

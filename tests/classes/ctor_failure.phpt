@@ -22,10 +22,10 @@ try
 }
 catch (Exception $e)
 {
-    echo 'Caught ' . get_class($e) . '(' . $e->getMessage() . ")\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 Test::__construct(Hello)
-Caught Exception(Hello)
+Exception: Hello

@@ -9,9 +9,9 @@ $doc->loadXML('<root></root>');
 $e = $doc->createElement('e');
 try {
     $e->appendChild($doc);
-} catch (DOMException $ex) {
-    echo $ex->getMessage(), PHP_EOL;
+} catch (Throwable $ex) {
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Hierarchy Request Error
+DOMException: Hierarchy Request Error

@@ -272,6 +272,14 @@ function ut_loc_get_display_variant( $locale , $dispLocale )
 {
     return $GLOBALS['oo-mode'] ? Locale::getDisplayVariant( $locale , $dispLocale ) : locale_get_display_variant( $locale, $dispLocale  );
 }
+function ut_loc_get_display_keyword( $keyword , $dispLocale )
+{
+    return $GLOBALS['oo-mode'] ? Locale::getDisplayKeyword( $keyword , $dispLocale ) : locale_get_display_keyword( $keyword, $dispLocale );
+}
+function ut_loc_get_display_keyword_value( $locale , $keyword , $dispLocale )
+{
+    return $GLOBALS['oo-mode'] ? Locale::getDisplayKeywordValue( $locale , $keyword , $dispLocale ) : locale_get_display_keyword_value( $locale, $keyword, $dispLocale );
+}
 function ut_loc_locale_compose( $loc_parts_arr )
 {
     return $GLOBALS['oo-mode'] ? Locale::composeLocale( $loc_parts_arr ) : locale_compose( $loc_parts_arr );

@@ -30,7 +30,7 @@ print_r($o);
 try {
     var_dump((string)$o);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($o);
 
@@ -59,7 +59,7 @@ $ar[$o->__toString()] = "ERROR";
 try {
     echo $ar[$o];
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "====test8====\n";
@@ -75,7 +75,7 @@ var_dump($o);
 try {
     echo $o;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -85,7 +85,7 @@ try {
 test1 Object
 (
 )
-Object of class test1 could not be converted to string
+Error: Object of class test1 could not be converted to string
 object(test1)#1 (0) {
 }
 ====test2====
@@ -118,7 +118,7 @@ test2::__toString()
 Converted
 ====test7====
 test2::__toString()
-Cannot access offset of type test2 on array
+TypeError: Cannot access offset of type test2 on array
 ====test8====
 test2::__toString()
 string(9) "Converted"
@@ -131,5 +131,5 @@ Converted
 object(test3)#2 (0) {
 }
 test3::__toString()
-test3::__toString(): Return value must be of type string, array returned
+TypeError: test3::__toString(): Return value must be of type string, array returned
 ====DONE====

@@ -26,7 +26,7 @@ try {
         $q->insert("d$i", 100 - $i);
     }
 } catch (RuntimeException $e) {
-    echo $e::class, ": ", $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>

@@ -4,12 +4,18 @@ dnl Include external macro definitions before the AC_INIT to also remove
 dnl comments starting with # and empty newlines from the included files.
 m4_include([build/ax_check_compile_flag.m4])
 m4_include([build/ax_gcc_func_attribute.m4])
+
 m4_include([build/libtool.m4])
+m4_include([build/ltoptions.m4])
+m4_include([build/ltsugar.m4])
+m4_include([build/ltversion.m4])
+m4_include([build/lt~obsolete.m4])
+
 m4_include([build/php_cxx_compile_stdcxx.m4])
 m4_include([build/php.m4])
 m4_include([build/pkg.m4])
 
-AC_PREREQ([2.68])
+AC_PREREQ([2.71])
 AC_INIT
 AC_CONFIG_SRCDIR([config.m4])
 AC_CONFIG_AUX_DIR([build])
@@ -30,6 +36,11 @@ PHP_INIT_BUILD_SYSTEM
 
 PKG_PROG_PKG_CONFIG
 AC_PROG_CC([cc gcc])
+
+dnl Check if C compiler accepts C11.
+AS_CASE([$ac_prog_cc_stdc], [c99|c89|no],
+  [AC_MSG_ERROR([C compiler would not accept C11 code.])])
+
 PHP_DETECT_ICC
 PHP_DETECT_SUNCC
 
@@ -138,16 +149,7 @@ enable_shared=yes
 PHP_HELP_SEPARATOR([Libtool:])
 PHP_CONFIGURE_PART([Configuring libtool])
 
-dnl Only allow AC_PROG_CXX and AC_PROG_CXXCPP if they are explicitly called (by
-dnl PHP_REQUIRE_CXX). Otherwise AC_PROG_LIBTOOL fails if there is no working C++
-dnl compiler.
-AC_PROVIDE_IFELSE([PHP_REQUIRE_CXX], [], [
-  undefine([AC_PROG_CXX])
-  AC_DEFUN([AC_PROG_CXX], [])
-  undefine([AC_PROG_CXXCPP])
-  AC_DEFUN([AC_PROG_CXXCPP], [php_prog_cxxcpp=disabled])
-])
-AC_PROG_LIBTOOL
+LT_INIT
 
 all_targets='$(PHP_MODULES) $(PHP_ZEND_EX)'
 install_targets="install-modules install-headers"

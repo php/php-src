@@ -16,7 +16,7 @@ var_dump(gmp_popcount($n));
 try {
     var_dump(gmp_popcount(array()));
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "Done\n";
@@ -28,5 +28,5 @@ int(10)
 int(31)
 int(-1)
 int(20)
-gmp_popcount(): Argument #1 ($num) must be of type GMP|string|int, array given
+TypeError: gmp_popcount(): Argument #1 ($num) must be of type GMP|string|int, array given
 Done

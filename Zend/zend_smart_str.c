@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Dmitry Stogov <dmitry@php.net>                               |
    +----------------------------------------------------------------------+
@@ -131,6 +129,13 @@ ZEND_API void smart_str_append_printf(smart_str *dest, const char *format, ...) 
 	va_end(arg);
 }
 
+ZEND_API void smart_string_append_printf(smart_string *dest, const char *format, ...) {
+	va_list arg;
+	va_start(arg, format);
+	zend_printf_to_smart_string(dest, format, arg);
+	va_end(arg);
+}
+
 #define SMART_STRING_OVERHEAD   (ZEND_MM_OVERHEAD + 1)
 #define SMART_STRING_START_SIZE 256
 #define SMART_STRING_START_LEN  (SMART_STRING_START_SIZE - SMART_STRING_OVERHEAD)
@@ -201,8 +206,11 @@ ZEND_API void ZEND_FASTCALL smart_str_append_scalar(smart_str *dest, const zval 
 		break;
 
 		case IS_TRUE:
+			smart_str_appendl(dest, "true", sizeof("true")-1);
+		break;
+
 		case IS_FALSE:
-			smart_str_appends(dest, Z_TYPE_P(value) == IS_TRUE ? "true" : "false");
+			smart_str_appendl(dest, "false", sizeof("false")-1);
 		break;
 
 		case IS_DOUBLE:
@@ -219,7 +227,7 @@ ZEND_API void ZEND_FASTCALL smart_str_append_scalar(smart_str *dest, const zval 
 			smart_str_appendc(dest, '\'');
 		break;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 

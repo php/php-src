@@ -13,8 +13,8 @@ EOD;
 var_dump( strrpos($empty_string, "") );
 try {
     strrpos($empty_string, "", 1);
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 var_dump( strrpos($empty_string, FALSE) );
 
@@ -24,6 +24,6 @@ echo "*** Done ***";
 *** Testing strrpos() function: with heredoc strings ***
 -- With empty heredoc string --
 int(0)
-strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 int(0)
 *** Done ***

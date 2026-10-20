@@ -24,7 +24,6 @@ HERE;
 $parser = xml_parser_create();
 xml_set_processing_instruction_handler($parser, $callback);
 xml_parse($parser, $xml, true);
-xml_parser_free($parser);
 
 ?>
 --EXPECT--

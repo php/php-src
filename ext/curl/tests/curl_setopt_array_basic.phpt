@@ -43,7 +43,6 @@ ob_start(); // start output buffering
 
 curl_setopt_array($ch, $options);
 $returnContent = curl_exec($ch);
-curl_close($ch);
 
 var_dump($returnContent);
 isset($tempname) and is_file($tempname) and @unlink($tempname);

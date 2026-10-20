@@ -3,7 +3,7 @@ GH-17541 (ext/session NULL pointer dereferencement during ID reset)
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --FILE--
 <?php
 function errorHandler($errorNumber, $errorMessage, $fileName, $lineNumber) {

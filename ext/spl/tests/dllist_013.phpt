@@ -7,7 +7,7 @@ $dll = new SplDoublyLinkedList();
 try {
     $dll->add(2,5);
 } catch (OutOfRangeException $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $dll->add(0,6);						//	6
@@ -40,7 +40,7 @@ var_dump($dll->shift());
 
 ?>
 --EXPECT--
-Exception: SplDoublyLinkedList::add(): Argument #1 ($index) is out of range
+OutOfRangeException: SplDoublyLinkedList::add(): Argument #1 ($index) is out of range
 7
 7
 6
