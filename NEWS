@@ -114,6 +114,8 @@ PHP                                                                        NEWS
     (Nicolas Grekas)
   . Fixed bug GH-24399 (usleep() and time_nanosleep() ignore queued APCs on
     Windows). (Nicolas Grekas)
+  . Fixed glob() not negating bracket expressions that start with "^".
+    (Nicolas Grekas)
 
 - Tidy:
   . Fixed tidy_repair_string(), tidy_repair_file(), tidy::repairString() and
