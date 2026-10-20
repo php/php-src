@@ -70,10 +70,7 @@ static void php_array_init_globals(zend_array_globals *array_globals)
 }
 /* }}} */
 
-/* The user comparison callback is kept in request globals that the sort
- * functions save and restore in LIFO order on the C stack. A fiber that
- * suspends inside a comparison callback breaks that order, so every fiber
- * gets its own copy of these globals, swapped in on each fiber switch. */
+/* Sorts restore these globals in LIFO order, which fibers break: keep one copy per fiber. */
 static int php_array_fiber_rid = -1;
 
 static void php_array_fiber_state_save(php_array_fiber_state *state)
@@ -92,7 +89,6 @@ static void php_array_fiber_state_load(const php_array_fiber_state *state)
 		ARRAYG(multisort_func) = state->multisort_func;
 		ARRAYG(compare_deprecation_thrown) = state->compare_deprecation_thrown;
 	} else {
-		/* A fiber that has not run any sort yet starts without a live comparison. */
 		memset(&BG(user_compare_fci), 0, sizeof(BG(user_compare_fci)));
 		BG(user_compare_fci_cache) = empty_fcall_info_cache;
 		ARRAYG(multisort_func) = NULL;
@@ -116,7 +112,6 @@ static void php_array_fiber_init(zend_fiber_context *initializing)
 
 static void php_array_fiber_switch(zend_fiber_context *from, zend_fiber_context *to)
 {
-	/* A finished fiber has no sort left to resume, there is nothing to keep. */
 	if (from == EG(main_fiber_context) || from->status != ZEND_FIBER_STATUS_DEAD) {
 		php_array_fiber_state *state = php_array_fiber_state_of(from);
 		if (!state) {
