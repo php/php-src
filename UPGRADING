@@ -37,6 +37,11 @@ PHP 8.7 UPGRADE NOTES
     application terminate one attribute and append further ones.
 
 - Standard:
+  . With pcntl_async_signals(true), time_sleep_until() now runs signal
+    handlers before the sleep ends. Previously, handlers waited until the
+    deadline. If a handler returns normally, the sleep resumes until the
+    original deadline. A handler can now interrupt the sleep by throwing an
+    exception or calling exit.
   . The number of filters that can be chained in a php://filter URL is limited
     to 16 by default. Set the stream context option max_filter_count to change
     this.
