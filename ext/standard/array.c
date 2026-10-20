@@ -33,9 +33,11 @@
 #include "zend_smart_str.h"
 #include "zend_bitset.h"
 #include "zend_exceptions.h"
+#include "zend_extensions.h"
+#include "zend_fibers.h"
+#include "zend_observer.h"
 #include "ext/random/php_random.h"
 #include "zend_frameless_function.h"
-#include "zend_fibers.h"
 
 /* {{{ defines */
 
@@ -68,9 +70,83 @@ static void php_array_init_globals(zend_array_globals *array_globals)
 }
 /* }}} */
 
+/* The user comparison callback is kept in request globals that the sort
+ * functions save and restore in LIFO order on the C stack. A fiber that
+ * suspends inside a comparison callback breaks that order, so every fiber
+ * gets its own copy of these globals, swapped in on each fiber switch. */
+static int php_array_fiber_rid = -1;
+
+static void php_array_fiber_state_save(php_array_fiber_state *state)
+{
+	state->user_compare_fci = BG(user_compare_fci);
+	state->user_compare_fci_cache = BG(user_compare_fci_cache);
+	state->multisort_func = ARRAYG(multisort_func);
+	state->compare_deprecation_thrown = ARRAYG(compare_deprecation_thrown);
+}
+
+static void php_array_fiber_state_load(const php_array_fiber_state *state)
+{
+	if (state) {
+		BG(user_compare_fci) = state->user_compare_fci;
+		BG(user_compare_fci_cache) = state->user_compare_fci_cache;
+		ARRAYG(multisort_func) = state->multisort_func;
+		ARRAYG(compare_deprecation_thrown) = state->compare_deprecation_thrown;
+	} else {
+		/* A fiber that has not run any sort yet starts without a live comparison. */
+		memset(&BG(user_compare_fci), 0, sizeof(BG(user_compare_fci)));
+		BG(user_compare_fci_cache) = empty_fcall_info_cache;
+		ARRAYG(multisort_func) = NULL;
+		ARRAYG(compare_deprecation_thrown) = 0;
+	}
+}
+
+static php_array_fiber_state *php_array_fiber_state_of(zend_fiber_context *context)
+{
+	if (context == EG(main_fiber_context)) {
+		return &ARRAYG(main_fiber_state);
+	}
+	return context->reserved[php_array_fiber_rid];
+}
+
+static void php_array_fiber_init(zend_fiber_context *initializing)
+{
+	/* The reserved slots are not guaranteed to be zeroed. */
+	initializing->reserved[php_array_fiber_rid] = NULL;
+}
+
+static void php_array_fiber_switch(zend_fiber_context *from, zend_fiber_context *to)
+{
+	/* A finished fiber has no sort left to resume, there is nothing to keep. */
+	if (from == EG(main_fiber_context) || from->status != ZEND_FIBER_STATUS_DEAD) {
+		php_array_fiber_state *state = php_array_fiber_state_of(from);
+		if (!state) {
+			state = emalloc(sizeof(php_array_fiber_state));
+			from->reserved[php_array_fiber_rid] = state;
+		}
+		php_array_fiber_state_save(state);
+	}
+
+	php_array_fiber_state_load(php_array_fiber_state_of(to));
+}
+
+static void php_array_fiber_destroy(zend_fiber_context *destroying)
+{
+	if (destroying->reserved[php_array_fiber_rid]) {
+		efree(destroying->reserved[php_array_fiber_rid]);
+		destroying->reserved[php_array_fiber_rid] = NULL;
+	}
+}
+
 PHP_MINIT_FUNCTION(array) /* {{{ */
 {
 	ZEND_INIT_MODULE_GLOBALS(array, php_array_init_globals, NULL);
+
+	php_array_fiber_rid = zend_get_resource_handle("standard_array");
+	if (php_array_fiber_rid >= 0) {
+		zend_observer_fiber_init_register(php_array_fiber_init);
+		zend_observer_fiber_switch_register(php_array_fiber_switch);
+		zend_observer_fiber_destroy_register(php_array_fiber_destroy);
+	}
 
 	return SUCCESS;
 }
@@ -808,11 +884,8 @@ static int php_array_user_compare(Bucket *a, Bucket *b) /* {{{ */
 	old_user_compare_fci_cache = BG(user_compare_fci_cache); \
 	ARRAYG(compare_deprecation_thrown) = 0; \
 	BG(user_compare_fci_cache) = empty_fcall_info_cache; \
-	/* The comparator is restored in LIFO order, which a fiber switch breaks. */ \
-	zend_fiber_switch_block(); \
 
 #define PHP_ARRAY_CMP_FUNC_RESTORE() \
-	zend_fiber_switch_unblock(); \
 	BG(user_compare_fci) = old_user_compare_fci; \
 	BG(user_compare_fci_cache) = old_user_compare_fci_cache; \
 
@@ -6383,7 +6456,6 @@ PHP_FUNCTION(array_multisort)
 	func[num_arrays - 1] = php_get_data_compare_func_unstable(sort_type, sort_order != PHP_SORT_ASC);
 	bucket_compare_func_t *old_multisort_func = ARRAYG(multisort_func);
 	ARRAYG(multisort_func) = func;
-	zend_fiber_switch_block();
 
 	/* Create the indirection array. This array is of size MxN, where
 	 * M is the number of entries in each input array and N is the number
@@ -6475,7 +6547,6 @@ clean_up:
 	efree(indirect);
 	efree(func);
 	efree(arrays);
-	zend_fiber_switch_unblock();
 	ARRAYG(multisort_func) = old_multisort_func;
 }
 /* }}} */
