@@ -2003,6 +2003,12 @@ PHP_FUNCTION(imagewebp)
 		RETURN_FALSE;
 	}
 
+	if (!gdImageTrueColor(im)) {
+		php_error_docref(NULL, E_WARNING, "Palette image not supported by webp");
+		ctx->gd_free(ctx);
+		RETURN_FALSE;
+	}
+
 	if (quality < -1) {
 		zend_argument_value_error(3, "must be greater than or equal to -1");
 		ctx->gd_free(ctx);
