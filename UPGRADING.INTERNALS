@@ -45,6 +45,10 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 - The INIT_CLASS_ENTRY_INIT_METHODS() macro, which was previously used as
   part of handling disabled classes, was removed following the removal of
   the `disable_classes` INI setting in PHP 8.5.
+- Added zend_hash_next_index_insert_copies(), which inserts several values like
+  repeated zend_hash_next_index_insert() calls and adds a reference to each
+  inserted value. Values appended right after the last used slot of a packed
+  array are stored in one go.
 
 ========================
 2. Build system changes
