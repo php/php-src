@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\UrlBuilder::build() - success - replaces the base fragment with an empty fragment
+Test Uri\WhatWg\UrlBuilder::build() - success - clears the base fragment with an empty string
 --FILE--
 <?php
 
@@ -13,5 +13,5 @@ var_dump($url->equals(new Uri\WhatWg\Url($url->toAsciiString())));
 
 ?>
 --EXPECT--
-string(26) "https://example.com/a?old#"
+string(25) "https://example.com/a?old"
 bool(true)
