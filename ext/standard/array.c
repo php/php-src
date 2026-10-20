@@ -5117,19 +5117,54 @@ static bool zval_always_true(zval *val, zval *data) {
 
 typedef bool (*php_diff_intersect_equality_fn)(zval *, zval *);
 
+ZEND_ATTRIBUTE_NONNULL static void php_check_and_populate_array_matching_condition(
+	HashTable *ht,
+	uint32_t argc, zval *args,
+	php_diff_intersect_equality_fn callback, bool callback_result
+) {
+	/* Iterate over keys of the first array, to compute keys that are in all of the other arrays. */
+	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(args[0]), zend_ulong h, zend_string *key, zval *val) {
+		bool ok = true;
+		zval *data;
+
+		if (Z_ISREF_P(val) && Z_REFCOUNT_P(val) == 1) {
+			val = Z_REFVAL_P(val);
+		}
+		if (key == NULL) {
+			for (uint32_t i = 1; i < argc; i++) {
+				data = zend_hash_index_find(Z_ARRVAL(args[i]), h);
+				if (callback(val, data) == callback_result) {
+					ok = false;
+					break;
+				}
+			}
+			if (ok) {
+				Z_TRY_ADDREF_P(val);
+				zend_hash_index_add_new(ht, h, val);
+			}
+		} else {
+			for (uint32_t i = 1; i < argc; i++) {
+				data = zend_hash_find_known_hash(Z_ARRVAL(args[i]), key);
+				if (callback(val, data) == callback_result) {
+					ok = false;
+					break;
+				}
+			}
+			if (ok) {
+				Z_TRY_ADDREF_P(val);
+				zend_hash_add_new(ht, key, val);
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+
 static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_type) /* {{{ */
 {
-	uint32_t argc, i;
+	uint32_t argc;
 	zval *args;
 	php_diff_intersect_equality_fn callback = zval_always_true;
-	bool ok;
-	zval *val, *data;
 	char *param_spec;
-	zend_string *key;
-	zend_ulong h;
 
-	/* Get the argument count */
-	argc = ZEND_NUM_ARGS();
 	if (data_compare_type == INTERSECT_COMP_DATA_USER) {
 		/* INTERSECT_COMP_DATA_USER - array_uintersect_assoc() */
 		param_spec = "+f";
@@ -5148,7 +5183,7 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 		RETURN_THROWS();
 	}
 
-	for (i = 0; i < argc; i++) {
+	for (uint32_t i = 0; i < argc; i++) {
 		if (Z_TYPE(args[i]) != IS_ARRAY) {
 			zend_argument_type_error(i + 1, "must be of type array, %s given", zend_zval_value_name(&args[i]));
 			RETURN_THROWS();
@@ -5156,40 +5191,7 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 	}
 
 	array_init(return_value);
-
-	/* Iterate over keys of the first array, to compute keys that are in all of the other arrays. */
-	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(args[0]), h, key, val) {
-		if (Z_ISREF_P(val) && Z_REFCOUNT_P(val) == 1) {
-			val = Z_REFVAL_P(val);
-		}
-		if (key == NULL) {
-			ok = true;
-			for (i = 1; i < argc; i++) {
-				data = zend_hash_index_find(Z_ARRVAL(args[i]), h);
-				if (callback(val, data) == false) {
-					ok = false;
-					break;
-				}
-			}
-			if (ok) {
-				Z_TRY_ADDREF_P(val);
-				zend_hash_index_add_new(Z_ARRVAL_P(return_value), h, val);
-			}
-		} else {
-			ok = true;
-			for (i = 1; i < argc; i++) {
-				data = zend_hash_find_known_hash(Z_ARRVAL(args[i]), key);
-				if (callback(val, data) == false) {
-					ok = false;
-					break;
-				}
-			}
-			if (ok) {
-				Z_TRY_ADDREF_P(val);
-				zend_hash_add_new(Z_ARRVAL_P(return_value), key, val);
-			}
-		}
-	} ZEND_HASH_FOREACH_END();
+	php_check_and_populate_array_matching_condition(Z_ARR_P(return_value), argc, args, callback, false);
 }
 /* }}} */
 
@@ -5725,13 +5727,9 @@ PHP_FUNCTION(array_uintersect_uassoc)
 
 static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_type) /* {{{ */
 {
-	uint32_t argc, i;
+	uint32_t argc;
 	zval *args;
 	php_diff_intersect_equality_fn callback = zval_always_true;
-	bool ok;
-	zval *val, *data;
-	zend_string *key;
-	zend_ulong h;
 
 	/* Get the argument count */
 	argc = ZEND_NUM_ARGS();
@@ -5749,7 +5747,7 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 		}
 	}
 
-	for (i = 0; i < argc; i++) {
+	for (uint32_t i = 0; i < argc; i++) {
 		if (Z_TYPE(args[i]) != IS_ARRAY) {
 			zend_argument_type_error(i + 1, "must be of type array, %s given", zend_zval_value_name(&args[i]));
 			RETURN_THROWS();
@@ -5757,40 +5755,7 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 	}
 
 	array_init(return_value);
-
-	/* Iterate over keys of the first array, to compute keys that aren't in the other arrays. */
-	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(args[0]), h, key, val) {
-		if (Z_ISREF_P(val) && Z_REFCOUNT_P(val) == 1) {
-			val = Z_REFVAL_P(val);
-		}
-		if (key == NULL) {
-			ok = true;
-			for (i = 1; i < argc; i++) {
-				data = zend_hash_index_find(Z_ARRVAL(args[i]), h);
-				if (callback(val, data) == true) {
-					ok = false;
-					break;
-				}
-			}
-			if (ok) {
-				Z_TRY_ADDREF_P(val);
-				zend_hash_index_add_new(Z_ARRVAL_P(return_value), h, val);
-			}
-		} else {
-			ok = true;
-			for (i = 1; i < argc; i++) {
-				data = zend_hash_find_known_hash(Z_ARRVAL(args[i]), key);
-				if (callback(val, data) == true) {
-					ok = false;
-					break;
-				}
-			}
-			if (ok) {
-				Z_TRY_ADDREF_P(val);
-				zend_hash_add_new(Z_ARRVAL_P(return_value), key, val);
-			}
-		}
-	} ZEND_HASH_FOREACH_END();
+	php_check_and_populate_array_matching_condition(Z_ARR_P(return_value), argc, args, callback, true);
 }
 /* }}} */
 
