@@ -154,7 +154,7 @@ PHPAPI zend_string *php_quot_print_encode(const unsigned char *str, size_t lengt
 			length--;
 			lp = 0;
 		} else {
-			if (iscntrl (c) || (c == 0x7f) || (c & 0x80) || (c == '=') || ((c == ' ') && (*str == '\015'))) {
+			if (iscntrl (c) || (c == 0x7f) || (c & 0x80) || (c == '=') || ((c == ' ') && (length == 0 || *str == '\015'))) {
 				if ((((lp+= 3) > PHP_QPRINT_MAXL) && (c <= 0x7f))
 				    || ((c > 0x7f) && (c <= 0xdf) && ((lp + 3) > PHP_QPRINT_MAXL))
 				    || ((c > 0xdf) && (c <= 0xef) && ((lp + 6) > PHP_QPRINT_MAXL))

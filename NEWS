@@ -110,6 +110,8 @@ PHP                                                                        NEWS
     (Jorg Sowa)
   . Don't share the unserialize() context with enum autoloaders.
     (Nicolas Grekas)
+  . Fixed bug GH-24458 (quoted_printable_encode does not encode trailing
+    space). (lazerg)
 
 - Tidy:
   . Fixed tidy_repair_string(), tidy_repair_file(), tidy::repairString() and
