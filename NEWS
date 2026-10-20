@@ -81,6 +81,8 @@ PHP                                                                        NEWS
     is reloaded from memory). (ndossche)
   . Fixed bug GH-24386 (JIT: register operand must be loaded before the typed
     reference check). (ndossche)
+  . Fixed bug GH-24437 (JIT: Fix OP_DATA read from an unwritten slot in
+    zend_jit_assign_dim_op()). (waroad)
 
 - PDO:
   . Fixed invalid ATTR_ORACLE_NULLS values being accepted and truncated.

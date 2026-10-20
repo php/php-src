@@ -13577,9 +13577,10 @@ static int zend_jit_assign_dim_op(zend_jit_ctx   *jit,
 						if (!zend_jit_spill_store_inv(jit, op3_addr, real_addr, op1_data_info)) {
 							return 0;
 						}
-						op3_addr = real_addr;
+						arg2 = jit_ZVAL_ADDR(jit, real_addr);
+					} else {
+						arg2 = jit_ZVAL_ADDR(jit, op3_addr);
 					}
-					arg2 = jit_ZVAL_ADDR(jit, op3_addr);
 					ir_CALL_3(IR_VOID, ir_CONST_FC_FUNC(zend_jit_assign_op_to_typed_ref),
 						reference, arg2, ir_CONST_FC_FUNC(binary_op));
 
