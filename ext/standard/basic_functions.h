@@ -38,13 +38,14 @@ PHP_MINIT_FUNCTION(basic);
 PHP_MSHUTDOWN_FUNCTION(basic);
 PHP_RINIT_FUNCTION(basic);
 PHP_RSHUTDOWN_FUNCTION(basic);
+ZEND_MODULE_POST_ZEND_DEACTIVATE_D(basic);
 PHP_MINFO_FUNCTION(basic);
 
 ZEND_API void php_get_highlight_struct(zend_syntax_highlighter_ini *syntax_highlighter_ini);
 
 PHP_MINIT_FUNCTION(poll);
 PHP_MINIT_FUNCTION(user_filters);
-PHP_RSHUTDOWN_FUNCTION(user_filters);
+ZEND_MODULE_POST_ZEND_DEACTIVATE_D(user_filters);
 PHP_RSHUTDOWN_FUNCTION(browscap);
 
 PHPAPI zend_result _php_error_log(int opt_err, const zend_string *message, const zend_string *opt, const zend_string *headers);
