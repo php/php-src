@@ -16,7 +16,7 @@ var_dump($url->equals(new Uri\WhatWg\Url($url->toAsciiString())));
 
 ?>
 --EXPECTF--
-string(21) "https://example.com/?"
+string(20) "https://example.com/"
 object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
@@ -31,7 +31,7 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["path"]=>
   string(1) "/"
   ["query"]=>
-  string(0) ""
+  NULL
   ["fragment"]=>
   NULL
 }

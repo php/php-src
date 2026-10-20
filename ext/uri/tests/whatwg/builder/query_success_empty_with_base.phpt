@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\UrlBuilder::build() - success - replaces the base query with an empty query
+Test Uri\WhatWg\UrlBuilder::build() - success - clears the base query with an empty string
 --FILE--
 <?php
 
@@ -13,5 +13,5 @@ var_dump($url->equals(new Uri\WhatWg\Url($url->toAsciiString())));
 
 ?>
 --EXPECT--
-string(22) "https://example.com/a?"
+string(21) "https://example.com/a"
 bool(true)
