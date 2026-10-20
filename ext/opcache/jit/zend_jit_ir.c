@@ -537,7 +537,7 @@ static ir_ref jit_TLS(zend_jit_ctx *jit)
 #  endif
 
 		/* NtCurrentTeb()->ThreadLocalStoragePointer */
-		ir_ref tls_array = ir_TLS_ADDR(-1, offset);
+		ir_ref tls_array = ir_TLS(-1, offset);
 
 		ir_ref index = ir_LOAD_A(ir_CONST_ADDR(&tsrm_tls_index));
 		jit->tls = ir_LOAD_A(ir_ADD_OFFSET(ir_LOAD_A(ir_ADD_A(tls_array, index)), tsrm_tls_offset));
