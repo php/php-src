@@ -1,7 +1,5 @@
 --TEST--
 GH-24497: memory_hard_limit_percent exposes automatic default
---INI--
-memory_hard_limit_percent=-1
 --FILE--
 <?php
 var_dump(ini_get('memory_hard_limit_percent'));
