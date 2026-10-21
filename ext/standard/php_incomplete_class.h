@@ -47,6 +47,10 @@
 
 #define INCOMPLETE_CLASS "__PHP_Incomplete_Class"
 #define MAGIC_MEMBER "__PHP_Incomplete_Class_Name"
+/* Set by php_var_unserialize() in incomplete_classes_only mode (see
+ * BG(serialize_incomplete_classes_only)): the raw payload of a C: value. The
+ * serializer writes it back unchanged. */
+#define MAGIC_MEMBER_SERIALIZED "__PHP_Incomplete_Class_Serialized"
 
 #ifdef __cplusplus
 extern "C" {

@@ -395,6 +395,27 @@ void shutdown_executor(void) /* {{{ */
 		}
 	} zend_end_try();
 
+	/* The request heap is about to be freed, but the following may be accessed
+	 * (e.g. by zend_error()) before the next init_executor(). A bailout above may
+	 * also have skipped their cleanup. Reset them unconditionally
+	 * (GHSA-6wmf-4rv5-p3rp, CVE-2026-109619). */
+	ZVAL_UNDEF(&EG(user_error_handler));
+	ZVAL_UNDEF(&EG(user_exception_handler));
+	memset(&EG(user_error_handlers_error_reporting), 0, sizeof(EG(user_error_handlers_error_reporting)));
+	memset(&EG(user_error_handlers), 0, sizeof(EG(user_error_handlers)));
+	memset(&EG(user_exception_handlers), 0, sizeof(EG(user_exception_handlers)));
+	EG(objects_store).object_buckets = NULL;
+	EG(objects_store).top = 1;
+	EG(objects_store).size = 0;
+	EG(objects_store).free_list_head = -1;
+	EG(in_autoload) = NULL;
+	EG(error_handling) = EH_NORMAL;
+	EG(exception_class) = NULL;
+	EG(exception) = NULL;
+	EG(prev_exception) = NULL;
+	EG(current_execute_data) = NULL;
+	EG(valid_symbol_table) = 0;
+
 	zend_shutdown_fpu();
 
 #if ZEND_DEBUG

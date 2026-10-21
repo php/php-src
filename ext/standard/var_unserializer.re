@@ -385,6 +385,14 @@ numeric_key:
 		} else {
 			if (EXPECTED(Z_TYPE(key) == IS_STRING)) {
 string_key:
+				/* The members that incomplete_classes_only mode writes itself
+				 * cannot be told apart from data carrying them: reject it. */
+				if (UNEXPECTED(BG(serialize_incomplete_classes_only))
+				 && (zend_string_equals_literal(Z_STR(key), MAGIC_MEMBER)
+				  || zend_string_equals_literal(Z_STR(key), MAGIC_MEMBER_SERIALIZED))) {
+					zval_dtor(&key);
+					return 0;
+				}
 				if ((old_data = zend_hash_find(ht, Z_STR(key))) != NULL) {
 					if (Z_TYPE_P(old_data) == IS_INDIRECT) {
 						old_data = Z_INDIRECT_P(old_data);
@@ -444,7 +452,15 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 		return 0;
 	}
 
-	if (ce->unserialize == NULL) {
+	if (ce == PHP_IC_ENTRY && BG(serialize_incomplete_classes_only)) {
+		/* The class was not resolved: keep the payload verbatim, so that the
+		 * object serializes back to the same bytes. */
+		zval payload;
+
+		ZVAL_STRINGL(&payload, (const char *) *p, datalen);
+		object_init_ex(rval, ce);
+		zend_hash_str_update(Z_OBJPROP_P(rval), MAGIC_MEMBER_SERIALIZED, sizeof(MAGIC_MEMBER_SERIALIZED) - 1, &payload);
+	} else if (ce->unserialize == NULL) {
 		zend_error(E_WARNING, "Class %s has no unserializer", ZSTR_VAL(ce->name));
 		object_init_ex(rval, ce);
 	} else if (ce->unserialize(rval, ce, (const unsigned char*)*p, datalen, (zend_unserialize_data *)var_hash) != SUCCESS) {
@@ -839,6 +855,14 @@ object ":" uiv ":" ["]	{
 	class_name = zend_string_init(str, len, 0);
 
 	do {
+		if (BG(serialize_incomplete_classes_only)) {
+			/* Do not look the class up at all, so that no user code can run
+			 * (no autoloading, no unserialize_callback_func, no __wakeup()). */
+			incomplete_class = 1;
+			ce = PHP_IC_ENTRY;
+			break;
+		}
+
 		if(!unserialize_allowed_class(class_name, classes)) {
 			incomplete_class = 1;
 			ce = PHP_IC_ENTRY;

@@ -372,6 +372,26 @@ static ZEND_COLD ZEND_NORETURN void zend_mm_panic(const char *message)
 	exit(1);
 }
 
+/* Report an allocation size overflow and terminate the process, without
+ * longjmp()ing out of the allocator, see zend_mm_safe_error() */
+ZEND_API ZEND_COLD ZEND_NORETURN void zend_mm_overflow_error(const char *format, ...)
+{
+	va_list args;
+	char buf[1024];
+
+	va_start(args, format);
+	vsnprintf(buf, sizeof(buf), format, args);
+	va_end(args);
+
+	zend_try {
+		zend_error_noreturn(E_ERROR, "%s", buf);
+	} zend_catch {
+	} zend_end_try();
+	fflush(stdout);
+	fflush(stderr);
+	_exit(255);
+}
+
 static ZEND_COLD ZEND_NORETURN void zend_mm_safe_error(zend_mm_heap *heap,
 	const char *format,
 	size_t limit,
@@ -395,8 +415,13 @@ static ZEND_COLD ZEND_NORETURN void zend_mm_safe_error(zend_mm_heap *heap,
 	} zend_catch {
 	}  zend_end_try();
 	heap->overflow = 0;
-	zend_bailout();
-	exit(1);
+	/* Do not longjmp() out of the allocator: the interrupted code may have left
+	 * request state half-initialized, and the shutdown sequence would then
+	 * operate on it (GHSA-w8hw-w9fx-j79w, CVE-2026-109618). The error has been
+	 * reported above; terminate the process instead. */
+	fflush(stdout);
+	fflush(stderr);
+	_exit(255);
 }
 
 #ifdef _WIN32
@@ -1381,7 +1406,7 @@ static zend_always_inline void *zend_mm_alloc_heap(zend_mm_heap *heap, size_t si
 	size = MAX(size, 1);
 	size = ZEND_MM_ALIGNED_SIZE(size) + ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info));
 	if (UNEXPECTED(size < real_size)) {
-		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu + %zu)", ZEND_MM_ALIGNED_SIZE(real_size), ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info)));
+		zend_mm_overflow_error("Possible integer overflow in memory allocation (%zu + %zu)", ZEND_MM_ALIGNED_SIZE(real_size), ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info)));
 		return NULL;
 	}
 #endif
@@ -2527,24 +2552,35 @@ ZEND_API size_t ZEND_FASTCALL _zend_mem_block_size(void *ptr ZEND_FILE_LINE_DC Z
 	return zend_mm_size(AG(mm_heap), ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 }
 
+static zend_always_inline size_t zend_mm_safe_address(size_t nmemb, size_t size, size_t offset)
+{
+	int overflow;
+	size_t ret = zend_safe_address(nmemb, size, offset, &overflow);
+
+	if (UNEXPECTED(overflow)) {
+		zend_mm_overflow_error("Possible integer overflow in memory allocation (%zu * %zu + %zu)", nmemb, size, offset);
+	}
+	return ret;
+}
+
 ZEND_API void* ZEND_FASTCALL _safe_emalloc(size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
-	return emalloc_rel(zend_safe_address_guarded(nmemb, size, offset));
+	return emalloc_rel(zend_mm_safe_address(nmemb, size, offset));
 }
 
 ZEND_API void* ZEND_FASTCALL _safe_malloc(size_t nmemb, size_t size, size_t offset)
 {
-	return pemalloc(zend_safe_address_guarded(nmemb, size, offset), 1);
+	return pemalloc(zend_mm_safe_address(nmemb, size, offset), 1);
 }
 
 ZEND_API void* ZEND_FASTCALL _safe_erealloc(void *ptr, size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
-	return erealloc_rel(ptr, zend_safe_address_guarded(nmemb, size, offset));
+	return erealloc_rel(ptr, zend_mm_safe_address(nmemb, size, offset));
 }
 
 ZEND_API void* ZEND_FASTCALL _safe_realloc(void *ptr, size_t nmemb, size_t size, size_t offset)
 {
-	return perealloc(ptr, zend_safe_address_guarded(nmemb, size, offset), 1);
+	return perealloc(ptr, zend_mm_safe_address(nmemb, size, offset), 1);
 }
 
 
@@ -2567,7 +2603,7 @@ ZEND_API char* ZEND_FASTCALL _estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_
 
 	length = strlen(s);
 	if (UNEXPECTED(length + 1 == 0)) {
-		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", 1, length, 1);
+		zend_mm_overflow_error("Possible integer overflow in memory allocation (%zu * %zu + %zu)", 1, length, 1);
 	}
 	p = (char *) _emalloc(length + 1 ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	if (UNEXPECTED(p == NULL)) {
@@ -2582,7 +2618,7 @@ ZEND_API char* ZEND_FASTCALL _estrndup(const char *s, size_t length ZEND_FILE_LI
 	char *p;
 
 	if (UNEXPECTED(length + 1 == 0)) {
-		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", 1, length, 1);
+		zend_mm_overflow_error("Possible integer overflow in memory allocation (%zu * %zu + %zu)", 1, length, 1);
 	}
 	p = (char *) _emalloc(length + 1 ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	if (UNEXPECTED(p == NULL)) {
@@ -2599,7 +2635,7 @@ ZEND_API char* ZEND_FASTCALL zend_strndup(const char *s, size_t length)
 	char *p;
 
 	if (UNEXPECTED(length + 1 == 0)) {
-		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", 1, length, 1);
+		zend_mm_overflow_error("Possible integer overflow in memory allocation (%zu * %zu + %zu)", 1, length, 1);
 	}
 	p = (char *) malloc(length + 1);
 	if (UNEXPECTED(p == NULL)) {

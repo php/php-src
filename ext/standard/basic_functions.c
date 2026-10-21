@@ -3829,6 +3829,22 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 }
 /* }}} */
 
+/* Called from php_request_startup(), before any request data is processed.
+ * A bailout in the previous request may have skipped RSHUTDOWN, leaving these
+ * pointing to freed request memory (GHSA-6wmf-4rv5-p3rp, CVE-2026-109619). */
+PHPAPI void php_basic_early_rinit(void)
+{
+	/* The session upload progress handler (un)serializes the session and
+	 * registers the session id with the URL rewriter from
+	 * php_hash_environment(), before RINIT. */
+	BG(serialize_lock) = 0;
+	memset(&BG(serialize), 0, sizeof(BG(serialize)));
+	memset(&BG(unserialize), 0, sizeof(BG(unserialize)));
+	BG(serialize_incomplete_classes_only) = 0;
+	/* Same as php_url_scanner_ex_activate(): everything before tags */
+	memset(&BG(url_adapt_state_ex), 0, XtOffsetOf(url_adapt_state_ex_t, tags));
+}
+
 PHP_MINFO_FUNCTION(basic) /* {{{ */
 {
 	php_info_print_table_start();

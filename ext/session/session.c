@@ -2927,8 +2927,16 @@ static void php_session_rfc1867_update(php_session_rfc1867_progress *progress, i
 		progress->next_update = Z_LVAL_P(progress->post_bytes_processed) + progress->update_step;
 	}
 
+	/* Runs before RINIT: no user code may be invoked. Objects are kept as
+	 * __PHP_Incomplete_Class: no autoloading, no unserialize_callback_func, no
+	 * __wakeup(), and they are written back unchanged
+	 * (GHSA-6wmf-4rv5-p3rp, CVE-2026-109619). */
+	BG(serialize_incomplete_classes_only) = 1;
 	php_session_initialize();
-	PS(session_status) = php_session_active;
+	if (PS(session_status) != php_session_active) {
+		BG(serialize_incomplete_classes_only) = 0;
+		return;
+	}
 	IF_SESSION_VARS() {
 		zval *sess_var = Z_REFVAL(PS(http_session_vars));
 		SEPARATE_ARRAY(sess_var);
@@ -2938,18 +2946,24 @@ static void php_session_rfc1867_update(php_session_rfc1867_progress *progress, i
 		zend_hash_update(Z_ARRVAL_P(sess_var), progress->key.s, &progress->data);
 	}
 	php_session_flush(1);
+	BG(serialize_incomplete_classes_only) = 0;
 } /* }}} */
 
 static void php_session_rfc1867_cleanup(php_session_rfc1867_progress *progress) /* {{{ */
 {
+	BG(serialize_incomplete_classes_only) = 1;
 	php_session_initialize();
-	PS(session_status) = php_session_active;
+	if (PS(session_status) != php_session_active) {
+		BG(serialize_incomplete_classes_only) = 0;
+		return;
+	}
 	IF_SESSION_VARS() {
 		zval *sess_var = Z_REFVAL(PS(http_session_vars));
 		SEPARATE_ARRAY(sess_var);
 		zend_hash_del(Z_ARRVAL_P(sess_var), progress->key.s);
 	}
 	php_session_flush(1);
+	BG(serialize_incomplete_classes_only) = 0;
 } /* }}} */
 
 static int php_session_rfc1867_callback(unsigned int event, void *event_data, void **extra) /* {{{ */
@@ -2969,6 +2983,10 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 	switch(event) {
 		case MULTIPART_EVENT_START: {
 			multipart_event_start *data = (multipart_event_start *) event_data;
+
+			/* This runs before RINIT, so we need to clear these early */
+			php_rinit_session_globals();
+
 			progress = ecalloc(1, sizeof(php_session_rfc1867_progress));
 			progress->content_length = data->content_length;
 			progress->sname_len  = strlen(PS(session_name));
@@ -3123,6 +3141,13 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			efree(progress);
 			progress = NULL;
 			PS(rfc1867_progress) = NULL;
+
+			/* $_SESSION was populated in incomplete_classes_only mode */
+			{
+				zend_string *session_var_name = zend_string_init("_SESSION", sizeof("_SESSION") - 1, 0);
+				zend_delete_global_variable(session_var_name);
+				zend_string_release(session_var_name);
+			}
 		}
 		break;
 	}

@@ -1610,6 +1610,7 @@ int php_request_startup(void)
 		PG(in_user_include) = 0;
 
 		zend_activate();
+		php_basic_early_rinit();
 		sapi_activate();
 
 #ifdef ZEND_SIGNALS
@@ -1748,6 +1749,8 @@ void php_request_shutdown_for_hook(void *dummy)
 
 		for (i = 0; i < NUM_TRACK_VARS; i++) {
 			zval_ptr_dtor(&PG(http_globals)[i]);
+			/* May be accessed before php_request_startup() */
+			ZVAL_UNDEF(&PG(http_globals)[i]);
 		}
 	} zend_end_try();
 
@@ -1844,6 +1847,8 @@ void php_request_shutdown(void *dummy)
 
 		for (i=0; i<NUM_TRACK_VARS; i++) {
 			zval_ptr_dtor(&PG(http_globals)[i]);
+			/* May be accessed before php_request_startup() */
+			ZVAL_UNDEF(&PG(http_globals)[i]);
 		}
 	} zend_end_try();
 
@@ -1873,6 +1878,8 @@ void php_request_shutdown(void *dummy)
 
 	/* 15. Free Willy (here be crashes) */
 	zend_interned_strings_restore();
+	/* Diagnostics emitted after step 9 may have repopulated these */
+	php_free_request_globals();
 	zend_try {
 		shutdown_memory_manager(CG(unclean_shutdown) || !report_memleaks, 0);
 	} zend_end_try();
@@ -1892,6 +1899,9 @@ void php_request_shutdown(void *dummy)
 #ifdef HAVE_DTRACE
 	DTRACE_REQUEST_SHUTDOWN(SAFE_FILENAME(SG(request_info).path_translated), SAFE_FILENAME(SG(request_info).request_uri), (char *)SAFE_FILENAME(SG(request_info).request_method));
 #endif /* HAVE_DTRACE */
+
+	/* May be accessed before php_request_startup() */
+	PG(modules_activated) = 0;
 }
 /* }}} */
 

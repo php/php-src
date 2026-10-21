@@ -215,6 +215,7 @@ ZEND_API void * __zend_realloc(void *p, size_t len) ZEND_ATTRIBUTE_ALLOC_SIZE(2)
 #define pestrdup_rel(s, persistent) ((persistent)?strdup(s):estrdup_rel(s))
 
 ZEND_API int zend_set_memory_limit(size_t memory_limit);
+ZEND_API ZEND_COLD ZEND_NORETURN void zend_mm_overflow_error(const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 1, 2);
 
 ZEND_API void start_memory_manager(void);
 ZEND_API void shutdown_memory_manager(int silent, int full_shutdown);
