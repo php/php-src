@@ -190,11 +190,10 @@ static void pgsql_stmt_finish(pdo_pgsql_stmt *S, int fin_mode)
 		res = PQclosePrepared(H->server, S->stmt_name);
 #endif
 		if (res) {
+			if (H->prepared_stmts && PQresultStatus(res) == PGRES_COMMAND_OK) {
+				zend_hash_str_del(H->prepared_stmts, S->stmt_name, strlen(S->stmt_name));
+			}
 			PQclear(res);
-		}
-
-		if (H->prepared_stmts) {
-			zend_hash_str_del(H->prepared_stmts, S->stmt_name, strlen(S->stmt_name));
 		}
 		S->is_prepared = false;
 	}
