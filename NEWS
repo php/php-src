@@ -89,6 +89,9 @@ PHP                                                                        NEWS
     (Ilia Alshanetsky)
   . Fixed a duplicate warning when ATTR_STATEMENT_CLASS is rejected on a
     persistent connection. (Ilia Alshanetsky)
+  . Fixed crash when the garbage collector freed SQLite user functions,
+    aggregates, or collations of a persistent connection shared by several
+    PDO objects. (Ilia Alshanetsky)
 
 - Phpdbg:
   . Fix wrong command names. (ndossche, Weilin Du)
