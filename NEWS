@@ -83,6 +83,8 @@ PHP                                                                        NEWS
     reference check). (ndossche)
   . Fixed bug GH-24437 (JIT: Fix OP_DATA read from an unwritten slot in
     zend_jit_assign_dim_op()). (waroad)
+  . Fixed bug GH-18714 (opcache_compile_file() breaks class hoisting).
+    (Ilia Alshanetsky)
 
 - PDO:
   . Fixed invalid ATTR_ORACLE_NULLS values being accepted and truncated.

@@ -360,7 +360,8 @@ static void zend_accel_do_delayed_early_binding(
 					: NULL;
 				if (parent_ce || (orig_ce->ce_flags & ZEND_ACC_LINKED)) {
 					ce = zend_try_early_bind(orig_ce, parent_ce, early_binding->lcname, zv);
-				} else if (ZSTR_LEN(early_binding->lc_parent_name) == 0) {
+				} else if (ZSTR_LEN(early_binding->lc_parent_name) == 0
+						&& !(CG(compiler_options) & ZEND_COMPILE_WITHOUT_EXECUTION)) {
 					/* Parentless class: use the same binding path as the VM handler */
 					zval lcname_zv[2];
 					ZVAL_STR(&lcname_zv[0], early_binding->lcname);
