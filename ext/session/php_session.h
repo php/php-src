@@ -132,8 +132,6 @@ typedef struct _php_session_rfc1867_progress {
 
 	zval      data;                 /* the array exported to session data */
 	zval      files;                /* data["files"] array */
-	zval	 *post_bytes_processed; /* data["bytes_processed"] */
-	zval	 *current_file_bytes_processed;
 	zval      current_file;         /* array of currently uploading file */
 } php_session_rfc1867_progress;
 
