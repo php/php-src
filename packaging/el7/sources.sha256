@@ -1,0 +1,11 @@
+6b11b477890a9c096ad856e0251920d1d8b9558b7d115256c027e0223755c793 apcu-5.1.17.tgz https://pecl.php.net/get/apcu-5.1.17.tgz
+40d8e44dbbb6fc3fc019824683d215717413633e5f0a70d34cfa8a09bd064055 apcu_bc-1.0.5.tgz https://pecl.php.net/get/apcu_bc-1.0.5.tgz
+3512d2fab1aee8e37215c83937fbea869a8593e66adcc36400e1ad5a4b657f4a event-2.5.7.tgz https://pecl.php.net/get/event-2.5.7.tgz
+8bf25d465abc7973d9e2c9a3039a5f8eea635b23bc1477017ff3999ff95836da igbinary-3.2.16.tgz https://pecl.php.net/get/igbinary-3.2.16.tgz
+7b7667813baea003671f174bbec849e43ff235a8ea4ab7e36c3a0380c2a9ed63 memcache-4.0.5.2.tgz https://pecl.php.net/get/memcache-4.0.5.2.tgz
+2a41143a7b29f4a962a3805b77aa207a99e4566e2d314ce98a051cd24d6e9636 memcached-3.2.0.tgz https://pecl.php.net/get/memcached-3.2.0.tgz
+95e832c5d48ae6e947bdc79f35a9f8f0bbd518f4aa00f1cef6c9eafbae02187d mongodb-1.9.2.tgz https://pecl.php.net/get/mongodb-1.9.2.tgz
+912ff4d33f323ea7cb04569df5ae23c09ce614412a65c39c2ca11f52802abe82 msgpack-2.1.2.tgz https://pecl.php.net/get/msgpack-2.1.2.tgz
+7af52bc5efea3efa1ba93bb382ce8a2722f618f296c328f84ac9dbe18ea16848 phpiredis-1.0.1.tar.gz https://github.com/nrk/phpiredis/archive/refs/tags/v1.0.1.tar.gz
+b958166ccda4f40bd17c6998f9e2239021ae644467cd8ad5c15def420aad65b0 redis-5.3.7.tgz https://pecl.php.net/get/redis-5.3.7.tgz
+b0f3283aa185c23fcd0137c3aaa58554d330995ef7a3421e983e8d018b05a4a6 xdebug-2.7.2.tgz https://pecl.php.net/get/xdebug-2.7.2.tgz
