@@ -10,6 +10,7 @@ function skipFunction($function): bool {
      || $function === 'exit'
      || $function === 'die'
      || $function === 'zend_trigger_bailout'
+     || $function === 'zend_test_serialization_bailout'
         /* intentionally violate invariants */
      || $function === 'zend_create_unterminated_string'
      || $function === 'zend_test_array_return'

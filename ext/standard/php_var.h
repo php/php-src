@@ -26,6 +26,9 @@ PHPAPI zend_result php_var_export_ex(zval *struc, int level, smart_str *buf);
 
 PHPAPI void php_debug_zval_dump(zval *struc, int level);
 
+/* Reset before request input processing, never during serialization. */
+PHPAPI void php_var_serialization_reset(void);
+
 typedef struct php_serialize_data *php_serialize_data_t;
 typedef struct php_unserialize_data *php_unserialize_data_t;
 

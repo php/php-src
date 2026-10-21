@@ -21,6 +21,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_var.h"
 #include "php_test.h"
 #include "observer.h"
 #include "fiber.h"
@@ -198,6 +199,38 @@ static ZEND_FUNCTION(zend_leak_bytes)
 	}
 
 	emalloc(leakbytes);
+}
+
+static ZEND_FUNCTION(zend_test_serialization_bailout)
+{
+	bool unserialize, locked;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_BOOL(unserialize)
+		Z_PARAM_BOOL(locked)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (unserialize) {
+		(void) php_var_unserialize_init();
+	} else {
+		(void) php_var_serialize_init();
+	}
+	if (locked) {
+		BG(serialize_lock)++;
+	}
+	zend_bailout();
+}
+
+static ZEND_FUNCTION(zend_test_serialization_state)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	array_init(return_value);
+	add_assoc_long(return_value, "lock", BG(serialize_lock));
+	add_assoc_long(return_value, "serialize_level", BG(serialize).level);
+	add_assoc_bool(return_value, "serialize_data", BG(serialize).data != NULL);
+	add_assoc_long(return_value, "unserialize_level", BG(unserialize).level);
+	add_assoc_bool(return_value, "unserialize_data", BG(unserialize).data != NULL);
 }
 
 /* Reallocate a block of old_size bytes to new_size bytes and return its block
