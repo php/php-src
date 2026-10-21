@@ -814,9 +814,12 @@ ZEND_FUNCTION(gmp_import)
 	int order, endian;
 	mpz_ptr gmpnumber;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|ll", &data, &data_len, &size, &options) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_STRING(data, data_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(size)
+		Z_PARAM_LONG(options)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!gmp_import_export_validate(size, options, &order, &endian)) {
 		RETURN_THROWS();
@@ -1561,9 +1564,9 @@ ZEND_FUNCTION(gmp_random_bits)
 	zend_long bits;
 	mpz_ptr gmpnum_result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &bits) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(bits)
+	ZEND_PARSE_PARAMETERS_END();
 
 #if SIZEOF_SIZE_T == 4
 	const zend_long maxbits = ULONG_MAX / GMP_NUMB_BITS;
@@ -1622,9 +1625,12 @@ ZEND_FUNCTION(gmp_setbit)
 	bool set = true;
 	mpz_ptr gmpnum_a;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ol|b", &a_arg, gmp_ce, &index, &set) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_OBJECT_OF_CLASS(a_arg, gmp_ce)
+		Z_PARAM_LONG(index)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(set)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!gmp_is_bit_index_valid(index)) {
 		zend_argument_value_error(2, "must be between 0 and %d * %d", INT_MAX, GMP_NUMB_BITS);
@@ -1648,9 +1654,10 @@ ZEND_FUNCTION(gmp_clrbit)
 	zend_long index;
 	mpz_ptr gmpnum_a;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ol", &a_arg, gmp_ce, &index) == FAILURE){
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_OBJECT_OF_CLASS(a_arg, gmp_ce)
+		Z_PARAM_LONG(index)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!gmp_is_bit_index_valid(index)) {
 		zend_argument_value_error(2, "must be between 0 and %d * %d", INT_MAX, GMP_NUMB_BITS);
