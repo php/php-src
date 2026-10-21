@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.37
 
+- Zip:
+  . Excluded libzip 1.12.0 due to a regression preventing additions and
+    replacements in torrentzip archives. (Weilin Du)
+
 
 
 21 Oct 2026, PHP 8.3.36
