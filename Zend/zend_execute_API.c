@@ -410,6 +410,17 @@ void shutdown_executor(void) /* {{{ */
 		efree(EG(ht_iterators));
 	}
 
+	/* May be accessed by error handling before init_executor(). */
+	ZVAL_UNDEF(&EG(user_error_handler));
+	ZVAL_UNDEF(&EG(user_exception_handler));
+	memset(&EG(user_error_handlers_error_reporting), 0, sizeof(EG(user_error_handlers_error_reporting)));
+	memset(&EG(user_error_handlers), 0, sizeof(EG(user_error_handlers)));
+	memset(&EG(user_exception_handlers), 0, sizeof(EG(user_exception_handlers)));
+	EG(error_handling) = EH_NORMAL;
+	EG(exception) = NULL;
+	EG(objects_store).object_buckets = NULL;
+	EG(objects_store).top = 1;
+
 	EG(active) = 0;
 }
 /* }}} */

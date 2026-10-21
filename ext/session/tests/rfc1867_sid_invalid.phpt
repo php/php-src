@@ -18,7 +18,7 @@ session.upload_progress.name=PHP_SESSION_UPLOAD_PROGRESS
 session.upload_progress.freq=0
 session.save_handler=files
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php die("skip Session upload progress is disabled by the security mitigation"); ?>
 --COOKIE--
 PHPSESSID=_
 --POST_RAW--

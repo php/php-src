@@ -399,6 +399,8 @@ static void apc_init_heap(void)
 
 */
 
+ZEND_API ZEND_COLD ZEND_NORETURN void zend_mm_safe_error_ex(const char *format, ...);
+
 END_EXTERN_C()
 
 #endif

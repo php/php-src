@@ -1,5 +1,23 @@
 PHP 7.1 UPGRADE NOTES
 
+PHP 7.1.34 security changes
+-------------------------
+
+The minimal mitigation for CVE-2026-109618 and CVE-2026-109619 changes failure
+and upload handling:
+
+  . Allocation failure, including memory_limit exhaustion, immediately exits
+    the process. Shutdown functions and destructors do not run. The fatal
+    diagnostic is written directly to stderr. FPM replaces the exited worker.
+  . Session upload progress is disabled even when its INI setting is enabled.
+    Normal sessions and file uploads remain supported.
+  . max_multipart_body_parts defaults to -1, which uses max_input_vars plus
+    max_file_uploads as the multipart part limit. An explicit nonnegative value
+    sets the limit. Empty file controls count towards the limit.
+  . Only the first Content-Disposition and Content-Type headers of each
+    multipart part are retained. Other headers and duplicates are ignored.
+
+
 1. Backward Incompatible Changes
 2. New Features
 3. Changes in SAPI modules

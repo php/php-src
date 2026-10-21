@@ -2,7 +2,17 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.1.34
 
+- Core:
+  . Backported the minimal end-of-life mitigation for CVE-2026-109618 and
+    CVE-2026-109619 from PHP 7.4. Allocation failure now terminates the process
+    without running request cleanup callbacks. Request state is reset before
+    heap reuse, and input arrays initially allocate a single bucket.
+  . Limited multipart body parts and retained multipart headers. The new
+    max_multipart_body_parts directive defaults to max_input_vars plus
+    max_file_uploads. Empty file controls count towards the limit.
 
+- Session:
+  . Disabled session upload progress as part of the security mitigation.
 
 24 Oct 2019, PHP 7.1.33
 
