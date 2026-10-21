@@ -1,0 +1,23 @@
+name: GH-24497 PHP regression tests
+on:
+  push:
+    branches: [fix-gh-24497-hard-limit-default]
+  workflow_dispatch:
+jobs:
+  build-and-test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PHP build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential autoconf bison re2c pkg-config
+      - name: Build PHP CLI
+        run: |
+          ./buildconf --force
+          ./configure --disable-all --enable-cli --enable-debug
+          make -j2
+      - name: Run focused PHPT regression tests
+        run: |
+          sapi/cli/php run-tests.php -q Zend/tests/memory_hard_limit_percent_default.phpt Zend/tests/memory_hard_limit_percent_runtime.phpt
