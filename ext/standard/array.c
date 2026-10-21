@@ -3696,9 +3696,30 @@ PHP_FUNCTION(array_unshift)
 		Z_PARAM_VARIADIC('+', args, argc)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_hash_init(&new_hash, zend_hash_num_elements(Z_ARRVAL_P(stack)) + argc, NULL, ZVAL_PTR_DTOR, 0);
+	HashTable *ht = Z_ARRVAL_P(stack);
+	uint32_t new_count = zend_hash_num_elements(ht) + argc;
 
-	if (HT_IS_PACKED(Z_ARRVAL_P(stack))) {
+	/* The rebuild below allocates the smallest power of two that fits new_count,
+	 * but at least HT_MIN_SIZE slots. If the current table has that size, a
+	 * packed array without holes can be shifted in place instead. */
+	bool same_table_size = new_count <= ht->nTableSize
+		&& (new_count > ht->nTableSize / 2 || ht->nTableSize == HT_MIN_SIZE);
+
+	if (HT_IS_PACKED(ht) && HT_IS_WITHOUT_HOLES(ht) && !HT_HAS_ITERATORS(ht) && same_table_size) {
+		memmove(ht->arPacked + argc, ht->arPacked, ht->nNumUsed * sizeof(zval));
+		for (uint32_t i = 0; i < argc; i++) {
+			ZVAL_COPY(&ht->arPacked[i], &args[i]);
+		}
+		ht->nNumUsed = new_count;
+		ht->nNumOfElements = new_count;
+		ht->nNextFreeElement = new_count;
+		ht->nInternalPointer = 0;
+		RETURN_LONG(new_count);
+	}
+
+	zend_hash_init(&new_hash, new_count, NULL, ZVAL_PTR_DTOR, 0);
+
+	if (HT_IS_PACKED(ht)) {
 		zend_hash_real_init_packed(&new_hash);
 
 		ZEND_HASH_FILL_PACKED(&new_hash) {
@@ -3707,7 +3728,7 @@ PHP_FUNCTION(array_unshift)
 				ZEND_HASH_FILL_ADD(&args[i]);
 			}
 
-			ZEND_HASH_PACKED_FOREACH_VAL(Z_ARRVAL_P(stack), value) {
+			ZEND_HASH_PACKED_FOREACH_VAL(ht, value) {
 				ZEND_HASH_FILL_ADD(value);
 			} ZEND_HASH_FOREACH_END();
 		} ZEND_HASH_FILL_END();
@@ -3717,7 +3738,7 @@ PHP_FUNCTION(array_unshift)
 			zend_hash_next_index_insert_new(&new_hash, &args[i]);
 		}
 
-		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(stack), key, value) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(ht, key, value) {
 			if (key) {
 				zend_hash_add_new(&new_hash, key, value);
 			} else {
@@ -3726,29 +3747,29 @@ PHP_FUNCTION(array_unshift)
 		} ZEND_HASH_FOREACH_END();
 	}
 
-	if (UNEXPECTED(HT_HAS_ITERATORS(Z_ARRVAL_P(stack)))) {
-		zend_hash_iterators_advance(Z_ARRVAL_P(stack), argc);
-		HT_SET_ITERATORS_COUNT(&new_hash, HT_ITERATORS_COUNT(Z_ARRVAL_P(stack)));
-		HT_SET_ITERATORS_COUNT(Z_ARRVAL_P(stack), 0);
+	if (UNEXPECTED(HT_HAS_ITERATORS(ht))) {
+		zend_hash_iterators_advance(ht, argc);
+		HT_SET_ITERATORS_COUNT(&new_hash, HT_ITERATORS_COUNT(ht));
+		HT_SET_ITERATORS_COUNT(ht, 0);
 	}
 
 	/* replace HashTable data */
-	Z_ARRVAL_P(stack)->pDestructor = NULL;
-	zend_hash_destroy(Z_ARRVAL_P(stack));
+	ht->pDestructor = NULL;
+	zend_hash_destroy(ht);
 
-	HT_FLAGS(Z_ARRVAL_P(stack))          = HT_FLAGS(&new_hash);
-	Z_ARRVAL_P(stack)->nTableSize        = new_hash.nTableSize;
-	Z_ARRVAL_P(stack)->nTableMask        = new_hash.nTableMask;
-	Z_ARRVAL_P(stack)->nNumUsed          = new_hash.nNumUsed;
-	Z_ARRVAL_P(stack)->nNumOfElements    = new_hash.nNumOfElements;
-	Z_ARRVAL_P(stack)->nNextFreeElement  = new_hash.nNextFreeElement;
-	Z_ARRVAL_P(stack)->arData            = new_hash.arData;
-	Z_ARRVAL_P(stack)->pDestructor       = new_hash.pDestructor;
+	HT_FLAGS(ht)          = HT_FLAGS(&new_hash);
+	ht->nTableSize        = new_hash.nTableSize;
+	ht->nTableMask        = new_hash.nTableMask;
+	ht->nNumUsed          = new_hash.nNumUsed;
+	ht->nNumOfElements    = new_hash.nNumOfElements;
+	ht->nNextFreeElement  = new_hash.nNextFreeElement;
+	ht->arData            = new_hash.arData;
+	ht->pDestructor       = new_hash.pDestructor;
 
-	zend_hash_internal_pointer_reset(Z_ARRVAL_P(stack));
+	zend_hash_internal_pointer_reset(ht);
 
 	/* Clean up and return the number of elements in the stack */
-	RETVAL_LONG(zend_hash_num_elements(Z_ARRVAL_P(stack)));
+	RETVAL_LONG(zend_hash_num_elements(ht));
 }
 /* }}} */
 
