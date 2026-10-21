@@ -3245,17 +3245,7 @@ static void ZEND_FASTCALL zend_jit_free_trampoline_helper(zend_function *func)
 static void ZEND_FASTCALL zend_jit_exception_in_interrupt_handler_helper(void)
 {
 	if (EG(exception)) {
-		/* We have to UNDEF result, because ZEND_HANDLE_EXCEPTION is going to free it */
-		const zend_op *throw_op = EG(opline_before_exception);
-
-		if (throw_op
-		 && throw_op->result_type & (IS_TMP_VAR|IS_VAR)
-		 && throw_op->opcode != ZEND_ADD_ARRAY_ELEMENT
-		 && throw_op->opcode != ZEND_ADD_ARRAY_UNPACK
-		 && throw_op->opcode != ZEND_ROPE_INIT
-		 && throw_op->opcode != ZEND_ROPE_ADD) {
-			ZVAL_UNDEF(ZEND_CALL_VAR(EG(current_execute_data), throw_op->result.var));
-		}
+		zend_cleanup_interrupted_op();
 	}
 }
 
