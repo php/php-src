@@ -46,6 +46,10 @@
 
 #include <signal.h>
 
+#ifdef __SANITIZE_ADDRESS__
+# include <sanitizer/asan_interface.h>
+#endif
+
 #if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
 # include <libxml/globals.h>
 # include <libxml/parser.h>
@@ -268,6 +272,124 @@ static ZEND_FUNCTION(zend_test_callback)
 	/* Reachable via unwind exit. */
 	free(p);
 }
+
+#ifdef __SANITIZE_ADDRESS__
+static ZEND_FUNCTION(zend_test_asan_zend_mm)
+{
+	zend_long old_size, new_size;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_LONG(old_size)
+		Z_PARAM_LONG(new_size)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (old_size < 1) {
+		zend_argument_value_error(1, "must be greater than 0");
+		RETURN_THROWS();
+	}
+	if (new_size < 1) {
+		zend_argument_value_error(2, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	zend_mm_heap *heap = zend_mm_startup();
+	char *ptr = zend_mm_alloc(heap, old_size);
+	bool allocated = __asan_region_is_poisoned(ptr, old_size) == NULL;
+	memset(ptr, 0x42, old_size);
+
+	size_t old_capacity = zend_mm_block_size(heap, ptr);
+	/* Unmapped huge allocations need not retain ASan shadow state. */
+	bool old_huge = old_capacity > ZEND_MM_MAX_LARGE_SIZE;
+	char *old_ptr = ptr;
+	ptr = zend_mm_realloc(heap, ptr, new_size);
+	size_t new_capacity = zend_mm_block_size(heap, ptr);
+	bool new_huge = new_capacity > ZEND_MM_MAX_LARGE_SIZE;
+	bool reallocated = __asan_region_is_poisoned(ptr, new_size) == NULL;
+	bool moved = ptr == old_ptr || old_huge || __asan_address_is_poisoned(old_ptr);
+	bool truncated = ptr != old_ptr || old_huge || new_capacity >= old_capacity
+		|| __asan_address_is_poisoned(ptr + old_capacity - 1);
+	bool preserved = true;
+	for (size_t i = 0; i < (size_t) MIN(old_size, new_size); i++) {
+		preserved &= ptr[i] == 0x42;
+	}
+	zend_mm_free(heap, ptr);
+	bool released = new_huge || (__asan_address_is_poisoned(ptr)
+		&& __asan_address_is_poisoned(ptr + new_size - 1));
+	zend_mm_refresh_key_child(heap);
+	bool rekeyed = new_huge || __asan_address_is_poisoned(ptr);
+	ptr = zend_mm_alloc(heap, new_size);
+	bool reused = __asan_region_is_poisoned(ptr, new_size) == NULL;
+	zend_mm_free(heap, ptr);
+	zend_mm_gc(heap);
+	bool collected = new_huge || __asan_address_is_poisoned(ptr);
+
+	ptr = zend_mm_realloc2(heap, NULL, old_size, 0);
+	memset(ptr, 0x24, old_size);
+	ptr = zend_mm_realloc2(heap, ptr, new_size, MIN(old_size, new_size));
+	bool copied = __asan_region_is_poisoned(ptr, new_size) == NULL;
+	for (size_t i = 0; i < (size_t) MIN(old_size, new_size); i++) {
+		copied &= ptr[i] == 0x24;
+	}
+	zend_mm_free(heap, ptr);
+
+	ptr = zend_mm_alloc(heap, old_size);
+	reused &= __asan_region_is_poisoned(ptr, old_size) == NULL;
+	zend_mm_shutdown(heap, false, true);
+	bool reset = old_huge || (__asan_address_is_poisoned(ptr)
+		&& __asan_address_is_poisoned(ptr + old_size - 1));
+	ptr = zend_mm_alloc(heap, old_size);
+	bool restarted = __asan_region_is_poisoned(ptr, old_size) == NULL;
+	zend_mm_free(heap, ptr);
+
+	zend_mm_heap *orig_heap = zend_mm_set_heap(heap);
+	ptr = emalloc(1);
+	bool specialized = __asan_region_is_poisoned(ptr, 1) == NULL;
+	efree_size(ptr, 1);
+	specialized &= __asan_address_is_poisoned(ptr);
+	ptr = emalloc(64);
+	specialized &= __asan_region_is_poisoned(ptr, 64) == NULL;
+	efree_size(ptr, 64);
+	specialized &= __asan_address_is_poisoned(ptr);
+	ptr = emalloc(8192);
+	specialized &= __asan_region_is_poisoned(ptr, 8192) == NULL;
+	efree_size(ptr, 8192);
+	specialized &= __asan_address_is_poisoned(ptr);
+	zend_mm_set_heap(orig_heap);
+
+	char *blocks[4];
+	for (size_t i = 0; i < 4; i++) {
+		blocks[i] = zend_mm_alloc(heap, 1024 * 1024);
+		memset(blocks[i], 0x42, 1024 * 1024);
+	}
+	zend_mm_shutdown(heap, false, true);
+	bool cached = true;
+	for (size_t i = 0; i < 4; i++) {
+		blocks[i] = zend_mm_alloc(heap, 1024 * 1024);
+		cached &= __asan_region_is_poisoned(blocks[i], 1024 * 1024) == NULL;
+		memset(blocks[i], 0x24, 1024 * 1024);
+	}
+	for (size_t i = 0; i < 4; i++) {
+		zend_mm_free(heap, blocks[i]);
+	}
+	zend_mm_shutdown(heap, true, true);
+
+	array_init(return_value);
+	add_assoc_bool(return_value, "allocated", allocated);
+	add_assoc_bool(return_value, "reallocated", reallocated);
+	add_assoc_bool(return_value, "moved", moved);
+	add_assoc_bool(return_value, "truncated", truncated);
+	add_assoc_bool(return_value, "preserved", preserved);
+	add_assoc_bool(return_value, "released", released);
+	add_assoc_bool(return_value, "rekeyed", rekeyed);
+	add_assoc_bool(return_value, "collected", collected);
+	add_assoc_bool(return_value, "reused", reused);
+	add_assoc_bool(return_value, "copied", copied);
+	add_assoc_bool(return_value, "reset", reset);
+	add_assoc_bool(return_value, "restarted", restarted);
+	add_assoc_bool(return_value, "specialized", specialized);
+	add_assoc_bool(return_value, "cached", cached);
+}
+#endif
 
 /* Leak a refcounted variable */
 static ZEND_FUNCTION(zend_leak_variable)
