@@ -83,6 +83,25 @@ The test runner can run tests in parallel, by using the ``-j`` option:
 
    php run-tests.php -j24 ext/date/*.phpt
 
+Testing ZendMM No-Reuse Mode
+============================
+
+The ``ZEND_MM_NO_REUSE`` environment option is documented in the `Zend memory-manager README
+<https://github.com/php/php-src/blob/master/Zend/README.md#request-scoped-no-reuse-mode>`__. Build
+with ``--enable-zend-test`` and run its dedicated regression tests:
+
+.. code:: shell
+
+   sapi/cli/php run-tests.php Zend/tests/zend_mm_no_reuse_*.phpt \
+       ext/zend_test/tests/zend_mm_no_reuse.phpt
+
+These tests enable the mode in their own test processes. They check address-range non-overlap,
+clearing, reallocations, GC, repeated heap shutdown, memory accounting, and incompatible
+configurations.
+
+Most ordinary tests should still be run in the default allocator mode; tests relying on allocation
+recycling or bounded memory usage can behave differently with no-reuse enabled.
+
 **************
  Test results
 **************
