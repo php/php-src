@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: 55c444ca86bbbd773e43ddb6bd470efb371c45a4
+ * Stub hash: a541ec4d43e8dfb243636d2517436196e337047e
  * Has decl header: yes */
 
 #include "zend_constants.h"
@@ -62,6 +62,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_test_erealloc_block_size, 0, 0, 2)
 	ZEND_ARG_INFO(0, old_size)
 	ZEND_ARG_INFO(0, new_size)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_test_serialization_bailout, 0, 0, 2)
+	ZEND_ARG_INFO(0, unserialize)
+	ZEND_ARG_INFO(0, locked)
+ZEND_END_ARG_INFO()
+
+#define arginfo_zend_test_serialization_state arginfo_zend_trigger_bailout
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_bool, 0, 0, 1)
 	ZEND_ARG_INFO(0, param)
@@ -397,6 +404,8 @@ static ZEND_FUNCTION(zend_leak_variable);
 static ZEND_FUNCTION(zend_leak_bytes);
 static ZEND_FUNCTION(zend_delref);
 static ZEND_FUNCTION(zend_test_erealloc_block_size);
+static ZEND_FUNCTION(zend_test_serialization_bailout);
+static ZEND_FUNCTION(zend_test_serialization_state);
 static ZEND_FUNCTION(zend_bool);
 static ZEND_FUNCTION(zend_bool_or_null);
 static ZEND_FUNCTION(zend_bool_slow_zpp);
@@ -553,6 +562,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_leak_bytes, arginfo_zend_leak_bytes)
 	ZEND_FE(zend_delref, arginfo_zend_delref)
 	ZEND_FE(zend_test_erealloc_block_size, arginfo_zend_test_erealloc_block_size)
+	ZEND_FE(zend_test_serialization_bailout, arginfo_zend_test_serialization_bailout)
+	ZEND_FE(zend_test_serialization_state, arginfo_zend_test_serialization_state)
 	ZEND_FE(zend_bool, arginfo_zend_bool)
 	ZEND_FE(zend_bool_or_null, arginfo_zend_bool_or_null)
 	ZEND_FE(zend_bool_slow_zpp, arginfo_zend_bool_slow_zpp)
