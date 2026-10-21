@@ -51,6 +51,8 @@ PHP                                                                        NEWS
 
 - FTP:
   . Fix double free in ext/ftp data_accept() on accept failure. (alepacheco)
+  . Fixed crash in ftp_nb_continue() after ftp_nb_get() failed to abort a
+    pending transfer. (Jakub Kozub)
 
 - MBString:
   . Fixed bug GH-23958 (truncated encoding names resolving to full names). (Kamil Tekiela)
