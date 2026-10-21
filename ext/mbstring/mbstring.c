@@ -607,8 +607,10 @@ static char *php_mb_rfc1867_getword(const zend_encoding *encoding, char **line, 
 				++pos;
 			}
 		} else {
-			pos += php_mb_mbchar_bytes(pos, (const mbfl_encoding *)encoding);
-
+			size_t len = php_mb_mbchar_bytes(pos, (const mbfl_encoding *)encoding);
+			while (len-- > 0 && *pos) {
+				++pos;
+			}
 		}
 	}
 	if (*pos == '\0') {
@@ -620,7 +622,10 @@ static char *php_mb_rfc1867_getword(const zend_encoding *encoding, char **line, 
 	res = estrndup(*line, pos - *line);
 
 	while (*pos == stop) {
-		pos += php_mb_mbchar_bytes(pos, (const mbfl_encoding *)encoding);
+		size_t len = php_mb_mbchar_bytes(pos, (const mbfl_encoding *)encoding);
+		while (len-- > 0 && *pos) {
+			++pos;
+		}
 	}
 
 	*line = pos;
