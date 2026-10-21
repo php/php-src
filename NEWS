@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.1.34
+21 Oct 2026, PHP 7.1.34
 
 - Core:
   . Backported the minimal end-of-life mitigation for CVE-2026-109618 and
