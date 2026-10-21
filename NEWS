@@ -125,6 +125,10 @@ PHP                                                                        NEWS
   . Don't share the unserialize() context with enum autoloaders.
     (Nicolas Grekas)
 
+- Streams:
+  . Fixed bug GH-24508 (HTTP wrapper leaks the dechunk filter when header
+    parsing fails after Transfer-Encoding). (bercedev)
+
 - Tidy:
   . Fixed tidy_repair_string(), tidy_repair_file(), tidy::repairString() and
     tidy::repairFile() rejecting null for $encoding. (lacatoire)
