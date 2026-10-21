@@ -13683,6 +13683,9 @@ static int zend_jit_assign_dim_op(zend_jit_ctx   *jit,
 		ir_MERGE_list(end_inputs);
 	}
 
+	if (opline->extended_value == ZEND_CONCAT) {
+		op1_data_info |= MAY_BE_RCN;
+	}
 	jit_FREE_OP(jit, (opline+1)->op1_type, (opline+1)->op1, op1_data_info, NULL);
 	jit_FREE_OP(jit, opline->op2_type, opline->op2, op2_info, NULL);
 	if (may_throw) {
