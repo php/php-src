@@ -204,6 +204,8 @@ typedef struct _php_ps_globals {
 	bool set_handler;     /* state if session module i setting handler or not */
 	bool random_seeded;
 	zend_string *session_vars; /* serialized original session data */
+
+	bool in_rfc1867_update;    /* php_session_rfc1867_update() is running */
 } php_ps_globals;
 
 typedef php_ps_globals zend_ps_globals;

@@ -459,6 +459,7 @@ void init_compiler(void) /* {{{ */
 	CG(delayed_autoloads) = NULL;
 	CG(unlinked_uses) = NULL;
 	CG(current_linking_class) = NULL;
+	CG(interned_strings_fallible) = false;
 }
 /* }}} */
 

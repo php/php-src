@@ -9,11 +9,6 @@ zend_test.observer.observe_all=1
 zend_test.observer.fiber_init=1
 zend_test.observer.fiber_switch=1
 zend_test.observer.fiber_destroy=1
-memory_limit=100M
---SKIPIF--
-<?php
-if (getenv("USE_ZEND_ALLOC") === "0") die("skip requires ZendMM because it uses the memory limit");
-?>
 --FILE--
 <?php
 
@@ -27,7 +22,7 @@ $notBailedOutFiber->start();
 $fiber = new Fiber(function (): void {
     var_dump(2);
     Fiber::suspend();
-    str_repeat('A', 200_000_000);
+    var_dump(new class { public function __debugInfo() { return ''; } }); // cause a bailout
 });
 
 $fiber->start();
@@ -76,11 +71,13 @@ int(2)
 <!-- switching from fiber %s to %s -->
 <resume '%s'>
           </Fiber::suspend>
-          <!-- init str_repeat() -->
-          <str_repeat>
+          <var_dump>
+            <!-- init class@anonymous::__debugInfo() -->
+            <class@anonymous::__debugInfo>
+            </class@anonymous::__debugInfo>
 
-Fatal error: Allowed memory size of 104857600 bytes exhausted %s on line %d
-          </str_repeat>
+Fatal error: __debuginfo() must return an array in %s on line %d
+          </var_dump>
         </{closure:%s:%d}>
 <!-- switching from fiber %s to %s -->
 <returned '%s'>

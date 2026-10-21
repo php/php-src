@@ -79,7 +79,8 @@ static void observer_begin(zend_execute_data *execute_data)
 {
 	assert_observer_opline(execute_data);
 
-	if (ZT_G(observer_set_vm_interrupt_on_begin)) {
+	if (ZT_G(observer_set_vm_interrupt_on_begin)
+	 || ZT_G(observer_set_vm_interrupt_on_begin_without_callback)) {
 		zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
 	}
 
@@ -375,6 +376,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_opcode", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_opcode, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_ENTRY("zend_test.observer.show_opcode_in_user_handler", "", PHP_INI_SYSTEM, OnUpdateString, observer_show_opcode_in_user_handler, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.set_vm_interrupt_on_begin", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_set_vm_interrupt_on_begin, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_BOOLEAN("zend_test.observer.set_vm_interrupt_on_begin_without_callback", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_set_vm_interrupt_on_begin_without_callback, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.fiber_init", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_fiber_init, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.fiber_switch", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_fiber_switch, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.fiber_destroy", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_fiber_destroy, zend_zend_test_globals, zend_test_globals)

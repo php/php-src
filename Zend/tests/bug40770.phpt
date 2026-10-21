@@ -16,9 +16,9 @@ if ($zend_mm_enabled === "0") {
 <?php
 ini_set('display_errors',true);
 $mb=148;
-$var = '';
+$var = [];
 for ($i=0; $i<=$mb; $i++) {
-        $var.= str_repeat('a',1*1024*1024);
+        $var[] = str_repeat('a',1*1024*1024);
 }
 ?>
 --EXPECTF--

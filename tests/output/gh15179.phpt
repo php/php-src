@@ -15,4 +15,4 @@ $var = str_repeat('a', 20 * 1024 * 1024);
 output_add_rewrite_var($var, $var);
 ?>
 --EXPECTF--
-Fatal error: Allowed memory size of %d bytes exhausted %s
+%rHard memory limit|Fatal error: Allowed memory size%r of %d bytes exhausted%s(tried to allocate %d bytes) in %s on line %d%r(\n\nTermsig=9)?%r

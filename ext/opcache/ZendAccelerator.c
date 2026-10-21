@@ -619,10 +619,13 @@ static zend_string* ZEND_FASTCALL accel_init_interned_string_for_php(const char 
 			return ret;
 		}
 
-		ret = zend_string_init(str, size, permanent);
+		ret = zend_string_finit(str, size, permanent, CG(interned_strings_fallible));
+		if (UNEXPECTED(!ret)) {
+			return NULL;
+		}
 		ZSTR_H(ret) = h;
 	} else {
-		ret = zend_string_init(str, size, permanent);
+		ret = zend_string_finit(str, size, permanent, CG(interned_strings_fallible));
 	}
 
 #if ZEND_RC_DEBUG
@@ -2428,6 +2431,7 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 	}
 
 	zend_map_ptr_extend(ZCSG(map_ptr_last));
+	zend_accel_pending_ce_cache_begin();
 
 #if ZEND_MM_NEED_EIGHT_BYTE_REALIGNMENT
 	/* Align to 8-byte boundary */
@@ -2488,6 +2492,8 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 	ZCSG(map_ptr_last) = CG(map_ptr_last);
 	ZEND_ATOMIC_FENCE_RELEASE();
 	proto->inheritance_cache = entry;
+
+	zend_accel_pending_ce_cache_commit();
 
 	zend_shared_alloc_destroy_xlat_table();
 
@@ -2808,6 +2814,9 @@ zend_result accel_post_deactivate(void)
 		zend_string_release_ex(ZCG(cwd), 0);
 		ZCG(cwd) = NULL;
 	}
+
+	/* A persist window left through a bailout never published its slots */
+	zend_accel_pending_ce_cache_discard();
 
 	if (!ZCG(enabled) || !accel_startup_ok) {
 		return SUCCESS;
@@ -4855,6 +4864,7 @@ static zend_result accel_finish_startup_preload(bool in_child)
 	EG(error_reporting) = 0;
 
 	const zend_result rc = php_request_startup();
+	zend_mm_set_max_allocs(0);
 
 	EG(error_reporting) = orig_error_reporting;
 
