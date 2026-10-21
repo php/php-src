@@ -1663,6 +1663,10 @@ PHP_FUNCTION(mb_str_split)
 		RETURN_THROWS();
 	}
 
+	if (split_len > ZSTR_LEN(str)) {
+		split_len = ZSTR_LEN(str);
+	}
+
 	const mbfl_encoding *enc = php_mb_get_encoding(encoding, 3);
 	if (!enc) {
 		RETURN_THROWS();
@@ -1678,16 +1682,23 @@ PHP_FUNCTION(mb_str_split)
 	if (char_len) {
 		unsigned int chunk_len = char_len * split_len;
 		unsigned int chunks = ((ZSTR_LEN(str) / chunk_len) + split_len - 1) / split_len; /* round up */
-		array_init_size(return_value, chunks);
+		if (UNEXPECTED(!array_finit_size_packed(return_value, chunks))) {
+			RETURN_OOM();
+		}
 		while (p < e) {
 			add_next_index_stringl(return_value, (const char*)p, MIN(chunk_len, e - p));
 			p += chunk_len;
+			if (ZEND_HAS_OOM()) {
+				RETURN_OOM();
+			}
 		}
 	} else if (enc->mblen_table) {
 		unsigned char const *mbtab = enc->mblen_table;
 
 		/* Assume that we have 1-byte characters */
-		array_init_size(return_value, (ZSTR_LEN(str) + split_len - 1) / split_len);
+		if (UNEXPECTED(!array_finit_size_packed(return_value, (ZSTR_LEN(str) + split_len - 1) / split_len))) {
+			RETURN_OOM();
+		}
 
 		while (p < e) {
 			unsigned char *chunk = p; /* start of chunk */
@@ -1699,10 +1710,15 @@ PHP_FUNCTION(mb_str_split)
 				p = e; /* ensure chunk is in bounds */
 			}
 			add_next_index_stringl(return_value, (const char*)chunk, p - chunk);
+			if (ZEND_HAS_OOM()) {
+				RETURN_OOM();
+			}
 		}
 	} else {
 		/* Assume that we have 1-byte characters */
-		array_init_size(return_value, (ZSTR_LEN(str) + split_len - 1) / split_len);
+		if (UNEXPECTED(!array_finit_size_packed(return_value, (ZSTR_LEN(str) + split_len - 1) / split_len))) {
+			RETURN_OOM();
+		}
 
 		uint32_t wchar_buf[128];
 		size_t in_len = ZSTR_LEN(str);
@@ -1711,6 +1727,10 @@ PHP_FUNCTION(mb_str_split)
 		mb_convert_buf buf;
 
 		while (in_len) {
+			if (ZEND_HAS_OOM()) {
+				RETURN_OOM();
+			}
+
 			size_t out_len = enc->to_wchar(&p, &in_len, wchar_buf, 128, &state);
 			ZEND_ASSERT(out_len <= 128);
 			size_t i = 0;
@@ -1734,6 +1754,10 @@ PHP_FUNCTION(mb_str_split)
 			}
 
 			while (i < out_len) {
+				if (ZEND_HAS_OOM()) {
+					RETURN_OOM();
+				}
+
 				/* Prepare for the next chunk */
 				mb_convert_buf_init(&buf, split_len, MBSTRG(current_filter_illegal_substchar), MBSTRG(current_filter_illegal_mode));
 
@@ -2503,8 +2527,10 @@ PHP_FUNCTION(mb_strcut)
 	}
 
 	ret = mbfl_strcut(&string, &result, from, len);
-	ZEND_ASSERT(ret != NULL);
-	RETVAL_STRINGL((char *)ret->val, ret->len); /* the string is already strdup()'ed */
+	if (UNEXPECTED(ret == NULL)) {
+		RETURN_OOM();
+	}
+	RETVAL_FSTRINGL((char *)ret->val, ret->len); /* the string is already strdup()'ed */
 	efree(ret->val);
 }
 /* }}} */
@@ -2677,7 +2703,9 @@ dont_restart_conversion:
 
 append_trim_marker:
 	if (ZSTR_LEN(marker) > 0) {
-		MB_CONVERT_BUF_ENSURE((&buf), buf.out, buf.limit, ZSTR_LEN(marker));
+		if (!MB_CONVERT_BUF_ENSURE_EX((&buf), buf.out, buf.limit, ZSTR_LEN(marker))) {
+			return mb_convert_buf_result(&buf, enc);
+		}
 		buf.out = zend_mempcpy(buf.out, ZSTR_VAL(marker), ZSTR_LEN(marker));
 	}
 
@@ -2734,7 +2762,12 @@ PHP_FUNCTION(mb_strimwidth)
 		}
 	}
 
-	RETVAL_STR(mb_trim_string(str, trimmarker, enc, from, width));
+	zend_string *ret = mb_trim_string(str, trimmarker, enc, from, width);
+	if (UNEXPECTED(ret == NULL)) {
+		RETURN_OOM();
+	}
+
+	RETVAL_STR(ret);
 }
 
 
@@ -3838,6 +3871,9 @@ static bool mb_recursive_convert_variable(uint32_t arg_num, zval *var, const mbf
 		zend_string *ret = php_mb_convert_encoding_ex(Z_STRVAL_P(var), Z_STRLEN_P(var), to_encoding, from_encoding);
 		zval_ptr_dtor(orig_var);
 		ZVAL_STR(orig_var, ret);
+		if (ZEND_HAS_OOM()) {
+			return true;
+		}
 	} else if (Z_TYPE_P(var) == IS_ARRAY || Z_TYPE_P(var) == IS_OBJECT) {
 		if (Z_TYPE_P(var) == IS_OBJECT) {
 			php_error_docref(NULL, E_DEPRECATED,
@@ -4719,6 +4755,9 @@ PHP_FUNCTION(mb_send_mail)
 	size_t line_sep_len = strlen(line_sep);
 
 	subject = mb_mime_header_encode(subject, enc, tran_cs, head_enc == &mbfl_encoding_base64, (char*)line_sep, line_sep_len, strlen("Subject: [PHP-jp nnnnnnnn]") + line_sep_len);
+	if (UNEXPECTED(!subject)) {
+		RETURN_OOM();
+	}
 
 	/* message body */
 	const mbfl_encoding *msg_enc = MBSTRG(current_internal_encoding);
@@ -6024,7 +6063,12 @@ PHP_FUNCTION(mb_str_pad)
 		goto overflow;
 	}
 
-	zend_string *result = zend_string_alloc(ZSTR_LEN(input) + left_pad_bytes + right_pad_bytes, false);
+	zend_string *result = zend_string_safe_falloc(1, ZSTR_LEN(input), left_pad_bytes + right_pad_bytes, false, /* fallible */ true);
+	if (UNEXPECTED(!result)) {
+		zend_string_release_ex(remaining_left_pad_str, false);
+		zend_string_release_ex(remaining_right_pad_str, false);
+		RETURN_OOM();
+	}
 	char *buffer = ZSTR_VAL(result);
 
 	/* First we pad the left. */
@@ -6375,13 +6419,17 @@ no_passthrough: ;
 				 * right now */
 feed_and_mime_encode:
 				if (mb_convert_buf_len(&buf) - line_start + indent + strlen(outcode->mime_name) > 55) {
-					MB_CONVERT_BUF_ENSURE(&buf, buf.out, buf.limit, (e - word_start) + linefeed_len + 1);
+					if (!MB_CONVERT_BUF_ENSURE_EX(&buf, buf.out, buf.limit, (e - word_start) + linefeed_len + 1)) {
+						return NULL;
+					}
 					buf.out = mb_convert_buf_appendn(buf.out, linefeed, linefeed_len);
 					buf.out = mb_convert_buf_add(buf.out, ' ');
 					indent = 0;
 					line_start = mb_convert_buf_len(&buf);
 				} else if (mb_convert_buf_len(&buf) > 0) {
-					MB_CONVERT_BUF_ENSURE(&buf, buf.out, buf.limit, 1);
+					if (!MB_CONVERT_BUF_ENSURE_EX(&buf, buf.out, buf.limit, 1)) {
+						return NULL;
+					}
 					buf.out = mb_convert_buf_add(buf.out, ' ');
 				}
 				p = word_start; /* Back up to where MIME encoding of input chars should start */
@@ -6389,13 +6437,17 @@ feed_and_mime_encode:
 			} else if (w == ' ') {
 				/* When we see a space, check whether we should insert a line break */
 				if (mb_convert_buf_len(&buf) - line_start + (p - word_start) + indent > 75) {
-					MB_CONVERT_BUF_ENSURE(&buf, buf.out, buf.limit, (e - word_start) + linefeed_len + 1);
+					if (!MB_CONVERT_BUF_ENSURE_EX(&buf, buf.out, buf.limit, (e - word_start) + linefeed_len + 1)) {
+						return NULL;
+					}
 					buf.out = mb_convert_buf_appendn(buf.out, linefeed, linefeed_len);
 					buf.out = mb_convert_buf_add(buf.out, ' ');
 					indent = 0;
 					line_start = mb_convert_buf_len(&buf);
 				} else if (mb_convert_buf_len(&buf) > 0) {
-					MB_CONVERT_BUF_ENSURE(&buf, buf.out, buf.limit, (e - word_start) + 1);
+					if (!MB_CONVERT_BUF_ENSURE_EX(&buf, buf.out, buf.limit, (e - word_start) + 1)) {
+						return NULL;
+					}
 					buf.out = mb_convert_buf_add(buf.out, ' ');
 				}
 				/* Output one (space-delimited) word as plain ASCII */
@@ -6430,11 +6482,15 @@ feed_and_mime_encode:
 				 * consider adding a line feed if necessary to prevent output lines from
 				 * being too long */
 				if (mb_convert_buf_len(&buf) - line_start + (p - word_start) + indent > 74) {
-					MB_CONVERT_BUF_ENSURE(&buf, buf.out, buf.limit, (e - word_start) + linefeed_len + 1);
+					if (!MB_CONVERT_BUF_ENSURE_EX(&buf, buf.out, buf.limit, (e - word_start) + linefeed_len + 1)) {
+						return NULL;
+					}
 					buf.out = mb_convert_buf_appendn(buf.out, linefeed, linefeed_len);
 					buf.out = mb_convert_buf_add(buf.out, ' ');
 				} else {
-					MB_CONVERT_BUF_ENSURE(&buf, buf.out, buf.limit, (e - word_start) + 1);
+					if (!MB_CONVERT_BUF_ENSURE_EX(&buf, buf.out, buf.limit, (e - word_start) + 1)) {
+						return NULL;
+					}
 					buf.out = mb_convert_buf_add(buf.out, ' ');
 				}
 			}
@@ -6474,7 +6530,9 @@ refill_wchar_buf: ;
 		e = wchar_buf + offset + out_len;
 
 start_new_line: ;
-		MB_CONVERT_BUF_ENSURE(&buf, buf.out, buf.limit, strlen(outcode->mime_name) + 5);
+		if (!MB_CONVERT_BUF_ENSURE_EX(&buf, buf.out, buf.limit, strlen(outcode->mime_name) + 5)) {
+			return NULL;
+		}
 		buf.out = mb_convert_buf_add2(buf.out, '=', '?');
 		buf.out = mb_convert_buf_appends(buf.out, outcode->mime_name);
 		buf.out = mb_convert_buf_add3(buf.out, '?', base64 ? 'B' : 'Q', '?');
@@ -6516,7 +6574,9 @@ start_new_line: ;
 					 * of the input string which needs to be processed */
 					ZEND_ASSERT(!in_len);
 					transfer_encode_mime_bytes(&tmpbuf, &buf, base64);
-					MB_CONVERT_BUF_ENSURE(&buf, buf.out, buf.limit, 2);
+					if (!MB_CONVERT_BUF_ENSURE_EX(&buf, buf.out, buf.limit, 2)) {
+						return NULL;
+					}
 					buf.out = mb_convert_buf_add2(buf.out, '?', '=');
 					mb_convert_buf_free(&tmpbuf);
 					return mb_convert_buf_result(&buf, &mbfl_encoding_utf8);
@@ -6539,7 +6599,9 @@ start_new_line: ;
 					transfer_encode_mime_bytes(&tmpbuf, &buf, base64);
 					tmpbuf.state = 0;
 
-					MB_CONVERT_BUF_ENSURE(&buf, buf.out, buf.limit, 3 + linefeed_len);
+					if (!MB_CONVERT_BUF_ENSURE_EX(&buf, buf.out, buf.limit, 3 + linefeed_len)) {
+						return NULL;
+					}
 					buf.out = mb_convert_buf_add2(buf.out, '?', '=');
 
 					indent = 0; /* Indent argument must only affect the first line */
@@ -6616,7 +6678,12 @@ PHP_FUNCTION(mb_encode_mimeheader)
 		}
 	}
 
-	RETURN_STR(mb_mime_header_encode(str, MBSTRG(current_internal_encoding), charset, base64, linefeed, linefeed_len, indent));
+	zend_string *ret = mb_mime_header_encode(str, MBSTRG(current_internal_encoding), charset, base64, linefeed, linefeed_len, indent);
+	if (UNEXPECTED(ret == NULL)) {
+		RETURN_OOM();
+	}
+
+	RETURN_STR(ret);
 }
 
 static int8_t decode_base64(unsigned char c)

@@ -907,6 +907,9 @@ U_CFUNC PHP_FUNCTION(grapheme_str_split)
 		if (i == split_len - 1) {
 			if ( pos != UBRK_DONE ) {
 				add_next_index_stringl(return_value, pstr, pos - current);
+				if (ZEND_HAS_OOM()) {
+					goto oom;
+				}
 				end = pstr + pos - current;
 				i = 0;
 				pstr += pos - current;
@@ -923,6 +926,12 @@ U_CFUNC PHP_FUNCTION(grapheme_str_split)
 
 	utext_close(ut);
 	ubrk_close(bi);
+	return;
+
+oom:
+	utext_close(ut);
+	ubrk_close(bi);
+	RETURN_OOM();
 }
 
 U_CFUNC PHP_FUNCTION(grapheme_levenshtein)
@@ -992,6 +1001,9 @@ U_CFUNC PHP_FUNCTION(grapheme_levenshtein)
 
 	intl_convert_utf8_to_utf16(&ustring1, &ustring1_len, pstr1, ZSTR_LEN(string1), &ustatus);
 
+	if (ZEND_HAS_OOM()) {
+		goto out_ustring1;
+	}
 	if (U_FAILURE(ustatus)) {
 		intl_error_set_code(NULL, ustatus);
 
@@ -1002,6 +1014,9 @@ U_CFUNC PHP_FUNCTION(grapheme_levenshtein)
 
 	intl_convert_utf8_to_utf16(&ustring2, &ustring2_len, pstr2, ZSTR_LEN(string2), &ustatus);
 
+	if (ZEND_HAS_OOM()) {
+		goto out_ustring2;
+	}
 	if (U_FAILURE(ustatus)) {
 		intl_error_set_code(NULL, ustatus);
 
@@ -1072,8 +1087,15 @@ U_CFUNC PHP_FUNCTION(grapheme_levenshtein)
 	}
 
 	zend_long *p1, *p2, *tmp;
-	p1 = reinterpret_cast<zend_long *>(safe_emalloc((size_t) strlen_2 + 1, sizeof(zend_long), 0));
-	p2 = reinterpret_cast<zend_long *>(safe_emalloc((size_t) strlen_2 + 1, sizeof(zend_long), 0));
+	p1 = reinterpret_cast<zend_long *>(safe_femalloc((size_t) strlen_2 + 1, sizeof(zend_long), 0, /* fallible */ true));
+	if (!p1) {
+		goto out_collator;
+	}
+	p2 = reinterpret_cast<zend_long *>(safe_femalloc((size_t) strlen_2 + 1, sizeof(zend_long), 0, /* fallible */ true));
+	if (!p2) {
+		efree(p1);
+		goto out_collator;
+	}
 
 	for (i2 = 0; i2 <= strlen_2; i2++) {
 		p1[i2] = i2 * cost_ins;

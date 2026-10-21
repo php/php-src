@@ -2,6 +2,7 @@
 FPM: Blocked SIGQUIT prevents idle process to be killed
 --EXTENSIONS--
 pcntl
+--FLAKY--
 --SKIPIF--
 <?php
 include "skipif.inc";

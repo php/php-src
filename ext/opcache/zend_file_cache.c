@@ -1942,6 +1942,7 @@ zend_persistent_script *zend_file_cache_script_load_ex(zend_file_handle *file_ha
 	bool cache_it = true;
 	unsigned int actual_checksum;
 	bool ok;
+	size_t orig_map_ptr_last = 0;
 
 	if (!full_path) {
 		return NULL;
@@ -2093,6 +2094,8 @@ zend_persistent_script *zend_file_cache_script_load_ex(zend_file_handle *file_ha
 		}
 		memcpy(buf, mem, info.mem_size);
 		zend_map_ptr_extend(ZCSG(map_ptr_last));
+		orig_map_ptr_last = CG(map_ptr_last);
+		zend_accel_pending_ce_cache_begin();
 	} else {
 use_process_mem:
 		buf = mem;
@@ -2111,6 +2114,10 @@ use_process_mem:
 	} zend_end_try();
 	if (!ok) {
 		if (cache_it) {
+			/* The slots allocated by the failed unserialization are referenced
+			 * only by the abandoned buffer, so they can be reclaimed. */
+			zend_accel_pending_ce_cache_discard();
+			CG(map_ptr_last) = orig_map_ptr_last;
 			zend_shared_alloc_unlock();
 			goto use_process_mem;
 		} else {
@@ -2124,6 +2131,7 @@ use_process_mem:
 
 	if (cache_it) {
 		ZCSG(map_ptr_last) = CG(map_ptr_last);
+		zend_accel_pending_ce_cache_commit();
 		script->dynamic_members.last_used = ZCG(request_time);
 
 		zend_accel_hash_update(&ZCSG(hash), script->script.filename, 0, script);
