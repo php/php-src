@@ -26,6 +26,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-24321 (ZTS: global_map_ptr_last survives zend_shutdown(),
     so an in-process engine restart keeps growing the map_ptr table).
     (David Carlier)
+  . Fixed bug GH-11709 (Line breaks in quoted strings fail with
+    INI_SCANNER_RAW). (Chris Smith)
 
 - Date:
   . Fixed bug GH-20503 (Assertion failure with ext/date DateInterval property
