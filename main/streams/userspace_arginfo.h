@@ -2,6 +2,7 @@
  * Stub hash: 9198095c858c95fcb31252ddfa24fe04787d0460 */
 
 #include "zend_constants.h"
+BEGIN_EXTERN_C()
 
 static void register_userspace_symbols(int module_number)
 {
@@ -29,3 +30,5 @@ static void register_userspace_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("STREAM_META_GROUP_NAME", PHP_STREAM_META_GROUP_NAME, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_META_ACCESS", PHP_STREAM_META_ACCESS, CONST_PERSISTENT);
 }
+
+END_EXTERN_C()

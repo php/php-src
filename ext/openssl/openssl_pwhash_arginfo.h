@@ -4,6 +4,7 @@
 #if defined(HAVE_OPENSSL_ARGON2)
 #include "zend_constants.h"
 #endif
+BEGIN_EXTERN_C()
 
 static void register_openssl_pwhash_symbols(int module_number)
 {
@@ -16,3 +17,5 @@ static void register_openssl_pwhash_symbols(int module_number)
 	REGISTER_STRING_CONSTANT("PASSWORD_ARGON2_PROVIDER", "openssl", CONST_PERSISTENT);
 #endif
 }
+
+END_EXTERN_C()

@@ -3,6 +3,7 @@
 
 #ifndef ZEND_SNMP_DECL_9a32b308176289c1b1475524372a69257f464bd4_H
 #define ZEND_SNMP_DECL_9a32b308176289c1b1475524372a69257f464bd4_H
+BEGIN_EXTERN_C()
 
 typedef enum zend_enum_Snmp_Mib {
 	ZEND_ENUM_Snmp_Mib_AllowUnderscores = 1,
@@ -36,4 +37,5 @@ typedef enum zend_enum_Snmp_StringOutput {
 	ZEND_ENUM_Snmp_StringOutput_Hex = 3,
 } zend_enum_Snmp_StringOutput;
 
+END_EXTERN_C()
 #endif /* ZEND_SNMP_DECL_9a32b308176289c1b1475524372a69257f464bd4_H */

@@ -2,6 +2,7 @@
  * Stub hash: 743a4be1078abfa29294336564126ace8c194cbe */
 
 #include "zend_constants.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_gmp_init, 0, 1, GMP, 0)
 	ZEND_ARG_TYPE_MASK(0, num, MAY_BE_LONG|MAY_BE_STRING, NULL)
@@ -366,3 +367,5 @@ static zend_class_entry *register_class_GMP(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

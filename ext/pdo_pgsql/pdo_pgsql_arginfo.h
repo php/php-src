@@ -2,6 +2,7 @@
  * Stub hash: 3f62627e74ad08de8e95c9862e3d209ae63d971a */
 
 #include "zend_attributes.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Pgsql_escapeIdentifier, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
@@ -176,3 +177,5 @@ static zend_class_entry *register_class_Pdo_Pgsql(zend_class_entry *class_entry_
 
 	return class_entry;
 }
+
+END_EXTERN_C()

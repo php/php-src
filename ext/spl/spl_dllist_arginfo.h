@@ -1,5 +1,6 @@
 /* This is a generated file, edit spl_dllist.stub.php instead.
  * Stub hash: 45e42d3a0589031651daee5653900d5a4fb61c3d */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplDoublyLinkedList_add, 0, 2, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
@@ -200,3 +201,5 @@ static zend_class_entry *register_class_SplStack(zend_class_entry *class_entry_S
 
 	return class_entry;
 }
+
+END_EXTERN_C()

@@ -3,6 +3,7 @@
 
 #ifndef ZEND_PHP_URI_DECL_d96bdceccf7867b022c923bcfaf9f7a1142f0d0b_H
 #define ZEND_PHP_URI_DECL_d96bdceccf7867b022c923bcfaf9f7a1142f0d0b_H
+BEGIN_EXTERN_C()
 
 typedef enum zend_enum_Uri_UriComparisonMode {
 	ZEND_ENUM_Uri_UriComparisonMode_IncludeFragment = 1,
@@ -76,4 +77,5 @@ typedef enum zend_enum_Uri_WhatWg_UrlPercentEncodingMode {
 	ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_Fragment = 10,
 } zend_enum_Uri_WhatWg_UrlPercentEncodingMode;
 
+END_EXTERN_C()
 #endif /* ZEND_PHP_URI_DECL_d96bdceccf7867b022c923bcfaf9f7a1142f0d0b_H */

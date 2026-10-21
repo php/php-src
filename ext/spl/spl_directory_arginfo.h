@@ -2,6 +2,7 @@
  * Stub hash: 3313c7bc6d9691a01903e6625630863e2b1e1bf7 */
 
 #include "zend_attributes.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileInfo___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -666,3 +667,5 @@ static zend_class_entry *register_class_SplTempFileObject(zend_class_entry *clas
 
 	return class_entry;
 }
+
+END_EXTERN_C()

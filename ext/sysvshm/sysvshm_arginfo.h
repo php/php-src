@@ -1,5 +1,6 @@
 /* This is a generated file, edit sysvshm.stub.php instead.
  * Stub hash: 792c695a705678a3779d62cef8a5136069f98dee */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_shm_attach, 0, 1, SysvSharedMemory, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, key, IS_LONG, 0)
@@ -61,3 +62,5 @@ static zend_class_entry *register_class_SysvSharedMemory(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

@@ -1,5 +1,6 @@
 /* This is a generated file, edit zend_fibers.stub.php instead.
  * Stub hash: e82bbc8e81fe98873a9a5697a4b38e63a24379da */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Fiber___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
@@ -89,3 +90,5 @@ static zend_class_entry *register_class_FiberError(zend_class_entry *class_entry
 
 	return class_entry;
 }
+
+END_EXTERN_C()

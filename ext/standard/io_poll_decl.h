@@ -3,6 +3,7 @@
 
 #ifndef ZEND_IO_POLL_DECL_2f52b00fd6dfc62291e0dd288ffd68547b29bdaa_H
 #define ZEND_IO_POLL_DECL_2f52b00fd6dfc62291e0dd288ffd68547b29bdaa_H
+BEGIN_EXTERN_C()
 
 typedef enum zend_enum_Io_Poll_Backend {
 	ZEND_ENUM_Io_Poll_Backend_Auto = 1,
@@ -23,4 +24,5 @@ typedef enum zend_enum_Io_Poll_Event {
 	ZEND_ENUM_Io_Poll_Event_EdgeTriggered = 7,
 } zend_enum_Io_Poll_Event;
 
+END_EXTERN_C()
 #endif /* ZEND_IO_POLL_DECL_2f52b00fd6dfc62291e0dd288ffd68547b29bdaa_H */

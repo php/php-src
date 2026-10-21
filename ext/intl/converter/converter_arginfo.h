@@ -1,5 +1,6 @@
 /* This is a generated file, edit converter.stub.php instead.
  * Stub hash: f351fbf3afd9753fb16c87903c3dbd5e4621c024 */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_UConverter___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, destination_encoding, IS_STRING, 1, "null")
@@ -372,3 +373,5 @@ static zend_class_entry *register_class_UConverter(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

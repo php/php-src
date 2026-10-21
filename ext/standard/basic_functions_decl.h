@@ -3,6 +3,7 @@
 
 #ifndef ZEND_BASIC_FUNCTIONS_DECL_5ccf5208c22244d77b47ac0f2363bf67eccb0e95_H
 #define ZEND_BASIC_FUNCTIONS_DECL_5ccf5208c22244d77b47ac0f2363bf67eccb0e95_H
+BEGIN_EXTERN_C()
 
 typedef enum zend_enum_SortDirection {
 	ZEND_ENUM_SortDirection_Ascending = 1,
@@ -20,4 +21,5 @@ typedef enum zend_enum_RoundingMode {
 	ZEND_ENUM_RoundingMode_PositiveInfinity = 8,
 } zend_enum_RoundingMode;
 
+END_EXTERN_C()
 #endif /* ZEND_BASIC_FUNCTIONS_DECL_5ccf5208c22244d77b47ac0f2363bf67eccb0e95_H */

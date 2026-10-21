@@ -2,6 +2,7 @@
  * Stub hash: 9b2eea541946c291eb002ee98997f3dcad8bdfce */
 
 #include "zend_constants.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_variant_set, 0, 2, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, variant, variant, 0)
@@ -338,3 +339,5 @@ static zend_class_entry *register_class_com_exception(zend_class_entry *class_en
 
 	return class_entry;
 }
+
+END_EXTERN_C()

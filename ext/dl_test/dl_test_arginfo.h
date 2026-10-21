@@ -2,6 +2,7 @@
  * Stub hash: 6f3b106c9f5e6d4b0a69451827c10ad6dad0d8f7 */
 
 #include "zend_constants.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dl_test_test1, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -104,3 +105,5 @@ static zend_class_entry *register_class_DlTestAliasedClass(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

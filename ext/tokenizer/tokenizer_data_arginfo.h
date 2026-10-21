@@ -2,6 +2,7 @@
  * Stub hash: c5235344b7c651d27c2c33c90696a418a9c96837 */
 
 #include "zend_constants.h"
+BEGIN_EXTERN_C()
 
 static void register_tokenizer_data_symbols(int module_number)
 {
@@ -159,3 +160,5 @@ static void register_tokenizer_data_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("T_BAD_CHARACTER", T_BAD_CHARACTER, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_DOUBLE_COLON", T_PAAMAYIM_NEKUDOTAYIM, CONST_PERSISTENT);
 }
+
+END_EXTERN_C()

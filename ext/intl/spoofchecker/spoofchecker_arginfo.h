@@ -1,5 +1,6 @@
 /* This is a generated file, edit spoofchecker.stub.php instead.
  * Stub hash: e701a18d8fd0c9bba50ee184e700263bffd882f8 */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Spoofchecker___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -220,3 +221,5 @@ static zend_class_entry *register_class_Spoofchecker(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

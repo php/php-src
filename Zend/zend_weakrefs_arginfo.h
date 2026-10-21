@@ -1,5 +1,6 @@
 /* This is a generated file, edit zend_weakrefs.stub.php instead.
  * Stub hash: d91889851d9732d41e43fffddb6235d033c67534 */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_WeakReference___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -81,3 +82,5 @@ static zend_class_entry *register_class_WeakMap(zend_class_entry *class_entry_Ar
 
 	return class_entry;
 }
+
+END_EXTERN_C()

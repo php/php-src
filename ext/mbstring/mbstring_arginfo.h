@@ -5,6 +5,7 @@
 #include "zend_attributes.h"
 #endif
 #include "zend_constants.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_language, 0, 0, MAY_BE_STRING|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, language, IS_STRING, 1, "null")
@@ -577,3 +578,5 @@ static void register_mbstring_symbols(int module_number)
 	attribute_Deprecated_const_MB_ONIGURUMA_VERSION_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 #endif
 }
+
+END_EXTERN_C()

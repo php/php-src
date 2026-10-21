@@ -2,6 +2,7 @@
  * Stub hash: 5f9f72a101d08dc67472461115b90534d4805ddc */
 
 #include "zend_attributes.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_implements, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, object_or_class)
@@ -115,3 +116,5 @@ static void register_php_spl_symbols(int module_number)
 	ZVAL_STR(&attribute_Deprecated_func_spl_object_hash_0->args[1].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_spl_object_hash_0->args[1].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 }
+
+END_EXTERN_C()

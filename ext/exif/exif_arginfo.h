@@ -2,6 +2,7 @@
  * Stub hash: 633b2db018fa1453845a854a6361f11f107f4653 */
 
 #include "zend_constants.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_exif_tagname, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
@@ -42,3 +43,5 @@ static void register_exif_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("EXIF_USE_MBSTRING", USE_MBSTRING, CONST_PERSISTENT);
 }
+
+END_EXTERN_C()

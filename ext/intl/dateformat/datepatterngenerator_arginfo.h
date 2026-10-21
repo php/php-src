@@ -1,5 +1,6 @@
 /* This is a generated file, edit datepatterngenerator.stub.php instead.
  * Stub hash: cea997295023d9f6f6451150bf19867e7dac8c90 */
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlDatePatternGenerator___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 1, "null")
@@ -43,3 +44,5 @@ static zend_class_entry *register_class_IntlDatePatternGenerator(void)
 
 	return class_entry;
 }
+
+END_EXTERN_C()

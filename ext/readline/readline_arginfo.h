@@ -2,6 +2,7 @@
  * Stub hash: 848e798481f62ee09cfd8cc3dfa6b0814cfdd979 */
 
 #include "zend_constants.h"
+BEGIN_EXTERN_C()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_readline, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, prompt, IS_STRING, 1, "null")
@@ -101,3 +102,5 @@ static void register_readline_symbols(int module_number)
 {
 	REGISTER_STRING_CONSTANT("READLINE_LIB", READLINE_LIB, CONST_PERSISTENT);
 }
+
+END_EXTERN_C()
