@@ -424,7 +424,10 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 
 			if (xpathobjp->type == XPATH_NODESET && NULL != (nodesetp = xpathobjp->nodesetval) && nodesetp->nodeNr) {
 
-				array_init(&retval);
+				array_init_size(&retval, nodesetp->nodeNr);
+				if (zend_hash_real_finit_packed(Z_ARRVAL(retval), /* fallible */ true) != SUCCESS) {
+					goto oom_nodeset;
+				}
 				for (i = 0; i < nodesetp->nodeNr; i++) {
 					xmlNodePtr node = nodesetp->nodeTab[i];
 					zval child;
@@ -443,6 +446,9 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 						php_dom_create_object(node, &child, &intern->dom);
 					}
 					add_next_index_zval(&retval, &child);
+					if (ZEND_HAS_OOM()) {
+						goto oom_nodeset;
+					}
 				}
 			} else {
 				ZVAL_EMPTY_ARRAY(&retval);
@@ -451,6 +457,13 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 			nodeobj = Z_DOMOBJ_P(return_value);
 			dom_xpath_iter(&retval, nodeobj);
 			break;
+
+oom_nodeset:
+			zval_ptr_dtor(&retval);
+			xmlXPathFreeObject(xpathobjp);
+			zval_ptr_dtor(return_value);
+			ZVAL_NULL(return_value);
+			RETURN_OOM();
 		}
 
 		case XPATH_BOOLEAN:

@@ -470,7 +470,10 @@ PHP_FUNCTION(bzcompress)
 	dest_len = (unsigned int) chunk_len;
 
 	/* Allocate the destination buffer */
-	dest = zend_string_alloc(dest_len, 0);
+	dest = zend_string_falloc(dest_len, 0, /* fallible */ true);
+	if (!dest) {
+		RETURN_OOM();
+	}
 
 	/* Handle the optional arguments */
 	if (argc > 1) {
@@ -499,7 +502,7 @@ PHP_FUNCTION(bzcompress)
 PHP_FUNCTION(bzdecompress)
 {
 	char *source;
-	zend_string *dest;
+	zend_string *dest = NULL, *tmp;
 	size_t source_len;
 	int error;
 	bool small = 0;
@@ -525,7 +528,10 @@ PHP_FUNCTION(bzdecompress)
 	bzs.avail_in = source_len;
 
 	/* in most cases bz2 offers at least 2:1 compression, so we use that as our base */
-	dest = zend_string_safe_alloc(source_len, 2, 1, 0);
+	dest = zend_string_safe_falloc(source_len, 2, 1, 0, /* fallible */ true);
+	if (!dest) {
+		goto failure;
+	}
 	bzs.avail_out = source_len * 2;
 	bzs.next_out = ZSTR_VAL(dest);
 
@@ -539,7 +545,11 @@ PHP_FUNCTION(bzdecompress)
 			break;
 		}
 #endif
-		dest = zend_string_safe_realloc(dest, 1, bzs.avail_out+1, (size_t) size, 0);
+		tmp = zend_string_safe_frealloc(dest, 1, bzs.avail_out+1, (size_t) size, 0, /* fallible */ true);
+		if (!tmp) {
+			goto failure;
+		}
+		dest = tmp;
 		bzs.next_out = ZSTR_VAL(dest) + size;
 	}
 
@@ -553,7 +563,11 @@ PHP_FUNCTION(bzdecompress)
 		} else
 #endif
 		{
-			dest = zend_string_safe_realloc(dest, 1, (size_t)size, 1, 0);
+			tmp = zend_string_safe_frealloc(dest, 1, (size_t)size, 1, 0, /* fallible */ true);
+			if (!tmp) {
+				goto failure;
+			}
+			dest = tmp;
 			ZSTR_LEN(dest) = (size_t)size;
 			ZSTR_VAL(dest)[(size_t)size] = '\0';
 			RETVAL_STR(dest);
@@ -563,6 +577,13 @@ PHP_FUNCTION(bzdecompress)
 		RETVAL_LONG(error);
 	}
 
+	BZ2_bzDecompressEnd(&bzs);
+	return;
+
+failure:
+	if (dest) {
+		zend_string_efree(dest);
+	}
 	BZ2_bzDecompressEnd(&bzs);
 }
 /* }}} */

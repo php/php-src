@@ -4051,7 +4051,7 @@ PHP_FUNCTION(imap_mime_header_decode)
 
 	charset = (char *) safe_emalloc((end + 1), 2, 0);
 	text = &charset[end + 1];
-	while (offset < end) {	/* Reached end of the string? */
+	while ((offset < end) && EXPECTED(!ZEND_HAS_OOM())) {	/* Reached end of the string? */
 		if ((charset_token = (zend_long)php_memnstr(&string[offset], "=?", 2, string + end))) {	/* Is there anything encoded in the string? */
 			charset_token -= (zend_long)string;
 			if (offset != charset_token) {	/* Is there anything before the encoded data? */

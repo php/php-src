@@ -264,7 +264,11 @@ std:
 			ZVAL_EMPTY_STRING(&s->value);
 			return PHP_JSON_T_ESTRING;
 		}
-		str = zend_string_alloc(len, 0);
+		str = zend_string_falloc(len, /* persistent */ false, /* fallible */ true);
+		if (UNEXPECTED(!str)) {
+			ZEND_ASSERT(ZEND_HAS_OOM());
+			return PHP_JSON_T_ERROR;
+		}
 		ZSTR_VAL(str)[len] = '\0';
 		ZVAL_STR(&s->value, str);
 		if (s->str_esc || s->utf8_invalid) {

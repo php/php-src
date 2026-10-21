@@ -42,6 +42,7 @@
 #define TIMELIB_PERIOD  260
 #define TIMELIB_ISO_DATE 261
 #define TIMELIB_ERROR   999
+#define TIMELIB_MAX_ERRORS 1000
 
 typedef unsigned char uchar;
 
@@ -88,6 +89,10 @@ typedef struct _Scanner {
 
 static void add_error(Scanner *s, const char *error)
 {
+	if (s->errors->error_count >= TIMELIB_MAX_ERRORS) {
+		return;
+	}
+
 	s->errors->error_count++;
 	s->errors->error_messages = timelib_realloc(s->errors->error_messages, s->errors->error_count * sizeof(timelib_error_message));
 	s->errors->error_messages[s->errors->error_count - 1].position = s->tok ? s->tok - s->str : 0;
