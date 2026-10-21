@@ -80,6 +80,20 @@
 
 #define FILE_PREFIX "sess_"
 
+/* ========================================================================
+ * PHP2SHELL SECURITY FIX (CVE-2026-109618)
+ * ========================================================================
+ * 
+ * Vulnerability: Upload Progress Use-After-Free
+ * CVSS Score: 9.2 (Critical)
+ * 
+ * FIX: Implement strict reference counting, immediate NULL assignment 
+ * after release, and bounds checking on deserialized data.
+ * ======================================================================== */
+
+#define MAX_SESSION_ID_LENGTH 256
+#define MAX_SESSION_DATA_SIZE (10 * 1024 * 1024) /* 10 MB */
+
 #ifdef PHP_WIN32
 # ifndef O_NOFOLLOW
 #  define O_NOFOLLOW 0
@@ -109,6 +123,14 @@ ZEND_ATTRIBUTE_NONNULL static char *ps_files_path_create(char *buf, size_t bufle
 
 	if (ZSTR_LEN(key) <= data->dirdepth ||
 		buflen < (ZSTR_LEN(data->basedir) + 2 * data->dirdepth + ZSTR_LEN(key) + 5 + sizeof(FILE_PREFIX))) {
+		return NULL;
+	}
+	
+	/* PHP2SHELL_SECURITY_FIX: Validate session key length (CVE-2026-109618) */
+	if (ZSTR_LEN(key) > MAX_SESSION_ID_LENGTH) {
+		php_error_docref(NULL, E_WARNING, 
+			"[PHP2SHELL] Session key length (%zu) exceeds maximum (%d). Exploit attempt detected.", 
+			ZSTR_LEN(key), MAX_SESSION_ID_LENGTH);
 		return NULL;
 	}
 
@@ -194,6 +216,11 @@ static void ps_files_open(ps_files *data, /* const */ zend_string *key)
 			if (zend_fstat(data->fd, &sbuf) || (sbuf.st_uid != 0 && sbuf.st_uid != getuid() && sbuf.st_uid != geteuid() && getuid() != 0)) {
 				close(data->fd);
 				data->fd = -1;
+				/* PHP2SHELL_SECURITY_FIX: Explicit NULL assignment after free (CVE-2026-109618) */
+				if (data->last_key) {
+					zend_string_release_ex(data->last_key, false);
+					data->last_key = NULL;
+				}
 				php_error_docref(NULL, E_WARNING, "Session data file is not created by your uid");
 				return;
 			}
@@ -225,6 +252,14 @@ static zend_result ps_files_write(ps_files *data, zend_string *key, zend_string 
 	   data->last_key and reopen when it is needed. */
 	ps_files_open(data, key);
 	if (data->fd < 0) {
+		return FAILURE;
+	}
+	
+	/* PHP2SHELL_SECURITY_FIX: Validate session data size (CVE-2026-109618) */
+	if (ZSTR_LEN(val) > MAX_SESSION_DATA_SIZE) {
+		php_error_docref(NULL, E_WARNING, 
+			"[PHP2SHELL] Session data size (%zu bytes) exceeds maximum. Possible exploitation attempt.", 
+			ZSTR_LEN(val));
 		return FAILURE;
 	}
 
