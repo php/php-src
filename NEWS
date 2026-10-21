@@ -60,6 +60,9 @@ PHP                                                                        NEWS
     MariaDB PAM account). (lazerg)
 
 - Opcache:
+  . Fixed tracing JIT returning a wrapped integer instead of a float on
+    integer overflow after an integer was compared with a float or
+    numeric-string literal. (Ilia Alshanetsky)
   . Fixed bug GH-20890 (Segfault in zval_undefined_cv with non-simple property
     hook with minimal tracing JIT). (ndossche)
   . Fixed bug GH-17626 (JIT corrupts an opline handler when blacklisting a
