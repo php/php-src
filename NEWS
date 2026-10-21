@@ -92,6 +92,8 @@ PHP                                                                        NEWS
   . Improved performance of the SQL parser that handles placeholders.
     (brainexe)
   . Improved performance of fetching integer columns. (brainexe)
+  . Fixed bug GH-24490 (pdo_pgsql prepare() hangs on a query containing a NUL
+    byte). (dev-null-undefined)
 
 - PGSQL:
   . Fixed pg_lo_write() rejecting data containing null bytes. (Ilia Alshanetsky)
