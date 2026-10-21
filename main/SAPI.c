@@ -164,6 +164,10 @@ SAPI_API void sapi_handle_post(void *arg)
 		SG(request_info).post_entry->post_handler(SG(request_info).content_type_dup, arg);
 		efree(SG(request_info).content_type_dup);
 		SG(request_info).content_type_dup = NULL;
+
+		if (ZEND_HAS_OOM()) {
+			zend_handle_delayed_oom();
+		}
 	}
 }
 

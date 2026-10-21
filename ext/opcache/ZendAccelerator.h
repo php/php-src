@@ -232,6 +232,12 @@ typedef struct _zend_accel_globals {
 	zend_persistent_script *cache_persistent_script;
 	/* preallocated buffer for keys */
 	zend_string            *key;
+
+	/* CE cache slots allocated during the current persist window, keyed by the
+	 * address of the shared class name string. They are written into the
+	 * strings by zend_accel_pending_ce_cache_commit() once ZCSG(map_ptr_last)
+	 * covers them. NULL outside a persist window. */
+	HashTable              *pending_ce_cache;
 } zend_accel_globals;
 
 typedef struct _zend_string_table {
@@ -337,7 +343,10 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type);
 
 zend_string* ZEND_FASTCALL accel_new_interned_string(zend_string *str);
 
-uint32_t zend_accel_get_class_name_map_ptr(zend_string *type_name);
+void zend_accel_get_class_name_map_ptr(zend_string *type_name);
+void zend_accel_pending_ce_cache_begin(void);
+void zend_accel_pending_ce_cache_commit(void);
+void zend_accel_pending_ce_cache_discard(void);
 
 END_EXTERN_C()
 

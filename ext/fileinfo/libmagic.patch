@@ -1,6 +1,6 @@
 diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
 --- libmagic.orig/apprentice.c	2024-11-27 16:37:00.000000000 +0100
-+++ libmagic/apprentice.c	2025-02-09 02:25:02.364884555 +0100
++++ libmagic/apprentice.c	2026-10-01 14:49:48.677051351 +0200
 @@ -32,7 +32,7 @@
  #include "file.h"
  
@@ -325,14 +325,14 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  			// Don't warn for DER
  			if (mpa.type == FILE_DER)
  				return 0;
-@@ -1151,6 +1075,7 @@
+@@ -1150,6 +1074,7 @@
+ 			    ma->mp->desc);
  			file_mdump(ma->mp);
  			file_mdump(mb->mp);
 +#endif
  			return 0;
  		}
  		return x > 0 ? -1 : 1;
- 	}
 @@ -1303,7 +1228,7 @@
  
  		size_t incr = mset[i].max + ALLOC_INCR;
@@ -1056,7 +1056,7 @@ diff -u libmagic.orig/buffer.c libmagic/buffer.c
  	}
 diff -u libmagic.orig/cdf.c libmagic/cdf.c
 --- libmagic.orig/cdf.c	2024-11-25 22:24:59.000000000 +0100
-+++ libmagic/cdf.c	2025-02-09 01:25:00.187641434 +0100
++++ libmagic/cdf.c	2026-10-02 19:35:44.175918710 +0200
 @@ -43,7 +43,9 @@
  #include <err.h>
  #endif
@@ -1067,55 +1067,64 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  #include <string.h>
  #include <time.h>
  #include <ctype.h>
-@@ -91,44 +93,9 @@
- 			    CDF_TOLE8(CAST(uint64_t, x))))
- #define CDF_GETUINT32(x, y)	cdf_getuint32(x, y)
+@@ -95,39 +97,39 @@
+ #define CDF_REALLOC(p, n) cdf_realloc(__FILE__, __LINE__, (p), (n))
+ #define CDF_CALLOC(n, u) cdf_calloc(__FILE__, __LINE__, (n), (u))
  
--#define CDF_MALLOC(n) cdf_malloc(__FILE__, __LINE__, (n))
--#define CDF_REALLOC(p, n) cdf_realloc(__FILE__, __LINE__, (p), (n))
--#define CDF_CALLOC(n, u) cdf_calloc(__FILE__, __LINE__, (n), (u))
 -
--
--/*ARGSUSED*/
+ /*ARGSUSED*/
 -file_private void *
 -cdf_malloc(const char *file __attribute__((__unused__)),
 -    size_t line __attribute__((__unused__)), size_t n)
--{
--	DPRINTF(("%s,%" SIZE_T_FORMAT "u: %s %" SIZE_T_FORMAT "u\n",
--	    file, line, __func__, n));
++static void *
++cdf_malloc(const char *file,
++    size_t line, size_t n)
+ {
+ 	DPRINTF(("%s,%" SIZE_T_FORMAT "u: %s %" SIZE_T_FORMAT "u\n",
+ 	    file, line, __func__, n));
 -	if (n == 0)
 -	    n++;
 -	return malloc(n);
--}
--
--/*ARGSUSED*/
++	return femalloc(n, /* fallible */ true);
+ }
+ 
+ /*ARGSUSED*/
 -file_private void *
 -cdf_realloc(const char *file __attribute__((__unused__)),
 -    size_t line __attribute__((__unused__)), void *p, size_t n)
--{
--	DPRINTF(("%s,%" SIZE_T_FORMAT "u: %s %" SIZE_T_FORMAT "u\n",
--	    file, line, __func__, n));
++static void *
++cdf_realloc(const char *file,
++    size_t line, void *p, size_t n)
+ {
+ 	DPRINTF(("%s,%" SIZE_T_FORMAT "u: %s %" SIZE_T_FORMAT "u\n",
+ 	    file, line, __func__, n));
 -	return realloc(p, n);
--}
--
--/*ARGSUSED*/
++	return safe_ferealloc(p, 1, n, 0, /* fallible */ true);
+ }
+ 
+ /*ARGSUSED*/
 -file_private void *
 -cdf_calloc(const char *file __attribute__((__unused__)),
 -    size_t line __attribute__((__unused__)), size_t n, size_t u)
--{
--	DPRINTF(("%s,%" SIZE_T_FORMAT "u: %s %" SIZE_T_FORMAT "u %"
--	    SIZE_T_FORMAT "u\n", file, line, __func__, n, u));
++static void *
++cdf_calloc(const char *file,
++    size_t line, size_t n, size_t u)
+ {
+ 	DPRINTF(("%s,%" SIZE_T_FORMAT "u: %s %" SIZE_T_FORMAT "u %"
+ 	    SIZE_T_FORMAT "u\n", file, line, __func__, n, u));
 -	if (n == 0)
 -	    n++;
 -	return calloc(n, u);
--}
-+#define CDF_MALLOC(n) emalloc(n)
-+#define CDF_REALLOC(p, n) erealloc(p, n)
-+#define CDF_CALLOC(n, u) ecalloc(n, u)
++	void *data = safe_femalloc(n, u, 0, /* fallible */ true);
++	if (!data) {
++		return NULL;
++	}
++	memset(data, 0, n * u);
++	return data;
+ }
  
  #if defined(HAVE_BYTESWAP_H)
- # define _cdf_tole2(x)	bswap_16(x)
-@@ -334,7 +301,7 @@
+@@ -334,7 +336,7 @@
  	scn->sst_len = 0;
  	scn->sst_dirlen = 0;
  	scn->sst_ss = 0;
@@ -1124,7 +1133,7 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  	scn->sst_tab = NULL;
  	return -1;
  }
-@@ -342,9 +309,11 @@
+@@ -342,9 +344,11 @@
  file_private size_t
  cdf_check_stream(const cdf_stream_t *sst, const cdf_header_t *h)
  {
@@ -1136,7 +1145,7 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  	return sst->sst_ss;
  }
  
-@@ -367,11 +336,11 @@
+@@ -367,11 +371,11 @@
  }
  
  file_private ssize_t
@@ -1150,7 +1159,7 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  		goto out;
  
  	if (info->i_buf != NULL && info->i_len >= siz) {
-@@ -382,7 +351,10 @@
+@@ -382,7 +386,10 @@
  	if (info->i_fd == -1)
  		goto out;
  
@@ -1162,7 +1171,7 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  		return -1;
  
  	return CAST(ssize_t, len);
-@@ -397,7 +369,7 @@
+@@ -397,7 +404,7 @@
  	char buf[512];
  
  	(void)memcpy(cdf_bo.s, "\01\02\03\04", 4);
@@ -1171,7 +1180,7 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  		return -1;
  	cdf_unpack_header(h, buf);
  	cdf_swap_header(h);
-@@ -544,14 +516,14 @@
+@@ -544,14 +551,14 @@
  	}
  out:
  	sat->sat_len = i;
@@ -1189,7 +1198,7 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  	return -1;
  }
  
-@@ -719,7 +691,7 @@
+@@ -719,7 +726,7 @@
  		return -1;
  
  	if ((buf = CAST(char *, CDF_MALLOC(ss))) == NULL) {
@@ -1198,7 +1207,7 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  		return -1;
  	}
  
-@@ -742,11 +714,11 @@
+@@ -742,11 +749,11 @@
  	if (NEED_SWAP)
  		for (i = 0; i < dir->dir_len; i++)
  			cdf_swap_dir(&dir->dir_tab[i]);
@@ -1213,7 +1222,7 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  	errno = EFTYPE;
  	return -1;
  }
-@@ -791,7 +763,7 @@
+@@ -791,7 +798,7 @@
  out:
  	errno = EFTYPE;
  out1:
@@ -1222,7 +1231,7 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  	return -1;
  }
  
-@@ -953,7 +925,7 @@
+@@ -953,7 +960,7 @@
  	*maxcount = newcount;
  	return inp;
  out:
@@ -1231,7 +1240,7 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  	*maxcount = 0;
  	*info = NULL;
  	return NULL;
-@@ -1136,7 +1108,7 @@
+@@ -1136,7 +1143,7 @@
  	}
  	return 0;
  out:
@@ -1240,7 +1249,7 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  	*info = NULL;
  	*count = 0;
  	*maxcount = 0;
-@@ -1428,7 +1400,7 @@
+@@ -1428,7 +1435,7 @@
  	cdf_directory_t *d;
  	char name[__arraycount(d->d_name)];
  	cdf_stream_t scn;
@@ -1249,7 +1258,7 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  
  	static const char *types[] = { "empty", "user storage",
  	    "user stream", "lockbytes", "property", "root storage" };
-@@ -1470,7 +1442,7 @@
+@@ -1470,7 +1477,7 @@
  				break;
  			}
  			cdf_dump_stream(&scn);
@@ -1258,7 +1267,7 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  			break;
  		default:
  			break;
-@@ -1483,7 +1455,7 @@
+@@ -1483,7 +1490,7 @@
  cdf_dump_property_info(const cdf_property_info_t *info, size_t count)
  {
  	cdf_timestamp_t tp;
@@ -1267,7 +1276,7 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  	char buf[64];
  	size_t i, j;
  
-@@ -1568,7 +1540,7 @@
+@@ -1568,7 +1575,7 @@
  	(void)fprintf(stderr, "Class %s\n", buf);
  	(void)fprintf(stderr, "Count %d\n", ssi.si_count);
  	cdf_dump_property_info(info, count);
@@ -1276,7 +1285,7 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  }
  
  
-@@ -1589,7 +1561,7 @@
+@@ -1589,7 +1596,7 @@
  		    cdf_u16tos8(sbuf, ce[i].ce_namlen, ce[i].ce_name),
  		    cdf_ctime(&ts.tv_sec, tbuf));
  	}

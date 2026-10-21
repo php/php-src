@@ -1722,7 +1722,7 @@ ZEND_FUNCTION(get_defined_constants)
 }
 /* }}} */
 
-static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /* {{{ */
+static bool debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /* {{{ */
 {
 	uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
 
@@ -1730,8 +1730,9 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 		uint32_t i = 0;
 		zval *p = ZEND_CALL_ARG(call, 1);
 
-		array_init_size(arg_array, num_args);
-		zend_hash_real_init_packed(Z_ARRVAL_P(arg_array));
+		if (!array_finit_size_packed(arg_array, num_args)) {
+			return false;
+		}
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(arg_array)) {
 			if (call->func->type == ZEND_USER_FUNCTION) {
 				uint32_t first_extra_arg = MIN(num_args, call->func->op_array.num_args);
@@ -1764,8 +1765,13 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 						if (is_sensitive) {
 							zval redacted_arg;
 							object_init_ex(&redacted_arg, zend_ce_sensitive_parameter_value);
-							zend_call_known_function(Z_OBJCE_P(&redacted_arg)->constructor, Z_OBJ_P(&redacted_arg), Z_OBJCE_P(&redacted_arg), NULL, 1, &original_arg, NULL);
+							zend_sensitive_parameter_value_init(Z_OBJ(redacted_arg), &original_arg);
 							ZEND_HASH_FILL_SET(&redacted_arg);
+							if (ZEND_HAS_OOM()) {
+								zval_ptr_dtor(&redacted_arg);
+								ZEND_HASH_FILL_FINISH();
+								goto oom;
+							}
 						} else {
 							Z_TRY_ADDREF_P(&original_arg);
 							ZEND_HASH_FILL_SET(&original_arg);
@@ -1796,8 +1802,13 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 						if (is_sensitive) {
 							zval redacted_arg;
 							object_init_ex(&redacted_arg, zend_ce_sensitive_parameter_value);
-							zend_call_known_function(Z_OBJCE_P(&redacted_arg)->constructor, Z_OBJ_P(&redacted_arg), Z_OBJCE_P(&redacted_arg), NULL, 1, &original_arg, NULL);
+							zend_sensitive_parameter_value_init(Z_OBJ(redacted_arg), &original_arg);
 							ZEND_HASH_FILL_SET(&redacted_arg);
+							if (ZEND_HAS_OOM()) {
+								zval_ptr_dtor(&redacted_arg);
+								ZEND_HASH_FILL_FINISH();
+								goto oom;
+							}
 						} else {
 							Z_TRY_ADDREF_P(&original_arg);
 							ZEND_HASH_FILL_SET(&original_arg);
@@ -1836,8 +1847,13 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 				if (is_sensitive) {
 					zval redacted_arg;
 					object_init_ex(&redacted_arg, zend_ce_sensitive_parameter_value);
-					zend_call_known_function(Z_OBJCE_P(&redacted_arg)->constructor, Z_OBJ_P(&redacted_arg), Z_OBJCE_P(&redacted_arg), NULL, 1, &original_arg, NULL);
+					zend_sensitive_parameter_value_init(Z_OBJ(redacted_arg), &original_arg);
 					ZEND_HASH_FILL_SET(&redacted_arg);
+					if (ZEND_HAS_OOM()) {
+						zval_ptr_dtor(&redacted_arg);
+						ZEND_HASH_FILL_FINISH();
+						goto oom;
+					}
 				} else {
 					Z_TRY_ADDREF_P(&original_arg);
 					ZEND_HASH_FILL_SET(&original_arg);
@@ -1872,17 +1888,28 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 		SEPARATE_ARRAY(arg_array);
 		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(call->extra_named_params, name, arg) {
 			ZVAL_DEREF(arg);
+			zval *add_result;
 			if (is_sensitive) {
 				zval redacted_arg;
 				object_init_ex(&redacted_arg, zend_ce_sensitive_parameter_value);
-				zend_call_method_with_1_params(Z_OBJ_P(&redacted_arg), zend_ce_sensitive_parameter_value, &zend_ce_sensitive_parameter_value->constructor, "__construct", NULL, arg);
-				zend_hash_add_new(Z_ARRVAL_P(arg_array), name, &redacted_arg);
+				zend_sensitive_parameter_value_init(Z_OBJ(redacted_arg), arg);
+				add_result = zend_hash_fadd_new(Z_ARRVAL_P(arg_array), name, &redacted_arg);
 			} else {
 				Z_TRY_ADDREF_P(arg);
-				zend_hash_add_new(Z_ARRVAL_P(arg_array), name, arg);
+				add_result = zend_hash_fadd_new(Z_ARRVAL_P(arg_array), name, arg);
+			}
+			if (UNEXPECTED(add_result == HASH_NOMEM)) {
+				goto oom;
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
+
+	return true;
+
+oom:
+	zval_ptr_dtor(arg_array);
+	ZVAL_EMPTY_ARRAY(arg_array);
+	return false;
 }
 /* }}} */
 
@@ -2143,7 +2170,11 @@ not_frameless_call:
 			if ((options & DEBUG_BACKTRACE_IGNORE_ARGS) == 0 &&
 				func->type != ZEND_EVAL_CODE) {
 
-				debug_backtrace_get_args(call, &tmp);
+				if (UNEXPECTED(!debug_backtrace_get_args(call, &tmp))) {
+					ZEND_ASSERT(ZEND_HAS_OOM());
+					zend_array_destroy(stack_frame);
+					return;
+				}
 				_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_ARGS), &tmp, 1);
 			}
 		} else {
@@ -2203,11 +2234,18 @@ not_frameless_call:
 		}
 
 		ZVAL_ARR(&tmp, stack_frame);
-		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
+		if (UNEXPECTED(zend_hash_next_index_finsert_new(Z_ARRVAL_P(return_value), &tmp) == HASH_NOMEM)) {
+			zend_array_destroy(stack_frame);
+			return;
+		}
 		frameno++;
 		prev_stack_frame = stack_frame;
 
 skip_frame:
+		if (ZEND_HAS_OOM()) {
+			return;
+		}
+
 		if (UNEXPECTED(ZEND_CALL_KIND(call) == ZEND_CALL_TOP_FUNCTION)
 		 && !fake_frame
 		 && prev

@@ -640,12 +640,18 @@ PHP_FUNCTION(file)
 			do {
 				p++;
 parse_eol:
+				if (ZEND_HAS_OOM()) {
+					break;
+				}
 				add_index_stringl(return_value, i++, s, p-s);
 				s = p;
 			} while ((p = memchr(p, eol_marker, (e-p))));
 		} else {
 			do {
 				int windows_eol = 0;
+				if (ZEND_HAS_OOM()) {
+					break;
+				}
 				if (p != ZSTR_VAL(target_buf) && eol_marker == '\n' && *(p - 1) == '\r') {
 					windows_eol++;
 				}
@@ -659,7 +665,7 @@ parse_eol:
 		}
 
 		/* handle any leftovers of files without new lines */
-		if (s != e) {
+		if (s != e && !ZEND_HAS_OOM()) {
 			p = e;
 			goto parse_eol;
 		}
@@ -881,8 +887,13 @@ PHPAPI PHP_FUNCTION(fgets)
 			RETURN_FALSE;
 		}
 		// TODO: avoid reallocation ???
-		RETVAL_STRINGL(buf, line_len);
+		/* This copy can double an already large buffer. */
+		str = zend_string_finit(buf, line_len, /* persistent */ false, /* fallible */ true);
 		efree(buf);
+		if (UNEXPECTED(!str)) {
+			RETURN_OOM();
+		}
+		RETVAL_STR(str);
 	} else {
 		if (len <= 0) {
 			zend_argument_value_error(2, "must be greater than 0");
@@ -1866,6 +1877,11 @@ PHPAPI HashTable *php_fgetcsv(php_stream *stream, char delimiter, char enclosure
 	do {
 		char *comp_end, *hunk_begin;
 		char *tptr = temp;
+
+		/* Each field costs a zval plus a zend_string, so stop once over the limit. */
+		if (ZEND_HAS_OOM()) {
+			break;
+		}
 
 		inc_len = (bptr < limit ? (*bptr == '\0' ? 1 : php_mblen(bptr, limit - bptr)): 0);
 		if (inc_len == 1) {

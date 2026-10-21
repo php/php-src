@@ -147,7 +147,10 @@ U_CFUNC PHP_FUNCTION( normalizer_normalize )
 
 	/* Allocate memory for the destination buffer for normalization */
 	uret_len = uinput_len * expansion_factor;
-	uret_buf = eumalloc( uret_len + 1 );
+	uret_buf = (UChar*)safe_femalloc(uret_len + 1, sizeof(UChar), 0, /* fallible */ true);
+	if (!uret_buf) {
+		RETURN_OOM();
+	}
 
 	/* normalize */
 	size_needed = intl_normalize(form, uinput, uinput_len, uret_buf, uret_len, &status);
@@ -168,7 +171,11 @@ U_CFUNC PHP_FUNCTION( normalizer_normalize )
 		 * uret_buf =  eurealloc(uret_buf, size_needed + 1);
 		 */
 		efree( uret_buf );
-		uret_buf = eumalloc( size_needed + 1 );
+		uret_buf = (UChar*)safe_femalloc(size_needed + 1, sizeof(UChar), 0, /* fallible */ true);
+		if (!uret_buf) {
+			efree(uinput);
+			RETURN_OOM();
+		}
 		uret_len = size_needed;
 
 		status = U_ZERO_ERROR;

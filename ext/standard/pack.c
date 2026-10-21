@@ -846,6 +846,11 @@ PHP_FUNCTION(unpack)
 		/* Do actual unpacking */
 		for (i = 0; i != repetitions; i++ ) {
 
+			/* Each repetition costs a name and a value, so stop once over the limit. */
+			if (ZEND_HAS_OOM()) {
+				RETURN_OOM();
+			}
+
 			if (size != 0 && size != -1 && INT_MAX - size + 1 < inputpos) {
 				php_error_docref(NULL, E_WARNING, "Type %c: integer overflow", type);
 				zend_array_destroy(Z_ARR_P(return_value));

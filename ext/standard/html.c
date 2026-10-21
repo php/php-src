@@ -1177,7 +1177,10 @@ PHPAPI zend_string *php_escape_html_entities_ex(const unsigned char *old, size_t
 		maxlen = zend_safe_addmult(oldlen, 2, 0, "html_entities");
 	}
 
-	replaced = zend_string_alloc(maxlen, 0);
+	replaced = zend_string_falloc(maxlen, /* persistent */ false, /* fallible */ true);
+	if (!replaced) {
+		return ZSTR_EMPTY_ALLOC();
+	}
 	len = 0;
 	cursor = 0;
 	while (cursor < oldlen) {
@@ -1190,7 +1193,12 @@ PHPAPI zend_string *php_escape_html_entities_ex(const unsigned char *old, size_t
 		/* guarantee we have at least 40 bytes to write.
 		 * In HTML5, entities may take up to 33 bytes */
 		if (len > maxlen - 40) { /* maxlen can never be smaller than 128 */
-			replaced = zend_string_safe_realloc(replaced, maxlen, 1, 128, 0);
+			zend_string *new_replaced = zend_string_safe_frealloc(replaced, maxlen, 1, 128, /* persistent */ false, /* fallible */ true);
+			if (!new_replaced) {
+				zend_string_release(replaced);
+				return ZSTR_EMPTY_ALLOC();
+			}
+			replaced = new_replaced;
 			maxlen += 128;
 		}
 

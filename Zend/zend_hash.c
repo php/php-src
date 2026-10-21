@@ -83,7 +83,10 @@ static void _zend_is_inconsistent(const HashTable *ht, const char *file, int lin
 
 #define ZEND_HASH_IF_FULL_DO_RESIZE(ht)				\
 	if ((ht)->nNumUsed >= (ht)->nTableSize) {		\
-		zend_hash_do_resize(ht);					\
+		zend_result _resize_status = zend_hash_do_fresize(ht, flag & HASH_FALLIBLE); \
+		if (ZEND_CONST_COND(flag & HASH_FALLIBLE, true) && UNEXPECTED(_resize_status == FAILURE)) { \
+			return HASH_NOMEM; \
+		} \
 	}
 
 ZEND_API void *zend_hash_str_find_ptr_lc(const HashTable *ht, const char *str, size_t len) {
@@ -108,9 +111,9 @@ ZEND_API void *zend_hash_find_ptr_lc(const HashTable *ht, zend_string *key) {
 	return result;
 }
 
-static void ZEND_FASTCALL zend_hash_do_resize(HashTable *ht);
+static zend_result ZEND_FASTCALL zend_hash_do_fresize(HashTable *ht, bool fallible);
 
-static zend_always_inline uint32_t zend_hash_check_size(uint32_t nSize)
+static zend_always_inline uint32_t zend_hash_check_size(uint32_t nSize, bool fallible)
 {
 #ifdef ZEND_WIN32
 	unsigned long index;
@@ -121,7 +124,8 @@ static zend_always_inline uint32_t zend_hash_check_size(uint32_t nSize)
 	if (nSize <= HT_MIN_SIZE) {
 		return HT_MIN_SIZE;
 	} else if (UNEXPECTED(nSize > HT_MAX_SIZE)) {
-		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%u * %zu + %zu)", nSize, sizeof(Bucket), sizeof(Bucket));
+		zend_mm_delayed_error_or_panic(fallible, "Possible integer overflow in memory allocation (%u * %zu + %zu)", nSize, sizeof(Bucket), sizeof(Bucket));
+		return 0;
 	}
 
 #ifdef ZEND_WIN32
@@ -145,25 +149,34 @@ static zend_always_inline uint32_t zend_hash_check_size(uint32_t nSize)
 #endif
 }
 
-static zend_always_inline void zend_hash_real_init_packed_ex(HashTable *ht)
+static zend_always_inline zend_result zend_hash_real_finit_packed_ex(HashTable *ht, bool fallible)
 {
 	void *data;
 
 	if (UNEXPECTED(GC_FLAGS(ht) & IS_ARRAY_PERSISTENT)) {
-		data = pemalloc(HT_PACKED_SIZE_EX(ht->nTableSize, HT_MIN_MASK), 1);
+		data = fpemalloc(HT_PACKED_SIZE_EX(ht->nTableSize, HT_MIN_MASK), true, fallible);
 	} else if (EXPECTED(ht->nTableSize == HT_MIN_SIZE)) {
 		/* Use specialized API with constant allocation amount for a particularly common case. */
-		data = emalloc(HT_PACKED_SIZE_EX(HT_MIN_SIZE, HT_MIN_MASK));
+		data = femalloc(HT_PACKED_SIZE_EX(HT_MIN_SIZE, HT_MIN_MASK), fallible);
 	} else {
-		data = emalloc(HT_PACKED_SIZE_EX(ht->nTableSize, HT_MIN_MASK));
+		data = femalloc(HT_PACKED_SIZE_EX(ht->nTableSize, HT_MIN_MASK), fallible);
+	}
+	if (ZEND_CONST_COND(fallible, true) && UNEXPECTED(!data)) {
+		return FAILURE;
 	}
 	HT_SET_DATA_ADDR(ht, data);
 	/* Don't overwrite iterator count. */
 	ht->u.v.flags = HASH_FLAG_PACKED | HASH_FLAG_STATIC_KEYS;
 	HT_HASH_RESET_PACKED(ht);
+	return SUCCESS;
 }
 
-static zend_always_inline void zend_hash_real_init_mixed_ex(HashTable *ht)
+static zend_always_inline void zend_hash_real_init_packed_ex(HashTable *ht)
+{
+	zend_hash_real_finit_packed_ex(ht, /* fallible */ false);
+}
+
+static zend_always_inline zend_result zend_hash_real_finit_mixed_ex(HashTable *ht, bool fallible)
 {
 	void *data;
 	uint32_t nSize = ht->nTableSize;
@@ -171,9 +184,15 @@ static zend_always_inline void zend_hash_real_init_mixed_ex(HashTable *ht)
 	ZEND_ASSERT(HT_SIZE_TO_MASK(nSize) != 0);
 
 	if (UNEXPECTED(GC_FLAGS(ht) & IS_ARRAY_PERSISTENT)) {
-		data = pemalloc(HT_SIZE_EX(nSize, HT_SIZE_TO_MASK(nSize)), 1);
+		data = fpemalloc(HT_SIZE_EX(nSize, HT_SIZE_TO_MASK(nSize)), true, fallible);
+		if (ZEND_CONST_COND(fallible, true) && UNEXPECTED(!data)) {
+			return FAILURE;
+		}
 	} else if (EXPECTED(nSize == HT_MIN_SIZE)) {
-		data = emalloc(HT_SIZE_EX(HT_MIN_SIZE, HT_SIZE_TO_MASK(HT_MIN_SIZE)));
+		data = femalloc(HT_SIZE_EX(HT_MIN_SIZE, HT_SIZE_TO_MASK(HT_MIN_SIZE)), fallible);
+		if (ZEND_CONST_COND(fallible, true) && UNEXPECTED(!data)) {
+			return FAILURE;
+		}
 		ht->nTableMask = HT_SIZE_TO_MASK(HT_MIN_SIZE);
 		HT_SET_DATA_ADDR(ht, data);
 		/* Don't overwrite iterator count. */
@@ -220,25 +239,40 @@ static zend_always_inline void zend_hash_real_init_mixed_ex(HashTable *ht)
 		HT_HASH_EX(data, 14) = -1;
 		HT_HASH_EX(data, 15) = -1;
 #endif
-		return;
+		return SUCCESS;
 	} else {
-		data = emalloc(HT_SIZE_EX(nSize, HT_SIZE_TO_MASK(nSize)));
+		data = femalloc(HT_SIZE_EX(nSize, HT_SIZE_TO_MASK(nSize)), fallible);
+		if (ZEND_CONST_COND(fallible, true) && UNEXPECTED(!data)) {
+			return FAILURE;
+		}
 	}
 	ht->nTableMask = HT_SIZE_TO_MASK(nSize);
 	HT_SET_DATA_ADDR(ht, data);
 	HT_FLAGS(ht) = HASH_FLAG_STATIC_KEYS;
 	HT_HASH_RESET(ht);
+
+	return SUCCESS;
 }
 
-static zend_always_inline void zend_hash_real_init_ex(HashTable *ht, bool packed)
+static zend_always_inline void zend_hash_real_init_mixed_ex(HashTable *ht)
+{
+	zend_hash_real_finit_mixed_ex(ht, /* fallible */ false);
+}
+
+static zend_always_inline zend_result zend_hash_real_finit_ex(HashTable *ht, bool packed, bool fallible)
 {
 	HT_ASSERT_RC1(ht);
 	ZEND_ASSERT(HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED);
 	if (packed) {
-		zend_hash_real_init_packed_ex(ht);
+		return zend_hash_real_finit_packed_ex(ht, fallible);
 	} else {
-		zend_hash_real_init_mixed_ex(ht);
+		return zend_hash_real_finit_mixed_ex(ht, fallible);
 	}
+}
+
+static zend_always_inline void zend_hash_real_init_ex(HashTable *ht, bool packed)
+{
+	zend_hash_real_finit_ex(ht, packed, /* fallible */ false);
 }
 
 static const uint32_t uninitialized_bucket[-HT_MIN_MASK] =
@@ -258,7 +292,7 @@ ZEND_API const HashTable zend_empty_array = {
 	.pDestructor = ZVAL_PTR_DTOR
 };
 
-static zend_always_inline void _zend_hash_init_int(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, bool persistent)
+static zend_always_inline zend_result _zend_hash_finit_int(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, bool persistent, bool fallible)
 {
 	GC_SET_REFCOUNT(ht, 1);
 	GC_TYPE_INFO(ht) = GC_ARRAY | (persistent ? ((GC_PERSISTENT|GC_NOT_COLLECTABLE) << GC_FLAGS_SHIFT) : 0);
@@ -270,7 +304,16 @@ static zend_always_inline void _zend_hash_init_int(HashTable *ht, uint32_t nSize
 	ht->nInternalPointer = 0;
 	ht->nNextFreeElement = ZEND_LONG_MIN;
 	ht->pDestructor = pDestructor;
-	ht->nTableSize = zend_hash_check_size(nSize);
+	ht->nTableSize = zend_hash_check_size(nSize, fallible);
+	if (ZEND_CONST_COND(fallible, true) && UNEXPECTED(!ht->nTableSize)) {
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+
+static zend_always_inline void _zend_hash_init_int(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, bool persistent)
+{
+	_zend_hash_finit_int(ht, nSize, pDestructor, persistent, /* fallible */ false);
 }
 
 ZEND_API void ZEND_FASTCALL _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, bool persistent)
@@ -285,10 +328,44 @@ ZEND_API HashTable* ZEND_FASTCALL _zend_new_array_0(void)
 	return ht;
 }
 
+ZEND_API HashTable* ZEND_FASTCALL _zend_fnew_array_0(void)
+{
+	HashTable *ht = femalloc(sizeof(HashTable), /* fallible */ true);
+	if (UNEXPECTED(ht == NULL)) {
+		return NULL;
+	}
+	if (UNEXPECTED(_zend_hash_finit_int(ht, HT_MIN_SIZE, ZVAL_PTR_DTOR, /* persistent */ false, /* fallible */ true) == FAILURE)) {
+		efree(ht);
+		return NULL;
+	}
+	return ht;
+}
+
+ZEND_API HashTable* ZEND_FASTCALL zend_new_array_singleton(void)
+{
+	HashTable *ht = _zend_new_array_0();
+	ht->nTableSize = 1;
+	return ht;
+}
+
 ZEND_API HashTable* ZEND_FASTCALL _zend_new_array(uint32_t nSize)
 {
 	HashTable *ht = emalloc(sizeof(HashTable));
 	_zend_hash_init_int(ht, nSize, ZVAL_PTR_DTOR, 0);
+	return ht;
+}
+
+ZEND_API HashTable* ZEND_FASTCALL _zend_fnew_array(uint32_t nSize)
+{
+	HashTable *ht = femalloc(sizeof(HashTable), /* fallible */ true);
+	if (UNEXPECTED(ht == NULL)) {
+		return NULL;
+	}
+
+	if (UNEXPECTED(_zend_hash_finit_int(ht, nSize, ZVAL_PTR_DTOR, /* persistent */ false, /* fallible */ true) == FAILURE)) {
+		efree(ht);
+		return NULL;
+	}
 	return ht;
 }
 
@@ -307,15 +384,26 @@ ZEND_API HashTable* ZEND_FASTCALL zend_new_pair(const zval *val1, const zval *va
 	return ht;
 }
 
-ZEND_API void ZEND_FASTCALL zend_hash_packed_grow(HashTable *ht)
+ZEND_API zend_result ZEND_FASTCALL zend_hash_packed_fgrow(HashTable *ht, bool fallible)
 {
 	HT_ASSERT_RC1(ht);
 	if (ht->nTableSize >= HT_MAX_SIZE) {
-		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%u * %zu + %zu)", ht->nTableSize * 2, sizeof(Bucket), sizeof(Bucket));
+		zend_mm_delayed_error_or_panic(fallible, "Possible integer overflow in memory allocation (%u * %zu + %zu)", ht->nTableSize * 2, sizeof(Bucket), sizeof(Bucket));
+		return FAILURE;
 	}
 	uint32_t newTableSize = ht->nTableSize * 2;
-	HT_SET_DATA_ADDR(ht, perealloc2(HT_GET_DATA_ADDR(ht), HT_PACKED_SIZE_EX(newTableSize, HT_MIN_MASK), HT_PACKED_USED_SIZE(ht), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT));
+	void *newData = fperealloc2(HT_GET_DATA_ADDR(ht), HT_PACKED_SIZE_EX(newTableSize, HT_MIN_MASK), HT_PACKED_USED_SIZE(ht), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT, fallible);
+	if (ZEND_CONST_COND(fallible, true) && UNEXPECTED(!newData)) {
+		return FAILURE;
+	}
+	HT_SET_DATA_ADDR(ht, newData);
 	ht->nTableSize = newTableSize;
+	return SUCCESS;
+}
+
+ZEND_API void ZEND_FASTCALL zend_hash_packed_grow(HashTable *ht)
+{
+	zend_hash_packed_fgrow(ht, /* fallible */ false);
 }
 
 ZEND_API void ZEND_FASTCALL zend_hash_real_init(HashTable *ht, bool packed)
@@ -326,12 +414,29 @@ ZEND_API void ZEND_FASTCALL zend_hash_real_init(HashTable *ht, bool packed)
 	zend_hash_real_init_ex(ht, packed);
 }
 
+ZEND_API zend_result ZEND_FASTCALL zend_hash_real_finit(HashTable *ht, bool packed, bool fallible)
+{
+	IS_CONSISTENT(ht);
+
+	HT_ASSERT_RC1(ht);
+	return zend_hash_real_finit_ex(ht, packed, fallible);
+}
+
 ZEND_API void ZEND_FASTCALL zend_hash_real_init_packed(HashTable *ht)
 {
 	IS_CONSISTENT(ht);
 
 	HT_ASSERT_RC1(ht);
 	zend_hash_real_init_packed_ex(ht);
+}
+
+/* Fallible variant of zend_hash_real_init_packed */
+ZEND_API zend_result ZEND_FASTCALL zend_hash_real_finit_packed(HashTable *ht, bool fallible)
+{
+	IS_CONSISTENT(ht);
+
+	HT_ASSERT_RC1(ht);
+	return zend_hash_real_finit_packed_ex(ht, fallible);
 }
 
 ZEND_API void ZEND_FASTCALL zend_hash_real_init_mixed(HashTable *ht)
@@ -342,7 +447,16 @@ ZEND_API void ZEND_FASTCALL zend_hash_real_init_mixed(HashTable *ht)
 	zend_hash_real_init_mixed_ex(ht);
 }
 
-ZEND_API void ZEND_FASTCALL zend_hash_packed_to_hash(HashTable *ht)
+/* Fallible variant of zend_hash_real_init_mixed */
+ZEND_API zend_result ZEND_FASTCALL zend_hash_real_finit_mixed(HashTable *ht, bool fallible)
+{
+	IS_CONSISTENT(ht);
+
+	HT_ASSERT_RC1(ht);
+	return zend_hash_real_finit_mixed_ex(ht, fallible);
+}
+
+ZEND_API zend_result ZEND_FASTCALL zend_hash_fconvert_packed_to_hash(HashTable *ht, bool fallible)
 {
 	void *new_data, *old_data = HT_GET_DATA_ADDR(ht);
 	zval *src = ht->arPacked;
@@ -354,7 +468,10 @@ ZEND_API void ZEND_FASTCALL zend_hash_packed_to_hash(HashTable *ht)
 
 	HT_ASSERT_RC1(ht);
 	// Alloc before assign to avoid inconsistencies on OOM
-	new_data = pemalloc(HT_SIZE_EX(nSize, HT_SIZE_TO_MASK(nSize)), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
+	new_data = fpemalloc(HT_SIZE_EX(nSize, HT_SIZE_TO_MASK(nSize)), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT, fallible);
+	if (ZEND_CONST_COND(fallible, true) && UNEXPECTED(!new_data)) {
+		return FAILURE;
+	}
 	HT_FLAGS(ht) &= ~HASH_FLAG_PACKED;
 	ht->nTableMask = HT_SIZE_TO_MASK(ht->nTableSize);
 	HT_SET_DATA_ADDR(ht, new_data);
@@ -368,6 +485,12 @@ ZEND_API void ZEND_FASTCALL zend_hash_packed_to_hash(HashTable *ht)
 	}
 	pefree(old_data, GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
 	zend_hash_rehash(ht);
+	return SUCCESS;
+}
+
+ZEND_API void ZEND_FASTCALL zend_hash_packed_to_hash(HashTable *ht)
+{
+	zend_hash_fconvert_packed_to_hash(ht, /* fallible */ false);
 }
 
 ZEND_API void ZEND_FASTCALL zend_hash_to_packed(HashTable *ht)
@@ -392,25 +515,39 @@ ZEND_API void ZEND_FASTCALL zend_hash_to_packed(HashTable *ht)
 	pefree(old_data, GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
 }
 
-ZEND_API void ZEND_FASTCALL zend_hash_extend(HashTable *ht, uint32_t nSize, bool packed)
+static zend_always_inline zend_result ZEND_FASTCALL _zend_hash_fextend(HashTable *ht, uint32_t nSize, bool packed, bool fallible)
 {
 	HT_ASSERT_RC1(ht);
 
-	if (nSize == 0) return;
+	if (nSize == 0) return SUCCESS;
 
 	ZEND_ASSERT(HT_SIZE_TO_MASK(nSize) != 0);
 
 	if (UNEXPECTED(HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED)) {
 		if (nSize > ht->nTableSize) {
-			ht->nTableSize = zend_hash_check_size(nSize);
+			uint32_t newTableSize = zend_hash_check_size(nSize, fallible);
+			if (ZEND_CONST_COND(fallible, true) && UNEXPECTED(!newTableSize)) {
+				return FAILURE;
+			}
+			ht->nTableSize = newTableSize;
 		}
-		zend_hash_real_init(ht, packed);
+		zend_result status = zend_hash_real_finit(ht, packed, fallible);
+		if (ZEND_CONST_COND(fallible, true) && UNEXPECTED(status == FAILURE)) {
+			return FAILURE;
+		}
 	} else {
 		if (packed) {
 			ZEND_ASSERT(HT_IS_PACKED(ht));
 			if (nSize > ht->nTableSize) {
-				uint32_t newTableSize = zend_hash_check_size(nSize);
-				HT_SET_DATA_ADDR(ht, perealloc2(HT_GET_DATA_ADDR(ht), HT_PACKED_SIZE_EX(newTableSize, HT_MIN_MASK), HT_PACKED_USED_SIZE(ht), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT));
+				uint32_t newTableSize = zend_hash_check_size(nSize, fallible);
+				if (ZEND_CONST_COND(fallible, true) && UNEXPECTED(!newTableSize)) {
+					return FAILURE;
+				}
+				void *new_data = fperealloc2(HT_GET_DATA_ADDR(ht), HT_PACKED_SIZE_EX(newTableSize, HT_MIN_MASK), HT_PACKED_USED_SIZE(ht), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT, fallible);
+				if (ZEND_CONST_COND(fallible, true) && UNEXPECTED(!new_data)) {
+					return FAILURE;
+				}
+				HT_SET_DATA_ADDR(ht, new_data);
 				ht->nTableSize = newTableSize;
 			}
 		} else {
@@ -418,8 +555,14 @@ ZEND_API void ZEND_FASTCALL zend_hash_extend(HashTable *ht, uint32_t nSize, bool
 			if (nSize > ht->nTableSize) {
 				void *new_data, *old_data = HT_GET_DATA_ADDR(ht);
 				Bucket *old_buckets = ht->arData;
-				nSize = zend_hash_check_size(nSize);
-				new_data = pemalloc(HT_SIZE_EX(nSize, HT_SIZE_TO_MASK(nSize)), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
+				nSize = zend_hash_check_size(nSize, fallible);
+				if (ZEND_CONST_COND(fallible, true) && UNEXPECTED(!nSize)) {
+					return FAILURE;
+				}
+				new_data = fpemalloc(HT_SIZE_EX(nSize, HT_SIZE_TO_MASK(nSize)), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT, fallible);
+				if (ZEND_CONST_COND(fallible, true) && UNEXPECTED(!new_data)) {
+					return FAILURE;
+				}
 				ht->nTableSize = nSize;
 				ht->nTableMask = HT_SIZE_TO_MASK(ht->nTableSize);
 				HT_SET_DATA_ADDR(ht, new_data);
@@ -429,6 +572,18 @@ ZEND_API void ZEND_FASTCALL zend_hash_extend(HashTable *ht, uint32_t nSize, bool
 			}
 		}
 	}
+
+	return SUCCESS;
+}
+
+ZEND_API zend_result ZEND_FASTCALL zend_hash_fextend(HashTable *ht, uint32_t nSize, bool packed)
+{
+	return _zend_hash_fextend(ht, nSize, packed, /* fallible */ true);
+}
+
+ZEND_API void ZEND_FASTCALL zend_hash_extend(HashTable *ht, uint32_t nSize, bool packed)
+{
+	_zend_hash_fextend(ht, nSize, packed, /* fallible */ false);
 }
 
 ZEND_API void ZEND_FASTCALL zend_hash_discard(HashTable *ht, uint32_t nNumUsed)
@@ -833,10 +988,16 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 
 	if (UNEXPECTED(HT_FLAGS(ht) & (HASH_FLAG_UNINITIALIZED|HASH_FLAG_PACKED))) {
 		if (EXPECTED(HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED)) {
-			zend_hash_real_init_mixed(ht);
+			zend_result status = zend_hash_real_finit_mixed(ht, flag & HASH_FALLIBLE);
+			if (ZEND_CONST_COND(flag & HASH_FALLIBLE, true) && UNEXPECTED(status == FAILURE)) {
+				return HASH_NOMEM;
+			}
 			goto add_to_hash;
 		} else {
-			zend_hash_packed_to_hash(ht);
+			zend_result status = zend_hash_fconvert_packed_to_hash(ht, flag & HASH_FALLIBLE);
+			if (ZEND_CONST_COND(flag & HASH_FALLIBLE, true) && UNEXPECTED(status == FAILURE)) {
+				return HASH_NOMEM;
+			}
 		}
 	} else if ((flag & HASH_ADD_NEW) == 0 || ZEND_DEBUG) {
 		p = zend_hash_find_bucket(ht, key);
@@ -1005,6 +1166,11 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_update(HashTable *ht, zend_string *key, z
 	return _zend_hash_add_or_update_i(ht, key, pData, HASH_UPDATE);
 }
 
+ZEND_API zval* ZEND_FASTCALL zend_hash_fupdate(HashTable *ht, zend_string *key, zval *pData)
+{
+	return _zend_hash_add_or_update_i(ht, key, pData, HASH_UPDATE | HASH_FALLIBLE);
+}
+
 ZEND_API zval* ZEND_FASTCALL zend_hash_update_ind(HashTable *ht, zend_string *key, zval *pData)
 {
 	return _zend_hash_add_or_update_i(ht, key, pData, HASH_UPDATE | HASH_UPDATE_INDIRECT);
@@ -1015,9 +1181,19 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_add_new(HashTable *ht, zend_string *key, 
 	return _zend_hash_add_or_update_i(ht, key, pData, HASH_ADD_NEW);
 }
 
+ZEND_API zval* ZEND_FASTCALL zend_hash_fadd_new(HashTable *ht, zend_string *key, zval *pData)
+{
+	return _zend_hash_add_or_update_i(ht, key, pData, HASH_ADD_NEW | HASH_FALLIBLE);
+}
+
 ZEND_API zval* ZEND_FASTCALL zend_hash_lookup(HashTable *ht, zend_string *key)
 {
 	return _zend_hash_add_or_update_i(ht, key, NULL, HASH_LOOKUP);
+}
+
+ZEND_API zval* ZEND_FASTCALL zend_hash_flookup(HashTable *ht, zend_string *key)
+{
+	return _zend_hash_add_or_update_i(ht, key, NULL, HASH_LOOKUP | HASH_FALLIBLE);
 }
 
 ZEND_API zval* ZEND_FASTCALL zend_hash_str_add_or_update(HashTable *ht, const char *str, size_t len, zval *pData, uint32_t flag)
@@ -1118,7 +1294,10 @@ replace:
 				ZVAL_COPY_VALUE(zv, pData);
 				return zv;
 			} else { /* we have to keep the order :( */
-				goto convert_to_hash;
+				zend_result status = zend_hash_fconvert_packed_to_hash(ht, flag & HASH_FALLIBLE);
+				if (ZEND_CONST_COND(flag & HASH_FALLIBLE, true) && UNEXPECTED(status == FAILURE)) {
+					return HASH_NOMEM;
+				}
 			}
 		} else if (EXPECTED(h < ht->nTableSize)) {
 add_to_packed:
@@ -1144,21 +1323,34 @@ add_to_packed:
 			return zv;
 		} else if ((h >> 1) < ht->nTableSize &&
 		           (ht->nTableSize >> 1) < ht->nNumOfElements) {
-			zend_hash_packed_grow(ht);
+			zend_result status = zend_hash_packed_fgrow(ht, flag & HASH_FALLIBLE);
+			if (ZEND_CONST_COND(flag & HASH_FALLIBLE, true) && UNEXPECTED(status == FAILURE)) {
+				return HASH_NOMEM;
+			}
 			goto add_to_packed;
 		} else {
+			uint32_t origSize = ht->nTableSize;
 			if (ht->nNumUsed >= ht->nTableSize) {
 				ht->nTableSize += ht->nTableSize;
 			}
-convert_to_hash:
-			zend_hash_packed_to_hash(ht);
+			zend_result status = zend_hash_fconvert_packed_to_hash(ht, flag & HASH_FALLIBLE);
+			if (ZEND_CONST_COND(flag & HASH_FALLIBLE, true) && UNEXPECTED(status == FAILURE)) {
+				ht->nTableSize = origSize;
+				return HASH_NOMEM;
+			}
 		}
 	} else if (HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED) {
 		if (h < ht->nTableSize) {
-			zend_hash_real_init_packed_ex(ht);
+			zend_result status = zend_hash_real_finit_packed_ex(ht, flag & HASH_FALLIBLE);
+			if (ZEND_CONST_COND(flag & HASH_FALLIBLE, true) && UNEXPECTED(status == FAILURE)) {
+				return HASH_NOMEM;
+			}
 			goto add_to_packed;
 		}
-		zend_hash_real_init_mixed(ht);
+		zend_result status = zend_hash_real_finit_mixed(ht, flag & HASH_FALLIBLE);
+		if (ZEND_CONST_COND(flag & HASH_FALLIBLE, true) && UNEXPECTED(status == FAILURE)) {
+			return HASH_NOMEM;
+		}
 	} else {
 		if ((flag & HASH_ADD_NEW) == 0 || ZEND_DEBUG) {
 			p = zend_hash_index_find_bucket(ht, h);
@@ -1227,9 +1419,19 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_index_update(HashTable *ht, zend_ulong h,
 	return _zend_hash_index_add_or_update_i(ht, h, pData, HASH_UPDATE);
 }
 
+ZEND_API zval* ZEND_FASTCALL zend_hash_index_fupdate(HashTable *ht, zend_ulong h, zval *pData)
+{
+	return _zend_hash_index_add_or_update_i(ht, h, pData, HASH_UPDATE | HASH_FALLIBLE);
+}
+
 ZEND_API zval* ZEND_FASTCALL zend_hash_next_index_insert(HashTable *ht, zval *pData)
 {
 	return _zend_hash_index_add_or_update_i(ht, ht->nNextFreeElement, pData, HASH_ADD | HASH_ADD_NEXT);
+}
+
+ZEND_API zval* ZEND_FASTCALL zend_hash_next_index_finsert(HashTable *ht, zval *pData)
+{
+	return _zend_hash_index_add_or_update_i(ht, ht->nNextFreeElement, pData, HASH_ADD | HASH_ADD_NEXT | HASH_FALLIBLE);
 }
 
 ZEND_API zval* ZEND_FASTCALL zend_hash_next_index_insert_new(HashTable *ht, zval *pData)
@@ -1237,9 +1439,19 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_next_index_insert_new(HashTable *ht, zval
 	return _zend_hash_index_add_or_update_i(ht, ht->nNextFreeElement, pData, HASH_ADD | HASH_ADD_NEW | HASH_ADD_NEXT);
 }
 
+ZEND_API zval* ZEND_FASTCALL zend_hash_next_index_finsert_new(HashTable *ht, zval *pData)
+{
+	return _zend_hash_index_add_or_update_i(ht, ht->nNextFreeElement, pData, HASH_ADD | HASH_ADD_NEW | HASH_ADD_NEXT | HASH_FALLIBLE);
+}
+
 ZEND_API zval* ZEND_FASTCALL zend_hash_index_lookup(HashTable *ht, zend_ulong h)
 {
 	return _zend_hash_index_add_or_update_i(ht, h, NULL, HASH_LOOKUP);
+}
+
+ZEND_API zval* ZEND_FASTCALL zend_hash_index_flookup(HashTable *ht, zend_ulong h)
+{
+	return _zend_hash_index_add_or_update_i(ht, h, NULL, HASH_LOOKUP | HASH_FALLIBLE);
 }
 
 ZEND_API zval* ZEND_FASTCALL zend_hash_set_bucket_key(HashTable *ht, Bucket *b, zend_string *key)
@@ -1303,9 +1515,8 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_set_bucket_key(HashTable *ht, Bucket *b, 
 	return &b->val;
 }
 
-static void ZEND_FASTCALL zend_hash_do_resize(HashTable *ht)
+static zend_result ZEND_FASTCALL zend_hash_do_fresize(HashTable *ht, bool fallible)
 {
-
 	IS_CONSISTENT(ht);
 	HT_ASSERT_RC1(ht);
 
@@ -1319,7 +1530,10 @@ static void ZEND_FASTCALL zend_hash_do_resize(HashTable *ht)
 
 		ZEND_ASSERT(HT_SIZE_TO_MASK(nSize) != 0);
 
-		new_data = pemalloc(HT_SIZE_EX(nSize, HT_SIZE_TO_MASK(nSize)), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
+		new_data = fpemalloc(HT_SIZE_EX(nSize, HT_SIZE_TO_MASK(nSize)), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT, fallible);
+		if (ZEND_CONST_COND(fallible, true) && UNEXPECTED(!new_data)) {
+			return FAILURE;
+		}
 		ht->nTableSize = nSize;
 		ht->nTableMask = HT_SIZE_TO_MASK(ht->nTableSize);
 		HT_SET_DATA_ADDR(ht, new_data);
@@ -1327,8 +1541,10 @@ static void ZEND_FASTCALL zend_hash_do_resize(HashTable *ht)
 		pefree(old_data, GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
 		zend_hash_rehash(ht);
 	} else {
-		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%u * %zu + %zu)", ht->nTableSize * 2, sizeof(Bucket) + sizeof(uint32_t), sizeof(Bucket));
+		zend_mm_delayed_error_or_panic(fallible, "Possible integer overflow in memory allocation (%u * %zu + %zu)", ht->nTableSize * 2, sizeof(Bucket) + sizeof(uint32_t), sizeof(Bucket));
+		return FAILURE;
 	}
+	return SUCCESS;
 }
 
 ZEND_API void ZEND_FASTCALL zend_hash_rehash(HashTable *ht)

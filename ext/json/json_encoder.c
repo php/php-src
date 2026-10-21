@@ -171,11 +171,16 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 			php_json_pretty_print_indent(buf, options, encoder);
 
 			if (php_json_escape_string(buf, ZSTR_VAL(prop_info->name), ZSTR_LEN(prop_info->name),
-					options & ~PHP_JSON_NUMERIC_CHECK, encoder) == FAILURE &&
-					(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) &&
-					buf->s) {
-				ZSTR_LEN(buf->s) -= 4;
-				smart_str_appendl(buf, "\"\"", 2);
+					options & ~PHP_JSON_NUMERIC_CHECK, encoder) == FAILURE) {
+				if (ZEND_HAS_OOM()) {
+					PHP_JSON_HASH_UNPROTECT_RECURSION(obj);
+					return FAILURE;
+				}
+				if ((options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) && buf->s) {
+					ZEND_ASSERT(ZSTR_LEN(buf->s) >= 4);
+					ZSTR_LEN(buf->s) -= 4;
+					smart_str_appendl(buf, "\"\"", 2);
+				}
 			}
 
 			smart_str_appendc(buf, ':');
@@ -287,11 +292,17 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 					php_json_pretty_print_indent(buf, options, encoder);
 
 					if (php_json_escape_string(buf, ZSTR_VAL(key), ZSTR_LEN(key),
-								options & ~PHP_JSON_NUMERIC_CHECK, encoder) == FAILURE &&
-							(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) &&
-							buf->s) {
-						ZSTR_LEN(buf->s) -= 4;
-						smart_str_appendl(buf, "\"\"", 2);
+								options & ~PHP_JSON_NUMERIC_CHECK, encoder) == FAILURE) {
+						if (ZEND_HAS_OOM()) {
+							PHP_JSON_HASH_UNPROTECT_RECURSION(myht);
+							zend_release_properties(prop_ht);
+							return FAILURE;
+						}
+						if ((options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) && buf->s) {
+							ZEND_ASSERT(ZSTR_LEN(buf->s) >= 4);
+							ZSTR_LEN(buf->s) -= 4;
+							smart_str_appendl(buf, "\"\"", 2);
+						}
 					}
 				} else {
 					if (need_comma) {
@@ -382,7 +393,9 @@ zend_result php_json_escape_string(
 	checkpoint = buf->s ? ZSTR_LEN(buf->s) : 0;
 
 	/* pre-allocate for string length plus 2 quotes */
-	smart_str_alloc(buf, len+2, 0);
+	if (UNEXPECTED(smart_str_falloc(buf, len+2, 0, /* fallible */ true) == (size_t)-1)) {
+		return FAILURE;
+	}
 	smart_str_appendc(buf, '"');
 
 	pos = 0;
@@ -401,6 +414,11 @@ zend_result php_json_escape_string(
 				break;
 			}
 		} else {
+			/* An escaped byte can append six. */
+			if (ZEND_HAS_OOM()) {
+				ZSTR_LEN(buf->s) = checkpoint;
+				return FAILURE;
+			}
 			if (pos) {
 				smart_str_appendl(buf, s, pos);
 				s += pos;
@@ -624,6 +642,9 @@ static zend_result php_json_encode_serializable_enum(smart_str *buf, zval *val, 
 
 zend_result php_json_encode_zval(smart_str *buf, zval *val, int options, php_json_encoder *encoder) /* {{{ */
 {
+	if (ZEND_HAS_OOM()) {
+		return FAILURE;
+	}
 again:
 	switch (Z_TYPE_P(val))
 	{

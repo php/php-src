@@ -29,5 +29,4 @@ while (1) {
 
 ?>
 --EXPECTF--
-Success
-Fatal error: Allowed memory size of %s bytes exhausted%s(tried to allocate %s bytes) in %s on line %d
+Fatal error: Allowed memory size of 2097152 bytes exhausted %S(tried to allocate %d bytes) in %s on line %d

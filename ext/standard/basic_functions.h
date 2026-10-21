@@ -132,6 +132,7 @@ PHPAPI extern bool register_user_shutdown_function(const char *function_name, si
 PHPAPI extern bool remove_user_shutdown_function(const char *function_name, size_t function_len);
 PHPAPI extern bool append_user_shutdown_function(php_shutdown_function_entry *shutdown_function_entry);
 
+PHPAPI void php_basic_early_rinit(void);
 PHPAPI void php_call_shutdown_functions(void);
 PHPAPI void php_free_shutdown_functions(void);
 

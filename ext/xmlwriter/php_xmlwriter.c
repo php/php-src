@@ -1024,7 +1024,11 @@ static void php_xmlwriter_flush(INTERNAL_FUNCTION_PARAMETERS, int force_string) 
 		if (empty) {
 			RETURN_STR(smart_str_extract(output));
 		} else if (smart_str_get_len(output) > 0) {
-			RETURN_NEW_STR(zend_string_dup(output->s, false));
+			zend_string *ret = zend_string_finit(ZSTR_VAL(output->s), ZSTR_LEN(output->s), /* persistent */ false, /* fallible */ true);
+			if (UNEXPECTED(!ret)) {
+				RETURN_OOM();
+			}
+			RETURN_NEW_STR(ret);
 		} else {
 			RETURN_EMPTY_STRING();
 		}
