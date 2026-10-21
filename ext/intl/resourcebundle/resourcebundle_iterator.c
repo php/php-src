@@ -29,10 +29,17 @@
 /* {{{ resourcebundle_iterator_read */
 static void resourcebundle_iterator_read( ResourceBundle_iterator *iterator )
 {
-	UErrorCode icuerror = U_ZERO_ERROR;
+	UErrorCode icuerror;
 	ResourceBundle_object *rb = iterator->subject;
 
-	rb->child = ures_getByIndex( rb->me, iterator->i, rb->child, &icuerror );
+	ZEND_ASSERT(Z_ISUNDEF(iterator->current));
+
+	/* Skip non-existing resource entries in the bundle, similar to how holes in arrays are skipped
+	 * in foreach loops. See also GH-17317. */
+	do {
+		icuerror = U_ZERO_ERROR;
+		rb->child = ures_getByIndex( rb->me, iterator->i, rb->child, &icuerror );
+	} while (icuerror == U_MISSING_RESOURCE_ERROR && iterator->i++ < iterator->length);
 
 	if (U_SUCCESS(icuerror)) {
 		/* ATTN: key extraction must be the first thing to do... rb->child might be reset in read! */
@@ -43,7 +50,6 @@ static void resourcebundle_iterator_read( ResourceBundle_iterator *iterator )
 	}
 	else {
 		// zend_throw_exception( spl_ce_OutOfRangeException, "Running past end of ResourceBundle", 0);
-		ZVAL_UNDEF(&iterator->current);
 	}
 }
 /* }}} */
@@ -89,7 +95,7 @@ static zval *resourcebundle_iterator_current( zend_object_iterator *iter )
 {
 	ResourceBundle_iterator *iterator = (ResourceBundle_iterator *) iter;
 	if (Z_ISUNDEF(iterator->current)) {
-		resourcebundle_iterator_read( iterator);
+		return NULL;
 	}
 	return &iterator->current;
 }
@@ -100,9 +106,7 @@ static void resourcebundle_iterator_key( zend_object_iterator *iter, zval *key )
 {
 	ResourceBundle_iterator *iterator = (ResourceBundle_iterator *) iter;
 
-	if (Z_ISUNDEF(iterator->current)) {
-		resourcebundle_iterator_read( iterator);
-	}
+	ZEND_ASSERT(!Z_ISUNDEF(iterator->current));
 
 	if (iterator->is_table) {
 		ZVAL_STRING(key, iterator->currentkey);
@@ -119,6 +123,7 @@ static void resourcebundle_iterator_step( zend_object_iterator *iter )
 
 	iterator->i++;
 	resourcebundle_iterator_invalidate( iter );
+	resourcebundle_iterator_read(iterator);
 }
 /* }}} */
 
@@ -129,6 +134,7 @@ static void resourcebundle_iterator_reset( zend_object_iterator *iter )
 
 	iterator->i = 0;
 	resourcebundle_iterator_invalidate( iter );
+	resourcebundle_iterator_read(iterator);
 }
 /* }}} */
 
