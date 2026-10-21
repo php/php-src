@@ -52,6 +52,9 @@
 #include "fopen_wrappers.h"
 #include "ext/standard/php_standard.h"
 #include "ext/standard/dl_arginfo.h"
+
+#include "ext/user_cache/php_user_cache.h"
+
 #include "cli.h"
 #ifdef PHP_WIN32
 #include <io.h>
@@ -385,7 +388,15 @@ static void sapi_cli_send_header(sapi_header_struct *sapi_header, void *server_c
 
 static int php_cli_startup(sapi_module_struct *sapi_module_ptr) /* {{{ */
 {
-	return php_module_startup(sapi_module_ptr, NULL);
+	if (php_module_startup(sapi_module_ptr, NULL) == FAILURE) {
+		return FAILURE;
+	}
+
+	if (php_ucache_opt_in(PHP_UCACHE_MODE_REQ) == FAILURE && php_ucache_is_enabled_by_ini()) {
+		php_error_docref(NULL, E_WARNING, "Unable to register UserCache request mode; UserCache will be unavailable");
+	}
+
+	return SUCCESS;
 }
 /* }}} */
 
