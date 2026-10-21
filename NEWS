@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-24461 (DISCARD ALL on persistent connection cleanup drops
     PgBouncer's prepared statements). (David Carlier, Artem Ukrainskiy)
 
+- Streams:
+  . Fixed bug GH-24506 (stream_select() leaks a stream-error operation level
+    on its FD_SETSIZE failure path). (azjezz)
+
 21 Oct 2026, PHP 8.6.0RC4
 
 - Core:
