@@ -3,6 +3,9 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.6.0RC4
 
 - Core:
+  . Fixed GHSA-w8hw-w9fx-j79w, GHSA-6wmf-4rv5-p3rp (Avoid state corruption via
+    bailout). (CVE-2026-109618, CVE-2026-109619) (Arnaud, ilutov, Jakub Zelenka,
+    ndossche, Nicolas Grekas)
   . Fixed bug GH-24184 (System ID not being reinitialized after an Apache
     graceful restart, potentially causing incompatible OPcache file cache
     entries to be reused). (Levi Morrison)

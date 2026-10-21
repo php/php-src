@@ -26,6 +26,7 @@
 
 #include "zend_globals_macros.h"
 
+#include "zend_alloc.h"
 #include "zend_atomic.h"
 #include "zend_stack.h"
 #include "zend_ptr_stack.h"
@@ -140,6 +141,7 @@ struct _zend_compiler_globals {
 	bool multibyte;
 	bool detect_unicode;
 	bool encoding_declared;
+	bool interned_strings_fallible;
 
 	zend_ast *ast;
 	zend_arena *ast_arena;
@@ -335,6 +337,8 @@ struct _zend_executor_globals {
 	uint32_t       fiber_vm_stack_page_cache_count;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
+
+	zend_oom_info delayed_oom;
 };
 
 #ifdef ZTS

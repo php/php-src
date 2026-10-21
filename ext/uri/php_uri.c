@@ -731,6 +731,11 @@ PHP_METHOD(Uri_Rfc3986_Uri, withFragment)
 
 static void throw_cannot_recompose_uri_to_string(php_uri_object *object)
 {
+	if (ZEND_HAS_OOM()) {
+		zend_handle_delayed_oom();
+		return;
+	}
+
 	zend_throw_exception_ex(php_uri_ce_error, 0, "Cannot recompose %pS to a string", object->std.ce->name);
 }
 
@@ -899,6 +904,9 @@ static void uri_unserialize(INTERNAL_FUNCTION_PARAMETERS)
 
 	uri_object->uri = uri_object->parser->parse(Z_STRVAL_P(uri_zv), Z_STRLEN_P(uri_zv), NULL, NULL, true);
 	if (uri_object->uri == NULL) {
+		if (ZEND_HAS_OOM()) {
+			RETURN_THROWS();
+		}
 		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %pS object", uri_object->std.ce->name);
 		RETURN_THROWS();
 	}
@@ -1003,7 +1011,13 @@ PHP_METHOD(Uri_WhatWg_Url, toUnicodeString)
 	php_uri_object *uri_object = php_uri_object_from_obj(this_object);
 	ZEND_ASSERT(uri_object->uri != NULL);
 
-	RETURN_STR(uri_object->parser->to_string(uri_object->uri, PHP_URI_RECOMPOSITION_MODE_RAW_UNICODE, false));
+	zend_string *uri_str = uri_object->parser->to_string(uri_object->uri, PHP_URI_RECOMPOSITION_MODE_RAW_UNICODE, false);
+	if (uri_str == NULL) {
+		throw_cannot_recompose_uri_to_string(uri_object);
+		RETURN_THROWS();
+	}
+
+	RETURN_STR(uri_str);
 }
 
 PHP_METHOD(Uri_WhatWg_Url, toAsciiString)
@@ -1014,7 +1028,13 @@ PHP_METHOD(Uri_WhatWg_Url, toAsciiString)
 	php_uri_object *uri_object = php_uri_object_from_obj(this_object);
 	ZEND_ASSERT(uri_object->uri != NULL);
 
-	RETURN_STR(uri_object->parser->to_string(uri_object->uri, PHP_URI_RECOMPOSITION_MODE_RAW_ASCII, false));
+	zend_string *uri_str = uri_object->parser->to_string(uri_object->uri, PHP_URI_RECOMPOSITION_MODE_RAW_ASCII, false);
+	if (uri_str == NULL) {
+		throw_cannot_recompose_uri_to_string(uri_object);
+		RETURN_THROWS();
+	}
+
+	RETURN_STR(uri_str);
 }
 
 PHP_METHOD(Uri_WhatWg_Url, resolve)
@@ -1486,7 +1506,12 @@ PHPAPI zend_object *php_uri_object_handler_clone(zend_object *object)
 	ZEND_ASSERT(new_uri_object->parser == uri_object->parser);
 
 	void *uri = uri_object->parser->clone(uri_object->uri);
-	ZEND_ASSERT(uri != NULL);
+	if (UNEXPECTED(uri == NULL)) {
+		ZEND_ASSERT(ZEND_HAS_OOM());
+		zend_object_release(&new_uri_object->std);
+		zend_handle_delayed_oom();
+		return NULL;
+	}
 
 	new_uri_object->uri = uri;
 

@@ -144,7 +144,7 @@ int mbfl_filt_conv_qprintenc(int c, mbfl_convert_filter *filter)
 int mbfl_filt_conv_qprintenc_flush(mbfl_convert_filter *filter)
 {
 	/* flush filter cache */
-	(*filter->filter_function)('\0', filter);
+	CK((*filter->filter_function)('\0', filter));
 	filter->status &= ~0xffff;
 	filter->cache = 0;
 
