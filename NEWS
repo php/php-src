@@ -107,6 +107,10 @@ PHP                                                                        NEWS
   . Fixed session data loss in the files save handler when writing the session
     file fails after it was already truncated. (Ilia Alshanetsky)
 
+- SimpleXML:
+  . Fixed bug GH-24488 (GC double-frees the SimpleXMLElement properties
+    table). (evankford)
+
 - Standard:
   . Fixed bug GH-24399 (usleep() and time_nanosleep() ignore queued APCs on
     Windows). (Nicolas Grekas)
