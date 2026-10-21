@@ -85,6 +85,9 @@ PHP                                                                        NEWS
     zend_jit_assign_dim_op()). (waroad)
   . Fixed bug GH-24398 (JIT: minimal JIT segfault when a hooked property is
     passed to a run-time-resolved function). (waroad)
+  . Fixed tracing JIT returning a wrapped integer instead of a float on
+    integer overflow after an integer was compared with a float or
+    numeric-string literal. (Ilia Alshanetsky)
 
 - PDO:
   . Fixed invalid ATTR_ORACLE_NULLS values being accepted and truncated.
