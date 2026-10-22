@@ -922,11 +922,7 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 						ZVAL_NULL(EX_VAR(opline->result.var));
 					}
 				}
-				if (opline->opcode == ZEND_ASSIGN_DIM
-				 && ((opline+1)->op1_type & (IS_VAR | IS_TMP_VAR))) {
-					zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
-				}
-				return NULL;
+				goto free_op_data;
 			}
 			ZEND_FALLTHROUGH;
 		case IS_NULL:
@@ -954,13 +950,13 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 							ZVAL_NULL(EX_VAR(opline->result.var));
 						}
 					}
-					return NULL;
+					goto free_op_data;
 				}
 				if (EG(exception)) {
 					if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
 						ZVAL_UNDEF(EX_VAR(opline->result.var));
 					}
-					return NULL;
+					goto free_op_data;
 				}
 			}
 			goto num_index;
@@ -984,13 +980,13 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 						ZVAL_NULL(EX_VAR(opline->result.var));
 					}
 				}
-				return NULL;
+				goto free_op_data;
 			}
 			if (EG(exception)) {
 				if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
 				}
-				return NULL;
+				goto free_op_data;
 			}
 			hval = Z_RES_HANDLE_P(dim);
 			goto num_index;
@@ -1012,6 +1008,13 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 			}
 			return NULL;
 	}
+
+free_op_data:
+	if (opline->opcode == ZEND_ASSIGN_DIM
+	 && ((opline+1)->op1_type & (IS_VAR | IS_TMP_VAR))) {
+		zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
+	}
+	return NULL;
 
 str_index:
 	if (ZEND_HANDLE_NUMERIC(offset_key, hval)) {
