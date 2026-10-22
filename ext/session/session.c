@@ -267,7 +267,7 @@ static zend_string *php_session_encode(void) /* {{{ */
 static ZEND_COLD void php_session_cancel_decode(void)
 {
 	if (PS(in_rfc1867_update)) {
-		/* The request decodes the data itself later, without the limits of the upload progress handler */
+		/* Leave the record alone, the request decodes it without these limits */
 		php_session_abort();
 		return;
 	}
