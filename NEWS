@@ -133,6 +133,8 @@ PHP                                                                        NEWS
     (Jorg Sowa)
   . Don't share the unserialize() context with enum autoloaders.
     (Nicolas Grekas)
+  . Fixed bug GH-24373 (serialize() called from a destructor during var_hash
+    destruction reuses the outer var_hash). (David Carlier)
 
 - Streams:
   . Fixed bug GH-24508 (HTTP wrapper leaks the dechunk filter when header
