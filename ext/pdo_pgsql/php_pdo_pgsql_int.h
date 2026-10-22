@@ -45,6 +45,7 @@ typedef struct {
 	bool		emulate_prepares;
 	bool		disable_prepares;
 	HashTable       *lob_streams;
+	HashTable       *prepared_stmts;
 	zend_fcall_info_cache *notice_callback;
 	bool		default_fetching_laziness;
 	zend_long	default_chunk_size;
