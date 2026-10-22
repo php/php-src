@@ -107,6 +107,8 @@ PHP 8.7 UPGRADE NOTES
     rebuilding PHP with --enable-fd-setsize. On Windows, selecting on more than
     64 pipe or file handles no longer crashes; it fails with a warning, as that
     path remains bounded by WaitForMultipleObjects().
+  . When rename() fails because a path does not exist, the warning now says
+    whether the source path is missing or the destination directory is missing.
 
 ========================================
 6. New Functions

@@ -160,6 +160,8 @@ PHP                                                                        NEWS
   . Fixed quoted_printable_decode() truncating input at NUL bytes. (Weilin Du)
   . Fixed version_compare() silently truncating version strings at NUL bytes by
     rejecting such input. (Weilin Du)
+  . rename() warnings for a missing path now say whether the source or the
+    destination directory is missing (GH-8597). (mvanhorn)
   . Fixed bug #60110 (fclose(), file_put_contents(), copy() do not return false
     properly). (Jakub Zelenka, Ilija Tovilo)
   . Fixed three Windows-only proc_open() defects: an uninitialized
