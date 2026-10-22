@@ -1232,9 +1232,9 @@ static int dom_xml_serializing_a_document_node(
 	node->children = NULL;
 
 	/* https://github.com/w3c/DOM-Parsing/issues/50 */
-	TRY(xmlOutputBufferFlush(ctx->out));
-	TRY(xmlSaveDoc(ctx->ctxt, (xmlDocPtr) node));
-	TRY(xmlSaveFlush(ctx->ctxt));
+	TRY_OR_CLEANUP(xmlOutputBufferFlush(ctx->out));
+	TRY_OR_CLEANUP(xmlSaveDoc(ctx->ctxt, (xmlDocPtr) node));
+	TRY_OR_CLEANUP(xmlSaveFlush(ctx->ctxt));
 
 	node->children = child;
 
@@ -1248,6 +1248,10 @@ static int dom_xml_serializing_a_document_node(
 	/* 3. Return the value of serialized document.
 	 *    => We use the output buffer instead. */
 	return 0;
+
+cleanup:
+	node->children = child;
+	return -1;
 }
 
 static zend_always_inline bool dom_xml_serialize_check_stack_limit(void)
