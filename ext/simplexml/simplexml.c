@@ -2180,7 +2180,7 @@ static void sxe_object_free_storage(zend_object *object)
 
 	if (sxe->properties) {
 		ZEND_ASSERT(!(GC_FLAGS(sxe->properties) & IS_ARRAY_IMMUTABLE));
-		zend_hash_release(sxe->properties);
+		zend_array_release(sxe->properties);
 	}
 }
 /* }}} */
