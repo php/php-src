@@ -29,6 +29,13 @@ PHP 8.7 UPGRADE NOTES
     not present in the result set. It previously reported the condition
     through PDO::ATTR_ERRMODE and returned false.
 
+- Reflection:
+  . The public $name and $class properties of ReflectionClass,
+    ReflectionClassConstant, ReflectionProperty, ReflectionMethod,
+    ReflectionFunctionAbstract, ReflectionParameter, ReflectionExtension,
+    ReflectionZendExtension, ReflectionAttribute and ReflectionConstant are
+    now readonly.
+
 - Session:
   . Setting session.cookie_path to a value containing one of ";\r\n", or
     session.cookie_domain to a value containing one of ",; \t\r\n\013\014",

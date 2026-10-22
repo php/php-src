@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_reflection.stub.php instead.
- * Stub hash: c4dcc2653f826c2c437065faec4bf77772ef88b1
+ * Stub hash: 6191049a28b4c5fe134fc37cd8969a33d00c51de
  * Has decl header: yes */
 
 #include "zend_attributes.h"
@@ -1442,7 +1442,7 @@ static zend_class_entry *register_class_ReflectionFunctionAbstract(zend_class_en
 
 	zval property_name_default_value;
 	ZVAL_UNDEF(&property_name_default_value);
-	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_NAME), &property_name_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_NAME), &property_name_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 
 	return class_entry;
 }
@@ -1526,7 +1526,7 @@ static zend_class_entry *register_class_ReflectionMethod(zend_class_entry *class
 
 	zval property_class_default_value;
 	ZVAL_UNDEF(&property_class_default_value);
-	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_CLASS), &property_class_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_CLASS), &property_class_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 
 
 	zend_attribute *attribute_Deprecated_func_setaccessible_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setaccessible", sizeof("setaccessible") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
@@ -1585,7 +1585,7 @@ static zend_class_entry *register_class_ReflectionClass(zend_class_entry *class_
 
 	zval property_name_default_value;
 	ZVAL_UNDEF(&property_name_default_value);
-	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_NAME), &property_name_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_NAME), &property_name_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 
 	return class_entry;
 }
@@ -1687,11 +1687,11 @@ static zend_class_entry *register_class_ReflectionProperty(zend_class_entry *cla
 
 	zval property_name_default_value;
 	ZVAL_UNDEF(&property_name_default_value);
-	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_NAME), &property_name_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_NAME), &property_name_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 
 	zval property_class_default_value;
 	ZVAL_UNDEF(&property_class_default_value);
-	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_CLASS), &property_class_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_CLASS), &property_class_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 
 
 	zend_attribute *attribute_Deprecated_func_setaccessible_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setaccessible", sizeof("setaccessible") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
@@ -1738,11 +1738,11 @@ static zend_class_entry *register_class_ReflectionClassConstant(zend_class_entry
 
 	zval property_name_default_value;
 	ZVAL_UNDEF(&property_name_default_value);
-	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_NAME), &property_name_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_NAME), &property_name_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 
 	zval property_class_default_value;
 	ZVAL_UNDEF(&property_class_default_value);
-	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_CLASS), &property_class_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_CLASS), &property_class_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 
 	return class_entry;
 }
@@ -1757,7 +1757,7 @@ static zend_class_entry *register_class_ReflectionParameter(zend_class_entry *cl
 
 	zval property_name_default_value;
 	ZVAL_UNDEF(&property_name_default_value);
-	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_NAME), &property_name_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_NAME), &property_name_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 
 
 	zend_attribute *attribute_Deprecated_func_getclass_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "getclass", sizeof("getclass") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
@@ -1833,7 +1833,7 @@ static zend_class_entry *register_class_ReflectionExtension(zend_class_entry *cl
 
 	zval property_name_default_value;
 	ZVAL_UNDEF(&property_name_default_value);
-	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_NAME), &property_name_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_NAME), &property_name_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 
 	return class_entry;
 }
@@ -1848,7 +1848,7 @@ static zend_class_entry *register_class_ReflectionZendExtension(zend_class_entry
 
 	zval property_name_default_value;
 	ZVAL_UNDEF(&property_name_default_value);
-	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_NAME), &property_name_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_NAME), &property_name_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 
 	return class_entry;
 }
@@ -1879,7 +1879,7 @@ static zend_class_entry *register_class_ReflectionAttribute(zend_class_entry *cl
 
 	zval property_name_default_value;
 	ZVAL_UNDEF(&property_name_default_value);
-	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_NAME), &property_name_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_NAME), &property_name_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 
 	return class_entry;
 }
@@ -1934,7 +1934,7 @@ static zend_class_entry *register_class_ReflectionConstant(zend_class_entry *cla
 
 	zval property_name_default_value;
 	ZVAL_UNDEF(&property_name_default_value);
-	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_NAME), &property_name_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_NAME), &property_name_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 
 	return class_entry;
 }
