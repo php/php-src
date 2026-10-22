@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d22337c57d9b921e17a7db0673f10de3cc572421 */
+ * Stub hash: de4bd0213b06d7be9e5a55ef7757ca137b03fa0e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -186,6 +186,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_log_err_debug, 0, 1, I
 	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_zend_test_compile_to_ast arginfo_zend_create_unterminated_string
+
 #define arginfo_zend_test_gh18756 arginfo_zend_test_void_return
 
 #define arginfo_zend_test_gh19792 arginfo_zend_test_void_return
@@ -336,6 +338,7 @@ static ZEND_FUNCTION(zend_test_set_fmode);
 static ZEND_FUNCTION(zend_test_cast_fread);
 static ZEND_FUNCTION(zend_test_is_zend_ptr);
 static ZEND_FUNCTION(zend_test_log_err_debug);
+static ZEND_FUNCTION(zend_test_compile_to_ast);
 static ZEND_FUNCTION(zend_test_gh18756);
 static ZEND_FUNCTION(zend_test_gh19792);
 static ZEND_FUNCTION(zend_test_handle_post_data);
@@ -449,6 +452,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_cast_fread, arginfo_zend_test_cast_fread)
 	ZEND_FE(zend_test_is_zend_ptr, arginfo_zend_test_is_zend_ptr)
 	ZEND_FE(zend_test_log_err_debug, arginfo_zend_test_log_err_debug)
+	ZEND_FE(zend_test_compile_to_ast, arginfo_zend_test_compile_to_ast)
 	ZEND_FE(zend_test_gh18756, arginfo_zend_test_gh18756)
 #if (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY("zend_test_gh19792", zif_zend_test_gh19792, arginfo_zend_test_gh19792, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
