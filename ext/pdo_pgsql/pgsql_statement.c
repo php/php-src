@@ -269,9 +269,9 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt)
 
 	bool in_trans = stmt->dbh->methods->in_transaction(stmt->dbh);
 
-	/* in unbuffered mode, finish any running statement: libpq explicitely prohibits this
+	/* in unbuffered mode, finish any running statement: libpq explicitly prohibits this
 	 * and returns a PGRES_FATAL_ERROR when PQgetResult gets called for stmt 2 if DEALLOCATE
-	 * was called for stmt 1 inbetween
+	 * was called for stmt 1 in between
 	 * (maybe it will change with pipeline mode in libpq 14?) */
 	if (S->is_unbuffered && H->running_stmt) {
 		pgsql_stmt_finish(H->running_stmt, FIN_CLOSE);
