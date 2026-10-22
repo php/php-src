@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug GH-24506 (stream_select() leaks a stream-error operation level
     on its FD_SETSIZE failure path). (azjezz)
+  . Fixed bug GH-24508 (HTTP wrapper leaks the dechunk filter when header
+    parsing fails after Transfer-Encoding). (bercedev)
 
 21 Oct 2026, PHP 8.6.0RC4
 
