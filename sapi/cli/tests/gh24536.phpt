@@ -18,7 +18,7 @@ var_dump(stream_get_contents($fp));
 fclose($fp);
 
 $fp = php_cli_server_connect();
-fwrite($fp, "POST / HTTP/1.1\r\nHost: {$host}\r\nContent-Length: 9000000000000000000\r\n\r\nAAAAAAAA");
+fwrite($fp, "POST / HTTP/1.1\r\nHost: {$host}\r\nContent-Length: " . PHP_INT_MAX . "\r\n\r\nAAAAAAAA");
 stream_socket_shutdown($fp, STREAM_SHUT_WR);
 var_dump(stream_get_contents($fp));
 fclose($fp);
