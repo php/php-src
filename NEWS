@@ -190,6 +190,8 @@ PHP                                                                        NEWS
     (Nicolas Grekas)
   . Fixed bug GH-24373 (serialize() called from a destructor during var_hash
     destruction reuses the outer var_hash). (David Carlier)
+  . Fixed bug GH-24552 (Case-insensitive substr_compare(), ksort() and
+    krsort() are still locale-dependent). (Lazizbek Ergashev, Jon Surrell)
   . Fixed bug GH-24605 (var_export() crashes on deeply nested arrays and
     objects). (Labish Bardiya)
 
