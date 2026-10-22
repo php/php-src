@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.6.0RC5
 
+- PDO_PGSQL:
+  . Fixed bug GH-24461 (DISCARD ALL on persistent connection cleanup drops
+    PgBouncer's prepared statements). (David Carlier, Artem Ukrainskiy)
 
 21 Oct 2026, PHP 8.6.0RC4
 
