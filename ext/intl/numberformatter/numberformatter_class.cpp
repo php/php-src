@@ -92,6 +92,17 @@ U_CFUNC PHP_METHOD(IntlNumberFormatter, createFromSkeleton)
 		RETURN_THROWS();
 	}
 
+	const char *scale = zend_memnstr(skeleton, "scale/", sizeof("scale/") - 1, skeleton + skeleton_len);
+
+	if (scale) {
+		scale += sizeof("scale/") - 1;
+		scale += strspn(scale, "0123456789.+-");
+		if (UNEXPECTED(*scale == 'e' || *scale == 'E')) {
+			intl_error_set(nullptr, U_NUMBER_SKELETON_SYNTAX_ERROR, "Number formatter creation failed");
+			RETURN_NULL();
+		}
+	}
+
 	UErrorCode status = U_ZERO_ERROR;
 	UnicodeString uskeleton;
 
