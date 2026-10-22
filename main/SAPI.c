@@ -732,7 +732,7 @@ SAPI_API zend_result sapi_header_op(sapi_header_op_enum op, void *arg)
 		return SUCCESS;
 	} else {
 		/* new line/NUL character safety check */
-		uint32_t i;
+		size_t i;
 		for (i = 0; i < header_line_len; i++) {
 			/* RFC 7230 ch. 3.2.4 deprecates folding support */
 			if (header_line[i] == '\n' || header_line[i] == '\r') {
