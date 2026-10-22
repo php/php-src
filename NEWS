@@ -27,6 +27,10 @@ PHP                                                                        NEWS
     so an in-process engine restart keeps growing the map_ptr table).
     (David Carlier)
 
+- CLI:
+  . Fixed bug GH-24536 (Built-in server crashes on a huge chunk size or
+    Content-Length). (lazerg)
+
 - Date:
   . Fixed bug GH-20503 (Assertion failure with ext/date DateInterval property
     hash construction). (heathdutton)
