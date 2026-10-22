@@ -109,6 +109,9 @@ PHP                                                                        NEWS
 - SAPI:
   . Fixed infinite loop in sapi_header_op() for headers of 4 GiB or more.
     (Martin Mirchev)
+  . Fixed header length truncation to 32 bits, which let setcookie() and
+    setrawcookie() skip the new line/NUL check for headers of 4 GiB or more.
+    (Jorg Sowa)
 
 - SOAP:
   . Fixed use of uninitialized func in do_request() on OOM bailout.
