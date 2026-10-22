@@ -6854,15 +6854,73 @@ static bool php_is_true(zval *zv)
 	}
 }
 
+static bool php_array_filter_validate_mode(zend_long use_type, uint32_t arg_num)
+{
+	switch (use_type) {
+		case ARRAY_FILTER_USE_VALUE:
+		case ARRAY_FILTER_USE_BOTH:
+		case ARRAY_FILTER_USE_KEY:
+			return true;
+		default:
+			zend_argument_value_error(arg_num, "must be one of ARRAY_FILTER_USE_VALUE, ARRAY_FILTER_USE_KEY, or ARRAY_FILTER_USE_BOTH");
+			return false;
+	}
+}
+
+enum php_array_filter_result {
+	PHP_ARRAY_FILTER_EXCEPTION = -1,
+	PHP_ARRAY_FILTER_REJECT = 0,
+	PHP_ARRAY_FILTER_ACCEPT = 1,
+};
+
+static zend_always_inline enum php_array_filter_result php_array_filter_call(
+	zend_fcall_info *fci, zend_fcall_info_cache *fci_cache, zend_long use_type,
+	zend_ulong num_key, zend_string *string_key, zval *operand)
+{
+	zval args[2];
+	zval retval;
+	zval *key = use_type == ARRAY_FILTER_USE_BOTH ? &args[1] : &args[0];
+
+	if (use_type != ARRAY_FILTER_USE_VALUE) {
+		if (!string_key) {
+			ZVAL_LONG(key, num_key);
+		} else {
+			ZVAL_STR(key, string_key);
+		}
+	}
+	if (use_type != ARRAY_FILTER_USE_KEY) {
+		ZVAL_COPY_VALUE(&args[0], operand);
+	}
+
+	fci->retval = &retval;
+	fci->params = args;
+	fci->param_count = use_type == ARRAY_FILTER_USE_BOTH ? 2 : 1;
+
+	zend_result result = zend_call_function(fci, fci_cache);
+	ZEND_ASSERT(result == SUCCESS);
+
+	if (UNEXPECTED(EG(exception))) {
+		return PHP_ARRAY_FILTER_EXCEPTION;
+	}
+
+	return php_is_true(&retval) ? PHP_ARRAY_FILTER_ACCEPT : PHP_ARRAY_FILTER_REJECT;
+}
+
+static zend_always_inline void php_array_filter_add(HashTable *target, zend_ulong num_key, zend_string *string_key, zval *operand)
+{
+	if (string_key) {
+		operand = zend_hash_add_new(target, string_key, operand);
+	} else {
+		operand = zend_hash_index_add_new(target, num_key, operand);
+	}
+	zval_add_ref(operand);
+}
+
 /* {{{ Filters elements from the array via the callback. */
 PHP_FUNCTION(array_filter)
 {
 	zval *array;
 	zval *operand;
-	zval *key;
-	zval args[2];
-	zval retval;
-	bool have_callback = 0;
 	zend_long use_type = ARRAY_FILTER_USE_VALUE;
 	zend_string *string_key;
 	zend_fcall_info fci = empty_fcall_info;
@@ -6876,13 +6934,7 @@ PHP_FUNCTION(array_filter)
 		Z_PARAM_LONG(use_type)
 	ZEND_PARSE_PARAMETERS_END();
 
-	switch (use_type) {
-		case ARRAY_FILTER_USE_VALUE:
-		case ARRAY_FILTER_USE_BOTH:
-		case ARRAY_FILTER_USE_KEY:
-			break;
-		default:
-			zend_argument_value_error(3, "must be one of ARRAY_FILTER_USE_VALUE, ARRAY_FILTER_USE_KEY, or ARRAY_FILTER_USE_BOTH");
+	if (!php_array_filter_validate_mode(use_type, 3)) {
 		RETURN_THROWS();
 	}
 
@@ -6891,54 +6943,76 @@ PHP_FUNCTION(array_filter)
 	}
 	array_init(return_value);
 
-	if (ZEND_FCI_INITIALIZED(fci)) {
-		have_callback = 1;
-		fci.retval = &retval;
-		if (use_type == ARRAY_FILTER_USE_BOTH) {
-			fci.param_count = 2;
-			key = &args[1];
-		} else {
-			fci.param_count = 1;
-			key = &args[0];
-		}
-	}
+	bool have_callback = ZEND_FCI_INITIALIZED(fci);
 
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_key, string_key, operand) {
 		if (have_callback) {
-			if (use_type != ARRAY_FILTER_USE_VALUE) {
-				/* Set up the key */
-				if (!string_key) {
-					ZVAL_LONG(key, num_key);
-				} else {
-					ZVAL_STR(key, string_key);
-				}
-			}
-			if (use_type != ARRAY_FILTER_USE_KEY) {
-				ZVAL_COPY_VALUE(&args[0], operand);
-			}
-			fci.params = args;
+			enum php_array_filter_result result = php_array_filter_call(&fci, &fci_cache, use_type, num_key, string_key, operand);
 
-			zend_result result = zend_call_function(&fci, &fci_cache);
-			ZEND_ASSERT(result == SUCCESS);
-
-			if (UNEXPECTED(EG(exception))) {
+			if (UNEXPECTED(result == PHP_ARRAY_FILTER_EXCEPTION)) {
 				RETURN_THROWS();
 			}
 
-			if (!php_is_true(&retval)) {
+			if (result == PHP_ARRAY_FILTER_REJECT) {
 				continue;
 			}
 		} else if (!zend_is_true(operand)) {
 			continue;
 		}
 
-		if (string_key) {
-			operand = zend_hash_add_new(Z_ARRVAL_P(return_value), string_key, operand);
-		} else {
-			operand = zend_hash_index_add_new(Z_ARRVAL_P(return_value), num_key, operand);
-		}
-		zval_add_ref(operand);
+		php_array_filter_add(Z_ARRVAL_P(return_value), num_key, string_key, operand);
 	} ZEND_HASH_FOREACH_END();
+}
+/* }}} */
+
+/* {{{ Splits the array into elements for which the callback returns true and those for which it returns false. */
+PHP_FUNCTION(array_partition)
+{
+	zval *array;
+	zval *operand;
+	zval matching;
+	zval non_matching;
+	zend_long use_type = ARRAY_FILTER_USE_VALUE;
+	zend_string *string_key;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache;
+	zend_ulong num_key;
+
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_ARRAY(array)
+		Z_PARAM_FUNC(fci, fci_cache)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(use_type)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!php_array_filter_validate_mode(use_type, 3)) {
+		RETURN_THROWS();
+	}
+
+	if (zend_hash_num_elements(Z_ARRVAL_P(array)) == 0) {
+		ZVAL_EMPTY_ARRAY(&matching);
+		ZVAL_EMPTY_ARRAY(&non_matching);
+		RETURN_ARR(zend_new_pair(&matching, &non_matching));
+	}
+
+	array_init(&matching);
+	array_init(&non_matching);
+
+	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_key, string_key, operand) {
+		enum php_array_filter_result result = php_array_filter_call(&fci, &fci_cache, use_type, num_key, string_key, operand);
+
+		if (UNEXPECTED(result == PHP_ARRAY_FILTER_EXCEPTION)) {
+			zval_ptr_dtor(&matching);
+			zval_ptr_dtor(&non_matching);
+			RETURN_THROWS();
+		}
+
+		php_array_filter_add(
+			result == PHP_ARRAY_FILTER_ACCEPT ? Z_ARRVAL(matching) : Z_ARRVAL(non_matching),
+			num_key, string_key, operand);
+	} ZEND_HASH_FOREACH_END();
+
+	RETURN_ARR(zend_new_pair(&matching, &non_matching));
 }
 /* }}} */
 
