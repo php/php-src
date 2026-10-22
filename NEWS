@@ -53,6 +53,7 @@ PHP                                                                        NEWS
     from a foreign document). (David Carlier)
   . Fixed DOMXPath crash wrapping a foreign node after a nodeset callback.
     (Ilia Alshanetsky)
+  . Fix error paths in dom_xml_serializing_a_document_node(). (ndossche)
 
 - FFI:
   . Fixed bug GH-24582 (Memory leaks in ext/ffi parser when finalize_type()
