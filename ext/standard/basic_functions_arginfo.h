@@ -1,5 +1,5 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: 0417817c5b2264dc58d63140d7c0ee0f0be35a65
+ * Stub hash: 4d3598866c4300007d25e391fe918f9808b55375
  * Has decl header: yes */
 
 #include "zend_attributes.h"
@@ -353,12 +353,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_filter, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "ARRAY_FILTER_USE_VALUE")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_partition, 0, 2, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "ARRAY_FILTER_USE_VALUE")
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_find, 0, 2, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
@@ -372,6 +366,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_any, 0, 2, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_array_all arginfo_array_any
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_partition, 0, 2, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_map, 0, 2, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 1)
@@ -2456,11 +2455,11 @@ ZEND_FUNCTION(array_sum);
 ZEND_FUNCTION(array_product);
 ZEND_FUNCTION(array_reduce);
 ZEND_FUNCTION(array_filter);
-ZEND_FUNCTION(array_partition);
 ZEND_FUNCTION(array_find);
 ZEND_FUNCTION(array_find_key);
 ZEND_FUNCTION(array_any);
 ZEND_FUNCTION(array_all);
+ZEND_FUNCTION(array_partition);
 ZEND_FUNCTION(array_map);
 ZEND_FUNCTION(array_key_exists);
 ZEND_FUNCTION(array_chunk);
@@ -3062,11 +3061,11 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("array_product", zif_array_product, arginfo_array_product, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_FE(array_reduce, arginfo_array_reduce)
 	ZEND_FE(array_filter, arginfo_array_filter)
-	ZEND_FE(array_partition, arginfo_array_partition)
 	ZEND_FE(array_find, arginfo_array_find)
 	ZEND_FE(array_find_key, arginfo_array_find_key)
 	ZEND_FE(array_any, arginfo_array_any)
 	ZEND_FE(array_all, arginfo_array_all)
+	ZEND_FE(array_partition, arginfo_array_partition)
 	ZEND_FE(array_map, arginfo_array_map)
 	ZEND_RAW_FENTRY("array_key_exists", zif_array_key_exists, arginfo_array_key_exists, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("key_exists", zif_array_key_exists, arginfo_key_exists, 0, NULL, NULL)

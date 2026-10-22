@@ -93,8 +93,8 @@ PHP 8.7 UPGRADE NOTES
 - Standard:
   . Added array_partition() to split an array into the elements for which a
     callback returns a truthy value and those for which it does not, in a
-    single pass. Keys are preserved, and the $mode argument accepts the same
-    ARRAY_FILTER_USE_* constants as array_filter().
+    single pass. Keys are preserved, and the callback receives the value and
+    the key, like array_find().
     RFC: https://wiki.php.net/rfc/array_partition
 
 ========================================

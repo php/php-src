@@ -10,7 +10,7 @@ echo "*** Non-sequential int keys ***\n";
 var_dump(array_partition([10 => 'x', 5 => 'y', -3 => 'z'], fn($v) => $v !== 'y'));
 
 echo "*** Mixed keys ***\n";
-var_dump(array_partition([0 => 'zero', 'one' => 1, 7 => 'seven', 'two' => 2], 'is_string'));
+var_dump(array_partition([0 => 'zero', 'one' => 1, 7 => 'seven', 'two' => 2], fn($v) => is_string($v)));
 
 ?>
 --EXPECT--

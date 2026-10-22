@@ -1886,8 +1886,6 @@ function array_reduce(array $array, callable $callback, mixed $initial = null): 
 
 function array_filter(array $array, ?callable $callback = null, int $mode = ARRAY_FILTER_USE_VALUE): array {}
 
-function array_partition(array $array, callable $callback, int $mode = ARRAY_FILTER_USE_VALUE): array {}
-
 function array_find(array $array, callable $callback): mixed {}
 
 function array_find_key(array $array, callable $callback): mixed {}
@@ -1895,6 +1893,8 @@ function array_find_key(array $array, callable $callback): mixed {}
 function array_any(array $array, callable $callback): bool {}
 
 function array_all(array $array, callable $callback): bool {}
+
+function array_partition(array $array, callable $callback): array {}
 
 function array_map(?callable $callback, array $array, array ...$arrays): array {}
 

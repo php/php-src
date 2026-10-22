@@ -13,7 +13,7 @@ try {
             throw new RuntimeException("failed on $k");
         }
         return true;
-    }, ARRAY_FILTER_USE_BOTH);
+    });
 } catch (RuntimeException $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
