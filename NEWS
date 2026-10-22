@@ -2,6 +2,11 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.6.0RC5
 
+- Opcache:
+  . Fixed tracing JIT returning a wrapped integer instead of a float on
+    integer overflow after an integer was compared with a float or
+    numeric-string literal. (Ilia Alshanetsky)
+
 - PDO_PGSQL:
   . Fixed bug GH-24461 (DISCARD ALL on persistent connection cleanup drops
     PgBouncer's prepared statements). (David Carlier, Artem Ukrainskiy)
