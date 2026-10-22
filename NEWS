@@ -100,6 +100,10 @@ PHP                                                                        NEWS
   . Fixed a crash in readline_info() when completion_append_character
     contains a non-ASCII byte. (Weilin Du)
 
+- SAPI:
+  . Fixed infinite loop in sapi_header_op() for headers of 4 GiB or more.
+    (Martin Mirchev)
+
 - Session:
   . Fixed session data loss in the files save handler when writing the session
     file fails after it was already truncated. (Ilia Alshanetsky)
