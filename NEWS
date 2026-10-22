@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed tracing JIT returning a wrapped integer instead of a float on
     integer overflow after an integer was compared with a float or
     numeric-string literal. (Ilia Alshanetsky)
+  . Fixed use-after-free in JIT ASSIGN_DIM_OP when concatenating into an
+    empty array element. (jorgsowa)
 
 - PDO_PGSQL:
   . Fixed bug GH-24461 (DISCARD ALL on persistent connection cleanup drops
