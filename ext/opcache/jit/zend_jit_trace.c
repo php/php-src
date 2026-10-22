@@ -3721,7 +3721,7 @@ static void zend_jit_trace_update_condition_ranges(const zend_op *opline, const 
 	zend_long op1_min, op1_max, op2_min, op2_max;
 
 	if ((OP1_INFO() & MAY_BE_ANY) != MAY_BE_LONG
-	 || (OP1_INFO() & MAY_BE_ANY) != MAY_BE_LONG) {
+	 || (OP2_INFO() & MAY_BE_ANY) != MAY_BE_LONG) {
 		return;
 	}
 

@@ -49,6 +49,9 @@ PHP                                                                        NEWS
     MariaDB PAM account). (lazerg)
 
 - Opcache:
+  . Fixed tracing JIT returning a wrapped integer instead of a float on
+    integer overflow after an integer was compared with a float or
+    numeric-string literal. (Ilia Alshanetsky)
   . Fixed bug GH-17626 (JIT corrupts an opline handler when blacklisting a
     root trace at the opcache.jit_max_root_traces limit, causing spurious
     "Too few arguments" errors and crashes). (RV7PR)
