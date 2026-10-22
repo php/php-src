@@ -57,6 +57,9 @@ PHP                                                                        NEWS
 - FTP:
   . Fix double free in ext/ftp data_accept() on accept failure. (alepacheco)
 
+- Hash:
+  . Fix GOST and Snefru digests of 512 MiB or more. (Martin Mirchev)
+
 - MBString:
   . Fixed bug GH-23958 (truncated encoding names resolving to full names). (Kamil Tekiela)
   . Fixed out-of-bounds read in php_mb_rfc1867_getword() on a multibyte lead
