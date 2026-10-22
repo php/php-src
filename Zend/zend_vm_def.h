@@ -10431,9 +10431,11 @@ ZEND_VM_HELPER(zend_interrupt_helper, ANY, ANY)
 		zend_handle_delayed_oom();
 		HANDLE_EXCEPTION();
 	} else if (zend_interrupt_function) {
+		bool exception_was_pending = EG(exception) != NULL;
+
 		zend_interrupt_function(execute_data);
 		if (EG(exception)) {
-			zend_cleanup_interrupted_op();
+			zend_cleanup_interrupted_op(exception_was_pending);
 		}
 		ZEND_VM_ENTER();
 	}

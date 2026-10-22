@@ -3242,10 +3242,10 @@ static void ZEND_FASTCALL zend_jit_free_trampoline_helper(zend_function *func)
 	zend_free_trampoline(func);
 }
 
-static void ZEND_FASTCALL zend_jit_exception_in_interrupt_handler_helper(void)
+static void ZEND_FASTCALL zend_jit_exception_in_interrupt_handler_helper(const zend_object *prev_exception)
 {
 	if (EG(exception)) {
-		zend_cleanup_interrupted_op();
+		zend_cleanup_interrupted_op(prev_exception != NULL);
 	}
 }
 

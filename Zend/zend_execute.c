@@ -4805,50 +4805,53 @@ static void zend_cleanup_interrupted_operand(zend_execute_data *execute_data, co
 }
 /* }}} */
 
-/* Called when the interrupt function throws. The VM checks for interrupts
- * after setting opline to the next op (e.g. the target of a jump), so the
- * exception is attributed to an op that did not run. */
-ZEND_API void zend_cleanup_interrupted_op(void) /* {{{ */
+/* Called when EG(exception) is set after the interrupt function was called.
+ * The VM checks for interrupts after setting opline to the next op (e.g. the
+ * target of a jump), so an exception that the interrupt function throws is
+ * attributed to an op that did not run. */
+ZEND_API void zend_cleanup_interrupted_op(bool exception_was_pending) /* {{{ */
 {
 	zend_execute_data *execute_data = EG(current_execute_data);
 	const zend_op *throw_op = EG(opline_before_exception);
 	uint32_t op_num;
 	int i;
 
-	if (!throw_op || EX(opline)->opcode != ZEND_HANDLE_EXCEPTION) {
-		/* The exception was already pending when the interrupt was handled
-		 * (e.g. on the jump to a catch block): throw_op did run. */
+	if (!throw_op) {
 		return;
 	}
 
-	/* Live ranges end at the op that frees the var (e.g. the FE_FREE of a
-	 * foreach loop), so ZEND_HANDLE_EXCEPTION does not free vars whose live
-	 * range ends at throw_op. throw_op did not free them, so do it here. */
-	op_num = throw_op - EX(func)->op_array.opcodes;
-	for (i = 0; i < EX(func)->op_array.last_live_range; i++) {
-		const zend_live_range *range = &EX(func)->op_array.live_range[i];
-		if (range->start > op_num) {
-			break;
-		} else if (range->end == op_num) {
-			cleanup_live_var(execute_data, range, op_num);
+	/* If the exception was already pending when the interrupt was handled
+	 * (e.g. when Generator::throw() resumes a generator), throw_op did run. */
+	if (!exception_was_pending && EX(opline)->opcode == ZEND_HANDLE_EXCEPTION) {
+		/* Live ranges end at the op that frees the var (e.g. the FE_FREE of a
+		 * foreach loop), so ZEND_HANDLE_EXCEPTION does not free vars whose live
+		 * range ends at throw_op. throw_op did not free them, so do it here. */
+		op_num = throw_op - EX(func)->op_array.opcodes;
+		for (i = 0; i < EX(func)->op_array.last_live_range; i++) {
+			const zend_live_range *range = &EX(func)->op_array.live_range[i];
+			if (range->start > op_num) {
+				break;
+			} else if (range->end == op_num) {
+				cleanup_live_var(execute_data, range, op_num);
+			}
 		}
-	}
 
-	/* A var defined by the op just before throw_op has no live range (it would
-	 * be trivial), e.g. the result of the last branch of a ternary. */
-	if (op_num > 0) {
-		const zend_op *def = throw_op - 1;
+		/* A var defined by the op just before throw_op has no live range (it would
+		 * be trivial), e.g. the result of the last branch of a ternary. */
+		if (op_num > 0) {
+			const zend_op *def = throw_op - 1;
 
-		if ((throw_op->op1_type & (IS_TMP_VAR|IS_VAR)) && throw_op->op1.var == def->result.var) {
-			zend_cleanup_interrupted_operand(execute_data, def, throw_op);
-		}
-		if ((throw_op->op2_type & (IS_TMP_VAR|IS_VAR)) && throw_op->op2.var == def->result.var) {
-			zend_cleanup_interrupted_operand(execute_data, def, throw_op);
-		}
-		if (op_num + 1 < EX(func)->op_array.last
-		 && (throw_op+1)->opcode == ZEND_OP_DATA
-		 && ((throw_op+1)->op1_type & (IS_TMP_VAR|IS_VAR)) && (throw_op+1)->op1.var == def->result.var) {
-			zend_cleanup_interrupted_operand(execute_data, def, throw_op);
+			if ((throw_op->op1_type & (IS_TMP_VAR|IS_VAR)) && throw_op->op1.var == def->result.var) {
+				zend_cleanup_interrupted_operand(execute_data, def, throw_op);
+			}
+			if ((throw_op->op2_type & (IS_TMP_VAR|IS_VAR)) && throw_op->op2.var == def->result.var) {
+				zend_cleanup_interrupted_operand(execute_data, def, throw_op);
+			}
+			if (op_num + 1 < EX(func)->op_array.last
+			 && (throw_op+1)->opcode == ZEND_OP_DATA
+			 && ((throw_op+1)->op1_type & (IS_TMP_VAR|IS_VAR)) && (throw_op+1)->op1.var == def->result.var) {
+				zend_cleanup_interrupted_operand(execute_data, def, throw_op);
+			}
 		}
 	}
 
