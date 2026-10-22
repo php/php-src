@@ -17,6 +17,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-24508 (HTTP wrapper leaks the dechunk filter when header
     parsing fails after Transfer-Encoding). (bercedev)
 
+- Zlib:
+  . Fixed bug GH-24533 (zlib.lib could not be found because zlib 1.3.2
+    CMake build does not emit it). (Lazizbek Ergashev)
+
 21 Oct 2026, PHP 8.6.0RC4
 
 - Core:
