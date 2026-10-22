@@ -1264,6 +1264,8 @@ out:
 		if (stream->writepos > stream->readpos) {
 			php_stream_notify_progress_increment(context, stream->writepos - stream->readpos, 0);
 		}
+	} else if (header_info.transfer_encoding) {
+		php_stream_filter_free(header_info.transfer_encoding);
 	}
 
 	return stream;
