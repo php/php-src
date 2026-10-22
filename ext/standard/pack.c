@@ -218,8 +218,15 @@ PHP_FUNCTION(pack)
 	ZEND_PARSE_PARAMETERS_END();
 
 	/* We have a maximum of <formatlen> format codes to deal with */
-	formatcodes = safe_emalloc(formatlen, sizeof(*formatcodes), 0);
-	formatargs = safe_emalloc(formatlen, sizeof(*formatargs), 0);
+	formatcodes = safe_femalloc(formatlen, sizeof(*formatcodes), 0, true);
+	if (UNEXPECTED(formatcodes == NULL)) {
+		RETURN_OOM();
+	}
+	formatargs = safe_femalloc(formatlen, sizeof(*formatargs), 0, true);
+	if (UNEXPECTED(formatargs == NULL)) {
+		efree(formatcodes);
+		RETURN_OOM();
+	}
 	currentarg = 0;
 
 	/* Preprocess format into formatcodes and formatargs */
@@ -428,7 +435,12 @@ too_few_args:
 		}
 	}
 
-	output = zend_string_alloc(outputsize, 0);
+	output = zend_string_falloc(outputsize, 0, true);
+	if (UNEXPECTED(output == NULL)) {
+		efree(formatcodes);
+		efree(formatargs);
+		RETURN_OOM();
+	}
 	outputpos = 0;
 	currentarg = 0;
 
