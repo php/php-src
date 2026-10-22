@@ -104,6 +104,10 @@ PHP                                                                        NEWS
   . Fixed a crash in readline_info() when completion_append_character
     contains a non-ASCII byte. (Weilin Du)
 
+- SAPI:
+  . Fixed infinite loop in sapi_header_op() for headers of 4 GiB or more.
+    (Martin Mirchev)
+
 - SOAP:
   . Fixed use of uninitialized func in do_request() on OOM bailout.
     (David Carlier)
