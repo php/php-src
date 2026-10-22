@@ -316,7 +316,11 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 				}
 			}
 
+			/* Do not let a destructor re-enter the unserializer: it would reuse the
+			 * var_hash (and its var_entries chunks) that we are destroying here. */
+			BG(serialize_lock)++;
 			i_zval_ptr_dtor(zv);
+			BG(serialize_lock)--;
 		}
 		next = var_dtor_hash->next;
 		efree_size(var_dtor_hash, sizeof(var_dtor_entries));
