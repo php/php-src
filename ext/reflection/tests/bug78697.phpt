@@ -6,9 +6,9 @@ trait T {}
 
 try {
     (new ReflectionClass(new stdClass))->implementsInterface(T::class);
-} catch (ReflectionException $e) {
-    echo $e->getMessage();
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-T is not an interface
+ReflectionException: T is not an interface

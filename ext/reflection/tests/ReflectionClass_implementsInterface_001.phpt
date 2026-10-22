@@ -24,14 +24,14 @@ foreach ($rcs as $childName => $child) {
         echo "   - Using object argument: ";
         try {
             var_dump($child->implementsInterface($parent));
-        } catch (Exception|TypeError $e) {
-            echo $e->getMessage() . "\n";
+        } catch (Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
         echo "   - Using string argument: ";
         try {
             var_dump($child->implementsInterface($parentName));
-        } catch (Exception|TypeError $e) {
-            echo $e->getMessage() . "\n";
+        } catch (Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }
 }
@@ -41,40 +41,40 @@ foreach ($rcs as $childName => $child) {
 echo "\n\nTest bad arguments:\n";
 try {
     $rcs['A']->implementsInterface();
-} catch (ArgumentCountError $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $rcs['A']->implementsInterface('C', 'C');
-} catch (ArgumentCountError $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $rcs['A']->implementsInterface(null);
-} catch (ReflectionException $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $rcs['A']->implementsInterface('ThisClassDoesNotExist');
-} catch (ReflectionException $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $rcs['A']->implementsInterface(2);
-} catch (ReflectionException $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
 Does A implement A?
-   - Using object argument: A is not an interface
-   - Using string argument: A is not an interface
+   - Using object argument: ReflectionException: A is not an interface
+   - Using string argument: ReflectionException: A is not an interface
 Does A implement B?
-   - Using object argument: B is not an interface
-   - Using string argument: B is not an interface
+   - Using object argument: ReflectionException: B is not an interface
+   - Using string argument: ReflectionException: B is not an interface
 Does A implement C?
-   - Using object argument: C is not an interface
-   - Using string argument: C is not an interface
+   - Using object argument: ReflectionException: C is not an interface
+   - Using string argument: ReflectionException: C is not an interface
 Does A implement I1?
    - Using object argument: bool(true)
    - Using string argument: bool(true)
@@ -82,14 +82,14 @@ Does A implement I2?
    - Using object argument: bool(false)
    - Using string argument: bool(false)
 Does B implement A?
-   - Using object argument: A is not an interface
-   - Using string argument: A is not an interface
+   - Using object argument: ReflectionException: A is not an interface
+   - Using string argument: ReflectionException: A is not an interface
 Does B implement B?
-   - Using object argument: B is not an interface
-   - Using string argument: B is not an interface
+   - Using object argument: ReflectionException: B is not an interface
+   - Using string argument: ReflectionException: B is not an interface
 Does B implement C?
-   - Using object argument: C is not an interface
-   - Using string argument: C is not an interface
+   - Using object argument: ReflectionException: C is not an interface
+   - Using string argument: ReflectionException: C is not an interface
 Does B implement I1?
    - Using object argument: bool(true)
    - Using string argument: bool(true)
@@ -97,14 +97,14 @@ Does B implement I2?
    - Using object argument: bool(false)
    - Using string argument: bool(false)
 Does C implement A?
-   - Using object argument: A is not an interface
-   - Using string argument: A is not an interface
+   - Using object argument: ReflectionException: A is not an interface
+   - Using string argument: ReflectionException: A is not an interface
 Does C implement B?
-   - Using object argument: B is not an interface
-   - Using string argument: B is not an interface
+   - Using object argument: ReflectionException: B is not an interface
+   - Using string argument: ReflectionException: B is not an interface
 Does C implement C?
-   - Using object argument: C is not an interface
-   - Using string argument: C is not an interface
+   - Using object argument: ReflectionException: C is not an interface
+   - Using string argument: ReflectionException: C is not an interface
 Does C implement I1?
    - Using object argument: bool(true)
    - Using string argument: bool(true)
@@ -112,14 +112,14 @@ Does C implement I2?
    - Using object argument: bool(true)
    - Using string argument: bool(true)
 Does I1 implement A?
-   - Using object argument: A is not an interface
-   - Using string argument: A is not an interface
+   - Using object argument: ReflectionException: A is not an interface
+   - Using string argument: ReflectionException: A is not an interface
 Does I1 implement B?
-   - Using object argument: B is not an interface
-   - Using string argument: B is not an interface
+   - Using object argument: ReflectionException: B is not an interface
+   - Using string argument: ReflectionException: B is not an interface
 Does I1 implement C?
-   - Using object argument: C is not an interface
-   - Using string argument: C is not an interface
+   - Using object argument: ReflectionException: C is not an interface
+   - Using string argument: ReflectionException: C is not an interface
 Does I1 implement I1?
    - Using object argument: bool(true)
    - Using string argument: bool(true)
@@ -127,14 +127,14 @@ Does I1 implement I2?
    - Using object argument: bool(false)
    - Using string argument: bool(false)
 Does I2 implement A?
-   - Using object argument: A is not an interface
-   - Using string argument: A is not an interface
+   - Using object argument: ReflectionException: A is not an interface
+   - Using string argument: ReflectionException: A is not an interface
 Does I2 implement B?
-   - Using object argument: B is not an interface
-   - Using string argument: B is not an interface
+   - Using object argument: ReflectionException: B is not an interface
+   - Using string argument: ReflectionException: B is not an interface
 Does I2 implement C?
-   - Using object argument: C is not an interface
-   - Using string argument: C is not an interface
+   - Using object argument: ReflectionException: C is not an interface
+   - Using string argument: ReflectionException: C is not an interface
 Does I2 implement I1?
    - Using object argument: bool(true)
    - Using string argument: bool(true)
@@ -144,10 +144,10 @@ Does I2 implement I2?
 
 
 Test bad arguments:
-ReflectionClass::implementsInterface() expects exactly 1 argument, 0 given
-ReflectionClass::implementsInterface() expects exactly 1 argument, 2 given
+ArgumentCountError: ReflectionClass::implementsInterface() expects exactly 1 argument, 0 given
+ArgumentCountError: ReflectionClass::implementsInterface() expects exactly 1 argument, 2 given
 
 Deprecated: ReflectionClass::implementsInterface(): Passing null to parameter #1 ($interface) of type ReflectionClass|string is deprecated in %s on line %d
-Interface "" does not exist
-Interface "ThisClassDoesNotExist" does not exist
-Interface "2" does not exist
+ReflectionException: Interface "" does not exist
+ReflectionException: Interface "ThisClassDoesNotExist" does not exist
+ReflectionException: Interface "2" does not exist

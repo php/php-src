@@ -13,12 +13,12 @@ echo $r, "\n";
 
 try  {
     echo $r->getPrototype();
-} catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
 Method [ <internal> public method __invoke ] {
 }
 
-Method Closure::__invoke() does not have a prototype
+ReflectionException: Method Closure::__invoke() does not have a prototype

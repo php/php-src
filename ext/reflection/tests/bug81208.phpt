@@ -18,11 +18,11 @@ $z = new ReflectionClass(MyClass::class);
 foreach ($z->getProperty("property")->getAttributes() as $attribute) {
     try {
         $attribute->newInstance();
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
 ?>
 --EXPECT--
-Undefined constant "asdasdasd"
+Error: Undefined constant "asdasdasd"

@@ -43,8 +43,8 @@ var_dump($methodWithArgs->invokeArgs($testClassInstance, array(1, "arg2", 3)));
 echo "\nMethod that throws an exception:\n";
 try {
     $methodThatThrows->invokeArgs($testClassInstance, array());
-} catch (Exception $e) {
-    var_dump($e->getMessage());
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -70,4 +70,4 @@ Called methodWithArgs(1, arg2)
 NULL
 
 Method that throws an exception:
-string(18) "Called willThrow()"
+Exception: Called willThrow()

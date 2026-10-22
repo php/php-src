@@ -23,20 +23,21 @@ function thrower2() {
 try {
     thrower();
 } catch(Throwable $e) {
-    echo $e::class, ': ', $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), "\n";
     print_r($e->getTrace());
 }
 
 try {
     thrower2();
 } catch (Throwable $e) {
-    echo $e::class, ': ', $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), "\n";
     print_r($e->getTrace());
 }
 
 ?>
 --EXPECTF--
 Exception: Missing static method 'ThrowException'
+
 Array
 (
     [0] => Array
@@ -70,6 +71,7 @@ Array
 
 )
 Exception: Missing method 'foo'
+
 Array
 (
     [0] => Array

@@ -10,8 +10,8 @@ class C {
         try {
           $rp = new ReflectionProperty("D", "p");
           var_dump($rp);
-        } catch (Exception $e) {
-            echo $e->getMessage();
+        } catch (Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }
 }
@@ -21,8 +21,8 @@ class D extends C{
         try {
           $rp = new ReflectionProperty("D", "p");
           var_dump($rp);
-        } catch (Exception $e) {
-            echo $e->getMessage();
+        } catch (Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }
 }
@@ -31,11 +31,11 @@ echo "--> Reflect inherited private from global scope:\n";
 try {
   $rp = new ReflectionProperty("D", "p");
   var_dump($rp);
-} catch (Exception $e) {
-    echo $e->getMessage();
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
-echo "\n\n--> Reflect inherited private from declaring scope:\n";
+echo "\n--> Reflect inherited private from declaring scope:\n";
 C::testFromC();
 
 echo "\n\n--> Reflect inherited private from declaring scope via subclass:\n";
@@ -46,13 +46,15 @@ D::testFromD();
 ?>
 --EXPECT--
 --> Reflect inherited private from global scope:
-Property D::$p does not exist
+ReflectionException: Property D::$p does not exist
 
 --> Reflect inherited private from declaring scope:
-Property D::$p does not exist
+ReflectionException: Property D::$p does not exist
+
 
 --> Reflect inherited private from declaring scope via subclass:
-Property D::$p does not exist
+ReflectionException: Property D::$p does not exist
+
 
 --> Reflect inherited private from subclass:
-Property D::$p does not exist
+ReflectionException: Property D::$p does not exist
