@@ -475,9 +475,6 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 	(*thread_resources_ptr)->count = id_count;
 	(*thread_resources_ptr)->thread_id = thread_id;
 	(*thread_resources_ptr)->next = NULL;
-#ifdef TSRM_WIN32
-	(*thread_resources_ptr)->thread_exit_data = NULL;
-#endif
 
 	/* Set thread local storage to this new thread resources structure */
 	set_thread_local_storage_resource_to(*thread_resources_ptr);

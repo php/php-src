@@ -24,9 +24,6 @@ struct _tsrm_tls_entry {
 	int count;
 	THREAD_T thread_id;
 	tsrm_tls_entry *next;
-#ifdef TSRM_WIN32
-	void *thread_exit_data;
-#endif
 };
 
 void tsrm_atexit(void);

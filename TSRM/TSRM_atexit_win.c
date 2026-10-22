@@ -15,46 +15,22 @@
 #if defined(ZTS) && defined(TSRM_WIN32)
 
 #include <stdio.h>
-#include <stdlib.h>
-
-TSRMLS_CACHE_EXTERN();
 
 static bool tsrm_thread_exit_armed = false;
 static DWORD tsrm_exit_key = FLS_OUT_OF_INDEXES;
 static BOOLEAN (NTAPI *tsrm_dll_shutdown_in_progress)(void);
 
-/* FLS is per-fiber, but TSRM resources are per-thread. Another fiber can free
- * and reallocate the resources while this fiber retains its FLS value. Keep a
- * separate record so callbacks can distinguish stale FLS values even if the
- * resource allocation reuses the same address. */
-typedef struct {
-	tsrm_tls_entry *thread_resources;
-} tsrm_thread_exit_data;
-
 static void WINAPI tsrm_thread_exit_handler(void *arg)
 {
-	tsrm_thread_exit_data *data = arg;
-	tsrm_tls_entry *thread_resources;
-
-	if (tsrm_dll_shutdown_in_progress()) {
+	if (!tsrm_thread_exit_armed || tsrm_dll_shutdown_in_progress()) {
 		return;
 	}
-	/* FLS callbacks also run when another fiber is deleted. TSRM storage is
-	 * thread-wide, so only tear it down for the exiting execution context. */
-	if (!tsrm_thread_exit_armed) {
-		free(data);
-		return;
-	}
-	if (FlsGetValue(tsrm_exit_key) != data) {
-		free(data);
+	if (IsThreadAFiber()) {
+		fprintf(stderr, "TSRM: Native Windows fibers are not supported\n");
 		return;
 	}
 	FlsSetValue(tsrm_exit_key, NULL);
-	thread_resources = data->thread_resources;
-	if (thread_resources == TSRMLS_CACHE && thread_resources->thread_exit_data == data) {
-		tsrm_free_thread_at_exit(thread_resources);
-	}
-	free(data);
+	tsrm_free_thread_at_exit(arg);
 }
 
 void tsrm_atexit(void)
@@ -75,35 +51,15 @@ void tsrm_atexit(void)
 
 void tsrm_atexit_set_data(tsrm_tls_entry *thread_resources)
 {
-	tsrm_thread_exit_data *data;
-
+	if (IsThreadAFiber()) {
+		fprintf(stderr, "TSRM: Native Windows fibers are not supported\n");
+		return;
+	}
 	if (!tsrm_thread_exit_armed) {
 		return;
 	}
 
-	data = FlsGetValue(tsrm_exit_key);
-	if (!thread_resources) {
-		if (data && FlsSetValue(tsrm_exit_key, NULL)) {
-			free(data);
-		}
-		return;
-	}
-
-	if (!data) {
-		data = malloc(sizeof(tsrm_thread_exit_data));
-		if (!data) {
-			return;
-		}
-		data->thread_resources = thread_resources;
-		if (!FlsSetValue(tsrm_exit_key, data)) {
-			free(data);
-			return;
-		}
-		thread_resources->thread_exit_data = data;
-		return;
-	}
-	data->thread_resources = thread_resources;
-	thread_resources->thread_exit_data = data;
+	FlsSetValue(tsrm_exit_key, thread_resources);
 }
 
 void tsrm_atexit_disarm(void)
