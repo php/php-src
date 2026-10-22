@@ -23,6 +23,9 @@ PHP                                                                        NEWS
     throwing a ValueError. (Marc Bennewitz)
 
 - Intl:
+  . Added IntlRelativeDateTimeFormatter for locale-aware relative date and time
+    formatting, with enums for styles, capitalization contexts, and units.
+    (Weilin Du)
   . Added Transliterator::toRules() and transliterator_to_rules().
     (Weilin Du, David Carlier)
   . Fixed Collator attribute and strength methods not rejecting an
