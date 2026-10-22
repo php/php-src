@@ -3301,6 +3301,8 @@ PHPAPI bool php_array_data_shuffle(php_random_algo_with_state engine, zval *arra
 				}
 				j++;
 			}
+			/* The tail now holds stale copies; drop it before the engine can throw. */
+			hash->nNumUsed = n_elems;
 		}
 		while (--n_left) {
 			rnd_idx = algo->range(state, 0, n_left);
@@ -3329,6 +3331,7 @@ PHPAPI bool php_array_data_shuffle(php_random_algo_with_state engine, zval *arra
 				}
 				j++;
 			}
+			hash->nNumUsed = n_elems;
 		}
 		while (--n_left) {
 			rnd_idx = algo->range(state, 0, n_left);
