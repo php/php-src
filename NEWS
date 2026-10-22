@@ -99,6 +99,10 @@ PHP                                                                        NEWS
   . Fixed a crash in readline_info() when completion_append_character
     contains a non-ASCII byte. (Weilin Du)
 
+- SimpleXML:
+  . Fixed memory leak of cycles through SimpleXMLElement temporary property
+    references and iterators. (Ilia Alshanetsky)
+
 - SOAP:
   . Fixed use of uninitialized func in do_request() on OOM bailout.
     (David Carlier)
