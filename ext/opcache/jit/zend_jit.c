@@ -2888,6 +2888,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						call_level--;
 					}
 					break;
+				/* FETCH_OBJ_FUNC_ARG may dispatch into the FETCH_OBJ_R handler (if sent by value). */
+				case ZEND_FETCH_OBJ_FUNC_ARG:
 				case ZEND_FETCH_OBJ_R:
 					if (!zend_jit_handler(&ctx, opline,
 						zend_may_throw(opline, ssa_op, op_array, ssa))) {

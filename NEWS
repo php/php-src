@@ -75,6 +75,8 @@ PHP                                                                        NEWS
     reference check). (ndossche)
   . Fixed bug GH-24437 (JIT: Fix OP_DATA read from an unwritten slot in
     zend_jit_assign_dim_op()). (waroad)
+  . Fixed bug GH-24398 (JIT: minimal JIT segfault when a hooked property is
+    passed to a run-time-resolved function). (waroad)
 
 - PDO:
   . Fixed invalid ATTR_ORACLE_NULLS values being accepted and truncated.
