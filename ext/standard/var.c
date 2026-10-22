@@ -1425,12 +1425,13 @@ PHPAPI void php_var_serialize_set_incomplete_classes_only(php_serialize_data_t d
 
 PHPAPI void php_var_serialize_destroy(php_serialize_data_t d) {
 	/* fprintf(stderr, "SERIALIZE_DESTROY   == lock: %u, level: %u\n", BG(serialize_lock), BG(serialize).level); */
-	if (BG(serialize_lock) || BG(serialize).level == 1) {
+	if (BG(serialize_lock)) {
 		zend_hash_destroy(&d->ht);
 		efree(d);
-	}
-	if (!BG(serialize_lock) && !--BG(serialize).level) {
+	} else if (!--BG(serialize).level) {
 		BG(serialize).data = NULL;
+		zend_hash_destroy(&d->ht);
+		efree(d);
 	}
 }
 
