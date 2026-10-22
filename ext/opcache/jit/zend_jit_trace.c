@@ -335,6 +335,8 @@ static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op 
 			// TODO: recompilation may change target ???
 			return 0;
 #endif
+		/* FETCH_OBJ_FUNC_ARG may dispatch into the FETCH_OBJ_R handler (if sent by value). */
+		case ZEND_FETCH_OBJ_FUNC_ARG:
 		case ZEND_FETCH_OBJ_R:
 			if (opline->op2_type == IS_CONST) {
 				const zend_class_entry *ce = opline->op1_type == IS_UNUSED ? op_array->scope : NULL;
