@@ -92,6 +92,17 @@ U_CFUNC PHP_METHOD(IntlNumberFormatter, createFromSkeleton)
 		RETURN_THROWS();
 	}
 
+	const char *scale = zend_memnstr(skeleton, "scale/", sizeof("scale/") - 1, skeleton + skeleton_len);
+
+	if (scale) {
+		scale += sizeof("scale/") - 1;
+		scale += strspn(scale, "0123456789.+-");
+		if (UNEXPECTED(*scale == 'e' || *scale == 'E')) {
+			intl_error_set(nullptr, U_NUMBER_SKELETON_SYNTAX_ERROR, "Number formatter creation failed");
+			RETURN_NULL();
+		}
+	}
+
 	UErrorCode status = U_ZERO_ERROR;
 	UnicodeString uskeleton;
 
@@ -127,6 +138,10 @@ U_CFUNC PHP_METHOD(IntlNumberFormatter, format)
 		if (UNEXPECTED(Z_STRLEN_P(value) > INT32_MAX)) {
 			zend_argument_value_error(1, "is too long");
 			RETURN_THROWS();
+		}
+		if (UNEXPECTED(strpbrk(Z_STRVAL_P(value), "eE"))) {
+			intl_errors_set(INTL_DATA_ERROR_P(nfo), U_DECIMAL_NUMBER_SYNTAX_ERROR, "Number formatting failed");
+			RETURN_FALSE;
 		}
 		result = NUMBERFORMATTER_OBJECT(nfo)->formatDecimal(icu::StringPiece(Z_STRVAL_P(value), static_cast<int32_t>(Z_STRLEN_P(value))), status).toString(status);
 	} else if (Z_TYPE_P(value) == IS_DOUBLE) {
