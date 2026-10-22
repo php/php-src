@@ -13353,6 +13353,7 @@ static int zend_jit_assign_dim(zend_jit_ctx  *jit,
 			// JIT: zend_throw_error(NULL, "Cannot add element to the array as the next element is already occupied");
 			jit_SET_EX_OPLINE(jit, opline);
 			ir_CALL(IR_VOID, jit_STUB_FUNC_ADDR(jit, jit_stub_cannot_add_element, IR_FASTCALL_FUNC));
+			jit_FREE_OP(jit, (opline+1)->op1_type, (opline+1)->op1, val_info, opline);
 
 			ir_END_list(end_inputs);
 
