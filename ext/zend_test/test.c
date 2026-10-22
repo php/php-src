@@ -2663,6 +2663,9 @@ static PHP_FUNCTION(zend_test_compile_to_ast)
 
 	zend_arena *ast_arena;
 	zend_ast *ast = zend_compile_string_to_ast(str, &ast_arena, ZSTR_EMPTY_ALLOC());
+	if (!ast) {
+		RETURN_THROWS();
+	}
 
 	zend_string *result = zend_ast_export("", ast, "");
 
