@@ -32,7 +32,7 @@ try {
 ?>
 --EXPECT--
 string(5) "1,000"
-string(3) "50%"
+string(4) "0.5%"
 NULL
 string(107) "IntlNumberFormatter::createFromSkeleton(): Number formatter creation failed: U_NUMBER_SKELETON_SYNTAX_ERROR"
 NULL
