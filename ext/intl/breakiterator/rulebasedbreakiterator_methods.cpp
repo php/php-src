@@ -30,7 +30,7 @@ static inline RuleBasedBreakIterator *fetch_rbbi(BreakIterator_object *bio) {
 	return (RuleBasedBreakIterator*)bio->biter;
 }
 
-U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, __construct)
+PHP_METHOD(IntlRuleBasedBreakIterator, __construct)
 {
 	zend_string *rules;
 	bool compiled = false;
@@ -90,7 +90,7 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, __construct)
 	}
 }
 
-U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getRules)
+PHP_METHOD(IntlRuleBasedBreakIterator, getRules)
 {
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;
@@ -112,7 +112,7 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getRules)
 	RETVAL_STR(u8str);
 }
 
-U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getRuleStatus)
+PHP_METHOD(IntlRuleBasedBreakIterator, getRuleStatus)
 {
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;
@@ -124,7 +124,7 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getRuleStatus)
 	RETURN_LONG(fetch_rbbi(bio)->getRuleStatus());
 }
 
-U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getRuleStatusVec)
+PHP_METHOD(IntlRuleBasedBreakIterator, getRuleStatusVec)
 {
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;
@@ -154,7 +154,7 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getRuleStatusVec)
 	}
 }
 
-U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getBinaryRules)
+PHP_METHOD(IntlRuleBasedBreakIterator, getBinaryRules)
 {
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;

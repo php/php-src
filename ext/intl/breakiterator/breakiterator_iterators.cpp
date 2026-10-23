@@ -23,9 +23,7 @@
 
 #define USE_BREAKITERATOR_POINTER
 #include "breakiterator_class.h"
-BEGIN_EXTERN_C()
 #include "breakiterator_iterators_arginfo.h"
-END_EXTERN_C()
 #include "../intl_convert.h"
 #include "../locale/locale.h"
 #include <zend_exceptions.h>
@@ -253,7 +251,7 @@ void IntlIterator_from_BreakIterator_parts(zval *break_iter_zv,
 	((zoi_break_iter_parts*)ii->iterator)->index_right = 0;
 }
 
-U_CFUNC PHP_METHOD(IntlPartsIterator, getBreakIterator)
+PHP_METHOD(IntlPartsIterator, getBreakIterator)
 {
 	INTLITERATOR_METHOD_INIT_VARS;
 
@@ -264,7 +262,7 @@ U_CFUNC PHP_METHOD(IntlPartsIterator, getBreakIterator)
 	RETURN_COPY_DEREF(&ii->iterator->data);
 }
 
-U_CFUNC PHP_METHOD(IntlPartsIterator, getRuleStatus)
+PHP_METHOD(IntlPartsIterator, getRuleStatus)
 {
 	INTLITERATOR_METHOD_INIT_VARS;
 
