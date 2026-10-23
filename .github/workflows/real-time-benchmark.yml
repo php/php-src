@@ -283,7 +283,7 @@ jobs:
           echo "NEWEST_RESULT_DIRECTORY=$(ls -td ${{ github.workspace }}/php-version-benchmarks/docs/results/${{ env.YEAR }}/*/ | head -1)" >> $GITHUB_ENV
       - name: Upload artifacts
         id: upload
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: results
           path: |
