@@ -183,6 +183,11 @@ void zend_debug_alloc_output(char *format, ...);
 #define full_mem_check(silent)
 #endif
 
+#if defined(__GNUC__) && __GNUC__ >= 3
+ZEND_API void zend_mm_safe_error_ex(const char *format, ...) __attribute__ ((noreturn, format(printf, 1, 2)));
+#else
+ZEND_API void zend_mm_safe_error_ex(const char *format, ...);
+#endif
 
 END_EXTERN_C()
 

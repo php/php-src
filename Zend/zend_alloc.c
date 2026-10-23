@@ -23,6 +23,7 @@
 #include "zend_alloc.h"
 #include "zend_globals.h"
 #include "zend_fast_cache.h"
+#include "zend_execute.h"
 #ifdef HAVE_SIGNAL_H
 # include <signal.h>
 #endif
@@ -35,6 +36,41 @@
 #ifndef ZTS
 ZEND_API zend_alloc_globals alloc_globals;
 #endif
+
+ZEND_API void zend_mm_safe_error_ex(const char *format, ...)
+{
+	char *error_filename;
+	uint error_lineno;
+	char buf[1024];
+	va_list args;
+	TSRMLS_FETCH();
+
+	if (zend_is_compiling(TSRMLS_C)) {
+		error_filename = zend_get_compiled_filename(TSRMLS_C);
+		error_lineno = zend_get_compiled_lineno(TSRMLS_C);
+	} else if (zend_is_executing(TSRMLS_C)) {
+		error_filename = zend_get_executed_filename(TSRMLS_C);
+		error_lineno = zend_get_executed_lineno(TSRMLS_C);
+	} else {
+		error_filename = NULL;
+		error_lineno = 0;
+	}
+	if (!error_filename) {
+		error_filename = "Unknown";
+	}
+
+	va_start(args, format);
+	vsnprintf(buf, sizeof(buf), format, args);
+	va_end(args);
+
+	fprintf(stderr, "\nFatal error: %s in %s on line %d\n", buf, error_filename, error_lineno);
+/* See http://support.microsoft.com/kb/190351 */
+#ifdef ZEND_WIN32
+	fflush(stderr);
+#endif
+
+	_exit(1);
+}
 
 
 #ifdef ZEND_MM
@@ -76,20 +112,10 @@ static long mem_block_end_magic = MEM_BLOCK_END_MAGIC;
 								if (AG(memory_limit)<AG(allocated_memory)) {\
 									int php_mem_limit = AG(memory_limit); \
 									AG(allocated_memory) -= rs; \
-									if (EG(in_execution) && AG(memory_limit)+1048576 > AG(allocated_memory)) { \
-										AG(memory_limit) = AG(allocated_memory) + 1048576; \
-										if (file) { \
-											zend_error(E_ERROR,"Allowed memory size of %d bytes exhausted at %s:%d (tried to allocate %d bytes)", php_mem_limit, file, lineno, s); \
-										} else { \
-											zend_error(E_ERROR,"Allowed memory size of %d bytes exhausted (tried to allocate %d bytes)", php_mem_limit, s); \
-										} \
+									if (file) { \
+										zend_mm_safe_error_ex("Allowed memory size of %d bytes exhausted at %s:%d (tried to allocate %zu bytes)", php_mem_limit, (const char *) (file), lineno, (size_t) (s)); \
 									} else { \
-										if (file) { \
-											fprintf(stderr, "Allowed memory size of %d bytes exhausted at %s:%d (tried to allocate %d bytes)\n", php_mem_limit, file, lineno, s); \
-										} else { \
-											fprintf(stderr, "Allowed memory size of %d bytes exhausted (tried to allocate %d bytes)\n", php_mem_limit, s); \
-										} \
-										exit(1); \
+										zend_mm_safe_error_ex("Allowed memory size of %d bytes exhausted (tried to allocate %zu bytes)", php_mem_limit, (size_t) (s)); \
 									} \
 								} \
 							}
@@ -192,7 +218,7 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 #if ZEND_DEBUG && defined(HAVE_KILL) && defined(HAVE_GETPID)
 		kill(getpid(), SIGSEGV);
 #else
-		exit(1);
+		_exit(1);
 #endif
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 		return (void *)p;
@@ -240,7 +266,7 @@ ZEND_API void *_safe_emalloc(size_t nmemb, size_t size, size_t offset ZEND_FILE_
 		}
 	}
 
-	zend_error(E_ERROR, "Possible integer overflow in memory allocation (%zd * %zd + %zd)", nmemb, size, offset);
+	zend_mm_safe_error_ex("Possible integer overflow in memory allocation (%zd * %zd + %zd)", nmemb, size, offset);
 	return 0;
 }
 
@@ -350,7 +376,7 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LIN
 #if ZEND_DEBUG && HAVE_KILL && HAVE_GETPID
 			kill(getpid(), SIGSEGV);
 #else
-			exit(1);
+			_exit(1);
 #endif
 		}
 		ADD_POINTER_TO_LIST(orig);

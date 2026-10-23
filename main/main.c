@@ -298,6 +298,7 @@ PHP_INI_BEGIN()
 
 	STD_PHP_INI_BOOLEAN("file_uploads",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			file_uploads,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("upload_max_filesize",	"2M",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateLong,			upload_max_filesize,	php_core_globals,	core_globals)
+	PHP_INI_ENTRY("max_multipart_body_parts",	"-1",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		NULL)
 	STD_PHP_INI_ENTRY("post_max_size",			"8M",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateLong,			post_max_size,			sapi_globals_struct,sapi_globals)
 	STD_PHP_INI_ENTRY("upload_tmp_dir",			NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	upload_tmp_dir,			php_core_globals,	core_globals)
 
@@ -1147,6 +1148,8 @@ void php_request_shutdown_for_hook(void *dummy)
 		for (i = 0; i < NUM_TRACK_VARS; i++) {
 			if (PG(http_globals)[i]) {
 				zval_ptr_dtor(&PG(http_globals)[i]);
+				/* May be accessed before php_request_startup() */
+				PG(http_globals)[i] = NULL;
 			}
 		}
 	} zend_end_try();
@@ -1213,6 +1216,8 @@ void php_request_shutdown(void *dummy)
 		for (i=0; i<NUM_TRACK_VARS; i++) {
 			if (PG(http_globals)[i]) {
 				zval_ptr_dtor(&PG(http_globals)[i]);
+				/* May be accessed before php_request_startup() */
+				PG(http_globals)[i] = NULL;
 			}
 		}
 	} zend_end_try();
@@ -1243,6 +1248,11 @@ void php_request_shutdown(void *dummy)
 #ifdef PHP_WIN32
 	CoUninitialize();
 #endif
+
+	/* May be accessed before php_request_startup() */
+	PG(modules_activated) = 0;
+	PG(error_handling) = EH_NORMAL;
+	PG(exception_class) = NULL;
 }
 /* }}} */
 
