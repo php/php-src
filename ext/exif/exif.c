@@ -4141,7 +4141,12 @@ static bool exif_process_IFD_in_TIFF_impl(image_info_type *ImageInfo, size_t dir
 					/*The next line would break the image on writeback: */
 					/* php_ifd_set16u(dir_entry+2, entry_type, ImageInfo->motorola_intel);*/
 				}
-				entry_length = php_ifd_get32u(dir_entry+4, ImageInfo->motorola_intel) * php_tiff_bytes_per_format[entry_type];
+				int64_t entry_length_signed = (int64_t)php_ifd_get32u(dir_entry+4, ImageInfo->motorola_intel) * php_tiff_bytes_per_format[entry_type];
+				if (entry_length_signed > INT32_MAX) {
+					exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Read from TIFF: entry length of %" PRId64 " exceeds INT32_MAX", entry_length_signed);
+					return false;
+				}
+				entry_length = (size_t)entry_length_signed;
 				if (entry_length <= 4) {
 					switch(entry_type) {
 						case TAG_FMT_USHORT:
@@ -4185,6 +4190,10 @@ static bool exif_process_IFD_in_TIFF_impl(image_info_type *ImageInfo, size_t dir
 					}
 				} else {
 					size_t entry_offset = php_ifd_get32u(dir_entry+8, ImageInfo->motorola_intel);
+					if (entry_length_signed + entry_offset > INT32_MAX) {
+						exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Read from TIFF: entry length of %" PRId64 " exceeds INT32_MAX when combined with entry offset", entry_length_signed);
+						return false;
+					}
 					/* if entry needs expanding ifd cache and entry is at end of current ifd cache. */
 					/* otherwise there may be huge holes between two entries */
 					if (entry_offset + entry_length > dir_offset + ifd_size
