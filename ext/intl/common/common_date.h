@@ -29,11 +29,11 @@
 
 using icu::TimeZone;
 
-U_CFUNC TimeZone *timezone_convert_datetimezone(int type, void *object, bool is_datetime, intl_error *outside_error);
-U_CFUNC zend_result intl_datetime_decompose(zend_object *obj, double *millis, TimeZone **tz, intl_error *err);
+TimeZone *timezone_convert_datetimezone(int type, void *object, bool is_datetime, intl_error *outside_error);
+zend_result intl_datetime_decompose(zend_object *obj, double *millis, TimeZone **tz, intl_error *err);
 
 #endif
 
-U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err);
+double intl_zval_to_millis(zval *z, intl_error *err);
 
 #endif	/* COMMON_DATE_H */

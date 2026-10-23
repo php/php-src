@@ -37,17 +37,17 @@ void zoi_with_current_dtor(zend_object_iterator *iter)
 	ZVAL_UNDEF(&zoiwc->wrapping_obj);
 }
 
-U_CFUNC zend_result zoi_with_current_valid(zend_object_iterator *iter)
+zend_result zoi_with_current_valid(zend_object_iterator *iter)
 {
 	return Z_ISUNDEF(((zoi_with_current*)iter)->current)? FAILURE : SUCCESS;
 }
 
-U_CFUNC zval *zoi_with_current_get_current_data(zend_object_iterator *iter)
+zval *zoi_with_current_get_current_data(zend_object_iterator *iter)
 {
 	return &((zoi_with_current*)iter)->current;
 }
 
-U_CFUNC void zoi_with_current_invalidate_current(zend_object_iterator *iter)
+void zoi_with_current_invalidate_current(zend_object_iterator *iter)
 {
 	zoi_with_current *zoi_iter = (zoi_with_current*)iter;
 	if (!Z_ISUNDEF(zoi_iter->current)) {
@@ -124,7 +124,7 @@ static const zend_object_iterator_funcs string_enum_object_iterator_funcs = {
 	zoi_with_current_get_gc,
 };
 
-U_CFUNC void IntlIterator_from_StringEnumeration(StringEnumeration *se, zval *object)
+void IntlIterator_from_StringEnumeration(StringEnumeration *se, zval *object)
 {
 	IntlIterator_object *ii;
 	object_init_ex(object, IntlIterator_ce_ptr);
