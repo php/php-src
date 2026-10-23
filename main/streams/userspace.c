@@ -612,6 +612,9 @@ static ssize_t php_userstreamop_write(php_stream *stream, const char *buf, size_
 	} else {
 		convert_to_long(&retval);
 		didwrite = Z_LVAL(retval);
+		if (didwrite < 0) {
+			didwrite = -1;
+		}
 	}
 
 	/* don't allow strange buffer overruns due to bogus return */

@@ -948,11 +948,11 @@ file_private cdf_property_info_t *
 cdf_grow_info(cdf_property_info_t **info, size_t *maxcount, size_t incr)
 {
 	cdf_property_info_t *inp;
-	size_t newcount = *maxcount + incr;
+	size_t newcount;
 
-	if (newcount > CDF_PROP_LIMIT) {
-		DPRINTF(("exceeded property limit %" SIZE_T_FORMAT "u > %"
-		    SIZE_T_FORMAT "u\n", newcount, CDF_PROP_LIMIT));
+	if (UNEXPECTED(__builtin_add_overflow(*maxcount, incr, &newcount)) || newcount > CDF_PROP_LIMIT) {
+		DPRINTF(("exceeded property limit or overflow %" SIZE_T_FORMAT "u + %" SIZE_T_FORMAT "u\n",
+		    *maxcount, incr));
 		goto out;
 	}
 	inp = CAST(cdf_property_info_t *,

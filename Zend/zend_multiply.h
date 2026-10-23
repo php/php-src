@@ -130,16 +130,36 @@
 
 #else
 
+#if (defined(__has_builtin) && __has_builtin(__builtin_mul_overflow)) || (defined(__GNUC__) && __GNUC__ >= 5)
+
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
-	long   __lres  = (a) * (b);										\
-	long double __dres  = (long double)(a) * (long double)(b);		\
-	long double __delta = (long double) __lres - __dres;			\
-	if ( ((usedval) = (( __dres + __delta ) != __dres))) {			\
-		(dval) = __dres;											\
+	if (UNEXPECTED(__builtin_mul_overflow((a), (b), &(lval)))) {	\
+		(usedval) = 1;												\
+		(dval) = (double) (a) * (double) (b);						\
 	} else {														\
-		(lval) = __lres;											\
+		(usedval) = 0;												\
 	}																\
 } while (0)
+
+#else
+
+#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
+	uint64_t __ua = (uint64_t)(a);									\
+	uint64_t __ub = (uint64_t)(b);									\
+	if ((a) > 0 && (b) > 0 && (a) > ZEND_LONG_MAX / (b)) {			\
+		(usedval) = 1; (dval) = (double)(a) * (double)(b);			\
+	} else if ((a) > 0 && (b) < 0 && (b) < ZEND_LONG_MIN / (a)) {	\
+		(usedval) = 1; (dval) = (double)(a) * (double)(b);			\
+	} else if ((a) < 0 && (b) > 0 && (a) < ZEND_LONG_MIN / (b)) {	\
+		(usedval) = 1; (dval) = (double)(a) * (double)(b);			\
+	} else if ((a) < 0 && (b) < 0 && (a) < ZEND_LONG_MAX / (b)) {	\
+		(usedval) = 1; (dval) = (double)(a) * (double)(b);			\
+	} else {														\
+		(usedval) = 0; (lval) = (zend_long)(__ua * __ub);			\
+	}																\
+} while (0)
+
+#endif
 
 #endif
 

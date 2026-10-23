@@ -52,8 +52,12 @@ static ssize_t php_stream_memory_write(php_stream *stream, const char *buf, size
 	if (ms->mode & TEMP_STREAM_APPEND) {
 		ms->fpos = data_len;
 	}
-	if (ms->fpos + count > data_len) {
-		zend_string *grown = zend_string_frealloc(ms->data, ms->fpos + count, 0, /* fallible */ true);
+	size_t new_pos;
+	if (UNEXPECTED(__builtin_add_overflow(ms->fpos, count, &new_pos))) {
+		return (ssize_t) -1;
+	}
+	if (new_pos > data_len) {
+		zend_string *grown = zend_string_frealloc(ms->data, new_pos, 0, /* fallible */ true);
 		if (UNEXPECTED(!grown)) {
 			return (ssize_t) -1;
 		}
@@ -69,7 +73,7 @@ static ssize_t php_stream_memory_write(php_stream *stream, const char *buf, size
 		ZEND_ASSERT(buf != NULL);
 		memcpy(ZSTR_VAL(ms->data) + ms->fpos, (char*) buf, count);
 		ZSTR_VAL(ms->data)[ZSTR_LEN(ms->data)] = '\0';
-		ms->fpos += count;
+		ms->fpos = new_pos;
 	}
 	return count;
 }
@@ -142,9 +146,14 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 					return 0;
 				}
 			} else {
+				size_t cur_new_pos;
+				if (UNEXPECTED(__builtin_add_overflow(ms->fpos, (size_t)offset, &cur_new_pos))) {
+					*newoffs = -1;
+					return -1;
+				}
 				stream->eof = 0;
 				stream->fatal_error = 0;
-				ms->fpos = ms->fpos + offset;
+				ms->fpos = cur_new_pos;
 				*newoffs = ms->fpos;
 				return 0;
 			}
@@ -154,7 +163,7 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 				*newoffs = -1;
 				return -1;
 			} else {
-				ms->fpos = offset;
+				ms->fpos = (size_t)offset;
 				*newoffs = ms->fpos;
 				stream->eof = 0;
 				stream->fatal_error = 0;
@@ -162,7 +171,12 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 			}
 		case SEEK_END:
 			if (offset > 0) {
-				ms->fpos = ZSTR_LEN(ms->data) + offset;
+				size_t end_new_pos;
+				if (UNEXPECTED(__builtin_add_overflow(ZSTR_LEN(ms->data), (size_t)offset, &end_new_pos))) {
+					*newoffs = -1;
+					return -1;
+				}
+				ms->fpos = end_new_pos;
 				*newoffs = ms->fpos;
 				stream->eof = 0;
 				stream->fatal_error = 0;

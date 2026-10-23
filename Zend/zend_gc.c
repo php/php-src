@@ -421,7 +421,10 @@ static zend_always_inline gc_root_buffer* gc_decompress(zend_refcounted *ref, ui
 
 	while (1) {
 		idx += GC_MAX_UNCOMPRESSED;
-		ZEND_ASSERT(idx < GC_G(first_unused));
+		if (UNEXPECTED(idx >= GC_G(first_unused))) {
+			zend_error_noreturn(E_CORE_ERROR, "GC root buffer corruption detected: unable to resolve compressed address");
+			return NULL;
+		}
 		root = GC_IDX2PTR(idx);
 		if (GC_GET_PTR(root->ref) == ref) {
 			return root;
