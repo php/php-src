@@ -26,6 +26,30 @@ static struct zlog_stream fpm_log_stream;
 
 static int fpm_access_log_suppress(struct fpm_scoreboard_proc_s *proc);
 
+/* Writes a value that comes from the request with the control characters escaped,
+ * so that it cannot start a new line in the access log */
+static void fpm_log_stream_request_value(struct zlog_stream *stream, const char *value)
+{
+	const char *run = value, *p;
+	char escaped[sizeof("\\xff")];
+
+	for (p = value; *p != '\0'; p++) {
+		unsigned char c = (unsigned char) *p;
+		if (c >= 0x20 && c != 0x7f) {
+			continue;
+		}
+		if (p > run) {
+			zlog_stream_str(stream, run, p - run);
+		}
+		snprintf(escaped, sizeof(escaped), "\\x%02x", c);
+		zlog_stream_str(stream, escaped, sizeof(escaped) - 1);
+		run = p + 1;
+	}
+	if (p > run) {
+		zlog_stream_str(stream, run, p - run);
+	}
+}
+
 int fpm_log_open(int reopen) /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
@@ -235,14 +259,14 @@ int fpm_log_write(char *log_format) /* {{{ */
 
 					if (!test) {
 						char *env = fcgi_getenv((fcgi_request*) SG(server_context), format, strlen(format));
-						zlog_stream_cstr(stream, env ? env : "-");
+						fpm_log_stream_request_value(stream, env ? env : "-");
 					}
 					format[0] = '\0';
 					break;
 
 				case 'f': /* script */
 					if (!test) {
-						zlog_stream_cstr(stream,  *proc.script_filename ? proc.script_filename : "-");
+						fpm_log_stream_request_value(stream, *proc.script_filename ? proc.script_filename : "-");
 					}
 					break;
 
@@ -254,7 +278,7 @@ int fpm_log_write(char *log_format) /* {{{ */
 
 				case 'm': /* method */
 					if (!test) {
-						zlog_stream_cstr(stream, *proc.request_method ? proc.request_method : "-");
+						fpm_log_stream_request_value(stream, *proc.request_method ? proc.request_method : "-");
 					}
 					break;
 
@@ -352,7 +376,7 @@ int fpm_log_write(char *log_format) /* {{{ */
 
 				case 'q': /* query_string */
 					if (!test) {
-						zlog_stream_cstr(stream, proc.query_string);
+						fpm_log_stream_request_value(stream, proc.query_string);
 					}
 					break;
 
@@ -364,7 +388,7 @@ int fpm_log_write(char *log_format) /* {{{ */
 
 				case 'r': /* request URI */
 					if (!test) {
-						zlog_stream_cstr(stream, proc.request_uri);
+						fpm_log_stream_request_value(stream, proc.request_uri);
 					}
 					break;
 
@@ -402,7 +426,7 @@ int fpm_log_write(char *log_format) /* {{{ */
 
 				case 'u': /* remote user */
 					if (!test) {
-						zlog_stream_cstr(stream, proc.auth_user);
+						fpm_log_stream_request_value(stream, proc.auth_user);
 					}
 					break;
 
