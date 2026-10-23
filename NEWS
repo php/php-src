@@ -62,6 +62,8 @@ PHP                                                                        NEWS
   . Fixed mbstring functions emitting surrogates in UTF-8 output and flagging
     it as valid UTF-8. (Nicolas Grekas)
   . Fixed bug GH-23958 (truncated encoding names resolving to full names). (Kamil Tekiela)
+  . Fixed mbstring.regex_retry_limit above UINT_MAX being ignored.
+    (Marc Bennewitz)
 
 - MySQLi:
   . Fix GH-22854: Fixed failed assertion when accessing mysqli property after

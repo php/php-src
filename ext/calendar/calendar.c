@@ -255,7 +255,7 @@ PHP_FUNCTION(cal_to_jd)
 		RETURN_THROWS();
 	}
 
-	if (UNEXPECTED(ZEND_LONG_EXCEEDS_INT(day))) {
+	if (!ZEND_IN_RANGE_OF(day, int32_t)) {
 		zend_argument_value_error(3, "must be between %d and %d", INT32_MIN, INT32_MAX);
 		RETURN_THROWS();
 	}
@@ -516,7 +516,7 @@ PHP_FUNCTION(jewishtojd)
 		RETURN_THROWS();
 	}
 
-	if (ZEND_LONG_EXCEEDS_INT(year)) {
+	if (!ZEND_IN_RANGE_OF(year, int)) {
 		zend_argument_value_error(3, "must be between %d and %d", INT_MIN, INT_MAX);
 		RETURN_THROWS();
 	}
