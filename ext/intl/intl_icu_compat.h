@@ -36,21 +36,13 @@ typedef USpoofCheckResult IntlIcuSpoofCheckResult;
 typedef void IntlIcuSpoofCheckResult;
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-UConverter *intl_icu_compat_ucnv_clone(const UConverter *converter, UErrorCode *status);
-UBreakIterator *intl_icu_compat_ubrk_clone(const UBreakIterator *break_iterator, UErrorCode *status);
-void intl_icu_compat_uspoof_init_checker(USpoofChecker *checker, IntlIcuSpoofCheckResult **check_result, UErrorCode *status);
-void intl_icu_compat_uspoof_close_check_result(IntlIcuSpoofCheckResult *check_result);
-int32_t intl_icu_compat_uspoof_check_utf8(const USpoofChecker *checker, const char *text, int32_t length, IntlIcuSpoofCheckResult *check_result, UErrorCode *status);
-UBool intl_icu_compat_uspoof_check_result_mismatch(IntlIcuSpoofCheckResult *check_result, int32_t checks, int32_t *result_checks, UErrorCode *status);
-UBool intl_icu_compat_uspoof_is_allowed_chars_pattern_option(int64_t pattern_option);
-const char *intl_icu_compat_uspoof_allowed_chars_pattern_option_error_message(void);
-
-#ifdef __cplusplus
-}
-#endif
+U_CFUNC UConverter *intl_icu_compat_ucnv_clone(const UConverter *converter, UErrorCode *status);
+U_CFUNC UBreakIterator *intl_icu_compat_ubrk_clone(const UBreakIterator *break_iterator, UErrorCode *status);
+U_CFUNC void intl_icu_compat_uspoof_init_checker(USpoofChecker *checker, IntlIcuSpoofCheckResult **check_result, UErrorCode *status);
+U_CFUNC void intl_icu_compat_uspoof_close_check_result(IntlIcuSpoofCheckResult *check_result);
+U_CFUNC int32_t intl_icu_compat_uspoof_check_utf8(const USpoofChecker *checker, const char *text, int32_t length, IntlIcuSpoofCheckResult *check_result, UErrorCode *status);
+U_CFUNC UBool intl_icu_compat_uspoof_check_result_mismatch(IntlIcuSpoofCheckResult *check_result, int32_t checks, int32_t *result_checks, UErrorCode *status);
+U_CFUNC UBool intl_icu_compat_uspoof_is_allowed_chars_pattern_option(int64_t pattern_option);
+U_CFUNC const char *intl_icu_compat_uspoof_allowed_chars_pattern_option_error_message(void);
 
 #endif
