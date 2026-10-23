@@ -397,7 +397,7 @@ static PHP_INI_MH(OnChangeMemoryHardLimitPercent)
 	if (new_value) {
 		value = zend_ini_parse_quantity_warn(new_value, entry->name);
 	} else {
-		value = -1; /* default: 200% if memory limit < 1G, fixed 1G buffer otherwise */
+		value = 100; /* default: hard limit equals soft limit */
 	}
 
 	if (value < 100 && value != -1) {
@@ -893,7 +893,7 @@ PHP_INI_BEGIN()
 
 	PHP_INI_ENTRY("max_memory_limit",		"-1",		PHP_INI_SYSTEM,		OnChangeMaxMemoryLimit)
 	PHP_INI_ENTRY("memory_limit",			"128M",		PHP_INI_ALL,		OnChangeMemoryLimit)
-	PHP_INI_ENTRY("memory_hard_limit_percent",	NULL,	PHP_INI_ALL,		OnChangeMemoryHardLimitPercent)
+	PHP_INI_ENTRY("memory_hard_limit_percent",	"100",	PHP_INI_ALL,		OnChangeMemoryHardLimitPercent)
 
 	PHP_INI_ENTRY("precision",					"14",		PHP_INI_ALL,		OnSetPrecision)
 	PHP_INI_ENTRY("sendmail_from",				NULL,		PHP_INI_ALL,		NULL)

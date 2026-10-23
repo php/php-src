@@ -536,7 +536,7 @@ static zend_always_inline zend_result zend_mm_check_limit(zend_mm_heap *heap, si
 			}
 		}
 		ZEND_ASSERT(heap->hard_limit >= heap->limit && heap->hard_limit >= heap->real_size);
-		if (!heap->fallible && add_size > heap->hard_limit - heap->real_size) {
+		if (add_size > heap->hard_limit - heap->real_size) {
 			zend_mm_hard_limit_error(heap, add_size ZEND_FILE_LINE_RELAY_CC);
 		}
 		/* Check soft limit again as gc may have reduced memory usage */
@@ -2323,7 +2323,7 @@ static zend_mm_heap *zend_mm_init(void)
 #if ZEND_MM_LIMIT
 	heap->limit = ZEND_MM_LIMIT_MAX;
 	heap->hard_limit = ZEND_MM_LIMIT_MAX;
-	heap->hard_limit_percent = -1;
+	heap->hard_limit_percent = 100;
 	heap->overflow = 0;
 #endif
 	heap->fallible = false;
@@ -3742,7 +3742,7 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 		mm_heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_STD;
 		mm_heap->limit = ZEND_MM_LIMIT_MAX;
 		mm_heap->hard_limit = ZEND_MM_LIMIT_MAX;
-		mm_heap->hard_limit_percent = -1;
+		mm_heap->hard_limit_percent = 100;
 		mm_heap->overflow = 0;
 		mm_heap->fallible = false;
 

@@ -19,6 +19,11 @@ PHP 8.7 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- OOM:
+  . The default value of `memory_hard_limit_percent` is now `100`, so exceeding
+    `memory_limit` terminates the process immediately instead of attempting
+    recovery. Set it to `-1` to restore the previous recoverable behavior.
+
 - Curl:
   . curl_multi_exec() now throws a TypeError when still_running is not an int.
   . Nested arrays in CURLOPT_POSTFIELDS now throw a TypeError, instead of being
