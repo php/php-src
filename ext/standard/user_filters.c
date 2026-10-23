@@ -147,6 +147,7 @@ static php_stream_filter_status_t userfilter_filter(
 	/* Make sure the stream is not closed while the filter callback executes. */
 	uint32_t orig_no_fclose = stream->flags & PHP_STREAM_FLAG_NO_FCLOSE;
 	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
+	thisfilter->running_calls++;
 
 	/* Give the userfilter class a hook back to the stream */
 	zend_class_entry *old_scope = EG(fake_scope);
@@ -171,6 +172,7 @@ static php_stream_filter_status_t userfilter_filter(
 			zend_string_release(stream_name);
 			stream->flags &= ~PHP_STREAM_FLAG_NO_FCLOSE;
 			stream->flags |= orig_no_fclose;
+			thisfilter->running_calls--;
 			return PSFS_ERR_FATAL;
 		}
 	}
@@ -234,6 +236,7 @@ static php_stream_filter_status_t userfilter_filter(
 
 	stream->flags &= ~PHP_STREAM_FLAG_NO_FCLOSE;
 	stream->flags |= orig_no_fclose;
+	thisfilter->running_calls--;
 
 	return ret;
 }

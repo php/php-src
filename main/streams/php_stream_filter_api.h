@@ -116,6 +116,10 @@ struct _php_stream_filter {
 
 	/* filters are auto_registered when they're applied */
 	zend_resource *res;
+
+	/* calls of the filter that have not returned, Fibers suspended in them included;
+	 * the filter must not be freed while there is one */
+	uint32_t running_calls;
 };
 
 /* stack filter onto a stream */
