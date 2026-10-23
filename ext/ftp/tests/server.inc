@@ -431,7 +431,7 @@ if ($pid) {
             $host = "127.0.0.1";
             $i=0;
 
-            if (empty($bug73457)) {
+            if (empty($bug73457) && empty($pasv_address_at_line_end)) {
                 if (!empty($ssl)) {
                     $soc = stream_socket_server("tcp://127.0.0.1:0", $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
                 } else {
@@ -450,9 +450,14 @@ if ($pid) {
 
             $p2 = $pasv_port % ((int) 1 << 8);
             $p1 = ($pasv_port-$p2)/((int) 1 << 8);
-            fputs($s, "227 Entering Passive Mode. (127,0,0,1,{$p1},{$p2})\r\n");
+            if (empty($pasv_address_at_line_end)) {
+                fputs($s, "227 Entering Passive Mode. (127,0,0,1,{$p1},{$p2})\r\n");
+            } else {
+                /* The address starts 14 bytes before the end of the 512 bytes the client reads the line into */
+                fputs($s, "227 " . str_repeat('.', 494) . "127,0,0,1,1,1)\r\n");
+            }
 
-            if (empty($bug73457)) {
+            if (empty($bug73457) && empty($pasv_address_at_line_end)) {
                 $pasvs = stream_socket_accept($soc,10);
             } else {
                 $pasvs = null;
