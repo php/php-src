@@ -113,6 +113,8 @@ PHP                                                                        NEWS
     file fails after it was already truncated. (Ilia Alshanetsky)
 
 - Standard:
+  . Fixed bug GH-24308 (Request shutdown calls closelog() even when syslog
+    was not opened by PHP). (lazerg)
   . Fixed password_get_info() and password_needs_rehash() accepting malformed
     bcrypt costs. (Ilia Alshanetsky)
   . Fixed proc_open() null descriptor not being inheritable on Windows.
