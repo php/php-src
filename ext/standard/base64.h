@@ -63,7 +63,6 @@ PHP_MINIT_FUNCTION(base64_intrin);
 
 /* php_base64_encode_ex flags */
 #define PHP_BASE64_NO_PADDING 1
-#define PHP_BASE64_FALLIBLE 2 /* Only PHP userland uses this fallible result contract */
 
 PHPAPI extern zend_string *php_base64_encode_ex(const unsigned char *, size_t, zend_long flags);
 PHPAPI extern zend_string *php_base64_decode_ex(const unsigned char *, size_t, bool);
