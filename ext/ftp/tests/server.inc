@@ -596,6 +596,11 @@ if ($pid) {
             fclose($fs);
         }elseif (preg_match('/^SIZE \/bug73457/', $buf)) {
             fputs($s, "213 10\r\n");
+        }elseif (preg_match('/^SIZE \/mdtmnodigits/', $buf)) {
+            fputs($s, "213 10\r\n");
+        }elseif (preg_match('/^MDTM \/mdtmnodigits/', $buf)) {
+            // No digit in the whole 512 byte buffer the client reads the reply into
+            fputs($s, "213 " . str_repeat('x', 600) . "\r\n");
         }elseif (preg_match("/^SITE/", $buf)) {
             fputs($s, "500 Syntax error, command unrecognized.\r\n");
         }else {

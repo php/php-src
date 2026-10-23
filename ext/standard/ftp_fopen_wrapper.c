@@ -847,11 +847,11 @@ static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, const char *url,
 		struct tm tm, tmbuf, *gmt;
 		time_t stamp;
 
-		while ((size_t)(p - tmp_line) < sizeof(tmp_line) && !isdigit((unsigned char)*p)) {
+		while (*p != '\0' && !isdigit((unsigned char)*p)) {
 			p++;
 		}
 
-		if ((size_t)(p - tmp_line) > sizeof(tmp_line)) {
+		if (*p == '\0') {
 			goto mdtm_error;
 		}
 
