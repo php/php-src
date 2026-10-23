@@ -883,6 +883,45 @@ static zend_always_inline void zend_mm_hugepage(void* ptr, size_t size)
 #endif
 }
 
+static zend_always_inline void zend_mm_no_reuse_clear(void *ptr, size_t size)
+{
+#if defined(MADV_DONTNEED)
+	char *p = (char *) ptr;
+	size_t offset = ZEND_MM_ALIGNED_OFFSET(p, REAL_PAGE_SIZE);
+	size_t prefix = offset != 0 ? REAL_PAGE_SIZE - offset : 0;
+
+	if (prefix > size) {
+		prefix = size;
+	}
+	if (prefix != 0) {
+		memset(p, 0, prefix);
+		p += prefix;
+		size -= prefix;
+	}
+
+	size_t discard_size = size - ZEND_MM_ALIGNED_OFFSET(size, REAL_PAGE_SIZE);
+	if (discard_size != 0) {
+#ifdef __linux__
+		/* Private anonymous pages fault back as zeroes while their addresses stay reserved. */
+		if (madvise(p, discard_size, MADV_DONTNEED) != 0) {
+			memset(p, 0, discard_size);
+		}
+#else
+		/* MADV_DONTNEED does not guarantee zero-fill on every supported platform. */
+		memset(p, 0, discard_size);
+		(void)madvise(p, discard_size, MADV_DONTNEED);
+#endif
+		p += discard_size;
+		size -= discard_size;
+	}
+	if (size != 0) {
+		memset(p, 0, size);
+	}
+#else
+	memset(ptr, 0, size);
+#endif
+}
+
 static void *zend_mm_chunk_alloc_int(size_t size, size_t alignment)
 {
 	void *ptr = zend_mm_mmap(size);
@@ -1398,7 +1437,7 @@ static zend_always_inline void zend_mm_free_large(zend_mm_heap *heap, zend_mm_ch
 	if (UNEXPECTED(zend_mm_no_reuse)) {
 		ZEND_MM_CHECK(!(chunk->map[page_num] & ZEND_MM_IS_RETIRED), "zend_mm_heap corrupted (double free)");
 		chunk->map[page_num] |= ZEND_MM_IS_RETIRED;
-		memset(ZEND_MM_PAGE_ADDR(chunk, page_num), 0, pages_count * ZEND_MM_PAGE_SIZE);
+		zend_mm_no_reuse_clear(ZEND_MM_PAGE_ADDR(chunk, page_num), pages_count * ZEND_MM_PAGE_SIZE);
 		return;
 	}
 	zend_mm_free_pages(heap, chunk, page_num, pages_count);
@@ -2255,7 +2294,7 @@ static void zend_mm_free_huge(zend_mm_heap *heap, void *ptr ZEND_FILE_LINE_DC ZE
 	size = zend_mm_del_huge_block(heap, ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	zend_mm_check_huge_block_size(heap, size);
 	if (UNEXPECTED(zend_mm_no_reuse)) {
-		memset(ptr, 0, size);
+		zend_mm_no_reuse_clear(ptr, size);
 	} else {
 		zend_mm_chunk_free(heap, ptr, size);
 #if ZEND_MM_STAT || ZEND_MM_LIMIT

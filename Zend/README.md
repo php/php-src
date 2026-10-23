@@ -41,6 +41,8 @@ With the mode enabled:
 
 - Freed small allocations, page runs, and huge mappings are cleared and retained
   until their heap shuts down, after request shutdown callbacks have finished.
+  OS pages belonging to retired page runs and huge mappings are returned to the
+  kernel on supported platforms while their virtual addresses remain reserved.
   Retired payloads are not used to store allocator free-list links.
 - Reallocations of existing blocks always move to fresh storage, including
   shrinking and unchanged-size reallocations. The original storage is retired.
@@ -51,11 +53,12 @@ With the mode enabled:
   `memory_get_usage(false)` can decrease after freeing an allocation even though
   the underlying storage remains retained.
 
-Memory consumption approaches cumulative allocation volume rather than peak
-live memory. Clearing freed storage and moving reallocations also add memory
-bandwidth and copying costs. The mode is intended for selected short-lived
-requests, not long-running scripts or application workers that do not perform
-normal PHP request shutdown.
+Reserved virtual memory and allocator accounting approach cumulative allocation
+volume rather than peak live memory. Resident memory may be lower where the
+operating system can discard fully retired pages. Clearing freed storage and
+moving reallocations also add memory bandwidth, system-call, and copying costs.
+The mode is intended for selected short-lived requests, not long-running scripts
+or application workers that do not perform normal PHP request shutdown.
 
 The mode requires native Zend MM. Combining it with `USE_ZEND_ALLOC=0`, custom
 heap or storage handlers, or `ZEND_MM_DEBUG` allocator wrappers causes an
