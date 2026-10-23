@@ -227,7 +227,7 @@ if (module_dirs.length == 0) {
 modules += gen_modules();
 
 // Look for ARG_ENABLE or ARG_WITH calls
-re = new RegExp("(ARG_(ENABLE|WITH)\([^;]+\);)", "gm");
+re = new RegExp("(ARG_(ENABLE|WITH)\\([^;]+\\);)", "gm");
 calls = modules.match(re);
 for (i = 0; i < calls.length; i++) {
 	item = calls[i];
