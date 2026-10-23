@@ -1,5 +1,13 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+23 Oct 2026, PHP 5.6.37-p1
+
+- Core:
+  . Fixed GHSA-w8hw-w9fx-j79w (Avoid state corruption via bailout).
+    (CVE-2026-109618) (Arnaud, ilutov)
+  . Fixed GHSA-6wmf-4rv5-p3rp (Avoid state corruption via bailout).
+    (CVE-2026-109619) (Arnaud, ilutov)
+
 19 Jul 2018, PHP 5.6.37
 
 - Exif:
