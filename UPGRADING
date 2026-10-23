@@ -183,6 +183,10 @@ PHP 8.7 UPGRADE NOTES
 - MBString:
   . Improved performance of mb_strlen for UTF-8 strings.
 
+- PDO:
+  . Improved performance of fetching rows with PDO::FETCH_BOTH, the default
+    fetch mode, for results with more than 4 columns.
+
 - PDO_PGSQL:
   . Improved performance of the SQL parser that handles placeholders in
     PDO::prepare() and, with emulated prepares, PDOStatement::execute().
