@@ -20,9 +20,7 @@
 
 #include "php_intl.h"
 #include "listformatter_class.h"
-BEGIN_EXTERN_C()
 #include "listformatter_arginfo.h"
-END_EXTERN_C()
 
 #include <memory>
 
