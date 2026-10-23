@@ -30,7 +30,7 @@ jobs:
 
       - name: Detect changed files
         if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@v4
         id: changes
         with:
           filters: |
