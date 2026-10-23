@@ -26,7 +26,7 @@
 #include "spoofchecker_class.h"
 
 /* {{{ Spoofchecker object constructor. */
-U_CFUNC PHP_METHOD(Spoofchecker, __construct)
+PHP_METHOD(Spoofchecker, __construct)
 {
 	SPOOFCHECKER_METHOD_INIT_VARS;
 
