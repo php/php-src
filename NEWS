@@ -131,6 +131,8 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug GH-24508 (HTTP wrapper leaks the dechunk filter when header
     parsing fails after Transfer-Encoding). (bercedev)
+  . Fixed bug GH-24509 (HTTP wrapper leaks Location buffer on empty
+    Location header). (bercedev)
 
 - Tidy:
   . Fixed tidy_repair_string(), tidy_repair_file(), tidy::repairString() and

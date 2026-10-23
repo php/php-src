@@ -337,7 +337,7 @@ static zend_string *php_stream_http_response_headers_parse(php_stream_wrapper *w
 			zend_string_efree(last_header_line_str);
 			return NULL;
 		}
-		if (header_info->location_len == 0) {
+		if (header_info->location == NULL) {
 			header_info->location = emalloc(last_header_value_len + 1);
 		} else if (header_info->location_len <= last_header_value_len) {
 			header_info->location = erealloc(header_info->location, last_header_value_len + 1);
