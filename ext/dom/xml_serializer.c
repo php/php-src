@@ -1228,18 +1228,18 @@ static int dom_xml_serializing_a_document_node(
 	/* 1. Let serialized document be an empty string.
 	 *    => We use the output buffer instead. */
 
-	xmlNodePtr child = node->children;
-	node->children = NULL;
-
 	/* https://github.com/w3c/DOM-Parsing/issues/50 */
-	TRY_OR_CLEANUP(xmlOutputBufferFlush(ctx->out));
-	TRY_OR_CLEANUP(xmlSaveDoc(ctx->ctxt, (xmlDocPtr) node));
-	TRY_OR_CLEANUP(xmlSaveFlush(ctx->ctxt));
-
-	node->children = child;
+	TRY(xmlOutputBufferFlush(ctx->out));
+	/* To gain the xml declaration, use a shallow copy of the document with the children NULLed out.
+	 * Stream wrappers can access the real document, so we cannot modify that. */
+	xmlDoc declaration_doc = *(xmlDocPtr) node;
+	declaration_doc.children = declaration_doc.last = NULL;
+	TRY(xmlSaveDoc(ctx->ctxt, &declaration_doc));
+	TRY(xmlSaveFlush(ctx->ctxt));
 
 	/* 2. For each child child of node, in tree order, run the XML serialization algorithm on the child passing along the provided arguments,
 	 *    and append the result to serialized document. */
+	xmlNodePtr child = node->children;
 	while (child != NULL) {
 		TRY(dom_xml_serialization_algorithm(ctx, namespace_prefix_map, child, namespace, prefix_index, indent, require_well_formed));
 		child = child->next;
@@ -1248,10 +1248,6 @@ static int dom_xml_serializing_a_document_node(
 	/* 3. Return the value of serialized document.
 	 *    => We use the output buffer instead. */
 	return 0;
-
-cleanup:
-	node->children = child;
-	return -1;
 }
 
 static zend_always_inline bool dom_xml_serialize_check_stack_limit(void)
