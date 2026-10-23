@@ -843,7 +843,7 @@ PHP_FUNCTION(unpack)
 				long tmp = strtol(format, NULL, 10);
 				/* There is not strtoi. We have to check the range ourselves.
 				 * With 32-bit long the INT_{MIN,MAX} are useless because long == int, but with 64-bit they do limit us to 32-bit. */
-				if (errno || tmp < INT_MIN || tmp > INT_MAX) {
+				if (errno || !ZEND_IN_RANGE_OF(tmp, int)) {
 					php_error_docref(NULL, E_WARNING, "Type %c: integer overflow", type);
 					zend_array_destroy(Z_ARR_P(return_value));
 					RETURN_FALSE;

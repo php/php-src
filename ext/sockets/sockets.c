@@ -716,7 +716,7 @@ PHP_FUNCTION(socket_create_listen)
 		Z_PARAM_LONG(backlog)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (port < 0 || port > USHRT_MAX) {
+	if (!ZEND_IN_RANGE_OF(port, unsigned short)) {
 		zend_argument_value_error(1, "must be between 0 and %u", USHRT_MAX);
 		RETURN_THROWS();
 	}
@@ -1307,7 +1307,7 @@ PHP_FUNCTION(socket_strerror)
 		Z_PARAM_LONG(arg1)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZEND_LONG_EXCEEDS_INT(arg1)) {
+	if (!ZEND_IN_RANGE_OF(arg1, int)) {
 		zend_argument_value_error(1, "must be between %d and %d", INT_MIN, INT_MAX);
 		RETURN_THROWS();
 	}
@@ -1337,7 +1337,7 @@ PHP_FUNCTION(socket_bind)
 	php_sock = Z_SOCKET_P(arg1);
 	ENSURE_SOCKET_VALID(php_sock);
 
-	if (objint < 0 || objint > USHRT_MAX) {
+	if (!ZEND_IN_RANGE_OF(objint, unsigned short)) {
 		zend_argument_value_error(3, "must be between 0 and %u", USHRT_MAX);
 		RETURN_THROWS();
 	}
@@ -1734,7 +1734,7 @@ PHP_FUNCTION(socket_sendto)
 #ifdef AF_PACKET
 	if (php_sock->type != AF_PACKET) {
 #endif
-		if (port < 0 || port > USHRT_MAX) {
+		if (!ZEND_IN_RANGE_OF(port, unsigned short)) {
 			zend_argument_value_error(6, "must be between 0 and %u", USHRT_MAX);
 			RETURN_THROWS();
 		}
@@ -2169,7 +2169,7 @@ PHP_FUNCTION(socket_set_option)
 			zend_long timeout = zval_get_long(arg4);
 
 			// TCP_USER_TIMEOUT unsigned int
-			if (timeout < 0 || timeout > UINT_MAX) {
+			if (!ZEND_IN_RANGE_OF(timeout, unsigned int)) {
 				zend_argument_value_error(4, "must be between 0 and %u", UINT_MAX);
 				RETURN_THROWS();
 			}
@@ -2225,12 +2225,12 @@ PHP_FUNCTION(socket_set_option)
 			zend_long val_linger = zval_get_long(l_linger);
 			zend_release_properties(opt_props);
 
-			if (val_lonoff < 0 || val_lonoff > USHRT_MAX) {
+			if (!ZEND_IN_RANGE_OF(val_lonoff, unsigned short)) {
 				zend_argument_value_error(4, "\"%s\" must be between 0 and %u", l_onoff_key, USHRT_MAX);
 				RETURN_THROWS();
 			}
 
-			if (val_linger < 0 || val_linger > USHRT_MAX) {
+			if (!ZEND_IN_RANGE_OF(val_linger, unsigned short)) {
 				zend_argument_value_error(4, "\"%s\" must be between 0 and %u", l_linger_key, USHRT_MAX);
 				RETURN_THROWS();
 			}
@@ -2409,7 +2409,7 @@ PHP_FUNCTION(socket_set_option)
 			ov = zval_get_long(arg4);
 
 			// UDP segmentation offload maximum size or 0 to disable it
-			if (ov < 0 || ov > USHRT_MAX) {
+			if (!ZEND_IN_RANGE_OF(ov, unsigned short)) {
 				zend_argument_value_error(4, "must be between 0 and %u", USHRT_MAX);
 				RETURN_THROWS();
 			}

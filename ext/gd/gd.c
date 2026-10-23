@@ -665,7 +665,7 @@ PHP_FUNCTION(imagesetstyle)
 			zend_argument_type_error(2, "must only have elements of type int, %s given", zend_zval_type_name(item));
 			RETURN_THROWS();
 		}
-		if (ZEND_LONG_EXCEEDS_INT(tmp)) {
+		if (!ZEND_IN_RANGE_OF(tmp, int)) {
 			efree(stylearr);
 			zend_argument_value_error(2, "elements must be between %d and %d", INT_MIN, INT_MAX);
 			RETURN_THROWS();
@@ -744,7 +744,7 @@ PHP_FUNCTION(imagetruecolortopalette)
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
-	if (ncolors <= 0 || ZEND_LONG_INT_OVFL(ncolors)) {
+	if (ncolors <= 0 || !ZEND_IN_RANGE_OF(ncolors, int)) {
 		zend_argument_value_error(3, "must be between 1 and %d", INT_MAX);
 		RETURN_THROWS();
 	}
@@ -849,7 +849,7 @@ PHP_FUNCTION(imagefilledellipse)
 		Z_PARAM_LONG(color)
 	ZEND_PARSE_PARAMETERS_END();
 
-    if (w < 0 || ZEND_LONG_INT_OVFL(w)) {
+    if (w < 0 || !ZEND_IN_RANGE_OF(w, int)) {
         zend_argument_value_error(4, "must be between 0 and %d", INT_MAX);
         RETURN_THROWS();
     }
@@ -1818,7 +1818,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type)
 	}
 
 	/* quality must fit in an int */
-	if (quality < INT_MIN || quality > INT_MAX) {
+	if (!ZEND_IN_RANGE_OF(quality, int)) {
 		php_error_docref(NULL, E_WARNING, "Argument #3 ($chunk_size) must be between %d and %d", INT_MIN, INT_MAX);
 		RETURN_FALSE;
 	}
@@ -3679,12 +3679,12 @@ static void php_image_filter_scatter(INTERNAL_FUNCTION_PARAMETERS)
 		Z_PARAM_ARRAY(hash_colors)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (scatter_sub < 0 || ZEND_SIZE_T_INT_OVFL(scatter_sub)) {
+	if (scatter_sub < 0 || !ZEND_IN_RANGE_OF(scatter_sub, int)) {
 		zend_argument_value_error(3, "must be between 0 and %d", INT_MAX);
 		RETURN_THROWS();
 	}
 
-	if (scatter_plus < 0 || ZEND_SIZE_T_INT_OVFL(scatter_plus)) {
+	if (scatter_plus < 0 || !ZEND_IN_RANGE_OF(scatter_plus, int)) {
 		zend_argument_value_error(4, "must be between 0 and %d", INT_MAX);
 		RETURN_THROWS();
 	}
@@ -3712,7 +3712,7 @@ static void php_image_filter_scatter(INTERNAL_FUNCTION_PARAMETERS)
 				zend_argument_type_error(5, "must be of type int, %s given", zend_zval_type_name(color));
 				RETURN_THROWS();
 			}
-			if (tmp < 0 || ZEND_LONG_INT_OVFL(tmp)) {
+			if (tmp < 0 || !ZEND_IN_RANGE_OF(tmp, int)) {
 				efree(colors);
 				zend_argument_value_error(5, "value must be between 0 and %d", INT_MAX);
 				RETURN_THROWS();
@@ -3894,7 +3894,7 @@ static bool php_gd_zval_try_get_c_int(zval *tmp, const char *field, int *res) {
 		zend_argument_type_error(2, "\"%s\" key must be of type int, %s given", field, zend_zval_type_name(tmp));
 		return false;
 	}
-	if (UNEXPECTED(ZEND_LONG_EXCEEDS_INT(r))) {
+	if (!ZEND_IN_RANGE_OF(r, int)) {
 		zend_argument_value_error(2, "\"%s\" key must be between %d and %d", field, INT_MIN, INT_MAX);
 		return false;
 	}
@@ -4090,12 +4090,12 @@ PHP_FUNCTION(imagescale)
 		}
 	}
 
-	if (tmp_w <= 0 || ZEND_SIZE_T_INT_OVFL(tmp_w)) {
+	if (tmp_w <= 0 || !ZEND_IN_RANGE_OF(tmp_w, int)) {
 		zend_argument_value_error(2, "must be between 1 and %d", INT_MAX);
 		RETURN_THROWS();
 	}
 
-	if (tmp_h <= 0 || ZEND_SIZE_T_INT_OVFL(tmp_h)) {
+	if (tmp_h <= 0 || !ZEND_IN_RANGE_OF(tmp_h, int)) {
 		zend_argument_value_error(3, "must be between 1 and %d", INT_MAX);
 		RETURN_THROWS();
 	}
@@ -4432,25 +4432,25 @@ PHP_FUNCTION(imageresolution)
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
 	if (!res_x_is_null && !res_y_is_null) {
-		if (res_x < 0 || ZEND_SIZE_T_UINT_OVFL(res_x)) {
+		if (!ZEND_IN_RANGE_OF(res_x, unsigned int)) {
 			zend_argument_value_error(2, "must be between 0 and %u", UINT_MAX);
 			RETURN_THROWS();
 		}
-		if (res_y < 0 || ZEND_SIZE_T_UINT_OVFL(res_y)) {
+		if (!ZEND_IN_RANGE_OF(res_y, unsigned int)) {
 			zend_argument_value_error(3, "must be between 0 and %u", UINT_MAX);
 			RETURN_THROWS();
 		}
 		gdImageSetResolution(im, res_x, res_y);
 		RETURN_TRUE;
 	} else if (!res_x_is_null && res_y_is_null) {
-		if (res_x < 0 || ZEND_SIZE_T_UINT_OVFL(res_x)) {
+		if (!ZEND_IN_RANGE_OF(res_x, unsigned int)) {
 			zend_argument_value_error(2, "must be between 0 and %u", UINT_MAX);
 			RETURN_THROWS();
 		}
 		gdImageSetResolution(im, res_x, res_x);
 		RETURN_TRUE;
 	} else if (res_x_is_null && !res_y_is_null) {
-		if (res_y < 0 || ZEND_SIZE_T_UINT_OVFL(res_y)) {
+		if (!ZEND_IN_RANGE_OF(res_y, unsigned int)) {
 			zend_argument_value_error(3, "must be between 0 and %u", UINT_MAX);
 			RETURN_THROWS();
 		}

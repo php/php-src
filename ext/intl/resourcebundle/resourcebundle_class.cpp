@@ -190,7 +190,7 @@ static zval *resource_bundle_array_fetch(
 		key = ZSTR_VAL(offset_str);
 		rb->child = ures_getByKey(rb->me, key, rb->child, &INTL_DATA_ERROR_CODE(rb) );
 	} else {
-		if (UNEXPECTED(offset_int < (zend_long)INT32_MIN || offset_int > (zend_long)INT32_MAX)) {
+		if (!ZEND_IN_RANGE_OF(offset_int, int32_t)) {
 			if (offset_arg_num) {
 				zend_argument_value_error(offset_arg_num, "index must be between %d and %d", INT32_MIN, INT32_MAX);
 			} else {

@@ -358,7 +358,7 @@ U_CFUNC PHP_FUNCTION(grapheme_substr)
 		Z_PARAM_PATH(locale, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (UNEXPECTED(lstart < INT32_MIN || lstart > INT32_MAX)) {
+	if (!ZEND_IN_RANGE_OF(lstart, int32_t)) {
 		zend_argument_value_error(2, "is too large");
 		RETURN_THROWS();
 	}
@@ -369,7 +369,7 @@ U_CFUNC PHP_FUNCTION(grapheme_substr)
 		length = str_len;
 	}
 
-	if (UNEXPECTED(length < INT32_MIN || length > INT32_MAX)) {
+	if (!ZEND_IN_RANGE_OF(length, int32_t)) {
 		zend_argument_value_error(3, "is too large");
 		RETURN_THROWS();
 	}

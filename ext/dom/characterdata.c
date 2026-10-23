@@ -119,7 +119,7 @@ PHP_METHOD(DOMCharacterData, substringData)
 	const xmlChar *cur = php_dom_get_content_or_empty(node);
 
 	length = xmlUTF8Strlen(cur);
-	if (ZEND_LONG_INT_OVFL(offset_input) || ZEND_LONG_INT_OVFL(count_input)) {
+	if ((offset_input > 0 && !ZEND_IN_RANGE_OF(offset_input, int)) || (count_input > 0 && !ZEND_IN_RANGE_OF(count_input, int))) {
 		php_dom_throw_error(INDEX_SIZE_ERR, dom_get_strict_error(intern->document));
 		RETURN_FALSE;
 	}
@@ -206,7 +206,7 @@ static void dom_character_data_insert_data(INTERNAL_FUNCTION_PARAMETERS, bool re
 
 	length = xmlUTF8Strlen(cur);
 
-	if (ZEND_LONG_INT_OVFL(offset_input)) {
+	if (offset_input > 0 && !ZEND_IN_RANGE_OF(offset_input, int)) {
 		php_dom_throw_error(INDEX_SIZE_ERR, dom_get_strict_error(intern->document));
 		RETURN_FALSE;
 	}
@@ -271,7 +271,7 @@ static void dom_character_data_delete_data(INTERNAL_FUNCTION_PARAMETERS, bool re
 
 	length = xmlUTF8Strlen(cur);
 
-	if (offset < 0 || ZEND_LONG_INT_OVFL(offset) || ZEND_LONG_INT_OVFL(count_input) || offset > length) {
+	if (offset < 0 || !ZEND_IN_RANGE_OF(offset, int) || (count_input > 0 && !ZEND_IN_RANGE_OF(count_input, int)) || offset > length) {
 		php_dom_throw_error(INDEX_SIZE_ERR, dom_get_strict_error(intern->document));
 		RETURN_FALSE;
 	}
@@ -341,7 +341,7 @@ static void dom_character_data_replace_data(INTERNAL_FUNCTION_PARAMETERS, bool r
 
 	length = xmlUTF8Strlen(cur);
 
-	if (offset < 0 || ZEND_LONG_INT_OVFL(offset) || ZEND_LONG_INT_OVFL(count_input) || offset > length) {
+	if (offset < 0 || !ZEND_IN_RANGE_OF(offset, int) || (count_input > 0 && !ZEND_IN_RANGE_OF(count_input, int)) || offset > length) {
 		php_dom_throw_error(INDEX_SIZE_ERR, dom_get_strict_error(intern->document));
 		RETURN_FALSE;
 	}

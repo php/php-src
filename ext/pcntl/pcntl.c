@@ -311,7 +311,7 @@ PHP_FUNCTION(pcntl_alarm)
 		Z_PARAM_LONG(seconds);
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (seconds < 0 || seconds > UINT_MAX) {
+	if (!ZEND_IN_RANGE_OF(seconds, unsigned int)) {
 		zend_argument_value_error(1, "must be between 0 and %u", UINT_MAX);
 		RETURN_THROWS();
 	}

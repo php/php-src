@@ -133,7 +133,7 @@ PHP_INTL_FUNCTION_WITH_ERROR_RESET(intltz_create_enumeration)
 	} else if (timezone != nullptr) {
 		se = TimeZone::createEnumeration(ZSTR_VAL(timezone));
 	} else {
-		if (UNEXPECTED(ZEND_LONG_EXCEEDS_INT(timezone_shift))) {
+		if (!ZEND_IN_RANGE_OF(timezone_shift, int32_t)) {
 			zend_argument_value_error(1, "must be between %d and %d", INT32_MIN, INT32_MAX);
 			RETURN_THROWS();
 		}
@@ -196,7 +196,7 @@ PHP_INTL_FUNCTION_WITH_ERROR_RESET(intltz_create_time_zone_id_enumeration)
 	}
 
 	if (!arg3isnull) {
-		if (UNEXPECTED(ZEND_LONG_EXCEEDS_INT(offset_arg))) {
+		if (!ZEND_IN_RANGE_OF(offset_arg, int32_t)) {
 			zend_argument_value_error(3, "must be between %d and %d", INT32_MIN, INT32_MAX);
 			RETURN_THROWS();
 		}
@@ -294,7 +294,7 @@ PHP_INTL_FUNCTION_WITH_ERROR_RESET(intltz_get_equivalent_id)
 		Z_PARAM_LONG(index)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (UNEXPECTED(ZEND_LONG_EXCEEDS_INT(index))) {
+	if (!ZEND_IN_RANGE_OF(index, int32_t)) {
 		zend_argument_value_error(2, "must be between %d and %d", INT32_MIN, INT32_MAX);
 		RETURN_THROWS();
 	}

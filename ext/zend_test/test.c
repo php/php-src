@@ -1235,8 +1235,8 @@ static ZEND_FUNCTION(zend_test_call_with_consumed_args)
 		Z_PARAM_LONG(consumed_args)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (UNEXPECTED(consumed_args < 0 || consumed_args > UINT32_MAX)) {
-		zend_argument_value_error(3, "must be between 0 and 4294967295");
+	if (!ZEND_IN_RANGE_OF(consumed_args, uint32_t)) {
+		zend_argument_value_error(3, "must be between 0 and %u", UINT32_MAX);
 		RETURN_THROWS();
 	}
 

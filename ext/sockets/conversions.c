@@ -390,7 +390,7 @@ void from_zval_write_int(const zval *arr_value, char *field, ser_context *ctx)
 		return;
 	}
 
-	if (lval > INT_MAX || lval < INT_MIN) {
+	if (!ZEND_IN_RANGE_OF(lval, int)) {
 		do_from_zval_err(ctx, "%s", "given PHP integer is out of bounds "
 				"for a native int");
 		return;
@@ -409,7 +409,7 @@ static void from_zval_write_uint32(const zval *arr_value, char *field, ser_conte
 		return;
 	}
 
-	if (sizeof(zend_long) > sizeof(uint32_t) && (lval < 0 || lval > 0xFFFFFFFF)) {
+	if (sizeof(zend_long) > sizeof(uint32_t) && !ZEND_IN_RANGE_OF(lval, uint32_t)) {
 		do_from_zval_err(ctx, "%s", "given PHP integer is out of bounds "
 				"for an unsigned 32-bit integer");
 		return;
@@ -428,7 +428,7 @@ static void from_zval_write_net_uint16(const zval *arr_value, char *field, ser_c
 		return;
 	}
 
-	if (lval < 0 || lval > 0xFFFF) {
+	if (!ZEND_IN_RANGE_OF(lval, uint16_t)) {
 		do_from_zval_err(ctx, "%s", "given PHP integer is out of bounds "
 				"for an unsigned 16-bit integer");
 		return;

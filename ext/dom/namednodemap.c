@@ -74,7 +74,7 @@ PHP_METHOD(DOMNamedNodeMap, item)
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(index)
 	ZEND_PARSE_PARAMETERS_END();
-	if (index < 0 || ZEND_LONG_INT_OVFL(index)) {
+	if (index < 0 || !ZEND_IN_RANGE_OF(index, int)) {
 		zend_argument_value_error(1, "must be between 0 and %d", INT_MAX);
 		RETURN_THROWS();
 	}

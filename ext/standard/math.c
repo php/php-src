@@ -349,9 +349,9 @@ PHP_FUNCTION(round)
 
 	if (ZEND_NUM_ARGS() >= 2) {
 		if (precision >= 0) {
-			places = ZEND_LONG_INT_OVFL(precision) ? INT_MAX : (int)precision;
+			places = ZEND_IN_RANGE_OF(precision, int) ? (int)precision : INT_MAX;
 		} else {
-			places = ZEND_LONG_INT_UDFL(precision) ? INT_MIN : (int)precision;
+			places = ZEND_IN_RANGE_OF(precision, int) ? (int)precision : INT_MIN;
 		}
 	}
 
@@ -1431,7 +1431,7 @@ PHP_FUNCTION(number_format)
 		thousand_sep_len = 1;
 	}
 
-	if (UNEXPECTED(dec > INT_MAX || dec < INT_MIN)) {
+	if (!ZEND_IN_RANGE_OF(dec, int)) {
 		zend_argument_value_error(2, "must be between %d and %d", INT_MIN, INT_MAX);
 		RETURN_THROWS();
 	}

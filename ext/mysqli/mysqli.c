@@ -395,7 +395,7 @@ static PHP_INI_MH(OnUpdateDefaultPort)
 {
 	zend_long value = ZEND_ATOL(ZSTR_VAL(new_value));
 
-	if (value < 0 || value > USHRT_MAX) {
+	if (!ZEND_IN_RANGE_OF(value, unsigned short)) {
 		return FAILURE;
 	}
 

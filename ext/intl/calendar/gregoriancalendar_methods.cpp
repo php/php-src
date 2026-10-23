@@ -41,7 +41,7 @@ using icu::UnicodeString;
 using icu::StringPiece;
 
 #define ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(argument, zpp_arg_position) \
-	if (UNEXPECTED(argument < INT32_MIN || argument > INT32_MAX)) { \
+	if (!ZEND_IN_RANGE_OF(argument, int32_t)) { \
 		zend_argument_value_error(zpp_arg_position, "must be between %d and %d", INT32_MIN, INT32_MAX); \
 		RETURN_THROWS(); \
 	}
@@ -357,7 +357,7 @@ U_CFUNC PHP_FUNCTION(intlgregcal_is_leap_year)
        }
 
 
-	if (UNEXPECTED(year < INT32_MIN || year > INT32_MAX)) {
+	if (!ZEND_IN_RANGE_OF(year, int32_t)) {
 		zend_argument_value_error(hasThis() ? 1 : 2, "must be between %d and %d", INT32_MIN, INT32_MAX);
 		RETURN_THROWS();
 	}

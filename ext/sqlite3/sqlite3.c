@@ -615,8 +615,7 @@ static void sqlite_value_to_zval(php_sqlite3_db_object *db_obj, sqlite3_stmt *st
 	switch (sqlite3_column_type(stmt, column)) {
 		case SQLITE_INTEGER:
 			val = sqlite3_column_int64(stmt, column);
-#ifndef ZEND_ENABLE_ZVAL_LONG64
-			if (val > ZEND_LONG_MAX || val < ZEND_LONG_MIN) {
+			if (!ZEND_IN_RANGE_OF(val, zend_long)) {
 				const char *text = (const char *) sqlite3_column_text(stmt, column);
 				if (UNEXPECTED(text == NULL)) {
 					php_sqlite3_error(db_obj, SQLITE_NOMEM, "Failed to retrieve column value due to out of memory");
@@ -625,11 +624,8 @@ static void sqlite_value_to_zval(php_sqlite3_db_object *db_obj, sqlite3_stmt *st
 					ZVAL_STRINGL(data, text, sqlite3_column_bytes(stmt, column));
 				}
 			} else {
-#endif
 				ZVAL_LONG(data, (zend_long) val);
-#ifndef ZEND_ENABLE_ZVAL_LONG64
 			}
-#endif
 			break;
 
 		case SQLITE_FLOAT:
