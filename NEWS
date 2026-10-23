@@ -17,6 +17,10 @@ PHP                                                                        NEWS
   . Fixed infinite loop in sapi_header_op() for headers of 4 GiB or more.
     (Martin Mirchev)
 
+- Standard:
+  . Fixed bug GH-24308 (Request shutdown calls closelog() even when syslog
+    was not opened by PHP). (lazerg)
+
 - Streams:
   . Fixed bug GH-24506 (stream_select() leaks a stream-error operation level
     on its FD_SETSIZE failure path). (azjezz)

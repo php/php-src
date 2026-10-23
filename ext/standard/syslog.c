@@ -39,7 +39,9 @@ PHP_MINIT_FUNCTION(syslog)
 
 PHP_RSHUTDOWN_FUNCTION(syslog)
 {
-	php_closelog();
+	if (PG(have_called_openlog)) {
+		php_closelog();
+	}
 	if (BG(syslog_device)) {
 		free(BG(syslog_device));
 		BG(syslog_device) = NULL;
@@ -100,6 +102,9 @@ PHP_FUNCTION(syslog)
 		Z_PARAM_STR(message)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (!PG(have_called_openlog)) {
+		php_openlog(PG(syslog_ident), 0, PG(syslog_facility));
+	}
 	php_syslog_str(priority, message);
 	RETURN_TRUE;
 }
