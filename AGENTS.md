@@ -4,7 +4,7 @@
 
 Before starting work and again before opening a pull request, check for existing
 pull requests as described in [CONTRIBUTING.md](CONTRIBUTING.md#pull-requests).
-Do not open a duplicate of an existing pull request. Unless you have a very good
+Do not open a duplicate of an existing pull request, unless you have a very good
 reason to do it.
 
 ## Vulnerability reports
