@@ -20,6 +20,9 @@
 #include "php.h"
 #include "base64.h"
 
+/* Private to this translation unit; C API callers retain existing flags. */
+#define PHP_BASE64_FALLIBLE 2
+
 /* {{{ base64 tables */
 static const char base64_table[] = {
 	'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
