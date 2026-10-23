@@ -518,7 +518,11 @@ zend_string *php_base64_encode_avx512_vbmi(const unsigned char *str, size_t leng
 	unsigned char *o;
 	zend_string *result;
 
-	result = zend_string_safe_alloc(((length + 2) / 3), 4 * sizeof(char), 0, 0);
+	result = zend_string_safe_falloc(((length + 2) / 3), 4 * sizeof(char), 0, 0,
+		(flags & PHP_BASE64_FALLIBLE) != 0);
+	if (UNEXPECTED(result == NULL)) {
+		return NULL;
+	}
 	o = (unsigned char *)ZSTR_VAL(result);
 
 	const __m512i shuffle_splitting = _mm512_setr_epi32(
@@ -628,7 +632,11 @@ zend_string *php_base64_encode_avx512(const unsigned char *str, size_t length, z
 	unsigned char *o;
 	zend_string *result;
 
-	result = zend_string_safe_alloc(((length + 2) / 3), 4 * sizeof(char), 0, 0);
+	result = zend_string_safe_falloc(((length + 2) / 3), 4 * sizeof(char), 0, 0,
+		(flags & PHP_BASE64_FALLIBLE) != 0);
+	if (UNEXPECTED(result == NULL)) {
+		return NULL;
+	}
 	o = (unsigned char *)ZSTR_VAL(result);
 
 	while (length > 63) {
@@ -915,7 +923,11 @@ zend_string *php_base64_encode_ssse3(const unsigned char *str, size_t length, ze
 	unsigned char *o;
 	zend_string *result;
 
-	result = zend_string_safe_alloc(((length + 2) / 3), 4 * sizeof(char), 0, 0);
+	result = zend_string_safe_falloc(((length + 2) / 3), 4 * sizeof(char), 0, 0,
+		(flags & PHP_BASE64_FALLIBLE) != 0);
+	if (UNEXPECTED(result == NULL)) {
+		return NULL;
+	}
 	o = (unsigned char *)ZSTR_VAL(result);
 # if defined(ZEND_INTRIN_AVX2_NATIVE) || defined(ZEND_INTRIN_AVX2_RESOLVER)
 	if (length > 31) {
@@ -956,7 +968,11 @@ zend_string *php_base64_encode_ssse3(const unsigned char *str, size_t length, ze
 	unsigned char *o;
 	zend_string *result;
 
-	result = zend_string_safe_alloc(((length + 2) / 3), 4 * sizeof(char), 0, 0);
+	result = zend_string_safe_falloc(((length + 2) / 3), 4 * sizeof(char), 0, 0,
+		(flags & PHP_BASE64_FALLIBLE) != 0);
+	if (UNEXPECTED(result == NULL)) {
+		return NULL;
+	}
 	o = (unsigned char *)ZSTR_VAL(result);
 
 	PHP_BASE64_ENCODE_SSSE3_LOOP;
@@ -1192,7 +1208,11 @@ PHPAPI zend_string *php_base64_encode_ex(const unsigned char *str, size_t length
 	unsigned char *p;
 	zend_string *result;
 
-	result = zend_string_safe_alloc(((length + 2) / 3), 4 * sizeof(char), 0, 0);
+	result = zend_string_safe_falloc(((length + 2) / 3), 4 * sizeof(char), 0, 0,
+		(flags & PHP_BASE64_FALLIBLE) != 0);
+	if (UNEXPECTED(result == NULL)) {
+		return NULL;
+	}
 	p = (unsigned char *)ZSTR_VAL(result);
 
 	p = php_base64_encode_impl(str, length, p, flags);
@@ -1238,7 +1258,10 @@ PHP_FUNCTION(base64_encode)
 		Z_PARAM_STRING(str, str_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	result = php_base64_encode((unsigned char*)str, str_len);
+	result = php_base64_encode_ex((unsigned char*)str, str_len, PHP_BASE64_FALLIBLE);
+	if (UNEXPECTED(result == NULL)) {
+		RETURN_OOM();
+	}
 	RETURN_STR(result);
 }
 /* }}} */
