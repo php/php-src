@@ -23,9 +23,7 @@
 #include "../intl_convertcpp.h"
 #include "../php_intl.h"
 
-BEGIN_EXTERN_C()
 #include "numberformatter_arginfo.h"
-END_EXTERN_C()
 #include "numberformatter_class.h"
 
 using icu::number::NumberFormatter;
@@ -60,14 +58,14 @@ static zend_object *numberformatter_create_object(zend_class_entry *ce)
 	return &nfo->zo;
 }
 
-U_CFUNC PHP_METHOD(IntlNumberFormatter, __construct)
+PHP_METHOD(IntlNumberFormatter, __construct)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_throw_error(nullptr, "Cannot directly construct %s, use createFromSkeleton method instead", ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
 }
 
-U_CFUNC PHP_METHOD(IntlNumberFormatter, createFromSkeleton)
+PHP_METHOD(IntlNumberFormatter, createFromSkeleton)
 {
 	char *skeleton, *locale;
 	size_t skeleton_len, locale_len;
@@ -114,7 +112,7 @@ U_CFUNC PHP_METHOD(IntlNumberFormatter, createFromSkeleton)
 	NUMBERFORMATTER_OBJECT(Z_INTL_INTLNUMBERFORMATTER_P(return_value)) = new LocalizedNumberFormatter(nf.locale(icu::Locale::createCanonical(locale)));
 }
 
-U_CFUNC PHP_METHOD(IntlNumberFormatter, format)
+PHP_METHOD(IntlNumberFormatter, format)
 {
 	zval *value;
 
@@ -163,14 +161,14 @@ U_CFUNC PHP_METHOD(IntlNumberFormatter, format)
 	RETVAL_STR(ret);
 }
 
-U_CFUNC PHP_METHOD(IntlNumberFormatter, getErrorCode)
+PHP_METHOD(IntlNumberFormatter, getErrorCode)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(INTL_DATA_ERROR_CODE(Z_INTL_INTLNUMBERFORMATTER_P(ZEND_THIS)));
 }
 
-U_CFUNC PHP_METHOD(IntlNumberFormatter, getErrorMessage)
+PHP_METHOD(IntlNumberFormatter, getErrorMessage)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 

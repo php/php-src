@@ -18,9 +18,7 @@
 
 #include <unicode/uspoof.h>
 
-BEGIN_EXTERN_C()
 #include "spoofchecker_arginfo.h"
-END_EXTERN_C()
 
 zend_class_entry *Spoofchecker_ce_ptr = NULL;
 static zend_object_handlers Spoofchecker_handlers;

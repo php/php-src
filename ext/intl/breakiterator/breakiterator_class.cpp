@@ -26,9 +26,7 @@
 
 #define USE_BREAKITERATOR_POINTER 1
 #include "breakiterator_class.h"
-BEGIN_EXTERN_C()
 #include "breakiterator_arginfo.h"
-END_EXTERN_C()
 #include <zend_exceptions.h>
 #include <zend_interfaces.h>
 #include <assert.h>
@@ -53,7 +51,7 @@ static void breakiterator_object_construct(zval *object,
 	bio->biter = biter;
 }
 
-U_CFUNC	void breakiterator_object_create(zval *object,
+void breakiterator_object_create(zval *object,
 										 BreakIterator *biter, int brand_new)
 {
 	UClassID classId = biter->getDynamicClassID();

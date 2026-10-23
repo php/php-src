@@ -16,7 +16,6 @@
 
 #include <unicode/umachine.h>
 
-#include <math.h>
 #include <php.h>
 
 typedef enum {

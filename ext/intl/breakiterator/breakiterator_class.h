@@ -62,9 +62,9 @@ typedef struct {
 		RETURN_THROWS(); \
 	}
 
-BEGIN_EXTERN_C()
 void breakiterator_object_create(zval *object, BreakIterator *break_iter, int brand_new);
 
+BEGIN_EXTERN_C()
 void breakiterator_register_BreakIterator_class(void);
 
 extern zend_class_entry *BreakIterator_ce_ptr,

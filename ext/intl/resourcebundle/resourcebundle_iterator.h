@@ -29,6 +29,6 @@ typedef struct {
 	zend_long             i;
 } ResourceBundle_iterator;
 
-U_CFUNC zend_object_iterator *resourcebundle_get_iterator( zend_class_entry *ce, zval *object, int byref );
+zend_object_iterator *resourcebundle_get_iterator( zend_class_entry *ce, zval *object, int byref );
 
 #endif // #ifndef RESOURCEBUNDLE_ITERATOR_H
