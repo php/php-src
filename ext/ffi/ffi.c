@@ -5771,7 +5771,7 @@ void zend_ffi_parser_error(const char *format, ...) /* {{{ */
 }
 /* }}} */
 
-static void zend_ffi_finalize_type(zend_ffi_dcl *dcl) /* {{{ */
+static zend_result zend_ffi_try_finalize_type(zend_ffi_dcl *dcl) /* {{{ */
 {
 	if (!dcl->type) {
 		switch (dcl->flags & ZEND_FFI_DCL_TYPE_SPECIFIERS) {
@@ -5851,14 +5851,23 @@ static void zend_ffi_finalize_type(zend_ffi_dcl *dcl) /* {{{ */
 			case ZEND_FFI_DCL_FLOAT|ZEND_FFI_DCL_COMPLEX:
 			case ZEND_FFI_DCL_DOUBLE|ZEND_FFI_DCL_COMPLEX:
 			case ZEND_FFI_DCL_DOUBLE|ZEND_FFI_DCL_LONG|ZEND_FFI_DCL_COMPLEX:
-				zend_ffi_parser_error("Unsupported type _Complex at line %d", FFI_G(line));
-				break;
+				zend_ffi_throw_parser_error("Unsupported type _Complex at line %d", FFI_G(line));
+				return FAILURE;
 			default:
-				zend_ffi_parser_error("Unsupported type specifier combination at line %d", FFI_G(line));
-				break;
+				zend_ffi_throw_parser_error("Unsupported type specifier combination at line %d", FFI_G(line));
+				return FAILURE;
 		}
 		dcl->flags &= ~ZEND_FFI_DCL_TYPE_SPECIFIERS;
 		dcl->flags |= ZEND_FFI_DCL_TYPEDEF_NAME;
+	}
+	return SUCCESS;
+}
+/* }}} */
+
+static void zend_ffi_finalize_type(zend_ffi_dcl *dcl) /* {{{ */
+{
+	if (zend_ffi_try_finalize_type(dcl) == FAILURE) {
+		LONGJMP(FFI_G(bailout), FAILURE);
 	}
 }
 /* }}} */
@@ -6359,16 +6368,19 @@ void zend_ffi_adjust_struct_size(zend_ffi_dcl *dcl) /* {{{ */
 
 void zend_ffi_make_pointer_type(zend_ffi_dcl *dcl) /* {{{ */
 {
-	zend_ffi_type *type = pemalloc(sizeof(zend_ffi_type), FFI_G(persistent));
-	type->kind = ZEND_FFI_TYPE_POINTER;
-	type->attr = FFI_G(default_type_attr) | (dcl->attr & ZEND_FFI_POINTER_ATTRS);
-	type->size = sizeof(void*);
-	type->align = _Alignof(void*);
+	zend_ffi_type *type;
+
 	zend_ffi_finalize_type(dcl);
 	if (zend_ffi_validate_vla(ZEND_FFI_TYPE(dcl->type)) == FAILURE) {
 		zend_ffi_cleanup_dcl(dcl);
 		LONGJMP(FFI_G(bailout), FAILURE);
 	}
+
+	type = pemalloc(sizeof(zend_ffi_type), FFI_G(persistent));
+	type->kind = ZEND_FFI_TYPE_POINTER;
+	type->attr = FFI_G(default_type_attr) | (dcl->attr & ZEND_FFI_POINTER_ATTRS);
+	type->size = sizeof(void*);
+	type->align = _Alignof(void*);
 	type->pointer.type = dcl->type;
 	dcl->type = ZEND_FFI_TYPE_MAKE_OWNED(type);
 	dcl->flags &= ~ZEND_FFI_DCL_TYPE_QUALIFIERS;
@@ -6455,7 +6467,14 @@ void zend_ffi_make_func_type(zend_ffi_dcl *dcl, HashTable *args, zend_ffi_dcl *n
 	zend_ffi_type *type;
 	zend_ffi_type *ret_type;
 
-	zend_ffi_finalize_type(dcl);
+	if (zend_ffi_try_finalize_type(dcl) == FAILURE) {
+		zend_ffi_cleanup_dcl(nested_dcl);
+		if (args) {
+			zend_hash_destroy(args);
+			pefree(args, FFI_G(persistent));
+		}
+		LONGJMP(FFI_G(bailout), FAILURE);
+	}
 	ret_type = ZEND_FFI_TYPE(dcl->type);
 
 	if (args) {
@@ -6592,11 +6611,18 @@ void zend_ffi_add_arg(HashTable **args, const char *name, size_t name_len, zend_
 {
 	zend_ffi_type *type;
 
+	if (zend_ffi_try_finalize_type(arg_dcl) == FAILURE) {
+		if (*args) {
+			zend_hash_destroy(*args);
+			pefree(*args, FFI_G(persistent));
+			*args = NULL;
+		}
+		LONGJMP(FFI_G(bailout), FAILURE);
+	}
 	if (!*args) {
 		*args = pemalloc(sizeof(HashTable), FFI_G(persistent));
 		zend_hash_init(*args, 0, NULL, zend_ffi_type_hash_dtor, FFI_G(persistent));
 	}
-	zend_ffi_finalize_type(arg_dcl);
 	type = ZEND_FFI_TYPE(arg_dcl->type);
 	if (type->kind == ZEND_FFI_TYPE_ARRAY) {
 		if (ZEND_FFI_TYPE_IS_OWNED(arg_dcl->type)) {
@@ -7092,7 +7118,10 @@ static zend_result zend_ffi_nested_type(zend_ffi_type *type, zend_ffi_type *nest
 void zend_ffi_nested_declaration(zend_ffi_dcl *dcl, zend_ffi_dcl *nested_dcl) /* {{{ */
 {
 	/* "char" is used as a terminator of nested declaration */
-	zend_ffi_finalize_type(dcl);
+	if (zend_ffi_try_finalize_type(dcl) == FAILURE) {
+		zend_ffi_cleanup_dcl(nested_dcl);
+		LONGJMP(FFI_G(bailout), FAILURE);
+	}
 	if (!nested_dcl->type || nested_dcl->type == &zend_ffi_type_char) {
 		nested_dcl->type = dcl->type;
 	} else {
