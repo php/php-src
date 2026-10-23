@@ -1096,6 +1096,9 @@ static zend_result zend_parse_arg(uint32_t arg_num, zval *arg, va_list *va, cons
 	zend_expected_type expected_type = zend_parse_arg_impl(arg, va, spec, &error, arg_num);
 	if (expected_type != Z_EXPECTED_LAST) {
 		if (EG(exception)) {
+			if (error && (expected_type == Z_EXPECTED_FUNC || expected_type == Z_EXPECTED_FUNC_OR_NULL)) {
+				efree(error);
+			}
 			return FAILURE;
 		}
 
