@@ -48,16 +48,12 @@ extern PHPAPI zend_class_entry *php_ce_incomplete_class;
 #define MAGIC_MEMBER_SERIALIZED "__PHP_Incomplete_Class_Serialized"
 #define MAGIC_MEMBER_ENUM_CASE "__PHP_Incomplete_Enum_Case"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+BEGIN_EXTERN_C()
 
 PHPAPI void php_register_incomplete_class_handlers(void);
 PHPAPI zend_string *php_lookup_class_name(zend_object *object);
 PHPAPI void php_store_class_name(zval *object, zend_string *name);
 
-#ifdef __cplusplus
-};
-#endif
+END_EXTERN_C()
 
 #endif
