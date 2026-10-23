@@ -811,16 +811,16 @@ try_again:
 				make_digest(response, hash);
 
 				smart_str_append_const(&soap_headers, "Authorization: Digest username=\"");
-				smart_str_append(&soap_headers, Z_STR_P(login));
+				soap_smart_str_append_header_value(&soap_headers, Z_STR_P(login), "Authorization");
 				if ((tmp = zend_hash_str_find(Z_ARRVAL_P(digest), "realm", sizeof("realm")-1)) != NULL &&
 					Z_TYPE_P(tmp) == IS_STRING) {
 					smart_str_append_const(&soap_headers, "\", realm=\"");
-					smart_str_append(&soap_headers, Z_STR_P(tmp));
+					soap_smart_str_append_header_value(&soap_headers, Z_STR_P(tmp), "Authorization");
 				}
 				if ((tmp = zend_hash_str_find(Z_ARRVAL_P(digest), "nonce", sizeof("nonce")-1)) != NULL &&
 					Z_TYPE_P(tmp) == IS_STRING) {
 					smart_str_append_const(&soap_headers, "\", nonce=\"");
-					smart_str_append(&soap_headers, Z_STR_P(tmp));
+					soap_smart_str_append_header_value(&soap_headers, Z_STR_P(tmp), "Authorization");
 				}
 				smart_str_append_const(&soap_headers, "\", uri=\"");
 				if (uri->path) {
@@ -850,12 +850,12 @@ try_again:
 				if ((tmp = zend_hash_str_find(Z_ARRVAL_P(digest), "opaque", sizeof("opaque")-1)) != NULL &&
 					Z_TYPE_P(tmp) == IS_STRING) {
 					smart_str_append_const(&soap_headers, "\", opaque=\"");
-					smart_str_append(&soap_headers, Z_STR_P(tmp));
+					soap_smart_str_append_header_value(&soap_headers, Z_STR_P(tmp), "Authorization");
 				}
 				if ((tmp = zend_hash_str_find(Z_ARRVAL_P(digest), "algorithm", sizeof("algorithm")-1)) != NULL &&
 					Z_TYPE_P(tmp) == IS_STRING) {
 					smart_str_append_const(&soap_headers, "\", algorithm=\"");
-					smart_str_append(&soap_headers, Z_STR_P(tmp));
+					soap_smart_str_append_header_value(&soap_headers, Z_STR_P(tmp), "Authorization");
 				}
 				smart_str_append_const(&soap_headers, "\"\r\n");
 			} else {
