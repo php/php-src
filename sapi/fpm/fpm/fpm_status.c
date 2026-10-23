@@ -122,6 +122,33 @@ int fpm_status_export_to_zval(zval *status)
 }
 /* }}} */
 
+/* Encodes a request value for the output format. The encoded string, if any,
+ * is stored in tmp and must be freed by the caller. */
+static char *fpm_status_encode_value(char *value, bool encode_html, bool encode_json, zend_string **tmp)
+{
+	char *encoded;
+
+	*tmp = NULL;
+	if (encode_html) {
+		*tmp = php_escape_html_entities_ex((const unsigned char *) value, strlen(value), 1,
+				ENT_DISALLOWED | ENT_HTML_DOC_XML1 | ENT_COMPAT, NULL, /* double_encode */ 1, /* quiet */ 0);
+		return ZSTR_VAL(*tmp);
+	}
+
+	if (encode_json) {
+		*tmp = php_json_encode_string(value, strlen(value), PHP_JSON_INVALID_UTF8_IGNORE);
+		encoded = ZSTR_VAL(*tmp);
+		/* remove quotes around the string */
+		if (ZSTR_LEN(*tmp) >= 2) {
+			encoded[ZSTR_LEN(*tmp) - 1] = '\0';
+			++encoded;
+		}
+		return encoded;
+	}
+
+	return value;
+}
+
 int fpm_status_handle_request(void) /* {{{ */
 {
 	struct fpm_scoreboard_s *scoreboard_p;
@@ -522,8 +549,10 @@ int fpm_status_handle_request(void) /* {{{ */
 		if (full_syntax) {
 			unsigned int i;
 			int first;
-			zend_string *tmp_query_string, *tmp_request_uri_string;
-			char *query_string, *request_uri_string;
+			zend_string *tmp_request_method_string, *tmp_request_uri_string, *tmp_query_string;
+			zend_string *tmp_auth_user_string, *tmp_script_filename_string;
+			char *request_method_string, *request_uri_string, *query_string;
+			char *auth_user_string, *script_filename_string;
 			struct timeval duration, now;
 			float cpu;
 
@@ -548,51 +577,30 @@ int fpm_status_handle_request(void) /* {{{ */
 					}
 				}
 
-				request_uri_string = NULL;
-				tmp_request_uri_string = NULL;
-				if (proc->request_uri[0] != '\0') {
-					if (encode_html) {
-						tmp_request_uri_string = php_escape_html_entities_ex(
-								(const unsigned char *) proc->request_uri,
-								strlen(proc->request_uri), 1, ENT_DISALLOWED | ENT_HTML_DOC_XML1 | ENT_COMPAT,
-								NULL, /* double_encode */ 1, /* quiet */ 0);
-						request_uri_string = ZSTR_VAL(tmp_request_uri_string);
-					} else if (encode_json) {
-						tmp_request_uri_string = php_json_encode_string(proc->request_uri,
-								strlen(proc->request_uri), PHP_JSON_INVALID_UTF8_IGNORE);
-						request_uri_string = ZSTR_VAL(tmp_request_uri_string);
-						/* remove quotes around the string */
-						if (ZSTR_LEN(tmp_request_uri_string) >= 2) {
-							request_uri_string[ZSTR_LEN(tmp_request_uri_string) - 1] = '\0';
-							++request_uri_string;
-						}
-					} else {
-						request_uri_string = proc->request_uri;
-					}
-				}
-
+				/* All of these come from the client */
+				request_method_string = request_uri_string = auth_user_string = script_filename_string = "-";
 				query_string = NULL;
-				tmp_query_string = NULL;
+				tmp_request_method_string = tmp_request_uri_string = tmp_query_string = NULL;
+				tmp_auth_user_string = tmp_script_filename_string = NULL;
+				if (proc->request_method[0] != '\0') {
+					request_method_string = fpm_status_encode_value(proc->request_method,
+							encode_html, encode_json, &tmp_request_method_string);
+				}
+				if (proc->request_uri[0] != '\0') {
+					request_uri_string = fpm_status_encode_value(proc->request_uri,
+							encode_html, encode_json, &tmp_request_uri_string);
+				}
 				if (proc->query_string[0] != '\0') {
-					if (encode_html) {
-						tmp_query_string = php_escape_html_entities_ex(
-								(const unsigned char *) proc->query_string,
-								strlen(proc->query_string), 1, ENT_DISALLOWED | ENT_HTML_DOC_XML1 | ENT_COMPAT,
-								NULL, /* double_encode */ 1, /* quiet */ 0);
-					} else if (encode_json) {
-						tmp_query_string = php_json_encode_string(proc->query_string,
-								strlen(proc->query_string), PHP_JSON_INVALID_UTF8_IGNORE);
-					} else {
-						query_string = proc->query_string;
-					}
-					if (tmp_query_string) {
-						query_string = ZSTR_VAL(tmp_query_string);
-						/* remove quotes around the string */
-						if (encode_json && ZSTR_LEN(tmp_query_string) >= 2) {
-							query_string[ZSTR_LEN(tmp_query_string) - 1] = '\0';
-							++query_string;
-						}
-					}
+					query_string = fpm_status_encode_value(proc->query_string,
+							encode_html, encode_json, &tmp_query_string);
+				}
+				if (proc->auth_user[0] != '\0') {
+					auth_user_string = fpm_status_encode_value(proc->auth_user,
+							encode_html, encode_json, &tmp_auth_user_string);
+				}
+				if (proc->script_filename[0] != '\0') {
+					script_filename_string = fpm_status_encode_value(proc->script_filename,
+							encode_html, encode_json, &tmp_script_filename_string);
 				}
 
 				/* prevent NaN */
@@ -615,23 +623,32 @@ int fpm_status_handle_request(void) /* {{{ */
 					(unsigned long) (now_epoch - proc->start_epoch),
 					proc->requests,
 					(unsigned long) (duration.tv_sec * 1000000UL + duration.tv_usec),
-					proc->request_method[0] != '\0' ? proc->request_method : "-",
-					request_uri_string ? request_uri_string : "-",
+					request_method_string,
+					request_uri_string,
 					query_string ? "?" : "",
 					query_string ? query_string : "",
 					proc->content_length,
-					proc->auth_user[0] != '\0' ? proc->auth_user : "-",
-					proc->script_filename[0] != '\0' ? proc->script_filename : "-",
+					auth_user_string,
+					script_filename_string,
 					proc->request_stage == FPM_REQUEST_ACCEPTING ? cpu : 0.,
 					proc->request_stage == FPM_REQUEST_ACCEPTING ? proc->memory : 0);
 				PUTS(buffer);
 				efree(buffer);
 
+				if (tmp_request_method_string) {
+					zend_string_free(tmp_request_method_string);
+				}
 				if (tmp_request_uri_string) {
 					zend_string_free(tmp_request_uri_string);
 				}
 				if (tmp_query_string) {
 					zend_string_free(tmp_query_string);
+				}
+				if (tmp_auth_user_string) {
+					zend_string_free(tmp_auth_user_string);
+				}
+				if (tmp_script_filename_string) {
+					zend_string_free(tmp_script_filename_string);
 				}
 			}
 
