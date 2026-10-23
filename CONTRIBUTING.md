@@ -41,9 +41,7 @@ linked pull requests, and search by issue number, relevant function names and
 keywords.
 
 If an open pull request already addresses the problem, help test or review it
-instead of opening an equivalent pull request. If a separate pull request is
-needed, link to the related pull request and explain what your change adds or
-does differently.
+to make it better instead of opening an equivalent pull request.
 
 When multiple pull requests provide equivalent fixes of comparable quality,
 we follow a first-come, first-served principle. We prefer the first correct
