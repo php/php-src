@@ -37,6 +37,15 @@
 void _php_import_environment_variables(zval *array_ptr TSRMLS_DC);
 PHPAPI void (*php_import_environment_variables)(zval *array_ptr TSRMLS_DC) = _php_import_environment_variables;
 
+/* Input arrays start with the smallest hash table size instead of the default
+ * of 8, to limit the memory used by deeply nested input. A table size of 1 is
+ * not possible here as an nTableMask of 0 marks the table as uninitialized. */
+static void array_init_singleton(zval *arg)
+{
+	array_init(arg);
+	Z_ARRVAL_P(arg)->nTableSize = 2;
+}
+
 PHPAPI void php_register_variable(char *var, char *strval, zval *track_vars_array TSRMLS_DC)
 {
 	php_register_variable_safe(var, strval, strlen(strval), track_vars_array TSRMLS_CC);
@@ -176,7 +185,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 
 			if (!index) {
 				MAKE_STD_ZVAL(gpc_element);
-				array_init(gpc_element);
+				array_init_singleton(gpc_element);
 				if (zend_hash_next_index_insert(symtable1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p) == FAILURE) {
 					zval_ptr_dtor(&gpc_element);
 					zval_dtor(val);
@@ -187,7 +196,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 				if (zend_symtable_find(symtable1, index, index_len + 1, (void **) &gpc_element_p) == FAILURE
 					|| Z_TYPE_PP(gpc_element_p) != IS_ARRAY) {
 					MAKE_STD_ZVAL(gpc_element);
-					array_init(gpc_element);
+					array_init_singleton(gpc_element);
 					zend_symtable_update(symtable1, index, index_len + 1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 				}
 			}
@@ -379,7 +388,7 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 		case PARSE_GET:
 		case PARSE_COOKIE:
 			ALLOC_ZVAL(array_ptr);
-			array_init(array_ptr);
+			array_init_singleton(array_ptr);
 			INIT_PZVAL(array_ptr);
 			switch (arg) {
 				case PARSE_POST:

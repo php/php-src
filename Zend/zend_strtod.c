@@ -479,7 +479,7 @@ static Bigint * Balloc(int k)
 	Bigint *rv;
 
 	if (k > Kmax) {
-		zend_error(E_ERROR, "Balloc() allocation exceeds list boundary");
+		zend_mm_safe_error_ex("Balloc() allocation exceeds list boundary");
 	}
 
 	_THREAD_PRIVATE_MUTEX_LOCK(dtoa_mutex);
@@ -490,7 +490,7 @@ static Bigint * Balloc(int k)
 		rv = (Bigint *)MALLOC(sizeof(Bigint) + (x-1)*sizeof(Long));
 		if (!rv) {
 			_THREAD_PRIVATE_MUTEX_UNLOCK(dtoa_mutex);
-			zend_error(E_ERROR, "Balloc() failed to allocate memory");
+			zend_mm_safe_error_ex("Balloc() failed to allocate memory");
 		}
 		rv->k = k;
 		rv->maxwds = x;
