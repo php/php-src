@@ -1298,7 +1298,7 @@ PHP_FUNCTION(mhash_keygen_s2k)
 		RETURN_THROWS();
 	}
 
-	if (ZEND_LONG_INT_OVFL(l_bytes)) {
+	if (!ZEND_IN_RANGE_OF(l_bytes, int)) {
 		zend_argument_value_error(4, "must be less than or equal to %d", INT_MAX);
 		RETURN_THROWS();
 	}

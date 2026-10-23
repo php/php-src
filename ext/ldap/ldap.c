@@ -3215,7 +3215,7 @@ PHP_FUNCTION(ldap_set_option)
 				RETURN_THROWS();
 			}
 
-			if (ZEND_LONG_EXCEEDS_INT(lval)) {
+			if (!ZEND_IN_RANGE_OF(lval, int)) {
 				zend_argument_value_error(3, "is too large");
 				RETURN_THROWS();
 			}

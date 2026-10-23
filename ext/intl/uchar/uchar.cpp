@@ -35,7 +35,7 @@ static inline int convert_cp(UChar32* pcp, const zend_string *string_codepoint, 
 		int32_t i = 0;
 		const size_t string_codepoint_length = ZSTR_LEN(string_codepoint);
 
-		if (UNEXPECTED(ZEND_SIZE_T_INT_OVFL(string_codepoint_length))) {
+		if (!ZEND_IN_RANGE_OF(string_codepoint_length, int32_t)) {
 			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
 			intl_error_set_custom_msg(NULL, "Input string is too long.");
 			return FAILURE;

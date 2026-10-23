@@ -274,7 +274,7 @@ static void pgsql_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 #ifdef HAVE_PG_SET_CHUNKED_ROWS_SIZE
 static bool pdo_pgsql_check_chunk_size(zend_long size)
 {
-	if (size < 0 || ZEND_LONG_EXCEEDS_INT(size)) {
+	if (size < 0 || !ZEND_IN_RANGE_OF(size, int)) {
 		zend_value_error("Pdo\\Pgsql::ATTR_CHUNK_SIZE must be between 0 and %d", INT_MAX);
 		return false;
 	}

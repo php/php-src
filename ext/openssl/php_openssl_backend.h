@@ -63,17 +63,17 @@ typedef X509_EXTENSION PHP_OPENSSL_X509_EXTENSION;
 	} while(0)
 /* check if size_t can be safely casted to int */
 #define PHP_OPENSSL_CHECK_SIZE_T_TO_INT(_var, _name, _arg_num) \
-	PHP_OPENSSL_CHECK_NUMBER_CONVERSION(ZEND_SIZE_T_INT_OVFL(_var), _name, _arg_num)
+	PHP_OPENSSL_CHECK_NUMBER_CONVERSION(!ZEND_IN_RANGE_OF((size_t)(_var), int), _name, _arg_num)
 #define PHP_OPENSSL_CHECK_SIZE_T_TO_INT_NULL_RETURN(_var, _name) \
-	PHP_OPENSSL_CHECK_NUMBER_CONVERSION_NULL_RETURN(ZEND_SIZE_T_INT_OVFL(_var), _name)
+	PHP_OPENSSL_CHECK_NUMBER_CONVERSION_NULL_RETURN(!ZEND_IN_RANGE_OF((size_t)(_var), int), _name)
 /* check if size_t can be safely casted to unsigned int */
 #define PHP_OPENSSL_CHECK_SIZE_T_TO_UINT(_var, _name, _arg_num) \
-	PHP_OPENSSL_CHECK_NUMBER_CONVERSION(ZEND_SIZE_T_UINT_OVFL(_var), _name, _arg_num)
+	PHP_OPENSSL_CHECK_NUMBER_CONVERSION(!ZEND_IN_RANGE_OF((size_t)(_var), unsigned int), _name, _arg_num)
 /* check if long can be safely casted to int */
 #define PHP_OPENSSL_CHECK_LONG_TO_INT(_var, _name, _arg_num) \
-	PHP_OPENSSL_CHECK_NUMBER_CONVERSION(ZEND_LONG_EXCEEDS_INT(_var), _name, _arg_num)
+	PHP_OPENSSL_CHECK_NUMBER_CONVERSION(!ZEND_IN_RANGE_OF(_var, int), _name, _arg_num)
 #define PHP_OPENSSL_CHECK_LONG_TO_INT_NULL_RETURN(_var, _name) \
-	PHP_OPENSSL_CHECK_NUMBER_CONVERSION_NULL_RETURN(ZEND_LONG_EXCEEDS_INT(_var), _name)
+	PHP_OPENSSL_CHECK_NUMBER_CONVERSION_NULL_RETURN(!ZEND_IN_RANGE_OF(_var, int), _name)
 
 /* FIXME: Use the openssl constants instead of
  * enum. It is now impossible to match real values
