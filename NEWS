@@ -40,6 +40,11 @@ PHP                                                                        NEWS
     selector lists). (fivefilters)
   . Fixed bug GH-23334 (Use-after-free in php_dom_free_templated_content()).
     (David Carlier, ndossche)
+  . Fixed bug GH-22077 (UAF in custom XPath function). (Joe Afflerbach)
+  . Fixed bug GH-22554 (use-after-free with XPath callback returning a node
+    from a foreign document). (David Carlier)
+  . Fixed DOMXPath crash wrapping a foreign node after a nodeset callback.
+    (Ilia Alshanetsky)
 
 - FPM:
   . Fixed bug GH-24229 (fcgi_close() passes shutdown() a literal 1, which is
