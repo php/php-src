@@ -347,6 +347,25 @@ static bool in_domain(const zend_string *host, const zend_string *domain)
 	}
 }
 
+/* Whether a cookie Domain attribute received from host may be accepted (RFC 6265 5.1.3) */
+static bool cookie_domain_matches(const zend_string *host, const char *domain, size_t domain_len)
+{
+	if (domain_len > 0 && domain[0] == '.') {
+		domain++;
+		domain_len--;
+	}
+
+	if (domain_len == 0 || domain_len > ZSTR_LEN(host)) {
+		return false;
+	}
+
+	if (strncasecmp(ZSTR_VAL(host) + ZSTR_LEN(host) - domain_len, domain, domain_len) != 0) {
+		return false;
+	}
+
+	return domain_len == ZSTR_LEN(host) || ZSTR_VAL(host)[ZSTR_LEN(host) - domain_len - 1] == '.';
+}
+
 /* The port of from must already be resolved, the port of to may still be 0 */
 static bool same_origin(const php_uri *from, const php_uri *to)
 {
@@ -1049,6 +1068,7 @@ try_again:
 		if (eqpos != NULL && (sempos == NULL || sempos > eqpos)) {
 			zval zcookie;
 			size_t cookie_value_len;
+			bool foreign_domain = false;
 
 			if (sempos != NULL) {
 				cookie_value_len = sempos-(eqpos+1);
@@ -1071,7 +1091,13 @@ try_again:
 						add_index_stringl(&zcookie, 1, eqpos, sempos?(size_t)(sempos-eqpos):strlen(eqpos));
 					} else if (strstr(options,"domain=") == options) {
 						eqpos = options + sizeof("domain=")-1;
-						add_index_stringl(&zcookie, 2, eqpos, sempos?(size_t)(sempos-eqpos):strlen(eqpos));
+						size_t domain_len = sempos ? (size_t)(sempos-eqpos) : strlen(eqpos);
+						/* A server must not set cookies for other hosts */
+						if (!cookie_domain_matches(uri->host, eqpos, domain_len)) {
+							foreign_domain = true;
+							break;
+						}
+						add_index_stringl(&zcookie, 2, eqpos, domain_len);
 					} else if (strstr(options,"secure") == options) {
 						add_index_bool(&zcookie, 3, 1);
 					}
@@ -1082,19 +1108,23 @@ try_again:
 					}
 				}
 			}
-			if (!zend_hash_index_exists(Z_ARRVAL(zcookie), 1)) {
-				char *t = uri->path?ZSTR_VAL(uri->path):"/";
-				char *c = strrchr(t, '/');
-				if (c) {
-					add_index_stringl(&zcookie, 1, t, c-t);
+			if (foreign_domain) {
+				zval_ptr_dtor(&zcookie);
+			} else {
+				if (!zend_hash_index_exists(Z_ARRVAL(zcookie), 1)) {
+					char *t = uri->path?ZSTR_VAL(uri->path):"/";
+					char *c = strrchr(t, '/');
+					if (c) {
+						add_index_stringl(&zcookie, 1, t, c-t);
+					}
 				}
-			}
-			if (!zend_hash_index_exists(Z_ARRVAL(zcookie), 2)) {
-				add_index_str(&zcookie, 2, uri->host);
-				GC_ADDREF(uri->host);
-			}
+				if (!zend_hash_index_exists(Z_ARRVAL(zcookie), 2)) {
+					add_index_str(&zcookie, 2, uri->host);
+					GC_ADDREF(uri->host);
+				}
 
-			zend_symtable_update(Z_ARRVAL_P(cookies), name, &zcookie);
+				zend_symtable_update(Z_ARRVAL_P(cookies), name, &zcookie);
+			}
 			zend_string_release_ex(name, false);
 		}
 

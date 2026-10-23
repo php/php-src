@@ -23,7 +23,7 @@ if (php_ini_loaded_file()) {
 // falsely matching it as a path attribute.
 $code = <<<'PHP'
 header("Content-Type: text/xml");
-header("Set-Cookie: sessionkey=path=/evil;domain=good.com");
+header("Set-Cookie: sessionkey=path=/evil;domain=localhost");
 echo <<<XML
 <?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="test-uri">
@@ -58,4 +58,4 @@ echo "domain: " . $cookies['sessionkey'][2] . "\n";
 --EXPECT--
 value: path=/evil
 path: /test
-domain: good.com
+domain: localhost
