@@ -557,6 +557,16 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 
 /* {{{ generic stream operations */
 
+static void php_stream_bucket_brigade_discard(php_stream_bucket_brigade *brigade)
+{
+	php_stream_bucket *bucket;
+
+	while ((bucket = brigade->head)) {
+		php_stream_bucket_unlink(bucket);
+		php_stream_bucket_delref(bucket);
+	}
+}
+
 PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 {
 	/* allocate/fill the buffer */
@@ -609,8 +619,10 @@ PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 				}
 
 				/* brig_out becomes brig_in.
-				 * brig_in will always be empty here, as the filter MUST attach any un-consumed buckets
-				 * to its own brigade */
+				 * brig_in should be empty here, as the filter MUST attach any un-consumed buckets
+				 * to its own brigade. A misbehaving filter may leave buckets behind; discard them
+				 * so they are not leaked when the brigade is reset below. */
+				php_stream_bucket_brigade_discard(brig_inp);
 				brig_swap = brig_inp;
 				brig_inp = brig_outp;
 				brig_outp = brig_swap;
@@ -1289,8 +1301,10 @@ static ssize_t _php_stream_write_filtered(php_stream *stream, const char *buf, s
 			break;
 		}
 		/* brig_out becomes brig_in.
-		 * brig_in will always be empty here, as the filter MUST attach any un-consumed buckets
-		 * to its own brigade */
+		 * brig_in should be empty here, as the filter MUST attach any un-consumed buckets
+		 * to its own brigade. A misbehaving filter may leave buckets behind; discard them
+		 * so they are not leaked when the brigade is reset below. */
+		php_stream_bucket_brigade_discard(brig_inp);
 		brig_swap = brig_inp;
 		brig_inp = brig_outp;
 		brig_outp = brig_swap;
@@ -1325,12 +1339,10 @@ static ssize_t _php_stream_write_filtered(php_stream *stream, const char *buf, s
 
 		case PSFS_FEED_ME:
 			/* need more data before we can push data through to the stream */
-			/* Filter could have added buckets anyway, but signalled that it did not return any. Discard them. */
-			while (brig_inp->head) {
-				bucket = brig_inp->head;
-				php_stream_bucket_unlink(bucket);
-				php_stream_bucket_delref(bucket);
-			}
+			/* Filter could have added buckets anyway, but signalled that it did not return any. Discard them,
+			 * together with any input buckets it did not consume. */
+			php_stream_bucket_brigade_discard(brig_inp);
+			php_stream_bucket_brigade_discard(brig_outp);
 			break;
 	}
 

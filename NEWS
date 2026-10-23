@@ -141,6 +141,9 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug GH-24508 (HTTP wrapper leaks the dechunk filter when header
     parsing fails after Transfer-Encoding). (bercedev)
+  . Fixed memory leak of stream buckets left behind by user filters that do
+    not consume their input brigade or return PSFS_FEED_ME with output.
+    (zeynallow)
 
 - Tidy:
   . Fixed tidy_repair_string(), tidy_repair_file(), tidy::repairString() and
