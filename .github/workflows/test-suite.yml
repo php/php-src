@@ -422,7 +422,7 @@ jobs:
       - name: Generate coverage report
         if: ${{ !cancelled() }}
         run: make gcovr-xml
-      - uses: codecov/codecov-action@v6
+      - uses: codecov/codecov-action@v7
         if: ${{ !cancelled() }}
         with:
           disable_search: true
