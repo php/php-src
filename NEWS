@@ -56,6 +56,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-23958 (truncated encoding names resolving to full names). (Kamil Tekiela)
   . Fixed out-of-bounds read in php_mb_rfc1867_getword() on a multibyte lead
     byte at the end of a multipart field name. (Jorg Sowa)
+  . Fixed bug GH-24606 (mbstring.http_input is ignored in subsequent requests
+    after changing default_charset). (Lazizbek Ergashev)
 
 - MySQLnd:
   . Fixed bug GH-24293 (Segfault on connect with an empty password to a
