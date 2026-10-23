@@ -28,6 +28,24 @@ static zend_object_handlers Spoofchecker_handlers;
  * Auxiliary functions needed by objects of 'Spoofchecker' class
  */
 
+/* Clean up mem allocted by internals of Spoofchecker_object */
+static void spoofchecker_object_destroy(Spoofchecker_object* co)
+{
+	if (!co) {
+		return;
+	}
+
+	if (co->uspoof) {
+		uspoof_close(co->uspoof);
+		co->uspoof = NULL;
+	}
+
+	intl_icu_compat_uspoof_close_check_result(co->uspoofres);
+	co->uspoofres = NULL;
+
+	intl_error_reset(SPOOFCHECKER_ERROR_P(co));
+}
+
 static void Spoofchecker_objects_free(zend_object *object)
 {
 	Spoofchecker_object* co = php_intl_spoofchecker_fetch_object(object);
@@ -98,26 +116,5 @@ U_CFUNC void spoofchecker_register_Spoofchecker_class(void)
 	Spoofchecker_handlers.offset = offsetof(Spoofchecker_object, zo);
 	Spoofchecker_handlers.clone_obj = spoofchecker_clone_obj;
 	Spoofchecker_handlers.free_obj = Spoofchecker_objects_free;
-}
-/* }}} */
-
-/* {{{ void spoofchecker_object_destroy( Spoofchecker_object* co )
- * Clean up mem allocted by internals of Spoofchecker_object
- */
-U_CFUNC void spoofchecker_object_destroy(Spoofchecker_object* co)
-{
-	if (!co) {
-		return;
-	}
-
-	if (co->uspoof) {
-		uspoof_close(co->uspoof);
-		co->uspoof = NULL;
-	}
-
-	intl_icu_compat_uspoof_close_check_result(co->uspoofres);
-	co->uspoofres = NULL;
-
-	intl_error_reset(SPOOFCHECKER_ERROR_P(co));
 }
 /* }}} */
