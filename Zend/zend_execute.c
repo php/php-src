@@ -1831,6 +1831,48 @@ ZEND_API zend_never_inline ZEND_COLD void zend_wrong_string_offset_error(void)
 	zend_throw_error(NULL, "%s", msg);
 }
 
+/* Reads the arguments of a #[\Deprecated] (message, since) or #[\NoDiscard] (message)
+ * attribute when they are strings or null, positional or named, each at most once; anything
+ * else is left to the constructor and its errors */
+static bool get_attribute_string_args(const zend_attribute *attr, zend_string **message, zend_string **since)
+{
+	zend_string *strs[2] = {NULL, NULL};
+	uint32_t num_params = since ? 2 : 1;
+
+	if (attr->argc > num_params) {
+		return false;
+	}
+	for (uint32_t i = 0; i < attr->argc; i++) {
+		const zend_attribute_arg *arg = &attr->args[i];
+		uint32_t param;
+
+		if (arg->name == NULL) {
+			param = i;
+		} else if (zend_string_equals(arg->name, ZSTR_KNOWN(ZEND_STR_MESSAGE))) {
+			param = 0;
+		} else if (num_params == 2 && zend_string_equals(arg->name, ZSTR_KNOWN(ZEND_STR_SINCE))) {
+			param = 1;
+		} else {
+			return false;
+		}
+		if (strs[param] != NULL) {
+			return false;
+		}
+		if (Z_TYPE(arg->value) == IS_STRING) {
+			strs[param] = Z_STR(arg->value);
+		} else if (Z_TYPE(arg->value) == IS_NULL) {
+			strs[param] = ZSTR_EMPTY_ALLOC();
+		} else {
+			return false;
+		}
+	}
+	*message = strs[0] ? strs[0] : ZSTR_EMPTY_ALLOC();
+	if (since) {
+		*since = strs[1] ? strs[1] : ZSTR_EMPTY_ALLOC();
+	}
+	return true;
+}
+
 ZEND_COLD static zend_result ZEND_FASTCALL get_deprecation_suffix_from_attribute(HashTable *attributes, zend_class_entry* scope, zend_string **message_suffix)
 {
 	*message_suffix = ZSTR_EMPTY_ALLOC();
@@ -1858,6 +1900,11 @@ ZEND_COLD static zend_result ZEND_FASTCALL get_deprecation_suffix_from_attribute
 	ZVAL_UNDEF(&obj);
 	zval *z;
 
+	/* With an exception pending the constructor is not run and nothing is emitted; keep that */
+	if (!EG(exception) && get_attribute_string_args(deprecated, &message, &since)) {
+		goto build;
+	}
+
 	/* Construct the Deprecated object to correctly handle parameter processing. */
 	if (FAILURE == zend_get_attribute_object(&obj, zend_ce_deprecated, deprecated, scope, NULL)) {
 		goto out;
@@ -1877,6 +1924,7 @@ ZEND_COLD static zend_result ZEND_FASTCALL get_deprecation_suffix_from_attribute
 		since = Z_STR_P(z);
 	}
 
+build:
 	/* Construct the suffix. */
 	*message_suffix = zend_strpprintf_unchecked(
 		0,
@@ -1948,6 +1996,10 @@ ZEND_COLD static zend_result ZEND_FASTCALL get_nodiscard_suffix_from_attribute(H
 	ZVAL_UNDEF(&obj);
 	zval *z;
 
+	if (!EG(exception) && get_attribute_string_args(nodiscard, &message, NULL)) {
+		goto build;
+	}
+
 	/* Construct the NoDiscard object to correctly handle parameter processing. */
 	if (FAILURE == zend_get_attribute_object(&obj, zend_ce_nodiscard, nodiscard, scope, NULL)) {
 		goto out;
@@ -1960,6 +2012,7 @@ ZEND_COLD static zend_result ZEND_FASTCALL get_nodiscard_suffix_from_attribute(H
 		message = Z_STR_P(z);
 	}
 
+build:
 	/* Construct the suffix. */
 	*message_suffix = zend_strpprintf_unchecked(
 		0,
