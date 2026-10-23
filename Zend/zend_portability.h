@@ -89,8 +89,6 @@ using std::memory_order_acquire;
 #include <intrin.h>
 #endif
 
-#include "zend_range_check.h"
-
 /* GCC x.y.z supplies __GNUC__ = x and __GNUC_MINOR__ = y */
 #ifdef __GNUC__
 # define ZEND_GCC_VERSION (__GNUC__ * 1000 + __GNUC_MINOR__)
@@ -953,5 +951,8 @@ static zend_always_inline uint64_t ZEND_BYTES_SWAP64(uint64_t u)
  * ASLR. Currently only possible on Windows. */
 # define ZEND_OPCACHE_SHM_REATTACHMENT 1
 #endif
+
+/* Last, as its declarations use ZEND_ATTRIBUTE_DEPRECATED. */
+#include "zend_range_check.h"
 
 #endif /* ZEND_PORTABILITY_H */
