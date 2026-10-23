@@ -34,6 +34,22 @@ had several contributions accepted, commit privileges are often quickly granted.
 PHP welcomes pull requests to [add tests](#writing-tests), fix bugs and to
 implement RFCs. Please be sure to include tests as appropriate!
 
+Before starting work and again before submitting a pull request, search the
+[existing pull requests](https://github.com/php/php-src/pulls?q=is%3Apr),
+including closed ones, for the same issue or change. Check the bug report for
+linked pull requests, and search by issue number, relevant function names and
+keywords.
+
+If an open pull request already addresses the problem, help test or review it
+instead of opening an equivalent pull request. If a separate pull request is
+needed, link to the related pull request and explain what your change adds or
+does differently.
+
+When multiple pull requests provide equivalent fixes of comparable quality,
+we follow a first-come, first-served principle. We prefer the first correct
+pull request. Thus, submitting duplicate pull requests is meaningless and a
+waste of everyone's time.
+
 By submitting a pull request, you certify that you have the necessary rights
 to submit the work, that the work does not violate any third-party rights
 (including those of your employer, if applicable), and that you license your
