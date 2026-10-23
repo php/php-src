@@ -20,7 +20,6 @@ set_error_handler(function ($errno, $errstr) {
 });
 
 function test() {
-    $a = [];
     $a[STDIN] = new D;
 }
 
