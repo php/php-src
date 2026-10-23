@@ -42,15 +42,9 @@ typedef struct {
 #define RELDATEFORMATTER_ERROR_P(obj) (&RELDATEFORMATTER_ERROR(obj))
 #define RELDATEFORMATTER_OBJECT(obj) ((obj)->formatter)
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
+BEGIN_EXTERN_C()
 void reldateformatter_register_class(void);
 extern zend_class_entry *IntlRelativeDateTimeFormatter_ce_ptr;
-
-#ifdef __cplusplus
-}
-#endif
+END_EXTERN_C()
 
 #endif /* RELDATEFORMATTER_CLASS_H */
