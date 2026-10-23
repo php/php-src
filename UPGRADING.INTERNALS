@@ -50,6 +50,10 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 - Added ZEND_IN_RANGE_OF(x, T) to check whether the value of an integer x is
   representable in the integer type T.
 - Added ZEND_TYPE_MIN(T) and ZEND_TYPE_MAX(T).
+- Deprecated ZEND_LONG_INT_OVFL(), ZEND_LONG_INT_UDFL(),
+  ZEND_LONG_EXCEEDS_INT(), ZEND_LONG_UINT_OVFL(), ZEND_SIZE_T_INT_OVFL(),
+  ZEND_SIZE_T_UINT_OVFL() and the *_CAN_OVFL_* flags. Use ZEND_IN_RANGE_OF()
+  instead.
 
 ========================
 2. Build system changes
