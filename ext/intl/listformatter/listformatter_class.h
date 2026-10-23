@@ -49,14 +49,10 @@ typedef struct {
 
 #define LISTFORMATTER_OBJECT(lfo) (lfo)->lf_data.ulistfmt
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+BEGIN_EXTERN_C()
 void listformatter_register_class( void );
+END_EXTERN_C()
 extern zend_class_entry *ListFormatter_ce_ptr;
-#ifdef __cplusplus
-}
-#endif
 
 #define INTL_LISTFORMATTER_FALLBACK_TYPE_AND 0
 #define INTL_LISTFORMATTER_FALLBACK_WIDTH_WIDE 0

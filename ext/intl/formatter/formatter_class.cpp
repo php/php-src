@@ -13,19 +13,17 @@
  */
 
 #include "formatter_class.h"
-extern "C" {
 #include "php_intl.h"
 #include "formatter_data.h"
 #include "formatter_format.h"
-}
 
 #include <zend_exceptions.h>
 #include "Zend/zend_attributes.h"
 #include "Zend/zend_interfaces.h"
 
-extern "C" {
+BEGIN_EXTERN_C()
 #include "formatter_arginfo.h"
-}
+END_EXTERN_C()
 
 zend_class_entry *NumberFormatter_ce_ptr = NULL;
 static zend_object_handlers NumberFormatter_handlers;

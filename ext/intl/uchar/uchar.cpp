@@ -12,7 +12,6 @@
    +----------------------------------------------------------------------+
  */
 
-extern "C" {
 #include "uchar.h"
 #include "intl_data.h"
 #include "intl_convert.h"
@@ -21,7 +20,6 @@ extern "C" {
 #include <unicode/utf8.h>
 
 #include "uchar_arginfo.h"
-}
 
 #define IC_METHOD(mname) \
 static void php_intl_IntlChar_##mname##_impl(INTERNAL_FUNCTION_PARAMETERS); \
@@ -651,7 +649,7 @@ IC_CHAR_METHOD_CHAR(getBidiPairedBracket)
 #undef IC_CHAR_METHOD_CHAR
 /* }}} */
 
-int php_uchar_minit(INIT_FUNC_ARGS) {
+U_CFUNC int php_uchar_minit(INIT_FUNC_ARGS) {
 	register_class_IntlChar();
 
 	return SUCCESS;

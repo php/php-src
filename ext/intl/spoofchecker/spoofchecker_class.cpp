@@ -13,13 +13,14 @@
  */
 
 #include "spoofchecker_class.h"
-extern "C" {
-#include "spoofchecker_arginfo.h"
 #include "php_intl.h"
 #include "intl_error.h"
-}
 
 #include <unicode/uspoof.h>
+
+BEGIN_EXTERN_C()
+#include "spoofchecker_arginfo.h"
+END_EXTERN_C()
 
 zend_class_entry *Spoofchecker_ce_ptr = NULL;
 static zend_object_handlers Spoofchecker_handlers;
@@ -66,7 +67,6 @@ static zend_object *Spoofchecker_object_create(zend_class_entry *ce)
 
 	return &intern->zo;
 }
-/* }}} */
 
 /*
  * 'Spoofchecker' class registration structures & functions

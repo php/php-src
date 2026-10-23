@@ -18,6 +18,7 @@
 
 #include <unicode/ustring.h>
 
+BEGIN_EXTERN_C()
 void intl_convert_utf8_to_utf16(
 	UChar**     target, int32_t* target_len,
 	const char* src,    size_t  src_len,
@@ -38,5 +39,6 @@ bool intl_convert_utf8_offset_to_utf16(
 int32_t intl_convert_utf16_offset_to_utf8(
 	const UChar* str, int32_t  str_len,
 	int32_t      position );
+END_EXTERN_C()
 
 #endif // INTL_CONVERT_H

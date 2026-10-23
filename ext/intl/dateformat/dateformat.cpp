@@ -17,9 +17,7 @@
 
 #include <unicode/udat.h>
 
-extern "C" {
 #include "php_intl.h"
-}
 #include "dateformat_class.h"
 #include "dateformat.h"
 

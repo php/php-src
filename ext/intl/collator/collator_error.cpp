@@ -22,9 +22,7 @@
 #include <unicode/unistr.h>
 #endif
 
-extern "C" {
 #include "php_intl.h"
-}
 #include "collator_class.h"
 
 /* {{{ Get collator's last error code. */

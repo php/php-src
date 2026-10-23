@@ -17,14 +17,8 @@
 
 #include <php.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 #include "intl_common.h"
 #include "intl_error.h"
-#ifdef __cplusplus
-}
-#endif
 
 #include <unicode/utrans.h>
 
@@ -60,19 +54,15 @@ typedef struct {
 		RETURN_THROWS(); \
 	}
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 int transliterator_object_construct( zval *object,
 									 UTransliterator *utrans,
 									 UErrorCode *status );
 
+BEGIN_EXTERN_C()
 void transliterator_register_Transliterator_class( void );
 
 extern zend_class_entry *Transliterator_ce_ptr;
 extern zend_object_handlers Transliterator_handlers;
-#ifdef __cplusplus
-}
-#endif
+END_EXTERN_C()
 
 #endif /* #ifndef TRANSLITERATOR_CLASS_H */

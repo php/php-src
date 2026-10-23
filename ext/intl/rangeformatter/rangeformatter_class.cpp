@@ -12,11 +12,9 @@
    +----------------------------------------------------------------------+
 */
 
-extern "C" {
-    #include "php.h"
-    #include "zend_API.h"
-    #include "../intl_common.h"
-}
+#include "php.h"
+#include "zend_API.h"
+#include "../intl_common.h"
 
 #if U_ICU_VERSION_MAJOR_NUM >= 63
 #include <unicode/numberrangeformatter.h>
@@ -25,13 +23,15 @@ extern "C" {
 #include <unicode/locid.h>
 #include "../intl_convertcpp.h"
 
-extern "C" {
-    #include "../intl_error.h"
-    #include "../php_intl.h"
-    #include "../intl_data.h"
-    #include "rangeformatter_arginfo.h"
-    #include "rangeformatter_class.h"
-}
+#include "../intl_error.h"
+#include "../php_intl.h"
+#include "../intl_data.h"
+
+BEGIN_EXTERN_C()
+#include "rangeformatter_arginfo.h"
+END_EXTERN_C()
+
+#include "rangeformatter_class.h"
 
 using icu::number::NumberRangeFormatter;
 using icu::number::NumberFormatter;
@@ -244,7 +244,7 @@ void IntlNumberRangeFormatter_object_free(zend_object *object)
     zend_object_std_dtor(&nfo->zo);
 }
 
-void rangeformatter_register_class(void)
+U_CFUNC void rangeformatter_register_class(void)
 {
     class_entry_IntlNumberRangeFormatter = register_class_IntlNumberRangeFormatter();
     class_entry_IntlNumberRangeFormatter->create_object = IntlNumberRangeFormatter_object_create;

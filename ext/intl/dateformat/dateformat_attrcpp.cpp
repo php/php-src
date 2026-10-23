@@ -18,14 +18,12 @@
 #include <unicode/calendar.h>
 #include <unicode/datefmt.h>
 
-extern "C" {
 #include "../php_intl.h"
 #include "dateformat_class.h"
 #define USE_TIMEZONE_POINTER 1
 #include "../timezone/timezone_class.h"
 #define USE_CALENDAR_POINTER 1
 #include "../calendar/calendar_class.h"
-}
 
 #include "../intl_convertcpp.h"
 #include "dateformat_helpers.h"

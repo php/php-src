@@ -20,10 +20,8 @@
 #include "../intl_convertcpp.h"
 #include "formatter_class.h"
 
-extern "C" {
 #include "php_intl.h"
 #include "intl_convert.h"
-}
 
 #define FORMATTER_UNUM(nfo) reinterpret_cast<UNumberFormat*>(FORMATTER_OBJECT(nfo))
 

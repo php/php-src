@@ -19,12 +19,10 @@
 #include <unicode/ustring.h>
 #include <unicode/umsg.h>
 
-extern "C" {
 #include "php_intl.h"
 #include "msgformat_class.h"
 #include "msgformat_data.h"
 #include "intl_convert.h"
-}
 
 /* {{{ */
 static int msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)

@@ -15,16 +15,10 @@
 #ifndef NUMBERFORMATTER_CLASS_H
 #define NUMBERFORMATTER_CLASS_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 #include <php.h>
 #include "intl_common.h"
 #include "intl_error.h"
 #include "intl_data.h"
-#ifdef __cplusplus
-}
-#endif
 
 #ifdef __cplusplus
 #include <unicode/numberformatter.h>
@@ -48,13 +42,9 @@ typedef struct {
 
 #define NUMBERFORMATTER_OBJECT(nfo) (nfo)->nf_data.unumf
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+BEGIN_EXTERN_C()
 void numberformatter_register_class(void);
 extern zend_class_entry *IntlNumberFormatter_ce_ptr;
-#ifdef __cplusplus
-}
-#endif
+END_EXTERN_C()
 
 #endif

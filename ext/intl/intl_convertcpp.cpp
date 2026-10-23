@@ -16,9 +16,7 @@
 
 #include "intl_convertcpp.h"
 #include <unicode/ustring.h>
-extern "C" {
 #include <php.h>
-}
 
 /* {{{ intl_stringFromChar */
 int intl_stringFromChar(UnicodeString &ret, char *str, size_t str_len, UErrorCode *status)

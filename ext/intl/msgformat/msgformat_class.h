@@ -33,9 +33,10 @@ typedef struct {
 #define php_intl_messageformatter_fetch_object(obj) ZEND_CONTAINER_OF(obj, MessageFormatter_object, zo)
 #define Z_INTL_MESSAGEFORMATTER_P(zv) php_intl_messageformatter_fetch_object(Z_OBJ_P(zv))
 
+BEGIN_EXTERN_C()
 void msgformat_register_class( void );
 extern zend_class_entry *MessageFormatter_ce_ptr;
-
+END_EXTERN_C()
 /* Auxiliary macros */
 
 #define MSG_FORMAT_METHOD_INIT_VARS		INTL_METHOD_INIT_VARS(MessageFormatter, mfo)

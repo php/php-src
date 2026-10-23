@@ -19,10 +19,8 @@
 #include <unicode/ustring.h>
 #include <math.h>
 
-extern "C" {
 #include "php_intl.h"
 #include "intl_convert.h"
-}
 #include "dateformat.h"
 #include "dateformat_class.h"
 #include "dateformat_data.h"

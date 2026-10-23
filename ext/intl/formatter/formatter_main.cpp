@@ -24,9 +24,7 @@
 #include "../intl_convertcpp.h"
 #include "formatter_class.h"
 
-extern "C" {
 #include "php_intl.h"
-}
 
 /* {{{ */
 static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)

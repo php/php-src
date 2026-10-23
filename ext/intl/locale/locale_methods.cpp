@@ -25,7 +25,6 @@
 #include <unicode/uenum.h>
 #include <unicode/locid.h>
 
-extern "C" {
 #include "php_intl.h"
 #include "locale.h"
 #include "locale_class.h"
@@ -37,7 +36,6 @@ extern "C" {
 #include <php.h>
 #include "main/php_ini.h"
 #include "zend_smart_str.h"
-}
 
 ZEND_EXTERN_MODULE_GLOBALS( intl )
 
