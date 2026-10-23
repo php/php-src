@@ -211,6 +211,8 @@ PHP                                                                        NEWS
     Lazizbek Ergashev)
   . Fixed getimagesize() reporting wrapped dimensions for XBM images with
     out-of-range width or height. (Ilia Alshanetsky)
+  . Fixed bug GH-24492 (urlencode() and rawurlencode() terminate the process
+    on allocation failure). (Kaustubh Singh)
 
 - Streams:
   . Fixed bug GH-22063 (Stream filter chain UAF on self-removal during
