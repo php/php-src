@@ -1,5 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+23 Oct 2026, PHP 5.0.5-p1
+- Fixed GHSA-w8hw-w9fx-j79w (Avoid state corruption via bailout).
+  (CVE-2026-109618) (Arnaud, ilutov)
+- Fixed GHSA-6wmf-4rv5-p3rp (Avoid state corruption via bailout).
+  (CVE-2026-109619) (Arnaud, ilutov)
+
 05 Sep 2005, PHP 5.0.5
 - Upgraded PCRE library to version 5.0. (Andrei)
 - Removed php_check_syntax() function which never worked properly. (Ilia)
