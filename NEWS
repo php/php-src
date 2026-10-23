@@ -125,6 +125,8 @@ PHP                                                                        NEWS
     table). (evankford)
 
 - Standard:
+  . Fixed bug GH-24492 (urlencode() and rawurlencode() terminate the process
+    on allocation failure). (Kaustubh Singh)
   . Fixed bug GH-24399 (usleep() and time_nanosleep() ignore queued APCs on
     Windows). (Nicolas Grekas)
   . Fixed chown() and lchown() failing to resolve user names in ZTS builds
