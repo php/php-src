@@ -47,6 +47,9 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 - The INIT_CLASS_ENTRY_INIT_METHODS() macro, which was previously used as
   part of handling disabled classes, was removed following the removal of
   the `disable_classes` INI setting in PHP 8.5.
+- Added ZEND_IN_RANGE_OF(x, T) to check whether the value of an integer x is
+  representable in the integer type T.
+- Added ZEND_TYPE_MIN(T) and ZEND_TYPE_MAX(T).
 
 ========================
 2. Build system changes
