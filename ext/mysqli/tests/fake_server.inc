@@ -805,6 +805,30 @@ function my_mysqli_test_stmt_response_row_short_length(
     $conn->read(65536);
 }
 
+function my_mysqli_test_stmt_response_row_no_null_bitmap(my_mysqli_fake_server_conn $conn): void
+{
+    $rh = $conn->packet_generator->server_stmt_execute_data_response('intval');
+
+    // The row packet ends right after the status byte, before the NULL bitmap
+    $row = new my_mysqli_fake_packet();
+    $row->packet_length = '010000';
+    $row->packet_number = '05';
+    $row->packet_type = '00';
+    $rh[4] = $row;
+
+    $conn->send_server_greetings();
+    $conn->read();
+    $conn->send_server_ok();
+    $conn->read();
+    $conn->send_server_stmt_prepare_data_response('intval');
+    $conn->read();
+    $conn->send(
+        $conn->packets_to_bytes($rh),
+        "Malicious Stmt Response for data intval [no NULL bitmap]"
+    );
+    $conn->read(65536);
+}
+
 function my_mysqli_test_stmt_response_row_short_length_date(my_mysqli_fake_server_conn $conn): void
 {
     my_mysqli_test_stmt_response_row_short_length($conn, 'datval');

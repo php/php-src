@@ -1546,6 +1546,12 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_ROW_BUFFER * row_buffer, zval * fi
 
 	end_field = (start_field = fields) + field_count;
 
+	/* The status byte and the NULL bitmap must fit in the packet */
+	if (UNEXPECTED(rbs < 1 + (field_count + 9) / 8)) {
+		php_error_docref(NULL, E_WARNING, "Malformed server packet. No packet space left for the NULL bitmap");
+		DBG_RETURN(FAIL);
+	}
+
 	/* skip the first byte, not EODATA_MARKER -> 0x0, status */
 	p++;
 	null_ptr= p;
