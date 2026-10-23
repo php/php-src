@@ -23211,22 +23211,30 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(Z
 						value_type = Z_TYPE_INFO_P(value);
 						if (EXPECTED(value_type != IS_UNDEF)
 						 && EXPECTED(zend_check_property_access(Z_OBJ_P(array), p->key, 0) == SUCCESS)) {
-							if ((value_type & Z_TYPE_MASK) != IS_REFERENCE) {
-								zend_property_info *prop_info =
-									zend_get_property_info_for_slot(Z_OBJ_P(array), value);
-								if (prop_info) {
-									if (UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
-										zend_throw_error(NULL,
-											"Cannot acquire reference to readonly property %s::$%s",
-											ZSTR_VAL(prop_info->ce->name), ZSTR_VAL(p->key));
-										UNDEF_RESULT();
-										HANDLE_EXCEPTION();
-									}
-									if (ZEND_TYPE_IS_SET(prop_info->type)) {
-										ZVAL_NEW_REF(value, value);
-										ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(value), prop_info);
-										value_type = IS_REFERENCE_EX;
-									}
+							zend_property_info *prop_info =
+								zend_get_property_info_for_slot(Z_OBJ_P(array), value);
+							if (prop_info) {
+								if ((value_type & Z_TYPE_MASK) != IS_REFERENCE
+								 && UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
+									zend_throw_error(NULL,
+										"Cannot acquire reference to readonly property %s::$%s",
+										ZSTR_VAL(prop_info->ce->name), ZSTR_VAL(p->key));
+									UNDEF_RESULT();
+									HANDLE_EXCEPTION();
+								}
+								/* An existing reference must not bypass setter visibility. */
+								if (UNEXPECTED(prop_info->flags & ZEND_ACC_PPP_SET_MASK)
+								 && (UNEXPECTED(EG(fake_scope) != NULL) || prop_info->ce != EX(func)->common.scope)
+								 && UNEXPECTED(!zend_asymmetric_property_has_set_access(prop_info))) {
+									zend_asymmetric_visibility_property_modification_error(prop_info, "indirectly modify");
+									UNDEF_RESULT();
+									HANDLE_EXCEPTION();
+								}
+								if ((value_type & Z_TYPE_MASK) != IS_REFERENCE
+								 && ZEND_TYPE_IS_SET(prop_info->type)) {
+									ZVAL_NEW_REF(value, value);
+									ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(value), prop_info);
+									value_type = IS_REFERENCE_EX;
 								}
 							}
 							break;
