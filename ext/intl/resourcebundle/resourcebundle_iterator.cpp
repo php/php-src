@@ -12,11 +12,9 @@
    +----------------------------------------------------------------------+
  */
 
-extern "C" {
 #include <php.h>
 #include <zend.h>
 #include <zend_API.h>
-}
 
 #include "resourcebundle/resourcebundle.h"
 #include "resourcebundle/resourcebundle_class.h"

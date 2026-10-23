@@ -21,10 +21,8 @@
 #include <unicode/unistr.h>
 #endif
 
-extern "C" {
 #include "php_intl.h"
 #include "intl_data.h"
-}
 #include "spoofchecker_class.h"
 
 /* {{{ Spoofchecker object constructor. */

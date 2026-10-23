@@ -21,15 +21,15 @@
 #include "breakiterator_iterators.h"
 #include "../common/common_enum.h"
 
-extern "C" {
 #define USE_BREAKITERATOR_POINTER
 #include "breakiterator_class.h"
+BEGIN_EXTERN_C()
 #include "breakiterator_iterators_arginfo.h"
+END_EXTERN_C()
 #include "../intl_convert.h"
 #include "../locale/locale.h"
 #include <zend_exceptions.h>
 #include <zend_interfaces.h>
-}
 
 static zend_class_entry *IntlPartsIterator_ce_ptr;
 

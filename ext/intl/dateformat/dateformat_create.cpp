@@ -19,7 +19,6 @@
 #include <unicode/calendar.h>
 #include <unicode/datefmt.h>
 
-extern "C" {
 #include <unicode/ustring.h>
 #include <unicode/udat.h>
 #include <unicode/uloc.h>
@@ -32,7 +31,6 @@ extern "C" {
 #define USE_TIMEZONE_POINTER 1
 #include "../timezone/timezone_class.h"
 #include "../intl_convert.h"
-}
 
 #include "dateformat_helpers.h"
 #include "zend_exceptions.h"

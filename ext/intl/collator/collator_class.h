@@ -18,15 +18,9 @@
 
 #include <php.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 #include "../intl_common.h"
 #include "../intl_error.h"
 #include "../intl_data.h"
-#ifdef __cplusplus
-}
-#endif
 
 #include <unicode/ucol.h>
 
@@ -64,17 +58,12 @@ static zend_always_inline zend_result collator_check_initialized(Collator_object
 
 	return SUCCESS;
 }
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+BEGIN_EXTERN_C()
 void collator_register_Collator_symbols(int module_number);
 void collator_object_destroy( Collator_object* co );
-#ifdef __cplusplus
-}
-#endif
 
 extern zend_class_entry *Collator_ce_ptr;
+END_EXTERN_C()
 
 /* Auxiliary macros */
 

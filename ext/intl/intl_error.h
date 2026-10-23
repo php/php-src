@@ -23,6 +23,8 @@
 
 #define INTL_ERROR_CODE(e) (e).code
 
+BEGIN_EXTERN_C()
+
 typedef struct {
 	zend_string *custom_error_message;
 	UErrorCode   code;
@@ -44,5 +46,7 @@ void        intl_errors_set( intl_error* err, UErrorCode code, const char* msg);
 
 // Other error helpers
 smart_str	intl_parse_error_to_string( UParseError* pe );
+
+END_EXTERN_C()
 
 #endif // INTL_ERROR_H

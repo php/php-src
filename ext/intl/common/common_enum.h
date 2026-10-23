@@ -17,17 +17,12 @@
 #define INTL_COMMON_ENUM_H
 
 #include <unicode/umachine.h>
-#ifdef __cplusplus
+
 #include <unicode/strenum.h>
-extern "C" {
 #include <math.h>
-#endif
 #include <php.h>
 #include "../intl_error.h"
 #include "../intl_data.h"
-#ifdef __cplusplus
-}
-#endif
 
 #define INTLITERATOR_ERROR(ii)						(ii)->err
 #define INTLITERATOR_ERROR_P(ii)					&(INTLITERATOR_ERROR(ii))

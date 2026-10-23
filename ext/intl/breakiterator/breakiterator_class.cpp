@@ -24,14 +24,14 @@
 
 #include <typeinfo>
 
-extern "C" {
 #define USE_BREAKITERATOR_POINTER 1
 #include "breakiterator_class.h"
+BEGIN_EXTERN_C()
 #include "breakiterator_arginfo.h"
+END_EXTERN_C()
 #include <zend_exceptions.h>
 #include <zend_interfaces.h>
 #include <assert.h>
-}
 
 using PHP::CodePointBreakIterator;
 using icu::RuleBasedBreakIterator;

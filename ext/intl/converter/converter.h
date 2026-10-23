@@ -19,14 +19,10 @@
 #include <config.h>
 #endif
 
-#include "php.h"
+#include "zend_portability.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+BEGIN_EXTERN_C()
 int php_converter_minit(INIT_FUNC_ARGS);
-#ifdef __cplusplus
-}
-#endif
+END_EXTERN_C()
 
 #endif /* PHP_INTL_CONVERTER_H */

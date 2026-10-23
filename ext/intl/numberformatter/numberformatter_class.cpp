@@ -12,22 +12,20 @@
    +----------------------------------------------------------------------+
 */
 
-extern "C" {
 #include "php.h"
 #include "zend_API.h"
 #include "../intl_common.h"
-}
 
 #if U_ICU_VERSION_MAJOR_NUM >= 63
 #include <unicode/numberformatter.h>
 #include <unicode/unistr.h>
 #include <unicode/locid.h>
 #include "../intl_convertcpp.h"
-
-extern "C" {
 #include "../php_intl.h"
+
+BEGIN_EXTERN_C()
 #include "numberformatter_arginfo.h"
-}
+END_EXTERN_C()
 #include "numberformatter_class.h"
 
 using icu::number::NumberFormatter;

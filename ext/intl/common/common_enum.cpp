@@ -18,20 +18,12 @@
 
 #include "../intl_cppshims.h"
 
-// Fix build on Windows/old versions of ICU
-#include <stdio.h>
-
-extern "C" {
 #include <zend_attributes.h>
-}
+#include <zend_interfaces.h>
+#include <zend_exceptions.h>
 
 #include "common_enum.h"
 #include "common_arginfo.h"
-
-extern "C" {
-#include <zend_interfaces.h>
-#include <zend_exceptions.h>
-}
 
 zend_class_entry *IntlIterator_ce_ptr;
 zend_object_handlers IntlIterator_handlers;
