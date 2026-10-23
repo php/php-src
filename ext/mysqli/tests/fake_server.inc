@@ -1021,6 +1021,26 @@ function my_mysqli_test_upsert_rset_header_packet_len_over_read(my_mysqli_fake_s
 }
 
 
+function my_mysqli_test_upsert_rset_header_no_info(my_mysqli_fake_server_conn $conn): void
+{
+	$ur = $conn->packet_generator->server_upsert_result_response();
+
+	$ur->packet_length = "070000";
+	$ur->affected_rows = "00";
+	$ur->last_insert_id = "00";
+	$ur->server_status = "0200";
+	$ur->warning_count = "0000";
+	$ur->payload = "";
+
+	$conn->send_server_greetings();
+	$conn->read();
+	$conn->send_server_ok();
+	$conn->read();
+	$conn->send($ur->to_bytes(), "Upsert Response without info");
+	$conn->read(65536);
+}
+
+
 function my_mysqli_test_query_response_row_read_two_fields(my_mysqli_fake_server_conn $conn): void
 {
     $conn->send_server_greetings();
