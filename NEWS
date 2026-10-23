@@ -13,6 +13,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-24461 (DISCARD ALL on persistent connection cleanup drops
     PgBouncer's prepared statements). (David Carlier, Artem Ukrainskiy)
 
+- Session:
+  . Changed default of session.upload_progress.enabled to 0. (jorgsowa)
+
 - SAPI:
   . Fixed infinite loop in sapi_header_op() for headers of 4 GiB or more.
     (Martin Mirchev)
