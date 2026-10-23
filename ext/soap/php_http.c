@@ -347,6 +347,25 @@ static bool in_domain(const zend_string *host, const zend_string *domain)
 	}
 }
 
+/* The port of from must already be resolved, the port of to may still be 0 */
+static bool same_origin(const php_uri *from, const php_uri *to)
+{
+	if (from->scheme == NULL || to->scheme == NULL || from->host == NULL || to->host == NULL) {
+		return false;
+	}
+
+	if (!zend_string_equals_ci(from->scheme, to->scheme) || !zend_string_equals_ci(from->host, to->host)) {
+		return false;
+	}
+
+	zend_long to_port = to->port;
+	if (to_port == 0) {
+		to_port = zend_string_equals_literal_ci(to->scheme, "https") ? 443 : 80;
+	}
+
+	return from->port == to_port;
+}
+
 bool make_http_soap_request(
 	zval *this_ptr, zend_string *buf, zend_string *location, char *soapaction,
 	int soap_version, zend_string *uri_parser_class, zval *return_value
@@ -376,6 +395,8 @@ bool make_http_soap_request(
 	bool has_authorization = false;
 	bool has_proxy_authorization = false;
 	bool has_cookies = false;
+	/* Set once a redirect left the origin, credentials must not follow it */
+	bool strip_auth = false;
 
 	if (this_ptr == NULL || Z_TYPE_P(this_ptr) != IS_OBJECT) {
 		return false;
@@ -687,7 +708,7 @@ try_again:
 
 		/* HTTP Authentication */
 		login = Z_CLIENT_LOGIN_P(this_ptr);
-		if (Z_TYPE_P(login) == IS_STRING) {
+		if (Z_TYPE_P(login) == IS_STRING && !strip_auth) {
 			zval *digest = Z_CLIENT_DIGEST_P(this_ptr);
 
 			has_authorization = true;
@@ -899,7 +920,9 @@ try_again:
 			smart_str_append_const(&soap_headers, "\r\n");
 		}
 
-		http_context_headers(context, has_authorization, has_proxy_authorization, has_cookies, &soap_headers);
+		/* Passing true for the credential headers makes it skip them */
+		http_context_headers(context, has_authorization || strip_auth, has_proxy_authorization,
+			has_cookies || strip_auth, &soap_headers);
 
 		smart_str_append_const(&soap_headers, "\r\n");
 		smart_str_0(&soap_headers);
@@ -1191,6 +1214,9 @@ try_again:
 						}
 					}
 				}
+				if (!same_origin(uri, new_uri)) {
+					strip_auth = true;
+				}
 				uri = new_uri;
 
 				if (--redirect_max < 1) {
@@ -1210,7 +1236,7 @@ try_again:
 		zval *password = Z_CLIENT_PASSWORD_P(this_ptr);
 		char *auth = get_http_header_value(http_headers, "WWW-Authenticate:");
 		if (auth && strstr(auth, "Digest") == auth && Z_TYPE_P(digest) != IS_ARRAY
-				&& Z_TYPE_P(login) == IS_STRING && Z_TYPE_P(password) == IS_STRING) {
+				&& Z_TYPE_P(login) == IS_STRING && Z_TYPE_P(password) == IS_STRING && !strip_auth) {
 			char *s;
 			zval digest;
 
