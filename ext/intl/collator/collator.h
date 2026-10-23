@@ -16,8 +16,6 @@
 #ifndef COLLATOR_COLLATOR_H
 #define COLLATOR_COLLATOR_H
 
-#include <php.h>
-
 #define COLLATOR_SORT_REGULAR   0
 #define COLLATOR_SORT_STRING    1
 #define COLLATOR_SORT_NUMERIC   2
