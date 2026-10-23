@@ -242,6 +242,10 @@ static void dom_xml_ns_prefix_map_add(
 	} else if (GC_REFCOUNT(list) > 1) {
 		GC_DELREF(list);
 		list = zend_array_dup(list);
+		ZEND_HASH_PACKED_FOREACH_VAL(list, zval *val) {
+			/* Descendant does not own the data. */
+			DOM_Z_UNOWNED(val, Z_PTR_P(val));
+		} ZEND_HASH_FOREACH_END();
 		zend_hash_str_update_ptr(map->ht, (const char *) ns, ns_length, list);
 	}
 
