@@ -1407,7 +1407,7 @@ PHP_METHOD(SoapServer, handle)
 	FETCH_THIS_SERVICE(service);
 	SOAP_GLOBAL(soap_version) = service->version;
 
-	if (arg && ZEND_SIZE_T_INT_OVFL(arg_len)) {
+	if (arg && !ZEND_IN_RANGE_OF(arg_len, int)) {
 		soap_server_fault_en("Server", "Input string is too long");
 		SOAP_SERVER_END_CODE();
 		return;

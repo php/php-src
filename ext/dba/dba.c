@@ -1057,7 +1057,7 @@ PHP_FUNCTION(dba_fetch)
 		ZEND_PARSE_PARAMETERS_END();
 	}
 
-	if (ZEND_LONG_EXCEEDS_INT(skip)) {
+	if (!ZEND_IN_RANGE_OF(skip, int)) {
 		zend_argument_value_error(3, "must be between %d and %d", INT_MIN, INT_MAX);
 		RETURN_THROWS();
 	}

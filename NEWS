@@ -18,6 +18,9 @@ PHP                                                                        NEWS
   . Use recommended TYPE, HELP order for OpenMetrics metadata.
     (Marcel Hernandez)
 
+- GD:
+  . Fixed imagetruecolortopalette() error message. (Marc Bennewitz)
+
 - Hash:
   . Fixed mhash_keygen_s2k() truncating a $length above INT_MAX instead of
     throwing a ValueError. (Marc Bennewitz)
@@ -36,6 +39,11 @@ PHP                                                                        NEWS
     IntlCalendar::fromDateTime() fails after adopting a TimeZone.
     (Ilia Alshanetsky)
   . Added IntlNumberFormatter::createFromSkeleton() (GH-24165). (David Carlier)
+  . Fixed IntlDateFormatter parse functions truncating an $offset below
+    INT_MIN. (Marc Bennewitz)
+
+- LDAP:
+  . Fixed ldap_set_option() error message. (Marc Bennewitz)
 
 - Lexbor:
   . Merge patches lexbor/lexbor@8a14bc0 and lexbor/lexbor@f67ce4b, fixing a
@@ -62,6 +70,10 @@ PHP                                                                        NEWS
   . Fixed mbstring functions emitting surrogates in UTF-8 output and flagging
     it as valid UTF-8. (Nicolas Grekas)
   . Fixed bug GH-23958 (truncated encoding names resolving to full names). (Kamil Tekiela)
+  . Fixed mbstring.regex_retry_limit above UINT_MAX being ignored.
+    (Marc Bennewitz)
+  . Fixed negative mbstring.regex_stack_limit and mbstring.regex_retry_limit
+    on 32bit platforms. (Marc Bennewitz)
 
 - MySQLi:
   . Fix GH-22854: Fixed failed assertion when accessing mysqli property after
@@ -105,6 +117,8 @@ PHP                                                                        NEWS
 - Phar:
   . Fixed bug GH-22556 (OOM DoS via oversized ././@LongLink entry in TAR phar).
     (crystarm)
+  . Fixed Phar::buildFromIterator() accepting a negative getMTime() on 32bit
+    platforms. (Marc Bennewitz)
 
 - Readline:
   . Fixed a heap over-read in the interactive shell prompt when cli.prompt is
@@ -171,6 +185,10 @@ PHP                                                                        NEWS
 - URI:
   . Fix casing of enum cases in UriHostType and UrlHostType to match the RFC
     and PHP’s naming policy. (timwolla)
+
+- Windows:
+  . Fixed sapi_windows_cp_set() and sapi_windows_cp_conv() accepting a negative
+    codepage on 32bit platforms. (Marc Bennewitz)
 
 - XML:
   . Fixed xml_get_current_byte_index() returning negative values for byte

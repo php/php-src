@@ -279,7 +279,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, bool is_file)
 		data = arg1;
 	}
 
-	if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(data))) {
+	if (!ZEND_IN_RANGE_OF(ZSTR_LEN(data), unsigned int)) {
 		if (is_file) {
 			zend_string_release_ex(data, false);
 			zend_argument_value_error(1, "File content is too long");
@@ -833,7 +833,7 @@ static zend_result php_tidy_parse_string(PHPTidyObj *obj, const zend_string *str
 {
 	TidyBuffer buf;
 
-	ZEND_ASSERT(!ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(string)));
+	ZEND_ASSERT(ZEND_IN_RANGE_OF(ZSTR_LEN(string), unsigned int));
 
 	if (enc) {
 		if (tidySetCharEncoding(obj->ptdoc->doc, enc) < 0) {
@@ -992,7 +992,7 @@ static zend_result php_tidy_output_handler(void **nothing, php_output_context *o
 	TidyBuffer inbuf, outbuf, errbuf;
 
 	if (TG(clean_output) && (output_context->op & PHP_OUTPUT_HANDLER_START) && (output_context->op & PHP_OUTPUT_HANDLER_FINAL)) {
-		if (ZEND_SIZE_T_UINT_OVFL(output_context->in.used)) {
+		if (!ZEND_IN_RANGE_OF(output_context->in.used, unsigned int)) {
 			php_error_docref(NULL, E_WARNING, "Input string is too long");
 			return status;
 		}
@@ -1043,7 +1043,7 @@ PHP_FUNCTION(tidy_parse_string)
 		Z_PARAM_STRING_OR_NULL(enc, enc_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(input))) {
+	if (!ZEND_IN_RANGE_OF(ZSTR_LEN(input), unsigned int)) {
 		zend_argument_value_error(1, "is too long");
 		RETURN_THROWS();
 	}
@@ -1110,7 +1110,7 @@ PHP_FUNCTION(tidy_parse_file)
 		RETURN_FALSE;
 	}
 
-	if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(contents))) {
+	if (!ZEND_IN_RANGE_OF(ZSTR_LEN(contents), unsigned int)) {
 		zend_string_release_ex(contents, 0);
 		zend_value_error("File content is too long");
 		RETURN_THROWS();
@@ -1390,7 +1390,7 @@ PHP_METHOD(tidy, __construct)
 			RETURN_THROWS();
 		}
 
-		if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(contents))) {
+		if (!ZEND_IN_RANGE_OF(ZSTR_LEN(contents), unsigned int)) {
 			zend_string_release_ex(contents, 0);
 			zend_value_error("File content is too long");
 			RETURN_THROWS();
@@ -1435,7 +1435,7 @@ PHP_METHOD(tidy, parseFile)
 		RETURN_FALSE;
 	}
 
-	if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(contents))) {
+	if (!ZEND_IN_RANGE_OF(ZSTR_LEN(contents), unsigned int)) {
 		zend_string_release_ex(contents, 0);
 		zend_value_error("File content is too long");
 		RETURN_THROWS();
@@ -1462,7 +1462,7 @@ PHP_METHOD(tidy, parseString)
 		Z_PARAM_STRING_OR_NULL(enc, enc_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(input))) {
+	if (!ZEND_IN_RANGE_OF(ZSTR_LEN(input), unsigned int)) {
 		zend_argument_value_error(1, "is too long");
 		RETURN_THROWS();
 	}
