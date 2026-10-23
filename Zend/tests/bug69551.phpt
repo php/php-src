@@ -7,10 +7,26 @@ $ini = <<<INI
 SubnetMask = "
 "
 INI;
-$settings = parse_ini_string($ini, false, INI_SCANNER_RAW);
-var_dump($settings);
+var_dump(parse_ini_string($ini, false, INI_SCANNER_RAW));
+
+echo "Unclosed quote:\n";
+$ini = <<<INI
+[Network.eth0]
+SubnetMask = "
+Gateway = 1
+INI;
+var_dump(parse_ini_string($ini, false, INI_SCANNER_RAW));
 ?>
---EXPECTF--
-Warning: syntax error, unexpected '"' in Unknown on line %d
- in %s on line %d
-bool(false)
+--EXPECT--
+array(1) {
+  ["SubnetMask"]=>
+  string(1) "
+"
+}
+Unclosed quote:
+array(2) {
+  ["SubnetMask"]=>
+  string(1) """
+  ["Gateway"]=>
+  string(1) "1"
+}

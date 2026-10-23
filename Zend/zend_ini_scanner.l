@@ -278,6 +278,30 @@ zend_result zend_ini_prepare_string_for_scanning(const char *str, int scanner_mo
 }
 /* }}} */
 
+/* Find a double quote that ends a raw value, i.e. one followed only by whitespace
+ * and an optional comment before the end of the line or input. */
+static const unsigned char *zend_ini_find_raw_closing_quote(const unsigned char *s, const unsigned char *limit)
+{
+	while (s < limit) {
+		if (*s++ != '"') {
+			continue;
+		}
+		const unsigned char *p = s;
+		while (p < limit && (*p == ' ' || *p == '\t')) {
+			p++;
+		}
+		if (p < limit && *p == ';') {
+			while (p < limit && *p != '\n' && *p != '\r') {
+				p++;
+			}
+		}
+		if (p == limit || *p == '\n' || *p == '\r') {
+			return s - 1;
+		}
+	}
+	return NULL;
+}
+
 /* {{{ zend_ini_escape_string() */
 static void zend_ini_escape_string(zval *lval, const char *str, int len, char quote_type)
 {
@@ -521,12 +545,25 @@ fallback_lexing:
 
 <ST_RAW>{RAW_VALUE_CHARS} { /* Raw value, only used when SCNG(scanner_mode) == ZEND_INI_SCANNER_RAW. */
 	const unsigned char *sc = NULL;
+	const unsigned char *closing_quote = NULL;
+	bool in_quotes;
 	EAT_LEADING_WHITESPACE();
+	in_quotes = yytext[0] == '"';
 	while (YYCURSOR < YYLIMIT) {
 		switch (*YYCURSOR) {
 			case '\n':
 			case '\r':
-				goto end_raw_value_chars;
+				/* A quoted value may span multiple lines, but only if the quote is closed */
+				if (in_quotes && !closing_quote) {
+					closing_quote = zend_ini_find_raw_closing_quote(YYCURSOR, YYLIMIT);
+				}
+				if (!in_quotes || !closing_quote || YYCURSOR > closing_quote) {
+					goto end_raw_value_chars;
+				}
+				if (*YYCURSOR == '\n' || YYCURSOR + 1 == YYLIMIT || YYCURSOR[1] != '\n') {
+					SCNG(lineno)++;
+				}
+				YYCURSOR++;
 				break;
 			case ';':
 				if (sc == NULL) {
@@ -537,6 +574,7 @@ fallback_lexing:
 			case '"':
 				if (yytext[0] == '"') {
 					sc = NULL;
+					in_quotes = !in_quotes;
 				}
 				YYCURSOR++;
 				break;
