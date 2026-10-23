@@ -60,7 +60,6 @@ static zend_always_inline zend_result collator_check_initialized(Collator_object
 }
 BEGIN_EXTERN_C()
 void collator_register_Collator_symbols(int module_number);
-void collator_object_destroy( Collator_object* co );
 
 extern zend_class_entry *Collator_ce_ptr;
 END_EXTERN_C()
