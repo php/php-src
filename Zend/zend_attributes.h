@@ -64,8 +64,15 @@ typedef struct _zend_attribute {
 	zend_string *validation_error;
 	uint32_t flags;
 	uint32_t lineno;
-	/* Parameter offsets start at 1.
-	 * User constants use their own offset in the shared table of the main op_array (see zend_attributed_constant).
+	/* Identifies which declaration (e.g. function, parameter or constant) the attribute is attached to,
+	 * for tables that are shared by multiple declarations:
+	 * - Function attribute tables also hold the attributes of the parameters.
+	 *   Parameter #n uses offset n (one-based), the function itself uses 0.
+	 * - The attributes of all user constants declared in a file are stored in
+	 *   the attributes table of that file's main op_array.
+	 *   Each constant uses the index of its first attribute in that table as offset.
+	 *   For example, given `#[A] const X = 1; #[B, C] const Y = 2;`,
+	 *   A has offset 0 while B and C have offset 1.
 	 * Everything else uses 0. */
 	uint32_t offset;
 	uint32_t argc;

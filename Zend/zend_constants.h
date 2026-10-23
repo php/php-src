@@ -64,7 +64,8 @@ typedef struct _zend_constant {
  * This is a type specialization of the zend_constant type. */
 typedef struct zend_attributed_constant {
 	zend_constant constant;
-	/* Offset into the attributes able of the main op_array of the declaring file. */
+	/* The zend_attribute.offset of this constant's attributes
+	 * in the attributes table of the main op_array of the declaring file. */
 	uint32_t attributes_offset;
 } zend_attributed_constant;
 
