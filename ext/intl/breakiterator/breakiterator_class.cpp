@@ -43,6 +43,16 @@ zend_class_entry *CodePointBreakIterator_ce_ptr;
 zend_object_handlers BreakIterator_handlers;
 /* }}} */
 
+static void breakiterator_object_construct(zval *object,
+											BreakIterator *biter)
+{
+	BreakIterator_object *bio;
+
+	BREAKITER_METHOD_FETCH_OBJECT_NO_CHECK; //populate to from object
+	ZEND_ASSERT(bio->biter == NULL);
+	bio->biter = biter;
+}
+
 U_CFUNC	void breakiterator_object_create(zval *object,
 										 BreakIterator *biter, int brand_new)
 {
@@ -61,16 +71,6 @@ U_CFUNC	void breakiterator_object_create(zval *object,
 		object_init_ex(object, ce);
 	}
 	breakiterator_object_construct(object, biter);
-}
-
-U_CFUNC void breakiterator_object_construct(zval *object,
-											BreakIterator *biter)
-{
-	BreakIterator_object *bio;
-
-	BREAKITER_METHOD_FETCH_OBJECT_NO_CHECK; //populate to from object
-	ZEND_ASSERT(bio->biter == NULL);
-	bio->biter = biter;
 }
 
 /* {{{ compare handler for BreakIterator */
