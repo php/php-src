@@ -446,7 +446,7 @@ static int php_htoi(char *s)
 
 static const unsigned char hexchars[] = "0123456789ABCDEF";
 
-static zend_always_inline zend_string *php_url_encode_impl(const char *s, size_t len, bool raw) /* {{{ */ {
+static zend_always_inline zend_string *php_url_encode_impl(const char *s, size_t len, bool raw, bool fallible) /* {{{ */ {
 	unsigned char c;
 	unsigned char *to;
 	unsigned char const *from, *end;
@@ -454,7 +454,10 @@ static zend_always_inline zend_string *php_url_encode_impl(const char *s, size_t
 
 	from = (unsigned char *)s;
 	end = (unsigned char *)s + len;
-	start = zend_string_safe_alloc(3, len, 0, 0);
+	start = zend_string_safe_falloc(3, len, 0, false, fallible);
+	if (UNEXPECTED(start == NULL)) {
+		return NULL;
+	}
 	to = (unsigned char*)ZSTR_VAL(start);
 
 #ifdef __SSE2__
@@ -536,29 +539,35 @@ static zend_always_inline zend_string *php_url_encode_impl(const char *s, size_t
 	}
 	*to = '\0';
 
-	start = zend_string_truncate(start, to - (unsigned char*)ZSTR_VAL(start), 0);
-
-	return start;
+	zend_string *result = zend_string_ftruncate(start, to - (unsigned char*)ZSTR_VAL(start), false, fallible);
+	if (UNEXPECTED(result == NULL)) {
+		zend_string_release(start);
+	}
+	return result;
 }
 /* }}} */
 
 /* {{{ php_url_encode */
 PHPAPI zend_string *php_url_encode(char const *s, size_t len)
 {
-	return php_url_encode_impl(s, len, 0);
+	return php_url_encode_impl(s, len, false, /* fallible */ false);
 }
 /* }}} */
 
 /* {{{ URL-encodes string */
 PHP_FUNCTION(urlencode)
 {
-	zend_string *in_str;
+	zend_string *in_str, *out_str;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR(in_str)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_STR(php_url_encode(ZSTR_VAL(in_str), ZSTR_LEN(in_str)));
+	out_str = php_url_encode_impl(ZSTR_VAL(in_str), ZSTR_LEN(in_str), false, /* fallible */ true);
+	if (UNEXPECTED(out_str == NULL)) {
+		RETURN_OOM();
+	}
+	RETURN_STR(out_str);
 }
 /* }}} */
 
@@ -607,20 +616,24 @@ PHPAPI size_t php_url_decode(char *str, size_t len)
 /* {{{ php_raw_url_encode */
 PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len)
 {
-	return php_url_encode_impl(s, len, 1);
+	return php_url_encode_impl(s, len, true, /* fallible */ false);
 }
 /* }}} */
 
 /* {{{ URL-encodes string */
 PHP_FUNCTION(rawurlencode)
 {
-	zend_string *in_str;
+	zend_string *in_str, *out_str;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR(in_str)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_STR(php_raw_url_encode(ZSTR_VAL(in_str), ZSTR_LEN(in_str)));
+	out_str = php_url_encode_impl(ZSTR_VAL(in_str), ZSTR_LEN(in_str), true, /* fallible */ true);
+	if (UNEXPECTED(out_str == NULL)) {
+		RETURN_OOM();
+	}
+	RETURN_STR(out_str);
 }
 /* }}} */
 
