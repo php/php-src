@@ -30,7 +30,7 @@
 #define ZEND_MODULE_INFO_FUNC_ARGS zend_module_entry *zend_module
 #define ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU zend_module
 
-#define ZEND_MODULE_API_NO 20260925
+#define ZEND_MODULE_API_NO 20261024
 #ifdef ZTS
 #define USING_ZTS 1
 #else
@@ -45,7 +45,11 @@
 
 #define ZEND_MODULE_BUILD_ID "API" ZEND_TOSTR(ZEND_MODULE_API_NO) ZEND_BUILD_TS ZEND_BUILD_DEBUG ZEND_BUILD_SYSTEM ZEND_BUILD_EXTRA
 
-#define STANDARD_MODULE_PROPERTIES_EX 0, 0, NULL, 0, ZEND_MODULE_BUILD_ID
+#define STANDARD_MODULE_PROPERTIES_EX_WITH_CHILD_INIT(child_init) \
+	0, 0, NULL, 0, ZEND_MODULE_BUILD_ID, child_init
+
+#define STANDARD_MODULE_PROPERTIES_EX \
+	STANDARD_MODULE_PROPERTIES_EX_WITH_CHILD_INIT(NULL)
 
 #define NO_MODULE_GLOBALS 0, NULL, NULL, NULL
 
@@ -96,6 +100,7 @@ struct _zend_module_entry {
 	void *handle;
 	int module_number;
 	const char *build_id;
+	void (*child_init_func)(void);
 };
 
 #define MODULE_DEP_REQUIRED		1

@@ -14,6 +14,12 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 1. Internal API changes
 ========================
 
+- Added zend_module_entry.child_init_func, an optional void callback invoked by
+  php_child_init() in the child process after core child initialization. It runs
+  in module dependency order for started modules and may run before a request
+  starts or during an active request. Use
+  STANDARD_MODULE_PROPERTIES_EX_WITH_CHILD_INIT(callback) to initialize it.
+  Modules without a callback continue to use STANDARD_MODULE_PROPERTIES_EX.
 - Removed the ZEND_LOG_XOR() macro.
 - Removed the ZEND_TRUTH() macro.
 - Removed zend_execute_scripts(). Manually call zend_execute_script() in a loop

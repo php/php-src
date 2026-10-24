@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: a541ec4d43e8dfb243636d2517436196e337047e
+ * Stub hash: 80f6b3b13c403e4e85ab908a2733f6a42fa26368
  * Has decl header: yes */
 
 #include "zend_attributes.h"
@@ -40,6 +40,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_nodiscard, 0, 0, IS_LO
 ZEND_END_ARG_INFO()
 
 #define arginfo_zend_test_deprecated_nodiscard arginfo_zend_test_nodiscard
+
+#define arginfo_zend_test_child_init_count arginfo_zend_test_nodiscard
 
 #define arginfo_zend_test_aliased arginfo_zend_test_void_return
 
@@ -474,6 +476,7 @@ static ZEND_FUNCTION(zend_test_deprecated);
 static ZEND_FUNCTION(zend_test_deprecated_attr);
 static ZEND_FUNCTION(zend_test_nodiscard);
 static ZEND_FUNCTION(zend_test_deprecated_nodiscard);
+static ZEND_FUNCTION(zend_test_child_init_count);
 static ZEND_FUNCTION(zend_create_unterminated_string);
 static ZEND_FUNCTION(zend_terminate_string);
 static ZEND_FUNCTION(zend_leak_variable);
@@ -620,6 +623,7 @@ static const zend_function_entry ext_functions[] = {
 #endif
 #endif
 	ZEND_FE(zend_test_void_return, arginfo_zend_test_void_return)
+	ZEND_FE(zend_test_child_init_count, arginfo_zend_test_child_init_count)
 	ZEND_FE(zend_test_forward_reference, arginfo_zend_test_forward_reference)
 	ZEND_FE(zend_test_compile_string, arginfo_zend_test_compile_string)
 #if (PHP_VERSION_ID >= 80400)
