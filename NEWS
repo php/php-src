@@ -68,6 +68,8 @@ PHP                                                                        NEWS
 - MySQLnd:
   . Fixed bug GH-24293 (Segfault on connect with an empty password to a
     MariaDB PAM account). (lazerg)
+  . Fixed bug GH-24609 (OK packets without an info message rejected on x32
+    builds). (lazerg)
 
 - Opcache:
   . Fixed tracing JIT returning a wrapped integer instead of a float on
