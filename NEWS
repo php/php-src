@@ -37,6 +37,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-24350 (MINIT reads a stale external tz database after an
     in-process module restart). (Lazizbek Ergashev)
 
+- DBA:
+  . Fixed bug GH-24641 (ndbm handler does not check dbm_open() result).
+    (Lazizbek Ergashev)
+
 - DOM:
   . Fixed bug GH-23352 (UAF reading an attribute value node retained across
     DOMDocument::adoptNode()). (David Carlier)
