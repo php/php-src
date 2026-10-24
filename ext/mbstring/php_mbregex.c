@@ -881,11 +881,11 @@ static int _php_mb_onig_search(regex_t* reg, const OnigUChar* str, const OnigUCh
 	OnigMatchParam *mp = onig_new_match_param();
 	int err;
 	onig_initialize_match_param(mp);
-	if (!ZEND_LONG_UINT_OVFL(MBSTRG(regex_stack_limit))) {
+	if (ZEND_IN_RANGE_OF(MBSTRG(regex_stack_limit), unsigned int)) {
 		onig_set_match_stack_limit_size_of_match_param(mp, (unsigned int)MBSTRG(regex_stack_limit));
 	}
-	if (!ZEND_LONG_UINT_OVFL(MBSTRG(regex_retry_limit))) {
-		onig_set_retry_limit_in_match_of_match_param(mp, (unsigned int)MBSTRG(regex_retry_limit));
+	if (ZEND_IN_RANGE_OF(MBSTRG(regex_retry_limit), unsigned long)) {
+		onig_set_retry_limit_in_match_of_match_param(mp, (unsigned long)MBSTRG(regex_retry_limit));
 	}
 	/* search */
 	err = onig_search_with_param(reg, str, end, start, range, region, option, mp);
