@@ -3712,8 +3712,8 @@ void zend_jit_startup(void *buf, size_t size, bool reattached)
 		*dasm_ptr = (void**)*dasm_ptr + sizeof(zend_jit_stubs) / sizeof(zend_jit_stubs[0]);
 #elif defined(IR_TARGET_AARCH64)
 		zend_jit_stub_handlers = dasm_buf;
-		*dasm_ptr = (void**)*dasm_ptr + (sizeof(zend_jit_stubs) / sizeof(zend_jit_stubs[0])) * 2;
-		memset(zend_jit_stub_handlers, 0, (sizeof(zend_jit_stubs) / sizeof(zend_jit_stubs[0])) * 2 * sizeof(void*));
+		*dasm_ptr = (void**)*dasm_ptr + (sizeof(zend_jit_stubs) / sizeof(zend_jit_stubs[0])) * 3;
+		memset(zend_jit_stub_handlers, 0, (sizeof(zend_jit_stubs) / sizeof(zend_jit_stubs[0])) * 3 * sizeof(void*));
 #endif
 		*dasm_ptr = (void*)ZEND_MM_ALIGNED_SIZE_EX(((size_t)(*dasm_ptr)), 16);
 		zend_jit_protect();
@@ -3899,6 +3899,9 @@ void zend_jit_restart(void)
 
 		/* restore JIT buffer pos */
 		dasm_ptr[0] = dasm_ptr[1];
+#if defined(IR_TARGET_AARCH64)
+		zend_jit_restore_stub_handlers();
+#endif
 
 		zend_jit_trace_restart();
 

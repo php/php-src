@@ -449,6 +449,24 @@ static void zend_jit_commit_veneers(void)
 		}
 	}
 }
+
+/* zend_jit_commit_veneers() replaces the address of a stub by the address of a veneer emitted
+ * after it. zend_jit_restart() rewinds the buffer below such veneers, so it restores the
+ * original addresses, kept after the pending veneers. */
+static void zend_jit_save_stub_handlers(void)
+{
+	int count = sizeof(zend_jit_stubs) / sizeof(zend_jit_stubs[0]);
+
+	memcpy(zend_jit_stub_handlers + count * 2, zend_jit_stub_handlers, count * sizeof(void*));
+}
+
+static void zend_jit_restore_stub_handlers(void)
+{
+	int count = sizeof(zend_jit_stubs) / sizeof(zend_jit_stubs[0]);
+
+	memcpy(zend_jit_stub_handlers, zend_jit_stub_handlers + count * 2, count * sizeof(void*));
+	memset(zend_jit_stub_handlers + count, 0, count * sizeof(void*));
+}
 #endif
 
 static bool zend_jit_prefer_const_addr_load(zend_jit_ctx *jit, uintptr_t addr)
@@ -2982,6 +3000,9 @@ static void zend_jit_setup_stubs(void)
 		}
 		zend_jit_free_ctx(&jit);
 	}
+#if defined(IR_TARGET_AARCH64)
+	zend_jit_save_stub_handlers();
+#endif
 }
 
 #define REGISTER_HELPER(n)  \
