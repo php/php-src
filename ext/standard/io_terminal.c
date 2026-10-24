@@ -1984,12 +1984,13 @@ static zend_string *php_io_terminal_key_from_escape_sequence(
 		deadline_ns = overall_deadline_ns;
 	}
 
-	if (now >= deadline_ns) {
-		return ZSTR_INIT_LITERAL("escape", false);
-	}
-
 	struct timespec remaining_ts;
-	php_io_terminal_ns_to_timespec(deadline_ns - now, &remaining_ts);
+	if (now >= deadline_ns) {
+		remaining_ts.tv_sec = 0;
+		remaining_ts.tv_nsec = 0;
+	} else {
+		php_io_terminal_ns_to_timespec(deadline_ns - now, &remaining_ts);
+	}
 
 	int read_result = php_io_terminal_read_byte(fd, stream, poll_ctx, &seq[seq_len], &remaining_ts, false, NULL);
 
@@ -2006,9 +2007,11 @@ static zend_string *php_io_terminal_key_from_escape_sequence(
 		while (seq_len < sizeof(seq)) {
 			now = zend_hrtime();
 			if (now >= deadline_ns) {
-				break;
+				remaining_ts.tv_sec = 0;
+				remaining_ts.tv_nsec = 0;
+			} else {
+				php_io_terminal_ns_to_timespec(deadline_ns - now, &remaining_ts);
 			}
-			php_io_terminal_ns_to_timespec(deadline_ns - now, &remaining_ts);
 			read_result = php_io_terminal_read_byte(fd, stream, poll_ctx, &seq[seq_len], &remaining_ts, false, NULL);
 			if (read_result != PHP_IO_TERMINAL_READ_SUCCESS) {
 				if (read_result == PHP_IO_TERMINAL_READ_EOF) {
@@ -2063,12 +2066,13 @@ static zend_string *php_io_terminal_key_from_escape_sequence(
 #undef PHP_IO_TERMINAL_CSI_IS
 	} else if (seq[1] == 'O' && seq_len < sizeof(seq)) {
 		now = zend_hrtime();
-		if (now < deadline_ns) {
-			php_io_terminal_ns_to_timespec(deadline_ns - now, &remaining_ts);
-			read_result = php_io_terminal_read_byte(fd, stream, poll_ctx, &seq[seq_len], &remaining_ts, false, NULL);
+		if (now >= deadline_ns) {
+			remaining_ts.tv_sec = 0;
+			remaining_ts.tv_nsec = 0;
 		} else {
-			read_result = PHP_IO_TERMINAL_READ_TIMEOUT;
+			php_io_terminal_ns_to_timespec(deadline_ns - now, &remaining_ts);
 		}
+		read_result = php_io_terminal_read_byte(fd, stream, poll_ctx, &seq[seq_len], &remaining_ts, false, NULL);
 		if (read_result == PHP_IO_TERMINAL_READ_SUCCESS) {
 			seq_len++;
 			switch (seq[2]) {
@@ -2869,9 +2873,11 @@ PHP_METHOD(Io_Terminal_Terminal, getSize)
 		RETURN_NULL();
 	}
 
-	intern->last_cols = columns;
-	intern->last_rows = rows;
-	intern->has_last_size = true;
+	if (!intern->has_last_size) {
+		intern->last_cols = columns;
+		intern->last_rows = rows;
+		intern->has_last_size = true;
+	}
 
 	zval params[2];
 	ZVAL_LONG(&params[0], columns);
@@ -3643,7 +3649,7 @@ PHP_METHOD(Io_Terminal_Terminal, readLine)
 				}
 			} else {
 				int ch = php_stream_getc(stream.php_stream);
-				if (ch != '\n' && ch != EOF) {
+				if (ch != '\n' && ch != EOF && intern->pending_utf8.length < sizeof(intern->pending_utf8.bytes)) {
 					intern->pending_utf8.bytes[intern->pending_utf8.length++] = (unsigned char) ch;
 				}
 			}
@@ -3689,7 +3695,7 @@ PHP_METHOD(Io_Terminal_Terminal, readLine)
 				}
 			} else {
 				int ch = php_stream_getc(stream.php_stream);
-				if (ch != '\n' && ch != EOF) {
+				if (ch != '\n' && ch != EOF && intern->pending_utf8.length < sizeof(intern->pending_utf8.bytes)) {
 					intern->pending_utf8.bytes[intern->pending_utf8.length++] = (unsigned char) ch;
 				}
 			}
