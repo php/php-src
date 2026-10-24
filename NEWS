@@ -91,6 +91,8 @@ PHP                                                                        NEWS
     empty array element. (jorgsowa)
   . Fixed bug GH-24396 (Assertion failure in zend_jit_def_reg() "reg forwarding"
     with chained Pi nodes). (ndossche)
+  . Fixed bug GH-24622 (Tracing JIT skips spilling inherited register values
+    before property helpers). (ndossche, kairosci)
 
 - PDO:
   . Fixed invalid ATTR_ORACLE_NULLS values being accepted and truncated.

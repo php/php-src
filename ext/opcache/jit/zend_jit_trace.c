@@ -3351,6 +3351,7 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 			for (i = 0; i < op_array->last_var + op_array->T; i++) {
 				int var = STACK_VAR(stack, i);
 				if (var >= 0 && RA_HAS_REG(var)
+				 && ssa->vars[var].definition >= 0
 				 && !(RA_REG_FLAGS(var) & (ZREG_LOAD|ZREG_STORE|ZREG_LAST_USE))) {
 					RA_REG_FLAGS(var) |= ZREG_STORE;
 				}
