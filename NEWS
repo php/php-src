@@ -123,6 +123,9 @@ PHP                                                                        NEWS
     into a hash. (jorgsowa)
   . Fixed bug GH-24436 (Tracing JIT: keep the SEND_VAL type guard after
     assigning to a reference). (waroad)
+  . Fixed bug GH-17733 (System entropy does not take into account function
+    order, resulting in wrong functions possibly called
+    in different configurations). (ndossche)
 
 - PDO:
   . Fixed invalid ATTR_ORACLE_NULLS values being accepted and truncated.
