@@ -170,6 +170,9 @@ static inline zend_result mb_convert_buf_ensure(mb_convert_buf *buf, unsigned ch
 		size_t newsize = oldsize + MAX(oldsize >> 1, needed);
 		zend_string *newstr = safe_ferealloc((buf)->str, 1, newsize, _ZSTR_STRUCT_SIZE(0), /* fallible */ true);
 		if (!newstr) {
+			/* An earlier growth may have moved the buffer. */
+			buf->out = *out;
+			buf->limit = *limit;
 			return FAILURE;
 		}
 		*out = (unsigned char*)ZSTR_VAL(newstr) + (*out - (unsigned char*)ZSTR_VAL((buf)->str));
