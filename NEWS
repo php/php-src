@@ -14,6 +14,10 @@ PHP                                                                        NEWS
     passing an array of CURLFile or CURLStringFile objects to
     CURLOPT_POSTFIELDS. (Sjoerd Langkemper)
 
+- Embed:
+  . Fixed infinite loop when a write fails and the connection is not aborted
+    (GH-23423). (Sjoerd Langkemper)
+
 - FPM:
   . Use recommended TYPE, HELP order for OpenMetrics metadata.
     (Marcel Hernandez)
