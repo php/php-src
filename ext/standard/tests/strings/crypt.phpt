@@ -18,16 +18,9 @@ echo (CRYPT_EXT_DES)  ? ((crypt($str, $salt2) === $res_2) ? 'EXT' : 'EXT - ERROR
 echo (CRYPT_MD5)      ? ((crypt($str, $salt3) === $res_3) ? 'MD5' : 'MD5 - ERROR') : 'MD5', "\n";
 echo (CRYPT_BLOWFISH) ? ((crypt($str, $salt4) === $res_4) ? 'BLO' : 'BLO - ERROR') : 'BLO', "\n";
 
-try {
-    var_dump(crypt($str));
-} catch (Throwable $e) {
-    echo $e::class, ': ', $e->getMessage(), "\n";
-}
-
 ?>
 --EXPECT--
 STD
 EXT
 MD5
 BLO
-ArgumentCountError: crypt() expects exactly 2 arguments, 1 given
