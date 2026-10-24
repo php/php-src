@@ -135,6 +135,9 @@ zend_class_entry *gd_image_ce;
 
 typedef struct _gd_ext_image_object {
 	gdImagePtr image;
+	/* libgd only keeps a pointer to the brush and tile images: hold them alive */
+	zval brush;
+	zval tile;
 	zend_object std;
 } php_gd_image_object;
 
@@ -183,7 +186,21 @@ static void php_gd_image_object_free(zend_object *intern)
 	if (img_obj_ptr->image) {
 		gdImageDestroy(img_obj_ptr->image);
 	}
+	zval_ptr_dtor(&img_obj_ptr->brush);
+	zval_ptr_dtor(&img_obj_ptr->tile);
 	zend_object_std_dtor(intern);
+}
+
+static HashTable *php_gd_image_object_get_gc(zend_object *intern, zval **table, int *n)
+{
+	php_gd_image_object *img_obj_ptr = php_gd_exgdimage_from_zobj_p(intern);
+	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
+
+	zend_get_gc_buffer_add_zval(gc_buffer, &img_obj_ptr->brush);
+	zend_get_gc_buffer_add_zval(gc_buffer, &img_obj_ptr->tile);
+	zend_get_gc_buffer_use(gc_buffer, table, n);
+
+	return zend_std_get_properties(intern);
 }
 
 /**
@@ -208,6 +225,7 @@ static void php_gd_object_minit_helper(void)
 	memcpy(&php_gd_image_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_gd_image_object_handlers.clone_obj = NULL;
 	php_gd_image_object_handlers.free_obj = php_gd_image_object_free;
+	php_gd_image_object_handlers.get_gc = php_gd_image_object_get_gc;
 	php_gd_image_object_handlers.get_constructor = php_gd_image_object_get_constructor;
 	php_gd_image_object_handlers.compare = zend_objects_not_comparable;
 	php_gd_image_object_handlers.offset = XtOffsetOf(php_gd_image_object, std);
@@ -1274,6 +1292,10 @@ PHP_FUNCTION(imagesettile)
 
 	gdImageSetTile(im, tile);
 
+	php_gd_image_object *dst = php_gd_exgdimage_from_zobj_p(Z_OBJ_P(IM));
+	zval_ptr_dtor(&dst->tile);
+	ZVAL_COPY(&dst->tile, TILE);
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1293,6 +1315,10 @@ PHP_FUNCTION(imagesetbrush)
 	tile = php_gd_libgdimageptr_from_zval_p(TILE);
 
 	gdImageSetBrush(im, tile);
+
+	php_gd_image_object *dst = php_gd_exgdimage_from_zobj_p(Z_OBJ_P(IM));
+	zval_ptr_dtor(&dst->brush);
+	ZVAL_COPY(&dst->brush, TILE);
 
 	RETURN_TRUE;
 }
