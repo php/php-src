@@ -45,8 +45,7 @@ to make it better instead of opening an equivalent pull request.
 
 When multiple pull requests provide equivalent fixes of comparable quality,
 we follow a first-come, first-served principle. We prefer the first correct
-pull request. Thus, submitting duplicate pull requests is meaningless and a
-waste of everyone's time.
+pull request.
 
 By submitting a pull request, you certify that you have the necessary rights
 to submit the work, that the work does not violate any third-party rights
