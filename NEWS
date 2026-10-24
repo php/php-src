@@ -29,6 +29,10 @@ PHP                                                                        NEWS
   . Fix function and constant imports in compile_to_ast and add support
     for grouping. (Klaas Skelte van der Werf)
 
+- CLI:
+  . Fixed bug GH-24536 (Built-in server crashes on a huge chunk size or
+    Content-Length). (lazerg)
+
 - Date:
   . Fixed bug GH-20503 (Assertion failure with ext/date DateInterval property
     hash construction). (heathdutton)
