@@ -18,17 +18,6 @@
 
 #include "php.h"
 
-//copied from cmemory.h, which is not public
-typedef union {
-    zend_long    t1;
-    double  t2;
-    void   *t3;
-} UAlignedMemory;
-
-#define U_POINTER_MASK_LSB(ptr, mask) (((ptrdiff_t)(char *)(ptr)) & (mask))
-#define U_ALIGNMENT_OFFSET(ptr) U_POINTER_MASK_LSB(ptr, sizeof(UAlignedMemory) - 1)
-#define U_ALIGNMENT_OFFSET_UP(ptr) (sizeof(UAlignedMemory) - U_ALIGNMENT_OFFSET(ptr))
-
 using namespace PHP;
 
 using icu::UCharCharacterIterator;
@@ -239,21 +228,19 @@ CodePointBreakIterator *CodePointBreakIterator::createBufferClone(
 	}
 
 	if (bufferSize <= 0) {
-		bufferSize = sizeof(CodePointBreakIterator) + U_ALIGNMENT_OFFSET_UP(0);
+		bufferSize = sizeof(CodePointBreakIterator);
 		return NULL;
 	}
 
 	char *buf = (char*)stackBuffer;
-	uint32_t s = bufferSize;
+	uint32_t s = 0;
 
-	if (stackBuffer == NULL) {
-		 s = 0;
-	}
-
-	if (U_ALIGNMENT_OFFSET(stackBuffer) != 0) {
-		uint32_t offsetUp = (uint32_t)U_ALIGNMENT_OFFSET_UP(buf);
-		s -= offsetUp;
-		buf += offsetUp;
+	if (stackBuffer) {
+		size_t newBufferSize = static_cast<size_t>(bufferSize);
+		if (std::align(alignof(CodePointBreakIterator), static_cast<size_t>(bufferSize), stackBuffer, newBufferSize)) {
+			bufferSize = static_cast<int32_t>(newBufferSize);
+		}
+		s = static_cast<uint32_t>(bufferSize);
 	}
 
 	if (s < sizeof(CodePointBreakIterator)) {
