@@ -213,8 +213,6 @@ static zend_always_inline void clear_link_to_root(zend_generator *generator) {
 
 /* Check if the node 'generator' is running in a fiber */
 static inline bool check_node_running_in_fiber(zend_generator *generator) {
-	ZEND_ASSERT(generator->execute_data);
-
 	if (EXPECTED(generator->flags & ZEND_GENERATOR_IN_FIBER)) {
 		return true;
 	}
