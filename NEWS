@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fix function and constant imports in compile_to_ast and add support
     for grouping. (Klaas Skelte van der Werf)
 
+- DBA:
+  . Fixed bug GH-24641 (ndbm backend never checks dbm_open() return value,
+    NULL deref on first use after a failed open). (Girgias)
+
 - Hash:
   . Fix GOST and Snefru digests of 512 MiB or more. (Martin Mirchev)
 
