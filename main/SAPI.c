@@ -797,7 +797,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 					PHP_STRLCPY(newheader, "Content-type: ", newlen, sizeof("Content-type: ")-1);
 					strlcat(newheader, mimetype, newlen);
 					sapi_header.header = newheader;
-					sapi_header.header_len = (uint32_t)(newlen - 1);
+					sapi_header.header_len = newlen - 1;
 					efree(header_line);
 				}
 				efree(mimetype);
@@ -904,7 +904,7 @@ SAPI_API int sapi_send_headers(void)
 
 				if (SG(sapi_headers).http_status_line) {
 					http_status_line.header = SG(sapi_headers).http_status_line;
-					http_status_line.header_len = (uint32_t)strlen(SG(sapi_headers).http_status_line);
+					http_status_line.header_len = strlen(SG(sapi_headers).http_status_line);
 				} else {
 					http_status_line.header = buf;
 					http_status_line.header_len = slprintf(buf, sizeof(buf), "HTTP/1.0 %d X", SG(sapi_headers).http_response_code);

@@ -192,7 +192,7 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 	}
 
 	ctr.line = ZSTR_VAL(buf.s);
-	ctr.line_len = (uint32_t) ZSTR_LEN(buf.s);
+	ctr.line_len = ZSTR_LEN(buf.s);
 
 	result = sapi_header_op(SAPI_HEADER_ADD, &ctr);
 	zend_string_release(buf.s);
