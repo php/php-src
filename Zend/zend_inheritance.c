@@ -1255,6 +1255,20 @@ static void do_inherit_method(zend_string *key, zend_function *parent, zend_clas
 
 		do_inheritance_check_on_method(
 			func, func->common.scope, parent, parent->common.scope, ce, child, flags);
+
+		if (!is_interface && (parent->common.fn_flags & ZEND_ACC_CTOR) && ce->parent) {
+			for (uint32_t i = 0; i < ce->parent->num_interfaces; i++) {
+				zend_class_entry *iface = ce->parent->interfaces[i];
+				zend_function *interface_constructor = zend_hash_find_ptr(&iface->function_table, key);
+				if (interface_constructor) {
+					do_inheritance_check_on_method(
+						func, func->common.scope,
+						interface_constructor, interface_constructor->common.scope,
+						ce, child,
+						ZEND_INHERITANCE_CHECK_PROTO | ZEND_INHERITANCE_CHECK_VISIBILITY);
+				}
+			}
+		}
 	} else {
 
 		if (is_interface || (parent->common.fn_flags & (ZEND_ACC_ABSTRACT))) {
