@@ -68,6 +68,8 @@ PHP                                                                        NEWS
 - MySQLnd:
   . Fixed bug GH-24293 (Segfault on connect with an empty password to a
     MariaDB PAM account). (lazerg)
+  . Fixed bug GH-16910 (Fractional seconds truncated in prepared statements
+    if decimals is AUTO_SEC_PART_DIGITS). (Ojus Chugh)
 
 - Opcache:
   . Fixed tracing JIT returning a wrapped integer instead of a float on

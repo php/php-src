@@ -305,10 +305,11 @@ ps_fetch_time(zval * zv, const MYSQLND_FIELD * const field, const unsigned int p
 		t.time_type = MYSQLND_TIMESTAMP_TIME;
 	}
 
-	if (field->decimals > 0 && field->decimals < 7) {
+	unsigned int decimals = field->decimals > 6 ? (t.second_part ? 6 : 0) : field->decimals;
+	if (decimals > 0) {
 		ZVAL_STR(zv, zend_strpprintf(0, "%s%02u:%02u:%02u.%0*u",
-			(t.neg ? "-" : ""), t.hour, t.minute, t.second, field->decimals,
-			(uint32_t) (t.second_part / pow(10, 6 - field->decimals))));
+			(t.neg ? "-" : ""), t.hour, t.minute, t.second, decimals,
+			(uint32_t) (t.second_part / pow(10, 6 - decimals))));
 	} else {
 		 ZVAL_STR(zv, zend_strpprintf(0, "%s%02u:%02u:%02u",
 			(t.neg ? "-" : ""), t.hour, t.minute, t.second));
@@ -401,10 +402,11 @@ ps_fetch_datetime(zval * zv, const MYSQLND_FIELD * const field, const unsigned i
 		t.time_type = MYSQLND_TIMESTAMP_DATETIME;
 	}
 
-	if (field->decimals > 0 && field->decimals < 7) {
+	unsigned int decimals = field->decimals > 6 ? (t.second_part ? 6 : 0) : field->decimals;
+	if (decimals > 0) {
 		ZVAL_STR(zv, zend_strpprintf(0, "%04u-%02u-%02u %02u:%02u:%02u.%0*u",
-			t.year, t.month, t.day, t.hour, t.minute, t.second, field->decimals,
-			(uint32_t) (t.second_part / pow(10, 6 - field->decimals))));
+			t.year, t.month, t.day, t.hour, t.minute, t.second, decimals,
+			(uint32_t) (t.second_part / pow(10, 6 - decimals))));
 	} else {
 		ZVAL_STR(zv,  zend_strpprintf(0, "%04u-%02u-%02u %02u:%02u:%02u",
 			t.year, t.month, t.day, t.hour, t.minute, t.second));
