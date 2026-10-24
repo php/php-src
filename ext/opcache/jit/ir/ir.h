@@ -65,6 +65,8 @@ extern "C" {
 #   define IR_TARGET_TRIPLET "x86-freebsd-sysv"
 #  elif defined(__NetBSD__)
 #   define IR_TARGET_TRIPLET "x86-netbsd-sysv"
+#  elif defined(__OpenBSD__)
+#   define IR_TARGET_TRIPLET "x86-openbsd-sysv"
 #  else
 #   define IR_TARGET_TRIPLET "x86-unknown-sysv"
 #  endif
@@ -79,6 +81,8 @@ extern "C" {
 #   define IR_TARGET_TRIPLET "x86_64-freebsd-sysv"
 #  elif defined(__NetBSD__)
 #   define IR_TARGET_TRIPLET "x86_64-netbsd-sysv"
+#  elif defined(__OpenBSD__)
+#   define IR_TARGET_TRIPLET "x86_64-openbsd-sysv"
 #  else
 #   define IR_TARGET_TRIPLET "x86_64-unknown-sysv"
 #  endif
@@ -93,6 +97,8 @@ extern "C" {
 #   define IR_TARGET_TRIPLET "aarch64-freebsd-sysv"
 #  elif defined(__NetBSD__)
 #   define IR_TARGET_TRIPLET "aarch64-netbsd-sysv"
+#  elif defined(__OpenBSD__)
+#   define IR_TARGET_TRIPLET "aarch64-openbsd-sysv"
 #  else
 #   define IR_TARGET_TRIPLET "aarch64-unknown-sysv"
 #  endif
@@ -256,9 +262,9 @@ typedef enum _ir_type {
  * E     - control   IR_OP_FLAG_CONTROL + IR_OP_FLAG_BB_END
  * T     - control   IR_OP_FLAG_CONTROL + IR_OP_FLAG_BB_END + IR_OP_FLAG_TERMINATOR
  * l     - load      IR_OP_FLAG_MEM + IR_OP_FLAG_MEM_LOAD
- * s     - store     IR_OP_FLAG_MEM + IR_OP_FLAG_STORE
- * x     - call      IR_OP_FLAG_MEM + IR_OP_FLAG_CALL
- * a     - alloc     IR_OP_FLAG_MEM + IR_OP_FLAG_ALLOC
+ * s     - store     IR_OP_FLAG_MEM + IR_OP_FLAG_MEM_STORE
+ * x     - call      IR_OP_FLAG_MEM + IR_OP_FLAG_MEM_CALL
+ * a     - alloc     IR_OP_FLAG_MEM + IR_OP_FLAG_MEM_ALLOC
  * 0-3   - number of input edges
  * N     - number of arguments is defined in the insn->inputs_count (MERGE, PHI, CALL)
  * X1-X3 - number of extra data ops
@@ -279,6 +285,7 @@ typedef enum _ir_type {
  * num - number: argument number (PARAM)
  * prb - branch probability 1-99 (0 - unspecified): (IF_TRUE, IF_FALSE, CASE_VAL, CASE_DEFAULT)
  * opt - optional number
+ * alg - optional alignment
  * pro - function prototype
  * lbl - label used as value (a reference to constant): (BEGIN)
  *
@@ -314,10 +321,10 @@ typedef enum _ir_type {
 	_(NE,           d2C,  def, def, ___) /* not equal                   */ \
 	\
 	/* comparison ops (order matters, LT must be a modulo of 4 !!!)     */ \
-	_(LT,           d2,   def, def, ___) /* less                        */ \
-	_(GE,           d2,   def, def, ___) /* greater or equal            */ \
-	_(LE,           d2,   def, def, ___) /* less or equal               */ \
-	_(GT,           d2,   def, def, ___) /* greater                     */ \
+	_(LT,           d2,   def, def, ___) /* less (signed)               */ \
+	_(GE,           d2,   def, def, ___) /* greater or equal (signed)   */ \
+	_(LE,           d2,   def, def, ___) /* less or equal (signed)      */ \
+	_(GT,           d2,   def, def, ___) /* greater (signed)            */ \
 	_(ULT,          d2,   def, def, ___) /* unsigned less               */ \
 	_(UGE,          d2,   def, def, ___) /* unsigned greater or equal   */ \
 	_(ULE,          d2,   def, def, ___) /* unsigned less or equal      */ \
@@ -389,7 +396,7 @@ typedef enum _ir_type {
 	\
 	/* data ops                                                         */ \
 	_(PARAM,        p1X2, reg, str, num) /* incoming parameter proj.    */ \
-	_(VAR,	        p1X1, reg, str, ___) /* local variable              */ \
+	_(VAR,	        p1X2, reg, str, alg) /* local variable              */ \
 	_(FUNC_ADDR,    r0,   ___, ___, ___) /* constant func ref           */ \
 	_(FUNC,         r0,   ___, ___, ___) /* constant func ref           */ \
 	_(SYM,          r0,   ___, ___, ___) /* constant symbol ref         */ \
@@ -402,10 +409,10 @@ typedef enum _ir_type {
 	_(TAILCALL,     xN,   src, def, def) /* CALL+RETURN                 */ \
 	\
 	/* memory reference and load/store ops                              */ \
-	_(ALLOCA,       a2,   src, def, ___) /* alloca(def)                 */ \
-	_(AFREE,        a2,   src, def, ___) /* revert alloca(def)          */ \
+	_(ALLOCA,       a2X1, src, def, alg) /* alloca(def)                 */ \
+	_(AFREE,        s2,   src, def, ___) /* revert alloca(def)          */ \
 	_(BLOCK_BEGIN,  a1,   src, ___, ___) /* stacksave                   */ \
-	_(BLOCK_END,    a2,   src, def, ___) /* stackrestore                */ \
+	_(BLOCK_END,    s2,   src, def, ___) /* stackrestore                */ \
 	_(VLOAD,        l2,   src, var, ___) /* load value of local var     */ \
 	_(VLOAD_v,      l2,   src, var, ___) /* volatile variant of VLOAD   */ \
 	_(VSTORE,       s3,   src, var, def) /* store value to local var    */ \
@@ -620,6 +627,7 @@ void ir_strtab_init(ir_strtab *strtab, uint32_t count, uint32_t buf_size);
 ir_str ir_strtab_lookup(ir_strtab *strtab, const char *str, uint32_t len, ir_str val);
 ir_str ir_strtab_find(const ir_strtab *strtab, const char *str, uint32_t len);
 ir_str ir_strtab_update(ir_strtab *strtab, const char *str, uint32_t len, ir_str val);
+void ir_strtab_set(ir_strtab *strtab, const char *str, uint32_t len, ir_str val);
 const char *ir_strtab_str(const ir_strtab *strtab, ir_str idx);
 const char *ir_strtab_strl(const ir_strtab *strtab, ir_str idx, size_t *len);
 void ir_strtab_apply(const ir_strtab *strtab, ir_strtab_apply_t func);
@@ -712,7 +720,6 @@ typedef struct _ir_code_buffer {
 typedef struct {
 	int   size;
 	int   align;
-	int   offset;
 } ir_value_param;
 
 typedef struct _ir_bitqueue ir_bitqueue;
@@ -747,8 +754,8 @@ struct _ir_ctx {
 	uint32_t          *cfg_map;                 /* map of instructions to basic block number */
 	uint32_t          *cfg_schedule;            /* BB order for code generation */
 	uint32_t          *rules;                   /* array of target specific code-generation rules (for each instruction) */
-	uint32_t          *vregs;
-	ir_ref             vregs_count;
+	int32_t           *vregs;                   /* map of insns to virtual regs (positive) or stack slots (negative) */
+	int32_t            vregs_count;
 	ir_str             func_name;               /* Function name (should be set through ir_string()/ir_stringl()) */
 	int32_t            spill_base;              /* base register for special spill area (e.g. PHP VM frame pointer) */
 	uint64_t           fixed_regset;            /* fixed registers, excluded for regular register allocation */
@@ -962,6 +969,8 @@ int ir_compute_dessa_moves(ir_ctx *ctx);
 int ir_reg_alloc(ir_ctx *ctx);
 int ir_reg_alloc_simple(ir_ctx *ctx);
 
+#define ir_reg_alloc_O0(_ctx) ir_reg_alloc_simple(_ctx)
+
 int ir_regs_number(void);
 bool ir_reg_is_int(int32_t reg);
 const char *ir_reg_name(int8_t reg, ir_type type);
@@ -1122,7 +1131,7 @@ IR_ALWAYS_INLINE void *ir_jit_compile(ir_ctx *ctx, int opt_level, size_t *size)
 		 || !ir_match(ctx)
 		 || !ir_assign_virtual_registers(ctx)
 		 || !ir_compute_dessa_moves(ctx)
-		 || !ir_reg_alloc_simple(ctx)) {
+		 || !ir_reg_alloc_O0(ctx)) {
 			return NULL;
 		}
 
