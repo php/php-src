@@ -46,6 +46,10 @@ PHP                                                                        NEWS
   . Fixed DOMXPath crash wrapping a foreign node after a nodeset callback.
     (Ilia Alshanetsky)
 
+- FFI:
+  . Fixed bug GH-24582 (Memory leaks in ext/ffi parser when finalize_type()
+    bails out). (matyapiro31, David Carlier)
+
 - FPM:
   . Fixed bug GH-24229 (fcgi_close() passes shutdown() a literal 1, which is
     SHUT_RD in WASI). (Ryosuke Ishibashi)
