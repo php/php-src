@@ -3768,6 +3768,10 @@ static void _zend_jit_fix_merges(zend_jit_ctx *jit)
 				if (k != n) {
 					ir_ref n2, k2;
 
+					while (r != q) {
+						*r = IR_UNUSED;
+						r++;
+					}
 					if (k <= 1) {
 						insn->op = IR_BEGIN;
 						insn->inputs_count = 0;
