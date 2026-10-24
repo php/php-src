@@ -24,6 +24,7 @@
 
 #include "zend_portability.h"
 #include "zend_long.h"
+#include "zend_atomic.h"
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -862,20 +863,26 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define OBJ_EXTRA_FLAGS(obj)		((obj)->extra_flags)
 
 /* Fast class cache */
-#define ZSTR_HAS_CE_CACHE(s)		(GC_FLAGS(s) & IS_STR_CLASS_NAME_MAP_PTR)
+static zend_always_inline bool zstr_has_ce_cache(const zend_string *s)
+{
+	if (GC_FLAGS(s) & IS_STR_CLASS_NAME_MAP_PTR) {
+		ZEND_ATOMIC_FENCE_ACQUIRE();
+		return true;
+	}
+	return false;
+}
+
+#define ZSTR_HAS_CE_CACHE(s)		zstr_has_ce_cache(s)
 #define ZSTR_GET_CE_CACHE(s)		ZSTR_GET_CE_CACHE_EX(s, 1)
 #define ZSTR_SET_CE_CACHE(s, ce)	ZSTR_SET_CE_CACHE_EX(s, ce, 1)
 
-/* Valid map_ptr offsets are always odd and strictly > 2 ((k * sizeof(void*)) + 1).
- * Interned strings in SHM initialize with refcount 2. A refcount <= 2 indicates
- * an unallocated or not-yet-committed cache slot and must not be dereferenced. */
-#define ZSTR_VALID_CE_CACHE(s)		EXPECTED(GC_REFCOUNT(s) > 2 && (GC_REFCOUNT(s)-1)/sizeof(void *) < CG(map_ptr_last))
+#define ZSTR_VALID_CE_CACHE(s)		EXPECTED((GC_REFCOUNT(s)-1)/sizeof(void *) < CG(map_ptr_last))
 
 #define ZSTR_GET_CE_CACHE_EX(s, validate) \
 	((!(validate) || ZSTR_VALID_CE_CACHE(s)) ? GET_CE_CACHE(GC_REFCOUNT(s)) : NULL)
 
 #define ZSTR_SET_CE_CACHE_EX(s, ce, validate) do { \
-		if ((!(validate) || ZSTR_VALID_CE_CACHE(s)) && EXPECTED(GC_REFCOUNT(s) > 2)) { \
+		if (!(validate) || ZSTR_VALID_CE_CACHE(s)) { \
 			ZEND_ASSERT((validate) || ZSTR_VALID_CE_CACHE(s)); \
 			SET_CE_CACHE(GC_REFCOUNT(s), ce); \
 		} \
