@@ -3612,6 +3612,17 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 				free_alloca(traits_and_interfaces, use_heap);
 				return NULL;
 			}
+			if (UNEXPECTED(iface->ce_flags & ZEND_ACC_DEPRECATED)) {
+				if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+					zend_extending_deprecated_interface(iface, ce->name);
+				} else {
+					zend_implementation_of_deprecated_interface(iface, ce->name);
+				}
+				if (UNEXPECTED(EG(exception))) {
+					free_alloca(traits_and_interfaces, use_heap);
+					return NULL;
+				}
+			}
 			traits_and_interfaces[ce->num_traits + i] = iface;
 			if (iface) {
 				UPDATE_IS_CACHEABLE(iface);
