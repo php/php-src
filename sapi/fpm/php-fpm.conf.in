@@ -124,6 +124,10 @@
 ; Default value: 10
 ;systemd_interval = 10
 
+; Set the process prefix name
+; Default value: php-fpm
+;proctitle_prefix = FPM1
+
 ;;;;;;;;;;;;;;;;;;;;
 ; Pool Definitions ;
 ;;;;;;;;;;;;;;;;;;;;
