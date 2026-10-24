@@ -167,7 +167,7 @@ PHP_FUNCTION(net_get_interfaces) {
 	}
 
 	if (pAddresses == NULL) {
-		zend_error(E_WARNING, "Memory allocation failed for IP_ADAPTER_ADDRESSES struct");
+		php_error_docref(NULL, E_WARNING, "Memory allocation failed for IP_ADAPTER_ADDRESSES struct");
 		RETURN_FALSE;
 	}
 
@@ -175,7 +175,7 @@ PHP_FUNCTION(net_get_interfaces) {
 
 	if (NO_ERROR != dwRetVal) {
 		char *buf = php_win32_error_to_msg(GetLastError());
-		zend_error(E_WARNING, "GetAdaptersAddresses failed: %s", buf);
+		php_error_docref(NULL, E_WARNING, "GetAdaptersAddresses failed: %s", buf);
 		php_win32_error_msg_free(buf);
 		FREE(pAddresses);
 		RETURN_FALSE;
@@ -265,7 +265,7 @@ PHP_FUNCTION(net_get_interfaces) {
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (getifaddrs(&addrs)) {
-		php_error(E_WARNING, "getifaddrs() failed %d: %s", errno, strerror(errno));
+		php_error_docref(NULL, E_WARNING, "getifaddrs() failed %d: %s", errno, strerror(errno));
 		RETURN_FALSE;
 	}
 
