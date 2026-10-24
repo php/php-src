@@ -159,12 +159,13 @@ static bool zend_ssa_is_last_use(const zend_op_array *op_array, const zend_ssa *
 	}
 
 	next_use = zend_ssa_next_use(ssa->ops, var, use);
-	if (next_use < 0) {
-		return 1;
-	} else if (zend_ssa_is_no_val_use(op_array->opcodes + next_use, ssa->ops + next_use, var)) {
-		return 1;
+	while (next_use >= 0) {
+		if (!zend_ssa_is_no_val_use(op_array->opcodes + next_use, ssa->ops + next_use, var)) {
+			return 0;
+		}
+		next_use = zend_ssa_next_use(ssa->ops, var, next_use);
 	}
-	return 0;
+	return 1;
 }
 
 static int zend_jit_is_constant_cmp_long_long(const zend_op  *opline,
