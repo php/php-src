@@ -1,5 +1,5 @@
 --TEST--
-GH-24264 (Unwind/GracefulExit discarded in spl_iterators.c): RecursiveIteratorIterator
+GH-24264 (Unwind/GracefulExit discarded in spl_iterators.c): RecursiveIteratorIterator hasChildren()
 --FILE--
 <?php
 
