@@ -75,6 +75,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed range inference of assignments through typed references.
     (Ilia Alshanetsky)
+  . Fixed bug GH-17770 (JIT-enabled scripts were not stored in the file cache).
+    (gregharmon, splitice)
   . Fixed bug GH-23693 (Tracing JIT produces wrong results for a guard on a
     loop-invariant addition). (Ilia Alshanetsky)
   . Fixed OSS-Fuzz #545352966 (default value AST of an SHM-persisted partial).
