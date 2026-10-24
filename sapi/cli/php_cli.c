@@ -151,6 +151,7 @@ const opt_struct OPTIONS[] = {
 	/* Internal testing option -- may be changed or removed without notice,
 	 * including in patch releases. */
 	{16,  1, "repeat"},
+	{17,  1, "loglevel"},
 	{'-', 0, NULL} /* end of args */
 };
 
@@ -459,7 +460,7 @@ static void php_cli_usage(char *argv0)
 				"   %s [options] -r <code> [--] [args...]\n"
 				"   %s [options] [-B <begin_code>] -R <code> [-E <end_code>] [--] [args...]\n"
 				"   %s [options] [-B <begin_code>] -F <file> [-E <end_code>] [--] [args...]\n"
-				"   %s [options] -S <addr>:<port> [-t docroot] [router]\n"
+				"   %s [options] -S <addr>:<port> [-t docroot] [--loglevel <n>] [router]\n"
 				"   %s [options] -- [args...]\n"
 				"   %s [options] -a\n"
 				"\n"
@@ -490,6 +491,8 @@ static void php_cli_usage(char *argv0)
 				"\n"
 				"  --ini            Show configuration file names\n"
 				"  --ini=diff       Show INI entries that differ from the built-in default\n"
+				"  --loglevel <n>   Built-in server log level: 1=process, 2=error,\n"
+				"                   3=message (default).\n"
 				"\n"
 				"  --rf <name>      Show information about function <name>.\n"
 				"  --rc <name>      Show information about class <name>.\n"
@@ -824,6 +827,9 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				break;
 			case 16:
 				num_repeats = atoi(php_optarg);
+				break;
+			case 17:
+				param_error = "--loglevel is only valid with the built-in server (-S).\n";
 				break;
 			default:
 				break;
