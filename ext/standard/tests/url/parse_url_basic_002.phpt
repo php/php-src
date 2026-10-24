@@ -15,7 +15,7 @@ foreach ($urls as $url) {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 --> 64.246.30.37   : NULL
 --> http://64.246.30.37   : string(4) "http"
 --> http://64.246.30.37/   : string(4) "http"
@@ -89,12 +89,18 @@ echo "Done";
 --> http://x:?   : string(4) "http"
 --> x:blah.com   : string(1) "x"
 --> x:/blah.com   : string(1) "x"
---> x://::abc/?   : bool(false)
+--> x://::abc/?   : 
+Warning: parse_url(): Invalid port in URL in %s on line %d
+bool(false)
 --> http://::?   : string(4) "http"
 --> http://::#   : string(4) "http"
 --> x://::6.5   : string(1) "x"
---> http://?:/   : bool(false)
---> http://@?:/   : bool(false)
+--> http://?:/   : 
+Warning: parse_url(): Empty host in URL in %s on line %d
+bool(false)
+--> http://@?:/   : 
+Warning: parse_url(): Empty host in URL in %s on line %d
+bool(false)
 --> file:///:   : string(4) "file"
 --> file:///a:/   : string(4) "file"
 --> file:///ab:/   : string(4) "file"
@@ -108,18 +114,46 @@ echo "Done";
 --> /rest/Users?filter={"id":"123"}   : NULL
 --> %:x   : NULL
 --> https://example.com:0/   : string(5) "https"
---> http:///blah.com   : bool(false)
---> http://:80   : bool(false)
---> http://user@:80   : bool(false)
---> http://user:pass@:80   : bool(false)
---> http://:   : bool(false)
---> http://@/   : bool(false)
---> http://@:/   : bool(false)
---> http://:/   : bool(false)
---> http://?   : bool(false)
---> http://#   : bool(false)
---> http://?:   : bool(false)
---> http://:?   : bool(false)
---> http://blah.com:123456   : bool(false)
---> http://blah.com:abcdef   : bool(false)
+--> http:///blah.com   : 
+Warning: parse_url(): Empty host in URL in %s on line %d
+bool(false)
+--> http://:80   : 
+Warning: parse_url(): Empty host in URL in %s on line %d
+bool(false)
+--> http://user@:80   : 
+Warning: parse_url(): Empty host in URL in %s on line %d
+bool(false)
+--> http://user:pass@:80   : 
+Warning: parse_url(): Empty host in URL in %s on line %d
+bool(false)
+--> http://:   : 
+Warning: parse_url(): Empty host in URL in %s on line %d
+bool(false)
+--> http://@/   : 
+Warning: parse_url(): Empty host in URL in %s on line %d
+bool(false)
+--> http://@:/   : 
+Warning: parse_url(): Empty host in URL in %s on line %d
+bool(false)
+--> http://:/   : 
+Warning: parse_url(): Empty host in URL in %s on line %d
+bool(false)
+--> http://?   : 
+Warning: parse_url(): Empty host in URL in %s on line %d
+bool(false)
+--> http://#   : 
+Warning: parse_url(): Empty host in URL in %s on line %d
+bool(false)
+--> http://?:   : 
+Warning: parse_url(): Empty host in URL in %s on line %d
+bool(false)
+--> http://:?   : 
+Warning: parse_url(): Empty host in URL in %s on line %d
+bool(false)
+--> http://blah.com:123456   : 
+Warning: parse_url(): Port number too long in URL in %s on line %d
+bool(false)
+--> http://blah.com:abcdef   : 
+Warning: parse_url(): Port number too long in URL in %s on line %d
+bool(false)
 Done
