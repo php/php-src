@@ -1510,13 +1510,6 @@ static void ZEND_FASTCALL zend_jit_assign_dim_helper(zval *object_ptr, zval *dim
 		return;
 	}
 
-	if (UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
-		const zend_op *op_data = EG(current_execute_data)->opline + 1;
-		ZEND_ASSERT(op_data->opcode == ZEND_OP_DATA && op_data->op1_type == IS_CV);
-		zend_jit_undefined_op_helper(op_data->op1.var);
-		value = &EG(uninitialized_zval);
-	}
-
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 		zend_throw_error(NULL, "[] operator not supported for strings");
 		if (result) {
@@ -1546,16 +1539,26 @@ static void ZEND_FASTCALL zend_jit_assign_dim_helper(zval *object_ptr, zval *dim
 			return;
 		}
 
+		if (UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+			/* EX(opline) no longer points to ASSIGN_DIM after a throw; the VM skips the warning too. */
+			if (EXPECTED(!EG(exception))) {
+				const zend_op *op_data = EG(current_execute_data)->opline + 1;
+				ZEND_ASSERT(op_data->opcode == ZEND_OP_DATA && op_data->op1_type == IS_CV);
+				if (!zend_jit_undefined_op_helper_write(arr, op_data->op1.var)) {
+					if (result) {
+						ZVAL_UNDEF(result);
+					}
+					return;
+				}
+			}
+			value = &EG(uninitialized_zval);
+		}
+
 		ZVAL_COPY_DEREF(var, value);
 		if (result) {
 			ZVAL_COPY(result, var);
 		}
 	} else {
-		if (dim && UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
-			const zend_op *opline = EG(current_execute_data)->opline;
-			zend_jit_undefined_op_helper(opline->op2.var);
-			dim = &EG(uninitialized_zval);
-		}
 		zend_throw_error(NULL, "Cannot use a scalar value as an array");
 		if (result) {
 			ZVAL_UNDEF(result);

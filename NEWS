@@ -119,6 +119,8 @@ PHP                                                                        NEWS
     with chained Pi nodes). (ndossche)
   . Fixed JIT treating an array as packed after a string key write turned it
     into a hash. (jorgsowa)
+  . Fixed function JIT ASSIGN_DIM reporting an undefined value or key out of
+    order, or when the VM does not, on non-array containers. (jorgsowa)
 
 - PDO:
   . Fixed invalid ATTR_ORACLE_NULLS values being accepted and truncated.
