@@ -128,9 +128,6 @@ PHPAPI time_t php_time(void);
 PHPAPI zend_long php_parse_date(const char *string, zend_long *now);
 PHPAPI bool php_idate(char format, time_t ts, bool localtime, int *result);
 
-#define _php_strftime php_strftime
-
-PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, bool gm);
 PHPAPI zend_string *php_format_date(const char *format, size_t format_len, time_t ts, bool localtime);
 PHPAPI zend_string *php_format_date_obj(const char *format, size_t format_len, const php_date_obj *date_obj);
 
