@@ -201,6 +201,9 @@ static int read_64bit_transitions(const unsigned char **tzf, timelib_tzinfo *tz)
 	unsigned char *cbuffer = NULL;
 
 	if (tz->bit64.timecnt) {
+		if (SIZE_MAX / sizeof(int64_t) < tz->bit64.timecnt) {
+			return TIMELIB_ERROR_CORRUPT_TRANSITIONS_DONT_INCREASE;
+		}
 		buffer = (int64_t*) timelib_malloc(tz->bit64.timecnt * sizeof(int64_t));
 		if (!buffer) {
 			return TIMELIB_ERROR_CANNOT_ALLOCATE;
@@ -246,6 +249,9 @@ static int read_64bit_types(const unsigned char **tzf, timelib_tzinfo *tz)
 	unsigned int i, j;
 
 	/* Offset Types */
+	if (SIZE_MAX / 6 < tz->bit64.typecnt || (SIZE_MAX / sizeof(ttinfo)) - 2 < tz->bit64.typecnt) {
+		return TIMELIB_ERROR_CANNOT_ALLOCATE;
+	}
 	buffer = (unsigned char*) timelib_malloc(tz->bit64.typecnt * sizeof(unsigned char) * 6);
 	if (!buffer) {
 		return TIMELIB_ERROR_CANNOT_ALLOCATE;

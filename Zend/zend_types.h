@@ -481,6 +481,9 @@ ZEND_ATTRIBUTE_CONST static zend_always_inline uint32_t HT_HASH_TO_IDX(uint32_t 
 	HT_HASH_EX((ht)->arHash, idx)
 
 ZEND_ATTRIBUTE_CONST static zend_always_inline uint32_t HT_SIZE_TO_MASK(uint32_t nTableSize) {
+	if (UNEXPECTED(nTableSize >= 0x80000000u)) {
+		return 0x80000000u;
+	}
 	return (uint32_t)(-(nTableSize + nTableSize));
 }
 
