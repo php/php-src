@@ -6555,7 +6555,7 @@ static zend_string *php_utf8_decode(const char *s, size_t len)
 	ZSTR_LEN(str) = 0;
 	while (pos < len) {
 		zend_result status = FAILURE;
-		c = php_next_utf8_char((const unsigned char*)s, (size_t) len, &pos, &status);
+		c = php_next_utf8_char_inline((const unsigned char*)s, (size_t) len, &pos, &status);
 
 		/* The lower 256 codepoints of Unicode are identical to Latin-1,
 		 * so we don't need to do any mapping here beyond replacing non-Latin-1

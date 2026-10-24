@@ -513,7 +513,7 @@ static zend_string *xml_utf8_decode(const XML_Char *s, size_t len, const XML_Cha
 	ZSTR_LEN(str) = 0;
 	while (pos < len) {
 		zend_result status = FAILURE;
-		c = php_next_utf8_char((const unsigned char*)s, len, &pos, &status);
+		c = php_next_utf8_char_inline((const unsigned char*)s, len, &pos, &status);
 
 		if (status == FAILURE || c > 0xFFU) {
 			c = '?';
