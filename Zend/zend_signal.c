@@ -75,7 +75,7 @@ static const int zend_sigs[] = { TIMEOUT_SIG, SIGHUP, SIGINT, SIGQUIT, SIGTERM, 
 
 #define SA_FLAGS_MASK ~(SA_NODEFER | SA_RESETHAND)
 
-/* True globals, written only at process startup */
+/* True globals, written only at process startup and when our handler is installed */
 static zend_signal_entry_t global_orig_handlers[NSIG];
 static sigset_t            global_sigmask;
 
@@ -181,12 +181,18 @@ static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context)
 	struct sigaction sa;
 	sigset_t sigset;
 	zend_signal_entry_t p_sig;
+	zend_signal_entry_t *hdl;
 #ifdef ZTS
-	if (tsrm_is_shutdown() || !tsrm_is_managed_thread()) {
-		p_sig = global_orig_handlers[signo-1];
-	} else
+	if (tsrm_is_shutdown() || !tsrm_is_managed_thread() || !SIGG(active)) {
+#else
+	if (!SIGG(active)) {
 #endif
-	p_sig = SIGG(handlers)[signo-1];
+		hdl = global_orig_handlers;
+	} else {
+		hdl = SIGG(handlers);
+	}
+
+	p_sig = hdl[signo-1];
 
 	if (p_sig.handler == SIG_DFL) { /* raise default handler */
 		if (sigaction(signo, NULL, &sa) == 0) {
@@ -213,8 +219,8 @@ static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context)
 	} else if (p_sig.handler != SIG_IGN) {
 		if (p_sig.flags & SA_SIGINFO) {
 			if (p_sig.flags & SA_RESETHAND) {
-				SIGG(handlers)[signo-1].flags   = 0;
-				SIGG(handlers)[signo-1].handler = SIG_DFL;
+				hdl[signo-1].flags   = 0;
+				hdl[signo-1].handler = SIG_DFL;
 			}
 			(*(void (*)(int, siginfo_t*, void*))p_sig.handler)(signo, siginfo, context);
 		} else {
@@ -301,6 +307,7 @@ static zend_result zend_signal_register(int signo, void (*handler)(int, siginfo_
 			SIGG(handlers)[signo-1].handler = (void *)sa.sa_handler;
 		}
 
+		global_orig_handlers[signo-1] = SIGG(handlers)[signo-1];
 		sa.sa_flags     = SA_SIGINFO; /* we'll use a siginfo handler */
 		sa.sa_sigaction = handler;
 		sa.sa_mask      = global_sigmask;
