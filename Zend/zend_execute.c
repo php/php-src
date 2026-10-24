@@ -1831,7 +1831,7 @@ ZEND_API zend_never_inline ZEND_COLD void zend_wrong_string_offset_error(void)
 	zend_throw_error(NULL, "%s", msg);
 }
 
-ZEND_COLD static zend_result ZEND_FASTCALL get_deprecation_suffix_from_attribute(HashTable *attributes, zend_class_entry* scope, zend_string **message_suffix)
+ZEND_COLD static zend_result ZEND_FASTCALL get_deprecation_suffix_from_attribute(HashTable *attributes, uint32_t offset, zend_class_entry* scope, zend_string **message_suffix)
 {
 	*message_suffix = ZSTR_EMPTY_ALLOC();
 
@@ -1839,7 +1839,7 @@ ZEND_COLD static zend_result ZEND_FASTCALL get_deprecation_suffix_from_attribute
 		return SUCCESS;
 	}
 
-	zend_attribute *deprecated = zend_get_attribute_str(attributes, "deprecated", sizeof("deprecated")-1);
+	zend_attribute *deprecated = zend_get_attribute_str_ex(attributes, "deprecated", sizeof("deprecated")-1, offset);
 
 	if (!deprecated) {
 		return SUCCESS;
@@ -1900,7 +1900,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_function(const zend_functi
 {
 	zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
 
-	if (get_deprecation_suffix_from_attribute(fbc->common.attributes, fbc->common.scope, &message_suffix) == FAILURE) {
+	if (get_deprecation_suffix_from_attribute(fbc->common.attributes, 0, fbc->common.scope, &message_suffix) == FAILURE) {
 		return;
 	}
 
@@ -2007,7 +2007,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_class_constant(const zend_
 {
 	zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
 
-	if (get_deprecation_suffix_from_attribute(c->attributes, c->ce, &message_suffix) == FAILURE) {
+	if (get_deprecation_suffix_from_attribute(c->attributes, 0, c->ce, &message_suffix) == FAILURE) {
 		return;
 	}
 
@@ -2028,7 +2028,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_constant(const zend_consta
 {
 	zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
 
-	if (get_deprecation_suffix_from_attribute(c->attributes, NULL, &message_suffix) == FAILURE) {
+	if (get_deprecation_suffix_from_attribute(c->attributes, zend_constant_attributes_offset(c), NULL, &message_suffix) == FAILURE) {
 		return;
 	}
 
@@ -2048,7 +2048,7 @@ ZEND_API ZEND_COLD void zend_use_of_deprecated_trait(
 ) {
 	zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
 
-	if (get_deprecation_suffix_from_attribute(trait->attributes, trait, &message_suffix) == FAILURE) {
+	if (get_deprecation_suffix_from_attribute(trait->attributes, 0, trait, &message_suffix) == FAILURE) {
 		return;
 	}
 
