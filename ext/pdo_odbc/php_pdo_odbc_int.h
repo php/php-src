@@ -121,6 +121,8 @@ typedef struct {
 	PDO_ODBC_HENV	env;
 	PDO_ODBC_HDBC	dbc;
 	pdo_odbc_errinfo einfo;
+	SQLUINTEGER conn_timeout;
+	SQLUINTEGER stmt_timeout;
 	unsigned assume_utf8:1;
 	unsigned _spare:31;
 } pdo_odbc_db_handle;
@@ -144,6 +146,7 @@ typedef struct {
 	char *convbuf;
 	zend_ulong convbufsize;
 	HashTable *out_buffers;
+	SQLUINTEGER stmt_timeout;
 	unsigned going_long:1;
 	unsigned assume_utf8:1;
 	unsigned params_dirty:1;
