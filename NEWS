@@ -26,6 +26,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-24321 (ZTS: global_map_ptr_last survives zend_shutdown(),
     so an in-process engine restart keeps growing the map_ptr table).
     (David Carlier)
+  . Fixed temporaries leaking when a VM interrupt throws at the op that frees
+    them, e.g. as a foreach loop over a generator exits.
+    (C. Scott Ananian)
 
 - Date:
   . Fixed bug GH-20503 (Assertion failure with ext/date DateInterval property

@@ -4687,6 +4687,51 @@ static void free_unfinished_calls(zend_execute_data *execute_data)
 	}
 }
 
+static void cleanup_live_var(zend_execute_data *execute_data, const zend_live_range *range, uint32_t op_num) /* {{{ */
+{
+	uint32_t kind = range->var & ZEND_LIVE_MASK;
+	uint32_t var_num = range->var & ~ZEND_LIVE_MASK;
+	zval *var = EX_VAR(var_num);
+
+	if (kind == ZEND_LIVE_TMPVAR) {
+		zval_ptr_dtor_nogc(var);
+	} else if (kind == ZEND_LIVE_NEW) {
+		zend_object *obj;
+		ZEND_ASSERT(Z_TYPE_P(var) == IS_OBJECT);
+		obj = Z_OBJ_P(var);
+		zend_object_store_ctor_failed(obj);
+		OBJ_RELEASE(obj);
+	} else if (kind == ZEND_LIVE_LOOP) {
+		if (Z_TYPE_P(var) != IS_ARRAY && Z_FE_ITER_P(var) != (uint32_t)-1) {
+			zend_hash_iterator_del(Z_FE_ITER_P(var));
+		}
+		zval_ptr_dtor_nogc(var);
+	} else if (kind == ZEND_LIVE_ROPE) {
+		zend_string **rope = (zend_string **)var;
+		zend_op *last = EX(func)->op_array.opcodes + op_num;
+		while ((last->opcode != ZEND_ROPE_ADD && last->opcode != ZEND_ROPE_INIT)
+				|| last->result.var != var_num) {
+			ZEND_ASSERT(last >= EX(func)->op_array.opcodes);
+			last--;
+		}
+		if (last->opcode == ZEND_ROPE_INIT) {
+			zend_string_release_ex(*rope, 0);
+		} else {
+			int j = last->extended_value;
+			do {
+				zend_string_release_ex(rope[j], 0);
+			} while (j--);
+		}
+	} else if (kind == ZEND_LIVE_SILENCE) {
+		/* restore previous error_reporting value */
+		if (E_HAS_ONLY_FATAL_ERRORS(EG(error_reporting))
+				&& !E_HAS_ONLY_FATAL_ERRORS(Z_LVAL_P(var))) {
+			EG(error_reporting) = Z_LVAL_P(var);
+		}
+	}
+}
+/* }}} */
+
 static void cleanup_live_vars(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num) /* {{{ */
 {
 	int i;
@@ -4698,10 +4743,6 @@ static void cleanup_live_vars(zend_execute_data *execute_data, uint32_t op_num, 
 			break;
 		} else if (op_num < range->end) {
 			if (!catch_op_num || catch_op_num >= range->end) {
-				uint32_t kind = range->var & ZEND_LIVE_MASK;
-				uint32_t var_num = range->var & ~ZEND_LIVE_MASK;
-				zval *var = EX_VAR(var_num);
-
 				/* Handle the split range for loop vars */
 				if (catch_op_num) {
 					zend_op *final_op = EX(func)->op_array.opcodes + range->end;
@@ -4712,44 +4753,115 @@ static void cleanup_live_vars(zend_execute_data *execute_data, uint32_t op_num, 
 					}
 				}
 
-				if (kind == ZEND_LIVE_TMPVAR) {
-					zval_ptr_dtor_nogc(var);
-				} else if (kind == ZEND_LIVE_NEW) {
-					zend_object *obj;
-					ZEND_ASSERT(Z_TYPE_P(var) == IS_OBJECT);
-					obj = Z_OBJ_P(var);
-					zend_object_store_ctor_failed(obj);
-					OBJ_RELEASE(obj);
-				} else if (kind == ZEND_LIVE_LOOP) {
-					if (Z_TYPE_P(var) != IS_ARRAY && Z_FE_ITER_P(var) != (uint32_t)-1) {
-						zend_hash_iterator_del(Z_FE_ITER_P(var));
-					}
-					zval_ptr_dtor_nogc(var);
-				} else if (kind == ZEND_LIVE_ROPE) {
-					zend_string **rope = (zend_string **)var;
-					zend_op *last = EX(func)->op_array.opcodes + op_num;
-					while ((last->opcode != ZEND_ROPE_ADD && last->opcode != ZEND_ROPE_INIT)
-							|| last->result.var != var_num) {
-						ZEND_ASSERT(last >= EX(func)->op_array.opcodes);
-						last--;
-					}
-					if (last->opcode == ZEND_ROPE_INIT) {
-						zend_string_release_ex(*rope, 0);
-					} else {
-						int j = last->extended_value;
-						do {
-							zend_string_release_ex(rope[j], 0);
-						} while (j--);
-					}
-				} else if (kind == ZEND_LIVE_SILENCE) {
-					/* restore previous error_reporting value */
-					if (E_HAS_ONLY_FATAL_ERRORS(EG(error_reporting))
-							&& !E_HAS_ONLY_FATAL_ERRORS(Z_LVAL_P(var))) {
-						EG(error_reporting) = Z_LVAL_P(var);
-					}
-				}
+				cleanup_live_var(execute_data, range, op_num);
 			}
 		}
+	}
+}
+/* }}} */
+
+static void zend_cleanup_interrupted_operand(zend_execute_data *execute_data, const zend_op *def, const zend_op *throw_op) /* {{{ */
+{
+	uint32_t op_num = throw_op - EX(func)->op_array.opcodes;
+	uint32_t var_num = def->result.var;
+	int i;
+
+	if (!(def->result_type & (IS_TMP_VAR|IS_VAR))) {
+		return;
+	}
+	switch (def->opcode) {
+		/* These don't define a value that has to be destroyed,
+		 * or have their own kind of live range (see emit_live_range()). */
+		case ZEND_ADD_ARRAY_ELEMENT:
+		case ZEND_ADD_ARRAY_UNPACK:
+		case ZEND_ROPE_INIT:
+		case ZEND_ROPE_ADD:
+		case ZEND_JMPZ_EX:
+		case ZEND_JMPNZ_EX:
+		case ZEND_BOOL:
+		case ZEND_BOOL_NOT:
+		case ZEND_FETCH_CLASS:
+		case ZEND_DECLARE_ANON_CLASS:
+		case ZEND_FAST_CALL:
+		case ZEND_BEGIN_SILENCE:
+		case ZEND_FE_RESET_R:
+		case ZEND_FE_RESET_RW:
+		case ZEND_NEW:
+		case ZEND_SEPARATE:
+			return;
+	}
+	/* A live range that ends at throw_op was cleaned up already; one that
+	 * continues past it (throw_op does not consume the var) is cleaned up by
+	 * ZEND_HANDLE_EXCEPTION. */
+	for (i = 0; i < EX(func)->op_array.last_live_range; i++) {
+		const zend_live_range *range = &EX(func)->op_array.live_range[i];
+		if (range->start > op_num) {
+			break;
+		} else if (op_num <= range->end && (range->var & ~ZEND_LIVE_MASK) == var_num) {
+			return;
+		}
+	}
+	zval_ptr_dtor_nogc(EX_VAR(var_num));
+}
+/* }}} */
+
+/* Called when EG(exception) is set after the interrupt function was called.
+ * The VM checks for interrupts after setting opline to the next op (e.g. the
+ * target of a jump), so an exception that the interrupt function throws is
+ * attributed to an op that did not run. */
+ZEND_API void zend_cleanup_interrupted_op(bool exception_was_pending) /* {{{ */
+{
+	zend_execute_data *execute_data = EG(current_execute_data);
+	const zend_op *throw_op = EG(opline_before_exception);
+	uint32_t op_num;
+	int i;
+
+	if (!throw_op) {
+		return;
+	}
+
+	/* If the exception was already pending when the interrupt was handled
+	 * (e.g. when Generator::throw() resumes a generator), throw_op did run. */
+	if (!exception_was_pending && EX(opline)->opcode == ZEND_HANDLE_EXCEPTION) {
+		/* Live ranges end at the op that frees the var (e.g. the FE_FREE of a
+		 * foreach loop), so ZEND_HANDLE_EXCEPTION does not free vars whose live
+		 * range ends at throw_op. throw_op did not free them, so do it here. */
+		op_num = throw_op - EX(func)->op_array.opcodes;
+		for (i = 0; i < EX(func)->op_array.last_live_range; i++) {
+			const zend_live_range *range = &EX(func)->op_array.live_range[i];
+			if (range->start > op_num) {
+				break;
+			} else if (range->end == op_num) {
+				cleanup_live_var(execute_data, range, op_num);
+			}
+		}
+
+		/* A var defined by the op just before throw_op has no live range (it would
+		 * be trivial), e.g. the result of the last branch of a ternary. */
+		if (op_num > 0) {
+			const zend_op *def = throw_op - 1;
+
+			if ((throw_op->op1_type & (IS_TMP_VAR|IS_VAR)) && throw_op->op1.var == def->result.var) {
+				zend_cleanup_interrupted_operand(execute_data, def, throw_op);
+			}
+			if ((throw_op->op2_type & (IS_TMP_VAR|IS_VAR)) && throw_op->op2.var == def->result.var) {
+				zend_cleanup_interrupted_operand(execute_data, def, throw_op);
+			}
+			if (op_num + 1 < EX(func)->op_array.last
+			 && (throw_op+1)->opcode == ZEND_OP_DATA
+			 && ((throw_op+1)->op1_type & (IS_TMP_VAR|IS_VAR)) && (throw_op+1)->op1.var == def->result.var) {
+				zend_cleanup_interrupted_operand(execute_data, def, throw_op);
+			}
+		}
+	}
+
+	/* We have to UNDEF result, because ZEND_HANDLE_EXCEPTION is going to free it */
+	if (throw_op->result_type & (IS_TMP_VAR|IS_VAR)
+	 && throw_op->opcode != ZEND_ADD_ARRAY_ELEMENT
+	 && throw_op->opcode != ZEND_ADD_ARRAY_UNPACK
+	 && throw_op->opcode != ZEND_ROPE_INIT
+	 && throw_op->opcode != ZEND_ROPE_ADD) {
+		ZVAL_UNDEF(EX_VAR(throw_op->result.var));
 	}
 }
 /* }}} */

@@ -2075,10 +2075,12 @@ static int zend_jit_interrupt_handler_stub(zend_jit_ctx *jit)
 	ir_IF_FALSE(if_delayed_oom);
 
 	if (zend_interrupt_function) {
+		ir_ref prev_exception = ir_LOAD_A(jit_EG(exception));
+
 		ir_CALL_1(IR_VOID, ir_CONST_FUNC(zend_interrupt_function), jit_FP(jit));
 		if_exception = ir_IF(ir_LOAD_A(jit_EG(exception)));
 		ir_IF_TRUE(if_exception);
-		ir_CALL(IR_VOID, ir_CONST_FUNC(zend_jit_exception_in_interrupt_handler_helper));
+		ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_exception_in_interrupt_handler_helper), prev_exception);
 		ir_MERGE_WITH_EMPTY_FALSE(if_exception);
 
 		jit_STORE_FP(jit, ir_LOAD_A(jit_EG(current_execute_data)));
