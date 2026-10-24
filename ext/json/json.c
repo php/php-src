@@ -321,6 +321,11 @@ PHP_FUNCTION(json_decode)
 		RETURN_THROWS();
 	}
 
+	if ((options & PHP_JSON_INVALID_UTF8_IGNORE) && (options & PHP_JSON_INVALID_UTF8_SUBSTITUTE)) {
+		zend_argument_value_error(4, "JSON_INVALID_UTF8_IGNORE and JSON_INVALID_UTF8_SUBSTITUTE are mutually exclusive");
+		RETURN_THROWS();
+	}
+
 	/* For BC reasons, the bool $assoc overrides the long $options bit for PHP_JSON_OBJECT_AS_ARRAY */
 	if (!assoc_null) {
 		if (assoc) {
