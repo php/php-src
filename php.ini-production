@@ -285,6 +285,8 @@ zlib.output_compression = Off
 ; implications and is generally recommended for debugging purposes only.
 ; https://php.net/implicit-flush
 ; Note: This directive is hardcoded to On for the CLI SAPI
+; Note: Printing empty strings or sending headers is not considered output and
+;   will not result in a flush operation.t
 implicit_flush = Off
 
 ; The unserialize callback function will be called (with the undefined class'
