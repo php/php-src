@@ -103,10 +103,22 @@ PHP_RSHUTDOWN_FUNCTION(user_filters)
 	return SUCCESS;
 }
 
+static void userfilter_release_brigade(php_stream_bucket_brigade *brigade)
+{
+	php_stream_bucket *bucket;
+
+	while ((bucket = brigade->head)) {
+		php_stream_bucket_unlink(bucket);
+		php_stream_bucket_delref(bucket);
+	}
+}
+
 static void userfilter_dtor(php_stream_filter *thisfilter)
 {
 	zval *obj = &thisfilter->abstract;
 	zval retval;
+
+	userfilter_release_brigade(&thisfilter->buffer);
 
 	if (Z_ISUNDEF_P(obj)) {
 		/* If there's no object associated then there's nothing to dispose of */
@@ -166,6 +178,7 @@ static php_stream_filter_status_t userfilter_filter(
 		if (EG(exception)) {
 			EG(fake_scope) = old_scope;
 			if (buckets_in->head) {
+				userfilter_release_brigade(buckets_in);
 				php_error_docref(NULL, E_WARNING, "Unprocessed filter buckets remaining on input brigade");
 			}
 			zend_string_release(stream_name);
@@ -176,6 +189,17 @@ static php_stream_filter_status_t userfilter_filter(
 	}
 
 	EG(fake_scope) = old_scope;
+
+	/* Re-present input kept back by a previous PSFS_FEED_ME */
+	if (thisfilter->buffer.head) {
+		php_stream_bucket *bucket = thisfilter->buffer.tail;
+		while (bucket) {
+			php_stream_bucket *prev = bucket->prev;
+			php_stream_bucket_unlink(bucket);
+			php_stream_bucket_prepend(buckets_in, bucket);
+			bucket = prev;
+		}
+	}
 
 	ZVAL_STRINGL(&func_name, "filter", sizeof("filter")-1);
 
@@ -212,7 +236,22 @@ static php_stream_filter_status_t userfilter_filter(
 	}
 
 	if (buckets_in->head) {
-		php_error_docref(NULL, E_WARNING, "Unprocessed filter buckets remaining on input brigade");
+		if (ret == PSFS_FEED_ME && !(flags & PSFS_FLAG_FLUSH_CLOSE)) {
+			/* Keep the input for the next call and make sure the buckets own their data */
+			php_stream_bucket *bucket;
+			while ((bucket = buckets_in->head)) {
+				bucket = php_stream_bucket_make_writeable(bucket);
+				php_stream_bucket_append(&thisfilter->buffer, bucket);
+			}
+		} else {
+			userfilter_release_brigade(buckets_in);
+			php_error_docref(NULL, E_WARNING, "Unprocessed filter buckets remaining on input brigade");
+		}
+	}
+
+	/* Filter could've broken contract and added buckets anyway. */
+	if (ret != PSFS_PASS_ON && buckets_out->head) {
+		userfilter_release_brigade(buckets_out);
 	}
 
 	/* filter resources are cleaned up by the stream destructor,
