@@ -161,6 +161,32 @@ static bool check_has_header(const char *headers, const char *header) {
 	return 0;
 }
 
+/* The components of a php_uri may be interned or shared, so they are decoded into a new string. */
+static zend_string *php_stream_http_url_decode(const zend_string *component)
+{
+	zend_string *decoded = zend_string_alloc(ZSTR_LEN(component), false);
+	ZSTR_LEN(decoded) = php_url_decode_ex(ZSTR_VAL(decoded), ZSTR_VAL(component), ZSTR_LEN(component));
+	return decoded;
+}
+
+static bool php_stream_http_url_component_has_cntrl(const zend_string *component)
+{
+	if (!component) {
+		return false;
+	}
+
+	zend_string *decoded = php_stream_http_url_decode(component);
+	bool has_cntrl = false;
+	for (size_t i = 0; i < ZSTR_LEN(decoded); i++) {
+		if (iscntrl((unsigned char) ZSTR_VAL(decoded)[i])) {
+			has_cntrl = true;
+			break;
+		}
+	}
+	zend_string_efree(decoded);
+	return has_cntrl;
+}
+
 static zend_result php_stream_handle_proxy_authorization_header(const char *s, smart_str *header)
 {
 	const char *p;
@@ -816,15 +842,16 @@ finish:
 		smart_str scratch = {0};
 
 		/* decode the strings first */
-		ZSTR_LEN(resource->user) = php_url_decode(ZSTR_VAL(resource->user), ZSTR_LEN(resource->user));
-
-		smart_str_append(&scratch, resource->user);
+		zend_string *decoded = php_stream_http_url_decode(resource->user);
+		smart_str_append(&scratch, decoded);
+		zend_string_efree(decoded);
 		smart_str_appendc(&scratch, ':');
 
 		/* Note: password is optional! */
 		if (resource->password) {
-			ZSTR_LEN(resource->password) = php_url_decode(ZSTR_VAL(resource->password), ZSTR_LEN(resource->password));
-			smart_str_append(&scratch, resource->password);
+			decoded = php_stream_http_url_decode(resource->password);
+			smart_str_append(&scratch, decoded);
+			zend_string_efree(decoded);
 		}
 
 		zend_string *scratch_str = smart_str_extract(&scratch);
@@ -1120,24 +1147,13 @@ finish:
 				char *loc_path = NULL;
 				if (*header_info.location != '/') {
 					if (header_info.location_len > 1 && resource->path) {
-						char *s = strrchr(ZSTR_VAL(resource->path), '/');
-						if (!s) {
-							s = ZSTR_VAL(resource->path);
-							if (!ZSTR_LEN(resource->path)) {
-								zend_string_release_ex(resource->path, 0);
-								resource->path = ZSTR_INIT_LITERAL("/", 0);
-								s = ZSTR_VAL(resource->path);
-							} else {
-								*s = '/';
-							}
-						}
-						s[1] = '\0';
-						if (resource->path &&
-							ZSTR_VAL(resource->path)[0] == '/' &&
-							ZSTR_VAL(resource->path)[1] == '\0') {
-							spprintf(&loc_path, 0, "%s%s", ZSTR_VAL(resource->path), header_info.location);
+						/* directory of the current path, up to and including its last '/' */
+						const char *dir = ZSTR_VAL(resource->path);
+						const char *s = strrchr(dir, '/');
+						if (!s || s == dir) {
+							spprintf(&loc_path, 0, "/%s", header_info.location);
 						} else {
-							spprintf(&loc_path, 0, "%s/%s", ZSTR_VAL(resource->path), header_info.location);
+							spprintf(&loc_path, 0, "%.*s/%s", (int) (s - dir + 1), dir, header_info.location);
 						}
 					} else {
 						spprintf(&loc_path, 0, "/%s", header_info.location);
@@ -1177,26 +1193,15 @@ finish:
 			php_uri_struct_free(resource);
 			resource = new_resource;
 
-#define CHECK_FOR_CNTRL_CHARS(val) { \
-	if (val) { \
-		unsigned char *s, *e; \
-		ZSTR_LEN(val) = php_url_decode(ZSTR_VAL(val), ZSTR_LEN(val)); \
-		s = (unsigned char*)ZSTR_VAL(val); e = s + ZSTR_LEN(val); \
-		while (s < e) { \
-			if (iscntrl(*s)) { \
-				php_stream_wrapper_log_error(wrapper, options, "Invalid redirect URL! %s", new_path); \
-				efree(new_path); \
-				goto out; \
-			} \
-			s++; \
-		} \
-	} \
-}
 			/* check for control characters in login, password & path */
 			if (strncasecmp(new_path, "http://", sizeof("http://") - 1) || strncasecmp(new_path, "https://", sizeof("https://") - 1)) {
-				CHECK_FOR_CNTRL_CHARS(resource->user);
-				CHECK_FOR_CNTRL_CHARS(resource->password);
-				CHECK_FOR_CNTRL_CHARS(resource->path);
+				if (php_stream_http_url_component_has_cntrl(resource->user)
+					|| php_stream_http_url_component_has_cntrl(resource->password)
+					|| php_stream_http_url_component_has_cntrl(resource->path)) {
+					php_stream_wrapper_log_error(wrapper, options, "Invalid redirect URL! %s", new_path);
+					efree(new_path);
+					goto out;
+				}
 			}
 			int new_flags = HTTP_WRAPPER_REDIRECTED | (flags & HTTP_WRAPPER_STRIP_AUTH);
 			if (!same_origin) {
