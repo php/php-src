@@ -35,7 +35,7 @@
 #define FETCH_DOUBLE_OPTION(var_name, option_name) \
 	var_name = 0; \
 	var_name##_set = 0; \
-	if (option_array) { \
+	if (option_array && Z_TYPE_P(option_array) == IS_ARRAY) { \
 		if ((option_val = zend_hash_str_find(Z_ARRVAL_P(option_array), option_name, sizeof(option_name) - 1)) != NULL) {	\
 			var_name = zval_get_double(option_val); \
 			var_name##_set = 1; \
@@ -47,7 +47,7 @@
 #define FETCH_LONG_OPTION(var_name, option_name) \
 	var_name = 0; \
 	var_name##_set = 0; \
-	if (option_array) { \
+	if (option_array && Z_TYPE_P(option_array) == IS_ARRAY) { \
 		if ((option_val = zend_hash_str_find(Z_ARRVAL_P(option_array), option_name, sizeof(option_name) - 1)) != NULL) {	\
 			var_name = zval_get_long(option_val); \
 			var_name##_set = 1; \
@@ -60,7 +60,7 @@
 	var_name = NULL; \
 	var_name##_set = 0; \
 	var_name##_len = 0; \
-	if (option_array) { \
+	if (option_array && Z_TYPE_P(option_array) == IS_ARRAY) { \
 		if ((option_val = zend_hash_str_find_deref(Z_ARRVAL_P(option_array), option_name, sizeof(option_name) - 1)) != NULL) { \
 			if (Z_TYPE_P(option_val) == IS_STRING) { \
 				var_name = Z_STRVAL_P(option_val); \
