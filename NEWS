@@ -23,6 +23,8 @@ PHP                                                                        NEWS
   . Fix escape analysis for objects implementing ArrayAccess. (ndossche, Arnaud)
   . Fix UAF for resolved callable zval. (EdmondDantes)
   . Fix memory leak for nested HTTP calls. (EdmondDantes)
+  . Fix function and constant imports in compile_to_ast and add support
+    for grouping. (Klaas Skelte van der Werf)
 
 - Date:
   . Fixed bug GH-20503 (Assertion failure with ext/date DateInterval property
