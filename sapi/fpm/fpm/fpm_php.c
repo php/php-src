@@ -75,7 +75,7 @@ int fpm_php_apply_defines_ex(struct key_value_s *kv, int mode) /* {{{ */
 		zend_rc_debug = false;
 #endif
 
-		php_dl(value, MODULE_PERSISTENT, &zv, 1);
+		php_dl(value, MODULE_PERSISTENT, &zv, PHP_DL_START_MODULE);
 
 #if ZEND_RC_DEBUG
 		zend_rc_debug = orig_rc_debug;
