@@ -17,6 +17,9 @@
 # if defined(__FreeBSD__) || defined(__DragonFly__)
 #  include <sys/sysctl.h>
 # endif
+# if defined(__OpenBSD__)
+#  include <sys/param.h>
+# endif
 #endif
 
 #include "ir.h"
@@ -599,7 +602,7 @@ int ir_disasm(const char    *name,
 			}
 			if (p != q && *(q-1) == '-') {
 				q--;
-				addr = (uint32_t)(-(int64_t)addr);
+				addr = (uint32_t)(0 - addr);
 			}
 			if (addr >= (uint64_t)(uintptr_t)start && addr < (uint64_t)(uintptr_t)orig_end) {
 				entry = ir_hashtab_find(&labels, (uint32_t)((uintptr_t)addr - (uintptr_t)start));
@@ -786,6 +789,12 @@ static void ir_elf_load_symbols(void)
 	size_t pathlen = sizeof(path);
 	int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1};
 	if (sysctl(mib, 4, path, &pathlen, NULL, 0) == -1) {
+		return;
+	}
+	int fd = open(path, O_RDONLY);
+#elif defined(__OpenBSD__) && OpenBSD >= 202610
+	char path[PATH_MAX];
+	if (getexecpath(path, sizeof(path)) == -1) {
 		return;
 	}
 	int fd = open(path, O_RDONLY);
