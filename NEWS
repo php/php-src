@@ -18,6 +18,10 @@ PHP                                                                        NEWS
   . Use recommended TYPE, HELP order for OpenMetrics metadata.
     (Marcel Hernandez)
 
+- GD:
+  . Added the gd.png_ignore_warning INI setting to suppress recoverable libpng
+    warnings when reading PNG images (GH-23674). (Chris Smith)
+
 - Hash:
   . Fixed mhash_keygen_s2k() truncating a $length above INT_MAX instead of
     throwing a ValueError. (Marc Bennewitz)
