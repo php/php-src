@@ -1009,9 +1009,9 @@ static zend_result php_openssl_set_local_cert(SSL_CTX *ctx, php_stream *stream) 
 /* }}} */
 
 #if PHP_OPENSSL_API_VERSION < 0x10100
-static int php_openssl_get_crypto_method_ctx_flags(int method_flags) /* {{{ */
+static uint64_t php_openssl_get_crypto_method_ctx_flags(int method_flags) /* {{{ */
 {
-	int ssl_ctx_options = SSL_OP_ALL;
+	uint64_t ssl_ctx_options = SSL_OP_ALL;
 
 #ifdef SSL_OP_NO_SSLv2
 	ssl_ctx_options |= SSL_OP_NO_SSLv2;
@@ -1688,7 +1688,7 @@ static zend_result php_openssl_setup_crypto(php_stream *stream,
 		php_stream_xport_crypto_param *cparam) /* {{{ */
 {
 	const SSL_METHOD *method;
-	int ssl_ctx_options;
+	uint64_t ssl_ctx_options;
 	int method_flags;
 	zend_long min_version = 0;
 	zend_long max_version = 0;
