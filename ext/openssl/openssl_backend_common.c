@@ -26,10 +26,6 @@
 /* Common */
 #include <time.h>
 
-#if (defined(PHP_WIN32) && defined(_MSC_VER))
-#define timezone _timezone	/* timezone is called _timezone in LibC */
-#endif
-
 
 /* openssl -> PHP "bridging" */
 /* true global; readonly after module startup */
@@ -115,19 +111,10 @@ void php_openssl_add_assoc_asn1_string(zval * val, char * key, ASN1_STRING * str
 
 time_t php_openssl_asn1_time_to_time_t(ASN1_UTCTIME * timestr)
 {
-    /*
-     * This is how the time string is formatted:
-     *
-     * snprintf(p, sizeof(p), "%02d%02d%02d%02d%02d%02dZ",ts->tm_year%100,
-     *   ts->tm_mon+1,ts->tm_mday,ts->tm_hour,ts->tm_min,ts->tm_sec);
-     */
-
-	time_t ret;
 	struct tm thetime;
-	char * strbuf;
-	char * thestr;
-	long gmadjust = 0;
 	size_t timestr_len;
+	int64_t year, month, era, year_of_era, day_of_year, day_of_era, days, timestamp;
+	time_t ret;
 
 	if (ASN1_STRING_type(timestr) != V_ASN1_UTCTIME && ASN1_STRING_type(timestr) != V_ASN1_GENERALIZEDTIME) {
 		php_error_docref(NULL, E_WARNING, "Illegal ASN1 data type for timestamp");
@@ -141,68 +128,39 @@ time_t php_openssl_asn1_time_to_time_t(ASN1_UTCTIME * timestr)
 		return (time_t)-1;
 	}
 
-	if (timestr_len < 13) {
+	/* OpenSSL < 3.3 accepts a UTCTime without seconds, which RFC 5280 forbids. */
+	if (timestr_len < 13 || (ASN1_STRING_type(timestr) == V_ASN1_GENERALIZEDTIME && timestr_len < 15)) {
 		php_error_docref(NULL, E_WARNING, "Unable to parse time string %s correctly", ASN1_STRING_get0_data(timestr));
 		return (time_t)-1;
 	}
 
-	if (ASN1_STRING_type(timestr) == V_ASN1_GENERALIZEDTIME && timestr_len < 15) {
+	/* Validates the string and fills in the broken-down time in UTC. */
+	if (!ASN1_TIME_to_tm(timestr, &thetime)) {
 		php_error_docref(NULL, E_WARNING, "Unable to parse time string %s correctly", ASN1_STRING_get0_data(timestr));
 		return (time_t)-1;
 	}
 
-	strbuf = estrdup((const char *)ASN1_STRING_get0_data(timestr));
-
-	memset(&thetime, 0, sizeof(thetime));
-
-	/* we work backwards so that we can use atoi more easily */
-
-	thestr = strbuf + timestr_len - 3;
-
-	thetime.tm_sec = atoi(thestr);
-	*thestr = '\0';
-	thestr -= 2;
-	thetime.tm_min = atoi(thestr);
-	*thestr = '\0';
-	thestr -= 2;
-	thetime.tm_hour = atoi(thestr);
-	*thestr = '\0';
-	thestr -= 2;
-	thetime.tm_mday = atoi(thestr);
-	*thestr = '\0';
-	thestr -= 2;
-	thetime.tm_mon = atoi(thestr)-1;
-
-	*thestr = '\0';
-	if( ASN1_STRING_type(timestr) == V_ASN1_UTCTIME ) {
-		thestr -= 2;
-		thetime.tm_year = atoi(thestr);
-
-		if (thetime.tm_year < 68) {
-			thetime.tm_year += 100;
-		}
-	} else if( ASN1_STRING_type(timestr) == V_ASN1_GENERALIZEDTIME ) {
-		thestr -= 4;
-		thetime.tm_year = atoi(thestr) - 1900;
-	}
-
-
-	thetime.tm_isdst = -1;
-	ret = mktime(&thetime);
-
-#ifdef HAVE_STRUCT_TM_TM_GMTOFF
-	gmadjust = thetime.tm_gmtoff;
-#else
 	/*
-	 * If correcting for daylight savings time, we set the adjustment to
-	 * the value of timezone - 3600 seconds. Otherwise, we need to overcorrect and
-	 * set the adjustment to the main timezone + 3600 seconds.
+	 * Compute the timestamp directly from the civil date (days_from_civil by
+	 * Howard Hinnant) rather than through mktime(), which works in local time
+	 * and on Windows cannot represent dates after the year 3000.
 	 */
-	gmadjust = -(thetime.tm_isdst ? (long)timezone - 3600 : (long)timezone);
-#endif
-	ret += gmadjust;
+	year = (int64_t) thetime.tm_year + 1900;
+	month = thetime.tm_mon + 1;
+	year -= month <= 2;
+	era = (year >= 0 ? year : year - 399) / 400;
+	year_of_era = year - era * 400;                                                     /* [0, 399] */
+	day_of_year = (153 * (month + (month > 2 ? -3 : 9)) + 2) / 5 + thetime.tm_mday - 1; /* [0, 365] */
+	day_of_era = year_of_era * 365 + year_of_era / 4 - year_of_era / 100 + day_of_year; /* [0, 146096] */
+	days = era * 146097 + day_of_era - 719468;
 
-	efree(strbuf);
+	timestamp = days * 86400 + thetime.tm_hour * 3600 + thetime.tm_min * 60 + thetime.tm_sec;
+
+	ret = (time_t) timestamp;
+	if ((int64_t) ret != timestamp) {
+		/* Does not fit into a 32-bit time_t. */
+		return (time_t)-1;
+	}
 
 	return ret;
 }
