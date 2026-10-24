@@ -6118,6 +6118,7 @@ void zend_ffi_add_enum_val(zend_ffi_dcl *enum_dcl, const char *name, size_t name
 	}
 	sym = zend_hash_str_find_ptr(FFI_G(symbols), name, name_len);
 	if (sym) {
+		zend_ffi_cleanup_dcl(enum_dcl);
 		zend_ffi_parser_error("Redeclaration of \"%.*s\" at line %d", name_len, name, FFI_G(line));
 	} else {
 		sym = pemalloc(sizeof(zend_ffi_symbol), FFI_G(persistent));
@@ -6724,6 +6725,8 @@ void zend_ffi_declare(const char *name, size_t name_len, zend_ffi_dcl *dcl, zend
 				}
 			}
 		}
+		zend_ffi_adopt_type(dcl, common_dcl);
+		zend_ffi_cleanup_dcl(dcl);
 		zend_ffi_parser_error("Redeclaration of \"%.*s\" at line %d", name_len, name, FFI_G(line));
 	} else {
 		if ((dcl->flags & ZEND_FFI_DCL_STORAGE_CLASS) == ZEND_FFI_DCL_TYPEDEF) {
