@@ -678,6 +678,7 @@ static uint8_t *php_parserr(uint8_t *cp, uint8_t *end, querybuf *answer, int typ
 			}
 			if (n % 16 > 8) {
 				/* Partial short */
+				CHECKCP(1);
 				if (cp[0] != 0) {
 					if (tp > (uint8_t *)name) {
 						in_v6_break = 0;
