@@ -4844,6 +4844,8 @@ static zend_result accel_finish_startup_preload(bool in_child)
 	bool old_reset_signals = SIGG(reset);
 #endif
 
+	ZCG(preloading) = true;
+
 	sapi_module.activate = NULL;
 	sapi_module.deactivate = NULL;
 	sapi_module.register_server_variables = NULL;
@@ -4925,6 +4927,8 @@ static zend_result accel_finish_startup_preload(bool in_child)
 	sapi_module.getenv = orig_getenv;
 	sapi_module.ub_write = orig_ub_write;
 	sapi_module.flush = orig_flush;
+
+	ZCG(preloading) = false;
 
 	sapi_activate();
 
@@ -5066,6 +5070,12 @@ static zend_result accel_finish_startup(void)
 }
 
 static void accel_activate(void) {
+	/* Reuse only startup slots until synchronizing with SHM for this request.
+	 * The startup boundary is not available during preloading. */
+	if (!ZCG(preloading)) {
+		zend_map_ptr_reset();
+	}
+
 	if (ZCG(preloaded_internal_run_time_cache)) {
 		memset(ZCG(preloaded_internal_run_time_cache), 0, ZCG(preloaded_internal_run_time_cache_size));
 	}
