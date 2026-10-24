@@ -280,6 +280,8 @@ namespace {
     #[\NoDiscard(message: "custom message 2")]
     function zend_test_deprecated_nodiscard(): int {}
 
+    function zend_test_child_init_count(): int {}
+
     /** @alias zend_test_void_return */
     function zend_test_aliased(): void {}
 
