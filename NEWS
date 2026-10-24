@@ -129,6 +129,8 @@ PHP                                                                        NEWS
 - Session:
   . Fixed session data loss in the files save handler when writing the session
     file fails after it was already truncated. (Ilia Alshanetsky)
+  . Fixed bug GH-24493 (Upload progress handler destroys the session when an
+    object has an incomplete class property name). (Lazizbek Ergashev)
 
 - SimpleXML:
   . Fixed bug GH-24488 (GC double-frees the SimpleXMLElement properties
