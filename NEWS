@@ -78,6 +78,8 @@ PHP                                                                        NEWS
     MariaDB PAM account). (lazerg)
 
 - Opcache:
+  . Fixed bug GH-23859 (Map pointer growth after OPcache resets under concurrent
+    traffic). (aasul)
   . Fixed tracing JIT returning a wrapped integer instead of a float on
     integer overflow after an integer was compared with a float or
     numeric-string literal. (Ilia Alshanetsky)
