@@ -71,7 +71,10 @@ PHPAPI zend_string *php_uuencode(const char *src, size_t src_len) /* {{{ */
 	/* encoded length is ~ 38% greater than the original
        Use 1.5 for easier calculation.
     */
-	dest = zend_string_safe_alloc(src_len/2, 3, 46, 0);
+	dest = zend_string_safe_falloc(src_len/2, 3, 46, 0, true);
+	if (UNEXPECTED(dest == NULL)) {
+		return NULL;
+	}
 	p = (unsigned char *) ZSTR_VAL(dest);
 	s = (unsigned char *) src;
 	e = s + src_len;
@@ -209,7 +212,11 @@ PHP_FUNCTION(convert_uuencode)
 		Z_PARAM_STR(src)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_STR(php_uuencode(ZSTR_VAL(src), ZSTR_LEN(src)));
+	zend_string *dest = php_uuencode(ZSTR_VAL(src), ZSTR_LEN(src));
+	if (UNEXPECTED(dest == NULL)) {
+		RETURN_OOM();
+	}
+	RETURN_STR(dest);
 }
 /* }}} */
 
