@@ -5070,8 +5070,9 @@ static zend_result accel_finish_startup(void)
 }
 
 static void accel_activate(void) {
-	/* Reuse only startup slots until synchronizing with SHM for this request.
-	 * The startup boundary is not available during preloading. */
+	/* zend_post_startup() saves the permanent boundary after preloading.
+	 * Discard only request slots before synchronizing with SHM for this request.
+	 * The permanent boundary is not available during preloading itself. */
 	if (!ZCG(preloading)) {
 		zend_map_ptr_reset();
 	}

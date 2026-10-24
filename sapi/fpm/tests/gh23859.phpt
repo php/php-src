@@ -49,7 +49,8 @@ if (isset($_GET['reset'])) {
 EOT);
 
 $opcache = ini_get('extension_dir') . DIRECTORY_SEPARATOR . 'opcache.' . PHP_SHLIB_SUFFIX;
-$tester->start(['-dzend_extension=' . $opcache], extensions: ['zend_test'], iniEntries: [
+$extraArgs = is_file($opcache) ? ['-dzend_extension=' . $opcache] : [];
+$tester->start($extraArgs, extensions: ['zend_test'], iniEntries: [
     'opcache.enable' => '1',
     'opcache.file_update_protection' => '0',
 ]);
@@ -82,4 +83,5 @@ Done
 <?php
 require_once "tester.inc";
 FPM\Tester::clean();
+@unlink(__DIR__ . '/gh23859.reset.src.php');
 ?>
