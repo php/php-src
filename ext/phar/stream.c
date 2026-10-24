@@ -49,7 +49,7 @@ static const php_stream_wrapper_ops phar_stream_wops = {
 const php_stream_wrapper php_stream_phar_wrapper = {
 	&phar_stream_wops,
 	NULL,
-	0 /* is_url */
+	0 /* flags */
 };
 
 /**

@@ -916,7 +916,7 @@ static long php_openssl_load_stream_cafile(X509_STORE *cert_store, const char *c
 		// TODO: no stream and no wrapper, cannot use php_stream_warn(stream, ReadFailed, ...) nor php_stream_wrapper_log_error()
 		php_error(E_WARNING, "failed loading cafile stream: `%s'", cafile);
 		return 0;
-	} else if (stream->wrapper->is_url) {
+	} else if (php_stream_is_url(stream)) {
 		php_stream_warn(stream, PermissionDenied, "remote cafile streams are disabled for security purposes");
 		php_stream_close(stream);
 		return 0;
