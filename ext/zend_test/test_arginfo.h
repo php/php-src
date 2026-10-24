@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: ea2674e5d5dbf60aa5efab31132064b52a07bddd
+ * Stub hash: 1b25893580205fc2db824a265839da14f5d2f0f0
  * Has decl header: yes */
 
 #include "zend_attributes.h"
@@ -36,6 +36,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_nodiscard, 0, 0, IS_LO
 ZEND_END_ARG_INFO()
 
 #define arginfo_zend_test_deprecated_nodiscard arginfo_zend_test_nodiscard
+
+#define arginfo_zend_test_child_init_count arginfo_zend_test_nodiscard
 
 #define arginfo_zend_test_aliased arginfo_zend_test_void_return
 
@@ -457,6 +459,7 @@ static ZEND_FUNCTION(zend_test_deprecated);
 static ZEND_FUNCTION(zend_test_deprecated_attr);
 static ZEND_FUNCTION(zend_test_nodiscard);
 static ZEND_FUNCTION(zend_test_deprecated_nodiscard);
+static ZEND_FUNCTION(zend_test_child_init_count);
 static ZEND_FUNCTION(zend_create_unterminated_string);
 static ZEND_FUNCTION(zend_terminate_string);
 static ZEND_FUNCTION(zend_leak_variable);
@@ -629,6 +632,7 @@ static const zend_function_entry ext_functions[] = {
 #else
 	ZEND_RAW_FENTRY("zend_test_deprecated_nodiscard", zif_zend_test_deprecated_nodiscard, arginfo_zend_test_deprecated_nodiscard, ZEND_ACC_DEPRECATED)
 #endif
+	ZEND_FE(zend_test_child_init_count, arginfo_zend_test_child_init_count)
 #if (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY("zend_test_aliased", zif_zend_test_void_return, arginfo_zend_test_aliased, 0, NULL, NULL)
 #else

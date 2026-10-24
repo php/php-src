@@ -3445,6 +3445,11 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 	return retval;
 }
 
+static void php_session_child_init(void)
+{
+	PS(random_seeded) = false;
+}
+
 zend_module_entry session_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"session",
@@ -3457,7 +3462,7 @@ zend_module_entry session_module_entry = {
 	PHP_GINIT(ps),
 	NULL,
 	NULL,
-	STANDARD_MODULE_PROPERTIES_EX
+	STANDARD_MODULE_PROPERTIES_EX_WITH_CHILD_INIT(php_session_child_init)
 };
 
 #ifdef COMPILE_DL_SESSION

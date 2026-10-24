@@ -29,6 +29,7 @@ ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
 ZEND_BEGIN_MODULE_GLOBALS(zend_test)
+	zend_long child_init_count;
 	int observer_enabled;
 	int observer_show_output;
 	int observer_observe_all;
