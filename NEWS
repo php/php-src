@@ -36,6 +36,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-24641 (ndbm backend never checks dbm_open() return value,
     NULL deref on first use after a failed open). (Girgias)
 
+- DOM:
+  . Fix error paths in dom_xml_serializing_a_document_node(). (ndossche)
+
 - Fileinfo:
   . Fixed bug GH-24289 (finfo::file() reports the wrong argument number for
     an invalid $filename). (Lazizbek Ergashev)
