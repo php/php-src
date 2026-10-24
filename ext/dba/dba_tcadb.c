@@ -34,7 +34,14 @@ typedef struct {
 DBA_OPEN_FUNC(tcadb)
 {
 	char *path_string;
-	TCADB *tcadb = tcadbnew();
+	TCADB *tcadb;
+
+	if (memchr(ZSTR_VAL(info->path), '#', ZSTR_LEN(info->path))) {
+		*error = "Path must not contain \"#\"";
+		return FAILURE;
+	}
+
+	tcadb = tcadbnew();
 
 	if (tcadb) {
 		switch(info->mode) {
