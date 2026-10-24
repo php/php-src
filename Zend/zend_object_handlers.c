@@ -1131,18 +1131,19 @@ try_again:
 				 && !(Z_PROP_FLAG_P(variable_ptr) & IS_PROP_REINITABLE)) {
 					zend_readonly_property_modification_error(prop_info);
 					variable_ptr = &EG(error_zval);
-					goto exit;
+					/* The set visibility was not checked */
+					goto exit_reset_cache_slot;
 				}
 				if ((prop_info->flags & ZEND_ACC_PPP_SET_MASK) && !zend_asymmetric_property_has_set_access(prop_info)) {
 					zend_asymmetric_visibility_property_modification_error(prop_info, "modify");
 					variable_ptr = &EG(error_zval);
-					if (cache_slot) {
-						/* Reset cache slot to dodge fast path in next execution. */
-						CACHE_POLYMORPHIC_PTR_EX(cache_slot, NULL, NULL);
-						CACHE_PTR_EX(cache_slot + 2, NULL);
-					}
-					goto exit;
+					goto exit_reset_cache_slot;
 				}
+			} else if (cache_slot) {
+				/* __set() will be called without checking the set visibility. The ZEND_ASSIGN_OBJ
+				 * fast path skips that check when the cache slot is primed, so reset it. */
+				CACHE_POLYMORPHIC_PTR_EX(cache_slot, NULL, NULL);
+				CACHE_PTR_EX(cache_slot + 2, NULL);
 			}
 		}
 
@@ -1345,6 +1346,15 @@ write_std_property:
 	}
 
 exit:
+	return variable_ptr;
+
+exit_reset_cache_slot:
+	if (cache_slot) {
+		/* Reset cache slot to dodge the fast path, which doesn't check the set visibility,
+		 * in the next execution. */
+		CACHE_POLYMORPHIC_PTR_EX(cache_slot, NULL, NULL);
+		CACHE_PTR_EX(cache_slot + 2, NULL);
+	}
 	return variable_ptr;
 
 lazy_init:
