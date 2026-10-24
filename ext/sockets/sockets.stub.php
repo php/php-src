@@ -1891,6 +1891,13 @@ const SCM_CREDS = UNKNOWN;
  */
 const LOCAL_CREDS = UNKNOWN;
 #endif
+#if defined(LOCAL_PEERCRED)
+/**
+ * @var int
+ * @cvalue LOCAL_PEERCRED
+ */
+const LOCAL_PEERCRED = UNKNOWN;
+#endif
 #if defined(SO_ATTACH_REUSEPORT_CBPF)
 /**
  * @var int
@@ -1932,6 +1939,13 @@ const SO_EXCLUSIVEADDRUSE = UNKNOWN;
  * @cvalue SO_NOSIGPIPE
  */
 const SO_NOSIGPIPE = UNKNOWN;
+#endif
+#if defined(SO_PEERCRED)
+/**
+ * @var int
+ * @cvalue SO_PEERCRED
+ */
+const SO_PEERCRED = UNKNOWN;
 #endif
 #if defined(TCP_QUICKACK)
 /**
