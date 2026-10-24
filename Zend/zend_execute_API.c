@@ -1410,6 +1410,10 @@ ZEND_API zend_result zend_eval_stringl(const char *str, size_t str_len, zval *re
 		efree_size(new_op_array, sizeof(zend_op_array));
 		retval = SUCCESS;
 	} else {
+		if (EG(delayed_oom).state == ZEND_OOM_STATE_PENDING) {
+			zend_clear_exception();
+			zend_handle_delayed_oom();
+		}
 		retval = FAILURE;
 	}
 	zend_string_release(code_str);
