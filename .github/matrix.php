@@ -160,7 +160,7 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
             ? ['zts' => [true, false]]
             : ['zts' => [false]];
     }
-    return $jobs;
+    return ['SOLARIS' => true];
 }
 
 $trigger = $argv[1] ?? 'schedule';
