@@ -16,16 +16,16 @@ file_put_contents(FILENAME, "1\n");
 
 var_dump(is_readable(FILENAME));
 include(FILENAME);
-var_dump(filemtime(FILENAME));
+$mtime = filemtime(FILENAME);
+var_dump($mtime);
 
-sleep(2);
 file_put_contents(FILENAME, "2\n");
+touch(FILENAME, $mtime + 2);
 
 var_dump(is_readable(FILENAME));
 include(FILENAME);
 var_dump(filemtime(FILENAME));
 
-sleep(2);
 unlink(FILENAME);
 
 var_dump(is_readable(FILENAME));
