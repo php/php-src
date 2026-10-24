@@ -266,6 +266,10 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 		var_hash = next;
 	}
 
+	(*var_hashx)->last = &(*var_hashx)->entries;
+	(*var_hashx)->entries.used_slots = 0;
+	(*var_hashx)->entries.next = NULL;
+
 	while (var_dtor_hash) {
 		for (i = 0; i < var_dtor_hash->used_slots; i++) {
 			zval *zv = &var_dtor_hash->data[i];
@@ -321,6 +325,13 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 		next = var_dtor_hash->next;
 		efree_size(var_dtor_hash, sizeof(var_dtor_entries));
 		var_dtor_hash = next;
+	}
+
+	var_hash = (*var_hashx)->entries.next;
+	while (var_hash) {
+		next = var_hash->next;
+		efree_size(var_hash, sizeof(var_entries));
+		var_hash = next;
 	}
 
 	if ((*var_hashx)->ref_props) {
