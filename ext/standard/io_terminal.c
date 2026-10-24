@@ -1940,11 +1940,7 @@ static zend_string *php_io_terminal_finish_utf8_sequence(
 			return NULL;
 		}
 		if (result == PHP_IO_TERMINAL_READ_EOF) {
-#ifndef PHP_WIN32
-			if (fd >= 0 && php_io_terminal_native_stream_is_tty(fd)) {
-				zend_throw_exception(php_io_terminal_exception_ce, "End of file reached on terminal input stream", 0);
-			}
-#endif
+			zend_throw_exception(php_io_terminal_exception_ce, "End of file reached on terminal input stream", 0);
 			return NULL;
 		}
 		if (result != PHP_IO_TERMINAL_READ_SUCCESS) {
