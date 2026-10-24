@@ -827,11 +827,7 @@ static void zend_fiber_object_destroy(zend_object *object)
 			zend_rethrow_exception(EG(current_execute_data));
 		}
 
-		if (exception && zend_is_unwind_exit(EG(exception))) {
-			OBJ_RELEASE(exception);
-		} else {
-			zend_exception_set_previous(EG(exception), exception);
-		}
+		zend_exception_set_previous(EG(exception), exception);
 
 		if (!EG(current_execute_data)) {
 			zend_exception_error(EG(exception), E_ERROR);
