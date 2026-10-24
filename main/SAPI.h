@@ -222,7 +222,6 @@ SAPI_API char *sapi_getenv(const char *name, size_t name_len);
 SAPI_API char *sapi_get_default_content_type(void);
 SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_header);
 SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len);
-SAPI_API void sapi_activate_headers_only(void);
 
 SAPI_API double sapi_get_request_time(void);
 END_EXTERN_C()
