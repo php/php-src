@@ -172,6 +172,8 @@ static zend_function *pgsql_link_get_constructor(zend_object *object) {
 	return NULL;
 }
 
+static void _php_pgsql_notice_handler(void *l, const char *message);
+
 static void pgsql_link_free(pgsql_link_handle *link)
 {
 	PGresult *res;
@@ -187,6 +189,12 @@ static void pgsql_link_free(pgsql_link_handle *link)
 
 	zend_hash_del(&PGG(connections), link->hash);
 
+	if (link->persistent) {
+		/* Reset the notice processor context to NULL so that notices emitted
+		 * during a subsequent PQreset on this persistent PGconn are safely
+		 * ignored rather than written to a stale link handle. */
+		PQsetNoticeProcessor(link->conn, _php_pgsql_notice_handler, NULL);
+	}
 	link->conn = NULL;
 	zend_string_release(link->hash);
 
