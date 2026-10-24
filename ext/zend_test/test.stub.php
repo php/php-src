@@ -301,6 +301,10 @@ namespace {
 
     function zend_test_erealloc_block_size(int $old_size, int $new_size): array {}
 
+#ifdef __SANITIZE_ADDRESS__
+    function zend_test_asan_zend_mm(int $old_size, int $new_size): array {}
+#endif
+
 	function zend_bool(bool $param): bool {}
 	function zend_bool_or_null(bool|null $param): bool|null {}
 	function zend_bool_slow_zpp(bool $param): bool {}
