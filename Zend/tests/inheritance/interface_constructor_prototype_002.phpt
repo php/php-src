@@ -1,9 +1,5 @@
 --TEST--
-Interfaces don't set prototypes to their parent method
---XFAIL--
-X::__constructor()'s prototype is set to B::__construct(). Y::__construct() then
-uses prototype to verify LSP, but misses A::__construct() which has a stricter
-signature.
+Child constructors are checked against all parent interface constructors
 --FILE--
 <?php
 
