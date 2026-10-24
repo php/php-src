@@ -414,7 +414,7 @@ void ir_set_fused_reg(ir_ctx *ctx, ir_ref root, ir_ref ref, ir_ref op, int8_t re
 	}
 	memcpy(key, &root, sizeof(ir_ref));
 	memcpy(key + 4, &ref_and_op, sizeof(ir_ref));
-	ir_strtab_lookup(ctx->fused_regs, key, 8, 0x10000000 | (uint8_t)reg);
+	ir_strtab_set(ctx->fused_regs, key, 8, 0x10000000 | (uint8_t)reg);
 }
 
 static int8_t ir_get_fused_reg_ex(ir_ctx *ctx, ir_ref root, ir_ref ref_and_op)
@@ -1008,6 +1008,27 @@ static uint32_t _find_mem_slot(ir_mem *mem_slots, uint32_t *mem_slots_count, ir_
 	return n;
 }
 
+static bool ir_dessa_needs_spill_load(ir_ctx *ctx, ir_use_list *use_list, ir_ref skip, int op_num, ir_reg reg)
+{
+	ir_ref *p, n, use;
+	ir_insn *insn;
+
+	for (n = use_list->count, p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
+		use = *p;
+		if (use == skip) continue;
+		insn = &ctx->ir_base[use];
+		if (insn->op == IR_PHI) {
+			ir_reg src = ir_get_alocated_reg(ctx, use, op_num);
+
+			if (IR_REG_NUM(src) == reg) {
+				/* the same input register used twice */
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
 static void ir_emit_dessa_moves(ir_ctx *ctx, int b, ir_block *bb)
 {
 	uint32_t succ, k, n = 0;
@@ -1054,7 +1075,21 @@ static void ir_emit_dessa_moves(ir_ctx *ctx, int b, ir_block *bb)
 			} else if (ir_rule(ctx, input) == IR_STATIC_ALLOCA) {
 				/* encode local variable address */
 				from = -(ctx->consts_count + input);
-			} else if (src != IR_REG_NONE && !IR_REG_SPILLED(src)) {
+			} else if (src != IR_REG_NONE
+			 && (!IR_REG_SPILLED(src)
+			  || ir_dessa_needs_spill_load(ctx, use_list, ref, k, IR_REG_NUM(src)))) {
+				if (IR_REG_SPILLED(src)) {
+					src = IR_REG_NUM(src);
+#if IR_X86_I64
+					if (insn->type == IR_I64 || insn->type == IR_U64) {
+						ir_reg reg_hi = IR_REG_I64_HI(src);
+						ir_reg reg_lo = IR_REG_I64_LO(src);
+						ir_emit_load_i64_lo(ctx, reg_lo, input);
+						ir_emit_load_i64_hi(ctx, reg_hi, input);
+					} else
+#endif
+					ir_emit_load(ctx, insn->type, src, input);
+				}
 #if IR_X86_I64
 				if (insn->type == IR_I64 || insn->type == IR_U64) {
 					src_hi = IR_REG_I64_HI(src);

@@ -627,6 +627,7 @@ void ir_strtab_init(ir_strtab *strtab, uint32_t count, uint32_t buf_size);
 ir_str ir_strtab_lookup(ir_strtab *strtab, const char *str, uint32_t len, ir_str val);
 ir_str ir_strtab_find(const ir_strtab *strtab, const char *str, uint32_t len);
 ir_str ir_strtab_update(ir_strtab *strtab, const char *str, uint32_t len, ir_str val);
+void ir_strtab_set(ir_strtab *strtab, const char *str, uint32_t len, ir_str val);
 const char *ir_strtab_str(const ir_strtab *strtab, ir_str idx);
 const char *ir_strtab_strl(const ir_strtab *strtab, ir_str idx, size_t *len);
 void ir_strtab_apply(const ir_strtab *strtab, ir_strtab_apply_t func);

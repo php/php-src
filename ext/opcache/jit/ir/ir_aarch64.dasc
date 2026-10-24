@@ -3997,7 +3997,7 @@ static void ir_emit_fix_type(ir_ctx *ctx, ir_type type, ir_reg op1_reg)
 	}
 }
 
-static void ir_emit_cmp_int_common(ir_ctx *ctx, ir_type type, ir_reg op1_reg, ir_ref op1, ir_reg op2_reg, ir_ref op2)
+static void ir_emit_cmp_int_common(ir_ctx *ctx, ir_op op, ir_type type, ir_reg op1_reg, ir_ref op1, ir_reg op2_reg, ir_ref op2)
 {
 	ir_backend_data *data = ctx->data;
 	dasm_State **Dst = &data->dasm_state;
@@ -4008,7 +4008,24 @@ static void ir_emit_cmp_int_common(ir_ctx *ctx, ir_type type, ir_reg op1_reg, ir
 	}
 
 	if (ir_type_size[type] < 4) {
-		ir_emit_fix_type(ctx, type, op1_reg);
+		/* Short signed comparison */
+		if (ir_type_size[type] == 2) {
+			if (op >= IR_LT && op <= IR_GT) {
+				|	sxth Rw(IR_REG_INT_TMP), Rw(op1_reg)
+			} else {
+				|	uxth Rw(IR_REG_INT_TMP), Rw(op1_reg)
+			}
+			op1_reg = IR_REG_INT_TMP;
+		} else if (ir_type_size[type] == 1) {
+			if (op >= IR_LT && op <= IR_GT) {
+				|	sxtb Rw(IR_REG_INT_TMP), Rw(op1_reg)
+			} else {
+				|	uxtb Rw(IR_REG_INT_TMP), Rw(op1_reg)
+			}
+			op1_reg = IR_REG_INT_TMP;
+		} else {
+			IR_ASSERT(0);
+		}
 	}
 	if (op2_reg != IR_REG_NONE) {
 		if (ir_type_size[type] == 8) {
@@ -4016,13 +4033,13 @@ static void ir_emit_cmp_int_common(ir_ctx *ctx, ir_type type, ir_reg op1_reg, ir
 		} else if (ir_type_size[type] == 4) {
 			|	cmp Rw(op1_reg), Rw(op2_reg)
 		} else if (ir_type_size[type] == 2) {
-			if (IR_IS_TYPE_SIGNED(type)) {
+			if (op >= IR_LT && op <= IR_GT) {
 				|	cmp Rw(op1_reg), Rw(op2_reg), sxth
 			} else {
 				|	cmp Rw(op1_reg), Rw(op2_reg), uxth
 			}
 		} else if (ir_type_size[type] == 1) {
-			if (IR_IS_TYPE_SIGNED(type)) {
+			if (op >= IR_LT && op <= IR_GT) {
 				|	cmp Rw(op1_reg), Rw(op2_reg), sxtb
 			} else {
 				|	cmp Rw(op1_reg), Rw(op2_reg), uxtb
@@ -4037,8 +4054,34 @@ static void ir_emit_cmp_int_common(ir_ctx *ctx, ir_type type, ir_reg op1_reg, ir
 
 		if (ir_type_size[type] == 8) {
 			|	cmp Rx(op1_reg), #val
-		} else {
+		} else if (ir_type_size[type] == 4) {
 			|	cmp Rw(op1_reg), #val
+		} else if (ir_type_size[type] == 2) {
+			if (op >= IR_LT && op <= IR_GT) {
+				val = (int32_t)(int16_t)(val & 0xffff);
+				if (val < 0) {
+					val = -val;
+					|	cmn Rw(op1_reg), #val
+				} else {
+					|	cmp Rw(op1_reg), #val
+				}
+			} else {
+				val = val & 0xffff;
+				|	cmp Rw(op1_reg), #val
+			}
+		} else if (ir_type_size[type] == 1) {
+			if (op >= IR_LT && op <= IR_GT) {
+				val = (int32_t)(int8_t)(val & 0xffff);
+				if (val < 0) {
+					val = -val;
+					|	cmn Rw(op1_reg), #val
+				} else {
+					|	cmp Rw(op1_reg), #val
+				}
+			} else {
+				val = val & 0xff;
+				|	cmp Rw(op1_reg), #val
+			}
 		}
 	}
 }
@@ -4091,7 +4134,7 @@ static void ir_emit_cmp_int(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 			op = IR_NE;
 		}
 	}
-	ir_emit_cmp_int_common(ctx, type, op1_reg, op1, op2_reg, op2);
+	ir_emit_cmp_int_common(ctx, op, type, op1_reg, op1, op2_reg, op2);
 	switch (op) {
 		default:
 			IR_ASSERT(0 && "NIY binary op");
@@ -4437,7 +4480,7 @@ static void ir_emit_cmp_and_branch_int(ir_ctx *ctx, uint32_t b, ir_ref def, ir_i
 			return;
 		}
 	}
-	ir_emit_cmp_int_common(ctx, type, op1_reg, op1, op2_reg, op2);
+	ir_emit_cmp_int_common(ctx, op, type, op1_reg, op1, op2_reg, op2);
 	ir_emit_jcc(ctx, b, def, insn, next_block, op, 1);
 }
 
@@ -6907,7 +6950,7 @@ static void ir_emit_guard_cmp_int(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *
 			return;
 		}
 	}
-	ir_emit_cmp_int_common(ctx, type, op1_reg, op1, op2_reg, op2);
+	ir_emit_cmp_int_common(ctx, op, type, op1_reg, op1, op2_reg, op2);
 
 	if (insn->op == IR_GUARD) {
 		op ^= 1; // reverse
@@ -6941,7 +6984,7 @@ static void ir_emit_guard_overflow(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	void *addr = ir_jmp_addr(ctx, insn, &ctx->ir_base[insn->op3]);
 
 	IR_ASSERT(IR_IS_TYPE_INT(type));
-	if (math_insn->op == IR_MUL_OV) {
+	if (math_insn->op == IR_MUL_OV || ir_type_size[math_insn->type] < 4) {
 		if (insn->op == IR_GUARD) {
 			|	beq &addr
 		} else {
@@ -6953,11 +6996,18 @@ static void ir_emit_guard_overflow(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 		} else {
 			|	bvs &addr
 		}
-	} else {
+	} else if (math_insn->op == IR_ADD_OV) {
 		if (insn->op == IR_GUARD) {
 			|	bcc &addr
 		} else {
 			|	bcs &addr
+		}
+	} else {
+		IR_ASSERT(math_insn->op == IR_SUB_OV);
+		if (insn->op == IR_GUARD) {
+			|	bcs &addr
+		} else {
+			|	bcc &addr
 		}
 	}
 }
