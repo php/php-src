@@ -98,6 +98,8 @@ PHP                                                                        NEWS
     empty array element. (jorgsowa)
   . Fixed bug GH-24396 (Assertion failure in zend_jit_def_reg() "reg forwarding"
     with chained Pi nodes). (ndossche)
+  . Fixed JIT treating an array as packed after a string key write turned it
+    into a hash. (jorgsowa)
 
 - PDO:
   . Fixed invalid ATTR_ORACLE_NULLS values being accepted and truncated.
