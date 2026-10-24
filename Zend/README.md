@@ -21,6 +21,57 @@ Zend MM disabled:
 USE_ZEND_ALLOC=0 valgrind --leak-check=full sapi/cli/php -r 'leak();'
 ```
 
+### Request-scoped no-reuse mode
+
+Set `ZEND_MM_NO_REUSE=1` in the process environment before starting PHP to
+prevent native Zend MM from reusing freed allocation ranges within a request:
+
+```bash
+ZEND_MM_NO_REUSE=1 sapi/cli/php script.php
+```
+
+The default is disabled: leave the variable unset or set it to `0`. Only the
+literal values `0` and `1` are accepted; other values cause an allocator panic.
+This is not a `php.ini` option. It is read at engine startup, so changing it with
+`putenv()` has no effect on the running engine. For web SAPIs, set it in the
+launcher or service environment before PHP starts, and restart PHP processes
+after changing it.
+
+With the mode enabled:
+
+- Freed small allocations, page runs, and huge mappings are cleared and retained
+  until their heap shuts down, after request shutdown callbacks have finished.
+  OS pages belonging to retired page runs and huge mappings are returned to the
+  kernel on supported platforms while their virtual addresses remain reserved.
+  Retired payloads are not used to store allocator free-list links.
+- Reallocations of existing blocks always move to fresh storage, including
+  shrinking and unchanged-size reallocations. The original storage is retired.
+- Allocator garbage collection does not reclaim retired storage. Addresses may
+  be reused after heap shutdown, normally in the next request.
+- Retained mappings remain charged against `memory_limit`. Reaching the limit
+  fails through the normal allocation-error path; it never enables reuse.
+  `memory_get_usage(false)` can decrease after freeing an allocation even though
+  the underlying storage remains retained.
+
+Reserved virtual memory and allocator accounting approach cumulative allocation
+volume rather than peak live memory. Resident memory may be lower where the
+operating system can discard fully retired pages. Clearing freed storage and
+moving reallocations also add memory bandwidth, system-call, and copying costs.
+The mode is intended for selected short-lived requests, not long-running scripts
+or application workers that do not perform normal PHP request shutdown.
+
+The mode requires native Zend MM. Combining it with `USE_ZEND_ALLOC=0`, custom
+heap or storage handlers, or `ZEND_MM_DEBUG` allocator wrappers causes an
+allocator panic rather than silently bypassing the protection.
+
+This is exploit mitigation, not memory safety or a sandbox. Invalid accesses
+to retired storage may still occur without trapping. Persistent allocations and
+extension-owned allocations outside native Zend MM are not covered, nor are
+dangling references that survive heap shutdown.
+
+See [Testing ZendMM No-Reuse Mode](../docs/source/miscellaneous/running-tests.rst#testing-zendmm-no-reuse-mode)
+for regression-test instructions.
+
 ### Shared extensions
 
 Since PHP 5.3.11 it is possible to prevent shared extensions from unloading so
