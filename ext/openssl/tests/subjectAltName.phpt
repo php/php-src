@@ -1,0 +1,50 @@
+--TEST--
+DirName in subjectAltName uses name-style notation with escaped commas
+--EXTENSIONS--
+openssl
+--FILE--
+<?php
+$cert = <<<'PEM'
+-----BEGIN CERTIFICATE-----
+MIIEbzCCA1egAwIBAgIUdeUsBnjgTxURiuUArMHKO9iz0RwwDQYJKoZIhvcNAQEL
+BQAwZTELMAkGA1UEBhMCVVMxEzARBgNVBAgMCkNhbGlmb3JuaWExFjAUBgNVBAcM
+DVNhbiBGcmFuY2lzY28xEzARBgNVBAoMCk15IENvbXBhbnkxFDASBgNVBAMMC2V4
+YW1wbGUuY29tMB4XDTI1MTAyNzE4NTkyN1oXDTI2MTAyNzE4NTkyN1owZTELMAkG
+A1UEBhMCVVMxEzARBgNVBAgMCkNhbGlmb3JuaWExFjAUBgNVBAcMDVNhbiBGcmFu
+Y2lzY28xEzARBgNVBAoMCk15IENvbXBhbnkxFDASBgNVBAMMC2V4YW1wbGUuY29t
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu/ojIyYq0/eUPO/iTeKa
+/lgeJUkfp9OR+RW9w+3SlVSh+PoxBaXtiJGUHNJ1L+QCAESOgt5PCe3XhZ7sPBZF
+hy+6SZYl46x5FwpDoqwo15mjJrgJ+RRrlUsaFGfGFAbucLcHUB7tMqa/drPzRLLb
+/1JW94R+Gb9uk/v8x6AYpeL1fjreagYNDGUgRw/5kQ0a84wmJqXBWVSH0yLeDnuu
+BvVStxI/omxAnRmttjLCs/WswwJHJC3iMy4ocP8Xe7xhz9m9nOiOYFLGaCZNPjMC
+xeylAgVfdtBe099Y6F3maIxZaVCGHKalwHB6dNwD//m0j6q8ylt5eEeSSSEf51mc
+SQIDAQABo4IBFTCCAREwge8GA1UdEQSB5zCB5IILZXhhbXBsZS5jb22CD3d3dy5l
+eGFtcGxlLmNvbYIVc3ViZG9tYWluLmV4YW1wbGUuY29thwTAqAEBhxAmB/DQEAIA
+UQAAAAAAAAAEgRFhZG1pbkBleGFtcGxlLmNvbaQ+MDwxETAPBgNVBAMMCEpvaG4g
+RG9lMRowGAYDVQQKDBFFeGFtcGxlIE9yZywgSW5jLjELMAkGA1UEBhMCVVOgIAYJ
+KoZIhvcNAQkUoBMMEVVJRF9mcmllbmRseV9uYW1liAMqAwSGG2h0dHA6Ly9leGFt
+cGxlLmNvbS9yZXNvdXJjZTAdBgNVHQ4EFgQUBoi/iNuA3Rj8YVxYu8cRWpfm89sw
+DQYJKoZIhvcNAQELBQADggEBAJ14oAlPBzG5TcIlVhCHhAlwdrTTledEzAE+3W9u
+gSIPZlwnxeDINn8ESJdH1vXzInkjMUWp5HLRHvnubkm+3+TxM62HSZ1wA8bnY0Yy
+hb9nwNj4MsNwWzzljT3W9rMiigZOmcTqEz+Ak+QdmxJHxqiuO5ZolC02D5t2H11A
+nL2qDlo/Td90KJi4Hn7W43pUGg/EqIcZf+OSsNIRGd+o/BqF7xHtX2peOCPDStWM
+Zvd3D90zu0hKS2mXwaNk6wXGgTTd3sO9+1QehwbvHU+ge1aFumNyrnGCD7NbLx+G
+Ch43ehA+qBjiykgmbH4fTobYyFMjNsLvWY9Jc5ruKJmPm5M=
+-----END CERTIFICATE-----
+PEM;
+$parsed = openssl_x509_parse($cert);
+
+if ($parsed === false || !isset($parsed['extensions']['subjectAltName'])) {
+    echo "MISSING_SUBJECT_ALT_NAME\n";
+    return;
+}
+
+$san = $parsed['extensions']['subjectAltName'];
+echo (strpos($san, 'DirName:/') !== false ? "HAS_DIRNAME_PREFIX\n" : "NO_DIRNAME_PREFIX\n");
+
+echo (strpos($san, '/O=Example Org, Inc.') !== false ? "COMMA_ESCAPED\n" : "COMMA_NOT_ESCAPED\n");
+
+?>
+--EXPECT--
+HAS_DIRNAME_PREFIX
+COMMA_ESCAPED
