@@ -393,8 +393,16 @@ static inline void accel_unlock_all(void)
 
 	mem_usage_unlock_all.l_type = F_UNLCK;
 	mem_usage_unlock_all.l_whence = SEEK_SET;
+#ifdef ZTS
+	/* fcntl() locks belong to the process: unlocking the whole file would also release
+	 * the SHM write lock (byte 0) and the restart lock (byte 2) held by other threads.
+	 * Those are always released by the thread that took them. */
+	mem_usage_unlock_all.l_start = 1;
+	mem_usage_unlock_all.l_len = 1;
+#else
 	mem_usage_unlock_all.l_start = 0;
 	mem_usage_unlock_all.l_len = 0;
+#endif
 
 	if (fcntl(lock_file, F_SETLK, &mem_usage_unlock_all) == -1) {
 		zend_accel_error(ACCEL_LOG_DEBUG, "UnlockAll:  %s (%d)", strerror(errno), errno);
