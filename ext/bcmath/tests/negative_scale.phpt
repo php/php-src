@@ -32,6 +32,11 @@ try {
     echo $e->getMessage() . \PHP_EOL;
 }
 try {
+    bcdivmod('1','2',-1);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
     bcpowmod('1', '2', '3', -9);
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
@@ -63,8 +68,10 @@ bcsub(): Argument #3 ($scale) must be between 0 and 2147483647
 bcmul(): Argument #3 ($scale) must be between 0 and 2147483647
 bcdiv(): Argument #3 ($scale) must be between 0 and 2147483647
 bcmod(): Argument #3 ($scale) must be between 0 and 2147483647
+bcdivmod(): Argument #3 ($scale) must be between 0 and 2147483647
 bcpowmod(): Argument #4 ($scale) must be between 0 and 2147483647
 bcpow(): Argument #3 ($scale) must be between 0 and 2147483647
 bcsqrt(): Argument #2 ($scale) must be between 0 and 2147483647
 bccomp(): Argument #3 ($scale) must be between 0 and 2147483647
 bcscale(): Argument #1 ($scale) must be between 0 and 2147483647
+
