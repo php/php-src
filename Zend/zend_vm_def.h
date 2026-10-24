@@ -10752,7 +10752,14 @@ ZEND_VM_HELPER(zend_interrupt_helper, ANY, ANY)
 
 			}
 		}
-		ZEND_VM_ENTER();
+		/* ZEND_VM_ENTER(), but do not check for interrupts immediately */
+		execute_data = EG(current_execute_data);
+		LOAD_OPLINE();
+#if ZEND_VM_KIND == ZEND_VM_KIND_CALL
+		return (zend_op*)((uintptr_t)opline | ZEND_VM_ENTER_BIT);
+#else
+		ZEND_VM_CONTINUE();
+#endif
 	}
 	ZEND_VM_CONTINUE();
 }
