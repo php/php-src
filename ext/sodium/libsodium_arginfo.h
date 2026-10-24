@@ -1,5 +1,5 @@
 /* This is a generated file, edit libsodium.stub.php instead.
- * Stub hash: 3660efaec3ee273ff570540c372d284c72468abb */
+ * Stub hash: 50b3cf45af139d4d38f0f46a152b5b1e2662dfd4 */
 
 #include "zend_attributes.h"
 #include "zend_constants.h"
@@ -536,43 +536,67 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_xof_shake128, 0, 2
 	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_xof_shake128_init, 0, 0, IS_STRING, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_sodium_crypto_xof_shake128_init, 0, 0, SodiumCryptoXofShake128State, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, domain, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_xof_shake128_update, 0, 2, IS_TRUE, 0)
-	ZEND_ARG_TYPE_INFO(1, state, IS_STRING, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_xof_shake128_update, 0, 2, IS_VOID, 0)
+	ZEND_ARG_OBJ_INFO(0, state, SodiumCryptoXofShake128State, 0)
 	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_xof_shake128_squeeze, 0, 2, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(1, state, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO(0, state, SodiumCryptoXofShake128State, 0)
 	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_sodium_crypto_xof_shake256 arginfo_sodium_crypto_xof_shake128
 
-#define arginfo_sodium_crypto_xof_shake256_init arginfo_sodium_crypto_xof_shake128_init
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_sodium_crypto_xof_shake256_init, 0, 0, SodiumCryptoXofShake256State, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, domain, IS_LONG, 1, "null")
+ZEND_END_ARG_INFO()
 
-#define arginfo_sodium_crypto_xof_shake256_update arginfo_sodium_crypto_xof_shake128_update
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_xof_shake256_update, 0, 2, IS_VOID, 0)
+	ZEND_ARG_OBJ_INFO(0, state, SodiumCryptoXofShake256State, 0)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_sodium_crypto_xof_shake256_squeeze arginfo_sodium_crypto_xof_shake128_squeeze
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_xof_shake256_squeeze, 0, 2, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO(0, state, SodiumCryptoXofShake256State, 0)
+	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_sodium_crypto_xof_turboshake128 arginfo_sodium_crypto_xof_shake128
 
-#define arginfo_sodium_crypto_xof_turboshake128_init arginfo_sodium_crypto_xof_shake128_init
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_sodium_crypto_xof_turboshake128_init, 0, 0, SodiumCryptoXofTurboshake128State, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, domain, IS_LONG, 1, "null")
+ZEND_END_ARG_INFO()
 
-#define arginfo_sodium_crypto_xof_turboshake128_update arginfo_sodium_crypto_xof_shake128_update
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_xof_turboshake128_update, 0, 2, IS_VOID, 0)
+	ZEND_ARG_OBJ_INFO(0, state, SodiumCryptoXofTurboshake128State, 0)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_sodium_crypto_xof_turboshake128_squeeze arginfo_sodium_crypto_xof_shake128_squeeze
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_xof_turboshake128_squeeze, 0, 2, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO(0, state, SodiumCryptoXofTurboshake128State, 0)
+	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_sodium_crypto_xof_turboshake256 arginfo_sodium_crypto_xof_shake128
 
-#define arginfo_sodium_crypto_xof_turboshake256_init arginfo_sodium_crypto_xof_shake128_init
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_sodium_crypto_xof_turboshake256_init, 0, 0, SodiumCryptoXofTurboshake256State, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, domain, IS_LONG, 1, "null")
+ZEND_END_ARG_INFO()
 
-#define arginfo_sodium_crypto_xof_turboshake256_update arginfo_sodium_crypto_xof_shake128_update
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_xof_turboshake256_update, 0, 2, IS_VOID, 0)
+	ZEND_ARG_OBJ_INFO(0, state, SodiumCryptoXofTurboshake256State, 0)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_sodium_crypto_xof_turboshake256_squeeze arginfo_sodium_crypto_xof_shake128_squeeze
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_xof_turboshake256_squeeze, 0, 2, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO(0, state, SodiumCryptoXofTurboshake256State, 0)
+	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 #endif
 
 #if defined(crypto_kem_PUBLICKEYBYTES)
@@ -1387,6 +1411,54 @@ static void register_libsodium_symbols(int module_number)
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_kem_mlkem768_dec", sizeof("sodium_crypto_kem_mlkem768_dec") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 #endif
 }
+
+#if defined(crypto_xof_shake128_STATEBYTES)
+static zend_class_entry *register_class_SodiumCryptoXofShake128State(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SodiumCryptoXofShake128State", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+
+	return class_entry;
+}
+#endif
+
+#if defined(crypto_xof_shake128_STATEBYTES)
+static zend_class_entry *register_class_SodiumCryptoXofShake256State(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SodiumCryptoXofShake256State", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+
+	return class_entry;
+}
+#endif
+
+#if defined(crypto_xof_shake128_STATEBYTES)
+static zend_class_entry *register_class_SodiumCryptoXofTurboshake128State(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SodiumCryptoXofTurboshake128State", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+
+	return class_entry;
+}
+#endif
+
+#if defined(crypto_xof_shake128_STATEBYTES)
+static zend_class_entry *register_class_SodiumCryptoXofTurboshake256State(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SodiumCryptoXofTurboshake256State", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+
+	return class_entry;
+}
+#endif
 
 static zend_class_entry *register_class_SodiumException(zend_class_entry *class_entry_Exception)
 {
