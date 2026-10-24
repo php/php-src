@@ -39,16 +39,41 @@ static int pdo_sqlite_stmt_dtor(pdo_stmt_t *stmt)
 	return 1;
 }
 
+static int pdo_sqlite_stmt_step(pdo_sqlite_stmt *S)
+{
+	int return_code;
+	bool bailout = false;
+
+	S->stepping = 1;
+	zend_try {
+		return_code = sqlite3_step(S->stmt);
+	} zend_catch {
+		bailout = true;
+	} zend_end_try();
+	S->stepping = 0;
+
+	if (bailout) {
+		zend_bailout();
+	}
+
+	return return_code;
+}
+
 static int pdo_sqlite_stmt_execute(pdo_stmt_t *stmt)
 {
 	pdo_sqlite_stmt *S = (pdo_sqlite_stmt*)stmt->driver_data;
+
+	if (S->stepping) {
+		zend_throw_error(NULL, "Cannot execute a PDOStatement while it is executing");
+		return 0;
+	}
 
 	if (stmt->executed && !S->done) {
 		sqlite3_reset(S->stmt);
 	}
 
 	S->done = 0;
-	switch (sqlite3_step(S->stmt)) {
+	switch (pdo_sqlite_stmt_step(S)) {
 		case SQLITE_ROW:
 			S->pre_fetched = 1;
 			php_pdo_stmt_set_column_count(stmt, sqlite3_data_count(S->stmt));
@@ -80,6 +105,11 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 
 	switch (event_type) {
 		case PDO_PARAM_EVT_EXEC_PRE:
+			if (S->stepping) {
+				zend_throw_error(NULL, "Cannot execute a PDOStatement while it is executing");
+				return 0;
+			}
+
 			if (stmt->executed && !S->done) {
 				sqlite3_reset(S->stmt);
 				S->done = 1;
@@ -214,7 +244,11 @@ static int pdo_sqlite_stmt_fetch(pdo_stmt_t *stmt,
 	if (S->done) {
 		return 0;
 	}
-	i = sqlite3_step(S->stmt);
+	if (S->stepping) {
+		zend_throw_error(NULL, "Cannot fetch from a PDOStatement while it is executing");
+		return 0;
+	}
+	i = pdo_sqlite_stmt_step(S);
 	switch (i) {
 		case SQLITE_ROW:
 			return 1;
@@ -363,6 +397,12 @@ static int pdo_sqlite_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *ret
 static int pdo_sqlite_stmt_cursor_closer(pdo_stmt_t *stmt)
 {
 	pdo_sqlite_stmt *S = (pdo_sqlite_stmt*)stmt->driver_data;
+
+	if (S->stepping) {
+		zend_throw_error(NULL, "Cannot close the cursor of a PDOStatement while it is executing");
+		return 0;
+	}
+
 	sqlite3_reset(S->stmt);
 	return 1;
 }
