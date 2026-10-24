@@ -333,6 +333,7 @@ struct _gc_stack {
 static zend_never_inline gc_stack* gc_stack_next(gc_stack *stack)
 {
 	if (UNEXPECTED(!stack->next)) {
+		/* Traversal must not bail out on the request memory limit after changing refcounts. */
 		gc_stack *segment = pemalloc(sizeof(gc_stack), true);
 		segment->prev = stack;
 		segment->next = NULL;
@@ -2154,6 +2155,8 @@ static int zend_gc_collect_cycles_with_stack(gc_stack *stack)
 
 ZEND_API int zend_gc_collect_cycles(void)
 {
+	/* Keep the modified stack outside the function containing setjmp(), so it remains
+	 * valid when freeing traversal storage after a bailout. */
 	gc_stack stack;
 
 	stack.prev = NULL;
