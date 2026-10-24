@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-24641 (ndbm backend never checks dbm_open() return value,
     NULL deref on first use after a failed open). (Girgias)
 
+- DOM:
+  . Fix error paths in dom_xml_serializing_a_document_node(). (ndossche)
+
 - Hash:
   . Fix GOST and Snefru digests of 512 MiB or more. (Martin Mirchev)
 
