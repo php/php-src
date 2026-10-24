@@ -3672,6 +3672,26 @@ static void zend_disable_function(const char *function_name, size_t function_nam
 		zend_error(E_WARNING, "Cannot disable function %s()", function_name);
 		return;
 	}
+#ifdef ZTS
+	/* After zend_post_startup() the function table of a thread borrows the
+	 * functions of the global function table, which destroys them on shutdown
+	 * (see compiler_globals_ctor()). Remove them without destroying them. */
+	HashTable *function_table = CG(function_table);
+	zval *zv = zend_hash_str_find(function_table, function_name, function_name_length);
+	if (zv && (uint32_t) ((Bucket *) zv - function_table->arData) < CG(copied_functions_count)) {
+		dtor_func_t dtor = function_table->pDestructor;
+
+		function_table->pDestructor = NULL;
+		zend_hash_str_del(function_table, function_name, function_name_length);
+		function_table->pDestructor = dtor;
+
+		/* Keep the remaining copied functions at the start of the table,
+		 * as expected by compiler_globals_dtor(). */
+		zend_hash_rehash(function_table);
+		CG(copied_functions_count)--;
+		return;
+	}
+#endif
 	zend_hash_str_del(CG(function_table), function_name, function_name_length);
 }
 
