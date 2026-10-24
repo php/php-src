@@ -404,7 +404,7 @@ static void track_class_dependency(zend_class_entry *ce, zend_string *class_name
 
 	ht = (HashTable*)CG(current_linking_class)->inheritance_cache;
 
-	if (!(ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+	if (!(ce->ce_flags & ZEND_ACC_IMMUTABLE) || !(ce->ce_flags & ZEND_ACC_LINKED)) {
 		// TODO: dependency on not-immutable class ???
 		if (ht) {
 			zend_hash_destroy(ht);
