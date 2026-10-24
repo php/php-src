@@ -822,7 +822,7 @@ PHP_FUNCTION(dns_get_record)
 	HEADER *hp;
 	querybuf answer = {0};
 	uint8_t *cp = NULL, *end = NULL;
-	int n, qd, an, ns = 0, ar = 0;
+	int n, qd, an, ns, ar;
 	int type, first_query = 1, store_results = 1;
 	bool raw = 0;
 
