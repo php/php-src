@@ -133,7 +133,7 @@ PHPAPI zend_string *php_uudecode(const char *src, size_t src_len) /* {{{ */
 		return NULL;
 	}
 
-	dest = zend_string_alloc((src_len * 3 + 3) / 4, 0);
+	dest = zend_string_alloc(src_len - src_len / 4, 0);
 	p = ZSTR_VAL(dest);
 	s = src;
 	e = src + src_len;
