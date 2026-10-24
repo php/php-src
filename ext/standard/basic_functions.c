@@ -436,9 +436,9 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 		BG(strtok_string) = NULL;
 	}
 #ifdef HAVE_PUTENV
-	tsrm_env_lock();
+	tsrm_env_lock(true);
 	zend_hash_destroy(&BG(putenv_ht));
-	tsrm_env_unlock();
+	tsrm_env_unlock(true);
 #endif
 
 	if (BG(umask) != -1) {
@@ -705,7 +705,7 @@ PHPAPI zend_string *php_getenv(const char *str, size_t str_len) {
 		}
 	}
 #else
-	tsrm_env_lock();
+	tsrm_env_lock(false);
 
 	/* system method returns a const */
 	char *ptr = getenv(str);
@@ -714,7 +714,7 @@ PHPAPI zend_string *php_getenv(const char *str, size_t str_len) {
 		result = zend_string_init(ptr, strlen(ptr), 0);
 	}
 
-	tsrm_env_unlock();
+	tsrm_env_unlock(false);
 	return result;
 #endif
 }
@@ -790,7 +790,7 @@ PHP_FUNCTION(putenv)
 		pe.key = zend_string_init(setting, setting_len, 0);
 	}
 
-	tsrm_env_lock();
+	tsrm_env_lock(true);
 	zend_hash_del(&BG(putenv_ht), pe.key);
 
 	/* find previous value */
@@ -825,7 +825,7 @@ PHP_FUNCTION(putenv)
 		}
 		/* valw may be NULL, but the failed conversion still needs to be checked. */
 		if (!keyw || (!valw && value)) {
-			tsrm_env_unlock();
+			tsrm_env_unlock(true);
 			free(pe.putenv_string);
 			zend_string_release(pe.key);
 			free(keyw);
@@ -853,14 +853,14 @@ PHP_FUNCTION(putenv)
 			tzset();
 		}
 #endif
-		tsrm_env_unlock();
+		tsrm_env_unlock(true);
 #ifdef PHP_WIN32
 		free(keyw);
 		free(valw);
 #endif
 		RETURN_TRUE;
 	} else {
-		tsrm_env_unlock();
+		tsrm_env_unlock(true);
 		free(pe.putenv_string);
 		zend_string_release(pe.key);
 #ifdef PHP_WIN32
