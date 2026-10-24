@@ -866,13 +866,16 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define ZSTR_GET_CE_CACHE(s)		ZSTR_GET_CE_CACHE_EX(s, 1)
 #define ZSTR_SET_CE_CACHE(s, ce)	ZSTR_SET_CE_CACHE_EX(s, ce, 1)
 
-#define ZSTR_VALID_CE_CACHE(s)		EXPECTED((GC_REFCOUNT(s)-1)/sizeof(void *) < CG(map_ptr_last))
+/* Valid map_ptr offsets are always odd and strictly > 2 ((k * sizeof(void*)) + 1).
+ * Interned strings in SHM initialize with refcount 2. A refcount <= 2 indicates
+ * an unallocated or not-yet-committed cache slot and must not be dereferenced. */
+#define ZSTR_VALID_CE_CACHE(s)		EXPECTED(GC_REFCOUNT(s) > 2 && (GC_REFCOUNT(s)-1)/sizeof(void *) < CG(map_ptr_last))
 
 #define ZSTR_GET_CE_CACHE_EX(s, validate) \
 	((!(validate) || ZSTR_VALID_CE_CACHE(s)) ? GET_CE_CACHE(GC_REFCOUNT(s)) : NULL)
 
 #define ZSTR_SET_CE_CACHE_EX(s, ce, validate) do { \
-		if (!(validate) || ZSTR_VALID_CE_CACHE(s)) { \
+		if ((!(validate) || ZSTR_VALID_CE_CACHE(s)) && EXPECTED(GC_REFCOUNT(s) > 2)) { \
 			ZEND_ASSERT((validate) || ZSTR_VALID_CE_CACHE(s)); \
 			SET_CE_CACHE(GC_REFCOUNT(s), ce); \
 		} \
