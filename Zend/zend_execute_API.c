@@ -1241,10 +1241,12 @@ ZEND_API bool zend_is_valid_class_name(const zend_string *name) {
 	for (size_t i = 0; i < ZSTR_LEN(name); i++) {
 		unsigned char c = ZSTR_VAL(name)[i];
 		if (!ZEND_BIT_TEST(valid_chars, c)) {
-			return 0;
+			return false;
 		}
 	}
-	return 1;
+
+	/* An empty string is *not* a valid class name */
+	return ZSTR_LEN(name);
 }
 
 ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *key, uint32_t flags) /* {{{ */
@@ -1263,17 +1265,11 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 	}
 
 	if (key) {
+		ZEND_ASSERT(ZSTR_LEN(name) != 0 && "Must not be an empty class name");
+		ZEND_ASSERT((ZSTR_VAL(name)[0] != '\\' || ZSTR_LEN(name) > 1) && "Class name must not be \"\\\"");
 		lc_name = key;
 	} else {
-		if (!ZSTR_LEN(name)) {
-			return NULL;
-		}
-
 		if (ZSTR_VAL(name)[0] == '\\') {
-			if (ZSTR_LEN(name) == 1) {
-				/* A lone namespace separator names no class, e.g. is_callable('\::method'). */
-				return NULL;
-			}
 			lc_name = zend_string_alloc(ZSTR_LEN(name) - 1, 0);
 			zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1);
 		} else {
@@ -1308,26 +1304,25 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 		return ce;
 	}
 
-	/* The compiler is not-reentrant. Make sure we autoload only during run-time. */
-	if ((flags & ZEND_FETCH_CLASS_NO_AUTOLOAD) || zend_is_compiling()) {
+	if (
+		(flags & ZEND_FETCH_CLASS_NO_AUTOLOAD)
+		|| !zend_autoload
+		/* The compiler is not-reentrant. Make sure we autoload only during run-time. */
+		|| zend_is_compiling()
+	) {
 		if (!key) {
 			zend_string_release_ex(lc_name, 0);
 		}
 		return NULL;
 	}
 
-	if (!zend_autoload) {
-		if (!key) {
-			zend_string_release_ex(lc_name, 0);
-		}
-		return NULL;
-	}
-
-	/* Verify class name before passing it to the autoloader. */
-	if (!key && !ZSTR_HAS_CE_CACHE(name) && !zend_is_valid_class_name(name)) {
+	/* Verify class name before passing it to the autoloader.
+	 * We check for the lowercase name as it already in canonical form without leading \ */
+	if (!key && !ZSTR_HAS_CE_CACHE(name) && !zend_is_valid_class_name(lc_name)) {
 		zend_string_release_ex(lc_name, 0);
 		return NULL;
 	}
+	ZEND_ASSERT(zend_is_valid_class_name(name) && "If lowercase name is valid the name must also be so");
 
 	if (zend_hash_add_empty_element(&EG(autoload_current_classnames), lc_name) == NULL) {
 		if (!key) {
