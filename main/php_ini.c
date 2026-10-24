@@ -25,6 +25,8 @@
 #ifdef PHP_WIN32
 #include "win32/php_registry.h"
 #include "win32/winutil.h"
+#include "win32/codepage.h"
+#include "win32/console.h"
 #endif
 
 #if defined(HAVE_SCANDIR) && defined(HAVE_ALPHASORT) && defined(HAVE_DIRENT_H)
@@ -307,6 +309,205 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 }
 /* }}} */
 
+#ifdef PHP_WIN32
+typedef struct {
+	zval args[3];
+	int callback_type;
+} php_ini_utf8_entry;
+
+typedef struct {
+	const struct php_win32_cp *cp;
+	const struct php_win32_cp *utf8;
+	HashTable values;
+	zend_llist entries;
+	bool failed;
+} php_ini_utf8_context;
+
+static php_ini_utf8_context *php_ini_utf8;
+
+static const struct php_win32_cp *php_ini_utf8_codepage(HashTable *hash)
+{
+	const char *names[] = {"internal_encoding", "default_charset"};
+	for (int i = 0; i < 2; i++) {
+		zval *value = zend_hash_str_find(hash, names[i], strlen(names[i]));
+		if (value && Z_TYPE_P(value) == IS_PTR) {
+			value = Z_PTR_P(value);
+		}
+		if (value && Z_TYPE_P(value) == IS_STRING && Z_STRLEN_P(value)) {
+			return php_win32_cp_get_by_enc(Z_STRVAL_P(value));
+		}
+	}
+	return php_win32_cp_get_by_id(CP_UTF8);
+}
+
+static bool php_ini_utf8_extension_path(zend_string *name)
+{
+	return zend_string_equals_literal_ci(name, PHP_EXTENSION_TOKEN)
+		|| zend_string_equals_literal_ci(name, ZEND_EXTENSION_TOKEN)
+		|| zend_string_equals_literal(name, "extension_dir");
+}
+
+static void php_ini_utf8_convert(php_ini_utf8_context *ctx, zval *value, const struct php_win32_cp *from, const struct php_win32_cp *to)
+{
+	if (ctx->failed || Z_TYPE_P(value) != IS_STRING || from == to) {
+		return;
+	}
+	wchar_t *wide = php_win32_cp_conv_ascii_to_w(Z_STRVAL_P(value), Z_STRLEN_P(value), PHP_WIN32_CP_IGNORE_LEN_P);
+	if (wide) {
+		free(wide);
+		return;
+	}
+	size_t length, wide_len;
+	wide = php_win32_cp_conv_to_w(from->id, from->to_w_fl, Z_STRVAL_P(value), Z_STRLEN_P(value), &wide_len);
+	char *bytes = NULL;
+	if (wide) {
+		bytes = php_win32_cp_conv_from_w(to->id, to->from_w_fl, wide, wide_len, &length);
+		free(wide);
+	}
+	if (!bytes) {
+		ctx->failed = true;
+		return;
+	}
+	zend_string_release(Z_STR_P(value));
+	ZVAL_STR(value, zend_string_init(bytes, length, true));
+	free(bytes);
+}
+
+static zval *php_ini_utf8_get_config(zend_string *name)
+{
+	php_ini_utf8_context *ctx = php_ini_utf8;
+	zval *value = zend_hash_find(&ctx->values, name);
+	if (!value || Z_TYPE_P(value) != IS_PTR) {
+		return value;
+	}
+	value = Z_PTR_P(value);
+	if (value && Z_TYPE_P(value) == IS_STRING) {
+		zval converted;
+		ZVAL_STR(&converted, zend_string_copy(Z_STR_P(value)));
+		const struct php_win32_cp *cp = php_ini_utf8_extension_path(name)
+			? php_win32_cp_get_by_id(CP_ACP) : ctx->cp;
+		php_ini_utf8_convert(ctx, &converted, cp, ctx->utf8);
+		return zend_hash_update(&ctx->values, name, &converted);
+	}
+	return value;
+}
+
+static char *php_ini_utf8_getenv(const char *name, size_t name_len)
+{
+	wchar_t *wide_name = php_win32_cp_conv_utf8_to_w(name, name_len, PHP_WIN32_CP_IGNORE_LEN_P);
+	if (!wide_name) {
+		php_ini_utf8->failed = true;
+		return estrdup("");
+	}
+	const wchar_t *value = _wgetenv(wide_name);
+	free(wide_name);
+	if (!value) {
+		return NULL;
+	}
+	char *bytes = php_win32_cp_w_to_utf8(value);
+	if (!bytes) {
+		php_ini_utf8->failed = true;
+		return estrdup("");
+	}
+	char *result = estrdup(bytes);
+	free(bytes);
+	return result;
+}
+
+static void php_ini_utf8_entry_dtor(void *data)
+{
+	php_ini_utf8_entry *entry = data;
+	for (int i = 0; i < 3; i++) {
+		zval_internal_ptr_dtor(&entry->args[i]);
+	}
+}
+
+static void php_ini_utf8_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_type, void *data)
+{
+	php_ini_utf8_context *ctx = data;
+	php_ini_utf8_entry entry;
+	zval *args[3] = {arg1, arg2, arg3};
+	for (int i = 0; i < 3; i++) {
+		if (args[i]) {
+			ZVAL_STR(&entry.args[i], zend_string_dup(Z_STR_P(args[i]), true));
+		} else {
+			ZVAL_UNDEF(&entry.args[i]);
+		}
+	}
+	entry.callback_type = callback_type;
+	zend_llist_add_element(&ctx->entries, &entry);
+	/* Keep earlier -d values available for expansion, without queuing extensions twice. */
+	if (callback_type == ZEND_INI_PARSER_ENTRY && !is_special_section
+			&& (zend_string_equals_literal_ci(Z_STR_P(arg1), PHP_EXTENSION_TOKEN)
+				|| zend_string_equals_literal_ci(Z_STR_P(arg1), ZEND_EXTENSION_TOKEN))) {
+		return;
+	}
+	php_ini_parser_cb(arg1, arg2, arg3, callback_type, &ctx->values);
+}
+
+static zend_result php_ini_parse_utf8(const char *entries)
+{
+	php_ini_utf8_context ctx = {0};
+	char *(*getenv_save)(const char *, size_t) = zend_getenv;
+	zend_hash_init(&ctx.values, 8, NULL, config_zval_dtor, true);
+	zend_llist_init(&ctx.entries, sizeof(php_ini_utf8_entry), php_ini_utf8_entry_dtor, true);
+	ctx.cp = php_ini_utf8_codepage(&configuration_hash);
+	ctx.utf8 = php_win32_cp_get_by_id(CP_UTF8);
+	if (!ctx.cp || !ctx.utf8) {
+		ctx.failed = true;
+		goto cleanup;
+	}
+	/* Borrow php.ini scalars; section arrays only need their structure while parsing. */
+	zend_string *key;
+	zval *value;
+	ZEND_HASH_FOREACH_STR_KEY_VAL(&configuration_hash, key, value) {
+		if (key) {
+			zval name, borrowed;
+			ZVAL_STR(&name, zend_string_copy(key));
+			php_ini_utf8_convert(&ctx, &name, ctx.cp, ctx.utf8);
+			if (Z_TYPE_P(value) == IS_ARRAY) {
+				ZVAL_NEW_PERSISTENT_ARR(&borrowed);
+				zend_hash_init(Z_ARRVAL(borrowed), 0, NULL, config_zval_dtor, true);
+			} else {
+				ZVAL_PTR(&borrowed, value);
+			}
+			zend_hash_update(&ctx.values, Z_STR(name), &borrowed);
+			zend_string_release(Z_STR(name));
+		}
+	} ZEND_HASH_FOREACH_END();
+	php_ini_utf8 = &ctx;
+	zend_getenv = php_ini_utf8_getenv;
+	/* Parse in UTF-8, then apply the values after resolving the final code page. */
+	zend_parse_ini_string(entries, true, ZEND_INI_SCANNER_NORMAL, php_ini_utf8_parser_cb, &ctx);
+	zend_getenv = getenv_save;
+	php_ini_utf8 = NULL;
+	RESET_ACTIVE_INI_HASH();
+	ctx.cp = php_ini_utf8_codepage(&ctx.values);
+	ctx.failed |= !ctx.cp;
+	for (zend_llist_element *element = ctx.entries.head; element && !ctx.failed; element = element->next) {
+		php_ini_utf8_entry *entry = (php_ini_utf8_entry *) element->data;
+		const struct php_win32_cp *value_cp = entry->callback_type == ZEND_INI_PARSER_ENTRY
+			&& php_ini_utf8_extension_path(Z_STR(entry->args[0]))
+			? php_win32_cp_get_by_id(CP_ACP) : ctx.cp;
+		for (int i = 0; i < 3; i++) {
+			php_ini_utf8_convert(&ctx, &entry->args[i], ctx.utf8, i == 1 ? value_cp : ctx.cp);
+		}
+		if (!ctx.failed) {
+			php_ini_parser_cb(&entry->args[0], Z_ISUNDEF(entry->args[1]) ? NULL : &entry->args[1],
+				Z_ISUNDEF(entry->args[2]) ? NULL : &entry->args[2], entry->callback_type, &configuration_hash);
+		}
+	}
+cleanup:
+	zend_llist_destroy(&ctx.entries);
+	zend_hash_destroy(&ctx.values);
+	if (ctx.failed) {
+		php_error(E_CORE_WARNING, "Could not convert command line INI values to the configured Windows code page");
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+#endif
+
 /* {{{ php_load_php_extension_cb */
 static void php_load_php_extension_cb(void *arg)
 {
@@ -404,7 +605,7 @@ static void append_ini_path(char *php_ini_search_path, size_t search_path_size, 
 }
 
 /* {{{ php_init_config */
-void php_init_config(void)
+zend_result php_init_config(void)
 {
 	char *php_ini_file_name = NULL;
 	char *php_ini_search_path = NULL;
@@ -722,8 +923,15 @@ void php_init_config(void)
 	if (sapi_module.ini_entries) {
 		/* Reset active ini section */
 		RESET_ACTIVE_INI_HASH();
+
+#ifdef PHP_WIN32
+		if (php_win32_console_is_cli_sapi()) {
+			return php_ini_parse_utf8(sapi_module.ini_entries);
+		}
+#endif
 		zend_parse_ini_string(sapi_module.ini_entries, true, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_cb, &configuration_hash);
 	}
+	return SUCCESS;
 }
 /* }}} */
 
@@ -882,6 +1090,11 @@ PHPAPI void php_ini_activate_per_host_config(const char *host, size_t host_len)
 /* {{{ cfg_get_entry */
 PHPAPI zval *cfg_get_entry_ex(zend_string *name)
 {
+#ifdef PHP_WIN32
+	if (php_ini_utf8) {
+		return php_ini_utf8_get_config(name);
+	}
+#endif
 	return zend_hash_find(&configuration_hash, name);
 }
 /* }}} */
