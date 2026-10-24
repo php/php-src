@@ -639,7 +639,7 @@ const char *zend_accel_get_shared_model(void)
 	return g_shared_model;
 }
 
-void zend_accel_shared_protect(bool protected)
+ZEND_API void zend_accel_shared_protect(bool protected)
 {
 #if defined(HAVE_MPROTECT) || defined(ZEND_WIN32)
 	int i;
