@@ -1854,6 +1854,8 @@ zend_result php_request_startup(void)
 {
 	zend_result retval = SUCCESS;
 
+	/* Input processing can use serialization before module RINIT. */
+	php_var_serialization_reset();
 	zend_interned_strings_activate();
 
 #ifdef HAVE_DTRACE
