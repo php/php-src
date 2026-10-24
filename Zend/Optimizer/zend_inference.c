@@ -4927,7 +4927,7 @@ ZEND_API zend_result zend_ssa_inference(zend_arena **arena, const zend_op_array 
 /* }}} */
 
 /* Key types whose conversion to an array offset may emit a diagnostic */
-#define MAY_BE_THROWING_KEY (MAY_BE_DOUBLE|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)
+#define MAY_BE_THROWING_KEY (MAY_BE_NULL|MAY_BE_DOUBLE|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)
 
 ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_op_array *op_array, const zend_ssa *ssa, uint32_t t1, uint32_t t2)
 {
@@ -5265,7 +5265,7 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 		case ZEND_INIT_ARRAY:
 			return (opline->op2_type != IS_UNUSED) && (t2 & MAY_BE_THROWING_KEY);
 		case ZEND_ADD_ARRAY_ELEMENT:
-			return (opline->op2_type == IS_UNUSED) || (t2 & (MAY_BE_NULL|MAY_BE_THROWING_KEY));
+			return (opline->op2_type == IS_UNUSED) || (t2 & MAY_BE_THROWING_KEY);
 		case ZEND_STRLEN:
 			return (t1 & MAY_BE_ANY) != MAY_BE_STRING;
 		case ZEND_COUNT:
