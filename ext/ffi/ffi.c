@@ -3677,6 +3677,11 @@ static void zend_ffi_throw_parser_error(const char *format, ...) /* {{{ */
 	va_list va;
 	char *message = NULL;
 
+	if (FFI_G(parse_failed)) {
+		/* An error was already reported, parsing only continues to unwind cleanly */
+		return;
+	}
+
 	va_start(va, format);
 	zend_vspprintf(&message, 0, format, va);
 
@@ -5752,20 +5757,22 @@ ZEND_GET_MODULE(ffi)
 /* parser callbacks */
 void zend_ffi_parser_error(const char *format, ...) /* {{{ */
 {
-	va_list va;
-	char *message = NULL;
+	if (!FFI_G(parse_failed)) {
+		va_list va;
+		char *message = NULL;
 
-	va_start(va, format);
-	zend_vspprintf(&message, 0, format, va);
+		va_start(va, format);
+		zend_vspprintf(&message, 0, format, va);
 
-	if (EG(current_execute_data)) {
-		zend_throw_exception(zend_ffi_parser_exception_ce, message, 0);
-	} else {
-		zend_error(E_WARNING, "FFI Parser: %s", message);
+		if (EG(current_execute_data)) {
+			zend_throw_exception(zend_ffi_parser_exception_ce, message, 0);
+		} else {
+			zend_error(E_WARNING, "FFI Parser: %s", message);
+		}
+
+		efree(message);
+		va_end(va);
 	}
-
-	efree(message);
-	va_end(va);
 
 	LONGJMP(FFI_G(bailout), FAILURE);
 }
@@ -5851,10 +5858,16 @@ static void zend_ffi_finalize_type(zend_ffi_dcl *dcl) /* {{{ */
 			case ZEND_FFI_DCL_FLOAT|ZEND_FFI_DCL_COMPLEX:
 			case ZEND_FFI_DCL_DOUBLE|ZEND_FFI_DCL_COMPLEX:
 			case ZEND_FFI_DCL_DOUBLE|ZEND_FFI_DCL_LONG|ZEND_FFI_DCL_COMPLEX:
-				zend_ffi_parser_error("Unsupported type _Complex at line %d", FFI_G(line));
+				zend_ffi_throw_parser_error("Unsupported type _Complex at line %d", FFI_G(line));
+				/* Do not bail out here: callers may hold memory that is not owned by dcl yet.
+				 * Continue with a placeholder type, zend_ffi_parse_*() report the failure. */
+				FFI_G(parse_failed) = 1;
+				dcl->type = (zend_ffi_type*)&zend_ffi_type_sint32;
 				break;
 			default:
-				zend_ffi_parser_error("Unsupported type specifier combination at line %d", FFI_G(line));
+				zend_ffi_throw_parser_error("Unsupported type specifier combination at line %d", FFI_G(line));
+				FFI_G(parse_failed) = 1;
+				dcl->type = (zend_ffi_type*)&zend_ffi_type_sint32;
 				break;
 		}
 		dcl->flags &= ~ZEND_FFI_DCL_TYPE_SPECIFIERS;
