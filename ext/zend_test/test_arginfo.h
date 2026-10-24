@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: 55bb2e6d209ea4030e3edfd604fc5ce4d14267f0
+ * Stub hash: 1b25893580205fc2db824a265839da14f5d2f0f0
  * Has decl header: yes */
 
 #include "zend_attributes.h"
@@ -20,10 +20,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_void_return, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_forward_reference, 1, 1, IS_MIXED, 0)
-	ZEND_ARG_TYPE_INFO(1, value, IS_MIXED, 0)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_compile_string, 0, 3, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, source_string, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -40,6 +36,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_nodiscard, 0, 0, IS_LO
 ZEND_END_ARG_INFO()
 
 #define arginfo_zend_test_deprecated_nodiscard arginfo_zend_test_nodiscard
+
+#define arginfo_zend_test_child_init_count arginfo_zend_test_nodiscard
 
 #define arginfo_zend_test_aliased arginfo_zend_test_void_return
 
@@ -363,11 +361,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_zend_new_singleton_array arginfo_zend_test_array_return
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_set_local_var, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
-ZEND_END_ARG_INFO()
-
 #define arginfo_ZendTestNS2_namespaced_func arginfo_zend_test_is_pcre_bundled
 
 #define arginfo_ZendTestNS2_namespaced_deprecated_func arginfo_zend_test_void_return
@@ -461,12 +454,12 @@ static ZEND_FUNCTION(zend_trigger_bailout);
 static ZEND_FUNCTION(zend_test_array_return);
 static ZEND_FUNCTION(zend_test_nullable_array_return);
 static ZEND_FUNCTION(zend_test_void_return);
-static ZEND_FUNCTION(zend_test_forward_reference);
 static ZEND_FUNCTION(zend_test_compile_string);
 static ZEND_FUNCTION(zend_test_deprecated);
 static ZEND_FUNCTION(zend_test_deprecated_attr);
 static ZEND_FUNCTION(zend_test_nodiscard);
 static ZEND_FUNCTION(zend_test_deprecated_nodiscard);
+static ZEND_FUNCTION(zend_test_child_init_count);
 static ZEND_FUNCTION(zend_create_unterminated_string);
 static ZEND_FUNCTION(zend_terminate_string);
 static ZEND_FUNCTION(zend_leak_variable);
@@ -566,7 +559,6 @@ static ZEND_FUNCTION(zend_test_uri_parser);
 static ZEND_FUNCTION(zend_test_gh19792);
 static ZEND_FUNCTION(zend_test_handle_post_data);
 static ZEND_FUNCTION(zend_new_singleton_array);
-static ZEND_FUNCTION(zend_test_set_local_var);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_func);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_deprecated_func);
 static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_func);
@@ -611,7 +603,6 @@ static const zend_function_entry ext_functions[] = {
 #endif
 #endif
 	ZEND_FE(zend_test_void_return, arginfo_zend_test_void_return)
-	ZEND_FE(zend_test_forward_reference, arginfo_zend_test_forward_reference)
 	ZEND_FE(zend_test_compile_string, arginfo_zend_test_compile_string)
 #if (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY("zend_test_deprecated", zif_zend_test_deprecated, arginfo_zend_test_deprecated, ZEND_ACC_DEPRECATED, NULL, NULL)
@@ -641,6 +632,7 @@ static const zend_function_entry ext_functions[] = {
 #else
 	ZEND_RAW_FENTRY("zend_test_deprecated_nodiscard", zif_zend_test_deprecated_nodiscard, arginfo_zend_test_deprecated_nodiscard, ZEND_ACC_DEPRECATED)
 #endif
+	ZEND_FE(zend_test_child_init_count, arginfo_zend_test_child_init_count)
 #if (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY("zend_test_aliased", zif_zend_test_void_return, arginfo_zend_test_aliased, 0, NULL, NULL)
 #else
@@ -758,7 +750,6 @@ static const zend_function_entry ext_functions[] = {
 #endif
 	ZEND_FE(zend_test_handle_post_data, arginfo_zend_test_handle_post_data)
 	ZEND_FE(zend_new_singleton_array, arginfo_zend_new_singleton_array)
-	ZEND_FE(zend_test_set_local_var, arginfo_zend_test_set_local_var)
 #if (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2", "namespaced_func"), zif_ZendTestNS2_namespaced_func, arginfo_ZendTestNS2_namespaced_func, 0, NULL, NULL)
 #else
