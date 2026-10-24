@@ -40,5 +40,5 @@ echo "done\n";
 @unlink(__DIR__ . '/schema-selfref-attrgroup.wsdl');
 ?>
 --EXPECTF--
-SoapFault: SOAP-ERROR: Parsing Schema: recursive attributeGroup 'ref' attribute '%s'
+SoapFault: SoapClient::__construct(): Parsing Schema: recursive attributeGroup 'ref' attribute '%s'
 done

@@ -15,4 +15,4 @@ try {
 
 ?>
 --EXPECTF--
-SoapFault: SOAP-ERROR: Parsing WSDL: Couldn't load from '%sload_wsdl_ex-failure-leak-missing.wsdl' : %s
+SoapFault: SoapClient::__construct(): Parsing WSDL: Couldn't load from '%sload_wsdl_ex-failure-leak-missing.wsdl' : %s
