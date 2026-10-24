@@ -135,7 +135,7 @@ PHP_HASH_API void PHP_SNEFRUInit(PHP_SNEFRU_CTX *context, ZEND_ATTRIBUTE_UNUSED 
 
 PHP_HASH_API void PHP_SNEFRUUpdate(PHP_SNEFRU_CTX *context, const unsigned char *input, size_t len)
 {
-	uint64_t count = ((uint64_t) context->count[0] << 32) + context->count[1] + (uint64_t) len * 8;
+	uint64_t count = (((uint64_t) context->count[0] << 32) | context->count[1]) + (uint64_t) len * 8;
 
 	context->count[0] = (uint32_t) (count >> 32);
 	context->count[1] = (uint32_t) count;

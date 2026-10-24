@@ -249,7 +249,7 @@ PHP_HASH_API void PHP_GOSTInitCrypto(PHP_GOST_CTX *context, ZEND_ATTRIBUTE_UNUSE
 
 PHP_HASH_API void PHP_GOSTUpdate(PHP_GOST_CTX *context, const unsigned char *input, size_t len)
 {
-	uint64_t count = ((uint64_t) context->count[1] << 32) + context->count[0] + (uint64_t) len * 8;
+	uint64_t count = (((uint64_t) context->count[1] << 32) | context->count[0]) + (uint64_t) len * 8;
 
 	context->count[0] = (uint32_t) count;
 	context->count[1] = (uint32_t) (count >> 32);
