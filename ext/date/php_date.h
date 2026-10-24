@@ -41,13 +41,6 @@
 extern zend_module_entry date_module_entry;
 #define phpext_date_ptr &date_module_entry
 
-PHP_RINIT_FUNCTION(date);
-PHP_RSHUTDOWN_FUNCTION(date);
-PHP_MINIT_FUNCTION(date);
-PHP_MSHUTDOWN_FUNCTION(date);
-PHP_MINFO_FUNCTION(date);
-ZEND_MODULE_POST_ZEND_DEACTIVATE_D(date);
-
 typedef struct _php_date_obj php_date_obj;
 typedef struct _php_timezone_obj php_timezone_obj;
 typedef struct _php_interval_obj php_interval_obj;
