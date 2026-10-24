@@ -14,17 +14,20 @@ use Time\Duration;
 
 // Helper to stage a stream with \xE2, timeout in readKey, then feed continuation
 function stageHandoff(string $continuation): Terminal {
-    $fp = fopen('php://memory', 'r+');
-    fwrite($fp, "\xE2");
-    rewind($fp);
-    $term = Terminal::fromStreams($fp);
-    $k = $term->readKey(Duration::fromSeconds(0));
+    [$read, $write] = stream_socket_pair(
+        PHP_OS_FAMILY === 'Windows' ? STREAM_PF_INET : STREAM_PF_UNIX,
+        STREAM_SOCK_STREAM,
+        PHP_OS_FAMILY === 'Windows' ? STREAM_IPPROTO_IP : 0
+    );
+    fwrite($write, "\xE2");
+    $term = Terminal::fromStreams($read);
+    // Writer remains open; readKey times out after 20ms and retains \xE2
+    $k = $term->readKey(Duration::fromMilliseconds(20));
     // Verify \xE2 timed out and is retained
     if ($k !== null) {
         echo "Unexpected key: " . bin2hex($k) . "\n";
     }
-    fwrite($fp, $continuation);
-    fseek($fp, 1);
+    fwrite($write, $continuation);
     return $term;
 }
 
