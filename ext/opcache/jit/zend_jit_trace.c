@@ -3763,7 +3763,7 @@ static void zend_jit_trace_update_condition_ranges(const zend_op *opline, const 
 					zend_jit_trace_set_var_range(
 						&ssa->var_info[ssa_op->op2_use],
 						op2_min,
-						op2_max != ZEND_LONG_MIN ?MIN(op2_max, op1_max - 1) : op1_max);
+						op1_max != ZEND_LONG_MIN ? MIN(op2_max, op1_max - 1) : op2_max);
 				}
 			}
 			break;
