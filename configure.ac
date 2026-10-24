@@ -1658,7 +1658,12 @@ PHP_INSTALL_HEADERS([Zend/Optimizer], m4_normalize([
   zend_worklist.h
 ]))
 
-PHP_ADD_SOURCES([TSRM], [TSRM.c], [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
+PHP_ADD_SOURCES([TSRM], m4_normalize([
+    TSRM.c
+    TSRM_atexit_win.c
+    TSRM_atexit_darwin.c
+    TSRM_atexit_posix.c
+  ]), [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
 PHP_ADD_SOURCES([main], m4_normalize([
     explicit_bzero.c

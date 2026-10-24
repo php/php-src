@@ -91,3 +91,11 @@ PHP 8.7 INTERNALS UPGRADE NOTES
   . The force_http_10 method has been removed.
   . The get_fd method has been removed.
   . The get_target_uid and get_target_gid methods have been removed.
+
+- Per-thread TSRM resources are now released best-effort at normal thread exit,
+  because native TLS resource destructors can only run on their owning thread and
+  tsrm_shutdown() cannot release them afterwards. Prefer explicitly calling ts_free_thread().
+
+- tsrm_shutdown() and the bundled library-unload hooks automatically disarm
+  thread-exit cleanup. Embedders must stop and join all PHP worker threads
+  before calling tsrm_shutdown() or unloading PHP.
