@@ -2388,7 +2388,7 @@ static void ZEND_FASTCALL zend_jit_vm_stack_free_args_helper(zend_execute_data *
 	zend_vm_stack_free_args(call);
 }
 
-static zend_always_inline zval* zend_jit_assign_to_typed_ref_helper(zend_reference *ref, zval *value, uint8_t value_type)
+static zend_always_inline zval* zend_jit_assign_to_typed_ref_helper(zend_reference *ref, zval *value, zend_operand_type value_type)
 {
 	zval variable;
 
@@ -2428,7 +2428,7 @@ static zval* ZEND_FASTCALL zend_jit_assign_cv_to_typed_ref(zend_reference *ref, 
 	return zend_jit_assign_to_typed_ref_helper(ref, value, IS_CV);
 }
 
-static zend_always_inline zval* zend_jit_assign_to_typed_ref2_helper(zend_reference *ref, zval *value, zval *result, uint8_t value_type)
+static zend_always_inline zval* zend_jit_assign_to_typed_ref2_helper(zend_reference *ref, zval *value, zval *result, zend_operand_type value_type)
 {
 	zval variable, *ret;
 	zend_refcounted *garbage = NULL;
