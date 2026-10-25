@@ -66,7 +66,7 @@ foreach (['string-oob' => $string_oob, 'index-oob' => $index_oob] as $label => $
         /* A corrupted cache entry must be rejected (and unlinked); the
          * constructor then fails fetching the non-existent WSDL. */
         @new SoapClient($uri, ['cache_wsdl' => WSDL_CACHE_DISK]);
-    } catch (SoapFault $e) {
+    } catch (Throwable $e) {
         echo $label, " rejected\n";
     }
 
