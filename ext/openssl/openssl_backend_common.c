@@ -72,7 +72,7 @@ void php_openssl_add_assoc_name_entry(zval * val, char * key, const X509_NAME * 
 		} else {
 			/* ASN1_STRING_get0_data(3): Since this is an internal pointer it should not be freed or modified in any way */
 			to_add = ASN1_STRING_get0_data(str);
-			to_add_len = ASN1_STRING_length(str);
+			to_add_len = ASN1_STRING_get_length(str);
 		}
 
 		if (to_add_len != -1) {
@@ -107,7 +107,7 @@ void php_openssl_add_assoc_name_entry(zval * val, char * key, const X509_NAME * 
 
 void php_openssl_add_assoc_asn1_string(zval * val, char * key, const ASN1_STRING * str)
 {
-	add_assoc_stringl(val, key, (const char *)ASN1_STRING_get0_data(str), ASN1_STRING_length(str));
+	add_assoc_stringl(val, key, (const char *)ASN1_STRING_get0_data(str), ASN1_STRING_get_length(str));
 }
 
 time_t php_openssl_asn1_time_to_time_t(ASN1_UTCTIME * timestr)
@@ -131,7 +131,7 @@ time_t php_openssl_asn1_time_to_time_t(ASN1_UTCTIME * timestr)
 		return (time_t)-1;
 	}
 
-	timestr_len = (size_t)ASN1_STRING_length(timestr);
+	timestr_len = ASN1_STRING_get_length(timestr);
 
 	if (timestr_len != strlen((const char *)ASN1_STRING_get0_data(timestr))) {
 		php_error_docref(NULL, E_WARNING, "Illegal length in timestamp");
@@ -636,7 +636,7 @@ int openssl_x509v3_subjectAltName(BIO *bio, PHP_OPENSSL_X509_EXTENSION *extensio
 
 	extension_data = X509_EXTENSION_get_data(extension);
 	p = ASN1_STRING_get0_data(extension_data);
-	length = ASN1_STRING_length(extension_data);
+	length = ASN1_STRING_get_length(extension_data);
 	if (method->it) {
 		names = (GENERAL_NAMES*) (ASN1_item_d2i(NULL, &p, length,
 			ASN1_ITEM_ptr(method->it)));
@@ -658,19 +658,19 @@ int openssl_x509v3_subjectAltName(BIO *bio, PHP_OPENSSL_X509_EXTENSION *extensio
 				BIO_puts(bio, "email:");
 				as = name->d.rfc822Name;
 				BIO_write(bio, ASN1_STRING_get0_data(as),
-					ASN1_STRING_length(as));
+					ASN1_STRING_get_length(as));
 				break;
 			case GEN_DNS:
 				BIO_puts(bio, "DNS:");
 				as = name->d.dNSName;
 				BIO_write(bio, ASN1_STRING_get0_data(as),
-					ASN1_STRING_length(as));
+					ASN1_STRING_get_length(as));
 				break;
 			case GEN_URI:
 				BIO_puts(bio, "URI:");
 				as = name->d.uniformResourceIdentifier;
 				BIO_write(bio, ASN1_STRING_get0_data(as),
-					ASN1_STRING_length(as));
+					ASN1_STRING_get_length(as));
 				break;
 			default:
 				/* use builtin print for GEN_OTHERNAME, GEN_X400,

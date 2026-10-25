@@ -27,6 +27,9 @@ PHP                                                                        NEWS
   . Fixed JIT treating an array as packed after a string key write turned it
     into a hash. (jorgsowa)
 
+- OpenSSL:
+  . Fixed build with OpenSSL 4.1. (Weilin Du)
+
 - PDO_PGSQL:
   . Fixed bug GH-24461 (DISCARD ALL on persistent connection cleanup drops
     PgBouncer's prepared statements). (David Carlier, Artem Ukrainskiy)
