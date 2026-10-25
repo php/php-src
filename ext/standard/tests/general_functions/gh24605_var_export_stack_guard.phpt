@@ -25,7 +25,7 @@ function test_export(string $name, mixed $value): void {
 }
 
 $data = 0;
-for ($i = 0; $i < 3000; $i++) {
+for ($i = 0; $i < 5000; $i++) {
     $data = [$data];
 }
 test_export('array', $data);
@@ -38,7 +38,7 @@ while (is_array($data)) {
 class StackNode { public ?StackNode $next = null; }
 $first = new StackNode();
 $node = $first;
-for ($i = 0; $i < 3000; $i++) {
+for ($i = 0; $i < 5000; $i++) {
     $node->next = new StackNode();
     $node = $node->next;
 }
