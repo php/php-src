@@ -132,6 +132,10 @@ PHP                                                                        NEWS
   . Fixed session data loss in the files save handler when writing the session
     file fails after it was already truncated. (Ilia Alshanetsky)
 
+- SPL:
+  . Fixed bug GH-24264 (Unwind/GracefulExit discarded in spl_iterators.c).
+    (Lazizbek Ergashev)
+
 - Standard:
   . Fixed bug GH-24308 (Request shutdown calls closelog() even when syslog
     was not opened by PHP). (lazerg)
