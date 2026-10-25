@@ -3,6 +3,7 @@ OOM: Delayed OOM raised during compilation of php -r code is reported when compi
 --SKIPIF--
 <?php
 if (!getenv('TEST_PHP_EXECUTABLE')) die('skip TEST_PHP_EXECUTABLE is not set');
+if (PHP_OS_FAMILY === 'Windows') die('skip the -r code is longer than Windows allows on the command line');
 ?>
 --FILE--
 <?php
