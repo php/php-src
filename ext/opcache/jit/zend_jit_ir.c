@@ -10068,6 +10068,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 	const void *exit_addr = NULL;
 	const zend_op *prev_opline;
 	ir_ref rx, func_ref = IR_UNUSED, if_user = IR_UNUSED, user_path = IR_UNUSED;
+	bool unknown_internal = 0;
 
 	prev_opline = opline - 1;
 	while (prev_opline->opcode == ZEND_EXT_FCALL_BEGIN || prev_opline->opcode == ZEND_TICKS) {
@@ -10151,14 +10152,31 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 	if (opline->opcode == ZEND_DO_FCALL || opline->opcode == ZEND_DO_FCALL_BY_NAME) {
 		if (!func) {
 			if (trace) {
-				uint32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+				uint32_t exit_point;
 
+				func_ref = ir_LOAD_A(jit_CALL(rx, func));
+
+				if (trace->op == ZEND_JIT_TRACE_DO_ICALL) {
+					exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_POLYMORPHISM);
+					exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+					if (!exit_addr) {
+						return 0;
+					}
+
+					ir_GUARD(
+						ir_EQ(
+							ir_LOAD_U8(ir_ADD_OFFSET(func_ref, offsetof(zend_function, type))),
+							ir_CONST_U8(ZEND_INTERNAL_FUNCTION)),
+						ir_CONST_ADDR(exit_addr));
+					unknown_internal = 1;
+				}
+
+				exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
 				exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 				if (!exit_addr) {
 					return 0;
 				}
 
-				func_ref = ir_LOAD_A(jit_CALL(rx, func));
 				ir_GUARD_NOT(
 					ir_AND_U32(
 						ir_LOAD_U32(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, fn_flags))),
@@ -10232,6 +10250,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 	}
 
 	if (!func
+	 && !unknown_internal
 	 && opline->opcode != ZEND_DO_UCALL
 	 && opline->opcode != ZEND_DO_ICALL) {
 		ir_ref type_ref = ir_LOAD_U8(ir_ADD_OFFSET(func_ref, offsetof(zend_function, type)));
@@ -10240,6 +10259,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 	}
 
 	if ((!func || func->type == ZEND_USER_FUNCTION)
+	 && !unknown_internal
 	 && opline->opcode != ZEND_DO_ICALL) {
 		bool recursive_call_through_jmp = 0;
 		uint32_t num_args = 0;
@@ -10546,7 +10566,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 
 	if ((!func || func->type == ZEND_INTERNAL_FUNCTION)
 	 && (opline->opcode != ZEND_DO_UCALL)) {
-		if (!func && (opline->opcode != ZEND_DO_ICALL)) {
+		if (!func && !unknown_internal && (opline->opcode != ZEND_DO_ICALL)) {
 			ir_IF_FALSE(if_user);
 		}
 

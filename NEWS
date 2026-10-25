@@ -75,6 +75,8 @@ PHP                                                                        NEWS
   . Fix exception checks due to NAN warnings and object empty()'s. (ndossche)
   . Fixed bug GH-24270 (JIT loses the called scope of self:: and parent:: calls
     in closures). (RV7PR)
+  . Fixed bug GH-24286 (Tracing JIT loses dynamic call results after
+    Closure::__invoke). (ndossche, Alessio Attilio)
   . Fixed bug GH-24337 (JIT: segfault when decrementing a non-numeric string
     property). (Lazizbek Ergashev)
   . Fixed bug GH-24185 (Windows ZTS: random access violations with OPcache JIT
