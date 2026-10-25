@@ -19,6 +19,11 @@ PHP 8.7 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- Bz2:
+  . The compress.bzip2:// wrapper and bzopen() now read all concatenated bzip2
+    streams instead of stopping after the first stream. Trailing data without
+    a bzip2 header is still ignored.
+
 - Curl:
   . curl_multi_exec() now throws a TypeError when still_running is not an int.
   . Nested arrays in CURLOPT_POSTFIELDS now throw a TypeError, instead of being
