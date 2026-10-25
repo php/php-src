@@ -30,6 +30,8 @@ PHP                                                                        NEWS
     for grouping. (Klaas Skelte van der Werf)
   . Fixed bug GH-24265 (Unwind/GracefulExit discarded in
     zend_fiber_execute()). (David Carlier)
+  . Fixed bug GH-24668 (zend_set_local_var() leaks the previous value of an
+    existing CV). (yasu20200121web-prog, lazerg)
 
 - Date:
   . Fixed bug GH-20503 (Assertion failure with ext/date DateInterval property
