@@ -266,6 +266,12 @@ static zend_string *php_session_encode(void) /* {{{ */
 
 static ZEND_COLD void php_session_cancel_decode(void)
 {
+	if (PS(in_rfc1867_update)) {
+		/* The upload progress decoder is deliberately more restrictive than
+		 * session_start(). Leave the stored record for the application to read. */
+		php_session_abort();
+		return;
+	}
 	php_session_destroy();
 	php_session_track_init();
 	php_error_docref(NULL, E_WARNING, "Failed to decode session object. Session has been destroyed");

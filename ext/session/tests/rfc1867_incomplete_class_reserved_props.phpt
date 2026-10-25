@@ -1,5 +1,5 @@
 --TEST--
-session rfc1867: the upload progress update rejects session data whose objects carry the incomplete class bookkeeping property names
+session rfc1867: the upload progress update preserves records it cannot decode without user code
 --EXTENSIONS--
 session
 --SKIPIF--
@@ -23,7 +23,8 @@ file_put_contents($worker, '<?php');
  * __PHP_Incomplete_Class, which stores the class name of each object and the
  * payload of C:/E: entries under these three property names. Data that already
  * carries one of them cannot be told apart from that bookkeeping, so the decode
- * has to fail rather than let the two meanings be confused. */
+ * has to fail rather than let the two meanings be confused. The progress
+ * update must abort without deleting or rewriting the stored record. */
 $cases = [
     'control'          => 'x|O:8:"stdClass":1:{s:1:"a";i:1;}',
     'Class_Name'       => 'x|O:8:"stdClass":1:{s:27:"__PHP_Incomplete_Class_Name";s:3:"foo";}',
@@ -109,9 +110,7 @@ foreach ($cases as $label => $record) {
     fclose($pipes[2]);
     proc_close($proc);
 
-    /* A refused decode must leave exactly one warning: the handler stops there
-     * instead of writing the progress into the empty session it was left with,
-     * which would add a second warning about the save path. */
+    /* A progress-only decode failure must leave the stored session intact. */
     $kept = file_exists($file) && str_starts_with(file_get_contents($file), $record);
     printf("%-16s warnings: %d, decode refused: %-5s record kept: %s\n", $label,
         substr_count($out, 'Warning:'),
@@ -131,9 +130,9 @@ foreach (glob("$dir/sess_*") as $f) {
 ?>
 --EXPECT--
 control          warnings: 0, decode refused: false record kept: true
-Class_Name       warnings: 1, decode refused: true  record kept: false
-Class_Serialized warnings: 1, decode refused: true  record kept: false
-Enum_Case        warnings: 1, decode refused: true  record kept: false
-nested           warnings: 1, decode refused: true  record kept: false
+Class_Name       warnings: 0, decode refused: false record kept: true
+Class_Serialized warnings: 0, decode refused: false record kept: true
+Enum_Case        warnings: 0, decode refused: false record kept: true
+nested           warnings: 0, decode refused: false record kept: true
 mangled          warnings: 0, decode refused: false record kept: true
-corrupt          warnings: 1, decode refused: true  record kept: false
+corrupt          warnings: 0, decode refused: false record kept: true
