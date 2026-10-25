@@ -19,6 +19,19 @@
 #ifndef ZEND_COMPILE_H
 #define ZEND_COMPILE_H
 
+#include "zend_portability.h"
+C23_ENUM(zend_operand_type, uint8_t) {
+	IS_UNUSED = 0,		/* Unused operand */
+	IS_CONST = (1<<0),
+	IS_TMP_VAR = (1<<1),
+	IS_VAR = (1<<2),
+	IS_CV = (1<<3),	/* Compiled variable */
+};
+
+/* Used for zend_op.result_type of smart branch instructions */
+#define IS_SMART_BRANCH_JMPZ  (1<<4)
+#define IS_SMART_BRANCH_JMPNZ (1<<5)
+
 #include "zend_ast.h"
 #include "zend_types.h"
 #include "zend_map_ptr.h"
@@ -860,16 +873,6 @@ static_assert(ZEND_MM_ALIGNED_SIZE(sizeof(zval)) == sizeof(zval),
 
 #define ZEND_OP_ARRAY_EXTENSION(op_array, handle) \
 	((void**)RUN_TIME_CACHE(op_array))[handle]
-
-#define IS_UNUSED	0		/* Unused operand */
-#define IS_CONST	(1<<0)
-#define IS_TMP_VAR	(1<<1)
-#define IS_VAR		(1<<2)
-#define IS_CV		(1<<3)	/* Compiled variable */
-
-/* Used for result.type of smart branch instructions */
-#define IS_SMART_BRANCH_JMPZ  (1<<4)
-#define IS_SMART_BRANCH_JMPNZ (1<<5)
 
 #define ZEND_EXTRA_VALUE 1
 
