@@ -10157,6 +10157,14 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 				func_ref = ir_LOAD_A(jit_CALL(rx, func));
 
 				if (trace->op == ZEND_JIT_TRACE_DO_ICALL) {
+					/* The trace recorded a call to an unknown internal function (e.g. a trampoline)
+					 * and continues in the caller, so the callee must be internal.
+					 *
+					 * If a user function is called instead, exit and let a side trace handle it.
+					 * This is better than emitting a user function code path:
+					 * - the trace code after the call has a single known state,
+					 * - the trace doesn't contain code for the user call that is rarely used,
+					 * - a side trace knows the called function and can inline it. */
 					exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_POLYMORPHISM);
 					exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 					if (!exit_addr) {
