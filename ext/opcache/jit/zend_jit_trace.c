@@ -4131,6 +4131,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 	name = zend_jit_trace_name(op_array, opline->lineno);
 	zend_jit_trace_start(&ctx, op_array, ssa, name, ZEND_JIT_TRACE_NUM,
 		parent_trace ? &zend_jit_traces[parent_trace] : NULL, exit_num);
+	JIT_G(active_ctx) = &ctx;
 	ctx.trace = &zend_jit_traces[ZEND_JIT_TRACE_NUM];
 
 	/* Register allocation */
@@ -7324,6 +7325,7 @@ done:
 	}
 
 jit_failure:
+	JIT_G(active_ctx) = NULL;
 	zend_jit_free_ctx(&ctx);
 
 	if (name) {
@@ -7333,6 +7335,10 @@ jit_failure:
 jit_cleanup:;
 	} zend_catch {
 		do_bailout = 1;
+		if (JIT_G(active_ctx)) {
+			zend_jit_free_ctx(JIT_G(active_ctx));
+			JIT_G(active_ctx) = NULL;
+		}
 	}  zend_end_try();
 
 	/* Clean up used op_arrays */
@@ -7394,6 +7400,7 @@ static const void *zend_jit_trace_exit_to_vm(uint32_t trace_num, uint32_t exit_n
 		zend_string_release(name);
 		return NULL;
 	}
+	JIT_G(active_ctx) = &ctx;
 
 	checkpoint = zend_arena_checkpoint(CG(arena));;
 
@@ -7430,6 +7437,7 @@ static const void *zend_jit_trace_exit_to_vm(uint32_t trace_num, uint32_t exit_n
 	handler = zend_jit_finish(&ctx);
 
 jit_failure:
+	JIT_G(active_ctx) = NULL;
 	zend_jit_free_ctx(&ctx);
 	zend_string_release(name);
 	zend_arena_release(&CG(arena), checkpoint);
@@ -7578,6 +7586,10 @@ static zend_jit_trace_stop zend_jit_compile_root_trace(zend_jit_trace_rec *trace
 exit:;
 		} zend_catch {
 			do_bailout = 1;
+			if (JIT_G(active_ctx)) {
+				zend_jit_free_ctx(JIT_G(active_ctx));
+				JIT_G(active_ctx) = NULL;
+			}
 		} zend_end_try();
 
 		zend_jit_protect();
@@ -8237,6 +8249,10 @@ static void zend_jit_blacklist_trace_exit(uint32_t trace_num, uint32_t exit_num)
 			zend_jit_traces[trace_num].exit_info[exit_num].flags |= ZEND_JIT_EXIT_BLACKLISTED;
 		} zend_catch {
 			do_bailout = 1;
+			if (JIT_G(active_ctx)) {
+				zend_jit_free_ctx(JIT_G(active_ctx));
+				JIT_G(active_ctx) = NULL;
+			}
 		} zend_end_try();
 
 		zend_jit_protect();
@@ -8418,6 +8434,10 @@ static zend_jit_trace_stop zend_jit_compile_side_trace(zend_jit_trace_rec *trace
 exit:;
 		} zend_catch {
 			do_bailout = 1;
+			if (JIT_G(active_ctx)) {
+				zend_jit_free_ctx(JIT_G(active_ctx));
+				JIT_G(active_ctx) = NULL;
+			}
 		}  zend_end_try();
 
 		zend_jit_protect();
