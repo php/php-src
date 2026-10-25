@@ -4474,9 +4474,7 @@ ZEND_VM_COLD_CONST_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV
 		SAVE_OPLINE();
 		zend_verify_missing_return_type(EX(func));
 		HANDLE_EXCEPTION();
-	} else {
-/* prevents "undefined variable opline" errors */
-#if !ZEND_VM_SPEC || (OP1_TYPE != IS_UNUSED)
+	} else if (!ZEND_VM_SPEC || (OP1_TYPE != IS_UNUSED)) {
 		USE_OPLINE
 		zval *retval_ref, *retval_ptr;
 		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
@@ -4534,7 +4532,6 @@ ZEND_VM_COLD_CONST_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV
 			HANDLE_EXCEPTION();
 		}
 		ZEND_VM_NEXT_OPCODE();
-#endif
 	}
 }
 
