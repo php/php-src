@@ -7461,6 +7461,7 @@ static zend_jit_trace_stop zend_jit_compile_root_trace(zend_jit_trace_rec *trace
 	} else if (ZEND_JIT_TRACE_NUM >= JIT_G(max_root_traces)) {
 		ret = ZEND_JIT_TRACE_STOP_TOO_MANY_TRACES;
 	} else {
+		orig_trigger = JIT_G(trigger);
 		zend_try {
 			SHM_UNPROTECT();
 			zend_jit_unprotect();
@@ -7489,7 +7490,6 @@ static zend_jit_trace_stop zend_jit_compile_root_trace(zend_jit_trace_rec *trace
 			t->consts_count = 0;
 			t->constants = NULL;
 
-			orig_trigger = JIT_G(trigger);
 			JIT_G(trigger) = ZEND_JIT_ON_HOT_TRACE;
 
 			handler = zend_jit_trace(trace_buffer, 0, 0);
@@ -7586,6 +7586,7 @@ static zend_jit_trace_stop zend_jit_compile_root_trace(zend_jit_trace_rec *trace
 exit:;
 		} zend_catch {
 			do_bailout = 1;
+			JIT_G(trigger) = orig_trigger;
 			if (JIT_G(active_ctx)) {
 				zend_jit_free_ctx(JIT_G(active_ctx));
 				JIT_G(active_ctx) = NULL;
@@ -8309,6 +8310,7 @@ static zend_jit_trace_stop zend_jit_compile_side_trace(zend_jit_trace_rec *trace
 	} else if (zend_jit_traces[zend_jit_traces[parent_num].root].child_count >= JIT_G(max_side_traces)) {
 		ret = ZEND_JIT_TRACE_STOP_TOO_MANY_CHILDREN;
 	} else {
+		orig_trigger = JIT_G(trigger);
 		SHM_UNPROTECT();
 		zend_jit_unprotect();
 
@@ -8331,7 +8333,6 @@ static zend_jit_trace_stop zend_jit_compile_side_trace(zend_jit_trace_rec *trace
 			t->consts_count = 0;
 			t->constants = NULL;
 
-			orig_trigger = JIT_G(trigger);
 			JIT_G(trigger) = ZEND_JIT_ON_HOT_TRACE;
 
 			handler = zend_jit_trace(trace_buffer, parent_num, exit_num);
@@ -8434,6 +8435,7 @@ static zend_jit_trace_stop zend_jit_compile_side_trace(zend_jit_trace_rec *trace
 exit:;
 		} zend_catch {
 			do_bailout = 1;
+			JIT_G(trigger) = orig_trigger;
 			if (JIT_G(active_ctx)) {
 				zend_jit_free_ctx(JIT_G(active_ctx));
 				JIT_G(active_ctx) = NULL;
