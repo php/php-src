@@ -316,7 +316,10 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 				}
 			}
 
+			/* Do not let a destructor re-enter the unserializer. */
+			BG(serialize_lock)++;
 			i_zval_ptr_dtor(zv);
+			BG(serialize_lock)--;
 		}
 		next = var_dtor_hash->next;
 		efree_size(var_dtor_hash, sizeof(var_dtor_entries));
@@ -1556,3 +1559,4 @@ any	{ return 0; }
 
 	return 0;
 }
+
