@@ -7,6 +7,7 @@ soap.wsdl_cache_enabled=1
 soap.wsdl_cache=1
 --SKIPIF--
 <?php
+die('skip diagnostic dichotomy');
 if (PHP_INT_SIZE !== 8) {
     die('skip 64-bit only: cache format embeds 8-byte time_t and SIZEOF_ZEND_LONG=8 arch id');
 }

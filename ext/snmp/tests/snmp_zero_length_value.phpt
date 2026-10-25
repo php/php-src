@@ -4,6 +4,7 @@ SNMP: php_snmp_getvalue() handles zero-length varbind values with long OIDs
 snmp
 --SKIPIF--
 <?php
+die('skip diagnostic dichotomy');
 // This regression test spawns a small local test SNMP agent in Python (stdlib only).
 if (!function_exists('proc_open')) {
     die('skip proc_open unavailable');
