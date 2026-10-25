@@ -18,6 +18,8 @@
 
 #define MYSQLND_HEADER_SIZE 4
 #define COMPRESSED_HEADER_SIZE 3
+/* Packets smaller than this are sent uncompressed: they barely shrink. */
+#define MYSQLND_MIN_COMPRESS_LENGTH 512
 
 #define MYSQLND_NULL_LENGTH	(zend_ulong) ~0
 
