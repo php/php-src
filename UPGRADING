@@ -22,6 +22,10 @@ PHP 8.7 UPGRADE NOTES
 - Core:
   . Block declaration support for the encoding declare has been removed as it
     did not function properly.
+- Bz2:
+  . The compress.bzip2:// wrapper and bzopen() now read all concatenated bzip2
+    streams instead of stopping after the first stream. Trailing data without
+    a bzip2 header is still ignored.
 
 - Curl:
   . curl_multi_exec() now throws a TypeError when $still_running cannot be

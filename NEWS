@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.7.0alpha1
 
+- Bz2:
+  . Fixed GH-24170 (compress.bzip2:// truncates concatenated bzip2 streams).
+    (Alessio Attilio)
+
 - Core:
   . A flat unkeyed list assignment from an array literal with one value per
     target, such as [$a, $b] = [$b, $a], no longer builds the array when the
