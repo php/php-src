@@ -563,7 +563,7 @@ optimize_type_check:
 								break;
 							case ZEND_IS_SMALLER:
 								if (opline->opcode == ZEND_BOOL_NOT) {
-									uint8_t tmp_type;
+									zend_operand_type tmp_type;
 									uint32_t tmp;
 
 									src->opcode = ZEND_IS_SMALLER_OR_EQUAL;
@@ -581,7 +581,7 @@ optimize_type_check:
 								break;
 							case ZEND_IS_SMALLER_OR_EQUAL:
 								if (opline->opcode == ZEND_BOOL_NOT) {
-									uint8_t tmp_type;
+									zend_operand_type tmp_type;
 									uint32_t tmp;
 
 									src->opcode = ZEND_IS_SMALLER;

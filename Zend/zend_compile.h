@@ -32,6 +32,15 @@
 #include "zend_frameless_function.h"
 #include "zend_property_hooks.h"
 
+/* Assign as specific bits so that one can quickly check types via a bit operation */
+C23_ENUM(zend_operand_type, uint8_t) {
+	IS_UNUSED = 0,		/* Unused operand */
+	IS_CONST = (1<<0),
+	IS_TMP_VAR = (1<<1),
+	IS_VAR = (1<<2),
+	IS_CV = (1<<3),	/* Compiled variable */
+};
+
 #define SET_UNUSED(op) do { \
 	op ## _type = IS_UNUSED; \
 	op.num = (uint32_t) -1; \
@@ -81,7 +90,7 @@ typedef union _znode_op {
 } znode_op;
 
 typedef struct _znode { /* used only during compilation */
-	uint8_t op_type;
+	zend_operand_type op_type;
 	uint8_t flag;
 	union {
 		znode_op op;
@@ -142,9 +151,9 @@ struct _zend_op {
 	uint32_t extended_value;
 	uint32_t lineno;
 	uint8_t opcode;       /* Opcodes defined in Zend/zend_vm_opcodes.h */
-	uint8_t op1_type;     /* IS_UNUSED, IS_CONST, IS_TMP_VAR, IS_VAR, IS_CV */
-	uint8_t op2_type;     /* IS_UNUSED, IS_CONST, IS_TMP_VAR, IS_VAR, IS_CV */
-	uint8_t result_type;  /* IS_UNUSED, IS_CONST, IS_TMP_VAR, IS_VAR, IS_CV */
+	zend_operand_type op1_type;     /* IS_UNUSED, IS_CONST, IS_TMP_VAR, IS_VAR, IS_CV */
+	zend_operand_type op2_type;     /* IS_UNUSED, IS_CONST, IS_TMP_VAR, IS_VAR, IS_CV */
+	zend_operand_type result_type;  /* IS_UNUSED, IS_CONST, IS_TMP_VAR, IS_VAR, IS_CV */
 #ifdef ZEND_VERIFY_TYPE_INFERENCE
 	uint32_t op1_use_type;
 	uint32_t op2_use_type;
@@ -860,12 +869,6 @@ static_assert(ZEND_MM_ALIGNED_SIZE(sizeof(zval)) == sizeof(zval),
 
 #define ZEND_OP_ARRAY_EXTENSION(op_array, handle) \
 	((void**)RUN_TIME_CACHE(op_array))[handle]
-
-#define IS_UNUSED	0		/* Unused operand */
-#define IS_CONST	(1<<0)
-#define IS_TMP_VAR	(1<<1)
-#define IS_VAR		(1<<2)
-#define IS_CV		(1<<3)	/* Compiled variable */
 
 /* Used for result.type of smart branch instructions */
 #define IS_SMART_BRANCH_JMPZ  (1<<4)

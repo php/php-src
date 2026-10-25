@@ -3138,7 +3138,7 @@ ZEND_VM_HOT_NOCONST_HANDLER(43, ZEND_JMPZ, CONST|TMP|CV, JMP_ADDR)
 {
 	USE_OPLINE
 	zval *val;
-	uint8_t op1_type;
+	zend_operand_type op1_type;
 
 	val = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 
@@ -3172,7 +3172,7 @@ ZEND_VM_HOT_NOCONST_HANDLER(44, ZEND_JMPNZ, CONST|TMP|CV, JMP_ADDR)
 {
 	USE_OPLINE
 	zval *val;
-	uint8_t op1_type;
+	zend_operand_type op1_type;
 
 	val = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 

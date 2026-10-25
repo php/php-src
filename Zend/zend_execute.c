@@ -414,7 +414,7 @@ static zend_always_inline zval *_get_zval_ptr_cv_BP_VAR_W(uint32_t var EXECUTE_D
 	return ret;
 }
 
-static zend_always_inline zval *_get_zval_ptr_tmpvarcv(int op_type, znode_op node, int type EXECUTE_DATA_DC)
+static zend_always_inline zval *_get_zval_ptr_tmpvarcv(zend_operand_type op_type, znode_op node, int type EXECUTE_DATA_DC)
 {
 	if (op_type & (IS_TMP_VAR|IS_VAR)) {
 		if (op_type == IS_TMP_VAR) {
@@ -429,7 +429,7 @@ static zend_always_inline zval *_get_zval_ptr_tmpvarcv(int op_type, znode_op nod
 	}
 }
 
-static zend_always_inline zval *_get_zval_ptr(int op_type, znode_op node, int type EXECUTE_DATA_DC OPLINE_DC)
+static zend_always_inline zval *_get_zval_ptr(zend_operand_type op_type, znode_op node, int type EXECUTE_DATA_DC OPLINE_DC)
 {
 	if (op_type & (IS_TMP_VAR|IS_VAR)) {
 		if (!ZEND_DEBUG || op_type == IS_VAR) {
@@ -449,7 +449,7 @@ static zend_always_inline zval *_get_zval_ptr(int op_type, znode_op node, int ty
 	}
 }
 
-static zend_always_inline zval *_get_op_data_zval_ptr_r(int op_type, znode_op node EXECUTE_DATA_DC OPLINE_DC)
+static zend_always_inline zval *_get_op_data_zval_ptr_r(zend_operand_type op_type, znode_op node EXECUTE_DATA_DC OPLINE_DC)
 {
 	if (op_type & (IS_TMP_VAR|IS_VAR)) {
 		if (!ZEND_DEBUG || op_type == IS_VAR) {
@@ -469,7 +469,7 @@ static zend_always_inline zval *_get_op_data_zval_ptr_r(int op_type, znode_op no
 	}
 }
 
-static zend_always_inline ZEND_ATTRIBUTE_UNUSED zval *_get_zval_ptr_deref(int op_type, znode_op node, int type EXECUTE_DATA_DC OPLINE_DC)
+static zend_always_inline ZEND_ATTRIBUTE_UNUSED zval *_get_zval_ptr_deref(zend_operand_type op_type, znode_op node, int type EXECUTE_DATA_DC OPLINE_DC)
 {
 	if (op_type & (IS_TMP_VAR|IS_VAR)) {
 		if (op_type == IS_TMP_VAR) {
@@ -489,7 +489,7 @@ static zend_always_inline ZEND_ATTRIBUTE_UNUSED zval *_get_zval_ptr_deref(int op
 	}
 }
 
-static zend_always_inline ZEND_ATTRIBUTE_UNUSED zval *_get_op_data_zval_ptr_deref_r(int op_type, znode_op node EXECUTE_DATA_DC OPLINE_DC)
+static zend_always_inline ZEND_ATTRIBUTE_UNUSED zval *_get_op_data_zval_ptr_deref_r(zend_operand_type op_type, znode_op node EXECUTE_DATA_DC OPLINE_DC)
 {
 	if (op_type & (IS_TMP_VAR|IS_VAR)) {
 		if (op_type == IS_TMP_VAR) {
@@ -509,7 +509,7 @@ static zend_always_inline ZEND_ATTRIBUTE_UNUSED zval *_get_op_data_zval_ptr_dere
 	}
 }
 
-static zend_always_inline zval *_get_zval_ptr_undef(int op_type, znode_op node, int type EXECUTE_DATA_DC OPLINE_DC)
+static zend_always_inline zval *_get_zval_ptr_undef(zend_operand_type op_type, znode_op node, int type EXECUTE_DATA_DC OPLINE_DC)
 {
 	if (op_type & (IS_TMP_VAR|IS_VAR)) {
 		if (!ZEND_DEBUG || op_type == IS_VAR) {
@@ -539,7 +539,7 @@ static zend_always_inline zval *_get_zval_ptr_ptr_var(uint32_t var EXECUTE_DATA_
 	return ret;
 }
 
-static inline zval *_get_zval_ptr_ptr(int op_type, znode_op node, int type EXECUTE_DATA_DC)
+static inline zval *_get_zval_ptr_ptr(zend_operand_type op_type, znode_op node, int type EXECUTE_DATA_DC)
 {
 	if (op_type == IS_CV) {
 		return _get_zval_ptr_cv(node.var, type EXECUTE_DATA_CC);
@@ -549,7 +549,7 @@ static inline zval *_get_zval_ptr_ptr(int op_type, znode_op node, int type EXECU
 	}
 }
 
-static inline ZEND_ATTRIBUTE_UNUSED zval *_get_obj_zval_ptr(int op_type, znode_op op, int type EXECUTE_DATA_DC OPLINE_DC)
+static inline ZEND_ATTRIBUTE_UNUSED zval *_get_obj_zval_ptr(zend_operand_type op_type, znode_op op, int type EXECUTE_DATA_DC OPLINE_DC)
 {
 	if (op_type == IS_UNUSED) {
 		return &EX(This);
@@ -557,7 +557,7 @@ static inline ZEND_ATTRIBUTE_UNUSED zval *_get_obj_zval_ptr(int op_type, znode_o
 	return get_zval_ptr(op_type, op, type);
 }
 
-static inline ZEND_ATTRIBUTE_UNUSED zval *_get_obj_zval_ptr_deref(int op_type, znode_op op, int type EXECUTE_DATA_DC OPLINE_DC)
+static inline ZEND_ATTRIBUTE_UNUSED zval *_get_obj_zval_ptr_deref(zend_operand_type op_type, znode_op op, int type EXECUTE_DATA_DC OPLINE_DC)
 {
 	if (op_type == IS_UNUSED) {
 		return &EX(This);
@@ -565,7 +565,7 @@ static inline ZEND_ATTRIBUTE_UNUSED zval *_get_obj_zval_ptr_deref(int op_type, z
 	return get_zval_ptr_deref(op_type, op, type);
 }
 
-static inline ZEND_ATTRIBUTE_UNUSED zval *_get_obj_zval_ptr_undef(int op_type, znode_op op, int type EXECUTE_DATA_DC OPLINE_DC)
+static inline ZEND_ATTRIBUTE_UNUSED zval *_get_obj_zval_ptr_undef(zend_operand_type op_type, znode_op op, int type EXECUTE_DATA_DC OPLINE_DC)
 {
 	if (op_type == IS_UNUSED) {
 		return &EX(This);
@@ -573,7 +573,7 @@ static inline ZEND_ATTRIBUTE_UNUSED zval *_get_obj_zval_ptr_undef(int op_type, z
 	return get_zval_ptr_undef(op_type, op, type);
 }
 
-static inline ZEND_ATTRIBUTE_UNUSED zval *_get_obj_zval_ptr_ptr(int op_type, znode_op node, int type EXECUTE_DATA_DC)
+static inline ZEND_ATTRIBUTE_UNUSED zval *_get_obj_zval_ptr_ptr(zend_operand_type op_type, znode_op node, int type EXECUTE_DATA_DC)
 {
 	if (op_type == IS_UNUSED) {
 		return &EX(This);
@@ -3541,9 +3541,9 @@ static zend_never_inline bool zend_handle_fetch_obj_flags(
 static zend_always_inline void zend_fetch_property_address(
 	zval *result,
 	const zval *container,
-	uint32_t container_op_type,
+	zend_operand_type container_op_type,
 	const zval *prop_ptr,
-	uint32_t prop_op_type,
+	zend_operand_type prop_op_type,
 	void **cache_slot,
 	int type,
 	uint32_t flags,
@@ -3696,9 +3696,9 @@ end:
 
 static zend_always_inline void zend_assign_to_property_reference(
 	const zval *container,
-	uint32_t container_op_type,
+	zend_operand_type container_op_type,
 	const zval *prop_ptr,
-	uint32_t prop_op_type,
+	zend_operand_type prop_op_type,
 	zval *value_ptr
 	OPLINE_DC EXECUTE_DATA_DC
 ) {
@@ -4088,7 +4088,7 @@ static zend_always_inline void i_zval_ptr_dtor_noref(zval *zval_ptr) {
 	}
 }
 
-ZEND_API zval* zend_assign_to_typed_ref_ex(zval *variable_ptr, zval *orig_value, uint8_t value_type, bool strict, zend_refcounted **garbage_ptr)
+ZEND_API zval* zend_assign_to_typed_ref_ex(zval *variable_ptr, zval *orig_value, zend_operand_type value_type, bool strict, zend_refcounted **garbage_ptr)
 {
 	bool ret;
 	zval value;
@@ -4123,7 +4123,7 @@ ZEND_API zval* zend_assign_to_typed_ref_ex(zval *variable_ptr, zval *orig_value,
 	return variable_ptr;
 }
 
-ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *orig_value, uint8_t value_type, bool strict)
+ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *orig_value, zend_operand_type value_type, bool strict)
 {
 	zend_refcounted *garbage = NULL;
 	zval *result = zend_assign_to_typed_ref_ex(variable_ptr, orig_value, value_type, strict, &garbage);
@@ -5976,7 +5976,7 @@ ZEND_API user_opcode_handler_t zend_get_user_opcode_handler(zend_uchar opcode)
 	return zend_user_opcode_handlers[opcode];
 }
 
-ZEND_API zval *zend_get_zval_ptr(const zend_op *opline, int op_type, const znode_op *node, const zend_execute_data *execute_data)
+ZEND_API zval *zend_get_zval_ptr(const zend_op *opline, zend_operand_type op_type, const znode_op *node, const zend_execute_data *execute_data)
 {
 	zval *ret;
 

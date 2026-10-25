@@ -565,7 +565,7 @@ static bool zend_jit_is_persistent_constant(zval *key, uint32_t flags)
 	return c && (ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT);
 }
 
-static zend_class_entry* zend_get_known_class(const zend_op_array *op_array, const zend_op *opline, uint8_t op_type, znode_op op)
+static zend_class_entry* zend_get_known_class(const zend_op_array *op_array, const zend_op *opline, zend_operand_type op_type, znode_op op)
 {
 	zend_class_entry *ce = NULL;
 
