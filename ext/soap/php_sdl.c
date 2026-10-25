@@ -1321,48 +1321,11 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 
 #define WSDL_CACHE_VERSION 0x11
 
-/*
- * The on-disk WSDL cache lives in a shared directory under a deterministic
- * file name, so its contents must never be trusted. The reader below carries
- * the current position, the end of the file buffer and a failure flag. Every
- * primitive read is bounds-checked; once a failure is recorded all further
- * reads become no-ops, so deserialization cannot touch memory outside of the
- * buffer and get_sdl_from_cache() discards the partially built SDL.
- */
-typedef struct _wsdl_cache_reader {
-	char *p;
-	char *end;
-	bool failed;
-	size_t max_type;     /* highest valid index into the types table */
-	size_t max_encoder;  /* highest valid index into the encoders table */
-} wsdl_cache_reader;
-
-#define WSDL_CACHE_REMAINING(r)       ((size_t)((r)->end - (r)->p))
-#define WSDL_CACHE_FAIL(r)            do { (r)->failed = 1; (r)->p = (r)->end; } while (0)
-
-#define WSDL_CACHE_GET(ret,type,r) \
-	do { \
-		if (WSDL_CACHE_REMAINING(r) >= sizeof(type)) { \
-			memcpy(&(ret),(r)->p,sizeof(type)); (r)->p += sizeof(type); \
-		} else { (ret) = (type)0; WSDL_CACHE_FAIL(r); } \
-	} while (0)
-#define WSDL_CACHE_GET_INT(ret,r) \
-	do { \
-		if (WSDL_CACHE_REMAINING(r) >= 4) { \
-			(ret) = ((unsigned char)(r)->p[0])|((unsigned char)(r)->p[1]<<8)|((unsigned char)(r)->p[2]<<16)|((unsigned)(r)->p[3]<<24); \
-			(r)->p += 4; \
-		} else { (ret) = 0; WSDL_CACHE_FAIL(r); } \
-	} while (0)
-#define WSDL_CACHE_GET_1(ret,type,r) \
-	do { \
-		if (WSDL_CACHE_REMAINING(r) >= 1) { (ret) = (type)(*(r)->p); (r)->p++; } \
-		else { (ret) = (type)0; WSDL_CACHE_FAIL(r); } \
-	} while (0)
-#define WSDL_CACHE_SKIP(n,r) \
-	do { \
-		if (WSDL_CACHE_REMAINING(r) >= (size_t)(n)) { (r)->p += (n); } \
-		else { WSDL_CACHE_FAIL(r); } \
-	} while (0)
+#define WSDL_CACHE_GET(ret,type,buf)   memcpy(&ret,*buf,sizeof(type)); *buf += sizeof(type);
+#define WSDL_CACHE_GET_INT(ret,buf)    ret = ((unsigned char)(*buf)[0])|((unsigned char)(*buf)[1]<<8)|((unsigned char)(*buf)[2]<<16)|((unsigned)(*buf)[3]<<24); *buf += 4;
+#define WSDL_CACHE_GET_1(ret,type,buf) ret = (type)(**buf); (*buf)++;
+#define WSDL_CACHE_GET_N(ret,n,buf)    memcpy(ret,*buf,n); *buf += n;
+#define WSDL_CACHE_SKIP(n,buf)         *buf += n;
 
 #define WSDL_CACHE_PUT_INT(val,buf)    smart_str_appendc(buf,(char)(val & 0xff)); \
                                        smart_str_appendc(buf,(char)((val >> 8) & 0xff)); \
@@ -1373,47 +1336,36 @@ typedef struct _wsdl_cache_reader {
 
 #define WSDL_NO_STRING_MARKER 0x7fffffff
 
-static char* sdl_deserialize_string(wsdl_cache_reader *in)
+static char* sdl_deserialize_string(char **in)
 {
 	char *s;
 	size_t len;
 
 	WSDL_CACHE_GET_INT(len, in);
-	if (in->failed || len == WSDL_NO_STRING_MARKER) {
+	if (len == WSDL_NO_STRING_MARKER) {
 		return NULL;
+	} else {
+		s = emalloc(len+1);
+		WSDL_CACHE_GET_N(s, len, in);
+		s[len] = '\0';
+		return s;
 	}
-	if (UNEXPECTED(len > WSDL_CACHE_REMAINING(in))) {
-		WSDL_CACHE_FAIL(in);
-		return NULL;
-	}
-	s = emalloc(len+1);
-	memcpy(s, in->p, len);
-	in->p += len;
-	s[len] = '\0';
-	return s;
 }
 
-static void sdl_deserialize_key(HashTable* ht, void* data, wsdl_cache_reader *in)
+static void sdl_deserialize_key(HashTable* ht, void* data, char **in)
 {
 	size_t len;
 
 	WSDL_CACHE_GET_INT(len, in);
-	if (in->failed) {
-		return;
-	}
 	if (len == WSDL_NO_STRING_MARKER) {
 		zend_hash_next_index_insert_ptr(ht, data);
 	} else {
-		if (UNEXPECTED(len > WSDL_CACHE_REMAINING(in))) {
-			WSDL_CACHE_FAIL(in);
-			return;
-		}
-		zend_hash_str_add_ptr(ht, in->p, len, data);
-		in->p += len;
+		zend_hash_str_add_ptr(ht, *in, len, data);
+		WSDL_CACHE_SKIP(len, in);
 	}
 }
 
-static void sdl_deserialize_attribute(sdlAttributePtr attr, encodePtr *encoders, wsdl_cache_reader *in)
+static void sdl_deserialize_attribute(sdlAttributePtr attr, encodePtr *encoders, char **in)
 {
 	size_t i;
 
@@ -1425,23 +1377,13 @@ static void sdl_deserialize_attribute(sdlAttributePtr attr, encodePtr *encoders,
 	WSDL_CACHE_GET_1(attr->form, sdlForm, in);
 	WSDL_CACHE_GET_1(attr->use, sdlUse, in);
 	WSDL_CACHE_GET_INT(i, in);
-	if (i <= in->max_encoder) {
-		attr->encode = encoders[i];
-	} else {
-		attr->encode = NULL;
-		WSDL_CACHE_FAIL(in);
-	}
+	attr->encode = encoders[i];
 	WSDL_CACHE_GET_INT(i, in);
-	if (UNEXPECTED(i > WSDL_CACHE_REMAINING(in))) {
-		WSDL_CACHE_FAIL(in);
-		i = 0;
-	}
 	if (i > 0) {
 		attr->extraAttributes = emalloc(sizeof(HashTable));
 		zend_hash_init(attr->extraAttributes, i, NULL, delete_extra_attribute, 0);
 		while (i > 0) {
 			sdlExtraAttributePtr x = emalloc(sizeof(sdlExtraAttribute));
-			memset(x, 0, sizeof(sdlExtraAttribute));
 			sdl_deserialize_key(attr->extraAttributes, x, in);
 			x->ns = sdl_deserialize_string(in);
 			x->val = sdl_deserialize_string(in);
@@ -1450,9 +1392,9 @@ static void sdl_deserialize_attribute(sdlAttributePtr attr, encodePtr *encoders,
 	}
 }
 
-static sdlRestrictionIntPtr sdl_deserialize_resriction_int(wsdl_cache_reader *in)
+static sdlRestrictionIntPtr sdl_deserialize_resriction_int(char **in)
 {
-	if (in->p[0] == 1) {
+	if (**in == 1) {
 		sdlRestrictionIntPtr x = emalloc(sizeof(sdlRestrictionInt));
 		WSDL_CACHE_SKIP(1, in);
 		WSDL_CACHE_GET_INT(x->value, in);
@@ -1464,11 +1406,10 @@ static sdlRestrictionIntPtr sdl_deserialize_resriction_int(wsdl_cache_reader *in
 	}
 }
 
-static sdlRestrictionCharPtr sdl_deserialize_resriction_char(wsdl_cache_reader *in)
+static sdlRestrictionCharPtr sdl_deserialize_resriction_char(char **in)
 {
-	if (in->p[0] == 1) {
+	if (**in == 1) {
 		sdlRestrictionCharPtr x = emalloc(sizeof(sdlRestrictionChar));
-		memset(x, 0, sizeof(sdlRestrictionChar));
 		WSDL_CACHE_SKIP(1, in);
 		x->value = sdl_deserialize_string(in);
 		WSDL_CACHE_GET_1(x->fixed, char, in);
@@ -1479,11 +1420,10 @@ static sdlRestrictionCharPtr sdl_deserialize_resriction_char(wsdl_cache_reader *
 	}
 }
 
-static sdlContentModelPtr sdl_deserialize_model(sdlTypePtr *types, sdlTypePtr *elements, size_t elements_limit, wsdl_cache_reader *in)
+static sdlContentModelPtr sdl_deserialize_model(sdlTypePtr *types, sdlTypePtr *elements, char **in)
 {
 	size_t i;
 	sdlContentModelPtr model = emalloc(sizeof(sdlContentModel));
-	memset(model, 0, sizeof(sdlContentModel));
 
 	WSDL_CACHE_GET_1(model->kind, sdlContentKind, in);
 	WSDL_CACHE_GET_INT(model->min_occurs, in);
@@ -1491,25 +1431,16 @@ static sdlContentModelPtr sdl_deserialize_model(sdlTypePtr *types, sdlTypePtr *e
 	switch (model->kind) {
 		case XSD_CONTENT_ELEMENT:
 			WSDL_CACHE_GET_INT(i, in);
-			if (i <= elements_limit) {
-				model->u.element = elements[i];
-			} else {
-				model->u.element = NULL;
-				WSDL_CACHE_FAIL(in);
-			}
+			model->u.element = elements[i];
 			break;
 		case XSD_CONTENT_SEQUENCE:
 		case XSD_CONTENT_ALL:
 		case XSD_CONTENT_CHOICE:
 			WSDL_CACHE_GET_INT(i, in);
-			if (UNEXPECTED(i > WSDL_CACHE_REMAINING(in))) {
-				WSDL_CACHE_FAIL(in);
-				i = 0;
-			}
 			model->u.content = emalloc(sizeof(HashTable));
 			zend_hash_init(model->u.content, i, NULL, delete_model, 0);
 			while (i > 0) {
-				sdlContentModelPtr x = sdl_deserialize_model(types, elements, elements_limit, in);
+				sdlContentModelPtr x = sdl_deserialize_model(types, elements, in);
 				zend_hash_next_index_insert_ptr(model->u.content, x);
 				i--;
 			}
@@ -1519,12 +1450,7 @@ static sdlContentModelPtr sdl_deserialize_model(sdlTypePtr *types, sdlTypePtr *e
 			break;
 		case XSD_CONTENT_GROUP:
 			WSDL_CACHE_GET_INT(i, in);
-			if (i <= in->max_type) {
-				model->u.group = types[i];
-			} else {
-				model->u.group = NULL;
-				WSDL_CACHE_FAIL(in);
-			}
+			model->u.group = types[i];
 			break;
 		default:
 			break;
@@ -1532,10 +1458,9 @@ static sdlContentModelPtr sdl_deserialize_model(sdlTypePtr *types, sdlTypePtr *e
 	return model;
 }
 
-static void sdl_deserialize_type(sdlTypePtr type, sdlTypePtr *types, encodePtr *encoders, wsdl_cache_reader *in)
+static void sdl_deserialize_type(sdlTypePtr type, sdlTypePtr *types, encodePtr *encoders, char **in)
 {
 	size_t i;
-	size_t elements_limit = 0;
 	sdlTypePtr *elements = NULL;
 
 	WSDL_CACHE_GET_1(type->kind, sdlTypeKind, in);
@@ -1548,14 +1473,9 @@ static void sdl_deserialize_type(sdlTypePtr type, sdlTypePtr *types, encodePtr *
 	WSDL_CACHE_GET_1(type->form, sdlForm, in);
 
 	WSDL_CACHE_GET_INT(i, in);
-	if (i <= in->max_encoder) {
-		type->encode = encoders[i];
-	} else {
-		type->encode = NULL;
-		WSDL_CACHE_FAIL(in);
-	}
+	type->encode = encoders[i];
 
-	if (in->p[0] == 1) {
+	if (**in == 1) {
 		WSDL_CACHE_SKIP(1, in);
 		type->restrictions = emalloc(sizeof(sdlRestrictions));
 		/*memset(type->restrictions, 0, sizeof(sdlRestrictions));*/
@@ -1571,10 +1491,6 @@ static void sdl_deserialize_type(sdlTypePtr type, sdlTypePtr *types, encodePtr *
 		type->restrictions->whiteSpace = sdl_deserialize_resriction_char(in);
 		type->restrictions->pattern = sdl_deserialize_resriction_char(in);
 		WSDL_CACHE_GET_INT(i, in);
-		if (UNEXPECTED(i > WSDL_CACHE_REMAINING(in))) {
-			WSDL_CACHE_FAIL(in);
-			i = 0;
-		}
 		if (i > 0) {
 			type->restrictions->enumeration = emalloc(sizeof(HashTable));
 			zend_hash_init(type->restrictions->enumeration, i, NULL, delete_restriction_var_char, 0);
@@ -1591,12 +1507,7 @@ static void sdl_deserialize_type(sdlTypePtr type, sdlTypePtr *types, encodePtr *
 	}
 
 	WSDL_CACHE_GET_INT(i, in);
-	if (UNEXPECTED(i > WSDL_CACHE_REMAINING(in))) {
-		WSDL_CACHE_FAIL(in);
-		i = 0;
-	}
 	if (i > 0) {
-		elements_limit = i;
 		elements = safe_emalloc((i+1), sizeof(sdlTypePtr), 0);
 		elements[0] = NULL;
 		type->elements = emalloc(sizeof(HashTable));
@@ -1612,10 +1523,6 @@ static void sdl_deserialize_type(sdlTypePtr type, sdlTypePtr *types, encodePtr *
 	}
 
 	WSDL_CACHE_GET_INT(i, in);
-	if (UNEXPECTED(i > WSDL_CACHE_REMAINING(in))) {
-		WSDL_CACHE_FAIL(in);
-		i = 0;
-	}
 	if (i > 0) {
 		type->attributes = emalloc(sizeof(HashTable));
 		zend_hash_init(type->attributes, i, NULL, delete_attribute, 0);
@@ -1628,9 +1535,9 @@ static void sdl_deserialize_type(sdlTypePtr type, sdlTypePtr *types, encodePtr *
 		}
 	}
 
-	if (in->p[0] != 0) {
+	if (**in != 0) {
 		WSDL_CACHE_SKIP(1, in);
-		type->model = sdl_deserialize_model(types, elements, elements_limit, in);
+		type->model = sdl_deserialize_model(types, elements, in);
 	} else {
 		WSDL_CACHE_SKIP(1, in);
 	}
@@ -1639,7 +1546,7 @@ static void sdl_deserialize_type(sdlTypePtr type, sdlTypePtr *types, encodePtr *
 	}
 }
 
-static void sdl_deserialize_encoder(encodePtr enc, sdlTypePtr *types, wsdl_cache_reader *in)
+static void sdl_deserialize_encoder(encodePtr enc, sdlTypePtr *types, char **in)
 {
 	size_t i;
 
@@ -1650,12 +1557,7 @@ static void sdl_deserialize_encoder(encodePtr enc, sdlTypePtr *types, wsdl_cache
 		enc->details.clark_notation = zend_strpprintf(0, "{%s}%s", enc->details.ns, enc->details.type_str);
 	}
 	WSDL_CACHE_GET_INT(i, in);
-	if (i <= in->max_type) {
-		enc->details.sdl_type = types[i];
-	} else {
-		enc->details.sdl_type = NULL;
-		WSDL_CACHE_FAIL(in);
-	}
+	enc->details.sdl_type = types[i];
 	enc->to_xml = sdl_guess_convert_xml;
 	enc->to_zval = sdl_guess_convert_zval;
 
@@ -1689,7 +1591,7 @@ static void sdl_deserialize_encoder(encodePtr enc, sdlTypePtr *types, wsdl_cache
 	}
 }
 
-static void sdl_deserialize_soap_body(sdlSoapBindingFunctionBodyPtr body, encodePtr *encoders, sdlTypePtr *types, wsdl_cache_reader *in)
+static void sdl_deserialize_soap_body(sdlSoapBindingFunctionBodyPtr body, encodePtr *encoders, sdlTypePtr *types, char **in)
 {
 	size_t i, n;
 
@@ -1701,10 +1603,6 @@ static void sdl_deserialize_soap_body(sdlSoapBindingFunctionBodyPtr body, encode
 	}
 	body->ns = sdl_deserialize_string(in);
 	WSDL_CACHE_GET_INT(i, in);
-	if (UNEXPECTED(i > WSDL_CACHE_REMAINING(in))) {
-		WSDL_CACHE_FAIL(in);
-		i = 0;
-	}
 	if (i > 0) {
 		body->headers = emalloc(sizeof(HashTable));
 		zend_hash_init(body->headers, i, NULL, delete_header, 0);
@@ -1721,27 +1619,13 @@ static void sdl_deserialize_soap_body(sdlSoapBindingFunctionBodyPtr body, encode
 			tmp->name = sdl_deserialize_string(in);
 			tmp->ns = sdl_deserialize_string(in);
 			WSDL_CACHE_GET_INT(n, in);
-			if (n <= in->max_encoder) {
-				tmp->encode = encoders[n];
-			} else {
-				tmp->encode = NULL;
-				WSDL_CACHE_FAIL(in);
-			}
+			tmp->encode = encoders[n];
 			WSDL_CACHE_GET_INT(n, in);
-			if (n <= in->max_type) {
-				tmp->element = types[n];
-			} else {
-				tmp->element = NULL;
-				WSDL_CACHE_FAIL(in);
-			}
+			tmp->element = types[n];
 			--i;
 
 			size_t j;
 			WSDL_CACHE_GET_INT(j, in);
-			if (UNEXPECTED(j > WSDL_CACHE_REMAINING(in))) {
-				WSDL_CACHE_FAIL(in);
-				j = 0;
-			}
 			if (j > 0) {
 				tmp->headerfaults = emalloc(sizeof(HashTable));
 				zend_hash_init(tmp->headerfaults, j, NULL, delete_header, 0);
@@ -1759,19 +1643,9 @@ static void sdl_deserialize_soap_body(sdlSoapBindingFunctionBodyPtr body, encode
 					tmp2->ns = sdl_deserialize_string(in);
 
 					WSDL_CACHE_GET_INT(n, in);
-					if (n <= in->max_encoder) {
-						tmp2->encode = encoders[n];
-					} else {
-						tmp2->encode = NULL;
-						WSDL_CACHE_FAIL(in);
-					}
+					tmp2->encode = encoders[n];
 					WSDL_CACHE_GET_INT(n, in);
-					if (n <= in->max_type) {
-						tmp2->element = types[n];
-					} else {
-						tmp2->element = NULL;
-						WSDL_CACHE_FAIL(in);
-					}
+					tmp2->element = types[n];
 					--j;
 				}
 			}
@@ -1779,39 +1653,24 @@ static void sdl_deserialize_soap_body(sdlSoapBindingFunctionBodyPtr body, encode
 	}
 }
 
-static HashTable* sdl_deserialize_parameters(encodePtr *encoders, sdlTypePtr *types, wsdl_cache_reader *in)
+static HashTable* sdl_deserialize_parameters(encodePtr *encoders, sdlTypePtr *types, char **in)
 {
 	size_t i, n;
 	HashTable *ht;
 
 	WSDL_CACHE_GET_INT(i, in);
 	if (i == 0) {return NULL;}
-	if (UNEXPECTED(i > WSDL_CACHE_REMAINING(in))) {
-		WSDL_CACHE_FAIL(in);
-		return NULL;
-	}
 	ht = emalloc(sizeof(HashTable));
 	zend_hash_init(ht, i, NULL, delete_parameter, 0);
 	while (i > 0) {
 		sdlParamPtr param = emalloc(sizeof(sdlParam));
-		memset(param, 0, sizeof(sdlParam));
 		sdl_deserialize_key(ht, param, in);
 		param->paramName = sdl_deserialize_string(in);
 		WSDL_CACHE_GET_INT(param->order, in);
 		WSDL_CACHE_GET_INT(n, in);
-		if (n <= in->max_encoder) {
-			param->encode = encoders[n];
-		} else {
-			param->encode = NULL;
-			WSDL_CACHE_FAIL(in);
-		}
+		param->encode = encoders[n];
 		WSDL_CACHE_GET_INT(n, in);
-		if (n <= in->max_type) {
-			param->element = types[n];
-		} else {
-			param->element = NULL;
-			WSDL_CACHE_FAIL(in);
-		}
+		param->element = types[n];
 		--i;
 	}
 	return ht;
@@ -1819,18 +1678,18 @@ static HashTable* sdl_deserialize_parameters(encodePtr *encoders, sdlTypePtr *ty
 
 static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, size_t uri_len, time_t t, time_t *cached)
 {
-	sdlPtr sdl = NULL;
+	sdlPtr sdl;
 	time_t old_t;
 	int  i, num_groups, num_types, num_elements, num_encoders, num_bindings, num_func;
 	sdlFunctionPtr *functions = NULL;
-	sdlBindingPtr *bindings = NULL;
-	sdlTypePtr *types = NULL;
-	encodePtr *encoders = NULL;
+	sdlBindingPtr *bindings;
+	sdlTypePtr *types;
+	encodePtr *encoders;
 	const encode *enc;
 
 	int f;
 	struct stat st;
-	char *buf;
+	char *in, *buf;
 
 	f = open(fn, O_RDONLY|O_BINARY);
 	if (UNEXPECTED(f < 0)) {
@@ -1840,71 +1699,56 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, size_t uri_len
 		close(f);
 		return NULL;
 	}
-	if (UNEXPECTED(st.st_size < 6)) {
+	buf = in = emalloc(st.st_size);
+	if (UNEXPECTED(read(f, in, st.st_size) != st.st_size)) {
 		close(f);
-		return NULL;
-	}
-	/* Extra zeroed padding so that a clamped reader never reads past the
-	 * allocation when a truncated file is rejected. */
-	buf = ecalloc((size_t)st.st_size + 16, 1);
-	if (UNEXPECTED(read(f, buf, st.st_size) != st.st_size)) {
-		close(f);
-		efree(buf);
+		efree(in);
 		return NULL;
 	}
 	close(f);
 
-	if (UNEXPECTED(strncmp(buf,"wsdl",4) != 0 || buf[4] != WSDL_CACHE_VERSION || buf[5] != '\0')) {
+	if (UNEXPECTED(strncmp(in,"wsdl",4) != 0 || in[4] != WSDL_CACHE_VERSION || in[5] != '\0')) {
 		unlink(fn);
 		efree(buf);
 		return NULL;
 	}
+	in += 6;
 
-	wsdl_cache_reader reader;
-	reader.p = buf + 6;
-	reader.end = buf + st.st_size;
-	reader.failed = 0;
-	reader.max_type = reader.max_encoder = 0;
-	wsdl_cache_reader *in = &reader;
-
-	WSDL_CACHE_GET(old_t, time_t, in);
-	if (in->failed || old_t < t) {
+	WSDL_CACHE_GET(old_t, time_t, &in);
+	if (old_t < t) {
 		unlink(fn);
 		efree(buf);
 		return NULL;
 	}
 	*cached = old_t;
 
-	WSDL_CACHE_GET_INT(i, in);
-	if (in->failed || i < 0 || (size_t)i != uri_len || WSDL_CACHE_REMAINING(in) < (size_t)i || strncmp(in->p, uri, i) != 0) {
+	WSDL_CACHE_GET_INT(i, &in);
+	if (i != uri_len || strncmp(in, uri, i) != 0) {
 		unlink(fn);
 		efree(buf);
 		return NULL;
 	}
-	WSDL_CACHE_SKIP(i, in);
+	WSDL_CACHE_SKIP(i, &in);
 
 	sdl = emalloc(sizeof(*sdl));
 	memset(sdl, 0, sizeof(*sdl));
-	/* Initialized up front so that any goto invalid_cache below can free
-	 * the partially built SDL through delete_sdl() safely. */
-	zend_hash_init(&sdl->functions, 0, NULL, delete_function, 0);
 
-	sdl->source = sdl_deserialize_string(in);
-	sdl->target_ns = sdl_deserialize_string(in);
+	sdl->source = sdl_deserialize_string(&in);
+	sdl->target_ns = sdl_deserialize_string(&in);
 
-	WSDL_CACHE_GET_INT(num_groups, in);
-	WSDL_CACHE_GET_INT(num_types, in);
-	WSDL_CACHE_GET_INT(num_elements, in);
-	WSDL_CACHE_GET_INT(num_encoders, in);
-	if (in->failed || num_groups < 0 || num_types < 0 || num_elements < 0 || num_encoders < 0
-	 || (size_t)num_groups + (size_t)num_types + (size_t)num_elements > (size_t)st.st_size
-	 || (size_t)num_encoders > (size_t)st.st_size) {
-		goto invalid_cache;
-	}
+	WSDL_CACHE_GET_INT(num_groups, &in);
+	WSDL_CACHE_GET_INT(num_types, &in);
+	WSDL_CACHE_GET_INT(num_elements, &in);
+	WSDL_CACHE_GET_INT(num_encoders, &in);
 
 	i = num_groups+num_types+num_elements;
 	types = safe_emalloc((i+1), sizeof(sdlTypePtr), 0);
-	memset(types, 0, (i+1) * sizeof(sdlTypePtr));
+	types[0] = NULL;
+	while (i > 0) {
+		types[i] = emalloc(sizeof(sdlType));
+		memset(types[i], 0, sizeof(sdlType));
+		i--;
+	}
 
 	i = num_encoders;
 	enc = defaultEncoding;
@@ -1912,27 +1756,26 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, size_t uri_len
 		i++; enc++;
 	}
 	encoders = safe_emalloc((i+1), sizeof(encodePtr), 0);
-	memset(encoders, 0, (i+1) * sizeof(encodePtr));
+	i = num_encoders;
+	encoders[0] = NULL;
+	while (i > 0) {
+		encoders[i] = emalloc(sizeof(encode));
+		memset(encoders[i], 0, sizeof(encode));
+		i--;
+	}
 	i = num_encoders;
 	enc = defaultEncoding;
 	while (enc->details.type != END_KNOWN_TYPES) {
 		encoders[++i] = (encodePtr)enc++;
 	}
 
-	/* File supplied indices may only address the deserialized (custom)
-	 * slots, never the default encoders appended above. */
-	reader.max_type = num_groups + num_types + num_elements;
-	reader.max_encoder = (size_t)num_encoders;
-
 	i = 1;
 	if (num_groups > 0) {
 		sdl->groups = emalloc(sizeof(HashTable));
 		zend_hash_init(sdl->groups, num_groups, NULL, delete_type, 0);
 		while (i < num_groups+1) {
-			types[i] = emalloc(sizeof(sdlType));
-			memset(types[i], 0, sizeof(sdlType));
-			sdl_deserialize_key(sdl->groups, types[i], in);
-			sdl_deserialize_type(types[i], types, encoders, in);
+			sdl_deserialize_key(sdl->groups, types[i], &in);
+			sdl_deserialize_type(types[i], types, encoders, &in);
 			i++;
 		}
 	}
@@ -1941,10 +1784,8 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, size_t uri_len
 		sdl->types = emalloc(sizeof(HashTable));
 		zend_hash_init(sdl->types, num_types, NULL, delete_type, 0);
 		while (i < num_groups+num_types+1) {
-			types[i] = emalloc(sizeof(sdlType));
-			memset(types[i], 0, sizeof(sdlType));
-			sdl_deserialize_key(sdl->types, types[i], in);
-			sdl_deserialize_type(types[i], types, encoders, in);
+			sdl_deserialize_key(sdl->types, types[i], &in);
+			sdl_deserialize_type(types[i], types, encoders, &in);
 			i++;
 		}
 	}
@@ -1953,10 +1794,8 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, size_t uri_len
 		sdl->elements = emalloc(sizeof(HashTable));
 		zend_hash_init(sdl->elements, num_elements, NULL, delete_type, 0);
 		while (i < num_groups+num_types+num_elements+1) {
-			types[i] = emalloc(sizeof(sdlType));
-			memset(types[i], 0, sizeof(sdlType));
-			sdl_deserialize_key(sdl->elements, types[i], in);
-			sdl_deserialize_type(types[i], types, encoders, in);
+			sdl_deserialize_key(sdl->elements, types[i], &in);
+			sdl_deserialize_type(types[i], types, encoders, &in);
 			i++;
 		}
 	}
@@ -1966,89 +1805,71 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, size_t uri_len
 		sdl->encoders = emalloc(sizeof(HashTable));
 		zend_hash_init(sdl->encoders, num_encoders, NULL, delete_encoder, 0);
 		while (i < num_encoders+1) {
-			encoders[i] = emalloc(sizeof(encode));
-			memset(encoders[i], 0, sizeof(encode));
-			sdl_deserialize_key(sdl->encoders, encoders[i], in);
-			sdl_deserialize_encoder(encoders[i], types, in);
+			sdl_deserialize_key(sdl->encoders, encoders[i], &in);
+			sdl_deserialize_encoder(encoders[i], types, &in);
 			i++;
 		}
 	}
 
 	/* deserialize bindings */
-	WSDL_CACHE_GET_INT(num_bindings, in);
-	if (in->failed || num_bindings < 0 || (size_t)num_bindings > (size_t)st.st_size) {
-		goto invalid_cache;
-	}
-	bindings = safe_emalloc(num_bindings ? num_bindings : 1, sizeof(sdlBindingPtr), 0);
-	memset(bindings, 0, (num_bindings ? num_bindings : 1) * sizeof(sdlBindingPtr));
+	WSDL_CACHE_GET_INT(num_bindings, &in);
+	bindings = safe_emalloc(num_bindings, sizeof(sdlBindingPtr), 0);
 	if (num_bindings > 0) {
 		sdl->bindings = emalloc(sizeof(HashTable));
 		zend_hash_init(sdl->bindings, num_bindings, NULL, delete_binding, 0);
 		for (i = 0; i < num_bindings; i++) {
 			sdlBindingPtr binding = emalloc(sizeof(sdlBinding));
 			memset(binding, 0, sizeof(sdlBinding));
-			sdl_deserialize_key(sdl->bindings, binding, in);
-			binding->name = sdl_deserialize_string(in);
-			binding->location = sdl_deserialize_string(in);
-			WSDL_CACHE_GET_1(binding->bindingType,sdlBindingType,in);
-			if (binding->bindingType == BINDING_SOAP && in->p[0] != 0) {
+			sdl_deserialize_key(sdl->bindings, binding, &in);
+			binding->name = sdl_deserialize_string(&in);
+			binding->location = sdl_deserialize_string(&in);
+			WSDL_CACHE_GET_1(binding->bindingType,sdlBindingType,&in);
+			if (binding->bindingType == BINDING_SOAP && *in != 0) {
 			  sdlSoapBindingPtr soap_binding = binding->bindingAttributes = emalloc(sizeof(sdlSoapBinding));
-				memset(soap_binding, 0, sizeof(sdlSoapBinding));
-				WSDL_CACHE_GET_1(soap_binding->style,sdlEncodingStyle,in);
-				WSDL_CACHE_GET_1(soap_binding->transport,sdlTransport,in);
+				WSDL_CACHE_GET_1(soap_binding->style,sdlEncodingStyle,&in);
+				WSDL_CACHE_GET_1(soap_binding->transport,sdlTransport,&in);
 			} else {
-				WSDL_CACHE_SKIP(1,in);
+				WSDL_CACHE_SKIP(1,&in);
 			}
 			bindings[i] = binding;
 		}
 	}
 
 	/* deserialize functions */
-	WSDL_CACHE_GET_INT(num_func, in);
-	if (in->failed || num_func < 0 || (size_t)num_func > (size_t)st.st_size) {
-		goto invalid_cache;
-	}
+	WSDL_CACHE_GET_INT(num_func, &in);
+	zend_hash_init(&sdl->functions, num_func, NULL, delete_function, 0);
 	if (num_func > 0) {
 		functions = safe_emalloc(num_func, sizeof(sdlFunctionPtr), 0);
-		memset(functions, 0, num_func * sizeof(sdlFunctionPtr));
 		for (i = 0; i < num_func; i++) {
 			int binding_num, num_faults;
 			sdlFunctionPtr func = emalloc(sizeof(sdlFunction));
-			memset(func, 0, sizeof(sdlFunction));
-			sdl_deserialize_key(&sdl->functions, func, in);
-			func->functionName = sdl_deserialize_string(in);
-			func->requestName = sdl_deserialize_string(in);
-			func->responseName = sdl_deserialize_string(in);
+			sdl_deserialize_key(&sdl->functions, func, &in);
+			func->functionName = sdl_deserialize_string(&in);
+			func->requestName = sdl_deserialize_string(&in);
+			func->responseName = sdl_deserialize_string(&in);
 
-			WSDL_CACHE_GET_INT(binding_num, in);
-			if (binding_num >= 1 && (size_t)binding_num <= (size_t)num_bindings) {
-				func->binding = bindings[binding_num-1];
-			} else {
-				if (binding_num != 0) {
-					WSDL_CACHE_FAIL(in);
-				}
+			WSDL_CACHE_GET_INT(binding_num, &in);
+			if (binding_num == 0) {
 				func->binding = NULL;
+			} else {
+				func->binding = bindings[binding_num-1];
 			}
-			if (func->binding && func->binding->bindingType == BINDING_SOAP && in->p[0] != 0) {
+			if (func->binding && func->binding->bindingType == BINDING_SOAP && *in != 0) {
 				sdlSoapBindingFunctionPtr binding = func->bindingAttributes = emalloc(sizeof(sdlSoapBindingFunction));
 				memset(binding, 0, sizeof(sdlSoapBindingFunction));
-				WSDL_CACHE_GET_1(binding->style,sdlEncodingStyle,in);
-				binding->soapAction = sdl_deserialize_string(in);
-				sdl_deserialize_soap_body(&binding->input, encoders, types, in);
-				sdl_deserialize_soap_body(&binding->output, encoders, types, in);
+				WSDL_CACHE_GET_1(binding->style,sdlEncodingStyle,&in);
+				binding->soapAction = sdl_deserialize_string(&in);
+				sdl_deserialize_soap_body(&binding->input, encoders, types, &in);
+				sdl_deserialize_soap_body(&binding->output, encoders, types, &in);
 			} else {
-				WSDL_CACHE_SKIP(1, in);
+				WSDL_CACHE_SKIP(1, &in);
 				func->bindingAttributes = NULL;
 			}
 
-			func->requestParameters = sdl_deserialize_parameters(encoders, types, in);
-			func->responseParameters = sdl_deserialize_parameters(encoders, types, in);
+			func->requestParameters = sdl_deserialize_parameters(encoders, types, &in);
+			func->responseParameters = sdl_deserialize_parameters(encoders, types, &in);
 
-			WSDL_CACHE_GET_INT(num_faults, in);
-			if (UNEXPECTED((size_t)num_faults > WSDL_CACHE_REMAINING(in))) {
-				WSDL_CACHE_FAIL(in);
-				num_faults = 0;
-			}
+			WSDL_CACHE_GET_INT(num_faults, &in);
 			if (num_faults > 0) {
 			  int j;
 
@@ -2057,23 +1878,22 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, size_t uri_len
 
 				for (j = 0; j < num_faults; j++) {
 					sdlFaultPtr fault = emalloc(sizeof(sdlFault));
-					memset(fault, 0, sizeof(sdlFault));
 
-					sdl_deserialize_key(func->faults, fault, in);
-					fault->name =sdl_deserialize_string(in);
-					fault->details =sdl_deserialize_parameters(encoders, types, in);
-					if (in->p[0] != 0) {
+					sdl_deserialize_key(func->faults, fault, &in);
+					fault->name =sdl_deserialize_string(&in);
+					fault->details =sdl_deserialize_parameters(encoders, types, &in);
+					if (*in != 0) {
 						sdlSoapBindingFunctionFaultPtr binding = fault->bindingAttributes = emalloc(sizeof(sdlSoapBindingFunctionFault));
 						memset(binding, 0, sizeof(sdlSoapBindingFunctionFault));
-						WSDL_CACHE_GET_1(binding->use,sdlEncodingUse,in);
+						WSDL_CACHE_GET_1(binding->use,sdlEncodingUse,&in);
 						if (binding->use == SOAP_ENCODED) {
-							WSDL_CACHE_GET_1(binding->encodingStyle, sdlRpcEncodingStyle, in);
+							WSDL_CACHE_GET_1(binding->encodingStyle, sdlRpcEncodingStyle, &in);
 						} else {
 							binding->encodingStyle = SOAP_ENCODING_DEFAULT;
 						}
-						binding->ns = sdl_deserialize_string(in);
+						binding->ns = sdl_deserialize_string(&in);
 					} else {
-						WSDL_CACHE_SKIP(1, in);
+						WSDL_CACHE_SKIP(1, &in);
 						fault->bindingAttributes = NULL;
 					}
 				}
@@ -2085,29 +1905,17 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, size_t uri_len
 	}
 
 	/* deserialize requests */
-	WSDL_CACHE_GET_INT(i, in);
-	if (in->failed || i < 0 || (size_t)i > (size_t)st.st_size) {
-		goto invalid_cache;
-	}
+	WSDL_CACHE_GET_INT(i, &in);
 	if (i > 0) {
 		sdl->requests = emalloc(sizeof(HashTable));
 		zend_hash_init(sdl->requests, i, NULL, NULL, 0);
 		while (i > 0) {
 			int function_num;
 
-			WSDL_CACHE_GET_INT(function_num, in);
-			if (function_num >= 1 && (size_t)function_num <= (size_t)num_func) {
-				sdl_deserialize_key(sdl->requests, functions[function_num-1], in);
-			} else {
-				WSDL_CACHE_FAIL(in);
-				sdl_deserialize_key(sdl->requests, NULL, in);
-			}
+			WSDL_CACHE_GET_INT(function_num, &in);
+			sdl_deserialize_key(sdl->requests, functions[function_num-1], &in);
 			i--;
 		}
-	}
-
-	if (in->failed) {
-		goto invalid_cache;
 	}
 
 	if (functions) {
@@ -2118,26 +1926,6 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, size_t uri_len
 	efree(types);
 	efree(buf);
 	return sdl;
-
-invalid_cache:
-	unlink(fn);
-	if (sdl) {
-		delete_sdl(sdl);
-	}
-	if (functions) {
-		efree(functions);
-	}
-	if (bindings) {
-		efree(bindings);
-	}
-	if (encoders) {
-		efree(encoders);
-	}
-	if (types) {
-		efree(types);
-	}
-	efree(buf);
-	return NULL;
 }
 
 static void sdl_serialize_string(const char *str, smart_str *out)
