@@ -5184,19 +5184,6 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 								 && ssa->vars[ssa_op->op1_def].alias == NO_ALIAS) {
 									ssa->var_info[ssa_op->op1_def].guarded_reference = 1;
 								}
-								if (opline->result_type == IS_UNUSED) {
-									res_addr = 0;
-								} else {
-									res_addr = RES_REG_ADDR();
-									if (Z_MODE(res_addr) != IS_REG
-									 && zend_jit_trace_next_is_send_result(opline, p, frame)) {
-										send_result = 1;
-										res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
-										if (!zend_jit_reuse_ip(&ctx)) {
-											goto jit_failure;
-										}
-									}
-								}
 								op1_def_addr = op1_addr;
 								op1_def_info &= ~MAY_BE_REF;
 							} else if (op1_info & MAY_BE_REF) {
@@ -5214,6 +5201,9 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 							res_addr = RES_REG_ADDR();
 							res_info = RES_INFO();
 							if (Z_MODE(res_addr) != IS_REG
+							 /* assignment to typed reference may cause conversion,
+							  * so SEND_VAL has to check the type of the result */
+							 && !ref_addr
 							 && zend_jit_trace_next_is_send_result(opline, p, frame)) {
 								send_result = 1;
 								res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
