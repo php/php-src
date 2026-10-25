@@ -1318,7 +1318,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 					break;
 				}
 			} else if (opline->opcode == ZEND_ASSIGN_DIM_OP) {
-				if ((IS_PARTIAL_ARRAY(op1) || Z_TYPE_P(op1) == IS_ARRAY)
+				if (op1 && (IS_PARTIAL_ARRAY(op1) || Z_TYPE_P(op1) == IS_ARRAY)
 						&& ssa_op->op1_def >= 0 && op2) {
 					zval tmp;
 					zval *data = get_op1_value(ctx, opline+1, ssa_op+1);
