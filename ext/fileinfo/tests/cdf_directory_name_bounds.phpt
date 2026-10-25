@@ -2,10 +2,6 @@
 fileinfo CDF: NUL-terminate directory names and stop on zero-length catalog records
 --EXTENSIONS--
 fileinfo
---SKIPIF--
-<?php
-die('skip diagnostic dichotomy');
-?>
 --FILE--
 <?php
 /*
