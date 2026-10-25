@@ -6394,6 +6394,8 @@ static void zend_compile_void_cast(znode *result, const zend_ast *ast)
 		case IS_CONST:
 			zend_do_free(&expr_node);
 			break;
+		default:
+			ZEND_UNREACHABLE();
 	}
 }
 
