@@ -42,6 +42,14 @@ php_dom_libxml_ns_mapper *php_dom_ns_mapper_from_private(php_dom_private_data *p
 	return private_data == NULL ? NULL : &private_data->ns_mapper;
 }
 
+static void php_dom_libxml_ns_mapper_prefix_map_dtor(zval *zv)
+{
+	HashTable *ht = Z_ARRVAL_P(zv);
+
+	zend_hash_destroy(ht);
+	efree(ht);
+}
+
 php_dom_private_data *php_dom_private_data_create(void)
 {
 	php_dom_private_data *private_data = emalloc(sizeof(*private_data));
@@ -49,7 +57,7 @@ php_dom_private_data *php_dom_private_data_create(void)
 	private_data->header.ns_hook = php_dom_libxml_private_data_ns_hook;
 	private_data->ns_mapper.html_ns = NULL;
 	private_data->ns_mapper.prefixless_xmlns_ns = NULL;
-	zend_hash_init(&private_data->ns_mapper.uri_to_prefix_map, 0, NULL, ZVAL_PTR_DTOR, false);
+	zend_hash_init(&private_data->ns_mapper.uri_to_prefix_map, 0, NULL, php_dom_libxml_ns_mapper_prefix_map_dtor, false);
 	private_data->template_fragments = NULL;
 	return private_data;
 }
