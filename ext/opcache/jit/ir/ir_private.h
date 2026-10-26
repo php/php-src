@@ -958,6 +958,39 @@ IR_ALWAYS_INLINE bool ir_ref_is_true(const ir_ctx *ctx, ir_ref ref)
 	}
 }
 
+IR_ALWAYS_INLINE bool ir_neg_is_safe(ir_type type, int64_t val)
+{
+	return val != (INT64_MIN >> ((8 - ir_type_size[type]) * 8));
+}
+
+/* Clear the "uvisible" high bits */
+IR_ALWAYS_INLINE uint64_t ir_fix_unsigned(ir_type type, uint64_t val)
+{
+	uint64_t shift;
+
+	shift = (8 - ir_type_size[type]) * 8;
+	return (val << shift) >> shift;
+}
+
+/* Sign extend the value into the "uvisible" high bits */
+IR_ALWAYS_INLINE uint64_t ir_fix_signed(ir_type type, uint64_t val)
+{
+	uint64_t shift;
+
+	shift = (8 - ir_type_size[type]) * 8;
+	return (int64_t)(val << shift) >> shift;
+}
+
+IR_ALWAYS_INLINE uint64_t ir_fix_int(ir_type type, uint64_t val)
+{
+	IR_ASSERT(IR_IS_TYPE_INT(type));
+	if (IR_IS_TYPE_SIGNED(type)) {
+		return ir_fix_signed(type, val);
+	} else {
+		return ir_fix_unsigned(type, val);
+	}
+}
+
 /* IR OP flags */
 #define IR_OP_FLAG_OPERANDS_SHIFT 3
 
