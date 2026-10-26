@@ -29,7 +29,7 @@ opcache_reset();
 echo "Opcache reset";
 ?>
 --EXPECTF--
-%s Message Cached script '%sbasic_logging%s'
+%r[^:]+: Debug zend_accel_shared_protect_init: pkey_alloc\(\) failed .*\n|%r%s Message Cached script '%sbasic_logging%s'
 Foo Bar
 %s Debug Restart Scheduled! Reason: user
 Opcache reset
