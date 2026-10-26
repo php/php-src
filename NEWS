@@ -126,6 +126,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-17733 (System entropy does not take into account function
     order, resulting in wrong functions possibly called
     in different configurations). (ndossche)
+  . Fixed bug GH-24438 (Preserve indirect types in JIT side traces). (aasul)
 
 - PDO:
   . Fixed invalid ATTR_ORACLE_NULLS values being accepted and truncated.
