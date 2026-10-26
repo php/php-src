@@ -1378,7 +1378,13 @@ static void zend_jit_def_reg(zend_jit_ctx *jit, zend_jit_addr addr, ir_ref val)
 				val = ir_emit2(&jit->ctx, IR_OPT(IR_COPY, jit->ctx.ir_base[val].type), val, 1);
 			}
 		}
-		if (!zend_jit_spilling_may_cause_conflict(jit, var, val)) {
+		bool may_cause_conflict = zend_jit_spilling_may_cause_conflict(jit, var, val);
+		/* Keep CV identities separate even when the assignment cannot be bound. */
+		if (jit->ssa->vars[var].var < jit->current_op_array->last_var
+		 && jit->ctx.ir_base[val].op < IR_PHI) {
+			val = ir_emit2(&jit->ctx, IR_OPT(IR_COPY, jit->ctx.ir_base[val].type), val, IR_COPY_HARD);
+		}
+		if (!may_cause_conflict) {
 			val = ir_bind(&jit->ctx, -EX_NUM_TO_VAR(jit->ssa->vars[var].var), val);
 		}
 	}

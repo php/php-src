@@ -1910,6 +1910,73 @@ static int ir_try_swap_operands(ir_ctx *ctx, ir_ref i, ir_insn *insn)
 	return 0;
 }
 
+/* Reuse a bound COPY's storage when it covers the source's optimized lifetime. */
+static void ir_share_copy_spill_slots(ir_ctx *ctx)
+{
+	ir_ref ref;
+
+	if (!ctx->binding) {
+		return;
+	}
+	for (ref = 1; ref < ctx->insns_count; ref += ir_insn_len(&ctx->ir_base[ref])) {
+		ir_insn *insn = &ctx->ir_base[ref];
+		ir_ref source, binding;
+		ir_live_interval *source_interval, *copy_interval;
+		ir_use_list *uses;
+		ir_ref i;
+		ir_live_range range, *source_range;
+
+		if (insn->op != IR_COPY || insn->op2 != IR_COPY_HARD) {
+			continue;
+		}
+		source = insn->op1;
+		if (source <= 0 || source != ref - 1 || ctx->ir_base[source].op >= IR_PHI
+		 || ctx->ir_base[source].type != insn->type
+		 || ctx->cfg_map[source] != ctx->cfg_map[ref]
+		 || !ctx->vregs[source] || !ctx->vregs[ref]
+		 || ir_binding_find(ctx, source)) {
+			continue;
+		}
+		binding = ir_binding_find(ctx, ref);
+		if (!binding) {
+			continue;
+		}
+		source_interval = ctx->live_intervals[ctx->vregs[source]];
+		copy_interval = ctx->live_intervals[ctx->vregs[ref]];
+		/* Do not borrow storage from a coalesced value or across a loop entry. */
+		if (((source_interval->flags | copy_interval->flags) & IR_LIVE_INTERVAL_COALESCED)
+		 || source_interval->range.start < IR_START_LIVE_POS_FROM_REF(source)
+		 || source_interval->range.start >= IR_END_LIVE_POS_FROM_REF(source)
+		 || copy_interval->range.start < IR_START_LIVE_POS_FROM_REF(ref)
+		 || copy_interval->range.start >= IR_END_LIVE_POS_FROM_REF(ref)) {
+			continue;
+		}
+		/* Ignore only the adjacent source definition before the COPY. Every
+		 * remaining source range, including holes and backedges, must be covered. */
+		range = source_interval->range;
+		range.start = copy_interval->range.start;
+		source_range = range.end > range.start ? &range : range.next;
+		if (source_range && !ir_ivals_inside(&copy_interval->range, source_range)) {
+			continue;
+		}
+		/* A source snapshot may require a different location from the bound COPY. */
+		uses = &ctx->use_lists[source];
+		for (i = 0; i < uses->count; i++) {
+			if (ctx->ir_base[ctx->use_edges[uses->refs + i]].op == IR_SNAPSHOT) {
+				break;
+			}
+		}
+		if (i != uses->count) {
+			continue;
+		}
+		/* Adjacent definitions have no intervening memory access or exit. The COPY's
+		 * live ranges cover every later use of the identically typed source.
+		 * Keep both identities and the allocator's binding compatibility checks. */
+		IR_ASSERT(binding < 0);
+		ir_bind(ctx, binding, source);
+	}
+}
+
 int ir_coalesce(ir_ctx *ctx)
 {
 	uint32_t b, n, succ, pred_b, count = 0;
@@ -2109,6 +2176,8 @@ int ir_coalesce(ir_ctx *ctx)
 		}
 		ir_mem_free(xlat);
 	}
+
+	ir_share_copy_spill_slots(ctx);
 
 	return 1;
 }
