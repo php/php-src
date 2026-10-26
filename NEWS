@@ -30,6 +30,8 @@ PHP                                                                        NEWS
     into a hash. (jorgsowa)
   . Fixed bug GH-24436 (Tracing JIT: keep the SEND_VAL type guard after
     assigning to a reference). (waroad)
+  . Fixed bug GH-24745 (File cache loses attributes on constants on 32-bit
+    builds). (Yannick Decat, Lazizbek Ergashev)
 
 - PDO_PGSQL:
   . Fixed bug GH-24461 (DISCARD ALL on persistent connection cleanup drops
