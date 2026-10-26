@@ -49,7 +49,7 @@ PHPAPI bool php_odbc_connstr_is_quoted(const char *str)
 			/* Skip over so we don't count it again */
 			i++;
 		} else if (str[i] == '}') {
-			/* If not at the end, not quoted */
+			/* Only quoted if at the end */
 			return str[i + 1] == '\0';
 		}
 	}
