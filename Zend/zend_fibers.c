@@ -645,9 +645,7 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 		zend_fiber_release_callable(fiber);
 
 		if (EG(exception)) {
-			if (!(fiber->flags & ZEND_FIBER_FLAG_DESTROYED)
-				|| !(zend_is_graceful_exit(EG(exception)) || zend_is_unwind_exit(EG(exception)))
-			) {
+			if (!(fiber->flags & ZEND_FIBER_FLAG_DESTROYED) || !zend_is_graceful_exit(EG(exception))) {
 				fiber->flags |= ZEND_FIBER_FLAG_THREW;
 				transfer->flags = ZEND_FIBER_TRANSFER_FLAG_ERROR;
 

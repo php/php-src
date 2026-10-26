@@ -1398,7 +1398,9 @@ static void zend_jit_def_reg(zend_jit_ctx *jit, zend_jit_addr addr, ir_ref val)
 			if (dst_phi->pi >= 0) {
 				jit->ra[src_var].ref = val;
 				src_var = dst_phi->ssa_var;
-				if (!(jit->ra[src_var].flags & ZREG_FORWARD)) {
+				if (!(jit->ra[src_var].flags & ZREG_FORWARD)
+				 /* Pi in a block that is not generated yet. It forwards later on its own. */
+				 || (jit->bb_start_ref && !jit->bb_start_ref[dst_phi->block])) {
 					phi = zend_ssa_next_use_phi(jit->ssa, var, phi);
 					continue;
 				}
@@ -13683,6 +13685,9 @@ static int zend_jit_assign_dim_op(zend_jit_ctx   *jit,
 		ir_MERGE_list(end_inputs);
 	}
 
+	if (op1_data_info & (MAY_BE_REF|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
+		op1_data_info |= MAY_BE_RC1|MAY_BE_RCN;
+	}
 	jit_FREE_OP(jit, (opline+1)->op1_type, (opline+1)->op1, op1_data_info, NULL);
 	jit_FREE_OP(jit, opline->op2_type, opline->op2, op2_info, NULL);
 	if (may_throw) {
