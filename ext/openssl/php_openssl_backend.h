@@ -35,6 +35,11 @@
 #include <openssl/pkcs12.h>
 #include <openssl/cms.h>
 
+#if OPENSSL_VERSION_NUMBER < 0x40100000L
+#define ASN1_STRING_set1_data(str, data, len) ASN1_STRING_set((str), (data), (int) (len))
+#define ASN1_STRING_get_length(str) ((size_t) ASN1_STRING_length(str))
+#endif
+
 #if defined(OPENSSL_VERSION_MAJOR) && OPENSSL_VERSION_MAJOR >= 4
 typedef const X509_EXTENSION PHP_OPENSSL_X509_EXTENSION;
 #else
