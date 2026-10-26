@@ -570,10 +570,9 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 
 	/* It's possible that the current thread resources are requested, and that we get here.
 	 * This means that the TSRM key pointer and cached pointer are NULL, but there is still
-	 * a thread resource associated with this ID in the hashtable. This can occur if a thread
-	 * goes away, but its resources are never cleaned up, and then that thread ID is reused.
-	 * Since we don't always have a way to know when a thread goes away, we can't clean up
-	 * the thread's resources before the new thread spawns.
+	 * a thread resource associated with this ID in the hashtable. Automatic thread cleanup
+	 * may be unavailable or fail, leaving an entry behind after its thread exits. A new
+	 * thread may then reuse that thread ID.
 	 * The old native TLS is no longer accessible, so its destructors cannot run safely.
 	 * Release the directly owned allocations and create fresh resources for the new thread.
 	 * The fact that this situation happens isn't that bad because a child process containing
