@@ -8148,7 +8148,7 @@ ZEND_METHOD(ReflectionConstant, getAttributes)
 	GET_REFLECTION_OBJECT_PTR(const_);
 
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
-		const_->attributes, 0, NULL, ZEND_ATTRIBUTE_TARGET_CONST,
+		const_->attributes, zend_constant_attributes_offset(const_), NULL, ZEND_ATTRIBUTE_TARGET_CONST,
 		const_->filename);
 }
 

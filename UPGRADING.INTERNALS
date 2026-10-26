@@ -47,6 +47,11 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 - The INIT_CLASS_ENTRY_INIT_METHODS() macro, which was previously used as
   part of handling disabled classes, was removed following the removal of
   the `disable_classes` INI setting in PHP 8.5.
+- Removed ZEND_ACC_PTR_OPS. Attributes of user constants are now stored in
+  the attributes table of the declaring file's main op_array.
+  zend_constant.attributes can therefore be shared.
+  Use zend_constant_attributes_offset() to get the offset of a constant's own attributes.
+  Added zend_get_attribute_str_ex() to look up an attribute at a raw offset.
 
 ========================
 2. Build system changes
@@ -81,6 +86,9 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 ========================
 4. OpCode changes
 ========================
+
+- ZEND_DECLARE_ATTRIBUTED_CONST no longer has an OP_DATA opline.
+  The offset of the constant's attributes in the op_array's attributes table is stored in extended_value.
 
 ========================
 5. SAPI changes
