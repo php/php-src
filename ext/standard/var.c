@@ -1124,6 +1124,8 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, php_serialize_
 	zend_long var_already;
 	HashTable *myht;
 
+	ZEND_ASSERT(var_hash != NULL);
+
 	if (EG(exception)) {
 		return;
 	}
@@ -1132,7 +1134,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, php_serialize_
 		return;
 	}
 
-	if (var_hash && (var_already = php_add_var_hash(var_hash, struc, in_rcn_array))) {
+	if (var_already = php_add_var_hash(var_hash, struc, in_rcn_array)) {
 		if (var_already == -1) {
 			/* Reference to an object that failed to serialize, replace with null. */
 			smart_str_appendl(buf, "N;", 2);
