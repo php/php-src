@@ -604,9 +604,8 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 void ts_free_thread(void)
 {/*{{{*/
 	tsrm_tls_entry *thread_resources = tsrm_tls_get();
-	tsrm_tls_entry *p;
+	tsrm_tls_entry **p;
 	int hash_value;
-	tsrm_tls_entry *last=NULL;
 
 	TSRM_ASSERT(!in_main_thread);
 	if (!thread_resources) {
@@ -621,29 +620,22 @@ void ts_free_thread(void)
 
 	tsrm_mutex_lock(tsmm_mutex);
 	hash_value = THREAD_HASH_OF(thread_resources->thread_id, tsrm_tls_table_size);
-	p = tsrm_tls_table[hash_value];
+	p = &tsrm_tls_table[hash_value];
 
-	while (p) {
-		if (p == thread_resources) {
-			ts_free_resources(thread_resources, true, true);
-			if (last) {
-				last->next = p->next;
-			} else {
-				tsrm_tls_table[hash_value] = p->next;
-			}
-			tsrm_tls_set(0);
-			tsrm_atexit_set_data(NULL);
-			TSRMLS_CACHE = NULL;
-			free((char *) thread_resources - tsrm_reserved_front);
-			tsrm_mutex_unlock(tsmm_mutex);
-			return;
-		}
-		last = p;
-		p = p->next;
+	while (*p && *p != thread_resources) {
+		p = &(*p)->next;
+	}
+	thread_resources = *p;
+	if (thread_resources) {
+		ts_free_resources(thread_resources, true, true);
+		*p = thread_resources->next;
 	}
 	tsrm_tls_set(0);
 	tsrm_atexit_set_data(NULL);
 	TSRMLS_CACHE = NULL;
+	if (thread_resources) {
+		free((char *) thread_resources - tsrm_reserved_front);
+	}
 	tsrm_mutex_unlock(tsmm_mutex);
 }/*}}}*/
 
