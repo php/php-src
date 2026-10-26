@@ -13,7 +13,7 @@ $php = getenv('TEST_PHP_EXECUTABLE');
 foreach (["\n", "\n)\n"] as $tail) {
     file_put_contents($fname, "<?php\n\$a = '" . str_repeat('A', 3 << 20) . "';" . $tail);
     // Windows rounds huge blocks up to 2MB, so leave room below the hard limit
-    echo shell_exec(escapeshellarg($php) . ' -n -d memory_limit=6M -d memory_hard_limit_percent=400 -l ' . escapeshellarg($fname) . ' 2>&1');
+    echo shell_exec(escapeshellarg($php) . ' -n -d fatal_error_backtraces=0 -d memory_limit=6M -d memory_hard_limit_percent=400 -l ' . escapeshellarg($fname) . ' 2>&1');
 }
 
 ?>

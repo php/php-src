@@ -11,7 +11,7 @@ if (PHP_OS_FAMILY === 'Windows') die('skip the -r code is longer than Windows al
 $code = '$a = [' . str_repeat('1,', 50000) . ']; )';
 
 $php = getenv('TEST_PHP_EXECUTABLE');
-echo shell_exec(escapeshellarg($php) . ' -n -d memory_limit=3M -r ' . escapeshellarg($code) . ' 2>&1');
+echo shell_exec(escapeshellarg($php) . ' -n -d fatal_error_backtraces=0 -d memory_limit=3M -r ' . escapeshellarg($code) . ' 2>&1');
 
 ?>
 --EXPECTF--
