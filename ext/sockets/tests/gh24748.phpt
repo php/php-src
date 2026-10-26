@@ -33,11 +33,10 @@ var_dump(socket_get_option($socket, SOL_SOCKET, SO_SNDTIMEO));
 $linger = new stdClass();
 $linger->l_onoff = new stdClass();
 $linger->l_linger = 5;
-set_error_handler(function ($errno, $errstr) use ($linger) {
-    echo $errstr, "\n";
-    for ($i = 0; $i < 100; $i++) {
-        $linger->{"p$i"} = $i;
-    }
+set_error_handler(function () use ($linger) {
+    $tmp = (array) $linger;
+    $linger->extra = 1;
+    unset($tmp);
     return true;
 });
 var_dump(socket_set_option($socket, SOL_SOCKET, SO_LINGER, $linger));
@@ -59,5 +58,4 @@ array(2) {
   ["usec"]=>
   int(0)
 }
-Object of class stdClass could not be converted to int
 bool(true)
