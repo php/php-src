@@ -49,23 +49,42 @@ foreach (['unseeded', 'seeded', 'active'] as $state) {
     if ($state === 'active') {
         session_start();
     }
-    $file = tempnam(sys_get_temp_dir(), 'gh22616');
-    $pid = pcntl_fork();
-    if ($pid === -1) {
+    $file1 = tempnam(sys_get_temp_dir(), 'gh22616');
+    $pid1 = pcntl_fork();
+    if ($pid1 === -1) {
         throw new Exception('fork failed');
     }
-    if ($pid === 0) {
-        file_put_contents($file, sequence());
+    if ($pid1 === 0) {
+        file_put_contents($file1, sequence());
         exit;
     }
+
+    $file2 = tempnam(sys_get_temp_dir(), 'gh22616');
+    $pid2 = pcntl_fork();
+    if ($pid2 === -1) {
+        throw new Exception('fork failed');
+    }
+    if ($pid2 === 0) {
+        file_put_contents($file2, sequence());
+        exit;
+    }
+
     $parent = sequence();
-    pcntl_waitpid($pid, $status);
-    $child = file_get_contents($file);
-    unlink($file);
-    $results[$state] = pcntl_wifexited($status)
-        && pcntl_wexitstatus($status) === 0
-        && strlen($child) === 256
-        && $parent !== $child;
+    pcntl_waitpid($pid1, $status1);
+    pcntl_waitpid($pid2, $status2);
+    $child1 = file_get_contents($file1);
+    $child2 = file_get_contents($file2);
+    unlink($file1);
+    unlink($file2);
+    $results[$state] = pcntl_wifexited($status1)
+        && pcntl_wexitstatus($status1) === 0
+        && pcntl_wifexited($status2)
+        && pcntl_wexitstatus($status2) === 0
+        && strlen($child1) === 256
+        && strlen($child2) === 256
+        && $parent !== $child1
+        && $parent !== $child2
+        && $child1 !== $child2;
 }
 var_dump($results);
 ?>
