@@ -3452,8 +3452,9 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 
 static void php_session_child_init(void)
 {
-	/* Move the child's GC sequence forward without requesting new entropy. */
-	php_random_pcgoneseq128xslrr64_advance(PS(random).state, 1);
+	/* Give each child a distinct, widely separated GC sequence without requesting new entropy. */
+	uint64_t advance = (uint64_t) getpid() << 32;
+	php_random_pcgoneseq128xslrr64_advance(PS(random).state, advance);
 }
 
 zend_module_entry session_module_entry = {
