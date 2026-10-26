@@ -76,7 +76,9 @@ static void zend_lazy_object_info_dtor_func(zval *pElement)
 		zend_object_release(info->u.instance);
 	} else {
 		zval_ptr_dtor(&info->u.initializer.zv);
-		zend_fcc_dtor(&info->u.initializer.fcc);
+		if (ZEND_FCC_INITIALIZED(info->u.initializer.fcc)) {
+			zend_fcc_dtor(&info->u.initializer.fcc);
+		}
 	}
 
 	efree(info);
@@ -157,6 +159,20 @@ zend_object* zend_lazy_object_get_instance(zend_object *obj)
 zend_lazy_object_flags_t zend_lazy_object_get_flags(zend_object *obj)
 {
 	return zend_lazy_object_get_info(obj)->flags;
+}
+
+/* Release the initializer while the info is still registered, so that
+ * destructors triggered by this can not reset the object */
+static void zend_lazy_object_release_initializer(zend_object *obj)
+{
+	zend_lazy_object_info *info = zend_hash_index_find_ptr(&EG(lazy_objects_store).infos, obj->handle);
+	ZEND_ASSERT(info && !(info->flags & ZEND_LAZY_OBJECT_INITIALIZED));
+
+	zval initializer_zv;
+	ZVAL_COPY_VALUE(&initializer_zv, &info->u.initializer.zv);
+	ZVAL_UNDEF(&info->u.initializer.zv);
+	zend_fcc_dtor(&info->u.initializer.fcc);
+	zval_ptr_dtor(&initializer_zv);
 }
 
 void zend_lazy_object_del_info(zend_object *obj)
@@ -410,6 +426,7 @@ ZEND_API zend_object *zend_lazy_object_mark_as_initialized(zend_object *obj)
 		}
 	}
 
+	zend_lazy_object_release_initializer(obj);
 	zend_lazy_object_del_info(obj);
 
 	return obj;
@@ -669,6 +686,8 @@ ZEND_API zend_object *zend_lazy_object_init(zend_object *obj)
 	if (properties_snapshot) {
 		zend_release_properties(properties_snapshot);
 	}
+
+	zend_lazy_object_release_initializer(obj);
 
 	/* Must be very last in this function, for the
 	 * zend_lazy_object_has_stale_info() check */
