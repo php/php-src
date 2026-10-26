@@ -23,6 +23,9 @@ PHP                                                                        NEWS
     throwing a ValueError. (Marc Bennewitz)
 
 - Intl:
+  . Added IntlRelativeDateTimeFormatter for locale-aware relative date and time
+    formatting, with enums for styles, capitalization contexts, and units.
+    (Weilin Du)
   . Added Transliterator::toRules() and transliterator_to_rules().
     (Weilin Du, David Carlier)
   . Fixed Collator attribute and strength methods not rejecting an
@@ -84,10 +87,15 @@ PHP                                                                        NEWS
     that is not in the result set. (Ilia Alshanetsky)
   . Fixed bug GH-23962 (Destroying a persistent PDO instance rolls back a
     transaction still in use by another instance). (Lazizbek Ergashev)
+  . Fixed PDOStatement::execute() leaving a partial set of bindings in place
+    when binding its array argument fails. (Ilia Alshanetsky, Kamil Tekiela)
 
 - PDO_PGSQL:
   . Improved performance of the SQL parser that handles placeholders.
     (brainexe)
+  . Improved performance of fetching integer columns. (brainexe)
+  . Fixed bug GH-24490 (pdo_pgsql prepare() hangs on a query containing a NUL
+    byte). (dev-null-undefined)
 
 - PGSQL:
   . Fixed pg_lo_write() rejecting data containing null bytes. (Ilia Alshanetsky)
@@ -119,6 +127,8 @@ PHP                                                                        NEWS
 - SOAP:
   . Fixed the SOAP client accepting a response body shorter than its
     Content-Length and reusing the connection. (Ilia Alshanetsky)
+  . Fixed bug GH-24315 (Harden SoapClient cross-origin redirect handling).
+    (Ilia Alshanetsky)
 
 - SPL:
   . Fixed bug GH-23385 (SplDoublyLinkedList::serialize() use-after-free when

@@ -20,14 +20,10 @@
 #include "normalizer.h"
 #include "normalizer_class.h"
 #include "php_intl.h"
-#ifdef __cplusplus
-extern "C" {
-#endif
+BEGIN_EXTERN_C()
 #include "normalizer_arginfo.h"
+END_EXTERN_C()
 #include "intl_error.h"
-#ifdef __cplusplus
-}
-#endif
 
 #include <unicode/unorm.h>
 

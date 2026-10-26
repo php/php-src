@@ -520,25 +520,13 @@ make_bottom:
 
 static bool ir_is_dead_load_ex(const ir_ctx *ctx, ir_ref ref, uint32_t flags, const ir_insn *insn)
 {
-	if ((flags & (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_MASK)) == (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_LOAD)) {
-		return ctx->use_lists[ref].count == 1;
-	} else if (insn->op == IR_ALLOCA || insn->op == IR_BLOCK_BEGIN) {
-		return ctx->use_lists[ref].count == 1;
-	}
-	return 0;
+	return (flags & IR_OP_FLAG_NO_SIDE_EFFECT) && ctx->use_lists[ref].count == 1;
 }
 
 static bool ir_is_dead_load(const ir_ctx *ctx, ir_ref ref)
 {
 	if (ctx->use_lists[ref].count == 1) {
-		const ir_insn *insn = &ctx->ir_base[ref];
-		uint32_t flags = ir_op_flags[insn->op];
-
-		if ((flags & (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_MASK)) == (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_LOAD)) {
-			return 1;
-		} else if (insn->op == IR_ALLOCA || insn->op == IR_BLOCK_BEGIN) {
-			return 1;
-		}
+		return (ir_op_flags[ctx->ir_base[ref].op] & IR_OP_FLAG_NO_SIDE_EFFECT) != 0;
 	}
 	return 0;
 }
@@ -3040,26 +3028,62 @@ static bool ir_cmp_is_true(ir_op op, const ir_insn *op1, const ir_insn *op2)
 		} else if (op == IR_LT) {
 			if (IR_IS_TYPE_SIGNED(op1->type)) {
 				return op1->val.i64 < op2->val.i64;
+			} else if (ir_type_size[op1->type] == 8) {
+				return op1->val.i64 < op2->val.i64;
+			} else if (ir_type_size[op1->type] == 4) {
+				return op1->val.i32 < op2->val.i32;
+			} else if (ir_type_size[op1->type] == 2) {
+				return op1->val.i16 < op2->val.i16;
+			} else if (ir_type_size[op1->type] == 1) {
+				return op1->val.i8 < op2->val.i8;
 			} else {
-				return op1->val.u64 < op2->val.u64;
+				IR_ASSERT(0);
+				return 0;
 			}
 		} else if (op == IR_GE) {
 			if (IR_IS_TYPE_SIGNED(op1->type)) {
 				return op1->val.i64 >= op2->val.i64;
+			} else if (ir_type_size[op1->type] == 8) {
+				return op1->val.i64 >= op2->val.i64;
+			} else if (ir_type_size[op1->type] == 4) {
+				return op1->val.i32 >= op2->val.i32;
+			} else if (ir_type_size[op1->type] == 2) {
+				return op1->val.i16 >= op2->val.i16;
+			} else if (ir_type_size[op1->type] == 1) {
+				return op1->val.i8 >= op2->val.i8;
 			} else {
-				return op1->val.u64 >= op2->val.u64;
+				IR_ASSERT(0);
+				return 0;
 			}
 		} else if (op == IR_LE) {
 			if (IR_IS_TYPE_SIGNED(op1->type)) {
 				return op1->val.i64 <= op2->val.i64;
+			} else if (ir_type_size[op1->type] == 8) {
+				return op1->val.i64 <= op2->val.i64;
+			} else if (ir_type_size[op1->type] == 4) {
+				return op1->val.i32 <= op2->val.i32;
+			} else if (ir_type_size[op1->type] == 2) {
+				return op1->val.i16 <= op2->val.i16;
+			} else if (ir_type_size[op1->type] == 1) {
+				return op1->val.i8 <= op2->val.i8;
 			} else {
-				return op1->val.u64 <= op2->val.u64;
+				IR_ASSERT(0);
+				return 0;
 			}
 		} else if (op == IR_GT) {
 			if (IR_IS_TYPE_SIGNED(op1->type)) {
 				return op1->val.i64 > op2->val.i64;
+			} else if (ir_type_size[op1->type] == 8) {
+				return op1->val.i64 > op2->val.i64;
+			} else if (ir_type_size[op1->type] == 4) {
+				return op1->val.i32 > op2->val.i32;
+			} else if (ir_type_size[op1->type] == 2) {
+				return op1->val.i16 > op2->val.i16;
+			} else if (ir_type_size[op1->type] == 1) {
+				return op1->val.i8 > op2->val.i8;
 			} else {
-				return op1->val.u64 > op2->val.u64;
+				IR_ASSERT(0);
+				return 0;
 			}
 		} else if (op == IR_ULT) {
 			return op1->val.u64 < op2->val.u64;
@@ -3752,7 +3776,7 @@ static ir_ref ir_iter_optimize_condition(ir_ctx *ctx, ir_ref control, ir_ref con
 		 && ctx->use_lists[condition].count == 1
 		 && ctx->use_lists[condition_insn->op1].count == 1
 		 && (op1_insn->op == IR_ZEXT || op1_insn->op == IR_SEXT)
-		 && val_insn->val.u64 <= (((uint64_t)-1ULL) >> (64 - ir_type_size[ctx->ir_base[op1_insn->op1].type] * 8))) {
+		 && val_insn->val.u64 <= (((uint64_t)(0-1ULL)) >> (64 - ir_type_size[ctx->ir_base[op1_insn->op1].type] * 8))) {
 			/* IF(AND(ZEXT(X), C)) => IF(AND(X, C)) */
 			if (op1_insn->op1 > 0) {
 				ir_use_list_replace_one(ctx, op1_insn->op1, condition_insn->op1, condition);

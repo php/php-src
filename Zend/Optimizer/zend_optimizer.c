@@ -1345,7 +1345,7 @@ static void zend_redo_pass_two_ex(zend_op_array *op_array, const zend_ssa *ssa)
 	while (opline < end) {
 		const zend_ssa_op *ssa_op = &ssa->ops[opline - op_array->opcodes];
 		uint32_t op1_info = opline->op1_type == IS_UNUSED ? 0 : (OP1_INFO() & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_KEY_ANY));
-		uint32_t op2_info = opline->op1_type == IS_UNUSED ? 0 : (OP2_INFO() & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_KEY_ANY));
+		uint32_t op2_info = opline->op2_type == IS_UNUSED ? 0 : (OP2_INFO() & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_KEY_ANY));
 		uint32_t res_info =
 			(opline->opcode == ZEND_PRE_INC ||
 			 opline->opcode == ZEND_PRE_DEC ||

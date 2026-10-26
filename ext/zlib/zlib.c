@@ -145,6 +145,9 @@ static int php_zlib_output_encoding(void)
 	zval *enc;
 
 	if (!ZLIBG(compression_coding)) {
+		if (!EG(active)) {
+			return 0;
+		}
 		if ((Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY || zend_is_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER))) &&
 			(enc = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_ACCEPT_ENCODING", sizeof("HTTP_ACCEPT_ENCODING") - 1))) {
 			convert_to_string(enc);
@@ -386,7 +389,11 @@ static zend_string *php_zlib_encode(const char *in_buf, size_t in_len, int encod
 	Z.zfree = php_zlib_free;
 
 	if (Z_OK == (status = deflateInit2(&Z, level, Z_DEFLATED, encoding, MAX_MEM_LEVEL, Z_DEFAULT_STRATEGY))) {
-		out = zend_string_alloc(PHP_ZLIB_BUFFER_SIZE_GUESS(in_len), 0);
+		out = zend_string_falloc(PHP_ZLIB_BUFFER_SIZE_GUESS(in_len), 0, /* fallible */ true);
+		if (UNEXPECTED(!out)) {
+			deflateEnd(&Z);
+			return NULL;
+		}
 
 		Z.next_in = (Bytef *) in_buf;
 		Z.next_out = (Bytef *) ZSTR_VAL(out);
@@ -423,7 +430,7 @@ static inline int php_zlib_inflate_rounds(z_stream *Z, size_t max, char **buf, s
 	buffer.size = (max && (max < Z->avail_in)) ? max : Z->avail_in;
 
 	do {
-		if ((max && (max <= buffer.used)) || !(buffer.aptr = erealloc_recoverable(buffer.data, buffer.size))) {
+		if ((max && (max <= buffer.used)) || !(buffer.aptr = safe_ferealloc(buffer.data, 1, buffer.size, 0, /* fallible */ true))) {
 			status = Z_MEM_ERROR;
 		} else {
 			buffer.data = buffer.aptr;
@@ -629,6 +636,10 @@ PHP_FUNCTION(gzfile)
 	memset(buf, 0, sizeof(buf));
 
 	while (php_stream_gets(stream, buf, sizeof(buf) - 1) != NULL) {
+		if (ZEND_HAS_OOM()) {
+			php_stream_close(stream);
+			RETURN_OOM();
+		}
 		add_index_string(return_value, i++, buf);
 	}
 	php_stream_close(stream);
@@ -974,6 +985,22 @@ PHP_FUNCTION(inflate_init)
 }
 /* }}} */
 
+/* Releases *out and returns false on failure. */
+static bool php_zlib_inflate_grow(zend_string **out, size_t buffer_used, size_t chunk_size, z_stream *Z)
+{
+	zend_string *grown = zend_string_fextend(*out, ZSTR_LEN(*out) + chunk_size, 0, /* fallible */ true);
+
+	if (UNEXPECTED(grown == NULL)) {
+		zend_string_release_ex(*out, 0);
+		return false;
+	}
+
+	*out = grown;
+	Z->avail_out = chunk_size;
+	Z->next_out = (Bytef *) ZSTR_VAL(grown) + buffer_used;
+	return true;
+}
+
 /* {{{ Incrementally inflate encoded data in the specified context */
 PHP_FUNCTION(inflate_add)
 {
@@ -1032,9 +1059,9 @@ PHP_FUNCTION(inflate_add)
 			case Z_OK:
 				if (ctx->Z.avail_out == 0) {
 					/* more output buffer space needed; realloc and try again */
-					out = zend_string_extend(out, ZSTR_LEN(out) + CHUNK_SIZE, 0);
-					ctx->Z.avail_out = CHUNK_SIZE;
-					ctx->Z.next_out = (Bytef *) ZSTR_VAL(out) + buffer_used;
+					if (UNEXPECTED(!php_zlib_inflate_grow(&out, buffer_used, CHUNK_SIZE, &ctx->Z))) {
+						RETURN_OOM();
+					}
 					break;
 				} else {
 					goto complete;
@@ -1044,9 +1071,9 @@ PHP_FUNCTION(inflate_add)
 			case Z_BUF_ERROR:
 				if (flush_type == Z_FINISH && ctx->Z.avail_out == 0) {
 					/* more output buffer space needed; realloc and try again */
-					out = zend_string_extend(out, ZSTR_LEN(out) + CHUNK_SIZE, 0);
-					ctx->Z.avail_out = CHUNK_SIZE;
-					ctx->Z.next_out = (Bytef *) ZSTR_VAL(out) + buffer_used;
+					if (UNEXPECTED(!php_zlib_inflate_grow(&out, buffer_used, CHUNK_SIZE, &ctx->Z))) {
+						RETURN_OOM();
+					}
 					break;
 				} else {
 					/* No more input data; we're finished */
@@ -1265,7 +1292,10 @@ PHP_FUNCTION(deflate_add)
 
 	out_size = PHP_ZLIB_BUFFER_SIZE_GUESS(in_len);
 	out_size = (out_size < 64) ? 64 : out_size;
-	out = zend_string_alloc(out_size, 0);
+	out = zend_string_falloc(out_size, 0, /* fallible */ true);
+	if (UNEXPECTED(!out)) {
+		RETURN_OOM();
+	}
 
 	ctx->Z.next_in = (Bytef *) in_buf;
 	ctx->Z.next_out = (Bytef *) ZSTR_VAL(out);

@@ -10,19 +10,18 @@ class Test {
 // This is unsupported and the actual behavior doesn't matter.
 // Just make sure it doesn't crash.
 $rc = new ReflectionClassConstant(Test::class, 'C');
-unset($rc->name);
 try {
-    var_dump($rc->getName());
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
-}
-try {
-    echo $rc, "\n";
+    unset($rc->name);
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
 
+var_dump($rc->getName());
+
+echo $rc, "\n";
+
 ?>
 --EXPECT--
-Typed property ReflectionClassConstant::$name must not be accessed before initialization
-Typed property ReflectionClassConstant::$name must not be accessed before initialization
+Cannot unset readonly property ReflectionClassConstant::$name
+string(1) "C"
+Constant [ public int C ] { 1 }

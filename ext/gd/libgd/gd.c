@@ -4523,5 +4523,6 @@ clean_on_error:
         gdFree(src->tpixels[yy]);
     }
     gdFree(src->tpixels);
+    src->tpixels = NULL;
     return 0;
 }

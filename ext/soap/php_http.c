@@ -347,6 +347,28 @@ static bool in_domain(const zend_string *host, const zend_string *domain)
 	}
 }
 
+static bool is_allowed_redirect(const php_uri *from, const php_uri *to)
+{
+	if (to->scheme == NULL || to->host == NULL) {
+		return true;
+	}
+
+	if (!zend_string_equals_ci(from->host, to->host)) {
+		return false;
+	}
+
+	zend_long to_port = to->port;
+	if (to_port == 0) {
+		to_port = zend_string_equals_literal(to->scheme, "https") ? 443 : 80;
+	}
+
+	if (zend_string_equals(from->scheme, to->scheme)) {
+		return from->port == to_port;
+	}
+
+	return zend_string_equals_literal(from->scheme, "http") && zend_string_equals_literal(to->scheme, "https") && to_port == 443;
+}
+
 bool make_http_soap_request(
 	zval *this_ptr, zend_string *buf, zend_string *location, char *soapaction,
 	int soap_version, zend_string *uri_parser_class, zval *return_value
@@ -1191,6 +1213,15 @@ try_again:
 						}
 					}
 				}
+
+				if (Z_TYPE_P(Z_CLIENT_FOLLOW_CROSS_ORIGIN_REDIRECTS_P(this_ptr)) != IS_TRUE && !is_allowed_redirect(uri, new_uri)) {
+					php_uri_struct_free(new_uri);
+					add_soap_fault(this_ptr, "HTTP", "Redirection to a different origin is not allowed", NULL, NULL, soap_lang_en);
+					smart_str_free(&soap_headers_z);
+					efree(http_msg);
+					return false;
+				}
+
 				uri = new_uri;
 
 				if (--redirect_max < 1) {
@@ -1510,9 +1541,17 @@ static zend_string* get_http_body(php_stream *stream, bool close, zend_string *h
 					}
 
 					if (http_buf) {
-						http_buf = zend_string_safe_realloc(http_buf, 1, http_buf_size, buf_size, false);
+						zend_string *new_http_buf = zend_string_safe_frealloc(http_buf, 1, http_buf_size, buf_size, /* persistent */ false, /* fallible */ true);
+						if (UNEXPECTED(!new_http_buf)) {
+							zend_string_release_ex(http_buf, false);
+							return NULL;
+						}
+						http_buf = new_http_buf;
 					} else {
-						http_buf = zend_string_alloc(buf_size, 0);
+						http_buf = zend_string_falloc(buf_size, /* persistent */ false, /* fallible */ true);
+						if (UNEXPECTED(!http_buf)) {
+							return NULL;
+						}
 					}
 
 					while (len_size < buf_size) {
@@ -1572,7 +1611,10 @@ static zend_string* get_http_body(php_stream *stream, bool close, zend_string *h
 		if (UNEXPECTED(header_length < 0 || header_length >= ZSTR_MAX_LEN)) {
 			return NULL;
 		}
-		http_buf = zend_string_alloc(header_length, 0);
+		http_buf = zend_string_falloc(header_length, /* persistent */ false, /* fallible */ true);
+		if (UNEXPECTED(!http_buf)) {
+			return NULL;
+		}
 		while (http_buf_size < header_length) {
 			ssize_t len_read = php_stream_read(stream, http_buf->val + http_buf_size, header_length - http_buf_size);
 			if (UNEXPECTED(len_read <= 0)) {
@@ -1589,7 +1631,12 @@ static zend_string* get_http_body(php_stream *stream, bool close, zend_string *h
 					zend_string_efree(http_buf);
 					return NULL;
 				}
-				http_buf = zend_string_realloc(http_buf, http_buf_size + 4096, false);
+				zend_string *new_http_buf = zend_string_safe_frealloc(http_buf, 1, http_buf_size, 4096, /* persistent */ false, /* fallible */ true);
+				if (UNEXPECTED(!new_http_buf)) {
+					zend_string_release_ex(http_buf, false);
+					return NULL;
+				}
+				http_buf = new_http_buf;
 			} else {
 				http_buf = zend_string_alloc(4096, 0);
 			}
@@ -1622,6 +1669,10 @@ static zend_string *get_http_headers(php_stream *stream)
 
 		/* add header to collection */
 		smart_str_appends(&tmp_response, headerbuf);
+
+		if (ZEND_HAS_OOM()) {
+			break;
+		}
 	}
 
 	smart_str_free(&tmp_response);

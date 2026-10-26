@@ -375,7 +375,9 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 
 			if (xpathobjp->type == XPATH_NODESET && NULL != (nodesetp = xpathobjp->nodesetval) && nodesetp->nodeNr) {
 				array_init_size(&retval, nodesetp->nodeNr);
-				zend_hash_real_init_packed(Z_ARRVAL_P(&retval));
+				if (zend_hash_real_finit_packed(Z_ARRVAL(retval), /* fallible */ true) != SUCCESS) {
+					goto oom_nodeset;
+				}
 				for (int i = 0; i < nodesetp->nodeNr; i++) {
 					xmlNodePtr node = nodesetp->nodeTab[i];
 					zval child;
@@ -406,6 +408,9 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 						php_dom_create_object(node, &child, parent);
 					}
 					add_next_index_zval(&retval, &child);
+					if (ZEND_HAS_OOM()) {
+						goto oom_nodeset;
+					}
 				}
 				release_array = true;
 			} else {
@@ -420,6 +425,13 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 			mapptr->release_array = release_array;
 			mapptr->handler = &php_dom_obj_map_nodeset;
 			break;
+
+oom_nodeset:
+			zval_ptr_dtor(&retval);
+			xmlXPathFreeObject(xpathobjp);
+			zval_ptr_dtor(return_value);
+			ZVAL_NULL(return_value);
+			RETURN_OOM();
 		}
 
 		case XPATH_BOOLEAN:
@@ -538,14 +550,20 @@ PHP_METHOD(DOMXPath, quote) {
 		RETURN_THROWS();
 	}
 	if (memchr(input, '\'', input_len) == NULL) {
-		zend_string *const output = zend_string_safe_alloc(1, input_len, 2, false);
+		zend_string *const output = zend_string_safe_falloc(1, input_len, 2, false, /* fallible */ true);
+		if (UNEXPECTED(!output)) {
+			RETURN_OOM();
+		}
 		ZSTR_VAL(output)[0] = '\'';
 		memcpy(ZSTR_VAL(output) + 1, input, input_len);
 		ZSTR_VAL(output)[input_len + 1] = '\'';
 		ZSTR_VAL(output)[input_len + 2] = '\0';
 		RETURN_NEW_STR(output);
 	} else if (memchr(input, '"', input_len) == NULL) {
-		zend_string *const output = zend_string_safe_alloc(1, input_len, 2, false);
+		zend_string *const output = zend_string_safe_falloc(1, input_len, 2, false, /* fallible */ true);
+		if (UNEXPECTED(!output)) {
+			RETURN_OOM();
+		}
 		ZSTR_VAL(output)[0] = '"';
 		memcpy(ZSTR_VAL(output) + 1, input, input_len);
 		ZSTR_VAL(output)[input_len + 1] = '"';
@@ -569,6 +587,10 @@ PHP_METHOD(DOMXPath, quote) {
 			smart_str_appendc(&output, quote_method);
 			ptr += bytes_until_quote;
 			smart_str_appendc(&output, ',');
+			if (ZEND_HAS_OOM()) {
+				smart_str_free(&output);
+				RETURN_OOM();
+			}
 		}
 		ZEND_ASSERT(ptr == end);
 		ZSTR_VAL(output.s)[ZSTR_LEN(output.s) - 1] = ')';

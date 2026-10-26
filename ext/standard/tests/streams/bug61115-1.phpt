@@ -5,6 +5,9 @@ Bug #61115: Stream related segfault on fatal error in php_stream_context_del_lin
 if (getenv("USE_ZEND_ALLOC") === "0") {
     die("skip Zend MM disabled");
 }
+if (PHP_ZTS) {
+    die("skip No hard limit in ZTS");
+}
 ?>
 --FILE--
 <?php

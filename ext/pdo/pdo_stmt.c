@@ -260,19 +260,6 @@ static bool really_register_bound_param(struct pdo_bound_param_data *param, pdo_
 	zval *parameter;
 	struct pdo_bound_param_data *pparam = NULL;
 
-	hash = is_param ? stmt->bound_params : stmt->bound_columns;
-
-	if (!hash) {
-		ALLOC_HASHTABLE(hash);
-		zend_hash_init(hash, 13, NULL, param_dtor, 0);
-
-		if (is_param) {
-			stmt->bound_params = hash;
-		} else {
-			stmt->bound_columns = hash;
-		}
-	}
-
 	if (!Z_ISREF(param->parameter)) {
 		parameter = &param->parameter;
 	} else {
@@ -348,6 +335,17 @@ static bool really_register_bound_param(struct pdo_bound_param_data *param, pdo_
 	/* delete any other parameter registered with this number.
 	 * If the parameter is named, it will be removed and correctly
 	 * disposed of by the hash_update call that follows */
+	hash = is_param ? stmt->bound_params : stmt->bound_columns;
+	if (!hash) {
+		ALLOC_HASHTABLE(hash);
+		zend_hash_init(hash, 13, NULL, param_dtor, 0);
+		if (is_param) {
+			stmt->bound_params = hash;
+		} else {
+			stmt->bound_columns = hash;
+		}
+	}
+
 	if (param->paramno >= 0) {
 		zend_hash_index_del(hash, param->paramno);
 	}
@@ -362,7 +360,6 @@ static bool really_register_bound_param(struct pdo_bound_param_data *param, pdo_
 	/* tell the driver we just created a parameter */
 	if (stmt->methods->param_hook) {
 		if (!stmt->methods->param_hook(stmt, pparam, PDO_PARAM_EVT_ALLOC)) {
-			PDO_HANDLE_STMT_ERR();
 			/* undo storage allocation; the hash will free the parameter
 			 * name if required */
 			if (pparam->name) {
@@ -373,6 +370,7 @@ static bool really_register_bound_param(struct pdo_bound_param_data *param, pdo_
 			ZVAL_UNDEF(&param->driver_params);
 			/* param->parameter is freed by hash dtor */
 			ZVAL_UNDEF(&param->parameter);
+			PDO_HANDLE_STMT_ERR();
 			return false;
 		}
 	}
@@ -433,6 +431,11 @@ PHP_METHOD(PDOStatement, execute)
 			if (!really_register_bound_param(&param, stmt, 1)) {
 				if (!Z_ISUNDEF(param.parameter)) {
 					zval_ptr_dtor(&param.parameter);
+				}
+				if (stmt->bound_params) {
+					zend_hash_destroy(stmt->bound_params);
+					FREE_HASHTABLE(stmt->bound_params);
+					stmt->bound_params = NULL;
 				}
 				RETURN_FALSE;
 			}
@@ -735,7 +738,8 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 		case PDO_FETCH_NUM:
 		case PDO_FETCH_NAMED:
 			if (!group_key) {
-				array_init_size(return_value, stmt->column_count);
+				/* PDO::FETCH_BOTH stores every value under its name and its index */
+				array_init_size(return_value, how == PDO_FETCH_BOTH ? 2 * stmt->column_count : stmt->column_count);
 			} else {
 				array_init(return_value);
 			}

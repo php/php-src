@@ -180,6 +180,55 @@ ir_str ir_strtab_lookup(ir_strtab *strtab, const char *str, uint32_t len, ir_str
 	return val;
 }
 
+void ir_strtab_set(ir_strtab *strtab, const char *str, uint32_t len, ir_str val)
+{
+	uint32_t h = ir_str_hash(str, len);
+	char *data = (char*)strtab->data;
+	uint32_t pos = ((uint32_t*)data)[(int32_t)(h | strtab->mask)];
+	ir_strtab_bucket *p;
+
+	while (pos != IR_INVALID_IDX) {
+		p = (ir_strtab_bucket*)(data + pos);
+		if (p->h == h
+		 && p->len == len
+		 && memcmp(p->str, str, len) == 0) {
+			p->val = val;
+			return;
+		}
+		pos = p->next;
+	}
+
+	IR_ASSERT(val != 0);
+
+	if (UNEXPECTED(strtab->count >= strtab->size)) {
+		ir_strtab_resize(strtab);
+		data = strtab->data;
+	}
+
+	if (strtab->buf) {
+		if (UNEXPECTED(strtab->buf_size - strtab->buf_top < len + 1)) {
+			ir_strtab_grow_buf(strtab, len + 1);
+		}
+
+		memcpy(strtab->buf + strtab->buf_top, str, len);
+		strtab->buf[strtab->buf_top + len] = 0;
+		str = (const char*)strtab->buf + strtab->buf_top;
+		strtab->buf_top += len + 1;
+	}
+
+	pos = strtab->pos;
+	strtab->pos += sizeof(ir_strtab_bucket);
+	strtab->count++;
+	p = (ir_strtab_bucket*)(data + pos);
+	p->h = h;
+	p->len = len;
+	p->str = str;
+	h |= strtab->mask;
+	p->next = ((uint32_t*)data)[(int32_t)h];
+	((uint32_t*)data)[(int32_t)h] = pos;
+	p->val = val;
+}
+
 ir_str ir_strtab_update(ir_strtab *strtab, const char *str, uint32_t len, ir_str val)
 {
 	uint32_t h = ir_str_hash(str, len);

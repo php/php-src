@@ -22,12 +22,10 @@
 
 #include "converter_class.h"
 
-extern "C" {
 #include "converter.h"
 #include "php_intl.h"
 #include "../intl_error.h"
 #include "../intl_common.h"
-}
 
 #define CONV_GET(pzv)  (Z_INTL_CONVERTER_P((pzv)))
 #define THROW_UFAILURE(obj, error) php_converter_throw_failure(obj, error, \
@@ -611,7 +609,10 @@ static zend_string* php_converter_do_convert(UConverter *dest_cnv,
 		THROW_UFAILURE(objval, error);
 		return nullptr;
 	}
-	temp = reinterpret_cast<UChar *>(safe_emalloc(sizeof(UChar), temp_len, sizeof(UChar)));
+	temp = reinterpret_cast<UChar *>(safe_femalloc(sizeof(UChar), temp_len, sizeof(UChar), /* fallible */ true));
+	if (!temp) {
+		return NULL;
+	}
 
 	/* Convert to intermediate UChar* array */
 	error = U_ZERO_ERROR;
@@ -631,7 +632,11 @@ static zend_string* php_converter_do_convert(UConverter *dest_cnv,
 		return nullptr;
 	}
 
-	ret = zend_string_alloc(ret_len, 0);
+	ret = zend_string_falloc(ret_len, /* persistent */ false, /* fallible */ true);
+	if (!ret) {
+		efree(temp);
+		return NULL;
+	}
 
 	/* Convert to final encoding */
 	error = U_ZERO_ERROR;

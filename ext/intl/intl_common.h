@@ -18,9 +18,7 @@
 #define INTL_COMMON_H
 /* Auxiliary macros */
 
-BEGIN_EXTERN_C()
 #include <php.h>
-END_EXTERN_C()
 #include <unicode/utypes.h>
 
 #ifndef UBYTES

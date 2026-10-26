@@ -21,14 +21,12 @@
 #include <unicode/unistr.h>
 #endif
 
-extern "C" {
 #include "php_intl.h"
 #include "intl_convert.h"
-}
 #include "spoofchecker_class.h"
 
 /* {{{ Checks if a given text contains any suspicious characters */
-U_CFUNC PHP_METHOD(Spoofchecker, isSuspicious)
+PHP_METHOD(Spoofchecker, isSuspicious)
 {
 	int32_t ret, errmask;
 	zend_string *text;
@@ -63,7 +61,7 @@ U_CFUNC PHP_METHOD(Spoofchecker, isSuspicious)
 /* }}} */
 
 /* {{{ Checks if a given text contains any confusable characters */
-U_CFUNC PHP_METHOD(Spoofchecker, areConfusable)
+PHP_METHOD(Spoofchecker, areConfusable)
 {
 	int ret;
 	zend_string *s1, *s2;
@@ -97,7 +95,7 @@ U_CFUNC PHP_METHOD(Spoofchecker, areConfusable)
 /* }}} */
 
 /* {{{ Locales to use when running checks */
-U_CFUNC PHP_METHOD(Spoofchecker, setAllowedLocales)
+PHP_METHOD(Spoofchecker, setAllowedLocales)
 {
 	zend_string *locales;
 	SPOOFCHECKER_METHOD_INIT_VARS;
@@ -119,7 +117,7 @@ U_CFUNC PHP_METHOD(Spoofchecker, setAllowedLocales)
 /* }}} */
 
 /* {{{ Set the checks to run */
-U_CFUNC PHP_METHOD(Spoofchecker, setChecks)
+PHP_METHOD(Spoofchecker, setChecks)
 {
 	zend_long checks;
 	SPOOFCHECKER_METHOD_INIT_VARS;
@@ -141,7 +139,7 @@ U_CFUNC PHP_METHOD(Spoofchecker, setChecks)
 
 /* TODO Document this method on PHP.net */
 /* {{{ Set the loosest restriction level allowed for strings. */
-U_CFUNC PHP_METHOD(Spoofchecker, setRestrictionLevel)
+PHP_METHOD(Spoofchecker, setRestrictionLevel)
 {
 	zend_long level;
 	SPOOFCHECKER_METHOD_INIT_VARS;
@@ -168,7 +166,7 @@ U_CFUNC PHP_METHOD(Spoofchecker, setRestrictionLevel)
 }
 /* }}} */
 
-U_CFUNC PHP_METHOD(Spoofchecker, setAllowedChars)
+PHP_METHOD(Spoofchecker, setAllowedChars)
 {
 	zend_string *pattern;
 	UChar *upattern = NULL;
@@ -274,7 +272,7 @@ static zend_string *spoofchecker_skeleton(Spoofchecker_object *co, zend_string *
 /* }}} */
 
 /* {{{ Get the confusable skeleton for an identifier */
-U_CFUNC PHP_METHOD(Spoofchecker, getSkeleton)
+PHP_METHOD(Spoofchecker, getSkeleton)
 {
 	zend_string *string;
 	SPOOFCHECKER_METHOD_INIT_VARS;
@@ -300,7 +298,7 @@ U_CFUNC PHP_METHOD(Spoofchecker, getSkeleton)
 
 #if U_ICU_VERSION_MAJOR_NUM >= 74
 /* {{{ Get the confusable skeleton for an identifier in a given text direction */
-U_CFUNC PHP_METHOD(Spoofchecker, getBidiSkeleton)
+PHP_METHOD(Spoofchecker, getBidiSkeleton)
 {
 	zend_long direction;
 	zend_string *string;
@@ -331,7 +329,7 @@ U_CFUNC PHP_METHOD(Spoofchecker, getBidiSkeleton)
 /* }}} */
 
 /* {{{ Checks if a given text contains any confusable characters, for a given text direction */
-U_CFUNC PHP_METHOD(Spoofchecker, areBidiConfusable)
+PHP_METHOD(Spoofchecker, areBidiConfusable)
 {
 	uint32_t ret = 0;
 	zend_long direction;

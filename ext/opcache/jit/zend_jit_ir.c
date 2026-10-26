@@ -357,6 +357,8 @@ static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
 
 static ir_ref jit_CONST_FUNC(zend_jit_ctx *jit, uintptr_t addr, uint16_t flags);
 
+static ir_ref jit_ADD_OFFSET(zend_jit_ctx *jit, ir_ref addr, uintptr_t offset);
+
 static void zend_jit_preserve_parent_regs(zend_jit_ctx *jit,
                                           zend_ssa *ssa,
                                           zend_jit_trace_info *parent,
@@ -519,9 +521,28 @@ static ir_ref jit_TLS(zend_jit_ctx *jit)
 	if (tsrm_ls_cache_tcb_offset == 0 && tsrm_tls_index == -1) {
 		jit->tls = ir_CALL(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_get_tsrm_ls_cache));
 	} else {
+# ifdef ZEND_OPCACHE_SHM_REATTACHMENT
+		/* Different processes may load TLS variables in a different order, so
+		 * they may have a different module index. Fetch the module index at
+		 * runtime from tsrm_tls_index. Its address is stable as it's in the same
+		 * module as execute_ex (whose address is checked before SHM reattachment). */
+
+#  ifdef _WIN64
+		const int offset = 0x58;
+#  else
+		const int offset = 0x2c;
+#  endif
+
+		/* NtCurrentTeb()->ThreadLocalStoragePointer */
+		ir_ref tls_array = ir_TLS(-1, offset);
+
+		ir_ref index = ir_LOAD_A(ir_CONST_ADDR(&tsrm_tls_index));
+		jit->tls = ir_LOAD_A(ir_ADD_OFFSET(ir_LOAD_A(ir_ADD_A(tls_array, index)), tsrm_tls_offset));
+# else
 		jit->tls = ir_TLS(
 				tsrm_ls_cache_tcb_offset ? tsrm_ls_cache_tcb_offset : tsrm_tls_index,
 				tsrm_ls_cache_tcb_offset ? IR_NULL : tsrm_tls_offset);
+# endif
 	}
 
 	return jit->tls;
@@ -1348,7 +1369,9 @@ static void zend_jit_def_reg(zend_jit_ctx *jit, zend_jit_addr addr, ir_ref val)
 			if (dst_phi->pi >= 0) {
 				jit->ra[src_var].ref = val;
 				src_var = dst_phi->ssa_var;
-				if (!(jit->ra[src_var].flags & ZREG_FORWARD)) {
+				if (!(jit->ra[src_var].flags & ZREG_FORWARD)
+				 /* Pi in a block that is not generated yet. It forwards later on its own. */
+				 || (jit->bb_start_ref && !jit->bb_start_ref[dst_phi->block])) {
 					phi = zend_ssa_next_use_phi(jit->ssa, var, phi);
 					continue;
 				}
@@ -2025,8 +2048,17 @@ static int zend_jit_interrupt_handler_stub(zend_jit_ctx *jit)
 	ir_STORE(jit_EG(vm_interrupt), ir_CONST_U8(0));
 	if_timeout = ir_IF(ir_EQ(ir_LOAD_U8(jit_EG(timed_out)), ir_CONST_U8(0)));
 	ir_IF_FALSE(if_timeout);
-	ir_CALL(IR_VOID, ir_CONST_FUNC(zend_timeout));
+	ir_CALL(IR_VOID, ir_CONST_FUNC(zend_timeout)); // noreturn
 	ir_MERGE_WITH_EMPTY_TRUE(if_timeout);
+
+	// if (ZEND_HAS_OOM()) {
+	ir_ref if_delayed_oom = ir_IF(ir_LOAD_U8(ir_ADD_OFFSET(jit_EG(delayed_oom), offsetof(zend_oom_info, state))));
+	ir_IF_TRUE(if_delayed_oom);
+	ir_CALL(IR_VOID, ir_CONST_FC_FUNC(zend_handle_delayed_oom));
+	// LOAD_OPLINE()
+	jit_STORE_IP(jit, ir_LOAD_A(jit_EX(opline)));
+	ir_ref if_delayed_oom_end = ir_END();
+	ir_IF_FALSE(if_delayed_oom);
 
 	if (zend_interrupt_function) {
 		ir_CALL_1(IR_VOID, ir_CONST_FUNC(zend_interrupt_function), jit_FP(jit));
@@ -2038,6 +2070,8 @@ static int zend_jit_interrupt_handler_stub(zend_jit_ctx *jit)
 		jit_STORE_FP(jit, ir_LOAD_A(jit_EG(current_execute_data)));
 		jit_STORE_IP(jit, ir_LOAD_A(jit_EX(opline)));
 	}
+
+	ir_MERGE_WITH(if_delayed_oom_end);
 
 	if (GCC_GLOBAL_REGS || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL) {
 		zend_jit_tailcall_handler(jit, ir_LOAD_A(jit_IP(jit)));
@@ -3157,6 +3191,7 @@ static void zend_jit_setup_disasm(void)
 	REGISTER_DATA(EG(opline_before_exception));
 	REGISTER_DATA(EG(vm_interrupt));
 	REGISTER_DATA(EG(timed_out));
+	REGISTER_DATA(EG(delayed_oom));
 	REGISTER_DATA(EG(uninitialized_zval));
 	REGISTER_DATA(EG(zend_constants));
 	REGISTER_DATA(EG(jit_trace_num));
@@ -3378,10 +3413,6 @@ static void zend_jit_setup(bool reattached)
 #endif
 
 #ifdef ZTS
-# ifdef ZEND_OPCACHE_SHM_REATTACHMENT
-	/* Different processes may load TLS variables in a different order, so we
-	 * can not rely on offsets. We will fallback to runtime resolution. */
-# else
 	zend_result result = zend_jit_resolve_tsrm_ls_cache_offsets(
 		&tsrm_ls_cache_tcb_offset,
 		&tsrm_tls_index,
@@ -3391,7 +3422,6 @@ static void zend_jit_setup(bool reattached)
 		zend_accel_error(ACCEL_LOG_INFO,
 				"Could not get _tsrm_ls_cache offsets, will fallback to runtime resolution");
 	}
-# endif
 #endif
 
 #if !defined(ZEND_WIN32) && !defined(IR_TARGET_AARCH64)
@@ -13909,6 +13939,9 @@ static int zend_jit_assign_dim_op(zend_jit_ctx   *jit,
 		ir_MERGE_list(end_inputs);
 	}
 
+	if (op1_data_info & (MAY_BE_REF|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
+		op1_data_info |= MAY_BE_RC1|MAY_BE_RCN;
+	}
 	jit_FREE_OP(jit, (opline+1)->op1_type, (opline+1)->op1, op1_data_info, NULL);
 	jit_FREE_OP(jit, opline->op2_type, opline->op2, op2_info, NULL);
 	if (!op1_indirect) {
@@ -17355,7 +17388,8 @@ static int zend_jit_trace_handler(zend_jit_ctx *jit, const zend_op_array *op_arr
 		    opline->opcode == ZEND_GENERATOR_CREATE ||
 		    opline->opcode == ZEND_INCLUDE_OR_EVAL ||
 		    /* May enter a simple get hook. */
-		    opline->opcode == ZEND_FETCH_OBJ_R) {
+		    opline->opcode == ZEND_FETCH_OBJ_R ||
+			opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG) {
 
 			jit_STORE_IP(jit, ir_AND_A(ref, ir_CONST_ADDR(~ZEND_VM_ENTER_BIT)));
 		} else {
@@ -17383,7 +17417,8 @@ static int zend_jit_trace_handler(zend_jit_ctx *jit, const zend_op_array *op_arr
 		    opline->opcode == ZEND_GENERATOR_CREATE ||
 		    opline->opcode == ZEND_INCLUDE_OR_EVAL ||
 		    /* May enter a simple get hook. */
-		    opline->opcode == ZEND_FETCH_OBJ_R) {
+		    opline->opcode == ZEND_FETCH_OBJ_R ||
+			opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG) {
 
 			ir_ref addr = jit_EG(current_execute_data);
 
@@ -18033,7 +18068,33 @@ static ir_ref jit_frameless_observer(zend_jit_ctx *jit, const zend_op *opline) {
 	return skip;
 }
 
-static void jit_frameless_icall0(zend_jit_ctx *jit, const zend_op *opline)
+static bool jit_frameless_interrupt_check(zend_jit_ctx *jit, const zend_op *next_opline)
+{
+	if (zend_interrupt_function) {
+		/* Mirrors ZEND_VM_FCALL_INTERRUPT_CHECK(), call before advancing opline. */
+		// JIT: if (EG(vm_interrupt)) zend_fcall_interrupt(execute_data);
+		ir_ref if_interrupt = ir_IF(ir_LOAD_U8(jit_EG(vm_interrupt)));
+		ir_IF_TRUE_cold(if_interrupt);
+		ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_fcall_interrupt), jit_FP(jit));
+		ir_MERGE_WITH_EMPTY_FALSE(if_interrupt);
+	} else {
+		const void *exit_addr = NULL;
+
+		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
+			uint32_t exit_point = zend_jit_trace_get_exit_point(next_opline, ZEND_JIT_EXIT_TO_VM);
+			exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+			if (!exit_addr) {
+				return false;
+			}
+		}
+
+		zend_jit_check_timeout(jit, next_opline, exit_addr);
+	}
+
+	return true;
+}
+
+static bool jit_frameless_icall0(zend_jit_ctx *jit, const zend_op *opline)
 {
 	jit_SET_EX_OPLINE(jit, opline);
 
@@ -18053,10 +18114,14 @@ static void jit_frameless_icall0(zend_jit_ctx *jit, const zend_op *opline)
 		ir_MERGE_WITH(skip_observer);
 	}
 
+	if (!jit_frameless_interrupt_check(jit, opline+1)) {
+		return false;
+	}
 	zend_jit_check_exception(jit);
+	return true;
 }
 
-static void jit_frameless_icall1(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1_info)
+static bool jit_frameless_icall1(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1_info)
 {
 	jit_SET_EX_OPLINE(jit, opline);
 
@@ -18093,10 +18158,14 @@ static void jit_frameless_icall1(zend_jit_ctx *jit, const zend_op *opline, uint3
 	}
 
 	jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, NULL);
+	if (!jit_frameless_interrupt_check(jit, opline+1)) {
+		return false;
+	}
 	zend_jit_check_exception(jit);
+	return true;
 }
 
-static void jit_frameless_icall2(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1_info, uint32_t op2_info)
+static bool jit_frameless_icall2(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1_info, uint32_t op2_info)
 {
 	jit_SET_EX_OPLINE(jit, opline);
 
@@ -18159,10 +18228,14 @@ static void jit_frameless_icall2(zend_jit_ctx *jit, const zend_op *opline, uint3
 		}
 	}
 	jit_FREE_OP(jit, opline->op2_type, opline->op2, op2_info, NULL);
+	if (!jit_frameless_interrupt_check(jit, opline+1)) {
+		return false;
+	}
 	zend_jit_check_exception(jit);
+	return true;
 }
 
-static void jit_frameless_icall3(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1_info, uint32_t op2_info, uint32_t op1_data_info)
+static bool jit_frameless_icall3(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1_info, uint32_t op2_info, uint32_t op1_data_info)
 {
 	jit_SET_EX_OPLINE(jit, opline);
 
@@ -18259,7 +18332,11 @@ static void jit_frameless_icall3(zend_jit_ctx *jit, const zend_op *opline, uint3
 		}
 	}
 	jit_FREE_OP(jit, (opline+1)->op1_type, (opline+1)->op1, op1_data_info, NULL);
+	if (!jit_frameless_interrupt_check(jit, opline+2)) {
+		return false;
+	}
 	zend_jit_check_exception(jit);
+	return true;
 }
 
 /*

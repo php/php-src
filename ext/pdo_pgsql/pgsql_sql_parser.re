@@ -48,5 +48,6 @@ int pdo_pgsql_scanner(pdo_scanner_t *s)
 		COMMENTS								{ RET(PDO_PARSER_TEXT); }
 		/* Plain text may contain e/E, as long as it doesn't end with one, which could start an E'...' string */
 		([eE]* TEXTCHR)+						{ RET(PDO_PARSER_TEXT); }
+		*										{ SKIP_ONE(PDO_PARSER_TEXT); }
 	*/
 }

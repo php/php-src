@@ -12,22 +12,18 @@
    +----------------------------------------------------------------------+
 */
 
-extern "C" {
 #include "php.h"
 #include "zend_API.h"
 #include "../intl_common.h"
-}
 
 #if U_ICU_VERSION_MAJOR_NUM >= 63
 #include <unicode/numberformatter.h>
 #include <unicode/unistr.h>
 #include <unicode/locid.h>
 #include "../intl_convertcpp.h"
-
-extern "C" {
 #include "../php_intl.h"
+
 #include "numberformatter_arginfo.h"
-}
 #include "numberformatter_class.h"
 
 using icu::number::NumberFormatter;
@@ -62,14 +58,14 @@ static zend_object *numberformatter_create_object(zend_class_entry *ce)
 	return &nfo->zo;
 }
 
-U_CFUNC PHP_METHOD(IntlNumberFormatter, __construct)
+PHP_METHOD(IntlNumberFormatter, __construct)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_throw_error(nullptr, "Cannot directly construct %s, use createFromSkeleton method instead", ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
 }
 
-U_CFUNC PHP_METHOD(IntlNumberFormatter, createFromSkeleton)
+PHP_METHOD(IntlNumberFormatter, createFromSkeleton)
 {
 	char *skeleton, *locale;
 	size_t skeleton_len, locale_len;
@@ -92,6 +88,17 @@ U_CFUNC PHP_METHOD(IntlNumberFormatter, createFromSkeleton)
 		RETURN_THROWS();
 	}
 
+	const char *scale = zend_memnstr(skeleton, "scale/", sizeof("scale/") - 1, skeleton + skeleton_len);
+
+	if (scale) {
+		scale += sizeof("scale/") - 1;
+		scale += strspn(scale, "0123456789.+-");
+		if (UNEXPECTED(*scale == 'e' || *scale == 'E')) {
+			intl_error_set(nullptr, U_NUMBER_SKELETON_SYNTAX_ERROR, "Number formatter creation failed");
+			RETURN_NULL();
+		}
+	}
+
 	UErrorCode status = U_ZERO_ERROR;
 	UnicodeString uskeleton;
 
@@ -105,7 +112,7 @@ U_CFUNC PHP_METHOD(IntlNumberFormatter, createFromSkeleton)
 	NUMBERFORMATTER_OBJECT(Z_INTL_INTLNUMBERFORMATTER_P(return_value)) = new LocalizedNumberFormatter(nf.locale(icu::Locale::createCanonical(locale)));
 }
 
-U_CFUNC PHP_METHOD(IntlNumberFormatter, format)
+PHP_METHOD(IntlNumberFormatter, format)
 {
 	zval *value;
 
@@ -127,6 +134,10 @@ U_CFUNC PHP_METHOD(IntlNumberFormatter, format)
 		if (UNEXPECTED(Z_STRLEN_P(value) > INT32_MAX)) {
 			zend_argument_value_error(1, "is too long");
 			RETURN_THROWS();
+		}
+		if (UNEXPECTED(strpbrk(Z_STRVAL_P(value), "eE"))) {
+			intl_errors_set(INTL_DATA_ERROR_P(nfo), U_DECIMAL_NUMBER_SYNTAX_ERROR, "Number formatting failed");
+			RETURN_FALSE;
 		}
 		result = NUMBERFORMATTER_OBJECT(nfo)->formatDecimal(icu::StringPiece(Z_STRVAL_P(value), static_cast<int32_t>(Z_STRLEN_P(value))), status).toString(status);
 	} else if (Z_TYPE_P(value) == IS_DOUBLE) {
@@ -150,14 +161,14 @@ U_CFUNC PHP_METHOD(IntlNumberFormatter, format)
 	RETVAL_STR(ret);
 }
 
-U_CFUNC PHP_METHOD(IntlNumberFormatter, getErrorCode)
+PHP_METHOD(IntlNumberFormatter, getErrorCode)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(INTL_DATA_ERROR_CODE(Z_INTL_INTLNUMBERFORMATTER_P(ZEND_THIS)));
 }
 
-U_CFUNC PHP_METHOD(IntlNumberFormatter, getErrorMessage)
+PHP_METHOD(IntlNumberFormatter, getErrorMessage)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 

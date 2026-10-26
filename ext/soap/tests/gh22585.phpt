@@ -35,5 +35,5 @@ try {
 }
 echo "Done" . PHP_EOL;
 ?>
---EXPECTREGEX--
-(?s)(Done|.*Allowed memory size of \d+ bytes exhausted.*)
+--EXPECTF--
+Fatal error: Allowed memory size of 67108864 bytes exhausted %S(tried to allocate %d bytes) in %s on line %d

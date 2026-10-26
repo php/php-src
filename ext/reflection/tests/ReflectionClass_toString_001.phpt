@@ -27,7 +27,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Stringable, Refle
   }
 
   - Properties [1] {
-    Property [ public string $name ]
+    Property [ public protected(set) readonly string $name ]
   }
 
   - Methods [64] {

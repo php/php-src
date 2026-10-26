@@ -12,11 +12,9 @@
    +----------------------------------------------------------------------+
 */
 
-extern "C" {
-    #include "php.h"
-    #include "zend_API.h"
-    #include "../intl_common.h"
-}
+#include "php.h"
+#include "zend_API.h"
+#include "../intl_common.h"
 
 #if U_ICU_VERSION_MAJOR_NUM >= 63
 #include <unicode/numberrangeformatter.h>
@@ -25,13 +23,13 @@ extern "C" {
 #include <unicode/locid.h>
 #include "../intl_convertcpp.h"
 
-extern "C" {
-    #include "../intl_error.h"
-    #include "../php_intl.h"
-    #include "../intl_data.h"
-    #include "rangeformatter_arginfo.h"
-    #include "rangeformatter_class.h"
-}
+#include "../intl_error.h"
+#include "../php_intl.h"
+#include "../intl_data.h"
+
+#include "rangeformatter_arginfo.h"
+
+#include "rangeformatter_class.h"
 
 using icu::number::NumberRangeFormatter;
 using icu::number::NumberFormatter;
@@ -73,13 +71,13 @@ static icu::Formattable rangeformatter_create_formattable(const zval *number)
     return formattable;
 }
 
-U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, __construct)
+PHP_METHOD(IntlNumberRangeFormatter, __construct)
 {
     ZEND_PARSE_PARAMETERS_NONE();
     zend_throw_error(NULL, "Cannot directly construct %s, use createFromSkeleton method instead", ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
 }
 
-U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, createFromSkeleton)
+PHP_METHOD(IntlNumberRangeFormatter, createFromSkeleton)
 {
     char* skeleton;
     char* locale;
@@ -157,7 +155,7 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, createFromSkeleton)
     RETURN_OBJ(obj);
 }
 
-U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, format)
+PHP_METHOD(IntlNumberRangeFormatter, format)
 {
     zval *start;
     zval *end;
@@ -212,7 +210,7 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, format)
     RETVAL_NEW_STR(ret);
 }
 
-U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, getErrorCode)
+PHP_METHOD(IntlNumberRangeFormatter, getErrorCode)
 {
     ZEND_PARSE_PARAMETERS_NONE();
 
@@ -221,7 +219,7 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, getErrorCode)
     RETURN_LONG(intl_error_get_code(&obj->nrf_data.error));
 }
 
-U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, getErrorMessage)
+PHP_METHOD(IntlNumberRangeFormatter, getErrorMessage)
 {
     ZEND_PARSE_PARAMETERS_NONE();
 
@@ -230,7 +228,7 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, getErrorMessage)
     RETURN_STR(intl_error_get_message(&obj->nrf_data.error));
 }
 
-void IntlNumberRangeFormatter_object_free(zend_object *object)
+static void IntlNumberRangeFormatter_object_free(zend_object *object)
 {
     IntlNumberRangeFormatter_object* nfo = php_intl_numberrangeformatter_fetch_object(object);
 
@@ -244,7 +242,7 @@ void IntlNumberRangeFormatter_object_free(zend_object *object)
     zend_object_std_dtor(&nfo->zo);
 }
 
-void rangeformatter_register_class(void)
+U_CFUNC void rangeformatter_register_class(void)
 {
     class_entry_IntlNumberRangeFormatter = register_class_IntlNumberRangeFormatter();
     class_entry_IntlNumberRangeFormatter->create_object = IntlNumberRangeFormatter_object_create;

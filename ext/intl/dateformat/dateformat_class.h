@@ -16,15 +16,9 @@
 
 #include <php.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 #include "intl_common.h"
 #include "intl_error.h"
 #include "intl_data.h"
-#ifdef __cplusplus
-}
-#endif
 #include "dateformat_data.h"
 
 typedef struct {
@@ -39,14 +33,10 @@ typedef struct {
 #define php_intl_dateformatter_fetch_object(obj) ZEND_CONTAINER_OF(obj, IntlDateFormatter_object, zo)
 #define Z_INTL_DATEFORMATTER_P(zv) php_intl_dateformatter_fetch_object(Z_OBJ_P(zv))
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+BEGIN_EXTERN_C()
 void dateformat_register_IntlDateFormatter_class( void );
 extern zend_class_entry *IntlDateFormatter_ce_ptr;
-#ifdef __cplusplus
-}
-#endif
+END_EXTERN_C()
 
 /* Auxiliary macros */
 

@@ -845,6 +845,12 @@ static inline size_t write_octet_sequence(unsigned char *buf, enum entity_charse
 	}
 }
 
+/* [0-9A-Za-z], independent of the locale */
+static zend_always_inline bool is_entity_name_byte(unsigned char c)
+{
+	return (unsigned char)((c | 0x20) - 'a') < 26 || (unsigned char)(c - '0') < 10;
+}
+
 /* {{{ traverse_for_entities
  * Auxiliary function to php_unescape_html_entities().
  * - The argument "all" determines if all numeric entities are decode or only those
@@ -867,7 +873,8 @@ static void traverse_for_entities(
 	const int doctype	   = flags & ENT_HTML_DOC_TYPE_MASK;
 
 	while (current_ptr < input_end) {
-		const char *ampersand_ptr = memchr(current_ptr, '&', input_end - current_ptr);
+		/* Runs of '&' would call memchr() for every byte */
+		const char *ampersand_ptr = *current_ptr == '&' ? current_ptr : memchr(current_ptr, '&', input_end - current_ptr);
 		if (!ampersand_ptr) {
 			const size_t tail_len = input_end - current_ptr;
 			if (tail_len > 0) {
@@ -921,10 +928,13 @@ static void traverse_for_entities(
 		} else {
 			/* Processing named entity */
 			const char *name_start = current_ptr + 1;
-			/* Search for ';' */
-			const size_t max_search_len = MIN(LONGEST_ENTITY_LENGTH + 1, input_end - name_start);
-			const char *semi_colon_ptr = memchr(name_start, ';', max_search_len);
-			if (!semi_colon_ptr) {
+			const char *semi_colon_ptr = name_start;
+			const char *const name_limit = name_start + MIN(LONGEST_ENTITY_LENGTH, input_end - name_start - 1);
+			/* A name is letters and digits only, so the first other byte must be the ';' */
+			while (semi_colon_ptr < name_limit && is_entity_name_byte(*semi_colon_ptr)) {
+				semi_colon_ptr++;
+			}
+			if (*semi_colon_ptr != ';') {
 				goto invalid_incomplete_entity;
 			} else {
 				const size_t name_len = semi_colon_ptr - name_start;
@@ -1329,7 +1339,10 @@ static zend_string *escape_html_entities_from(const unsigned char *old, size_t o
 		maxlen = zend_safe_addmult(oldlen, 2, 0, "html_entities");
 	}
 
-	replaced = zend_string_alloc(maxlen, 0);
+	replaced = zend_string_falloc(maxlen, /* persistent */ false, /* fallible */ true);
+	if (!replaced) {
+		return ZSTR_EMPTY_ALLOC();
+	}
 	memcpy(ZSTR_VAL(replaced), old, cursor);
 	len = cursor;
 	while (cursor < oldlen) {
@@ -1342,7 +1355,12 @@ static zend_string *escape_html_entities_from(const unsigned char *old, size_t o
 		/* guarantee we have at least 40 bytes to write.
 		 * In HTML5, entities may take up to 33 bytes */
 		if (len > maxlen - 40) { /* maxlen can never be smaller than 128 */
-			replaced = zend_string_safe_realloc(replaced, maxlen, 1, 128, 0);
+			zend_string *new_replaced = zend_string_safe_frealloc(replaced, maxlen, 1, 128, /* persistent */ false, /* fallible */ true);
+			if (!new_replaced) {
+				zend_string_release(replaced);
+				return ZSTR_EMPTY_ALLOC();
+			}
+			replaced = new_replaced;
 			maxlen += 128;
 		}
 

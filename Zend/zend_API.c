@@ -1096,6 +1096,9 @@ static zend_result zend_parse_arg(uint32_t arg_num, zval *arg, va_list *va, cons
 	zend_expected_type expected_type = zend_parse_arg_impl(arg, va, spec, &error, arg_num);
 	if (expected_type != Z_EXPECTED_LAST) {
 		if (EG(exception)) {
+			if (error && (expected_type == Z_EXPECTED_FUNC || expected_type == Z_EXPECTED_FUNC_OR_NULL)) {
+				efree(error);
+			}
 			return FAILURE;
 		}
 
@@ -1987,6 +1990,18 @@ ZEND_API void object_init(zval *arg) /* {{{ */
 	ZVAL_OBJ(arg, zend_objects_new(zend_standard_class_def));
 }
 /* }}} */
+
+ZEND_API bool object_finit(zval *arg)
+{
+	zend_object *obj = zend_objects_fnew(zend_standard_class_def);
+
+	if (UNEXPECTED(obj == NULL)) {
+		ZVAL_NULL(arg);
+		return false;
+	}
+	ZVAL_OBJ(arg, obj);
+	return true;
+}
 
 ZEND_API void add_assoc_long_ex(zval *arg, const char *key, size_t key_len, zend_long n) /* {{{ */
 {

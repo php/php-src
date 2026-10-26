@@ -12,9 +12,9 @@ char *gd_strtok_r(char *s, const char *sep, char **state);
         in gd.h, where callers can utilize it to correctly
         free memory allocated by these functions with the
         right version of free(). */
-#define gdCalloc(nmemb, size) ecalloc((nmemb), (size))
-#define gdMalloc(size) emalloc(size)
-#define gdRealloc(ptr, size) erealloc(ptr, size)
+#define gdCalloc(nmemb, size) fecalloc((nmemb), (size), /* fallible */ true)
+#define gdMalloc(size) femalloc(size, /* fallible */ true)
+#define gdRealloc(ptr, size) safe_ferealloc(ptr, 1, size, 0, /* fallible */ true)
 #define gdEstrdup(ptr) estrdup(ptr)
 #define gdFree(ptr) efree(ptr)
 #define gdPMalloc(ptr) pemalloc(ptr, 1)

@@ -24,14 +24,12 @@
 
 #include <typeinfo>
 
-extern "C" {
 #define USE_BREAKITERATOR_POINTER 1
 #include "breakiterator_class.h"
 #include "breakiterator_arginfo.h"
 #include <zend_exceptions.h>
 #include <zend_interfaces.h>
 #include <assert.h>
-}
 
 using PHP::CodePointBreakIterator;
 using icu::RuleBasedBreakIterator;
@@ -43,7 +41,17 @@ zend_class_entry *CodePointBreakIterator_ce_ptr;
 zend_object_handlers BreakIterator_handlers;
 /* }}} */
 
-U_CFUNC	void breakiterator_object_create(zval *object,
+static void breakiterator_object_construct(zval *object,
+											BreakIterator *biter)
+{
+	BreakIterator_object *bio;
+
+	BREAKITER_METHOD_FETCH_OBJECT_NO_CHECK; //populate to from object
+	ZEND_ASSERT(bio->biter == NULL);
+	bio->biter = biter;
+}
+
+void breakiterator_object_create(zval *object,
 										 BreakIterator *biter, int brand_new)
 {
 	UClassID classId = biter->getDynamicClassID();
@@ -61,16 +69,6 @@ U_CFUNC	void breakiterator_object_create(zval *object,
 		object_init_ex(object, ce);
 	}
 	breakiterator_object_construct(object, biter);
-}
-
-U_CFUNC void breakiterator_object_construct(zval *object,
-											BreakIterator *biter)
-{
-	BreakIterator_object *bio;
-
-	BREAKITER_METHOD_FETCH_OBJECT_NO_CHECK; //populate to from object
-	ZEND_ASSERT(bio->biter == NULL);
-	bio->biter = biter;
 }
 
 /* {{{ compare handler for BreakIterator */

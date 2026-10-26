@@ -29,6 +29,21 @@ PHP 8.7 UPGRADE NOTES
     not present in the result set. It previously reported the condition
     through PDO::ATTR_ERRMODE and returned false.
 
+- Reflection:
+  . The public $name and $class properties of ReflectionClass,
+    ReflectionClassConstant, ReflectionProperty, ReflectionMethod,
+    ReflectionFunctionAbstract, ReflectionParameter, ReflectionExtension,
+    ReflectionZendExtension, ReflectionAttribute and ReflectionConstant are
+    now readonly.
+
+- SOAP:
+  . SoapClient no longer follows an HTTP redirect to a different origin
+    (scheme, host, or port) and throws a SoapFault instead. Previously the
+    request body and the configured credentials and headers were resent to
+    the new origin. A redirect from http to https on the same host is still
+    followed. Set the new follow_cross_origin_redirects option to true to
+    restore the previous behavior.
+
 - Session:
   . Setting session.cookie_path to a value containing one of ";\r\n", or
     session.cookie_domain to a value containing one of ",; \t\r\n\013\014",
@@ -50,6 +65,18 @@ PHP 8.7 UPGRADE NOTES
     array of CURLFile or CURLStringFile objects to CURLOPT_POSTFIELDS.
 
 - Intl:
+  . Added IntlRelativeDateTimeFormatter to format relative date and time offsets
+    using locale-specific text, such as "yesterday" or "in 3 days". Its format()
+    method uses a textual form when available and a numeric form otherwise,
+    while formatNumeric() always uses a numeric form. combineDateAndTime()
+    combines already formatted date and time strings according to the locale.
+    The constructor accepts an optional NumberFormatter to customize numeric
+    output; subsequent configuration changes to that object are reflected in
+    formatting results. Styles, capitalization contexts, and units are selected
+    using the IntlRelativeDateTimeFormatterStyle,
+    IntlRelativeDateTimeFormatterCapitalization, and
+    IntlRelativeDateTimeFormatterUnit enums, respectively.
+    RFC: https://wiki.php.net/rfc/reldateformatter
   . Locale::acceptFromHttp() and locale_accept_from_http() now accept an
     optional $availableLocales array argument. When given, the
     Accept-Language header is matched against these locales instead of all
@@ -95,11 +122,19 @@ PHP 8.7 UPGRADE NOTES
 ========================================
 
 - Intl:
+  . IntlRelativeDateTimeFormatter
+  . enum IntlRelativeDateTimeFormatterStyle
+  . enum IntlRelativeDateTimeFormatterCapitalization
+  . enum IntlRelativeDateTimeFormatterUnit
+    RFC: https://wiki.php.net/rfc/reldateformatter
   . Added IntlNumberFormatter class to format a number with a given locale
     and ICU number skeleton, which also covers measurement units, e.g.
     "measure-unit/speed-kilometer-per-hour unit-width-full-name".
-    IntlNumberFormatter::format() accepts an int, a float or a numeric
-    string, the latter being formatted as a decimal of arbitrary precision.
+    IntlNumberFormatter::format() accepts an int, a float or a decimal
+    string without exponent, the latter being formatted with arbitrary
+    precision.
+    IntlNumberFormatter::createFromSkeleton() rejects a scale/ option in
+    exponent notation, e.g. "scale/1e3".
     It is supported from icu 63.
 
 ========================================
@@ -156,6 +191,11 @@ PHP 8.7 UPGRADE NOTES
 - MBString:
   . Improved performance of mb_strlen for UTF-8 strings.
 
+- PDO:
+  . Improved performance of fetching rows with PDO::FETCH_BOTH, the default
+    fetch mode, for results with more than 4 columns.
+
 - PDO_PGSQL:
   . Improved performance of the SQL parser that handles placeholders in
     PDO::prepare() and, with emulated prepares, PDOStatement::execute().
+  . Improved performance of fetching integer columns.

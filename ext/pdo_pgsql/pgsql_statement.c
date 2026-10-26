@@ -190,9 +190,11 @@ static void pgsql_stmt_finish(pdo_pgsql_stmt *S, int fin_mode)
 		res = PQclosePrepared(H->server, S->stmt_name);
 #endif
 		if (res) {
+			if (H->prepared_stmts && PQresultStatus(res) == PGRES_COMMAND_OK) {
+				zend_hash_str_del(H->prepared_stmts, S->stmt_name, strlen(S->stmt_name));
+			}
 			PQclear(res);
 		}
-
 		S->is_prepared = false;
 	}
 }
@@ -267,9 +269,9 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt)
 
 	bool in_trans = stmt->dbh->methods->in_transaction(stmt->dbh);
 
-	/* in unbuffered mode, finish any running statement: libpq explicitely prohibits this
+	/* in unbuffered mode, finish any running statement: libpq explicitly prohibits this
 	 * and returns a PGRES_FATAL_ERROR when PQgetResult gets called for stmt 2 if DEALLOCATE
-	 * was called for stmt 1 inbetween
+	 * was called for stmt 1 in between
 	 * (maybe it will change with pipeline mode in libpq 14?) */
 	if (S->is_unbuffered && H->running_stmt) {
 		pgsql_stmt_finish(H->running_stmt, FIN_CLOSE);
@@ -339,6 +341,9 @@ stmt_retry:
 				case PGRES_TUPLES_OK:
 					/* it worked */
 					S->is_prepared = true;
+					if (H->prepared_stmts) {
+						zend_hash_str_add_empty_element(H->prepared_stmts, S->stmt_name, strlen(S->stmt_name));
+					}
 					PQclear(S->result);
 					S->result = NULL;
 					break;
@@ -753,8 +758,17 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pd
 #if SIZEOF_ZEND_LONG >= 8
 			case INT8OID:
 #endif
-				ZVAL_LONG(result, ZEND_ATOL(ptr));
+			{
+				/* PostgreSQL sends integers in canonical decimal form, which the numeric array key
+				 * parser handles without the overhead of strtoll() */
+				zend_ulong lval;
+				if (EXPECTED(ZEND_HANDLE_NUMERIC_STR(ptr, len, lval))) {
+					ZVAL_LONG(result, (zend_long) lval);
+				} else {
+					ZVAL_LONG(result, ZEND_ATOL(ptr));
+				}
 				break;
+			}
 			case FLOAT4OID:
 			case FLOAT8OID:
                 if (strncmp(ptr, "Infinity", len) == 0) {
