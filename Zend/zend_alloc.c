@@ -900,6 +900,9 @@ static void *zend_mm_chunk_alloc_int(size_t size, size_t alignment)
 		/* chunk has to be aligned */
 		zend_mm_munmap(ptr, size);
 		ptr = zend_mm_mmap(size + alignment - REAL_PAGE_SIZE);
+		if (ptr == NULL) {
+			return NULL;
+		}
 #ifdef _WIN32
 		offset = ZEND_MM_ALIGNED_OFFSET(ptr, alignment);
 		if (offset != 0) {

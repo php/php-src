@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fix function and constant imports in compile_to_ast and add support
     for grouping. (Klaas Skelte van der Werf)
+  . Fixed unmapping of an unrelated range when the aligned chunk mmap fails
+    (Marti2203).
 
 - DBA:
   . Fixed bug GH-24641 (ndbm backend never checks dbm_open() return value,
