@@ -25,6 +25,8 @@ PHP                                                                        NEWS
   . Fix memory leak for nested HTTP calls. (EdmondDantes)
   . Fix function and constant imports in compile_to_ast and add support
     for grouping. (Klaas Skelte van der Werf)
+  . Fixed unmapping of an unrelated range when the aligned chunk mmap fails
+    (Marti2203).
 
 - Date:
   . Fixed bug GH-20503 (Assertion failure with ext/date DateInterval property
