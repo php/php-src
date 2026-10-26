@@ -30,6 +30,9 @@ PHP                                                                        NEWS
     for grouping. (Klaas Skelte van der Werf)
   . Fixed bug GH-24265 (Unwind/GracefulExit discarded in
     zend_fiber_execute()). (David Carlier)
+  . Fixed bug GH-24731 (Assertion failure in zend_objects_store_del() when a
+    bailout interrupts releasing the header_register_callback() callback).
+    (lazerg)
 
 - Date:
   . Fixed bug GH-20503 (Assertion failure with ext/date DateInterval property

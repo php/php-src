@@ -118,8 +118,11 @@ PHP_FUNCTION(header_register_callback)
 	}
 
 	if (Z_TYPE(SG(callback_func)) != IS_UNDEF) {
-		zval_ptr_dtor(&SG(callback_func));
+		zval cb;
+		ZVAL_COPY_VALUE(&cb, &SG(callback_func));
+		ZVAL_UNDEF(&SG(callback_func));
 		SG(fci_cache) = empty_fcall_info_cache;
+		zval_ptr_dtor(&cb);
 	}
 
 	/* Don't store callback if headers have already been sent:
