@@ -32,6 +32,10 @@ PHP                                                                        NEWS
     assigning to a reference). (waroad)
   . Fixed bug GH-24745 (File cache loses attributes on constants on 32-bit
     builds). (Yannick Decat, Lazizbek Ergashev)
+  . Fixed bug GH-17733 (System entropy does not take into account function
+    order, resulting in wrong functions possibly called
+    in different configurations). (ndossche)
+  . Fixed bug GH-24438 (Preserve indirect types in JIT side traces). (aasul)
 
 - OpenSSL:
   . Fixed build with OpenSSL 4.1. (Weilin Du)
