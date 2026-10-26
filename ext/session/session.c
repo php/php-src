@@ -409,18 +409,6 @@ static zend_long php_session_gc(bool immediate)
 	if ((PS(mod_data) || PS(mod_user_implemented))) {
 		/* Use probability-based GC if not forced and probability is configured */
 		if (!collect && PS(gc_probability) > 0) {
-			/* Seed lazily on first GC draw per process. */
-			if (UNEXPECTED(!PS(random_seeded))) {
-				php_random_uint128_t seed;
-				if (php_random_bytes_silent(&seed, sizeof(seed)) == FAILURE) {
-					seed = php_random_uint128_constant(
-						php_random_generate_fallback_seed(),
-						php_random_generate_fallback_seed()
-					);
-				}
-				php_random_pcgoneseq128xslrr64_seed128(PS(random).state, seed);
-				PS(random_seeded) = true;
-			}
 			collect = php_random_range(PS(random), 0, PS(gc_divisor) - 1) < PS(gc_probability);
 		}
 
@@ -3019,7 +3007,15 @@ static PHP_GINIT_FUNCTION(ps)
 		.algo = &php_random_algo_pcgoneseq128xslrr64,
 		.state = &ps_globals->random_state,
 	};
-	ps_globals->random_seeded = false;
+
+	php_random_uint128_t seed;
+	if (php_random_bytes_silent(&seed, sizeof(seed)) == FAILURE) {
+		seed = php_random_uint128_constant(
+			php_random_generate_fallback_seed(),
+			php_random_generate_fallback_seed()
+		);
+	}
+	php_random_pcgoneseq128xslrr64_seed128(ps_globals->random.state, seed);
 }
 
 /* Interfaces extending the given one are not flattened into ce->interfaces before they are
@@ -3456,7 +3452,8 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 
 static void php_session_child_init(void)
 {
-	PS(random_seeded) = false;
+	/* Move the child's GC sequence forward without requesting new entropy. */
+	php_random_pcgoneseq128xslrr64_advance(PS(random).state, 1);
 }
 
 zend_module_entry session_module_entry = {
