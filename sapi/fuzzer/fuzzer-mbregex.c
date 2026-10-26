@@ -33,32 +33,23 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 		return 0;
 	}
 
-	char *args[2];
-	char *data = malloc(Size+1);
-	memcpy(data, Data, Size);
-	data[Size] = '\0';
-
 	fuzzer_setup_dummy_frame();
 
-	args[0] = data;
-	args[1] = "test123";
-	fuzzer_call_php_func("mb_ereg", 2, args);
+	/* Pass the input with its length, as strlen() would cut it off at the first NUL byte. */
+	zval args[2];
+	ZVAL_STRINGL(&args[0], (const char *) Data, Size);
+	ZVAL_STRING(&args[1], "test123");
+	fuzzer_call_php_func_zval("mb_ereg", 2, args);
+	fuzzer_call_php_func_zval("mb_eregi", 2, args);
+	zval_ptr_dtor(&args[1]);
 
-	args[0] = data;
-	args[1] = "test123";
-	fuzzer_call_php_func("mb_eregi", 2, args);
-
-	args[0] = data;
-	args[1] = data;
-	fuzzer_call_php_func("mb_ereg", 2, args);
-
-	args[0] = data;
-	args[1] = data;
-	fuzzer_call_php_func("mb_eregi", 2, args);
+	ZVAL_COPY(&args[1], &args[0]);
+	fuzzer_call_php_func_zval("mb_ereg", 2, args);
+	fuzzer_call_php_func_zval("mb_eregi", 2, args);
+	zval_ptr_dtor(&args[0]);
+	zval_ptr_dtor(&args[1]);
 
 	fuzzer_request_shutdown();
-
-	free(data);
 #else
 	fprintf(stderr, "\n\nERROR:\nPHP built without mbstring, recompile with --enable-mbstring to use this fuzzer\n");
 	exit(1);

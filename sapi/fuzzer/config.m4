@@ -69,7 +69,8 @@ if test "$PHP_FUZZER" != "no"; then
   fi
   if test -n "$enable_mbstring" && test "$enable_mbstring" != "no"; then
     PHP_FUZZER_TARGET([mbstring], [PHP_FUZZER_MBSTRING_OBJS])
-    if test -n "$enable_mbregex" && test "$enable_mbregex" != "no"; then
+    dnl mbregex is enabled by default, so enable_mbregex is usually unset here.
+    if test "$enable_mbregex" != "no"; then
       PHP_FUZZER_TARGET([mbregex], [PHP_FUZZER_MBREGEX_OBJS])
     fi
   fi
