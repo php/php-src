@@ -203,13 +203,11 @@ static void ts_free_resources(
  * in the table. Native TLS dtors only run for the calling thread. */
 TSRM_API void tsrm_shutdown(void)
 {/*{{{*/
-	tsrm_tls_entry *current_thread_resources;
-
 	if (is_thread_shutdown) {
 		/* shutdown must only occur once */
 		return;
 	}
-	current_thread_resources = tsrm_tls_get();
+	tsrm_tls_entry *current_thread_resources = tsrm_tls_get();
 
 	is_thread_shutdown = true;
 
