@@ -19,13 +19,6 @@
 
 typedef struct _tsrm_tls_entry tsrm_tls_entry;
 
-struct _tsrm_tls_entry {
-	void **storage;
-	int count;
-	THREAD_T thread_id;
-	tsrm_tls_entry *next;
-};
-
 void tsrm_atexit(void);
 void tsrm_atexit_set_data(tsrm_tls_entry *thread_resources);
 void tsrm_atexit_disarm(void);

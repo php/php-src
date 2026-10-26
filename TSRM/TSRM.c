@@ -24,8 +24,17 @@
 # define TSRM_ASSERT(c)
 #endif
 
+typedef struct _tsrm_tls_entry tsrm_tls_entry;
+
 /* TSRMLS_CACHE_DEFINE; is already done in Zend, this is being always compiled statically. */
 TSRMLS_CACHE_EXTERN();
+
+struct _tsrm_tls_entry {
+	void **storage;
+	int count;
+	THREAD_T thread_id;
+	tsrm_tls_entry *next;
+};
 
 typedef struct {
 	size_t size;
