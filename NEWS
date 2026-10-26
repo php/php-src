@@ -154,6 +154,8 @@ PHP                                                                        NEWS
     lookup, and an unchecked CreateFileA() failure. (Ilia Alshanetsky)
   . Fix persistent stream context lifetime during shutdown (Levi Morrison)
   . Fixed bug GH-23780 (unserialize('') fails silently). (timwolla)
+  . Fixed bug GH-24674 (unserialize() called while another value is being
+    unserialized reads that value's back-references). (Ilia Alshanetsky)
   . Fixed stream_select() aborting the whole call once any watched stream's
     descriptor exceeded FD_SETSIZE; it no longer imposes that limit, so watching
     many descriptors no longer requires rebuilding with --enable-fd-setsize.

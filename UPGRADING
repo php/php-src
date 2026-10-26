@@ -55,6 +55,14 @@ PHP 8.7 UPGRADE NOTES
   . The number of filters that can be chained in a php://filter URL is limited
     to 16 by default. Set the stream context option max_filter_count to change
     this.
+  . unserialize() called from a destructor, an error handler or another
+    callback that runs while a value is being unserialized no longer resolves
+    R: and r: back-references into the outer value. Only the
+    Serializable::unserialize() call made for a C: payload, and code it calls,
+    shares them.
+  . A C: payload unserialized from __wakeup() or __unserialize() now honours
+    the allowed_classes and max_depth options of that unserialize() call, and
+    unserialize() calls made while it is processed inherit them.
 
 ========================================
 2. New Features

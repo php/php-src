@@ -20,6 +20,9 @@
 
 PHP_MINIT_FUNCTION(var);
 
+void php_var_unserialize_fiber_init(zend_fiber_context *initializing);
+void php_var_unserialize_fiber_switch(zend_fiber_context *from, zend_fiber_context *to);
+
 PHPAPI void php_var_dump(zval *struc, int level);
 PHPAPI void php_var_export(zval *struc, int level);
 PHPAPI zend_result php_var_export_ex(zval *struc, int level, smart_str *buf);
