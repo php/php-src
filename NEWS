@@ -13,6 +13,8 @@ PHP                                                                        NEWS
     two digits per step. (Alexander Danilov)
   . Fixed bug GH-25788 (clone() with properties corrupts memory with JIT when
     __clone() keeps a reference and the result is discarded). (Tomasz Kowalczyk)
+  . Fixed bug GH-24712 (Use-after-free in foreach by reference when destructor
+    modifies the loop variable). (Lazizbek Ergashev)
 
 - Curl:
   . Negative values for CURLOPT_POSTREDIR are now rejected, causing
