@@ -1955,7 +1955,8 @@ PHP_FUNCTION(socket_set_option)
 					zend_argument_type_error(4, "must be of type array when argument #3 ($option) is SO_LINGER, %s given", zend_zval_value_name(arg4));
 					RETURN_THROWS();
 				} else {
-					opt_ht = opt_props = zend_get_properties_for(arg4, ZEND_PROP_PURPOSE_ARRAY_CAST);
+					opt_props = zend_get_properties_for(arg4, ZEND_PROP_PURPOSE_ARRAY_CAST);
+					opt_ht = opt_props ? opt_props : (HashTable *) &zend_empty_array;
 				}
 			} else {
 				opt_ht = Z_ARRVAL_P(arg4);
@@ -2006,7 +2007,8 @@ PHP_FUNCTION(socket_set_option)
 							zend_zval_value_name(arg4));
 					RETURN_THROWS();
 				} else {
-					opt_ht = opt_props = zend_get_properties_for(arg4, ZEND_PROP_PURPOSE_ARRAY_CAST);
+					opt_props = zend_get_properties_for(arg4, ZEND_PROP_PURPOSE_ARRAY_CAST);
+					opt_ht = opt_props ? opt_props : (HashTable *) &zend_empty_array;
 				}
 			} else {
 				opt_ht = Z_ARRVAL_P(arg4);
