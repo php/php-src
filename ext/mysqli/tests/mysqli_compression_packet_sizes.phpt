@@ -24,12 +24,19 @@ foreach ([1, 230, 235, 236, 237, 238, 240, 600, 4000, 100000, 3000000] as $lengt
     }
 }
 
+$stmt = $link->prepare("SELECT HEX(?)");
 for ($i = 0; $i < 200; $i++) {
-    $value = bin2hex(random_bytes(1 + $i * 37));
-    if ($link->query("SELECT '$value' AS v")->fetch_assoc()['v'] !== $value) {
+    $value = random_bytes(1 + $i * 37);
+    $stmt->bind_param('s', $value);
+    $stmt->execute();
+    $stmt->bind_result($hex);
+    $stmt->fetch();
+    $stmt->free_result();
+    if ($hex !== strtoupper(bin2hex($value))) {
         printf("[003] Round trip failed for %d bytes\n", strlen($value));
     }
 }
+$stmt->close();
 
 $link->close();
 print "done!";
