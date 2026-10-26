@@ -47,6 +47,10 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 - The INIT_CLASS_ENTRY_INIT_METHODS() macro, which was previously used as
   part of handling disabled classes, was removed following the removal of
   the `disable_classes` INI setting in PHP 8.5.
+- Using zend_array_destroy() on HashTables with a custom pDestructor is not
+  allowed anymore. User-facing HashTables must have pDestructor = ZVAL_PTR_DTOR
+  or NULL, and must be freed with zend_array_destroy(). Other HashTables can be
+  freed with zend_hash_destroy() + pefree().
 
 ========================
 2. Build system changes
