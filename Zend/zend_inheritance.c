@@ -2848,6 +2848,7 @@ static void zend_do_traits_constant_binding(zend_class_entry *ce, zend_class_ent
 
 				Z_TRY_ADDREF(constant->value);
 				constant->doc_comment = constant->doc_comment ? zend_string_copy(constant->doc_comment) : NULL;
+				zend_type_copy_ctor(&constant->type, /* use_arena */ true, /* persistent */ false);
 				if (constant->attributes && (!(GC_FLAGS(constant->attributes) & IS_ARRAY_IMMUTABLE))) {
 					GC_ADDREF(constant->attributes);
 				}
