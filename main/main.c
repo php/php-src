@@ -1286,7 +1286,7 @@ PHPAPI void php_html_puts(const char *str, size_t size)
 }
 /* }}} */
 
-static void clear_last_error(void) {
+static void clear_last_error(bool clear_repeated_errors) {
 	if (PG(last_error_message)) {
 		zend_string_release(PG(last_error_message));
 		PG(last_error_message) = NULL;
@@ -1294,6 +1294,16 @@ static void clear_last_error(void) {
 	if (PG(last_error_file)) {
 		zend_string_release(PG(last_error_file));
 		PG(last_error_file) = NULL;
+	}
+	if (clear_repeated_errors) {
+		for (uint32_t i = 0; i < 32; i++) {
+			if (PG(repeated_error_messages)[i]) {
+				zend_string_release(PG(repeated_error_messages)[i]);
+				PG(repeated_error_messages)[i] = NULL;
+				zend_string_release(PG(repeated_error_files)[i]);
+				PG(repeated_error_files)[i] = NULL;
+			}
+		}
 	}
 }
 
@@ -1328,16 +1338,20 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 {
 	bool display;
 	int type = orig_type & E_ALL;
+	uint32_t repeated_error_index = 0;
 	zend_string *backtrace = ZSTR_EMPTY_ALLOC();
+	zend_string *repeated_error_file = error_filename ? error_filename : ZSTR_KNOWN(ZEND_STR_UNKNOWN_CAPITALIZED);
+
+	while (repeated_error_index < 31 && !(type & (1U << repeated_error_index))) {
+		repeated_error_index++;
+	}
 
 	/* check for repeated errors to be ignored */
-	if (PG(ignore_repeated_errors) && PG(last_error_message)) {
-		/* no check for PG(last_error_file) is needed since it cannot
-		 * be NULL if PG(last_error_message) is not NULL */
-		if (!zend_string_equals(PG(last_error_message), message)
+	if (PG(ignore_repeated_errors) && PG(repeated_error_messages)[repeated_error_index]) {
+		if (!zend_string_equals(PG(repeated_error_messages)[repeated_error_index], message)
 			|| (!PG(ignore_repeated_source)
-				&& ((PG(last_error_lineno) != error_lineno)
-					|| !zend_string_equals(PG(last_error_file), error_filename)))) {
+				&& ((PG(repeated_error_linenos)[repeated_error_index] != (int)error_lineno)
+					|| !zend_string_equals(PG(repeated_error_files)[repeated_error_index], repeated_error_file)))) {
 			display = 1;
 		} else {
 			display = 0;
@@ -1374,7 +1388,7 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 
 	/* store the error if it has changed */
 	if (display) {
-		clear_last_error();
+		clear_last_error(false);
 		if (!error_filename) {
 			error_filename = ZSTR_KNOWN(ZEND_STR_UNKNOWN_CAPITALIZED);
 		}
@@ -1382,6 +1396,17 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 		PG(last_error_message) = zend_string_copy(message);
 		PG(last_error_file) = zend_string_copy(error_filename);
 		PG(last_error_lineno) = error_lineno;
+	}
+
+	if (!PG(repeated_error_messages)[repeated_error_index]
+		|| display) {
+		if (PG(repeated_error_messages)[repeated_error_index]) {
+			zend_string_release(PG(repeated_error_messages)[repeated_error_index]);
+			zend_string_release(PG(repeated_error_files)[repeated_error_index]);
+		}
+		PG(repeated_error_linenos)[repeated_error_index] = error_lineno;
+		PG(repeated_error_messages)[repeated_error_index] = zend_string_copy(message);
+		PG(repeated_error_files)[repeated_error_index] = zend_string_copy(repeated_error_file);
 	}
 
 	/* Discarding the output buffers frees every handler on the stack, which is
@@ -1708,7 +1733,7 @@ static zval *php_get_configuration_directive_for_zend(zend_string *name)
 /* {{{ php_free_request_globals */
 static void php_free_request_globals(void)
 {
-	clear_last_error();
+	clear_last_error(true);
 	if (PG(php_sys_temp_dir)) {
 		efree(PG(php_sys_temp_dir));
 		PG(php_sys_temp_dir) = NULL;
@@ -2039,7 +2064,7 @@ void php_request_shutdown(void *dummy)
 	/* 16. Free Willy (here be crashes) */
 	zend_arena_destroy(CG(arena));
 	zend_interned_strings_deactivate();
-	clear_last_error();
+	clear_last_error(true);
 	zend_try {
 		shutdown_memory_manager(CG(unclean_shutdown) || !report_memleaks, 0);
 	} zend_end_try();
@@ -2456,7 +2481,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	module_startup = false;
 
 	/* Don't leak errors from startup into the per-request phase. */
-	clear_last_error();
+	clear_last_error(true);
 	shutdown_memory_manager(1, 0);
 	virtual_cwd_activate();
 
@@ -2519,7 +2544,7 @@ void php_module_shutdown(void)
 
 	/* close down the ini config */
 	php_shutdown_config();
-	clear_last_error();
+	clear_last_error(true);
 
 #ifndef ZTS
 	zend_ini_shutdown();
