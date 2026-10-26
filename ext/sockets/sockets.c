@@ -1961,11 +1961,11 @@ PHP_FUNCTION(socket_set_option)
 				opt_ht = Z_ARRVAL_P(arg4);
 			}
 
-			if ((l_onoff = zend_hash_str_find(opt_ht, l_onoff_key, sizeof(l_onoff_key) - 1)) == NULL) {
+			if ((l_onoff = zend_hash_str_find_ind(opt_ht, l_onoff_key, sizeof(l_onoff_key) - 1)) == NULL) {
 				zend_argument_value_error(4, "must have key \"%s\"", l_onoff_key);
 				RETURN_THROWS();
 			}
-			if ((l_linger = zend_hash_str_find(opt_ht, l_linger_key, sizeof(l_linger_key) - 1)) == NULL) {
+			if ((l_linger = zend_hash_str_find_ind(opt_ht, l_linger_key, sizeof(l_linger_key) - 1)) == NULL) {
 				zend_argument_value_error(4, "must have key \"%s\"", l_linger_key);
 				RETURN_THROWS();
 			}
@@ -2009,11 +2009,11 @@ PHP_FUNCTION(socket_set_option)
 				opt_ht = Z_ARRVAL_P(arg4);
 			}
 
-			if ((sec = zend_hash_str_find(opt_ht, sec_key, sizeof(sec_key) - 1)) == NULL) {
+			if ((sec = zend_hash_str_find_ind(opt_ht, sec_key, sizeof(sec_key) - 1)) == NULL) {
 				zend_argument_value_error(4, "must have key \"%s\"", sec_key);
 				RETURN_THROWS();
 			}
-			if ((usec = zend_hash_str_find(opt_ht, usec_key, sizeof(usec_key) - 1)) == NULL) {
+			if ((usec = zend_hash_str_find_ind(opt_ht, usec_key, sizeof(usec_key) - 1)) == NULL) {
 				zend_argument_value_error(4, "must have key \"%s\"", usec_key);
 				RETURN_THROWS();
 			}
