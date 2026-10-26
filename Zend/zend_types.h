@@ -865,11 +865,8 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 /* Fast class cache */
 static zend_always_inline bool zstr_has_ce_cache(const zend_string *s)
 {
-	if (GC_FLAGS(s) & IS_STR_CLASS_NAME_MAP_PTR) {
-		ZEND_ATOMIC_FENCE_ACQUIRE();
-		return true;
-	}
-	return false;
+	uint32_t type_info = ZEND_ATOMIC_LOAD_ACQUIRE_32(&GC_TYPE_INFO(s));
+	return (type_info & (IS_STR_CLASS_NAME_MAP_PTR << GC_FLAGS_SHIFT)) != 0;
 }
 
 #define ZSTR_HAS_CE_CACHE(s)		zstr_has_ce_cache(s)
