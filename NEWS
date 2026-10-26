@@ -139,6 +139,11 @@ PHP                                                                        NEWS
   . Fixed a crash in readline_info() when completion_append_character
     contains a non-ASCII byte. (Weilin Du)
 
+- Reflection:
+  . Fixed bug GH-24729 (Use-after-free in
+    ReflectionClass::setStaticPropertyValue() when the old value's destructor
+    unbinds the property). (Lazizbek Ergashev)
+
 - SAPI:
   . Fixed infinite loop in sapi_header_op() for headers of 4 GiB or more.
     (Martin Mirchev)

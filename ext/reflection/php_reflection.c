@@ -4452,8 +4452,10 @@ ZEND_METHOD(ReflectionClass, setStaticPropertyValue)
 		return;
 	}
 
-	zval_ptr_dtor(variable_ptr);
+	zval garbage;
+	ZVAL_COPY_VALUE(&garbage, variable_ptr);
 	ZVAL_COPY(variable_ptr, value);
+	zval_ptr_dtor(&garbage);
 
 }
 /* }}} */
