@@ -2768,7 +2768,7 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 #  endif
 #endif
 
-	if (zhints) {
+	if (zhints && zend_hash_num_elements(Z_ARRVAL_P(zhints)) > 0) {
 		if (UNEXPECTED(HT_IS_PACKED(Z_ARRVAL_P(zhints)))) {
 			zend_argument_value_error(3, "must only contain array keys \"ai_flags\", \"ai_socktype\", "
 					"\"ai_protocol\", or \"ai_family\"");
