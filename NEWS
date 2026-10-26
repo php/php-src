@@ -143,6 +143,9 @@ PHP                                                                        NEWS
 - Streams:
   . Applied the so_linger, so_rcvbuf and so_sndbuf context options to unix
     sockets. (David Carlier)
+  . Fixed a use-after-free when a user stream wrapper unregisters itself from
+    its constructor or destructor during unlink(), rename(), mkdir(), rmdir(),
+    touch(), chmod() or stat(). (Ilia Alshanetsky)
 
 - Standard:
   . Fixed bug #60110 (fclose(), file_put_contents(), copy() do not return false
