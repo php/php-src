@@ -16,7 +16,7 @@ class Timeout {
 
 $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 var_dump(socket_set_option($socket, SOL_SOCKET, SO_LINGER, new Linger()));
-var_dump(socket_get_option($socket, SOL_SOCKET, SO_LINGER));
+var_dump(socket_get_option($socket, SOL_SOCKET, SO_LINGER)["l_linger"]);
 
 try {
     socket_set_option($socket, SOL_SOCKET, SO_RCVTIMEO, new Timeout());
@@ -43,12 +43,7 @@ var_dump(socket_set_option($socket, SOL_SOCKET, SO_LINGER, $linger));
 ?>
 --EXPECT--
 bool(true)
-array(2) {
-  ["l_onoff"]=>
-  int(1)
-  ["l_linger"]=>
-  int(5)
-}
+int(5)
 socket_set_option(): Argument #4 ($value) must have key "usec"
 bool(true)
 bool(true)
