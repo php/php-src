@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed unmapping of an unrelated range when the aligned chunk mmap fails
     (Marti2203).
 
+- CLI:
+  . Fixed bug GH-24697 (PHP_HTTP_PARSER_STRICT build option doesn't work).
+    (ndossche, devnexen)
+
 - DBA:
   . Fixed bug GH-24641 (ndbm backend never checks dbm_open() return value,
     NULL deref on first use after a failed open). (Girgias)
