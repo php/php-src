@@ -3570,8 +3570,7 @@ PHP_FUNCTION(mb_list_encodings)
 		/* Initialize shared array of supported encoding names
 		 * This is done so that we can check if `mb_list_encodings()` is being
 		 * passed to other mbstring functions using a cheap pointer equality check */
-		HashTable *array = emalloc(sizeof(HashTable));
-		zend_hash_init(array, 80, NULL, zval_ptr_dtor_str, false);
+		HashTable *array = zend_new_array(80);
 		for (const mbfl_encoding **encodings = mbfl_get_supported_encodings(); *encodings; encodings++) {
 			zval tmp;
 			ZVAL_STRING(&tmp, (*encodings)->name);
