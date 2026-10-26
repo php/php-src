@@ -30,7 +30,9 @@ PHP                                                                        NEWS
     for grouping. (Klaas Skelte van der Werf)
   . Fixed bug GH-24265 (Unwind/GracefulExit discarded in
     zend_fiber_execute()). (David Carlier)
-
+  . Fixed unmapping of an unrelated range when the aligned chunk mmap fails
+    (Marti2203).
+    
 - Date:
   . Fixed bug GH-20503 (Assertion failure with ext/date DateInterval property
     hash construction). (heathdutton)
