@@ -8,8 +8,14 @@ include "skipif.inc";
 <?php
 include "php_cli_server.inc";
 
-$server = php_cli_server_start(null, null, [], "/");
-assert($server->docRoot === '/');
+if (PHP_OS_FAMILY === 'Windows') {
+	$doc_root = '\\';
+} else {
+	$doc_root = '/';
+}
+
+$server = php_cli_server_start(null, null, [], $doc_root);
+assert($server->docRoot === $doc_root);
 
 file_put_contents(__DIR__ . '/public.txt', 'Public file contents');
 
