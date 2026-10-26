@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-24697 (PHP_HTTP_PARSER_STRICT build option doesn't work).
     (ndossche, devnexen)
 
+- Curl:
+  . Fix use-after-free of CURLOPT_STDERR stream on cloned curl handle.
+    (lacatoire)
+
 - DBA:
   . Fixed bug GH-24641 (ndbm backend never checks dbm_open() return value,
     NULL deref on first use after a failed open). (Girgias)
