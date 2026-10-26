@@ -41858,6 +41858,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BIND_STATIC_SPEC_CV_HANDLER(ZE
 	HashTable *ht;
 	zval *value;
 	zval *variable_ptr;
+	zval garbage;
 
 	variable_ptr = EX_VAR(opline->op1.var);
 
@@ -41887,19 +41888,22 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BIND_STATIC_SPEC_CV_HANDLER(ZE
 			ref->sources.ptr = NULL;
 			Z_REF_P(value) = ref;
 			Z_TYPE_INFO_P(value) = IS_REFERENCE_EX;
-			i_zval_ptr_dtor(variable_ptr);
+			ZVAL_COPY_VALUE(&garbage, variable_ptr);
 			ZVAL_REF(variable_ptr, ref);
+			i_zval_ptr_dtor(&garbage);
 		} else {
 			Z_ADDREF_P(value);
-			i_zval_ptr_dtor(variable_ptr);
+			ZVAL_COPY_VALUE(&garbage, variable_ptr);
 			ZVAL_REF(variable_ptr, Z_REF_P(value));
+			i_zval_ptr_dtor(&garbage);
 			if (opline->op2_type != IS_UNUSED) {
 				FREE_OP(opline->op2_type, opline->op2.var);
 			}
 		}
 	} else {
-		i_zval_ptr_dtor(variable_ptr);
+		ZVAL_COPY_VALUE(&garbage, variable_ptr);
 		ZVAL_COPY(variable_ptr, value);
+		i_zval_ptr_dtor(&garbage);
 	}
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -41924,11 +41928,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BIND_INIT_STATIC_OR_JMP_SPEC_C
 	if (Z_TYPE_P(value) == IS_NULL) {
 		ZEND_VM_NEXT_OPCODE();
 	} else {
+		zval garbage;
+
 		SAVE_OPLINE();
-		zval_ptr_dtor(variable_ptr);
 		ZEND_ASSERT(Z_TYPE_P(value) == IS_REFERENCE);
 		Z_ADDREF_P(value);
+		ZVAL_COPY_VALUE(&garbage, variable_ptr);
 		ZVAL_REF(variable_ptr, Z_REF_P(value));
+		zval_ptr_dtor(&garbage);
 		ZEND_VM_JMP_EX(OP_JMP_ADDR(opline, opline->op2), 1);
 	}
 }
