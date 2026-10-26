@@ -171,7 +171,7 @@ TSRM_API bool tsrm_startup(int expected_threads, int expected_resources, int deb
 	tsrm_reserved_front = 0;
 
 	tsrm_env_mutex = tsrm_mutex_alloc();
-	tsrm_atexit();
+	tsrm_atexit_init();
 
 	return 1;
 }/*}}}*/

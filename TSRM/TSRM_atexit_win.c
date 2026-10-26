@@ -33,7 +33,7 @@ static void WINAPI tsrm_thread_exit_handler(void *arg)
 	tsrm_free_thread_at_exit(arg);
 }
 
-void tsrm_atexit(void)
+void tsrm_atexit_init(void)
 {
 	tsrm_dll_shutdown_in_progress = (BOOLEAN (NTAPI *)(void)) (void *) GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "RtlDllShutdownInProgress");
 	/* Use FlsAlloc() because TlsAlloc() does not provide a thread-exit callback

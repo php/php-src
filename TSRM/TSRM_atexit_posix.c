@@ -26,7 +26,7 @@ static void tsrm_thread_exit_handler(void *arg)
 	}
 }
 
-void tsrm_atexit(void)
+void tsrm_atexit_init(void)
 {
 	int error = pthread_key_create(&tsrm_exit_key, tsrm_thread_exit_handler);
 	tsrm_thread_exit_armed = error == 0;

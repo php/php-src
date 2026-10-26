@@ -30,7 +30,7 @@ static void tsrm_thread_exit_handler(void *arg)
 	tsrm_free_thread_at_exit(pthread_getspecific(tsrm_exit_key));
 }
 
-void tsrm_atexit(void)
+void tsrm_atexit_init(void)
 {
 	int error = pthread_key_create(&tsrm_exit_key, NULL);
 	tsrm_thread_exit_armed = error == 0;
