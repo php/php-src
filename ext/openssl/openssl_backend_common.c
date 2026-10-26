@@ -123,6 +123,7 @@ time_t php_openssl_asn1_time_to_time_t(ASN1_UTCTIME * timestr)
 	struct tm thetime;
 	char * strbuf;
 	char * thestr;
+	const char *timestr_data;
 	long gmadjust = 0;
 	size_t timestr_len;
 
@@ -132,23 +133,24 @@ time_t php_openssl_asn1_time_to_time_t(ASN1_UTCTIME * timestr)
 	}
 
 	timestr_len = ASN1_STRING_get_length(timestr);
+	timestr_data = timestr_len ? (const char *)ASN1_STRING_get0_data(timestr) : "";
 
-	if (timestr_len != strlen((const char *)ASN1_STRING_get0_data(timestr))) {
+	if (memchr(timestr_data, '\0', timestr_len) != NULL) {
 		php_error_docref(NULL, E_WARNING, "Illegal length in timestamp");
 		return (time_t)-1;
 	}
 
 	if (timestr_len < 13) {
-		php_error_docref(NULL, E_WARNING, "Unable to parse time string %s correctly", ASN1_STRING_get0_data(timestr));
+		php_error_docref(NULL, E_WARNING, "Unable to parse time string %.*s correctly", (int)timestr_len, timestr_data);
 		return (time_t)-1;
 	}
 
 	if (ASN1_STRING_type(timestr) == V_ASN1_GENERALIZEDTIME && timestr_len < 15) {
-		php_error_docref(NULL, E_WARNING, "Unable to parse time string %s correctly", ASN1_STRING_get0_data(timestr));
+		php_error_docref(NULL, E_WARNING, "Unable to parse time string %.*s correctly", (int)timestr_len, timestr_data);
 		return (time_t)-1;
 	}
 
-	strbuf = estrdup((const char *)ASN1_STRING_get0_data(timestr));
+	strbuf = estrndup(timestr_data, timestr_len);
 
 	memset(&thetime, 0, sizeof(thetime));
 

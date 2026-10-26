@@ -1206,7 +1206,8 @@ PHP_FUNCTION(openssl_spki_export_challenge)
 		goto cleanup;
 	}
 
-	RETVAL_STRING((const char *)ASN1_STRING_get0_data(spki->spkac->challenge));
+	RETVAL_STRINGL_FAST((const char *)ASN1_STRING_get0_data(spki->spkac->challenge),
+		ASN1_STRING_get_length(spki->spkac->challenge));
 	goto cleanup;
 
 cleanup:
