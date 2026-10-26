@@ -6828,14 +6828,24 @@ static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
 		ZEND_ASSERT(end_inputs->count == res_inputs->count || (end_inputs->count == 0 && res_inputs->count == 1));
 		jit->delay_var = -1;
 		jit->delay_refs = NULL;
-		if (res_inputs->count == 1) {
-			phi = res_inputs->refs[0];
-		} else {
-			phi = ir_PHI_N((var_def_info & MAY_BE_LONG & MAY_BE_LONG) ? IR_LONG : IR_DOUBLE,
-				res_inputs->count, res_inputs->refs);
+		/* Keep identical constants unbound: a COPY may be hoisted and spill into a live CV. */
+		phi = res_inputs->refs[0];
+		if (res_inputs->count > 1) {
+			uint32_t i = 1;
+
+			if (IR_IS_CONST_REF(phi)) {
+				while (i < res_inputs->count && res_inputs->refs[i] == phi) {
+					i++;
+				}
+			}
+			if (i < res_inputs->count) {
+				phi = ir_PHI_N((var_def_info & MAY_BE_LONG) ? IR_LONG : IR_DOUBLE,
+					res_inputs->count, res_inputs->refs);
+			}
 		}
 		if (Z_MODE(var_addr) == IS_REG) {
-			if ((var_info & (MAY_BE_REF|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) || ref_addr) {
+			if (!IR_IS_CONST_REF(phi)
+			 && ((var_info & (MAY_BE_REF|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) || ref_addr)) {
 				phi = ir_emit2(&jit->ctx, IR_OPT(IR_COPY, jit->ctx.ir_base[phi].type), phi, 1);
 			}
 			zend_jit_def_reg(jit, var_addr, phi);
