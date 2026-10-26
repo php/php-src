@@ -369,6 +369,17 @@ static zend_always_inline size_t php_json_verbatim_ascii_len(const char *s, size
 {
 	size_t i = 0;
 #ifdef __SSE2__
+	/* Short runs are common in non-Latin text (e.g. a space between words). Check the first
+	 * byte before paying for the vector setup. */
+	if (len == 0) {
+		return 0;
+	} else {
+		const unsigned char c = (unsigned char) s[0];
+		if (c < 0x20 || c >= 0x80 || c == '"' || c == '&' || c == '\'' || c == '/'
+				|| c == '<' || c == '>' || c == '\\') {
+			return 0;
+		}
+	}
 	/* As signed bytes, both control characters (< 0x20) and non-ASCII bytes (>= 0x80) are < 0x20. */
 	const __m128i ctrl_or_high = _mm_set1_epi8(0x20);
 	while (len - i >= 16) {
@@ -428,9 +439,11 @@ static zend_always_inline size_t php_json_verbatim_utf8_len(const unsigned char 
 	return 0;
 }
 
-zend_result php_json_escape_string(
+/* verbatim_utf8 is (options & PHP_JSON_UNESCAPED_UNICODE), passed as a constant so that the
+ * default escaping path is compiled without the checks only needed for unescaped UTF-8. */
+static zend_always_inline zend_result php_json_escape_string_ex(
 		smart_str *buf, const char *s, size_t len,
-		int options, php_json_encoder *encoder) /* {{{ */
+		int options, php_json_encoder *encoder, const bool verbatim_utf8)
 {
 	size_t pos, checkpoint, verbatim;
 	char *dst;
@@ -480,7 +493,7 @@ zend_result php_json_escape_string(
 				smart_str_appendl(buf, s, pos);
 				break;
 			}
-		} else if (us >= 0x80 && (options & PHP_JSON_UNESCAPED_UNICODE)
+		} else if (verbatim_utf8 && us >= 0x80
 				&& (verbatim = php_json_verbatim_utf8_len((const unsigned char *) s + pos, len, options))) {
 			/* Keep well-formed UTF-8 in the pending run instead of copying it on its own. */
 			pos += verbatim;
@@ -654,6 +667,16 @@ zend_result php_json_escape_string(
 	smart_str_appendc(buf, '"');
 
 	return SUCCESS;
+}
+
+zend_result php_json_escape_string(
+		smart_str *buf, const char *s, size_t len,
+		int options, php_json_encoder *encoder) /* {{{ */
+{
+	if (options & PHP_JSON_UNESCAPED_UNICODE) {
+		return php_json_escape_string_ex(buf, s, len, options, encoder, true);
+	}
+	return php_json_escape_string_ex(buf, s, len, options, encoder, false);
 }
 /* }}} */
 

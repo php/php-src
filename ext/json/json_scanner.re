@@ -79,6 +79,11 @@ static void php_json_scanner_copy_string(php_json_scanner *s, size_t esc_size)
 static zend_always_inline php_json_ctype *php_json_skip_plain_string_bytes(
 		php_json_ctype *p, const php_json_ctype *limit)
 {
+	/* Nothing to skip when the next byte already needs the state machine, e.g. in escape-heavy
+	 * strings. Avoids the vector setup there. */
+	if (p >= limit || *p < 0x20 || *p >= 0x80 || *p == '"' || *p == '\\') {
+		return p;
+	}
 #ifdef __SSE2__
 	const __m128i quote = _mm_set1_epi8('"');
 	const __m128i backslash = _mm_set1_epi8('\\');
@@ -338,7 +343,11 @@ std:
 			return PHP_JSON_T_STRING;
 		}
 	}
-	<STR_P1>UTF8             { PHP_JSON_CONDITION_GOTO_STR_P1(); }
+	<STR_P1>UTF8_1           { PHP_JSON_CONDITION_GOTO_STR_P1(); }
+	<STR_P1>UTF8_2|UTF8_3|UTF8_4 {
+		/* Stay in the state machine: it handles runs of multibyte characters efficiently. */
+		PHP_JSON_CONDITION_GOTO(STR_P1);
+	}
 	<STR_P1>ANY              {
 		if (s->options & (PHP_JSON_INVALID_UTF8_IGNORE | PHP_JSON_INVALID_UTF8_SUBSTITUTE)) {
 			if (s->options & PHP_JSON_INVALID_UTF8_SUBSTITUTE) {
