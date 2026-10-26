@@ -23317,11 +23317,13 @@ fe_fetch_w_exit:
 		zval *variable_ptr = EX_VAR(opline->op2.var);
 		if (EXPECTED(variable_ptr != value)) {
 			zend_reference *ref;
+			zval garbage;
 
 			ref = Z_REF_P(value);
 			GC_ADDREF(ref);
-			i_zval_ptr_dtor(variable_ptr);
+			ZVAL_COPY_VALUE(&garbage, variable_ptr);
 			ZVAL_REF(variable_ptr, ref);
+			i_zval_ptr_dtor(&garbage);
 		}
 	} else {
 		Z_ADDREF_P(value);
