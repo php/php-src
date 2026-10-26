@@ -26,6 +26,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-24321 (ZTS: global_map_ptr_last survives zend_shutdown(),
     so an in-process engine restart keeps growing the map_ptr table).
     (David Carlier)
+  . Fixed unmapping of an unrelated range when the aligned chunk mmap fails
+    (Marti2203).
 
 - Date:
   . Fixed bug GH-20503 (Assertion failure with ext/date DateInterval property
