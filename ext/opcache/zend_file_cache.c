@@ -561,6 +561,10 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 				&& (opline-1)->opcode == ZEND_DECLARE_ATTRIBUTED_CONST
 			) {
 				zval *literal = RT_CONSTANT(opline, opline->op1);
+#if ZEND_USE_ABS_CONST_ADDR
+				SERIALIZE_PTR(literal);
+				UNSERIALIZE_PTR(literal);
+#endif
 				SERIALIZE_ATTRIBUTES(Z_PTR_P(literal));
 			}
 
