@@ -33,6 +33,9 @@ ZEND_VM_HELPER(zend_add_helper, ANY, ANY, zval *op_1, zval *op_2)
 	}
 	if (UNEXPECTED(Z_TYPE_INFO_P(op_2) == IS_UNDEF)) {
 		op_2 = ZVAL_UNDEFINED_OP2();
+		if (UNEXPECTED(Z_TYPE_INFO_P(op_1) == IS_UNDEF)) {
+			op_1 = &EG(uninitialized_zval);
+		}
 	}
 	add_function(EX_VAR(opline->result.var), op_1, op_2);
 	if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
@@ -92,6 +95,9 @@ ZEND_VM_HELPER(zend_sub_helper, ANY, ANY, zval *op_1, zval *op_2)
 	}
 	if (UNEXPECTED(Z_TYPE_INFO_P(op_2) == IS_UNDEF)) {
 		op_2 = ZVAL_UNDEFINED_OP2();
+		if (UNEXPECTED(Z_TYPE_INFO_P(op_1) == IS_UNDEF)) {
+			op_1 = &EG(uninitialized_zval);
+		}
 	}
 	sub_function(EX_VAR(opline->result.var), op_1, op_2);
 	if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
@@ -151,6 +157,9 @@ ZEND_VM_HELPER(zend_mul_helper, ANY, ANY, zval *op_1, zval *op_2)
 	}
 	if (UNEXPECTED(Z_TYPE_INFO_P(op_2) == IS_UNDEF)) {
 		op_2 = ZVAL_UNDEFINED_OP2();
+		if (UNEXPECTED(Z_TYPE_INFO_P(op_1) == IS_UNDEF)) {
+			op_1 = &EG(uninitialized_zval);
+		}
 	}
 	mul_function(EX_VAR(opline->result.var), op_1, op_2);
 	if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
@@ -211,6 +220,9 @@ ZEND_VM_COLD_CONSTCONST_HANDLER(4, ZEND_DIV, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 	SAVE_OPLINE();
 	op1 = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	op2 = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = &EG(uninitialized_zval);
+	}
 	div_function(EX_VAR(opline->result.var), op1, op2);
 	FREE_OP1();
 	FREE_OP2();
@@ -237,6 +249,9 @@ ZEND_VM_HELPER(zend_mod_helper, ANY, ANY, zval *op_1, zval *op_2)
 	}
 	if (UNEXPECTED(Z_TYPE_INFO_P(op_2) == IS_UNDEF)) {
 		op_2 = ZVAL_UNDEFINED_OP2();
+		if (UNEXPECTED(Z_TYPE_INFO_P(op_1) == IS_UNDEF)) {
+			op_1 = &EG(uninitialized_zval);
+		}
 	}
 	mod_function(EX_VAR(opline->result.var), op_1, op_2);
 	if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
@@ -285,6 +300,9 @@ ZEND_VM_HELPER(zend_shift_left_helper, ANY, ANY, zval *op_1, zval *op_2)
 	}
 	if (UNEXPECTED(Z_TYPE_INFO_P(op_2) == IS_UNDEF)) {
 		op_2 = ZVAL_UNDEFINED_OP2();
+		if (UNEXPECTED(Z_TYPE_INFO_P(op_1) == IS_UNDEF)) {
+			op_1 = &EG(uninitialized_zval);
+		}
 	}
 	shift_left_function(EX_VAR(opline->result.var), op_1, op_2);
 	if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
@@ -327,6 +345,9 @@ ZEND_VM_HELPER(zend_shift_right_helper, ANY, ANY, zval *op_1, zval *op_2)
 	}
 	if (UNEXPECTED(Z_TYPE_INFO_P(op_2) == IS_UNDEF)) {
 		op_2 = ZVAL_UNDEFINED_OP2();
+		if (UNEXPECTED(Z_TYPE_INFO_P(op_1) == IS_UNDEF)) {
+			op_1 = &EG(uninitialized_zval);
+		}
 	}
 	shift_right_function(EX_VAR(opline->result.var), op_1, op_2);
 	if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
@@ -365,6 +386,9 @@ ZEND_VM_COLD_CONSTCONST_HANDLER(12, ZEND_POW, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 	SAVE_OPLINE();
 	op1 = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	op2 = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		op1 = &EG(uninitialized_zval);
+	}
 	pow_function(EX_VAR(opline->result.var), op1, op2);
 	FREE_OP1();
 	FREE_OP2();
@@ -810,6 +834,9 @@ ZEND_VM_HELPER(zend_bw_or_helper, ANY, ANY, zval *op_1, zval *op_2)
 	}
 	if (UNEXPECTED(Z_TYPE_INFO_P(op_2) == IS_UNDEF)) {
 		op_2 = ZVAL_UNDEFINED_OP2();
+		if (UNEXPECTED(Z_TYPE_INFO_P(op_1) == IS_UNDEF)) {
+			op_1 = &EG(uninitialized_zval);
+		}
 	}
 	bitwise_or_function(EX_VAR(opline->result.var), op_1, op_2);
 	if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
@@ -849,6 +876,9 @@ ZEND_VM_HELPER(zend_bw_and_helper, ANY, ANY, zval *op_1, zval *op_2)
 	}
 	if (UNEXPECTED(Z_TYPE_INFO_P(op_2) == IS_UNDEF)) {
 		op_2 = ZVAL_UNDEFINED_OP2();
+		if (UNEXPECTED(Z_TYPE_INFO_P(op_1) == IS_UNDEF)) {
+			op_1 = &EG(uninitialized_zval);
+		}
 	}
 	bitwise_and_function(EX_VAR(opline->result.var), op_1, op_2);
 	if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
@@ -888,6 +918,9 @@ ZEND_VM_HELPER(zend_bw_xor_helper, ANY, ANY, zval *op_1, zval *op_2)
 	}
 	if (UNEXPECTED(Z_TYPE_INFO_P(op_2) == IS_UNDEF)) {
 		op_2 = ZVAL_UNDEFINED_OP2();
+		if (UNEXPECTED(Z_TYPE_INFO_P(op_1) == IS_UNDEF)) {
+			op_1 = &EG(uninitialized_zval);
+		}
 	}
 	bitwise_xor_function(EX_VAR(opline->result.var), op_1, op_2);
 	if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
