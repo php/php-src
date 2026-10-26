@@ -31,7 +31,7 @@
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 #ifdef HAVE_EXIF
 	php_stream *stream;
-	zval stream_zv;
+	zval stream_zv, args[4];
 
 	if (Size > 256 * 1024) {
 		/* Large inputs have a large impact on fuzzer performance,
@@ -47,7 +47,23 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	php_stream_write(stream, (const char *) Data, Size);
 	php_stream_to_zval(stream, &stream_zv);
 
-	fuzzer_call_php_func_zval("exif_read_data", 1, &stream_zv);
+	/* exif_read_data($stream, null, false, true): the thumbnail is only read if requested. */
+	ZVAL_COPY_VALUE(&args[0], &stream_zv);
+	ZVAL_NULL(&args[1]);
+	ZVAL_FALSE(&args[2]);
+	ZVAL_TRUE(&args[3]);
+	fuzzer_call_php_func_zval("exif_read_data", 4, args);
+
+	/* exif_thumbnail($stream, $width, $height, $type): the thumbnail is only scanned for its
+	 * dimensions if they are requested. */
+	for (int i = 1; i < 4; i++) {
+		ZVAL_NEW_EMPTY_REF(&args[i]);
+		ZVAL_NULL(Z_REFVAL(args[i]));
+	}
+	fuzzer_call_php_func_zval("exif_thumbnail", 4, args);
+	for (int i = 1; i < 4; i++) {
+		zval_ptr_dtor(&args[i]);
+	}
 
 	zval_ptr_dtor(&stream_zv);
 
