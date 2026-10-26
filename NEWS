@@ -155,6 +155,8 @@ PHP                                                                        NEWS
     map_ptr offset). (prateekbhujel)
   . Fixed tracing JIT losing register-allocated CVs when an interrupt is
     handled at the end of a loop trace. (Levi Morrison)
+  . Fixed bug GH-24675 (function with >~1.7 MB of machine code corrupts JIT
+    buffer accounting). (ndossche)
 
 - PDO:
   . Fixed invalid ATTR_ORACLE_NULLS values being accepted and truncated.
