@@ -1962,6 +1962,9 @@ ZEND_API void ZEND_FASTCALL zend_hash_destroy(HashTable *ht)
 {
 	IS_CONSISTENT(ht);
 	HT_ASSERT(ht, GC_REFCOUNT(ht) <= 1);
+	ZEND_ASSERT(((GC_TYPE(ht) == IS_ARRAY && !(GC_TYPE_INFO(ht) & GC_INFO_MASK))
+			|| GC_TYPE(ht) == IS_NULL /* destroyed by GC */)
+			&& "HashTables exposed to userland should be destroyed with zend_array_destroy()");
 
 	if (ht->nNumUsed) {
 		if (HT_IS_PACKED(ht)) {

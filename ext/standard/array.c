@@ -3740,8 +3740,11 @@ PHP_FUNCTION(array_unshift)
 
 	/* replace HashTable data */
 	Z_ARRVAL_P(stack)->pDestructor = NULL;
+	uint32_t type_info = GC_TYPE_INFO(Z_ARRVAL_P(stack));
+	GC_TYPE_INFO(Z_ARRVAL_P(stack)) = GC_ARRAY;
 	zend_hash_destroy(Z_ARRVAL_P(stack));
 
+	GC_TYPE_INFO(Z_ARRVAL_P(stack)) = type_info;
 	HT_FLAGS(Z_ARRVAL_P(stack))          = HT_FLAGS(&new_hash);
 	Z_ARRVAL_P(stack)->nTableSize        = new_hash.nTableSize;
 	Z_ARRVAL_P(stack)->nTableMask        = new_hash.nTableMask;
