@@ -33,6 +33,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-24745 (File cache loses attributes on constants on 32-bit
     builds). (Yannick Decat, Lazizbek Ergashev)
 
+- OpenSSL:
+  . Fixed build with OpenSSL 4.1. (Weilin Du)
+
 - PDO_PGSQL:
   . Fixed bug GH-24461 (DISCARD ALL on persistent connection cleanup drops
     PgBouncer's prepared statements). (David Carlier, Artem Ukrainskiy)
