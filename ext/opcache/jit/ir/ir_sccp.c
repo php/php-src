@@ -3761,6 +3761,9 @@ static ir_ref ir_iter_optimize_condition(ir_ctx *ctx, ir_ref control, ir_ref con
 			default:
 				IR_ASSERT(0);
 		}
+		if (IR_IS_TYPE_SIGNED(condition_insn->type)) {
+			val.u64 = ir_fix_signed(condition_insn->type, val.u64);
+		}
 
 		ir_ref c = ir_const(ctx, val, condition_insn->type);
 		condition_insn = &ctx->ir_base[condition];
@@ -3785,7 +3788,11 @@ static ir_ref ir_iter_optimize_condition(ir_ctx *ctx, ir_ref control, ir_ref con
 			CLEAR_USES(condition_insn->op1);
 			condition_insn->type = ctx->ir_base[op1_insn->op1].type;
 			condition_insn->op1 = op1_insn->op1;
-			ir_ref c = ir_const(ctx, val_insn->val, condition_insn->type);
+			ir_val val = val_insn->val;
+			if (IR_IS_TYPE_SIGNED(condition_insn->type)) {
+				val.u64 = ir_fix_signed(condition_insn->type, val.u64);
+			}
+			ir_ref c = ir_const(ctx, val, condition_insn->type);
 			condition_insn = &ctx->ir_base[condition];
 			condition_insn->op2 = c;
 			ir_bitqueue_add(ctx->iter_worklist, condition);
