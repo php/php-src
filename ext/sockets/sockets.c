@@ -1965,12 +1965,12 @@ PHP_FUNCTION(socket_set_option)
 				zend_argument_value_error(4, "must have key \"%s\"", l_onoff_key);
 				RETURN_THROWS();
 			}
+			zend_long val_lonoff = zval_get_long(l_onoff);
+
 			if ((l_linger = zend_hash_str_find_ind(opt_ht, l_linger_key, sizeof(l_linger_key) - 1)) == NULL) {
 				zend_argument_value_error(4, "must have key \"%s\"", l_linger_key);
 				RETURN_THROWS();
 			}
-
-			zend_long val_lonoff = zval_get_long(l_onoff);
 			zend_long val_linger = zval_get_long(l_linger);
 
 			if (val_lonoff < 0 || val_lonoff > USHRT_MAX) {
@@ -2013,12 +2013,12 @@ PHP_FUNCTION(socket_set_option)
 				zend_argument_value_error(4, "must have key \"%s\"", sec_key);
 				RETURN_THROWS();
 			}
+			zend_long valsec = zval_get_long(sec);
+
 			if ((usec = zend_hash_str_find_ind(opt_ht, usec_key, sizeof(usec_key) - 1)) == NULL) {
 				zend_argument_value_error(4, "must have key \"%s\"", usec_key);
 				RETURN_THROWS();
 			}
-
-			zend_long valsec = zval_get_long(sec);
 			zend_long valusec = zval_get_long(usec);
 #ifndef PHP_WIN32
 			tv.tv_sec = valsec;
