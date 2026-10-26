@@ -3332,7 +3332,7 @@ static bool php_date_modify(zval *object, char *modify, size_t modify_len) /* {{
 
 	timelib_time_dtor(tmp_time);
 
-	timelib_update_ts(dateobj->time, NULL);
+	timelib_update_ts_first(dateobj->time, NULL);
 	timelib_update_from_sse(dateobj->time);
 	dateobj->time->have_relative = 0;
 	memset(&dateobj->time->relative, 0, sizeof(dateobj->time->relative));
@@ -3691,7 +3691,7 @@ static void php_date_time_set(zval *object, zend_long h, zend_long i, zend_long 
 	dateobj->time->i = i;
 	dateobj->time->s = s;
 	dateobj->time->us = ms;
-	timelib_update_ts(dateobj->time, NULL);
+	timelib_update_ts_first(dateobj->time, NULL);
 	timelib_update_from_sse(dateobj->time);
 } /* }}} */
 
