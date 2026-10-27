@@ -72,6 +72,7 @@ PHP                                                                        NEWS
   . Call orig_post_shutdown_cb(). (ndossche)
   . Fixed JIT segfault on switch over a string reference holding a
     non-string value. (jorgsowa)
+  . Fixed AArch64 JIT encoding of invalid logical immediates. (jorgsowa)
 
 - OpenSSL:
   . Fixed build with OpenSSL 4.1. (Weilin Du)
