@@ -915,6 +915,12 @@ PHP 8.6 UPGRADE NOTES
   . enum: Snmp\Output
   . enum: Snmp\StringOutput
 
+- Sodium:
+  . SodiumCryptoXofShake128State
+  . SodiumCryptoXofShake256State
+  . SodiumCryptoXofTurboshake128State
+  . SodiumCryptoXofTurboshake256State
+
 - Standard:
   . enum SortDirection
     RFC: https://wiki.php.net/rfc/sort_direction_enum
