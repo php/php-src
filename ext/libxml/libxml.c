@@ -1041,7 +1041,10 @@ static PHP_RINIT_FUNCTION(libxml)
 static PHP_RSHUTDOWN_FUNCTION(libxml)
 {
 	if (ZEND_FCC_INITIALIZED(LIBXML(entity_loader_callback))) {
-		zend_fcc_dtor(&LIBXML(entity_loader_callback));
+		/* Detach before destruction, as destroying the callback may bail out. */
+		zend_fcall_info_cache old_fcc = LIBXML(entity_loader_callback);
+		LIBXML(entity_loader_callback) = empty_fcall_info_cache;
+		zend_fcc_dtor(&old_fcc);
 	}
 
 	return SUCCESS;
@@ -1261,12 +1264,17 @@ PHP_FUNCTION(libxml_set_external_entity_loader)
 		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE_OR_NULL(fci, fcc)
 	ZEND_PARSE_PARAMETERS_END();
 
-	/* Unset old callback if it's defined */
-	if (ZEND_FCC_INITIALIZED(LIBXML(entity_loader_callback))) {
-		zend_fcc_dtor(&LIBXML(entity_loader_callback));
-	}
+	/* Detach the old callback before destruction, which may re-enter this function. */
+	zend_fcall_info_cache old_fcc = LIBXML(entity_loader_callback);
+	LIBXML(entity_loader_callback) = empty_fcall_info_cache;
+
 	if (ZEND_FCI_INITIALIZED(fci)) { /* argument not null */
 		zend_fcc_dup(&LIBXML(entity_loader_callback), &fcc);
+	}
+
+	/* Destroy only after installing the replacement so re-entrant changes are preserved. */
+	if (ZEND_FCC_INITIALIZED(old_fcc)) {
+		zend_fcc_dtor(&old_fcc);
 	}
 	RETURN_TRUE;
 }
