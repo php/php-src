@@ -40,6 +40,13 @@ set_error_handler(function () use ($linger) {
     return true;
 });
 var_dump(socket_set_option($socket, SOL_SOCKET, SO_LINGER, $linger));
+restore_error_handler();
+
+try {
+    socket_set_option($socket, SOL_SOCKET, SO_LINGER, new ArrayObject(['l_onoff' => 1, 'l_linger' => 70000]));
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 --EXPECT--
 bool(true)
@@ -54,3 +61,4 @@ array(2) {
   int(0)
 }
 bool(true)
+socket_set_option(): Argument #4 ($value) "l_linger" must be between 0 and 65535

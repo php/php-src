@@ -155,10 +155,6 @@ PHP                                                                        NEWS
   . Fixed bug GH-24488 (GC double-frees the SimpleXMLElement properties
     table). (evankford)
 
-- Sockets:
-  . Fixed bug GH-24748 (socket_set_option() crashes when the value is an
-    object with declared properties). (lazerg)
-
 - SPL:
   . Fixed bug GH-24264 (Unwind/GracefulExit discarded in spl_iterators.c).
     (Lazizbek Ergashev)

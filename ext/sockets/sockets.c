@@ -1983,7 +1983,7 @@ PHP_FUNCTION(socket_set_option)
 			}
 
 			if (val_linger < 0 || val_linger > USHRT_MAX) {
-				zend_argument_value_error(4, "\"%s\" must be between 0 and %d", l_linger, USHRT_MAX);
+				zend_argument_value_error(4, "\"%s\" must be between 0 and %d", l_linger_key, USHRT_MAX);
 				RETURN_THROWS();
 			}
 
