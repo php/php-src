@@ -40,7 +40,7 @@ PHP                                                                        NEWS
 - Curl:
   . Fix use-after-free of CURLOPT_STDERR stream on cloned curl handle.
     (lacatoire)
-    
+
 - Date:
   . Fixed bug GH-20503 (Assertion failure with ext/date DateInterval property
     hash construction). (heathdutton)
@@ -135,6 +135,8 @@ PHP                                                                        NEWS
     order, resulting in wrong functions possibly called
     in different configurations). (ndossche)
   . Fixed bug GH-24438 (Preserve indirect types in JIT side traces). (aasul)
+  . Fixed bug GH-24577 (CE-cache flag on interned class name visible before
+    map_ptr offset). (prateekbhujel)
 
 - PDO:
   . Fixed invalid ATTR_ORACLE_NULLS values being accepted and truncated.
