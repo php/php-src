@@ -1,8 +1,93 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.6.0RC4
+?? ??? ????, PHP 8.6.0RC5
 
 - Core:
+  . Fix function and constant imports in compile_to_ast and add support
+    for grouping. (Klaas Skelte van der Werf)
+  . Fixed unmapping of an unrelated range when the aligned chunk mmap fails
+    (Marti2203).
+
+- CLI:
+  . Fixed bug GH-24697 (PHP_HTTP_PARSER_STRICT build option doesn't work).
+    (ndossche, devnexen)
+
+- Curl:
+  . Fix use-after-free of CURLOPT_STDERR stream on cloned curl handle.
+    (lacatoire)
+
+- DBA:
+  . Fixed bug GH-24641 (ndbm backend never checks dbm_open() return value,
+    NULL deref on first use after a failed open). (Girgias)
+
+- DOM:
+  . Fix error paths in dom_xml_serializing_a_document_node(). (ndossche)
+
+- Hash:
+  . Fix GOST and Snefru digests of 512 MiB or more. (Martin Mirchev)
+
+- Opcache:
+  . Fixed tracing JIT returning a wrapped integer instead of a float on
+    integer overflow after an integer was compared with a float or
+    numeric-string literal. (Ilia Alshanetsky)
+  . Fixed use-after-free in JIT ASSIGN_DIM_OP when concatenating into an
+    empty array element. (jorgsowa)
+  . Fixed bug GH-24396 (Assertion failure in zend_jit_def_reg() "reg forwarding"
+    with chained Pi nodes). (ndossche)
+  . Fixed JIT treating an array as packed after a string key write turned it
+    into a hash. (jorgsowa)
+  . Fixed bug GH-24436 (Tracing JIT: keep the SEND_VAL type guard after
+    assigning to a reference). (waroad)
+  . Fixed bug GH-24745 (File cache loses attributes on constants on 32-bit
+    builds). (Yannick Decat, Lazizbek Ergashev)
+  . Fixed bug GH-17733 (System entropy does not take into account function
+    order, resulting in wrong functions possibly called
+    in different configurations). (ndossche)
+  . Fixed bug GH-24438 (Preserve indirect types in JIT side traces). (aasul)
+
+- OpenSSL:
+  . Fixed build with OpenSSL 4.1. (Weilin Du)
+
+- PDO_PGSQL:
+  . Fixed bug GH-24461 (DISCARD ALL on persistent connection cleanup drops
+    PgBouncer's prepared statements). (David Carlier, Artem Ukrainskiy)
+
+- SAPI:
+  . Fixed infinite loop in sapi_header_op() for headers of 4 GiB or more.
+    (Martin Mirchev)
+
+- SPL:
+  . Fixed bug GH-24264 (Unwind/GracefulExit discarded in spl_iterators.c).
+    (Lazizbek Ergashev)
+
+- Standard:
+  . Fixed bug GH-24308 (Request shutdown calls closelog() even when syslog
+    was not opened by PHP). (lazerg)
+
+- Streams:
+  . Fixed bug GH-24506 (stream_select() leaks a stream-error operation level
+    on its FD_SETSIZE failure path). (azjezz)
+  . Fixed bug GH-24508 (HTTP wrapper leaks the dechunk filter when header
+    parsing fails after Transfer-Encoding). (bercedev)
+  . Fixed bug GH-24509 (HTTP wrapper leaks Location buffer on empty
+    Location header). (bercedev)
+
+- Zip:
+  . Reject broken libzip versions 1.3.1, 1.7.0 and 1.12.0 during Windows
+    configuration. (Weilin Du)
+  . Excluded libzip 1.12.0 due to a regression preventing additions and
+    replacements in torrentzip archives. (Weilin Du)
+
+- Zlib:
+  . Fixed bug GH-24533 (zlib.lib could not be found because zlib 1.3.2
+    CMake build does not emit it). (Lazizbek Ergashev)
+
+21 Oct 2026, PHP 8.6.0RC4
+
+- Core:
+  . Fixed GHSA-w8hw-w9fx-j79w, GHSA-6wmf-4rv5-p3rp (Avoid state corruption via
+    bailout). (CVE-2026-109618, CVE-2026-109619) (Arnaud, ilutov, Jakub Zelenka,
+    ndossche, Nicolas Grekas)
   . Fixed bug GH-24184 (System ID not being reinitialized after an Apache
     graceful restart, potentially causing incompatible OPcache file cache
     entries to be reused). (Levi Morrison)
@@ -20,6 +105,12 @@ PHP                                                                        NEWS
   . Fixed array_map() optimization not resolving the class name of a static
     first-class callable. (Claudio Dekker)
 
+- Date:
+  . Fixed bug GH-20503 (Assertion failure with ext/date DateInterval property
+    hash construction). (heathdutton)
+  . Fixed bug GH-24350 (MINIT reads a stale external tz database after an
+    in-process module restart). (Lazizbek Ergashev)
+
 - Fileinfo:
   . Fixed bug GH-24289 (finfo::file() reports the wrong argument number for
     an invalid $filename). (Lazizbek Ergashev)
@@ -28,8 +119,13 @@ PHP                                                                        NEWS
   . Fixed bug GH-24229 (fcgi_close() passes shutdown() a literal 1, which is
     SHUT_RD in WASI). (Ryosuke Ishibashi)
 
+- FTP:
+  . Fix double free in ext/ftp data_accept() on accept failure. (alepacheco)
+
 - MBString:
   . Fixed bug GH-23958 (truncated encoding names resolving to full names). (Kamil Tekiela)
+  . Fixed out-of-bounds read in php_mb_rfc1867_getword() on a multibyte lead
+    byte at the end of a multipart field name. (Jorg Sowa)
 
 - MySQLnd:
   . Fixed bug GH-24293 (Segfault on connect with an empty password to a
@@ -45,8 +141,29 @@ PHP                                                                        NEWS
   . Fix exception checks due to NAN warnings and object empty()'s. (ndossche)
   . Fixed bug GH-24270 (JIT loses the called scope of self:: and parent:: calls
     in closures). (RV7PR)
+  . Fixed bug GH-24337 (JIT: segfault when decrementing a non-numeric string
+    property). (Lazizbek Ergashev)
+  . Fixed bug GH-24185 (Windows ZTS: random access violations with OPcache JIT
+    in multi-process setups). (Arnaud, ndossche)
+  . Fix SIGFPE on LONG_MIN % -1 with a constant divisor. (waroad)
+  . Fixed bug GH-24388 (Tracing JIT: segfault when a trace runs out of side
+    exits). (Lazizbek Ergashev)
+  . Fixed bug GH-24391 (JIT switch on constant null takes default instead of
+    case 0). (ndossche)
+  . Fixed bug GH-24206 (Tracing JIT loses loop-carried CV when its loop PHI
+    is reloaded from memory). (ndossche)
+  . Fixed bug GH-24386 (JIT: register operand must be loaded before the typed
+    reference check). (ndossche)
+  . Fixed bug GH-24437 (JIT: Fix OP_DATA read from an unwritten slot in
+    zend_jit_assign_dim_op()). (waroad)
+  . Fixed bug GH-24398 (JIT: minimal JIT segfault when a hooked property is
+    passed to a run-time-resolved function). (waroad)
+  . Fixed bug GH-24389 (Tracing JIT: type guard on entry of an inlined call
+    exits with an uninitialized opline). (waroad)
 
 - PDO:
+  . Fixed invalid ATTR_ORACLE_NULLS values being accepted and truncated.
+    (Ilia Alshanetsky)
   . Fixed a duplicate warning when ATTR_STATEMENT_CLASS is rejected on a
     persistent connection. (Ilia Alshanetsky)
   . Fixed constructor option errors naming argument #3 ($password) instead
@@ -59,6 +176,10 @@ PHP                                                                        NEWS
   . Fixed GH-24166 (Double-free in Phar::webPhar() in CGI without PATH_INFO).
     (RigelYoung, Jakub Zelenka)
 
+- POSIX:
+  . Fixed posix_setrlimit() rejecting POSIX_RLIMIT_INFINITY on Solaris.
+    (Jorg Sowa)
+
 - Readline:
   . Fixed a crash in readline_info() when completion_append_character
     contains a non-ASCII byte. (Weilin Du)
@@ -66,12 +187,32 @@ PHP                                                                        NEWS
 - Session:
   . Fixed session_write_close() keeping the save handler open when the
     session data cannot be encoded. (Ilia Alshanetsky)
+  . Fixed session data loss in the files save handler when writing the session
+    file fails after it was already truncated. (Ilia Alshanetsky)
+
+- SOAP:
+  . Fixed bug GH-23686 (SoapClient only strips `Authorization: Basic` when a
+    WSDL imports from another host). (DanielEScherzer)
 
 - Standard:
   . Fixed chown() and lchown() failing to resolve user names in ZTS builds
     when getpwnam_r() needs a larger buffer. (Ilia Alshanetsky)
   . Fixed password_get_info() and password_needs_rehash() accepting malformed
     bcrypt costs. (Ilia Alshanetsky)
+  . Fixed proc_open() null descriptor not being inheritable on Windows.
+    (Jorg Sowa)
+  . Don't share the unserialize() context with enum autoloaders.
+    (Nicolas Grekas)
+  . Fixed bug GH-24399 (usleep() and time_nanosleep() ignore queued APCs on
+    Windows). (Nicolas Grekas)
+  . Fixed glob() not negating bracket expressions that start with "^".
+    (Nicolas Grekas)
+  . Fixed bug GH-24605 (var_export() crashes on deeply nested arrays and
+    objects). (Labish Bardiya)
+
+- Tidy:
+  . Fixed tidy_repair_string(), tidy_repair_file(), tidy::repairString() and
+    tidy::repairFile() rejecting null for $encoding. (lacatoire)
 
 - Zip:
   . Fixed use-after-free when re-entering ZipArchive during destruction or
@@ -134,6 +275,8 @@ PHP                                                                        NEWS
     CLOCK_MONOTONIC_RAW. (nicolas-grekas)
   . Fixed array_map optimization with non-literal function or non-literal args.
     (Arnaud)
+  . Fixed memory leak in array_map() foreach optimization when a constant
+    non-array string argument is passed. (Alexander Danilov)
   . Fixed use-after-free when a dl()-loaded extension declares a frameless
     function and a later request calls it. (Ilia Alshanetsky)
   . Fixed System V shared memory emulation for Windows attaching segments past

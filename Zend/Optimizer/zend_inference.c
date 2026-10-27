@@ -2221,6 +2221,9 @@ static uint32_t assign_dim_array_result_type(
 			if (dim_type & (MAY_BE_UNDEF|MAY_BE_NULL)) {
 				tmp |= MAY_BE_ARRAY_KEY_STRING;
 			}
+			if ((tmp & MAY_BE_ARRAY_KEY_STRING) && MAY_BE_PACKED(arr_type)) {
+				tmp |= MAY_BE_ARRAY_NUMERIC_HASH;
+			}
 		}
 	}
 	/* Only add value type if we have a key type. It might be that the key type is illegal
@@ -3615,6 +3618,9 @@ static zend_always_inline zend_result _zend_update_type_info(
 						}
 						if (t2 & (MAY_BE_UNDEF | MAY_BE_NULL)) {
 							key_type |= MAY_BE_ARRAY_KEY_STRING;
+						}
+						if ((key_type & MAY_BE_ARRAY_KEY_STRING) && MAY_BE_PACKED(t1)) {
+							key_type |= MAY_BE_ARRAY_NUMERIC_HASH;
 						}
 					}
 				} else if (opline->opcode == ZEND_FETCH_DIM_UNSET) {

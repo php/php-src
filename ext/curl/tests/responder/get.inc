@@ -52,6 +52,13 @@
       $target = $_GET['target'] ?? 'input';
       $code = $_GET['code'] ?? 307;
       header('Location: /get.inc?test=' . $target, true, $code);
+    case 'bigbody':
+      $mib = isset($_GET['mib']) ? (int) $_GET['mib'] : 12;
+      header('Content-Type: application/octet-stream');
+      $chunk = str_repeat('x', 1024 * 1024);
+      for ($i = 0; $i < $mib; $i++) {
+        echo $chunk;
+      }
       break;
     default:
       echo "Hello World!\n";

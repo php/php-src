@@ -2708,6 +2708,11 @@ static zval *to_zval_array(zval *ret, encodeTypePtr type, xmlNodePtr data)
 					ar = zend_hash_index_update(Z_ARRVAL_P(ar), pos[i], &tmpAr);
 				}
 				i++;
+				if (ZEND_HAS_OOM()) {
+					zval_ptr_dtor(ret);
+					ZVAL_NULL(ret);
+					goto ret;
+				}
 			}
 			zend_hash_index_update(Z_ARRVAL_P(ar), pos[i], &tmpVal);
 
@@ -2733,6 +2738,8 @@ static zval *to_zval_array(zval *ret, encodeTypePtr type, xmlNodePtr data)
 		}
 		trav = trav->next;
 	}
+
+ret:;
 	efree(dims);
 	efree(pos);
 	return ret;

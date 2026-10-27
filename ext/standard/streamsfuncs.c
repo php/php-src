@@ -835,6 +835,7 @@ PHP_FUNCTION(stream_select)
 	}
 
 	if (!PHP_SAFE_MAX_FD(max_fd, max_set_count)) {
+		php_stream_error_operation_end(context);
 		RETURN_FALSE;
 	}
 

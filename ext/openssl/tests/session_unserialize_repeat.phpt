@@ -13,6 +13,7 @@ $certFile = __DIR__ . DIRECTORY_SEPARATOR . 'session_unserialize_repeat.pem.tmp'
 $serverCode = <<<'CODE'
     $serverCtx = stream_context_create(['ssl' => [
         'local_cert' => '%s',
+        'session_id_context' => 'unserialize-repeat-test',
     ]]);
 
     $server = stream_socket_server('tls://127.0.0.1:0', $errno, $errstr,

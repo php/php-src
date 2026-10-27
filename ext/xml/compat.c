@@ -109,6 +109,15 @@ start_element_handler_ns(void *user, const xmlChar *name, const xmlChar *prefix,
 			attrs[z + 1] = BAD_CAST estrndup((const char *) attributes[y + 3], attributes[y + 4] - attributes[y + 3]);
 			z += 2;
 			y += 5;
+
+			if (ZEND_HAS_OOM()) {
+				for (i = 0; i < z; i++) {
+					efree(attrs[i]);
+				}
+				efree(attrs);
+				efree(qualified_name);
+				return;
+			}
 		}
 
 		attrs[z] = NULL;

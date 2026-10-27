@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\UrlBuilder::build() - success - resolves an empty fragment against an opaque base
+Test Uri\WhatWg\UrlBuilder::build() - success - clears the fragment of an opaque base with an empty string
 --FILE--
 <?php
 
@@ -15,7 +15,7 @@ var_dump($base->toAsciiString());
 
 ?>
 --EXPECT--
-string(15) "foo:opaque?old#"
+string(14) "foo:opaque?old"
 enum(Uri\WhatWg\UrlValidationErrorType::InvalidUrlUnit)
 bool(true)
 string(18) "foo:opaque?old#old"

@@ -190,9 +190,11 @@ static void pgsql_stmt_finish(pdo_pgsql_stmt *S, int fin_mode)
 		res = PQclosePrepared(H->server, S->stmt_name);
 #endif
 		if (res) {
+			if (H->prepared_stmts && PQresultStatus(res) == PGRES_COMMAND_OK) {
+				zend_hash_str_del(H->prepared_stmts, S->stmt_name, strlen(S->stmt_name));
+			}
 			PQclear(res);
 		}
-
 		S->is_prepared = false;
 	}
 }
@@ -339,6 +341,9 @@ stmt_retry:
 				case PGRES_TUPLES_OK:
 					/* it worked */
 					S->is_prepared = true;
+					if (H->prepared_stmts) {
+						zend_hash_str_add_empty_element(H->prepared_stmts, S->stmt_name, strlen(S->stmt_name));
+					}
 					PQclear(S->result);
 					S->result = NULL;
 					break;

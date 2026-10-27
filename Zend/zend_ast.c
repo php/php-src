@@ -2531,9 +2531,9 @@ simple_list:
 			break;
 		case ZEND_AST_USE:
 			smart_str_appends(str, "use ");
-			if (ast->attr == T_FUNCTION) {
+			if (ast->attr == ZEND_SYMBOL_FUNCTION) {
 				smart_str_appends(str, "function ");
-			} else if (ast->attr == T_CONST) {
+			} else if (ast->attr == ZEND_SYMBOL_CONST) {
 				smart_str_appends(str, "const ");
 			}
 			goto simple_list;
@@ -2973,6 +2973,19 @@ simple_list:
 			}
 			break;
 		case ZEND_AST_USE_ELEM:
+			if (ast->attr == ZEND_SYMBOL_FUNCTION) {
+				smart_str_appends(str, "function ");
+			} else if (ast->attr == ZEND_SYMBOL_CONST) {
+				smart_str_appends(str, "const ");
+			}
+
+			zend_ast_export_name(str, ast->child[0], 0, indent);
+
+			if (ast->child[1]) {
+				smart_str_appends(str, " as ");
+				zend_ast_export_name(str, ast->child[1], 0, indent);
+			}
+			break;
 		case ZEND_AST_TRAIT_ALIAS:
 			zend_ast_export_name(str, ast->child[0], 0, indent);
 			if (ast->attr & ZEND_ACC_PUBLIC) {
@@ -2994,6 +3007,18 @@ simple_list:
 			smart_str_appends(str, ": ");
 			ast = ast->child[1];
 			goto tail_call;
+		case ZEND_AST_GROUP_USE:
+			smart_str_appends(str, "use ");
+			if (ast->attr == ZEND_SYMBOL_FUNCTION) {
+				smart_str_appends(str, "function ");
+			} else if (ast->attr == ZEND_SYMBOL_CONST) {
+				smart_str_appends(str, "const ");
+			}
+			smart_str_append(str, zend_ast_get_str(ast->child[0]));
+			smart_str_appends(str, "\\{");
+			zend_ast_export_list(str, zend_ast_get_list(ast->child[1]), true, 20, indent);
+			smart_str_appends(str, "}");
+			break;
 
 		/* 3 child nodes */
 		case ZEND_AST_METHOD_CALL:

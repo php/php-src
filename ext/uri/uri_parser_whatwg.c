@@ -41,17 +41,22 @@ ZEND_ATTRIBUTE_NONNULL static zend_always_inline void zval_string_or_null_to_lex
 	}
 }
 
-ZEND_ATTRIBUTE_NONNULL static zend_always_inline void zval_long_or_null_to_lexbor_str(const zval *value, lexbor_str_t *lexbor_str)
+static zend_always_inline bool zval_long_or_null_to_lexbor_str(const zval *value, lexbor_str_t *lexbor_str)
 {
 	if (Z_TYPE_P(value) == IS_LONG) {
 		char buf[MAX_LENGTH_OF_LONG + 1];
 		const char *res = zend_print_long_to_buf(buf + sizeof(buf) - 1, Z_LVAL_P(value));
-		lexbor_str_init_append(lexbor_str, lexbor_parser.mraw, (const lxb_char_t *) res, strlen(res));
+		const lxb_char_t *appended = lexbor_str_init_append(lexbor_str, lexbor_parser.mraw, (const lxb_char_t *) res, strlen(res));
+		if (UNEXPECTED(appended == NULL)) {
+			return false;
+		}
 	} else {
 		ZEND_ASSERT(Z_ISNULL_P(value));
 		lexbor_str->data = (lxb_char_t *) "";
 		lexbor_str->length = 0;
 	}
+
+	return true;
 }
 
 ZEND_ATTRIBUTE_NONNULL static bool get_reason_from_error_type(const lxb_url_error_type_t error_type, const char **error_str)
@@ -182,6 +187,10 @@ ZEND_ATTRIBUTE_NONNULL static const char *fill_errors_inner(HashTable *errors)
 		if (append_validation_error(errors, lxb_error->id, (const char *) lxb_error->data, &reason) && result == NULL) {
 			result = reason;
 		}
+
+		if (ZEND_HAS_OOM()) {
+			break;
+		}
 	}
 	lexbor_plog_clean(log);
 
@@ -208,6 +217,11 @@ ZEND_ATTRIBUTE_NONNULL static const char *fill_errors(zval *errors)
 
 static void throw_invalid_url_exception_with_reason(zval *errors, const char *component, const char *reason, zval *err)
 {
+	if (ZEND_HAS_OOM()) {
+		zend_handle_delayed_oom();
+		return;
+	}
+
 	zend_object *exception = zend_throw_exception_ex(
 		php_uri_ce_whatwg_invalid_url_exception,
 		0,
@@ -355,6 +369,10 @@ static zend_result php_uri_parser_whatwg_host_read(void *uri, const php_uri_comp
 		smart_str host_str = {0};
 
 		lxb_url_serialize_host_ipv4(lexbor_uri->host.u.ipv4, serialize_to_smart_str_callback, &host_str);
+		if (ZEND_HAS_OOM()) {
+			smart_str_free(&host_str);
+			return FAILURE;
+		}
 
 		ZVAL_NEW_STR(retval, smart_str_extract(&host_str));
 	} else if (lexbor_uri->host.type == LXB_URL_HOST_TYPE_IPV6) {
@@ -363,6 +381,10 @@ static zend_result php_uri_parser_whatwg_host_read(void *uri, const php_uri_comp
 		smart_str_appendc(&host_str, '[');
 		lxb_url_serialize_host_ipv6(lexbor_uri->host.u.ipv6, serialize_to_smart_str_callback, &host_str);
 		smart_str_appendc(&host_str, ']');
+		if (ZEND_HAS_OOM()) {
+			smart_str_free(&host_str);
+			return FAILURE;
+		}
 
 		ZVAL_NEW_STR(retval, smart_str_extract(&host_str));
 	} else if (lexbor_uri->host.type == LXB_URL_HOST_TYPE_EMPTY) {
@@ -373,6 +395,10 @@ static zend_result php_uri_parser_whatwg_host_read(void *uri, const php_uri_comp
 				smart_str host_str = {0};
 				lxb_url_serialize_host_unicode(&lexbor_idna, &lexbor_uri->host, serialize_to_smart_str_callback, &host_str);
 				lxb_unicode_idna_clean(&lexbor_idna);
+				if (ZEND_HAS_OOM()) {
+					smart_str_free(&host_str);
+					return FAILURE;
+				}
 
 				ZVAL_STR(retval, smart_str_extract(&host_str));
 				break;
@@ -452,7 +478,11 @@ static zend_result php_uri_parser_whatwg_port_write(void *uri, const zval *value
 	lxb_url_t *lexbor_uri = uri;
 	lexbor_str_t str = {0};
 
-	zval_long_or_null_to_lexbor_str(value, &str);
+	if (UNEXPECTED(!zval_long_or_null_to_lexbor_str(value, &str))) {
+		ZEND_ASSERT(ZEND_HAS_OOM());
+		zend_handle_delayed_oom();
+		return FAILURE;
+	}
 
 	lxb_url_parser_clean(&lexbor_parser);
 
@@ -612,9 +642,21 @@ lxb_url_t *php_uri_parser_whatwg_parse_ex(const char *uri_str, const size_t uri_
 
 	lxb_url_t *url = lxb_url_parse(&lexbor_parser, lexbor_base_url, (unsigned char *) uri_str, uri_str_len);
 
+	if (ZEND_HAS_OOM()) {
+		zend_handle_delayed_oom();
+		return url;
+	}
+
 	if ((url == NULL && !silent) || errors != NULL) {
 		zval err;
 		const char *reason = fill_errors(&err);
+		if (ZEND_HAS_OOM()) {
+			zval_ptr_dtor(&err);
+			zend_handle_delayed_oom();
+
+			return url;
+		}
+
 		if (url == NULL && !silent) {
 			zend_object *exception = zend_throw_exception_ex(php_uri_ce_whatwg_invalid_url_exception, 0, "The specified URI is malformed%s%s%s", reason ? " (" : "", reason ? reason : "", reason ? ")" : "");
 			zend_update_property(exception->ce, exception, ZEND_STRL("errors"), &err);
@@ -660,6 +702,11 @@ static zend_string *php_uri_parser_whatwg_to_string(void *uri, const php_uri_rec
 			lxb_url_serialize(lexbor_uri, serialize_to_smart_str_callback, &uri_str, exclude_fragment);
 			break;
 		default: ZEND_UNREACHABLE();
+	}
+
+	if (ZEND_HAS_OOM()) {
+		smart_str_free(&uri_str);
+		return NULL;
 	}
 
 	return smart_str_extract(&uri_str);
@@ -977,26 +1024,19 @@ ZEND_ATTRIBUTE_NONNULL static lxb_url_scheme_type_t php_uri_parser_whatwg_get_sp
 	return LXB_URL_SCHEMEL_TYPE__UNDEF;
 }
 
-ZEND_ATTRIBUTE_NONNULL static const char *php_uri_parser_whatwg_build_errors(zval *errors)
+ZEND_ATTRIBUTE_NONNULL static const char *php_uri_parser_whatwg_build_errors(HashTable *errors)
 {
-	size_t log_len;
-
-	if (lexbor_parser.log == NULL || (log_len = lexbor_plog_length(lexbor_parser.log)) == 0) {
+	if (lexbor_parser.log == NULL || lexbor_plog_length(lexbor_parser.log) == 0) {
 		return NULL;
 	}
 
-	if (Z_TYPE_P(errors) != IS_ARRAY) {
-		zval_ptr_dtor(errors);
-		array_init_size(errors, log_len);
-	}
-
-	return fill_errors_inner(Z_ARRVAL_P(errors));
+	return fill_errors_inner(errors);
 }
 
-ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_whatwg_build_errors_into_exception(zval *errors)
+ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_whatwg_build_errors_into_exception(HashTable *errors)
 {
 	/* Include errors from earlier components in the exception raised by a later component. */
-	if (zend_hash_num_elements(Z_ARRVAL_P(errors)) > 0 && EG(exception)
+	if (zend_hash_num_elements(errors) > 0 && EG(exception)
 		&& instanceof_function(EG(exception)->ce, php_uri_ce_whatwg_invalid_url_exception)) {
 		zval rv;
 		zval *exception_errors = zend_read_property(php_uri_ce_whatwg_invalid_url_exception,
@@ -1006,15 +1046,16 @@ ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_whatwg_build_errors_into_excep
 		zval *error;
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(exception_errors), error) {
 			Z_TRY_ADDREF_P(error);
-			zend_hash_next_index_insert(Z_ARRVAL_P(errors), error);
+			zend_hash_next_index_insert(errors, error);
 		} ZEND_HASH_FOREACH_END();
 
 		zval_ptr_dtor(exception_errors);
-		ZVAL_COPY(exception_errors, errors);
+		GC_ADDREF(errors);
+		ZVAL_ARR(exception_errors, errors);
 	}
 }
 
-ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_whatwg_build_errors_and_throw(const lxb_status_t status, const char *component, zval *errors)
+ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_whatwg_build_errors_and_throw(const lxb_status_t status, const char *component, HashTable *errors)
 {
 	if (status != LXB_STATUS_OK) {
 		throw_invalid_url_exception_during_write(NULL, component);
@@ -1131,7 +1172,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 		lxb_url_parser_clean(&lexbor_parser);
 		status = lxb_url_parse_basic(&lexbor_parser, lexbor_url, lexbor_base_url,
 			(const lxb_char_t *) ZSTR_VAL(input), ZSTR_LEN(input), state, LXB_ENCODING_UTF_8);
-		php_uri_parser_whatwg_build_errors_and_throw(status, "path", &errors);
+		php_uri_parser_whatwg_build_errors_and_throw(status, "path", Z_ARRVAL(errors));
 		zend_string_release(input);
 		if (status != LXB_STATUS_OK) {
 			goto failure;
@@ -1142,33 +1183,23 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 	}
 
 	if (Z_TYPE_P(query) == IS_STRING) {
-		lxb_url_query_set_null(lexbor_url);
-		lxb_url_parser_clean(&lexbor_parser);
-		status = lxb_url_parse_basic(&lexbor_parser, lexbor_url, lexbor_base_url,
-			(lxb_char_t *) Z_STRVAL_P(query), Z_STRLEN_P(query),
-			LXB_URL_STATE_QUERY_STATE, LXB_ENCODING_AUTO
-		);
-		php_uri_parser_whatwg_build_errors_and_throw(status, "query", &errors);
-		if (status != LXB_STATUS_OK) {
+		zend_result result = php_uri_parser_whatwg_query_write(lexbor_url, query, NULL);
+		php_uri_parser_whatwg_build_errors(Z_ARRVAL(errors));
+		if (result == FAILURE) {
 			goto failure;
 		}
 	}
 
 	if (Z_TYPE_P(fragment) == IS_STRING) {
-		lxb_url_fragment_set_null(lexbor_url);
-		lxb_url_parser_clean(&lexbor_parser);
-		status = lxb_url_parse_basic(&lexbor_parser, lexbor_url, lexbor_base_url,
-			(lxb_char_t *) Z_STRVAL_P(fragment), Z_STRLEN_P(fragment),
-			LXB_URL_STATE_FRAGMENT_STATE, LXB_ENCODING_AUTO
-		);
-		php_uri_parser_whatwg_build_errors_and_throw(status, "fragment", &errors);
-		if (status != LXB_STATUS_OK) {
+		zend_result result = php_uri_parser_whatwg_fragment_write(lexbor_url, fragment, NULL);
+		php_uri_parser_whatwg_build_errors(Z_ARRVAL(errors));
+		if (result == FAILURE) {
 			goto failure;
 		}
 	}
 
-	if (php_uri_pass_errors_by_ref_and_free(soft_errors_zv, &errors) == FAILURE) {
-		/* The errors zval was already consumed; goto failure would destroy it again. */
+	if (php_uri_pass_errors_by_ref_and_free(soft_errors_zv, Z_ARRVAL(errors)) == FAILURE) {
+		/* The errors array was already consumed; goto failure would destroy it again. */
 		lxb_url_destroy(lexbor_url);
 		return NULL;
 	}
@@ -1176,14 +1207,14 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 	return lexbor_url;
 
 failure:
-	php_uri_parser_whatwg_build_errors_into_exception(&errors);
+	php_uri_parser_whatwg_build_errors_into_exception(Z_ARRVAL(errors));
 	zval_ptr_dtor(&errors);
 	lxb_url_destroy(lexbor_url);
 	return NULL;
 }
 
 ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_whatwg_build_path(
-	lxb_url_t *lexbor_url, const zval *path, const zval *query, const zval *fragment, zval *errors
+	lxb_url_t *lexbor_url, const zval *path, const zval *query, const zval *fragment, HashTable *errors
 ) {
 	zend_result result;
 	const char *path_start = Z_STRVAL_P(path);
@@ -1208,9 +1239,9 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_whatwg_build_path(
 
 		/* The opaque path parser needs the following delimiter to encode the
 		 * immediately preceding space, while still reporting all space errors. */
-		if (Z_TYPE_P(query) != IS_NULL) {
+		if (Z_TYPE_P(query) == IS_STRING && Z_STRLEN_P(query) > 0) {
 			smart_str_appendc(&opaque_path, '?');
-		} else if (Z_TYPE_P(fragment) != IS_NULL) {
+		} else if (Z_TYPE_P(fragment) == IS_STRING && Z_STRLEN_P(fragment) > 0) {
 			smart_str_appendc(&opaque_path, '#');
 		}
 
@@ -1265,7 +1296,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_wh
 	array_init(&errors);
 
 	zend_result result = php_uri_parser_whatwg_scheme_write(lexbor_url, scheme, NULL);
-	php_uri_parser_whatwg_build_errors(&errors);
+	php_uri_parser_whatwg_build_errors(Z_ARRVAL(errors));
 	if (result == FAILURE) {
 		goto failure;
 	}
@@ -1274,7 +1305,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_wh
 	 * Otherwise, preserve the absent host so the path can be opaque. */
 	if (Z_TYPE_P(host) == IS_STRING || lxb_url_is_special(lexbor_url)) {
 		result = php_uri_parser_whatwg_host_write(lexbor_url, host, NULL);
-		php_uri_parser_whatwg_build_errors(&errors);
+		php_uri_parser_whatwg_build_errors(Z_ARRVAL(errors));
 		if (result == FAILURE) {
 			goto failure;
 		}
@@ -1301,59 +1332,45 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_wh
 
 	/* Intentionally writing username after host to avoid error when the username is set but the host is missing */
 	result = php_uri_parser_whatwg_username_write(lexbor_url, username, NULL);
-	php_uri_parser_whatwg_build_errors(&errors);
+	php_uri_parser_whatwg_build_errors(Z_ARRVAL(errors));
 	if (result == FAILURE) {
 		goto failure;
 	}
 
 	/* Intentionally writing password after host to avoid error when the password is set but the password is missing */
 	result = php_uri_parser_whatwg_password_write(lexbor_url, password, NULL);
-	php_uri_parser_whatwg_build_errors(&errors);
+	php_uri_parser_whatwg_build_errors(Z_ARRVAL(errors));
 	if (result == FAILURE) {
 		goto failure;
 	}
 
 	/* Intentionally writing port after host to avoid error when the port is set but the host is missing */
 	result = php_uri_parser_whatwg_port_write(lexbor_url, port, NULL);
-	php_uri_parser_whatwg_build_errors(&errors);
+	php_uri_parser_whatwg_build_errors(Z_ARRVAL(errors));
 	if (result == FAILURE) {
 		goto failure;
 	}
 
-	result = php_uri_parser_whatwg_build_path(lexbor_url, path, query, fragment, &errors);
-	php_uri_parser_whatwg_build_errors(&errors);
+	result = php_uri_parser_whatwg_build_path(lexbor_url, path, query, fragment, Z_ARRVAL(errors));
+	php_uri_parser_whatwg_build_errors(Z_ARRVAL(errors));
 	if (result == FAILURE) {
 		goto failure;
 	}
 
-	if (Z_TYPE_P(query) == IS_STRING && Z_STRLEN_P(query) == 0) {
-		/* The URL API setter treats an empty string as removal. The builder
-		 * distinguishes an empty component from an absent one. */
-		lexbor_str_destroy(&lexbor_url->query, lexbor_url->mraw, false);
-		lexbor_str_init(&lexbor_url->query, lexbor_url->mraw, 1);
-	} else {
-		result = php_uri_parser_whatwg_query_write(lexbor_url, query, NULL);
-		php_uri_parser_whatwg_build_errors(&errors);
-		if (result == FAILURE) {
-			goto failure;
-		}
+	result = php_uri_parser_whatwg_query_write(lexbor_url, query, NULL);
+	php_uri_parser_whatwg_build_errors(Z_ARRVAL(errors));
+	if (result == FAILURE) {
+		goto failure;
 	}
 
-	if (Z_TYPE_P(fragment) == IS_STRING && Z_STRLEN_P(fragment) == 0) {
-		/* The URL API setter treats an empty string as removal. The builder
-		 * distinguishes an empty component from an absent one. */
-		lexbor_str_destroy(&lexbor_url->fragment, lexbor_url->mraw, false);
-		lexbor_str_init(&lexbor_url->fragment, lexbor_url->mraw, 1);
-	} else {
-		result = php_uri_parser_whatwg_fragment_write(lexbor_url, fragment, NULL);
-		php_uri_parser_whatwg_build_errors(&errors);
-		if (result == FAILURE) {
-			goto failure;
-		}
+	result = php_uri_parser_whatwg_fragment_write(lexbor_url, fragment, NULL);
+	php_uri_parser_whatwg_build_errors(Z_ARRVAL(errors));
+	if (result == FAILURE) {
+		goto failure;
 	}
 
-	if (php_uri_pass_errors_by_ref_and_free(soft_errors_zv, &errors) == FAILURE) {
-		/* The errors zval was already consumed; goto failure would destroy it again. */
+	if (php_uri_pass_errors_by_ref_and_free(soft_errors_zv, Z_ARRVAL(errors)) == FAILURE) {
+		/* The errors array was already consumed; goto failure would destroy it again. */
 		lxb_url_destroy(lexbor_url);
 		return NULL;
 	}
@@ -1361,7 +1378,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_wh
 	return lexbor_url;
 failure:
 	ZEND_ASSERT(EG(exception));
-	php_uri_parser_whatwg_build_errors_into_exception(&errors);
+	php_uri_parser_whatwg_build_errors_into_exception(Z_ARRVAL(errors));
 	zval_ptr_dtor(&errors);
 	lxb_url_destroy(lexbor_url);
 	return NULL;

@@ -574,7 +574,8 @@ struct _pdo_stmt_t {
 	 * emulate prepare and bind on its behalf */
 	uint16_t supports_placeholders:2;
 	uint16_t in_param_event:1;
-	uint16_t reserved: 11;
+	uint16_t execute_incomplete:1;
+	uint16_t reserved: 10;
 
 	/* keep track of bound input parameters.  Some drivers support
 	 * input/output parameters, but you can't rely on that working */

@@ -186,7 +186,7 @@ static lxb_dom_document_cmode_t dom_translate_quirks_mode(php_libxml_quirks_mode
 }
 
 /* https://html.spec.whatwg.org/#html-fragment-parsing-algorithm */
-static xmlNodePtr dom_html_fragment_parsing_algorithm(dom_object *obj, xmlNodePtr context_node, const zend_string *input, php_libxml_quirks_mode quirks_mode)
+static xmlNodePtr dom_html_fragment_parsing_algorithm(dom_object *obj, xmlNodePtr context_node, const zend_string *input, php_libxml_quirks_mode quirks_mode, bool is_template)
 {
 	/* The whole algorithm is implemented in Lexbor, we just have to be the adapter between the
 	 * data structures used in PHP and what Lexbor expects. */
@@ -214,7 +214,7 @@ static xmlNodePtr dom_html_fragment_parsing_algorithm(dom_object *obj, xmlNodePt
 	xmlNodePtr fragment = NULL;
 	if (node != NULL) {
 		/* node->last_child could be NULL, but that is allowed. */
-		lexbor_libxml2_bridge_status status = lexbor_libxml2_bridge_convert_fragment(node->last_child, context_node->doc, &fragment, true, true, php_dom_get_private_data(obj));
+		lexbor_libxml2_bridge_status status = lexbor_libxml2_bridge_convert_fragment(node->last_child, context_node->doc, &fragment, true, true, is_template, php_dom_get_private_data(obj));
 		if (UNEXPECTED(status != LEXBOR_LIBXML2_BRIDGE_STATUS_OK)) {
 			php_dom_throw_error(INVALID_STATE_ERR, true);
 		}
@@ -346,13 +346,18 @@ static xmlNodePtr dom_xml_fragment_parsing_algorithm(dom_object *obj, const xmlN
 }
 
 /* https://w3c.github.io/DOM-Parsing/#dfn-fragment-parsing-algorithm */
-xmlNodePtr dom_parse_fragment(dom_object *obj, xmlNodePtr context_node, const zend_string *input)
+static xmlNodePtr dom_parse_fragment_ex(dom_object *obj, xmlNodePtr context_node, const zend_string *input, bool is_template)
 {
 	if (context_node->doc->type == XML_DOCUMENT_NODE) {
 		return dom_xml_fragment_parsing_algorithm(obj, context_node, input);
 	} else {
-		return dom_html_fragment_parsing_algorithm(obj, context_node, input, obj->document->quirks_mode);
+		return dom_html_fragment_parsing_algorithm(obj, context_node, input, obj->document->quirks_mode, is_template);
 	}
+}
+
+xmlNodePtr dom_parse_fragment(dom_object *obj, xmlNodePtr context_node, const zend_string *input)
+{
+	return dom_parse_fragment_ex(obj, context_node, input, false);
 }
 
 /* https://w3c.github.io/DOM-Parsing/#the-innerhtml-mixin */
@@ -363,14 +368,16 @@ zend_result dom_element_inner_html_write(dom_object *obj, zval *newval)
 	/* 2. Let context be this. */
 	DOM_PROP_NODE(xmlNodePtr, context_node, obj);
 
+	bool is_template = php_dom_ns_is_fast(context_node, php_dom_ns_is_html_magic_token) && xmlStrEqual(context_node->name, BAD_CAST "template");
+
 	/* 3. Let fragment be the result of invoking the fragment parsing algorithm steps with context and compliantString. */
-	xmlNodePtr fragment = dom_parse_fragment(obj, context_node, Z_STR_P(newval));
+	xmlNodePtr fragment = dom_parse_fragment_ex(obj, context_node, Z_STR_P(newval), is_template);
 	if (fragment == NULL) {
 		return FAILURE;
 	}
 
 	/* 4. If context is a template element, then set context to the template element's template contents (a DocumentFragment). */
-	if (php_dom_ns_is_fast(context_node, php_dom_ns_is_html_magic_token) && xmlStrEqual(context_node->name, BAD_CAST "template")) {
+	if (is_template) {
 		context_node = php_dom_ensure_templated_content(php_dom_get_private_data(obj), context_node);
 		if (context_node == NULL) {
 			xmlFreeNode(fragment);

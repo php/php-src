@@ -348,6 +348,8 @@ static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op 
 			// TODO: recompilation may change target ???
 			return 0;
 #endif
+		/* FETCH_OBJ_FUNC_ARG may dispatch into the FETCH_OBJ_R handler (if sent by value). */
+		case ZEND_FETCH_OBJ_FUNC_ARG:
 		case ZEND_FETCH_OBJ_R:
 			if (opline->op2_type == IS_CONST) {
 				const zend_class_entry *ce = opline->op1_type == IS_UNUSED ? op_array->scope : NULL;
@@ -1770,7 +1772,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				if (i < op_array->last_var) {
 					ssa_var_info[i].type = MAY_BE_UNDEF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY  | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 				} else {
-					ssa_var_info[i].type = MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+					ssa_var_info[i].type = MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_INDIRECT | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 				}
 			}
 			if (i < parent_vars_count) {
@@ -3339,6 +3341,7 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 						RA_REG_FLAGS(def) |= ZREG_LOAD;
 						RA_REG_FLAGS(use) |= ZREG_STORE;
 					} else {
+						/* trace-entry value */
 						use = phi->sources[0];
 						if (zend_jit_var_supports_reg(ssa, use)) {
 							ZEND_ASSERT(!RA_HAS_REG(use));
@@ -3347,6 +3350,8 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 							count++;
 						} else {
 							RA_REG_FLAGS(def) |= ZREG_LOAD;
+							/* back-edge value */
+							RA_REG_FLAGS(phi->sources[1]) |= ZREG_STORE;
 						}
 					}
 				} else if (RA_HAS_REG(use)) {
@@ -3733,7 +3738,7 @@ static void zend_jit_trace_update_condition_ranges(const zend_op *opline, const 
 	zend_long op1_min, op1_max, op2_min, op2_max;
 
 	if ((OP1_INFO() & MAY_BE_ANY) != MAY_BE_LONG
-	 || (OP1_INFO() & MAY_BE_ANY) != MAY_BE_LONG) {
+	 || (OP2_INFO() & MAY_BE_ANY) != MAY_BE_LONG) {
 		return;
 	}
 
@@ -3808,7 +3813,7 @@ static void zend_jit_trace_update_condition_ranges(const zend_op *opline, const 
 					zend_jit_trace_set_var_range(
 						&ssa->var_info[ssa_op->op2_use],
 						op2_min,
-						op2_max != ZEND_LONG_MIN ?MIN(op2_max, op1_max - 1) : op1_max);
+						op1_max != ZEND_LONG_MIN ? MIN(op2_max, op1_max - 1) : op2_max);
 				}
 			}
 			break;
@@ -5181,19 +5186,6 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 								 && ssa->vars[ssa_op->op1_def].alias == NO_ALIAS) {
 									ssa->var_info[ssa_op->op1_def].guarded_reference = 1;
 								}
-								if (opline->result_type == IS_UNUSED) {
-									res_addr = 0;
-								} else {
-									res_addr = RES_REG_ADDR();
-									if (Z_MODE(res_addr) != IS_REG
-									 && zend_jit_trace_next_is_send_result(opline, p, frame)) {
-										send_result = 1;
-										res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
-										if (!zend_jit_reuse_ip(&ctx)) {
-											goto jit_failure;
-										}
-									}
-								}
 								op1_def_addr = op1_addr;
 								op1_def_info &= ~MAY_BE_REF;
 							} else if (op1_info & MAY_BE_REF) {
@@ -5211,6 +5203,9 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 							res_addr = RES_REG_ADDR();
 							res_info = RES_INFO();
 							if (Z_MODE(res_addr) != IS_REG
+							 /* assignment to typed reference may cause conversion,
+							  * so SEND_VAL has to check the type of the result */
+							 && !ref_addr
 							 && zend_jit_trace_next_is_send_result(opline, p, frame)) {
 								send_result = 1;
 								res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
@@ -6493,21 +6488,29 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 						}
 						goto done;
 					case ZEND_FRAMELESS_ICALL_0:
-						jit_frameless_icall0(jit, opline);
+						if (!jit_frameless_icall0(jit, opline)) {
+							goto jit_failure;
+						}
 						goto done;
 					case ZEND_FRAMELESS_ICALL_1:
 						op1_info = OP1_INFO();
-						jit_frameless_icall1(jit, opline, op1_info);
+						if (!jit_frameless_icall1(jit, opline, op1_info)) {
+							goto jit_failure;
+						}
 						goto done;
 					case ZEND_FRAMELESS_ICALL_2:
 						op1_info = OP1_INFO();
 						op2_info = OP2_INFO();
-						jit_frameless_icall2(jit, opline, op1_info, op2_info);
+						if (!jit_frameless_icall2(jit, opline, op1_info, op2_info)) {
+							goto jit_failure;
+						}
 						goto done;
 					case ZEND_FRAMELESS_ICALL_3:
 						op1_info = OP1_INFO();
 						op2_info = OP2_INFO();
-						jit_frameless_icall3(jit, opline, op1_info, op2_info, OP1_DATA_INFO());
+						if (!jit_frameless_icall3(jit, opline, op1_info, op2_info, OP1_DATA_INFO())) {
+							goto jit_failure;
+						}
 						goto done;
 					default:
 						break;
@@ -6971,7 +6974,7 @@ done:
 
 							ssa->var_info[j].type &= ~MAY_BE_GUARD;
 							op_type = concrete_type(ssa->var_info[j].type);
-							if (!zend_jit_type_guard(&ctx, NULL, EX_NUM_TO_VAR(i), op_type)) {
+							if (!zend_jit_type_guard(&ctx, (p+1)->opline, EX_NUM_TO_VAR(i), op_type)) {
 								goto jit_failure;
 							}
 							SET_STACK_TYPE(stack, i, op_type, 1);

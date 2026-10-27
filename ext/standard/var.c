@@ -33,6 +33,9 @@
 struct php_serialize_data {
 	HashTable ht;
 	uint32_t n;
+	/* Write back the C: and E: payloads kept by php_var_unserialize() in
+	 * incomplete_classes_only mode, see php_var_serialize_incomplete_raw() */
+	bool incomplete_classes_only;
 };
 
 #define COMMON (is_ref ? "&" : "")
@@ -541,6 +544,13 @@ PHPAPI zend_result php_var_export_ex(zval *struc, int level, smart_str *buf) /* 
 	zend_string *key;
 	zval *val;
 
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		zend_call_stack_size_error();
+		return FAILURE;
+	}
+#endif
+
 again:
 	switch (Z_TYPE_P(struc)) {
 		case IS_FALSE:
@@ -671,9 +681,14 @@ again:
 								return FAILURE;
 							}
 						}
-						php_object_element_export(val, index, key, level, buf);
+						zend_result result = php_object_element_export(val, index, key, level, buf);
 						if (val == &tmp) {
 							zval_ptr_dtor(val);
+						}
+						if (UNEXPECTED(result == FAILURE)) {
+							ZEND_GUARD_OR_GC_UNPROTECT_RECURSION(guard, EXPORT, zobj);
+							zend_release_properties(myht);
+							return FAILURE;
 						}
 					} ZEND_HASH_FOREACH_END();
 				}
@@ -848,6 +863,56 @@ static inline bool php_var_serialize_class_name(smart_str *buf, zval *struc) /* 
 	return incomplete_class;
 }
 /* }}} */
+
+static bool php_var_serialize_incomplete_raw(smart_str *buf, zval *struc)
+{
+	HashTable *props = Z_OBJ_P(struc)->properties;
+	zend_string *class_name;
+	zval *member;
+
+	if (!props) {
+		return false;
+	}
+
+	member = zend_hash_str_find(props, MAGIC_MEMBER_SERIALIZED, sizeof(MAGIC_MEMBER_SERIALIZED) - 1);
+	if (member && Z_TYPE_P(member) == IS_STRING) {
+		class_name = php_lookup_class_name(Z_OBJ_P(struc));
+		if (!class_name) {
+			return false;
+		}
+		smart_str_appendl(buf, "C:", 2);
+		smart_str_append_unsigned(buf, ZSTR_LEN(class_name));
+		smart_str_appendl(buf, ":\"", 2);
+		smart_str_append(buf, class_name);
+		smart_str_appendl(buf, "\":", 2);
+		smart_str_append_unsigned(buf, Z_STRLEN_P(member));
+		smart_str_appendl(buf, ":{", 2);
+		smart_str_append(buf, Z_STR_P(member));
+		smart_str_appendc(buf, '}');
+		zend_string_release_ex(class_name, 0);
+		return true;
+	}
+
+	member = zend_hash_str_find(props, MAGIC_MEMBER_ENUM_CASE, sizeof(MAGIC_MEMBER_ENUM_CASE) - 1);
+	if (member && Z_TYPE_P(member) == IS_STRING) {
+		class_name = php_lookup_class_name(Z_OBJ_P(struc));
+		if (!class_name) {
+			return false;
+		}
+		smart_str_appendl(buf, "E:", 2);
+		smart_str_append_unsigned(buf, ZSTR_LEN(class_name) + strlen(":") + Z_STRLEN_P(member));
+		smart_str_appendl(buf, ":\"", 2);
+		smart_str_append(buf, class_name);
+		smart_str_appendc(buf, ':');
+		smart_str_append(buf, Z_STR_P(member));
+		smart_str_appendl(buf, "\";", 2);
+		zend_string_release_ex(class_name, 0);
+		return true;
+	}
+
+	/* Other incomplete classes are handled using the normal path */
+	return false;
+}
 
 static HashTable* php_var_serialize_call_sleep(zend_object *obj, zend_function *fn) /* {{{ */
 {
@@ -1136,6 +1201,10 @@ again:
 				bool incomplete_class;
 				uint32_t count;
 
+				if (ce == PHP_IC_ENTRY && var_hash->incomplete_classes_only && php_var_serialize_incomplete_raw(buf, struc)) {
+					return;
+				}
+
 				if (ce->ce_flags & ZEND_ACC_NOT_SERIALIZABLE) {
 					zend_throw_exception_ex(NULL, 0, "Serialization of '%s' is not allowed",
 						ZSTR_VAL(ce->name));
@@ -1356,6 +1425,7 @@ PHPAPI php_serialize_data_t php_var_serialize_init(void) {
 		d = emalloc(sizeof(struct php_serialize_data));
 		zend_hash_init(&d->ht, 16, NULL, ZVAL_PTR_DTOR, 0);
 		d->n = 0;
+		d->incomplete_classes_only = false;
 		if (!BG(serialize_lock)) {
 			BG(serialize).data = d;
 			BG(serialize).level = 1;
@@ -1367,14 +1437,19 @@ PHPAPI php_serialize_data_t php_var_serialize_init(void) {
 	return d;
 }
 
+PHPAPI void php_var_serialize_set_incomplete_classes_only(php_serialize_data_t d, bool incomplete_classes_only) {
+	d->incomplete_classes_only = incomplete_classes_only;
+}
+
 PHPAPI void php_var_serialize_destroy(php_serialize_data_t d) {
 	/* fprintf(stderr, "SERIALIZE_DESTROY   == lock: %u, level: %u\n", BG(serialize_lock), BG(serialize).level); */
-	if (BG(serialize_lock) || BG(serialize).level == 1) {
+	if (BG(serialize_lock)) {
 		zend_hash_destroy(&d->ht);
 		efree(d);
-	}
-	if (!BG(serialize_lock) && !--BG(serialize).level) {
+	} else if (!--BG(serialize).level) {
 		BG(serialize).data = NULL;
+		zend_hash_destroy(&d->ht);
+		efree(d);
 	}
 }
 

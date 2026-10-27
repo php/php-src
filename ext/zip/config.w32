@@ -3,11 +3,19 @@
 ARG_ENABLE("zip", "ZIP support", "yes,shared");
 
 if (PHP_ZIP != "no") {
+	var zipconf_dir;
 	if (CHECK_HEADER("zip.h", "CFLAGS_ZIP", PHP_PHP_BUILD + "\\include;" + PHP_EXTRA_INCLUDES) &&
-		CHECK_HEADER("zipconf.h", "CFLAGS_ZIP", PHP_PHP_BUILD + "\\lib\\libzip\\include;" + PHP_EXTRA_LIBS + "\\libzip\\include;" + PHP_ZIP) &&
+		(zipconf_dir = CHECK_HEADER("zipconf.h", "CFLAGS_ZIP", PHP_PHP_BUILD + "\\lib\\libzip\\include;" + PHP_EXTRA_LIBS + "\\libzip\\include;" + PHP_ZIP)) &&
 		(PHP_ZIP_SHARED && CHECK_LIB("libzip.lib", "zip", PHP_ZIP) ||
-		 CHECK_LIB("libzip_a.lib", "zip", PHP_ZIP) && CHECK_LIB("libbz2_a.lib", "zip", PHP_ZIP) && CHECK_LIB("zlib_a.lib", "zip", PHP_ZIP) && CHECK_LIB("liblzma_a.lib", "zip", PHP_ZIP))
+		 CHECK_LIB("libzip_a.lib", "zip", PHP_ZIP) && CHECK_LIB("libbz2_a.lib", "zip", PHP_ZIP) && CHECK_LIB("zlib_a.lib;zs.lib", "zip", PHP_ZIP) && CHECK_LIB("liblzma_a.lib", "zip", PHP_ZIP))
 	) {
+		if (zipconf_dir === true) {
+			zipconf_dir = search_paths("zipconf.h", WshShell.Environment("Process").Item("INCLUDE"), null);
+		}
+		if (GREP_HEADER("zipconf.h", /^\s*#\s*define\s+LIBZIP_VERSION\s+"(?:1\.3\.1|1\.7\.0|1\.12(?:\.0)?)"/m, zipconf_dir)) {
+			ERROR("libzip 1.3.1, 1.7.0 and 1.12.0 are not supported. Please use another version.");
+		}
+
 		EXTENSION('zip', 'php_zip.c zip_source.c zip_stream.c');
 		ADD_EXTENSION_DEP('zip', 'pcre');
 

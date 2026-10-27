@@ -87,6 +87,21 @@ void zend_finalize_system_id(void)
 		}
 	}
 
+	/* Cached scripts can refer to offsets of internal functions.
+	 * Effects of disable_functions and frameless functions must be taken into account.
+	 * Therefore, embed the function names in-order.
+	 * Updating third party extensions may change function signatures, arginfo, offsets, ...
+	 * Therefore, also embed the loaded modules and their versions. */
+	ZEND_HASH_MAP_FOREACH_STR_KEY(CG(function_table), zend_string *name) {
+		PHP_MD5Update(&context, ZSTR_VAL(name), ZSTR_LEN(name) + 1);
+	} ZEND_HASH_FOREACH_END();
+	ZEND_HASH_MAP_FOREACH_PTR(&module_registry, zend_module_entry *mod) {
+		PHP_MD5Update(&context, mod->name, strlen(mod->name) + 1);
+		if (EXPECTED(mod->version != NO_VERSION_YET)) {
+			PHP_MD5Update(&context, mod->version, strlen(mod->version) + 1);
+		}
+	} ZEND_HASH_FOREACH_END();
+
 	PHP_MD5Final(digest, &context);
 	zend_bin2hex(zend_system_id, digest, sizeof digest);
 	finalized = 1;

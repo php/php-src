@@ -76,6 +76,21 @@ have lsphp bind to address 192.168.0.2:3000,
 
 have lsphp accept request on Unix domain socket `/tmp/lsphp_manual.sock`.
 
+### Listener Security
+
+The lsphp listener must only be reachable by trusted sources, generally just 
+the LiteSpeed web front end. Allowing access from other sources may cause
+security issues:
+
+* Any source that can set its own environment variables can configure arbitrary
+PHP INI directives at the `ZEND_INI_SYSTEM` level for that request. This is the
+equivalent level of access as the Apache `php_admin_value` directive or the
+FPM `PHP_ADMIN_VALUE` parameter.
+* Any source that can invoke the lsphp listener can choose what file to execute
+based on the request contents. The file to execute is the file name reported by
+`LSAPI_GetScriptFileName()`, without additional validation.  Specifically, there
+is no enforcement of a docroot or `open_basedir` restriction.
+
 ## Using LiteSpeed PHP with LiteSpeed Web Server
 
 Detailed information about how to configure LiteSpeed web server with PHP

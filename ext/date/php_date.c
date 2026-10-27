@@ -449,13 +449,14 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(date)
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(date)
 {
+	php_date_global_timezone_db = NULL;
+	php_date_global_timezone_db_enabled = 0;
+
 	REGISTER_INI_ENTRIES();
 	date_register_classes();
 	register_php_date_symbols(module_number);
 	PHP_MINIT(date_time)(INIT_FUNC_ARGS_PASSTHRU);
 
-	php_date_global_timezone_db = NULL;
-	php_date_global_timezone_db_enabled = 0;
 	DATEG(last_errors) = NULL;
 	return SUCCESS;
 }
@@ -2232,6 +2233,12 @@ static HashTable *date_object_get_properties_interval(zend_object *object) /* {{
 	props = zend_std_get_properties(object);
 	if (!intervalobj->initialized) {
 		return props;
+	}
+
+	/* The table may still be held elsewhere (e.g. json_encode() walking a cycle), so separate it before writing */
+	if (UNEXPECTED(GC_REFCOUNT(props) > 1)) {
+        GC_TRY_DELREF(props);
+		props = object->properties = zend_array_dup(props);
 	}
 
 	date_interval_object_to_hash(intervalobj, props);

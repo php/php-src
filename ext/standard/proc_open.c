@@ -841,7 +841,7 @@ static zend_result set_proc_descriptor_to_blackhole(descriptorspec_item *desc)
 {
 #ifdef PHP_WIN32
 	desc->childend = CreateFileA("nul", GENERIC_READ | GENERIC_WRITE,
-		FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+		FILE_SHARE_READ | FILE_SHARE_WRITE, &php_proc_open_security, OPEN_EXISTING, 0, NULL);
 	if (desc->childend == INVALID_HANDLE_VALUE) {
 		php_error_docref(NULL, E_WARNING, "Failed to open nul");
 		return FAILURE;

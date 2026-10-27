@@ -34,7 +34,6 @@
 #include "zend_enum.h"
 #include "zend_object_handlers.h"
 #include "zend_observer.h"
-#include "zend_system_id.h"
 
 #include <stdarg.h>
 
@@ -1998,6 +1997,18 @@ ZEND_API void object_init(zval *arg) /* {{{ */
 }
 /* }}} */
 
+ZEND_API bool object_finit(zval *arg)
+{
+	zend_object *obj = zend_objects_fnew(zend_standard_class_def);
+
+	if (UNEXPECTED(obj == NULL)) {
+		ZVAL_NULL(arg);
+		return false;
+	}
+	ZVAL_OBJ(arg, obj);
+	return true;
+}
+
 ZEND_API void add_assoc_long_ex(zval *arg, const char *key, size_t key_len, zend_long n) /* {{{ */
 {
 	zval tmp;
@@ -3224,7 +3235,6 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 				}
 				zend_flf_handlers[zend_flf_count] = flf_info->handler;
 				zend_flf_functions[zend_flf_count] = (zend_function *)reg_function;
-				zend_add_system_entropy("frameless", ZSTR_VAL(reg_function->function_name), &flf_info->num_args, sizeof(flf_info->num_args));
 				zend_flf_count++;
 				flf_info++;
 			}

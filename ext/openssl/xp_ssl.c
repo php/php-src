@@ -541,7 +541,7 @@ static bool php_openssl_matches_san_list(
 				/* TODO: warn ? */
 				continue;
 			}
-			if ((size_t)ASN1_STRING_length(san->d.dNSName) != strlen((const char*)cert_name)) {
+			if (ASN1_STRING_get_length(san->d.dNSName) != strlen((const char*)cert_name)) {
 				OPENSSL_free(cert_name);
 				/* prevent null-byte poisoning*/
 				continue;
@@ -561,7 +561,7 @@ static bool php_openssl_matches_san_list(
 			}
 			OPENSSL_free(cert_name);
 		} else if (san->type == GEN_IPADD) {
-			if (ASN1_STRING_length(san->d.iPAddress) == 4) {
+			if (ASN1_STRING_get_length(san->d.iPAddress) == 4) {
 				snprintf(ipbuffer, sizeof(ipbuffer), "%d.%d.%d.%d",
 					ASN1_STRING_get0_data(san->d.iPAddress)[0],
 					ASN1_STRING_get0_data(san->d.iPAddress)[1],
@@ -575,7 +575,7 @@ static bool php_openssl_matches_san_list(
 				}
 			}
 #ifdef HAVE_IPV6_SAN
-			else if (ASN1_STRING_length(san->d.ip) == 16 && subject_name_is_ipv6) {
+			else if (ASN1_STRING_get_length(san->d.ip) == 16 && subject_name_is_ipv6) {
 				ipbuffer[0] = 0;
 				EXPAND_IPV6_ADDRESS(ipbuffer, ASN1_STRING_get0_data(san->d.iPAddress));
 				if (strcasecmp((const char*)subject_name_ipv6_expanded, (const char*)ipbuffer) == 0) {
@@ -630,7 +630,7 @@ static bool php_openssl_matches_common_name(php_stream *stream, const X509 *peer
 		return false;
 	}
 	name_asn1 = X509_NAME_ENTRY_get_data(name_entry);
-	cert_name_len = ASN1_STRING_length(name_asn1);
+	cert_name_len = ASN1_STRING_get_length(name_asn1);
 	cert_name = (unsigned char *) OPENSSL_strndup((const char *) ASN1_STRING_get0_data(name_asn1), cert_name_len);
 	if (cert_name == NULL) {
 		php_stream_warn(stream, NetworkRecvFailed, "Unable to locate peer certificate CN");

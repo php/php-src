@@ -7,4 +7,6 @@ bcmath
 bcmul('0', '0', 2147483647);
 ?>
 --EXPECTF--
-Fatal error: Allowed memory size of %d bytes exhausted%s(tried to allocate %d bytes) in %s on line %d
+Hard memory limit of 268435456 bytes exhausted %S(tried to allocate %d bytes) in %s on line %d
+
+Termsig=9

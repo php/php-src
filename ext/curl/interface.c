@@ -592,7 +592,13 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 			return fwrite(data, size, nmemb, write_handler->fp);
 		case PHP_CURL_RETURN:
 			if (length > 0) {
-				smart_str_appendl(&write_handler->buf, data, length);
+				if (!smart_str_fappendl_ex(&write_handler->buf, data, length, /* persistent */ false, /* fallible */ true)) {
+#ifdef CURL_WRITEFUNC_ERROR
+					return CURL_WRITEFUNC_ERROR;
+#else
+					return 0;
+#endif
+				}
 			}
 			break;
 		case PHP_CURL_USER: {
@@ -1289,6 +1295,10 @@ void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
 		Z_ADDREF(source->handlers.write_header->stream);
 	}
 	ch->handlers.write_header->stream = source->handlers.write_header->stream;
+	if (!Z_ISUNDEF(source->handlers.std_err)) {
+		Z_ADDREF(source->handlers.std_err);
+	}
+	ch->handlers.std_err = source->handlers.std_err;
 
 	ch->handlers.write->fp = source->handlers.write->fp;
 	ch->handlers.write_header->fp = source->handlers.write_header->fp;

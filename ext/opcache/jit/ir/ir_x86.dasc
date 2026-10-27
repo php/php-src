@@ -26954,7 +26954,7 @@ next_block:;
 		if (ctx->code_buffer) {
 			if (ctx->code_buffer->pos == (char*)entry + size) {
 				/* rollback */
-				ctx->code_buffer->pos = (char*)entry - size;
+				ctx->code_buffer->pos = (char*)entry;
 			}
 		} else {
 			ir_mem_unmap(entry, size);
@@ -27080,7 +27080,7 @@ const void *ir_emit_exitgroup(uint32_t first_exit_point, uint32_t exit_points_pe
 		dasm_free(&dasm_state);
 		if (code_buffer->pos == (char*)entry + size) {
 			/* rollback */
-			code_buffer->pos = (char*)entry - size;
+			code_buffer->pos = (char*)entry;
 		}
 		return NULL;
 	}

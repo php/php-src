@@ -853,9 +853,16 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value, u
 			if (!pdo_get_long_param(&lval, value)) {
 				return false;
 			}
-			/* TODO Check for valid value (NULL_NATURAL, NULL_EMPTY_STRING, NULL_TO_STRING)? */
-			dbh->oracle_nulls = lval;
-			return true;
+			switch (lval) {
+				case PDO_NULL_NATURAL:
+				case PDO_NULL_EMPTY_STRING:
+				case PDO_NULL_TO_STRING:
+					dbh->oracle_nulls = lval;
+					return true;
+				default:
+					zend_argument_value_error(value_arg_num, "PDO::ATTR_ORACLE_NULLS must be one of the PDO::NULL_* constants");
+					return false;
+			}
 
 		case PDO_ATTR_DEFAULT_FETCH_MODE:
 			if (Z_TYPE_P(value) == IS_ARRAY) {
@@ -1599,7 +1606,7 @@ static void pdo_dbh_free_storage(zend_object *std)
 		dbh->in_txn = false;
 	}
 
-	if (dbh->is_persistent && dbh->driver_data && dbh->methods && dbh->methods->persistent_shutdown) {
+	if (dbh->is_persistent && dbh->refcount <= 2 && dbh->driver_data && dbh->methods && dbh->methods->persistent_shutdown) {
 		dbh->methods->persistent_shutdown(dbh);
 	}
 	zend_object_std_dtor(std);

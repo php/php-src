@@ -251,6 +251,11 @@ static void pgsql_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 			pefree(H->lob_streams, dbh->is_persistent);
 			H->lob_streams = NULL;
 		}
+		if (H->prepared_stmts) {
+			zend_hash_destroy(H->prepared_stmts);
+			pefree(H->prepared_stmts, 1);
+			H->prepared_stmts = NULL;
+		}
 		pdo_pgsql_cleanup_notice_callback(H);
 		if (H->server) {
 			PQfinish(H->server);
@@ -1398,11 +1403,28 @@ static void pdo_pgsql_request_shutdown(pdo_dbh_t *dbh)
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 
 	if(H->server) {
-		res = PQexec(H->server, "DISCARD ALL");
+		zend_string *name;
 
-		if(res) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY(H->prepared_stmts, name) {
+#ifndef HAVE_PQCLOSEPREPARED
+			char *q;
+			spprintf(&q, 0, "DEALLOCATE %s", ZSTR_VAL(name));
+			res = PQexec(H->server, q);
+			efree(q);
+#else
+			res = PQclosePrepared(H->server, ZSTR_VAL(name));
+#endif
 			PQclear(res);
+		} ZEND_HASH_FOREACH_END();
+		zend_hash_clean(H->prepared_stmts);
+
+		res = PQexec(H->server, "CLOSE ALL; SET SESSION AUTHORIZATION DEFAULT; RESET ALL; UNLISTEN *; "
+			"SELECT pg_advisory_unlock_all(); DISCARD TEMP; DISCARD SEQUENCES");
+
+		if (PQresultStatus(res) != PGRES_COMMAND_OK && PQstatus(H->server) == CONNECTION_OK) {
+			PQreset(H->server);
 		}
+		PQclear(res);
 	}
 }
 
@@ -1523,6 +1545,10 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{
 	H->server = PQconnectdb(ZSTR_VAL(conn_str.s));
 	H->lob_streams = (HashTable *) pemalloc(sizeof(HashTable), dbh->is_persistent);
 	zend_hash_init(H->lob_streams, 0, NULL, NULL, 1);
+	if (dbh->is_persistent) {
+		H->prepared_stmts = (HashTable *) pemalloc(sizeof(HashTable), 1);
+		zend_hash_init(H->prepared_stmts, 0, NULL, NULL, 1);
+	}
 
 	if (tmp_user) {
 		zend_string_release_ex(tmp_user, 0);

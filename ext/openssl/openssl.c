@@ -1019,7 +1019,7 @@ PHP_FUNCTION(openssl_spki_new)
 	}
 
 	if (challenge) {
-		if (!ASN1_STRING_set(spki->spkac->challenge, challenge, (int)challenge_len)) {
+		if (!ASN1_STRING_set1_data(spki->spkac->challenge, (const unsigned char *) challenge, challenge_len)) {
 			php_openssl_store_errors();
 			php_error_docref(NULL, E_WARNING, "Unable to set challenge data");
 			goto cleanup;
@@ -1206,7 +1206,8 @@ PHP_FUNCTION(openssl_spki_export_challenge)
 		goto cleanup;
 	}
 
-	RETVAL_STRING((const char *)ASN1_STRING_get0_data(spki->spkac->challenge));
+	RETVAL_STRINGL_FAST((const char *)ASN1_STRING_get0_data(spki->spkac->challenge),
+		ASN1_STRING_get_length(spki->spkac->challenge));
 	goto cleanup;
 
 cleanup:

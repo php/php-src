@@ -585,6 +585,13 @@ static zend_string* ZEND_FASTCALL accel_new_interned_string_for_php(zend_string 
 			return ret;
 		}
 	}
+#if ZEND_RC_DEBUG
+	/* PHP shouldn't create persistent strings during request, but at least
+	 * dl() may do this. They belong to the temporary module and are not shared. */
+	if (!zend_rc_debug && !ZSTR_IS_INTERNED(str) && (GC_FLAGS(str) & GC_PERSISTENT)) {
+		GC_MAKE_PERSISTENT_LOCAL(str);
+	}
+#endif
 	return str;
 }
 
@@ -608,19 +615,34 @@ static zend_always_inline zend_string *accel_find_interned_string_ex(zend_ulong 
 
 static zend_string* ZEND_FASTCALL accel_init_interned_string_for_php(const char *str, size_t size, bool permanent)
 {
+	zend_string *ret;
+
 	if (ZCG(counted)) {
 	    zend_ulong h = zend_inline_hash_func(str, size);
-		zend_string *ret = accel_find_interned_string_ex(h, str, size);
+		ret = accel_find_interned_string_ex(h, str, size);
 
-		if (!ret) {
-			ret = zend_string_init(str, size, permanent);
-			ZSTR_H(ret) = h;
+		if (ret) {
+			return ret;
 		}
 
-		return ret;
+		ret = zend_string_finit(str, size, permanent, CG(interned_strings_fallible));
+		if (UNEXPECTED(!ret)) {
+			return NULL;
+		}
+		ZSTR_H(ret) = h;
+	} else {
+		ret = zend_string_finit(str, size, permanent, CG(interned_strings_fallible));
 	}
 
-	return zend_string_init(str, size, permanent);
+#if ZEND_RC_DEBUG
+	/* PHP shouldn't create persistent strings during request, but at least
+	 * dl() may do this. They belong to the temporary module and are not shared. */
+	if (!zend_rc_debug && permanent) {
+		GC_MAKE_PERSISTENT_LOCAL(ret);
+	}
+#endif
+
+	return ret;
 }
 
 static inline void accel_copy_permanent_list_types(
@@ -2647,6 +2669,7 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 	}
 
 	zend_map_ptr_extend(ZCSG(map_ptr_last));
+	zend_accel_pending_ce_cache_begin();
 
 #if ZEND_MM_NEED_EIGHT_BYTE_REALIGNMENT
 	/* Align to 8-byte boundary */
@@ -2704,6 +2727,8 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 	ZCSG(map_ptr_last) = CG(map_ptr_last);
 	ZEND_ATOMIC_FENCE_RELEASE();
 	proto->inheritance_cache = entry;
+
+	zend_accel_pending_ce_cache_commit();
 
 	zend_shared_alloc_destroy_xlat_table();
 
@@ -3028,6 +3053,9 @@ zend_result accel_post_deactivate(void)
 		zend_string_release_ex(ZCG(cwd), 0);
 		ZCG(cwd) = NULL;
 	}
+
+	/* A persist window left through a bailout never published its slots */
+	zend_accel_pending_ce_cache_discard();
 
 	if (!ZCG(enabled) || !accel_startup_ok) {
 		return SUCCESS;
@@ -5133,6 +5161,7 @@ static zend_result accel_finish_startup_preload(bool in_child)
 	EG(error_reporting) = 0;
 
 	const zend_result rc = php_request_startup();
+	zend_mm_set_max_allocs(0);
 
 	EG(error_reporting) = orig_error_reporting;
 

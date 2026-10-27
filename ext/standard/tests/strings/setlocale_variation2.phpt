@@ -8,6 +8,9 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 if (PHP_OS_FAMILY === 'Solaris') {
     die("skip Some locales on Solaris (e.g. iso_8859_1) are incomplete, cannot test LC_ALL");
 }
+if (PHP_OS === 'FreeBSD') {
+    die("skip Some locales listed by locale -a on FreeBSD (e.g. hr_HR.ISO8859-2) are incomplete, cannot test LC_ALL");
+}
 exec("locale -a", $output, $exit_code);
 if ($exit_code !== 0) {
     die("skip locale -a not available");
