@@ -49,6 +49,10 @@ PHP                                                                        NEWS
 - DOM:
   . Fix error paths in dom_xml_serializing_a_document_node(). (ndossche)
 
+- FFI:
+  . Fixed bug GH-24582 (Memory leaks in ext/ffi parser when finalize_type()
+    bails out). (matyapiro31, David Carlier)
+
 - Fileinfo:
   . Fixed bug GH-24289 (finfo::file() reports the wrong argument number for
     an invalid $filename). (Lazizbek Ergashev)
@@ -56,6 +60,9 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed bug GH-24229 (fcgi_close() passes shutdown() a literal 1, which is
     SHUT_RD in WASI). (Ryosuke Ishibashi)
+  . Fixed crash and stack memory disclosure in the worker output logging with
+    a pool name longer than the message prefix buffer or log_limit.
+    (Martin Mirchev)
 
 - FTP:
   . Fix double free in ext/ftp data_accept() on accept failure. (alepacheco)
