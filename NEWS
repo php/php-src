@@ -169,6 +169,8 @@ PHP                                                                        NEWS
     Windows). (Nicolas Grekas)
   . Fixed glob() not negating bracket expressions that start with "^".
     (Nicolas Grekas)
+  . Fixed bug GH-24552 (Case-insensitive substr_compare(), ksort() and
+    krsort() are still locale-dependent). (Lazizbek Ergashev, Jon Surrell)
   . Fixed bug GH-24605 (var_export() crashes on deeply nested arrays and
     objects). (Labish Bardiya)
 

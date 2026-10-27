@@ -185,7 +185,7 @@ static zend_always_inline int php_array_key_compare_string_case_unstable_i(Bucke
 		s2 = zend_print_long_to_buf(buf2 + sizeof(buf2) - 1, s->h);
 		l2 = buf2 + sizeof(buf2) - 1 - s2;
 	}
-	return zend_binary_strcasecmp_l(s1, l1, s2, l2);
+	return zend_binary_strcasecmp(s1, l1, s2, l2);
 }
 /* }}} */
 
