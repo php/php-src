@@ -117,19 +117,19 @@ PHP_FUNCTION(header_register_callback)
 		RETURN_THROWS();
 	}
 
-	if (Z_TYPE(SG(callback_func)) != IS_UNDEF) {
-		zval cb;
-		ZVAL_COPY_VALUE(&cb, &SG(callback_func));
-		ZVAL_UNDEF(&SG(callback_func));
-		SG(fci_cache) = empty_fcall_info_cache;
-		zval_ptr_dtor(&cb);
-	}
+	zval old_cb;
+	ZVAL_COPY_VALUE(&old_cb, &SG(callback_func));
+	ZVAL_UNDEF(&SG(callback_func));
+	SG(fci_cache) = empty_fcall_info_cache;
 
 	/* Don't store callback if headers have already been sent:
 	 * It won't get used and we won't have a chance to release it. */
 	if (!SG(headers_sent)) {
 		ZVAL_COPY(&SG(callback_func), &fci.function_name);
 	}
+
+	/* Release the old callback last, its destructor may register a new one or bail out. */
+	zval_ptr_dtor(&old_cb);
 
 	RETURN_TRUE;
 }

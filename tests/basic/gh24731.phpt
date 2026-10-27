@@ -15,7 +15,7 @@ $cl = function () use ($c) {};
 unset($c);
 header_register_callback($cl);
 unset($cl);
-header_register_callback('str_repeat');
+header_register_callback(function () {});
 echo "Unreachable\n";
 ?>
 --EXPECTF--
