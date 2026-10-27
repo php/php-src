@@ -3,7 +3,7 @@ IntlRuleBasedBreakIterator compiled rules outlive the source string
 --EXTENSIONS--
 intl
 --SKIPIF--
-<?php if (version_compare(INTL_ICU_VERSION, '68.1') < 0) die('skip for ICU >= 68.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '68.1') < 0) die('skip requires ICU >= 68.1'); ?>
 --FILE--
 <?php
 

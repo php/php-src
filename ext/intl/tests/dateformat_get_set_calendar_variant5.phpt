@@ -7,7 +7,7 @@ intl.default_locale=pt_PT
 date.timezone=Atlantic/Azores
 --SKIPIF--
 <?php
-if (version_compare(INTL_ICU_VERSION, '58.1') < 0 || version_compare(INTL_ICU_VERSION, '70.1') >= 0) die('skip for ICU >= 58.1 and < 70.1');
+if (version_compare(INTL_ICU_VERSION, '58.1') < 0 || version_compare(INTL_ICU_VERSION, '70.1') >= 0) die('skip requires ICU >= 58.1 and < 70.1');
 ?>
 --FILE--
 <?php
