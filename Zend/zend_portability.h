@@ -58,6 +58,8 @@ extern "C++" {
 /* Make the atomic types used by Zend available to C++ extensions. */
 using std::atomic_bool;
 using std::atomic_int;
+using std::atomic_thread_fence;
+using std::memory_order_acquire;
 }
 #else
 # if !defined(__STDC_VERSION__) || __STDC_VERSION__ < 201112L
