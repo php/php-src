@@ -24,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y autoconf bison build-essential libtool libtool-bin pkg-config re2c libxml2-dev apache2-dev
+          sudo apt-get install -y autoconf bison build-essential libtool libtool-bin pkg-config re2c libxml2-dev apache2-dev apache2
       - name: Build Apache SAPI
         run: |
           ./buildconf --force
