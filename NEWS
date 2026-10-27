@@ -92,6 +92,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-24293 (Segfault on connect with an empty password to a
     MariaDB PAM account). (lazerg)
 
+- ODBC:
+  . Fixed bug GH-24736 (php_odbc_connstr_is_quoted() treats a value with no
+    closing brace as quoted). (lazerg)
+
 - Opcache:
   . Fixed tracing JIT returning a wrapped integer instead of a float on
     integer overflow after an integer was compared with a float or
