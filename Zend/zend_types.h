@@ -963,11 +963,16 @@ static zend_always_inline uint32_t zend_gc_delref_ex(zend_refcounted_h *p, uint3
 /* Fast class cache */
 static zend_always_inline bool zstr_has_ce_cache(const zend_string *s)
 {
-	static_assert(sizeof(_Atomic uint32_t) == sizeof(uint32_t), "atomic size");
-	static_assert(alignof(_Atomic uint32_t) == alignof(uint32_t), "atomic align");
-	static_assert(ATOMIC_INT_LOCK_FREE == 2, "not always lock-free");
+#if defined(__cplusplus) || !defined(ATOMIC_INT_LOCK_FREE) || ATOMIC_INT_LOCK_FREE != 2
+	uint32_t type_info = *(const volatile uint32_t *)&GC_TYPE_INFO(s);
+	atomic_thread_fence(memory_order_acquire);
+#else
+	static_assert(sizeof(_Atomic(uint32_t)) == sizeof(uint32_t), "atomic size");
+	static_assert(alignof(_Atomic(uint32_t)) == alignof(uint32_t), "atomic align");
 
-	uint32_t type_info = atomic_load_explicit((_Atomic uint32_t *)&GC_TYPE_INFO(s), memory_order_acquire);
+	uint32_t type_info = atomic_load_explicit((_Atomic(uint32_t) *)&GC_TYPE_INFO(s), memory_order_acquire);
+#endif
+
 	return (type_info & (IS_STR_CLASS_NAME_MAP_PTR << GC_FLAGS_SHIFT)) != 0;
 }
 
