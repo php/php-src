@@ -159,6 +159,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-24675 (function with >~1.7 MB of machine code corrupts JIT
     buffer accounting). (ndossche)
   . Call orig_post_shutdown_cb(). (ndossche)
+  . Fixed JIT segfault on switch over a string reference holding a
+    non-string value. (jorgsowa)
 
 - PDO:
   . Fixed invalid ATTR_ORACLE_NULLS values being accepted and truncated.
