@@ -25,22 +25,31 @@ const ps_module ps_mod_user = {
 static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval)
 {
 	int i;
+	bool bailout = false;
 	if (PS(in_save_handler)) {
 		PS(in_save_handler) = false;
 		ZVAL_UNDEF(retval);
 		php_error_docref(NULL, E_WARNING, "Cannot call session save handler in a recursive manner");
 	} else {
 		PS(in_save_handler) = true;
-		if (call_user_function(NULL, NULL, func, retval, argc, argv) == FAILURE) {
-			zval_ptr_dtor(retval);
-			ZVAL_UNDEF(retval);
-		} else if (Z_ISUNDEF_P(retval)) {
-			ZVAL_NULL(retval);
-		}
+		zend_try {
+			if (call_user_function(NULL, NULL, func, retval, argc, argv) == FAILURE) {
+				zval_ptr_dtor(retval);
+				ZVAL_UNDEF(retval);
+			} else if (Z_ISUNDEF_P(retval)) {
+				ZVAL_NULL(retval);
+			}
+		} zend_catch {
+			bailout = true;
+			PS(handler_bailout) = true;
+		} zend_end_try();
 		PS(in_save_handler) = false;
 	}
 	for (i = 0; i < argc; i++) {
 		zval_ptr_dtor(&argv[i]);
+	}
+	if (bailout) {
+		zend_bailout();
 	}
 }
 
@@ -91,7 +100,9 @@ PS_OPEN_FUNC(user)
 	zend_try {
 		ps_call_handler(&PSF(open), 2, args, &retval);
 	} zend_catch {
-		PS(session_status) = php_session_none;
+		if (!PS(mod_user_implemented)) {
+			PS(session_status) = php_session_none;
+		}
 		if (!Z_ISUNDEF(retval)) {
 			zval_ptr_dtor(&retval);
 		}
