@@ -26,12 +26,30 @@ PHP                                                                        NEWS
   . Fixed bug GH-24321 (ZTS: global_map_ptr_last survives zend_shutdown(),
     so an in-process engine restart keeps growing the map_ptr table).
     (David Carlier)
+  . Fix function and constant imports in compile_to_ast and add support
+    for grouping. (Klaas Skelte van der Werf)
+  . Fixed bug GH-24265 (Unwind/GracefulExit discarded in
+    zend_fiber_execute()). (David Carlier)
+  . Fixed unmapping of an unrelated range when the aligned chunk mmap fails
+    (Marti2203).
+
+- CLI:
+  . Fixed bug GH-24697 (PHP_HTTP_PARSER_STRICT build option doesn't work).
+    (ndossche, devnexen)
+
+- Curl:
+  . Fix use-after-free of CURLOPT_STDERR stream on cloned curl handle.
+    (lacatoire)
 
 - Date:
   . Fixed bug GH-20503 (Assertion failure with ext/date DateInterval property
     hash construction). (heathdutton)
   . Fixed bug GH-24350 (MINIT reads a stale external tz database after an
     in-process module restart). (Lazizbek Ergashev)
+
+- DBA:
+  . Fixed bug GH-24641 (ndbm backend never checks dbm_open() return value,
+    NULL deref on first use after a failed open). (Girgias)
 
 - DOM:
   . Fixed bug GH-23352 (UAF reading an attribute value node retained across
@@ -45,6 +63,11 @@ PHP                                                                        NEWS
     from a foreign document). (David Carlier)
   . Fixed DOMXPath crash wrapping a foreign node after a nodeset callback.
     (Ilia Alshanetsky)
+  . Fix error paths in dom_xml_serializing_a_document_node(). (ndossche)
+
+- FFI:
+  . Fixed bug GH-24582 (Memory leaks in ext/ffi parser when finalize_type()
+    bails out). (matyapiro31, David Carlier)
 
 - FPM:
   . Fixed bug GH-24229 (fcgi_close() passes shutdown() a literal 1, which is
@@ -56,6 +79,9 @@ PHP                                                                        NEWS
 
 - FTP:
   . Fix double free in ext/ftp data_accept() on accept failure. (alepacheco)
+
+- Hash:
+  . Fix GOST and Snefru digests of 512 MiB or more. (Martin Mirchev)
 
 - MBString:
   . Fixed bug GH-23958 (truncated encoding names resolving to full names). (Kamil Tekiela)
@@ -99,6 +125,18 @@ PHP                                                                        NEWS
     exits with an uninitialized opline). (waroad)
   . Fixed use-after-free in JIT ASSIGN_DIM_OP when concatenating into an
     empty array element. (jorgsowa)
+  . Fixed bug GH-24396 (Assertion failure in zend_jit_def_reg() "reg forwarding"
+    with chained Pi nodes). (ndossche)
+  . Fixed JIT treating an array as packed after a string key write turned it
+    into a hash. (jorgsowa)
+  . Fixed bug GH-24436 (Tracing JIT: keep the SEND_VAL type guard after
+    assigning to a reference). (waroad)
+  . Fixed bug GH-17733 (System entropy does not take into account function
+    order, resulting in wrong functions possibly called
+    in different configurations). (ndossche)
+  . Fixed bug GH-24438 (Preserve indirect types in JIT side traces). (aasul)
+  . Fixed bug GH-24577 (CE-cache flag on interned class name visible before
+    map_ptr offset). (prateekbhujel)
   . Fixed tracing JIT losing register-allocated CVs when an interrupt is
     handled at the end of a loop trace. (Levi Morrison)
 
@@ -110,6 +148,10 @@ PHP                                                                        NEWS
 
 - Phpdbg:
   . Fix wrong command names. (ndossche, Weilin Du)
+  . Fixed bug GH-22480 (Use-after-free when re-watching an already-watched
+    variable). (Ilia Alshanetsky)
+  . Fixed over-read when watching a packed array element. (Ilia Alshanetsky)
+  . Fixed double free of watch element chains. (Arnaud)
 
 - Readline:
   . Fixed a crash in readline_info() when completion_append_character
@@ -131,7 +173,13 @@ PHP                                                                        NEWS
   . Fixed bug GH-24488 (GC double-frees the SimpleXMLElement properties
     table). (evankford)
 
+- SPL:
+  . Fixed bug GH-24264 (Unwind/GracefulExit discarded in spl_iterators.c).
+    (Lazizbek Ergashev)
+
 - Standard:
+  . Fixed bug GH-24308 (Request shutdown calls closelog() even when syslog
+    was not opened by PHP). (lazerg)
   . Fixed bug GH-24399 (usleep() and time_nanosleep() ignore queued APCs on
     Windows). (Nicolas Grekas)
   . Fixed chown() and lchown() failing to resolve user names in ZTS builds
@@ -144,16 +192,26 @@ PHP                                                                        NEWS
     (Nicolas Grekas)
   . Fixed bug GH-24373 (serialize() called from a destructor during var_hash
     destruction reuses the outer var_hash). (David Carlier)
+  . Fixed bug GH-24552 (Case-insensitive substr_compare(), ksort() and
+    krsort() are still locale-dependent). (Lazizbek Ergashev, Jon Surrell)
+  . Fixed bug GH-24605 (var_export() crashes on deeply nested arrays and
+    objects). (Labish Bardiya)
 
 - Streams:
   . Fixed bug GH-24508 (HTTP wrapper leaks the dechunk filter when header
     parsing fails after Transfer-Encoding). (bercedev)
+  . Fixed bug GH-24509 (HTTP wrapper leaks Location buffer on empty
+    Location header). (bercedev)
 
 - Tidy:
   . Fixed tidy_repair_string(), tidy_repair_file(), tidy::repairString() and
     tidy::repairFile() rejecting null for $encoding. (lacatoire)
 
 - Zip:
+  . Reject broken libzip versions 1.3.1, 1.7.0 and 1.12.0 during Windows
+    configuration. (Weilin Du)
+  . Excluded libzip 1.12.0 due to a regression preventing additions and
+    replacements in torrentzip archives. (Weilin Du)
   . Fixed use-after-free when re-entering ZipArchive during destruction or
     a close warning, and rejected opening streams while closing. (jvoisin)
   . Fixed a use-after-free when a ZipArchive method that modifies the archive
