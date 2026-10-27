@@ -87,6 +87,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-23958 (truncated encoding names resolving to full names). (Kamil Tekiela)
   . Fixed out-of-bounds read in php_mb_rfc1867_getword() on a multibyte lead
     byte at the end of a multipart field name. (Jorg Sowa)
+  . Fixed negative mbstring.regex_stack_limit and mbstring.regex_retry_limit
+    on 32bit platforms. (Marc Bennewitz)
 
 - MySQLnd:
   . Fixed bug GH-24293 (Segfault on connect with an empty password to a
@@ -200,6 +202,10 @@ PHP                                                                        NEWS
 - Tidy:
   . Fixed tidy_repair_string(), tidy_repair_file(), tidy::repairString() and
     tidy::repairFile() rejecting null for $encoding. (lacatoire)
+
+- Windows:
+  . Fixed sapi_windows_cp_set() and sapi_windows_cp_conv() accepting a negative
+    codepage on 32bit platforms. (Marc Bennewitz)
 
 - Zip:
   . Reject broken libzip versions 1.3.1, 1.7.0 and 1.12.0 during Windows
