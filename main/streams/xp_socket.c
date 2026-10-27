@@ -631,6 +631,17 @@ static inline int parse_unix_address(php_stream *stream, php_stream_xport_param 
 }
 #endif
 
+static inline bool parse_port(const char *str, int *portno)
+{
+	/* Like atoi(), but reject ports that do not fit in 16 bits */
+	zend_long port = ZEND_STRTOL(str, NULL, 10);
+	if (port < 0 || port > 65535) {
+		return false;
+	}
+	*portno = (int) port;
+	return true;
+}
+
 static inline char *parse_ip_address_ex(const char *str, size_t str_len, int *portno, int get_err, zend_string **err)
 {
 	const char *colon;
@@ -651,7 +662,12 @@ static inline char *parse_ip_address_ex(const char *str, size_t str_len, int *po
 			}
 			return NULL;
 		}
-		*portno = atoi(p + 2);
+		if (!parse_port(p + 2, portno)) {
+			if (get_err) {
+				*err = strpprintf(0, "Failed to parse port of address \"%s\"", str);
+			}
+			return NULL;
+		}
 		return estrndup(str + 1, p - str - 1);
 	}
 #endif
@@ -661,7 +677,12 @@ static inline char *parse_ip_address_ex(const char *str, size_t str_len, int *po
 		colon = NULL;
 	}
 	if (colon) {
-		*portno = atoi(colon + 1);
+		if (!parse_port(colon + 1, portno)) {
+			if (get_err) {
+				*err = strpprintf(0, "Failed to parse port of address \"%s\"", str);
+			}
+			return NULL;
+		}
 		host = estrndup(str, colon - str);
 	} else {
 		if (get_err) {
