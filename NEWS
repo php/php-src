@@ -44,6 +44,8 @@ PHP                                                                        NEWS
     order, resulting in wrong functions possibly called
     in different configurations). (ndossche)
   . Fixed bug GH-24438 (Preserve indirect types in JIT side traces). (aasul)
+  . Fixed bug GH-24577 (CE-cache flag on interned class name visible before
+    map_ptr offset). (prateekbhujel)
 
 - OpenSSL:
   . Fixed build with OpenSSL 4.1. (Weilin Du)

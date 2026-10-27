@@ -371,6 +371,7 @@ void zend_accel_pending_ce_cache_commit(void)
 
 		ZEND_ASSERT(!ZSTR_HAS_CE_CACHE(type_name));
 		GC_SET_REFCOUNT(type_name, (uint32_t)Z_LVAL_P(zv));
+		ZEND_ATOMIC_FENCE_RELEASE();
 		GC_ADD_FLAGS(type_name, IS_STR_CLASS_NAME_MAP_PTR);
 	} ZEND_HASH_FOREACH_END();
 
