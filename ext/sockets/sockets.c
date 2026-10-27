@@ -1951,15 +1951,10 @@ PHP_FUNCTION(socket_set_option)
 			const char l_linger_key[] = "l_linger";
 
 			if (Z_TYPE_P(arg4) != IS_ARRAY) {
-				if (UNEXPECTED(Z_TYPE_P(arg4) != IS_OBJECT)) {
-					zend_argument_type_error(4, "must be of type array when argument #3 ($option) is SO_LINGER, %s given", zend_zval_value_name(arg4));
-					RETURN_THROWS();
-				} else {
-					opt_ht = Z_OBJPROP_P(arg4);
-				}
-			} else {
-				opt_ht = Z_ARRVAL_P(arg4);
+				zend_argument_type_error(4, "must be of type array when argument #3 ($option) is SO_LINGER, %s given", zend_zval_value_name(arg4));
+				RETURN_THROWS();
 			}
+			opt_ht = Z_ARRVAL_P(arg4);
 
 			if ((l_onoff = zend_hash_str_find(opt_ht, l_onoff_key, sizeof(l_onoff_key) - 1)) == NULL) {
 				zend_argument_value_error(4, "must have key \"%s\"", l_onoff_key);
@@ -1997,17 +1992,12 @@ PHP_FUNCTION(socket_set_option)
 			const char usec_key[] = "usec";
 
 			if (Z_TYPE_P(arg4) != IS_ARRAY) {
-				if (UNEXPECTED(Z_TYPE_P(arg4) != IS_OBJECT)) {
-					zend_argument_type_error(4, "must be of type array when argument #3 ($option) is %s, %s given",
-							optname == SO_RCVTIMEO ? "SO_RCVTIMEO" : "SO_SNDTIMEO",
-							zend_zval_value_name(arg4));
-					RETURN_THROWS();
-				} else {
-					opt_ht = Z_OBJPROP_P(arg4);
-				}
-			} else {
-				opt_ht = Z_ARRVAL_P(arg4);
+				zend_argument_type_error(4, "must be of type array when argument #3 ($option) is %s, %s given",
+						optname == SO_RCVTIMEO ? "SO_RCVTIMEO" : "SO_SNDTIMEO",
+						zend_zval_value_name(arg4));
+				RETURN_THROWS();
 			}
+			opt_ht = Z_ARRVAL_P(arg4);
 
 			if ((sec = zend_hash_str_find(opt_ht, sec_key, sizeof(sec_key) - 1)) == NULL) {
 				zend_argument_value_error(4, "must have key \"%s\"", sec_key);
