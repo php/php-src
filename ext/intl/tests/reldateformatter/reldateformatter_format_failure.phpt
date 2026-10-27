@@ -3,7 +3,7 @@ IntlRelativeDateTimeFormatter returns false on number formatting failure
 --EXTENSIONS--
 intl
 --SKIPIF--
-<?php if (version_compare(INTL_ICU_VERSION, '62.1') < 0) die('skip ICU >= 62.1 required for number formatting errors'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '62.1') < 0) die('skip requires ICU >= 62.1 for number formatting errors'); ?>
 --FILE--
 <?php
 

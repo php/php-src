@@ -3,7 +3,7 @@ NumberFormatter: rounding modes
 --EXTENSIONS--
 intl
 --SKIPIF--
-<?php if (version_compare(INTL_ICU_VERSION, '69.0') < 0) die('skip for ICU >= 69.0'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '69.0') < 0) die('skip requires ICU >= 69.0'); ?>
 --FILE--
 <?php
 

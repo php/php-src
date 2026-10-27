@@ -3,7 +3,7 @@ datefmt_format_code() and datefmt_parse_code()
 --EXTENSIONS--
 intl
 --SKIPIF--
-<?php if (version_compare(INTL_ICU_VERSION, '72.1') < 0) die('skip for ICU >= 72.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '72.1') < 0) die('skip requires ICU >= 72.1'); ?>
 --FILE--
 <?php
 

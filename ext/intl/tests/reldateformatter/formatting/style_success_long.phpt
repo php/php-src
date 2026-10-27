@@ -5,7 +5,7 @@ intl
 --SKIPIF--
 <?php
 if (version_compare(INTL_ICU_VERSION, '65.0', '<')) {
-    die('skip ICU >= 65.0 required for relative hour and minute names');
+    die('skip requires ICU >= 65.0 for relative hour and minute names');
 }
 ?>
 --FILE--
