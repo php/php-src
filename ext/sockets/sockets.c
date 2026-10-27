@@ -2053,7 +2053,7 @@ PHP_FUNCTION(socket_set_option)
 #endif
 	zend_long					level, optname;
 	void 					*opt_ptr;
-	HashTable		 		*opt_ht;
+	HashTable		 		*opt_ht, *opt_props = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(4, 4)
 		Z_PARAM_OBJECT_OF_CLASS(arg1, socket_ce)
@@ -2158,23 +2158,27 @@ PHP_FUNCTION(socket_set_option)
 					zend_argument_type_error(4, "must be of type array when argument #3 ($option) is SO_LINGER, %s given", zend_zval_value_name(arg4));
 					RETURN_THROWS();
 				} else {
-					opt_ht = Z_OBJPROP_P(arg4);
+					opt_props = zend_get_properties_for(arg4, ZEND_PROP_PURPOSE_ARRAY_CAST);
+					opt_ht = opt_props ? opt_props : (HashTable *) &zend_empty_array;
 				}
 			} else {
 				opt_ht = Z_ARRVAL_P(arg4);
 			}
 
-			if ((l_onoff = zend_hash_str_find(opt_ht, l_onoff_key, sizeof(l_onoff_key) - 1)) == NULL) {
+			if ((l_onoff = zend_hash_str_find_ind(opt_ht, l_onoff_key, sizeof(l_onoff_key) - 1)) == NULL) {
+				zend_release_properties(opt_props);
 				zend_argument_value_error(4, "must have key \"%s\"", l_onoff_key);
 				RETURN_THROWS();
 			}
-			if ((l_linger = zend_hash_str_find(opt_ht, l_linger_key, sizeof(l_linger_key) - 1)) == NULL) {
+			if ((l_linger = zend_hash_str_find_ind(opt_ht, l_linger_key, sizeof(l_linger_key) - 1)) == NULL) {
+				zend_release_properties(opt_props);
 				zend_argument_value_error(4, "must have key \"%s\"", l_linger_key);
 				RETURN_THROWS();
 			}
 
 			zend_long val_lonoff = zval_get_long(l_onoff);
 			zend_long val_linger = zval_get_long(l_linger);
+			zend_release_properties(opt_props);
 
 			if (val_lonoff < 0 || val_lonoff > USHRT_MAX) {
 				zend_argument_value_error(4, "\"%s\" must be between 0 and %u", l_onoff_key, USHRT_MAX);
@@ -2207,23 +2211,27 @@ PHP_FUNCTION(socket_set_option)
 							zend_zval_value_name(arg4));
 					RETURN_THROWS();
 				} else {
-					opt_ht = Z_OBJPROP_P(arg4);
+					opt_props = zend_get_properties_for(arg4, ZEND_PROP_PURPOSE_ARRAY_CAST);
+					opt_ht = opt_props ? opt_props : (HashTable *) &zend_empty_array;
 				}
 			} else {
 				opt_ht = Z_ARRVAL_P(arg4);
 			}
 
-			if ((sec = zend_hash_str_find(opt_ht, sec_key, sizeof(sec_key) - 1)) == NULL) {
+			if ((sec = zend_hash_str_find_ind(opt_ht, sec_key, sizeof(sec_key) - 1)) == NULL) {
+				zend_release_properties(opt_props);
 				zend_argument_value_error(4, "must have key \"%s\"", sec_key);
 				RETURN_THROWS();
 			}
-			if ((usec = zend_hash_str_find(opt_ht, usec_key, sizeof(usec_key) - 1)) == NULL) {
+			if ((usec = zend_hash_str_find_ind(opt_ht, usec_key, sizeof(usec_key) - 1)) == NULL) {
+				zend_release_properties(opt_props);
 				zend_argument_value_error(4, "must have key \"%s\"", usec_key);
 				RETURN_THROWS();
 			}
 
 			zend_long valsec = zval_get_long(sec);
 			zend_long valusec = zval_get_long(usec);
+			zend_release_properties(opt_props);
 #ifndef PHP_WIN32
 			tv.tv_sec = valsec;
 			tv.tv_usec = valusec;
