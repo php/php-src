@@ -29,9 +29,9 @@ $serverCode = <<<'CODE'
         echo "SERVER_EXCEPTION accept failed\n";
         exit(1);
     }
-    foreach (["tls-unique", "tls-server-end-point", "tls-exporter"] as $t) {
-        $v = openssl_get_channel_binding($conn, $t);
-        fwrite($conn, $t . "=" . (is_string($v) ? bin2hex($v) : "") . "\n");
+    foreach (Openssl\ChannelBindingType::cases() as $type) {
+        $v = openssl_get_channel_binding($conn, $type);
+        fwrite($conn, $type->value . "=" . (is_string($v) ? bin2hex($v) : "") . "\n");
     }
     phpt_wait();
     fclose($conn);
@@ -55,8 +55,8 @@ $clientCode = <<<'CODE'
     }
 
     $my = [];
-    foreach (["tls-unique", "tls-server-end-point", "tls-exporter"] as $t) {
-        $my[$t] = openssl_get_channel_binding($client, $t);
+    foreach (Openssl\ChannelBindingType::cases() as $type) {
+        $my[$type->value] = openssl_get_channel_binding($client, $type);
     }
 
     $peer = [];
@@ -70,7 +70,8 @@ $clientCode = <<<'CODE'
         $peer[$t] = ($enc === "") ? null : hex2bin($enc);
     }
 
-    foreach (["tls-unique", "tls-server-end-point", "tls-exporter"] as $t) {
+    foreach (Openssl\ChannelBindingType::cases() as $type) {
+        $t = $type->value;
         $c = $my[$t];
         $s = $peer[$t];
         $lc = is_string($c) ? strlen($c) : "null";

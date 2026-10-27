@@ -57,6 +57,10 @@ ZEND_DECLARE_MODULE_GLOBALS(openssl)
 
 zend_class_entry *php_openssl_exception_ce;
 
+/* Openssl\ChannelBindingType enum */
+
+static zend_class_entry *php_openssl_channel_binding_type_ce;
+
 /* OpenSSLCertificate class */
 
 zend_class_entry *php_openssl_certificate_ce;
@@ -757,6 +761,7 @@ PHP_INI_END()
 PHP_MINIT_FUNCTION(openssl)
 {
 	php_openssl_exception_ce = register_class_Openssl_OpensslException(zend_ce_exception);
+	php_openssl_channel_binding_type_ce = register_class_Openssl_ChannelBindingType();
 
 	php_openssl_certificate_ce = register_class_OpenSSLCertificate();
 	php_openssl_certificate_ce->create_object = php_openssl_certificate_create_object;
@@ -5109,31 +5114,15 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 PHP_FUNCTION(openssl_get_channel_binding)
 {
 	php_stream *stream = NULL;
-	zend_string *type = NULL;
+	zend_enum_Openssl_ChannelBindingType type;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		PHP_Z_PARAM_STREAM(stream)
-		Z_PARAM_STR(type)
+		Z_PARAM_ENUM(type, php_openssl_channel_binding_type_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_openssl_channel_binding_type type_code;
-	if (zend_string_equals_literal(type, "tls-unique")) {
-		type_code = PHP_OPENSSL_CHANNEL_BINDING_TYPE_TLS_UNIQUE;
-	} else if (zend_string_equals_literal(type, "tls-server-end-point")) {
-		type_code = PHP_OPENSSL_CHANNEL_BINDING_TYPE_TLS_SERVER_ENDPOINT;
-	} else if (zend_string_equals_literal(type, "tls-exporter")) {
-		type_code = PHP_OPENSSL_CHANNEL_BINDING_TYPE_TLS_EXPORTER;
-	} else {
-		zend_value_error(
-			"%s(): argument #2 ($channel_binding_type) \"%s\" is not a known "
-			"channel binding type, expected \"tls-unique\", "
-			"\"tls-server-end-point\" or \"tls-exporter\"",
-			get_active_function_name(), ZSTR_VAL(type));
-		RETURN_THROWS();
-	}
-
 	zend_string *result = NULL;
-	php_openssl_channel_binding_result ret = php_openssl_netstream_get_channel_binding(stream, type_code, &result);
+	php_openssl_channel_binding_result ret = php_openssl_netstream_get_channel_binding(stream, type, &result);
 	switch (ret) {
 		case PHP_OPENSSL_CHANNEL_BINDING_RESULT_OK:
 			RETURN_STR(result);

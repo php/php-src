@@ -3976,7 +3976,7 @@ static int php_openssl_get_cert_signature_md_nid(const X509 *cert) /* {{{ */
  * PHP_OPENSSL_CHANNEL_BINDING_RESULT_ERROR is returned; in both of these cases *out is set to NULL.
  */
 php_openssl_channel_binding_result php_openssl_netstream_get_channel_binding( /* {{{ */
-	php_stream *stream, php_openssl_channel_binding_type type, zend_string **out)
+	php_stream *stream, zend_enum_Openssl_ChannelBindingType type, zend_string **out)
 {
 	unsigned char buf[EVP_MAX_MD_SIZE];
 	size_t len = 0;
@@ -3995,7 +3995,7 @@ php_openssl_channel_binding_result php_openssl_netstream_get_channel_binding( /*
 	ssl = sslsock->ssl_handle;
 
 	switch (type) {
-	case PHP_OPENSSL_CHANNEL_BINDING_TYPE_TLS_UNIQUE:
+	case ZEND_ENUM_Openssl_ChannelBindingType_TlsUnique:
 		/* RFC 5929 section 3: tls-unique is not defined for TLS 1.3. */
 		if (SSL_version(ssl) >= TLS1_3_VERSION) {
 			return PHP_OPENSSL_CHANNEL_BINDING_RESULT_NOT_APPLICABLE;
@@ -4020,7 +4020,7 @@ php_openssl_channel_binding_result php_openssl_netstream_get_channel_binding( /*
 		*out = zend_string_init((char *)buf, len, 0);
 		return *out != NULL ? PHP_OPENSSL_CHANNEL_BINDING_RESULT_OK : PHP_OPENSSL_CHANNEL_BINDING_RESULT_ERROR;
 
-	case PHP_OPENSSL_CHANNEL_BINDING_TYPE_TLS_SERVER_ENDPOINT:
+	case ZEND_ENUM_Openssl_ChannelBindingType_TlsServerEndPoint:
 		{
 			X509 *cert = sslsock->is_client ?
 				SSL_get_peer_certificate(ssl) : SSL_get_certificate(ssl);
@@ -4062,7 +4062,7 @@ php_openssl_channel_binding_result php_openssl_netstream_get_channel_binding( /*
 			return *out != NULL ? PHP_OPENSSL_CHANNEL_BINDING_RESULT_OK : PHP_OPENSSL_CHANNEL_BINDING_RESULT_ERROR;
 		}
 
-	case PHP_OPENSSL_CHANNEL_BINDING_TYPE_TLS_EXPORTER:
+	case ZEND_ENUM_Openssl_ChannelBindingType_TlsExporter:
 		/*
 		 * RFC 9266 section 4 / RFC 5705: 32 octets, label
 		 * "EXPORTER-Channel-Binding", empty context. For an empty context the

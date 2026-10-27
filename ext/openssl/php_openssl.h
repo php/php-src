@@ -23,6 +23,8 @@ extern zend_module_entry openssl_module_entry;
 #include "php_version.h"
 #define PHP_OPENSSL_VERSION PHP_VERSION
 
+#include "openssl_decl.h"
+
 #include <openssl/opensslconf.h>
 #include <openssl/opensslv.h>
 /* OpenSSL version check */
@@ -224,16 +226,6 @@ typedef struct _php_openssl_session_object {
 	zend_object std;
 } php_openssl_session_object;
 
-/* Channel binding data types (RFC 5929, RFC 9266), as used for SASL
- * channel binding (e.g. SCRAM-SHA-*-PLUS, RFC 5802 / RFC 5801). The string
- * values accepted by openssl_get_channel_binding() are the IANA "Channel
- * Binding" registry names. */
-typedef enum php_openssl_channel_binding_type {
-	PHP_OPENSSL_CHANNEL_BINDING_TYPE_TLS_UNIQUE = 0,
-	PHP_OPENSSL_CHANNEL_BINDING_TYPE_TLS_SERVER_ENDPOINT,
-	PHP_OPENSSL_CHANNEL_BINDING_TYPE_TLS_EXPORTER,
-} php_openssl_channel_binding_type;
-
 /* Result of php_openssl_netstream_get_channel_binding(). */
 typedef enum php_openssl_channel_binding_result {
 	PHP_OPENSSL_CHANNEL_BINDING_RESULT_OK = 0,		/* *out holds a zend_string with the data */
@@ -254,7 +246,7 @@ extern zend_class_entry *php_openssl_session_ce;
 void php_openssl_session_object_init(zval *zv, SSL_SESSION *session);
 bool php_openssl_is_session_ce(zval *val);
 SSL_SESSION *php_openssl_session_from_zval(zval *zv);
-php_openssl_channel_binding_result php_openssl_netstream_get_channel_binding(struct _php_stream *stream, php_openssl_channel_binding_type type, zend_string **out);
+php_openssl_channel_binding_result php_openssl_netstream_get_channel_binding(struct _php_stream *stream, zend_enum_Openssl_ChannelBindingType type, zend_string **out);
 
 #if defined(HAVE_OPENSSL_ARGON2)
 
