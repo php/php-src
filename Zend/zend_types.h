@@ -23,7 +23,6 @@
 
 #include "zend_portability.h"
 #include "zend_long.h"
-#include "zend_atomic.h"
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -960,17 +959,6 @@ static zend_always_inline uint32_t zend_gc_delref_ex(zend_refcounted_h *p, uint3
 #define OBJ_EXTRA_FLAG_PRIV_2       (1U<<28) /* Reserved for private use by the object itself */
 
 #define OBJ_EXTRA_FLAGS(obj)		((obj)->extra_flags)
-
-static zend_always_inline uint32_t zend_atomic_load_acquire_32(const uint32_t *ptr)
-{
-#if defined(__GNUC__) || defined(__clang__) || defined(HAVE_GNUC_ATOMICS)
-	return __atomic_load_n(ptr, __ATOMIC_ACQUIRE);
-#else
-	uint32_t val = *(const volatile uint32_t *)ptr;
-	ZEND_ATOMIC_FENCE_ACQUIRE();
-	return val;
-#endif
-}
 
 /* Fast class cache */
 static zend_always_inline bool zstr_has_ce_cache(const zend_string *s)
