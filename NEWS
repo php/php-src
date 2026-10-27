@@ -30,10 +30,20 @@ PHP                                                                        NEWS
     for grouping. (Klaas Skelte van der Werf)
   . Fixed bug GH-24265 (Unwind/GracefulExit discarded in
     zend_fiber_execute()). (David Carlier)
+  . Fixed unmapping of an unrelated range when the aligned chunk mmap fails
+    (Marti2203).
   . Fixed bug GH-24731 (Assertion failure in zend_objects_store_del() when a
     bailout interrupts releasing the header_register_callback() callback).
     (lazerg)
 
+- CLI:
+  . Fixed bug GH-24697 (PHP_HTTP_PARSER_STRICT build option doesn't work).
+    (ndossche, devnexen)
+
+- Curl:
+  . Fix use-after-free of CURLOPT_STDERR stream on cloned curl handle.
+    (lacatoire)
+    
 - Date:
   . Fixed bug GH-20503 (Assertion failure with ext/date DateInterval property
     hash construction). (heathdutton)
@@ -124,6 +134,10 @@ PHP                                                                        NEWS
     into a hash. (jorgsowa)
   . Fixed bug GH-24436 (Tracing JIT: keep the SEND_VAL type guard after
     assigning to a reference). (waroad)
+  . Fixed bug GH-17733 (System entropy does not take into account function
+    order, resulting in wrong functions possibly called
+    in different configurations). (ndossche)
+  . Fixed bug GH-24438 (Preserve indirect types in JIT side traces). (aasul)
 
 - PDO:
   . Fixed invalid ATTR_ORACLE_NULLS values being accepted and truncated.
