@@ -27,6 +27,10 @@
 #include "ext/json/php_json.h"
 #include "ext/json/php_json_parser.h"
 
+/* Lower than the default depth of 512, so that deeply nested inputs fail quickly and the
+ * depth limit is reached with small inputs. */
+#define MAX_DEPTH 10
+
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 
 	if (fuzzer_request_startup() == FAILURE){
@@ -55,7 +59,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	for (int index = 0; index < 12; ++index) {
 		zval result;
 		php_json_parser parser;
-		php_json_parser_init(&parser, &result, data, Size, options[index], PHP_JSON_PARSER_DEFAULT_DEPTH);
+		php_json_parser_init(&parser, &result, data, Size, options[index], MAX_DEPTH);
 		bool decoded = php_json_yyparse(&parser) == SUCCESS;
 		if (decoded) {
 			zval_ptr_dtor(&result);
@@ -66,7 +70,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 		if (options[index] == PHP_JSON_OBJECT_AS_ARRAY
 				|| options[index] == (PHP_JSON_OBJECT_AS_ARRAY | PHP_JSON_INVALID_UTF8_IGNORE)) {
 			bool valid = php_json_validate_ex(data, Size,
-				options[index] & PHP_JSON_INVALID_UTF8_IGNORE, PHP_JSON_PARSER_DEFAULT_DEPTH);
+				options[index] & PHP_JSON_INVALID_UTF8_IGNORE, MAX_DEPTH);
 			ZEND_ASSERT(valid == decoded);
 		}
 	}
