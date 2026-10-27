@@ -1,10 +1,14 @@
 --TEST--
 Tracing JIT: register-allocated loop variable must survive a VM interrupt raised in the loop body
 --DESCRIPTION--
-VmInterruptComparable's compare handler raises EG(vm_interrupt) without a
-function call, so the interrupt is only noticed by the check that closes the
-loop trace. That check must deoptimize (write $s back to its CV slot) before
-entering the VM.
+Comparing two VmInterruptComparable objects sets EG(vm_interrupt) without a
+PHP function call, so the JIT only notices the interrupt at the end of the
+loop. Before handing control to the VM there, it has to write $s back to
+memory, or the loop continues with a stale value.
+
+This only shows up if $s is kept in a callee-saved register across the
+comparison, which is why it's an int: x86_64 has no callee-saved floating
+point registers, so a float would always be spilled to memory first.
 --EXTENSIONS--
 opcache
 zend_test
@@ -16,10 +20,10 @@ opcache.jit_buffer_size=64M
 opcache.jit_hot_loop=1
 --FILE--
 <?php
-function sum(array $objs, VmInterruptComparable $t): float {
-    $s = 0.0;
+function sum(array $objs, VmInterruptComparable $t): int {
+    $s = 0;
     foreach ($objs as $o) {
-        $s += 1.5;
+        $s += 3;
         // Only VmInterruptComparable's compare handler raises the interrupt.
         $r = $o == $t;
     }
@@ -31,4 +35,4 @@ $objs[150] = new VmInterruptComparable(0);
 var_dump(sum($objs, new VmInterruptComparable(0)));
 ?>
 --EXPECT--
-float(300)
+int(600)
