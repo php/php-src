@@ -4152,11 +4152,11 @@ static int zend_jit_handler(zend_jit_ctx *jit, const zend_op *opline, int may_th
 	} else if (ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL) {
 		zend_vm_opcode_handler_func_t handler = (zend_vm_opcode_handler_func_t)zend_get_opcode_handler_func(opline);
 		ir_ref ip = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(handler), jit_FP(jit), jit_IP(jit));
-		jit_STORE_IP(jit, ip);
+		jit_STORE_IP(jit, ir_AND_A(ip, ir_CONST_ADDR(~ZEND_VM_ENTER_BIT)));
 	} else {
 		zend_vm_opcode_handler_t handler = opline->handler;
 		ir_ref ip = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(handler), jit_FP(jit), jit_IP(jit));
-		jit_STORE_IP(jit, ip);
+		jit_STORE_IP(jit, ir_AND_A(ip, ir_CONST_ADDR(~ZEND_VM_ENTER_BIT)));
 	}
 	if (may_throw) {
 		zend_jit_check_exception(jit);

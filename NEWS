@@ -124,6 +124,8 @@ PHP                                                                        NEWS
     handled at the end of a loop trace. (Levi Morrison)
   . Fixed JIT crashes when handling a VM interrupt with a stale saved opline
     in the tailcall VM. (Levi Morrison)
+  . Fixed function JIT misinterpreting VM-enter results after an interrupt
+    callback in the CALL and TAILCALL VMs. (Levi Morrison)
 
 - PDO:
   . Fixed invalid ATTR_ORACLE_NULLS values being accepted and truncated.
