@@ -99,6 +99,8 @@ PHP                                                                        NEWS
     exits with an uninitialized opline). (waroad)
   . Fixed use-after-free in JIT ASSIGN_DIM_OP when concatenating into an
     empty array element. (jorgsowa)
+  . Fixed tracing JIT losing register-allocated CVs when an interrupt is
+    handled at the end of a loop trace. (Levi Morrison)
 
 - PDO:
   . Fixed invalid ATTR_ORACLE_NULLS values being accepted and truncated.
