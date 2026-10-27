@@ -65,6 +65,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug GH-24308 (Request shutdown calls closelog() even when syslog
     was not opened by PHP). (lazerg)
+  . Fixed bug GH-24552 (Case-insensitive substr_compare(), ksort() and
+    krsort() are still locale-dependent). (Lazizbek Ergashev, Jon Surrell)
 
 - Streams:
   . Fixed bug GH-24506 (stream_select() leaks a stream-error operation level
