@@ -3456,7 +3456,11 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 		return;
 	}
 
+	uint32_t type_info = GC_TYPE_INFO(in_hash);
+	GC_TYPE_INFO(in_hash) = GC_ARRAY;
+
 	zend_hash_destroy(in_hash);
+	GC_TYPE_INFO(in_hash) = type_info;
 
 	HT_FLAGS(in_hash)          = HT_FLAGS(&out_hash);
 	in_hash->nTableSize        = out_hash.nTableSize;
