@@ -1109,8 +1109,9 @@ static HashTable *sxe_get_prop_hash(zend_object *object, int is_debug) /* {{{ */
 	GET_NODE(sxe, node);
 	if (sxe->iter.type == SXE_ITER_CHILD) {
 		/* Start at the first child rather than at the first element child, so that
-		 * non-element nodes (e.g. PIs, comments) before it are not skipped. */
-		node = node ? node->children : NULL;
+		 * non-element nodes (e.g. PIs, comments) before it are not skipped. Like
+		 * sxe_prop_is_empty(), only do so if there is a matching element child. */
+		node = php_sxe_get_first_node_non_destructive(sxe, node) ? node->children : NULL;
 	} else {
 		node = php_sxe_get_first_node_non_destructive(sxe, node);
 	}
