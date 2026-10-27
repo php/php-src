@@ -145,6 +145,9 @@ PHP                                                                        NEWS
   . Fixed JIT segfault on switch over a string reference holding a
     non-string value. (jorgsowa)
   . Fixed AArch64 JIT encoding of invalid logical immediates. (jorgsowa)
+  . Fixed bug GH-23572 (Tracing JIT calls the wrong method for self::/parent::
+    static calls in trait methods shared by several classes). (jorgsowa,
+    mgoulart)
 
 - PDO:
   . Fixed invalid ATTR_ORACLE_NULLS values being accepted and truncated.
