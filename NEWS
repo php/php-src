@@ -26,6 +26,10 @@ PHP                                                                        NEWS
 - Hash:
   . Fix GOST and Snefru digests of 512 MiB or more. (Martin Mirchev)
 
+- MBString:
+  . Fixed negative mbstring.regex_stack_limit and mbstring.regex_retry_limit
+    on 32bit platforms. (Marc Bennewitz)
+
 - Opcache:
   . Fixed tracing JIT returning a wrapped integer instead of a float on
     integer overflow after an integer was compared with a float or
@@ -71,6 +75,10 @@ PHP                                                                        NEWS
     parsing fails after Transfer-Encoding). (bercedev)
   . Fixed bug GH-24509 (HTTP wrapper leaks Location buffer on empty
     Location header). (bercedev)
+
+- Windows:
+  . Fixed sapi_windows_cp_set() and sapi_windows_cp_conv() accepting a negative
+    codepage on 32bit platforms. (Marc Bennewitz)
 
 - Zip:
   . Reject broken libzip versions 1.3.1, 1.7.0 and 1.12.0 during Windows
