@@ -472,6 +472,15 @@ static void zend_jit_commit_veneers(void)
 		}
 	}
 }
+
+static void zend_jit_discard_veneers(void)
+{
+	int i, count = sizeof(zend_jit_stubs) / sizeof(zend_jit_stubs[0]);
+
+	for (i = 0; i < count; i++) {
+		zend_jit_stub_handlers[count + i] = NULL;
+	}
+}
 #endif
 
 static bool zend_jit_prefer_const_addr_load(zend_jit_ctx *jit, uintptr_t addr)
@@ -2967,7 +2976,11 @@ static void *zend_jit_ir_compile(ir_ctx *ctx, size_t *size, const char *name)
 
 #if defined(IR_TARGET_AARCH64)
 	if (ctx->flags2 & IR_HAS_VENEERS) {
-		zend_jit_commit_veneers();
+		if (entry) {
+			zend_jit_commit_veneers();
+		} else {
+			zend_jit_discard_veneers();
+		}
 	}
 #endif
 
@@ -16493,7 +16506,7 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 					if (fallback_label) {
 						jit_guard_Z_TYPE(jit, op1_addr, IS_REFERENCE, fallback_label);
 					} else {
-						ir_ref if_ref = jit_if_Z_TYPE(jit, op1_addr, IS_STRING);
+						ir_ref if_ref = jit_if_Z_TYPE(jit, op1_addr, IS_REFERENCE);
 						ir_IF_FALSE_cold(if_ref);
 						ir_refs_add(slow_inputs, ir_END());
 						ir_IF_TRUE(if_ref);
@@ -16503,7 +16516,7 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 					op1_addr = ZEND_ADDR_REF_ZVAL(ref2);
 
 					if (fallback_label) {
-						jit_guard_Z_TYPE(jit, op1_addr, IS_LONG, fallback_label);
+						jit_guard_Z_TYPE(jit, op1_addr, IS_STRING, fallback_label);
 					} else {
 						if_string = jit_if_Z_TYPE(jit, op1_addr, IS_STRING);
 						ir_IF_FALSE_cold(if_string);

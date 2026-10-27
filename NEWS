@@ -35,6 +35,7 @@ PHP                                                                        NEWS
 - Curl:
   . Fix use-after-free of CURLOPT_STDERR stream on cloned curl handle.
     (lacatoire)
+  . Fix UAF on clone due to callback data pointer mismatch. (ndossche)
 
 - Date:
   . Fixed bug GH-20503 (Assertion failure with ext/date DateInterval property
@@ -49,6 +50,10 @@ PHP                                                                        NEWS
 - DOM:
   . Fix error paths in dom_xml_serializing_a_document_node(). (ndossche)
 
+- FFI:
+  . Fixed bug GH-24582 (Memory leaks in ext/ffi parser when finalize_type()
+    bails out). (matyapiro31, David Carlier)
+
 - Fileinfo:
   . Fixed bug GH-24289 (finfo::file() reports the wrong argument number for
     an invalid $filename). (Lazizbek Ergashev)
@@ -56,6 +61,18 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed bug GH-24229 (fcgi_close() passes shutdown() a literal 1, which is
     SHUT_RD in WASI). (Ryosuke Ishibashi)
+  . Fixed crash and stack memory disclosure in the worker output logging with
+    a pool name longer than the message prefix buffer or log_limit.
+    (Martin Mirchev)
+  . Fixed bug GH-24046 (FPM worker stdio pipe fd closed twice when a child
+    process outlives the worker, breaking a later worker's stdio).
+    (Ian P. Christian, ndossche)
+  . Fixed memory leaks of the _GET string on the status page error and HEAD
+    request paths. (Marcel Hernandez)
+  . Fixed use-after-free of the scoreboard copy when logging invalid status
+    values. (Marcel Hernandez)
+  . Fixed null pointer dereference in fpm_get_status() when the scoreboard
+    copy fails. (Marcel Hernandez)
 
 - FTP:
   . Fix double free in ext/ftp data_accept() on accept failure. (alepacheco)
@@ -122,6 +139,12 @@ PHP                                                                        NEWS
     map_ptr offset). (prateekbhujel)
   . Fixed tracing JIT losing register-allocated CVs when an interrupt is
     handled at the end of a loop trace. (Levi Morrison)
+  . Fixed bug GH-24675 (function with >~1.7 MB of machine code corrupts JIT
+    buffer accounting). (ndossche)
+  . Call orig_post_shutdown_cb(). (ndossche)
+  . Fixed JIT segfault on switch over a string reference holding a
+    non-string value. (jorgsowa)
+  . Fixed AArch64 JIT encoding of invalid logical immediates. (jorgsowa)
   . Fixed JIT crashes when handling a VM interrupt with a stale saved opline
     in the tailcall VM. (Levi Morrison)
   . Fixed function JIT misinterpreting VM-enter results after an interrupt
