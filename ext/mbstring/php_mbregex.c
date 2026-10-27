@@ -737,8 +737,9 @@ static inline void mb_regex_substitute(
 		clen = (int) php_mb_mbchar_bytes(p, enc);
 		if (clen != 1 || p == eos || p[0] != '\\') {
 			/* skip anything that's not an ascii backslash */
-			smart_str_appendl(pbuf, p, clen);
-			p += clen;
+			sp = p;
+			p = MIN(p + clen, eos);
+			smart_str_appendl(pbuf, sp, p - sp);
 			continue;
 		}
 		sp = p; /* save position */
