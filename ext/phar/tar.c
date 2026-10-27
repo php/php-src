@@ -588,7 +588,7 @@ bail:
 		}
 
 		if (entry.filename_len >= sizeof(".phar/.metadata")-1 && !memcmp(entry.filename, ".phar/.metadata", sizeof(".phar/.metadata")-1)) {
-			if (FAILURE == phar_tar_process_metadata(newentry, fp)) {
+			if (size > totalsize || FAILURE == phar_tar_process_metadata(newentry, fp)) {
 				if (error) {
 					spprintf(error, 4096, "phar error: tar-based phar \"%s\" has invalid metadata in magic file \"%s\"", fname, entry.filename);
 				}
