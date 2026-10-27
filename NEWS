@@ -31,6 +31,9 @@ PHP                                                                        NEWS
   . Fixed crash and stack memory disclosure in the worker output logging with
     a pool name longer than the message prefix buffer or log_limit.
     (Martin Mirchev)
+  . Fixed bug GH-24046 (FPM worker stdio pipe fd closed twice when a child
+    process outlives the worker, breaking a later worker's stdio).
+    (Ian P. Christian, ndossche)
 
 - Hash:
   . Fix GOST and Snefru digests of 512 MiB or more. (Martin Mirchev)
