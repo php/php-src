@@ -457,8 +457,9 @@ static void accel_interned_strings_restore_state(void)
 				/* Discard non-global CE_CACHE slots on reset. */
 				uintptr_t idx = (GC_REFCOUNT(s) - 1) / sizeof(void *);
 				if (idx >= ZCSG(map_ptr_last)) {
-					GC_SET_REFCOUNT(s, 2);
 					GC_DEL_FLAGS(s, IS_STR_CLASS_NAME_MAP_PTR);
+					atomic_thread_fence(memory_order_release);
+					GC_SET_REFCOUNT(s, 2);
 				}
 			}
 
@@ -567,6 +568,7 @@ finish:
 	if (ZSTR_HAS_CE_CACHE(str) && !ZSTR_HAS_CE_CACHE(s)) {
 		ZEND_ASSERT(GC_FLAGS(str) & IS_STR_PERMANENT);
 		GC_SET_REFCOUNT(s, GC_REFCOUNT(str));
+		atomic_thread_fence(memory_order_release);
 		GC_ADD_FLAGS(s, IS_STR_CLASS_NAME_MAP_PTR);
 	}
 
