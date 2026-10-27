@@ -167,6 +167,8 @@ PHP                                                                        NEWS
     Windows). (Nicolas Grekas)
   . Fixed glob() not negating bracket expressions that start with "^".
     (Nicolas Grekas)
+  . Fixed bug GH-24605 (var_export() crashes on deeply nested arrays and
+    objects). (Labish Bardiya)
 
 - Streams:
   . Fixed bug GH-24508 (HTTP wrapper leaks the dechunk filter when header
