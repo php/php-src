@@ -472,6 +472,15 @@ static void zend_jit_commit_veneers(void)
 		}
 	}
 }
+
+static void zend_jit_discard_veneers(void)
+{
+	int i, count = sizeof(zend_jit_stubs) / sizeof(zend_jit_stubs[0]);
+
+	for (i = 0; i < count; i++) {
+		zend_jit_stub_handlers[count + i] = NULL;
+	}
+}
 #endif
 
 static bool zend_jit_prefer_const_addr_load(zend_jit_ctx *jit, uintptr_t addr)
@@ -2967,7 +2976,11 @@ static void *zend_jit_ir_compile(ir_ctx *ctx, size_t *size, const char *name)
 
 #if defined(IR_TARGET_AARCH64)
 	if (ctx->flags2 & IR_HAS_VENEERS) {
-		zend_jit_commit_veneers();
+		if (entry) {
+			zend_jit_commit_veneers();
+		} else {
+			zend_jit_discard_veneers();
+		}
 	}
 #endif
 
