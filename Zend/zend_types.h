@@ -24,6 +24,7 @@
 
 #include "zend_portability.h"
 #include "zend_long.h"
+#include "zend_atomic.h"
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -882,7 +883,13 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define OBJ_EXTRA_FLAGS(obj)		((obj)->extra_flags)
 
 /* Fast class cache */
-#define ZSTR_HAS_CE_CACHE(s)		(GC_FLAGS(s) & IS_STR_CLASS_NAME_MAP_PTR)
+static zend_always_inline bool zstr_has_ce_cache(const zend_string *s)
+{
+	uint32_t type_info = ZEND_ATOMIC_LOAD_ACQUIRE_32(&GC_TYPE_INFO(s));
+	return (type_info & (IS_STR_CLASS_NAME_MAP_PTR << GC_FLAGS_SHIFT)) != 0;
+}
+
+#define ZSTR_HAS_CE_CACHE(s)		zstr_has_ce_cache(s)
 #define ZSTR_GET_CE_CACHE(s)		ZSTR_GET_CE_CACHE_EX(s, 1)
 #define ZSTR_SET_CE_CACHE(s, ce)	ZSTR_SET_CE_CACHE_EX(s, ce, 1)
 
