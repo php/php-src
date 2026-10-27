@@ -160,6 +160,11 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
             ? ['zts' => [true, false]]
             : ['zts' => [false]];
     }
+    if ($all_jobs) {
+        $jobs['APACHE_SAPI'] = true;
+        $jobs['LITESPEED_SAPI'] = true;
+    }
+
     return $jobs;
 }
 
