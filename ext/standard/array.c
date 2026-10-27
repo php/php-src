@@ -3456,7 +3456,11 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 		return;
 	}
 
+	uint32_t type_info = GC_TYPE_INFO(in_hash);
+	GC_TYPE_INFO(in_hash) = GC_ARRAY;
+
 	zend_hash_destroy(in_hash);
+	GC_TYPE_INFO(in_hash) = type_info;
 
 	HT_FLAGS(in_hash)          = HT_FLAGS(&out_hash);
 	in_hash->nTableSize        = out_hash.nTableSize;
@@ -3740,8 +3744,11 @@ PHP_FUNCTION(array_unshift)
 
 	/* replace HashTable data */
 	Z_ARRVAL_P(stack)->pDestructor = NULL;
+	uint32_t type_info = GC_TYPE_INFO(Z_ARRVAL_P(stack));
+	GC_TYPE_INFO(Z_ARRVAL_P(stack)) = GC_ARRAY;
 	zend_hash_destroy(Z_ARRVAL_P(stack));
 
+	GC_TYPE_INFO(Z_ARRVAL_P(stack)) = type_info;
 	HT_FLAGS(Z_ARRVAL_P(stack))          = HT_FLAGS(&new_hash);
 	Z_ARRVAL_P(stack)->nTableSize        = new_hash.nTableSize;
 	Z_ARRVAL_P(stack)->nTableMask        = new_hash.nTableMask;
