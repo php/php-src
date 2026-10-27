@@ -122,6 +122,8 @@ PHP                                                                        NEWS
     map_ptr offset). (prateekbhujel)
   . Fixed tracing JIT losing register-allocated CVs when an interrupt is
     handled at the end of a loop trace. (Levi Morrison)
+  . Fixed JIT crashes when handling a VM interrupt with a stale saved opline
+    in the tailcall VM. (Levi Morrison)
 
 - PDO:
   . Fixed invalid ATTR_ORACLE_NULLS values being accepted and truncated.
