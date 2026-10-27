@@ -338,10 +338,12 @@ static void do_adjust_special_early(timelib_time* time)
 	timelib_do_normalize(time);
 }
 
-static bool timelib_adjust_timezone_to_earlier(timelib_time *tz, timelib_tzinfo *tzi)
+static bool timelib_adjust_timezone_for_overlap(timelib_time *tz, timelib_tzinfo *tzi)
 {
 	timelib_sll earlier_sse = INT64_MAX;
 	timelib_sll second_earliest_sse = INT64_MAX;
+	timelib_sll matching_offset_sse = INT64_MAX;
+	int32_t preferred_offset = tz->z;
 	uint64_t type_count = tzi->bit64.typecnt;
 
 	for (uint64_t i = 0; i < type_count; i++) {
@@ -363,19 +365,24 @@ static bool timelib_adjust_timezone_to_earlier(timelib_time *tz, timelib_tzinfo 
 		} else if (candidate_sse > earlier_sse && candidate_sse < second_earliest_sse) {
 			second_earliest_sse = candidate_sse;
 		}
+
+		if (offset == preferred_offset && candidate_sse < matching_offset_sse) {
+			matching_offset_sse = candidate_sse;
+		}
 	}
 
 	if (second_earliest_sse == INT64_MAX) {
 		return false;
 	}
 
-	tz->sse = earlier_sse;
+	/* Keep the previous offset if it is valid for the new local time. */
+	tz->sse = matching_offset_sse != INT64_MAX ? matching_offset_sse : earlier_sse;
 	tz->is_localtime = 1;
 	timelib_set_timezone(tz, tzi);
 	return true;
 }
 
-static void do_adjust_timezone(timelib_time *tz, timelib_tzinfo *tzi, bool prefer_earlier)
+static void do_adjust_timezone(timelib_time *tz, timelib_tzinfo *tzi, bool resolve_overlap)
 {
 	switch (tz->zone_type) {
 		case TIMELIB_ZONETYPE_OFFSET:
@@ -410,7 +417,7 @@ static void do_adjust_timezone(timelib_time *tz, timelib_tzinfo *tzi, bool prefe
 			if (!tzi) {
 				return;
 			}
-			if (prefer_earlier && timelib_adjust_timezone_to_earlier(tz, tzi)) {
+			if (resolve_overlap && timelib_adjust_timezone_for_overlap(tz, tzi)) {
 				return;
 			}
 
@@ -474,7 +481,7 @@ timelib_sll timelib_epoch_days_from_time(timelib_time *time)
 	return era * DAYS_PER_ERA + day_of_era - HINNANT_EPOCH_SHIFT;
 }
 
-static void timelib_update_ts_internal(timelib_time* time, timelib_tzinfo* tzi, bool prefer_earlier)
+static void timelib_update_ts_internal(timelib_time* time, timelib_tzinfo* tzi, bool resolve_overlap)
 {
 	do_adjust_special_early(time);
 	do_adjust_relative(time);
@@ -491,7 +498,7 @@ static void timelib_update_ts_internal(timelib_time* time, timelib_tzinfo* tzi, 
 	time->sse += timelib_epoch_days_from_time(time) * (SECS_PER_DAY / 2);
 
 	// This modifies time->sse, if needed
-	do_adjust_timezone(time, tzi, prefer_earlier);
+	do_adjust_timezone(time, tzi, resolve_overlap);
 
 	time->sse_uptodate = 1;
 	time->have_relative = time->relative.have_weekday_relative = time->relative.have_special_relative = time->relative.first_last_day_of = 0;
