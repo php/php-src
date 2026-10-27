@@ -46,12 +46,13 @@ PHPAPI bool php_odbc_connstr_is_quoted(const char *str)
 		if (str[i] == '}' && str[i + 1] == '}') {
 			/* Skip over so we don't count it again */
 			i++;
-		} else if (str[i] == '}' && str[i + 1] != '\0') {
-			/* If not at the end, not quoted */
-			return false;
+		} else if (str[i] == '}') {
+			/* Only quoted if at the end */
+			return str[i + 1] == '\0';
 		}
 	}
-	return true;
+	/* No closing brace */
+	return false;
 }
 
 /**
