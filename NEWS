@@ -32,9 +32,6 @@ PHP                                                                        NEWS
     zend_fiber_execute()). (David Carlier)
   . Fixed unmapping of an unrelated range when the aligned chunk mmap fails
     (Marti2203).
-  . Fixed bug GH-24731 (Assertion failure in zend_objects_store_del() when a
-    bailout interrupts releasing the header_register_callback() callback).
-    (lazerg)
 
 - CLI:
   . Fixed bug GH-24697 (PHP_HTTP_PARSER_STRICT build option doesn't work).
