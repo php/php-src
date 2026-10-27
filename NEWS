@@ -56,6 +56,10 @@ PHP                                                                        NEWS
   . Fixed infinite loop in sapi_header_op() for headers of 4 GiB or more.
     (Martin Mirchev)
 
+- Sodium:
+  . Pass sodium_crypto_xof_*() state via objects instead of by-ref strings.
+    (timwolla)
+
 - SPL:
   . Fixed bug GH-24264 (Unwind/GracefulExit discarded in spl_iterators.c).
     (Lazizbek Ergashev)
