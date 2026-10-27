@@ -216,7 +216,7 @@ php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, const char *path, con
 
 				stream = php_stream_alloc_rel(&php_stream_gzio_ops, self, 0, mode);
 				if (stream) {
-					stream->flags |= PHP_STREAM_FLAG_NO_BUFFER;
+					stream->flags |= PHP_STREAM_FLAG_NO_BUFFER | (innerstream->flags & PHP_STREAM_FLAG_URL);
 					return stream;
 				}
 
@@ -252,5 +252,5 @@ static const php_stream_wrapper_ops gzip_stream_wops = {
 const php_stream_wrapper php_stream_gzip_wrapper =	{
 	&gzip_stream_wops,
 	NULL,
-	0, /* is_url */
+	PHP_STREAM_WRAPPER_FLAG_NESTED,
 };

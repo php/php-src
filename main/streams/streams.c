@@ -2020,7 +2020,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 		return plain_files_wrapper;
 	}
 
-	if (wrapper && wrapper->is_url &&
+	if (wrapper && (wrapper->flags & PHP_STREAM_WRAPPER_FLAG_URL) &&
 	    (options & STREAM_DISABLE_URL_PROTECTION) == 0 &&
 	    (!PG(allow_url_fopen) ||
 	     (((options & STREAM_OPEN_FOR_INCLUDE) ||
@@ -2039,6 +2039,29 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 	return wrapper;
 }
 /* }}} */
+
+PHPAPI bool php_stream_wrapper_is_url(const php_stream_wrapper *wrapper, const char *path)
+{
+	while ((wrapper->flags & (PHP_STREAM_WRAPPER_FLAG_URL | PHP_STREAM_WRAPPER_FLAG_NESTED))
+			== PHP_STREAM_WRAPPER_FLAG_NESTED) {
+		const char *p = path;
+
+		while (isalnum((unsigned char)*p) || *p == '+' || *p == '-' || *p == '.') {
+			p++;
+		}
+		if (p == path || strncmp(p, "://", 3) != 0) {
+			return false;
+		}
+		path = p + 3;
+
+		wrapper = php_stream_locate_url_wrapper(path, NULL, STREAM_DISABLE_URL_PROTECTION);
+		if (wrapper == NULL) {
+			return true;
+		}
+	}
+
+	return (wrapper->flags & PHP_STREAM_WRAPPER_FLAG_URL) != 0;
+}
 
 PHPAPI int php_stream_mkdir(const char *path, int mode, int options, php_stream_context *context)
 {
@@ -2111,6 +2134,9 @@ PHPAPI php_stream *_php_stream_opendir(const char *path, int options,
 	if (stream) {
 		stream->wrapper = wrapper;
 		stream->flags |= PHP_STREAM_FLAG_NO_BUFFER | PHP_STREAM_FLAG_IS_DIR;
+		if (wrapper->flags & PHP_STREAM_WRAPPER_FLAG_URL) {
+			stream->flags |= PHP_STREAM_FLAG_URL;
+		}
 	} else if (options & REPORT_ERRORS) {
 		php_stream_display_wrapper_errors(wrapper, context, PHP_STREAM_EC(OpenFailed),
 				"Failed to open directory");
@@ -2179,7 +2205,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 			"Failed to open stream: no suitable wrapper could be found");
 		goto cleanup_no_wrapper_name;
 	}
-	if ((options & STREAM_USE_URL) && !wrapper->is_url) {
+	if ((options & STREAM_USE_URL) && !php_stream_wrapper_is_url(wrapper, path)) {
 		php_stream_wrapper_warn(wrapper, context, options,
 			ProtocolUnsupported,
 			"This function may only be used against URLs");
@@ -2219,6 +2245,10 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 	}
 
 	stream->wrapper = wrapper;
+	if (wrapper->flags & PHP_STREAM_WRAPPER_FLAG_URL) {
+		stream->flags |= PHP_STREAM_FLAG_URL;
+	}
+	uint32_t url_flag = stream->flags & PHP_STREAM_FLAG_URL;
 
 	if (opened_path && !*opened_path && resolved_path) {
 		*opened_path = resolved_path;
@@ -2254,6 +2284,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 					pefree(newstream->orig_path, persistent);
 				}
 				newstream->orig_path = pestrdup(path, persistent);
+				newstream->flags |= url_flag;
 				stream = newstream;
 				goto cleanup;
 			default:
