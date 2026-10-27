@@ -144,6 +144,7 @@ PHP                                                                        NEWS
   . Call orig_post_shutdown_cb(). (ndossche)
   . Fixed JIT segfault on switch over a string reference holding a
     non-string value. (jorgsowa)
+  . Fixed AArch64 JIT encoding of invalid logical immediates. (jorgsowa)
 
 - PDO:
   . Fixed invalid ATTR_ORACLE_NULLS values being accepted and truncated.
