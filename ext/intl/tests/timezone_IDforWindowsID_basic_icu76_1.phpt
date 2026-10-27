@@ -4,6 +4,7 @@ IntlTimeZone::getIDForWindowsID basic test
 intl
 --SKIPIF--
 <?php if (version_compare(INTL_ICU_VERSION, '76.1') < 0) die('skip for ICU >= 76.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '79.1') >= 0) die('skip for ICU < 79.1'); ?>
 --FILE--
 <?php
 
