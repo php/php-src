@@ -156,6 +156,21 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 	if (host == NULL) {
 		return 0;
 	}
+
+	/* CVE-2025-1220: reject hostnames containing null bytes */
+	{
+		size_t host_len = strlen(host);
+		if (memchr(host, '\0', host_len) != NULL) {
+			if (error_string) {
+				*error_string = ZSTR_INIT_LITERAL("The hostname must not contain null bytes", 0);
+				php_error_docref(NULL, E_WARNING, "%s", ZSTR_VAL(*error_string));
+			} else {
+				php_error_docref(NULL, E_WARNING, "The hostname must not contain null bytes");
+			}
+			return 0;
+		}
+	}
+
 #ifdef HAVE_GETADDRINFO
 	memset(&hints, '\0', sizeof(hints));
 
@@ -636,6 +651,11 @@ PHPAPI zend_result php_network_parse_network_address_with_port(const char *addr,
 #else
 	memset(in4, 0, sizeof(struct sockaddr_in));
 #endif
+
+	/* CVE-2025-1220: reject addresses containing null bytes */
+	if (memchr(addr, '\0', addrlen) != NULL) {
+		return FAILURE;
+	}
 
 	if (*addr == '[') {
 		colon = memchr(addr + 1, ']', addrlen-1);
