@@ -346,7 +346,7 @@ typedef struct post_var_data {
 	size_t already_scanned;
 } post_var_data_t;
 
-static bool add_post_var(zval *arr, post_var_data_t *var, bool eof)
+static bool add_post_var(zval *arr, post_var_data_t *var, bool eof, bool register_var)
 {
 	char *start, *ksep, *vsep, *val;
 	size_t klen, vlen;
@@ -365,6 +365,11 @@ static bool add_post_var(zval *arr, post_var_data_t *var, bool eof)
 		} else {
 			vsep = var->end;
 		}
+	}
+
+	if (!register_var) {
+		/* Over max_input_vars; the caller reports the error. */
+		return 1;
 	}
 
 	ksep = memchr(var->ptr, '=', vsep - var->ptr);
@@ -411,7 +416,7 @@ static inline int add_post_vars(zval *arr, post_var_data_t *vars, bool eof)
 
 	vars->ptr = ZSTR_VAL(vars->str.s);
 	vars->end = ZSTR_VAL(vars->str.s) + ZSTR_LEN(vars->str.s);
-	while (add_post_var(arr, vars, eof)) {
+	while (add_post_var(arr, vars, eof, vars->cnt < max_vars)) {
 		if (++vars->cnt > max_vars) {
 			php_error_docref(NULL, E_WARNING,
 					"Input variables exceeded %" PRIu64 ". "
