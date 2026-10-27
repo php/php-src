@@ -1124,6 +1124,9 @@ class Tester
     {
         if (is_null($pid)) {
             $pid = $this->getPid();
+            if ($pid === 0) {
+                return '';
+            }
         }
         $cmd = "kill -$signal $pid";
         $this->trace('Sending signal using command', $cmd, true);
