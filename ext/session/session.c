@@ -185,6 +185,11 @@ static void php_rshutdown_session_globals(void)
 
 	php_session_cleanup_filename();
 
+	/* CVE-2026-109619: clear request-scoped rfc1867 state so a longjmp()
+	 * during pre-RINIT processing can never leave stale pointers/flags
+	 * visible to the next request on the same worker. */
+	PS(in_rfc1867_update) = false;
+
 	/* User save handlers may end up directly here by misuse, bugs in user script, etc. */
 	/* Set session status to prevent error while restoring save handler INI value. */
 	PS(session_status) = php_session_none;
@@ -260,6 +265,10 @@ static void php_session_track_init(void)
 
 	if (!Z_ISUNDEF(PS(http_session_vars))) {
 		zval_ptr_dtor(&PS(http_session_vars));
+		/* CVE-2026-109619: clear the slot immediately so an OOM/longjmp()
+		 * during array_init() below cannot leave a dangling pointer that
+		 * rshutdown would double-free. */
+		ZVAL_UNDEF(&PS(http_session_vars));
 	}
 
 	array_init(&session_vars);
@@ -507,7 +516,10 @@ static zend_result php_session_initialize(void)
 		if (PS(lazy_write)) {
 			PS(session_vars) = zend_string_copy(val);
 		}
-		php_session_decode(val);
+		if (php_session_decode(val) == FAILURE) {
+			zend_string_release_ex(val, false);
+			return FAILURE;
+		}
 		zend_string_release_ex(val, false);
 	}
 
@@ -3217,35 +3229,48 @@ static void php_session_rfc1867_update(php_session_rfc1867_progress *progress, b
 
 	/* Runs before RINIT: no user code may be invoked, see php_session_unserialize_init() */
 	PS(in_rfc1867_update) = true;
-	if (php_session_initialize() == FAILURE || PS(session_status) != php_session_active) {
-		PS(in_rfc1867_update) = false;
-		return;
-	}
-	IF_SESSION_VARS() {
-		zval *sess_var = Z_REFVAL(PS(http_session_vars));
-		SEPARATE_ARRAY(sess_var);
+	zend_try {
+		if (php_session_initialize() == FAILURE || PS(session_status) != php_session_active) {
+			PS(in_rfc1867_update) = false;
+			return;
+		}
+		IF_SESSION_VARS() {
+			zval *sess_var = Z_REFVAL(PS(http_session_vars));
+			SEPARATE_ARRAY(sess_var);
 
-		progress->cancel_upload |= php_check_cancel_upload(progress);
-		Z_TRY_ADDREF(progress->data);
-		zend_hash_update(Z_ARRVAL_P(sess_var), progress->key.s, &progress->data);
-	}
-	php_session_flush(true);
+			progress->cancel_upload |= php_check_cancel_upload(progress);
+			Z_TRY_ADDREF(progress->data);
+			zend_hash_update(Z_ARRVAL_P(sess_var), progress->key.s, &progress->data);
+		}
+		php_session_flush(true);
+	} zend_catch {
+		/* CVE-2026-109619: on OOM/fatal bailout, clear the pre-RINIT
+		 * deserialization guard before unwinding so it can never leak into
+		 * shutdown or the next request on this worker. */
+		PS(in_rfc1867_update) = false;
+		zend_bailout();
+	} zend_end_try();
 	PS(in_rfc1867_update) = false;
 }
 
 static void php_session_rfc1867_cleanup(const php_session_rfc1867_progress *progress)
 {
 	PS(in_rfc1867_update) = true;
-	if (php_session_initialize() == FAILURE || PS(session_status) != php_session_active) {
+	zend_try {
+		if (php_session_initialize() == FAILURE || PS(session_status) != php_session_active) {
+			PS(in_rfc1867_update) = false;
+			return;
+		}
+		IF_SESSION_VARS() {
+			zval *sess_var = Z_REFVAL(PS(http_session_vars));
+			SEPARATE_ARRAY(sess_var);
+			zend_hash_del(Z_ARRVAL_P(sess_var), progress->key.s);
+		}
+		php_session_flush(true);
+	} zend_catch {
 		PS(in_rfc1867_update) = false;
-		return;
-	}
-	IF_SESSION_VARS() {
-		zval *sess_var = Z_REFVAL(PS(http_session_vars));
-		SEPARATE_ARRAY(sess_var);
-		zend_hash_del(Z_ARRVAL_P(sess_var), progress->key.s);
-	}
-	php_session_flush(true);
+		zend_bailout();
+	} zend_end_try();
 	PS(in_rfc1867_update) = false;
 }
 
@@ -3283,6 +3308,9 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 			const multipart_event_formdata *data = event_data;
 			size_t value_len;
 
+			if (progress == NULL) {
+				break;
+			}
 			if (Z_TYPE(progress->sid) && progress->key.s) {
 				break;
 			}
@@ -3315,6 +3343,9 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 		case MULTIPART_EVENT_FILE_START: {
 			const multipart_event_file_start *data = event_data;
 
+			if (progress == NULL) {
+				break;
+			}
 			/* Do nothing when $_POST["PHP_SESSION_UPLOAD_PROGRESS"] is not set
 			 * or when we have no session id */
 			if (!Z_TYPE(progress->sid) || !progress->key.s) {
@@ -3376,6 +3407,9 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 		case MULTIPART_EVENT_FILE_DATA: {
 			const multipart_event_file_data *data = event_data;
 
+			if (progress == NULL) {
+				break;
+			}
 			if (!Z_TYPE(progress->sid) || !progress->key.s) {
 				break;
 			}
@@ -3389,6 +3423,9 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 		case MULTIPART_EVENT_FILE_END: {
 			const multipart_event_file_end *data = event_data;
 
+			if (progress == NULL) {
+				break;
+			}
 			if (!Z_TYPE(progress->sid) || !progress->key.s) {
 				break;
 			}
@@ -3408,6 +3445,9 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 		case MULTIPART_EVENT_END: {
 			const multipart_event_end *data = event_data;
 
+			if (progress == NULL) {
+				break;
+			}
 			if (Z_TYPE(progress->sid) && progress->key.s) {
 				if (PS(rfc1867_cleanup)) {
 					php_session_rfc1867_cleanup(progress);
