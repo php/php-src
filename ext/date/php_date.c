@@ -3289,6 +3289,9 @@ static bool php_date_modify(zval *object, char *modify, size_t modify_len) /* {{
 
 	memcpy(&dateobj->time->relative, &tmp_time->relative, sizeof(timelib_rel_time));
 	dateobj->time->have_relative = tmp_time->have_relative;
+	if (dateobj->time->sse_uptodate && dateobj->time->zone_type == TIMELIB_ZONETYPE_ID && dateobj->time->tz_info) {
+		timelib_get_time_zone_offset_info(dateobj->time->sse, dateobj->time->tz_info, &dateobj->time->z, NULL, NULL);
+	}
 	dateobj->time->sse_uptodate = 0;
 
 	if (tmp_time->y != TIMELIB_UNSET) {

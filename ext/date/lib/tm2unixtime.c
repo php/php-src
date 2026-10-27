@@ -338,12 +338,11 @@ static void do_adjust_special_early(timelib_time* time)
 	timelib_do_normalize(time);
 }
 
-static bool timelib_adjust_timezone_for_overlap(timelib_time *tz, timelib_tzinfo *tzi)
+static bool timelib_adjust_timezone_for_overlap(timelib_time *tz, timelib_tzinfo *tzi, int32_t preferred_offset)
 {
 	timelib_sll earlier_sse = INT64_MAX;
 	timelib_sll second_earliest_sse = INT64_MAX;
 	timelib_sll matching_offset_sse = INT64_MAX;
-	int32_t preferred_offset = tz->z;
 	uint64_t type_count = tzi->bit64.typecnt;
 
 	for (uint64_t i = 0; i < type_count; i++) {
@@ -382,7 +381,7 @@ static bool timelib_adjust_timezone_for_overlap(timelib_time *tz, timelib_tzinfo
 	return true;
 }
 
-static void do_adjust_timezone(timelib_time *tz, timelib_tzinfo *tzi, bool resolve_overlap)
+static void do_adjust_timezone(timelib_time *tz, timelib_tzinfo *tzi, bool resolve_overlap, int32_t preferred_offset)
 {
 	switch (tz->zone_type) {
 		case TIMELIB_ZONETYPE_OFFSET:
@@ -417,7 +416,7 @@ static void do_adjust_timezone(timelib_time *tz, timelib_tzinfo *tzi, bool resol
 			if (!tzi) {
 				return;
 			}
-			if (resolve_overlap && timelib_adjust_timezone_for_overlap(tz, tzi)) {
+			if (resolve_overlap && timelib_adjust_timezone_for_overlap(tz, tzi, preferred_offset)) {
 				return;
 			}
 
@@ -483,6 +482,11 @@ timelib_sll timelib_epoch_days_from_time(timelib_time *time)
 
 static void timelib_update_ts_internal(timelib_time* time, timelib_tzinfo* tzi, bool resolve_overlap)
 {
+	int32_t preferred_offset = time->z;
+	if (time->sse_uptodate && time->zone_type == TIMELIB_ZONETYPE_ID && time->tz_info) {
+		timelib_get_time_zone_offset_info(time->sse, time->tz_info, &preferred_offset, NULL, NULL);
+	}
+
 	do_adjust_special_early(time);
 	do_adjust_relative(time);
 	do_adjust_special(time);
@@ -498,7 +502,7 @@ static void timelib_update_ts_internal(timelib_time* time, timelib_tzinfo* tzi, 
 	time->sse += timelib_epoch_days_from_time(time) * (SECS_PER_DAY / 2);
 
 	// This modifies time->sse, if needed
-	do_adjust_timezone(time, tzi, resolve_overlap);
+	do_adjust_timezone(time, tzi, resolve_overlap, preferred_offset);
 
 	time->sse_uptodate = 1;
 	time->have_relative = time->relative.have_weekday_relative = time->relative.have_special_relative = time->relative.first_last_day_of = 0;
