@@ -142,6 +142,10 @@ PHP                                                                        NEWS
   . Fixed a duplicate warning when ATTR_STATEMENT_CLASS is rejected on a
     persistent connection. (Ilia Alshanetsky)
 
+- Phar:
+  . Fixed bug GH-24531 (Crash when modifying a zip-based phar whose file was
+    renamed). (Ilia Alshanetsky)
+
 - Phpdbg:
   . Fix wrong command names. (ndossche, Weilin Du)
   . Fixed bug GH-22480 (Use-after-free when re-watching an already-watched
