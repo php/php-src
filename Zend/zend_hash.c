@@ -2054,6 +2054,9 @@ ZEND_API void ZEND_FASTCALL zend_array_destroy(HashTable *ht)
 	if (ht->nNumUsed) {
 		/* In some rare cases destructors of regular arrays may be changed */
 		if (UNEXPECTED(ht->pDestructor != ZVAL_PTR_DTOR)) {
+			if (UNEXPECTED(ht->pDestructor != NULL)) {
+				abort();
+			}
 			zend_hash_destroy(ht);
 			goto free_ht;
 		}
