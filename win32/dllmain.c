@@ -38,20 +38,6 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID dummy)
 	}
 #endif
 
-#ifdef ZEND_WIN_TSRM_TEB_SLOT
-	if (reason == DLL_PROCESS_ATTACH) {
-		zend_win_tsrm_cache_init(true);
-	} else if (reason == DLL_THREAD_ATTACH) {
-		zend_win_tsrm_cache_init(false);
-	} else if (reason == DLL_PROCESS_DETACH && dummy == NULL) {
-		/* https://learn.microsoft.com/en-us/windows/win32/dlls/dllmain
-		 * When handling DLL_PROCESS_DETACH, a DLL should free resources
-		 * such as heap memory only if the DLL is being unloaded
-		 * dynamically (the lpvReserved parameter is NULL). */
-		zend_win_tsrm_cache_shutdown();
-	}
-#endif
-
 #ifdef HAVE_LIBXML
 	/* This imply that only LIBXML_STATIC_FOR_DLL is supported ATM.
 		If that changes, this place will need some rework.

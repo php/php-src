@@ -29,64 +29,6 @@ typedef struct _tsrm_tls_entry tsrm_tls_entry;
 /* TSRMLS_CACHE_DEFINE; is already done in Zend, this is being always compiled statically. */
 TSRMLS_CACHE_EXTERN();
 
-#ifdef ZEND_WIN_TSRM_TEB_SLOT
-/* Holds &_tsrm_ls_cache in a TEB TLS slot so EG()/CG() reach it
- * with a single gs:[] load rather than the 3-load __declspec(thread) lookup. */
-#define ZEND_WIN_TEB_TLS_SLOTS 0x1480
-
-static DWORD zend_win_tsrm_cache_slot = TLS_OUT_OF_INDEXES;
-unsigned long zend_win_tsrm_cache_offset = 0;
-
-ZEND_API zend_tsrm_ls_cache *zend_win_tsrm_cache_fallback(void)
-{
-	return &_tsrm_ls_cache;
-}
-
-ZEND_API void zend_win_tsrm_cache_shutdown(void)
-{
-	zend_win_tsrm_cache_offset = 0;
-	if (zend_win_tsrm_cache_slot != TLS_OUT_OF_INDEXES) {
-		TlsFree(zend_win_tsrm_cache_slot);
-		zend_win_tsrm_cache_slot = TLS_OUT_OF_INDEXES;
-	}
-}
-
-static void zend_win_tsrm_cache_publish(void)
-{
-	if (zend_win_tsrm_cache_slot == TLS_OUT_OF_INDEXES) {
-		return;
-	}
-	TlsSetValue(zend_win_tsrm_cache_slot, &_tsrm_ls_cache);
-	/* Verify our layout assumptions work */
-	if ((zend_tsrm_ls_cache *) __readgsqword(zend_win_tsrm_cache_offset) != &_tsrm_ls_cache) {
-		fprintf(stderr, "PHP Startup: the ZTS globals cache is not reachable through "
-			"TEB offset %lu, falling back to __declspec(thread)\n",
-			zend_win_tsrm_cache_offset);
-		zend_win_tsrm_cache_shutdown();
-	}
-}
-
-ZEND_API void zend_win_tsrm_cache_init(bool alloc)
-{
-	if (alloc) {
-		DWORD slot = TlsAlloc();
-		if (slot == TLS_OUT_OF_INDEXES) {
-			return;
-		}
-		if (slot >= TLS_MINIMUM_AVAILABLE) {
-			TlsFree(slot);
-			return;
-		}
-		zend_win_tsrm_cache_slot = slot;
-		zend_win_tsrm_cache_offset = ZEND_WIN_TEB_TLS_SLOTS
-			+ slot * (unsigned long) sizeof(void*);
-	}
-	zend_win_tsrm_cache_publish();
-}
-#else
-# define zend_win_tsrm_cache_publish() do {} while (0)
-#endif
-
 struct _tsrm_tls_entry {
 	void **storage;
 	int count;
@@ -497,7 +439,6 @@ static void set_thread_local_storage_resource_to(tsrm_tls_entry *thread_resource
 {
 	tsrm_tls_set(thread_resource);
 	TSRMLS_CACHE = thread_resource;
-	zend_win_tsrm_cache_publish();
 }
 
 /* Must be called with tsmm_mutex held */
