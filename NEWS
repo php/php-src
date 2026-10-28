@@ -168,6 +168,7 @@ PHP                                                                        NEWS
   . Fixed JIT segfault on switch over a string reference holding a
     non-string value. (jorgsowa)
   . Fixed AArch64 JIT encoding of invalid logical immediates. (jorgsowa)
+  . Fixed unsound shift_left_overflows range when shift wraps. (mkrishna793)
 
 - PDO:
   . Fixed invalid ATTR_ORACLE_NULLS values being accepted and truncated.
