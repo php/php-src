@@ -179,25 +179,16 @@ code_changed:
 		return FAILURE;
 	}
 
-	int32_t displacement;
-	memcpy(&displacement, &code[12], sizeof(displacement));
-	uintptr_t offset;
-
-	if (memcmp(&code[9], "\x48\x8d\x80", 3) == 0) {
-		/* local-exec */
-		// leaq any(%rax),%rax
-		offset = (uintptr_t)displacement;
-	} else if (memcmp(&code[9], "\x48\x03\x05", 3) == 0) {
-		/* initial-exec */
-		// addq any(%rip),%rax
-		uintptr_t got_addr = (uintptr_t)code + 16 + displacement;
-		memcpy(&offset, (void*)got_addr, sizeof(offset));
-	} else {
+	// leaq any(%rax),%rax or addq any(%rip),%rax
+	if (memcmp(&code[9], "\x48\x8d\x80", 3) != 0
+			&& memcmp(&code[9], "\x48\x03\x05", 3) != 0) {
 		uint64_t bytes;
 		memcpy(&bytes, &code[9], 8);
 		zend_accel_error(ACCEL_LOG_DEBUG, "leaq/addq insn does not match: 0x%016" PRIx64 "\n", bytes);
 		return FAILURE;
 	}
+
+	uintptr_t offset = (uintptr_t)addr - (uintptr_t)thread_pointer;
 
 	if ((uintptr_t)&_tsrm_ls_cache - (uintptr_t)thread_pointer == offset) {
 		*tcb_offset = offset;

@@ -200,7 +200,6 @@ code_changed:
 		}
 	}
 
-	uint64_t offset;
 	if ((insn[0] & ~AARCH64_ADRP_IMM_MASK) == 0x90000000) {
 		/* intial-exec */
 		// ldr x0, [x0, #any]
@@ -208,16 +207,6 @@ code_changed:
 			zend_accel_error(ACCEL_LOG_DEBUG, "ldr insn does not match: 0x%08" PRIx32 "\n", insn[1]);
 			return FAILURE;
 		}
-
-		uint64_t adrp_immhi = (insn[0] & AARCH64_ADRP_IMMHI_MASK) >> AARCH64_ADRP_IMMHI_START;
-		uint64_t adrp_immlo = (insn[0] & AARCH64_ADRP_IMMLO_MASK) >> AARCH64_ADRP_IMMLO_START;
-		int64_t adrp_imm = (adrp_immhi << AARCH64_ADRP_IMMLO_WIDTH) | adrp_immlo;
-		if (adrp_imm & (1 << 20)) {
-			adrp_imm -= 1 << 21;
-		}
-		uint64_t ldr_imm = (insn[1] & AARCH64_LDR_UNSIGNED_IMM_MASK) >> 10;
-		uintptr_t got_addr = ((uintptr_t)insn & ~(uintptr_t)(4096-1)) + adrp_imm * 4096 + ldr_imm * 8;
-		memcpy(&offset, (void*)got_addr, sizeof(offset));
 	} else {
 		/* local-exec */
 		// movz x0, #0, lsl #16
@@ -231,14 +220,9 @@ code_changed:
 			zend_accel_error(ACCEL_LOG_DEBUG, "movk insn does not match: 0x%08" PRIx32 "\n", insn[1]);
 			return FAILURE;
 		}
-
-		/* Extract immediate values */
-
-		uint64_t movz_imm = (insn[0] & AARCH64_MOVZ_IMM_MASK) >> 5;
-		uint64_t movz_shift = (((insn[0] & AARCH64_MOVZ_HW_MASK) >> 21) << 4);
-		uint64_t movk_imm = (insn[1] & AARCH64_MOVK_IMM_MASK) >> 5;
-		offset = (movz_imm << movz_shift) | movk_imm;
 	}
+
+	uintptr_t offset = (uintptr_t)addr - (uintptr_t)thread_pointer;
 
 	if ((uintptr_t)&_tsrm_ls_cache - (uintptr_t)thread_pointer == offset) {
 		zend_accel_error(ACCEL_LOG_DEBUG, "static tls at offset %" PRIxPTR " from thread pointer (inferred from code)\n", offset);
