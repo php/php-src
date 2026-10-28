@@ -3266,6 +3266,15 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 	}
 
 	if (count) {
+		for (i = 0; i < ssa->vars_count; i++) {
+			if (RA_HAS_REG(i) &&
+			    vars_op_array[i] &&
+			    vars_op_array[i]->last_try_catch &&
+			    ssa->vars[i].var < vars_op_array[i]->last_var &&
+			    !(RA_REG_FLAGS(i) & ZREG_LOAD)) {
+				RA_REG_FLAGS(i) |= ZREG_STORE;
+			}
+		}
 		/* SSA resolution */
 		if (trace_buffer->stop == ZEND_JIT_TRACE_STOP_LOOP
 		 || trace_buffer->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_CALL
