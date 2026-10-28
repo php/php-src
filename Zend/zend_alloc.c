@@ -2821,8 +2821,9 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
 				heap->custom_heap._free = __zend_free;
 			}
 #if ZEND_MM_STAT
-			heap->size = 0;
-			heap->real_size = 0;
+			/* Zones set a 2MiB floor. Emulate that here. */
+			heap->size = ZEND_MM_CHUNK_SIZE;
+			heap->real_size = ZEND_MM_CHUNK_SIZE;
 #endif
 		}
 
@@ -3951,6 +3952,9 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 			mm_heap->custom_heap._free = tracked_free;
 			mm_heap->custom_heap._realloc = tracked_realloc;
 			mm_heap->tracked_allocs = malloc(sizeof(HashTable));
+			/* Zones set a 2MiB floor. Emulate that here. */
+			mm_heap->size = ZEND_MM_CHUNK_SIZE;
+			mm_heap->real_size = ZEND_MM_CHUNK_SIZE;
 			zend_hash_init(mm_heap->tracked_allocs, 1024, NULL, NULL, 1);
 		}
 		return;
