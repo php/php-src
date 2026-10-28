@@ -15,6 +15,7 @@
 #include <config.w32.h>
 
 #include <php.h>
+#include <TSRM/TSRM_atexit.h>
 
 #ifdef HAVE_LIBXML
 #include <libxml/threads.h>
@@ -30,6 +31,12 @@
 BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID dummy)
 {
 	BOOL ret = TRUE;
+
+#ifdef ZTS
+	if (reason == DLL_PROCESS_DETACH && dummy == NULL) {
+		tsrm_atexit_disarm();
+	}
+#endif
 
 #ifdef HAVE_LIBXML
 	/* This imply that only LIBXML_STATIC_FOR_DLL is supported ATM.
