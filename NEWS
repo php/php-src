@@ -116,7 +116,7 @@ PHP                                                                        NEWS
   . Fixed the files save handler's garbage collector deleting a session file
     that another request still holds open and locked, silently destroying
     its data without either side seeing an error. (reported and fixed by
-    [reporter name])
+    (Asahi)
   . Fixed session_start() continuing after a failed create_sid() when
     session.use_strict_mode rejects the supplied ID. (Ilia Alshanetsky)
   . Fixed exceptions from user-defined create_sid() handlers being replaced
