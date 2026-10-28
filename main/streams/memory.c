@@ -52,10 +52,10 @@ static ssize_t php_stream_memory_write(php_stream *stream, const char *buf, size
 	if (ms->mode & TEMP_STREAM_APPEND) {
 		ms->fpos = data_len;
 	}
-	size_t new_pos;
-	if (UNEXPECTED(__builtin_add_overflow(ms->fpos, count, &new_pos))) {
+	if (UNEXPECTED(count > SIZE_MAX - ms->fpos)) {
 		return (ssize_t) -1;
 	}
+	size_t new_pos = ms->fpos + count;
 	if (new_pos > data_len) {
 		zend_string *grown = zend_string_frealloc(ms->data, new_pos, 0, /* fallible */ true);
 		if (UNEXPECTED(!grown)) {
@@ -146,14 +146,13 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 					return 0;
 				}
 			} else {
-				size_t cur_new_pos;
-				if (UNEXPECTED(__builtin_add_overflow(ms->fpos, (size_t)offset, &cur_new_pos))) {
+				if (UNEXPECTED((size_t)offset > SIZE_MAX - ms->fpos)) {
 					*newoffs = -1;
 					return -1;
 				}
 				stream->eof = 0;
 				stream->fatal_error = 0;
-				ms->fpos = cur_new_pos;
+				ms->fpos += (size_t)offset;
 				*newoffs = ms->fpos;
 				return 0;
 			}
@@ -171,12 +170,11 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 			}
 		case SEEK_END:
 			if (offset > 0) {
-				size_t end_new_pos;
-				if (UNEXPECTED(__builtin_add_overflow(ZSTR_LEN(ms->data), (size_t)offset, &end_new_pos))) {
+				if (UNEXPECTED((size_t)offset > SIZE_MAX - ZSTR_LEN(ms->data))) {
 					*newoffs = -1;
 					return -1;
 				}
-				ms->fpos = end_new_pos;
+				ms->fpos = ZSTR_LEN(ms->data) + (size_t)offset;
 				*newoffs = ms->fpos;
 				stream->eof = 0;
 				stream->fatal_error = 0;
