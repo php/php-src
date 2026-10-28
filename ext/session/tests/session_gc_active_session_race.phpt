@@ -22,6 +22,11 @@ ini_set('session.cache_limiter', '');
 // before the first session_start() call; it is irrelevant to the "victim"
 // session below, only to the "attacker" one further down.
 ini_set('session.gc_maxlifetime', 1);
+// session.use_strict_mode (default on) rejects a caller-supplied ID that
+// does not already have a session file and silently replaces it with a
+// freshly generated one. This test depends on session_id() actually
+// pinning $victimId/'attackerxxx...', so strict mode must be off.
+ini_set('session.use_strict_mode', 0);
 
 // The "victim": a session file a still-active request has open+locked, the
 // way ps_files_open() holds flock(LOCK_EX) for as long as a slow request
