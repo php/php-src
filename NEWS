@@ -86,6 +86,8 @@ PHP                                                                        NEWS
     static calls in trait methods shared by several classes). (jorgsowa,
     mgoulart)
   . Fix block pass dropping ZEND_FAST_CALL OP2 definition. (Mrmaxmeier)
+  . Fixed bug GH-23626 (orphaned temporaries cause leaks and assertions).
+    (ndossche, khaledalam)
 
 - OpenSSL:
   . Fixed bug GH-24784 (openssl_pkcs7_read() and openssl_cms_read() overwrite
