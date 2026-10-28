@@ -7,17 +7,10 @@
 
 #include <errno.h>
 #include <limits.h>
-#ifdef PHP_WIN32
-# define __alignof__ __alignof
-#else
-# ifndef HAVE_ALIGNOF
-#  include <stddef.h>
-#  define __alignof__(type) offsetof (struct { char c; type member;}, member)
-# endif
-#endif
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdalign.h>
 
 #ifdef PHP_WIN32
 # include <string.h>
@@ -294,14 +287,7 @@ sha512_process_bytes(const void *buffer, size_t len, struct sha512_ctx *ctx) {
 	/* Process available complete blocks.  */
 	if (len >= 128) {
 #ifndef _STRING_ARCH_unaligned
-/* To check alignment gcc has an appropriate operator.  Other
-   compilers don't.  */
-# if __GNUC__ >= 2
-#  define UNALIGNED_P(p) (((uintptr_t) p) % __alignof__ (uint64_t) != 0)
-# else
-#  define UNALIGNED_P(p) (((uintptr_t) p) % sizeof(uint64_t) != 0)
-# endif
-		if (UNALIGNED_P(buffer))
+		if ((uintptr_t)buffer % alignof(uint64_t) != 0)
 			while (len > 128) {
 				sha512_process_block(memcpy(ctx->buffer, buffer, 128), 128, ctx);
 				buffer = (const char *) buffer + 128;
@@ -355,13 +341,8 @@ static const char b64t[64] ZEND_NONSTRING =
 
 char *
 php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) {
-#ifdef PHP_WIN32
-	ZEND_SET_ALIGNED(64, unsigned char alt_result[64]);
-	ZEND_SET_ALIGNED(64, unsigned char temp_result[64]);
-#else
-	ZEND_SET_ALIGNED(__alignof__ (uint64_t), unsigned char alt_result[64]);
-	ZEND_SET_ALIGNED(__alignof__ (uint64_t), unsigned char temp_result[64]);
-#endif
+	ZEND_SET_ALIGNED(alignof(uint64_t), unsigned char alt_result[64]);
+	ZEND_SET_ALIGNED(alignof(uint64_t), unsigned char temp_result[64]);
 	struct sha512_ctx ctx;
 	struct sha512_ctx alt_ctx;
 	size_t salt_len;
@@ -409,15 +390,15 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
 	SET_ALLOCA_FLAG(use_heap_key);
 	SET_ALLOCA_FLAG(use_heap_salt);
 
-	if ((uintptr_t)key % __alignof__ (uint64_t) != 0) {
-		tmp_key = (char *) do_alloca(key_len + __alignof__ (uint64_t), use_heap_key);
+	if ((uintptr_t)key % alignof(uint64_t) != 0) {
+		tmp_key = (char *) do_alloca(key_len + alignof(uint64_t), use_heap_key);
 		key = copied_key =
-		memcpy(tmp_key + __alignof__(uint64_t) - (uintptr_t)tmp_key % __alignof__(uint64_t), key, key_len);
+		memcpy(tmp_key + alignof(uint64_t) - (uintptr_t)tmp_key % alignof(uint64_t), key, key_len);
 	}
 
-	if ((uintptr_t)salt % __alignof__ (uint64_t) != 0) {
-		tmp_salt = (char *) do_alloca(salt_len + 1 + __alignof__(uint64_t), use_heap_salt);
-		salt = copied_salt = memcpy(tmp_salt + __alignof__(uint64_t) - (uintptr_t)tmp_salt % __alignof__(uint64_t), salt, salt_len);
+	if ((uintptr_t)salt % alignof(uint64_t) != 0) {
+		tmp_salt = (char *) do_alloca(salt_len + 1 + alignof(uint64_t), use_heap_salt);
+		salt = copied_salt = memcpy(tmp_salt + alignof(uint64_t) - (uintptr_t)tmp_salt % alignof(uint64_t), salt, salt_len);
 		copied_salt[salt_len] = 0;
 	}
 
