@@ -356,7 +356,7 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 /* Default session id char validation function allowed by ps_modules.
  * If you change the logic here, please also update the error message in
  * ps_modules appropriately. */
-static zend_result php_session_valid_key_len(const char *key, size_t key_len) /* {{{ */
+static zend_result php_session_valid_key_len(const char *key, size_t key_len)
 {
 	/* Somewhat arbitrary length limit here, but should be way more than
 	   anyone needs and avoids file-level warnings later on if we exceed MAX_PATH */
@@ -379,23 +379,19 @@ static zend_result php_session_valid_key_len(const char *key, size_t key_len) /*
 
 	return SUCCESS;
 }
-/* }}} */
 
 /* Validate the full zend_string, including embedded NUL bytes. */
-PHPAPI zend_result php_session_valid_key_ex(const zend_string *key) /* {{{ */
+PHPAPI zend_result php_session_valid_key_ex(const zend_string *key)
 {
 	return php_session_valid_key_len(ZSTR_VAL(key), ZSTR_LEN(key));
 }
-/* }}} */
 
 /* C-string compatibility wrapper. Callers that have a zend_string should use
  * php_session_valid_key_ex() instead. */
-PHPAPI zend_result php_session_valid_key(const char *key) /* {{{ */
+PHPAPI zend_result php_session_valid_key(const char *key)
 {
 	return php_session_valid_key_len(key, strlen(key));
 }
-/* }}} */
-
 
 static zend_long php_session_gc(bool immediate) /* {{{ */
 {
