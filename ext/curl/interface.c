@@ -2961,6 +2961,9 @@ static void _php_curl_reset_handlers(php_curl *ch)
 	}
 	ch->handlers.write->fp = NULL;
 	ch->handlers.write->method = PHP_CURL_STDOUT;
+	if (ZEND_FCC_INITIALIZED(ch->handlers.write->fcc)) {
+		zend_fcc_dtor(&ch->handlers.write->fcc);
+	}
 
 	if (!Z_ISUNDEF(ch->handlers.write_header->stream)) {
 		zval_ptr_dtor(&ch->handlers.write_header->stream);
@@ -2968,6 +2971,9 @@ static void _php_curl_reset_handlers(php_curl *ch)
 	}
 	ch->handlers.write_header->fp = NULL;
 	ch->handlers.write_header->method = PHP_CURL_IGNORE;
+	if (ZEND_FCC_INITIALIZED(ch->handlers.write_header->fcc)) {
+		zend_fcc_dtor(&ch->handlers.write_header->fcc);
+	}
 
 	if (!Z_ISUNDEF(ch->handlers.read->stream)) {
 		zval_ptr_dtor(&ch->handlers.read->stream);
@@ -2976,6 +2982,9 @@ static void _php_curl_reset_handlers(php_curl *ch)
 	ch->handlers.read->fp = NULL;
 	ch->handlers.read->res = NULL;
 	ch->handlers.read->method  = PHP_CURL_DIRECT;
+	if (ZEND_FCC_INITIALIZED(ch->handlers.read->fcc)) {
+		zend_fcc_dtor(&ch->handlers.read->fcc);
+	}
 
 	if (!Z_ISUNDEF(ch->handlers.std_err)) {
 		zval_ptr_dtor(&ch->handlers.std_err);
@@ -3015,6 +3024,7 @@ PHP_FUNCTION(curl_reset)
 {
 	zval       *zid;
 	php_curl   *ch;
+	zval        garbage;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_OBJECT_OF_CLASS(zid, curl_ce)
@@ -3029,6 +3039,15 @@ PHP_FUNCTION(curl_reset)
 
 	curl_easy_reset(ch->cp);
 	_php_curl_reset_handlers(ch);
+
+	ZVAL_COPY_VALUE(&garbage, &ch->postfields);
+	ZVAL_UNDEF(&ch->postfields);
+	zval_ptr_dtor(&garbage);
+
+	ZVAL_COPY_VALUE(&garbage, &ch->private_data);
+	ZVAL_UNDEF(&ch->private_data);
+	zval_ptr_dtor(&garbage);
+
 	_php_curl_set_default_options(ch);
 }
 /* }}} */
