@@ -937,6 +937,12 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 
 static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER)
 {
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		zend_call_stack_size_error();
+		return 0;
+	}
+#endif
 	const unsigned char *cursor, *limit, *marker, *start;
 	zval *rval_ref;
 
