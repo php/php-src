@@ -84,6 +84,8 @@ PHP                                                                        NEWS
   . Fixed unsound shift_left_overflows range when shift wraps. (mkrishna793)
 
 - OpenSSL:
+  . Fixed bug GH-24784 (openssl_pkcs7_read() and openssl_cms_read() overwrite
+    certificates with CRLs). (Alexander Danilov)
   . Fixed build with OpenSSL 4.1. (Weilin Du)
 
 - PDO_PGSQL:
