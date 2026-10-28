@@ -155,6 +155,10 @@ PHP                                                                        NEWS
     callback in the CALL and TAILCALL VMs. (Levi Morrison)
   . Fixed unsound shift_left_overflows range when shift wraps. (mkrishna793)
 
+- OpenSSL:
+  . Fixed bug GH-24784 (openssl_pkcs7_read() and openssl_cms_read() overwrite
+    certificates with CRLs). (Alexander Danilov)
+
 - PDO:
   . Fixed invalid ATTR_ORACLE_NULLS values being accepted and truncated.
     (Ilia Alshanetsky)
