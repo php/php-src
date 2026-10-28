@@ -462,7 +462,7 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 	cfg->blocks_count = blocks_count;
 
 	/* Build CFG, Step 2: Build Array of Basic Blocks */
-	cfg->blocks = blocks = zend_arena_calloc(arena, sizeof(zend_basic_block), blocks_count);
+	cfg->blocks = blocks = zend_arena_calloc(arena, blocks_count, sizeof(zend_basic_block));
 
 	blocks_count = -1;
 
@@ -611,7 +611,7 @@ ZEND_API void zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* 
 	}
 
 	cfg->edges_count = edges;
-	cfg->predecessors = predecessors = (int*)zend_arena_calloc(arena, sizeof(int), edges);
+	cfg->predecessors = predecessors = (int*)zend_arena_calloc(arena, edges, sizeof(int));
 
 	edges = 0;
 	for (b = blocks; b < end; b++) {

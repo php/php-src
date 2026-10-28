@@ -445,7 +445,7 @@ void zend_enum_register_funcs(zend_class_entry *ce)
 {
 	const uint32_t fn_flags =
 		ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_ARENA_ALLOCATED;
-	zend_internal_function *cases_function = zend_arena_calloc(&CG(arena), sizeof(zend_internal_function), 1);
+	zend_internal_function *cases_function = zend_arena_calloc(&CG(arena), 1, sizeof(zend_internal_function));
 	cases_function->handler = zend_enum_cases_func;
 	cases_function->function_name = ZSTR_KNOWN(ZEND_STR_CASES);
 	cases_function->fn_flags = fn_flags;
@@ -454,7 +454,7 @@ void zend_enum_register_funcs(zend_class_entry *ce)
 	zend_enum_register_func(ce, ZEND_STR_CASES, cases_function);
 
 	if (ce->enum_backing_type != IS_UNDEF) {
-		zend_internal_function *from_function = zend_arena_calloc(&CG(arena), sizeof(zend_internal_function), 1);
+		zend_internal_function *from_function = zend_arena_calloc(&CG(arena), 1, sizeof(zend_internal_function));
 		from_function->handler = zend_enum_from_func;
 		from_function->function_name = ZSTR_KNOWN(ZEND_STR_FROM);
 		from_function->fn_flags = fn_flags;
@@ -464,7 +464,7 @@ void zend_enum_register_funcs(zend_class_entry *ce)
 		from_function->arg_info = zarginfo_class_BackedEnum_from + 1;
 		zend_enum_register_func(ce, ZEND_STR_FROM, from_function);
 
-		zend_internal_function *try_from_function = zend_arena_calloc(&CG(arena), sizeof(zend_internal_function), 1);
+		zend_internal_function *try_from_function = zend_arena_calloc(&CG(arena), 1, sizeof(zend_internal_function));
 		try_from_function->handler = zend_enum_try_from_func;
 		try_from_function->function_name = ZSTR_KNOWN(ZEND_STR_TRYFROM);
 		try_from_function->fn_flags = fn_flags;
