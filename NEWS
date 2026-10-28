@@ -37,6 +37,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-24697 (PHP_HTTP_PARSER_STRICT build option doesn't work).
     (ndossche, devnexen)
 
+- COM:
+  . Fixed bug GH-25008 (com_event_sink() and com_print_typeinfo() crash
+    resolving an event source with no loaded typelib). (Ilia Alshanetsky)
+
 - Curl:
   . Fix use-after-free of CURLOPT_STDERR stream on cloned curl handle.
     (lacatoire)
