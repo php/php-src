@@ -381,7 +381,7 @@ static zend_result php_session_valid_key_len(const char *key, size_t key_len)
 }
 
 /* Validate the full zend_string, including embedded NUL bytes. */
-PHPAPI zend_result php_session_valid_key_ex(const zend_string *key)
+zend_result php_session_valid_key_ex(const zend_string *key)
 {
 	return php_session_valid_key_len(ZSTR_VAL(key), ZSTR_LEN(key));
 }
