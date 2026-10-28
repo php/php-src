@@ -401,7 +401,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 			case ZEND_FAST_CALL:
 				if (opline->op2_type & (IS_TMP_VAR|IS_VAR)) {
 					/* OP2 holds the pending return value. A TMP normally has a single
-					 * consumer, but FAST_CALL reads does not consume it:
+					 * consumer, but FAST_CALL does not consume it:
 					 * the RETURN behind it is the consumer, and
 					 * zend_dispatch_try_catch_finally_helper() destroys the value
 					 * through OP2 if the finally block throws. Propagating the source
