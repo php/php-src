@@ -85,6 +85,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-23572 (Tracing JIT calls the wrong method for self::/parent::
     static calls in trait methods shared by several classes). (jorgsowa,
     mgoulart)
+  . Fix block pass dropping ZEND_FAST_CALL OP2 definition. (Mrmaxmeier)
 
 - OpenSSL:
   . Fixed bug GH-24784 (openssl_pkcs7_read() and openssl_cms_read() overwrite
