@@ -12,6 +12,16 @@ $save_path = sys_get_temp_dir() . '/' . uniqid('ps_gc_lock_test_', true);
 mkdir($save_path);
 ini_set('session.save_path', $save_path);
 ini_set('session.save_handler', 'files');
+// This single script calls session_start() several times. With cookies and
+// the cache limiter enabled, session_start() refuses to run once any
+// output has already been sent, so disable both and defer all var_dump()
+// output to the very end of the script.
+ini_set('session.use_cookies', 0);
+ini_set('session.cache_limiter', '');
+// gc_maxlifetime cannot be changed once a session is active, so set it
+// before the first session_start() call; it is irrelevant to the "victim"
+// session below, only to the "attacker" one further down.
+ini_set('session.gc_maxlifetime', 1);
 
 // The "victim": a session file a still-active request has open+locked, the
 // way ps_files_open() holds flock(LOCK_EX) for as long as a slow request
@@ -33,11 +43,10 @@ flock($lockHandle, LOCK_EX);
 // Forcing GC only requires an unrelated session of one's own.
 session_id('attackerxxxxxxxxxxxxxxxxxxxxxxxx');
 session_start();
-ini_set('session.gc_maxlifetime', 1);
 session_gc();
 session_write_close();
 
-var_dump(file_exists($victimFile));
+$survived_while_locked = file_exists($victimFile);
 
 flock($lockHandle, LOCK_UN);
 fclose($lockHandle);
@@ -45,8 +54,11 @@ fclose($lockHandle);
 // The data must still be there once nobody holds the lock any more.
 session_id($victimId);
 session_start();
-var_dump($_SESSION);
+$restored_session = $_SESSION;
 session_write_close();
+
+var_dump($survived_while_locked);
+var_dump($restored_session);
 ?>
 --EXPECT--
 bool(true)
