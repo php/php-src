@@ -2040,7 +2040,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             out($f,"# define ZEND_VM_ENTER()           execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_ENTER_EX()\n");
                             out($f,"# define ZEND_VM_LEAVE()           return (zend_op*)((uintptr_t)opline | ZEND_VM_ENTER_BIT)\n");
                             out($f,"#endif\n");
-                            out($f,"#define ZEND_VM_INTERRUPT()      ZEND_VM_TAIL_CALL(zend_interrupt_helper".($spec?"_SPEC":"")."(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));\n");
+                            out($f,"#define ZEND_VM_INTERRUPT()      ZEND_VM_KIND_TAILCALL_SAVE_OPLINE(); ZEND_VM_TAIL_CALL(zend_interrupt_helper".($spec?"_SPEC":"")."(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));\n");
                             out($f,"#ifdef ZEND_VM_FP_GLOBAL_REG\n");
                             out($f,"#define ZEND_VM_LOOP_INTERRUPT() zend_interrupt_helper".($spec?"_SPEC":"")."(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
                             out($f,"#else\n");

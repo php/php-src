@@ -77,6 +77,10 @@ PHP                                                                        NEWS
   . Fixed JIT segfault on switch over a string reference holding a
     non-string value. (jorgsowa)
   . Fixed AArch64 JIT encoding of invalid logical immediates. (jorgsowa)
+  . Fixed JIT crashes when handling a VM interrupt with a stale saved opline
+    in the tailcall VM. (Levi Morrison)
+  . Fixed function JIT misinterpreting VM-enter results after an interrupt
+    callback in the CALL and TAILCALL VMs. (Levi Morrison)
 
 - OpenSSL:
   . Fixed build with OpenSSL 4.1. (Weilin Du)
