@@ -2,8 +2,6 @@
 FPM: Buffered worker output decorated log with multiple continuous messages (stdout/stderr mixed)
 --SKIPIF--
 <?php include "skipif.inc"; ?>
---XFAIL--
-Fails intermittently
 --FILE--
 <?php
 
@@ -34,7 +32,10 @@ EOT;
 $tester = new FPM\Tester($cfg, $code);
 $tester->start();
 $tester->expectLogStartNotices();
+// Check logs after each request so a slow master cannot merge the stdout msgs.
 $tester->request()->expectEmptyBody();
+$tester->expectLogLine('msg 1 - ', false);
+$tester->expectLogLine('msg 2 - msg 3', true);
 $tester->request()->expectEmptyBody();
 $tester->expectLogLine('msg 1 - ', false);
 $tester->expectLogLine('msg 2 - msg 3', true);
