@@ -45,6 +45,10 @@ PHP                                                                        NEWS
 - Hash:
   . Fix GOST and Snefru digests of 512 MiB or more. (Martin Mirchev)
 
+- Intl:
+  . Fixed IntlDateFormatter parse functions truncating an $offset below
+    INT_MIN. (Marc Bennewitz)
+
 - Opcache:
   . Fixed tracing JIT returning a wrapped integer instead of a float on
     integer overflow after an integer was compared with a float or
