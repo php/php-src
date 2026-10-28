@@ -176,6 +176,10 @@ PHP                                                                        NEWS
   . Fixed a duplicate warning when ATTR_STATEMENT_CLASS is rejected on a
     persistent connection. (Ilia Alshanetsky)
 
+- PDO_Firebird:
+  . Fixed bug GH-25006 (getColumnMeta() reads out of bounds for an
+    out-of-range column index). (Ilia Alshanetsky)
+
 - Phar:
   . Fixed bug GH-24740 (Oversized tar metadata exhausts the memory limit).
     (Lazizbek Ergashev)
