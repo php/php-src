@@ -5265,9 +5265,8 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 						 * If the property holds a reference, all its type sources accept this type because they accept the current value. */
 						if ((prop_info->flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_SET_MASK))
 						 || ZEND_TYPE_IS_COMPLEX(prop_info->type)
-						 /* can't include bool due to references to false or true types. */
 						 || (type_mask & ~(MAY_BE_NULL|MAY_BE_BOOL|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING))
-						 /* single type */
+						 /* single type, this excludes bool too as a reference can exist to true or false standalone types. */
 						 || (type_mask & (type_mask - 1))
 						 || (OP1_DATA_INFO() & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) != type_mask) {
 							return 1;
