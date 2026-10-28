@@ -62,11 +62,10 @@ static int pdo_sqlite_stmt_execute(pdo_stmt_t *stmt)
 			return 1;
 
 		case SQLITE_ERROR:
-			sqlite3_reset(S->stmt);
-			ZEND_FALLTHROUGH;
 		case SQLITE_MISUSE:
 		case SQLITE_BUSY:
 		default:
+			sqlite3_reset(S->stmt);
 			pdo_sqlite_error_stmt(stmt);
 			return 0;
 	}
