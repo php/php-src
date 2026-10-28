@@ -199,6 +199,8 @@ PHP                                                                        NEWS
     (David Carlier)
 
 - Session:
+  . Validate whole session ID instead of stopping at the first NUL byte.
+    (Sjoerd Langkemper)
   . Fixed session data loss in the files save handler when writing the session
     file fails after it was already truncated. (Ilia Alshanetsky)
 
