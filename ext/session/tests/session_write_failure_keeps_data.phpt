@@ -40,6 +40,10 @@ session_start();
 $_SESSION['data'] = 'new';
 @session_write_close();
 
+// pcntl puts SIGXFSZ back to SIG_DFL on request shutdown, so lift the limit
+// again before anything else (e.g. gcov at exit) writes to a file.
+posix_setrlimit(POSIX_RLIMIT_FSIZE, POSIX_RLIMIT_INFINITY, POSIX_RLIMIT_INFINITY);
+
 echo "Contents unchanged after failed write: ";
 var_dump(file_get_contents($file) === $before);
 
