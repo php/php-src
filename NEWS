@@ -154,6 +154,9 @@ PHP                                                                        NEWS
   . Fixed function JIT misinterpreting VM-enter results after an interrupt
     callback in the CALL and TAILCALL VMs. (Levi Morrison)
   . Fixed unsound shift_left_overflows range when shift wraps. (mkrishna793)
+  . Fixed bug GH-23572 (Tracing JIT calls the wrong method for self::/parent::
+    static calls in trait methods shared by several classes). (jorgsowa,
+    mgoulart)
 
 - OpenSSL:
   . Fixed bug GH-24784 (openssl_pkcs7_read() and openssl_cms_read() overwrite
