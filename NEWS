@@ -45,6 +45,8 @@ PHP                                                                        NEWS
     CURLOPT_PRIVATE and CURLOPT_POSTFIELDS. (Raj Siva-Rajah)
   . Fix curl_copy_handle() restoring file post fields that were replaced.
     (Raj Siva-Rajah)
+  . Fix curl_copy_handle() restoring file post fields after the request method
+    changes. (Raj Siva-Rajah)
 
 - Date:
   . Fixed bug GH-20503 (Assertion failure with ext/date DateInterval property

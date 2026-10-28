@@ -1897,6 +1897,15 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 					return FAILURE;
 			}
 			error = curl_easy_setopt(ch->cp, option, lval);
+			/* Copied handles would otherwise rebuild the file fields, overriding these options */
+			if (error == CURLE_OK &&
+				(option == CURLOPT_POST || option == CURLOPT_PUT || option == CURLOPT_UPLOAD ||
+				(lval && (option == CURLOPT_HTTPGET || option == CURLOPT_NOBODY)))) {
+				zval garbage;
+				ZVAL_COPY_VALUE(&garbage, &ch->postfields);
+				ZVAL_UNDEF(&ch->postfields);
+				zval_ptr_dtor(&garbage);
+			}
 			break;
 		case CURLOPT_SAFE_UPLOAD:
 			if (!zend_is_true(zvalue)) {
