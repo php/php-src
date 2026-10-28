@@ -54,7 +54,7 @@ CODE;
 include 'CertificateGenerator.inc';
 (new CertificateGenerator())->saveNewCertAsFileWithKey('stream_poll_handle_cast', $certFile);
 
-include 'ServerClientTestCase.inc';
+include dirname(__DIR__, 2) . "/standard/tests/ServerClientTestCase.inc";
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --CLEAN--

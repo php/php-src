@@ -60,7 +60,7 @@ $actualSha256 = $certificateGenerator->getCertDigest('sha256');
 $clientCode = sprintf($clientCode, $cacertFile, $peerName, $brokenMd5, $actualSha256);
 
 
-include 'ServerClientTestCase.inc';
+include dirname(__DIR__, 2) . "/standard/tests/ServerClientTestCase.inc";
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --CLEAN--
