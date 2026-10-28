@@ -2248,6 +2248,13 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 			break;
 
 		case CURLOPT_POSTFIELDS:
+		{
+			/* Drop file fields kept from a previous value, which copied handles would otherwise rebuild */
+			zval garbage;
+			ZVAL_COPY_VALUE(&garbage, &ch->postfields);
+			ZVAL_UNDEF(&ch->postfields);
+			zval_ptr_dtor(&garbage);
+
 			if (Z_TYPE_P(zvalue) == IS_ARRAY) {
 				if (zend_hash_num_elements(HASH_OF(zvalue)) == 0) {
 					/* no need to build the mime structure for empty hashtables;
@@ -2266,6 +2273,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 				zend_tmp_string_release(tmp_str);
 			}
 			break;
+		}
 
 		case CURLOPT_RETURNTRANSFER:
 			if (zend_is_true(zvalue)) {
