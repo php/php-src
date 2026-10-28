@@ -81,6 +81,7 @@ PHP                                                                        NEWS
     in the tailcall VM. (Levi Morrison)
   . Fixed function JIT misinterpreting VM-enter results after an interrupt
     callback in the CALL and TAILCALL VMs. (Levi Morrison)
+  . Fixed unsound shift_left_overflows range when shift wraps. (mkrishna793)
 
 - OpenSSL:
   . Fixed build with OpenSSL 4.1. (Weilin Du)
