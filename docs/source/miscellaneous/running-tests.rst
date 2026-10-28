@@ -83,6 +83,28 @@ The test runner can run tests in parallel, by using the ``-j`` option:
 
    php run-tests.php -j24 ext/date/*.phpt
 
+Testing the Native Allocator with AddressSanitizer
+==================================================
+
+Build with ``--enable-address-sanitizer`` to enable AddressSanitizer (ASan). The test runner's
+``--asan`` option selects the system allocator with allocation tracking. To test native ZendMM
+allocation behavior instead, omit ``--asan``, set ``USE_ZEND_ALLOC=1``, and retain the
+sanitizer-specific test exclusions:
+
+.. code:: shell
+
+   USE_ZEND_ALLOC=1 SKIP_ASAN=1 SKIP_PERF_SENSITIVE=1 \
+       sapi/cli/php run-tests.php Zend/tests
+
+Native ZendMM poisons freed small allocations and page runs, and unpoisons them when reused. It also
+poisons storage released during request shutdown. These annotations detect accesses to freed storage
+until it is reused; they do not provide a quarantine or exact requested-size bounds checking.
+Allocation size-class padding remains accessible, as do the debug trailers inspected by leak
+detection in debug builds.
+
+The ``zend_mm_asan.phpt`` test in ``ext/zend_test/tests`` checks allocator shadow state directly and
+requires both ASan and ``--enable-zend-test``.
+
 **************
  Test results
 **************
