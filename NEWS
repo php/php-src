@@ -206,6 +206,8 @@ PHP                                                                        NEWS
     krsort() are still locale-dependent). (Lazizbek Ergashev, Jon Surrell)
   . Fixed bug GH-24605 (var_export() crashes on deeply nested arrays and
     objects). (Labish Bardiya)
+  . Fix use-after-free in Randomizer::shuffleArray() when the engine throws.
+    (Marti2203)
 
 - Streams:
   . Fixed bug GH-24508 (HTTP wrapper leaks the dechunk filter when header
