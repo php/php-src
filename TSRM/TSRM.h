@@ -201,7 +201,6 @@ TSRM_API bool tsrm_is_managed_thread(void);
 # define ZEND_TLS_DIRECT 1
 #endif
 
-struct _zend_tsrm_ls_cache;
 typedef struct _zend_tsrm_ls_cache zend_tsrm_ls_cache;
 
 #ifdef ZEND_TLS_DIRECT
