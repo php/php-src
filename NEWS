@@ -106,6 +106,8 @@ PHP                                                                        NEWS
     was not opened by PHP). (lazerg)
   . Fixed bug GH-24552 (Case-insensitive substr_compare(), ksort() and
     krsort() are still locale-dependent). (Lazizbek Ergashev, Jon Surrell)
+  . Fix use-after-free in Randomizer::shuffleArray() when the engine throws.
+    (Marti2203)
 
 - Streams:
   . Fixed bug GH-24506 (stream_select() leaks a stream-error operation level
