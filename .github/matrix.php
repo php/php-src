@@ -48,9 +48,9 @@ function get_current_version(): array {
 }
 
 function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $ref, $all_variations) {
-    $test_sapi_builds = in_array('CI: SAPI builds', $labels, true);
-    $no_jobs = in_array('CI: No jobs', $labels, true) || $test_sapi_builds;
+    $no_jobs = in_array('CI: No jobs', $labels, true);
     $all_jobs = in_array('CI: All jobs', $labels, true) || $nightly;
+    $test_sapi_builds = in_array('CI: SAPI builds', $labels, true);
     $test_alpine = in_array('CI: Alpine', $labels, true);
     $test_benchmarking = in_array('CI: Benchmarking', $labels, true);
     $test_community = in_array('CI: Community', $labels, true);
