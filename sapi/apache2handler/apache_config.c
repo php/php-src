@@ -200,6 +200,9 @@ void apply_config(void *dummy)
 		if (zend_alter_ini_entry_chars(str, data->value, data->value_len, data->status, data->htaccess?PHP_INI_STAGE_HTACCESS:PHP_INI_STAGE_ACTIVATE) == FAILURE) {
 			phpapdebug((stderr, "..FAILED\n"));
 		}
+		if (zend_string_equals_literal(str, "disable_functions") && *data->value) {
+			zend_disable_functions(data->value);
+		}
 	} ZEND_HASH_FOREACH_END();
 }
 
