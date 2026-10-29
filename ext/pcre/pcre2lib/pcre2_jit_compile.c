@@ -97,7 +97,7 @@ Fast, but limited size. */
 
 /* Growth rate for stack allocated by the OS. Should be the multiply
 of page size. */
-#define STACK_GROWTH_RATE 8192
+#define STACK_GROWTH_RATE (sljit_sw)8192
 
 /* Enable to check that the allocation could destroy temporaries. */
 #if defined SLJIT_DEBUG && SLJIT_DEBUG
@@ -438,6 +438,8 @@ typedef struct compiler_common {
   BOOL local_quit_available;
   /* Currently in a positive assertion. */
   BOOL in_positive_assertion;
+  /* More than STACK_GROWTH_RATE / 2 stack memory is allocated. */
+  BOOL large_stack_allocation;
   /* Newline control. */
   int nltype;
   sljit_u32 nlmax;
@@ -3144,6 +3146,8 @@ static SLJIT_INLINE void allocate_stack(compiler_common *common, int size)
 DEFINE_COMPILER;
 
 SLJIT_ASSERT(size > 0);
+if (size > (STACK_GROWTH_RATE / (SSIZE_OF(sw) * 2)))
+  common->large_stack_allocation = TRUE;
 OP2(SLJIT_SUB, STACK_TOP, 0, STACK_TOP, 0, SLJIT_IMM, size * SSIZE_OF(sw));
 #ifdef DESTROY_REGISTERS
 OP1(SLJIT_MOV, TMP1, 0, SLJIT_IMM, 12345);
@@ -14193,7 +14197,20 @@ SLJIT_ASSERT(TMP1 == SLJIT_R0 && STR_PTR == SLJIT_R1);
 
 OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCALS1, STR_PTR, 0);
 OP1(SLJIT_MOV, SLJIT_R0, 0, ARGUMENTS, 0);
-OP2(SLJIT_SUB, SLJIT_R1, 0, STACK_LIMIT, 0, SLJIT_IMM, STACK_GROWTH_RATE);
+if (common->large_stack_allocation)
+  {
+  SLJIT_COMPILE_ASSERT((STACK_GROWTH_RATE & (STACK_GROWTH_RATE - 1)) == 0, stack_growth_must_be_power_of_2);
+  // Negative difference. The positive difference would also use the same amount
+  // of operations, but the last subtraction emits several instructions on x86.
+  OP2(SLJIT_SUB, SLJIT_R1, 0, STACK_TOP, 0, STACK_LIMIT, 0);
+  // Minimum extra space after allocation.
+  OP2(SLJIT_SUB, SLJIT_R1, 0, SLJIT_R1, 0, SLJIT_IMM, (STACK_GROWTH_RATE / 2));
+  // Rounds down negative numbers.
+  OP2(SLJIT_AND, SLJIT_R1, 0, SLJIT_R1, 0, SLJIT_IMM, ~(STACK_GROWTH_RATE - 1));
+  OP2(SLJIT_ADD, SLJIT_R1, 0, SLJIT_R1, 0, STACK_LIMIT, 0);
+  }
+else
+  OP2(SLJIT_SUB, SLJIT_R1, 0, STACK_LIMIT, 0, SLJIT_IMM, STACK_GROWTH_RATE);
 OP1(SLJIT_MOV, SLJIT_R0, 0, SLJIT_MEM1(SLJIT_R0), SLJIT_OFFSETOF(jit_arguments, stack));
 OP1(SLJIT_MOV, STACK_LIMIT, 0, TMP2, 0);
 
