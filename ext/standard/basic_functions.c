@@ -158,7 +158,7 @@ zend_module_entry basic_functions_module = { /* {{{ */
 	PHP_STANDARD_VERSION,		/* extension version */
 	NO_MODULE_GLOBALS,
 	ZEND_MODULE_POST_ZEND_DEACTIVATE_N(streams),
-	STANDARD_MODULE_PROPERTIES_EX
+	STANDARD_MODULE_PROPERTIES_REQUEST_HOOKS(NULL, PHP_REND(basic))
 };
 /* }}} */
 
@@ -428,6 +428,14 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 	return SUCCESS;
 }
 /* }}} */
+
+/* Other state, like strtok() or the stat cache, is shared by the requests as in a long-running script */
+PHP_REND_FUNCTION(basic)
+{
+	BASIC_RSHUTDOWN_SUBMODULE(url_scanner_ex)
+
+	return SUCCESS;
+}
 
 PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 {

@@ -38,6 +38,7 @@ PHP_MINIT_FUNCTION(basic);
 PHP_MSHUTDOWN_FUNCTION(basic);
 PHP_RINIT_FUNCTION(basic);
 PHP_RSHUTDOWN_FUNCTION(basic);
+PHP_REND_FUNCTION(basic);
 PHP_MINFO_FUNCTION(basic);
 
 ZEND_API void php_get_highlight_struct(zend_syntax_highlighter_ini *syntax_highlighter_ini);
