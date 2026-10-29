@@ -630,6 +630,15 @@ class my_mysqli_fake_server_conn
         fprintf(STDERR, "[*] Received: %s\n", bin2hex($data));
     }
 
+    public function read_compressed_packet(): void
+    {
+        $header = $this->read_bytes(7);
+        $compressed_length = ord($header[0]) | (ord($header[1]) << 8) | (ord($header[2]) << 16);
+        $uncompressed_length = ord($header[4]) | (ord($header[5]) << 8) | (ord($header[6]) << 16);
+        $this->read_bytes($compressed_length);
+        fprintf(STDERR, "[*] Received compressed packet: %d bytes, uncompressed length %d\n", $compressed_length, $uncompressed_length);
+    }
+
     public function close()
     {
         fclose($this->conn);
@@ -1443,6 +1452,19 @@ function my_mysqli_test_stmt_response_field_len_premature(my_mysqli_fake_server_
 	$packets[1]->orig_name_len = '0c';
 	$conn->send($conn->packets_to_bytes($packets), "Malicious Stmt Prepare items [Field length over-read]");
 	$conn->read(65536);
+}
+
+function my_mysqli_test_compressed_queries(my_mysqli_fake_server_conn $conn): void
+{
+    $conn->send_server_greetings();
+    $conn->read();
+    $conn->send_server_ok();
+    for ($i = 0; $i < 2; $i++) {
+        $conn->read_compressed_packet();
+        $ok = $conn->packet_generator->server_ok("01")->to_bytes();
+        $conn->send(substr(pack('V', strlen($ok)), 0, 3) . "\x01\x00\x00\x00" . $ok, "Compressed Server OK");
+    }
+    $conn->read_compressed_packet();
 }
 
 function run_fake_server(string $test_function, int|string $port = 0): void
