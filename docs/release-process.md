@@ -55,6 +55,11 @@ releases.
    If the release is to be on Thursday, package on Tuesday. Think about
    timezones as well.
 
+   For stable releases, nothing is pushed to the public repositories on
+   packaging day. The tag and tarballs are shared through the private
+   `php-src-staging` and `web-php-distributions-staging` repositories and are
+   only published on the announcement day.
+
 3. Ensure that the relevant tests on CI are green.
 
    - https://cirrus-ci.com/github/php/php-src
@@ -559,19 +564,24 @@ slightly different steps. We'll call attention where the steps differ.
    about it by the security release manager (SRM) by Tuesday noon (UTC).
 
    > 💬 **Hint** \
-   > If you haven't set up a git remote for the security repo yet, do so:
+   > If you haven't set up a git remote for the staging repo yet, do so:
    > ```bash
-   > git remote add security git@github.com:php/php-src-security.git
+   > git remote add staging git@github.com:php/php-src-staging.git
    > ```
 
-   The SRM will provide you with a branch to merge in your
+   The SRM will provide you with a branch in `php-src-staging` to merge in your
    *patch-level version branch*.
 
    ```bash
-   git fetch security
-   git merge security/PHP-X.Y.Z-security
-   git push upstream PHP-X.Y.Z
+   git fetch staging
+   git merge staging/PHP-X.Y.Z-security
+   git push staging PHP-X.Y.Z
    ```
+
+   > 🚨 **Attention** \
+   > Do *not* push the merged branch to `php-src` yet. The security fixes must
+   > stay private until the announcement day, so the branch is pushed only to
+   > `php-src-staging` at this point.
 
    > 💬 **Hint** \
    > You do not need to merge this back into PHP-X.Y; the SRM will take care
@@ -589,7 +599,7 @@ slightly different steps. We'll call attention where the steps differ.
    version branch*.
 
    ```shell
-   git checkout -b php-X.Y.Z-local-release-branch upstream/PHP-X.Y.Z
+   git checkout -b php-X.Y.Z-local-release-branch PHP-X.Y.Z
    ```
 
 5. Using your local-only release branch, bump the version numbers in
@@ -638,12 +648,22 @@ slightly different steps. We'll call attention where the steps differ.
    git commit --gpg-sign=YOURKEYID -m "Update versions for PHP X.Y.Z"
    ```
 
-9. Tag your local-only release branch with the release version and push the tag.
+9. Tag your local-only release branch with the release version and push the tag
+   to the private `php-src-staging` repository only.
 
    ```shell
    git tag -s -u YOURKEYID php-X.Y.Z -m "Tag for php-X.Y.Z"
-   git push upstream php-X.Y.Z
+   git push staging php-X.Y.Z
    ```
+
+   > 🚨 **Attention** \
+   > Do *not* push the tag to `php-src` yet. The tag is pushed to `php-src` on
+   > the announcement day, as described in [Announcing a stable
+   > release](#announcing-a-stable-release). Until then, the tag only exists
+   > locally and in `php-src-staging`.
+   >
+   > Do not push with `--tags`, as this will push all local tags, including
+   > tags you might not wish to push.
 
 10. Run the following using the release tag to export the tree, create the
     `configure` script, and build and compress three tarballs (`.tar.gz`,
@@ -672,25 +692,34 @@ slightly different steps. We'll call attention where the steps differ.
     ```
 
 12. If you have the [GitHub command line tool][] installed, run the following to
-    create a public Gist for the manifest file:
+    create a secret Gist for the manifest file:
 
     ```shell
-    gh gist create --public php-X.Y.Z.manifest
+    gh gist create php-X.Y.Z.manifest
     ```
 
     Or you may go to https://gist.github.com to create it manually.
 
-13. Switch to your local clone of the `web-php-distributions` repository and
-    copy the tarballs and signature files into the repository. Add, commit, and
-    push them.
+    > 💬 **Hint** \
+    > A secret Gist is not listed publicly but is still accessible to anyone
+    > with the link, so it can be shared in the announcement emails later.
+
+13. Switch to your local clone of the private `web-php-distributions-staging`
+    repository and copy the tarballs and signature files into the repository.
+    Add, commit, and push them.
 
     ```shell
-    cd /path/to/repos/php/web-php-distributions
-    mv /path/to/repos/php/php-src/php-X.Y.Z.tar.* .
+    cd /path/to/repos/php/web-php-distributions-staging
+    cp /path/to/repos/php/php-src/php-X.Y.Z.tar.* .
     git add php-X.Y.Z.tar.*
     git commit --gpg-sign=YOURKEYID -m "Add tarballs for php-X.Y.Z"
-    git push upstream master
+    git push upstream main
     ```
+
+    > 🚨 **Attention** \
+    > Do *not* push the tarballs to `web-php-distributions` yet. They are
+    > published there on the announcement day. Keep a copy of the tarballs and
+    > signature files, as you will need them again then.
 
 14. Once the release is tagged, contact the release-managers@php.net distribution
     list so that Windows binaries can be created. Once those are made, they may
@@ -706,8 +735,8 @@ slightly different steps. We'll call attention where the steps differ.
 
     Hi, all!
 
-    Tag: php-8.1.6
-    Tarballs: web-php-distributions
+    Tag: php-8.1.6 (php-src-staging)
+    Tarballs: web-php-distributions-staging
     Manifest: https://gist.github.com/ramsey/432fcf8afcbfb1f1de6c3ab47d82e366
 
     Cheers,
@@ -719,7 +748,46 @@ slightly different steps. We'll call attention where the steps differ.
 
 ## Announcing a stable release
 
-1. This steps applies only for releases after PHP-X.Y.0.
+1. Publish the tag and the tarballs.
+
+   > 💬 **Hint** \
+   > For security releases, agree on a time with the other release managers
+   > on release-managers@php.net first, so that everyone involved (other RMs,
+   > the SRM, and the Windows builders) is ready to publish at the same time.
+
+   Push the tag and the *patch-level version branch* to `php-src`. The branch
+   push is only needed for security releases, as the branch then contains the
+   security fixes merged on packaging day.
+
+   ```shell
+   cd /path/to/repos/php/php-src
+   git push upstream php-X.Y.Z   # tag name
+   git push upstream PHP-X.Y.Z   # patch-level version branch
+   ```
+
+   > 🚨 **Attention** \
+   > Do not push with `--tags`, as this will push all local tags, including
+   > tags you might not wish to push.
+   >
+   > Local-only release branches should not be pushed!
+
+   Switch to your local clone of the `web-php-distributions` repository, copy
+   the tarballs and signature files from your `web-php-distributions-staging`
+   clone into it, and add, commit, and push them.
+
+   ```shell
+   cd /path/to/repos/php/web-php-distributions
+   cp /path/to/repos/php/web-php-distributions-staging/php-X.Y.Z.tar.* .
+   git add php-X.Y.Z.tar.*
+   git commit --gpg-sign=YOURKEYID -m "Add tarballs for php-X.Y.Z"
+   git push upstream master
+   ```
+
+   > 💬 **Hint** \
+   > The remaining steps reference the tag in `php-src` (e.g., when updating
+   > the ChangeLog), so they can only be completed once the tag is public.
+
+2. This steps applies only for releases after PHP-X.Y.0.
 
    Switch to your local clone of `web-php` and add the information for the
    previous release to `include/releases.inc`.
@@ -752,7 +820,7 @@ slightly different steps. We'll call attention where the steps differ.
    * Update the `tags` array to include `'security'` if this is a security release
    * Set the `sha256` array with the hashes for each of the release tarballs
 
-5. Create the release file and news entry for the new version.
+4. Create the release file and news entry for the new version.
 
    ```shell
    ./bin/createReleaseEntry -v X.Y.Z -r # --security for security releases
@@ -768,7 +836,7 @@ slightly different steps. We'll call attention where the steps differ.
    The edits are necessary for PHP-X.Y.0 version where the format is different.
    See for example [PHP-8.2 announcement](https://github.com/php/web-php/commit/c966868202caafa880213055f4e3e97c0483119b)
 
-7. Update the ChangeLog file for the given major version (e.g., `ChangeLog-8.php`).
+5. Update the ChangeLog file for the given major version (e.g., `ChangeLog-8.php`).
 
    If PHP-X.Y.0 is released, modify the `ChangeLog-X.php` (where `X` is the major
    version) file manually first. The `$MINOR_VERSIONS` field needs to be extended
@@ -778,7 +846,7 @@ slightly different steps. We'll call attention where the steps differ.
    ```shell
    ./bin/news2html 'https://github.com/php/php-src/raw/php-X.Y.Z/NEWS' 'X.Y.Z' 'public/ChangeLog-X.php'
    ```
-8. Update the information in the `$QA_RELEASES` array in `include/release-qa.php`.
+6. Update the information in the `$QA_RELEASES` array in `include/release-qa.php`.
 
    The array probably contains information about the RC released two weeks ago
    in preparation for the current release. Since the current release is now GA,
@@ -788,7 +856,7 @@ slightly different steps. We'll call attention where the steps differ.
    stop displaying the RC build on the release candidates page. You may also remove the
    sha256 hashes for the RC tarballs, but it's not necessary.
 
-9. Review all the changes in `web-php`, commit, and push them.
+7. Review all the changes in `web-php`, commit, and push them.
 
    ```shell
    git add -p
@@ -799,7 +867,7 @@ slightly different steps. We'll call attention where the steps differ.
 
    See [Announce PHP 8.1.6][] for an example commit.
 
-10. 🚨 **Before sending announcement emails, check to make sure the websites have
+8. 🚨 **Before sending announcement emails, check to make sure the websites have
    synced.**
 
    * Make sure the tarballs are available from, e.g.,
@@ -816,10 +884,10 @@ slightly different steps. We'll call attention where the steps differ.
 
    Keep in mind it may take up to an hour for the websites to sync.
 
-11. Please note down the sha256 and the PGP signature (.asc). These *must* be
+9. Please note down the sha256 and the PGP signature (.asc). These *must* be
    included in the release mail.
 
-12. Send *separate* announcement emails to:
+10. Send *separate* announcement emails to:
 
    * `php-announce@lists.php.net`
    * `php-general@lists.php.net`
@@ -843,7 +911,7 @@ slightly different steps. We'll call attention where the steps differ.
    > want their email client to automatically send the reply to each list, as
    > often occurs.
 
-13. Coordinate with the social media team (i.e., Derick) to
+11. Coordinate with the social media team (i.e., Derick) to
     [create a PR request](https://github.com/derickr/toot-together/blob/main/toots/README.md)
     for posting the release announcement to Mastodon. Posts need to be
     approved.
@@ -1182,6 +1250,12 @@ volunteers to begin the selection process for the next release managers.
    * https://github.com/php/php-src
    * https://github.com/php/web-php
    * https://github.com/php/web-php-distributions
+   * https://github.com/php/web-php-distributions-staging
+
+   Also add the private https://github.com/php/php-src-staging repository as a
+   remote of your `php-src` clone, as described in [Packaging a stable
+   release](#packaging-a-stable-release). Access to the private repositories is
+   granted through the release managers group.
 
 
 [general availability]: https://en.wikipedia.org/wiki/Software_release_life_cycle#General_availability_(GA)
