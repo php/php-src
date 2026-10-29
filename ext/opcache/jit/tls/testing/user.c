@@ -3,7 +3,7 @@
 
 #include "../zend_jit_tls.h"
 
-extern __thread void* _tsrm_ls_cache;
+TSRMLS_MAIN_CACHE_EXTERN()
 
 int test(void)
 {

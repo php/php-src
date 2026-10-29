@@ -166,7 +166,9 @@ code_changed:
 
 	/*
 	 * 64 48 8b 04 25 00 00 00 00	movq    %fs:0x0,%rax
-	 * 48 8d 80 f8 ff ff ff	        leaq    -0x8(%rax),%rax
+	 * 48 8d 80 f8 ff ff ff	        leaq    -0x8(%rax),%rax (Local Exec)
+	 * or
+	 * 48 03 05 xx xx xx xx	        addq    any(%rip),%rax (Initial Exec)
 	 */
 
 	// movq %fs:0x0,%rax
@@ -177,20 +179,16 @@ code_changed:
 		return FAILURE;
 	}
 
-	// leaq any(%rax),$rax
-	if (memcmp(&code[9], "\x48\x8d\x80", 3) != 0) {
+	// leaq any(%rax),%rax or addq any(%rip),%rax
+	if (memcmp(&code[9], "\x48\x8d\x80", 3) != 0
+			&& memcmp(&code[9], "\x48\x03\x05", 3) != 0) {
 		uint64_t bytes;
-		memcpy(&bytes, &code[10], 8);
-		zend_accel_error(ACCEL_LOG_DEBUG, "leaq insn does not match: 0x%016" PRIx64 "\n", bytes);
+		memcpy(&bytes, &code[9], 8);
+		zend_accel_error(ACCEL_LOG_DEBUG, "leaq/addq insn does not match: 0x%016" PRIx64 "\n", bytes);
 		return FAILURE;
 	}
 
-	/* Extract immediate values */
-
-	uintptr_t offset = (uintptr_t)(int32_t)(((uint32_t)code[15] << 24)
-		| ((uint32_t)code[14] << 16)
-		| ((uint32_t)code[13] << 8)
-		| ((uint32_t)code[12]));
+	uintptr_t offset = (uintptr_t)addr - (uintptr_t)thread_pointer;
 
 	if ((uintptr_t)&_tsrm_ls_cache - (uintptr_t)thread_pointer == offset) {
 		*tcb_offset = offset;
