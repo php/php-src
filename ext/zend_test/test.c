@@ -269,6 +269,128 @@ static ZEND_FUNCTION(zend_test_callback)
 	free(p);
 }
 
+typedef struct {
+	uintptr_t start;
+	size_t size;
+} zend_test_mm_range;
+
+static bool zend_test_mm_is_fresh(const zend_test_mm_range *retired, size_t count, void *ptr, size_t size)
+{
+	uintptr_t start = (uintptr_t) ptr;
+	for (size_t i = 0; i < count; i++) {
+		if (start < retired[i].start + retired[i].size && retired[i].start < start + size) {
+			return false;
+		}
+	}
+	return true;
+}
+
+static ZEND_FUNCTION(zend_test_mm_no_reuse)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	const char *enabled = getenv("ZEND_MM_NO_REUSE");
+	if (!enabled || strcmp(enabled, "1") != 0) {
+		zend_throw_error(NULL, "Start PHP with ZEND_MM_NO_REUSE=1");
+		RETURN_THROWS();
+	}
+
+#define ZEND_TEST_MM_SIZE(num, size, elements, pages, x, y) size,
+	const size_t sizes[] = {
+		ZEND_MM_BINS_INFO(ZEND_TEST_MM_SIZE, x, y)
+		4096, 16384, 1024 * 1024, ZEND_MM_MAX_LARGE_SIZE, 3 * 1024 * 1024
+	};
+#undef ZEND_TEST_MM_SIZE
+	const size_t realloc_sizes[] = {1, 64, 3072, 4096, 16384, 3 * 1024 * 1024};
+	zend_test_mm_range retired[1024];
+	size_t count = 0;
+	bool fresh = true, collected = true, moved = true, preserved = true, cleared = true;
+	zend_mm_heap *heap = zend_mm_startup();
+
+	for (size_t i = 0; i < 512; i++) {
+		void *ptr = zend_mm_alloc(heap, 64);
+		size_t capacity = zend_mm_block_size(heap, ptr);
+		fresh &= zend_test_mm_is_fresh(retired, count, ptr, capacity);
+		memset(ptr, 0x5a, 64);
+		zend_mm_free(heap, ptr);
+		retired[count++] = (zend_test_mm_range) {(uintptr_t) ptr, capacity};
+		if (i % 32 == 0) {
+			collected &= zend_mm_gc(heap) == 0;
+		}
+	}
+	for (size_t pass = 0; pass < 2; pass++) {
+		for (size_t i = 0; i < sizeof(sizes) / sizeof(*sizes); i++) {
+			void *ptr = zend_mm_alloc(heap, sizes[i]);
+			size_t capacity = zend_mm_block_size(heap, ptr);
+			fresh &= zend_test_mm_is_fresh(retired, count, ptr, capacity);
+			memset(ptr, 0x5a, sizes[i]);
+			zend_mm_free(heap, ptr);
+			retired[count++] = (zend_test_mm_range) {(uintptr_t) ptr, capacity};
+			collected &= zend_mm_gc(heap) == 0;
+		}
+	}
+	for (size_t i = 0; i < sizeof(realloc_sizes) / sizeof(*realloc_sizes); i++) {
+		for (size_t j = 0; j < sizeof(realloc_sizes) / sizeof(*realloc_sizes); j++) {
+			size_t old_size = realloc_sizes[i], new_size = realloc_sizes[j];
+			void *ptr = zend_mm_realloc2(heap, NULL, old_size, 0);
+			size_t capacity = zend_mm_block_size(heap, ptr);
+			fresh &= zend_test_mm_is_fresh(retired, count, ptr, capacity);
+			memset(ptr, 0x5a, old_size);
+			retired[count++] = (zend_test_mm_range) {(uintptr_t) ptr, capacity};
+			if (j % 2 == 0) {
+				ptr = zend_mm_realloc(heap, ptr, new_size);
+			} else {
+				ptr = zend_mm_realloc2(heap, ptr, new_size, MIN(old_size, new_size));
+			}
+			capacity = zend_mm_block_size(heap, ptr);
+			moved &= zend_test_mm_is_fresh(retired, count, ptr, capacity);
+			for (size_t k = 0; k < MIN(old_size, new_size); k++) {
+				preserved &= ((unsigned char *) ptr)[k] == 0x5a;
+			}
+			zend_mm_free(heap, ptr);
+			retired[count++] = (zend_test_mm_range) {(uintptr_t) ptr, capacity};
+		}
+	}
+
+	zend_mm_heap *orig_heap = zend_mm_set_heap(heap);
+	void *ptr = emalloc(1);
+	size_t capacity = zend_mem_block_size(ptr);
+	fresh &= zend_test_mm_is_fresh(retired, count, ptr, capacity);
+	efree_size(ptr, 1);
+	retired[count++] = (zend_test_mm_range) {(uintptr_t) ptr, capacity};
+	ptr = emalloc(8192);
+	capacity = zend_mem_block_size(ptr);
+	fresh &= zend_test_mm_is_fresh(retired, count, ptr, capacity);
+	efree_size(ptr, 8192);
+	retired[count++] = (zend_test_mm_range) {(uintptr_t) ptr, capacity};
+	zend_mm_set_heap(orig_heap);
+
+	ZEND_ASSERT(count <= sizeof(retired) / sizeof(*retired));
+	zend_mm_refresh_key_child(heap);
+	for (size_t i = 0; i < count; i++) {
+		const unsigned char *bytes = (const unsigned char *) retired[i].start;
+		for (size_t j = 0; j < retired[i].size; j++) {
+			cleared &= bytes[j] == 0;
+		}
+	}
+	zend_mm_shutdown(heap, false, false);
+	ptr = zend_mm_alloc(heap, 64);
+	bool reset = (uintptr_t) ptr == retired[0].start;
+	zend_mm_free(heap, ptr);
+	zend_mm_shutdown(heap, false, false);
+	ptr = zend_mm_alloc(heap, 3 * 1024 * 1024);
+	zend_mm_free(heap, ptr);
+	zend_mm_shutdown(heap, true, false);
+
+	array_init(return_value);
+	add_assoc_bool(return_value, "non-overlap", fresh);
+	add_assoc_bool(return_value, "gc", collected);
+	add_assoc_bool(return_value, "realloc", moved);
+	add_assoc_bool(return_value, "contents", preserved);
+	add_assoc_bool(return_value, "cleared", cleared);
+	add_assoc_bool(return_value, "shutdown", reset);
+}
+
 /* Leak a refcounted variable */
 static ZEND_FUNCTION(zend_leak_variable)
 {
