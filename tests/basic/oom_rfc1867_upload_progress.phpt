@@ -1,8 +1,10 @@
 --TEST--
 rfc1867: the session upload progress handler doesn't reach the hard limit
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php
-require __DIR__ . "/oom_rfc1867_session_skipif.inc";
+require __DIR__ . "/oom_rfc1867_skipif.inc";
 if (getenv('SKIP_ASAN')) die("skip slow under ASan");
 ?>
 --FILE--

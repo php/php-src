@@ -1,9 +1,10 @@
 --TEST--
 Failure to send "100 Continue" is reported with ignore_user_abort=1
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
 include "skipif.inc";
-if (!extension_loaded("sockets")) die("skip sockets extension required");
 if (PHP_OS_FAMILY === "Windows") die("skip SO_LINGER reset behaviour differs on Windows");
 ?>
 --FILE--

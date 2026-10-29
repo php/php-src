@@ -2,11 +2,7 @@
 GHSA-r6x9-5r99-36j7 (Various packet overreads in mysqlnd_writeprotocol.c - cached sha2 result with empty packet)
 --EXTENSIONS--
 mysqli
---SKIPIF--
-<?php
-if (!extension_loaded("openssl"))
-    die("skip mysqlnd is built without SSL support, so the caching_sha2_password plugin is not available");
-?>
+openssl
 --FILE--
 <?php
 require_once 'fake_server.inc';
