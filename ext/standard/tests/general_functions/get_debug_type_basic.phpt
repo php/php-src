@@ -45,8 +45,8 @@ namespace {
 ClassInGlobal
 Demo\ClassInNamespace
 class@anonymous
-ToBeExtended@anonymous
-ToBeImplemented@anonymous
+class@anonymous
+class@anonymous
 string
 bool
 bool
