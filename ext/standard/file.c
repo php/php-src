@@ -493,8 +493,24 @@ PHP_FUNCTION(file_put_contents)
 		RETURN_FALSE;
 	}
 
-	if (mode[0] == 'c') {
-		php_stream_truncate_set_size(stream, 0);
+	if (mode[0] == 'c' && php_stream_truncate_set_size(stream, 0) != PHP_STREAM_OPTION_RETURN_OK) {
+		bool non_regular = false;
+		if (php_stream_is(stream, PHP_STREAM_IS_STDIO)) {
+#ifdef PHP_WIN32
+			php_socket_t fd;
+			if (php_stream_cast(stream, PHP_STREAM_AS_FD, (void **) &fd, 0) == SUCCESS) {
+				DWORD file_type = GetFileType((HANDLE) _get_osfhandle((int) fd));
+				non_regular = file_type == FILE_TYPE_CHAR || file_type == FILE_TYPE_PIPE;
+			}
+#else
+			php_stream_statbuf ssb;
+			non_regular = php_stream_stat(stream, &ssb) == 0 && !S_ISREG(ssb.sb.st_mode);
+#endif
+		}
+		if (!non_regular) {
+			php_stream_close(stream);
+			RETURN_FALSE;
+		}
 	}
 
 	switch (Z_TYPE_P(data)) {
