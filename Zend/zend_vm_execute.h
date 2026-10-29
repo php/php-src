@@ -4031,7 +4031,12 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_FCALL_SPEC_CO
 	if (UNEXPECTED(fbc == NULL)) {
 		fname = (zval*)RT_CONSTANT(opline, opline->op2);
 		func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(fname));
-		ZEND_ASSERT(func != NULL && "Function existence must be checked at compile time");
+		/* The function table can differ from the one the script was compiled with.
+		 * A call compiled for an internal function (op2.extra is its offset) can't go to a user function. */
+		if (UNEXPECTED(func == NULL)
+		 || (Z_EXTRA_P(fname) && UNEXPECTED(Z_FUNC_P(func)->type != ZEND_INTERNAL_FUNCTION))) {
+			ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+		}
 		fbc = Z_FUNC_P(func);
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
@@ -4055,7 +4060,22 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_FCALL_OFFSET_
 	zend_execute_data *call;
 	fbc = CACHED_PTR(opline->result.num);
 	if (UNEXPECTED(fbc == NULL)) {
-		fbc = Z_PTR(EG(function_table)->arData[Z_EXTRA_P(RT_CONSTANT(opline, opline->op2))].val);
+		zval *fname = (zval*)RT_CONSTANT(opline, opline->op2);
+		uint32_t offset = Z_EXTRA_P(fname);
+		Bucket *p = EG(function_table)->arData;
+
+		/* The offset is stale if the function table differs from the one the script was compiled with. */
+		if (EXPECTED(offset < EG(function_table)->nNumUsed)
+		 && EXPECTED(p[offset].key && zend_string_equals(p[offset].key, Z_STR_P(fname)))) {
+			fbc = Z_PTR(p[offset].val);
+		} else {
+			zval *func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(fname));
+			fbc = func ? Z_FUNC_P(func) : NULL;
+		}
+		/* The call was compiled for an internal function and can't go to a user function. */
+		if (UNEXPECTED(fbc == NULL) || UNEXPECTED(fbc->type != ZEND_INTERNAL_FUNCTION)) {
+			ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+		}
 		CACHE_PTR(opline->result.num, fbc);
 	}
 	call = _zend_vm_stack_push_call_frame_ex(
