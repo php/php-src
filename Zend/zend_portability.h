@@ -406,8 +406,8 @@ extern "C++" {
 # define ZEND_CONTAINER_OF(ptr, Type, member) \
 	_Generic( \
 		(ptr), \
-		const typeof(((Type*)0)->member) *: ((const Type*)((char*)(ptr) - offsetof(Type, member))), \
-		typeof(((Type*)0)->member) *: ((Type*)((char*)(ptr) - offsetof(Type, member))) \
+		const __typeof__(((Type*)0)->member) *: ((const Type*)((char*)(ptr) - offsetof(Type, member))), \
+		__typeof__(((Type*)0)->member) *: ((Type*)((char*)(ptr) - offsetof(Type, member))) \
 	)
 #else
 /* Define a variant that does not keep const-ness for older compilers. Mismatches
