@@ -649,7 +649,7 @@ static int readline_shell_run(void) /* {{{ */
 
 		len = strlen(line);
 
-		if (line[0] == '#' && line[1] != '[') {
+		if (line[0] == '#' && line[1] != '[' && pos == 0) {
 			char *param = strstr(&line[1], "=");
 			if (param) {
 				zend_string *cmd;
@@ -661,7 +661,6 @@ static int readline_shell_run(void) /* {{{ */
 				add_history(line);
 
 				zend_string_release_ex(prompt, 0);
-				/* TODO: This might be wrong! */
 				prompt = cli_get_prompt("php", '>');
 				continue;
 			}
