@@ -2,6 +2,8 @@
 GH-24668 (zend_set_local_var() leaks the previous value of an existing CV)
 --EXTENSIONS--
 zend_test
+--INI--
+opcache.jit=0
 --FILE--
 <?php
 
