@@ -1420,6 +1420,14 @@ PHPAPI void php_var_serialize(smart_str *buf, zval *struc, php_serialize_data_t 
 }
 /* }}} */
 
+PHPAPI void php_var_serialization_reset(void)
+{
+	/* A bailout can abandon contexts that the request heap will reclaim. */
+	BG(serialize_lock) = 0;
+	memset(&BG(serialize), 0, sizeof(BG(serialize)));
+	memset(&BG(unserialize), 0, sizeof(BG(unserialize)));
+}
+
 PHPAPI php_serialize_data_t php_var_serialize_init(void) {
 	struct php_serialize_data *d;
 	/* fprintf(stderr, "SERIALIZE_INIT      == lock: %u, level: %u\n", BG(serialize_lock), BG(serialize).level); */
