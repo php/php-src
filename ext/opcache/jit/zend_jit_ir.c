@@ -16339,11 +16339,14 @@ static int zend_jit_fetch_static_prop(zend_jit_ctx *jit, const zend_op *opline, 
 	uint32_t cache_slot = opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS;
 	uint32_t flags;
 	ir_ref ref, ref2, if_cached, fast_path, cold_path, prop_info_ref, if_typed, if_def;
+	ir_ref slow_inputs = IR_UNUSED;
 	int fetch_type;
 	zend_property_info *known_prop_info = NULL;
 	zend_class_entry *ce;
+	bool is_static = opline->op2_type == IS_UNUSED
+		&& (opline->op2.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_STATIC;
 
-	ce = zend_get_known_class(op_array, opline, opline->op2_type, opline->op2);
+	ce = is_static ? NULL : zend_get_known_class(op_array, opline, opline->op2_type, opline->op2);
 	if (ce) {
 		zval *zv = RT_CONSTANT(opline, opline->op1);
 		zend_string *prop_name;
@@ -16384,6 +16387,17 @@ static int zend_jit_fetch_static_prop(zend_jit_ctx *jit, const zend_op *opline, 
 			fetch_type = BP_VAR_UNSET;
 			break;
 		default: ZEND_UNREACHABLE();
+	}
+
+	if (is_static) {
+		/* The cache slot is polymorphic on the called scope. */
+		// JIT: if (CACHED_PTR(cache_slot) == called_scope)
+		ir_ref if_scope = ir_IF(ir_EQ(
+			ir_LOAD_A(ir_ADD_OFFSET(ir_LOAD_A(jit_EX(run_time_cache)), cache_slot)),
+			jit_called_scope(jit, op_array)));
+		ir_IF_FALSE_cold(if_scope);
+		ir_END_list(slow_inputs);
+		ir_IF_TRUE(if_scope);
 	}
 
 	// JIT: result = CACHED_PTR(cache_slot + sizeof(void *));
@@ -16461,6 +16475,10 @@ static int zend_jit_fetch_static_prop(zend_jit_ctx *jit, const zend_op *opline, 
 	fast_path = ir_END();
 
 	ir_IF_FALSE_cold(if_cached);
+	if (slow_inputs) {
+		ir_END_list(slow_inputs);
+		ir_MERGE_list(slow_inputs);
+	}
 	jit_SET_EX_OPLINE(jit, opline);
 	ref2 = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_fetch_static_property), jit_FP(jit), ir_CONST_I32(fetch_type));
 	zend_jit_check_exception_undef_result(jit, opline);
