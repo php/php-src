@@ -7,10 +7,10 @@ PHP                                                                        NEWS
     for grouping. (Klaas Skelte van der Werf)
   . Fixed unmapping of an unrelated range when the aligned chunk mmap fails
     (Marti2203).
-  . Fixed bug GH-25007 (Partial function application: named args in a constant
-    expression cause out-of-bounds write in zp_compile()). (lazerg)
   . Fixed bug GH-25023 (ZEND_CONTAINER_OF() fails to compile with -std=c11).
     (lazerg)
+  . Fixed bug GH-25007 (Partial function application: named args in a constant
+    expression cause out-of-bounds write in zp_compile()). (lazerg)
 
 - CLI:
   . Fixed bug GH-24697 (PHP_HTTP_PARSER_STRICT build option doesn't work).
