@@ -36,11 +36,6 @@ for ($i = 0; $i < 200; $i++) {
         printf("[003] Round trip failed for %d bytes\n", strlen($value));
     }
 }
-$stmt->close();
-
-$link->close();
-print "done!";
 ?>
 --EXPECT--
 string(2) "ON"
-done!
