@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: ea2674e5d5dbf60aa5efab31132064b52a07bddd
+ * Stub hash: a49cfced20b16588283149be5d01212924c925fd
  * Has decl header: yes */
 
 #include "zend_attributes.h"
@@ -359,6 +359,11 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_zend_new_singleton_array arginfo_zend_test_array_return
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_set_local_var, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
 #define arginfo_ZendTestNS2_namespaced_func arginfo_zend_test_is_pcre_bundled
 
 #define arginfo_ZendTestNS2_namespaced_deprecated_func arginfo_zend_test_void_return
@@ -556,6 +561,7 @@ static ZEND_FUNCTION(zend_test_uri_parser);
 static ZEND_FUNCTION(zend_test_gh19792);
 static ZEND_FUNCTION(zend_test_handle_post_data);
 static ZEND_FUNCTION(zend_new_singleton_array);
+static ZEND_FUNCTION(zend_test_set_local_var);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_func);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_deprecated_func);
 static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_func);
@@ -746,6 +752,7 @@ static const zend_function_entry ext_functions[] = {
 #endif
 	ZEND_FE(zend_test_handle_post_data, arginfo_zend_test_handle_post_data)
 	ZEND_FE(zend_new_singleton_array, arginfo_zend_new_singleton_array)
+	ZEND_FE(zend_test_set_local_var, arginfo_zend_test_set_local_var)
 #if (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2", "namespaced_func"), zif_ZendTestNS2_namespaced_func, arginfo_ZendTestNS2_namespaced_func, 0, NULL, NULL)
 #else
