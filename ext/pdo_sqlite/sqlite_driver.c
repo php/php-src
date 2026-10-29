@@ -292,6 +292,10 @@ static bool pdo_sqlite_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			if (!pdo_get_long_param(&lval, val)) {
 				return false;
 			}
+			if (lval > INT_MAX / 1000) {
+				return false;
+			}
+			lval = MAX(lval, 0);
 			sqlite3_busy_timeout(H->db, lval * 1000);
 			return true;
 		case PDO_SQLITE_ATTR_EXTENDED_RESULT_CODES:
