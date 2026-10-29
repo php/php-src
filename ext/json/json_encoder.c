@@ -309,8 +309,9 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 					if (php_json_escape_string(buf, ZSTR_VAL(key), ZSTR_LEN(key),
 								options & ~PHP_JSON_NUMERIC_CHECK, encoder) == FAILURE) {
 						if (ZEND_HAS_OOM()) {
-							PHP_JSON_HASH_UNPROTECT_RECURSION(myht);
+							PHP_JSON_HASH_UNPROTECT_RECURSION(recursion_rc);
 							zend_release_properties(prop_ht);
+							zval_ptr_dtor(&tmp);
 							return FAILURE;
 						}
 						if ((options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) && buf->s) {
