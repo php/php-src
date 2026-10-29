@@ -341,8 +341,8 @@ static const char b64t[64] ZEND_NONSTRING =
 
 char *
 php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) {
-	ZEND_SET_ALIGNED(alignof(uint64_t), unsigned char alt_result[64]);
-	ZEND_SET_ALIGNED(alignof(uint64_t), unsigned char temp_result[64]);
+	alignas(uint64_t) unsigned char alt_result[64];
+	alignas(uint64_t) unsigned char temp_result[64];
 	struct sha512_ctx ctx;
 	struct sha512_ctx alt_ctx;
 	size_t salt_len;
