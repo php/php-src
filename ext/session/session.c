@@ -2945,6 +2945,38 @@ static PHP_RINIT_FUNCTION(session)
 		ZVAL_UNDEF(&PS(mod_user_names).struct_name); \
 	}
 
+static PHP_RBEGIN_FUNCTION(session)
+{
+	if (PS(auto_start) && PS(session_status) == php_session_none) {
+		php_session_start();
+	}
+
+	return SUCCESS;
+}
+
+/* Unlike RSHUTDOWN, keeps the save handlers registered by the running script */
+static PHP_REND_FUNCTION(session)
+{
+	bool uses_object_methods_as_handlers = PS(mod_user_uses_object_methods_as_handlers);
+
+	if (PS(session_status) == php_session_active) {
+		zend_try {
+			php_session_flush(true);
+		} zend_end_try();
+	}
+	php_rshutdown_session_globals();
+	php_rinit_session_globals();
+	PS(mod_user_uses_object_methods_as_handlers) = uses_object_methods_as_handlers;
+
+	if (PS(mod) == NULL || PS(serializer) == NULL) {
+		PS(session_status) = php_session_disabled;
+	}
+
+	zend_hash_str_del(&EG(symbol_table), ZEND_STRL("_SESSION"));
+
+	return SUCCESS;
+}
+
 static PHP_RSHUTDOWN_FUNCTION(session)
 {
 	if (PS(session_status) == php_session_active) {
@@ -3469,7 +3501,7 @@ zend_module_entry session_module_entry = {
 	PHP_GINIT(ps),
 	NULL,
 	NULL,
-	STANDARD_MODULE_PROPERTIES_EX,
+	STANDARD_MODULE_PROPERTIES_REQUEST_HOOKS(PHP_RBEGIN(session), PHP_REND(session)),
 	.child_init_func = PHP_CINIT(session)
 };
 
