@@ -1,9 +1,6 @@
 <?php
-function skipif(bool $want_expat) {
+function xml_uses_expat(): bool {
     ob_start();
     echo phpinfo(INFO_MODULES);
-    $output = ob_get_clean();
-    if ($want_expat !== str_contains($output, 'EXPAT')) {
-        die('skip test is for ' . ($want_expat ? 'Expat' : 'libxml'));
-    }
+    return str_contains(ob_get_clean(), 'EXPAT');
 }

@@ -5,7 +5,7 @@ Venkat Raman Don
 --SKIPIF--
 <?php
 include_once __DIR__ . '/common.inc';
-skipif();
+skip_unless_acl_testable();
 ?>
 --FILE--
 <?php

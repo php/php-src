@@ -5,8 +5,8 @@ xml
 --SKIPIF--
 <?php
 require __DIR__ . '/libxml_expat_skipif.inc';
-skipif(want_expat: false);
-if (LIBXML_VERSION >= 21100) die('skip libxml2 test variant for version < 2.11');
+skipif(xml_uses_expat(), 'test is for libxml');
+skipif(LIBXML_VERSION >= 21100, 'libxml2 test variant for version < 2.11');
 ?>
 --FILE--
 <?php

@@ -1248,6 +1248,36 @@ function test_sort($a, $b): int
     return $tb - $ta;
 }
 
+// Functions available to every SKIPIF section via auto_prepend_file.
+function skipif_helpers_file(): string
+{
+    static $file;
+    if ($file !== null) {
+        return $file;
+    }
+
+    $code = <<<'PHP'
+        <?php
+        function skipif($condition, string $reason): void
+        {
+            if ($condition) {
+                echo "skip $reason";
+                exit;
+            }
+        }
+
+        PHP;
+
+    // Content-addressed, so concurrent runs and workers can share it and leftovers are harmless.
+    $file = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'run-tests-skipif-helpers-' . md5($code) . '.php';
+    if (!is_file($file)) {
+        $tmp = $file . '.' . getmypid();
+        file_put_contents($tmp, $code);
+        rename($tmp, $file);
+    }
+    return $file;
+}
+
 //
 //  Write the given text to a temporary file.
 //
@@ -3900,7 +3930,7 @@ class SkipCache
 
         save_text($checkFile, $code, $tempFile);
         $env['TEST_PHP_EVALUATING_SKIPIF'] = '1';
-        $command[] = $checkFile;
+        array_push($command, '-d', 'auto_prepend_file=' . skipif_helpers_file(), $checkFile);
         $result = trim(system_with_timeout($command, $env));
         if (strpos($result, 'nocache') === 0) {
             $result = '';
