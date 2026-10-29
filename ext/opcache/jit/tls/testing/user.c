@@ -3,8 +3,6 @@
 
 #include "../zend_jit_tls.h"
 
-extern __thread void* _tsrm_ls_cache;
-
 int test(void)
 {
 	size_t tcb_offset = 0;
