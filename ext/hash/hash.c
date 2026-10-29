@@ -487,6 +487,35 @@ static inline void php_hash_hmac_round(unsigned char *final, const php_hash_ops 
 	ops->hash_final(final, context);
 }
 
+PHP_HASH_API void php_hash_hmac(
+	const char *algo, const size_t algo_len,
+	const unsigned char *data, const size_t data_len,
+	const unsigned char *key, const size_t key_len,
+	unsigned char *output, const size_t output_len
+) {
+	const php_hash_ops *ops = zend_hash_str_find_ptr(&php_hash_hashtable, algo, algo_len);
+	ZEND_ASSERT(ops && ops->is_crypto);
+	void *ctx = php_hash_alloc_context(ops);
+
+	ALLOCA_FLAG(use_heap_key);
+	unsigned char *K = do_alloca(ops->block_size, use_heap_key);
+	ALLOCA_FLAG(use_heap_digest);
+	unsigned char *digest = do_alloca(ops->digest_size, use_heap_digest);
+
+	php_hash_hmac_prep_key(K, ops, ctx, key, key_len);
+	php_hash_hmac_round(digest, ops, ctx, K, data, data_len);
+	php_hash_string_xor_char(K, K, 0x6A, ops->block_size);
+	php_hash_hmac_round(digest, ops, ctx, K, digest, ops->digest_size);
+	php_hash_free_context(ops, ctx);
+
+	memcpy(output, digest, output_len < ops->digest_size ? output_len : ops->digest_size);
+
+	ZEND_SECURE_ZERO(K, ops->block_size);
+	free_alloca(K, use_heap_key);
+	ZEND_SECURE_ZERO(digest, ops->digest_size);
+	free_alloca(digest, use_heap_digest);
+}
+
 static void php_hash_do_hash_hmac(
 	zval *return_value, zend_string *algo, char *data, size_t data_len, char *key, size_t key_len, bool raw_output, bool isfilename
 ) /* {{{ */ {

@@ -351,3 +351,80 @@ DECLARE_SHA3_OPS(384);
 DECLARE_SHA3_OPS(512);
 
 #undef DECLARE_SHA3_OPS
+
+static size_t php_hash_sha3_left_encode(uint8_t *out, uint64_t val)
+{
+	uint8_t bytes[8];
+	size_t num_bytes = 0;
+
+	if (val == 0) {
+		bytes[0] = 0;
+		num_bytes = 1;
+	} else {
+		while (val > 0) {
+			bytes[num_bytes++] = (uint8_t)(val & 0xFF);
+			val >>= 8;
+		}
+	}
+
+	out[0] = (uint8_t)num_bytes;
+	for (size_t i = 0; i < num_bytes; i++) {
+		out[1 + i] = bytes[num_bytes - 1 - i];
+	}
+	return 1 + num_bytes;
+}
+
+PHP_HASH_API void php_hash_cshake256(
+	const unsigned char *data, size_t data_len,
+	const unsigned char *custom, size_t custom_len,
+	unsigned char *output, size_t out_len
+) {
+	PHP_SHA3_512_CTX ctx;
+	uint8_t header_buf[32];
+	size_t pos = 0;
+	const size_t rate = 136;
+
+	/* cSHAKE256 is basically SHA3-512 with a few adjusted params:
+	 * rate = 136 bytes, capacity = 512 bits, 0 output size, 0x04 suffix
+	 * The slow path has to account for that differently, but it works. */
+#ifdef HAVE_SLOW_HASH3
+	PHP_SHA3_Init(&ctx, 512);
+# define CSHAKE_UPDATE(ctx, buf, len) PHP_SHA3_Update((ctx), (buf), (len), rate)
+#else
+	Keccak_HashInstance *hash = (Keccak_HashInstance *)&ctx;
+	Keccak_HashInitialize(hash, rate * 8, 512, 0, 0x04);
+# define CSHAKE_UPDATE(ctx, buf, len) PHP_SHA3512Update((ctx), (buf), (len))
+#endif
+
+	/* NIST SP800-185 header metadata */
+	pos += php_hash_sha3_left_encode(&header_buf[pos], rate);
+	pos += php_hash_sha3_left_encode(&header_buf[pos], 0); // reserved
+	pos += php_hash_sha3_left_encode(&header_buf[pos], (uint64_t)custom_len * 8);
+
+	CSHAKE_UPDATE(&ctx, header_buf, pos);
+	if (custom_len > 0) {
+		CSHAKE_UPDATE(&ctx, custom, custom_len);
+	}
+
+	size_t remainder = (pos + custom_len) % rate;
+	if (remainder > 0) {
+		size_t pad_len = rate - remainder;
+		uint8_t zero_pad[rate];
+		memset(zero_pad, 0, sizeof(zero_pad));
+		CSHAKE_UPDATE(&ctx, zero_pad, pad_len);
+	}
+
+	if (data_len > 0) {
+		CSHAKE_UPDATE(&ctx, data, data_len);
+	}
+
+#ifdef HAVE_SLOW_HASH3
+	/* Hack for 0x04 when PHP_SHA3_Final does ctx->state[ctx=>post++] ^= 0x06 */
+	ctx.state[ctx.pos] ^= 0x02;
+	PHP_SHA3_Final(output, &ctx, rate, out_len);
+#else
+	Keccak_HashFinal(hash, NULL);
+	Keccak_HashSqueeze(hash, output, out_len * 8);
+#endif
+#undef CSHAKE_UPDATE
+}
