@@ -45,5 +45,5 @@ America/New_York 01:10:59 EDT +29
 Australia/Lord_Howe 01:45:59 +11 +29
 01:10:59 GMT +29
 01:10:59 GMT +29
-01:10:59 IST +29
+01:10:59 GMT +29
 01:10:59 IST +29
