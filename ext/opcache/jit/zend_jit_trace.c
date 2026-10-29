@@ -3350,7 +3350,10 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 		} else if (p->stop >= ZEND_JIT_TRACE_STOP_LINK) {
 			for (i = 0; i < op_array->last_var + op_array->T; i++) {
 				int var = STACK_VAR(stack, i);
+				/* A side trace must define the variable, otherwise it may set ZREG_STORE on
+				 * variables inherited from the parent trace that are only stored when linking. */
 				if (var >= 0 && RA_HAS_REG(var)
+				 && ssa->vars[var].definition >= 0
 				 && !(RA_REG_FLAGS(var) & (ZREG_LOAD|ZREG_STORE|ZREG_LAST_USE))) {
 					RA_REG_FLAGS(var) |= ZREG_STORE;
 				}
