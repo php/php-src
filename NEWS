@@ -58,6 +58,10 @@ PHP                                                                        NEWS
     properties after running out of memory while escaping a property name.
     (adapik)
 
+- MySQLnd:
+  . Fixed bug GH-24609 (OK packets without an info message rejected on x32
+    builds). (lazerg)
+
 - Opcache:
   . Fixed tracing JIT returning a wrapped integer instead of a float on
     integer overflow after an integer was compared with a float or
