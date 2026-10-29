@@ -179,6 +179,7 @@ function main(): void
     }
 
     define('TEST_PHP_SRCDIR', getcwd());
+    define('SKIPIF_HELPERS_FILE', write_skipif_helpers());
 
     check_proc_open_function_exists();
 
@@ -1249,13 +1250,8 @@ function test_sort($a, $b): int
 }
 
 // Functions available to every SKIPIF section via auto_prepend_file.
-function skipif_helpers_file(): string
+function write_skipif_helpers(): string
 {
-    static $file;
-    if ($file !== null) {
-        return $file;
-    }
-
     $code = <<<'PHP'
         <?php
         function skipif($condition, string $reason): void
@@ -1268,13 +1264,12 @@ function skipif_helpers_file(): string
 
         PHP;
 
-    // Content-addressed, so concurrent runs and workers can share it and leftovers are harmless.
-    $file = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'run-tests-skipif-helpers-' . md5($code) . '.php';
-    if (!is_file($file)) {
-        $tmp = $file . '.' . getmypid();
-        file_put_contents($tmp, $code);
-        rename($tmp, $file);
+    $file = tempnam(sys_get_temp_dir(), 'run-tests-skipif-');
+    if ($file === false || file_put_contents($file, $code) === false) {
+        error('Unable to write SKIPIF helpers file.');
     }
+    // Workers are killed with SIGTERM, so only the parent can clean up.
+    register_shutdown_function(static fn () => @unlink($file));
     return $file;
 }
 
@@ -1666,6 +1661,7 @@ function run_all_tests_parallel(array $test_files, array $env, ?string $redir_te
             "constants" => [
                 "INIT_DIR" => INIT_DIR,
                 "TEST_PHP_SRCDIR" => TEST_PHP_SRCDIR,
+                "SKIPIF_HELPERS_FILE" => SKIPIF_HELPERS_FILE,
             ]
         ])) . "\n";
 
@@ -3930,7 +3926,7 @@ class SkipCache
 
         save_text($checkFile, $code, $tempFile);
         $env['TEST_PHP_EVALUATING_SKIPIF'] = '1';
-        array_push($command, '-d', 'auto_prepend_file=' . skipif_helpers_file(), $checkFile);
+        array_push($command, '-d', 'auto_prepend_file=' . SKIPIF_HELPERS_FILE, $checkFile);
         $result = trim(system_with_timeout($command, $env));
         if (strpos($result, 'nocache') === 0) {
             $result = '';

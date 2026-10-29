@@ -12,8 +12,7 @@ define('PHPT_ACL_DENY',  2);
 function skip_unless_acl_testable() {
     skipif(substr(PHP_OS, 0, 3) != 'WIN', 'windows only test');
     skipif(stripos(php_uname(), 'XP') !== FALSE, 'windows 2003 or newer only test');
-    // bug44859_4.phpt test fails on the 1st run
-    // other ACL tests cannot be run twice
+    // bug44859_4.phpt fails on the 1st run; other ACL tests cannot be run twice
     skipif(getenv('GITHUB_ACTIONS'), 'failing on Github Actions');
 }
 
