@@ -236,6 +236,8 @@ PHP                                                                        NEWS
     properties). (Lazizbek Ergashev)
 
 - Standard:
+  . Fixed memory leaks in checkdnsrr() and dns_check_record() on Windows.
+    (Ilia Alshanetsky)
   . Fixed bug GH-24308 (Request shutdown calls closelog() even when syslog
     was not opened by PHP). (lazerg)
   . Fixed bug GH-24399 (usleep() and time_nanosleep() ignore queued APCs on
