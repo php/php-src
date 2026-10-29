@@ -125,6 +125,8 @@ PHP                                                                        NEWS
 - ODBC:
   . Fixed bug GH-24736 (php_odbc_connstr_is_quoted() treats a value with no
     closing brace as quoted). (lazerg)
+  . Fixed bug GH-25036 (odbc_prepare() corrupts the heap when the driver
+    cannot describe a parameter). (Ilia Alshanetsky)
 
 - Opcache:
   . Fixed tracing JIT returning a wrapped integer instead of a float on
