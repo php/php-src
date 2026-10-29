@@ -169,6 +169,8 @@ PHP                                                                        NEWS
   . Fix block pass dropping ZEND_FAST_CALL OP2 definition. (Mrmaxmeier)
   . Fixed bug GH-23626 (orphaned temporaries cause leaks and assertions).
     (ndossche, khaledalam)
+  . Fix preloaded functions JIT-compiled on load being overwritten
+    after restart. (Pavel Gushcha)
 
 - OpenSSL:
   . Fixed bug GH-24784 (openssl_pkcs7_read() and openssl_cms_read() overwrite
