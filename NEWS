@@ -25,6 +25,8 @@ PHP                                                                        NEWS
   . Fix memory leak for nested HTTP calls. (EdmondDantes)
   . Fix function and constant imports in compile_to_ast and add support
     for grouping. (Klaas Skelte van der Werf)
+  . Fixed bug GH-24668 (zend_set_local_var() leaks the previous value of an
+    existing CV). (yasu20200121web-prog, lazerg)
   . Fixed unmapping of an unrelated range when the aligned chunk mmap fails
     (Marti2203).
 
