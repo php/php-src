@@ -61,6 +61,7 @@ static const php_stream_ops php_stream_output_ops = {
 
 typedef struct php_stream_input { /* {{{ */
 	php_stream *body;
+	zend_resource *body_res;
 	zend_off_t position;
 } php_stream_input_t;
 /* }}} */
@@ -105,7 +106,10 @@ static ssize_t php_stream_input_read(php_stream *stream, char *buf, size_t count
 
 static int php_stream_input_close(php_stream *stream, int close_handle) /* {{{ */
 {
-	efree(stream->abstract);
+	php_stream_input_t *input = stream->abstract;
+
+	zend_list_delete(input->body_res);
+	efree(input);
 	stream->abstract = NULL;
 
 	return 0;
@@ -251,6 +255,9 @@ static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const c
 			input->body = php_stream_temp_create_ex(TEMP_STREAM_DEFAULT, SAPI_POST_BLOCK_SIZE, PG(upload_tmp_dir));
 			SG(request_info).request_body = input->body;
 		}
+		/* The body outlives the request when a long-running script keeps this stream */
+		input->body_res = input->body->res;
+		GC_ADDREF(input->body_res);
 
 		return php_stream_alloc(&php_stream_input_ops, input, 0, "rb");
 	}

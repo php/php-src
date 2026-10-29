@@ -45,12 +45,16 @@
 
 #define ZEND_MODULE_BUILD_ID "API" ZEND_TOSTR(ZEND_MODULE_API_NO) ZEND_BUILD_TS ZEND_BUILD_DEBUG ZEND_BUILD_SYSTEM ZEND_BUILD_EXTRA
 
-#define STANDARD_MODULE_PROPERTIES_EX \
+#define STANDARD_MODULE_PROPERTIES_EX STANDARD_MODULE_PROPERTIES_REQUEST_HOOKS(NULL, NULL)
+
+#define STANDARD_MODULE_PROPERTIES_REQUEST_HOOKS(request_begin, request_end) \
 	.module_started = 0, \
 	.type = 0, \
 	.handle = NULL, \
 	.module_number = 0, \
-	.build_id = ZEND_MODULE_BUILD_ID
+	.build_id = ZEND_MODULE_BUILD_ID, \
+	.request_begin_func = request_begin, \
+	.request_end_func = request_end
 
 #define NO_MODULE_GLOBALS 0, NULL, NULL, NULL
 
@@ -102,6 +106,9 @@ struct _zend_module_entry {
 	void *handle;
 	int module_number;
 	const char *build_id;
+	/* Called between two requests served by the same script, see php_request_begin() and php_request_end() */
+	zend_result (*request_begin_func)(INIT_FUNC_ARGS);
+	zend_result (*request_end_func)(SHUTDOWN_FUNC_ARGS);
 };
 
 #define MODULE_DEP_REQUIRED		1

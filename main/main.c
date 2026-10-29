@@ -1876,6 +1876,25 @@ PHPAPI void php_child_init(void)
 	} ZEND_HASH_FOREACH_END();
 }
 
+static void php_request_start_output(void)
+{
+	if (PG(expose_php) && !SG(headers_sent)) {
+		sapi_add_header(SAPI_PHP_VERSION_HEADER, sizeof(SAPI_PHP_VERSION_HEADER)-1, 1);
+	}
+
+	if (PG(output_handler)) {
+		zval oh;
+
+		ZVAL_STR(&oh, zend_string_dup(PG(output_handler), false));
+		php_output_start_user(&oh, 0, PHP_OUTPUT_HANDLER_STDFLAGS);
+		zval_ptr_dtor(&oh);
+	} else if (PG(output_buffering)) {
+		php_output_start_user(NULL, PG(output_buffering) > 1 ? PG(output_buffering) : 0, PHP_OUTPUT_HANDLER_STDFLAGS);
+	} else if (PG(implicit_flush)) {
+		php_output_set_implicit_flush(1);
+	}
+}
+
 /* {{{ php_request_startup */
 zend_result php_request_startup(void)
 {
@@ -1929,21 +1948,7 @@ zend_result php_request_startup(void)
 			CWDG(realpath_cache_size_limit) = 0;
 		}
 
-		if (PG(expose_php) && !SG(headers_sent)) {
-			sapi_add_header(SAPI_PHP_VERSION_HEADER, sizeof(SAPI_PHP_VERSION_HEADER)-1, 1);
-		}
-
-		if (PG(output_handler)) {
-			zval oh;
-
-			ZVAL_STR(&oh, zend_string_dup(PG(output_handler), false));
-			php_output_start_user(&oh, 0, PHP_OUTPUT_HANDLER_STDFLAGS);
-			zval_ptr_dtor(&oh);
-		} else if (PG(output_buffering)) {
-			php_output_start_user(NULL, PG(output_buffering) > 1 ? PG(output_buffering) : 0, PHP_OUTPUT_HANDLER_STDFLAGS);
-		} else if (PG(implicit_flush)) {
-			php_output_set_implicit_flush(1);
-		}
+		php_request_start_output();
 
 		/* We turn this off in php_execute_script() */
 		/* PG(during_request_startup) = 0; */
@@ -1965,6 +1970,91 @@ zend_result php_request_startup(void)
 	return retval;
 }
 /* }}} */
+
+/* Superglobals already compiled into the running script are imported again,
+ * the others are armed for just in time creation. $_ENV comes from the process,
+ * not the request, so the script keeps it. */
+static void php_rehash_environment(void)
+{
+	zend_auto_global *auto_global;
+
+	for (int i = 0; i < NUM_TRACK_VARS; i++) {
+		if (i == TRACK_VARS_ENV) {
+			continue;
+		}
+		zval_ptr_dtor(&PG(http_globals)[i]);
+		ZVAL_UNDEF(&PG(http_globals)[i]);
+	}
+
+	ZEND_HASH_MAP_FOREACH_PTR(CG(auto_globals), auto_global) {
+		if (auto_global->name == ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_ENV)) {
+			continue;
+		}
+		if (!auto_global->auto_global_callback) {
+			auto_global->armed = false;
+		} else if (!auto_global->jit || zend_hash_exists(&EG(symbol_table), auto_global->name)) {
+			auto_global->armed = auto_global->auto_global_callback(auto_global->name);
+		} else {
+			auto_global->armed = true;
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+
+/* Starts a new request in a script that served the previous one, such as a
+ * worker script. The SAPI must fill SG(request_info) and SG(server_context) first. */
+PHPAPI zend_result php_request_begin(void)
+{
+	zend_result retval = SUCCESS;
+
+	zend_try {
+		php_output_activate();
+
+		PG(header_is_being_sent) = 0;
+		PG(connection_status) = PHP_CONNECTION_NORMAL;
+
+		sapi_activate();
+
+		/* The script is already executing, there is no separate input phase */
+		zend_set_timeout(EG(timeout_seconds), 0);
+
+		php_request_start_output();
+		php_rehash_environment();
+		zend_request_begin_modules();
+	} zend_catch {
+		retval = FAILURE;
+	} zend_end_try();
+
+	return retval;
+}
+
+/* Ends a request without ending the script serving it. */
+PHPAPI void php_request_end(void)
+{
+	php_stream *request_body = SG(request_info).request_body;
+
+	zend_try {
+		php_output_end_all();
+	} zend_end_try();
+
+	zend_try {
+		zend_unset_timeout();
+	} zend_end_try();
+
+	zend_request_end_modules();
+
+	zend_try {
+		php_output_deactivate();
+	} zend_end_try();
+
+	zend_try {
+		sapi_deactivate();
+	} zend_end_try();
+
+	/* sapi_deactivate() forgets the body without closing it */
+	if (request_body) {
+		zend_list_delete(request_body->res);
+	}
+}
 
 /* {{{ php_request_shutdown */
 void php_request_shutdown(void *dummy)

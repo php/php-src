@@ -3468,6 +3468,31 @@ ZEND_API void zend_activate_modules(void) /* {{{ */
 }
 /* }}} */
 
+ZEND_API void zend_request_begin_modules(void)
+{
+	zend_module_entry *module;
+
+	ZEND_HASH_MAP_FOREACH_PTR(&module_registry, module) {
+		if (module->request_begin_func
+				&& module->request_begin_func(module->type, module->module_number) == FAILURE) {
+			zend_error(E_WARNING, "request_begin() for %s module failed", module->name);
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+
+ZEND_API void zend_request_end_modules(void)
+{
+	zend_module_entry *module;
+
+	ZEND_HASH_MAP_REVERSE_FOREACH_PTR(&module_registry, module) {
+		if (module->request_end_func) {
+			zend_try {
+				module->request_end_func(module->type, module->module_number);
+			} zend_end_try();
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+
 ZEND_API void zend_deactivate_modules(void) /* {{{ */
 {
 	EG(current_execute_data) = NULL; /* we're no longer executing anything */

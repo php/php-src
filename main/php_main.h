@@ -50,6 +50,8 @@ PHPAPI void php_print_version(sapi_module_struct *sapi_module);
 PHPAPI void php_child_init(void);
 PHPAPI zend_result php_request_startup(void);
 PHPAPI void php_request_shutdown(void *dummy);
+PHPAPI zend_result php_request_begin(void);
+PHPAPI void php_request_end(void);
 PHPAPI zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_module);
 PHPAPI void php_module_shutdown(void);
 PHPAPI int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals);

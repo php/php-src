@@ -331,6 +331,8 @@ ZEND_API void zend_call_destructors(void);
 ZEND_API void zend_activate_modules(void);
 ZEND_API void zend_deactivate_modules(void);
 ZEND_API void zend_post_deactivate_modules(void);
+ZEND_API void zend_request_begin_modules(void);
+ZEND_API void zend_request_end_modules(void);
 
 ZEND_API void free_estring(char **str_p);
 

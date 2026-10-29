@@ -34,6 +34,7 @@
 #include "Zend/Optimizer/zend_optimizer.h"
 #include "Zend/zend_alloc.h"
 #include "SAPI.h"
+#include "php_main.h"
 #include "rfc1867.h"
 #include "test_arginfo.h"
 #include "tmp_methods_arginfo.h"
@@ -104,6 +105,14 @@ static ZEND_FUNCTION(zend_test_void_return)
 {
 	/* dummy */
 	ZEND_PARSE_PARAMETERS_NONE();
+}
+
+static ZEND_FUNCTION(zend_test_request_boundary)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	php_request_end();
+	RETURN_BOOL(php_request_begin() == SUCCESS);
 }
 
 static void pass1(zend_script *script, void *context)

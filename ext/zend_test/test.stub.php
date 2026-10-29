@@ -267,6 +267,9 @@ namespace {
 
     function &zend_test_forward_reference(mixed &$value): mixed {}
 
+    /** Ends the current request and begins a new one, like a worker script between two requests */
+    function zend_test_request_boundary(): bool {}
+
     function zend_test_compile_string(string $source_string, string $filename, int $position): void {}
 
     /** @deprecated */
