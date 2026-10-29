@@ -91,8 +91,6 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Fixed bug GH-24289 (finfo::file() reports the wrong argument number for
     an invalid $filename). (Lazizbek Ergashev)
-  . Fixed bug GH-25029 (fileinfo built-in magic database is not aligned).
-    (Lazizbek Ergashev)
 
 - FTP:
   . Fix double free in ext/ftp data_accept() on accept failure. (alepacheco)
