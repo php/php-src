@@ -402,6 +402,12 @@ char *alloca();
 #define ZEND_ELEMENT_COUNT(m)
 #endif
 
+#if __STDC_VERSION__ >= 202311L
+# define ZEND_TYPEOF(x) typeof(x)
+#elif ZEND_GCC_VERSION
+# define ZEND_TYPEOF(x) __typeof__(x)
+#endif
+
 #if __cplusplus
 extern "C++" {
 # include <cstddef>
@@ -416,13 +422,12 @@ extern "C++" {
 
 # define ZEND_CONTAINER_OF(ptr, Type, member) zend_container_of<Type, decltype(Type::member)>(ptr, offsetof(Type, member))
 }
-#elif __STDC_VERSION__ >= 202311L || ZEND_GCC_VERSION
-/* typeof is C23 or a GCC extension */
+#elif defined(ZEND_TYPEOF)
 # define ZEND_CONTAINER_OF(ptr, Type, member) \
 	_Generic( \
 		(ptr), \
-		const typeof(((Type*)0)->member) *: ((const Type*)((char*)(ptr) - offsetof(Type, member))), \
-		typeof(((Type*)0)->member) *: ((Type*)((char*)(ptr) - offsetof(Type, member))) \
+		const ZEND_TYPEOF(((Type*)0)->member) *: ((const Type*)((char*)(ptr) - offsetof(Type, member))), \
+		ZEND_TYPEOF(((Type*)0)->member) *: ((Type*)((char*)(ptr) - offsetof(Type, member))) \
 	)
 #else
 /* Define a variant that does not keep const-ness for older compilers. Mismatches

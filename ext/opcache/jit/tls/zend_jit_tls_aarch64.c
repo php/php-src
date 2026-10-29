@@ -201,7 +201,7 @@ code_changed:
 	}
 
 	if ((insn[0] & ~AARCH64_ADRP_IMM_MASK) == 0x90000000) {
-		/* intial-exec */
+		/* initial-exec */
 		// ldr x0, [x0, #any]
 		if ((insn[1] & ~AARCH64_LDR_UNSIGNED_IMM_MASK) != 0xf9400000) {
 			zend_accel_error(ACCEL_LOG_DEBUG, "ldr insn does not match: 0x%08" PRIx32 "\n", insn[1]);

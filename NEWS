@@ -71,6 +71,8 @@ PHP                                                                        NEWS
 
 - MySQLnd:
   . Fixed field_count not resetting on OK packet. (Kamil Tekiela)
+  . Fixed bug GH-24609 (OK packets without an info message rejected on x32
+    builds). (lazerg)
 
 - Opcache:
   . Fixed range inference of assignments through typed references.

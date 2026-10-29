@@ -1127,7 +1127,7 @@ php_mysqlnd_rset_header_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	zend_uchar * const buf = (zend_uchar *) pfc->cmd_buffer.buffer;
 	const zend_uchar * p = buf;
 	const zend_uchar * const begin = buf;
-	size_t len;
+	zend_ulong len;
 	MYSQLND_OPTIONAL_UINT64_T len_ll;
 
 	DBG_ENTER("php_mysqlnd_rset_header_read");
