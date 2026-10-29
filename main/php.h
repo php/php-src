@@ -77,7 +77,9 @@
 /* Windows specific defines */
 #ifdef PHP_WIN32
 # define PHP_PROG_SENDMAIL		"Built in mailer"
-# define WIN32_LEAN_AND_MEAN
+# ifndef WIN32_LEAN_AND_MEAN
+#  define WIN32_LEAN_AND_MEAN
+# endif
 # define NOOPENFILE
 
 # include <io.h>
