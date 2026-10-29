@@ -84,6 +84,11 @@ PHP                                                                        NEWS
   . Fixed IntlDateFormatter parse functions truncating an $offset below
     INT_MIN. (Marc Bennewitz)
 
+- JSON:
+  . Fixed json_encode() leaving the recursion guard set on objects with hooked
+    properties after running out of memory while escaping a property name.
+    (adapik)
+
 - MBString:
   . Fixed bug GH-23958 (truncated encoding names resolving to full names). (Kamil Tekiela)
   . Fixed out-of-bounds read in php_mb_rfc1867_getword() on a multibyte lead
