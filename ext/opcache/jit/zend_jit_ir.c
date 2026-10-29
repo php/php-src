@@ -9389,7 +9389,8 @@ static int zend_jit_init_static_method_call(zend_jit_ctx         *jit,
 		     (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF)) {
 			if (op_array->fn_flags & ZEND_ACC_STATIC) {
 				scope_ref = ir_LOAD_A(jit_EX(This.value.ref));
-			} else if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
+			} else if ((op_array->fn_flags & ZEND_ACC_CLOSURE) || !op_array->function_name) {
+				/* Closures can be unbound, file/eval inherits This from the existing frame's scope. */
 				ir_ref if_object, values = IR_UNUSED;
 
 				if_object = ir_IF(ir_EQ(jit_Z_TYPE_ref(jit, jit_EX(This)), ir_CONST_U8(IS_OBJECT)));

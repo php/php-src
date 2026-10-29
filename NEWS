@@ -179,6 +179,8 @@ PHP                                                                        NEWS
     (Pavel Gushcha)
   . Fixed potential infinite recursion/hang (HYBRID/TAILCALL respectively)
     when zend_interrupt_function resets EG(vm_interrupt).  (Levi Morrison)
+  . Fix JIT losing the called scope of self::/parent:: calls in included files.
+    (ndossche)
 
 - OpenSSL:
   . Fixed bug GH-24784 (openssl_pkcs7_read() and openssl_cms_read() overwrite
