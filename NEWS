@@ -9,6 +9,8 @@ PHP                                                                        NEWS
     (Marti2203).
   . Fixed bug GH-25007 (Partial function application: named args in a constant
     expression cause out-of-bounds write in zp_compile()). (lazerg)
+  . Fixed bug GH-25023 (ZEND_CONTAINER_OF() fails to compile with -std=c11).
+    (lazerg)
 
 - CLI:
   . Fixed bug GH-24697 (PHP_HTTP_PARSER_STRICT build option doesn't work).
@@ -51,6 +53,11 @@ PHP                                                                        NEWS
   . Fixed IntlDateFormatter parse functions truncating an $offset below
     INT_MIN. (Marc Bennewitz)
 
+- JSON:
+  . Fixed json_encode() leaving the recursion guard set on objects with hooked
+    properties after running out of memory while escaping a property name.
+    (adapik)
+
 - Opcache:
   . Fixed tracing JIT returning a wrapped integer instead of a float on
     integer overflow after an integer was compared with a float or
@@ -84,9 +91,17 @@ PHP                                                                        NEWS
   . Fixed function JIT misinterpreting VM-enter results after an interrupt
     callback in the CALL and TAILCALL VMs. (Levi Morrison)
   . Fixed unsound shift_left_overflows range when shift wraps. (mkrishna793)
+  . Fixed bug GH-23572 (Tracing JIT calls the wrong method for self::/parent::
+    static calls in trait methods shared by several classes). (jorgsowa,
+    mgoulart)
+  . Fix block pass dropping ZEND_FAST_CALL OP2 definition. (Mrmaxmeier)
+  . Fixed bug GH-23626 (orphaned temporaries cause leaks and assertions).
+    (ndossche, khaledalam)
 
 - OpenSSL:
   . Fixed build with OpenSSL 4.1. (Weilin Du)
+  . Fixed bug GH-24784 (openssl_pkcs7_read() and openssl_cms_read() overwrite
+    certificates with CRLs). (Alexander Danilov)
 
 - PDO_PGSQL:
   . Fixed bug GH-24461 (DISCARD ALL on persistent connection cleanup drops
