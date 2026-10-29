@@ -120,6 +120,8 @@ PHP_FUNCTION(dns_check_record)
 		RETURN_FALSE;
 	}
 
+	DnsRecordListFree(pResult, DnsFreeRecordListDeep);
+
 	RETURN_TRUE;
 }
 /* }}} */
