@@ -9,6 +9,8 @@ PHP                                                                        NEWS
     (Marti2203).
   . Fixed bug GH-25023 (ZEND_CONTAINER_OF() fails to compile with -std=c11).
     (lazerg)
+  . Fixed bug GH-25007 (Partial function application: named args in a constant
+    expression cause out-of-bounds write in zp_compile()). (lazerg)
 
 - CLI:
   . Fixed bug GH-24697 (PHP_HTTP_PARSER_STRICT build option doesn't work).
@@ -97,9 +99,9 @@ PHP                                                                        NEWS
     (ndossche, khaledalam)
 
 - OpenSSL:
+  . Fixed build with OpenSSL 4.1. (Weilin Du)
   . Fixed bug GH-24784 (openssl_pkcs7_read() and openssl_cms_read() overwrite
     certificates with CRLs). (Alexander Danilov)
-  . Fixed build with OpenSSL 4.1. (Weilin Du)
 
 - PDO_PGSQL:
   . Fixed bug GH-24461 (DISCARD ALL on persistent connection cleanup drops

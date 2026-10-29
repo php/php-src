@@ -701,14 +701,6 @@ static zend_execute_data *zend_ast_evaluate_arg_list(
 			if (!arg) {
 				goto fail;
 			}
-			if (named_positions_ptr) {
-				if (!*named_positions_ptr) {
-					*named_positions_ptr = zend_new_array(0);
-				}
-				zval tmp;
-				ZVAL_LONG(&tmp, zend_hash_num_elements(*named_positions_ptr));
-				zend_hash_add(*named_positions_ptr, arg_name, &tmp);
-			}
 			arg_ast = arg_ast->child[1];
 		} else {
 			arg = ZEND_CALL_VAR_NUM(frame, ZEND_CALL_NUM_ARGS(frame));
@@ -723,6 +715,14 @@ static zend_execute_data *zend_ast_evaluate_arg_list(
 				continue;
 			} else {
 				Z_TYPE_INFO_P(arg) = _IS_PLACEHOLDER;
+			}
+			if (arg_name && named_positions_ptr) {
+				if (!*named_positions_ptr) {
+					*named_positions_ptr = zend_new_array(0);
+				}
+				zval tmp;
+				ZVAL_LONG(&tmp, zend_hash_num_elements(*named_positions_ptr));
+				zend_hash_add(*named_positions_ptr, arg_name, &tmp);
 			}
 		} else {
 			if (zend_ast_evaluate_ex(arg, arg_ast, scope, short_circuited_ptr, ctx) == FAILURE) {
