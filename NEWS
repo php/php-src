@@ -119,6 +119,10 @@ PHP                                                                        NEWS
   . Fixed infinite loop in sapi_header_op() for headers of 4 GiB or more.
     (Martin Mirchev)
 
+- Session:
+  . Validate whole session ID instead of stopping at the first NUL byte.
+    (Sjoerd Langkemper)
+
 - Sodium:
   . Pass sodium_crypto_xof_*() state via objects instead of by-ref strings.
     (timwolla)
