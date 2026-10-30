@@ -1020,7 +1020,7 @@ PHP_FUNCTION(getopt)
 
 		/* the first <len> slots are filled by the one short ops
 		 * we now extend our array and jump to the new added structs */
-		opts = (opt_struct *) safe_erealloc(opts, sizeof(opt_struct), (len + count + 1), 0);
+		opts = (opt_struct *) safe_erealloc(opts, (len + count + 1), sizeof(opt_struct), 0);
 		orig_opts = opts;
 		opts += len;
 

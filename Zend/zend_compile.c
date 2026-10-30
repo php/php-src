@@ -1243,7 +1243,7 @@ static uint32_t zend_add_try_element(uint32_t try_op) /* {{{ */
 	zend_try_catch_element *elem;
 
 	op_array->try_catch_array = safe_erealloc(
-		op_array->try_catch_array, sizeof(zend_try_catch_element), op_array->last_try_catch, 0);
+		op_array->try_catch_array, op_array->last_try_catch, sizeof(zend_try_catch_element), 0);
 
 	elem = &op_array->try_catch_array[try_catch_offset];
 	elem->try_op = try_op;

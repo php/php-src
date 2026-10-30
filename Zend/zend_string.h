@@ -299,7 +299,7 @@ static zend_always_inline zend_string *zend_string_frealloc(zend_string *s, size
 
 	if (!ZSTR_IS_INTERNED(s)) {
 		if (EXPECTED(GC_REFCOUNT(s) == 1)) {
-			ret = (zend_string *)safe_fperealloc(s, 1, len, ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(0)), persistent, fallible);
+			ret = (zend_string *)safe_fperealloc(s, len, sizeof(char), ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(0)), persistent, fallible);
 			if (ZEND_CONST_COND(fallible, true) && UNEXPECTED(!ret)) {
 				return NULL;
 			}
@@ -331,7 +331,7 @@ static zend_always_inline zend_string *zend_string_fextend(zend_string *s, size_
 	ZEND_ASSERT(len >= ZSTR_LEN(s));
 	if (!ZSTR_IS_INTERNED(s)) {
 		if (EXPECTED(GC_REFCOUNT(s) == 1)) {
-			ret = (zend_string *)safe_fperealloc(s, 1, len, ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(0)), persistent, fallible);
+			ret = (zend_string *)safe_fperealloc(s, len, sizeof(char), ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(0)), persistent, fallible);
 			if (ZEND_CONST_COND(fallible, true) && UNEXPECTED(!ret)) {
 				return NULL;
 			}
@@ -363,7 +363,7 @@ static zend_always_inline zend_string *zend_string_ftruncate(zend_string *s, siz
 	ZEND_ASSERT(len <= ZSTR_LEN(s));
 	if (!ZSTR_IS_INTERNED(s)) {
 		if (EXPECTED(GC_REFCOUNT(s) == 1)) {
-			ret = (zend_string *)safe_fperealloc(s, 1, len, ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(0)), persistent, fallible);
+			ret = (zend_string *)safe_fperealloc(s, len, sizeof(char), ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(0)), persistent, fallible);
 			if (ZEND_CONST_COND(fallible, true) && UNEXPECTED(!ret)) {
 				return NULL;
 			}
