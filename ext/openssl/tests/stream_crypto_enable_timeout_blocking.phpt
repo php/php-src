@@ -42,7 +42,7 @@ $clientCode = <<<'CODE'
     phpt_notify();
 CODE;
 
-include 'ServerClientTestCase.inc';
+include dirname(__DIR__, 2) . "/standard/tests/ServerClientTestCase.inc";
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --EXPECT--

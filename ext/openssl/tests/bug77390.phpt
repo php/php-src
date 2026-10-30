@@ -109,7 +109,7 @@ $certificateGenerator = new CertificateGenerator();
 $certificateGenerator->saveCaCert($cacertFile);
 $certificateGenerator->saveNewCertAsFileWithKey($peerName, $certFile);
 
-include 'ServerClientTestCase.inc';
+include dirname(__DIR__, 2) . "/standard/tests/ServerClientTestCase.inc";
 ServerClientTestCase::getInstance()->run($clientCode, [
     'server' => $serverCode,
     'proxy' => $proxyCode,

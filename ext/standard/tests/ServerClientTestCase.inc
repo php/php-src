@@ -24,7 +24,7 @@ function phpt_has_sslv3() {
     if (!is_null($result)) {
         return $result;
     }
-    $server = @stream_socket_server('sslv3://127.0.0.1:0');
+    $server = @stream_socket_server('sslv3://127.0.0.1:10013');
     if ($result = !!$server) {
         fclose($server);
     }
@@ -100,8 +100,7 @@ class ServerClientTestCase
             $ini = php_ini_loaded_file();
             $cmd = sprintf(
                 '%s %s "%s" %s',
-                // XXX: TEST_PHP_EXTRA_ARGS for run-test values won't work here?
-                PHP_BINARY, $ini ? "-n -c $ini -d error_include_args=0" : "",
+                PHP_BINARY, $ini ? "-n -c $ini" : "",
                 __FILE__,
                 WORKER_ARGV_VALUE
             );
@@ -129,10 +128,6 @@ class ServerClientTestCase
     private function cleanupWorkerProcess($worker)
     {
         fclose($this->workerStdIn[$worker]);
-        /* Drain stdout to EOF before closing it, so late worker writes (e.g.
-         * buffered error output) don't fail and abort the worker mid-output. */
-        stream_set_blocking($this->workerStdOut[$worker], true);
-        stream_get_contents($this->workerStdOut[$worker]);
         fclose($this->workerStdOut[$worker]);
         proc_close($this->workerHandle[$worker]);
     }
