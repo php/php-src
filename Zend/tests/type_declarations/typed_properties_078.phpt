@@ -42,18 +42,18 @@ $ref = new ArrayIterator();
 var_dump($ref instanceof ArrayIterator);
 
 ?>
---EXPECT--
+--EXPECTF--
 array(0) {
 }
-TypeError: Cannot assign array to property class@anonymous::$t of type ?Traversable
+TypeError: Cannot assign array to property class@anonymous%0%s::$t of type ?Traversable
 array(0) {
 }
 array(1) {
   [0]=>
   int(1)
 }
-TypeError: Cannot assign ArrayIterator to reference held by property class@anonymous::$a of type ?array
+TypeError: Cannot assign ArrayIterator to reference held by property class@anonymous%0%s::$a of type ?array
 bool(false)
-TypeError: Cannot assign array to reference held by property class@anonymous::$t of type ?Traversable
+TypeError: Cannot assign array to reference held by property class@anonymous%0%s::$t of type ?Traversable
 bool(false)
 bool(true)

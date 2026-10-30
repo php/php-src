@@ -20,6 +20,6 @@ try {
 
 echo "Done";
 ?>
---EXPECT--
-Error: Invalid callback foo, function "foo" not found or invalid function name
+--EXPECTF--
+Error: Invalid callback foo%0butno, function "foo" not found or invalid function name
 Done
