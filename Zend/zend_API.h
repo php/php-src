@@ -634,34 +634,34 @@ static zend_always_inline void add_assoc_zval(zval *arg, const char *key, zval *
 	add_assoc_zval_ex(arg, key, strlen(key), value);
 }
 
-ZEND_API void add_index_long(zval *arg, zend_ulong index, zend_long n);
-ZEND_API void add_index_null(zval *arg, zend_ulong index);
-ZEND_API void add_index_bool(zval *arg, zend_ulong index, bool b);
-ZEND_API void add_index_resource(zval *arg, zend_ulong index, zend_resource *r);
-ZEND_API void add_index_double(zval *arg, zend_ulong index, double d);
-ZEND_API void add_index_str(zval *arg, zend_ulong index, zend_string *str);
-ZEND_API void add_index_string(zval *arg, zend_ulong index, const char *str);
-ZEND_API void add_index_stringl(zval *arg, zend_ulong index, const char *str, size_t length);
-ZEND_API void add_index_array(zval *arg, zend_ulong index, zend_array *arr);
-ZEND_API void add_index_object(zval *arg, zend_ulong index, zend_object *obj);
-ZEND_API void add_index_reference(zval *arg, zend_ulong index, zend_reference *ref);
+ZEND_API void add_index_long_ex(HashTable *arg, zend_ulong index, zend_long n);
+ZEND_API void add_index_null_ex(HashTable *arg, zend_ulong index);
+ZEND_API void add_index_bool_ex(HashTable *arg, zend_ulong index, bool b);
+ZEND_API void add_index_resource_ex(HashTable *arg, zend_ulong index, zend_resource *r);
+ZEND_API void add_index_double_ex(HashTable *arg, zend_ulong index, double d);
+ZEND_API void add_index_str_ex(HashTable *arg, zend_ulong index, zend_string *str);
+ZEND_API void add_index_string_ex(HashTable *arg, zend_ulong index, const char *str);
+ZEND_API void add_index_stringl_ex(HashTable *arg, zend_ulong index, const char *str, size_t length);
+ZEND_API void add_index_array_ex(HashTable *arg, zend_ulong index, zend_array *arr);
+ZEND_API void add_index_object_ex(HashTable *arg, zend_ulong index, zend_object *obj);
+ZEND_API void add_index_reference_ex(HashTable *arg, zend_ulong index, zend_reference *ref);
 
 static zend_always_inline zend_result add_index_zval(zval *arg, zend_ulong index, zval *value)
 {
 	return zend_hash_index_update(Z_ARRVAL_P(arg), index, value) ? SUCCESS : FAILURE;
 }
 
-ZEND_API zend_result add_next_index_long(zval *arg, zend_long n);
-ZEND_API zend_result add_next_index_null(zval *arg);
-ZEND_API zend_result add_next_index_bool(zval *arg, bool b);
-ZEND_API zend_result add_next_index_resource(zval *arg, zend_resource *r);
-ZEND_API zend_result add_next_index_double(zval *arg, double d);
-ZEND_API zend_result add_next_index_str(zval *arg, zend_string *str);
-ZEND_API zend_result add_next_index_string(zval *arg, const char *str);
-ZEND_API zend_result add_next_index_stringl(zval *arg, const char *str, size_t length);
-ZEND_API zend_result add_next_index_array(zval *arg, zend_array *arr);
-ZEND_API zend_result add_next_index_object(zval *arg, zend_object *obj);
-ZEND_API zend_result add_next_index_reference(zval *arg, zend_reference *ref);
+ZEND_API zend_result add_next_index_long_ex(HashTable *arg, zend_long n);
+ZEND_API zend_result add_next_index_null_ex(HashTable *arg);
+ZEND_API zend_result add_next_index_bool_ex(HashTable *arg, bool b);
+ZEND_API zend_result add_next_index_resource_ex(HashTable *arg, zend_resource *r);
+ZEND_API zend_result add_next_index_double_ex(HashTable *arg, double d);
+ZEND_API zend_result add_next_index_str_ex(HashTable *arg, zend_string *str);
+ZEND_API zend_result add_next_index_string_ex(HashTable *arg, const char *str);
+ZEND_API zend_result add_next_index_stringl_ex(HashTable *arg, const char *str, size_t length);
+ZEND_API zend_result add_next_index_array_ex(HashTable *arg, zend_array *arr);
+ZEND_API zend_result add_next_index_object_ex(HashTable *arg, zend_object *obj);
+ZEND_API zend_result add_next_index_reference_ex(HashTable *arg, zend_reference *ref);
 
 static zend_always_inline zend_result add_next_index_zval(zval *arg, zval *value)
 {
@@ -2695,5 +2695,7 @@ static zend_always_inline bool zend_parse_arg_obj_or_str(
 }
 
 END_EXTERN_C()
+
+#include "zend_API_generic.h"
 
 #endif /* ZEND_API_H */
