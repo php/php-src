@@ -1676,6 +1676,28 @@ after_open_fp:
 		data->internal_file->offset_abs = data->internal_file->offset = php_stream_tell(p_obj->fp);
 		data->fp = NULL;
 		php_stream_copy_to_stream_ex(fp, p_obj->fp, PHP_STREAM_COPY_ALL, &contents_len);
+		if (ZEND_SIZE_T_UINT_OVFL(contents_len)) {
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned a file that is too large \"%s\"", ZSTR_VAL(ce->name), fname);
+			phar_entry_delref(data);
+
+			if (save) {
+				efree(save);
+			}
+
+			if (opened) {
+				zend_string_release_ex(opened, 0);
+			}
+
+			if (temp) {
+				efree(temp);
+			}
+
+			if (close_fp) {
+				php_stream_close(fp);
+			}
+
+			return ZEND_HASH_APPLY_STOP;
+		}
 		data->internal_file->uncompressed_filesize = data->internal_file->compressed_filesize =
 			php_stream_tell(p_obj->fp) - data->internal_file->offset;
 		if (php_stream_stat(fp, &ssb) != -1) {
@@ -3684,6 +3706,11 @@ static void phar_add_file(phar_archive_data **pphar, zend_string *file_name, con
 					goto finish;
 				}
 				php_stream_copy_to_stream_ex(contents_file, data->fp, PHP_STREAM_COPY_ALL, &contents_len);
+			}
+			if (ZEND_SIZE_T_UINT_OVFL(contents_len)) {
+				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s is too large to be stored in a phar archive", filename);
+				phar_entry_delref(data);
+				goto finish;
 			}
 			data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize = contents_len;
 		}
