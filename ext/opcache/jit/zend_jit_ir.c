@@ -1354,13 +1354,6 @@ static bool zend_jit_spilling_may_cause_conflict(zend_jit_ctx *jit, int var, ir_
 		 && (jit->ssa->cfg.blocks[jit->ssa->vars[jit->ssa->ops[jit->ssa->vars[var].definition].op1_use].definition_phi->block].flags & ZEND_BB_LOOP_HEADER)) {
 			/* Avoid moving spill store out of loop */
 			return 1;
-		} else if (jit->ssa->vars[var].definition >= 0
-		 && jit->ssa->ops[jit->ssa->vars[var].definition].op1_def == var
-		 && jit->ssa->ops[jit->ssa->vars[var].definition].op1_use >= 0
-		 && jit->ssa->ops[jit->ssa->vars[var].definition].op2_use >= 0
-		 && jit->ra[jit->ssa->ops[jit->ssa->vars[var].definition].op2_use].ref == val) {
-			/* Avoid spill conflict between of ASSIGN.op1_def and ASSIGN.op1_use */
-			return 1;
 		}
 		return 0;
 	}
@@ -1386,6 +1379,14 @@ static void zend_jit_def_reg(zend_jit_ctx *jit, zend_jit_addr addr, ir_ref val)
 			if (old && old != -EX_NUM_TO_VAR(jit->ssa->vars[var].var)) {
 				val = ir_emit2(&jit->ctx, IR_OPT(IR_COPY, jit->ctx.ir_base[val].type), val, 1);
 			}
+		}
+		if (jit->ssa->vars[var].var < jit->current_op_array->last_var
+		 && jit->ssa->vars[var].definition >= 0
+		 && jit->ssa->ops[jit->ssa->vars[var].definition].op1_def == var
+		 && jit->ssa->ops[jit->ssa->vars[var].definition].op1_use >= 0
+		 && jit->ssa->ops[jit->ssa->vars[var].definition].op2_use >= 0
+		 && jit->ra[jit->ssa->ops[jit->ssa->vars[var].definition].op2_use].ref == val) {
+			val = ir_emit2(&jit->ctx, IR_OPT(IR_COPY, jit->ctx.ir_base[val].type), val, 1);
 		}
 		if (!zend_jit_spilling_may_cause_conflict(jit, var, val)) {
 			val = ir_bind(&jit->ctx, -EX_NUM_TO_VAR(jit->ssa->vars[var].var), val);

@@ -129,6 +129,8 @@ PHP                                                                        NEWS
     cannot describe a parameter). (Ilia Alshanetsky)
 
 - Opcache:
+  . Fixed bug GH-24214 (Function JIT fails to restore shared assignment values
+    at loop entries when DFA optimization is disabled). (Alessio Attilio)
   . Fixed tracing JIT returning a wrapped integer instead of a float on
     integer overflow after an integer was compared with a float or
     numeric-string literal. (Ilia Alshanetsky)
