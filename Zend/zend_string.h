@@ -131,6 +131,20 @@ static zend_always_inline zend_string *ZSTR_KNOWN(size_t idx) {
 #define ZSTR_MAX_OVERHEAD (ZEND_MM_ALIGNED_SIZE(_ZSTR_HEADER_SIZE + 1))
 #define ZSTR_MAX_LEN (SIZE_MAX - ZSTR_MAX_OVERHEAD)
 
+/* Returns n * m + l, or SIZE_MAX on fallible overflow. Rejects lengths above
+ * ZSTR_MAX_LEN so the aligned allocation size of the string can not wrap. */
+static zend_always_inline size_t zend_string_safe_len(size_t n, size_t m, size_t l, bool fallible)
+{
+	bool overflow;
+	size_t len = zend_safe_address(n, m, l, &overflow);
+
+	if (UNEXPECTED(overflow || len > ZSTR_MAX_LEN)) {
+		zend_mm_delayed_error_or_panic(fallible, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", n, m, l);
+		return SIZE_MAX;
+	}
+	return len;
+}
+
 #define ZSTR_ALLOCA_ALLOC(str, _len, use_heap) do { \
 	(str) = (zend_string *)do_alloca(ZEND_MM_ALIGNED_SIZE_EX(_ZSTR_STRUCT_SIZE(_len), 8), (use_heap)); \
 	GC_SET_REFCOUNT(str, 1); \
@@ -209,16 +223,11 @@ static zend_always_inline zend_string *zend_string_alloc(size_t len, bool persis
 /* Fallible variant of zend_string_safe_alloc */
 static zend_always_inline zend_string *zend_string_safe_falloc(size_t n, size_t m, size_t l, bool persistent, bool fallible)
 {
-	zend_string *ret = (zend_string *)safe_fpemalloc(n, m, ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(l)), persistent, fallible);
-	if (ZEND_CONST_COND(fallible, true) && UNEXPECTED(ret == NULL)) {
-		return ret;
+	size_t len = zend_string_safe_len(n, m, l, fallible && !persistent);
+	if (UNEXPECTED(len == SIZE_MAX)) {
+		return NULL;
 	}
-
-	GC_SET_REFCOUNT(ret, 1);
-	GC_TYPE_INFO(ret) = GC_STRING | ((persistent ? IS_STR_PERSISTENT : 0) << GC_FLAGS_SHIFT);
-	ZSTR_H(ret) = 0;
-	ZSTR_LEN(ret) = (n * m) + l;
-	return ret;
+	return zend_string_falloc(len, persistent, fallible);
 }
 
 static zend_always_inline zend_string *zend_string_safe_alloc(size_t n, size_t m, size_t l, bool persistent)
@@ -391,23 +400,27 @@ static zend_always_inline zend_string *zend_string_truncate(zend_string *s, size
 static zend_always_inline zend_string *zend_string_safe_frealloc(zend_string *s, size_t n, size_t m, size_t l, bool persistent, bool fallible)
 {
 	zend_string *ret;
+	size_t len = zend_string_safe_len(n, m, l, fallible && !persistent);
+	if (UNEXPECTED(len == SIZE_MAX)) {
+		return NULL;
+	}
 
 	if (!ZSTR_IS_INTERNED(s)) {
 		if (GC_REFCOUNT(s) == 1) {
-			ret = (zend_string *)safe_fperealloc(s, n, m, ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(l)), persistent, fallible);
+			ret = (zend_string *)fperealloc(s, ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(len)), persistent, fallible);
 			if (ZEND_CONST_COND(fallible, true) && !ret) {
 				return NULL;
 			}
-			ZSTR_LEN(ret) = (n * m) + l;
+			ZSTR_LEN(ret) = len;
 			zend_string_forget_hash_val(ret);
 			return ret;
 		}
 	}
-	ret = zend_string_safe_falloc(n, m, l, persistent, fallible);
+	ret = zend_string_falloc(len, persistent, fallible);
 	if (ZEND_CONST_COND(fallible, true) && !ret) {
 		return NULL;
 	}
-	memcpy(ZSTR_VAL(ret), ZSTR_VAL(s), MIN((n * m) + l, ZSTR_LEN(s)) + 1);
+	memcpy(ZSTR_VAL(ret), ZSTR_VAL(s), MIN(len, ZSTR_LEN(s)) + 1);
 	if (!ZSTR_IS_INTERNED(s)) {
 		GC_DELREF(s);
 	}
