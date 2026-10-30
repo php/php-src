@@ -189,6 +189,8 @@ PHP                                                                        NEWS
     after restart. (Pavel Gushcha)
   . Fix opcache.interned_strings_buffer being 0 in threads started later (ZTS).
     (Pavel Gushcha)
+  . Fixed potential infinite recursion/hang (HYBRID/TAILCALL respectively)
+    when zend_interrupt_function resets EG(vm_interrupt).  (Levi Morrison)
 
 - OpenSSL:
   . Fixed bug GH-24784 (openssl_pkcs7_read() and openssl_cms_read() overwrite
