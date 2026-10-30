@@ -2044,7 +2044,7 @@ PHP_FUNCTION(sodium_crypto_aead_aes256gcm_decrypt)
 	if (ciphertext_len < crypto_aead_aes256gcm_ABYTES) {
 		RETURN_FALSE;
 	}
-	if (ciphertext_len - crypto_aead_aes256gcm_ABYTES > 16ULL * ((1ULL << 32) - 2ULL)) {
+	if ((unsigned long long) ciphertext_len - crypto_aead_aes256gcm_ABYTES > 16ULL * ((1ULL << 32) - 2ULL)) {
 		zend_argument_error(sodium_exception_ce, 1, "is too long");
 		RETURN_THROWS();
 	}
