@@ -27,7 +27,7 @@ extern zend_result php_string_to_if_index(const char *val, unsigned *out);
 
 #ifdef HAVE_IPV6
 /* Sets addr by hostname, or by ip in string form (AF_INET6) */
-int php_set_inet6_addr(struct sockaddr_in6 *sin6, zend_string *string, php_socket *php_sock) /* {{{ */
+bool php_set_inet6_addr(struct sockaddr_in6 *sin6, zend_string *string, php_socket *php_sock) /* {{{ */
 {
 	struct in6_addr tmp;
 #ifdef HAVE_GETADDRINFO
@@ -55,12 +55,12 @@ int php_set_inet6_addr(struct sockaddr_in6 *sin6, zend_string *string, php_socke
 #else
 			PHP_SOCKET_ERROR(php_sock, "Host lookup failed", (-10000 - h_errno));
 #endif
-			return 0;
+			return false;
 		}
 		if (addrinfo->ai_family != PF_INET6 || addrinfo->ai_addrlen != sizeof(struct sockaddr_in6)) {
 			php_error_docref(NULL, E_WARNING, "Host lookup failed: Non AF_INET6 domain returned on AF_INET6 socket");
 			freeaddrinfo(addrinfo);
-			return 0;
+			return false;
 		}
 
 		memcpy(&(sin6->sin6_addr.s6_addr), ((struct sockaddr_in6*)(addrinfo->ai_addr))->sin6_addr.s6_addr, sizeof(struct in6_addr));
@@ -69,7 +69,7 @@ int php_set_inet6_addr(struct sockaddr_in6 *sin6, zend_string *string, php_socke
 #else
 		/* No IPv6 specific hostname resolution is available on this system? */
 		php_error_docref(NULL, E_WARNING, "Host lookup failed: getaddrinfo() not available on this system");
-		return 0;
+		return false;
 #endif
 
 	}
@@ -92,13 +92,13 @@ int php_set_inet6_addr(struct sockaddr_in6 *sin6, zend_string *string, php_socke
 		sin6->sin6_scope_id = scope_id;
 	}
 
-	return 1;
+	return true;
 }
 /* }}} */
 #endif
 
 /* Sets addr by hostname, or by ip in string form (AF_INET)  */
-int php_set_inet_addr(struct sockaddr_in *sin, zend_string *string, php_socket *php_sock) /* {{{ */
+bool php_set_inet_addr(struct sockaddr_in *sin, zend_string *string, php_socket *php_sock) /* {{{ */
 {
 	struct in_addr tmp;
 	struct hostent *host_entry;
@@ -113,22 +113,22 @@ int php_set_inet_addr(struct sockaddr_in *sin, zend_string *string, php_socket *
 #else
 			PHP_SOCKET_ERROR(php_sock, "Host lookup failed", (-10000 - h_errno));
 #endif
-			return 0;
+			return false;
 		}
 		if (host_entry->h_addrtype != AF_INET) {
 			php_error_docref(NULL, E_WARNING, "Host lookup failed: Non AF_INET domain returned on AF_INET socket");
-			return 0;
+			return false;
 		}
 		memcpy(&(sin->sin_addr.s_addr), host_entry->h_addr_list[0], host_entry->h_length);
 	}
 
-	return 1;
+	return true;
 }
 /* }}} */
 
 /* Sets addr by hostname or by ip in string form (AF_INET or AF_INET6,
  * depending on the socket) */
-int php_set_inet46_addr(php_sockaddr_storage *ss, socklen_t *ss_len, zend_string *string, php_socket *php_sock) /* {{{ */
+bool php_set_inet46_addr(php_sockaddr_storage *ss, socklen_t *ss_len, zend_string *string, php_socket *php_sock) /* {{{ */
 {
 	if (php_sock->type == AF_INET) {
 		struct sockaddr_in t = {0};
@@ -136,7 +136,7 @@ int php_set_inet46_addr(php_sockaddr_storage *ss, socklen_t *ss_len, zend_string
 			memcpy(ss, &t, sizeof t);
 			ss->ss_family = AF_INET;
 			*ss_len = sizeof(t);
-			return 1;
+			return true;
 		}
 	}
 #ifdef HAVE_IPV6
@@ -146,12 +146,12 @@ int php_set_inet46_addr(php_sockaddr_storage *ss, socklen_t *ss_len, zend_string
 			memcpy(ss, &t, sizeof t);
 			ss->ss_family = AF_INET6;
 			*ss_len = sizeof(t);
-			return 1;
+			return true;
 		}
 	}
 #endif
 	else {
 		zend_value_error("IP address used in the context of an unexpected type of socket");
 	}
-	return 0;
+	return false;
 }
