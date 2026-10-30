@@ -425,8 +425,8 @@ PW32CP BOOL php_win32_cp_use_unicode(void)
 
 PW32CP wchar_t *php_win32_cp_env_any_to_w(const char* env)
 {/*{{{*/
-	wchar_t *envw = NULL, ew[32760];
-	char *cur = (char *)env, *prev;
+	wchar_t *envw = NULL;
+	const char *cur = env;
 	size_t bin_len = 0;
 
 	if (!env) {
@@ -436,29 +436,38 @@ PW32CP wchar_t *php_win32_cp_env_any_to_w(const char* env)
 
 	do {
 		wchar_t *tmp;
+		wchar_t *new_envw;
+		size_t tmp_len;
 
 		tmp = php_win32_cp_any_to_w(cur);
-		if (tmp) {
-			size_t tmp_len = wcslen(tmp) + 1;
-			memmove(ew + bin_len, tmp, tmp_len * sizeof(wchar_t));
-			free(tmp);
-
-			bin_len += tmp_len;
+		if (!tmp) {
+			free(envw);
+			return NULL;
 		}
 
-		prev = cur;
+		tmp_len = wcslen(tmp) + 1;
+		if (tmp_len > SIZE_MAX / sizeof(wchar_t) - bin_len - 2) {
+			free(tmp);
+			free(envw);
+			SET_ERRNO_FROM_WIN32_CODE(ERROR_OUTOFMEMORY);
+			return NULL;
+		}
+		new_envw = realloc(envw, (bin_len + tmp_len + 2) * sizeof(wchar_t));
+		if (!new_envw) {
+			free(tmp);
+			free(envw);
+			SET_ERRNO_FROM_WIN32_CODE(ERROR_OUTOFMEMORY);
+			return NULL;
+		}
+		envw = new_envw;
+		memcpy(envw + bin_len, tmp, tmp_len * sizeof(wchar_t));
+		bin_len += tmp_len;
+		free(tmp);
+		cur += strlen(cur) + 1;
+	} while (*cur);
 
-	} while (NULL != (cur = strchr(prev, '\0')) && cur++ && *cur && bin_len + (cur - prev) < 32760);
-
-	envw = (wchar_t *) malloc((bin_len + 3) * sizeof(wchar_t));
-	if (!envw) {
-		SET_ERRNO_FROM_WIN32_CODE(ERROR_OUTOFMEMORY);
-		return NULL;
-	}
-	memmove(envw, ew, bin_len * sizeof(wchar_t));
 	envw[bin_len] = L'\0';
 	envw[bin_len + 1] = L'\0';
-	envw[bin_len + 2] = L'\0';
 
 	return envw;
 }/*}}}*/
