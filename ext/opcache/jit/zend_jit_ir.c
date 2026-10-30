@@ -294,6 +294,7 @@ typedef struct _zend_jit_ctx {
 	ir_ref              *bb_edges;
 	zend_jit_trace_info *trace;
 	zend_jit_reg_var    *ra;
+	ir_ref               op_start_ref;
 	int                  delay_var;
 	ir_refs             *delay_refs;
 	ir_ref               eg_exception_addr;
@@ -1360,6 +1361,8 @@ static bool zend_jit_spilling_may_cause_conflict(zend_jit_ctx *jit, int var, ir_
 		 && jit->ssa->ops[jit->ssa->vars[var].definition].op2_use >= 0
 		 && jit->ra[jit->ssa->ops[jit->ssa->vars[var].definition].op2_use].ref == val) {
 			/* Avoid spill conflict between of ASSIGN.op1_def and ASSIGN.op1_use */
+			return 1;
+		} else if (val < jit->op_start_ref) {
 			return 1;
 		}
 		return 0;
@@ -2820,6 +2823,7 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 	jit->bb_edges = NULL;
 	jit->trace = NULL;
 	jit->ra = NULL;
+	jit->op_start_ref = IR_UNUSED;
 	jit->delay_var = -1;
 	jit->delay_refs = NULL;
 	jit->eg_exception_addr = 0;
