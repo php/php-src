@@ -16,13 +16,14 @@ foreach (['phar', 'phar.zip'] as $ext) {
     $phar = new Phar($fname);
     $phar['a.txt'] = $contents;
     $phar['b.txt'] = 'our fathers';
+    $phar->addEmptyDir('dir');
 
     $phar->compressFiles(Phar::GZ);
     $phar->compressFiles(Phar::BZ2);
     var_dump($phar['a.txt']->isCompressed(Phar::BZ2));
     var_dump($phar['a.txt']->getContent() === $contents);
 
-    $phar->decompressFiles();
+    var_dump($phar->decompressFiles());
     var_dump($phar['a.txt']->isCompressed());
     var_dump($phar['a.txt']->getContent() === $contents);
     var_dump($phar['b.txt']->getContent());
@@ -42,11 +43,13 @@ foreach (['phar', 'phar.zip'] as $ext) {
 --EXPECT--
 bool(true)
 bool(true)
+bool(true)
 bool(false)
 bool(true)
 string(11) "our fathers"
 bool(true)
 string(11) "our fathers"
+bool(true)
 bool(true)
 bool(true)
 bool(false)

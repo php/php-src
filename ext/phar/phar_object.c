@@ -3184,7 +3184,7 @@ static int phar_decompress_for_compression_change(zval *zv, void *argument) /* {
 	phar_compression_args *args = (phar_compression_args *)argument;
 	uint32_t current = entry->flags & PHAR_ENT_COMPRESSION_MASK;
 
-	if (entry->is_deleted || !current || current == args->compress) {
+	if (entry->is_deleted || entry->is_dir || !current || current == args->compress) {
 		return ZEND_HASH_APPLY_KEEP;
 	}
 
