@@ -175,6 +175,8 @@ PHP                                                                        NEWS
     (ndossche, khaledalam)
   . Fix preloaded functions JIT-compiled on load being overwritten
     after restart. (Pavel Gushcha)
+  . Fix opcache.interned_strings_buffer being 0 in threads started later (ZTS).
+    (Pavel Gushcha)
 
 - OpenSSL:
   . Fixed bug GH-24784 (openssl_pkcs7_read() and openssl_cms_read() overwrite
