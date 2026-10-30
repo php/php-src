@@ -52,10 +52,15 @@ AC_DEFUN([PHP_MBSTRING_SETUP_MBREGEX], [
   PHP_INSTALL_HEADERS([ext/mbstring], [php_mbregex.h php_onig_compat.h])
 ])
 
+dnl
+dnl PHP_MBSTRING_SETUP_LIBMBFL
+dnl
+dnl Configure bundled libmbfl. It is required and cannot be disabled.
+dnl
 AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
-  dnl
-  dnl Bundled libmbfl is required and can not be disabled
-  dnl
+  AC_CHECK_HEADERS([strings.h])
+  AC_CHECK_FUNCS([strcasecmp])
+
   PHP_MBSTRING_ADD_BUILD_DIR([libmbfl])
   PHP_MBSTRING_ADD_BUILD_DIR([libmbfl/mbfl])
   PHP_MBSTRING_ADD_BUILD_DIR([libmbfl/filters])
@@ -103,7 +108,6 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
   ])
 
   PHP_INSTALL_HEADERS([ext/mbstring], m4_normalize([
-    libmbfl/config.h
     libmbfl/mbfl/eaw_table.h
     libmbfl/mbfl/mbfilter_8bit.h
     libmbfl/mbfl/mbfilter_pass.h
@@ -144,7 +148,6 @@ if test "$PHP_MBSTRING" != "no"; then
 
   AS_VAR_IF([PHP_MBREGEX], [yes], [PHP_MBSTRING_SETUP_MBREGEX])
 
-  dnl libmbfl is required
   PHP_MBSTRING_SETUP_LIBMBFL
 
   PHP_NEW_EXTENSION([mbstring],
@@ -159,18 +162,15 @@ if test "$PHP_MBSTRING" != "no"; then
   done
 
   for dir in $PHP_MBSTRING_EXTRA_INCLUDES; do
-    PHP_ADD_INCLUDE([$ext_srcdir/$dir])
     PHP_ADD_INCLUDE([$ext_builddir/$dir])
+    PHP_ADD_INCLUDE([$ext_srcdir/$dir])
   done
 
-  out="php_config.h"
-
-  if test "$ext_shared" != "no" && test -f "$ext_builddir/config.h.in"; then
-    out="$abs_builddir/config.h"
-  fi
-
   cat > $ext_builddir/libmbfl/config.h <<EOF
-#include "$out"
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
+#include <php_config.h>
 EOF
 
   PHP_INSTALL_HEADERS([ext/mbstring], [mbstring.h])
