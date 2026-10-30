@@ -20,7 +20,7 @@ $file = $dir . '/sess_' . session_id();
 $_SESSION['bad|key'] = 'value';
 var_dump(session_write_close());
 
-$fp = fopen($file, 'r');
+$fp = fopen($file, 'r+');
 var_dump(flock($fp, LOCK_EX | LOCK_NB));
 fclose($fp);
 
@@ -34,7 +34,7 @@ try {
     echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
-$fp = fopen($file, 'r');
+$fp = fopen($file, 'r+');
 var_dump(flock($fp, LOCK_EX | LOCK_NB));
 fclose($fp);
 
