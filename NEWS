@@ -37,6 +37,9 @@ PHP                                                                        NEWS
     (Jorg Sowa)
   . Fixed bug GH-25061 ($x = $x - 1 on null is optimized to PRE_DEC).
     (Lazizbek Ergashev)
+  . Fixed first-class callables to static methods in trait constant
+    expressions resolving to the method of the first using class and
+    bypassing visibility checks. (Jorg Sowa)
 
 - CLI:
   . Fixed bug GH-24697 (PHP_HTTP_PARSER_STRICT build option doesn't work).
