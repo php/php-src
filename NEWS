@@ -381,6 +381,7 @@ PHP                                                                        NEWS
     (DanielEScherzer, cmb)
   . Fixed undefined behavior with GIFs with problematic LZW compression data.
     (DanielEScherzer, vapier)
+  . Fixed the return value of imagewebp() for palette images. (arshidkv12)
 
 - Intl:
   . Fixed IntlDateFormatter::parse(), localtime() and parseToCalendar()
