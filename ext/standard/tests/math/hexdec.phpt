@@ -18,13 +18,13 @@ var_dump(hexdec("17fffffffffffffff"));
 int(74565)
 int(74565)
 
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+Deprecated: hexdec(): Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(74565)
 
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+Deprecated: hexdec(): Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(74565)
 
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+Deprecated: hexdec(): Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(74565)
 
 Notice: Input number is larger than PHP_INT_MAX, precision has been lost in conversion in %s on line %d
