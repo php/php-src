@@ -1677,7 +1677,7 @@ after_open_fp:
 		data->fp = NULL;
 		php_stream_copy_to_stream_ex(fp, p_obj->fp, PHP_STREAM_COPY_ALL, &contents_len);
 		if (ZEND_SIZE_T_UINT_OVFL(contents_len)) {
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned a file that is too large \"%s\"", ZSTR_VAL(ce->name), fname);
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s is too large to be stored in a phar archive", str_key);
 			phar_entry_delref(data);
 
 			if (save) {

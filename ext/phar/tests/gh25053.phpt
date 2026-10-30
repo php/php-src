@@ -27,16 +27,33 @@ try {
 $tar = new PharData(__DIR__ . '/gh25053-2.tar');
 try {
     $tar->buildFromIterator(new ArrayIterator(['big' => $src]));
-} catch (UnexpectedValueException $e) {
-    echo str_replace($src, 'gh25053.big', $e->getMessage()), "\n";
+} catch (BadMethodCallException $e) {
+    echo $e->getMessage(), "\n";
 }
+
+$tar = new PharData(__DIR__ . '/gh25053-3.tar');
+try {
+    $tar->buildFromIterator(new ArrayIterator(['big' => fopen($src, 'rb')]));
+} catch (BadMethodCallException $e) {
+    echo $e->getMessage(), "\n";
+}
+
+$phar = new Phar(__DIR__ . '/gh25053-4.phar');
+$phar->addFromString('small', 'x');
+var_dump(copy($src, 'phar://' . __DIR__ . '/gh25053-4.phar/big'));
 ?>
 --CLEAN--
 <?php
 @unlink(__DIR__ . '/gh25053.big');
 @unlink(__DIR__ . '/gh25053-1.tar');
 @unlink(__DIR__ . '/gh25053-2.tar');
+@unlink(__DIR__ . '/gh25053-3.tar');
+@unlink(__DIR__ . '/gh25053-4.phar');
 ?>
---EXPECT--
+--EXPECTF--
 Entry big is too large to be stored in a phar archive
-Iterator ArrayIterator returned a file that is too large "gh25053.big"
+Entry big is too large to be stored in a phar archive
+Entry big is too large to be stored in a phar archive
+
+Warning: copy(): phar error: Could not write %d characters to "big" in phar "%sgh25053-4.phar", entry is too large in %s on line %d
+bool(false)
