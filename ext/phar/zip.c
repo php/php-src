@@ -1026,7 +1026,11 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 		php_stream_flush(entry->cfp);
 		php_stream_filter_remove(filter, 1);
 		php_stream_seek(entry->cfp, 0, SEEK_END);
-		entry->compressed_filesize = (uint32_t) php_stream_tell(entry->cfp);
+		if ((uint64_t) php_stream_tell(entry->cfp) > UINT32_MAX) {
+			spprintf(p->error, 0, "unable to compress file \"%s\" to zip-based phar \"%s\", compressed file is too large", entry->filename, entry->phar->fname);
+			return ZEND_HASH_APPLY_STOP;
+		}
+		entry->compressed_filesize = php_stream_tell(entry->cfp);
 		PHAR_SET_32(central.compsize, entry->compressed_filesize);
 		PHAR_SET_32(local.compsize, entry->compressed_filesize);
 		/* generate crc on compressed file */
