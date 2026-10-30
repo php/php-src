@@ -3095,7 +3095,7 @@ static int phar_set_compression(zval *zv, void *argument) /* {{{ */
 	phar_entry_info *entry = (phar_entry_info *)Z_PTR_P(zv);
 	uint32_t compress = *(uint32_t *)argument;
 
-	if (entry->is_deleted) {
+	if (entry->is_deleted || (entry->flags & PHAR_ENT_COMPRESSION_MASK) == compress) {
 		return ZEND_HASH_APPLY_KEEP;
 	}
 
