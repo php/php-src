@@ -2854,7 +2854,7 @@ static void curl_free_obj(zend_object *object)
 	fprintf(stderr, "DTOR CALLED, ch = %x\n", ch);
 #endif
 
-	if (!ch->cp) {
+	if (!ch->clone) {
 		/* Can happen if constructor throws. */
 		zend_object_std_dtor(&ch->std);
 		return;
