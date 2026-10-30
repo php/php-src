@@ -1465,6 +1465,14 @@ nocentralerror:
 	}
 
 	/* save zip */
+	/* zip64 is not supported, so all offsets must fit in 32 bits */
+	if ((uint64_t) php_stream_tell(pass.filefp) > UINT32_MAX) {
+		if (error) {
+			spprintf(error, 4096, "phar zip flush of \"%s\" failed: archive is too large for zip file format", phar->fname);
+		}
+		goto notemperror;
+	}
+
 	cdir_size = php_stream_tell(pass.centralfp);
 	cdir_offset = php_stream_tell(pass.filefp);
 	PHAR_SET_32(eocd.cdir_size, cdir_size);

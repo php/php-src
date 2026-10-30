@@ -65,6 +65,15 @@ try {
 } catch (PharException $e) {
     echo $e->getMessage(), "\n";
 }
+
+$zip = new PharData(__DIR__ . '/gh25053-7.zip');
+$fp = fopen($src, 'rb');
+fseek($fp, 12);
+try {
+    $zip['big'] = $fp;
+} catch (PharException $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 --CLEAN--
 <?php
@@ -75,6 +84,7 @@ try {
 @unlink(__DIR__ . '/gh25053-4.phar');
 @unlink(__DIR__ . '/gh25053-5.tar');
 @unlink(__DIR__ . '/gh25053-6.tar');
+@unlink(__DIR__ . '/gh25053-7.zip');
 ?>
 --EXPECTF--
 Entry big is too large to be stored in a phar archive
@@ -89,3 +99,4 @@ bool(false)
 mount failed
 int(1)
 tar-based phar "%sgh25053-6.tar" cannot be created, file "big" is too large for tar file format
+phar zip flush of "%sgh25053-7.zip" failed: archive is too large for zip file format
