@@ -2205,7 +2205,7 @@ simple_list:
 			zend_ast_export_var(str, ast->child[1], 0, indent);
 			break;
 		case ZEND_AST_STATIC_PROP:
-			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
+			zend_ast_export_ns_name(str, ast->child[0], 260, indent);
 			smart_str_appends(str, "::$");
 			zend_ast_export_var(str, ast->child[1], 0, indent);
 			break;
@@ -2225,7 +2225,7 @@ simple_list:
 			smart_str_appends(str, "...");
 			break;
 		case ZEND_AST_CLASS_CONST:
-			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
+			zend_ast_export_ns_name(str, ast->child[0], 260, indent);
 			smart_str_appends(str, "::");
 			zend_ast_export_name(str, ast->child[1], 0, indent);
 			break;
@@ -2242,7 +2242,7 @@ simple_list:
 					EMPTY_SWITCH_DEFAULT_CASE()
 				}
 			} else {
-				zend_ast_export_ns_name(str, ast->child[0], 0, indent);
+				zend_ast_export_ns_name(str, ast->child[0], 260, indent);
 			}
 			smart_str_appends(str, "::class");
 			break;
@@ -2547,7 +2547,7 @@ simple_list:
 			smart_str_appendc(str, ')');
 			break;
 		case ZEND_AST_STATIC_CALL:
-			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
+			zend_ast_export_ns_name(str, ast->child[0], 260, indent);
 			smart_str_appends(str, "::");
 			zend_ast_export_var(str, ast->child[1], 0, indent);
 			smart_str_appendc(str, '(');
