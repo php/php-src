@@ -339,10 +339,14 @@ static zend_always_inline bool php_stream_zend_parse_arg_into_stream(
 PHPAPI php_stream *php_stream_encloses(php_stream *enclosing, php_stream *enclosed);
 PHPAPI int php_stream_free_enclosed(php_stream *stream_enclosed, int close_options);
 
-PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream **stream);
-#define PHP_STREAM_PERSISTENT_SUCCESS	0 /* id exists */
-#define PHP_STREAM_PERSISTENT_FAILURE	1 /* id exists but is not a stream! */
-#define PHP_STREAM_PERSISTENT_NOT_EXIST	2 /* id does not exist */
+
+C23_ENUM(php_stream_persistent_status, uint8_t) {
+	PHP_STREAM_PERSISTENT_SUCCESS = 0, /* id exists */
+	PHP_STREAM_PERSISTENT_FAILURE = 1, /* id exists but is not a stream! */
+	PHP_STREAM_PERSISTENT_NOT_EXIST	= 2, /* id does not exist */
+};
+
+PHPAPI php_stream_persistent_status php_stream_from_persistent_id(const char *persistent_id, php_stream **stream);
 
 #define PHP_STREAM_FREE_CALL_DTOR			1 /* call ops->close */
 #define PHP_STREAM_FREE_RELEASE_STREAM		2 /* pefree(stream) */

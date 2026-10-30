@@ -876,9 +876,9 @@ PHP_FUNCTION(pclose)
 		GC_ADDREF(context->res);
 	}
 	php_stream_error_operation_begin();
-	FG(pclose_wait) = 1;
+	FG(pclose_wait) = true;
 	zend_list_close(stream->res);
-	FG(pclose_wait) = 0;
+	FG(pclose_wait) = false;
 	php_stream_error_operation_end(context);
 	if (context) {
 		zend_list_delete(context->res);

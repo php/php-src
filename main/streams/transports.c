@@ -85,7 +85,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 				/* fall through */
 
 			case PHP_STREAM_PERSISTENT_FAILURE:
-			default:
+			case PHP_STREAM_PERSISTENT_NOT_EXIST:
 				/* failed; get a new one */
 				;
 		}
