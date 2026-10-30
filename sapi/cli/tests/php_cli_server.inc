@@ -13,14 +13,20 @@ class CliServerInfo {
 function php_cli_server_start(
     ?string $code = 'echo "Hello world";',
     ?string $router = 'index.php',
-    array $cmd_args = []
+    array $cmd_args = [],
+    ?string $override_doc_root = null,
 ): CliServerInfo {
     $php_executable = getenv('TEST_PHP_EXECUTABLE') ?: PHP_BINARY;
     $error = null;
 
-    // Create dedicated doc root to avoid index.php clashes between processes.
-    $doc_root = __DIR__ . DIRECTORY_SEPARATOR . basename($_SERVER['PHP_SELF'], '.php') . '-' . getmypid();
-    @mkdir($doc_root);
+    // Create dedicated doc root to avoid index.php clashes between processes,
+    // unless a specific root was requested
+    if ($override_doc_root === null) {
+        $doc_root = __DIR__ . DIRECTORY_SEPARATOR . basename($_SERVER['PHP_SELF'], '.php') . '-' . getmypid();
+        @mkdir($doc_root);
+    } else {
+        $doc_root = $override_doc_root;
+    }
 
     if ($code) {
         file_put_contents($doc_root . '/' . ($router ?: 'index.php'), '<?php ' . $code . ' ?>');
@@ -100,7 +106,7 @@ function php_cli_server_start(
     }
 
     register_shutdown_function(
-        function($handle) use($router, $doc_root, $output_file) {
+        function($handle) use($router, $doc_root, $override_doc_root, $output_file) {
             proc_terminate($handle);
             $status = proc_get_status($handle);
             if ($status['exitcode'] !== -1 && $status['exitcode'] !== 0
@@ -109,7 +115,9 @@ function php_cli_server_start(
                 printf("Server output:\n%s\n", file_get_contents($output_file));
             }
             @unlink(__DIR__ . "/{$router}");
-            remove_directory($doc_root);
+            if ($override_doc_root === null) {
+                remove_directory($doc_root);
+            }
         },
         $handle
     );
