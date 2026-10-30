@@ -59,6 +59,8 @@ PHP                                                                        NEWS
   . Fixed json_encode() leaving the recursion guard set on objects with hooked
     properties after running out of memory while escaping a property name.
     (adapik)
+  . Fixed json_encode() silently narrowing $depth values outside the int range,
+    which wrapped to an unrelated depth. (cuishuang)
 
 - LDAP:
   . Fix crash in ldap_exop_sync() when $response_data is omitted. (lacatoire)
