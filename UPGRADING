@@ -153,6 +153,13 @@ PHP 8.7 UPGRADE NOTES
 11. Changes to INI File Handling
 ========================================
 
+- GD:
+  . Added gd.png_ignore_warning. Recoverable libpng warnings, like
+    "iCCP: known incorrect sRGB profile", will not be issued when loading PNG
+    files anymore, although fatal libpng errors will continue to be shown.
+    Off by default. Only takes effect if PHP is compiled with the bundled
+    libgd.
+
 ========================================
 12. Windows Support
 ========================================

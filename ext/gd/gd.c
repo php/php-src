@@ -292,8 +292,29 @@ ZEND_GET_MODULE(gd)
 /* {{{ PHP_INI_BEGIN */
 PHP_INI_BEGIN()
 	PHP_INI_ENTRY_EX("gd.jpeg_ignore_warning", "1", PHP_INI_ALL, NULL, zend_ini_boolean_displayer_cb)
+	PHP_INI_ENTRY_EX("gd.png_ignore_warning", "0", PHP_INI_ALL, NULL, zend_ini_boolean_displayer_cb)
 PHP_INI_END()
 /* }}} */
+
+#ifdef HAVE_GD_PNG
+static gdImagePtr php_gd_image_create_from_png(FILE *fp)
+{
+#ifdef HAVE_GD_BUNDLED
+	return gdImageCreateFromPngEx(fp, zend_ini_bool_literal("gd.png_ignore_warning"));
+#else
+	return gdImageCreateFromPng(fp);
+#endif
+}
+
+static gdImagePtr php_gd_image_create_from_png_ctx(gdIOCtxPtr ctx)
+{
+#ifdef HAVE_GD_BUNDLED
+	return gdImageCreateFromPngCtxEx(ctx, zend_ini_bool_literal("gd.png_ignore_warning"));
+#else
+	return gdImageCreateFromPngCtx(ctx);
+#endif
+}
+#endif
 
 /* {{{ php_gd_error_method */
 void php_gd_error_method(int type, const char *format, va_list args)
@@ -1478,7 +1499,7 @@ PHP_FUNCTION(imagecreatefromstring)
 
 		case PHP_GDIMG_TYPE_PNG:
 #ifdef HAVE_GD_PNG
-			im = _php_image_create_from_string(data, "PNG", gdImageCreateFromPngCtx);
+			im = _php_image_create_from_string(data, "PNG", php_gd_image_create_from_png_ctx);
 #else
 			php_error_docref(NULL, E_WARNING, "No PNG support in this PHP build");
 			RETURN_FALSE;
@@ -1684,7 +1705,7 @@ PHP_FUNCTION(imagecreatefromjpeg)
 /* {{{ Create a new image from PNG file or URL */
 PHP_FUNCTION(imagecreatefrompng)
 {
-	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_PNG, "PNG", gdImageCreateFromPng, gdImageCreateFromPngCtx);
+	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_PNG, "PNG", php_gd_image_create_from_png, php_gd_image_create_from_png_ctx);
 }
 /* }}} */
 #endif /* HAVE_GD_PNG */
