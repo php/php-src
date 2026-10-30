@@ -1,7 +1,9 @@
 --TEST--
 rfc1867: mbstring input conversion of a body part doesn't reach the hard limit
+--EXTENSIONS--
+mbstring
 --SKIPIF--
-<?php require __DIR__ . "/oom_rfc1867_mb_skipif.inc"; ?>
+<?php require __DIR__ . "/oom_rfc1867_skipif.inc"; ?>
 --FILE--
 <?php
 require __DIR__ . '/oom_rfc1867.inc';
