@@ -36,6 +36,8 @@ PHP                                                                        NEWS
     (Marti2203).
   . Fixed bug GH-24989 (Use-after-free in GC when an exception is thrown).
     (David Carlier)
+  . Fixed AST printing dropping fully qualified and namespace-relative prefixes
+    of class names in implements, catch, and trait use lists. (Jorg Sowa)
 
 - CLI:
   . Fixed bug GH-24697 (PHP_HTTP_PARSER_STRICT build option doesn't work).
