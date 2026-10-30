@@ -44,6 +44,27 @@ var_dump(isset($tar['big']));
 $phar = new Phar(__DIR__ . '/gh25053-4.phar');
 $phar->addFromString('small', 'x');
 var_dump(copy($src, 'phar://' . __DIR__ . '/gh25053-4.phar/big'));
+
+try {
+    Phar::mount('phar://' . __DIR__ . '/gh25053-4.phar/big', $src);
+} catch (PharException $e) {
+    echo "mount failed\n";
+}
+
+$tar = new PharData(__DIR__ . '/gh25053-5.tar');
+$fp = fopen($src, 'rb');
+fseek($fp, 2**32);
+$tar->buildFromIterator(new ArrayIterator(['tail' => $fp]));
+var_dump($tar['tail']->getSize());
+
+$tar = new PharData(__DIR__ . '/gh25053-6.tar');
+$fp = fopen($src, 'rb');
+fseek($fp, 102);
+try {
+    $tar['big'] = $fp;
+} catch (PharException $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 --CLEAN--
 <?php
@@ -52,6 +73,8 @@ var_dump(copy($src, 'phar://' . __DIR__ . '/gh25053-4.phar/big'));
 @unlink(__DIR__ . '/gh25053-2.tar');
 @unlink(__DIR__ . '/gh25053-3.tar');
 @unlink(__DIR__ . '/gh25053-4.phar');
+@unlink(__DIR__ . '/gh25053-5.tar');
+@unlink(__DIR__ . '/gh25053-6.tar');
 ?>
 --EXPECTF--
 Entry big is too large to be stored in a phar archive
@@ -63,3 +86,6 @@ bool(false)
 
 Warning: copy(): phar error: Could not write %d characters to "big" in phar "%sgh25053-4.phar", entry is too large in %s on line %d
 bool(false)
+mount failed
+int(1)
+tar-based phar "%sgh25053-6.tar" cannot be created, file "big" is too large for tar file format
