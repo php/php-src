@@ -7589,6 +7589,39 @@ static int zend_jit_identical(zend_jit_ctx   *jit,
 	return 1;
 }
 
+/* This is only for the tracing JIT.
+ * `taken` is used for the recorded direction in the tracing jit. */
+static int zend_jit_coalesce(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1_info, zend_jit_addr op1_addr, zend_jit_addr res_addr, bool taken, const void *exit_addr)
+{
+	ir_ref ref = jit_ZVAL_ADDR(jit, op1_addr);
+
+	ZEND_ASSERT(opline->op1_type & (IS_TMP_VAR|IS_CV));
+
+	if (opline->op1_type == IS_CV && (op1_info & MAY_BE_REF)) {
+		ref = jit_ZVAL_DEREF_ref(jit, ref);
+		op1_info &= ~MAY_BE_REF;
+	}
+
+	if (exit_addr) {
+		// JIT: if (Z_TYPE_P(value) > IS_NULL)
+		ir_ref cond = ir_GT(jit_Z_TYPE_ref(jit, ref), ir_CONST_U8(IS_NULL));
+
+		if (taken) {
+			ir_GUARD(cond, ir_CONST_ADDR(exit_addr));
+		} else {
+			ir_GUARD_NOT(cond, ir_CONST_ADDR(exit_addr));
+		}
+	}
+
+	if (taken) {
+		// JIT: ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
+		// JIT: Z_ADDREF_P(EX_VAR(opline->result.var)) for CV
+		jit_ZVAL_COPY(jit, res_addr, -1, ZEND_ADDR_REF_ZVAL(ref), op1_info, opline->op1_type == IS_CV);
+	}
+
+	return 1;
+}
+
 static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1_info, zend_jit_addr op1_addr, zend_jit_addr res_addr, uint32_t target_label, uint32_t target_label2, int may_throw, uint8_t branch_opcode, const void *exit_addr, bool warn_undef)
 {
 	uint32_t true_label = -1;
