@@ -265,6 +265,8 @@ namespace {
 
     function zend_test_void_return(): void {}
 
+    function &zend_test_forward_reference(mixed &$value): mixed {}
+
     function zend_test_compile_string(string $source_string, string $filename, int $position): void {}
 
     /** @deprecated */

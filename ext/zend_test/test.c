@@ -132,6 +132,18 @@ static void pass2(zend_script *script, void *context)
 	php_printf("pass2\n");
 }
 
+static ZEND_FUNCTION(zend_test_forward_reference)
+{
+	zval *value;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	ZVAL_COPY(return_value, value);
+	zend_return_unwrap_ref(execute_data, return_value);
+}
+
 static ZEND_FUNCTION(zend_test_deprecated)
 {
 	zval *arg1;

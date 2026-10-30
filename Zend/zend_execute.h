@@ -676,6 +676,24 @@ static zend_always_inline void *zend_get_bad_ptr(void)
 	return NULL;
 }
 
+static zend_always_inline bool zend_return_should_unwrap_ref(const zend_execute_data *call)
+{
+	const zend_execute_data *prev_ex = call->prev_execute_data;
+	if (!prev_ex || !prev_ex->func || !ZEND_USER_CODE(prev_ex->func->type)) {
+		return false;
+	}
+
+	const zend_op *do_opline = prev_ex->opline;
+	if (do_opline->result_type != IS_TMP_VAR) {
+		return false;
+	}
+
+	return do_opline->opcode == ZEND_DO_FCALL
+		|| do_opline->opcode == ZEND_DO_FCALL_BY_NAME
+		|| do_opline->opcode == ZEND_DO_ICALL
+		|| do_opline->opcode == ZEND_DO_UCALL;
+}
+
 ZEND_API void zend_return_unwrap_ref(zend_execute_data *call, zval *return_value);
 
 END_EXTERN_C()
