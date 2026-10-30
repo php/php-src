@@ -383,7 +383,7 @@ static zend_result php_uri_parser_rfc3986_host_write(void *uri, const zval *valu
 	}
 }
 
-ZEND_ATTRIBUTE_NONNULL static zend_long port_str_to_zend_long_checked(const char *str, const size_t len)
+ZEND_ATTRIBUTE_NONNULL static zend_long port_str_to_zend_long_checked(const char *str, size_t len)
 {
 	while (len > 1 && *str == '0') {
 		str++;
