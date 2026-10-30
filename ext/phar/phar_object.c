@@ -1640,6 +1640,28 @@ after_open_fp:
 		return ZEND_HASH_APPLY_KEEP;
 	}
 
+	if (php_stream_stat(fp, &ssb) != -1 && (uint64_t) ssb.sb.st_size > UINT32_MAX) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s is too large to be stored in a phar archive", str_key);
+
+		if (save) {
+			efree(save);
+		}
+
+		if (opened) {
+			zend_string_release_ex(opened, 0);
+		}
+
+		if (temp) {
+			efree(temp);
+		}
+
+		if (close_fp) {
+			php_stream_close(fp);
+		}
+
+		return ZEND_HASH_APPLY_STOP;
+	}
+
 	if (!(data = phar_get_or_create_entry_data(phar_obj->archive->fname, phar_obj->archive->fname_len, str_key, str_key_len, "w+b", 0, &error, 1))) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s cannot be created: %s", str_key, error);
 		efree(error);
@@ -1678,6 +1700,7 @@ after_open_fp:
 		php_stream_copy_to_stream_ex(fp, p_obj->fp, PHP_STREAM_COPY_ALL, &contents_len);
 		if (ZEND_SIZE_T_UINT_OVFL(contents_len)) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s is too large to be stored in a phar archive", str_key);
+			data->internal_file->is_deleted = 1;
 			phar_entry_delref(data);
 
 			if (save) {
@@ -3676,6 +3699,16 @@ static void phar_add_file(phar_archive_data **pphar, zend_string *file_name, con
 	}
 #endif
 
+	if (zresource) {
+		php_stream_from_zval_no_verify(contents_file, zresource);
+	}
+
+	if ((content && ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(content)))
+		|| (contents_file && php_stream_stat(contents_file, &ssb) != -1 && (uint64_t) ssb.sb.st_size > UINT32_MAX)) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s is too large to be stored in a phar archive", filename);
+		goto finish;
+	}
+
 	if (!(data = phar_get_or_create_entry_data((*pphar)->fname, (*pphar)->fname_len, filename, filename_len, "w+b", 0, &error, 1))) {
 		if (error) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s does not exist and cannot be created: %s", filename, error);
@@ -3700,7 +3733,7 @@ static void phar_add_file(phar_archive_data **pphar, zend_string *file_name, con
 					goto finish;
 				}
 			} else {
-				if (!(php_stream_from_zval_no_verify(contents_file, zresource))) {
+				if (!contents_file) {
 					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s could not be written to", filename);
 					phar_entry_delref(data);
 					goto finish;
@@ -3709,6 +3742,7 @@ static void phar_add_file(phar_archive_data **pphar, zend_string *file_name, con
 			}
 			if (ZEND_SIZE_T_UINT_OVFL(contents_len)) {
 				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s is too large to be stored in a phar archive", filename);
+				data->internal_file->is_deleted = 1;
 				phar_entry_delref(data);
 				goto finish;
 			}
