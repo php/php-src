@@ -1352,7 +1352,7 @@ static size_t phar_hex_str(const char *digest, size_t digest_len, char **signatu
 	size_t pos = 0;
 	size_t len = 0;
 
-	*signature = (char*)safe_pemalloc(digest_len, 2, 1, PHAR_G(persist));
+	*signature = (char*)safe_pemalloc(digest_len * 2, sizeof(char), 1, PHAR_G(persist));
 
 	for (; len < digest_len; ++len) {
 		(*signature)[pos++] = hexChars[((const unsigned char *)digest)[len] >> 4];

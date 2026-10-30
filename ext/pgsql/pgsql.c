@@ -1217,7 +1217,7 @@ static char **php_pgsql_make_arguments(const HashTable *param_arr, int *num_para
 {
 	/* This conversion is safe because of the limit of number of elements in a table. */
 	*num_params = (int) zend_hash_num_elements(param_arr);
-	char **params = safe_emalloc(sizeof(char *), *num_params, 0);
+	char **params = safe_emalloc(*num_params, sizeof(char *), 0);
 	uint32_t i = 0;
 
 	ZEND_HASH_FOREACH_VAL(param_arr, zval *tmp) {
@@ -4570,7 +4570,7 @@ PHP_PGSQL_API zend_result php_pgsql_meta_data(PGconn *pg_link, const zend_string
 						  "WHERE a.attnum > 0 AND c.relname = '");
 	}
 	len = strlen(tmp_name2);
-	escaped = (char *)safe_emalloc(len, 2, 1);
+	escaped = (char *)safe_emalloc(len * 2, sizeof(char), 1);
 	new_len = PQescapeStringConn(pg_link, escaped, tmp_name2, len, &err);
 	if (err) {
 		php_error_docref(NULL, E_WARNING, "Escaping table name '%s' failed", ZSTR_VAL(table_name));
@@ -4586,7 +4586,7 @@ PHP_PGSQL_API zend_result php_pgsql_meta_data(PGconn *pg_link, const zend_string
 
 	smart_str_appends(&querystr, "' AND n.nspname = '");
 	len = strlen(tmp_name);
-	escaped = (char *)safe_emalloc(len, 2, 1);
+	escaped = (char *)safe_emalloc(len * 2, sizeof(char), 1);
 	new_len = PQescapeStringConn(pg_link, escaped, tmp_name, len, &err);
 	if (err) {
 		php_error_docref(NULL, E_WARNING, "Escaping table namespace '%s' failed", ZSTR_VAL(table_name));
@@ -5640,7 +5640,7 @@ PHP_PGSQL_API zend_result php_pgsql_insert(PGconn *pg_link, const zend_string *t
 			case IS_STRING:
 				if (opt & PGSQL_DML_ESCAPE) {
 					int error;
-					char *tmp = safe_emalloc(Z_STRLEN_P(val), 2, 1);
+					char *tmp = safe_emalloc(Z_STRLEN_P(val) * 2, sizeof(char), 1);
 					size_t new_len = PQescapeStringConn(pg_link, tmp, Z_STRVAL_P(val), Z_STRLEN_P(val), &error);
 					if (error) {
 						php_error_docref(NULL, E_NOTICE, "Failed to escape field '%s' value", ZSTR_VAL(fld));
@@ -5824,7 +5824,7 @@ static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, 
 			case IS_STRING:
 				if (opt & PGSQL_DML_ESCAPE) {
 					int error;
-					char *tmp = (char *)safe_emalloc(Z_STRLEN_P(val), 2, 1);
+					char *tmp = (char *)safe_emalloc(Z_STRLEN_P(val) * 2, sizeof(char), 1);
 					size_t new_len = PQescapeStringConn(pg_link, tmp, Z_STRVAL_P(val), Z_STRLEN_P(val), &error);
 					if (error) {
 						php_error_docref(NULL, E_NOTICE, "Failed to escape field '%s' value", ZSTR_VAL(fld));

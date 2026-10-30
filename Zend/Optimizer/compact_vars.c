@@ -96,7 +96,7 @@ void zend_optimizer_compact_vars(zend_op_array *op_array) {
 	/* Update CV name table */
 	if (num_cvs != op_array->last_var) {
 		if (num_cvs) {
-			zend_string **names = safe_emalloc(sizeof(zend_string *), num_cvs, 0);
+			zend_string **names = safe_emalloc(num_cvs, sizeof(zend_string *), 0);
 			for (i = 0; i < op_array->last_var; i++) {
 				if (vars_map[i] != (uint32_t) -1) {
 					names[vars_map[i]] = op_array->vars[i];

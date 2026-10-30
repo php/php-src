@@ -5208,7 +5208,7 @@ static zend_result zend_compile_func_sprintf(znode *result, zend_ast_list *args)
 	znode *elements = NULL;
 
 	if (placeholder_count > 0) {
-		elements = safe_emalloc(sizeof(*elements), placeholder_count, 0);
+		elements = safe_emalloc(placeholder_count, sizeof(*elements), 0);
 	}
 
 	/* Compile the value expressions first for error handling that is consistent
@@ -6816,7 +6816,7 @@ static void zend_compile_if(zend_ast *ast) /* {{{ */
 	uint32_t *jmp_opnums = NULL;
 
 	if (list->children > 1) {
-		jmp_opnums = safe_emalloc(sizeof(uint32_t), list->children - 1, 0);
+		jmp_opnums = safe_emalloc(list->children - 1, sizeof(uint32_t), 0);
 	}
 
 	for (i = 0; i < list->children; ++i) {
@@ -6956,7 +6956,7 @@ static void zend_compile_switch(zend_ast *ast) /* {{{ */
 		opnum_switch = opline - CG(active_op_array)->opcodes;
 	}
 
-	jmpnz_opnums = safe_emalloc(sizeof(uint32_t), cases->children, 0);
+	jmpnz_opnums = safe_emalloc(cases->children, sizeof(uint32_t), 0);
 	for (i = 0; i < cases->children; ++i) {
 		zend_ast *case_ast = cases->child[i];
 		zend_ast *cond_ast = case_ast->child[0];
@@ -7294,7 +7294,7 @@ static void zend_compile_match(znode *result, zend_ast *ast)
 		}
 		opnum_match = opline - CG(active_op_array)->opcodes;
 	} else {
-		jmpnz_opnums = safe_emalloc(sizeof(uint32_t), num_conds, 0);
+		jmpnz_opnums = safe_emalloc(num_conds, sizeof(uint32_t), 0);
 		uint32_t cond_count = 0;
 		for (uint32_t i = 0; i < arms->children; ++i) {
 			zend_ast *arm_ast = arms->child[i];
@@ -7331,7 +7331,7 @@ static void zend_compile_match(znode *result, zend_ast *ast)
 
 	bool is_first_case = true;
 	uint32_t cond_count = 0;
-	uint32_t *jmp_end_opnums = safe_emalloc(sizeof(uint32_t), arms->children, 0);
+	uint32_t *jmp_end_opnums = safe_emalloc(arms->children, sizeof(uint32_t), 0);
 
 	// The generated default arm is emitted first to avoid live range issues where the tmpvar
 	// for the arm result is freed even though it has not been initialized yet.
@@ -7441,7 +7441,7 @@ static void zend_compile_try(const zend_ast *ast) /* {{{ */
 	uint32_t i, j;
 	zend_op *opline;
 	uint32_t try_catch_offset;
-	uint32_t *jmp_opnums = safe_emalloc(sizeof(uint32_t), catches->children, 0);
+	uint32_t *jmp_opnums = safe_emalloc(catches->children, sizeof(uint32_t), 0);
 	uint32_t orig_fast_call_var = CG(context).fast_call_var;
 	uint32_t orig_try_catch_offset = CG(context).try_catch_offset;
 
@@ -7493,7 +7493,7 @@ static void zend_compile_try(const zend_ast *ast) /* {{{ */
 		zend_string *var_name = var_ast ? zval_make_interned_string(zend_ast_get_zval(var_ast)) : NULL;
 		bool is_last_catch = (i + 1 == catches->children);
 
-		uint32_t *jmp_multicatch = safe_emalloc(sizeof(uint32_t), classes->children - 1, 0);
+		uint32_t *jmp_multicatch = safe_emalloc(classes->children - 1, sizeof(uint32_t), 0);
 		uint32_t opnum_catch = (uint32_t)-1;
 
 		CG(zend_lineno) = catch_ast->lineno;
@@ -8440,7 +8440,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 
 	if (return_type_ast || fallback_return_type) {
 		/* Use op_array->arg_info[-1] for return type */
-		arg_infos = safe_emalloc(sizeof(zend_arg_info), list->children + 1, 0);
+		arg_infos = safe_emalloc(list->children + 1, sizeof(zend_arg_info), 0);
 		arg_infos->name = NULL;
 		if (return_type_ast) {
 			arg_infos->type = zend_compile_typename(return_type_ast);
@@ -8463,7 +8463,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 		if (list->children == 0) {
 			return;
 		}
-		arg_infos = safe_emalloc(sizeof(zend_arg_info), list->children, 0);
+		arg_infos = safe_emalloc(list->children, sizeof(zend_arg_info), 0);
 	}
 
 	/* Find last required parameter number for deprecation message. */

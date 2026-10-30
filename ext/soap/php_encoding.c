@@ -984,7 +984,7 @@ static xmlNodePtr to_xml_hexbin(encodeTypePtr type, zval *data, int style, xmlNo
 		ZVAL_STR(&tmp, get_serialization_string_from_zval(data));
 		data = &tmp;
 	}
-	str = (unsigned char *) safe_emalloc(Z_STRLEN_P(data), 2, 1);
+	str = (unsigned char *) safe_emalloc(Z_STRLEN_P(data) * 2, sizeof(unsigned char), 1);
 
 	for (i = j = 0; i < Z_STRLEN_P(data); i++) {
 		str[j++] = hexconvtab[((unsigned char)Z_STRVAL_P(data)[i]) >> 4];
@@ -2076,7 +2076,7 @@ static int* get_position_12(int dimension, const char* str)
 	int *pos;
 	int i = -1, flag = 0;
 
-	pos = safe_emalloc(sizeof(int), dimension, 0);
+	pos = safe_emalloc(dimension, sizeof(int), 0);
 	memset(pos,0,sizeof(int)*dimension);
 	while (*str != '\0' && (*str < '0' || *str > '9') && (*str != '*')) {
 		str++;
@@ -2133,7 +2133,7 @@ static int* get_position(int dimension, const char* str)
 {
 	int *pos;
 
-	pos = safe_emalloc(sizeof(int), dimension, 0);
+	pos = safe_emalloc(dimension, sizeof(int), 0);
 	get_position_ex(dimension, str, &pos);
 	return pos;
 }
@@ -2355,7 +2355,7 @@ iterator_failed_to_get:
 				smart_str_appends(&array_type, value);
 			}
 
-			dims = safe_emalloc(sizeof(int), dimension, 0);
+			dims = safe_emalloc(dimension, sizeof(int), 0);
 			dims[0] = i;
 			el = data;
 			for (i = 1; i < dimension; i++) {
@@ -2450,13 +2450,13 @@ iterator_failed_to_get:
 
 			smart_str_append_long(&array_size, i);
 
-			dims = safe_emalloc(sizeof(int), dimension, 0);
+			dims = safe_emalloc(dimension, sizeof(int), 0);
 			dims[0] = i;
 		} else {
 
 			enc = get_array_type(xmlParam, data, &array_type);
 			smart_str_append_long(&array_size, i);
-			dims = safe_emalloc(sizeof(int), dimension, 0);
+			dims = safe_emalloc(dimension, sizeof(int), 0);
 			dims[0] = i;
 		}
 
@@ -2660,7 +2660,7 @@ static zval *to_zval_array(zval *ret, encodeTypePtr type, xmlNodePtr data)
 		dims = emalloc(sizeof(int));
 		*dims = 0;
 	}
-	pos = safe_emalloc(sizeof(int), dimension, 0);
+	pos = safe_emalloc(dimension, sizeof(int), 0);
 	memset(pos,0,sizeof(int)*dimension);
 	if (data &&
 	    (attr = get_soap_enc_attribute(data->properties,"offset")) &&

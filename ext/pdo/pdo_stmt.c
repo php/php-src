@@ -825,7 +825,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 			}
 			/* There will be at most stmt->column_count parameters.
 			 * However, if we fetch a group key we will have over allocated. */
-			fetch_function_params = safe_emalloc(sizeof(zval), stmt->column_count, 0);
+			fetch_function_params = safe_emalloc(stmt->column_count, sizeof(zval), 0);
 			break;
 		default: ZEND_UNREACHABLE();
 	}

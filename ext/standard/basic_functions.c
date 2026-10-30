@@ -923,7 +923,7 @@ static int parse_opts(char * opts, opt_struct ** result)
 		}
 	}
 
-	paras = safe_emalloc(sizeof(opt_struct), count, 0);
+	paras = safe_emalloc(count, sizeof(opt_struct), 0);
 	memset(paras, 0, sizeof(opt_struct) * count);
 	*result = paras;
 	while ( (*opts >= 48 && *opts <= 57) || /* 0 - 9 */
@@ -990,7 +990,7 @@ PHP_FUNCTION(getopt)
 
 		/* Attempt to allocate enough memory to hold all of the arguments
 		 * and a trailing NULL */
-		argv = (char **) safe_emalloc(sizeof(char *), (argc + 1), 0);
+		argv = (char **) safe_emalloc((argc + 1), sizeof(char *), 0);
 
 		/* Iterate over the hash to construct the argv array. */
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args), entry) {

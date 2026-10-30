@@ -544,7 +544,7 @@ IC_METHOD(getFC_NFKC_Closure) {
 	if (closure_len == 0) {
 		RETURN_EMPTY_STRING();
 	}
-	closure = reinterpret_cast<UChar *>(safe_emalloc(sizeof(UChar), closure_len + 1, 0));
+	closure = reinterpret_cast<UChar *>(safe_emalloc(closure_len + 1, sizeof(UChar), 0));
 	error = U_ZERO_ERROR;
 	closure_len = u_getFC_NFKC_Closure(cp, closure, closure_len, &error);
 	if (U_FAILURE(error)) {

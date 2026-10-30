@@ -795,7 +795,7 @@ static zend_string* get_command_from_array(const HashTable *array, char ***argv,
 	zend_string *command = NULL;
 	uint32_t i = 0;
 
-	*argv = safe_emalloc(sizeof(char *), num_elems + 1, 0);
+	*argv = safe_emalloc(num_elems + 1, sizeof(char *), 0);
 
 	ZEND_HASH_FOREACH_VAL(array, arg_zv) {
 		zend_string *arg_str = get_valid_arg_string(arg_zv, i + 1);

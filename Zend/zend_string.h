@@ -420,7 +420,7 @@ static zend_always_inline zend_string *zend_string_safe_realloc(zend_string *s, 
 }
 
 static zend_always_inline char *zend_cstr_append_char(const char *str, size_t len, char c) {
-	char *res = (char *)safe_emalloc(len, 1, 2);
+	char *res = (char *)safe_emalloc(len, sizeof(char), 2);
 	if (len > 0) {
 		memcpy(res, str, len);
 	}
