@@ -268,7 +268,7 @@ ZEND_API zend_call_info **zend_build_call_map(zend_arena **arena, const zend_fun
 		return NULL;
 	}
 
-	map = zend_arena_calloc(arena, sizeof(zend_call_info *), op_array->last);
+	map = zend_arena_calloc(arena, op_array->last, sizeof(zend_call_info *));
 	for (call = info->callee_info; call; call = call->next_callee) {
 		map[call->caller_init_opline - op_array->opcodes] = call;
 		if (call->caller_call_opline) {
