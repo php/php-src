@@ -1096,8 +1096,10 @@ static int user_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 	int ret = 0;
 
 	/* create an instance of our class */
+	GC_ADDREF(uwrap->resource);
 	zend_object *object = user_stream_create_object(uwrap, context);
 	if (object == NULL) {
+		zend_list_delete(uwrap->resource);
 		return ret;
 	}
 
@@ -1121,6 +1123,7 @@ static int user_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 
 	zval_ptr_dtor(&zretval);
 
+	zend_list_delete(uwrap->resource);
 	return ret;
 }
 
@@ -1133,8 +1136,10 @@ static int user_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 	int ret = 0;
 
 	/* create an instance of our class */
+	GC_ADDREF(uwrap->resource);
 	zend_object *object = user_stream_create_object(uwrap, context);
 	if (object == NULL) {
+		zend_list_delete(uwrap->resource);
 		return ret;
 	}
 
@@ -1159,6 +1164,7 @@ static int user_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 
 	zval_ptr_dtor(&zretval);
 
+	zend_list_delete(uwrap->resource);
 	return ret;
 }
 
@@ -1171,8 +1177,10 @@ static int user_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url, int 
 	int ret = 0;
 
 	/* create an instance of our class */
+	GC_ADDREF(uwrap->resource);
 	zend_object *object = user_stream_create_object(uwrap, context);
 	if (object == NULL) {
+		zend_list_delete(uwrap->resource);
 		return ret;
 	}
 
@@ -1197,6 +1205,7 @@ static int user_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url, int 
 
 	zval_ptr_dtor(&zretval);
 
+	zend_list_delete(uwrap->resource);
 	return ret;
 }
 
@@ -1209,8 +1218,10 @@ static int user_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url,
 	int ret = 0;
 
 	/* create an instance of our class */
+	GC_ADDREF(uwrap->resource);
 	zend_object *object = user_stream_create_object(uwrap, context);
 	if (object == NULL) {
+		zend_list_delete(uwrap->resource);
 		return ret;
 	}
 
@@ -1234,6 +1245,7 @@ static int user_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url,
 
 	zval_ptr_dtor(&zretval);
 
+	zend_list_delete(uwrap->resource);
 	return ret;
 }
 
@@ -1271,9 +1283,11 @@ static int user_wrapper_metadata(php_stream_wrapper *wrapper, const char *url, i
 	}
 
 	/* create an instance of our class */
+	GC_ADDREF(uwrap->resource);
 	zend_object *object = user_stream_create_object(uwrap, context);
 	if (object == NULL) {
 		zval_ptr_dtor(&args[2]);
+		zend_list_delete(uwrap->resource);
 		return ret;
 	}
 
@@ -1298,6 +1312,7 @@ static int user_wrapper_metadata(php_stream_wrapper *wrapper, const char *url, i
 
 	zval_ptr_dtor(&zretval);
 
+	zend_list_delete(uwrap->resource);
 	return ret;
 }
 
@@ -1311,8 +1326,10 @@ static int user_wrapper_stat_url(php_stream_wrapper *wrapper, const char *url, i
 	int ret = -1;
 
 	/* create an instance of our class */
+	GC_ADDREF(uwrap->resource);
 	zend_object *object = user_stream_create_object(uwrap, context);
 	if (object == NULL) {
+		zend_list_delete(uwrap->resource);
 		return -1;
 	}
 
@@ -1329,9 +1346,11 @@ static int user_wrapper_stat_url(php_stream_wrapper *wrapper, const char *url, i
 	if (UNEXPECTED(call_result == FAILURE)) {
 		php_stream_wrapper_warn(wrapper, context, REPORT_ERRORS, NotImplemented,
 			"%s::" USERSTREAM_STATURL " is not implemented!", ZSTR_VAL(uwrap->ce->name));
+		zend_list_delete(uwrap->resource);
 		return -1;
 	}
 	if (UNEXPECTED(Z_ISUNDEF(zretval))) {
+		zend_list_delete(uwrap->resource);
 		return -1;
 	}
 	if (EXPECTED(Z_TYPE(zretval) == IS_ARRAY)) {
@@ -1342,6 +1361,7 @@ static int user_wrapper_stat_url(php_stream_wrapper *wrapper, const char *url, i
 
 	zval_ptr_dtor(&zretval);
 
+	zend_list_delete(uwrap->resource);
 	return ret;
 
 }
