@@ -2827,6 +2827,21 @@ static void zend_jit_trace_use_var(int line, int var, int def, int use_chain, ze
 	}
 }
 
+static bool zend_jit_trace_op_in_try(const zend_op_array *op_array, const zend_op *opline)
+{
+	uint32_t op_num = opline - op_array->opcodes;
+
+	for (uint32_t i = 0; i < op_array->last_try_catch; i++) {
+		const zend_try_catch_element *try_catch = &op_array->try_catch_array[i];
+
+		if (op_num >= try_catch->try_op
+		 && op_num < (try_catch->finally_op ? try_catch->finally_op : try_catch->catch_op)) {
+			return true;
+		}
+	}
+	return false;
+}
+
 static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *trace_buffer, zend_ssa *ssa, uint32_t parent_trace, uint32_t exit_num)
 {
 	const zend_op **ssa_opcodes = ((zend_tssa*)ssa)->tssa_opcodes;
@@ -2838,6 +2853,7 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 	int i, j, idx, count, level;
 	zend_jit_reg_var *ra;
 	const zend_op_array **vars_op_array;
+	zend_bitset store_vars;
 	void *checkpoint;
 	zend_jit_trace_stack_frame *frame;
 	zend_jit_trace_stack *stack;
@@ -2850,6 +2866,7 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 	ra = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_reg_var));
 	vars_op_array = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_op_array*));
 	memset(ZEND_VOIDP(vars_op_array), 0, sizeof(zend_op_array*) * ssa->vars_count);
+	store_vars = zend_arena_calloc(&CG(arena), zend_bitset_len(ssa->vars_count), ZEND_BITSET_ELM_SIZE);
 
 	op_array = trace_buffer->op_array;
 	jit_extension =
@@ -2937,6 +2954,17 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 			 && ssa->vars[ssa_op->op1_def].alias != NO_ALIAS) {
 				/* avoid register allocation in case of possibility of indirect modification*/
 				support_opline = 0;
+			}
+
+			if (op_array->last_try_catch
+			 && zend_jit_trace_op_in_try(op_array, opline)
+			 && zend_may_throw(opline, ssa_op, op_array, ssa)) {
+				for (i = 0; i < op_array->last_var; i++) {
+					j = STACK_VAR(stack, i);
+					if (j >= 0 && RA_HAS_IVAL(j)) {
+						zend_bitset_incl(store_vars, j);
+					}
+				}
 			}
 
 			if (ssa_op->op1_use >= 0
@@ -3268,9 +3296,7 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 	if (count) {
 		for (i = 0; i < ssa->vars_count; i++) {
 			if (RA_HAS_REG(i) &&
-			    vars_op_array[i] &&
-			    vars_op_array[i]->last_try_catch &&
-			    ssa->vars[i].var < vars_op_array[i]->last_var &&
+			    zend_bitset_in(store_vars, i) &&
 			    !(RA_REG_FLAGS(i) & ZREG_LOAD)) {
 				RA_REG_FLAGS(i) |= ZREG_STORE;
 			}
