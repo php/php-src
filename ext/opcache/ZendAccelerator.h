@@ -236,6 +236,7 @@ typedef struct _zend_accel_globals {
 	 * strings by zend_accel_pending_ce_cache_commit() once ZCSG(map_ptr_last)
 	 * covers them. NULL outside a persist window. */
 	HashTable              *pending_ce_cache;
+	bool                    preloading;
 } zend_accel_globals;
 
 typedef struct _zend_string_table {
