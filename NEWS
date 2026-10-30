@@ -349,6 +349,12 @@ PHP                                                                        NEWS
   . Fixed the built-in server truncating an error page and leaking its
     unsent part after a partial socket write. (Ilia Alshanetsky)
 
+- Curl:
+  . Fixed a leaked CurlHandle and clone accounting when a CURLMOPT_PUSHFUNCTION
+    callback denies the push or throws. (Ilia Alshanetsky)
+  . Fixed crash in curl_reset(), curl_copy_handle() and clone on a pushed
+    handle kept after CURLMOPT_PUSHFUNCTION denied it. (Ilia Alshanetsky)
+
 - DOM:
   . Fixed use-after-free when re-constructing a DOMXPath whose php:function
     registrations are freed while still reachable from the cycle collector.

@@ -443,7 +443,7 @@ static zend_object *curl_clone_obj(zend_object *object) {
 	clone_ch = curl_from_obj(clone_object);
 
 	ch = curl_from_obj(object);
-	cp = curl_easy_duphandle(ch->cp);
+	cp = ch->cp ? curl_easy_duphandle(ch->cp) : NULL;
 	if (!cp) {
 		zend_throw_exception(NULL, "Failed to clone CurlHandle", 0);
 		return &clone_ch->std;
@@ -1639,7 +1639,7 @@ PHP_FUNCTION(curl_copy_handle)
 
 	ch = Z_CURL_P(zid);
 
-	cp = curl_easy_duphandle(ch->cp);
+	cp = ch->cp ? curl_easy_duphandle(ch->cp) : NULL;
 	if (!cp) {
 		php_error_docref(NULL, E_WARNING, "Cannot duplicate cURL handle");
 		RETURN_FALSE;
@@ -2854,7 +2854,7 @@ static void curl_free_obj(zend_object *object)
 	fprintf(stderr, "DTOR CALLED, ch = %x\n", ch);
 #endif
 
-	if (!ch->cp) {
+	if (!ch->clone) {
 		/* Can happen if constructor throws. */
 		zend_object_std_dtor(&ch->std);
 		return;
@@ -3027,7 +3027,9 @@ PHP_FUNCTION(curl_reset)
 		RETURN_THROWS();
 	}
 
-	curl_easy_reset(ch->cp);
+	if (ch->cp) {
+		curl_easy_reset(ch->cp);
+	}
 	_php_curl_reset_handlers(ch);
 	_php_curl_set_default_options(ch);
 }
