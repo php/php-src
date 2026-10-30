@@ -6,10 +6,6 @@ opcache.enable_cli=1
 opcache.preload={PWD}/preload_gh18567.inc
 --EXTENSIONS--
 opcache
---SKIPIF--
-<?php
-if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
-?>
 --FILE--
 <?php
 abstract class Test implements MyStringable {
