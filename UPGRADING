@@ -29,6 +29,9 @@ PHP 8.7 UPGRADE NOTES
     not present in the result set. It previously reported the condition
     through PDO::ATTR_ERRMODE and returned false.
 
+- Pdo_Sqlite:
+  . Pdo\Sqlite::backup() analogous to Sqlite3::backup().
+
 - Reflection:
   . The public $name and $class properties of ReflectionClass,
     ReflectionClassConstant, ReflectionProperty, ReflectionMethod,
