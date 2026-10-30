@@ -46,6 +46,10 @@ PHP                                                                        NEWS
     (lacatoire)
   . Fix UAF on clone due to callback data pointer mismatch. (ndossche)
 
+- Curl:
+  . Fixed curl_setopt() ignoring errors while building multipart POST fields.
+    (Ilia Alshanetsky)
+
 - Date:
   . Fixed bug GH-20503 (Assertion failure with ext/date DateInterval property
     hash construction). (heathdutton)
