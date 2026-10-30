@@ -1668,7 +1668,7 @@ static ZEND_COLD void zend_ast_export_class_no_header(smart_str *str, zend_ast_d
 		zend_ast_export_ns_name(str, decl->child[0], 0, indent);
 	}
 	if (decl->child[1]) {
-		smart_str_appends(str, " implements ");
+		smart_str_appends(str, decl->flags & ZEND_ACC_INTERFACE ? " extends " : " implements ");
 		zend_ast_export_ex(str, decl->child[1], 0, indent);
 	}
 	smart_str_appends(str, " {\n");
