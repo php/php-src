@@ -173,6 +173,9 @@ PHP 8.7 UPGRADE NOTES
     target does not keep is now released at that assignment instead of after
     the last one.
 
+- Opcache:
+  . Improved performance of file cache checksum verification on AArch64.
+
 - Standard:
   . Improved performance of strcspn() and strpbrk() when searching longer strings
     with a single-byte character mask.
