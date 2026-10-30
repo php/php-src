@@ -28,15 +28,15 @@ file_put_contents($filename, $code);
 
 if (defined("PHP_WINDOWS_VERSION_MAJOR")) {
     var_dump(shell_exec(<<<SHELL
-    $php -n -f "$filename"
+    $php -n -d cgi.security_limit_extensions='.test.php' -f "$filename"
     SHELL));
 } else {
     var_dump(shell_exec(<<<SHELL
-    $php -n -f "$filename" 2>/dev/null
+    $php -n -d cgi.security_limit_extensions='.test.php' -f "$filename" 2>/dev/null
     SHELL));
 }
 var_dump(shell_exec(<<<SHELL
-$php -n -f "wrong"
+$php -n -d cgi.security_limit_extensions='' -f "wrong"
 SHELL));
 
 @unlink($filename);
