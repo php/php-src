@@ -128,6 +128,8 @@ PHP                                                                        NEWS
     PgBouncer's prepared statements). (David Carlier, Artem Ukrainskiy)
 
 - Phar:
+  . Fixed bug GH-8469 (Phar::decompressFiles() and Phar::compressFiles() retain
+    compressed contents after changing compression). (Raphael Paez)
   . Fixed bug GH-24740 (Oversized tar metadata exhausts the memory limit).
     (Lazizbek Ergashev)
 
