@@ -1170,7 +1170,11 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, const char *de
 	if (is_negative) {
 		reslen++;
 	}
-	res = zend_string_alloc(reslen, 0);
+	res = zend_string_falloc(reslen, 0, true);
+	if (UNEXPECTED(res == NULL)) {
+		zend_string_release_ex(tmpbuf, 0);
+		return NULL;
+	}
 
 	s = ZSTR_VAL(tmpbuf) + ZSTR_LEN(tmpbuf) - 1;
 	t = ZSTR_VAL(res) + reslen;
@@ -1300,7 +1304,11 @@ PHPAPI zend_string *_php_math_number_format_long(zend_long num, zend_long dec, c
 		}
 	}
 
-	res = zend_string_alloc(reslen, 0);
+	res = zend_string_falloc(reslen, 0, true);
+	if (UNEXPECTED(res == NULL)) {
+		zend_string_release_ex(tmpbuf, 0);
+		return NULL;
+	}
 
 	s = ZSTR_VAL(tmpbuf) + ZSTR_LEN(tmpbuf) - 1;
 	t = ZSTR_VAL(res) + reslen;
@@ -1368,9 +1376,14 @@ PHP_FUNCTION(number_format)
 	}
 
 	switch (Z_TYPE_P(num)) {
-		case IS_LONG:
-			RETURN_STR(_php_math_number_format_long(Z_LVAL_P(num), dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
+		case IS_LONG: {
+			zend_string *formatted = _php_math_number_format_long(Z_LVAL_P(num), dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len);
+			if (UNEXPECTED(formatted == NULL)) {
+				RETURN_OOM();
+			}
+			RETURN_STR(formatted);
 			break;
+		}
 
 		case IS_DOUBLE:
 			// double values of >= 2^52 can not have fractional digits anymore
@@ -1379,7 +1392,13 @@ PHP_FUNCTION(number_format)
 				(Z_DVAL_P(num) >= 4503599627370496.0 || Z_DVAL_P(num) <= -4503599627370496.0)
 				&& ZEND_DOUBLE_FITS_LONG(Z_DVAL_P(num))
 			)) {
-				RETURN_STR(_php_math_number_format_long((zend_long)Z_DVAL_P(num), dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
+				{
+					zend_string *formatted = _php_math_number_format_long((zend_long)Z_DVAL_P(num), dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len);
+					if (UNEXPECTED(formatted == NULL)) {
+						RETURN_OOM();
+					}
+					RETURN_STR(formatted);
+				}
                 break;
 			}
 
@@ -1388,7 +1407,13 @@ PHP_FUNCTION(number_format)
 			} else {
 				dec_int = ZEND_LONG_INT_UDFL(dec) ? INT_MIN : (int)dec;
 			}
-			RETURN_STR(_php_math_number_format_ex(Z_DVAL_P(num), dec_int, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
+			{
+				zend_string *formatted = _php_math_number_format_ex(Z_DVAL_P(num), dec_int, dec_point, dec_point_len, thousand_sep, thousand_sep_len);
+				if (UNEXPECTED(formatted == NULL)) {
+					RETURN_OOM();
+				}
+				RETURN_STR(formatted);
+			}
 			break;
 
 		EMPTY_SWITCH_DEFAULT_CASE()
