@@ -1640,7 +1640,9 @@ after_open_fp:
 		return ZEND_HASH_APPLY_KEEP;
 	}
 
-	if (php_stream_stat(fp, &ssb) != -1 && (int64_t) ssb.sb.st_size - php_stream_tell(fp) > (int64_t) UINT32_MAX) {
+	/* read filters change the length, so filtered streams are only checked after the copy */
+	if (!fp->readfilters.head && php_stream_stat(fp, &ssb) != -1
+			&& (int64_t) ssb.sb.st_size - php_stream_tell(fp) > (int64_t) UINT32_MAX) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s is too large to be stored in a phar archive", str_key);
 
 		if (save) {
@@ -3704,7 +3706,7 @@ static void phar_add_file(phar_archive_data **pphar, zend_string *file_name, con
 	}
 
 	if ((content && ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(content)))
-		|| (contents_file && php_stream_stat(contents_file, &ssb) != -1
+		|| (contents_file && !contents_file->readfilters.head && php_stream_stat(contents_file, &ssb) != -1
 			&& (int64_t) ssb.sb.st_size - php_stream_tell(contents_file) > (int64_t) UINT32_MAX)) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s is too large to be stored in a phar archive", filename);
 		goto finish;
