@@ -1057,7 +1057,7 @@ ZEND_API bool zend_never_inline zend_verify_property_type(const zend_property_in
 	return i_zend_verify_property_type(info, property, strict);
 }
 
-static zend_never_inline zval* zend_assign_to_typed_prop(zend_property_info *info, zval *property_val, zval *value, zend_refcounted **garbage_ptr EXECUTE_DATA_DC)
+static zend_never_inline zval* zend_assign_to_typed_prop(zend_object *zobj, zend_property_info *info, zval *property_val, zval *value, zend_refcounted **garbage_ptr EXECUTE_DATA_DC)
 {
 	zval tmp;
 
@@ -1075,9 +1075,23 @@ static zend_never_inline zval* zend_assign_to_typed_prop(zend_property_info *inf
 	ZVAL_DEREF(value);
 	ZVAL_COPY(&tmp, value);
 
-	if (UNEXPECTED(!i_zend_verify_property_type(info, &tmp, EX_USES_STRICT_TYPES()))) {
-		zval_ptr_dtor(&tmp);
-		return &EG(uninitialized_zval);
+	if (UNEXPECTED(!ZEND_TYPE_CONTAINS_CODE(info->type, Z_TYPE(tmp)))) {
+		bool protect_object = zobj
+			&& (Z_TYPE(tmp) != IS_OBJECT || (ZEND_TYPE_FULL_MASK(info->type) & MAY_BE_STRING));
+		if (protect_object) {
+			GC_ADDREF(zobj);
+		}
+		bool type_matched = i_zend_verify_property_type(info, &tmp, EX_USES_STRICT_TYPES());
+		if (protect_object && UNEXPECTED(GC_DELREF(zobj) == 0)) {
+			zend_object_released_while_assigning_to_property_error(info);
+			zend_objects_store_del(zobj);
+			zval_ptr_dtor(&tmp);
+			return &EG(uninitialized_zval);
+		}
+		if (UNEXPECTED(!type_matched)) {
+			zval_ptr_dtor(&tmp);
+			return &EG(uninitialized_zval);
+		}
 	}
 
 	Z_PROP_FLAG_P(property_val) &= ~IS_PROP_REINITABLE;

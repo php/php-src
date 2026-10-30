@@ -36,6 +36,8 @@ PHP                                                                        NEWS
     (Marti2203).
   . Fixed bug GH-24989 (Use-after-free in GC when an exception is thrown).
     (David Carlier)
+  . Fixed use-after-free when assigning to a typed property releases the
+    object while the value is coerced. (Alexander Danilov)
 
 - CLI:
   . Fixed bug GH-24697 (PHP_HTTP_PARSER_STRICT build option doesn't work).

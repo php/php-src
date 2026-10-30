@@ -14925,7 +14925,8 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 			}
 			// JIT: value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 			jit_SET_EX_OPLINE(jit, opline);
-			ir_CALL_4(IR_VOID, ir_CONST_FC_FUNC(zend_jit_assign_to_typed_prop),
+			ir_CALL_5(IR_VOID, ir_CONST_FC_FUNC(zend_jit_assign_to_typed_prop),
+				obj_ref,
 				prop_ref,
 				prop_info_ref,
 				arg3,
@@ -14996,7 +14997,8 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 			} else {
 				arg4 = jit_ZVAL_ADDR(jit, res_addr);
 			}
-			ir_CALL_4(IR_VOID, ir_CONST_FC_FUNC(zend_jit_assign_to_typed_prop),
+			ir_CALL_5(IR_VOID, ir_CONST_FC_FUNC(zend_jit_assign_to_typed_prop),
+				obj_ref,
 				prop_ref,
 				ref,
 				arg3,
