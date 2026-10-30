@@ -144,6 +144,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-24480 (Finally block running a second time when a VM interrupt
     throws as the finally block returns to a "return" in its try block).
     (C. Scott Ananian)
+  . Fixed AST export of by-reference property hooks. (Jorg Sowa)
 
 - CLI:
   . Fixed bug GH-24697 (PHP_HTTP_PARSER_STRICT build option doesn't work).
