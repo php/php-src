@@ -60,6 +60,9 @@ PHP                                                                        NEWS
     properties after running out of memory while escaping a property name.
     (adapik)
 
+- LDAP:
+  . Fix crash in ldap_exop_sync() when $response_data is omitted. (lacatoire)
+
 - MySQLnd:
   . Fixed bug GH-24609 (OK packets without an info message rejected on x32
     builds). (lazerg)
