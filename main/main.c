@@ -893,7 +893,7 @@ PHP_INI_BEGIN()
 
 	PHP_INI_ENTRY("max_memory_limit",		"-1",		PHP_INI_SYSTEM,		OnChangeMaxMemoryLimit)
 	PHP_INI_ENTRY("memory_limit",			"128M",		PHP_INI_ALL,		OnChangeMemoryLimit)
-	PHP_INI_ENTRY("memory_hard_limit_percent",	NULL,	PHP_INI_ALL,		OnChangeMemoryHardLimitPercent)
+	PHP_INI_ENTRY("memory_hard_limit_percent",	"-1",	PHP_INI_ALL,		OnChangeMemoryHardLimitPercent)
 
 	PHP_INI_ENTRY("precision",					"14",		PHP_INI_ALL,		OnSetPrecision)
 	PHP_INI_ENTRY("sendmail_from",				NULL,		PHP_INI_ALL,		NULL)
