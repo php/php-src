@@ -1347,6 +1347,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 	}
 
 	zend_jit_start(&ctx, op_array, ssa);
+	JIT_G(active_ctx) = &ctx;
 	if (JIT_G(opt_flags) & (ZEND_JIT_REG_ALLOC_LOCAL|ZEND_JIT_REG_ALLOC_GLOBAL)) {
 		checkpoint = zend_arena_checkpoint(CG(arena));
 		zend_jit_allocate_registers(&ctx, op_array, ssa);
@@ -1395,6 +1396,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					           ssa->cfg.blocks[b].len == 1 &&
 					           (ssa->cfg.blocks[b].flags & ZEND_BB_EXIT)) {
 						/* don't generate code for BB with single opcode */
+						JIT_G(active_ctx) = NULL;
 						zend_jit_free_ctx(&ctx);
 
 						if (JIT_G(opt_flags) & (ZEND_JIT_REG_ALLOC_LOCAL|ZEND_JIT_REG_ALLOC_GLOBAL)) {
@@ -1407,6 +1409,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 			           ssa->cfg.blocks[b].len == 1 &&
 			           (ssa->cfg.blocks[b].flags & ZEND_BB_EXIT)) {
 				/* don't generate code for BB with single opcode */
+				JIT_G(active_ctx) = NULL;
 				zend_jit_free_ctx(&ctx);
 
 				if (JIT_G(opt_flags) & (ZEND_JIT_REG_ALLOC_LOCAL|ZEND_JIT_REG_ALLOC_GLOBAL)) {
@@ -2832,6 +2835,7 @@ done:
 	if (!handler) {
 		goto jit_failure;
 	}
+	JIT_G(active_ctx) = NULL;
 	zend_jit_free_ctx(&ctx);
 
 	if (JIT_G(opt_flags) & (ZEND_JIT_REG_ALLOC_LOCAL|ZEND_JIT_REG_ALLOC_GLOBAL)) {
@@ -2840,6 +2844,7 @@ done:
 	return SUCCESS;
 
 jit_failure:
+	JIT_G(active_ctx) = NULL;
 	zend_jit_free_ctx(&ctx);
 	if (JIT_G(opt_flags) & (ZEND_JIT_REG_ALLOC_LOCAL|ZEND_JIT_REG_ALLOC_GLOBAL)) {
 		zend_arena_release(&CG(arena), checkpoint);
@@ -2998,6 +3003,10 @@ static int ZEND_FASTCALL zend_runtime_jit(void)
 			jit_extension->func_info.flags |= ZEND_FUNC_JITED;
 		} zend_catch {
 			do_bailout = true;
+			if (JIT_G(active_ctx)) {
+				zend_jit_free_ctx(JIT_G(active_ctx));
+				JIT_G(active_ctx) = NULL;
+			}
 		} zend_end_try();
 
 		zend_jit_protect();
@@ -3076,6 +3085,10 @@ void ZEND_FASTCALL zend_jit_hot_func(zend_execute_data *execute_data, const zend
 			jit_extension->func_info.flags |= ZEND_FUNC_JITED;
 		} zend_catch {
 			do_bailout = 1;
+			if (JIT_G(active_ctx)) {
+				zend_jit_free_ctx(JIT_G(active_ctx));
+				JIT_G(active_ctx) = NULL;
+			}
 		} zend_end_try();
 
 		zend_jit_protect();
