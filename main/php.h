@@ -377,6 +377,8 @@ END_EXTERN_C()
 #define PHP_MINFO_FUNCTION		ZEND_MODULE_INFO_D
 #define PHP_GINIT_FUNCTION		ZEND_GINIT_FUNCTION
 #define PHP_GSHUTDOWN_FUNCTION	ZEND_GSHUTDOWN_FUNCTION
+#define PHP_CINIT_FUNCTION(module)	static void php_##module##_child_init(void)
+#define PHP_CINIT(module)		php_##module##_child_init
 
 #define PHP_MODULE_GLOBALS		ZEND_MODULE_GLOBALS
 
