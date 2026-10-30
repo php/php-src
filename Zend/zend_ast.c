@@ -1147,7 +1147,11 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 							}
 						}
 
-						ZEND_MAP_PTR_SET(fcc_ast->fptr, fptr);
+						/* The AST may be shared between scopes (e.g. via traits), so only cache scope-independent results. */
+						if ((ast->child[0]->attr >> ZEND_CONST_EXPR_NEW_FETCH_TYPE_SHIFT) == ZEND_FETCH_CLASS_DEFAULT
+						 && (fptr->common.fn_flags & ZEND_ACC_PUBLIC)) {
+							ZEND_MAP_PTR_SET(fcc_ast->fptr, fptr);
+						}
 					}
 
 					break;
