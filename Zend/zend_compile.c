@@ -12797,11 +12797,17 @@ static zend_op *zend_compile_var_inner(znode *result, zend_ast *ast, uint32_t ty
 			*result = *zend_ast_get_znode(ast);
 			return NULL;
 		case ZEND_AST_ASSIGN_REF:
-			zend_compile_assign_ref(result, ast, type);
-			return NULL;
 		case ZEND_AST_ASSIGN:
-			zend_compile_assign(result, ast, false, type);
-			return NULL;
+			/* Assignment results may only be passed by reference, not written to. */
+			if (by_ref || (type != BP_VAR_W && type != BP_VAR_RW && type != BP_VAR_UNSET)) {
+				if (ast->kind == ZEND_AST_ASSIGN_REF) {
+					zend_compile_assign_ref(result, ast, type);
+				} else {
+					zend_compile_assign(result, ast, false, type);
+				}
+				return NULL;
+			}
+			ZEND_FALLTHROUGH;
 		default:
 			if (type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET) {
 				zend_error_noreturn(E_COMPILE_ERROR,
