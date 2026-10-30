@@ -11417,8 +11417,10 @@ static int zend_jit_leave_func(zend_jit_ctx         *jit,
 
 		return 1;
 	} else {
-		// JIT: if (EG(exception))
-		ir_GUARD_NOT(ir_LOAD_A(jit_EG(exception)), jit_STUB_ADDR(jit, jit_stub_leave_throw));
+		if (may_throw) {
+			// JIT: if (EG(exception))
+			ir_GUARD_NOT(ir_LOAD_A(jit_EG(exception)), jit_STUB_ADDR(jit, jit_stub_leave_throw));
+		}
 		// JIT: opline = EX(opline) + 1
 		jit_STORE_IP(jit, ir_LOAD_A(jit_EX(opline)));
 		jit_STORE_IP(jit, ir_ADD_OFFSET(jit_IP(jit), sizeof(zend_op)));

@@ -1437,6 +1437,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 	int call_level = 0;
 	void *checkpoint = NULL;
 	bool recv_emitted = false;   /* emitted at least one RECV opcode */
+	bool leave_may_throw = false; /* a destructor may run on the common return path */
 	uint8_t smart_branch_opcode;
 	uint32_t target_label, target_label2;
 	uint32_t op1_info, op1_def_info, op2_info, res_info, res_use_info, op1_mem_info;
@@ -2302,6 +2303,12 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 									op1_info, OP1_REG_ADDR())) {
 								goto jit_failure;
 							}
+							/* An unused return value is destroyed by zend_jit_return() */
+							if ((opline->op1_type & (IS_VAR|IS_TMP_VAR))
+							 && (op1_info & MAY_BE_RC1)
+							 && (op1_info & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY))) {
+								leave_may_throw = true;
+							}
 						}
 						goto done;
 					case ZEND_BOOL:
@@ -2952,6 +2959,7 @@ done:
 				goto jit_failure;
 			}
 			left_frame = true;
+			leave_may_throw = true;
 		}
 		if (!left_frame) {
 			int j;
@@ -2969,11 +2977,21 @@ done:
 					if (!zend_jit_free_cv(&ctx, info, j)) {
 						goto jit_failure;
 					}
+					if ((info & MAY_BE_REF)
+					 || ((info & MAY_BE_RC1)
+					  && (info & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_RESOURCE)))) {
+						leave_may_throw = true;
+					}
 				}
 			}
 		}
+		if (ZEND_OBSERVER_ENABLED
+		 /* releasing the closure may destroy its bound $this or used variables */
+		 || (op_array->fn_flags & (ZEND_ACC_CLOSURE|ZEND_ACC_FAKE_CLOSURE)) == ZEND_ACC_CLOSURE) {
+			leave_may_throw = true;
+		}
 		if (!zend_jit_leave_func(&ctx, op_array, NULL, MAY_BE_ANY, left_frame,
-				NULL, NULL, (ssa->cfg.flags & ZEND_FUNC_INDIRECT_VAR_ACCESS) != 0, 1)) {
+				NULL, NULL, (ssa->cfg.flags & ZEND_FUNC_INDIRECT_VAR_ACCESS) != 0, leave_may_throw)) {
 			goto jit_failure;
 		}
 	}
