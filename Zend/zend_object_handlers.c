@@ -1059,6 +1059,16 @@ exit:
 }
 /* }}} */
 
+/* The ZEND_ASSIGN_OBJ fast path skips the set visibility check when the cache slot is
+ * primed, assuming write_property() only primes it after that check passed. Reset the
+ * slot on the paths that leave it primed without having checked. */
+static zend_always_inline void zend_reset_property_cache_slot(void **cache_slot) {
+	if (cache_slot) {
+		CACHE_POLYMORPHIC_PTR_EX(cache_slot, NULL, NULL);
+		CACHE_PTR_EX(cache_slot + 2, NULL);
+	}
+}
+
 static zend_always_inline bool property_uses_strict_types(void) {
 	const zend_execute_data *execute_data = EG(current_execute_data);
 	return execute_data
@@ -1131,19 +1141,19 @@ try_again:
 				 && !(Z_PROP_FLAG_P(variable_ptr) & IS_PROP_REINITABLE)) {
 					zend_readonly_property_modification_error(prop_info);
 					variable_ptr = &EG(error_zval);
-					/* The set visibility was not checked */
-					goto exit_reset_cache_slot;
+					/* The set visibility was not checked. */
+					zend_reset_property_cache_slot(cache_slot);
+					goto exit;
 				}
 				if ((prop_info->flags & ZEND_ACC_PPP_SET_MASK) && !zend_asymmetric_property_has_set_access(prop_info)) {
 					zend_asymmetric_visibility_property_modification_error(prop_info, "modify");
 					variable_ptr = &EG(error_zval);
-					goto exit_reset_cache_slot;
+					zend_reset_property_cache_slot(cache_slot);
+					goto exit;
 				}
-			} else if (cache_slot) {
-				/* __set() will be called without checking the set visibility. The ZEND_ASSIGN_OBJ
-				 * fast path skips that check when the cache slot is primed, so reset it. */
-				CACHE_POLYMORPHIC_PTR_EX(cache_slot, NULL, NULL);
-				CACHE_PTR_EX(cache_slot + 2, NULL);
+			} else {
+				/* __set() will be called without checking the set visibility. */
+				zend_reset_property_cache_slot(cache_slot);
 			}
 		}
 
@@ -1346,15 +1356,6 @@ write_std_property:
 	}
 
 exit:
-	return variable_ptr;
-
-exit_reset_cache_slot:
-	if (cache_slot) {
-		/* Reset cache slot to dodge the fast path, which doesn't check the set visibility,
-		 * in the next execution. */
-		CACHE_POLYMORPHIC_PTR_EX(cache_slot, NULL, NULL);
-		CACHE_PTR_EX(cache_slot + 2, NULL);
-	}
 	return variable_ptr;
 
 lazy_init:
