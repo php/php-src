@@ -1164,7 +1164,7 @@ static void zend_jit_allocate_registers(zend_jit_ctx *ctx, const zend_op_array *
 							if (range->start > op_num) {
 								/* further blocks will not be relevant... */
 								break;
-							} else if (op_num < range->end && var_num == (range->var & ~ZEND_LIVE_MASK)) {
+							} else if (op_num < range->end && EX_NUM_TO_VAR(var_num) == (range->var & ~ZEND_LIVE_MASK)) {
 								/* check if opcodes in range may throw */
 								do {
 									if (zend_may_throw(op_array->opcodes + op_num, ssa->ops + op_num, op_array, ssa)) {
