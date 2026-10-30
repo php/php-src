@@ -129,6 +129,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-24740 (Oversized tar metadata exhausts the memory limit).
     (Lazizbek Ergashev)
 
+- Reflection:
+  . Fixed bug GH-21768 (Assertion failure in ReflectionProperty::isReadable()
+    and isWritable() on internal virtual properties). (David Carlier)
+
 - SAPI:
   . Fixed infinite loop in sapi_header_op() for headers of 4 GiB or more.
     (Martin Mirchev)
