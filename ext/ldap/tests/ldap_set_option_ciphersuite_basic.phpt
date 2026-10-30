@@ -7,7 +7,7 @@ ldap
 --FILE--
 <?php
 require "connect.inc";
-$link = ldap_connect($host, $port);
+$link = ldap_connect($uri);
 
 $result = ldap_set_option($link, LDAP_OPT_X_TLS_CIPHER_SUITE, '3DES');
 var_dump($result);

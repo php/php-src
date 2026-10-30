@@ -6,8 +6,11 @@ mbstring
 memory_limit=8M
 --FILE--
 <?php
-// 3 MB needle -> 12 MB wchar buffer, memory_limit is 8 MB
-mb_substr_count("abc", str_repeat("a", 3 * 1024 * 1024));
+/* The needle is converted to UTF-8 before counting. 0x80 is U+20AC in CP1252,
+ * which takes 3 bytes in UTF-8, so a 2 MB needle (memory_limit / 4) grows into
+ * a 6 MB buffer. */
+mb_substr_count("abc", str_repeat("\x80", 2 * 1024 * 1024), "CP1252");
+
 echo "not reached\n";
 ?>
 --EXPECTF--

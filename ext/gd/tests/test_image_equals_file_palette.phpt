@@ -2,6 +2,12 @@
 test_image_equals_file(): comparing palette images
 --EXTENSIONS--
 gd
+--SKIPIF--
+<?php
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
+?>
 --FILE--
 <?php
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'func.inc';

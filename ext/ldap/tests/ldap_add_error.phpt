@@ -11,7 +11,7 @@ ldap
 <?php
 require "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 
 var_dump(ldap_add($link, "$base", array()));
 
@@ -43,7 +43,7 @@ try {
     ldap_add($link, "dc=my-domain2,dc=com", array(
         "objectClass"	=> array(
             0	=> "top",
-            2	=> "dcObject",
+            "x" => "dcObject",
             5	=> "organization"),
         "dc"			=> "my-domain",
         "o"				=> "my-domain",
@@ -86,7 +86,7 @@ var_dump(
 <?php
 require "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 
 ldap_delete($link, "dc=my-domain,$base");
 ?>
@@ -104,7 +104,7 @@ Warning: ldap_add(): Add: Already exists in %s on line %d
 bool(false)
 string(14) "Already exists"
 int(68)
-ldap_add(): Argument #3 ($entry) must contain arrays with consecutive integer indices starting from 0
+ldap_add(): Argument #3 ($entry) attribute "objectClass" must be an array with numeric keys
 
 Warning: ldap_add(): Add: Undefined attribute type in %s on line %d
 bool(false)

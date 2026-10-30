@@ -38,7 +38,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_filter_id, 0, 1, MAY_BE_LONG|MAY
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(filter_has_var);
 ZEND_FUNCTION(filter_input);
 ZEND_FUNCTION(filter_var);
@@ -46,7 +45,6 @@ ZEND_FUNCTION(filter_input_array);
 ZEND_FUNCTION(filter_var_array);
 ZEND_FUNCTION(filter_list);
 ZEND_FUNCTION(filter_id);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(filter_has_var, arginfo_filter_has_var)

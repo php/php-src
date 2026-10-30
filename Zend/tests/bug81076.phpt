@@ -4,6 +4,12 @@ Bug #81076 Invalid implicit binds cause incorrect static var count in closure de
 <?php
 var_dump(fn() => [$why, $do, $we, $count]);
 ?>
---EXPECT--
-object(Closure)#1 (0) {
+--EXPECTF--
+object(Closure)#%d (3) {
+  ["name"]=>
+  string(%d) "{closure:%s:%d}"
+  ["file"]=>
+  string(%d) "%s"
+  ["line"]=>
+  int(%d)
 }

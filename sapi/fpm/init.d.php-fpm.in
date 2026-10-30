@@ -17,9 +17,7 @@ php_fpm_BIN=@sbindir@/php-fpm
 php_fpm_CONF=@sysconfdir@/php-fpm.conf
 php_fpm_PID=@localstatedir@/run/php-fpm.pid
 
-
 php_opts="--fpm-config $php_fpm_CONF --pid $php_fpm_PID"
-
 
 wait_for_pid () {
 	try=0

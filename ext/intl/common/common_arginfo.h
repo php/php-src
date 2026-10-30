@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: bc47f841e1bc12324d4c5cfea798fbfb43592c07 */
+ * Stub hash: 83971f2cec8c413d6207382e6ebc4ebf500e805f */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlIterator_current, 0, 0, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
@@ -14,13 +14,11 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlIterator_valid, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(IntlIterator, current);
 ZEND_METHOD(IntlIterator, key);
 ZEND_METHOD(IntlIterator, next);
 ZEND_METHOD(IntlIterator, rewind);
 ZEND_METHOD(IntlIterator, valid);
-
 
 static const zend_function_entry class_IntlIterator_methods[] = {
 	ZEND_ME(IntlIterator, current, arginfo_class_IntlIterator_current, ZEND_ACC_PUBLIC)
@@ -115,7 +113,7 @@ static void register_common_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("U_UNEXPECTED_TOKEN", U_UNEXPECTED_TOKEN, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("U_FMT_PARSE_ERROR_START", U_FMT_PARSE_ERROR_START, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("U_MULTIPLE_DECIMAL_SEPARATORS", U_MULTIPLE_DECIMAL_SEPARATORS, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("U_MULTIPLE_DECIMAL_SEPERATORS", U_MULTIPLE_DECIMAL_SEPERATORS, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("U_MULTIPLE_DECIMAL_SEPERATORS", U_MULTIPLE_DECIMAL_SEPERATORS, CONST_PERSISTENT | CONST_DEPRECATED);
 	REGISTER_LONG_CONSTANT("U_MULTIPLE_EXPONENTIAL_SYMBOLS", U_MULTIPLE_EXPONENTIAL_SYMBOLS, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("U_MALFORMED_EXPONENTIAL_PATTERN", U_MALFORMED_EXPONENTIAL_PATTERN, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("U_MULTIPLE_PERCENT_SYMBOLS", U_MULTIPLE_PERCENT_SYMBOLS, CONST_PERSISTENT);
@@ -181,8 +179,7 @@ static zend_class_entry *register_class_IntlIterator(zend_class_entry *class_ent
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "IntlIterator", class_IntlIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 	zend_class_implements(class_entry, 1, class_entry_Iterator);
 
 	return class_entry;

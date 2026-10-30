@@ -4,12 +4,12 @@ Bug #37707 (clone without assigning leaks memory)
 <?php
 class testme {
     function __clone() {
-        echo "clonned\n";
+        echo "cloned\n";
     }
 }
 clone new testme();
 echo "NO LEAK\n";
 ?>
 --EXPECT--
-clonned
+cloned
 NO LEAK

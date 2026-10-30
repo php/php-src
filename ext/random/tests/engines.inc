@@ -27,13 +27,22 @@ final class TestShaEngine implements Engine
 
 final class TestWrapperEngine implements Engine
 {
+    private int $count = 0;
+
     public function __construct(private readonly Engine $engine)
     {
     }
 
     public function generate(): string
     {
+        $this->count++;
+
         return $this->engine->generate();
+    }
+
+    public function getCount(): int
+    {
+        return $this->count;
     }
 }
 
@@ -68,6 +77,29 @@ final class TestXoshiro128PlusPlusEngine implements Engine
         $this->s3 = self::rotl($this->s3, 11);
 
         return pack('V', $result);
+    }
+}
+
+final class TestCountingEngine32 implements Engine
+{
+    private int $count = 0;
+
+    public function generate(): string
+    {
+        return pack('V', $this->count++);
+    }
+}
+
+final class TestCountingEngine64 implements Engine
+{
+    private int $count = 0;
+
+    public function generate(): string
+    {
+        if ($this->count > 2147483647 || $this->count < 0) {
+            throw new \Exception('Overflow');
+        }
+        return pack('V', $this->count++) . "\x00\x00\x00\x00";
     }
 }
 

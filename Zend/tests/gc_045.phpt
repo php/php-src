@@ -45,14 +45,30 @@ for ($j = 0; $j < 10; $j++) {
 
 var_dump(gc_status());
 ?>
---EXPECT--
-array(4) {
+--EXPECTF--
+array(12) {
+  ["running"]=>
+  bool(false)
+  ["protected"]=>
+  bool(false)
+  ["full"]=>
+  bool(false)
   ["runs"]=>
   int(10)
   ["collected"]=>
   int(25000)
   ["threshold"]=>
   int(10001)
+  ["buffer_size"]=>
+  int(16384)
   ["roots"]=>
   int(10000)
+  ["application_time"]=>
+  float(%f)
+  ["collector_time"]=>
+  float(%f)
+  ["destructor_time"]=>
+  float(%f)
+  ["free_time"]=>
+  float(%f)
 }

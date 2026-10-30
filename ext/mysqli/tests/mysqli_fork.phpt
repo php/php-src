@@ -20,7 +20,7 @@ if (!have_innodb($link))
 ?>
 --FILE--
 <?php
-    require_once "table.inc";
+    require_once 'table.inc';
 
     $res = mysqli_query($link, "SELECT 'dumped by the parent' AS message");
     $pid = pcntl_fork();
@@ -32,7 +32,6 @@ if (!have_innodb($link))
         case 0:
             /* child */
             exit(0);
-            break;
 
         default:
             /* parent */
@@ -123,8 +122,8 @@ if (!have_innodb($link))
 
             if (!mysqli_query($plink, sprintf($sql, 'stop')) || !mysqli_commit($link))
                 exit(mysqli_errno($plink));
+
             exit(0);
-            break;
 
         default:
             /* parent */
@@ -223,7 +222,7 @@ if (!have_innodb($link))
 ?>
 --CLEAN--
 <?php
-require_once "connect.inc";
+require_once 'connect.inc';
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
    printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 

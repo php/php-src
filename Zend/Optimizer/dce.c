@@ -145,6 +145,8 @@ static inline bool may_have_side_effects(
 		case ZEND_COALESCE:
 		case ZEND_ASSERT_CHECK:
 		case ZEND_JMP_NULL:
+		case ZEND_BIND_INIT_STATIC_OR_JMP:
+		case ZEND_JMP_FRAMELESS:
 			/* For our purposes a jumps and branches are side effects. */
 			return 1;
 		case ZEND_BEGIN_SILENCE:
@@ -166,6 +168,10 @@ static inline bool may_have_side_effects(
 		case ZEND_DO_FCALL_BY_NAME:
 		case ZEND_DO_ICALL:
 		case ZEND_DO_UCALL:
+		case ZEND_FRAMELESS_ICALL_0:
+		case ZEND_FRAMELESS_ICALL_1:
+		case ZEND_FRAMELESS_ICALL_2:
+		case ZEND_FRAMELESS_ICALL_3:
 			/* For now assume all calls have side effects */
 			return 1;
 		case ZEND_RECV:
@@ -245,15 +251,9 @@ static inline bool may_have_side_effects(
 				if ((opline->extended_value & (ZEND_BIND_IMPLICIT|ZEND_BIND_EXPLICIT))) {
 					return 1;
 				}
-
-				if ((opline->extended_value & ZEND_BIND_REF) != 0) {
-					zval *value =
-						(zval*)((char*)op_array->static_variables->arData +
-							(opline->extended_value & ~ZEND_BIND_REF));
-					if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
-						/* AST may contain undefined constants */
-						return 1;
-					}
+				/* Modifies static variables which are observable through reflection */
+				if ((opline->extended_value & ZEND_BIND_REF) && opline->op2_type != IS_UNUSED) {
+					return 1;
 				}
 			}
 			return 0;
@@ -413,7 +413,7 @@ static inline bool is_free_of_live_var(context *ctx, zend_op *opline, zend_ssa_o
 static bool dce_instr(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
 	zend_ssa *ssa = ctx->ssa;
 	int free_var = -1;
-	zend_uchar free_var_type;
+	uint8_t free_var_type;
 
 	if (opline->opcode == ZEND_NOP) {
 		return 0;

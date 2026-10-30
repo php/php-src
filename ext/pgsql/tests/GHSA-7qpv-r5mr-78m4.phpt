@@ -5,10 +5,10 @@ expatch.llc
 --EXTENSIONS--
 pgsql
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php include("inc/skipif.inc"); ?>
 --FILE--
 <?php
-include 'config.inc';
+include 'inc/config.inc';
 
 $db = pg_connect($conn_str);
 
@@ -50,3 +50,9 @@ string(1) "f"
 
 INSERT INTO "ghsa_7qpv_r5mr_78m4" ("name","admin") VALUES ('jake\'', true) --','f');
 string(1) "f"
+--CLEAN--
+<?php
+include('inc/config.inc');
+$db = pg_connect($conn_str);
+pg_query($db, "DROP TABLE IF EXISTS ghsa_7qpv_r5mr_78m4");
+?>

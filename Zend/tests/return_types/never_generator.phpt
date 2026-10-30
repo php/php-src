@@ -1,5 +1,5 @@
 --TEST--
-never return type: not valid as a parameter type
+never return type: not valid for a generator
 --FILE--
 <?php
 

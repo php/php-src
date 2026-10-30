@@ -20,15 +20,11 @@ $node = $xpath->query('//child')->item(0);
 echo $node->nodeName . "\n";
 $GLOBALS['dom']->removeChild($GLOBALS['dom']->firstChild);
 
-try {
-    echo "nodeType: " . $node->nodeType . "\n";
-} catch (\Error $e) {
-    echo get_class($e) . ': ' . $e->getMessage() .\PHP_EOL;
-}
+echo "nodeType: " . $node->nodeType . "\n";
 
 ?>
 --EXPECT--
 root
 nodeType: 1
 child
-Error: Couldn't fetch DOMElement. Node no longer exists
+nodeType: 1

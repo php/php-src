@@ -43,7 +43,7 @@
 #define SIZE_MAX	((size_t)~0)
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 #ifdef MBFL_DLL_EXPORT
 #define MBFLAPI __declspec(dllexport)
 #else
@@ -55,6 +55,6 @@
 #else
 #define MBFLAPI
 #endif /* defined(__GNUC__) && __GNUC__ >= 4 */
-#endif /* WIN32 */
+#endif /* _WIN32 */
 
 #endif /* MBFL_DEFS_H */

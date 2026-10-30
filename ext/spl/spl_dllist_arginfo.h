@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b88d228873f2d8e0caa583fd80c70ce2bfc51188 */
+ * Stub hash: 45e42d3a0589031651daee5653900d5a4fb61c3d */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplDoublyLinkedList_add, 0, 2, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
@@ -83,7 +83,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplQueue_dequeue arginfo_class_SplDoublyLinkedList_pop
 
-
 ZEND_METHOD(SplDoublyLinkedList, add);
 ZEND_METHOD(SplDoublyLinkedList, pop);
 ZEND_METHOD(SplDoublyLinkedList, shift);
@@ -110,7 +109,6 @@ ZEND_METHOD(SplDoublyLinkedList, unserialize);
 ZEND_METHOD(SplDoublyLinkedList, serialize);
 ZEND_METHOD(SplDoublyLinkedList, __serialize);
 ZEND_METHOD(SplDoublyLinkedList, __unserialize);
-
 
 static const zend_function_entry class_SplDoublyLinkedList_methods[] = {
 	ZEND_ME(SplDoublyLinkedList, add, arginfo_class_SplDoublyLinkedList_add, ZEND_ACC_PUBLIC)
@@ -142,15 +140,9 @@ static const zend_function_entry class_SplDoublyLinkedList_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_SplQueue_methods[] = {
-	ZEND_MALIAS(SplDoublyLinkedList, enqueue, push, arginfo_class_SplQueue_enqueue, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(SplDoublyLinkedList, dequeue, shift, arginfo_class_SplQueue_dequeue, ZEND_ACC_PUBLIC)
-	ZEND_FE_END
-};
-
-
-static const zend_function_entry class_SplStack_methods[] = {
+	ZEND_RAW_FENTRY("enqueue", zim_SplDoublyLinkedList_push, arginfo_class_SplQueue_enqueue, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("dequeue", zim_SplDoublyLinkedList_shift, arginfo_class_SplQueue_dequeue, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };
 
@@ -159,31 +151,31 @@ static zend_class_entry *register_class_SplDoublyLinkedList(zend_class_entry *cl
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SplDoublyLinkedList", class_SplDoublyLinkedList_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 	zend_class_implements(class_entry, 4, class_entry_Iterator, class_entry_Countable, class_entry_ArrayAccess, class_entry_Serializable);
 
 	zval const_IT_MODE_LIFO_value;
 	ZVAL_LONG(&const_IT_MODE_LIFO_value, SPL_DLLIST_IT_LIFO);
 	zend_string *const_IT_MODE_LIFO_name = zend_string_init_interned("IT_MODE_LIFO", sizeof("IT_MODE_LIFO") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_IT_MODE_LIFO_name, &const_IT_MODE_LIFO_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_class_constant(class_entry, const_IT_MODE_LIFO_name, &const_IT_MODE_LIFO_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_IT_MODE_LIFO_name);
 
 	zval const_IT_MODE_FIFO_value;
 	ZVAL_LONG(&const_IT_MODE_FIFO_value, SPL_DLLIST_IT_FIFO);
 	zend_string *const_IT_MODE_FIFO_name = zend_string_init_interned("IT_MODE_FIFO", sizeof("IT_MODE_FIFO") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_IT_MODE_FIFO_name, &const_IT_MODE_FIFO_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_class_constant(class_entry, const_IT_MODE_FIFO_name, &const_IT_MODE_FIFO_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_IT_MODE_FIFO_name);
 
 	zval const_IT_MODE_DELETE_value;
 	ZVAL_LONG(&const_IT_MODE_DELETE_value, SPL_DLLIST_IT_DELETE);
 	zend_string *const_IT_MODE_DELETE_name = zend_string_init_interned("IT_MODE_DELETE", sizeof("IT_MODE_DELETE") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_IT_MODE_DELETE_name, &const_IT_MODE_DELETE_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_class_constant(class_entry, const_IT_MODE_DELETE_name, &const_IT_MODE_DELETE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_IT_MODE_DELETE_name);
 
 	zval const_IT_MODE_KEEP_value;
 	ZVAL_LONG(&const_IT_MODE_KEEP_value, SPL_DLLIST_IT_KEEP);
 	zend_string *const_IT_MODE_KEEP_name = zend_string_init_interned("IT_MODE_KEEP", sizeof("IT_MODE_KEEP") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_IT_MODE_KEEP_name, &const_IT_MODE_KEEP_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_class_constant(class_entry, const_IT_MODE_KEEP_name, &const_IT_MODE_KEEP_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_IT_MODE_KEEP_name);
 
 	return class_entry;
@@ -194,7 +186,7 @@ static zend_class_entry *register_class_SplQueue(zend_class_entry *class_entry_S
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SplQueue", class_SplQueue_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_SplDoublyLinkedList);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_SplDoublyLinkedList, 0);
 
 	return class_entry;
 }
@@ -203,8 +195,8 @@ static zend_class_entry *register_class_SplStack(zend_class_entry *class_entry_S
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "SplStack", class_SplStack_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_SplDoublyLinkedList);
+	INIT_CLASS_ENTRY(ce, "SplStack", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_SplDoublyLinkedList, 0);
 
 	return class_entry;
 }

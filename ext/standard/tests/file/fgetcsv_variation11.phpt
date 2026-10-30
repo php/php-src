@@ -71,7 +71,7 @@ foreach ($csv_lists as $csv_list) {
     // use different delimiter but same enclosure char
     fseek($file_handle, 0, SEEK_SET);
     $enc = "+";
-    var_dump( fgetcsv($file_handle, 1024, $delimiter, $enc) );
+    var_dump( fgetcsv($file_handle, 1024, $delimiter, $enc, escape: "\\") );
     // check the file pointer position and if eof
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 820ad2d68166b189b9163c2c3dfcc76806d41b7d */
+ * Stub hash: fcc388de55bd6d21530d16f6a9ab5f0eb307c1ff */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_xmlwriter_open_uri, 0, 1, XMLWriter, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
@@ -179,7 +179,18 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XMLWriter_openUr
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_XMLWriter_toUri, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XMLWriter_openMemory, 0, 0, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_XMLWriter_toMemory, 0, 0, IS_STATIC, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_XMLWriter_toStream, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_INFO(0, stream)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XMLWriter_setIndent, 0, 1, _IS_BOOL, 0)
@@ -327,7 +338,6 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_XMLWriter_flush,
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, empty, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(xmlwriter_open_uri);
 ZEND_FUNCTION(xmlwriter_open_memory);
 ZEND_FUNCTION(xmlwriter_set_indent);
@@ -370,7 +380,9 @@ ZEND_FUNCTION(xmlwriter_end_dtd_entity);
 ZEND_FUNCTION(xmlwriter_write_dtd_entity);
 ZEND_FUNCTION(xmlwriter_output_memory);
 ZEND_FUNCTION(xmlwriter_flush);
-
+ZEND_METHOD(XMLWriter, toUri);
+ZEND_METHOD(XMLWriter, toMemory);
+ZEND_METHOD(XMLWriter, toStream);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(xmlwriter_open_uri, arginfo_xmlwriter_open_uri)
@@ -418,50 +430,52 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_XMLWriter_methods[] = {
-	ZEND_ME_MAPPING(openUri, xmlwriter_open_uri, arginfo_class_XMLWriter_openUri, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(openMemory, xmlwriter_open_memory, arginfo_class_XMLWriter_openMemory, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(setIndent, xmlwriter_set_indent, arginfo_class_XMLWriter_setIndent, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(setIndentString, xmlwriter_set_indent_string, arginfo_class_XMLWriter_setIndentString, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(startComment, xmlwriter_start_comment, arginfo_class_XMLWriter_startComment, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(endComment, xmlwriter_end_comment, arginfo_class_XMLWriter_endComment, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(startAttribute, xmlwriter_start_attribute, arginfo_class_XMLWriter_startAttribute, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(endAttribute, xmlwriter_end_attribute, arginfo_class_XMLWriter_endAttribute, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(writeAttribute, xmlwriter_write_attribute, arginfo_class_XMLWriter_writeAttribute, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(startAttributeNs, xmlwriter_start_attribute_ns, arginfo_class_XMLWriter_startAttributeNs, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(writeAttributeNs, xmlwriter_write_attribute_ns, arginfo_class_XMLWriter_writeAttributeNs, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(startElement, xmlwriter_start_element, arginfo_class_XMLWriter_startElement, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(endElement, xmlwriter_end_element, arginfo_class_XMLWriter_endElement, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(fullEndElement, xmlwriter_full_end_element, arginfo_class_XMLWriter_fullEndElement, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(startElementNs, xmlwriter_start_element_ns, arginfo_class_XMLWriter_startElementNs, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(writeElement, xmlwriter_write_element, arginfo_class_XMLWriter_writeElement, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(writeElementNs, xmlwriter_write_element_ns, arginfo_class_XMLWriter_writeElementNs, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(startPi, xmlwriter_start_pi, arginfo_class_XMLWriter_startPi, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(endPi, xmlwriter_end_pi, arginfo_class_XMLWriter_endPi, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(writePi, xmlwriter_write_pi, arginfo_class_XMLWriter_writePi, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(startCdata, xmlwriter_start_cdata, arginfo_class_XMLWriter_startCdata, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(endCdata, xmlwriter_end_cdata, arginfo_class_XMLWriter_endCdata, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(writeCdata, xmlwriter_write_cdata, arginfo_class_XMLWriter_writeCdata, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(text, xmlwriter_text, arginfo_class_XMLWriter_text, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(writeRaw, xmlwriter_write_raw, arginfo_class_XMLWriter_writeRaw, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(startDocument, xmlwriter_start_document, arginfo_class_XMLWriter_startDocument, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(endDocument, xmlwriter_end_document, arginfo_class_XMLWriter_endDocument, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(writeComment, xmlwriter_write_comment, arginfo_class_XMLWriter_writeComment, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(startDtd, xmlwriter_start_dtd, arginfo_class_XMLWriter_startDtd, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(endDtd, xmlwriter_end_dtd, arginfo_class_XMLWriter_endDtd, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(writeDtd, xmlwriter_write_dtd, arginfo_class_XMLWriter_writeDtd, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(startDtdElement, xmlwriter_start_dtd_element, arginfo_class_XMLWriter_startDtdElement, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(endDtdElement, xmlwriter_end_dtd_element, arginfo_class_XMLWriter_endDtdElement, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(writeDtdElement, xmlwriter_write_dtd_element, arginfo_class_XMLWriter_writeDtdElement, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(startDtdAttlist, xmlwriter_start_dtd_attlist, arginfo_class_XMLWriter_startDtdAttlist, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(endDtdAttlist, xmlwriter_end_dtd_attlist, arginfo_class_XMLWriter_endDtdAttlist, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(writeDtdAttlist, xmlwriter_write_dtd_attlist, arginfo_class_XMLWriter_writeDtdAttlist, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(startDtdEntity, xmlwriter_start_dtd_entity, arginfo_class_XMLWriter_startDtdEntity, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(endDtdEntity, xmlwriter_end_dtd_entity, arginfo_class_XMLWriter_endDtdEntity, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(writeDtdEntity, xmlwriter_write_dtd_entity, arginfo_class_XMLWriter_writeDtdEntity, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(outputMemory, xmlwriter_output_memory, arginfo_class_XMLWriter_outputMemory, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(flush, xmlwriter_flush, arginfo_class_XMLWriter_flush, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("openUri", zif_xmlwriter_open_uri, arginfo_class_XMLWriter_openUri, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_ME(XMLWriter, toUri, arginfo_class_XMLWriter_toUri, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_RAW_FENTRY("openMemory", zif_xmlwriter_open_memory, arginfo_class_XMLWriter_openMemory, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_ME(XMLWriter, toMemory, arginfo_class_XMLWriter_toMemory, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(XMLWriter, toStream, arginfo_class_XMLWriter_toStream, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_RAW_FENTRY("setIndent", zif_xmlwriter_set_indent, arginfo_class_XMLWriter_setIndent, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("setIndentString", zif_xmlwriter_set_indent_string, arginfo_class_XMLWriter_setIndentString, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("startComment", zif_xmlwriter_start_comment, arginfo_class_XMLWriter_startComment, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("endComment", zif_xmlwriter_end_comment, arginfo_class_XMLWriter_endComment, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("startAttribute", zif_xmlwriter_start_attribute, arginfo_class_XMLWriter_startAttribute, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("endAttribute", zif_xmlwriter_end_attribute, arginfo_class_XMLWriter_endAttribute, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("writeAttribute", zif_xmlwriter_write_attribute, arginfo_class_XMLWriter_writeAttribute, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("startAttributeNs", zif_xmlwriter_start_attribute_ns, arginfo_class_XMLWriter_startAttributeNs, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("writeAttributeNs", zif_xmlwriter_write_attribute_ns, arginfo_class_XMLWriter_writeAttributeNs, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("startElement", zif_xmlwriter_start_element, arginfo_class_XMLWriter_startElement, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("endElement", zif_xmlwriter_end_element, arginfo_class_XMLWriter_endElement, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("fullEndElement", zif_xmlwriter_full_end_element, arginfo_class_XMLWriter_fullEndElement, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("startElementNs", zif_xmlwriter_start_element_ns, arginfo_class_XMLWriter_startElementNs, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("writeElement", zif_xmlwriter_write_element, arginfo_class_XMLWriter_writeElement, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("writeElementNs", zif_xmlwriter_write_element_ns, arginfo_class_XMLWriter_writeElementNs, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("startPi", zif_xmlwriter_start_pi, arginfo_class_XMLWriter_startPi, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("endPi", zif_xmlwriter_end_pi, arginfo_class_XMLWriter_endPi, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("writePi", zif_xmlwriter_write_pi, arginfo_class_XMLWriter_writePi, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("startCdata", zif_xmlwriter_start_cdata, arginfo_class_XMLWriter_startCdata, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("endCdata", zif_xmlwriter_end_cdata, arginfo_class_XMLWriter_endCdata, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("writeCdata", zif_xmlwriter_write_cdata, arginfo_class_XMLWriter_writeCdata, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("text", zif_xmlwriter_text, arginfo_class_XMLWriter_text, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("writeRaw", zif_xmlwriter_write_raw, arginfo_class_XMLWriter_writeRaw, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("startDocument", zif_xmlwriter_start_document, arginfo_class_XMLWriter_startDocument, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("endDocument", zif_xmlwriter_end_document, arginfo_class_XMLWriter_endDocument, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("writeComment", zif_xmlwriter_write_comment, arginfo_class_XMLWriter_writeComment, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("startDtd", zif_xmlwriter_start_dtd, arginfo_class_XMLWriter_startDtd, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("endDtd", zif_xmlwriter_end_dtd, arginfo_class_XMLWriter_endDtd, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("writeDtd", zif_xmlwriter_write_dtd, arginfo_class_XMLWriter_writeDtd, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("startDtdElement", zif_xmlwriter_start_dtd_element, arginfo_class_XMLWriter_startDtdElement, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("endDtdElement", zif_xmlwriter_end_dtd_element, arginfo_class_XMLWriter_endDtdElement, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("writeDtdElement", zif_xmlwriter_write_dtd_element, arginfo_class_XMLWriter_writeDtdElement, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("startDtdAttlist", zif_xmlwriter_start_dtd_attlist, arginfo_class_XMLWriter_startDtdAttlist, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("endDtdAttlist", zif_xmlwriter_end_dtd_attlist, arginfo_class_XMLWriter_endDtdAttlist, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("writeDtdAttlist", zif_xmlwriter_write_dtd_attlist, arginfo_class_XMLWriter_writeDtdAttlist, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("startDtdEntity", zif_xmlwriter_start_dtd_entity, arginfo_class_XMLWriter_startDtdEntity, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("endDtdEntity", zif_xmlwriter_end_dtd_entity, arginfo_class_XMLWriter_endDtdEntity, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("writeDtdEntity", zif_xmlwriter_write_dtd_entity, arginfo_class_XMLWriter_writeDtdEntity, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("outputMemory", zif_xmlwriter_output_memory, arginfo_class_XMLWriter_outputMemory, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("flush", zif_xmlwriter_flush, arginfo_class_XMLWriter_flush, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };
 
@@ -470,7 +484,7 @@ static zend_class_entry *register_class_XMLWriter(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "XMLWriter", class_XMLWriter_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 
 	return class_entry;
 }

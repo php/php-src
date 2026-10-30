@@ -21,7 +21,7 @@ DONE
 --EXPECTF--
 Error at offset 10 of 19 bytes
 
-Notice: unserialize(): Error at offset 22 of 43 bytes in %s on line %d
+Warning: unserialize(): Error at offset 22 of 43 bytes in %s on line %d
 
-Warning: Trying to access array offset on value of type bool in %s on line %d
+Warning: Trying to access array offset on false in %s on line %d
 DONE

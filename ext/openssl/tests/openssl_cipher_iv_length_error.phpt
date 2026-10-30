@@ -18,4 +18,4 @@ try {
 
 Warning: openssl_cipher_iv_length(): Unknown cipher algorithm in %s on line %d
 bool(false)
-openssl_cipher_iv_length(): Argument #1 ($cipher_algo) cannot be empty
+openssl_cipher_iv_length(): Argument #1 ($cipher_algo) must not be empty

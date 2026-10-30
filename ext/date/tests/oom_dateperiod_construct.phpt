@@ -15,4 +15,5 @@ try {
 }
 ?>
 --EXPECTF--
-Exception: Unknown or bad format (%s)
+Deprecated: Calling DatePeriod::__construct(string $isostr, int $options = 0) is deprecated, use DatePeriod::createFromISO8601String() instead in %s on line %d
+DateMalformedPeriodStringException: Unknown or bad format (%s)

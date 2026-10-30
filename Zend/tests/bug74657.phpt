@@ -21,5 +21,6 @@ var_dump((new C)->options);
 --EXPECTF--
 Fatal error: Uncaught Error: Undefined constant I::FOO in %s:%d
 Stack trace:
-#0 {main}
+#0 %s(%d): [constant expression]()
+#1 {main}
   thrown in %sbug74657.php on line %d

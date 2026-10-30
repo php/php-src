@@ -21,9 +21,9 @@ $fiber->start('test');
 --EXPECTF--
 int(1)
 
-Fatal error: Uncaught TypeError: {closure}(): Argument #1 ($x) must be of type int, string given in %sstart-arguments.php:%d
+Fatal error: Uncaught TypeError: {closure:%s:%d}(): Argument #1 ($x) must be of type int, string given in %s:%d
 Stack trace:
-#0 [internal function]: {closure}('test')
+#0 [internal function]: {closure:%s:%d}('test')
 #1 %sstart-arguments.php(%d): Fiber->start('test')
 #2 {main}
   thrown in %sstart-arguments.php on line %d

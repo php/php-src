@@ -4,14 +4,14 @@ MySQL PDO: PDOStatement->fetchObject() with $constructorArgs
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
 
 try {
     $query = "SELECT '', NULL, \"\" FROM DUAL";
     $stmt = $db->prepare($query);
-    $ok = @$stmt->execute();
+    $ok = $stmt->execute();
 } catch (PDOException $e) {
     die("skip: Test cannot be run with SQL mode ANSI");
 }
@@ -20,12 +20,14 @@ if (!$ok)
 ?>
 --FILE--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 /** @var PDO $db */
 $db = MySQLPDOTest::factory();
-MySQLPDOTest::createTestTable($db);
 
-$query = "SELECT id FROM test ORDER BY id ASC LIMIT 1";
+$table = 'pdo_mysql_stmt_fetchobject_ctor_args';
+MySQLPDOTest::createTestTable($table, $db);
+
+$query = "SELECT id FROM {$table} ORDER BY id ASC LIMIT 1";
 $stmt = $db->prepare($query);
 
 class Foo {
@@ -77,8 +79,9 @@ try {
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable();
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS pdo_mysql_stmt_fetchobject_ctor_args');
 ?>
 --EXPECTF--
 Too few arguments to function Foo::__construct(), 0 passed and exactly 1 expected

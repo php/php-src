@@ -4,7 +4,7 @@ MySQL 5.6 / MariaDB 10.4.3 EXPIRE PASSWORD protocol change
 mysqli
 --SKIPIF--
 <?php
-require_once('connect.inc');
+require_once 'connect.inc';
 
 if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
     die(sprintf("SKIP Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
@@ -58,8 +58,8 @@ if (!mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO expiretest@'%
 ?>
 --FILE--
 <?php
-    require_once('connect.inc');
-    require_once('table.inc');
+    require_once 'connect.inc';
+    require_once 'table.inc';
 
     /* default */
     if (!$link = my_mysqli_connect($host, 'expiretest', 'expiredpassword', $db, $port, $socket)) {
@@ -127,7 +127,7 @@ if (!mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO expiretest@'%
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
     mysqli_query($link, 'DROP USER expiretest');
     mysqli_query($link, 'DROP USER expiretest@localhost');
 ?>

@@ -26,8 +26,6 @@
 #include "fopen_wrappers.h"
 #include "php_zip.h"
 
-#include "ext/standard/url.h"
-
 /* needed for ssize_t definition */
 #include <sys/types.h>
 
@@ -36,6 +34,7 @@ struct php_zip_stream_data_t {
 	struct zip_file *zf;
 	size_t cursor;
 	php_stream *stream;
+	php_zip_archive *archive;
 };
 
 #define STREAM_DATA_FROM_STREAM() \
@@ -103,6 +102,12 @@ static int php_zip_ops_close(php_stream *stream, int close_handle)
 			self->za = NULL;
 		}
 	}
+
+	/* the archive ref is tied to self, so release it regardless of close_handle */
+	if (self->archive) {
+		php_zip_archive_release(self->archive);
+		self->archive = NULL;
+	}
 	efree(self);
 	stream->abstract = NULL;
 	return EOF;
@@ -127,12 +132,11 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ 
 	size_t path_len = strlen(stream->orig_path);
 	char file_dirname[MAXPATHLEN];
 	struct zip *za;
-	char *fragment;
 	size_t fragment_len;
 	int err;
 	zend_string *file_basename;
 
-	fragment = strchr(path, '#');
+	const char *fragment = strchr(path, '#');
 	if (!fragment) {
 		return -1;
 	}
@@ -191,6 +195,9 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ 
 		ssb->sb.st_blocks = -1;
 #endif
 		ssb->sb.st_ino = -1;
+	} else {
+		zend_string_release_ex(file_basename, 0);
+		return -1;
 	}
 	zend_string_release_ex(file_basename, 0);
 	return 0;
@@ -237,8 +244,9 @@ const php_stream_ops php_stream_zipio_ops = {
 };
 
 /* {{{ php_stream_zip_open */
-php_stream *php_stream_zip_open(struct zip *arch, struct zip_stat *sb, const char *mode, zip_flags_t flags STREAMS_DC)
+php_stream *php_stream_zip_open(ze_zip_object *obj, struct zip_stat *sb, const char *mode, zip_flags_t flags STREAMS_DC)
 {
+	struct zip *arch = php_zip_object_za(obj);
 	struct zip_file *zf = NULL;
 
 	php_stream *stream = NULL;
@@ -257,6 +265,9 @@ php_stream *php_stream_zip_open(struct zip *arch, struct zip_stat *sb, const cha
 			self->zf = zf;
 			self->stream = NULL;
 			self->cursor = 0;
+			/* keep the zip_t alive while the stream borrows it */
+			self->archive = obj->archive;
+			php_zip_archive_addref(self->archive);
 #if LIBZIP_ATLEAST(1,9,1)
 			if (zip_file_is_seekable(zf) > 0) {
 				stream = php_stream_alloc(&php_stream_zipio_seek_ops, self, NULL, mode);
@@ -288,14 +299,13 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 
 	struct zip *za;
 	struct zip_file *zf = NULL;
-	char *fragment;
 	size_t fragment_len;
 	int err;
 
 	php_stream *stream = NULL;
 	struct php_zip_stream_data_t *self;
 
-	fragment = strchr(path, '#');
+	const char *fragment = strchr(path, '#');
 	if (!fragment) {
 		return NULL;
 	}
@@ -343,6 +353,7 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 			self->zf = zf;
 			self->stream = NULL;
 			self->cursor = 0;
+			self->archive = NULL;
 #if LIBZIP_ATLEAST(1,9,1)
 			if (zip_file_is_seekable(zf) > 0) {
 				stream = php_stream_alloc(&php_stream_zipio_seek_ops, self, NULL, mode);

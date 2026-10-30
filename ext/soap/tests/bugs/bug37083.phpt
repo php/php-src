@@ -7,7 +7,7 @@ soap.wsdl_cache=3
 --FILE--
 <?php
 class TestSoapClient extends SoapClient {
-    function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
+    function __doRequest($request, $location, $action, $version, $one_way = 0): string {
         return <<<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">

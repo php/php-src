@@ -16,5 +16,5 @@ $stmt = $db->prepare('SELECT foo FROM bar');
 var_dump($stmt);
 ?>
 --EXPECTF--
-Warning: SQLite3::prepare(): Unable to prepare statement: 1, no such table: bar in %s on line %d
+Warning: SQLite3::prepare(): Unable to prepare statement: no such table: bar in %s on line %d
 bool(false)

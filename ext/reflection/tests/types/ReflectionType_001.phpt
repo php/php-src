@@ -100,7 +100,8 @@ $obj->std = new stdClass;
 $r = (new ReflectionProperty($obj, 'std'))->getType();
 var_dump($r->getName());
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: foo(): Implicitly marking parameter $d as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
 *** functions
 ** Function 0 - Parameter 0
 bool(true)

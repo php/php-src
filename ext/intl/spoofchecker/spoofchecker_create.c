@@ -13,7 +13,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php_intl.h"
@@ -29,13 +29,15 @@ PHP_METHOD(Spoofchecker, __construct)
 	zend_error_handling error_handling;
 	SPOOFCHECKER_METHOD_INIT_VARS;
 
-	if (zend_parse_parameters_none() == FAILURE) {
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	SPOOFCHECKER_METHOD_FETCH_OBJECT_NO_CHECK;
+	if (co->uspoof) {
+		zend_throw_error(NULL, "Spoofchecker object is already constructed");
 		RETURN_THROWS();
 	}
 
 	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
-
-	SPOOFCHECKER_METHOD_FETCH_OBJECT_NO_CHECK;
 
 	co->uspoof = uspoof_open(SPOOFCHECKER_ERROR_CODE_P(co));
 	INTL_METHOD_CHECK_STATUS(co, "spoofchecker: unable to open ICU Spoof Checker");
@@ -49,6 +51,7 @@ PHP_METHOD(Spoofchecker, __construct)
 	 uspoof_check2 APIs when it became stable, to use extended check result APIs.
 	 Subsequent changes in the unicode security algos are to be watched.*/
 	uspoof_setRestrictionLevel(co->uspoof, SPOOFCHECKER_DEFAULT_RESTRICTION_LEVEL);
+	co->uspoofres = uspoof_openCheckResult(SPOOFCHECKER_ERROR_CODE_P(co));
 #else
 	/* Single-script enforcement is on by default. This fails for languages
 	 like Japanese that legally use multiple scripts within a single word,

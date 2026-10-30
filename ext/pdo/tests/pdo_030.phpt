@@ -60,9 +60,9 @@ class PDODatabase extends PDO
 $db = PDOTest::factory('PDODatabase');
 var_dump(get_class($db));
 
-$db->exec('CREATE TABLE test(id INT NOT NULL PRIMARY KEY, val VARCHAR(10), val2 VARCHAR(16))');
+$db->exec('CREATE TABLE test030(id INT NOT NULL PRIMARY KEY, val VARCHAR(10), val2 VARCHAR(16))');
 
-$stmt = $db->prepare("INSERT INTO test VALUES(?, ?, ?)");
+$stmt = $db->prepare("INSERT INTO test030 VALUES(?, ?, ?)");
 var_dump(get_class($stmt));
 foreach ($data as $row) {
     $stmt->execute($row);
@@ -75,7 +75,18 @@ echo "===QUERY===\n";
 var_dump($db->getAttribute(PDO::ATTR_STATEMENT_CLASS));
 $db->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('PDOStatementx', array($db)));
 var_dump($db->getAttribute(PDO::ATTR_STATEMENT_CLASS));
-$stmt = $db->query('SELECT * FROM test');
+try {
+    $db->setAttribute(PDO::ATTR_STATEMENT_CLASS, [PDOStatement::class, 'invalid-args']);
+} catch (TypeError $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+var_dump($db->getAttribute(PDO::ATTR_STATEMENT_CLASS));
+try {
+    $db->prepare('SELECT * FROM test030', [PDO::ATTR_STATEMENT_CLASS => [PDOStatement::class, 'invalid-args']]);
+} catch (TypeError $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+$stmt = $db->query('SELECT * FROM test030');
 var_dump(get_class($stmt));
 var_dump(get_class($stmt->dbh));
 
@@ -87,6 +98,12 @@ foreach($stmt as $obj) {
 
 echo "===DONE===\n";
 exit(0);
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+PDOTest::dropTableIfExists($db, "test030");
 ?>
 --EXPECTF--
 string(11) "PDODatabase"
@@ -106,6 +123,18 @@ array(2) {
     }
   }
 }
+TypeError: PDO::ATTR_STATEMENT_CLASS constructor_args must be of type ?array, string given
+array(2) {
+  [0]=>
+  string(13) "PDOStatementX"
+  [1]=>
+  array(1) {
+    [0]=>
+    object(PDODatabase)#%d (0) {
+    }
+  }
+}
+TypeError: PDO::ATTR_STATEMENT_CLASS constructor_args must be of type ?array, string given
 PDODatabase::query()
 PDOStatementX::__construct()
 string(13) "PDOStatementX"

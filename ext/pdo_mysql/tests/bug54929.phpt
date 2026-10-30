@@ -4,38 +4,34 @@ Bug #54929 (Parse error with single quote in sql comment (pdo-mysql))
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-
 ?>
 --FILE--
 <?php
-
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
-
-$pdodb = PDOTest::test_factory(__DIR__ . '/common.phpt');
-
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$pdodb = MySQLPDOTest::factory();
 
 function testQuery($query) {
     global $pdodb;
     $stmt = $pdodb->prepare($query);
 
-    if (!$stmt->execute(array("foo"))) {
+    if (!$stmt->execute(["foo"])) {
         var_dump($stmt->errorInfo());
     } else{
         var_dump($stmt->fetch(PDO::FETCH_ASSOC));
     }
 }
 
-testQuery("/* ' */ select ? as f1 /* ' */");
-testQuery("/* '-- */ select ? as f1 /* *' */");
-testQuery("/* ' */ select ? as f1 --';");
-testQuery("/* ' */ select ? as f1 -- 'a;");
-testQuery("/*'**/ select ? as f1 /* ' */");
-testQuery("/*'***/ select ? as f1 /* ' */");
+testQuery("/* ' */ SELECT ? AS f1 /* ' */");
+testQuery("/* '-- */ SELECT ? AS f1 /* *' */");
+testQuery("/* ' */ SELECT ? AS f1 --';");
+testQuery("/* ' */ SELECT ? AS f1 -- 'a;");
+testQuery("/*'**/ SELECT ? AS f1 /* ' */");
+testQuery("/*'***/ SELECT ? AS f1 /* ' */");
 testQuery("/*'**a ***b / ****
 ******
-**/ select ? as f1 /* ' */");
+**/ SELECT ? AS f1 /* ' */");
 
 ?>
 --EXPECTF--

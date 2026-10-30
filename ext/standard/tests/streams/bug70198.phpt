@@ -17,6 +17,7 @@ server
 
 $srv_addr = "tcp://127.0.0.1:8964";
 $srv_fl = __DIR__ . "/bug70198_svr_" . md5(uniqid()) . ".php";
+$srv_fl_escaped = escapeshellarg($srv_fl);
 $srv_fl_cont = <<<SRV
 <?php
 \$socket = stream_socket_server('$srv_addr', \$errno, \$errstr);
@@ -35,7 +36,7 @@ if (!\$socket) {
 SRV;
 file_put_contents($srv_fl, $srv_fl_cont);
 $dummy0 = $dummy1 = array();
-$srv_proc = proc_open(PHP_BINARY . " -n $srv_fl", $dummy0, $dummy1);
+$srv_proc = proc_open(getenv('TEST_PHP_EXECUTABLE_ESCAPED') . " -n $srv_fl_escaped", $dummy0, $dummy1);
 
 $i = 0;
 /* wait a bit for the server startup */

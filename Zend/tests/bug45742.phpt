@@ -1,5 +1,5 @@
 --TEST--
-Bug #45742 Wrong class array inpretetion using constant indexes
+Bug #45742 Wrong class array interpretation using constant indexes
 --FILE--
 <?php
 class Constants {

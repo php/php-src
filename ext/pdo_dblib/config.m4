@@ -4,21 +4,14 @@ PHP_ARG_WITH([pdo-dblib],
     [PDO: DBLIB-DB support. DIR is the FreeTDS home directory])])
 
 if test "$PHP_PDO_DBLIB" != "no"; then
-
-  if test "$PHP_PDO" = "no" && test "$ext_shared" = "no"; then
-    AC_MSG_ERROR([PDO is not enabled! Add --enable-pdo to your configure line.])
-  fi
-
-  if test "$PHP_PDO_DBLIB" = "yes"; then
+  AS_VAR_IF([PHP_PDO_DBLIB], [yes], [
     dnl FreeTDS must be on the default system include/library path.
     dnl Only perform a sanity check that this is really the case.
-    PHP_CHECK_LIBRARY(sybdb, dbsqlexec,
-    [],[
-      AC_MSG_ERROR([Cannot find FreeTDS in known installation directories])
-    ])
-    PHP_ADD_LIBRARY(sybdb,,PDO_DBLIB_SHARED_LIBADD)
-  elif test "$PHP_PDO_DBLIB" != "no"; then
-
+    PHP_CHECK_LIBRARY([sybdb], [dbsqlexec],
+      [],
+      [AC_MSG_FAILURE([Cannot find FreeTDS in known installation directories.])])
+    PHP_ADD_LIBRARY([sybdb],, [PDO_DBLIB_SHARED_LIBADD])
+  ], [
     if test -f $PHP_PDO_DBLIB/include/sybdb.h; then
       PDO_FREETDS_INSTALLATION_DIR=$PHP_PDO_DBLIB
       PDO_FREETDS_INCLUDE_DIR=$PHP_PDO_DBLIB/include
@@ -26,30 +19,27 @@ if test "$PHP_PDO_DBLIB" != "no"; then
       PDO_FREETDS_INSTALLATION_DIR=$PHP_PDO_DBLIB
       PDO_FREETDS_INCLUDE_DIR=$PHP_PDO_DBLIB/include/freetds
     else
-      AC_MSG_ERROR(Directory $PHP_PDO_DBLIB is not a FreeTDS installation directory)
-    fi
-
-    if test "x$PHP_LIBDIR" = "x" ; then
-      PHP_LIBDIR=lib
+      AC_MSG_ERROR([Directory $PHP_PDO_DBLIB is not a FreeTDS installation directory])
     fi
 
     if test ! -r "$PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR/libsybdb.a" && test ! -r "$PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR/libsybdb.so"; then
-       AC_MSG_ERROR(Could not find $PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR/libsybdb.[a|so])
+       AC_MSG_ERROR([[Could not find $PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR/libsybdb.[a|so]]])
     fi
 
-    PHP_ADD_INCLUDE($PDO_FREETDS_INCLUDE_DIR)
-    PHP_ADD_LIBRARY_WITH_PATH(sybdb, $PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR, PDO_DBLIB_SHARED_LIBADD)
-  fi
+    PHP_ADD_INCLUDE([$PDO_FREETDS_INCLUDE_DIR])
+    PHP_ADD_LIBRARY_WITH_PATH([sybdb],
+      [$PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR],
+      [PDO_DBLIB_SHARED_LIBADD])
+  ])
 
   PHP_CHECK_PDO_INCLUDES
 
   PDO_DBLIB_DEFS="-DPDO_DBLIB_FLAVOUR=\\\"freetds\\\""
-  PHP_NEW_EXTENSION(pdo_dblib, pdo_dblib.c dblib_driver.c dblib_stmt.c, $ext_shared,,-I$pdo_cv_inc_path $PDO_DBLIB_DEFS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
-  AC_CHECK_LIB(dnet_stub, dnet_addr, [
-    PHP_ADD_LIBRARY_WITH_PATH(dnet_stub,,PDO_DBLIB_SHARED_LIBADD)
-  ])
-  AC_DEFINE(HAVE_PDO_DBLIB,1,[ ])
-  PHP_SUBST(PDO_DBLIB_SHARED_LIBADD)
+  PHP_NEW_EXTENSION([pdo_dblib],
+    [pdo_dblib.c dblib_driver.c dblib_stmt.c],
+    [$ext_shared],,
+    [$PDO_DBLIB_DEFS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
+  PHP_SUBST([PDO_DBLIB_SHARED_LIBADD])
 
   PHP_ADD_EXTENSION_DEP(pdo_dblib, pdo)
 fi

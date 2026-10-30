@@ -21,7 +21,13 @@ foo(array("bar", "baz"));
 --EXPECTF--
 string(6) "strpos"
 string(3) "foo"
-object(Closure)#1 (0) {
+object(Closure)#%d (3) {
+  ["name"]=>
+  string(%d) "{closure:%s:%d}"
+  ["file"]=>
+  string(%d) "%s"
+  ["line"]=>
+  int(%d)
 }
 array(2) {
   [0]=>

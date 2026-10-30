@@ -19,8 +19,8 @@ $pdo->setAttribute (\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 $pdo->beginTransaction();
 
 try {
-    $pdo->query("CREATE TABLE b67462 (a int NOT NULL PRIMARY KEY DEFERRABLE INITIALLY DEFERRED)");
-    $pdo->query("INSERT INTO b67462 VALUES (1), (1)");
+    $pdo->query("CREATE TABLE test67462 (a int NOT NULL PRIMARY KEY DEFERRABLE INITIALLY DEFERRED)");
+    $pdo->query("INSERT INTO test67462 VALUES (1), (1)");
 
     var_dump($pdo->inTransaction());
     $pdo->commit(); // This should fail!
@@ -29,6 +29,12 @@ try {
     var_dump($pdo->beginTransaction());
 }
 
+?>
+--CLEAN--
+<?php
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$pdo = PDOTest::test_factory(__DIR__ . '/common.phpt');
+$pdo->query("DROP TABLE IF EXISTS test67462");
 ?>
 --EXPECT--
 bool(true)

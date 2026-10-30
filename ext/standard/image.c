@@ -882,6 +882,9 @@ static struct gfxinfo *php_handle_iff(php_stream * stream)
 			return NULL;
 		}
 		if ((size & 1) == 1) {
+			if (size == INT_MAX) {
+				return NULL;
+			}
 			size++;
 		}
 		if (chunkId == 0x424d4844) { /* BMHD chunk */

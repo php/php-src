@@ -1,5 +1,5 @@
 --TEST--
-array_pop() function precerve foreach by reference iterator pointer
+array_pop() function preserve foreach by reference iterator pointer
 --FILE--
 <?php
 $a = [1,2,3];

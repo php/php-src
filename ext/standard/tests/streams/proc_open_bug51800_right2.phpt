@@ -3,8 +3,8 @@ Bug #51800 proc_open on Windows hangs forever, the right way to do it with more 
 --FILE--
 <?php
 $callee = __DIR__ . "/process_proc_open_bug51800_right2.php";
-$php = PHP_BINARY;
-$cmd = "$php -n $callee";
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
+$cmd = "$php -n " . escapeshellarg($callee);
 
 $status;
 $stdout = "";

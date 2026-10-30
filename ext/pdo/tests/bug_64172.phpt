@@ -16,9 +16,8 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 
 $db = PDOTest::factory();
 
-@$db->exec("DROP TABLE test");
-$db->exec("CREATE TABLE test (x int)");
-$db->exec("INSERT INTO test VALUES (1)");
+$db->exec("CREATE TABLE test64172 (x int)");
+$db->exec("INSERT INTO test64172 VALUES (1)");
 
 echo "===FAIL===\n";
 $db->query('SELECT * FROM bad_table');
@@ -28,7 +27,7 @@ var_dump(is_string($db->errorInfo()[0])) . "\n";
 var_dump(is_int($db->errorInfo()[1])) . "\n";
 var_dump(is_string($db->errorInfo()[2])) . "\n";
 echo "===GOOD===\n";
-$stmt = $db->query('SELECT * FROM test');
+$stmt = $db->query('SELECT * FROM test64172');
 $stmt->fetchAll();
 $stmt = null;
 var_dump($db->errorInfo());
@@ -41,10 +40,14 @@ var_dump(is_string($db->errorInfo()[0])) . "\n";
 var_dump(is_int($db->errorInfo()[1])) . "\n";
 var_dump(is_string($db->errorInfo()[2])) . "\n";
 echo "===GOOD===\n";
-$db->exec("INSERT INTO test VALUES (2)");
+$db->exec("INSERT INTO test64172 VALUES (2)");
 var_dump($db->errorInfo());
-
-$db->exec("DROP TABLE test");
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+PDOTest::dropTableIfExists($db, "test64172");
 ?>
 --EXPECTF--
 ===FAIL===

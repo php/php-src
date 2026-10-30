@@ -11,5 +11,6 @@ new Foo();
 --EXPECTF--
 Fatal error: Uncaught Error: Class "NonExistent" not found in %sgh7771_2_definition.inc:6
 Stack trace:
-#0 {main}
+#0 %sgh7771_2.php(5): [constant expression]()
+#1 {main}
   thrown in %sgh7771_2_definition.inc on line 6

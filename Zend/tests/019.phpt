@@ -50,7 +50,7 @@ foreach ($scalar_variables as $scalar_var) {
 
   // destroy the variable using unset
   unset( $scalar_var );
-  // dump and see if its destroyed, expcted: NULL
+  // dump and see if its destroyed, expected: NULL
   var_dump( $scalar_var );
 
   // check using isset to see if unset, expected: bool(false)
@@ -165,11 +165,11 @@ foreach ($resources as $resource) {
   // unset the resource
   unset($resource);
   // check using isset() and empty()
-  var_dump( isset($resource) );  // expected: bool(flase)
+  var_dump( isset($resource) );  // expected: bool(false)
   var_dump( empty($resource) );  // expected: bool(true)
   // call isset() with two args, but one set
   var_dump( isset($resource, $temp_var) ); // expected: bool(false)
-  // uset the temp_var
+  // unset the temp_var
   unset($temp_var);
   // now the isset() with both the args as unset
   var_dump( isset($resource, $temp_var) ); // expected: bool(false);
@@ -211,7 +211,7 @@ var_dump($point1); // dump the object
 // check the object and member that is not set
 var_dump( isset($point1) );  // expected: bool(true)
 var_dump( empty($point1) );  // expected: bool(false)
-var_dump( isset($point1->$lable) );  //expected: bool(flase)
+var_dump( isset($point1->$lable) );  //expected: bool(false)
 var_dump( empty($point1->$lable) );  //expected: bool(true)
 
 //set the member variable lable and check
@@ -291,7 +291,7 @@ function test_unset1() {
   $static_var = 20;
   echo "value of static_var after new assignment: $static_var\n";
 }
-// call the functiont
+// call the function
 test_unset1();
 test_unset1();
 test_unset1();

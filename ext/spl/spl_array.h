@@ -18,8 +18,6 @@
 #define SPL_ARRAY_H
 
 #include "php.h"
-#include "php_spl.h"
-#include "spl_iterators.h"
 
 #define SPL_ARRAY_STD_PROP_LIST      0x00000001
 #define SPL_ARRAY_ARRAY_AS_PROPS     0x00000002

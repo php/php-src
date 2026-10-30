@@ -152,8 +152,6 @@ MYSQLND_METHOD(mysqlnd_res, read_result_metadata)(MYSQLND_RES * result, MYSQLND_
 		result->meta = NULL;
 		DBG_RETURN(FAIL);
 	}
-	/* COM_FIELD_LIST is broken and has premature EOF, thus we need to hack here and in mysqlnd_res_meta.c */
-	result->field_count = result->meta->field_count;
 
 	/*
 	  2. Follows an EOF packet, which the client of mysqlnd_read_result_metadata()
@@ -185,7 +183,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 		UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
 
 		if (FAIL == (ret = PACKET_READ(conn, &rset_header))) {
-			if (conn->error_info->error_no != CR_SERVER_GONE_ERROR) {
+			if (conn->error_info->error_no != CR_SERVER_GONE_ERROR && conn->error_info->error_no != CR_CLIENT_INTERACTION_TIMEOUT) {
 				php_error_docref(NULL, E_WARNING, "Error reading result set's header");
 			}
 			break;
@@ -332,7 +330,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 					/*
 					  If SERVER_MORE_RESULTS_EXISTS is set then this is either MULTI_QUERY or a CALL()
 					  The first packet after sending the query/com_execute has the bit set only
-					  in this cases. Not sure why it's a needed but it marks that the whole stream
+					  in these cases. Not sure why it's a needed but it marks that the whole stream
 					  will include many result sets. What actually matters are the bits set at the end
 					  of every result set (the EOF packet).
 					*/
@@ -996,8 +994,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, const unsigned int
 	array_init_size(return_value, array_size);
 
 	HashTable *row_ht = Z_ARRVAL_P(return_value);
-	MYSQLND_FIELD *field = meta->fields;
-	for (unsigned i = 0; i < meta->field_count; i++, field++) {
+	for (unsigned i = 0; i < meta->field_count; i++) {
 		zval *data = &row_data[i];
 
 		if (flags & MYSQLND_FETCH_NUM) {
@@ -1040,10 +1037,9 @@ MYSQLND_METHOD(mysqlnd_res, fetch_row_c)(MYSQLND_RES * result)
 	mysqlnd_result_free_prev_data(result);
 	if (result->m.fetch_row(result, &row_data, 0, &fetched_anything) == PASS && fetched_anything) {
 		unsigned field_count = result->field_count;
-		MYSQLND_FIELD *field = result->meta->fields;
 
 		ret = mnd_emalloc(field_count * sizeof(char *));
-		for (unsigned i = 0; i < field_count; i++, field++) {
+		for (unsigned i = 0; i < field_count; i++) {
 			zval *data = &row_data[i];
 			if (Z_TYPE_P(data) != IS_NULL) {
 				convert_to_string(data);

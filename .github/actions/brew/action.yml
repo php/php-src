@@ -26,14 +26,13 @@ runs:
           bison \
           re2c
         brew install -v \
-          aspell \
           bzip2 \
           enchant \
           libffi \
           intltool \
-          icu4c \
           libiconv \
           t1lib \
           libxml2 \
           libjpeg \
-          libxslt
+          libxslt \
+          openssl@3

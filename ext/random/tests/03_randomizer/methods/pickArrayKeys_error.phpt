@@ -43,7 +43,7 @@ try {
 ?>
 --EXPECTF--
 Random\Randomizer::pickArrayKeys(): Argument #1 ($array) must be of type array, string given
-Random\Randomizer::pickArrayKeys(): Argument #1 ($array) cannot be empty
+Random\Randomizer::pickArrayKeys(): Argument #1 ($array) must not be empty
 Random\Randomizer::pickArrayKeys(): Argument #2 ($num) must be between 1 and the number of elements in argument #1 ($array)
 Random\Randomizer::pickArrayKeys(): Argument #2 ($num) must be between 1 and the number of elements in argument #1 ($array)
 Random\Randomizer::pickArrayKeys(): Argument #2 ($num) must be between 1 and the number of elements in argument #1 ($array)

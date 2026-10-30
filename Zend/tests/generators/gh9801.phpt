@@ -17,5 +17,6 @@ function a() {
 }
 
 foreach(a() as $v);
+?>
 --EXPECTF--
 Fatal error: Allowed memory size of %d bytes exhausted %s

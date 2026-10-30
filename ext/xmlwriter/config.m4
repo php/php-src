@@ -5,14 +5,11 @@ PHP_ARG_ENABLE([xmlwriter],
   [yes])
 
 if test "$PHP_XMLWRITER" != "no"; then
-
-  if test "$PHP_LIBXML" = "no"; then
-    AC_MSG_ERROR([XMLWriter extension requires LIBXML extension, add --with-libxml])
-  fi
-
-  PHP_SETUP_LIBXML(XMLWRITER_SHARED_LIBADD, [
-    AC_DEFINE(HAVE_XMLWRITER,1,[ ])
-    PHP_NEW_EXTENSION(xmlwriter, php_xmlwriter.c, $ext_shared)
-    PHP_SUBST(XMLWRITER_SHARED_LIBADD)
+  PHP_SETUP_LIBXML([XMLWRITER_SHARED_LIBADD], [
+    AC_DEFINE([HAVE_XMLWRITER], [1],
+      [Define to 1 if the PHP extension 'xmlwriter' is available.])
+    PHP_NEW_EXTENSION([xmlwriter], [php_xmlwriter.c], [$ext_shared])
+    PHP_ADD_EXTENSION_DEP(xmlwriter, libxml)
+    PHP_SUBST([XMLWRITER_SHARED_LIBADD])
   ])
 fi

@@ -1,5 +1,5 @@
 --TEST--
-Ownership of constant expression inhereted from interface should be transfered to class
+Ownership of constant expression inherited from interface should be tranferred to class
 --FILE--
 <?php
 interface I {

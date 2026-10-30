@@ -5,8 +5,8 @@ proc_open() with no pipes
 
 $spec = array();
 
-$php = getenv("TEST_PHP_EXECUTABLE");
-$callee = __DIR__ . "/proc_open_pipes_sleep.inc";
+$php = getenv("TEST_PHP_EXECUTABLE_ESCAPED");
+$callee = escapeshellarg(__DIR__ . "/proc_open_pipes_sleep.inc");
 proc_open("$php -n $callee", $spec, $pipes);
 
 var_dump(count($spec));

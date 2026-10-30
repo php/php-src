@@ -8,27 +8,27 @@ require(__DIR__ . '/data.inc');
 
 function cmp ($a, $b) {
     is_array ($a)
-        and $a = array_sum ($a);
+        and $a = count($a);
     is_array ($b)
-        and $b = array_sum ($b);
+        and $b = count($b);
     return strcmp ($a, $b);
 }
 
-echo " -- Testing uasort() -- \n";
+echo "-- Testing uasort() --\n";
 uasort ($data, 'cmp');
 var_dump ($data);
 
 
-echo "\n -- Testing uksort() -- \n";
+echo "\n-- Testing uksort() --\n";
 uksort ($data, 'cmp');
 var_dump ($data);
 
-echo "\n -- Testing usort() -- \n";
+echo "\n-- Testing usort() --\n";
 usort ($data, 'cmp');
 var_dump ($data);
 ?>
 --EXPECT--
--- Testing uasort() -- 
+-- Testing uasort() --
 array(8) {
   [16777216]=>
   float(-0.3333333333333333)
@@ -53,7 +53,7 @@ array(8) {
   string(4) "test"
 }
 
- -- Testing uksort() -- 
+-- Testing uksort() --
 array(8) {
   [-1000]=>
   array(2) {
@@ -78,7 +78,7 @@ array(8) {
   int(27)
 }
 
- -- Testing usort() -- 
+-- Testing usort() --
 array(8) {
   [0]=>
   float(-0.3333333333333333)

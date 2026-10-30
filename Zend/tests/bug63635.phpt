@@ -6,7 +6,7 @@ class Node {
     public $parent = NULL;
     public $children = array();
 
-    function __construct(Node $parent=NULL) {
+    function __construct(?Node $parent=NULL) {
         if ($parent) {
             $parent->children[] = $this;
         }

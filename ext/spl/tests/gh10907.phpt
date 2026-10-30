@@ -114,26 +114,26 @@ object(SplFixedArray)#1 (3) {
 Test with adding members
 string(180) "O:15:"MySplFixedArray":5:{i:0;s:12:"test value 1";i:1;s:12:"test value 2";i:2;N;s:9:"my_string";s:15:"my_string_value";s:19:"my_dynamic_property";s:25:"my_dynamic_property_value";}"
 object(MySplFixedArray)#1 (5) {
-  ["my_string"]=>
-  string(15) "my_string_value"
-  ["my_dynamic_property"]=>
-  string(25) "my_dynamic_property_value"
   [0]=>
   string(12) "test value 1"
   [1]=>
   string(12) "test value 2"
   [2]=>
   NULL
+  ["my_string"]=>
+  string(15) "my_string_value"
+  ["my_dynamic_property"]=>
+  string(25) "my_dynamic_property_value"
 }
 object(MySplFixedArray)#2 (5) {
-  ["my_string"]=>
-  string(15) "my_string_value"
-  ["my_dynamic_property"]=>
-  string(25) "my_dynamic_property_value"
   [0]=>
   string(12) "test value 1"
   [1]=>
   string(12) "test value 2"
   [2]=>
   NULL
+  ["my_string"]=>
+  string(15) "my_string_value"
+  ["my_dynamic_property"]=>
+  string(25) "my_dynamic_property_value"
 }

@@ -13,7 +13,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php_intl.h"
@@ -105,11 +105,11 @@ PHP_FUNCTION( transliterator_create )
 
 	(void) to; /* unused */
 
-	if( zend_parse_parameters( ZEND_NUM_ARGS(), "s|l",
-		&str_id, &str_id_len, &direction ) == FAILURE )
-	{
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(str_id, str_id_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(direction)
+	ZEND_PARSE_PARAMETERS_END();
 
 	object = return_value;
 	res = create_transliterator( str_id, str_id_len, direction, object );
@@ -134,11 +134,11 @@ PHP_FUNCTION( transliterator_create_from_rules )
 					       0x61, 0x6E, 0x73, 0x50, 0x48, 0x50, 0}; /* RulesTransPHP */
 	TRANSLITERATOR_METHOD_INIT_VARS;
 
-	if( zend_parse_parameters( ZEND_NUM_ARGS(), "s|l",
-		&str_rules, &str_rules_len, &direction ) == FAILURE )
-	{
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(str_rules, str_rules_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(direction)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if( ( direction != TRANSLITERATOR_FORWARD ) && (direction != TRANSLITERATOR_REVERSE ) )
 	{
@@ -225,10 +225,7 @@ PHP_FUNCTION( transliterator_list_ids )
 
 	intl_error_reset( NULL );
 
-	if( zend_parse_parameters_none() == FAILURE )
-	{
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	en = utrans_openIDs( &status );
 	INTL_CHECK_STATUS( status,
@@ -274,14 +271,16 @@ PHP_FUNCTION( transliterator_transliterate )
 	zend_long	start		= 0,
 				limit		= -1;
 	int			success     = 0;
+	bool		is_method;
 	zval 		tmp_object;
 	TRANSLITERATOR_METHOD_INIT_VARS;
 
 	object = getThis();
+	is_method = object != NULL;
 
 	ZVAL_UNDEF(&tmp_object);
 
-	if (object == NULL) {
+	if (!is_method) {
 		/* in non-OOP version, accept both a transliterator and a string */
 		zend_string *arg1_str;
 		zend_object *arg1_obj;
@@ -318,17 +317,17 @@ PHP_FUNCTION( transliterator_transliterate )
 	}
 
 	if (limit < -1) {
-		zend_argument_value_error(object ? 3 : 4, "must be greater than or equal to -1");
+		zend_argument_value_error(is_method ? 3 : 4, "must be greater than or equal to -1");
 		goto cleanup_object;
 	}
 
 	if (start < 0) {
-		zend_argument_value_error(object ? 2 : 3, "must be greater than or equal to 0");
+		zend_argument_value_error(is_method ? 2 : 3, "must be greater than or equal to 0");
 		goto cleanup_object;
 	}
 
 	if (limit != -1 && start > limit) {
-		zend_argument_value_error(object ? 2 : 3, "must be less than or equal to argument #%d ($end)", object ? 3 : 4);
+		zend_argument_value_error(is_method ? 2 : 3, "must be less than or equal to argument #%d ($end)", is_method ? 3 : 4);
 		goto cleanup_object;
 	}
 

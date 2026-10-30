@@ -46,19 +46,19 @@ static void _breakiter_factory(const char *func_name,
 							   INTERNAL_FUNCTION_PARAMETERS)
 {
 	BreakIterator	*biter;
-	const char		*locale_str = NULL;
+	char		                *locale_str = NULL;
 	size_t				dummy;
 	char			*msg;
 	UErrorCode		status = UErrorCode();
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!",
-			&locale_str, &dummy) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING_OR_NULL(locale_str, dummy)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (locale_str == NULL) {
-		locale_str = intl_locale_get_default();
+		locale_str = (char *)intl_locale_get_default();
 	}
 
 	biter = func(Locale::createFromName(locale_str), status);
@@ -113,9 +113,7 @@ U_CFUNC PHP_METHOD(IntlBreakIterator, createCodePointInstance)
 {
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	CodePointBreakIterator *cpbi = new CodePointBreakIterator();
 	breakiterator_object_create(return_value, cpbi, 1);
@@ -126,9 +124,7 @@ U_CFUNC PHP_METHOD(IntlBreakIterator, getText)
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	BREAKITER_METHOD_FETCH_OBJECT;
 
@@ -146,18 +142,18 @@ U_CFUNC PHP_METHOD(IntlBreakIterator, setText)
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &text) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(text)
+	ZEND_PARSE_PARAMETERS_END();
 
 	BREAKITER_METHOD_FETCH_OBJECT;
 
 	ut = utext_openUTF8(ut, ZSTR_VAL(text), ZSTR_LEN(text), BREAKITER_ERROR_CODE_P(bio));
-	INTL_METHOD_CHECK_STATUS_OR_NULL(bio, "breakiter_set_text: error opening UText");
+	INTL_METHOD_CHECK_STATUS(bio, "breakiter_set_text: error opening UText");
 
 	bio->biter->setText(ut, BREAKITER_ERROR_CODE(bio));
 	utext_close(ut); /* ICU shallow clones the UText */
-	INTL_METHOD_CHECK_STATUS_OR_NULL(bio, "breakiter_set_text: error calling "
+	INTL_METHOD_CHECK_STATUS(bio, "breakiter_set_text: error calling "
 		"BreakIterator::setText()");
 
 	/* When ICU clones the UText, it does not copy the buffer, so we have to
@@ -176,9 +172,7 @@ static void _breakiter_no_args_ret_int32(
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	BREAKITER_METHOD_FETCH_OBJECT;
 
@@ -195,13 +189,13 @@ static void _breakiter_int32_ret_int32(
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &arg) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(arg)
+	ZEND_PARSE_PARAMETERS_END();
 
 	BREAKITER_METHOD_FETCH_OBJECT;
 
-	if (arg < INT32_MIN || arg > INT32_MAX) {
+	if (UNEXPECTED(arg < INT32_MIN || arg > INT32_MAX)) {
 		zend_argument_value_error(1, "must be between %d and %d", INT32_MIN, INT32_MAX);
 		RETURN_THROWS();
 	}
@@ -233,16 +227,13 @@ U_CFUNC PHP_METHOD(IntlBreakIterator, next)
 {
 	zval *arg = NULL;
 
-	if (ZEND_NUM_ARGS() == 0) {
-		goto no_arg_version;
-	}
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z!", &arg) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL_OR_NULL(arg)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (arg == NULL) {
-		ZEND_NUM_ARGS() = 0; /* pretend we don't have any argument */
-		no_arg_version:
+		ZEND_NUM_ARGS() = 0;
 		_breakiter_no_args_ret_int32(&BreakIterator::next,
 				INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	} else {
@@ -256,9 +247,7 @@ U_CFUNC PHP_METHOD(IntlBreakIterator, current)
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	BREAKITER_METHOD_FETCH_OBJECT;
 
@@ -287,12 +276,11 @@ U_CFUNC PHP_METHOD(IntlBreakIterator, isBoundary)
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l",
-			&offset) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(offset)
+	ZEND_PARSE_PARAMETERS_END();
 
-	if (offset < INT32_MIN || offset > INT32_MAX) {
+	if (UNEXPECTED(offset < INT32_MIN || offset > INT32_MAX)) {
 		zend_argument_value_error(1, "must be between %d and %d", INT32_MIN, INT32_MAX);
 		RETURN_THROWS();
 	}
@@ -310,9 +298,9 @@ U_CFUNC PHP_METHOD(IntlBreakIterator, getLocale)
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &locale_type) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(locale_type)
+	ZEND_PARSE_PARAMETERS_END();
 
 	/* Change to ValueError? */
 	if (locale_type != ULOC_ACTUAL_LOCALE && locale_type != ULOC_VALID_LOCALE) {
@@ -337,9 +325,10 @@ U_CFUNC PHP_METHOD(IntlBreakIterator, getPartsIterator)
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &key_type) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(key_type)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (key_type != PARTS_ITERATOR_KEY_SEQUENTIAL
 			&& key_type != PARTS_ITERATOR_KEY_LEFT
@@ -360,9 +349,7 @@ U_CFUNC PHP_METHOD(IntlBreakIterator, getErrorCode)
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	/* Fetch the object (without resetting its last error code ). */
 	bio = Z_INTL_BREAKITERATOR_P(object);
@@ -375,10 +362,7 @@ U_CFUNC PHP_METHOD(IntlBreakIterator, getErrorMessage)
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
-
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	/* Fetch the object (without resetting its last error code ). */
 	bio = Z_INTL_BREAKITERATOR_P(object);
@@ -390,9 +374,7 @@ U_CFUNC PHP_METHOD(IntlBreakIterator, getErrorMessage)
 
 U_CFUNC PHP_METHOD(IntlBreakIterator, getIterator)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
 }

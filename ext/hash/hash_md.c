@@ -29,7 +29,8 @@ const php_hash_ops php_hash_md5_ops = {
 	16,
 	64,
 	sizeof(PHP_MD5_CTX),
-	1
+	1,
+	0
 };
 
 const php_hash_ops php_hash_md4_ops = {
@@ -44,7 +45,8 @@ const php_hash_ops php_hash_md4_ops = {
 	16,
 	64,
 	sizeof(PHP_MD4_CTX),
-	1
+	1,
+	0
 };
 
 static int php_md2_unserialize(php_hashcontext_object *hash, zend_long magic, const zval *zv);
@@ -61,7 +63,8 @@ const php_hash_ops php_hash_md2_ops = {
 	16,
 	16,
 	sizeof(PHP_MD2_CTX),
-	1
+	1,
+	0
 };
 
 /* MD common stuff */
@@ -239,7 +242,7 @@ PHP_HASH_API void PHP_MD4Update(PHP_MD4_CTX * context, const unsigned char *inpu
 /* }}} */
 
 /* {{{ PHP_MD4Final
-   MD4 finalization. Ends an MD4 message-digest operation, writing the
+   MD4 finalization. Ends an MD4 message-digest operation, writing
    the message digest and zeroizing the context.
  */
 PHP_HASH_API void PHP_MD4Final(unsigned char digest[16], PHP_MD4_CTX * context)

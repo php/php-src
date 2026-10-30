@@ -17,7 +17,7 @@ typedef unsigned char zlog_bool;
 #define ZLOG_FALSE 0
 
 void zlog_set_external_logger(void (*logger)(int, char *, size_t));
-int zlog_set_fd(int new_fd);
+int zlog_set_fd(int new_fd, zlog_bool is_stderr);
 int zlog_set_level(int new_value);
 int zlog_set_limit(int new_value);
 int zlog_set_buffering(zlog_bool buffering);

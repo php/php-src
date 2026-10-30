@@ -418,7 +418,7 @@ int LSAPI_Postfork_Parent(LSAPI_Request * pReq);
 #define LSAPI_LOG_PID            (0x10000)
 
 void LSAPI_Log(int flag, const char * fmt, ...)
-#if __GNUC__
+#ifdef __GNUC__
         __attribute__((format(printf, 2, 3)))
 #endif
 ;

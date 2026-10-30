@@ -165,7 +165,7 @@ static void ps_files_open(ps_files *data, /* const */ zend_string *key)
 
 		ps_files_close(data);
 
-		if (php_session_valid_key(ZSTR_VAL(key)) == FAILURE) {
+		if (php_session_valid_key_ex(key) == FAILURE) {
 			php_error_docref(NULL, E_WARNING, "Session ID is too long or contains illegal characters. Only the A-Z, a-z, 0-9, \"-\", and \",\" characters are allowed");
 			return;
 		}
@@ -236,11 +236,6 @@ static zend_result ps_files_write(ps_files *data, zend_string *key, zend_string 
 		return FAILURE;
 	}
 
-	/* Truncate file if the amount of new data is smaller than the existing data set. */
-	if (ZSTR_LEN(val) < data->st_size) {
-		php_ignore_value(ftruncate(data->fd, 0));
-	}
-
 #ifdef HAVE_PWRITE
 	n = pwrite(data->fd, ZSTR_VAL(val), ZSTR_LEN(val), 0);
 #else
@@ -273,6 +268,12 @@ static zend_result ps_files_write(ps_files *data, zend_string *key, zend_string 
 		}
 		return FAILURE;
 	}
+
+	if (ZSTR_LEN(val) < data->st_size) {
+		php_ignore_value(ftruncate(data->fd, ZSTR_LEN(val)));
+	}
+
+	data->st_size = ZSTR_LEN(val);
 
 	return SUCCESS;
 }
@@ -675,10 +676,8 @@ PS_CREATE_SID_FUNC(files)
 		/* Check collision */
 		/* FIXME: mod_data(data) should not be NULL (User handler could be NULL) */
 		if (data && ps_files_key_exists(data, sid) == SUCCESS) {
-			if (sid) {
-				zend_string_release_ex(sid, 0);
-				sid = NULL;
-			}
+			zend_string_release_ex(sid, 0);
+			sid = NULL;
 			if (--maxfail < 0) {
 				return NULL;
 			}

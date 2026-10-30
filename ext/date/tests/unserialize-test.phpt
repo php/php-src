@@ -31,7 +31,6 @@ bool(false)
 
 ossfuzz-55599.txt: 
 %s: unserialize(): Error at offset 26 of 26 bytes in %sunserialize-test.php on line %d
-Error: Invalid serialization data for DateTime object
 bool(false)
 
 
@@ -41,7 +40,5 @@ bool(false)
 
 
 ossfuzz-56931.txt: 
-Notice: unserialize(): Error at offset 39 of 39 bytes in %sunserialize-test.php on line %d
-
-Deprecated: Creation of dynamic property DateInterval::$ is deprecated in %s on line %d
+%s: unserialize(): Error at offset 39 of 39 bytes in %sunserialize-test.php on line %d
 bool(false)

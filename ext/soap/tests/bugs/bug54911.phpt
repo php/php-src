@@ -5,7 +5,7 @@ soap
 --FILE--
 <?php
     class XSoapClient extends SoapClient {
-        function __doRequest($request, $location, $action, $version, $one_way=false): ?string {
+        function __doRequest($request, $location, $action, $version, $one_way=false): never {
             echo self::$crash;
         }
     }

@@ -111,7 +111,7 @@ PHPDBG_API int phpdbg_is_addr(const char *str) /* {{{ */
 
 PHPDBG_API int phpdbg_is_class_method(const char *str, size_t len, char **class, char **method) /* {{{ */
 {
-	char *sep = NULL;
+	const char *sep = NULL;
 
 	if (strstr(str, "#") != NULL)
 		return 0;
@@ -199,7 +199,7 @@ PHPDBG_API char *phpdbg_trim(const char *str, size_t len, size_t *new_len) /* {{
 	const char *p = str;
 	char *new = NULL;
 
-	while (p && isspace((unsigned char)*p)) {
+	while (isspace((unsigned char)*p)) {
 		++p;
 		--len;
 	}
@@ -397,29 +397,20 @@ PHPDBG_API void phpdbg_set_async_io(int fd) {
 
 int phpdbg_safe_class_lookup(const char *name, int name_length, zend_class_entry **ce) {
 	if (PHPDBG_G(flags) & PHPDBG_IN_SIGNAL_HANDLER) {
-		char *lc_name, *lc_free;
-		int lc_length;
-
 		if (name == NULL || !name_length) {
 			return FAILURE;
 		}
 
-		lc_free = lc_name = emalloc(name_length + 1);
-		zend_str_tolower_copy(lc_name, name, name_length);
-		lc_length = name_length + 1;
-
-		if (lc_name[0] == '\\') {
-			lc_name += 1;
-			lc_length -= 1;
+		if (name[0] == '\\') {
+			name += 1;
+			name_length -= 1;
 		}
 
 		phpdbg_try_access {
-			*ce = zend_hash_str_find_ptr(EG(class_table), lc_name, lc_length);
+			*ce = zend_hash_str_find_ptr_lc(EG(class_table), name, name_length);
 		} phpdbg_catch_access {
 			phpdbg_error("Could not fetch class %.*s, invalid data source", name_length, name);
 		} phpdbg_end_try_access();
-
-		efree(lc_free);
 	} else {
 		zend_string *str_name = zend_string_init(name, name_length, 0);
 		*ce = zend_lookup_class(str_name);
@@ -503,8 +494,9 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 						keylen = spprintf(&key, 0, ZEND_ULONG_FMT, numkey);
 					}
 					propkey = phpdbg_get_property_key(key);
-					name = emalloc(i + keylen + 2);
-					namelen = sprintf(name, "%.*s%.*s%s", (int) i, input, (int) (keylen - (propkey - key)), propkey, input[len - 1] == ']'?"]":"");
+					namelen = i + keylen + 2;
+					name = emalloc(namelen);
+					namelen = snprintf(name, namelen, "%.*s%.*s%s", (int) i, input, (int) (keylen - (propkey - key)), propkey, input[len - 1] == ']'?"]":"");
 					if (!strkey) {
 						efree(key);
 					}
@@ -614,7 +606,7 @@ PHPDBG_API bool phpdbg_check_caught_ex(zend_execute_data *execute_data, zend_obj
 	uint32_t op_num, i;
 	zend_op_array *op_array = &execute_data->func->op_array;
 
-	if (execute_data->opline >= EG(exception_op) && execute_data->opline < EG(exception_op) + 3) {
+	if (execute_data->opline >= EG(exception_op) && execute_data->opline < EG(exception_op) + 3 && EG(opline_before_exception)) {
 		op = EG(opline_before_exception);
 	} else {
 		op = execute_data->opline;

@@ -9,4 +9,4 @@ class Test {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use 'static' as trait name, as it is reserved in %s on line %d
+Fatal error: Cannot use "static" as trait name, as it is reserved in %s on line %d

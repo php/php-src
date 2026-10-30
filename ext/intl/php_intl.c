@@ -16,7 +16,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 
@@ -72,6 +72,8 @@
 
 #include "php_ini.h"
 
+#include "zend_attributes.h"
+
 #include "php_intl_arginfo.h"
 
 /*
@@ -92,6 +94,20 @@ const char *intl_locale_get_default( void )
 		return uloc_getDefault();
 	}
 	return INTL_G(default_locale);
+}
+
+char* canonicalize_locale_string(const char* locale) {
+	char canonicalized[ULOC_FULLNAME_CAPACITY];
+	UErrorCode status = U_ZERO_ERROR;
+	int32_t canonicalized_len;
+
+	canonicalized_len = uloc_canonicalize(locale, canonicalized, sizeof(canonicalized), &status);
+
+	if (U_FAILURE(status) || canonicalized_len <= 0) {
+		return NULL;
+	}
+
+	return estrdup(canonicalized);
 }
 
 /* {{{ INI Settings */
@@ -257,7 +273,7 @@ PHP_MINFO_FUNCTION( intl )
 #endif
 
 	php_info_print_table_start();
-	php_info_print_table_header( 2, "Internationalization support", "enabled" );
+	php_info_print_table_row( 2, "Internationalization support", "enabled" );
 	php_info_print_table_row( 2, "ICU version", U_ICU_VERSION );
 #ifdef U_ICU_DATA_VERSION
 	php_info_print_table_row( 2, "ICU Data version", U_ICU_DATA_VERSION );

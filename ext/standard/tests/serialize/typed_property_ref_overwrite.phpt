@@ -7,7 +7,7 @@ class Test {
     public ?object $prop;
 }
 $s = <<<'STR'
-O:4:"Test":2:{s:4:"prop";R:1;s:4:"prop";N;}}
+O:4:"Test":2:{s:4:"prop";R:1;s:4:"prop";N;}
 STR;
 var_dump(unserialize($s));
 

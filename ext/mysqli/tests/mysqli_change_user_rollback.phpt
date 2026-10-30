@@ -30,7 +30,7 @@ if (!have_innodb($link))
     $num = $row['_num'];
     assert($num > 0);
 
-    if (!$res = mysqli_query($link, 'DELETE FROM test'))
+    if (false === mysqli_query($link, 'DELETE FROM test'))
         printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
     if (!$res = mysqli_query($link, 'SELECT COUNT(*) AS _num FROM test'))
@@ -62,7 +62,7 @@ if (!have_innodb($link))
 ?>
 --CLEAN--
 <?php
-require_once "clean_table.inc";
+require_once 'clean_table.inc';
 ?>
 --EXPECT--
 done!

@@ -18,8 +18,8 @@ $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
 $pdo->beginTransaction();
 
-$pdo->query("CREATE TABLE b66584 (a int)");
-$pdo->query("INSERT INTO b66584 VALUES (165)");
+$pdo->query("CREATE TABLE test66584 (a int)");
+$pdo->query("INSERT INTO test66584 VALUES (165)");
 
 for ($i = 1; $i >= 0; $i--) {
     $pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, (bool)$i);
@@ -38,7 +38,7 @@ for ($i = 1; $i >= 0; $i--) {
 }
 
 try {
-    $pdo->query("DROP TABLE b66584");
+    $pdo->query("DROP TABLE test66584");
     $pdo->rollback();
 } catch (\Exception $e) {
 }
@@ -47,7 +47,7 @@ function run($pdo, $data)
 {
     $bind = join(', ', array_fill(0, count($data), '?'));
 
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM b66584 WHERE a IN ({$bind})");
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM test66584 WHERE a IN ({$bind})");
 
     var_dump(count($data));
 
@@ -56,6 +56,12 @@ function run($pdo, $data)
     var_dump($stmt->fetchColumn());
 }
 
+?>
+--CLEAN--
+<?php
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$pdo = PDOTest::test_factory(__DIR__ . '/common.phpt');
+$pdo->query("DROP TABLE IF EXISTS test66584");
 ?>
 --EXPECTF--
 int(3)

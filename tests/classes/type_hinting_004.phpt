@@ -143,6 +143,11 @@ Ensure type hints are enforced for functions invoked as callbacks.
 
 ?>
 --EXPECTF--
+Deprecated: f2(): Implicitly marking parameter $a as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
+
+Deprecated: C::f2(): Implicitly marking parameter $a as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
+
+Deprecated: D::f2(): Implicitly marking parameter $a as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
 ---> Type hints with callback function:
 0: f1(): Argument #1 ($a) must be of type A, int given%s(%d)
 

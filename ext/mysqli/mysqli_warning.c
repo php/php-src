@@ -15,23 +15,14 @@
 
 */
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <signal.h>
 
 #include "php.h"
-#include "php_ini.h"
-#include "ext/standard/info.h"
 #include "php_mysqli_structs.h"
 #include "mysqli_priv.h"
-
-/* Define these in the PHP7 tree to make merging easy process */
-#define ZSTR_DUPLICATE (1<<0)
-#define ZSTR_AUTOFREE  (1<<1)
-
-#define ZVAL_UTF8_STRING(z, s, flags)          ZVAL_STRING((z), (char*)(s))
-#define ZVAL_UTF8_STRINGL(z, s, l, flags)      ZVAL_STRINGL((z), (char*)(s), (l))
 
 /* {{{ void php_clear_warnings() */
 void php_clear_warnings(MYSQLI_WARNING *w)
@@ -59,7 +50,7 @@ MYSQLI_WARNING *php_new_warning(zval * reason, int errorno)
 	ZVAL_COPY(&w->reason, reason);
 	convert_to_string(&w->reason);
 
-	ZVAL_UTF8_STRINGL(&(w->sqlstate), "HY000", sizeof("HY000") - 1,  ZSTR_DUPLICATE);
+	ZVAL_STRINGL(&(w->sqlstate), "HY000", sizeof("HY000") - 1);
 
 	w->errorno = errorno;
 
@@ -147,7 +138,7 @@ PHP_METHOD(mysqli_warning, next)
 /* }}} */
 
 /* {{{ property mysqli_warning_message */
-static int mysqli_warning_message(mysqli_object *obj, zval *retval, bool quiet)
+static zend_result mysqli_warning_message(mysqli_object *obj, zval *retval, bool quiet)
 {
 	MYSQLI_WARNING *w;
 
@@ -167,7 +158,7 @@ static int mysqli_warning_message(mysqli_object *obj, zval *retval, bool quiet)
 /* }}} */
 
 /* {{{ property mysqli_warning_sqlstate */
-static int mysqli_warning_sqlstate(mysqli_object *obj, zval *retval, bool quiet)
+static zend_result mysqli_warning_sqlstate(mysqli_object *obj, zval *retval, bool quiet)
 {
 	MYSQLI_WARNING *w;
 
@@ -187,7 +178,7 @@ static int mysqli_warning_sqlstate(mysqli_object *obj, zval *retval, bool quiet)
 /* }}} */
 
 /* {{{ property mysqli_warning_error */
-static int mysqli_warning_errno(mysqli_object *obj, zval *retval, bool quiet)
+static zend_result mysqli_warning_errno(mysqli_object *obj, zval *retval, bool quiet)
 {
 	MYSQLI_WARNING *w;
 

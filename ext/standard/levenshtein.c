@@ -15,7 +15,6 @@
  */
 
 #include "php.h"
-#include "php_string.h"
 
 /* {{{ reference_levdist
  * reference implementation, only optimized for memory usage, not speed */
@@ -32,6 +31,15 @@ static bool reference_levdist(const zend_string *string1, const zend_string *str
 	if (ZSTR_LEN(string2) == 0) {
 		*result = ZSTR_LEN(string1) * cost_del;
 		return true;
+	}
+
+	/* When all costs are equal, levenshtein fulfills the requirements of a metric, which means
+	 * that the distance is symmetric. If string1 is shorter than string 2 we can save memory (and CPU time)
+	 * by having shorter rows (p1 & p2). */
+	if (ZSTR_LEN(string1) < ZSTR_LEN(string2) && cost_ins == cost_rep && cost_rep == cost_del) {
+		const zend_string *tmp = string1;
+		string1 = string2;
+		string2 = tmp;
 	}
 
 	/* Each row is eight times the length of string2. */

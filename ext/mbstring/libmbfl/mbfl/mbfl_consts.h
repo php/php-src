@@ -32,8 +32,8 @@
 #define MBFL_CONSTS_H
 
 #define MBFL_ENCTYPE_SBCS		0x00000001 /* single-byte encoding */
-#define MBFL_ENCTYPE_WCS2		0x00000010 /* 2 bytes/char */
-#define MBFL_ENCTYPE_WCS4		0x00000100 /* 4 bytes/char */
+#define MBFL_ENCTYPE_WCS2		0x00000002 /* 2 bytes/char */
+#define MBFL_ENCTYPE_WCS4		0x00000004 /* 4 bytes/char */
 #define MBFL_ENCTYPE_GL_UNSAFE	0x00004000
 
 #define MBFL_WCSPLANE_UCS2MAX		0x00010000
@@ -44,7 +44,10 @@
 /* Marker for an erroneous input byte (or sequence of bytes) */
 #define MBFL_BAD_INPUT (-1)
 
-#define MBFL_QPRINT_STS_MIME_HEADER 0x1000000
-#define MBFL_BASE64_STS_MIME_HEADER 0x1000000
+#define MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE 0
+#define MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR 1
+#define MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG 2
+#define MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY 3
+#define MBFL_OUTPUTFILTER_ILLEGAL_MODE_BADUTF8 4 /* For internal use only; deliberately uses invalid UTF-8 byte sequence as error marker */
 
 #endif /* MBFL_CONSTS_H */

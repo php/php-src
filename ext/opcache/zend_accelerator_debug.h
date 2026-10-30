@@ -28,7 +28,11 @@
 #define ACCEL_LOG_INFO					3
 #define ACCEL_LOG_DEBUG					4
 
+BEGIN_EXTERN_C()
+
 void zend_accel_error(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 ZEND_NORETURN void zend_accel_error_noreturn(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
+
+END_EXTERN_C()
 
 #endif /* _ZEND_ACCELERATOR_DEBUG_H */

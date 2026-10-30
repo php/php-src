@@ -44,8 +44,13 @@ function us($test) {
     echo 'done';
 }
 
+function us_dim($test) {
+    unset($test->prop->array[0]);
+    echo 'done';
+}
+
 foreach ([true, false] as $init) {
-    foreach (['r', 'w', 'rw', 'im', 'is', 'us'] as $op) {
+    foreach (['r', 'w', 'rw', 'im', 'is', 'us', 'us_dim'] as $op) {
         $test = new Test();
         if ($init) {
             $test->init();
@@ -69,9 +74,11 @@ Init: 1, op: rw: done
 Init: 1, op: im: done
 Init: 1, op: is: 1
 Init: 1, op: us: done
+Init: 1, op: us_dim: done
 Init: 0, op: r: Typed property Test::$prop must not be accessed before initialization
 Init: 0, op: w: Cannot indirectly modify readonly property Test::$prop
 Init: 0, op: rw: Typed property Test::$prop must not be accessed before initialization
 Init: 0, op: im: Cannot indirectly modify readonly property Test::$prop
 Init: 0, op: is: 0
 Init: 0, op: us: done
+Init: 0, op: us_dim: done

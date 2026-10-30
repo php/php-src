@@ -2,6 +2,10 @@
 XMLReader: accessing empty and non existing attributes
 --EXTENSIONS--
 xmlreader
+--SKIPIF--
+<?php
+if (preg_match('/[^\x00-\x7F]/', __DIR__)) die('skip path contains non-ASCII characters that libxml URI parser rejects');
+?>
 --FILE--
 <?php
 

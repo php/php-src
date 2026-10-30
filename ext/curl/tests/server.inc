@@ -71,7 +71,7 @@ function curl_cli_server_start() {
     }
 
     register_shutdown_function(
-        function($handle) use($router) {
+        function($handle) {
             proc_terminate($handle);
             /* Wait for server to shutdown */
             for ($i = 0; $i < 60; $i++) {

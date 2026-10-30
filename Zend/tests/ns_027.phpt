@@ -1,5 +1,5 @@
 --TEST--
-027: Name ambiguity (class name & part of extertnal namespace name)
+027: Name ambiguity (class name & part of external namespace name)
 --FILE--
 <?php
 require "ns_027.inc";

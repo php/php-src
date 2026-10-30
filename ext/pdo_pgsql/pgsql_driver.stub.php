@@ -33,4 +33,8 @@ class PDO_PGSql_Ext {
 
     /** @tentative-return-type */
     public function pgsqlGetPid(): int {}
+
+    /* Do NOT add new methods here. See https://wiki.php.net/rfc/pdo_driver_specific_subclasses
+     * Any new feature should be declared only on Pdo\Pgsql.
+     */
 }

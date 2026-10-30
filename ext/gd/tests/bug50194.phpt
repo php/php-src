@@ -5,7 +5,9 @@ gd
 --SKIPIF--
 <?php
 if (!function_exists('imagettftext')) die('skip imagettftext() not available');
-//die('skip freetype issues');
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
 ?>
 --FILE--
 <?php

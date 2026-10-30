@@ -8,7 +8,7 @@ ini_set('date.timezone', 'dummy');
 try {
 	$dt = new DateTime('now');
 } catch (Exception $e) {
-	echo $e->getMessage(), "\n";
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--

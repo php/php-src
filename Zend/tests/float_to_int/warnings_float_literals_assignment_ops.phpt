@@ -1,5 +1,5 @@
 --TEST--
-Implicit float to int conversions should warn for literals in combined assingment operetor
+Implicit float to int conversions should warn for literals in combined assignment operator
 --FILE--
 <?php
 

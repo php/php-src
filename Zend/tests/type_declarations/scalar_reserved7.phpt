@@ -7,4 +7,4 @@ namespace foo;
 class int {}
 ?>
 --EXPECTF--
-Fatal error: Cannot use 'int' as class name as it is reserved in %s on line %d
+Fatal error: Cannot use "int" as a class name as it is reserved in %s on line %d

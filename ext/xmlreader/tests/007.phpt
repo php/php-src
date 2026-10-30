@@ -53,4 +53,4 @@ $reader->close();
 --EXPECT--
 file relaxNG: ok
 string relaxNG: ok
-XMLReader::setRelaxNGSchema(): Argument #1 ($filename) cannot be empty
+XMLReader::setRelaxNGSchema(): Argument #1 ($filename) must not be empty

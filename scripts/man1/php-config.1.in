@@ -39,6 +39,14 @@ Directory where extensions are searched by default
 Directory prefix where header files are installed by default
 .TP
 .PD 0
+.B \-\-lib-dir
+Directory where libraries are installed by default
+.TP
+.PD 0
+.B \-\-lib-embed
+PHP embed library name
+.TP
+.PD 0
 .B \-\-php-binary
 Full path to php CLI or CGI binary
 .TP
@@ -49,6 +57,14 @@ Show all SAPI modules available
 .PD 0
 .B \-\-configure-options
 Configure options to recreate configuration of current PHP installation
+.TP
+.PD 0
+.B \-\-ini-path
+Directory from which PHP reads its INI configuration file (php.ini)
+.TP
+.PD 0
+.B \-\-ini-dir
+Directory from which PHP scans for additional INI configuration files
 .TP
 .PD 0
 .B \-\-version

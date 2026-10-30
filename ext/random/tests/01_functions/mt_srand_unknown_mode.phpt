@@ -15,8 +15,10 @@ var_dump(mt_rand());
 mt_srand(1, 256);
 var_dump(mt_rand());
 ?>
---EXPECT--
+--EXPECTF--
 int(895547922)
+
+Deprecated: The MT_RAND_PHP variant of Mt19937 is deprecated in %s on line %d
 int(1244335972)
 int(895547922)
 int(895547922)

@@ -4,7 +4,7 @@ Bug #51647 (Certificate file without private key (pk in another file) doesn't wo
 mysqli
 --SKIPIF--
 <?php
-require_once "connect.inc";
+require_once 'connect.inc';
 
 if (!defined('MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT'))
     die("skip Requires MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT");
@@ -42,7 +42,7 @@ $link->close();
 ?>
 --FILE--
 <?php
-    include "connect.inc";
+    include 'connect.inc';
 
     if (!is_object($link = mysqli_init()))
         printf("[001] Cannot create link\n");

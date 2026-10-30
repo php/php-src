@@ -43,7 +43,7 @@ int fpm_event_init_main(void);
 int fpm_event_set(struct fpm_event_s *ev, int fd, int flags, void (*callback)(struct fpm_event_s *, short, void *), void *arg);
 int fpm_event_add(struct fpm_event_s *ev, unsigned long int timeout);
 int fpm_event_del(struct fpm_event_s *ev);
-int fpm_event_pre_init(char *machanism);
+int fpm_event_pre_init(char *mechanism);
 const char *fpm_event_mechanism_name(void);
 int fpm_event_support_edge_trigger(void);
 

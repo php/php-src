@@ -264,12 +264,14 @@ struct_contents(zend_ffi_dcl *dcl):
 
 struct_declaration(zend_ffi_dcl *struct_dcl):
 	{zend_ffi_dcl common_field_dcl = ZEND_FFI_ATTR_INIT;}
+	{zend_ffi_dcl base_field_dcl = ZEND_FFI_ATTR_INIT;}
 	specifier_qualifier_list(&common_field_dcl)
+	{base_field_dcl = common_field_dcl;}
 	(	/* empty */
 		{zend_ffi_add_anonymous_field(struct_dcl, &common_field_dcl);}
 	|	struct_declarator(struct_dcl, &common_field_dcl)
 		(	","
-			{zend_ffi_dcl field_dcl = common_field_dcl;}
+			{zend_ffi_dcl field_dcl = base_field_dcl;}
 			attributes(&field_dcl)?
 			struct_declarator(struct_dcl, &field_dcl)
 		)*
@@ -888,9 +890,15 @@ zend_result zend_ffi_parse_decl(const char *str, size_t len) {
 		FFI_G(attribute_parsing) = 0;
 		yy_buf = (unsigned char*)str;
 		yy_end = yy_buf + len;
+		FFI_G(parse_failed) = 0;
 		parse();
+		if (FFI_G(parse_failed)) {
+			FFI_G(parse_failed) = 0;
+			return FAILURE;
+		}
 		return SUCCESS;
 	} else {
+		FFI_G(parse_failed) = 0;
 		return FAILURE;
 	}
 }
@@ -904,13 +912,19 @@ zend_result zend_ffi_parse_type(const char *str, size_t len, zend_ffi_dcl *dcl) 
 		yy_pos = yy_text = yy_buf = (unsigned char*)str;
 		yy_end = yy_buf + len;
 		yy_line = 1;
+		FFI_G(parse_failed) = 0;
 		sym = parse_type_name(get_sym(), dcl);
 		if (sym != YY_EOF) {
 			yy_error_sym("<EOF> expected, got", sym);
 		}
 		zend_ffi_validate_type_name(dcl);
+		if (FFI_G(parse_failed)) {
+			FFI_G(parse_failed) = 0;
+			return FAILURE;
+		}
 		return SUCCESS;
 	} else {
+		FFI_G(parse_failed) = 0;
 		return FAILURE;
 	};
 }

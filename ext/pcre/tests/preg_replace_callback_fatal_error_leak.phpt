@@ -15,4 +15,4 @@ preg_replace_callback('/a/', function($matches) {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot redeclare test() (previously declared in %s on line %d
+Fatal error: Cannot redeclare function test() (previously declared in %s:%d) in %s on line %d

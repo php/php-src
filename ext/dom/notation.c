@@ -16,12 +16,13 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "dom_properties.h"
 
 /*
 * class DOMNotation extends DOMNode
@@ -37,14 +38,9 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-54F2B4D0
 Since:
 */
-int dom_notation_public_id_read(dom_object *obj, zval *retval)
+zend_result dom_notation_public_id_read(dom_object *obj, zval *retval)
 {
-	xmlEntityPtr nodep = (xmlEntityPtr) dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlEntityPtr, nodep, obj);
 
 	if (nodep->ExternalID) {
 		ZVAL_STRING(retval, (char *) (nodep->ExternalID));
@@ -62,14 +58,9 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-E8AAB1D0
 Since:
 */
-int dom_notation_system_id_read(dom_object *obj, zval *retval)
+zend_result dom_notation_system_id_read(dom_object *obj, zval *retval)
 {
-	xmlEntityPtr nodep = (xmlEntityPtr) dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlEntityPtr, nodep, obj);
 
 	if (nodep->SystemID) {
 		ZVAL_STRING(retval, (char *) (nodep->SystemID));

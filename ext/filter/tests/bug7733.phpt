@@ -1,5 +1,5 @@
 --TEST--
-filter_var() Float exponential weird result
+Bug #7733 (filter_var() Float exponential weird result)
 --EXTENSIONS--
 filter
 --FILE--

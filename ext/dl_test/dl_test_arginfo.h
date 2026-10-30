@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2dbacf5282b0f8e53923ac70495c2da43c7237e3 */
+ * Stub hash: 41b8200735b71e691dc431d7ce34e9e0b9a4a7fd */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dl_test_test1, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -8,23 +8,41 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dl_test_test2, 0, 0, IS_STRING, 
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, str, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dl_test_frameless, 0, 1, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
 #define arginfo_class_DlTest_test arginfo_dl_test_test2
 
+#define arginfo_class_DlTestSuperClass_test arginfo_dl_test_test2
+
+
+ZEND_FRAMELESS_FUNCTION(dl_test_frameless, 1);
+static const zend_frameless_function_info frameless_function_infos_dl_test_frameless[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(dl_test_frameless, 1), 1 },
+	{ 0 },
+};
 
 ZEND_FUNCTION(dl_test_test1);
 ZEND_FUNCTION(dl_test_test2);
+ZEND_FUNCTION(dl_test_frameless);
 ZEND_METHOD(DlTest, test);
-
+ZEND_METHOD(DlTestSuperClass, test);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(dl_test_test1, arginfo_dl_test_test1)
 	ZEND_FE(dl_test_test2, arginfo_dl_test_test2)
+	ZEND_RAW_FENTRY("dl_test_frameless", zif_dl_test_frameless, arginfo_dl_test_frameless, 0, frameless_function_infos_dl_test_frameless, NULL)
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_DlTest_methods[] = {
 	ZEND_ME(DlTest, test, arginfo_class_DlTest_test, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_DlTestSuperClass_methods[] = {
+	ZEND_ME(DlTestSuperClass, test, arginfo_class_DlTestSuperClass_test, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -33,7 +51,50 @@ static zend_class_entry *register_class_DlTest(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "DlTest", class_DlTest_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DlTestSuperClass(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DlTestSuperClass", class_DlTestSuperClass_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+
+	zval property_a_default_value;
+	ZVAL_UNDEF(&property_a_default_value);
+	zend_string *property_a_name = zend_string_init("a", sizeof("a") - 1, 1);
+	zend_declare_typed_property(class_entry, property_a_name, &property_a_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_a_name);
+
+	zval property_temporary_default_value;
+	ZVAL_LONG(&property_temporary_default_value, 0);
+	zend_string *property_temporary_name = zend_string_init("temporary", sizeof("temporary") - 1, 1);
+	zend_declare_typed_property(class_entry, property_temporary_name, &property_temporary_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_temporary_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DlTestSubClass(zend_class_entry *class_entry_DlTestSuperClass)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DlTestSubClass", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_DlTestSuperClass, 0);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DlTestAliasedClass(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DlTestAliasedClass", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+	zend_register_class_alias("DlTestClassAlias", class_entry);
 
 	return class_entry;
 }

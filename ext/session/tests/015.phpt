@@ -20,10 +20,16 @@ error_reporting(E_ALL);
 
 session_id("test015");
 session_start();
+$sid = SID;
 ?>
-<a href="/link?<?php echo SID; ?>">
+<a href="/link?<?=$sid ?>">
 <?php
 session_destroy();
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: PHP Startup: Disabling session.use_only_cookies INI setting is deprecated in Unknown on line 0
+
+Deprecated: PHP Startup: Enabling session.use_trans_sid INI setting is deprecated in Unknown on line 0
+
+Deprecated: Constant SID is deprecated in %s on line 6
 <a href="/link?PHPSESSID=test015&PHPSESSID=test015">

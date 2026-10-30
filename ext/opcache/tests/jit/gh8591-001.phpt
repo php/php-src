@@ -5,7 +5,6 @@ opcache
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
-opcache.jit_buffer_size=1M
 opcache.jit=1255
 opcache.file_update_protection=0
 opcache.revalidate_freq=0
@@ -44,6 +43,7 @@ touch(__DIR__ . '/gh8591-001.inc');
 var_dump($x);
 
 print "OK";
+?>
 --EXPECT--
 int(1)
 OK

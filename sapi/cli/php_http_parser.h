@@ -31,17 +31,15 @@ extern "C" {
 # include <windows.h>
 # include "config.w32.h"
 #else
-# include "php_config.h"
+# include <php_config.h>
 #endif
 
 #include <stdint.h>
 
-/* Compile with -DPHP_HTTP_PARSER_STRICT=0 to make less checks, but run
- * faster
+/* Compile with -DPHP_HTTP_PARSER_STRICT=1 to enable more checks, but run
+ * slower
  */
 #ifndef PHP_HTTP_PARSER_STRICT
-# define PHP_HTTP_PARSER_STRICT 1
-#else
 # define PHP_HTTP_PARSER_STRICT 0
 #endif
 

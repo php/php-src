@@ -4,30 +4,26 @@ MySQL PDOStatement->bindParam() - SQL column types
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
-    MySQLPDOTest::createTestTable($db);
 
     function pdo_mysql_stmt_bindparam_types_do($db, $offset, $native, $sql_type, $value) {
-
             if ($native)
                 $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 0);
             else
                 $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 1);
 
-            $db->exec('DROP TABLE IF EXISTS test');
-            $sql = sprintf('CREATE TABLE test(id INT, label %s) ENGINE=%s', $sql_type, MySQLPDOTest::getTableEngine());
-            if ((!$stmt = @$db->prepare($sql)) || (!@$stmt->execute()))
+            $sql = sprintf('CREATE TABLE test_stmt_bindparam_types(id INT, label %s) ENGINE=%s', $sql_type, MySQLPDOTest::getTableEngine());
+            if ((!$stmt = $db->prepare($sql)) || (!$stmt->execute()))
                 // Server might not support column type - skip it
                 return true;
 
-            $stmt = $db->prepare('INSERT INTO test(id, label) VALUES (1, ?)');
+            $stmt = $db->prepare('INSERT INTO test_stmt_bindparam_types(id, label) VALUES (1, ?)');
             if (!$stmt->bindParam(1, $value)) {
                 printf("[%03d/%s + 1] %s\n", $offset, ($native) ? 'native' : 'emulated',
                     var_export($stmt->errorInfo(), true));
@@ -39,7 +35,7 @@ $db = MySQLPDOTest::factory();
                 return false;
             }
 
-            $stmt = $db->query('SELECT id, label FROM test');
+            $stmt = $db->query('SELECT id, label FROM test_stmt_bindparam_types');
             $id = $label = null;
             if (!$stmt->bindColumn(1, $id)) {
                 printf("[%03d/%s + 3] %s\n", $offset, ($native) ? 'native' : 'emulated',
@@ -88,19 +84,16 @@ $db = MySQLPDOTest::factory();
                 return false;
             }
 
-            $db->exec('DROP TABLE IF EXISTS test');
+            $db->exec('DROP TABLE IF EXISTS test_stmt_bindparam_types');
             return true;
     }
 
     function pdo_mysql_stmt_bindparam_types($db, $offset, $sql_type, $value) {
-
         pdo_mysql_stmt_bindparam_types_do($db, $offset, true, $sql_type, $value);
         pdo_mysql_stmt_bindparam_types_do($db, $offset, false, $sql_type, $value);
-
     }
 
     try {
-
         // pdo_mysql_stmt_bindparam_types($db, 2, 'BIT(8)', 1);
         pdo_mysql_stmt_bindparam_types($db, 3, 'TINYINT', -127);
         pdo_mysql_stmt_bindparam_types($db, 4, 'TINYINT UNSIGNED', 255);
@@ -157,7 +150,6 @@ $db = MySQLPDOTest::factory();
         pdo_mysql_stmt_bindparam_types($db, 55, 'LONGTEXT BINARY', str_repeat('d', 300));
         pdo_mysql_stmt_bindparam_types($db, 56, "ENUM('yes', 'no') DEFAULT 'yes'", "no");
         pdo_mysql_stmt_bindparam_types($db, 57, "SET('yes', 'no') DEFAULT 'yes'", "no");
-
     } catch (PDOException $e) {
         printf("[001] %s [%s] %s\n",
             $e->getMessage(), $db->errorCode(), implode(' ', $db->errorInfo()));
@@ -167,8 +159,9 @@ $db = MySQLPDOTest::factory();
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable();
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS test_stmt_bindparam_types');
 ?>
 --EXPECT--
 done!

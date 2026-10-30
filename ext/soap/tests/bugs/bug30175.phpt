@@ -9,7 +9,7 @@ soap.wsdl_cache_enabled=0
 
 class LocalSoapClient extends SoapClient {
 
-  function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
+  function __doRequest($request, $location, $action, $version, $one_way = 0): string {
     return <<<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Envelope

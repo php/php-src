@@ -22,24 +22,24 @@ fclose($file_handle);
 $dest_files = array(
 
   /* File names containing special(non-alpha numeric) characters */
-  "_copy_variation2.tmp",
-  "@copy_variation2.tmp",
-  "#copy_variation2.tmp",
-  "+copy_variation2.tmp",
-  "?copy_variation2.tmp",
-  ">copy_variation2.tmp",
-  "!copy_variation2.tmp",
-  "&copy_variation2.tmp",
-  "(copy_variation2.tmp",
-  ":copy_variation2.tmp",
-  ";copy_variation2.tmp",
-  "=copy_variation2.tmp",
-  "[copy_variation2.tmp",
-  "^copy_variation2.tmp",
-  "{copy_variation2.tmp",
-  "|copy_variation2.tmp",
-  "~copy_variation2.tmp",
-  "\$copy_variation2.tmp"
+  "_copy_variation2_mb.tmp",
+  "@copy_variation2_mb.tmp",
+  "#copy_variation2_mb.tmp",
+  "+copy_variation2_mb.tmp",
+  "?copy_variation2_mb.tmp",
+  ">copy_variation2_mb.tmp",
+  "!copy_variation2_mb.tmp",
+  "&copy_variation2_mb.tmp",
+  "(copy_variation2_mb.tmp",
+  ":copy_variation2_mb.tmp",
+  ";copy_variation2_mb.tmp",
+  "=copy_variation2_mb.tmp",
+  "[copy_variation2_mb.tmp",
+  "^copy_variation2_mb.tmp",
+  "{copy_variation2_mb.tmp",
+  "|copy_variation2_mb.tmp",
+  "~copy_variation2_mb.tmp",
+  "\$copy_variation2_mb.tmp"
 );
 
 echo "Size of the source file before copy operation => ";
@@ -90,28 +90,28 @@ Size of the source file before copy operation => int(1500)
 -- Iteration 1 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
-Destination file name => %s/_copy_variation2.tmp
+Destination file name => %s/_copy_variation2_mb.tmp
 Size of source file => int(1500)
 Size of destination file => int(1500)
 
 -- Iteration 2 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
-Destination file name => %s/@copy_variation2.tmp
+Destination file name => %s/@copy_variation2_mb.tmp
 Size of source file => int(1500)
 Size of destination file => int(1500)
 
 -- Iteration 3 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
-Destination file name => %s/#copy_variation2.tmp
+Destination file name => %s/#copy_variation2_mb.tmp
 Size of source file => int(1500)
 Size of destination file => int(1500)
 
 -- Iteration 4 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
-Destination file name => %s/+copy_variation2.tmp
+Destination file name => %s/+copy_variation2_mb.tmp
 Size of source file => int(1500)
 Size of destination file => int(1500)
 
@@ -130,21 +130,21 @@ Existence of destination file => bool(false)
 -- Iteration 7 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
-Destination file name => %s/!copy_variation2.tmp
+Destination file name => %s/!copy_variation2_mb.tmp
 Size of source file => int(1500)
 Size of destination file => int(1500)
 
 -- Iteration 8 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
-Destination file name => %s/&copy_variation2.tmp
+Destination file name => %s/&copy_variation2_mb.tmp
 Size of source file => int(1500)
 Size of destination file => int(1500)
 
 -- Iteration 9 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
-Destination file name => %s/(copy_variation2.tmp
+Destination file name => %s/(copy_variation2_mb.tmp
 Size of source file => int(1500)
 Size of destination file => int(1500)
 
@@ -157,35 +157,35 @@ Existence of destination file => bool(false)
 -- Iteration 11 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
-Destination file name => %s/;copy_variation2.tmp
+Destination file name => %s/;copy_variation2_mb.tmp
 Size of source file => int(1500)
 Size of destination file => int(1500)
 
 -- Iteration 12 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
-Destination file name => %s/=copy_variation2.tmp
+Destination file name => %s/=copy_variation2_mb.tmp
 Size of source file => int(1500)
 Size of destination file => int(1500)
 
 -- Iteration 13 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
-Destination file name => %s/[copy_variation2.tmp
+Destination file name => %s/[copy_variation2_mb.tmp
 Size of source file => int(1500)
 Size of destination file => int(1500)
 
 -- Iteration 14 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
-Destination file name => %s/^copy_variation2.tmp
+Destination file name => %s/^copy_variation2_mb.tmp
 Size of source file => int(1500)
 Size of destination file => int(1500)
 
 -- Iteration 15 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
-Destination file name => %s/{copy_variation2.tmp
+Destination file name => %s/{copy_variation2_mb.tmp
 Size of source file => int(1500)
 Size of destination file => int(1500)
 
@@ -198,14 +198,14 @@ Existence of destination file => bool(false)
 -- Iteration 17 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
-Destination file name => %s/~copy_variation2.tmp
+Destination file name => %s/~copy_variation2_mb.tmp
 Size of source file => int(1500)
 Size of destination file => int(1500)
 
 -- Iteration 18 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
-Destination file name => %s/$copy_variation2.tmp
+Destination file name => %s/$copy_variation2_mb.tmp
 Size of source file => int(1500)
 Size of destination file => int(1500)
 *** Done ***

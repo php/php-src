@@ -290,7 +290,7 @@ if ($pid) {
             }
 
             if (empty($m[1]) || $m[1] !== 'emptydir') {
-                fputs($fs, "file1\r\nfile1\r\nfile\nb0rk\r\n");
+                fputs($fs, $nlst_data ?? "file1\r\nfile1\r\nfile\nb0rk\r\n");
             }
 
             fputs($s, "226 Closing data Connection.\r\n");
@@ -328,6 +328,11 @@ if ($pid) {
                 break;
             }
         }elseif (preg_match('/^RETR ([\/]*[\w\h]+)/', $buf, $matches)) {
+            if ($matches[1] === "no_data_connection") {
+                // Never open the active data connection.
+                fputs($s, "150 File status okay; about to open data connection.\r\n");
+                continue;
+            }
             if(!empty($pasv)){
                 ;
             }
@@ -390,6 +395,13 @@ if ($pid) {
                 case "gh10521":
                     // Just a side channel for getting the received file size.
                     fputs($s, "425 Can't open data connection (".$GLOBALS['rest_pos'].").\r\n");
+                    break;
+                case "crlf_boundary":
+                    // A CRLF whose CR lands on the final byte of the first
+                    // FTP_BUFSIZE (4096) read, so the LF arrives in the next read.
+                    fputs($s, "150 File status okay; about to open data connection.\r\n");
+                    fputs($fs, str_repeat("A", 4095) . "\r\n" . str_repeat("B", 10));
+                    fputs($s, "226 Closing data Connection.\r\n");
                     break;
 
                 default:
@@ -470,7 +482,7 @@ if ($pid) {
             fputs($fs, "file1\r\nfile1\r\nfile\nb0rk\r\n");
             fputs($s, "226 Closing data Connection.\r\n");
             fclose($fs);
-            
+
             fputs($s, "226 Transfer complete\r\n");
         }elseif (preg_match('/^LIST no_exists\//', $buf, $matches)) {
             fputs($s, "425 Error establishing connection\r\n");

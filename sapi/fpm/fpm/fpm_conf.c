@@ -84,7 +84,7 @@ static char *ini_include = NULL;
 /*
  * Please keep the same order as in fpm_conf.h and in php-fpm.conf.in
  */
-static struct ini_value_parser_s ini_fpm_global_options[] = {
+static const struct ini_value_parser_s ini_fpm_global_options[] = {
 	{ "pid",                         &fpm_conf_set_string,          GO(pid_file) },
 	{ "error_log",                   &fpm_conf_set_string,          GO(error_log) },
 #ifdef HAVE_SYSLOG_H
@@ -112,7 +112,7 @@ static struct ini_value_parser_s ini_fpm_global_options[] = {
 /*
  * Please keep the same order as in fpm_conf.h and in php-fpm.conf.in
  */
-static struct ini_value_parser_s ini_fpm_pool_options[] = {
+static const struct ini_value_parser_s ini_fpm_pool_options[] = {
 	{ "prefix",                    &fpm_conf_set_string,      WPO(prefix) },
 	{ "user",                      &fpm_conf_set_string,      WPO(user) },
 	{ "group",                     &fpm_conf_set_string,      WPO(group) },
@@ -548,7 +548,7 @@ static char *fpm_conf_set_pm(zval *value, void **config, intptr_t offset) /* {{{
 {
 	zend_string *val = Z_STR_P(value);
 	struct fpm_worker_pool_config_s  *c = *config;
-	if (zend_string_equals_literal_ci(val, "static")) {
+	if (zend_string_equals_ci(val, ZSTR_KNOWN(ZEND_STR_STATIC))) {
 		c->pm = PM_STYLE_STATIC;
 	} else if (zend_string_equals_literal_ci(val, "dynamic")) {
 		c->pm = PM_STYLE_DYNAMIC;
@@ -721,6 +721,17 @@ int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc) /* {{{ */
 	} while (0)
 #define FPM_WPC_STR_CP(_cfg, _scfg, _field) FPM_WPC_STR_CP_EX(_cfg, _scfg, _field, _field)
 
+static void fpm_conf_apply_kv_array_to_kv_array(struct key_value_s *src, void *dest) {
+	struct key_value_s *kv;
+
+	for (kv = src; kv; kv = kv->next) {
+		zval k, v;
+		ZVAL_STRING(&k, kv->key);
+		ZVAL_STRING(&v, kv->value);
+		fpm_conf_set_array(&k, &v, &dest, 0);
+	}
+}
+
 static int fpm_worker_pool_shared_status_alloc(struct fpm_worker_pool_s *shared_wp) { /* {{{ */
 	struct fpm_worker_pool_config_s *config, *shared_config;
 	config = fpm_worker_pool_config_alloc();
@@ -754,6 +765,9 @@ static int fpm_worker_pool_shared_status_alloc(struct fpm_worker_pool_s *shared_
 	FPM_WPC_STR_CP(config, shared_config, pm_status_path);
 	FPM_WPC_STR_CP(config, shared_config, ping_path);
 	FPM_WPC_STR_CP(config, shared_config, ping_response);
+
+	fpm_conf_apply_kv_array_to_kv_array(shared_config->php_values, (char *)config + WPO(php_values));
+	fpm_conf_apply_kv_array_to_kv_array(shared_config->php_admin_values, (char *)config + WPO(php_admin_values));
 
 	config->pm = PM_STYLE_ONDEMAND;
 	config->pm_max_children = 2;
@@ -1185,11 +1199,10 @@ static int fpm_conf_process_all_pools(void)
 		/* env[], php_value[], php_admin_values[] */
 		if (!wp->config->chroot) {
 			struct key_value_s *kv;
-			char *options[] = FPM_PHP_INI_TO_EXPAND;
-			char **p;
+			static const char *const options[] = FPM_PHP_INI_TO_EXPAND;
 
 			for (kv = wp->config->php_values; kv; kv = kv->next) {
-				for (p = options; *p; p++) {
+				for (const char *const*p = options; *p; p++) {
 					if (!strcasecmp(kv->key, *p)) {
 						fpm_evaluate_full_path(&kv->value, wp, NULL, 0);
 					}
@@ -1199,7 +1212,7 @@ static int fpm_conf_process_all_pools(void)
 				if (!strcasecmp(kv->key, "error_log") && !strcasecmp(kv->value, "syslog")) {
 					continue;
 				}
-				for (p = options; *p; p++) {
+				for (const char *const*p = options; *p; p++) {
 					if (!strcasecmp(kv->key, *p)) {
 						fpm_evaluate_full_path(&kv->value, wp, NULL, 0);
 					}
@@ -1251,7 +1264,7 @@ int fpm_conf_write_pid(void)
 			return -1;
 		}
 
-		len = sprintf(buf, "%d", (int) fpm_globals.parent_pid);
+		len = snprintf(buf, sizeof(buf), "%d", (int) fpm_globals.parent_pid);
 
 		if (len != write(fd, buf, len)) {
 			zlog(ZLOG_SYSERROR, "Unable to write to the PID file.");
@@ -1466,7 +1479,7 @@ static void fpm_conf_ini_parser_section(zval *section, void *arg) /* {{{ */
 
 static void fpm_conf_ini_parser_entry(zval *name, zval *value, void *arg) /* {{{ */
 {
-	struct ini_value_parser_s *parser;
+	const struct ini_value_parser_s *parser;
 	void *config = NULL;
 
 	int *error = (int *)arg;
@@ -1880,7 +1893,7 @@ int fpm_conf_init_main(int test_conf, int force_daemon) /* {{{ */
 		if (test_conf > 1) {
 			fpm_conf_dump();
 		}
-		zlog(ZLOG_NOTICE, "configuration file %s test is successful\n", fpm_globals.config);
+		zlog(ZLOG_NOTICE, "configuration file %s test is successful", fpm_globals.config);
 		fpm_globals.test_successful = 1;
 		return -1;
 	}

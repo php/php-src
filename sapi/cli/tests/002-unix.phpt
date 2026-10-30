@@ -10,7 +10,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --FILE--
 <?php
 
-$php = getenv('TEST_PHP_EXECUTABLE');
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
 var_dump(`$php -n -r 'var_dump("hello");'`);
 

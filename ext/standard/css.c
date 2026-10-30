@@ -21,8 +21,8 @@ PHPAPI ZEND_COLD void php_info_print_css(void) /* {{{ */
 {
 	PUTS("body {background-color: #fff; color: #222; font-family: sans-serif;}\n");
 	PUTS("pre {margin: 0; font-family: monospace;}\n");
-	PUTS("a:link {color: #009; text-decoration: none; background-color: #fff;}\n");
-	PUTS("a:hover {text-decoration: underline;}\n");
+	PUTS("a {color: inherit;}\n");
+	PUTS("a:hover {text-decoration: none;}\n");
 	PUTS("table {border-collapse: collapse; border: 0; width: 934px; box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.2);}\n");
 	PUTS(".center {text-align: center;}\n");
 	PUTS(".center table {margin: 1em auto; text-align: left;}\n");
@@ -31,7 +31,8 @@ PHPAPI ZEND_COLD void php_info_print_css(void) /* {{{ */
 	PUTS("th {position: sticky; top: 0; background: inherit;}\n");
 	PUTS("h1 {font-size: 150%;}\n");
 	PUTS("h2 {font-size: 125%;}\n");
-	PUTS("h2 a:link, h2 a:visited{color: inherit; background: inherit;}\n");
+	PUTS("h2 > a {text-decoration: none;}\n");
+	PUTS("h2 > a:hover {text-decoration: underline;}\n");
 	PUTS(".p {text-align: left;}\n");
 	PUTS(".e {background-color: #ccf; width: 300px; font-weight: bold;}\n");
 	PUTS(".h {background-color: #99c; font-weight: bold;}\n");

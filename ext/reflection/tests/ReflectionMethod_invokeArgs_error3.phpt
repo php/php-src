@@ -34,8 +34,8 @@ $testClassInstance = new TestClass();
 $testClassInstance->prop = "Hello";
 
 $foo = new ReflectionMethod($testClassInstance, 'foo');
-$staticMethod = new ReflectionMethod('TestClass::staticMethod');
-$privateMethod = new ReflectionMethod("TestClass::privateMethod");
+$staticMethod = ReflectionMethod::createFromMethodName('TestClass::staticMethod');
+$privateMethod = new ReflectionMethod("TestClass", "privateMethod");
 
 echo "\nNon-instance:\n";
 try {
@@ -52,7 +52,7 @@ echo "\nPrivate method:\n";
 var_dump($privateMethod->invokeArgs($testClassInstance, array()));
 
 echo "\nAbstract method:\n";
-$abstractMethod = new ReflectionMethod("AbstractClass::foo");
+$abstractMethod = new ReflectionMethod("AbstractClass", "foo");
 try {
     $abstractMethod->invokeArgs($testClassInstance, array());
 } catch (ReflectionException $e) {

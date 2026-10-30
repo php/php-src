@@ -32,6 +32,7 @@
 #endif
 
 #include "ext/random/php_random.h"
+#include "ext/random/php_random_csprng.h"
 
 #ifdef HAVE_GETTIMEOFDAY
 ZEND_TLS struct timeval prev_tv = { 0, 0 };
@@ -74,10 +75,9 @@ PHP_FUNCTION(uniqid)
 		uint32_t bytes;
 		double seed;
 		if (php_random_bytes_silent(&bytes, sizeof(uint32_t)) == FAILURE) {
-			seed = php_combined_lcg() * 10;
-		} else {
-			seed = ((double) bytes / UINT32_MAX) * 10.0;
+			bytes = php_random_generate_fallback_seed();
 		}
+		seed = ((double) bytes / UINT32_MAX) * 10.0;
 		uniqid = strpprintf(0, "%s%08x%05x%.8F", prefix, sec, usec, seed);
 	} else {
 		uniqid = strpprintf(0, "%s%08x%05x", prefix, sec, usec);

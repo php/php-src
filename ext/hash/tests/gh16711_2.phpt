@@ -94,5 +94,5 @@ array(40) {
   int(41)
 }
 
-Deprecated: Function mhash() is deprecated in %s on line %d
+Deprecated: Function mhash() is deprecated since 8.1 in %s on line %d
 bool(false)

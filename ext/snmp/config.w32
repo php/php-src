@@ -4,10 +4,11 @@ ARG_WITH("snmp", "SNMP support", "no");
 
 if (PHP_SNMP != "no") {
 	if (CHECK_HEADER_ADD_INCLUDE("snmp.h", "CFLAGS_SNMP", PHP_PHP_BUILD + "\\include\\net-snmp;" + PHP_SNMP) &&
-		SETUP_OPENSSL("snmp", PHP_SNMP) > 0) {
+		SETUP_OPENSSL("snmp", PHP_SNMP) >= 2) {
 		if (CHECK_LIB("netsnmp.lib", "snmp", PHP_SNMP)) {
 			EXTENSION('snmp', 'snmp.c');
-			AC_DEFINE('HAVE_SNMP', 1);
+			ADD_EXTENSION_DEP('snmp', 'spl');
+			AC_DEFINE('HAVE_SNMP', 1, "Define to 1 if the PHP extension 'snmp' is available.");
 		} else {
 			WARNING("snmp not enabled; libraries and headers not found");
 		}

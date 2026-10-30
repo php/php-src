@@ -17,8 +17,6 @@
 #ifndef SHA1_H
 #define SHA1_H
 
-#include "ext/standard/basic_functions.h"
-
 /* SHA1 context. */
 typedef struct {
 	uint32_t state[5];		/* state (ABCD) */

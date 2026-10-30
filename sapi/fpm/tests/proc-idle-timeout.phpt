@@ -30,7 +30,7 @@ EOT;
 $tester = new FPM\Tester($cfg, $code);
 $tester->start();
 $tester->expectLogStartNotices();
-$tester->multiRequest(2, null, null, null, false, 7000);
+$tester->multiRequest(2, readTimeout: 7000);
 $tester->status([
     'total processes' => 2,
 ]);

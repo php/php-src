@@ -4,7 +4,6 @@ JIT ASSIGN_DIM: 002
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_update_protection=0
-opcache.jit_buffer_size=1M
 --EXTENSIONS--
 opcache
 --FILE--
@@ -161,7 +160,7 @@ array(1) {
     int(1)
   }
 }
-Illegal offset type
+Cannot access offset of type Closure on array
 array(1) {
   [0]=>
   array(2) {
@@ -198,7 +197,7 @@ array(1) {
 }
 
 Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
-Illegal offset type
+Cannot access offset of type array on array
 
 Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 int(1)
@@ -221,7 +220,7 @@ array(1) {
 }
 
 Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
-Illegal offset type
+Cannot access offset of type array on array
 
 Warning: Undefined variable $undef in %s on line %d
 NULL

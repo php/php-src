@@ -18,6 +18,7 @@ if (PHP_OS_FAMILY === 'Windows') {
 var_dump($loaded);
 
 var_dump(ini_get('dl_test.long'));
+?>
 --EXPECT--
 bool(true)
 string(1) "0"

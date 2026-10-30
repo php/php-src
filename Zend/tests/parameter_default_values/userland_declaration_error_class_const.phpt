@@ -1,5 +1,5 @@
 --TEST--
-The default value is a constant in the parent class method's signature.
+The default value is a class constant in the parent class method's signature.
 --FILE--
 <?php
 

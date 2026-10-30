@@ -26,8 +26,8 @@ $fiber->start();
 Fatal error: Uncaught FiberError: Cannot switch fibers in current execution context in %sticks.php:%d
 Stack trace:
 #0 %sticks.php(%d): Fiber::suspend()
-#1 %sticks.php(%d): {closure}()
-#2 [internal function]: {closure}()
+#1 %s(%d): {closure:%s:%d}()
+#2 [internal function]: {closure:%s:%d}()
 #3 %sticks.php(%d): Fiber->start()
 #4 {main}
   thrown in %sticks.php on line %d

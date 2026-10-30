@@ -50,6 +50,6 @@ try {
 count(): Argument #1 ($value) must be of type Countable|array, null given
 count(): Argument #1 ($value) must be of type Countable|array, string given
 count(): Argument #1 ($value) must be of type Countable|array, int given
-count(): Argument #1 ($value) must be of type Countable|array, bool given
-count(): Argument #1 ($value) must be of type Countable|array, bool given
+count(): Argument #1 ($value) must be of type Countable|array, true given
+count(): Argument #1 ($value) must be of type Countable|array, false given
 count(): Argument #1 ($value) must be of type Countable|array, stdClass given

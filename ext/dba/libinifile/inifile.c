@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -38,7 +38,7 @@
  */
 
 /* {{{ inifile_version */
-char *inifile_version()
+const char *inifile_version(void)
 {
 	return "1.0, $Id$";
 }
@@ -111,7 +111,7 @@ void inifile_free(inifile *dba, int persistent)
 key_type inifile_key_split(const char *group_name)
 {
 	key_type key;
-	char *name;
+	const char *name;
 
 	if (group_name[0] == '[' && (name = strchr(group_name, ']')) != NULL) {
 		key.group = estrndup(group_name+1, name - (group_name + 1));

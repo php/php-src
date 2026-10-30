@@ -1,5 +1,5 @@
 --TEST--
-Bug #27731 (error_reporing() call inside @ block does not work correctly)
+Bug #27731 (error_reporting() call inside @ block does not work correctly)
 --FILE--
 <?php
     error_reporting(E_ALL ^ E_NOTICE);

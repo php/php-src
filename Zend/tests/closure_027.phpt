@@ -28,7 +28,7 @@ object(stdClass)#%d (0) {
 NULL
 
 Warning: Undefined variable $y in %s on line %d
-Exception: Too few arguments to function {closure}(), 0 passed in %s on line %d and exactly 1 expected
+Exception: Too few arguments to function {closure:%s:%d}(), 0 passed in %s on line %d and exactly 1 expected
 
 Fatal error: Uncaught TypeError: test(): Argument #1 ($a) must be of type Closure, stdClass given, called in %s:%d
 Stack trace:

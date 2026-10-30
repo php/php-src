@@ -25,7 +25,7 @@ if (isset($array[$data]) or getPlugin($data)) {
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Illegal offset type in isset or empty in %s:%d
+Fatal error: Uncaught TypeError: Cannot access offset of type array in isset or empty in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

@@ -15,7 +15,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -46,7 +46,7 @@ DBA_OPEN_FUNC(gdbm)
 	if(gmode == -1)
 		return FAILURE; /* not possible */
 
-	dbf = gdbm_open(info->path, /* int block_size */ 0, gmode, filemode, NULL);
+	dbf = gdbm_open(ZSTR_VAL(info->path), /* int block_size */ 0, gmode, filemode, NULL);
 
 	if(dbf) {
 		info->dbf = pemalloc(sizeof(dba_gdbm_data), info->flags&DBA_PERSISTENT);

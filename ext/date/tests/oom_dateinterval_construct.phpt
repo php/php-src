@@ -15,4 +15,4 @@ try {
 }
 ?>
 --EXPECTF--
-Exception: Unknown or bad format (%s)
+DateMalformedIntervalStringException: Unknown or bad format (%s)

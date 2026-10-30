@@ -4,12 +4,11 @@ Interface of the class mysqli_stmt
 mysqli
 --SKIPIF--
 <?php
-    require_once('skipifconnectfailure.inc');
+    require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require('connect.inc');
-    require('table.inc');
+    require 'table.inc';
 
     $link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
     $stmt = new mysqli_stmt($link);
@@ -69,12 +68,12 @@ mysqli
     printf("\nClass variables:\n");
     $variables = array_keys(get_class_vars(get_class($stmt)));
     sort($variables);
-    foreach ($variables as $k => $var)
+    foreach ($variables as $var)
         printf("%s\n", $var);
 
     printf("\nObject variables:\n");
     $variables = array_keys(get_object_vars($stmt));
-    foreach ($variables as $k => $var)
+    foreach ($variables as $var)
         printf("%s\n", $var);
 
 printf("\nMagic, magic properties:\n");

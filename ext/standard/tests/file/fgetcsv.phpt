@@ -34,7 +34,7 @@ various fgetcsv() functionality tests
         fwrite($fp, $v);
         fclose($fp);
 
-        var_dump(fgetcsv(fopen($file, "r"), 1024));
+        var_dump(fgetcsv(fopen($file, "r"), 1024, escape: "\\"));
     }
     @unlink($file);
 ?>

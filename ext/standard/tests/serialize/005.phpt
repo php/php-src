@@ -157,7 +157,7 @@ Deprecated: %s implements the Serializable interface, which is deprecated. Imple
 
 Warning: Erroneous data format for unserializing 'TestNANew' in %s005.php on line %d
 
-Notice: unserialize(): Error at offset 19 of 20 bytes in %s005.php on line %d
+Warning: unserialize(): Error at offset 19 of 20 bytes in %s on line %d
 bool(false)
 ===NANew2===
 unserializer(TestNANew2)

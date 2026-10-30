@@ -247,17 +247,12 @@ PHP_HASH_API void PHP_GOSTInitCrypto(PHP_GOST_CTX *context, ZEND_ATTRIBUTE_UNUSE
 	context->tables = &tables_crypto;
 }
 
-static const uint32_t MAX32 = 0xffffffffLU;
-
 PHP_HASH_API void PHP_GOSTUpdate(PHP_GOST_CTX *context, const unsigned char *input, size_t len)
 {
-	if ((MAX32 - context->count[0]) < (len * 8)) {
-		context->count[1]++;
-		context->count[0] = MAX32 - context->count[0];
-		context->count[0] = (len * 8) - context->count[0];
-	} else {
-		context->count[0] += len * 8;
-	}
+	uint64_t count = (((uint64_t) context->count[1] << 32) | context->count[0]) + (uint64_t) len * 8;
+
+	context->count[0] = (uint32_t) count;
+	context->count[1] = (uint32_t) (count >> 32);
 
 	if (context->length + len < 32) {
 		memcpy(&context->buffer[context->length], input, len);
@@ -329,7 +324,8 @@ const php_hash_ops php_hash_gost_ops = {
 	32,
 	32,
 	sizeof(PHP_GOST_CTX),
-	1
+	1,
+	0
 };
 
 const php_hash_ops php_hash_gost_crypto_ops = {
@@ -344,5 +340,6 @@ const php_hash_ops php_hash_gost_crypto_ops = {
 	32,
 	32,
 	sizeof(PHP_GOST_CTX),
-	1
+	1,
+	0
 };

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 8fa6f4fa2f3eb8db944626b5b3d814f5e3ae04a3 */
+ * Stub hash: e0d2498c10cba72adb97504fd13e178e090de2cd */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_libxml_set_streams_context, 0, 1, IS_VOID, 0)
 	ZEND_ARG_INFO(0, context)
@@ -29,7 +29,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_libxml_get_external_entity_loader, 0, 0, IS_CALLABLE, 1)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(libxml_set_streams_context);
 ZEND_FUNCTION(libxml_use_internal_errors);
 ZEND_FUNCTION(libxml_get_last_error);
@@ -39,21 +38,15 @@ ZEND_FUNCTION(libxml_disable_entity_loader);
 ZEND_FUNCTION(libxml_set_external_entity_loader);
 ZEND_FUNCTION(libxml_get_external_entity_loader);
 
-
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(libxml_set_streams_context, arginfo_libxml_set_streams_context)
 	ZEND_FE(libxml_use_internal_errors, arginfo_libxml_use_internal_errors)
 	ZEND_FE(libxml_get_last_error, arginfo_libxml_get_last_error)
 	ZEND_FE(libxml_get_errors, arginfo_libxml_get_errors)
 	ZEND_FE(libxml_clear_errors, arginfo_libxml_clear_errors)
-	ZEND_DEP_FE(libxml_disable_entity_loader, arginfo_libxml_disable_entity_loader)
+	ZEND_RAW_FENTRY("libxml_disable_entity_loader", zif_libxml_disable_entity_loader, arginfo_libxml_disable_entity_loader, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(libxml_set_external_entity_loader, arginfo_libxml_set_external_entity_loader)
 	ZEND_FE(libxml_get_external_entity_loader, arginfo_libxml_get_external_entity_loader)
-	ZEND_FE_END
-};
-
-
-static const zend_function_entry class_LibXMLError_methods[] = {
 	ZEND_FE_END
 };
 
@@ -62,7 +55,11 @@ static void register_libxml_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("LIBXML_VERSION", LIBXML_VERSION, CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("LIBXML_DOTTED_VERSION", LIBXML_DOTTED_VERSION, CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("LIBXML_LOADED_VERSION", PHP_LIBXML_LOADED_VERSION, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXML_RECOVER", XML_PARSE_RECOVER, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LIBXML_NOENT", XML_PARSE_NOENT, CONST_PERSISTENT);
+#if LIBXML_VERSION >= 21300
+	REGISTER_LONG_CONSTANT("LIBXML_NO_XXE", XML_PARSE_NO_XXE, CONST_PERSISTENT);
+#endif
 	REGISTER_LONG_CONSTANT("LIBXML_DTDLOAD", XML_PARSE_DTDLOAD, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LIBXML_DTDATTR", XML_PARSE_DTDATTR, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LIBXML_DTDVALID", XML_PARSE_DTDVALID, CONST_PERSISTENT);
@@ -77,31 +74,38 @@ static void register_libxml_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("LIBXML_COMPACT", XML_PARSE_COMPACT, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LIBXML_NOXMLDECL", XML_SAVE_NO_DECL, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LIBXML_PARSEHUGE", XML_PARSE_HUGE, CONST_PERSISTENT);
-#if LIBXML_VERSION >= 20900
 	REGISTER_LONG_CONSTANT("LIBXML_BIGLINES", XML_PARSE_BIG_LINES, CONST_PERSISTENT);
-#endif
 	REGISTER_LONG_CONSTANT("LIBXML_NOEMPTYTAG", LIBXML_SAVE_NOEMPTYTAG, CONST_PERSISTENT);
 #if defined(LIBXML_SCHEMAS_ENABLED)
 	REGISTER_LONG_CONSTANT("LIBXML_SCHEMA_CREATE", XML_SCHEMA_VAL_VC_I_CREATE, CONST_PERSISTENT);
 #endif
-#if LIBXML_VERSION >= 20707
 	REGISTER_LONG_CONSTANT("LIBXML_HTML_NOIMPLIED", HTML_PARSE_NOIMPLIED, CONST_PERSISTENT);
-#endif
-#if LIBXML_VERSION >= 20708
 	REGISTER_LONG_CONSTANT("LIBXML_HTML_NODEFDTD", HTML_PARSE_NODEFDTD, CONST_PERSISTENT);
-#endif
 	REGISTER_LONG_CONSTANT("LIBXML_ERR_NONE", XML_ERR_NONE, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LIBXML_ERR_WARNING", XML_ERR_WARNING, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LIBXML_ERR_ERROR", XML_ERR_ERROR, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LIBXML_ERR_FATAL", XML_ERR_FATAL, CONST_PERSISTENT);
+
+
+	zend_attribute *attribute_Deprecated_func_libxml_disable_entity_loader_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "libxml_disable_entity_loader", sizeof("libxml_disable_entity_loader") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_func_libxml_disable_entity_loader_0_arg0;
+	zend_string *attribute_Deprecated_func_libxml_disable_entity_loader_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_libxml_disable_entity_loader_0_arg0, attribute_Deprecated_func_libxml_disable_entity_loader_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_libxml_disable_entity_loader_0->args[0].value, &attribute_Deprecated_func_libxml_disable_entity_loader_0_arg0);
+	attribute_Deprecated_func_libxml_disable_entity_loader_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_libxml_disable_entity_loader_0_arg1;
+	zend_string *attribute_Deprecated_func_libxml_disable_entity_loader_0_arg1_str = zend_string_init("as external entity loading is disabled by default", strlen("as external entity loading is disabled by default"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_libxml_disable_entity_loader_0_arg1, attribute_Deprecated_func_libxml_disable_entity_loader_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_libxml_disable_entity_loader_0->args[1].value, &attribute_Deprecated_func_libxml_disable_entity_loader_0_arg1);
+	attribute_Deprecated_func_libxml_disable_entity_loader_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
 
 static zend_class_entry *register_class_LibXMLError(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "LibXMLError", class_LibXMLError_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	INIT_CLASS_ENTRY(ce, "LibXMLError", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 
 	zval property_level_default_value;
 	ZVAL_UNDEF(&property_level_default_value);

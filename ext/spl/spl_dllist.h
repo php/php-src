@@ -18,7 +18,6 @@
 #define SPL_DLLIST_H
 
 #include "php.h"
-#include "php_spl.h"
 
 #define SPL_DLLIST_IT_KEEP   0x00000000
 #define SPL_DLLIST_IT_FIFO   0x00000000 /* FIFO flag makes the iterator traverse the structure as a FirstInFirstOut */

@@ -4,16 +4,19 @@ PostgreSQL pg_convert() (9.0+)
 pgsql
 --SKIPIF--
 <?php
-include("skipif.inc");
+include("inc/skipif.inc");
 skip_bytea_not_hex();
 ?>
 --FILE--
 <?php
 error_reporting(E_ALL);
 
-include 'config.inc';
+include 'inc/config.inc';
+$table_name = "table_10pg_convert_9";
 
 $db = pg_connect($conn_str);
+pg_query($db, "CREATE TABLE {$table_name} (num int, str text, bin bytea)");
+
 pg_query($db, "SET standard_conforming_strings = 0");
 
 $fields = array('num'=>'1234', 'str'=>'AAA', 'bin'=>'BBB');
@@ -54,6 +57,14 @@ try {
 /* standard_conforming_strings = 1 */
 pg_query($db, "SET standard_conforming_strings = 1");
 var_dump(pg_convert($db, $table_name, ['str' => "\\' OR 1=1"]));
+?>
+--CLEAN--
+<?php
+include('inc/config.inc');
+$table_name = "table_10pg_convert_9";
+
+$db = pg_connect($conn_str);
+pg_query($db, "DROP TABLE IF EXISTS {$table_name}");
 ?>
 --EXPECT--
 array(3) {

@@ -2,6 +2,12 @@
 Bug #77943 (imageantialias($image, false); does not work)
 --EXTENSIONS--
 gd
+--SKIPIF--
+<?php
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
+?>
 --FILE--
 <?php
 require_once __DIR__ . '/func.inc';

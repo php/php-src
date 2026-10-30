@@ -5,7 +5,6 @@ opcache
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
-opcache.jit_buffer_size=1M
 opcache.jit=1255
 opcache.file_update_protection=0
 opcache.revalidate_freq=0
@@ -67,5 +66,6 @@ for ($i = 0; $i < 10; $i++) {
 }
 
 print "OK";
+?>
 --EXPECT--
 OK

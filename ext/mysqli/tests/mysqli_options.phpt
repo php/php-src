@@ -9,7 +9,7 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-require_once "connect.inc";
+require_once 'connect.inc';
 
 $link = mysqli_init();
 
@@ -27,20 +27,6 @@ var_dump("MYSQLI_INIT_COMMAND", mysqli_options($link, MYSQLI_INIT_COMMAND, array
 if (!$link2 = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
     printf("[006] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
         $host, $user, $db, $port, $socket);
-}
-
-if (!$res = mysqli_query($link2, 'SELECT version() AS server_version')) {
-    printf("[007] [%d] %s\n", mysqli_errno($link2), mysqli_error($link2));
-}
-$tmp = mysqli_fetch_assoc($res);
-mysqli_free_result($res);
-$version = explode('.', $tmp['server_version']);
-if (empty($version)) {
-    printf("[008] Cannot determine server version, need MySQL Server 4.1+ for the test!\n");
-}
-
-if ($version[0] <= 4 && $version[1] < 1) {
-    printf("[009] Need MySQL Server 4.1+ for the test!\n");
 }
 
 if (!$res = mysqli_query($link2, "SHOW CHARACTER SET")) {

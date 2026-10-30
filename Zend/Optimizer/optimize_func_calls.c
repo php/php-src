@@ -48,6 +48,7 @@ static void zend_delete_call_instructions(zend_op_array *op_array, zend_op *opli
 			case ZEND_INIT_STATIC_METHOD_CALL:
 			case ZEND_INIT_METHOD_CALL:
 			case ZEND_INIT_FCALL:
+			case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
 				if (call == 0) {
 					MAKE_NOP(opline);
 					return;
@@ -62,6 +63,7 @@ static void zend_delete_call_instructions(zend_op_array *op_array, zend_op *opli
 			case ZEND_DO_ICALL:
 			case ZEND_DO_UCALL:
 			case ZEND_DO_FCALL_BY_NAME:
+			case ZEND_CALLABLE_CONVERT:
 				call++;
 				break;
 			case ZEND_SEND_VAL:
@@ -78,7 +80,7 @@ static void zend_delete_call_instructions(zend_op_array *op_array, zend_op *opli
 static void zend_try_inline_call(zend_op_array *op_array, zend_op *fcall, zend_op *opline, zend_function *func)
 {
 	if (func->type == ZEND_USER_FUNCTION
-	 && !(func->op_array.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_HAS_TYPE_HINTS))
+	 && !(func->op_array.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_HAS_TYPE_HINTS|ZEND_ACC_DEPRECATED))
 		/* TODO: function copied from trait may be inconsistent ??? */
 	 && !(func->op_array.fn_flags & (ZEND_ACC_TRAIT_CLONE))
 	 && fcall->extended_value >= func->op_array.required_num_args
@@ -169,12 +171,15 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			case ZEND_INIT_METHOD_CALL:
 			case ZEND_INIT_FCALL:
 			case ZEND_NEW:
+			case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
 				/* The argument passing optimizations are valid for prototypes as well,
 				 * as inheritance cannot change between ref <-> non-ref arguments. */
 				call_stack[call].func = zend_optimizer_get_called_func(
 					ctx->script, op_array, opline, &call_stack[call].is_prototype);
 				call_stack[call].try_inline =
-					!call_stack[call].is_prototype && opline->opcode != ZEND_NEW;
+					!call_stack[call].is_prototype
+					&& opline->opcode != ZEND_NEW
+					&& opline->opcode != ZEND_INIT_PARENT_PROPERTY_HOOK_CALL;
 				ZEND_FALLTHROUGH;
 			case ZEND_INIT_DYNAMIC_CALL:
 			case ZEND_INIT_USER_CALL:
@@ -212,6 +217,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						}
 					} else if (fcall->opcode == ZEND_INIT_STATIC_METHOD_CALL
 							|| fcall->opcode == ZEND_INIT_METHOD_CALL
+							|| fcall->opcode == ZEND_INIT_PARENT_PROPERTY_HOOK_CALL
 							|| fcall->opcode == ZEND_NEW) {
 						/* We don't have specialized opcodes for this, do nothing */
 					} else {
@@ -234,12 +240,13 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			case ZEND_FETCH_OBJ_FUNC_ARG:
 			case ZEND_FETCH_DIM_FUNC_ARG:
 				if (call_stack[call - 1].func_arg_num != (uint32_t)-1
+						&& call_stack[call - 1].last_check_func_arg_opline != NULL
 						&& has_known_send_mode(&call_stack[call - 1], call_stack[call - 1].func_arg_num)) {
 					if (ARG_SHOULD_BE_SENT_BY_REF(call_stack[call - 1].func, call_stack[call - 1].func_arg_num)) {
 						/* There's no TMP specialization for FETCH_OBJ_W/FETCH_DIM_W. Avoid
 						 * converting it and error at runtime in the FUNC_ARG variant. */
 						if ((opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG || opline->opcode == ZEND_FETCH_DIM_FUNC_ARG)
-						 && (opline->op1_type == IS_TMP_VAR || call_stack[call - 1].last_check_func_arg_opline == NULL)) {
+						 && opline->op1_type == IS_TMP_VAR) {
 							/* Don't remove the associated CHECK_FUNC_ARG opcode. */
 							call_stack[call - 1].last_check_func_arg_opline = NULL;
 							break;
@@ -255,6 +262,8 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 							/* FETCH_DIM_FUNC_ARG supports UNUSED op2, while FETCH_DIM_R does not.
 							 * Performing the replacement would create an invalid opcode. */
 							call_stack[call - 1].try_inline = 0;
+							/* Don't remove the associated CHECK_FUNC_ARG opcode. */
+							call_stack[call - 1].last_check_func_arg_opline = NULL;
 							break;
 						}
 

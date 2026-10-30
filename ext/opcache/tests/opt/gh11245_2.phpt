@@ -28,9 +28,9 @@ $_main:
 0000 T1 = PRE_INC_STATIC_PROP string("prop") string("X")
 0001 T2 = ISSET_ISEMPTY_CV (empty) CV0($xx)
 0002 JMPZ T2 0005
-0003 FREE T1
+0003 FREE T1 loop-end(+2)
 0004 RETURN null
 0005 FREE T1
 0006 RETURN int(1)
 LIVE RANGES:
-     1: 0001 - 0005 (tmp/var)
+     1: 0001 - 0003 (tmp/var)

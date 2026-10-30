@@ -44,7 +44,7 @@ PHP_FUNCTION(header)
 	ZEND_PARSE_PARAMETERS_END();
 
 	ctr.line = line;
-	ctr.line_len = (uint32_t)len;
+	ctr.line_len = len;
 	sapi_header_op(rep ? SAPI_HEADER_REPLACE:SAPI_HEADER_ADD, &ctr);
 }
 /* }}} */
@@ -62,17 +62,17 @@ PHP_FUNCTION(header_remove)
 	ZEND_PARSE_PARAMETERS_END();
 
 	ctr.line = line;
-	ctr.line_len = (uint32_t)len;
+	ctr.line_len = len;
 	sapi_header_op(line == NULL ? SAPI_HEADER_DELETE_ALL : SAPI_HEADER_DELETE, &ctr);
 }
 /* }}} */
 
-PHPAPI int php_header(void)
+PHPAPI bool php_header(void)
 {
 	if (sapi_send_headers()==FAILURE || SG(request_info).headers_only) {
-		return 0; /* don't allow output */
+		return false; /* don't allow output */
 	} else {
-		return 1; /* allow output */
+		return true; /* allow output */
 	}
 }
 
@@ -87,7 +87,7 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 	smart_str buf = {0};
 
 	if (!ZSTR_LEN(name)) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		return FAILURE;
 	}
 	if (strpbrk(ZSTR_VAL(name), "=,; \t\r\n\013\014") != NULL) {   /* man isspace for \013 and \014 */
@@ -213,14 +213,23 @@ static zend_result php_head_parse_cookie_options_array(HashTable *options, zend_
 		if (zend_string_equals_literal_ci(key, "expires")) {
 			*expires = zval_get_long(value);
 		} else if (zend_string_equals_literal_ci(key, "path")) {
+			if (*path) {
+				zend_string_release(*path);
+			}
 			*path = zval_get_string(value);
 		} else if (zend_string_equals_literal_ci(key, "domain")) {
+			if (*domain) {
+				zend_string_release(*domain);
+			}
 			*domain = zval_get_string(value);
 		} else if (zend_string_equals_literal_ci(key, "secure")) {
 			*secure = zval_is_true(value);
 		} else if (zend_string_equals_literal_ci(key, "httponly")) {
 			*httponly = zval_is_true(value);
 		} else if (zend_string_equals_literal_ci(key, "samesite")) {
+			if (*samesite) {
+				zend_string_release(*samesite);
+			}
 			*samesite = zval_get_string(value);
 		} else {
 			zend_value_error("%s(): option \"%s\" is invalid", get_active_function_name(), ZSTR_VAL(key));
@@ -371,6 +380,18 @@ PHP_FUNCTION(http_response_code)
 
 	if (response_code)
 	{
+		if (SG(headers_sent) && !SG(request_info).no_headers) {
+			const char *output_start_filename = php_output_get_start_filename();
+			int output_start_lineno = php_output_get_start_lineno();
+
+			if (output_start_filename) {
+				php_error_docref(NULL, E_WARNING, "Cannot set response code - headers already sent "
+					"(output started at %s:%d)", output_start_filename, output_start_lineno);
+			} else {
+				php_error_docref(NULL, E_WARNING, "Cannot set response code - headers already sent");
+			}
+			RETURN_FALSE;
+		}
 		zend_long old_response_code;
 
 		old_response_code = SG(sapi_headers).http_response_code;

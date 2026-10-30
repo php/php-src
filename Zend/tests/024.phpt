@@ -17,14 +17,14 @@ var_dump($a->$b->{$c[1]});
 --EXPECTF--
 Warning: Undefined variable $a in %s on line %d
 
-Warning: Trying to access array offset on value of type null in %s on line %d
+Warning: Trying to access array offset on null in %s on line %d
 NULL
 
 Warning: Undefined variable $a in %s on line %d
 
 Warning: Undefined variable $c in %s on line %d
 
-Warning: Trying to access array offset on value of type null in %s on line %d
+Warning: Trying to access array offset on null in %s on line %d
 NULL
 
 Warning: Undefined variable $a in %s on line %d
@@ -49,7 +49,7 @@ NULL
 
 Warning: Undefined variable $c in %s on line %d
 
-Warning: Trying to access array offset on value of type null in %s on line %d
+Warning: Trying to access array offset on null in %s on line %d
 
 Warning: Attempt to read property "1" on int in %s on line %d
 

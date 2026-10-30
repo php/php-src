@@ -17,6 +17,8 @@
 */
 
 #include "phar_internal.h"
+#include "ext/standard/crc32.h"
+#include "ext/standard/php_string.h" /* For php_stristr() */
 
 #define PHAR_GET_16(var) ((uint16_t)((((uint16_t)var[0]) & 0xff) | \
 	(((uint16_t)var[1]) & 0xff) << 8))
@@ -39,38 +41,90 @@ static inline void phar_write_16(char buffer[2], uint32_t value)
 # define PHAR_SET_32(var, value) phar_write_32(var, (uint32_t) (value));
 # define PHAR_SET_16(var, value) phar_write_16(var, (uint16_t) (value));
 
-static int phar_zip_process_extra(php_stream *fp, phar_entry_info *entry, uint16_t len) /* {{{ */
+static int phar_zip_process_extra(php_stream *fp, phar_entry_info *entry, uint16_t extra_len) /* {{{ */
 {
 	union {
 		phar_zip_extra_field_header header;
 		phar_zip_unix3 unix3;
+		phar_zip_unix_time time;
 	} h;
+	size_t len = extra_len;
 	size_t read;
 
-	do {
+	while (len) {
+		size_t header_size;
+
+		if (len < sizeof(h.header)) {
+			return FAILURE;
+		}
 		if (sizeof(h.header) != php_stream_read(fp, (char *) &h.header, sizeof(h.header))) {
 			return FAILURE;
+		}
+		len -= sizeof(h.header);
+		header_size = PHAR_GET_16(h.header.size);
+		if (header_size > len) {
+			return FAILURE;
+		}
+
+		if (h.header.tag[0] == 'U' && h.header.tag[1] == 'T') {
+			/* Unix timestamp header found.
+			 * The flags field indicates which timestamp fields are present.
+			 * The size with a timestamp is at least 5 (== 9 - tag size) bytes, but may be larger.
+			 * We only store the modification time in the entry, so only read that.
+			 */
+			const size_t min_size = 5;
+			if (header_size >= min_size) {
+				read = php_stream_read(fp, &h.time.flags, min_size);
+				if (read != min_size) {
+					return FAILURE;
+				}
+				if (h.time.flags & (1 << 0)) {
+					/* Modification time set */
+					entry->timestamp = PHAR_GET_32(h.time.time);
+				}
+
+				/* Consume remaining bytes */
+				if (header_size != read && -1 == php_stream_seek(fp, header_size - read, SEEK_CUR)) {
+					return FAILURE;
+				}
+				len -= header_size;
+				continue;
+			}
+			/* Fallthrough to next if to skip header */
 		}
 
 		if (h.header.tag[0] != 'n' || h.header.tag[1] != 'u') {
 			/* skip to next header */
-			php_stream_seek(fp, PHAR_GET_16(h.header.size), SEEK_CUR);
-			len -= PHAR_GET_16(h.header.size) + 4;
+			if (header_size && -1 == php_stream_seek(fp, header_size, SEEK_CUR)) {
+				return FAILURE;
+			}
+			len -= header_size;
 			continue;
 		}
 
 		/* unix3 header found */
-		read = php_stream_read(fp, (char *) &(h.unix3.crc32), sizeof(h.unix3) - sizeof(h.header));
-		len -= read + 4;
-
-		if (sizeof(h.unix3) - sizeof(h.header) != read) {
+		size_t unix3_size = sizeof(h.unix3) - sizeof(h.header);
+		size_t field_size = header_size;
+		if (field_size == unix3_size - sizeof(h.unix3.crc32)) {
+			/* Some archives omit the CRC32 from the unix3 size field. */
+			field_size = unix3_size;
+		}
+		if (field_size < unix3_size || field_size > len) {
 			return FAILURE;
 		}
 
-		if (PHAR_GET_16(h.unix3.size) > sizeof(h.unix3) - 4) {
-			/* skip symlink filename - we may add this support in later */
-			php_stream_seek(fp, PHAR_GET_16(h.unix3.size) - sizeof(h.unix3.size), SEEK_CUR);
+		read = php_stream_read(fp, (char *) &(h.unix3.crc32), unix3_size);
+		if (unix3_size != read) {
+			return FAILURE;
 		}
+
+		if (field_size > unix3_size) {
+			/* skip symlink filename - we may add this support in later */
+			if (-1 == php_stream_seek(fp, field_size - unix3_size, SEEK_CUR)) {
+				return FAILURE;
+			}
+		}
+		len -= field_size;
 
 		/* set permissions */
 		entry->flags &= PHAR_ENT_COMPRESSION_MASK;
@@ -81,7 +135,7 @@ static int phar_zip_process_extra(php_stream *fp, phar_entry_info *entry, uint16
 			entry->flags |= PHAR_GET_16(h.unix3.perms) & PHAR_ENT_PERM_MASK;
 		}
 
-	} while (len);
+	}
 
 	return SUCCESS;
 }
@@ -120,7 +174,7 @@ static int phar_zip_process_extra(php_stream *fp, phar_entry_info *entry, uint16
   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-static time_t phar_zip_d2u_time(char *cdtime, char *cddate) /* {{{ */
+static time_t phar_zip_d2u_time(const char *cdtime, const char *cddate) /* {{{ */
 {
 	int dtime = PHAR_GET_16(cdtime), ddate = PHAR_GET_16(cddate);
 	struct tm *tm, tmbuf;
@@ -313,29 +367,8 @@ foundit:
 	entry.is_zip = 1;
 	entry.fp_type = PHAR_FP;
 	entry.is_persistent = mydata->is_persistent;
-#define PHAR_ZIP_FAIL_FREE(errmsg, save) \
-			zend_hash_destroy(&mydata->manifest); \
-			HT_INVALIDATE(&mydata->manifest); \
-			zend_hash_destroy(&mydata->mounted_dirs); \
-			HT_INVALIDATE(&mydata->mounted_dirs); \
-			zend_hash_destroy(&mydata->virtual_dirs); \
-			HT_INVALIDATE(&mydata->virtual_dirs); \
-			php_stream_close(fp); \
-			phar_metadata_tracker_free(&mydata->metadata_tracker, mydata->is_persistent); \
-			if (mydata->signature) { \
-				efree(mydata->signature); \
-			} \
-			if (error) { \
-				spprintf(error, 4096, "phar error: %s in zip-based phar \"%s\"", errmsg, mydata->fname); \
-			} \
-			pefree(mydata->fname, mydata->is_persistent); \
-			if (mydata->alias) { \
-				pefree(mydata->alias, mydata->is_persistent); \
-			} \
-			pefree(mydata, mydata->is_persistent); \
-			efree(save); \
-			return FAILURE;
 #define PHAR_ZIP_FAIL(errmsg) \
+			efree(actual_alias); \
 			zend_hash_destroy(&mydata->manifest); \
 			HT_INVALIDATE(&mydata->manifest); \
 			zend_hash_destroy(&mydata->mounted_dirs); \
@@ -463,7 +496,6 @@ foundit:
 				PHAR_ZIP_FAIL("signatures larger than 64 KiB are not supported");
 			}
 
-			php_stream_tell(fp);
 			sigfile = php_stream_fopen_tmpfile();
 			if (!sigfile) {
 				PHAR_ZIP_FAIL("couldn't open temporary file");
@@ -490,14 +522,13 @@ foundit:
 			mydata->sig_flags = PHAR_GET_32(sig);
 			if (FAILURE == phar_verify_signature(sigfile, php_stream_tell(sigfile), mydata->sig_flags, sig + 8, entry.uncompressed_filesize - 8, fname, &mydata->signature, &sig_len, error)) {
 				efree(sig);
+				php_stream_close(sigfile);
 				if (error) {
-					char *save;
-					php_stream_close(sigfile);
-					spprintf(&save, 4096, "signature cannot be verified: %s", *error);
+					char errmsg[128];
+					snprintf(errmsg, sizeof(errmsg), "signature cannot be verified: %s", *error);
 					efree(*error);
-					PHAR_ZIP_FAIL_FREE(save, save);
+					PHAR_ZIP_FAIL(errmsg);
 				} else {
-					php_stream_close(sigfile);
 					PHAR_ZIP_FAIL("signature cannot be verified");
 				}
 			}
@@ -642,7 +673,8 @@ foundit:
 					}
 				}
 
-				if (!entry.uncompressed_filesize || !actual_alias) {
+				if (!entry.uncompressed_filesize) {
+					php_stream_filter_remove(filter, 1);
 					pefree(entry.filename, entry.is_persistent);
 					PHAR_ZIP_FAIL("unable to read in alias, truncated");
 				}
@@ -674,7 +706,8 @@ foundit:
 					}
 				}
 
-				if (!entry.uncompressed_filesize || !actual_alias) {
+				if (!entry.uncompressed_filesize) {
+					php_stream_filter_remove(filter, 1);
 					pefree(entry.filename, entry.is_persistent);
 					PHAR_ZIP_FAIL("unable to read in alias, truncated");
 				}
@@ -696,7 +729,7 @@ foundit:
 					}
 				}
 
-				if (!entry.uncompressed_filesize || !actual_alias) {
+				if (!entry.uncompressed_filesize) {
 					pefree(entry.filename, entry.is_persistent);
 					PHAR_ZIP_FAIL("unable to read in alias, truncated");
 				}
@@ -813,7 +846,6 @@ int phar_open_or_create_zip(char *fname, size_t fname_len, char *alias, size_t a
 	}
 
 	if (phar->is_brandnew) {
-		phar->internal_file_start = 0;
 		phar->is_zip = 1;
 		phar->is_tar = 0;
 		return SUCCESS;
@@ -832,9 +864,9 @@ struct _phar_zip_pass {
 	php_stream *filefp;
 	php_stream *centralfp;
 	php_stream *old;
-	int free_fp;
-	int free_ufp;
 	char **error;
+	bool free_fp;
+	bool free_ufp;
 };
 /* perform final modification of zip contents for each file in the manifest before saving */
 static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ */
@@ -854,7 +886,7 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 	}
 
 	if (entry->is_deleted) {
-		if (entry->fp_refcount <= 0) {
+		if (entry->fp_refcount <= 0 && entry->fileinfo_lock_count == 0) {
 			return ZEND_HASH_APPLY_REMOVE;
 		} else {
 			/* we can't delete this in-memory until it is closed */
@@ -969,6 +1001,7 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 		entry->cfp = php_stream_fopen_tmpfile();
 
 		if (!entry->cfp) {
+			php_stream_filter_free(filter);
 			spprintf(p->error, 0, "unable to create temporary file for file \"%s\" while creating zip-based phar \"%s\"", entry->filename, entry->phar->fname);
 			return ZEND_HASH_APPLY_STOP;
 		}
@@ -976,6 +1009,7 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 		php_stream_flush(efp);
 
 		if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, 0)) {
+			php_stream_filter_free(filter);
 			spprintf(p->error, 0, "unable to seek to start of file \"%s\" to zip-based phar \"%s\"", entry->filename, entry->phar->fname);
 			return ZEND_HASH_APPLY_STOP;
 		}
@@ -983,6 +1017,7 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 		php_stream_filter_append((&entry->cfp->writefilters), filter);
 
 		if (SUCCESS != php_stream_copy_to_stream_ex(efp, entry->cfp, entry->uncompressed_filesize, NULL)) {
+			php_stream_filter_remove(filter, 1);
 			spprintf(p->error, 0, "unable to copy compressed file contents of file \"%s\" while creating new phar \"%s\"", entry->filename, entry->phar->fname);
 			return ZEND_HASH_APPLY_STOP;
 		}
@@ -1188,7 +1223,9 @@ static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pas
 		entry.fp_type = PHAR_MOD;
 		entry.is_modified = 1;
 		if (entry.fp == NULL) {
+			efree(signature);
 			spprintf(pass->error, 0, "phar error: unable to create temporary file for signature");
+			php_stream_close(newfile);
 			return FAILURE;
 		}
 
@@ -1221,14 +1258,13 @@ static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pas
 }
 /* }}} */
 
-int phar_zip_flush(phar_archive_data *phar, char *user_stub, zend_long len, int defaultstub, char **error) /* {{{ */
+int phar_zip_flush(phar_archive_data *phar, zend_string *user_stub, bool is_default_stub, char **error) /* {{{ */
 {
-	char *pos;
 	static const char newstub[] = "<?php // zip-based phar archive stub file\n__HALT_COMPILER();";
-	char halt_stub[] = "__HALT_COMPILER();";
+	static const char halt_stub[] = "__HALT_COMPILER();";
 
-	php_stream *stubfile, *oldfile;
-	int free_user_stub, closeoldfile = 0;
+	php_stream *oldfile;
+	bool must_close_old_file = false;
 	phar_entry_info entry = {0};
 	char *temperr = NULL;
 	struct _phar_zip_pass pass;
@@ -1239,7 +1275,7 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 	entry.flags = PHAR_ENT_PERM_DEF_FILE;
 	entry.timestamp = time(NULL);
 	entry.is_modified = 1;
-	entry.is_zip = 1;
+	entry.is_zip = true;
 	entry.phar = phar;
 	entry.fp_type = PHAR_MOD;
 
@@ -1262,6 +1298,7 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 			return EOF;
 		}
 		if (phar->alias_len != php_stream_write(entry.fp, phar->alias, phar->alias_len)) {
+			php_stream_close(entry.fp);
 			if (error) {
 				spprintf(error, 0, "unable to set alias in zip-based phar \"%s\"", phar->fname);
 			}
@@ -1285,74 +1322,33 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 	}
 
 	/* set stub */
-	if (user_stub && !defaultstub) {
-		if (len < 0) {
-			/* resource passed in */
-			if (!(php_stream_from_zval_no_verify(stubfile, (zval *)user_stub))) {
-				if (error) {
-					spprintf(error, 0, "unable to access resource to copy stub to new zip-based phar \"%s\"", phar->fname);
-				}
-				return EOF;
-			}
+	if (user_stub && !is_default_stub) {
+		char *pos = php_stristr(ZSTR_VAL(user_stub), halt_stub, ZSTR_LEN(user_stub), strlen(halt_stub));
 
-			if (len == -1) {
-				len = PHP_STREAM_COPY_ALL;
-			} else {
-				len = -len;
-			}
-
-			user_stub = 0;
-
-			// TODO: refactor to avoid reallocation ???
-//???		len = php_stream_copy_to_mem(stubfile, &user_stub, len, 0)
-			{
-				zend_string *str = php_stream_copy_to_mem(stubfile, len, 0);
-				if (str) {
-					len = ZSTR_LEN(str);
-					user_stub = estrndup(ZSTR_VAL(str), ZSTR_LEN(str));
-					zend_string_release_ex(str, 0);
-				} else {
-					user_stub = NULL;
-					len = 0;
-				}
-			}
-
-			if (!len || !user_stub) {
-				if (error) {
-					spprintf(error, 0, "unable to read resource to copy stub to new zip-based phar \"%s\"", phar->fname);
-				}
-				return EOF;
-			}
-			free_user_stub = 1;
-		} else {
-			free_user_stub = 0;
-		}
-
-		if ((pos = php_stristr(user_stub, halt_stub, len, sizeof(halt_stub) - 1)) == NULL) {
+		if (pos == NULL) {
 			if (error) {
 				spprintf(error, 0, "illegal stub for zip-based phar \"%s\"", phar->fname);
-			}
-			if (free_user_stub) {
-				efree(user_stub);
 			}
 			return EOF;
 		}
 
-		len = pos - user_stub + 18;
+		size_t len = pos - ZSTR_VAL(user_stub) + strlen(halt_stub);
+		const char end_sequence[] = " ?>\r\n";
+		size_t end_sequence_len = strlen(end_sequence);
+
 		entry.fp = php_stream_fopen_tmpfile();
 		if (entry.fp == NULL) {
 			spprintf(error, 0, "phar error: unable to create temporary file");
 			return EOF;
 		}
-		entry.uncompressed_filesize = len + 5;
+		entry.uncompressed_filesize = len + end_sequence_len;
 
-		if ((size_t)len != php_stream_write(entry.fp, user_stub, len)
-		||            5 != php_stream_write(entry.fp, " ?>\r\n", 5)) {
+		if (
+			len != php_stream_write(entry.fp, ZSTR_VAL(user_stub), len)
+			|| end_sequence_len != php_stream_write(entry.fp, end_sequence, end_sequence_len)
+		) {
 			if (error) {
 				spprintf(error, 0, "unable to create stub from string in new zip-based phar \"%s\"", phar->fname);
-			}
-			if (free_user_stub) {
-				efree(user_stub);
 			}
 			php_stream_close(entry.fp);
 			return EOF;
@@ -1362,10 +1358,6 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 		entry.filename_len = sizeof(".phar/stub.php")-1;
 
 		zend_hash_str_update_mem(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info));
-
-		if (free_user_stub) {
-			efree(user_stub);
-		}
 	} else {
 		/* Either this is a brand new phar (add the stub), or the default stub is required (overwrite the stub) */
 		entry.fp = php_stream_fopen_tmpfile();
@@ -1385,7 +1377,7 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 		entry.filename = estrndup(".phar/stub.php", sizeof(".phar/stub.php")-1);
 		entry.filename_len = sizeof(".phar/stub.php")-1;
 
-		if (!defaultstub) {
+		if (!is_default_stub) {
 			if (!zend_hash_str_exists(&phar->manifest, ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
 				if (NULL == zend_hash_str_add_mem(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info))) {
 					php_stream_close(entry.fp);
@@ -1406,11 +1398,11 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 nostub:
 	if (phar->fp && !phar->is_brandnew) {
 		oldfile = phar->fp;
-		closeoldfile = 0;
+		must_close_old_file = false;
 		php_stream_rewind(oldfile);
 	} else {
 		oldfile = php_stream_open_wrapper(phar->fname, "rb", 0, NULL);
-		closeoldfile = oldfile != NULL;
+		must_close_old_file = oldfile != NULL;
 	}
 
 	/* save modified files to the zip */
@@ -1419,7 +1411,7 @@ nostub:
 
 	if (!pass.filefp) {
 fperror:
-		if (closeoldfile) {
+		if (must_close_old_file) {
 			php_stream_close(oldfile);
 		}
 		if (error) {
@@ -1431,6 +1423,7 @@ fperror:
 	pass.centralfp = php_stream_fopen_tmpfile();
 
 	if (!pass.centralfp) {
+		php_stream_close(pass.filefp);
 		goto fperror;
 	}
 
@@ -1452,15 +1445,16 @@ fperror:
 
 	phar_metadata_tracker_try_ensure_has_serialized_data(&phar->metadata_tracker, phar->is_persistent);
 	if (temperr) {
+temperror:
 		if (error) {
 			spprintf(error, 4096, "phar zip flush of \"%s\" failed: %s", phar->fname, temperr);
 		}
 		efree(temperr);
-temperror:
+notemperror:
 		php_stream_close(pass.centralfp);
 nocentralerror:
 		php_stream_close(pass.filefp);
-		if (closeoldfile) {
+		if (must_close_old_file) {
 			php_stream_close(oldfile);
 		}
 		return EOF;
@@ -1484,7 +1478,7 @@ nocentralerror:
 			if (error) {
 				spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to write central-directory", phar->fname);
 			}
-			goto temperror;
+			goto notemperror;
 		}
 	}
 
@@ -1537,7 +1531,7 @@ nocentralerror:
 	} else {
 		phar->fp = php_stream_open_wrapper(phar->fname, "w+b", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
 		if (!phar->fp) {
-			if (closeoldfile) {
+			if (must_close_old_file) {
 				php_stream_close(oldfile);
 			}
 			phar->fp = pass.filefp;
@@ -1552,9 +1546,9 @@ nocentralerror:
 		php_stream_close(pass.filefp);
 	}
 
-	if (closeoldfile) {
+	if (must_close_old_file) {
 		php_stream_close(oldfile);
 	}
-	return EOF;
+	return 0;
 }
 /* }}} */

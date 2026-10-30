@@ -7,4 +7,4 @@ error_reporting = E_ALL ^ E_NOTICE ^ E_WARNING ^ E_DEPRECATED
 echo ini_get('error_reporting');
 ?>
 --EXPECT--
-24565
+22517

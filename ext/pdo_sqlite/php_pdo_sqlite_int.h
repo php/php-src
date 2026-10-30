@@ -26,28 +26,23 @@ typedef struct {
 	char *errmsg;
 } pdo_sqlite_error_info;
 
-struct pdo_sqlite_fci {
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcc;
-};
-
 struct pdo_sqlite_func {
 	struct pdo_sqlite_func *next;
 
-	zval func, step, fini;
 	int argc;
 	const char *funcname;
 
 	/* accelerated callback references */
-	struct pdo_sqlite_fci afunc, astep, afini;
+	zend_fcall_info_cache func;
+	zend_fcall_info_cache step;
+	zend_fcall_info_cache fini;
 };
 
 struct pdo_sqlite_collation {
 	struct pdo_sqlite_collation *next;
 
 	const char *name;
-	zval callback;
-	struct pdo_sqlite_fci fc;
+	zend_fcall_info_cache callback;
 };
 
 typedef struct {
@@ -66,6 +61,8 @@ typedef struct {
 
 extern const pdo_driver_t pdo_sqlite_driver;
 
+extern int pdo_sqlite_scanner(pdo_scanner_t *s);
+
 extern int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line);
 #define pdo_sqlite_error(s) _pdo_sqlite_error(s, NULL, __FILE__, __LINE__)
 #define pdo_sqlite_error_stmt(s) _pdo_sqlite_error(stmt->dbh, stmt, __FILE__, __LINE__)
@@ -77,5 +74,11 @@ enum {
 	PDO_SQLITE_ATTR_READONLY_STATEMENT,
 	PDO_SQLITE_ATTR_EXTENDED_RESULT_CODES
 };
+
+typedef int pdo_sqlite_create_collation_callback(void*, int, const void*, int, const void*);
+
+void pdo_sqlite_create_function_internal(INTERNAL_FUNCTION_PARAMETERS);
+void pdo_sqlite_create_aggregate_internal(INTERNAL_FUNCTION_PARAMETERS);
+void pdo_sqlite_create_collation_internal(INTERNAL_FUNCTION_PARAMETERS, pdo_sqlite_create_collation_callback callback);
 
 #endif

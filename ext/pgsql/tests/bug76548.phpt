@@ -3,16 +3,16 @@ Bug #76548 pg_fetch_result did not fetch the next row
 --EXTENSIONS--
 pgsql
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php include("inc/skipif.inc"); ?>
 --FILE--
 <?php
-include('config.inc');
+include('inc/config.inc');
 
 $conn = pg_connect($conn_str);
 
 $result = pg_query($conn, 'SELECT v FROM (VALUES (1), (2), (3)) AS t(v)');
 
-while ($value = pg_fetch_result($result, 0)) {
+while ($value = pg_fetch_result($result, null, 0)) {
   var_dump($value); // should be 1, 2 then 3.
 }
 

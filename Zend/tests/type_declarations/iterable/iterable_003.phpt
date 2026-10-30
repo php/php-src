@@ -24,9 +24,11 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 array(0) {
 }
-object(Generator)#2 (0) {
+object(Generator)#%d (1) {
+  ["function"]=>
+  string(17) "{closure:bar():7}"
 }
 baz(): Return value must be of type Traversable|array, int returned

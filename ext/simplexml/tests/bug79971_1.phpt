@@ -1,8 +1,10 @@
 --TEST--
 Bug #79971 (special character is breaking the path in xml function)
+--EXTENSIONS--
+simplexml
 --SKIPIF--
 <?php
-if (!extension_loaded('simplexml')) die('skip simplexml extension not available');
+if (str_contains(getcwd(), ' ')) die('skip simplexml already escapes the path with spaces so this test does not work');
 ?>
 --FILE--
 <?php

@@ -29,11 +29,6 @@
 
 *************************************************************************/
 
-#include <config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
 #include "bcmath.h"
 #include "private.h"
 
@@ -43,9 +38,22 @@
 
 void _bc_rm_leading_zeros(bc_num num)
 {
-  /* We can move n_value to point to the first non zero digit! */
-  while (*num->n_value == 0 && num->n_len > 1) {
-    num->n_value++;
-    num->n_len--;
-  }
+	/* We can move n_value to point to the first non-zero digit! */
+	while (*num->n_value == 0 && num->n_len > 1) {
+		num->n_value++;
+		num->n_len--;
+	}
+}
+
+void bc_rm_trailing_zeros(bc_num num)
+{
+	if (num->n_scale == 0) {
+		return;
+	}
+
+	char *end = num->n_value + num->n_len + num->n_scale - 1;
+	while (*end == 0 && num->n_scale > 0) {
+		num->n_scale--;
+		end--;
+	}
 }

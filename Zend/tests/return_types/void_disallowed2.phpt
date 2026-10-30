@@ -1,5 +1,5 @@
 --TEST--
-void return type: unacceptable cases: explicit return of some other value
+void return type: unacceptable cases: explicit return of some other value in a function
 --FILE--
 <?php
 

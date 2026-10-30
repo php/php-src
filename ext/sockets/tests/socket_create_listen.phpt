@@ -7,6 +7,7 @@ sockets
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip.. Not valid for Windows');
 }
+?>
 --FILE--
 <?php
 $sock = socket_create_listen(31338);

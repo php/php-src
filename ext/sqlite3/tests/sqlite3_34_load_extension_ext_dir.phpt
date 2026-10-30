@@ -24,4 +24,4 @@ try {
 
 ?>
 --EXPECTF--
-Warning: SQLite3::loadExtension(): SQLite Extension are disabled in %s on line %d
+Warning: SQLite3::loadExtension(): SQLite Extensions are disabled in %s on line %d

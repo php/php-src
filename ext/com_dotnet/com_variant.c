@@ -15,7 +15,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -96,7 +96,7 @@ bogus:
 static void php_com_variant_from_zval_ex(VARIANT *v, zval *z, int codepage, VARTYPE vt)
 {
 	php_com_dotnet_object *obj;
-	zend_uchar ztype = IS_NULL;
+	uint8_t ztype = IS_NULL;
 
 	if (z) {
 		ZVAL_DEREF(z);
@@ -436,7 +436,7 @@ PHP_METHOD(variant, __construct)
 {
 	/* VARTYPE == unsigned short */ zend_long vt = VT_EMPTY;
 	zend_long codepage = CP_ACP;
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 	php_com_dotnet_object *obj;
 	zval *zvalue = NULL;
 	HRESULT res;

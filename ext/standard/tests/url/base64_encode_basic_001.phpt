@@ -14,7 +14,24 @@ for ($i=0; $i<256; $i++) {
     printf("0x%X: %s\n", $i, $enc);
 }
 
-echo "Done";
+$values = array(
+    "Hello World",
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!%^&*(){}[]",
+    "\n\t Line with control characters\r\n",
+    "\xC1\xC2\xC3\xC4\xC5\xC6",
+    "\75\76\77\78\79\80",
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%!",
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%!\75\76\77\78\79\80",
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%!",
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%!\75\76\77\78\79\80"
+);
+
+foreach($values as $str) {
+    $enc = base64_encode($str);
+    printf("%s\n", $enc);
+}
+
+echo "Done\n";
 ?>
 --EXPECT--
 *** Testing base64_encode() : basic functionality ***
@@ -274,4 +291,13 @@ echo "Done";
 0xFD: /Q==
 0xFE: /g==
 0xFF: /w==
+SGVsbG8gV29ybGQ=
+QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVoxMjM0NTY3ODkwISVeJiooKXt9W10=
+CgkgTGluZSB3aXRoIGNvbnRyb2wgY2hhcmFjdGVycw0K
+wcLDxMXG
+PT4/BzgHOVw4MA==
+QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVphYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ejAxMjM0NTY3ODklIQ==
+QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVphYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ejAxMjM0NTY3ODklIT0+Pwc4BzlcODA=
+QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVphYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ejAxMjM0NTY3ODklIUFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaYWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXowMTIzNDU2Nzg5JSE=
+QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVphYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ejAxMjM0NTY3ODklIUFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaYWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXowMTIzNDU2Nzg5JSE9Pj8HOAc5XDgw
 Done

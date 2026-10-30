@@ -2,12 +2,6 @@
 Test curl_getinfo() function with CURLINFO_* from curl >= 7.52.0
 --EXTENSIONS--
 curl
---SKIPIF--
-<?php $curl_version = curl_version();
-if ($curl_version['version_number'] < 0x073400) {
-        exit("skip: test works only with curl >= 7.52.0");
-}
-?>
 --FILE--
 <?php
 

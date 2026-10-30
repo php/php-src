@@ -4,14 +4,11 @@ mysqli_connect()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-
-    $tmp    = NULL;
-    $link   = NULL;
+    require_once 'connect.inc';
 
     /* we need to check, if the server allows anonymous login (empty user) */
     $tmp = @mysqli_connect('localhost');
@@ -19,6 +16,7 @@ require_once('skipifconnectfailure.inc');
 
     $exptype = ($anon_allow) ? "mysqli_object" : "false";
 
+    $link = NULL;
     $tmp = @mysqli_connect($link);
     if (($anon_allow && gettype($tmp) != "object") || (!$anon_allow && $tmp != false)) {
         printf("[002] Expecting %s, got %s/%s\n", $exptype, gettype($tmp), $tmp);

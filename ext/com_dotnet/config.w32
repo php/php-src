@@ -8,6 +8,6 @@ if (PHP_COM_DOTNET == "yes") {
 		com_handlers.c com_iterator.c com_misc.c com_olechar.c \
 		com_typeinfo.c com_variant.c com_wrapper.c com_saproxy.c com_persist.c",
 		null, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
-	AC_DEFINE('HAVE_COM_DOTNET', 1, 'Have COM_DOTNET support');
+	AC_DEFINE('HAVE_COM_DOTNET', 1, "Define to 1 if the PHP extension 'com_dotnet' is available.");
 	CHECK_HEADER_ADD_INCLUDE('mscoree.h', 'CFLAGS_COM_DOTNET');
 }

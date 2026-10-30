@@ -16,7 +16,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -43,7 +43,7 @@
 #include "exif_arginfo.h"
 #include <math.h>
 #include "php_ini.h"
-#include "ext/standard/php_string.h"
+#include "ext/standard/php_string.h" /* for php_basename() */
 #include "ext/standard/php_image.h"
 #include "ext/standard/info.h"
 
@@ -73,7 +73,7 @@ PHP_MINFO_FUNCTION(exif)
 	php_info_print_table_row(2, "Supported EXIF Version", "0220");
 	php_info_print_table_row(2, "Supported filetypes", "JPEG, TIFF");
 
-	if (zend_hash_str_exists(&module_registry, "mbstring", sizeof("mbstring")-1)) {
+	if (USE_MBSTRING) {
 		php_info_print_table_row(2, "Multibyte decoding support using mbstring", "enabled");
 	} else {
 		php_info_print_table_row(2, "Multibyte decoding support using mbstring", "disabled");
@@ -220,7 +220,7 @@ ZEND_GET_MODULE(exif)
  * is read or until there is no more data available to read. */
 static ssize_t exif_read_from_stream_file_looped(php_stream *stream, char *buf, size_t count)
 {
-	ssize_t total_read = 0;
+	size_t total_read = 0;
 	while (total_read < count) {
 		ssize_t ret = php_stream_read(stream, buf + total_read, count - total_read);
 		if (ret == -1) {
@@ -234,25 +234,13 @@ static ssize_t exif_read_from_stream_file_looped(php_stream *stream, char *buf, 
 	return total_read;
 }
 
-/* {{{ php_strnlen
- * get length of string if buffer if less than buffer size or buffer size */
-static size_t php_strnlen(char* str, size_t maxlen) {
-	size_t len = 0;
-
-	if (str && maxlen && *str) {
-		do {
-			len++;
-		} while (--maxlen && *(++str));
-	}
-	return len;
-}
 /* }}} */
 
 /* {{{ error messages */
-static const char * EXIF_ERROR_FILEEOF   = "Unexpected end of file reached";
-static const char * EXIF_ERROR_CORRUPT   = "File structure corrupted";
-static const char * EXIF_ERROR_THUMBEOF  = "Thumbnail goes IFD boundary or end of file reached";
-static const char * EXIF_ERROR_FSREALLOC = "Illegal reallocating of undefined file section";
+static const char *const EXIF_ERROR_FILEEOF   = "Unexpected end of file reached";
+static const char *const EXIF_ERROR_CORRUPT   = "File structure corrupted";
+static const char *const EXIF_ERROR_THUMBEOF  = "Thumbnail goes IFD boundary or end of file reached";
+static const char *const EXIF_ERROR_FSREALLOC = "Illegal reallocating of undefined file section";
 
 #define EXIF_ERRLOG_FILEEOF(ImageInfo)    exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "%s", EXIF_ERROR_FILEEOF);
 #define EXIF_ERRLOG_CORRUPT(ImageInfo)    exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "%s", EXIF_ERROR_CORRUPT);
@@ -263,7 +251,7 @@ static const char * EXIF_ERROR_FSREALLOC = "Illegal reallocating of undefined fi
 /* {{{ format description defines
    Describes format descriptor
 */
-static int php_tiff_bytes_per_format[] = {0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8, 1};
+static const int php_tiff_bytes_per_format[] = {0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8, 1};
 #define NUM_FORMATS 13
 
 #define TAG_FMT_BYTE       1
@@ -2200,16 +2188,12 @@ static image_info_data *exif_alloc_image_info_data(image_info_list *info_list) {
 /* {{{ exif_iif_add_value
  Add a value to image_info
 */
-static void exif_iif_add_value(image_info_type *image_info, int section_index, char *name, int tag, int format, int length, void* value, size_t value_len, int motorola_intel)
+static void exif_iif_add_value(image_info_type *image_info, int section_index, char *name, int tag, int format, size_t length, void* value, size_t value_len, int motorola_intel)
 {
 	size_t idex;
 	void *vptr, *vptr_end;
 	image_info_value *info_value;
 	image_info_data  *info_data;
-
-	if (length < 0) {
-		return;
-	}
 
 	info_data = exif_alloc_image_info_data(&image_info->info_list[section_index]);
 	memset(info_data, 0, sizeof(image_info_data));
@@ -2226,7 +2210,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 				value = NULL;
 			}
 			if (value) {
-				length = (int)php_strnlen(value, length);
+				length = zend_strnlen(value, length);
 				info_value->s = estrndup(value, length);
 				info_data->length = length;
 			} else {
@@ -2257,7 +2241,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 			}
 			if (value) {
 				if (tag == TAG_MAKER_NOTE) {
-					length = (int) php_strnlen(value, length);
+					length = zend_strnlen(value, length);
 				}
 
 				/* do not recompute length here */
@@ -2279,7 +2263,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 		case TAG_FMT_DOUBLE:
 			if (length==0) {
 				break;
-			} else
+			}
 			if (length>1) {
 				info_value->list = safe_femalloc(length, sizeof(image_info_value), 0, /* fallible */ true);
 				if (!info_value->list) {
@@ -2290,7 +2274,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 				info_value = &info_data->value;
 			}
 			vptr_end = (char *) value + value_len;
-			for (idex=0,vptr=value; idex<(size_t)length; idex++,vptr=(char *) vptr + php_tiff_bytes_per_format[format]) {
+			for (idex=0,vptr=value; idex<length; idex++,vptr=(char *) vptr + php_tiff_bytes_per_format[format]) {
 				if ((char *) vptr_end - (char *) vptr < php_tiff_bytes_per_format[format]) {
 					exif_error_docref("exif_iif_add_value" EXIFERR_CC, image_info, E_WARNING, "Value too short");
 					break;
@@ -2329,13 +2313,13 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 #ifdef EXIF_DEBUG
 						php_error_docref(NULL, E_WARNING, "Found value of type single");
 #endif
-						info_value->f = php_ifd_get_float(value);
+						info_value->f = php_ifd_get_float(vptr);
 						break;
 					case TAG_FMT_DOUBLE:
 #ifdef EXIF_DEBUG
 						php_error_docref(NULL, E_WARNING, "Found value of type double");
 #endif
-						info_value->d = php_ifd_get_double(value);
+						info_value->d = php_ifd_get_double(vptr);
 						break;
 				}
 			}
@@ -2349,7 +2333,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 */
 static void exif_iif_add_tag(image_info_type *image_info, int section_index, char *name, int tag, int format, size_t length, void* value, size_t value_len)
 {
-	exif_iif_add_value(image_info, section_index, name, tag, format, (int)length, value, value_len, image_info->motorola_intel);
+	exif_iif_add_value(image_info, section_index, name, tag, format, length, value, value_len, image_info->motorola_intel);
 }
 /* }}} */
 
@@ -2840,7 +2824,7 @@ static void* exif_ifd_make_value(image_info_data *info_data, int motorola_intel)
 	if (info_data->format == TAG_FMT_UNDEFINED || info_data->format == TAG_FMT_STRING
 	  || (byte_count>1 && (info_data->format == TAG_FMT_BYTE || info_data->format == TAG_FMT_SBYTE))
 	) {
-		memmove(value_ptr, info_data->value.s, byte_count);
+		memcpy(value_ptr, info_data->value.s, byte_count);
 		return value_ptr;
 	} else if (info_data->format == TAG_FMT_BYTE) {
 		*value_ptr = info_data->value.u;
@@ -2884,11 +2868,11 @@ static void* exif_ifd_make_value(image_info_data *info_data, int motorola_intel)
 					data_ptr += 8;
 					break;
 				case TAG_FMT_SINGLE:
-					memmove(data_ptr, &info_value->f, 4);
+					memcpy(data_ptr, &info_value->f, 4);
 					data_ptr += 4;
 					break;
 				case TAG_FMT_DOUBLE:
-					memmove(data_ptr, &info_value->d, 8);
+					memcpy(data_ptr, &info_value->d, 8);
 					data_ptr += 8;
 					break;
 			}
@@ -2945,9 +2929,9 @@ static void exif_thumbnail_build(image_info_type *ImageInfo) {
 			ImageInfo->Thumbnail.size += new_size;
 			/* fill in data */
 			if (ImageInfo->motorola_intel) {
-				memmove(new_data, "MM\x00\x2a\x00\x00\x00\x08", 8);
+				memcpy(new_data, "MM\x00\x2a\x00\x00\x00\x08", 8);
 			} else {
-				memmove(new_data, "II\x2a\x00\x08\x00\x00\x00", 8);
+				memcpy(new_data, "II\x2a\x00\x08\x00\x00\x00", 8);
 			}
 			new_data += 8;
 			php_ifd_set16u(new_data, info_list->count, ImageInfo->motorola_intel);
@@ -3072,11 +3056,11 @@ static int exif_process_string(char **result, char *value, size_t byte_count) {
 	/* we cannot use strlcpy - here the problem is that we cannot use strlen to
 	 * determine length of string and we cannot use strlcpy with len=byte_count+1
 	 * because then we might get into an EXCEPTION if we exceed an allocated
-	 * memory page...so we use php_strnlen in conjunction with memcpy and add the NUL
+	 * memory page...so we use zend_strnlen in conjunction with memcpy and add the NUL
 	 * char.
 	 * estrdup would sometimes allocate more memory and does not return length
 	 */
-	if ((byte_count=php_strnlen(value, byte_count)) > 0) {
+	if ((byte_count=zend_strnlen(value, byte_count)) > 0) {
 		return exif_process_undefined(result, value, byte_count);
 	}
 	(*result) = estrndup("", 1); /* force empty string */
@@ -3303,6 +3287,7 @@ static bool exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * val
 
 #define REQUIRE_NON_EMPTY() do { \
 	if (byte_count == 0) { \
+		EFREE_IF(outside); \
 		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Cannot be empty", tag, exif_get_tagname_debug(tag, tag_table)); \
 		return false; \
 	} \
@@ -3368,7 +3353,7 @@ static bool exif_process_IFD_TAG_impl(image_info_type *ImageInfo, char *dir_entr
 				 * it is faster to use a static buffer there
 				 * BUT it offers also the possibility to have
 				 * pointers read without the need to free them
-				 * explicitley before returning. */
+				 * explicitly before returning. */
 				memset(&cbuf, 0, sizeof(cbuf));
 				value_ptr = cbuf;
 			}
@@ -3453,7 +3438,7 @@ static bool exif_process_IFD_TAG_impl(image_info_type *ImageInfo, char *dir_entr
 		switch(tag) {
 			case TAG_COPYRIGHT:
 				/* check for "<photographer> NUL <editor> NUL" */
-				if (byte_count>1 && (length=php_strnlen(value_ptr, byte_count)) > 0) {
+				if (byte_count>1 && (length=zend_strnlen(value_ptr, byte_count)) > 0) {
 					if (length<byte_count-1) {
 						/* When there are any characters after the first NUL */
 						EFREE_IF(ImageInfo->CopyrightPhotographer);
@@ -3547,7 +3532,7 @@ static bool exif_process_IFD_TAG_impl(image_info_type *ImageInfo, char *dir_entr
 				switch (exif_convert_any_to_int(value_ptr, format, ImageInfo->motorola_intel)) {
 					case 1: ImageInfo->FocalplaneUnits = 25.4; break; /* inch */
 					case 2:
-						/* According to the information I was using, 2 measn meters.
+						/* According to the information I was using, 2 means meters.
 						   But looking at the Cannon powershot's files, inches is the only
 						   sensible value. */
 						ImageInfo->FocalplaneUnits = 25.4;
@@ -3702,8 +3687,14 @@ static bool exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start
 	 * There are 2 IDFs, the second one holds the keys (0x0201 and 0x0202) to the thumbnail
 	 */
 	if (!exif_offset_info_contains(info, dir_start+2+NumDirEntries*12, 4)) {
-		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Illegal IFD size");
-		return false;
+		/*
+		 * A TIFF/EXIF IFD ends with a 4-byte offset to the next IFD (IFD1 here,
+		 * which links the thumbnail), or zero when there is none. Some files end
+		 * the EXIF segment right after the entries and omit those 4 bytes. A
+		 * missing offset is valid and just means there is no next IFD, so stop
+		 * here instead of reporting the size as illegal.
+		 */
+		return true;
 	}
 
 	if (tag != TAG_EXIF_IFD_POINTER && tag != TAG_GPS_IFD_POINTER) {
@@ -3747,11 +3738,6 @@ static void exif_process_TIFF_in_JPEG(image_info_type *ImageInfo, char *CharBuf,
 {
 	unsigned exif_value_2a, offset_of_ifd;
 	exif_offset_info info;
-
-	if (length < 2) {
-		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Missing TIFF alignment marker");
-		return;
-	}
 
 	if (length < 2) {
 		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Missing TIFF alignment marker");
@@ -3826,10 +3812,10 @@ static void exif_process_APP12(image_info_type *ImageInfo, char *buffer, size_t 
 {
 	size_t l1, l2=0;
 
-	if ((l1 = php_strnlen(buffer+2, length-2)) > 0) {
+	if ((l1 = zend_strnlen(buffer+2, length-2)) > 0) {
 		exif_iif_add_tag(ImageInfo, SECTION_APP12, "Company", TAG_NONE, TAG_FMT_STRING, l1, buffer+2, l1);
 		if (length > 2+l1+1) {
-			l2 = php_strnlen(buffer+2+l1+1, length-2-l1-1);
+			l2 = zend_strnlen(buffer+2+l1+1, length-2-l1-1);
 			exif_iif_add_tag(ImageInfo, SECTION_APP12, "Info", TAG_NONE, TAG_FMT_STRING, l2, buffer+2+l1+1, l2);
 		}
 	}
@@ -3843,14 +3829,14 @@ static void exif_process_APP12(image_info_type *ImageInfo, char *buffer, size_t 
  * Parse the marker stream until SOS or EOI is seen; */
 static bool exif_scan_JPEG_header(image_info_type *ImageInfo)
 {
-	int section, sn;
+	int sn;
 	int marker = 0, last_marker = M_PSEUDO, comment_correction=1;
 	unsigned int ll, lh;
 	uchar *Data;
 	size_t fpos, size, got, itemlen;
 	jpeg_sof_info sof_info;
 
-	for(section=0;;section++) {
+	while (true) {
 		/* Every section is retained, so stop once over the limit. */
 		if (ZEND_HAS_OOM()) {
 			return false;
@@ -3888,11 +3874,8 @@ static bool exif_scan_JPEG_header(image_info_type *ImageInfo)
 
 		fpos = php_stream_tell(ImageInfo->infile);
 
-		if (marker == 0xff) {
-			/* 0xff is legal padding, but if we get that many, something's wrong. */
-			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "To many padding bytes");
-			return false;
-		}
+		/* safety net in case the above algorithm change dramatically, should not trigger */
+		ZEND_ASSERT(marker != 0xff);
 
 		/* Read the length of the section. */
 		if ((lh = php_stream_getc(ImageInfo->infile)) == (unsigned int)EOF) {
@@ -4633,7 +4616,7 @@ PHP_FUNCTION(exif_read_data)
 		}
 
 		if (!Z_STRLEN_P(stream)) {
-			zend_argument_value_error(1, "cannot be empty");
+			zend_argument_must_not_be_empty_error(1);
 			RETURN_THROWS();
 		}
 
@@ -4819,7 +4802,7 @@ PHP_FUNCTION(exif_thumbnail)
 		}
 
 		if (!Z_STRLEN_P(stream)) {
-			zend_argument_value_error(1, "cannot be empty");
+			zend_argument_must_not_be_empty_error(1);
 			RETURN_THROWS();
 		}
 

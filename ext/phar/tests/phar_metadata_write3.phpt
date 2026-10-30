@@ -79,7 +79,7 @@ Calling getMetadata with too low max_depth
 
 Warning: Phar::getMetadata(): Maximum depth of 1 exceeded. The depth limit can be changed using the max_depth unserialize() option or the unserialize_max_depth ini setting in %sphar_metadata_write3.php on line 39
 
-Notice: Phar::getMetadata(): Error at offset 34 of 59 bytes in %sphar_metadata_write3.php on line 39
+Warning: Phar::getMetadata(): Error at offset 34 of 59 bytes in %sphar_metadata_write3.php on line 39
 bool(false)
 Calling getMetadata with some allowed classes
 In wakeup

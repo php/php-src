@@ -37,6 +37,7 @@ function check_response($response, $clientCertSubject) {
 }
 
 $clientCertSubject = "Subject: C=US, ST=TX, L=Clientlocation, O=Clientcompany, CN=clientname/emailAddress=test@example.com";
+$rejectsZeroLengthBlobs = curl_version()['version_number'] >= 0x081300;
 
 // load server cert
 $serverCertPath = __DIR__ . DIRECTORY_SEPARATOR . 'curl_setopt_ssl_servercert.pem';
@@ -72,8 +73,24 @@ if ($process === false) {
     die('failed to start server');
 }
 try {
-    // Give the server time to start
-    sleep(1);
+    // Wait until OpenSSL is actually listening before making the first request.
+    $ready = false;
+    for ($i = 0; $i < 100; $i++) {
+        $connection = @stream_socket_client("tcp://127.0.0.1:$port", $errno, $errstr, 0.05);
+        if ($connection !== false) {
+            fclose($connection);
+            $ready = true;
+            break;
+        }
+        if (!proc_get_status($process)['running']) {
+            break;
+        }
+        usleep(50000);
+    }
+    if (!$ready) {
+        stream_set_blocking($pipes[2], false);
+        throw new RuntimeException('OpenSSL server did not start: ' . trim(stream_get_contents($pipes[2])));
+    }
 
     echo "case 1: client cert and key from string\n";
     $ch = curl_init("https://127.0.0.1:$port/");
@@ -91,7 +108,7 @@ try {
     echo "\n";
     echo "case 2: empty client cert and key from string\n";
     $ch = curl_init("https://127.0.0.1:$port/");
-    var_dump(curl_setopt($ch, CURLOPT_SSLCERT_BLOB, ''));
+    var_dump(curl_setopt($ch, CURLOPT_SSLCERT_BLOB, '') === !$rejectsZeroLengthBlobs);
     var_dump(curl_setopt($ch, CURLOPT_SSLKEY_BLOB, $clientKey));
     var_dump(curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false));
     var_dump(curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false));
@@ -99,14 +116,14 @@ try {
 
     $response = curl_exec($ch);
     check_response($response, $clientCertSubject);
-    check_error($ch);
+    check_error($ch, $rejectsZeroLengthBlobs ? 56 : 58);
     curl_close($ch);
 
     echo "\n";
     echo "case 3: client cert and empty key from string\n";
     $ch = curl_init("https://127.0.0.1:$port/");
     var_dump(curl_setopt($ch, CURLOPT_SSLCERT_BLOB, $clientCert));
-    var_dump(curl_setopt($ch, CURLOPT_SSLKEY_BLOB, ''));
+    var_dump(curl_setopt($ch, CURLOPT_SSLKEY_BLOB, '') === !$rejectsZeroLengthBlobs);
     var_dump(curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false));
     var_dump(curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false));
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -166,7 +183,7 @@ try {
     echo "case 7: empty issuer cert from string\n";
     $ch = curl_init("https://127.0.0.1:$port/");
     var_dump(curl_setopt($ch, CURLOPT_CAINFO, $serverCertPath));
-    var_dump(curl_setopt($ch, CURLOPT_ISSUERCERT_BLOB, ''));
+    var_dump(curl_setopt($ch, CURLOPT_ISSUERCERT_BLOB, '') === !$rejectsZeroLengthBlobs);
     var_dump(curl_setopt($ch, CURLOPT_SSLCERT, $clientCertPath));
     var_dump(curl_setopt($ch, CURLOPT_SSLKEY, $clientKeyPath));
     var_dump(curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true));
@@ -174,8 +191,8 @@ try {
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
     $response = curl_exec($ch);
-    check_response($response, $clientCertSubject);
-    check_error($ch);
+    var_dump((is_string($response) && strpos($response, $clientCertSubject) !== false) === $rejectsZeroLengthBlobs);
+    var_dump(curl_errno($ch) === ($rejectsZeroLengthBlobs ? 0 : 83));
     curl_close($ch);
 
 } finally {
@@ -199,7 +216,7 @@ bool(true)
 bool(true)
 bool(true)
 client cert subject not in response
-CURL ERROR: 58
+CURL ERROR: EXPECTED
 
 case 3: client cert and empty key from string
 bool(true)
@@ -241,5 +258,5 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-client cert subject not in response
-CURL ERROR: 83
+bool(true)
+bool(true)

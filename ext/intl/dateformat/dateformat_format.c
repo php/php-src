@@ -13,7 +13,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "../php_intl.h"
@@ -64,7 +64,7 @@ static int32_t internal_get_arr_ele(IntlDateFormatter_object *dfo,
 		return result;
 	}
 
-	if ((ele_value = zend_hash_str_find(hash_arr, key_name, strlen(key_name))) != NULL) {
+	if ((ele_value = zend_hash_str_find_deref(hash_arr, key_name, strlen(key_name))) != NULL) {
 		if(Z_TYPE_P(ele_value) != IS_LONG) {
 			spprintf(&message, 0, "datefmt_format: parameter array contains "
 					"a non-integer element for key '%s'", key_name);

@@ -28,8 +28,6 @@
 #else
 #include <sys/param.h>
 #endif
-#include "ext/standard/head.h"
-#include "php_string.h"
 #include "pack.h"
 #ifdef HAVE_PWD_H
 #ifdef PHP_WIN32
@@ -388,7 +386,7 @@ too_few_args:
 		switch ((int) code) {
 			case 'h':
 			case 'H':
-				INC_OUTPUTPOS((arg + (arg % 2)) / 2,1)	/* 4 bit per arg */
+				INC_OUTPUTPOS((arg / 2) + (arg % 2),1)	/* 4 bit per arg */
 				break;
 
 			case 'a':
@@ -1193,7 +1191,7 @@ PHP_FUNCTION(unpack)
 				/* Reached end of input for '*' repeater */
 				break;
 			} else {
-				php_error_docref(NULL, E_WARNING, "Type %c: not enough input, need %d, have " ZEND_LONG_FMT, type, size, inputlen - inputpos);
+				php_error_docref(NULL, E_WARNING, "Type %c: not enough input values, need %d values but only " ZEND_LONG_FMT " %s provided", type, size, inputlen - inputpos, inputlen - inputpos == 1 ? "was" : "were");
 				zend_array_destroy(Z_ARR_P(return_value));
 				RETURN_FALSE;
 			}

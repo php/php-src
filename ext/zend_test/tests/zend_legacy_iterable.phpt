@@ -16,13 +16,17 @@ var_dump(zend_iterable_legacy(gen(), gen()));
 
 ?>
 ==DONE==
---EXPECT--
+--EXPECTF--
 array(0) {
 }
 array(0) {
 }
-object(Generator)#1 (0) {
+object(Generator)#%d (1) {
+  ["function"]=>
+  string(3) "gen"
 }
-object(Generator)#1 (0) {
+object(Generator)#%d (1) {
+  ["function"]=>
+  string(3) "gen"
 }
 ==DONE==

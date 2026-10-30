@@ -9,7 +9,7 @@ opcache.optimization_level=-1
 var_dump([[]=>&$x]);
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Illegal offset type in %sinference_002.php:2
+Fatal error: Uncaught TypeError: Cannot access offset of type array on array in %sinference_002.php:2
 Stack trace:
 #0 {main}
   thrown in %sinference_002.php on line 2

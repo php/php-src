@@ -11,8 +11,8 @@ if (PHP_INT_SIZE !== 8) {
 --FILE--
 <?php
 
-var_dump(array_fill(-1, 1024*1024*1024, (string)time()));
+var_dump(array_fill(-1, 1024*1024*1024+1, (string)time()));
 
 ?>
 --EXPECTF--
-Fatal error: Possible integer overflow in memory allocation (1073741824 * 32 + 32) in %s on line 3
+Fatal error: Possible integer overflow in memory allocation (1073741825 * 32 + 32) in %s on line 3

@@ -118,6 +118,7 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 		ZVAL_STRING(&zfuncname, "getTimestamp");
 		if (call_user_function(NULL, z, &zfuncname, &retval, 0, NULL)
 				!= SUCCESS || Z_TYPE(retval) != IS_LONG) {
+			zval_ptr_dtor(&retval);
 			spprintf(&message, 0, "%s: error calling ::getTimeStamp() on the "
 					"object", func);
 			intl_errors_set(err, U_INTERNAL_PROGRAM_ERROR,

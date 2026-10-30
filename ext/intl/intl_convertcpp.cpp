@@ -23,7 +23,7 @@ extern "C" {
 /* {{{ intl_stringFromChar */
 int intl_stringFromChar(UnicodeString &ret, char *str, size_t str_len, UErrorCode *status)
 {
-	if(str_len > INT32_MAX) {
+	if(UNEXPECTED(str_len > INT32_MAX)) {
 		*status = U_BUFFER_OVERFLOW_ERROR;
 		ret.setToBogus();
 		return FAILURE;
@@ -56,12 +56,16 @@ zend_string* intl_charFromString(const UnicodeString &from, UErrorCode *status)
 {
 	zend_string *u8res;
 
-	if (from.isBogus()) {
+	if (UNEXPECTED(from.isBogus())) {
 		return NULL;
 	}
 
 	//the number of UTF-8 code units is not larger than that of UTF-16 code
 	//units * 3
+	if (UNEXPECTED(from.length() > INT32_MAX / 3)) {
+		*status = U_BUFFER_OVERFLOW_ERROR;
+		return NULL;
+	}
 	int32_t capacity = from.length() * 3;
 
 	if (from.isEmpty()) {
@@ -79,8 +83,7 @@ zend_string* intl_charFromString(const UnicodeString &from, UErrorCode *status)
 		zend_string_free(u8res);
 		return NULL;
 	}
-	ZSTR_VAL(u8res)[actual_len] = '\0';
-	ZSTR_LEN(u8res) = actual_len;
+	u8res = zend_string_truncate(u8res, actual_len, 0);
 
 	return u8res;
 }

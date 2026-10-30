@@ -18,14 +18,12 @@
 
 #include <ctype.h>
 #include <sys/stat.h>
+#include <locale.h>
 
 #include "php.h"
 #include "SAPI.h"
 #include "php_variables.h"
 #include "php_ini.h"
-#include "ext/standard/php_string.h"
-#include "ext/standard/pageinfo.h"
-#include "ext/pcre/php_pcre.h"
 #ifdef ZTS
 #include "TSRM.h"
 #endif
@@ -187,7 +185,7 @@ SAPI_API void sapi_read_post_data(void)
 	 * - Make the content type lowercase
 	 * - Trim descriptive data, stay with the content-type only
 	 */
-	for (p=content_type; p<content_type+content_type_length; p++) {
+	for (p = content_type; p < content_type + content_type_length; p++) {
 		switch (*p) {
 			case ';':
 			case ',':
@@ -211,10 +209,11 @@ SAPI_API void sapi_read_post_data(void)
 	} else {
 		/* fallback */
 		SG(request_info).post_entry = NULL;
-		if (!sapi_module.default_post_reader) {
-			/* no default reader? */
+		if (UNEXPECTED(!sapi_module.default_post_reader)) {
+			/* this should not happen as there should always be a default_post_reader */
 			SG(request_info).content_type_dup = NULL;
 			sapi_module.sapi_error(E_WARNING, "Unsupported content type:  '%s'", content_type);
+			efree(content_type);
 			return;
 		}
 	}
@@ -222,6 +221,7 @@ SAPI_API void sapi_read_post_data(void)
 		*(p-1) = oldchar;
 	}
 
+	/* the content_type_dup is not set at this stage so no need to try to free it first */
 	SG(request_info).content_type_dup = content_type;
 
 	if(post_reader_func) {
@@ -257,9 +257,11 @@ SAPI_API size_t sapi_read_post_block(char *buffer, size_t buflen)
 
 SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 {
-	if ((SG(post_max_size) > 0) && (SG(request_info).content_length > SG(post_max_size))) {
+	zend_long post_max_size = REQUEST_PARSE_BODY_OPTION_GET(post_max_size, SG(post_max_size));
+
+	if (post_max_size > 0 && SG(request_info).content_length > post_max_size) {
 		php_error_docref(NULL, E_WARNING, "POST Content-Length of " ZEND_LONG_FMT " bytes exceeds the limit of " ZEND_LONG_FMT " bytes",
-					SG(request_info).content_length, SG(post_max_size));
+					SG(request_info).content_length, post_max_size);
 		return;
 	}
 
@@ -283,8 +285,8 @@ SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 				}
 			}
 
-			if ((SG(post_max_size) > 0) && (SG(read_post_bytes) > SG(post_max_size))) {
-				php_error_docref(NULL, E_WARNING, "Actual POST length does not match Content-Length, and exceeds " ZEND_LONG_FMT " bytes", SG(post_max_size));
+			if (post_max_size > 0 && SG(read_post_bytes) > post_max_size) {
+				php_error_docref(NULL, E_WARNING, "Actual POST length does not match Content-Length, and exceeds " ZEND_LONG_FMT " bytes", post_max_size);
 				break;
 			}
 
@@ -324,10 +326,8 @@ static inline char *get_default_content_type(uint32_t prefix_len, uint32_t *len)
 		*len = prefix_len + mimetype_len + sizeof("; charset=") - 1 + charset_len;
 		content_type = (char*)emalloc(*len + 1);
 		p = content_type + prefix_len;
-		memcpy(p, mimetype, mimetype_len);
-		p += mimetype_len;
-		memcpy(p, "; charset=", sizeof("; charset=") - 1);
-		p += sizeof("; charset=") - 1;
+		p = zend_mempcpy(p, mimetype, mimetype_len);
+		p = zend_mempcpy(p, "; charset=", sizeof("; charset=") - 1);
 		memcpy(p, charset, charset_len + 1);
 	} else {
 		*len = prefix_len + mimetype_len;
@@ -459,6 +459,8 @@ SAPI_API void sapi_activate(void)
 		SG(request_info).headers_only = 0;
 	}
 	SG(rfc1867_uploaded_files) = NULL;
+	SG(request_parse_body_context).throw_exceptions = false;
+	memset(&SG(request_parse_body_context).options_cache, 0, sizeof(SG(request_parse_body_context).options_cache));
 
 	/* Handle request method */
 	if (SG(server_context)) {
@@ -688,7 +690,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 
 	switch (op) {
 		case SAPI_HEADER_SET_STATUS:
-			sapi_update_response_code((int)(zend_intptr_t) arg);
+			sapi_update_response_code((int)(intptr_t) arg);
 			return SUCCESS;
 
 		case SAPI_HEADER_ADD:
@@ -740,7 +742,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 		return SUCCESS;
 	} else {
 		/* new line/NUL character safety check */
-		uint32_t i;
+		size_t i;
 		for (i = 0; i < header_line_len; i++) {
 			/* RFC 7230 ch. 3.2.4 deprecates folding support */
 			if (header_line[i] == '\n' || header_line[i] == '\r') {
@@ -806,7 +808,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 				 * to disable compression altogether. This contributes to making scripts
 				 * portable between setups that have and don't have zlib compression
 				 * enabled globally. See req #44164 */
-				zend_string *key = zend_string_init("zlib.output_compression", sizeof("zlib.output_compression")-1, 0);
+				zend_string *key = ZSTR_INIT_LITERAL("zlib.output_compression", 0);
 				zend_alter_ini_entry_chars(key,
 					"0", sizeof("0") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 				zend_string_release_ex(key, 0);

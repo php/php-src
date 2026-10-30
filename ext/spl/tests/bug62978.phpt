@@ -34,7 +34,7 @@ NULL
 
 Warning: Undefined variable $c in %s on line %d
 
-Warning: Trying to access array offset on value of type null in %s on line %d
+Warning: Trying to access array offset on null in %s on line %d
 NULL
 
 Warning: Undefined array key "epic_magic" in %s on line %d

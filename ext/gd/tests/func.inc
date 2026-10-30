@@ -70,12 +70,8 @@ function get_libxpm_version()
  * message is printed, and the actual file is stored right beside the temporary
  * .php test file with the extension .out.png, to be able to manually inspect
  * the result.
- *
- * @param string $filename
- * @param resource $actual
- * @return void
  */
-function test_image_equals_file($filename, $actual)
+function test_image_equals_file(string $filename, GdImage $actual): void
 {
     if (!file_exists($filename)) {
         echo "The expected image does not exist.\n";
@@ -85,13 +81,29 @@ function test_image_equals_file($filename, $actual)
     $actual = test_to_truecolor($actual);
     $expected = imagecreatefrompng($filename);
     $expected = test_to_truecolor($expected);
+    test_image_equals_image($expected, $actual, true);
+}
+
+/**
+ * Tests that an in-memory image equals another in-memory image.
+ *
+ * It checks for equal image sizes, and whether any pixels are different.
+ * The textual result is printed, so the EXPECT section should contain the line
+ * "The images are equal."
+ *
+ * If the images are not equal, a diagnostic message is printed.
+ */
+function test_image_equals_image(GdImage $expected, GdImage $actual, bool $save_actual = false): void
+{
     $exp_x = imagesx($expected);
     $exp_y = imagesy($expected);
     $act_x = imagesx($actual);
     $act_y = imagesy($actual);
     if ($exp_x != $act_x || $exp_y != $act_y) {
         echo "The image size differs: expected {$exp_x}x{$exp_y}, got {$act_x}x{$act_y}.\n";
-        save_actual_image($actual);
+        if ($save_actual) {
+            save_actual_image($actual);
+        }
         return;
     }
     $pixels_changed = 0;
@@ -108,7 +120,9 @@ function test_image_equals_file($filename, $actual)
         echo "The images are equal.\n";
     } else {
         echo "The images differ in {$pixels_changed} pixels.\n";
-        save_actual_image($actual);
+        if ($save_actual) {
+            save_actual_image($actual);
+        }
     }
 }
 

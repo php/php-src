@@ -4,14 +4,16 @@ MySQL PDOStatement->execute()/fetch(), Non-SELECT
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
-    MySQLPDOTest::createTestTable($db);
+
+    $table = 'pdo_mysql_stmt_fetch_non_select';
+    MySQLPDOTest::createTestTable($table, $db);
 
     try {
 
@@ -20,7 +22,7 @@ MySQLPDOTest::skip();
         if (1 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
             printf("[002] Unable to turn on emulated prepared statements\n");
 
-        if (!is_object($stmt = $db->query('DESCRIBE test id')))
+        if (!is_object($stmt = $db->query("DESCRIBE {$table} id")))
             printf("[003] Emulated PS, DESCRIBE failed, %s\n", var_export($db->errorInfo(), true));
 
         $describe = array();
@@ -55,7 +57,7 @@ MySQLPDOTest::skip();
             printf("[008] Emulated PS, SHOW data seems wrong, dumping %s\n",
                 var_export($show, true));
 
-        if (!is_object($stmt = $db->query("EXPLAIN SELECT id FROM test")))
+        if (!is_object($stmt = $db->query("EXPLAIN SELECT id FROM {$table}")))
             printf("[009] Emulated PS, EXPLAIN returned no results\n");
 
         $explain = array();
@@ -71,12 +73,12 @@ MySQLPDOTest::skip();
             printf("[011] Unable to turn off emulated prepared statements\n");
 
         $native_support = 'no';
-        if ($db->exec("PREPARE mystmt FROM 'DESCRIBE test id'")) {
+        if ($db->exec("PREPARE mystmt FROM 'DESCRIBE {$table} id'")) {
             $native_support = 'yes';
             $db->exec('DEALLOCATE PREPARE mystmt');
         }
 
-        if (!is_object($stmt = $db->query('DESCRIBE test id')))
+        if (!is_object($stmt = $db->query("DESCRIBE {$table} id")))
             printf("[012] Native PS (native support: %s), DESCRIBE failed, %s\n",
                 $native_support,
                 var_export($db->errorInfo(), true));
@@ -138,12 +140,12 @@ MySQLPDOTest::skip();
                 var_export($show_native, true));
 
         $native_support = 'no';
-        if ($db->exec("PREPARE mystmt FROM 'EXPLAIN SELECT id FROM test'")) {
+        if ($db->exec("PREPARE mystmt FROM 'EXPLAIN SELECT id FROM {$table}'")) {
             $native_support = 'yes';
             $db->exec('DEALLOCATE PREPARE mystmt');
         }
 
-        if (!is_object($stmt = $db->query("EXPLAIN SELECT id FROM test")))
+        if (!is_object($stmt = $db->query("EXPLAIN SELECT id FROM {$table}")))
             printf("[012] Native PS (native support: %s), EXPLAIN failed, %s\n",
                 $native_support,
                 var_export($db->errorInfo(), true));
@@ -185,8 +187,9 @@ MySQLPDOTest::skip();
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable();
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS pdo_mysql_stmt_fetch_non_select');
 ?>
 --EXPECT--
 done!

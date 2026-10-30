@@ -1,5 +1,5 @@
 --TEST--
-Bug #54043: Remove inconsitency of internal exceptions and user defined exceptions
+Bug #54043: Remove inconsistency of internal exceptions and user defined exceptions
 --FILE--
 <?php
 

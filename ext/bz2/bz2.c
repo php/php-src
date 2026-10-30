@@ -15,7 +15,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -26,7 +26,6 @@
 
 /* PHP Includes */
 #include "ext/standard/info.h"
-#include "ext/standard/php_string.h"
 #include "main/php_network.h"
 
 /* for fileno() */
@@ -60,7 +59,7 @@ ZEND_GET_MODULE(bz2)
 
 struct php_bz2_stream_data_t {
 	BZFILE *bz_file;
-	php_stream *stream;
+	zend_resource *stream_res;
 };
 
 /* {{{ BZip2 stream implementation */
@@ -97,7 +96,7 @@ static ssize_t php_bz2iop_read(php_stream *stream, char *buf, size_t count)
 
 static ssize_t php_bz2iop_write(php_stream *stream, const char *buf, size_t count)
 {
-	ssize_t wrote = 0;
+	size_t wrote = 0;
 	struct php_bz2_stream_data_t *self = (struct php_bz2_stream_data_t *)stream->abstract;
 
 	do {
@@ -132,8 +131,15 @@ static int php_bz2iop_close(php_stream *stream, int close_handle)
 		BZ2_bzclose(self->bz_file);
 	}
 
-	if (self->stream) {
-		php_stream_free(self->stream, PHP_STREAM_FREE_CLOSE | (close_handle == 0 ? PHP_STREAM_FREE_PRESERVE_HANDLE : 0));
+	/* The inner stream may have been closed by the user, only its resource is held */
+	if (self->stream_res) {
+		php_stream *inner = zend_fetch_resource2(
+				self->stream_res, NULL, php_file_le_stream(), php_file_le_pstream());
+		if (inner) {
+			php_stream_free(inner, PHP_STREAM_FREE_CLOSE | (close_handle == 0 ? PHP_STREAM_FREE_PRESERVE_HANDLE : 0));
+		} else {
+			zend_list_delete(self->stream_res);
+		}
 	}
 
 	efree(self);
@@ -159,6 +165,23 @@ const php_stream_ops php_stream_bz2io_ops = {
 };
 
 /* {{{ Bzip2 stream openers */
+
+/* bzlib closes the descriptor it is given, so it gets a duplicate */
+static BZFILE *php_bz2_bzdopen(php_socket_t fd, const char *mode)
+{
+	int dup_fd = dup((int) fd);
+	if (dup_fd == -1) {
+		return NULL;
+	}
+
+	BZFILE *bz = BZ2_bzdopen(dup_fd, mode);
+	if (!bz) {
+		close(dup_fd);
+	}
+
+	return bz;
+}
+
 PHP_BZ2_API php_stream *_php_stream_bz2open_from_BZFILE(BZFILE *bz,
 														const char *mode, php_stream *innerstream STREAMS_DC)
 {
@@ -166,8 +189,9 @@ PHP_BZ2_API php_stream *_php_stream_bz2open_from_BZFILE(BZFILE *bz,
 
 	self = emalloc(sizeof(*self));
 
-	self->stream = innerstream;
+	self->stream_res = NULL;
 	if (innerstream) {
+		self->stream_res = innerstream->res;
 		GC_ADDREF(innerstream->res);
 	}
 	self->bz_file = bz;
@@ -224,7 +248,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 		if (stream) {
 			php_socket_t fd;
 			if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD, (void **) &fd, REPORT_ERRORS)) {
-				bz_file = BZ2_bzdopen((int)fd, mode);
+				bz_file = php_bz2_bzdopen(fd, mode);
 			}
 		}
 
@@ -350,7 +374,7 @@ PHP_FUNCTION(bzopen)
 	/* If it's not a resource its a string containing the filename to open */
 	if (Z_TYPE_P(file) == IS_STRING) {
 		if (Z_STRLEN_P(file) == 0) {
-			zend_argument_value_error(1, "cannot be empty");
+			zend_argument_must_not_be_empty_error(1);
 			RETURN_THROWS();
 		}
 
@@ -400,11 +424,14 @@ PHP_FUNCTION(bzopen)
 			RETURN_FALSE;
 		}
 
-		bz = BZ2_bzdopen((int)fd, mode);
+		bz = php_bz2_bzdopen(fd, mode);
+		if (!bz) {
+			RETURN_FALSE;
+		}
 
 		stream = php_stream_bz2open_from_BZFILE(bz, mode, stream);
 	} else {
-		zend_argument_type_error(1, "must be of type string or file-resource, %s given", zend_zval_type_name(file));
+		zend_argument_type_error(1, "must be of type string or file-resource, %s given", zend_zval_value_name(file));
 		RETURN_THROWS();
 	}
 
@@ -459,7 +486,15 @@ PHP_FUNCTION(bzcompress)
 	   + .01 x length of data + 600 which is the largest size the results of the compression
 	   could possibly be, at least that's what the libbz2 docs say (thanks to jeremy@nirvani.net
 	   for pointing this out).  */
-	dest_len = (unsigned int) (source_len + (0.01 * source_len) + 600);
+	size_t chunk_len = source_len + source_len / 100 + 600;
+	const size_t min = MIN(ZSTR_MAX_LEN, UINT_MAX);
+
+	if (chunk_len < source_len || chunk_len > min) {
+		zend_argument_value_error(1, "must have a length less than or equal to %zu", min);
+		RETURN_THROWS();
+	}
+
+	dest_len = (unsigned int) chunk_len;
 
 	/* Allocate the destination buffer */
 	dest = zend_string_falloc(dest_len, 0, /* fallible */ true);
@@ -498,11 +533,7 @@ PHP_FUNCTION(bzdecompress)
 	size_t source_len;
 	int error;
 	bool small = 0;
-#ifdef PHP_WIN32
-	unsigned __int64 size = 0;
-#else
-	unsigned long long size = 0;
-#endif
+	uint64_t size = 0;
 	bz_stream bzs;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|b", &source, &source_len, &small)) {
@@ -530,13 +561,11 @@ PHP_FUNCTION(bzdecompress)
 	while ((error = BZ2_bzDecompress(&bzs)) == BZ_OK && bzs.avail_in > 0) {
 		/* compression is better then 2:1, need to allocate more memory */
 		bzs.avail_out = source_len;
-		size = (bzs.total_out_hi32 * (unsigned int) -1) + bzs.total_out_lo32;
-#ifndef ZEND_ENABLE_ZVAL_LONG64
+		size = (((uint64_t) bzs.total_out_hi32) << 32U) + bzs.total_out_lo32;
 		if (size > SIZE_MAX) {
 			/* no reason to continue if we're going to drop it anyway */
 			break;
 		}
-#endif
 		tmp = zend_string_safe_frealloc(dest, 1, bzs.avail_out+1, (size_t) size, 0, /* fallible */ true);
 		if (!tmp) {
 			goto failure;
@@ -546,15 +575,12 @@ PHP_FUNCTION(bzdecompress)
 	}
 
 	if (error == BZ_STREAM_END || error == BZ_OK) {
-		size = (bzs.total_out_hi32 * (unsigned int) -1) + bzs.total_out_lo32;
-#ifndef ZEND_ENABLE_ZVAL_LONG64
+		size = (((uint64_t) bzs.total_out_hi32) << 32U) + bzs.total_out_lo32;
 		if (UNEXPECTED(size > SIZE_MAX)) {
 			php_error_docref(NULL, E_WARNING, "Decompressed size too big, max is %zd", SIZE_MAX);
 			zend_string_efree(dest);
 			RETVAL_LONG(BZ_MEM_ERROR);
-		} else
-#endif
-		{
+		} else {
 			tmp = zend_string_safe_frealloc(dest, 1, (size_t)size, 1, 0, /* fallible */ true);
 			if (!tmp) {
 				goto failure;

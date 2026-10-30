@@ -8,5 +8,5 @@ var_dump($obj);
 --EXPECTF--
 Warning: Bad unserialize data in %sbug73825.php on line %d
 
-Notice: unserialize(): Error at offset 13 of 15 bytes in %sbug73825.php on line %d
+Warning: unserialize(): Error at offset 13 of 15 bytes in %s on line %d
 bool(false)

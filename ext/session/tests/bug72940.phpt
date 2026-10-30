@@ -31,8 +31,15 @@ session_start();
 var_dump(session_id(), SID);
 session_destroy();
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: ini_set(): Disabling session.use_only_cookies INI setting is deprecated in %s on line 6
+
+Deprecated: Constant SID is deprecated in %s on line 8
 string(12) "bug72940test"
 string(0) ""
+
+Deprecated: ini_set(): Disabling session.use_only_cookies INI setting is deprecated in %s on line 13
+
+Deprecated: Constant SID is deprecated in %s on line 15
 string(11) "bug72940get"
 string(21) "PHPSESSID=bug72940get"

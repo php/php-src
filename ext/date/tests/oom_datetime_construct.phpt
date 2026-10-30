@@ -11,4 +11,4 @@ try {
 }
 ?>
 --EXPECTF--
-Exception: Failed to parse time string (%s) at position 0 (%s): Unexpected character
+DateMalformedStringException: Failed to parse time string (%s) at position 0 (%s): Unexpected character

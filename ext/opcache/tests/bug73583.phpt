@@ -16,4 +16,4 @@ if (true) {
 }
 ?>
 --EXPECTF--
-Fatal error: Cannot redeclare A() (previously declared in %sbug73583.php:4) in %sbug73583.php on line 5
+Fatal error: Cannot redeclare function A() (previously declared in %sbug73583.php:4) in %sbug73583.php on line 5

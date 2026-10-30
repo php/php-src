@@ -15,12 +15,10 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
-#include "php_ini.h"
-#include "ext/standard/info.h"
 #include "php_mysqli_structs.h"
 
 extern void php_mysqli_throw_sql_exception(char *sqlstate, int errorno, char *format, ...);

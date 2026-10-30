@@ -15,6 +15,6 @@ var_dump(parse_ini_file($ini_file));
 unlink(__DIR__ . "/bug70748.ini");
 ?>
 --EXPECTF--
-Warning: syntax error, unexpected end of file, expecting '}' in %sbug70748.ini on line %d
+Warning: syntax error, unexpected end of file, expecting TC_FALLBACK or '}' in %s on line %d
  in %sbug70748.php on line %d
 bool(false)

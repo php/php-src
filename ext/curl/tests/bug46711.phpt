@@ -20,7 +20,8 @@ foreach( $opt as $option => $value ) {
 var_dump($opt); // with this bug, $opt[58] becomes NULL
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Constant CURLOPT_BINARYTRANSFER is deprecated in %s on line %d
 array(2) {
   [58]=>
   bool(true)

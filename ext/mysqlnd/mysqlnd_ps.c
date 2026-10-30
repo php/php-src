@@ -515,6 +515,7 @@ mysqlnd_stmt_execute_parse_response(MYSQLND_STMT * const s, enum_mysqlnd_parse_e
 
 		stmt->state = MYSQLND_STMT_EXECUTED;
 		if (conn->last_query_type == QUERY_UPSERT || conn->last_query_type == QUERY_LOAD_LOCAL) {
+			stmt->field_count = conn->field_count;
 			DBG_INF("PASS");
 			DBG_RETURN(PASS);
 		}
@@ -767,7 +768,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, zval **row_ptr, const unsign
 
 	DBG_ENTER("mysqlnd_fetch_stmt_row_cursor");
 
-	if (!stmt || !stmt->conn || !result || !result->conn || !result->unbuf) {
+	if (!stmt->conn || !result->conn) {
 		DBG_ERR("no statement");
 		DBG_RETURN(FAIL);
 	}
@@ -1321,7 +1322,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_one_result)(MYSQLND_STMT * const s, unsigned i
 	MYSQLND_STMT_DATA * stmt = s? s->data : NULL;
 	MYSQLND_CONN_DATA * conn = stmt? stmt->conn : NULL;
 
-	DBG_ENTER("mysqlnd_stmt::bind_result");
+	DBG_ENTER("mysqlnd_stmt::bind_one_result");
 	if (!stmt || !conn) {
 		DBG_RETURN(FAIL);
 	}
@@ -1555,18 +1556,6 @@ MYSQLND_METHOD(mysqlnd_stmt, attr_set)(MYSQLND_STMT * const s,
 			stmt->flags = ival;
 			break;
 		}
-		case STMT_ATTR_PREFETCH_ROWS: {
-			unsigned long ival = *(unsigned long *) value;
-			if (ival == 0) {
-				ival = MYSQLND_DEFAULT_PREFETCH_ROWS;
-			} else if (ival > 1) {
-				SET_CLIENT_ERROR(stmt->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "Not implemented");
-				DBG_INF("FAIL");
-				DBG_RETURN(FAIL);
-			}
-			stmt->prefetch_rows = ival;
-			break;
-		}
 		default:
 			SET_CLIENT_ERROR(stmt->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "Not implemented");
 			DBG_RETURN(FAIL);
@@ -1584,7 +1573,7 @@ MYSQLND_METHOD(mysqlnd_stmt, attr_get)(const MYSQLND_STMT * const s,
 									   void * const value)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data : NULL;
-	DBG_ENTER("mysqlnd_stmt::attr_set");
+	DBG_ENTER("mysqlnd_stmt::attr_get");
 	if (!stmt) {
 		DBG_RETURN(FAIL);
 	}
@@ -1597,10 +1586,6 @@ MYSQLND_METHOD(mysqlnd_stmt, attr_get)(const MYSQLND_STMT * const s,
 			break;
 		case STMT_ATTR_CURSOR_TYPE:
 			*(unsigned long *) value = stmt->flags;
-			DBG_INF_FMT("value=%lu", *(unsigned long *) value);
-			break;
-		case STMT_ATTR_PREFETCH_ROWS:
-			*(unsigned long *) value = stmt->prefetch_rows;
 			DBG_INF_FMT("value=%lu", *(unsigned long *) value);
 			break;
 		default:
@@ -1773,6 +1758,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, close_on_server)(MYSQLND_STMT * const s, bo
 	MYSQLND_STMT_DATA * stmt = s? s->data : NULL;
 	MYSQLND_CONN_DATA * conn = stmt? stmt->conn : NULL;
 	enum_mysqlnd_collected_stats statistic = STAT_LAST;
+	enum_func_status ret = PASS;
 
 	DBG_ENTER("mysqlnd_stmt::close_on_server");
 	if (!stmt || !conn) {
@@ -1810,14 +1796,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, close_on_server)(MYSQLND_STMT * const s, bo
 														STAT_FREE_RESULT_EXPLICIT);
 
 		if (GET_CONNECTION_STATE(&conn->state) == CONN_READY) {
-			enum_func_status ret = FAIL;
-			const size_t stmt_id = stmt->stmt_id;
-
-			ret = conn->command->stmt_close(conn, stmt_id);
-			if (ret == FAIL) {
-				COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);
-				DBG_RETURN(FAIL);
-			}
+			ret = conn->command->stmt_close(conn, stmt->stmt_id);
 		}
 	}
 	switch (stmt->execute_count) {
@@ -1846,7 +1825,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, close_on_server)(MYSQLND_STMT * const s, bo
 		stmt->conn = NULL;
 	}
 
-	DBG_RETURN(PASS);
+	DBG_RETURN(ret);
 }
 /* }}} */
 
@@ -1984,7 +1963,7 @@ MYSQLND_CLASS_METHODS_END;
 
 
 /* {{{ _mysqlnd_init_ps_subsystem */
-void _mysqlnd_init_ps_subsystem()
+void _mysqlnd_init_ps_subsystem(void)
 {
 	mysqlnd_stmt_set_methods(&MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_stmt));
 	_mysqlnd_init_ps_fetch_subsystem();

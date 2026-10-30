@@ -1,5 +1,5 @@
 --TEST--
-Bug #63219 (Segfault when aliasing trait method when autoloader throws excpetion)
+Bug #63219 (Segfault when aliasing trait method when autoloader throws exception)
 --FILE--
 <?php
 trait TFoo {

@@ -17,6 +17,7 @@
 
 #include "php_hash.h"
 #include "php_hash_sha.h"
+#include "Zend/zend_cpuinfo.h"
 
 static const unsigned char PADDING[128] =
 {
@@ -74,7 +75,8 @@ const php_hash_ops php_hash_sha1_ops = {
 	20,
 	64,
 	sizeof(PHP_SHA1_CTX),
-	1
+	1,
+	0
 };
 
 /* sha224/sha256 */
@@ -91,7 +93,8 @@ const php_hash_ops php_hash_sha256_ops = {
 	32,
 	64,
 	sizeof(PHP_SHA256_CTX),
-	1
+	1,
+	0
 };
 
 const php_hash_ops php_hash_sha224_ops = {
@@ -106,7 +109,8 @@ const php_hash_ops php_hash_sha224_ops = {
 	28,
 	64,
 	sizeof(PHP_SHA224_CTX),
-	1
+	1,
+	0
 };
 
 #define ROTR32(b,x)		((x >> b) | (x << (32 - b)))
@@ -160,6 +164,24 @@ PHP_HASH_API void PHP_SHA256InitArgs(PHP_SHA256_CTX * context, ZEND_ATTRIBUTE_UN
  */
 static void SHA256Transform(uint32_t state[8], const unsigned char block[64])
 {
+#if defined(PHP_HASH_INTRIN_SHA_NATIVE)
+	SHA256_Transform_shani(state, block);
+	return;
+#elif defined(PHP_HASH_INTRIN_SHA_RESOLVER)
+	if (zend_cpu_supports(ZEND_CPU_FEATURE_SSSE3) && zend_cpu_supports(ZEND_CPU_FEATURE_SHA)) {
+		SHA256_Transform_shani(state, block);
+		return;
+	}
+#endif
+
+#if defined(__SSE2__)
+	uint32_t tmp32[72];
+
+	SHA256_Transform_sse2(state, block, &tmp32[0], &tmp32[64]);
+	ZEND_SECURE_ZERO((unsigned char*) tmp32, sizeof(tmp32));
+	return;
+#endif
+
 	uint32_t a = state[0], b = state[1], c = state[2], d = state[3];
 	uint32_t e = state[4], f = state[5], g = state[6], h = state[7];
 	uint32_t x[16], T1, T2, W[64];
@@ -605,7 +627,8 @@ const php_hash_ops php_hash_sha384_ops = {
 	48,
 	128,
 	sizeof(PHP_SHA384_CTX),
-	1
+	1,
+	0
 };
 
 /* {{{ PHP_SHA512InitArgs
@@ -784,7 +807,8 @@ const php_hash_ops php_hash_sha512_ops = {
 	64,
 	128,
 	sizeof(PHP_SHA512_CTX),
-	1
+	1,
+	0
 };
 
 const php_hash_ops php_hash_sha512_256_ops = {
@@ -799,7 +823,8 @@ const php_hash_ops php_hash_sha512_256_ops = {
 	32,
 	128,
 	sizeof(PHP_SHA512_CTX),
-	1
+	1,
+	0
 };
 
 const php_hash_ops php_hash_sha512_224_ops = {
@@ -814,5 +839,6 @@ const php_hash_ops php_hash_sha512_224_ops = {
 	28,
 	128,
 	sizeof(PHP_SHA512_CTX),
-	1
+	1,
+	0
 };

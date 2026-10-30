@@ -22,6 +22,8 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context);
 
 #ifdef PHAR_DIRSTREAM
+#include "ext/standard/url.h"
+
 php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const char *mode, int options);
 
 /* directory handlers */

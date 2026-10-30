@@ -16,7 +16,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -543,7 +543,7 @@ bool php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, bool p
 					/* first element is the function name */
 					SysFreeString(names[0]);
 
-					php_printf("\t/* DISPID=%d */\n", func->memid);
+					php_printf("\t/* DISPID=%ld */\n", func->memid);
 
 					if (func->elemdescFunc.tdesc.vt != VT_VOID) {
 						php_printf("\t/* %s [%d] */\n",

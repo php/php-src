@@ -53,8 +53,8 @@ uint32_t scdf_remove_unreachable_blocks(scdf_ctx *scdf);
 
 /* Add uses to worklist */
 static inline void scdf_add_to_worklist(scdf_ctx *scdf, int var_num) {
-	zend_ssa *ssa = scdf->ssa;
-	zend_ssa_var *var = &ssa->vars[var_num];
+	const zend_ssa *ssa = scdf->ssa;
+	const zend_ssa_var *var = &ssa->vars[var_num];
 	int use;
 	zend_ssa_phi *phi;
 	FOREACH_USE(var, use) {
@@ -67,7 +67,7 @@ static inline void scdf_add_to_worklist(scdf_ctx *scdf, int var_num) {
 
 /* This should usually not be necessary, however it's used for type narrowing. */
 static inline void scdf_add_def_to_worklist(scdf_ctx *scdf, int var_num) {
-	zend_ssa_var *var = &scdf->ssa->vars[var_num];
+	const zend_ssa_var *var = &scdf->ssa->vars[var_num];
 	if (var->definition >= 0) {
 		zend_bitset_incl(scdf->instr_worklist, var->definition);
 	} else if (var->definition_phi) {
@@ -75,8 +75,8 @@ static inline void scdf_add_def_to_worklist(scdf_ctx *scdf, int var_num) {
 	}
 }
 
-static inline uint32_t scdf_edge(zend_cfg *cfg, int from, int to) {
-	zend_basic_block *to_block = cfg->blocks + to;
+static inline uint32_t scdf_edge(const zend_cfg *cfg, int from, int to) {
+	const zend_basic_block *to_block = cfg->blocks + to;
 	int i;
 
 	for (i = 0; i < to_block->predecessors_count; i++) {
@@ -89,7 +89,7 @@ static inline uint32_t scdf_edge(zend_cfg *cfg, int from, int to) {
 	ZEND_UNREACHABLE();
 }
 
-static inline bool scdf_is_edge_feasible(scdf_ctx *scdf, int from, int to) {
+static inline bool scdf_is_edge_feasible(const scdf_ctx *scdf, int from, int to) {
 	uint32_t edge = scdf_edge(&scdf->ssa->cfg, from, to);
 	return zend_bitset_in(scdf->feasible_edges, edge);
 }

@@ -52,7 +52,7 @@ foreach( $string_array as $string )  {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strtok() : with miscellaneous inputs ***
 
 --- Iteration 1 ---
@@ -65,10 +65,20 @@ bool(false)
 
 --- Iteration 2 ---
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
 
 --- Iteration 3 ---
@@ -113,18 +123,38 @@ bool(false)
 
 --- Iteration 8 ---
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
 
 --- Iteration 9 ---
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
 
 --- Iteration 10 ---

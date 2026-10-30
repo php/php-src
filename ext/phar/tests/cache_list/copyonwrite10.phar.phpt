@@ -8,7 +8,7 @@ phar.readonly=0
 phar
 --FILE_EXTERNAL--
 files/write10.phar
---EXPECT--
+--EXPECTF--
 string(214) "<?php
 $p = new Phar(__FILE__);
 var_dump($p->getStub());
@@ -19,6 +19,8 @@ echo $p2->getStub(),"\n";
 echo "ok\n";
 __HALT_COMPILER(); ?>
 "
+
+Deprecated: Calling Phar::setStub(resource $stub, int $length) is deprecated in %s on line %d
 <?php __HALT_COMPILER(); ?>
 
 ok

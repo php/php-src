@@ -674,15 +674,11 @@ MYSQLND_METHOD(mysqlnd_vio, close_stream)(MYSQLND_VIO * const net, MYSQLND_STATS
 		bool pers = net->persistent;
 		DBG_INF_FMT("Freeing stream. abstract=%p", net_stream->abstract);
 		/* We removed the resource from the stream, so pass FREE_RSRC_DTOR now to force
-		 * destruction to occur during shutdown, because it won't happen through the resource. */
-		/* TODO: The EG(active) check here is dead -- check IN_SHUTDOWN? */
-		if (pers && EG(active)) {
+		 * destruction to occur during shutdown, because it won't happen through the resource
+		 * because we removed the resource from the EG resource list(s). */
+		if (pers) {
 			php_stream_free(net_stream, PHP_STREAM_FREE_CLOSE_PERSISTENT | PHP_STREAM_FREE_RSRC_DTOR);
 		} else {
-			/*
-			  otherwise we will crash because the EG(persistent_list) has been freed already,
-			  before the modules are shut down
-			*/
 			php_stream_free(net_stream, PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_RSRC_DTOR);
 		}
 		net->data->m.set_stream(net, NULL);

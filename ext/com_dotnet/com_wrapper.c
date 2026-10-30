@@ -18,7 +18,7 @@
  * using IDispatchEx */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -42,26 +42,9 @@ typedef struct {
 	HashTable *name_to_dispid;	/* keep track of name -> dispid mappings */
 
 	GUID sinkid;	/* iid that we "implement" for event sinking */
-
-	zend_resource *res;
 } php_dispatchex;
 
-static int le_dispatch;
-
 static void disp_destructor(php_dispatchex *disp);
-
-static void dispatch_dtor(zend_resource *rsrc)
-{
-	php_dispatchex *disp = (php_dispatchex *)rsrc->ptr;
-	disp_destructor(disp);
-}
-
-int php_com_wrapper_minit(INIT_FUNC_ARGS)
-{
-	le_dispatch = zend_register_list_destructors_ex(dispatch_dtor,
-		NULL, "com_dotnet_dispatch_wrapper", module_number);
-	return le_dispatch;
-}
 
 
 /* {{{ trace */
@@ -70,7 +53,7 @@ static inline void trace(char *fmt, ...)
 	va_list ap;
 	char buf[4096];
 
-	snprintf(buf, sizeof(buf), "T=%08x ", GetCurrentThreadId());
+	snprintf(buf, sizeof(buf), "T=%08lx ", GetCurrentThreadId());
 	OutputDebugString(buf);
 
 	va_start(ap, fmt);
@@ -87,7 +70,7 @@ static inline void trace(char *fmt, ...)
 	if (COMG(rshutdown_started)) {																		\
 		trace(" PHP Object:%p (name:unknown) %s\n", Z_OBJ(disp->object),  methname); 							\
 	} else {																							\
-		trace(" PHP Object:%p (name:%s) %s\n", Z_OBJ(disp->object), Z_OBJCE(disp->object)->name->val, methname); 	\
+		trace(" PHP Object:%p (name:%s) %s\n", Z_OBJ(disp->object), ZSTR_VAL(Z_OBJCE(disp->object)->name), methname); 	\
 	}																									\
 	if (GetCurrentThreadId() != disp->engine_thread) {													\
 		return RPC_E_WRONG_THREAD;																		\
@@ -126,11 +109,10 @@ static ULONG STDMETHODCALLTYPE disp_release(IDispatchEx *This)
 	FETCH_DISP("Release");
 
 	ret = InterlockedDecrement(&disp->refcount);
-	trace("-- refcount now %d\n", ret);
+	trace("-- refcount now %lu\n", ret);
 	if (ret == 0) {
 		/* destroy it */
-		if (disp->res)
-			zend_list_delete(disp->res);
+		disp_destructor(disp);
 	}
 	return ret;
 }
@@ -219,7 +201,7 @@ static HRESULT STDMETHODCALLTYPE disp_getdispid(
 
 	name = php_com_olestring_to_string(bstrName, COMG(code_page));
 
-	trace("Looking for %s, namelen=%d in %p\n", ZSTR_VAL(name), ZSTR_LEN(name), disp->name_to_dispid);
+	trace("Looking for %s, namelen=%lu in %p\n", ZSTR_VAL(name), ZSTR_LEN(name), disp->name_to_dispid);
 
 	/* Lookup the name in the hash */
 	if ((tmp = zend_hash_find(disp->name_to_dispid, name)) != NULL) {
@@ -253,7 +235,7 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 	if (NULL != (name = zend_hash_index_find(disp->dispid_to_name, id))) {
 		/* TODO: add support for overloaded objects */
 
-		trace("-- Invoke: %d %20s [%d] flags=%08x args=%d\n", id, Z_STRVAL_P(name), Z_STRLEN_P(name), wFlags, pdp->cArgs);
+		trace("-- Invoke: %ld %20s [%lu] flags=%08x args=%u\n", id, Z_STRVAL_P(name), Z_STRLEN_P(name), wFlags, pdp->cArgs);
 
 		/* convert args into zvals.
 		 * Args are in reverse order */
@@ -264,7 +246,7 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 
 				arg = &pdp->rgvarg[ pdp->cArgs - 1 - i];
 
-				trace("alloc zval for arg %d VT=%08x\n", i, V_VT(arg));
+				trace("alloc zval for arg %u VT=%08x\n", i, V_VT(arg));
 
 				php_com_wrap_variant(&params[i], arg, COMG(code_page));
 			}
@@ -293,7 +275,7 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 						VARIANT *srcvar = &obj->v;
 						VARIANT *dstvar = &pdp->rgvarg[ pdp->cArgs - 1 - i];
 						if ((V_VT(dstvar) & VT_BYREF) && obj->modified ) {
-							trace("percolate modified value for arg %d VT=%08x\n", i, V_VT(dstvar));
+							trace("percolate modified value for arg %u VT=%08x\n", i, V_VT(dstvar));
 							php_com_copy_variant(dstvar, srcvar);
 						}
 					}
@@ -329,7 +311,7 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 		}
 
 	} else {
-		trace("InvokeEx: I don't support DISPID=%d\n", id);
+		trace("InvokeEx: I don't support DISPID=%ld\n", id);
 	}
 
 	return ret;
@@ -525,9 +507,8 @@ static void generate_dispids(php_dispatchex *disp)
 static php_dispatchex *disp_constructor(zval *object)
 {
 	php_dispatchex *disp = (php_dispatchex*)CoTaskMemAlloc(sizeof(php_dispatchex));
-	zval *tmp;
 
-	trace("constructing a COM wrapper for PHP object %p (%s)\n", object, Z_OBJCE_P(object)->name);
+	trace("constructing a COM wrapper for PHP object %p (%s)\n", object, ZSTR_VAL(Z_OBJCE_P(object)->name));
 
 	if (disp == NULL)
 		return NULL;
@@ -545,26 +526,11 @@ static php_dispatchex *disp_constructor(zval *object)
 		ZVAL_UNDEF(&disp->object);
 	}
 
-	tmp = zend_list_insert(disp, le_dispatch);
-	disp->res = Z_RES_P(tmp);
-
 	return disp;
 }
 
 static void disp_destructor(php_dispatchex *disp)
 {
-	/* Object store not available during request shutdown */
-	if (COMG(rshutdown_started)) {
-		trace("destroying COM wrapper for PHP object %p (name:unknown)\n", Z_OBJ(disp->object));
-	} else {
-		trace("destroying COM wrapper for PHP object %p (name:%s)\n", Z_OBJ(disp->object), Z_OBJCE(disp->object)->name->val);
-	}
-
-	disp->res = NULL;
-
-	if (disp->refcount > 0)
-		CoDisconnectObject((IUnknown*)disp, 0);
-
 	zend_hash_destroy(disp->dispid_to_name);
 	zend_hash_destroy(disp->name_to_dispid);
 	FREE_HASHTABLE(disp->dispid_to_name);

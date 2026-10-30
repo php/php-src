@@ -5,7 +5,6 @@ opcache
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
-opcache.jit_buffer_size=1M
 opcache.jit=1255
 opcache.file_update_protection=0
 opcache.revalidate_freq=0
@@ -44,6 +43,7 @@ namespace test {
     var_dump($initialRequest ? $x : $y);
     print "OK";
 }
+?>
 --EXPECT--
 int(10)
 OK

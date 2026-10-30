@@ -5,5 +5,6 @@ standard
 --FILE--
 <?php
 var_dump(extension_loaded('standard'));
+?>
 --EXPECT--
 bool(true)

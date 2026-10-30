@@ -3,8 +3,20 @@ Static in new is not supported
 --FILE--
 <?php
 
-static $x = new static;
+class Foo {
+    public static function singleton() {
+        static $x = new static;
+        return $x;
+    }
+}
+
+$x = Foo::singleton();
+$y = Foo::singleton();
+var_dump($x, $y);
 
 ?>
---EXPECTF--
-Fatal error: "static" is not allowed in compile-time constants in %s on line %d
+--EXPECT--
+object(Foo)#1 (0) {
+}
+object(Foo)#1 (0) {
+}

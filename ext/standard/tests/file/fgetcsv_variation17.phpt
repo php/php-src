@@ -65,13 +65,13 @@ foreach ($csv_lists as $csv_list) {
 
     // use length as less than the actual size of the line
     fseek($file_handle, 0, SEEK_SET);
-    var_dump( fgetcsv($file_handle, 9, $delimiter) );
+    var_dump( fgetcsv($file_handle, 9, $delimiter, escape: "\\") );
     // check the file pointer position and if eof
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );
 
     // read rest of the line
-    var_dump( fgetcsv($file_handle, 1024, $delimiter) );
+    var_dump( fgetcsv($file_handle, 1024, $delimiter, escape: "\\") );
     // check the file pointer position and if eof
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );

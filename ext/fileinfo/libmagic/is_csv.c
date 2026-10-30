@@ -32,7 +32,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: is_csv.c,v 1.6 2020/08/09 16:43:36 christos Exp $")
+FILE_RCSID("@(#)$File: is_csv.c,v 1.13 2023/07/17 16:08:17 christos Exp $")
 #endif
 
 #include <string.h>
@@ -125,12 +125,13 @@ csv_parse(const unsigned char *uc, const unsigned char *ue)
 			break;
 		}
 	}
-	return tf && nl > 2;
+	return tf && nl >= 2;
 }
 
 #ifndef TEST
 int
-file_is_csv(struct magic_set *ms, const struct buffer *b, int looks_text)
+file_is_csv(struct magic_set *ms, const struct buffer *b, int looks_text,
+    const char *code)
 {
 	const unsigned char *uc = CAST(const unsigned char *, b->fbuf);
 	const unsigned char *ue = uc + b->flen;
@@ -154,7 +155,8 @@ file_is_csv(struct magic_set *ms, const struct buffer *b, int looks_text)
 		return 1;
 	}
 
-	if (file_printf(ms, "CSV text") == -1)
+	if (file_printf(ms, "CSV %s%stext", code ? code : "",
+	    code ? " " : "") == -1)
 		return -1;
 
 	return 1;
@@ -174,7 +176,7 @@ file_is_csv(struct magic_set *ms, const struct buffer *b, int looks_text)
 int
 main(int argc, char *argv[])
 {
-	int fd, rv;
+	int fd;
 	struct stat st;
 	unsigned char *p;
 
@@ -184,7 +186,7 @@ main(int argc, char *argv[])
 	if (fstat(fd, &st) == -1)
 		err(EXIT_FAILURE, "Can't stat `%s'", argv[1]);
 
-	if ((p = malloc(st.st_size)) == NULL)
+	if ((p = CAST(char *, malloc(st.st_size))) == NULL)
 		err(EXIT_FAILURE, "Can't allocate %jd bytes",
 		    (intmax_t)st.st_size);
 	if (read(fd, p, st.st_size) != st.st_size)

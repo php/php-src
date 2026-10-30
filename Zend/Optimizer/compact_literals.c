@@ -197,6 +197,9 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 						LITERAL_INFO(opline->op2.constant, 2);
 					}
 					break;
+				case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
+					LITERAL_INFO(opline->op1.constant, 1);
+					break;
 				case ZEND_CATCH:
 					LITERAL_INFO(opline->op1.constant, 2);
 					break;
@@ -211,7 +214,9 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					if (opline->op1_type == IS_CONST) {
 						LITERAL_INFO(opline->op1.constant, 2);
 					}
-					LITERAL_INFO(opline->op2.constant, 1);
+					if (opline->op2_type == IS_CONST) {
+						LITERAL_INFO(opline->op2.constant, 1);
+					}
 					break;
 				case ZEND_ASSIGN_STATIC_PROP:
 				case ZEND_ASSIGN_STATIC_PROP_REF:
@@ -668,7 +673,9 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					}
 					break;
 				case ZEND_FETCH_CLASS_CONSTANT:
-					if (opline->op1_type == IS_CONST) {
+					if (opline->op1_type == IS_CONST
+						&& opline->op2_type == IS_CONST
+						&& Z_TYPE(op_array->literals[opline->op2.constant]) == IS_STRING) {
 						// op1/op2 class_const
 						opline->extended_value = add_static_slot(&hash, op_array,
 							opline->op1.constant,
@@ -766,6 +773,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					break;
 				case ZEND_DECLARE_ANON_CLASS:
 				case ZEND_DECLARE_CLASS_DELAYED:
+				case ZEND_JMP_FRAMELESS:
 					opline->extended_value = cache_size;
 					cache_size += sizeof(void *);
 					break;

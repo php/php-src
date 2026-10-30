@@ -8,7 +8,7 @@ opcache
 server
 --FILE--
 <?php
-$root  = str_replace('.php', "", __FILE__);
+$root  = __DIR__ . '/' . basename(__FILE__, '.php');
 $base  = basename( $root );
 
 file_put_contents( "$root-Officials.inc", '<?php
@@ -34,10 +34,12 @@ php_cli_server_start("-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.opt
 
 echo file_get_contents("http://" . PHP_CLI_SERVER_ADDRESS . "/$base-clientUS.php" );
 echo file_get_contents("http://" . PHP_CLI_SERVER_ADDRESS . "/$base-clientUK.php" );
-
-unlink("$root-Officials.inc");
-unlink("$root-clientUS.php");
-unlink("$root-clientUK.php");
+?>
+--CLEAN--
+<?php
+unlink(__DIR__ . "/bug66338-Officials.inc");
+unlink(__DIR__ . "/bug66338-clientUS.php");
+unlink(__DIR__ . "/bug66338-clientUK.php");
 ?>
 --EXPECT--
 The President of the USA is Barack Hussein Obama II

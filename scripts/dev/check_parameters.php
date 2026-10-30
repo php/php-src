@@ -20,13 +20,10 @@ define('REPORT_LEVEL', 1); // 0 reports less false-positives. up to level 5.
 define('VERSION', '7.0');  // minimum is 7.0
 define('PHPDIR', realpath(dirname(__FILE__) . '/../..'));
 
-
 // be sure you have enough memory and stack for PHP. pcre will push the limits!
 ini_set('pcre.backtrack_limit', 10000000);
 
-
 // ------------------------ end of config ----------------------------
-
 
 $API_params = array(
     'a' => array('zval**'), // array
@@ -64,7 +61,6 @@ function error($str, $level = 0)
     }
 }
 
-
 /** this updates the global var $line (for error reporting) */
 function update_lineno($offset)
 {
@@ -99,7 +95,6 @@ function update_lineno($offset)
     } while (true);
 }
 
-
 /** parses the sources and fetches its vars name, type and if they are initialized or not */
 function get_vars($txt)
 {
@@ -120,10 +115,9 @@ function get_vars($txt)
         }
     }
 
-//	if ($GLOBALS['current_function'] == 'for_debugging') { print_r($m);print_r($ret); }
+// if ($GLOBALS['current_function'] == 'for_debugging') { print_r($m);print_r($ret); }
     return $ret;
 }
-
 
 /** run diagnostic checks against one var. */
 function check_param($db, $idx, $exp, $optional, $allow_uninit = false)
@@ -180,10 +174,9 @@ function get_params($vars, $str)
         }
     }
 
-//	if ($GLOBALS['current_function'] == 'for_debugging') { var_dump($m); var_dump($ret); }
+// if ($GLOBALS['current_function'] == 'for_debugging') { var_dump($m); var_dump($ret); }
     return $ret;
 }
-
 
 /** run tests on a function. the code is passed in $txt */
 function check_function($name, $txt, $offset)
@@ -291,7 +284,6 @@ function check_function($name, $txt, $offset)
     }
 }
 
-
 /** the main recursion function. splits files in functions and calls the other functions */
 function recurse($path)
 {
@@ -319,7 +311,6 @@ function recurse($path)
         if (count($split) < 2) continue; // no functions defined on this file
         array_shift($split); // the first part isn't relevant
 
-
         // generate the line offsets array
         $j = 0;
         $lines = preg_split("/(\r\n?|\n)/S", $txt, -1, PREG_SPLIT_DELIM_CAPTURE);
@@ -332,7 +323,6 @@ function recurse($path)
 
         $GLOBALS['lines_offset'] = $lines_offset;
         $GLOBALS['current_file'] = $file;
-
 
         for ($i = 0; $i < count($split); $i+=2) {
             // if the /* }}} */ comment is found use it to reduce false positives

@@ -16,7 +16,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -25,27 +25,20 @@
 #define rl_completion_matches completion_matches
 #endif
 
-#include "php_globals.h"
-#include "php_variables.h"
 #include "zend_hash.h"
-#include "zend_modules.h"
 
 #include "SAPI.h"
 #include <locale.h>
 #include "zend.h"
-#include "zend_extensions.h"
 #include "php_ini.h"
-#include "php_globals.h"
-#include "php_main.h"
-#include "fopen_wrappers.h"
-#include "ext/standard/php_standard.h"
+#include "ext/standard/info.h"
 #include "zend_smart_str.h"
 
 #ifdef __riscos__
 #include <unixlib/local.h>
 #endif
 
-#if HAVE_LIBEDIT
+#ifdef HAVE_LIBEDIT
 #include <editline/readline.h>
 #else
 #include <readline/readline.h>
@@ -137,7 +130,7 @@ static zend_string *cli_get_prompt(char *block, char prompt) /* {{{ */
 	char *prompt_spec = CLIR_G(prompt) ? CLIR_G(prompt) : DEFAULT_PROMPT;
 	bool unicode_warned = false;
 
-	do {
+	while (*prompt_spec) {
 		if (*prompt_spec == '\\') {
 			switch (prompt_spec[1]) {
 			case '\\':
@@ -205,9 +198,9 @@ static zend_string *cli_get_prompt(char *block, char prompt) /* {{{ */
 				smart_str_appendc(&retval, '?');
 			}
 		}
-	} while (++prompt_spec && *prompt_spec);
-	smart_str_0(&retval);
-	return retval.s;
+		++prompt_spec;
+	}
+	return smart_str_extract(&retval);
 }
 /* }}} */
 
@@ -536,7 +529,9 @@ TODO:
 	} else if (text[0] == '#' && text[1] != '[') {
 		retval = cli_completion_generator_ini(text, textlen, &cli_completion_state);
 	} else {
-		char *lc_text, *class_name_end;
+		char *lc_text;
+		const char *class_name_end;
+		const char *constant_text = text;
 		zend_string *class_name = NULL;
 		zend_class_entry *ce = NULL;
 
@@ -549,6 +544,7 @@ TODO:
 				zend_string_release_ex(class_name, 0);
 				return NULL;
 			}
+			constant_text = class_name_end + 2;
 			lc_text = zend_str_tolower_dup(class_name_end + 2, textlen - 2 - class_name_len);
 			textlen -= (class_name_len + 2);
 		} else {
@@ -565,7 +561,7 @@ TODO:
 				ZEND_FALLTHROUGH;
 			case 2:
 			case 3:
-				retval = cli_completion_generator_define(text, textlen, &cli_completion_state, ce ? &ce->constants_table : EG(zend_constants));
+				retval = cli_completion_generator_define(constant_text, textlen, &cli_completion_state, ce ? &ce->constants_table : EG(zend_constants));
 				if (retval || ce) {
 					break;
 				}
@@ -618,7 +614,12 @@ static int readline_shell_run(void) /* {{{ */
 	}
 
 #ifndef PHP_WIN32
-	history_file = tilde_expand("~/.php_history");
+	const char *histfile_env_name = "PHP_HISTFILE";
+	if (getenv(histfile_env_name)) {
+		spprintf(&history_file, MAXPATHLEN, "%s", getenv(histfile_env_name));
+	} else {
+		spprintf(&history_file, MAXPATHLEN, "%s/.php_history", getenv("HOME"));
+	}
 #else
 	spprintf(&history_file, MAX_PATH, "%s/.php_history", getenv("USERPROFILE"));
 #endif
@@ -663,6 +664,7 @@ static int readline_shell_run(void) /* {{{ */
 				zend_string_release_ex(prompt, 0);
 				/* TODO: This might be wrong! */
 				prompt = cli_get_prompt("php", '>');
+				free(line);
 				continue;
 			}
 		}
@@ -689,7 +691,7 @@ static int readline_shell_run(void) /* {{{ */
 		}
 
 		if (history_lines_to_write) {
-#if HAVE_LIBEDIT
+#ifdef HAVE_LIBEDIT
 			write_history(history_file);
 #else
 			append_history(history_lines_to_write, history_file);
@@ -718,11 +720,7 @@ static int readline_shell_run(void) /* {{{ */
 
 		php_last_char = '\0';
 	}
-#ifdef PHP_WIN32
 	efree(history_file);
-#else
-	free(history_file);
-#endif
 	efree(code);
 	zend_string_release_ex(prompt, 0);
 	return EG(exit_status);
@@ -801,7 +799,7 @@ PHP_MSHUTDOWN_FUNCTION(cli_readline)
 PHP_MINFO_FUNCTION(cli_readline)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "Readline Support", "enabled");
+	php_info_print_table_row(2, "Readline Support", "enabled");
 #ifdef PHP_WIN32
 	php_info_print_table_row(2, "Readline library", "WinEditLine");
 #else

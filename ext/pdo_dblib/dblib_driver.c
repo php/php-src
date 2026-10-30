@@ -22,8 +22,8 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "pdo/php_pdo.h"
-#include "pdo/php_pdo_driver.h"
+#include "ext/pdo/php_pdo.h"
+#include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_dblib.h"
 #include "php_pdo_dblib_int.h"
 #include "zend_exceptions.h"
@@ -77,11 +77,12 @@ static void dblib_handle_closer(pdo_dbh_t *dbh)
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 
 	if (H) {
-		pdo_dblib_err_dtor(&H->err);
 		if (H->link) {
+			dbsetuserdata(H->link, (BYTE*) &H->err);
 			dbclose(H->link);
 			H->link = NULL;
 		}
+		pdo_dblib_err_dtor(&H->err);
 		if (H->login) {
 			dbfreelogin(H->login);
 			H->login = NULL;
@@ -202,6 +203,8 @@ static bool pdo_dblib_transaction_cmd(const char *cmd, pdo_dbh_t *dbh)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 
+	dbsetuserdata(H->link, (BYTE*) &H->err);
+
 	if (FAIL == dbcmd(H->link, cmd)) {
 		return false;
 	}
@@ -234,12 +237,14 @@ zend_string *dblib_handle_last_id(pdo_dbh_t *dbh, const zend_string *name)
 
 	RETCODE ret;
 	char *id = NULL;
-	size_t len;
+	DBINT len;
 	zend_string *ret_id;
 
 	/*
 	 * Would use scope_identity() but it's not implemented on Sybase
 	 */
+
+	dbsetuserdata(H->link, (BYTE*) &H->err);
 
 	if (FAIL == dbcmd(H->link, "SELECT @@IDENTITY")) {
 		return NULL;
@@ -267,9 +272,14 @@ zend_string *dblib_handle_last_id(pdo_dbh_t *dbh, const zend_string *name)
 		return NULL;
 	}
 
-	id = emalloc(32);
-	len = dbconvert(NULL, (dbcoltype(H->link, 1)) , (dbdata(H->link, 1)) , (dbdatlen(H->link, 1)), SQLCHAR, (BYTE *)id, (DBINT)-1);
+	id = emalloc(40);
+	len = dbconvert(NULL, (dbcoltype(H->link, 1)) , (dbdata(H->link, 1)) , (dbdatlen(H->link, 1)), SQLCHAR, (BYTE *)id, (DBINT)40);
 	dbcancel(H->link);
+
+	if (len < 0) {
+		efree(id);
+		return NULL;
+	}
 
 	ret_id = zend_string_init(id, len, 0);
 	efree(id);
@@ -296,10 +306,10 @@ static bool dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			}
 			return SUCCEED == dbsettime(lval);
 		case PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER:
-			if (!pdo_get_long_param(&lval, val)) {
+			if (!pdo_get_bool_param(&bval, val)) {
 				return false;
 			}
-			H->stringify_uniqueidentifier = lval;
+			H->stringify_uniqueidentifier = bval;
 			return true;
 		case PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS:
 			if (!pdo_get_bool_param(&bval, val)) {
@@ -308,10 +318,10 @@ static bool dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			H->skip_empty_rowsets = bval;
 			return true;
 		case PDO_DBLIB_ATTR_DATETIME_CONVERT:
-			if (!pdo_get_long_param(&lval, val)) {
+			if (!pdo_get_bool_param(&bval, val)) {
 				return false;
 			}
-			H->datetime_convert = lval;
+			H->datetime_convert = bval;
 			return true;
 		default:
 			return false;
@@ -442,7 +452,8 @@ static const struct pdo_dbh_methods dblib_methods = {
 	NULL, /* get driver methods */
 	NULL, /* request shutdown */
 	NULL, /* in transaction, use PDO's internal tracking mechanism */
-	NULL /* get gc */
+	NULL, /* get gc */
+	NULL /* scanner */
 };
 
 static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
@@ -538,7 +549,6 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		}
 
 		if (i==nvers) {
-			printf("Invalid version '%s'\n", vars[5].optval);
 			pdo_raise_impl_error(dbh, NULL, "HY000", "PDO_DBLIB: Invalid version specified in connection string.");
 			goto cleanup; /* unknown version specified */
 		}

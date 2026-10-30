@@ -4,12 +4,12 @@ Bug #74021 (fetch_array broken data. Data more then MEDIUMBLOB)
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
 
-require_once("connect.inc");
+require_once 'connect.inc';
 $link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
 $link->query('SET @@global.max_allowed_packet = 67108864');

@@ -25,8 +25,8 @@ var_dump($gen2->current());
 ?>
 --EXPECTF--
 int(1)
-int(1)
 #0 %s(10): gen()
 #1 [internal function]: from(Object(Generator))
-#2 %s(19): Generator->next()
+#2 %s(17): Generator->next()
 int(2)
+NULL

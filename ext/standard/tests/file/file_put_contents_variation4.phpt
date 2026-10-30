@@ -22,8 +22,6 @@ runtest();
 
 teardown_include_path();
 chdir("..");
-rmdir($thisTestDir);
-
 
 function runtest() {
    global $filename;
@@ -35,6 +33,13 @@ function runtest() {
    unlink($filename);
 }
 
+?>
+--CLEAN--
+<?php
+$thisTestDir = basename(__FILE__, ".clean.php") . ".dir";
+$filename = basename(__FILE__, ".clean.php") . ".tmp";
+@unlink($filename);
+rmdir($thisTestDir);
 ?>
 --EXPECT--
 File in include path

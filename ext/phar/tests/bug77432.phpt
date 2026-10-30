@@ -38,8 +38,6 @@ include("phar://" . $filename);
 --- Include 1 ---
 hello world
 --- Include 2 ---
-
-Warning: Constant  already defined in %s on line %d
 hello world
 --- After unlink ---
 

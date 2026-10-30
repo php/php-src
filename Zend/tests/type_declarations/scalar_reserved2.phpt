@@ -6,4 +6,4 @@ Scalar type names cannot be used as class, trait or interface names (2)
 class int {}
 ?>
 --EXPECTF--
-Fatal error: Cannot use 'int' as class name as it is reserved in %s on line %d
+Fatal error: Cannot use "int" as a class name as it is reserved in %s on line %d

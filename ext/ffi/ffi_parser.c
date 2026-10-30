@@ -2472,14 +2472,16 @@ _yy_state_2:
 
 static int parse_struct_declaration(int sym, zend_ffi_dcl *struct_dcl) {
 	zend_ffi_dcl common_field_dcl = ZEND_FFI_ATTR_INIT;
+	zend_ffi_dcl base_field_dcl = ZEND_FFI_ATTR_INIT;
 	sym = parse_specifier_qualifier_list(sym, &common_field_dcl);
+	base_field_dcl = common_field_dcl;
 	if (sym == YY__SEMICOLON || sym == YY__RBRACE) {
 		zend_ffi_add_anonymous_field(struct_dcl, &common_field_dcl);
 	} else if (sym == YY__STAR || sym == YY_ID || sym == YY__LPAREN || sym == YY__COLON) {
 		sym = parse_struct_declarator(sym, struct_dcl, &common_field_dcl);
 		while (sym == YY__COMMA) {
 			sym = get_sym();
-			zend_ffi_dcl field_dcl = common_field_dcl;
+			zend_ffi_dcl field_dcl = base_field_dcl;
 			if (YY_IN_SET(sym, (YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\000\000\000\000\000\000\360\017\000\000\000\000\000")) {
 				sym = parse_attributes(sym, &field_dcl);
 			}
@@ -3621,9 +3623,15 @@ zend_result zend_ffi_parse_decl(const char *str, size_t len) {
 		FFI_G(attribute_parsing) = 0;
 		yy_buf = (unsigned char*)str;
 		yy_end = yy_buf + len;
+		FFI_G(parse_failed) = 0;
 		parse();
+		if (FFI_G(parse_failed)) {
+			FFI_G(parse_failed) = 0;
+			return FAILURE;
+		}
 		return SUCCESS;
 	} else {
+		FFI_G(parse_failed) = 0;
 		return FAILURE;
 	}
 }
@@ -3637,13 +3645,19 @@ zend_result zend_ffi_parse_type(const char *str, size_t len, zend_ffi_dcl *dcl) 
 		yy_pos = yy_text = yy_buf = (unsigned char*)str;
 		yy_end = yy_buf + len;
 		yy_line = 1;
+		FFI_G(parse_failed) = 0;
 		sym = parse_type_name(get_sym(), dcl);
 		if (sym != YY_EOF) {
 			yy_error_sym("<EOF> expected, got", sym);
 		}
 		zend_ffi_validate_type_name(dcl);
+		if (FFI_G(parse_failed)) {
+			FFI_G(parse_failed) = 0;
+			return FAILURE;
+		}
 		return SUCCESS;
 	} else {
+		FFI_G(parse_failed) = 0;
 		return FAILURE;
 	};
 }

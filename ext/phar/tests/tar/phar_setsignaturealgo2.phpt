@@ -6,6 +6,7 @@ phar
 <?php
 $arr = Phar::getSupportedSignatures();
 if (!in_array("OpenSSL", $arr)) die("skip openssl support required");
+?>
 --INI--
 phar.require_hash=0
 phar.readonly=0

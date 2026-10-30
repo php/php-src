@@ -22,45 +22,17 @@
 #include <mmsystem.h>
 #include <errno.h>
 #include "php_win32_globals.h"
+#include "zend_hrtime.h"
 
-typedef VOID (WINAPI *MyGetSystemTimeAsFileTime)(LPFILETIME lpSystemTimeAsFileTime);
-
-static MyGetSystemTimeAsFileTime timefunc = NULL;
-
-#ifdef PHP_EXPORTS
-static zend_always_inline MyGetSystemTimeAsFileTime get_time_func(void)
-{/*{{{*/
-	MyGetSystemTimeAsFileTime timefunc = NULL;
-	HMODULE hMod = GetModuleHandle("kernel32.dll");
-
-	if (hMod) {
-		/* Max possible resolution <1us, win8/server2012 */
-		timefunc = (MyGetSystemTimeAsFileTime)GetProcAddress(hMod, "GetSystemTimePreciseAsFileTime");
-	}
-
-	if(!timefunc) {
-		/* 100ns blocks since 01-Jan-1641 */
-		timefunc = (MyGetSystemTimeAsFileTime) GetSystemTimeAsFileTime;
-	}
-
-	return timefunc;
-}/*}}}*/
-
-void php_win32_init_gettimeofday(void)
-{/*{{{*/
-	timefunc = get_time_func();
-}/*}}}*/
-#endif
-
-static zend_always_inline int getfilesystemtime(struct timeval *tv)
+static zend_always_inline void getfilesystemtime(struct timeval *tv)
 {/*{{{*/
 	FILETIME ft;
 	unsigned __int64 ff = 0;
 	ULARGE_INTEGER fft;
 
-	timefunc(&ft);
+	GetSystemTimePreciseAsFileTime(&ft);
 
-        /*
+	/*
 	 * Do not cast a pointer to a FILETIME structure to either a
 	 * ULARGE_INTEGER* or __int64* value because it can cause alignment faults on 64-bit Windows.
 	 * via  http://technet.microsoft.com/en-us/library/ms724284(v=vs.85).aspx
@@ -74,8 +46,6 @@ static zend_always_inline int getfilesystemtime(struct timeval *tv)
 
 	tv->tv_sec = (long)(ff / 1000000Ui64);
 	tv->tv_usec = (long)(ff % 1000000Ui64);
-
-	return 0;
 }/*}}}*/
 
 PHPAPI int gettimeofday(struct timeval *time_Info, struct timezone *timezone_Info)
@@ -94,17 +64,44 @@ PHPAPI int gettimeofday(struct timeval *time_Info, struct timezone *timezone_Inf
 	return 0;
 }/*}}}*/
 
+static DWORD wait_timer_alertable(HANDLE timer)
+{/*{{{*/
+	DWORD result;
+
+#ifdef ZTS
+	/* Threads that PHP does not manage have no executor globals, and their APCs cannot run PHP code */
+	if (!tsrm_is_managed_thread()) {
+		return WaitForSingleObjectEx(timer, INFINITE, TRUE);
+	}
+#endif
+
+	/* APCs can run PHP code that bails out. Close the timer before propagating the bailout. */
+	zend_try {
+		result = WaitForSingleObjectEx(timer, INFINITE, TRUE);
+	} zend_catch {
+		CloseHandle(timer);
+		zend_bailout();
+	} zend_end_try();
+
+	return result;
+}/*}}}*/
+
 PHPAPI int usleep(unsigned int useconds)
 {/*{{{*/
 	HANDLE timer;
 	LARGE_INTEGER due;
+	DWORD result;
 
 	due.QuadPart = -(10 * (__int64)useconds);
 
 	timer = CreateWaitableTimer(NULL, TRUE, NULL);
 	SetWaitableTimer(timer, &due, 0, NULL, NULL, 0);
-	WaitForSingleObject(timer, INFINITE);
+	result = wait_timer_alertable(timer);
 	CloseHandle(timer);
+	if (result == WAIT_IO_COMPLETION) {
+		errno = EINTR;
+		return -1;
+	}
 	return 0;
 }/*}}}*/
 
@@ -115,5 +112,30 @@ PHPAPI int nanosleep( const struct timespec * rqtp, struct timespec * rmtp )
 		errno = EINVAL;
 		return -1;
 	}
-	return usleep( rqtp->tv_sec * 1000000 + rqtp->tv_nsec / 1000  );
+	/* Run already queued APCs first, so that their runtime doesn't count as time slept */
+	if (SleepEx(0, TRUE) == WAIT_IO_COMPLETION) {
+		if (rmtp != NULL) {
+			*rmtp = *rqtp;
+		}
+		errno = EINTR;
+		return -1;
+	}
+	zend_hrtime_t start = zend_hrtime();
+	int result = usleep(rqtp->tv_sec * 1000000 + rqtp->tv_nsec / 1000);
+	if (result == -1 && errno == EINTR && rmtp != NULL) {
+		zend_hrtime_t elapsed = zend_hrtime() - start;
+		time_t seconds = rqtp->tv_sec - (time_t) (elapsed / ZEND_NANO_IN_SEC);
+		long nanoseconds = rqtp->tv_nsec - (long) (elapsed % ZEND_NANO_IN_SEC);
+		if (nanoseconds < 0) {
+			seconds--;
+			nanoseconds += (long) ZEND_NANO_IN_SEC;
+		}
+		if (seconds < 0) {
+			seconds = 0;
+			nanoseconds = 0;
+		}
+		rmtp->tv_sec = seconds;
+		rmtp->tv_nsec = nanoseconds;
+	}
+	return result;
 }/*}}}*/

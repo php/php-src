@@ -22,6 +22,7 @@
 #include "zend_ssa.h"
 #include "zend_dump.h"
 #include "zend_inference.h"
+#include "zend_worklist.h"
 #include "Optimizer/zend_optimizer_internal.h"
 
 static bool dominates(const zend_basic_block *blocks, int a, int b) {
@@ -57,9 +58,9 @@ static bool will_rejoin(
 	return 0;
 }
 
-static bool needs_pi(const zend_op_array *op_array, zend_dfg *dfg, zend_ssa *ssa, int from, int to, int var) /* {{{ */
+static bool needs_pi(const zend_op_array *op_array, const zend_dfg *dfg, const zend_ssa *ssa, int from, int to, int var) /* {{{ */
 {
-	zend_basic_block *from_block, *to_block;
+	const zend_basic_block *from_block, *to_block;
 	int other_successor;
 
 	if (!DFG_ISSET(dfg->in, dfg->size, to, var)) {
@@ -142,7 +143,7 @@ static void pi_range(
 	constraint->range.underflow = underflow;
 	constraint->range.overflow = overflow;
 	constraint->negative = negative ? NEG_INIT : NEG_NONE;
-	phi->has_range_constraint = 1;
+	phi->has_range_constraint = true;
 }
 /* }}} */
 
@@ -160,7 +161,7 @@ static inline void pi_range_max(zend_ssa_phi *phi, int var, zend_long val) {
 }
 
 static void pi_type_mask(zend_ssa_phi *phi, uint32_t type_mask) {
-	phi->has_range_constraint = 0;
+	phi->has_range_constraint = false;
 	phi->constraint.type.ce = NULL;
 	phi->constraint.type.type_mask = MAY_BE_REF|MAY_BE_RC1|MAY_BE_RCN;
 	phi->constraint.type.type_mask |= type_mask;
@@ -607,7 +608,7 @@ add_op1_def:
 			}
 			break;
 		case ZEND_ASSIGN_OBJ_REF:
-			if (opline->op1_type == IS_CV) {
+			if ((build_flags & ZEND_SSA_RC_INFERENCE) && opline->op1_type == IS_CV) {
 				ssa_ops[k].op1_def = ssa_vars_count;
 				var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
 				ssa_vars_count++;
@@ -679,6 +680,7 @@ add_op1_def:
 		case ZEND_POST_DEC:
 		case ZEND_BIND_GLOBAL:
 		case ZEND_BIND_STATIC:
+		case ZEND_BIND_INIT_STATIC_OR_JMP:
 		case ZEND_SEND_VAR_NO_REF:
 		case ZEND_SEND_VAR_NO_REF_EX:
 		case ZEND_SEND_VAR_EX:
@@ -765,6 +767,35 @@ add_op1_def:
 				//NEW_SSA_VAR(opline->op1.var)
 			}
 			break;
+		case ZEND_FRAMELESS_ICALL_1:
+		case ZEND_FRAMELESS_ICALL_2:
+		case ZEND_FRAMELESS_ICALL_3: {
+			if ((build_flags & ZEND_SSA_RC_INFERENCE) && opline->op1_type == IS_CV) {
+				ssa_ops[k].op1_def = ssa_vars_count;
+				var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
+				ssa_vars_count++;
+				//NEW_SSA_VAR(opline->op1.var)
+			}
+			if ((build_flags & ZEND_SSA_RC_INFERENCE) && opline->op2_type == IS_CV) {
+				ssa_ops[k].op2_def = ssa_vars_count;
+				var[EX_VAR_TO_NUM(opline->op2.var)] = ssa_vars_count;
+				ssa_vars_count++;
+				//NEW_SSA_VAR(opline->op2.var)
+			}
+			if (opline->opcode == ZEND_FRAMELESS_ICALL_3) {
+				next = opline + 1;
+				if (next->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
+					ssa_ops[k + 1].op1_use = var[EX_VAR_TO_NUM(next->op1.var)];
+					//USE_SSA_VAR(op_array->last_var + next->op1.var);
+					if ((build_flags & ZEND_SSA_RC_INFERENCE) && next->op1_type == IS_CV) {
+						ssa_ops[k + 1].op1_def = ssa_vars_count;
+						var[EX_VAR_TO_NUM(next->op1.var)] = ssa_vars_count;
+						ssa_vars_count++;
+						//NEW_SSA_VAR(next->op1.var)
+					}
+				}
+			}
+		}
 		default:
 			break;
 	}
@@ -786,7 +817,7 @@ ZEND_API int zend_ssa_rename_op(const zend_op_array *op_array, const zend_op *op
 }
 /* }}} */
 
-static zend_result zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa, int *var, int n) /* {{{ */
+static void zend_ssa_rename_in_block(const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa, int *var, int n) /* {{{ */
 {
 	zend_basic_block *blocks = ssa->cfg.blocks;
 	zend_ssa_block *ssa_blocks = ssa->blocks;
@@ -794,15 +825,6 @@ static zend_result zend_ssa_rename(const zend_op_array *op_array, uint32_t build
 	int ssa_vars_count = ssa->vars_count;
 	int i, j;
 	zend_op *opline, *end;
-	int *tmp = NULL;
-	ALLOCA_FLAG(use_heap = 0);
-
-	// FIXME: Can we optimize this copying out in some cases?
-	if (blocks[n].next_child >= 0) {
-		tmp = do_alloca(sizeof(int) * (op_array->last_var + op_array->T), use_heap);
-		memcpy(tmp, var, sizeof(int) * (op_array->last_var + op_array->T));
-		var = tmp;
-	}
 
 	if (ssa_blocks[n].phis) {
 		zend_ssa_phi *phi = ssa_blocks[n].phis;
@@ -886,22 +908,90 @@ static zend_result zend_ssa_rename(const zend_op_array *op_array, uint32_t build
 	}
 
 	ssa->vars_count = ssa_vars_count;
+}
+/* }}} */
 
-	j = blocks[n].children;
-	while (j >= 0) {
-		// FIXME: Tail call optimization?
-		if (zend_ssa_rename(op_array, build_flags, ssa, var, j) == FAILURE)
-			return FAILURE;
-		j = blocks[j].next_child;
+static zend_result zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa, int *var, int n)
+{
+	/* The worklist contains block numbers, encoded as positive or negative value.
+	 * Positive values indicate that the variable rename still needs to happen for the block.
+	 * Negative values indicate the variable rename was done and all children were handled too.
+	 * In that case, we will clean up.
+	 * Because block 0 is valid, we bias the block numbers by adding 1 such that we can distinguish
+	 * positive and negative values in all cases. */
+	zend_worklist_stack work;
+	ALLOCA_FLAG(work_use_heap);
+	ZEND_WORKLIST_STACK_ALLOCA(&work, ssa->cfg.blocks_count, work_use_heap);
+	zend_worklist_stack_push(&work, n + 1);
+
+	/* This is used to backtrack the right version of the renamed variables to use. */
+	ALLOCA_FLAG(save_vars_use_heap);
+	unsigned int save_vars_top = 0;
+	int **save_vars = do_alloca(sizeof(int *) * (ssa->cfg.blocks_count + 1), save_vars_use_heap);
+	save_vars[0] = var;
+
+	while (work.len) {
+		n = zend_worklist_stack_pop(&work);
+
+		/* Enter state: perform SSA variable rename */
+		if (n > 0) {
+			n--;
+
+			// FIXME: Can we optimize this copying out in some cases?
+			int *new_var;
+			if (ssa->cfg.blocks[n].next_child >= 0) {
+				new_var = emalloc(sizeof(int) * (op_array->last_var + op_array->T));
+				memcpy(new_var, save_vars[save_vars_top], sizeof(int) * (op_array->last_var + op_array->T));
+				save_vars[++save_vars_top] = new_var;
+			} else {
+				new_var = save_vars[save_vars_top];
+			}
+
+			zend_ssa_rename_in_block(op_array, build_flags, ssa, new_var, n);
+
+			int j = ssa->cfg.blocks[n].children;
+			if (j >= 0) {
+				/* Push backtrack state */
+				zend_worklist_stack_push(&work, -(n + 1));
+
+				/* Push children in enter state */
+				unsigned int child_count = 0;
+				int len_prior = work.len;
+				do {
+					zend_worklist_stack_push(&work, j + 1);
+					j = ssa->cfg.blocks[j].next_child;
+					child_count++;
+				} while (j >= 0);
+
+				/* Reverse block order to maintain SSA variable number order given in previous PHP versions,
+				 * but the data structure doesn't allow reverse dominator tree traversal. */
+				for (unsigned int i = 0; i < child_count / 2; i++) {
+					int tmp = work.buf[len_prior + i];
+					work.buf[len_prior + i] = work.buf[work.len - 1 - i];
+					work.buf[work.len - 1 - i] = tmp;
+				}
+			} else {
+				/* Leafs jump directly to backtracking */
+				goto backtrack;
+			}
+		}
+		/* Leave state: backtrack */
+		else {
+			n = -n;
+			n--;
+backtrack:;
+			if (ssa->cfg.blocks[n].next_child >= 0) {
+				efree(save_vars[save_vars_top]);
+				save_vars_top--;
+			}
+		}
 	}
 
-	if (tmp) {
-		free_alloca(tmp, use_heap);
-	}
+	free_alloca(save_vars, save_vars_use_heap);
+	ZEND_WORKLIST_STACK_FREE_ALLOCA(&work, work_use_heap);
 
 	return SUCCESS;
 }
-/* }}} */
 
 ZEND_API zend_result zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa) /* {{{ */
 {

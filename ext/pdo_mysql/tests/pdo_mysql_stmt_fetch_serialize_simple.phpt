@@ -4,12 +4,12 @@ MySQL PDOStatement->fetch(), PDO::FETCH_SERIALIZE
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
 
     try {
@@ -42,11 +42,10 @@ MySQLPDOTest::skip();
         var_dump($tmp);
 
         printf("\nAnd now magic PDO using fetchAll(PDO::FETCH_CLASS|PDO::FETCH_SERIALIZE)...\n");
-        $db->exec('DROP TABLE IF EXISTS test');
-        $db->exec(sprintf('CREATE TABLE test(myobj BLOB) ENGINE=%s', MySQLPDOTest::getTableEngine()));
-        $db->exec("INSERT INTO test(myobj) VALUES ('Data fetched from DB to be given to unserialize()')");
+        $db->exec(sprintf('CREATE TABLE test_stmt_fetchserialize_simple(myobj BLOB) ENGINE=%s', MySQLPDOTest::getTableEngine()));
+        $db->exec("INSERT INTO test_stmt_fetchserialize_simple(myobj) VALUES ('Data fetched from DB to be given to unserialize()')");
 
-        $stmt = $db->prepare('SELECT myobj FROM test');
+        $stmt = $db->prepare('SELECT myobj FROM test_stmt_fetchserialize_simple');
         $stmt->execute();
         $rows = $stmt->fetchAll(PDO::FETCH_CLASS|PDO::FETCH_SERIALIZE, 'myclass', array('Called by PDO'));
         var_dump($rows[0]);
@@ -56,7 +55,7 @@ MySQLPDOTest::skip();
         var_dump($rows[0]);
 
         printf("\nAnd now PDO using setFetchMode(PDO::FETCH:CLASS|PDO::FETCH_SERIALIZE) + fetch()...\n");
-        $stmt = $db->prepare('SELECT myobj FROM test');
+        $stmt = $db->prepare('SELECT myobj FROM test_stmt_fetchserialize_simple');
         $stmt->setFetchMode(PDO::FETCH_CLASS|PDO::FETCH_SERIALIZE, 'myclass', array('Called by PDO'));
         $stmt->execute();
         var_dump($stmt->fetch());
@@ -66,8 +65,13 @@ MySQLPDOTest::skip();
             $e->getMessage(), $db->errorCode(), implode(' ', $db->errorInfo()));
     }
 
-    $db->exec('DROP TABLE IF EXISTS test');
     print "done!\n";
+?>
+--CLEAN--
+<?php
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS test_stmt_fetchserialize_simple');
 ?>
 --EXPECTF--
 Deprecated: %s implements the Serializable interface, which is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d

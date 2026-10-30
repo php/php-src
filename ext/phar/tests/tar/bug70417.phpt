@@ -10,10 +10,11 @@ $filename = __DIR__ . '/bug70417.tar';
 $resBefore = count(get_resources());
 $arch = new PharData($filename);
 $arch->addFromString('foo', 'bar');
+$arch->addFromString('foo2', 'baz');
 $arch->compress(Phar::GZ);
 unset($arch);
 $resAfter = count(get_resources());
-var_dump($resBefore === $resAfter);
+var_dump($resAfter - $resBefore);
 ?>
 --CLEAN--
 <?php
@@ -22,4 +23,4 @@ $filename = __DIR__ . '/bug70417.tar';
 @unlink("$filename.gz");
 ?>
 --EXPECT--
-bool(true)
+int(0)

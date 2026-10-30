@@ -4,25 +4,13 @@ mysqli_fetch_field()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-
     // Note: no SQL type tests, internally the same function gets used as for mysqli_fetch_array() which does a lot of SQL type test
-    $mysqli = new mysqli();
-    $res = false;
-    try {
-        new mysqli_result($mysqli);
-    } catch (Error $exception) {
-        echo $exception->getMessage() . "\n";
-    }
-
-    require('table.inc');
-    if (!$mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket))
-        printf("[002] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-            $host, $user, $db, $port, $socket);
+    require 'table.inc';
+    $mysqli = $link;
 
     // Make sure that client, connection and result charsets are all the
     // same. Not sure whether this is strictly necessary.
@@ -63,10 +51,9 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECTF--
-mysqli object is not fully initialized
 object(stdClass)#%d (13) {
   ["name"]=>
   string(2) "ID"

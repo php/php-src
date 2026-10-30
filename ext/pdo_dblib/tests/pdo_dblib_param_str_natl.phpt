@@ -5,10 +5,13 @@ pdo_dblib
 --SKIPIF--
 <?php
 require __DIR__ . '/config.inc';
+getDbConnection();
 ?>
 --FILE--
 <?php
 require __DIR__ . '/config.inc';
+
+$db = getDbConnection();
 
 $stmt = $db->prepare('SELECT :value');
 $stmt->bindValue(':value', 'foo', PDO::PARAM_STR | PDO::PARAM_STR_NATL);

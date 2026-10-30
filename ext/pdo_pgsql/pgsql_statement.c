@@ -17,14 +17,14 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "pdo/php_pdo.h"
-#include "pdo/php_pdo_driver.h"
+#include "ext/pdo/php_pdo.h"
+#include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_pgsql.h"
 #include "php_pdo_pgsql_int.h"
 #ifdef HAVE_NETINET_IN_H
@@ -51,8 +51,52 @@
 #define TIMESTAMPOID   1114
 #define VARCHARLABEL "varchar"
 #define VARCHAROID   1043
+#define FLOAT4LABEL "float4"
+#define FLOAT4OID 700
+#define FLOAT8LABEL "float8"
+#define FLOAT8OID 701
 
+#ifndef HAVE_PQCLOSEPORTAL
+static bool pdo_pgsql_try_cmd(const char *cmd, const char *ok_sqlstate, pdo_pgsql_db_handle *H)
+{
+	bool result = false;
+	char *q = NULL;
+	PGresult *res = NULL;
 
+	PGTransactionStatusType status = PQtransactionStatus(H->server);
+
+	switch (status) {
+		case PQTRANS_ACTIVE:
+		case PQTRANS_INERROR:
+			break;
+		case PQTRANS_INTRANS: /* failure must not abort the caller's transaction */
+			/* PQexec does not run the statements following a failed one */
+			spprintf(&q, 0, "SAVEPOINT pdo_pgsql_savepoint; %s; RELEASE SAVEPOINT pdo_pgsql_savepoint;", cmd);
+			res = PQexec(H->server, q);
+
+			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
+				PQclear(PQexec(H->server, "ROLLBACK TO SAVEPOINT pdo_pgsql_savepoint; RELEASE SAVEPOINT pdo_pgsql_savepoint"));
+			}
+
+			break;
+		default:
+			res = PQexec(H->server, cmd);
+	}
+
+	if (PQresultStatus(res) == PGRES_COMMAND_OK) {
+		result = true;
+	} else if (res) {
+		const char *sqlstate = pdo_pgsql_sqlstate(res);
+
+		result = sqlstate && !strcmp(sqlstate, ok_sqlstate);
+	}
+
+	if (q) efree(q);
+	if (res) PQclear(res);
+
+	return result;
+}
+#endif
 
 static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 {
@@ -70,12 +114,17 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 	if (S->stmt_name) {
 		if (S->is_prepared && server_obj_usable) {
 			pdo_pgsql_db_handle *H = S->H;
-			char *q = NULL;
 			PGresult *res;
-
+#ifndef HAVE_PQCLOSEPREPARED
+			// TODO (??) libpq does not support close statement protocol < postgres 17
+			// check if we can circumvent this.
+			char *q = NULL;
 			spprintf(&q, 0, "DEALLOCATE %s", S->stmt_name);
 			res = PQexec(H->server, q);
 			efree(q);
+#else
+			res = PQclosePrepared(H->server, S->stmt_name);
+#endif
 			if (res) {
 				PQclear(res);
 			}
@@ -105,15 +154,16 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 	}
 
 	if (S->cursor_name) {
-		if (server_obj_usable) {
+		if (S->is_cursor_declared && server_obj_usable) {
 			pdo_pgsql_db_handle *H = S->H;
-			char *q = NULL;
-			PGresult *res;
-
+#ifndef HAVE_PQCLOSEPORTAL
+			char *q;
 			spprintf(&q, 0, "CLOSE %s", S->cursor_name);
-			res = PQexec(H->server, q);
+			pdo_pgsql_try_cmd(q, "34000", H); /* 34000: invalid_cursor_name */
 			efree(q);
-			if (res) PQclear(res);
+#else
+			PQclear(PQclosePortal(H->server, S->cursor_name));
+#endif
 		}
 		efree(S->cursor_name);
 		S->cursor_name = NULL;
@@ -147,10 +197,25 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt)
 	if (S->cursor_name) {
 		char *q = NULL;
 
-		if (S->is_prepared) {
+		if (S->is_cursor_declared) {
+#ifndef HAVE_PQCLOSEPORTAL
 			spprintf(&q, 0, "CLOSE %s", S->cursor_name);
-			PQclear(PQexec(H->server, q));
+
+			/* 34000: invalid_cursor_name */
+			if (pdo_pgsql_try_cmd(q, "34000", H)) {
+				S->is_cursor_declared = false;
+			}
+
 			efree(q);
+#else
+			PGresult *res = PQclosePortal(H->server, S->cursor_name);
+
+			if (PQresultStatus(res) == PGRES_COMMAND_OK) {
+				S->is_cursor_declared = false;
+			}
+
+			PQclear(res);
+#endif
 		}
 
 		spprintf(&q, 0, "DECLARE %s SCROLL CURSOR WITH HOLD FOR %s", S->cursor_name, ZSTR_VAL(stmt->active_query_string));
@@ -166,7 +231,7 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt)
 		PQclear(S->result);
 
 		/* the cursor was declared correctly */
-		S->is_prepared = 1;
+		S->is_cursor_declared = true;
 
 		/* fetch to be able to get the number of tuples later, but don't advance the cursor pointer */
 		spprintf(&q, 0, "FETCH FORWARD 0 FROM %s", S->cursor_name);
@@ -199,10 +264,14 @@ stmt_retry:
 					 * deallocate it and retry ONCE (thies 2005.12.15)
 					 */
 					if (sqlstate && !strcmp(sqlstate, "42P05")) {
-						char buf[100]; /* stmt_name == "pdo_crsr_%08x" */
 						PGresult *res;
+#ifndef HAVE_PQCLOSEPREPARED
+						char buf[100]; /* stmt_name == "pdo_crsr_%08x" */
 						snprintf(buf, sizeof(buf), "DEALLOCATE %s", S->stmt_name);
 						res = PQexec(H->server, buf);
+#else
+						res = PQclosePrepared(H->server, S->stmt_name);
+#endif
 						if (res) {
 							PQclear(res);
 						}
@@ -513,6 +582,18 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pd
 #endif
 				ZVAL_LONG(result, ZEND_ATOL(ptr));
 				break;
+			case FLOAT4OID:
+			case FLOAT8OID:
+                if (strncmp(ptr, "Infinity", len) == 0) {
+                    ZVAL_DOUBLE(result, ZEND_INFINITY);
+                } else if (strncmp(ptr, "-Infinity", len) == 0) {
+                    ZVAL_DOUBLE(result, -ZEND_INFINITY);
+                } else if (strncmp(ptr, "NaN", len) == 0) {
+                    ZVAL_DOUBLE(result, ZEND_NAN);
+                } else {
+                    ZVAL_DOUBLE(result, zend_strtod(ptr, NULL));
+                }
+				break;
 
 			case OIDOID: {
 				char *end_ptr;
@@ -632,6 +713,12 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *r
 		case INT4OID:
 			add_assoc_string(return_value, "native_type", INT4LABEL);
 			break;
+		case FLOAT4OID:
+			add_assoc_string(return_value, "native_type", FLOAT4LABEL);
+			break;
+		case FLOAT8OID:
+			add_assoc_string(return_value, "native_type", FLOAT8LABEL);
+			break;
 		case TEXTOID:
 			add_assoc_string(return_value, "native_type", TEXTLABEL);
 			break;
@@ -683,6 +770,33 @@ static int pdo_pgsql_stmt_cursor_closer(pdo_stmt_t *stmt)
 	return 1;
 }
 
+static int pgsql_stmt_get_attr(pdo_stmt_t *stmt, zend_long attr, zval *val)
+{
+	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
+
+	switch (attr) {
+#ifdef HAVE_PG_RESULT_MEMORY_SIZE
+		case PDO_PGSQL_ATTR_RESULT_MEMORY_SIZE:
+			if(stmt->executed) {
+				ZVAL_LONG(val, PQresultMemorySize(S->result));
+			} else {
+				char *tmp;
+				spprintf(&tmp, 0, "statement '%s' has not been executed yet", S->stmt_name);
+
+				pdo_pgsql_error_stmt_msg(stmt, 0, "HY000", tmp);
+				efree(tmp);
+
+				ZVAL_NULL(val);
+			}
+			return 1;
+#endif
+
+		default:
+			(void)S;
+			return 0;
+	}
+}
+
 const struct pdo_stmt_methods pgsql_stmt_methods = {
 	pgsql_stmt_dtor,
 	pgsql_stmt_execute,
@@ -691,7 +805,7 @@ const struct pdo_stmt_methods pgsql_stmt_methods = {
 	pgsql_stmt_get_col,
 	pgsql_stmt_param_hook,
 	NULL, /* set_attr */
-	NULL, /* get_attr */
+	pgsql_stmt_get_attr,
 	pgsql_stmt_get_column_meta,
 	NULL,  /* next_rowset */
 	pdo_pgsql_stmt_cursor_closer

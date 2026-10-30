@@ -20,7 +20,7 @@ Array
         (
             [file] => %s
             [line] => %d
-            [function] => {closure}
+            [function] => {closure:%s:%d}
             [args] => Array
                 (
                     [0] => 23
@@ -29,14 +29,14 @@ Array
         )
 
 )
-#0 %s(%d): {closure}(23)
+#0 %s(%d): {closure:%s:%d}(23)
 Array
 (
     [0] => Array
         (
             [file] => %s
             [line] => %d
-            [function] => {closure}
+            [function] => {closure:%s:%d}
             [args] => Array
                 (
                     [0] => 23
@@ -53,6 +53,9 @@ Array
                 (
                     [0] => Closure Object
                         (
+                            [name] => {closure:%s:%d}
+                            [file] => %s
+                            [line] => 8
                             [parameter] => Array
                                 (
                                     [$param] => <required>
@@ -65,5 +68,5 @@ Array
         )
 
 )
-#0 %s(%d): {closure}(23)
+#0 %s(%d): {closure:%s:%d}(23)
 #1 %s(%d): test(Object(Closure))

@@ -1,5 +1,5 @@
 --TEST--
-sort() functions precerve foreach by reference iterator pointer
+sort() functions preserve foreach by reference iterator pointer
 --FILE--
 <?php
 $a = [1,2,3,4,5,0];

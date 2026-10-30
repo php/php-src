@@ -8,4 +8,4 @@ include __DIR__ . '/gh16509.inc';
 
 ?>
 --EXPECTF--
-Fatal error: Cannot redeclare test() (previously declared in %sgh16509.inc:3) in %sgh16509.inc on line 3
+Fatal error: Cannot redeclare function test() (previously declared in %sgh16509.inc:3) in %sgh16509.inc on line 3

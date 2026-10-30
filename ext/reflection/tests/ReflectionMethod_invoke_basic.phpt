@@ -40,9 +40,9 @@ abstract class AbstractClass {
 
 $foo = new ReflectionMethod('TestClass', 'foo');
 $methodWithArgs = new ReflectionMethod('TestClass', 'methodWithArgs');
-$staticMethod = new ReflectionMethod('TestClass::staticMethod');
-$privateMethod = new ReflectionMethod("TestClass::privateMethod");
-$methodThatThrows = new ReflectionMethod("TestClass::willThrow");
+$staticMethod = new ReflectionMethod('TestClass', 'staticMethod');
+$privateMethod = new ReflectionMethod('TestClass', 'privateMethod');
+$methodThatThrows = new ReflectionMethod('TestClass', 'willThrow');
 
 $testClassInstance = new TestClass();
 $testClassInstance->prop = "Hello";
@@ -103,7 +103,7 @@ NULL
 
 Static method:
 ReflectionMethod::invoke() expects at least 1 argument, 0 given
-ReflectionMethod::invoke(): Argument #1 ($object) must be of type ?object, bool given
+ReflectionMethod::invoke(): Argument #1 ($object) must be of type ?object, true given
 Called staticMethod()
 Exception: Using $this when not in object context
 NULL

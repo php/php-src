@@ -15,13 +15,13 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../
 require getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
-$db->exec("CREATE TABLE test (x int)");
-$db->exec("INSERT INTO test VALUES (1)");
+$db->exec("CREATE TABLE test44173 (x int)");
+$db->exec("INSERT INTO test44173 VALUES (1)");
 
 
 // Bug entry [2] -- 1 is PDO::FETCH_LAZY
 try {
-    $stmt = $db->query("SELECT * FROM test", PDO::FETCH_LAZY, 0, []);
+    $stmt = $db->query("SELECT * FROM test44173", PDO::FETCH_LAZY, 0, []);
     var_dump($stmt);
 } catch (\TypeError $e) {
     echo $e->getMessage(), \PHP_EOL;
@@ -30,14 +30,14 @@ try {
 
 // Bug entry [3]
 try {
-    $stmt = $db->query("SELECT * FROM test", 'abc');
+    $stmt = $db->query("SELECT * FROM test44173", 'abc');
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 
 // Bug entry [4]
 try {
-    $stmt = $db->query("SELECT * FROM test", PDO::FETCH_CLASS, 0, 0, 0);
+    $stmt = $db->query("SELECT * FROM test44173", PDO::FETCH_CLASS, 0, 0, 0);
     var_dump($stmt);
 } catch (\ArgumentCountError $e) {
     echo $e->getMessage(), \PHP_EOL;
@@ -46,7 +46,7 @@ try {
 
 // Bug entry [5]
 try {
-    $stmt = $db->query("SELECT * FROM test", PDO::FETCH_INTO);
+    $stmt = $db->query("SELECT * FROM test44173", PDO::FETCH_INTO);
     var_dump($stmt);
 } catch (\ArgumentCountError $e) {
     echo $e->getMessage(), \PHP_EOL;
@@ -55,7 +55,7 @@ try {
 
 // Bug entry [6]
 try {
-    $stmt = $db->query("SELECT * FROM test", PDO::FETCH_COLUMN);
+    $stmt = $db->query("SELECT * FROM test44173", PDO::FETCH_COLUMN);
     var_dump($stmt);
 } catch (\ArgumentCountError $e) {
     echo $e->getMessage(), \PHP_EOL;
@@ -64,13 +64,19 @@ try {
 
 // Bug entry [7]
 try {
-    $stmt = $db->query("SELECT * FROM test", PDO::FETCH_CLASS);
+    $stmt = $db->query("SELECT * FROM test44173", PDO::FETCH_CLASS);
     var_dump($stmt);
 } catch (\ArgumentCountError $e) {
     echo $e->getMessage(), \PHP_EOL;
 }
 
 
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+PDOTest::dropTableIfExists($db, "test44173");
 ?>
 --EXPECT--
 PDO::query() expects exactly 2 arguments for the fetch mode provided, 4 given

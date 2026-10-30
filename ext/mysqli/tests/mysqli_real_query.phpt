@@ -4,13 +4,11 @@ mysqli_real_query()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-
-    require('table.inc');
+    require 'table.inc';
 
     if (false !== ($tmp = mysqli_real_query($link, 'THIS IS NOT SQL')))
         printf("[004] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
@@ -83,7 +81,7 @@ ver_param;')) {
 ?>
 --CLEAN--
 <?php
-require_once("connect.inc");
+require_once 'connect.inc';
 if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
    printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 

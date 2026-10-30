@@ -421,7 +421,7 @@ typedef struct buf_area buffy;
  *      bep points to the end-of-buffer+1
  * While using this macro, note that the nextb pointer is NOT updated.
  *
- * NOTE: Evaluation of the c argument should not have any side-effects
+ * NOTE: Evaluation of the c argument should not have any side effects
  */
 #define INS_CHAR(c, sp, bep, cc) \
 	{                            \
@@ -830,7 +830,7 @@ static size_t format_converter(buffy * odp, const char *fmt, va_list ap) /* {{{ 
 					}
 					s = ap_php_conv_p2(ui_num, 4, *fmt, &num_buf[NUM_BUF_SIZE], &s_len);
 					FIX_PRECISION(adjust_precision, precision, s, s_len);
-					if (alternate_form && i_num != 0) {
+					if (alternate_form && ui_num != 0) {
 						*--s = *fmt;	/* 'x' or 'X' */
 						*--s = '0';
 						s_len += 2;

@@ -481,6 +481,10 @@ static php_mb_regex_t *php_mbregex_compile_pattern(const char *pattern, size_t p
 		if (rc == MBREX(search_re)) {
 			/* reuse the new rc? see bug #72399 */
 			MBREX(search_re) = NULL;
+			if (MBREX(search_regs) != NULL) {
+				onig_region_free(MBREX(search_regs), 1);
+				MBREX(search_regs) = NULL;
+			}
 		}
 		zend_hash_str_update_ptr(&MBREX(ht_rc), (char *)pattern, patlen, retval);
 	} else {
@@ -694,7 +698,7 @@ mb_regex_groups_iter(const OnigUChar* name, const OnigUChar* name_end, int ngrou
 	gn = onig_name_to_backref_number(reg, name, name_end, args->region);
 	beg = args->region->beg[gn];
 	end = args->region->end[gn];
-	if (beg >= 0 && beg < end && end <= args->search_len) {
+	if (beg >= 0 && beg < end && ((size_t)end <= args->search_len)) {
 		add_assoc_stringl_ex(args->groups, (char *)name, name_end - name, &args->search_str[beg], end - beg);
 	} else {
 		add_assoc_bool_ex(args->groups, (char *)name, name_end - name, 0);
@@ -771,7 +775,7 @@ static inline void mb_regex_substitute(
 				clen = (int) php_mb_mbchar_bytes(++p, enc);
 				if (clen != 1 || p == eos || (p[0] != '<' && p[0] != '\'')) {
 					/* not a backref delimiter */
-					p += clen;
+					p = MIN(p + clen, eos);
 					smart_str_appendl(pbuf, sp, p - sp);
 					continue;
 				}
@@ -791,12 +795,13 @@ static inline void mb_regex_substitute(
 					if (maybe_num && !isdigit((unsigned char)name_end[0])) maybe_num = 0;
 					name_end++;
 				}
-				p = name_end + 1;
 				if (name_end - name < 1 || name_end >= eos) {
 					/* the backref was empty or we failed to find the end delimiter */
+					p = MIN(name_end + 1, eos);
 					smart_str_appendl(pbuf, sp, p - sp);
 					continue;
 				}
+				p = name_end + 1;
 				/* we have either a name or a number */
 				if (maybe_num) {
 					if (!onig_noname_group_capture_is_active(regexp)) {
@@ -909,7 +914,7 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	}
 
 	if (arg_pattern_len == 0) {
-		zend_argument_value_error(1, "must not be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -1193,7 +1198,7 @@ PHP_FUNCTION(mb_split)
 	size_t string_len;
 
 	int err;
-	zend_long count = -1;
+	zend_ulong count = -1; /* unsigned, it's a limit and we want to prevent signed overflow */
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &arg_pattern, &arg_pattern_len, &string, &string_len, &count) == FAILURE) {
 		RETURN_THROWS();
@@ -1481,7 +1486,7 @@ PHP_FUNCTION(mb_ereg_search_init)
 	}
 
 	if (arg_pattern && arg_pattern_len == 0) {
-		zend_argument_value_error(2, "must not be empty");
+		zend_argument_must_not_be_empty_error(2);
 		RETURN_THROWS();
 	}
 

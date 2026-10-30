@@ -374,14 +374,16 @@ static process_pair *process_get(FILE *stream)
 	process_pair *ptr;
 	process_pair *newptr;
 
-	for (ptr = TWG(process); ptr < (TWG(process) + TWG(process_size)); ptr++) {
-		if (ptr->stream == stream) {
-			break;
+	if (TWG(process) != NULL) {
+		for (ptr = TWG(process); ptr < (TWG(process) + TWG(process_size)); ptr++) {
+			if (ptr->stream == stream) {
+				break;
+			}
 		}
-	}
 
-	if (ptr < (TWG(process) + TWG(process_size))) {
-		return ptr;
+		if (ptr < (TWG(process) + TWG(process_size))) {
+			return ptr;
+		}
 	}
 
 	newptr = (process_pair*)realloc((void*)TWG(process), (TWG(process_size)+1)*sizeof(process_pair));
@@ -400,19 +402,21 @@ static shm_pair *shm_get(key_t key, void *addr)
 	shm_pair *ptr;
 	shm_pair *newptr;
 
-	for (ptr = TWG(shm); ptr < (TWG(shm) + TWG(shm_size)); ptr++) {
-		if (!ptr->descriptor) {
-			continue;
+	if (TWG(shm) != NULL) {
+		for (ptr = TWG(shm); ptr < (TWG(shm) + TWG(shm_size)); ptr++) {
+			if (!ptr->descriptor) {
+				continue;
+			}
+			if (!addr && ptr->descriptor->shm_perm.key == key) {
+				break;
+			} else if (ptr->addr == addr) {
+				break;
+			}
 		}
-		if (!addr && ptr->descriptor->shm_perm.key == key) {
-			break;
-		} else if (ptr->addr == addr) {
-			break;
-		}
-	}
 
-	if (ptr < (TWG(shm) + TWG(shm_size))) {
-		return ptr;
+		if (ptr < (TWG(shm) + TWG(shm_size))) {
+			return ptr;
+		}
 	}
 
 	newptr = (shm_pair*)realloc((void*)TWG(shm), (TWG(shm_size)+1)*sizeof(shm_pair));
@@ -477,12 +481,13 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 		return NULL;
 	}
 
-	cmd = (char*)malloc(strlen(command)+strlen(TWG(comspec))+sizeof(" /s /c ")+2);
+	size_t cmd_buffer_size = strlen(command) + strlen(TWG(comspec)) + sizeof(" /s /c ") + 2;
+	cmd = malloc(cmd_buffer_size);
 	if (!cmd) {
 		return NULL;
 	}
 
-	sprintf(cmd, "%s /s /c \"%s\"", TWG(comspec), command);
+	snprintf(cmd, cmd_buffer_size, "%s /s /c \"%s\"", TWG(comspec), command);
 	cmdw = php_win32_cp_any_to_w(cmd);
 	if (!cmdw) {
 		free(cmd);
@@ -630,6 +635,7 @@ static key_t tsrm_choose_random_shm_key(key_t prev_key) {
 TSRM_API int shmget(key_t key, size_t size, int flags)
 {/*{{{*/
 	shm_pair *shm;
+	size_t mapping_size;
 	char shm_segment[sizeof(SEGMENT_PREFIX INT_MIN_AS_STRING)];
 	HANDLE shm_handle = NULL, info_handle = NULL;
 	BOOL created = FALSE;
@@ -645,16 +651,16 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 
 	if (!shm_handle) {
 		if (flags & IPC_CREAT) {
-			if (size == 0 || size > SIZE_MAX - sizeof(shm->descriptor)) {
+			if (size == 0 || size > SIZE_MAX - sizeof(*shm->descriptor)) {
 				return -1;
 			}
-			size += sizeof(shm->descriptor);
+			mapping_size = size + sizeof(*shm->descriptor);
 #if SIZEOF_SIZE_T == 8
-			DWORD high = size >> 32;
-			DWORD low = (DWORD)size;
+			DWORD high = mapping_size >> 32;
+			DWORD low = (DWORD)mapping_size;
 #else
 			DWORD high = 0;
-			DWORD low = size;
+			DWORD low = mapping_size;
 #endif
 			shm_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, high, low, key == IPC_PRIVATE ? NULL : shm_segment);
 			created		= TRUE;
@@ -725,7 +731,7 @@ TSRM_API void *shmat(int key, const void *shmaddr, int flags)
 		return (void*)-1;
 	}
 
-	shm->addr = shm->descriptor + sizeof(shm->descriptor);
+	shm->addr = shm->descriptor + 1;
 	shm->descriptor->shm_atime = time(NULL);
 	shm->descriptor->shm_lpid  = getpid();
 	shm->descriptor->shm_nattch++;

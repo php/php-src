@@ -28,5 +28,6 @@ echo "\n";
 
 http_server_kill($pid);
 
+?>
 --EXPECT--
 Hello

@@ -4,11 +4,11 @@ Bug #38710 (data leakage because of nonexisting boundary checking in statements)
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-require_once("connect.inc");
+require_once 'connect.inc';
 
 $db = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 $qry=$db->stmt_init();

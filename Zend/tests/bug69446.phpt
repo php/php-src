@@ -23,12 +23,12 @@ unset($foo);
 gc_collect_cycles();
 var_dump($bar);
 ?>
---EXPECT--
-object(bad)#2 (2) {
+--EXPECTF--
+object(bad)#%d (2) {
   ["x"]=>
-  object(stdClass)#3 (0) {
+  object(stdClass)#%d (0) {
   }
   ["y"]=>
-  object(stdClass)#4 (0) {
+  object(stdClass)#%d (0) {
   }
 }

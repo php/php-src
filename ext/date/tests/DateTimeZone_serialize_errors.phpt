@@ -7,9 +7,8 @@ $serialized = 'O:12:"DateTimeZone":2:{s:13:"timezone_type";i:3;s:8:"timezone";s:
 try {
 	$tz = unserialize($serialized);
 } catch (Throwable $e) {
-	echo $e->getMessage(), "\n";
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
---EXPECTF--
-Warning: DateTimeZone::__unserialize(): Timezone must not contain null bytes in %s on line %d
-Invalid serialization data for DateTimeZone object
+--EXPECT--
+Error: Invalid serialization data for DateTimeZone object

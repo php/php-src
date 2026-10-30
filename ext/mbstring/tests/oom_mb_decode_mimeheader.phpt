@@ -4,7 +4,6 @@ mb_decode_mimeheader() doesn't reach hard limit
 mbstring
 --INI--
 memory_limit=8M
-memory_hard_limit_percent=125
 --FILE--
 <?php
 $encoded = str_repeat("=?UTF-8?B?w6nDqcOp?= ", (int) (5500 * 1024 / 21));

@@ -149,6 +149,29 @@ class Response extends BaseResponse
     }
 
     /**
+     * Expect status field with value that matches the supplied pattern.
+     *
+     * @param string $fieldName
+     * @param string $pattern
+     *
+     * @return Response
+     */
+    public function expectJsonBodyPatternForStatusField(string $fieldName, string $pattern): Response
+    {
+        $rawData = $this->getBody('application/json');
+        $data = json_decode($rawData, true);
+        if (preg_match('|' . $pattern . '|', $data[$fieldName]) > 0) {
+            return $this;
+        }
+
+        $this->error(
+            "Field $fieldName did not match pattern $pattern in status data '$rawData'"
+        );
+
+        return $this;
+    }
+
+    /**
      * Expect that one of the processes in json status process list has a field with value that
      * matches the supplied pattern.
      *
@@ -167,7 +190,7 @@ class Response extends BaseResponse
             );
         }
         foreach ($data['processes'] as $process) {
-            if (preg_match('|' . $pattern . '|', $process[$fieldName]) !== false) {
+            if (preg_match('|' . $pattern . '|', $process[$fieldName]) > 0) {
                 return $this;
             }
         }
@@ -195,9 +218,20 @@ class Response extends BaseResponse
      *
      * @return Response
      */
-    public function expectHeader($name, $value): Response
+    public function expectHeader($name, $value, $useRegex = false): Response
     {
-        $this->checkHeader($name, $value);
+        $this->checkHeader($name, $value, $useRegex);
+
+        return $this;
+    }
+
+    /**
+     * @param string $name
+     * @return Response
+     */
+    public function expectNoHeader($name)
+    {
+        $this->checkNoHeader($name);
 
         return $this;
     }
@@ -225,7 +259,7 @@ class Response extends BaseResponse
     /**
      * Expect error pattern in the response.
      *
-     * @param string $errorMessagePattern Expected error message RegExp patter.
+     * @param string $errorMessagePattern Expected error message RegExp pattern.
      *
      * @return Response
      */
@@ -404,6 +438,21 @@ class Response extends BaseResponse
 
         if ( ! preg_match($value, $header)) {
             return $this->error("The header $name value '$header' does not match RegExp '$value'");
+        }
+
+        return true;
+    }
+
+    /**
+     * @param string $name
+     * @return bool
+     */
+    private function checkNoHeader(string $name)
+    {
+        $lcName = strtolower($name);
+        $headers = $this->getHeaders();
+        if (isset($headers[$lcName])) {
+            return $this->error("The header $name is present");
         }
 
         return true;

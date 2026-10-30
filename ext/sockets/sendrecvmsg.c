@@ -107,23 +107,23 @@ static void init_ancillary_registry(void)
 	key.cmsg_type		= type; \
 	zend_hash_str_update_mem(&ancillary_registry.ht, (char*)&key, sizeof(key), (void*)&entry, sizeof(entry))
 
-#if defined(IPV6_PKTINFO) && HAVE_IPV6
+#if defined(IPV6_PKTINFO) && defined(HAVE_IPV6)
 	PUT_ENTRY(sizeof(struct in6_pktinfo), 0, 0, from_zval_write_in6_pktinfo,
 			to_zval_read_in6_pktinfo, IPPROTO_IPV6, IPV6_PKTINFO);
 #endif
 
-#if defined(IPV6_HOPLIMIT) && HAVE_IPV6
+#if defined(IPV6_HOPLIMIT) && defined(HAVE_IPV6)
 	PUT_ENTRY(sizeof(int), 0, 0, from_zval_write_int,
 			to_zval_read_int, IPPROTO_IPV6, IPV6_HOPLIMIT);
 #endif
 
-#if defined(IPV6_TCLASS) && HAVE_IPV6
+#if defined(IPV6_TCLASS) && defined(HAVE_IPV6)
 	PUT_ENTRY(sizeof(int), 0, 0, from_zval_write_int,
 			to_zval_read_int, IPPROTO_IPV6, IPV6_TCLASS);
 #endif
 
 #ifdef SO_PASSCRED
-#ifdef ANC_CREDS_UCRED
+#ifdef HAVE_STRUCT_UCRED
 	PUT_ENTRY(sizeof(struct ucred), 0, 0, from_zval_write_ucred,
 			to_zval_read_ucred, SOL_SOCKET, SCM_CREDENTIALS);
 #else
@@ -326,7 +326,7 @@ PHP_FUNCTION(socket_cmsg_space)
 	RETURN_LONG((zend_long)CMSG_SPACE(entry->size + n * entry->var_el_size));
 }
 
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 int php_do_setsockopt_ipv6_rfc3542(php_socket *php_sock, int level, int optname, zval *arg4)
 {
 	struct err_s	err = {0};

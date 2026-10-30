@@ -93,14 +93,9 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.3
 -------------------------------------------------------------------------------
-EXTENSION:           oci8
-PRIMARY MAINTAINER:  Christopher Jones <sixd@php.net> (2007 - 2017)
-                     Antony Dovgal <tony2001@php.net> (2003 - 2009)
-MAINTENANCE:         Maintained
-STATUS:              Working
--------------------------------------------------------------------------------
 EXTENSION:           odbc
 PRIMARY MAINTAINER:  Daniel R. Kalowsky <kalowsky@php.net> (2000 - 2004)
+                     Calvin Buckley <calvin@cmpct.info> (2024 - )
 MAINTENANCE:         Maintained
 STATUS:              Working
 COMMENT:             Working
@@ -134,14 +129,8 @@ STATUS:              Working
 SINCE:               5.1
 -------------------------------------------------------------------------------
 EXTENSION:           pdo_odbc
-PRIMARY MAINTAINER:  Unknown
-MAINTENANCE:         Odd fixes
-STATUS:              Working
-SINCE:               5.1
--------------------------------------------------------------------------------
-EXTENSION:           pdo_oci
-PRIMARY MAINTAINER:  Christopher Jones <sixd@php.net> (2007 - 2017)
-MAINTENANCE:         Odd fixes
+PRIMARY MAINTAINER:  Calvin Buckley <calvin@cmpct.info> (2024 - )
+MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.1
 -------------------------------------------------------------------------------
@@ -181,50 +170,57 @@ EXTENSION:           dom
 PRIMARY MAINTAINER:  Christian Stocker <chregu@php.net> (2003 - 2011)
                      Rob Richards <rrichards@php.net> (2003 - 2012)
                      Marcus Börger <helly@php.net> (2003 - 2006)
-MAINTENANCE:         Maintained
+                     Nora Dossche <nielsdos@php.net> (2023 - 2026)
+MAINTENANCE:         Orphan
 STATUS:              Working
 SINCE:               5.0
 -------------------------------------------------------------------------------
 EXTENSION:           simplexml
 PRIMARY MAINTAINER:  Marcus Börger <helly@php.net> (2003 - 2008)
-MAINTENANCE:         Maintained
+                     Nora Dossche <nielsdos@php.net> (2023 - 2026)
+MAINTENANCE:         Orphan
 STATUS:              Working
 SINCE:               5.0
 -------------------------------------------------------------------------------
 EXTENSION:           soap
 PRIMARY MAINTAINER:  Dmitry Stogov <dmitry@php.net> (2004 - 2018)
-                     Niels Dossche <nielsdos@php.net> (2024 - 2024)
-MAINTENANCE:         Odd fixes
+                     Nora Dossche <nielsdos@php.net> (2024 - 2026)
+MAINTENANCE:         Orphan
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           xml
 PRIMARY MAINTAINER:  Thies C. Arntzen <thies@thieso.net> (1999 - 2002)
                      Rob Richards <rrichards@php.net> (2003 - 2013)
-MAINTENANCE:         Maintained
+                     Nora Dossche <nielsdos@php.net> (2023 - 2026)
+MAINTENANCE:         Orphan
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           libxml
 PRIMARY MAINTAINER:  Rob Richards <rrichards@php.net> (2003 - 2009)
                      Christian Stocker <chregu@php.net> (2004 - 2011)
-MAINTENANCE:         Maintained
+                     Nora Dossche <nielsdos@php.net> (2023 - 2026)
+MAINTENANCE:         Orphan
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           xmlreader
 PRIMARY MAINTAINER:  Rob Richards <rrichards@php.net> (2004 - 2010)
                      Christian Stocker <chregu@php.net> (2004 - 2004)
-MAINTENANCE:         Maintained
+                     Nora Dossche <nielsdos@php.net> (2023 - 2026)
+MAINTENANCE:         Orphan
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           xmlwriter
 PRIMARY MAINTAINER:  Rob Richards <rrichards@php.net> (2004 - 2010)
                      Pierre-Alain Joye <pajoye@php.net> (2005-2009)
-MAINTENANCE:         Maintained
+                     Nora Dossche <nielsdos@php.net> (2023 - 2026)
+MAINTENANCE:         Orphan
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           xsl
 PRIMARY MAINTAINER:  Christian Stocker <chregu@php.net> (2003 - 2011)
                      Rob Richards <rrichards@php.net> (2003 - 2010)
-MAINTENANCE:         Maintained
+                     Nora Dossche <nielsdos@php.net> (2023 - 2026)
+MAINTENANCE:         Orphan
 STATUS:              Working
 SINCE:               5.0
 -------------------------------------------------------------------------------
@@ -235,7 +231,7 @@ SINCE:               5.0
 -------------------------------------------------------------------------------
 EXTENSION:           bcmath
 PRIMARY MAINTAINER:  Andi Gutmans <andi@php.net> (2000 - 2004)
-MAINTENANCE:         Unknown
+MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           bz2
@@ -347,17 +343,10 @@ STATUS:              Working
 EXTENSION:           intl
 PRIMARY MAINTAINER:  Stanislav Malyshev <stas@php.net> (2008 - 2019)
                      Anatol Belski <ab@php.net> (2017 - 2018)
+                     Weilin Du <weilindu@php.net> (2026 - 2026)
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.3
--------------------------------------------------------------------------------
-EXTENSION:           imap
-PRIMARY MAINTAINER:  Chuck Hagenbuch <chuck@horde.org> (1999 - 2004)
-                     Ilia Alshanetsky <iliaa@php.net> (2002 - 2010)
-                     Pierre-Alain Joye <pajoye@php.net> (2008 - 2010)
-                     Bishop Bettini <bishop@php.net> (2018 - 2019)
-MAINTENANCE:         Maintained
-STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           json
 PRIMARY MAINTAINER:  Jakub Zelenka <bukka@php.net> (2014 - 2018)
@@ -376,7 +365,8 @@ STATUS:              Working
 EXTENSION:           mbstring
 PRIMARY MAINTAINER:  Rui Hirokawa <hirokawa@php.net> (2001 - 2013)
                      Nikita Popov <nikic@php.net> (2017 - 2020)
-                     Alex Dowad <alexinbeijing@gmail.com> (2021 - 2022)
+                     Alex Dowad <alexinbeijing@gmail.com> (2021 - 2024)
+                     Yuya Hamada <youkidearitai@gmail.com> (2024 - 2024)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
@@ -412,6 +402,7 @@ PRIMARY MAINTAINER:  Greg Beaver <cellog@php.net> (2008 - 2009)
                      Marcus Börger <helly@php.net> (2008 - 2008)
                      Steph Fox <sfox@php.net> (2008 - 2008)
                      Bishop Bettini <bishop@php.net> (2018 - 2019)
+                     Weilin Du <weilindu@php.net> (2026 - 2026)
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.3
@@ -421,22 +412,16 @@ PRIMARY MAINTAINER:  Kristian Köhntopp <kris@koehntopp.de> (2000 - 2000)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
-EXTENSION:           pspell
-PRIMARY MAINTAINER:  Vlad Krupin <phpdevel@echospace.com> (2000 - 2004)
-MAINTENANCE:         Unknown
-STATUS:              Working
-SINCE:               4.0.2
--------------------------------------------------------------------------------
 EXTENSION:           random
-PRIMARY MAINTAINER   Go Kudo <zeriyoshi@php.net> (2022 - 2022)
-                     Tim Düsterhus <timwolla@php.net> (2022 - 2022)
+PRIMARY MAINTAINER   Go Kudo <zeriyoshi@php.net> (2022 - 2024)
+                     Tim Düsterhus <timwolla@php.net> (2022 - 2024)
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               8.2.0
 -------------------------------------------------------------------------------
 EXTENSION:           readline
-PRIMARY MAINTAINER:  Unknown
-MAINTENANCE:         Unknown
+PRIMARY MAINTAINER:  Weilin Du <weilindu@php.net> (2026 - 2026)
+MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           reflection
@@ -503,7 +488,8 @@ EXTENSION:           tidy
 PRIMARY MAINTAINER:  John Coggeshall <john@php.net> (2003 - 2006)
                      Ilia Alshanetsky <iliaa@php.net> (2003 - 2009)
                      Nuno Lopes <nlopess@php.net> (2006 - 2012)
-MAINTENANCE:         Maintained
+                     Nora Dossche <nielsdos@php.net> (2025 - 2026)
+MAINTENANCE:         Orphan
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           tokenizer
@@ -514,7 +500,8 @@ STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           zip
 PRIMARY MAINTAINER:  Pierre-Alain Joye <pajoye@php.net> (2006 - 2011)
-                     Remi Collet <remi@php.net> (2013-2020)
+                     Remi Collet <remi@php.net> (2013 - 2020)
+                     Weilin Du <weilindu@php.net> (2026 - 2026)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------

@@ -14,7 +14,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php_intl.h"
@@ -259,12 +259,13 @@ static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 	UCollator*     saved_collator;
 	zval*          array            = NULL;
 	HashTable*     hash             = NULL;
+	zend_array*    sorted           = NULL;
 	zend_long           sort_flags       = COLLATOR_SORT_REGULAR;
 
 	COLLATOR_METHOD_INIT_VARS
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oa/|l",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oa|l",
 		&object, Collator_ce_ptr, &array, &sort_flags ) == FAILURE )
 	{
 		RETURN_THROWS();
@@ -283,8 +284,14 @@ static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 
 	hash = Z_ARRVAL_P( array );
 
+	/* Copy array, so the in-place modifications will not be visible to the callback function */
+	sorted = zend_array_dup( hash );
+
 	/* Convert strings in the specified array from UTF-8 to UTF-16. */
-	collator_convert_hash_from_utf8_to_utf16( hash, COLLATOR_ERROR_CODE_P( co ) );
+	collator_convert_hash_from_utf8_to_utf16( sorted, COLLATOR_ERROR_CODE_P( co ) );
+	if( U_FAILURE( COLLATOR_ERROR_CODE( co ) ) ) {
+		zend_array_destroy( sorted );
+	}
 	COLLATOR_CHECK_STATUS( co, "Error converting hash from UTF-8 to UTF-16" );
 
 	/* Save specified collator in the request-global (?) variable. */
@@ -292,14 +299,22 @@ static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 	INTL_G( current_collator ) = co->ucoll;
 
 	/* Sort specified array. */
-	zend_hash_sort(hash, collator_compare_func, renumber);
+	zend_hash_sort( sorted, collator_compare_func, renumber );
 
 	/* Restore saved collator. */
 	INTL_G( current_collator ) = saved_collator;
 
 	/* Convert strings in the specified array back to UTF-8. */
-	collator_convert_hash_from_utf16_to_utf8( hash, COLLATOR_ERROR_CODE_P( co ) );
+	collator_convert_hash_from_utf16_to_utf8( sorted, COLLATOR_ERROR_CODE_P( co ) );
+	if( U_FAILURE( COLLATOR_ERROR_CODE( co ) ) ) {
+		zend_array_destroy( sorted );
+	}
 	COLLATOR_CHECK_STATUS( co, "Error converting hash from UTF-16 to UTF-8" );
+
+	zval garbage;
+	ZVAL_COPY_VALUE( &garbage, array );
+	ZVAL_ARR( array, sorted );
+	zval_ptr_dtor( &garbage );
 
 	RETURN_TRUE;
 }
@@ -361,12 +376,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 	/* Fetch the object. */
 	COLLATOR_METHOD_FETCH_OBJECT;
 
-	if (!co || !co->ucoll) {
-		intl_error_set_code( NULL, COLLATOR_ERROR_CODE( co ) );
-		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ),
-			"Object not initialized", 0 );
-		zend_throw_error(NULL, "Object not initialized");
-
+	if (collator_check_initialized(co) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -517,12 +527,7 @@ PHP_FUNCTION( collator_get_sort_key )
 	/* Fetch the object. */
 	COLLATOR_METHOD_FETCH_OBJECT;
 
-	if (!co || !co->ucoll) {
-		intl_error_set_code( NULL, COLLATOR_ERROR_CODE( co ) );
-		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ),
-			"Object not initialized", 0 );
-		zend_throw_error(NULL, "Object not initialized");
-
+	if (collator_check_initialized(co) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -556,6 +561,7 @@ PHP_FUNCTION( collator_get_sort_key )
 	key_len = ucol_getSortKey(co->ucoll, ustr, ustr_len, (uint8_t*)ZSTR_VAL(key_str), key_len);
 	efree( ustr );
 	if(!key_len) {
+		zend_string_efree(key_str);
 		RETURN_FALSE;
 	}
 	ZSTR_LEN(key_str) = key_len - 1;

@@ -197,32 +197,6 @@ void timelib_do_rel_normalize(timelib_time *base, timelib_rel_time *rt)
 	do_range_limit(0, 12, 12, &rt->m, &rt->y);
 }
 
-static void magic_date_calc(timelib_time *time)
-{
-	timelib_sll y, ddd, mi, mm, dd, g;
-
-	/* The algorithm doesn't work before the year 1 */
-	if (time->d < -719498) {
-		return;
-	}
-
-	g = time->d + HINNANT_EPOCH_SHIFT - 1;
-
-	y = (10000 * g + 14780) / 3652425;
-	ddd = g - ((365*y) + (y/4) - (y/100) + (y/400));
-	if (ddd < 0) {
-		y--;
-		ddd = g - ((365*y) + (y/4) - (y/100) + (y/400));
-	}
-	mi = (100 * ddd + 52) / 3060;
-	mm = ((mi + 2) % 12) + 1;
-	y = y + (mi + 2) / 12;
-	dd = ddd - ((mi * 306 + 5) / 10) + 1;
-	time->y = y;
-	time->m = mm;
-	time->d = dd;
-}
-
 void timelib_do_normalize(timelib_time* time)
 {
 	if (time->us != TIMELIB_UNSET) do_range_limit(0, 1000000, 1000000, &time->us, &time->s);
@@ -232,8 +206,9 @@ void timelib_do_normalize(timelib_time* time)
 	do_range_limit(1, 13, 12, &time->m, &time->y);
 
 	/* Short cut if we're doing things against the Epoch */
-	if (time->y == 1970 && time->m == 1 && time->d != 1) {
-		magic_date_calc(time);
+	if (time->y == 1970 && time->m == 1) {
+		timelib_date_from_epoch_days(time->d - 1, &time->y, &time->m, &time->d);
+		return;
 	}
 
 	do {} while (do_range_limit_days(&time->y, &time->m, &time->d));

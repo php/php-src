@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: adcbda7b6763141981700bec5d8c5b739f8de767 */
+ * Stub hash: 6a5b332ba4bfeceaca6aad734d38dabb66d82c97 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PDOStatement_bindColumn, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_MASK(0, column, MAY_BE_STRING|MAY_BE_LONG, NULL)
@@ -79,14 +79,13 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PDOStatement_set
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDOStatement_setFetchMode, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PDOStatement_setFetchMode, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
 	ZEND_ARG_VARIADIC_TYPE_INFO(0, args, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_PDOStatement_getIterator, 0, 0, Iterator, 0)
 ZEND_END_ARG_INFO()
-
 
 ZEND_METHOD(PDOStatement, bindColumn);
 ZEND_METHOD(PDOStatement, bindParam);
@@ -108,7 +107,6 @@ ZEND_METHOD(PDOStatement, rowCount);
 ZEND_METHOD(PDOStatement, setAttribute);
 ZEND_METHOD(PDOStatement, setFetchMode);
 ZEND_METHOD(PDOStatement, getIterator);
-
 
 static const zend_function_entry class_PDOStatement_methods[] = {
 	ZEND_ME(PDOStatement, bindColumn, arginfo_class_PDOStatement_bindColumn, ZEND_ACC_PUBLIC)
@@ -134,18 +132,12 @@ static const zend_function_entry class_PDOStatement_methods[] = {
 	ZEND_FE_END
 };
 
-
-static const zend_function_entry class_PDORow_methods[] = {
-	ZEND_FE_END
-};
-
 static zend_class_entry *register_class_PDOStatement(zend_class_entry *class_entry_IteratorAggregate)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "PDOStatement", class_PDOStatement_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 	zend_class_implements(class_entry, 1, class_entry_IteratorAggregate);
 
 	zval property_queryString_default_value;
@@ -161,9 +153,8 @@ static zend_class_entry *register_class_PDORow(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "PDORow", class_PDORow_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE;
+	INIT_CLASS_ENTRY(ce, "PDORow", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE);
 
 	zval property_queryString_default_value;
 	ZVAL_UNDEF(&property_queryString_default_value);

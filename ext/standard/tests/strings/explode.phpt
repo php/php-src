@@ -3,7 +3,9 @@ explode() function
 --INI--
 error_reporting=2047
 --SKIPIF--
-<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
+<?php
+if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
+?>
 --FILE--
 <?php
 /* From http://bugs.php.net/19865 */
@@ -60,9 +62,9 @@ array (
   4 => 'd',
 )
 d6bee42a771449205344c0938ad4f035
-explode(): Argument #1 ($separator) cannot be empty
-explode(): Argument #1 ($separator) cannot be empty
-explode(): Argument #1 ($separator) cannot be empty
+explode(): Argument #1 ($separator) must not be empty
+explode(): Argument #1 ($separator) must not be empty
+explode(): Argument #1 ($separator) must not be empty
 array(1) {
   [0]=>
   string(0) ""
@@ -77,7 +79,7 @@ array(1) {
   [0]=>
   string(0) ""
 }
-explode(): Argument #1 ($separator) cannot be empty
+explode(): Argument #1 ($separator) must not be empty
 array(1) {
   [0]=>
   string(3) "acb"

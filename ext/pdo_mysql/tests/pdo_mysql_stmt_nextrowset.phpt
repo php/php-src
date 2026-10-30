@@ -4,55 +4,48 @@ MySQL PDOStatement->nextRowSet()
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
-$row = $db->query('SELECT VERSION() as _version')->fetch(PDO::FETCH_ASSOC);
-$matches = array();
-if (!preg_match('/^(\d+)\.(\d+)\.(\d+)/ismU', $row['_version'], $matches))
-    die(sprintf("skip Cannot determine MySQL Server version\n"));
-
-$version = $matches[1] * 10000 + $matches[2] * 100 + $matches[3];
-if ($version < 50000)
-    die(sprintf("skip Need MySQL Server 5.0.0+, found %d.%02d.%02d (%d)\n",
-        $matches[1], $matches[2], $matches[3], $version));
-
-if (!MySQLPDOTest::isPDOMySQLnd())
-    die("skip This will not work with libmysql");
+MySQLPDOTest::skipNotMySQLnd();
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
     $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
-    MySQLPDOTest::createTestTable($db);
+    $table = 'pdo_mysql_stmt_nextrowset';
+    $procedure = 'pdo_mysql_stmt_nextrowset_p';
 
-    $stmt = $db->query('SELECT id FROM test');
+    MySQLPDOTest::createTestTable($table, $db);
+
+    $stmt = $db->query("SELECT id FROM {$table}");
     if (false !== ($tmp = $stmt->nextRowSet()))
         printf("[002] Expecting false got %s\n", var_export($tmp, true));
 
     function test_proc1($db) {
+        global $procedure;
 
         $stmt = $db->query('SELECT @VERSION as _version');
         $tmp = $stmt->fetch(PDO::FETCH_ASSOC);
         assert($tmp['_version'] === NULL);
         while ($stmt->fetch()) ;
 
-        $db->exec('DROP PROCEDURE IF EXISTS p');
-        $db->exec('CREATE PROCEDURE p(OUT ver_param VARCHAR(25)) BEGIN SELECT VERSION() INTO ver_param; END;');
-        $db->exec('CALL p(@VERSION)');
+        $db->exec("DROP PROCEDURE IF EXISTS {$procedure}");
+        $db->exec("CREATE PROCEDURE {$procedure}(OUT ver_param VARCHAR(25)) BEGIN SELECT VERSION() INTO ver_param; END;");
+        $db->exec("CALL {$procedure}(@VERSION)");
         $stmt = $db->query('SELECT @VERSION as _version');
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
         var_dump($stmt->nextRowSet());
-
     }
 
     function test_proc2($db) {
+        global $table;
+        global $procedure;
 
-        $db->exec('DROP PROCEDURE IF EXISTS p');
-        $db->exec('CREATE PROCEDURE p() BEGIN SELECT id FROM test ORDER BY id ASC LIMIT 3; SELECT id, label FROM test WHERE id < 4 ORDER BY id DESC LIMIT 3; END;');
-        $stmt = $db->query('CALL p()');
+        $db->exec("DROP PROCEDURE IF EXISTS {$procedure}");
+        $db->exec("CREATE PROCEDURE {$procedure}() BEGIN SELECT id FROM {$table} ORDER BY id ASC LIMIT 3; SELECT id, label FROM {$table} WHERE id < 4 ORDER BY id DESC LIMIT 3; END;");
+        $stmt = $db->query("CALL {$procedure}()");
         do {
             var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
         } while ($stmt->nextRowSet());
@@ -60,13 +53,12 @@ if (!MySQLPDOTest::isPDOMySQLnd())
 
         echo "Skip fetchAll(): ";
         unset($stmt);
-        $stmt = $db->query('CALL p()');
+        $stmt = $db->query("CALL {$procedure}()");
         var_dump($stmt->nextRowSet());
         $stmt->closeCursor();
     }
 
     try {
-
         // Emulated PS
         printf("Emulated PS...\n");
         $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 1);
@@ -98,9 +90,6 @@ if (!MySQLPDOTest::isPDOMySQLnd())
 
         test_proc1($db);
         test_proc2($db);
-
-        @$db->exec('DROP PROCEDURE IF EXISTS p');
-
     } catch (PDOException $e) {
         printf("[001] %s [%s] %s\n",
             $e->getMessage(), $db->errorCode(), implode(' ', $db->errorInfo()));
@@ -110,8 +99,10 @@ if (!MySQLPDOTest::isPDOMySQLnd())
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable();
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS pdo_mysql_stmt_nextrowset');
+$db->exec('DROP PROCEDURE IF EXISTS pdo_mysql_stmt_nextrowset_p');
 ?>
 --EXPECTF--
 Emulated PS...

@@ -12,7 +12,7 @@ trait THello1 {
 }
 
 // Protected and public are handle more strict with a warning then what is
-// expected from normal inheritance since they can have easier coliding semantics
+// expected from normal inheritance since they can have easier colliding semantics
 echo "PRE-CLASS-GUARD\n";
 class SameNameInSubClassProducesNotice extends Base {
     use THello1;

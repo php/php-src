@@ -31,5 +31,6 @@ $xml_parser->free();
 
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
+Deprecated: Function xml_set_object() is deprecated since 8.4, provide a proper method callable to xml_set_*_handler() functions in %s on line %d
 ===DONE===

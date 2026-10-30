@@ -23,6 +23,11 @@ intl
     $r2 = $r['testarray'];
     printf( "testarray: %s\n", $r2[2] );
 
+    echo "Using a reference as an offset:\n";
+    $offset = 'teststring';
+    $ref = &$offset;
+    var_dump($r[$ref]);
+
     $t = $r['nonexisting'];
     echo debug( $t );
 ?>
@@ -46,5 +51,7 @@ Array
 testbin: a1b2c3d4e5f67890
 testtable: 3
 testarray: string 3
+Using a reference as an offset:
+string(12) "Hello World!"
 NULL
     2: Cannot load resource element 'nonexisting': U_MISSING_RESOURCE_ERROR

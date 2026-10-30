@@ -5,18 +5,25 @@ intl
 --FILE--
 <?php
 
-var_dump(new IntlDateFormatter(
-	'xx',
-	IntlDateFormatter::FULL,
-	IntlDateFormatter::FULL,
-	null,
-	null,
-	'w'
-));
+try {
+    new IntlDateFormatter(
+	    'xx',
+	    IntlDateFormatter::FULL,
+	    IntlDateFormatter::FULL,
+	    null,
+	    null,
+	    'w'
+    );
+} catch (\ValueError $e) {
+    echo $e->getMessage() . PHP_EOL;
+}
+
 Locale::setDefault('xx');
-var_dump(new IntlDateFormatter(Locale::getDefault()));
+try {
+    new IntlDateFormatter(Locale::getDefault());
+} catch (\ValueError $e) {
+    echo $e->getMessage();
+}
 --EXPECT--
-object(IntlDateFormatter)#1 (0) {
-}
-object(IntlDateFormatter)#1 (0) {
-}
+IntlDateFormatter::__construct(): Argument #1 ($locale) "xx" is invalid
+IntlDateFormatter::__construct(): Argument #1 ($locale) "xx" is invalid

@@ -7,12 +7,12 @@ touch($filename);
 $fp = fopen ($filename, "r");
 
 try {
-	fgetcsv($fp, PHP_INT_MAX);
+	fgetcsv($fp, PHP_INT_MAX, escape: '');
 } catch (\ValueError $e) {
 	echo $e->getMessage() . PHP_EOL;
 }
 
-fgetcsv($fp, PHP_INT_MAX-1);
+fgetcsv($fp, PHP_INT_MAX-1,  escape: '');
 --CLEAN--
 <?php
 @unlink(__DIR__ . "/gh15653.tmp");

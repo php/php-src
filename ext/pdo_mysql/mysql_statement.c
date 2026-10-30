@@ -17,14 +17,14 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "pdo/php_pdo.h"
-#include "pdo/php_pdo_driver.h"
+#include "ext/pdo/php_pdo.h"
+#include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_mysql.h"
 #include "php_pdo_mysql_int.h"
 
@@ -715,7 +715,7 @@ static int pdo_mysql_stmt_get_col(
 
 static char *type_to_name_native(int type) /* {{{ */
 {
-#define PDO_MYSQL_NATIVE_TYPE_NAME(x)	case FIELD_TYPE_##x: return #x;
+#define PDO_MYSQL_NATIVE_TYPE_NAME(x)	case MYSQL_TYPE_##x: return #x;
 
 	switch (type) {
 		PDO_MYSQL_NATIVE_TYPE_NAME(STRING)
@@ -748,6 +748,13 @@ static char *type_to_name_native(int type) /* {{{ */
 		PDO_MYSQL_NATIVE_TYPE_NAME(DATE)
 #ifdef FIELD_TYPE_NEWDATE
 		PDO_MYSQL_NATIVE_TYPE_NAME(NEWDATE)
+#endif
+		/* The following 2 don't have BC FIELD_TYPE_* aliases. */
+#if (MYSQL_VERSION_ID >= 90000 && !defined(MARIADB_BASE_VERSION)) || defined(PDO_USE_MYSQLND)
+		PDO_MYSQL_NATIVE_TYPE_NAME(VECTOR)
+#endif
+#if MYSQL_VERSION_ID >= 50708 || defined(PDO_USE_MYSQLND)
+		PDO_MYSQL_NATIVE_TYPE_NAME(JSON)
 #endif
 		PDO_MYSQL_NATIVE_TYPE_NAME(TIME)
 		PDO_MYSQL_NATIVE_TYPE_NAME(DATETIME)

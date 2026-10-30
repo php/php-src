@@ -17,8 +17,8 @@ for($i=0;$i<7;$i++) {
 }
 ?>
 --EXPECTF--
-!! [TypeError] imageaffinematrixget(): Argument #1 ($type) must be of type array when using translate or scale
-!! [TypeError] imageaffinematrixget(): Argument #1 ($type) must be of type array when using translate or scale
+!! [TypeError] imageaffinematrixget(): Argument #2 ($options) must be of type array when using translate or scale
+!! [TypeError] imageaffinematrixget(): Argument #2 ($options) must be of type array when using translate or scale
 
 Warning: Object of class stdClass could not be converted to float in %s on line %d
 array(6) {

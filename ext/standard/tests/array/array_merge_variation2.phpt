@@ -133,16 +133,16 @@ array_merge(): Argument #2 must be of type array, null given
 array_merge(): Argument #2 must be of type array, null given
 
 -- Iteration 12 --
-array_merge(): Argument #2 must be of type array, bool given
+array_merge(): Argument #2 must be of type array, true given
 
 -- Iteration 13 --
-array_merge(): Argument #2 must be of type array, bool given
+array_merge(): Argument #2 must be of type array, false given
 
 -- Iteration 14 --
-array_merge(): Argument #2 must be of type array, bool given
+array_merge(): Argument #2 must be of type array, true given
 
 -- Iteration 15 --
-array_merge(): Argument #2 must be of type array, bool given
+array_merge(): Argument #2 must be of type array, false given
 
 -- Iteration 16 --
 array_merge(): Argument #2 must be of type array, string given

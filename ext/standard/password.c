@@ -25,7 +25,8 @@
 #include "base64.h"
 #include "zend_interfaces.h"
 #include "info.h"
-#include "ext/random/php_random.h"
+#include "ext/random/php_random_csprng.h"
+#include "password_arginfo.h"
 #ifdef HAVE_ARGON2LIB
 #include "argon2.h"
 #endif
@@ -83,7 +84,7 @@ static zend_string* php_password_make_salt(size_t length) /* {{{ */
 	}
 
 	buffer = zend_string_alloc(length * 3 / 4 + 1, 0);
-	if (FAILURE == php_random_bytes_silent(ZSTR_VAL(buffer), ZSTR_LEN(buffer))) {
+	if (FAILURE == php_random_bytes_throw(ZSTR_VAL(buffer), ZSTR_LEN(buffer))) {
 		zend_value_error("Unable to generate salt");
 		zend_string_release_ex(buffer, 0);
 		return NULL;
@@ -112,21 +113,33 @@ static zend_string* php_password_get_salt(zval *unused_, size_t required_salt_le
 
 /* bcrypt implementation */
 
-static bool php_password_bcrypt_valid(const zend_string *hash) {
+static bool php_password_bcrypt_get_cost(const zend_string *hash, zend_long *cost) {
 	const char *h = ZSTR_VAL(hash);
-	return (ZSTR_LEN(hash) == 60) &&
-		(h[0] == '$') && (h[1] == '2') && (h[2] == 'y');
+
+	if ((ZSTR_LEN(hash) != 60) ||
+		(h[0] != '$') || (h[1] != '2') || (h[2] != 'y') || (h[3] != '$') ||
+		!ZEND_IS_DIGIT(h[4]) || !ZEND_IS_DIGIT(h[5]) || (h[6] != '$')) {
+		return false;
+	}
+
+	*cost = (h[4] - '0') * 10 + (h[5] - '0');
+
+	return *cost >= 4 && *cost <= 31;
+}
+
+static bool php_password_bcrypt_valid(const zend_string *hash) {
+	zend_long cost;
+
+	return php_password_bcrypt_get_cost(hash, &cost);
 }
 
 static int php_password_bcrypt_get_info(zval *return_value, const zend_string *hash) {
-	zend_long cost = PHP_PASSWORD_BCRYPT_COST;
+	zend_long cost;
 
-	if (!php_password_bcrypt_valid(hash)) {
+	if (!php_password_bcrypt_get_cost(hash, &cost)) {
 		/* Should never get called this way. */
 		return FAILURE;
 	}
-
-	sscanf(ZSTR_VAL(hash), "$2y$" ZEND_LONG_FMT "$", &cost);
 	add_assoc_long(return_value, "cost", cost);
 
 	return SUCCESS;
@@ -134,15 +147,13 @@ static int php_password_bcrypt_get_info(zval *return_value, const zend_string *h
 
 static bool php_password_bcrypt_needs_rehash(const zend_string *hash, zend_array *options) {
 	zval *znew_cost;
-	zend_long old_cost = PHP_PASSWORD_BCRYPT_COST;
+	zend_long old_cost;
 	zend_long new_cost = PHP_PASSWORD_BCRYPT_COST;
 
-	if (!php_password_bcrypt_valid(hash)) {
+	if (!php_password_bcrypt_get_cost(hash, &old_cost)) {
 		/* Should never get called this way. */
 		return 1;
 	}
-
-	sscanf(ZSTR_VAL(hash), "$2y$" ZEND_LONG_FMT "$", &old_cost);
 	if (options && (znew_cost = zend_hash_str_find(options, "cost", sizeof("cost")-1)) != NULL) {
 		new_cost = zval_get_long(znew_cost);
 	}
@@ -200,9 +211,7 @@ static zend_string* php_password_bcrypt_hash(const zend_string *password, zend_a
 	}
 	ZSTR_VAL(salt)[ZSTR_LEN(salt)] = 0;
 
-	hash = zend_string_alloc(ZSTR_LEN(salt) + hash_format_len, 0);
-	sprintf(ZSTR_VAL(hash), "%s%s", hash_format, ZSTR_VAL(salt));
-	ZSTR_VAL(hash)[hash_format_len + ZSTR_LEN(salt)] = 0;
+	hash = zend_string_concat2(hash_format, hash_format_len, ZSTR_VAL(salt), ZSTR_LEN(salt));
 
 	zend_string_release_ex(salt, 0);
 
@@ -421,32 +430,20 @@ const php_password_algo php_password_algo_argon2id = {
 PHP_MINIT_FUNCTION(password) /* {{{ */
 {
 	zend_hash_init(&php_password_algos, 4, NULL, ZVAL_PTR_DTOR, 1);
-	REGISTER_STRING_CONSTANT("PASSWORD_DEFAULT", "2y", CONST_CS | CONST_PERSISTENT);
+
+	register_password_symbols(module_number);
 
 	if (FAILURE == php_password_algo_register("2y", &php_password_algo_bcrypt)) {
 		return FAILURE;
 	}
-	REGISTER_STRING_CONSTANT("PASSWORD_BCRYPT", "2y", CONST_CS | CONST_PERSISTENT);
 
 #ifdef HAVE_ARGON2LIB
 	if (FAILURE == php_password_algo_register("argon2i", &php_password_algo_argon2i)) {
 		return FAILURE;
 	}
-	REGISTER_STRING_CONSTANT("PASSWORD_ARGON2I", "argon2i", CONST_CS | CONST_PERSISTENT);
-
 	if (FAILURE == php_password_algo_register("argon2id", &php_password_algo_argon2id)) {
 		return FAILURE;
 	}
-	REGISTER_STRING_CONSTANT("PASSWORD_ARGON2ID", "argon2id", CONST_CS | CONST_PERSISTENT);
-#endif
-
-	REGISTER_LONG_CONSTANT("PASSWORD_BCRYPT_DEFAULT_COST", PHP_PASSWORD_BCRYPT_COST, CONST_CS | CONST_PERSISTENT);
-#ifdef HAVE_ARGON2LIB
-	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2_DEFAULT_MEMORY_COST", PHP_PASSWORD_ARGON2_MEMORY_COST, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2_DEFAULT_TIME_COST", PHP_PASSWORD_ARGON2_TIME_COST, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2_DEFAULT_THREADS", PHP_PASSWORD_ARGON2_THREADS, CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_STRING_CONSTANT("PASSWORD_ARGON2_PROVIDER", "standard", CONST_CS | CONST_PERSISTENT);
 #endif
 
 	return SUCCESS;
@@ -502,14 +499,14 @@ static const php_password_algo* php_password_algo_find_zval(zend_string *arg_str
 #else
 		case 2:
 			{
-			zend_string *n = zend_string_init("argon2i", sizeof("argon2i")-1, 0);
+			zend_string *n = ZSTR_INIT_LITERAL("argon2i", 0);
 			const php_password_algo* ret = php_password_algo_find(n);
 			zend_string_release(n);
 			return ret;
 			}
 		case 3:
 			{
-			zend_string *n = zend_string_init("argon2id", sizeof("argon2id")-1, 0);
+			zend_string *n = ZSTR_INIT_LITERAL("argon2id", 0);
 			const php_password_algo* ret = php_password_algo_find(n);
 			zend_string_release(n);
 			return ret;
@@ -596,7 +593,7 @@ PHP_FUNCTION(password_needs_rehash)
 	zend_string *new_algo_str;
 	zend_long new_algo_long = 0;
 	bool new_algo_is_null;
-	zend_array *options = 0;
+	zend_array *options = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(hash)

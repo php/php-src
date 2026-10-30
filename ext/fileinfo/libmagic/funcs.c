@@ -27,7 +27,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: funcs.c,v 1.121 2021/02/05 22:29:07 christos Exp $")
+FILE_RCSID("@(#)$File: funcs.c,v 1.140 2023/05/21 17:08:34 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -51,23 +51,19 @@ FILE_RCSID("@(#)$File: funcs.c,v 1.121 2021/02/05 22:29:07 christos Exp $")
 #define SIZE_MAX	((size_t)~0)
 #endif
 
-#include "php.h"
-#include "main/php_network.h"
-
-#ifndef PREG_OFFSET_CAPTURE
-# define PREG_OFFSET_CAPTURE                 (1<<8)
-#endif
-
-protected char *
+file_protected char *
 file_copystr(char *buf, size_t blen, size_t width, const char *str)
 {
-	if (++width > blen)
-		width = blen;
-	strlcpy(buf, str, width);
+	if (blen == 0)
+		return buf;
+	if (width >= blen)
+		width = blen - 1;
+	memcpy(buf, str, width);
+	buf[width] = '\0';
 	return buf;
 }
 
-private void
+file_private void
 file_clearbuf(struct magic_set *ms)
 {
 	efree(ms->o.buf);
@@ -75,7 +71,7 @@ file_clearbuf(struct magic_set *ms)
 	ms->o.blen = 0;
 }
 
-private int
+file_private int
 file_checkfield(char *msg, size_t mlen, const char *what, const char **pp)
 {
 	const char *p = *pp;
@@ -94,10 +90,11 @@ file_checkfield(char *msg, size_t mlen, const char *what, const char **pp)
 	return 0;
 }
 
-protected int
+file_protected int
 file_checkfmt(char *msg, size_t mlen, const char *fmt)
 {
-	for (const char *p = fmt; *p; p++) {
+	const char *p;
+	for (p = fmt; *p; p++) {
 		if (*p != '%')
 			continue;
 		if (*++p == '%')
@@ -132,7 +129,7 @@ file_checkfmt(char *msg, size_t mlen, const char *fmt)
 /*
  * Like printf, only we append to a buffer.
  */
-protected int
+file_protected int
 file_vprintf(struct magic_set *ms, const char *fmt, va_list ap)
 {
 	size_t len;
@@ -153,8 +150,8 @@ file_vprintf(struct magic_set *ms, const char *fmt, va_list ap)
 		size_t blen = ms->o.blen;
 		if (buf) efree(buf);
 		file_clearbuf(ms);
-		file_error(ms, 0, "Output buffer space exceeded %d+%zu", len,
-		    blen);
+		file_error(ms, 0, "Output buffer space exceeded %" SIZE_T_FORMAT "u+%"
+		    SIZE_T_FORMAT "u", len, blen);
 		return -1;
 	}
 
@@ -169,7 +166,7 @@ file_vprintf(struct magic_set *ms, const char *fmt, va_list ap)
 	return 0;
 }
 
-protected int
+file_protected int
 file_printf(struct magic_set *ms, const char *fmt, ...)
 {
 	int rv;
@@ -185,7 +182,8 @@ file_printf(struct magic_set *ms, const char *fmt, ...)
  * error - print best error message possible
  */
 /*VARARGS*/
-private void
+__attribute__((__format__(__printf__, 3, 0)))
+file_private void
 file_error_core(struct magic_set *ms, int error, const char *f, va_list va,
     size_t lineno)
 {
@@ -206,7 +204,7 @@ file_error_core(struct magic_set *ms, int error, const char *f, va_list va,
 }
 
 /*VARARGS*/
-protected void
+file_protected void
 file_error(struct magic_set *ms, int error, const char *f, ...)
 {
 	va_list va;
@@ -219,7 +217,7 @@ file_error(struct magic_set *ms, int error, const char *f, ...)
  * Print an error with magic line number.
  */
 /*VARARGS*/
-protected void
+file_protected void
 file_magerror(struct magic_set *ms, const char *f, ...)
 {
 	va_list va;
@@ -228,20 +226,20 @@ file_magerror(struct magic_set *ms, const char *f, ...)
 	va_end(va);
 }
 
-protected void
+file_protected void
 file_oomem(struct magic_set *ms, size_t len)
 {
 	file_error(ms, errno, "cannot allocate %" SIZE_T_FORMAT "u bytes",
 	    len);
 }
 
-protected void
+file_protected void
 file_badseek(struct magic_set *ms)
 {
 	file_error(ms, errno, "error seeking");
 }
 
-protected void
+file_protected void
 file_badread(struct magic_set *ms)
 {
 	file_error(ms, errno, "error reading");
@@ -250,7 +248,7 @@ file_badread(struct magic_set *ms)
 #ifndef COMPILE_ONLY
 #define FILE_SEPARATOR "\n- "
 
-protected int
+file_protected int
 file_separator(struct magic_set *ms)
 {
 	return file_printf(ms, FILE_SEPARATOR);
@@ -285,7 +283,7 @@ checkdone(struct magic_set *ms, int *rv)
 	return 0;
 }
 
-protected int
+file_protected int
 file_default(struct magic_set *ms, size_t nb)
 {
 	if (ms->flags & MAGIC_MIME) {
@@ -315,9 +313,9 @@ file_default(struct magic_set *ms, size_t nb)
  *	-1: error
  */
 /*ARGSUSED*/
-protected int
+file_protected int
 file_buffer(struct magic_set *ms, php_stream *stream, zend_stat_t *st,
-    const char *inname,
+    const char *inname __attribute__ ((__unused__)),
     const void *buf, size_t nb)
 {
 	int m = 0, rv = 0, looks_text = 0;
@@ -373,7 +371,7 @@ file_buffer(struct magic_set *ms, php_stream *stream, zend_stat_t *st,
 	}
 #endif
 
-#if PHP_FILEINFO_UNCOMPRESS
+#ifdef PHP_FILEINFO_UNCOMPRESS
 	/* try compression stuff */
 	if ((ms->flags & MAGIC_NO_CHECK_COMPRESS) == 0) {
 		m = file_zmagic(ms, &b, inname);
@@ -408,9 +406,20 @@ file_buffer(struct magic_set *ms, php_stream *stream, zend_stat_t *st,
 
 	/* Check if we have a CSV file */
 	if ((ms->flags & MAGIC_NO_CHECK_CSV) == 0) {
-		m = file_is_csv(ms, &b, looks_text);
+		m = file_is_csv(ms, &b, looks_text, code);
 		if ((ms->flags & MAGIC_DEBUG) != 0)
 			(void)fprintf(stderr, "[try csv %d]\n", m);
+		if (m) {
+			if (checkdone(ms, &rv))
+				goto done;
+		}
+	}
+
+	/* Check if we have a SIMH tape file */
+	if ((ms->flags & MAGIC_NO_CHECK_SIMH) == 0) {
+		m = file_is_simh(ms, &b);
+		if ((ms->flags & MAGIC_DEBUG) != 0)
+			(void)fprintf(stderr, "[try simh %d]\n", m);
 		if (m) {
 			if (checkdone(ms, &rv))
 				goto done;
@@ -446,7 +455,7 @@ file_buffer(struct magic_set *ms, php_stream *stream, zend_stat_t *st,
 		rv = file_tryelf(ms, &b);
 		rbuf = file_pop_buffer(ms, pb);
 		if (rv == -1) {
-			free(rbuf);
+			efree(rbuf);
 			rbuf = NULL;
 		}
 		if ((ms->flags & MAGIC_DEBUG) != 0)
@@ -498,7 +507,7 @@ simple:
 		if (file_printf(ms, "%s", code_mime) == -1)
 			rv = -1;
 	}
-#if PHP_FILEINFO_UNCOMPRESS
+#ifdef PHP_FILEINFO_UNCOMPRESS
  done_encoding:
 #endif
 	efree(rbuf);
@@ -510,7 +519,7 @@ simple:
 }
 #endif
 
-protected int
+file_protected int
 file_reset(struct magic_set *ms, int checkloaded)
 {
 	if (checkloaded && ms->mlist[0] == NULL) {
@@ -535,7 +544,7 @@ file_reset(struct magic_set *ms, int checkloaded)
 	*(n)++ = ((CAST(uint32_t, *(o)) >> 0) & 7) + '0', \
 	(o)++)
 
-protected const char *
+file_protected const char *
 file_getbuffer(struct magic_set *ms)
 {
 	char *pbuf, *op, *np;
@@ -613,7 +622,7 @@ file_getbuffer(struct magic_set *ms)
 	return ms->o.pbuf;
 }
 
-protected int
+file_protected int
 file_check_mem(struct magic_set *ms, unsigned int level)
 {
 	size_t len;
@@ -636,13 +645,13 @@ file_check_mem(struct magic_set *ms, unsigned int level)
 	return 0;
 }
 
-protected size_t
+file_protected size_t
 file_printedlen(const struct magic_set *ms)
 {
 	return ms->o.blen;
 }
 
-protected int
+file_protected int
 file_replace(struct magic_set *ms, const char *pat, const char *rep)
 {
 	zend_string *pattern;
@@ -670,7 +679,7 @@ file_replace(struct magic_set *ms, const char *pat, const char *rep)
 		goto out;
 	}
 
-	strncpy(ms->o.buf, ZSTR_VAL(res), ZSTR_LEN(res));
+	memcpy(ms->o.buf, ZSTR_VAL(res), ZSTR_LEN(res));
 	ms->o.buf[ZSTR_LEN(res)] = '\0';
 
 	zend_string_release_ex(res, 0);
@@ -679,7 +688,7 @@ out:
 	return rep_cnt;
 }
 
-protected file_pushbuf_t *
+file_protected file_pushbuf_t *
 file_push_buffer(struct magic_set *ms)
 {
 	file_pushbuf_t *pb;
@@ -701,7 +710,7 @@ file_push_buffer(struct magic_set *ms)
 	return pb;
 }
 
-protected char *
+file_protected char *
 file_pop_buffer(struct magic_set *ms, file_pushbuf_t *pb)
 {
 	char *rbuf;
@@ -725,15 +734,16 @@ file_pop_buffer(struct magic_set *ms, file_pushbuf_t *pb)
 /*
  * convert string to ascii printable format.
  */
-protected char *
-file_printable(char *buf, size_t bufsiz, const char *str, size_t slen)
+file_protected char *
+file_printable(struct magic_set *ms, char *buf, size_t bufsiz,
+    const char *str, size_t slen)
 {
 	char *ptr, *eptr = buf + bufsiz - 1;
 	const unsigned char *s = RCAST(const unsigned char *, str);
 	const unsigned char *es = s + slen;
 
 	for (ptr = buf;  ptr < eptr && s < es && *s; s++) {
-		if (isprint(*s)) {
+		if ((ms->flags & MAGIC_RAW) != 0 || isprint(*s)) {
 			*ptr++ = *s;
 			continue;
 		}
@@ -755,52 +765,82 @@ struct guid {
 	uint8_t data4[8];
 };
 
-protected int
+file_protected int
 file_parse_guid(const char *s, uint64_t *guid)
 {
 	struct guid *g = CAST(struct guid *, CAST(void *, guid));
+#ifndef WIN32
 	return sscanf(s,
 	    "%8x-%4hx-%4hx-%2hhx%2hhx-%2hhx%2hhx%2hhx%2hhx%2hhx%2hhx",
 	    &g->data1, &g->data2, &g->data3, &g->data4[0], &g->data4[1],
 	    &g->data4[2], &g->data4[3], &g->data4[4], &g->data4[5],
 	    &g->data4[6], &g->data4[7]) == 11 ? 0 : -1;
+#else
+	/* MS-Windows runtime doesn't support %hhx, except under
+	   non-default __USE_MINGW_ANSI_STDIO.  */
+	uint16_t data16[8];
+	int rv = sscanf(s, "%8x-%4hx-%4hx-%2hx%2hx-%2hx%2hx%2hx%2hx%2hx%2hx",
+	    &g->data1, &g->data2, &g->data3, &data16[0], &data16[1],
+	    &data16[2], &data16[3], &data16[4], &data16[5],
+	    &data16[6], &data16[7]) == 11 ? 0 : -1;
+	int i;
+	for (i = 0; i < 8; i++)
+	    g->data4[i] = data16[i];
+	return rv;
+#endif
 }
 
-protected int
+file_protected int
 file_print_guid(char *str, size_t len, const uint64_t *guid)
 {
 	const struct guid *g = CAST(const struct guid *,
 	    CAST(const void *, guid));
 
+#ifndef WIN32
 	return snprintf(str, len, "%.8X-%.4hX-%.4hX-%.2hhX%.2hhX-"
 	    "%.2hhX%.2hhX%.2hhX%.2hhX%.2hhX%.2hhX",
 	    g->data1, g->data2, g->data3, g->data4[0], g->data4[1],
 	    g->data4[2], g->data4[3], g->data4[4], g->data4[5],
 	    g->data4[6], g->data4[7]);
+#else
+	return snprintf(str, len, "%.8X-%.4hX-%.4hX-%.2hX%.2hX-"
+	    "%.2hX%.2hX%.2hX%.2hX%.2hX%.2hX",
+	    g->data1, g->data2, g->data3, g->data4[0], g->data4[1],
+	    g->data4[2], g->data4[3], g->data4[4], g->data4[5],
+	    g->data4[6], g->data4[7]);
+#endif
 }
 
 #if 0
-protected int
+file_protected int
 file_pipe_closexec(int *fds)
 {
-#ifdef HAVE_PIPE2
+#ifdef __MINGW32__
+	return 0;
+#elif defined(HAVE_PIPE2)
 	return pipe2(fds, O_CLOEXEC);
 #else
 	if (pipe(fds) == -1)
 		return -1;
+# ifdef F_SETFD
 	(void)fcntl(fds[0], F_SETFD, FD_CLOEXEC);
 	(void)fcntl(fds[1], F_SETFD, FD_CLOEXEC);
+# endif
+	return 0;
+#endif
+}
+#endif
+
+file_protected int
+file_clear_closexec(int fd) {
+#ifdef F_SETFD
+	return fcntl(fd, F_SETFD, 0);
+#else
 	return 0;
 #endif
 }
 
-protected int
-file_clear_closexec(int fd) {
-	return fcntl(fd, F_SETFD, 0);
-}
-#endif
-
-protected char *
+file_protected char *
 file_strtrim(char *str)
 {
 	char *last;

@@ -6,7 +6,7 @@ Testing parameter type-hinted with default value inside namespace
 namespace foo;
 
 class bar {
-    public function __construct(\stdclass $x = NULL) {
+    public function __construct(?\stdclass $x = NULL) {
         var_dump($x);
     }
 }

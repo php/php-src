@@ -4,13 +4,12 @@ MySQL PDO->lastInsertId()
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
 
     try {
@@ -22,45 +21,44 @@ $db = MySQLPDOTest::factory();
             printf("[002] MySQL does not support sequences, expecting '0'/string got '%s'/%s\n",
                 var_export($tmp, true), gettype($tmp));
 
-        $db->exec('DROP TABLE IF EXISTS test');
         if ('0' !== ($tmp = $db->lastInsertId()))
             printf("[003] Expecting '0'/string got '%s'/%s", var_export($tmp, true), gettype($tmp));
 
-        $db->exec(sprintf('CREATE TABLE test(id INT, col1 CHAR(10)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE));
+        $db->exec(sprintf('CREATE TABLE test_pdo_mysql_last_insert_id(id INT, col1 CHAR(10)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE));
         if ('0' !== ($tmp = $db->lastInsertId()))
             printf("[004] Expecting '0'/string got '%s'/%s", var_export($tmp, true), gettype($tmp));
 
-        $stmt = $db->query('SELECT id FROM test LIMIT 1');
+        $stmt = $db->query('SELECT id FROM test_pdo_mysql_last_insert_id LIMIT 1');
         if ('0' !== ($tmp = $db->lastInsertId()))
             printf("[005] Expecting '0'/string got '%s'/%s", var_export($tmp, true), gettype($tmp));
 
         // no auto increment column
-        $db->exec("INSERT INTO test(id, col1) VALUES (100, 'a')");
+        $db->exec("INSERT INTO test_pdo_mysql_last_insert_id(id, col1) VALUES (100, 'a')");
         if ('0' !== ($tmp = $db->lastInsertId()))
             printf("[006] Expecting '0'/string got '%s'/%s", var_export($tmp, true), gettype($tmp));
 
-        $db->exec('ALTER TABLE test MODIFY id INT AUTO_INCREMENT PRIMARY KEY');
+        $db->exec('ALTER TABLE test_pdo_mysql_last_insert_id MODIFY id INT AUTO_INCREMENT PRIMARY KEY');
         if ('0' !== ($tmp = $db->lastInsertId()))
             printf("[006] Expecting '0'/string got '%s'/%s", var_export($tmp, true), gettype($tmp));
 
         // duplicate key
-        @$db->exec("INSERT INTO test(id, col1) VALUES (100, 'a')");
+        @$db->exec("INSERT INTO test_pdo_mysql_last_insert_id(id, col1) VALUES (100, 'a')");
         if ('0' !== ($tmp = $db->lastInsertId()))
             printf("[007] Expecting '0'/string got '%s'/%s", var_export($tmp, true), gettype($tmp));
 
-        $db->exec("INSERT INTO test(id, col1) VALUES (101, 'b')");
+        $db->exec("INSERT INTO test_pdo_mysql_last_insert_id(id, col1) VALUES (101, 'b')");
         if ('101' !== ($tmp = $db->lastInsertId()))
             printf("[008] Expecting '0'/string got '%s'/%s", var_export($tmp, true), gettype($tmp));
 
-        $db->exec('ALTER TABLE test MODIFY col1 CHAR(10) UNIQUE');
+        $db->exec('ALTER TABLE test_pdo_mysql_last_insert_id MODIFY col1 CHAR(10) UNIQUE');
         // replace = delete + insert -> new auto increment value
-        $db->exec("REPLACE INTO test(col1) VALUES ('b')");
+        $db->exec("REPLACE INTO test_pdo_mysql_last_insert_id(col1) VALUES ('b')");
         $next_id = (int)$db->lastInsertId();
 
         if ($next_id <= 101)
             printf("[009] Expecting at least 102, got %d\n",$next_id);
 
-        $stmt = $db->query('SELECT LAST_INSERT_ID() as _last_id');
+        $stmt = $db->query('SELECT LAST_INSERT_ID() AS _last_id');
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         $last_id = $row['_last_id'];
         if ($next_id != $last_id) {
@@ -68,7 +66,7 @@ $db = MySQLPDOTest::factory();
                 $last_id, $next_id);
         }
 
-        $db->exec("INSERT INTO test(col1) VALUES ('c'), ('d'), ('e')");
+        $db->exec("INSERT INTO test_pdo_mysql_last_insert_id(col1) VALUES ('c'), ('d'), ('e')");
         $next_id = (int)$db->lastInsertId();
         if ($next_id <= $last_id)
             printf("[011] Expecting at least %d, got %d\n", $last_id + 1, $next_id);
@@ -77,7 +75,7 @@ $db = MySQLPDOTest::factory();
         $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         try {
             $ignore_exception = true;
-            $db->exec('LOCK TABLE test WRITE');
+            $db->exec('LOCK TABLE test_pdo_mysql_last_insert_id WRITE');
             $ignore_exception = false;
 
             if (MySQLPDOTest::getServerVersion($db) >= 50000) {
@@ -88,11 +86,11 @@ $db = MySQLPDOTest::factory();
                 $inc = 1;
             }
 
-            $stmt = $db->query('SELECT LAST_INSERT_ID() as _last_id');
+            $stmt = $db->query('SELECT LAST_INSERT_ID() AS _last_id');
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             $last_id = $row['_last_id'];
 
-            $db->exec("INSERT INTO test(col1) VALUES ('z')");
+            $db->exec("INSERT INTO test_pdo_mysql_last_insert_id(col1) VALUES ('z')");
             $next_id = (int)$db->lastInsertId();
             if ($next_id < ($last_id + $inc))
                 printf("[012] Expecting at least %d, got %d\n", $last_id + $inc, $next_id);
@@ -102,7 +100,7 @@ $db = MySQLPDOTest::factory();
                 printf("[014] %s, [%s} %s\n", $e->getMessage(), $db->errorCode(), implode(' ', $db->errorInfo()));
         }
         $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-        @$db->exec('UNLOCK TABLE test');
+        @$db->exec('UNLOCK TABLE test_pdo_mysql_last_insert_id');
 
     } catch (PDOException $e) {
         printf("[001] %s [%s] %s\n",
@@ -113,8 +111,9 @@ $db = MySQLPDOTest::factory();
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable();
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS test_pdo_mysql_last_insert_id');
 ?>
 --EXPECT--
 done!

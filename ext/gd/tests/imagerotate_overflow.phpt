@@ -2,12 +2,6 @@
 imagerotate() overflow with negative numbers
 --EXTENSIONS--
 gd
---SKIPIF--
-<?php
-    if (!function_exists('imagerotate')) {
-        die("skip imagerotate() not available.");
-    }
-?>
 --FILE--
 <?php
 

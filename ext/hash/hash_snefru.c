@@ -39,7 +39,7 @@ void ph(uint32_t h[16])
 
 static inline void Snefru(uint32_t input[16])
 {
-	static int shifts[4] = {16, 8, 16, 24};
+	static const int shifts[4] = {16, 8, 16, 24};
 	int b, index, rshift, lshift;
 	const uint32_t *t0,*t1;
 	uint32_t SBE,B00,B01,B02,B03,B04,B05,B06,B07,B08,B09,B10,B11,B12,B13,B14,B15;
@@ -133,17 +133,12 @@ PHP_HASH_API void PHP_SNEFRUInit(PHP_SNEFRU_CTX *context, ZEND_ATTRIBUTE_UNUSED 
 	memset(context, 0, sizeof(*context));
 }
 
-static const uint32_t MAX32 = 0xffffffffLU;
-
 PHP_HASH_API void PHP_SNEFRUUpdate(PHP_SNEFRU_CTX *context, const unsigned char *input, size_t len)
 {
-	if ((MAX32 - context->count[1]) < (len * 8)) {
-		context->count[0]++;
-		context->count[1] = MAX32 - context->count[1];
-		context->count[1] = ((uint32_t) len * 8) - context->count[1];
-	} else {
-		context->count[1] += (uint32_t) len * 8;
-	}
+	uint64_t count = (((uint64_t) context->count[0] << 32) | context->count[1]) + (uint64_t) len * 8;
+
+	context->count[0] = (uint32_t) (count >> 32);
+	context->count[1] = (uint32_t) count;
 
 	if (context->length + len < 32) {
 		memcpy(&context->buffer[context->length], input, len);
@@ -214,5 +209,6 @@ const php_hash_ops php_hash_snefru_ops = {
 	32,
 	32,
 	sizeof(PHP_SNEFRU_CTX),
-	1
+	1,
+	0
 };

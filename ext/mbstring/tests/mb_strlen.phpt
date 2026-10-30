@@ -39,6 +39,8 @@ echo "== CP932 ==\n";
 print mb_strlen("\x80\xA1", "CP932") . "\n";
 // 0xFD, 0xFE, 0xFF is reserved.
 print mb_strlen("abc\xFD\xFE\xFF", 'CP932') . "\n";
+print mb_strlen("\x80\xA1", "SJIS-win") . "\n";
+print mb_strlen("abc\xFD\xFE\xFF", 'SJIS-win') . "\n";
 
 echo "== MacJapanese ==\n";
 print mb_strlen("\x80\xA1", 'MacJapanese') . "\n";
@@ -67,10 +69,26 @@ mb_internal_encoding('JIS')  or print("mb_internal_encoding() failed\n");
 print strlen($jis) . "\n";
 
 echo "== UTF-8 ==\n";
-$utf8 = mb_convert_encoding($euc_jp, 'UTF-8','EUC-JP');
-print mb_strlen($utf8,'UTF-8') . "\n";
-mb_internal_encoding('UTF-8')  or print("mb_internal_encoding() failed\n");
-print strlen($utf8) . "\n";
+$utf8 = mb_convert_encoding($euc_jp, 'UTF-8', 'EUC-JP');
+print mb_strlen($utf8,'UTF-8') . " codepoints\n";
+mb_internal_encoding('UTF-8') or print("mb_internal_encoding() failed\n");
+print strlen($utf8) . " bytes\n";
+
+$utf8 = "abcde あいうえお 汉字 ελληνικά";
+$long_utf8 = str_repeat($utf8, 100);
+print mb_strlen($utf8, 'UTF-8') . "\n";
+print mb_strlen($long_utf8, 'UTF-8') . "\n";
+
+echo "== UTF-8 with performance optimizations ==\n";
+// Optimized mb_strlen can be used on UTF-8 strings after they are checked for validity
+mb_check_encoding($utf8);
+mb_check_encoding($long_utf8);
+print mb_strlen($utf8, 'UTF-8') . "\n";
+print mb_strlen($long_utf8, 'UTF-8') . "\n";
+
+$str = str_repeat('Σ', 2048); // 2-byte UTF-8 character
+mb_check_encoding($str, 'UTF-8');
+print mb_strlen($str, 'UTF-8') . "\n";
 
 // Wrong Parameters
 echo "== WRONG PARAMETERS ==\n";
@@ -98,10 +116,12 @@ try {
 6
 == CP932 ==
 2
-5
-== MacJapanese ==
+6
 2
 6
+== MacJapanese ==
+2
+7
 == SJIS-2004 ==
 2
 6
@@ -118,7 +138,13 @@ try {
 43
 90
 == UTF-8 ==
-43
-101
+43 codepoints
+101 bytes
+23
+2300
+== UTF-8 with performance optimizations ==
+23
+2300
+2048
 == WRONG PARAMETERS ==
 mb_strlen(): Argument #2 ($encoding) must be a valid encoding, "BAD_NAME" given

@@ -2,7 +2,6 @@
 oss-fuzz #64727
 --INI--
 opcache.enable_cli=1
-opcache.jit_buffer_size=64M
 opcache.jit=function
 --EXTENSIONS--
 opcache

@@ -5,6 +5,15 @@ class Test {
             echo "dynamic\n";
         }
     }      
+
+    public int $hook {
+        get {
+            function dynamic_in_hook() {
+                echo "dynamic in hook\n";
+            }
+            return 1;
+        }
+    }
 }       
 
 function func() {
@@ -16,3 +25,4 @@ function func() {
 $test = new Test; 
 $test->method();
 func();
+$test->hook;

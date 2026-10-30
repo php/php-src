@@ -15,17 +15,15 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
-#include "php_ini.h"
 #include "php_main.h"
 #include "ext/standard/info.h"
 #include "php_spl.h"
 #include "php_spl_arginfo.h"
 #include "spl_functions.h"
-#include "spl_engine.h"
 #include "spl_array.h"
 #include "spl_directory.h"
 #include "spl_iterators.h"
@@ -38,10 +36,6 @@
 #include "zend_interfaces.h"
 #include "main/snprintf.h"
 
-#ifdef COMPILE_DL_SPL
-ZEND_GET_MODULE(spl)
-#endif
-
 ZEND_TLS zend_string *spl_autoload_extensions;
 ZEND_TLS HashTable *spl_autoload_functions;
 
@@ -49,16 +43,7 @@ ZEND_TLS HashTable *spl_autoload_functions;
 
 static zend_class_entry * spl_find_ce_by_name(zend_string *name, bool autoload)
 {
-	zend_class_entry *ce;
-
-	if (!autoload) {
-		zend_string *lc_name = zend_string_tolower(name);
-
-		ce = zend_hash_find_ptr(EG(class_table), lc_name);
-		zend_string_release(lc_name);
-	} else {
-		ce = zend_lookup_class(name);
-	}
+	zend_class_entry *ce = zend_lookup_class_ex(name, NULL, autoload ? 0 : ZEND_FETCH_CLASS_NO_AUTOLOAD);
 	if (ce == NULL) {
 		php_error_docref(NULL, E_WARNING, "Class %s does not exist%s", ZSTR_VAL(name), autoload ? " and could not be loaded" : "");
 		return NULL;
@@ -74,12 +59,13 @@ PHP_FUNCTION(class_parents)
 	zend_class_entry *parent_class, *ce;
 	bool autoload = 1;
 
+	/* We do not use Z_PARAM_OBJ_OR_STR here to be able to exclude int, float, and bool which are bogus class names */
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &obj, &autoload) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	if (Z_TYPE_P(obj) != IS_OBJECT && Z_TYPE_P(obj) != IS_STRING) {
-		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_type_name(obj));
+		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_value_name(obj));
 		RETURN_THROWS();
 	}
 
@@ -107,11 +93,12 @@ PHP_FUNCTION(class_implements)
 	bool autoload = 1;
 	zend_class_entry *ce;
 
+	/* We do not use Z_PARAM_OBJ_OR_STR here to be able to exclude int, float, and bool which are bogus class names */
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &obj, &autoload) == FAILURE) {
 		RETURN_THROWS();
 	}
 	if (Z_TYPE_P(obj) != IS_OBJECT && Z_TYPE_P(obj) != IS_STRING) {
-		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_type_name(obj));
+		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_value_name(obj));
 		RETURN_THROWS();
 	}
 
@@ -135,11 +122,12 @@ PHP_FUNCTION(class_uses)
 	bool autoload = 1;
 	zend_class_entry *ce;
 
+	/* We do not use Z_PARAM_OBJ_OR_STR here to be able to exclude int, float, and bool which are bogus class names */
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &obj, &autoload) == FAILURE) {
 		RETURN_THROWS();
 	}
 	if (Z_TYPE_P(obj) != IS_OBJECT && Z_TYPE_P(obj) != IS_STRING) {
-		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_type_name(obj));
+		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_value_name(obj));
 		RETURN_THROWS();
 	}
 
@@ -313,7 +301,12 @@ PHP_FUNCTION(spl_autoload)
 		pos_len = (int)ZSTR_LEN(file_exts);
 	}
 
-	lc_name = zend_string_tolower(class_name);
+	if (ZSTR_VAL(class_name)[0] == '\\') {
+		lc_name = zend_string_alloc(ZSTR_LEN(class_name) - 1, 0);
+		zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(class_name) + 1, ZSTR_LEN(class_name) - 1);
+	} else {
+		lc_name = zend_string_tolower(class_name);
+	}
 	while (pos && *pos && !EG(exception)) {
 		pos1 = strchr(pos, ',');
 		if (pos1) {
@@ -692,7 +685,7 @@ PHP_MINFO_FUNCTION(spl)
 	char *strg;
 
 	php_info_print_table_start();
-	php_info_print_table_header(2, "SPL support",        "enabled");
+	php_info_print_table_row(2, "SPL support", "enabled");
 
 	array_init(&list);
 	SPL_LIST_CLASSES(&list, 0, 1, ZEND_ACC_INTERFACE)

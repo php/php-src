@@ -46,6 +46,7 @@ Class [ <user> class Test ] {
   - Properties [3] {
     Property [ public $z = NULL ]
     Property [ public int $x ]
+    /** @SomeAnnotation() */
     Property [ public string $y ]
   }
 

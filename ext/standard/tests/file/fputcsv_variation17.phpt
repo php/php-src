@@ -12,7 +12,7 @@ $eol_chars = ['||', '|', '\n', "\n", "\0"];
 foreach ($eol_chars as $eol_char) {
     $stream = fopen('php://memory', 'w+');
     foreach ($data as $record) {
-        fputcsv($stream, $record, ',', '"', '\\', $eol_char);
+        fputcsv($stream, $record, ',', '"', '', $eol_char);
     }
     rewind($stream);
     echo stream_get_contents($stream), "\n";

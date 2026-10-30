@@ -15,7 +15,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -29,7 +29,6 @@
 #include "ext/standard/info.h"
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
-#include "php_ini.h"
 
 /* SysvSharedMemory class */
 
@@ -47,7 +46,6 @@ static zend_object *sysvshm_create_object(zend_class_entry *class_type) {
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
-	intern->std.handlers = &sysvshm_object_handlers;
 
 	return &intern->std;
 }
@@ -101,6 +99,7 @@ PHP_MINIT_FUNCTION(sysvshm)
 {
 	sysvshm_ce = register_class_SysvSharedMemory();
 	sysvshm_ce->create_object = sysvshm_create_object;
+	sysvshm_ce->default_object_handlers = &sysvshm_object_handlers;
 
 	memcpy(&sysvshm_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	sysvshm_object_handlers.offset = XtOffsetOf(sysvshm_shm, std);
@@ -131,8 +130,10 @@ PHP_FUNCTION(shm_attach)
 	sysvshm_shm *shm_list_ptr;
 	char *shm_ptr;
 	sysvshm_chunk_head *chunk_ptr;
+	struct shmid_ds shm_desc;
 	zend_long shm_key, shm_id, shm_size, shm_flag = 0666;
 	bool shm_size_is_null = 1;
+	bool created = false;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|l!l", &shm_key, &shm_size, &shm_size_is_null, &shm_flag)) {
 		RETURN_THROWS();
@@ -157,10 +158,33 @@ PHP_FUNCTION(shm_attach)
 			php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", shm_key, strerror(errno));
 			RETURN_FALSE;
 		}
+		created = true;
 	}
 
 	if ((shm_ptr = shmat(shm_id, NULL, 0)) == (void *) -1) {
 		php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", shm_key, strerror(errno));
+		if (created) {
+			shmctl(shm_id, IPC_RMID, NULL);
+		}
+		RETURN_FALSE;
+	}
+
+	if (shmctl(shm_id, IPC_STAT, &shm_desc) < 0) {
+		php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", shm_key, strerror(errno));
+		shmdt(shm_ptr);
+		if (created) {
+			shmctl(shm_id, IPC_RMID, NULL);
+		}
+		RETURN_FALSE;
+	}
+	shm_size = (zend_long)shm_desc.shm_segsz;
+
+	if (shm_size < (zend_long) sizeof(sysvshm_chunk_head)) {
+		php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": segment too small", shm_key);
+		shmdt(shm_ptr);
+		if (created) {
+			shmctl(shm_id, IPC_RMID, NULL);
+		}
 		RETURN_FALSE;
 	}
 
@@ -310,11 +334,13 @@ PHP_FUNCTION(shm_get_var)
 	shm_data = &shm_var->mem;
 
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
-	if (php_var_unserialize(return_value, (const unsigned char **) &shm_data, (unsigned char *) shm_data + shm_var->length, &var_hash) != 1) {
-		php_error_docref(NULL, E_WARNING, "Variable data in shared memory is corrupted");
-		RETVAL_FALSE;
-	}
+	int res = php_var_unserialize(return_value, (const unsigned char **) &shm_data, (unsigned char *) shm_data + shm_var->length, &var_hash);
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+	if (res != 1) {
+		php_error_docref(NULL, E_WARNING, "Variable data in shared memory is corrupted");
+		zval_ptr_dtor(return_value);
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 

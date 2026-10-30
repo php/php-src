@@ -76,11 +76,13 @@ novalue_option4[]=
 ["Quoted strings and variables in sections"]
 
 [${basicval}]
+[${undefinedval:-foo}]
 [${basicval}/foo]
 [foo/${basicval}]
 [foo/${basicval}/foo]
 
 ["${basicqval}"]
+["${undefinedval:-foo}"]
 ["${basicqval}/foo"]
 ["foo/${basicqval}"]
 ["foo/${basicqval}/foo"]
@@ -141,3 +143,24 @@ double_quoted_multiline = "Lorem \"ipsum\"""
  dolor"
 dollar_test = "\${test}"
 unescaped ="\n\r\t"
+
+[variable-fallback]
+defined1 = "Hello, ${basicval:-world}!"
+defined2 = ${basicval:-123}
+falsy = ${falsyval:-hi}
+undefined = "Hello, ${undefined_var:-world}!"
+empty = ${emptyval:-foo}
+spaces = ${undefined_var:-hi there}
+exclamation = ${hi_is_this_undefined:-"no, this is fallback!"}
+nested = ${undefined_var:-${also_undefined:-${undefined_too:-hello}}}
+hostname = localhost:${undefined_var:-8080}
+outer_quotes = "foo:${undefined_var:-bar}"
+number_value = ${undefined_var:-12345}
+true_value = ${undefined_var:-true}
+false_value = ${undefined_var:-false}
+null_value = ${undefined_var:-null}
+empty1 = ${undefined_var:-}
+empty2 = ${undefined}
+constant = ${undefined:-TEST_CONSTANT}
+INI:WITH:COLON = ${INI:WITH:COLON:-}
+NONEXISTENT:INI:WITH:COLON = ${NONEXISTENT:INI:WITH:COLON:-fallback}

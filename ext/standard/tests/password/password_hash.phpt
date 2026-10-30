@@ -1,10 +1,12 @@
 --TEST--
 Test normal operation of password_hash()
+--SKIPIF--
+<?php if (getenv("SKIP_SLOW_TESTS")) die("skip slow test"); ?>
 --FILE--
 <?php
 //-=-=-=-
 
-var_dump(strlen(password_hash("foo", PASSWORD_BCRYPT)));
+var_dump(password_hash("foo", PASSWORD_BCRYPT));
 
 $algos = [
   PASSWORD_BCRYPT,
@@ -19,8 +21,8 @@ foreach ($algos as $algo) {
 
 echo "OK!";
 ?>
---EXPECT--
-int(60)
+--EXPECTF--
+string(60) "$2y$12$%s"
 bool(true)
 bool(true)
 bool(true)

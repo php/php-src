@@ -1,5 +1,5 @@
 --TEST--
-Constructor promotiong mixed with other properties, parameters and code
+Constructor promotion mixed with other properties, parameters and code
 --FILE--
 <?php
 

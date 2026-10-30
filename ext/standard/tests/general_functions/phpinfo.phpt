@@ -29,6 +29,7 @@ PHP Extension => %d
 Zend Extension => %d
 Zend Extension Build => API%s
 PHP Extension Build => API%s
+PHP Integer Size => %d bits
 Debug Build => %s
 Thread Safety => %r(.+?)%r
 Zend Signal Handling => %s

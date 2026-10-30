@@ -44,8 +44,6 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_call_destructors(zend_objects_sto
 {
 	EG(flags) |= EG_FLAGS_OBJECT_STORE_NO_REUSE;
 	if (objects->top > 1) {
-		zend_fiber_switch_block();
-
 		uint32_t i;
 		for (i = 1; i < objects->top; i++) {
 			zend_object *obj = objects->object_buckets[i];
@@ -62,8 +60,6 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_call_destructors(zend_objects_sto
 				}
 			}
 		}
-
-		zend_fiber_switch_unblock();
 	}
 }
 
@@ -104,7 +100,9 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_free_object_storage(zend_objects_
 			if (IS_OBJ_VALID(obj)) {
 				if (!(OBJ_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
 					GC_ADD_FLAGS(obj, IS_OBJ_FREE_CALLED);
-					if (obj->handlers->free_obj != zend_object_std_dtor) {
+					if (obj->handlers->free_obj != zend_object_std_dtor
+					 || (OBJ_FLAGS(obj) & IS_OBJ_WEAKLY_REFERENCED)
+					) {
 						GC_ADDREF(obj);
 						obj->handlers->free_obj(obj);
 					}
@@ -179,11 +177,9 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_del(zend_object *object) /* {{{ *
 
 		if (object->handlers->dtor_obj != zend_objects_destroy_object
 				|| object->ce->destructor) {
-			zend_fiber_switch_block();
 			GC_SET_REFCOUNT(object, 1);
 			object->handlers->dtor_obj(object);
 			GC_DELREF(object);
-			zend_fiber_switch_unblock();
 		}
 	}
 
@@ -206,3 +202,15 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_del(zend_object *object) /* {{{ *
 	}
 }
 /* }}} */
+
+ZEND_API ZEND_COLD zend_property_info *zend_get_property_info_for_slot_slow(zend_object *obj, zval *slot)
+{
+	uintptr_t offset = OBJ_PROP_SLOT_TO_OFFSET(obj, slot);
+	zend_property_info *prop_info;
+	ZEND_HASH_MAP_FOREACH_PTR(&obj->ce->properties_info, prop_info) {
+		if (prop_info->offset == offset) {
+			return prop_info;
+		}
+	} ZEND_HASH_FOREACH_END();
+	return NULL;
+}

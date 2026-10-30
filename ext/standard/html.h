@@ -30,6 +30,8 @@
 /* reserve bit 6 */
 #define ENT_HTML_SUBSTITUTE_DISALLOWED_CHARS	128
 
+#define PHP_HTML_SPECIALCHARS 	0
+#define PHP_HTML_ENTITIES	 	1
 
 #define ENT_COMPAT		ENT_HTML_QUOTE_DOUBLE
 #define ENT_QUOTES		(ENT_HTML_QUOTE_DOUBLE | ENT_HTML_QUOTE_SINGLE)
@@ -41,8 +43,6 @@
 #define ENT_XHTML		32
 #define ENT_HTML5		(16|32)
 #define ENT_DISALLOWED	128
-
-void register_html_constants(INIT_FUNC_ARGS);
 
 PHPAPI zend_string *php_escape_html_entities(const unsigned char *old, size_t oldlen, int all, int flags, const char *hint_charset);
 PHPAPI zend_string *php_escape_html_entities_ex(const unsigned char *old, size_t oldlen, int all, int flags, const char *hint_charset, bool double_encode, bool quiet);

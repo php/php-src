@@ -10,11 +10,9 @@ function foo()
 $g = foo();
 $g->next();
 
-try {
-    $r = new ReflectionGenerator($g);
-} catch (ReflectionException $e) {
-    echo "Done!\n";
-}
+$r = new ReflectionGenerator($g);
+var_dump($r);
 ?>
---EXPECT--
-Done!
+--EXPECTF--
+object(ReflectionGenerator)#%d (0) {
+}

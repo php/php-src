@@ -3,7 +3,7 @@ Bug #81577: (Exceptions in interrupt handlers: cleanup_live_vars)
 --EXTENSIONS--
 pcntl
 posix
---XFAIL--
+--XLEAK--
 leaks are not fixed yet
 --FILE--
 <?php

@@ -68,7 +68,7 @@ unlink(__DIR__.'/003-move-errors.xml');
 book
 bool(true)
 num: 1
-XMLReader::moveToAttribute(): Argument #1 ($name) cannot be empty
+XMLReader::moveToAttribute(): Argument #1 ($name) must not be empty
 num: 1
 bool(false)
 num: 1

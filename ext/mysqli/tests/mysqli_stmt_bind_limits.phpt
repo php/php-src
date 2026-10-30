@@ -4,13 +4,14 @@ Bind limits
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+if (getenv("SKIP_SLOW_TESTS")) die('skip slow test');
+require_once 'skipifconnectfailure.inc';
 ?>
 --CONFLICTS--
 all
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
     function bind_many($offset, $link, $num_params, $rows, $eval = true) {
 
@@ -115,7 +116,7 @@ all
 ?>
 --CLEAN--
 <?php
-require_once("clean_table.inc");
+require_once 'clean_table.inc';
 ?>
 --EXPECT--
 Testing 273 columns with 240 rows...

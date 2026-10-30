@@ -2,7 +2,7 @@
 Bug #60120 (proc_open hangs when data in stdin/out/err is getting larger or equal to 2048)
 --SKIPIF--
 <?php
-$php = getenv('TEST_PHP_EXECUTABLE');
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 if (!$php) {
     die("skip No php executable defined\n");
 }
@@ -13,11 +13,10 @@ if (PHP_OS_FAMILY === 'Windows') die('skip not for Windows');
 
 error_reporting(E_ALL);
 
-$php = getenv('TEST_PHP_EXECUTABLE');
-if (!$php) {
-    die("No php executable defined\n");
-}
-$cmd = $php . ' -r "\$in = file_get_contents(\'php://stdin\'); fwrite(STDOUT, \$in); fwrite(STDERR, \$in);"';
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
+$args = getenv('TEST_PHP_EXTRA_ARGS');
+$cmd = ' -r "\$in = file_get_contents(\'php://stdin\'); fwrite(STDOUT, \$in); fwrite(STDERR, \$in);"';
+$cmd = join(' ', [$php, $args, $cmd]);
 $descriptors = array(array('pipe', 'r'), array('pipe', 'w'), array('pipe', 'w'));
 $stdin = str_repeat('*', 2049 );
 

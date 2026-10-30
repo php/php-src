@@ -8,7 +8,7 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once('table.inc');
+    require_once 'table.inc';
 
     function get_connection() {
         global $host, $user, $passwd, $db, $port, $socket;
@@ -44,11 +44,11 @@ require_once 'skipifconnectfailure.inc';
     mysqli_close($link);
 
     $links = array();
-    for ($i = 0; $i < count($queries); $i++) {
+    foreach ($queries as $query) {
 
         $link = get_connection();
 
-        if (true !== ($tmp = mysqli_query($link, $queries[$i], MYSQLI_ASYNC |  MYSQLI_USE_RESULT)))
+        if (true !== ($tmp = mysqli_query($link, $query, MYSQLI_ASYNC |  MYSQLI_USE_RESULT)))
             printf("[002] Expecting true got %s/%s\n", gettype($tmp), var_export($tmp, true));
 
         // WARNING KLUDGE NOTE
@@ -57,7 +57,7 @@ require_once 'skipifconnectfailure.inc';
         usleep(20000);
 
         $links[mysqli_thread_id($link)] = array(
-            'query' => $queries[$i],
+            'query' => $query,
             'link' => $link,
             'processed' => false,
         );
@@ -66,7 +66,7 @@ require_once 'skipifconnectfailure.inc';
     $saved_errors = array();
     do {
         $poll_links = $poll_errors = $poll_reject = array();
-        foreach ($links as $thread_id => $link) {
+        foreach ($links as $link) {
             if (!$link['processed']) {
                 $poll_links[] = $link['link'];
                 $poll_errors[] = $link['link'];
@@ -93,7 +93,7 @@ require_once 'skipifconnectfailure.inc';
 
             if (is_object($res = mysqli_reap_async_query($link))) {
                 // result set object
-                while ($row = mysqli_fetch_assoc($res)) {
+                while (mysqli_fetch_assoc($res)) {
                     // eat up all results
                     ;
                 }
@@ -120,9 +120,9 @@ require_once 'skipifconnectfailure.inc';
         }
 
         if (!$res = mysqli_query($link['link'], 'SELECT * FROM test WHERE id = 100'))
-            printf("[005] Expecting true got %s/%s\n", gettype($tmp), var_export($tmp, true));
+            printf("[005] Expecting true got %s/%s\n", gettype($res), var_export($res, true));
         if (!$row = mysqli_fetch_row($res))
-            printf("[006] Expecting true got %s/%s\n", gettype($tmp), var_export($tmp, true));
+            printf("[006] Expecting true got %s/%s\n", gettype($row), var_export($row, true));
 
         mysqli_free_result($res);
     }
@@ -157,7 +157,7 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --CLEAN--
 <?php
-require_once("connect.inc");
+require_once 'connect.inc';
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
    printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 

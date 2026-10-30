@@ -4,7 +4,7 @@ mysqli_report(), MySQL < 5.6
 mysqli
 --SKIPIF--
 <?php
-require_once "connect.inc";
+require_once 'connect.inc';
 
 if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
     die(sprintf("SKIP Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
@@ -33,7 +33,12 @@ if (mysqli_get_server_version($link) >= 50600)
     if (true !== ($tmp = mysqli_report(MYSQLI_REPORT_OFF)))
         printf("[008] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 
-    require 'table.inc';
+    require_once 'connect.inc';
+    if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+        printf("Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+            $host, $user, $db, $port, $socket);
+        exit(1);
+    }
 
     /*
     Internal macro MYSQL_REPORT_ERROR
@@ -49,7 +54,6 @@ if (mysqli_get_server_version($link) >= 50600)
         echo $e->getMessage() . \PHP_EOL;
     }
 
-    // mysqli_ping() cannot be tested, because one would need to cause an error inside the C function to test it
     mysqli_real_query($link, "FOO");
     if (@mysqli_select_db($link, "Oh lord, let this be an unknown database name"))
         printf("[009] select_db should have failed\n");
@@ -98,10 +102,6 @@ if (mysqli_get_server_version($link) >= 50600)
     }
 
     print "done!";
-?>
---CLEAN--
-<?php
-require_once "clean_table.inc";
 ?>
 --EXPECTF--
 Warning: mysqli_multi_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'BAR; FOO' at line 1 in %s on line %d

@@ -14,5 +14,5 @@ if (!file_exists($path)) {
 }
 
 if (getenv('SKIP_ASAN')) {
-    die('skip dl() crashes LSan');
+    die('xleak dl() crashes LSan');
 }

@@ -8,7 +8,7 @@ if (PHP_PASSWORD_ARGON2 != "no") {
 		if (!CHECK_FUNC_IN_HEADER("argon2.h", "argon2id_hash_raw", PHP_PHP_BUILD + "\\include", "CFLAGS")) {
 			ERROR("Please verify that Argon2 header and libraries >= 20161029 are installed");
 		}
-		AC_DEFINE('HAVE_ARGON2LIB', 1);
+		AC_DEFINE('HAVE_ARGON2LIB', 1, "Define to 1 if the system has the 'libargon2' library.");
 	} else {
 		WARNING("Argon2 not enabled; libraries and headers not found");
 	}
@@ -17,7 +17,7 @@ if (PHP_PASSWORD_ARGON2 != "no") {
 ARG_WITH("config-file-scan-dir", "Dir to check for additional php ini files", "");
 
 AC_DEFINE("PHP_CONFIG_FILE_SCAN_DIR", PHP_CONFIG_FILE_SCAN_DIR);
-AC_DEFINE("PHP_USE_PHP_CRYPT_R", 1);
+AC_DEFINE("PHP_USE_PHP_CRYPT_R", 1, "Define to 1 if PHP uses its own crypt_r, and to 0 if using the external crypt library.");
 
 CHECK_HEADER_ADD_INCLUDE("timelib_config.h", "CFLAGS_STANDARD", "ext/date/lib");
 

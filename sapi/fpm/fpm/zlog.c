@@ -25,6 +25,7 @@
 #define EXTRA_SPACE_FOR_PREFIX 128
 
 static int zlog_fd = -1;
+static bool zlog_fd_is_stderr = false;
 static int zlog_level = ZLOG_NOTICE;
 static int zlog_limit = ZLOG_DEFAULT_LIMIT;
 static zlog_bool zlog_buffering = ZLOG_DEFAULT_BUFFERING;
@@ -88,11 +89,13 @@ size_t zlog_print_time(struct timeval *tv, char *timebuf, size_t timebuf_len) /*
 }
 /* }}} */
 
-int zlog_set_fd(int new_fd) /* {{{ */
+int zlog_set_fd(int new_fd, zlog_bool is_stderr) /* {{{ */
 {
 	int old_fd = zlog_fd;
 
 	zlog_fd = new_fd;
+	zlog_fd_is_stderr = is_stderr;
+
 	return old_fd;
 }
 /* }}} */
@@ -246,7 +249,7 @@ void vzlog(const char *function, int line, int flags, const char *fmt, va_list a
 		zend_quiet_write(zlog_fd > -1 ? zlog_fd : STDERR_FILENO, buf, len);
 	}
 
-	if (zlog_fd != STDERR_FILENO && zlog_fd != -1 &&
+	if (!zlog_fd_is_stderr && zlog_fd != -1 &&
 			!launched && (flags & ZLOG_LEVEL_MASK) >= ZLOG_NOTICE) {
 		zend_quiet_write(STDERR_FILENO, buf, len);
 	}
@@ -584,6 +587,7 @@ zlog_bool zlog_stream_set_msg_prefix(struct zlog_stream *stream, const char *fmt
 {
 	char buf[MAX_WRAPPING_PREFIX_LENGTH];
 	size_t len;
+	int written;
 	va_list args;
 
 	if (!stream->decorate) {
@@ -591,8 +595,15 @@ zlog_bool zlog_stream_set_msg_prefix(struct zlog_stream *stream, const char *fmt
 	}
 
 	va_start(args, fmt);
-	len = vsnprintf(buf, MAX_WRAPPING_PREFIX_LENGTH - 1, fmt, args);
+	written = vsnprintf(buf, sizeof(buf), fmt, args);
 	va_end(args);
+
+	if (written < 0) {
+		return ZLOG_FALSE;
+	}
+	/* Use only what was written to buf, and keep at least half of the log line
+	 * for the time and level prefix and the message itself. */
+	len = MIN((size_t) written, MIN(sizeof(buf) - 1, (size_t) zlog_limit / 2));
 
 	if (stream->msg_prefix_len < len) {
 		stream->msg_prefix = stream->msg_prefix_len ? realloc(stream->msg_prefix, len + 1) : malloc(len + 1);
@@ -604,7 +615,7 @@ zlog_bool zlog_stream_set_msg_prefix(struct zlog_stream *stream, const char *fmt
 	stream->msg_prefix[len] = 0;
 	stream->msg_prefix_len = len;
 
-	return len;
+	return ZLOG_TRUE;
 }
 /* }}} */
 
@@ -723,7 +734,10 @@ ssize_t zlog_stream_vformat(struct zlog_stream *stream, const char *fmt, va_list
 	char sbuf[1024];
 	size_t len;
 
-	len = vsnprintf(sbuf, 1024, fmt, args);
+	len = vsnprintf(sbuf, sizeof(sbuf), fmt, args);
+	if (len >= sizeof(sbuf)) {
+		len = sizeof(sbuf) - 1;
+	}
 
 	return zlog_stream_str(stream, sbuf, len);
 }

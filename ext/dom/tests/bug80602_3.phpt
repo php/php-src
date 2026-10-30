@@ -23,11 +23,15 @@ var_dump($target);
 ?>
 --EXPECTF--
 <a>barfoobaz<last/></a>
-object(DOMElement)#3 (23) {
-  ["schemaTypeInfo"]=>
-  NULL
+object(DOMElement)#3 (27) {
   ["tagName"]=>
   string(4) "last"
+  ["className"]=>
+  string(0) ""
+  ["id"]=>
+  string(0) ""
+  ["schemaTypeInfo"]=>
+  NULL
   ["firstElementChild"]=>
   NULL
   ["lastElementChild"]=>
@@ -46,6 +50,8 @@ object(DOMElement)#3 (23) {
   int(1)
   ["parentNode"]=>
   string(22) "(object value omitted)"
+  ["parentElement"]=>
+  string(22) "(object value omitted)"
   ["childNodes"]=>
   string(22) "(object value omitted)"
   ["firstChild"]=>
@@ -58,6 +64,8 @@ object(DOMElement)#3 (23) {
   NULL
   ["attributes"]=>
   string(22) "(object value omitted)"
+  ["isConnected"]=>
+  bool(true)
   ["ownerDocument"]=>
   string(22) "(object value omitted)"
   ["namespaceURI"]=>
@@ -72,11 +80,15 @@ object(DOMElement)#3 (23) {
   string(0) ""
 }
 <a><last/>barfoobaz</a>
-object(DOMElement)#2 (23) {
-  ["schemaTypeInfo"]=>
-  NULL
+object(DOMElement)#2 (27) {
   ["tagName"]=>
   string(4) "last"
+  ["className"]=>
+  string(0) ""
+  ["id"]=>
+  string(0) ""
+  ["schemaTypeInfo"]=>
+  NULL
   ["firstElementChild"]=>
   NULL
   ["lastElementChild"]=>
@@ -95,6 +107,8 @@ object(DOMElement)#2 (23) {
   int(1)
   ["parentNode"]=>
   string(22) "(object value omitted)"
+  ["parentElement"]=>
+  string(22) "(object value omitted)"
   ["childNodes"]=>
   string(22) "(object value omitted)"
   ["firstChild"]=>
@@ -107,6 +121,8 @@ object(DOMElement)#2 (23) {
   string(22) "(object value omitted)"
   ["attributes"]=>
   string(22) "(object value omitted)"
+  ["isConnected"]=>
+  bool(true)
   ["ownerDocument"]=>
   string(22) "(object value omitted)"
   ["namespaceURI"]=>

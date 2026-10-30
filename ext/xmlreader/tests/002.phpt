@@ -36,6 +36,6 @@ unlink($filename);
 
 ?>
 --EXPECT--
-XMLReader::open(): Argument #1 ($uri) cannot be empty
+XMLReader::open(): Argument #1 ($uri) must not be empty
 books
 books

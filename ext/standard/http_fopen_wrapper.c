@@ -159,6 +159,34 @@ static bool check_has_header(const char *headers, const char *header) {
 	return 0;
 }
 
+static zend_result php_stream_handle_proxy_authorization_header(const char *s, smart_str *header)
+{
+	const char *p;
+
+	do {
+		while (*s == ' ' || *s == '\t') s++;
+		p = s;
+		while (*p != 0 && *p != ':' && *p != '\r' && *p !='\n') p++;
+		if (*p == ':') {
+			p++;
+			if (p - s == sizeof("Proxy-Authorization:") - 1 &&
+				zend_binary_strcasecmp(s, sizeof("Proxy-Authorization:") - 1,
+									   "Proxy-Authorization:", sizeof("Proxy-Authorization:") - 1) == 0) {
+				while (*p != 0 && *p != '\r' && *p !='\n') p++;
+				smart_str_appendl(header, s, p - s);
+				smart_str_appendl(header, "\r\n", sizeof("\r\n")-1);
+				return SUCCESS;
+			} else {
+				while (*p != 0 && *p != '\r' && *p !='\n') p++;
+			}
+		}
+		s = p;
+		while (*s == '\r' || *s == '\n') s++;
+	} while (*s != 0);
+
+	return FAILURE;
+}
+
 typedef struct _php_stream_http_response_header_info {
 	php_stream_filter *transfer_encoding;
 	size_t file_size;
@@ -307,7 +335,7 @@ static zend_string *php_stream_http_response_headers_parse(php_stream_wrapper *w
 			zend_string_efree(last_header_line_str);
 			return NULL;
 		}
-		if (header_info->location_len == 0) {
+		if (header_info->location == NULL) {
 			header_info->location = emalloc(last_header_value_len + 1);
 		} else if (header_info->location_len <= last_header_value_len) {
 			header_info->location = erealloc(header_info->location, last_header_value_len + 1);
@@ -336,7 +364,7 @@ static zend_string *php_stream_http_response_headers_parse(php_stream_wrapper *w
 	) {
 		/* Create filter to decode response body. */
 		if (!(options & STREAM_ONLY_GET_HEADERS)) {
-			zend_long decode = 1;
+			bool decode = true;
 
 			if (context && (tmpzval = php_stream_context_get_option(context, "http", "auto_decode")) != NULL) {
 				decode = zend_is_true(tmpzval);
@@ -389,7 +417,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	zend_string *transport_string;
 	zend_string *errstr = NULL;
 	int have_header = 0;
-	bool request_fulluri = 0, ignore_errors = 0;
+	bool request_fulluri = false, ignore_errors = false;
 	struct timeval timeout;
 	char *user_headers = NULL;
 	int header_init = ((flags & HTTP_WRAPPER_HEADER_INIT) != 0);
@@ -411,6 +439,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		return NULL;
 	}
 
+	ZEND_ASSERT(resource->scheme);
 	if (!zend_string_equals_literal_ci(resource->scheme, "http") &&
 		!zend_string_equals_literal_ci(resource->scheme, "https")) {
 		if (!context ||
@@ -421,7 +450,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 			return php_stream_open_wrapper_ex(path, mode, REPORT_ERRORS, NULL, context);
 		}
 		/* Called from a non-http wrapper with http proxying requested (i.e. ftp) */
-		request_fulluri = 1;
+		request_fulluri = true;
 		use_ssl = 0;
 		use_proxy = 1;
 		transport_string = zend_string_copy(Z_STR_P(tmpzval));
@@ -439,7 +468,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 			request_fulluri = zend_is_true(tmpzval);
 		}
 
-		use_ssl = resource->scheme && (ZSTR_LEN(resource->scheme) > 4) && ZSTR_VAL(resource->scheme)[4] == 's';
+		use_ssl = (ZSTR_LEN(resource->scheme) > 4) && ZSTR_VAL(resource->scheme)[4] == 's';
 		/* choose default ports */
 		if (use_ssl && resource->port == 0)
 			resource->port = 443;
@@ -466,6 +495,18 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 
 	if (context && (tmpzval = php_stream_context_get_option(context, wrapper->wops->label, "timeout")) != NULL) {
 		double d = zval_get_double(tmpzval);
+#ifndef PHP_WIN32
+		const double timeoutmax = (double) PHP_TIMEOUT_ULL_MAX / 1000000.0;
+#else
+		const double timeoutmax = (double) LONG_MAX / 1000000.0;
+#endif
+
+		if (d > timeoutmax) {
+			php_stream_wrapper_log_error(wrapper, options, "timeout must be lower than " ZEND_ULONG_FMT, (zend_ulong)timeoutmax);
+			zend_string_release(transport_string);
+			php_url_free(resource);
+			return NULL;
+		}
 #ifndef PHP_WIN32
 		timeout.tv_sec = (time_t) d;
 		timeout.tv_usec = (size_t) ((d - timeout.tv_sec) * 1000000);
@@ -500,12 +541,14 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 
 	if (stream && use_proxy && use_ssl) {
 		smart_str header = {0};
+		bool reset_ssl_peer_name = false;
 
 		/* Set peer_name or name verification will try to use the proxy server name */
 		if (!context || (tmpzval = php_stream_context_get_option(context, "ssl", "peer_name")) == NULL) {
 			ZVAL_STR_COPY(&ssl_proxy_peer_name, resource->host);
 			php_stream_context_set_option(PHP_STREAM_CONTEXT(stream), "ssl", "peer_name", &ssl_proxy_peer_name);
 			zval_ptr_dtor(&ssl_proxy_peer_name);
+			reset_ssl_peer_name = true;
 		}
 
 		smart_str_appendl(&header, "CONNECT ", sizeof("CONNECT ")-1);
@@ -516,7 +559,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 
 	    /* check if we have Proxy-Authorization header */
 		if (context && (tmpzval = php_stream_context_get_option(context, "http", "header")) != NULL) {
-			char *s, *p;
+			const char *s;
 
 			if (Z_TYPE_P(tmpzval) == IS_ARRAY) {
 				zval *tmpheader = NULL;
@@ -524,56 +567,26 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(tmpzval), tmpheader) {
 					if (Z_TYPE_P(tmpheader) == IS_STRING) {
 						s = Z_STRVAL_P(tmpheader);
-						do {
-							while (*s == ' ' || *s == '\t') s++;
-							p = s;
-							while (*p != 0 && *p != ':' && *p != '\r' && *p !='\n') p++;
-							if (*p == ':') {
-								p++;
-								if (p - s == sizeof("Proxy-Authorization:") - 1 &&
-								    zend_binary_strcasecmp(s, sizeof("Proxy-Authorization:") - 1,
-								        "Proxy-Authorization:", sizeof("Proxy-Authorization:") - 1) == 0) {
-									while (*p != 0 && *p != '\r' && *p !='\n') p++;
-									smart_str_appendl(&header, s, p - s);
-									smart_str_appendl(&header, "\r\n", sizeof("\r\n")-1);
-									goto finish;
-								} else {
-									while (*p != 0 && *p != '\r' && *p !='\n') p++;
-								}
-							}
-							s = p;
-							while (*s == '\r' || *s == '\n') s++;
-						} while (*s != 0);
+						if (php_stream_handle_proxy_authorization_header(s, &header) == SUCCESS) {
+							goto finish;
+						}
 					}
 				} ZEND_HASH_FOREACH_END();
 			} else if (Z_TYPE_P(tmpzval) == IS_STRING && Z_STRLEN_P(tmpzval)) {
 				s = Z_STRVAL_P(tmpzval);
-				do {
-					while (*s == ' ' || *s == '\t') s++;
-					p = s;
-					while (*p != 0 && *p != ':' && *p != '\r' && *p !='\n') p++;
-					if (*p == ':') {
-						p++;
-						if (p - s == sizeof("Proxy-Authorization:") - 1 &&
-						    zend_binary_strcasecmp(s, sizeof("Proxy-Authorization:") - 1,
-						        "Proxy-Authorization:", sizeof("Proxy-Authorization:") - 1) == 0) {
-							while (*p != 0 && *p != '\r' && *p !='\n') p++;
-							smart_str_appendl(&header, s, p - s);
-							smart_str_appendl(&header, "\r\n", sizeof("\r\n")-1);
-							goto finish;
-						} else {
-							while (*p != 0 && *p != '\r' && *p !='\n') p++;
-						}
-					}
-					s = p;
-					while (*s == '\r' || *s == '\n') s++;
-				} while (*s != 0);
+				if (php_stream_handle_proxy_authorization_header(s, &header) == SUCCESS) {
+					goto finish;
+				}
 			}
 		}
 finish:
 		smart_str_appendl(&header, "\r\n", sizeof("\r\n")-1);
 
 		if (php_stream_write(stream, ZSTR_VAL(header.s), ZSTR_LEN(header.s)) != ZSTR_LEN(header.s)) {
+			if (reset_ssl_peer_name) {
+				php_stream_context_unset_option(PHP_STREAM_CONTEXT(stream), "ssl", "peer_name");
+			}
+
 			php_stream_wrapper_log_error(wrapper, options, "Cannot connect to HTTPS server through proxy");
 			php_stream_close(stream);
 			stream = NULL;
@@ -595,11 +608,17 @@ finish:
 
 		/* enable SSL transport layer */
 		if (stream) {
+			php_stream_context *old_context = PHP_STREAM_CONTEXT(stream);
+
 			if (php_stream_xport_crypto_setup(stream, STREAM_CRYPTO_METHOD_SSLv23_CLIENT, NULL) < 0 ||
 			    php_stream_xport_crypto_enable(stream, 1) < 0) {
 				php_stream_wrapper_log_error(wrapper, options, "Cannot connect to HTTPS server through proxy");
 				php_stream_close(stream);
 				stream = NULL;
+			}
+
+			if (reset_ssl_peer_name) {
+				php_stream_context_unset_option(old_context, "ssl", "peer_name");
 			}
 		}
 	}
@@ -843,7 +862,7 @@ finish:
 	 * interprets the RFC literally and establishes a keep-alive connection,
 	 * unless the user specifically requests something else by specifying a
 	 * Connection header in the context options. Send that header even for
-	 * HTTP/1.0 to avoid issues when the server respond with a HTTP/1.1
+	 * HTTP/1.0 to avoid issues when the server respond with an HTTP/1.1
 	 * keep-alive response, which is the preferred response type. */
 	if ((have_header & HTTP_HEADER_CONNECTION) == 0) {
 		smart_str_appends(&req_buf, "Connection: close\r\n");
@@ -1105,7 +1124,7 @@ finish:
 							s = ZSTR_VAL(resource->path);
 							if (!ZSTR_LEN(resource->path)) {
 								zend_string_release_ex(resource->path, 0);
-								resource->path = zend_string_init("/", 1, 0);
+								resource->path = ZSTR_INIT_LITERAL("/", 0);
 								s = ZSTR_VAL(resource->path);
 							} else {
 								*s = '/';
@@ -1240,6 +1259,8 @@ out:
 		if (stream->writepos > stream->readpos) {
 			php_stream_notify_progress_increment(context, stream->writepos - stream->readpos, 0);
 		}
+	} else if (header_info.transfer_encoding) {
+		php_stream_filter_free(header_info.transfer_encoding);
 	}
 
 	return stream;
@@ -1250,11 +1271,16 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, const char *pa
 {
 	php_stream *stream;
 	zval headers;
+
 	ZVAL_UNDEF(&headers);
 
 	stream = php_stream_url_wrap_http_ex(
 		wrapper, path, mode, options, opened_path, context,
 		PHP_URL_REDIRECT_MAX, HTTP_WRAPPER_HEADER_INIT, &headers STREAMS_CC);
+
+	/* After the request: one made from its notification callback may have stored its own headers here. */
+	zval_ptr_dtor(&BG(last_http_headers));
+	ZVAL_COPY(&BG(last_http_headers), &headers);
 
 	if (!Z_ISUNDEF(headers)) {
 		if (FAILURE == zend_set_local_var_str(

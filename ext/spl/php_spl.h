@@ -18,31 +18,11 @@
 #define PHP_SPL_H
 
 #include "php.h"
-#include <stdarg.h>
 
 #define PHP_SPL_VERSION PHP_VERSION
 
 extern zend_module_entry spl_module_entry;
 #define phpext_spl_ptr &spl_module_entry
-
-#ifdef PHP_WIN32
-#	ifdef SPL_EXPORTS
-#		define SPL_API __declspec(dllexport)
-#	elif defined(COMPILE_DL_SPL)
-#		define SPL_API __declspec(dllimport)
-#	else
-#		define SPL_API /* nothing */
-#	endif
-#elif defined(__GNUC__) && __GNUC__ >= 4
-#	define SPL_API __attribute__ ((visibility("default")))
-#else
-#	define SPL_API
-#endif
-
-#if defined(PHP_WIN32) && !defined(COMPILE_DL_SPL)
-#undef phpext_spl
-#define phpext_spl NULL
-#endif
 
 PHP_MINIT_FUNCTION(spl);
 PHP_MSHUTDOWN_FUNCTION(spl);

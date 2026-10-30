@@ -20,15 +20,15 @@ try {
             "include_end_date" => true,
         ]
     );
-} catch (\Error $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (\Error $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump($period);
 
 ?>
 --EXPECTF--
-Invalid serialization data for DatePeriod object
+Error: Invalid serialization data for DatePeriod object
 object(DatePeriod)#%d (%d) {
   ["start"]=>
   object(DateTime)#%d (%d) {

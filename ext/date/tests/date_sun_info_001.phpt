@@ -10,9 +10,9 @@ echo "Done\n";
 --EXPECT--
 array(9) {
   ["sunrise"]=>
-  int(1165897682)
+  int(1165897761)
   ["sunset"]=>
-  int(1165934239)
+  int(1165934160)
   ["transit"]=>
   int(1165915961)
   ["civil_twilight_begin"]=>

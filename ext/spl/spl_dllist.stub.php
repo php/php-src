@@ -4,26 +4,14 @@
 
 class SplDoublyLinkedList implements Iterator, Countable, ArrayAccess, Serializable
 {
-    /**
-     * @var int
-     * @cvalue SPL_DLLIST_IT_LIFO
-     */
-    public const IT_MODE_LIFO = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue SPL_DLLIST_IT_FIFO
-     */
-    public const IT_MODE_FIFO = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue SPL_DLLIST_IT_DELETE
-     */
-    public const IT_MODE_DELETE = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue SPL_DLLIST_IT_KEEP
-     */
-    public const IT_MODE_KEEP = UNKNOWN;
+    /** @cvalue SPL_DLLIST_IT_LIFO */
+    public const int IT_MODE_LIFO = UNKNOWN;
+    /** @cvalue SPL_DLLIST_IT_FIFO */
+    public const int IT_MODE_FIFO = UNKNOWN;
+    /** @cvalue SPL_DLLIST_IT_DELETE */
+    public const int IT_MODE_DELETE = UNKNOWN;
+    /** @cvalue SPL_DLLIST_IT_KEEP */
+    public const int IT_MODE_KEEP = UNKNOWN;
 
     /** @tentative-return-type */
     public function add(int $index, mixed $value): void {}

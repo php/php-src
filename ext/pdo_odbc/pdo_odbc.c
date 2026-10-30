@@ -15,16 +15,19 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "pdo/php_pdo.h"
-#include "pdo/php_pdo_driver.h"
+#include "ext/pdo/php_pdo.h"
+#include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_odbc.h"
 #include "php_pdo_odbc_int.h"
+#include "pdo_odbc_arginfo.h"
+
+static zend_class_entry *pdo_odbc_ce;
 
 /* {{{ pdo_odbc_deps[] */
 static const zend_module_dep pdo_odbc_deps[] = {
@@ -96,13 +99,18 @@ PHP_MINIT_FUNCTION(pdo_odbc)
 	}
 #endif
 
+	register_pdo_odbc_symbols(module_number);
+
 	REGISTER_PDO_CLASS_CONST_LONG("ODBC_ATTR_USE_CURSOR_LIBRARY", PDO_ODBC_ATTR_USE_CURSOR_LIBRARY);
 	REGISTER_PDO_CLASS_CONST_LONG("ODBC_ATTR_ASSUME_UTF8", PDO_ODBC_ATTR_ASSUME_UTF8);
 	REGISTER_PDO_CLASS_CONST_LONG("ODBC_SQL_USE_IF_NEEDED", SQL_CUR_USE_IF_NEEDED);
 	REGISTER_PDO_CLASS_CONST_LONG("ODBC_SQL_USE_DRIVER", SQL_CUR_USE_DRIVER);
 	REGISTER_PDO_CLASS_CONST_LONG("ODBC_SQL_USE_ODBC", SQL_CUR_USE_ODBC);
 
-	return SUCCESS;
+	pdo_odbc_ce = register_class_Pdo_Odbc(pdo_dbh_ce);
+	pdo_odbc_ce->create_object = pdo_dbh_new;
+
+	return php_pdo_register_driver_specific_ce(&pdo_odbc_driver, pdo_odbc_ce);
 }
 /* }}} */
 
@@ -118,7 +126,7 @@ PHP_MSHUTDOWN_FUNCTION(pdo_odbc)
 PHP_MINFO_FUNCTION(pdo_odbc)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "PDO Driver for ODBC (" PDO_ODBC_TYPE ")" , "enabled");
+	php_info_print_table_row(2, "PDO Driver for ODBC (" PDO_ODBC_TYPE ")" , "enabled");
 #ifdef SQL_ATTR_CONNECTION_POOLING
 	php_info_print_table_row(2, "ODBC Connection Pooling",	pdo_odbc_pool_on == SQL_CP_OFF ?
 			"Disabled" : (pdo_odbc_pool_mode == SQL_CP_STRICT_MATCH ? "Enabled, strict matching" : "Enabled, relaxed matching"));

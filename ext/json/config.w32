@@ -6,4 +6,4 @@ ADD_SOURCES(configure_module_dirname, "json_encoder.c json_parser.tab.c json_sca
 
 ADD_MAKEFILE_FRAGMENT();
 
-PHP_INSTALL_HEADERS("ext/json/", "php_json.h php_json_parser.h php_json_scanner.h");
+PHP_INSTALL_HEADERS("ext/json", "php_json.h php_json_parser.h php_json_scanner.h");

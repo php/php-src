@@ -31,13 +31,16 @@
  *                                                                                      *
  ****************************************************************************************/
 
-# if defined __CET__
-#  include <cet.h>
-#  define SHSTK_ENABLED (__CET__ & 0x2)
-#  define BOOST_CONTEXT_SHADOW_STACK (SHSTK_ENABLED && SHADOW_STACK_SYSCALL)
+# ifdef __i386__
+#  include "make_i386_sysv_elf_gas.S"
 # else
-#  define _CET_ENDBR
-# endif
+#  if defined __CET__
+#   include <cet.h>
+#   define SHSTK_ENABLED (__CET__ & 0x2)
+#   define BOOST_CONTEXT_SHADOW_STACK (SHSTK_ENABLED && SHADOW_STACK_SYSCALL)
+#  else
+#   define _CET_ENDBR
+#  endif
 .file "make_x86_64_sysv_elf_gas.S"
 .text
 .globl make_fcontext
@@ -45,6 +48,7 @@
 .align 16
 make_fcontext:
     _CET_ENDBR
+
 #if BOOST_CONTEXT_SHADOW_STACK
     /* the new shadow stack pointer (SSP) */
     movq  -0x8(%rdi), %r9
@@ -116,12 +120,50 @@ make_fcontext:
     movq  %r9, (%rax)
 #endif
 
+#if BOOST_CONTEXT_SHADOW_STACK
+    /* Populate the shadow stack */
+
+    /* get original SSP */
+    rdsspq  %r8
+    /* restore new shadow stack */
+    rstorssp  -0x8(%r9)
+    /* save the restore token on the original shadow stack */
+    saveprevssp
+    /* push the address of "jmp trampoline" to the new shadow stack */
+    /* as well as the stack */
+    call  1f
+    jmp  trampoline
+1:
+    /* save address of "jmp trampoline" as return-address */
+    /* for context-function */
+    pop 0x38(%rax)
+    /* Get the new SSP.  */
+    rdsspq  %r9
+    /* restore original shadow stack */
+    rstorssp  -0x8(%r8)
+    /* save the restore token on the new shadow stack.  */
+    saveprevssp
+
+    /* now the new shadow stack looks like:
+        base->  +------------------------------+
+                | address of "jmp  trampoline" |
+        SSP->   +------------------------------+
+                |         restore token        |
+                +------------------------------+
+    */
+
+    /* reserve space for the new SSP */
+    leaq  -0x8(%rax), %rax
+    /* save the new SSP to this fcontext */
+    movq  %r9, (%rax)
+#endif
+
     ret /* return pointer to context-data */
 
 trampoline:
-    _CET_ENDBR
     /* store return address on stack */
     /* fix stack alignment */
+    _CET_ENDBR
 #if BOOST_CONTEXT_SHADOW_STACK
     /* save address of "jmp *%rbp" as return-address */
     /* on stack and shadow stack */
@@ -145,3 +187,4 @@ finish:
 
 /* Mark that we don't need executable stack. */
 .section .note.GNU-stack,"",%progbits
+# endif

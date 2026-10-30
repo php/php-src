@@ -42,7 +42,6 @@ static void resourcebundle_iterator_read( ResourceBundle_iterator *iterator )
 		resourcebundle_extract_value( &iterator->current, rb );
 	}
 	else {
-		// zend_throw_exception( spl_ce_OutOfRangeException, "Running past end of ResourceBundle", 0);
 		ZVAL_UNDEF(&iterator->current);
 	}
 }
@@ -77,7 +76,7 @@ static void resourcebundle_iterator_dtor( zend_object_iterator *iter )
 /* }}} */
 
 /* {{{ resourcebundle_iterator_has_more */
-static int resourcebundle_iterator_has_more( zend_object_iterator *iter )
+static zend_result resourcebundle_iterator_has_more( zend_object_iterator *iter )
 {
 	ResourceBundle_iterator *iterator = (ResourceBundle_iterator *) iter;
 	return (iterator->i < iterator->length) ? SUCCESS : FAILURE;
@@ -148,12 +147,13 @@ static const zend_object_iterator_funcs resourcebundle_iterator_funcs = {
 /* {{{ resourcebundle_get_iterator */
 zend_object_iterator *resourcebundle_get_iterator( zend_class_entry *ce, zval *object, int byref )
 {
+	if (byref) {
+		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
+		return NULL;
+	}
+
 	ResourceBundle_object   *rb = Z_INTL_RESOURCEBUNDLE_P(object );
 	ResourceBundle_iterator *iterator = emalloc( sizeof( ResourceBundle_iterator ) );
-
-	if (byref) {
-	     php_error( E_ERROR, "ResourceBundle does not support writable iterators" );
-	}
 
 	zend_iterator_init(&iterator->intern);
 	Z_ADDREF_P(object);

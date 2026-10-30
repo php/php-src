@@ -11,6 +11,6 @@ Ensure proper backtraces with anon classes
 --EXPECTF--
 Fatal error: Uncaught Exception in %s:%d
 Stack trace:
-#0 %s(%d): {closure}(Object(class@anonymous))
+#0 %s(%d): {closure:%s:%d}(Object(class@anonymous))
 #1 {main}
   thrown in %s on line %d

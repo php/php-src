@@ -18,5 +18,5 @@ var_dump(error_reporting());
 
 ?>
 --EXPECT--
-int(32767)
-int(32767)
+int(30719)
+int(30719)

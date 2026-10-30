@@ -23,4 +23,4 @@ trycatch_dump(
 !! [ValueError] imagecolorset(): Argument #3 ($red) must be between 0 and 255 (inclusive)
 !! [ValueError] imagecolorset(): Argument #4 ($green) must be between 0 and 255 (inclusive)
 !! [ValueError] imagecolorset(): Argument #5 ($blue) must be between 0 and 255 (inclusive)
-NULL
+!! [ValueError] imagecolorset(): Argument #6 ($alpha) must be between 0 and 127 (inclusive)

@@ -7,7 +7,7 @@ soap
 --FILE--
 <?php
 class TestSoapClient extends SoapClient {
-  function __doRequest($request, $location, $action, $version, $one_way = false): ?string {
+  function __doRequest($request, $location, $action, $version, $one_way = false): string {
         return <<<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://schemas.nothing.com" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><SOAP-ENV:Body>
@@ -32,8 +32,8 @@ class DummyClass {
 $client = new TestSoapClient(__DIR__."/../classmap.wsdl", ['classmap' => ['Struct' => 'DummyClass']]);
 var_dump($client->dotest2("???"));
 ?>
---EXPECT--
-object(DummyClass)#2 (2) {
+--EXPECTF--
+object(DummyClass)#%d (%d) {
   ["a"]=>
   array(2) {
     [0]=>

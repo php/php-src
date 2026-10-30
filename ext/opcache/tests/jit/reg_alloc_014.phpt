@@ -4,7 +4,6 @@ Register Alloction 014: Register clobbering
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_update_protection=0
-opcache.jit_buffer_size=1M
 --FILE--
 <?php
 function foo() {
@@ -18,4 +17,8 @@ foo();
 DONE
 --EXPECTF--
 Warning: Undefined variable $a in %sreg_alloc_014.php on line 4
+
+Warning: Decrement on type null has no effect, this will change in the next major version of PHP in %sreg_alloc_014.php on line 4
+
+Warning: Decrement on type null has no effect, this will change in the next major version of PHP in %sreg_alloc_014.php on line 4
 DONE

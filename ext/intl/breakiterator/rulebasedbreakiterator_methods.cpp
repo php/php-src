@@ -34,17 +34,17 @@ static inline RuleBasedBreakIterator *fetch_rbbi(BreakIterator_object *bio) {
 
 static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling *error_handling, bool *error_handling_replaced)
 {
-	char		*rules;
-	size_t		rules_len;
-	bool	compiled	= 0;
+	zend_string	*rules;
+	bool	compiled	= false;
 	UErrorCode	status		= U_ZERO_ERROR;
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|b",
-			&rules, &rules_len, &compiled) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR(rules)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(compiled)
+	ZEND_PARSE_PARAMETERS_END();
 
 	BREAKITER_METHOD_FETCH_OBJECT_NO_CHECK;
 	if (bio->biter) {
@@ -61,7 +61,7 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS, zend_er
 	if (!compiled) {
 		UnicodeString	rulesStr;
 		UParseError		parseError = UParseError();
-		if (intl_stringFromChar(rulesStr, rules, rules_len, &status)
+		if (intl_stringFromChar(rulesStr, ZSTR_VAL(rules), ZSTR_LEN(rules), &status)
 				== FAILURE) {
 			zend_throw_exception(IntlException_ce_ptr,
 				"IntlRuleBasedBreakIterator::__construct(): "
@@ -83,7 +83,7 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS, zend_er
 			RETURN_THROWS();
 		}
 	} else { // compiled
-		rbbi = new RuleBasedBreakIterator((uint8_t*)rules, rules_len, status);
+		rbbi = new RuleBasedBreakIterator(reinterpret_cast<uint8_t *>(ZSTR_VAL(rules)), ZSTR_LEN(rules), status);
 		if (U_FAILURE(status)) {
 			zend_throw_exception(IntlException_ce_ptr,
 				"IntlRuleBasedBreakIterator::__construct(): "
@@ -94,6 +94,9 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS, zend_er
 	}
 
 	breakiterator_object_create(return_value, rbbi, 0);
+	if (compiled) {
+		Z_INTL_BREAKITERATOR_P(return_value)->compiled_rules = zend_string_copy(rules);
+	}
 }
 
 U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, __construct)
@@ -113,9 +116,7 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getRules)
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	BREAKITER_METHOD_FETCH_OBJECT;
 
@@ -138,9 +139,7 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getRuleStatus)
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	BREAKITER_METHOD_FETCH_OBJECT;
 
@@ -152,9 +151,7 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getRuleStatusVec)
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	BREAKITER_METHOD_FETCH_OBJECT;
 
@@ -185,9 +182,7 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getBinaryRules)
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	BREAKITER_METHOD_FETCH_OBJECT;
 

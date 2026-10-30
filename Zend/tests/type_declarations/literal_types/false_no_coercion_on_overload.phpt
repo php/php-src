@@ -1,5 +1,5 @@
 --TEST--
-No coercion should be applied to type false even if it's an overide
+No coercion should be applied to type false even if it's an override
 --FILE--
 <?php
 

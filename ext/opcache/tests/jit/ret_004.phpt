@@ -4,7 +4,6 @@ JIT RET: 004 Return a reference when it's not expected
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_update_protection=0
-opcache.jit_buffer_size=32M
 --FILE--
 <?php
 class A {

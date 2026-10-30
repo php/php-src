@@ -5,23 +5,24 @@ pdo_dblib
 --SKIPIF--
 <?php
 require __DIR__ . '/config.inc';
-
+$db = getDbConnection();
 if (!driver_supports_batch_statements_without_select($db)) die('xfail test will fail with this version of FreeTDS');
 ?>
 --FILE--
 <?php
 require __DIR__ . '/config.inc';
 
+$db = getDbConnection();
 $stmt = $db->query(
-"create table #php_pdo(id int);" .
-"insert into #php_pdo values(1), (2), (3);" .
-"select * from #php_pdo;" .
+"create table #test_batch_stmt_transaction(id int);" .
+"insert into #test_batch_stmt_transaction values(1), (2), (3);" .
+"select * from #test_batch_stmt_transaction;" .
 "begin transaction;" .
-"update #php_pdo set id = 4;" .
+"update #test_batch_stmt_transaction set id = 4;" .
 "rollback transaction;" .
-"select * from #php_pdo;" .
-"delete from #php_pdo;" .
-"drop table #php_pdo;"
+"select * from #test_batch_stmt_transaction;" .
+"delete from #test_batch_stmt_transaction;" .
+"drop table #test_batch_stmt_transaction;"
 );
 
 // check results from the create table

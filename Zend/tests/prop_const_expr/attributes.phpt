@@ -25,20 +25,20 @@ foreach ((new ReflectionClass(C::class))->getAttributes() as $reflectionAttribut
 }
 
 ?>
---EXPECT--
-object(Attr)#1 (1) {
+--EXPECTF--
+object(Attr)#%d (1) {
   ["value"]=>
   string(1) "B"
 }
-object(Attr)#1 (1) {
+object(Attr)#%d (1) {
   ["value"]=>
   string(1) "C"
 }
-object(Attr)#1 (1) {
+object(Attr)#%d (1) {
   ["value"]=>
   string(1) "B"
 }
-object(Attr)#1 (1) {
+object(Attr)#%d (1) {
   ["value"]=>
   string(1) "C"
 }

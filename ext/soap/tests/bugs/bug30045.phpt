@@ -21,7 +21,7 @@ class LocalSoapClient extends SoapClient {
     $this->server->addFunction('foo');
   }
 
-  function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
+  function __doRequest($request, $location, $action, $version, $one_way = 0): string {
     $xml = simplexml_load_string($request);
     echo $xml->children("http://schemas.xmlsoap.org/soap/envelope/")->Body->children("http://test-uri")->children()->param1->asXML(),"\n";
     unset($xml);

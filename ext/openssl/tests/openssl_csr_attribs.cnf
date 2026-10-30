@@ -1,0 +1,31 @@
+oid_section = new_oids
+[ new_oids ]
+aansluitNummer = 1.3.6.1.4.1.11278.1150.2.1
+kvkNummer = 1.3.6.1.4.1.11278.1150.2.2
+
+[ req ]
+default_bits = 2048
+distinguished_name = req_distinguished_name
+attributes = req_attributes
+req_extensions = v3_req
+prompt = no
+
+[ req_distinguished_name ]
+C = NL
+ST = ST
+L = L
+O = O
+CN = test
+
+[ req_attributes ]
+facsimileTelephoneNumber =
+postalCode =
+streetAddress =
+name = Organisation
+telephoneNumber = 012345678
+aansluitNummer = 1234
+kvkNummer = 12345678
+emailAddress = info@example.com
+
+[ v3_req ]
+basicConstraints = CA:FALSE

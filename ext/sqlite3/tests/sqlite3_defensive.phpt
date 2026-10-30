@@ -35,6 +35,6 @@ bool(true)
 bool(true)
 int(1)
 
-Warning: SQLite3::querySingle(): Unable to prepare statement: 1, table sqlite_master may not be modified in %s on line %d
+Warning: SQLite3::querySingle(): Unable to prepare statement: table sqlite_master may not be modified in %s on line %d
 bool(false)
 int(1)

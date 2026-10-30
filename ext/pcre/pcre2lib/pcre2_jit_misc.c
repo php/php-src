@@ -110,8 +110,10 @@ pcre2_jit_free_unused_memory(pcre2_general_context *gcontext)
 (void)gcontext;     /* Suppress warning */
 #else  /* SUPPORT_JIT */
 SLJIT_UNUSED_ARG(gcontext);
+#if (defined SLJIT_EXECUTABLE_ALLOCATOR && SLJIT_EXECUTABLE_ALLOCATOR)
 sljit_free_unused_memory_exec();
-#endif  /* SUPPORT_JIT */
+#endif /* SLJIT_EXECUTABLE_ALLOCATOR */
+#endif /* SUPPORT_JIT */
 }
 
 
@@ -139,8 +141,8 @@ if (startsize == 0 || maxsize == 0 || maxsize > SIZE_MAX - STACK_GROWTH_RATE)
   return NULL;
 if (startsize > maxsize)
   startsize = maxsize;
-startsize = (startsize + STACK_GROWTH_RATE - 1) & ~(STACK_GROWTH_RATE - 1);
-maxsize = (maxsize + STACK_GROWTH_RATE - 1) & ~(STACK_GROWTH_RATE - 1);
+startsize = (startsize + STACK_GROWTH_RATE - 1) & (size_t)(~(STACK_GROWTH_RATE - 1));
+maxsize = (maxsize + STACK_GROWTH_RATE - 1) & (size_t)(~(STACK_GROWTH_RATE - 1));
 
 jit_stack = PRIV(memctl_malloc)(sizeof(pcre2_real_jit_stack), (pcre2_memctl *)gcontext);
 if (jit_stack == NULL) return NULL;
@@ -209,32 +211,6 @@ return "JIT is not supported";
 #else  /* SUPPORT_JIT */
 return sljit_get_platform_name();
 #endif  /* SUPPORT_JIT */
-}
-
-
-/*************************************************
-*          Checks function compilation           *
-*************************************************/
-
-BOOL
-PRIV(jit_check_exec)(void *executable_jit, uint32_t options)
-{
-#ifndef SUPPORT_JIT
-(void)executable_jit;
-(void)options;
-return FALSE;
-#else  /* SUPPORT_JIT */
-/* The same check is performed at the beginning of pcre2_jit_match(). */
-executable_functions *functions = (executable_functions *)executable_jit;
-int index = 0;
-
-if ((options & PCRE2_PARTIAL_HARD) != 0)
-  index = 2;
-else if ((options & PCRE2_PARTIAL_SOFT) != 0)
-  index = 1;
-
-return functions->executable_funcs[index] != NULL;
-#endif
 }
 
 

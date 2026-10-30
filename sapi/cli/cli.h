@@ -36,4 +36,23 @@ typedef struct  {
 
 extern PHP_CLI_API cli_shell_callbacks_t *php_cli_get_shell_callbacks(void);
 
+typedef enum php_cli_mode {
+	PHP_CLI_MODE_STANDARD = 1,
+	PHP_CLI_MODE_HIGHLIGHT = 2,
+	PHP_CLI_MODE_LINT = 4,
+	PHP_CLI_MODE_STRIP = 5,
+	PHP_CLI_MODE_CLI_DIRECT = 6,
+	PHP_CLI_MODE_PROCESS_STDIN = 7,
+	PHP_CLI_MODE_REFLECTION_FUNCTION = 8,
+	PHP_CLI_MODE_REFLECTION_CLASS = 9,
+	PHP_CLI_MODE_REFLECTION_EXTENSION = 10,
+	PHP_CLI_MODE_REFLECTION_EXT_INFO = 11,
+	PHP_CLI_MODE_REFLECTION_ZEND_EXTENSION = 12,
+	PHP_CLI_MODE_SHOW_INI_CONFIG = 13,
+} php_cli_mode;
+
+typedef struct php_cli_server_context {
+	php_cli_mode mode;
+} php_cli_server_context;
+
 #endif /* CLI_H */

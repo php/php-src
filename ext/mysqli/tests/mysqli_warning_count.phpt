@@ -4,15 +4,13 @@ mysqli_warning_count()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require 'table.inc';
 
-    require('table.inc');
-
-    if (!$res = mysqli_query($link, "SELECT id, label FROM test"))
+    if (false === mysqli_query($link, "SELECT id, label FROM test"))
         printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
     if (0 !== ($tmp = mysqli_warning_count($link)))
@@ -36,7 +34,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 mysqli object is already closed

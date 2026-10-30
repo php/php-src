@@ -1,0 +1,10 @@
+name: Install
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -x
+        sudo make install
+        sudo mkdir -p /etc/php.d
+        sudo chmod 777 /etc/php.d

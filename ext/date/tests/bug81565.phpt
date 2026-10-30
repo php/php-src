@@ -15,6 +15,6 @@ echo "\n", (new DatetimeZone('+01:45:30'))->getName();
 \DateTime::__set_state(array(
    'date' => '0021-08-21 00:00:00.000000',
    'timezone_type' => 1,
-   'timezone' => '+00:49',
+   'timezone' => '+00:49:56',
 ))
 +01:45:30

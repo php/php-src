@@ -170,7 +170,14 @@ static const timelib_tz_lookup_table timelib_timezone_utc[] = {
 };
 
 #if defined(_POSIX_TZNAME_MAX)
-# define MAX_ABBR_LEN _POSIX_TZNAME_MAX
+/* Solaris exposes _POSIX_TZNAME_MAX = 3 unless _XPG6 is defined.
+ * That is too small for real-world timezone abbreviations ("EDT", "CEST", ...).
+ */
+# if defined(__sun__) && _POSIX_TZNAME_MAX < 6
+#  define MAX_ABBR_LEN 6
+# else
+#  define MAX_ABBR_LEN _POSIX_TZNAME_MAX
+# endif
 #elif defined(TZNAME_MAX)
 # define MAX_ABBR_LEN TZNAME_MAX
 #else
@@ -565,7 +572,6 @@ static timelib_ull timelib_get_signed_nr(Scanner *s, const char **ptr, int max_l
 	int len = 0;
 
 	/* Skip over non-numeric chars */
-
 	while (((**ptr < '0') || (**ptr > '9')) && (**ptr != '+') && (**ptr != '-')) {
 		if (**ptr == '\0') {
 			add_error(s, TIMELIB_ERR_UNEXPECTED_DATA, "Found unexpected data");
@@ -578,6 +584,7 @@ static timelib_ull timelib_get_signed_nr(Scanner *s, const char **ptr, int max_l
 	str = timelib_calloc(1, max_length + 2);
 	str[0] = '+'; /* First position is the sign */
 	str_ptr = str + 1;
+
 
 	while ((**ptr == '+') || (**ptr == '-')) {
 		if (**ptr == '-') {
@@ -956,10 +963,12 @@ timelib_long timelib_parse_zone(const char **ptr, int *dst, timelib_time *t, int
 {
 	timelib_tzinfo *res;
 	timelib_long            retval = 0;
+	size_t paren_count = 0;
 
 	*tz_not_found = 0;
 
 	while (**ptr == ' ' || **ptr == '\t' || **ptr == '(') {
+		paren_count += **ptr == '(';
 		++*ptr;
 	}
 	if ((*ptr)[0] == 'G' && (*ptr)[1] == 'M' && (*ptr)[2] == 'T' && ((*ptr)[3] == '+' || (*ptr)[3] == '-')) {
@@ -1008,8 +1017,9 @@ timelib_long timelib_parse_zone(const char **ptr, int *dst, timelib_time *t, int
 		*tz_not_found = (found == 0);
 		retval = offset;
 	}
-	while (**ptr == ')') {
+	while (paren_count > 0 && **ptr == ')') {
 		++*ptr;
+		paren_count--;
 	}
 	return retval;
 }
@@ -2027,7 +2037,7 @@ timelib_time *timelib_strtotime(const char *s, size_t len, timelib_error_contain
 	in.errors->error_messages = NULL;
 
 	if (len > 0) {
-		while (isspace((unsigned char)*s) && s < e) {
+		while (isspace((unsigned char)*s) && s <= e) {
 			s++;
 		}
 		while (isspace((unsigned char)*e) && e > s) {

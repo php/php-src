@@ -34,6 +34,7 @@ const php_hash_ops php_hash_xxh32_ops = {
 	4,
 	4,
 	sizeof(PHP_XXH32_CTX),
+	0,
 	0
 };
 
@@ -46,14 +47,17 @@ PHP_HASH_API void PHP_XXH32Init(PHP_XXH32_CTX *ctx, HashTable *args)
 		zval *seed = zend_hash_str_find_deref(args, "seed", sizeof("seed") - 1);
 		/* This might be a bit too restrictive, but thinking that a seed might be set
 			once and for all, it should be done a clean way. */
-		if (seed && IS_LONG == Z_TYPE_P(seed)) {
-			XXH32_reset(&ctx->s, (XXH32_hash_t)Z_LVAL_P(seed));
-		} else {
-			XXH32_reset(&ctx->s, 0);
+		if (seed) {
+			if (IS_LONG == Z_TYPE_P(seed)) {
+				XXH32_reset(&ctx->s, (XXH32_hash_t)Z_LVAL_P(seed));
+				return;
+			} else {
+				php_error_docref(NULL, E_DEPRECATED, "Passing a seed of a type other than int is deprecated because it is the same as setting the seed to 0");
+			}
 		}
-	} else {
-		XXH32_reset(&ctx->s, 0);
 	}
+
+	XXH32_reset(&ctx->s, 0);
 }
 
 PHP_HASH_API void PHP_XXH32Update(PHP_XXH32_CTX *ctx, const unsigned char *in, size_t len)
@@ -66,7 +70,7 @@ PHP_HASH_API void PHP_XXH32Final(unsigned char digest[4], PHP_XXH32_CTX *ctx)
 	XXH32_canonicalFromHash((XXH32_canonical_t*)digest, XXH32_digest(&ctx->s));
 }
 
-PHP_HASH_API int PHP_XXH32Copy(const php_hash_ops *ops, PHP_XXH32_CTX *orig_context, PHP_XXH32_CTX *copy_context)
+PHP_HASH_API zend_result PHP_XXH32Copy(const php_hash_ops *ops, const PHP_XXH32_CTX *orig_context, PHP_XXH32_CTX *copy_context)
 {
 	copy_context->s = orig_context->s;
 	return SUCCESS;
@@ -98,6 +102,7 @@ const php_hash_ops php_hash_xxh64_ops = {
 	8,
 	8,
 	sizeof(PHP_XXH64_CTX),
+	0,
 	0
 };
 
@@ -110,14 +115,17 @@ PHP_HASH_API void PHP_XXH64Init(PHP_XXH64_CTX *ctx, HashTable *args)
 		zval *seed = zend_hash_str_find_deref(args, "seed", sizeof("seed") - 1);
 		/* This might be a bit too restrictive, but thinking that a seed might be set
 			once and for all, it should be done a clean way. */
-		if (seed && IS_LONG == Z_TYPE_P(seed)) {
-			XXH64_reset(&ctx->s, (XXH64_hash_t)Z_LVAL_P(seed));
-		} else {
-			XXH64_reset(&ctx->s, 0);
+		if (seed) {
+			if (IS_LONG == Z_TYPE_P(seed)) {
+				XXH64_reset(&ctx->s, (XXH64_hash_t)Z_LVAL_P(seed));
+				return;
+			} else {
+				php_error_docref(NULL, E_DEPRECATED, "Passing a seed of a type other than int is deprecated because it is the same as setting the seed to 0");
+			}
 		}
-	} else {
-		XXH64_reset(&ctx->s, 0);
 	}
+
+	XXH64_reset(&ctx->s, 0);
 }
 
 PHP_HASH_API void PHP_XXH64Update(PHP_XXH64_CTX *ctx, const unsigned char *in, size_t len)
@@ -130,7 +138,7 @@ PHP_HASH_API void PHP_XXH64Final(unsigned char digest[8], PHP_XXH64_CTX *ctx)
 	XXH64_canonicalFromHash((XXH64_canonical_t*)digest, XXH64_digest(&ctx->s));
 }
 
-PHP_HASH_API int PHP_XXH64Copy(const php_hash_ops *ops, PHP_XXH64_CTX *orig_context, PHP_XXH64_CTX *copy_context)
+PHP_HASH_API zend_result PHP_XXH64Copy(const php_hash_ops *ops, const PHP_XXH64_CTX *orig_context, PHP_XXH64_CTX *copy_context)
 {
 	copy_context->s = orig_context->s;
 	return SUCCESS;
@@ -148,13 +156,14 @@ const php_hash_ops php_hash_xxh3_64_ops = {
 	8,
 	8,
 	sizeof(PHP_XXH3_64_CTX),
-	0
+	0,
+	64
 };
 
 typedef XXH_errorcode (*xxh3_reset_with_secret_func_t)(XXH3_state_t*, const void*, size_t);
 typedef XXH_errorcode (*xxh3_reset_with_seed_func_t)(XXH3_state_t*, XXH64_hash_t);
 
-zend_always_inline static void _PHP_XXH3_Init(PHP_XXH3_64_CTX *ctx, HashTable *args,
+static void _PHP_XXH3_Init(PHP_XXH3_64_CTX *ctx, HashTable *args,
 		xxh3_reset_with_seed_func_t func_init_seed, xxh3_reset_with_secret_func_t func_init_secret, const char* algo_name)
 {
 	memset(&ctx->s, 0, sizeof ctx->s);
@@ -168,12 +177,19 @@ zend_always_inline static void _PHP_XXH3_Init(PHP_XXH3_64_CTX *ctx, HashTable *a
 			return;
 		}
 
+		if (_seed && IS_LONG != Z_TYPE_P(_seed)) {
+			php_error_docref(NULL, E_DEPRECATED, "Passing a seed of a type other than int is deprecated because it is ignored");
+		}
+
 		if (_seed && IS_LONG == Z_TYPE_P(_seed)) {
 			/* This might be a bit too restrictive, but thinking that a seed might be set
 				once and for all, it should be done a clean way. */
 			func_init_seed(&ctx->s, (XXH64_hash_t)Z_LVAL_P(_seed));
 			return;
 		} else if (_secret) {
+			if (IS_STRING != Z_TYPE_P(_secret)) {
+				php_error_docref(NULL, E_DEPRECATED, "Passing a secret of a type other than string is deprecated because it implicitly converts to a string, potentially hiding bugs");
+			}
 			zend_string *secret_string = zval_try_get_string(_secret);
 			if (UNEXPECTED(!secret_string)) {
 				ZEND_ASSERT(EG(exception));
@@ -214,7 +230,7 @@ PHP_HASH_API void PHP_XXH3_64_Final(unsigned char digest[8], PHP_XXH3_64_CTX *ct
 	XXH64_canonicalFromHash((XXH64_canonical_t*)digest, XXH3_64bits_digest(&ctx->s));
 }
 
-PHP_HASH_API int PHP_XXH3_64_Copy(const php_hash_ops *ops, PHP_XXH3_64_CTX *orig_context, PHP_XXH3_64_CTX *copy_context)
+PHP_HASH_API zend_result PHP_XXH3_64_Copy(const php_hash_ops *ops, const PHP_XXH3_64_CTX *orig_context, PHP_XXH3_64_CTX *copy_context)
 {
 	copy_context->s = orig_context->s;
 	return SUCCESS;
@@ -246,7 +262,8 @@ const php_hash_ops php_hash_xxh3_128_ops = {
 	16,
 	8,
 	sizeof(PHP_XXH3_128_CTX),
-	0
+	0,
+	64
 };
 
 PHP_HASH_API void PHP_XXH3_128_Init(PHP_XXH3_128_CTX *ctx, HashTable *args)
@@ -264,7 +281,7 @@ PHP_HASH_API void PHP_XXH3_128_Final(unsigned char digest[16], PHP_XXH3_128_CTX 
 	XXH128_canonicalFromHash((XXH128_canonical_t*)digest, XXH3_128bits_digest(&ctx->s));
 }
 
-PHP_HASH_API int PHP_XXH3_128_Copy(const php_hash_ops *ops, PHP_XXH3_128_CTX *orig_context, PHP_XXH3_128_CTX *copy_context)
+PHP_HASH_API zend_result PHP_XXH3_128_Copy(const php_hash_ops *ops, const PHP_XXH3_128_CTX *orig_context, PHP_XXH3_128_CTX *copy_context)
 {
 	copy_context->s = orig_context->s;
 	return SUCCESS;

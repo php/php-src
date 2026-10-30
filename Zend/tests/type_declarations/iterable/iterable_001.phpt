@@ -32,7 +32,9 @@ array(3) {
   [2]=>
   int(3)
 }
-object(Generator)#1 (0) {
+object(Generator)#%d (1) {
+  ["function"]=>
+  string(3) "gen"
 }
 object(ArrayIterator)#1 (1) {
   ["storage":"ArrayIterator":private]=>

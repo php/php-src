@@ -15,7 +15,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -311,6 +311,7 @@ static zend_function *com_method_get(zend_object **object_ptr, zend_string *name
 		f.fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
 		f.function_name = zend_string_copy(name);
 		f.handler = PHP_FN(com_method_handler);
+		f.doc_comment = NULL;
 
 		fptr = &f;
 
@@ -627,7 +628,6 @@ zend_object* php_com_object_new(zend_class_entry *ce)
 	obj->ce = ce;
 
 	zend_object_std_init(&obj->zo, ce);
-	obj->zo.handlers = &php_com_object_handlers;
 
 	obj->typeinfo = NULL;
 

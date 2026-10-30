@@ -37,6 +37,9 @@
 #endif
 
 #include "zend_execute.h"
+#ifdef HAVE_PROCCTL
+#include <sys/procctl.h>
+#endif
 
 #if defined(MAP_ANON) && !defined(MAP_ANONYMOUS)
 # define MAP_ANONYMOUS MAP_ANON
@@ -176,11 +179,17 @@ static void *find_prefered_mmap_base(size_t requested_size)
 }
 #endif
 
-static int create_segments(size_t requested_size, zend_shared_segment ***shared_segments_p, int *shared_segments_count, char **error_in)
+static int create_segments(size_t requested_size, zend_shared_segment ***shared_segments_p, int *shared_segments_count, const char **error_in)
 {
 	zend_shared_segment *shared_segment;
 	int flags = PROT_READ | PROT_WRITE, fd = -1;
 	void *p;
+#if defined(HAVE_PROCCTL) && defined(PROC_WXMAP_CTL)
+	int enable_wxmap = PROC_WX_MAPPINGS_PERMIT;
+	if (procctl(P_PID, getpid(), PROC_WXMAP_CTL, &enable_wxmap) == -1) {
+		return ALLOC_FAILURE;
+	}
+#endif
 #ifdef PROT_MPROTECT
 	flags |= PROT_MPROTECT(PROT_EXEC);
 #endif
@@ -236,9 +245,9 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 		/* to got HUGE PAGES in low 32-bit address we have to reserve address
 		   space and then remap it using MAP_HUGETLB */
 
-		p = mmap(NULL, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT, fd, 0);
+		p = mmap(NULL, requested_size + huge_page_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT, fd, 0);
 		if (p != MAP_FAILED) {
-			munmap(p, requested_size);
+			munmap(p, requested_size + huge_page_size);
 			p = (void*)(ZEND_MM_ALIGNED_SIZE_EX((ptrdiff_t)p, huge_page_size));
 			p = mmap(p, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT|MAP_HUGETLB|MAP_FIXED, -1, 0);
 			if (p != MAP_FAILED) {
@@ -298,7 +307,7 @@ static size_t segment_type_size(void)
 	return sizeof(zend_shared_segment);
 }
 
-zend_shared_memory_handlers zend_alloc_mmap_handlers = {
+const zend_shared_memory_handlers zend_alloc_mmap_handlers = {
 	create_segments,
 	detach_segment,
 	segment_type_size

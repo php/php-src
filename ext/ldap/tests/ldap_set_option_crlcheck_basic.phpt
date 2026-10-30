@@ -7,7 +7,7 @@ ldap
 --SKIPIF--
 <?php
     require "connect.inc";
-    $link = ldap_connect($host, $port);
+    $link = ldap_connect($uri);
     ldap_get_option($link, LDAP_OPT_X_TLS_PACKAGE, $package);
     if ($package != 'OpenSSL') {
         die("skip OpenSSL required for CRL check options, got: $package");
@@ -16,7 +16,7 @@ ldap
 --FILE--
 <?php
 require "connect.inc";
-$link = ldap_connect($host, $port);
+$link = ldap_connect($uri);
 
 foreach([
     LDAP_OPT_X_TLS_CRL_NONE,

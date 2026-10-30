@@ -158,16 +158,16 @@ class_implements(): Argument #1 ($object_or_class) must be of type object|string
 class_implements(): Argument #1 ($object_or_class) must be of type object|string, null given
 
 --lowercase true--
-class_implements(): Argument #1 ($object_or_class) must be of type object|string, bool given
+class_implements(): Argument #1 ($object_or_class) must be of type object|string, true given
 
 --lowercase false--
-class_implements(): Argument #1 ($object_or_class) must be of type object|string, bool given
+class_implements(): Argument #1 ($object_or_class) must be of type object|string, false given
 
 --uppercase TRUE--
-class_implements(): Argument #1 ($object_or_class) must be of type object|string, bool given
+class_implements(): Argument #1 ($object_or_class) must be of type object|string, true given
 
 --uppercase FALSE--
-class_implements(): Argument #1 ($object_or_class) must be of type object|string, bool given
+class_implements(): Argument #1 ($object_or_class) must be of type object|string, false given
 
 --empty string DQ--
 Error: 2 - class_implements(): Class  does not exist and could not be loaded, %s(%d)

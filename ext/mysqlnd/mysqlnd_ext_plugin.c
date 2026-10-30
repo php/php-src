@@ -74,7 +74,7 @@ mysqlnd_plugin__get_plugin_result_data(const MYSQLND_RES * result, const unsigne
 static void **
 mysqlnd_plugin__get_plugin_result_unbuffered_data(const MYSQLND_RES_UNBUFFERED * result, const unsigned int plugin_id)
 {
-	DBG_ENTER("mysqlnd_plugin__get_plugin_result_data");
+	DBG_ENTER("mysqlnd_plugin__get_plugin_result_unbuffered_data");
 	DBG_INF_FMT("plugin_id=%u", plugin_id);
 	if (!result || plugin_id >= mysqlnd_plugin_count()) {
 		return NULL;
@@ -87,7 +87,7 @@ mysqlnd_plugin__get_plugin_result_unbuffered_data(const MYSQLND_RES_UNBUFFERED *
 static void **
 mysqlnd_plugin__get_plugin_result_buffered_data(const MYSQLND_RES_BUFFERED * result, const unsigned int plugin_id)
 {
-	DBG_ENTER("mysqlnd_plugin__get_plugin_result_data");
+	DBG_ENTER("mysqlnd_plugin__get_plugin_result_buffered_data");
 	DBG_INF_FMT("plugin_id=%u", plugin_id);
 	if (!result || plugin_id >= mysqlnd_plugin_count()) {
 		return NULL;

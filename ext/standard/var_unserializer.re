@@ -89,12 +89,13 @@ PHPAPI php_unserialize_data_t php_var_unserialize_init(void) {
 
 PHPAPI void php_var_unserialize_destroy(php_unserialize_data_t d) {
 	/* fprintf(stderr, "UNSERIALIZE_DESTROY == lock: %u, level: %u\n", BG(serialize_lock), BG(unserialize).level); */
-	if (BG(serialize_lock) || BG(unserialize).level == 1) {
+	if (BG(serialize_lock)) {
 		var_destroy(&d);
 		efree(d);
-	}
-	if (!BG(serialize_lock) && !--BG(unserialize).level) {
+	} else if (!--BG(unserialize).level) {
 		BG(unserialize).data = NULL;
+		var_destroy(&d);
+		efree(d);
 	}
 }
 
@@ -339,11 +340,6 @@ static zend_string *unserialize_str(const unsigned char **p, size_t len, size_t 
 	}
 	unsigned char *end = *(unsigned char **)p+maxlen;
 
-	if (end < *p) {
-		zend_string_efree(str);
-		return NULL;
-	}
-
 	for (i = 0; i < len; i++) {
 		if (*p >= end) {
 			zend_string_efree(str);
@@ -556,7 +552,7 @@ failure:
 static int is_property_visibility_changed(zend_class_entry *ce, zval *key)
 {
 	if (zend_hash_num_elements(&ce->properties_info) > 0) {
-		zend_property_info *existing_propinfo;
+		zend_property_info *existing_propinfo = NULL;
 		const char *unmangled_class = NULL;
 		const char *unmangled_prop;
 		size_t unmangled_prop_len;
@@ -568,21 +564,25 @@ static int is_property_visibility_changed(zend_class_entry *ce, zval *key)
 
 		if (unmangled_class == NULL) {
 			existing_propinfo = zend_hash_find_ptr(&ce->properties_info, Z_STR_P(key));
-			if (existing_propinfo != NULL) {
-				zval_ptr_dtor_str(key);
-				ZVAL_STR_COPY(key, existing_propinfo->name);
-				return 1;
-			}
 		} else {
 			if (!strcmp(unmangled_class, "*")
 			 || !strcasecmp(unmangled_class, ZSTR_VAL(ce->name))) {
 				existing_propinfo = zend_hash_str_find_ptr(
 					&ce->properties_info, unmangled_prop, unmangled_prop_len);
-				if (existing_propinfo != NULL) {
-					zval_ptr_dtor_str(key);
-					ZVAL_STR_COPY(key, existing_propinfo->name);
-					return 1;
-				}
+			}
+		}
+
+		if (existing_propinfo != NULL) {
+			if (!(existing_propinfo->flags & ZEND_ACC_VIRTUAL)) {
+				zval_ptr_dtor_str(key);
+				ZVAL_STR_COPY(key, existing_propinfo->name);
+				return 1;
+			} else {
+				php_error_docref(NULL, E_WARNING,
+					"Cannot unserialize value for virtual property %s::$%s",
+					ZSTR_VAL(existing_propinfo->ce->name), Z_STRVAL_P(key));
+				zval_ptr_dtor_str(key);
+				return -1;
 			}
 		}
 	}
@@ -651,7 +651,7 @@ declared_property:
 						if ((*var_hash)->ref_props) {
 							/* Remove old entry from ref_props table, if it exists. */
 							zend_hash_index_del(
-								(*var_hash)->ref_props, (zend_uintptr_t) data);
+								(*var_hash)->ref_props, (uintptr_t) data);
 						}
 					}
 					/* We may override default property value, but they are usually immutable */
@@ -740,7 +740,7 @@ second_try:
 					zend_hash_init((*var_hash)->ref_props, 8, NULL, NULL, 0);
 				}
 				zend_hash_index_update_ptr(
-					(*var_hash)->ref_props, (zend_uintptr_t) data, info);
+					(*var_hash)->ref_props, (uintptr_t) data, info);
 			}
 		}
 
@@ -855,10 +855,11 @@ static inline int object_common(UNSERIALIZE_PARAMETER, zend_long elements, bool 
 		if (UNEXPECTED(!array_finit_size_mixed(&ary, elements))) {
 			return 0;
 		}
-		if (!process_nested_array_data(UNSERIALIZE_PASSTHRU, Z_ARRVAL(ary), elements)) {
+		if (!process_nested_array_data(UNSERIALIZE_PASSTHRU, Z_ARRVAL(ary), elements)
+				|| !finish_nested_data(UNSERIALIZE_PASSTHRU)) {
 			ZVAL_DEREF(rval);
 			GC_ADD_FLAGS(Z_OBJ_P(rval), IS_OBJ_DESTRUCTOR_CALLED);
-			zval_ptr_dtor(&ary);
+			ZVAL_COPY_VALUE(var_tmp_var(var_hash), &ary);
 			return 0;
 		}
 
@@ -871,7 +872,7 @@ static inline int object_common(UNSERIALIZE_PARAMETER, zend_long elements, bool 
 		tmp++;
 		ZVAL_COPY_VALUE(tmp, &ary);
 
-		return finish_nested_data(UNSERIALIZE_PASSTHRU);
+		return 1;
 	}
 
 	has_wakeup = Z_OBJCE_P(rval) != PHP_IC_ENTRY
@@ -882,10 +883,11 @@ static inline int object_common(UNSERIALIZE_PARAMETER, zend_long elements, bool 
 		return 0;
 	}
 
-	if (UNEXPECTED(zend_hash_fextend(ht, zend_hash_num_elements(ht) + elements, HT_FLAGS(ht) & HASH_FLAG_PACKED) == FAILURE)) {
+	if (UNEXPECTED(zend_hash_fextend(ht, zend_hash_num_elements(ht) + elements, HT_IS_PACKED(ht)) == FAILURE)) {
 		return 0;
 	}
-	if (!process_nested_object_data(UNSERIALIZE_PASSTHRU, ht, elements, Z_OBJ_P(rval))) {
+	if (!process_nested_object_data(UNSERIALIZE_PASSTHRU, ht, elements, Z_OBJ_P(rval))
+			|| !finish_nested_data(UNSERIALIZE_PASSTHRU)) {
 		if (has_wakeup) {
 			ZVAL_DEREF(rval);
 			GC_ADD_FLAGS(Z_OBJ_P(rval), IS_OBJ_DESTRUCTOR_CALLED);
@@ -901,7 +903,7 @@ static inline int object_common(UNSERIALIZE_PARAMETER, zend_long elements, bool 
 		Z_EXTRA_P(wakeup_var) = VAR_WAKEUP_FLAG;
 	}
 
-	return finish_nested_data(UNSERIALIZE_PASSTHRU);
+	return 1;
 }
 #ifdef PHP_WIN32
 # pragma optimize("", on)
@@ -972,7 +974,7 @@ static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER)
 	if (!Z_ISREF_P(rval_ref)) {
 		zend_property_info *info = NULL;
 		if ((*var_hash)->ref_props) {
-			info = zend_hash_index_find_ptr((*var_hash)->ref_props, (zend_uintptr_t) rval_ref);
+			info = zend_hash_index_find_ptr((*var_hash)->ref_props, (uintptr_t) rval_ref);
 		}
 		ZVAL_NEW_REF(rval_ref, rval_ref);
 		if (info) {
@@ -1156,6 +1158,9 @@ use_double:
 	*p = YYCURSOR;
 
 	ZVAL_STR(rval, str);
+
+	php_error_docref(NULL, E_DEPRECATED, "Unserializing the 'S' format is deprecated");
+
 	return 1;
 }
 
@@ -1395,10 +1400,12 @@ object ":" uiv ":" ["]	{
 	YYCURSOR = *p;
 
 	if (*(YYCURSOR) != ':') {
+		zend_string_release_ex(class_name, 0);
 		return 0;
 	}
 	if (*(YYCURSOR+1) != '{') {
 		*p = YYCURSOR+1;
+		zend_string_release_ex(class_name, 0);
 		return 0;
 	}
 
@@ -1489,7 +1496,9 @@ object ":" uiv ":" ["]	{
 		return 1;
 	}
 
+	BG(serialize_lock)++;
 	zend_class_entry *ce = zend_lookup_class(enum_name);
+	BG(serialize_lock)--;
 	if (!ce) {
 		php_error_docref(NULL, E_WARNING, "Class '%s' not found", ZSTR_VAL(enum_name));
 		goto fail;
@@ -1518,7 +1527,10 @@ object ":" uiv ":" ["]	{
 
 	zval *value = &c->value;
 	if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
-		if (zval_update_constant_ex(value, c->ce) == FAILURE) {
+		BG(serialize_lock)++;
+		zend_result result = zval_update_constant_ex(value, c->ce);
+		BG(serialize_lock)--;
+		if (result == FAILURE) {
 			return 0;
 		}
 	}
@@ -1535,7 +1547,7 @@ fail:
 
 "}" {
 	/* this is the case where we have less data than planned */
-	php_error_docref(NULL, E_NOTICE, "Unexpected end of serialized data");
+	php_error_docref(NULL, E_WARNING, "Unexpected end of serialized data");
 	return 0; /* not sure if it should be 0 or 1 here? */
 }
 

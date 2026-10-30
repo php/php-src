@@ -8,5 +8,5 @@ var_dump(unserialize($s));
 --EXPECTF--
 Warning: unserialize(): %s in %sbug74101.php on line %d
 
-Notice: unserialize(): Error at offset 46 of 74 bytes in %sbug74101.php on line %d
+Warning: unserialize(): Error at offset 46 of 74 bytes in %s on line %d
 bool(false)

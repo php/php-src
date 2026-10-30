@@ -3,11 +3,12 @@
 ARG_ENABLE("bcmath", "bc style precision math functions", "yes");
 
 if (PHP_BCMATH == "yes") {
-	EXTENSION("bcmath", "bcmath.c",	null, "-Iext/bcmath/libbcmath/src /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+	EXTENSION("bcmath", "bcmath.c",	null, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 	ADD_SOURCES("ext/bcmath/libbcmath/src", "add.c div.c init.c neg.c \
-		raisemod.c sub.c compare.c divmod.c int2num.c \
-		num2long.c output.c recmul.c sqrt.c zero.c debug.c doaddsub.c \
-		nearzero.c num2str.c raise.c rmzero.c str2num.c", "bcmath");
+		raisemod.c sub.c compare.c divmod.c int2num.c long2num.c \
+		num2long.c recmul.c sqrt.c zero.c doaddsub.c \
+		floor_or_ceil.c nearzero.c num2str.c raise.c rmzero.c str2num.c \
+		round.c convert.c", "bcmath");
 
-	AC_DEFINE('HAVE_BCMATH', 1, 'Have BCMATH library');
+	AC_DEFINE('HAVE_BCMATH', 1, "Define to 1 if the PHP extension 'bcmath' is available.");
 }

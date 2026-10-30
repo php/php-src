@@ -15,7 +15,6 @@
 */
 
 #include "php.h"
-#include "php_incomplete_class.h"
 
 /* {{{ Returns the type of the variable */
 PHP_FUNCTION(gettype)
@@ -100,31 +99,31 @@ PHP_FUNCTION(settype)
 	} else {
 		ptr = Z_REFVAL_P(var);
 	}
-	if (zend_string_equals_literal_ci(type, "integer")) {
+	if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_INTEGER))) {
 		convert_to_long(ptr);
-	} else if (zend_string_equals_literal_ci(type, "int")) {
+	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_INT))) {
 		convert_to_long(ptr);
-	} else if (zend_string_equals_literal_ci(type, "float")) {
+	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_FLOAT))) {
 		convert_to_double(ptr);
-	} else if (zend_string_equals_literal_ci(type, "double")) { /* deprecated */
+	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_DOUBLE))) { /* deprecated */
 		convert_to_double(ptr);
-	} else if (zend_string_equals_literal_ci(type, "string")) {
+	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_STRING))) {
 		convert_to_string(ptr);
-	} else if (zend_string_equals_literal_ci(type, "array")) {
+	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_ARRAY))) {
 		convert_to_array(ptr);
-	} else if (zend_string_equals_literal_ci(type, "object")) {
+	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_OBJECT))) {
 		convert_to_object(ptr);
-	} else if (zend_string_equals_literal_ci(type, "bool")) {
+	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_BOOL))) {
 		convert_to_boolean(ptr);
-	} else if (zend_string_equals_literal_ci(type, "boolean")) {
+	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_BOOLEAN))) {
 		convert_to_boolean(ptr);
-	} else if (zend_string_equals_literal_ci(type, "null")) {
+	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_NULL_LOWERCASE))) {
 		convert_to_null(ptr);
 	} else {
 		if (ptr == &tmp) {
 			zval_ptr_dtor(&tmp);
 		}
-		if (zend_string_equals_literal_ci(type, "resource")) {
+		if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_RESOURCE))) {
 			zend_value_error("Cannot convert to resource type");
 		} else {
 			zend_argument_value_error(2, "must be a valid type");
@@ -342,15 +341,8 @@ PHP_FUNCTION(is_object)
 }
 /* }}} */
 
-/* {{{ Returns true if value is a number or a numeric string */
-PHP_FUNCTION(is_numeric)
+static inline void _zend_is_numeric(zval *return_value, zval *arg)
 {
-	zval *arg;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(arg)
-	ZEND_PARSE_PARAMETERS_END();
-
 	switch (Z_TYPE_P(arg)) {
 		case IS_LONG:
 		case IS_DOUBLE:
@@ -370,7 +362,28 @@ PHP_FUNCTION(is_numeric)
 			break;
 	}
 }
+
+/* {{{ Returns true if value is a number or a numeric string */
+PHP_FUNCTION(is_numeric)
+{
+	zval *arg;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(arg)
+	ZEND_PARSE_PARAMETERS_END();
+
+	_zend_is_numeric(return_value, arg);
+}
 /* }}} */
+
+ZEND_FRAMELESS_FUNCTION(is_numeric, 1)
+{
+	zval *arg;
+
+	Z_FLF_PARAM_ZVAL(1, arg);
+
+	_zend_is_numeric(return_value, arg);
+}
 
 /* {{{ Returns true if value is a scalar */
 PHP_FUNCTION(is_scalar)

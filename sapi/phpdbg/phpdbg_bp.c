@@ -31,7 +31,7 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_file(zend_op_array*);
 static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_symbol(zend_function*);
 static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_method(zend_op_array*);
 static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opline(phpdbg_opline_ptr_t);
-static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opcode(zend_uchar);
+static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opcode(uint8_t);
 static inline phpdbg_breakbase_t *phpdbg_find_conditional_breakpoint(zend_execute_data *execute_data); /* }}} */
 
 /*
@@ -604,13 +604,13 @@ PHPDBG_API int phpdbg_resolve_opline_break(phpdbg_breakopline_t *new_break) /* {
 
 	if (new_break->class_name != NULL) {
 		zend_class_entry *ce;
-		if (!(ce = zend_hash_str_find_ptr(EG(class_table), zend_str_tolower_dup(new_break->class_name, new_break->class_len), new_break->class_len))) {
+		if (!(ce = zend_hash_str_find_ptr_lc(EG(class_table), new_break->class_name, new_break->class_len))) {
 			return FAILURE;
 		}
 		func_table = &ce->function_table;
 	}
 
-	if (!(func = zend_hash_str_find_ptr(func_table, zend_str_tolower_dup(new_break->func_name, new_break->func_len), new_break->func_len))) {
+	if (!(func = zend_hash_str_find_ptr_lc(func_table, new_break->func_name, new_break->func_len))) {
 		if (new_break->class_name != NULL && new_break->func_name != NULL) {
 			phpdbg_error("Method %s doesn't exist in class %s", new_break->func_name, new_break->class_name);
 			return 2;
@@ -1009,7 +1009,7 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opline(phpdbg_opline_pt
 	return (phpdbg_breakbase_t *) brake;
 } /* }}} */
 
-static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opcode(zend_uchar opcode) /* {{{ */
+static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opcode(uint8_t opcode) /* {{{ */
 {
 	const char *opname = zend_get_opcode_name(opcode);
 

@@ -1,5 +1,5 @@
 --TEST--
-Bug #73987 (Method compatibility check looks to original definition and not parent - nullabilty abstract)
+Bug #73987 (Method compatibility check looks to original definition and not parent - nullability abstract)
 --FILE--
 <?php
 

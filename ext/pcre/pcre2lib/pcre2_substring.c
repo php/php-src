@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2018 University of Cambridge
+          New API code Copyright (c) 2016-2023 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -214,10 +214,9 @@ PCRE2_SIZE size;
 PCRE2_UCHAR *yield;
 rc = pcre2_substring_length_bynumber(match_data, stringnumber, &size);
 if (rc < 0) return rc;
-if (size > ((PCRE2_SIZE_MAX - sizeof(pcre2_memctl)) / CU2BYTES(1)) - 1 ||
-    (yield = PRIV(memctl_malloc)(sizeof(pcre2_memctl) +
-      CU2BYTES(size + 1), (pcre2_memctl *)match_data)) == NULL)
-  return PCRE2_ERROR_NOMEMORY;
+yield = PRIV(memctl_malloc)(sizeof(pcre2_memctl) +
+  (size + 1)*PCRE2_CODE_UNIT_WIDTH, (pcre2_memctl *)match_data);
+if (yield == NULL) return PCRE2_ERROR_NOMEMORY;
 yield = (PCRE2_UCHAR *)(((char *)yield) + sizeof(pcre2_memctl));
 memcpy(yield, match_data->subject + match_data->ovector[stringnumber*2],
   CU2BYTES(size));
@@ -310,6 +309,7 @@ Returns:         if successful: 0
                    PCRE2_ERROR_NOSUBSTRING: no such substring
                    PCRE2_ERROR_UNAVAILABLE: ovector is too small
                    PCRE2_ERROR_UNSET: substring is not set
+                   PCRE2_ERROR_INVALIDOFFSET: internal error, should not occur
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
@@ -342,6 +342,8 @@ else  /* Matched using pcre2_dfa_match() */
 
 left = match_data->ovector[stringnumber*2];
 right = match_data->ovector[stringnumber*2+1];
+if (left > match_data->subject_length || right > match_data->subject_length)
+  return PCRE2_ERROR_INVALIDOFFSET;
 if (sizeptr != NULL) *sizeptr = (left > right)? 0 : right - left;
 return 0;
 }
@@ -443,7 +445,7 @@ Returns:      nothing
 */
 
 PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
-pcre2_substring_list_free(PCRE2_SPTR *list)
+pcre2_substring_list_free(PCRE2_UCHAR **list)
 {
 if (list != NULL)
   {

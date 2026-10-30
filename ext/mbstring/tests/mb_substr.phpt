@@ -64,6 +64,16 @@ echo "SJIS-Mobile#SoftBank:\n";
 print bin2hex(mb_substr("\x80abc\x80\xA1", 3, 2, 'SJIS-Mobile#SoftBank')) . "\n";
 print bin2hex(mb_substr("\x80abc\x80\xA1", 0, 3, 'SJIS-Mobile#SoftBank')) . "\n";
 
+echo "-- Testing MacJapanese characters which map to 3-5 codepoints each --\n";
+
+/* There are many characters in MacJapanese which map to sequences of several codepoints */
+print bin2hex(mb_substr("abc\x85\xAB\x85\xAC\x85\xAD", 0, 3, 'MacJapanese')) . "\n";
+print bin2hex(mb_substr("abc\x85\xAB\x85\xAC\x85\xAD", 3, 2, 'MacJapanese')) . "\n";
+print bin2hex(mb_substr("abc\x85\xAB\x85\xAC\x85\xAD", -2, 1, 'MacJapanese')) . "\n";
+print bin2hex(mb_substr("abc\x85\xBF\x85\xC0\x85\xC1", 0, 3, 'MacJapanese')) . "\n";
+print bin2hex(mb_substr("abc\x85\xBF\x85\xC0\x85\xC1", 3, 2, 'MacJapanese')) . "\n";
+print bin2hex(mb_substr("abc\x85\xBF\x85\xC0\x85\xC1", -2, 1, 'MacJapanese')) . "\n";
+
 echo "ISO-2022-JP:\n";
 print "1: " . bin2hex(mb_substr($iso2022jp, 0, 3, 'ISO-2022-JP')) . "\n";
 print "2: " . bin2hex(mb_substr($iso2022jp, -1, null, 'ISO-2022-JP')) . "\n";
@@ -108,6 +118,26 @@ print "3: " . mb_convert_encoding(mb_substr($utf7, -5, 3, 'UTF-7'), 'UTF-8', 'UT
 print "4: " . mb_convert_encoding(mb_substr($utf7, 1, null, 'UTF-7'), 'UTF-8', 'UTF-7') . "\n";
 print "5:" . mb_convert_encoding(mb_substr($utf7, 10, 0, 'UTF-7'), 'UTF-8', 'UTF-7') . "\n";
 
+echo "Testing agreement with mb_strpos on invalid UTF-8 string:\n";
+/* Stefan Schiller pointed out that on invalid UTF-8 strings, character indices returned
+ * by mb_strpos would not extract the desired part of the string when passed to mb_substr.
+ * This is the test case which he provided: */
+$data = "\xF0AAA<b>";
+$pos = mb_strpos($data, "<", 0, "UTF-8");
+$out = mb_substr($data, 0, $pos, "UTF-8");
+print $out . "\n";
+
+echo "Regression:\n";
+/* During development, one >= comparison in mb_get_substr was wrongly written as >
+ * This was caught by libFuzzer */
+$str = "\xbd\xbd\xbd\xbd\xbd\xbd\xbd\xbe\xbd\xbd\xbd\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x89\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x00\x00\x00\x00\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8b\x8b\x8b\xbd\xbd\xbd\xbd\xbd\xbd\xbd\xbe\x01:O\xaa\xd3";
+echo bin2hex(mb_substr($str, 0, 128, "JIS")), "\n";
+
+/* Alex messed up when reimplementing mb_substr and, in cases where `from` is non-zero and
+ * the number of characters to extract is more than 128, miscalculated where to end the substring
+ * Thanks to Maurício Fauth for finding the issue */
+var_dump(mb_substr('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum dapibus feugiat ex non cursus. Pellentesque vestibulum tellus sit lectus.', 19, -1));
+
 ?>
 --EXPECT--
 EUC-JP:
@@ -122,23 +152,30 @@ SJIS:
 4: 967b8cea8365834c8358836782c582b781423031323334825482558256825782588142
 5:
 -- Testing illegal SJIS byte 0x80 --
-6380
-806162
+633f
+3f6162
 SJIS-2004:
-6380
-806162
+633f
+3f6162
 MacJapanese:
 6380
 806162
 SJIS-Mobile#DOCOMO:
-6380
-806162
+633f
+3f6162
 SJIS-Mobile#KDDI:
-6380
-806162
+633f
+3f6162
 SJIS-Mobile#SoftBank:
-6380
-806162
+633f
+3f6162
+-- Testing MacJapanese characters which map to 3-5 codepoints each --
+616263
+3f3f
+58
+616263
+3f3f
+78
 ISO-2022-JP:
 1: 1b2442212121721b284241
 2: 43
@@ -177,3 +214,8 @@ UTF-7:
 3: йте
 4: reek: Σὲ γνωρίζω ἀπὸ τὴν κόψη Russian: Зарегистрируйтесь
 5:
+Testing agreement with mb_strpos on invalid UTF-8 string:
+?AAA
+Regression:
+1b28493d3d3d3d3d3d3d3e3d3d3d1b28423f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f000000003f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f1b28493d3d3d3d3d3d3d3e1b2842013a4f1b28492a1b2842
+string(121) "it amet, consectetur adipiscing elit. Vestibulum dapibus feugiat ex non cursus. Pellentesque vestibulum tellus sit lectus"

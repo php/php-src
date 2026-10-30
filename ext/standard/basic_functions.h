@@ -27,9 +27,6 @@
 
 #include "url_scanner_ex.h"
 
-/* for MT_N */
-#include "ext/random/php_random.h"
-
 #if defined(_WIN32) && !defined(__clang__)
 #include <intrin.h>
 #endif
@@ -54,10 +51,6 @@ PHPAPI int _php_error_log(int opt_err, const char *message, const char *opt, con
 PHPAPI int _php_error_log_ex(int opt_err, const char *message, size_t message_len, const char *opt, const char *headers);
 PHPAPI int php_prefix_varname(zval *result, zend_string *prefix, const char *var_name, size_t var_name_len, bool add_underscore);
 
-/* Deprecated type aliases -- use the standard types instead */
-typedef uint32_t php_uint32;
-typedef int32_t php_int32;
-
 typedef struct _php_basic_globals {
 	HashTable *user_shutdown_function_names;
 	HashTable putenv_ht;
@@ -72,6 +65,9 @@ typedef struct _php_basic_globals {
 	zend_llist *user_tick_functions;
 
 	zval active_ini_file_section;
+
+	/* http_fopen_wrapper.c */
+	zval last_http_headers;
 
 	/* pageinfo.c */
 	zend_long page_uid;

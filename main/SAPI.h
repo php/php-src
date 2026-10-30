@@ -108,6 +108,26 @@ typedef struct {
 	int proto_num;
 } sapi_request_info;
 
+typedef struct {
+	bool throw_exceptions;
+	struct {
+		bool set;
+		zend_long value;
+	} options_cache[5];
+} sapi_request_parse_body_context;
+
+typedef enum {
+	REQUEST_PARSE_BODY_OPTION_max_file_uploads = 0,
+	REQUEST_PARSE_BODY_OPTION_max_input_vars,
+	REQUEST_PARSE_BODY_OPTION_max_multipart_body_parts,
+	REQUEST_PARSE_BODY_OPTION_post_max_size,
+	REQUEST_PARSE_BODY_OPTION_upload_max_filesize,
+} request_parse_body_option;
+
+#define REQUEST_PARSE_BODY_OPTION_GET(name, fallback) \
+	(SG(request_parse_body_context).options_cache[REQUEST_PARSE_BODY_OPTION_ ## name].set \
+		? SG(request_parse_body_context).options_cache[REQUEST_PARSE_BODY_OPTION_ ## name].value \
+		: (fallback))
 
 typedef struct _sapi_globals_struct {
 	void *server_context;
@@ -127,6 +147,7 @@ typedef struct _sapi_globals_struct {
 	HashTable known_post_content_types;
 	zval callback_func;
 	zend_fcall_info_cache fci_cache;
+	sapi_request_parse_body_context request_parse_body_context;
 } sapi_globals_struct;
 
 
@@ -263,7 +284,7 @@ struct _sapi_module_struct {
 	void (*ini_defaults)(HashTable *configuration_hash);
 	int phpinfo_as_text;
 
-	char *ini_entries;
+	const char *ini_entries;
 	const zend_function_entry *additional_functions;
 	unsigned int (*input_filter_init)(void);
 };

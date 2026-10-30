@@ -7,7 +7,6 @@ openssl
 if (substr(PHP_OS, 0, 3) != 'WIN') {
     die('skip windows only test');
 }
-if (substr(PHP_OS, 0, 3) == "WIN") die("skip Failing on Windows");
 ?>
 --ENV--
 OPENSSL_CONF=

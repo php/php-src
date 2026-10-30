@@ -17,7 +17,7 @@
 #include "fuzzer.h"
 
 #include "Zend/zend.h"
-#include "main/php_config.h"
+#include <main/php_config.h>
 #include "main/php_main.h"
 #include "ext/standard/php_var.h"
 
@@ -31,7 +31,7 @@
 #include "fuzzer-sapi.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
-#if HAVE_EXIF
+#ifdef HAVE_EXIF
 	php_stream *stream;
 	zval stream_zv;
 

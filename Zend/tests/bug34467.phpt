@@ -1,5 +1,5 @@
 --TEST--
-Bug #34467 (foreach + __get + __set incosistency)
+Bug #34467 (foreach + __get + __set inconsistency)
 --FILE--
 <?php
 class abc {

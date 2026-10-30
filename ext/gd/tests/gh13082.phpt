@@ -3,7 +3,7 @@ GH-13082 - imagefontwidth/height unexpectedly throwing an exception on a valid G
 --EXTENSIONS--
 gd
 --SKIPIF--
-<?php if (getenv('TRAVIS')) die('skip Currently fails on Travis'); ?>
+<?php if (pack('i', 0x01020304) !== "\x04\x03\x02\x01") die('skip unsupported platform'); ?>
 --FILE--
 <?php
     $font = imageloadfont(__DIR__ . "/gh13082.gdf");

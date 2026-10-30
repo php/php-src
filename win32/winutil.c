@@ -56,7 +56,7 @@ PHP_WINUTIL_API void php_win32_error_msg_free(char *msg)
 
 int php_win32_check_trailing_space(const char * path, const size_t path_len)
 {/*{{{*/
-	if (path_len > MAXPATHLEN - 1) {
+	if (path_len == 0 || path_len > MAXPATHLEN - 1) {
 		return 1;
 	}
 	if (path) {

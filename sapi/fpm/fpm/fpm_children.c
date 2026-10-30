@@ -87,7 +87,11 @@ static void fpm_child_close(struct fpm_child_s *child, int in_event_loop) /* {{{
 			fpm_event_fire(&child->ev_stdout);
 		}
 		if (child->fd_stdout != -1) {
+			if (in_event_loop) {
+				fpm_event_del(&child->ev_stdout);
+			}
 			close(child->fd_stdout);
+			child->fd_stdout = -1;
 		}
 	}
 
@@ -97,7 +101,11 @@ static void fpm_child_close(struct fpm_child_s *child, int in_event_loop) /* {{{
 			fpm_event_fire(&child->ev_stderr);
 		}
 		if (child->fd_stderr != -1) {
+			if (in_event_loop) {
+				fpm_event_del(&child->ev_stderr);
+			}
 			close(child->fd_stderr);
+			child->fd_stderr = -1;
 		}
 	}
 
@@ -167,6 +175,24 @@ struct fpm_child_s *fpm_child_find(pid_t pid) /* {{{ */
 }
 /* }}} */
 
+static int fpm_child_cloexec(void)
+{
+	/* get listening socket attributes so it can be extended */
+	int attrs = fcntl(fpm_globals.listening_socket, F_GETFD);
+	if (0 > attrs) {
+		zlog(ZLOG_WARNING, "failed to get attributes of listening socket, errno: %d", errno);
+		return -1;
+	}
+
+	/* set CLOEXEC to prevent the descriptor leaking to child processes */
+	if (0 > fcntl(fpm_globals.listening_socket, F_SETFD, attrs | FD_CLOEXEC)) {
+		zlog(ZLOG_WARNING, "failed to change attribute of listening socket");
+		return -1;
+	}
+
+	return 0;
+}
+
 static void fpm_child_init(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	fpm_globals.max_requests = wp->config->pm_max_requests;
@@ -178,7 +204,8 @@ static void fpm_child_init(struct fpm_worker_pool_s *wp) /* {{{ */
 	    0 > fpm_unix_init_child(wp)   ||
 	    0 > fpm_signals_init_child()  ||
 	    0 > fpm_env_init_child(wp)    ||
-	    0 > fpm_php_init_child(wp)) {
+	    0 > fpm_php_init_child(wp)    ||
+	    0 > fpm_child_cloexec()) {
 
 		zlog(ZLOG_ERROR, "[pool %s] child failed to initialize", wp->config->name);
 		exit(FPM_EXIT_SOFTWARE);

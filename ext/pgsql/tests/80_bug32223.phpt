@@ -4,7 +4,7 @@ Bug #32223 (weird behaviour of pg_last_notice)
 pgsql
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require_once('inc/skipif.inc');
 
 _skip_lc_messages($conn);
 
@@ -22,8 +22,8 @@ pgsql.ignore_notice=0
 --FILE--
 <?php
 
-require_once('config.inc');
-require_once('lcmess.inc');
+require_once('inc/config.inc');
+require_once('inc/lcmess.inc');
 
 $dbh = @pg_connect($conn_str);
 if (!$dbh) {

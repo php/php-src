@@ -12,6 +12,7 @@ See https://github.com/FirebirdSQL/firebird/issues/7849
 
 require("testdb.inc");
 
+$dbh = getDbConnection();
 $dbh->exec('CREATE TABLE ghsa_w476_322c_wpvm (name VARCHAR(255))');
 
 $param = $dbh->quote("\0");
@@ -35,6 +36,7 @@ echo $affectedRows . "\n";
 --CLEAN--
 <?php
 require 'testdb.inc';
+$dbh = getDbConnection();
 $dbh->exec("DROP TABLE ghsa_w476_322c_wpvm");
 ?>
 --EXPECT--

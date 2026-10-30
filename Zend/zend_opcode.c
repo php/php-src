@@ -45,7 +45,7 @@ static void zend_extension_op_array_dtor_handler(zend_extension *extension, zend
 	}
 }
 
-void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_size)
+void init_op_array(zend_op_array *op_array, uint8_t type, int initial_ops_size)
 {
 	op_array->type = type;
 	op_array->arg_flags[0] = 0;
@@ -73,6 +73,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 
 	op_array->scope = NULL;
 	op_array->prototype = NULL;
+	op_array->prop_info = NULL;
 
 	op_array->live_range = NULL;
 	op_array->try_catch_array = NULL;
@@ -161,6 +162,11 @@ ZEND_API void zend_function_dtor(zval *zv)
 				zend_hash_release(function->common.attributes);
 				function->common.attributes = NULL;
 			}
+		}
+
+		if (function->common.doc_comment) {
+			zend_string_release_ex(function->common.doc_comment, 1);
+			function->common.doc_comment = NULL;
 		}
 
 		if (!(function->common.fn_flags & ZEND_ACC_ARENA_ALLOCATED)) {
@@ -293,6 +299,12 @@ ZEND_API void destroy_zend_class(zval *zv)
 		return;
 	}
 
+	/* We don't increase the refcount for class aliases,
+	 * skip the destruction of aliases entirely. */
+	if (UNEXPECTED(Z_TYPE_INFO_P(zv) == IS_ALIAS_PTR)) {
+		return;
+	}
+
 	if (ce->ce_flags & ZEND_ACC_FILE_CACHED) {
 		zend_class_constant *c;
 		zval *p, *end;
@@ -315,6 +327,8 @@ ZEND_API void destroy_zend_class(zval *zv)
 		return;
 	}
 
+	ZEND_ASSERT(ce->refcount > 0);
+
 	if (--ce->refcount > 0) {
 		return;
 	}
@@ -329,8 +343,8 @@ ZEND_API void destroy_zend_class(zval *zv)
 				zend_string_release_ex(ce->name, 0);
 				zend_string_release_ex(ce->info.user.filename, 0);
 
-				if (ce->info.user.doc_comment) {
-					zend_string_release_ex(ce->info.user.doc_comment, 0);
+				if (ce->doc_comment) {
+					zend_string_release_ex(ce->doc_comment, 0);
 				}
 
 				if (ce->attributes) {
@@ -383,6 +397,13 @@ ZEND_API void destroy_zend_class(zval *zv)
 						zend_hash_release(prop_info->attributes);
 					}
 					zend_type_release(prop_info->type, /* persistent */ 0);
+					if (prop_info->hooks) {
+						for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
+							if (prop_info->hooks[i]) {
+								destroy_op_array(&prop_info->hooks[i]->op_array);
+							}
+						}
+					}
 				}
 			} ZEND_HASH_FOREACH_END();
 			zend_hash_destroy(&ce->properties_info);
@@ -411,6 +432,10 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 			break;
 		case ZEND_INTERNAL_CLASS:
+			if (ce->doc_comment) {
+				zend_string_release_ex(ce->doc_comment, 1);
+			}
+
 			if (ce->backed_enum_table) {
 				zend_hash_release(ce->backed_enum_table);
 			}
@@ -439,6 +464,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 				if (prop_info->ce == ce) {
 					zend_string_release(prop_info->name);
 					zend_type_release(prop_info->type, /* persistent */ 1);
+					if (prop_info->attributes) {
+						zend_hash_release(prop_info->attributes);
+					}
 					free(prop_info);
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -508,7 +536,7 @@ void zend_class_add_ref(zval *zv)
 {
 	zend_class_entry *ce = Z_PTR_P(zv);
 
-	if (!(ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+	if (Z_TYPE_P(zv) != IS_ALIAS_PTR && !(ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
 		ce->refcount++;
 	}
 }
@@ -656,6 +684,10 @@ static void zend_check_finally_breakout(zend_op_array *op_array, uint32_t op_num
 	int i;
 
 	for (i = 0; i < op_array->last_try_catch; i++) {
+		if (!op_array->try_catch_array[i].finally_op) {
+			continue;
+		}
+
 		if ((op_num < op_array->try_catch_array[i].finally_op ||
 					op_num >= op_array->try_catch_array[i].finally_end)
 				&& (dst_num >= op_array->try_catch_array[i].finally_op &&
@@ -766,6 +798,7 @@ static void emit_live_range(
 					case ZEND_INIT_USER_CALL:
 					case ZEND_INIT_METHOD_CALL:
 					case ZEND_INIT_STATIC_METHOD_CALL:
+					case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
 					case ZEND_NEW:
 						level++;
 						break;
@@ -866,6 +899,7 @@ static bool keeps_op1_alive(zend_op *opline) {
 	 || opline->opcode == ZEND_SWITCH_LONG
 	 || opline->opcode == ZEND_SWITCH_STRING
 	 || opline->opcode == ZEND_MATCH
+	 || opline->opcode == ZEND_MATCH_ERROR
 	 || opline->opcode == ZEND_FETCH_LIST_R
 	 || opline->opcode == ZEND_FETCH_LIST_W
 	 || opline->opcode == ZEND_COPY_TMP) {
@@ -910,6 +944,14 @@ static void zend_calc_live_ranges(
 		opnum--;
 		opline--;
 
+		/* SEPARATE always redeclares its op1. For the purposes of live-ranges,
+		 * its declaration is irrelevant. Don't terminate the current live-range
+		 * to avoid breaking special handling of COPY_TMP. */
+		if (opline->opcode == ZEND_SEPARATE) {
+			ZEND_ASSERT(opline->op1.var == opline->result.var);
+			continue;
+		}
+
 		if ((opline->result_type & (IS_TMP_VAR|IS_VAR)) && !is_fake_def(opline)) {
 			uint32_t var_num = EX_VAR_TO_NUM(opline->result.var) - var_offset;
 			/* Defs without uses can occur for two reasons: Either because the result is
@@ -942,6 +984,35 @@ static void zend_calc_live_ranges(
 				if (EXPECTED(!keeps_op1_alive(opline))) {
 					/* OP_DATA is really part of the previous opcode. */
 					last_use[var_num] = opnum - (opline->opcode == ZEND_OP_DATA);
+				}
+			} else if ((opline->opcode == ZEND_FREE || opline->opcode == ZEND_FE_FREE) && opline->extended_value & ZEND_FREE_ON_RETURN) {
+				int jump_offset = 1;
+				while (((opline + jump_offset)->opcode == ZEND_FREE || (opline + jump_offset)->opcode == ZEND_FE_FREE)
+					&& (opline + jump_offset)->extended_value & ZEND_FREE_ON_RETURN) {
+					++jump_offset;
+				}
+				// loop var frees directly precede the jump (or return) operand, except that ZEND_VERIFY_RETURN_TYPE may happen first.
+				if ((opline + jump_offset)->opcode == ZEND_VERIFY_RETURN_TYPE) {
+					++jump_offset;
+				}
+				/* FREE with ZEND_FREE_ON_RETURN immediately followed by RETURN frees
+				 * the loop variable on early return. We need to split the live range
+				 * so GC doesn't access the freed variable after this FREE. */
+				uint32_t opnum_last_use = last_use[var_num];
+				zend_op *opline_last_use = op_array->opcodes + opnum_last_use;
+				ZEND_ASSERT(opline_last_use->opcode == opline->opcode); // any ZEND_FREE_ON_RETURN must be followed by a FREE without
+				if (opnum + jump_offset + 1 != opnum_last_use) {
+					emit_live_range_raw(op_array, var_num, opline->opcode == ZEND_FE_FREE ? ZEND_LIVE_LOOP : ZEND_LIVE_TMPVAR,
+							opnum + jump_offset + 1, opnum_last_use);
+				}
+
+				/* Update last_use so next range includes this FREE */
+				last_use[var_num] = opnum;
+
+				/* Store opline offset to loop end */
+				opline->op2.opline_num = opnum_last_use - opnum;
+				if (opline_last_use->extended_value & ZEND_FREE_ON_RETURN) {
+					opline->op2.opline_num += opline_last_use->op2.opline_num;
 				}
 			}
 		}
@@ -1106,6 +1177,8 @@ ZEND_API void pass_two(zend_op_array *op_array)
 			case ZEND_FE_RESET_R:
 			case ZEND_FE_RESET_RW:
 			case ZEND_JMP_NULL:
+			case ZEND_BIND_INIT_STATIC_OR_JMP:
+			case ZEND_JMP_FRAMELESS:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
 				break;
 			case ZEND_ASSERT_CHECK:

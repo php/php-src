@@ -56,6 +56,7 @@ typedef enum {
 #define PHPDBG_WATCH_NORMAL     (PHPDBG_WATCH_SIMPLE | PHPDBG_WATCH_RECURSIVE)
 #define PHPDBG_WATCH_IMPLICIT   0x10
 #define PHPDBG_WATCH_RECURSIVE_ROOT 0x20
+#define PHPDBG_WATCH_HT_REGISTERED  0x40
 
 typedef struct _phpdbg_watch_collision phpdbg_watch_collision;
 
@@ -106,17 +107,13 @@ typedef struct _phpdbg_watch_element {
 typedef struct {
 	/* to watch rehashes (yes, this is not *perfect*, but good enough for everything in PHP...) */
 	phpdbg_watchpoint_t hash_watch; /* must be first element */
-	Bucket *last;
-	zend_string *last_str;
-	zend_ulong last_idx;
-
 	HashTable *ht;
-	size_t data_size;
 	HashTable watches; /* contains phpdbg_watch_element */
 } phpdbg_watch_ht_info;
 
 void phpdbg_setup_watchpoints(void);
 void phpdbg_destroy_watchpoints(void);
+void phpdbg_release_watch_elements(void);
 void phpdbg_purge_watchpoint_tree(void);
 
 #ifndef _WIN32
@@ -135,7 +132,7 @@ int phpdbg_print_changed_zvals(void);
 
 void phpdbg_list_watchpoints(void);
 
-void phpdbg_watch_efree(void *ptr);
+void phpdbg_watch_efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 
 
 static long phpdbg_pagesize;

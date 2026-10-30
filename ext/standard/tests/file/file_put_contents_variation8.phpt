@@ -48,9 +48,14 @@ for( $i=0; $i<count($names_arr); $i++ ) {
         echo get_class($e) . ': ' . $e->getMessage(), "\n";
     }
 }
-rmdir($dir);
 
 echo "\n*** Done ***\n";
+?>
+--CLEAN--
+<?php
+$dir = __DIR__ . '/file_put_contents_variation8';
+// TODO Cleanup temp files?
+rmdir($dir);
 ?>
 --EXPECTF--
 *** Testing file_put_contents() : usage variation ***
@@ -59,9 +64,9 @@ echo "\n*** Done ***\n";
 -- Iteration 1 --
 9 bytes written to: '1'
 -- Iteration 2 --
-ValueError: Path cannot be empty
+ValueError: Path must not be empty
 -- Iteration 3 --
-ValueError: Path cannot be empty
+ValueError: Path must not be empty
 -- Iteration 4 --
 9 bytes written to: ' '
 -- Iteration 5 --

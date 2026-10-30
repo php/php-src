@@ -1,0 +1,20 @@
+--TEST--
+GH-24736 (Connection string value without closing brace treated as quoted)
+--EXTENSIONS--
+odbc
+--FILE--
+<?php
+var_dump(odbc_connection_string_is_quoted("{;Trusted_Connection=yes;UID=x"));
+var_dump(odbc_connection_string_is_quoted("{"));
+var_dump(odbc_connection_string_is_quoted("{foo}}"));
+var_dump(odbc_connection_string_is_quoted("{foo}"));
+var_dump(odbc_connection_string_is_quoted("{foo}}}"));
+var_dump(odbc_connection_string_is_quoted("{}"));
+?>
+--EXPECT--
+bool(false)
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+bool(true)

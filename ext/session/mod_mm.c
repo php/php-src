@@ -351,7 +351,7 @@ PS_READ_FUNC(mm)
 		&& ps_mm_key_exists(data, key) == FAILURE) {
 		/* key points to PS(id), but cannot change here. */
 		if (key) {
-			efree(PS(id));
+			zend_string_release_ex(PS(id), false);
 			PS(id) = NULL;
 		}
 		PS(id) = PS(mod)->s_create_sid((void **)&data);

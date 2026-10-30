@@ -119,10 +119,14 @@ Deprecated: numfmt_create(): Passing null to parameter #1 ($locale) of type stri
 
 Deprecated: numfmt_create(): Passing null to parameter #2 ($style) of type int is deprecated in %s on line %d
 
-IntlException: Constructor failed in %s on line %d
-'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
-'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
-'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
+ValueError: NumberFormatter::__construct(): Argument #1 ($locale) "%s" is invalid in %s on line %d
+'U_ZERO_ERROR'
+
+ValueError: NumberFormatter::create(): Argument #1 ($locale) "%s" is invalid in %s on line %d
+'U_ZERO_ERROR'
+
+ValueError: numfmt_create(): Argument #1 ($locale) "%s" is invalid in %s on line %d
+'U_ZERO_ERROR'
 
 TypeError: NumberFormatter::__construct(): Argument #1 ($locale) must be of type string, array given in %s on line %d
 'U_ZERO_ERROR'

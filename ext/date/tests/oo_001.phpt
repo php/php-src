@@ -23,13 +23,13 @@ try {
     $d = new _d;
     var_dump($d->format("Y-m-d H:i:s"));
 } catch (Error $e) {
-    echo $e->getMessage(),"\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     new DateTime("1am todax");
 } catch (Exception $e) {
-    echo $e->getMessage(),"\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $t = new DateTimeZone("UTC");
@@ -39,36 +39,36 @@ try {
     $t = new _t;
     var_dump($t->getName());
 } catch (Error $e) {
-    echo $e->getMessage(),"\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     new DateTimeZone("GottaFindThisOne");
-} catch (Exception $e) {
-    echo $e->getMessage(),"\n";
+} catch (DateInvalidTimeZoneException $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $p = new _p;
 try {
     var_dump($p->getStartDate());
 } catch (Error $e) {
-    echo $e->getMessage(),"\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump($p->getDateInterval());
 } catch (Error $e) {
-    echo $e->getMessage(),"\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "DONE\n";
 ?>
 --EXPECTF--
 string(19) "%d-%d-%d %d:%d:%d"
-The DateTime object has not been correctly initialized by its constructor
-Failed to parse time string (1am todax) at position 4 (t): The timezone could not be found in the database
+DateObjectError: Object of type _d (inheriting DateTime) has not been correctly initialized by calling parent::__construct() in its constructor
+DateMalformedStringException: Failed to parse time string (1am todax) at position 4 (t): The timezone could not be found in the database
 string(3) "UTC"
-The DateTimeZone object has not been correctly initialized by its constructor
-DateTimeZone::__construct(): Unknown or bad timezone (GottaFindThisOne)
-The DatePeriod object has not been correctly initialized by its constructor
-The DatePeriod object has not been correctly initialized by its constructor
+DateObjectError: Object of type _t (inheriting DateTimeZone) has not been correctly initialized by calling parent::__construct() in its constructor
+DateInvalidTimeZoneException: DateTimeZone::__construct(): Unknown or bad timezone (GottaFindThisOne)
+DateObjectError: Object of type _p (inheriting DatePeriod) has not been correctly initialized by calling parent::__construct() in its constructor
+DateObjectError: Object of type _p (inheriting DatePeriod) has not been correctly initialized by calling parent::__construct() in its constructor
 DONE
