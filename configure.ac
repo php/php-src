@@ -579,6 +579,7 @@ AC_CHECK_FUNCS([
   mmap
   nice
   nl_langinfo
+  pkey_mprotect
   poll
   pthread_jit_write_protect_np
   putenv
