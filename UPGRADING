@@ -117,6 +117,13 @@ PHP 8.7 UPGRADE NOTES
     rules that can be used to recreate a transliterator. The optional
     $escapeUnprintable argument escapes unprintable characters when true.
 
+- Standard:
+  . Added array_partition() to split an array into the elements for which a
+    callback returns a truthy value and those for which it does not, in a
+    single pass. Keys are preserved, and the callback receives the value and
+    the key, like array_find().
+    RFC: https://wiki.php.net/rfc/array_partition
+
 ========================================
 7. New Classes and Interfaces
 ========================================
