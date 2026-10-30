@@ -4292,15 +4292,20 @@ static zend_always_inline void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMET
 			ret = &args[0];
 		}
 		if (ret) {
-			if (HT_IS_PACKED(Z_ARRVAL_P(ret))) {
-				if (HT_IS_WITHOUT_HOLES(Z_ARRVAL_P(ret))) {
+			HashTable *ht = Z_ARRVAL_P(ret);
+			/* ZEND_LONG_MIN means no integer key yet, the next append uses index 0. */
+			zend_long next_free = ht->nNextFreeElement == ZEND_LONG_MIN ? 0 : ht->nNextFreeElement;
+
+			/* array_merge() renumbers integer keys from 0, so the next free index must match. */
+			if (HT_IS_PACKED(ht)) {
+				if (HT_IS_WITHOUT_HOLES(ht) && next_free == (zend_long) ht->nNumOfElements) {
 					RETURN_COPY(ret);
 				}
-			} else {
+			} else if (next_free == 0) {
 				bool copy = true;
 				zend_string *string_key;
 
-				ZEND_HASH_MAP_FOREACH_STR_KEY(Z_ARRVAL_P(ret), string_key) {
+				ZEND_HASH_MAP_FOREACH_STR_KEY(ht, string_key) {
 					if (!string_key) {
 						copy = false;
 						break;
