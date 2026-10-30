@@ -1496,7 +1496,7 @@ static ZEND_COLD void zend_ast_export_name_list_ex(smart_str *str, zend_ast_list
 		if (i != 0) {
 			smart_str_appends(str, separator);
 		}
-		zend_ast_export_name(str, list->child[i], 0, indent);
+		zend_ast_export_ns_name(str, list->child[i], 0, indent);
 		i++;
 	}
 }
@@ -2468,7 +2468,7 @@ simple_list:
 			break;
 		case ZEND_AST_METHOD_REFERENCE:
 			if (ast->child[0]) {
-				zend_ast_export_name(str, ast->child[0], 0, indent);
+				zend_ast_export_ns_name(str, ast->child[0], 0, indent);
 				smart_str_appends(str, "::");
 			}
 			zend_ast_export_name(str, ast->child[1], 0, indent);
