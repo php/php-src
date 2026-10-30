@@ -195,7 +195,7 @@ static const uint8_t normal_url_char[256] = {
         1,       1,       1,       1,       1,       1,       1,       0 };
 
 
-#define PARSING_HEADER(state) (state <= s_headers_almost_done && 0 == (parser->flags & F_TRAILING))
+#define PARSING_HEADER(state) (state <= s_headers_almost_done)
 
 
 enum header_states
