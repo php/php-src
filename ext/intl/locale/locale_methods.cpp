@@ -1397,7 +1397,7 @@ PHP_INTL_FUNCTION_WITH_ERROR_RESET(locale_filter_matches)
 		}
 
 		/* Convert to lower case for case-insensitive comparison */
-		cur_lang_tag = std::unique_ptr<char, char_deleter>(reinterpret_cast<char *>(ecalloc( 1, can_lang_tag->len + 1)));
+		cur_lang_tag = std::unique_ptr<char, char_deleter>(reinterpret_cast<char *>(ecalloc(can_lang_tag->len + 1, sizeof(char))));
 		char *p_cur_lang_tag = cur_lang_tag.get();
 
 		/* Convert to lower case for case-insensitive comparison */
@@ -1407,7 +1407,7 @@ PHP_INTL_FUNCTION_WITH_ERROR_RESET(locale_filter_matches)
 			RETURN_FALSE;
 		}
 
-		cur_loc_range = std::unique_ptr<char, char_deleter>(reinterpret_cast<char *>(ecalloc( 1, can_loc_range->len + 1)));
+		cur_loc_range = std::unique_ptr<char, char_deleter>(reinterpret_cast<char *>(ecalloc(can_loc_range->len + 1, sizeof(char))));
 		char *p_cur_loc_range = cur_loc_range.get();
 		result = strToMatch( can_loc_range->val , p_cur_loc_range );
 		if( result == 0) {
@@ -1437,14 +1437,14 @@ PHP_INTL_FUNCTION_WITH_ERROR_RESET(locale_filter_matches)
 	} /* end of if isCanonical */
 	else{
 		/* Convert to lower case for case-insensitive comparison */
-		cur_lang_tag = std::unique_ptr<char, char_deleter>(reinterpret_cast<char *>(ecalloc(1, lang_tag_len + 1)));
+		cur_lang_tag = std::unique_ptr<char, char_deleter>(reinterpret_cast<char *>(ecalloc(lang_tag_len + 1, sizeof(char))));
 		char *p_cur_lang_tag = cur_lang_tag.get();
 
 		result = strToMatch( lang_tag , p_cur_lang_tag);
 		if( result == 0) {
 			RETURN_FALSE;
 		}
-		cur_loc_range = std::unique_ptr<char, char_deleter>(reinterpret_cast<char *>(ecalloc(1, loc_range_len + 1)));
+		cur_loc_range = std::unique_ptr<char, char_deleter>(reinterpret_cast<char *>(ecalloc(loc_range_len + 1, sizeof(char))));
 		char *p_cur_loc_range = cur_loc_range.get();
 		result = strToMatch( loc_range , p_cur_loc_range );
 		if( result == 0) {
@@ -1561,7 +1561,7 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 		}
 	}
 
-	cur_loc_range = reinterpret_cast<char *>(ecalloc(1, strlen(loc_range)+1));
+	cur_loc_range = reinterpret_cast<char *>(ecalloc(strlen(loc_range)+1, sizeof(char)));
 	/* convert to lower and replace hyphens */
 	result = strToMatch(loc_range, cur_loc_range);
 	if(can_loc_range) {

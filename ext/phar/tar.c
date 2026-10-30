@@ -1318,7 +1318,7 @@ nostub:
 	} /* signature */
 
 	/* add final zero blocks */
-	buf = (char *) ecalloc(1024, 1);
+	buf = (char *) ecalloc(1024, sizeof(char));
 	php_stream_write(newfile, buf, 1024);
 	efree(buf);
 
