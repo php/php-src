@@ -47,7 +47,8 @@ install-modules: build-modules
 	$(mkinstalldirs) $(INSTALL_ROOT)$(EXTENSION_DIR)
 	@echo "Installing shared extensions:     $(INSTALL_ROOT)$(EXTENSION_DIR)/"
 	@rm -f modules/*.la >/dev/null 2>&1
-	@$(INSTALL) modules/* $(INSTALL_ROOT)$(EXTENSION_DIR)
+	@test -z "`ls modules/* 2>/dev/null`" || \
+		$(INSTALL) modules/* $(INSTALL_ROOT)$(EXTENSION_DIR)
 
 install-headers:
 	-@if test "$(INSTALL_HEADERS)"; then \
