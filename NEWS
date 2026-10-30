@@ -111,6 +111,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-24784 (openssl_pkcs7_read() and openssl_cms_read() overwrite
     certificates with CRLs). (Alexander Danilov)
 
+- PDO_Firebird:
+  . Fixed bug GH-25006 (getColumnMeta() reads out of bounds for an
+    out-of-range column index). (Ilia Alshanetsky)
+
 - PDO_PGSQL:
   . Fixed bug GH-24461 (DISCARD ALL on persistent connection cleanup drops
     PgBouncer's prepared statements). (David Carlier, Artem Ukrainskiy)
