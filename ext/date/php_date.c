@@ -3289,6 +3289,9 @@ static bool php_date_modify(zval *object, char *modify, size_t modify_len) /* {{
 
 	memcpy(&dateobj->time->relative, &tmp_time->relative, sizeof(timelib_rel_time));
 	dateobj->time->have_relative = tmp_time->have_relative;
+	if (dateobj->time->sse_uptodate && dateobj->time->zone_type == TIMELIB_ZONETYPE_ID && dateobj->time->tz_info) {
+		timelib_get_time_zone_offset_info(dateobj->time->sse, dateobj->time->tz_info, &dateobj->time->z, NULL, NULL);
+	}
 	dateobj->time->sse_uptodate = 0;
 
 	if (tmp_time->y != TIMELIB_UNSET) {
@@ -3332,7 +3335,7 @@ static bool php_date_modify(zval *object, char *modify, size_t modify_len) /* {{
 
 	timelib_time_dtor(tmp_time);
 
-	timelib_update_ts(dateobj->time, NULL);
+	timelib_update_ts_first(dateobj->time, NULL);
 	timelib_update_from_sse(dateobj->time);
 	dateobj->time->have_relative = 0;
 	memset(&dateobj->time->relative, 0, sizeof(dateobj->time->relative));
@@ -3691,7 +3694,7 @@ static void php_date_time_set(zval *object, zend_long h, zend_long i, zend_long 
 	dateobj->time->i = i;
 	dateobj->time->s = s;
 	dateobj->time->us = ms;
-	timelib_update_ts(dateobj->time, NULL);
+	timelib_update_ts_first(dateobj->time, NULL);
 	timelib_update_from_sse(dateobj->time);
 } /* }}} */
 
