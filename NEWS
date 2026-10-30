@@ -199,6 +199,8 @@ PHP                                                                        NEWS
 - Phar:
   . Fixed bug GH-24740 (Oversized tar metadata exhausts the memory limit).
     (Lazizbek Ergashev)
+  . Fixed bug GH-8469 (Phar Class decompressFiles() bad in PHP 7.4 and 8.x
+    branches). (Raphael Paez)
 
 - Phpdbg:
   . Fix wrong command names. (ndossche, Weilin Du)
