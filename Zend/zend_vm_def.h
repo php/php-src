@@ -8422,9 +8422,10 @@ ZEND_VM_HANDLER(142, ZEND_DECLARE_LAMBDA_FUNCTION, UNUSED, NUM, NUM|CACHE_SLOT)
 	zend_function *func;
 	zend_object *object;
 	zend_class_entry *called_scope;
+	uint32_t cache_slot = opline->extended_value;
 
-	if (opline->extended_value != (uint32_t)-1) {
-		zend_object *closure = CACHED_PTR(opline->extended_value);
+	if (cache_slot != (uint32_t)-1) {
+		zend_object *closure = CACHED_PTR(cache_slot);
 		if (closure) {
 			ZVAL_OBJ_COPY(EX_VAR(opline->result.var), closure);
 			ZEND_VM_NEXT_OPCODE();
@@ -8447,10 +8448,10 @@ ZEND_VM_HANDLER(142, ZEND_DECLARE_LAMBDA_FUNCTION, UNUSED, NUM, NUM|CACHE_SLOT)
 	SAVE_OPLINE();
 	zend_create_closure(EX_VAR(opline->result.var), func,
 		EX(func)->op_array.scope, called_scope, object);
-	if (opline->extended_value != (uint32_t)-1) {
+	if (cache_slot != (uint32_t)-1) {
 		zend_object *closure = Z_OBJ_P(EX_VAR(opline->result.var));
 		GC_ADDREF(closure);
-		CACHE_PTR(opline->extended_value, closure);
+		CACHE_PTR(cache_slot, closure);
 		zend_stack_push(&EG(lambda_cache), &closure);
 	}
 	ZEND_VM_NEXT_OPCODE();
@@ -9852,9 +9853,10 @@ ZEND_VM_HANDLER(202, ZEND_CALLABLE_CONVERT, UNUSED, UNUSED, NUM|CACHE_SLOT)
 {
 	USE_OPLINE
 	zend_execute_data *call = EX(call);
+	uint32_t cache_slot = opline->extended_value;
 
-	if (opline->extended_value != (uint32_t)-1) {
-		zend_object *closure = CACHED_PTR(opline->extended_value);
+	if (cache_slot != (uint32_t)-1) {
+		zend_object *closure = CACHED_PTR(cache_slot);
 		if (closure) {
 			ZVAL_OBJ_COPY(EX_VAR(opline->result.var), closure);
 		} else {
@@ -9869,7 +9871,7 @@ ZEND_VM_HANDLER(202, ZEND_CALLABLE_CONVERT, UNUSED, UNUSED, NUM|CACHE_SLOT)
 			ZEND_ASSERT(Z_TYPE_P(closure_zv) == IS_OBJECT);
 			closure = Z_OBJ_P(closure_zv);
 			ZVAL_OBJ_COPY(EX_VAR(opline->result.var), closure);
-			CACHE_PTR(opline->extended_value, closure);
+			CACHE_PTR(cache_slot, closure);
 		}
 	} else {
 		zend_closure_from_frame(EX_VAR(opline->result.var), call);
