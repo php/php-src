@@ -27,6 +27,10 @@ PHP                                                                        NEWS
   . Fixed stack overflow in mb_check_encoding() and mb_convert_encoding() with
     deeply nested arrays. (Eyüp Can Akman)
 
+- Core:
+  . Fixed set visibility bypass through a primed ZEND_ASSIGN_OBJ cache slot.
+    (Matthias Dötsch)
+
 - Opcache:
   . Fixed bug GH-22216 (spurious opcache.memory_consumption warning on each new
     ZTS thread; the directive is also reported as 0 in worker threads).
