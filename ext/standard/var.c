@@ -1083,16 +1083,25 @@ static void php_var_serialize_nested_data(smart_str *buf, zval *struc, HashTable
 				php_var_serialize_string(buf, ZSTR_VAL(key), ZSTR_LEN(key));
 			}
 
+			bool unwrapped_ref = false;
 			if (Z_ISREF_P(data) && Z_REFCOUNT_P(data) == 1) {
 				data = Z_REFVAL_P(data);
+				unwrapped_ref = true;
 			}
 
 			/* we should still add element even if it's not OK,
 			 * since we already wrote the length of the array before */
 			if (Z_TYPE_P(data) == IS_ARRAY) {
-				if (UNEXPECTED(Z_TYPE_P(struc) == IS_ARRAY && Z_ARR_P(data) == Z_ARR_P(struc))) {
+				/* An array reached through a reference of refcount 1 is not recorded in
+				 * var_hash, so a cycle made of such references has to be detected here. */
+				if (UNEXPECTED(Z_TYPE_P(struc) == IS_ARRAY && Z_ARR_P(data) == Z_ARR_P(struc))
+					|| (unwrapped_ref && UNEXPECTED(GC_IS_RECURSIVE(Z_ARR_P(data))))) {
 					php_add_var_hash(var_hash, struc, in_rcn_array);
 					smart_str_appendl(buf, "N;", 2);
+				} else if (unwrapped_ref) {
+					GC_TRY_PROTECT_RECURSION(Z_ARR_P(data));
+					php_var_serialize_intern(buf, data, var_hash, in_rcn_array, false);
+					GC_TRY_UNPROTECT_RECURSION(Z_ARR_P(data));
 				} else {
 					php_var_serialize_intern(buf, data, var_hash, in_rcn_array, false);
 				}
