@@ -113,30 +113,41 @@ static zend_string* php_password_get_salt(zval *unused_, size_t required_salt_le
 
 /* bcrypt implementation */
 
-static bool php_password_bcrypt_get_cost(const zend_string *hash, zend_long *cost) {
-	const char *h = ZSTR_VAL(hash);
-
-	if ((ZSTR_LEN(hash) != 60) ||
-		(h[0] != '$') || (h[1] != '2') || (h[2] != 'y') || (h[3] != '$') ||
-		!ZEND_IS_DIGIT(h[4]) || !ZEND_IS_DIGIT(h[5]) || (h[6] != '$')) {
-		return false;
+static bool php_password_bcrypt_get_cost(zend_array *options, zend_long *cost) {
+	zval *zcost;
+	if (options && (zcost = zend_hash_str_find(options, "cost", sizeof("cost")-1)) != NULL) {
+		*cost = zval_get_long(zcost);
 	}
-
-	*cost = (h[4] - '0') * 10 + (h[5] - '0');
 
 	return *cost >= 4 && *cost <= 31;
 }
 
-static bool php_password_bcrypt_valid(const zend_string *hash) {
-	zend_long cost;
+static bool php_password_bcrypt_parse(const zend_string *hash, zend_long *cost) {
+	unsigned int c = 0;
+	int r = 0;
+	const char *h = ZSTR_VAL(hash);
 
-	return php_password_bcrypt_get_cost(hash, &cost);
+	if (ZSTR_LEN(hash) == 60 && ZEND_IS_DIGIT(h[4]) && ZEND_IS_DIGIT(h[5]) &&
+		1 == sscanf(h, "$2y$%2u$%*21[./A-Za-z0-9]%*1[.Oeu]%*31[./A-Za-z0-9]%n", &c, &r) &&
+		r == 60 && c >= 4 && c <= 31
+	) {
+		if (cost != NULL) {
+			*cost = (zend_long) c;
+		}
+		return true;
+	}
+
+	return false;
+}
+
+static bool php_password_bcrypt_valid(const zend_string *hash) {
+	return php_password_bcrypt_parse(hash, NULL);
 }
 
 static int php_password_bcrypt_get_info(zval *return_value, const zend_string *hash) {
 	zend_long cost;
 
-	if (!php_password_bcrypt_get_cost(hash, &cost)) {
+	if (!php_password_bcrypt_parse(hash, &cost)) {
 		/* Should never get called this way. */
 		return FAILURE;
 	}
@@ -146,17 +157,15 @@ static int php_password_bcrypt_get_info(zval *return_value, const zend_string *h
 }
 
 static bool php_password_bcrypt_needs_rehash(const zend_string *hash, zend_array *options) {
-	zval *znew_cost;
 	zend_long old_cost;
 	zend_long new_cost = PHP_PASSWORD_BCRYPT_COST;
 
-	if (!php_password_bcrypt_get_cost(hash, &old_cost)) {
+	if (!php_password_bcrypt_parse(hash, &old_cost)) {
 		/* Should never get called this way. */
 		return 1;
 	}
-	if (options && (znew_cost = zend_hash_str_find(options, "cost", sizeof("cost")-1)) != NULL) {
-		new_cost = zval_get_long(znew_cost);
-	}
+
+	php_password_bcrypt_get_cost(options, &new_cost);
 
 	return old_cost != new_cost;
 }
@@ -188,7 +197,6 @@ static zend_string* php_password_bcrypt_hash(const zend_string *password, zend_a
 	char hash_format[10];
 	size_t hash_format_len;
 	zend_string *result, *hash, *salt;
-	zval *zcost;
 	zend_long cost = PHP_PASSWORD_BCRYPT_COST;
 
 	if (memchr(ZSTR_VAL(password), '\0', ZSTR_LEN(password))) {
@@ -196,11 +204,7 @@ static zend_string* php_password_bcrypt_hash(const zend_string *password, zend_a
 		return NULL;
 	}
 
-	if (options && (zcost = zend_hash_str_find(options, "cost", sizeof("cost")-1)) != NULL) {
-		cost = zval_get_long(zcost);
-	}
-
-	if (cost < 4 || cost > 31) {
+	if (!php_password_bcrypt_get_cost(options, &cost)) {
 		zend_value_error("Invalid bcrypt cost parameter specified: " ZEND_LONG_FMT, cost);
 		return NULL;
 	}
