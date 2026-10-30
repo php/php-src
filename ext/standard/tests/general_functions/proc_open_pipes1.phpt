@@ -8,7 +8,7 @@ for ($i = 3; $i<= 30; $i++) {
 }
 
 $php = getenv("TEST_PHP_EXECUTABLE_ESCAPED");
-$callee = escapeshellarg(__DIR__ . "/proc_open_pipes_sleep.inc");
+$callee = escapeshellarg(__DIR__ . "/proc_open_pipes_exit.inc");
 proc_open("$php -n $callee", $spec, $pipes);
 
 var_dump(count($spec));
