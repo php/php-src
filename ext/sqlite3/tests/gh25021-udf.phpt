@@ -1,5 +1,5 @@
 --TEST--
-GH-25021 UDF isn't using sqlite3_*_int64 API
+GH-25021 (UDF isn't using sqlite3_*_int64 API)
 --EXTENSIONS--
 sqlite3
 --FILE--

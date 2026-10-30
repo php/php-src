@@ -368,7 +368,7 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 		/* get the value */
 		switch (sqlite3_value_type(argv[i])) {
 			case SQLITE_INTEGER:
-#if ZEND_LONG_MAX > 2147483647
+#ifdef ZEND_ENABLE_ZVAL_LONG64
 				ZVAL_LONG(&zargs[i + is_agg], sqlite3_value_int64(argv[i]));
 #else
 				ZVAL_LONG(&zargs[i + is_agg], sqlite3_value_int(argv[i]));
@@ -414,7 +414,7 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 		if (!Z_ISUNDEF(retval)) {
 			switch (Z_TYPE(retval)) {
 				case IS_LONG:
-#if ZEND_LONG_MAX > 2147483647
+#ifdef ZEND_ENABLE_ZVAL_LONG64
 					sqlite3_result_int64(context, Z_LVAL(retval));
 #else
 					sqlite3_result_int(context, Z_LVAL(retval));
