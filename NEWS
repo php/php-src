@@ -38,6 +38,8 @@ PHP                                                                        NEWS
     (David Carlier)
   . Fixed bug GH-24534 (Segfault in zend_try_early_bind when a parent class
     autoloads its cached child during linking). (David Carlier)
+  . Fixed AST printing dropping final on class constants and properties, and
+    abstract on properties. (Jorg Sowa)
 
 - CLI:
   . Fixed bug GH-24697 (PHP_HTTP_PARSER_STRICT build option doesn't work).
