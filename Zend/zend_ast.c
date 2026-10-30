@@ -2200,7 +2200,7 @@ simple_list:
 			break;
 		case ZEND_AST_PROP:
 		case ZEND_AST_NULLSAFE_PROP:
-			zend_ast_export_ex(str, ast->child[0], 0, indent);
+			zend_ast_export_ex(str, ast->child[0], 260, indent);
 			smart_str_appends(str, ast->kind == ZEND_AST_NULLSAFE_PROP ? "?->" : "->");
 			zend_ast_export_var(str, ast->child[1], 0, indent);
 			break;
@@ -2327,9 +2327,11 @@ simple_list:
 			}
 			break;
 		case ZEND_AST_INSTANCEOF:
-			zend_ast_export_ex(str, ast->child[0], 0, indent);
+			if (priority > 230) smart_str_appendc(str, '(');
+			zend_ast_export_ex(str, ast->child[0], 231, indent);
 			smart_str_appends(str, " instanceof ");
 			zend_ast_export_ns_name(str, ast->child[1], 0, indent);
+			if (priority > 230) smart_str_appendc(str, ')');
 			break;
 		case ZEND_AST_YIELD:
 			if (priority > 70) smart_str_appendc(str, '(');
@@ -2539,7 +2541,7 @@ simple_list:
 		/* 3 child nodes */
 		case ZEND_AST_METHOD_CALL:
 		case ZEND_AST_NULLSAFE_METHOD_CALL:
-			zend_ast_export_ex(str, ast->child[0], 0, indent);
+			zend_ast_export_ex(str, ast->child[0], 260, indent);
 			smart_str_appends(str, ast->kind == ZEND_AST_NULLSAFE_METHOD_CALL ? "?->" : "->");
 			zend_ast_export_var(str, ast->child[1], 0, indent);
 			smart_str_appendc(str, '(');
