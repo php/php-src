@@ -152,6 +152,7 @@ static bool odbc_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *s
 
 	S->H = H;
 	S->assume_utf8 = H->assume_utf8;
+	S->stmt_timeout = H->stmt_timeout;
 
 	/* before we prepare, we need to peek at the query; if it uses named parameters,
 	 * we want PDO to rewrite them for us */
@@ -192,6 +193,16 @@ static bool odbc_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *s
 			}
 			return false;
 		}
+	}
+
+	rc = SQLSetStmtAttr(S->stmt, SQL_ATTR_QUERY_TIMEOUT, (SQLPOINTER)(uintptr_t) S->stmt_timeout, SQL_IS_INTEGER);
+	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+		pdo_odbc_stmt_error("SQLSetStmtAttr: SQL_ATTR_QUERY_TIMEOUT");
+		SQLFreeHandle(SQL_HANDLE_STMT, S->stmt);
+		if (nsql) {
+			zend_string_release(nsql);
+		}
+		return false;
 	}
 
 	rc = SQLPrepare(S->stmt, (SQLCHAR *) ZSTR_VAL(sql), SQL_NTS);
@@ -341,6 +352,7 @@ static bool odbc_handle_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	bool bval;
+	zend_long lval;
 
 	switch (attr) {
 		case PDO_ODBC_ATTR_ASSUME_UTF8:
@@ -371,6 +383,29 @@ static bool odbc_handle_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 					);
 					return false;
 				}
+			}
+			return true;
+		case PDO_ATTR_TIMEOUT:
+			if (!pdo_get_long_param(&lval, val)) {
+				return false;
+			}
+			/* This will only apply to the current connection and
+			 * any new statements; currently no way to set timeout
+			 * for already existing statements.
+			 */
+			H->stmt_timeout = H->conn_timeout = lval;
+			/* set odbc conn attr in case driver cares */
+			RETCODE rc = SQLSetConnectAttr(
+				H->dbc,
+				SQL_ATTR_CONNECTION_TIMEOUT,
+				(SQLPOINTER) lval,
+				SQL_IS_INTEGER
+			);
+			if (rc != SQL_SUCCESS) {
+				pdo_odbc_drv_error(
+					dbh->auto_commit ? "SQLSetConnectAttr AUTOCOMMIT = ON" : "SQLSetConnectAttr AUTOCOMMIT = OFF"
+				);
+				return false;
 			}
 			return true;
 		default:
@@ -408,16 +443,17 @@ static int odbc_handle_get_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			return pdo_odbc_get_info_string(dbh, SQL_DBMS_VER, val);
 		case PDO_ATTR_SERVER_INFO:
 			return pdo_odbc_get_info_string(dbh, SQL_DBMS_NAME, val);
-		case PDO_ATTR_PREFETCH:
 		case PDO_ATTR_TIMEOUT:
-		case PDO_ATTR_CONNECTION_STATUS:
-			break;
+			ZVAL_LONG(val, H->conn_timeout);
+			return 1;
 		case PDO_ODBC_ATTR_ASSUME_UTF8:
 			ZVAL_BOOL(val, H->assume_utf8);
 			return 1;
 		case PDO_ATTR_AUTOCOMMIT:
 			ZVAL_BOOL(val, dbh->auto_commit);
 			return 1;
+		default:
+			break;
 	}
 	return 0;
 }
@@ -475,7 +511,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 	pdo_odbc_db_handle *H;
 	RETCODE rc;
 	int use_direct = 0;
-	zend_ulong cursor_lib;
+	zend_ulong cursor_lib, connection_timeout;
 
 	H = pecalloc(1, sizeof(*H), dbh->is_persistent);
 
@@ -524,6 +560,15 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 		pdo_odbc_drv_error("SQLSetConnectAttr SQL_ODBC_CURSORS");
 		goto fail;
 	}
+
+	/* setup connection timeout */
+	connection_timeout = pdo_attr_lval(driver_options, PDO_ATTR_TIMEOUT, 0);
+	rc = SQLSetConnectAttr(H->dbc, SQL_ATTR_CONNECTION_TIMEOUT, (void*)connection_timeout, SQL_IS_INTEGER);
+	if (rc != SQL_SUCCESS) {
+		pdo_odbc_drv_error("SQLSetConnectAttr SQL_ATTR_CONNECTION_TIMEOUT");
+		goto fail;
+	}
+	H->stmt_timeout = H->conn_timeout = connection_timeout;
 
 	/* a connection string may have = but not ; - i.e. "DSN=PHP" */
 	if (strchr(dbh->data_source, '=')) {
