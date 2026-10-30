@@ -64,6 +64,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-24609 (OK packets without an info message rejected on x32
     builds). (lazerg)
 
+- ODBC:
+  . Fixed bug GH-25036 (odbc_prepare() corrupts the heap when the driver
+    cannot describe a parameter). (Ilia Alshanetsky)
+
 - Opcache:
   . Fixed tracing JIT returning a wrapped integer instead of a float on
     integer overflow after an integer was compared with a float or
