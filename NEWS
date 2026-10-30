@@ -34,6 +34,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-24582 (Memory leaks in ext/ffi parser when finalize_type()
     bails out). (matyapiro31, David Carlier)
 
+- Fileinfo:
+  . Fixed bug GH-25051 (TrueType fonts detected as application/octet-stream
+    since libmagic 5.48). (Weilin Du)
+
 - FPM:
   . Fixed crash and stack memory disclosure in the worker output logging with
     a pool name longer than the message prefix buffer or log_limit.
