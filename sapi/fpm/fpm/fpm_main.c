@@ -236,14 +236,15 @@ static void print_extensions(void) /* {{{ */
 #define STDOUT_FILENO 1
 #endif
 
-static inline size_t sapi_cgibin_single_write(const char *str, uint32_t str_length) /* {{{ */
+static inline size_t sapi_cgibin_single_write(const char *str, size_t str_length) /* {{{ */
 {
 	ssize_t ret;
 
 	/* sapi has started which means everything must be send through fcgi */
 	if (fpm_is_running) {
 		fcgi_request *request = (fcgi_request*) SG(server_context);
-		ret = fcgi_write(request, FCGI_STDOUT, str, str_length);
+		int to_write = str_length > INT_MAX ? INT_MAX : (int)str_length;
+		ret = fcgi_write(request, FCGI_STDOUT, str, to_write);
 		if (ret <= 0) {
 			return 0;
 		}
@@ -266,7 +267,7 @@ static inline size_t sapi_cgibin_single_write(const char *str, uint32_t str_leng
 static size_t sapi_cgibin_ub_write(const char *str, size_t str_length) /* {{{ */
 {
 	const char *ptr = str;
-	uint32_t remaining = str_length;
+	size_t remaining = str_length;
 	size_t ret;
 
 	while (remaining > 0) {
