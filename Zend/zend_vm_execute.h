@@ -4049,7 +4049,11 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV 
 
 			}
 		}
-		ZEND_VM_ENTER();
+		/* Like ZEND_VM_ENTER() but don't check for interrupts yet to avoid recursion if the
+		 * interrupt handler re-sets the vm_interrupt flag. */
+		execute_data = EG(current_execute_data);
+		LOAD_OPLINE();
+		ZEND_VM_LEAVE();
 	}
 	ZEND_VM_CONTINUE();
 }
