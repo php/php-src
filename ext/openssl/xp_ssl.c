@@ -3970,8 +3970,8 @@ static int php_openssl_get_cert_signature_md_nid(const X509 *cert) /* {{{ */
  *
  * On success *out is set to a newly-allocated zend_string holding the data
  * and PHP_OPENSSL_CHANNEL_BINDING_RESULT_OK is returned. For a type that is not applicable to the
- * connection (currently: tls-unique over TLS 1.3) *out is set to NULL and
- * PHP_OPENSSL_CHANNEL_BINDING_RESULT_NOT_APPLICABLE is returned. If the stream is not an active TLS
+ * connection (tls-unique over TLS 1.3, or tls-server-end-point without a certificate) *out is set
+ * to NULL and PHP_OPENSSL_CHANNEL_BINDING_RESULT_NOT_APPLICABLE is returned. If the stream is not an active TLS
  * stream PHP_OPENSSL_CHANNEL_BINDING_RESULT_NOT_TLS is returned, and if an OpenSSL call fails
  * PHP_OPENSSL_CHANNEL_BINDING_RESULT_ERROR is returned; in both of these cases *out is set to NULL.
  */
@@ -4029,7 +4029,7 @@ php_openssl_channel_binding_result php_openssl_netstream_get_channel_binding( /*
 			unsigned int digest_len = 0;
 
 			if (cert == NULL) {
-				return PHP_OPENSSL_CHANNEL_BINDING_RESULT_ERROR;
+				return PHP_OPENSSL_CHANNEL_BINDING_RESULT_NOT_APPLICABLE;
 			}
 
 			md_nid = php_openssl_get_cert_signature_md_nid(cert);

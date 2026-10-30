@@ -33,7 +33,13 @@ try {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
-/* A stream without transport encryption -> Openssl\OpensslException. */
+/* The unsupported-type exception extends the general OpenSSL exception. */
+var_dump(is_subclass_of(
+    Openssl\UnsupportedChannelBindingException::class,
+    Openssl\OpensslException::class,
+));
+
+/* A stream without transport encryption -> ValueError. */
 $plain = fopen("php://memory", "r");
 foreach (Openssl\ChannelBindingType::cases() as $type) {
     try {
@@ -52,6 +58,7 @@ TlsExporter=tls-exporter
 TypeError: openssl_get_channel_binding(): Argument #2 ($channel_binding_type) must be of type Openssl\ChannelBindingType, string given
 TypeError: openssl_get_channel_binding(): Argument #2 ($channel_binding_type) must be of type Openssl\ChannelBindingType, string given
 TypeError: openssl_get_channel_binding(): Argument #1 ($stream) must be of type resource, int given
-tls-unique: Openssl\OpensslException: Stream does not have transport encryption enabled
-tls-server-end-point: Openssl\OpensslException: Stream does not have transport encryption enabled
-tls-exporter: Openssl\OpensslException: Stream does not have transport encryption enabled
+bool(true)
+tls-unique: ValueError: Stream does not have transport encryption enabled
+tls-server-end-point: ValueError: Stream does not have transport encryption enabled
+tls-exporter: ValueError: Stream does not have transport encryption enabled

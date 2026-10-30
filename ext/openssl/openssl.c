@@ -57,6 +57,10 @@ ZEND_DECLARE_MODULE_GLOBALS(openssl)
 
 zend_class_entry *php_openssl_exception_ce;
 
+/* Openssl\UnsupportedChannelBindingException class */
+
+static zend_class_entry *php_openssl_unsupported_channel_binding_exception_ce;
+
 /* Openssl\ChannelBindingType enum */
 
 static zend_class_entry *php_openssl_channel_binding_type_ce;
@@ -761,6 +765,8 @@ PHP_INI_END()
 PHP_MINIT_FUNCTION(openssl)
 {
 	php_openssl_exception_ce = register_class_Openssl_OpensslException(zend_ce_exception);
+	php_openssl_unsupported_channel_binding_exception_ce =
+		register_class_Openssl_UnsupportedChannelBindingException(php_openssl_exception_ce);
 	php_openssl_channel_binding_type_ce = register_class_Openssl_ChannelBindingType();
 
 	php_openssl_certificate_ce = register_class_OpenSSLCertificate();
@@ -5127,10 +5133,24 @@ PHP_FUNCTION(openssl_get_channel_binding)
 		case PHP_OPENSSL_CHANNEL_BINDING_RESULT_OK:
 			RETURN_STR(result);
 		case PHP_OPENSSL_CHANNEL_BINDING_RESULT_NOT_APPLICABLE:
-			RETURN_NULL();
+			switch (type) {
+				case ZEND_ENUM_Openssl_ChannelBindingType_TlsUnique:
+					zend_throw_exception(php_openssl_unsupported_channel_binding_exception_ce,
+						"Channel binding type \"tls-unique\" is not supported for TLS 1.3", 0);
+					break;
+				case ZEND_ENUM_Openssl_ChannelBindingType_TlsServerEndPoint:
+					zend_throw_exception(php_openssl_unsupported_channel_binding_exception_ce,
+						"Channel binding type \"tls-server-end-point\" requires a certificate", 0);
+					break;
+				default:
+					zend_throw_exception(php_openssl_unsupported_channel_binding_exception_ce,
+						"Channel binding type is not applicable to this connection", 0);
+					break;
+			}
+			RETURN_THROWS();
 		case PHP_OPENSSL_CHANNEL_BINDING_RESULT_NOT_TLS:
-			zend_throw_exception_ex(php_openssl_exception_ce, 0,
-				"Stream does not have transport encryption enabled");
+			zend_throw_exception(zend_ce_value_error,
+				"Stream does not have transport encryption enabled", 0);
 			RETURN_THROWS();
 		case PHP_OPENSSL_CHANNEL_BINDING_RESULT_ERROR:
 			{

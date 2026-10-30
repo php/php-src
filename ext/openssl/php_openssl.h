@@ -229,7 +229,7 @@ typedef struct _php_openssl_session_object {
 /* Result of php_openssl_netstream_get_channel_binding(). */
 typedef enum php_openssl_channel_binding_result {
 	PHP_OPENSSL_CHANNEL_BINDING_RESULT_OK = 0,		/* *out holds a zend_string with the data */
-	PHP_OPENSSL_CHANNEL_BINDING_RESULT_NOT_APPLICABLE,	/* *out = NULL (e.g. tls-unique over TLS 1.3) */
+	PHP_OPENSSL_CHANNEL_BINDING_RESULT_NOT_APPLICABLE,	/* *out = NULL (e.g. tls-unique over TLS 1.3, or tls-server-end-point without a certificate) */
 	PHP_OPENSSL_CHANNEL_BINDING_RESULT_NOT_TLS,	/* stream is not an active TLS stream */
 	PHP_OPENSSL_CHANNEL_BINDING_RESULT_ERROR,		/* an OpenSSL-level failure occurred */
 } php_openssl_channel_binding_result;

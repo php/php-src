@@ -28,8 +28,12 @@ $serverCode = <<<'CODE'
         exit(1);
     }
     foreach (Openssl\ChannelBindingType::cases() as $type) {
-        $v = openssl_get_channel_binding($conn, $type);
-        fwrite($conn, $type->value . "=" . (is_string($v) ? bin2hex($v) : "") . "\n");
+        try {
+            $v = openssl_get_channel_binding($conn, $type);
+            fwrite($conn, $type->value . "=" . bin2hex($v) . "\n");
+        } catch (Openssl\UnsupportedChannelBindingException) {
+            fwrite($conn, $type->value . "=unsupported\n");
+        }
     }
     phpt_wait();
     fclose($conn);
@@ -50,8 +54,14 @@ $clientCode = <<<'CODE'
     }
 
     $my = [];
+    $myException = [];
     foreach (Openssl\ChannelBindingType::cases() as $type) {
-        $my[$type->value] = openssl_get_channel_binding($client, $type);
+        try {
+            $my[$type->value] = openssl_get_channel_binding($client, $type);
+        } catch (Openssl\UnsupportedChannelBindingException $e) {
+            $my[$type->value] = null;
+            $myException[$type->value] = $e::class . ': ' . $e->getMessage();
+        }
     }
 
     $peer = [];
@@ -62,7 +72,7 @@ $clientCode = <<<'CODE'
         $eq = strpos($line, "=");
         $t = substr($line, 0, $eq);
         $enc = substr($line, $eq + 1);
-        $peer[$t] = ($enc === "") ? null : hex2bin($enc);
+        $peer[$t] = ($enc === "unsupported") ? null : hex2bin($enc);
     }
 
     foreach (Openssl\ChannelBindingType::cases() as $type) {
@@ -75,7 +85,8 @@ $clientCode = <<<'CODE'
             $t, var_export($c === $s, true), $lc, $ls);
     }
 
-    echo "tls_unique_is_null=" . var_export($my["tls-unique"] === null, true) . "\n";
+    echo "tls_unique_unsupported=" . var_export($my["tls-unique"] === null, true) . "\n";
+    echo "tls_unique_message=" . ($myException["tls-unique"] ?? "none") . "\n";
 
     $opts = stream_context_get_options($client);
     $cert = $opts['ssl']['peer_certificate'] ?? null;
@@ -102,5 +113,6 @@ ServerClientTestCase::getInstance()->run($clientCode, ['server' => $serverCode])
 tls-unique equal=true len_client=null len_server=null
 tls-server-end-point equal=true len_client=32 len_server=32
 tls-exporter equal=true len_client=32 len_server=32
-tls_unique_is_null=true
+tls_unique_unsupported=true
+tls_unique_message=Openssl\UnsupportedChannelBindingException: Channel binding type "tls-unique" is not supported for TLS 1.3
 tse_matches_sha256_fingerprint=true

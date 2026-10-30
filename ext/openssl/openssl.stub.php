@@ -11,6 +11,10 @@ namespace Openssl {
     {
     }
 
+    class UnsupportedChannelBindingException extends OpensslException
+    {
+    }
+
     /**
      * Channel binding type for openssl_get_channel_binding().
      * The backing values are the IANA "Channel Binding" registry names.
@@ -793,6 +797,6 @@ function openssl_password_verify(string $algo, #[\SensitiveParameter] string $pa
   * @param resource $stream
   * @refcount 1
   */
-function openssl_get_channel_binding($stream, Openssl\ChannelBindingType $channel_binding_type): ?string {}
+function openssl_get_channel_binding($stream, Openssl\ChannelBindingType $channel_binding_type): string {}
 
 }

@@ -1,5 +1,5 @@
 /* This is a generated file, edit openssl.stub.php instead.
- * Stub hash: ebf128e671cd7d9caf1b793173dd5b5acf8dbc8d
+ * Stub hash: 3da1308c2a61aeb7a402d7c9b409aa001f73db94
  * Has decl header: yes */
 
 #include "zend_attributes.h"
@@ -413,7 +413,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_password_verify, 0, 3, _
 ZEND_END_ARG_INFO()
 #endif
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_get_channel_binding, 0, 2, IS_STRING, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_get_channel_binding, 0, 2, IS_STRING, 0)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_OBJ_INFO(0, channel_binding_type, Openssl\\ChannelBindingType, 0)
 ZEND_END_ARG_INFO()
@@ -844,6 +844,16 @@ static zend_class_entry *register_class_Openssl_OpensslException(zend_class_entr
 
 	INIT_NS_CLASS_ENTRY(ce, "Openssl", "OpensslException", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Openssl_Exception, 0);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Openssl_UnsupportedChannelBindingException(zend_class_entry *class_entry_Openssl_OpensslException)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Openssl", "UnsupportedChannelBindingException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Openssl_OpensslException, 0);
 
 	return class_entry;
 }
