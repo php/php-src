@@ -92,6 +92,11 @@ struct _zend_fiber_stack {
 	size_t asan_size;
 #endif
 
+#ifdef ZEND_WIN32
+	/* Bottom of the initially committed part of the stack. */
+	void *initial_stack_limit;
+#endif
+
 #ifdef ZEND_FIBER_UCONTEXT
 	/* Embedded ucontext to avoid unnecessary memory allocations. */
 	ucontext_t ucontext;
@@ -187,6 +192,12 @@ ZEND_TLS uint32_t zend_fiber_switch_blocking = 0;
 
 #define ZEND_FIBER_DEFAULT_PAGE_SIZE 4096
 
+#ifdef ZEND_WIN32
+/* Committed up front: the frames a fiber touches on its first run fit here, so a short fiber takes no guard page
+ * fault. Any page multiple works; the kernel commits the rest page by page. */
+# define ZEND_FIBER_INITIAL_COMMIT_SIZE (32 * 1024)
+#endif
+
 static size_t zend_fiber_get_page_size(void)
 {
 	static size_t page_size = 0;
@@ -222,7 +233,10 @@ static zend_fiber_stack *zend_fiber_stack_allocate(size_t size)
 	const size_t alloc_size = stack_size + ZEND_FIBER_GUARD_PAGES * page_size;
 
 #ifdef ZEND_WIN32
-	pointer = VirtualAlloc(0, alloc_size, MEM_COMMIT, PAGE_READWRITE);
+	/* As for a thread stack, only the top is committed and the kernel commits the rest through the PAGE_GUARD page
+	 * below it as the stack grows. The reserved bottom page (ZEND_FIBER_GUARD_PAGES) is never committed: it stops the
+	 * stack, because zend_fiber_init_context() makes the reservation's base the TEB deallocation stack. */
+	pointer = VirtualAlloc(0, alloc_size, MEM_RESERVE, PAGE_READWRITE);
 
 	if (!pointer) {
 		DWORD err = GetLastError();
@@ -232,18 +246,19 @@ static zend_fiber_stack *zend_fiber_stack_allocate(size_t size)
 		return NULL;
 	}
 
-# if ZEND_FIBER_GUARD_PAGES
-	DWORD protect;
+	const size_t commit_size = MIN(ZEND_FIBER_INITIAL_COMMIT_SIZE, stack_size - page_size);
+	void *initial_stack_limit = (void *) ((uintptr_t) pointer + alloc_size - commit_size);
+	void *guard_pointer = (void *) ((uintptr_t) initial_stack_limit - page_size);
 
-	if (!VirtualProtect(pointer, ZEND_FIBER_GUARD_PAGES * page_size, PAGE_READWRITE | PAGE_GUARD, &protect)) {
+	if (UNEXPECTED(!VirtualAlloc(initial_stack_limit, commit_size, MEM_COMMIT, PAGE_READWRITE))
+		|| UNEXPECTED(!VirtualAlloc(guard_pointer, page_size, MEM_COMMIT, PAGE_READWRITE | PAGE_GUARD))) {
 		DWORD err = GetLastError();
 		char *errmsg = php_win32_error_to_msg(err);
-		zend_throw_exception_ex(NULL, 0, "Fiber stack protect failed: VirtualProtect failed: [0x%08lx] %s", err, errmsg[0] ? errmsg : "Unknown");
+		zend_throw_exception_ex(NULL, 0, "Fiber stack commit failed: VirtualAlloc failed: [0x%08lx] %s", err, errmsg[0] ? errmsg : "Unknown");
 		php_win32_error_msg_free(errmsg);
 		VirtualFree(pointer, 0, MEM_RELEASE);
 		return NULL;
 	}
-# endif
 #else
 	pointer = mmap(NULL, alloc_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_STACK, -1, 0);
 
@@ -273,6 +288,10 @@ static zend_fiber_stack *zend_fiber_stack_allocate(size_t size)
 
 	stack->pointer = (void *) ((uintptr_t) pointer + ZEND_FIBER_GUARD_PAGES * page_size);
 	stack->size = stack_size;
+
+#ifdef ZEND_WIN32
+	stack->initial_stack_limit = initial_stack_limit;
+#endif
 
 #if !defined(ZEND_FIBER_UCONTEXT) && BOOST_CONTEXT_SHADOW_STACK
 	/* shadow stack saves ret address only, need less space */
@@ -363,6 +382,13 @@ ZEND_NORETURN static void zend_fiber_trampoline(void)
 ZEND_NORETURN static void zend_fiber_trampoline(boost_context_data data)
 #endif
 {
+#ifdef ZEND_WIN32
+	/* x64 __chkstk probes only below the TEB stack limit, and jump_fcontext() loaded the reservation's base there:
+	 * a large frame would skip the guard page. From here on the kernel moves the limit as the stack grows, and
+	 * jump_fcontext() keeps it per context. */
+	((NT_TIB *) NtCurrentTeb())->StackLimit = EG(current_fiber_context)->stack->initial_stack_limit;
+#endif
+
 	/* Initialize transfer struct with a copy of passed data. */
 #ifdef ZEND_FIBER_UCONTEXT
 	zend_fiber_transfer transfer = *transfer_data;
@@ -446,7 +472,15 @@ ZEND_API zend_result zend_fiber_init_context(zend_fiber_context *context, void *
 	*((unsigned long*) (stack - 8)) = (unsigned long)context->stack->ss_base + context->stack->ss_size;
 #endif
 
+#ifdef ZEND_WIN32
+	/* The bottom becomes the TEB deallocation stack and, as for a thread stack, it is the reservation's base: the
+	 * never committed bottom page of zend_fiber_stack_allocate() stops the stack, and the kernel's stack overflow
+	 * path can still use the page above it. */
+	const size_t alloc_size = context->stack->size + ZEND_FIBER_GUARD_PAGES * zend_fiber_get_page_size();
+	context->handle = make_fcontext(stack, alloc_size, zend_fiber_trampoline);
+#else
 	context->handle = make_fcontext(stack, context->stack->size, zend_fiber_trampoline);
+#endif
 	ZEND_ASSERT(context->handle != NULL && "make_fcontext() never returns NULL");
 #endif
 
