@@ -52,6 +52,9 @@ PHP 8.7 UPGRADE NOTES
     application terminate one attribute and append further ones.
 
 - Standard:
+  . bindec(), octdec(), hexdec() and base_convert() now throw an Exception
+    when the passed string contains characters that are invalid for the
+    specified number base.
   . The number of filters that can be chained in a php://filter URL is limited
     to 16 by default. Set the stream context option max_filter_count to change
     this.

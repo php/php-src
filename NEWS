@@ -173,6 +173,9 @@ PHP                                                                        NEWS
     especially UTF-8. (Nicolas Grekas)
   . Improved performance of htmlspecialchars() when nothing needs encoding.
     (Nicolas Grekas)
+  . bindec(), octdec(), hexdec() and base_convert() now throw an Exception
+    when the passed string contains characters that are invalid for the
+    specified number base. (Sjoerd Langkemper)
 
 - URI:
   . Fix casing of enum cases in UriHostType and UrlHostType to match the RFC
