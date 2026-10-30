@@ -2329,6 +2329,14 @@ ftp_nb_put(ftpbuf_t *ftp, const char *path, const size_t path_len, php_stream *i
 		php_error_docref(NULL, E_WARNING, "FTP\\Connection is already in use");
 		return PHP_FTP_FAILED;
 	}
+	if (ftp->data != NULL) {
+		/* If there is a transfer in action, abort it.
+		 * If we don't, we get an invalid state and memory leaks when the new connection gets opened. */
+		data_close(ftp);
+		if (!ftp_getresp(ftp) || (ftp->resp != 226 && ftp->resp != 250)) {
+			goto bail;
+		}
+	}
 	if (!ftp_type(ftp, type)) {
 		goto bail;
 	}
