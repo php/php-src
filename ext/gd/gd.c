@@ -4186,7 +4186,7 @@ PHP_FUNCTION(imageaffine)
 		dest_ht = NULL; \
 		if (UNEXPECTED(!zend_parse_arg_double(_arg, &dest_double, NULL, false, _i))) { \
 			zend_argument_type_error(_i, "must be of type array|float, %s given", zend_zval_value_name(_arg)); \
-			_error_code = ZPP_ERROR_FAILURE; \
+			_expected_type = Z_EXPECTED_FAILURE; \
 			break; \
 		} \
 	}
