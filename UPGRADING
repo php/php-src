@@ -21,8 +21,9 @@ PHP 8.7 UPGRADE NOTES
 
 - Bz2:
   . The compress.bzip2:// wrapper and bzopen() now read all concatenated bzip2
-    streams instead of stopping after the first stream. Trailing data without
-    a bzip2 header is still ignored.
+    streams instead of stopping after the first stream. bzdecompress() still
+    decompresses only the first stream. Trailing data without a bzip2 header is
+    still ignored.
 
 - Curl:
   . curl_multi_exec() now throws a TypeError when still_running is not an int.
