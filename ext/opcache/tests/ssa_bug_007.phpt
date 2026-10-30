@@ -20,5 +20,6 @@ function render($properties) {
 }
 ?>
 OK
---EXPECT--
+--EXPECTF--
+Warning: Non-empty case falls through to the next case, terminate the case with "fallthrough;" if this is intentional in %s on line %d
 OK
