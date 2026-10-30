@@ -326,6 +326,27 @@ ITypeInfo *php_com_locate_typeinfo(zend_string *type_lib_name, php_com_dotnet_ob
 					php_error_docref(NULL, E_WARNING, "IProvideClassInfo: this code not yet written!");
 					IProvideClassInfo_Release(pci);
 				}
+				if (gotguid) {
+					ITypeInfo *srcinfo = obj->typeinfo;
+					bool release_srcinfo = false;
+					unsigned int idx;
+					ITypeLib *container = NULL;
+
+					if (!srcinfo) {
+						ITypeInfo *fetched = NULL;
+
+						if (SUCCEEDED(IDispatch_GetTypeInfo(V_DISPATCH(&obj->v), 0, LANG_NEUTRAL, &fetched)) && fetched) {
+							srcinfo = fetched;
+							release_srcinfo = true;
+						}
+					}
+					if (srcinfo && SUCCEEDED(ITypeInfo_GetContainingTypeLib(srcinfo, &container, &idx))) {
+						typelib = container;
+					}
+					if (release_srcinfo) {
+						ITypeInfo_Release(srcinfo);
+					}
+				}
 			}
 		} else if (dispatch_name == NULL) {
 			if (obj->typeinfo) {
@@ -408,8 +429,12 @@ ITypeInfo *php_com_locate_typeinfo(zend_string *type_lib_name, php_com_dotnet_ob
 
 
 		efree(olename);
-	} else if (gotguid) {
-		ITypeLib_GetTypeInfoOfGuid(typelib, &iid, &typeinfo);
+	} else if (gotguid && typelib) {
+		ITypeInfo *found = NULL;
+
+		if (SUCCEEDED(ITypeLib_GetTypeInfoOfGuid(typelib, &iid, &found))) {
+			typeinfo = found;
+		}
 	}
 
 	if (typelib) {
@@ -639,6 +664,8 @@ bool php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, bool p
 		}
 	} else {
 		zend_throw_error(NULL, "Type kind must be dispatchable, %08x given", attr->typekind);
+		ITypeInfo_ReleaseTypeAttr(typeinfo, attr);
+		return false;
 	}
 
 	ITypeInfo_ReleaseTypeAttr(typeinfo, attr);
