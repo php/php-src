@@ -2230,7 +2230,7 @@ static void (*zend_test_prev_interrupt_function)(zend_execute_data *execute_data
  * leaves an interrupt pending at all times. The VM must still make progress. */
 static void zend_test_rearm_interrupt_function(zend_execute_data *execute_data)
 {
-	zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+	atomic_store(&EG(vm_interrupt), true);
 
 	if (zend_test_prev_interrupt_function) {
 		zend_test_prev_interrupt_function(execute_data);
@@ -2508,7 +2508,7 @@ PHP_RINIT_FUNCTION(zend_test)
 	zend_test_mm_custom_handlers_rinit();
 
 	if (ZT_G(rearm_vm_interrupt)) {
-		zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+		atomic_store(&EG(vm_interrupt), true);
 	}
 
 	return SUCCESS;
