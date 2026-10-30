@@ -234,6 +234,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed memory leaks in checkdnsrr() and dns_check_record() on Windows.
     (Ilia Alshanetsky)
+  . Fixed __unserialize() and __wakeup() being called for objects with a missing
+    closing brace. (Ilia Alshanetsky)
   . Fixed bug GH-24308 (Request shutdown calls closelog() even when syslog
     was not opened by PHP). (lazerg)
   . Fixed password_get_info() and password_needs_rehash() accepting malformed
