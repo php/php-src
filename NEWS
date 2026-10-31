@@ -213,6 +213,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-25006 (getColumnMeta() reads out of bounds for an
     out-of-range column index). (Ilia Alshanetsky)
 
+- PDO_SQLite:
+  . Fixed bug GH-25021 (SQLite createFunction corrupts large integers).
+    (mvorisek)
+
 - Phar:
   . Fixed bug GH-8469 (Phar::decompressFiles() and Phar::compressFiles() retain
     compressed contents after changing compression). (Raphael Paez)
@@ -255,6 +259,10 @@ PHP                                                                        NEWS
 - Sockets:
   . Fixed bug GH-24748 (socket_set_option() crashes with declared object
     properties). (Lazizbek Ergashev)
+
+- SQLite3:
+  . Fixed bug GH-25021 (SQLite createFunction corrupts large integers).
+    (mvorisek)
 
 - Standard:
   . Fixed memory leaks in checkdnsrr() and dns_check_record() on Windows.
