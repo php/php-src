@@ -179,7 +179,6 @@ function main(): void
     }
 
     define('TEST_PHP_SRCDIR', getcwd());
-    define('SKIPIF_HELPERS_FILE', write_skipif_helpers());
 
     check_proc_open_function_exists();
 
@@ -1249,30 +1248,6 @@ function test_sort($a, $b): int
     return $tb - $ta;
 }
 
-// Functions available to every SKIPIF section via auto_prepend_file.
-function write_skipif_helpers(): string
-{
-    $code = <<<'PHP'
-        <?php
-        function skipif($condition, string $reason): void
-        {
-            if ($condition) {
-                echo "skip $reason";
-                exit;
-            }
-        }
-
-        PHP;
-
-    $file = tempnam(sys_get_temp_dir(), 'run-tests-skipif-');
-    if ($file === false || file_put_contents($file, $code) === false) {
-        error('Unable to write SKIPIF helpers file.');
-    }
-    // Workers are killed with SIGTERM, so only the parent can clean up.
-    register_shutdown_function(static fn () => @unlink($file));
-    return $file;
-}
-
 //
 //  Write the given text to a temporary file.
 //
@@ -1661,7 +1636,6 @@ function run_all_tests_parallel(array $test_files, array $env, ?string $redir_te
             "constants" => [
                 "INIT_DIR" => INIT_DIR,
                 "TEST_PHP_SRCDIR" => TEST_PHP_SRCDIR,
-                "SKIPIF_HELPERS_FILE" => SKIPIF_HELPERS_FILE,
             ]
         ])) . "\n";
 
@@ -3892,6 +3866,9 @@ class JUnit
 
 class SkipCache
 {
+    // Kept on one line so SKIPIF line numbers are unchanged.
+    private const HELPERS = '<?php function skipif($condition, string $reason): void { if ($condition) { echo "skip $reason"; exit; } } ?>';
+
     private bool $enable;
     private bool $keepFile;
 
@@ -3919,14 +3896,14 @@ class SkipCache
         if (isset($this->skips[$key][$code])) {
             $this->hits++;
             if ($this->keepFile) {
-                save_text($checkFile, $code, $tempFile);
+                save_text($checkFile, self::HELPERS . $code, $tempFile);
             }
             return $this->skips[$key][$code];
         }
 
-        save_text($checkFile, $code, $tempFile);
+        save_text($checkFile, self::HELPERS . $code, $tempFile);
         $env['TEST_PHP_EVALUATING_SKIPIF'] = '1';
-        array_push($command, '-d', 'auto_prepend_file=' . SKIPIF_HELPERS_FILE, $checkFile);
+        $command[] = $checkFile;
         $result = trim(system_with_timeout($command, $env));
         if (strpos($result, 'nocache') === 0) {
             $result = '';
