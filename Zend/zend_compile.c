@@ -64,7 +64,7 @@
 
 typedef struct _zend_loop_var {
 	uint8_t opcode;
-	uint8_t var_type;
+	zend_operand_type var_type;
 	uint32_t   var_num;
 	uint32_t   try_catch_offset;
 } zend_loop_var;
@@ -6394,6 +6394,8 @@ static void zend_compile_void_cast(znode *result, const zend_ast *ast)
 		case IS_CONST:
 			zend_do_free(&expr_node);
 			break;
+		default:
+			ZEND_UNREACHABLE();
 	}
 }
 

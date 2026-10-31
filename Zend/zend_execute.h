@@ -133,8 +133,8 @@ ZEND_API bool zend_verify_internal_return_type(const zend_function *zf, zval *re
 ZEND_API void ZEND_FASTCALL zend_ref_add_type_source(zend_property_info_source_list *source_list, zend_property_info *prop);
 ZEND_API void ZEND_FASTCALL zend_ref_del_type_source(zend_property_info_source_list *source_list, const zend_property_info *prop);
 
-ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *value, uint8_t value_type, bool strict);
-ZEND_API zval* zend_assign_to_typed_ref_ex(zval *variable_ptr, zval *value, uint8_t value_type, bool strict, zend_refcounted **garbage_ptr);
+ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *value, zend_operand_type value_type, bool strict);
+ZEND_API zval* zend_assign_to_typed_ref_ex(zval *variable_ptr, zval *value, zend_operand_type value_type, bool strict, zend_refcounted **garbage_ptr);
 
 static zend_always_inline void zend_copy_to_variable(zval *variable_ptr, const zval *value, uint8_t value_type)
 {
@@ -163,7 +163,7 @@ static zend_always_inline void zend_copy_to_variable(zval *variable_ptr, const z
 	}
 }
 
-static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, uint8_t value_type, bool strict)
+static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, zend_operand_type value_type, bool strict)
 {
 	do {
 		if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr))) {
@@ -190,7 +190,7 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 	return variable_ptr;
 }
 
-static zend_always_inline zval* zend_assign_to_variable_ex(zval *variable_ptr, zval *value, zend_uchar value_type, bool strict, zend_refcounted **garbage_ptr)
+static zend_always_inline zval* zend_assign_to_variable_ex(zval *variable_ptr, zval *value, zend_operand_type value_type, bool strict, zend_refcounted **garbage_ptr)
 {
 	do {
 		if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr))) {
@@ -223,7 +223,7 @@ static zend_always_inline void zend_safe_assign_to_variable_noref(zval *variable
 	}
 }
 
-static zend_always_inline void zend_cast_zval_to_object(zval *result, zval *expr, uint8_t op1_type) {
+static zend_always_inline void zend_cast_zval_to_object(zval *result, zval *expr, zend_operand_type op1_type) {
 	HashTable *ht;
 
 	ZVAL_OBJ(result, zend_objects_new(zend_standard_class_def));
@@ -248,7 +248,7 @@ static zend_always_inline void zend_cast_zval_to_object(zval *result, zval *expr
 	}
 }
 
-static zend_always_inline void zend_cast_zval_to_array(zval *result, zval *expr, uint8_t op1_type) {
+static zend_always_inline void zend_cast_zval_to_array(zval *result, zval *expr, zend_operand_type op1_type) {
 	extern ZEND_API zend_class_entry *zend_ce_closure;
 	if (op1_type == IS_CONST || Z_TYPE_P(expr) != IS_OBJECT || Z_OBJCE_P(expr) == zend_ce_closure) {
 		if (Z_TYPE_P(expr) != IS_NULL) {
@@ -550,7 +550,7 @@ ZEND_API bool zend_gcc_global_regs(void);
 ZEND_API zend_result zend_set_user_opcode_handler(uint8_t opcode, user_opcode_handler_t handler);
 ZEND_API user_opcode_handler_t zend_get_user_opcode_handler(uint8_t opcode);
 
-ZEND_API zval *zend_get_zval_ptr(const zend_op *opline, int op_type, const znode_op *node, const zend_execute_data *execute_data);
+ZEND_API zval *zend_get_zval_ptr(const zend_op *opline, zend_operand_type op_type, const znode_op *node, const zend_execute_data *execute_data);
 
 ZEND_API void zend_clean_and_cache_symbol_table(zend_array *symbol_table);
 ZEND_API void ZEND_FASTCALL zend_free_compiled_variables(zend_execute_data *execute_data);

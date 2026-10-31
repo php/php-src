@@ -2134,7 +2134,7 @@ ZEND_API uint32_t ZEND_FASTCALL zend_array_type_info(const zval *zv)
 }
 
 
-ZEND_API uint32_t zend_array_element_type(uint32_t t1, uint8_t op_type, bool write, bool insert)
+ZEND_API uint32_t zend_array_element_type(uint32_t t1, zend_operand_type op_type, bool write, bool insert)
 {
 	uint32_t tmp = 0;
 
@@ -2196,7 +2196,7 @@ ZEND_API uint32_t zend_array_element_type(uint32_t t1, uint8_t op_type, bool wri
 }
 
 static uint32_t assign_dim_array_result_type(
-		uint32_t arr_type, uint32_t dim_type, uint32_t value_type, uint8_t dim_op_type) {
+		uint32_t arr_type, uint32_t dim_type, uint32_t value_type, zend_operand_type dim_op_type) {
 	uint32_t tmp = 0;
 	/* Only add key type if we have a value type. We want to maintain the invariant that a
 	 * key type exists iff a value type exists even in dead code that may use empty types. */
@@ -2244,7 +2244,7 @@ static uint32_t assign_dim_array_result_type(
 }
 
 static uint32_t assign_dim_result_type(
-		uint32_t arr_type, uint32_t dim_type, uint32_t value_type, uint8_t dim_op_type) {
+		uint32_t arr_type, uint32_t dim_type, uint32_t value_type, zend_operand_type dim_op_type) {
 	uint32_t tmp = arr_type & ~(MAY_BE_RC1|MAY_BE_RCN);
 
 	if (arr_type & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {

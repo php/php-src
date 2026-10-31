@@ -348,7 +348,7 @@ static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
                                        zend_jit_addr   var_addr,
                                        uint32_t        var_info,
                                        uint32_t        var_def_info,
-                                       uint8_t         val_type,
+                                       zend_operand_type val_type,
                                        zend_jit_addr   val_addr,
                                        uint32_t        val_info,
                                        zend_jit_addr   res_addr,
@@ -1233,13 +1233,13 @@ static ir_ref jit_if_Z_TYPE_ref(zend_jit_ctx *jit, ir_ref ref, ir_ref type)
 	return ir_IF(ir_EQ(jit_Z_TYPE_ref(jit, ref), type));
 }
 
-static ir_ref jit_if_Z_TYPE(zend_jit_ctx *jit, zend_jit_addr addr, uint8_t type)
+static ir_ref jit_if_Z_TYPE(zend_jit_ctx *jit, zend_jit_addr addr, zend_operand_type type)
 {
 	ZEND_ASSERT(type != IS_UNDEF);
 	return ir_IF(ir_EQ(jit_Z_TYPE(jit, addr), ir_CONST_U8(type)));
 }
 
-static ir_ref jit_if_not_Z_TYPE(zend_jit_ctx *jit, zend_jit_addr addr, uint8_t type)
+static ir_ref jit_if_not_Z_TYPE(zend_jit_ctx *jit, zend_jit_addr addr, zend_operand_type type)
 {
 	ir_ref ref = jit_Z_TYPE(jit, addr);
 
@@ -1249,7 +1249,7 @@ static ir_ref jit_if_not_Z_TYPE(zend_jit_ctx *jit, zend_jit_addr addr, uint8_t t
 	return ir_IF(ref);
 }
 
-static void jit_guard_Z_TYPE(zend_jit_ctx *jit, zend_jit_addr addr, uint8_t type, const void *exit_addr)
+static void jit_guard_Z_TYPE(zend_jit_ctx *jit, zend_jit_addr addr, zend_operand_type type, const void *exit_addr)
 {
 	ir_ref ref = jit_Z_TYPE(jit, addr);
 
@@ -1260,7 +1260,7 @@ static void jit_guard_Z_TYPE(zend_jit_ctx *jit, zend_jit_addr addr, uint8_t type
 	}
 }
 
-static void jit_guard_not_Z_TYPE(zend_jit_ctx *jit, zend_jit_addr addr, uint8_t type, const void *exit_addr)
+static void jit_guard_not_Z_TYPE(zend_jit_ctx *jit, zend_jit_addr addr, zend_operand_type type, const void *exit_addr)
 {
 	ir_ref ref = jit_Z_TYPE(jit, addr);
 
@@ -1875,7 +1875,7 @@ static void jit_ZVAL_PTR_DTOR(zend_jit_ctx  *jit,
 }
 
 static void jit_FREE_OP(zend_jit_ctx  *jit,
-                        uint8_t        op_type,
+                        zend_operand_type op_type,
                         znode_op       op,
                         uint32_t       op_info,
                         const zend_op *opline)
@@ -4578,7 +4578,7 @@ static int zend_jit_load_var(zend_jit_ctx *jit, uint32_t info, int var, int ssa_
 	return zend_jit_load_reg(jit, src, dst, info);
 }
 
-static int zend_jit_invalidate_var_if_necessary(zend_jit_ctx *jit, uint8_t op_type, zend_jit_addr addr, znode_op op)
+static int zend_jit_invalidate_var_if_necessary(zend_jit_ctx *jit, zend_operand_type op_type, zend_jit_addr addr, znode_op op)
 {
 	if ((op_type & (IS_TMP_VAR|IS_VAR)) && Z_MODE(addr) == IS_REG && !Z_LOAD(addr) && !Z_STORE(addr)) {
 		/* Invalidate operand type to prevent incorrect destruction by exception_handler_free_op1_op2() */
@@ -5347,11 +5347,11 @@ static int zend_jit_math_double_double(zend_jit_ctx   *jit,
 static int zend_jit_math_helper(zend_jit_ctx   *jit,
                                 const zend_op  *opline,
                                 uint8_t         opcode,
-                                uint8_t         op1_type,
+                                zend_operand_type op1_type,
                                 znode_op        op1,
                                 zend_jit_addr   op1_addr,
                                 uint32_t        op1_info,
-                                uint8_t         op2_type,
+                                zend_operand_type op2_type,
                                 znode_op        op2,
                                 zend_jit_addr   op2_addr,
                                 uint32_t        op2_info,
@@ -5676,12 +5676,12 @@ static int zend_jit_add_arrays(zend_jit_ctx *jit, const zend_op *opline, uint32_
 static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
                                      const zend_op  *opline,
                                      uint8_t         opcode,
-                                     uint8_t         op1_type,
+                                     zend_operand_type op1_type,
                                      znode_op        op1,
                                      zend_jit_addr   op1_addr,
                                      uint32_t        op1_info,
                                      zend_ssa_range *op1_range,
-                                     uint8_t         op2_type,
+                                     zend_operand_type op2_type,
                                      znode_op        op2,
                                      zend_jit_addr   op2_addr,
                                      uint32_t        op2_info,
@@ -6052,11 +6052,11 @@ static int zend_jit_long_math(zend_jit_ctx *jit, const zend_op *opline, uint32_t
 
 static int zend_jit_concat_helper(zend_jit_ctx   *jit,
                                   const zend_op  *opline,
-                                  uint8_t         op1_type,
+                                  zend_operand_type op1_type,
                                   znode_op        op1,
                                   zend_jit_addr   op1_addr,
                                   uint32_t        op1_info,
-                                  uint8_t         op2_type,
+                                  zend_operand_type op2_type,
                                   znode_op        op2,
                                   zend_jit_addr   op2_addr,
                                   uint32_t        op2_info,
@@ -6304,7 +6304,7 @@ static int zend_jit_simple_assign(zend_jit_ctx   *jit,
                                   zend_jit_addr   var_addr,
                                   uint32_t        var_info,
                                   uint32_t        var_def_info,
-                                  uint8_t         val_type,
+                                  zend_operand_type val_type,
                                   zend_jit_addr   val_addr,
                                   uint32_t        val_info,
                                   zend_jit_addr   res_addr,
@@ -6425,7 +6425,7 @@ static int zend_jit_assign_to_variable_call(zend_jit_ctx   *jit,
                                             zend_jit_addr   var_addr,
                                             uint32_t        __var_info,
                                             uint32_t        __var_def_info,
-                                            uint8_t         val_type,
+                                            zend_operand_type val_type,
                                             zend_jit_addr   val_addr,
                                             uint32_t        val_info,
                                             zend_jit_addr   __res_addr,
@@ -6505,7 +6505,7 @@ static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
                                        zend_jit_addr   var_addr,
                                        uint32_t        var_info,
                                        uint32_t        var_def_info,
-                                       uint8_t         val_type,
+                                       zend_operand_type val_type,
                                        zend_jit_addr   val_addr,
                                        uint32_t        val_info,
                                        zend_jit_addr   res_addr,
@@ -13884,7 +13884,7 @@ static int zend_jit_assign_dim_op(zend_jit_ctx   *jit,
 		}
 
 		if (emit_fast_path) {
-			uint8_t val_op_type = (opline+1)->op1_type;
+			zend_operand_type val_op_type = (opline+1)->op1_type;
 
 			if (val_op_type & (IS_TMP_VAR|IS_VAR)) {
 				/* prevent FREE_OP in the helpers */
@@ -15711,7 +15711,7 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
 			var_info &= ~MAY_BE_REF;
 		}
 
-		uint8_t val_op_type = (opline+1)->op1_type;
+		zend_operand_type val_op_type = (opline+1)->op1_type;
 		if (val_op_type & (IS_TMP_VAR|IS_VAR)) {
 			/* prevent FREE_OP in the helpers */
 			val_op_type = IS_CV;
@@ -18271,7 +18271,7 @@ static bool jit_frameless_icall3(zend_jit_ctx *jit, const zend_op *opline, uint3
 	}
 
 	void *function = ZEND_FLF_HANDLER(opline);
-	uint8_t op_data_type = (opline + 1)->op1_type;
+	zend_operand_type op_data_type = (opline + 1)->op1_type;
 	zend_jit_addr res_addr = RES_ADDR();
 	zend_jit_addr op1_addr = OP1_ADDR();
 	zend_jit_addr op2_addr = OP2_ADDR();
