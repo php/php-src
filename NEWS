@@ -173,6 +173,8 @@ PHP                                                                        NEWS
     especially UTF-8. (Nicolas Grekas)
   . Improved performance of htmlspecialchars() when nothing needs encoding.
     (Nicolas Grekas)
+  . Fixed bug GH-10460 (allow_url_include warning must be consistent even with
+    path with filters). (Chris Smith)
 
 - URI:
   . Fix casing of enum cases in UriHostType and UrlHostType to match the RFC
