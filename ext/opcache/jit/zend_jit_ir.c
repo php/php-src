@@ -17476,6 +17476,20 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 
 static bool zend_jit_var_supports_reg(zend_ssa *ssa, int var)
 {
+	/* A transient assignment to a live loop-carried CV needs an explicit,
+	 * control-dependent store. Its spill must not be hoisted before the
+	 * loop guards, where the incoming value is still observable. */
+	if (ssa->vars[var].definition >= 0
+	 && !ssa->vars[var].phi_use_chain
+	 && ssa->ops[ssa->vars[var].definition].op1_def == var) {
+		int use = ssa->ops[ssa->vars[var].definition].op1_use;
+
+		if (use >= 0 && !ssa->vars[use].no_val
+		 && ssa->vars[use].definition_phi
+		 && (ssa->cfg.blocks[ssa->vars[use].definition_phi->block].flags & ZEND_BB_LOOP_HEADER)) {
+			return 0;
+		}
+	}
 	if (ssa->vars[var].no_val) {
 		/* we don't need the value */
 		return 0;
