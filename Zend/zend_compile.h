@@ -580,10 +580,6 @@ struct _zend_op_array {
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
 
-
-#define ZEND_RETURN_VALUE				0
-#define ZEND_RETURN_REFERENCE			1
-
 #define INTERNAL_FUNCTION_PARAMETERS zend_execute_data *execute_data, zval *return_value
 #define INTERNAL_FUNCTION_PARAM_PASSTHRU execute_data, return_value
 
