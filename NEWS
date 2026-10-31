@@ -224,6 +224,8 @@ PHP                                                                        NEWS
     out-of-range column index). (Ilia Alshanetsky)
 
 - PDO_SQLite:
+  . Fixed bug GH-25106 (Re-executing a statement could return a spurious row).
+    (JoaoMarcos44)
   . Fixed bug GH-25021 (SQLite createFunction corrupts large integers).
     (mvorisek)
 
