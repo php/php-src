@@ -648,7 +648,6 @@ foundit:
 			fp->readpos = 0;
 			/* the above lines should be for php < 5.2.6 after 5.3 filters are fixed */
 
-			mydata->alias_len = entry.uncompressed_filesize;
 			if (entry.flags & PHAR_ENT_COMPRESSED_GZ) {
 				filter = php_stream_filter_create("zlib.inflate", NULL, php_stream_is_persistent(fp));
 
@@ -734,6 +733,8 @@ foundit:
 					PHAR_ZIP_FAIL("unable to read in alias, truncated");
 				}
 			}
+
+			mydata->alias_len = entry.uncompressed_filesize;
 
 			/* return to central directory parsing */
 			php_stream_seek(fp, restore_pos, SEEK_SET);
