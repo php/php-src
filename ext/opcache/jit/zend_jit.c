@@ -3296,6 +3296,8 @@ static int zend_jit_restart_hot_counters(zend_op_array *op_array)
 	uint32_t i;
 
 	jit_extension = (zend_jit_op_array_hot_extension*)ZEND_FUNC_INFO(op_array);
+	/* The JIT-ed code is gone, so allow compiling it again */
+	jit_extension->func_info.flags &= ~ZEND_FUNC_JITED;
 	for (i = 0; i < op_array->last; i++) {
 		op_array->opcodes[i].handler = jit_extension->orig_handlers[i];
 	}

@@ -124,6 +124,8 @@ PHP                                                                        NEWS
     when zend_interrupt_function resets EG(vm_interrupt).  (Levi Morrison)
   . Fix JIT losing the called scope of self::/parent:: calls in included files.
     (ndossche)
+  . Fixed preloaded functions not JIT-compiled again after OPcache restart.
+    (Jorg Sowa)
 
 - OpenSSL:
   . Fixed build with OpenSSL 4.1. (Weilin Du)
