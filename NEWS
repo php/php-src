@@ -22,6 +22,10 @@ PHP                                                                        NEWS
   . Fixed mhash_keygen_s2k() truncating a $length above INT_MAX instead of
     throwing a ValueError. (Marc Bennewitz)
 
+- JSON:
+  . Improved performance of json_decode(), json_validate() and json_encode()
+    for input containing strings. (zeynallow)
+
 - Intl:
   . Added IntlRelativeDateTimeFormatter for locale-aware relative date and time
     formatting, with enums for styles, capitalization contexts, and units.

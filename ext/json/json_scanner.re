@@ -17,6 +17,11 @@
 #include "php_json_scanner_defs.h"
 #include "php_json_parser.h"
 #include "json_parser.tab.h"
+#include "zend_bitset.h"
+
+#ifdef __SSE2__
+# include <emmintrin.h>
+#endif
 
 #define	YYCTYPE     php_json_ctype
 #define	YYCURSOR    s->cursor
@@ -34,6 +39,13 @@
 #define PHP_JSON_CONDITION_SET_AND_GOTO(condition) \
 	PHP_JSON_CONDITION_SET(condition); \
 	PHP_JSON_CONDITION_GOTO(condition)
+/* Skip the run of bytes inside a string that need no handling by the state machine
+ * before (re)entering the first string pass. */
+#define PHP_JSON_CONDITION_GOTO_STR_P1() \
+	do { \
+		s->cursor = php_json_skip_plain_string_bytes(s->cursor, s->limit); \
+		PHP_JSON_CONDITION_GOTO(STR_P1); \
+	} while (0)
 #define PHP_JSON_CONDITION_GOTO_STR_P2() \
 	do { \
 		if (s->utf8_invalid) { \
@@ -59,6 +71,41 @@ static void php_json_scanner_copy_string(php_json_scanner *s, size_t esc_size)
 		memcpy(s->pstr, s->str_start, len);
 		s->pstr += len;
 	}
+}
+
+/* Returns a pointer to the first byte at or after p (and before limit) that is not printable
+ * ASCII other than '"' and '\\'. Those are the only bytes the first string pass has to look
+ * at; everything else is accepted as is. */
+static zend_always_inline php_json_ctype *php_json_skip_plain_string_bytes(
+		php_json_ctype *p, const php_json_ctype *limit)
+{
+	/* Nothing to skip when the next byte already needs the state machine, e.g. in escape-heavy
+	 * strings. Avoids the vector setup there. */
+	if (p >= limit || *p < 0x20 || *p >= 0x80 || *p == '"' || *p == '\\') {
+		return p;
+	}
+#ifdef __SSE2__
+	const __m128i quote = _mm_set1_epi8('"');
+	const __m128i backslash = _mm_set1_epi8('\\');
+	/* As signed bytes, both control characters (< 0x20) and non-ASCII bytes (>= 0x80) are < 0x20. */
+	const __m128i ctrl_or_high = _mm_set1_epi8(0x20);
+
+	while (limit - p >= 16) {
+		const __m128i chunk = _mm_loadu_si128((const __m128i *) p);
+		const __m128i special = _mm_or_si128(
+			_mm_or_si128(_mm_cmpeq_epi8(chunk, quote), _mm_cmpeq_epi8(chunk, backslash)),
+			_mm_cmpgt_epi8(ctrl_or_high, chunk));
+		const int mask = _mm_movemask_epi8(special);
+		if (mask) {
+			return p + zend_ulong_ntz((zend_ulong) mask);
+		}
+		p += 16;
+	}
+#endif
+	while (p < limit && *p >= 0x20 && *p < 0x80 && *p != '"' && *p != '\\') {
+		p++;
+	}
+	return p;
 }
 
 static int php_json_hex_to_int(unsigned char code)
@@ -216,7 +263,8 @@ std:
 		s->str_esc = 0;
 		s->utf8_invalid = 0;
 		s->utf8_invalid_count = 0;
-		PHP_JSON_CONDITION_SET_AND_GOTO(STR_P1);
+		PHP_JSON_CONDITION_SET(STR_P1);
+		PHP_JSON_CONDITION_GOTO_STR_P1();
 	}
 	<JS>CTRL                 {
 		s->errcode = PHP_JSON_ERROR_CTRL_CHAR;
@@ -244,19 +292,19 @@ std:
 	}
 	<STR_P1>UTF16_1          {
 		s->str_esc += 5;
-		PHP_JSON_CONDITION_GOTO(STR_P1);
+		PHP_JSON_CONDITION_GOTO_STR_P1();
 	}
 	<STR_P1>UTF16_2          {
 		s->str_esc += 4;
-		PHP_JSON_CONDITION_GOTO(STR_P1);
+		PHP_JSON_CONDITION_GOTO_STR_P1();
 	}
 	<STR_P1>UTF16_3          {
 		s->str_esc += 3;
-		PHP_JSON_CONDITION_GOTO(STR_P1);
+		PHP_JSON_CONDITION_GOTO_STR_P1();
 	}
 	<STR_P1>UTF16_4          {
 		s->str_esc += 8;
-		PHP_JSON_CONDITION_GOTO(STR_P1);
+		PHP_JSON_CONDITION_GOTO_STR_P1();
 	}
 	<STR_P1>UCS2             {
 		s->errcode = PHP_JSON_ERROR_UTF16;
@@ -264,7 +312,7 @@ std:
 	}
 	<STR_P1>ESC              {
 		s->str_esc++;
-		PHP_JSON_CONDITION_GOTO(STR_P1);
+		PHP_JSON_CONDITION_GOTO_STR_P1();
 	}
 	<STR_P1>ESCPREF           {
 		s->errcode = PHP_JSON_ERROR_SYNTAX;
@@ -295,7 +343,11 @@ std:
 			return PHP_JSON_T_STRING;
 		}
 	}
-	<STR_P1>UTF8             { PHP_JSON_CONDITION_GOTO(STR_P1); }
+	<STR_P1>UTF8_1           { PHP_JSON_CONDITION_GOTO_STR_P1(); }
+	<STR_P1>UTF8_2|UTF8_3|UTF8_4 {
+		/* Stay in the state machine: it handles runs of multibyte characters efficiently. */
+		PHP_JSON_CONDITION_GOTO(STR_P1);
+	}
 	<STR_P1>ANY              {
 		if (s->options & (PHP_JSON_INVALID_UTF8_IGNORE | PHP_JSON_INVALID_UTF8_SUBSTITUTE)) {
 			if (s->options & PHP_JSON_INVALID_UTF8_SUBSTITUTE) {

@@ -188,6 +188,11 @@ PHP 8.7 UPGRADE NOTES
   . htmlspecialchars() returns its input without copying it when nothing needs
     encoding.
 
+- JSON:
+  . Improved performance of json_decode() and json_validate() when scanning
+    strings, and of json_encode() when escaping strings, notably UTF-8 text
+    with JSON_UNESCAPED_UNICODE.
+
 - MBString:
   . Improved performance of mb_strlen for UTF-8 strings.
 
