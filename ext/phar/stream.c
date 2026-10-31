@@ -852,6 +852,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		entry->is_deleted = 1;
 		entry->fp = NULL;
 		ZVAL_UNDEF(&entry->metadata_tracker.val);
+		entry->metadata_tracker.str = NULL;
 		entry->link = entry->tmp = NULL;
 		source = entry;
 
