@@ -81,6 +81,9 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 - Standard:
   . php_explode() now takes a HashTable* instead of a zval* to store the
     resulting parts. It already expected the zval* to be IS_ARRAY.
+  . Added php_next_utf8_char_fast() to ext/standard/html.h. It has the same
+    contract as php_next_utf8_char() and decodes valid UTF-8 at the call
+    site.
 
 ========================
 4. OpCode changes
