@@ -31,6 +31,8 @@ PHP                                                                        NEWS
     (Marti2203).
   . Fixed AST printing dropping final on class constants and properties, and
     abstract on properties. (Jorg Sowa)
+  . Fixed AST export of readonly anonymous classes dropping the readonly
+    modifier. (Jorg Sowa)
 
 - CLI:
   . Fixed bug GH-24697 (PHP_HTTP_PARSER_STRICT build option doesn't work).
