@@ -324,8 +324,53 @@ static int ps_files_cleanup_dir(const zend_string *dirname, zend_long maxlifetim
 			}
 			time(&now);
 			if ((now - sbuf.st_mtime) > maxlifetime) {
-				VCWD_UNLINK(buf);
-				nrdels++;
+				/* ps_files_open() holds flock(LOCK_EX) on a session file for
+				 * as long as the owning request is active. Unlinking a file
+				 * while another process still has it open succeeds silently
+				 * on POSIX (the directory entry disappears, but the holder's
+				 * already-open fd keeps working against the now-orphaned
+				 * inode), so a session actively in use can be destroyed
+				 * out from under its owner without either side ever seeing
+				 * an error. Probe for that with a non-blocking lock attempt
+				 * before deleting, and skip files currently in use instead
+				 * of unlinking them. */
+				int fd = VCWD_OPEN(buf, O_RDWR);
+				if (fd < 0) {
+					/* Can no longer be opened (already removed, permissions
+					 * changed, etc.); nothing to delete or protect. */
+					continue;
+				}
+				if (flock(fd, LOCK_EX | LOCK_NB) == 0) {
+					/* We obtained the lock: no other request currently has
+					 * this session open. Unlink while still holding it,
+					 * instead of unlocking first: a request that already
+					 * called open() on this same path is blocked in its own
+					 * flock(LOCK_EX) call until we release, so it can only
+					 * acquire the lock after the unlink below has already
+					 * happened, never on a still-linked file we are about
+					 * to remove out from under it.
+					 *
+					 * This does not fully close the race: that request's
+					 * open() happened before our unlink(), so once its
+					 * flock() unblocks it is still holding a valid fd on
+					 * the now-unlinked inode, and whatever it writes is
+					 * lost the same way as the bug this function guards
+					 * against, just in a far narrower window. Closing that
+					 * last gap needs the open side (ps_files_open()) to
+					 * notice its file was unlinked out from under it after
+					 * acquiring the lock (e.g. via fstat() st_nlink) and
+					 * retry; this function cannot do that from here. */
+					if (VCWD_UNLINK(buf) == 0) {
+						nrdels++;
+					}
+					flock(fd, LOCK_UN);
+					close(fd);
+				} else {
+					/* Another request holds the lock; this session is
+					 * actively in use despite its old mtime. Leave it for a
+					 * future GC pass instead of destroying live data. */
+					close(fd);
+				}
 			}
 		} else {
 			/* intermediate depth: recurse into subdirectories */

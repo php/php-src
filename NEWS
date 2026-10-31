@@ -115,6 +115,14 @@ PHP                                                                        NEWS
     set to an empty string. (Ilia Alshanetsky)
 
 - Session:
+  . Fixed the files save handler's garbage collector deleting a session file
+    that another request still holds open and locked, silently destroying
+    its data without either side seeing an error. As a side effect, a
+    request that resumes its own already-expired session during the same
+    GC pass that would have collected it now keeps that session instead of
+    losing it; previously, gc_maxlifetime could cause a client's own
+    request to destroy the very session data it was about to write.
+    (reported and fixed by Asahi)
   . Fixed session_start() continuing after a failed create_sid() when
     session.use_strict_mode rejects the supplied ID. (Ilia Alshanetsky)
   . Fixed exceptions from user-defined create_sid() handlers being replaced
