@@ -485,7 +485,10 @@ static void php_filter_call(
 ) /* {{{ */ {
 	zval *options = NULL;
 	zval *option;
+	zval options_copy;
 	char *charset = NULL;
+
+	ZVAL_UNDEF(&options_copy);
 
 	if (!filter_args_ht) {
 		if (filter != -1) { /* handler for array apply */
@@ -504,12 +507,16 @@ static void php_filter_call(
 		}
 
 		if ((option = zend_hash_str_find_deref(filter_args_ht, "options", sizeof("options") - 1)) != NULL) {
+			/* Hold our own copy: converting the value to a string can run __toString(),
+			 * which may change the options through a reference (GH-24579). */
 			if (filter != FILTER_CALLBACK) {
 				if (Z_TYPE_P(option) == IS_ARRAY) {
-					options = option;
+					ZVAL_COPY(&options_copy, option);
+					options = &options_copy;
 				}
 			} else {
-				options = option;
+				ZVAL_COPY(&options_copy, option);
+				options = &options_copy;
 				filter_flags = 0;
 			}
 		}
@@ -531,10 +538,10 @@ static void php_filter_call(
 			} else {
 				ZVAL_FALSE(filtered);
 			}
-			return;
+			goto out;
 		}
 		php_zval_filter_recursive(filtered, filter, filter_flags, options, charset, copy);
-		return;
+		goto out;
 	}
 	if (filter_flags & FILTER_REQUIRE_ARRAY) {
 		zval_ptr_dtor(filtered);
@@ -543,7 +550,7 @@ static void php_filter_call(
 		} else {
 			ZVAL_FALSE(filtered);
 		}
-		return;
+		goto out;
 	}
 
 	php_zval_filter(filtered, filter, filter_flags, options, charset, copy);
@@ -553,6 +560,9 @@ static void php_filter_call(
 		array_init(filtered);
 		add_next_index_zval(filtered, &tmp);
 	}
+
+out:
+	zval_ptr_dtor(&options_copy);
 }
 /* }}} */
 
