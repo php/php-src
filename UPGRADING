@@ -966,6 +966,7 @@ PHP 8.6 UPGRADE NOTES
 - Fileinfo:
   . Upgraded to file 5.48.
     Custom compiled magic databases from older file versions must be regenerated.
+  . TrueType fonts are now detected as font/ttf instead of font/sfnt.
 
 - Hash:
   . The bundled version of xxHash was upgraded to 0.8.2.
