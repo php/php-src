@@ -60,6 +60,17 @@ PHP 8.7 UPGRADE NOTES
 2. New Features
 ========================================
 
+- Core:
+  . Added experimental async/await syntax built on top of Fibers.
+    Calling an `async function` (or async method, closure or arrow function)
+    runs its body in a new Fiber and returns an Async\Future. `await $future`
+    suspends the current task until the Future completes and returns its value
+    or rethrows its exception. Awaiting outside of a task runs the scheduler
+    until the Future completes.
+    New API: Async\Future, Async\async(), Async\wait(), Async\delay() and
+    Async\suspend(). `async` is only a keyword when followed by `function` or
+    `fn`; `await` is a new reserved keyword (still allowed as a member name).
+
 - Curl:
   . Multiple files can now be uploaded with the same field name by passing an
     array of CURLFile or CURLStringFile objects to CURLOPT_POSTFIELDS.
