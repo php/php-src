@@ -3,6 +3,7 @@
 /** @generate-class-entries */
 
 const PASSWORD_BCRYPT = "2y";
+const PASSWORD_BCRYPT_WRAP = "bcrypt-wrap";
 /**
  * @var int
  * @cvalue PHP_PASSWORD_BCRYPT_COST

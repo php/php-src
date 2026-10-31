@@ -48,4 +48,12 @@ PHP_HASH_API void PHP_SHA3512Init(PHP_SHA3_512_CTX*, ZEND_ATTRIBUTE_UNUSED HashT
 PHP_HASH_API void PHP_SHA3512Update(PHP_SHA3_512_CTX*, const unsigned char*, size_t);
 PHP_HASH_API void PHP_SAH3512Final(unsigned char[32], PHP_SHA3_512_CTX*);
 
+/* TODO: Decide whether this is appropriate; kept minimal here to avoid scope creep,
+ *       but userspace-exposed cSHAKE makes sense and likely looks different. */
+PHP_HASH_API void php_hash_cshake256(
+	const unsigned char *data, size_t data_len,
+	const unsigned char *custom, size_t custom_len,
+	unsigned char *output, size_t out_len
+);
+
 #endif
