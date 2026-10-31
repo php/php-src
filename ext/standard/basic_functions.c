@@ -774,6 +774,9 @@ PHP_FUNCTION(putenv)
 		zend_argument_value_error(1, "must have a valid syntax");
 		RETURN_THROWS();
 	}
+	if (UNEXPECTED(EG(flags) & EG_FLAGS_IN_RESOURCE_SHUTDOWN)) {
+		RETURN_FALSE;
+	}
 
 	pe.putenv_string = zend_strndup(setting, setting_len);
 	if ((p = strchr(setting, '='))) {
