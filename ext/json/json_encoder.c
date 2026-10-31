@@ -295,6 +295,10 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 							zval_ptr_dtor(&tmp);
 							return FAILURE;
 						}
+						if (UNEXPECTED(data == &EG(uninitialized_zval))) {
+							zval_ptr_dtor(&tmp);
+							continue;
+						}
 					}
 
 					if (need_comma) {
