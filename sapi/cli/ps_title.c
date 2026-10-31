@@ -405,7 +405,7 @@ int get_ps_title(size_t *displen, const char** string)
 	wchar_t ps_buffer_w[MAX_PATH];
 	char *tmp;
 
-        if (!(ps_buffer_cur_len = GetConsoleTitleW(ps_buffer_w, (DWORD)sizeof(ps_buffer_w)))) {
+        if (!(ps_buffer_cur_len = GetConsoleTitleW(ps_buffer_w, MAX_PATH))) {
             return PS_TITLE_WINDOWS_ERROR;
 	}
 
