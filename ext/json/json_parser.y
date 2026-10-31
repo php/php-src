@@ -121,6 +121,7 @@ members:
 				}
 			}
 	|	member
+	|	member trailing_comma
 ;
 
 member:
@@ -181,6 +182,7 @@ elements:
 				}
 			}
 	|	element
+	|	element trailing_comma
 ;
 
 element:
@@ -199,6 +201,18 @@ element:
 					YYERROR;
 				}
 				ZVAL_COPY_VALUE(&$$, &$1);
+			}
+;
+
+trailing_comma:
+		','
+			{
+				if (!(parser->scanner.options & PHP_JSON_ALLOW_TRAILING_COMMAS)) {
+					/* This rule also reduces on an error token from the scanner,
+					 * so keep the scanner's error code. */
+					php_json_yyerror(parser, NULL);
+					YYERROR;
+				}
 			}
 ;
 
