@@ -212,6 +212,8 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bug GH-24784 (openssl_pkcs7_read() and openssl_cms_read() overwrite
     certificates with CRLs). (Alexander Danilov)
+  . Fixed bug GH-25088 (SNI server contexts do not inherit ciphers, ALPN,
+    DH params and security level). (Roman Ondráček)
 
 - PDO:
   . Fixed invalid ATTR_ORACLE_NULLS values being accepted and truncated.

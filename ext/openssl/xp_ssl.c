@@ -1400,6 +1400,31 @@ static zend_result php_openssl_set_server_specific_opts(php_stream *stream, SSL_
 }
 /* }}} */
 
+static zend_result php_openssl_set_cipher_list(php_stream *stream, SSL_CTX *ctx) /* {{{ */
+{
+	zval *val;
+	char *cipherlist = NULL;
+
+	GET_VER_OPT_STRING("ciphers", cipherlist);
+#ifndef USE_OPENSSL_SYSTEM_CIPHERS
+	if (!cipherlist) {
+		cipherlist = OPENSSL_DEFAULT_STREAM_CIPHERS;
+	}
+#endif
+	if (cipherlist && SSL_CTX_set_cipher_list(ctx, cipherlist) != 1) {
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
+#ifdef HAVE_TLS_ALPN
+static int php_openssl_server_alpn_callback(SSL *ssl_handle,
+		const unsigned char **out, unsigned char *outlen,
+		const unsigned char *in, unsigned int inlen, void *arg);
+#endif
+
 #ifdef HAVE_TLS_SNI
 static int php_openssl_server_sni_callback(SSL *ssl_handle, int *al, void *arg) /* {{{ */
 {
@@ -1432,13 +1457,50 @@ static int php_openssl_server_sni_callback(SSL *ssl_handle, int *al, void *arg) 
 }
 /* }}} */
 
-static SSL_CTX *php_openssl_create_sni_server_ctx(char *cert_path, char *key_path)  /* {{{ */
+/* SSL_set_SSL_CTX() in the SNI callback switches the handshake to the per-host
+ * context, so the cipher list, ALPN selection callback, DH parameters and
+ * security level are taken from that context instead of the base one. Apply
+ * the base context policy to the per-host context. */
+static zend_result php_openssl_apply_server_policy_to_sni_ctx(php_stream *stream,
+		php_openssl_netstream_data_t *sslsock, SSL_CTX *ctx) /* {{{ */
+{
+	if (FAILURE == php_openssl_set_cipher_list(stream, ctx)) {
+		return FAILURE;
+	}
+
+#ifdef HAVE_SEC_LEVEL
+	SSL_CTX_set_security_level(ctx, SSL_CTX_get_security_level(sslsock->ctx));
+#endif
+
+	if (FAILURE == php_openssl_set_server_dh_param(stream, ctx)) {
+		return FAILURE;
+	}
+
+#ifdef HAVE_TLS_ALPN
+	if (sslsock->alpn_ctx.data) {
+		SSL_CTX_set_alpn_select_cb(ctx, php_openssl_server_alpn_callback, sslsock);
+	}
+#endif
+
+	return SUCCESS;
+}
+/* }}} */
+
+static SSL_CTX *php_openssl_create_sni_server_ctx(php_stream *stream,
+		php_openssl_netstream_data_t *sslsock, char *cert_path, char *key_path)  /* {{{ */
 {
 	/* The hello method is not inherited by SSL structs when assigning a new context
 	 * inside the SNI callback, so the just use SSLv23 */
 	SSL_CTX *ctx = SSL_CTX_new(SSLv23_server_method());
 	if (!ctx) {
 		php_error_docref(NULL, E_WARNING, "Failed to create the SSL context");
+		return NULL;
+	}
+
+	/* The security level must be set before loading the certificate and key,
+	 * as OpenSSL checks them against it. */
+	if (FAILURE == php_openssl_apply_server_policy_to_sni_ctx(stream, sslsock, ctx)) {
+		SSL_CTX_free(ctx);
 		return NULL;
 	}
 
@@ -1570,10 +1632,10 @@ static zend_result php_openssl_enable_server_sni(
 			}
 			zend_string_release(local_pk_str);
 
-			ctx = php_openssl_create_sni_server_ctx(resolved_cert_path_buff, resolved_pk_path_buff);
+			ctx = php_openssl_create_sni_server_ctx(stream, sslsock, resolved_cert_path_buff, resolved_pk_path_buff);
 		} else if (Z_TYPE_P(current) == IS_STRING) {
 			if (php_openssl_check_path_str_ex(Z_STR_P(current), resolved_path_buff, 0, false, false, "SNI_server_certs in ssl stream context")) {
-				ctx = php_openssl_create_sni_server_ctx(resolved_path_buff, resolved_path_buff);
+				ctx = php_openssl_create_sni_server_ctx(stream, sslsock, resolved_path_buff, resolved_path_buff);
 			} else {
 				php_error_docref(NULL, E_WARNING,
 						"Failed setting local cert chain file `%s'; file not found",
@@ -1692,7 +1754,6 @@ static zend_result php_openssl_setup_crypto(php_stream *stream,
 	int method_flags;
 	zend_long min_version = 0;
 	zend_long max_version = 0;
-	char *cipherlist = NULL;
 	char *alpn_protocols = NULL;
 	zval *val;
 	bool verify_peer = false;
@@ -1760,16 +1821,8 @@ static zend_result php_openssl_setup_crypto(php_stream *stream,
 		SSL_CTX_set_default_passwd_cb(sslsock->ctx, php_openssl_passwd_callback);
 	}
 
-	GET_VER_OPT_STRING("ciphers", cipherlist);
-#ifndef USE_OPENSSL_SYSTEM_CIPHERS
-	if (!cipherlist) {
-		cipherlist = OPENSSL_DEFAULT_STREAM_CIPHERS;
-	}
-#endif
-	if (cipherlist) {
-		if (SSL_CTX_set_cipher_list(sslsock->ctx, cipherlist) != 1) {
-			return FAILURE;
-		}
+	if (FAILURE == php_openssl_set_cipher_list(stream, sslsock->ctx)) {
+		return FAILURE;
 	}
 
 	if (GET_VER_OPT("security_level")) {
