@@ -13,6 +13,8 @@ PHP                                                                        NEWS
     (lazerg)
   . Fixed bug GH-25007 (Partial function application: named args in a constant
     expression cause out-of-bounds write in zp_compile()). (lazerg)
+  . Fixed AST printing dropping final on class constants and properties, and
+    abstract on properties. (Jorg Sowa)
 
 - CLI:
   . Fixed bug GH-24697 (PHP_HTTP_PARSER_STRICT build option doesn't work).
