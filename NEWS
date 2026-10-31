@@ -271,6 +271,8 @@ PHP                                                                        NEWS
     properties). (Lazizbek Ergashev)
 
 - Standard:
+  . Fixed bug GH-25107 (array_unshift() skips elements during foreach by
+    reference when the array contains holes). (JoaoMarcos44)
   . Fixed memory leaks in checkdnsrr() and dns_check_record() on Windows.
     (Ilia Alshanetsky)
   . Fixed __unserialize() and __wakeup() being called for objects with a missing
