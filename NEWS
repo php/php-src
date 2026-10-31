@@ -35,6 +35,8 @@ PHP                                                                        NEWS
     modifier. (Jorg Sowa)
   . Fixed memory leak of a duplicate named argument in new in initializer.
     (Jorg Sowa)
+  . Fixed bug GH-25061 ($x = $x - 1 on null is optimized to PRE_DEC).
+    (Lazizbek Ergashev)
 
 - CLI:
   . Fixed bug GH-24697 (PHP_HTTP_PARSER_STRICT build option doesn't work).
