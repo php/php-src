@@ -5761,6 +5761,46 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 							goto jit_failure;
 						}
 						goto done;
+					case ZEND_COALESCE:
+						if (!(opline->op1_type & (IS_TMP_VAR|IS_CV))
+						 /* COALESCE may have two identical successors due to DCE edge case.
+						  * In that case we cannot tell the branch directions apart. */
+						 || OP_JMP_ADDR(opline, opline->op2) == opline + 1) {
+							break;
+						}
+						op1_info = OP1_INFO();
+						CHECK_OP1_TRACE_TYPE();
+						if ((p+1)->op == ZEND_JIT_TRACE_VM || (p+1)->op == ZEND_JIT_TRACE_END) {
+							bool taken;
+							uint32_t refined_type_mask;
+
+							if ((p+1)->opline == OP_JMP_ADDR(opline, opline->op2)) {
+								taken = true;
+								refined_type_mask = op1_info & (MAY_BE_UNDEF|MAY_BE_NULL);
+							} else if ((p+1)->opline == opline + 1) {
+								taken = false;
+								refined_type_mask = op1_info & ((MAY_BE_ANY|MAY_BE_REF) - MAY_BE_NULL);
+							} else {
+								ZEND_UNREACHABLE();
+							}
+							if (!refined_type_mask) {
+								/* unconditional branch */
+								exit_addr = NULL;
+							} else {
+								/* Execute the other direction in VM or side trace. */
+								uint32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
+								exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+								if (!exit_addr) {
+									goto jit_failure;
+								}
+							}
+							if (!zend_jit_coalesce(&ctx, opline, refined_type_mask, OP1_ADDR(), RES_ADDR(), taken, exit_addr)) {
+								goto jit_failure;
+							}
+							goto done;
+						} else {
+							ZEND_UNREACHABLE();
+						}
 					case ZEND_JMP_FRAMELESS:
 						op1_info = OP1_INFO();
 						ZEND_ASSERT((p+1)->op == ZEND_JIT_TRACE_VM);
