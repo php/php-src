@@ -78,6 +78,13 @@ PHP 8.7 INTERNALS UPGRADE NOTES
     mysqlnd_reverse_api_register_api() and mysqlnd_reverse_api_get_api_list()
     no longer exist.
 
+- Mysqlnd:
+  . In ZTS builds the values of MYSQLND_STATS are atomic_uint_least64_t and
+    the LOCK_access member was removed. The MYSQLND_INC_STATISTIC*() and
+    MYSQLND_DEC_STATISTIC() macros update them with relaxed atomic additions.
+  . The MYSQLND_STATS_LOCK() and MYSQLND_STATS_UNLOCK() macros were removed.
+    MYSQLND_STATS_UPDATE_VALUE() is now an expression instead of a block.
+
 - Standard:
   . php_explode() now takes a HashTable* instead of a zval* to store the
     resulting parts. It already expected the zval* to be IS_ARRAY.

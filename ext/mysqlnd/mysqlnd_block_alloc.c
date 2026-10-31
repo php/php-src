@@ -53,7 +53,6 @@ PHPAPI void
 mysqlnd_mempool_destroy(MYSQLND_MEMORY_POOL * pool)
 {
 	DBG_ENTER("mysqlnd_mempool_destroy");
-	/* mnd_free will reference LOCK_access and might crash, depending on the caller...*/
 	zend_arena_destroy(pool->arena);
 	DBG_VOID_RETURN;
 }

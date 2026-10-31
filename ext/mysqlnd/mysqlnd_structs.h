@@ -292,13 +292,24 @@ typedef enum_func_status  (*mysqlnd_fetch_row_func)(MYSQLND_RES *result,
 
 typedef struct st_mysqlnd_stats MYSQLND_STATS;
 
+#if defined(ZTS) && defined(__cplusplus)
+/* The C11 atomics used by struct st_mysqlnd_stats and the MYSQLND_*_STATISTIC*() macros */
+extern "C++" {
+using std::atomic_uint_least64_t;
+using std::atomic_fetch_add_explicit;
+using std::atomic_load_explicit;
+using std::memory_order_relaxed;
+}
+#endif
+
 struct st_mysqlnd_stats
 {
 	size_t					count;
 #ifdef ZTS
-	MUTEX_T	LOCK_access;
-#endif
+	atomic_uint_least64_t values[] ZEND_ELEMENT_COUNT(count);
+#else
 	uint64_t values[] ZEND_ELEMENT_COUNT(count);
+#endif
 };
 
 
