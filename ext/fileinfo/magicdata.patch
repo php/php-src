@@ -1,0 +1,11 @@
+--- Magdir.orig/msooxml
++++ Magdir/msooxml
+@@ -35,7 +35,7 @@
+ # make sure the first file is correct
+ >0x1E		use		msooxml
+ >0x1E		default		x
+->>0x1E		regex		\\[Content_Types\\]\\.xml|_rels/\\.rels|docProps|customXml|.*\\.md|.*\\.png
++>>0x1E		regex		\\[Content_Types\\]\\.xml|_rels/\\.rels|docProps|customXml|\^[[:print:]]*\\.md|\^[[:print:]]*\\.png
+ # skip to the second local file header
+ # since some documents include a 520-byte extra field following the file
+ # header, we need to scan for the next header
