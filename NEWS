@@ -29,6 +29,9 @@ PHP                                                                        NEWS
     existing CV). (yasu20200121web-prog, lazerg)
   . Fixed unmapping of an unrelated range when the aligned chunk mmap fails
     (Marti2203).
+  . Fixed first-class callables to static methods in trait constant
+    expressions resolving to the method of the first using class and
+    bypassing visibility checks. (jorgsowa)
 
 - CLI:
   . Fixed bug GH-24697 (PHP_HTTP_PARSER_STRICT build option doesn't work).
