@@ -179,15 +179,11 @@ static zend_result kqueue_backend_modify(php_poll_ctx *ctx, int fd, uint32_t eve
 		add_flags |= EV_CLEAR;
 	}
 
-	/* Delete existing filters that are not in the new events */
-	if (!(events & PHP_POLL_READ)) {
-		EV_SET(&deletes[delete_count], fd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
-		delete_count++;
-	}
-	if (!(events & PHP_POLL_WRITE)) {
-		EV_SET(&deletes[delete_count], fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
-		delete_count++;
-	}
+	/* Delete all existing filters so the counters below know which ones were registered */
+	EV_SET(&deletes[delete_count], fd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
+	delete_count++;
+	EV_SET(&deletes[delete_count], fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+	delete_count++;
 
 	/* Prepare add operations for requested events */
 	if (events & PHP_POLL_READ) {
