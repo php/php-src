@@ -157,6 +157,8 @@ PHP                                                                        NEWS
     with chained Pi nodes). (ndossche)
   . Fixed JIT treating an array as packed after a string key write turned it
     into a hash. (jorgsowa)
+  . Fixed bug GH-24622 (Tracing JIT skips spilling inherited register values
+    before property helpers). (ndossche, Alessio Attilio)
   . Fixed bug GH-24436 (Tracing JIT: keep the SEND_VAL type guard after
     assigning to a reference). (waroad)
   . Fixed bug GH-24745 (File cache loses attributes on constants on 32-bit
