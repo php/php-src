@@ -1,0 +1,22 @@
+--- Magdir.orig/fonts
++++ Magdir/fonts
+@@ -2,3 +2,3 @@
+ #------------------------------------------------------------------------------
+-# $File: fonts,v 1.55 2026/03/24 22:28:58 christos Exp $
++# $File: fonts,v 1.56 2026/10/22 15:55:33 christos Exp $
+ # fonts:  file(1) magic for font data
+@@ -285,4 +285,2 @@
+ >>>0	ubelong		!0x4f54544f	TrueType
+-# fontkit FK
+->>>>12	ubelong		0x464b2020	(FontKit)
+ !:mime	font/ttf
+@@ -292,2 +290,4 @@
+ !:ext	ttf/tte
++# fontkit FK
++>>>>12	ubelong		0x464b2020	(FontKit)
+ # sfnt version 4F54544Fh~OTTO
+@@ -306,3 +306,3 @@
+ # table directory entries
+->>>12	ubelong		!0x464b2020	(FontKit)
++>>>12	ubelong		!0x464b2020
+ >>>>12	string		x		\b, 1st "%4.4s"
