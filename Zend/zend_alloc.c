@@ -411,6 +411,7 @@ static ZEND_COLD ZEND_NORETURN void zend_mm_panic(const char *message)
 }
 
 static ZEND_COLD ZEND_NORETURN void zend_out_of_memory(void);
+static void zend_mm_chunk_free(zend_mm_heap *heap, void *addr, size_t size);
 
 static ZEND_COLD void zend_mm_delayed_verror(const char *format, va_list args)
 {
@@ -539,6 +540,15 @@ static zend_always_inline zend_result zend_mm_check_limit(zend_mm_heap *heap, si
 			if (did_gc) {
 				*did_gc = true;
 			}
+		}
+		/* Cached chunks are free memory but are counted in real_size */
+		while (gc && heap->cached_chunks &&
+		       (heap->limit < heap->real_size || add_size > heap->limit - heap->real_size)) {
+			zend_mm_chunk *p = heap->cached_chunks;
+			heap->cached_chunks = p->next;
+			zend_mm_chunk_free(heap, p, ZEND_MM_CHUNK_SIZE);
+			heap->cached_chunks_count--;
+			heap->real_size -= ZEND_MM_CHUNK_SIZE;
 		}
 		ZEND_ASSERT(heap->hard_limit >= heap->limit && heap->hard_limit >= heap->real_size);
 		if (!heap->fallible && add_size > heap->hard_limit - heap->real_size) {
