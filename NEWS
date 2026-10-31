@@ -114,6 +114,8 @@ PHP                                                                        NEWS
     (adapik)
   . Fixed json_encode() silently narrowing $depth values outside the int range,
     which wrapped to an unrelated depth. (cuishuang)
+  . Fixed json_encode() continuing to encode after an array or object key
+    failed to encode. (Ilia Alshanetsky)
 
 - LDAP:
   . Fix crash in ldap_exop_sync() when $response_data is omitted. (lacatoire)

@@ -187,11 +187,11 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 
 			if (php_json_escape_string(buf, ZSTR_VAL(prop_info->name), ZSTR_LEN(prop_info->name),
 					options & ~PHP_JSON_NUMERIC_CHECK, encoder) == FAILURE) {
-				if (ZEND_HAS_OOM()) {
+				if (ZEND_HAS_OOM() || !(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
 					PHP_JSON_HASH_UNPROTECT_RECURSION(obj);
 					return FAILURE;
 				}
-				if ((options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) && buf->s) {
+				if (buf->s) {
 					ZEND_ASSERT(ZSTR_LEN(buf->s) >= 4);
 					ZSTR_LEN(buf->s) -= 4;
 					smart_str_appendl(buf, "\"\"", 2);
@@ -308,13 +308,13 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 
 					if (php_json_escape_string(buf, ZSTR_VAL(key), ZSTR_LEN(key),
 								options & ~PHP_JSON_NUMERIC_CHECK, encoder) == FAILURE) {
-						if (ZEND_HAS_OOM()) {
+						if (ZEND_HAS_OOM() || !(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
 							PHP_JSON_HASH_UNPROTECT_RECURSION(recursion_rc);
 							zend_release_properties(prop_ht);
 							zval_ptr_dtor(&tmp);
 							return FAILURE;
 						}
-						if ((options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) && buf->s) {
+						if (buf->s) {
 							ZEND_ASSERT(ZSTR_LEN(buf->s) >= 4);
 							ZSTR_LEN(buf->s) -= 4;
 							smart_str_appendl(buf, "\"\"", 2);
