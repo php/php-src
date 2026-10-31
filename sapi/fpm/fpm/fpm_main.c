@@ -78,6 +78,9 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 
 #include <php_config.h>
 #include "fpm.h"
+#ifdef PHP_FPM_WITH_CLI
+#include "sapi/cli/cli.h"
+#endif
 #include "fpm_main_arginfo.h"
 #include "fpm_request.h"
 #include "fpm_status.h"
@@ -1557,6 +1560,19 @@ int main(int argc, char *argv[])
 	int php_allow_to_run_as_root = 0;
 #if ZEND_RC_DEBUG
 	bool old_rc_debug;
+#endif
+
+#ifdef PHP_FPM_WITH_CLI
+	/* Invoked as "php", "php8.7", "php87"... (e.g. a php symlink to php-fpm):
+	 * run the CLI SAPI instead. */
+	if (argc > 0 && argv[0]) {
+		const char *name = strrchr(argv[0], '/');
+		name = name ? name + 1 : argv[0];
+		if (strncmp(name, "php", strlen("php")) == 0
+				&& (name[3] == '\0' || isdigit((unsigned char) name[3]))) {
+			return do_php_cli(argc, argv);
+		}
+	}
 #endif
 
 #if defined(SIGPIPE) && defined(SIG_IGN)
