@@ -343,6 +343,11 @@ static int kqueue_backend_wait(
 			if (backend_data->events[i].flags & EV_ERROR) {
 				events[i].revents |= PHP_POLL_ERROR;
 			}
+
+			/* Oneshot filters are deleted by the kernel once retrieved */
+			if (backend_data->events[i].flags & EV_ONESHOT) {
+				backend_data->filter_count--;
+			}
 		}
 
 		return nfds;
@@ -380,6 +385,10 @@ static int kqueue_backend_wait(
 			uint32_t revents = 0;
 			void *data = backend_data->events[i].udata;
 			bool is_oneshot = (backend_data->events[i].flags & EV_ONESHOT) != 0;
+
+			if (is_oneshot) {
+				backend_data->filter_count--;
+			}
 
 			/* Convert this event */
 			if (backend_data->events[i].filter == EVFILT_READ) {
@@ -462,7 +471,9 @@ static int kqueue_backend_wait(
 			if (flags & KQUEUE_FD_HAS_GARBAGE) {
 				int filter = (flags & KQUEUE_FD_GARBAGE_READ) ? EVFILT_WRITE : EVFILT_READ;
 				EV_SET(&cleanup_change, fd_key, filter, EV_DELETE, 0, 0, NULL);
-				kevent(backend_data->kqueue_fd, &cleanup_change, 1, NULL, 0, NULL);
+				if (kevent(backend_data->kqueue_fd, &cleanup_change, 1, NULL, 0, NULL) == 0) {
+					backend_data->filter_count--;
+				}
 
 				/* Remove FD from tracking after cleanup */
 				zend_hash_index_del(backend_data->fd_tracking, fd_key);
