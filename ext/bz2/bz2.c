@@ -57,10 +57,53 @@ ZEND_GET_MODULE(bz2)
 
 struct php_bz2_stream_data_t {
 	BZFILE *bz_file;
+	FILE *file;
+	bool stream_end;
+	bool read_failed;
 	zend_resource *stream_res;
 };
 
 /* {{{ BZip2 stream implementation */
+
+static bool php_bz2iop_next_stream(php_stream *stream)
+{
+	struct php_bz2_stream_data_t *self = stream->abstract;
+	char buffer[BZ_MAX_UNUSED];
+	void *unused;
+	int unused_len, error;
+
+	BZ2_bzReadGetUnused(&error, self->bz_file, &unused, &unused_len);
+	if (error != BZ_OK) {
+		self->read_failed = true;
+		stream->eof = 1;
+		return false;
+	}
+	memcpy(buffer, unused, unused_len);
+	while (unused_len < 4) {
+		int ch = fgetc(self->file);
+		if (ch == EOF) {
+			self->read_failed = ferror(self->file) != 0;
+			break;
+		}
+		buffer[unused_len++] = ch;
+	}
+	if (unused_len < 4 || memcmp(buffer, "BZh", 3) != 0
+			|| buffer[3] < '1' || buffer[3] > '9') {
+		stream->eof = 1;
+		return false;
+	}
+
+	BZFILE *next = BZ2_bzReadOpen(&error, self->file, 0, strchr(stream->mode, 's') != NULL, buffer, unused_len);
+	if (error != BZ_OK) {
+		self->read_failed = true;
+		stream->eof = 1;
+		return false;
+	}
+	BZ2_bzReadClose(&error, self->bz_file);
+	self->bz_file = next;
+	self->stream_end = false;
+	return true;
+}
 
 static ssize_t php_bz2iop_read(php_stream *stream, char *buf, size_t count)
 {
@@ -72,12 +115,30 @@ static ssize_t php_bz2iop_read(php_stream *stream, char *buf, size_t count)
 		size_t remain = count - ret;
 		int to_read = (int)(remain <= INT_MAX ? remain : INT_MAX);
 
-		just_read = BZ2_bzread(self->bz_file, buf, to_read);
+		if (stream->eof) {
+			return ret ? (ssize_t) ret : (self->read_failed ? -1 : 0);
+		}
+		if (self->file) {
+			int error;
+			if (self->stream_end && !php_bz2iop_next_stream(stream)) {
+				return ret ? (ssize_t) ret : (self->read_failed ? -1 : 0);
+			}
+			just_read = BZ2_bzRead(&error, self->bz_file, buf + ret, to_read);
+			self->stream_end = error == BZ_STREAM_END;
+			if (error != BZ_OK && error != BZ_STREAM_END) {
+				just_read = -1;
+			} else if (just_read == 0 && self->stream_end) {
+				continue;
+			}
+		} else {
+			just_read = BZ2_bzread(self->bz_file, buf + ret, to_read);
+		}
 
 		if (just_read < 1) {
 			/* it is not safe to keep reading after an error, see #72613 */
 			stream->eof = 1;
 			if (just_read < 0) {
+				self->read_failed = true;
 				if (ret) {
 					return ret;
 				}
@@ -126,7 +187,13 @@ static int php_bz2iop_close(php_stream *stream, int close_handle)
 	int ret = EOF;
 
 	if (close_handle) {
-		BZ2_bzclose(self->bz_file);
+		if (self->file) {
+			int error;
+			BZ2_bzReadClose(&error, self->bz_file);
+			fclose(self->file);
+		} else {
+			BZ2_bzclose(self->bz_file);
+		}
 	}
 
 	/* The inner stream may have been closed by the user, only its resource is held */
@@ -164,12 +231,30 @@ const php_stream_ops php_stream_bz2io_ops = {
 
 /* {{{ Bzip2 stream openers */
 
-/* bzlib closes the descriptor it is given, so it gets a duplicate */
-static BZFILE *php_bz2_bzdopen(php_socket_t fd, const char *mode)
+static BZFILE *php_bz2_readopen(FILE *file, const char *mode)
+{
+	int error;
+	BZFILE *bz = BZ2_bzReadOpen(&error, file, 0, strchr(mode, 's') != NULL, NULL, 0);
+	if (!bz) {
+		fclose(file);
+	}
+	return bz;
+}
+
+static BZFILE *php_bz2_bzdopen(php_socket_t fd, const char *mode, FILE **file)
 {
 	int dup_fd = dup((int) fd);
 	if (dup_fd == -1) {
 		return NULL;
+	}
+
+	if (mode[0] == 'r') {
+		*file = fdopen(dup_fd, "rb");
+		if (!*file) {
+			close(dup_fd);
+			return NULL;
+		}
+		return php_bz2_readopen(*file, mode);
 	}
 
 	BZFILE *bz = BZ2_bzdopen(dup_fd, mode);
@@ -193,6 +278,9 @@ PHP_BZ2_API php_stream *_php_stream_bz2open_from_BZFILE(BZFILE *bz,
 		GC_ADDREF(innerstream->res);
 	}
 	self->bz_file = bz;
+	self->file = NULL;
+	self->stream_end = false;
+	self->read_failed = false;
 
 	return php_stream_alloc_rel(&php_stream_bz2io_ops, self, 0, mode);
 }
@@ -207,6 +295,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 	php_stream *retstream = NULL, *stream = NULL;
 	char *path_copy = NULL;
 	BZFILE *bz_file = NULL;
+	FILE *file = NULL;
 
 	if (strncasecmp("compress.bzip2://", path, 17) == 0) {
 		path += 17;
@@ -229,7 +318,14 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 	}
 
 	/* try and open it directly first */
-	bz_file = BZ2_bzopen(path_copy, mode);
+	if (mode[0] == 'r') {
+		file = VCWD_FOPEN(path_copy, "rb");
+		if (file) {
+			bz_file = php_bz2_readopen(file, mode);
+		}
+	} else {
+		bz_file = BZ2_bzopen(path_copy, mode);
+	}
 
 	if (opened_path && bz_file) {
 		*opened_path = zend_string_init(path_copy, strlen(path_copy), 0);
@@ -246,7 +342,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 		if (stream) {
 			php_socket_t fd;
 			if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD, (void **) &fd, REPORT_ERRORS)) {
-				bz_file = php_bz2_bzdopen(fd, mode);
+				bz_file = php_bz2_bzdopen(fd, mode, &file);
 			}
 		}
 
@@ -261,6 +357,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 	if (bz_file) {
 		retstream = _php_stream_bz2open_from_BZFILE(bz_file, mode, stream STREAMS_REL_CC);
 		if (retstream) {
+			((struct php_bz2_stream_data_t *) retstream->abstract)->file = file;
 			return retstream;
 		}
 
@@ -358,6 +455,7 @@ PHP_FUNCTION(bzopen)
 
 	BZFILE   *bz;     /* The compressed file stream */
 	php_stream *stream = NULL;
+	FILE *handle = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs", &file, &mode, &mode_len) == FAILURE) {
 		RETURN_THROWS();
@@ -432,12 +530,13 @@ unsupported_mode:
 			RETURN_FALSE;
 		}
 
-		bz = php_bz2_bzdopen(fd, mode);
+		bz = php_bz2_bzdopen(fd, mode, &handle);
 		if (!bz) {
 			RETURN_FALSE;
 		}
 
 		stream = php_stream_bz2open_from_BZFILE(bz, mode, stream);
+		((struct php_bz2_stream_data_t *) stream->abstract)->file = handle;
 	} else {
 		zend_argument_type_error(1, "must be of type string or file-resource, %s given", zend_zval_value_name(file));
 		RETURN_THROWS();
