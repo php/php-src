@@ -251,8 +251,8 @@ PHPAPI php_session_status php_get_session_status(void);
 PHPAPI const ps_module *_php_find_ps_module(const char *name);
 PHPAPI const ps_serializer *_php_find_ps_serializer(const char *name);
 
-PHPAPI zend_result php_session_valid_key(const char *key);
-zend_result php_session_valid_key_ex(const zend_string *key);
+PHPAPI ZEND_ATTRIBUTE_DEPRECATED zend_result php_session_valid_key(const char *key);
+PHPAPI zend_result php_session_valid_key_ex(const zend_string *key);
 PHPAPI zend_result php_session_reset_id(void);
 
 /* Do not use a return statement in `code` because that may leak memory.
