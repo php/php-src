@@ -198,6 +198,8 @@ PHP                                                                        NEWS
     (ndossche)
   . Fixed preloaded functions not JIT-compiled again after OPcache restart.
     (Jorg Sowa)
+  . Fixed bug GH-24988 (Incorrect opcode range check causes bugs with exceptions in
+    function JIT). (ndossche, Jorg Sowa)
 
 - OpenSSL:
   . Fixed bug GH-24784 (openssl_pkcs7_read() and openssl_cms_read() overwrite
