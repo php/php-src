@@ -260,10 +260,6 @@ PHP                                                                        NEWS
   . Fixed bug GH-24748 (socket_set_option() crashes with declared object
     properties). (Lazizbek Ergashev)
 
-- SQLite3:
-  . Fixed bug GH-25021 (SQLite createFunction corrupts large integers).
-    (mvorisek)
-
 - Standard:
   . Fixed memory leaks in checkdnsrr() and dns_check_record() on Windows.
     (Ilia Alshanetsky)
