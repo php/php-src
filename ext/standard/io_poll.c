@@ -880,7 +880,7 @@ PHP_METHOD(Io_Poll_Context, wait)
 	} else if (UNEXPECTED(max_events <= 0)) {
 		zend_argument_value_error(2, "must be greater than 0");
 		RETURN_THROWS();
-	} else if (ZEND_LONG_INT_OVFL(max_events)) {
+	} else if (!ZEND_IN_RANGE_OF(max_events, int)) {
 		zend_argument_value_error(2, "must be less than or equal to %d", INT_MAX);
 		RETURN_THROWS();
 	}

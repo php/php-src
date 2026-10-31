@@ -1745,7 +1745,7 @@ static void dom_element_insert_adjacent_text(INTERNAL_FUNCTION_PARAMETERS, zend_
 
 	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, this_intern);
 
-	if (UNEXPECTED(ZEND_SIZE_T_INT_OVFL(ZSTR_LEN(data)))) {
+	if (!ZEND_IN_RANGE_OF(ZSTR_LEN(data), int)) {
 		zend_argument_value_error(2, "is too long");
 		RETURN_THROWS();
 	}

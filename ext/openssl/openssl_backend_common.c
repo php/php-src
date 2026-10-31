@@ -2116,7 +2116,7 @@ PHP_OPENSSL_API zend_string* php_openssl_random_pseudo_bytes(zend_long buffer_le
 		zend_argument_value_error(1, "must be greater than 0");
 		return NULL;
 	}
-	if (ZEND_LONG_INT_OVFL(buffer_length)) {
+	if (!ZEND_IN_RANGE_OF(buffer_length, int)) {
 		zend_argument_value_error(1, "must be less than or equal to %d", INT_MAX);
 		return NULL;
 	}

@@ -2413,7 +2413,7 @@ static zval *dom_nodemap_read_dimension(zend_object *object, zval *offset, int t
 	}
 
 	/* see PHP_METHOD(DOMNamedNodeMap, item) */
-	if (UNEXPECTED(lval < 0 || ZEND_LONG_INT_OVFL(lval))) {
+	if (UNEXPECTED(lval < 0 || !ZEND_IN_RANGE_OF(lval, int))) {
 		zend_value_error("must be between 0 and %d", INT_MAX);
 		return NULL;
 	}

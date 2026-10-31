@@ -597,8 +597,8 @@ PHP_FUNCTION(sapi_windows_cp_set)
 		RETURN_THROWS();
 	}
 
-	if (ZEND_LONG_UINT_OVFL(id)) {
-		zend_argument_value_error(1, "must be between 0 and %u", UINT_MAX);
+	if (!ZEND_IN_RANGE_OF(id, DWORD)) {
+		zend_argument_value_error(1, "must be between 0 and %u", MAXDWORD);
 		RETURN_THROWS();
 	}
 
@@ -669,7 +669,7 @@ PHP_FUNCTION(sapi_windows_cp_conv)
 		Z_PARAM_STR(subject)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZEND_SIZE_T_INT_OVFL(ZSTR_LEN(subject))) {
+	if (!ZEND_IN_RANGE_OF(ZSTR_LEN(subject), int)) {
 		zend_argument_value_error(1, "is too long");
 		RETURN_THROWS();
 	}
@@ -681,8 +681,8 @@ PHP_FUNCTION(sapi_windows_cp_conv)
 			RETURN_THROWS();
 		}
 	} else {
-		if (ZEND_LONG_UINT_OVFL(int_in_codepage)) {
-			zend_argument_value_error(1, "must be between 0 and %u", UINT_MAX);
+		if (!ZEND_IN_RANGE_OF(int_in_codepage, DWORD)) {
+			zend_argument_value_error(1, "must be between 0 and %u", MAXDWORD);
 			RETURN_THROWS();
 		}
 
@@ -700,8 +700,8 @@ PHP_FUNCTION(sapi_windows_cp_conv)
 			RETURN_THROWS();
 		}
 	} else {
-		if (ZEND_LONG_UINT_OVFL(int_out_codepage)) {
-			zend_argument_value_error(2, "must be between 0 and %u", UINT_MAX);
+		if (!ZEND_IN_RANGE_OF(int_out_codepage, DWORD)) {
+			zend_argument_value_error(2, "must be between 0 and %u", MAXDWORD);
 			RETURN_THROWS();
 		}
 
