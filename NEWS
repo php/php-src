@@ -47,6 +47,12 @@ PHP                                                                        NEWS
   . Fix use-after-free of CURLOPT_STDERR stream on cloned curl handle.
     (lacatoire)
   . Fix UAF on clone due to callback data pointer mismatch. (ndossche)
+  . Fix curl_reset() not releasing the write, header and read callbacks,
+    CURLOPT_PRIVATE and CURLOPT_POSTFIELDS. (Raj Siva-Rajah)
+  . Fix curl_copy_handle() restoring file post fields that were replaced.
+    (Raj Siva-Rajah)
+  . Fix curl_copy_handle() restoring file post fields after the request method
+    changes. (Raj Siva-Rajah)
 
 - Date:
   . Fixed bug GH-20503 (Assertion failure with ext/date DateInterval property
