@@ -729,7 +729,7 @@ PHP_FUNCTION(imagetruecolortopalette)
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
 	if (ncolors <= 0 || ZEND_LONG_INT_OVFL(ncolors)) {
-		zend_argument_value_error(3, "must be greater than 0 and less than %d", INT_MAX);
+		zend_argument_value_error(3, "must be between 1 and %d", INT_MAX);
 		RETURN_THROWS();
 	}
 

@@ -101,6 +101,9 @@ PHP                                                                        NEWS
 - FTP:
   . Fix double free in ext/ftp data_accept() on accept failure. (alepacheco)
 
+- GD:
+  . Fixed imagetruecolortopalette() error message. (Marc Bennewitz)
+
 - Hash:
   . Fix GOST and Snefru digests of 512 MiB or more. (Martin Mirchev)
 
