@@ -784,7 +784,7 @@ cleanup_fail:
 			sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
 
 			if (not_cgi) {
-				tmp = strstr(path_info, basename) + fname_len;
+				tmp = strstr(path_info, basename) + (fname_len - (basename - fname));
 				sa = *tmp;
 				*tmp = '\0';
 			}
