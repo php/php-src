@@ -202,6 +202,8 @@ PHP                                                                        NEWS
     (Pavel Gushcha)
   . Fixed potential infinite recursion/hang (HYBRID/TAILCALL respectively)
     when zend_interrupt_function resets EG(vm_interrupt).  (Levi Morrison)
+  . Fixed preloaded functions not JIT-compiled again after OPcache restart.
+    (Jorg Sowa)
 
 - OpenSSL:
   . Fixed bug GH-24784 (openssl_pkcs7_read() and openssl_cms_read() overwrite
