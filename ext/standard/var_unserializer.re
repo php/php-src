@@ -58,43 +58,81 @@ struct php_unserialize_data {
 	 * __unserialize(). O:, C: and E: values all serialize back to the same
 	 * bytes. */
 	bool              incomplete_classes_only;
+	uint32_t          nesting;
+	zend_fiber_context *parked_in;
+	php_unserialize_data_t next_parked;
 	var_entries       entries;
 };
 
 PHPAPI php_unserialize_data_t php_var_unserialize_init(void) {
+	php_unserialize_data_t published = BG(unserialize).data;
 	php_unserialize_data_t d;
-	/* fprintf(stderr, "UNSERIALIZE_INIT    == lock: %u, level: %u\n", BG(serialize_lock), BG(unserialize).level); */
-	if (BG(serialize_lock) || !BG(unserialize).level) {
-		d = emalloc(sizeof(struct php_unserialize_data));
-		d->last = &d->entries;
-		d->first_dtor = d->last_dtor = NULL;
+
+	if (published && !BG(serialize_lock)) {
+		BG(unserialize).data = NULL;
+		published->nesting++;
+		return published;
+	}
+
+	d = emalloc(sizeof(struct php_unserialize_data));
+	d->last = &d->entries;
+	d->first_dtor = d->last_dtor = NULL;
+	d->ref_props = NULL;
+	d->cur_depth = 0;
+	if (published) {
+		d->allowed_classes = published->allowed_classes;
+		d->max_depth = published->max_depth;
+		d->incomplete_classes_only = published->incomplete_classes_only;
+	} else {
 		d->allowed_classes = NULL;
-		d->ref_props = NULL;
-		d->cur_depth = 0;
 		d->max_depth = BG(unserialize_max_depth);
 		d->incomplete_classes_only = false;
-		d->entries.used_slots = 0;
-		d->entries.next = NULL;
-		if (!BG(serialize_lock)) {
-			BG(unserialize).data = d;
-			BG(unserialize).level = 1;
-		}
-	} else {
-		d = BG(unserialize).data;
-		++BG(unserialize).level;
 	}
+	d->nesting = 0;
+	d->entries.used_slots = 0;
+	d->entries.next = NULL;
 	return d;
 }
 
 PHPAPI void php_var_unserialize_destroy(php_unserialize_data_t d) {
-	/* fprintf(stderr, "UNSERIALIZE_DESTROY == lock: %u, level: %u\n", BG(serialize_lock), BG(unserialize).level); */
-	if (BG(serialize_lock)) {
-		var_destroy(&d);
-		efree(d);
-	} else if (!--BG(unserialize).level) {
+	if (d->nesting) {
+		d->nesting--;
+		BG(unserialize).data = d;
+		return;
+	}
+	var_destroy(&d);
+	efree(d);
+}
+
+void php_var_unserialize_fiber_switch(zend_fiber_context *from, zend_fiber_context *to)
+{
+	php_unserialize_data_t d = BG(unserialize).data;
+	php_unserialize_data_t *link;
+
+	if (d) {
+		d->parked_in = from;
+		d->next_parked = BG(unserialize).parked;
+		BG(unserialize).parked = d;
 		BG(unserialize).data = NULL;
-		var_destroy(&d);
-		efree(d);
+	}
+	for (link = &BG(unserialize).parked; *link; link = &(*link)->next_parked) {
+		if ((*link)->parked_in == to) {
+			BG(unserialize).data = *link;
+			*link = (*link)->next_parked;
+			break;
+		}
+	}
+}
+
+void php_var_unserialize_fiber_init(zend_fiber_context *initializing)
+{
+	php_unserialize_data_t *link;
+
+	for (link = &BG(unserialize).parked; *link; link = &(*link)->next_parked) {
+		if ((*link)->parked_in == initializing) {
+			*link = (*link)->next_parked;
+			break;
+		}
 	}
 }
 
@@ -825,8 +863,24 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce, boo
 			return 0;
 		}
 		object_init_ex(rval, ce);
-	} else if (ce->unserialize(rval, ce, (const unsigned char*)*p, datalen, (zend_unserialize_data *)var_hash) != SUCCESS) {
-		return 0;
+	} else {
+		php_unserialize_data_t prev = BG(unserialize).data;
+		zend_result result = FAILURE;
+		bool bailout = false;
+
+		BG(unserialize).data = *var_hash;
+		zend_try {
+			result = ce->unserialize(rval, ce, (const unsigned char*)*p, datalen, (zend_unserialize_data *)var_hash);
+		} zend_catch {
+			bailout = true;
+		} zend_end_try();
+		BG(unserialize).data = prev;
+		if (bailout) {
+			zend_bailout();
+		}
+		if (result != SUCCESS) {
+			return 0;
+		}
 	}
 
 	if (ZEND_HAS_OOM()) {
@@ -914,9 +968,12 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 {
 	var_entries *orig_var_entries = (*var_hash)->last;
 	zend_long orig_used_slots = orig_var_entries ? orig_var_entries->used_slots : 0;
+	php_unserialize_data_t prev = BG(unserialize).data;
 	int result;
 
+	BG(unserialize).data = NULL;
 	result = php_var_unserialize_internal(UNSERIALIZE_PASSTHRU);
+	BG(unserialize).data = prev;
 
 	if (!result) {
 		/* If the unserialization failed, mark all elements that have been added to var_hash

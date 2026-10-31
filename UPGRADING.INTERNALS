@@ -81,6 +81,16 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 - Standard:
   . php_explode() now takes a HashTable* instead of a zval* to store the
     resulting parts. It already expected the zval* to be IS_ARRAY.
+  . BG(unserialize).level has been removed. BG(unserialize).data is now set
+    only while unserialize() calls the unserialize handler of a C: payload,
+    and is NULL otherwise; code that writes it must save and restore it. It
+    is kept per fiber: a fiber switch parks it and restores the value of the
+    fiber being resumed. The
+    first PHP_VAR_UNSERIALIZE_INIT() made while it is set shares that
+    context until the matching PHP_VAR_UNSERIALIZE_DESTROY() if
+    BG(serialize_lock) is zero, as php_var_serialize_init() does. Otherwise
+    it creates its own context, which takes allowed_classes, max_depth and
+    incomplete_classes_only from the shared one.
 
 ========================
 4. OpCode changes
