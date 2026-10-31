@@ -778,6 +778,7 @@ static void sapi_cli_server_log_write(int type, const char *msg) /* {{{ */
 #else
 	fprintf(stderr, "[%s] %s\n", buf, msg);
 #endif
+	fflush(stderr);
 } /* }}} */
 
 static void sapi_cli_server_log_message(const char *msg, int syslog_type_int) /* {{{ */
@@ -2908,6 +2909,18 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 					php_cli_server_log_level--;
 				}
 				break;
+			case 17: {
+				char *end = NULL;
+				long level = strtol(php_optarg, &end, 10);
+				if (end == php_optarg || *end != '\0' || level < 1 || level > 3) {
+					fprintf(stderr,
+						"Invalid --loglevel \"%s\". Use 1 (process), 2 (error), or 3 (message).\n",
+						php_optarg);
+					return 1;
+				}
+				php_cli_server_log_level = (int) level;
+				break;
+			}
 		}
 	}
 

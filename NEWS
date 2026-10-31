@@ -7,6 +7,10 @@ PHP                                                                        NEWS
     target, such as [$a, $b] = [$b, $a], no longer builds the array when the
     result is unused (GH-23048). (Artem Ukrainskiy)
 
+- CLI:
+  . Added --loglevel for the built-in development server to select process,
+    error, or request logs (GH-16855). (mvanhorn)
+
 - Curl:
   . curl_multi_exec() now throws a TypeError when still_running is not an int.
     (arshidkv12)

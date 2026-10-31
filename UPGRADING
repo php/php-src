@@ -92,6 +92,11 @@ PHP 8.7 UPGRADE NOTES
 3. Changes in SAPI modules
 ========================================
 
+- CLI:
+  . The built-in development server accepts --loglevel <n>, where 1 logs
+    process messages only, 2 also logs errors, and 3 (the default) also logs
+    each request.
+
 ========================================
 4. Deprecated Functionality
 ========================================
