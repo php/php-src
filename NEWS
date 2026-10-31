@@ -30,6 +30,10 @@ PHP                                                                        NEWS
   . Fixed unmapping of an unrelated range when the aligned chunk mmap fails
     (Marti2203).
 
+- Apache:
+  . Fixed bug #61471 (Incomplete POST does not timeout but is passed to PHP).
+    (Jakub Zelenka)
+
 - CLI:
   . Fixed bug GH-24697 (PHP_HTTP_PARSER_STRICT build option doesn't work).
     (ndossche, devnexen)
