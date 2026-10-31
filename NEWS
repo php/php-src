@@ -37,6 +37,11 @@ PHP                                                                        NEWS
     (Ilia Alshanetsky)
   . Added IntlNumberFormatter::createFromSkeleton() (GH-24165). (David Carlier)
 
+- JSON:
+  . Added a vectorized (SSE2/NEON) fast path to php_json_escape_string()
+    that bulk-copies runs of bytes which need no escaping, speeding up
+    json_encode() on ASCII-heavy strings. (adapik)
+
 - Lexbor:
   . Merge patches lexbor/lexbor@8a14bc0 and lexbor/lexbor@f67ce4b, fixing a
     heap buffer overflow in :lexbor-contains() parsing and buffer overflows
