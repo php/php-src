@@ -355,6 +355,12 @@ PHP_FUNCTION(request_parse_body)
 		Z_PARAM_ARRAY_HT_OR_NULL(options)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (SG(request_parse_body_context).in_progress) {
+		zend_throw_error(zend_ce_request_parse_body_exception, "Cannot call request_parse_body() while the request body is already being parsed");
+		RETURN_THROWS();
+	}
+
+	SG(request_parse_body_context).in_progress = true;
 	SG(request_parse_body_context).throw_exceptions = true;
 	if (options) {
 		if (cache_request_parse_body_options(options) == FAILURE) {
@@ -390,6 +396,7 @@ PHP_FUNCTION(request_parse_body)
 	RETVAL_ARR(zend_new_pair(&post, &files));
 
 exit:
+	SG(request_parse_body_context).in_progress = false;
 	SG(request_parse_body_context).throw_exceptions = false;
 	memset(&SG(request_parse_body_context).options_cache, 0, sizeof(SG(request_parse_body_context).options_cache));
 }
