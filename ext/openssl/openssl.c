@@ -57,6 +57,14 @@ ZEND_DECLARE_MODULE_GLOBALS(openssl)
 
 zend_class_entry *php_openssl_exception_ce;
 
+/* Openssl\UnsupportedChannelBindingException class */
+
+static zend_class_entry *php_openssl_unsupported_channel_binding_exception_ce;
+
+/* Openssl\ChannelBindingType enum */
+
+static zend_class_entry *php_openssl_channel_binding_type_ce;
+
 /* OpenSSLCertificate class */
 
 zend_class_entry *php_openssl_certificate_ce;
@@ -757,6 +765,9 @@ PHP_INI_END()
 PHP_MINIT_FUNCTION(openssl)
 {
 	php_openssl_exception_ce = register_class_Openssl_OpensslException(zend_ce_exception);
+	php_openssl_unsupported_channel_binding_exception_ce =
+		register_class_Openssl_UnsupportedChannelBindingException(php_openssl_exception_ce);
+	php_openssl_channel_binding_type_ce = register_class_Openssl_ChannelBindingType();
 
 	php_openssl_certificate_ce = register_class_OpenSSLCertificate();
 	php_openssl_certificate_ce->create_object = php_openssl_certificate_create_object;
@@ -5107,6 +5118,63 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 		}
 	} else if (zstrong_result_returned) {
 		ZEND_TRY_ASSIGN_REF_FALSE(zstrong_result_returned);
+	}
+}
+/* }}} */
+
+/* {{{ */
+PHP_FUNCTION(openssl_get_channel_binding)
+{
+	php_stream *stream = NULL;
+	zend_enum_Openssl_ChannelBindingType type;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		PHP_Z_PARAM_STREAM(stream)
+		Z_PARAM_ENUM(type, php_openssl_channel_binding_type_ce)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_string *result = NULL;
+	php_openssl_channel_binding_result ret = php_openssl_netstream_get_channel_binding(stream, type, &result);
+	switch (ret) {
+		case PHP_OPENSSL_CHANNEL_BINDING_RESULT_OK:
+			RETURN_STR(result);
+		case PHP_OPENSSL_CHANNEL_BINDING_RESULT_NOT_APPLICABLE:
+			switch (type) {
+				case ZEND_ENUM_Openssl_ChannelBindingType_TlsUnique:
+					zend_throw_exception(php_openssl_unsupported_channel_binding_exception_ce,
+						"Channel binding type \"tls-unique\" is not supported for TLS 1.3", 0);
+					break;
+				case ZEND_ENUM_Openssl_ChannelBindingType_TlsServerEndPoint:
+					zend_throw_exception(php_openssl_unsupported_channel_binding_exception_ce,
+						"Channel binding type \"tls-server-end-point\" requires a certificate", 0);
+					break;
+				default:
+					zend_throw_exception(php_openssl_unsupported_channel_binding_exception_ce,
+						"Channel binding type is not applicable to this connection", 0);
+					break;
+			}
+			RETURN_THROWS();
+		case PHP_OPENSSL_CHANNEL_BINDING_RESULT_NOT_TLS:
+			zend_throw_exception(zend_ce_value_error,
+				"Stream does not have transport encryption enabled", 0);
+			RETURN_THROWS();
+		case PHP_OPENSSL_CHANNEL_BINDING_RESULT_ERROR:
+			{
+				unsigned long err = ERR_peek_last_error();
+				if (err != 0) {
+					char errstr[256];
+
+					(void)ERR_error_string_n(err, errstr, sizeof(errstr));
+					zend_throw_exception_ex(php_openssl_exception_ce, 0,
+						"Failed to get channel binding data: %s", errstr);
+				} else {
+					zend_throw_exception_ex(php_openssl_exception_ce, 0,
+						"Failed to get channel binding data");
+				}
+			}
+			RETURN_THROWS();
+		default:
+			ZEND_UNREACHABLE();
 	}
 }
 /* }}} */

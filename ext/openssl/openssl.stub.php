@@ -1,11 +1,28 @@
 <?php
 
-/** @generate-class-entries */
+/**
+ * @generate-class-entries
+ * @generate-c-enums
+ */
 
 namespace Openssl {
 
     class OpensslException extends Exception
     {
+    }
+
+    class UnsupportedChannelBindingException extends OpensslException
+    {
+    }
+
+    /**
+     * Channel binding type for openssl_get_channel_binding().
+     * The backing values are the IANA "Channel Binding" registry names.
+     */
+    enum ChannelBindingType: string {
+        case TlsUnique = 'tls-unique';
+        case TlsServerEndPoint = 'tls-server-end-point';
+        case TlsExporter = 'tls-exporter';
     }
 
     /**
@@ -775,5 +792,11 @@ function openssl_get_cert_locations(): array {}
 function openssl_password_hash(string $algo, #[\SensitiveParameter] string $password, array $options = []): string {}
 function openssl_password_verify(string $algo, #[\SensitiveParameter] string $password, string $hash): bool {}
 #endif
+
+ /**
+  * @param resource $stream
+  * @refcount 1
+  */
+function openssl_get_channel_binding($stream, Openssl\ChannelBindingType $channel_binding_type): string {}
 
 }

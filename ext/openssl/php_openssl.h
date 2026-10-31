@@ -23,6 +23,8 @@ extern zend_module_entry openssl_module_entry;
 #include "php_version.h"
 #define PHP_OPENSSL_VERSION PHP_VERSION
 
+#include "openssl_decl.h"
+
 #include <openssl/opensslconf.h>
 #include <openssl/opensslv.h>
 /* OpenSSL version check */
@@ -224,6 +226,14 @@ typedef struct _php_openssl_session_object {
 	zend_object std;
 } php_openssl_session_object;
 
+/* Result of php_openssl_netstream_get_channel_binding(). */
+typedef enum php_openssl_channel_binding_result {
+	PHP_OPENSSL_CHANNEL_BINDING_RESULT_OK = 0,		/* *out holds a zend_string with the data */
+	PHP_OPENSSL_CHANNEL_BINDING_RESULT_NOT_APPLICABLE,	/* *out = NULL (e.g. tls-unique over TLS 1.3, or tls-server-end-point without a certificate) */
+	PHP_OPENSSL_CHANNEL_BINDING_RESULT_NOT_TLS,	/* stream is not an active TLS stream */
+	PHP_OPENSSL_CHANNEL_BINDING_RESULT_ERROR,		/* an OpenSSL-level failure occurred */
+} php_openssl_channel_binding_result;
+
 static inline php_openssl_session_object *php_openssl_session_from_obj(zend_object *obj) {
 	return (php_openssl_session_object *)((char *)(obj) - offsetof(php_openssl_session_object, std));
 }
@@ -236,6 +246,7 @@ extern zend_class_entry *php_openssl_session_ce;
 void php_openssl_session_object_init(zval *zv, SSL_SESSION *session);
 bool php_openssl_is_session_ce(zval *val);
 SSL_SESSION *php_openssl_session_from_zval(zval *zv);
+php_openssl_channel_binding_result php_openssl_netstream_get_channel_binding(struct _php_stream *stream, zend_enum_Openssl_ChannelBindingType type, zend_string **out);
 
 #if defined(HAVE_OPENSSL_ARGON2)
 
