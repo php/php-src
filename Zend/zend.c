@@ -1983,6 +1983,17 @@ ZEND_API zend_result zend_execute_script(int type, zval *retval, zend_file_handl
 		zend_hash_add_empty_element(&EG(included_files), file_handle->opened_path);
 	}
 
+	/* GH-24631: a delayed OOM raised during compilation must be reported even
+	 * when compilation produced no op_array. Any pending exception here (e.g. a
+	 * parse error from the OOM-truncated source) is a downstream artifact of the
+	 * OOM, so discard it and let the OOM be the reported error. */
+	if (ZEND_HAS_OOM()) {
+		if (EG(exception)) {
+			zend_clear_exception();
+		}
+		zend_handle_delayed_oom();
+	}
+
 	zend_result ret = SUCCESS;
 	if (op_array) {
 		zend_execute(op_array, retval);
