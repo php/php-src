@@ -1,5 +1,8 @@
 --TEST--
 GH-24988 (JIT: crash in cleanup_live_vars when % by zero throws mid-expression)
+--CREDITS--
+waroad
+jorgsowa
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
@@ -11,24 +14,34 @@ opcache
 --FILE--
 <?php
 
+class D {
+    function self() { return $this; }
+    function __destruct() { echo "dtor\n"; }
+}
+
+// Leaves a stale object in the frame slot deep() uses for its first temporary
+function pollute($a, $b, $c) {
+    return $a->self()->self();
+}
+
 function deep(int $a, int $b, int $c) {
     $a &= 255;
     return ($a + 1) - ($b + $b + (($a + 1) % ($b % $c)));
 }
 
-$out = [deep(15, 3, 7)];
+$o = new D;
+var_dump(deep(15, 3, 7));
+pollute($o, 1, 2);
 try {
     deep(15, 3, 0);
 } catch (DivisionByZeroError $e) {
-    $out[] = $e->getMessage();
+    echo $e->getMessage(), "\n";
 }
-var_dump($out);
+echo "end\n";
 
 ?>
 --EXPECT--
-array(2) {
-  [0]=>
-  int(9)
-  [1]=>
-  string(14) "Modulo by zero"
-}
+int(9)
+Modulo by zero
+end
+dtor
