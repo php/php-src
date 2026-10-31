@@ -293,6 +293,11 @@ struct _phar_archive_data {
 	uint32_t             is_persistent:1;
 };
 
+static inline uint32_t phar_entry_max_size(const phar_archive_data *phar)
+{
+	return phar->is_tar ? UINT32_MAX - 511 : UINT32_MAX;
+}
+
 typedef struct _phar_entry_fp_info {
 	enum phar_fp_type        fp_type;
 	/* offset within fp of the file contents */

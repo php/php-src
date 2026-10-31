@@ -447,7 +447,7 @@ static ssize_t phar_stream_write(php_stream *stream, const char *buf, size_t cou
 {
 	phar_entry_data *data = (phar_entry_data *) stream->abstract;
 
-	if ((uint64_t) data->position + count > UINT32_MAX) {
+	if ((uint64_t) data->position + count > phar_entry_max_size(data->phar)) {
 		php_error_docref(NULL, E_WARNING, "phar error: Could not write %d characters to \"%s\" in phar \"%s\", entry is too large", (int) count, data->internal_file->filename, data->phar->fname);
 		return -1;
 	}

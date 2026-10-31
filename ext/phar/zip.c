@@ -1475,7 +1475,15 @@ nocentralerror:
 		if (error) {
 			spprintf(error, 4096, "phar zip flush of \"%s\" failed: archive is too large for zip file format", phar->fname);
 		}
-		goto notemperror;
+		php_stream_close(pass.centralfp);
+		if (phar->fp && pass.free_fp) {
+			php_stream_close(phar->fp);
+		} else if (must_close_old_file) {
+			php_stream_close(oldfile);
+		}
+		phar->fp = pass.filefp;
+		phar->is_brandnew = 0;
+		return EOF;
 	}
 
 	cdir_size = php_stream_tell(pass.centralfp);

@@ -1642,7 +1642,7 @@ after_open_fp:
 
 	/* read filters change the length, so filtered streams are only checked after the copy */
 	if (!fp->readfilters.head && php_stream_stat(fp, &ssb) != -1
-			&& (int64_t) ssb.sb.st_size - php_stream_tell(fp) > (int64_t) UINT32_MAX) {
+			&& (int64_t) ssb.sb.st_size - php_stream_tell(fp) > (int64_t) phar_entry_max_size(phar_obj->archive)) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s is too large to be stored in a phar archive", str_key);
 
 		if (save) {
@@ -1662,6 +1662,10 @@ after_open_fp:
 		}
 
 		return ZEND_HASH_APPLY_STOP;
+	}
+
+	if (p_obj->fp == phar_obj->archive->ufp) {
+		php_stream_seek(p_obj->fp, 0, SEEK_END);
 	}
 
 	if (!(data = phar_get_or_create_entry_data(phar_obj->archive->fname, phar_obj->archive->fname_len, str_key, str_key_len, "w+b", 0, &error, 1))) {
@@ -1700,7 +1704,7 @@ after_open_fp:
 		data->internal_file->offset_abs = data->internal_file->offset = php_stream_tell(p_obj->fp);
 		data->fp = NULL;
 		php_stream_copy_to_stream_ex(fp, p_obj->fp, PHP_STREAM_COPY_ALL, &contents_len);
-		if (ZEND_SIZE_T_UINT_OVFL(contents_len)) {
+		if (contents_len > phar_entry_max_size(phar_obj->archive)) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s is too large to be stored in a phar archive", str_key);
 			data->internal_file->is_deleted = 1;
 			phar_entry_delref(data);
@@ -1766,7 +1770,7 @@ after_open_fp:
 PHP_METHOD(Phar, buildFromDirectory)
 {
 	char *error;
-	bool apply_reg = 0;
+	bool apply_reg = 0, pass_fp_is_new;
 	zval arg, arg2, iter, iteriter, regexiter;
 	struct _phar_t pass;
 	zend_string *dir, *regex = NULL;
@@ -1840,14 +1844,20 @@ PHP_METHOD(Phar, buildFromDirectory)
 	pass.base = dir;
 	pass.count = 0;
 	pass.ret = return_value;
-	pass.fp = php_stream_fopen_tmpfile();
-	if (pass.fp == NULL) {
-		zval_ptr_dtor(&iteriter);
-		if (apply_reg) {
-			zval_ptr_dtor(&regexiter);
+	pass.fp = phar_obj->archive->ufp;
+	pass_fp_is_new = pass.fp == NULL;
+	if (pass_fp_is_new) {
+		pass.fp = php_stream_fopen_tmpfile();
+		if (pass.fp == NULL) {
+			zval_ptr_dtor(&iteriter);
+			if (apply_reg) {
+				zval_ptr_dtor(&regexiter);
+			}
+			zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\" unable to create temporary file", phar_obj->archive->fname);
+			RETURN_THROWS();
 		}
-		zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\" unable to create temporary file", phar_obj->archive->fname);
-		RETURN_THROWS();
+	} else {
+		php_stream_seek(pass.fp, 0, SEEK_END);
 	}
 
 	if (phar_obj->archive->is_persistent && FAILURE == phar_copy_on_write(&(phar_obj->archive))) {
@@ -1855,7 +1865,9 @@ PHP_METHOD(Phar, buildFromDirectory)
 		if (apply_reg) {
 			zval_ptr_dtor(&regexiter);
 		}
-		php_stream_close(pass.fp);
+		if (pass_fp_is_new) {
+			php_stream_close(pass.fp);
+		}
 		zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\" is persistent, unable to copy on write", phar_obj->archive->fname);
 		RETURN_THROWS();
 	}
@@ -1880,7 +1892,7 @@ PHP_METHOD(Phar, buildFromDirectory)
 		if (apply_reg) {
 			zval_ptr_dtor(&regexiter);
 		}
-		php_stream_close(pass.fp);
+		phar_obj->archive->ufp = pass.fp;
 	}
 }
 /* }}} */
@@ -1925,10 +1937,15 @@ PHP_METHOD(Phar, buildFromIterator)
 	pass.base = base;
 	pass.ret = return_value;
 	pass.count = 0;
-	pass.fp = php_stream_fopen_tmpfile();
+	pass.fp = phar_obj->archive->ufp;
 	if (pass.fp == NULL) {
-		zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\": unable to create temporary file", phar_obj->archive->fname);
-		RETURN_THROWS();
+		pass.fp = php_stream_fopen_tmpfile();
+		if (pass.fp == NULL) {
+			zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\": unable to create temporary file", phar_obj->archive->fname);
+			RETURN_THROWS();
+		}
+	} else {
+		php_stream_seek(pass.fp, 0, SEEK_END);
 	}
 
 	if (SUCCESS == spl_iterator_apply(obj, (spl_iterator_apply_func_t) phar_build, (void *) &pass)) {
@@ -1939,7 +1956,7 @@ PHP_METHOD(Phar, buildFromIterator)
 			efree(error);
 		}
 	} else {
-		php_stream_close(pass.fp);
+		phar_obj->archive->ufp = pass.fp;
 	}
 }
 /* }}} */
@@ -3705,9 +3722,9 @@ static void phar_add_file(phar_archive_data **pphar, zend_string *file_name, con
 		php_stream_from_zval_no_verify(contents_file, zresource);
 	}
 
-	if ((content && ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(content)))
+	if ((content && ZSTR_LEN(content) > phar_entry_max_size(*pphar))
 		|| (contents_file && !contents_file->readfilters.head && php_stream_stat(contents_file, &ssb) != -1
-			&& (int64_t) ssb.sb.st_size - php_stream_tell(contents_file) > (int64_t) UINT32_MAX)) {
+			&& (int64_t) ssb.sb.st_size - php_stream_tell(contents_file) > (int64_t) phar_entry_max_size(*pphar))) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s is too large to be stored in a phar archive", filename);
 		goto finish;
 	}
@@ -3743,7 +3760,7 @@ static void phar_add_file(phar_archive_data **pphar, zend_string *file_name, con
 				}
 				php_stream_copy_to_stream_ex(contents_file, data->fp, PHP_STREAM_COPY_ALL, &contents_len);
 			}
-			if (ZEND_SIZE_T_UINT_OVFL(contents_len)) {
+			if (contents_len > phar_entry_max_size(*pphar)) {
 				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s is too large to be stored in a phar archive", filename);
 				data->internal_file->is_deleted = 1;
 				phar_entry_delref(data);

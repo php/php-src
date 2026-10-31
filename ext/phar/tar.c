@@ -830,8 +830,8 @@ static int phar_tar_writeheaders_int(phar_entry_info *entry, void *argument) /* 
 
 	phar_tar_octal(header.mode, entry->flags & PHAR_ENT_PERM_MASK, sizeof(header.mode)-1);
 
-	/* the reader rejects sizes above UINT32_MAX - 511, as they overflow the 512 byte padding */
-	if (entry->uncompressed_filesize > UINT32_MAX - 511
+	/* the reader rejects sizes above this limit, as they overflow the 512 byte padding */
+	if (entry->uncompressed_filesize > phar_entry_max_size(entry->phar)
 		|| FAILURE == phar_tar_octal(header.size, entry->uncompressed_filesize, sizeof(header.size)-1)) {
 		if (fp->error) {
 			spprintf(fp->error, 4096, "tar-based phar \"%s\" cannot be created, file \"%s\" is too large for tar file format", entry->phar->fname, entry->filename);
