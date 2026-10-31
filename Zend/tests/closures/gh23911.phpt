@@ -31,6 +31,24 @@ function f() {
 var_dump(f() === f());
 var_dump(B::name(...) !== C::name(...));
 
+trait T {
+    public static function names(): array {
+        return (static fn () => [self::class, static::class])();
+    }
+}
+class U1 { use T; }
+class U2 { use T; }
+class U3 extends U1 {}
+var_dump(U1::names(), U2::names(), U3::names());
+
+class N {
+    public static function nested(): string {
+        return (static fn () => (static fn () => static::class)())();
+    }
+}
+class N2 extends N {}
+var_dump(N::nested(), N2::nested(), N::nested());
+
 ?>
 --EXPECT--
 string(1) "B"
@@ -43,3 +61,24 @@ string(1) "B"
 string(1) "C"
 bool(true)
 bool(true)
+array(2) {
+  [0]=>
+  string(2) "U1"
+  [1]=>
+  string(2) "U1"
+}
+array(2) {
+  [0]=>
+  string(2) "U2"
+  [1]=>
+  string(2) "U2"
+}
+array(2) {
+  [0]=>
+  string(2) "U1"
+  [1]=>
+  string(2) "U3"
+}
+string(1) "N"
+string(2) "N2"
+string(1) "N"
