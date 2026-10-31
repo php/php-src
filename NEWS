@@ -29,6 +29,8 @@ PHP                                                                        NEWS
     existing CV). (yasu20200121web-prog, lazerg)
   . Fixed unmapping of an unrelated range when the aligned chunk mmap fails
     (Marti2203).
+  . Fixed AST printing dropping final on class constants and properties, and
+    abstract on properties. (Jorg Sowa)
 
 - CLI:
   . Fixed bug GH-24697 (PHP_HTTP_PARSER_STRICT build option doesn't work).
