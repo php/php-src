@@ -1039,7 +1039,7 @@ PHP_FUNCTION(hash_pbkdf2)
 
 	result = safe_emalloc(loops, ops->digest_size, 0);
 
-	computed_salt = safe_emalloc(salt_len, 1, 4);
+	computed_salt = safe_emalloc(salt_len, sizeof(unsigned char), 4);
 	memcpy(computed_salt, (unsigned char *) salt, salt_len);
 
 	for (i = 1; i <= loops; i++) {

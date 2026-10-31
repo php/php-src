@@ -237,7 +237,7 @@ static zend_string* sqlite_handle_quoter(pdo_dbh_t *dbh, const zend_string *unqu
 		return NULL;
 	}
 
-	quoted = safe_emalloc(2, ZSTR_LEN(unquoted), 3);
+	quoted = safe_emalloc(ZSTR_LEN(unquoted) * 2, sizeof(char), 3);
 	/* TODO use %Q format? */
 	sqlite3_snprintf(2*ZSTR_LEN(unquoted) + 3, quoted, "'%q'", ZSTR_VAL(unquoted));
 	zend_string *quoted_str = zend_string_init(quoted, strlen(quoted), 0);

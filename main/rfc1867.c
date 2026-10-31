@@ -265,7 +265,7 @@ static multipart_buffer *multipart_buffer_new(char *boundary, int boundary_len)
 	int minsize = boundary_len + 6;
 	if (minsize < FILLUNIT) minsize = FILLUNIT;
 
-	self->buffer = (char *) ecalloc(1, minsize + 1);
+	self->buffer = (char *) ecalloc(minsize + 1, sizeof(char));
 	self->bufsize = minsize;
 
 	spprintf(&self->boundary, 0, "--%s", boundary);

@@ -684,7 +684,7 @@ void odbc_bindcols(odbc_result *result)
 	SQLLEN      	displaysize;
 	SQLUSMALLINT	colfieldid;
 
-	result->values = (odbc_result_value *) safe_emalloc(sizeof(odbc_result_value), result->numcols, 0);
+	result->values = (odbc_result_value *) safe_emalloc(result->numcols, sizeof(odbc_result_value), 0);
 
 	result->longreadlen = ODBCG(defaultlrl);
 	result->binmode = ODBCG(defaultbinmode);
@@ -954,7 +954,7 @@ PHP_FUNCTION(odbc_prepare)
 	result->fetched = 0;
 	odbc_insert_new_result(conn, return_value);
 
-	result->param_info = (odbc_param_info *) safe_emalloc(sizeof(odbc_param_info), result->numparams, 0);
+	result->param_info = (odbc_param_info *) safe_emalloc(result->numparams, sizeof(odbc_param_info), 0);
 	for (i=0;i<result->numparams;i++) {
 		rc = SQLDescribeParam(result->stmt, (SQLUSMALLINT)(i+1), &result->param_info[i].sqltype, &result->param_info[i].precision,
 													&result->param_info[i].scale, &result->param_info[i].nullable);
@@ -1017,7 +1017,7 @@ PHP_FUNCTION(odbc_execute)
 			RETURN_FALSE;
 		}
 
-		params = (odbc_params_t *)safe_emalloc(sizeof(odbc_params_t), result->numparams, 0);
+		params = (odbc_params_t *)safe_emalloc(result->numparams, sizeof(odbc_params_t), 0);
 		for(i = 0; i < result->numparams; i++) {
 			params[i].fp = -1;
 			params[i].zstr = NULL;

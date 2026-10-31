@@ -175,7 +175,7 @@ ZEND_ATTRIBUTE_NONNULL static php_process_env php_array_to_envp(const HashTable 
 #ifndef PHP_WIN32
 		env.envarray = (char **) ecalloc(1, sizeof(char *));
 #endif
-		env.envp = (char *) ecalloc(4, 1);
+		env.envp = (char *) ecalloc(4, sizeof(char));
 		return env;
 	}
 
@@ -204,7 +204,7 @@ ZEND_ATTRIBUTE_NONNULL static php_process_env php_array_to_envp(const HashTable 
 #ifndef PHP_WIN32
 	ep = env.envarray = (char **) ecalloc(cnt + 1, sizeof(char *));
 #endif
-	p = env.envp = (char *) ecalloc(sizeenv + 4, 1);
+	p = env.envp = (char *) ecalloc(sizeenv + 4, sizeof(char));
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(env_hash, key, str) {
 #ifndef PHP_WIN32
@@ -795,7 +795,7 @@ static zend_string* get_command_from_array(const HashTable *array, char ***argv,
 	zend_string *command = NULL;
 	uint32_t i = 0;
 
-	*argv = safe_emalloc(sizeof(char *), num_elems + 1, 0);
+	*argv = safe_emalloc(num_elems + 1, sizeof(char *), 0);
 
 	ZEND_HASH_FOREACH_VAL(array, arg_zv) {
 		zend_string *arg_str = get_valid_arg_string(arg_zv, i + 1);

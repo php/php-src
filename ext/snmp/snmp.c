@@ -707,7 +707,7 @@ static bool php_snmp_parse_oid(
 			zend_argument_value_error(oid_arg_num, "must not be empty when passed as an array");
 			return false;
 		}
-		objid_query->vars = (snmpobjarg *)safe_emalloc(sizeof(snmpobjarg), zend_hash_num_elements(oid_ht), 0);
+		objid_query->vars = (snmpobjarg *)safe_emalloc(zend_hash_num_elements(oid_ht), sizeof(snmpobjarg), 0);
 		memset(objid_query->vars, 0, sizeof(snmpobjarg) * zend_hash_num_elements(oid_ht));
 		objid_query->array_output = (st & SNMP_CMD_SET) == 0;
 		ZEND_HASH_FOREACH_VAL(oid_ht, tmp_oid) {

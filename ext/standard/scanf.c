@@ -161,9 +161,9 @@ static char * BuildCharSet(CharSet *cset, char *format)
 		ch = end++;
 	}
 
-	cset->chars = (char *) safe_emalloc(sizeof(char), (end - format - 1), 0);
+	cset->chars = (char *) safe_emalloc((end - format - 1), sizeof(char), 0);
 	if (nranges > 0) {
-		cset->ranges = (struct Range *) safe_emalloc(sizeof(struct Range), nranges, 0);
+		cset->ranges = (struct Range *) safe_emalloc(nranges, sizeof(struct Range), 0);
 	} else {
 		cset->ranges = NULL;
 	}
@@ -317,7 +317,7 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 	 * a variable is multiply assigned or left unassigned.
 	 */
 	if (numVars > nspace) {
-		nassign = (int*)safe_emalloc(sizeof(int), numVars, 0);
+		nassign = (int*)safe_emalloc(numVars, sizeof(int), 0);
 		nspace = numVars;
 	}
 	for (i = 0; i < nspace; i++) {

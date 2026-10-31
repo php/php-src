@@ -351,7 +351,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
            TODO: Allow failed userfilter creations to continue
                  scanning through the list */
 		if ((period = strrchr(filtername, '.'))) {
-			char *wildcard = safe_emalloc(len, 1, 3);
+			char *wildcard = safe_emalloc(len, sizeof(char), 3);
 
 			/* Search for wildcard matches instead */
 			memcpy(wildcard, filtername, len + 1); /* copy \0 */

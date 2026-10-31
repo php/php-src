@@ -212,7 +212,7 @@ static zend_result phar_tar_process_metadata(phar_entry_info *entry, php_stream 
 	size_t save = php_stream_tell(fp), read;
 	phar_entry_info *mentry;
 
-	metadata = (char *) safe_emalloc(1, entry->uncompressed_filesize, 1);
+	metadata = (char *) safe_emalloc(entry->uncompressed_filesize, sizeof(char), 1);
 
 	read = php_stream_read(fp, metadata, entry->uncompressed_filesize);
 	if (read != entry->uncompressed_filesize) {
@@ -1318,7 +1318,7 @@ nostub:
 	} /* signature */
 
 	/* add final zero blocks */
-	buf = (char *) ecalloc(1024, 1);
+	buf = (char *) ecalloc(1024, sizeof(char));
 	php_stream_write(newfile, buf, 1024);
 	efree(buf);
 
