@@ -1026,7 +1026,11 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 		php_stream_flush(entry->cfp);
 		php_stream_filter_remove(filter, 1);
 		php_stream_seek(entry->cfp, 0, SEEK_END);
-		entry->compressed_filesize = (uint32_t) php_stream_tell(entry->cfp);
+		if ((uint64_t) php_stream_tell(entry->cfp) > UINT32_MAX) {
+			spprintf(p->error, 0, "unable to compress file \"%s\" to zip-based phar \"%s\", compressed file is too large", entry->filename, entry->phar->fname);
+			return ZEND_HASH_APPLY_STOP;
+		}
+		entry->compressed_filesize = php_stream_tell(entry->cfp);
 		PHAR_SET_32(central.compsize, entry->compressed_filesize);
 		PHAR_SET_32(local.compsize, entry->compressed_filesize);
 		/* generate crc on compressed file */
@@ -1465,6 +1469,23 @@ nocentralerror:
 	}
 
 	/* save zip */
+	/* zip64 is not supported, so the central directory offset and size must fit in 32 bits */
+	if ((uint64_t) php_stream_tell(pass.filefp) > UINT32_MAX
+			|| (uint64_t) php_stream_tell(pass.centralfp) > UINT32_MAX) {
+		if (error) {
+			spprintf(error, 4096, "phar zip flush of \"%s\" failed: archive is too large for zip file format", phar->fname);
+		}
+		php_stream_close(pass.centralfp);
+		if (phar->fp && pass.free_fp) {
+			php_stream_close(phar->fp);
+		} else if (must_close_old_file) {
+			php_stream_close(oldfile);
+		}
+		phar->fp = pass.filefp;
+		phar->is_brandnew = 0;
+		return EOF;
+	}
+
 	cdir_size = php_stream_tell(pass.centralfp);
 	cdir_offset = php_stream_tell(pass.filefp);
 	PHAR_SET_32(eocd.cdir_size, cdir_size);

@@ -2819,7 +2819,17 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 		php_stream_flush(entry->cfp);
 		php_stream_filter_remove(filter, 1);
 		php_stream_seek(entry->cfp, 0, SEEK_END);
-		entry->compressed_filesize = ((uint32_t) php_stream_tell(entry->cfp)) - entry->header_offset;
+		if ((uint64_t) (php_stream_tell(entry->cfp) - entry->header_offset) > UINT32_MAX) {
+			if (must_close_old_file) {
+				php_stream_close(oldfile);
+			}
+			php_stream_close(newfile);
+			if (error) {
+				spprintf(error, 0, "unable to compress file \"%s\" to new phar \"%s\", compressed file is too large", entry->filename, phar->fname);
+			}
+			goto cleanup;
+		}
+		entry->compressed_filesize = php_stream_tell(entry->cfp) - entry->header_offset;
 		/* generate crc on compressed file */
 		entry->old_flags = entry->flags;
 		entry->is_modified = 1;
