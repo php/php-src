@@ -1122,6 +1122,37 @@ static zend_never_inline zval* zend_assign_to_typed_prop(const zend_property_inf
 	return zend_assign_to_variable_ex(property_val, &tmp, IS_TMP_VAR, EX_USES_STRICT_TYPES(), garbage_ptr);
 }
 
+static zend_never_inline zval* zend_assign_to_uninit_typed_prop(zend_object *zobj, const zend_property_info *info, zval *property_val, zval *value EXECUTE_DATA_DC)
+{
+	zval tmp;
+
+	ZEND_ASSERT(Z_TYPE_P(property_val) == IS_UNDEF);
+	ZEND_ASSERT(Z_PROP_FLAG_P(property_val) & IS_PROP_UNINIT);
+	ZEND_ASSERT(!zend_object_is_lazy(zobj));
+
+	ZVAL_COPY_DEREF(&tmp, value);
+
+	if (UNEXPECTED(!ZEND_TYPE_CONTAINS_CODE(info->type, Z_TYPE(tmp)))) {
+		GC_ADDREF(zobj);
+		bool type_matched = i_zend_verify_property_type(info, &tmp, EX_USES_STRICT_TYPES());
+		if (UNEXPECTED(GC_DELREF(zobj) == 0)) {
+			zend_object_released_while_assigning_to_property_error(info);
+			zend_objects_store_del(zobj);
+			zval_ptr_dtor(&tmp);
+			return &EG(uninitialized_zval);
+		}
+		if (UNEXPECTED(!type_matched)) {
+			zval_ptr_dtor(&tmp);
+			return &EG(uninitialized_zval);
+		}
+	}
+
+	ZVAL_COPY_VALUE(property_val, &tmp);
+	Z_PROP_FLAG_P(property_val) &= ~(IS_PROP_UNINIT|IS_PROP_REINITABLE);
+
+	return property_val;
+}
+
 static zend_always_inline bool zend_value_instanceof_static(const zval *zv) {
 	if (Z_TYPE_P(zv) != IS_OBJECT) {
 		return 0;
