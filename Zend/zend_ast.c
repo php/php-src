@@ -942,6 +942,7 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 							zend_throw_error(NULL,
 								"Named parameter $%s overwrites previous argument",
 								ZSTR_VAL(name));
+							zval_ptr_dtor(&arg);
 							zend_array_destroy(args);
 							zval_ptr_dtor(result);
 							return FAILURE;
