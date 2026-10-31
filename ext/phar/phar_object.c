@@ -3560,6 +3560,14 @@ PHP_METHOD(Phar, copy)
 	newentry.filename_len = tmp_len;
 	newentry.fp_refcount = 0;
 
+	if (newentry.link) {
+		newentry.link = estrdup(newentry.link);
+	}
+
+	if (newentry.tmp) {
+		newentry.tmp = estrdup(newentry.tmp);
+	}
+
 	if (oldentry->fp_type != PHAR_FP) {
 		if (FAILURE == phar_copy_entry_fp(oldentry, &newentry, &error)) {
 			efree(newentry.filename);
