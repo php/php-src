@@ -24,6 +24,13 @@ PHP 8.7 UPGRADE NOTES
   . Nested arrays in CURLOPT_POSTFIELDS now throw a TypeError, instead of being
     silently converted to the string "Array".
 
+- OpenSSL:
+  . The config option of openssl_csr_new(), openssl_csr_sign(),
+    openssl_pkey_new(), openssl_pkey_export() and openssl_pkey_export_to_file()
+    now respects open_basedir. A config file outside of open_basedir, or a path
+    containing a null byte, now emits a warning and the function returns false.
+    The default OpenSSL config is not affected.
+
 - PDO:
   . PDOStatement::bindColumn() now throws a ValueError when the column name is
     not present in the result set. It previously reported the condition

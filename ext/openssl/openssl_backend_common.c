@@ -291,10 +291,21 @@ int php_openssl_spki_cleanup(const char *src, char *dest)
 
 int php_openssl_parse_config(struct php_x509_request * req, zval * optional_args)
 {
-	char * str, path[MAXPATHLEN];
+	char * str, path[MAXPATHLEN], config_path[MAXPATHLEN];
+	const char * config_load_path;
 	zval * item;
 
 	SET_OPTIONAL_STRING_ARG("config", req->config_filename, default_ssl_conf_filename);
+	config_load_path = req->config_filename;
+	/* Only a config passed in the options is subject to open_basedir, the default
+	 * config is not. */
+	if (req->config_filename != default_ssl_conf_filename) {
+		if (!php_openssl_check_path_ex(Z_STRVAL_P(item), Z_STRLEN_P(item), config_path,
+				0, false, true, "config", NULL)) {
+			return FAILURE;
+		}
+		config_load_path = config_path;
+	}
 	SET_OPTIONAL_STRING_ARG("config_section_name", req->section_name, "req");
 	req->global_config = php_openssl_nconf_new();
 	if (!NCONF_load(req->global_config, default_ssl_conf_filename, NULL)) {
@@ -302,7 +313,7 @@ int php_openssl_parse_config(struct php_x509_request * req, zval * optional_args
 	}
 
 	req->req_config = php_openssl_nconf_new();
-	if (!NCONF_load(req->req_config, req->config_filename, NULL)) {
+	if (!NCONF_load(req->req_config, config_load_path, NULL)) {
 		return FAILURE;
 	}
 
