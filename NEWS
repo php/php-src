@@ -115,6 +115,8 @@ PHP                                                                        NEWS
     INT_MIN. (Marc Bennewitz)
 
 - JSON:
+  . Fixed bug GH-25108 (json_encode() serializes uninitialized properties
+    with setter hooks as null). (JoaoMarcos44)
   . Fixed json_encode() leaving the recursion guard set on objects with hooked
     properties after running out of memory while escaping a property name.
     (adapik)
