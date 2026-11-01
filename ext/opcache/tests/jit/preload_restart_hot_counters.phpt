@@ -6,6 +6,7 @@ opcache
 <?php
 if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
 if (ini_get('opcache.jit') === false) die('skip PHP is compiled without JIT');
+if (!(opcache_get_status()['jit']['on'] ?? false)) die('skip JIT is not available');
 ?>
 --INI--
 opcache.enable=1
