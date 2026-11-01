@@ -567,6 +567,9 @@ static const unsigned char *mbfl_find_offset_utf8(
 			}
 			pos += u8_tbl[*pos];
 		}
+		if (pos > end) {
+			pos = end;
+		}
 		return pos;
 	}
 }
