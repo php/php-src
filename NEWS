@@ -166,6 +166,8 @@ PHP                                                                        NEWS
     are equal). (Lazizbek Ergashev)
   . Fixed bug GH-25092 (Double free in Phar::copy() on link and
     mounted entries). (Lazizbek Ergashev)
+  . Fixed bug GH-24531 (Crash when modifying a zip-based phar whose file was
+    renamed). (Ilia Alshanetsky)
 
 - Reflection:
   . Fixed bug GH-21768 (Assertion failure in ReflectionProperty::isReadable()
