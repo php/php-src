@@ -200,6 +200,9 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug GH-25086 (Io\Poll kqueue backend leaks memory on every
     Watcher::modifyEvents() call). (Lazizbek Ergashev, Jakub Zelenka)
+  . Fixed Io\Poll WSAPoll backend accepting handles that are not sockets, which
+    were then silently dropped by wait(). Adding them now fails with
+    ERROR_NOSUPPORT. (Nicolas Grekas)
   . Fixed memory leaks in checkdnsrr() and dns_check_record() on Windows.
     (Ilia Alshanetsky)
   . Fixed __unserialize() and __wakeup() being called for objects with a missing
