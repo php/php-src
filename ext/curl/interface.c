@@ -2012,7 +2012,13 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 #endif
 		{
 			zend_string *tmp_str;
-			zend_string *str = zval_get_tmp_string(zvalue, &tmp_str);
+			zend_string *str = zval_try_get_tmp_string(zvalue, &tmp_str);
+			if (UNEXPECTED(str == NULL)) {
+				zend_argument_type_error(2 + !is_array_config,
+					"must be of type string for option CURLOPT_%s, %s given",
+					php_curl_option_get_name(option), zend_zval_type_name(zvalue));
+				return FAILURE;
+			}
 #if LIBCURL_VERSION_NUM >= 0x075500 /* Available since 7.85.0 */
 			if ((option == CURLOPT_PROTOCOLS_STR || option == CURLOPT_REDIR_PROTOCOLS_STR) &&
 				(PG(open_basedir) && *PG(open_basedir))
@@ -2061,7 +2067,13 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 				error = curl_easy_setopt(ch->cp, option, NULL);
 			} else {
 				zend_string *tmp_str;
-				zend_string *str = zval_get_tmp_string(zvalue, &tmp_str);
+				zend_string *str = zval_try_get_tmp_string(zvalue, &tmp_str);
+				if (UNEXPECTED(str == NULL)) {
+					zend_argument_type_error(2 + !is_array_config,
+						"must be of type string for option CURLOPT_%s, %s given",
+						php_curl_option_get_name(option), zend_zval_type_name(zvalue));
+					return FAILURE;
+				}
 				zend_result ret = php_curl_option_str(ch, option, ZSTR_VAL(str), ZSTR_LEN(str));
 				zend_tmp_string_release(tmp_str);
 				return ret;
@@ -2081,7 +2093,11 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		case CURLOPT_URL:
 		{
 			zend_string *tmp_str;
-			zend_string *str = zval_get_tmp_string(zvalue, &tmp_str);
+			zend_string *str = zval_try_get_tmp_string(zvalue, &tmp_str);
+			if (UNEXPECTED(str == NULL)) {
+				zend_argument_type_error(2 + !is_array_config, "must be of type string for option CURLOPT_URl, %s given", zend_zval_type_name(zvalue));
+				return FAILURE;
+			}
 			zend_result ret = php_curl_option_url(ch, str);
 			zend_tmp_string_release(tmp_str);
 			return ret;
@@ -2198,7 +2214,6 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		{
 			zval *current;
 			HashTable *ph;
-			zend_string *val, *tmp_val;
 			struct curl_slist *slist = NULL;
 
 			if (Z_TYPE_P(zvalue) != IS_ARRAY) {
@@ -2209,7 +2224,12 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 			ph = Z_ARRVAL_P(zvalue);
 			ZEND_HASH_FOREACH_VAL(ph, current) {
 				ZVAL_DEREF(current);
-				val = zval_get_tmp_string(current, &tmp_val);
+				zend_string *tmp_val;
+				zend_string *val = zval_try_get_tmp_string(current, &tmp_val);
+				if (UNEXPECTED(val == NULL)) {
+					zend_argument_type_error(2 + !is_array_config, "entries for option CURLOPT_%s must be of type string, %s given", php_curl_option_get_name(option), zend_zval_type_name(zvalue));
+					return FAILURE;
+				}
 
 				if (zend_str_has_nul_byte(val)) {
 					curl_slist_free_all(slist);
@@ -2258,7 +2278,11 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 				}
 			} else {
 				zend_string *tmp_str;
-				zend_string *str = zval_get_tmp_string(zvalue, &tmp_str);
+				zend_string *str = zval_try_get_tmp_string(zvalue, &tmp_str);
+				if (UNEXPECTED(str == NULL)) {
+					zend_argument_type_error(2 + !is_array_config, "must be of type string|array for option CURLOPT_POSTFIELDS, %s given", zend_zval_type_name(zvalue));
+					return FAILURE;
+				}
 				/* with curl 7.17.0 and later, we can use COPYPOSTFIELDS, but we have to provide size before */
 				error = curl_easy_setopt(ch->cp, CURLOPT_POSTFIELDSIZE_LARGE, (curl_off_t) ZSTR_LEN(str));
 				error = curl_easy_setopt(ch->cp, CURLOPT_COPYPOSTFIELDS, ZSTR_VAL(str));
@@ -2321,7 +2345,13 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		case CURLOPT_SSH_KNOWNHOSTS:
 		{
 			zend_string *tmp_str;
-			zend_string *str = zval_get_tmp_string(zvalue, &tmp_str);
+			zend_string *str = zval_try_get_tmp_string(zvalue, &tmp_str);
+			if (UNEXPECTED(str == NULL)) {
+				zend_argument_type_error(2 + !is_array_config,
+					"must be of type string for option CURLOPT_%s, %s given",
+					php_curl_option_get_name(option), zend_zval_type_name(zvalue));
+				return FAILURE;
+			}
 			zend_result ret;
 
 			if (ZSTR_LEN(str) && php_check_open_basedir(ZSTR_VAL(str))) {
