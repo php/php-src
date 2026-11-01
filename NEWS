@@ -157,6 +157,10 @@ PHP                                                                        NEWS
     compressed contents after changing compression). (Raphael Paez)
   . Fixed bug GH-24740 (Oversized tar metadata exhausts the memory limit).
     (Lazizbek Ergashev)
+  . Fixed bug GH-25090 (UAF in phar rename() of an entry with metadata).
+    (Lazizbek Ergashev)
+  . Fixed bug GH-25091 (UAF in phar rename() when source and destination
+    are equal). (Lazizbek Ergashev)
 
 - Reflection:
   . Fixed bug GH-21768 (Assertion failure in ReflectionProperty::isReadable()
