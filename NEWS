@@ -145,6 +145,8 @@ PHP                                                                        NEWS
   . Fixed build with OpenSSL 4.1. (Weilin Du)
   . Fixed bug GH-24784 (openssl_pkcs7_read() and openssl_cms_read() overwrite
     certificates with CRLs). (Alexander Danilov)
+  . Fixed use-after-free in the TLS session remove callback when the listener
+    stream is closed while a shared context is still in use. (Jakub Zelenka)
 
 - PDO_Firebird:
   . Fixed bug GH-25006 (getColumnMeta() reads out of bounds for an
