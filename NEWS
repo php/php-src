@@ -40,6 +40,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-25306 (Assertion status == LXB_STATUS_OK in dom_parse_selector
     when lexbor allocation fails). (ndossche)
 
+- FFI:
+  . Fixed calling conventions inside a nested declarator, such as
+    "void (__stdcall *f)(void)", being ignored or rejected. (Nicolas Grekas)
+
 - GD:
   . Fixed use-after-free when drawing with a brush or tile image that was
     released after imagesetbrush() or imagesettile(). (lacatoire)

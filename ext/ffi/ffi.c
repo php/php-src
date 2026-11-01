@@ -6467,6 +6467,7 @@ void zend_ffi_make_func_type(zend_ffi_dcl *dcl, HashTable *args, zend_ffi_dcl *n
 {
 	zend_ffi_type *type;
 	zend_ffi_type *ret_type;
+	bool nested_abi = false;
 
 	zend_ffi_finalize_type(dcl);
 	ret_type = ZEND_FFI_TYPE(dcl->type);
@@ -6495,6 +6496,23 @@ void zend_ffi_make_func_type(zend_ffi_dcl *dcl, HashTable *args, zend_ffi_dcl *n
 			pefree(args, FFI_G(persistent));
 			args = NULL;
 		}
+	}
+
+	/* The calling convention can be inside the parentheses, as in "void (__stdcall *f)(void)" */
+	if (nested_dcl->abi != ZEND_FFI_ABI_DEFAULT) {
+		if (dcl->abi != ZEND_FFI_ABI_DEFAULT) {
+			zend_ffi_cleanup_dcl(nested_dcl);
+			zend_ffi_cleanup_dcl(dcl);
+			if (args) {
+				zend_hash_destroy(args);
+				pefree(args, FFI_G(persistent));
+			}
+			zend_ffi_parser_error("Multiple calling convention specifiers at line %d", FFI_G(line));
+			return;
+		}
+		dcl->abi = nested_dcl->abi;
+		nested_dcl->abi = ZEND_FFI_ABI_DEFAULT;
+		nested_abi = true;
 	}
 
 #ifdef HAVE_FFI_VECTORCALL_PARTIAL
@@ -6583,6 +6601,11 @@ void zend_ffi_make_func_type(zend_ffi_dcl *dcl, HashTable *args, zend_ffi_dcl *n
 #endif
 		default:
 			type->func.abi = FFI_DEFAULT_ABI;
+			if (nested_abi) {
+				/* A convention that the platform doesn't support was ignored
+				 * inside the parentheses so far, keep accepting it */
+				break;
+			}
 			zend_ffi_cleanup_dcl(nested_dcl);
 			if (args) {
 				zend_hash_destroy(args);
