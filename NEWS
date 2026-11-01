@@ -147,6 +147,7 @@ PHP                                                                        NEWS
     certificates with CRLs). (Alexander Danilov)
   . Fixed use-after-free in the TLS session remove callback when the listener
     stream is closed while a shared context is still in use. (Jakub Zelenka)
+  . Fixed heap buffer overflow in TLS PSK callbacks. (Jakub Zelenka)
 
 - PDO_Firebird:
   . Fixed bug GH-25006 (getColumnMeta() reads out of bounds for an
