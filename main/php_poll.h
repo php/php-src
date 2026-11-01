@@ -173,4 +173,14 @@ PHPAPI void php_poll_handle_object_free(zend_object *obj);
 /* Get file descriptor from any poll handle */
 PHPAPI php_socket_t php_poll_handle_get_fd(php_poll_handle_object *handle);
 
+/* Extra handle ops registered per ops pointer (temporary, ABI) */
+typedef struct php_poll_handle_ext_ops {
+	/* Data above the descriptor that a read returns without waiting */
+	bool (*has_buffered_data)(php_poll_handle_object *handle);
+} php_poll_handle_ext_ops;
+
+PHPAPI zend_result php_poll_handle_register_ext_ops(
+		const php_poll_handle_ops *ops, const php_poll_handle_ext_ops *ext_ops);
+PHPAPI const php_poll_handle_ext_ops *php_poll_handle_get_ext_ops(const php_poll_handle_ops *ops);
+
 #endif /* PHP_POLL_H */
