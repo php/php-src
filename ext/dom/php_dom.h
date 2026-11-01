@@ -115,6 +115,7 @@ zend_object *dom_xpath_objects_new(zend_class_entry *class_type);
 #endif
 bool dom_get_strict_error(php_libxml_ref_obj *document);
 void node_list_unlink(xmlNodePtr node);
+xmlAttrPtr dom_set_attribute_value(xmlNodePtr element, xmlNsPtr ns, const xmlChar *name, const xmlChar *value);
 int dom_check_qname(char *qname, char **localname, char **prefix, int uri_len, int name_len);
 xmlNsPtr dom_get_ns(xmlNodePtr node, char *uri, int *errorcode, char *prefix);
 xmlNsPtr dom_get_ns_unchecked(xmlNodePtr nodep, char *uri, char *prefix);
