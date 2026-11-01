@@ -14,7 +14,7 @@ include 'server.inc';
 $host = curl_cli_server_start();
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, "{$host}/get.php?test=post");
-curl_setopt($ch, CURLOPT_POST, ['f' => 'f']);
+curl_setopt($ch, CURLOPT_POST, 1);
 curl_setopt($ch, CURLOPT_TIMEOUT, 2);
 curl_setopt($ch, CURLOPT_READFUNCTION, "custom_readfunction" );
 
