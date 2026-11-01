@@ -195,6 +195,8 @@ PHP                                                                        NEWS
     properties). (Lazizbek Ergashev)
 
 - Standard:
+  . Fixed bug GH-25086 (Io\Poll kqueue backend leaks memory on every
+    Watcher::modifyEvents() call). (Lazizbek Ergashev, Jakub Zelenka)
   . Fixed memory leaks in checkdnsrr() and dns_check_record() on Windows.
     (Ilia Alshanetsky)
   . Fixed __unserialize() and __wakeup() being called for objects with a missing
