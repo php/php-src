@@ -120,6 +120,15 @@ static zend_result wsapoll_backend_add(php_poll_ctx *ctx, int fd, uint32_t event
 		return FAILURE;
 	}
 
+	/* WSAPoll() can only poll sockets, so reject files and pipes. */
+	int type;
+	int type_len = sizeof(type);
+	if (getsockopt((SOCKET) fd, SOL_SOCKET, SO_TYPE, (char *) &type, &type_len) != 0
+			&& WSAGetLastError() == WSAENOTSOCK) {
+		php_poll_set_error(ctx, PHP_POLL_ERR_NOSUPPORT);
+		return FAILURE;
+	}
+
 	php_poll_fd_entry *entry = php_poll_fd_table_get_new(backend_data->fd_table, fd);
 	if (!entry) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
