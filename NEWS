@@ -68,6 +68,8 @@ PHP                                                                        NEWS
     NULL deref on first use after a failed open). (Girgias)
 
 - DOM:
+  . Fixed a use-after-free when reflected attribute setters replace an
+    attribute whose child still has a live wrapper. (Jakub Zelenka)
   . Fixed bug GH-23352 (UAF reading an attribute value node retained across
     DOMDocument::adoptNode()). (David Carlier)
   . Fixed bug GH-24260 (querySelectorAll() returns duplicate elements for
