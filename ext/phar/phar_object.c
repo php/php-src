@@ -3494,8 +3494,8 @@ PHP_METHOD(Phar, copy)
 	newentry.filename = zend_string_copy(new_file);
 	newentry.fp_refcount = 0;
 
-	if (newentry.link) {
-		newentry.link = estrdup(newentry.link);
+	if (newentry.symlink) {
+		newentry.symlink = zend_string_copy(newentry.symlink);
 	}
 
 	if (newentry.tmp) {
@@ -3505,8 +3505,8 @@ PHP_METHOD(Phar, copy)
 	if (oldentry->fp_type != PHAR_FP) {
 		if (FAILURE == phar_copy_entry_fp(oldentry, &newentry, &error)) {
 			zend_string_release(newentry.filename);
-			if (newentry.link) {
-				efree(newentry.link);
+			if (newentry.symlink) {
+				zend_string_release(newentry.symlink);
 			}
 			if (newentry.tmp) {
 				efree(newentry.tmp);
