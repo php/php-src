@@ -320,11 +320,7 @@ static inline int LSAPI_ReqBodyGetChar(void)
 {   return LSAPI_ReqBodyGetChar_r( &g_req );        }
 
 static inline int LSAPI_ReqBodyGetLine( char * pBuf, int len, int *getLF )
-{
-    if (len <= 0)
-        return -1;
-    return LSAPI_ReqBodyGetLine_r( &g_req, pBuf, (size_t)len, getLF );
-}
+{   return LSAPI_ReqBodyGetLine_r( &g_req, pBuf, len, getLF );        }
 
 
 
@@ -332,11 +328,7 @@ static inline int LSAPI_FinalizeRespHeaders(void)
 {   return LSAPI_FinalizeRespHeaders_r( &g_req );           }
 
 static inline ssize_t LSAPI_Write( const char * pBuf, ssize_t len )
-{
-    if (len < 0)
-        return -1;
-    return LSAPI_Write_r( &g_req, pBuf, (size_t)len );
-}
+{   return LSAPI_Write_r( &g_req, pBuf, len );              }
 
 static inline ssize_t LSAPI_sendfile( int fdIn, off_t* off, size_t size )
 {
@@ -344,11 +336,7 @@ static inline ssize_t LSAPI_sendfile( int fdIn, off_t* off, size_t size )
 }
 
 static inline ssize_t LSAPI_Write_Stderr( const char * pBuf, ssize_t len )
-{
-    if (len < 0)
-        return -1;
-    return LSAPI_Write_Stderr_r( &g_req, pBuf, (size_t)len );
-}
+{   return LSAPI_Write_Stderr_r( &g_req, pBuf, len );       }
 
 static inline int LSAPI_Flush(void)
 {   return LSAPI_Flush_r( &g_req );                         }
@@ -403,14 +391,6 @@ int LSAPI_Set_Restored_Parent_Pid(int pid);
 
 typedef void (*LSAPI_On_Timer_pf)(int *forked_child_pid);
 void LSAPI_Register_Pgrp_Timer_Callback(LSAPI_On_Timer_pf);
-
-/* Called around the fork() of each worker by the prefork server
- * (LSAPI_Prefork_Accept_r): before in the parent, then after_parent in the
- * parent (also when fork() fails) or after_child in the new worker. */
-typedef void (*LSAPI_Fork_Hook_pf)(void);
-void LSAPI_Set_Fork_Hooks(LSAPI_Fork_Hook_pf before,
-                          LSAPI_Fork_Hook_pf after_parent,
-                          LSAPI_Fork_Hook_pf after_child);
 
 int LSAPI_Inc_Req_Processed(int cnt);
 
