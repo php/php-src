@@ -4,9 +4,14 @@ HWPX files with embedded PNG or Markdown names are not mistaken for OOXML
 fileinfo
 --FILE--
 <?php
-$data = file_get_contents(__DIR__ . '/hwpx-with-preview.testfile');
+$data = base64_decode('UEsDBBQAAAAAAAAAIQCC8EFHEwAAABMAAAAIAAAAbWltZXR5cGVhcHBsaWNhdGlvbi9od3AremlwUEsDBBQAAAAAAAAAIQB3Efq0CAAAAAgAAAASAAAAQ29udGVudHMvZmlsZTAueG1sY29udGVudHNQSwMEFAAAAAAAAAAhAHcR+rQIAAAACAAAABIAAABDb250ZW50cy9maWxlMS54bWxjb250ZW50c1BLAwQUAAAAAAAAACEAXwQ9xQUAAAAFAAAAFAAAAFByZXZpZXcvUHJ2SW1hZ2UucG5naW1hZ2VQSwMEFAAAAAAAAAAhAEs2srcBAAAAAQAAAAwAAABzZXR0aW5ncy54bWxYUEsBAhQDFAAAAAAAAAAhAILwQUcTAAAAEwAAAAgAAAAAAAAAAAAAAIABAAAAAG1pbWV0eXBlUEsBAhQDFAAAAAAAAAAhAHcR+rQIAAAACAAAABIAAAAAAAAAAAAAAIABOQAAAENvbnRlbnRzL2ZpbGUwLnhtbFBLAQIUAxQAAAAAAAAAIQB3Efq0CAAAAAgAAAASAAAAAAAAAAAAAACAAXEAAABDb250ZW50cy9maWxlMS54bWxQSwECFAMUAAAAAAAAACEAXwQ9xQUAAAAFAAAAFAAAAAAAAAAAAAAAgAGpAAAAUHJldmlldy9QcnZJbWFnZS5wbmdQSwECFAMUAAAAAAAAACEASzaytwEAAAABAAAADAAAAAAAAAAAAAAAgAHgAAAAc2V0dGluZ3MueG1sUEsFBgAAAAAFAAUAMgEAAAsBAAAAAA==');
+// Extra ZIP signatures in the archive comment exercise the OOXML search path.
+$comment = str_repeat(str_repeat('X', 128) . "PK\x03\x04", 5) . str_repeat('X', 200);
+$data = substr($data, 0, -2) . pack('v', strlen($comment)) . $comment;
+$path = __DIR__ . '/hwpx_mime_tmp.zip';
+file_put_contents($path, $data);
 $finfo = new finfo(FILEINFO_MIME_TYPE);
-var_dump($finfo->file(__DIR__ . '/hwpx-with-preview.testfile'));
+var_dump($finfo->file($path));
 var_dump($finfo->buffer($data));
 var_dump($finfo->buffer(str_replace('PrvImage.png', 'PrvImage.md_', $data)));
 
@@ -16,6 +21,10 @@ foreach ([
 ] as $encoded) {
     var_dump($finfo->buffer(base64_decode($encoded)));
 }
+?>
+--CLEAN--
+<?php
+unlink(__DIR__ . '/hwpx_mime_tmp.zip');
 ?>
 --EXPECT--
 string(21) "application/x-hwp+zip"
