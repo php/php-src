@@ -723,6 +723,8 @@ PHP                                                                        NEWS
     TAR archive entry injection). (CVE-2026-6103) (Jakub Zelenka)
 
 - SNMP:
+  . Fixed bug GH-25137 (SNMP accepts malformed remote ports).
+    (somethingwithproof)
   . Fixed bug GH-23453 (SNMP::setSecurity() frees a non-malloced address with a
     context engine ID longer than 32 bytes). (Lazizbek Ergashev)
 
