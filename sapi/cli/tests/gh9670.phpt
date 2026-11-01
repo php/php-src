@@ -9,7 +9,7 @@ include "skipif.inc";
 
 $php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
-foreach (explode("\n", `$php -n -h`) as $line) {
+foreach (explode("\n", shell_exec("$php -n -h")) as $line) {
     if (preg_match('/^  -[Cq] /', $line)) {
         echo $line, "\n";
     }
