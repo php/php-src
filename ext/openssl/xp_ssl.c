@@ -3376,6 +3376,10 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle) /* {{{
 			sslsock->ssl_handle = NULL;
 		}
 		if (sslsock->ctx) {
+			/* Clear the ctx stream pointer as the ctx may outlive this stream. */
+			if (SSL_CTX_get_ex_data(sslsock->ctx, php_openssl_get_ctx_stream_data_index()) == stream) {
+				SSL_CTX_set_ex_data(sslsock->ctx, php_openssl_get_ctx_stream_data_index(), NULL);
+			}
 			SSL_CTX_free(sslsock->ctx);
 			sslsock->ctx = NULL;
 		}
