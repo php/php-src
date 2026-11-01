@@ -3571,6 +3571,12 @@ PHP_METHOD(Phar, copy)
 	if (oldentry->fp_type != PHAR_FP) {
 		if (FAILURE == phar_copy_entry_fp(oldentry, &newentry, &error)) {
 			efree(newentry.filename);
+			if (newentry.link) {
+				efree(newentry.link);
+			}
+			if (newentry.tmp) {
+				efree(newentry.tmp);
+			}
 			php_stream_close(newentry.fp);
 			zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
 			efree(error);
