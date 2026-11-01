@@ -51,6 +51,7 @@ runs:
             --enable-sockets \
             --with-openssl \
             --enable-bcmath \
+            --enable-strmatch \
             --enable-calendar \
             --enable-ftp \
             --enable-zend-test \

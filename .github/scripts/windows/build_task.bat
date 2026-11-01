@@ -41,6 +41,7 @@ if "%CLANG_TOOLSET%" equ "1" (
 
 cmd /c configure.bat ^
 	--enable-snapshot-build ^
+	--enable-strmatch ^
 	--disable-debug-pack ^
 	--without-analyzer ^
 	--enable-object-out-dir=%PHP_BUILD_OBJ_DIR% ^

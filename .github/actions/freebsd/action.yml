@@ -80,6 +80,7 @@ runs:
             --with-openssl \
             --with-iconv=/usr/local \
             --enable-bcmath \
+            --enable-strmatch \
             --enable-calendar \
             --enable-ftp \
             --with-ffi \
