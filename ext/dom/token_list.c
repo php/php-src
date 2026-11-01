@@ -192,7 +192,7 @@ static void dom_token_list_update(dom_token_list_object *intern)
 	/* 2. Set an attribute value for the associated element using associated attribute’s local name and the result of
 	 *    running the ordered set serializer for token set. */
 	char *value = dom_ordered_set_serializer(token_set);
-	xmlSetNsProp(dom_token_list_get_element(intern), NULL, BAD_CAST "class", BAD_CAST value);
+	dom_set_attribute_value(dom_token_list_get_element(intern), NULL, BAD_CAST "class", BAD_CAST value);
 	efree(intern->cached_string);
 	intern->cached_string = value;
 }
@@ -432,7 +432,7 @@ zend_result dom_token_list_value_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 	php_libxml_invalidate_node_list_cache(intern->dom.document);
-	xmlSetNsProp(dom_token_list_get_element(intern), NULL, BAD_CAST "class", BAD_CAST Z_STRVAL_P(newval));
+	dom_set_attribute_value(dom_token_list_get_element(intern), NULL, BAD_CAST "class", BAD_CAST Z_STRVAL_P(newval));
 	/* Note: we don't update the set here, the set is always lazily updated for performance reasons. */
 	return SUCCESS;
 }

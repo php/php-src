@@ -2350,6 +2350,15 @@ void dom_remove_all_children(xmlNodePtr nodep)
 	}
 }
 
+xmlAttrPtr dom_set_attribute_value(xmlNodePtr element, xmlNsPtr ns, const xmlChar *name, const xmlChar *value)
+{
+	xmlAttrPtr existing = xmlHasNsProp(element, name, ns == NULL ? NULL : ns->href);
+	if (existing != NULL && existing->type != XML_ATTRIBUTE_DECL) {
+		node_list_unlink(existing->children);
+	}
+	return xmlSetNsProp(element, ns, name, value);
+}
+
 void php_dom_get_content_into_zval(const xmlNode *nodep, zval *return_value, bool null_on_failure)
 {
 	ZEND_ASSERT(nodep != NULL);
