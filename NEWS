@@ -231,6 +231,8 @@ PHP                                                                        NEWS
     (Lazizbek Ergashev)
   . Fixed bug GH-25091 (UAF in phar rename() when source and destination
     are equal). (Lazizbek Ergashev)
+  . Fixed bug GH-25092 (Double free in Phar::copy() on link and
+    mounted entries). (Lazizbek Ergashev)
 
 - Phpdbg:
   . Fix wrong command names. (ndossche, Weilin Du)
