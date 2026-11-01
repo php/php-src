@@ -1776,8 +1776,6 @@ static unsigned int php_openssl_psk_client_cb(SSL *ssl, const char *hint,
 		unsigned char *psk_out, unsigned int max_psk_len)
 {
 	(void)hint; /* identity hint deliberately not exposed as it is useless */
-	(void)max_identity_len;
-	(void)max_psk_len;
 
 	php_stream *stream = (php_stream *)SSL_get_ex_data(ssl,
 			php_openssl_get_ssl_stream_data_index());
@@ -1816,6 +1814,18 @@ static unsigned int php_openssl_psk_client_cb(SSL *ssl, const char *hint,
 		return 0;
 	}
 
+	/* Returned lengths are untrusted, so bound them to the buffers. */
+	if (ZSTR_LEN(identity_str) >= max_identity_len) {
+		zend_value_error("PSK identity must be shorter than %u bytes", max_identity_len);
+		zval_ptr_dtor(&result);
+		return 0;
+	}
+	if (ZSTR_LEN(psk_str) > max_psk_len) {
+		zend_value_error("PSK key must not exceed %u bytes", max_psk_len);
+		zval_ptr_dtor(&result);
+		return 0;
+	}
+
 	memcpy(identity_out, ZSTR_VAL(identity_str), ZSTR_LEN(identity_str));
 	identity_out[ZSTR_LEN(identity_str)] = '\0';
 	memcpy(psk_out, ZSTR_VAL(psk_str), ZSTR_LEN(psk_str));
@@ -1828,8 +1838,6 @@ static unsigned int php_openssl_psk_client_cb(SSL *ssl, const char *hint,
 static unsigned int php_openssl_psk_server_cb(SSL *ssl, const char *identity,
 		unsigned char *psk_out, unsigned int max_psk_len)
 {
-	(void)max_psk_len;
-
 	php_stream *stream = (php_stream *)SSL_get_ex_data(ssl,
 			php_openssl_get_ssl_stream_data_index());
 	if (stream == NULL) {
@@ -1865,6 +1873,13 @@ static unsigned int php_openssl_psk_server_cb(SSL *ssl, const char *identity,
 
 	zend_string *psk_str = php_openssl_psk_get_psk(&result);
 	if (psk_str == NULL) {
+		zval_ptr_dtor(&result);
+		return 0;
+	}
+
+	/* Returned length is untrusted, so bound it to the buffer. */
+	if (ZSTR_LEN(psk_str) > max_psk_len) {
+		zend_value_error("PSK key must not exceed %u bytes", max_psk_len);
 		zval_ptr_dtor(&result);
 		return 0;
 	}
@@ -1931,6 +1946,14 @@ static int php_openssl_psk_use_session_cb(SSL *ssl, const EVP_MD *md,
 			/* Could not satisfy the server's chosen digest */
 			return 1;
 		}
+		return 0;
+	}
+
+	/* Returned length is untrusted, so bound it to the buffer. */
+	if (ZSTR_LEN(identity_str) > PHP_OPENSSL_PSK_MAX_IDENTITY_LEN) {
+		zend_value_error("PSK identity must not exceed %d bytes", PHP_OPENSSL_PSK_MAX_IDENTITY_LEN);
+		SSL_SESSION_free(session);
+		zval_ptr_dtor(&result);
 		return 0;
 	}
 
