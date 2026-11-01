@@ -550,6 +550,8 @@ PHP                                                                        NEWS
     (Nicolas Grekas)
   . Fixed convert.quoted-printable-decode decoding lowercase hex digits to
     the wrong byte. (Ilia Alshanetsky)
+  . Fixed bug GH-23948 (Io\Poll: data buffered by the stream layer is not
+    reported). (Jakub Zelenka)
 
 - Tidy:
   . Fixed a use-after-free when a tidyNode is used after its document is
