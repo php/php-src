@@ -3825,7 +3825,7 @@ static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *sc
 		*strict_class = true;
 		ret = true;
 	} else {
-		if (error) zend_spprintf(error, 0, "class \"%.*s\" not found", (int)name_len, ZSTR_VAL(name));
+		if (error) zend_spprintf(error, 0, "class \"%pS\" not found", name);
 	}
 	ZSTR_ALLOCA_FREE(lcname, use_heap);
 	/* User error handlers may throw from deprecations above; do not report callable as valid. */
