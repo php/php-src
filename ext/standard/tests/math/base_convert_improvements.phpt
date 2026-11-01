@@ -33,15 +33,15 @@ echo base_convert("0 0" , 9, 10) . "\n";
 7
 10
 =======================================
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+Deprecated: base_convert(): Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 15
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+Deprecated: base_convert(): Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 61695
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+Deprecated: base_convert(): Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 511
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+Deprecated: base_convert(): Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 0
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+Deprecated: base_convert(): Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 7
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+Deprecated: base_convert(): Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 0
