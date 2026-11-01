@@ -536,7 +536,6 @@ PHP_FUNCTION(chown)
 #ifdef HAVE_LCHOWN
 PHP_FUNCTION(lchown)
 {
-	RETVAL_TRUE;
 	php_do_chown(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 #endif

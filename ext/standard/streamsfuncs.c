@@ -249,9 +249,7 @@ PHP_FUNCTION(stream_socket_server)
 
 	if (stream == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to connect to %s (%s)", host, errstr == NULL ? "Unknown error" : ZSTR_VAL(errstr));
-	}
 
-	if (stream == NULL) {
 		if (zerrno) {
 			ZEND_TRY_ASSIGN_REF_LONG(zerrno, err);
 		}

@@ -55,8 +55,6 @@ compare_right(char const **a, char const *aend, char const **b, char const *bend
 				bias = +1;
 		}
 	}
-
-	return 0;
 }
 /* }}} */
 
@@ -79,8 +77,6 @@ compare_left(char const **a, char const *aend, char const **b, char const *bend)
 		 else if (**a > **b)
 			 return +1;
 	}
-
-	return 0;
 }
 /* }}} */
 
