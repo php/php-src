@@ -179,7 +179,7 @@ PHP_FUNCTION(stream_socket_client)
 		/* host might contain binary characters */
 		zend_string *quoted_host = php_addslashes(host);
 
-		php_error_docref(NULL, E_WARNING, "Unable to connect to %s (%s)", ZSTR_VAL(quoted_host), errstr == NULL ? "Unknown error" : ZSTR_VAL(errstr));
+		php_error_docref(NULL, E_WARNING, "Unable to connect to %pS (%s)", quoted_host, errstr == NULL ? "Unknown error" : ZSTR_VAL(errstr));
 		zend_string_release_ex(quoted_host, 0);
 	}
 
