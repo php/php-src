@@ -388,6 +388,7 @@ static PHP_GINIT_FUNCTION(date)
 	date_globals->default_timezone = NULL;
 	date_globals->timezone = NULL;
 	date_globals->tzcache = NULL;
+	date_globals->last_errors = NULL;
 }
 /* }}} */
 
