@@ -10,6 +10,7 @@ const KNOWNS_ERRORS = [
 	'curl_setopt(): supplied argument is not a valid File-Handle resource',
 	'Object of class stdClass could not be converted to string',
 	'curl_setopt(): The CURLOPT_HTTP200ALIASES option must have an array value',
+	'curl_setopt(): Argument #3 ($value) must be of type CurlSharePersistentHandle|CurlShareHandle for option CURLOPT_SHARE, stdClass given',
 ];
 
 function isKnownError($error): bool {
@@ -66,7 +67,6 @@ Option CURLOPT_BINARYTRANSFER succeeded
 Option CURLOPT_DNS_USE_GLOBAL_CACHE succeeded
 Option CURLOPT_PRIVATE succeeded
 Option CURLOPT_RETURNTRANSFER succeeded
-Option CURLOPT_SHARE succeeded
 Option CURLFOLLOW_OBEYCODE succeeded
 Option CURLE_FAILED_INIT succeeded
 Option CURLINFO_HEADER_OUT succeeded
