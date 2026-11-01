@@ -645,7 +645,6 @@ zend_result phar_parse_zipfile(
 			zend_off_t restore_pos = php_stream_tell(fp);
 			php_stream_seek(fp, entry.offset, SEEK_SET);
 
-			mydata->alias_len = entry.uncompressed_filesize;
 			if (entry.flags & PHAR_ENT_COMPRESSED_GZ) {
 				filter = php_stream_filter_create("zlib.inflate", NULL, php_stream_is_persistent(fp));
 
@@ -731,6 +730,8 @@ zend_result phar_parse_zipfile(
 					PHAR_ZIP_FAIL("unable to read in alias, truncated");
 				}
 			}
+
+			mydata->alias_len = entry.uncompressed_filesize;
 
 			/* return to central directory parsing */
 			php_stream_seek(fp, restore_pos, SEEK_SET);
