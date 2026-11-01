@@ -1541,10 +1541,10 @@ static void zend_accel_add_key(zend_string *key, zend_accel_hash_entry *bucket)
 	}
 }
 
+/* Must perform the same check as phar_compile_file(). */
 static zend_always_inline bool is_phar_file(const zend_string *filename)
 {
-	return filename &&
-		zend_string_ends_with_literal(filename, ".phar") &&
+	return filename && strstr(ZSTR_VAL(filename), ".phar") &&
 		!strstr(ZSTR_VAL(filename), "://");
 }
 
