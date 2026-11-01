@@ -3494,9 +3494,23 @@ PHP_METHOD(Phar, copy)
 	newentry.filename = zend_string_copy(new_file);
 	newentry.fp_refcount = 0;
 
+	if (newentry.link) {
+		newentry.link = estrdup(newentry.link);
+	}
+
+	if (newentry.tmp) {
+		newentry.tmp = estrdup(newentry.tmp);
+	}
+
 	if (oldentry->fp_type != PHAR_FP) {
 		if (FAILURE == phar_copy_entry_fp(oldentry, &newentry, &error)) {
 			zend_string_release(newentry.filename);
+			if (newentry.link) {
+				efree(newentry.link);
+			}
+			if (newentry.tmp) {
+				efree(newentry.tmp);
+			}
 			php_stream_close(newentry.fp);
 			zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
 			efree(error);
