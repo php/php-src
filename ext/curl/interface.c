@@ -2217,7 +2217,9 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 			struct curl_slist *slist = NULL;
 
 			if (Z_TYPE_P(zvalue) != IS_ARRAY) {
-				zend_type_error("%s(): The CURLOPT_%s option must have an array value", get_active_function_name(), php_curl_option_get_name(option));
+				zend_argument_type_error(2 + !is_array_config,
+					"must be of type array for option CURLOPT_%s, %s given",
+					php_curl_option_get_name(option), zend_zval_type_name(zvalue));
 				return FAILURE;
 			}
 

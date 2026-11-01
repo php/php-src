@@ -9,7 +9,6 @@ const KNOWNS_ERRORS = [
 	'curl_setopt(): Argument #2 ($option) is not a valid cURL option',
 	'curl_setopt(): supplied argument is not a valid File-Handle resource',
 	'Object of class stdClass could not be converted to string',
-	'curl_setopt(): The CURLOPT_HTTP200ALIASES option must have an array value',
 	'curl_setopt(): Argument #3 ($value) must be of type CurlSharePersistentHandle|CurlShareHandle for option CURLOPT_SHARE, stdClass given',
 ];
 
@@ -25,7 +24,7 @@ function isKnownError($error): bool {
 	    return true;
 	}
 	if (preg_match(
-	    '/curl_setopt\(\): The CURLOPT_([A-Z_])+ option must have an array value/',
+	    '/curl_setopt\(\): Argument #3 \(\$value\) must be of type array for option CURLOPT_([A-Z0-9_])+, stdClass given/',
 	    $error,
 	)) {
 	    return true;
