@@ -412,6 +412,13 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 			ret = -1;
 		} else if (n == 0) {
 			error = PHP_TIMEOUT_ERROR_VALUE;
+#ifdef PHP_WIN32
+		} else if ((n & POLLOUT) && !(n & POLLPRI)) {
+			/* Writable and not in exceptfds: the connect succeeded (see the
+			 * comment above). Skip getsockopt(SO_ERROR) here, as calling it
+			 * right after the connection completes can block for 10-25ms. */
+			error = 0;
+#endif
 		} else {
 			len = sizeof(error);
 			/* BSD-derived systems set errno correctly.
