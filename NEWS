@@ -139,6 +139,7 @@ PHP                                                                        NEWS
     (Jorg Sowa)
   . Fixed bug GH-24988 (Incorrect opcode range check causes bugs with exceptions in
     function JIT). (ndossche, Jorg Sowa)
+  . Fix opcache phar check. (ndossche)
 
 - OpenSSL:
   . Fixed build with OpenSSL 4.1. (Weilin Du)
