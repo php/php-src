@@ -6497,6 +6497,22 @@ void zend_ffi_make_func_type(zend_ffi_dcl *dcl, HashTable *args, zend_ffi_dcl *n
 		}
 	}
 
+	/* The calling convention can be inside the parentheses, as in "void (__stdcall *f)(void)" */
+	if (nested_dcl->abi != ZEND_FFI_ABI_DEFAULT) {
+		if (dcl->abi != ZEND_FFI_ABI_DEFAULT) {
+			zend_ffi_cleanup_dcl(nested_dcl);
+			zend_ffi_cleanup_dcl(dcl);
+			if (args) {
+				zend_hash_destroy(args);
+				pefree(args, FFI_G(persistent));
+			}
+			zend_ffi_parser_error("Multiple calling convention specifiers at line %d", FFI_G(line));
+			return;
+		}
+		dcl->abi = nested_dcl->abi;
+		nested_dcl->abi = ZEND_FFI_ABI_DEFAULT;
+	}
+
 #ifdef HAVE_FFI_VECTORCALL_PARTIAL
 	if (dcl->abi == ZEND_FFI_ABI_VECTORCALL && args) {
 		zend_ulong i;

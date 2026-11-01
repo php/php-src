@@ -86,6 +86,8 @@ PHP                                                                        NEWS
 - FFI:
   . Fixed bug GH-24582 (Memory leaks in ext/ffi parser when finalize_type()
     bails out). (matyapiro31, David Carlier)
+  . Fixed calling conventions inside a nested declarator, such as
+    "void (__stdcall *f)(void)", being ignored or rejected. (Nicolas Grekas)
 
 - FPM:
   . Fixed bug GH-24229 (fcgi_close() passes shutdown() a literal 1, which is
