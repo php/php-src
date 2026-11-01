@@ -1,5 +1,7 @@
 --TEST--
 GH-25094 (NULL pointer dereference in get_doc_function() when the request has fewer parts than the WSDL)
+--CREDITS--
+cxxz16
 --EXTENSIONS--
 soap
 --INI--
