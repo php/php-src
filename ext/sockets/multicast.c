@@ -777,7 +777,7 @@ zend_result php_add4_to_if_index(struct in_addr *addr, php_socket *php_sock, uns
 
 	for(;;) {
 		size += 5 * sizeof(struct ifreq);
-		buf = ecalloc(size, 1);
+		buf = ecalloc(size, sizeof(char));
 		if_conf.ifc_len = size;
 		if_conf.ifc_buf = buf;
 

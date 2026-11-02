@@ -2763,7 +2763,7 @@ static void soap_client_call_common(
 		zval *param;
 		int i = 0;
 
-		real_args = safe_emalloc(sizeof(zval), arg_count, 0);
+		real_args = safe_emalloc(arg_count, sizeof(zval), 0);
 		ZEND_HASH_FOREACH_VAL(args, param) {
 			/*zval_add_ref(param);*/
 			ZVAL_DEREF(param);

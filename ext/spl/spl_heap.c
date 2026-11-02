@@ -251,7 +251,7 @@ static spl_ptr_heap *spl_ptr_heap_init(spl_ptr_heap_cmp_func cmp, spl_ptr_heap_c
 	heap->dtor     = dtor;
 	heap->ctor     = ctor;
 	heap->cmp      = cmp;
-	heap->elements = ecalloc(PTR_HEAP_BLOCK_SIZE, elem_size);
+	heap->elements = ecalloc(elem_size, PTR_HEAP_BLOCK_SIZE);
 	heap->max_size = PTR_HEAP_BLOCK_SIZE;
 	heap->count    = 0;
 	heap->flags    = 0;

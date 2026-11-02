@@ -609,7 +609,7 @@ static zend_string* php_converter_do_convert(UConverter *dest_cnv,
 		THROW_UFAILURE(objval, error);
 		return nullptr;
 	}
-	temp = reinterpret_cast<UChar *>(safe_femalloc(sizeof(UChar), temp_len, sizeof(UChar), /* fallible */ true));
+	temp = reinterpret_cast<UChar *>(safe_femalloc(temp_len, sizeof(UChar), sizeof(UChar), /* fallible */ true));
 	if (!temp) {
 		return NULL;
 	}

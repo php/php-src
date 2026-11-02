@@ -255,7 +255,7 @@ static void browscap_add_kv(
 		browser_data *bdata, zend_string *key, zend_string *value, bool persistent) {
 	if (bdata->kv_used == bdata->kv_size) {
 		bdata->kv_size *= 2;
-		bdata->kv = safe_perealloc(bdata->kv, sizeof(browscap_kv), bdata->kv_size, 0, persistent);
+		bdata->kv = safe_perealloc(bdata->kv, bdata->kv_size, sizeof(browscap_kv), 0, persistent);
 	}
 
 	bdata->kv[bdata->kv_used].key = key;

@@ -451,7 +451,7 @@ static zend_string* pgsql_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquo
 			PQfreemem(escaped);
 			break;
 		default:
-			quoted = safe_emalloc(2, ZSTR_LEN(unquoted), 3);
+			quoted = safe_emalloc(ZSTR_LEN(unquoted) * 2, sizeof(char), 3);
 			quoted[0] = '\'';
 			quotedlen = PQescapeStringConn(H->server, quoted + 1, ZSTR_VAL(unquoted), ZSTR_LEN(unquoted), &err);
 			if (err) {

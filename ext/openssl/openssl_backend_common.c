@@ -1727,7 +1727,7 @@ zend_result php_openssl_validate_iv(const char **piv, size_t *piv_len, size_t iv
 		return SUCCESS;
 	}
 
-	iv_new = ecalloc(1, iv_required_len + 1);
+	iv_new = ecalloc(iv_required_len + 1, sizeof(char));
 
 	if (*piv_len == 0) {
 		/* BC behavior */
