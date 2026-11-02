@@ -68,7 +68,7 @@
 #  include <assert.h>
 
 int URI_FUNC(SetHostAutoMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                            const URI_CHAR * afterLast, UriMemoryManager * memory) {
+        const URI_CHAR * afterLast, UriMemoryManager * memory) {
     if ((uri == NULL) || ((first == NULL) != (afterLast == NULL))) {
         return URI_ERROR_NULL;
     }
@@ -116,8 +116,8 @@ int URI_FUNC(SetHostAutoMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
     return URI_FUNC(InternalSetHostMm)(uri, hostType, first, afterLast, memory);
 }
 
-int URI_FUNC(SetHostAuto)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                          const URI_CHAR * afterLast) {
+int URI_FUNC(SetHostAuto)(
+        URI_TYPE(Uri) * uri, const URI_CHAR * first, const URI_CHAR * afterLast) {
     return URI_FUNC(SetHostAutoMm)(uri, first, afterLast, NULL);
 }
 

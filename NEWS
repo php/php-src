@@ -311,6 +311,7 @@ PHP                                                                        NEWS
 - URI:
   . Fixed bug GH-25019 (Uri\Rfc3986\Uri rejects a port with leading zeros as
     out of range). (lazerg)
+  . Upgrade to uriparser 1.0.3. (CVE-2026-48841) (Sebastian Pipping, timwolla)
 
 - Windows:
   . Fixed bug GH-25009 (GetConsoleTitleW() buffer size passed in bytes).

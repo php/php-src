@@ -72,27 +72,22 @@
 #  endif
 
 /* Prototypes */
-static const URI_CHAR * URI_FUNC(ParseDecOctet)(UriIp4Parser * parser,
-                                                const URI_CHAR * first,
-                                                const URI_CHAR * afterLast);
-static const URI_CHAR * URI_FUNC(ParseDecOctetOne)(UriIp4Parser * parser,
-                                                   const URI_CHAR * first,
-                                                   const URI_CHAR * afterLast);
-static const URI_CHAR * URI_FUNC(ParseDecOctetTwo)(UriIp4Parser * parser,
-                                                   const URI_CHAR * first,
-                                                   const URI_CHAR * afterLast);
-static const URI_CHAR * URI_FUNC(ParseDecOctetThree)(UriIp4Parser * parser,
-                                                     const URI_CHAR * first,
-                                                     const URI_CHAR * afterLast);
-static const URI_CHAR * URI_FUNC(ParseDecOctetFour)(UriIp4Parser * parser,
-                                                    const URI_CHAR * first,
-                                                    const URI_CHAR * afterLast);
+static const URI_CHAR * URI_FUNC(ParseDecOctet)(
+        UriIp4Parser * parser, const URI_CHAR * first, const URI_CHAR * afterLast);
+static const URI_CHAR * URI_FUNC(ParseDecOctetOne)(
+        UriIp4Parser * parser, const URI_CHAR * first, const URI_CHAR * afterLast);
+static const URI_CHAR * URI_FUNC(ParseDecOctetTwo)(
+        UriIp4Parser * parser, const URI_CHAR * first, const URI_CHAR * afterLast);
+static const URI_CHAR * URI_FUNC(ParseDecOctetThree)(
+        UriIp4Parser * parser, const URI_CHAR * first, const URI_CHAR * afterLast);
+static const URI_CHAR * URI_FUNC(ParseDecOctetFour)(
+        UriIp4Parser * parser, const URI_CHAR * first, const URI_CHAR * afterLast);
 
 /*
  * [ipFourAddress]->[decOctet]<.>[decOctet]<.>[decOctet]<.>[decOctet]
  */
-int URI_FUNC(ParseIpFourAddress)(unsigned char * octetOutput, const URI_CHAR * first,
-                                 const URI_CHAR * afterLast) {
+int URI_FUNC(ParseIpFourAddress)(
+        unsigned char * octetOutput, const URI_CHAR * first, const URI_CHAR * afterLast) {
     const URI_CHAR * after;
     UriIp4Parser parser;
 
@@ -147,9 +142,8 @@ int URI_FUNC(ParseIpFourAddress)(unsigned char * octetOutput, const URI_CHAR * f
  * [decOctet]-><8>[decOctetThree]
  * [decOctet]-><9>[decOctetThree]
  */
-static URI_INLINE const URI_CHAR * URI_FUNC(ParseDecOctet)(UriIp4Parser * parser,
-                                                           const URI_CHAR * first,
-                                                           const URI_CHAR * afterLast) {
+static URI_INLINE const URI_CHAR * URI_FUNC(ParseDecOctet)(
+        UriIp4Parser * parser, const URI_CHAR * first, const URI_CHAR * afterLast) {
     if (first >= afterLast) {
         return NULL;
     }
@@ -175,8 +169,8 @@ static URI_INLINE const URI_CHAR * URI_FUNC(ParseDecOctet)(UriIp4Parser * parser
     case _UT('8'):
     case _UT('9'):
         uriPushToStack(parser, (unsigned char)(9 + *first - _UT('9')));
-        return (const URI_CHAR *)URI_FUNC(ParseDecOctetThree)(parser, first + 1,
-                                                              afterLast);
+        return (const URI_CHAR *)URI_FUNC(ParseDecOctetThree)(
+                parser, first + 1, afterLast);
 
     default:
         return NULL;
@@ -187,9 +181,8 @@ static URI_INLINE const URI_CHAR * URI_FUNC(ParseDecOctet)(UriIp4Parser * parser
  * [decOctetOne]-><NULL>
  * [decOctetOne]->[DIGIT][decOctetThree]
  */
-static URI_INLINE const URI_CHAR *
-URI_FUNC(ParseDecOctetOne)(UriIp4Parser * parser, const URI_CHAR * first,
-                           const URI_CHAR * afterLast) {
+static URI_INLINE const URI_CHAR * URI_FUNC(ParseDecOctetOne)(
+        UriIp4Parser * parser, const URI_CHAR * first, const URI_CHAR * afterLast) {
     if (first >= afterLast) {
         return afterLast;
     }
@@ -197,8 +190,8 @@ URI_FUNC(ParseDecOctetOne)(UriIp4Parser * parser, const URI_CHAR * first,
     switch (*first) {
     case URI_SET_DIGIT(_UT):
         uriPushToStack(parser, (unsigned char)(9 + *first - _UT('9')));
-        return (const URI_CHAR *)URI_FUNC(ParseDecOctetThree)(parser, first + 1,
-                                                              afterLast);
+        return (const URI_CHAR *)URI_FUNC(ParseDecOctetThree)(
+                parser, first + 1, afterLast);
 
     default:
         return first;
@@ -218,9 +211,8 @@ URI_FUNC(ParseDecOctetOne)(UriIp4Parser * parser, const URI_CHAR * first,
  * [decOctetTwo]-><8>
  * [decOctetTwo]-><9>
  */
-static URI_INLINE const URI_CHAR *
-URI_FUNC(ParseDecOctetTwo)(UriIp4Parser * parser, const URI_CHAR * first,
-                           const URI_CHAR * afterLast) {
+static URI_INLINE const URI_CHAR * URI_FUNC(ParseDecOctetTwo)(
+        UriIp4Parser * parser, const URI_CHAR * first, const URI_CHAR * afterLast) {
     if (first >= afterLast) {
         return afterLast;
     }
@@ -232,13 +224,13 @@ URI_FUNC(ParseDecOctetTwo)(UriIp4Parser * parser, const URI_CHAR * first,
     case _UT('3'):
     case _UT('4'):
         uriPushToStack(parser, (unsigned char)(9 + *first - _UT('9')));
-        return (const URI_CHAR *)URI_FUNC(ParseDecOctetThree)(parser, first + 1,
-                                                              afterLast);
+        return (const URI_CHAR *)URI_FUNC(ParseDecOctetThree)(
+                parser, first + 1, afterLast);
 
     case _UT('5'):
         uriPushToStack(parser, 5);
-        return (const URI_CHAR *)URI_FUNC(ParseDecOctetFour)(parser, first + 1,
-                                                             afterLast);
+        return (const URI_CHAR *)URI_FUNC(ParseDecOctetFour)(
+                parser, first + 1, afterLast);
 
     case _UT('6'):
     case _UT('7'):
@@ -256,9 +248,8 @@ URI_FUNC(ParseDecOctetTwo)(UriIp4Parser * parser, const URI_CHAR * first,
  * [decOctetThree]-><NULL>
  * [decOctetThree]->[DIGIT]
  */
-static URI_INLINE const URI_CHAR *
-URI_FUNC(ParseDecOctetThree)(UriIp4Parser * parser, const URI_CHAR * first,
-                             const URI_CHAR * afterLast) {
+static URI_INLINE const URI_CHAR * URI_FUNC(ParseDecOctetThree)(
+        UriIp4Parser * parser, const URI_CHAR * first, const URI_CHAR * afterLast) {
     if (first >= afterLast) {
         return afterLast;
     }
@@ -282,9 +273,8 @@ URI_FUNC(ParseDecOctetThree)(UriIp4Parser * parser, const URI_CHAR * first,
  * [decOctetFour]-><4>
  * [decOctetFour]-><5>
  */
-static URI_INLINE const URI_CHAR *
-URI_FUNC(ParseDecOctetFour)(UriIp4Parser * parser, const URI_CHAR * first,
-                            const URI_CHAR * afterLast) {
+static URI_INLINE const URI_CHAR * URI_FUNC(ParseDecOctetFour)(
+        UriIp4Parser * parser, const URI_CHAR * first, const URI_CHAR * afterLast) {
     if (first >= afterLast) {
         return afterLast;
     }
