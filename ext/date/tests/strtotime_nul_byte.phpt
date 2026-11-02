@@ -1,5 +1,7 @@
 --TEST--
 strtotime() rejects strings containing NUL bytes
+--CREDITS--
+HackingRepo (relunsec@insitetech.jp)
 --FILE--
 <?php
 
