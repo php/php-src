@@ -2,7 +2,6 @@
 FPM: Blocked SIGQUIT prevents idle process to be killed
 --EXTENSIONS--
 pcntl
---FLAKY--
 --SKIPIF--
 <?php
 include "skipif.inc";
@@ -32,23 +31,30 @@ EOT;
 $code = <<<EOT
 <?php
 pcntl_sigprocmask(SIG_BLOCK, [SIGQUIT, SIGTERM]);
-usleep(300000);
+usleep(2000000);
 EOT;
-
 
 $tester = new FPM\Tester($cfg, $code);
 $tester->start(extensions: ['pcntl']);
 $tester->expectLogStartNotices();
-$tester->multiRequest(2);
+$tester->request()->expectEmptyBody();
 $tester->status([
     'total processes' => 2,
 ]);
-// wait for process to be killed
-sleep(7);
-$tester->expectLogWarning('child \\d+ exited on signal 9 \\(SIGKILL\\) after \\d+.\\d+ seconds from start', 'unconfined');
+$tester->expectLogWarning(
+    'child \\d+ exited on signal 9 \\(SIGKILL\\) after \\d+.\\d+ seconds from start',
+    'unconfined',
+    timeoutSeconds: 10
+);
 $tester->expectLogNotice('child \\d+ started', 'unconfined');
-$tester->expectLogWarning('child \\d+ exited on signal 9 \\(SIGKILL\\) after \\d+.\\d+ seconds from start', 'unconfined');
-$tester->expectLogNotice('child \\d+ started', 'unconfined');
+// wait for the remaining spare process to be quit
+for ($i = 0; $i < 20; $i++) {
+    $status = json_decode($tester->request('json', [], '/status')->getBody('application/json'), true);
+    if (($status['total processes'] ?? null) === 1) {
+        break;
+    }
+    usleep(500000);
+}
 $tester->status([
     'total processes' => 1,
 ]);

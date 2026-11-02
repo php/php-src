@@ -846,12 +846,18 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 			php_error_docref(NULL, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\" from extracted phar archive, source has been deleted", url_from, url_to);
 			return 0;
 		}
+		if (zend_string_equals(resource_from->path, resource_to->path)) {
+			php_url_free(resource_from);
+			php_url_free(resource_to);
+			return 1;
+		}
 		/* transfer all data over to the new entry */
 		memcpy((void *) &new, (void *) entry, sizeof(phar_entry_info));
 		/* mark the old one for deletion */
 		entry->is_deleted = 1;
 		entry->fp = NULL;
 		ZVAL_UNDEF(&entry->metadata_tracker.val);
+		entry->metadata_tracker.str = NULL;
 		entry->link = entry->tmp = NULL;
 		source = entry;
 

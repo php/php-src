@@ -997,6 +997,7 @@ PHP_FUNCTION(odbc_prepare)
 	}
 	result->conn_ptr = conn;
 	result->fetched = 0;
+	odbc_insert_new_result(conn, return_value);
 
 	result->param_info = (odbc_param_info *) safe_emalloc(sizeof(odbc_param_info), result->numparams, 0);
 	for (i=0;i<result->numparams;i++) {
@@ -1004,14 +1005,11 @@ PHP_FUNCTION(odbc_prepare)
 													&result->param_info[i].scale, &result->param_info[i].nullable);
 		if (rc == SQL_ERROR) {
 			odbc_sql_error(result->conn_ptr, result->stmt, "SQLDescribeParameter");
-			SQLFreeStmt(result->stmt, SQL_RESET_PARAMS);
-			efree(result->param_info);
+			odbc_result_free(result);
 			zval_ptr_dtor(return_value);
 			RETURN_FALSE;
 		}
 	}
-
-	odbc_insert_new_result(conn, return_value);
 }
 /* }}} */
 

@@ -942,6 +942,7 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 							zend_throw_error(NULL,
 								"Named parameter $%s overwrites previous argument",
 								ZSTR_VAL(name));
+							zval_ptr_dtor(&arg);
 							zend_array_destroy(args);
 							zval_ptr_dtor(result);
 							return FAILURE;
@@ -2010,6 +2011,12 @@ simple_list:
 			if (ast->attr & ZEND_ACC_STATIC) {
 				smart_str_appends(str, "static ");
 			}
+			if (ast->attr & ZEND_ACC_ABSTRACT) {
+				smart_str_appends(str, "abstract ");
+			}
+			if (ast->attr & ZEND_ACC_FINAL) {
+				smart_str_appends(str, "final ");
+			}
 			if (ast->attr & ZEND_ACC_READONLY) {
 				smart_str_appends(str, "readonly ");
 			}
@@ -2032,6 +2039,9 @@ simple_list:
 			}
 
 			zend_ast_export_visibility(str, ast->attr, ZEND_MODIFIER_TARGET_CONSTANT);
+			if (ast->attr & ZEND_ACC_FINAL) {
+				smart_str_appends(str, "final ");
+			}
 			smart_str_appends(str, "const ");
 			if (ast->child[2]) {
 				zend_ast_export_type(str, ast->child[2], indent);
@@ -2310,6 +2320,9 @@ simple_list:
 				zend_ast_decl *decl = (zend_ast_decl *) ast->child[0];
 				if (decl->child[3]) {
 					zend_ast_export_attributes(str, decl->child[3], indent, 0);
+				}
+				if (decl->flags & ZEND_ACC_READONLY_CLASS) {
+					smart_str_appends(str, "readonly ");
 				}
 				smart_str_appends(str, "class");
 				if (!zend_ast_is_list(ast->child[1])

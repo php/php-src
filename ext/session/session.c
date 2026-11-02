@@ -355,14 +355,18 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 
 /* Default session id char validation function allowed by ps_modules.
  * If you change the logic here, please also update the error message in
- * ps_modules appropriately */
-PHPAPI zend_result php_session_valid_key(const char *key) /* {{{ */
+ * ps_modules appropriately. */
+static zend_result php_session_valid_key_len(const char *key, size_t key_len)
 {
-	size_t len;
-	const char *p;
-	char c;
+	/* Somewhat arbitrary length limit here, but should be way more than
+	   anyone needs and avoids file-level warnings later on if we exceed MAX_PATH */
+	if (key_len == 0 || key_len > PS_MAX_SID_LENGTH) {
+		return FAILURE;
+	}
 
-	for (p = key; (c = *p); p++) {
+	for (size_t i = 0; i < key_len; i++) {
+		unsigned char c = (unsigned char) key[i];
+
 		/* valid characters are [a-z], [A-Z], [0-9], - (hyphen) and , (comma) */
 		if (!((c >= 'a' && c <= 'z')
 				|| (c >= 'A' && c <= 'Z')
@@ -373,18 +377,21 @@ PHPAPI zend_result php_session_valid_key(const char *key) /* {{{ */
 		}
 	}
 
-	len = p - key;
-
-	/* Somewhat arbitrary length limit here, but should be way more than
-	   anyone needs and avoids file-level warnings later on if we exceed MAX_PATH */
-	if (len == 0 || len > PS_MAX_SID_LENGTH) {
-		return FAILURE;
-	}
-
 	return SUCCESS;
 }
-/* }}} */
 
+/* Validate the full zend_string, including embedded NUL bytes. */
+zend_result php_session_valid_key_ex(const zend_string *key)
+{
+	return php_session_valid_key_len(ZSTR_VAL(key), ZSTR_LEN(key));
+}
+
+/* C-string compatibility wrapper. Callers that have a zend_string should use
+ * php_session_valid_key_ex() instead. */
+PHPAPI zend_result php_session_valid_key(const char *key)
+{
+	return php_session_valid_key_len(key, strlen(key));
+}
 
 static zend_long php_session_gc(bool immediate) /* {{{ */
 {
@@ -2527,7 +2534,7 @@ PHP_FUNCTION(session_create_id)
             zend_argument_value_error(1, "cannot be longer than %d characters", PS_MAX_SID_LENGTH);
             RETURN_THROWS();
         }
-		if (php_session_valid_key(ZSTR_VAL(prefix)) == FAILURE) {
+		if (php_session_valid_key_ex(prefix) == FAILURE) {
 			/* E_ERROR raised for security reason. */
 			php_error_docref(NULL, E_WARNING, "Prefix cannot contain special characters. Only the A-Z, a-z, 0-9, \"-\", and \",\" characters are allowed");
 			RETURN_FALSE;
