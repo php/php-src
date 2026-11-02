@@ -1,5 +1,5 @@
 /* This is a generated file, edit pdo_dbh.stub.php instead.
- * Stub hash: 006be61b2c519e7d9ca997a7f12135eb3e0f3500 */
+ * Stub hash: 53680de042448efefeb18469824d158f362e861b */
 
 #include "zend_attributes.h"
 
@@ -563,7 +563,11 @@ static zend_class_entry *register_class_PDO(void)
 	zend_string_release_ex(const_CURSOR_SCROLL_name, true);
 
 
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "__construct", sizeof("__construct") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "__construct", sizeof("__construct") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "connect", sizeof("connect") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "connect", sizeof("connect") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
