@@ -364,6 +364,7 @@ static int pdo_sqlite_stmt_cursor_closer(pdo_stmt_t *stmt)
 {
 	pdo_sqlite_stmt *S = (pdo_sqlite_stmt*)stmt->driver_data;
 	sqlite3_reset(S->stmt);
+	S->pre_fetched = 0;
 	return 1;
 }
 
