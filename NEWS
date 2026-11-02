@@ -169,6 +169,9 @@ PHP                                                                        NEWS
 - PDO_PGSQL:
   . Fixed bug GH-24461 (DISCARD ALL on persistent connection cleanup drops
     PgBouncer's prepared statements). (David Carlier, Artem Ukrainskiy)
+  . Fixed a use-after-free when a persistent connection receives a notice
+    after the request that called Pdo\Pgsql::setNoticeCallback() has ended.
+    (Ilia Alshanetsky)
 
 - PDO_SQLite:
   . Fixed bug GH-24990 (Statement unusable after a failed execute()). (lazerg)

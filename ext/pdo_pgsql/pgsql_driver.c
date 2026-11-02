@@ -1426,6 +1426,8 @@ static void pdo_pgsql_request_shutdown(pdo_dbh_t *dbh)
 		}
 		PQclear(res);
 	}
+
+	pdo_pgsql_cleanup_notice_callback(H);
 }
 
 static bool pdo_pgsql_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
