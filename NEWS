@@ -224,6 +224,8 @@ PHP                                                                        NEWS
     out-of-range column index). (Ilia Alshanetsky)
 
 - Phar:
+  . Fixed bug GH-25093 (Phar::webPhar() redirect reads past the request URI).
+    (lazerg)
   . Fixed bug GH-25089 (Heap buffer over-read via crafted alias size in
     zip-based phar). (Lazizbek Ergashev)
   . Fixed bug GH-8469 (Phar::decompressFiles() and Phar::compressFiles() retain
