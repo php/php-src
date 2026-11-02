@@ -95,11 +95,6 @@ TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, size_t size, ts_allocate
 TSRM_API void tsrm_reserve(size_t size);
 TSRM_API ts_rsrc_id ts_allocate_fast_id(ts_rsrc_id *rsrc_id, size_t *offset, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor);
 
-/* Fast resources at caller-chosen, compile-time-constant offsets. The fixed
- * front region must be reserved after tsrm_reserve() and before any fast id. */
-TSRM_API void tsrm_reserve_fast_front(size_t size);
-TSRM_API ts_rsrc_id ts_allocate_fast_id_at(ts_rsrc_id *rsrc_id, size_t *offset, ptrdiff_t fixed_offset, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor);
-
 /* Resource whose per-thread storage is a native __thread block.
  * Must be called at startup before any other thread exists. */
 TSRM_API ts_rsrc_id ts_allocate_tls_id(ts_rsrc_id *rsrc_id, void *(*tls_addr)(void), size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor);
@@ -168,7 +163,7 @@ TSRM_API bool tsrm_is_managed_thread(void);
 	|| defined(__MUSL__) || defined(__HAIKU__) || defined(_AIX)
 # define TSRM_TLS_MODEL_ATTR
 # define TSRM_TLS_MODEL_DEFAULT
-#elif defined(__PIC__) && !defined(__PIE__)
+#elif (defined(__PIC__) && !defined(__PIE__)) || !defined(ZEND_ENABLE_STATIC_TSRMLS_CACHE)
 # if defined(TSRM_TLS_MODEL_USE_DEFAULT)
 #  define TSRM_TLS_MODEL_ATTR
 #  define TSRM_TLS_MODEL_DEFAULT
@@ -193,17 +188,41 @@ TSRM_API bool tsrm_is_managed_thread(void);
 #define TSRMG_BULK_STATIC(id, type)	((type) (*((void ***) TSRMLS_CACHE))[TSRM_UNSHUFFLE_RSRC_ID(id)])
 #define TSRMG_FAST_STATIC(offset, type, element)	(TSRMG_FAST_BULK_STATIC(offset, type)->element)
 #define TSRMG_FAST_BULK_STATIC(offset, type)	((type) (((char*) TSRMLS_CACHE)+(offset)))
-#ifdef __cplusplus
-#define TSRMLS_MAIN_CACHE_EXTERN() extern "C" { extern TSRM_TLS void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR; }
-#define TSRMLS_CACHE_EXTERN() extern "C" { extern TSRM_TLS void *TSRMLS_CACHE; }
+
+/* Windows can't dllexport __declspec(thread) symbols, so outside Zend each module
+ * keeps a per-module `void *` pointer and reaches EG/CG via the resource-id indirection. */
+#ifdef ZEND_WIN32
+# define ZEND_TLS_API
+# ifdef LIBZEND_EXPORTS
+#  define ZEND_TLS_DIRECT 1
+# endif
 #else
-#define TSRMLS_MAIN_CACHE_EXTERN() extern TSRM_TLS void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR;
-#define TSRMLS_CACHE_EXTERN() extern TSRM_TLS void *TSRMLS_CACHE;
+# define ZEND_TLS_API ZEND_API
+# define ZEND_TLS_DIRECT 1
 #endif
-#define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR = NULL;
-#define TSRMLS_CACHE_DEFINE() TSRM_TLS void *TSRMLS_CACHE = NULL;
+
+typedef struct _zend_tsrm_ls_cache zend_tsrm_ls_cache;
+
+#ifdef ZEND_TLS_DIRECT
+# define ZEND_TSRMLS_CACHE_T zend_tsrm_ls_cache
+# define TSRMLS_CACHE_DEFINE()
+extern ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_tsrm_ls_cache _tsrm_ls_cache;
+# define ZEND_TSRM_CACHE_PTR (&_tsrm_ls_cache)
+# define ZEND_TSRMG_DIRECT(id, type, member, element) (ZEND_TSRM_CACHE_PTR->member.element)
+#else
+# define ZEND_TSRMLS_CACHE_T void *
+# define TSRMLS_CACHE_DEFINE() TSRM_TLS void *_tsrm_ls_cache = NULL;
+# define ZEND_TSRMG_DIRECT(id, type, member, element) ZEND_TSRMG(id, type, element)
+#endif
+#ifdef __cplusplus
+#define TSRMLS_MAIN_CACHE_EXTERN() extern "C" { extern TSRM_TLS ZEND_TSRMLS_CACHE_T _tsrm_ls_cache TSRM_TLS_MODEL_ATTR; }
+#define TSRMLS_CACHE_EXTERN() extern "C" { extern TSRM_TLS ZEND_TSRMLS_CACHE_T _tsrm_ls_cache; }
+#else
+#define TSRMLS_MAIN_CACHE_EXTERN() extern TSRM_TLS ZEND_TSRMLS_CACHE_T _tsrm_ls_cache TSRM_TLS_MODEL_ATTR;
+#define TSRMLS_CACHE_EXTERN() extern TSRM_TLS ZEND_TSRMLS_CACHE_T _tsrm_ls_cache;
+#endif
 #define TSRMLS_CACHE_UPDATE() TSRMLS_CACHE = tsrm_get_ls_cache()
-#define TSRMLS_CACHE _tsrm_ls_cache
+#define TSRMLS_CACHE (*(void **) &_tsrm_ls_cache)
 
 #ifdef __cplusplus
 }
@@ -216,7 +235,6 @@ TSRM_API bool tsrm_is_managed_thread(void);
 
 #define TSRMG_STATIC(id, type, element)
 #define TSRMLS_MAIN_CACHE_EXTERN()
-#define TSRMLS_MAIN_CACHE_DEFINE()
 #define TSRMLS_CACHE_EXTERN()
 #define TSRMLS_CACHE_DEFINE()
 #define TSRMLS_CACHE_UPDATE()

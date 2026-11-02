@@ -52,16 +52,16 @@ static bool startup_done = false;
 #ifdef ZTS
 ZEND_API int compiler_globals_id;
 ZEND_API int executor_globals_id;
-ZEND_API size_t compiler_globals_offset;
-ZEND_API size_t executor_globals_offset;
+ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_tsrm_ls_cache _tsrm_ls_cache = {0};
 /* ts_allocate_tls_id takes a callback so each thread resolves its own block.
  * A plain &language_scanner_globals would capture only the registering thread's address. */
+static void *executor_globals_tls_addr(void) { return &_tsrm_ls_cache.eg; }
+static void *compiler_globals_tls_addr(void) { return &_tsrm_ls_cache.cg; }
 static void *language_scanner_globals_tls_addr(void) { return &language_scanner_globals; }
 static HashTable *global_function_table = NULL;
 static HashTable *global_class_table = NULL;
 static HashTable *global_constants_table = NULL;
 static HashTable *global_auto_globals_table = NULL;
-TSRMLS_MAIN_CACHE_DEFINE()
 # define GLOBAL_FUNCTION_TABLE		global_function_table
 # define GLOBAL_CLASS_TABLE			global_class_table
 # define GLOBAL_CONSTANTS_TABLE		global_constants_table
@@ -1031,11 +1031,9 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	zend_init_rsrc_list_dtors();
 
 #ifdef ZTS
-	ts_allocate_fast_id_at(&compiler_globals_id, &compiler_globals_offset, ZEND_CG_OFFSET, sizeof(zend_compiler_globals), (ts_allocate_ctor) compiler_globals_ctor, (ts_allocate_dtor) compiler_globals_dtor);
-	ts_allocate_fast_id_at(&executor_globals_id, &executor_globals_offset, ZEND_EG_OFFSET, sizeof(zend_executor_globals), (ts_allocate_ctor) executor_globals_ctor, (ts_allocate_dtor) executor_globals_dtor);
+	ts_allocate_tls_id(&compiler_globals_id, compiler_globals_tls_addr, sizeof(zend_compiler_globals), (ts_allocate_ctor) compiler_globals_ctor, (ts_allocate_dtor) compiler_globals_dtor);
+	ts_allocate_tls_id(&executor_globals_id, executor_globals_tls_addr, sizeof(zend_executor_globals), (ts_allocate_ctor) executor_globals_ctor, (ts_allocate_dtor) executor_globals_dtor);
 	ts_allocate_tls_id(&language_scanner_globals_id, language_scanner_globals_tls_addr, sizeof(zend_php_scanner_globals), (ts_allocate_ctor) php_scanner_globals_ctor, NULL);
-	ZEND_ASSERT(compiler_globals_offset == ZEND_CG_OFFSET);
-	ZEND_ASSERT(executor_globals_offset == ZEND_EG_OFFSET);
 	ts_allocate_fast_id(&ini_scanner_globals_id, &ini_scanner_globals_offset, sizeof(zend_ini_scanner_globals), (ts_allocate_ctor) ini_scanner_globals_ctor, NULL);
 	compiler_globals = ts_resource(compiler_globals_id);
 	executor_globals = ts_resource(executor_globals_id);

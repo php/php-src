@@ -51,6 +51,8 @@ PHP 8.7 INTERNALS UPGRADE NOTES
   allowed anymore. User-facing HashTables must have pDestructor = ZVAL_PTR_DTOR
   or NULL, and must be freed with zend_array_destroy(). Other HashTables can be
   freed with zend_hash_destroy() + pefree().
+- The ZTS symbols compiler_globals_offset and executor_globals_offset have been
+  removed: CG()/EG() now reach the globals through a __thread struct.
 
 ========================
 2. Build system changes
