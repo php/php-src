@@ -68,8 +68,12 @@ void php_dom_private_data_destroy(php_dom_private_data *data)
 	efree(data);
 }
 
-static void php_dom_free_templated_content(php_dom_private_data *private_data, xmlNodePtr base)
+void php_dom_remove_templated_content_in_subtree(php_dom_private_data *private_data, xmlNodePtr base)
 {
+	if (private_data->template_fragments == NULL) {
+		return;
+	}
+
 	/* Note: it's not possible to obtain a userland reference to these yet, so we can just free them without worrying
 	 *       about their proxies.
 	 * Note 2: it's possible to have nested template content. */
@@ -85,7 +89,11 @@ static void php_dom_free_templated_content(php_dom_private_data *private_data, x
 			current = php_dom_next_in_tree_order(current, base);
 		}
 	}
+}
 
+static void php_dom_free_templated_content(php_dom_private_data *private_data, xmlNodePtr base)
+{
+	php_dom_remove_templated_content_in_subtree(private_data, base);
 	xmlFreeNode(base);
 }
 

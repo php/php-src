@@ -40,7 +40,7 @@ typedef struct work_list_item {
     bool in_template;
 } work_list_item;
 
-static void lexbor_libxml2_bridge_work_list_item_push(
+static bool lexbor_libxml2_bridge_work_list_item_push(
     lexbor_array_obj_t *array,
     lxb_dom_node_t *node,
     uintptr_t current_active_namespace,
@@ -50,11 +50,15 @@ static void lexbor_libxml2_bridge_work_list_item_push(
 )
 {
     work_list_item *item = (work_list_item *) lexbor_array_obj_push_wo_cls(array);
+    if (UNEXPECTED(item == NULL)) {
+        return false;
+    }
     item->node = node;
     item->current_active_namespace = current_active_namespace;
     item->lxml_parent = lxml_parent;
     item->lxml_ns = lxml_ns;
     item->in_template = in_template;
+    return true;
 }
 
 static unsigned short sanitize_line_nr(size_t line)
@@ -123,10 +127,15 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
     xmlNsPtr prefixed_xmlns_ns = NULL;
 
     lexbor_array_obj_t work_list;
-    lexbor_array_obj_init(&work_list, WORK_LIST_INIT_SIZE, sizeof(work_list_item));
+    if (UNEXPECTED(lexbor_array_obj_init(&work_list, WORK_LIST_INIT_SIZE, sizeof(work_list_item)) != LXB_STATUS_OK)) {
+        return LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
+    }
 
     for (lxb_dom_node_t *node = start_node; node != NULL; node = node->prev) {
-        lexbor_libxml2_bridge_work_list_item_push(&work_list, node, LXB_NS__UNDEF, root, NULL, in_template_contents);
+        if (UNEXPECTED(!lexbor_libxml2_bridge_work_list_item_push(&work_list, node, LXB_NS__UNDEF, root, NULL, in_template_contents))) {
+            lexbor_array_obj_destroy(&work_list, false);
+            return LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
+        }
     }
 
     work_list_item *current_stack_item;
@@ -198,14 +207,20 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
 			}
 
             for (; child_node != NULL; child_node = child_node->prev) {
-                lexbor_libxml2_bridge_work_list_item_push(
+                if (UNEXPECTED(!lexbor_libxml2_bridge_work_list_item_push(
                     &work_list,
                     child_node,
                     entering_namespace,
                     lxml_child_parent,
                     current_lxml_ns,
                     child_in_template
-                );
+                ))) {
+                    retval = LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
+                    break;
+                }
+            }
+            if (UNEXPECTED(retval != LEXBOR_LIBXML2_BRIDGE_STATUS_OK)) {
+                break;
             }
 
             xmlAttrPtr last_added_attr = NULL;
@@ -379,6 +394,7 @@ lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_document(
         private_data
     );
     if (status != LEXBOR_LIBXML2_BRIDGE_STATUS_OK) {
+        php_dom_remove_templated_content_in_subtree(private_data, (xmlNodePtr) lxml_doc);
         xmlFreeDoc(lxml_doc);
         return status;
     }
@@ -410,6 +426,7 @@ lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_fragment(
         private_data
     );
     if (status != LEXBOR_LIBXML2_BRIDGE_STATUS_OK) {
+        php_dom_remove_templated_content_in_subtree(private_data, fragment);
         xmlFreeNode(fragment);
         return status;
     }
