@@ -246,6 +246,7 @@ PHP                                                                        NEWS
     out-of-range column index). (Ilia Alshanetsky)
 
 - PDO_SQLite:
+  . Fixed bug GH-24990 (Statement unusable after a failed execute()). (lazerg)
   . Fixed bug GH-25021 (SQLite createFunction corrupts large integers).
     (mvorisek)
 
