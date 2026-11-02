@@ -33,6 +33,8 @@ $p = proc_open(
         'CONTENT_LENGTH'  => (string) strlen($body),
         'SCRIPT_FILENAME' => $script,
         'REDIRECT_STATUS' => '1',
+        /* PATH is needed to find ASan DLLs (and maybe others) on Windows */
+        'PATH'           => getenv('PATH'),
     ]
 );
 fwrite($pipes[0], $body);
