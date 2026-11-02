@@ -298,6 +298,39 @@ php_com_load_typelib_via_cache_return:
 	return TL;
 }
 
+static ITypeInfo *php_com_find_impl_typeinfo(ITypeInfo *coinfo, const GUID *iid)
+{
+	ITypeInfo *found = NULL;
+	TYPEATTR *coattr;
+
+	if (FAILED(ITypeInfo_GetTypeAttr(coinfo, &coattr))) {
+		return NULL;
+	}
+
+	for (unsigned int i = 0; i < coattr->cImplTypes && !found; i++) {
+		HREFTYPE rt;
+		ITypeInfo *implinfo;
+		TYPEATTR *implattr;
+
+		if (FAILED(ITypeInfo_GetRefTypeOfImplType(coinfo, i, &rt)) ||
+				FAILED(ITypeInfo_GetRefTypeInfo(coinfo, rt, &implinfo))) {
+			continue;
+		}
+		if (SUCCEEDED(ITypeInfo_GetTypeAttr(implinfo, &implattr))) {
+			if (IsEqualGUID(&implattr->guid, iid)) {
+				found = implinfo;
+			}
+			ITypeInfo_ReleaseTypeAttr(implinfo, implattr);
+		}
+		if (!found) {
+			ITypeInfo_Release(implinfo);
+		}
+	}
+
+	ITypeInfo_ReleaseTypeAttr(coinfo, coattr);
+	return found;
+}
+
 ITypeInfo *php_com_locate_typeinfo(zend_string *type_lib_name, php_com_dotnet_object *obj,
 	zend_string *dispatch_name, bool sink)
 {
@@ -314,6 +347,14 @@ ITypeInfo *php_com_locate_typeinfo(zend_string *type_lib_name, php_com_dotnet_ob
 
 				if (SUCCEEDED(IDispatch_QueryInterface(V_DISPATCH(&obj->v), &IID_IProvideClassInfo2, (void**)&pci2))) {
 					gotguid = SUCCEEDED(IProvideClassInfo2_GetGUID(pci2, GUIDKIND_DEFAULT_SOURCE_DISP_IID, &iid));
+					if (gotguid) {
+						ITypeInfo *coinfo;
+
+						if (SUCCEEDED(IProvideClassInfo2_GetClassInfo(pci2, &coinfo))) {
+							typeinfo = php_com_find_impl_typeinfo(coinfo, &iid);
+							ITypeInfo_Release(coinfo);
+						}
+					}
 					IProvideClassInfo2_Release(pci2);
 				}
 				if (!gotguid && SUCCEEDED(IDispatch_QueryInterface(V_DISPATCH(&obj->v), &IID_IProvideClassInfo, (void**)&pci))) {
@@ -404,8 +445,6 @@ ITypeInfo *php_com_locate_typeinfo(zend_string *type_lib_name, php_com_dotnet_ob
 
 
 		efree(olename);
-	} else if (gotguid) {
-		ITypeLib_GetTypeInfoOfGuid(typelib, &iid, &typeinfo);
 	}
 
 	if (typelib) {
@@ -635,6 +674,8 @@ bool php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, bool p
 		}
 	} else {
 		zend_throw_error(NULL, "Type kind must be dispatchable, %08x given", attr->typekind);
+		ITypeInfo_ReleaseTypeAttr(typeinfo, attr);
+		return false;
 	}
 
 	ITypeInfo_ReleaseTypeAttr(typeinfo, attr);
