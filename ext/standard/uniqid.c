@@ -42,7 +42,7 @@ PHP_FUNCTION(uniqid)
 {
 	char *prefix = "";
 	bool more_entropy = 0;
-	zend_string *uniqid;
+	zend_string *tail, *uniqid;
 	int sec, usec;
 	size_t prefix_len = 0;
 	struct timeval tv;
@@ -78,10 +78,15 @@ PHP_FUNCTION(uniqid)
 			bytes = php_random_generate_fallback_seed();
 		}
 		seed = ((double) bytes / UINT32_MAX) * 10.0;
-		uniqid = strpprintf(0, "%s%08x%05x%.8F", prefix, sec, usec, seed);
+		tail = strpprintf(0, "%08x%05x%.8F", sec, usec, seed);
 	} else {
-		uniqid = strpprintf(0, "%s%08x%05x", prefix, sec, usec);
+		tail = strpprintf(0, "%08x%05x", sec, usec);
 	}
+
+	/* The prefix may contain NUL bytes, so it cannot be passed through a
+	 * format string which would stop at the first NUL byte. */
+	uniqid = zend_string_concat2(prefix, prefix_len, ZSTR_VAL(tail), ZSTR_LEN(tail));
+	zend_string_release_ex(tail, 0);
 
 	RETURN_STR(uniqid);
 }
