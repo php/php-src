@@ -66,6 +66,8 @@ PHP                                                                        NEWS
   . Fixed a use-after-free when reflected attribute setters replace an
     attribute whose child still has a live wrapper. (Jakub Zelenka)
   . Fix error paths in dom_xml_serializing_a_document_node(). (ndossche)
+  . Fixed bug GH-25118 (Dom\HTMLDocument::createFromString() crash on OOM).
+    (devnexen)
 
 - FFI:
   . Fixed bug GH-24582 (Memory leaks in ext/ffi parser when finalize_type()
