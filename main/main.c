@@ -1286,7 +1286,7 @@ PHPAPI void php_html_puts(const char *str, size_t size)
 }
 /* }}} */
 
-static void clear_last_error(bool clear_repeated_errors) {
+PHPAPI void php_clear_last_error(bool clear_repeated_errors) {
 	if (PG(last_error_message)) {
 		zend_string_release(PG(last_error_message));
 		PG(last_error_message) = NULL;
@@ -1386,11 +1386,14 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 		backtrace = zend_trace_to_string(Z_ARRVAL(EG(last_fatal_error_backtrace)), /* include_main */ true);
 	}
 
-	/* store the error if it has changed */
-	if (display) {
-		clear_last_error(false);
+	/* Keep error_get_last() up to date even when this occurrence is suppressed. */
+	if (display || !PG(last_error_message)
+		|| !zend_string_equals(PG(last_error_message), message)
+		|| PG(last_error_lineno) != error_lineno
+		|| !zend_string_equals(PG(last_error_file), repeated_error_file)) {
+		php_clear_last_error(false);
 		if (!error_filename) {
-			error_filename = ZSTR_KNOWN(ZEND_STR_UNKNOWN_CAPITALIZED);
+			error_filename = repeated_error_file;
 		}
 		PG(last_error_type) = type;
 		PG(last_error_message) = zend_string_copy(message);
@@ -1733,7 +1736,7 @@ static zval *php_get_configuration_directive_for_zend(zend_string *name)
 /* {{{ php_free_request_globals */
 static void php_free_request_globals(void)
 {
-	clear_last_error(true);
+	php_clear_last_error(true);
 	if (PG(php_sys_temp_dir)) {
 		efree(PG(php_sys_temp_dir));
 		PG(php_sys_temp_dir) = NULL;
@@ -2064,7 +2067,7 @@ void php_request_shutdown(void *dummy)
 	/* 16. Free Willy (here be crashes) */
 	zend_arena_destroy(CG(arena));
 	zend_interned_strings_deactivate();
-	clear_last_error(true);
+	php_clear_last_error(true);
 	zend_try {
 		shutdown_memory_manager(CG(unclean_shutdown) || !report_memleaks, 0);
 	} zend_end_try();
@@ -2481,7 +2484,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	module_startup = false;
 
 	/* Don't leak errors from startup into the per-request phase. */
-	clear_last_error(true);
+	php_clear_last_error(true);
 	shutdown_memory_manager(1, 0);
 	virtual_cwd_activate();
 
@@ -2544,7 +2547,7 @@ void php_module_shutdown(void)
 
 	/* close down the ini config */
 	php_shutdown_config();
-	clear_last_error(true);
+	php_clear_last_error(true);
 
 #ifndef ZTS
 	zend_ini_shutdown();
