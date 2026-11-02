@@ -383,6 +383,7 @@ PHP_HASH_API void php_hash_cshake256(
 	uint8_t header_buf[32];
 	size_t pos = 0;
 	const size_t rate = 136;
+	static const uint8_t zero_pad[136] = {0};
 
 	/* cSHAKE256 is basically SHA3-512 with a few adjusted params:
 	 * rate = 136 bytes, capacity = 512 bits, 0 output size, 0x04 suffix
@@ -409,9 +410,7 @@ PHP_HASH_API void php_hash_cshake256(
 	size_t remainder = (pos + custom_len) % rate;
 	if (remainder > 0) {
 		size_t pad_len = rate - remainder;
-		uint8_t zero_pad[rate];
-		memset(zero_pad, 0, sizeof(zero_pad));
-		CSHAKE_UPDATE(&ctx, zero_pad, pad_len);
+		CSHAKE_UPDATE(&ctx, zero_pad, rate - remainder);
 	}
 
 	if (data_len > 0) {

@@ -20,7 +20,8 @@ foreach ($missing as $name => $val) {
 
 foreach (["", " ", "0", "+", "-1", "10", PHP_INT_MAX] as $v) {
 	$info = password_get_info(sprintf($template, $v, $goodvals["cost"], $goodvals["prehash"], $goodvals["salt"], $goodvals["hash"]));
-	printf("v=%s :: %s\n", $v, $info["algoName"]);
+	// Odd handling of PHP_INT_MAX just to work around the test framework for 32/64bit difference
+	printf("v=%s :: %s\n", $v === PHP_INT_MAX ? "PHP_INT_MAX" : $v, $info["algoName"]);
 }
 
 foreach (["", " ", "-10", "3", "-4", "+4", " 4", "4", "31", "32"] as $cost) {
@@ -62,7 +63,7 @@ v=0 :: bcrypt-wrap
 v=+ :: unknown
 v=-1 :: unknown
 v=10 :: unknown
-v=9223372036854775807 :: unknown
+v=PHP_INT_MAX :: unknown
 cost= :: unknown
 cost=  :: unknown
 cost=-10 :: unknown
