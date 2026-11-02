@@ -701,14 +701,6 @@ static zend_execute_data *zend_ast_evaluate_arg_list(
 			if (!arg) {
 				goto fail;
 			}
-			if (named_positions_ptr) {
-				if (!*named_positions_ptr) {
-					*named_positions_ptr = zend_new_array(0);
-				}
-				zval tmp;
-				ZVAL_LONG(&tmp, zend_hash_num_elements(*named_positions_ptr));
-				zend_hash_add(*named_positions_ptr, arg_name, &tmp);
-			}
 			arg_ast = arg_ast->child[1];
 		} else {
 			arg = ZEND_CALL_VAR_NUM(frame, ZEND_CALL_NUM_ARGS(frame));
@@ -723,6 +715,14 @@ static zend_execute_data *zend_ast_evaluate_arg_list(
 				continue;
 			} else {
 				Z_TYPE_INFO_P(arg) = _IS_PLACEHOLDER;
+			}
+			if (arg_name && named_positions_ptr) {
+				if (!*named_positions_ptr) {
+					*named_positions_ptr = zend_new_array(0);
+				}
+				zval tmp;
+				ZVAL_LONG(&tmp, zend_hash_num_elements(*named_positions_ptr));
+				zend_hash_add(*named_positions_ptr, arg_name, &tmp);
 			}
 		} else {
 			if (zend_ast_evaluate_ex(arg, arg_ast, scope, short_circuited_ptr, ctx) == FAILURE) {
@@ -1171,8 +1171,9 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 					if (name) {
 						if (!zend_hash_add(args, name, &arg)) {
 							zend_throw_error(NULL,
-								"Named parameter $%s overwrites previous argument",
-								ZSTR_VAL(name));
+								"Named parameter $%pS overwrites previous argument",
+								name);
+							zval_ptr_dtor(&arg);
 							zend_array_destroy(args);
 							zval_ptr_dtor(result);
 							return FAILURE;
@@ -1259,7 +1260,7 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 						}
 
 						if (!fptr) {
-							zend_throw_error(NULL, "Call to undefined function %s()", ZSTR_VAL(function_name));
+							zend_throw_error(NULL, "Call to undefined function %pS()", function_name);
 							return FAILURE;
 						}
 
@@ -1315,9 +1316,9 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 							return FAILURE;
 						} else if (fptr->common.scope->ce_flags & ZEND_ACC_TRAIT) {
 							zend_error(E_DEPRECATED,
-								"Calling static trait method %s::%s is deprecated, "
+								"Calling static trait method %pS::%pS is deprecated, "
 								"it should only be called on a class using the trait",
-								ZSTR_VAL(fptr->common.scope->name), ZSTR_VAL(fptr->common.function_name));
+								fptr->common.scope->name, fptr->common.function_name);
 							if (EG(exception)) {
 								return FAILURE;
 							}
@@ -2478,6 +2479,12 @@ simple_list:
 			if (ast->attr & ZEND_ACC_STATIC) {
 				smart_str_appends(str, "static ");
 			}
+			if (ast->attr & ZEND_ACC_ABSTRACT) {
+				smart_str_appends(str, "abstract ");
+			}
+			if (ast->attr & ZEND_ACC_FINAL) {
+				smart_str_appends(str, "final ");
+			}
 			if (ast->attr & ZEND_ACC_READONLY) {
 				smart_str_appends(str, "readonly ");
 			}
@@ -2517,6 +2524,9 @@ simple_list:
 			}
 
 			zend_ast_export_visibility(str, ast->attr, ZEND_MODIFIER_TARGET_CONSTANT);
+			if (ast->attr & ZEND_ACC_FINAL) {
+				smart_str_appends(str, "final ");
+			}
 			smart_str_appends(str, "const ");
 			if (ast->child[2]) {
 				zend_ast_export_type(str, ast->child[2], indent);
@@ -2794,6 +2804,9 @@ simple_list:
 				const zend_ast_decl *decl = (const zend_ast_decl *) ast->child[0];
 				if (decl->child[3]) {
 					zend_ast_export_attributes(str, decl->child[3], indent, false);
+				}
+				if (decl->flags & ZEND_ACC_READONLY_CLASS) {
+					smart_str_appends(str, "readonly ");
 				}
 				smart_str_appends(str, "class");
 				if (!zend_ast_is_list(ast->child[1])

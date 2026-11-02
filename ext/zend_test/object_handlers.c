@@ -230,6 +230,8 @@ ZEND_METHOD(NumericCastableNoOperations, __construct)
 	ZVAL_COPY(OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0), n);
 }
 
+/* Comparing two VmInterruptComparable objects raises EG(vm_interrupt) without a
+ * function call. Used by ext/opcache/tests/jit/loop_vm_interrupt_001.phpt. */
 static zend_class_entry *vm_interrupt_comparable_ce;
 static zend_object_handlers vm_interrupt_comparable_object_handlers;
 

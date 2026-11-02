@@ -60,21 +60,21 @@ $_[0] = 1;
 var_dump($a->foo);
 
 ?>
---EXPECT--
+--EXPECTF--
 int(2)
 int(21)
-TypeError: Cannot assign string to reference held by property class@anonymous::$foo of type int
+TypeError: Cannot assign string to reference held by property class@anonymous%0%s::$foo of type int
 int(21)
 int(20)
 int(19)
-TypeError: Cannot decrement a reference held by property class@anonymous::$foo of type int past its minimal value
+TypeError: Cannot decrement a reference held by property class@anonymous%0%s::$foo of type int past its minimal value
 integer
-TypeError: Cannot decrement a reference held by property class@anonymous::$foo of type int past its minimal value
+TypeError: Cannot decrement a reference held by property class@anonymous%0%s::$foo of type int past its minimal value
 integer
-TypeError: Cannot increment a reference held by property class@anonymous::$foo of type int past its maximal value
+TypeError: Cannot increment a reference held by property class@anonymous%0%s::$foo of type int past its maximal value
 integer
-TypeError: Cannot increment a reference held by property class@anonymous::$foo of type int past its maximal value
+TypeError: Cannot increment a reference held by property class@anonymous%0%s::$foo of type int past its maximal value
 integer
-TypeError: Cannot assign array to reference held by property class@anonymous::$foo of type int
+TypeError: Cannot assign array to reference held by property class@anonymous%0%s::$foo of type int
 int(0)
 int(1)

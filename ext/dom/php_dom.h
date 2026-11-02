@@ -112,6 +112,7 @@ zend_object *dom_xpath_objects_new(zend_class_entry *class_type);
 #endif
 bool dom_get_strict_error(php_libxml_ref_obj *document);
 void node_list_unlink(xmlNodePtr node);
+xmlAttrPtr dom_set_attribute_value(xmlNodePtr element, xmlNsPtr ns, const xmlChar *name, const xmlChar *value);
 int dom_check_qname(char *qname, char **localname, char **prefix, int uri_len, int name_len);
 xmlNsPtr dom_get_ns(xmlNodePtr node, char *uri, int *errorcode, char *prefix);
 xmlNsPtr dom_get_ns_unchecked(xmlNodePtr nodep, char *uri, char *prefix);
@@ -207,7 +208,7 @@ xmlNodePtr dom_nodelist_iter_start_first_child(xmlNodePtr nodep);
 #define DOM_GET_INTERN(__id, __intern) { \
 	__intern = Z_DOMOBJ_P(__id); \
 	if (UNEXPECTED(__intern->ptr == NULL)) { \
-		zend_throw_error(NULL, "Couldn't fetch %s", ZSTR_VAL(__intern->std.ce->name));\
+		zend_throw_error(NULL, "Couldn't fetch %pS", __intern->std.ce->name);\
 		RETURN_THROWS();\
   	} \
 }

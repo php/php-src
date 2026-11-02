@@ -47,12 +47,12 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 int(0)
 int(-2)
 int(-1)
 int(-1)
-TypeError: Cannot increment a reference held by property class@anonymous::$bar of type ?int past its maximal value
-TypeError: Cannot increment a reference held by property class@anonymous::$bar of type ?int past its maximal value
-TypeError: Cannot decrement a reference held by property class@anonymous::$bar of type ?int past its minimal value
-TypeError: Cannot decrement a reference held by property class@anonymous::$bar of type ?int past its minimal value
+TypeError: Cannot increment a reference held by property class@anonymous%0%s::$bar of type ?int past its maximal value
+TypeError: Cannot increment a reference held by property class@anonymous%0%s::$bar of type ?int past its maximal value
+TypeError: Cannot decrement a reference held by property class@anonymous%0%s::$bar of type ?int past its minimal value
+TypeError: Cannot decrement a reference held by property class@anonymous%0%s::$bar of type ?int past its minimal value

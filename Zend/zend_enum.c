@@ -27,7 +27,7 @@
 #define ZEND_ENUM_DISALLOW_MAGIC_METHOD(propertyName, methodName) \
 	do { \
 		if (ce->propertyName) { \
-			zend_error_noreturn(E_COMPILE_ERROR, "Enum %s cannot include magic method %s", ZSTR_VAL(ce->name), methodName); \
+			zend_error_noreturn(E_COMPILE_ERROR, "Enum %pS cannot include magic method %s", ce->name, methodName); \
 		} \
 	} while (0);
 
@@ -83,8 +83,8 @@ static void zend_verify_enum_properties(const zend_class_entry *ce)
 			continue;
 		}
 		// FIXME: File/line number for traits?
-		zend_error_noreturn(E_COMPILE_ERROR, "Enum %s cannot include properties",
-			ZSTR_VAL(ce->name));
+		zend_error_noreturn(E_COMPILE_ERROR, "Enum %pS cannot include properties",
+			ce->name);
 	} ZEND_HASH_FOREACH_END();
 }
 
@@ -114,7 +114,7 @@ static void zend_verify_enum_magic_methods(const zend_class_entry *ce)
 		const char *forbidden_method = forbidden_methods[i];
 
 		if (zend_hash_str_exists(&ce->function_table, forbidden_method, strlen(forbidden_method))) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Enum %s cannot include magic method %s", ZSTR_VAL(ce->name), forbidden_method);
+			zend_error_noreturn(E_COMPILE_ERROR, "Enum %pS cannot include magic method %s", ce->name, forbidden_method);
 		}
 	}
 }
@@ -123,7 +123,7 @@ static void zend_verify_enum_interfaces(const zend_class_entry *ce)
 {
 	if (zend_class_implements_interface(ce, zend_ce_serializable)) {
 		zend_error_noreturn(E_COMPILE_ERROR,
-			"Enum %s cannot implement the Serializable interface", ZSTR_VAL(ce->name));
+			"Enum %pS cannot implement the Serializable interface", ce->name);
 	}
 }
 
@@ -140,9 +140,9 @@ static int zend_implement_unit_enum(zend_class_entry *interface, zend_class_entr
 		return SUCCESS;
 	}
 
-	zend_error_noreturn(E_ERROR, "Non-enum class %s cannot implement interface %s",
-		ZSTR_VAL(class_type->name),
-		ZSTR_VAL(interface->name));
+	zend_error_noreturn(E_ERROR, "Non-enum class %pS cannot implement interface %pS",
+		class_type->name,
+		interface->name);
 
 	return FAILURE;
 }
@@ -150,16 +150,16 @@ static int zend_implement_unit_enum(zend_class_entry *interface, zend_class_entr
 static int zend_implement_backed_enum(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	if (!(class_type->ce_flags & ZEND_ACC_ENUM)) {
-		zend_error_noreturn(E_ERROR, "Non-enum class %s cannot implement interface %s",
-			ZSTR_VAL(class_type->name),
-			ZSTR_VAL(interface->name));
+		zend_error_noreturn(E_ERROR, "Non-enum class %pS cannot implement interface %pS",
+			class_type->name,
+			interface->name);
 		return FAILURE;
 	}
 
 	if (class_type->enum_backing_type == IS_UNDEF) {
-		zend_error_noreturn(E_ERROR, "Non-backed enum %s cannot implement interface %s",
-			ZSTR_VAL(class_type->name),
-			ZSTR_VAL(interface->name));
+		zend_error_noreturn(E_ERROR, "Non-backed enum %pS cannot implement interface %pS",
+			class_type->name,
+			interface->name);
 		return FAILURE;
 	}
 
@@ -241,10 +241,10 @@ zend_result zend_enum_build_backed_enum_table(zend_class_entry *ce)
 			zend_long long_key = Z_LVAL_P(case_value);
 			const zval *existing_case_name = zend_hash_index_find(backed_enum_table, long_key);
 			if (existing_case_name) {
-				zend_throw_error(NULL, "Duplicate value in enum %s for cases %s and %s",
-					ZSTR_VAL(enum_class_name),
-					Z_STRVAL_P(existing_case_name),
-					ZSTR_VAL(name));
+				zend_throw_error(NULL, "Duplicate value in enum %pS for cases %pS and %pS",
+					enum_class_name,
+					Z_STR_P(existing_case_name),
+					name);
 				goto failure;
 			}
 			Z_TRY_ADDREF_P(case_name);
@@ -254,10 +254,10 @@ zend_result zend_enum_build_backed_enum_table(zend_class_entry *ce)
 			zend_string *string_key = Z_STR_P(case_value);
 			const zval *existing_case_name = zend_hash_find(backed_enum_table, string_key);
 			if (existing_case_name != NULL) {
-				zend_throw_error(NULL, "Duplicate value in enum %s for cases %s and %s",
-					ZSTR_VAL(enum_class_name),
-					Z_STRVAL_P(existing_case_name),
-					ZSTR_VAL(name));
+				zend_throw_error(NULL, "Duplicate value in enum %pS for cases %pS and %pS",
+					enum_class_name,
+					Z_STR_P(existing_case_name),
+					name);
 				goto failure;
 			}
 			Z_TRY_ADDREF_P(case_name);
@@ -327,10 +327,10 @@ not_found:
 		}
 
 		if (ce->enum_backing_type == IS_LONG) {
-			zend_value_error(ZEND_LONG_FMT " is not a valid backing value for enum %s", long_key, ZSTR_VAL(ce->name));
+			zend_value_error(ZEND_LONG_FMT " is not a valid backing value for enum %pS", long_key, ce->name);
 		} else {
 			ZEND_ASSERT(ce->enum_backing_type == IS_STRING);
-			zend_value_error("\"%s\" is not a valid backing value for enum %s", ZSTR_VAL(string_key), ZSTR_VAL(ce->name));
+			zend_value_error("\"%pS\" is not a valid backing value for enum %pS", string_key, ce->name);
 		}
 		return FAILURE;
 	}
@@ -443,7 +443,7 @@ static void zend_enum_register_func(zend_class_entry *ce, zend_known_string_id n
 	}
 
 	if (!zend_hash_add_ptr(&ce->function_table, name, zif)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare %s::%s()", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare %pS::%pS()", ce->name, name);
 	}
 }
 

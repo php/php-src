@@ -265,6 +265,8 @@ namespace {
 
     function zend_test_void_return(): void {}
 
+    function &zend_test_forward_reference(mixed &$value): mixed {}
+
     function zend_test_compile_string(string $source_string, string $filename, int $position): void {}
 
     /** @deprecated */
@@ -470,6 +472,8 @@ function zend_test_override_libxml_global_state(): void {}
     function zend_test_handle_post_data(mixed $stream, string $content_type, int $content_length): void {}
 
     function zend_new_singleton_array(): array {}
+
+    function zend_test_set_local_var(string $name, mixed $value): bool {}
 }
 
 namespace ZendTestNS {

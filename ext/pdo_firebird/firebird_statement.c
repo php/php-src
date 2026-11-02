@@ -332,9 +332,15 @@ static int pdo_firebird_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 static int pdo_firebird_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value)
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt *) stmt->driver_data;
-	XSQLVAR *var = &S->out_sqlda.sqlvar[colno];
-
+	XSQLVAR *var;
 	enum pdo_param_type param_type;
+
+	if (colno >= stmt->column_count) {
+		ZVAL_EMPTY_ARRAY(return_value);
+		return 1;
+	}
+
+	var = &S->out_sqlda.sqlvar[colno];
 	if (var->sqlscale < 0) {
 		param_type = PDO_PARAM_STR;
 	} else {

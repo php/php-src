@@ -766,7 +766,7 @@ PHP_METHOD(Phar, webPhar)
 			sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
 
 			if (not_cgi) {
-				tmp = strstr(path_info, basename) + fname_len;
+				tmp = strstr(path_info, basename) + (fname_len - (basename - fname));
 				sa = *tmp;
 				*tmp = '\0';
 			}
@@ -3095,7 +3095,7 @@ static int phar_set_compression(zval *zv, void *argument) /* {{{ */
 	phar_entry_info *entry = (phar_entry_info *)Z_PTR_P(zv);
 	uint32_t compress = *(uint32_t *)argument;
 
-	if (entry->is_deleted) {
+	if (entry->is_deleted || (entry->flags & PHAR_ENT_COMPRESSION_MASK) == compress) {
 		return ZEND_HASH_APPLY_KEEP;
 	}
 
@@ -3103,6 +3103,30 @@ static int phar_set_compression(zval *zv, void *argument) /* {{{ */
 	entry->flags &= ~PHAR_ENT_COMPRESSION_MASK;
 	entry->flags |= compress;
 	entry->is_modified = 1;
+	return ZEND_HASH_APPLY_KEEP;
+}
+/* }}} */
+
+typedef struct {
+	uint32_t compress;
+	char *error;
+} phar_compression_args;
+
+static int phar_decompress_for_compression_change(zval *zv, void *argument) /* {{{ */
+{
+	phar_entry_info *entry = (phar_entry_info *)Z_PTR_P(zv);
+	phar_compression_args *args = (phar_compression_args *)argument;
+	uint32_t current = entry->flags & PHAR_ENT_COMPRESSION_MASK;
+
+	if (entry->is_deleted || entry->is_dir || !current || current == args->compress) {
+		return ZEND_HASH_APPLY_KEEP;
+	}
+
+	/* phar_flush() would otherwise copy the old compressed bytes as the new contents */
+	if (FAILURE == phar_open_entry_fp(entry, &args->error, 0)) {
+		return ZEND_HASH_APPLY_STOP;
+	}
+
 	return ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
@@ -3133,9 +3157,18 @@ static int phar_test_compression(zval *zv, void *argument) /* {{{ */
 }
 /* }}} */
 
-static void pharobj_set_compression(HashTable *manifest, uint32_t compress) /* {{{ */
+static zend_result pharobj_set_compression(HashTable *manifest, uint32_t compress, char **error) /* {{{ */
 {
+	phar_compression_args args = { .compress = compress, .error = NULL };
+
+	zend_hash_apply_with_argument(manifest, phar_decompress_for_compression_change, &args);
+	if (args.error) {
+		*error = args.error;
+		return FAILURE;
+	}
+
 	zend_hash_apply_with_argument(manifest, phar_set_compression, &compress);
+	return SUCCESS;
 }
 /* }}} */
 
@@ -3326,7 +3359,11 @@ PHP_METHOD(Phar, compressFiles)
 		zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%pS\" is persistent, unable to copy on write", phar_obj->archive->fname);
 		RETURN_THROWS();
 	}
-	pharobj_set_compression(&phar_obj->archive->manifest, flags);
+	if (FAILURE == pharobj_set_compression(&phar_obj->archive->manifest, flags, &error)) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s", error);
+		efree(error);
+		RETURN_THROWS();
+	}
 	phar_obj->archive->is_modified = 1;
 	phar_flush(phar_obj->archive, &error);
 
@@ -3365,7 +3402,11 @@ PHP_METHOD(Phar, decompressFiles)
 			zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%pS\" is persistent, unable to copy on write", phar_obj->archive->fname);
 			RETURN_THROWS();
 		}
-		pharobj_set_compression(&phar_obj->archive->manifest, PHAR_ENT_COMPRESSED_NONE);
+		if (FAILURE == pharobj_set_compression(&phar_obj->archive->manifest, PHAR_ENT_COMPRESSED_NONE, &error)) {
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s", error);
+			efree(error);
+			RETURN_THROWS();
+		}
 	}
 
 	phar_obj->archive->is_modified = 1;
@@ -3453,9 +3494,23 @@ PHP_METHOD(Phar, copy)
 	newentry.filename = zend_string_copy(new_file);
 	newentry.fp_refcount = 0;
 
+	if (newentry.symlink) {
+		newentry.symlink = zend_string_copy(newentry.symlink);
+	}
+
+	if (newentry.tmp) {
+		newentry.tmp = estrdup(newentry.tmp);
+	}
+
 	if (oldentry->fp_type != PHAR_FP) {
 		if (FAILURE == phar_copy_entry_fp(oldentry, &newentry, &error)) {
 			zend_string_release(newentry.filename);
+			if (newentry.symlink) {
+				zend_string_release(newentry.symlink);
+			}
+			if (newentry.tmp) {
+				efree(newentry.tmp);
+			}
 			php_stream_close(newentry.fp);
 			zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
 			efree(error);

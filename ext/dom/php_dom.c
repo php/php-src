@@ -482,7 +482,7 @@ static void dom_unset_property(zend_object *object, zend_string *member, void **
 	dom_object *obj = php_dom_obj_from_obj(object);
 
 	if (obj->prop_handler != NULL && zend_hash_exists(obj->prop_handler, member)) {
-		zend_throw_error(NULL, "Cannot unset %s::$%s", ZSTR_VAL(object->ce->name), ZSTR_VAL(member));
+		zend_throw_error(NULL, "Cannot unset %pS::$%pS", object->ce->name, member);
 		return;
 	}
 
@@ -2307,7 +2307,7 @@ static bool dom_nodemap_or_nodelist_process_offset_as_named(zval *offset, zend_l
 static zval *dom_nodelist_read_dimension(zend_object *object, zval *offset, int type, zval *rv)
 {
 	if (UNEXPECTED(!offset)) {
-		zend_throw_error(NULL, "Cannot access %s without offset", ZSTR_VAL(object->ce->name));
+		zend_throw_error(NULL, "Cannot access %pS without offset", object->ce->name);
 		return NULL;
 	}
 
@@ -2348,6 +2348,15 @@ void dom_remove_all_children(xmlNodePtr nodep)
 		nodep->children = NULL;
 		nodep->last = NULL;
 	}
+}
+
+xmlAttrPtr dom_set_attribute_value(xmlNodePtr element, xmlNsPtr ns, const xmlChar *name, const xmlChar *value)
+{
+	xmlAttrPtr existing = xmlHasNsProp(element, name, ns == NULL ? NULL : ns->href);
+	if (existing != NULL && existing->type != XML_ATTRIBUTE_DECL) {
+		node_list_unlink(existing->children);
+	}
+	return xmlSetNsProp(element, ns, name, value);
 }
 
 void php_dom_get_content_into_zval(const xmlNode *nodep, zval *return_value, bool null_on_failure)
@@ -2399,7 +2408,7 @@ void php_dom_get_content_into_zval(const xmlNode *nodep, zval *return_value, boo
 static zval *dom_nodemap_read_dimension(zend_object *object, zval *offset, int type, zval *rv)
 {
 	if (UNEXPECTED(!offset)) {
-		zend_throw_error(NULL, "Cannot access %s without offset", ZSTR_VAL(object->ce->name));
+		zend_throw_error(NULL, "Cannot access %pS without offset", object->ce->name);
 		return NULL;
 	}
 
@@ -2443,7 +2452,7 @@ static int dom_nodemap_has_dimension(zend_object *object, zval *member, int chec
 static zval *dom_modern_nodemap_read_dimension(zend_object *object, zval *offset, int type, zval *rv)
 {
 	if (UNEXPECTED(!offset)) {
-		zend_throw_error(NULL, "Cannot append to %s", ZSTR_VAL(object->ce->name));
+		zend_throw_error(NULL, "Cannot append to %pS", object->ce->name);
 		return NULL;
 	}
 

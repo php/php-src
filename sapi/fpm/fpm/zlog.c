@@ -609,6 +609,7 @@ zlog_bool zlog_stream_set_msg_prefix(struct zlog_stream *stream, const char *fmt
 {
 	char buf[MAX_WRAPPING_PREFIX_LENGTH];
 	size_t len;
+	int written;
 	va_list args;
 
 	if (!stream->decorate) {
@@ -616,8 +617,15 @@ zlog_bool zlog_stream_set_msg_prefix(struct zlog_stream *stream, const char *fmt
 	}
 
 	va_start(args, fmt);
-	len = vsnprintf(buf, MAX_WRAPPING_PREFIX_LENGTH - 1, fmt, args);
+	written = vsnprintf(buf, sizeof(buf), fmt, args);
 	va_end(args);
+
+	if (written < 0) {
+		return ZLOG_FALSE;
+	}
+	/* Use only what was written to buf, and keep at least half of the log line
+	 * for the time and level prefix and the message itself. */
+	len = MIN((size_t) written, MIN(sizeof(buf) - 1, (size_t) zlog_limit / 2));
 
 	if (stream->msg_prefix_len < len) {
 		stream->msg_prefix = stream->msg_prefix_len ? realloc(stream->msg_prefix, len + 1) : malloc(len + 1);
@@ -629,7 +637,7 @@ zlog_bool zlog_stream_set_msg_prefix(struct zlog_stream *stream, const char *fmt
 	stream->msg_prefix[len] = 0;
 	stream->msg_prefix_len = len;
 
-	return len;
+	return ZLOG_TRUE;
 }
 /* }}} */
 
@@ -748,7 +756,10 @@ ssize_t zlog_stream_vformat(struct zlog_stream *stream, const char *fmt, va_list
 	char sbuf[1024];
 	size_t len;
 
-	len = vsnprintf(sbuf, 1024, fmt, args);
+	len = vsnprintf(sbuf, sizeof(sbuf), fmt, args);
+	if (len >= sizeof(sbuf)) {
+		len = sizeof(sbuf) - 1;
+	}
 
 	return zlog_stream_str(stream, sbuf, len);
 }

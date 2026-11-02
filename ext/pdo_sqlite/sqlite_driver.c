@@ -397,7 +397,11 @@ static int do_callback(zend_fcall_info_cache *fcc, int argc, sqlite3_value **arg
 		/* get the value */
 		switch (sqlite3_value_type(argv[i])) {
 			case SQLITE_INTEGER:
+#ifdef ZEND_ENABLE_ZVAL_LONG64
+				ZVAL_LONG(&zargs[i + is_agg], sqlite3_value_int64(argv[i]));
+#else
 				ZVAL_LONG(&zargs[i + is_agg], sqlite3_value_int(argv[i]));
+#endif
 				break;
 
 			case SQLITE_FLOAT:
@@ -435,7 +439,11 @@ static int do_callback(zend_fcall_info_cache *fcc, int argc, sqlite3_value **arg
 		if (!Z_ISUNDEF(retval)) {
 			switch (Z_TYPE(retval)) {
 				case IS_LONG:
+#ifdef ZEND_ENABLE_ZVAL_LONG64
+					sqlite3_result_int64(context, Z_LVAL(retval));
+#else
 					sqlite3_result_int(context, Z_LVAL(retval));
+#endif
 					break;
 
 				case IS_NULL:

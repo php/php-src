@@ -602,7 +602,7 @@ bail:
 		}
 
 		if (zend_string_starts_with_literal(entry.filename, ".phar/.metadata")) {
-			if (FAILURE == phar_tar_process_metadata(newentry, fp)) {
+			if (size > totalsize || FAILURE == phar_tar_process_metadata(newentry, fp)) {
 				if (error) {
 					spprintf(error, 4096, "phar error: tar-based phar \"%s\" has invalid metadata in magic file \"%s\"", fname, ZSTR_VAL(entry.filename));
 				}

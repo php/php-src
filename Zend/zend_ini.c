@@ -653,8 +653,8 @@ static zend_ulong zend_ini_parse_quantity_internal(const zend_string *value, zen
 		smart_str_append_escaped(&invalid, ZSTR_VAL(value), ZSTR_LEN(value));
 		smart_str_0(&invalid);
 
-		*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": no valid leading digits, interpreting as \"0\" for backwards compatibility",
-						ZSTR_VAL(invalid.s));
+		*errstr = zend_strpprintf(0, "Invalid quantity \"%pS\": no valid leading digits, interpreting as \"0\" for backwards compatibility",
+						invalid.s);
 
 		smart_str_free(&invalid);
 		return 0;
@@ -702,8 +702,8 @@ static zend_ulong zend_ini_parse_quantity_internal(const zend_string *value, zen
 			smart_str_append_escaped(&invalid, ZSTR_VAL(value), ZSTR_LEN(value));
 			smart_str_0(&invalid);
 
-			*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": no digits after base prefix, interpreting as \"0\" for backwards compatibility",
-							ZSTR_VAL(invalid.s));
+			*errstr = zend_strpprintf(0, "Invalid quantity \"%pS\": no digits after base prefix, interpreting as \"0\" for backwards compatibility",
+							invalid.s);
 
 			smart_str_free(&invalid);
 			return 0;
@@ -744,8 +744,8 @@ static zend_ulong zend_ini_parse_quantity_internal(const zend_string *value, zen
 		smart_str_append_escaped(&invalid, ZSTR_VAL(value), ZSTR_LEN(value));
 		smart_str_0(&invalid);
 
-		*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": no valid leading digits, interpreting as \"0\" for backwards compatibility",
-						ZSTR_VAL(invalid.s));
+		*errstr = zend_strpprintf(0, "Invalid quantity \"%pS\": no valid leading digits, interpreting as \"0\" for backwards compatibility",
+						invalid.s);
 
 		smart_str_free(&invalid);
 		return 0;
@@ -781,8 +781,8 @@ static zend_ulong zend_ini_parse_quantity_internal(const zend_string *value, zen
 			smart_str_append_escaped(&chr, str_end-1, 1);
 			smart_str_0(&chr);
 
-			*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": unknown multiplier \"%s\", interpreting as \"%s\" for backwards compatibility",
-						ZSTR_VAL(invalid.s), ZSTR_VAL(chr.s), ZSTR_VAL(interpreted.s));
+			*errstr = zend_strpprintf(0, "Invalid quantity \"%pS\": unknown multiplier \"%pS\", interpreting as \"%pS\" for backwards compatibility",
+						invalid.s, chr.s, interpreted.s);
 
 			smart_str_free(&invalid);
 			smart_str_free(&interpreted);
@@ -815,8 +815,8 @@ static zend_ulong zend_ini_parse_quantity_internal(const zend_string *value, zen
 		smart_str_append_escaped(&chr, str_end-1, 1);
 		smart_str_0(&chr);
 
-		*errstr = zend_strpprintf(0, "Invalid quantity \"%s\", interpreting as \"%s%s\" for backwards compatibility",
-						ZSTR_VAL(invalid.s), ZSTR_VAL(interpreted.s), ZSTR_VAL(chr.s));
+		*errstr = zend_strpprintf(0, "Invalid quantity \"%pS\", interpreting as \"%pS%pS\" for backwards compatibility",
+						invalid.s, interpreted.s, chr.s);
 
 		smart_str_free(&invalid);
 		smart_str_free(&interpreted);
@@ -833,8 +833,8 @@ end:
 		/* Not specifying the resulting value here because the caller may make
 		 * additional conversions. Not specifying the allowed range
 		 * because the caller may do narrower range checks. */
-		*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": value is out of range, using overflow result for backwards compatibility",
-						ZSTR_VAL(invalid.s));
+		*errstr = zend_strpprintf(0, "Invalid quantity \"%pS\": value is out of range, using overflow result for backwards compatibility",
+						invalid.s);
 
 		smart_str_free(&invalid);
 		smart_str_free(&interpreted);
@@ -866,7 +866,7 @@ ZEND_API zend_long zend_ini_parse_quantity_warn(const zend_string *value, zend_s
 	zend_long retval = zend_ini_parse_quantity(value, &errstr);
 
 	if (errstr) {
-		zend_error(E_WARNING, "Invalid \"%s\" setting. %s", ZSTR_VAL(setting), ZSTR_VAL(errstr));
+		zend_error(E_WARNING, "Invalid \"%pS\" setting. %pS", setting, errstr);
 		zend_string_release(errstr);
 	}
 
@@ -880,7 +880,7 @@ ZEND_API zend_ulong zend_ini_parse_uquantity_warn(const zend_string *value, zend
 	zend_ulong retval = zend_ini_parse_uquantity(value, &errstr);
 
 	if (errstr) {
-		zend_error(E_WARNING, "Invalid \"%s\" setting. %s", ZSTR_VAL(setting), ZSTR_VAL(errstr));
+		zend_error(E_WARNING, "Invalid \"%pS\" setting. %pS", setting, errstr);
 		zend_string_release(errstr);
 	}
 

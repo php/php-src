@@ -119,7 +119,7 @@ jobs:
           sudo apt-get update -y
           sudo apt-get install -y terraform=1.5.7-*
       - name: Checkout benchmark suite
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: 'kocsismate/php-version-benchmarks'
           ref: 'main'
@@ -133,7 +133,7 @@ jobs:
           rm -rf ./php-version-benchmarks/docs/results
       - name: Checkout benchmark data
         if: github.event_name != 'workflow_dispatch'
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: php/real-time-benchmark-data
           ssh-key: ${{ secrets.PHP_VERSION_BENCHMARK_RESULTS_DEPLOY_KEY }}

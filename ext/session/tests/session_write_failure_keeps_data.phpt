@@ -40,6 +40,9 @@ session_start();
 $_SESSION['data'] = 'new';
 @session_write_close();
 
+// Restore the limit so that shutdown (and gcov) can write files
+posix_setrlimit(POSIX_RLIMIT_FSIZE, POSIX_RLIMIT_INFINITY, POSIX_RLIMIT_INFINITY);
+
 echo "Contents unchanged after failed write: ";
 var_dump(file_get_contents($file) === $before);
 

@@ -174,7 +174,7 @@ U_CFUNC PHP_FUNCTION(datefmt_parse)
 			zend_argument_type_error(hasThis() ? 2 : 3, "must be of type int, %s given", zend_zval_value_name(z_parse_pos));
 			RETURN_THROWS();
 		}
-		if (ZEND_LONG_INT_OVFL(long_parse_pos)) {
+		if (ZEND_LONG_EXCEEDS_INT(long_parse_pos)) {
 			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
 			intl_error_set_custom_msg(NULL, "String index is out of valid range.");
 			RETURN_FALSE;
@@ -217,7 +217,7 @@ U_CFUNC PHP_METHOD(IntlDateFormatter, parseToCalendar)
 			zend_argument_type_error(2, "must be of type int, %s given", zend_zval_value_name(z_parse_pos));
 			RETURN_THROWS();
 		}
-		if (ZEND_LONG_INT_OVFL(long_parse_pos)) {
+		if (ZEND_LONG_EXCEEDS_INT(long_parse_pos)) {
 			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
 			intl_error_set_custom_msg(NULL, "String index is out of valid range.");
 			RETURN_FALSE;
@@ -259,7 +259,7 @@ U_CFUNC PHP_FUNCTION(datefmt_localtime)
 			zend_argument_type_error(hasThis() ? 2 : 3, "must be of type int, %s given", zend_zval_value_name(z_parse_pos));
 			RETURN_THROWS();
 		}
-		if (ZEND_LONG_INT_OVFL(long_parse_pos)) {
+		if (ZEND_LONG_EXCEEDS_INT(long_parse_pos)) {
 			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
 			intl_error_set_custom_msg(NULL, "String index is out of valid range.");
 			RETURN_FALSE;
