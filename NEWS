@@ -139,6 +139,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-23958 (truncated encoding names resolving to full names). (Kamil Tekiela)
   . Fixed out-of-bounds read in php_mb_rfc1867_getword() on a multibyte lead
     byte at the end of a multipart field name. (Jorg Sowa)
+  . Fixed negative mbstring.regex_stack_limit and mbstring.regex_retry_limit
+    on 32bit platforms. (Marc Bennewitz)
 
 - MySQLnd:
   . Fixed bug GH-24293 (Segfault on connect with an empty password to a
@@ -333,6 +335,8 @@ PHP                                                                        NEWS
     tidy::repairFile() rejecting null for $encoding. (lacatoire)
 
 - Windows:
+  . Fixed sapi_windows_cp_set() and sapi_windows_cp_conv() accepting a negative
+    codepage on 32bit platforms. (Marc Bennewitz)
   . Fixed bug GH-25009 (GetConsoleTitleW() buffer size passed in bytes).
     (Lazizbek Ergashev)
 

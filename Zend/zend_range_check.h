@@ -47,7 +47,7 @@
 # define ZEND_LONG_INT_OVFL(zl) (0)
 # define ZEND_LONG_INT_UDFL(zl) (0)
 # define ZEND_LONG_EXCEEDS_INT(zlong) (0)
-# define ZEND_LONG_UINT_OVFL(zl) (0)
+# define ZEND_LONG_UINT_OVFL(zl) UNEXPECTED((zl) < 0)
 #endif
 
 /* size_t vs (unsigned) int checks. */
