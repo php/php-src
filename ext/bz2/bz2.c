@@ -60,10 +60,24 @@ struct php_bz2_stream_data_t {
 	FILE *file;
 	bool stream_end;
 	bool read_failed;
+	bool report_read_errors;
+	bool read_error_reported;
 	zend_resource *stream_res;
 };
 
 /* {{{ BZip2 stream implementation */
+
+static void php_bz2iop_report_read_error(php_stream *stream)
+{
+	struct php_bz2_stream_data_t *self = stream->abstract;
+
+	self->read_failed = true;
+	stream->eof = 1;
+	if (self->report_read_errors && !self->read_error_reported) {
+		self->read_error_reported = true;
+		php_error_docref(NULL, E_WARNING, "Failed to read bzip2 stream");
+	}
+}
 
 static bool php_bz2iop_next_stream(php_stream *stream)
 {
@@ -74,8 +88,7 @@ static bool php_bz2iop_next_stream(php_stream *stream)
 
 	BZ2_bzReadGetUnused(&error, self->bz_file, &unused, &unused_len);
 	if (error != BZ_OK) {
-		self->read_failed = true;
-		stream->eof = 1;
+		php_bz2iop_report_read_error(stream);
 		return false;
 	}
 	memcpy(buffer, unused, unused_len);
@@ -87,6 +100,10 @@ static bool php_bz2iop_next_stream(php_stream *stream)
 		}
 		buffer[unused_len++] = ch;
 	}
+	if (self->read_failed) {
+		php_bz2iop_report_read_error(stream);
+		return false;
+	}
 	if (unused_len < 4 || memcmp(buffer, "BZh", 3) != 0
 			|| buffer[3] < '1' || buffer[3] > '9') {
 		stream->eof = 1;
@@ -95,8 +112,7 @@ static bool php_bz2iop_next_stream(php_stream *stream)
 
 	BZFILE *next = BZ2_bzReadOpen(&error, self->file, 0, strchr(stream->mode, 's') != NULL, buffer, unused_len);
 	if (error != BZ_OK) {
-		self->read_failed = true;
-		stream->eof = 1;
+		php_bz2iop_report_read_error(stream);
 		return false;
 	}
 	BZ2_bzReadClose(&error, self->bz_file);
@@ -115,6 +131,9 @@ static ssize_t php_bz2iop_read(php_stream *stream, char *buf, size_t count)
 		size_t remain = count - ret;
 		int to_read = (int)(remain <= INT_MAX ? remain : INT_MAX);
 
+		if (self->read_failed) {
+			return ret ? (ssize_t) ret : -1;
+		}
 		if (stream->eof) {
 			return ret ? (ssize_t) ret : (self->read_failed ? -1 : 0);
 		}
@@ -136,14 +155,14 @@ static ssize_t php_bz2iop_read(php_stream *stream, char *buf, size_t count)
 
 		if (just_read < 1) {
 			/* it is not safe to keep reading after an error, see #72613 */
-			stream->eof = 1;
 			if (just_read < 0) {
-				self->read_failed = true;
+				php_bz2iop_report_read_error(stream);
 				if (ret) {
 					return ret;
 				}
 				return -1;
 			}
+			stream->eof = 1;
 			break;
 		}
 
@@ -281,6 +300,8 @@ PHP_BZ2_API php_stream *_php_stream_bz2open_from_BZFILE(BZFILE *bz,
 	self->file = NULL;
 	self->stream_end = false;
 	self->read_failed = false;
+	self->report_read_errors = false;
+	self->read_error_reported = false;
 
 	return php_stream_alloc_rel(&php_stream_bz2io_ops, self, 0, mode);
 }
@@ -357,7 +378,9 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 	if (bz_file) {
 		retstream = _php_stream_bz2open_from_BZFILE(bz_file, mode, stream STREAMS_REL_CC);
 		if (retstream) {
-			((struct php_bz2_stream_data_t *) retstream->abstract)->file = file;
+			struct php_bz2_stream_data_t *self = retstream->abstract;
+			self->file = file;
+			self->report_read_errors = wrapper != NULL;
 			return retstream;
 		}
 

@@ -22,6 +22,17 @@ foreach (['BZh9', substr(bzcompress('broken'), 0, -1), $damaged] as $suffix) {
     var_dump(bzread($fp, 8192));
     bzclose($fp);
 }
+
+file_put_contents($file, bzcompress('data') . $damaged);
+$warning = false;
+set_error_handler(function () use (&$warning) {
+    $warning = true;
+    return true;
+});
+$result = file_get_contents('compress.bzip2://' . $file);
+restore_error_handler();
+var_dump($result);
+var_dump($warning);
 unlink($file);
 ?>
 --CLEAN--
@@ -51,3 +62,5 @@ bool(false)
 bool(true)
 bool(true)
 bool(false)
+string(4) "data"
+bool(true)
