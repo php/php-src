@@ -32947,7 +32947,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_DECLARE_LAMBD
 	}
 
 	func = (zend_function *) EX(func)->op_array.dynamic_func_defs[opline->op2.num];
-	if (Z_TYPE(EX(This)) == IS_OBJECT && EXPECTED(!(func->common.fn_flags & ZEND_ACC_STATIC))) {
+	if (Z_TYPE(EX(This)) == IS_OBJECT && !(func->common.fn_flags & ZEND_ACC_STATIC)) {
 		ZEND_ASSERT(!(EX(func)->common.fn_flags & ZEND_ACC_STATIC));
 		object = Z_OBJ(EX(This));
 	} else {
@@ -85618,7 +85618,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DECLARE_LAMBDA_FUN
 	}
 
 	func = (zend_function *) EX(func)->op_array.dynamic_func_defs[opline->op2.num];
-	if (Z_TYPE(EX(This)) == IS_OBJECT && EXPECTED(!(func->common.fn_flags & ZEND_ACC_STATIC))) {
+	if (Z_TYPE(EX(This)) == IS_OBJECT && !(func->common.fn_flags & ZEND_ACC_STATIC)) {
 		ZEND_ASSERT(!(EX(func)->common.fn_flags & ZEND_ACC_STATIC));
 		object = Z_OBJ(EX(This));
 	} else {
