@@ -121,19 +121,6 @@ zend_always_inline static char *php_win32_cp_conv_w_to_any(const wchar_t* in, si
 }/*}}}*/
 #define php_win32_cp_w_to_any(in) php_win32_cp_conv_w_to_any(in, PHP_WIN32_CP_IGNORE_LEN, PHP_WIN32_CP_IGNORE_LEN_P)
 
-#define PHP_WIN32_CP_W_TO_ANY_ARRAY(aw, aw_len, aa, aa_len) do { \
-	int i; \
-	aa_len = aw_len; \
-	aa = (char **) malloc(aw_len * sizeof(char *)); \
-	if (!aa) { \
-		break; \
-	} \
-	for (i = 0; i < aw_len; i++) { \
-		aa[i] = php_win32_cp_w_to_any(aw[i]); \
-	} \
-} while (0);
-
-
 #define PHP_WIN32_CP_FREE_ARRAY(a, a_len) do { \
 	int i; \
 	for (i = 0; i < a_len; i++) { \
@@ -141,6 +128,36 @@ zend_always_inline static char *php_win32_cp_conv_w_to_any(const wchar_t* in, si
 	} \
 	free(a); \
 } while (0);
+
+zend_always_inline static char *php_win32_cp_utf8_to_any(const char *in)
+{
+	wchar_t *wide = php_win32_cp_utf8_to_w(in);
+	if (!wide) {
+		return NULL;
+	}
+	char *result = php_win32_cp_w_to_any(wide);
+	free(wide);
+	return result;
+}
+
+#define PHP_WIN32_CP_CONVERT_ARRAY(src, src_len, dst, dst_len, convert) do { \
+	(dst_len) = (src_len); \
+	(dst) = calloc((size_t) (dst_len) + 1, sizeof(char *)); \
+	if (!(dst)) { \
+		break; \
+	} \
+	for (int _php_cp_i = 0; _php_cp_i < (dst_len); _php_cp_i++) { \
+		(dst)[_php_cp_i] = convert((src)[_php_cp_i]); \
+		if (!(dst)[_php_cp_i]) { \
+			PHP_WIN32_CP_FREE_ARRAY((dst), (dst_len)) \
+			(dst) = NULL; \
+			break; \
+		} \
+	} \
+} while (0);
+
+#define PHP_WIN32_CP_W_TO_ANY_ARRAY(aw, aw_len, aa, aa_len) \
+	PHP_WIN32_CP_CONVERT_ARRAY(aw, aw_len, aa, aa_len, php_win32_cp_w_to_any)
 
 #ifdef __cplusplus
 }
