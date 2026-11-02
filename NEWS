@@ -33,6 +33,7 @@ PHP                                                                        NEWS
     (Ostap Brehin)
   . Fixed stack limit fallback on FreeBSD threads other than the main one.
     (Ostap Brehin)
+  . Fixed propagation of public(set) of readonly trait property. (ilutov)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
