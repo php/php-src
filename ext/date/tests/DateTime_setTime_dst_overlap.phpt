@@ -28,6 +28,11 @@ printf("%s %+d\n", $result->format('H:i:s T'), $result->getTimestamp() - $date->
 
 $date = new DateTimeImmutable('2026-10-25 01:10:30 UTC');
 $date = $date->setTimezone(new DateTimeZone('Europe/London'));
+$result = $date->setTime(1, 10, 59);
+printf("%s %+d\n", $result->format('H:i:s T'), $result->getTimestamp() - $date->getTimestamp());
+
+$date = new DateTimeImmutable('2026-10-25 01:10:30 UTC');
+$date = $date->setTimezone(new DateTimeZone('Europe/London'));
 $result = $date->modify('+29 seconds');
 printf("%s %+d\n", $result->format('H:i:s T'), $result->getTimestamp() - $date->getTimestamp());
 
@@ -43,6 +48,7 @@ Europe/London 01:10:59 BST +29
 Europe/Amsterdam 02:10:59 CEST +29
 America/New_York 01:10:59 EDT +29
 Australia/Lord_Howe 01:45:59 +11 +29
+01:10:59 GMT +29
 01:10:59 GMT +29
 01:10:59 GMT +29
 01:10:59 GMT +29
