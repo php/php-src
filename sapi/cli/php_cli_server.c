@@ -1701,17 +1701,30 @@ static void php_cli_server_client_save_header(php_cli_server_client *client)
 	} else {
 		zend_string *curval = Z_STR_P(entry);
 		zend_string *newval = zend_string_safe_alloc(1, ZSTR_LEN(curval),  ZSTR_LEN(client->current_header_value) + 2, /* persistent */true);
+		GC_MAKE_PERSISTENT_LOCAL(newval);
 
 		memcpy(ZSTR_VAL(newval), ZSTR_VAL(curval), ZSTR_LEN(curval));
 		memcpy(ZSTR_VAL(newval) + ZSTR_LEN(curval), ", ", 2);
 		memcpy(ZSTR_VAL(newval) + ZSTR_LEN(curval) + 2, ZSTR_VAL(client->current_header_value), ZSTR_LEN(client->current_header_value) + 1);
 
 		ZVAL_STR(&tmp, newval);
+		zend_string_release_ex(client->current_header_value, /* persistent */ true);
+	}
+
+	zend_string *orig = client->current_header_name;
+	if (entry != NULL) {
+		zend_string *key;
+		ZEND_HASH_MAP_FOREACH_STR_KEY(&client->request.headers_original_case, key) {
+			if (zend_string_equals_ci(key, client->current_header_name)) {
+				orig = key;
+				break;
+			}
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	/* Add/Update the wrapped zend_string to the HashTable */
 	zend_hash_update(&client->request.headers, lc_header_name, &tmp);
-	zend_hash_update(&client->request.headers_original_case, client->current_header_name, &tmp);
+	zend_hash_update(&client->request.headers_original_case, orig, &tmp);
 
 	zend_string_release_ex(lc_header_name, /* persistent */ true);
 	zend_string_release_ex(client->current_header_name, /* persistent */ true);
