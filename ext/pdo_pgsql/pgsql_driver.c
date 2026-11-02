@@ -112,7 +112,7 @@ static void _pdo_pgsql_notice(void *context, const char *message) /* {{{ */
 {
 	pdo_dbh_t * dbh = (pdo_dbh_t *)context;
 	zend_fcall_info_cache *fc = ((pdo_pgsql_db_handle *)dbh->driver_data)->notice_callback;
-	if (fc) {
+	if (fc && !dbh->is_closed) {
 		zval zarg;
 		ZVAL_STRING(&zarg, message);
 		zend_call_known_fcc(fc, NULL, 1, &zarg, NULL);
@@ -1329,6 +1329,15 @@ static bool pdo_pgsql_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 	}
 }
 
+static void pdo_pgsql_get_gc(pdo_dbh_t *dbh, zend_get_gc_buffer *gc_buffer)
+{
+	pdo_pgsql_db_handle *H = dbh->driver_data;
+
+	if (!dbh->is_persistent && H && H->notice_callback) {
+		zend_get_gc_buffer_add_fcc(gc_buffer, H->notice_callback);
+	}
+}
+
 static const struct pdo_dbh_methods pgsql_methods = {
 	pgsql_handle_closer,
 	pgsql_handle_preparer,
@@ -1345,7 +1354,7 @@ static const struct pdo_dbh_methods pgsql_methods = {
 	pdo_pgsql_get_driver_methods,  /* get_driver_methods */
 	pdo_pgsql_request_shutdown,
 	pgsql_handle_in_transaction,
-	NULL, /* get_gc */
+	pdo_pgsql_get_gc,
 	pdo_pgsql_scanner
 };
 
