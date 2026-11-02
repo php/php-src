@@ -409,7 +409,6 @@ PHP_HASH_API void php_hash_cshake256(
 
 	size_t remainder = (pos + custom_len) % rate;
 	if (remainder > 0) {
-		size_t pad_len = rate - remainder;
 		CSHAKE_UPDATE(&ctx, zero_pad, rate - remainder);
 	}
 
