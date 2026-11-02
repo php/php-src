@@ -20,7 +20,7 @@ $fname = __DIR__ . '/gh25112.phar';
 $phar = new Phar($fname);
 $phar->addFromString('index.php', '<?php echo "ok\n"; ?>');
 $phar->setStub('<?php
-Phar::webPhar(null, null, null, null, function ($path) { return "/"; });
+Phar::webPhar(null, null, null, [], function ($path) { return "/"; });
 __HALT_COMPILER(); ?>');
 unset($phar);
 include $fname;
