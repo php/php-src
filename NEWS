@@ -232,6 +232,11 @@ PHP                                                                        NEWS
   . Fixed bug GH-25006 (getColumnMeta() reads out of bounds for an
     out-of-range column index). (Ilia Alshanetsky)
 
+- PDO_PGSQL:
+  . Fixed a use-after-free when a persistent connection receives a notice
+    after the request that called Pdo\Pgsql::setNoticeCallback() has ended.
+    (Ilia Alshanetsky)
+
 - PDO_SQLite:
   . Fixed bug GH-24990 (Statement unusable after a failed execute()). (lazerg)
 
