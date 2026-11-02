@@ -48,6 +48,7 @@ void php_dom_add_templated_content(php_dom_private_data *private_data, const xml
 xmlNodePtr php_dom_retrieve_templated_content(php_dom_private_data *private_data, const xmlNode *template_node);
 xmlNodePtr php_dom_ensure_templated_content(php_dom_private_data *private_data, xmlNodePtr template_node);
 void php_dom_remove_templated_content(php_dom_private_data *private_data, const xmlNode *template_node);
+void php_dom_remove_templated_content_in_subtree(php_dom_private_data *private_data, xmlNodePtr base);
 uint32_t php_dom_get_template_count(const php_dom_private_data *private_data);
 void dom_add_element_ns_hook(php_dom_private_data *private_data, xmlNodePtr element);
 
