@@ -11244,9 +11244,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 		SAVE_OPLINE();
 		zend_verify_missing_return_type(EX(func));
 		HANDLE_EXCEPTION();
-	} else {
-/* prevents "undefined variable opline" errors */
-#if 0 || (IS_CONST != IS_UNUSED)
+	} else if (0 || (IS_CONST != IS_UNUSED)) {
 		USE_OPLINE
 		zval *retval_ref, *retval_ptr;
 		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
@@ -11304,7 +11302,6 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 			HANDLE_EXCEPTION();
 		}
 		ZEND_VM_NEXT_OPCODE();
-#endif
 	}
 }
 
@@ -21609,9 +21606,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 		SAVE_OPLINE();
 		zend_verify_missing_return_type(EX(func));
 		HANDLE_EXCEPTION();
-	} else {
-/* prevents "undefined variable opline" errors */
-#if 0 || (IS_TMP_VAR != IS_UNUSED)
+	} else if (0 || (IS_TMP_VAR != IS_UNUSED)) {
 		USE_OPLINE
 		zval *retval_ref, *retval_ptr;
 		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
@@ -21669,7 +21664,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 			HANDLE_EXCEPTION();
 		}
 		ZEND_VM_NEXT_OPCODE();
-#endif
 	}
 }
 
@@ -29658,9 +29652,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 		SAVE_OPLINE();
 		zend_verify_missing_return_type(EX(func));
 		HANDLE_EXCEPTION();
-	} else {
-/* prevents "undefined variable opline" errors */
-#if 0 || (IS_VAR != IS_UNUSED)
+	} else if (0 || (IS_VAR != IS_UNUSED)) {
 		USE_OPLINE
 		zval *retval_ref, *retval_ptr;
 		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
@@ -29718,7 +29710,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 			HANDLE_EXCEPTION();
 		}
 		ZEND_VM_NEXT_OPCODE();
-#endif
 	}
 }
 
@@ -37113,9 +37104,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 		SAVE_OPLINE();
 		zend_verify_missing_return_type(EX(func));
 		HANDLE_EXCEPTION();
-	} else {
-/* prevents "undefined variable opline" errors */
-#if 0 || (IS_UNUSED != IS_UNUSED)
+	} else if (0 || (IS_UNUSED != IS_UNUSED)) {
 		USE_OPLINE
 		zval *retval_ref, *retval_ptr;
 		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
@@ -37173,7 +37162,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 			HANDLE_EXCEPTION();
 		}
 		ZEND_VM_NEXT_OPCODE();
-#endif
 	}
 }
 
@@ -49356,9 +49344,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 		SAVE_OPLINE();
 		zend_verify_missing_return_type(EX(func));
 		HANDLE_EXCEPTION();
-	} else {
-/* prevents "undefined variable opline" errors */
-#if 0 || (IS_CV != IS_UNUSED)
+	} else if (0 || (IS_CV != IS_UNUSED)) {
 		USE_OPLINE
 		zval *retval_ref, *retval_ptr;
 		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
@@ -49416,7 +49402,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 			HANDLE_EXCEPTION();
 		}
 		ZEND_VM_NEXT_OPCODE();
-#endif
 	}
 }
 
@@ -64027,9 +64012,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIF
 		SAVE_OPLINE();
 		zend_verify_missing_return_type(EX(func));
 		HANDLE_EXCEPTION();
-	} else {
-/* prevents "undefined variable opline" errors */
-#if 0 || (IS_CONST != IS_UNUSED)
+	} else if (0 || (IS_CONST != IS_UNUSED)) {
 		USE_OPLINE
 		zval *retval_ref, *retval_ptr;
 		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
@@ -64087,7 +64070,6 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIF
 			HANDLE_EXCEPTION();
 		}
 		ZEND_VM_NEXT_OPCODE();
-#endif
 	}
 }
 
@@ -74292,9 +74274,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 		SAVE_OPLINE();
 		zend_verify_missing_return_type(EX(func));
 		HANDLE_EXCEPTION();
-	} else {
-/* prevents "undefined variable opline" errors */
-#if 0 || (IS_TMP_VAR != IS_UNUSED)
+	} else if (0 || (IS_TMP_VAR != IS_UNUSED)) {
 		USE_OPLINE
 		zval *retval_ref, *retval_ptr;
 		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
@@ -74352,7 +74332,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 			HANDLE_EXCEPTION();
 		}
 		ZEND_VM_NEXT_OPCODE();
-#endif
 	}
 }
 
@@ -82341,9 +82320,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 		SAVE_OPLINE();
 		zend_verify_missing_return_type(EX(func));
 		HANDLE_EXCEPTION();
-	} else {
-/* prevents "undefined variable opline" errors */
-#if 0 || (IS_VAR != IS_UNUSED)
+	} else if (0 || (IS_VAR != IS_UNUSED)) {
 		USE_OPLINE
 		zval *retval_ref, *retval_ptr;
 		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
@@ -82401,7 +82378,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 			HANDLE_EXCEPTION();
 		}
 		ZEND_VM_NEXT_OPCODE();
-#endif
 	}
 }
 
@@ -89796,9 +89772,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 		SAVE_OPLINE();
 		zend_verify_missing_return_type(EX(func));
 		HANDLE_EXCEPTION();
-	} else {
-/* prevents "undefined variable opline" errors */
-#if 0 || (IS_UNUSED != IS_UNUSED)
+	} else if (0 || (IS_UNUSED != IS_UNUSED)) {
 		USE_OPLINE
 		zval *retval_ref, *retval_ptr;
 		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
@@ -89856,7 +89830,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 			HANDLE_EXCEPTION();
 		}
 		ZEND_VM_NEXT_OPCODE();
-#endif
 	}
 }
 
@@ -101937,9 +101910,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 		SAVE_OPLINE();
 		zend_verify_missing_return_type(EX(func));
 		HANDLE_EXCEPTION();
-	} else {
-/* prevents "undefined variable opline" errors */
-#if 0 || (IS_CV != IS_UNUSED)
+	} else if (0 || (IS_CV != IS_UNUSED)) {
 		USE_OPLINE
 		zval *retval_ref, *retval_ptr;
 		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
@@ -101997,7 +101968,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 			HANDLE_EXCEPTION();
 		}
 		ZEND_VM_NEXT_OPCODE();
-#endif
 	}
 }
 
