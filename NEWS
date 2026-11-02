@@ -168,6 +168,10 @@ PHP                                                                        NEWS
   . Fixed a double free when a destructor throws while freeing a temporary
     whose result the optimizer discarded. (Ilia Alshanetsky)
 
+- PDO_DBLIB:
+  . Fixed a crash on persistent connections after an error raised through
+    PDO::exec(). (Ilia Alshanetsky)
+
 - PDO_Firebird:
   . Fixed stack buffer overflow with long connection user names, passwords,
     charsets, or roles. (Ilia Alshanetsky)
