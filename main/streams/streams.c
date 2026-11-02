@@ -2104,6 +2104,8 @@ PHPAPI php_stream *_php_stream_opendir(const char *path, int options,
 		return NULL;
 	}
 
+	/* wrapper name needs to be stored as wrapper can be removed in opener (user stream) */
+	char *wrapper_name = estrdup(PHP_STREAM_ERROR_WRAPPER_NAME(wrapper));
 	stream = wrapper->wops->dir_opener(wrapper,
 			path_to_open, "r", options & ~REPORT_ERRORS, NULL,
 			context STREAMS_REL_CC);
@@ -2112,10 +2114,11 @@ PHPAPI php_stream *_php_stream_opendir(const char *path, int options,
 		stream->wrapper = wrapper;
 		stream->flags |= PHP_STREAM_FLAG_NO_BUFFER | PHP_STREAM_FLAG_IS_DIR;
 	} else if (options & REPORT_ERRORS) {
-		php_stream_display_wrapper_errors(wrapper, context, PHP_STREAM_EC(OpenFailed),
+		php_stream_display_wrapper_name_errors(wrapper_name, context, PHP_STREAM_EC(OpenFailed),
 				"Failed to open directory");
 	}
-	php_stream_tidy_wrapper_error_log(wrapper);
+	php_stream_tidy_wrapper_name_error_log(wrapper_name);
+	efree(wrapper_name);
 
 	return stream;
 }

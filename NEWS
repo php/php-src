@@ -223,6 +223,8 @@ PHP                                                                        NEWS
     parsing fails after Transfer-Encoding). (bercedev)
   . Fixed bug GH-24509 (HTTP wrapper leaks Location buffer on empty
     Location header). (bercedev)
+  . Fixed bug GH-24707 (Use-after-free in opendir() when a user wrapper
+    unregisters itself). (lazerg)
 
 - Windows:
   . Fixed bug GH-25009 (GetConsoleTitleW() buffer size passed in bytes).
