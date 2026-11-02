@@ -170,6 +170,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-24461 (DISCARD ALL on persistent connection cleanup drops
     PgBouncer's prepared statements). (David Carlier, Artem Ukrainskiy)
 
+- PDO_SQLite:
+  . Fixed bug GH-24990 (Statement unusable after a failed execute()). (lazerg)
+
 - Phar:
   . Fixed bug GH-25093 (Phar::webPhar() redirect reads past the request URI).
     (lazerg)
