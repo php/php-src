@@ -37,7 +37,7 @@ $args = [
     "-d", "session.save_path=$sessionDir",
 ];
 foreach (["session", "zend_test"] as $extension) {
-    $path = ini_get("extension_dir") . DIRECTORY_SEPARATOR . $extension . "." . PHP_SHLIB_SUFFIX;
+    $path = ini_get("extension_dir") . DIRECTORY_SEPARATOR . (PHP_OS_FAMILY === "Windows" ? "php_" : "") . $extension . "." . PHP_SHLIB_SUFFIX;
     if (file_exists($path)) {
         $args[] = "-d";
         $args[] = "extension=$path";
