@@ -1165,7 +1165,6 @@ PHP_RSHUTDOWN_FUNCTION(mbstring)
 
 	MBSTRG(internal_encoding_set) = 0;
 	MBSTRG(http_output_set) = 0;
-	MBSTRG(http_input_set) = 0;
 
 	MBSTRG(outconv_enabled) = false;
 	MBSTRG(outconv_state) = 0;
