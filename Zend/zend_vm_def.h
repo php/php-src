@@ -8440,7 +8440,7 @@ ZEND_VM_HANDLER(142, ZEND_DECLARE_LAMBDA_FUNCTION, UNUSED, NUM, NUM|CACHE_SLOT)
 	}
 
 	func = (zend_function *) EX(func)->op_array.dynamic_func_defs[opline->op2.num];
-	if (Z_TYPE(EX(This)) == IS_OBJECT && EXPECTED(!(func->common.fn_flags & ZEND_ACC_STATIC))) {
+	if (Z_TYPE(EX(This)) == IS_OBJECT && !(func->common.fn_flags & ZEND_ACC_STATIC)) {
 		ZEND_ASSERT(!(EX(func)->common.fn_flags & ZEND_ACC_STATIC));
 		object = Z_OBJ(EX(This));
 	} else {
