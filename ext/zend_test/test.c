@@ -2505,6 +2505,7 @@ PHP_RINIT_FUNCTION(zend_test)
 	ALLOC_HASHTABLE(ZT_G(global_weakmap));
 	zend_hash_init(ZT_G(global_weakmap), 8, NULL, ZVAL_PTR_DTOR, 0);
 	ZT_G(observer_nesting_depth) = 0;
+	ZT_G(observer_throw_on_vm_interrupt) = false;
 	zend_test_mm_custom_handlers_rinit();
 
 	if (ZT_G(rearm_vm_interrupt)) {

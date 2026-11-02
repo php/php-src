@@ -3348,7 +3348,9 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV_
 			Z_OPLINE_NUM_P(fast_call) = (uint32_t)-1;
 			ZEND_VM_JMP_EX(&EX(func)->op_array.opcodes[try_catch->finally_op], 0);
 
-		} else if (op_num < try_catch->finally_end) {
+		} else if (op_num <= try_catch->finally_end) {
+			/* Exception thrown in the finally block, or at its FAST_RET
+			 * (by an interrupt) */
 			zval *fast_call = EX_VAR(EX(func)->op_array.opcodes[try_catch->finally_end].op1.var);
 
 			/* cleanup incomplete RETURN statement */
@@ -3428,7 +3430,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_HANDLE_EXCEPT
 			/* further blocks will not be relevant... */
 			break;
 		}
-		if (throw_op_num < try_catch->catch_op || throw_op_num < try_catch->finally_end) {
+		if (throw_op_num < try_catch->catch_op || throw_op_num <= try_catch->finally_end) {
 			current_try_catch_offset = i;
 		}
 	}
@@ -3550,7 +3552,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FAST_RET_SPEC
 	if (Z_OPLINE_NUM_P(fast_call) != (uint32_t)-1) {
 		const zend_op *fast_ret = EX(func)->op_array.opcodes + Z_OPLINE_NUM_P(fast_call);
 
-		ZEND_VM_JMP_EX(fast_ret + 1, 0);
+		/* Handle interrupts before jumping: fast_ret + 1 is inside the try
+		 * block, so an exception thrown there would run the finally block
+		 * again. An exception thrown at FAST_RET belongs to the finally
+		 * block. */
+		ZEND_VM_INTERRUPT_CHECK();
+		ZEND_VM_SET_OPCODE_NO_INTERRUPT(fast_ret + 1);
+		ZEND_VM_CONTINUE();
 	}
 
 	/* special case for unhandled exceptions */
@@ -56317,7 +56325,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_HANDLE_EXCEPTION_S
 			/* further blocks will not be relevant... */
 			break;
 		}
-		if (throw_op_num < try_catch->catch_op || throw_op_num < try_catch->finally_end) {
+		if (throw_op_num < try_catch->catch_op || throw_op_num <= try_catch->finally_end) {
 			current_try_catch_offset = i;
 		}
 	}
@@ -56439,7 +56447,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FAST_RET_SPEC_TAIL
 	if (Z_OPLINE_NUM_P(fast_call) != (uint32_t)-1) {
 		const zend_op *fast_ret = EX(func)->op_array.opcodes + Z_OPLINE_NUM_P(fast_call);
 
-		ZEND_VM_JMP_EX(fast_ret + 1, 0);
+		/* Handle interrupts before jumping: fast_ret + 1 is inside the try
+		 * block, so an exception thrown there would run the finally block
+		 * again. An exception thrown at FAST_RET belongs to the finally
+		 * block. */
+		ZEND_VM_INTERRUPT_CHECK();
+		ZEND_VM_SET_OPCODE_NO_INTERRUPT(fast_ret + 1);
+		ZEND_VM_CONTINUE();
 	}
 
 	/* special case for unhandled exceptions */
@@ -106710,7 +106724,9 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV_EX  z
 			Z_OPLINE_NUM_P(fast_call) = (uint32_t)-1;
 			ZEND_VM_JMP_EX(&EX(func)->op_array.opcodes[try_catch->finally_op], 0);
 
-		} else if (op_num < try_catch->finally_end) {
+		} else if (op_num <= try_catch->finally_end) {
+			/* Exception thrown in the finally block, or at its FAST_RET
+			 * (by an interrupt) */
 			zval *fast_call = EX_VAR(EX(func)->op_array.opcodes[try_catch->finally_end].op1.var);
 
 			/* cleanup incomplete RETURN statement */
