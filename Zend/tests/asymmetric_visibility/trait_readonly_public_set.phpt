@@ -4,7 +4,19 @@ public(set) of trait property is properly propagated
 <?php
 
 trait T {
-    public public(set) readonly int $prop;
+    public public(set) readonly int $pub;
+    protected readonly int $prot;
+    private readonly int $priv;
+
+    public function modify($prop) {
+        $this->{$prop} = 42;
+        try {
+            $this->{$prop} = 43;
+        } catch (\Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
+        }
+        var_dump($this->{$prop});
+    }
 }
 
 class C {
@@ -12,17 +24,23 @@ class C {
 }
 
 $c = new C;
-$c->prop = 42;
 
+$c->pub = 42;
 try {
-    $c->prop = 43;
+    $c->pub = 43;
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
+var_dump($c->pub);
 
-var_dump($c->prop);
+$c->modify('prot');
+$c->modify('priv');
 
 ?>
 --EXPECT--
-Error: Cannot modify readonly property C::$prop
+Error: Cannot modify readonly property C::$pub
+int(42)
+Error: Cannot modify readonly property C::$prot
+int(42)
+Error: Cannot modify readonly property C::$priv
 int(42)

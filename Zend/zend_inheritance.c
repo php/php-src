@@ -2899,7 +2899,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 			uint32_t flags = property_info->flags;
 
 			/* ZEND_ACC_PUBLIC_SET is removed at compile-time. */
-			if ((flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_SET_MASK)) == ZEND_ACC_READONLY) {
+			if ((flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_MASK|ZEND_ACC_PPP_SET_MASK)) == (ZEND_ACC_READONLY|ZEND_ACC_PUBLIC)) {
 				flags |= ZEND_ACC_PUBLIC_SET;
 			}
 
