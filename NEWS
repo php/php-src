@@ -65,6 +65,9 @@ PHP                                                                        NEWS
   . Fixed null pointer dereference in fpm_get_status() when the scoreboard
     copy fails. (Marcel Hernandez)
 
+- GD:
+  . Fixed imagetruecolortopalette() error message. (Marc Bennewitz)
+
 - Hash:
   . Fix GOST and Snefru digests of 512 MiB or more. (Martin Mirchev)
 
