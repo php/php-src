@@ -184,6 +184,8 @@ PHP                                                                        NEWS
     mounted entries). (Lazizbek Ergashev)
   . Fixed bug GH-24531 (Crash when modifying a zip-based phar whose file was
     renamed). (Ilia Alshanetsky)
+  . Fixed Phar::buildFromIterator() accepting a negative getMTime() on 32bit
+    platforms. (Marc Bennewitz)
 
 - Reflection:
   . Fixed bug GH-21768 (Assertion failure in ReflectionProperty::isReadable()
