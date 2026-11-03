@@ -1073,7 +1073,8 @@ static void zend_jit_allocate_registers(zend_jit_ctx *ctx, const zend_op_array *
 						ra[src].flags |= ZREG_STORE;
 					}
 				} else {
-					int need_move = 0;
+					/* The VM may enter an ENTRY block, so its Phi sources must go through memory */
+					int need_move = (ssa->cfg.blocks[phi->block].flags & (ZEND_BB_ENTRY|ZEND_BB_RECV_ENTRY)) != 0;
 
 					for (k = 0; k < ssa->cfg.blocks[phi->block].predecessors_count; k++) {
 						src = phi->sources[k];
