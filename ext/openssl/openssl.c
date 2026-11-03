@@ -663,16 +663,16 @@ static STACK_OF(X509) * php_openssl_load_all_certs_from_file(
 		char *cert_file, size_t cert_file_len, uint32_t arg_num);
 static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req);
 
-static void php_openssl_add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int shortname) /* {{{ */
+static void php_openssl_add_assoc_name_entry(zval * val, char * key, const X509_NAME * name, int shortname) /* {{{ */
 {
 	zval *data;
 	zval subitem, tmp;
 	int i;
 	char *sname;
 	int nid;
-	X509_NAME_ENTRY * ne;
-	ASN1_STRING * str = NULL;
-	ASN1_OBJECT * obj;
+	const X509_NAME_ENTRY * ne;
+	const ASN1_STRING * str = NULL;
+	const ASN1_OBJECT * obj;
 
 	if (key != NULL) {
 		array_init(&subitem);
@@ -703,7 +703,7 @@ static void php_openssl_add_assoc_name_entry(zval * val, char * key, X509_NAME *
 		} else {
 			/* ASN1_STRING_get0_data(3): Since this is an internal pointer it should not be freed or modified in any way */
 			to_add = ASN1_STRING_get0_data(str);
-			to_add_len = ASN1_STRING_length(str);
+			to_add_len = ASN1_STRING_get_length(str);
 		}
 
 		if (to_add_len != -1) {
@@ -737,9 +737,9 @@ static void php_openssl_add_assoc_name_entry(zval * val, char * key, X509_NAME *
 }
 /* }}} */
 
-static void php_openssl_add_assoc_asn1_string(zval * val, char * key, ASN1_STRING * str) /* {{{ */
+static void php_openssl_add_assoc_asn1_string(zval * val, char * key, const ASN1_STRING * str) /* {{{ */
 {
-	add_assoc_stringl(val, key, (const char *)ASN1_STRING_get0_data(str), ASN1_STRING_length(str));
+	add_assoc_stringl(val, key, (const char *)ASN1_STRING_get0_data(str), ASN1_STRING_get_length(str));
 }
 /* }}} */
 
@@ -756,6 +756,7 @@ static time_t php_openssl_asn1_time_to_time_t(ASN1_UTCTIME * timestr) /* {{{ */
 	struct tm thetime;
 	char * strbuf;
 	char * thestr;
+	const char *timestr_data;
 	long gmadjust = 0;
 	size_t timestr_len;
 
@@ -764,24 +765,25 @@ static time_t php_openssl_asn1_time_to_time_t(ASN1_UTCTIME * timestr) /* {{{ */
 		return (time_t)-1;
 	}
 
-	timestr_len = (size_t)ASN1_STRING_length(timestr);
+	timestr_len = ASN1_STRING_get_length(timestr);
+	timestr_data = timestr_len ? (const char *)ASN1_STRING_get0_data(timestr) : "";
 
-	if (timestr_len != strlen((const char *)ASN1_STRING_get0_data(timestr))) {
+	if (memchr(timestr_data, '\0', timestr_len) != NULL) {
 		php_error_docref(NULL, E_WARNING, "Illegal length in timestamp");
 		return (time_t)-1;
 	}
 
 	if (timestr_len < 13) {
-		php_error_docref(NULL, E_WARNING, "Unable to parse time string %s correctly", ASN1_STRING_get0_data(timestr));
+		php_error_docref(NULL, E_WARNING, "Unable to parse time string %.*s correctly", (int)timestr_len, timestr_data);
 		return (time_t)-1;
 	}
 
 	if (ASN1_STRING_type(timestr) == V_ASN1_GENERALIZEDTIME && timestr_len < 15) {
-		php_error_docref(NULL, E_WARNING, "Unable to parse time string %s correctly", ASN1_STRING_get0_data(timestr));
+		php_error_docref(NULL, E_WARNING, "Unable to parse time string %.*s correctly", (int)timestr_len, timestr_data);
 		return (time_t)-1;
 	}
 
-	strbuf = estrdup((const char *)ASN1_STRING_get0_data(timestr));
+	strbuf = estrndup(timestr_data, timestr_len);
 
 	memset(&thetime, 0, sizeof(thetime));
 
@@ -1324,7 +1326,7 @@ PHP_MINIT_FUNCTION(openssl)
 	}
 
 	php_stream_xport_register("ssl", php_openssl_ssl_socket_factory);
-#ifndef OPENSSL_NO_SSL3
+#if OPENSSL_VERSION_NUMBER < 0x40000000L && !defined(OPENSSL_NO_SSL3)
 	php_stream_xport_register("sslv3", php_openssl_ssl_socket_factory);
 #endif
 	php_stream_xport_register("tls", php_openssl_ssl_socket_factory);
@@ -1410,7 +1412,7 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 	php_unregister_url_stream_wrapper("ftps");
 
 	php_stream_xport_unregister("ssl");
-#ifndef OPENSSL_NO_SSL3
+#if OPENSSL_VERSION_NUMBER < 0x40000000L && !defined(OPENSSL_NO_SSL3)
 	php_stream_xport_unregister("sslv3");
 #endif
 	php_stream_xport_unregister("tls");
@@ -1632,7 +1634,7 @@ PHP_FUNCTION(openssl_spki_new)
 	}
 
 	if (challenge) {
-		if (!ASN1_STRING_set(spki->spkac->challenge, challenge, (int)challenge_len)) {
+		if (!ASN1_STRING_set1_data(spki->spkac->challenge, (const unsigned char *) challenge, challenge_len)) {
 			php_openssl_store_errors();
 			php_error_docref(NULL, E_WARNING, "Unable to set challenge data");
 			goto cleanup;
@@ -1824,7 +1826,8 @@ PHP_FUNCTION(openssl_spki_export_challenge)
 		goto cleanup;
 	}
 
-	RETVAL_STRING((const char *)ASN1_STRING_get0_data(spki->spkac->challenge));
+	RETVAL_STRINGL_FAST((const char *)ASN1_STRING_get0_data(spki->spkac->challenge),
+		ASN1_STRING_get_length(spki->spkac->challenge));
 	goto cleanup;
 
 cleanup:
@@ -2026,11 +2029,11 @@ PHP_FUNCTION(openssl_x509_verify)
  * Christian Heimes
  */
 
-static int openssl_x509v3_subjectAltName(BIO *bio, X509_EXTENSION *extension)
+static int openssl_x509v3_subjectAltName(BIO *bio, PHP_OPENSSL_X509_EXTENSION *extension)
 {
 	GENERAL_NAMES *names;
 	const X509V3_EXT_METHOD *method = NULL;
-	ASN1_OCTET_STRING *extension_data;
+	const ASN1_OCTET_STRING *extension_data;
 	long i, length, num;
 	const unsigned char *p;
 
@@ -2041,7 +2044,7 @@ static int openssl_x509v3_subjectAltName(BIO *bio, X509_EXTENSION *extension)
 
 	extension_data = X509_EXTENSION_get_data(extension);
 	p = ASN1_STRING_get0_data(extension_data);
-	length = ASN1_STRING_length(extension_data);
+	length = ASN1_STRING_get_length(extension_data);
 	if (method->it) {
 		names = (GENERAL_NAMES*) (ASN1_item_d2i(NULL, &p, length,
 			ASN1_ITEM_ptr(method->it)));
@@ -2063,19 +2066,19 @@ static int openssl_x509v3_subjectAltName(BIO *bio, X509_EXTENSION *extension)
 				BIO_puts(bio, "email:");
 				as = name->d.rfc822Name;
 				BIO_write(bio, ASN1_STRING_get0_data(as),
-					ASN1_STRING_length(as));
+					ASN1_STRING_get_length(as));
 				break;
 			case GEN_DNS:
 				BIO_puts(bio, "DNS:");
 				as = name->d.dNSName;
 				BIO_write(bio, ASN1_STRING_get0_data(as),
-					ASN1_STRING_length(as));
+					ASN1_STRING_get_length(as));
 				break;
 			case GEN_URI:
 				BIO_puts(bio, "URI:");
 				as = name->d.uniformResourceIdentifier;
 				BIO_write(bio, ASN1_STRING_get0_data(as),
-					ASN1_STRING_length(as));
+					ASN1_STRING_get_length(as));
 				break;
 			default:
 				/* use builtin print for GEN_OTHERNAME, GEN_X400,
@@ -2103,8 +2106,8 @@ PHP_FUNCTION(openssl_x509_parse)
 	bool useshortnames = 1;
 	char * tmpstr;
 	zval subitem;
-	X509_EXTENSION *extension;
-	X509_NAME *subject_name;
+	PHP_OPENSSL_X509_EXTENSION *extension;
+	const X509_NAME *subject_name;
 	char *cert_name;
 	char *extname;
 	BIO *bio_out;
@@ -2989,7 +2992,12 @@ static zend_result php_openssl_csr_make(struct php_x509_request * req, X509_REQ 
 		zval *item, *subitem;
 		zend_string *strindex = NULL;
 
-		subj = X509_REQ_get_subject_name(csr);
+		subj = X509_NAME_new();
+		if (subj == NULL) {
+			php_openssl_store_errors();
+			return FAILURE;
+		}
+
 		/* apply values from the dn hash */
 		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(dn), strindex, item) {
 			if (strindex) {
@@ -2998,10 +3006,12 @@ static zend_result php_openssl_csr_make(struct php_x509_request * req, X509_REQ 
 					if (Z_TYPE_P(item) == IS_ARRAY) {
 						ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(item), i, subitem) {
 							if (php_openssl_csr_add_subj_entry(subitem, subj, nid) == FAILURE) {
+								X509_NAME_free(subj);
 								return FAILURE;
 							}
 						} ZEND_HASH_FOREACH_END();
 					} else if (php_openssl_csr_add_subj_entry(item, subj, nid) == FAILURE) {
+						X509_NAME_free(subj);
 						return FAILURE;
 					}
 				} else {
@@ -3052,13 +3062,23 @@ static zend_result php_openssl_csr_make(struct php_x509_request * req, X509_REQ 
 			if (!X509_NAME_add_entry_by_txt(subj, type, MBSTRING_UTF8, (unsigned char*)v->value, -1, -1, 0)) {
 				php_openssl_store_errors();
 				php_error_docref(NULL, E_WARNING, "add_entry_by_txt %s -> %s (failed)", type, v->value);
+				X509_NAME_free(subj);
 				return FAILURE;
 			}
 			if (!X509_NAME_entry_count(subj)) {
 				php_error_docref(NULL, E_WARNING, "No objects specified in config file");
+				X509_NAME_free(subj);
 				return FAILURE;
 			}
 		}
+
+		if (!X509_REQ_set_subject_name(csr, subj)) {
+			php_openssl_store_errors();
+			X509_NAME_free(subj);
+			return FAILURE;
+		}
+		X509_NAME_free(subj);
+
 		if (attribs) {
 			ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(attribs), strindex, item) {
 				int nid;
@@ -3547,7 +3567,7 @@ PHP_FUNCTION(openssl_csr_get_subject)
 	zend_object *csr_obj;
 	zend_string *csr_str;
 	bool use_shortnames = 1;
-	X509_NAME *subject;
+	const X509_NAME *subject;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_OBJ_OF_CLASS_OR_STR(csr_obj, php_openssl_request_ce, csr_str)
@@ -4697,7 +4717,7 @@ static EVP_PKEY *php_openssl_pkey_init_ec(zval *data, bool *is_private) {
 		}
 
 		OPENSSL_PKEY_SET_BN(data, cofactor);
-		if (!OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_EC_COFACTOR, cofactor) ||
+		if ((cofactor && !OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_EC_COFACTOR, cofactor)) ||
 			!EC_GROUP_set_generator(group, point_g, order, cofactor)) {
 			goto cleanup;
 		}
