@@ -16,5 +16,5 @@ $path = "ftp://localhost:" . $port . "/pasvbufferend";
 var_dump(fopen($path, "r"));
 ?>
 --EXPECTF--
-Warning: fopen(%s): Failed to open stream: FTP server reports %a in %s on line %d
+Warning: fopen(%S): Failed to open stream: FTP server reports %a in %s on line %d
 bool(false)
