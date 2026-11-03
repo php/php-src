@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_intl.stub.php instead.
- * Stub hash: c54e9724edabab5a6531e535f2226f512a904c8e */
+ * Stub hash: ed75eb7fd8b3b113d08e8c2a02ff3050f1f01132 */
 
 #include "zend_attributes.h"
 #include "zend_constants.h"
@@ -508,6 +508,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_strrev, 0, 1, MAY_BE_ST
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_str_pad, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pad_string, IS_STRING, 0, "\" \"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pad_type, IS_LONG, 0, "STR_PAD_RIGHT")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_extract, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, haystack, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
@@ -947,6 +954,7 @@ ZEND_FUNCTION(grapheme_stristr);
 ZEND_FUNCTION(grapheme_str_split);
 ZEND_FUNCTION(grapheme_levenshtein);
 ZEND_FUNCTION(grapheme_strrev);
+ZEND_FUNCTION(grapheme_str_pad);
 ZEND_FUNCTION(grapheme_extract);
 ZEND_FUNCTION(idn_to_ascii);
 ZEND_FUNCTION(idn_to_utf8);
@@ -1142,6 +1150,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(grapheme_str_split, arginfo_grapheme_str_split)
 	ZEND_FE(grapheme_levenshtein, arginfo_grapheme_levenshtein)
 	ZEND_FE(grapheme_strrev, arginfo_grapheme_strrev)
+	ZEND_FE(grapheme_str_pad, arginfo_grapheme_str_pad)
 	ZEND_FE(grapheme_extract, arginfo_grapheme_extract)
 	ZEND_FE(idn_to_ascii, arginfo_idn_to_ascii)
 	ZEND_FE(idn_to_utf8, arginfo_idn_to_utf8)

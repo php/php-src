@@ -447,6 +447,8 @@ function grapheme_levenshtein(string $string1, string $string2, int $insertion_c
 
 function grapheme_strrev(string $string): string|false {}
 
+function grapheme_str_pad(string $string, int $length, string $pad_string = " ", int $pad_type = STR_PAD_RIGHT): string|false {}
+
 /** @param int $next */
 function grapheme_extract(string $haystack, int $size, int $type = GRAPHEME_EXTR_COUNT, int $offset = 0, &$next = null): string|false {}
 
