@@ -219,6 +219,8 @@ PHP                                                                        NEWS
   . Fix opcache phar check. (ndossche)
 
 - OpenSSL:
+  . Fixed build and test compatibility with OpenSSL 4.0 and 4.1.
+    (Sam James, Weilin Du, Shivam Mathur)
   . Fixed bug GH-24784 (openssl_pkcs7_read() and openssl_cms_read() overwrite
     certificates with CRLs). (Alexander Danilov)
 

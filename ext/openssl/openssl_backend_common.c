@@ -35,16 +35,16 @@
 /* true global; readonly after module startup */
 static char default_ssl_conf_filename[MAXPATHLEN];
 
-void php_openssl_add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int shortname)
+void php_openssl_add_assoc_name_entry(zval * val, char * key, const X509_NAME * name, int shortname)
 {
 	zval *data;
 	zval subitem, tmp;
 	int i;
 	char *sname;
 	int nid;
-	X509_NAME_ENTRY * ne;
-	ASN1_STRING * str = NULL;
-	ASN1_OBJECT * obj;
+	const X509_NAME_ENTRY * ne;
+	const ASN1_STRING * str = NULL;
+	const ASN1_OBJECT * obj;
 
 	if (key != NULL) {
 		array_init(&subitem);
@@ -75,7 +75,7 @@ void php_openssl_add_assoc_name_entry(zval * val, char * key, X509_NAME * name, 
 		} else {
 			/* ASN1_STRING_get0_data(3): Since this is an internal pointer it should not be freed or modified in any way */
 			to_add = ASN1_STRING_get0_data(str);
-			to_add_len = ASN1_STRING_length(str);
+			to_add_len = ASN1_STRING_get_length(str);
 		}
 
 		if (to_add_len != -1) {
@@ -108,9 +108,9 @@ void php_openssl_add_assoc_name_entry(zval * val, char * key, X509_NAME * name, 
 	}
 }
 
-void php_openssl_add_assoc_asn1_string(zval * val, char * key, ASN1_STRING * str)
+void php_openssl_add_assoc_asn1_string(zval * val, char * key, const ASN1_STRING * str)
 {
-	add_assoc_stringl(val, key, (const char *)ASN1_STRING_get0_data(str), ASN1_STRING_length(str));
+	add_assoc_stringl(val, key, (const char *)ASN1_STRING_get0_data(str), ASN1_STRING_get_length(str));
 }
 
 time_t php_openssl_asn1_time_to_time_t(ASN1_UTCTIME * timestr)
@@ -126,6 +126,7 @@ time_t php_openssl_asn1_time_to_time_t(ASN1_UTCTIME * timestr)
 	struct tm thetime;
 	char * strbuf;
 	char * thestr;
+	const char *timestr_data;
 	long gmadjust = 0;
 	size_t timestr_len;
 
@@ -134,24 +135,25 @@ time_t php_openssl_asn1_time_to_time_t(ASN1_UTCTIME * timestr)
 		return (time_t)-1;
 	}
 
-	timestr_len = (size_t)ASN1_STRING_length(timestr);
+	timestr_len = ASN1_STRING_get_length(timestr);
+	timestr_data = timestr_len ? (const char *)ASN1_STRING_get0_data(timestr) : "";
 
-	if (timestr_len != strlen((const char *)ASN1_STRING_get0_data(timestr))) {
+	if (memchr(timestr_data, '\0', timestr_len) != NULL) {
 		php_error_docref(NULL, E_WARNING, "Illegal length in timestamp");
 		return (time_t)-1;
 	}
 
 	if (timestr_len < 13) {
-		php_error_docref(NULL, E_WARNING, "Unable to parse time string %s correctly", ASN1_STRING_get0_data(timestr));
+		php_error_docref(NULL, E_WARNING, "Unable to parse time string %.*s correctly", (int)timestr_len, timestr_data);
 		return (time_t)-1;
 	}
 
 	if (ASN1_STRING_type(timestr) == V_ASN1_GENERALIZEDTIME && timestr_len < 15) {
-		php_error_docref(NULL, E_WARNING, "Unable to parse time string %s correctly", ASN1_STRING_get0_data(timestr));
+		php_error_docref(NULL, E_WARNING, "Unable to parse time string %.*s correctly", (int)timestr_len, timestr_data);
 		return (time_t)-1;
 	}
 
-	strbuf = estrdup((const char *)ASN1_STRING_get0_data(timestr));
+	strbuf = estrndup(timestr_data, timestr_len);
 
 	memset(&thetime, 0, sizeof(thetime));
 
@@ -618,11 +620,11 @@ zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, bool r
 /* Special handling of subjectAltName, see CVE-2013-4073
  * Christian Heimes
  */
-int openssl_x509v3_subjectAltName(BIO *bio, X509_EXTENSION *extension)
+int openssl_x509v3_subjectAltName(BIO *bio, PHP_OPENSSL_X509_EXTENSION *extension)
 {
 	GENERAL_NAMES *names;
 	const X509V3_EXT_METHOD *method = NULL;
-	ASN1_OCTET_STRING *extension_data;
+	const ASN1_OCTET_STRING *extension_data;
 	long i, length, num;
 	const unsigned char *p;
 
@@ -633,7 +635,7 @@ int openssl_x509v3_subjectAltName(BIO *bio, X509_EXTENSION *extension)
 
 	extension_data = X509_EXTENSION_get_data(extension);
 	p = ASN1_STRING_get0_data(extension_data);
-	length = ASN1_STRING_length(extension_data);
+	length = ASN1_STRING_get_length(extension_data);
 	if (method->it) {
 		names = (GENERAL_NAMES*) (ASN1_item_d2i(NULL, &p, length,
 			ASN1_ITEM_ptr(method->it)));
@@ -655,19 +657,19 @@ int openssl_x509v3_subjectAltName(BIO *bio, X509_EXTENSION *extension)
 				BIO_puts(bio, "email:");
 				as = name->d.rfc822Name;
 				BIO_write(bio, ASN1_STRING_get0_data(as),
-					ASN1_STRING_length(as));
+					ASN1_STRING_get_length(as));
 				break;
 			case GEN_DNS:
 				BIO_puts(bio, "DNS:");
 				as = name->d.dNSName;
 				BIO_write(bio, ASN1_STRING_get0_data(as),
-					ASN1_STRING_length(as));
+					ASN1_STRING_get_length(as));
 				break;
 			case GEN_URI:
 				BIO_puts(bio, "URI:");
 				as = name->d.uniformResourceIdentifier;
 				BIO_write(bio, ASN1_STRING_get0_data(as),
-					ASN1_STRING_length(as));
+					ASN1_STRING_get_length(as));
 				break;
 			default:
 				/* use builtin print for GEN_OTHERNAME, GEN_X400,
@@ -978,7 +980,12 @@ zend_result php_openssl_csr_make(struct php_x509_request * req, X509_REQ * csr, 
 		zval *item, *subitem;
 		zend_string *strindex = NULL;
 
-		subj = X509_REQ_get_subject_name(csr);
+		subj = X509_NAME_new();
+		if (subj == NULL) {
+			php_openssl_store_errors();
+			return FAILURE;
+		}
+
 		/* apply values from the dn hash */
 		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(dn), strindex, item) {
 			if (strindex) {
@@ -987,10 +994,12 @@ zend_result php_openssl_csr_make(struct php_x509_request * req, X509_REQ * csr, 
 					if (Z_TYPE_P(item) == IS_ARRAY) {
 						ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(item), i, subitem) {
 							if (php_openssl_csr_add_subj_entry(subitem, subj, nid) == FAILURE) {
+								X509_NAME_free(subj);
 								return FAILURE;
 							}
 						} ZEND_HASH_FOREACH_END();
 					} else if (php_openssl_csr_add_subj_entry(item, subj, nid) == FAILURE) {
+						X509_NAME_free(subj);
 						return FAILURE;
 					}
 				} else {
@@ -1041,13 +1050,23 @@ zend_result php_openssl_csr_make(struct php_x509_request * req, X509_REQ * csr, 
 			if (!X509_NAME_add_entry_by_txt(subj, type, MBSTRING_UTF8, (unsigned char*)v->value, -1, -1, 0)) {
 				php_openssl_store_errors();
 				php_error_docref(NULL, E_WARNING, "add_entry_by_txt %s -> %s (failed)", type, v->value);
+				X509_NAME_free(subj);
 				return FAILURE;
 			}
 			if (!X509_NAME_entry_count(subj)) {
 				php_error_docref(NULL, E_WARNING, "No objects specified in config file");
+				X509_NAME_free(subj);
 				return FAILURE;
 			}
 		}
+
+		if (!X509_REQ_set_subject_name(csr, subj)) {
+			php_openssl_store_errors();
+			X509_NAME_free(subj);
+			return FAILURE;
+		}
+		X509_NAME_free(subj);
+
 		if (attribs) {
 			ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(attribs), strindex, item) {
 				int nid;
