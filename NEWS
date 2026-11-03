@@ -244,6 +244,8 @@ PHP                                                                        NEWS
     parsing fails after Transfer-Encoding). (bercedev)
   . Fixed bug GH-24509 (HTTP wrapper leaks Location buffer on empty
     Location header). (bercedev)
+  . Fix out-of-bounds reads parsing ftp:// wrapper server replies.
+    (Alejandro Pacheco)
 
 - Windows:
   . Fixed bug GH-25009 (GetConsoleTitleW() buffer size passed in bytes).
