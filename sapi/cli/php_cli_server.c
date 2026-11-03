@@ -1712,8 +1712,9 @@ static void php_cli_server_client_save_header(php_cli_server_client *client)
 
 	/* Add/Update the wrapped zend_string to the HashTable */
 	zend_hash_update(&client->request.headers, lc_header_name, &tmp);
-	/* A repeat spelled differently leaves the first spelling's entry in place while the
-	 * update above releases its value, so this table must own a reference too. */
+	/* Each table owns a reference to the new value. The old value can outlive the update
+	 * above, as a repeat spelled differently keeps the first spelling's entry in
+	 * headers_original_case. */
 	zend_string_addref(Z_STR(tmp));
 	zend_hash_update(&client->request.headers_original_case, client->current_header_name, &tmp);
 
