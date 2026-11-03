@@ -49,7 +49,7 @@ var_dump($pdo->getAttribute(Pdo\Sqlite::ATTR_DQS));
 check($pdo, 'SELECT "abc"');
 
 ?>
---EXPECT--
+--EXPECTF--
 Enabled:
 bool(true)
 bool(true)
@@ -58,10 +58,10 @@ index created
 Disabled:
 bool(true)
 bool(false)
-SQLSTATE[HY000]: General error: 1 no such column: abc
+SQLSTATE[HY000]: General error: 1 no such column: %Sabc%S
 string(3) "abc"
 int(1)
-SQLSTATE[HY000]: General error: 1 no such column: missing
+SQLSTATE[HY000]: General error: 1 no such column: %Smissing%S
 Constructor option:
 bool(false)
-SQLSTATE[HY000]: General error: 1 no such column: abc
+SQLSTATE[HY000]: General error: 1 no such column: %Sabc%S
