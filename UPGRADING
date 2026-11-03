@@ -153,6 +153,12 @@ PHP 8.7 UPGRADE NOTES
 11. Changes to INI File Handling
 ========================================
 
+- Opcache:
+  . opcache.max_accelerated_files now defaults to 16229 (previously 10000),
+    accepts values up to 1048793 (previously 1000000), and logs a warning for
+    values other than 223, 463, 983, 1979, 3907, 7963, 16229, 32531, 65407,
+    130987, 262237, 524521 and 1048793.
+
 ========================================
 12. Windows Support
 ========================================
