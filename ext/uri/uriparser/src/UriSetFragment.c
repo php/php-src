@@ -67,8 +67,8 @@
 
 #  include <assert.h>
 
-UriBool URI_FUNC(IsWellFormedFragment)(const URI_CHAR * first,
-                                       const URI_CHAR * afterLast) {
+UriBool URI_FUNC(IsWellFormedFragment)(
+        const URI_CHAR * first, const URI_CHAR * afterLast) {
     if ((first == NULL) || (afterLast == NULL)) {
         return URI_FALSE;
     }
@@ -117,7 +117,7 @@ UriBool URI_FUNC(IsWellFormedFragment)(const URI_CHAR * first,
 }
 
 int URI_FUNC(SetFragmentMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                            const URI_CHAR * afterLast, UriMemoryManager * memory) {
+        const URI_CHAR * afterLast, UriMemoryManager * memory) {
     /* Input validation (before making any changes) */
     if ((uri == NULL) || ((first == NULL) != (afterLast == NULL))) {
         return URI_ERROR_NULL;
@@ -126,7 +126,7 @@ int URI_FUNC(SetFragmentMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
     URI_CHECK_MEMORY_MANAGER(memory); /* may return */
 
     if ((first != NULL)
-        && (URI_FUNC(IsWellFormedFragment)(first, afterLast) == URI_FALSE)) {
+            && (URI_FUNC(IsWellFormedFragment)(first, afterLast) == URI_FALSE)) {
         return URI_ERROR_SYNTAX;
     }
 
@@ -166,8 +166,8 @@ int URI_FUNC(SetFragmentMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
     return URI_SUCCESS;
 }
 
-int URI_FUNC(SetFragment)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                          const URI_CHAR * afterLast) {
+int URI_FUNC(SetFragment)(
+        URI_TYPE(Uri) * uri, const URI_CHAR * first, const URI_CHAR * afterLast) {
     return URI_FUNC(SetFragmentMm)(uri, first, afterLast, NULL);
 }
 

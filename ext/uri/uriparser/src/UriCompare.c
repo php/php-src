@@ -88,9 +88,9 @@ UriBool URI_FUNC(EqualsUri)(const URI_TYPE(Uri) * a, const URI_TYPE(Uri) * b) {
 
     /* Host */
     if (((a->hostData.ip4 == NULL) != (b->hostData.ip4 == NULL))
-        || ((a->hostData.ip6 == NULL) != (b->hostData.ip6 == NULL))
-        || ((a->hostData.ipFuture.first == NULL)
-            != (b->hostData.ipFuture.first == NULL))) {
+            || ((a->hostData.ip6 == NULL) != (b->hostData.ip6 == NULL))
+            || ((a->hostData.ipFuture.first == NULL)
+                    != (b->hostData.ipFuture.first == NULL))) {
         return URI_FALSE;
     }
 
@@ -113,7 +113,7 @@ UriBool URI_FUNC(EqualsUri)(const URI_TYPE(Uri) * a, const URI_TYPE(Uri) * b) {
     }
 
     if ((a->hostData.ip4 == NULL) && (a->hostData.ip6 == NULL)
-        && (a->hostData.ipFuture.first == NULL)) {
+            && (a->hostData.ipFuture.first == NULL)) {
         if (!URI_FUNC(RangeEquals)(&(a->hostText), &(b->hostText))) {
             return URI_FALSE;
         }

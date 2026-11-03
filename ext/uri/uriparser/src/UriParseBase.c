@@ -41,8 +41,8 @@
 #  include "UriParseBase.h"
 #endif
 
-void uriWriteQuadToDoubleByte(const unsigned char * hexDigits, int digitCount,
-                              unsigned char * output) {
+void uriWriteQuadToDoubleByte(
+        const unsigned char * hexDigits, int digitCount, unsigned char * output) {
     switch (digitCount) {
     case 1:
         /* 0x___? -> \x00 \x0? */

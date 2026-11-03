@@ -86,7 +86,7 @@ UriBool URI_FUNC(IsWellFormedPort)(const URI_CHAR * first, const URI_CHAR * afte
 }
 
 int URI_FUNC(SetPortTextMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                            const URI_CHAR * afterLast, UriMemoryManager * memory) {
+        const URI_CHAR * afterLast, UriMemoryManager * memory) {
     /* Input validation (before making any changes) */
     if ((uri == NULL) || ((first == NULL) != (afterLast == NULL))) {
         return URI_ERROR_NULL;
@@ -141,8 +141,8 @@ int URI_FUNC(SetPortTextMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
     return URI_SUCCESS;
 }
 
-int URI_FUNC(SetPortText)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                          const URI_CHAR * afterLast) {
+int URI_FUNC(SetPortText)(
+        URI_TYPE(Uri) * uri, const URI_CHAR * first, const URI_CHAR * afterLast) {
     return URI_FUNC(SetPortTextMm)(uri, first, afterLast, NULL);
 }
 

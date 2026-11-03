@@ -68,9 +68,8 @@
 #  include <assert.h>
 #  include <string.h> /* for memcpy */
 
-int URI_FUNC(IsWellFormedHostIpFutureMm)(const URI_CHAR * first,
-                                         const URI_CHAR * afterLast,
-                                         UriMemoryManager * memory) {
+int URI_FUNC(IsWellFormedHostIpFutureMm)(
+        const URI_CHAR * first, const URI_CHAR * afterLast, UriMemoryManager * memory) {
     if ((first == NULL) || (afterLast == NULL)) {
         return URI_ERROR_NULL;
     }
@@ -109,7 +108,7 @@ int URI_FUNC(IsWellFormedHostIpFutureMm)(const URI_CHAR * first,
     }
 
     URI_CHAR * const candidate =
-        memory->malloc(memory, (candidateLenChars + 1) * sizeof(URI_CHAR));
+            memory->malloc(memory, (candidateLenChars + 1) * sizeof(URI_CHAR));
 
     if (candidate == NULL) {
         return URI_ERROR_MALLOC;
@@ -118,15 +117,15 @@ int URI_FUNC(IsWellFormedHostIpFutureMm)(const URI_CHAR * first,
     memcpy(candidate, _UT("//["), 3 * sizeof(URI_CHAR));
     memcpy(candidate + 3, first, inputLenChars * sizeof(URI_CHAR));
     memcpy(candidate + 3 + inputLenChars, _UT("]"),
-           2 * sizeof(URI_CHAR)); /* includes zero terminator */
+            2 * sizeof(URI_CHAR)); /* includes zero terminator */
 
     /* Parse as an RFC 3986 URI */
     URI_TYPE(Uri) uri;
     const int res = URI_FUNC(ParseSingleUriExMm)(
-        &uri, candidate, candidate + candidateLenChars, NULL, memory);
+            &uri, candidate, candidate + candidateLenChars, NULL, memory);
 
     assert((res == URI_SUCCESS) || (res == URI_ERROR_SYNTAX)
-           || (res == URI_ERROR_MALLOC));
+            || (res == URI_ERROR_MALLOC));
 
     if (res == URI_SUCCESS) {
         assert(uri.hostData.ipFuture.first != NULL);
@@ -138,19 +137,19 @@ int URI_FUNC(IsWellFormedHostIpFutureMm)(const URI_CHAR * first,
     return res;
 }
 
-int URI_FUNC(IsWellFormedHostIpFuture)(const URI_CHAR * first,
-                                       const URI_CHAR * afterLast) {
+int URI_FUNC(IsWellFormedHostIpFuture)(
+        const URI_CHAR * first, const URI_CHAR * afterLast) {
     return URI_FUNC(IsWellFormedHostIpFutureMm)(first, afterLast, NULL);
 }
 
 int URI_FUNC(SetHostIpFutureMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                                const URI_CHAR * afterLast, UriMemoryManager * memory) {
-    return URI_FUNC(InternalSetHostMm)(uri, URI_HOST_TYPE_IPFUTURE, first, afterLast,
-                                       memory);
+        const URI_CHAR * afterLast, UriMemoryManager * memory) {
+    return URI_FUNC(InternalSetHostMm)(
+            uri, URI_HOST_TYPE_IPFUTURE, first, afterLast, memory);
 }
 
-int URI_FUNC(SetHostIpFuture)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                              const URI_CHAR * afterLast) {
+int URI_FUNC(SetHostIpFuture)(
+        URI_TYPE(Uri) * uri, const URI_CHAR * first, const URI_CHAR * afterLast) {
     return URI_FUNC(SetHostIpFutureMm)(uri, first, afterLast, NULL);
 }
 

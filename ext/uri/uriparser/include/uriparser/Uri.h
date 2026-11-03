@@ -1,4 +1,4 @@
-/* c9d94656d067288e474df19a062d487c736b0fa8517d2ef7bbeb8dcd5a70c05b (1.0.2+)
+/* 9e66e003d384ea11f187e27b8a6a09e9f917467321dc6698b876d7500e62d2e7 (1.0.3+)
  *
  * uriparser - RFC 3986 URI parsing library
  *
@@ -45,8 +45,8 @@
  */
 
 #if (defined(URI_PASS_ANSI) && !defined(URI_H_ANSI)) \
-    || (defined(URI_PASS_UNICODE) && !defined(URI_H_UNICODE)) \
-    || (!defined(URI_PASS_ANSI) && !defined(URI_PASS_UNICODE))
+        || (defined(URI_PASS_UNICODE) && !defined(URI_H_UNICODE)) \
+        || (!defined(URI_PASS_ANSI) && !defined(URI_PASS_UNICODE))
 /* What encodings are enabled? */
 #  include "UriDefsConfig.h"
 #  if (!defined(URI_PASS_ANSI) && !defined(URI_PASS_UNICODE))
@@ -63,8 +63,8 @@
 #    endif
 /* Only one pass for each encoding */
 #  elif (defined(URI_PASS_ANSI) && !defined(URI_H_ANSI) && defined(URI_ENABLE_ANSI)) \
-      || (defined(URI_PASS_UNICODE) && !defined(URI_H_UNICODE) \
-          && defined(URI_ENABLE_UNICODE))
+          || (defined(URI_PASS_UNICODE) && !defined(URI_H_UNICODE) \
+                  && defined(URI_ENABLE_UNICODE))
 #    ifdef URI_PASS_ANSI
 #      define URI_H_ANSI 1
 #      include "UriDefsAnsi.h"
@@ -218,8 +218,8 @@ URI_PUBLIC UriBool URI_FUNC(HasHost)(const URI_TYPE(Uri) * uri);
  * @see uriIsWellFormedHostIp6A
  * @since 0.9.9
  */
-URI_PUBLIC int URI_FUNC(ParseIpSixAddress)(UriIp6 * output, const URI_CHAR * first,
-                                           const URI_CHAR * afterLast);
+URI_PUBLIC int URI_FUNC(ParseIpSixAddress)(
+        UriIp6 * output, const URI_CHAR * first, const URI_CHAR * afterLast);
 
 /**
  * Converts an IPv6 text representation into 16 bytes.
@@ -236,8 +236,7 @@ URI_PUBLIC int URI_FUNC(ParseIpSixAddress)(UriIp6 * output, const URI_CHAR * fir
  * @since 0.9.9
  */
 URI_PUBLIC int URI_FUNC(ParseIpSixAddressMm)(UriIp6 * output, const URI_CHAR * first,
-                                             const URI_CHAR * afterLast,
-                                             UriMemoryManager * memory);
+        const URI_CHAR * afterLast, UriMemoryManager * memory);
 
 /**
  * Parses a RFC 3986 %URI.
@@ -258,7 +257,7 @@ URI_PUBLIC int URI_FUNC(ParseIpSixAddressMm)(UriIp6 * output, const URI_CHAR * f
  * "Single").
  */
 URI_PUBLIC int URI_FUNC(ParseUriEx)(URI_TYPE(ParserState) * state, const URI_CHAR * first,
-                                    const URI_CHAR * afterLast);
+        const URI_CHAR * afterLast);
 
 /**
  * Parses a RFC 3986 %URI.
@@ -295,8 +294,8 @@ URI_PUBLIC int URI_FUNC(ParseUri)(URI_TYPE(ParserState) * state, const URI_CHAR 
  * @see uriToStringA
  * @since 0.9.0
  */
-URI_PUBLIC int URI_FUNC(ParseSingleUri)(URI_TYPE(Uri) * uri, const URI_CHAR * text,
-                                        const URI_CHAR ** errorPos);
+URI_PUBLIC int URI_FUNC(ParseSingleUri)(
+        URI_TYPE(Uri) * uri, const URI_CHAR * text, const URI_CHAR ** errorPos);
 
 /**
  * Parses a single RFC 3986 %URI.
@@ -319,8 +318,7 @@ URI_PUBLIC int URI_FUNC(ParseSingleUri)(URI_TYPE(Uri) * uri, const URI_CHAR * te
  * @since 0.9.0
  */
 URI_PUBLIC int URI_FUNC(ParseSingleUriEx)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                                          const URI_CHAR * afterLast,
-                                          const URI_CHAR ** errorPos);
+        const URI_CHAR * afterLast, const URI_CHAR ** errorPos);
 
 /**
  * Parses a single RFC 3986 %URI.
@@ -343,9 +341,8 @@ URI_PUBLIC int URI_FUNC(ParseSingleUriEx)(URI_TYPE(Uri) * uri, const URI_CHAR * 
  * @since 0.9.0
  */
 URI_PUBLIC int URI_FUNC(ParseSingleUriExMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                                            const URI_CHAR * afterLast,
-                                            const URI_CHAR ** errorPos,
-                                            UriMemoryManager * memory);
+        const URI_CHAR * afterLast, const URI_CHAR ** errorPos,
+        UriMemoryManager * memory);
 
 /**
  * Frees all memory associated with the members
@@ -411,8 +408,8 @@ URI_PUBLIC int URI_FUNC(FreeUriMembersMm)(URI_TYPE(Uri) * uri, UriMemoryManager 
  * @since 0.5.2
  */
 URI_PUBLIC URI_CHAR * URI_FUNC(EscapeEx)(const URI_CHAR * inFirst,
-                                         const URI_CHAR * inAfterLast, URI_CHAR * out,
-                                         UriBool spaceToPlus, UriBool normalizeBreaks);
+        const URI_CHAR * inAfterLast, URI_CHAR * out, UriBool spaceToPlus,
+        UriBool normalizeBreaks);
 
 /**
  * Percent-encodes all but unreserved characters from the input string and
@@ -442,7 +439,7 @@ URI_PUBLIC URI_CHAR * URI_FUNC(EscapeEx)(const URI_CHAR * inFirst,
  * @since 0.5.0
  */
 URI_PUBLIC URI_CHAR * URI_FUNC(Escape)(const URI_CHAR * in, URI_CHAR * out,
-                                       UriBool spaceToPlus, UriBool normalizeBreaks);
+        UriBool spaceToPlus, UriBool normalizeBreaks);
 
 /**
  * Unescapes percent-encoded groups in a given string.
@@ -461,9 +458,8 @@ URI_PUBLIC URI_CHAR * URI_FUNC(Escape)(const URI_CHAR * in, URI_CHAR * out,
  * @see uriEscapeExA
  * @since 0.5.0
  */
-URI_PUBLIC const URI_CHAR *
-    URI_FUNC(UnescapeInPlaceEx)(URI_CHAR * inout, UriBool plusToSpace,
-                                UriBreakConversion breakConversion);
+URI_PUBLIC const URI_CHAR * URI_FUNC(UnescapeInPlaceEx)(
+        URI_CHAR * inout, UriBool plusToSpace, UriBreakConversion breakConversion);
 
 /**
  * Unescapes percent-encoded groups in a given string.
@@ -503,8 +499,7 @@ URI_PUBLIC const URI_CHAR * URI_FUNC(UnescapeInPlace)(URI_CHAR * inout);
  * @since 0.4.0
  */
 URI_PUBLIC int URI_FUNC(AddBaseUri)(URI_TYPE(Uri) * absoluteDest,
-                                    const URI_TYPE(Uri) * relativeSource,
-                                    const URI_TYPE(Uri) * absoluteBase);
+        const URI_TYPE(Uri) * relativeSource, const URI_TYPE(Uri) * absoluteBase);
 
 /**
  * Performs reference resolution as described in
@@ -524,9 +519,8 @@ URI_PUBLIC int URI_FUNC(AddBaseUri)(URI_TYPE(Uri) * absoluteDest,
  * @since 0.8.1
  */
 URI_PUBLIC int URI_FUNC(AddBaseUriEx)(URI_TYPE(Uri) * absoluteDest,
-                                      const URI_TYPE(Uri) * relativeSource,
-                                      const URI_TYPE(Uri) * absoluteBase,
-                                      UriResolutionOptions options);
+        const URI_TYPE(Uri) * relativeSource, const URI_TYPE(Uri) * absoluteBase,
+        UriResolutionOptions options);
 
 /**
  * Performs reference resolution as described in
@@ -548,10 +542,8 @@ URI_PUBLIC int URI_FUNC(AddBaseUriEx)(URI_TYPE(Uri) * absoluteDest,
  * @since 0.9.0
  */
 URI_PUBLIC int URI_FUNC(AddBaseUriExMm)(URI_TYPE(Uri) * absoluteDest,
-                                        const URI_TYPE(Uri) * relativeSource,
-                                        const URI_TYPE(Uri) * absoluteBase,
-                                        UriResolutionOptions options,
-                                        UriMemoryManager * memory);
+        const URI_TYPE(Uri) * relativeSource, const URI_TYPE(Uri) * absoluteBase,
+        UriResolutionOptions options, UriMemoryManager * memory);
 
 /**
  * Tries to make a relative %URI (a reference) from an
@@ -576,9 +568,8 @@ URI_PUBLIC int URI_FUNC(AddBaseUriExMm)(URI_TYPE(Uri) * absoluteDest,
  * @since 0.5.2
  */
 URI_PUBLIC int URI_FUNC(RemoveBaseUri)(URI_TYPE(Uri) * dest,
-                                       const URI_TYPE(Uri) * absoluteSource,
-                                       const URI_TYPE(Uri) * absoluteBase,
-                                       UriBool domainRootMode);
+        const URI_TYPE(Uri) * absoluteSource, const URI_TYPE(Uri) * absoluteBase,
+        UriBool domainRootMode);
 
 /**
  * Tries to make a relative %URI (a reference) from an
@@ -603,10 +594,8 @@ URI_PUBLIC int URI_FUNC(RemoveBaseUri)(URI_TYPE(Uri) * dest,
  * @since 0.9.0
  */
 URI_PUBLIC int URI_FUNC(RemoveBaseUriMm)(URI_TYPE(Uri) * dest,
-                                         const URI_TYPE(Uri) * absoluteSource,
-                                         const URI_TYPE(Uri) * absoluteBase,
-                                         UriBool domainRootMode,
-                                         UriMemoryManager * memory);
+        const URI_TYPE(Uri) * absoluteSource, const URI_TYPE(Uri) * absoluteBase,
+        UriBool domainRootMode, UriMemoryManager * memory);
 
 /**
  * Checks two URIs for equivalence. Comparison is done
@@ -634,8 +623,8 @@ URI_PUBLIC UriBool URI_FUNC(EqualsUri)(const URI_TYPE(Uri) * a, const URI_TYPE(U
  * @see uriToStringA
  * @since 0.5.0
  */
-URI_PUBLIC int URI_FUNC(ToStringCharsRequired)(const URI_TYPE(Uri) * uri,
-                                               int * charsRequired);
+URI_PUBLIC int URI_FUNC(ToStringCharsRequired)(
+        const URI_TYPE(Uri) * uri, int * charsRequired);
 
 /**
  * Converts a %URI structure back to text as described in
@@ -658,8 +647,8 @@ URI_PUBLIC int URI_FUNC(ToStringCharsRequired)(const URI_TYPE(Uri) * uri,
  * @see uriToStringCharsRequiredA
  * @since 0.4.0
  */
-URI_PUBLIC int URI_FUNC(ToString)(URI_CHAR * dest, const URI_TYPE(Uri) * uri,
-                                  int maxChars, int * charsWritten);
+URI_PUBLIC int URI_FUNC(ToString)(
+        URI_CHAR * dest, const URI_TYPE(Uri) * uri, int maxChars, int * charsWritten);
 
 /**
  * Copies a %URI structure.
@@ -673,8 +662,7 @@ URI_PUBLIC int URI_FUNC(ToString)(URI_CHAR * dest, const URI_TYPE(Uri) * uri,
  * @since 0.9.9
  */
 URI_PUBLIC int URI_FUNC(CopyUriMm)(URI_TYPE(Uri) * destUri,
-                                   const URI_TYPE(Uri) * sourceUri,
-                                   UriMemoryManager * memory);
+        const URI_TYPE(Uri) * sourceUri, UriMemoryManager * memory);
 
 /**
  * Copies a %URI structure.
@@ -686,8 +674,8 @@ URI_PUBLIC int URI_FUNC(CopyUriMm)(URI_TYPE(Uri) * destUri,
  * @see uriCopyUriMmA
  * @since 0.9.9
  */
-URI_PUBLIC int URI_FUNC(CopyUri)(URI_TYPE(Uri) * destUri,
-                                 const URI_TYPE(Uri) * sourceUri);
+URI_PUBLIC int URI_FUNC(CopyUri)(
+        URI_TYPE(Uri) * destUri, const URI_TYPE(Uri) * sourceUri);
 
 /**
  * Determines the components of a %URI that are not normalized.
@@ -718,8 +706,8 @@ URI_PUBLIC unsigned int URI_FUNC(NormalizeSyntaxMaskRequired)(const URI_TYPE(Uri
  * @see uriNormalizeSyntaxMaskRequiredA
  * @since 0.9.0
  */
-URI_PUBLIC int URI_FUNC(NormalizeSyntaxMaskRequiredEx)(const URI_TYPE(Uri) * uri,
-                                                       unsigned int * outMask);
+URI_PUBLIC int URI_FUNC(NormalizeSyntaxMaskRequiredEx)(
+        const URI_TYPE(Uri) * uri, unsigned int * outMask);
 
 /**
  * Normalizes a %URI using a normalization mask.
@@ -757,8 +745,8 @@ URI_PUBLIC int URI_FUNC(NormalizeSyntaxEx)(URI_TYPE(Uri) * uri, unsigned int mas
  * @see uriNormalizeSyntaxMaskRequiredA
  * @since 0.9.0
  */
-URI_PUBLIC int URI_FUNC(NormalizeSyntaxExMm)(URI_TYPE(Uri) * uri, unsigned int mask,
-                                             UriMemoryManager * memory);
+URI_PUBLIC int URI_FUNC(NormalizeSyntaxExMm)(
+        URI_TYPE(Uri) * uri, unsigned int mask, UriMemoryManager * memory);
 
 /**
  * Normalizes all components of a %URI.
@@ -795,8 +783,8 @@ URI_PUBLIC int URI_FUNC(NormalizeSyntax)(URI_TYPE(Uri) * uri);
  * @see uriWindowsFilenameToUriStringA
  * @since 0.5.2
  */
-URI_PUBLIC int URI_FUNC(UnixFilenameToUriString)(const URI_CHAR * filename,
-                                                 URI_CHAR * uriString);
+URI_PUBLIC int URI_FUNC(UnixFilenameToUriString)(
+        const URI_CHAR * filename, URI_CHAR * uriString);
 
 /**
  * Converts a Windows filename to a %URI string.
@@ -816,8 +804,8 @@ URI_PUBLIC int URI_FUNC(UnixFilenameToUriString)(const URI_CHAR * filename,
  * @see uriUnixFilenameToUriStringA
  * @since 0.5.2
  */
-URI_PUBLIC int URI_FUNC(WindowsFilenameToUriString)(const URI_CHAR * filename,
-                                                    URI_CHAR * uriString);
+URI_PUBLIC int URI_FUNC(WindowsFilenameToUriString)(
+        const URI_CHAR * filename, URI_CHAR * uriString);
 
 /**
  * Extracts a Unix filename from a %URI string.
@@ -833,8 +821,8 @@ URI_PUBLIC int URI_FUNC(WindowsFilenameToUriString)(const URI_CHAR * filename,
  * @see uriUriStringToWindowsFilenameA
  * @since 0.5.2
  */
-URI_PUBLIC int URI_FUNC(UriStringToUnixFilename)(const URI_CHAR * uriString,
-                                                 URI_CHAR * filename);
+URI_PUBLIC int URI_FUNC(UriStringToUnixFilename)(
+        const URI_CHAR * uriString, URI_CHAR * filename);
 
 /**
  * Extracts a Windows filename from a %URI string.
@@ -850,8 +838,8 @@ URI_PUBLIC int URI_FUNC(UriStringToUnixFilename)(const URI_CHAR * uriString,
  * @see uriUriStringToUnixFilenameA
  * @since 0.5.2
  */
-URI_PUBLIC int URI_FUNC(UriStringToWindowsFilename)(const URI_CHAR * uriString,
-                                                    URI_CHAR * filename);
+URI_PUBLIC int URI_FUNC(UriStringToWindowsFilename)(
+        const URI_CHAR * uriString, URI_CHAR * filename);
 
 /**
  * Calculates the number of characters needed to store the
@@ -868,8 +856,8 @@ URI_PUBLIC int URI_FUNC(UriStringToWindowsFilename)(const URI_CHAR * uriString,
  * @see uriComposeQueryA
  * @since 0.7.0
  */
-URI_PUBLIC int URI_FUNC(ComposeQueryCharsRequired)(const URI_TYPE(QueryList) * queryList,
-                                                   int * charsRequired);
+URI_PUBLIC int URI_FUNC(ComposeQueryCharsRequired)(
+        const URI_TYPE(QueryList) * queryList, int * charsRequired);
 
 /**
  * Calculates the number of characters needed to store the
@@ -887,10 +875,9 @@ URI_PUBLIC int URI_FUNC(ComposeQueryCharsRequired)(const URI_TYPE(QueryList) * q
  * @see uriComposeQueryExA
  * @since 0.7.0
  */
-URI_PUBLIC int
-    URI_FUNC(ComposeQueryCharsRequiredEx)(const URI_TYPE(QueryList) * queryList,
-                                          int * charsRequired, UriBool spaceToPlus,
-                                          UriBool normalizeBreaks);
+URI_PUBLIC int URI_FUNC(ComposeQueryCharsRequiredEx)(
+        const URI_TYPE(QueryList) * queryList, int * charsRequired, UriBool spaceToPlus,
+        UriBool normalizeBreaks);
 
 /**
  * Converts a query list structure back to a query string.
@@ -917,8 +904,7 @@ URI_PUBLIC int
  * @since 0.7.0
  */
 URI_PUBLIC int URI_FUNC(ComposeQuery)(URI_CHAR * dest,
-                                      const URI_TYPE(QueryList) * queryList, int maxChars,
-                                      int * charsWritten);
+        const URI_TYPE(QueryList) * queryList, int maxChars, int * charsWritten);
 
 /**
  * Converts a query list structure back to a query string.
@@ -945,9 +931,8 @@ URI_PUBLIC int URI_FUNC(ComposeQuery)(URI_CHAR * dest,
  * @since 0.7.0
  */
 URI_PUBLIC int URI_FUNC(ComposeQueryEx)(URI_CHAR * dest,
-                                        const URI_TYPE(QueryList) * queryList,
-                                        int maxChars, int * charsWritten,
-                                        UriBool spaceToPlus, UriBool normalizeBreaks);
+        const URI_TYPE(QueryList) * queryList, int maxChars, int * charsWritten,
+        UriBool spaceToPlus, UriBool normalizeBreaks);
 
 /**
  * Converts a query list structure back to a query string.
@@ -969,8 +954,8 @@ URI_PUBLIC int URI_FUNC(ComposeQueryEx)(URI_CHAR * dest,
  * @see uriDissectQueryMallocExMmA
  * @since 0.7.0
  */
-URI_PUBLIC int URI_FUNC(ComposeQueryMalloc)(URI_CHAR ** dest,
-                                            const URI_TYPE(QueryList) * queryList);
+URI_PUBLIC int URI_FUNC(ComposeQueryMalloc)(
+        URI_CHAR ** dest, const URI_TYPE(QueryList) * queryList);
 
 /**
  * Converts a query list structure back to a query string.
@@ -993,9 +978,8 @@ URI_PUBLIC int URI_FUNC(ComposeQueryMalloc)(URI_CHAR ** dest,
  * @since 0.7.0
  */
 URI_PUBLIC int URI_FUNC(ComposeQueryMallocEx)(URI_CHAR ** dest,
-                                              const URI_TYPE(QueryList) * queryList,
-                                              UriBool spaceToPlus,
-                                              UriBool normalizeBreaks);
+        const URI_TYPE(QueryList) * queryList, UriBool spaceToPlus,
+        UriBool normalizeBreaks);
 
 /**
  * Converts a query list structure back to a query string.
@@ -1018,10 +1002,8 @@ URI_PUBLIC int URI_FUNC(ComposeQueryMallocEx)(URI_CHAR ** dest,
  * @since 0.9.0
  */
 URI_PUBLIC int URI_FUNC(ComposeQueryMallocExMm)(URI_CHAR ** dest,
-                                                const URI_TYPE(QueryList) * queryList,
-                                                UriBool spaceToPlus,
-                                                UriBool normalizeBreaks,
-                                                UriMemoryManager * memory);
+        const URI_TYPE(QueryList) * queryList, UriBool spaceToPlus,
+        UriBool normalizeBreaks, UriMemoryManager * memory);
 
 /**
  * Constructs a query list from the raw query string of a given URI.
@@ -1042,8 +1024,7 @@ URI_PUBLIC int URI_FUNC(ComposeQueryMallocExMm)(URI_CHAR ** dest,
  * @since 0.7.0
  */
 URI_PUBLIC int URI_FUNC(DissectQueryMalloc)(URI_TYPE(QueryList) * *dest, int * itemCount,
-                                            const URI_CHAR * first,
-                                            const URI_CHAR * afterLast);
+        const URI_CHAR * first, const URI_CHAR * afterLast);
 
 /**
  * Constructs a query list from the raw query string of a given URI.
@@ -1064,10 +1045,8 @@ URI_PUBLIC int URI_FUNC(DissectQueryMalloc)(URI_TYPE(QueryList) * *dest, int * i
  * @since 0.7.0
  */
 URI_PUBLIC int URI_FUNC(DissectQueryMallocEx)(URI_TYPE(QueryList) * *dest,
-                                              int * itemCount, const URI_CHAR * first,
-                                              const URI_CHAR * afterLast,
-                                              UriBool plusToSpace,
-                                              UriBreakConversion breakConversion);
+        int * itemCount, const URI_CHAR * first, const URI_CHAR * afterLast,
+        UriBool plusToSpace, UriBreakConversion breakConversion);
 
 /**
  * Constructs a query list from the raw query string of a given URI.
@@ -1089,11 +1068,9 @@ URI_PUBLIC int URI_FUNC(DissectQueryMallocEx)(URI_TYPE(QueryList) * *dest,
  * @since 0.9.0
  */
 URI_PUBLIC int URI_FUNC(DissectQueryMallocExMm)(URI_TYPE(QueryList) * *dest,
-                                                int * itemCount, const URI_CHAR * first,
-                                                const URI_CHAR * afterLast,
-                                                UriBool plusToSpace,
-                                                UriBreakConversion breakConversion,
-                                                UriMemoryManager * memory);
+        int * itemCount, const URI_CHAR * first, const URI_CHAR * afterLast,
+        UriBool plusToSpace, UriBreakConversion breakConversion,
+        UriMemoryManager * memory);
 
 /**
  * Frees all memory associated with the given query list.
@@ -1117,8 +1094,8 @@ URI_PUBLIC void URI_FUNC(FreeQueryList)(URI_TYPE(QueryList) * queryList);
  * @see uriFreeQueryListA
  * @since 0.9.0
  */
-URI_PUBLIC int URI_FUNC(FreeQueryListMm)(URI_TYPE(QueryList) * queryList,
-                                         UriMemoryManager * memory);
+URI_PUBLIC int URI_FUNC(FreeQueryListMm)(
+        URI_TYPE(QueryList) * queryList, UriMemoryManager * memory);
 
 /**
  * Makes the %URI hold copies of strings so that it no longer depends
@@ -1171,8 +1148,8 @@ URI_PUBLIC int URI_FUNC(MakeOwnerMm)(URI_TYPE(Uri) * uri, UriMemoryManager * mem
  * @see uriSetFragmentMmA
  * @since 0.9.9
  */
-URI_PUBLIC UriBool URI_FUNC(IsWellFormedFragment)(const URI_CHAR * first,
-                                                  const URI_CHAR * afterLast);
+URI_PUBLIC UriBool URI_FUNC(IsWellFormedFragment)(
+        const URI_CHAR * first, const URI_CHAR * afterLast);
 
 /**
  * Determines if the given text range contains a well-formed IPv4 address
@@ -1196,8 +1173,8 @@ URI_PUBLIC UriBool URI_FUNC(IsWellFormedFragment)(const URI_CHAR * first,
  * @see uriSetHostIp4MmA
  * @since 0.9.9
  */
-URI_PUBLIC UriBool URI_FUNC(IsWellFormedHostIp4)(const URI_CHAR * first,
-                                                 const URI_CHAR * afterLast);
+URI_PUBLIC UriBool URI_FUNC(IsWellFormedHostIp4)(
+        const URI_CHAR * first, const URI_CHAR * afterLast);
 
 /**
  * Determines if the given text range contains a well-formed IPv6 address
@@ -1222,9 +1199,10 @@ URI_PUBLIC UriBool URI_FUNC(IsWellFormedHostIp4)(const URI_CHAR * first,
  * @see uriIsWellFormedUserInfoA
  * @see uriParseIpSixAddressA
  * @see uriParseIpSixAddressMmA
- * @since 0.9.9
+ * @since 1.0.3
  */
-int URI_FUNC(IsWellFormedHostIp6)(const URI_CHAR * first, const URI_CHAR * afterLast);
+URI_PUBLIC int URI_FUNC(IsWellFormedHostIp6)(
+        const URI_CHAR * first, const URI_CHAR * afterLast);
 
 /**
  * Determines if the given text range contains a well-formed IPv6 address
@@ -1246,10 +1224,10 @@ int URI_FUNC(IsWellFormedHostIp6)(const URI_CHAR * first, const URI_CHAR * after
  * @see uriIsWellFormedQueryA
  * @see uriIsWellFormedSchemeA
  * @see uriIsWellFormedUserInfoA
- * @since 0.9.9
+ * @since 1.0.3
  */
-int URI_FUNC(IsWellFormedHostIp6Mm)(const URI_CHAR * first, const URI_CHAR * afterLast,
-                                    UriMemoryManager * memory);
+URI_PUBLIC int URI_FUNC(IsWellFormedHostIp6Mm)(
+        const URI_CHAR * first, const URI_CHAR * afterLast, UriMemoryManager * memory);
 
 /**
  * Determines if the given text range contains a well-formed IPvFuture address
@@ -1274,10 +1252,10 @@ int URI_FUNC(IsWellFormedHostIp6Mm)(const URI_CHAR * first, const URI_CHAR * aft
  * @see uriIsWellFormedUserInfoA
  * @see uriSetHostIpFutureA
  * @see uriSetHostIpFutureMmA
- * @since 0.9.9
+ * @since 1.0.3
  */
-int URI_FUNC(IsWellFormedHostIpFuture)(const URI_CHAR * first,
-                                       const URI_CHAR * afterLast);
+URI_PUBLIC int URI_FUNC(IsWellFormedHostIpFuture)(
+        const URI_CHAR * first, const URI_CHAR * afterLast);
 
 /**
  * Determines if the given text range contains a well-formed IPvFuture address
@@ -1301,11 +1279,10 @@ int URI_FUNC(IsWellFormedHostIpFuture)(const URI_CHAR * first,
  * @see uriIsWellFormedUserInfoA
  * @see uriSetHostIpFutureA
  * @see uriSetHostIpFutureMmA
- * @since 0.9.9
+ * @since 1.0.3
  */
-int URI_FUNC(IsWellFormedHostIpFutureMm)(const URI_CHAR * first,
-                                         const URI_CHAR * afterLast,
-                                         UriMemoryManager * memory);
+URI_PUBLIC int URI_FUNC(IsWellFormedHostIpFutureMm)(
+        const URI_CHAR * first, const URI_CHAR * afterLast, UriMemoryManager * memory);
 
 /**
  * Determines if the given text range contains a well-formed registered host name
@@ -1329,8 +1306,8 @@ int URI_FUNC(IsWellFormedHostIpFutureMm)(const URI_CHAR * first,
  * @see uriSetHostRegNameMmA
  * @since 0.9.9
  */
-URI_PUBLIC UriBool URI_FUNC(IsWellFormedHostRegName)(const URI_CHAR * first,
-                                                     const URI_CHAR * afterLast);
+URI_PUBLIC UriBool URI_FUNC(IsWellFormedHostRegName)(
+        const URI_CHAR * first, const URI_CHAR * afterLast);
 
 /**
  * Determines if the given text range contains a well-formed path
@@ -1357,9 +1334,8 @@ URI_PUBLIC UriBool URI_FUNC(IsWellFormedHostRegName)(const URI_CHAR * first,
  * @see uriSetPathMmA
  * @since 0.9.9
  */
-URI_PUBLIC UriBool URI_FUNC(IsWellFormedPath)(const URI_CHAR * first,
-                                              const URI_CHAR * afterLast,
-                                              UriBool hasHost);
+URI_PUBLIC UriBool URI_FUNC(IsWellFormedPath)(
+        const URI_CHAR * first, const URI_CHAR * afterLast, UriBool hasHost);
 
 /**
  * Determines if the given text range contains a well-formed port text
@@ -1383,8 +1359,8 @@ URI_PUBLIC UriBool URI_FUNC(IsWellFormedPath)(const URI_CHAR * first,
  * @see uriSetPortTextMmA
  * @since 0.9.9
  */
-URI_PUBLIC UriBool URI_FUNC(IsWellFormedPort)(const URI_CHAR * first,
-                                              const URI_CHAR * afterLast);
+URI_PUBLIC UriBool URI_FUNC(IsWellFormedPort)(
+        const URI_CHAR * first, const URI_CHAR * afterLast);
 
 /**
  * Determines if the given text range contains a well-formed query
@@ -1408,8 +1384,8 @@ URI_PUBLIC UriBool URI_FUNC(IsWellFormedPort)(const URI_CHAR * first,
  * @see uriSetQueryMmA
  * @since 0.9.9
  */
-URI_PUBLIC UriBool URI_FUNC(IsWellFormedQuery)(const URI_CHAR * first,
-                                               const URI_CHAR * afterLast);
+URI_PUBLIC UriBool URI_FUNC(IsWellFormedQuery)(
+        const URI_CHAR * first, const URI_CHAR * afterLast);
 
 /**
  * Determines if the given text range contains a well-formed scheme
@@ -1434,8 +1410,8 @@ URI_PUBLIC UriBool URI_FUNC(IsWellFormedQuery)(const URI_CHAR * first,
  * @see uriSetSchemeMmA
  * @since 0.9.9
  */
-URI_PUBLIC UriBool URI_FUNC(IsWellFormedScheme)(const URI_CHAR * first,
-                                                const URI_CHAR * afterLast);
+URI_PUBLIC UriBool URI_FUNC(IsWellFormedScheme)(
+        const URI_CHAR * first, const URI_CHAR * afterLast);
 
 /**
  * Determines if the given text range contains a well-formed user info
@@ -1459,8 +1435,8 @@ URI_PUBLIC UriBool URI_FUNC(IsWellFormedScheme)(const URI_CHAR * first,
  * @see uriSetUserInfoMmA
  * @since 0.9.9
  */
-URI_PUBLIC UriBool URI_FUNC(IsWellFormedUserInfo)(const URI_CHAR * first,
-                                                  const URI_CHAR * afterLast);
+URI_PUBLIC UriBool URI_FUNC(IsWellFormedUserInfo)(
+        const URI_CHAR * first, const URI_CHAR * afterLast);
 
 /**
  * Sets the fragment of the given %URI to the given value.
@@ -1495,8 +1471,8 @@ URI_PUBLIC UriBool URI_FUNC(IsWellFormedUserInfo)(const URI_CHAR * first,
  * @see uriSetUserInfoA
  * @since 0.9.9
  */
-URI_PUBLIC int URI_FUNC(SetFragment)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                                     const URI_CHAR * afterLast);
+URI_PUBLIC int URI_FUNC(SetFragment)(
+        URI_TYPE(Uri) * uri, const URI_CHAR * first, const URI_CHAR * afterLast);
 
 /**
  * Sets the fragment of the given %URI to the given value.
@@ -1531,8 +1507,7 @@ URI_PUBLIC int URI_FUNC(SetFragment)(URI_TYPE(Uri) * uri, const URI_CHAR * first
  * @since 0.9.9
  */
 URI_PUBLIC int URI_FUNC(SetFragmentMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                                       const URI_CHAR * afterLast,
-                                       UriMemoryManager * memory);
+        const URI_CHAR * afterLast, UriMemoryManager * memory);
 
 /**
  * Sets the host of the given %URI to the given value.
@@ -1572,8 +1547,8 @@ URI_PUBLIC int URI_FUNC(SetFragmentMm)(URI_TYPE(Uri) * uri, const URI_CHAR * fir
  * @see uriSetUserInfoA
  * @since 0.9.9
  */
-URI_PUBLIC int URI_FUNC(SetHostAuto)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                                     const URI_CHAR * afterLast);
+URI_PUBLIC int URI_FUNC(SetHostAuto)(
+        URI_TYPE(Uri) * uri, const URI_CHAR * first, const URI_CHAR * afterLast);
 
 /**
  * Sets the host of the given %URI to the given value.
@@ -1613,8 +1588,7 @@ URI_PUBLIC int URI_FUNC(SetHostAuto)(URI_TYPE(Uri) * uri, const URI_CHAR * first
  * @since 0.9.9
  */
 URI_PUBLIC int URI_FUNC(SetHostAutoMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                                       const URI_CHAR * afterLast,
-                                       UriMemoryManager * memory);
+        const URI_CHAR * afterLast, UriMemoryManager * memory);
 
 /**
  * Sets the host of the given %URI to the given value.
@@ -1649,8 +1623,8 @@ URI_PUBLIC int URI_FUNC(SetHostAutoMm)(URI_TYPE(Uri) * uri, const URI_CHAR * fir
  * @see uriSetUserInfoA
  * @since 0.9.9
  */
-URI_PUBLIC int URI_FUNC(SetHostRegName)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                                        const URI_CHAR * afterLast);
+URI_PUBLIC int URI_FUNC(SetHostRegName)(
+        URI_TYPE(Uri) * uri, const URI_CHAR * first, const URI_CHAR * afterLast);
 
 /**
  * Sets the host of the given %URI to the given value.
@@ -1685,8 +1659,7 @@ URI_PUBLIC int URI_FUNC(SetHostRegName)(URI_TYPE(Uri) * uri, const URI_CHAR * fi
  * @since 0.9.9
  */
 URI_PUBLIC int URI_FUNC(SetHostRegNameMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                                          const URI_CHAR * afterLast,
-                                          UriMemoryManager * memory);
+        const URI_CHAR * afterLast, UriMemoryManager * memory);
 
 /**
  * Sets the host of the given %URI to the given value.
@@ -1721,8 +1694,8 @@ URI_PUBLIC int URI_FUNC(SetHostRegNameMm)(URI_TYPE(Uri) * uri, const URI_CHAR * 
  * @see uriSetUserInfoA
  * @since 0.9.9
  */
-URI_PUBLIC int URI_FUNC(SetHostIp4)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                                    const URI_CHAR * afterLast);
+URI_PUBLIC int URI_FUNC(SetHostIp4)(
+        URI_TYPE(Uri) * uri, const URI_CHAR * first, const URI_CHAR * afterLast);
 
 /**
  * Sets the host of the given %URI to the given value.
@@ -1757,8 +1730,7 @@ URI_PUBLIC int URI_FUNC(SetHostIp4)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
  * @since 0.9.9
  */
 URI_PUBLIC int URI_FUNC(SetHostIp4Mm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                                      const URI_CHAR * afterLast,
-                                      UriMemoryManager * memory);
+        const URI_CHAR * afterLast, UriMemoryManager * memory);
 
 /**
  * Sets the host of the given %URI to the given value.
@@ -1793,8 +1765,8 @@ URI_PUBLIC int URI_FUNC(SetHostIp4Mm)(URI_TYPE(Uri) * uri, const URI_CHAR * firs
  * @see uriSetUserInfoA
  * @since 0.9.9
  */
-URI_PUBLIC int URI_FUNC(SetHostIp6)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                                    const URI_CHAR * afterLast);
+URI_PUBLIC int URI_FUNC(SetHostIp6)(
+        URI_TYPE(Uri) * uri, const URI_CHAR * first, const URI_CHAR * afterLast);
 
 /**
  * Sets the host of the given %URI to the given value.
@@ -1829,8 +1801,7 @@ URI_PUBLIC int URI_FUNC(SetHostIp6)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
  * @since 0.9.9
  */
 URI_PUBLIC int URI_FUNC(SetHostIp6Mm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                                      const URI_CHAR * afterLast,
-                                      UriMemoryManager * memory);
+        const URI_CHAR * afterLast, UriMemoryManager * memory);
 
 /**
  * Sets the host of the given %URI to the given value.
@@ -1865,8 +1836,8 @@ URI_PUBLIC int URI_FUNC(SetHostIp6Mm)(URI_TYPE(Uri) * uri, const URI_CHAR * firs
  * @see uriSetUserInfoA
  * @since 0.9.9
  */
-URI_PUBLIC int URI_FUNC(SetHostIpFuture)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                                         const URI_CHAR * afterLast);
+URI_PUBLIC int URI_FUNC(SetHostIpFuture)(
+        URI_TYPE(Uri) * uri, const URI_CHAR * first, const URI_CHAR * afterLast);
 
 /**
  * Sets the host of the given %URI to the given value.
@@ -1901,8 +1872,7 @@ URI_PUBLIC int URI_FUNC(SetHostIpFuture)(URI_TYPE(Uri) * uri, const URI_CHAR * f
  * @since 0.9.9
  */
 URI_PUBLIC int URI_FUNC(SetHostIpFutureMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                                           const URI_CHAR * afterLast,
-                                           UriMemoryManager * memory);
+        const URI_CHAR * afterLast, UriMemoryManager * memory);
 
 /**
  * Sets the path of the given %URI to the given value.
@@ -1940,8 +1910,8 @@ URI_PUBLIC int URI_FUNC(SetHostIpFutureMm)(URI_TYPE(Uri) * uri, const URI_CHAR *
  * @see uriSetUserInfoA
  * @since 0.9.9
  */
-URI_PUBLIC int URI_FUNC(SetPath)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                                 const URI_CHAR * afterLast);
+URI_PUBLIC int URI_FUNC(SetPath)(
+        URI_TYPE(Uri) * uri, const URI_CHAR * first, const URI_CHAR * afterLast);
 
 /**
  * Sets the path of the given %URI to the given value.
@@ -1981,7 +1951,7 @@ URI_PUBLIC int URI_FUNC(SetPath)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
  * @since 0.9.9
  */
 URI_PUBLIC int URI_FUNC(SetPathMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                                   const URI_CHAR * afterLast, UriMemoryManager * memory);
+        const URI_CHAR * afterLast, UriMemoryManager * memory);
 
 /**
  * Sets the port text of the given %URI to the given value.
@@ -2018,8 +1988,8 @@ URI_PUBLIC int URI_FUNC(SetPathMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
  * @see uriSetUserInfoA
  * @since 0.9.9
  */
-URI_PUBLIC int URI_FUNC(SetPortText)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                                     const URI_CHAR * afterLast);
+URI_PUBLIC int URI_FUNC(SetPortText)(
+        URI_TYPE(Uri) * uri, const URI_CHAR * first, const URI_CHAR * afterLast);
 
 /**
  * Sets the port text of the given %URI to the given value.
@@ -2056,8 +2026,7 @@ URI_PUBLIC int URI_FUNC(SetPortText)(URI_TYPE(Uri) * uri, const URI_CHAR * first
  * @since 0.9.9
  */
 URI_PUBLIC int URI_FUNC(SetPortTextMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                                       const URI_CHAR * afterLast,
-                                       UriMemoryManager * memory);
+        const URI_CHAR * afterLast, UriMemoryManager * memory);
 
 /**
  * Sets the query of the given %URI to the given value.
@@ -2092,8 +2061,8 @@ URI_PUBLIC int URI_FUNC(SetPortTextMm)(URI_TYPE(Uri) * uri, const URI_CHAR * fir
  * @see uriSetUserInfoA
  * @since 0.9.9
  */
-URI_PUBLIC int URI_FUNC(SetQuery)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                                  const URI_CHAR * afterLast);
+URI_PUBLIC int URI_FUNC(SetQuery)(
+        URI_TYPE(Uri) * uri, const URI_CHAR * first, const URI_CHAR * afterLast);
 
 /**
  * Sets the query of the given %URI to the given value.
@@ -2128,8 +2097,7 @@ URI_PUBLIC int URI_FUNC(SetQuery)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
  * @since 0.9.9
  */
 URI_PUBLIC int URI_FUNC(SetQueryMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                                    const URI_CHAR * afterLast,
-                                    UriMemoryManager * memory);
+        const URI_CHAR * afterLast, UriMemoryManager * memory);
 
 /**
  * Sets the scheme of the given %URI to the given value.
@@ -2164,8 +2132,8 @@ URI_PUBLIC int URI_FUNC(SetQueryMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
  * @see uriSetUserInfoA
  * @since 0.9.9
  */
-URI_PUBLIC int URI_FUNC(SetScheme)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                                   const URI_CHAR * afterLast);
+URI_PUBLIC int URI_FUNC(SetScheme)(
+        URI_TYPE(Uri) * uri, const URI_CHAR * first, const URI_CHAR * afterLast);
 
 /**
  * Sets the scheme of the given %URI to the given value.
@@ -2200,8 +2168,7 @@ URI_PUBLIC int URI_FUNC(SetScheme)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
  * @since 0.9.9
  */
 URI_PUBLIC int URI_FUNC(SetSchemeMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                                     const URI_CHAR * afterLast,
-                                     UriMemoryManager * memory);
+        const URI_CHAR * afterLast, UriMemoryManager * memory);
 
 /**
  * Sets the user info of the given %URI to the given value.
@@ -2238,8 +2205,8 @@ URI_PUBLIC int URI_FUNC(SetSchemeMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first
  * @see uriSetUserInfoMmA
  * @since 0.9.9
  */
-URI_PUBLIC int URI_FUNC(SetUserInfo)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                                     const URI_CHAR * afterLast);
+URI_PUBLIC int URI_FUNC(SetUserInfo)(
+        URI_TYPE(Uri) * uri, const URI_CHAR * first, const URI_CHAR * afterLast);
 
 /**
  * Sets the user info of the given %URI to the given value.
@@ -2276,8 +2243,7 @@ URI_PUBLIC int URI_FUNC(SetUserInfo)(URI_TYPE(Uri) * uri, const URI_CHAR * first
  * @since 0.9.9
  */
 URI_PUBLIC int URI_FUNC(SetUserInfoMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                                       const URI_CHAR * afterLast,
-                                       UriMemoryManager * memory);
+        const URI_CHAR * afterLast, UriMemoryManager * memory);
 
 /**
  * Obtain the base runtime version of uriparser.
