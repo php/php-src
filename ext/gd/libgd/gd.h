@@ -560,7 +560,9 @@ BGD_DECLARE(gdImagePtr) gdImageCreateTrueColor(int sx, int sy);
         JPEG is always truecolor. */
 /* PNG */
 BGD_DECLARE(gdImagePtr) gdImageCreateFromPng(FILE *fd);
+BGD_DECLARE(gdImagePtr) gdImageCreateFromPngEx(FILE *fd, int ignore_warning);
 BGD_DECLARE(gdImagePtr) gdImageCreateFromPngCtx(gdIOCtxPtr in);
+BGD_DECLARE(gdImagePtr) gdImageCreateFromPngCtxEx(gdIOCtxPtr in, int ignore_warning);
 BGD_DECLARE(gdImagePtr)
 gdImageCreateFromPngCtxWithMetadata(gdIOCtxPtr in, gdImageMetadata *metadata);
 BGD_DECLARE(gdImagePtr) gdImageCreateFromPngPtr(int size, void *data);

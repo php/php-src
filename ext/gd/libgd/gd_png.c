@@ -268,6 +268,7 @@ static void *gdPngReadCtxToMemory(gdIOCtx *infile, int *size)
 #ifdef PNG_SETJMP_SUPPORTED
 typedef struct _jmpbuf_wrapper {
     jmp_buf jmpbuf;
+    int ignore_warning;
 } jmpbuf_wrapper;
 
 static void gdPngErrorHandler(png_structp png_ptr, png_const_charp msg)
@@ -295,8 +296,14 @@ static void gdPngErrorHandler(png_structp png_ptr, png_const_charp msg)
     longjmp(jmpbuf_ptr->jmpbuf, 1);
 }
 
-static void gdPngWarningHandler(UNUSED_PARAM(png_structp png_ptr), png_const_charp msg)
+static void gdPngWarningHandler(png_structp png_ptr, png_const_charp msg)
 {
+    jmpbuf_wrapper *jmpbuf_ptr = png_get_error_ptr(png_ptr);
+
+    if (jmpbuf_ptr != NULL && jmpbuf_ptr->ignore_warning) {
+        return;
+    }
+
     gd_error_ex(GD_WARNING, "gd-png: libpng warning: %s", msg);
 }
 #endif
@@ -379,11 +386,27 @@ static void gdPngFlushData(png_structp png_ptr) { (void)png_ptr; }
  */
 BGD_DECLARE(gdImagePtr) gdImageCreateFromPng(FILE *inFile)
 {
+    return gdImageCreateFromPngEx(inFile, 0);
+}
+
+/*
+  Function: gdImageCreateFromPngEx
+
+    <gdImageCreateFromPngEx> is equivalent to <gdImageCreateFromPng>,
+    but allows recoverable libpng warnings to be ignored.
+
+  Parameters:
+
+    inFile         - The input FILE pointer.
+    ignore_warning - Flag.  If true, ignores recoverable warnings.
+*/
+BGD_DECLARE(gdImagePtr) gdImageCreateFromPngEx(FILE *inFile, int ignore_warning)
+{
     gdImagePtr im;
     gdIOCtx *in = gdNewFileCtx(inFile);
     if (in == NULL)
         return NULL;
-    im = gdImageCreateFromPngCtx(in);
+    im = gdImageCreateFromPngCtxEx(in, ignore_warning);
     in->gd_free(in);
     return im;
 }
@@ -453,6 +476,16 @@ gdImageCreateFromPngCtxWithMetadata(gdIOCtx *infile, gdImageMetadata *metadata)
 */
 BGD_DECLARE(gdImagePtr) gdImageCreateFromPngCtx(gdIOCtx *infile)
 {
+    return gdImageCreateFromPngCtxEx(infile, 0);
+}
+
+/*
+  Function: gdImageCreateFromPngCtxEx
+
+  See <gdImageCreateFromPngEx>.
+*/
+BGD_DECLARE(gdImagePtr) gdImageCreateFromPngCtxEx(gdIOCtx *infile, int ignore_warning)
+{
     png_byte sig[8];
 #ifdef PNG_SETJMP_SUPPORTED
     jmpbuf_wrapper jbw;
@@ -488,9 +521,11 @@ BGD_DECLARE(gdImagePtr) gdImageCreateFromPngCtx(gdIOCtx *infile)
     }
 
 #ifdef PNG_SETJMP_SUPPORTED
+    jbw.ignore_warning = ignore_warning;
     png_ptr =
         png_create_read_struct(PNG_LIBPNG_VER_STRING, &jbw, gdPngErrorHandler, gdPngWarningHandler);
 #else
+    ARG_NOT_USED(ignore_warning);
     png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 #endif
     if (png_ptr == NULL) {
@@ -1319,6 +1354,7 @@ static int _gdImagePngCtxWithOptions(gdImagePtr im, gdIOCtx *outfile,
         return 1;
 
 #ifdef PNG_SETJMP_SUPPORTED
+    jbw.ignore_warning = 0;
     png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, &jbw, gdPngErrorHandler,
                                       gdPngWarningHandler);
 #else
@@ -1696,6 +1732,14 @@ BGD_DECLARE(gdImagePtr) gdImageCreateFromPng(FILE *inFile)
     return NULL;
 }
 
+BGD_DECLARE(gdImagePtr) gdImageCreateFromPngEx(FILE *inFile, int ignore_warning)
+{
+    ARG_NOT_USED(inFile);
+    ARG_NOT_USED(ignore_warning);
+    _noPngError();
+    return NULL;
+}
+
 BGD_DECLARE(gdImagePtr) gdImageCreateFromPngPtr(int size, void *data)
 {
     ARG_NOT_USED(size);
@@ -1723,6 +1767,13 @@ gdImageCreateFromPngCtxWithMetadata(gdIOCtx *infile, gdImageMetadata *metadata)
 BGD_DECLARE(gdImagePtr) gdImageCreateFromPngCtx(gdIOCtx *infile)
 {
     ARG_NOT_USED(infile);
+    return NULL;
+}
+
+BGD_DECLARE(gdImagePtr) gdImageCreateFromPngCtxEx(gdIOCtx *infile, int ignore_warning)
+{
+    ARG_NOT_USED(infile);
+    ARG_NOT_USED(ignore_warning);
     return NULL;
 }
 

@@ -1607,6 +1607,10 @@ zend.assertions = 1
 ; https://php.net/gd.jpeg-ignore-warning
 ;gd.jpeg_ignore_warning = 1
 
+; Tell the png decoder to ignore recoverable libpng warnings
+; disabled by default
+;gd.png_ignore_warning = 0
+
 [exif]
 ; Exif UNICODE user comments are handled as UCS-2BE/UCS-2LE and JIS as JIS.
 ; With mbstring support this will automatically be converted into the encoding
