@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.6.0RC5
+05 Nov 2026, PHP 8.6.0RC5
 
 - Core:
   . Fix function and constant imports in compile_to_ast and add support
