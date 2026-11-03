@@ -71,7 +71,7 @@ static bool php_password_b64_from_bcrypt(const char *in, char *out, const size_t
 	/* If it doesn't match bcrypt hash size, something's wrong.
 	 * Salt cannot be converted back, because bcrypt discards the 128th bit */
 	if (len != 31) {
-		zend_value_error("Unexpected bcrypt size encountered: " ZEND_LONG_FMT, len);
+		zend_value_error("Unexpected bcrypt size encountered: %zu", len);
 		return false;
 	}
 
@@ -107,7 +107,7 @@ static bool php_password_bcrypt_from_b64(const char *in, char *out, const size_t
 {
 	/* If it doesn't match bcrypt salt/hash size, something's wrong */
 	if (len != 22 && len != 31) {
-		zend_value_error("Unexpected bcrypt size encountered: " ZEND_LONG_FMT, len);
+		zend_value_error("Unexpected bcrypt size encountered: %zu", len);
 		return false;
 	}
 
@@ -372,8 +372,7 @@ static bool php_password_argon2_needs_rehash(const zend_string *hash, zend_array
 static zend_string *php_password_argon2_hash(const zend_string *password, zend_array *options, argon2_type type) {
 	zval *option_buffer;
 	zend_string *out, *encoded;
-	size_t salt_len = 16;
-	unsigned char salt[salt_len];
+	unsigned char salt[16];
 	size_t time_cost = PHP_PASSWORD_ARGON2_TIME_COST;
 	size_t memory_cost = PHP_PASSWORD_ARGON2_MEMORY_COST;
 	size_t threads = PHP_PASSWORD_ARGON2_THREADS;
@@ -407,7 +406,7 @@ static zend_string *php_password_argon2_hash(const zend_string *password, zend_a
 		return NULL;
 	}
 
-	if (!php_password_make_salt(salt, salt_len)) {
+	if (!php_password_make_salt(salt, sizeof(salt))) {
 		return NULL;
 	}
 
@@ -416,7 +415,7 @@ static zend_string *php_password_argon2_hash(const zend_string *password, zend_a
 		time_cost,
 		memory_cost,
 		threads,
-		(uint32_t)salt_len,
+		(uint32_t)sizeof(salt),
 		ZSTR_LEN(out),
 		type
 	);
@@ -429,7 +428,7 @@ static zend_string *php_password_argon2_hash(const zend_string *password, zend_a
 		ZSTR_VAL(password),
 		ZSTR_LEN(password),
 		salt,
-		salt_len,
+		sizeof(salt),
 		ZSTR_VAL(out),
 		ZSTR_LEN(out),
 		ZSTR_VAL(encoded),
@@ -839,28 +838,25 @@ static bool php_password_bcrypt_wrap_parse(const zend_string *hash, bcrypt_wrap_
 }
 /* }}} */
 
-static zend_string* php_password_bcrypt_wrap_prehash(const zend_string *password, const bcrypt_wrap_ops *ops, const unsigned char *salt, size_t salt_len) /* {{{ */
+static zend_string* php_password_bcrypt_wrap_prehash(const zend_string *password, const bcrypt_wrap_ops *ops, const unsigned char *salt) /* {{{ */
 {
 	 /* 72 bytes after base64 encoding */
-	const size_t raw_len = 54;
-	unsigned char raw[raw_len];
+	unsigned char raw[54];
 	/* Dynamic sizes not needed anytime soon, if at all, but still */
 	static const char prefix[] = "bcrypt-wrap:%u:";
 	const size_t prefix_len = snprintf(NULL, 0, prefix, ops->version);
-	unsigned char psalt[prefix_len + salt_len];
+	const size_t psalt_len = prefix_len + PHP_BCRYPT_SALT_SIZE;
+	unsigned char psalt[sizeof(prefix) + PHP_BCRYPT_SALT_SIZE];
 
-	/* Prehash salt is technically not bound by Bcrypt's limit.
-	 * Highly unlikely, but a future version could increase its size. */
-	ZEND_ASSERT(salt_len >= PHP_BCRYPT_SALT_SIZE);
 	snprintf((char *) psalt, sizeof(psalt), prefix, ops->version);
-	memcpy(psalt + prefix_len, salt, salt_len);
+	memcpy(psalt + prefix_len, salt, PHP_BCRYPT_SALT_SIZE);
 
 #if ZEND_DEBUG
 	/* Official test vectors from NIST, here for PoC purposes, as this is our first
 	 * use of cSHAKE256. Can probably be dropped from final patch after review.
 	 * https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/cSHAKE_samples.pdf
 	 * (tail of page 8 until end of document) */
-	const unsigned char cstr[15] = "Email Signature";
+	const unsigned char cstr[15] = {'E','m','a','i','l',' ','S','i','g','n','a','t','u','r','e'};
 	const unsigned char data1[4] = { 0x00, 0x01, 0x02, 0x03 };
 	const unsigned char out1[64] = {
 		0xD0, 0x08, 0x82, 0x8E, 0x2B, 0x80, 0xAC, 0x9D, 0x22, 0x18, 0xFF, 0xEE, 0x1D, 0x07, 0x0C, 0x48,
@@ -886,23 +882,23 @@ static zend_string* php_password_bcrypt_wrap_prehash(const zend_string *password
 	ZEND_ASSERT(memcmp(out2, buffer, 64) == 0);
 	/* One more for our intended size */
 	memset(buffer, 0, sizeof(buffer));
-	php_hash_cshake256(data2, sizeof(data2), cstr, sizeof(cstr), buffer, raw_len);
-	ZEND_ASSERT(memcmp(out2, buffer, raw_len) == 0 && buffer[raw_len] == 0);
+	php_hash_cshake256(data2, sizeof(data2), cstr, sizeof(cstr), buffer, sizeof(raw));
+	ZEND_ASSERT(memcmp(out2, buffer, sizeof(raw)) == 0 && buffer[sizeof(raw)] == 0);
 #endif
 
 	if (strcmp(ops->prehash, "cshake256") == 0) {
 		/* Salt goes into the customization string as defined by SP 800-185 */
 		php_hash_cshake256(
 			(const unsigned char *) ZSTR_VAL(password), ZSTR_LEN(password),
-			psalt, sizeof(psalt),
-			raw, raw_len
+			psalt, psalt_len,
+			raw, sizeof(raw)
 		);
 	} else if (strcmp(ops->prehash, "sha512") == 0) {
 		php_hash_hmac(
 			"sha512", sizeof("sha512")-1,
 			(const unsigned char *) ZSTR_VAL(password), ZSTR_LEN(password),
-			psalt, sizeof(psalt),
-			raw, raw_len
+			psalt, psalt_len,
+			raw, sizeof(raw)
 		);
 	} else {
 		/* Failsafe, but should not be possible as there are prior guards.
@@ -912,7 +908,7 @@ static zend_string* php_password_bcrypt_wrap_prehash(const zend_string *password
 	}
 
 	ZEND_ASSERT(raw != NULL);
-	return php_base64_encode_ex((const unsigned char *) raw, raw_len, PHP_BASE64_NO_PADDING);
+	return php_base64_encode_ex((const unsigned char *) raw, sizeof(raw), PHP_BASE64_NO_PADDING);
 }
 /* }}} */
 
@@ -939,7 +935,7 @@ static zend_string* php_password_bcrypt_wrap_hash(const zend_string *password, z
 		return NULL;
 	}
 
-	prehash = php_password_bcrypt_wrap_prehash(password, &ops, salt, PHP_BCRYPT_SALT_SIZE);
+	prehash = php_password_bcrypt_wrap_prehash(password, &ops, salt);
 	ZEND_ASSERT(prehash != NULL);
 	if (!(hash = php_password_bcrypt_hash_internal(prehash, &salt, ops.cost))) {
 		zend_string_free(prehash);
@@ -996,7 +992,7 @@ static bool php_password_bcrypt_wrap_verify(const zend_string *password, const z
 		return false;
 	}
 
-	prehash = php_password_bcrypt_wrap_prehash(password, &ops, (const unsigned char *) ZSTR_VAL(salt), PHP_BCRYPT_SALT_SIZE);
+	prehash = php_password_bcrypt_wrap_prehash(password, &ops, (const unsigned char *) ZSTR_VAL(salt));
 	zend_string_free(salt);
 
 	if (!prehash) {
