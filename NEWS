@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.6.1
 
+- Core:
+  . Fixed bug GH-24792 (Assignment-result writes compile but fail with invalid
+    opcode). (ChrisAbner)
+
 - Opcache:
   . Fixed bug GH-22216 (spurious opcache.memory_consumption warning on each new
     ZTS thread; the directive is also reported as 0 in worker threads).
