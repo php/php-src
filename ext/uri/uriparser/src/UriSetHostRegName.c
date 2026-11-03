@@ -66,8 +66,8 @@
 #    include "UriSets.h"
 #  endif
 
-UriBool URI_FUNC(IsWellFormedHostRegName)(const URI_CHAR * first,
-                                          const URI_CHAR * afterLast) {
+UriBool URI_FUNC(IsWellFormedHostRegName)(
+        const URI_CHAR * first, const URI_CHAR * afterLast) {
     if ((first == NULL) || (afterLast == NULL)) {
         return URI_FALSE;
     }
@@ -111,13 +111,13 @@ UriBool URI_FUNC(IsWellFormedHostRegName)(const URI_CHAR * first,
 }
 
 int URI_FUNC(SetHostRegNameMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                               const URI_CHAR * afterLast, UriMemoryManager * memory) {
-    return URI_FUNC(InternalSetHostMm)(uri, URI_HOST_TYPE_REGNAME, first, afterLast,
-                                       memory);
+        const URI_CHAR * afterLast, UriMemoryManager * memory) {
+    return URI_FUNC(InternalSetHostMm)(
+            uri, URI_HOST_TYPE_REGNAME, first, afterLast, memory);
 }
 
-int URI_FUNC(SetHostRegName)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                             const URI_CHAR * afterLast) {
+int URI_FUNC(SetHostRegName)(
+        URI_TYPE(Uri) * uri, const URI_CHAR * first, const URI_CHAR * afterLast) {
     return URI_FUNC(SetHostRegNameMm)(uri, first, afterLast, NULL);
 }
 

@@ -67,8 +67,8 @@
 
 #  include <assert.h>
 
-UriBool URI_FUNC(IsWellFormedUserInfo)(const URI_CHAR * first,
-                                       const URI_CHAR * afterLast) {
+UriBool URI_FUNC(IsWellFormedUserInfo)(
+        const URI_CHAR * first, const URI_CHAR * afterLast) {
     if ((first == NULL) || (afterLast == NULL)) {
         return URI_FALSE;
     }
@@ -116,7 +116,7 @@ UriBool URI_FUNC(IsWellFormedUserInfo)(const URI_CHAR * first,
 }
 
 int URI_FUNC(SetUserInfoMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                            const URI_CHAR * afterLast, UriMemoryManager * memory) {
+        const URI_CHAR * afterLast, UriMemoryManager * memory) {
     /* Input validation (before making any changes) */
     if ((uri == NULL) || ((first == NULL) != (afterLast == NULL))) {
         return URI_ERROR_NULL;
@@ -132,7 +132,7 @@ int URI_FUNC(SetUserInfoMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
     }
 
     if ((first != NULL)
-        && (URI_FUNC(IsWellFormedUserInfo)(first, afterLast) == URI_FALSE)) {
+            && (URI_FUNC(IsWellFormedUserInfo)(first, afterLast) == URI_FALSE)) {
         return URI_ERROR_SYNTAX;
     }
 
@@ -172,8 +172,8 @@ int URI_FUNC(SetUserInfoMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
     return URI_SUCCESS;
 }
 
-int URI_FUNC(SetUserInfo)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                          const URI_CHAR * afterLast) {
+int URI_FUNC(SetUserInfo)(
+        URI_TYPE(Uri) * uri, const URI_CHAR * first, const URI_CHAR * afterLast) {
     return URI_FUNC(SetUserInfoMm)(uri, first, afterLast, NULL);
 }
 

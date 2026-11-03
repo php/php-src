@@ -68,8 +68,7 @@
 /* Appends a relative URI to an absolute. The last path segment of
  * the absolute URI is replaced. */
 static URI_INLINE UriBool URI_FUNC(MergePath)(URI_TYPE(Uri) * absWork,
-                                              const URI_TYPE(Uri) * relAppend,
-                                              UriMemoryManager * memory) {
+        const URI_TYPE(Uri) * relAppend, UriMemoryManager * memory) {
     URI_TYPE(PathSegment) * sourceWalker;
     URI_TYPE(PathSegment) * destPrev;
     if (relAppend->pathHead == NULL) {
@@ -79,7 +78,7 @@ static URI_INLINE UriBool URI_FUNC(MergePath)(URI_TYPE(Uri) * absWork,
     /* Replace last segment ("" if trailing slash) with first of append chain */
     if (absWork->pathHead == NULL) {
         URI_TYPE(PathSegment) * const dup =
-            memory->malloc(memory, sizeof(URI_TYPE(PathSegment)));
+                memory->malloc(memory, sizeof(URI_TYPE(PathSegment)));
         if (dup == NULL) {
             return URI_FALSE; /* Raises malloc error */
         }
@@ -99,7 +98,7 @@ static URI_INLINE UriBool URI_FUNC(MergePath)(URI_TYPE(Uri) * absWork,
 
     for (;;) {
         URI_TYPE(PathSegment) * const dup =
-            memory->malloc(memory, sizeof(URI_TYPE(PathSegment)));
+                memory->malloc(memory, sizeof(URI_TYPE(PathSegment)));
         if (dup == NULL) {
             destPrev->next = NULL;
             absWork->pathTail = destPrev;
@@ -120,8 +119,8 @@ static URI_INLINE UriBool URI_FUNC(MergePath)(URI_TYPE(Uri) * absWork,
     return URI_TRUE;
 }
 
-static int URI_FUNC(ResolveAbsolutePathFlag)(URI_TYPE(Uri) * absWork,
-                                             UriMemoryManager * memory) {
+static int URI_FUNC(ResolveAbsolutePathFlag)(
+        URI_TYPE(Uri) * absWork, UriMemoryManager * memory) {
     if (absWork == NULL) {
         return URI_ERROR_NULL;
     }
@@ -130,7 +129,7 @@ static int URI_FUNC(ResolveAbsolutePathFlag)(URI_TYPE(Uri) * absWork,
         /* Empty segment needed, instead? */
         if (absWork->pathHead == NULL) {
             URI_TYPE(PathSegment) * const segment =
-                memory->malloc(memory, sizeof(URI_TYPE(PathSegment)));
+                    memory->malloc(memory, sizeof(URI_TYPE(PathSegment)));
             if (segment == NULL) {
                 return URI_ERROR_MALLOC;
             }
@@ -149,10 +148,8 @@ static int URI_FUNC(ResolveAbsolutePathFlag)(URI_TYPE(Uri) * absWork,
 }
 
 static int URI_FUNC(AddBaseUriImpl)(URI_TYPE(Uri) * absDest,
-                                    const URI_TYPE(Uri) * relSource,
-                                    const URI_TYPE(Uri) * absBase,
-                                    UriResolutionOptions options,
-                                    UriMemoryManager * memory) {
+        const URI_TYPE(Uri) * relSource, const URI_TYPE(Uri) * absBase,
+        UriResolutionOptions options, UriMemoryManager * memory) {
     UriBool relSourceHasScheme;
 
     if (absDest == NULL) {
@@ -179,12 +176,12 @@ static int URI_FUNC(AddBaseUriImpl)(URI_TYPE(Uri) * absDest,
     /* [00/32] if ((not strict) and (R.scheme == Base.scheme)) then */
                 /* clang-format on */
                 relSourceHasScheme =
-                    (relSource->scheme.first != NULL) ? URI_TRUE : URI_FALSE;
+                        (relSource->scheme.first != NULL) ? URI_TRUE : URI_FALSE;
                 if ((options & URI_RESOLVE_IDENTICAL_SCHEME_COMPAT)
-                    && (absBase->scheme.first != NULL)
-                    && (relSource->scheme.first != NULL)
-                    && (URI_FUNC(RangeEquals)(&(absBase->scheme),
-                                              &(relSource->scheme)))) {
+                        && (absBase->scheme.first != NULL)
+                        && (relSource->scheme.first != NULL)
+                        && (URI_FUNC(RangeEquals)(
+                                &(absBase->scheme), &(relSource->scheme)))) {
                     /* clang-format off */
     /* [00/32]     undefine(R.scheme); */
                     /* clang-format on */
@@ -307,8 +304,8 @@ static int URI_FUNC(AddBaseUriImpl)(URI_TYPE(Uri) * absDest,
                                 if (res != URI_SUCCESS) {
                                     return res;
                                 }
-                                if (!URI_FUNC(RemoveDotSegmentsAbsolute)(absDest,
-                                                                         memory)) {
+                                if (!URI_FUNC(RemoveDotSegmentsAbsolute)(
+                                            absDest, memory)) {
                                     return URI_ERROR_MALLOC;
                                 }
                                 /* clang-format off */
@@ -327,8 +324,8 @@ static int URI_FUNC(AddBaseUriImpl)(URI_TYPE(Uri) * absDest,
                                 /* clang-format off */
     /* [24/32]                 T.path = remove_dot_segments(T.path); */
                                 /* clang-format on */
-                                if (!URI_FUNC(RemoveDotSegmentsAbsolute)(absDest,
-                                                                         memory)) {
+                                if (!URI_FUNC(RemoveDotSegmentsAbsolute)(
+                                            absDest, memory)) {
                                     return URI_ERROR_MALLOC;
                                 }
 
@@ -370,19 +367,19 @@ static int URI_FUNC(AddBaseUriImpl)(URI_TYPE(Uri) * absDest,
 }
 
 int URI_FUNC(AddBaseUri)(URI_TYPE(Uri) * absDest, const URI_TYPE(Uri) * relSource,
-                         const URI_TYPE(Uri) * absBase) {
+        const URI_TYPE(Uri) * absBase) {
     const UriResolutionOptions options = URI_RESOLVE_STRICTLY;
     return URI_FUNC(AddBaseUriEx)(absDest, relSource, absBase, options);
 }
 
 int URI_FUNC(AddBaseUriEx)(URI_TYPE(Uri) * absDest, const URI_TYPE(Uri) * relSource,
-                           const URI_TYPE(Uri) * absBase, UriResolutionOptions options) {
+        const URI_TYPE(Uri) * absBase, UriResolutionOptions options) {
     return URI_FUNC(AddBaseUriExMm)(absDest, relSource, absBase, options, NULL);
 }
 
 int URI_FUNC(AddBaseUriExMm)(URI_TYPE(Uri) * absDest, const URI_TYPE(Uri) * relSource,
-                             const URI_TYPE(Uri) * absBase, UriResolutionOptions options,
-                             UriMemoryManager * memory) {
+        const URI_TYPE(Uri) * absBase, UriResolutionOptions options,
+        UriMemoryManager * memory) {
     int res;
 
     URI_CHECK_MEMORY_MANAGER(memory); /* may return */
