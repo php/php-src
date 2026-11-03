@@ -541,7 +541,9 @@ static IR_NEVER_INLINE void ir_emit_osr_entry_loads(ir_ctx *ctx, int b, ir_block
 static int ir_parallel_copy(ir_ctx *ctx, ir_copy *copies, int count, ir_reg tmp_reg, ir_reg tmp_fp_reg)
 {
 	int i;
-	int8_t *pred, *loc, *types;
+	int8_t *loc;   /* array of the current locations of the original source registers: initially loc[from] = from */
+	int8_t *pred;  /* array of original source registers that must be copied to destinations: pred[to] = from */
+	int8_t *types; /* array of the types of the orginal source registers: types[from] = typeof(from) */
 	ir_reg to, from;
 	ir_type type;
 	ir_regset todo, ready, srcs;
@@ -625,18 +627,19 @@ static int ir_parallel_copy(ir_ctx *ctx, ir_copy *copies, int count, ir_reg tmp_
 	IR_ASSERT(tmp_reg == IR_REG_NONE || !IR_REGSET_IN(srcs, tmp_reg) || pred[loc[tmp_reg]] == tmp_reg);
 	IR_ASSERT(tmp_fp_reg == IR_REG_NONE || !IR_REGSET_IN(srcs, tmp_fp_reg) || pred[loc[tmp_fp_reg]] == tmp_fp_reg);
 
-	/* now we resolve all "windmill axles" - cycles (this reuires temporary registers) */
+	/* now we resolve all "windmill axles" - cycles (this requires temporary registers) */
 	while (todo != IR_REGSET_EMPTY) {
-		to = ir_regset_pop_first(&todo);
+		to = ir_regset_pop_first(&todo); /* select a register to break the cycle */
 		from = pred[to];
 		IR_ASSERT(to != loc[from]);
-		type = types[from];
+		type = types[to]; /* type of the register that needs to be moved into a temporary register */
 		if (IR_IS_TYPE_INT(type)) {
 #ifdef IR_HAVE_SWAP_INT
 			if (pred[from] == to) {
-				if (ir_type_size[types[to]] > ir_type_size[type]) {
-					type = types[to];
+				if (ir_type_size[types[from]] > ir_type_size[type]) {
+					type = types[from];
 				}
+				/* resolve the cycle with 2 registers using SWAP */
 				ir_emit_swap(ctx, type, to, from);
 				IR_REGSET_EXCL(todo, from);
 				loc[to] = from;
@@ -646,11 +649,13 @@ static int ir_parallel_copy(ir_ctx *ctx, ir_copy *copies, int count, ir_reg tmp_
 #endif
 			IR_ASSERT(tmp_reg != IR_REG_NONE);
 			IR_ASSERT(tmp_reg >= IR_REG_GP_FIRST && tmp_reg <= IR_REG_GP_LAST);
+			/* break cycle, moving one of its register into a temporary register */
 			ir_emit_mov(ctx, type, tmp_reg, to);
 			loc[to] = tmp_reg;
 		} else {
 #ifdef IR_HAVE_SWAP_FP
-			if (pred[from] == to && types[to] == type) {
+			if (pred[from] == to && types[from] == type) {
+				/* resolve the cycle with 2 registers using SWAP */
 				ir_emit_swap_fp(ctx, type, to, from);
 				IR_REGSET_EXCL(todo, from);
 				loc[to] = from;
@@ -660,6 +665,7 @@ static int ir_parallel_copy(ir_ctx *ctx, ir_copy *copies, int count, ir_reg tmp_
 #endif
 			IR_ASSERT(tmp_fp_reg != IR_REG_NONE);
 			IR_ASSERT(tmp_fp_reg >= IR_REG_FP_FIRST && tmp_fp_reg <= IR_REG_FP_LAST);
+			/* break cycle, moving one of its register into a temporary register */
 			ir_emit_fp_mov(ctx, type, tmp_fp_reg, to);
 			loc[to] = tmp_fp_reg;
 		}

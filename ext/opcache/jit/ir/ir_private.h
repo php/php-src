@@ -1204,6 +1204,7 @@ void ir_iter_cleanup(ir_ctx *ctx);
 #define IR_BB_PREV_EMPTY_ENTRY  (1<<8)
 #define IR_BB_OSR_ENTRY_LOADS   (1<<9) /* OSR Entry-point with register LOADs   */
 #define IR_BB_LOOP_WITH_ENTRY   (1<<10) /* set together with LOOP_HEADER if there is an ENTRY in the loop */
+#define IR_BB_LOOP_WITH_ENTRY_IN_PREDS (1<<18) /* set together with LOOP_HEADER if an ENTRY reaches the loop bypassing its immediate dominator */
 
 /* The following flags are set by GCM */
 #define IR_BB_HAS_PHI           (1<<11)

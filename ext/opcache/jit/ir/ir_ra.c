@@ -812,6 +812,9 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 										IR_ASSERT(use_insn->op3 == ref);
 										/* skip VSTORE (VAR is going to be remapped to PARAM) */
 										param_ival->flags |= IR_LIVE_INTERVAL_VAR_MEM_PARAM;
+										if (ctx->use_lists[ref].count != 1) {
+											param_ival->flags &= ~IR_LIVE_INTERVAL_MEM_PARAM;
+										}
 										param_ival->use_pos = param_ival->use_pos->next;
 										ctx->rules[use] = IR_SKIPPED | IR_NOP;
 									}
@@ -1530,6 +1533,9 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 										IR_ASSERT(use_insn->op3 == ref);
 										/* skip VSTORE (VAR is going to be remapped to PARAM) */
 										param_ival->flags |= IR_LIVE_INTERVAL_VAR_MEM_PARAM;
+										if (ctx->use_lists[ref].count != 1) {
+											param_ival->flags &= ~IR_LIVE_INTERVAL_MEM_PARAM;
+										}
 										param_ival->use_pos = param_ival->use_pos->next;
 										ctx->rules[use] = IR_SKIPPED | IR_NOP;
 									}

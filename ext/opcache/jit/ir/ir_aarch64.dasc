@@ -1413,8 +1413,9 @@ binop_fp:
 			if (IR_IS_TYPE_VECTOR(insn->type)) {
 				return IR_VECTOR_OP;
 			}
-			IR_FALLTHROUGH;
 #endif
+			IR_ASSERT(IR_IS_TYPE_INT(ctx->ir_base[insn->op1].type));
+			IR_FALLTHROUGH;
 		case IR_BSWAP:
 		case IR_CTLZ:
 		case IR_CTTZ:
@@ -3487,29 +3488,41 @@ static void ir_emit_sdiv_pwr2(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	}
 
 	if (ir_type_size[type] == 8) {
-		|	cmp Rx(op1_reg), #0
-		if (op2_reg != IR_REG_NONE) {
-			|	add Rx(def_reg), Rx(op1_reg), Rx(op2_reg)
+		if (shift == 63) {
+			|	movz Rx(def_reg), #0x8000, lsl #48
+			|	cmp Rx(def_reg), Rx(op1_reg)
+			|	cset Rx(def_reg), eq
 		} else {
-			|	add Rx(def_reg), Rx(op1_reg), #offset
+			|	cmp Rx(op1_reg), #0
+			if (op2_reg != IR_REG_NONE) {
+				|	add Rx(def_reg), Rx(op1_reg), Rx(op2_reg)
+			} else {
+				|	add Rx(def_reg), Rx(op1_reg), #offset
+			}
+			|	csel Rx(def_reg), Rx(def_reg), Rx(op1_reg), lt
+			|	asr Rx(def_reg), Rx(def_reg), #shift
 		}
-		|	csel Rx(def_reg), Rx(def_reg), Rx(op1_reg), lt
-		|	asr Rx(def_reg), Rx(def_reg), #shift
 	} else {
-		|	cmp Rw(op1_reg), #0
-		if (op2_reg != IR_REG_NONE) {
-			|	add Rw(def_reg), Rw(op1_reg), Rw(op2_reg)
+		if (shift == 31) {
+			|	movz Rw(def_reg), #0x8000, lsl #16
+			|	cmp Rw(def_reg), Rw(op1_reg)
+			|	cset Rw(def_reg), eq
 		} else {
-			|	add Rw(def_reg), Rw(op1_reg), #offset
-		}
-		|	csel Rw(def_reg), Rw(def_reg), Rw(op1_reg), lt
-		if (ir_type_size[type] == 4) {
-			|	asr Rw(def_reg), Rw(def_reg), #shift
-		} else if (ir_type_size[type] == 2) {
-			|	ubfx Rw(def_reg), Rw(def_reg), #shift, #16
-		} else {
-			IR_ASSERT(ir_type_size[type] == 1);
-			|	ubfx Rw(def_reg), Rw(def_reg), #shift, #8
+			|	cmp Rw(op1_reg), #0
+			if (op2_reg != IR_REG_NONE) {
+				|	add Rw(def_reg), Rw(op1_reg), Rw(op2_reg)
+			} else {
+				|	add Rw(def_reg), Rw(op1_reg), #offset
+			}
+			|	csel Rw(def_reg), Rw(def_reg), Rw(op1_reg), lt
+			if (ir_type_size[type] == 4) {
+				|	asr Rw(def_reg), Rw(def_reg), #shift
+			} else if (ir_type_size[type] == 2) {
+				|	ubfx Rw(def_reg), Rw(def_reg), #shift, #16
+			} else {
+				IR_ASSERT(ir_type_size[type] == 1);
+				|	ubfx Rw(def_reg), Rw(def_reg), #shift, #8
+			}
 		}
 	}
 	if (IR_REG_SPILLED(ctx->regs[def][0])) {
@@ -3965,10 +3978,10 @@ static void ir_emit_binop_fp(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 			|	ASM_FP_REG_REG_REG_OP fdiv, type, def_reg, op1_reg, op2_reg
 			break;
 		case IR_MIN:
-			|	ASM_FP_REG_REG_REG_OP fmin, type, def_reg, op1_reg, op2_reg
+			|	ASM_FP_REG_REG_REG_OP fminnm, type, def_reg, op1_reg, op2_reg
 			break;
 		case IR_MAX:
-			|	ASM_FP_REG_REG_REG_OP fmax, type, def_reg, op1_reg, op2_reg
+			|	ASM_FP_REG_REG_REG_OP fmaxnm, type, def_reg, op1_reg, op2_reg
 			break;
 	}
 	if (IR_REG_SPILLED(ctx->regs[def][0])) {
@@ -9272,10 +9285,10 @@ static void ir_fix_param_spills(ir_ctx *ctx)
 					if (ival->flags & IR_LIVE_INTERVAL_MEM_PARAM) {
 						IR_ASSERT(ival->stack_spill_pos == -1);
 						ival->stack_spill_pos = stack_start + stack_offset;
-						if (ival->flags & IR_LIVE_INTERVAL_VAR_MEM_PARAM) {
-							/* Remap VAR to PARAM stack slot */
-							ir_remap_param_spill_slot(ctx, use, stack_start + stack_offset);
-						}
+					}
+					if (ival->flags & IR_LIVE_INTERVAL_VAR_MEM_PARAM) {
+						/* Remap VAR to PARAM stack slot */
+						ir_remap_param_spill_slot(ctx, use, stack_start + stack_offset);
 					}
 				}
 				if (sizeof(void*) == 8) {
