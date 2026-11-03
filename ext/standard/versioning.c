@@ -215,8 +215,8 @@ PHP_FUNCTION(version_compare)
 	int compare;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_STRING(v1, v1_len)
-		Z_PARAM_STRING(v2, v2_len)
+		Z_PARAM_PATH(v1, v1_len)
+		Z_PARAM_PATH(v2, v2_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_NULL(op)
 	ZEND_PARSE_PARAMETERS_END();
