@@ -116,7 +116,7 @@ UriBool URI_FUNC(IsWellFormedQuery)(const URI_CHAR * first, const URI_CHAR * aft
 }
 
 int URI_FUNC(SetQueryMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                         const URI_CHAR * afterLast, UriMemoryManager * memory) {
+        const URI_CHAR * afterLast, UriMemoryManager * memory) {
     /* Input validation (before making any changes) */
     if ((uri == NULL) || ((first == NULL) != (afterLast == NULL))) {
         return URI_ERROR_NULL;
@@ -164,8 +164,8 @@ int URI_FUNC(SetQueryMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
     return URI_SUCCESS;
 }
 
-int URI_FUNC(SetQuery)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                       const URI_CHAR * afterLast) {
+int URI_FUNC(SetQuery)(
+        URI_TYPE(Uri) * uri, const URI_CHAR * first, const URI_CHAR * afterLast) {
     return URI_FUNC(SetQueryMm)(uri, first, afterLast, NULL);
 }
 

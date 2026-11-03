@@ -89,7 +89,7 @@ int URI_FUNC(FreeUriPath)(URI_TYPE(Uri) * uri, UriMemoryManager * memory) {
         while (segWalk != NULL) {
             URI_TYPE(PathSegment) * const next = segWalk->next;
             if ((uri->owner == URI_TRUE)
-                && (segWalk->text.first != segWalk->text.afterLast)) {
+                    && (segWalk->text.first != segWalk->text.afterLast)) {
                 memory->free(memory, (URI_CHAR *)segWalk->text.first);
             }
             segWalk->text.first = NULL;
@@ -128,8 +128,7 @@ bool URI_FUNC(RangeEquals)(const URI_TYPE(TextRange) * a, const URI_TYPE(TextRan
 }
 
 UriBool URI_FUNC(CopyRange)(URI_TYPE(TextRange) * destRange,
-                            const URI_TYPE(TextRange) * sourceRange,
-                            UriMemoryManager * memory) {
+        const URI_TYPE(TextRange) * sourceRange, UriMemoryManager * memory) {
     const size_t lenInChars = sourceRange->afterLast - sourceRange->first;
     if (lenInChars > SIZE_MAX / sizeof(URI_CHAR)) {  // detect integer overflow
         return URI_FALSE;
@@ -147,8 +146,7 @@ UriBool URI_FUNC(CopyRange)(URI_TYPE(TextRange) * destRange,
 }
 
 UriBool URI_FUNC(CopyRangeAsNeeded)(URI_TYPE(TextRange) * destRange,
-                                    const URI_TYPE(TextRange) * sourceRange,
-                                    UriMemoryManager * memory) {
+        const URI_TYPE(TextRange) * sourceRange, UriMemoryManager * memory) {
     if (sourceRange->first == NULL) {
         destRange->first = NULL;
         destRange->afterLast = NULL;
@@ -163,7 +161,7 @@ UriBool URI_FUNC(CopyRangeAsNeeded)(URI_TYPE(TextRange) * destRange,
 }
 
 UriBool URI_FUNC(RemoveDotSegmentsEx)(URI_TYPE(Uri) * uri, UriBool relative,
-                                      UriBool pathOwned, UriMemoryManager * memory) {
+        UriBool pathOwned, UriMemoryManager * memory) {
     URI_TYPE(PathSegment) * walker;
     if ((uri == NULL) || (uri->pathHead == NULL)) {
         return URI_TRUE;
@@ -198,7 +196,7 @@ UriBool URI_FUNC(RemoveDotSegmentsEx)(URI_TYPE(Uri) * uri, UriBool relative,
                 if ((walker == uri->pathHead) && (walker->next != NULL)) {
                     /* Detect case "/.//" (with or without scheme) */
                     if ((walker->next->text.first == walker->next->text.afterLast)
-                        && (URI_FUNC(HasHost)(uri) == URI_FALSE)) {
+                            && (URI_FUNC(HasHost)(uri) == URI_FALSE)) {
                         removeSegment = URI_FALSE;
                         /* Detect case "./withcolon:" */
                     } else if (relative) {
@@ -271,7 +269,7 @@ UriBool URI_FUNC(RemoveDotSegmentsEx)(URI_TYPE(Uri) * uri, UriBool relative,
 
         case 2:
             if (((walker->text.first)[0] == _UT('.'))
-                && ((walker->text.first)[1] == _UT('.'))) {
+                    && ((walker->text.first)[1] == _UT('.'))) {
                 /* Path ".." -> remove this and the previous segment */
                 URI_TYPE(PathSegment) * const prev = walker->reserved;
                 URI_TYPE(PathSegment) * prevPrev;
@@ -314,20 +312,21 @@ UriBool URI_FUNC(RemoveDotSegmentsEx)(URI_TYPE(Uri) * uri, UriBool relative,
                                 /* Last segment -> insert "" segment to represent trailing
                                  * slash, update tail */
                                 URI_TYPE(PathSegment) * const segment = memory->calloc(
-                                    memory, 1, sizeof(URI_TYPE(PathSegment)));
+                                        memory, 1, sizeof(URI_TYPE(PathSegment)));
                                 if (segment == NULL) {
                                     if (pathOwned
-                                        && (walker->text.first
-                                            != walker->text.afterLast)) {
-                                        memory->free(memory,
-                                                     (URI_CHAR *)walker->text.first);
+                                            && (walker->text.first
+                                                    != walker->text.afterLast)) {
+                                        memory->free(
+                                                memory, (URI_CHAR *)walker->text.first);
                                     }
                                     memory->free(memory, walker);
 
                                     if (pathOwned
-                                        && (prev->text.first != prev->text.afterLast)) {
-                                        memory->free(memory,
-                                                     (URI_CHAR *)prev->text.first);
+                                            && (prev->text.first
+                                                    != prev->text.afterLast)) {
+                                        memory->free(
+                                                memory, (URI_CHAR *)prev->text.first);
                                     }
                                     memory->free(memory, prev);
 
@@ -340,7 +339,7 @@ UriBool URI_FUNC(RemoveDotSegmentsEx)(URI_TYPE(Uri) * uri, UriBool relative,
                             }
 
                             if (pathOwned
-                                && (walker->text.first != walker->text.afterLast)) {
+                                    && (walker->text.first != walker->text.afterLast)) {
                                 memory->free(memory, (URI_CHAR *)walker->text.first);
                             }
                             memory->free(memory, walker);
@@ -358,7 +357,8 @@ UriBool URI_FUNC(RemoveDotSegmentsEx)(URI_TYPE(Uri) * uri, UriBool relative,
                                 walker->next->reserved = NULL;
 
                                 if (pathOwned
-                                    && (walker->text.first != walker->text.afterLast)) {
+                                        && (walker->text.first
+                                                != walker->text.afterLast)) {
                                     memory->free(memory, (URI_CHAR *)walker->text.first);
                                 }
                                 memory->free(memory, walker);
@@ -367,7 +367,8 @@ UriBool URI_FUNC(RemoveDotSegmentsEx)(URI_TYPE(Uri) * uri, UriBool relative,
                                  * slash, update tail */
                                 URI_TYPE(PathSegment) * const segment = walker;
                                 if (pathOwned
-                                    && (segment->text.first != segment->text.afterLast)) {
+                                        && (segment->text.first
+                                                != segment->text.afterLast)) {
                                     memory->free(memory, (URI_CHAR *)segment->text.first);
                                 }
                                 segment->text.first = URI_FUNC(SafeToPointTo);
@@ -413,7 +414,8 @@ UriBool URI_FUNC(RemoveDotSegmentsEx)(URI_TYPE(Uri) * uri, UriBool relative,
                                 /* Reuse segment for "" path segment to represent trailing
                                  * slash, then update head and tail */
                                 if (pathOwned
-                                    && (walker->text.first != walker->text.afterLast)) {
+                                        && (walker->text.first
+                                                != walker->text.afterLast)) {
                                     memory->free(memory, (URI_CHAR *)walker->text.first);
                                 }
                                 walker->text.first = URI_FUNC(SafeToPointTo);
@@ -424,7 +426,7 @@ UriBool URI_FUNC(RemoveDotSegmentsEx)(URI_TYPE(Uri) * uri, UriBool relative,
 
                         if (freeWalker) {
                             if (pathOwned
-                                && (walker->text.first != walker->text.afterLast)) {
+                                    && (walker->text.first != walker->text.afterLast)) {
                                 memory->free(memory, (URI_CHAR *)walker->text.first);
                             }
                             memory->free(memory, walker);
@@ -453,8 +455,8 @@ UriBool URI_FUNC(RemoveDotSegmentsEx)(URI_TYPE(Uri) * uri, UriBool relative,
 }
 
 /* Properly removes "." and ".." path segments */
-UriBool URI_FUNC(RemoveDotSegmentsAbsolute)(URI_TYPE(Uri) * uri,
-                                            UriMemoryManager * memory) {
+UriBool URI_FUNC(RemoveDotSegmentsAbsolute)(
+        URI_TYPE(Uri) * uri, UriMemoryManager * memory) {
     const UriBool ABSOLUTE = URI_FALSE;
     if (uri == NULL) {
         return URI_TRUE;
@@ -523,12 +525,12 @@ UriBool URI_FUNC(HasHost)(const URI_TYPE(Uri) * uri) {
      *       no more information to be gained.                */
     return (uri != NULL)
            && ((uri->hostText.first != NULL) || (uri->hostData.ip4 != NULL)
-               || (uri->hostData.ip6 != NULL));
+                   || (uri->hostData.ip6 != NULL));
 }
 
 /* Copies the path segment list from one URI to another. */
-UriBool URI_FUNC(CopyPath)(URI_TYPE(Uri) * dest, const URI_TYPE(Uri) * source,
-                           UriMemoryManager * memory) {
+UriBool URI_FUNC(CopyPath)(
+        URI_TYPE(Uri) * dest, const URI_TYPE(Uri) * source, UriMemoryManager * memory) {
     if (source->pathHead == NULL) {
         /* No path component */
         dest->pathHead = NULL;
@@ -539,7 +541,7 @@ UriBool URI_FUNC(CopyPath)(URI_TYPE(Uri) * dest, const URI_TYPE(Uri) * source,
         URI_TYPE(PathSegment) * destPrev = NULL;
         do {
             URI_TYPE(PathSegment) * cur =
-                memory->malloc(memory, sizeof(URI_TYPE(PathSegment)));
+                    memory->malloc(memory, sizeof(URI_TYPE(PathSegment)));
             if (cur == NULL) {
                 /* Fix broken list */
                 if (destPrev != NULL) {
@@ -569,8 +571,8 @@ UriBool URI_FUNC(CopyPath)(URI_TYPE(Uri) * dest, const URI_TYPE(Uri) * source,
 }
 
 /* Copies the authority part of an URI over to another. */
-UriBool URI_FUNC(CopyAuthority)(URI_TYPE(Uri) * dest, const URI_TYPE(Uri) * source,
-                                UriMemoryManager * memory) {
+UriBool URI_FUNC(CopyAuthority)(
+        URI_TYPE(Uri) * dest, const URI_TYPE(Uri) * source, UriMemoryManager * memory) {
     /* From this functions usage we know that *
      * the dest URI cannot be uri->owner      */
 
@@ -615,14 +617,15 @@ UriBool URI_FUNC(FixAmbiguity)(URI_TYPE(Uri) * uri, UriMemoryManager * memory) {
     URI_TYPE(PathSegment) * segment;
 
     if (/* Case 1: absolute path, empty first segment */
-        (uri->absolutePath && (uri->pathHead != NULL)
-         && (uri->pathHead->text.afterLast == uri->pathHead->text.first))
+            (uri->absolutePath && (uri->pathHead != NULL)
+                    && (uri->pathHead->text.afterLast == uri->pathHead->text.first))
 
-        /* Case 2: relative path, empty first and second segment */
-        || (!uri->absolutePath && (uri->pathHead != NULL) && (uri->pathHead->next != NULL)
-            && (uri->pathHead->text.afterLast == uri->pathHead->text.first)
-            && (uri->pathHead->next->text.afterLast
-                == uri->pathHead->next->text.first))) {
+            /* Case 2: relative path, empty first and second segment */
+            || (!uri->absolutePath && (uri->pathHead != NULL)
+                    && (uri->pathHead->next != NULL)
+                    && (uri->pathHead->text.afterLast == uri->pathHead->text.first)
+                    && (uri->pathHead->next->text.afterLast
+                            == uri->pathHead->next->text.first))) {
         /* NOOP */
     } else {
         return URI_TRUE;
@@ -641,13 +644,13 @@ UriBool URI_FUNC(FixAmbiguity)(URI_TYPE(Uri) * uri, UriMemoryManager * memory) {
     return URI_TRUE;
 }
 
-static UriBool URI_FUNC(PrependNewDotSegment)(URI_TYPE(Uri) * uri,
-                                              UriMemoryManager * memory) {
+static UriBool URI_FUNC(PrependNewDotSegment)(
+        URI_TYPE(Uri) * uri, UriMemoryManager * memory) {
     assert(uri != NULL);
     assert(memory != NULL);
 
     URI_TYPE(PathSegment) * const segment =
-        memory->malloc(memory, 1 * sizeof(URI_TYPE(PathSegment)));
+            memory->malloc(memory, 1 * sizeof(URI_TYPE(PathSegment)));
 
     if (segment == NULL) {
         return URI_FALSE; /* i.e. raise malloc error */
@@ -695,7 +698,7 @@ UriBool URI_FUNC(FixPathNoScheme)(URI_TYPE(Uri) * uri, UriMemoryManager * memory
     assert(memory != NULL);
 
     if ((uri->absolutePath == URI_TRUE) || (uri->pathHead == NULL)
-        || (uri->scheme.first != NULL) || URI_FUNC(HasHost)(uri)) {
+            || (uri->scheme.first != NULL) || URI_FUNC(HasHost)(uri)) {
         return URI_TRUE; /* i.e. nothing to do */
     }
 
@@ -735,15 +738,15 @@ UriBool URI_FUNC(FixPathNoScheme)(URI_TYPE(Uri) * uri, UriMemoryManager * memory
  * Returns URI_TRUE for (a) nothing to do or (b) successful changes.
  * Returns URI_FALSE to signal out-of-memory.
  */
-UriBool URI_FUNC(EnsureThatPathIsNotMistakenForHost)(URI_TYPE(Uri) * uri,
-                                                     UriMemoryManager * memory) {
+UriBool URI_FUNC(EnsureThatPathIsNotMistakenForHost)(
+        URI_TYPE(Uri) * uri, UriMemoryManager * memory) {
     assert(uri != NULL);
     assert(memory != NULL);
 
     if ((URI_FUNC(HasHost)(uri) == URI_TRUE) || (uri->absolutePath == URI_FALSE)
-        || (uri->pathHead == NULL)
-        || (uri->pathHead == uri->pathTail) /* i.e. no second slash */
-        || (uri->pathHead->text.first != uri->pathHead->text.afterLast)) {
+            || (uri->pathHead == NULL)
+            || (uri->pathHead == uri->pathTail) /* i.e. no second slash */
+            || (uri->pathHead->text.first != uri->pathHead->text.afterLast)) {
         return URI_TRUE; /* i.e. nothing to do */
     }
 
@@ -754,8 +757,8 @@ UriBool URI_FUNC(EnsureThatPathIsNotMistakenForHost)(URI_TYPE(Uri) * uri,
 void URI_FUNC(FixEmptyTrailSegment)(URI_TYPE(Uri) * uri, UriMemoryManager * memory) {
     /* Fix path if only one empty segment */
     if (!uri->absolutePath && !URI_FUNC(HasHost)(uri) && (uri->pathHead != NULL)
-        && (uri->pathHead->next == NULL)
-        && (uri->pathHead->text.first == uri->pathHead->text.afterLast)) {
+            && (uri->pathHead->next == NULL)
+            && (uri->pathHead->text.first == uri->pathHead->text.afterLast)) {
         memory->free(memory, uri->pathHead);
         uri->pathHead = NULL;
         uri->pathTail = NULL;

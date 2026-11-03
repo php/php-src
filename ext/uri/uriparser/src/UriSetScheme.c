@@ -109,7 +109,7 @@ UriBool URI_FUNC(IsWellFormedScheme)(const URI_CHAR * first, const URI_CHAR * af
 }
 
 int URI_FUNC(SetSchemeMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                          const URI_CHAR * afterLast, UriMemoryManager * memory) {
+        const URI_CHAR * afterLast, UriMemoryManager * memory) {
     /* Input validation (before making any changes) */
     if ((uri == NULL) || ((first == NULL) != (afterLast == NULL))) {
         return URI_ERROR_NULL;
@@ -118,7 +118,7 @@ int URI_FUNC(SetSchemeMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
     URI_CHECK_MEMORY_MANAGER(memory); /* may return */
 
     if ((first != NULL)
-        && (URI_FUNC(IsWellFormedScheme)(first, afterLast) == URI_FALSE)) {
+            && (URI_FUNC(IsWellFormedScheme)(first, afterLast) == URI_FALSE)) {
         return URI_ERROR_SYNTAX;
     }
 
@@ -160,8 +160,8 @@ int URI_FUNC(SetSchemeMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
     return URI_SUCCESS;
 }
 
-int URI_FUNC(SetScheme)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                        const URI_CHAR * afterLast) {
+int URI_FUNC(SetScheme)(
+        URI_TYPE(Uri) * uri, const URI_CHAR * first, const URI_CHAR * afterLast) {
     return URI_FUNC(SetSchemeMm)(uri, first, afterLast, NULL);
 }
 
