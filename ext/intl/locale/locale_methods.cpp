@@ -664,7 +664,7 @@ static void get_icu_disp_value_src_php( const char* tag_name, INTERNAL_FUNCTION_
 		RETURN_FALSE;
 	}
 
-	RETVAL_STR( u8str );
+	RETURN_STR( u8str );
 }
 /* }}} */
 
@@ -745,7 +745,7 @@ static void get_icu_disp_keyword_value_src_php(const char* tag_name, INTERNAL_FU
 		RETURN_FALSE;
 	}
 
-	RETVAL_STR(u8str);
+	RETURN_STR(u8str);
 }
 /* }}} */
 
