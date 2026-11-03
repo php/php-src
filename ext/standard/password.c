@@ -46,7 +46,7 @@ void php_password_algo_unregister(const char *ident) {
 	zend_hash_str_del(&php_password_algos, ident, strlen(ident));
 }
 
-static bool php_password_make_salt(char *salt, size_t length) /* {{{ */
+static bool php_password_make_salt(unsigned char *salt, size_t length) /* {{{ */
 {
 	/* 64 ought to be enough for anybody */
 	if (length > 64) {
@@ -59,7 +59,6 @@ static bool php_password_make_salt(char *salt, size_t length) /* {{{ */
 		return false;
 	}
 
-	salt[length] = 0;
 	return true;
 }
 /* }}} */
@@ -139,7 +138,7 @@ static bool php_password_bcrypt_verify(const zend_string *password, const zend_s
 
 static zend_string* php_password_bcrypt_hash(const zend_string *password, zend_array *options) {
 	char hash[30];
-	char salt[17];
+	unsigned char salt[16];
 	zend_string *result, *salt64;
 	zval *zcost;
 	zend_long cost = PHP_PASSWORD_BCRYPT_COST;
@@ -158,11 +157,11 @@ static zend_string* php_password_bcrypt_hash(const zend_string *password, zend_a
 		return NULL;
 	}
 
-	if (!php_password_make_salt(salt, 16)) {
+	if (!php_password_make_salt(salt, sizeof(salt))) {
 		return NULL;
 	}
 
-	salt64 = php_base64_encode_ex((const unsigned char*) salt, 16, PHP_BASE64_NO_PADDING);
+	salt64 = php_base64_encode_ex(salt, sizeof(salt), PHP_BASE64_NO_PADDING);
 	ZEND_ASSERT(salt64 != NULL && ZSTR_LEN(salt64) == 22);
 
 	char *ptr = ZSTR_VAL(salt64);
@@ -281,8 +280,7 @@ static bool php_password_argon2_needs_rehash(const zend_string *hash, zend_array
 static zend_string *php_password_argon2_hash(const zend_string *password, zend_array *options, argon2_type type) {
 	zval *option_buffer;
 	zend_string *out, *encoded;
-	char salt[17];
-	size_t salt_len = sizeof(salt)-1;
+	unsigned char salt[16];
 	size_t time_cost = PHP_PASSWORD_ARGON2_TIME_COST;
 	size_t memory_cost = PHP_PASSWORD_ARGON2_MEMORY_COST;
 	size_t threads = PHP_PASSWORD_ARGON2_THREADS;
@@ -316,7 +314,7 @@ static zend_string *php_password_argon2_hash(const zend_string *password, zend_a
 		return NULL;
 	}
 
-	if (!php_password_make_salt(salt, salt_len)) {
+	if (!php_password_make_salt(salt, sizeof(salt))) {
 		return NULL;
 	}
 
@@ -325,7 +323,7 @@ static zend_string *php_password_argon2_hash(const zend_string *password, zend_a
 		time_cost,
 		memory_cost,
 		threads,
-		(uint32_t)salt_len,
+		(uint32_t)sizeof(salt),
 		ZSTR_LEN(out),
 		type
 	);
@@ -338,7 +336,7 @@ static zend_string *php_password_argon2_hash(const zend_string *password, zend_a
 		ZSTR_VAL(password),
 		ZSTR_LEN(password),
 		salt,
-		salt_len,
+		sizeof(salt),
 		ZSTR_VAL(out),
 		ZSTR_LEN(out),
 		ZSTR_VAL(encoded),
