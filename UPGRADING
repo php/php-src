@@ -84,6 +84,12 @@ PHP 8.7 UPGRADE NOTES
     A ValueError is thrown if the array is empty or contains an invalid
     locale, and a TypeError if it contains a non-string value.
 
+- PDO_SQLite:
+  . Added the Pdo\Sqlite::ATTR_DQS connection attribute. Setting it to false
+    makes SQLite reject double-quoted string literals, so "abc" is only read
+    as an identifier, as in the sqlite3 shell since SQLite 3.41.0. It is
+    available when PHP is built against SQLite 3.29.0 or later.
+
 - Streams:
   . The so_linger, so_rcvbuf and so_sndbuf stream socket context options are
     now also applied to unix and unix datagram sockets.
