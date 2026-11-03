@@ -1033,7 +1033,8 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 			break;
 		case ZEND_AST_DIM:
 			if (ast->child[1] == NULL) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Cannot use [] for reading");
+				zend_throw_error(NULL, "Cannot use [] for reading");
+				return FAILURE;
 			}
 
 			if (UNEXPECTED(zend_ast_evaluate_ex(&op1, ast->child[0], scope, &short_circuited, ctx) != SUCCESS)) {
