@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
 
+- Opcache:
+  . Fixed bug GH-25165 (Tracing JIT loops forever once opcache.jit_buffer_size
+    is exhausted while compiling side traces). (Ilia Alshanetsky)
+
 19 Nov 2026, PHP 8.4.28
 
 - Core:
