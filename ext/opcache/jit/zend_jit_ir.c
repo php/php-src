@@ -243,7 +243,6 @@ static size_t tsrm_tls_offset = 0;
 	_(undefined_offset,               IR_FUNCTION | IR_FASTCALL_FUNC) \
 	_(undefined_key,                  IR_FUNCTION | IR_FASTCALL_FUNC) \
 	_(cannot_add_element,             IR_FUNCTION | IR_FASTCALL_FUNC) \
-	_(assign_dim_cannot_add_element,  IR_FUNCTION | IR_FASTCALL_FUNC) \
 	_(assign_const,                   IR_FUNCTION | IR_FASTCALL_FUNC) \
 	_(assign_tmp,                     IR_FUNCTION | IR_FASTCALL_FUNC) \
 	_(assign_var,                     IR_FUNCTION | IR_FASTCALL_FUNC) \
@@ -2167,12 +2166,6 @@ static int zend_jit_invalid_this_stub(zend_jit_ctx *jit)
 		IR_NULL,
 		ir_CONST_ADDR("Using $this when not in object context"));
 	ir_IJMP(jit_STUB_ADDR(jit, jit_stub_exception_handler_undef));
-	return 1;
-}
-
-static int zend_jit_assign_dim_cannot_add_element_stub(zend_jit_ctx *jit)
-{
-	ir_TAILCALL(IR_VOID, ir_CONST_FC_FUNC(zend_jit_assign_dim_cannot_add_element));
 	return 1;
 }
 
@@ -13384,11 +13377,8 @@ static int zend_jit_assign_dim(zend_jit_ctx  *jit,
 
 			// JIT: zend_throw_error(NULL, "Cannot add element to the array as the next element is already occupied");
 			jit_SET_EX_OPLINE(jit, opline);
-			if ((opline+1)->op1_type & (IS_VAR|IS_TMP_VAR)) {
-				ir_CALL(IR_VOID, jit_STUB_FUNC_ADDR(jit, jit_stub_assign_dim_cannot_add_element, IR_FASTCALL_FUNC));
-			} else {
-				ir_CALL(IR_VOID, jit_STUB_FUNC_ADDR(jit, jit_stub_cannot_add_element, IR_FASTCALL_FUNC));
-			}
+			ir_CALL(IR_VOID, jit_STUB_FUNC_ADDR(jit, jit_stub_cannot_add_element, IR_FASTCALL_FUNC));
+			jit_FREE_OP(jit, (opline+1)->op1_type, (opline+1)->op1, val_info, NULL);
 
 			ir_END_list(end_inputs);
 

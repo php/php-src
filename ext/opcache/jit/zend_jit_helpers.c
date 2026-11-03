@@ -1463,27 +1463,16 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_obj_rw_helper(zval *object_ptr, zva
 
 static zval* ZEND_FASTCALL zend_jit_assign_dim_fetch_w_helper(zend_array *ht, zval *dim)
 {
-	zend_execute_data *execute_data = EG(current_execute_data);
-	/* EX(opline) points to HANDLE_EXCEPTION once the fetch throws */
-	const zend_op *opline = EX(opline);
 	zval *retval = zend_jit_fetch_dim_w_helper(ht, dim);
 
 	if (UNEXPECTED(!retval)) {
+		zend_execute_data *execute_data = EG(current_execute_data);
+		/* Throwing replaces EX(opline) with HANDLE_EXCEPTION */
+		const zend_op *opline = EG(exception) ? EG(opline_before_exception) : EX(opline);
+
 		zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 	}
 	return retval;
-}
-
-static ZEND_COLD void ZEND_FASTCALL zend_jit_assign_dim_cannot_add_element(void)
-{
-	zend_execute_data *execute_data = EG(current_execute_data);
-	const zend_op *opline = EX(opline);
-
-	if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
-		ZVAL_UNDEF(EX_VAR(opline->result.var));
-	}
-	zend_cannot_add_element();
-	zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 }
 
 static void ZEND_FASTCALL zend_jit_assign_dim_helper(zval *object_ptr, zval *dim, zval *value, zval *result)
