@@ -69,13 +69,23 @@ typedef struct _php_ftp_dirstream_data {
 } php_ftp_dirstream_data;
 
 /* {{{ get_ftp_result */
+/* Reads reply lines into buffer until a complete status line ("ddd ") and
+ * returns its code, or 0 if the stream ends before one.
+ * On return the buffer always holds a NUL-terminated string, which the
+ * callers rely on when they parse or print the reply text: it is emptied
+ * first in case nothing can be read, and php_stream_gets() terminates every
+ * line it reads. */
 static inline int get_ftp_result(php_stream *stream, char *buffer, size_t buffer_size)
 {
 	buffer[0] = '\0'; /* in case read fails to read anything */
-	while (php_stream_gets(stream, buffer, buffer_size-1) &&
-		   !(isdigit((unsigned char)buffer[0]) && isdigit((unsigned char)buffer[1]) &&
-			 isdigit((unsigned char)buffer[2]) && buffer[3] == ' '));
-	return strtol(buffer, NULL, 10);
+	while (php_stream_gets(stream, buffer, buffer_size-1)) {
+		if (isdigit((unsigned char)buffer[0]) && isdigit((unsigned char)buffer[1]) &&
+			isdigit((unsigned char)buffer[2]) && buffer[3] == ' ') {
+			return strtol(buffer, NULL, 10);
+		}
+	}
+	/* no complete status line, callers parse the reply from buffer + 4 */
+	return 0;
 }
 /* }}} */
 
@@ -364,8 +374,10 @@ static unsigned short php_fopen_do_pasv(php_stream *stream, char *ip, size_t ip_
 			tpath++;
 		}
 		tpath[-1] = '\0';
-		memcpy(ip, hoststart, ip_size);
-		ip[ip_size-1] = '\0';
+		if ((size_t)(tpath - hoststart) > ip_size) {
+			return 0;
+		}
+		memcpy(ip, hoststart, tpath - hoststart);
 		hoststart = ip;
 
 		/* pull out the MSB of the port */
@@ -847,11 +859,11 @@ static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, const char *url,
 		struct tm tm, tmbuf, *gmt;
 		time_t stamp;
 
-		while ((size_t)(p - tmp_line) < sizeof(tmp_line) && !isdigit((unsigned char)*p)) {
+		while (*p && !isdigit((unsigned char)*p)) {
 			p++;
 		}
 
-		if ((size_t)(p - tmp_line) > sizeof(tmp_line)) {
+		if (!*p) {
 			goto mdtm_error;
 		}
 
