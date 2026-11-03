@@ -230,6 +230,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-24988 (Incorrect opcode range check causes bugs with exceptions in
     function JIT). (ndossche, Jorg Sowa)
   . Fix opcache phar check. (ndossche)
+  . Fixed bug GH-25165 (Tracing JIT loops forever once opcache.jit_buffer_size
+    is exhausted while compiling side traces). (Ilia Alshanetsky)
 
 - OpenSSL:
   . Fixed build and test compatibility with OpenSSL 4.0 and 4.1.
