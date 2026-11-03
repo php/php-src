@@ -427,7 +427,11 @@ static inline void accel_deactivate_sub(void)
 		SHM_PROTECT();
 	}
 #elif defined(ZTS)
-	/* nothing to release: accel_activate_add() never succeeds under ZTS */
+	/* releases the reference taken in RINIT (accel_activate_add() never succeeds under ZTS) */
+	if (ZCG(counted)) {
+		accel_zts_readers_add(-1);
+		ZCG(counted) = false;
+	}
 #else
 	struct flock mem_usage_unlock;
 
@@ -444,15 +448,10 @@ static inline void accel_deactivate_sub(void)
 
 static inline void accel_unlock_all(void)
 {
-#ifdef ZEND_WIN32
+#if defined(ZEND_WIN32) || defined(ZTS)
+	/* Under ZTS never unlock the whole file: fcntl() locks belong to the process, and the
+	 * SHM write lock (byte 0) and the restart lock (byte 2) may be held by other threads. */
 	accel_deactivate_sub();
-#elif defined(ZTS)
-	/* Release this thread's reference only. Never unlock the whole file: fcntl() locks
-	 * belong to the process, and the SHM write lock (byte 0) and the restart lock
-	 * (byte 2) may be held by other threads. */
-	if (ZCG(counted)) {
-		accel_zts_readers_add(-1);
-	}
 #else
 	if (lock_file == -1) {
 		return;

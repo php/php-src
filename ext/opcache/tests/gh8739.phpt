@@ -26,7 +26,8 @@ file_put_contents("$dir/reset.php", "<?php\nvar_dump(opcache_reset());\n");
 
 include __DIR__ . '/php_cli_server.inc';
 
-if (PHP_OS_FAMILY !== 'Windows') {
+/* elsewhere the workers outlive the server without PDEATHSIG, see php_cli_server_pdeathsig.phpt */
+if (PHP_OS === 'Linux' || PHP_OS === 'FreeBSD') {
     putenv('PHP_CLI_SERVER_WORKERS=2');
 }
 $ini = '-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.file_update_protection=0';
