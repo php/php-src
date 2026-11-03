@@ -69,7 +69,6 @@ PHPAPI void mysqlnd_library_init(void)
 		mysqlnd_conn_set_methods(&MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_conn));
 		mysqlnd_conn_data_set_methods(&MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_conn_data));
 		_mysqlnd_init_ps_subsystem();
-		/* Should be calloc, as mnd_calloc will reference LOCK_access*/
 		mysqlnd_stats_init(&mysqlnd_global_stats, STAT_LAST, 1);
 		mysqlnd_plugin_subsystem_init();
 		{
