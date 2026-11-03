@@ -140,6 +140,12 @@ static zend_always_inline size_t zend_string_safe_len(size_t n, size_t m, size_t
 
 	if (UNEXPECTED(overflow || len > ZSTR_MAX_LEN)) {
 		zend_mm_delayed_error_or_panic(fallible, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", n, m, l);
+		if (!fallible) {
+			/* zend_mm_delayed_error_or_panic() aborts for !fallible, but its body
+			 * is in zend_alloc.c and is not visible when compiling other source files.
+			 * Its declaration cannot use ZEND_NORETURN because the fallible path returns. */
+			ZEND_UNREACHABLE();
+		}
 		return SIZE_MAX;
 	}
 	return len;
