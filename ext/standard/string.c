@@ -4076,7 +4076,7 @@ PHPAPI zend_string *php_addslashes(zend_string *str) /* {{{ */
 zend_string *php_addslashes_sse42(zend_string *str)
 # endif
 {
-	ZEND_SET_ALIGNED(16, static const char slashchars[16]) = "\'\"\\\0";
+	alignas(16) static const char slashchars[16] = "\'\"\\\0";
 	__m128i w128, s128;
 	uint32_t res = 0;
 	/* maximum string length, worst case situation */

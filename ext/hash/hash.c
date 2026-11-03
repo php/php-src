@@ -26,17 +26,9 @@
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
 #include "zend_smart_str.h"
+#include <stdalign.h>
 
 #include "hash_arginfo.h"
-
-#ifdef PHP_WIN32
-# define __alignof__ __alignof
-#else
-# ifndef HAVE_ALIGNOF
-#  include <stddef.h>
-#  define __alignof__(type) offsetof (struct { char c; type member;}, member)
-# endif
-#endif
 
 static HashTable php_hash_hashtable;
 zend_class_entry *php_hashcontext_ce;
@@ -138,16 +130,16 @@ static size_t parse_serialize_spec(
 	/* parse size */
 	if (*spec == 's' || *spec == 'S') {
 		*sz = 2;
-		alignment = __alignof__(uint16_t); /* usually 2 */
+		alignment = alignof(uint16_t); /* usually 2 */
 	} else if (*spec == 'l' || *spec == 'L') {
 		*sz = 4;
-		alignment = __alignof__(uint32_t); /* usually 4 */
+		alignment = alignof(uint32_t); /* usually 4 */
 	} else if (*spec == 'q' || *spec == 'Q') {
 		*sz = 8;
-		alignment = __alignof__(uint64_t); /* usually 8 */
+		alignment = alignof(uint64_t); /* usually 8 */
 	} else if (*spec == 'i' || *spec == 'I') {
 		*sz = sizeof(int);
-		alignment = __alignof__(int);      /* usually 4 */
+		alignment = alignof(int);      /* usually 4 */
 	} else {
 		ZEND_ASSERT(*spec == 'b' || *spec == 'B');
 		*sz = 1;
