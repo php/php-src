@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.14
 
+- Curl:
+  . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
 
 19 Nov 2026, PHP 8.5.13
 
