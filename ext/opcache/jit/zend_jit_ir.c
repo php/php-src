@@ -18018,6 +18018,7 @@ static bool zend_jit_may_be_in_reg(const zend_op_array *op_array, zend_ssa *ssa,
 		zend_basic_block *bb;
 		zend_ssa_phi *p;
 		bool ret = true;
+		bool def_is_pi = false;
 		zend_worklist worklist;
 		ALLOCA_FLAG(use_heap)
 
@@ -18027,6 +18028,7 @@ static bool zend_jit_may_be_in_reg(const zend_op_array *op_array, zend_ssa *ssa,
 		} else {
 			ZEND_ASSERT(ssa->vars[var].definition_phi);
 			def_block = ssa->vars[var].definition_phi->block;
+			def_is_pi = ssa->vars[var].definition_phi->pi >= 0;
 		}
 
 		ZEND_WORKLIST_ALLOCA(&worklist, ssa->cfg.blocks_count, use_heap);
@@ -18044,9 +18046,14 @@ static bool zend_jit_may_be_in_reg(const zend_op_array *op_array, zend_ssa *ssa,
 
 		p = ssa->vars[var].phi_use_chain;
 		while (p) {
-			use_block = p->block;
-			if (use_block != def_block) {
-				bb = &ssa->cfg.blocks[use_block];
+			bb = &ssa->cfg.blocks[p->block];
+			if (p->pi >= 0) {
+				/* A Pi uses the value on the single edge from its "pi" block */
+				if (p->pi != def_block) {
+					zend_worklist_push(&worklist, p->pi);
+				}
+			} else if (p->block != def_block || !def_is_pi) {
+				/* Live to the end of the predecessor; a same-block Pi is zero-length */
 				for (j = 0; j < bb->predecessors_count; j++) {
 					if (p->sources[j] == var) {
 						use_block = ssa->cfg.predecessors[bb->predecessor_offset + j];
