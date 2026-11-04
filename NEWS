@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-25165 (Tracing JIT loops forever once opcache.jit_buffer_size
     is exhausted while compiling side traces). (Ilia Alshanetsky)
+  . Fixed bug GH-25164 (Function JIT loop calling a user function runs once
+    or never terminates). (Ilia Alshanetsky)
 
 19 Nov 2026, PHP 8.5.13
 
