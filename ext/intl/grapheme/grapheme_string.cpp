@@ -1308,7 +1308,10 @@ U_CFUNC PHP_FUNCTION(grapheme_str_pad)
 			goto overflow;
 		}
 
-		zend_string *result = zend_string_safe_alloc(1, ZSTR_LEN(input), left_bytes + right_bytes, false);
+		zend_string *result = zend_string_safe_falloc(1, ZSTR_LEN(input), left_bytes + right_bytes, false, /* fallible */ true);
+		if (UNEXPECTED(!result)) {
+			RETURN_OOM();
+		}
 		char *buffer = ZSTR_VAL(result);
 
 		buffer = grapheme_str_pad_fill(buffer, pad, full_left_copies, left_remaining_bytes);
