@@ -4195,9 +4195,9 @@ static zend_string *zend_compile_partial_name(const zend_op_array *declaring_op_
 		}
 	}
 
-	zend_string *name = zend_strpprintf_unchecked(
+	zend_string *name = zend_strpprintf(
 		0,
-		"{closure:pfa:%S%S%S%s:%" PRIu32 "}",
+		"{closure:pfa:%pS%pS%pS%s:%" PRIu32 "}",
 		class,
 		separator,
 		function,
@@ -6119,7 +6119,7 @@ static void zend_compile_static_var(zend_ast *ast) /* {{{ */
 	}
 
 	if (zend_hash_exists(CG(active_op_array)->static_variables, var_name)) {
-		zend_error_noreturn_unchecked(E_COMPILE_ERROR, "Duplicate declaration of static variable $%S", var_name);
+		zend_error_noreturn(E_COMPILE_ERROR, "Duplicate declaration of static variable $%pS", var_name);
 	}
 
 	zend_eval_const_expr(&ast->child[1]);
@@ -8921,8 +8921,8 @@ static void zend_compile_closure_uses(zend_ast *ast) /* {{{ */
 			int i;
 			for (i = 0; i < op_array->last_var; i++) {
 				if (zend_string_equals(op_array->vars[i], var_name)) {
-					zend_error_noreturn_unchecked(E_COMPILE_ERROR,
-						"Cannot use lexical variable $%S as a parameter name", var_name);
+					zend_error_noreturn(E_COMPILE_ERROR,
+						"Cannot use lexical variable $%pS as a parameter name", var_name);
 				}
 			}
 		}
@@ -9094,9 +9094,9 @@ static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array,
 			}
 		}
 
-		unqualified_name = zend_strpprintf_unchecked(
+		unqualified_name = zend_strpprintf(
 			0,
-			"{closure:%S%S%S%s:%" PRIu32 "}",
+			"{closure:%pS%pS%pS%s:%" PRIu32 "}",
 			class,
 			separator,
 			function,

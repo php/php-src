@@ -1242,15 +1242,15 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, int type, const char *forma
 		}
 		/* display html formatted or only show the additional links */
 		if (PG(html_errors)) {
-			message = zend_strpprintf_unchecked(0, "%s [<a href='%s%s%s'>%s</a>]: %S", origin, docref_root, docref, docref_target, docref, buffer);
+			message = zend_strpprintf(0, "%s [<a href='%s%s%s'>%s</a>]: %pS", origin, docref_root, docref, docref_target, docref, buffer);
 		} else {
-			message = zend_strpprintf_unchecked(0, "%s [%s%s%s]: %S", origin, docref_root, docref, docref_target, buffer);
+			message = zend_strpprintf(0, "%s [%s%s%s]: %pS", origin, docref_root, docref, docref_target, buffer);
 		}
 		if (target) {
 			efree(target);
 		}
 	} else {
-		message = zend_strpprintf_unchecked(0, "%s: %S", origin, buffer);
+		message = zend_strpprintf(0, "%s: %pS", origin, buffer);
 	}
 	if (replace_origin) {
 		zend_string_free(replace_origin);
@@ -1461,7 +1461,7 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%" PRIu32 "</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, ZSTR_VAL(buf), ZSTR_VAL(error_filename), error_lineno, STR_PRINT(append_string));
 						zend_string_free(buf);
 					} else {
-						php_printf_unchecked("%s<br />\n<b>%s</b>:  %S in <b>%s</b> on line <b>%" PRIu32 "</b><br />%s%s\n%s", STR_PRINT(prepend_string), error_type_str, message, ZSTR_VAL(error_filename), error_lineno, ZSTR_LEN(backtrace) ? "\nStack trace:\n" : "", ZSTR_VAL(backtrace), STR_PRINT(append_string));
+						php_printf("%s<br />\n<b>%s</b>:  %pS in <b>%s</b> on line <b>%" PRIu32 "</b><br />%s%s\n%s", STR_PRINT(prepend_string), error_type_str, message, ZSTR_VAL(error_filename), error_lineno, ZSTR_LEN(backtrace) ? "\nStack trace:\n" : "", ZSTR_VAL(backtrace), STR_PRINT(append_string));
 					}
 				} else {
 					/* Write CLI/CGI errors to stderr if display_errors = "stderr" */
@@ -1475,7 +1475,7 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 						fflush(stderr);
 #endif
 					} else {
-						php_printf_unchecked("%s\n%s: %S in %s on line %" PRIu32 "%s%s\n%s", STR_PRINT(prepend_string), error_type_str, message, ZSTR_VAL(error_filename), error_lineno, ZSTR_LEN(backtrace) ? "\nStack trace:\n" : "", ZSTR_VAL(backtrace), STR_PRINT(append_string));
+						php_printf("%s\n%s: %pS in %s on line %" PRIu32 "%s%s\n%s", STR_PRINT(prepend_string), error_type_str, message, ZSTR_VAL(error_filename), error_lineno, ZSTR_LEN(backtrace) ? "\nStack trace:\n" : "", ZSTR_VAL(backtrace), STR_PRINT(append_string));
 					}
 				}
 			}
