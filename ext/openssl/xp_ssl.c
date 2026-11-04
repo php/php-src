@@ -785,7 +785,8 @@ static int php_openssl_win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, 
 	bool is_self_signed = false;
 
 
-	stream = (php_stream*)arg;
+	SSL *ssl = X509_STORE_CTX_get_ex_data(x509_store_ctx, SSL_get_ex_data_X509_STORE_CTX_idx());
+	stream = (php_stream*)SSL_get_ex_data(ssl, php_openssl_get_ssl_stream_data_index());
 	sslsock = (php_openssl_netstream_data_t*)stream->abstract;
 
 	{ /* First convert the x509 struct back to a DER encoded buffer and let Windows decode it into a form it can work with */
@@ -1020,7 +1021,7 @@ static zend_result php_openssl_enable_peer_verification(SSL_CTX *ctx, php_stream
 		}
 	} else {
 #ifdef PHP_WIN32
-		SSL_CTX_set_cert_verify_callback(ctx, php_openssl_win_cert_verify_callback, (void *)stream);
+		SSL_CTX_set_cert_verify_callback(ctx, php_openssl_win_cert_verify_callback, NULL);
 #else
 		if (sslsock->is_client && !SSL_CTX_set_default_verify_paths(ctx)) {
 			php_stream_warn(stream, ProtocolError,
@@ -1649,7 +1650,10 @@ static int php_openssl_server_alpn_callback(SSL *ssl_handle,
 		const unsigned char **out, unsigned char *outlen,
 		const unsigned char *in, unsigned int inlen, void *arg) /* {{{ */
 {
-	php_openssl_netstream_data_t *sslsock = arg;
+	php_stream *stream = (php_stream *)SSL_get_ex_data(ssl_handle, php_openssl_get_ssl_stream_data_index());
+	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t *)stream->abstract;
+
+	ZEND_ASSERT(sslsock->alpn_ctx.data != NULL);
 
 	if (SSL_select_next_proto((unsigned char **)out, outlen, sslsock->alpn_ctx.data, sslsock->alpn_ctx.len, in, inlen) != OPENSSL_NPN_NEGOTIATED) {
 		return SSL_TLSEXT_ERR_NOACK;
@@ -2707,7 +2711,7 @@ static zend_result php_openssl_create_server_ctx(php_stream *stream,
 			} else {
 				sslsock->alpn_ctx.data = (unsigned char *) pestrndup((const char*)alpn, alpn_len, php_stream_is_persistent(stream));
 				sslsock->alpn_ctx.len = alpn_len;
-				SSL_CTX_set_alpn_select_cb(sslsock->ctx, php_openssl_server_alpn_callback, sslsock);
+				SSL_CTX_set_alpn_select_cb(sslsock->ctx, php_openssl_server_alpn_callback, NULL);
 			}
 
 			efree(alpn);
@@ -2808,6 +2812,16 @@ static zend_result php_openssl_setup_crypto(php_stream *stream,
 		} else {
 			SSL_CTX_up_ref(parent_sslsock->ctx);
 			sslsock->ctx = parent_sslsock->ctx;
+#ifdef HAVE_TLS_ALPN
+			if (parent_sslsock->alpn_ctx.data) {
+				if (sslsock->alpn_ctx.data) {
+					pefree(sslsock->alpn_ctx.data, php_stream_is_persistent(stream));
+				}
+				sslsock->alpn_ctx.data = (unsigned char *) pestrndup((const char *) parent_sslsock->alpn_ctx.data,
+					parent_sslsock->alpn_ctx.len, php_stream_is_persistent(stream));
+				sslsock->alpn_ctx.len = parent_sslsock->alpn_ctx.len;
+			}
+#endif
 			if (parent_sslsock->session_callbacks) {
 				parent_sslsock->session_callbacks->refcount++;
 				sslsock->session_callbacks = parent_sslsock->session_callbacks;
