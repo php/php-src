@@ -1668,7 +1668,7 @@ int fpm_conf_load_ini_file(char *filename) /* {{{ */
 		/* always append newline and null terminate */
 		buf[n++] = '\n';
 		buf[n] = '\0';
-		tmp = zend_parse_ini_string(buf, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t)fpm_conf_ini_parser, &error);
+		tmp = zend_parse_ini_string(buf, strlen(buf), 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t)fpm_conf_ini_parser, &error);
 		ini_filename = filename;
 		if (error || tmp == FAILURE) {
 			if (ini_include) {
