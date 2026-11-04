@@ -24,16 +24,16 @@
 #include <unicode/gregocal.h>
 #include <unicode/ustring.h>
 
-extern "C" {
 #include "../php_intl.h"
 #include "../intl_common.h"
 #define USE_TIMEZONE_POINTER 1
 #include "../timezone/timezone_class.h"
 #define USE_CALENDAR_POINTER 1
 #include "calendar_class.h"
+BEGIN_EXTERN_C()
 #include <ext/date/php_date.h>
+END_EXTERN_C()
 #include "zend_exceptions.h"
-}
 
 using icu::GregorianCalendar;
 using icu::Locale;

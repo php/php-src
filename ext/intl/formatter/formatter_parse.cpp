@@ -23,10 +23,8 @@
 #include "formatter_class.h"
 #include "formatter_format.h"
 
-extern "C" {
 #include "php_intl.h"
 #include "intl_convert.h"
-}
 
 #include <locale.h>
 #include <memory>

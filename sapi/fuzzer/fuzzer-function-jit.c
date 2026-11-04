@@ -27,15 +27,13 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	 * we bail out here, as the JIT code may loop infinitely. */
 	steps_left = MAX_STEPS;
 	bailed_out = false;
-	zend_alter_ini_entry_chars(
-		jit_option, "off", sizeof("off")-1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+	set_jit_option(jit_option, "off");
 	fuzzer_do_request_from_buffer(
 		FILE_NAME, (const char *) Data, Size, /* execute */ 1, opcache_invalidate);
 
 	if (!bailed_out) {
 		steps_left = MAX_STEPS;
-		zend_alter_ini_entry_chars(jit_option,
-			"function", sizeof("function")-1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		set_jit_option(jit_option, "function");
 		zend_execute_ex = orig_execute_ex;
 		fuzzer_do_request_from_buffer(
 			FILE_NAME, (const char *) Data, Size, /* execute */ 1, opcache_invalidate);
@@ -50,6 +48,8 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 int LLVMFuzzerInitialize(int *argc, char ***argv) {
 	char ini_buf[512];
 	snprintf(ini_buf, sizeof(ini_buf),
+		/* The default opcache.jit=disable does not allow enabling the JIT at runtime. */
+		"opcache.jit=off\n"
 		"opcache.validate_timestamps=0\n"
 		"opcache.file_update_protection=0\n"
 		"opcache.jit_buffer_size=128M\n"

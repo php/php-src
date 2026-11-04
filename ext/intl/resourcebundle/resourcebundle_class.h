@@ -18,14 +18,10 @@
 #include <unicode/ures.h>
 
 #include <zend.h>
-#ifdef __cplusplus
-extern "C" {
-#endif
+
 #include "php.h"
 #include "intl_error.h"
-#ifdef __cplusplus
-}
-#endif
+
 
 typedef struct {
 	intl_error      error;
@@ -51,13 +47,9 @@ static inline ResourceBundle_object *php_intl_resourcebundle_fetch_object(zend_o
 
 #define RESOURCEBUNDLE_OBJECT(rb)			(rb)->me
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+BEGIN_EXTERN_C()
 void resourcebundle_register_class( void );
 extern zend_class_entry *ResourceBundle_ce_ptr;
-#ifdef __cplusplus
-}
-#endif
+END_EXTERN_C()
 
 #endif // #ifndef RESOURCEBUNDLE_CLASS_H

@@ -541,7 +541,7 @@ static bool php_openssl_matches_san_list(
 				/* TODO: warn ? */
 				continue;
 			}
-			if ((size_t)ASN1_STRING_length(san->d.dNSName) != strlen((const char*)cert_name)) {
+			if (ASN1_STRING_get_length(san->d.dNSName) != strlen((const char*)cert_name)) {
 				OPENSSL_free(cert_name);
 				/* prevent null-byte poisoning*/
 				continue;
@@ -561,7 +561,7 @@ static bool php_openssl_matches_san_list(
 			}
 			OPENSSL_free(cert_name);
 		} else if (san->type == GEN_IPADD) {
-			if (ASN1_STRING_length(san->d.iPAddress) == 4) {
+			if (ASN1_STRING_get_length(san->d.iPAddress) == 4) {
 				snprintf(ipbuffer, sizeof(ipbuffer), "%d.%d.%d.%d",
 					ASN1_STRING_get0_data(san->d.iPAddress)[0],
 					ASN1_STRING_get0_data(san->d.iPAddress)[1],
@@ -575,7 +575,7 @@ static bool php_openssl_matches_san_list(
 				}
 			}
 #ifdef HAVE_IPV6_SAN
-			else if (ASN1_STRING_length(san->d.ip) == 16 && subject_name_is_ipv6) {
+			else if (ASN1_STRING_get_length(san->d.ip) == 16 && subject_name_is_ipv6) {
 				ipbuffer[0] = 0;
 				EXPAND_IPV6_ADDRESS(ipbuffer, ASN1_STRING_get0_data(san->d.iPAddress));
 				if (strcasecmp((const char*)subject_name_ipv6_expanded, (const char*)ipbuffer) == 0) {
@@ -630,7 +630,7 @@ static bool php_openssl_matches_common_name(php_stream *stream, const X509 *peer
 		return false;
 	}
 	name_asn1 = X509_NAME_ENTRY_get_data(name_entry);
-	cert_name_len = ASN1_STRING_length(name_asn1);
+	cert_name_len = ASN1_STRING_get_length(name_asn1);
 	cert_name = (unsigned char *) OPENSSL_strndup((const char *) ASN1_STRING_get0_data(name_asn1), cert_name_len);
 	if (cert_name == NULL) {
 		php_stream_warn(stream, NetworkRecvFailed, "Unable to locate peer certificate CN");
@@ -1776,8 +1776,6 @@ static unsigned int php_openssl_psk_client_cb(SSL *ssl, const char *hint,
 		unsigned char *psk_out, unsigned int max_psk_len)
 {
 	(void)hint; /* identity hint deliberately not exposed as it is useless */
-	(void)max_identity_len;
-	(void)max_psk_len;
 
 	php_stream *stream = (php_stream *)SSL_get_ex_data(ssl,
 			php_openssl_get_ssl_stream_data_index());
@@ -1816,6 +1814,18 @@ static unsigned int php_openssl_psk_client_cb(SSL *ssl, const char *hint,
 		return 0;
 	}
 
+	/* Returned lengths are untrusted, so bound them to the buffers. */
+	if (ZSTR_LEN(identity_str) >= max_identity_len) {
+		zend_value_error("PSK identity must be shorter than %u bytes", max_identity_len);
+		zval_ptr_dtor(&result);
+		return 0;
+	}
+	if (ZSTR_LEN(psk_str) > max_psk_len) {
+		zend_value_error("PSK key must not exceed %u bytes", max_psk_len);
+		zval_ptr_dtor(&result);
+		return 0;
+	}
+
 	memcpy(identity_out, ZSTR_VAL(identity_str), ZSTR_LEN(identity_str));
 	identity_out[ZSTR_LEN(identity_str)] = '\0';
 	memcpy(psk_out, ZSTR_VAL(psk_str), ZSTR_LEN(psk_str));
@@ -1828,8 +1838,6 @@ static unsigned int php_openssl_psk_client_cb(SSL *ssl, const char *hint,
 static unsigned int php_openssl_psk_server_cb(SSL *ssl, const char *identity,
 		unsigned char *psk_out, unsigned int max_psk_len)
 {
-	(void)max_psk_len;
-
 	php_stream *stream = (php_stream *)SSL_get_ex_data(ssl,
 			php_openssl_get_ssl_stream_data_index());
 	if (stream == NULL) {
@@ -1865,6 +1873,13 @@ static unsigned int php_openssl_psk_server_cb(SSL *ssl, const char *identity,
 
 	zend_string *psk_str = php_openssl_psk_get_psk(&result);
 	if (psk_str == NULL) {
+		zval_ptr_dtor(&result);
+		return 0;
+	}
+
+	/* Returned length is untrusted, so bound it to the buffer. */
+	if (ZSTR_LEN(psk_str) > max_psk_len) {
+		zend_value_error("PSK key must not exceed %u bytes", max_psk_len);
 		zval_ptr_dtor(&result);
 		return 0;
 	}
@@ -1931,6 +1946,14 @@ static int php_openssl_psk_use_session_cb(SSL *ssl, const EVP_MD *md,
 			/* Could not satisfy the server's chosen digest */
 			return 1;
 		}
+		return 0;
+	}
+
+	/* Returned length is untrusted, so bound it to the buffer. */
+	if (ZSTR_LEN(identity_str) > PHP_OPENSSL_PSK_MAX_IDENTITY_LEN) {
+		zend_value_error("PSK identity must not exceed %d bytes", PHP_OPENSSL_PSK_MAX_IDENTITY_LEN);
+		SSL_SESSION_free(session);
+		zval_ptr_dtor(&result);
 		return 0;
 	}
 
@@ -3368,6 +3391,10 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle) /* {{{
 			sslsock->ssl_handle = NULL;
 		}
 		if (sslsock->ctx) {
+			/* Clear the ctx stream pointer as the ctx may outlive this stream. */
+			if (SSL_CTX_get_ex_data(sslsock->ctx, php_openssl_get_ctx_stream_data_index()) == stream) {
+				SSL_CTX_set_ex_data(sslsock->ctx, php_openssl_get_ctx_stream_data_index(), NULL);
+			}
 			SSL_CTX_free(sslsock->ctx);
 			sslsock->ctx = NULL;
 		}

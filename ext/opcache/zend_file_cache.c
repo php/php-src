@@ -570,6 +570,10 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 				&& (opline-1)->opcode == ZEND_DECLARE_ATTRIBUTED_CONST
 			) {
 				zval *literal = RT_CONSTANT(opline, opline->op1);
+#if ZEND_USE_ABS_CONST_ADDR
+				SERIALIZE_PTR(literal);
+				UNSERIALIZE_PTR(literal);
+#endif
 				SERIALIZE_ATTRIBUTES(Z_PTR_P(literal));
 			}
 
@@ -579,32 +583,13 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 			}
 			if (opline->op2_type == IS_CONST) {
 				SERIALIZE_PTR(opline->op2.zv);
-
-				/* See GH-17733. Reset Z_EXTRA_P(op2) of ZEND_INIT_FCALL, which
-				 * is an offset into the global function table, to avoid calling
-				 * incorrect functions when environment changes. This, and the
-				 * equivalent code below, can be removed once proper system ID
-				 * validation is implemented. */
-				if (opline->opcode == ZEND_INIT_FCALL) {
-					zval *op2 = opline->op2.zv;
-					UNSERIALIZE_PTR(op2);
-					Z_EXTRA_P(op2) = 0;
-					ZEND_VM_SET_OPCODE_HANDLER(opline);
-				}
 			}
 #else
 			if (opline->op1_type == IS_CONST) {
 				opline->op1.constant = RT_CONSTANT(opline, opline->op1) - literals;
 			}
 			if (opline->op2_type == IS_CONST) {
-				zval *op2 = RT_CONSTANT(opline, opline->op2);
-				opline->op2.constant = op2 - literals;
-
-				/* See GH-17733 and comment above. */
-				if (opline->opcode == ZEND_INIT_FCALL) {
-					Z_EXTRA_P(op2) = 0;
-					ZEND_VM_SET_OPCODE_HANDLER(opline);
-				}
+				opline->op2.constant = RT_CONSTANT(opline, opline->op2) - literals;
 			}
 #endif
 #if ZEND_USE_ABS_JMP_ADDR

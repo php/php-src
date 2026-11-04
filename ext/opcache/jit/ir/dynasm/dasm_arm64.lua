@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 -- DynASM ARM64 module.
 --
--- Copyright (C) 2005-2023 Mike Pall. All rights reserved.
+-- Copyright (C) 2005-2026 Mike Pall. All rights reserved.
 -- See dynasm.lua for full copyright notice.
 ------------------------------------------------------------------------------
 
@@ -244,6 +244,10 @@ local map_cond = {
   hs = 2, lo = 3,
 }
 
+local map_bti = {
+  c = 0x40, j = 0x80, jc = 0xc0,
+}
+
 ------------------------------------------------------------------------------
 
 local parse_reg_type
@@ -473,6 +477,12 @@ local function parse_cond(expr, inv)
   local c = map_cond[expr]
   if not c then werror("expected condition operand") end
   return shl(bit.bxor(c, inv), 12)
+end
+
+local function parse_map(expr, map)
+  local x = map[expr]
+  if not x then werror("bad operand") end
+  return x
 end
 
 local function parse_load(params, nparams, n, op)
@@ -823,11 +833,21 @@ map_op = {
   tbz_3  = "36000000DTBw|36000000DTBx",
   tbnz_3 = "37000000DTBw|37000000DTBx",
 
+  -- Branch Target Identification.
+  bti_1  = "d503241ft",
+
   -- ARM64e: Pointer authentication codes (PAC).
   blraaz_1  = "d63f081fNx",
+  blrabz_1  = "d63f0c1fNx",
   braa_2    = "d71f0800NDx",
+  brab_2    = "d71f0c00NDx",
   braaz_1   = "d61f081fNx",
+  brabz_1   = "d61f0c1fNx",
+  paciasp_0 = "d503233f",
   pacibsp_0 = "d503237f",
+  autiasp_0 = "d50323bf",
+  autibsp_0 = "d50323ff",
+  retaa_0   = "d65f0bff",
   retab_0   = "d65f0fff",
 
   -- Miscellaneous instructions.
@@ -996,6 +1016,8 @@ local function parse_template(params, template, nparams, pos)
       op = op + parse_cond(q, 0); n = n + 1
     elseif p == "c" then
       op = op + parse_cond(q, 1); n = n + 1
+    elseif p == "t" then
+      op = op + parse_map(q, map_bti); n = n + 1
 
     else
       assert(false)

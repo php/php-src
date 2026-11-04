@@ -17,6 +17,8 @@
 
 #include "php.h"
 
+BEGIN_EXTERN_C()
 int php_uchar_minit(INIT_FUNC_ARGS);
+END_EXTERN_C()
 
 #endif // incl_PHP_INTL_UCHAR_H

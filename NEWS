@@ -71,6 +71,8 @@ PHP                                                                        NEWS
 
 - MySQLnd:
   . Fixed field_count not resetting on OK packet. (Kamil Tekiela)
+  . Fixed bug GH-24609 (OK packets without an info message rejected on x32
+    builds). (lazerg)
 
 - Opcache:
   . Fixed range inference of assignments through typed references.
@@ -79,6 +81,7 @@ PHP                                                                        NEWS
     loop-invariant addition). (Ilia Alshanetsky)
   . Fixed OSS-Fuzz #545352966 (default value AST of an SHM-persisted partial).
     (ndossche)
+  . Fixed JIT ignoring exceptions from typed property set hooks. (David Carlier)
 
 - PDO:
   . Fixed PDOStatement::getColumnMeta() reading out of bounds for an invalid
@@ -87,6 +90,8 @@ PHP                                                                        NEWS
     that is not in the result set. (Ilia Alshanetsky)
   . Fixed bug GH-23962 (Destroying a persistent PDO instance rolls back a
     transaction still in use by another instance). (Lazizbek Ergashev)
+  . Fixed PDOStatement::execute() leaving a partial set of bindings in place
+    when binding its array argument fails. (Ilia Alshanetsky, Kamil Tekiela)
 
 - PDO_PGSQL:
   . Improved performance of the SQL parser that handles placeholders.
@@ -94,6 +99,9 @@ PHP                                                                        NEWS
   . Improved performance of fetching integer columns. (brainexe)
   . Fixed bug GH-24490 (pdo_pgsql prepare() hangs on a query containing a NUL
     byte). (dev-null-undefined)
+
+- PDO_SQLite:
+  . Fixed bug GH-24990 (Statement unusable after a failed execute()). (lazerg)
 
 - PGSQL:
   . Fixed pg_lo_write() rejecting data containing null bytes. (Ilia Alshanetsky)
@@ -103,6 +111,8 @@ PHP                                                                        NEWS
     (David Carlier)
 
 - Phar:
+  . Fixed bug GH-25093 (Phar::webPhar() redirect reads past the request URI).
+    (lazerg)
   . Fixed bug GH-22556 (OOM DoS via oversized ././@LongLink entry in TAR phar).
     (crystarm)
 
@@ -125,6 +135,8 @@ PHP                                                                        NEWS
 - SOAP:
   . Fixed the SOAP client accepting a response body shorter than its
     Content-Length and reusing the connection. (Ilia Alshanetsky)
+  . Fixed bug GH-24315 (Harden SoapClient cross-origin redirect handling).
+    (Ilia Alshanetsky)
 
 - SPL:
   . Fixed bug GH-23385 (SplDoublyLinkedList::serialize() use-after-free when
@@ -139,6 +151,9 @@ PHP                                                                        NEWS
 - Streams:
   . Applied the so_linger, so_rcvbuf and so_sndbuf context options to unix
     sockets. (David Carlier)
+  . Fixed a use-after-free when a user stream wrapper unregisters itself from
+    its constructor, destructor or __set() during unlink(), rename(), mkdir(),
+    rmdir(), touch(), chmod() or stat(). (Ilia Alshanetsky)
 
 - Standard:
   . Fixed bug #60110 (fclose(), file_put_contents(), copy() do not return false

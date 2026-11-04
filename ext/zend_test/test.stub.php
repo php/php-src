@@ -265,6 +265,8 @@ namespace {
 
     function zend_test_void_return(): void {}
 
+    function &zend_test_forward_reference(mixed &$value): mixed {}
+
     function zend_test_compile_string(string $source_string, string $filename, int $position): void {}
 
     /** @deprecated */
@@ -300,6 +302,10 @@ namespace {
     function zend_delref(mixed $variable): void {}
 
     function zend_test_erealloc_block_size(int $old_size, int $new_size): array {}
+
+    function zend_test_serialization_bailout(bool $unserialize, bool $locked): never {}
+
+    function zend_test_serialization_state(): array {}
 
 	function zend_bool(bool $param): bool {}
 	function zend_bool_or_null(bool|null $param): bool|null {}
@@ -470,6 +476,8 @@ function zend_test_override_libxml_global_state(): void {}
     function zend_test_handle_post_data(mixed $stream, string $content_type, int $content_length): void {}
 
     function zend_new_singleton_array(): array {}
+
+    function zend_test_set_local_var(string $name, mixed $value): bool {}
 }
 
 namespace ZendTestNS {

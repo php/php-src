@@ -900,6 +900,9 @@ static void *zend_mm_chunk_alloc_int(size_t size, size_t alignment)
 		/* chunk has to be aligned */
 		zend_mm_munmap(ptr, size);
 		ptr = zend_mm_mmap(size + alignment - REAL_PAGE_SIZE);
+		if (ptr == NULL) {
+			return NULL;
+		}
 #ifdef _WIN32
 		offset = ZEND_MM_ALIGNED_OFFSET(ptr, alignment);
 		if (offset != 0) {
@@ -1372,6 +1375,11 @@ static zend_always_inline void zend_mm_delete_chunk(zend_mm_heap *heap, zend_mm_
 
 static zend_always_inline void zend_mm_free_pages_ex(zend_mm_heap *heap, zend_mm_chunk *chunk, uint32_t page_num, uint32_t pages_count, int free_chunk)
 {
+	/* pages_count is decoded from a page map entry or a caller-supplied size, both of which
+	 * may be corrupted. An out-of-range run would make the updates below reach past free_map
+	 * into the rest of the chunk header. */
+	ZEND_MM_CHECK(page_num >= ZEND_MM_FIRST_PAGE && pages_count != 0
+		&& page_num + pages_count <= ZEND_MM_PAGES, "zend_mm_heap corrupted");
 	chunk->free_pages += pages_count;
 	zend_mm_bitset_reset_range(chunk->free_map, page_num, pages_count);
 	chunk->map[page_num] = 0;
@@ -1981,6 +1989,9 @@ failed:
 		} else {
 			ZEND_MM_CHECK(info & ZEND_MM_IS_LRUN, "zend_mm_heap corrupted");
 			ZEND_MM_CHECK(ZEND_MM_ALIGNED_OFFSET(page_offset, ZEND_MM_PAGE_SIZE) == 0, "zend_mm_heap corrupted");
+			/* The decoded run length drives a free_map reset in the shrink path
+			 * below; an out-of-range count would reach past it into the chunk header. */
+			ZEND_MM_CHECK(page_num + ZEND_MM_LRUN_PAGES(info) <= ZEND_MM_PAGES, "zend_mm_heap corrupted");
 			old_size = ZEND_MM_LRUN_PAGES(info) * ZEND_MM_PAGE_SIZE;
 			if (size > ZEND_MM_MAX_SMALL_SIZE && size <= ZEND_MM_MAX_LARGE_SIZE) {
 				new_size = ZEND_MM_ALIGNED_SIZE_EX(size, ZEND_MM_PAGE_SIZE);

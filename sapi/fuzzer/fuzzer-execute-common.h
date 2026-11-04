@@ -146,3 +146,12 @@ ZEND_ATTRIBUTE_UNUSED static void opcache_invalidate(void) {
 	zval_ptr_dtor(&retval);
 	EG(exception) = exception;
 }
+
+ZEND_ATTRIBUTE_UNUSED static void set_jit_option(zend_string *jit_option, const char *value) {
+	if (zend_alter_ini_entry_chars(
+			jit_option, value, strlen(value), PHP_INI_USER, PHP_INI_STAGE_RUNTIME) == FAILURE) {
+		/* Fail loudly instead of silently fuzzing without the JIT. */
+		fprintf(stderr, "Failed to set opcache.jit=%s\n", value);
+		abort();
+	}
+}

@@ -12,11 +12,9 @@
    +----------------------------------------------------------------------+
  */
 
-extern "C" {
 #include <php.h>
 #include <zend.h>
 #include <zend_API.h>
-}
 
 #include "resourcebundle/resourcebundle.h"
 #include "resourcebundle/resourcebundle_class.h"
@@ -146,8 +144,7 @@ static const zend_object_iterator_funcs resourcebundle_iterator_funcs = {
 };
 /* }}} */
 
-/* {{{ resourcebundle_get_iterator */
-U_CFUNC zend_object_iterator *resourcebundle_get_iterator( zend_class_entry *ce, zval *object, int byref )
+zend_object_iterator *resourcebundle_get_iterator( zend_class_entry *ce, zval *object, int byref )
 {
 	if (byref) {
 		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
@@ -176,4 +173,3 @@ U_CFUNC zend_object_iterator *resourcebundle_get_iterator( zend_class_entry *ce,
 
 	return (zend_object_iterator *) iterator;
 }
-/* }}} */

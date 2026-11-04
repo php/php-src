@@ -493,19 +493,6 @@ PHP_CHECK_AVX512_SUPPORTS
 dnl Check AVX512 VBMI
 PHP_CHECK_AVX512_VBMI_SUPPORTS
 
-dnl Check for __alignof__ support in the compiler
-AC_CACHE_CHECK([whether the compiler supports __alignof__],
-[php_cv_have_alignof],
-[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [
-  int align = __alignof__(int);
-  (void)align;
-])],
-[php_cv_have_alignof=yes],
-[php_cv_have_alignof=no])])
-AS_VAR_IF([php_cv_have_alignof], [yes],
-  [AC_DEFINE([HAVE_ALIGNOF], [1],
-    [Define to 1 if the compiler supports '__alignof__'.])])
-
 dnl Check for structure members.
 AC_CHECK_MEMBERS([struct tm.tm_gmtoff],,,[#include <time.h>])
 AC_CHECK_MEMBERS(m4_normalize([
@@ -1658,7 +1645,12 @@ PHP_INSTALL_HEADERS([Zend/Optimizer], m4_normalize([
   zend_worklist.h
 ]))
 
-PHP_ADD_SOURCES([TSRM], [TSRM.c], [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
+PHP_ADD_SOURCES([TSRM], m4_normalize([
+    TSRM.c
+    TSRM_atexit_win.c
+    TSRM_atexit_darwin.c
+    TSRM_atexit_posix.c
+  ]), [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
 PHP_ADD_SOURCES([main], m4_normalize([
     explicit_bzero.c

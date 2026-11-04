@@ -22,10 +22,8 @@
 #include <unicode/unistr.h>
 #endif
 
-extern "C" {
 #include "php_intl.h"
 #include "intl_convert.h"
-}
 #include "collator.h"
 #include "collator_class.h"
 #include "collator_sort.h"

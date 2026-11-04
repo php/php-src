@@ -31,12 +31,12 @@ typedef struct _php_json_scanner {
 	php_json_ctype *line_start;     /* start position of the current line */
 	uint64_t line;                  /* current line number (1-based) */
 	zval value;                     /* value */
-	int str_esc;                    /* number of extra characters for escaping */
+	ptrdiff_t str_esc;              /* number of extra characters for escaping */
 	int state;                      /* condition state */
 	int options;                    /* options */
 	php_json_error_code errcode;    /* error type if there is an error */
 	int utf8_invalid;               /* whether utf8 is invalid */
-	int utf8_invalid_count;         /* number of extra character for invalid utf8 */
+	ptrdiff_t utf8_invalid_count;   /* number of extra character for invalid utf8 */
 } php_json_scanner;
 
 void php_json_scanner_init(php_json_scanner *scanner, const char *str, size_t str_len, int options);

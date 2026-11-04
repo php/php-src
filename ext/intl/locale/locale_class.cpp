@@ -13,13 +13,13 @@
 */
 
 #include <unicode/uloc.h>
-extern "C" {
 #include "php_intl.h"
 #include "intl_error.h"
 #include "locale_class.h"
 #include "locale.h"
+BEGIN_EXTERN_C()
 #include "locale_arginfo.h"
-}
+END_EXTERN_C()
 
 zend_class_entry *Locale_ce_ptr = NULL;
 

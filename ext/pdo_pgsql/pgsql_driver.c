@@ -451,7 +451,7 @@ static zend_string* pgsql_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquo
 			PQfreemem(escaped);
 			break;
 		default:
-			quoted = safe_emalloc(2, ZSTR_LEN(unquoted), 3);
+			quoted = safe_emalloc(ZSTR_LEN(unquoted) * 2, sizeof(char), 3);
 			quoted[0] = '\'';
 			quotedlen = PQescapeStringConn(H->server, quoted + 1, ZSTR_VAL(unquoted), ZSTR_LEN(unquoted), &err);
 			if (err) {
@@ -1426,6 +1426,8 @@ static void pdo_pgsql_request_shutdown(pdo_dbh_t *dbh)
 		}
 		PQclear(res);
 	}
+
+	pdo_pgsql_cleanup_notice_callback(H);
 }
 
 static bool pdo_pgsql_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
@@ -1534,11 +1536,11 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{
 
 	/* support both full connection string & connection string + login and/or password */
 	if (tmp_user) {
-		smart_str_append_printf(&conn_str, " user='%s'", ZSTR_VAL(tmp_user));
+		smart_str_append_printf(&conn_str, " user='%pS'", tmp_user);
 	}
 
 	if (tmp_pass) {
-		smart_str_append_printf(&conn_str, " password='%s'", ZSTR_VAL(tmp_pass));
+		smart_str_append_printf(&conn_str, " password='%pS'", tmp_pass);
 	}
 	smart_str_0(&conn_str);
 

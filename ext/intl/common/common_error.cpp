@@ -17,10 +17,8 @@
 #include <config.h>
 #endif
 
-extern "C" {
 #include "php_intl.h"
 #include "intl_error.h"
-}
 
 /* {{{ Get code of the last occurred error. */
 U_CFUNC PHP_FUNCTION( intl_get_error_code )

@@ -39,7 +39,7 @@ static inline void zend_worklist_stack_prepare(zend_arena **arena, zend_worklist
 {
 	ZEND_ASSERT(len >= 0);
 
-	stack->buf = (int*)zend_arena_calloc(arena, sizeof(*stack->buf), len);
+	stack->buf = (int*)zend_arena_calloc(arena, len, sizeof(*stack->buf));
 	stack->len = 0;
 	stack->capacity = len;
 }
@@ -81,7 +81,7 @@ typedef struct _zend_worklist {
 static inline void zend_worklist_prepare(zend_arena **arena, zend_worklist *worklist, int len)
 {
 	ZEND_ASSERT(len >= 0);
-	worklist->visited = (zend_bitset)zend_arena_calloc(arena, sizeof(zend_ulong), zend_bitset_len(len));
+	worklist->visited = (zend_bitset)zend_arena_calloc(arena, zend_bitset_len(len), sizeof(zend_ulong));
 	zend_worklist_stack_prepare(arena, &worklist->stack, len);
 }
 

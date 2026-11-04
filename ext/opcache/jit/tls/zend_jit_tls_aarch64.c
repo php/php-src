@@ -192,18 +192,6 @@ code_changed:
 
 	/* Code was changed by the linker. Check if we recognize the updated code */
 
-	// movz	x0, #0, lsl #16
-	if ((insn[0] & ~AARCH64_MOVZ_IMM_MASK) != 0xd2a00000) {
-		zend_accel_error(ACCEL_LOG_DEBUG, "movz insn does not match: 0x%08" PRIx32 "\n", insn[0]);
-		return FAILURE;
-	}
-
-	// movk	x0, #0x10
-	if ((insn[1] & ~AARCH64_MOVK_IMM_MASK) != 0xf2800000) {
-		zend_accel_error(ACCEL_LOG_DEBUG, "movk insn does not match: 0x%08" PRIx32 "\n", insn[1]);
-		return FAILURE;
-	}
-
 	// nop
 	for (int i = 0; i < 2; i++) {
 		if (insn[2+i] != AARCH64_NOP) {
@@ -212,12 +200,29 @@ code_changed:
 		}
 	}
 
-	/* Extract immediate values */
+	if ((insn[0] & ~AARCH64_ADRP_IMM_MASK) == 0x90000000) {
+		/* initial-exec */
+		// ldr x0, [x0, #any]
+		if ((insn[1] & ~AARCH64_LDR_UNSIGNED_IMM_MASK) != 0xf9400000) {
+			zend_accel_error(ACCEL_LOG_DEBUG, "ldr insn does not match: 0x%08" PRIx32 "\n", insn[1]);
+			return FAILURE;
+		}
+	} else {
+		/* local-exec */
+		// movz x0, #0, lsl #16
+		if ((insn[0] & ~AARCH64_MOVZ_IMM_MASK) != 0xd2a00000) {
+			zend_accel_error(ACCEL_LOG_DEBUG, "movz insn does not match: 0x%08" PRIx32 "\n", insn[0]);
+			return FAILURE;
+		}
 
-	uint64_t movz_imm = (insn[0] & AARCH64_MOVZ_IMM_MASK) >> 5;
-	uint64_t movz_shift = (((insn[0] & AARCH64_MOVZ_HW_MASK) >> 21) << 4);
-	uint64_t movk_imm = (insn[1] & AARCH64_MOVK_IMM_MASK) >> 5;
-	uint64_t offset = (movz_imm << movz_shift) | movk_imm;
+		// movk x0, #0x10
+		if ((insn[1] & ~AARCH64_MOVK_IMM_MASK) != 0xf2800000) {
+			zend_accel_error(ACCEL_LOG_DEBUG, "movk insn does not match: 0x%08" PRIx32 "\n", insn[1]);
+			return FAILURE;
+		}
+	}
+
+	uintptr_t offset = (uintptr_t)addr - (uintptr_t)thread_pointer;
 
 	if ((uintptr_t)&_tsrm_ls_cache - (uintptr_t)thread_pointer == offset) {
 		zend_accel_error(ACCEL_LOG_DEBUG, "static tls at offset %" PRIxPTR " from thread pointer (inferred from code)\n", offset);

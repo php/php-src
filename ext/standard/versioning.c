@@ -26,7 +26,7 @@ PHPAPI char *
 php_canonicalize_version(const char *version)
 {
 	size_t len = strlen(version);
-	char *buf = safe_emalloc(len, 2, 1), *q, lp, lq;
+	char *buf = safe_emalloc(len * 2, sizeof(char), 1), *q, lp, lq;
 	const char *p;
 
 	if (len == 0) {

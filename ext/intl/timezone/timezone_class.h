@@ -69,9 +69,11 @@ TimeZone *timezone_process_timezone_argument(zend_object *timezone_object, zend_
 
 void timezone_object_construct(const TimeZone *zone, zval *object, int owned);
 
+BEGIN_EXTERN_C()
 void timezone_register_IntlTimeZone_class(void);
 
 extern zend_class_entry *TimeZone_ce_ptr;
 extern zend_object_handlers TimeZone_handlers;
+END_EXTERN_C()
 
 #endif /* #ifndef TIMEZONE_CLASS_H */

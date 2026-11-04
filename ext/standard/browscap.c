@@ -255,7 +255,7 @@ static void browscap_add_kv(
 		browser_data *bdata, zend_string *key, zend_string *value, bool persistent) {
 	if (bdata->kv_used == bdata->kv_size) {
 		bdata->kv_size *= 2;
-		bdata->kv = safe_perealloc(bdata->kv, sizeof(browscap_kv), bdata->kv_size, 0, persistent);
+		bdata->kv = safe_perealloc(bdata->kv, bdata->kv_size, sizeof(browscap_kv), 0, persistent);
 	}
 
 	bdata->kv[bdata->kv_used].key = key;
@@ -334,8 +334,8 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 						zend_string_equals_ci(ctx->current_section_name, Z_STR_P(arg2))
 					) {
 						zend_error(E_CORE_ERROR, "Invalid browscap ini file: "
-							"'Parent' value cannot be same as the section name: %s "
-							"(in file %s)", ZSTR_VAL(ctx->current_section_name), zend_ini_string_literal("browscap"));
+							"'Parent' value cannot be same as the section name: %pS "
+							"(in file %s)", ctx->current_section_name, zend_ini_string_literal("browscap"));
 						return;
 					}
 

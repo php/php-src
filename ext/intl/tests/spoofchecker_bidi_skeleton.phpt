@@ -3,7 +3,7 @@ Spoofchecker::getBidiSkeleton()
 --EXTENSIONS--
 intl
 --SKIPIF--
-<?php if (version_compare(INTL_ICU_VERSION, '74.0') < 0) die('skip for ICU >= 74.0'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '74.0') < 0) die('skip requires ICU >= 74.0'); ?>
 --FILE--
 <?php
 $checker = new Spoofchecker();

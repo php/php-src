@@ -44,7 +44,8 @@ typedef struct {
 
 #define RANGEFORMATTER_OBJECT(nfo) (nfo)->nrf_data.unumrf
 
-
+BEGIN_EXTERN_C()
 void rangeformatter_register_class(void);
+END_EXTERN_C()
 
 #endif

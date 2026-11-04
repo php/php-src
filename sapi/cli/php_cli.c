@@ -465,6 +465,7 @@ static void php_cli_usage(char *argv0)
 				"\n"
 				"  -a               Run as interactive shell (requires readline extension)\n"
 				"  -c <path>|<file> Look for php.ini file in this directory\n"
+				"  -C               Do not chdir to the script's directory (no-op in CLI)\n"
 				"  -n               No configuration (ini) files will be used\n"
 				"  -d foo[=bar]     Define INI entry foo with value 'bar'\n"
 				"  -e               Generate extended information for debugger/profiler\n"
@@ -473,6 +474,7 @@ static void php_cli_usage(char *argv0)
 				"  -i               PHP information\n"
 				"  -l               Syntax check only (lint)\n"
 				"  -m               Show compiled in modules\n"
+				"  -q               Do not output HTTP headers (no-op in CLI)\n"
 				"  -r <code>        Run PHP <code> without using script tags <?..?>\n"
 				"  -B <begin_code>  Run PHP <begin_code> before processing input lines\n"
 				"  -R <code>        Run PHP <code> for every input line\n"
@@ -1332,12 +1334,16 @@ exit_loop:
 #if defined(PHP_WIN32)
 	php_win32_cp_cli_setup();
 	orig_cp = (php_win32_cp_get_orig())->id;
-	/* Ignore the delivered argv and argc, read from W API. This place
-		might be too late though, but this is the earliest place ATW
-		we can access the internal charset information from PHP. */
-	argv_wide = CommandLineToArgvW(GetCommandLineW(), &num_args);
-	PHP_WIN32_CP_W_TO_ANY_ARRAY(argv_wide, num_args, argv, argc)
-	using_wide_argv = 1;
+	/* Embedders supply their own arguments, we mustn't replace them with
+	 * the ones by the host process command line. */
+	if (argv_save == __argv) {
+		/* Ignore the delivered argv and argc, read from W API. This place
+			might be too late though, but this is the earliest place ATW
+			we can access the internal charset information from PHP. */
+		argv_wide = CommandLineToArgvW(GetCommandLineW(), &num_args);
+		PHP_WIN32_CP_W_TO_ANY_ARRAY(argv_wide, num_args, argv, argc)
+		using_wide_argv = 1;
+	}
 
 	SetConsoleCtrlHandler(php_cli_win32_ctrl_handler, TRUE);
 #endif

@@ -43,6 +43,8 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	char *observer_show_opcode_in_user_handler;
 	int observer_set_vm_interrupt_on_begin;
 	int observer_set_vm_interrupt_on_begin_without_callback;
+	int observer_set_vm_interrupt_on_end;
+	bool observer_throw_on_vm_interrupt;
 	int observer_nesting_depth;
 	int observer_fiber_init;
 	int observer_fiber_switch;
@@ -52,6 +54,7 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	HashTable *global_weakmap;
 	int replace_zend_execute_ex;
 	int register_passes;
+	bool rearm_vm_interrupt;
 	bool print_stderr_mshutdown;
 	zend_long limit_copy_file_range;
 	int observe_opline_in_zendmm;

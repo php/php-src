@@ -242,7 +242,7 @@ static const mbfl_encoding *php_mb_get_encoding(zend_string *encoding_name, uint
 
 		encoding = mbfl_name2encoding(ZSTR_VAL(encoding_name));
 		if (!encoding) {
-			zend_argument_value_error(arg_num, "must be a valid encoding, \"%s\" given", ZSTR_VAL(encoding_name));
+			zend_argument_value_error(arg_num, "must be a valid encoding, \"%pS\" given", encoding_name);
 			return NULL;
 		} else if (encoding->no_encoding <= mbfl_no_encoding_qprint) {
 			if (encoding == &mbfl_encoding_base64) {
@@ -408,7 +408,7 @@ static zend_result php_mb_parse_encoding_array(HashTable *target_hash, const mbf
 				*entry++ = encoding;
 				n++;
 			} else {
-				zend_argument_value_error(arg_num, "contains invalid encoding \"%s\"", ZSTR_VAL(encoding_str));
+				zend_argument_value_error(arg_num, "contains invalid encoding \"%pS\"", encoding_str);
 				zend_tmp_string_release(tmp_encoding_str);
 				efree(ZEND_VOIDP(list));
 				return FAILURE;
@@ -1224,7 +1224,7 @@ PHP_FUNCTION(mb_language)
 	} else {
 		zend_string *ini_name = ZSTR_INIT_LITERAL("mbstring.language", false);
 		if (FAILURE == zend_alter_ini_entry(ini_name, name, PHP_INI_USER, PHP_INI_STAGE_RUNTIME)) {
-			zend_argument_value_error(1, "must be a valid language, \"%s\" given", ZSTR_VAL(name));
+			zend_argument_value_error(1, "must be a valid language, \"%pS\" given", name);
 			zend_string_release_ex(ini_name, false);
 			RETURN_THROWS();
 		}
@@ -1908,7 +1908,9 @@ static inline bool php_mb_is_no_encoding_utf8(enum mbfl_no_encoding no_enc)
 	return (no_enc >= mbfl_no_encoding_utf8 && no_enc <= mbfl_no_encoding_utf8_sb);
 }
 
-static unsigned char* offset_to_pointer_utf8(unsigned char *str, unsigned char *end, ssize_t offset) {
+#define IS_UTF8_CONTINUATION_BYTE(c) (((c) & 0xC0) == 0x80)
+
+static unsigned char* offset_to_pointer_utf8(unsigned char *str, unsigned char *end, ssize_t offset, bool is_valid_utf8) {
 	if (offset < 0) {
 		unsigned char *pos = end;
 		while (offset < 0) {
@@ -1917,7 +1919,7 @@ static unsigned char* offset_to_pointer_utf8(unsigned char *str, unsigned char *
 			}
 
 			unsigned char c = *--pos;
-			if (c < 0x80 || (c & 0xC0) != 0x80) {
+			if (!IS_UTF8_CONTINUATION_BYTE(c)) {
 				offset++;
 			}
 		}
@@ -1925,6 +1927,21 @@ static unsigned char* offset_to_pointer_utf8(unsigned char *str, unsigned char *
 	} else {
 		const unsigned char *u8_tbl = mbfl_encoding_utf8.mblen_table;
 		unsigned char *pos = str;
+		if (is_valid_utf8) {
+			while (offset > 256 && (size_t)(end - pos) >= 256) {
+				offset -= mb_fast_strlen_utf8(pos, 256);
+				pos += 256;
+			}
+			for (; pos < end; pos++) {
+				if (!IS_UTF8_CONTINUATION_BYTE(*pos)) {
+					if (offset == 0) {
+						return pos;
+					}
+					offset--;
+				}
+			}
+			return offset == 0 ? end : NULL;
+		}
 		while (offset-- > 0) {
 			if (pos >= end) {
 				return NULL;
@@ -1957,7 +1974,7 @@ static size_t mb_find_strpos(zend_string *haystack, zend_string *needle, const m
 		needle_u8 = needle;
 	}
 
-	offset_pointer = offset_to_pointer_utf8((unsigned char*)ZSTR_VAL(haystack_u8), (unsigned char*)ZSTR_VAL(haystack_u8) + ZSTR_LEN(haystack_u8), offset);
+	offset_pointer = offset_to_pointer_utf8((unsigned char*)ZSTR_VAL(haystack_u8), (unsigned char*)ZSTR_VAL(haystack_u8) + ZSTR_LEN(haystack_u8), offset, ZSTR_IS_VALID_UTF8(haystack_u8));
 	if (!offset_pointer) {
 		result = MBFL_ERROR_OFFSET;
 		goto out;
@@ -1975,7 +1992,7 @@ static size_t mb_find_strpos(zend_string *haystack, zend_string *needle, const m
 		found_pos = zend_memnrstr((const char*)offset_pointer, ZSTR_VAL(needle_u8), ZSTR_LEN(needle_u8), ZSTR_VAL(haystack_u8) + ZSTR_LEN(haystack_u8));
 	} else {
 		size_t needle_len = pointer_to_offset_utf8((unsigned char*)ZSTR_VAL(needle_u8), (unsigned char*)ZSTR_VAL(needle_u8) + ZSTR_LEN(needle_u8));
-		offset_pointer = offset_to_pointer_utf8(offset_pointer, (unsigned char*)ZSTR_VAL(haystack_u8) + ZSTR_LEN(haystack_u8), needle_len);
+		offset_pointer = offset_to_pointer_utf8(offset_pointer, (unsigned char*)ZSTR_VAL(haystack_u8) + ZSTR_LEN(haystack_u8), needle_len, ZSTR_IS_VALID_UTF8(haystack_u8));
 		if (!offset_pointer) {
 			offset_pointer = (unsigned char*)ZSTR_VAL(haystack_u8) + ZSTR_LEN(haystack_u8);
 		}
@@ -2212,6 +2229,27 @@ static zend_string* mb_get_substr(zend_string *input, size_t from, size_t len, c
 			len = in_len;
 		}
 		return zend_string_init_fast((const char*)in, len);
+	}
+
+	if (enc == &mbfl_encoding_utf8 && ZSTR_IS_VALID_UTF8(input)) {
+		/* Valid UTF-8 can be sliced on codepoint boundaries without decoding it */
+		unsigned char *end = in + in_len;
+		unsigned char *start = offset_to_pointer_utf8(in, end, from, true);
+		if (!start) {
+			return zend_empty_string;
+		}
+		unsigned char *stop = end;
+		if (len < (size_t)(end - start)) {
+			stop = offset_to_pointer_utf8(start, end, len, true);
+			if (!stop) {
+				stop = end;
+			}
+		}
+		zend_string *result = zend_string_init_fast((const char*)start, stop - start);
+		if (!ZSTR_IS_INTERNED(result)) {
+			GC_ADD_FLAGS(result, IS_STR_VALID_UTF8);
+		}
+		return result;
 	}
 
 	return mb_get_substr_slow(in, in_len, from, len, enc);
@@ -3570,8 +3608,7 @@ PHP_FUNCTION(mb_list_encodings)
 		/* Initialize shared array of supported encoding names
 		 * This is done so that we can check if `mb_list_encodings()` is being
 		 * passed to other mbstring functions using a cheap pointer equality check */
-		HashTable *array = emalloc(sizeof(HashTable));
-		zend_hash_init(array, 80, NULL, zval_ptr_dtor_str, false);
+		HashTable *array = zend_new_array(80);
 		for (const mbfl_encoding **encodings = mbfl_get_supported_encodings(); *encodings; encodings++) {
 			zval tmp;
 			ZVAL_STRING(&tmp, (*encodings)->name);
@@ -4715,7 +4752,7 @@ PHP_FUNCTION(mb_send_mail)
 				break;
 
 			default:
-				php_error_docref(NULL, E_WARNING, "Unsupported transfer encoding \"%s\" - will be regarded as 8bit", Z_STRVAL_P(s));
+				php_error_docref(NULL, E_WARNING, "Unsupported transfer encoding \"%pS\" - will be regarded as 8bit", Z_STR_P(s));
 				body_enc =	&mbfl_encoding_8bit;
 				break;
 		}
@@ -6661,7 +6698,7 @@ PHP_FUNCTION(mb_encode_mimeheader)
 		if (!charset) {
 			RETURN_THROWS();
 		} else if (charset->mime_name == NULL || charset->mime_name[0] == '\0' || charset == &mbfl_encoding_qprint) {
-			zend_argument_value_error(2, "\"%s\" cannot be used for MIME header encoding", ZSTR_VAL(charset_name));
+			zend_argument_value_error(2, "\"%pS\" cannot be used for MIME header encoding", charset_name);
 			RETURN_THROWS();
 		}
 	} else {

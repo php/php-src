@@ -1416,7 +1416,7 @@ PHP_FUNCTION(str_decrement)
 		RETURN_THROWS();
 	}
 	if (ZSTR_LEN(str) >= 1 && ZSTR_VAL(str)[0] == '0') {
-		zend_argument_value_error(1, "\"%s\" is out of decrement range", ZSTR_VAL(str));
+		zend_argument_value_error(1, "\"%pS\" is out of decrement range", str);
 		RETURN_THROWS();
 	}
 
@@ -1443,7 +1443,7 @@ PHP_FUNCTION(str_decrement)
 	if (UNEXPECTED(carry || (ZSTR_VAL(decremented)[0] == '0' && ZSTR_LEN(decremented) > 1))) {
 		if (ZSTR_LEN(decremented) == 1) {
 			zend_string_efree(decremented);
-			zend_argument_value_error(1, "\"%s\" is out of decrement range", ZSTR_VAL(str));
+			zend_argument_value_error(1, "\"%pS\" is out of decrement range", str);
 			RETURN_THROWS();
 		}
 		zend_string *tmp = zend_string_alloc(ZSTR_LEN(decremented) - 1, 0);
@@ -4076,7 +4076,7 @@ PHPAPI zend_string *php_addslashes(zend_string *str) /* {{{ */
 zend_string *php_addslashes_sse42(zend_string *str)
 # endif
 {
-	ZEND_SET_ALIGNED(16, static const char slashchars[16]) = "\'\"\\\0";
+	alignas(16) static const char slashchars[16] = "\'\"\\\0";
 	__m128i w128, s128;
 	uint32_t res = 0;
 	/* maximum string length, worst case situation */
@@ -6509,7 +6509,7 @@ PHP_FUNCTION(substr_compare)
 	if (!cs) {
 		RETURN_LONG(zend_binary_strncmp(ZSTR_VAL(s1) + offset, (ZSTR_LEN(s1) - offset), ZSTR_VAL(s2), ZSTR_LEN(s2), cmp_len));
 	} else {
-		RETURN_LONG(zend_binary_strncasecmp_l(ZSTR_VAL(s1) + offset, (ZSTR_LEN(s1) - offset), ZSTR_VAL(s2), ZSTR_LEN(s2), cmp_len));
+		RETURN_LONG(zend_binary_strncasecmp(ZSTR_VAL(s1) + offset, (ZSTR_LEN(s1) - offset), ZSTR_VAL(s2), ZSTR_LEN(s2), cmp_len));
 	}
 }
 /* }}} */

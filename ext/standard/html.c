@@ -168,7 +168,7 @@ static zend_always_inline unsigned int get_next_char_utf8(
 }
 
 /* {{{ get_next_char */
-static inline unsigned int get_next_char(
+static zend_always_inline unsigned int get_next_char(
 		enum entity_charset charset,
 		const unsigned char *str,
 		size_t str_len,
@@ -845,6 +845,12 @@ static inline size_t write_octet_sequence(unsigned char *buf, enum entity_charse
 	}
 }
 
+/* [0-9A-Za-z], independent of the locale */
+static zend_always_inline bool is_entity_name_byte(unsigned char c)
+{
+	return (unsigned char)((c | 0x20) - 'a') < 26 || (unsigned char)(c - '0') < 10;
+}
+
 /* {{{ traverse_for_entities
  * Auxiliary function to php_unescape_html_entities().
  * - The argument "all" determines if all numeric entities are decode or only those
@@ -867,7 +873,8 @@ static void traverse_for_entities(
 	const int doctype	   = flags & ENT_HTML_DOC_TYPE_MASK;
 
 	while (current_ptr < input_end) {
-		const char *ampersand_ptr = memchr(current_ptr, '&', input_end - current_ptr);
+		/* Runs of '&' would call memchr() for every byte */
+		const char *ampersand_ptr = *current_ptr == '&' ? current_ptr : memchr(current_ptr, '&', input_end - current_ptr);
 		if (!ampersand_ptr) {
 			const size_t tail_len = input_end - current_ptr;
 			if (tail_len > 0) {
@@ -921,10 +928,13 @@ static void traverse_for_entities(
 		} else {
 			/* Processing named entity */
 			const char *name_start = current_ptr + 1;
-			/* Search for ';' */
-			const size_t max_search_len = MIN(LONGEST_ENTITY_LENGTH + 1, input_end - name_start);
-			const char *semi_colon_ptr = memchr(name_start, ';', max_search_len);
-			if (!semi_colon_ptr) {
+			const char *semi_colon_ptr = name_start;
+			const char *const name_limit = name_start + MIN(LONGEST_ENTITY_LENGTH, input_end - name_start - 1);
+			/* A name is letters and digits only, so the first other byte must be the ';' */
+			while (semi_colon_ptr < name_limit && is_entity_name_byte(*semi_colon_ptr)) {
+				semi_colon_ptr++;
+			}
+			if (*semi_colon_ptr != ';') {
 				goto invalid_incomplete_entity;
 			} else {
 				const size_t name_len = semi_colon_ptr - name_start;
@@ -1172,6 +1182,12 @@ static inline void find_entity_for_char_basic(
 }
 /* }}} */
 
+/* ASCII other than the characters htmlspecialchars() can escape */
+static zend_always_inline bool is_non_special_ascii(unsigned char c)
+{
+	return c < 0x80 && c != '&' && c != '"' && c != '\'' && c != '<' && c != '>';
+}
+
 /* Character classes used by html_verbatim_prefix_len(). The quote classes are the flags
  * that make the quotes encoded. */
 #define HTML_CC_SQUOTE    (1<<0) /* ' */
@@ -1335,12 +1351,36 @@ static zend_string *escape_html_entities_from(const unsigned char *old, size_t o
 	}
 	memcpy(ZSTR_VAL(replaced), old, cursor);
 	len = cursor;
+	/* htmlspecialchars() without ENT_DISALLOWED leaves such ASCII as is */
+	const bool copy_ascii_runs = !all && !(flags & ENT_HTML_SUBSTITUTE_DISALLOWED_CHARS);
+
 	while (cursor < oldlen) {
 		const unsigned char *mbsequence = NULL;
 		size_t mbseqlen					= 0,
 		       cursor_before			= cursor;
 		zend_result status				= SUCCESS;
-		unsigned int this_char			= get_next_char(charset, old, oldlen, &cursor, &status);
+		unsigned int this_char			= old[cursor];
+
+		if (this_char >= 0x80) {
+			this_char = get_next_char(charset, old, oldlen, &cursor, &status);
+		} else if (copy_ascii_runs && is_non_special_ascii(this_char)) {
+			/* The run can be as long as the rest of the input */
+			if (maxlen - len < oldlen - cursor + 40) {
+				replaced = zend_string_safe_realloc(replaced, maxlen, 1, oldlen - cursor + 128, 0);
+				maxlen += oldlen - cursor + 128;
+			}
+			const unsigned char *in = &old[cursor], *const end = &old[oldlen];
+			char *out = &ZSTR_VAL(replaced)[len];
+			do {
+				*out++ = *in++;
+			} while (in < end && is_non_special_ascii(*in));
+			len = out - ZSTR_VAL(replaced);
+			cursor = in - old;
+			continue;
+		} else {
+			/* ASCII is a single byte in every charset */
+			cursor++;
+		}
 
 		/* guarantee we have at least 40 bytes to write.
 		 * In HTML5, entities may take up to 33 bytes */

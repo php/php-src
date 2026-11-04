@@ -14,12 +14,13 @@
 
 #include <unicode/unum.h>
 
-extern "C" {
 #include "msgformat_class.h"
 #include "php_intl.h"
 #include "msgformat_data.h"
+
+BEGIN_EXTERN_C()
 #include "msgformat_arginfo.h"
-}
+END_EXTERN_C()
 
 #include <zend_exceptions.h>
 
@@ -31,7 +32,7 @@ static zend_object_handlers MessageFormatter_handlers;
  */
 
 /* {{{ MessageFormatter_objects_free */
-U_CFUNC void MessageFormatter_object_free( zend_object *object )
+static void MessageFormatter_object_free( zend_object *object )
 {
 	MessageFormatter_object* mfo = php_intl_messageformatter_fetch_object(object);
 
@@ -42,7 +43,7 @@ U_CFUNC void MessageFormatter_object_free( zend_object *object )
 /* }}} */
 
 /* {{{ MessageFormatter_object_create */
-U_CFUNC zend_object *MessageFormatter_object_create(zend_class_entry *ce)
+static zend_object *MessageFormatter_object_create(zend_class_entry *ce)
 {
 	MessageFormatter_object*     intern;
 
@@ -56,7 +57,7 @@ U_CFUNC zend_object *MessageFormatter_object_create(zend_class_entry *ce)
 /* }}} */
 
 /* {{{ MessageFormatter_object_clone */
-U_CFUNC zend_object *MessageFormatter_object_clone(zend_object *object)
+static zend_object *MessageFormatter_object_clone(zend_object *object)
 {
 	const MessageFormatter_object     *mfo = php_intl_messageformatter_fetch_object(object);
 	zend_object             *new_obj = MessageFormatter_ce_ptr->create_object(object->ce);

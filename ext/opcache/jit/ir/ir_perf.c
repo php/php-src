@@ -167,6 +167,7 @@ int ir_perf_jitdump_open(void)
 	if (jitdump_mem == MAP_FAILED) {
 		close(jitdump_fd);
 		jitdump_fd = -1;
+		unlink(filename);
 		return 0;
 	}
 
@@ -179,6 +180,11 @@ int ir_perf_jitdump_open(void)
 	jit_hdr.time_stamp      = ir_perf_timestamp();
 	jit_hdr.flags           = 0;
 	if (write(jitdump_fd, &jit_hdr, sizeof(jit_hdr)) != sizeof(jit_hdr)) {
+		munmap(jitdump_mem, sysconf(_SC_PAGESIZE));
+		jitdump_mem = MAP_FAILED;
+		close(jitdump_fd);
+		jitdump_fd = -1;
+		unlink(filename);
 		return 0;
 	}
 	return 1;

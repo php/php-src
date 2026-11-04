@@ -17,14 +17,7 @@
 
 #include "php.h"
 #include <unicode/ucnv.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 #include "../intl_error.h"
-#ifdef __cplusplus
-}
-#endif
 
 typedef struct _php_converter_object {
 	UConverter *src, *dest;

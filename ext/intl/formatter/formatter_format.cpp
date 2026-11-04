@@ -22,9 +22,7 @@
 #include "formatter_class.h"
 #include "formatter_format.h"
 
-extern "C" {
 #include "php_intl.h"
-}
 
 /* {{{ Format a number. */
 U_CFUNC PHP_FUNCTION( numfmt_format )

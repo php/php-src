@@ -324,7 +324,7 @@ static zend_string *php_stream_http_response_headers_parse(php_stream_wrapper *w
 			zend_string_efree(last_header_line);
 			return NULL;
 		}
-		if (header_info->location_len == 0) {
+		if (header_info->location == NULL) {
 			header_info->location = emalloc(last_header_value_len + 1);
 		} else if (header_info->location_len <= last_header_value_len) {
 			header_info->location = erealloc(header_info->location, last_header_value_len + 1);
@@ -495,7 +495,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 			use_proxy = 1;
 			transport_string = zend_string_copy(Z_STR_P(tmpzval));
 		} else {
-			transport_string = zend_strpprintf(0, "%s://%s:" ZEND_LONG_FMT, use_ssl ? "ssl" : "tcp", ZSTR_VAL(resource->host), resource->port);
+			transport_string = zend_strpprintf(0, "%s://%pS:" ZEND_LONG_FMT, use_ssl ? "ssl" : "tcp", resource->host, resource->port);
 		}
 	}
 

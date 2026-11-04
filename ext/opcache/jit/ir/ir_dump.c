@@ -400,13 +400,13 @@ void ir_dump_live_ranges(const ir_ctx *ctx, FILE *f)
 				fprintf(f, "TMP");
 			} else {
 				for (j = 1; j < ctx->insns_count; j++) {
-					if (ctx->vregs[j] == (uint32_t)i) {
+					if (ctx->vregs[j] == i) {
 						break;
 					}
 				}
 				fprintf(f, "R%d (d_%d", i, j);
 				for (j++; j < ctx->insns_count; j++) {
-					if (ctx->vregs[j] == (uint32_t)i) {
+					if (ctx->vregs[j] == i) {
 						fprintf(f, ", d_%d", j);
 					}
 				}
@@ -667,7 +667,7 @@ void ir_dump_codegen(const ir_ctx *ctx, FILE *f)
 					fprintf(f, "\t");
 					ir_print_type_cname(insn->type, f);
 					fprintf(f, " d_%d", i);
-					if (ctx->vregs && ctx->vregs[i]) {
+					if (ctx->vregs && ctx->vregs[i] > 0) {
 						fprintf(f, " {R%d}", ctx->vregs[i]);
 					}
 					if (ctx->regs) {
@@ -683,7 +683,7 @@ void ir_dump_codegen(const ir_ctx *ctx, FILE *f)
 				if (flags & IR_OP_FLAG_DATA) {
 					ir_print_type_cname(insn->type, f);
 					fprintf(f, " d_%d", i);
-					if (ctx->vregs && ctx->vregs[i]) {
+					if (ctx->vregs && ctx->vregs[i] > 0) {
 						fprintf(f, " {R%d}", ctx->vregs[i]);
 					}
 					if (ctx->regs) {
@@ -719,7 +719,7 @@ void ir_dump_codegen(const ir_ctx *ctx, FILE *f)
 							} else {
 								fprintf(f, "%sd_%d", first ? "(" : ", ", ref);
 							}
-							if (ctx->vregs && ref > 0 && ctx->vregs[ref]) {
+							if (ctx->vregs && ref > 0 && ctx->vregs[ref] > 0) {
 								fprintf(f, " {R%d}", ctx->vregs[ref]);
 							}
 							if (ctx->regs) {
@@ -746,7 +746,7 @@ void ir_dump_codegen(const ir_ctx *ctx, FILE *f)
 							fprintf(f, "%sfunc ", first ? "(" : ", ");
 							ir_print_proto(ctx, ref, f);
 							break;
-						case IR_OPND_PROB:
+						case IR_OPND_OPT:
 							if (ref == 0) {
 								break;
 							}

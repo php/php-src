@@ -63,10 +63,12 @@ Calendar *calendar_fetch_native_calendar(zend_object *object);
 
 void calendar_object_construct(zval *object, Calendar *calendar);
 
+BEGIN_EXTERN_C()
 void calendar_register_IntlCalendar_class(void);
 
 extern zend_class_entry *Calendar_ce_ptr, *GregorianCalendar_ce_ptr;
 
 extern zend_object_handlers Calendar_handlers;
+END_EXTERN_C()
 
 #endif /* #ifndef CALENDAR_CLASS_H */

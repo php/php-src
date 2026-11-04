@@ -16,6 +16,7 @@ $serverCode = <<<'CODE'
     // Test with num_tickets = 3 (should issue 3 tickets)
     $ctx = stream_context_create(['ssl' => [
         'local_cert' => '%s',
+        'session_id_context' => 'num-tickets-test',
         'crypto_method' => STREAM_CRYPTO_METHOD_TLSv1_3_SERVER,
         'num_tickets' => 3,  // Issue 3 tickets per connection
     ]]);

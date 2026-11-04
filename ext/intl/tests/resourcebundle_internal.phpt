@@ -4,7 +4,7 @@ Test ResourceBundle::__construct() with internal ICU bundles
 intl
 --SKIPIF--
 <?php if( !defined('INTL_ICU_DATA_VERSION')) print 'skip INTL_ICU_DATA_VERSION constant not defined'; ?>
-<?php if( version_compare(INTL_ICU_DATA_VERSION, '4.4', '<')) print 'skip for ICU >= 4.4'; ?>
+<?php if( version_compare(INTL_ICU_DATA_VERSION, '4.4', '<')) print 'skip requires ICU data >= 4.4'; ?>
 --FILE--
 <?php
 $b = new ResourceBundle('de_DE', 'ICUDATA-region');

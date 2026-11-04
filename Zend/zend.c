@@ -52,17 +52,16 @@ static bool startup_done = false;
 #ifdef ZTS
 ZEND_API int compiler_globals_id;
 ZEND_API int executor_globals_id;
-ZEND_API size_t compiler_globals_offset;
-ZEND_API size_t executor_globals_offset;
+ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_tsrm_ls_cache _tsrm_ls_cache = {0};
 /* ts_allocate_tls_id takes a callback so each thread resolves its own block.
  * A plain &language_scanner_globals would capture only the registering thread's address. */
+static void *executor_globals_tls_addr(void) { return &_tsrm_ls_cache.eg; }
+static void *compiler_globals_tls_addr(void) { return &_tsrm_ls_cache.cg; }
 static void *language_scanner_globals_tls_addr(void) { return &language_scanner_globals; }
 static HashTable *global_function_table = NULL;
 static HashTable *global_class_table = NULL;
 static HashTable *global_constants_table = NULL;
 static HashTable *global_auto_globals_table = NULL;
-static HashTable *global_persistent_list = NULL;
-TSRMLS_MAIN_CACHE_DEFINE()
 # define GLOBAL_FUNCTION_TABLE		global_function_table
 # define GLOBAL_CLASS_TABLE			global_class_table
 # define GLOBAL_CONSTANTS_TABLE		global_constants_table
@@ -194,8 +193,8 @@ static ZEND_INI_MH(OnUpdateMaxAllowedStackSize) /* {{{ */
 	zend_long size = zend_ini_parse_quantity_warn(new_value, entry->name);
 
 	if (size < ZEND_MAX_ALLOWED_STACK_SIZE_UNCHECKED) {
-		zend_error(E_WARNING, "Invalid \"%s\" setting. Value must be >= %d, but got " ZEND_LONG_FMT,
-			ZSTR_VAL(entry->name), ZEND_MAX_ALLOWED_STACK_SIZE_UNCHECKED, size);
+		zend_error(E_WARNING, "Invalid \"%pS\" setting. Value must be >= %d, but got " ZEND_LONG_FMT,
+			entry->name, ZEND_MAX_ALLOWED_STACK_SIZE_UNCHECKED, size);
 		return FAILURE;
 	}
 
@@ -228,8 +227,8 @@ static ZEND_INI_MH(OnUpdateReservedStackSize) /* {{{ */
 	if (size == 0) {
 		size = min;
 	} else if (size < min) {
-		zend_error(E_WARNING, "Invalid \"%s\" setting. Value must be >= " ZEND_ULONG_FMT ", but got " ZEND_ULONG_FMT "\n",
-			ZSTR_VAL(entry->name), min, size);
+		zend_error(E_WARNING, "Invalid \"%pS\" setting. Value must be >= " ZEND_ULONG_FMT ", but got " ZEND_ULONG_FMT "\n",
+			entry->name, min, size);
 		return FAILURE;
 	}
 
@@ -860,13 +859,17 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 }
 /* }}} */
 
-static void executor_globals_persistent_list_dtor(void *storage)
+static void zend_thread_free_handler(void)
 {
-	zend_executor_globals *executor_globals = storage;
+	volatile bool completed = false;
 
-	if (&executor_globals->persistent_list != global_persistent_list) {
-		zend_destroy_rsrc_list(&executor_globals->persistent_list);
-	}
+	do {
+		zend_try {
+			zend_destroy_rsrc_list(&EG(persistent_list));
+			completed = true;
+		} zend_end_try();
+	} while (!completed);
+	zend_init_rsrc_plist();
 }
 
 static void executor_globals_dtor(zend_executor_globals *executor_globals) /* {{{ */
@@ -1028,11 +1031,9 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	zend_init_rsrc_list_dtors();
 
 #ifdef ZTS
-	ts_allocate_fast_id_at(&compiler_globals_id, &compiler_globals_offset, ZEND_CG_OFFSET, sizeof(zend_compiler_globals), (ts_allocate_ctor) compiler_globals_ctor, (ts_allocate_dtor) compiler_globals_dtor);
-	ts_allocate_fast_id_at(&executor_globals_id, &executor_globals_offset, ZEND_EG_OFFSET, sizeof(zend_executor_globals), (ts_allocate_ctor) executor_globals_ctor, (ts_allocate_dtor) executor_globals_dtor);
+	ts_allocate_tls_id(&compiler_globals_id, compiler_globals_tls_addr, sizeof(zend_compiler_globals), (ts_allocate_ctor) compiler_globals_ctor, (ts_allocate_dtor) compiler_globals_dtor);
+	ts_allocate_tls_id(&executor_globals_id, executor_globals_tls_addr, sizeof(zend_executor_globals), (ts_allocate_ctor) executor_globals_ctor, (ts_allocate_dtor) executor_globals_dtor);
 	ts_allocate_tls_id(&language_scanner_globals_id, language_scanner_globals_tls_addr, sizeof(zend_php_scanner_globals), (ts_allocate_ctor) php_scanner_globals_ctor, NULL);
-	ZEND_ASSERT(compiler_globals_offset == ZEND_CG_OFFSET);
-	ZEND_ASSERT(executor_globals_offset == ZEND_EG_OFFSET);
 	ts_allocate_fast_id(&ini_scanner_globals_id, &ini_scanner_globals_offset, sizeof(zend_ini_scanner_globals), (ts_allocate_ctor) ini_scanner_globals_ctor, NULL);
 	compiler_globals = ts_resource(compiler_globals_id);
 	executor_globals = ts_resource(executor_globals_id);
@@ -1088,6 +1089,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 
 #ifdef ZTS
 	tsrm_set_new_thread_end_handler(zend_new_thread_end_handler);
+	tsrm_set_thread_free_handler(zend_thread_free_handler);
 	tsrm_set_shutdown_handler(zend_interned_strings_dtor);
 #endif
 
@@ -1158,7 +1160,6 @@ zend_result zend_post_startup(void) /* {{{ */
 	EG(zend_constants) = NULL;
 
 	executor_globals_ctor(executor_globals);
-	global_persistent_list = &EG(persistent_list);
 	zend_copy_ini_directives();
 #else
 	global_map_ptr_last = CG(map_ptr_last);
@@ -1175,12 +1176,12 @@ zend_result zend_post_startup(void) /* {{{ */
 
 void zend_shutdown(void) /* {{{ */
 {
+#ifdef ZTS
+	tsrm_set_thread_free_handler(NULL);
+#endif
 	zend_vm_dtor();
 
 	zend_destroy_rsrc_list(&EG(persistent_list));
-#ifdef ZTS
-	ts_apply_for_id(executor_globals_id, executor_globals_persistent_list_dtor);
-#endif
 	zend_destroy_modules();
 
 	virtual_cwd_deactivate();
@@ -1842,7 +1843,7 @@ ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const c
 	if (EG(current_execute_data) && !CG(in_compilation)) {
 		zend_throw_exception_ex(exception_ce, 0, "%pS", message);
 	} else {
-		zend_error_noreturn(E_ERROR, "%s", ZSTR_VAL(message));
+		zend_error_noreturn(E_ERROR, "%pS", message);
 	}
 
 	zend_string_release(message);
@@ -1863,12 +1864,12 @@ ZEND_API ZEND_COLD void zend_illegal_container_offset(const zend_string *contain
 			if (zend_string_equals(container, ZSTR_KNOWN(ZEND_STR_STRING))) {
 				zend_throw_error(NULL, "Cannot unset string offsets");
 			} else {
-				zend_type_error("Cannot unset offset of type %s on %s", zend_zval_type_name(offset), ZSTR_VAL(container));
+				zend_type_error("Cannot unset offset of type %s on %pS", zend_zval_type_name(offset), container);
 			}
 			return;
 		default:
-			zend_type_error("Cannot access offset of type %s on %s",
-				zend_zval_type_name(offset), ZSTR_VAL(container));
+			zend_type_error("Cannot access offset of type %s on %pS",
+				zend_zval_type_name(offset), container);
 			return;
 	}
 }
@@ -1876,12 +1877,11 @@ ZEND_API ZEND_COLD void zend_illegal_container_offset(const zend_string *contain
 ZEND_API ZEND_COLD void zend_type_error(const char *format, ...) /* {{{ */
 {
 	va_list va;
-	char *message = NULL;
 
 	va_start(va, format);
-	zend_vspprintf(&message, 0, format, va);
-	zend_throw_exception(zend_ce_type_error, message, 0);
-	efree(message);
+	zend_string *message = zend_vstrpprintf(0, format, va);
+	zend_throw_exception_ex(zend_ce_type_error, 0, "%pS", message);
+	zend_string_release(message);
 	va_end(va);
 } /* }}} */
 
@@ -1901,12 +1901,11 @@ ZEND_API ZEND_COLD void zend_argument_count_error(const char *format, ...) /* {{
 ZEND_API ZEND_COLD void zend_value_error(const char *format, ...) /* {{{ */
 {
 	va_list va;
-	char *message = NULL;
 
 	va_start(va, format);
-	zend_vspprintf(&message, 0, format, va);
-	zend_throw_exception(zend_ce_value_error, message, 0);
-	efree(message);
+	zend_string *message = zend_vstrpprintf(0, format, va);
+	zend_throw_exception_ex(zend_ce_value_error, 0, "%pS", message);
+	zend_string_release(message);
 	va_end(va);
 } /* }}} */
 
@@ -2119,6 +2118,7 @@ ZEND_API void zend_alloc_ce_cache(zend_string *type_name)
 	do {
 		ret = ZEND_MAP_PTR_NEW_OFFSET();
 	} while (ret <= 2);
-	GC_ADD_FLAGS(type_name, IS_STR_CLASS_NAME_MAP_PTR);
 	GC_SET_REFCOUNT(type_name, ret);
+	atomic_thread_fence(memory_order_release);
+	GC_ADD_FLAGS(type_name, IS_STR_CLASS_NAME_MAP_PTR);
 }

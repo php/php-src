@@ -19,6 +19,11 @@ $(BUILD_DIR)\ext\opcache\jit\ir\ir_ra.obj: \
 	ext\opcache\jit\ir\ir_private.h \
 	ext\opcache\jit\ir\ir_x86.h
 
+$(BUILD_DIR)\ext\opcache\jit\ir\ir_ra_simple.obj: \
+	ext\opcache\jit\ir\ir.h \
+	ext\opcache\jit\ir\ir_private.h \
+	ext\opcache\jit\ir\ir_x86.h
+
 $(BUILD_DIR)\ext\opcache\jit\ir\ir_emit.obj: \
 	ext\opcache\jit\ir\ir.h \
 	ext\opcache\jit\ir\ir_private.h \

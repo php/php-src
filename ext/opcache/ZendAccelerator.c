@@ -457,8 +457,9 @@ static void accel_interned_strings_restore_state(void)
 				/* Discard non-global CE_CACHE slots on reset. */
 				uintptr_t idx = (GC_REFCOUNT(s) - 1) / sizeof(void *);
 				if (idx >= ZCSG(map_ptr_last)) {
-					GC_SET_REFCOUNT(s, 2);
 					GC_DEL_FLAGS(s, IS_STR_CLASS_NAME_MAP_PTR);
+					atomic_thread_fence(memory_order_release);
+					GC_SET_REFCOUNT(s, 2);
 				}
 			}
 
@@ -567,6 +568,7 @@ finish:
 	if (ZSTR_HAS_CE_CACHE(str) && !ZSTR_HAS_CE_CACHE(s)) {
 		ZEND_ASSERT(GC_FLAGS(str) & IS_STR_PERMANENT);
 		GC_SET_REFCOUNT(s, GC_REFCOUNT(str));
+		atomic_thread_fence(memory_order_release);
 		GC_ADD_FLAGS(s, IS_STR_CLASS_NAME_MAP_PTR);
 	}
 
@@ -1539,10 +1541,10 @@ static void zend_accel_add_key(zend_string *key, zend_accel_hash_entry *bucket)
 	}
 }
 
+/* Must perform the same check as phar_compile_file(). */
 static zend_always_inline bool is_phar_file(const zend_string *filename)
 {
-	return filename &&
-		zend_string_ends_with_literal(filename, ".phar") &&
+	return filename && strstr(ZSTR_VAL(filename), ".phar") &&
 		!strstr(ZSTR_VAL(filename), "://");
 }
 
@@ -3721,6 +3723,11 @@ static void (*orig_post_shutdown_cb)(void);
 
 static void accel_post_shutdown(void)
 {
+	/* Call original shutdown prior to detaching SHM, so it can access its memory safely. */
+	if (orig_post_shutdown_cb) {
+		orig_post_shutdown_cb();
+	}
+
 	zend_shared_alloc_shutdown();
 }
 
@@ -5079,6 +5086,9 @@ static zend_result accel_preload(const char *config, bool in_child)
 
 		zend_shared_alloc_save_state();
 		accel_interned_strings_save_state();
+#ifdef HAVE_JIT
+		zend_jit_save_restart_point();
+#endif
 
 		SHM_PROTECT();
 		HANDLE_UNBLOCK_INTERRUPTIONS();

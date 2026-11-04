@@ -64,13 +64,13 @@ typedef struct {
 
 void breakiterator_object_create(zval *object, BreakIterator *break_iter, int brand_new);
 
-void breakiterator_object_construct(zval *object, BreakIterator *break_iter);
-
+BEGIN_EXTERN_C()
 void breakiterator_register_BreakIterator_class(void);
 
 extern zend_class_entry *BreakIterator_ce_ptr,
 						*RuleBasedBreakIterator_ce_ptr;
 
 extern zend_object_handlers BreakIterator_handlers;
+END_EXTERN_C()
 
 #endif /* #ifndef BREAKITERATOR_CLASS_H */

@@ -73,7 +73,7 @@ static zend_always_inline bool i_smart_str_realloc(smart_str *str, size_t len, b
 		ZSTR_LEN(str->s) = 0;
 	} else {
 		size_t a = SMART_STR_NEW_LEN(len);
-		zend_string *s = (zend_string *) safe_fperealloc(str->s, 1, a, _ZSTR_HEADER_SIZE + 1, /* persistent */ true, fallible);
+		zend_string *s = (zend_string *) safe_fperealloc(str->s, a, sizeof(char), _ZSTR_HEADER_SIZE + 1, /* persistent */ true, fallible);
 		if (ZEND_CONST_COND(fallible, true) && !s) {
 			return false;
 		}

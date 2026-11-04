@@ -299,7 +299,7 @@ void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f)
 				ir_print_type_cname(insn->type, f);
 				fprintf(f, " d_%d", i);
 				if (save_flags & IR_SAVE_REGS) {
-					if (ctx->vregs && ctx->vregs[i]) {
+					if (ctx->vregs && ctx->vregs[i] > 0) {
 						fprintf(f, " {R%d}", ctx->vregs[i]);
 					}
 					if (ctx->regs) {
@@ -317,7 +317,7 @@ void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f)
 				ir_print_type_cname(insn->type, f);
 				fprintf(f, " d_%d", i);
 				if (save_flags & IR_SAVE_REGS) {
-					if (ctx->vregs && ctx->vregs[i]) {
+					if (ctx->vregs && ctx->vregs[i] > 0) {
 						fprintf(f, " {R%d}", ctx->vregs[i]);
 					}
 					if (ctx->regs) {
@@ -355,7 +355,7 @@ void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f)
 							fprintf(f, "%sd_%d", first ? "(" : ", ", ref);
 						}
 						if (save_flags & IR_SAVE_REGS) {
-							if (ctx->vregs && ref > 0 && ctx->vregs[ref]) {
+							if (ctx->vregs && ref > 0 && ctx->vregs[ref] > 0) {
 								fprintf(f, " {R%d}", ctx->vregs[ref]);
 							}
 							if (ctx->regs) {
@@ -383,7 +383,7 @@ void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f)
 						fprintf(f, "%sfunc ", first ? "(" : ", ");
 						ir_print_proto(ctx, ref, f);
 						break;
-					case IR_OPND_PROB:
+					case IR_OPND_OPT:
 						if (ref == 0) {
 							break;
 						}

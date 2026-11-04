@@ -15,13 +15,7 @@
 #ifndef FORMATTER_DATA_H
 #define FORMATTER_DATA_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 #include <php.h>
-#ifdef __cplusplus
-}
-#endif
 
 #ifdef __cplusplus
 #include <unicode/numfmt.h>
@@ -30,13 +24,7 @@ using icu::NumberFormat;
 typedef void NumberFormat;
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 #include "intl_error.h"
-#ifdef __cplusplus
-}
-#endif
 
 typedef struct {
 	// error hangling
@@ -46,13 +34,7 @@ typedef struct {
 	NumberFormat*    unum;
 } formatter_data;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 void formatter_data_init( formatter_data* nf_data );
 void formatter_data_free( formatter_data* nf_data );
-#ifdef __cplusplus
-}
-#endif
 
 #endif // FORMATTER_DATA_H

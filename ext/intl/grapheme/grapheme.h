@@ -18,13 +18,9 @@
 #include <php.h>
 #include <unicode/utypes.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+BEGIN_EXTERN_C()
 void grapheme_close_global_iterator( void );
-#ifdef __cplusplus
-}
-#endif
+END_EXTERN_C()
 
 #define GRAPHEME_EXTRACT_TYPE_COUNT		0
 #define GRAPHEME_EXTRACT_TYPE_MAXBYTES	1

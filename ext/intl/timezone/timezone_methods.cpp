@@ -26,14 +26,14 @@
 
 #include "../common/common_date.h"
 
-extern "C" {
 #include "../php_intl.h"
 #define USE_TIMEZONE_POINTER 1
 #include "timezone_class.h"
 #include "intl_convert.h"
 #include <zend_exceptions.h>
+BEGIN_EXTERN_C()
 #include <ext/date/php_date.h>
-}
+END_EXTERN_C()
 #include "common/common_enum.h"
 
 using icu::Locale;

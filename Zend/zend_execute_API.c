@@ -875,7 +875,7 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 			}
 			zend_string *callable_name
 				= zend_get_callable_name_ex(&fci->function_name, fci->object);
-			zend_throw_error(NULL, "Invalid callback %s, %s", ZSTR_VAL(callable_name), error);
+			zend_throw_error(NULL, "Invalid callback %pS, %s", callable_name, error);
 			efree(error);
 			zend_string_release_ex(callable_name, 0);
 			return SUCCESS;
@@ -1103,7 +1103,7 @@ cleanup_args:
 				bool result = zend_verify_internal_return_type(call->func, fci->retval);
 				ZEND_ASSERT(result);
 			}
-			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
+			ZEND_ASSERT(((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) && !zend_return_should_unwrap_ref(call))
 				? Z_ISREF_P(fci->retval) : !Z_ISREF_P(fci->retval));
 			ZEND_ASSERT(!(call->func->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS));
 		}
@@ -1774,11 +1774,11 @@ static ZEND_COLD void report_class_fetch_error(const zend_string *class_name, ui
 	}
 
 	if ((fetch_type & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_INTERFACE) {
-		zend_throw_or_error(fetch_type, NULL, "Interface \"%s\" not found", ZSTR_VAL(class_name));
+		zend_throw_or_error(fetch_type, NULL, "Interface \"%pS\" not found", class_name);
 	} else if ((fetch_type & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_TRAIT) {
-		zend_throw_or_error(fetch_type, NULL, "Trait \"%s\" not found", ZSTR_VAL(class_name));
+		zend_throw_or_error(fetch_type, NULL, "Trait \"%pS\" not found", class_name);
 	} else {
-		zend_throw_or_error(fetch_type, NULL, "Class \"%s\" not found", ZSTR_VAL(class_name));
+		zend_throw_or_error(fetch_type, NULL, "Class \"%pS\" not found", class_name);
 	}
 }
 
@@ -2008,7 +2008,10 @@ ZEND_API zend_result zend_set_local_var(zend_string *name, zval *value, bool for
 					if (ZSTR_H(*str) == h &&
 					    zend_string_equal_content(*str, name)) {
 						zval *var = EX_VAR_NUM(str - op_array->vars);
+						zval garbage;
+						ZVAL_COPY_VALUE(&garbage, var);
 						ZVAL_COPY_VALUE(var, value);
+						zval_ptr_dtor(&garbage);
 						return SUCCESS;
 					}
 					str++;
@@ -2050,8 +2053,10 @@ ZEND_API zend_result zend_set_local_var_str(const char *name, size_t len, zval *
 					if (ZSTR_H(*str) == h &&
 					    zend_string_equals_cstr(*str, name, len)) {
 						zval *var = EX_VAR_NUM(str - op_array->vars);
-						zval_ptr_dtor(var);
+						zval garbage;
+						ZVAL_COPY_VALUE(&garbage, var);
 						ZVAL_COPY_VALUE(var, value);
+						zval_ptr_dtor(&garbage);
 						return SUCCESS;
 					}
 					str++;

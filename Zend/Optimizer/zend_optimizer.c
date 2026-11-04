@@ -846,6 +846,7 @@ zend_class_entry *zend_optimizer_get_class_entry_from_op1(
 			return zend_optimizer_get_class_entry(script, op_array, Z_STR_P(op1 + 1));
 		}
 	} else if (opline->op1_type == IS_UNUSED && op_array->scope
+			&& !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)
 			&& !(op_array->scope->ce_flags & ZEND_ACC_TRAIT)
 			&& ((opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF
 				|| ((opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_STATIC
@@ -1345,7 +1346,7 @@ static void zend_redo_pass_two_ex(zend_op_array *op_array, const zend_ssa *ssa)
 	while (opline < end) {
 		const zend_ssa_op *ssa_op = &ssa->ops[opline - op_array->opcodes];
 		uint32_t op1_info = opline->op1_type == IS_UNUSED ? 0 : (OP1_INFO() & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_KEY_ANY));
-		uint32_t op2_info = opline->op1_type == IS_UNUSED ? 0 : (OP2_INFO() & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_KEY_ANY));
+		uint32_t op2_info = opline->op2_type == IS_UNUSED ? 0 : (OP2_INFO() & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_KEY_ANY));
 		uint32_t res_info =
 			(opline->opcode == ZEND_PRE_INC ||
 			 opline->opcode == ZEND_PRE_DEC ||

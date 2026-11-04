@@ -51,6 +51,9 @@ DBA_OPEN_FUNC(ndbm)
 	}
 
 	dbf = dbm_open(ZSTR_VAL(info->path), gmode, filemode);
+	if (dbf == NULL) {
+		return FAILURE;
+	}
 
 	pinfo->dbf = dbf;
 	return SUCCESS;

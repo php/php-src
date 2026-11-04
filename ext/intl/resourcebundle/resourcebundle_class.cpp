@@ -16,24 +16,20 @@
 #include <unicode/ures.h>
 #include <unicode/uenum.h>
 
-
-extern "C" {
-#include <zend.h>
 #include <php.h>
-}
 
 #include <Zend/zend_exceptions.h>
 #include <Zend/zend_interfaces.h>
 
-extern "C" {
 #include "php_intl.h"
 #include "intl_data.h"
 #include "intl_common.h"
 #include "resourcebundle/resourcebundle.h"
 #include "resourcebundle/resourcebundle_iterator.h"
 #include "resourcebundle/resourcebundle_class.h"
+BEGIN_EXTERN_C()
 #include "resourcebundle/resourcebundle_arginfo.h"
-}
+END_EXTERN_C()
 
 zend_class_entry *ResourceBundle_ce_ptr = NULL;
 
@@ -239,7 +235,7 @@ static zval *resource_bundle_array_fetch(
 /* }}} */
 
 /* {{{ resourcebundle_array_get */
-U_CFUNC zval *resourcebundle_array_get(zend_object *object, zval *offset, int type, zval *rv)
+static zval *resourcebundle_array_get(zend_object *object, zval *offset, int type, zval *rv)
 {
 	if (offset == NULL) {
 		zend_throw_error(NULL, "Cannot apply [] to ResourceBundle object");

@@ -12,11 +12,9 @@
    +----------------------------------------------------------------------+
  */
 
-extern "C" {
 #include "php.h"
 #include "zend_enum.h"
 #include "zend_exceptions.h"
-}
 
 #include "../formatter/formatter_class.h"
 
@@ -32,11 +30,9 @@ extern "C" {
 #include <memory>
 #include <new>
 
-extern "C" {
 #include "../php_intl.h"
 #include "../intl_data.h"
 #include "../intl_error.h"
-}
 
 #include "../intl_convertcpp.h"
 #include "reldateformatter_class.h"

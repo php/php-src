@@ -131,17 +131,12 @@ PHP_HASH_API void PHP_SNEFRUInit(PHP_SNEFRU_CTX *context, ZEND_ATTRIBUTE_UNUSED 
 	memset(context, 0, sizeof(*context));
 }
 
-static const uint32_t MAX32 = 0xffffffffLU;
-
 PHP_HASH_API void PHP_SNEFRUUpdate(PHP_SNEFRU_CTX *context, const unsigned char *input, size_t len)
 {
-	if ((MAX32 - context->count[1]) < (len * 8)) {
-		context->count[0]++;
-		context->count[1] = MAX32 - context->count[1];
-		context->count[1] = ((uint32_t) len * 8) - context->count[1];
-	} else {
-		context->count[1] += (uint32_t) len * 8;
-	}
+	uint64_t count = (((uint64_t) context->count[0] << 32) | context->count[1]) + (uint64_t) len * 8;
+
+	context->count[0] = (uint32_t) (count >> 32);
+	context->count[1] = (uint32_t) count;
 
 	if (context->length + len < 32) {
 		memcpy(&context->buffer[context->length], input, len);

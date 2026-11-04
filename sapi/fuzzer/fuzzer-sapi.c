@@ -46,7 +46,7 @@ static const char HARDCODED_INI[] =
 	"disable_functions=dl,mail,mb_send_mail,set_error_handler"
 	",shell_exec,exec,system,proc_open,popen,passthru,pcntl_exec"
 	",chdir,chgrp,chmod,chown,copy,file_put_contents,lchgrp,lchown,link,mkdir"
-	",move_uploaded_file,rename,rmdir,symlink,tempname,touch,unlink,fopen"
+	",move_uploaded_file,rename,rmdir,symlink,tempnam,touch,unlink,fopen"
 	/* Networking code likes to wait and wait. */
 	",fsockopen,pfsockopen"
 	",stream_socket_pair,stream_socket_client,stream_socket_server"

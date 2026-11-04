@@ -123,7 +123,7 @@ static zend_string* php_dba_make_key(const HashTable *key)
 		return name_str;
 	}
 
-	zend_string *key_str = zend_strpprintf(0, "[%s]%s", ZSTR_VAL(group_str), ZSTR_VAL(name_str));
+	zend_string *key_str = zend_strpprintf(0, "[%pS]%pS", group_str, name_str);
 	zend_string_release_ex(group_str, false);
 	zend_string_release_ex(name_str, false);
 	return key_str;
@@ -364,7 +364,7 @@ static ZEND_INI_MH(OnUpdateDefaultHandler)
 	for (hptr = handler; hptr->name && strcasecmp(hptr->name, ZSTR_VAL(new_value)); hptr++);
 
 	if (!hptr->name) {
-		php_error_docref(NULL, E_WARNING, "No such handler: %s", ZSTR_VAL(new_value));
+		php_error_docref(NULL, E_WARNING, "No such handler: %pS", new_value);
 		return FAILURE;
 	}
 	DBA_G(default_hptr) = hptr;
@@ -575,7 +575,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 	}
 
 	zend_string *resource_key = zend_strpprintf(0,
-		"dba_%d_%u_%s_%s_%s", persistent, persistent ? 0 : DBA_G(connection_counter)++, ZSTR_VAL(path), ZSTR_VAL(mode), handler_str ? ZSTR_VAL(handler_str) : ""
+		"dba_%d_%u_%pS_%pS_%s", persistent, persistent ? 0 : DBA_G(connection_counter)++, path, mode, handler_str ? ZSTR_VAL(handler_str) : ""
 	);
 
 	if (persistent) {
@@ -618,7 +618,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 		for (hptr = handler; hptr->name && strcasecmp(hptr->name, ZSTR_VAL(handler_str)); hptr++);
 
 		if (!hptr->name) {
-			php_error_docref(NULL, E_WARNING, "Handler \"%s\" is not available", ZSTR_VAL(handler_str));
+			php_error_docref(NULL, E_WARNING, "Handler \"%pS\" is not available", handler_str);
 			zend_string_release_ex(resource_key, /* persistent */ false);
 			RETURN_FALSE;
 		}

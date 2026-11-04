@@ -47,6 +47,12 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 - The INIT_CLASS_ENTRY_INIT_METHODS() macro, which was previously used as
   part of handling disabled classes, was removed following the removal of
   the `disable_classes` INI setting in PHP 8.5.
+- Using zend_array_destroy() on HashTables with a custom pDestructor is not
+  allowed anymore. User-facing HashTables must have pDestructor = ZVAL_PTR_DTOR
+  or NULL, and must be freed with zend_array_destroy(). Other HashTables can be
+  freed with zend_hash_destroy() + pefree().
+- The ZTS symbols compiler_globals_offset and executor_globals_offset have been
+  removed: CG()/EG() now reach the globals through a __thread struct.
 
 ========================
 2. Build system changes
@@ -74,6 +80,13 @@ PHP 8.7 INTERNALS UPGRADE NOTES
     mysqlnd_reverse_api_register_api() and mysqlnd_reverse_api_get_api_list()
     no longer exist.
 
+- Mysqlnd:
+  . In ZTS builds the values of MYSQLND_STATS are atomic_uint_least64_t and
+    the LOCK_access member was removed. The MYSQLND_INC_STATISTIC*() and
+    MYSQLND_DEC_STATISTIC() macros update them with relaxed atomic additions.
+  . The MYSQLND_STATS_LOCK() and MYSQLND_STATS_UNLOCK() macros were removed.
+    MYSQLND_STATS_UPDATE_VALUE() is now an expression instead of a block.
+
 - Standard:
   . php_explode() now takes a HashTable* instead of a zval* to store the
     resulting parts. It already expected the zval* to be IS_ARRAY.
@@ -91,3 +104,11 @@ PHP 8.7 INTERNALS UPGRADE NOTES
   . The force_http_10 method has been removed.
   . The get_fd method has been removed.
   . The get_target_uid and get_target_gid methods have been removed.
+
+- Per-thread TSRM resources are now released best-effort at normal thread exit,
+  because native TLS resource destructors can only run on their owning thread and
+  tsrm_shutdown() cannot release them afterwards. Prefer explicitly calling ts_free_thread().
+
+- tsrm_shutdown() and the bundled library-unload hooks automatically disarm
+  thread-exit cleanup. Embedders must stop and join all PHP worker threads
+  before calling tsrm_shutdown() or unloading PHP.

@@ -3,7 +3,7 @@ IntlBreakIterator::getLocale(): basic test
 --EXTENSIONS--
 intl
 --SKIPIF--
-<?php if (version_compare(INTL_ICU_VERSION, '64.0') < 0) die('skip for ICU >= 64.0'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '64.0') < 0) die('skip requires ICU >= 64.0'); ?>
 --FILE--
 <?php
 

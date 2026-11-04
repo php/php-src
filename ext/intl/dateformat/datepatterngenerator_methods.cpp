@@ -18,13 +18,11 @@
 
 #include "../intl_convertcpp.h"
 
-extern "C" {
 #include "php_intl.h"
 #define USE_DATETIMEPATTERNGENERATOR_POINTER 1
 #include "datepatterngenerator_class.h"
 #include <zend_exceptions.h>
 #include <assert.h>
-}
 
 using icu::DateTimePatternGenerator;
 using icu::Locale;

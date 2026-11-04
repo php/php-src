@@ -641,9 +641,7 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 		zend_fiber_release_callable(fiber);
 
 		if (EG(exception)) {
-			if (!(fiber->flags & ZEND_FIBER_FLAG_DESTROYED)
-				|| !(zend_is_graceful_exit(EG(exception)) || zend_is_unwind_exit(EG(exception)))
-			) {
+			if (!(fiber->flags & ZEND_FIBER_FLAG_DESTROYED) || !zend_is_graceful_exit(EG(exception))) {
 				fiber->flags |= ZEND_FIBER_FLAG_THREW;
 				transfer->flags = ZEND_FIBER_TRANSFER_FLAG_ERROR;
 
@@ -1131,8 +1129,8 @@ ZEND_METHOD(FiberError, __construct)
 {
 	zend_throw_error(
 		NULL,
-		"The \"%s\" class is reserved for internal use and cannot be manually instantiated",
-		ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name)
+		"The \"%pS\" class is reserved for internal use and cannot be manually instantiated",
+		Z_OBJCE_P(ZEND_THIS)->name
 	);
 }
 

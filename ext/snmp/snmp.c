@@ -535,14 +535,21 @@ retry:
 						} else if (st & SNMP_USE_SUFFIX_AS_KEYS && st & SNMP_CMD_WALK) {
 							snprint_objid(buf2, sizeof(buf2), vars->name, vars->name_length);
 							if (rootlen <= vars->name_length && snmp_oid_compare(root, rootlen, vars->name, rootlen) == 0) {
-								buf2[0] = '\0';
+								size_t pos = 0;
 								count = rootlen;
-								while(count < vars->name_length){
-									snprintf(buf, sizeof(buf), "%lu.", vars->name[count]);
-									strcat(buf2, buf);
+								while (count < vars->name_length) {
+									int written = snprintf(buf2 + pos, sizeof(buf2) - pos, "%lu.", vars->name[count]);
+									if (written < 0 || (size_t)written >= sizeof(buf2) - pos) {
+										break;
+									}
+									pos += (size_t)written;
 									count++;
 								}
-								buf2[strlen(buf2) - 1] = '\0'; /* remove trailing '.' */
+								if (pos > 0) {
+									buf2[pos - 1] = '\0'; /* remove trailing '.' */
+								} else {
+									buf2[0] = '\0';
+								}
 							}
 							add_assoc_zval(return_value, buf2, &snmpval);
 						} else {
@@ -707,7 +714,7 @@ static bool php_snmp_parse_oid(
 			zend_argument_value_error(oid_arg_num, "must not be empty when passed as an array");
 			return false;
 		}
-		objid_query->vars = (snmpobjarg *)safe_emalloc(sizeof(snmpobjarg), zend_hash_num_elements(oid_ht), 0);
+		objid_query->vars = (snmpobjarg *)safe_emalloc(zend_hash_num_elements(oid_ht), sizeof(snmpobjarg), 0);
 		memset(objid_query->vars, 0, sizeof(snmpobjarg) * zend_hash_num_elements(oid_ht));
 		objid_query->array_output = (st & SNMP_CMD_SET) == 0;
 		ZEND_HASH_FOREACH_VAL(oid_ht, tmp_oid) {

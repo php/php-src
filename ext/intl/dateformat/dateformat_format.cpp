@@ -19,10 +19,8 @@
 #include <unicode/ustring.h>
 #include <unicode/unum.h>
 
-extern "C" {
 #include "../php_intl.h"
 #include "../intl_convert.h"
-}
 
 #include "../common/common_date.h"
 #include "dateformat.h"

@@ -12,7 +12,6 @@
    +----------------------------------------------------------------------+
  */
 
-extern "C" {
 #include "uchar.h"
 #include "intl_data.h"
 #include "intl_convert.h"
@@ -21,7 +20,6 @@ extern "C" {
 #include <unicode/utf8.h>
 
 #include "uchar_arginfo.h"
-}
 
 #define IC_METHOD(mname) \
 static void php_intl_IntlChar_##mname##_impl(INTERNAL_FUNCTION_PARAMETERS); \
@@ -546,7 +544,7 @@ IC_METHOD(getFC_NFKC_Closure) {
 	if (closure_len == 0) {
 		RETURN_EMPTY_STRING();
 	}
-	closure = reinterpret_cast<UChar *>(safe_emalloc(sizeof(UChar), closure_len + 1, 0));
+	closure = reinterpret_cast<UChar *>(safe_emalloc(closure_len + 1, sizeof(UChar), 0));
 	error = U_ZERO_ERROR;
 	closure_len = u_getFC_NFKC_Closure(cp, closure, closure_len, &error);
 	if (U_FAILURE(error)) {
@@ -651,7 +649,7 @@ IC_CHAR_METHOD_CHAR(getBidiPairedBracket)
 #undef IC_CHAR_METHOD_CHAR
 /* }}} */
 
-int php_uchar_minit(INIT_FUNC_ARGS) {
+U_CFUNC int php_uchar_minit(INIT_FUNC_ARGS) {
 	register_class_IntlChar();
 
 	return SUCCESS;

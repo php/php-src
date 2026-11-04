@@ -5,7 +5,7 @@ intl
 --SKIPIF--
 <?php
 if (version_compare(INTL_ICU_VERSION, '59.1', '<')) {
-    die('skip for ICU >= 59.1');
+    die('skip requires ICU >= 59.1');
 }
 ?>
 --FILE--

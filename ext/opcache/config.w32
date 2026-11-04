@@ -25,7 +25,7 @@ if (PHP_OPCACHE_JIT == "yes") {
 	} else if (CHECK_HEADER("ir/ir.h", "CFLAGS_OPCACHE", PHP_OPCACHE + ";ext\\opcache\\jit")) {
 		var dasm_flags = (X64 ? "-D X64=1" : "") + (X64 ? " -D X64WIN=1" : "") + " -D WIN=1";
 		var ir_target = (X64 ? "IR_TARGET_X64" : "IR_TARGET_X86");
-		var ir_src = "ir_strtab.c ir_cfg.c ir_sccp.c ir_gcm.c ir_ra.c ir_save.c \
+		var ir_src = "ir_strtab.c ir_cfg.c ir_sccp.c ir_gcm.c ir_ra.c ir_ra_simple.c ir_save.c \
 			 ir_dump.c ir_check.c ir_patch.c";
 
 		DEFINE("IR_TARGET", ir_target);

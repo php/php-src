@@ -382,6 +382,7 @@ AC_DEFUN([ZEND_CHECK_ALIGNMENT],
 [AC_RUN_IFELSE([AC_LANG_SOURCE([
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdalign.h>
 
 typedef union _mm_align_test {
   void *ptr;
@@ -389,11 +390,7 @@ typedef union _mm_align_test {
   long lng;
 } mm_align_test;
 
-#if (defined (__GNUC__) && __GNUC__ >= 2)
-#define ZEND_MM_ALIGNMENT (__alignof__ (mm_align_test))
-#else
-#define ZEND_MM_ALIGNMENT (sizeof(mm_align_test))
-#endif
+#define ZEND_MM_ALIGNMENT (alignof(mm_align_test))
 
 int main(void)
 {

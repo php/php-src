@@ -573,6 +573,7 @@ namespace {
         private ?string $__last_request_headers = null;
         private ?string $__last_response_headers = null;
         private int $_keep_headers = 0;
+        private bool $_follow_cross_origin_redirects = false;
 
         public function __construct(?string $wsdl, array $options = []) {}
 

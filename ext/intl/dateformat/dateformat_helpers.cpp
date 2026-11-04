@@ -21,12 +21,10 @@
 
 #include "dateformat_helpers.h"
 
-extern "C" {
 #include "../php_intl.h"
 #include <Zend/zend_operators.h>
 #define USE_CALENDAR_POINTER 1
 #include "../calendar/calendar_class.h"
-}
 
 // Artificial value to set for a pure proleptic gregorian calendar (until icu provides it eventually)
 #define UCAL_PHP_PROLEPTIC_GREGORIAN -16

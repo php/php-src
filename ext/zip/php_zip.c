@@ -138,26 +138,15 @@ static char * php_zip_make_relative_path(char *path, size_t path_len) /* {{{ */
 /* }}} */
 
 /* {{{ php_zip_file_error
- Entry error code, plus its message when message is not NULL.
- zip_error_t and its accessors only exist since libzip 1.0. */
+ Entry error code, plus its message when message is not NULL. */
 static int php_zip_file_error(struct zip_file *zf, const char **message)
 {
-#if LIBZIP_VERSION_MAJOR < 1
-	int zep, syp;
-
-	zip_file_error_get(zf, &zep, &syp);
-	if (message) {
-		*message = zip_file_strerror(zf);
-	}
-	return zep;
-#else
 	zip_error_t *err = zip_file_get_error(zf);
 
 	if (message) {
 		*message = zip_error_strerror(err);
 	}
 	return zip_error_code_zip(err);
-#endif
 }
 /* }}} */
 

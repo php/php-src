@@ -55,6 +55,7 @@ ZEND_BEGIN_MODULE_GLOBALS(ffi)
 	bool allow_vla;
 	bool attribute_parsing;
 	bool persistent;
+	bool parse_failed;
 	uint32_t  default_type_attr;
 ZEND_END_MODULE_GLOBALS(ffi)
 

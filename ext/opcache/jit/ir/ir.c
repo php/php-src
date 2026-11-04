@@ -379,6 +379,7 @@ void ir_print_const(const ir_ctx *ctx, const ir_insn *insn, FILE *f, bool quoted
 #define ir_op_flag_xN      (IR_OP_FLAG_CONTROL|IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_CALL | IR_OP_FLAG_VAR_INPUTS)
 #define ir_op_flag_a1      (IR_OP_FLAG_CONTROL|IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_ALLOC | 1 | (1 << IR_OP_FLAG_OPERANDS_SHIFT))
 #define ir_op_flag_a2      (IR_OP_FLAG_CONTROL|IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_ALLOC | 2 | (2 << IR_OP_FLAG_OPERANDS_SHIFT))
+#define ir_op_flag_a2X1    (IR_OP_FLAG_CONTROL|IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_ALLOC | 2 | (3 << IR_OP_FLAG_OPERANDS_SHIFT))
 
 #define ir_op_kind____     IR_OPND_UNUSED
 #define ir_op_kind_def     IR_OPND_DATA
@@ -391,8 +392,9 @@ void ir_print_const(const ir_ctx *ctx, const ir_insn *insn, FILE *f, bool quoted
 #define ir_op_kind_num     IR_OPND_NUM
 #define ir_op_kind_fld     IR_OPND_STR
 #define ir_op_kind_var     IR_OPND_DATA
-#define ir_op_kind_prb     IR_OPND_PROB
-#define ir_op_kind_opt     IR_OPND_PROB
+#define ir_op_kind_opt     IR_OPND_OPT
+#define ir_op_kind_prb     IR_OPND_OPT
+#define ir_op_kind_alg     IR_OPND_OPT
 #define ir_op_kind_pro     IR_OPND_PROTO
 #define ir_op_kind_lbl     IR_OPND_LABEL_REF
 
@@ -620,7 +622,7 @@ static IR_NEVER_INLINE void ir_const_hash_rehash(ir_ctx *ctx)
 	ctx->const_hash = ir_mem_calloc(ctx->const_hash_mask + 1, sizeof(ir_ref));
 	for (ref = 1 - ctx->consts_count, insn = ctx->ir_base + ref; ref < IR_TRUE; ref++, insn++) {
 		if (insn->op == IR_LONG_CONST) {
-			hash = insn->val.u64;
+			hash = insn->val.addr;
 			insn->prev_const = ctx->const_hash[hash & ctx->const_hash_mask];
 			ctx->const_hash[hash & ctx->const_hash_mask] = ref;
 			ref += IR_ALIGNED_SIZE(insn->long_const_size, sizeof(ir_insn)) / sizeof(ir_insn);
@@ -633,6 +635,26 @@ static IR_NEVER_INLINE void ir_const_hash_rehash(ir_ctx *ctx)
 	}
 }
 
+#ifdef IR_DEBUG
+/* Narrow integer constants are kept sign/zero extended to 64 bits, FLOAT has zero upper half */
+static bool ir_const_is_canonical(ir_val val, uint8_t type)
+{
+	uint32_t shift;
+
+	if (type == IR_FLOAT) {
+		return val.u32_hi == 0;
+	}
+	if (!IR_IS_TYPE_INT(type) || ir_type_size[type] == 8) {
+		return 1;
+	}
+	shift = (8 - ir_type_size[type]) * 8;
+	if (IR_IS_TYPE_SIGNED(type)) {
+		return val.i64 == (int64_t)(val.u64 << shift) >> shift;
+	}
+	return val.u64 == (val.u64 << shift) >> shift;
+}
+#endif
+
 ir_ref ir_const_ex(ir_ctx *ctx, ir_val val, uint8_t type, uint32_t optx)
 {
 	ir_insn *insn;
@@ -644,6 +666,8 @@ ir_ref ir_const_ex(ir_ctx *ctx, ir_val val, uint8_t type, uint32_t optx)
 	} else if (type == IR_ADDR && val.u64 == 0) {
 		return IR_NULL;
 	}
+
+	IR_ASSERT(IR_IS_SYM_CONST(optx & IR_OPT_OP_MASK) || ir_const_is_canonical(val, type));
 
 	hash = ir_const_hash(val, optx) & ctx->const_hash_mask;
 	ref = ctx->const_hash[hash];
@@ -1276,12 +1300,7 @@ ir_fold_const:
 		/* Extend a narrow integer result to its type width so no
 		 * fold rule sees garbage in the upper bits. */
 		if (IR_IS_TYPE_INT(type) && ir_type_size[type] < 8) {
-			uint32_t shift = (8 - ir_type_size[type]) * 8;
-			if (IR_IS_TYPE_SIGNED(type)) {
-				val.i64 = (int64_t)(val.u64 << shift) >> shift;
-			} else {
-				val.u64 = (val.u64 << shift) >> shift;
-			}
+			val.u64 = ir_fix_int(type, val.u64);
 		}
 
 		if (!ctx->use_lists) {
@@ -1299,6 +1318,11 @@ ir_ref ir_fold(ir_ctx *ctx, uint32_t opt, ir_ref op1, ir_ref op2, ir_ref op3)
 	if (UNEXPECTED(!(ctx->flags & IR_OPT_FOLDING))) {
 		if ((opt & IR_OPT_OP_MASK) == IR_PHI) {
 			opt |= (3 << IR_OPT_INPUTS_SHIFT);
+		} else if ((ir_op_flags[(opt & IR_OPT_OP_MASK)] & IR_OP_FLAG_COMMUTATIVE)
+		 && op1 < op2
+		 && IR_IS_CONST_REF(op1)) {
+			/* Move constants to op2 for better instruction selection with (this is for -O0) */
+			SWAP_REFS(op1, op2);
 		}
 		return ir_emit(ctx, opt, op1, op2, op3);
 	}

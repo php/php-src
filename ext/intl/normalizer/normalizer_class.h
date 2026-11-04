@@ -36,12 +36,9 @@ typedef struct {
 #define NORMALIZER_ERROR_CODE(co)   INTL_ERROR_CODE(NORMALIZER_ERROR(co))
 #define NORMALIZER_ERROR_CODE_P(co) &(INTL_ERROR_CODE(NORMALIZER_ERROR(co)))
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+BEGIN_EXTERN_C()
 void normalizer_register_Normalizer_class( void );
-#ifdef __cplusplus
-}
-#endif
+END_EXTERN_C()
+
 extern zend_class_entry *Normalizer_ce_ptr;
 #endif // #ifndef NORMALIZER_CLASS_H

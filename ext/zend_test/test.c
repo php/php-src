@@ -21,6 +21,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_var.h"
 #include "php_test.h"
 #include "observer.h"
 #include "fiber.h"
@@ -132,6 +133,18 @@ static void pass2(zend_script *script, void *context)
 	php_printf("pass2\n");
 }
 
+static ZEND_FUNCTION(zend_test_forward_reference)
+{
+	zval *value;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	ZVAL_COPY(return_value, value);
+	zend_return_unwrap_ref(execute_data, return_value);
+}
+
 static ZEND_FUNCTION(zend_test_deprecated)
 {
 	zval *arg1;
@@ -198,6 +211,38 @@ static ZEND_FUNCTION(zend_leak_bytes)
 	}
 
 	emalloc(leakbytes);
+}
+
+static ZEND_FUNCTION(zend_test_serialization_bailout)
+{
+	bool unserialize, locked;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_BOOL(unserialize)
+		Z_PARAM_BOOL(locked)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (unserialize) {
+		(void) php_var_unserialize_init();
+	} else {
+		(void) php_var_serialize_init();
+	}
+	if (locked) {
+		BG(serialize_lock)++;
+	}
+	zend_bailout();
+}
+
+static ZEND_FUNCTION(zend_test_serialization_state)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	array_init(return_value);
+	add_assoc_long(return_value, "lock", BG(serialize_lock));
+	add_assoc_long(return_value, "serialize_level", BG(serialize).level);
+	add_assoc_bool(return_value, "serialize_data", BG(serialize).data != NULL);
+	add_assoc_long(return_value, "unserialize_level", BG(unserialize).level);
+	add_assoc_bool(return_value, "unserialize_data", BG(unserialize).data != NULL);
 }
 
 /* Reallocate a block of old_size bytes to new_size bytes and return its block
@@ -1834,6 +1879,24 @@ static ZEND_FUNCTION(zend_new_singleton_array)
 	array_init_singleton(return_value);
 }
 
+static ZEND_FUNCTION(zend_test_set_local_var)
+{
+	zend_string *name;
+	zval *value;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR(name)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	Z_TRY_ADDREF_P(value);
+	if (zend_set_local_var(name, value, false) == FAILURE) {
+		zval_ptr_dtor(value);
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+}
+
 static zend_object *zend_test_class_new(zend_class_entry *class_type)
 {
 	zend_test_object *intern = zend_object_alloc(sizeof(zend_test_object), class_type);
@@ -2194,10 +2257,24 @@ static ZEND_METHOD(_ZendTestMagicCallForward, __call)
 	zval_ptr_dtor(&rv);
 }
 
+static void (*zend_test_prev_interrupt_function)(zend_execute_data *execute_data);
+
+/* The VM clears EG(vm_interrupt) before calling this, so setting it again
+ * leaves an interrupt pending at all times. The VM must still make progress. */
+static void zend_test_rearm_interrupt_function(zend_execute_data *execute_data)
+{
+	atomic_store(&EG(vm_interrupt), true);
+
+	if (zend_test_prev_interrupt_function) {
+		zend_test_prev_interrupt_function(execute_data);
+	}
+}
+
 PHP_INI_BEGIN()
 	PHP_INI_ENTRY("zend_test.register_system_entropy", "0", PHP_INI_SYSTEM, NULL)
 	STD_PHP_INI_BOOLEAN("zend_test.replace_zend_execute_ex", "0", PHP_INI_SYSTEM, OnUpdateBool, replace_zend_execute_ex, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.register_passes", "0", PHP_INI_SYSTEM, OnUpdateBool, register_passes, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_BOOLEAN("zend_test.rearm_vm_interrupt", "0", PHP_INI_SYSTEM, OnUpdateBool, rearm_vm_interrupt, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.print_stderr_mshutdown", "0", PHP_INI_SYSTEM, OnUpdateBool, print_stderr_mshutdown, zend_zend_test_globals, zend_test_globals)
 #ifdef HAVE_COPY_FILE_RANGE
 	STD_PHP_INI_ENTRY("zend_test.limit_copy_file_range", "-1", PHP_INI_ALL, OnUpdateLong, limit_copy_file_range, zend_zend_test_globals, zend_test_globals)
@@ -2420,6 +2497,11 @@ PHP_MINIT_FUNCTION(zend_test)
 		zend_optimizer_register_pass(pass2);
 	}
 
+	if (ZT_G(rearm_vm_interrupt)) {
+		zend_test_prev_interrupt_function = zend_interrupt_function;
+		zend_interrupt_function = zend_test_rearm_interrupt_function;
+	}
+
 	zend_test_observer_init(INIT_FUNC_ARGS_PASSTHRU);
 	zend_test_mm_custom_handlers_minit(INIT_FUNC_ARGS_PASSTHRU);
 	zend_test_fiber_init();
@@ -2439,6 +2521,11 @@ PHP_MSHUTDOWN_FUNCTION(zend_test)
 
 	zend_test_observer_shutdown(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 
+	if (zend_interrupt_function == zend_test_rearm_interrupt_function) {
+		zend_interrupt_function = zend_test_prev_interrupt_function;
+		zend_test_prev_interrupt_function = NULL;
+	}
+
 	if (ZT_G(print_stderr_mshutdown)) {
 		fprintf(stderr, "[zend_test] MSHUTDOWN\n");
 	}
@@ -2451,7 +2538,13 @@ PHP_RINIT_FUNCTION(zend_test)
 	ALLOC_HASHTABLE(ZT_G(global_weakmap));
 	zend_hash_init(ZT_G(global_weakmap), 8, NULL, ZVAL_PTR_DTOR, 0);
 	ZT_G(observer_nesting_depth) = 0;
+	ZT_G(observer_throw_on_vm_interrupt) = false;
 	zend_test_mm_custom_handlers_rinit();
+
+	if (ZT_G(rearm_vm_interrupt)) {
+		atomic_store(&EG(vm_interrupt), true);
+	}
+
 	return SUCCESS;
 }
 

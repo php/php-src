@@ -201,7 +201,12 @@ mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING 
 	for (i = 0; i < stats->count; i++) {
 		char tmp[25];
 
-		snprintf(tmp, sizeof(tmp), "%" PRIu64, stats->values[i]);
+#ifdef ZTS
+		uint64_t value = atomic_load_explicit(&stats->values[i], memory_order_relaxed);
+#else
+		uint64_t value = stats->values[i];
+#endif
+		snprintf(tmp, sizeof(tmp), "%" PRIu64, value);
 		add_assoc_string_ex(return_value, names[i].s, names[i].l, tmp);
 	}
 }
@@ -216,7 +221,9 @@ mysqlnd_stats_init(MYSQLND_STATS ** stats, const size_t statistic_count, const b
 	*stats = pecalloc(1, size, persistent);
 	(*stats)->count = statistic_count;
 #ifdef ZTS
-	(*stats)->LOCK_access = tsrm_mutex_alloc();
+	for (size_t i = 0; i < statistic_count; i++) {
+		atomic_init(&(*stats)->values[i], 0);
+	}
 #endif
 }
 /* }}} */
@@ -226,10 +233,7 @@ mysqlnd_stats_init(MYSQLND_STATS ** stats, const size_t statistic_count, const b
 PHPAPI void
 mysqlnd_stats_end(MYSQLND_STATS * stats, const bool persistent)
 {
-#ifdef ZTS
-	tsrm_mutex_free(stats->LOCK_access);
-#endif
-	/* mnd_free will reference LOCK_access and crash...*/
+	/* mnd_free would update the statistics being freed */
 	pefree(stats, persistent);
 }
 /* }}} */

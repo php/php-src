@@ -36,6 +36,14 @@ PHP 8.7 UPGRADE NOTES
     ReflectionZendExtension, ReflectionAttribute and ReflectionConstant are
     now readonly.
 
+- SOAP:
+  . SoapClient no longer follows an HTTP redirect to a different origin
+    (scheme, host, or port) and throws a SoapFault instead. Previously the
+    request body and the configured credentials and headers were resent to
+    the new origin. A redirect from http to https on the same host is still
+    followed. Set the new follow_cross_origin_redirects option to true to
+    restore the previous behavior.
+
 - Session:
   . Setting session.cookie_path to a value containing one of ";\r\n", or
     session.cookie_domain to a value containing one of ",; \t\r\n\013\014",
@@ -145,6 +153,12 @@ PHP 8.7 UPGRADE NOTES
 11. Changes to INI File Handling
 ========================================
 
+- Opcache:
+  . opcache.max_accelerated_files now defaults to 16229 (previously 10000),
+    accepts values up to 1048793 (previously 1000000), and logs a warning for
+    values other than 223, 463, 983, 1979, 3907, 7963, 16229, 32531, 65407,
+    130987, 262237, 524521 and 1048793.
+
 ========================================
 12. Windows Support
 ========================================
@@ -182,6 +196,11 @@ PHP 8.7 UPGRADE NOTES
 
 - MBString:
   . Improved performance of mb_strlen for UTF-8 strings.
+  . Improved performance of mb_substr and mb_strpos for UTF-8 strings.
+
+- PDO:
+  . Improved performance of fetching rows with PDO::FETCH_BOTH, the default
+    fetch mode, for results with more than 4 columns.
 
 - PDO_PGSQL:
   . Improved performance of the SQL parser that handles placeholders in

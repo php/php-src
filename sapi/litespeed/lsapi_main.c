@@ -620,6 +620,11 @@ static sapi_module_struct lsapi_sapi_module =
 };
 /* }}} */
 
+/* SG(request_info).path_translated comes from LSAPI_GetScriptFileName() without
+ * any additional validation; this is intentional, and is the mechanism by which
+ * LiteSpeed communicates the file to execute. The LiteSpeed listener should
+ * only be reachable from trusted callers. See README.md in this directory for
+ * more details. */
 static void init_request_info( void )
 {
     char * pContentType = LSAPI_GetHeader( H_CONTENT_TYPE );
@@ -1683,6 +1688,10 @@ PHP_FUNCTION(litespeed_response_headers)
 
     if (!zend_llist_count(&SG(sapi_headers).headers)) {
 	    RETURN_FALSE;
+    }
+
+    if (!&SG(sapi_headers).headers) {
+        RETURN_FALSE;
     }
     array_init(return_value);
 

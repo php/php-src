@@ -29,6 +29,156 @@
 
 static zend_class_entry *sodium_exception_ce;
 
+#ifdef crypto_xof_shake128_STATEBYTES
+static zend_class_entry *sodium_crypto_xof_shake128_state_ce;
+static zend_class_entry *sodium_crypto_xof_shake256_state_ce;
+static zend_class_entry *sodium_crypto_xof_turboshake128_state_ce;
+static zend_class_entry *sodium_crypto_xof_turboshake256_state_ce;
+
+static zend_object_handlers sodium_crypto_xof_shake128_state_object_handlers;
+static zend_object_handlers sodium_crypto_xof_shake256_state_object_handlers;
+static zend_object_handlers sodium_crypto_xof_turboshake128_state_object_handlers;
+static zend_object_handlers sodium_crypto_xof_turboshake256_state_object_handlers;
+
+typedef struct php_sodium_crypto_xof_shake128_state {
+	crypto_xof_shake128_state state;
+	zend_object std;
+} php_sodium_crypto_xof_shake128_state;
+
+typedef struct php_sodium_crypto_xof_shake256_state {
+	crypto_xof_shake256_state state;
+	zend_object std;
+} php_sodium_crypto_xof_shake256_state;
+
+typedef struct php_sodium_crypto_xof_turboshake128_state {
+	crypto_xof_turboshake128_state state;
+	zend_object std;
+} php_sodium_crypto_xof_turboshake128_state;
+
+typedef struct php_sodium_crypto_xof_turboshake256_state {
+	crypto_xof_turboshake256_state state;
+	zend_object std;
+} php_sodium_crypto_xof_turboshake256_state;
+
+# define php_sodium_crypto_xof_shake128_state_from_obj(object) ZEND_CONTAINER_OF(object, php_sodium_crypto_xof_shake128_state, std)
+# define php_sodium_crypto_xof_shake256_state_from_obj(object) ZEND_CONTAINER_OF(object, php_sodium_crypto_xof_shake256_state, std)
+# define php_sodium_crypto_xof_turboshake128_state_from_obj(object) ZEND_CONTAINER_OF(object, php_sodium_crypto_xof_turboshake128_state, std)
+# define php_sodium_crypto_xof_turboshake256_state_from_obj(object) ZEND_CONTAINER_OF(object, php_sodium_crypto_xof_turboshake256_state, std)
+
+static zend_object *sodium_crypto_xof_shake128_state_new(zend_class_entry *ce)
+{
+	php_sodium_crypto_xof_shake128_state *state = zend_object_alloc(sizeof(*state), ce);
+
+	zend_object_std_init(&state->std, ce);
+	object_properties_init(&state->std, ce);
+
+	return &state->std;
+}
+
+static zend_object *sodium_crypto_xof_shake256_state_new(zend_class_entry *ce)
+{
+	php_sodium_crypto_xof_shake256_state *state = zend_object_alloc(sizeof(*state), ce);
+
+	zend_object_std_init(&state->std, ce);
+	object_properties_init(&state->std, ce);
+
+	return &state->std;
+}
+
+static zend_object *sodium_crypto_xof_turboshake128_state_new(zend_class_entry *ce)
+{
+	php_sodium_crypto_xof_turboshake128_state *state = zend_object_alloc(sizeof(*state), ce);
+
+	zend_object_std_init(&state->std, ce);
+	object_properties_init(&state->std, ce);
+
+	return &state->std;
+}
+
+static zend_object *sodium_crypto_xof_turboshake256_state_new(zend_class_entry *ce)
+{
+	php_sodium_crypto_xof_turboshake256_state *state = zend_object_alloc(sizeof(*state), ce);
+
+	zend_object_std_init(&state->std, ce);
+	object_properties_init(&state->std, ce);
+
+	return &state->std;
+}
+
+static zend_function *sodium_crypto_xof_shake128_state_get_constructor(zend_object *object)
+{
+	zend_throw_error(NULL, "Cannot directly construct %s, use sodium_crypto_xof_shake128_init() instead", ZSTR_VAL(object->ce->name));
+	return NULL;
+}
+
+static zend_function *sodium_crypto_xof_shake256_state_get_constructor(zend_object *object)
+{
+	zend_throw_error(NULL, "Cannot directly construct %s, use sodium_crypto_xof_shake256_init() instead", ZSTR_VAL(object->ce->name));
+	return NULL;
+}
+
+static zend_function *sodium_crypto_xof_turboshake128_state_get_constructor(zend_object *object)
+{
+	zend_throw_error(NULL, "Cannot directly construct %s, use sodium_crypto_xof_turboshake128_init() instead", ZSTR_VAL(object->ce->name));
+	return NULL;
+}
+
+static zend_function *sodium_crypto_xof_turboshake256_state_get_constructor(zend_object *object)
+{
+	zend_throw_error(NULL, "Cannot directly construct %s, use sodium_crypto_xof_turboshake256_init() instead", ZSTR_VAL(object->ce->name));
+	return NULL;
+}
+
+static zend_object *sodium_crypto_xof_shake128_state_clone(zend_object *old_obj)
+{
+	php_sodium_crypto_xof_shake128_state *old_state = php_sodium_crypto_xof_shake128_state_from_obj(old_obj);
+	zend_object *new_obj = sodium_crypto_xof_shake128_state_new(old_obj->ce);
+	php_sodium_crypto_xof_shake128_state *new_state = php_sodium_crypto_xof_shake128_state_from_obj(new_obj);
+
+	zend_objects_clone_members(new_obj, old_obj);
+	memcpy(&new_state->state, &old_state->state, sizeof(new_state->state));
+
+	return new_obj;
+}
+
+static zend_object *sodium_crypto_xof_shake256_state_clone(zend_object *old_obj)
+{
+	php_sodium_crypto_xof_shake256_state *old_state = php_sodium_crypto_xof_shake256_state_from_obj(old_obj);
+	zend_object *new_obj = sodium_crypto_xof_shake256_state_new(old_obj->ce);
+	php_sodium_crypto_xof_shake256_state *new_state = php_sodium_crypto_xof_shake256_state_from_obj(new_obj);
+
+	zend_objects_clone_members(new_obj, old_obj);
+	memcpy(&new_state->state, &old_state->state, sizeof(new_state->state));
+
+	return new_obj;
+}
+
+static zend_object *sodium_crypto_xof_turboshake128_state_clone(zend_object *old_obj)
+{
+	php_sodium_crypto_xof_turboshake128_state *old_state = php_sodium_crypto_xof_turboshake128_state_from_obj(old_obj);
+	zend_object *new_obj = sodium_crypto_xof_turboshake128_state_new(old_obj->ce);
+	php_sodium_crypto_xof_turboshake128_state *new_state = php_sodium_crypto_xof_turboshake128_state_from_obj(new_obj);
+
+	zend_objects_clone_members(new_obj, old_obj);
+	memcpy(&new_state->state, &old_state->state, sizeof(new_state->state));
+
+	return new_obj;
+}
+
+static zend_object *sodium_crypto_xof_turboshake256_state_clone(zend_object *old_obj)
+{
+	php_sodium_crypto_xof_turboshake256_state *old_state = php_sodium_crypto_xof_turboshake256_state_from_obj(old_obj);
+	zend_object *new_obj = sodium_crypto_xof_turboshake256_state_new(old_obj->ce);
+	php_sodium_crypto_xof_turboshake256_state *new_state = php_sodium_crypto_xof_turboshake256_state_from_obj(new_obj);
+
+	zend_objects_clone_members(new_obj, old_obj);
+	memcpy(&new_state->state, &old_state->state, sizeof(new_state->state));
+
+	return new_obj;
+}
+
+#endif
+
 #if (defined(__amd64) || defined(__amd64__) || defined(__x86_64__) || defined(__i386__) || \
 	 defined(_M_AMD64) || defined(_M_IX86) || defined(__aarch64__) || defined(_M_ARM64))
 # define HAVE_AESGCM 1
@@ -167,6 +317,40 @@ PHP_MINIT_FUNCTION(sodium)
 #endif
 
 	register_libsodium_symbols(module_number);
+
+#ifdef crypto_xof_shake128_STATEBYTES
+	sodium_crypto_xof_shake128_state_ce = register_class_SodiumCryptoXofShake128State();
+	sodium_crypto_xof_shake128_state_ce->create_object = sodium_crypto_xof_shake128_state_new;
+	sodium_crypto_xof_shake128_state_ce->default_object_handlers = &sodium_crypto_xof_shake128_state_object_handlers;
+	memcpy(&sodium_crypto_xof_shake128_state_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	sodium_crypto_xof_shake128_state_object_handlers.offset = offsetof(php_sodium_crypto_xof_shake128_state, std);
+	sodium_crypto_xof_shake128_state_object_handlers.clone_obj = sodium_crypto_xof_shake128_state_clone;
+	sodium_crypto_xof_shake128_state_object_handlers.get_constructor = sodium_crypto_xof_shake128_state_get_constructor;
+
+	sodium_crypto_xof_shake256_state_ce = register_class_SodiumCryptoXofShake256State();
+	sodium_crypto_xof_shake256_state_ce->create_object = sodium_crypto_xof_shake256_state_new;
+	sodium_crypto_xof_shake256_state_ce->default_object_handlers = &sodium_crypto_xof_shake256_state_object_handlers;
+	memcpy(&sodium_crypto_xof_shake256_state_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	sodium_crypto_xof_shake256_state_object_handlers.offset = offsetof(php_sodium_crypto_xof_shake256_state, std);
+	sodium_crypto_xof_shake256_state_object_handlers.clone_obj = sodium_crypto_xof_shake256_state_clone;
+	sodium_crypto_xof_shake256_state_object_handlers.get_constructor = sodium_crypto_xof_shake256_state_get_constructor;
+
+	sodium_crypto_xof_turboshake128_state_ce = register_class_SodiumCryptoXofTurboshake128State();
+	sodium_crypto_xof_turboshake128_state_ce->create_object = sodium_crypto_xof_turboshake128_state_new;
+	sodium_crypto_xof_turboshake128_state_ce->default_object_handlers = &sodium_crypto_xof_turboshake128_state_object_handlers;
+	memcpy(&sodium_crypto_xof_turboshake128_state_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	sodium_crypto_xof_turboshake128_state_object_handlers.offset = offsetof(php_sodium_crypto_xof_turboshake128_state, std);
+	sodium_crypto_xof_turboshake128_state_object_handlers.clone_obj = sodium_crypto_xof_turboshake128_state_clone;
+	sodium_crypto_xof_turboshake128_state_object_handlers.get_constructor = sodium_crypto_xof_turboshake128_state_get_constructor;
+
+	sodium_crypto_xof_turboshake256_state_ce = register_class_SodiumCryptoXofTurboshake256State();
+	sodium_crypto_xof_turboshake256_state_ce->create_object = sodium_crypto_xof_turboshake256_state_new;
+	sodium_crypto_xof_turboshake256_state_ce->default_object_handlers = &sodium_crypto_xof_turboshake256_state_object_handlers;
+	memcpy(&sodium_crypto_xof_turboshake256_state_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	sodium_crypto_xof_turboshake256_state_object_handlers.offset = offsetof(php_sodium_crypto_xof_turboshake256_state, std);
+	sodium_crypto_xof_turboshake256_state_object_handlers.clone_obj = sodium_crypto_xof_turboshake256_state_clone;
+	sodium_crypto_xof_turboshake256_state_object_handlers.get_constructor = sodium_crypto_xof_turboshake256_state_get_constructor;
+#endif
 
 	return SUCCESS;
 }
@@ -4269,8 +4453,8 @@ PHP_FUNCTION(sodium_crypto_xof_shake128)
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
-	if (out_len <= 0 || out_len > ZSTR_MAX_LEN) {
-		zend_argument_error(sodium_exception_ce, 1, "must be a positive integer");
+	if (out_len <= 0) {
+		zend_argument_error(sodium_exception_ce, 1, "must be greater than 0");
 		RETURN_THROWS();
 	}
 	out = zend_string_alloc((size_t) out_len, 0);
@@ -4286,8 +4470,6 @@ PHP_FUNCTION(sodium_crypto_xof_shake128)
 
 PHP_FUNCTION(sodium_crypto_xof_shake128_init)
 {
-	crypto_xof_shake128_state  state_tmp;
-	zend_string              *state;
 	zend_long                 domain = -1;
 	bool                      domain_is_null = 1;
 
@@ -4296,9 +4478,10 @@ PHP_FUNCTION(sodium_crypto_xof_shake128_init)
 		Z_PARAM_LONG_OR_NULL(domain, domain_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
-	memset(&state_tmp, 0, sizeof state_tmp);
+	object_init_ex(return_value, sodium_crypto_xof_shake128_state_ce);
+	php_sodium_crypto_xof_shake128_state *state = php_sodium_crypto_xof_shake128_state_from_obj(Z_OBJ_P(return_value));
 	if (domain_is_null) {
-		if (crypto_xof_shake128_init(&state_tmp) != 0) {
+		if (crypto_xof_shake128_init(&state->state) != 0) {
 			zend_throw_exception(sodium_exception_ce, "internal error", 0);
 			RETURN_THROWS();
 		}
@@ -4307,95 +4490,56 @@ PHP_FUNCTION(sodium_crypto_xof_shake128_init)
 			zend_argument_error(sodium_exception_ce, 1, "must be between 0x01 and 0x7f");
 			RETURN_THROWS();
 		}
-		if (crypto_xof_shake128_init_with_domain(&state_tmp, (unsigned char) domain) != 0) {
+		if (crypto_xof_shake128_init_with_domain(&state->state, (unsigned char) domain) != 0) {
 			zend_throw_exception(sodium_exception_ce, "internal error", 0);
 			RETURN_THROWS();
 		}
 	}
-	state = zend_string_alloc(sizeof state_tmp, 0);
-	memcpy(ZSTR_VAL(state), &state_tmp, sizeof state_tmp);
-	sodium_memzero(&state_tmp, sizeof state_tmp);
-	ZSTR_VAL(state)[sizeof state_tmp] = 0;
-	RETURN_STR(state);
 }
 
 PHP_FUNCTION(sodium_crypto_xof_shake128_update)
 {
-	crypto_xof_shake128_state  state_tmp;
 	zval                      *state_zv;
 	unsigned char             *msg;
-	unsigned char             *state;
 	size_t                     msg_len;
-	size_t                     state_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs",
-							  &state_zv, &msg, &msg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os",
+							  &state_zv, sodium_crypto_xof_shake128_state_ce, &msg, &msg_len) == FAILURE) {
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
-	ZVAL_DEREF(state_zv);
-	if (Z_TYPE_P(state_zv) != IS_STRING) {
-		zend_argument_error(sodium_exception_ce, 1, "must be a reference to a state");
-		RETURN_THROWS();
-	}
-	sodium_separate_string(state_zv);
-	state = (unsigned char *) Z_STRVAL(*state_zv);
-	state_len = Z_STRLEN(*state_zv);
-	if (state_len != sizeof (crypto_xof_shake128_state)) {
-		zend_argument_error(sodium_exception_ce, 1, "must have a correct state length");
-		RETURN_THROWS();
-	}
-	memcpy(&state_tmp, state, sizeof state_tmp);
-	if (crypto_xof_shake128_update(&state_tmp, msg, (unsigned long long) msg_len) != 0) {
-		sodium_memzero(&state_tmp, sizeof state_tmp);
+
+	php_sodium_crypto_xof_shake128_state *state = php_sodium_crypto_xof_shake128_state_from_obj(Z_OBJ_P(state_zv));
+	if (crypto_xof_shake128_update(&state->state, msg, (unsigned long long) msg_len) != 0) {
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		RETURN_THROWS();
 	}
-	memcpy(state, &state_tmp, sizeof state_tmp);
-	sodium_memzero(&state_tmp, sizeof state_tmp);
-	RETURN_TRUE;
 }
 
 PHP_FUNCTION(sodium_crypto_xof_shake128_squeeze)
 {
-	crypto_xof_shake128_state  state_tmp;
 	zval                      *state_zv;
-	zend_string               *out;
-	unsigned char             *state;
 	zend_long                  out_len;
-	size_t                     state_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zl",
-							  &state_zv, &out_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ol",
+							  &state_zv, sodium_crypto_xof_shake128_state_ce, &out_len) == FAILURE) {
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
-	ZVAL_DEREF(state_zv);
-	if (Z_TYPE_P(state_zv) != IS_STRING) {
-		zend_argument_error(sodium_exception_ce, 1, "must be a reference to a state");
+
+	if (out_len <= 0) {
+		zend_argument_error(sodium_exception_ce, 2, "must be greater than 0");
 		RETURN_THROWS();
 	}
-	sodium_separate_string(state_zv);
-	state = (unsigned char *) Z_STRVAL(*state_zv);
-	state_len = Z_STRLEN(*state_zv);
-	if (state_len != sizeof (crypto_xof_shake128_state)) {
-		zend_argument_error(sodium_exception_ce, 1, "must have a correct state length");
-		RETURN_THROWS();
-	}
-	if (out_len <= 0 || out_len > ZSTR_MAX_LEN) {
-		zend_argument_error(sodium_exception_ce, 2, "must be a positive integer");
-		RETURN_THROWS();
-	}
-	out = zend_string_alloc((size_t) out_len, 0);
-	memcpy(&state_tmp, state, sizeof state_tmp);
-	if (crypto_xof_shake128_squeeze(&state_tmp, (unsigned char *) ZSTR_VAL(out), (size_t) out_len) != 0) {
+
+	php_sodium_crypto_xof_shake128_state *state = php_sodium_crypto_xof_shake128_state_from_obj(Z_OBJ_P(state_zv));
+
+	zend_string *out = zend_string_alloc((size_t) out_len, 0);
+	if (crypto_xof_shake128_squeeze(&state->state, (unsigned char *) ZSTR_VAL(out), (size_t) out_len) != 0) {
 		zend_string_efree(out);
-		sodium_memzero(&state_tmp, sizeof state_tmp);
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		RETURN_THROWS();
 	}
-	memcpy(state, &state_tmp, sizeof state_tmp);
-	sodium_memzero(&state_tmp, sizeof state_tmp);
 	ZSTR_VAL(out)[out_len] = 0;
 	RETURN_NEW_STR(out);
 }
@@ -4412,8 +4556,8 @@ PHP_FUNCTION(sodium_crypto_xof_shake256)
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
-	if (out_len <= 0 || out_len > ZSTR_MAX_LEN) {
-		zend_argument_error(sodium_exception_ce, 1, "must be a positive integer");
+	if (out_len <= 0) {
+		zend_argument_error(sodium_exception_ce, 1, "must be greater than 0");
 		RETURN_THROWS();
 	}
 	out = zend_string_alloc((size_t) out_len, 0);
@@ -4429,8 +4573,6 @@ PHP_FUNCTION(sodium_crypto_xof_shake256)
 
 PHP_FUNCTION(sodium_crypto_xof_shake256_init)
 {
-	crypto_xof_shake256_state  state_tmp;
-	zend_string              *state;
 	zend_long                 domain = -1;
 	bool                      domain_is_null = 1;
 
@@ -4439,9 +4581,10 @@ PHP_FUNCTION(sodium_crypto_xof_shake256_init)
 		Z_PARAM_LONG_OR_NULL(domain, domain_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
-	memset(&state_tmp, 0, sizeof state_tmp);
+	object_init_ex(return_value, sodium_crypto_xof_shake256_state_ce);
+	php_sodium_crypto_xof_shake256_state *state = php_sodium_crypto_xof_shake256_state_from_obj(Z_OBJ_P(return_value));
 	if (domain_is_null) {
-		if (crypto_xof_shake256_init(&state_tmp) != 0) {
+		if (crypto_xof_shake256_init(&state->state) != 0) {
 			zend_throw_exception(sodium_exception_ce, "internal error", 0);
 			RETURN_THROWS();
 		}
@@ -4450,95 +4593,55 @@ PHP_FUNCTION(sodium_crypto_xof_shake256_init)
 			zend_argument_error(sodium_exception_ce, 1, "must be between 0x01 and 0x7f");
 			RETURN_THROWS();
 		}
-		if (crypto_xof_shake256_init_with_domain(&state_tmp, (unsigned char) domain) != 0) {
+		if (crypto_xof_shake256_init_with_domain(&state->state, (unsigned char) domain) != 0) {
 			zend_throw_exception(sodium_exception_ce, "internal error", 0);
 			RETURN_THROWS();
 		}
 	}
-	state = zend_string_alloc(sizeof state_tmp, 0);
-	memcpy(ZSTR_VAL(state), &state_tmp, sizeof state_tmp);
-	sodium_memzero(&state_tmp, sizeof state_tmp);
-	ZSTR_VAL(state)[sizeof state_tmp] = 0;
-	RETURN_STR(state);
 }
 
 PHP_FUNCTION(sodium_crypto_xof_shake256_update)
 {
-	crypto_xof_shake256_state  state_tmp;
 	zval                      *state_zv;
 	unsigned char             *msg;
-	unsigned char             *state;
 	size_t                     msg_len;
-	size_t                     state_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs",
-							  &state_zv, &msg, &msg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os",
+							  &state_zv, sodium_crypto_xof_shake256_state_ce, &msg, &msg_len) == FAILURE) {
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
-	ZVAL_DEREF(state_zv);
-	if (Z_TYPE_P(state_zv) != IS_STRING) {
-		zend_argument_error(sodium_exception_ce, 1, "must be a reference to a state");
-		RETURN_THROWS();
-	}
-	sodium_separate_string(state_zv);
-	state = (unsigned char *) Z_STRVAL(*state_zv);
-	state_len = Z_STRLEN(*state_zv);
-	if (state_len != sizeof (crypto_xof_shake256_state)) {
-		zend_argument_error(sodium_exception_ce, 1, "must have a correct state length");
-		RETURN_THROWS();
-	}
-	memcpy(&state_tmp, state, sizeof state_tmp);
-	if (crypto_xof_shake256_update(&state_tmp, msg, (unsigned long long) msg_len) != 0) {
-		sodium_memzero(&state_tmp, sizeof state_tmp);
+
+	php_sodium_crypto_xof_shake256_state *state = php_sodium_crypto_xof_shake256_state_from_obj(Z_OBJ_P(state_zv));
+	if (crypto_xof_shake256_update(&state->state, msg, (unsigned long long) msg_len) != 0) {
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		RETURN_THROWS();
 	}
-	memcpy(state, &state_tmp, sizeof state_tmp);
-	sodium_memzero(&state_tmp, sizeof state_tmp);
-	RETURN_TRUE;
 }
 
 PHP_FUNCTION(sodium_crypto_xof_shake256_squeeze)
 {
-	crypto_xof_shake256_state  state_tmp;
 	zval                      *state_zv;
-	zend_string               *out;
-	unsigned char             *state;
 	zend_long                  out_len;
-	size_t                     state_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zl",
-							  &state_zv, &out_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ol",
+							  &state_zv, sodium_crypto_xof_shake256_state_ce, &out_len) == FAILURE) {
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
-	ZVAL_DEREF(state_zv);
-	if (Z_TYPE_P(state_zv) != IS_STRING) {
-		zend_argument_error(sodium_exception_ce, 1, "must be a reference to a state");
+	if (out_len <= 0) {
+		zend_argument_error(sodium_exception_ce, 2, "must be greater than 0");
 		RETURN_THROWS();
 	}
-	sodium_separate_string(state_zv);
-	state = (unsigned char *) Z_STRVAL(*state_zv);
-	state_len = Z_STRLEN(*state_zv);
-	if (state_len != sizeof (crypto_xof_shake256_state)) {
-		zend_argument_error(sodium_exception_ce, 1, "must have a correct state length");
-		RETURN_THROWS();
-	}
-	if (out_len <= 0 || out_len > ZSTR_MAX_LEN) {
-		zend_argument_error(sodium_exception_ce, 2, "must be a positive integer");
-		RETURN_THROWS();
-	}
-	out = zend_string_alloc((size_t) out_len, 0);
-	memcpy(&state_tmp, state, sizeof state_tmp);
-	if (crypto_xof_shake256_squeeze(&state_tmp, (unsigned char *) ZSTR_VAL(out), (size_t) out_len) != 0) {
+
+	php_sodium_crypto_xof_shake256_state *state = php_sodium_crypto_xof_shake256_state_from_obj(Z_OBJ_P(state_zv));
+
+	zend_string *out = zend_string_alloc((size_t) out_len, 0);
+	if (crypto_xof_shake256_squeeze(&state->state, (unsigned char *) ZSTR_VAL(out), (size_t) out_len) != 0) {
 		zend_string_efree(out);
-		sodium_memzero(&state_tmp, sizeof state_tmp);
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		RETURN_THROWS();
 	}
-	memcpy(state, &state_tmp, sizeof state_tmp);
-	sodium_memzero(&state_tmp, sizeof state_tmp);
 	ZSTR_VAL(out)[out_len] = 0;
 	RETURN_NEW_STR(out);
 }
@@ -4555,8 +4658,8 @@ PHP_FUNCTION(sodium_crypto_xof_turboshake128)
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
-	if (out_len <= 0 || out_len > ZSTR_MAX_LEN) {
-		zend_argument_error(sodium_exception_ce, 1, "must be a positive integer");
+	if (out_len <= 0) {
+		zend_argument_error(sodium_exception_ce, 1, "must be greater than 0");
 		RETURN_THROWS();
 	}
 	out = zend_string_alloc((size_t) out_len, 0);
@@ -4572,8 +4675,6 @@ PHP_FUNCTION(sodium_crypto_xof_turboshake128)
 
 PHP_FUNCTION(sodium_crypto_xof_turboshake128_init)
 {
-	crypto_xof_turboshake128_state  state_tmp;
-	zend_string                    *state;
 	zend_long                       domain = -1;
 	bool                            domain_is_null = 1;
 
@@ -4582,9 +4683,10 @@ PHP_FUNCTION(sodium_crypto_xof_turboshake128_init)
 		Z_PARAM_LONG_OR_NULL(domain, domain_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
-	memset(&state_tmp, 0, sizeof state_tmp);
+	object_init_ex(return_value, sodium_crypto_xof_turboshake128_state_ce);
+	php_sodium_crypto_xof_turboshake128_state *state = php_sodium_crypto_xof_turboshake128_state_from_obj(Z_OBJ_P(return_value));
 	if (domain_is_null) {
-		if (crypto_xof_turboshake128_init(&state_tmp) != 0) {
+		if (crypto_xof_turboshake128_init(&state->state) != 0) {
 			zend_throw_exception(sodium_exception_ce, "internal error", 0);
 			RETURN_THROWS();
 		}
@@ -4593,95 +4695,56 @@ PHP_FUNCTION(sodium_crypto_xof_turboshake128_init)
 			zend_argument_error(sodium_exception_ce, 1, "must be between 0x01 and 0x7f");
 			RETURN_THROWS();
 		}
-		if (crypto_xof_turboshake128_init_with_domain(&state_tmp, (unsigned char) domain) != 0) {
+		if (crypto_xof_turboshake128_init_with_domain(&state->state, (unsigned char) domain) != 0) {
 			zend_throw_exception(sodium_exception_ce, "internal error", 0);
 			RETURN_THROWS();
 		}
 	}
-	state = zend_string_alloc(sizeof state_tmp, 0);
-	memcpy(ZSTR_VAL(state), &state_tmp, sizeof state_tmp);
-	sodium_memzero(&state_tmp, sizeof state_tmp);
-	ZSTR_VAL(state)[sizeof state_tmp] = 0;
-	RETURN_STR(state);
 }
 
 PHP_FUNCTION(sodium_crypto_xof_turboshake128_update)
 {
-	crypto_xof_turboshake128_state  state_tmp;
 	zval                           *state_zv;
 	unsigned char                  *msg;
-	unsigned char                  *state;
 	size_t                          msg_len;
-	size_t                          state_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs",
-							  &state_zv, &msg, &msg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os",
+							  &state_zv, sodium_crypto_xof_turboshake128_state_ce, &msg, &msg_len) == FAILURE) {
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
-	ZVAL_DEREF(state_zv);
-	if (Z_TYPE_P(state_zv) != IS_STRING) {
-		zend_argument_error(sodium_exception_ce, 1, "must be a reference to a state");
-		RETURN_THROWS();
-	}
-	sodium_separate_string(state_zv);
-	state = (unsigned char *) Z_STRVAL(*state_zv);
-	state_len = Z_STRLEN(*state_zv);
-	if (state_len != sizeof (crypto_xof_turboshake128_state)) {
-		zend_argument_error(sodium_exception_ce, 1, "must have a correct state length");
-		RETURN_THROWS();
-	}
-	memcpy(&state_tmp, state, sizeof state_tmp);
-	if (crypto_xof_turboshake128_update(&state_tmp, msg, (unsigned long long) msg_len) != 0) {
-		sodium_memzero(&state_tmp, sizeof state_tmp);
+
+	php_sodium_crypto_xof_turboshake128_state *state = php_sodium_crypto_xof_turboshake128_state_from_obj(Z_OBJ_P(state_zv));
+	if (crypto_xof_turboshake128_update(&state->state, msg, (unsigned long long) msg_len) != 0) {
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		RETURN_THROWS();
 	}
-	memcpy(state, &state_tmp, sizeof state_tmp);
-	sodium_memzero(&state_tmp, sizeof state_tmp);
-	RETURN_TRUE;
 }
 
 PHP_FUNCTION(sodium_crypto_xof_turboshake128_squeeze)
 {
-	crypto_xof_turboshake128_state  state_tmp;
 	zval                           *state_zv;
-	zend_string                    *out;
-	unsigned char                  *state;
 	zend_long                       out_len;
-	size_t                          state_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zl",
-							  &state_zv, &out_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ol",
+							  &state_zv, sodium_crypto_xof_turboshake128_state_ce, &out_len) == FAILURE) {
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
-	ZVAL_DEREF(state_zv);
-	if (Z_TYPE_P(state_zv) != IS_STRING) {
-		zend_argument_error(sodium_exception_ce, 1, "must be a reference to a state");
+
+	if (out_len <= 0) {
+		zend_argument_error(sodium_exception_ce, 2, "must be greater than 0");
 		RETURN_THROWS();
 	}
-	sodium_separate_string(state_zv);
-	state = (unsigned char *) Z_STRVAL(*state_zv);
-	state_len = Z_STRLEN(*state_zv);
-	if (state_len != sizeof (crypto_xof_turboshake128_state)) {
-		zend_argument_error(sodium_exception_ce, 1, "must have a correct state length");
-		RETURN_THROWS();
-	}
-	if (out_len <= 0 || out_len > ZSTR_MAX_LEN) {
-		zend_argument_error(sodium_exception_ce, 2, "must be a positive integer");
-		RETURN_THROWS();
-	}
-	out = zend_string_alloc((size_t) out_len, 0);
-	memcpy(&state_tmp, state, sizeof state_tmp);
-	if (crypto_xof_turboshake128_squeeze(&state_tmp, (unsigned char *) ZSTR_VAL(out), (size_t) out_len) != 0) {
+	
+	php_sodium_crypto_xof_turboshake128_state *state = php_sodium_crypto_xof_turboshake128_state_from_obj(Z_OBJ_P(state_zv));
+
+	zend_string *out = zend_string_alloc((size_t) out_len, 0);
+	if (crypto_xof_turboshake128_squeeze(&state->state, (unsigned char *) ZSTR_VAL(out), (size_t) out_len) != 0) {
 		zend_string_efree(out);
-		sodium_memzero(&state_tmp, sizeof state_tmp);
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		RETURN_THROWS();
 	}
-	memcpy(state, &state_tmp, sizeof state_tmp);
-	sodium_memzero(&state_tmp, sizeof state_tmp);
 	ZSTR_VAL(out)[out_len] = 0;
 	RETURN_NEW_STR(out);
 }
@@ -4698,8 +4761,8 @@ PHP_FUNCTION(sodium_crypto_xof_turboshake256)
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
-	if (out_len <= 0 || out_len > ZSTR_MAX_LEN) {
-		zend_argument_error(sodium_exception_ce, 1, "must be a positive integer");
+	if (out_len <= 0) {
+		zend_argument_error(sodium_exception_ce, 1, "must be greater than 0");
 		RETURN_THROWS();
 	}
 	out = zend_string_alloc((size_t) out_len, 0);
@@ -4715,8 +4778,6 @@ PHP_FUNCTION(sodium_crypto_xof_turboshake256)
 
 PHP_FUNCTION(sodium_crypto_xof_turboshake256_init)
 {
-	crypto_xof_turboshake256_state  state_tmp;
-	zend_string                    *state;
 	zend_long                       domain = -1;
 	bool                            domain_is_null = 1;
 
@@ -4725,9 +4786,10 @@ PHP_FUNCTION(sodium_crypto_xof_turboshake256_init)
 		Z_PARAM_LONG_OR_NULL(domain, domain_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
-	memset(&state_tmp, 0, sizeof state_tmp);
+	object_init_ex(return_value, sodium_crypto_xof_turboshake256_state_ce);
+	php_sodium_crypto_xof_turboshake256_state *state = php_sodium_crypto_xof_turboshake256_state_from_obj(Z_OBJ_P(return_value));
 	if (domain_is_null) {
-		if (crypto_xof_turboshake256_init(&state_tmp) != 0) {
+		if (crypto_xof_turboshake256_init(&state->state) != 0) {
 			zend_throw_exception(sodium_exception_ce, "internal error", 0);
 			RETURN_THROWS();
 		}
@@ -4736,95 +4798,56 @@ PHP_FUNCTION(sodium_crypto_xof_turboshake256_init)
 			zend_argument_error(sodium_exception_ce, 1, "must be between 0x01 and 0x7f");
 			RETURN_THROWS();
 		}
-		if (crypto_xof_turboshake256_init_with_domain(&state_tmp, (unsigned char) domain) != 0) {
+		if (crypto_xof_turboshake256_init_with_domain(&state->state, (unsigned char) domain) != 0) {
 			zend_throw_exception(sodium_exception_ce, "internal error", 0);
 			RETURN_THROWS();
 		}
 	}
-	state = zend_string_alloc(sizeof state_tmp, 0);
-	memcpy(ZSTR_VAL(state), &state_tmp, sizeof state_tmp);
-	sodium_memzero(&state_tmp, sizeof state_tmp);
-	ZSTR_VAL(state)[sizeof state_tmp] = 0;
-	RETURN_STR(state);
 }
 
 PHP_FUNCTION(sodium_crypto_xof_turboshake256_update)
 {
-	crypto_xof_turboshake256_state  state_tmp;
 	zval                           *state_zv;
 	unsigned char                  *msg;
-	unsigned char                  *state;
 	size_t                          msg_len;
-	size_t                          state_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs",
-							  &state_zv, &msg, &msg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os",
+							  &state_zv, sodium_crypto_xof_turboshake256_state_ce, &msg, &msg_len) == FAILURE) {
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
-	ZVAL_DEREF(state_zv);
-	if (Z_TYPE_P(state_zv) != IS_STRING) {
-		zend_argument_error(sodium_exception_ce, 1, "must be a reference to a state");
-		RETURN_THROWS();
-	}
-	sodium_separate_string(state_zv);
-	state = (unsigned char *) Z_STRVAL(*state_zv);
-	state_len = Z_STRLEN(*state_zv);
-	if (state_len != sizeof (crypto_xof_turboshake256_state)) {
-		zend_argument_error(sodium_exception_ce, 1, "must have a correct state length");
-		RETURN_THROWS();
-	}
-	memcpy(&state_tmp, state, sizeof state_tmp);
-	if (crypto_xof_turboshake256_update(&state_tmp, msg, (unsigned long long) msg_len) != 0) {
-		sodium_memzero(&state_tmp, sizeof state_tmp);
+
+	php_sodium_crypto_xof_turboshake256_state *state = php_sodium_crypto_xof_turboshake256_state_from_obj(Z_OBJ_P(state_zv));
+	if (crypto_xof_turboshake256_update(&state->state, msg, (unsigned long long) msg_len) != 0) {
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		RETURN_THROWS();
 	}
-	memcpy(state, &state_tmp, sizeof state_tmp);
-	sodium_memzero(&state_tmp, sizeof state_tmp);
-	RETURN_TRUE;
 }
 
 PHP_FUNCTION(sodium_crypto_xof_turboshake256_squeeze)
 {
-	crypto_xof_turboshake256_state  state_tmp;
 	zval                           *state_zv;
-	zend_string                    *out;
-	unsigned char                  *state;
 	zend_long                       out_len;
-	size_t                          state_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zl",
-							  &state_zv, &out_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ol",
+							  &state_zv, sodium_crypto_xof_turboshake256_state_ce, &out_len) == FAILURE) {
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
-	ZVAL_DEREF(state_zv);
-	if (Z_TYPE_P(state_zv) != IS_STRING) {
-		zend_argument_error(sodium_exception_ce, 1, "must be a reference to a state");
+
+	if (out_len <= 0) {
+		zend_argument_error(sodium_exception_ce, 2, "must be greater than 0");
 		RETURN_THROWS();
 	}
-	sodium_separate_string(state_zv);
-	state = (unsigned char *) Z_STRVAL(*state_zv);
-	state_len = Z_STRLEN(*state_zv);
-	if (state_len != sizeof (crypto_xof_turboshake256_state)) {
-		zend_argument_error(sodium_exception_ce, 1, "must have a correct state length");
-		RETURN_THROWS();
-	}
-	if (out_len <= 0 || out_len > ZSTR_MAX_LEN) {
-		zend_argument_error(sodium_exception_ce, 2, "must be a positive integer");
-		RETURN_THROWS();
-	}
-	out = zend_string_alloc((size_t) out_len, 0);
-	memcpy(&state_tmp, state, sizeof state_tmp);
-	if (crypto_xof_turboshake256_squeeze(&state_tmp, (unsigned char *) ZSTR_VAL(out), (size_t) out_len) != 0) {
+
+	php_sodium_crypto_xof_turboshake256_state *state = php_sodium_crypto_xof_turboshake256_state_from_obj(Z_OBJ_P(state_zv));
+
+	zend_string *out = zend_string_alloc((size_t) out_len, 0);
+	if (crypto_xof_turboshake256_squeeze(&state->state, (unsigned char *) ZSTR_VAL(out), (size_t) out_len) != 0) {
 		zend_string_efree(out);
-		sodium_memzero(&state_tmp, sizeof state_tmp);
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		RETURN_THROWS();
 	}
-	memcpy(state, &state_tmp, sizeof state_tmp);
-	sodium_memzero(&state_tmp, sizeof state_tmp);
 	ZSTR_VAL(out)[out_len] = 0;
 	RETURN_NEW_STR(out);
 }
