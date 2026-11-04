@@ -746,7 +746,15 @@ AC_DEFUN([PHP_REQUIRE_CXX],[
   if test -z "$php_cxx_done"; then
     AC_PROG_CXX
     AC_PROG_CXXCPP
-    PHP_ADD_LIBRARY(stdc++)
+    case "$CXX" in
+      *clang++*)
+    	PHP_ADD_LIBRARY(c++)
+    	PHP_ADD_LIBRARY(c++abi)
+	;;
+      *)
+    	PHP_ADD_LIBRARY(stdc++)
+	;;
+    esac
     php_cxx_done=yes
   fi
 ])
