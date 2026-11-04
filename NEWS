@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed AST printing of interface extends list as implements. (Jorg Sowa)
+  . Fixed AST printing dropping fully qualified and namespace-relative prefixes
+    of class names in implements, catch, and trait use lists. (Jorg Sowa)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
