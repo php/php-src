@@ -21,6 +21,8 @@ PHP                                                                        NEWS
     deeply nested arrays. (Eyüp Can Akman)
 
 - Opcache:
+  . Fixed bug GH-24801 (JIT: SIGFPE in ir_fold MUL_OV constant folding).
+    (waroad)
   . Fixed bug GH-25165 (Tracing JIT loops forever once opcache.jit_buffer_size
     is exhausted while compiling side traces). (Ilia Alshanetsky)
   . Fixed bug GH-25164 (Function JIT loop calling a user function runs once
