@@ -170,8 +170,7 @@ static int php_password_bcrypt_get_info(zval *return_value, const zend_string *h
 }
 
 static bool php_password_bcrypt_needs_rehash(const zend_string *hash, zend_array *options) {
-	zend_long old_cost;
-	zend_long new_cost = PHP_PASSWORD_BCRYPT_COST;
+	zend_long old_cost, new_cost;
 
 	if (!php_password_bcrypt_parse(hash, &old_cost)) {
 		/* Should never get called this way. */
@@ -210,7 +209,7 @@ static zend_string* php_password_bcrypt_hash(const zend_string *password, zend_a
 	char hash_format[10];
 	size_t hash_format_len;
 	zend_string *result, *hash, *salt;
-	zend_long cost = PHP_PASSWORD_BCRYPT_COST;
+	zend_long cost;
 
 	if (memchr(ZSTR_VAL(password), '\0', ZSTR_LEN(password))) {
 		zend_value_error("Bcrypt password must not contain null character");
