@@ -2898,6 +2898,11 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&traits[i]->properties_info, prop_name, property_info) {
 			uint32_t flags = property_info->flags;
 
+			/* ZEND_ACC_PUBLIC_SET is removed at compile-time. */
+			if ((flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_MASK|ZEND_ACC_PPP_SET_MASK)) == (ZEND_ACC_READONLY|ZEND_ACC_PUBLIC)) {
+				flags |= ZEND_ACC_PUBLIC_SET;
+			}
+
 			/* next: check for conflicts with current class */
 			if ((colliding_prop = zend_hash_find_ptr(&ce->properties_info, prop_name)) != NULL) {
 				if ((colliding_prop->flags & ZEND_ACC_PRIVATE) && colliding_prop->ce != ce) {
