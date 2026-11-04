@@ -1,5 +1,5 @@
 --TEST--
-zend multibyte (11)
+zend multibyte encoding declare cannot use block mode
 --EXTENSIONS--
 mbstring
 --INI--
@@ -12,4 +12,4 @@ declare(encoding="ISO-8859-15") {
 }
 ?>
 --EXPECTF--
-Fatal error: Encoding declaration pragma must not use block mode in %s on line %d
+Fatal error: Encoding declaration must not use block mode in %s on line %d
