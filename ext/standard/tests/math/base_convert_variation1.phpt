@@ -74,37 +74,25 @@ string(1) "1"
 string(2) "14"
 
 -- Iteration 4 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(2) "14"
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 5 --
 string(11) "17777777777"
 
 -- Iteration 6 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(3) "151"
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 7 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(3) "151"
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 8 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(7) "4553207"
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 9 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(7) "4553207"
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 10 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(1) "5"
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 11 --
 string(1) "1"
@@ -128,19 +116,13 @@ string(1) "0"
 TypeError: base_convert(): Argument #1 ($num) must be of type string, array given
 
 -- Iteration 18 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(1) "0"
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 19 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(1) "0"
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 20 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(1) "0"
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 21 --
 TypeError: base_convert(): Argument #1 ($num) must be of type string, resource given
