@@ -1815,7 +1815,7 @@ next:
 			}
 		}
 	}
-	zend_error_noreturn(E_ERROR, "Arrived at end of main loop which shouldn't happen");
+	zend_error_noreturn(E_CORE_ERROR, "Arrived at end of main loop which shouldn't happen");
 } /* }}} */
 
 /* only if *not* interactive and while executing */

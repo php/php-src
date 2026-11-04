@@ -1580,7 +1580,7 @@ function gen_null_handler($f, $kind) {
     out($f,"\tUSE_OPLINE\n");
     out($f,"\n");
     out($f,"\tSAVE_OPLINE();\n");
-    out($f,"\tzend_error_noreturn(E_ERROR, \"Invalid opcode %d/%d/%d.\", OPLINE->opcode, OPLINE->op1_type, OPLINE->op2_type);\n");
+    out($f,"\tzend_error_noreturn(E_CORE_ERROR, \"Invalid opcode %d/%d/%d.\", OPLINE->opcode, OPLINE->op1_type, OPLINE->op2_type);\n");
     out($f,"}\n\n");
 }
 
@@ -1825,11 +1825,11 @@ function gen_executor_code($f, $spec, $kind, $prolog, &$switch_labels = array())
             break;
         case ZEND_VM_KIND_SWITCH:
             out($f,"default: ZEND_NULL_LABEL:\n");
-            out($f,"\tzend_error_noreturn(E_ERROR, \"Invalid opcode %d/%d/%d.\", OPLINE->opcode, OPLINE->op1_type, OPLINE->op2_type);\n");
+            out($f,"\tzend_error_noreturn(E_CORE_ERROR, \"Invalid opcode %d/%d/%d.\", OPLINE->opcode, OPLINE->op1_type, OPLINE->op2_type);\n");
             break;
         case ZEND_VM_KIND_GOTO:
             out($f,"ZEND_NULL_LABEL:\n");
-            out($f,"\tzend_error_noreturn(E_ERROR, \"Invalid opcode %d/%d/%d.\", OPLINE->opcode, OPLINE->op1_type, OPLINE->op2_type);\n");
+            out($f,"\tzend_error_noreturn(E_CORE_ERROR, \"Invalid opcode %d/%d/%d.\", OPLINE->opcode, OPLINE->op1_type, OPLINE->op2_type);\n");
             break;
         case ZEND_VM_KIND_HYBRID:
             out($f,"\t\t\tHYBRID_CASE(HYBRID_HALT):\n");

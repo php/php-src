@@ -10181,7 +10181,7 @@ link_unbound:
 		zend_make_var_result(result, opline);
 		if (!zend_hash_add_ptr(CG(class_table), lcname, ce)) {
 			/* We checked above that the class name is not used. This really shouldn't happen. */
-			zend_error_noreturn(E_ERROR,
+			zend_error_noreturn(E_CORE_ERROR,
 				"Runtime definition key collision for %pS. This is a bug", name);
 		}
 	} else {
