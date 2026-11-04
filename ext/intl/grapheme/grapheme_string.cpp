@@ -1152,15 +1152,16 @@ out_ustring1:
 	efree(ustring1);
 }
 
-/* {{{ Counts the grapheme clusters of a UTF-8 string and, if prefix_bytes is not NULL, the number of bytes
- * taken by its first prefix_graphemes clusters. Returns false on failure. */
-static bool grapheme_str_pad_measure(const zend_string *str, size_t prefix_graphemes, size_t *count, size_t *prefix_bytes)
+/* {{{ Counts the grapheme clusters of a UTF-8 string, but stops once limit clusters have been counted.
+ * Also stores the number of bytes taken by its first prefix1 and prefix2 clusters in bytes1 and bytes2,
+ * if the string has that many (0 otherwise). Returns false on failure. */
+static bool grapheme_str_pad_measure(const zend_string *str, size_t limit, size_t *count,
+	size_t prefix1, size_t *bytes1, size_t prefix2, size_t *bytes2)
 {
 	if (grapheme_ascii_check((const unsigned char *) ZSTR_VAL(str), ZSTR_LEN(str)) >= 0) {
 		*count = ZSTR_LEN(str);
-		if (prefix_bytes != nullptr) {
-			*prefix_bytes = MIN(prefix_graphemes, ZSTR_LEN(str));
-		}
+		*bytes1 = prefix1 <= ZSTR_LEN(str) ? prefix1 : 0;
+		*bytes2 = prefix2 <= ZSTR_LEN(str) ? prefix2 : 0;
 		return true;
 	}
 
@@ -1202,14 +1203,16 @@ static bool grapheme_str_pad_measure(const zend_string *str, size_t prefix_graph
 	ubrk_setUText(bi, ut, &ustatus);
 
 	size_t graphemes = 0;
-	if (prefix_bytes != nullptr) {
-		*prefix_bytes = 0;
-	}
+	*bytes1 = 0;
+	*bytes2 = 0;
 
-	for (int32_t pos = ubrk_next(bi); pos != UBRK_DONE; pos = ubrk_next(bi)) {
+	for (int32_t pos = ubrk_next(bi); pos != UBRK_DONE && graphemes < limit; pos = ubrk_next(bi)) {
 		graphemes++;
-		if (prefix_bytes != nullptr && graphemes == prefix_graphemes) {
-			*prefix_bytes = pos;
+		if (graphemes == prefix1) {
+			*bytes1 = pos;
+		}
+		if (graphemes == prefix2) {
+			*bytes2 = pos;
 		}
 	}
 
@@ -1224,12 +1227,24 @@ static bool grapheme_str_pad_measure(const zend_string *str, size_t prefix_graph
 /* {{{ Writes full_copies copies of the padding string followed by its first remaining_bytes bytes. */
 static char *grapheme_str_pad_fill(char *buffer, const zend_string *pad, size_t full_copies, size_t remaining_bytes)
 {
-	for (size_t i = 0; i < full_copies; i++) {
-		memcpy(buffer, ZSTR_VAL(pad), ZSTR_LEN(pad));
-		buffer += ZSTR_LEN(pad);
+	if (full_copies > 0) {
+		size_t full_bytes = full_copies * ZSTR_LEN(pad);
+		if (ZSTR_LEN(pad) == 1) {
+			memset(buffer, ZSTR_VAL(pad)[0], full_bytes);
+			buffer += full_bytes;
+		} else {
+			const char *start = buffer;
+			const char *end = buffer + full_bytes;
+			buffer = (char *) zend_mempcpy(buffer, ZSTR_VAL(pad), ZSTR_LEN(pad));
+
+			/* Double the filled area on each iteration, like mb_str_pad(). */
+			while (buffer < end) {
+				size_t len = MIN((size_t) (buffer - start), (size_t) (end - buffer));
+				buffer = (char *) zend_mempcpy(buffer, start, len);
+			}
+		}
 	}
-	memcpy(buffer, ZSTR_VAL(pad), remaining_bytes);
-	return buffer + remaining_bytes;
+	return (char *) zend_mempcpy(buffer, ZSTR_VAL(pad), remaining_bytes);
 }
 /* }}} */
 
@@ -1248,8 +1263,10 @@ U_CFUNC PHP_FUNCTION(grapheme_str_pad)
 		Z_PARAM_LONG(pad_type_val)
 	ZEND_PARSE_PARAMETERS_END();
 
-	size_t input_length;
-	if (!grapheme_str_pad_measure(input, 0, &input_length, nullptr)) {
+	/* Counting stops past pad_to_length: a longer input is returned unchanged anyway. */
+	size_t input_length, unused;
+	if (!grapheme_str_pad_measure(input, pad_to_length < 0 ? 0 : (size_t) pad_to_length + 1, &input_length,
+			0, &unused, 0, &unused)) {
 		RETURN_FALSE;
 	}
 
@@ -1282,17 +1299,22 @@ U_CFUNC PHP_FUNCTION(grapheme_str_pad)
 			break;
 	}
 
-	size_t pad_length, left_remaining_bytes, right_remaining_bytes, unused;
-	if (!grapheme_str_pad_measure(pad, 0, &pad_length, nullptr)) {
+	/* Only the first MAX(left_pad, right_pad) clusters of the padding string can be needed. If it has
+	 * that many, a prefix of it is enough on each side; otherwise it is repeated. */
+	size_t pad_length, left_remaining_bytes, right_remaining_bytes;
+	size_t full_left_copies = 0, full_right_copies = 0;
+	if (!grapheme_str_pad_measure(pad, MAX(left_pad, right_pad), &pad_length,
+			left_pad, &left_remaining_bytes, right_pad, &right_remaining_bytes)) {
 		RETURN_FALSE;
 	}
-	if (!grapheme_str_pad_measure(pad, left_pad % pad_length, &unused, &left_remaining_bytes)
-		|| !grapheme_str_pad_measure(pad, right_pad % pad_length, &unused, &right_remaining_bytes)) {
-		RETURN_FALSE;
+	if (pad_length < MAX(left_pad, right_pad)) {
+		full_left_copies = left_pad / pad_length;
+		full_right_copies = right_pad / pad_length;
+		if (!grapheme_str_pad_measure(pad, pad_length, &unused,
+				left_pad % pad_length, &left_remaining_bytes, right_pad % pad_length, &right_remaining_bytes)) {
+			RETURN_FALSE;
+		}
 	}
-
-	size_t full_left_copies = left_pad / pad_length;
-	size_t full_right_copies = right_pad / pad_length;
 
 	if (UNEXPECTED(full_left_copies > (ZSTR_MAX_LEN - left_remaining_bytes) / ZSTR_LEN(pad)
 		|| full_right_copies > (ZSTR_MAX_LEN - right_remaining_bytes) / ZSTR_LEN(pad))) {

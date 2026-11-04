@@ -28,9 +28,18 @@ var_dump(grapheme_str_pad("ab", 5, "\u{304B}\u{3099}x", STR_PAD_BOTH) === "\u{30
 // "\r\n" is a single grapheme
 var_dump(grapheme_str_pad("\r\n", 2, "-") === "\r\n-");
 
+// Only a prefix of a long padding string is used
+var_dump(grapheme_str_pad("ab", 5, "\u{304B}\u{3099}xyz", STR_PAD_BOTH) === "\u{304B}\u{3099}ab\u{304B}\u{3099}x");
+
+// Many copies of the padding string, with a partial copy at the end
+var_dump(grapheme_str_pad("x", 1001, "e\u{0301}ab", STR_PAD_LEFT) === str_repeat("e\u{0301}ab", 333) . "e\u{0301}x");
+var_dump(grapheme_str_pad("x", 1002, "\u{00B7}", STR_PAD_BOTH) === str_repeat("\u{00B7}", 500) . "x" . str_repeat("\u{00B7}", 501));
+
 // Nothing to pad
 var_dump(grapheme_str_pad("abc", 3, "-"));
 var_dump(grapheme_str_pad("abc", -1, "-"));
+var_dump(grapheme_str_pad($nfd, 6, ".") === $nfd);
+var_dump(grapheme_str_pad($nfd, 2, ".") === $nfd);
 var_dump(grapheme_str_pad("", 3));
 ?>
 --EXPECT--
@@ -46,6 +55,11 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+bool(true)
+bool(true)
+bool(true)
 string(3) "abc"
 string(3) "abc"
+bool(true)
+bool(true)
 string(3) "   "
