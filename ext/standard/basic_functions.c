@@ -2573,8 +2573,8 @@ PHP_FUNCTION(parse_ini_string)
 		RETURN_THROWS();
 	}
 
-	if (INT_MAX - str_len < ZEND_MMAP_AHEAD) {
-		RETVAL_FALSE;
+	if (ZEND_SIZE_T_UINT_OVFL(str_len)) {
+		RETURN_FALSE;
 	}
 
 	/* Set callback function */

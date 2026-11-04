@@ -157,6 +157,8 @@ PHP                                                                        NEWS
     rmdir(), touch(), chmod() or stat(). (Ilia Alshanetsky)
 
 - Standard:
+  . Fixed parse_ini_string() silently truncating strings longer than 4 GiB.
+    (Ilia Alshanetsky)
   . Fixed bug #60110 (fclose(), file_put_contents(), copy() do not return false
     properly). (Jakub Zelenka, Ilija Tovilo)
   . Fixed three Windows-only proc_open() defects: an uninitialized
