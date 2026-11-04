@@ -25,23 +25,20 @@ $values = array(01234567,
                 );
 
 for ($i = 0; $i < count($values); $i++) {
-    $res = octdec($values[$i]);
-    var_dump($res);
+    try {
+        $res = octdec($values[$i]);
+        var_dump($res);
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage() . "\n";
+    }
 }
 ?>
 --EXPECTF--
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(14489)
+Exception: Invalid characters passed for attempted conversion
 int(253)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(36947879)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(4618484)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(4104)
+Exception: Invalid characters passed for attempted conversion
+Exception: Invalid characters passed for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 int(5349)
 int(342391)
 int(375)
@@ -49,13 +46,9 @@ int(2147483647)
 
 Notice: Input number is larger than PHP_INT_MAX, precision has been lost in conversion in %s on line %d
 float(2147483648)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(668)
+Exception: Invalid characters passed for attempted conversion
 int(5349)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(102923)
+Exception: Invalid characters passed for attempted conversion
 int(823384)
 int(1)
 int(0)

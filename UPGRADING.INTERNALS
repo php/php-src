@@ -53,6 +53,9 @@ PHP 8.7 INTERNALS UPGRADE NOTES
   freed with zend_hash_destroy() + pefree().
 - The ZTS symbols compiler_globals_offset and executor_globals_offset have been
   removed: CG()/EG() now reach the globals through a __thread struct.
+- _php_math_basetozval() now returns zend_result instead of void. It throws an
+  exception and returns FAILURE if the input contains invalid characters
+  for the given base.
 
 ========================
 2. Build system changes
