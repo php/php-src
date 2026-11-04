@@ -1756,11 +1756,6 @@ ZEND_NORETURN ZEND_API ZEND_COLD void zend_error_noreturn(int type, const char *
 	zend_error_noreturn_impl(type, format);
 }
 
-ZEND_NORETURN ZEND_API ZEND_COLD void zend_error_noreturn_unchecked(int type, const char *format, ...)
-{
-	zend_error_noreturn_impl(type, format);
-}
-
 ZEND_NORETURN ZEND_API ZEND_COLD void zend_strerror_noreturn(int type, int errn, const char *message)
 {
 #ifdef HAVE_STRERROR_R

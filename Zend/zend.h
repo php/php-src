@@ -388,7 +388,6 @@ extern ZEND_API void (*zend_accel_schedule_restart_hook)(int reason);
 
 ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 ZEND_NORETURN ZEND_API ZEND_COLD void zend_error_noreturn(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
-ZEND_NORETURN ZEND_API ZEND_COLD void zend_error_noreturn_unchecked(int type, const char *format, ...);
 /* For custom format specifiers like H */
 ZEND_API ZEND_COLD void zend_error_unchecked(int type, const char *format, ...);
 /* If filename is NULL the default filename is used. */
