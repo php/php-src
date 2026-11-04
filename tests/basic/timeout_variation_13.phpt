@@ -1,5 +1,5 @@
 --TEST--
-max_execution_time timeout skips finally blocks
+Timeout does not execute finally blocks
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");

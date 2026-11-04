@@ -1,5 +1,5 @@
 --TEST--
-max_execution_time timeout does not call destructors
+Timeout does not call destructors
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");

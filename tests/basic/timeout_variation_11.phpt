@@ -1,5 +1,5 @@
 --TEST--
-max_execution_time timeout during a shutdown function
+Timeout within shutdown function, user function variation
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
@@ -10,6 +10,10 @@ max_execution_time=1
 <?php
 
 register_shutdown_function(function () {
+    while (true) {}
+});
+register_shutdown_function(function () {
+    echo "Not executed\n";
     while (true) {}
 });
 
