@@ -15,4 +15,4 @@ echo "Bye"
 --EXPECTF--
 Warning: declare(encoding=...) ignored because Zend multibyte feature is turned off by settings in %s on line %d
 
-Fatal error: Encoding declaration pragma must be the very first statement in the script in %s on line %d
+Fatal error: Encoding declaration must be the very first statement in the script in %s on line %d

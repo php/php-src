@@ -15,4 +15,4 @@ function foo() {
 echo "Bye"
 ?>
 --EXPECTF--
-Fatal error: Encoding declaration pragma must be the very first statement in the script in %s on line %d
+Fatal error: Encoding declaration must be the very first statement in the script in %s on line %d
