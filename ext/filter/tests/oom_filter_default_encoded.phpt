@@ -26,6 +26,17 @@ function oom_post_encoded(string $body, string $script): void
             '-d', 'html_errors=0',
             '-d', 'filter.default=encoded',
             '-d', 'filter.default_flags=0',
+            ...((function () {
+                $extDir = ini_get("extension_dir");
+                if (file_exists($extDir."/filter.so")) {
+                    return [
+                        '-d', sprintf("extension_dir=%s", ini_get('extension_dir')),
+                        '-d', 'extension=filter.so',
+                    ];
+                } else {
+                    return [];
+                }
+            })()),
             /* the conversion is what is under test, not the deprecation */
             '-d', 'error_reporting=' . (E_ALL & ~E_DEPRECATED),
         ],
