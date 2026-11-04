@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.36
 
+- MBString:
+  . Fixed mb_ereg_replace() emitting a NUL or out-of-bounds bytes in the
+    replacement when a \k<name> backref has no closing delimiter.
+    (Ilia Alshanetsky)
 
 
 21 Oct 2026, PHP 8.2.35
