@@ -3333,7 +3333,7 @@ IR_FOLD(MIN(MIN, _))
 IR_FOLD(MAX(MAX, _))
 {
 	if (op1_insn->op1 == op2 || op1_insn->op2 == op2) {
-		IR_FOLD_COPY(op2);
+		IR_FOLD_COPY(op1);
 	}
 	IR_FOLD_NEXT;
 }
