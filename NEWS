@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
 
+- PDO PgSQL:
+  . Fixed bug GH-25184 (Out-of-bounds read when a re-executed statement returns
+    more columns). (dixyes)
+
 19 Nov 2026, PHP 8.4.28
 
 - Core:
