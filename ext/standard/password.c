@@ -117,9 +117,11 @@ static bool php_password_bcrypt_get_cost(zend_array *options, zend_long *cost) {
 	zval *zcost;
 	if (options && (zcost = zend_hash_str_find(options, "cost", sizeof("cost")-1)) != NULL) {
 		*cost = zval_get_long(zcost);
+		return *cost >= 4 && *cost <= 31;
 	}
 
-	return *cost >= 4 && *cost <= 31;
+	*cost = PHP_PASSWORD_BCRYPT_COST;
+	return true;
 }
 
 static bool php_password_bcrypt_parse(const zend_string *hash, zend_long *cost) {
