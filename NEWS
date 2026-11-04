@@ -127,6 +127,13 @@ PHP                                                                        NEWS
   . Fixed bug GH-15701 (Build failure: incompatible funopen() seeker pointer
     type on 32-bit platforms). (Kamil Tekiela)
 
+?? ??? ????, PHP 8.6.0
+
+- OpenSSL:
+  . Fixed use-after-free in TLS server ALPN and Windows certificate checks
+    when the session stream passed to stream_socket_enable_crypto() is closed
+    before the handshake. (Ilia Alshanetsky)
+
 12 Nov 2026, PHP 8.6.0RC6
 
 - Core:
