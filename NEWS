@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.28
+?? ??? ????, PHP 8.4.29
+
+
+19 Nov 2026, PHP 8.4.28
 
 - Core:
   . Fixed bug GH-24184 (System ID not being reinitialized after an Apache
