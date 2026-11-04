@@ -2,6 +2,8 @@
 GH-25175 (imagecopyresampled() copies nothing with negative source width/height)
 --EXTENSIONS--
 gd
+--CREDITS--
+desrosj
 --FILE--
 <?php
 $src = imagecreatetruecolor(100, 100);
