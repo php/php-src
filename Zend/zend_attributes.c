@@ -537,7 +537,7 @@ ZEND_API zend_internal_attribute *zend_mark_internal_attribute(zend_class_entry 
 	zend_attribute *attr;
 
 	if (ce->type != ZEND_INTERNAL_CLASS) {
-		zend_error_noreturn(E_ERROR, "Only internal classes can be registered as compiler attribute");
+		zend_error_noreturn(E_CORE_ERROR, "Only internal classes can be registered as compiler attribute");
 	}
 
 	ZEND_HASH_FOREACH_PTR(ce->attributes, attr) {
@@ -555,7 +555,7 @@ ZEND_API zend_internal_attribute *zend_mark_internal_attribute(zend_class_entry 
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	zend_error_noreturn(E_ERROR, "Classes must be first marked as attribute before being able to be registered as internal attribute class");
+	zend_error_noreturn(E_CORE_ERROR, "Classes must be first marked as attribute before being able to be registered as internal attribute class");
 }
 
 ZEND_API zend_internal_attribute *zend_internal_attribute_register(zend_class_entry *ce, uint32_t flags)

@@ -1862,12 +1862,12 @@ static zend_internal_function gc_destructor_fiber;
 
 ZEND_NORETURN static ZEND_COLD void gc_create_destructor_fiber_error(void)
 {
-	zend_error_noreturn(E_ERROR, "Unable to create destructor fiber");
+	zend_error_noreturn(E_CORE_ERROR, "Unable to create destructor fiber");
 }
 
 ZEND_NORETURN static ZEND_COLD void gc_start_destructor_fiber_error(void)
 {
-	zend_error_noreturn(E_ERROR, "Unable to start destructor fiber");
+	zend_error_noreturn(E_CORE_ERROR, "Unable to start destructor fiber");
 }
 
 /* Call destructors for garbage in the buffer. */

@@ -304,7 +304,7 @@ static void sodium_separate_string(zval *zv) {
 PHP_MINIT_FUNCTION(sodium)
 {
 	if (sodium_init() < 0) {
-		zend_error_noreturn(E_ERROR, "sodium_init()");
+		zend_error_noreturn(E_CORE_ERROR, "sodium_init()");
 	}
 
 	sodium_exception_ce = register_class_SodiumException(zend_ce_exception);
@@ -4736,7 +4736,7 @@ PHP_FUNCTION(sodium_crypto_xof_turboshake128_squeeze)
 		zend_argument_error(sodium_exception_ce, 2, "must be greater than 0");
 		RETURN_THROWS();
 	}
-	
+
 	php_sodium_crypto_xof_turboshake128_state *state = php_sodium_crypto_xof_turboshake128_state_from_obj(Z_OBJ_P(state_zv));
 
 	zend_string *out = zend_string_alloc((size_t) out_len, 0);

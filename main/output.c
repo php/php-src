@@ -606,7 +606,7 @@ PHPAPI zend_result php_output_handler_conflict_register(const char *name, size_t
 	zend_string *str;
 
 	if (!EG(current_module)) {
-		zend_error_noreturn(E_ERROR, "Cannot register an output handler conflict outside of MINIT");
+		zend_error_noreturn(E_CORE_ERROR, "Cannot register an output handler conflict outside of MINIT");
 	}
 	str = zend_string_init_interned(name, name_len, 1);
 	zend_hash_update_ptr(&php_output_handler_conflicts, str, check_func);
@@ -622,7 +622,7 @@ PHPAPI zend_result php_output_handler_reverse_conflict_register(const char *name
 	HashTable rev, *rev_ptr = NULL;
 
 	if (!EG(current_module)) {
-		zend_error_noreturn(E_ERROR, "Cannot register a reverse output handler conflict outside of MINIT");
+		zend_error_noreturn(E_CORE_ERROR, "Cannot register a reverse output handler conflict outside of MINIT");
 	}
 
 	if (NULL != (rev_ptr = zend_hash_str_find_ptr(&php_output_handler_reverse_conflicts, name, name_len))) {
@@ -658,7 +658,7 @@ PHPAPI zend_result php_output_handler_alias_register(const char *name, size_t na
 	zend_string *str;
 
 	if (!EG(current_module)) {
-		zend_error_noreturn(E_ERROR, "Cannot register an output handler alias outside of MINIT");
+		zend_error_noreturn(E_CORE_ERROR, "Cannot register an output handler alias outside of MINIT");
 	}
 	str = zend_string_init_interned(name, name_len, 1);
 	zend_hash_update_ptr(&php_output_handler_aliases, str, func);
