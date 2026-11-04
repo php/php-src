@@ -8,6 +8,7 @@ PHP                                                                        NEWS
     result is unused (GH-23048). (Artem Ukrainskiy)
 
 - Curl:
+  . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
   . curl_multi_exec() now throws a TypeError when still_running is not an int.
     (arshidkv12)
   . Uploading multiple files with the same field name is now possible by
