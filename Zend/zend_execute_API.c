@@ -1494,7 +1494,7 @@ ZEND_API zend_result zend_eval_string_ex(const char *str, zval *retval_ptr, cons
 
 static void zend_set_timeout_ex(zend_long seconds, bool reset_signals);
 
-/* zend_timeout() is called by the VM interrupt handler when EG(timed_out) is set */
+/* zend_timeout() is called by the VM interrupt handler or by zend_call_function() when EG(timed_out) is set */
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 {
 #if defined(PHP_WIN32)
@@ -1521,15 +1521,17 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 	/* Do not call destructors */
 	zend_objects_store_mark_destructed(&EG(objects_store));
 
-	/* An exception may already be in flight, and zend_throw_unwind_exit()
-	 * does not allow that */
 	if (EG(exception)) {
 		OBJ_RELEASE(EG(exception));
-		EG(exception) = NULL;
 	}
+	EG(exception) = zend_create_unwind_exit();
 
-	ZEND_ASSERT(EG(current_execute_data));
-	zend_throw_unwind_exit();
+	if (EG(current_execute_data)) {
+		/* zend_call_function() may call zend_timeout() without EG(current_execute_data)
+		 * when executing shutdown functions */
+		EG(opline_before_exception) = EG(current_execute_data)->opline;
+		EG(current_execute_data)->opline = EG(exception_op);
+	}
 }
 /* }}} */
 
