@@ -26,4 +26,7 @@ int start_accel_module(void);
 
 void zend_accel_override_file_functions(void);
 
+void zend_accel_record_fatal_error(
+		int type, zend_string *error_filename, uint32_t error_lineno, zend_string *message);
+
 #endif /* _ZEND_ACCELERATOR_MODULE_H */
