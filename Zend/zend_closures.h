@@ -41,6 +41,11 @@ ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *obj);
 ZEND_API const zend_function *zend_get_closure_method_def(zend_object *obj);
 ZEND_API zend_object* zend_get_closure_this_ptr(zval *obj);
 
+ZEND_API bool zend_fn_closure_equals_ex(
+	const zend_function *fn_a, const zend_object *closure_zobj_a,
+	const zend_function *fn_b, const zend_object *closure_zobj_b
+);
+
 END_EXTERN_C()
 
 #endif
