@@ -85,6 +85,7 @@ static void fpm_child_close(struct fpm_child_s *child, int in_event_loop) /* {{{
 		if (in_event_loop) {
 			child->postponed_free = true;
 			fpm_event_fire(&child->ev_stdout);
+			fpm_event_del(&child->ev_stdout);
 		}
 		if (child->fd_stdout != -1) {
 			if (in_event_loop) {
@@ -99,6 +100,7 @@ static void fpm_child_close(struct fpm_child_s *child, int in_event_loop) /* {{{
 		if (in_event_loop) {
 			child->postponed_free = true;
 			fpm_event_fire(&child->ev_stderr);
+			fpm_event_del(&child->ev_stderr);
 		}
 		if (child->fd_stderr != -1) {
 			if (in_event_loop) {
