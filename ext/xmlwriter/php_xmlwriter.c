@@ -77,9 +77,11 @@ static zend_object *xmlwriter_object_new(zend_class_entry *class_type)
 }
 /* }}} */
 
+/* The procedural functions take the writer as their first argument, the method
+ * aliases do not, so the argument number has to be shifted for method calls. */
 #define XMLW_NAME_CHK(__arg_no, __subject) \
 	if (xmlValidateName((xmlChar *) name, 0) != 0) {	\
-		zend_argument_value_error(__arg_no, "must be a valid %s, \"%s\" given", __subject, name);	\
+		zend_argument_value_error(getThis() != NULL ? (__arg_no) - 1 : (__arg_no), "must be a valid %s, \"%s\" given", __subject, name);	\
 		RETURN_THROWS();	\
 	}	\
 
