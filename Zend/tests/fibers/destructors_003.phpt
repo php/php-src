@@ -33,6 +33,28 @@ new Cycle();
 new Cycle();
 gc_collect_cycles();
 
+class ResumeGeneratorInFiberDestructor {
+    public function __destruct() {
+        $object = new self;
+        static $gen = (function () {
+            $from = (function () {
+                $object = new ResumeGeneratorInFiberDestructor;
+                yield;
+            })();
+            try {
+                yield from $from;
+            } finally {
+            }
+        })();
+        $fiber = new Fiber(function () use ($gen) {
+            $gen->next();
+        });
+        $fiber->start();
+    }
+}
+
+new ResumeGeneratorInFiberDestructor;
+
 ?>
 --EXPECT--
 0: Start destruct
