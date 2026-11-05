@@ -34,7 +34,7 @@ static_assert(NANOS_IN_MILLI * MILLIS_IN_SEC == NANOS_IN_SEC, "");
 		Z_PARAM_LONG(__##l); \
 		if (__##l < 0) { \
 			zend_argument_value_error(_i, "must be greater than or equal to 0"); \
-			_error_code = ZPP_ERROR_FAILURE; \
+			_expected_type = Z_EXPECTED_FAILURE; \
 			break; \
 		} \
 		l = __##l; \
