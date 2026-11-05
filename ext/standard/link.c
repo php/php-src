@@ -120,6 +120,42 @@ PHP_FUNCTION(linkinfo)
 }
 /* }}} */
 
+/* Expand the link path but do not resolve its last component (it is the link itself) */
+static char *php_expand_link_path(const char *path, size_t path_len, char *expanded, char *dir_p, size_t *dir_len)
+{
+	char dir[MAXPATHLEN];
+	zend_string *base;
+	size_t len, base_len;
+
+	if (path_len == 0 || path_len >= MAXPATHLEN) {
+		return NULL;
+	}
+
+	memcpy(dir, path, path_len + 1);
+	zend_dirname(dir, path_len);
+	if (!expand_filepath(dir, dir_p)) {
+		return NULL;
+	}
+	len = strlen(dir_p);
+
+	base = php_basename(path, path_len, NULL, 0);
+	base_len = ZSTR_LEN(base);
+	if (len + 1 + base_len >= MAXPATHLEN) {
+		zend_string_release_ex(base, 0);
+		return NULL;
+	}
+
+	memcpy(expanded, dir_p, len);
+	*dir_len = len;
+	if (!IS_SLASH(dir_p[len - 1])) {
+		expanded[len++] = DEFAULT_SLASH;
+	}
+	memcpy(expanded + len, ZSTR_VAL(base), base_len + 1);
+	zend_string_release_ex(base, 0);
+
+	return expanded;
+}
+
 /* {{{ Create a symbolic link */
 PHP_FUNCTION(symlink)
 {
@@ -136,13 +172,10 @@ PHP_FUNCTION(symlink)
 		Z_PARAM_PATH(frompath, frompath_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (!expand_filepath(frompath, source_p)) {
+	if (!php_expand_link_path(frompath, frompath_len, source_p, dirname, &len)) {
 		php_error_docref(NULL, E_WARNING, "No such file or directory");
 		RETURN_FALSE;
 	}
-
-	memcpy(dirname, source_p, sizeof(source_p));
-	len = zend_dirname(dirname, strlen(dirname));
 
 	if (!expand_filepath_ex(topath, dest_p, dirname, len)) {
 		php_error_docref(NULL, E_WARNING, "No such file or directory");
@@ -186,13 +219,15 @@ PHP_FUNCTION(link)
 	int ret;
 	char source_p[MAXPATHLEN];
 	char dest_p[MAXPATHLEN];
+	char dirname[MAXPATHLEN];
+	size_t len;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_PATH(topath, topath_len)
 		Z_PARAM_PATH(frompath, frompath_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (!expand_filepath(frompath, source_p) || !expand_filepath(topath, dest_p)) {
+	if (!php_expand_link_path(frompath, frompath_len, source_p, dirname, &len) || !expand_filepath(topath, dest_p)) {
 		php_error_docref(NULL, E_WARNING, "No such file or directory");
 		RETURN_FALSE;
 	}
