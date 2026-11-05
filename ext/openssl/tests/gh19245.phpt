@@ -8,7 +8,7 @@ if (!function_exists("proc_open")) die("skip no proc_open");
 ?>
 --FILE--
 <?php
-include 'ServerClientTestCase.inc';
+include dirname(__DIR__, 2) . "/standard/tests/ServerClientTestCase.inc";
 
 $baseDir = __DIR__ . '/gh19245';
 $baseDirCertFile = $baseDir . '/cert.crt';
@@ -16,7 +16,7 @@ $baseDirPkFile = $baseDir . '/private.key';
 
 $serverCodeTemplate = <<<'CODE'
     ini_set('log_errors', 'On');
-    ini_set('open_basedir',  __DIR__ . '/gh19245');
+    ini_set('open_basedir',  '%s');
     $serverUri = "ssl://127.0.0.1:0";
     $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
     $serverCtx = stream_context_create(['ssl' => [
@@ -42,7 +42,7 @@ $clientCode = <<<'CODE'
     @stream_socket_client($serverUri, $errno, $errstr, 2, $clientFlags, $clientCtx);
 CODE;
 
-$serverCode = sprintf($serverCodeTemplate, $baseDirCertFile . "\0test", $baseDirPkFile);
+$serverCode = sprintf($serverCodeTemplate, $baseDir, $baseDirCertFile . "\0test", $baseDirPkFile);
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 
 ?>
