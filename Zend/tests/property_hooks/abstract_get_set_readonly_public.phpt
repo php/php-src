@@ -1,0 +1,16 @@
+--TEST--
+Readonly property cannot implement set hook of public get/set abstract property
+--FILE--
+<?php
+abstract class A {
+    public abstract int $prop { get; set; }
+}
+class C extends A {
+    public readonly int $prop;
+    public function __construct(int $prop) {
+        $this->prop = $prop;
+    }
+}
+?>
+--EXPECTF--
+Fatal error: Readonly property C::$prop cannot implement set hook required by class A::$prop in %s on line %d

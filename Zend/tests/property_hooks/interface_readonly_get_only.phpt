@@ -1,5 +1,5 @@
 --TEST--
-readonly property satisfies get only interface property
+Readonly property satisfies get-only interface property
 --FILE--
 <?php
 interface I {
