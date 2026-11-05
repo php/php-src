@@ -5,16 +5,20 @@ cd "$(dirname "$0")/../../.."
 tmp_dir=/tmp/php-src-download-bundled/pcre2
 rm -rf "$tmp_dir"
 
-revision=refs/tags/pcre2-10.44
+revision=refs/tags/pcre2-10.49
 
 git clone --depth 1 --recurse-submodules --revision="$revision" https://github.com/PCRE2Project/pcre2.git "$tmp_dir"
 
 rm -rf ext/pcre/pcre2lib
 cp -R "$tmp_dir"/src ext/pcre/pcre2lib
+cp -R "$tmp_dir"/deps/sljit/sljit_src ext/pcre/pcre2lib/sljit
+sed 's|"../deps/sljit/sljit_src/sljitLir.c"|"sljit/sljitLir.c"|' \
+    "$tmp_dir"/src/pcre2_jit_compile.c > ext/pcre/pcre2lib/pcre2_jit_compile.c
 
 cd ext/pcre/pcre2lib
 
 # remove unneeded files
+rm config-cmake.h.in
 rm config.h.generic
 rm pcre2.h.in
 rm pcre2_dftables.c
@@ -26,6 +30,9 @@ rm pcre2posix.c
 rm pcre2posix.h
 rm pcre2posix_test.c
 rm pcre2test.c
+rm pcre2test_inc.h
+rm pcre2_chartables.c.ebcdic-*
+rm libpcre2-*.sym.in
 
 # move renamed files
 mv pcre2.h.generic pcre2.h

@@ -34,6 +34,7 @@ php_pcre2_match_context_free
 php_pcre2_match_data_create
 php_pcre2_match_data_create_from_pattern
 php_pcre2_match_data_free
+php_pcre2_next_match
 php_pcre2_pattern_info
 php_pcre2_serialize_decode
 php_pcre2_serialize_encode
@@ -53,6 +54,8 @@ php_pcre2_set_max_pattern_length
 php_pcre2_set_newline
 php_pcre2_set_parens_nest_limit
 php_pcre2_set_offset_limit
+php_pcre2_set_optimize
+php_pcre2_set_substitute_case_callout
 php_pcre2_substitute
 php_pcre2_substring_copy_byname
 php_pcre2_substring_copy_bynumber
