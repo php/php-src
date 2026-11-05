@@ -20,6 +20,8 @@ PHP                                                                        NEWS
 19 Nov 2026, PHP 8.4.28
 
 - Core:
+  . Fixed bug GH-23586 (Assertion failure during garbage collection upon memory
+    exhaustion). (Alessio Attilio)
   . Fixed bug GH-24184 (System ID not being reinitialized after an Apache
     graceful restart, potentially causing incompatible OPcache file cache
     entries to be reused). (Levi Morrison)
