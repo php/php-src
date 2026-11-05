@@ -76,6 +76,9 @@ are not limited to):
 - The use of legacy APIs or settings known to be insecure, particularly those
   documented as such, or those with a secure alternative.
 
+- Insecure default arguments, such as a default algorithm selection (e.g.
+  SHA1). Changing such defaults is handled through the deprecation process.
+
 - The use of FFI.
 
 - The use of the built-in web server, which is intended for development only.
@@ -86,6 +89,13 @@ are not limited to):
 
 - Memory exhaustion from a size the input declares, where `memory_limit`
   refuses the allocation and only the current request dies.
+
+- Bugs in third-party libraries, whether bundled (like lexbor/lexbor, libgd,
+  libmagic, PCRE2 or timelib) or linked from the system (like
+  libxml2, OpenSSL or libcurl). Please report them to the library's maintainers
+  directly. Issues in how PHP uses these libraries remain in scope. The bundled
+  libraries and their upstream locations are listed in
+  [CONTRIBUTING.md](CONTRIBUTING.md#php-source-code-directory-structure).
 
 - Issues that are present only in branches without a stable release. Such
   branches are per se not intended for production use.
