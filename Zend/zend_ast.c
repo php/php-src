@@ -1429,22 +1429,11 @@ static ZEND_COLD bool zend_ast_var_needs_braces(char ch)
 	return ch == '[' || zend_ast_valid_var_char(ch);
 }
 
-static ZEND_COLD void zend_ast_export_class_const_name(smart_str *str, zend_ast *ast, int indent)
+/* T_HALT_COMPILER is the only keyword the grammar rejects as an identifier. */
+static ZEND_COLD bool zend_ast_valid_identifier(const zend_string *name)
 {
-	if (ast->kind == ZEND_AST_ZVAL) {
-		const zval *zv = zend_ast_get_zval(ast);
-
-		/* A bare "class" would turn the dynamic fetch into a class name fetch. */
-		if (Z_TYPE_P(zv) == IS_STRING
-				&& zend_ast_valid_var_name(Z_STRVAL_P(zv), Z_STRLEN_P(zv))
-				&& !zend_string_equals_ci(Z_STR_P(zv), ZSTR_KNOWN(ZEND_STR_CLASS))) {
-			smart_str_append(str, Z_STR_P(zv));
-			return;
-		}
-	}
-	smart_str_appendc(str, '{');
-	zend_ast_export_ex(str, ast, 0, indent);
-	smart_str_appendc(str, '}');
+	return zend_ast_valid_var_name(ZSTR_VAL(name), ZSTR_LEN(name))
+		&& !zend_string_equals_literal_ci(name, "__halt_compiler");
 }
 
 static ZEND_COLD void zend_ast_export_var(smart_str *str, zend_ast *ast, int priority, int indent)
@@ -1462,6 +1451,30 @@ static ZEND_COLD void zend_ast_export_var(smart_str *str, zend_ast *ast, int pri
 	}
 	smart_str_appendc(str, '{');
 	zend_ast_export_name(str, ast, 0, indent);
+	smart_str_appendc(str, '}');
+}
+
+static ZEND_COLD void zend_ast_export_static_member_name(smart_str *str, zend_ast *ast, bool is_call, int indent)
+{
+	if (ast->kind == ZEND_AST_ZVAL && Z_TYPE_P(zend_ast_get_zval(ast)) == IS_STRING) {
+		const zend_string *name = zend_ast_get_str(ast);
+		/* A bare "class" fetch is a class name fetch, and "public(set)" and its siblings lex as one token. */
+		bool needs_braces = is_call
+			? zend_string_equals_literal_ci(name, "public")
+				|| zend_string_equals_literal_ci(name, "protected")
+				|| zend_string_equals_literal_ci(name, "private")
+			: zend_string_equals_ci(name, ZSTR_KNOWN(ZEND_STR_CLASS));
+
+		if (zend_ast_valid_identifier(name) && !needs_braces) {
+			smart_str_append(str, name);
+			return;
+		}
+	} else if (is_call) {
+		zend_ast_export_var(str, ast, 0, indent);
+		return;
+	}
+	smart_str_appendc(str, '{');
+	zend_ast_export_ex(str, ast, 0, indent);
 	smart_str_appendc(str, '}');
 }
 
@@ -2255,7 +2268,7 @@ simple_list:
 		case ZEND_AST_CLASS_CONST:
 			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
 			smart_str_appends(str, "::");
-			zend_ast_export_class_const_name(str, ast->child[1], indent);
+			zend_ast_export_static_member_name(str, ast->child[1], false, indent);
 			break;
 		case ZEND_AST_CLASS_NAME:
 			if (ast->child[0] == NULL) {
@@ -2580,7 +2593,7 @@ simple_list:
 		case ZEND_AST_STATIC_CALL:
 			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
 			smart_str_appends(str, "::");
-			zend_ast_export_var(str, ast->child[1], 0, indent);
+			zend_ast_export_static_member_name(str, ast->child[1], true, indent);
 			smart_str_appendc(str, '(');
 			zend_ast_export_ex(str, ast->child[2], 0, indent);
 			smart_str_appendc(str, ')');

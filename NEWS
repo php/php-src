@@ -16,6 +16,8 @@ PHP                                                                        NEWS
     hooked subclass). (Lazizbek Ergashev)
   . Fixed bug GH-25299 (Exception string code is lost after unserialize()).
     (Lazizbek Ergashev, David Carlier)
+  . Fixed AST export of static member names that do not lex as identifiers.
+    (Jorg Sowa)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
