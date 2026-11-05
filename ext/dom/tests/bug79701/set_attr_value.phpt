@@ -6,7 +6,8 @@ dom
 <?php
 foreach (["value", "nodeValue"] as $property) {
     echo "--- Testing property \$$property ---\n";
-    $dom = Dom\XMLDocument::createFromString(<<<XML
+    $dom = new DOMDocument;
+    $dom->loadXML(<<<XML
     <root>
         <test1 xml:id="x"/>
         <test2 xml:id="y"/>
