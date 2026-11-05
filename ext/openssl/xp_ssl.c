@@ -2262,7 +2262,7 @@ static SSL_SESSION *php_openssl_session_get_cb(SSL *ssl, const unsigned char *se
 			SSL_SESSION_up_ref(obj->session);
 			session = obj->session;
 		}
-	} else if (Z_TYPE(retval) != IS_NULL) {
+	} else if (!Z_ISUNDEF(retval) && Z_TYPE(retval) != IS_NULL) {
 		zend_type_error("session_get_cb return type must be null or Openssl\\Session");
 	}
 
