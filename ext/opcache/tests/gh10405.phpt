@@ -7,6 +7,8 @@ opcache.optimization_level=-1
 opcache.preload={PWD}/preload_user.inc
 opcache.preload_user={ENV:TEST_NON_ROOT_USER}
 opcache.log_verbosity_level=2
+--ENV--
+ASAN_OPTIONS=detect_leaks=0
 --EXTENSIONS--
 opcache
 posix
