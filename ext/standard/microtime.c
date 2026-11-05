@@ -73,7 +73,7 @@ static void _php_gettimeofday(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 		timelib_time_offset_dtor(offset);
 	} else {
-		RETURN_NEW_STR(zend_strpprintf(0, "%.8F %ld", tp.tv_usec / MICRO_IN_SEC, (long)tp.tv_sec));
+		RETURN_NEW_STR(zend_strpprintf(0, "0.%06ld00 %ld", (long)tp.tv_usec, (long)tp.tv_sec));
 	}
 }
 
