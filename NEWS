@@ -32,6 +32,8 @@ PHP                                                                        NEWS
     (waroad)
   . Fixed bug GH-25037 (Function JIT ENTRY live var assertion).
     (Ilia Alshanetsky)
+  . Fixed bug GH-25195 (smm_shared_globals left dangling without an
+    SHM backend). (Lazizbek Ergashev)
 
 - SOAP:
   . Fixed bug GH-25267 (NULL dereference in to_xml_any() with integer key).
