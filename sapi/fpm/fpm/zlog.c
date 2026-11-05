@@ -2,6 +2,9 @@
 
 #include "fpm_config.h"
 
+#include "SAPI.h"
+#include "php.h"
+
 #include <stdio.h>
 #include <unistd.h>
 #include <time.h>
@@ -10,10 +13,16 @@
 #include <sys/time.h>
 #include <errno.h>
 
+#include "zend.h"
+#include "zend_extensions.h"
+#include "php_ini.h"
+#include "php_globals.h"
+#include "php_main.h"
 #include "php_syslog.h"
 
 #include "zlog.h"
 #include "fpm.h"
+#include "fastcgi.h"
 #include "zend_portability.h"
 
 /* buffer is used for fmt result and it should never be over 2048 */
@@ -137,7 +146,7 @@ static inline size_t zlog_truncate_buf(char *buf, size_t buf_size, size_t space_
 /* }}} */
 
 static inline void zlog_external(
-		int flags, char *buf, size_t buf_size, const char *fmt, va_list args) /* {{{ */
+		int flags, char *buf, size_t buf_size, char *url, size_t url_len, const char *fmt, va_list args) /* {{{ */
 {
 	va_list ap;
 	size_t len;
@@ -145,6 +154,10 @@ static inline void zlog_external(
 	va_copy(ap, args);
 	len = vsnprintf(buf, buf_size, fmt, ap);
 	va_end(ap);
+
+	if (url_len > 0 && buf_size > len) {
+		len += snprintf(buf + len, buf_size - len, "%s", url);
+	}
 
 	if (len >= buf_size) {
 		len = zlog_truncate_buf(buf, buf_size, 0);
@@ -198,13 +211,23 @@ static size_t zlog_buf_prefix(
 void vzlog(const char *function, int line, int flags, const char *fmt, va_list args) /* {{{ */
 {
 	char buf[MAX_BUF_LENGTH];
+	char url[MAX_BUF_LENGTH];
+	size_t url_len = 0;
 	size_t buf_size = MAX_BUF_LENGTH;
 	size_t len = 0;
 	int truncated = 0;
 	int saved_errno;
+	char *server_name, *document_uri;
+	fcgi_request *request = (fcgi_request*) SG(server_context);
+
+	if (request) {
+		server_name = FCGI_GETENV(request, "SERVER_NAME");
+		document_uri = FCGI_GETENV(request, "DOCUMENT_URI");
+		url_len = snprintf(url, sizeof(url), " URI: %s%s", server_name ? server_name : "*unknown*", document_uri ? document_uri : "*unknown_uri*");
+	}
 
 	if (external_logger) {
-		zlog_external(flags, buf, buf_size, fmt, args);
+		zlog_external(flags, buf, buf_size, url, url_len, fmt, args);
 	}
 
 	if ((flags & ZLOG_LEVEL_MASK) < zlog_level) {
@@ -218,6 +241,11 @@ void vzlog(const char *function, int line, int flags, const char *fmt, va_list a
 		truncated = 1;
 	} else {
 		len += vsnprintf(buf + len, buf_size - len, fmt, args);
+
+		if (url_len > 0 && buf_size > len) {
+			len += snprintf(buf + len, buf_size - len, "%s", url);
+		}
+
 		if (len >= buf_size) {
 			truncated = 1;
 		}
