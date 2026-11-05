@@ -404,6 +404,15 @@ if ($pid) {
                     fputs($s, "226 Closing data Connection.\r\n");
                     break;
 
+                case "abort_rejected":
+                    // Opens the data connection, then answers the transfer with
+                    // something other than 226/250, so that a client aborting it
+                    // from ftp_nb_get() takes the error path.
+                    fputs($s, "150 File status okay; about to open data connection.\r\n");
+                    fputs($fs, "partial");
+                    fputs($s, "451 Requested action aborted: local error in processing.\r\n");
+                    break;
+
                 default:
                     fputs($s, "550 {$matches[1]}: No such file or directory \r\n");
                     break;
