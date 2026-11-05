@@ -4401,6 +4401,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			bool gen_handler = false;
 
 			opline = p->opline;
+			jit->op_start_ref = jit->ctx.insns_count;
 			if (op1_type & (IS_TRACE_REFERENCE|IS_TRACE_INDIRECT)) {
 				op1_type = IS_UNKNOWN;
 			}
