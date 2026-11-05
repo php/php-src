@@ -26,6 +26,9 @@ var_dump(grapheme_str_pad("a\xffb", 5, "."));
 var_dump(intl_get_error_message());
 var_dump(grapheme_str_pad("ab\u{00FC}", 5, "\xff"));
 
+// The input is always checked, even when no padding is needed
+var_dump(grapheme_str_pad("a\xffb", 1, "."));
+
 // A successful call clears the error of a previous one
 var_dump(grapheme_str_pad("ab\u{00FC}", 5, "."));
 var_dump(intl_get_error_code());
@@ -38,6 +41,7 @@ string(3) "abc"
 string(3) "abc"
 bool(false)
 string(62) "grapheme_str_pad(): Invalid UTF-8 string: U_INVALID_CHAR_FOUND"
+bool(false)
 bool(false)
 string(6) "abü.."
 int(0)
