@@ -590,7 +590,8 @@ function ut_main()
         array( $char_a_ring_nfd . "bcde" . $char_a_ring_nfd . "f", 4, 5, 11, "de" . $char_a_ring_nfd . "f" ),
         array( $char_a_ring_nfd . "bcde" . $char_a_ring_nfd . "f", 4, -6, 11, "de" . $char_a_ring_nfd . "f" ),
 
-        array( "\x95\x00a\x85b", 1, 0, 2, "\x00" ),
+        array( "\x95\x00a\x85b", 1, 0, 2, "\x00" ), // Invalid UTF-8 leading byte.
+        array( "\xED\xA0\xBDa", 1, 0, 3, "a" ), // Incorrectly-encoded surrogate half.
 
         array( $char_a_ring_nfd . $char_o_diaeresis_nfd . $char_o_diaeresis_nfd, 3, $char_a_ring_nfd . $char_o_diaeresis_nfd . $char_o_diaeresis_nfd ),
         array( $char_a_ring_nfd . $char_o_diaeresis_nfd . $char_o_diaeresis_nfd, 2, $char_a_ring_nfd . $char_o_diaeresis_nfd ),
@@ -744,6 +745,7 @@ function ut_main()
         array( $char_o_diaeresis_nfd . "abc" . $char_a_ring_nfd . "xyz", 8, 5, "c" . $char_a_ring_nfd . "xyz" ),
         array( $char_o_diaeresis_nfd . "abc" . $char_a_ring_nfd . "xyz", 8, 6, $char_a_ring_nfd . "xyz" ),
 
+        array( "\xED\xA0\xBDa", 1, 0, 3, "a" ), // Incorrectly-encoded surrogate half.
     );
 
     foreach( $tests as $test ) {
@@ -1137,6 +1139,7 @@ extract from "a%CC%8Abcde" "2" graphemes - grapheme_extract starting at byte pos
 extract from "a%CC%8Abcdea%CC%8Af" "4" graphemes - grapheme_extract starting at byte position 5 with $next = dea%CC%8Af == dea%CC%8Af $next=11 == 11 
 extract from "a%CC%8Abcdea%CC%8Af" "4" graphemes - grapheme_extract starting at byte position -6 with $next = dea%CC%8Af == dea%CC%8Af $next=11 == 11 
 extract from "%95%00a%85b" "1" graphemes - grapheme_extract starting at byte position 0 with $next = %00 == %00 $next=2 == 2 
+extract from "%ED%A0%BDa" "1" graphemes - grapheme_extract starting at byte position 0 with $next = a == a $next=3 == 3 
 extract from "a%CC%8Ao%CC%88o%CC%88" "3" graphemes - grapheme_extract = a%CC%8Ao%CC%88o%CC%88 == a%CC%8Ao%CC%88o%CC%88
 extract from "a%CC%8Ao%CC%88o%CC%88" "2" graphemes - grapheme_extract = a%CC%8Ao%CC%88 == a%CC%8Ao%CC%88
 extract from "a%CC%8Ao%CC%88c" "1" graphemes - grapheme_extract = a%CC%8A == a%CC%8A
@@ -1221,3 +1224,4 @@ extract from "o%CC%88abca%CC%8Axyz" "8" graphemes - grapheme_extract GRAPHEME_EX
 extract from "o%CC%88abca%CC%8Axyz" "8" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS starting at byte position 4 = bca%CC%8Axyz == bca%CC%8Axyz
 extract from "o%CC%88abca%CC%8Axyz" "8" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS starting at byte position 5 = ca%CC%8Axyz == ca%CC%8Axyz
 extract from "o%CC%88abca%CC%8Axyz" "8" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS starting at byte position 6 = a%CC%8Axyz == a%CC%8Axyz
+extract from "%ED%A0%BDa" "1" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS starting at byte position 0 = a == a 
