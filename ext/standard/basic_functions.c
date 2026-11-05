@@ -2591,7 +2591,7 @@ PHP_FUNCTION(parse_ini_string)
 	memset(string + str_len, 0, ZEND_MMAP_AHEAD);
 
 	array_init(return_value);
-	if (zend_parse_ini_string(string, 0, (zend_ini_scanner_mode)scanner_mode, ini_parser_cb, return_value) == FAILURE) {
+	if (zend_parse_ini_string(string, str_len, 0, (zend_ini_scanner_mode)scanner_mode, ini_parser_cb, return_value) == FAILURE) {
 		zend_array_destroy(Z_ARR_P(return_value));
 		RETVAL_FALSE;
 	}

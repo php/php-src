@@ -248,13 +248,11 @@ zend_result zend_ini_open_file_for_scanning(zend_file_handle *fh, zend_ini_scann
 	return SUCCESS;
 }
 
-void zend_ini_prepare_string_for_scanning(const char *str, zend_ini_scanner_mode scanner_mode)
+void zend_ini_prepare_string_for_scanning(const char *str, size_t len, zend_ini_scanner_mode scanner_mode)
 {
-	int len = (int)strlen(str);
-
 	init_ini_scanner(scanner_mode, NULL);
 
-	yy_scan_buffer(str, len);
+	yy_scan_buffer(str, (unsigned int)len);
 }
 
 /* {{{ zend_ini_escape_string() */

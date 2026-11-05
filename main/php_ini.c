@@ -722,7 +722,7 @@ void php_init_config(void)
 	if (sapi_module.ini_entries) {
 		/* Reset active ini section */
 		RESET_ACTIVE_INI_HASH();
-		zend_parse_ini_string(sapi_module.ini_entries, true, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_cb, &configuration_hash);
+		zend_parse_ini_string(sapi_module.ini_entries, strlen(sapi_module.ini_entries), true, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_cb, &configuration_hash);
 	}
 }
 /* }}} */

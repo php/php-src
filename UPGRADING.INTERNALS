@@ -53,6 +53,8 @@ PHP 8.7 INTERNALS UPGRADE NOTES
   freed with zend_hash_destroy() + pefree().
 - The ZTS symbols compiler_globals_offset and executor_globals_offset have been
   removed: CG()/EG() now reach the globals through a __thread struct.
+- zend_parse_ini_string() now takes the length of the string as its second
+  argument. The string is no longer cut off at the first NUL byte.
 
 ========================
 2. Build system changes

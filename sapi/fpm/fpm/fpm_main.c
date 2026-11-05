@@ -1350,7 +1350,7 @@ static void init_request_info(void)
 		int mode = ZEND_INI_USER;
 		char *tmp;
 		spprintf(&tmp, 0, "%s\n", ini);
-		zend_parse_ini_string(tmp, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t)fastcgi_ini_parser, &mode);
+		zend_parse_ini_string(tmp, strlen(tmp), 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t)fastcgi_ini_parser, &mode);
 		efree(tmp);
 	}
 
@@ -1359,7 +1359,7 @@ static void init_request_info(void)
 		int mode = ZEND_INI_SYSTEM;
 		char *tmp;
 		spprintf(&tmp, 0, "%s\n", ini);
-		zend_parse_ini_string(tmp, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t)fastcgi_ini_parser, &mode);
+		zend_parse_ini_string(tmp, strlen(tmp), 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t)fastcgi_ini_parser, &mode);
 		efree(tmp);
 	}
 }
