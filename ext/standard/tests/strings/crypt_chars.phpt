@@ -4,11 +4,11 @@ crypt() function - characters > 0x80
 <?php
 var_dump(crypt("À1234abcd", "99"));
 var_dump(crypt("À9234abcd", "99"));
-var_dump(crypt("À1234abcd", "_01234567"));
-var_dump(crypt("À9234abcd", "_01234567"));
+var_dump(crypt("À1234abcd", "_J9..4567"));
+var_dump(crypt("À9234abcd", "_J9..4567"));
 ?>
 --EXPECT--
 string(13) "99PxawtsTfX56"
 string(13) "99jcVcGxUZOWk"
-string(20) "_01234567IBjxKliXXRQ"
-string(20) "_012345678OSGpGQRVHA"
+string(20) "_J9..4567q0YG9xIr3M6"
+string(20) "_J9..4567xcl/AKtT5rI"
