@@ -20,6 +20,11 @@
 #endif
 
 #include "php.h"
+
+#ifdef __APPLE__
+# include <crt_externs.h>
+#endif
+
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_test.h"
@@ -1879,4 +1884,43 @@ static PHP_FUNCTION(zend_test_gh19792)
 	RETVAL_STRING("this is a non-interned string");
 	zend_error(E_WARNING, "a warning");
 	zend_throw_error(NULL, "an exception");
+}
+
+#ifdef __APPLE__
+static char **zend_test_argv_at_register;
+static bool zend_test_argv_atexit_registered;
+static bool zend_test_argv_atexit_enabled;
+
+static void zend_test_argv_atexit_handler(void)
+{
+	char **argv;
+
+	/* arginfo_zpp_mismatch calls every function, so only report when the test
+	 * asks for it. */
+	if (!zend_test_argv_atexit_enabled) {
+		return;
+	}
+
+	argv = *_NSGetArgv();
+
+	printf("argv_changed=%d\n", argv != zend_test_argv_at_register);
+	printf("argv_valid=%d\n", argv != NULL && argv[0] != NULL && strlen(argv[0]) > 0);
+	fflush(stdout);
+}
+#endif
+
+static PHP_FUNCTION(zend_test_register_argv_atexit)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+#ifdef __APPLE__
+	zend_test_argv_atexit_enabled = getenv("ZEND_TEST_ARGV_ATEXIT") != NULL;
+	zend_test_argv_at_register = *_NSGetArgv();
+
+	/* A single handler keeps --repeat from printing it more than once. */
+	if (!zend_test_argv_atexit_registered) {
+		zend_test_argv_atexit_registered = true;
+		atexit(zend_test_argv_atexit_handler);
+	}
+#endif
 }

@@ -437,6 +437,10 @@ void cleanup_ps_args(char **argv)
 #ifndef PS_USE_NONE
     if (save_argv)
     {
+#if defined(__APPLE__)
+        char **saved_argv = save_argv;
+#endif
+
         save_argv = NULL;
         save_argc = 0;
 
@@ -456,6 +460,16 @@ void cleanup_ps_args(char **argv)
 #if defined(PS_USE_CHANGE_ARGV) || defined(PS_USE_CLOBBER_ARGV)
         {
             int i;
+
+#if defined(__APPLE__)
+            /*
+             * Apple's Cyrus SASL reads the process arguments through
+             * _NSGetArgv() from an atexit() handler, which still points to
+             * the copy freed below. Restore the original array first.
+             */
+            *_NSGetArgv() = saved_argv;
+#endif
+
             for (i=0; argv[i] != NULL; i++)
                 free(argv[i]);
             free(argv);
