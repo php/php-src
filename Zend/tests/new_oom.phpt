@@ -2,8 +2,8 @@
 Test OOM on new of each class
 --SKIPIF--
 <?php
-if (getenv("USE_ZEND_ALLOC") === "0") die("skip requires zmm");
-if (getenv("SKIP_SLOW_TESTS")) die('skip slow test');
+skipif(getenv('USE_ZEND_ALLOC') === '0', 'requires zmm');
+skipif(getenv('SKIP_SLOW_TESTS'), 'slow test');
 ?>
 --FILE--
 <?php
