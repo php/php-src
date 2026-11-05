@@ -50,6 +50,8 @@ PHP                                                                        NEWS
   . Fixed use-after-free in JIT when the error handler releases a string while
     an "Undefined variable" warning is raised for its offset in ?? or nested
     isset()/empty(). (Jorg Sowa)
+  . Fixed bug GH-24361 (opcache_compile_file() disables cycle collection after
+    a compile error). (akasakariko)
 
 - PDO_Firebird:
   . Fixed stack buffer overflow with long connection user names, passwords,
