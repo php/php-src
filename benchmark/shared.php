@@ -72,3 +72,16 @@ function cloneRepo(string $path, string $url) {
     }
     runCommand(['git', 'clone', '-q', '--end-of-options', $url, $repo], dirname($path));
 }
+
+function checkPersonalityAslrDisablePermission(): bool {
+    $processResult = runCommand(['sh', '-c', 'setarch --addr-no-randomize sh -c \'cat /proc/self/personality\' || true'], null, false);
+
+    $n = hexdec($processResult->stdout);
+    if (($n & 0x4_00_00) === 0) {
+        fwrite(STDOUT, 'Unable to disable ASLR: ' . trim($processResult->stderr) . "\n");
+
+        return false;
+    }
+
+    return true;
+}
