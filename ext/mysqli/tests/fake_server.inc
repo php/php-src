@@ -1445,6 +1445,20 @@ function my_mysqli_test_stmt_response_field_len_premature(my_mysqli_fake_server_
 	$conn->read(65536);
 }
 
+function my_mysqli_test_sha256_password_short_scramble(my_mysqli_fake_server_conn $conn): void
+{
+    $conn->send_server_greetings();
+    $conn->read();
+    // AuthSwitchRequest (0xfe) to sha256_password carrying a scramble shorter
+    // than SCRAMBLE_LENGTH (20). mnd_emalloc sizes the heap copy to this
+    // length, so the sha256 plugin's 20-byte XOR over-reads it without the
+    // length guard.
+    $payload = "\xfe" . "sha256_password\x00" . str_repeat("\x41", 8);
+    $header = substr(pack('V', strlen($payload)), 0, 3) . "\x02";
+    $conn->send($header . $payload, "Auth Switch Request [short sha256 scramble]");
+    $conn->read();
+}
+
 function run_fake_server(string $test_function, int|string $port = 0): void
 {
     $host = '127.0.0.1';
