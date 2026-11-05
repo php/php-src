@@ -338,7 +338,50 @@ static void do_adjust_special_early(timelib_time* time)
 	timelib_do_normalize(time);
 }
 
-static void do_adjust_timezone(timelib_time *tz, timelib_tzinfo *tzi)
+static bool timelib_adjust_timezone_for_overlap(timelib_time *tz, timelib_tzinfo *tzi, int32_t preferred_offset)
+{
+	timelib_sll earlier_sse = INT64_MAX;
+	timelib_sll second_earliest_sse = INT64_MAX;
+	timelib_sll matching_offset_sse = INT64_MAX;
+	uint64_t type_count = tzi->bit64.typecnt;
+
+	for (uint64_t i = 0; i < type_count; i++) {
+		int32_t offset = tzi->type[i].offset;
+		int32_t actual_offset;
+
+		if ((offset > 0 && tz->sse < INT64_MIN + offset) || (offset < 0 && tz->sse > INT64_MAX + offset)) {
+			continue;
+		}
+
+		timelib_sll candidate_sse = tz->sse - offset;
+		if (!timelib_get_time_zone_offset_info(candidate_sse, tzi, &actual_offset, NULL, NULL) || actual_offset != offset) {
+			continue;
+		}
+
+		if (candidate_sse < earlier_sse) {
+			second_earliest_sse = earlier_sse;
+			earlier_sse = candidate_sse;
+		} else if (candidate_sse > earlier_sse && candidate_sse < second_earliest_sse) {
+			second_earliest_sse = candidate_sse;
+		}
+
+		if (offset == preferred_offset && candidate_sse < matching_offset_sse) {
+			matching_offset_sse = candidate_sse;
+		}
+	}
+
+	if (second_earliest_sse == INT64_MAX) {
+		return false;
+	}
+
+	/* Keep the previous offset if it is valid for the new local time. */
+	tz->sse = matching_offset_sse != INT64_MAX ? matching_offset_sse : earlier_sse;
+	tz->is_localtime = 1;
+	timelib_set_timezone(tz, tzi);
+	return true;
+}
+
+static void do_adjust_timezone(timelib_time *tz, timelib_tzinfo *tzi, bool resolve_overlap, int32_t preferred_offset)
 {
 	switch (tz->zone_type) {
 		case TIMELIB_ZONETYPE_OFFSET:
@@ -373,33 +416,31 @@ static void do_adjust_timezone(timelib_time *tz, timelib_tzinfo *tzi)
 			if (!tzi) {
 				return;
 			}
+			if (resolve_overlap && timelib_adjust_timezone_for_overlap(tz, tzi, preferred_offset)) {
+				return;
+			}
 
 			timelib_get_time_zone_offset_info(tz->sse, tzi, &current_offset, &current_transition_time, &current_is_dst);
 			timelib_get_time_zone_offset_info(tz->sse - current_offset, tzi, &after_offset, &after_transition_time, NULL);
 			actual_offset = after_offset;
 			actual_transition_time = after_transition_time;
 			if (current_offset == after_offset && tz->have_zone) {
-				/* Make sure we're not missing a DST change because we don't know the actual offset yet */
 				if (current_offset >= 0 && tz->dst && !current_is_dst) {
-						/* Timezone or its DST at or east of UTC, so the local time, interpreted as UTC, leaves DST (as defined in the actual timezone) before the actual local time */
-						int32_t              earlier_offset;
-						timelib_sll          earlier_transition_time;
-						timelib_get_time_zone_offset_info(tz->sse - current_offset - 7200, tzi, &earlier_offset, &earlier_transition_time, NULL);
-						if ((earlier_offset != after_offset) && (tz->sse - earlier_offset < after_transition_time)) {
-								/* Looking behind a bit clarified the actual offset to use */
-								actual_offset = earlier_offset;
-								actual_transition_time = earlier_transition_time;
-						}
+					int32_t earlier_offset;
+					timelib_sll earlier_transition_time;
+					timelib_get_time_zone_offset_info(tz->sse - current_offset - 7200, tzi, &earlier_offset, &earlier_transition_time, NULL);
+					if ((earlier_offset != after_offset) && (tz->sse - earlier_offset < after_transition_time)) {
+						actual_offset = earlier_offset;
+						actual_transition_time = earlier_transition_time;
+					}
 				} else if (current_offset <= 0 && current_is_dst && !tz->dst) {
-						/* Timezone west of UTC, so the local time, interpreted as UTC, leaves DST (as defined in the actual timezone) after the actual local time */
-						int32_t              later_offset;
-						timelib_sll          later_transition_time;
-						timelib_get_time_zone_offset_info(tz->sse - current_offset + 7200, tzi, &later_offset, &later_transition_time, NULL);
-						if ((later_offset != after_offset) && (tz->sse - later_offset >= later_transition_time)) {
-								/* Looking ahead a bit clarified the actual offset to use */
-								actual_offset = later_offset;
-								actual_transition_time = later_transition_time;
-						}
+					int32_t later_offset;
+					timelib_sll later_transition_time;
+					timelib_get_time_zone_offset_info(tz->sse - current_offset + 7200, tzi, &later_offset, &later_transition_time, NULL);
+					if ((later_offset != after_offset) && (tz->sse - later_offset >= later_transition_time)) {
+						actual_offset = later_offset;
+						actual_transition_time = later_transition_time;
+					}
 				}
 			}
 
@@ -439,8 +480,13 @@ timelib_sll timelib_epoch_days_from_time(timelib_time *time)
 	return era * DAYS_PER_ERA + day_of_era - HINNANT_EPOCH_SHIFT;
 }
 
-void timelib_update_ts(timelib_time* time, timelib_tzinfo* tzi)
+static void timelib_update_ts_internal(timelib_time* time, timelib_tzinfo* tzi, bool resolve_overlap)
 {
+	int32_t preferred_offset = time->z;
+	if (time->sse_uptodate && time->zone_type == TIMELIB_ZONETYPE_ID && time->tz_info) {
+		timelib_get_time_zone_offset_info(time->sse, time->tz_info, &preferred_offset, NULL, NULL);
+	}
+
 	do_adjust_special_early(time);
 	do_adjust_relative(time);
 	do_adjust_special(time);
@@ -456,10 +502,20 @@ void timelib_update_ts(timelib_time* time, timelib_tzinfo* tzi)
 	time->sse += timelib_epoch_days_from_time(time) * (SECS_PER_DAY / 2);
 
 	// This modifies time->sse, if needed
-	do_adjust_timezone(time, tzi);
+	do_adjust_timezone(time, tzi, resolve_overlap, preferred_offset);
 
 	time->sse_uptodate = 1;
 	time->have_relative = time->relative.have_weekday_relative = time->relative.have_special_relative = time->relative.first_last_day_of = 0;
+}
+
+void timelib_update_ts(timelib_time* time, timelib_tzinfo* tzi)
+{
+	timelib_update_ts_internal(time, tzi, false);
+}
+
+void timelib_update_ts_first(timelib_time* time, timelib_tzinfo* tzi)
+{
+	timelib_update_ts_internal(time, tzi, true);
 }
 
 #if 0
