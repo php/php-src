@@ -83,6 +83,8 @@ PHP                                                                        NEWS
   . Fixed OSS-Fuzz #545352966 (default value AST of an SHM-persisted partial).
     (ndossche)
   . Fixed JIT ignoring exceptions from typed property set hooks. (David Carlier)
+  . Added the opcache.file_cache_permissions INI setting (GH-22226).
+    (Jack Worman)
 
 - PDO:
   . Fixed PDOStatement::getColumnMeta() reading out of bounds for an invalid
