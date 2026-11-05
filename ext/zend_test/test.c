@@ -2793,3 +2793,80 @@ static PHP_FUNCTION(zend_test_gh19792)
 	zend_error(E_WARNING, "a warning");
 	zend_throw_error(NULL, "an exception");
 }
+
+/* Returns whether destroying a HashTable detaches the iterators on it. */
+static PHP_FUNCTION(zend_test_hash_destroy_detaches_iterator)
+{
+	zend_string *destroy, *state;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR(destroy)
+		Z_PARAM_STR(state)
+	ZEND_PARSE_PARAMETERS_END();
+
+	void (ZEND_FASTCALL *destroy_func)(HashTable *);
+	if (zend_string_equals_literal(destroy, "zend_hash_destroy")) {
+		destroy_func = zend_hash_destroy;
+	} else if (zend_string_equals_literal(destroy, "zend_hash_graceful_reverse_destroy")) {
+		destroy_func = zend_hash_graceful_reverse_destroy;
+	} else {
+		zend_argument_value_error(1, "must be \"zend_hash_destroy\" or \"zend_hash_graceful_reverse_destroy\"");
+		RETURN_THROWS();
+	}
+
+	bool packed;
+	bool emptied;
+	if (zend_string_equals_literal(state, "uninitialized")) {
+		packed = false;
+		emptied = false;
+	} else if (zend_string_equals_literal(state, "packed")) {
+		packed = true;
+		emptied = false;
+	} else if (zend_string_equals_literal(state, "packed_emptied")) {
+		packed = true;
+		emptied = true;
+	} else if (zend_string_equals_literal(state, "hash")) {
+		packed = false;
+		emptied = false;
+	} else if (zend_string_equals_literal(state, "hash_emptied")) {
+		packed = false;
+		emptied = true;
+	} else {
+		zend_argument_value_error(2, "must be \"uninitialized\", \"packed\", \"packed_emptied\", \"hash\", or \"hash_emptied\"");
+		RETURN_THROWS();
+	}
+
+	HashTable *ht = emalloc(sizeof(HashTable));
+	zend_hash_init(ht, 8, NULL, ZVAL_PTR_DTOR, false);
+
+	if (!zend_string_equals_literal(state, "uninitialized")) {
+		zval value;
+		ZVAL_STR(&value, zend_string_init("value", strlen("value"), false));
+		if (packed) {
+			zend_hash_index_add_new(ht, 0, &value);
+			ZEND_ASSERT(HT_IS_PACKED(ht));
+		} else {
+			zend_hash_str_add_new(ht, "key", strlen("key"), &value);
+			ZEND_ASSERT(!HT_IS_PACKED(ht));
+		}
+		if (emptied) {
+			if (packed) {
+				zend_hash_index_del(ht, 0);
+			} else {
+				zend_hash_str_del(ht, "key", strlen("key"));
+			}
+			ZEND_ASSERT(ht->nNumUsed == 0);
+		}
+	}
+
+	uint32_t iter_idx = zend_hash_iterator_add(ht, 0);
+	destroy_func(ht);
+	bool detached = EG(ht_iterators)[iter_idx].ht != ht;
+
+	/* Delete the iterator before ht is freed, so that this helper stays memory safe
+	 * when the iterator was not detached. */
+	zend_hash_iterator_del(iter_idx);
+	efree(ht);
+
+	RETURN_BOOL(detached);
+}

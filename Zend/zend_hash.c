@@ -1986,7 +1986,6 @@ ZEND_API void ZEND_FASTCALL zend_hash_destroy(HashTable *ht)
 				}
 				SET_INCONSISTENT(HT_DESTROYED);
 			}
-			zend_hash_iterators_remove(ht);
 		} else {
 			Bucket *p = ht->arData;
 			Bucket *end = p + ht->nNumUsed;
@@ -2034,12 +2033,13 @@ ZEND_API void ZEND_FASTCALL zend_hash_destroy(HashTable *ht)
 					} while (++p != end);
 				}
 			}
-			zend_hash_iterators_remove(ht);
 		}
-	} else if (EXPECTED(HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED)) {
-		return;
 	}
-	pefree(HT_GET_DATA_ADDR(ht), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
+
+	zend_hash_iterators_remove(ht);
+	if (!(HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED)) {
+		pefree(HT_GET_DATA_ADDR(ht), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
+	}
 }
 
 ZEND_API void ZEND_FASTCALL zend_array_destroy(HashTable *ht)
@@ -2251,6 +2251,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_graceful_reverse_destroy(HashTable *ht)
 		}
 	}
 
+	zend_hash_iterators_remove(ht);
 	if (!(HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED)) {
 		pefree(HT_GET_DATA_ADDR(ht), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
 	}

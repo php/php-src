@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: a541ec4d43e8dfb243636d2517436196e337047e
+ * Stub hash: 23669ad6e9407e4851abc2f350efd7672a82c98a
  * Has decl header: yes */
 
 #include "zend_constants.h"
@@ -299,6 +299,11 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_zend_test_gh19792 arginfo_zend_trigger_bailout
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_test_hash_destroy_detaches_iterator, 0, 0, 2)
+	ZEND_ARG_INFO(0, destroy)
+	ZEND_ARG_INFO(0, state)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_test_handle_post_data, 0, 0, 3)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_INFO(0, content_type)
@@ -497,6 +502,7 @@ static ZEND_FUNCTION(zend_test_gh18756);
 static ZEND_FUNCTION(zend_test_opcache_preloading);
 static ZEND_FUNCTION(zend_test_uri_parser);
 static ZEND_FUNCTION(zend_test_gh19792);
+static ZEND_FUNCTION(zend_test_hash_destroy_detaches_iterator);
 static ZEND_FUNCTION(zend_test_handle_post_data);
 static ZEND_FUNCTION(zend_new_singleton_array);
 static ZEND_FUNCTION(zend_test_set_local_var);
@@ -655,6 +661,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_opcache_preloading, arginfo_zend_test_opcache_preloading)
 	ZEND_FE(zend_test_uri_parser, arginfo_zend_test_uri_parser)
 	ZEND_FE(zend_test_gh19792, arginfo_zend_test_gh19792)
+	ZEND_FE(zend_test_hash_destroy_detaches_iterator, arginfo_zend_test_hash_destroy_detaches_iterator)
 	ZEND_FE(zend_test_handle_post_data, arginfo_zend_test_handle_post_data)
 	ZEND_FE(zend_new_singleton_array, arginfo_zend_new_singleton_array)
 	ZEND_FE(zend_test_set_local_var, arginfo_zend_test_set_local_var)
