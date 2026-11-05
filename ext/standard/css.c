@@ -35,7 +35,7 @@ PHPAPI ZEND_COLD void php_info_print_css(void) /* {{{ */
 	PUTS(".e {background-color: #ccf; width: 300px; font-weight: bold;}\n");
 	PUTS(".h {background-color: #99c; font-weight: bold;}\n");
 	PUTS(".v {background-color: #ddd; max-width: 300px; overflow-x: auto; word-wrap: break-word;}\n");
-	PUTS(".v i {color: #999;}\n");
+	PUTS(".v i {color: #454545;}\n");
 	PUTS("img {float: right; border: 0;}\n");
 	PUTS("hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}\n");
 	PUTS(":root {--php-dark-grey: #333; --php-dark-blue: #4F5B93; --php-medium-blue: #8892BF; --php-light-blue: #E2E4EF; --php-accent-purple: #793862}");
@@ -47,6 +47,7 @@ PHPAPI ZEND_COLD void php_info_print_css(void) /* {{{ */
 		"  .e {background-color: #404A77}\n"
 		"  .h {background-color: var(--php-dark-blue)}\n"
 		"  .v {background-color: var(--php-dark-grey)}\n"
+		"  .v i {color: #c4c4c4;}\n"
 		"  hr {background-color: #505153}\n"
 		"}\n"
 	);
