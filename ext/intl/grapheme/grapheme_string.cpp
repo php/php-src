@@ -1202,6 +1202,14 @@ static bool grapheme_str_pad_measure(const zend_string *str, size_t limit, size_
 
 	ubrk_setUText(bi, ut, &ustatus);
 
+	if (U_FAILURE(ustatus)) {
+		intl_error_set_code(nullptr, ustatus);
+		intl_error_set_custom_msg(nullptr, "Error setting up grapheme break iterator");
+		ubrk_close(bi);
+		utext_close(ut);
+		return false;
+	}
+
 	size_t graphemes = 0;
 	*bytes1 = 0;
 	*bytes2 = 0;
