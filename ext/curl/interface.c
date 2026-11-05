@@ -1917,7 +1917,6 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		case CURLOPT_PROXYUSERPWD:
 		case CURLOPT_REFERER:
 		case CURLOPT_SSLCERTTYPE:
-		case CURLOPT_SSLENGINE:
 		case CURLOPT_SSLENGINE_DEFAULT:
 		case CURLOPT_SSLKEY:
 		case CURLOPT_SSLKEYPASSWD:
@@ -2277,6 +2276,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		case CURLOPT_CRLFILE:
 		case CURLOPT_ISSUERCERT:
 		case CURLOPT_SSH_KNOWNHOSTS:
+		case CURLOPT_SSLENGINE:
 		{
 			zend_string *tmp_str;
 			zend_string *str = zval_get_tmp_string(zvalue, &tmp_str);
