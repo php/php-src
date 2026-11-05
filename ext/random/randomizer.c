@@ -84,7 +84,7 @@ PHP_METHOD(Random_Randomizer, __construct)
 /* {{{ Generate a float in [0, 1) */
 PHP_METHOD(Random_Randomizer, nextFloat)
 {
-	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
+	const php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
 	php_random_algo_with_state engine = randomizer->engine;
 
 	uint64_t result;
@@ -127,7 +127,7 @@ PHP_METHOD(Random_Randomizer, nextFloat)
  */
 PHP_METHOD(Random_Randomizer, getFloat)
 {
-	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
+	const php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
 	double min, max;
 	zend_enum_Random_IntervalBoundary bounds_type = ZEND_ENUM_Random_IntervalBoundary_ClosedOpen;
 
@@ -191,7 +191,7 @@ PHP_METHOD(Random_Randomizer, getFloat)
 /* {{{ Generate positive random number */
 PHP_METHOD(Random_Randomizer, nextInt)
 {
-	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
+	const php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
 	php_random_algo_with_state engine = randomizer->engine;
 
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -212,7 +212,7 @@ PHP_METHOD(Random_Randomizer, nextInt)
 /* {{{ Generate random number in range */
 PHP_METHOD(Random_Randomizer, getInt)
 {
-	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
+	const php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
 	php_random_algo_with_state engine = randomizer->engine;
 
 	uint64_t result;
@@ -255,7 +255,7 @@ PHP_METHOD(Random_Randomizer, getInt)
 /* {{{ Generate random bytes string in ordered length */
 PHP_METHOD(Random_Randomizer, getBytes)
 {
-	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
+	const php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
 	php_random_algo_with_state engine = randomizer->engine;
 
 	zend_string *retval;
@@ -330,7 +330,7 @@ PHP_METHOD(Random_Randomizer, getBytes)
 /* {{{ Shuffling array */
 PHP_METHOD(Random_Randomizer, shuffleArray)
 {
-	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
+	const php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
 	zval *array;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -347,7 +347,7 @@ PHP_METHOD(Random_Randomizer, shuffleArray)
 /* {{{ Shuffling binary */
 PHP_METHOD(Random_Randomizer, shuffleBytes)
 {
-	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
+	const php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
 	zend_string *bytes;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -368,8 +368,8 @@ PHP_METHOD(Random_Randomizer, shuffleBytes)
 /* {{{ Pick keys */
 PHP_METHOD(Random_Randomizer, pickArrayKeys)
 {
-	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
-	zval *input, t;
+	const php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
+	zval *input;
 	zend_long num_req;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2);
@@ -389,6 +389,7 @@ PHP_METHOD(Random_Randomizer, pickArrayKeys)
 
 	/* Keep compatibility, But the result is always an array */
 	if (Z_TYPE_P(return_value) != IS_ARRAY) {
+		zval t;
 		ZVAL_COPY_VALUE(&t, return_value);
 		array_init(return_value);
 		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &t);
@@ -399,7 +400,7 @@ PHP_METHOD(Random_Randomizer, pickArrayKeys)
 /* {{{ Get Random Bytes for String */
 PHP_METHOD(Random_Randomizer, getBytesFromString)
 {
-	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
+	const php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
 	php_random_algo_with_state engine = randomizer->engine;
 
 	zend_long user_length;
