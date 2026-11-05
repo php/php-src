@@ -77,7 +77,7 @@ int cdb_make_addend(struct cdb_make *c, unsigned int keylen, unsigned int datale
 
 	head = c->head;
 	if (!head || (head->num >= CDB_HPLIST)) {
-		head = (struct cdb_hplist *) emalloc(sizeof(struct cdb_hplist));
+		head = pemalloc(sizeof(struct cdb_hplist), php_stream_is_persistent(c->fp));
 		if (!head)
 			return -1;
 		head->num = 0;
@@ -221,7 +221,7 @@ int cdb_make_finish(struct cdb_make *c)
 
 	for (x = c->head; x; c->head = x) {
 		x = x->next;
-		efree(c->head);
+		pefree(c->head, php_stream_is_persistent(c->fp));
 	}
 
 	if (php_stream_flush(c->fp) != 0)
