@@ -65,13 +65,13 @@ PHPAPI HashTable *php_stream_get_url_stream_wrappers_hash_global(void)
 	return &url_stream_wrappers_hash;
 }
 
-static int forget_persistent_resource_id_numbers(zval *el)
+static void forget_persistent_resource_id_numbers(zval *el)
 {
 	php_stream *stream;
 	zend_resource *rsrc = Z_RES_P(el);
 
 	if (rsrc->type != le_pstream) {
-		return 0;
+		return;
 	}
 
 	stream = (php_stream*)rsrc->ptr;
@@ -84,7 +84,7 @@ fprintf(stderr, "forget_persistent: %s:%p\n", stream->ops->label, stream);
 	stream->res = NULL;
 	stream->ctx = NULL;
 
-	return 0;
+	return;
 }
 
 ZEND_MODULE_POST_ZEND_DEACTIVATE_D(streams)
@@ -107,7 +107,7 @@ PHPAPI php_stream *php_stream_encloses(php_stream *enclosing, php_stream *enclos
 	return orig;
 }
 
-PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream **stream)
+PHPAPI php_stream_persistent_status php_stream_from_persistent_id(const char *persistent_id, php_stream **stream)
 {
 	zend_resource *le;
 
@@ -252,8 +252,8 @@ static int php_stream_flush_ex(php_stream *stream, bool closing);
 PHPAPI int php_stream_free(php_stream *stream, int close_options) /* {{{ */
 {
 	int ret = 1;
-	int preserve_handle = close_options & PHP_STREAM_FREE_PRESERVE_HANDLE ? 1 : 0;
-	int release_cast = 1;
+	bool preserve_handle = (close_options & PHP_STREAM_FREE_PRESERVE_HANDLE) ? true : false;
+	bool release_cast = true;
 	php_stream_context *context;
 
 	/* During shutdown resources may be released before other resources still holding them.
@@ -324,7 +324,7 @@ PHPAPI int php_stream_free(php_stream *stream, int close_options) /* {{{ */
 			return 0;
 		}
 		/* otherwise, make sure that we don't close the FILE* from a cast */
-		release_cast = 0;
+		release_cast = false;
 	}
 
 #if STREAM_DEBUG
@@ -681,7 +681,7 @@ PHPAPI ssize_t php_stream_read(php_stream *stream, char *buf, size_t size)
 				break;
 			}
 		} else {
-			if (php_stream_fill_read_buffer(stream, size) != SUCCESS) {
+			if (php_stream_fill_read_buffer(stream, size) == FAILURE) {
 				if (didread == 0) {
 					return -1;
 				}
@@ -864,11 +864,11 @@ PHPAPI char *php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
 	size_t avail = 0;
 	size_t current_buf_size = 0;
 	size_t total_copied = 0;
-	int grow_mode = 0;
+	bool grow_mode = false;
 	char *bufstart = buf;
 
 	if (buf == NULL) {
-		grow_mode = 1;
+		grow_mode = true;
 	} else if (maxlen == 0) {
 		return NULL;
 	}
@@ -893,14 +893,14 @@ PHPAPI char *php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
 			size_t cpysz = 0;
 			char *readptr;
 			const char *eol;
-			int done = 0;
+			bool done = false;
 
 			readptr = (char*)stream->readbuf + stream->readpos;
 			eol = php_stream_locate_eol(stream, NULL);
 
 			if (eol) {
 				cpysz = eol - readptr + 1;
-				done = 1;
+				done = true;
 			} else {
 				cpysz = avail;
 			}
@@ -922,7 +922,7 @@ PHPAPI char *php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
 			} else {
 				if (cpysz >= maxlen - 1) {
 					cpysz = maxlen - 1;
-					done = 1;
+					done = true;
 				}
 			}
 

@@ -71,7 +71,7 @@ extern int php_get_gid_by_name(const char *name, gid_t *gid);
 #endif
 
 /* parse standard "fopen" modes into open() flags */
-PHPAPI int php_stream_parse_fopen_modes(const char *mode, int *open_flags)
+PHPAPI zend_result php_stream_parse_fopen_modes(const char *mode, int *open_flags)
 {
 	int flags;
 
@@ -1220,6 +1220,9 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, zen
 			case PHP_STREAM_PERSISTENT_FAILURE:
 				efree(persistent_id);
 				return ret;
+			case PHP_STREAM_PERSISTENT_NOT_EXIST:
+				/* Fallthrough to open new stream */
+				break;
 		}
 	}
 #ifdef PHP_WIN32
