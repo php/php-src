@@ -79,8 +79,8 @@ array(2) {
   [1]=>
   string(4) "leaf"
 }
-SOAP-ERROR: Parsing WSDL: Couldn't find <definitions> in '%sGHSA-rgrp-mwpx-f6rm.wsdl'
-SOAP-ERROR: Parsing WSDL: Couldn't load from '%sGHSA-rgrp-mwpx-f6rm.wsdl'%S
+SoapClient::__construct(): Parsing WSDL: Couldn't find <definitions> in '%sGHSA-rgrp-mwpx-f6rm.wsdl'
+SoapClient::__construct(): Parsing WSDL: Couldn't load from '%sGHSA-rgrp-mwpx-f6rm.wsdl'%S
 array(1) {
   [0]=>
   string(9) "void op()"
