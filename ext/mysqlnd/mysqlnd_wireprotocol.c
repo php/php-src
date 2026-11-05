@@ -740,9 +740,9 @@ php_mysqlnd_auth_response_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	/* Should be always 0x0 or ERROR_MARKER for error */
 	packet->response_code = uint1korr(p);
 	p++;
-	BAIL_IF_NOT_ENOUGH_DATA;
 
 	if (ERROR_MARKER == packet->response_code) {
+		BAIL_IF_NOT_ENOUGH_DATA;
 		php_mysqlnd_read_error_from_line(p, packet->header.size - 1,
 										 packet->error, sizeof(packet->error),
 										 &packet->error_no, packet->sqlstate
@@ -1015,9 +1015,9 @@ php_mysqlnd_eof_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	/* Should be always EODATA_MARKER */
 	packet->field_count = uint1korr(p);
 	p++;
-	BAIL_IF_NOT_ENOUGH_DATA;
 
 	if (ERROR_MARKER == packet->field_count) {
+		BAIL_IF_NOT_ENOUGH_DATA;
 		php_mysqlnd_read_error_from_line(p, packet->header.size - 1,
 										 packet->error, sizeof(packet->error),
 										 &packet->error_no, packet->sqlstate
