@@ -684,7 +684,7 @@ PHP_FUNCTION(expm1)
 		Z_PARAM_DOUBLE(num)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_DOUBLE(expm1(num));
+	RETURN_DOUBLE(zend_expm1(num));
 }
 /* }}} */
 
