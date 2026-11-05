@@ -37,6 +37,12 @@
 # define PHP_DATE_DOUBLE_FITS_LONG(d) (!((d) >= (double)TIMELIB_LONG_MAX || (d) < (double)TIMELIB_LONG_MIN))
 #endif
 
+/* Same as PHP_DATE_SIZEOF_LONG but for timelib_sll (int64_t) */
+#define PHP_DATE_DOUBLE_FITS_SLL(d) (!((d) >= (double)INT64_MAX || (d) < (double)INT64_MIN))
+
+/* Same as TIMELIB_LONG_FMT but for timelib_sll (int64_t) */
+#define PHP_DATE_SLL_FMT "%" PRId64
+
 #include "php_version.h"
 #define PHP_DATE_VERSION PHP_VERSION
 
@@ -160,6 +166,7 @@ PHPAPI zend_class_entry *php_date_get_period_ce(void);
 
 PHPAPI zval *php_date_instantiate(zend_class_entry *pce, zval *object);
 PHPAPI bool php_date_initialize(php_date_obj *dateobj, const char *time_str, size_t time_str_len, const char *format, zval *timezone_object, int flags);
+PHPAPI void php_date_initialize_from_ts_sll(php_date_obj *dateobj, timelib_sll sec, int usec);
 PHPAPI void php_date_initialize_from_ts_long(php_date_obj *dateobj, zend_long sec, int usec);
 PHPAPI bool php_date_initialize_from_ts_double(php_date_obj *dateobj, double ts);
 
