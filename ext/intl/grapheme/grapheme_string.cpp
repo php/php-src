@@ -1152,6 +1152,17 @@ out_ustring1:
 	efree(ustring1);
 }
 
+/* {{{ Returns the byte length, in the UTF-8 string str, of the first upos UTF-16 code units of ustr,
+ * its UTF-16 conversion. */
+static size_t grapheme_str_pad_utf8_offset(const zend_string *str, const UChar *ustr, int32_t upos)
+{
+	int32_t code_points = u_countChar32(ustr, upos);
+	int32_t offset = 0;
+	U8_FWD_N(ZSTR_VAL(str), offset, (int32_t) ZSTR_LEN(str), code_points);
+	return offset;
+}
+/* }}} */
+
 /* {{{ Counts the grapheme clusters of a UTF-8 string, but stops once limit clusters have been counted.
  * Also stores the number of bytes taken by its first prefix1 and prefix2 clusters in bytes1 and bytes2,
  * if the string has that many (0 otherwise). Returns false on failure. */
@@ -1171,23 +1182,18 @@ static bool grapheme_str_pad_measure(const zend_string *str, size_t limit, size_
 		return false;
 	}
 
-	/* Reject invalid UTF-8, like grapheme_strlen() does, instead of counting each invalid byte. */
-	for (int32_t i = 0, len = (int32_t) ZSTR_LEN(str); i < len;) {
-		UChar32 c;
-		U8_NEXT(ZSTR_VAL(str), i, len, c);
-		if (c < 0) {
-			intl_error_set_code(nullptr, U_INVALID_CHAR_FOUND);
-			intl_error_set_custom_msg(nullptr, "Invalid UTF-8 string");
-			return false;
-		}
-	}
-
+	/* Like grapheme_strlen(), work on UTF-16. The conversion also rejects invalid UTF-8. */
 	UErrorCode ustatus = U_ZERO_ERROR;
-	UText *ut = utext_openUTF8(nullptr, ZSTR_VAL(str), ZSTR_LEN(str), &ustatus);
+	UChar *ustr = nullptr;
+	int32_t ulen = 0;
+	intl_convert_utf8_to_utf16(&ustr, &ulen, ZSTR_VAL(str), ZSTR_LEN(str), &ustatus);
 
 	if (U_FAILURE(ustatus)) {
 		intl_error_set_code(nullptr, ustatus);
-		intl_error_set_custom_msg(nullptr, "Error opening UTF-8 text");
+		intl_error_set_custom_msg(nullptr, "Invalid UTF-8 string");
+		if (ustr) {
+			efree(ustr);
+		}
 		return false;
 	}
 
@@ -1196,38 +1202,39 @@ static bool grapheme_str_pad_measure(const zend_string *str, size_t limit, size_
 	if (U_FAILURE(ustatus)) {
 		intl_error_set_code(nullptr, ustatus);
 		intl_error_set_custom_msg(nullptr, "Error creating grapheme break iterator");
-		utext_close(ut);
+		efree(ustr);
 		return false;
 	}
 
-	ubrk_setUText(bi, ut, &ustatus);
+	ubrk_setText(bi, ustr, ulen, &ustatus);
 
 	if (U_FAILURE(ustatus)) {
 		intl_error_set_code(nullptr, ustatus);
 		intl_error_set_custom_msg(nullptr, "Error setting up grapheme break iterator");
 		ubrk_close(bi);
-		utext_close(ut);
+		efree(ustr);
 		return false;
 	}
 
 	size_t graphemes = 0;
-	*bytes1 = 0;
-	*bytes2 = 0;
+	int32_t upos1 = 0, upos2 = 0;
 
 	for (int32_t pos = ubrk_next(bi); pos != UBRK_DONE && graphemes < limit; pos = ubrk_next(bi)) {
 		graphemes++;
 		if (graphemes == prefix1) {
-			*bytes1 = pos;
+			upos1 = pos;
 		}
 		if (graphemes == prefix2) {
-			*bytes2 = pos;
+			upos2 = pos;
 		}
 	}
 
 	ubrk_close(bi);
-	utext_close(ut);
 
+	*bytes1 = upos1 ? grapheme_str_pad_utf8_offset(str, ustr, upos1) : 0;
+	*bytes2 = upos2 ? grapheme_str_pad_utf8_offset(str, ustr, upos2) : 0;
 	*count = graphemes;
+	efree(ustr);
 	return true;
 }
 /* }}} */
