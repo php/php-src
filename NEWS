@@ -20,6 +20,10 @@ PHP                                                                        NEWS
     or never terminates). (Ilia Alshanetsky)
   . Fixed memory leak in JIT ASSIGN_DIM when the assignment fails. (Jorg Sowa)
 
+- OpenSSL:
+  . Fixed bug GH-25172 (TLS session reuse shares request-lifetime callback
+    structures with persistent streams). (cxxz16, David Carlier)
+
 05 Nov 2026, PHP 8.6.0RC5
 
 - Core:

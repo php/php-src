@@ -2797,6 +2797,14 @@ static zend_result php_openssl_setup_crypto(php_stream *stream,
 			php_stream_warn(stream, SslNotSupported, "Supplied SSL session stream is not set up");
 		} else if (sslsock->is_client && parent_sslsock->ssl_handle == NULL) {
 			php_stream_warn(stream, SslNotSupported, "Supplied SSL session stream is not initialized");
+		} else if (php_stream_is_persistent(stream) &&
+			  (parent_sslsock->session_callbacks
+			   || parent_sslsock->psk_callbacks
+#if defined(HAVE_TLS13)
+			   || parent_sslsock->early_data_callbacks
+#endif
+			  )) {
+			php_stream_warn(stream, PersistentNotSupported, "Supplied SSL session stream with callbacks is not supported for persistent streams");
 		} else {
 			SSL_CTX_up_ref(parent_sslsock->ctx);
 			sslsock->ctx = parent_sslsock->ctx;
