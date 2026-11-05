@@ -84,6 +84,9 @@ PHP                                                                        NEWS
     (ndossche)
   . Fixed JIT ignoring exceptions from typed property set hooks. (David Carlier)
 
+- PCRE:
+  . Upgraded bundled PCRE2 to 10.49. (Ilia Alshanetsky)
+
 - PDO:
   . Fixed PDOStatement::getColumnMeta() reading out of bounds for an invalid
     column index. (Ilia Alshanetsky)
