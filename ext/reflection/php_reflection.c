@@ -4439,21 +4439,12 @@ ZEND_METHOD(ReflectionClass, setStaticPropertyValue)
 		RETURN_THROWS();
 	}
 
-	if (Z_ISREF_P(variable_ptr)) {
-		zend_reference *ref = Z_REF_P(variable_ptr);
-		variable_ptr = Z_REFVAL_P(variable_ptr);
-
-		if (!zend_verify_ref_assignable_zval(ref, value, 0)) {
-			return;
-		}
-	}
-
 	if (ZEND_TYPE_IS_SET(prop_info->type) && !zend_verify_property_type(prop_info, value, 0)) {
 		return;
 	}
 
-	zval_ptr_dtor(variable_ptr);
-	ZVAL_COPY(variable_ptr, value);
+	Z_TRY_ADDREF_P(value);
+	zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR, 0);
 
 }
 /* }}} */
