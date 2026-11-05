@@ -9,7 +9,8 @@ if (!(str_contains(PHP_OS, 'Linux') || str_contains(PHP_OS, 'FreeBSD'))) {
     die('skip PDEATHSIG is only supported on Linux and FreeBSD');
 }
 if (@file_exists('/.dockerenv')) die("skip Broken in Docker");
-if (!shell_exec("which pgrep")) die("skip Missing pgrep command");
+if (!function_exists('shell_exec')) die("skip shell_exec() is not available");
+if (!shell_exec("command -v pgrep")) die("skip Missing pgrep command");
 ?>
 --FILE--
 <?php
@@ -23,7 +24,13 @@ function find_workers_by_ppid(string $ppid) {
 }
 
 function find_workers_by_pids(array $pids) {
-    return split_words(shell_exec('ps -o pid= -p ' . join(',', $pids)));
+    $workers = [];
+    foreach ($pids as $pid) {
+        if (shell_exec('kill -0 ' . (int) $pid . ' 2>/dev/null && echo 1') !== null) {
+            $workers[] = $pid;
+        }
+    }
+    return $workers;
 }
 
 include "php_cli_server.inc";
