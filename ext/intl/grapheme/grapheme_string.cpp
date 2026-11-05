@@ -1271,6 +1271,8 @@ U_CFUNC PHP_FUNCTION(grapheme_str_pad)
 		Z_PARAM_LONG(pad_type_val)
 	ZEND_PARSE_PARAMETERS_END();
 
+	intl_error_reset(nullptr);
+
 	/* Counting stops past pad_to_length: a longer input is returned unchanged anyway. */
 	size_t input_length, unused;
 	if (!grapheme_str_pad_measure(input, pad_to_length < 0 ? 0 : (size_t) pad_to_length + 1, &input_length,
