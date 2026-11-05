@@ -1114,6 +1114,10 @@ PHP_FUNCTION(strtotime)
 		RETURN_FALSE;
 	}
 
+	if (memchr(ZSTR_VAL(times), '\0', ZSTR_LEN(times)) != NULL) {
+		RETURN_FALSE;
+	}
+
 	tzi = get_timezone_info();
 	if (!tzi) {
 		return;
