@@ -3206,6 +3206,7 @@ static void zend_jit_setup_disasm(void)
 	REGISTER_HELPER(zend_jit_fetch_dim_isset_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_rw_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_w_helper);
+	REGISTER_HELPER(zend_jit_assign_dim_fetch_w_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_str_offset_r_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_str_r_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_str_is_helper);
@@ -12564,7 +12565,11 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 				ir_END_list(*end_inputs);
 				break;
 			case BP_VAR_W:
-				ref = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_fetch_dim_w_helper), ht_ref, ref);
+				if (opline->opcode == ZEND_ASSIGN_DIM && ((opline+1)->op1_type & (IS_VAR|IS_TMP_VAR))) {
+					ref = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_assign_dim_fetch_w_helper), ht_ref, ref);
+				} else {
+					ref = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_fetch_dim_w_helper), ht_ref, ref);
+				}
 				if_found = ir_IF(ref);
 				ir_IF_TRUE(if_found);
 				ir_refs_add(found_inputs, ir_END());
@@ -13511,6 +13516,7 @@ static int zend_jit_assign_dim(zend_jit_ctx  *jit,
 			// JIT: zend_throw_error(NULL, "Cannot add element to the array as the next element is already occupied");
 			jit_SET_EX_OPLINE(jit, opline);
 			ir_CALL(IR_VOID, jit_STUB_FUNC_ADDR(jit, jit_stub_cannot_add_element, IR_FASTCALL_FUNC));
+			jit_FREE_OP(jit, (opline+1)->op1_type, (opline+1)->op1, val_info, NULL);
 
 			ir_END_list(end_inputs);
 

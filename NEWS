@@ -18,6 +18,7 @@ PHP                                                                        NEWS
     is exhausted while compiling side traces). (Ilia Alshanetsky)
   . Fixed bug GH-25164 (Function JIT loop calling a user function runs once
     or never terminates). (Ilia Alshanetsky)
+  . Fixed memory leak in JIT ASSIGN_DIM when the assignment fails. (Jorg Sowa)
 
 05 Nov 2026, PHP 8.6.0RC5
 
