@@ -10,6 +10,7 @@ PHP                                                                        NEWS
     (Jorg Sowa)
   . Fixed AST export not quoting invalid variable and property names.
     (Jorg Sowa)
+  . Fixed AST export treating 0x7f as a valid name character. (Jorg Sowa)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
