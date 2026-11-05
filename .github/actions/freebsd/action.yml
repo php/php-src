@@ -48,6 +48,7 @@ runs:
             libavif \
             sqlite3 \
             curl \
+            apache24 \
             $OPCACHE_TLS_TESTS_DEPS
 
           ./buildconf -f
@@ -57,6 +58,7 @@ runs:
             --enable-debug \
             --enable-option-checking=fatal \
             --enable-fpm \
+            --with-apxs2 \
             --with-pdo-sqlite \
             --without-pear \
             --with-bz2 \
