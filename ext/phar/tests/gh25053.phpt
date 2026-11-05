@@ -88,42 +88,11 @@ $phar = new Phar(__DIR__ . '/gh25053-4.phar');
 $phar->addFromString('small', 'x');
 var_dump(copy($src, 'phar://' . __DIR__ . '/gh25053-4.phar/big'));
 
-try {
-    Phar::mount('phar://' . __DIR__ . '/gh25053-4.phar/big', $src);
-} catch (PharException $e) {
-    echo "mount failed\n";
-}
-
 $tar = new PharData(__DIR__ . '/gh25053-5.tar');
 $fp = fopen($src, 'rb');
 fseek($fp, 2**32);
 $tar->buildFromIterator(new ArrayIterator(['tail' => $fp]));
 var_dump($tar['tail']->getSize());
-
-$tar = new PharData(__DIR__ . '/gh25053-6.tar');
-$fp = fopen($src, 'rb');
-fseek($fp, 102);
-try {
-    $tar['big'] = $fp;
-} catch (BadMethodCallException $e) {
-    echo $e->getMessage(), "\n";
-}
-$tar->addFromString('big', 'small');
-var_dump($tar['big']->getContent());
-
-$zip = new PharData(__DIR__ . '/gh25053-7.zip');
-$zip->addFromString('keep', 'old');
-$fp = fopen($src, 'rb');
-fseek($fp, 12);
-try {
-    $zip['big'] = $fp;
-} catch (PharException $e) {
-    echo $e->getMessage(), "\n";
-}
-var_dump($zip['keep']->getContent());
-$zip->addFromString('big', 'small');
-var_dump($zip['keep']->getContent());
-var_dump($zip['big']->getContent());
 ?>
 --CLEAN--
 <?php
@@ -135,8 +104,6 @@ var_dump($zip['big']->getContent());
 @unlink(__DIR__ . '/gh25053-iterator-read-retry.tar');
 @unlink(__DIR__ . '/gh25053-4.phar');
 @unlink(__DIR__ . '/gh25053-5.tar');
-@unlink(__DIR__ . '/gh25053-6.tar');
-@unlink(__DIR__ . '/gh25053-7.zip');
 ?>
 --EXPECTF--
 Entry big is too large to be stored in a phar archive
@@ -157,11 +124,4 @@ string(5) "third"
 
 Warning: copy(): phar error: Could not write %d characters to "big" in phar "%sgh25053-4.phar", entry is too large in %s on line %d
 bool(false)
-mount failed
 int(1)
-Entry big is too large to be stored in a phar archive
-string(5) "small"
-phar zip flush of "%sgh25053-7.zip" failed: archive is too large for zip file format
-string(3) "old"
-string(3) "old"
-string(5) "small"

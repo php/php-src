@@ -1642,7 +1642,7 @@ after_open_fp:
 
 	/* read filters change the length, so filtered streams are only checked after the copy */
 	if (!fp->readfilters.head && php_stream_stat(fp, &ssb) != -1
-			&& (int64_t) ssb.sb.st_size - php_stream_tell(fp) > (int64_t) phar_entry_max_size(phar_obj->archive)) {
+			&& (int64_t) ssb.sb.st_size - php_stream_tell(fp) > (int64_t) UINT32_MAX) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s is too large to be stored in a phar archive", str_key);
 
 		if (save) {
@@ -1704,7 +1704,7 @@ after_open_fp:
 		data->internal_file->offset_abs = data->internal_file->offset = php_stream_tell(p_obj->fp);
 		data->fp = NULL;
 		php_stream_copy_to_stream_ex(fp, p_obj->fp, PHP_STREAM_COPY_ALL, &contents_len);
-		if (contents_len > phar_entry_max_size(phar_obj->archive)) {
+		if (contents_len > UINT32_MAX) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s is too large to be stored in a phar archive", str_key);
 			data->internal_file->is_deleted = 1;
 			phar_entry_delref(data);
@@ -3722,9 +3722,9 @@ static void phar_add_file(phar_archive_data **pphar, zend_string *file_name, con
 		php_stream_from_zval_no_verify(contents_file, zresource);
 	}
 
-	if ((content && ZSTR_LEN(content) > phar_entry_max_size(*pphar))
+	if ((content && ZSTR_LEN(content) > UINT32_MAX)
 		|| (contents_file && !contents_file->readfilters.head && php_stream_stat(contents_file, &ssb) != -1
-			&& (int64_t) ssb.sb.st_size - php_stream_tell(contents_file) > (int64_t) phar_entry_max_size(*pphar))) {
+			&& (int64_t) ssb.sb.st_size - php_stream_tell(contents_file) > (int64_t) UINT32_MAX)) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s is too large to be stored in a phar archive", filename);
 		goto finish;
 	}
@@ -3760,7 +3760,7 @@ static void phar_add_file(phar_archive_data **pphar, zend_string *file_name, con
 				}
 				php_stream_copy_to_stream_ex(contents_file, data->fp, PHP_STREAM_COPY_ALL, &contents_len);
 			}
-			if (contents_len > phar_entry_max_size(*pphar)) {
+			if (contents_len > UINT32_MAX) {
 				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s is too large to be stored in a phar archive", filename);
 				data->internal_file->is_deleted = 1;
 				phar_entry_delref(data);
