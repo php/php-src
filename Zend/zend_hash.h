@@ -166,7 +166,6 @@ typedef int (*apply_func_t)(zval *pDest);
 typedef int (*apply_func_arg_t)(zval *pDest, void *argument);
 typedef int (*apply_func_args_t)(zval *pDest, int num_args, va_list args, zend_hash_key *hash_key);
 
-ZEND_API void ZEND_FASTCALL zend_hash_graceful_destroy(HashTable *ht);
 ZEND_API void ZEND_FASTCALL zend_hash_graceful_reverse_destroy(HashTable *ht);
 ZEND_API void ZEND_FASTCALL zend_hash_apply(HashTable *ht, apply_func_t apply_func);
 ZEND_API void ZEND_FASTCALL zend_hash_apply_with_argument(HashTable *ht, apply_func_arg_t apply_func, void *);
