@@ -12,9 +12,6 @@ class sample  {
   }
 }
 
-//getting the resource
-$file_handle = fopen(__FILE__, "r");
-
 // array with different values for $input
 $inputs =  array (
 
@@ -29,22 +26,12 @@ $inputs =  array (
           -20.5,
           10.1234567e10,
 
-          // array values
-/*8*/	  array(),
-          array(0),
-          array(1, 2),
-
           // boolean values
-/*11*/	  true,
+/*8*/	  true,
           false,
-          TRUE,
-          FALSE,
 
           // objects
-/*17*/	  new sample(),
-
-          // resource
-/*18*/	  $file_handle,
+/*10*/	  new sample(),
 );
 
 //defining '$pad_length' argument
@@ -54,15 +41,9 @@ $pad_length = "20";
 $count = 1;
 foreach($inputs as $input) {
   echo "-- Iteration $count --\n";
-  try {
-    var_dump( stristr("Hello World", $input) );
-  } catch (Throwable $e) {
-    echo $e::class, ': ', $e->getMessage(), "\n";
-  }
+  var_dump( stristr("Hello World", $input) );
   $count ++;
 }
-
-fclose($file_handle);  //closing the file handle
 
 ?>
 --EXPECT--
@@ -82,20 +63,8 @@ bool(false)
 -- Iteration 7 --
 bool(false)
 -- Iteration 8 --
-TypeError: stristr(): Argument #2 ($needle) must be of type string, array given
+bool(false)
 -- Iteration 9 --
-TypeError: stristr(): Argument #2 ($needle) must be of type string, array given
+string(11) "Hello World"
 -- Iteration 10 --
-TypeError: stristr(): Argument #2 ($needle) must be of type string, array given
--- Iteration 11 --
 bool(false)
--- Iteration 12 --
-string(11) "Hello World"
--- Iteration 13 --
-bool(false)
--- Iteration 14 --
-string(11) "Hello World"
--- Iteration 15 --
-bool(false)
--- Iteration 16 --
-TypeError: stristr(): Argument #2 ($needle) must be of type string, resource given

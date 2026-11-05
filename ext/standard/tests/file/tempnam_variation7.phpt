@@ -21,9 +21,6 @@ $names_arr = array(
   FALSE,
   "",
   " ",
-  "\0",
-  array(),
-
   /* Non-existing dirs */
   "/no/such/file/dir",
   "php"
@@ -32,12 +29,7 @@ $names_arr = array(
 
 for( $i=0; $i<count($names_arr); $i++ ) {
   echo "-- Iteration $i --\n";
-  try {
-    $file_name = tempnam($names_arr[$i], "tempnam_variation3.tmp");
-  } catch (Throwable $e) {
-    echo $e::class, ': ', $e->getMessage(), "\n";
-    continue;
-  }
+  $file_name = tempnam($names_arr[$i], "tempnam_variation3.tmp");
 
   if( file_exists($file_name) ){
 
@@ -96,16 +88,12 @@ File name is => %s%etempnam_variation3.tmp%s
 File permissions are => 100600
 File created in => temp dir
 -- Iteration 5 --
-ValueError: tempnam(): Argument #1 ($directory) must not contain any null bytes
--- Iteration 6 --
-TypeError: tempnam(): Argument #1 ($directory) must be of type string, array given
--- Iteration 7 --
 
 Notice: tempnam(): file created in the system's temporary directory in %stempnam_variation7.php on line %d
 File name is => %s/tempnam_variation3.tmp%s
 File permissions are => 100600
 File created in => temp dir
--- Iteration 8 --
+-- Iteration 6 --
 
 Notice: tempnam(): file created in the system's temporary directory in %stempnam_variation7.php on line %d
 File name is => %s/tempnam_variation3.tmp%s

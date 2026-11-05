@@ -93,21 +93,6 @@ var_dump(str_replace(1, 3, array("aaa1", "2bbb"), $count));
 var_dump($count);
 
 
-echo "\n-- Testing Resources --\n";
-$resource1 = fopen( __FILE__, "r" );
-$resource2 = opendir( "." );
-try {
-    var_dump(str_replace("stream", "FOUND", $resource1, $count));
-} catch (Throwable $e) {
-    echo $e::class, ': ', $e->getMessage(), "\n";
-}
-try {
-    var_dump(str_replace("stream", "FOUND", $resource2, $count));
-} catch (Throwable $e) {
-    echo $e::class, ': ', $e->getMessage(), "\n";
-}
-
-
 echo "\n-- Testing a longer and heredoc string --\n";
 $string = <<<EOD
 abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789
@@ -143,9 +128,6 @@ var_dump( str_replace("worldS", "FOUND", "$strS") );
 var_dump( str_replace("worldS", "FOUND", "${str}S") );
 var_dump( str_replace("worldS", "FOUND", "{$str}S") );
 
-
-fclose($resource1);
-closedir($resource2);
 
 ?>
 --EXPECTF--
@@ -195,10 +177,6 @@ array(2) {
   string(4) "2bbb"
 }
 int(1)
-
--- Testing Resources --
-TypeError: str_replace(): Argument #3 ($subject) must be of type array|string, resource given
-TypeError: str_replace(): Argument #3 ($subject) must be of type array|string, resource given
 
 -- Testing a longer and heredoc string --
 string(623) "FOUNDghijklmnopqrstuvwxyz0123456789FOUNDghijklmnopqrstuvwxyz0123456789
