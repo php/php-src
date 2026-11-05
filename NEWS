@@ -262,6 +262,10 @@ PHP                                                                        NEWS
   . Fixed a duplicate warning when ATTR_STATEMENT_CLASS is rejected on a
     persistent connection. (Ilia Alshanetsky)
 
+- PDO_DBLIB:
+  . Fixed a crash on persistent connections after an error raised through
+    PDO::exec(). (Ilia Alshanetsky)
+
 - PDO_Firebird:
   . Fixed bug GH-25006 (getColumnMeta() reads out of bounds for an
     out-of-range column index). (Ilia Alshanetsky)
