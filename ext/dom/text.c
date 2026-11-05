@@ -115,7 +115,7 @@ PHP_METHOD(DOMText, splitText)
 	const xmlChar *cur = php_dom_get_content_or_empty(node);
 	length = xmlUTF8Strlen(cur);
 
-	if (ZEND_LONG_INT_OVFL(offset) || (int)offset > length) {
+	if (!ZEND_IN_RANGE_OF(offset, int) || (int)offset > length) {
 		if (php_dom_follow_spec_intern(intern)) {
 			php_dom_throw_error(INDEX_SIZE_ERR, /* strict */ true);
 		}
