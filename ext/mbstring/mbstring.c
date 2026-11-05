@@ -1546,7 +1546,7 @@ PHP_FUNCTION(mb_parse_str)
 	info.from_encodings         = MBSTRG(http_input_list);
 	info.num_from_encodings     = MBSTRG(http_input_list_size);
 
-	detected = _php_mb_encoding_handler_ex(&info, track_vars_array, encstr);
+	detected = _php_mb_encoding_handler_ex(&info, track_vars_array, encstr, encstr_len);
 
 	MBSTRG(http_input_identify) = detected;
 

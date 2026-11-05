@@ -33,6 +33,7 @@ ZEND_EXTERN_MODULE_GLOBALS(mbstring)
 MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 {
 	char *res = NULL, *separator=NULL;
+	size_t res_len = 0;
 	const char *c_var;
 	zval v_array;
 	int free_buffer=0;
@@ -74,6 +75,7 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 			c_var = SG(request_info).query_string;
 			if (c_var && *c_var) {
 				res = (char *) estrdup(c_var);
+				res_len = strlen(c_var);
 				free_buffer = 1;
 			}
 			break;
@@ -81,11 +83,13 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 			c_var = SG(request_info).cookie_data;
 			if (c_var && *c_var) {
 				res = (char *) estrdup(c_var);
+				res_len = strlen(c_var);
 				free_buffer = 1;
 			}
 			break;
 		case PARSE_STRING: /* String data */
 			res = str;
+			res_len = res ? strlen(res) : 0;
 			free_buffer = 1;
 			break;
 	}
@@ -129,7 +133,7 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 
 	MBSTRG(illegalchars) = 0;
 
-	detected = _php_mb_encoding_handler_ex(&info, &v_array, res);
+	detected = _php_mb_encoding_handler_ex(&info, &v_array, res, res_len);
 	MBSTRG(http_input_identify) = detected;
 
 	if (detected) {
@@ -160,26 +164,40 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 /* }}} */
 
 /* {{{ mbfl_no_encoding _php_mb_encoding_handler_ex() */
-const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_info_t *info, zval *array_ptr, char *res)
+static inline bool is_separator(char c, const char *separator)
+{
+	if (!separator) {
+		return false;
+	}
+	for (const char *s = separator; *s; s++) {
+		if (c == *s) {
+			return true;
+		}
+	}
+	return false;
+}
+
+const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_info_t *info, zval *array_ptr, char *res, size_t res_len)
 {
 	char *var, *val;
-	char *strtok_buf = NULL, **val_list = NULL;
+	char **val_list = NULL;
 	size_t n, num = 1, *len_list = NULL;
 	size_t new_val_len;
 	const mbfl_encoding *from_encoding = NULL;
 
-	if (!res || *res == '\0') {
+	if (!res || res_len == 0) {
 		goto out;
 	}
 
 	/* count variables contained in `res`.
 	 * separator may contain multiple separator chars; ANY of them demarcate variables */
-	for (char *s1 = res; *s1; s1++) {
-		for (const char *s2 = info->separator; *s2; s2++) {
-			if (*s1 == *s2) {
-				num++;
-			}
+	for (size_t i = 0; i < res_len; i++) {
+		if (is_separator(res[i], info->separator)) {
+			num++;
 		}
+	}
+	if (num > SIZE_MAX / 2) {
+		goto out;
 	}
 	num *= 2; /* need space for variable name and value */
 
@@ -195,27 +213,52 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 
 	/* split and decode the query */
 	n = 0;
-	var = php_strtok_r(res, info->separator, &strtok_buf);
-	while (var)  {
-		val = strchr(var, '=');
-		if (val) { /* have a value */
-			len_list[n] = php_url_decode(var, val-var);
-			val_list[n] = var;
+	char *p = res;
+	char *res_end = res + res_len;
+	while (p < res_end) {
+		while (p < res_end && is_separator(*p, info->separator)) {
+			p++;
+		}
+		if (p >= res_end) {
+			break;
+		}
+
+		char *pair_start = p;
+		char *eq = NULL;
+
+		while (p < res_end && !is_separator(*p, info->separator)) {
+			if (*p == '=' && !eq) {
+				eq = p;
+			}
+			p++;
+		}
+		char *pair_end = p;
+
+		if (eq) { /* have a value */
+			*eq = '\0';
+			val_list[n] = pair_start;
+			len_list[n] = php_url_decode(pair_start, eq - pair_start);
 			n++;
 
-			*val++ = '\0';
-			val_list[n] = val;
-			len_list[n] = php_url_decode(val, strlen(val));
+			char *val_start = eq + 1;
+			size_t val_len = pair_end - val_start;
+			val_list[n] = val_start;
+			len_list[n] = php_url_decode(val_start, val_len);
+			n++;
 		} else {
-			len_list[n] = php_url_decode(var, strlen(var));
-			val_list[n] = var;
+			val_list[n] = pair_start;
+			len_list[n] = php_url_decode(pair_start, pair_end - pair_start);
 			n++;
 
 			val_list[n] = "";
 			len_list[n] = 0;
+			n++;
 		}
-		n++;
-		var = php_strtok_r(NULL, info->separator, &strtok_buf);
+
+		if (pair_end < res_end) {
+			*pair_end = '\0';
+			p = pair_end + 1;
+		}
 	}
 
 	zend_long max_input_vars = REQUEST_PARSE_BODY_OPTION_GET(max_input_vars, PG(max_input_vars));
@@ -309,7 +352,7 @@ SAPI_POST_HANDLER_FUNC(php_mb_post_handler)
 
 	php_stream_rewind(SG(request_info).request_body);
 	post_data_str = php_stream_copy_to_mem(SG(request_info).request_body, PHP_STREAM_COPY_ALL, 0);
-	detected = _php_mb_encoding_handler_ex(&info, arg, post_data_str ? ZSTR_VAL(post_data_str) : NULL);
+	detected = _php_mb_encoding_handler_ex(&info, arg, post_data_str ? ZSTR_VAL(post_data_str) : NULL, post_data_str ? ZSTR_LEN(post_data_str) : 0);
 	if (post_data_str) {
 		zend_string_release_ex(post_data_str, 0);
 	}
