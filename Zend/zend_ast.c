@@ -1389,7 +1389,7 @@ static ZEND_COLD bool zend_ast_valid_var_char(char ch)
 {
 	unsigned char c = (unsigned char)ch;
 
-	if (c != '_' && c < 127 &&
+	if (c != '_' && c < 128 &&
 	    (c < '0' || c > '9') &&
 	    (c < 'A' || c > 'Z') &&
 	    (c < 'a' || c > 'z')) {
@@ -1407,14 +1407,14 @@ static ZEND_COLD bool zend_ast_valid_var_name(const char *s, size_t len)
 		return 0;
 	}
 	c = (unsigned char)s[0];
-	if (c != '_' && c < 127 &&
+	if (c != '_' && c < 128 &&
 	    (c < 'A' || c > 'Z') &&
 	    (c < 'a' || c > 'z')) {
 		return 0;
 	}
 	for (i = 1; i < len; i++) {
 		c = (unsigned char)s[i];
-		if (c != '_' && c < 127 &&
+		if (c != '_' && c < 128 &&
 		    (c < '0' || c > '9') &&
 		    (c < 'A' || c > 'Z') &&
 		    (c < 'a' || c > 'z')) {
@@ -1451,9 +1451,14 @@ static ZEND_COLD void zend_ast_export_var(smart_str *str, zend_ast *ast, int pri
 {
 	if (ast->kind == ZEND_AST_ZVAL) {
 		zval *zv = zend_ast_get_zval(ast);
-		if (Z_TYPE_P(zv) == IS_STRING &&
-		    zend_ast_valid_var_name(Z_STRVAL_P(zv), Z_STRLEN_P(zv))) {
-			smart_str_append(str, Z_STR_P(zv));
+		if (Z_TYPE_P(zv) == IS_STRING) {
+			if (zend_ast_valid_var_name(Z_STRVAL_P(zv), Z_STRLEN_P(zv))) {
+				smart_str_append(str, Z_STR_P(zv));
+			} else {
+				smart_str_appends(str, "{'");
+				zend_ast_export_str(str, Z_STR_P(zv));
+				smart_str_appends(str, "'}");
+			}
 			return;
 		}
 	} else if (ast->kind == ZEND_AST_VAR) {
