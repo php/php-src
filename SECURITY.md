@@ -39,6 +39,13 @@ are not limited to):
 - Memory exhaustion from a size the input declares, where `memory_limit`
   refuses the allocation and only the current request dies.
 
+- Bugs in third-party libraries, whether bundled (like lexbor/lexbor, libgd,
+  libmagic, PCRE2 or timelib) or linked from the system (like
+  libxml2, OpenSSL or libcurl). Please report them to the library's maintainers
+  directly. Issues in how PHP uses these libraries remain in scope. The bundled
+  libraries and their upstream locations are listed in
+  [CONTRIBUTING.md](CONTRIBUTING.md#php-source-code-directory-structure).
+
 When creating reports, please **skip** the theatrics. Drop the impact essay,
 send a short reproducer with the few lines that matter, and make each point
 once. This allows us to triage and respond to your report quickly.
