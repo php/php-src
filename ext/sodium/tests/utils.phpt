@@ -87,6 +87,62 @@ if (defined('SODIUM_BASE64_VARIANT_ORIGINAL')) {
         var_dump('base64("O") case passed');
     }
     var_dump(sodium_base642bin('YWJjZA', SODIUM_BASE64_VARIANT_ORIGINAL_NO_PADDING));
+
+    $expectedBinary = hex2bin('aeb6798fef4e5184ff3b5596af753487');
+    $base64Original = 'rrZ5j+9OUYT/O1WWr3U0hw==';
+    $base64OriginalNoPadding = 'rrZ5j+9OUYT/O1WWr3U0hw';
+    $base64UrlSafe = 'rrZ5j-9OUYT_O1WWr3U0hw==';
+    $base64UrlSafeNoPadding = 'rrZ5j-9OUYT_O1WWr3U0hw';
+
+    $base64 = sodium_bin2base64($expectedBinary, SODIUM_BASE64_VARIANT_ORIGINAL);
+    if ($base64 !== $base64Original) {
+        echo "Encode original: actual[$base64] != expected[$base64Original]\n";
+    }
+    $base64 = sodium_bin2base64($expectedBinary, SODIUM_BASE64_VARIANT_ORIGINAL_NO_PADDING);
+    if ($base64 !== $base64OriginalNoPadding) {
+        echo "Encode original, no padding: actual[$base64] != expected[$base64OriginalNoPadding]\n";
+    }
+    $base64 = sodium_bin2base64($expectedBinary, SODIUM_BASE64_VARIANT_URLSAFE);
+    if ($base64 !== $base64UrlSafe) {
+        echo "Encode URL safe: actual[$base64] != expected[$base64UrlSafe]\n";
+    }
+    $base64 = sodium_bin2base64($expectedBinary, SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING);
+    if ($base64 !== $base64UrlSafeNoPadding) {
+        echo "Encode URL safe, no padding: actual[$base64] != expected[$base64UrlSafeNoPadding]\n";
+    }
+
+    $binary = sodium_base642bin($base64Original, SODIUM_BASE64_VARIANT_ORIGINAL);
+    if ($binary !== $expectedBinary) {
+        echo "Decode original: actual[" . bin2hex($binary) . "] != expected[" . bin2hex($expectedBinary) . "]\n";
+    }
+    $binary = sodium_base642bin(" $base64Original\n", SODIUM_BASE64_VARIANT_ORIGINAL, " \n");
+    if ($binary !== $expectedBinary) {
+        echo "Decode original, ignore: actual[" . bin2hex($binary) . "] != expected[" . bin2hex($expectedBinary) . "]\n";
+    }
+    $binary = sodium_base642bin($base64OriginalNoPadding, SODIUM_BASE64_VARIANT_ORIGINAL_NO_PADDING);
+    if ($binary !== $expectedBinary) {
+        echo "Decode original, no padding: actual[" . bin2hex($binary) . "] != expected[" . bin2hex($expectedBinary) . "]\n";
+    }
+    $binary = sodium_base642bin(" $base64OriginalNoPadding\n", SODIUM_BASE64_VARIANT_ORIGINAL_NO_PADDING, " \n");
+    if ($binary !== $expectedBinary) {
+        echo "Decode original, no padding, ignore: actual[" . bin2hex($binary) . "] != expected[" . bin2hex($expectedBinary) . "]\n";
+    }
+    $binary = sodium_base642bin($base64UrlSafe, SODIUM_BASE64_VARIANT_URLSAFE);
+    if ($binary !== $expectedBinary) {
+        echo "Decode URL safe: actual[" . bin2hex($binary) . "] != expected[" . bin2hex($expectedBinary) . "]\n";
+    }
+    $binary = sodium_base642bin(" $base64UrlSafe\n", SODIUM_BASE64_VARIANT_URLSAFE, " \n");
+    if ($binary !== $expectedBinary) {
+        echo "Decode URL safe, ignore: actual[" . bin2hex($binary) . "] != expected[" . bin2hex($expectedBinary) . "]\n";
+    }
+    $binary = sodium_base642bin($base64UrlSafeNoPadding, SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING);
+    if ($binary !== $expectedBinary) {
+        echo "Decode URL safe, no padding: actual[" . bin2hex($binary) . "] != expected[" . bin2hex($expectedBinary) . "]\n";
+    }
+    $binary = sodium_base642bin(" $base64UrlSafeNoPadding\n", SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING, " \n");
+    if ($binary !== $expectedBinary) {
+        echo "Decode URL safe, no padding, ignore: actual[" . bin2hex($binary) . "] != expected[" . bin2hex($expectedBinary) . "]\n";
+    }
 } else {
     var_dump('base64("O1R") case passed');
     var_dump('base64("O1") case passed');
