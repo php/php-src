@@ -3294,6 +3294,10 @@ static zend_always_inline zend_result tracked_check_max_allocs(zend_mm_heap *hea
 static void *tracked_malloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	zend_mm_heap *heap = AG(mm_heap);
+
+	/* malloc(0) may return NULL, so allocate at least one byte. */
+	size = MAX(size, 1);
+
 	if (UNEXPECTED(tracked_check_limit(heap, size ZEND_FILE_LINE_CC) == FAILURE)) {
 		return NULL;
 	}
