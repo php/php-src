@@ -25,6 +25,7 @@
 #include "main/php_output.h"
 #include "SAPI.h"
 #include "php_ini.h"
+#include "zend_attributes.h"
 
 #include <stdlib.h>
 #include <errno.h>
