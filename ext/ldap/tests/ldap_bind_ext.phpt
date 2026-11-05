@@ -30,6 +30,20 @@ var_dump(
     $ctrls
 );
 
+// Same thing using Connection::bind
+var_dump(
+    $result = $link->bind($user, $passwd),
+    ldap_parse_result($link, $result, $errcode, $matcheddn, $errmsg, $referrals, $ctrls),
+    $errcode,
+    $errmsg,
+    $ctrls,
+    $result = $link->bind($user, $passwd, [['oid' => LDAP_CONTROL_PASSWORDPOLICYREQUEST]]),
+    ldap_parse_result($link, $result, $errcode, $matcheddn, $errmsg, $referrals, $ctrls),
+    $errcode,
+    $errmsg,
+    $ctrls
+);
+
 /* Failures */
 var_dump(
     $result = ldap_bind_ext($link, $user, "wrongPassword", [['oid' => LDAP_CONTROL_PASSWORDPOLICYREQUEST]]),
@@ -45,6 +59,20 @@ var_dump(
 );
 ?>
 --EXPECTF--
+object(LDAP\Result)#%d (0) {
+}
+bool(true)
+int(0)
+string(0) ""
+array(0) {
+}
+object(LDAP\Result)#%d (0) {
+}
+bool(true)
+int(0)
+string(0) ""
+array(0) {
+}
 object(LDAP\Result)#%d (0) {
 }
 bool(true)

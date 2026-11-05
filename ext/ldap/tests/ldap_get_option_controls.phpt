@@ -47,16 +47,18 @@ $controls_set2 = array(
 var_dump(
     bin2hex($controls_set[0]['value']),
     ldap_get_option($link, LDAP_OPT_SERVER_CONTROLS, $controls_get),
+    $link->getOption(LDAP_OPT_SERVER_CONTROLS),
     ldap_set_option($link, LDAP_OPT_SERVER_CONTROLS, $controls_set),
     ldap_get_option($link, LDAP_OPT_SERVER_CONTROLS, $controls_get),
     $controls_get,
+    $link->getOption(LDAP_OPT_SERVER_CONTROLS),
     ldap_set_option($link, LDAP_OPT_SERVER_CONTROLS, $controls_set2),
     ldap_get_option($link, LDAP_OPT_SERVER_CONTROLS, $controls_get),
     $controls_get,
     $result = ldap_search($link, $base, "(objectClass=person)", array('cn')),
     ldap_get_entries($link, $result)['count'],
     ldap_set_option($link, LDAP_OPT_SERVER_CONTROLS, array()),
-    ldap_get_option($link, LDAP_OPT_SERVER_CONTROLS, $controls_get)
+    ldap_get_option($link, LDAP_OPT_SERVER_CONTROLS, $controls_get),
 );
 ?>
 --CLEAN--
@@ -69,8 +71,26 @@ remove_dummy_data($link, $base);
 --EXPECTF--
 string(26) "300b02010104066f7061717565"
 bool(false)
+array(0) {
+}
 bool(true)
 bool(true)
+array(1) {
+  ["1.2.840.113556.1.4.319"]=>
+  array(3) {
+    ["oid"]=>
+    string(22) "1.2.840.113556.1.4.319"
+    ["iscritical"]=>
+    bool(true)
+    ["value"]=>
+    array(2) {
+      ["size"]=>
+      int(1)
+      ["cookie"]=>
+      string(6) "opaque"
+    }
+  }
+}
 array(1) {
   ["1.2.840.113556.1.4.319"]=>
   array(3) {

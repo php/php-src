@@ -15,7 +15,13 @@ $option = null;
 var_dump(ldap_set_option($link, LDAP_OPT_PROTOCOL_VERSION, $protocol_version));
 ldap_get_option($link, LDAP_OPT_PROTOCOL_VERSION, $option);
 var_dump($option);
+var_dump(
+    $link->setOption(LDAP_OPT_PROTOCOL_VERSION, 2),
+    $link->getOption(LDAP_OPT_PROTOCOL_VERSION),
+);
 ?>
 --EXPECT--
 bool(true)
 int(3)
+NULL
+int(2)
