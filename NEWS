@@ -25,6 +25,8 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bug GH-25172 (TLS session reuse shares request-lifetime callback
     structures with persistent streams). (cxxz16, David Carlier)
+  . Fixed an exception thrown by the session_get_cb stream context callback
+    being replaced with a TypeError. (Ilia Alshanetsky)
 
 05 Nov 2026, PHP 8.6.0RC5
 
