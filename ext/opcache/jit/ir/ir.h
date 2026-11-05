@@ -968,8 +968,9 @@ int ir_coalesce(ir_ctx *ctx);
 int ir_compute_dessa_moves(ir_ctx *ctx);
 int ir_reg_alloc(ir_ctx *ctx);
 int ir_reg_alloc_simple(ir_ctx *ctx);
+int ir_reg_alloc_fast(ir_ctx *ctx);
 
-#define ir_reg_alloc_O0(_ctx) ir_reg_alloc_simple(_ctx)
+#define ir_reg_alloc_O0(_ctx) ir_reg_alloc_fast(_ctx)
 
 int ir_regs_number(void);
 bool ir_reg_is_int(int32_t reg);

@@ -5,7 +5,7 @@ cd "$(dirname "$0")/../../.."
 tmp_dir=/tmp/php-src-download-bundled/jit-ir
 rm -rf "$tmp_dir"
 
-revision=30a40633b0b8f3e8e66da0a25941c4199d69d38a
+revision=43d1d1023a6ea811b11b39ed738f5e18696a1254
 
 git clone --depth 1 --revision="$revision" https://github.com/dstogov/ir.git "$tmp_dir"
 
@@ -32,6 +32,7 @@ rm ir_load.c
 rm ir_load_llvm.c
 rm ir_main.c
 rm ir_mem2ssa.c
+rm ir_ra_fast.c
 
 # add extra files
 git restore README

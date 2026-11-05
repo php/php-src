@@ -1,6 +1,6 @@
 /*
  * IR - Lightweight JIT Compilation Framework
- * Simple Local Register Allocation (used for -O0)
+ * Simple Local Register Allocation (not used anymore)
  * This file is part of the IR Project distributed under the MIT-style LICENSE.
  * Authors: Dmitry Stogov <dmitry@php.net>
  *
@@ -130,6 +130,15 @@ static ir_reg _get_free_reg2(ir_ctx *ctx, ir_type type, ir_reg_alloc_simple_data
 	}
 	return reg;
 }
+
+/* The following checks for the safety of VAR slot reuse are incomplete.
+ * Some of the unsupported edge cases are demonstrated at https://github.com/dstogov/ir/pull/232
+ * and https://github.com/dstogov/ir/pull/230 (there are may be other problems).
+ * Unfortunatly, the attempts to fix the problems break the simplicity of this allocator and make it ridiculous.
+ * The complete removing of VAR slot reuse makes the already bad generated code significanly worse.
+ *
+ * A better appoach is implemented in ir_ra_fast.c
+ */
 
 static bool ir_load_may_reuse_var_slot(ir_ctx *ctx, ir_block *bb, ir_ref var, ir_ref load)
 {
