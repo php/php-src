@@ -141,3 +141,5 @@ const FALSE = false;
  * @undocumentable
  */
 const NULL = null;
+
+const fallthrough = null;
