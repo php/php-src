@@ -45,5 +45,5 @@ int(4)
 int(2)
 int(0)
 ValueError: pg_lo_write(): Argument #3 ($length) must be greater than or equal to 0
-ValueError: pg_lo_write(): Argument #3 ($length) must be less than or equal to the length of argument #2 ($buf)
+ValueError: pg_lo_write(): Argument #3 ($length) must be less than or equal to the length of argument #2 ($data)
 string(6) "780079"
