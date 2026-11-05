@@ -5,6 +5,24 @@ declare(strict_types=1);
 
 namespace Phpsrc\Ci\DownloadBundled;
 
+// How to add a new bundled source?
+// 1. add a new entry for the source into $bundles variable below
+// 2. run this make-workflow-file.php generator
+// 3. edit the generated .github/scripts/download-bundled/<name>.sh file, see and be consistent with other files
+
+// How to run this make-workflow-file.php generator?
+// ```
+// docker run --rm -v "$(git rev-parse --show-toplevel)":/h php:latest /h/.github/scripts/download-bundled/make-workflow-file.php
+// ```
+
+// How to update/download specific bundled source?
+// 1. edit the bundled version inside relevant .github/scripts/download-bundled/<name>.sh file
+// 2. run:
+// ```
+// docker run --rm -v "$(git rev-parse --show-toplevel)":/f alpine:latest sh -c "apk add git && /f/.github/scripts/download-bundled/<name>.sh"
+// ```
+// 3. review git changes and commit the changes
+
 $bundles = [
     new Bundle('boost.context', ['Zend/asm']),
     new Bundle('XSSE', [], ['Zend/zend_simd.h']),
