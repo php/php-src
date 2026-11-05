@@ -1526,10 +1526,7 @@ static void zend_adjust_fcall_stack_size_graph(zend_op_array *op_array)
 	}
 }
 
-static bool needs_live_range(zend_op_array *op_array, zend_op *def_opline) {
-	zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
-	zend_ssa_op *ssa_op = &func_info->ssa.ops[def_opline - op_array->opcodes];
-	int ssa_var = ssa_op->result_def;
+static bool ssa_var_needs_live_range(const zend_func_info *func_info, int ssa_var) {
 	if (ssa_var < 0) {
 		/* Be conservative. */
 		return 1;
@@ -1544,6 +1541,21 @@ static bool needs_live_range(zend_op_array *op_array, zend_op *def_opline) {
 
 	uint32_t type = func_info->ssa.var_info[ssa_var].type;
 	return (type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) != 0;
+}
+
+static bool needs_live_range(zend_op_array *op_array, zend_op *def_opline) {
+	zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
+	zend_ssa_op *ssa_op = &func_info->ssa.ops[def_opline - op_array->opcodes];
+
+	/* OP2 of FE_FETCH (the value) is a def as well. The callback doesn't know which of the
+	 * two variables the live range is for, so require it if either one needs it. */
+	if ((def_opline->opcode == ZEND_FE_FETCH_R || def_opline->opcode == ZEND_FE_FETCH_RW)
+	 && (def_opline->op2_type & (IS_TMP_VAR|IS_VAR))
+	 && ssa_var_needs_live_range(func_info, ssa_op->op2_def)) {
+		return 1;
+	}
+
+	return ssa_var_needs_live_range(func_info, ssa_op->result_def);
 }
 
 static void zend_foreach_op_array_helper(
