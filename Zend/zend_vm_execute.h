@@ -24590,6 +24590,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
@@ -24747,6 +24752,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
@@ -24902,6 +24912,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
@@ -27298,6 +27313,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC));
@@ -27454,6 +27474,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC));
@@ -27608,6 +27633,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC));
@@ -31122,6 +31152,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
@@ -31279,6 +31314,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
@@ -31434,6 +31474,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
@@ -33700,6 +33745,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
@@ -33858,6 +33908,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
@@ -34014,6 +34069,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
@@ -35822,6 +35882,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC));
@@ -35979,6 +36044,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC));
@@ -36134,6 +36204,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC));
@@ -38418,6 +38493,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
@@ -38576,6 +38656,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
@@ -38732,6 +38817,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
@@ -42791,6 +42881,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
@@ -42949,6 +43044,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
@@ -43105,6 +43205,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
@@ -46614,6 +46719,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC));
@@ -46771,6 +46881,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC));
@@ -46926,6 +47041,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC));
@@ -51730,6 +51850,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
@@ -51888,6 +52013,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
@@ -52044,6 +52174,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
@@ -77267,6 +77402,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
@@ -77424,6 +77564,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
@@ -77579,6 +77724,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
@@ -79975,6 +80125,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC));
@@ -80131,6 +80286,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC));
@@ -80285,6 +80445,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC));
@@ -83799,6 +83964,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
@@ -83956,6 +84126,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
@@ -84111,6 +84286,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
@@ -86377,6 +86557,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
@@ -86535,6 +86720,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
@@ -86691,6 +86881,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
@@ -88499,6 +88694,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC));
@@ -88656,6 +88856,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC));
@@ -88811,6 +89016,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC));
@@ -91095,6 +91305,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
@@ -91253,6 +91468,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
@@ -91409,6 +91629,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
@@ -95468,6 +95693,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
@@ -95626,6 +95856,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
@@ -95782,6 +96017,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
@@ -99291,6 +99531,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC));
@@ -99448,6 +99693,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC));
@@ -99603,6 +99853,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC));
@@ -104305,6 +104560,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
@@ -104463,6 +104723,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
@@ -104619,6 +104884,11 @@ fast_assign_obj:
 						}
 						goto exit_assign_obj;
 					}
+				} else if (prop_info != NULL
+				 && EXPECTED((Z_PROP_FLAG_P(property_val) & (IS_PROP_UNINIT|IS_PROP_LAZY)) == IS_PROP_UNINIT)
+				 && EXPECTED(!zend_object_is_lazy(zobj))) {
+					value = zend_assign_to_uninit_typed_prop(zobj, prop_info, property_val, value EXECUTE_DATA_CC);
+					goto free_and_exit_assign_obj;
 				}
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
