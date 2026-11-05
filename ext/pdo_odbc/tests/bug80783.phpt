@@ -21,7 +21,7 @@ $stmt->bindColumn(1, $data, PDO::PARAM_LOB);
 $stmt->execute();
 $stmt->fetch(PDO::FETCH_BOUND);
 
-var_dump($data === bin2hex($string));
+var_dump($data === $string);
 ?>
 --CLEAN--
 <?php
