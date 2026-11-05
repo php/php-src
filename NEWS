@@ -24,6 +24,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-25268 (NULL php_libxml_ref_obj dereference in
     dom_objects_store_clone_obj when cloning Dom\Notation). (David Carlier)
 
+- Filter:
+  . Fixed stack overflow in filter_var() and filter_var_array() with deeply
+    nested arrays. (Eyüp Can Akman)
+
 - MBString:
   . Fixed stack overflow in mb_check_encoding() and mb_convert_encoding() with
     deeply nested arrays. (Eyüp Can Akman)
