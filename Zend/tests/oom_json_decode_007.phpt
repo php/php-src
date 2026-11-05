@@ -1,7 +1,7 @@
 --TEST--
 OOM json_decode() empty objects
 --INI--
-memory_limit=10M
+memory_limit=12M
 --FILE--
 <?php
 
@@ -11,4 +11,4 @@ var_dump(json_decode($json));
 
 ?>
 --EXPECTF--
-Fatal error: Allowed memory size of 10485760 bytes exhausted %S(tried to allocate %d bytes) in %s on line 5
+Fatal error: Allowed memory size of 12582912 bytes exhausted %S(tried to allocate %d bytes) in %s on line 5

@@ -1,7 +1,7 @@
 --TEST--
 Bug #70258 (Segfault if do_resize fails to allocated memory)
 --INI--
-memory_limit=2M
+memory_limit=4M
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY === 'Windows') {
@@ -28,4 +28,4 @@ $a = new A;
 $a->core();
 ?>
 --EXPECTF--
-Fatal error: Allowed memory size of 2097152 bytes exhausted%s(tried to allocate %d bytes) in %s on line %d
+Fatal error: Allowed memory size of 4194304 bytes exhausted%s(tried to allocate %d bytes) in %s on line %d

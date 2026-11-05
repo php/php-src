@@ -3,7 +3,7 @@ XMLReader::getAttribute() doesn't reach hard limit
 --EXTENSIONS--
 xmlreader
 --INI--
-memory_limit=2M
+memory_limit=4M
 --FILE--
 <?php
 $path = __DIR__ . '/' . basename(__FILE__, '.php') . '.tmp';
@@ -29,4 +29,4 @@ echo "not reached\n";
 @unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tmp');
 ?>
 --EXPECTF--
-Fatal error: Allowed memory size of 2097152 bytes exhausted %S(tried to allocate %d bytes) in %s on line %d
+Fatal error: Allowed memory size of 4194304 bytes exhausted %S(tried to allocate %d bytes) in %s on line %d

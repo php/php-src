@@ -148,7 +148,11 @@ static size_t _real_page_size = ZEND_MM_PAGE_SIZE;
 # define ZEND_MM_ERROR 1   /* report system errors                           */
 #endif
 #ifndef ZEND_MM_HEAP_PROTECTION
-# define ZEND_MM_HEAP_PROTECTION 1 /* protect heap against corruptions       */
+/* Protect heap against:
+ * - Freelist pointer corruption
+ * - Heap spraying and heap feng shui via environment / user input
+ */
+# define ZEND_MM_HEAP_PROTECTION 1
 #endif
 
 #if ZEND_MM_HEAP_PROTECTION
@@ -223,6 +227,50 @@ typedef zend_mm_bitset zend_mm_page_map[ZEND_MM_PAGE_MAP_LEN];     /* 64B */
 #   define ZEND_MM_LIMIT_MAX           ((size_t)Z_L(-1) >> 1)
 #endif
 
+#define ZEND_MM_ZONE_LEN        32 /* ZEND_MM_BINS rounded to next power of two */
+#define ZEND_MM_FREE_SLOT_LEN   (ZEND_MM_ZONE_LEN * ZEND_MM_ZONES)
+#define ZEND_MM_ZONE_DEFAULT    0
+
+#if ZEND_MM_HEAP_PROTECTION
+
+/* How may zones to use. Each zone has a separate freelist and chunks, so that
+ * allocation from a zone does not affect the layout of other zones. */
+# define ZEND_MM_ZONES 2
+
+# define ZEND_MM_ZONE_FOREACH(_heap, _zone) do {                        \
+		zend_mm_heap *__heap = (_heap);                                 \
+		zend_mm_zone *__zone = &__heap->zones[0];                       \
+		zend_mm_zone *__end = &__heap->zones[ZEND_MM_ZONES];            \
+		for (; __zone != __end; __zone++) {                             \
+			_zone = __zone;
+
+# define ZEND_MM_ZONE_FOREACH_END()                                     \
+		}                                                               \
+	} while (0)
+
+# define ZEND_MM_ZONE_FREE_SLOT(heap, num)          (&(heap)->free_slot[ZEND_MM_ZONE_LEN * num])
+# define ZEND_MM_CURRENT_ZONE(heap)                 (&(heap)->zones[(uintptr_t)(&(heap)->zone_free_slot[0] - &(heap)->free_slot[0]) / ZEND_MM_ZONE_LEN])
+# define ZEND_MM_FREE_SLOT(heap, bin_num)           ((heap)->zone_free_slot[(bin_num)])
+# define ZEND_MM_FREE_SLOT_EX(heap, chunk, bin_num) ((chunk)->zone_free_slot[(bin_num)])
+# define ZEND_MM_CHUNK_ZONE(heap, chunk)            ((chunk)->zone)
+
+#else /* ZEND_MM_HEAP_PROTECTION */
+
+# define ZEND_MM_ZONES 1
+
+# define ZEND_MM_ZONE_FOREACH(_heap, _zone) do {                        \
+		_zone = &_heap->zones[0];                                       \
+
+# define ZEND_MM_ZONE_FOREACH_END()                                     \
+	} while (0)
+
+# define ZEND_MM_CURRENT_ZONE(heap)                 (&(heap)->zones[0])
+# define ZEND_MM_FREE_SLOT(heap, bin_num)           ((heap)->free_slot[(bin_num)])
+# define ZEND_MM_FREE_SLOT_EX(heap, chunk, bin_num) ZEND_MM_FREE_SLOT(heap, bin_num)
+# define ZEND_MM_CHUNK_ZONE(heap, chunk)            (&(heap)->zones[0])
+
+#endif /* ZEND_MM_HEAP_PROTECTION */
+
 #if UINTPTR_MAX == UINT64_MAX
 #  define BSWAPPTR(u) ZEND_BYTES_SWAP64(u)
 #else
@@ -233,10 +281,15 @@ typedef struct  _zend_mm_page      zend_mm_page;
 typedef struct  _zend_mm_bin       zend_mm_bin;
 typedef struct  _zend_mm_free_slot zend_mm_free_slot;
 typedef struct  _zend_mm_chunk     zend_mm_chunk;
+typedef struct  _zend_mm_zone      zend_mm_zone;
 typedef struct  _zend_mm_huge_list zend_mm_huge_list;
 
 static bool zend_mm_use_huge_pages = false;
 static bool zend_mm_max_allocs_reached = false;
+
+struct _zend_mm_zone {
+	zend_mm_chunk *chunks;
+};
 
 /*
  * Memory is retrieved from OS by chunks of fixed size 2MB.
@@ -282,7 +335,10 @@ struct _zend_mm_heap {
 	size_t             peak;                    /* peak memory usage */
 #endif
 	uintptr_t          shadow_key;              /* free slot shadow ptr xor key */
-	zend_mm_free_slot *free_slot[ZEND_MM_BINS]; /* free lists for small sizes */
+#if ZEND_MM_HEAP_PROTECTION
+	zend_mm_free_slot **zone_free_slot;
+#endif
+	zend_mm_free_slot *free_slot[ZEND_MM_FREE_SLOT_LEN]; /* free lists for small sizes */
 #if ZEND_MM_STAT || ZEND_MM_LIMIT
 	size_t             real_size;               /* current size of allocated pages */
 #endif
@@ -307,6 +363,7 @@ struct _zend_mm_heap {
 	double             avg_chunks_count;		/* average number of chunks allocated per request */
 	int                last_chunks_delete_boundary; /* number of chunks after last deletion */
 	int                last_chunks_delete_count;    /* number of deletion over the last boundary */
+	zend_mm_zone       zones[ZEND_MM_ZONES];
 #if ZEND_MM_CUSTOM
 	struct {
 		void      *(*_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
@@ -336,17 +393,24 @@ struct _zend_mm_heap {
 
 struct _zend_mm_chunk {
 	zend_mm_heap      *heap;
+#if ZEND_MM_HEAP_PROTECTION
+	zend_mm_free_slot **zone_free_slot;
+#endif
 	zend_mm_chunk     *next;
 	zend_mm_chunk     *prev;
 	zend_mm_chunk     *next_shadow;             /* shadow of "next" while the chunk is cached */
 	uint32_t           free_pages;				/* number of free pages */
 	uint32_t           free_tail;               /* number of free pages at the end of chunk */
 	uint32_t           num;
-	char               reserve[64 - (sizeof(void*) * 4 + sizeof(uint32_t) * 3)];
-	zend_mm_heap       heap_slot;               /* used only in main chunk */
+	alignas(64) zend_mm_heap heap_slot;         /* used only in main chunk */
+#if ZEND_MM_HEAP_PROTECTION
+	zend_mm_zone      *zone;
+#endif
 	zend_mm_page_map   free_map;                /* 512 bits or 64 bytes */
 	zend_mm_page_info  map[ZEND_MM_PAGES];      /* 2 KB = 512 * 4 */
 };
+
+static_assert(sizeof(zend_mm_chunk) <= ZEND_MM_FIRST_PAGE * ZEND_MM_PAGE_SIZE, "");
 
 struct _zend_mm_page {
 	char               bytes[ZEND_MM_PAGE_SIZE];
@@ -1012,13 +1076,23 @@ static int zend_mm_chunk_extend(zend_mm_heap *heap, void *addr, size_t old_size,
 #endif
 }
 
-static zend_always_inline void zend_mm_chunk_init(zend_mm_heap *heap, zend_mm_chunk *chunk)
+static zend_always_inline void zend_mm_chunk_init(zend_mm_heap *heap, zend_mm_zone *zone, zend_mm_chunk *chunk)
 {
 	chunk->heap = heap;
-	chunk->next = heap->main_chunk;
-	chunk->prev = heap->main_chunk->prev;
-	chunk->prev->next = chunk;
-	chunk->next->prev = chunk;
+	if (UNEXPECTED(zone->chunks == NULL)) {
+		zone->chunks = chunk;
+		chunk->next = chunk;
+		chunk->prev = chunk;
+	} else {
+		chunk->next = zone->chunks;
+		chunk->prev = zone->chunks->prev;
+		chunk->prev->next = chunk;
+		chunk->next->prev = chunk;
+	}
+#if ZEND_MM_HEAP_PROTECTION
+	chunk->zone_free_slot = ZEND_MM_ZONE_FREE_SLOT(heap, (uintptr_t)(zone - &heap->zones[0]));
+	chunk->zone = zone;
+#endif
 	/* mark first pages as allocated */
 	chunk->free_pages = ZEND_MM_PAGES - ZEND_MM_FIRST_PAGE;
 	chunk->free_tail = ZEND_MM_FIRST_PAGE;
@@ -1111,9 +1185,14 @@ static void *zend_mm_alloc_pages(zend_mm_heap *heap, uint32_t pages_count, size_
 static void *zend_mm_alloc_pages(zend_mm_heap *heap, uint32_t pages_count ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 #endif
 {
-	zend_mm_chunk *chunk = heap->main_chunk;
+	zend_mm_zone *zone = ZEND_MM_CURRENT_ZONE(heap);
+	zend_mm_chunk *chunk = zone->chunks;
 	uint32_t page_num, len;
 	int steps = 0;
+
+	if (UNEXPECTED(!chunk)) {
+		goto get_chunk;
+	}
 
 	while (1) {
 		if (UNEXPECTED(chunk->free_pages < pages_count)) {
@@ -1230,7 +1309,7 @@ static void *zend_mm_alloc_pages(zend_mm_heap *heap, uint32_t pages_count ZEND_F
 		}
 
 not_found:
-		if (chunk->next == heap->main_chunk) {
+		if (chunk->next == zone->chunks) {
 get_chunk:
 			if (heap->cached_chunks) {
 				heap->cached_chunks_count--;
@@ -1273,7 +1352,7 @@ get_chunk:
 			if (heap->chunks_count > heap->peak_chunks_count) {
 				heap->peak_chunks_count = heap->chunks_count;
 			}
-			zend_mm_chunk_init(heap, chunk);
+			zend_mm_chunk_init(heap, zone, chunk);
 			page_num = ZEND_MM_FIRST_PAGE;
 			len = ZEND_MM_PAGES - ZEND_MM_FIRST_PAGE;
 			goto found;
@@ -1291,8 +1370,8 @@ found:
 		/* move chunk into the head of the linked-list */
 		chunk->prev->next = chunk->next;
 		chunk->next->prev = chunk->prev;
-		chunk->next = heap->main_chunk->next;
-		chunk->prev = heap->main_chunk;
+		chunk->next = zone->chunks->next;
+		chunk->prev = zone->chunks;
 		chunk->prev->next = chunk;
 		chunk->next->prev = chunk;
 	}
@@ -1338,8 +1417,13 @@ static zend_always_inline void zend_mm_delete_chunk(zend_mm_heap *heap, zend_mm_
 	ZEND_MM_CHECK(chunk->next->prev == chunk, "zend_mm_heap corrupted");
 	ZEND_MM_CHECK(chunk->prev->next == chunk, "zend_mm_heap corrupted");
 
-	chunk->next->prev = chunk->prev;
-	chunk->prev->next = chunk->next;
+	if (ZEND_MM_CHUNK_ZONE(heap, chunk)->chunks == chunk && chunk->next == chunk) {
+		ZEND_ASSERT(chunk->prev == chunk);
+		ZEND_MM_CHUNK_ZONE(heap, chunk)->chunks = NULL;
+	} else {
+		chunk->next->prev = chunk->prev;
+		chunk->prev->next = chunk->next;
+	}
 	heap->chunks_count--;
 	if (heap->chunks_count + heap->cached_chunks_count < heap->avg_chunks_count + 0.1
 	 || (heap->chunks_count == heap->last_chunks_delete_boundary
@@ -1576,7 +1660,7 @@ static zend_never_inline void *zend_mm_alloc_small_slow(zend_mm_heap *heap, uint
 
 	/* create a linked list of elements from 1 to last */
 	end = (zend_mm_free_slot*)((char*)bin + (bin_data_size[bin_num] * (bin_elements[bin_num] - 1)));
-	heap->free_slot[bin_num] = p = (zend_mm_free_slot*)((char*)bin + bin_data_size[bin_num]);
+	ZEND_MM_FREE_SLOT(heap, bin_num) = p = (zend_mm_free_slot*)((char*)bin + bin_data_size[bin_num]);
 	do {
 		zend_mm_set_next_free_slot(heap, bin_num, p, (zend_mm_free_slot*)((char*)p + bin_data_size[bin_num]));
 #if ZEND_DEBUG
@@ -1603,6 +1687,7 @@ static zend_never_inline void *zend_mm_alloc_small_slow(zend_mm_heap *heap, uint
 
 static zend_always_inline void *zend_mm_alloc_small(zend_mm_heap *heap, uint32_t bin_num ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
+	ZEND_ASSERT(bin_num <= ZEND_MM_BINS);
 	ZEND_ASSERT(bin_data_size[bin_num] >= ZEND_MM_MIN_USEABLE_BIN_SIZE);
 
 #if ZEND_MM_STAT
@@ -1614,17 +1699,18 @@ static zend_always_inline void *zend_mm_alloc_small(zend_mm_heap *heap, uint32_t
 	} while (0);
 #endif
 
-	if (EXPECTED(heap->free_slot[bin_num] != NULL)) {
-		zend_mm_free_slot *p = heap->free_slot[bin_num];
-		heap->free_slot[bin_num] = zend_mm_get_next_free_slot(heap, bin_num, p);
+	if (EXPECTED(ZEND_MM_FREE_SLOT(heap, bin_num) != NULL)) {
+		zend_mm_free_slot *p = ZEND_MM_FREE_SLOT(heap, bin_num);
+		ZEND_MM_FREE_SLOT(heap, bin_num) = zend_mm_get_next_free_slot(heap, bin_num, p);
 		return p;
 	} else {
 		return zend_mm_alloc_small_slow(heap, bin_num ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	}
 }
 
-static zend_always_inline void zend_mm_free_small(zend_mm_heap *heap, void *ptr, uint32_t bin_num)
+static zend_always_inline void zend_mm_free_small(zend_mm_heap *heap, zend_mm_chunk *chunk, void *ptr, uint32_t bin_num)
 {
+	ZEND_ASSERT(bin_num <= ZEND_MM_BINS);
 	ZEND_ASSERT(bin_data_size[bin_num] >= ZEND_MM_MIN_USEABLE_BIN_SIZE);
 
 	zend_mm_free_slot *p;
@@ -1647,8 +1733,8 @@ static zend_always_inline void zend_mm_free_small(zend_mm_heap *heap, void *ptr,
 		zend_mm_panic("zend_mm_heap corrupted (double free)");
 	}
 #endif
-	zend_mm_set_next_free_slot(heap, bin_num, p, heap->free_slot[bin_num]);
-	heap->free_slot[bin_num] = p;
+	zend_mm_set_next_free_slot(heap, bin_num, p, ZEND_MM_FREE_SLOT_EX(heap, chunk, bin_num));
+	ZEND_MM_FREE_SLOT_EX(heap, chunk, bin_num) = p;
 }
 
 /********/
@@ -1748,7 +1834,7 @@ static zend_always_inline void zend_mm_free_heap(zend_mm_heap *heap, void *ptr Z
 
 		ZEND_MM_CHECK(chunk->heap == heap, "zend_mm_heap corrupted");
 		if (EXPECTED(info & ZEND_MM_IS_SRUN)) {
-			zend_mm_free_small(heap, ptr, ZEND_MM_SRUN_BIN_NUM(info));
+			zend_mm_free_small(heap, chunk, ptr, ZEND_MM_SRUN_BIN_NUM(info));
 		} else {
 			/* A freed large run has a zeroed map entry, so this also rejects double frees. */
 			ZEND_MM_CHECK(info & ZEND_MM_IS_LRUN, "zend_mm_heap corrupted");
@@ -1941,7 +2027,7 @@ static zend_always_inline void *zend_mm_realloc_heap(zend_mm_heap *heap, void *p
 						}
 						copy_size = use_copy_size ? MIN(size, copy_size) : size;
 						memcpy(ret, ptr, copy_size);
-						zend_mm_free_small(heap, ptr, old_bin_num);
+						zend_mm_free_small(heap, chunk, ptr, old_bin_num);
 					} else {
 						/* reallocation in-place */
 						ret = ptr;
@@ -1959,7 +2045,7 @@ static zend_always_inline void *zend_mm_realloc_heap(zend_mm_heap *heap, void *p
 						}
 						copy_size = use_copy_size ? MIN(old_size, copy_size) : old_size;
 						memcpy(ret, ptr, copy_size);
-						zend_mm_free_small(heap, ptr, old_bin_num);
+						zend_mm_free_small(heap, chunk, ptr, old_bin_num);
 #if ZEND_MM_STAT
 						heap->peak = MAX(orig_peak, heap->size);
 					} while (0);
@@ -2266,26 +2352,30 @@ static void zend_mm_init_key(zend_mm_heap *heap)
 
 ZEND_API void zend_mm_refresh_key_child(zend_mm_heap *heap)
 {
+#if ZEND_MM_HEAP_PROTECTION
 	uintptr_t old_key = heap->shadow_key;
 
 	zend_mm_init_key(heap);
 
 	/* Update shadow pointers with new key */
-	for (uint32_t i = 0; i < ZEND_MM_BINS; i++) {
-		zend_mm_free_slot *slot = heap->free_slot[i];
-		if (!slot) {
-			continue;
-		}
-		zend_mm_free_slot *next;
-		while ((next = slot->next_free_slot)) {
-			zend_mm_free_slot **shadow_addr = ZEND_MM_FREE_SLOT_PTR_SHADOW_ADDR(slot, i);
-			if (UNEXPECTED(next != zend_mm_decode_free_slot_key(old_key, shadow_addr, *shadow_addr))) {
-				zend_mm_panic("zend_mm_heap corrupted");
+	for (uint32_t i = 0; i < ZEND_MM_ZONES; i++) {
+		for (uint32_t j = 0; j < ZEND_MM_BINS; j++) {
+			zend_mm_free_slot *slot = ZEND_MM_ZONE_FREE_SLOT(heap, i)[j];
+			if (!slot) {
+				continue;
 			}
-			zend_mm_set_next_free_slot(heap, i, slot, next);
-			slot = next;
+			zend_mm_free_slot *next;
+			while ((next = slot->next_free_slot)) {
+				zend_mm_free_slot **shadow_addr = ZEND_MM_FREE_SLOT_PTR_SHADOW_ADDR(slot, j);
+				if (UNEXPECTED(next != zend_mm_decode_free_slot_key(old_key, shadow_addr, *shadow_addr))) {
+					zend_mm_panic("zend_mm_heap corrupted");
+				}
+				zend_mm_set_next_free_slot(heap, j, slot, next);
+				slot = next;
+			}
 		}
 	}
+#endif
 
 	zend_mm_rekey_cached_chunks(heap, old_key);
 
@@ -2307,6 +2397,10 @@ static zend_mm_heap *zend_mm_init(void)
 	}
 	heap = &chunk->heap_slot;
 	chunk->heap = heap;
+#if ZEND_MM_HEAP_PROTECTION
+	chunk->zone_free_slot = ZEND_MM_ZONE_FREE_SLOT(heap, ZEND_MM_ZONE_DEFAULT);
+	chunk->zone = &heap->zones[0];
+#endif
 	chunk->next = chunk;
 	chunk->prev = chunk;
 	chunk->free_pages = ZEND_MM_PAGES - ZEND_MM_FIRST_PAGE;
@@ -2316,6 +2410,13 @@ static zend_mm_heap *zend_mm_init(void)
 	chunk->map[0] = ZEND_MM_LRUN(ZEND_MM_FIRST_PAGE);
 	heap->main_chunk = chunk;
 	heap->cached_chunks = NULL;
+#if ZEND_MM_HEAP_PROTECTION
+	heap->zone_free_slot = ZEND_MM_ZONE_FREE_SLOT(heap, ZEND_MM_ZONE_DEFAULT);
+#endif
+	heap->zones[0].chunks = chunk;
+#if ZEND_MM_HEAP_PROTECTION
+	heap->zones[1].chunks = NULL;
+#endif
 	heap->chunks_count = 1;
 	heap->peak_chunks_count = 1;
 	heap->cached_chunks_count = 0;
@@ -2358,9 +2459,10 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap)
 	size_t page_offset;
 	int page_num;
 	zend_mm_page_info info;
-	uint32_t i, free_counter;
+	uint32_t i, free_counter, bin_num;
 	bool has_free_pages;
 	size_t collected = 0;
+	zend_mm_zone *zone;
 
 #if ZEND_MM_CUSTOM
 	if (heap->use_custom_heap) {
@@ -2372,9 +2474,10 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap)
 	}
 #endif
 
-	for (i = 0; i < ZEND_MM_BINS; i++) {
+	for (i = 0; i < ZEND_MM_FREE_SLOT_LEN; i++) {
 		has_free_pages = false;
 		p = heap->free_slot[i];
+		bin_num = i % ZEND_MM_ZONE_LEN;
 		while (p != NULL) {
 			chunk = (zend_mm_chunk*)ZEND_MM_ALIGNED_BASE(p, ZEND_MM_CHUNK_SIZE);
 			ZEND_MM_CHECK(chunk->heap == heap, "zend_mm_heap corrupted");
@@ -2389,17 +2492,17 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap)
 				ZEND_ASSERT(info & ZEND_MM_IS_SRUN);
 				ZEND_ASSERT(!(info & ZEND_MM_IS_LRUN));
 			}
-			ZEND_ASSERT(ZEND_MM_SRUN_BIN_NUM(info) == i);
+			ZEND_ASSERT(ZEND_MM_SRUN_BIN_NUM(info) == bin_num);
 			free_counter = ZEND_MM_SRUN_FREE_COUNTER(info) + 1;
 			/* A slot can only be on the free list once, so exceeding the number
 			 * of slots in the page means the list is corrupted, most likely a
 			 * cycle, which would loop here forever. */
-			ZEND_MM_CHECK(free_counter <= bin_elements[i], "zend_mm_heap corrupted");
-			if (free_counter == bin_elements[i]) {
+			ZEND_MM_CHECK(free_counter <= bin_elements[bin_num], "zend_mm_heap corrupted");
+			if (free_counter == bin_elements[bin_num]) {
 				has_free_pages = true;
 			}
-			chunk->map[page_num] = ZEND_MM_SRUN_EX(i, free_counter);
-			p = zend_mm_get_next_free_slot(heap, i, p);
+			chunk->map[page_num] = ZEND_MM_SRUN_EX(bin_num, free_counter);
+			p = zend_mm_get_next_free_slot(heap, bin_num, p);
 		}
 
 		if (!has_free_pages) {
@@ -2422,61 +2525,66 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap)
 				ZEND_ASSERT(info & ZEND_MM_IS_SRUN);
 				ZEND_ASSERT(!(info & ZEND_MM_IS_LRUN));
 			}
-			ZEND_ASSERT(ZEND_MM_SRUN_BIN_NUM(info) == i);
-			if (ZEND_MM_SRUN_FREE_COUNTER(info) == bin_elements[i]) {
+			ZEND_ASSERT(ZEND_MM_SRUN_BIN_NUM(info) == bin_num);
+			if (ZEND_MM_SRUN_FREE_COUNTER(info) == bin_elements[bin_num]) {
 				/* remove from cache */
-				p = zend_mm_get_next_free_slot(heap, i, p);
+				p = zend_mm_get_next_free_slot(heap, bin_num, p);
 				if (q == (zend_mm_free_slot*)&heap->free_slot[i]) {
 					q->next_free_slot = p;
 				} else {
-					zend_mm_set_next_free_slot(heap, i, q, p);
+					zend_mm_set_next_free_slot(heap, bin_num, q, p);
 				}
 			} else {
 				q = p;
 				if (q == (zend_mm_free_slot*)&heap->free_slot[i]) {
 					p = q->next_free_slot;
 				} else {
-					p = zend_mm_get_next_free_slot(heap, i, q);
+					p = zend_mm_get_next_free_slot(heap, bin_num, q);
 				}
 			}
 		}
 	}
 
-	chunk = heap->main_chunk;
-	do {
-		i = ZEND_MM_FIRST_PAGE;
-		while (i < chunk->free_tail) {
-			if (zend_mm_bitset_is_set(chunk->free_map, i)) {
-				info = chunk->map[i];
-				if (info & ZEND_MM_IS_SRUN) {
-					uint32_t bin_num = ZEND_MM_SRUN_BIN_NUM(info);
-					int pages_count = bin_pages[bin_num];
+	ZEND_MM_ZONE_FOREACH(heap, zone) {
+		chunk = zone->chunks;
+		if (chunk == NULL) {
+			continue;
+		}
+		do {
+			i = ZEND_MM_FIRST_PAGE;
+			while (i < chunk->free_tail) {
+				if (zend_mm_bitset_is_set(chunk->free_map, i)) {
+					info = chunk->map[i];
+					if (info & ZEND_MM_IS_SRUN) {
+						bin_num = ZEND_MM_SRUN_BIN_NUM(info);
+						int pages_count = bin_pages[bin_num];
 
-					if (ZEND_MM_SRUN_FREE_COUNTER(info) == bin_elements[bin_num]) {
-						/* all elements are free */
-						zend_mm_free_pages_ex(heap, chunk, i, pages_count, 0);
-						collected += pages_count;
-					} else {
-						/* reset counter */
-						chunk->map[i] = ZEND_MM_SRUN(bin_num);
+						if (ZEND_MM_SRUN_FREE_COUNTER(info) == bin_elements[bin_num]) {
+							/* all elements are free */
+							zend_mm_free_pages_ex(heap, chunk, i, pages_count, 0);
+							collected += pages_count;
+						} else {
+							/* reset counter */
+							chunk->map[i] = ZEND_MM_SRUN(bin_num);
+						}
+						i += bin_pages[bin_num];
+					} else /* if (info & ZEND_MM_IS_LRUN) */ {
+						i += ZEND_MM_LRUN_PAGES(info);
 					}
-					i += bin_pages[bin_num];
-				} else /* if (info & ZEND_MM_IS_LRUN) */ {
-					i += ZEND_MM_LRUN_PAGES(info);
+				} else {
+					i++;
 				}
-			} else {
-				i++;
 			}
-		}
-		if (chunk->free_pages == ZEND_MM_PAGES - ZEND_MM_FIRST_PAGE && chunk != heap->main_chunk) {
-			zend_mm_chunk *next_chunk = chunk->next;
+			if (chunk->free_pages == ZEND_MM_PAGES - ZEND_MM_FIRST_PAGE && chunk != heap->main_chunk) {
+				zend_mm_chunk *next_chunk = chunk->next;
 
-			zend_mm_delete_chunk(heap, chunk);
-			chunk = next_chunk;
-		} else {
-			chunk = chunk->next;
-		}
-	} while (chunk != heap->main_chunk);
+				zend_mm_delete_chunk(heap, chunk);
+				chunk = next_chunk;
+			} else {
+				chunk = chunk->next;
+			}
+		} while (zone->chunks && chunk != zone->chunks);
+	} ZEND_MM_ZONE_FOREACH_END();
 
 	return collected * ZEND_MM_PAGE_SIZE;
 }
@@ -2513,7 +2621,7 @@ static zend_long zend_mm_find_leaks_small(zend_mm_chunk *p, uint32_t i, uint32_t
 	return count;
 }
 
-static zend_long zend_mm_find_leaks(zend_mm_heap *heap, zend_mm_chunk *p, uint32_t i, zend_leak_info *leak)
+static zend_long zend_mm_find_leaks(zend_mm_zone *zone, zend_mm_chunk *p, uint32_t i, zend_leak_info *leak)
 {
 	zend_long count = 0;
 
@@ -2540,7 +2648,7 @@ static zend_long zend_mm_find_leaks(zend_mm_heap *heap, zend_mm_chunk *p, uint32
 		}
 		p = p->next;
 		i = ZEND_MM_FIRST_PAGE;
-	} while (p != heap->main_chunk);
+	} while (p != zone->chunks);
 	return count;
 }
 
@@ -2576,6 +2684,7 @@ static void zend_mm_check_leaks(zend_mm_heap *heap)
 	zend_long repeated = 0;
 	uint32_t total = 0;
 	uint32_t i, j;
+	zend_mm_zone *zone;
 
 	/* find leaked huge blocks and free them */
 	list = heap->huge_list;
@@ -2605,73 +2714,78 @@ static void zend_mm_check_leaks(zend_mm_heap *heap)
 		zend_mm_free_heap(heap, q, NULL, 0, NULL, 0);
 	}
 
-	/* for each chunk */
-	p = heap->main_chunk;
-	do {
-		i = ZEND_MM_FIRST_PAGE;
-		while (i < p->free_tail) {
-			if (zend_mm_bitset_is_set(p->free_map, i)) {
-				if (p->map[i] & ZEND_MM_IS_SRUN) {
-					uint32_t bin_num = ZEND_MM_SRUN_BIN_NUM(p->map[i]);
-					zend_mm_debug_info *dbg = (zend_mm_debug_info*)((char*)p + ZEND_MM_PAGE_SIZE * i + bin_data_size[bin_num] - ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info)));
-
-					j = 0;
-					while (j < bin_elements[bin_num]) {
-						if (dbg->size != 0) {
-							leak.addr = (zend_mm_debug_info*)((char*)p + ZEND_MM_PAGE_SIZE * i + bin_data_size[bin_num] * j);
-							leak.size = dbg->size;
-							leak.filename = dbg->filename;
-							leak.orig_filename = dbg->orig_filename;
-							leak.lineno = dbg->lineno;
-							leak.orig_lineno = dbg->orig_lineno;
-
-							zend_message_dispatcher(ZMSG_LOG_SCRIPT_NAME, NULL);
-							zend_message_dispatcher(ZMSG_MEMORY_LEAK_DETECTED, &leak);
-
-							dbg->size = 0;
-							dbg->filename = NULL;
-							dbg->lineno = 0;
-
-							repeated = zend_mm_find_leaks_small(p, i, j + 1, &leak) +
-							           zend_mm_find_leaks(heap, p, i + bin_pages[bin_num], &leak);
-							total += 1 + repeated;
-							if (repeated) {
-								zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *)(uintptr_t)repeated);
-							}
-						}
-						dbg = (zend_mm_debug_info*)((char*)dbg + bin_data_size[bin_num]);
-						j++;
-					}
-					i += bin_pages[bin_num];
-				} else /* if (p->map[i] & ZEND_MM_IS_LRUN) */ {
-					int pages_count = ZEND_MM_LRUN_PAGES(p->map[i]);
-					zend_mm_debug_info *dbg = (zend_mm_debug_info*)((char*)p + ZEND_MM_PAGE_SIZE * (i + pages_count) - ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info)));
-
-					leak.addr = (void*)((char*)p + ZEND_MM_PAGE_SIZE * i);
-					leak.size = dbg->size;
-					leak.filename = dbg->filename;
-					leak.orig_filename = dbg->orig_filename;
-					leak.lineno = dbg->lineno;
-					leak.orig_lineno = dbg->orig_lineno;
-
-					zend_message_dispatcher(ZMSG_LOG_SCRIPT_NAME, NULL);
-					zend_message_dispatcher(ZMSG_MEMORY_LEAK_DETECTED, &leak);
-
-					zend_mm_bitset_reset_range(p->free_map, i, pages_count);
-
-					repeated = zend_mm_find_leaks(heap, p, i + pages_count, &leak);
-					total += 1 + repeated;
-					if (repeated) {
-						zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *)(uintptr_t)repeated);
-					}
-					i += pages_count;
-				}
-			} else {
-				i++;
-			}
+	ZEND_MM_ZONE_FOREACH(heap, zone) {
+		/* for each chunk */
+		p = zone->chunks;
+		if (p == NULL) {
+			continue;
 		}
-		p = p->next;
-	} while (p != heap->main_chunk);
+		do {
+			i = ZEND_MM_FIRST_PAGE;
+			while (i < p->free_tail) {
+				if (zend_mm_bitset_is_set(p->free_map, i)) {
+					if (p->map[i] & ZEND_MM_IS_SRUN) {
+						uint32_t bin_num = ZEND_MM_SRUN_BIN_NUM(p->map[i]);
+						zend_mm_debug_info *dbg = (zend_mm_debug_info*)((char*)p + ZEND_MM_PAGE_SIZE * i + bin_data_size[bin_num] - ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info)));
+
+						j = 0;
+						while (j < bin_elements[bin_num]) {
+							if (dbg->size != 0) {
+								leak.addr = (zend_mm_debug_info*)((char*)p + ZEND_MM_PAGE_SIZE * i + bin_data_size[bin_num] * j);
+								leak.size = dbg->size;
+								leak.filename = dbg->filename;
+								leak.orig_filename = dbg->orig_filename;
+								leak.lineno = dbg->lineno;
+								leak.orig_lineno = dbg->orig_lineno;
+
+								zend_message_dispatcher(ZMSG_LOG_SCRIPT_NAME, NULL);
+								zend_message_dispatcher(ZMSG_MEMORY_LEAK_DETECTED, &leak);
+
+								dbg->size = 0;
+								dbg->filename = NULL;
+								dbg->lineno = 0;
+
+								repeated = zend_mm_find_leaks_small(p, i, j + 1, &leak) +
+										   zend_mm_find_leaks(zone, p, i + bin_pages[bin_num], &leak);
+								total += 1 + repeated;
+								if (repeated) {
+									zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *)(uintptr_t)repeated);
+								}
+							}
+							dbg = (zend_mm_debug_info*)((char*)dbg + bin_data_size[bin_num]);
+							j++;
+						}
+						i += bin_pages[bin_num];
+					} else /* if (p->map[i] & ZEND_MM_IS_LRUN) */ {
+						int pages_count = ZEND_MM_LRUN_PAGES(p->map[i]);
+						zend_mm_debug_info *dbg = (zend_mm_debug_info*)((char*)p + ZEND_MM_PAGE_SIZE * (i + pages_count) - ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info)));
+
+						leak.addr = (void*)((char*)p + ZEND_MM_PAGE_SIZE * i);
+						leak.size = dbg->size;
+						leak.filename = dbg->filename;
+						leak.orig_filename = dbg->orig_filename;
+						leak.lineno = dbg->lineno;
+						leak.orig_lineno = dbg->orig_lineno;
+
+						zend_message_dispatcher(ZMSG_LOG_SCRIPT_NAME, NULL);
+						zend_message_dispatcher(ZMSG_MEMORY_LEAK_DETECTED, &leak);
+
+						zend_mm_bitset_reset_range(p->free_map, i, pages_count);
+
+						repeated = zend_mm_find_leaks(zone, p, i + pages_count, &leak);
+						total += 1 + repeated;
+						if (repeated) {
+							zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *)(uintptr_t)repeated);
+						}
+						i += pages_count;
+					}
+				} else {
+					i++;
+				}
+			}
+			p = p->next;
+		} while (p != zone->chunks);
+	} ZEND_MM_ZONE_FOREACH_END();
 	if (total) {
 		zend_message_dispatcher(ZMSG_MEMORY_LEAKS_GRAND_TOTAL, &total);
 	}
@@ -2698,6 +2812,7 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
 {
 	zend_mm_chunk *p;
 	zend_mm_huge_list *list;
+	zend_mm_zone *zone;
 
 #if ZEND_MM_CUSTOM
 	if (heap->use_custom_heap) {
@@ -2714,8 +2829,9 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
 				heap->custom_heap._free = __zend_free;
 			}
 #if ZEND_MM_STAT
-			heap->size = 0;
-			heap->real_size = 0;
+			/* Zones set a 2MiB floor. Emulate that here. */
+			heap->size = ZEND_MM_CHUNK_SIZE;
+			heap->real_size = ZEND_MM_CHUNK_SIZE;
 #endif
 		}
 
@@ -2752,16 +2868,25 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
 		zend_mm_chunk_free(heap, q->ptr, q->size);
 	}
 
-	/* move all chunks except of the first one into the cache */
-	p = heap->main_chunk->next;
-	while (p != heap->main_chunk) {
-		zend_mm_chunk *q = p->next;
-		zend_mm_set_next_cached_chunk(heap, p, heap->cached_chunks);
-		heap->cached_chunks = p;
-		p = q;
-		heap->chunks_count--;
-		heap->cached_chunks_count++;
-	}
+	/* move all chunks except of the main one into the cache */
+	ZEND_MM_ZONE_FOREACH(heap, zone) {
+		p = zone->chunks;
+		if (p == NULL) {
+			continue;
+		}
+		do {
+			zend_mm_chunk *q = p->next;
+			if (p == heap->main_chunk) {
+				p = q;
+				continue;
+			}
+			zend_mm_set_next_cached_chunk(heap, p, heap->cached_chunks);
+			heap->cached_chunks = p;
+			p = q;
+			heap->chunks_count--;
+			heap->cached_chunks_count++;
+		} while (p != zone->chunks);
+	} ZEND_MM_ZONE_FOREACH_END();
 
 	if (full) {
 		/* free all cached chunks */
@@ -2775,6 +2900,7 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
 	} else {
 		/* free some cached chunks to keep average count */
 		heap->avg_chunks_count = (heap->avg_chunks_count + (double)heap->peak_chunks_count) / 2.0;
+
 		while ((double)heap->cached_chunks_count + 0.9 > heap->avg_chunks_count &&
 		       heap->cached_chunks) {
 			p = heap->cached_chunks;
@@ -2814,6 +2940,16 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
 		heap->peak_chunks_count = 1;
 		heap->last_chunks_delete_boundary = 0;
 		heap->last_chunks_delete_count = 0;
+
+#if ZEND_MM_HEAP_PROTECTION
+		heap->zone_free_slot = ZEND_MM_ZONE_FREE_SLOT(heap, ZEND_MM_ZONE_DEFAULT);
+#endif
+		heap->zones[0].chunks = p;
+#if ZEND_MM_HEAP_PROTECTION
+		heap->zones[1].chunks = NULL;
+		ZEND_MM_CHECK(p->zone == &heap->zones[0], "zend_mm_heap corrupted");
+		ZEND_MM_CHECK(p->zone_free_slot == ZEND_MM_ZONE_FREE_SLOT(heap, ZEND_MM_ZONE_DEFAULT), "zend_mm_heap corrupted");
+#endif
 
 		memset(p->free_map, 0, sizeof(p->free_map) + sizeof(p->map));
 		p->free_map[0] = (1L << ZEND_MM_FIRST_PAGE) - 1;
@@ -2881,6 +3017,8 @@ ZEND_API size_t ZEND_FASTCALL _zend_mm_block_size(zend_mm_heap *heap, void *ptr 
 
 typedef struct _zend_alloc_globals {
 	zend_mm_heap *mm_heap;
+	uint32_t      userinput_zone_activated;   /* Whether the userinput zone is currently active */
+	bool          enable_userinput_isolation; /* Whether to switch to the userinput zone before handling user inputs */
 } zend_alloc_globals;
 
 #ifdef ZTS
@@ -2891,6 +3029,10 @@ static void *alloc_globals_tls_addr(void) { return &alloc_globals; }
 static zend_alloc_globals alloc_globals;
 #endif
 #define AG(v) (alloc_globals.v)
+
+#if ZEND_MM_HEAP_PROTECTION
+# define ZEND_MM_ZONE_USERINPUT 1
+#endif
 
 ZEND_API bool is_zend_mm(void)
 {
@@ -2916,8 +3058,12 @@ ZEND_API bool is_zend_ptr(const void *ptr)
 	}
 #endif
 
-	if (AG(mm_heap)->main_chunk) {
-		zend_mm_chunk *chunk = AG(mm_heap)->main_chunk;
+	zend_mm_zone *zone;
+	ZEND_MM_ZONE_FOREACH(AG(mm_heap), zone) {
+		zend_mm_chunk *chunk = zone->chunks;
+		if (chunk == NULL) {
+			continue;
+		}
 
 		do {
 			if (ptr >= (void*)chunk
@@ -2925,8 +3071,8 @@ ZEND_API bool is_zend_ptr(const void *ptr)
 				return 1;
 			}
 			chunk = chunk->next;
-		} while (chunk != AG(mm_heap)->main_chunk);
-	}
+		} while (chunk != zone->chunks);
+	} ZEND_MM_ZONE_FOREACH_END();
 
 	zend_mm_huge_list *block = AG(mm_heap)->huge_list;
 	while (block) {
@@ -2938,6 +3084,40 @@ ZEND_API bool is_zend_ptr(const void *ptr)
 	}
 
 	return 0;
+}
+
+ZEND_API void zend_mm_userinput_begin(void)
+{
+#if ZEND_MM_HEAP_PROTECTION
+	if (AG(enable_userinput_isolation)) {
+		AG(userinput_zone_activated)++;
+		AG(mm_heap)->zone_free_slot = ZEND_MM_ZONE_FREE_SLOT(AG(mm_heap), ZEND_MM_ZONE_USERINPUT);
+	}
+#endif
+}
+
+ZEND_API void zend_mm_userinput_end(void)
+{
+#if ZEND_MM_HEAP_PROTECTION
+	if (AG(enable_userinput_isolation)) {
+		AG(userinput_zone_activated)--;
+		if (!AG(userinput_zone_activated)) {
+			AG(mm_heap)->zone_free_slot = ZEND_MM_ZONE_FREE_SLOT(AG(mm_heap), ZEND_MM_ZONE_DEFAULT);
+		}
+	}
+#endif
+}
+
+ZEND_API void zend_mm_check_in_userinput(void)
+{
+#if ZEND_MM_HEAP_PROTECTION
+	if (AG(enable_userinput_isolation)) {
+		ZEND_ASSERT(AG(userinput_zone_activated));
+		ZEND_ASSERT(AG(mm_heap)->zone_free_slot == ZEND_MM_ZONE_FREE_SLOT(AG(mm_heap), ZEND_MM_ZONE_USERINPUT));
+	} else {
+		ZEND_ASSERT(AG(mm_heap)->zone_free_slot == ZEND_MM_ZONE_FREE_SLOT(AG(mm_heap), ZEND_MM_ZONE_DEFAULT));
+	}
+#endif
 }
 
 #if !ZEND_DEBUG && defined(HAVE_BUILTIN_CONSTANT_P)
@@ -2998,7 +3178,7 @@ ZEND_API void* ZEND_FASTCALL _emalloc_huge(size_t size)
 			ZEND_MM_CHECK(chunk->heap == AG(mm_heap), "zend_mm_heap corrupted"); \
 			ZEND_ASSERT(chunk->map[page_num] & ZEND_MM_IS_SRUN); \
 			ZEND_ASSERT(ZEND_MM_SRUN_BIN_NUM(chunk->map[page_num]) == _num); \
-			zend_mm_free_small(AG(mm_heap), ptr, _num); \
+			zend_mm_free_small(AG(mm_heap), chunk, ptr, _num); \
 		} \
 	}
 #else
@@ -3012,7 +3192,7 @@ ZEND_API void* ZEND_FASTCALL _emalloc_huge(size_t size)
 		{ \
 			zend_mm_chunk *chunk = (zend_mm_chunk*)ZEND_MM_ALIGNED_BASE(ptr, ZEND_MM_CHUNK_SIZE); \
 			ZEND_MM_CHECK(chunk->heap == AG(mm_heap), "zend_mm_heap corrupted"); \
-			zend_mm_free_small(AG(mm_heap), ptr, _num); \
+			zend_mm_free_small(AG(mm_heap), chunk, ptr, _num); \
 		} \
 	}
 #endif
@@ -3401,6 +3581,14 @@ ZEND_API bool zend_mm_max_allocs_hit(void)
 ZEND_API void shutdown_memory_manager(bool silent, bool full_shutdown)
 {
 	zend_mm_shutdown(AG(mm_heap), full_shutdown, silent);
+
+	if (!full_shutdown) {
+		if (AG(enable_userinput_isolation)) {
+			ZEND_ASSERT(AG(userinput_zone_activated) == 0 || silent);
+			AG(userinput_zone_activated) = 0;
+			zend_mm_userinput_begin();
+		}
+	}
 }
 
 ZEND_API void refresh_memory_manager(void)
@@ -3744,6 +3932,10 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 {
 	char *tmp;
 
+	tmp = getenv("ZEND_MM_USERINPUT_ISOLATION");
+	alloc_globals->enable_userinput_isolation = !(tmp && !ZEND_ATOL(tmp));
+	alloc_globals->userinput_zone_activated = 0;
+
 #if ZEND_MM_CUSTOM
 	tmp = getenv("USE_ZEND_ALLOC");
 	if (tmp && !ZEND_ATOL(tmp)) {
@@ -3768,6 +3960,9 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 			mm_heap->custom_heap._free = tracked_free;
 			mm_heap->custom_heap._realloc = tracked_realloc;
 			mm_heap->tracked_allocs = malloc(sizeof(HashTable));
+			/* Zones set a 2MiB floor. Emulate that here. */
+			mm_heap->size = ZEND_MM_CHUNK_SIZE;
+			mm_heap->real_size = ZEND_MM_CHUNK_SIZE;
 			zend_hash_init(mm_heap->tracked_allocs, 1024, NULL, NULL, 1);
 		}
 		return;

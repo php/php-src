@@ -1,7 +1,7 @@
 --TEST--
 OOM SplFixedArray::fromArray() 002
 --INI--
-memory_limit=10M
+memory_limit=11M
 --FILE--
 <?php
 
@@ -11,4 +11,4 @@ SplFixedArray::fromArray($array, false);
 
 ?>
 --EXPECTF--
-Fatal error: Allowed memory size of 10485760 bytes exhausted %S(tried to allocate %d bytes) in %s on line 5
+Fatal error: Allowed memory size of 11534336 bytes exhausted %S(tried to allocate %d bytes) in %s on line 5

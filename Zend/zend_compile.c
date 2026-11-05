@@ -1986,7 +1986,9 @@ static zend_always_inline bool zend_auto_global_check(zend_auto_global *auto_glo
 	}
 
 	if (auto_global->armed) {
+		zend_mm_userinput_begin();
 		auto_global->armed = auto_global->auto_global_callback(auto_global->name);
+		zend_mm_userinput_end();
 	}
 	return true;
 }
@@ -2021,6 +2023,10 @@ ZEND_API zend_result zend_register_auto_global(zend_string *name, bool jit, zend
 ZEND_API void zend_activate_auto_globals(void) /* {{{ */
 {
 	zend_auto_global *auto_global;
+
+#if ZEND_DEBUG
+	zend_mm_check_in_userinput();
+#endif
 
 	ZEND_HASH_MAP_FOREACH_PTR(CG(auto_globals), auto_global) {
 		auto_global->armed = auto_global->jit || auto_global->auto_global_callback;

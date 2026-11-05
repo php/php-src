@@ -3,7 +3,7 @@ GH-17399 (iconv() leak on bailout)
 --EXTENSIONS--
 iconv
 --INI--
-memory_limit=2M
+memory_limit=4M
 --FILE--
 <?php
 $str = str_repeat('a', 1024 * 1024);
