@@ -107,6 +107,9 @@ PHP 8.7 UPGRADE NOTES
     rebuilding PHP with --enable-fd-setsize. On Windows, selecting on more than
     64 pipe or file handles no longer crashes; it fails with a warning, as that
     path remains bounded by WaitForMultipleObjects().
+  . The http stream wrapper now honors the "protocol_version" context option
+    for the CONNECT request sent to a proxy when tunneling HTTPS, and sends a
+    Host header in that case. Without the option, CONNECT still uses HTTP/1.0.
 
 ========================================
 6. New Functions

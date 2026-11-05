@@ -571,7 +571,18 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		smart_str_append(&header, resource->host);
 		smart_str_appendc(&header, ':');
 		smart_str_append_unsigned(&header, resource->port);
-		smart_str_appendl(&header, " HTTP/1.0\r\n", sizeof(" HTTP/1.0\r\n")-1);
+		if (context && (tmpzval = php_stream_context_get_option(context, "http", "protocol_version")) != NULL) {
+			smart_str_appends(&header, " HTTP/");
+			smart_str_append_printf(&header, "%.1F", zval_get_double(tmpzval));
+			/* HTTP/1.1 requires a Host header, which for CONNECT is the target authority */
+			smart_str_appends(&header, "\r\nHost: ");
+			smart_str_append(&header, resource->host);
+			smart_str_appendc(&header, ':');
+			smart_str_append_unsigned(&header, resource->port);
+			smart_str_appends(&header, "\r\n");
+		} else {
+			smart_str_appendl(&header, " HTTP/1.0\r\n", sizeof(" HTTP/1.0\r\n")-1);
+		}
 
 	    /* check if we have Proxy-Authorization header */
 		if (context && (tmpzval = php_stream_context_get_option(context, "http", "header")) != NULL) {
