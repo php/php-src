@@ -44,7 +44,7 @@ zend_module_entry tokenizer_module_entry = {
 	ext_functions,
 	PHP_MINIT(tokenizer),
 	NULL,
-	NULL,
+	PHP_RINIT(tokenizer),
 	NULL,
 	PHP_MINFO(tokenizer),
 	PHP_TOKENIZER_VERSION,
@@ -53,6 +53,9 @@ zend_module_entry tokenizer_module_entry = {
 /* }}} */
 
 #ifdef COMPILE_DL_TOKENIZER
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_DEFINE()
+#endif
 ZEND_GET_MODULE(tokenizer)
 #endif
 
@@ -247,6 +250,17 @@ PHP_MINIT_FUNCTION(tokenizer)
 	register_tokenizer_data_symbols(module_number);
 	register_tokenizer_symbols(module_number);
 	php_token_ce = register_class_PhpToken(zend_ce_stringable);
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_RINIT_FUNCTION */
+PHP_RINIT_FUNCTION(tokenizer)
+{
+#if defined(ZTS) && defined(COMPILE_DL_TOKENIZER)
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
 
 	return SUCCESS;
 }
