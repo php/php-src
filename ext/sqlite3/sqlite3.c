@@ -840,10 +840,6 @@ static int sqlite3_do_callback(zend_fcall_info_cache *fcc, uint32_t argc, sqlite
 		bailout = true;
 	} zend_end_try();
 
-	if (in_callback) {
-		(*in_callback)--;
-	}
-
 	/* clean up the params */
 	if (is_agg) {
 		zval_ptr_dtor(&zargs[0]);
@@ -908,6 +904,9 @@ static int sqlite3_do_callback(zend_fcall_info_cache *fcc, uint32_t argc, sqlite
 	if (!Z_ISUNDEF(retval)) {
 		zval_ptr_dtor(&retval);
 	}
+	if (in_callback) {
+		(*in_callback)--;
+	}
 	if (bailout) {
 		zend_bailout();
 	}
@@ -971,13 +970,12 @@ static int php_sqlite3_callback_compare(void *coll, int a_len, const void *a, in
 		bailout = true;
 	} zend_end_try();
 
-	if (collation->in_callback_ptr) {
-		(*collation->in_callback_ptr)--;
-	}
-
 	zval_ptr_dtor(&zargs[0]);
 	zval_ptr_dtor(&zargs[1]);
 	if (bailout) {
+		if (collation->in_callback_ptr) {
+			(*collation->in_callback_ptr)--;
+		}
 		zval_ptr_dtor(&retval);
 		zend_bailout();
 	}
@@ -994,6 +992,10 @@ static int php_sqlite3_callback_compare(void *coll, int a_len, const void *a, in
 	}
 
 	zval_ptr_dtor(&retval);
+
+	if (collation->in_callback_ptr) {
+		(*collation->in_callback_ptr)--;
+	}
 
 	return ret;
 }
@@ -2201,7 +2203,6 @@ static int php_sqlite3_authorizer(void *autharg, int action, const char *arg1, c
 	} zend_catch {
 		bailout = true;
 	} zend_end_try();
-	db_obj->in_callback--;
 	if (Z_ISUNDEF(retval)) {
 		php_sqlite3_error(db_obj, 0, "An error occurred while invoking the authorizer callback");
 	} else {
@@ -2225,6 +2226,7 @@ static int php_sqlite3_authorizer(void *autharg, int action, const char *arg1, c
 	zval_ptr_dtor(&argv[3]);
 	zval_ptr_dtor(&argv[4]);
 
+	db_obj->in_callback--;
 	if (bailout) {
 		zend_bailout();
 	}
