@@ -3388,6 +3388,12 @@ jit_failure:
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
 			ZEND_SET_FUNC_INFO(call_graph.op_arrays[i], NULL);
 		}
+	} else {
+		/* Remaining op_arrays still point at func_info in the arena
+		   released below. Already-setup ones keep their SHM jit_extension. */
+		for (; i < call_graph.op_arrays_count; i++) {
+			ZEND_SET_FUNC_INFO(call_graph.op_arrays[i], NULL);
+		}
 	}
 	zend_arena_release(&CG(arena), checkpoint);
 	return FAILURE;
