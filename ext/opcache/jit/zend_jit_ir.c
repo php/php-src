@@ -14817,13 +14817,13 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 					if (!prop_type_ref) {
 						prop_type_ref = jit_Z_TYPE_INFO(jit, prop_addr);
 					}
-					ir_ref if_null_or_flase = ir_IF(ir_LE(prop_type_ref, ir_CONST_U32(IR_FALSE)));
-					ir_IF_TRUE_cold(if_null_or_flase);
+					ir_ref if_null_or_false = ir_IF(ir_LE(prop_type_ref, ir_CONST_U32(IR_FALSE)));
+					ir_IF_TRUE_cold(if_null_or_false);
 					jit_SET_EX_OPLINE(jit, opline);
 					ir_CALL_2(IR_VOID, ir_CONST_FC_FUNC(zend_jit_check_array_promotion),
 						prop_ref, ir_CONST_ADDR(prop_info));
 					ir_END_list(end_inputs);
-					ir_IF_FALSE(if_null_or_flase);
+					ir_IF_FALSE(if_null_or_false);
 				}
 			} else if (flags == ZEND_FETCH_REF) {
 				ir_ref ref;
