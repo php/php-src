@@ -105,6 +105,10 @@ PHP 8.7 UPGRADE NOTES
 ========================================
 
 - Standard:
+  . The default $flags of htmlspecialchars_decode() and html_entity_decode()
+    is now ENT_QUOTES | ENT_HTML401. ENT_SUBSTITUTE was removed from the
+    default because the decoding functions ignore it. The behavior does not
+    change.
   . stream_select() no longer fails once a watched descriptor exceeds
     FD_SETSIZE. The descriptor set now grows on demand on both POSIX (bitset)
     and Windows (winsock fd_set), so code watching many streams works without
