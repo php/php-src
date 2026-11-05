@@ -118,9 +118,7 @@ using std::memory_order_acquire;
 # pragma clang diagnostic ignored "-Wassume"
 # define ZEND_ASSUME(c)	__builtin_assume(c)
 #elif defined(PHP_HAVE_BUILTIN_UNREACHABLE) && defined(PHP_HAVE_BUILTIN_EXPECT)
-# define ZEND_ASSUME(c)	do { \
-		if (__builtin_expect(!(c), 0)) __builtin_unreachable(); \
-	} while (0)
+# define ZEND_ASSUME(c)	((void)(__builtin_expect(!(c), 0) ? __builtin_unreachable() : (void)false))
 #else
 # define ZEND_ASSUME(c)
 #endif
