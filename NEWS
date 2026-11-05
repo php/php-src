@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.36
 
+- Standard:
+  . Fixed use-after-free in parse_str() when an error handler replaces the
+    result variable. (cataphract)
+
 
 
 21 Oct 2026, PHP 8.2.35
