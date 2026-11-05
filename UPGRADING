@@ -19,6 +19,10 @@ PHP 8.7 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- Core:
+  . Block declaration support for the encoding declare has been removed as it
+    did not function properly.
+
 - Curl:
   . curl_multi_exec() now throws a TypeError when still_running is not an int.
   . Nested arrays in CURLOPT_POSTFIELDS now throw a TypeError, instead of being
