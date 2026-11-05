@@ -560,6 +560,7 @@ PHP_METHOD(SQLite3, query)
 	zend_string *sql;
 	char *errtext = NULL;
 	int return_code;
+	bool bailout = false;
 	db_obj = Z_SQLITE3_DB_P(object);
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "S", &sql)) {
@@ -605,7 +606,16 @@ PHP_METHOD(SQLite3, query)
 	result->column_count = -1;
 	ZVAL_OBJ(&result->stmt_obj_zval, Z_OBJ(stmt));
 
-	return_code = sqlite3_step(result->stmt_obj->stmt);
+	result->stmt_obj->stepping++;
+	zend_try {
+		return_code = sqlite3_step(result->stmt_obj->stmt);
+	} zend_catch {
+		bailout = true;
+	} zend_end_try();
+	result->stmt_obj->stepping--;
+	if (bailout) {
+		zend_bailout();
+	}
 
 	switch (return_code) {
 		case SQLITE_ROW: /* Valid Row */
@@ -1490,6 +1500,11 @@ PHP_METHOD(SQLite3Stmt, close)
 
 	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
 
+	if (stmt_obj->stepping) {
+		zend_throw_error(NULL, "Cannot close SQLite3 statement while it is executing");
+		RETURN_THROWS();
+	}
+
 	zend_llist_del_element(&(stmt_obj->db_obj->free_list), object, (int (*)(void *, void *)) php_sqlite3_compare_stmt_zval_free);
 
 	RETURN_TRUE;
@@ -1507,6 +1522,11 @@ PHP_METHOD(SQLite3Stmt, reset)
 
 	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
 	SQLITE3_CHECK_INITIALIZED_STMT(stmt_obj->stmt, SQLite3Stmt);
+
+	if (stmt_obj->stepping) {
+		zend_throw_error(NULL, "Cannot reset SQLite3 statement while it is executing");
+		RETURN_THROWS();
+	}
 
 	if (sqlite3_reset(stmt_obj->stmt) != SQLITE_OK) {
 		php_sqlite3_error(stmt_obj->db_obj, sqlite3_errcode(sqlite3_db_handle(stmt_obj->stmt)), "Unable to reset statement: %s", sqlite3_errmsg(sqlite3_db_handle(stmt_obj->stmt)));
@@ -1838,6 +1858,7 @@ PHP_METHOD(SQLite3Stmt, execute)
 	zval *object = ZEND_THIS;
 	int return_code = 0;
 	int bind_rc = 0;
+	bool bailout = false;
 
 	stmt_obj = Z_SQLITE3_STMT_P(object);
 
@@ -1855,7 +1876,16 @@ PHP_METHOD(SQLite3Stmt, execute)
 		RETURN_FALSE;
 	}
 
-	return_code = sqlite3_step(stmt_obj->stmt);
+	stmt_obj->stepping++;
+	zend_try {
+		return_code = sqlite3_step(stmt_obj->stmt);
+	} zend_catch {
+		bailout = true;
+	} zend_end_try();
+	stmt_obj->stepping--;
+	if (bailout) {
+		zend_bailout();
+	}
 
 	switch (return_code) {
 		case SQLITE_ROW: /* Valid Row */
@@ -2002,6 +2032,7 @@ PHP_METHOD(SQLite3Result, fetchArray)
 	php_sqlite3_result *result_obj;
 	zval *object = ZEND_THIS;
 	int i, ret;
+	bool bailout = false;
 	zend_long mode = PHP_SQLITE3_BOTH;
 	result_obj = Z_SQLITE3_RESULT_P(object);
 
@@ -2012,7 +2043,16 @@ PHP_METHOD(SQLite3Result, fetchArray)
 
 	SQLITE3_CHECK_INITIALIZED(result_obj->db_obj, result_obj->stmt_obj->initialised, SQLite3Result)
 
-	ret = sqlite3_step(result_obj->stmt_obj->stmt);
+	result_obj->stmt_obj->stepping++;
+	zend_try {
+		ret = sqlite3_step(result_obj->stmt_obj->stmt);
+	} zend_catch {
+		bailout = true;
+	} zend_end_try();
+	result_obj->stmt_obj->stepping--;
+	if (bailout) {
+		zend_bailout();
+	}
 	switch (ret) {
 		case SQLITE_ROW:
 			/* If there was no return value then just skip fetching */
@@ -2093,6 +2133,11 @@ PHP_METHOD(SQLite3Result, reset)
 
 	SQLITE3_CHECK_INITIALIZED(result_obj->db_obj, result_obj->stmt_obj->initialised, SQLite3Result)
 
+	if (result_obj->stmt_obj->stepping) {
+		zend_throw_error(NULL, "Cannot reset SQLite3 result set while its statement is executing");
+		RETURN_THROWS();
+	}
+
 	sqlite3result_clear_column_names_cache(result_obj);
 
 	if (sqlite3_reset(result_obj->stmt_obj->stmt) != SQLITE_OK) {
@@ -2113,6 +2158,11 @@ PHP_METHOD(SQLite3Result, finalize)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	SQLITE3_CHECK_INITIALIZED(result_obj->db_obj, result_obj->stmt_obj->initialised, SQLite3Result)
+
+	if (result_obj->stmt_obj->stepping) {
+		zend_throw_error(NULL, "Cannot finalize SQLite3 result set while its statement is executing");
+		RETURN_THROWS();
+	}
 
 	sqlite3result_clear_column_names_cache(result_obj);
 
@@ -2400,7 +2450,7 @@ static void php_sqlite3_result_object_free_storage(zend_object *object) /* {{{ *
 	sqlite3result_clear_column_names_cache(intern);
 
 	if (!Z_ISNULL(intern->stmt_obj_zval)) {
-		if (intern->stmt_obj && intern->stmt_obj->initialised) {
+		if (intern->stmt_obj && intern->stmt_obj->initialised && !intern->stmt_obj->stepping) {
 			sqlite3_reset(intern->stmt_obj->stmt);
 		}
 
