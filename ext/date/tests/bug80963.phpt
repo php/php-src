@@ -27,7 +27,7 @@ array(5) {
   ["abbr"]=>
   string(3) "GMT"
 }
-int(237)
+int(23%d)
 array(5) {
   ["ts"]=>
   int(2140668000)
@@ -40,7 +40,7 @@ array(5) {
   ["abbr"]=>
   string(3) "EST"
 }
-int(144)
+int(14%d)
 array(5) {
   ["ts"]=>
   int(2140045200)
