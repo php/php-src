@@ -10,6 +10,10 @@ PHP                                                                        NEWS
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
 
+- MBString:
+  . Fixed stack overflow in mb_check_encoding() and mb_convert_encoding() with
+    deeply nested arrays. (Eyüp Can Akman)
+
 - Opcache:
   . Fixed bug GH-25165 (Tracing JIT loops forever once opcache.jit_buffer_size
     is exhausted while compiling side traces). (Ilia Alshanetsky)
