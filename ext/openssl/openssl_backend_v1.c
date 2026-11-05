@@ -285,7 +285,7 @@ static bool php_openssl_pkey_init_ec_data(EC_KEY *eckey, zval *data, bool *is_pr
 	if (curve_name_zv && Z_TYPE_P(curve_name_zv) == IS_STRING && Z_STRLEN_P(curve_name_zv) > 0) {
 		int nid = OBJ_sn2nid(Z_STRVAL_P(curve_name_zv));
 		if (nid == NID_undef) {
-			php_error_docref(NULL, E_WARNING, "Unknown elliptic curve (short) name %s", Z_STRVAL_P(curve_name_zv));
+			php_error_docref(NULL, E_WARNING, "Unknown elliptic curve (short) name %pS", Z_STR_P(curve_name_zv));
 			goto clean_exit;
 		}
 
