@@ -1052,6 +1052,7 @@ add_to_hash:
 	nIndex = h | ht->nTableMask;
 	Z_NEXT(p->val) = HT_HASH_EX(arData, nIndex);
 	HT_HASH_EX(arData, nIndex) = HT_IDX_TO_HASH(idx);
+	GC_DEL_FLAGS(ht, GC_NOT_COLLECTABLE);
 	if (flag & HASH_LOOKUP) {
 		ZVAL_NULL(&p->val);
 	} else {
@@ -1137,6 +1138,7 @@ add_to_hash:
 	nIndex = h | ht->nTableMask;
 	Z_NEXT(p->val) = HT_HASH(ht, nIndex);
 	HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);
+	GC_DEL_FLAGS(ht, GC_NOT_COLLECTABLE);
 
 	return &p->val;
 }
@@ -1383,6 +1385,7 @@ add_to_packed:
 	p = ht->arData + idx;
 	Z_NEXT(p->val) = HT_HASH(ht, nIndex);
 	HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);
+	GC_DEL_FLAGS(ht, GC_NOT_COLLECTABLE);
 	if ((zend_long)h >= ht->nNextFreeElement) {
 		ht->nNextFreeElement = (zend_long)h < ZEND_LONG_MAX ? h + 1 : ZEND_LONG_MAX;
 	}
