@@ -133,13 +133,16 @@ static void sapi_lsapi_ini_defaults(HashTable *configuration_hash)
 /* {{{ sapi_lsapi_ub_write */
 static size_t sapi_lsapi_ub_write(const char *str, size_t str_length)
 {
-    int ret;
-    int remain;
+    ssize_t ret;
+    size_t remain;
     if ( lsapi_mode ) {
-        ret  = LSAPI_Write( str, str_length );
-        if ( ret < str_length ) {
+        ret = LSAPI_Write( str, str_length );
+        if ( ret < 0 ) {
             php_handle_aborted_connection();
-            return str_length - ret;
+            return 0;
+        } else if ( (size_t) ret < str_length ) {
+            php_handle_aborted_connection();
+            return (size_t) ret;
         }
     } else {
         remain = str_length;
