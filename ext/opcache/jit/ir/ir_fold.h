@@ -2670,10 +2670,6 @@ IR_FOLD(MUL(NEG, C_I8))
 IR_FOLD(MUL(NEG, C_I16))
 IR_FOLD(MUL(NEG, C_I32))
 IR_FOLD(MUL(NEG, C_I64))
-IR_FOLD(DIV(NEG, C_I8))
-IR_FOLD(DIV(NEG, C_I16))
-IR_FOLD(DIV(NEG, C_I32))
-IR_FOLD(DIV(NEG, C_I64))
 {
 	op1 = op1_insn->op1;
 	val.u64 = (0 - op2_insn->val.u64);
@@ -2869,11 +2865,20 @@ IR_FOLD(DIV(_, C_FLOAT))
 }
 
 IR_FOLD(MUL(NEG, NEG))
-IR_FOLD(DIV(NEG, NEG))
 {
 	op1 = op1_insn->op1;
 	op2 = op2_insn->op1;
 	IR_FOLD_RESTART;
+}
+
+IR_FOLD(DIV(NEG, NEG))
+{
+	if (IR_IS_TYPE_FP(IR_OPT_TYPE(opt))) {
+		op1 = op1_insn->op1;
+		op2 = op2_insn->op1;
+		IR_FOLD_RESTART;
+	}
+	IR_FOLD_NEXT;
 }
 
 IR_FOLD(AND(_, C_BOOL))
