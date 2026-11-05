@@ -1020,6 +1020,9 @@ PHP_FUNCTION(unpack)
 
 						ZSTR_VAL(buf)[len] = '\0';
 
+						/* Advance by the number of bytes consumed, also for '*' */
+						size = (len + 1) / 2;
+
 						ZVAL_STR(&val, buf);
 						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
