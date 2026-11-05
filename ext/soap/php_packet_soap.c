@@ -435,6 +435,11 @@ bool parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunctio
 					smart_str_free(&key);
 				}
 				master_to_zval_with_doc_cleanup(&val, enc, trav, response);
+				if (EG(exception)) {
+					/* The trace of the exception holds a copy of the output headers array */
+					zval_ptr_dtor(&val);
+					break;
+				}
 				add_assoc_zval(soap_headers, (char*)trav->name, &val);
 			}
 			trav = trav->next;
