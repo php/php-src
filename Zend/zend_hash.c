@@ -886,11 +886,28 @@ ZEND_API void ZEND_FASTCALL _zend_hash_iterators_update(HashTable *ht, HashPosit
 ZEND_API void ZEND_FASTCALL zend_hash_iterators_advance(HashTable *ht, HashPosition step)
 {
 	HashTableIterator *iter = EG(ht_iterators);
-	HashTableIterator *end  = iter + EG(ht_iterators_used);
+	HashTableIterator *end = iter + EG(ht_iterators_used);
 
 	while (iter != end) {
 		if (iter->ht == ht) {
-			iter->pos += step;
+			HashPosition pos = iter->pos;
+			HashPosition compacted_pos = 0;
+
+			for (HashPosition idx = 0; idx < pos && idx < ht->nNumUsed; idx++) {
+				zval *val = HT_IS_PACKED(ht)
+					? &ht->arPacked[idx]
+					: &ht->arData[idx].val;
+
+				if (Z_TYPE_P(val) != IS_UNDEF) {
+					compacted_pos++;
+				}
+			}
+
+			if (pos > ht->nNumUsed) {
+				compacted_pos += pos - ht->nNumUsed;
+			}
+
+			iter->pos = compacted_pos + step;
 		}
 		iter++;
 	}
