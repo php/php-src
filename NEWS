@@ -338,6 +338,7 @@ PHP                                                                        NEWS
     properties). (Lazizbek Ergashev)
 
 - Standard:
+  . Fixed uniqid() truncating prefixes containing NUL bytes.
   . Fixed memory leaks in checkdnsrr() and dns_check_record() on Windows.
     (Ilia Alshanetsky)
   . Fixed __unserialize() and __wakeup() being called for objects with a missing
