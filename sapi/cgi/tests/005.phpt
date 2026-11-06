@@ -11,10 +11,10 @@ $php = get_cgi_path();
 reset_env_vars();
 
 var_dump(shell_exec(<<<SHELL
-$php -n -a -f "wrong"
+$php -n -d cgi.security_limit_extensions="" -a -f "wrong"
 SHELL));
 var_dump(shell_exec(<<<SHELL
-$php -n -f "wrong" -a
+$php -n -d cgi.security_limit_extensions="" -f "wrong" -a
 SHELL));
 
 echo "Done\n";

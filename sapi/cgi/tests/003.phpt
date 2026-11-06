@@ -38,10 +38,10 @@ class test { /* {{{ */
 file_put_contents($filename, $code);
 
 var_dump(shell_exec(<<<SHELL
-$php -n -w "$filename"
+$php -n -d cgi.security_limit_extensions=".test.php" -w "$filename"
 SHELL));
 var_dump(shell_exec(<<<SHELL
-$php -n -w "wrong"
+$php -n -d cgi.security_limit_extensions="" -w "wrong"
 SHELL));
 var_dump(shell_exec(<<<SHELL
 echo "<?php /* comment */ class test {\n // comment \n function foo() {} } ?>" | $php -n -w

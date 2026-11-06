@@ -21,6 +21,8 @@ function test($boundaryLen) {
         getenv('TEST_PHP_CGI_EXECUTABLE'),
         '-C',
         '-n',
+        '-d',
+        'cgi.security_limit_extensions=".inc"',
         __DIR__ . '/GHSA-9pqp-7h25-4f32.inc',
     ];
 

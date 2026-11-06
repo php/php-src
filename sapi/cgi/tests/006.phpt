@@ -30,10 +30,10 @@ echo test::$var;
 file_put_contents($filename, $code);
 
 var_dump(shell_exec(<<<SHELL
-"$php" -n -l "$filename"
+"$php" -n -d cgi.security_limit_extensions=".test.php" -l "$filename"
 SHELL));
 var_dump(shell_exec(<<<SHELL
-"$php" -n -l some.unknown
+"$php" -n -d cgi.security_limit_extensions='.unknown' -l some.unknown
 SHELL));
 
 $code = '
@@ -50,11 +50,11 @@ file_put_contents($filename, $code);
 
 if (defined("PHP_WINDOWS_VERSION_MAJOR")) {
     var_dump(shell_exec(<<<SHELL
-    "$php" -n -l "$filename"
+    "$php" -n -d cgi.security_allowed_extensions=".test.php" -l "$filename"
     SHELL));
 } else {
     var_dump(shell_exec(<<<SHELL
-    "$php" -n -l "$filename" 2>/dev/null
+    "$php" -n -d cgi.security_allowed_extensions=".test.php" -l "$filename" 2>/dev/null
     SHELL));
 }
 

@@ -29,6 +29,7 @@ $cmd = 'env -u SCRIPT_FILENAME -u PATH_TRANSLATED -u REDIRECT_STATUS -u REQUEST_
     . ' setarch ' . escapeshellarg(php_uname('m')) . ' -R '
     . escapeshellarg(getenv('TEST_PHP_CGI_EXECUTABLE'))
     . ' -n -q -T 2 -d enable_dl=1 -d extension_dir=' . escapeshellarg(ini_get('extension_dir'))
+    . ' -d cgi.security_limit_extensions=.inc'
     . ' ' . escapeshellarg(__DIR__ . '/frameless_temporary_cgi.inc');
 $proc = proc_open($cmd, [
     0 => ['pipe', 'r'],
