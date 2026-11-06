@@ -45,20 +45,25 @@ static const char hexchars[] = "0123456789abcdef";
 static const char HEXCHARS[] = "0123456789ABCDEF";
 
 /* php_spintf_appendchar() {{{ */
-inline static void
+inline static bool
 php_sprintf_appendchar(zend_string **buffer, size_t *pos, char add)
 {
 	if ((*pos + 1) >= ZSTR_LEN(*buffer)) {
 		PRINTF_DEBUG(("%s(): ereallocing buffer to %zu bytes\n", get_active_function_name(), ZSTR_LEN(*buffer)));
-		*buffer = zend_string_extend(*buffer, ZSTR_LEN(*buffer) << 1, 0);
+		zend_string *new_buffer = zend_string_fextend(*buffer, ZSTR_LEN(*buffer) << 1, 0, true);
+		if (UNEXPECTED(new_buffer == NULL)) {
+			return false;
+		}
+		*buffer = new_buffer;
 	}
 	PRINTF_DEBUG(("sprintf: appending '%c', pos=%zu\n", add, *pos));
 	ZSTR_VAL(*buffer)[(*pos)++] = add;
+	return true;
 }
 /* }}} */
 
 /* php_spintf_appendchar() {{{ */
-inline static void
+inline static bool
 php_sprintf_appendchars(zend_string **buffer, size_t *pos, char *add, size_t len)
 {
 	if ((*pos + len) >= ZSTR_LEN(*buffer)) {
@@ -68,16 +73,21 @@ php_sprintf_appendchars(zend_string **buffer, size_t *pos, char *add, size_t len
 		do {
 			nlen = nlen << 1;
 		} while ((*pos + len) >= nlen);
-		*buffer = zend_string_extend(*buffer, nlen, 0);
+		zend_string *new_buffer = zend_string_fextend(*buffer, nlen, 0, true);
+		if (UNEXPECTED(new_buffer == NULL)) {
+			return false;
+		}
+		*buffer = new_buffer;
 	}
 	PRINTF_DEBUG(("sprintf: appending \"%s\", pos=%zu\n", add, *pos));
 	memcpy(ZSTR_VAL(*buffer) + (*pos), add, len);
 	*pos += len;
+	return true;
 }
 /* }}} */
 
 /* php_spintf_appendstring() {{{ */
-inline static void
+inline static bool
 php_sprintf_appendstring(zend_string **buffer, size_t *pos, char *add,
 						   size_t min_width, size_t max_width, char padding,
 						   size_t alignment, size_t len, bool neg, int expprec, int always_sign)
@@ -109,7 +119,11 @@ php_sprintf_appendstring(zend_string **buffer, size_t *pos, char *add,
 			size <<= 1;
 		}
 		PRINTF_DEBUG(("sprintf ereallocing buffer to %zu bytes\n", size));
-		*buffer = zend_string_extend(*buffer, size, 0);
+		zend_string *new_buffer = zend_string_fextend(*buffer, size, 0, true);
+		if (UNEXPECTED(new_buffer == NULL)) {
+			return false;
+		}
+		*buffer = new_buffer;
 	}
 	if (alignment == ALIGN_RIGHT) {
 		if ((neg || always_sign) && padding=='0') {
@@ -130,11 +144,12 @@ php_sprintf_appendstring(zend_string **buffer, size_t *pos, char *add,
 			ZSTR_VAL(*buffer)[(*pos)++] = padding;
 		}
 	}
+	return true;
 }
 /* }}} */
 
 /* php_spintf_appendint() {{{ */
-inline static void
+inline static bool
 php_sprintf_appendint(zend_string **buffer, size_t *pos, zend_long number,
 						size_t width, char padding, size_t alignment,
 						int always_sign)
@@ -171,14 +186,14 @@ php_sprintf_appendint(zend_string **buffer, size_t *pos, zend_long number,
 	}
 	PRINTF_DEBUG(("sprintf: appending " ZEND_LONG_FMT " as \"%s\", i=%u\n",
 				  number, &numbuf[i], i));
-	php_sprintf_appendstring(buffer, pos, &numbuf[i], width, 0,
+	return php_sprintf_appendstring(buffer, pos, &numbuf[i], width, 0,
 							 padding, alignment, (NUM_BUF_SIZE - 1) - i,
 							 neg, 0, always_sign);
 }
 /* }}} */
 
 /* php_spintf_appenduint() {{{ */
-inline static void
+inline static bool
 php_sprintf_appenduint(zend_string **buffer, size_t *pos,
 					   zend_ulong number,
 					   size_t width, char padding, size_t alignment)
@@ -204,13 +219,13 @@ php_sprintf_appenduint(zend_string **buffer, size_t *pos,
 	} while (magn > 0 && i > 0);
 
 	PRINTF_DEBUG(("sprintf: appending " ZEND_LONG_FMT " as \"%s\", i=%d\n", number, &numbuf[i], i));
-	php_sprintf_appendstring(buffer, pos, &numbuf[i], width, 0,
+	return php_sprintf_appendstring(buffer, pos, &numbuf[i], width, 0,
 							 padding, alignment, (NUM_BUF_SIZE - 1) - i, /* neg */ false, 0, 0);
 }
 /* }}} */
 
 /* php_spintf_appenddouble() {{{ */
-inline static void
+inline static bool
 php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 						 double number,
 						 size_t width, char padding,
@@ -240,17 +255,15 @@ php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 
 	if (zend_isnan(number)) {
 		is_negative = (number<0);
-		php_sprintf_appendstring(buffer, pos, "NaN", 3, 0, padding,
+		return php_sprintf_appendstring(buffer, pos, "NaN", 3, 0, padding,
 								 alignment, 3, is_negative, 0, always_sign);
-		return;
 	}
 
 	if (zend_isinf(number)) {
 		is_negative = (number<0);		
 		char *str = is_negative ? "-INF" : "INF";
-		php_sprintf_appendstring(buffer, pos, str, strlen(str), 0, padding,
+		return php_sprintf_appendstring(buffer, pos, str, strlen(str), 0, padding,
 								alignment, strlen(str), is_negative, 0, always_sign);
-		return;
 	}
 
 	switch (fmt) {
@@ -312,13 +325,13 @@ php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 		}
 	}
 
-	php_sprintf_appendstring(buffer, pos, s, width, 0, padding,
+	return php_sprintf_appendstring(buffer, pos, s, width, 0, padding,
 							 alignment, s_len, is_negative, 0, always_sign);
 }
 /* }}} */
 
 /* php_spintf_appendd2n() {{{ */
-inline static void
+inline static bool
 php_sprintf_append2n(zend_string **buffer, size_t *pos, zend_long number,
 					 size_t width, char padding, size_t alignment, int n,
 					 const char *chartable, int expprec)
@@ -342,7 +355,7 @@ php_sprintf_append2n(zend_string **buffer, size_t *pos, zend_long number,
 	}
 	while (num > 0);
 
-	php_sprintf_appendstring(buffer, pos, &numbuf[i], width, 0,
+	return php_sprintf_appendstring(buffer, pos, &numbuf[i], width, 0,
 							 padding, alignment, (NUM_BUF_SIZE - 1) - i,
 							 /* neg */ false, expprec, 0);
 }
@@ -433,7 +446,10 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 	const char *format_orig = format;
 	ZEND_IGNORE_VALUE(format_orig);
 
-	result = zend_string_alloc(size, 0);
+	result = zend_string_falloc(size, 0, true);
+	if (UNEXPECTED(result == NULL)) {
+		return NULL;
+	}
 
 	currarg = 0;
 	argnum = 0;
@@ -444,10 +460,14 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 
 		temppos = memchr(format, '%', format_len);
 		if (!temppos) {
-			php_sprintf_appendchars(&result, &outpos, format, format_len);
+			if (UNEXPECTED(!php_sprintf_appendchars(&result, &outpos, format, format_len))) {
+				goto fail;
+			}
 			break;
 		} else if (temppos != format) {
-			php_sprintf_appendchars(&result, &outpos, format, temppos - format);
+			if (UNEXPECTED(!php_sprintf_appendchars(&result, &outpos, format, temppos - format))) {
+				goto fail;
+			}
 			format_len -= temppos - format;
 			format = temppos;
 		}
@@ -455,7 +475,9 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 		format_len--;
 
 		if (*format == '%') {
-			php_sprintf_appendchar(&result, &outpos, '%');
+			if (UNEXPECTED(!php_sprintf_appendchar(&result, &outpos, '%'))) {
+				goto fail;
+			}
 			format++;
 			format_len--;
 		} else {
@@ -625,27 +647,34 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 				case 's': {
 					zend_string *t;
 					zend_string *str = zval_get_tmp_string(tmp, &t);
-					php_sprintf_appendstring(&result, &outpos,
+					bool success = php_sprintf_appendstring(&result, &outpos,
 											 ZSTR_VAL(str),
 											 width, precision, padding,
 											 alignment,
 											 ZSTR_LEN(str),
 											 /* neg */ false, expprec, 0);
 					zend_tmp_string_release(t);
+					if (UNEXPECTED(!success)) {
+						goto fail;
+					}
 					break;
 				}
 
 				case 'd':
-					php_sprintf_appendint(&result, &outpos,
+					if (UNEXPECTED(!php_sprintf_appendint(&result, &outpos,
 										  zval_get_long(tmp),
 										  width, padding, alignment,
-										  always_sign);
+										  always_sign))) {
+						goto fail;
+					}
 					break;
 
 				case 'u':
-					php_sprintf_appenduint(&result, &outpos,
+					if (UNEXPECTED(!php_sprintf_appenduint(&result, &outpos,
 										  zval_get_long(tmp),
-										  width, padding, alignment);
+										  width, padding, alignment))) {
+						goto fail;
+					}
 					break;
 
 				case 'e':
@@ -656,49 +685,63 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 				case 'G':
 				case 'h':
 				case 'H':
-					php_sprintf_appenddouble(&result, &outpos,
+					if (UNEXPECTED(!php_sprintf_appenddouble(&result, &outpos,
 											 zval_get_double(tmp),
 											 width, padding, alignment,
 											 precision, adjusting,
 											 *format, always_sign
-											);
+											))) {
+						goto fail;
+					}
 					break;
 
 				case 'c':
-					php_sprintf_appendchar(&result, &outpos,
-										(char) zval_get_long(tmp));
+					if (UNEXPECTED(!php_sprintf_appendchar(&result, &outpos,
+										(char) zval_get_long(tmp)))) {
+						goto fail;
+					}
 					break;
 
 				case 'o':
-					php_sprintf_append2n(&result, &outpos,
+					if (UNEXPECTED(!php_sprintf_append2n(&result, &outpos,
 										 zval_get_long(tmp),
 										 width, padding, alignment, 3,
-										 hexchars, expprec);
+										 hexchars, expprec))) {
+						goto fail;
+					}
 					break;
 
 				case 'x':
-					php_sprintf_append2n(&result, &outpos,
+					if (UNEXPECTED(!php_sprintf_append2n(&result, &outpos,
 										 zval_get_long(tmp),
 										 width, padding, alignment, 4,
-										 hexchars, expprec);
+										 hexchars, expprec))) {
+						goto fail;
+					}
 					break;
 
 				case 'X':
-					php_sprintf_append2n(&result, &outpos,
+					if (UNEXPECTED(!php_sprintf_append2n(&result, &outpos,
 										 zval_get_long(tmp),
 										 width, padding, alignment, 4,
-										 HEXCHARS, expprec);
+										 HEXCHARS, expprec))) {
+						goto fail;
+					}
 					break;
 
 				case 'b':
-					php_sprintf_append2n(&result, &outpos,
+					if (UNEXPECTED(!php_sprintf_append2n(&result, &outpos,
 										 zval_get_long(tmp),
 										 width, padding, alignment, 1,
-										 hexchars, expprec);
+										 hexchars, expprec))) {
+						goto fail;
+					}
 					break;
 
 				case '%':
-					php_sprintf_appendchar(&result, &outpos, '%');
+					if (UNEXPECTED(!php_sprintf_appendchar(&result, &outpos, '%'))) {
+						goto fail;
+					}
 
 					break;
 
@@ -745,7 +788,10 @@ static zval *php_formatted_print_get_array(zend_array *array, int *argc)
 	int n;
 
 	n = zend_hash_num_elements(array);
-	args = (zval *)safe_emalloc(n, sizeof(zval), 0);
+	args = (zval *)safe_femalloc(n, sizeof(zval), 0, true);
+	if (UNEXPECTED(args == NULL)) {
+		return NULL;
+	}
 	n = 0;
 	ZEND_HASH_FOREACH_VAL(array, zv) {
 		ZVAL_COPY_VALUE(&args[n], zv);
@@ -773,6 +819,9 @@ PHP_FUNCTION(sprintf)
 
 	result = php_formatted_print(format, format_len, args, argc, 1);
 	if (result == NULL) {
+		if (ZEND_HAS_OOM()) {
+			RETURN_OOM();
+		}
 		RETURN_THROWS();
 	}
 	RETVAL_STR(result);
@@ -795,10 +844,16 @@ PHP_FUNCTION(vsprintf)
 	ZEND_PARSE_PARAMETERS_END();
 
 	args = php_formatted_print_get_array(array, &argc);
+	if (UNEXPECTED(args == NULL)) {
+		RETURN_OOM();
+	}
 
 	result = php_formatted_print(format, format_len, args, argc, -1);
 	efree(args);
 	if (result == NULL) {
+		if (ZEND_HAS_OOM()) {
+			RETURN_OOM();
+		}
 		RETURN_THROWS();
 	}
 	RETVAL_STR(result);
@@ -822,6 +877,9 @@ PHP_FUNCTION(printf)
 
 	result = php_formatted_print(format, format_len, args, argc, 1);
 	if (result == NULL) {
+		if (ZEND_HAS_OOM()) {
+			RETURN_OOM();
+		}
 		RETURN_THROWS();
 	}
 	rlen = PHPWRITE(ZSTR_VAL(result), ZSTR_LEN(result));
@@ -847,10 +905,16 @@ PHP_FUNCTION(vprintf)
 	ZEND_PARSE_PARAMETERS_END();
 
 	args = php_formatted_print_get_array(array, &argc);
+	if (UNEXPECTED(args == NULL)) {
+		RETURN_OOM();
+	}
 
 	result = php_formatted_print(format, format_len, args, argc, -1);
 	efree(args);
 	if (result == NULL) {
+		if (ZEND_HAS_OOM()) {
+			RETURN_OOM();
+		}
 		RETURN_THROWS();
 	}
 	rlen = PHPWRITE(ZSTR_VAL(result), ZSTR_LEN(result));
@@ -877,6 +941,9 @@ PHP_FUNCTION(fprintf)
 
 	result = php_formatted_print(format, format_len, args, argc, 2);
 	if (result == NULL) {
+		if (ZEND_HAS_OOM()) {
+			RETURN_OOM();
+		}
 		RETURN_THROWS();
 	}
 
@@ -905,10 +972,16 @@ PHP_FUNCTION(vfprintf)
 	ZEND_PARSE_PARAMETERS_END();
 
 	args = php_formatted_print_get_array(array, &argc);
+	if (UNEXPECTED(args == NULL)) {
+		RETURN_OOM();
+	}
 
 	result = php_formatted_print(format, format_len, args, argc, -1);
 	efree(args);
 	if (result == NULL) {
+		if (ZEND_HAS_OOM()) {
+			RETURN_OOM();
+		}
 		RETURN_THROWS();
 	}
 
