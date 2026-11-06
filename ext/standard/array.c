@@ -7073,6 +7073,65 @@ PHP_FUNCTION(array_all)
 }
 /* }}} */
 
+/* {{{ Splits the array into elements for which the callback returns true and those for which it returns false. */
+PHP_FUNCTION(array_partition)
+{
+	HashTable *array;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+	zval matching;
+	zval non_matching;
+	zval retval;
+	zval args[2];
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ARRAY_HT(array)
+		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(fci, fcc)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (zend_hash_num_elements(array) == 0) {
+		zend_release_fcall_info_cache(&fcc);
+		ZVAL_EMPTY_ARRAY(&matching);
+		ZVAL_EMPTY_ARRAY(&non_matching);
+		RETURN_ARR(zend_new_pair(&matching, &non_matching));
+	}
+
+	array_init(&matching);
+	array_init(&non_matching);
+
+	ZEND_HASH_FOREACH_KEY_VAL(array, zend_ulong num_key, zend_string *str_key, zval *operand) {
+		if (!str_key) {
+			ZVAL_LONG(&args[1], num_key);
+		} else {
+			ZVAL_STR(&args[1], str_key);
+		}
+
+		ZVAL_COPY_VALUE(&args[0], operand);
+
+		zend_call_known_fcc(&fcc, &retval, 2, args, NULL);
+
+		if (UNEXPECTED(Z_ISUNDEF(retval))) {
+			zval_ptr_dtor(&matching);
+			zval_ptr_dtor(&non_matching);
+			zend_release_fcall_info_cache(&fcc);
+			RETURN_THROWS();
+		}
+
+		HashTable *target = php_is_true(&retval) ? Z_ARRVAL(matching) : Z_ARRVAL(non_matching);
+
+		if (str_key) {
+			operand = zend_hash_add_new(target, str_key, operand);
+		} else {
+			operand = zend_hash_index_add_new(target, num_key, operand);
+		}
+		zval_add_ref(operand);
+	} ZEND_HASH_FOREACH_END();
+
+	zend_release_fcall_info_cache(&fcc);
+	RETURN_ARR(zend_new_pair(&matching, &non_matching));
+}
+/* }}} */
+
 /* {{{ Applies the callback to the elements in given arrays. */
 PHP_FUNCTION(array_map)
 {
