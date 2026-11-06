@@ -8,7 +8,7 @@ php_ini_loaded_file() function
     $code = '"var_dump(php_ini_loaded_file());"';
 
     // No ini file
-    passthru("$php $args -n -r $code");
+    passthru("$php -n -r $code");
 
     // Specified ini file
     passthru("$php $args -c $inifile -r $code");
