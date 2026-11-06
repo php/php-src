@@ -1236,6 +1236,9 @@ cdf_unpack_catalog(const cdf_header_t *h, const cdf_stream_t *sst,
 		extract_catalog_field(uint64_t, ce_timestamp, 8);
 		reclen = cep->ce_namlen;
 
+		if (reclen == 0)
+			break;
+
 		if (reclen < 14) {
 			cep->ce_namlen = 0;
 			continue;
