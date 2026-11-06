@@ -146,7 +146,7 @@ class Generator
             '.github/scripts/download-bundled/**',
         ];
         foreach ($this->bundles as $bundle) {
-            foreach ($this->makeDornyPathsFilterFilters($bundle) as $p) {
+            foreach ($this->makeFiltersForDornyPathsFilterAction($bundle) as $p) {
                 if (str_starts_with($p, '.github/scripts/download-bundled/')) {
                     continue;
                 }
@@ -158,7 +158,7 @@ class Generator
 
         $filters = [];
         foreach ($this->bundles as $bundle) {
-            $filters[$bundle->getNameForPath()] = $this->makeDornyPathsFilterFilters($bundle);
+            $filters[$bundle->getNameForPath()] = $this->makeFiltersForDornyPathsFilterAction($bundle);
         }
         $content = str_replace('%filters%', $this->indentString($this->encodeYml($this->encodeYml($filters)), 5, false), $content);
 
@@ -182,7 +182,7 @@ class Generator
         file_put_contents($this->getRepoDirectory() . '/.github/workflows/verify-bundled-files.yml', $content);
     }
 
-    protected function makeDornyPathsFilterFilters(Bundle $bundle): array
+    protected function makeFiltersForDornyPathsFilterAction(Bundle $bundle): array
     {
         return [
             '.github/scripts/download-bundled/' . $bundle->getNameForPath() . '.*',
