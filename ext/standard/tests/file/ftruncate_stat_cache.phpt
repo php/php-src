@@ -1,5 +1,5 @@
 --TEST--
-ftruncate() clears the stat cache
+GH-25232 ftruncate() clears the stat cache
 --CREDITS--
 tolry (tobias.olry@gmail.com)
 --FILE--
