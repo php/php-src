@@ -538,6 +538,12 @@ static zend_result php_object_element_export(zval *zv, zend_ulong index, zend_st
 
 PHPAPI zend_result php_var_export_ex(zval *struc, int level, smart_str *buf) /* {{{ */
 {
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		zend_call_stack_size_error();
+		return FAILURE;
+	}
+#endif
 	HashTable *myht;
 	zend_string *ztmp, *ztmp2;
 	zend_ulong index;
