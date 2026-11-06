@@ -303,6 +303,15 @@ static int pdo_sqlite_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return
 		case PDO_SQLITE_ATTR_TRANSACTION_MODE:
 			ZVAL_LONG(return_value, H->transaction_mode);
 			break;
+#ifdef SQLITE_DBCONFIG_DQS_DML
+		case PDO_SQLITE_ATTR_DQS: {
+			int dml = 0, ddl = 0;
+			sqlite3_db_config(H->db, SQLITE_DBCONFIG_DQS_DML, -1, &dml);
+			sqlite3_db_config(H->db, SQLITE_DBCONFIG_DQS_DDL, -1, &ddl);
+			ZVAL_BOOL(return_value, dml || ddl);
+			break;
+		}
+#endif
 
 		default:
 			return 0;
@@ -351,6 +360,22 @@ static bool pdo_sqlite_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 				default:
 					return false;
 			}
+#ifdef SQLITE_DBCONFIG_DQS_DML
+		case PDO_SQLITE_ATTR_DQS: {
+			bool bval;
+			if (!pdo_get_bool_param(&bval, val)) {
+				return false;
+			}
+			/* Double-quoted string literals are controlled separately for DML
+			 * and DDL statements; toggle both so the attribute has a single
+			 * meaning. */
+			if (sqlite3_db_config(H->db, SQLITE_DBCONFIG_DQS_DML, (int) bval, NULL) != SQLITE_OK
+				|| sqlite3_db_config(H->db, SQLITE_DBCONFIG_DQS_DDL, (int) bval, NULL) != SQLITE_OK) {
+				return false;
+			}
+			return true;
+		}
+#endif
 	}
 	return false;
 }

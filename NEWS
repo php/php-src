@@ -106,6 +106,8 @@ PHP                                                                        NEWS
 
 - PDO_SQLite:
   . Fixed bug GH-24990 (Statement unusable after a failed execute()). (lazerg)
+  . Added Pdo\Sqlite::ATTR_DQS to disable double-quoted string literals
+    (GH-13597). (Juan Versolato Lopes)
 
 - PGSQL:
   . Fixed pg_lo_write() rejecting data containing null bytes. (Ilia Alshanetsky)
