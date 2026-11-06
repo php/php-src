@@ -472,6 +472,8 @@ function zend_test_override_libxml_global_state(): void {}
     /** @compile-time-eval */
     function zend_test_gh19792(): void {}
 
+    function zend_test_hash_destroy_detaches_iterator(string $destroy, string $state): bool {}
+
     /* @param resource $stream */
     function zend_test_handle_post_data(mixed $stream, string $content_type, int $content_length): void {}
 
