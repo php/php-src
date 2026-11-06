@@ -4284,6 +4284,10 @@ static sdlFunctionPtr get_doc_function(sdlPtr sdl, xmlNodePtr params) /* {{{ */
 						xmlNodePtr node = params;
 
 						ZEND_HASH_FOREACH_PTR(tmp->requestParameters, param) {
+							if (node == NULL) {
+								ok = 0;
+								break;
+							}
 							if (param->element) {
 								if (strcmp(param->element->name, (char*)node->name) != 0) {
 									ok = 0;
