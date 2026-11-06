@@ -34,6 +34,10 @@ PHP                                                                        NEWS
   . Fixed an exception thrown by the session_get_cb stream context callback
     being replaced with a TypeError. (Ilia Alshanetsky)
 
+- Streams:
+  . Fixed bug GH-22063 (Stream filter chain UAF on self-removal during
+    callback). (Ilia Alshanetsky)
+
 05 Nov 2026, PHP 8.6.0RC5
 
 - Core:
