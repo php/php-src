@@ -28,6 +28,7 @@ $bundles = [
     new Bundle('XSSE', [], ['Zend/zend_simd.h']),
     new Bundle('JIT IR', ['ext/opcache/jit/ir']),
     new Bundle('xxHash', ['ext/hash/xxhash']),
+    new Bundle('lexbor', ['ext/lexbor/lexbor', 'ext/lexbor/patches']),
     new Bundle('PCRE2', ['ext/pcre/pcre2lib']),
     new Bundle('uriparser', ['ext/uri/uriparser']),
 ];
