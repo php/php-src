@@ -9,6 +9,10 @@ var_dump(password_needs_rehash('', PASSWORD_BCRYPT));
 var_dump(password_needs_rehash('', 1));
 var_dump(password_needs_rehash('', '2y'));
 
+// Plausible-looking, but malformed hashes
+var_dump(password_needs_rehash('$2y$04$MTIzNDU2Nzg5MDEyMzQ1NEj0NmcAWSLR.oP7XOR9HD/vjUuOj100y', PASSWORD_BCRYPT));
+var_dump(password_needs_rehash('$2y$04$MTIzNDU2Nzg5MDEyMzQ1Nej0NmcAWSLR+oP7XOR9HD/vjUuOj100y', PASSWORD_BCRYPT));
+
 // Valid, as it's an unknown algorithm
 var_dump(password_needs_rehash('', PASSWORD_DEFAULT));
 var_dump(password_needs_rehash('', 0));
@@ -42,6 +46,10 @@ $costCases = [
 	'malformed separator' => ['$2y$10x' . $suffix, 10],
 	'below range' => ['$2y$03$' . $suffix, 3],
 	'above range' => ['$2y$32$' . $suffix, 32],
+	'minus sign' => ['$2y$-4$' . $suffix, 4],
+	'plus sign' => ['$2y$+4$' . $suffix, 4],
+	'newline' => ['$2y$'."\n".'4$' . $suffix, 4],
+	'space' => ['$2y$ 4$' . $suffix, 4],
 ];
 foreach ($costCases as $description => $case) {
 	echo $description, ': ';
@@ -63,6 +71,8 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+bool(true)
+bool(true)
 bool(false)
 bool(false)
 bool(true)
@@ -75,6 +85,10 @@ non-digit: bool(true)
 malformed separator: bool(true)
 below range: bool(true)
 above range: bool(true)
+minus sign: bool(true)
+plus sign: bool(true)
+newline: bool(true)
+space: bool(true)
 bool(true)
 bool(true)
 OK!

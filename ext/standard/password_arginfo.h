@@ -1,11 +1,12 @@
 /* This is a generated file, edit password.stub.php instead.
- * Stub hash: 589ff98a8fd6883f11558d4984b89a0467e756e0 */
+ * Stub hash: 93162f1cd7a6680d74449dcf8a498e397d4d02ce */
 
 #include "zend_constants.h"
 
 static void register_password_symbols(int module_number)
 {
 	REGISTER_STRING_CONSTANT("PASSWORD_BCRYPT", "2y", CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("PASSWORD_BCRYPT_WRAP", "bcrypt-wrap", CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PASSWORD_BCRYPT_DEFAULT_COST", PHP_PASSWORD_BCRYPT_COST, CONST_PERSISTENT);
 #if defined(HAVE_ARGON2LIB)
 	REGISTER_STRING_CONSTANT("PASSWORD_ARGON2I", "argon2i", CONST_PERSISTENT);
