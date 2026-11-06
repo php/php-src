@@ -63,6 +63,8 @@ PHP                                                                        NEWS
   . Fixed mbstring functions emitting surrogates in UTF-8 output and flagging
     it as valid UTF-8. (Nicolas Grekas)
   . Fixed bug GH-23958 (truncated encoding names resolving to full names). (Kamil Tekiela)
+  . Fixed stack overflow in mb_check_encoding() and mb_convert_encoding() with
+    deeply nested arrays. (Eyüp Can Akman)
 
 - MySQLi:
   . Fix GH-22854: Fixed failed assertion when accessing mysqli property after
