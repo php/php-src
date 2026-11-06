@@ -1,7 +1,8 @@
 /* This is a generated file, edit io_terminal.stub.php instead.
- * Stub hash: 701a9256c6116cb9161669791188bdf8d7295ba8
+ * Stub hash: 4a02ce6dc91286e5038c0fe29f3f280eb64ad97f
  * Has decl header: yes */
 
+#include "zend_attributes.h"
 #include "zend_enum.h"
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Io_Terminal_TerminalSize___construct, 0, 0, 2)
@@ -71,7 +72,7 @@ static const zend_function_entry class_Io_Terminal_Terminal_methods[] = {
 	ZEND_ME(Io_Terminal_Terminal, fromStdio, arginfo_class_Io_Terminal_Terminal_fromStdio, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Io_Terminal_Terminal, fromStreams, arginfo_class_Io_Terminal_Terminal_fromStreams, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Io_Terminal_Terminal, getSize, arginfo_class_Io_Terminal_Terminal_getSize, ZEND_ACC_PUBLIC)
-	ZEND_ME(Io_Terminal_Terminal, enableRawMode, arginfo_class_Io_Terminal_Terminal_enableRawMode, ZEND_ACC_PUBLIC)
+	ZEND_ME(Io_Terminal_Terminal, enableRawMode, arginfo_class_Io_Terminal_Terminal_enableRawMode, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD)
 	ZEND_ME(Io_Terminal_Terminal, restoreMode, arginfo_class_Io_Terminal_Terminal_restoreMode, ZEND_ACC_PUBLIC)
 	ZEND_ME(Io_Terminal_Terminal, readKey, arginfo_class_Io_Terminal_Terminal_readKey, ZEND_ACC_PUBLIC)
 	ZEND_ME(Io_Terminal_Terminal, readLine, arginfo_class_Io_Terminal_Terminal_readLine, ZEND_ACC_PUBLIC)
@@ -190,6 +191,12 @@ static zend_class_entry *register_class_Io_Terminal_Terminal(void)
 
 	INIT_NS_CLASS_ENTRY(ce, "Io\\Terminal", "Terminal", class_Io_Terminal_Terminal_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+
+
+	zend_attribute *attribute_NoDiscard_func_enablerawmode_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "enablerawmode", sizeof("enablerawmode") - 1), ZSTR_KNOWN(ZEND_STR_NODISCARD), 1);
+	zend_string *attribute_NoDiscard_func_enablerawmode_0_arg0_str = zend_string_init("as the returned token must stay alive to keep the raw-mode lease active", strlen("as the returned token must stay alive to keep the raw-mode lease active"), 1);
+	ZVAL_STR(&attribute_NoDiscard_func_enablerawmode_0->args[0].value, attribute_NoDiscard_func_enablerawmode_0_arg0_str);
+	attribute_NoDiscard_func_enablerawmode_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	return class_entry;
 }

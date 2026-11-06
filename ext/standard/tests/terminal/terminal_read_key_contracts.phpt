@@ -46,7 +46,6 @@ $proc = proc_open(
 );
 
 $terminal = Terminal::fromStreams($pipes[0]);
-$terminal->enableRawMode();
 
 // Contract 1: No input + zero timeout (non-blocking) returns null immediately
 $start = hrtime(true);

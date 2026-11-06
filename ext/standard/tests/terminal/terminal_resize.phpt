@@ -59,7 +59,6 @@ $proc = proc_open(
 
 $r1 = fgets($pipes[2]);
 $terminal = Terminal::fromStreams($pipes[0]);
-$terminal->enableRawMode();
 
 $s1 = $terminal->getSize();
 echo "s1: {$s1->cols}x{$s1->rows}\n";
