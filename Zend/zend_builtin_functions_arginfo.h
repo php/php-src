@@ -1,5 +1,5 @@
 /* This is a generated file, edit zend_builtin_functions.stub.php instead.
- * Stub hash: 5d7145b7bc305bb50b45e75c02740206148223b1 */
+ * Stub hash: 2d81a5e78df4c93aada70439f7a395c0e07a7d9f */
 
 #include "zend_attributes.h"
 
@@ -223,7 +223,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_gc_mem_caches arginfo_func_num_args
 
-#define arginfo_gc_collect_cycles arginfo_func_num_args
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gc_collect_cycles, 0, 0, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, full_gc, _IS_BOOL, 0, "true")
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gc_enabled, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
