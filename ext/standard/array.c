@@ -3826,7 +3826,25 @@ PHP_FUNCTION(array_unshift)
 	} ZEND_HASH_FOREACH_END();
 
 	if (UNEXPECTED(HT_HAS_ITERATORS(Z_ARRVAL_P(stack)))) {
-		zend_hash_iterators_advance(Z_ARRVAL_P(stack), argc);
+		HashTable *ht = Z_ARRVAL_P(stack);
+
+		if (!HT_IS_WITHOUT_HOLES(ht)) {
+			uint32_t iter_pos = zend_hash_iterators_lower_pos(ht, 0);
+			uint32_t compacted_pos = 0;
+			size_t element_size = ZEND_HASH_ELEMENT_SIZE(ht);
+
+			for (uint32_t idx = 0; idx < ht->nNumUsed; idx++) {
+				if (idx == iter_pos) {
+					zend_hash_iterators_update(ht, idx, compacted_pos);
+					iter_pos = zend_hash_iterators_lower_pos(ht, idx + 1);
+				}
+				if (Z_TYPE_P(ZEND_HASH_ELEMENT_EX(ht, idx, element_size)) != IS_UNDEF) {
+					compacted_pos++;
+				}
+			}
+			zend_hash_iterators_update(ht, ht->nNumUsed, compacted_pos);
+		}
+		zend_hash_iterators_advance(ht, argc);
 		HT_SET_ITERATORS_COUNT(&new_hash, HT_ITERATORS_COUNT(Z_ARRVAL_P(stack)));
 		HT_SET_ITERATORS_COUNT(Z_ARRVAL_P(stack), 0);
 	}
