@@ -808,6 +808,33 @@ static int sp_adj[SP_ADJ_LAST];
 # pragma clang diagnostic pop
 #endif
 
+/* SEND_*_EX above MAX_ARG_FLAG_NUM is left to the VM handler, which reads
+ * the operand from its stack slot. The allocator may still keep a long or
+ * double in a register for that operand (ZREG_LAST_USE, without ZREG_STORE),
+ * so zend_jit_store_var_if_necessary() does not write it back. GH-25247.
+ */
+static int zend_jit_spill_op1_before_vm_send(dasm_State **Dst, const zend_op *opline,
+		zend_jit_addr op1_addr, uint32_t op1_info, zend_jit_trace_stack *stack)
+{
+	uint32_t concrete = op1_info & MAY_BE_ANY;
+
+	if (!(opline->op1_type & (IS_TMP_VAR|IS_VAR))
+	 || (concrete != MAY_BE_LONG && concrete != MAY_BE_DOUBLE)
+	 || Z_MODE(op1_addr) != IS_REG
+	 || Z_LOAD(op1_addr)) {
+		return 1;
+	}
+	if (!zend_jit_spill_store(Dst, op1_addr,
+			ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->op1.var), op1_info, 1)) {
+		return 0;
+	}
+	if (stack) {
+		SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var),
+			concrete == MAY_BE_LONG ? IS_LONG : IS_DOUBLE, 1);
+	}
+	return 1;
+}
+
 #if _WIN32
 # include <Windows.h>
 #else
@@ -3388,6 +3415,10 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						if (opline->opcode == ZEND_SEND_VAL_EX
 						 && opline->op2.num > MAX_ARG_FLAG_NUM) {
+							if (!zend_jit_spill_op1_before_vm_send(&dasm_state, opline,
+									OP1_REG_ADDR(), OP1_INFO(), NULL)) {
+								goto jit_failure;
+							}
 							break;
 						}
 						if (!zend_jit_send_val(&dasm_state, opline,
@@ -3417,6 +3448,10 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						if ((opline->opcode == ZEND_SEND_VAR_EX
 						  || opline->opcode == ZEND_SEND_VAR_NO_REF_EX)
 						 && opline->op2.num > MAX_ARG_FLAG_NUM) {
+							if (!zend_jit_spill_op1_before_vm_send(&dasm_state, opline,
+									OP1_REG_ADDR(), OP1_INFO(), NULL)) {
+								goto jit_failure;
+							}
 							break;
 						}
 						op1_addr = OP1_REG_ADDR();
