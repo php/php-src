@@ -52,6 +52,8 @@ namespace Io\Terminal {
     }
 
     /**
+     * Destroying the last reference to an active token attempts to release its lease.
+     *
      * @strict-properties
      * @not-serializable
      */
@@ -81,6 +83,7 @@ namespace Io\Terminal {
 
         public function getSize(): ?TerminalSize {}
 
+        #[\NoDiscard(message: "as the returned token must stay alive to keep the raw-mode lease active")]
         public function enableRawMode(): ModeToken {}
 
         public function restoreMode(
