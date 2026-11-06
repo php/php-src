@@ -12,6 +12,10 @@ PHP                                                                        NEWS
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
 
+- MBString:
+  . Fixed stack overflow in mb_check_encoding() and mb_convert_encoding() with
+    deeply nested arrays. (Eyüp Can Akman)
+
 - Opcache:
   . Fixed bug GH-22216 (spurious opcache.memory_consumption warning on each new
     ZTS thread; the directive is also reported as 0 in worker threads).
