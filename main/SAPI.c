@@ -460,6 +460,7 @@ SAPI_API void sapi_activate(void)
 	}
 	SG(rfc1867_uploaded_files) = NULL;
 	SG(request_parse_body_context).throw_exceptions = false;
+	SG(request_parse_body_context).in_progress = false;
 	memset(&SG(request_parse_body_context).options_cache, 0, sizeof(SG(request_parse_body_context).options_cache));
 
 	/* Handle request method */

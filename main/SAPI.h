@@ -110,6 +110,7 @@ typedef struct {
 
 typedef struct {
 	bool throw_exceptions;
+	bool in_progress;
 	struct {
 		bool set;
 		zend_long value;
