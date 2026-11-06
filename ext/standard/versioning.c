@@ -22,12 +22,11 @@
 
 /* {{{ php_canonicalize_version() */
 
-PHPAPI char *
-php_canonicalize_version(const char *version)
+static char *
+php_canonicalize_version_ex(const char *version, size_t len)
 {
-	size_t len = strlen(version);
 	char *buf = safe_emalloc(len * 2, sizeof(char), 1), *q, lp, lq;
-	const char *p;
+	const char *p, *end = version + len;
 
 	if (len == 0) {
 		*buf = '\0';
@@ -37,8 +36,11 @@ php_canonicalize_version(const char *version)
 	p = version;
 	q = buf;
 	*q++ = lp = *p++;
+	if (lp == '\0') {
+		q[-1] = '.';
+	}
 
-	while (*p) {
+	while (p < end) {
 /*  s/[-_+]/./g;
  *  s/([^\d\.])([^\D\.])/$1.$2/g;
  *  s/([^\D\.])([^\d\.])/$1.$2/g;
@@ -48,7 +50,7 @@ php_canonicalize_version(const char *version)
 #define isspecialver(x) ((x)=='-'||(x)=='_'||(x)=='+')
 
 		lq = *(q - 1);
-		if (isspecialver(*p)) {
+		if (*p == '\0' || isspecialver(*p)) {
 			if (lq != '.') {
 				*q++ = '.';
 			}
@@ -76,6 +78,12 @@ php_canonicalize_version(const char *version)
 	}
 
 	return buf;
+}
+
+PHPAPI char *
+php_canonicalize_version(const char *version)
+{
+	return php_canonicalize_version_ex(version, strlen(version));
 }
 
 /* }}} */
@@ -123,8 +131,20 @@ static int compare_special_version_forms(char *form1, char *form2)
 /* }}} */
 /* {{{ php_version_compare() */
 
+static char *php_copy_special_version(const char *version, size_t len)
+{
+	char *copy = estrndup(version, len);
+
+	for (size_t i = 0; i < len; i++) {
+		if (copy[i] == '\0') {
+			copy[i] = '.';
+		}
+	}
+	return copy;
+}
+
 PHPAPI int
-php_version_compare(const char *orig_ver1, const char *orig_ver2)
+php_version_compare_ex(const char *orig_ver1, size_t ver1_len, const char *orig_ver2, size_t ver2_len)
 {
 	char *ver1;
 	char *ver2;
@@ -132,22 +152,28 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 	long l1, l2;
 	int compare = 0;
 
-	if (!*orig_ver1 || !*orig_ver2) {
-		if (!*orig_ver1 && !*orig_ver2) {
+	if (ver1_len == 0 || ver2_len == 0) {
+		if (ver1_len == 0 && ver2_len == 0) {
 			return 0;
 		} else {
-			return *orig_ver1 ? 1 : -1;
+			return ver1_len != 0 ? 1 : -1;
 		}
 	}
 	if (orig_ver1[0] == '#') {
-		ver1 = estrdup(orig_ver1);
+		ver1 = php_copy_special_version(orig_ver1, ver1_len);
 	} else {
-		ver1 = php_canonicalize_version(orig_ver1);
+		ver1 = php_canonicalize_version_ex(orig_ver1, ver1_len);
 	}
 	if (orig_ver2[0] == '#') {
-		ver2 = estrdup(orig_ver2);
+		ver2 = php_copy_special_version(orig_ver2, ver2_len);
 	} else {
-		ver2 = php_canonicalize_version(orig_ver2);
+		ver2 = php_canonicalize_version_ex(orig_ver2, ver2_len);
+	}
+	if (!*ver1 || !*ver2) {
+		compare = *ver1 ? 1 : (*ver2 ? -1 : 0);
+		efree(ver1);
+		efree(ver2);
+		return compare;
 	}
 	p1 = n1 = ver1;
 	p2 = n2 = ver2;
@@ -204,6 +230,12 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 	return compare;
 }
 
+PHPAPI int
+php_version_compare(const char *orig_ver1, const char *orig_ver2)
+{
+	return php_version_compare_ex(orig_ver1, strlen(orig_ver1), orig_ver2, strlen(orig_ver2));
+}
+
 /* }}} */
 /* {{{ Compares two "PHP-standardized" version number strings */
 
@@ -215,13 +247,13 @@ PHP_FUNCTION(version_compare)
 	int compare;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_PATH(v1, v1_len)
-		Z_PARAM_PATH(v2, v2_len)
+		Z_PARAM_STRING(v1, v1_len)
+		Z_PARAM_STRING(v2, v2_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_NULL(op)
 	ZEND_PARSE_PARAMETERS_END();
 
-	compare = php_version_compare(v1, v2);
+	compare = php_version_compare_ex(v1, v1_len, v2, v2_len);
 	if (!op) {
 		RETURN_LONG(compare);
 	}
