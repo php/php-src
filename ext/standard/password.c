@@ -113,30 +113,54 @@ static zend_string* php_password_get_salt(zval *unused_, size_t required_salt_le
 
 /* bcrypt implementation */
 
-static bool php_password_bcrypt_get_cost(const zend_string *hash, zend_long *cost) {
+static bool php_password_bcrypt_get_cost(zend_array *options, zend_long *cost) {
+	zval *zcost;
+	if (options && (zcost = zend_hash_str_find(options, "cost", sizeof("cost")-1)) != NULL) {
+		*cost = zval_get_long(zcost);
+		return *cost >= 4 && *cost <= 31;
+	}
+
+	*cost = PHP_PASSWORD_BCRYPT_COST;
+	return true;
+}
+
+static bool php_password_bcrypt_parse(const zend_string *hash, zend_long *cost) {
 	const char *h = ZSTR_VAL(hash);
 
-	if ((ZSTR_LEN(hash) != 60) ||
-		(h[0] != '$') || (h[1] != '2') || (h[2] != 'y') || (h[3] != '$') ||
-		!ZEND_IS_DIGIT(h[4]) || !ZEND_IS_DIGIT(h[5]) || (h[6] != '$')) {
+	if (ZSTR_LEN(hash) != 60 ||
+		h[0] != '$' || h[1] != '2' || h[2] != 'y' || h[3] != '$' ||
+		!ZEND_IS_DIGIT(h[4]) || !ZEND_IS_DIGIT(h[5]) || h[6] != '$' ||
+		(h[28] != '.' && h[28] != 'O' && h[28] != 'e' && h[28] != 'u')
+	) {
 		return false;
 	}
 
-	*cost = (h[4] - '0') * 10 + (h[5] - '0');
+	unsigned char c = (h[4] - '0') * 10 + (h[5] - '0');
+	if (c < 4 || c > 31) {
+		return false;
+	}
 
-	return *cost >= 4 && *cost <= 31;
+	for (size_t i = 7; i < 60; i++) {
+		if (h[i] < '.' || h[i] > 'z' ||	(h[i] > '9' && h[i] < 'A') || (h[i] > 'Z' && h[i] < 'a')) {
+			return false;
+		}
+	}
+
+	if (cost != NULL) {
+		*cost = (zend_long) c;
+	}
+
+	return true;
 }
 
 static bool php_password_bcrypt_valid(const zend_string *hash) {
-	zend_long cost;
-
-	return php_password_bcrypt_get_cost(hash, &cost);
+	return php_password_bcrypt_parse(hash, NULL);
 }
 
 static int php_password_bcrypt_get_info(zval *return_value, const zend_string *hash) {
 	zend_long cost;
 
-	if (!php_password_bcrypt_get_cost(hash, &cost)) {
+	if (!php_password_bcrypt_parse(hash, &cost)) {
 		/* Should never get called this way. */
 		return FAILURE;
 	}
@@ -146,17 +170,14 @@ static int php_password_bcrypt_get_info(zval *return_value, const zend_string *h
 }
 
 static bool php_password_bcrypt_needs_rehash(const zend_string *hash, zend_array *options) {
-	zval *znew_cost;
-	zend_long old_cost;
-	zend_long new_cost = PHP_PASSWORD_BCRYPT_COST;
+	zend_long old_cost, new_cost;
 
-	if (!php_password_bcrypt_get_cost(hash, &old_cost)) {
+	if (!php_password_bcrypt_parse(hash, &old_cost)) {
 		/* Should never get called this way. */
 		return 1;
 	}
-	if (options && (znew_cost = zend_hash_str_find(options, "cost", sizeof("cost")-1)) != NULL) {
-		new_cost = zval_get_long(znew_cost);
-	}
+
+	php_password_bcrypt_get_cost(options, &new_cost);
 
 	return old_cost != new_cost;
 }
@@ -188,19 +209,14 @@ static zend_string* php_password_bcrypt_hash(const zend_string *password, zend_a
 	char hash_format[10];
 	size_t hash_format_len;
 	zend_string *result, *hash, *salt;
-	zval *zcost;
-	zend_long cost = PHP_PASSWORD_BCRYPT_COST;
+	zend_long cost;
 
 	if (memchr(ZSTR_VAL(password), '\0', ZSTR_LEN(password))) {
 		zend_value_error("Bcrypt password must not contain null character");
 		return NULL;
 	}
 
-	if (options && (zcost = zend_hash_str_find(options, "cost", sizeof("cost")-1)) != NULL) {
-		cost = zval_get_long(zcost);
-	}
-
-	if (cost < 4 || cost > 31) {
+	if (!php_password_bcrypt_get_cost(options, &cost)) {
 		zend_value_error("Invalid bcrypt cost parameter specified: " ZEND_LONG_FMT, cost);
 		return NULL;
 	}
