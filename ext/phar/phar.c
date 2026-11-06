@@ -2791,9 +2791,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *phar, zen
 				php_stream_close(oldfile);
 			}
 			php_stream_close(newfile);
-			if (error) {
-				spprintf(error, 0, "unable to compress file \"%s\" to new phar \"%s\", compressed file is too large", ZSTR_VAL(entry->filename), ZSTR_VAL(phar->fname));
-			}
+			spprintf(error, 0, "unable to compress file \"%s\" to new phar \"%s\", compressed file is too large", ZSTR_VAL(entry->filename), ZSTR_VAL(phar->fname));
 			goto cleanup;
 		}
 		entry->compressed_filesize = php_stream_tell(entry->cfp) - entry->header_offset;
