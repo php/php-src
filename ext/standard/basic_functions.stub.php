@@ -2275,9 +2275,9 @@ function headers_list(): array {}
 
 function htmlspecialchars(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, ?string $encoding = null, bool $double_encode = true): string {}
 
-function htmlspecialchars_decode(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401): string {}
+function htmlspecialchars_decode(string $string, int $flags = ENT_QUOTES | ENT_HTML401): string {}
 
-function html_entity_decode(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, ?string $encoding = null): string {}
+function html_entity_decode(string $string, int $flags = ENT_QUOTES | ENT_HTML401, ?string $encoding = null): string {}
 
 function htmlentities(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, ?string $encoding = null, bool $double_encode = true): string {}
 

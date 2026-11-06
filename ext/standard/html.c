@@ -1608,7 +1608,7 @@ PHP_FUNCTION(htmlspecialchars)
 PHP_FUNCTION(htmlspecialchars_decode)
 {
 	zend_string *str;
-	zend_long quote_style = ENT_QUOTES|ENT_SUBSTITUTE;
+	zend_long quote_style = ENT_QUOTES;
 	zend_string *replaced;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
@@ -1626,7 +1626,7 @@ PHP_FUNCTION(htmlspecialchars_decode)
 PHP_FUNCTION(html_entity_decode)
 {
 	zend_string *str, *hint_charset = NULL;
-	zend_long quote_style = ENT_QUOTES|ENT_SUBSTITUTE;
+	zend_long quote_style = ENT_QUOTES;
 	zend_string *replaced;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
