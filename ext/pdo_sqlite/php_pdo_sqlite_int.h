@@ -57,6 +57,7 @@ typedef struct {
 	sqlite3_stmt *stmt;
 	unsigned pre_fetched:1;
 	unsigned done:1;
+	unsigned stepping:1;
 } pdo_sqlite_stmt;
 
 extern const pdo_driver_t pdo_sqlite_driver;
