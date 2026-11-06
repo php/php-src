@@ -7,7 +7,7 @@ class Line {
     public string $label = '';
 }
 
-class Empty_ {
+class NoDefault {
     public string $label;
 }
 
@@ -35,18 +35,18 @@ foreach (['first', 'second'] as $label) {
     var_dump($line->label);
 }
 
-$class = new ReflectionClass(Empty_::class);
-$property = new ReflectionProperty(Empty_::class, 'label');
-
-foreach ([1, 2] as $i) {
-    $empty = $class->newLazyGhost(function (Empty_ $empty) {});
-    var_dump($property->isInitialized($empty));
-    var_dump($class->isUninitializedLazyObject($empty));
-}
-
 $line = new Line();
 unset($line->label);
-var_dump((new ReflectionProperty(Line::class, 'label'))->isInitialized($line));
+var_dump($property->isInitialized($line));
+
+$class = new ReflectionClass(NoDefault::class);
+$property = new ReflectionProperty(NoDefault::class, 'label');
+
+for ($i = 0; $i < 2; $i++) {
+    $object = $class->newLazyGhost(function (NoDefault $object) {});
+    var_dump($property->isInitialized($object));
+    var_dump($class->isUninitializedLazyObject($object));
+}
 
 ?>
 --EXPECT--
