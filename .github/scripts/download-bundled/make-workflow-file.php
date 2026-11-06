@@ -6,7 +6,7 @@ declare(strict_types=1);
 namespace Phpsrc\Ci\DownloadBundled;
 
 // How to add a new bundled source?
-// 1. add a new entry for the source into $bundles variable below
+// 1. add a new entry for the source into $bundles variable below (name and monitored directories/files, path is generated from the name)
 // 2. run this make-workflow-file.php generator
 // 3. edit the generated .github/scripts/download-bundled/<name>.sh file, see and be consistent with other files
 
