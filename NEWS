@@ -12,6 +12,12 @@ PHP                                                                        NEWS
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
 
+- DOM:
+  . Fixed CSS selectors checking only the nearest element for a descendant or
+    subsequent-sibling combinator after a compound selector that starts with
+    :is(), :where(), :not(), :has() or :nth-child(An+B of S), by merging
+    lexbor/lexbor@f6c1d06. (phcorp)
+
 - MBString:
   . Fixed stack overflow in mb_check_encoding() and mb_convert_encoding() with
     deeply nested arrays. (Eyüp Can Akman)
