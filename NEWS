@@ -8,6 +8,8 @@ PHP                                                                        NEWS
     of class names in implements, catch, and trait use lists. (Jorg Sowa)
   . Fixed AST export dropping the braces of dynamic class constant fetches.
     (Jorg Sowa)
+  . Fixed bug GH-25238 (ReflectionProperty::isInitialized() skips lazy init once
+    cached). (lazerg)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
