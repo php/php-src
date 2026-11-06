@@ -531,6 +531,12 @@ static zend_object_iterator *spl_recursive_it_get_iterator(zend_class_entry *ce,
 static zend_result spl_get_iterator_from_aggregate(zval *retval, zend_class_entry *ce, zend_object *obj) {
 	zend_function **getiterator_cache =
 		ce->iterator_funcs_ptr ? &ce->iterator_funcs_ptr->zf_new_iterator : NULL;
+	if (getiterator_cache && ((*getiterator_cache)->common.fn_flags & ZEND_ACC_ABSTRACT)) {
+		zend_throw_error(NULL, "Cannot call abstract method %s::%s()",
+			ZSTR_VAL((*getiterator_cache)->common.scope->name),
+			ZSTR_VAL((*getiterator_cache)->common.function_name));
+		return FAILURE;
+	}
 	zend_call_method_with_0_params(obj, ce, getiterator_cache, "getiterator", retval);
 	if (EG(exception)) {
 		return FAILURE;
