@@ -1956,8 +1956,14 @@ ZEND_API zend_result zend_execute_script(int type, zval *retval, zend_file_handl
 		zend_destroy_static_vars(op_array);
 		destroy_op_array(op_array);
 		efree_size(op_array, sizeof(zend_op_array));
-	} else if (type == ZEND_REQUIRE) {
-		ret = FAILURE;
+	} else {
+		if (EG(delayed_oom).state == ZEND_OOM_STATE_PENDING) {
+			zend_clear_exception();
+			zend_handle_delayed_oom();
+		}
+		if (type == ZEND_REQUIRE) {
+			ret = FAILURE;
+		}
 	}
 
 	return ret;

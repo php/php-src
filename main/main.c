@@ -2771,6 +2771,11 @@ PHPAPI zend_result php_lint_script(zend_file_handle *file)
 			efree(op_array);
 			retval = SUCCESS;
 		}
+		if (EG(delayed_oom).state == ZEND_OOM_STATE_PENDING) {
+			retval = FAILURE;
+			zend_clear_exception();
+			zend_handle_delayed_oom();
+		}
 	} zend_end_try();
 	if (EG(exception)) {
 		zend_exception_error(EG(exception), E_ERROR);
