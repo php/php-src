@@ -2614,7 +2614,8 @@ zend_module_entry zend_test_module_entry = {
 	PHP_GINIT(zend_test),
 	PHP_GSHUTDOWN(zend_test),
 	NULL,
-	STANDARD_MODULE_PROPERTIES_EX_WITH_CHILD_INIT(zend_test_child_init)
+	STANDARD_MODULE_PROPERTIES_EX,
+	.child_init_func = zend_test_child_init
 };
 
 #ifdef COMPILE_DL_ZEND_TEST

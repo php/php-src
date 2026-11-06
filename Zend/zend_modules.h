@@ -45,11 +45,12 @@
 
 #define ZEND_MODULE_BUILD_ID "API" ZEND_TOSTR(ZEND_MODULE_API_NO) ZEND_BUILD_TS ZEND_BUILD_DEBUG ZEND_BUILD_SYSTEM ZEND_BUILD_EXTRA
 
-#define STANDARD_MODULE_PROPERTIES_EX_WITH_CHILD_INIT(child_init) \
-	0, 0, NULL, 0, ZEND_MODULE_BUILD_ID, child_init
-
 #define STANDARD_MODULE_PROPERTIES_EX \
-	STANDARD_MODULE_PROPERTIES_EX_WITH_CHILD_INIT(NULL)
+	.module_started = 0, \
+	.type = 0, \
+	.handle = NULL, \
+	.module_number = 0, \
+	.build_id = ZEND_MODULE_BUILD_ID
 
 #define NO_MODULE_GLOBALS 0, NULL, NULL, NULL
 
@@ -95,12 +96,12 @@ struct _zend_module_entry {
 	void (*globals_ctor)(void *global);
 	void (*globals_dtor)(void *global);
 	zend_result (*post_deactivate_func)(void);
+	void (*child_init_func)(void);
 	int module_started;
 	unsigned char type;
 	void *handle;
 	int module_number;
 	const char *build_id;
-	void (*child_init_func)(void);
 };
 
 #define MODULE_DEP_REQUIRED		1

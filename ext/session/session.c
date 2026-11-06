@@ -3469,7 +3469,8 @@ zend_module_entry session_module_entry = {
 	PHP_GINIT(ps),
 	NULL,
 	NULL,
-	STANDARD_MODULE_PROPERTIES_EX_WITH_CHILD_INIT(PHP_CINIT(session))
+	STANDARD_MODULE_PROPERTIES_EX,
+	.child_init_func = PHP_CINIT(session)
 };
 
 #ifdef COMPILE_DL_SESSION
