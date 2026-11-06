@@ -191,6 +191,8 @@
 #define GC_THRESHOLD_STEP    10000
 #define GC_THRESHOLD_MAX     1000000000
 #define GC_THRESHOLD_TRIGGER 100
+/* A GC run may traverse this many live nodes per root added since the last run */
+#define GC_THRESHOLD_COST_RATIO 8
 
 /* GC flags */
 #define GC_HAS_DESTRUCTORS  (1<<0)
@@ -278,11 +280,13 @@ typedef struct _zend_gc_globals {
 	uint32_t          unused;			/* linked list of unused buffers    */
 	uint32_t          first_unused;		/* first unused buffer              */
 	uint32_t          gc_threshold;     /* GC collection threshold          */
+	uint32_t          gc_base_threshold; /* threshold from the collected count */
 	uint32_t          buf_size;			/* size of the GC buffer            */
 	uint32_t          num_roots;		/* number of roots in GC buffer     */
 
 	uint32_t gc_runs;					/* number of GC runs since reset */
 	uint32_t collected;					/* number of collected nodes since reset */
+	size_t visited;						/* number of nodes traversed by the last run */
 
 	zend_hrtime_t activated_at;			/* the timestamp of the last reset */
 	zend_hrtime_t collector_time;		/* time spent running GC (ns) */
@@ -521,6 +525,7 @@ static void gc_globals_ctor_ex(zend_gc_globals *gc_globals)
 	gc_globals->unused = GC_INVALID;
 	gc_globals->first_unused = GC_INVALID;
 	gc_globals->gc_threshold = GC_INVALID;
+	gc_globals->gc_base_threshold = GC_INVALID;
 	gc_globals->buf_size = GC_INVALID;
 	gc_globals->num_roots = 0;
 
@@ -571,6 +576,8 @@ void gc_reset(void)
 		GC_G(unused) = GC_INVALID;
 		GC_G(first_unused) = GC_FIRST_ROOT;
 		GC_G(num_roots) = 0;
+		/* The run cost depends on the live graph of the request */
+		GC_G(gc_threshold) = GC_G(gc_base_threshold);
 
 		GC_G(gc_runs) = 0;
 		GC_G(collected) = 0;
@@ -608,6 +615,7 @@ ZEND_API bool gc_enable(bool enable)
 		GC_G(buf)[0].ref = NULL;
 		GC_G(buf_size) = GC_DEFAULT_BUF_SIZE;
 		GC_G(gc_threshold) = GC_THRESHOLD_DEFAULT;
+		GC_G(gc_base_threshold) = GC_THRESHOLD_DEFAULT;
 		gc_reset();
 	}
 	return old_enabled;
@@ -656,35 +664,49 @@ static void gc_grow_root_buffer(void)
 	GC_G(buf_size) = new_size;
 }
 
+static void gc_grow_root_buffer_to(size_t min_size)
+{
+	size_t new_size = GC_G(buf_size);
+
+	ZEND_ASSERT(min_size <= GC_MAX_BUF_SIZE);
+	if (new_size >= min_size) {
+		return;
+	}
+	while (new_size < min_size && new_size < GC_BUF_GROW_STEP) {
+		new_size *= 2;
+	}
+	if (new_size < min_size) {
+		new_size += ZEND_MM_ALIGNED_SIZE_EX(min_size - new_size, GC_BUF_GROW_STEP);
+	}
+	if (new_size > GC_MAX_BUF_SIZE) {
+		new_size = GC_MAX_BUF_SIZE;
+	}
+	GC_G(buf) = perealloc(GC_G(buf), sizeof(gc_root_buffer) * new_size, 1);
+	GC_G(buf_size) = new_size;
+}
+
 /* Adjust the GC activation threshold given the number of nodes collected by the last run */
 static void gc_adjust_threshold(int count)
 {
-	uint32_t new_threshold;
+	uint32_t base = GC_G(gc_base_threshold);
+	size_t live, threshold;
 
-	/* TODO Very simple heuristic for dynamic GC buffer resizing:
-	 * If there are "too few" collections, increase the collection threshold
+	/* If there are "too few" collections, increase the collection threshold
 	 * by a fixed step */
 	if (count < GC_THRESHOLD_TRIGGER || GC_G(num_roots) >= GC_G(gc_threshold)) {
-		/* increase */
-		if (GC_G(gc_threshold) < GC_THRESHOLD_MAX) {
-			new_threshold = GC_G(gc_threshold) + GC_THRESHOLD_STEP;
-			if (new_threshold > GC_THRESHOLD_MAX) {
-				new_threshold = GC_THRESHOLD_MAX;
-			}
-			if (new_threshold > GC_G(buf_size)) {
-				gc_grow_root_buffer();
-			}
-			if (new_threshold <= GC_G(buf_size)) {
-				GC_G(gc_threshold) = new_threshold;
-			}
-		}
-	} else if (GC_G(gc_threshold) > GC_THRESHOLD_DEFAULT) {
-		new_threshold = GC_G(gc_threshold) - GC_THRESHOLD_STEP;
-		if (new_threshold < GC_THRESHOLD_DEFAULT) {
-			new_threshold = GC_THRESHOLD_DEFAULT;
-		}
-		GC_G(gc_threshold) = new_threshold;
+		base = MIN(base + GC_THRESHOLD_STEP, GC_THRESHOLD_MAX);
+	} else if (base > GC_THRESHOLD_DEFAULT) {
+		base = MAX(base - GC_THRESHOLD_STEP, GC_THRESHOLD_DEFAULT);
 	}
+	GC_G(gc_base_threshold) = base;
+
+	/* Wait for enough new roots to pay for the live nodes that the run traversed */
+	live = GC_G(visited) > (size_t)count ? GC_G(visited) - (size_t)count : 0;
+	threshold = MAX(live / GC_THRESHOLD_COST_RATIO + GC_FIRST_ROOT, base);
+	threshold = MIN(threshold, GC_THRESHOLD_MAX);
+
+	gc_grow_root_buffer_to(threshold);
+	GC_G(gc_threshold) = (uint32_t)threshold;
 }
 
 /* Perform a GC run and then add a node as a possible root. */
@@ -1049,6 +1071,7 @@ static void gc_mark_grey(zend_refcounted *ref, gc_stack *stack)
 
 tail_call:
 	GC_BENCH_INC(zval_marked_grey);
+	GC_G(visited)++;
 
 	if (GC_TYPE(ref) == IS_OBJECT) {
 		zend_object *obj = (zend_object*)ref;
@@ -2010,6 +2033,9 @@ ZEND_API int zend_gc_collect_cycles(void)
 	bool did_rerun_gc = false;
 
 	zend_hrtime_t start_time = zend_hrtime();
+	if (!GC_G(gc_active)) {
+		GC_G(visited) = 0;
+	}
 	if (GC_G(num_roots) && !GC_G(gc_active)) {
 		zend_gc_remove_root_tmpvars();
 	}
