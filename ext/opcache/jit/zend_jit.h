@@ -161,6 +161,7 @@ extern zend_jit_globals jit_globals;
 
 int  zend_jit_op_array(zend_op_array *op_array, zend_script *script);
 int  zend_jit_script(zend_script *script);
+void zend_jit_restore_original_handler(const zend_op_array *op_array, uint32_t index, zend_op *opline);
 void zend_jit_unprotect(void);
 void zend_jit_protect(void);
 void zend_jit_init(void);

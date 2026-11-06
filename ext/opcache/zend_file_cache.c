@@ -37,6 +37,7 @@
 #include "zend_accelerator_hash.h"
 
 #ifdef HAVE_JIT
+#include "Optimizer/zend_func_info.h"
 #include "jit/zend_jit.h"
 #endif
 
@@ -500,6 +501,10 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
                                                zend_file_cache_metainfo *info,
                                                void                     *buf)
 {
+#ifdef HAVE_JIT
+	/* Function info and JIT extensions refer to shared memory and generated code. */
+	ZEND_SET_FUNC_INFO(op_array, NULL);
+#endif
 	ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, NULL);
 	ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
 
@@ -555,6 +560,11 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 
 	{
 		zend_op *opline, *end;
+#ifdef HAVE_JIT
+		zend_op *start_opline;
+		const zend_op_array *original =
+			(const zend_op_array*)((char*)script->mem + ((char*)op_array - (char*)buf));
+#endif
 
 #if !ZEND_USE_ABS_CONST_ADDR
 		zval *literals = op_array->literals;
@@ -565,7 +575,13 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 		opline = op_array->opcodes;
 		UNSERIALIZE_PTR(opline);
 		end = opline + op_array->last;
+#ifdef HAVE_JIT
+		start_opline = opline;
+#endif
 		while (opline < end) {
+#ifdef HAVE_JIT
+			zend_jit_restore_original_handler(original, (uint32_t)(opline - start_opline), opline);
+#endif
 			if (opline->opcode == ZEND_OP_DATA
 				&& (opline-1)->opcode == ZEND_DECLARE_ATTRIBUTED_CONST
 			) {
@@ -1147,13 +1163,6 @@ int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 	char *filename;
 	zend_file_cache_metainfo info;
 	void *mem, *buf;
-
-#ifdef HAVE_JIT
-	/* FIXME: dump jited codes out to file cache? */
-	if (JIT_G(on)) {
-		return FAILURE;
-	}
-#endif
 
 	if (ZCG(accel_directives).file_cache_read_only) {
 		return FAILURE;
@@ -2115,6 +2124,16 @@ use_process_mem:
 	script->corrupted = false;
 
 	if (cache_it) {
+#ifdef HAVE_JIT
+		if (JIT_G(on)) {
+			/* The file cache contains bytecode only. Rebuild JIT in shared memory. */
+			zend_shared_alloc_init_xlat_table();
+			zend_jit_unprotect();
+			zend_jit_script(&script->script);
+			zend_jit_protect();
+			zend_shared_alloc_destroy_xlat_table();
+		}
+#endif
 		ZCSG(map_ptr_last) = CG(map_ptr_last);
 		zend_accel_pending_ce_cache_commit();
 		script->dynamic_members.last_used = ZCG(request_time);
