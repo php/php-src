@@ -1,8 +1,10 @@
 /* This is a generated file, edit openssl.stub.php instead.
- * Stub hash: 7cad995b734d69f98d489edb97a7878a4ea8f47e */
+ * Stub hash: 3da1308c2a61aeb7a402d7c9b409aa001f73db94
+ * Has decl header: yes */
 
 #include "zend_attributes.h"
 #include "zend_constants.h"
+#include "zend_enum.h"
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_export_to_file, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, certificate, OpenSSLCertificate, MAY_BE_STRING, NULL)
@@ -411,6 +413,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_password_verify, 0, 3, _
 ZEND_END_ARG_INFO()
 #endif
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_get_channel_binding, 0, 2, IS_STRING, 0)
+	ZEND_ARG_INFO(0, stream)
+	ZEND_ARG_OBJ_INFO(0, channel_binding_type, Openssl\\ChannelBindingType, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Openssl_Psk___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, psk, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, identity, IS_STRING, 1, "null")
@@ -516,6 +523,7 @@ ZEND_FUNCTION(openssl_get_cert_locations);
 ZEND_FUNCTION(openssl_password_hash);
 ZEND_FUNCTION(openssl_password_verify);
 #endif
+ZEND_FUNCTION(openssl_get_channel_binding);
 ZEND_METHOD(Openssl_Psk, __construct);
 ZEND_METHOD(Openssl_Session, export);
 ZEND_METHOD(Openssl_Session, import);
@@ -600,6 +608,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(openssl_password_hash, arginfo_openssl_password_hash)
 	ZEND_FE(openssl_password_verify, arginfo_openssl_password_verify)
 #endif
+	ZEND_FE(openssl_get_channel_binding, arginfo_openssl_get_channel_binding)
 	ZEND_FE_END
 };
 
@@ -835,6 +844,38 @@ static zend_class_entry *register_class_Openssl_OpensslException(zend_class_entr
 
 	INIT_NS_CLASS_ENTRY(ce, "Openssl", "OpensslException", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Openssl_Exception, 0);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Openssl_UnsupportedChannelBindingException(zend_class_entry *class_entry_Openssl_OpensslException)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Openssl", "UnsupportedChannelBindingException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Openssl_OpensslException, 0);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Openssl_ChannelBindingType(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("Openssl\\ChannelBindingType", IS_STRING, NULL);
+
+	zval enum_case_TlsUnique_value;
+	zend_string *enum_case_TlsUnique_value_str = zend_string_init("tls-unique", strlen("tls-unique"), 1);
+	ZVAL_STR(&enum_case_TlsUnique_value, enum_case_TlsUnique_value_str);
+	zend_enum_add_case_cstr(class_entry, "TlsUnique", &enum_case_TlsUnique_value);
+
+	zval enum_case_TlsServerEndPoint_value;
+	zend_string *enum_case_TlsServerEndPoint_value_str = zend_string_init("tls-server-end-point", strlen("tls-server-end-point"), 1);
+	ZVAL_STR(&enum_case_TlsServerEndPoint_value, enum_case_TlsServerEndPoint_value_str);
+	zend_enum_add_case_cstr(class_entry, "TlsServerEndPoint", &enum_case_TlsServerEndPoint_value);
+
+	zval enum_case_TlsExporter_value;
+	zend_string *enum_case_TlsExporter_value_str = zend_string_init("tls-exporter", strlen("tls-exporter"), 1);
+	ZVAL_STR(&enum_case_TlsExporter_value, enum_case_TlsExporter_value_str);
+	zend_enum_add_case_cstr(class_entry, "TlsExporter", &enum_case_TlsExporter_value);
 
 	return class_entry;
 }
