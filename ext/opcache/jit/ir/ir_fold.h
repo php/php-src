@@ -891,7 +891,8 @@ IR_FOLD(MUL_OV(C_I64, C_I64))
 	int64_t res;
 	IR_ASSERT(IR_OPT_TYPE(opt) == op1_insn->type);
 	res = op1_insn->val.u64 * op2_insn->val.u64;
-	if ((op1_insn->val.i64 != 0 && res / op1_insn->val.i64 != op2_insn->val.i64) || res < min || res > max) {
+	if ((op1_insn->val.i64 == -1 && res == INT64_MIN)
+	 || (op1_insn->val.i64 != 0 && res / op1_insn->val.i64 != op2_insn->val.i64) || res < min || res > max) {
 		IR_FOLD_NEXT;
 	}
 	IR_FOLD_CONST_U(res);
@@ -3333,7 +3334,7 @@ IR_FOLD(MIN(MIN, _))
 IR_FOLD(MAX(MAX, _))
 {
 	if (op1_insn->op1 == op2 || op1_insn->op2 == op2) {
-		IR_FOLD_COPY(op2);
+		IR_FOLD_COPY(op1);
 	}
 	IR_FOLD_NEXT;
 }
