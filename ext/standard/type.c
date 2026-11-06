@@ -151,7 +151,8 @@ PHP_FUNCTION(intval)
 	}
 
 
-	if (base == 0 || base == 2) {
+	/* strtol() handles the "0x" prefix itself, but not "0b" or "0o" */
+	if (base == 0 || base == 2 || base == 8) {
 		char *strval = Z_STRVAL_P(num);
 		size_t strlen = Z_STRLEN_P(num);
 
@@ -167,24 +168,33 @@ PHP_FUNCTION(intval)
 				offset = 1;
 			}
 
-			if (strval[offset] == '0' && (strval[offset + 1] == 'b' || strval[offset + 1] == 'B')) {
+			int prefix_base = 0;
+			if (strval[offset] == '0') {
+				if (strval[offset + 1] == 'b' || strval[offset + 1] == 'B') {
+					prefix_base = 2;
+				} else if (strval[offset + 1] == 'o' || strval[offset + 1] == 'O') {
+					prefix_base = 8;
+				}
+			}
+
+			if (prefix_base != 0 && (base == 0 || base == prefix_base)) {
 				if (strval[0] != '-') {
-					/* Either "+0b", or "0b" */
-					RETURN_LONG(ZEND_STRTOL(strval + 2 + offset, NULL, 2));
+					/* Either "+0b"/"+0o", or "0b"/"0o" */
+					RETURN_LONG(ZEND_STRTOL(strval + 2 + offset, NULL, prefix_base));
 				}
 
 				char *tmpval;
-				strlen -= 2; /* Removing "0b" */
+				strlen -= 2; /* Removing "0b"/"0o" */
 				tmpval = emalloc(strlen + 1);
 
 				/* Place the unary symbol at pos 0 */
 				tmpval[0] = '-';
 
-				/* Copy the data from after "0b" to the end of the buffer */
+				/* Copy the data from after the prefix to the end of the buffer */
 				memcpy(tmpval + offset, strval + offset + 2, strlen - offset);
 				tmpval[strlen] = 0;
 
-				RETVAL_LONG(ZEND_STRTOL(tmpval, NULL, 2));
+				RETVAL_LONG(ZEND_STRTOL(tmpval, NULL, prefix_base));
 				efree(tmpval);
 				return;
 			}
