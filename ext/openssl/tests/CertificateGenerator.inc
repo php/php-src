@@ -44,6 +44,7 @@ class CertificateGenerator
         }
 
         return openssl_pkey_new([
+            'config' => self::CONFIG,
             'private_key_bits' => $keyLength,
             'private_key_type' => OPENSSL_KEYTYPE_RSA,
             'encrypt_key' => false,
@@ -102,7 +103,7 @@ class CertificateGenerator
 [ req ]
 distinguished_name = req_distinguished_name
 default_md = sha256
-default_bits = 1024
+default_bits = 2048
 
 [ req_distinguished_name ]
 
