@@ -9,17 +9,17 @@ intl
 // One side alone does not fit
 try {
     grapheme_str_pad("a", PHP_INT_MAX, "\u{1F600}");
-} catch (Error $e) {
-    echo $e->getMessage(), PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 // Each side fits, both together do not
 try {
     grapheme_str_pad("a", PHP_INT_MAX, "\u{00E9}", STR_PAD_BOTH);
-} catch (Error $e) {
-    echo $e->getMessage(), PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-String size overflow
-String size overflow
+Error: String size overflow
+Error: String size overflow
