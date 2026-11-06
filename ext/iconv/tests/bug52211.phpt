@@ -5,22 +5,13 @@ iconv
 --FILE--
 <?php
 
-// According to POSIX 2024, the to/from charset names are
-// implementation-defined. To keep this test true to its original
-// purpose, we retain the charsets used in bug 52211, but only when
-// the implementation is known to support them. Otherwise we default
-// both to ASCII, which should be supported everywhere (in particular
-// on musl) yet still considers the input invalid.
-$from_charset = "ASCII";
-$to_charset = "ASCII";
-
-if (ICONV_IMPL == "libiconv" || ICONV_IMPL == "glibc") {
-    $from_charset = "CP850";
-    $to_charset = "ISO-8859-1";
-}
-
-$str = "PATHOLOGIES MÉDICO-CHIRUR. ADUL. PL";
-$str_iconv = iconv($from_charset, $to_charset, $str );
+// The input contains an incomplete UTF-8 sequence: 0xC3 must be followed
+// by a continuation byte, but is followed by "D". Unlike characters that
+// are merely unrepresentable in the target charset (which some iconv
+// implementations replace instead of rejecting), an invalid source
+// sequence makes every implementation fail.
+$str = "PATHOLOGIES M\xC3DICO-CHIRUR. ADUL. PL";
+$str_iconv = iconv("UTF-8", "ASCII", $str);
 var_dump($str_iconv);
 
 ?>
