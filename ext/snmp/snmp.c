@@ -829,10 +829,33 @@ static bool php_snmp_parse_oid(
 }
 /* }}} */
 
+static bool php_snmp_parse_port(const char *port_string, unsigned short *port)
+{
+	unsigned int value = 0;
+
+	if (*port_string == '\0') {
+		return false;
+	}
+
+	do {
+		if (!ZEND_IS_DIGIT(*port_string)) {
+			return false;
+		}
+
+		value = value * 10 + (unsigned int) (*port_string - '0');
+		if (value > USHRT_MAX) {
+			return false;
+		}
+	} while (*++port_string != '\0');
+
+	*port = (unsigned short) value;
+	return true;
+}
+
 /* {{{ netsnmp_session_init
 	allocates memory for session and session->peername, caller should free it manually using netsnmp_session_free() and efree()
 */
-static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend_string *hostname, zend_string *community, int timeout, int retries)
+static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend_string *hostname, zend_string *community, int timeout, int retries, uint32_t hostname_arg_num)
 {
 	php_snmp_session *session;
 	char *pptr, *host_ptr;
@@ -841,7 +864,7 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 	struct sockaddr **psal;
 	struct sockaddr **res;
 	// TODO: Do not strip and re-add the port in peername?
-	unsigned remote_port = SNMP_PORT;
+	unsigned short remote_port = SNMP_PORT;
 
 	*session_p = (php_snmp_session *)emalloc(sizeof(php_snmp_session));
 	session = *session_p;
@@ -862,7 +885,10 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 		host_ptr++;
 		if ((pptr = strchr(host_ptr, ']'))) {
 			if (pptr[1] == ':') {
-				remote_port = atoi(pptr + 2);
+				if (!php_snmp_parse_port(pptr + 2, &remote_port)) {
+					zend_argument_value_error(hostname_arg_num, "remote port must be between 0 and %u", (unsigned int) USHRT_MAX);
+					return false;
+				}
 			}
 			*pptr = '\0';
 		} else {
@@ -871,7 +897,10 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 		}
 	} else { /* IPv4 address */
 		if ((pptr = strchr(host_ptr, ':'))) {
-			remote_port = atoi(pptr + 1);
+			if (!php_snmp_parse_port(pptr + 1, &remote_port)) {
+				zend_argument_value_error(hostname_arg_num, "remote port must be between 0 and %u", (unsigned int) USHRT_MAX);
+				return false;
+			}
 			*pptr = '\0';
 		}
 	}
@@ -921,7 +950,7 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 	if (remote_port != SNMP_PORT) {
 		size_t peername_length = strlen(session->peername);
 		pptr = session->peername + peername_length;
-		snprintf(pptr, MAX_NAME_LEN - peername_length, ":%d", remote_port);
+		snprintf(pptr, MAX_NAME_LEN - peername_length, ":%u", (unsigned int) remote_port);
 	}
 
 	php_network_freeaddresses(psal);
@@ -1314,7 +1343,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 	}
 
 	if (session_less_mode) {
-		if (!netsnmp_session_init(&session, version, a1, a2, timeout, retries)) {
+		if (!netsnmp_session_init(&session, version, a1, a2, timeout, retries, 1)) {
 			php_free_objid_query(&objid_query, oid_ht, value_ht, st);
 			netsnmp_session_free(&session);
 			RETURN_FALSE;
@@ -1618,7 +1647,7 @@ PHP_METHOD(SNMP, __construct)
 		netsnmp_session_free(&(snmp_object->session));
 	}
 
-	if (!netsnmp_session_init(&(snmp_object->session), version, a1, a2, timeout, retries)) {
+	if (!netsnmp_session_init(&(snmp_object->session), version, a1, a2, timeout, retries, 2)) {
 		return;
 	}
 	snmp_object->max_oids = 0;
