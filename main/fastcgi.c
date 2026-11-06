@@ -644,7 +644,7 @@ int fcgi_listen(const char *path, int backlog)
 	const char *s;
 	int       tcp = 0;
 	char      host[MAXPATHLEN];
-	short     port = 0;
+	zend_long port = 0;
 	int       listen_socket;
 	sa_t      sa;
 	socklen_t sock_len;
@@ -657,14 +657,20 @@ int fcgi_listen(const char *path, int backlog)
 #endif
 
 	if ((s = strchr(path, ':'))) {
-		port = atoi(s+1);
+		port = ZEND_STRTOL(s+1, NULL, 10);
+		if (port < 0 || port > 65535) {
+			return -1;
+		}
 		if (port != 0 && (s-path) < MAXPATHLEN) {
 			strncpy(host, path, s-path);
 			host[s-path] = '\0';
 			tcp = 1;
 		}
 	} else if (is_port_number(path)) {
-		port = atoi(path);
+		port = ZEND_STRTOL(path, NULL, 10);
+		if (port > 65535) {
+			return -1;
+		}
 		if (port != 0) {
 			host[0] = '\0';
 			tcp = 1;
