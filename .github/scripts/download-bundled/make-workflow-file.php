@@ -106,7 +106,7 @@ class Generator
 
     public function makeWorkflowFile(): void
     {
-        $content = <<<'EOD'
+        $content = <<<'YAML'
             name: Verify Bundled Files
 
             on:
@@ -140,7 +140,7 @@ class Generator
 
                   %steps%
 
-            EOD;
+            YAML;
 
         $paths = [
             '.github/scripts/download-bundled/**',
@@ -206,7 +206,7 @@ class Generator
             ? "# TODO\n"
             : file_get_contents($scriptPath);
 
-        $header = <<<'EOD'
+        $header = <<<'YAML'
             #!/bin/sh
             set -ex
             cd "$(dirname "$0")/../../.."
@@ -215,7 +215,7 @@ class Generator
             rm -rf "$tmp_dir"
 
 
-            EOD;
+            YAML;
 
         $header = str_replace('%tmp_dir%', '/tmp/php-src-download-bundled/' . $bundle->getNameForPath(), $header);
 
