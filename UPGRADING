@@ -121,6 +121,11 @@ PHP 8.7 UPGRADE NOTES
   . Added Transliterator::toRules() and transliterator_to_rules() to export
     rules that can be used to recreate a transliterator. The optional
     $escapeUnprintable argument escapes unprintable characters when true.
+  . Added Collator::getRules() and collator_get_rules() to retrieve collation
+    tailoring rules as a UTF-8 string. These describe locale-specific adjustments
+    to the root collation order; the full root/UCA rules are not included. An
+    empty string is returned if no tailoring rules are available, or false if
+    the rules cannot be converted to UTF-8.
 
 ========================================
 7. New Classes and Interfaces

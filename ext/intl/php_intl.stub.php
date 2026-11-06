@@ -308,6 +308,8 @@ function collator_asort(Collator $object, array &$array, int $flags = Collator::
 
 function collator_get_locale(Collator $object, int $type): string|false {}
 
+function collator_get_rules(Collator $object): string|false {}
+
 function collator_get_error_code(Collator $object): int|false {}
 
 function collator_get_error_message(Collator $object): string|false {}
