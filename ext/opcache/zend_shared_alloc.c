@@ -82,6 +82,12 @@ static const zend_shared_memory_handler_entry handler_table[] = {
 	{ NULL, NULL}
 };
 
+#ifdef ZEND_ACCEL_USE_PKEYS
+int zend_accel_pkey = 0; /* Memory Protection Key */
+#endif
+
+static void zend_accel_shared_protect_init(void);
+
 #ifndef ZEND_WIN32
 void zend_shared_alloc_create_lock(char *lockfile_path)
 {
@@ -268,6 +274,8 @@ int zend_shared_alloc_startup(size_t requested_size, size_t reserved_size)
 		ZSMMG(shared_segments)[i]->end = ZSMMG(shared_segments)[i]->size;
 	}
 
+	zend_accel_shared_protect_init();
+
 	shared_segments_array_size = ZSMMG(shared_segments_count) * S_H(segment_type_size)();
 
 	/* move shared_segments and shared_free to shared memory */
@@ -350,6 +358,13 @@ void zend_shared_alloc_shutdown(void)
 # ifdef ZTS
 	tsrm_mutex_free(zts_lock);
 # endif
+
+# ifdef ZEND_ACCEL_USE_PKEYS
+	if (zend_accel_pkey) {
+		pkey_free(zend_accel_pkey);
+	}
+# endif
+
 #endif
 #ifdef ZTS
 	tsrm_mutex_free(zts_protect_lock);
@@ -639,8 +654,39 @@ const char *zend_accel_get_shared_model(void)
 	return g_shared_model;
 }
 
+static void zend_accel_shared_protect_init(void)
+{
+#ifdef ZEND_ACCEL_USE_PKEYS
+	if (ZCG(accel_directives).protect_memory) {
+		zend_accel_pkey = pkey_alloc(0, 0);
+		if (zend_accel_pkey < 0) {
+			zend_accel_error(ACCEL_LOG_DEBUG, "zend_accel_shared_protect_init: pkey_alloc() failed [%d] %s", errno, strerror(errno));
+			zend_accel_pkey = 0;
+			return;
+		}
+
+		for (int i = 0; i < ZSMMG(shared_segments_count); i++) {
+			if (pkey_mprotect(ZSMMG(shared_segments)[i]->p, ZSMMG(shared_segments)[i]->end, PROT_READ | PROT_WRITE, zend_accel_pkey) != 0) {
+				zend_accel_error(ACCEL_LOG_DEBUG, "zend_accel_shared_protect_init: pkey_mprotect() failed [%d] %s", errno, strerror(errno));
+				zend_accel_pkey = 0;
+				break;
+			}
+		}
+	}
+#endif
+}
+
 void zend_accel_shared_protect(bool protected)
 {
+#ifdef ZEND_ACCEL_USE_PKEYS
+	if (zend_accel_pkey) {
+		if (pkey_set(zend_accel_pkey, protected ? PKEY_DISABLE_WRITE : 0) != 0) {
+			ZEND_UNREACHABLE();
+		}
+		return;
+	}
+#endif
+
 #if defined(HAVE_MPROTECT) || defined(ZEND_WIN32)
 	int i;
 

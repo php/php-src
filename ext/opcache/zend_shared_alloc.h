@@ -196,6 +196,8 @@ const char *zend_accel_get_shared_model(void);
  */
 void zend_accel_shared_protect(bool protected);
 
+extern int zend_accel_pkey;
+
 #ifdef USE_MMAP
 extern const zend_shared_memory_handlers zend_alloc_mmap_handlers;
 #endif

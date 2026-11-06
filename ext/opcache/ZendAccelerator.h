@@ -46,6 +46,11 @@
 # include <unistd.h>
 #endif
 
+#ifdef HAVE_PKEY_MPROTECT
+/* PKEY_DISABLE_WRITE */
+# include "sys/mman.h"
+#endif
+
 #include "zend_extensions.h"
 #include "zend_compile.h"
 #include "zend_API.h"
@@ -357,6 +362,10 @@ zend_op_array *zend_accel_compile_pfa(zend_ast *ast,
 		zend_string *pfa_func_name, bool cacheable_in_shm);
 
 END_EXTERN_C()
+
+#if defined(HAVE_PKEY_MPROTECT) && defined(PKEY_DISABLE_WRITE)
+# define ZEND_ACCEL_USE_PKEYS
+#endif
 
 /* memory write protection */
 #define SHM_PROTECT() \
