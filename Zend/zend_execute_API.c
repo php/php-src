@@ -1719,6 +1719,12 @@ static ZEND_COLD void report_class_fetch_error(zend_string *class_name, uint32_t
 	}
 
 	if (EG(exception)) {
+		if (EG(exception) == (void *)(uintptr_t)-1) {
+			return;
+		}
+		if (zend_is_unwind_exit(EG(exception)) || zend_is_graceful_exit(EG(exception))) {
+			return;
+		}
 		if (!(fetch_type & ZEND_FETCH_CLASS_EXCEPTION)) {
 			zend_exception_uncaught_error("During class fetch");
 		}
