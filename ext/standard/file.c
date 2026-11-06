@@ -1374,7 +1374,11 @@ PHP_FUNCTION(ftruncate)
 		RETURN_FALSE;
 	}
 
-	RETURN_BOOL(0 == php_stream_truncate_set_size(stream, size));
+	if (php_stream_truncate_set_size(stream, size) == 0) {
+		php_clear_stat_cache(0, NULL, 0);
+		RETURN_TRUE;
+	}
+	RETURN_FALSE;
 }
 /* }}} */
 PHPAPI void php_fstat(php_stream *stream, zval *return_value)
