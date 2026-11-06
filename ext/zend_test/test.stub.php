@@ -343,6 +343,8 @@ function zend_test_override_libxml_global_state(): void {}
     function zend_new_singleton_array(): array {}
 
     function zend_test_set_local_var(string $name, mixed $value): bool {}
+
+    function zend_test_register_argv_atexit(): void {}
 }
 
 namespace ZendTestNS {
