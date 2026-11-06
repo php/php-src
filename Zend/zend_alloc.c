@@ -1037,21 +1037,19 @@ static zend_always_inline void zend_mm_chunk_init(zend_mm_heap *heap, zend_mm_ch
 static zend_always_inline zend_mm_chunk *zend_mm_encode_cached_chunk(const zend_mm_heap *heap, const void *holder, const zend_mm_chunk *next)
 {
 #ifdef WORDS_BIGENDIAN
-	uintptr_t p = (uintptr_t)next;
+	return (zend_mm_chunk*)((uintptr_t)next ^ heap->shadow_key ^ (uintptr_t)holder);
 #else
-	uintptr_t p = BSWAPPTR((uintptr_t)next);
+	return (zend_mm_chunk*)(BSWAPPTR((uintptr_t)next) ^ heap->shadow_key ^ (uintptr_t)holder);
 #endif
-	/* ARX (Addition-XOR) non-linear mixing prevents linear algebraic shadow_key recovery */
-	return (zend_mm_chunk*)((p + heap->shadow_key) ^ (uintptr_t)holder);
 }
 
 static zend_always_inline zend_mm_chunk *zend_mm_decode_cached_chunk_key(uintptr_t key, const void *holder, const zend_mm_chunk *encoded)
 {
-	uintptr_t p = ((uintptr_t)encoded ^ (uintptr_t)holder) - key;
-#ifndef WORDS_BIGENDIAN
-	p = BSWAPPTR(p);
+#ifdef WORDS_BIGENDIAN
+	zend_mm_chunk *next = (zend_mm_chunk*)((uintptr_t)encoded ^ key ^ (uintptr_t)holder);
+#else
+	zend_mm_chunk *next = (zend_mm_chunk*)(BSWAPPTR((uintptr_t)encoded ^ key ^ (uintptr_t)holder));
 #endif
-	zend_mm_chunk *next = (zend_mm_chunk*)p;
 
 	ZEND_MM_CHECK(ZEND_MM_ALIGNED_OFFSET(next, ZEND_MM_CHUNK_SIZE) == 0, "zend_mm_heap corrupted");
 	return next;
