@@ -2009,7 +2009,10 @@ PHP_FUNCTION(imagewebp)
 		RETURN_THROWS();
 	}
 
-	gdImageWebpCtx(im, ctx, (int) quality);
+	if (!gdImageWebpCtxEx(im, ctx, (int) quality)) {
+		ctx->gd_free(ctx);
+		RETURN_FALSE;
+	}
 
 	ctx->gd_free(ctx);
 

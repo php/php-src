@@ -48,6 +48,7 @@ extern "C" {
 
 /* va_list needed in gdErrorMethod */
 #include <stdarg.h>
+#include <stdbool.h>
 
 /* The maximum number of palette entries in palette-based images.
 	In the wonderful new world of gd 2.0, you can of course have
@@ -633,6 +634,7 @@ void gdImageJpegCtx(gdImagePtr im, gdIOCtx *out, int quality);
 #define gdWebpLossless 101
 
 void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quality);
+bool gdImageWebpCtxEx (gdImagePtr im, gdIOCtx * outfile, int quality);
 
 /* Best to free this memory with gdFree(), not free() */
 void *gdImageJpegPtr(gdImagePtr im, int *size, int quality);
