@@ -1365,6 +1365,13 @@ PHP_METHOD(SQLite3, setAuthorizer)
 
 	SQLITE3_CHECK_INITIALIZED_FREE_TRAMPOLINE(db_obj, db_obj->initialised, SQLite3, &fcc);
 
+	/* Replacing the authorizer while it is executing would free the fcc still in use. */
+	if (db_obj->in_callback) {
+		zend_release_fcall_info_cache(&fcc);
+		zend_throw_error(NULL, "Cannot set authorizer while inside a callback");
+		RETURN_THROWS();
+	}
+
 	/* Clear previously set callback */
 	if (ZEND_FCC_INITIALIZED(db_obj->authorizer_fcc)) {
 		zend_fcc_dtor(&db_obj->authorizer_fcc);
