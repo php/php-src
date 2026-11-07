@@ -424,7 +424,7 @@ zend_result php_json_escape_string(
 			us = (unsigned char)s[0];
 			if (UNEXPECTED(us >= 0x80)) {
 				zend_result status;
-				us = php_next_utf8_char((unsigned char *)s, len, &pos, &status);
+				us = php_next_utf8_char_fast((const unsigned char *)s, len, &pos, &status);
 
 				/* check whether UTF8 character is correct */
 				if (UNEXPECTED(status != SUCCESS)) {
