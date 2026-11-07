@@ -433,12 +433,14 @@ static ssize_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 			HANDLE ph = (HANDLE)_get_osfhandle(data->fd);
 			int retry = 0;
 			DWORD avail_read = 0;
+			BOOL peeked;
 
 			do {
 				/* Look ahead to get the available data amount to read. Do the same
 					as read() does, however not blocking forever. In case it failed,
 					no data will be read (better than block). */
-				if (!PeekNamedPipe(ph, NULL, 0, NULL, &avail_read, NULL)) {
+				peeked = PeekNamedPipe(ph, NULL, 0, NULL, &avail_read, NULL);
+				if (!peeked) {
 					break;
 				}
 				/* If there's nothing to read, wait in 10us periods. */
@@ -446,6 +448,11 @@ static ssize_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 					usleep(10);
 				}
 			} while (0 == avail_read && retry++ < 3200000);
+
+			/* The wait ran out on an open pipe, this is not the end of the stream. */
+			if (peeked && 0 == avail_read) {
+				return 0;
+			}
 
 			/* Reduce the required data amount to what is available, otherwise read()
 				will block.*/
