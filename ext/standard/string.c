@@ -1521,6 +1521,7 @@ PHPAPI zend_string *php_basename(const char *s, size_t len, const char *suffix, 
 		 * State 1 is everything else. */
 		int state = 0;
 
+		php_mb_reset();
 		basename_start = s;
 		basename_end = s;
 		while (len > 0) {

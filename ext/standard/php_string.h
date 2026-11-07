@@ -57,16 +57,31 @@ PHPAPI size_t php_strcspn(const char *s1, const char *s2, const char *s1_end, co
 
 PHPAPI bool php_binary_string_shuffle(php_random_algo_with_state engine, char *str, zend_long len);
 
-#ifdef _REENTRANT
-# ifdef PHP_WIN32
-#  include <wchar.h>
-# endif
-# define php_mblen(ptr, len) ((int) mbrlen(ptr, len, &BG(mblen_state)))
-# define php_mb_reset() memset(&BG(mblen_state), 0, sizeof(BG(mblen_state)))
-#else
-# define php_mblen(ptr, len) mblen(ptr, len)
-# define php_mb_reset() php_ignore_value(mblen(NULL, 0))
-#endif
+#include <wchar.h>
+/* Starts a new string. A byte below 0x80 is one character when the locale uses ASCII
+ * characters as singletons */
+static zend_always_inline void php_mb_reset_ex(mbstate_t *state, bool *ascii_singletons)
+{
+	memset(state, 0, sizeof(*state));
+	*ascii_singletons = CG(ascii_compatible_locale);
+}
+
+static zend_always_inline int php_mblen_ex(const char *ptr, size_t len, mbstate_t *state, bool ascii_singletons)
+{
+	if (len > 0 && *ptr != '\0' && (unsigned char) *ptr < 0x80 && ascii_singletons) {
+		return 1;
+	}
+	int result = (int) mbrlen(ptr, len, state);
+	if (result == 0 && *ptr != '\0') {
+		/* A buffered character was flushed without consuming the byte; decode it from the initial state */
+		memset(state, 0, sizeof(*state));
+		result = (int) mbrlen(ptr, len, state);
+	}
+	return result;
+}
+
+#define php_mblen(ptr, len) php_mblen_ex(ptr, len, &BG(mblen_state), BG(mblen_ascii_singletons))
+#define php_mb_reset() php_mb_reset_ex(&BG(mblen_state), &BG(mblen_ascii_singletons))
 
 #define PHP_STR_PAD_LEFT		0
 #define PHP_STR_PAD_RIGHT		1
