@@ -27,6 +27,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-16396 (Failed to invoke user error handler during index
     conversion in JIT). (Jorg Sowa)
 
+- SOAP:
+  . Fixed bug GH-25267 (NULL dereference in to_xml_any() with integer key).
+    (lazerg)
+
 - Streams:
   . Fixed bug GH-22063 (Stream filter chain UAF on self-removal during
     callback). (Ilia Alshanetsky)
