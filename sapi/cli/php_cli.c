@@ -1243,12 +1243,19 @@ int main(int argc, char *argv[])
 	while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 1, 2))!=-1) {
 		switch (c) {
 			case 'c':
+				/* later -c override earlier -n */
+				ini_ignore = 0;
 				if (ini_path_override) {
 					free(ini_path_override);
 				}
 				ini_path_override = strdup(php_optarg);
 				break;
 			case 'n':
+				/* later -n override earlier -c */
+				if (ini_path_override) {
+					free(ini_path_override);
+				}
+				ini_path_override = NULL;
 				ini_ignore = 1;
 				break;
 			case 'd':
