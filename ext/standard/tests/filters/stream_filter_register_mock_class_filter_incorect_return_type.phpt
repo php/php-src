@@ -25,8 +25,8 @@ bool(true)
 resource(4) of type (stream filter)
 
 Warning: Object of class stdClass could not be converted to int in %s on line %d
-
-Warning: fwrite(): Unprocessed filter buckets remaining on input brigade in %s on line %d
 int(0)
 
 Warning: Object of class stdClass could not be converted to int in Unknown on line 0
+
+Warning: PHP Request Shutdown: Unprocessed filter buckets remaining on input brigade in Unknown on line 0
