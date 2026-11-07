@@ -3241,6 +3241,8 @@ static int accel_startup(zend_extension *extension)
 	/* Prevent unloading */
 	extension->handle = 0;
 
+	zend_observer_error_register(zend_accel_record_fatal_error);
+
 	return SUCCESS;
 }
 
