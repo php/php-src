@@ -33,6 +33,8 @@ typedef struct _php_bz2_filter_data {
 	char *outbuf;
 	size_t inbuf_len;
 	size_t outbuf_len;
+	size_t max_output;
+	size_t total_output;
 
 	bool persistent;
 	bool expect_concatenated : 1; /* Decompress option */
@@ -142,6 +144,12 @@ static php_stream_filter_status_t php_bz2_decompress_filter(
 			if (data->strm.avail_out < data->outbuf_len) {
 				php_stream_bucket *out_bucket;
 				size_t bucketlen = data->outbuf_len - data->strm.avail_out;
+				data->total_output += bucketlen;
+				if (data->max_output && data->total_output > data->max_output) {
+					php_stream_bucket_delref(bucket);
+					php_error_docref(NULL, E_NOTICE, "bzip2.decompress: decompressed output exceeded max_output");
+					return PSFS_ERR_FATAL;
+				}
 				out_bucket = php_stream_bucket_new(stream, estrndup(data->outbuf, bucketlen), bucketlen, 1, 0);
 				php_stream_bucket_append(buckets_out, out_bucket);
 				data->strm.avail_out = data->outbuf_len;
@@ -165,6 +173,11 @@ static php_stream_filter_status_t php_bz2_decompress_filter(
 			if (data->strm.avail_out < data->outbuf_len) {
 				size_t bucketlen = data->outbuf_len - data->strm.avail_out;
 
+				data->total_output += bucketlen;
+				if (data->max_output && data->total_output > data->max_output) {
+					php_error_docref(NULL, E_NOTICE, "bzip2.decompress: decompressed output exceeded max_output");
+					return PSFS_ERR_FATAL;
+				}
 				bucket = php_stream_bucket_new(stream, estrndup(data->outbuf, bucketlen), bucketlen, 1, 0);
 				php_stream_bucket_append(buckets_out, bucket);
 				data->strm.avail_out = data->outbuf_len;
@@ -207,6 +220,7 @@ static zend_result php_bz2_decompress_seek(
 	data->strm.next_out = data->outbuf;
 	data->strm.avail_out = data->outbuf_len;
 	data->status = PHP_BZ2_UNINITIALIZED;
+	data->total_output = 0;
 
 	/* Note: We don't reinitialize here - it will be done on first use in the filter function */
 
@@ -398,6 +412,7 @@ static php_stream_filter *php_bz2_decompress_filter_create(zval *filter_params, 
 	php_stream_filter_seekable_t write_seekable = PSFS_SEEKABLE_ALWAYS;
 	bool small_footprint = false;
 	bool expect_concatenated = false;
+	size_t max_output = 0;
 
 	if (filter_params) {
 		if (UNEXPECTED(
@@ -440,6 +455,20 @@ static php_stream_filter *php_bz2_decompress_filter_create(zval *filter_params, 
 			if (small) {
 				small_footprint = zend_is_true(small);
 			}
+
+			const zval *max_output_zv = zend_hash_str_find_ind(filter_params_ht, ZEND_STRL("max_output"));
+			if (max_output_zv) {
+				bool failed = false;
+				zend_long max_output_long = zval_try_get_long(max_output_zv, &failed);
+				if (UNEXPECTED(failed)) {
+					php_error_docref("filters.compression", E_WARNING, "Max output parameter must be of type int, %s given", zend_zval_type_name(max_output_zv));
+					return NULL;
+				} else if (max_output_long <= 0) {
+					php_error_docref("filters.compression", E_WARNING, "Max output must be greater than 0, " ZEND_LONG_FMT " given", max_output_long);
+					return NULL;
+				}
+				max_output = (size_t) max_output_long;
+			}
 		}
 	}
 
@@ -447,6 +476,7 @@ static php_stream_filter *php_bz2_decompress_filter_create(zval *filter_params, 
 	/* Save configuration for reset */
 	data->small_footprint = small_footprint;
 	data->expect_concatenated = expect_concatenated;
+	data->max_output = max_output;
 	data->status = PHP_BZ2_UNINITIALIZED;
 
 	return php_stream_filter_alloc(&php_bz2_decompress_ops, data, persistent, PSFS_SEEKABLE_START, write_seekable);
