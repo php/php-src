@@ -72,7 +72,6 @@ extern int php_init_environ(void);
 extern int php_shutdown_environ(void);
 
 #ifdef ZTS
-PHPAPI void php_reserve_tsrm_memory(void);
 PHPAPI bool php_tsrm_startup_ex(int expected_threads);
 PHPAPI bool php_tsrm_startup(void);
 

@@ -57,6 +57,7 @@ PHP 8.7 INTERNALS UPGRADE NOTES
   The core_globals_offset, sapi_globals_offset, cwd_globals_offset,
   zend_signal_globals_offset, accel_globals_offset, jit_globals_offset and
   ini_scanner_globals_offset symbols have been removed.
+- php_reserve_tsrm_memory() has been removed.
 - Removed zend_error_noreturn_unchecked().
 
 ========================

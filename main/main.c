@@ -2795,18 +2795,9 @@ PHPAPI zend_result php_lint_script(zend_file_handle *file)
 /* }}} */
 
 #ifdef ZTS
-/* {{{ php_reserve_tsrm_memory */
-PHPAPI void php_reserve_tsrm_memory(void)
-{
-	/* Core fast globals use native TLS and need no reserved TSRM space. */
-	tsrm_reserve(0);
-}
-/* }}} */
-
 PHPAPI bool php_tsrm_startup_ex(int expected_threads)
 {
 	bool ret = tsrm_startup(expected_threads, 1, 0, NULL);
-	php_reserve_tsrm_memory();
 	(void)ts_resource(0);
 	return ret;
 }
