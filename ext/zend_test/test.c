@@ -1648,6 +1648,13 @@ static PHP_INI_MH(OnUpdateZendTestObserveOplineInZendMM)
 	return OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
 
+static ZEND_FUNCTION(zend_test_child_init_count)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_LONG(ZT_G(child_init_count));
+}
+
 static ZEND_FUNCTION(zend_test_fill_packed_array)
 {
 	HashTable *parameter;
@@ -2588,6 +2595,11 @@ PHP_MINFO_FUNCTION(zend_test)
 	DISPLAY_INI_ENTRIES();
 }
 
+static void zend_test_child_init(void)
+{
+	ZT_G(child_init_count)++;
+}
+
 zend_module_entry zend_test_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"zend_test",
@@ -2602,7 +2614,8 @@ zend_module_entry zend_test_module_entry = {
 	PHP_GINIT(zend_test),
 	PHP_GSHUTDOWN(zend_test),
 	NULL,
-	STANDARD_MODULE_PROPERTIES_EX
+	STANDARD_MODULE_PROPERTIES_EX,
+	.child_init_func = zend_test_child_init
 };
 
 #ifdef COMPILE_DL_ZEND_TEST
