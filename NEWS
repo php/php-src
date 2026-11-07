@@ -148,6 +148,11 @@ PHP                                                                        NEWS
     initialization). (lazerg)
   . Fixed memory leak in get_meta_tags() when a tag opens while an attribute
     value is expected. (Jorg Sowa)
+  . Fixed bug GH-25284 (quoted_printable_encode() splits UTF-8 characters).
+    (Lazizbek Ergashev, Matthijs Kooijman)
+  . Fixed bug GH-24441 (quoted_printable_encode() produces lines longer than
+    76 characters for bytes 0xF5 to 0xFF). (Sebastian Turner,
+    Lazizbek Ergashev)
 
 - Streams:
   . Fixed bug GH-22063 (Stream filter chain UAF on self-removal during
