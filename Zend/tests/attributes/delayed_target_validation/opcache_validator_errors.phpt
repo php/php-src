@@ -7,10 +7,6 @@ opcache.preload={PWD}/opcache_validator_errors.inc
 opcache.file_cache_only=0
 --EXTENSIONS--
 opcache
---SKIPIF--
-<?php
-if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
-?>
 --FILE--
 <?php
 $r = new ReflectionClass('DemoTrait');
