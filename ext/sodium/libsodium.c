@@ -4193,13 +4193,16 @@ PHP_FUNCTION(sodium_crypto_ipcrypt_nd_encrypt)
 	size_t         ip_len;
 	unsigned char *key;
 	size_t         key_len;
+	char          *tweak = NULL;
+	size_t         tweak_len = 0;
 	unsigned char  bin[crypto_ipcrypt_ND_INPUTBYTES];
-	unsigned char  tweak[crypto_ipcrypt_ND_TWEAKBYTES];
+	unsigned char  tweak_buf[crypto_ipcrypt_ND_TWEAKBYTES];
+	const unsigned char *tweak_ptr;
 	unsigned char  encrypted[crypto_ipcrypt_ND_OUTPUTBYTES];
 	char           hex_out[crypto_ipcrypt_ND_OUTPUTBYTES * 2 + 1];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
-							  &ip, &ip_len, &key, &key_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|s!",
+							  &ip, &ip_len, &key, &key_len, &tweak, &tweak_len) == FAILURE) {
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
@@ -4207,12 +4210,20 @@ PHP_FUNCTION(sodium_crypto_ipcrypt_nd_encrypt)
 		zend_argument_error(sodium_exception_ce, 2, "must be SODIUM_CRYPTO_IPCRYPT_ND_KEYBYTES bytes long");
 		RETURN_THROWS();
 	}
+	if (tweak == NULL) {
+		randombytes_buf(tweak_buf, sizeof tweak_buf);
+		tweak_ptr = tweak_buf;
+	} else if (tweak_len != crypto_ipcrypt_ND_TWEAKBYTES) {
+		zend_argument_error(sodium_exception_ce, 3, "must be SODIUM_CRYPTO_IPCRYPT_ND_TWEAKBYTES bytes long");
+		RETURN_THROWS();
+	} else {
+		tweak_ptr = (const unsigned char *) tweak;
+	}
 	if (sodium_ip2bin(bin, ip, ip_len) != 0) {
 		zend_argument_error(sodium_exception_ce, 1, "must be a valid IP address");
 		RETURN_THROWS();
 	}
-	randombytes_buf(tweak, sizeof tweak);
-	crypto_ipcrypt_nd_encrypt(encrypted, bin, tweak, key);
+	crypto_ipcrypt_nd_encrypt(encrypted, bin, tweak_ptr, key);
 	sodium_bin2hex(hex_out, sizeof hex_out, encrypted, sizeof encrypted);
 	RETURN_STRINGL(hex_out, crypto_ipcrypt_ND_OUTPUTBYTES * 2);
 }
@@ -4269,13 +4280,16 @@ PHP_FUNCTION(sodium_crypto_ipcrypt_ndx_encrypt)
 	size_t         ip_len;
 	unsigned char *key;
 	size_t         key_len;
+	char          *tweak = NULL;
+	size_t         tweak_len = 0;
 	unsigned char  bin[crypto_ipcrypt_NDX_INPUTBYTES];
-	unsigned char  tweak[crypto_ipcrypt_NDX_TWEAKBYTES];
+	unsigned char  tweak_buf[crypto_ipcrypt_NDX_TWEAKBYTES];
+	const unsigned char *tweak_ptr;
 	unsigned char  encrypted[crypto_ipcrypt_NDX_OUTPUTBYTES];
 	char           hex_out[crypto_ipcrypt_NDX_OUTPUTBYTES * 2 + 1];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
-							  &ip, &ip_len, &key, &key_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|s!",
+							  &ip, &ip_len, &key, &key_len, &tweak, &tweak_len) == FAILURE) {
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
@@ -4283,12 +4297,20 @@ PHP_FUNCTION(sodium_crypto_ipcrypt_ndx_encrypt)
 		zend_argument_error(sodium_exception_ce, 2, "must be SODIUM_CRYPTO_IPCRYPT_NDX_KEYBYTES bytes long");
 		RETURN_THROWS();
 	}
+	if (tweak == NULL) {
+		randombytes_buf(tweak_buf, sizeof tweak_buf);
+		tweak_ptr = tweak_buf;
+	} else if (tweak_len != crypto_ipcrypt_NDX_TWEAKBYTES) {
+		zend_argument_error(sodium_exception_ce, 3, "must be SODIUM_CRYPTO_IPCRYPT_NDX_TWEAKBYTES bytes long");
+		RETURN_THROWS();
+	} else {
+		tweak_ptr = (const unsigned char *) tweak;
+	}
 	if (sodium_ip2bin(bin, ip, ip_len) != 0) {
 		zend_argument_error(sodium_exception_ce, 1, "must be a valid IP address");
 		RETURN_THROWS();
 	}
-	randombytes_buf(tweak, sizeof tweak);
-	crypto_ipcrypt_ndx_encrypt(encrypted, bin, tweak, key);
+	crypto_ipcrypt_ndx_encrypt(encrypted, bin, tweak_ptr, key);
 	sodium_bin2hex(hex_out, sizeof hex_out, encrypted, sizeof encrypted);
 	RETURN_STRINGL(hex_out, crypto_ipcrypt_NDX_OUTPUTBYTES * 2);
 }

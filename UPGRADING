@@ -105,6 +105,11 @@ PHP 8.7 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- Sodium:
+  . sodium_crypto_ipcrypt_nd_encrypt() and sodium_crypto_ipcrypt_ndx_encrypt()
+    accept an optional $tweak argument. Omitting it keeps the previous
+    behavior of generating a random tweak.
+
 - Standard:
   . stream_select() no longer fails once a watched descriptor exceeds
     FD_SETSIZE. The descriptor set now grows on demand on both POSIX (bitset)

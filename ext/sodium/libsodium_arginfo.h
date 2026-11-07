@@ -1,5 +1,5 @@
 /* This is a generated file, edit libsodium.stub.php instead.
- * Stub hash: 50b3cf45af139d4d38f0f46a152b5b1e2662dfd4 */
+ * Stub hash: 80e109d22f563766f7c7417c8479ab30ad3837c8 */
 
 #include "zend_attributes.h"
 #include "zend_constants.h"
@@ -502,7 +502,11 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_sodium_crypto_ipcrypt_nd_keygen arginfo_sodium_crypto_ipcrypt_keygen
 
-#define arginfo_sodium_crypto_ipcrypt_nd_encrypt arginfo_sodium_crypto_ipcrypt_encrypt
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_ipcrypt_nd_encrypt, 0, 2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, ip, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, tweak, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_ipcrypt_nd_decrypt, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, ciphertext_hex, IS_STRING, 0)
@@ -511,7 +515,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_sodium_crypto_ipcrypt_ndx_keygen arginfo_sodium_crypto_ipcrypt_keygen
 
-#define arginfo_sodium_crypto_ipcrypt_ndx_encrypt arginfo_sodium_crypto_ipcrypt_encrypt
+#define arginfo_sodium_crypto_ipcrypt_ndx_encrypt arginfo_sodium_crypto_ipcrypt_nd_encrypt
 
 #define arginfo_sodium_crypto_ipcrypt_ndx_decrypt arginfo_sodium_crypto_ipcrypt_nd_decrypt
 

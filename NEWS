@@ -142,6 +142,11 @@ PHP                                                                        NEWS
   . Fixed bug GH-24315 (Harden SoapClient cross-origin redirect handling).
     (Ilia Alshanetsky)
 
+- Sodium:
+  . sodium_crypto_ipcrypt_nd_encrypt() and sodium_crypto_ipcrypt_ndx_encrypt()
+    accept an optional tweak. Omitting it still generates a random one.
+    (rafamolina1)
+
 - SPL:
   . Fixed bug GH-23385 (SplDoublyLinkedList::serialize() use-after-free when
     __serialize() removes an element). (David Carlier)
