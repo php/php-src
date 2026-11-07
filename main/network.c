@@ -286,8 +286,10 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 typedef u_long php_non_blocking_flags_t;
 #  define SET_SOCKET_BLOCKING_MODE(sock, save) \
 	save = TRUE; ioctlsocket(sock, FIONBIO, &save)
+/* Winsock cannot query the current mode; callers pass freshly created
+ * (blocking) sockets, so restore to blocking. */
 #  define RESTORE_SOCKET_BLOCKING_MODE(sock, save) \
-	ioctlsocket(sock, FIONBIO, &save)
+	save = FALSE; ioctlsocket(sock, FIONBIO, &save)
 #else
 typedef int php_non_blocking_flags_t;
 #  define SET_SOCKET_BLOCKING_MODE(sock, save) \
