@@ -1493,6 +1493,15 @@ static zend_result php_session_send_cookie(void)
 
 	ZEND_ASSERT(strpbrk(ZSTR_VAL(PS(session_name)), SESSION_FORBIDDEN_CHARS) == NULL);
 
+	/* Validate the session ID again right before it is sent. The ID may have
+	 * been corrupted in memory after it was initially validated, and sending
+	 * it in a cookie could leak the corrupted contents. Do not fail the
+	 * session here, as user save handlers may use IDs outside the default
+	 * charset. */
+	if (UNEXPECTED(php_session_valid_key_ex(PS(id)) == FAILURE)) {
+		return SUCCESS;
+	}
+
 	/* URL encode id because it might be user supplied */
 	e_id = php_url_encode(ZSTR_VAL(PS(id)), ZSTR_LEN(PS(id)));
 
