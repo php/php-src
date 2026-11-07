@@ -840,6 +840,11 @@ PHP_FUNCTION(pclose)
 		PHP_Z_PARAM_STREAM(stream)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if ((stream->flags & PHP_STREAM_FLAG_NO_FCLOSE) != 0) {
+		php_error_docref(NULL, E_WARNING, "cannot close the provided stream, as it must not be manually closed");
+		RETURN_LONG(-1);
+	}
+
 	FG(pclose_wait) = 1;
 	zend_list_close(stream->res);
 	FG(pclose_wait) = 0;

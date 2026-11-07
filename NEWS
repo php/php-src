@@ -30,6 +30,8 @@ PHP                                                                        NEWS
     callback). (Ilia Alshanetsky)
   . Fixed leaks and data loss when user filter leaves buckets on input
     brigade. (ndossche, Matthias Goergens, Jakub Zelenka)
+  . Fixed bug GH-24175 (Use-after-free when pclose() closes a stream from its
+    user filter). (Edmond)
 
 19 Nov 2026, PHP 8.5.13
 
