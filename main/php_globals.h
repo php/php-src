@@ -22,9 +22,13 @@
 typedef struct _php_core_globals php_core_globals;
 
 #ifdef ZTS
-# define PG(v) ZEND_TSRMG_FAST(core_globals_offset, php_core_globals *, v)
 extern PHPAPI int core_globals_id;
-extern PHPAPI size_t core_globals_offset;
+# ifdef ZEND_TLS_DIRECT
+#  define PG(v) (core_globals.v)
+extern ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR php_core_globals core_globals;
+# else
+#  define PG(v) ZEND_TSRMG(core_globals_id, php_core_globals *, v)
+# endif
 #else
 # define PG(v) (core_globals.v)
 extern ZEND_API struct _php_core_globals core_globals;

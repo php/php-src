@@ -81,8 +81,9 @@ MUTEX_T cwd_mutex;
 #endif
 
 #ifdef ZTS
-ts_rsrc_id cwd_globals_id;
-size_t     cwd_globals_offset;
+CWD_API ts_rsrc_id cwd_globals_id;
+ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR virtual_cwd_globals cwd_globals;
+static void *cwd_globals_tls_addr(void) { return &cwd_globals; }
 #else
 virtual_cwd_globals cwd_globals;
 #endif
@@ -204,7 +205,7 @@ CWD_API void virtual_cwd_startup(void) /* {{{ */
 {
 	virtual_cwd_main_cwd_init(0);
 #ifdef ZTS
-	ts_allocate_fast_id(&cwd_globals_id, &cwd_globals_offset, sizeof(virtual_cwd_globals), (ts_allocate_ctor) cwd_globals_ctor, (ts_allocate_dtor) cwd_globals_dtor);
+	ts_allocate_tls_id(&cwd_globals_id, cwd_globals_tls_addr, sizeof(virtual_cwd_globals), (ts_allocate_ctor) cwd_globals_ctor, (ts_allocate_dtor) cwd_globals_dtor);
 #else
 	cwd_globals_ctor(&cwd_globals);
 #endif

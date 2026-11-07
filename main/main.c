@@ -96,7 +96,8 @@ PHPAPI int (*php_register_internal_extensions_func)(void) = php_register_interna
 php_core_globals core_globals;
 #else
 PHPAPI int core_globals_id;
-PHPAPI size_t core_globals_offset;
+ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR php_core_globals core_globals;
+static void *core_globals_tls_addr(void) { return &core_globals; }
 #endif
 
 #define SAFE_FILENAME(f) ((f)?(f):"-")
@@ -2214,7 +2215,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	php_output_startup();
 
 #ifdef ZTS
-	ts_allocate_fast_id(&core_globals_id, &core_globals_offset, sizeof(php_core_globals), (ts_allocate_ctor) core_globals_ctor, (ts_allocate_dtor) core_globals_dtor);
+	ts_allocate_tls_id(&core_globals_id, core_globals_tls_addr, sizeof(php_core_globals), (ts_allocate_ctor) core_globals_ctor, (ts_allocate_dtor) core_globals_dtor);
 #ifdef PHP_WIN32
 	ts_allocate_id(&php_win32_core_globals_id, sizeof(php_win32_core_globals), (ts_allocate_ctor) php_win32_core_globals_ctor, (ts_allocate_dtor) php_win32_core_globals_dtor);
 #endif
@@ -2794,32 +2795,9 @@ PHPAPI zend_result php_lint_script(zend_file_handle *file)
 /* }}} */
 
 #ifdef ZTS
-/* {{{ php_reserve_tsrm_memory */
-PHPAPI void php_reserve_tsrm_memory(void)
-{
-	/* CG/EG/GC globals live in native __thread storage and need no
-	 * reserved TSRM space. */
-	tsrm_reserve(
-		TSRM_ALIGNED_SIZE(sizeof(zend_ini_scanner_globals)) +
-		TSRM_ALIGNED_SIZE(sizeof(virtual_cwd_globals)) +
-#ifdef ZEND_SIGNALS
-		TSRM_ALIGNED_SIZE(sizeof(zend_signal_globals_t)) +
-#endif
-		TSRM_ALIGNED_SIZE(sizeof(php_core_globals)) +
-		TSRM_ALIGNED_SIZE(sizeof(sapi_globals_struct)) +
-		TSRM_ALIGNED_SIZE(sizeof(zend_accel_globals)) +
-#ifdef HAVE_JIT
-		TSRM_ALIGNED_SIZE(sizeof(zend_jit_globals)) +
-#endif
-		0
-	);
-}
-/* }}} */
-
 PHPAPI bool php_tsrm_startup_ex(int expected_threads)
 {
 	bool ret = tsrm_startup(expected_threads, 1, 0, NULL);
-	php_reserve_tsrm_memory();
 	(void)ts_resource(0);
 	return ret;
 }

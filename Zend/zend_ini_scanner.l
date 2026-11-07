@@ -103,7 +103,7 @@
 #define SCNG	INI_SCNG
 #ifdef ZTS
 ZEND_API ts_rsrc_id ini_scanner_globals_id;
-ZEND_API size_t ini_scanner_globals_offset;
+ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_ini_scanner_globals ini_scanner_globals;
 #else
 ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 #endif

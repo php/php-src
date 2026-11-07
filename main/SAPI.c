@@ -37,7 +37,8 @@
 
 #ifdef ZTS
 SAPI_API int sapi_globals_id;
-SAPI_API size_t sapi_globals_offset;
+ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR sapi_globals_struct sapi_globals;
+static void *sapi_globals_tls_addr(void) { return &sapi_globals; }
 #else
 sapi_globals_struct sapi_globals;
 #endif
@@ -69,7 +70,7 @@ SAPI_API void sapi_startup(sapi_module_struct *sf)
 	sapi_module = *sf;
 
 #ifdef ZTS
-	ts_allocate_fast_id(&sapi_globals_id, &sapi_globals_offset, sizeof(sapi_globals_struct), (ts_allocate_ctor) sapi_globals_ctor, (ts_allocate_dtor) sapi_globals_dtor);
+	ts_allocate_tls_id(&sapi_globals_id, sapi_globals_tls_addr, sizeof(sapi_globals_struct), (ts_allocate_ctor) sapi_globals_ctor, (ts_allocate_dtor) sapi_globals_dtor);
 # ifdef PHP_WIN32
 	_configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
 # endif
