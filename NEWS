@@ -8,6 +8,8 @@ PHP                                                                        NEWS
     of class names in implements, catch, and trait use lists. (Jorg Sowa)
   . Fixed AST export dropping the braces of dynamic class constant fetches.
     (Jorg Sowa)
+  . Fixed bug GH-25265 (Misaligned read for virtual internal props in
+    hooked subclass). (Lazizbek Ergashev)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
