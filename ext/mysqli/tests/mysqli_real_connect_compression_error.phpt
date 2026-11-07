@@ -4,20 +4,16 @@ Bug #80107 mysqli_query() fails for ~16 MB long query when compression is enable
 mysqli
 --SKIPIF--
 <?php
-require_once 'connect.inc';
-$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
-if (!$link) {
-    die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
-}
-$result = $link->query("SHOW VARIABLES LIKE 'max_allowed_packet'");
-if ($result->fetch_assoc()['Value'] < 0xffffff) {
-    die('skip max_allowed_packet is less than 0xffffff');
-}
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
 
 require_once 'connect.inc';
+
+$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+$link->query('SET GLOBAL max_allowed_packet = GREATEST(@@global.max_allowed_packet, 67108864)');
+$link->close();
 
 $data_size = 16777174;
 
