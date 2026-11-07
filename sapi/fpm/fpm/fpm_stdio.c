@@ -192,7 +192,14 @@ static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 	create_log_stream = !child->log_stream;
 	if (create_log_stream) {
 		log_stream = child->log_stream = malloc(sizeof(struct zlog_stream));
-		zlog_stream_init_ex(log_stream, ZLOG_WARNING, STDERR_FILENO);
+		int log_fd = STDERR_FILENO;
+#ifdef HAVE_SYSLOG_H
+		/* The FPM master redirects stderr to /dev/null when logging to syslog. */
+		if (fpm_use_error_log() && fpm_globals.error_log_fd == ZLOG_SYSLOG) {
+			log_fd = ZLOG_SYSLOG;
+		}
+#endif
+		zlog_stream_init_ex(log_stream, ZLOG_WARNING, log_fd);
 		zlog_stream_set_decorating(log_stream, child->wp->config->decorate_workers_output);
 		zlog_stream_set_wrapping(log_stream, ZLOG_TRUE);
 		zlog_stream_set_msg_prefix(log_stream, STREAM_SET_MSG_PREFIX_FMT,

@@ -12,6 +12,10 @@ PHP                                                                        NEWS
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
 
+- FPM:
+  . Fixed bug GH-25077 (Worker output lost when catch_workers_output is enabled
+    and error_log is syslog). (localzet)
+
 - MBString:
   . Fixed stack overflow in mb_check_encoding() and mb_convert_encoding() with
     deeply nested arrays. (Eyüp Can Akman)
