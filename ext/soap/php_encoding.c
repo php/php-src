@@ -3237,7 +3237,7 @@ static xmlNodePtr to_xml_any(encodeTypePtr type, zval *data, int style, xmlNodeP
 
 		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(data), name, el) {
 			ret = master_to_xml(enc, el, style, parent);
-		    if (ret &&
+		    if (ret && name &&
 		        ret->name != xmlStringTextNoenc) {
 				xmlNodeSetName(ret, BAD_CAST(ZSTR_VAL(name)));
 		    }
