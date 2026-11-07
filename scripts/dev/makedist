@@ -5,6 +5,8 @@
 # Written by Stig Bakken <ssb@guardian.no> 1997-05-28.
 # Adapted to Git by Stanislav Malyshev <stas@php.net>.
 
+set -ex
+
 # Check whether gtar is present (GNU tar)
 tar="$(command -v gtar || command -v tar)"
 

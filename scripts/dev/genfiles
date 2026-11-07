@@ -31,6 +31,8 @@
 #   For example:
 #     YACC=/path/to/bison ./genfiles
 
+set -ex
+
 YACC=${YACC:-bison}
 YACC="$YACC -l"
 YFLAGS="-Wall"

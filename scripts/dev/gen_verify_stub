@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -ex
+
 # Handle GNU vs. BSD checksum utilities
 sha256sum="$(which sha256sum)"
 sha256sum="${sha256sum:-$(which shasum) -a 256}"
