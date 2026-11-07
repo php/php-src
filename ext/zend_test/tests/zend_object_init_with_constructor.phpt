@@ -2,7 +2,6 @@
 Zend: Test object_init_with_constructor() API
 --EXTENSIONS--
 zend_test
-sysvmsg
 --FILE--
 <?php
 
