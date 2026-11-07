@@ -12,6 +12,10 @@ PHP                                                                        NEWS
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
 
+- FPM:
+  . Fixed worker output not being read after worker replacement with the
+    poll event mechanism. (Ilia Alshanetsky)
+
 - MBString:
   . Fixed stack overflow in mb_check_encoding() and mb_convert_encoding() with
     deeply nested arrays. (Eyüp Can Akman)

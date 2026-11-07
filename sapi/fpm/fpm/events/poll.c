@@ -206,7 +206,8 @@ static int fpm_event_poll_add(struct fpm_event_s *ev) /* {{{ */
 		pollfds[i].events = POLLIN;
 
 		/* remember the event place in the fd list and suppose next slot is free */
-		ev->index = next_free_slot++;
+		ev->index = i;
+		next_free_slot = i + 1;
 		if (next_free_slot >= npollfds) {
 			next_free_slot = 0;
 		}
