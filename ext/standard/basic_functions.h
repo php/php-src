@@ -88,7 +88,7 @@ typedef struct _php_basic_globals {
 	} serialize;
 	struct {
 		struct php_unserialize_data *data;
-		unsigned level;
+		struct php_unserialize_data *parked;
 	} unserialize;
 
 	/* url_scanner_ex.re */

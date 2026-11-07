@@ -22,6 +22,7 @@
 #include "php_string.h"
 #include "php_var.h"
 #include "zend_lazy_objects.h"
+#include "zend_observer.h"
 #include "zend_smart_str.h"
 #include "basic_functions.h"
 #include "php_incomplete_class.h"
@@ -1487,6 +1488,7 @@ PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, co
 	zval *retval;
 	HashTable *class_hash = NULL, *prev_class_hash;
 	zend_long prev_max_depth, prev_cur_depth;
+	bool nested = BG(unserialize).data != NULL;
 
 	p = (const unsigned char*) buf;
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
@@ -1553,7 +1555,7 @@ PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, co
 		}
 	}
 
-	if (BG(unserialize).level > 1) {
+	if (nested) {
 		retval = var_tmp_var(&var_hash);
 	} else {
 		retval = return_value;
@@ -1563,7 +1565,7 @@ PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, co
 			php_error_docref(NULL, E_WARNING, "Error at offset " ZEND_LONG_FMT " of %zd bytes",
 				(zend_long)((char*)p - buf), buf_len);
 		}
-		if (BG(unserialize).level <= 1) {
+		if (!nested) {
 			zval_ptr_dtor(return_value);
 		}
 		RETVAL_FALSE;
@@ -1574,7 +1576,7 @@ PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, co
 					(zend_long)((char*)p - buf), buf_len);
 			}
 		}
-		if (BG(unserialize).level > 1) {
+		if (nested) {
 			ZVAL_COPY(return_value, retval);
 		} else if (Z_REFCOUNTED_P(return_value)) {
 			zend_refcounted *ref = Z_COUNTED_P(return_value);
@@ -1661,5 +1663,7 @@ PHP_INI_END()
 PHP_MINIT_FUNCTION(var)
 {
 	REGISTER_INI_ENTRIES();
+	zend_observer_fiber_init_register(php_var_unserialize_fiber_init);
+	zend_observer_fiber_switch_register(php_var_unserialize_fiber_switch);
 	return SUCCESS;
 }
