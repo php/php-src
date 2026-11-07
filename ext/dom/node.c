@@ -1513,6 +1513,10 @@ PHP_METHOD(DOMNode, cloneNode)
 		if (clone_document && private_data != NULL) {
 			php_dom_private_data_destroy(private_data);
 		}
+		if (instanceof_function(intern->std.ce, dom_modern_node_class_entry)) {
+			php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+			RETURN_THROWS();
+		}
 		RETURN_FALSE;
 	}
 

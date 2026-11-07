@@ -13,8 +13,15 @@ foreach ([$dom->doctype->entities->getNamedItem("e"), $dom->doctype->childNodes[
     } catch (DOMException $e) {
         echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
+    try {
+        var_dump($decl->cloneNode());
+    } catch (DOMException $e) {
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+    }
 }
 ?>
 --EXPECT--
+DOMException: Invalid State Error
+DOMException: Invalid State Error
 DOMException: Invalid State Error
 DOMException: Invalid State Error
