@@ -6744,8 +6744,8 @@ handle_magic_get:
 		RETURN_FALSE;
 	}
 
-	if ((prop->flags & ZEND_ACC_VIRTUAL) && prop->hooks) {
-		if (!prop->hooks[ZEND_PROPERTY_HOOK_GET]) {
+	if (prop->flags & ZEND_ACC_VIRTUAL) {
+		if (prop->hooks && !prop->hooks[ZEND_PROPERTY_HOOK_GET]) {
 			RETURN_FALSE;
 		}
 	} else if (obj && (!prop->hooks || !prop->hooks[ZEND_PROPERTY_HOOK_GET])) {
