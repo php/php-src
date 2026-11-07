@@ -18,6 +18,7 @@
 #include "zend_portability.h"
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #define ZEND_GCC_PREREQ(x, y) \
 	((__GNUC__ == (x) && __GNUC_MINOR__ >= (y)) || (__GNUC__ > (x)))
@@ -414,6 +415,29 @@ static zend_always_inline uint32_t zend_atomic_load_acquire_32(const uint32_t *p
 }
 
 #define ZEND_ATOMIC_LOAD_ACQUIRE_32(ptr) zend_atomic_load_acquire_32(ptr)
+
+/* Naturally aligned machine-word atomics. Loads must not use a
+ * read-modify-write operation: the storage may be mapped read-only. */
+static zend_always_inline uintptr_t zend_atomic_load_acquire_uintptr(const uintptr_t *ptr)
+{
+#if defined(HAVE_GNUC_ATOMICS) || defined(HAVE_C11_ATOMICS)
+	return __atomic_load_n(ptr, __ATOMIC_ACQUIRE);
+#else
+	uintptr_t value = *(const volatile uintptr_t *)ptr;
+	ZEND_ATOMIC_FENCE_ACQUIRE();
+	return value;
+#endif
+}
+
+static zend_always_inline void zend_atomic_store_release_uintptr(uintptr_t *ptr, uintptr_t value)
+{
+#if defined(HAVE_GNUC_ATOMICS) || defined(HAVE_C11_ATOMICS)
+	__atomic_store_n(ptr, value, __ATOMIC_RELEASE);
+#else
+	ZEND_ATOMIC_FENCE_RELEASE();
+	*(volatile uintptr_t *)ptr = value;
+#endif
+}
 
 END_EXTERN_C()
 

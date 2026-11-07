@@ -23,6 +23,7 @@
 #define ZEND_ACCELERATOR_HASH_H
 
 #include "zend.h"
+#include "zend_atomic.h"
 
 /*
 	zend_accel_hash - is a hash table allocated in shared memory and
@@ -36,8 +37,9 @@
 	however, entries are still taken from the same 'hash_entries' array.
 	'key' and 'data' passed to zend_accel_hash_update() must be already
 	allocated in shared memory. Few keys may be resolved to the same data.
-	using 'indirect' entries, that point to other entries ('data' is actually
-	a pointer to another zend_accel_hash_entry).
+	using indirect entries, whose data is a tagged pointer to another entry.
+	The pointer and its kind are published together because readers do not
+	take the writer lock. Entries and scripts remain allocated until restart.
 	zend_accel_hash_update() requires exclusive lock, however,
 	zend_accel_hash_find() does not.
 */
@@ -47,13 +49,63 @@ typedef struct _zend_accel_hash_entry zend_accel_hash_entry;
 struct _zend_accel_hash_entry {
 	zend_ulong             hash_value;
 	zend_string           *key;
+	/* Immutable after the entry is published. */
 	zend_accel_hash_entry *next;
-	void                  *data;
-	bool                   indirect;
+	/* Tagged pointer: bit 0 selects an indirect entry; otherwise a script. */
+	uintptr_t              data;
 };
 
+#define ZEND_ACCEL_HASH_INDIRECT ((uintptr_t) 1)
+
+static zend_always_inline zend_accel_hash_entry *zend_accel_hash_load_entry(const uintptr_t *ptr)
+{
+	return (zend_accel_hash_entry *)zend_atomic_load_acquire_uintptr(ptr);
+}
+
+static zend_always_inline void zend_accel_hash_store_entry(uintptr_t *ptr, zend_accel_hash_entry *value)
+{
+	zend_atomic_store_release_uintptr(ptr, (uintptr_t)value);
+}
+
+static zend_always_inline uintptr_t zend_accel_hash_load_data(const zend_accel_hash_entry *entry)
+{
+	return zend_atomic_load_acquire_uintptr(&entry->data);
+}
+
+static zend_always_inline void zend_accel_hash_store_data(zend_accel_hash_entry *entry, uintptr_t value)
+{
+	zend_atomic_store_release_uintptr(&entry->data, value);
+}
+
+static zend_always_inline zend_accel_hash_entry *zend_accel_hash_indirect_target(uintptr_t data)
+{
+	ZEND_ASSERT(data & ZEND_ACCEL_HASH_INDIRECT);
+	return (zend_accel_hash_entry *)(data & ~ZEND_ACCEL_HASH_INDIRECT);
+}
+
+/* An entry returned by find_entry() can become indirect before the caller
+ * uses it. Resolve each atomically loaded value, including newly formed chains. */
+static zend_always_inline void *zend_accel_hash_entry_data(const zend_accel_hash_entry *entry)
+{
+	while (1) {
+		uintptr_t data = zend_accel_hash_load_data(entry);
+		if (!(data & ZEND_ACCEL_HASH_INDIRECT)) {
+			return (void *)data;
+		}
+		entry = zend_accel_hash_indirect_target(data);
+	}
+}
+
+/* Enumerators need the kind and data from the same snapshot. */
+static zend_always_inline void *zend_accel_hash_direct_data(const zend_accel_hash_entry *entry)
+{
+	uintptr_t data = zend_accel_hash_load_data(entry);
+	return (data & ZEND_ACCEL_HASH_INDIRECT) ? NULL : (void *)data;
+}
+
 typedef struct _zend_accel_hash {
-	zend_accel_hash_entry **hash_table;
+	/* Bucket heads are untagged entry addresses. */
+	uintptr_t             *hash_table;
 	zend_accel_hash_entry  *hash_entries;
 	uint32_t               num_entries;
 	uint32_t               max_num_entries;
@@ -76,10 +128,6 @@ void* zend_accel_hash_find(
 		zend_string            *key);
 
 zend_accel_hash_entry* zend_accel_hash_find_entry(
-		zend_accel_hash        *accel_hash,
-		zend_string            *key);
-
-int zend_accel_hash_unlink(
 		zend_accel_hash        *accel_hash,
 		zend_string            *key);
 
