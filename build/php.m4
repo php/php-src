@@ -2454,8 +2454,10 @@ dnl
 AC_DEFUN([PHP_PATCH_CONFIG_HEADERS], [
   AC_MSG_NOTICE([patching $1])
 
-  $SED -e 's/^#undef PACKAGE_[^ ]*/\/\* & \*\//g' < $srcdir/$1 \
-    > $srcdir/$1.tmp && mv $srcdir/$1.tmp $srcdir/$1
+  AS_MKDIR_P(["$(AS_DIRNAME(["$1"]))"])
+  $SED -e 's/^#undef PACKAGE_[^ ]*/\/\* & \*\//g' < "$srcdir/$1" \
+    > "$1.tmp" && mv "$1.tmp" "$1" ||
+    AC_MSG_ERROR([failed to patch $1])
 ])
 
 dnl
