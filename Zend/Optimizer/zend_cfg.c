@@ -335,9 +335,13 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 				flags |= ZEND_FUNC_HAS_CALLS;
 				break;
 			case ZEND_INIT_FCALL:
+			case ZEND_INIT_FCALL_BY_NAME:
 			case ZEND_INIT_NS_FCALL_BY_NAME:
 				zv = CRT_CONSTANT(opline->op2);
-				if (opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
+				if (opline->opcode == ZEND_INIT_FCALL_BY_NAME) {
+					/* The second literal is the lowercased name */
+					zv += 1;
+				} else if (opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
 					/* The third literal is the lowercased unqualified name */
 					zv += 2;
 				}

@@ -817,7 +817,7 @@ static bool zend_optimizer_ignore_function(zval *fbc_zv, zend_string *filename)
 	zend_function *fbc = Z_PTR_P(fbc_zv);
 
 	if (fbc->type == ZEND_INTERNAL_FUNCTION) {
-		return false;
+		return fbc->internal_function.module->type == MODULE_TEMPORARY;
 	} else if (fbc->type == ZEND_USER_FUNCTION) {
 		if (fbc->op_array.fn_flags & ZEND_ACC_PRELOADED) {
 			if (CG(compiler_options) & ZEND_COMPILE_WITH_FILE_CACHE) {
