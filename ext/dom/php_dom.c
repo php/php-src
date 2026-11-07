@@ -2683,6 +2683,13 @@ static xmlNodePtr dom_clone_helper(php_dom_libxml_ns_mapper *ns_mapper, xmlNodeP
 
 xmlNodePtr dom_clone_node(php_dom_libxml_ns_mapper *ns_mapper, xmlNodePtr node, xmlDocPtr doc, bool recursive)
 {
+	if (node->type == XML_NOTATION_NODE) {
+		const xmlEntity *notation = (const xmlEntity *) node;
+		xmlNodePtr clone = create_notation(NULL, notation->name, notation->ExternalID, notation->SystemID);
+		clone->doc = doc;
+		return clone;
+	}
+
 	if (node->type == XML_DTD_NODE) {
 		/* The behaviour w.r.t. the internal subset is implementation-defined according to DOM 3.
 		 * This follows what e.g. Java and C# do: copy it regardless of the recursiveness.
