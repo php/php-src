@@ -49,7 +49,8 @@ typedef struct _zend_accel_hash_entry zend_accel_hash_entry;
 struct _zend_accel_hash_entry {
 	zend_ulong             hash_value;
 	zend_string           *key;
-	/* Immutable after the entry is published. */
+	/* Immutable after the entry is published, until zend_accel_hash_clean()
+	 * reuses all entries during an OPcache restart (when no readers remain). */
 	zend_accel_hash_entry *next;
 	/* Tagged pointer: bit 0 selects an indirect entry; otherwise a script. */
 	uintptr_t              data;

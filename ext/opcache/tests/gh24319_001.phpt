@@ -16,6 +16,7 @@ opcache
 pcntl
 --SKIPIF--
 <?php
+if (getenv('SKIP_SLOW_TESTS')) die('skip slow test');
 if (PHP_OS_FAMILY === 'Windows') die('skip Unix symlinks required');
 if (!function_exists('stream_socket_pair')) die('skip stream_socket_pair required');
 ?>
