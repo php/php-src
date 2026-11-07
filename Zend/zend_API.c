@@ -3405,17 +3405,32 @@ void module_registry_unload(const zend_module_entry *module)
 
 ZEND_API void zend_activate_modules(void) /* {{{ */
 {
-	zend_module_entry **p = module_request_startup_handlers;
+	zend_module_entry ** volatile p = module_request_startup_handlers;
 
-	while (*p) {
-		zend_module_entry *module = *p;
+	zend_try {
+		while (*p) {
+			zend_module_entry *module = *p;
 
-		if (module->request_startup_func(module->type, module->module_number)==FAILURE) {
-			zend_error(E_WARNING, "request_startup() for %s module failed", module->name);
-			exit(1);
+			if (module->request_startup_func(module->type, module->module_number)==FAILURE) {
+				zend_error(E_WARNING, "request_startup() for %s module failed", module->name);
+				exit(1);
+			}
+			p++;
 		}
-		p++;
-	}
+	} zend_catch {
+		/* The request shutdown skips RSHUTDOWN unless every RINIT returned,
+		 * release what the modules activated so far hold (e.g. session locks) */
+		while (p > module_request_startup_handlers) {
+			zend_module_entry *module = *--p;
+
+			if (module->request_shutdown_func) {
+				zend_try {
+					module->request_shutdown_func(module->type, module->module_number);
+				} zend_end_try();
+			}
+		}
+		zend_bailout();
+	} zend_end_try();
 }
 /* }}} */
 
