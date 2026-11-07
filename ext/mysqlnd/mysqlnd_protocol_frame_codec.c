@@ -55,7 +55,8 @@ static ssize_t write_compressed_packet(
 	/* here we need to compress the data and then write it, first comes the compressed header */
 	size_t tmp_complen = to_be_sent;
 	size_t payload_size;
-	if (PASS == pfc->data->m.encode((compress_buf + COMPRESSED_HEADER_SIZE + MYSQLND_HEADER_SIZE), &tmp_complen,
+	if (to_be_sent >= MYSQLND_MIN_COMPRESS_LENGTH
+		&& PASS == pfc->data->m.encode((compress_buf + COMPRESSED_HEADER_SIZE + MYSQLND_HEADER_SIZE), &tmp_complen,
 							   uncompressed_payload, to_be_sent))
 	{
 		int3store(compress_buf + MYSQLND_HEADER_SIZE, to_be_sent);
