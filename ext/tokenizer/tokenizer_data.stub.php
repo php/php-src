@@ -119,6 +119,16 @@ const T_YIELD = UNKNOWN;
 const T_YIELD_FROM = UNKNOWN;
 /**
  * @var int
+ * @cvalue T_ASYNC
+ */
+const T_ASYNC = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_AWAIT
+ */
+const T_AWAIT = UNKNOWN;
+/**
+ * @var int
  * @cvalue T_INSTANCEOF
  */
 const T_INSTANCEOF = UNKNOWN;

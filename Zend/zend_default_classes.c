@@ -27,6 +27,7 @@
 #include "zend_weakrefs.h"
 #include "zend_enum.h"
 #include "zend_fibers.h"
+#include "zend_async.h"
 
 ZEND_API void zend_register_default_classes(void)
 {
@@ -39,4 +40,5 @@ ZEND_API void zend_register_default_classes(void)
 	zend_register_attribute_ce();
 	zend_register_enum_ce();
 	zend_register_fiber_ce();
+	zend_register_async_ce();
 }

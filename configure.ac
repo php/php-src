@@ -1766,6 +1766,7 @@ PHP_ADD_SOURCES([Zend], m4_normalize([
     zend_alloc.c
     zend_API.c
     zend_ast.c
+    zend_async.c
     zend_attributes.c
     zend_autoload.c
     zend_builtin_functions.c
