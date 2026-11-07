@@ -419,6 +419,7 @@ PHP_NEW_EXTENSION([standard], m4_normalize([
     incomplete_class.c
     info.c
     io_poll.c
+    io_terminal.c
     iptc.c
     levenshtein.c
     libavifinfo/avifinfo.c
