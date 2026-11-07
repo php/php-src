@@ -659,9 +659,11 @@ static zend_object *dom_objects_store_clone_obj(zend_object *zobject) /* {{{ */
 			xmlNodePtr cloned_node = dom_clone_node(php_dom_ns_mapper_from_private(private_data), node, node->doc, true);
 			if (cloned_node != NULL) {
 				dom_update_refcount_after_clone(intern, node, clone, cloned_node);
-			}
-			if (private_data != NULL) {
-				clone->document->private_data = php_dom_libxml_private_data_header(private_data);
+				if (private_data != NULL) {
+					clone->document->private_data = php_dom_libxml_private_data_header(private_data);
+				}
+			} else if (private_data != NULL && (node->type == XML_DOCUMENT_NODE || node->type == XML_HTML_DOCUMENT_NODE)) {
+				php_dom_private_data_destroy(private_data);
 			}
 		}
 	}
