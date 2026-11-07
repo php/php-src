@@ -23,6 +23,7 @@
 #endif
 
 #include <php.h>
+#include "ext/standard/php_string.h"
 #include "grapheme.h"
 #include "grapheme_util.h"
 
@@ -1150,6 +1151,222 @@ out_ustring2:
 out_ustring1:
 	efree(ustring1);
 }
+
+/* {{{ Returns the byte length, in the UTF-8 string str, of the first upos UTF-16 code units of ustr,
+ * its UTF-16 conversion. */
+static size_t grapheme_str_pad_utf8_offset(const zend_string *str, const UChar *ustr, int32_t upos)
+{
+	int32_t code_points = u_countChar32(ustr, upos);
+	int32_t offset = 0;
+	U8_FWD_N(ZSTR_VAL(str), offset, (int32_t) ZSTR_LEN(str), code_points);
+	return offset;
+}
+/* }}} */
+
+/* {{{ Counts the grapheme clusters of a UTF-8 string, but stops once limit clusters have been counted.
+ * Also stores the number of bytes taken by its first prefix1 and prefix2 clusters in bytes1 and bytes2,
+ * if the string has that many (0 otherwise). Returns false on failure. */
+static bool grapheme_str_pad_measure(const zend_string *str, size_t limit, size_t *count,
+	size_t prefix1, size_t *bytes1, size_t prefix2, size_t *bytes2)
+{
+	if (grapheme_ascii_check((const unsigned char *) ZSTR_VAL(str), ZSTR_LEN(str)) >= 0) {
+		*count = ZSTR_LEN(str);
+		*bytes1 = prefix1 <= ZSTR_LEN(str) ? prefix1 : 0;
+		*bytes2 = prefix2 <= ZSTR_LEN(str) ? prefix2 : 0;
+		return true;
+	}
+
+	if (UNEXPECTED(ZSTR_LEN(str) > INT32_MAX)) {
+		intl_error_set_code(nullptr, U_INDEX_OUTOFBOUNDS_ERROR);
+		intl_error_set_custom_msg(nullptr, "String is too long");
+		return false;
+	}
+
+	/* Like grapheme_strlen(), work on UTF-16. The conversion also rejects invalid UTF-8. */
+	UErrorCode ustatus = U_ZERO_ERROR;
+	UChar *ustr = nullptr;
+	int32_t ulen = 0;
+	intl_convert_utf8_to_utf16(&ustr, &ulen, ZSTR_VAL(str), ZSTR_LEN(str), &ustatus);
+
+	if (U_FAILURE(ustatus)) {
+		intl_error_set_code(nullptr, ustatus);
+		intl_error_set_custom_msg(nullptr, "Invalid UTF-8 string");
+		if (ustr) {
+			efree(ustr);
+		}
+		return false;
+	}
+
+	UBreakIterator *bi = grapheme_get_break_iterator(&ustatus);
+
+	if (U_FAILURE(ustatus)) {
+		intl_error_set_code(nullptr, ustatus);
+		intl_error_set_custom_msg(nullptr, "Error creating grapheme break iterator");
+		efree(ustr);
+		return false;
+	}
+
+	ubrk_setText(bi, ustr, ulen, &ustatus);
+
+	if (U_FAILURE(ustatus)) {
+		intl_error_set_code(nullptr, ustatus);
+		intl_error_set_custom_msg(nullptr, "Error setting up grapheme break iterator");
+		ubrk_close(bi);
+		efree(ustr);
+		return false;
+	}
+
+	size_t graphemes = 0;
+	int32_t upos1 = 0, upos2 = 0;
+
+	for (int32_t pos = ubrk_next(bi); pos != UBRK_DONE && graphemes < limit; pos = ubrk_next(bi)) {
+		graphemes++;
+		if (graphemes == prefix1) {
+			upos1 = pos;
+		}
+		if (graphemes == prefix2) {
+			upos2 = pos;
+		}
+	}
+
+	ubrk_close(bi);
+
+	*bytes1 = upos1 ? grapheme_str_pad_utf8_offset(str, ustr, upos1) : 0;
+	*bytes2 = upos2 ? grapheme_str_pad_utf8_offset(str, ustr, upos2) : 0;
+	*count = graphemes;
+	efree(ustr);
+	return true;
+}
+/* }}} */
+
+/* {{{ Writes full_copies copies of the padding string followed by its first remaining_bytes bytes. */
+static char *grapheme_str_pad_fill(char *buffer, const zend_string *pad, size_t full_copies, size_t remaining_bytes)
+{
+	if (full_copies > 0) {
+		size_t full_bytes = full_copies * ZSTR_LEN(pad);
+		if (ZSTR_LEN(pad) == 1) {
+			memset(buffer, ZSTR_VAL(pad)[0], full_bytes);
+			buffer += full_bytes;
+		} else {
+			const char *start = buffer;
+			const char *end = buffer + full_bytes;
+			buffer = (char *) zend_mempcpy(buffer, ZSTR_VAL(pad), ZSTR_LEN(pad));
+
+			/* Double the filled area on each iteration, like mb_str_pad(). */
+			while (buffer < end) {
+				size_t len = MIN((size_t) (buffer - start), (size_t) (end - buffer));
+				buffer = (char *) zend_mempcpy(buffer, start, len);
+			}
+		}
+	}
+	return (char *) zend_mempcpy(buffer, ZSTR_VAL(pad), remaining_bytes);
+}
+/* }}} */
+
+/* {{{ Pad a string to a certain length, counted in grapheme clusters, with another string */
+U_CFUNC PHP_FUNCTION(grapheme_str_pad)
+{
+	zend_string *input, *pad = ZSTR_CHAR(' ');
+	zend_long pad_to_length;
+	zend_long pad_type_val = PHP_STR_PAD_RIGHT;
+
+	ZEND_PARSE_PARAMETERS_START(2, 4)
+		Z_PARAM_STR(input)
+		Z_PARAM_LONG(pad_to_length)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR(pad)
+		Z_PARAM_LONG(pad_type_val)
+	ZEND_PARSE_PARAMETERS_END();
+
+	intl_error_reset(nullptr);
+
+	/* Counting stops past pad_to_length: a longer input is returned unchanged anyway. */
+	size_t input_length, unused;
+	if (!grapheme_str_pad_measure(input, pad_to_length < 0 ? 0 : (size_t) pad_to_length + 1, &input_length,
+			0, &unused, 0, &unused)) {
+		RETURN_FALSE;
+	}
+
+	if (pad_to_length < 0 || (size_t) pad_to_length <= input_length) {
+		RETURN_STR_COPY(input);
+	}
+
+	if (ZSTR_LEN(pad) == 0) {
+		zend_argument_must_not_be_empty_error(3);
+		RETURN_THROWS();
+	}
+
+	if (pad_type_val < PHP_STR_PAD_LEFT || pad_type_val > PHP_STR_PAD_BOTH) {
+		zend_argument_value_error(4, "must be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH");
+		RETURN_THROWS();
+	}
+
+	size_t num_pad_graphemes = (size_t) pad_to_length - input_length;
+	size_t left_pad = 0, right_pad = 0;
+	switch (pad_type_val) {
+		case PHP_STR_PAD_RIGHT:
+			right_pad = num_pad_graphemes;
+			break;
+		case PHP_STR_PAD_LEFT:
+			left_pad = num_pad_graphemes;
+			break;
+		case PHP_STR_PAD_BOTH:
+			left_pad = num_pad_graphemes / 2;
+			right_pad = num_pad_graphemes - left_pad;
+			break;
+	}
+
+	/* Only the first MAX(left_pad, right_pad) clusters of the padding string can be needed. If it has
+	 * that many, a prefix of it is enough on each side; otherwise it is repeated. */
+	size_t pad_length, left_remaining_bytes, right_remaining_bytes;
+	size_t full_left_copies = 0, full_right_copies = 0;
+	if (!grapheme_str_pad_measure(pad, MAX(left_pad, right_pad), &pad_length,
+			left_pad, &left_remaining_bytes, right_pad, &right_remaining_bytes)) {
+		RETURN_FALSE;
+	}
+	if (pad_length < MAX(left_pad, right_pad)) {
+		full_left_copies = left_pad / pad_length;
+		full_right_copies = right_pad / pad_length;
+		if (!grapheme_str_pad_measure(pad, pad_length, &unused,
+				left_pad % pad_length, &left_remaining_bytes, right_pad % pad_length, &right_remaining_bytes)) {
+			RETURN_FALSE;
+		}
+	}
+
+	if (UNEXPECTED(full_left_copies > (ZSTR_MAX_LEN - left_remaining_bytes) / ZSTR_LEN(pad)
+		|| full_right_copies > (ZSTR_MAX_LEN - right_remaining_bytes) / ZSTR_LEN(pad))) {
+		goto overflow;
+	}
+
+	{
+		size_t left_bytes = full_left_copies * ZSTR_LEN(pad) + left_remaining_bytes;
+		size_t right_bytes = full_right_copies * ZSTR_LEN(pad) + right_remaining_bytes;
+
+		if (UNEXPECTED(left_bytes > ZSTR_MAX_LEN - right_bytes
+			|| ZSTR_LEN(input) > ZSTR_MAX_LEN - left_bytes - right_bytes)) {
+			goto overflow;
+		}
+
+		zend_string *result = zend_string_safe_falloc(1, ZSTR_LEN(input), left_bytes + right_bytes, false, /* fallible */ true);
+		if (UNEXPECTED(!result)) {
+			RETURN_OOM();
+		}
+		char *buffer = ZSTR_VAL(result);
+
+		buffer = grapheme_str_pad_fill(buffer, pad, full_left_copies, left_remaining_bytes);
+		memcpy(buffer, ZSTR_VAL(input), ZSTR_LEN(input));
+		buffer += ZSTR_LEN(input);
+		buffer = grapheme_str_pad_fill(buffer, pad, full_right_copies, right_remaining_bytes);
+		*buffer = '\0';
+
+		RETURN_NEW_STR(result);
+	}
+
+overflow:
+	zend_throw_error(nullptr, "String size overflow");
+	RETURN_THROWS();
+}
+/* }}} */
 
 U_CFUNC PHP_FUNCTION(grapheme_strrev)
 {

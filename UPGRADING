@@ -121,6 +121,9 @@ PHP 8.7 UPGRADE NOTES
   . Added Transliterator::toRules() and transliterator_to_rules() to export
     rules that can be used to recreate a transliterator. The optional
     $escapeUnprintable argument escapes unprintable characters when true.
+  . Added grapheme_str_pad() to pad a string to a length counted in grapheme
+    clusters, the grapheme counterpart of str_pad() and mb_str_pad().
+    RFC: https://wiki.php.net/rfc/grapheme_str_pad
 
 ========================================
 7. New Classes and Interfaces

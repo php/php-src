@@ -30,6 +30,7 @@ PHP                                                                        NEWS
     (Weilin Du)
   . Added Transliterator::toRules() and transliterator_to_rules().
     (Weilin Du, David Carlier)
+  . Added grapheme_str_pad(). (Chris Abner Herrera Navarro)
   . Fixed Collator attribute and strength methods not rejecting an
     unconstructed Collator. (Ilia Alshanetsky)
   . Added optional $availableLocales argument to Locale::acceptFromHttp()
