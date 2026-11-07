@@ -6748,6 +6748,8 @@ handle_magic_get:
 		if (!prop->hooks[ZEND_PROPERTY_HOOK_GET]) {
 			RETURN_FALSE;
 		}
+	} else if (prop->flags & ZEND_ACC_VIRTUAL) {
+		RETURN_TRUE;
 	} else if (obj && (!prop->hooks || !prop->hooks[ZEND_PROPERTY_HOOK_GET])) {
 retry_declared:;
 		zval *prop_val = OBJ_PROP(obj, prop->offset);
