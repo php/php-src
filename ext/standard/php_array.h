@@ -64,9 +64,17 @@ PHPAPI bool php_array_pick_keys(php_random_algo_with_state engine, zval *input, 
 
 extern PHPAPI zend_class_entry *sort_direction_ce;
 
+typedef struct _php_array_fiber_state {
+	zend_fcall_info user_compare_fci;
+	zend_fcall_info_cache user_compare_fci_cache;
+	bucket_compare_func_t *multisort_func;
+	bool compare_deprecation_thrown;
+} php_array_fiber_state;
+
 ZEND_BEGIN_MODULE_GLOBALS(array)
 	bucket_compare_func_t *multisort_func;
 	bool compare_deprecation_thrown;
+	php_array_fiber_state main_fiber_state;
 ZEND_END_MODULE_GLOBALS(array)
 
 #define ARRAYG(v) ZEND_MODULE_GLOBALS_ACCESSOR(array, v)
