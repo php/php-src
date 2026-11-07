@@ -193,6 +193,19 @@ static zend_result php_stream_apply_filter_list(php_stream *stream, char *filter
 }
 /* }}} */
 
+static bool php_stream_has_registered_wrapper(const char *path)
+{
+	const HashTable *wrapper_hash = php_stream_get_url_stream_wrappers_hash();
+	size_t n = 0;
+
+	while (isalnum((unsigned char)path[n]) || path[n] == '+' || path[n] == '-' || path[n] == '.') {
+		n++;
+	}
+
+	return path[n] == ':' && n > 1 &&
+		(zend_hash_str_exists(wrapper_hash, path, n) || zend_hash_str_find_ptr_lc(wrapper_hash, path, n));
+}
+
 static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *path, const char *mode, int options,
 									 zend_string **opened_path, php_stream_context *context STREAMS_DC) /* {{{ */
 {
@@ -376,6 +389,11 @@ static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const c
 		}
 
 		if (!(stream = php_stream_open_wrapper_ex(p + 10, mode, options, opened_path, context))) {
+			/* REPORT_ERRORS is not passed to wrappers, so a disabled inner wrapper
+			 * (e.g. allow_url_include=0) would otherwise fail silently */
+			if (php_stream_has_registered_wrapper(p + 10)) {
+				php_stream_locate_url_wrapper(p + 10, NULL, options | REPORT_ERRORS);
+			}
 			efree(pathdup);
 			return NULL;
 		}
