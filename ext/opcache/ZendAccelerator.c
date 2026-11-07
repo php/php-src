@@ -1544,8 +1544,26 @@ static void zend_accel_add_key(zend_string *key, zend_accel_hash_entry *bucket)
 /* Must perform the same check as phar_compile_file(). */
 static zend_always_inline bool is_phar_file(const zend_string *filename)
 {
-	return filename && strstr(ZSTR_VAL(filename), ".phar") &&
-		!strstr(ZSTR_VAL(filename), "://");
+	if (!filename || strstr(ZSTR_VAL(filename), "://")) {
+		return false;
+	}
+
+	const char *path = ZSTR_VAL(filename);
+	const char *basename = zend_memrchr(path, '/', ZSTR_LEN(filename));
+#if defined(PHP_WIN32) || defined(ZEND_WIN32)
+	const char *backslash = zend_memrchr(path, '\\', ZSTR_LEN(filename));
+	if (backslash && (!basename || backslash > basename)) {
+		basename = backslash;
+	}
+#endif
+	const char *marker = basename ? basename + 1 : path;
+	while ((marker = strstr(marker, ".phar"))) {
+		marker += sizeof(".phar") - 1;
+		if (*marker == '\0' || *marker == '.') {
+			return true;
+		}
+	}
+	return false;
 }
 
 static zend_persistent_script *store_script_in_file_cache(zend_persistent_script *new_persistent_script)
