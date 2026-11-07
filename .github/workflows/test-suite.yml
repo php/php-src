@@ -767,6 +767,7 @@ jobs:
             --disable-mbregex \
             --enable-sockets \
             --enable-bcmath \
+            --enable-strmatch \
             --enable-calendar \
             --enable-ftp \
             --enable-zend-test \

@@ -51,6 +51,7 @@ runs:
           --with-openssl \
           --with-gmp \
           --enable-bcmath \
+          --enable-strmatch \
           --enable-calendar \
           --enable-ftp \
           ${{ inputs.skipSlow == 'false' && '--with-enchant=/usr' || '' }} \

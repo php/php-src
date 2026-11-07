@@ -52,6 +52,7 @@ runs:
             --with-openssl \
             --with-gmp \
             --enable-bcmath \
+            --enable-strmatch \
             --enable-calendar \
             --enable-ftp \
             --enable-sysvmsg \
