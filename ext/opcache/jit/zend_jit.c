@@ -47,8 +47,9 @@
 #endif
 
 #ifdef ZTS
-int jit_globals_id;
-size_t jit_globals_offset;
+ZEND_API int jit_globals_id;
+ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_jit_globals jit_globals;
+static void *jit_globals_tls_addr(void) { return &jit_globals; }
 #else
 zend_jit_globals jit_globals;
 #endif
@@ -3770,7 +3771,7 @@ int zend_jit_debug_config(zend_long old_val, zend_long new_val, int stage)
 void zend_jit_init(void)
 {
 #ifdef ZTS
-	jit_globals_id = ts_allocate_fast_id(&jit_globals_id, &jit_globals_offset, sizeof(zend_jit_globals), (ts_allocate_ctor) zend_jit_globals_ctor, (ts_allocate_dtor) zend_jit_globals_dtor);
+	jit_globals_id = ts_allocate_tls_id(&jit_globals_id, jit_globals_tls_addr, sizeof(zend_jit_globals), (ts_allocate_ctor) zend_jit_globals_ctor, (ts_allocate_dtor) zend_jit_globals_dtor);
 #else
 	zend_jit_globals_ctor(&jit_globals);
 #endif

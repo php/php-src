@@ -53,6 +53,10 @@ PHP 8.7 INTERNALS UPGRADE NOTES
   freed with zend_hash_destroy() + pefree().
 - The ZTS symbols compiler_globals_offset and executor_globals_offset have been
   removed: CG()/EG() now reach the globals through a __thread struct.
+- PG(), SG(), CWDG(), SIGG(), ZCG(), JIT_G() and INI_SCNG() use native TLS.
+  The core_globals_offset, sapi_globals_offset, cwd_globals_offset,
+  zend_signal_globals_offset, accel_globals_offset, jit_globals_offset and
+  ini_scanner_globals_offset symbols have been removed.
 - Removed zend_error_noreturn_unchecked().
 
 ========================
