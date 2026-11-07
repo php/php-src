@@ -13,8 +13,8 @@ class C extends SoapClient {
     }
 }
 $c = new C(null, ["location" => "test://", "uri" => "test://"]);
-$c->foo(new SoapVar(["a" => new SoapVar("x", XSD_STRING), new SoapVar("y", XSD_STRING)], XSD_ANYXML));
+$c->foo(new SoapVar([new SoapVar("y", XSD_STRING), "a" => new SoapVar("x", XSD_STRING)], XSD_ANYXML));
 ?>
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>
-<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="test://" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><SOAP-ENV:Body><ns1:foo><a xsi:type="xsd:string">x</a><param0 xsi:type="xsd:string">y</param0></ns1:foo></SOAP-ENV:Body></SOAP-ENV:Envelope>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="test://" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><SOAP-ENV:Body><ns1:foo><BOGUS xsi:type="xsd:string">y</BOGUS><a xsi:type="xsd:string">x</a></ns1:foo></SOAP-ENV:Body></SOAP-ENV:Envelope>
