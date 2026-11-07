@@ -1112,17 +1112,35 @@ try_string_offset:
 		switch (Z_TYPE_P(dim)) {
 			/* case IS_LONG: */
 			case IS_STRING:
-				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, false)) {
-					break;
+			{
+				bool trailing_data = false;
+				/* Allow errors to warn on leading-numeric strings, like the VM */
+				if (IS_LONG != is_numeric_string_ex(Z_STRVAL_P(dim), Z_STRLEN_P(dim), &offset,
+						NULL, /* allow errors */ true, NULL, &trailing_data)) {
+					ZVAL_NULL(result);
+					return;
 				}
-				ZVAL_NULL(result);
-				return;
+				if (UNEXPECTED(trailing_data)) {
+					if (!(GC_FLAGS(str) & IS_STR_INTERNED)) {
+						GC_ADDREF(str);
+					}
+					zend_error(E_WARNING, "Illegal string offset \"%s\"", Z_STRVAL_P(dim));
+					if (!(GC_FLAGS(str) & IS_STR_INTERNED) && UNEXPECTED(GC_DELREF(str) == 0)) {
+						zend_string_efree(str);
+						ZVAL_NULL(result);
+						return;
+					}
+				}
+				break;
+			}
 			case IS_UNDEF:
 				zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
+				ZEND_FALLTHROUGH;
 			case IS_DOUBLE:
 			case IS_NULL:
 			case IS_FALSE:
 			case IS_TRUE:
+				offset = zval_get_long_func(dim, /* is_strict */ false);
 				break;
 			case IS_REFERENCE:
 				dim = Z_REFVAL_P(dim);
@@ -1134,8 +1152,6 @@ try_string_offset:
 				ZVAL_NULL(result);
 				return;
 		}
-
-		offset = zval_get_long_func(dim, /* is_strict */ false);
 	} else {
 		offset = Z_LVAL_P(dim);
 	}
