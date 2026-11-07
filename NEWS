@@ -31,6 +31,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-25267 (NULL dereference in to_xml_any() with integer key).
     (lazerg)
 
+- Readline:
+  . Fixed incorrect handling of non-ASCII pending_input bytes in readline_info(),
+    which could cause readline() to return false prematurely. (Weilin Du)
+
 - Streams:
   . Fixed bug GH-22063 (Stream filter chain UAF on self-removal during
     callback). (Ilia Alshanetsky)
