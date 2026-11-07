@@ -48,8 +48,6 @@
  * SUCH DAMAGE.
  */
 
-#include <math.h>
-
 #include "php.h"
 #include "php_uuencode.h"
 
@@ -80,7 +78,7 @@ PHPAPI zend_string *php_uuencode(const char *src, size_t src_len) /* {{{ */
 			ee = e;
 			len = ee - s;
 			if (len % 3) {
-				ee = s + (int) (floor((double)len / 3) * 3);
+				ee = s + (len / 3) * 3;
 			}
 		}
 		*p++ = PHP_UU_ENC(len);
@@ -135,7 +133,7 @@ PHPAPI zend_string *php_uudecode(const char *src, size_t src_len) /* {{{ */
 		return NULL;
 	}
 
-	dest = zend_string_alloc((size_t) ceil(src_len * 0.75), 0);
+	dest = zend_string_alloc(src_len - src_len / 4, 0);
 	p = ZSTR_VAL(dest);
 	s = src;
 	e = src + src_len;
@@ -151,7 +149,7 @@ PHPAPI zend_string *php_uudecode(const char *src, size_t src_len) /* {{{ */
 
 		total_len += len;
 
-		ee = s + (len == 45 ? 60 : (int) floor(len * 1.33));
+		ee = s + ((len + 2) / 3) * 4;
 		/* sanity check */
 		if (ee > e) {
 			goto err;
