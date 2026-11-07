@@ -28,6 +28,8 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug GH-22063 (Stream filter chain UAF on self-removal during
     callback). (Ilia Alshanetsky)
+  . Fixed leaks and data loss when user filter leaves buckets on input
+    brigade. (ndossche, Matthias Goergens, Jakub Zelenka)
 
 19 Nov 2026, PHP 8.5.13
 
