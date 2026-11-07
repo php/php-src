@@ -1796,9 +1796,16 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties)
 			} else if (!(object->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 				zend_error(E_DEPRECATED, "Creation of dynamic property %s::$" ZEND_LONG_FMT " is deprecated",
 					ZSTR_VAL(object->ce->name), h);
+				if (UNEXPECTED(EG(exception))) {
+					return;
+				}
 			}
 
-			prop = zend_hash_index_update(zend_std_get_properties_ex(object), h, prop);
+			HashTable *ht = zend_std_get_properties_ex(object);
+			if (HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED) {
+				zend_hash_real_init_mixed(ht);
+			}
+			prop = zend_hash_index_update(ht, h, prop);
 			zval_add_ref(prop);
 		}
 	} ZEND_HASH_FOREACH_END();
