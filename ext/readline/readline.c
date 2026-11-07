@@ -227,7 +227,7 @@ PHP_FUNCTION(readline_info)
 				if (!try_convert_to_string(value)) {
 					RETURN_THROWS();
 				}
-				rl_pending_input = Z_STRVAL_P(value)[0];
+				rl_pending_input = (unsigned char)Z_STRVAL_P(value)[0];
 			}
 			RETVAL_LONG(oldval);
 		} else if (zend_string_equals_literal_ci(what, "prompt")) {
