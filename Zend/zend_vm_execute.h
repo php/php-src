@@ -4055,6 +4055,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV 
 #endif
 	if (atomic_load(&EG(timed_out))) {
 		zend_timeout();
+		HANDLE_EXCEPTION();
 	} else if (ZEND_HAS_OOM()) {
 		zend_handle_delayed_oom();
 		HANDLE_EXCEPTION();
@@ -56934,6 +56935,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV  zend
 #endif
 	if (atomic_load(&EG(timed_out))) {
 		zend_timeout();
+		HANDLE_EXCEPTION();
 	} else if (ZEND_HAS_OOM()) {
 		zend_handle_delayed_oom();
 		HANDLE_EXCEPTION();

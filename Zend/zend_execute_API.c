@@ -1494,7 +1494,8 @@ ZEND_API zend_result zend_eval_string_ex(const char *str, zval *retval_ptr, cons
 
 static void zend_set_timeout_ex(zend_long seconds, bool reset_signals);
 
-ZEND_NORETURN ZEND_API void ZEND_FASTCALL zend_timeout(void) /* {{{ */
+/* zend_timeout() is called by the VM interrupt handler or by zend_call_function() when EG(timed_out) is set */
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 {
 #if defined(PHP_WIN32)
 # ifndef ZTS
@@ -1514,7 +1515,23 @@ ZEND_NORETURN ZEND_API void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 	zend_set_timeout_ex(0, true);
 #endif
 
-	zend_error_noreturn(E_ERROR, "Maximum execution time of " ZEND_LONG_FMT " second%s exceeded", EG(timeout_seconds), EG(timeout_seconds) == 1 ? "" : "s");
+	/* Trigger error but do not bail */
+	zend_error(E_ERROR | E_DONT_BAIL, "Maximum execution time of " ZEND_LONG_FMT " second%s exceeded", EG(timeout_seconds), EG(timeout_seconds) == 1 ? "" : "s");
+
+	/* Do not call destructors */
+	zend_objects_store_mark_destructed(&EG(objects_store));
+
+	if (EG(exception)) {
+		OBJ_RELEASE(EG(exception));
+	}
+	EG(exception) = zend_create_unwind_exit();
+
+	if (EG(current_execute_data)) {
+		/* zend_call_function() may call zend_timeout() without EG(current_execute_data)
+		 * when executing shutdown functions */
+		EG(opline_before_exception) = EG(current_execute_data)->opline;
+		EG(current_execute_data)->opline = EG(exception_op);
+	}
 }
 /* }}} */
 

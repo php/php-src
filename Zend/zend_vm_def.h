@@ -10743,6 +10743,7 @@ ZEND_VM_HELPER(zend_interrupt_helper, ANY, ANY)
 #endif
 	if (atomic_load(&EG(timed_out))) {
 		zend_timeout();
+		HANDLE_EXCEPTION();
 	} else if (ZEND_HAS_OOM()) {
 		zend_handle_delayed_oom();
 		HANDLE_EXCEPTION();
