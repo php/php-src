@@ -30,7 +30,7 @@ copy($srcDir . DIRECTORY_SEPARATOR . $dll, $binDir . DIRECTORY_SEPARATOR . $dll)
 $args = [
     $binDir . DIRECTORY_SEPARATOR . basename(PHP_BINARY),
     '-n',
-    '-d', 'extension_dir=' . ini_get('extension_dir'),
+    '-d', 'extension_dir="' . ini_get('extension_dir') . '"',
 ];
 if (file_exists(ini_get('extension_dir') . DIRECTORY_SEPARATOR . 'php_opcache.dll')) {
     $args[] = '-d';
@@ -43,7 +43,7 @@ foreach (['opcache.memory_consumption', 'opcache.jit', 'opcache.jit_buffer_size'
 array_push($args,
     '-d', 'opcache.enable=1',
     '-d', 'opcache.enable_cli=1',
-    '-d', 'opcache.file_cache=' . $cacheDir,
+    '-d', 'opcache.file_cache="' . $cacheDir . '"',
     '-d', 'opcache.file_cache_fallback=1',
     '-r', 'var_dump(opcache_get_status(false)["file_cache_only"]);'
 );
