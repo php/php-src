@@ -38,6 +38,8 @@ PHP                                                                        NEWS
     (Ilia Alshanetsky)
   . Fixed bug GH-25195 (smm_shared_globals left dangling without an
     SHM backend). (Lazizbek Ergashev)
+  . Fixed bug GH-25269 (JIT: misaligned zval passed to
+    ZEND_ADD_ARRAY_ELEMENT handler). (Jorg Sowa, ndossche)
 
 - SOAP:
   . Fixed bug GH-25267 (NULL dereference in to_xml_any() with integer key).
