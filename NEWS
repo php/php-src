@@ -22,6 +22,10 @@ PHP                                                                        NEWS
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
 
+- DBA:
+  . Fixed dba_close() not closing a database opened with dba_popen().
+    (Ilia Alshanetsky)
+
 - DOM:
   . Fixed bug GH-25268 (NULL php_libxml_ref_obj dereference in
     dom_objects_store_clone_obj when cloning Dom\Notation). (David Carlier)
