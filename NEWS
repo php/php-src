@@ -35,6 +35,8 @@ PHP                                                                        NEWS
     (waroad)
   . Fixed bug GH-25037 (Function JIT ENTRY live var assertion).
     (Ilia Alshanetsky)
+  . Fixed bug GH-25195 (smm_shared_globals left dangling without an
+    SHM backend). (Lazizbek Ergashev)
 
 - OpenSSL:
   . Fixed bug GH-25172 (TLS session reuse shares request-lifetime callback
