@@ -1508,9 +1508,12 @@ error:
 
 	if (PCRE_G(error_code) == PHP_PCRE_NO_ERROR) {
 		/* If there was no error and we're in /u mode, remember that the string is valid UTF-8. */
-		if ((pce->compile_options & PCRE2_UTF)
-				&& !ZSTR_IS_INTERNED(subject_str) && orig_start_offset == 0) {
-			GC_ADD_FLAGS(subject_str, IS_STR_VALID_UTF8);
+		if ((pce->compile_options & PCRE2_UTF) && orig_start_offset == 0) {
+			if (ZSTR_IS_INTERNED(subject_str)) {
+				GC_ADD_FLAGS_ATOMIC(subject_str, IS_STR_VALID_UTF8);
+			} else {
+				GC_ADD_FLAGS(subject_str, IS_STR_VALID_UTF8);
+			}
 		}
 
 		RETVAL_LONG(matched);
