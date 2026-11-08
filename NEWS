@@ -18,6 +18,7 @@ PHP                                                                        NEWS
     hooked subclass). (Lazizbek Ergashev)
   . Fixed bug GH-25314 (Assertion in ZEND_DO_FCALL: reference returned by
     &__get() reaches property hook TMP result). (ndossche)
+  . Fix support for never-returning functions in PFAs. (ndossche)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
