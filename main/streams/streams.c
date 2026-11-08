@@ -1763,9 +1763,9 @@ PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *de
 
 				/* there may be more data; continue copying using the fallback code below */
 			} else if (result == 0) {
-				/* end of file */
-				*len = haveread;
-				return SUCCESS;
+				/* Nothing was copied yet, but this does not prove end-of-file: some kernels return 0
+				 * for sources that are not empty, e.g. procfs files or VirtualBox shared folders.
+				 * Fall back to classic copying, which detects end-of-file reliably. */
 			} else if (result < 0) {
 				switch (errno) {
 					case EINVAL:
