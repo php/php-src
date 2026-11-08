@@ -1106,6 +1106,33 @@ static IR_NEVER_INLINE uint32_t ir_collect_irreducible_loops(ir_ctx *ctx, uint32
 	return loops;
 }
 
+static IR_NEVER_INLINE void ir_check_loop_entry_in_preds(ir_ctx *ctx, uint32_t hdr, ir_worklist *work)
+{
+	ir_block *blocks = ctx->cfg_blocks;
+	uint32_t *edges = ctx->cfg_edges;
+
+	ir_worklist_clear(work);
+	ir_bitset_incl(work->visited, blocks[hdr].idom);
+	ir_worklist_push(work, hdr);
+	while (ir_worklist_len(work)) {
+		ir_block *bb = &blocks[ir_worklist_pop(work)];
+
+		if (bb->flags & IR_BB_ENTRY) {
+			blocks[hdr].flags |= IR_BB_LOOP_WITH_ENTRY_IN_PREDS;
+			break;
+		}
+
+		uint32_t *p = &edges[bb->predecessors];
+		uint32_t count = bb->predecessors_count;
+
+		for (; count > 0; p++, count--) {
+			if (!ir_dominates(blocks, hdr, *p)) {
+				ir_worklist_push(work, *p);
+			}
+		}
+	}
+}
+
 int ir_find_loops(ir_ctx *ctx)
 {
 	uint32_t b, j, n;
@@ -1325,6 +1352,12 @@ next:
 			} else if ((bb->flags & (IR_BB_LOOP_HEADER|IR_BB_ENTRY|IR_BB_LOOP_WITH_ENTRY)) ==
 					(IR_BB_LOOP_HEADER|IR_BB_ENTRY)) {
 				bb->flags |= IR_BB_LOOP_WITH_ENTRY;
+			}
+			bb = &blocks[b];
+			if (ctx->entries_count
+			 && (bb->flags & (IR_BB_LOOP_HEADER|IR_BB_LOOP_WITH_ENTRY)) == IR_BB_LOOP_HEADER
+			 && (bb->predecessors_count > 2 || (bb->flags & IR_BB_IRREDUCIBLE_LOOP))) {
+				ir_check_loop_entry_in_preds(ctx, b, &work);
 			}
 		}
 	}
