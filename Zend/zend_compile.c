@@ -9483,12 +9483,15 @@ static void zend_compile_const_decl(zend_ast *ast) /* {{{ */
 			}
 		}
 
+		/* Register before the literal takes the name: interning it there may
+		 * release it, when opcache has put the same string in shared memory
+		 * since the call above. */
+		zend_register_seen_symbol(name, ZEND_SYMBOL_CONST);
+
 		name_node.op_type = IS_CONST;
 		ZVAL_STR(&name_node.u.constant, name);
 
 		zend_emit_op(NULL, ZEND_DECLARE_CONST, &name_node, &value_node);
-
-		zend_register_seen_symbol(name, ZEND_SYMBOL_CONST);
 	}
 }
 /* }}}*/
