@@ -1,0 +1,59 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: David Carlier <devnexen@gmail.com>
+Date: Sun, 8 Nov 2026 14:54:32 +0000
+Subject: [PATCH 22/22] DOM: fixed NULL dereference on document init failure.
+
+When lxb_dom_document_init() failed while creating the document's own
+memory pools, node.owner_document was still NULL, so the
+lxb_dom_document_destroy() call in the error path of
+lxb_html_document_interface_create() dereferenced a NULL owner.
+The failure path also left dangling pointers to the destroyed pools,
+which would be destroyed again once the owner check passed.
+
+Set owner_document before allocating and reset the pool pointers on
+failure.
+
+Added a test that fails every allocation of lxb_html_document_create()
+in turn.
+---
+ source/lexbor/dom/interfaces/document.c | 16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/source/lexbor/dom/interfaces/document.c b/source/lexbor/dom/interfaces/document.c
+index 43eeba0203f..b477a5a416f 100644
+--- a/source/lexbor/dom/interfaces/document.c
++++ b/source/lexbor/dom/interfaces/document.c
+@@ -124,6 +124,8 @@ lxb_dom_document_init(lxb_dom_document_t *document, lxb_dom_document_t *owner,
+ 
+     document->css = NULL;
+ 
++    node->owner_document = document;
++
+     /* For nodes */
+     document->mraw = lexbor_mraw_create();
+     status = lexbor_mraw_init(document->mraw, (4096 * 8));
+@@ -166,18 +168,16 @@ lxb_dom_document_init(lxb_dom_document_t *document, lxb_dom_document_t *owner,
+         goto failed;
+     }
+ 
+-    node->owner_document = document;
+-
+     return LXB_STATUS_OK;
+ 
+ failed:
+ 
+-    lexbor_mraw_destroy(document->mraw, true);
+-    lexbor_mraw_destroy(document->text, true);
+-    lexbor_hash_destroy(document->tags, true);
+-    lexbor_hash_destroy(document->ns, true);
+-    lexbor_hash_destroy(document->attrs, true);
+-    lexbor_hash_destroy(document->prefix, true);
++    document->mraw = lexbor_mraw_destroy(document->mraw, true);
++    document->text = lexbor_mraw_destroy(document->text, true);
++    document->tags = lexbor_hash_destroy(document->tags, true);
++    document->ns = lexbor_hash_destroy(document->ns, true);
++    document->attrs = lexbor_hash_destroy(document->attrs, true);
++    document->prefix = lexbor_hash_destroy(document->prefix, true);
+ 
+     return LXB_STATUS_ERROR;
+ }
