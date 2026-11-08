@@ -59,6 +59,10 @@ PHP                                                                        NEWS
   . Fix trampoline leak when object construction fails for lazy object.
     (ndossche)
 
+- Standard:
+  . Fixed getimagesize() reporting wrapped dimensions for XBM images with
+    out-of-range width or height. (Ilia Alshanetsky)
+
 - Streams:
   . Fixed bug GH-22063 (Stream filter chain UAF on self-removal during
     callback). (Ilia Alshanetsky)

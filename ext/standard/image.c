@@ -1000,7 +1000,9 @@ static int php_get_xbm(php_stream *stream, struct gfxinfo **result)
 	char *fline;
 	char *iname;
 	char *type;
-	int value;
+	char *end;
+	int offset;
+	long value;
 	unsigned int width = 0, height = 0;
 
 	if (result) {
@@ -1017,25 +1019,29 @@ static int php_get_xbm(php_stream *stream, struct gfxinfo **result)
 			break;
 		}
 		iname = estrdup(fline); /* simple way to get necessary buffer of required size */
-		if (sscanf(fline, "#define %s %d", iname, &value) == 2) {
-			if (!(type = strrchr(iname, '_'))) {
-				type = iname;
-			} else {
-				type++;
-			}
-
-			if (!strcmp("width", type)) {
-				width = (unsigned int) value;
-				if (height) {
-					efree(iname);
-					break;
+		if (sscanf(fline, "#define %s %n", iname, &offset) == 1) {
+			errno = 0;
+			value = strtol(fline + offset, &end, 10);
+			if (end != fline + offset && errno == 0 && value > 0 && value <= INT_MAX) {
+				if (!(type = strrchr(iname, '_'))) {
+					type = iname;
+				} else {
+					type++;
 				}
-			}
-			if (!strcmp("height", type)) {
-				height = (unsigned int) value;
-				if (width) {
-					efree(iname);
-					break;
+
+				if (!strcmp("width", type)) {
+					width = (unsigned int) value;
+					if (height) {
+						efree(iname);
+						break;
+					}
+				}
+				if (!strcmp("height", type)) {
+					height = (unsigned int) value;
+					if (width) {
+						efree(iname);
+						break;
+					}
 				}
 			}
 		}
