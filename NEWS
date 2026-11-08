@@ -41,6 +41,8 @@ PHP                                                                        NEWS
     (Ilia Alshanetsky)
   . Fixed bug GH-25195 (smm_shared_globals left dangling without an
     SHM backend). (Lazizbek Ergashev)
+  . Fixed bug GH-25269 (JIT: misaligned zval passed to
+    ZEND_ADD_ARRAY_ELEMENT handler). (Jorg Sowa, ndossche)
 
 - OpenSSL:
   . Fixed bug GH-25172 (TLS session reuse shares request-lifetime callback
