@@ -19,8 +19,6 @@
 #include "zend.h"
 #include "zend_stack.h"
 
-#define ZEND_STACK_ELEMENT(stack, n) ((void *)((char *) (stack)->elements + (stack)->size * (n)))
-
 ZEND_API void zend_stack_init(zend_stack *stack, int size)
 {
 	stack->size = size;

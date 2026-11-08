@@ -28,6 +28,7 @@ typedef struct _zend_stack {
 
 
 #define STACK_BLOCK_SIZE 16
+#define ZEND_STACK_ELEMENT(stack, n) ((void *)((char *) (stack)->elements + (stack)->size * (n)))
 
 typedef enum {
 	ZEND_STACK_APPLY_TOPDOWN,
@@ -49,7 +50,7 @@ END_EXTERN_C()
 static zend_always_inline void *zend_stack_top(const zend_stack *stack)
 {
 	if (stack->top > 0) {
-		return (void *) ((char *) stack->elements + stack->size * (stack->top - 1));
+		return ZEND_STACK_ELEMENT(stack, stack->top - 1);
 	} else {
 		return NULL;
 	}
