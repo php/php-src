@@ -1,11 +1,14 @@
 --TEST--
 GH-18417 (Windows SHM reattachment fails when increasing memory_consumption or jit_buffer_size)
+--EXTENSIONS--
+opcache
+--INI--
+opcache.enable=1
+opcache.enable_cli=1
+opcache.file_cache_only=0
 --SKIPIF--
 <?php
-$extDir = ini_get('extension_dir');
-if (!file_exists($extDir . '/php_opcache.dll')) {
-    die('skip Opcache DLL not found in extension_dir (Windows-only)');
-}
+if (PHP_OS_FAMILY !== 'Windows') die('skip Windows only');
 ?>
 --FILE--
 <?php

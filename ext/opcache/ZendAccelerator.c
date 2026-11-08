@@ -3549,7 +3549,13 @@ void accel_shutdown(void)
 		orig_post_shutdown_cb = zend_post_shutdown_cb;
 		zend_post_shutdown_cb = accel_post_shutdown;
 	} else {
-		free(accel_shared_globals);
+#if ENABLE_FILE_CACHE_FALLBACK
+		/* A fallback process maps accel_shared_globals from SHM; it did not allocate it. */
+		if (!fallback_process)
+#endif
+		{
+			free(accel_shared_globals);
+		}
 	}
 
 	zend_compile_file = accelerator_orig_compile_file;
