@@ -37,6 +37,8 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-25306 (Assertion status == LXB_STATUS_OK in dom_parse_selector
     when lexbor allocation fails). (ndossche)
+  . Fixed bug GH-25305 (NULL dereference in lxb_dom_document_destroy on lexbor
+    document init failure). (David Carlier)
 
 - Filter:
   . Fixed stack overflow in filter_var() and filter_var_array() with deeply

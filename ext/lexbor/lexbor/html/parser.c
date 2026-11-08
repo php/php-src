@@ -40,7 +40,12 @@ lxb_html_parser_init(lxb_html_parser_t *parser)
     parser->tkz = lxb_html_tokenizer_create();
     lxb_status_t status = lxb_html_tokenizer_init(parser->tkz);
 
+    /*
+     * A tokenizer or a tree that failed to initialize has no reference yet,
+     * so lxb_html_parser_destroy() could not release it: destroy it here.
+     */
     if (status != LXB_STATUS_OK) {
+        parser->tkz = lxb_html_tokenizer_destroy(parser->tkz);
         return status;
     }
 
@@ -51,6 +56,7 @@ lxb_html_parser_init(lxb_html_parser_t *parser)
     status = lxb_html_tree_init(parser->tree, parser->tkz);
 
     if (status != LXB_STATUS_OK) {
+        parser->tree = lxb_html_tree_destroy(parser->tree);
         return status;
     }
 
