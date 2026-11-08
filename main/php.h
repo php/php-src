@@ -293,11 +293,11 @@ END_EXTERN_C()
 #define error_handling_t zend_error_handling_t
 
 BEGIN_EXTERN_C()
-static inline ZEND_ATTRIBUTE_DEPRECATED void php_set_error_handling(error_handling_t error_handling, zend_class_entry *exception_class)
+ZEND_ATTRIBUTE_DEPRECATED static inline void php_set_error_handling(error_handling_t error_handling, zend_class_entry *exception_class)
 {
 	zend_replace_error_handling(error_handling, exception_class, NULL);
 }
-static inline ZEND_ATTRIBUTE_DEPRECATED void php_std_error_handling(void) {}
+ZEND_ATTRIBUTE_DEPRECATED static inline void php_std_error_handling(void) {}
 
 PHPAPI ZEND_COLD void php_verror(const char *docref, int type, const char *format, va_list args) PHP_ATTRIBUTE_FORMAT(printf, 3, 0);
 
