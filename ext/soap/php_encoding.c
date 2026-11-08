@@ -3117,7 +3117,7 @@ static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style, xmlNodeP
 			} else {
 				soap_error2(E_ERROR,
 					"Encoding: Failed to encode list item of type '%s' for list type '%s'",
-					soap_type_name(&list_enc->details), soap_type_name(enc));
+					soap_type_name(list_enc ? &list_enc->details : NULL), soap_type_name(enc));
 			}
 			xmlUnlinkNode(dummy);
 			xmlFreeNode(dummy);
@@ -3161,7 +3161,7 @@ static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style, xmlNodeP
 			} else {
 				soap_error2(E_ERROR,
 					"Encoding: Failed to encode list item of type '%s' for list type '%s'",
-					soap_type_name(&list_enc->details), soap_type_name(enc));
+					soap_type_name(list_enc ? &list_enc->details : NULL), soap_type_name(enc));
 			}
 			xmlUnlinkNode(dummy);
 			xmlFreeNode(dummy);
