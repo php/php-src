@@ -20,6 +20,8 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
+#include <errno.h>
+#include <limits.h>
 #include "gd.h"
 #include "gdhelpers.h"
 #include "gd_errors.h"
@@ -34,7 +36,9 @@ gdImagePtr gdImageCreateFromXbm(FILE * fd)
 	char fline[MAX_XBM_LINE_SIZE];
 	char iname[MAX_XBM_LINE_SIZE];
 	char *type;
-	int value;
+	char *end;
+	int offset;
+	long value;
 	unsigned int width = 0, height = 0;
 	int fail = 0;
 	int max_bit = 0;
@@ -52,18 +56,22 @@ gdImagePtr gdImageCreateFromXbm(FILE * fd)
 		if (strlen(fline) == MAX_XBM_LINE_SIZE-1) {
 			return 0;
 		}
-		if (sscanf(fline, "#define %s %d", iname, &value) == 2) {
-			if (!(type = strrchr(iname, '_'))) {
-				type = iname;
-			} else {
-				type++;
-			}
+		if (sscanf(fline, "#define %s %n", iname, &offset) == 1) {
+			errno = 0;
+			value = strtol(fline + offset, &end, 10);
+			if (end != fline + offset && errno == 0 && value > 0 && value <= INT_MAX) {
+				if (!(type = strrchr(iname, '_'))) {
+					type = iname;
+				} else {
+					type++;
+				}
 
-			if (!strcmp("width", type)) {
-				width = (unsigned int) value;
-			}
-			if (!strcmp("height", type)) {
-				height = (unsigned int) value;
+				if (!strcmp("width", type)) {
+					width = (unsigned int) value;
+				}
+				if (!strcmp("height", type)) {
+					height = (unsigned int) value;
+				}
 			}
 		} else {
 			if ( sscanf(fline, "static unsigned char %s = {", iname) == 1

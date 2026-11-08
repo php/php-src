@@ -18,6 +18,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-25268 (NULL php_libxml_ref_obj dereference in
     dom_objects_store_clone_obj when cloning Dom\Notation). (David Carlier)
 
+- GD:
+  . Fixed imagecreatefromxbm() accepting XBM files with out-of-range
+    dimensions. (Ilia Alshanetsky)
+
 - MBString:
   . Fixed stack overflow in mb_check_encoding() and mb_convert_encoding() with
     deeply nested arrays. (Eyüp Can Akman)
