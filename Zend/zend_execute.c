@@ -5040,7 +5040,7 @@ ZEND_API void zend_cleanup_unfinished_execution(zend_execute_data *execute_data,
 	cleanup_live_vars(execute_data, op_num, catch_op_num);
 }
 
-ZEND_API ZEND_ATTRIBUTE_DEPRECATED HashTable *zend_unfinished_execution_gc(zend_execute_data *execute_data, zend_execute_data *call, zend_get_gc_buffer *gc_buffer)
+ZEND_ATTRIBUTE_DEPRECATED ZEND_API HashTable *zend_unfinished_execution_gc(zend_execute_data *execute_data, zend_execute_data *call, zend_get_gc_buffer *gc_buffer)
 {
 	return zend_unfinished_execution_gc_ex(execute_data, call, gc_buffer, false);
 }
