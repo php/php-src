@@ -37,16 +37,32 @@ typedef enum {
 BEGIN_EXTERN_C()
 ZEND_API void zend_stack_init(zend_stack *stack, int size);
 ZEND_API int zend_stack_push(zend_stack *stack, const void *element);
-ZEND_API void *zend_stack_top(const zend_stack *stack);
 ZEND_API void zend_stack_del_top(zend_stack *stack);
 ZEND_API int zend_stack_int_top(const zend_stack *stack);
 ZEND_API bool zend_stack_is_empty(const zend_stack *stack);
 ZEND_API void zend_stack_destroy(zend_stack *stack);
-ZEND_API void *zend_stack_base(const zend_stack *stack);
-ZEND_API int zend_stack_count(const zend_stack *stack);
 ZEND_API void zend_stack_apply(zend_stack *stack, int type, int (*apply_function)(void *element));
 ZEND_API void zend_stack_apply_with_argument(zend_stack *stack, zend_stack_apply_direction type, int (*apply_function)(void *element, void *arg), void *arg);
 ZEND_API void zend_stack_clean(zend_stack *stack, void (*func)(void *), bool free_elements);
 END_EXTERN_C()
+
+static zend_always_inline void *zend_stack_top(const zend_stack *stack)
+{
+	if (stack->top > 0) {
+		return (void *) ((char *) stack->elements + stack->size * (stack->top - 1));
+	} else {
+		return NULL;
+	}
+}
+
+static zend_always_inline void *zend_stack_base(const zend_stack *stack)
+{
+	return stack->elements;
+}
+
+static zend_always_inline int zend_stack_count(const zend_stack *stack)
+{
+	return stack->top;
+}
 
 #endif /* ZEND_STACK_H */

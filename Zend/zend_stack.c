@@ -41,16 +41,6 @@ ZEND_API int zend_stack_push(zend_stack *stack, const void *element)
 }
 
 
-ZEND_API void *zend_stack_top(const zend_stack *stack)
-{
-	if (stack->top > 0) {
-		return ZEND_STACK_ELEMENT(stack, stack->top - 1);
-	} else {
-		return NULL;
-	}
-}
-
-
 ZEND_API void zend_stack_del_top(zend_stack *stack)
 {
 	--stack->top;
@@ -80,18 +70,6 @@ ZEND_API void zend_stack_destroy(zend_stack *stack)
 		efree(stack->elements);
 		stack->elements = NULL;
 	}
-}
-
-
-ZEND_API void *zend_stack_base(const zend_stack *stack)
-{
-	return stack->elements;
-}
-
-
-ZEND_API int zend_stack_count(const zend_stack *stack)
-{
-	return stack->top;
 }
 
 
