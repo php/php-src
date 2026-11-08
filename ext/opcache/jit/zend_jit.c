@@ -592,7 +592,7 @@ static zend_class_entry* zend_get_known_class(const zend_op_array *op_array, con
 			ZEND_ASSERT((op.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_PARENT);
 			ce = op_array->scope;
 			if (ce) {
-				if (ce->parent) {
+				if ((ce->ce_flags & ZEND_ACC_LINKED) && ce->parent) {
 					ce = ce->parent;
 					if (ce->type == ZEND_INTERNAL_CLASS || ce->info.user.filename != op_array->filename) {
 						ce = NULL;

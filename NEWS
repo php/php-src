@@ -43,6 +43,8 @@ PHP                                                                        NEWS
     SHM backend). (Lazizbek Ergashev)
   . Fixed bug GH-25269 (JIT: misaligned zval passed to
     ZEND_ADD_ARRAY_ELEMENT handler). (Jorg Sowa, ndossche)
+  . Fixed bug GH-25253 (JIT reads parent of an unlinked class).
+    (lazerg, mlenarciak)
 
 - OpenSSL:
   . Fixed bug GH-25172 (TLS session reuse shares request-lifetime callback
