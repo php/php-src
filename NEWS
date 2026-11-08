@@ -34,6 +34,8 @@ PHP                                                                        NEWS
     (Ilia Alshanetsky)
   . Fixed bug GH-25195 (smm_shared_globals left dangling without an
     SHM backend). (Lazizbek Ergashev)
+  . Fixed heap corruption on shutdown of a Windows process that fell back to
+    the file cache. (Kamil Tekiela)
 
 - SOAP:
   . Fixed bug GH-25267 (NULL dereference in to_xml_any() with integer key).
