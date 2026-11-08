@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.6.1
 
+- CLI:
+  . Fixed built-in server rejecting long request paths, or paths received in
+    several pieces, as malformed. (Ilia Alshanetsky)
+
 - Core:
   . Fixed AST printing of interface extends list as implements. (Jorg Sowa)
   . Fixed AST printing dropping fully qualified and namespace-relative prefixes

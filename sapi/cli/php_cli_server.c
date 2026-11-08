@@ -1607,21 +1607,22 @@ static void normalize_vpath(char **retval, size_t *retval_len, const char *vpath
 /* {{{ php_cli_server_client_read_request */
 static int php_cli_server_client_read_request_on_message_begin(php_http_parser *parser)
 {
-	return 0;
+	php_cli_server_client *client = parser->data;
+	return client->request_read;
 }
 
 static int php_cli_server_client_read_request_on_path(php_http_parser *parser, const char *at, size_t length)
 {
 	php_cli_server_client *client = parser->data;
-	{
-		char *vpath;
-		size_t vpath_len;
-		if (UNEXPECTED(client->request.vpath != NULL)) {
-			return 1;
-		}
-		normalize_vpath(&vpath, &vpath_len, at, length, 1);
-		client->request.vpath = vpath;
-		client->request.vpath_len = vpath_len;
+	if (EXPECTED(client->request.vpath == NULL)) {
+		client->request.vpath = pestrndup(at, length, true);
+		client->request.vpath_len = length;
+	} else {
+		ZEND_ASSERT(length <= PHP_HTTP_MAX_HEADER_SIZE && PHP_HTTP_MAX_HEADER_SIZE - length >= client->request.vpath_len);
+		client->request.vpath = perealloc(client->request.vpath, client->request.vpath_len + length + 1, true);
+		memcpy(client->request.vpath + client->request.vpath_len, at, length);
+		client->request.vpath_len += length;
+		client->request.vpath[client->request.vpath_len] = '\0';
 	}
 	return 0;
 }
@@ -1830,6 +1831,12 @@ static int php_cli_server_client_read_request_on_message_complete(php_http_parse
 {
 	php_cli_server_client *client = parser->data;
 	client->request.protocol_version = parser->http_major * 100 + parser->http_minor;
+	if (client->request.vpath) {
+		char *vpath = client->request.vpath;
+		normalize_vpath(&client->request.vpath, &client->request.vpath_len,
+			vpath, client->request.vpath_len, true);
+		pefree(vpath, true);
+	}
 	php_cli_server_request_translate_vpath(client->server, &client->request, client->server->document_root, client->server->document_root_len);
 	if (client->request.vpath) {
 		const char *vpath = client->request.vpath;
