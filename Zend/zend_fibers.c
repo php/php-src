@@ -606,6 +606,14 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 	/* We cannot rely on EG(error_reporting) as a silence operator @ may modify the executor global error_reporting
 	 * value without changing the underlying INI value */
 	zend_long error_reporting = zend_ini_long_literal("error_reporting");
+	/* Unset directive: OnUpdateErrorReporting() stores E_ALL in EG(), but the
+	 * INI value stays NULL and zend_ini_long() returns 0. zend_ini_str()
+	 * replaces that NULL with an empty string, so this uses zend_ini_str_ex(),
+	 * which still returns NULL. An explicit 0 or an empty string does not.
+	 * GH-25249. */
+	if (!error_reporting && !zend_ini_str_ex("error_reporting", sizeof("error_reporting") - 1, false, NULL)) {
+		error_reporting = E_ALL;
+	}
 
 	EG(vm_stack) = NULL;
 
