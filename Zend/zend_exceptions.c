@@ -1005,12 +1005,19 @@ ZEND_API ZEND_COLD zend_result zend_exception_error(zend_object *ex, int severit
 /* }}} */
 
 ZEND_NORETURN void zend_exception_uncaught_error(const char *format, ...) {
+	ZEND_ASSERT(EG(exception));
+	if (zend_is_unwind_exit(EG(exception))) {
+		/* exit() was called in a place that cannot unwind. exit() already set
+		 * EG(exit_status), so end the request without an error. */
+		zend_clear_exception();
+		zend_bailout();
+	}
+
 	va_list va;
 	va_start(va, format);
 	zend_string *prefix = zend_vstrpprintf(0, format, va);
 	va_end(va);
 
-	ZEND_ASSERT(EG(exception));
 	zval exception_zv;
 	ZVAL_OBJ_COPY(&exception_zv, EG(exception));
 	zend_clear_exception();
