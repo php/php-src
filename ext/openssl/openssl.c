@@ -5116,7 +5116,6 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 }
 /* }}} */
 
-/* {{{ */
 PHP_FUNCTION(openssl_get_channel_binding)
 {
 	php_stream *stream = NULL;
@@ -5143,9 +5142,7 @@ PHP_FUNCTION(openssl_get_channel_binding)
 						"Channel binding type \"tls-server-end-point\" requires a certificate", 0);
 					break;
 				default:
-					zend_throw_exception(php_openssl_unsupported_channel_binding_exception_ce,
-						"Channel binding type is not applicable to this connection", 0);
-					break;
+					ZEND_UNREACHABLE();
 			}
 			RETURN_THROWS();
 		case PHP_OPENSSL_CHANNEL_BINDING_RESULT_NOT_TLS:
@@ -5171,4 +5168,3 @@ PHP_FUNCTION(openssl_get_channel_binding)
 			ZEND_UNREACHABLE();
 	}
 }
-/* }}} */

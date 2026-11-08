@@ -3952,7 +3952,7 @@ static const php_stream_ops php_openssl_socket_ops = {
  * Get the NID of the message-digest algorithm used to sign a certificate,
  * or NID_undef if it cannot be determined.
  */
-static int php_openssl_get_cert_signature_md_nid(const X509 *cert) /* {{{ */
+static int php_openssl_get_cert_signature_md_nid(const X509 *cert)
 {
 	int md_nid, pkey_nid, secbits;
 	uint32_t flags = 0;
@@ -3963,7 +3963,6 @@ static int php_openssl_get_cert_signature_md_nid(const X509 *cert) /* {{{ */
 
 	return md_nid;
 }
-/* }}} */
 
 /*
  * Extract TLS channel binding data from an established openssl stream.
@@ -3975,24 +3974,20 @@ static int php_openssl_get_cert_signature_md_nid(const X509 *cert) /* {{{ */
  * stream PHP_OPENSSL_CHANNEL_BINDING_RESULT_NOT_TLS is returned, and if an OpenSSL call fails
  * PHP_OPENSSL_CHANNEL_BINDING_RESULT_ERROR is returned; in both of these cases *out is set to NULL.
  */
-php_openssl_channel_binding_result php_openssl_netstream_get_channel_binding( /* {{{ */
+php_openssl_channel_binding_result php_openssl_netstream_get_channel_binding(
 	php_stream *stream, zend_enum_Openssl_ChannelBindingType type, zend_string **out)
 {
-	unsigned char buf[EVP_MAX_MD_SIZE];
-	size_t len = 0;
-	php_openssl_netstream_data_t *sslsock;
-	SSL *ssl;
-
 	*out = NULL;
 
 	if (stream == NULL || stream->ops != &php_openssl_socket_ops) {
 		return PHP_OPENSSL_CHANNEL_BINDING_RESULT_NOT_TLS;
 	}
-	sslsock = (php_openssl_netstream_data_t *)stream->abstract;
+	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t *)stream->abstract;
 	if (sslsock == NULL || !sslsock->ssl_active || sslsock->ssl_handle == NULL) {
 		return PHP_OPENSSL_CHANNEL_BINDING_RESULT_NOT_TLS;
 	}
-	ssl = sslsock->ssl_handle;
+	SSL *ssl = sslsock->ssl_handle;
+	unsigned char buf[EVP_MAX_MD_SIZE];
 
 	switch (type) {
 	case ZEND_ENUM_Openssl_ChannelBindingType_TlsUnique:
@@ -4009,6 +4004,7 @@ php_openssl_channel_binding_result php_openssl_netstream_get_channel_binding( /*
 		 * buffer), and in a resumed handshake the server's Finished. This is
 		 * the same selection CPython's _ssl.get_channel_binding() makes.
 		 */
+		size_t len;
 		if (sslsock->is_client ^ SSL_session_reused(ssl)) {
 			len = SSL_get_finished(ssl, buf, sizeof(buf));
 		} else {
@@ -4017,22 +4013,19 @@ php_openssl_channel_binding_result php_openssl_netstream_get_channel_binding( /*
 		if (len == 0) {
 			return PHP_OPENSSL_CHANNEL_BINDING_RESULT_ERROR;
 		}
-		*out = zend_string_init((char *)buf, len, 0);
-		return *out != NULL ? PHP_OPENSSL_CHANNEL_BINDING_RESULT_OK : PHP_OPENSSL_CHANNEL_BINDING_RESULT_ERROR;
+		*out = zend_string_init((char *)buf, len, false);
+		return PHP_OPENSSL_CHANNEL_BINDING_RESULT_OK;
 
 	case ZEND_ENUM_Openssl_ChannelBindingType_TlsServerEndPoint:
 		{
 			X509 *cert = sslsock->is_client ?
 				SSL_get_peer_certificate(ssl) : SSL_get_certificate(ssl);
-			int md_nid, rc;
-			const EVP_MD *md;
-			unsigned int digest_len = 0;
 
 			if (cert == NULL) {
 				return PHP_OPENSSL_CHANNEL_BINDING_RESULT_NOT_APPLICABLE;
 			}
 
-			md_nid = php_openssl_get_cert_signature_md_nid(cert);
+			int md_nid = php_openssl_get_cert_signature_md_nid(cert);
 			/*
 			 * RFC 5929 section 4.1: if the digest used to sign the
 			 * certificate is MD5 or SHA-1, or cannot be determined, use
@@ -4041,11 +4034,12 @@ php_openssl_channel_binding_result php_openssl_netstream_get_channel_binding( /*
 			if (md_nid == NID_md5 || md_nid == NID_sha1 || md_nid == NID_undef) {
 				md_nid = NID_sha256;
 			}
-			md = EVP_get_digestbynid(md_nid);
+			const EVP_MD *md = EVP_get_digestbynid(md_nid);
 			if (md == NULL) {
 				md = EVP_sha256();
 			}
-			rc = X509_digest(cert, md, buf, &digest_len);
+			unsigned int digest_len;
+			int rc = X509_digest(cert, md, buf, &digest_len);
 			/*
 			 * SSL_get_peer_certificate() returns a certificate with an
 			 * incremented reference count that we must free;
@@ -4058,8 +4052,8 @@ php_openssl_channel_binding_result php_openssl_netstream_get_channel_binding( /*
 			if (rc != 1) {
 				return PHP_OPENSSL_CHANNEL_BINDING_RESULT_ERROR;
 			}
-			*out = zend_string_init((char *)buf, digest_len, 0);
-			return *out != NULL ? PHP_OPENSSL_CHANNEL_BINDING_RESULT_OK : PHP_OPENSSL_CHANNEL_BINDING_RESULT_ERROR;
+			*out = zend_string_init((char *)buf, digest_len, false);
+			return PHP_OPENSSL_CHANNEL_BINDING_RESULT_OK;
 		}
 
 	case ZEND_ENUM_Openssl_ChannelBindingType_TlsExporter:
@@ -4075,14 +4069,13 @@ php_openssl_channel_binding_result php_openssl_netstream_get_channel_binding( /*
 				(const unsigned char *)"", 0, 1) != 1) {
 			return PHP_OPENSSL_CHANNEL_BINDING_RESULT_ERROR;
 		}
-		*out = zend_string_init((char *)buf, 32, 0);
-		return *out != NULL ? PHP_OPENSSL_CHANNEL_BINDING_RESULT_OK : PHP_OPENSSL_CHANNEL_BINDING_RESULT_ERROR;
+		*out = zend_string_init((char *)buf, 32, false);
+		return PHP_OPENSSL_CHANNEL_BINDING_RESULT_OK;
 
 	default:
-		return PHP_OPENSSL_CHANNEL_BINDING_RESULT_ERROR;
+		ZEND_UNREACHABLE();
 	}
 }
-/* }}} */
 
 static zend_long php_openssl_get_crypto_method(
 		php_stream_context *ctx, zend_long crypto_method)  /* {{{ */
