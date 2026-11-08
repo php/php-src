@@ -347,9 +347,9 @@ ZEND_METHOD(Exception, __construct)
 /* }}} */
 
 /* {{{ Exception unserialize checks */
-#define CHECK_EXC_TYPE(id, type) \
+#define CHECK_EXC_TYPE(id, type_mask) \
 	pvalue = zend_read_property_ex(i_get_exception_base(Z_OBJ_P(object)), Z_OBJ_P(object), ZSTR_KNOWN(id), 1, &value); \
-	if (Z_TYPE_P(pvalue) != IS_NULL && Z_TYPE_P(pvalue) != type) { \
+	if (Z_TYPE_P(pvalue) != IS_NULL && !((type_mask) & (1u << Z_TYPE_P(pvalue)))) { \
 		zend_unset_property(i_get_exception_base(Z_OBJ_P(object)), Z_OBJ_P(object), ZSTR_VAL(ZSTR_KNOWN(id)), ZSTR_LEN(ZSTR_KNOWN(id))); \
 	}
 
@@ -359,8 +359,8 @@ ZEND_METHOD(Exception, __wakeup)
 
 	zval value, *pvalue;
 	zval *object = ZEND_THIS;
-	CHECK_EXC_TYPE(ZEND_STR_MESSAGE, IS_STRING);
-	CHECK_EXC_TYPE(ZEND_STR_CODE,    IS_LONG);
+	CHECK_EXC_TYPE(ZEND_STR_MESSAGE, MAY_BE_STRING);
+	CHECK_EXC_TYPE(ZEND_STR_CODE,    MAY_BE_LONG | MAY_BE_STRING);
 	/* The type of all other properties is enforced through typed properties. */
 }
 /* }}} */
