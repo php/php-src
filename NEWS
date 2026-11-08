@@ -16,6 +16,8 @@ PHP                                                                        NEWS
     cached). (lazerg)
   . Fixed bug GH-25265 (Misaligned read for virtual internal props in
     hooked subclass). (Lazizbek Ergashev)
+  . Fixed bug GH-25314 (Assertion in ZEND_DO_FCALL: reference returned by
+    &__get() reaches property hook TMP result). (ndossche)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)

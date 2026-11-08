@@ -1880,11 +1880,15 @@ static ZEND_FUNCTION(zend_parent_hook_get_trampoline)
 	}
 
 	zval rv;
-	const zval *retval = obj->handlers->read_property(obj, prop_name, BP_VAR_R, NULL, &rv);
+	zval *retval = obj->handlers->read_property(obj, prop_name, BP_VAR_R, NULL, &rv);
 	if (retval == &rv) {
 		RETVAL_COPY_VALUE(retval);
+		if (UNEXPECTED(Z_ISREF_P(return_value))) {
+			/* __get() may return by reference. */
+			zend_unwrap_reference(return_value);
+		}
 	} else {
-		RETVAL_COPY(retval);
+		RETVAL_COPY_DEREF(retval);
 	}
 
 clean:
