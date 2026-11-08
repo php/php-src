@@ -14,6 +14,8 @@ PHP                                                                        NEWS
     (Jorg Sowa)
   . Fixed bug GH-25265 (Misaligned read for virtual internal props in
     hooked subclass). (Lazizbek Ergashev)
+  . Fixed bug GH-25299 (Exception string code is lost after unserialize()).
+    (Lazizbek Ergashev, David Carlier)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
