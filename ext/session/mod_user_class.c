@@ -16,13 +16,14 @@
 
 #include "php.h"
 #include "php_session.h"
+#include "mod_user.h"
 
 #define PS_SANITY_CHECK						\
 	if (PS(session_status) != php_session_active) { \
 		zend_throw_error(NULL, "Session is not active"); \
 		RETURN_THROWS(); \
 	} \
-	if (PS(default_mod) == NULL) { \
+	if (PS(default_mod) == NULL || PS(default_mod) == ps_user_ptr) { \
 		zend_throw_error(NULL, "Cannot call default session handler"); \
 		RETURN_THROWS(); \
 	}
