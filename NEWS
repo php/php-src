@@ -157,6 +157,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-24441 (quoted_printable_encode() produces lines longer than
     76 characters for bytes 0xF5 to 0xFF). (Sebastian Turner,
     Lazizbek Ergashev)
+  . Fixed getimagesize() reporting wrapped dimensions for XBM images with
+    out-of-range width or height. (Ilia Alshanetsky)
 
 - Streams:
   . Fixed bug GH-22063 (Stream filter chain UAF on self-removal during
