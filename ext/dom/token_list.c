@@ -302,7 +302,9 @@ static void dom_token_list_item_read(dom_token_list_object *token_list, zval *re
 			index--;
 		}
 		zend_string *str_index;
-		zend_hash_get_current_key_ex(token_set, &str_index, NULL, &position);
+		zend_ulong unused;
+		zend_hash_get_current_key_ex(token_set, &str_index, &unused, &position);
+		ZEND_ASSERT(str_index != NULL);
 		ZVAL_STR_COPY(retval, str_index);
 	} else {
 		/* Not an out of bounds ValueError, but NULL, as according to spec.
