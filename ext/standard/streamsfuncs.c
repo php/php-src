@@ -68,7 +68,7 @@ PHP_FUNCTION(stream_socket_pair)
 	}
 
 	php_stream_error_operation_begin();
-	context = php_stream_context_from_zval(zcontext, 0);
+	context = php_stream_context_from_zval_or_default(zcontext);
 
     s1 = php_stream_sock_open_from_socket(pair[0], 0);
     if (s1 == NULL) {
@@ -529,7 +529,7 @@ PHP_FUNCTION(stream_copy_to_stream)
 	}
 
 	php_stream_error_operation_begin();
-	context = php_stream_context_from_zval(zcontext, 0);
+	context = php_stream_context_from_zval_or_default(zcontext);
 
 	if (pos > 0 && php_stream_seek(src, pos, SEEK_SET) < 0) {
 		php_stream_error_operation_end(context);
@@ -791,7 +791,7 @@ PHP_FUNCTION(stream_select)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_stream_error_operation_begin();
-	php_stream_context *context = php_stream_context_from_zval(zcontext, 0);
+	php_stream_context *context = php_stream_context_from_zval_or_default(zcontext);
 
 	/* The sets grow as streams are added, past FD_SETSIZE */
 	php_growable_fd_set rfds, wfds, efds;
@@ -1705,7 +1705,7 @@ PHP_FUNCTION(stream_is_local)
 		}
 
 		php_stream_error_operation_begin();
-		context = php_stream_context_from_zval(zcontext, 0);
+		context = php_stream_context_from_zval_or_default(zcontext);
 		wrapper = php_stream_locate_url_wrapper(Z_STRVAL_P(zstream), NULL, 0);
 		php_stream_error_operation_end(context);
 	}

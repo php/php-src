@@ -473,7 +473,7 @@ bool make_http_soap_request(
 
 	tmp = Z_CLIENT_STREAM_CONTEXT_P(this_ptr);
 	if (Z_TYPE_P(tmp) == IS_RESOURCE) {
-		context = php_stream_context_from_zval(tmp, 0);
+		context = php_stream_context_from_zval_or_default(tmp);
 	}
 
 	if (context &&
