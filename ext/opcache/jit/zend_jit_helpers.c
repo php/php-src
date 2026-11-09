@@ -1134,7 +1134,16 @@ try_string_offset:
 				break;
 			}
 			case IS_UNDEF:
+				/* The string may be destroyed while throwing the notice */
+				if (!(GC_FLAGS(str) & IS_STR_INTERNED)) {
+					GC_ADDREF(str);
+				}
 				zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
+				if (!(GC_FLAGS(str) & IS_STR_INTERNED) && UNEXPECTED(GC_DELREF(str) == 0)) {
+					zend_string_efree(str);
+					ZVAL_NULL(result);
+					return;
+				}
 				ZEND_FALLTHROUGH;
 			case IS_DOUBLE:
 			case IS_NULL:
