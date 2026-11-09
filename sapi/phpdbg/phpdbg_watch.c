@@ -979,6 +979,9 @@ void phpdbg_remove_watch_element(phpdbg_watch_element *element) {
 }
 
 void phpdbg_backup_watch_element(phpdbg_watch_element *element) {
+	if (!element->watch) {
+		return;
+	}
 	memcpy(&element->backup, &element->watch->backup, /* element->watch->size */ sizeof(element->backup));
 }
 
@@ -1097,6 +1100,7 @@ void phpdbg_clean_watch_element(phpdbg_watch_element *element) {
 		if (zend_hash_num_elements(elements) == 0) {
 			phpdbg_remove_watchpoint(element->watch);
 		}
+		element->watch = NULL;
 	}
 }
 
