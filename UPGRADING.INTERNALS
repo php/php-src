@@ -94,6 +94,7 @@ PHP 8.7 INTERNALS UPGRADE NOTES
   . _php_math_basetozval() now returns zend_result instead of void. It throws
     an exception and returns FAILURE if the input contains invalid characters
     for the given base.
+  . php_dl() has been removed, use php_load_extension() instead.
 
 ========================
 4. OpCode changes
