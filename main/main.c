@@ -1901,6 +1901,7 @@ zend_result php_request_startup(void)
 #if PHP_SIGCHILD
 	signal(SIGCHLD, sigchld_handler);
 #endif
+	PG(default_context) = NULL;
 
 	/* Default to global wrappers only */
 	PG(stream_wrappers) = NULL;
@@ -2354,6 +2355,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	 * (this uses configuration parameters from php.ini)
 	 */
 	php_init_stream_wrappers(module_number);
+	php_stream_context_init(module_number);
 
 	zuv.html_errors = 1;
 	php_startup_auto_globals();

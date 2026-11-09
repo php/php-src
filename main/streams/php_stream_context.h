@@ -59,10 +59,9 @@ PHPAPI php_stream_notifier *php_stream_notification_alloc(void);
 PHPAPI void php_stream_notification_free(php_stream_notifier *notifier);
 END_EXTERN_C()
 
-/* TODO: Remove dependence on ext/standard/file.h for the default context global */
-//#include "ext/standard/file.h"
+//#include "php_globals.h"
 #define php_stream_context_get_default() \
-	FG(default_context) ? FG(default_context) : (FG(default_context) = php_stream_context_alloc())
+	PG(default_context) ? PG(default_context) : (PG(default_context) = php_stream_context_alloc())
 
 /* Attempt to fetch context from the zval passed,
    If no context was passed, use the default context

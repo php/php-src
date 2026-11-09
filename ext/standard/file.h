@@ -93,7 +93,6 @@ typedef struct {
 	size_t def_chunk_size;
 	zend_string *user_agent; /* for the http wrapper */
 	zend_string *from_address; /* for the ftp and http wrappers */
-	php_stream_context *default_context;
 	bool pclose_wait;
 #ifdef HAVE_GETHOSTBYNAME_R
 	struct hostent tmp_host_info;

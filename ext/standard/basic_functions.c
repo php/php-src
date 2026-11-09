@@ -418,8 +418,6 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 	/* Initialize memory for last http headers */
 	ZVAL_UNDEF(&BG(last_http_headers));
 
-	/* Setup default context */
-	FG(default_context) = NULL;
 	return SUCCESS;
 }
 /* }}} */

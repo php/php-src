@@ -96,30 +96,7 @@ php_file_globals file_globals;
 
 /* }}} */
 
-/* {{{ ZTS-stuff / Globals / Prototypes */
-
-/* sharing globals is *evil* */
-static int le_stream_context = FAILURE;
-
-PHPAPI int php_le_stream_context(void)
-{
-	return le_stream_context;
-}
-/* }}} */
-
 /* {{{ Module-Stuff */
-static ZEND_RSRC_DTOR_FUNC(file_context_dtor)
-{
-	php_stream_context *context = (php_stream_context*)res->ptr;
-	if (context == FG(default_context)) {
-		FG(default_context) = NULL;
-	}
-	if (Z_TYPE(context->options) != IS_UNDEF) {
-		zval_ptr_dtor(&context->options);
-		ZVAL_UNDEF(&context->options);
-	}
-	php_stream_context_free(context);
-}
 
 static void file_globals_ctor(php_file_globals *file_globals_p)
 {
@@ -143,8 +120,6 @@ PHP_INI_END()
 
 PHP_MINIT_FUNCTION(file)
 {
-	le_stream_context = zend_register_list_destructors_ex(file_context_dtor, NULL, "stream-context", module_number);
-
 #ifdef ZTS
 	ts_allocate_id(&file_globals_id, sizeof(php_file_globals), (ts_allocate_ctor) file_globals_ctor, (ts_allocate_dtor) file_globals_dtor);
 #else

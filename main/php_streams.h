@@ -614,6 +614,7 @@ END_EXTERN_C()
 /* this flag is only used by include/require functions */
 #define STREAM_OPEN_FOR_ZEND_STREAM     0x00010000
 
+void php_stream_context_init(int module_number);
 void php_init_stream_wrappers(int module_number);
 void php_shutdown_stream_wrappers(int module_number);
 void php_shutdown_stream_hashes(void);

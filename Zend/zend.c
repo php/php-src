@@ -40,8 +40,6 @@
 #include "zend_enum.h"
 #include "zend_closures.h"
 #include "Optimizer/zend_optimizer.h"
-#include "php.h"
-#include "php_globals.h"
 
 // FIXME: Breaks the declaration of the function below
 #undef zenderror
