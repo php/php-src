@@ -8,13 +8,23 @@ YuanchengJiang
 <?php
 class C extends SoapClient {
     function __doRequest($request, $location, $action, $version, $one_way = false, ?string $uriParserClass = null): string {
-        echo $request;
+        preg_match('#<ns1:foo>(.*)</ns1:foo>#', $request, $m);
+        echo $m[1], PHP_EOL;
         return "";
     }
 }
 $c = new C(null, ["location" => "test://", "uri" => "test://"]);
-$c->foo(new SoapVar([new SoapVar("y", XSD_STRING), "a" => new SoapVar("x", XSD_STRING)], XSD_ANYXML));
+
+try {
+    $c->foo(new SoapVar([new SoapVar("y", XSD_STRING), "a" => new SoapVar("x", XSD_STRING)], XSD_ANYXML));
+} catch (SoapFault $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+
+$c->foo(new SoapVar([new SoapVar("y", XSD_STRING, nodeName: "b"), "a" => new SoapVar("x", XSD_STRING)], XSD_ANYXML));
+$c->foo(new SoapVar(["<b>y</b>", "a" => new SoapVar("x", XSD_STRING)], XSD_ANYXML));
 ?>
 --EXPECT--
-<?xml version="1.0" encoding="UTF-8"?>
-<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="test://" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><SOAP-ENV:Body><ns1:foo><BOGUS xsi:type="xsd:string">y</BOGUS><a xsi:type="xsd:string">x</a></ns1:foo></SOAP-ENV:Body></SOAP-ENV:Envelope>
+SoapFault: SOAP-ERROR: Encoding: Element at index 0 of 'any' content has no name
+<b xsi:type="xsd:string">y</b><a xsi:type="xsd:string">x</a>
+<b>y</b><a xsi:type="xsd:string">x</a>

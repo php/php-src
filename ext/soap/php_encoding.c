@@ -3234,13 +3234,18 @@ static xmlNodePtr to_xml_any(encodeTypePtr type, zval *data, int style, xmlNodeP
 		zval *el;
 		encodePtr enc = get_conversion(XSD_ANYXML);
 		zend_string *name;
+		zend_ulong idx;
 
-		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(data), name, el) {
+		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(data), idx, name, el) {
 			ret = master_to_xml(enc, el, style, parent);
-		    if (ret && name &&
-		        ret->name != xmlStringTextNoenc) {
+			if (!ret || ret->name == xmlStringTextNoenc) {
+				continue;
+			}
+			if (name) {
 				xmlNodeSetName(ret, BAD_CAST(ZSTR_VAL(name)));
-		    }
+			} else if (ret->type == XML_ELEMENT_NODE && xmlStrEqual(ret->name, BAD_CAST("BOGUS"))) {
+				soap_error1(E_ERROR, "Encoding: Element at index " ZEND_ULONG_FMT " of 'any' content has no name", idx);
+			}
 		} ZEND_HASH_FOREACH_END();
 		return ret;
 	}
