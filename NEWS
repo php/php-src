@@ -59,6 +59,10 @@ PHP                                                                        NEWS
   . Fixed an exception thrown by the session_get_cb stream context callback
     being replaced with a TypeError. (Ilia Alshanetsky)
 
+- PDO_Firebird:
+  . Fixed stack buffer overflow with long connection user names, passwords,
+    charsets, or roles. (Ilia Alshanetsky)
+
 - SOAP:
   . Fixed bug GH-25267 (NULL dereference in to_xml_any() with integer key).
     (lazerg)
