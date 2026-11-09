@@ -2972,8 +2972,6 @@ static PHP_REND_FUNCTION(session)
 		PS(session_status) = php_session_disabled;
 	}
 
-	zend_hash_str_del(&EG(symbol_table), ZEND_STRL("_SESSION"));
-
 	return SUCCESS;
 }
 

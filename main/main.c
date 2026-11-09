@@ -2007,6 +2007,9 @@ PHPAPI zend_result php_request_begin(void)
 	zend_result retval = SUCCESS;
 
 	zend_try {
+		/* the script reads the previous request's superglobals until now */
+		php_release_request_globals();
+
 		php_output_activate();
 
 		PG(header_is_being_sent) = 0;

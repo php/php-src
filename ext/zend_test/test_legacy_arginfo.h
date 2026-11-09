@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: afaf90f82bb94a431f6a9cd133b4dacba99595f2
+ * Stub hash: 0d4aef6dc380491c756b7db128db865464bd22c9
  * Has decl header: yes */
 
 #include "zend_constants.h"
@@ -20,7 +20,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_test_forward_reference, 0, 1, 1)
 	ZEND_ARG_INFO(1, value)
 ZEND_END_ARG_INFO()
 
-#define arginfo_zend_test_request_boundary arginfo_zend_trigger_bailout
+ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_test_request_boundary, 0, 0, 0)
+	ZEND_ARG_INFO(0, between)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_test_compile_string, 0, 0, 3)
 	ZEND_ARG_INFO(0, source_string)

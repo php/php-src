@@ -820,6 +820,52 @@ PHPAPI zend_result php_hash_environment(void)
 }
 /* }}} */
 
+static bool php_release_request_globals_once(void)
+{
+	zend_auto_global *auto_global;
+	bool released = false;
+
+	ZEND_HASH_MAP_FOREACH_PTR(CG(auto_globals), auto_global) {
+		zval *value, *array, garbage;
+
+		if (auto_global->name == ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_ENV)
+			|| !(value = zend_hash_find(&EG(symbol_table), auto_global->name))) {
+			continue;
+		}
+
+		/* created by their extension when needed, such as $_SESSION */
+		if (!auto_global->auto_global_callback) {
+			zend_hash_del(&EG(symbol_table), auto_global->name);
+			released = true;
+			continue;
+		}
+
+		array = value;
+		ZVAL_DEREF(array);
+		if (Z_TYPE_P(array) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL_P(array)) == 0) {
+			continue;
+		}
+
+		/* kept as an empty array so php_request_begin() imports it again */
+		ZVAL_COPY_VALUE(&garbage, value);
+		ZVAL_EMPTY_ARRAY(value);
+		zval_ptr_dtor(&garbage);
+		released = true;
+	} ZEND_HASH_FOREACH_END();
+
+	return released;
+}
+
+/* Runs the destructors of the objects stored in superglobals before the output
+ * of the next request is active. $_ENV comes from the process, not the request,
+ * so the script keeps it. */
+PHPAPI void php_release_request_globals(void)
+{
+	/* a destructor can put data back into a superglobal already released */
+	while (php_release_request_globals_once()) {
+	}
+}
+
 static bool php_auto_globals_create_get(zend_string *name)
 {
 	if (PG(variables_order) && (strchr(PG(variables_order),'G') || strchr(PG(variables_order),'g'))) {

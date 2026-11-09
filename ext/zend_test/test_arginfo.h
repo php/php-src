@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: afaf90f82bb94a431f6a9cd133b4dacba99595f2
+ * Stub hash: 0d4aef6dc380491c756b7db128db865464bd22c9
  * Has decl header: yes */
 
 #include "zend_attributes.h"
@@ -25,6 +25,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_forward_reference, 1, 
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_request_boundary, 0, 0, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, between, IS_CALLABLE, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_compile_string, 0, 3, IS_VOID, 0)
@@ -338,7 +339,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_override_libxml_global
 ZEND_END_ARG_INFO()
 #endif
 
-#define arginfo_zend_test_is_pcre_bundled arginfo_zend_test_request_boundary
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_is_pcre_bundled, 0, 0, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
 
 #if defined(PHP_WIN32)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_set_fmode, 0, 1, IS_VOID, 0)
@@ -362,7 +364,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_zend_test_gh18756 arginfo_zend_test_void_return
 
-#define arginfo_zend_test_opcache_preloading arginfo_zend_test_request_boundary
+#define arginfo_zend_test_opcache_preloading arginfo_zend_test_is_pcre_bundled
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_uri_parser, 0, 2, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
@@ -384,7 +386,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_set_local_var, 0, 2, _
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_ZendTestNS2_namespaced_func arginfo_zend_test_request_boundary
+#define arginfo_ZendTestNS2_namespaced_func arginfo_zend_test_is_pcre_bundled
 
 #define arginfo_ZendTestNS2_namespaced_deprecated_func arginfo_zend_test_void_return
 
@@ -392,7 +394,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_ZendTestNS2_namespaced_deprecated_aliased_func arginfo_zend_test_void_return
 
-#define arginfo_ZendTestNS2_ZendSubNS_namespaced_func arginfo_zend_test_request_boundary
+#define arginfo_ZendTestNS2_ZendSubNS_namespaced_func arginfo_zend_test_is_pcre_bundled
 
 #define arginfo_ZendTestNS2_ZendSubNS_namespaced_deprecated_func arginfo_zend_test_void_return
 
@@ -432,9 +434,9 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class__ZendTestChildClass_returnsThrowable, 0, 0, Exception, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_ZendAttributeTest_testMethod arginfo_zend_test_request_boundary
+#define arginfo_class_ZendAttributeTest_testMethod arginfo_zend_test_is_pcre_bundled
 
-#define arginfo_class__ZendTestTrait_testMethod arginfo_zend_test_request_boundary
+#define arginfo_class__ZendTestTrait_testMethod arginfo_zend_test_is_pcre_bundled
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ZendTestAttributeWithArguments___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, arg, IS_MIXED, 0)

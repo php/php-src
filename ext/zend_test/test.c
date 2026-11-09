@@ -109,9 +109,18 @@ static ZEND_FUNCTION(zend_test_void_return)
 
 static ZEND_FUNCTION(zend_test_request_boundary)
 {
-	ZEND_PARSE_PARAMETERS_NONE();
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_FUNC_OR_NULL(fci, fcc)
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_request_end();
+	if (ZEND_FCI_INITIALIZED(fci)) {
+		zend_call_known_fcc(&fcc, NULL, 0, NULL, NULL);
+	}
 	RETURN_BOOL(php_request_begin() == SUCCESS);
 }
 
