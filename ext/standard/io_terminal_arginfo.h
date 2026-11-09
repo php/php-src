@@ -1,5 +1,5 @@
 /* This is a generated file, edit io_terminal.stub.php instead.
- * Stub hash: b4b859efdbcba4500483769c7ae8520659cff5fa
+ * Stub hash: e24d70debb197766b78c9a58b9d5300f6ced77a5
  * Has decl header: yes */
 
 #include "zend_attributes.h"
@@ -43,6 +43,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Io_Terminal_Terminal_readSecret, 0, 0, IS_STRING, 1)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, timeout, Time\\Duration, 1, "null")
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, sequenceTimeout, Time\\Duration, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_METHOD(Io_Terminal_Dimensions, __construct);

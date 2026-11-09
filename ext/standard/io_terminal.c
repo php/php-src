@@ -2350,6 +2350,7 @@ static zend_string *php_io_terminal_read_stream_secret(
 	php_io_terminal_native_stream input,
 	php_stream *stream,
 	const struct timespec *timeout,
+	const struct timespec *sequence_timeout,
 	php_io_terminal_object *intern,
 	bool *timed_out
 )
@@ -2392,6 +2393,8 @@ static zend_string *php_io_terminal_read_stream_secret(
 		);
 		is_positive_timeout = (timeout->tv_sec > 0 || timeout->tv_nsec > 0);
 	}
+
+	zend_hrtime_t seq_timeout_ns = php_io_terminal_timespec_to_ns(sequence_timeout);
 
 	smart_str secret = {0};
 	bool success = false;
@@ -2514,13 +2517,12 @@ process_key:
 						step_timeout.tv_nsec = 0;
 					} else {
 						zend_hrtime_t remaining_ns = overall_deadline_ns - now;
-						zend_hrtime_t step_ns = remaining_ns < 25000000ULL ? remaining_ns : 25000000ULL;
+						zend_hrtime_t step_ns = remaining_ns < seq_timeout_ns ? remaining_ns : seq_timeout_ns;
 						php_io_terminal_ns_to_timespec(step_ns, &step_timeout);
 					}
 					step_timeout_ptr = &step_timeout;
 				} else {
-					step_timeout.tv_sec = 0;
-					step_timeout.tv_nsec = 25000000L;
+					step_timeout = *sequence_timeout;
 					step_timeout_ptr = &step_timeout;
 				}
 				unsigned char next;
@@ -2553,13 +2555,12 @@ process_key:
 								step_timeout.tv_nsec = 0;
 							} else {
 								zend_hrtime_t remaining_ns = overall_deadline_ns - now;
-								zend_hrtime_t step_ns = remaining_ns < 25000000ULL ? remaining_ns : 25000000ULL;
+								zend_hrtime_t step_ns = remaining_ns < seq_timeout_ns ? remaining_ns : seq_timeout_ns;
 								php_io_terminal_ns_to_timespec(step_ns, &step_timeout);
 							}
 							step_timeout_ptr = &step_timeout;
 						} else {
-							step_timeout.tv_sec = 0;
-							step_timeout.tv_nsec = 25000000L;
+							step_timeout = *sequence_timeout;
 							step_timeout_ptr = &step_timeout;
 						}
 
@@ -2603,13 +2604,12 @@ process_key:
 							step_timeout.tv_nsec = 0;
 						} else {
 							zend_hrtime_t remaining_ns = overall_deadline_ns - now;
-							zend_hrtime_t step_ns = remaining_ns < 25000000ULL ? remaining_ns : 25000000ULL;
+							zend_hrtime_t step_ns = remaining_ns < seq_timeout_ns ? remaining_ns : seq_timeout_ns;
 							php_io_terminal_ns_to_timespec(step_ns, &step_timeout);
 						}
 						step_timeout_ptr = &step_timeout;
 					} else {
-						step_timeout.tv_sec = 0;
-						step_timeout.tv_nsec = 25000000L;
+						step_timeout = *sequence_timeout;
 						step_timeout_ptr = &step_timeout;
 					}
 
@@ -3731,14 +3731,21 @@ PHP_METHOD(Io_Terminal_Terminal, readLine)
 PHP_METHOD(Io_Terminal_Terminal, readSecret)
 {
 	php_date_time_duration *timeout_duration = NULL;
+	php_date_time_duration *seq_timeout_duration = NULL;
 
-	ZEND_PARSE_PARAMETERS_START(0, 1)
+	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_DATE_TIME_DURATION_OR_NULL(timeout_duration)
+		Z_PARAM_DATE_TIME_DURATION_OR_NULL(seq_timeout_duration)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (timeout_duration != NULL && timeout_duration->duration.negative) {
 		zend_argument_value_error(1, "must not be negative");
+		RETURN_THROWS();
+	}
+
+	if (seq_timeout_duration != NULL && seq_timeout_duration->duration.negative) {
+		zend_argument_value_error(2, "must not be negative");
 		RETURN_THROWS();
 	}
 
@@ -3787,12 +3794,15 @@ PHP_METHOD(Io_Terminal_Terminal, readSecret)
 		bool success = false;
 		unsigned char byte = 0;
 		struct timespec win_sec_timeout;
+		struct timespec win_seq_timeout = {0, PHP_IO_TERMINAL_SEQUENCE_TIMEOUT_MS * 1000000L};
 		const struct timespec *win_sec_timeout_ptr = NULL;
 		bool win_has_deadline = false;
 		zend_hrtime_t win_deadline_ns = 0;
 		bool win_is_positive_timeout = false;
+		bool win_is_non_blocking = false;
 
 		if (timeout_duration != NULL) {
+			win_is_non_blocking = (timeout_duration->duration.seconds == 0 && timeout_duration->duration.nanoseconds == 0);
 			win_sec_timeout.tv_sec = php_io_terminal_clamp_duration_seconds(timeout_duration->duration.seconds);
 			win_sec_timeout.tv_nsec = timeout_duration->duration.nanoseconds;
 			win_sec_timeout_ptr = &win_sec_timeout;
@@ -3803,6 +3813,16 @@ PHP_METHOD(Io_Terminal_Terminal, readSecret)
 			);
 			win_is_positive_timeout = (win_sec_timeout.tv_sec > 0 || win_sec_timeout.tv_nsec > 0);
 		}
+
+		if (win_is_non_blocking) {
+			win_seq_timeout.tv_sec = 0;
+			win_seq_timeout.tv_nsec = 0;
+		} else if (seq_timeout_duration != NULL) {
+			win_seq_timeout.tv_sec = php_io_terminal_clamp_duration_seconds(seq_timeout_duration->duration.seconds);
+			win_seq_timeout.tv_nsec = seq_timeout_duration->duration.nanoseconds;
+		}
+
+		zend_hrtime_t win_seq_timeout_ns = php_io_terminal_timespec_to_ns(&win_seq_timeout);
 
 		/* If pending UTF-8 bytes exist from previous readKey, process them first */
 		if (intern->pending_utf8.length > 0) {
@@ -3918,12 +3938,11 @@ win_process_key:
 							esc_to.tv_nsec = 0;
 						} else {
 							zend_hrtime_t rem_ns = win_deadline_ns - now;
-							zend_hrtime_t step_ns = rem_ns < 25000000ULL ? rem_ns : 25000000ULL;
+							zend_hrtime_t step_ns = rem_ns < win_seq_timeout_ns ? rem_ns : win_seq_timeout_ns;
 							php_io_terminal_ns_to_timespec(step_ns, &esc_to);
 						}
 					} else {
-						esc_to.tv_sec = 0;
-						esc_to.tv_nsec = 25000000L;
+						esc_to = win_seq_timeout;
 					}
 
 					unsigned char next_b;
@@ -3950,12 +3969,11 @@ win_process_key:
 									esc_to.tv_nsec = 0;
 								} else {
 									zend_hrtime_t rem_ns = win_deadline_ns - now;
-									zend_hrtime_t step_ns = rem_ns < 25000000ULL ? rem_ns : 25000000ULL;
+									zend_hrtime_t step_ns = rem_ns < win_seq_timeout_ns ? rem_ns : win_seq_timeout_ns;
 									php_io_terminal_ns_to_timespec(step_ns, &esc_to);
 								}
 							} else {
-								esc_to.tv_sec = 0;
-								esc_to.tv_nsec = 25000000L;
+								esc_to = win_seq_timeout;
 							}
 
 							unsigned char csi_ch;
@@ -3991,12 +4009,11 @@ win_process_key:
 								esc_to.tv_nsec = 0;
 							} else {
 								zend_hrtime_t rem_ns = win_deadline_ns - now;
-								zend_hrtime_t step_ns = rem_ns < 25000000ULL ? rem_ns : 25000000ULL;
+								zend_hrtime_t step_ns = rem_ns < win_seq_timeout_ns ? rem_ns : win_seq_timeout_ns;
 								php_io_terminal_ns_to_timespec(step_ns, &esc_to);
 							}
 						} else {
-							esc_to.tv_sec = 0;
-							esc_to.tv_nsec = 25000000L;
+							esc_to = win_seq_timeout;
 						}
 
 						unsigned char ss3_ch;
@@ -4035,14 +4052,27 @@ win_secret_done:
 	}
 #else
 	struct timespec timeout;
+	struct timespec sequence_timeout = {0, PHP_IO_TERMINAL_SEQUENCE_TIMEOUT_MS * 1000000L};
 	const struct timespec *timeout_ptr = NULL;
+	bool is_non_blocking = false;
+
 	if (timeout_duration != NULL) {
+		is_non_blocking = (timeout_duration->duration.seconds == 0 && timeout_duration->duration.nanoseconds == 0);
 		timeout.tv_sec = php_io_terminal_clamp_duration_seconds(timeout_duration->duration.seconds);
 		timeout.tv_nsec = timeout_duration->duration.nanoseconds;
 		timeout_ptr = &timeout;
 	}
+
+	if (is_non_blocking) {
+		sequence_timeout.tv_sec = 0;
+		sequence_timeout.tv_nsec = 0;
+	} else if (seq_timeout_duration != NULL) {
+		sequence_timeout.tv_sec = php_io_terminal_clamp_duration_seconds(seq_timeout_duration->duration.seconds);
+		sequence_timeout.tv_nsec = seq_timeout_duration->duration.nanoseconds;
+	}
+
 	zend_string *secret = php_io_terminal_read_stream_secret(
-		stream.native_stream, stream.php_stream, timeout_ptr, intern, &timed_out
+		stream.native_stream, stream.php_stream, timeout_ptr, &sequence_timeout, intern, &timed_out
 	);
 #endif
 	if (secret != NULL) {

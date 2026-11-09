@@ -30,8 +30,8 @@ try {
 
 // readSecret rejects extra arguments
 try {
-    $nonTty->readSecret(null, null);
-    echo "FAIL: readSecret accepted multiple arguments\n";
+    $nonTty->readSecret(null, null, null);
+    echo "FAIL: readSecret accepted extra arguments\n";
 } catch (Throwable $e) {
     echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
@@ -44,6 +44,14 @@ try {
     echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
+// readSecret rejects negative sequenceTimeout
+try {
+    $nonTty->readSecret(null, Duration::fromSeconds(1)->negate());
+    echo "FAIL: readSecret accepted negative sequenceTimeout\n";
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+}
+
 fclose($fp);
 
 ?>
@@ -51,5 +59,6 @@ fclose($fp);
 bool(true)
 Io\Terminal\TerminalException: Unable to read secret from terminal
 TypeError: Io\Terminal\Terminal::readSecret(): Argument #1 ($timeout) must be of type ?Time\Duration, string given
-ArgumentCountError: Io\Terminal\Terminal::readSecret() expects at most 1 argument, 2 given
+ArgumentCountError: Io\Terminal\Terminal::readSecret() expects at most 2 arguments, 3 given
 ValueError: Io\Terminal\Terminal::readSecret(): Argument #1 ($timeout) must not be negative
+ValueError: Io\Terminal\Terminal::readSecret(): Argument #2 ($sequenceTimeout) must not be negative
