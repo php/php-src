@@ -1697,7 +1697,7 @@ PHP_FUNCTION(stream_is_local)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(zstream) == IS_RESOURCE) {
-		php_stream_from_zval(stream, zstream);
+		php_stream_from_res(stream, Z_RES_P(zstream));
 		wrapper = stream->wrapper;
 	} else {
 		if (!try_convert_to_string(zstream)) {

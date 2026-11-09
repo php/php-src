@@ -540,7 +540,7 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, enum pdo
 				} else if (Z_TYPE_P(dest) == IS_RESOURCE) {
 					/* Convert LOB stream to string */
 					php_stream *stream;
-					php_stream_from_zval_no_verify(stream, dest);
+					php_stream_from_res_no_verify(stream, Z_RES_P(dest));
 					zend_string *str = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0);
 					zval_ptr_dtor_nogc(dest);
 					if (str == NULL) {
