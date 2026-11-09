@@ -42,6 +42,6 @@ var_dump( $curl_content );
 ?>
 --EXPECT--
 *** curl_setopt() call with CURLOPT_HTTPHEADER
-TypeError: curl_setopt(): The CURLOPT_HTTPHEADER option must have an array value
+TypeError: curl_setopt(): Argument #3 ($value) must be of type array for option CURLOPT_HTTPHEADER, int given
 bool(false)
 bool(true)
