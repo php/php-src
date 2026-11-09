@@ -7807,6 +7807,12 @@ ZEND_METHOD(ReflectionEnumBackedCase, getBackingValue)
 	}
 	GET_REFLECTION_OBJECT_PTR(ref);
 
+	if (!(ZEND_CLASS_CONST_FLAGS(ref) & ZEND_CLASS_CONST_IS_CASE) || ref->ce->enum_backing_type == IS_UNDEF) {
+		zval *case_name = reflection_prop_name(ZEND_THIS);
+		zend_throw_exception_ex(reflection_exception_ptr, 0, "Enum case %s::%s is not a backed case", ZSTR_VAL(ref->ce->name), Z_STRVAL_P(case_name));
+		RETURN_THROWS();
+	}
+
 	if (Z_TYPE(ref->value) == IS_CONSTANT_AST) {
 		zval_update_constant_ex(&ref->value, ref->ce);
 		if (EG(exception)) {
@@ -7814,7 +7820,6 @@ ZEND_METHOD(ReflectionEnumBackedCase, getBackingValue)
 		}
 	}
 
-	ZEND_ASSERT(intern->ce->enum_backing_type != IS_UNDEF);
 	zval *member_p = zend_enum_fetch_case_value(Z_OBJ(ref->value));
 
 	ZVAL_COPY_OR_DUP(return_value, member_p);
