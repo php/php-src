@@ -3076,6 +3076,17 @@ static zval* to_zval_list(zval *ret, encodeTypePtr enc, xmlNodePtr data) {
 	return to_zval_stringc(ret, enc, data);
 }
 
+static void to_xml_list_item_error(encodeTypePtr enc, encodePtr list_enc)
+{
+	if (enc->sdl_type && enc->sdl_type->kind == XSD_TYPEKIND_UNION) {
+		soap_error1(E_ERROR, "Encoding: Value does not match any member type of union type '%s'",
+			soap_type_name(enc));
+	} else {
+		soap_error2(E_ERROR, "Encoding: Failed to encode list item of type '%s' for list type '%s'",
+			soap_type_name(list_enc ? &list_enc->details : NULL), soap_type_name(enc));
+	}
+}
+
 static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style, xmlNodePtr parent) {
 	xmlNodePtr ret;
 	encodePtr list_enc = NULL;
@@ -3111,9 +3122,7 @@ static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style, xmlNodeP
 				}
 				smart_str_appends(&list, (char*)dummy->children->content);
 			} else {
-				soap_error2(E_ERROR,
-					"Encoding: Failed to encode list item of type '%s' for list type '%s'",
-					soap_type_name(&list_enc->details), soap_type_name(enc));
+				to_xml_list_item_error(enc, list_enc);
 			}
 			xmlUnlinkNode(dummy);
 			xmlFreeNode(dummy);
@@ -3155,9 +3164,7 @@ static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style, xmlNodeP
 				}
 				smart_str_appends(&list, (char*)dummy->children->content);
 			} else {
-				soap_error2(E_ERROR,
-					"Encoding: Failed to encode list item of type '%s' for list type '%s'",
-					soap_type_name(&list_enc->details), soap_type_name(enc));
+				to_xml_list_item_error(enc, list_enc);
 			}
 			xmlUnlinkNode(dummy);
 			xmlFreeNode(dummy);
