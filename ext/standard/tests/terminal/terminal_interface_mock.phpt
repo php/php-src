@@ -6,7 +6,7 @@ Io\Terminal\Terminal: final class boundary, dependency injection, and testing wi
 use Io\Terminal\Key;
 use Io\Terminal\ModeToken;
 use Io\Terminal\Terminal;
-use Io\Terminal\TerminalSize;
+use Io\Terminal\Dimensions;
 use Time\Duration;
 
 // Verify final class design (no interfaces)
