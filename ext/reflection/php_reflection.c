@@ -5149,6 +5149,7 @@ static void reflection_class_new_lazy(INTERNAL_FUNCTION_PARAMETERS,
 			strategy | options);
 
 	if (!obj) {
+		zend_release_fcall_info_cache(&fcc);
 		RETURN_THROWS();
 	}
 
@@ -6769,6 +6770,7 @@ retry_declared:;
 			zend_class_init_statics(ce);
 		}
 		zval *prop_val = CE_STATIC_MEMBERS(ce) + prop->offset;
+		ZVAL_DEINDIRECT(prop_val);
 		RETURN_BOOL(!Z_ISUNDEF_P(prop_val));
 	}
 
