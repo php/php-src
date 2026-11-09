@@ -283,7 +283,7 @@ static void spl_filesystem_dir_open(spl_filesystem_object* intern, zend_string *
 	bool skip_dots = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_SKIPDOTS);
 
 	intern->type = SPL_FS_DIR;
-	intern->u.dir.dirp = php_stream_opendir(ZSTR_VAL(path), REPORT_ERRORS, FG(default_context));
+	intern->u.dir.dirp = php_stream_opendir(ZSTR_VAL(path), REPORT_ERRORS, php_stream_context_get_default());
 
 	if (intern->u.dir.dirp) {
 		/* we prevent potential UAF with conflicting explicit fclose(), relying on the object destructor for this */
@@ -328,7 +328,7 @@ static zend_result spl_filesystem_file_open(spl_filesystem_object *intern, bool 
 		return FAILURE;
 	}
 
-	intern->u.file.context = php_stream_context_from_zval(intern->u.file.zcontext, 0);
+	intern->u.file.context = php_stream_context_from_zval_or_default(intern->u.file.zcontext);
 	intern->u.file.stream = php_stream_open_wrapper_ex(ZSTR_VAL(intern->file_name), ZSTR_VAL(intern->u.file.open_mode), (use_include_path ? USE_PATH : 0) | REPORT_ERRORS, NULL, intern->u.file.context);
 
 	if (!ZSTR_LEN(intern->file_name) || !intern->u.file.stream) {

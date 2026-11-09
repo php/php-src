@@ -40,7 +40,7 @@ extern zend_module_entry libxml_module_entry;
 #define LIBXML_NS_TAG_HOOK 1
 
 ZEND_BEGIN_MODULE_GLOBALS(libxml)
-	zval stream_context;
+	zval stream_context; // TODO: Use php_stream_context* directly?
 	smart_str error_buffer;
 	zend_llist *error_list;
 	zend_fcall_info_cache entity_loader_callback;

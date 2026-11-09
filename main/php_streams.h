@@ -93,7 +93,6 @@ END_EXTERN_C()
 
 typedef struct _php_stream php_stream;
 typedef struct _php_stream_wrapper php_stream_wrapper;
-typedef struct _php_stream_context php_stream_context;
 typedef struct _php_stream_filter php_stream_filter;
 
 #include "streams/php_stream_context.h"

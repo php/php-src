@@ -417,7 +417,11 @@ static PHP_GINIT_FUNCTION(libxml)
 
 PHP_LIBXML_API php_stream_context *php_libxml_get_stream_context(void)
 {
-	return php_stream_context_from_zval(Z_ISUNDEF(LIBXML(stream_context)) ? NULL : &LIBXML(stream_context), false);
+	php_stream_context *context = php_stream_context_get_default();
+	if (!Z_ISUNDEF(LIBXML(stream_context))) {
+		context = php_stream_context_from_zval(&LIBXML(stream_context));
+	}
+	return context;
 }
 
 /* Channel libxml file io layer through the PHP streams subsystem.
@@ -1105,7 +1109,8 @@ PHP_FUNCTION(libxml_set_streams_context)
 		Z_PARAM_RESOURCE(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (php_stream_context_from_zval(arg, true) != NULL) {
+	php_stream_context *context = php_stream_context_from_zval(arg);
+	if (context != NULL) {
 		if (!Z_ISUNDEF(LIBXML(stream_context))) {
 			zval_ptr_dtor(&LIBXML(stream_context));
 		}
