@@ -4275,7 +4275,7 @@ IR_FOLD(ULE(_, _))
 IR_FOLD(UGT(_, _))
 {
 	if (op1 == op2) {
-		if (IR_IS_TYPE_SCALAR(IR_OPT_TYPE(opt))) {
+		if (IR_IS_TYPE_INT(op1_insn->type)) {
 			/* a >= a => true (two low bits are differ) */
 			IR_FOLD_BOOL((opt ^ (opt >> 1)) & 1);
 		}
