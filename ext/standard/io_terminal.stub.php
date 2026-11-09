@@ -99,6 +99,7 @@ namespace Io\Terminal {
 
         public function readSecret(
             ?\Time\Duration $timeout = null,
+            ?\Time\Duration $sequenceTimeout = null,
         ): ?string {}
     }
 }
