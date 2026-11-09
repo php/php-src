@@ -76,6 +76,8 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug GH-25266 (Misaligned read in ReflectionProperty::isReadable()).
     (Lazizbek Ergashev)
+  . Fix trampoline leak when object construction fails for lazy object.
+    (ndossche)
 
 - Streams:
   . Fixed in-place URL decoding of interned strings in the HTTP and FTP
