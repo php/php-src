@@ -4540,7 +4540,7 @@ static gdIOCtx *create_output_context(zval *to_zval, uint32_t arg_num) {
 		ZEND_ASSERT(arg_num > 0);
 
 		if (Z_TYPE_P(to_zval) == IS_RESOURCE) {
-			php_stream_from_zval_no_verify(stream, to_zval);
+			php_stream_from_res_no_verify(stream, Z_RES_P(to_zval));
 			if (stream == NULL) {
 				return NULL;
 			}

@@ -402,7 +402,7 @@ PHP_FUNCTION(mime_content_type)
 			break;
 
 		case IS_RESOURCE:
-			php_stream_from_zval(stream, path_or_stream);
+			php_stream_from_res(stream, Z_RES_P(path_or_stream));
 			break;
 
 		default:

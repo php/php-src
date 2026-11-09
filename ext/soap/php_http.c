@@ -453,7 +453,7 @@ bool make_http_soap_request(
 
 	tmp = Z_CLIENT_HTTPSOCKET_P(this_ptr);
 	if (Z_TYPE_P(tmp) == IS_RESOURCE) {
-		php_stream_from_zval_no_verify(stream,tmp);
+		php_stream_from_res_no_verify(stream, Z_RES_P(tmp));
 		tmp = Z_CLIENT_USE_PROXY_P(this_ptr);
 		if (Z_TYPE_P(tmp) == IS_LONG) {
 			use_proxy = Z_LVAL_P(tmp);

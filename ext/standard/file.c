@@ -467,7 +467,7 @@ PHP_FUNCTION(file_put_contents)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(data) == IS_RESOURCE) {
-		php_stream_from_zval(srcstream, data);
+		php_stream_from_res(srcstream, Z_RES_P(data));
 	}
 
 	php_stream_error_operation_begin();
