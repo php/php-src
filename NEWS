@@ -21,6 +21,8 @@ PHP                                                                        NEWS
   . Fix support for never-returning functions in PFAs. (ndossche)
   . Fixed array_map() optimization not resolving the function name of an FCC.
     (ChrisAbner)
+  . Fixed bug GH-25302 (Use-after-free in zend_compile_const_decl() with
+    OPcache during concurrent compilation). (Nicolas Grekas)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
