@@ -206,6 +206,8 @@ PHP 8.7 UPGRADE NOTES
     UTF-8.
   . htmlspecialchars() returns its input without copying it when nothing needs
     encoding.
+  . Improved performance of in_array() and array_search() in strict mode when
+    searching for a string.
 
 - MBString:
   . Improved performance of mb_strlen for UTF-8 strings.
