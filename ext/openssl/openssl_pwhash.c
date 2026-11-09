@@ -38,7 +38,7 @@
 #define PHP_OPENSSL_ITERLIMIT_MIN 1u
 #define PHP_OPENSSL_ITERLIMIT_MAX UINT32_MAX
 #define PHP_OPENSSL_THREADS_MIN   1u
-#define PHP_OPENSSL_THREADS_MAX   UINT32_MAX
+#define PHP_OPENSSL_THREADS_MAX   255
 
 #define PHP_OPENSSL_ARGON_VERSION 0x13
 
@@ -87,7 +87,7 @@ static inline zend_result get_options(zend_array *options, uint32_t *memlimit, u
 
 static bool php_openssl_argon2_compute_hash(
 	const char *algo,
-	uint32_t version, uint32_t memlimit, uint32_t iterlimit, uint32_t threads,
+	uint32_t version, uint32_t memlimit, uint32_t iterlimit, uint32_t laneslimit,
 	const char *pass, size_t pass_len,
 	const unsigned char *salt, size_t salt_len,
 	unsigned char *hash, size_t hash_len)
@@ -95,30 +95,35 @@ static bool php_openssl_argon2_compute_hash(
 	OSSL_PARAM params[7], *p = params;
 	EVP_KDF *kdf = NULL;
 	EVP_KDF_CTX *kctx = NULL;
-	uint32_t oldthreads;
 	bool ret = false;
 
-	oldthreads = OSSL_get_max_threads(NULL);
-	if (OSSL_set_max_threads(NULL, threads) != 1) {
-		goto fail;
+	OSSL_LIB_CTX *libctx = OSSL_LIB_CTX_new();
+	if (libctx == NULL) {
+		return false;
 	}
+
+	uint32_t ossl_threads = (OSSL_set_max_threads(libctx, laneslimit) == 1)
+		? laneslimit : MIN(laneslimit, OSSL_get_max_threads(libctx));
+	if (ossl_threads == 0) {
+		ossl_threads = 1;
+	}
+
 	p = params;
-	*p++ = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_THREADS, &threads);
-	*p++ = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_ARGON2_LANES,	&threads);
+	*p++ = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_THREADS, &ossl_threads);
+	*p++ = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_ARGON2_LANES,	&laneslimit);
 	*p++ = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_ITER, &iterlimit);
 	*p++ = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_ARGON2_MEMCOST, &memlimit);
 	*p++ = OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_SALT, (void *)salt, salt_len);
 	*p++ = OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_PASSWORD, (void *)pass, pass_len);
 	*p++ = OSSL_PARAM_construct_end();
 
-	if ((kdf = EVP_KDF_fetch(NULL, algo, NULL)) == NULL) {
+	if ((kdf = EVP_KDF_fetch(libctx, algo, NULL)) == NULL) {
 		goto fail;
 	}
 	if ((kctx = EVP_KDF_CTX_new(kdf)) == NULL) {
 		goto fail;
 	}
 	if (EVP_KDF_derive(kctx, hash, hash_len, params) != 1) {
-		zend_value_error("Unexpected failure hashing password");
 		goto fail;
 	}
 
@@ -127,7 +132,7 @@ static bool php_openssl_argon2_compute_hash(
 fail:
 	EVP_KDF_free(kdf);
 	EVP_KDF_CTX_free(kctx);
-	OSSL_set_max_threads(NULL, oldthreads);
+	OSSL_LIB_CTX_free(libctx);
 
 	return ret;
 }
@@ -151,6 +156,7 @@ static zend_string *php_openssl_argon2_hash(const zend_string *password, zend_ar
 
 	if (!php_openssl_argon2_compute_hash(algo, version, memlimit, iterlimit, threads,
 			ZSTR_VAL(password), ZSTR_LEN(password),	salt, PHP_OPENSSL_SALT_SIZE, hash, PHP_OPENSSL_HASH_SIZE)) {
+		zend_value_error("Unexpected failure hashing password");
 		return NULL;
 	}
 
@@ -175,13 +181,13 @@ static int php_openssl_argon2_extract(
 	const char *p;
 	char *hash64, *salt64;
 
-	if (!digest || (ZSTR_LEN(digest) < sizeof("$argon2id$"))) {
+	if (!digest || ZSTR_LEN(digest) < 49 || ZSTR_LEN(digest) > 198) {
 		return FAILURE;
 	}
 	p = ZSTR_VAL(digest);
 	if (!memcmp(p, "$argon2i$", strlen("$argon2i$"))) {
 		p += strlen("$argon2i$");
-	} else if (!memcmp(p, "$argon2id$", strlen("$argon2id$"))) {
+	} else if (!memcmp(p, "$argon2id$v=19$", strlen("$argon2id$v=19$"))) {
 		p += strlen("$argon2id$");
 	} else {
 		return FAILURE;
@@ -189,7 +195,14 @@ static int php_openssl_argon2_extract(
 	if (sscanf(p, "v=%" PRIu32 "$m=%" PRIu32 ",t=%" PRIu32 ",p=%" PRIu32,
 			version, memlimit, iterlimit, threads) != 4) {
 		return FAILURE;
+	} else if ((*version != 0x10 && *version != 0x13) ||
+		*memlimit < PHP_OPENSSL_MEMLIMIT_MIN || *memlimit > PHP_OPENSSL_MEMLIMIT_MAX ||
+		*iterlimit < PHP_OPENSSL_ITERLIMIT_MIN || *iterlimit > PHP_OPENSSL_ITERLIMIT_MAX ||
+		*threads < PHP_OPENSSL_THREADS_MIN || *threads > PHP_OPENSSL_THREADS_MAX ||
+		*memlimit < *threads * 8) {
+		return FAILURE;
 	}
+
 	if (salt && hash) {
 		/* start of param */
 		p = strchr(p, '$');
@@ -222,10 +235,15 @@ static bool php_openssl_argon2_verify(const zend_string *password, const zend_st
 	zend_string *salt, *hash, *new;
 	bool ret = false;
 
-	if ((ZSTR_LEN(password) >= UINT32_MAX) || (ZSTR_LEN(digest) >= UINT32_MAX)) {
+	if (ZSTR_LEN(password) >= UINT32_MAX || ZSTR_LEN(digest) < 49 || ZSTR_LEN(digest) > 198) {
 		return false;
 	}
 	if (FAILURE == php_openssl_argon2_extract(digest, &version, &memlimit, &iterlimit, &threads, &salt, &hash)) {
+		return false;
+	}
+	if (ZSTR_LEN(salt) < 8 || ZSTR_LEN(salt) > 48 || ZSTR_LEN(hash) < 12 || ZSTR_LEN(hash) > 64) {
+		zend_string_free(salt);
+		zend_string_free(hash);
 		return false;
 	}
 
@@ -266,7 +284,7 @@ static bool php_openssl_argon2_needs_rehash(const zend_string *hash, zend_array 
 	}
 
 	// Algo already checked in pasword_needs_rehash implementation
-	return (version != new_version) ||
+	return (version < new_version) ||
 		(iterlimit != new_iterlimit) ||
 		(memlimit != new_memlimit) ||
 		(threads != new_threads);
