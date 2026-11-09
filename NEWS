@@ -55,6 +55,10 @@ PHP                                                                        NEWS
   . Fixed incorrect handling of non-ASCII pending_input bytes in readline_info(),
     which could cause readline() to return false prematurely. (Weilin Du)
 
+- Reflection:
+  . Fix trampoline leak when object construction fails for lazy object.
+    (ndossche)
+
 - Streams:
   . Fixed bug GH-22063 (Stream filter chain UAF on self-removal during
     callback). (Ilia Alshanetsky)
