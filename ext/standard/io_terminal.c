@@ -210,7 +210,7 @@ static MUTEX_T php_io_terminal_resize_mutex = NULL;
 
 static zend_always_inline bool php_io_terminal_is_callable_handler(void (*handler)(int))
 {
-	return handler != NULL && handler != SIG_DFL && handler != SIG_IGN;
+	return handler != SIG_DFL && handler != SIG_IGN;
 }
 
 static void php_io_terminal_sigwinch_handler(int signo, siginfo_t *info, void *context)
