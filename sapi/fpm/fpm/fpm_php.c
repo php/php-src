@@ -64,7 +64,6 @@ int fpm_php_apply_defines_ex(struct key_value_s *kv, int mode) /* {{{ */
 	int value_len = strlen(value);
 
 	if (!strcmp(name, "extension") && *value) {
-		zval zv;
 		zend_interned_strings_switch_storage(0);
 
 #if ZEND_RC_DEBUG
@@ -75,14 +74,14 @@ int fpm_php_apply_defines_ex(struct key_value_s *kv, int mode) /* {{{ */
 		zend_rc_debug = false;
 #endif
 
-		php_dl(value, MODULE_PERSISTENT, &zv, 1);
+		zend_result loaded = php_load_extension(value, MODULE_PERSISTENT, true);
 
 #if ZEND_RC_DEBUG
 		zend_rc_debug = orig_rc_debug;
 #endif
 
 		zend_interned_strings_switch_storage(1);
-		return Z_TYPE(zv) == IS_TRUE ? FPM_PHP_INI_EXTENSION_LOADED : FPM_PHP_INI_EXTENSION_FAILED;
+		return loaded == SUCCESS ? FPM_PHP_INI_EXTENSION_LOADED : FPM_PHP_INI_EXTENSION_FAILED;
 	}
 
 	if (fpm_php_zend_ini_alter_master(name, name_len, value, value_len, mode, PHP_INI_STAGE_ACTIVATE) == FAILURE) {
