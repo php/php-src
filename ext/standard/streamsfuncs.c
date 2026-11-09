@@ -14,7 +14,7 @@
 */
 
 #include "php.h"
-#include "ext/standard/flock_compat.h"
+#include "main/flock_compat.h"
 #include "ext/standard/file.h"
 #include "ext/standard/basic_functions.h"
 #include "php_ini.h"
