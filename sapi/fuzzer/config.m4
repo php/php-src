@@ -21,11 +21,6 @@ AC_DEFUN([PHP_FUZZER_TARGET], [
 ])
 
 if test "$PHP_FUZZER" != "no"; then
-  AS_VAR_IF([enable_zts], [yes], [AC_MSG_ERROR(m4_text_wrap([
-    Thread safety (--enable-zts) is not supported when building fuzzing module
-    (--enable-fuzzer). Please build fuzzer without ZTS.
-  ]))])
-
   dnl Don't use PHP_REQUIRE_CXX() to avoid unnecessarily pulling in -lstdc++
   AC_PROG_CXX
   AC_PROG_CXXCPP
@@ -69,7 +64,8 @@ if test "$PHP_FUZZER" != "no"; then
   fi
   if test -n "$enable_mbstring" && test "$enable_mbstring" != "no"; then
     PHP_FUZZER_TARGET([mbstring], [PHP_FUZZER_MBSTRING_OBJS])
-    if test -n "$enable_mbregex" && test "$enable_mbregex" != "no"; then
+    dnl mbregex is enabled by default, so enable_mbregex is usually unset here.
+    if test "$enable_mbregex" != "no"; then
       PHP_FUZZER_TARGET([mbregex], [PHP_FUZZER_MBREGEX_OBJS])
     fi
   fi

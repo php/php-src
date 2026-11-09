@@ -3152,6 +3152,7 @@ static void zend_jit_setup_disasm(void)
 	REGISTER_HELPER(zend_jit_fetch_dim_isset_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_rw_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_w_helper);
+	REGISTER_HELPER(zend_jit_assign_dim_fetch_w_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_str_offset_r_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_str_r_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_str_is_helper);
@@ -4972,7 +4973,7 @@ static int zend_jit_inc_dec(zend_jit_ctx *jit, const zend_op *opline, uint32_t o
 				if_def = jit_if_not_Z_TYPE(jit, op1_addr, IS_UNDEF);
 				ir_IF_FALSE_cold(if_def);
 
-				// zend_error_unchecked(E_WARNING, "Undefined variable $%S", CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var)));
+				// zend_error(E_WARNING, "Undefined variable $%pS", CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var)));
 				ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_undefined_op_helper), ir_CONST_U32(opline->op1.var));
 
 				jit_set_Z_TYPE_INFO(jit, op1_def_addr, IS_NULL);
@@ -5930,7 +5931,7 @@ static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
 			if_def = jit_if_not_Z_TYPE(jit, op1_addr, IS_UNDEF);
 			ir_IF_FALSE_cold(if_def);
 
-			// zend_error_unchecked(E_WARNING, "Undefined variable $%S", CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var)));
+			// zend_error(E_WARNING, "Undefined variable $%pS", CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var)));
 			jit_SET_EX_OPLINE(jit, opline);
 			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_undefined_op_helper), ir_CONST_U32(opline->op1.var));
 
@@ -5947,7 +5948,7 @@ static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
 			if_def = jit_if_not_Z_TYPE(jit, op2_addr, IS_UNDEF);
 			ir_IF_FALSE_cold(if_def);
 
-			// zend_error_unchecked(E_WARNING, "Undefined variable $%S", CV_DEF_OF(EX_VAR_TO_NUM(opline->op2.var)));
+			// zend_error(E_WARNING, "Undefined variable $%pS", CV_DEF_OF(EX_VAR_TO_NUM(opline->op2.var)));
 			jit_SET_EX_OPLINE(jit, opline);
 			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_undefined_op_helper), ir_CONST_U32(opline->op2.var));
 
@@ -6351,7 +6352,7 @@ static int zend_jit_simple_assign(zend_jit_ctx   *jit,
 			jit_SET_EX_OPLINE(jit, opline);
 
 			ZEND_ASSERT(Z_MODE(val_addr) == IS_MEM_ZVAL);
-			// zend_error_unchecked(E_WARNING, "Undefined variable $%S", CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var)));
+			// zend_error(E_WARNING, "Undefined variable $%pS", CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var)));
 			ret = ir_CALL_1(IR_I32, ir_CONST_FC_FUNC(zend_jit_undefined_op_helper), ir_CONST_U32(Z_OFFSET(val_addr)));
 
 			if (check_exception) {
@@ -11425,8 +11426,10 @@ static int zend_jit_leave_func(zend_jit_ctx         *jit,
 
 		return 1;
 	} else {
-		// JIT: if (EG(exception))
-		ir_GUARD_NOT(ir_LOAD_A(jit_EG(exception)), jit_STUB_ADDR(jit, jit_stub_leave_throw));
+		if (may_throw) {
+			// JIT: if (EG(exception))
+			ir_GUARD_NOT(ir_LOAD_A(jit_EG(exception)), jit_STUB_ADDR(jit, jit_stub_leave_throw));
+		}
 		// JIT: opline = EX(opline) + 1
 		jit_STORE_IP(jit, ir_LOAD_A(jit_EX(opline)));
 		jit_STORE_IP(jit, ir_ADD_OFFSET(jit_IP(jit), sizeof(zend_op)));
@@ -12648,7 +12651,11 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 				ir_END_list(*end_inputs);
 				break;
 			case BP_VAR_W:
-				ref = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_fetch_dim_w_helper), ht_ref, ref);
+				if (opline->opcode == ZEND_ASSIGN_DIM && ((opline+1)->op1_type & (IS_VAR|IS_TMP_VAR))) {
+					ref = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_assign_dim_fetch_w_helper), ht_ref, ref);
+				} else {
+					ref = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_fetch_dim_w_helper), ht_ref, ref);
+				}
 				if_found = ir_IF(ref);
 				ir_IF_TRUE(if_found);
 				ir_refs_add(found_inputs, ir_END());
@@ -13632,6 +13639,7 @@ static int zend_jit_assign_dim(zend_jit_ctx  *jit,
 			// JIT: zend_throw_error(NULL, "Cannot add element to the array as the next element is already occupied");
 			jit_SET_EX_OPLINE(jit, opline);
 			ir_CALL(IR_VOID, jit_STUB_FUNC_ADDR(jit, jit_stub_cannot_add_element, IR_FASTCALL_FUNC));
+			jit_FREE_OP(jit, (opline+1)->op1_type, (opline+1)->op1, val_info, NULL);
 
 			ir_END_list(end_inputs);
 
@@ -14809,13 +14817,13 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 					if (!prop_type_ref) {
 						prop_type_ref = jit_Z_TYPE_INFO(jit, prop_addr);
 					}
-					ir_ref if_null_or_flase = ir_IF(ir_LE(prop_type_ref, ir_CONST_U32(IR_FALSE)));
-					ir_IF_TRUE_cold(if_null_or_flase);
+					ir_ref if_null_or_false = ir_IF(ir_LE(prop_type_ref, ir_CONST_U32(IR_FALSE)));
+					ir_IF_TRUE_cold(if_null_or_false);
 					jit_SET_EX_OPLINE(jit, opline);
 					ir_CALL_2(IR_VOID, ir_CONST_FC_FUNC(zend_jit_check_array_promotion),
 						prop_ref, ir_CONST_ADDR(prop_info));
 					ir_END_list(end_inputs);
-					ir_IF_FALSE(if_null_or_flase);
+					ir_IF_FALSE(if_null_or_false);
 				}
 			} else if (flags == ZEND_FETCH_REF) {
 				ir_ref ref;
@@ -18016,6 +18024,7 @@ static bool zend_jit_may_be_in_reg(const zend_op_array *op_array, zend_ssa *ssa,
 		zend_basic_block *bb;
 		zend_ssa_phi *p;
 		bool ret = true;
+		bool def_is_pi = false;
 		zend_worklist worklist;
 		ALLOCA_FLAG(use_heap)
 
@@ -18025,6 +18034,7 @@ static bool zend_jit_may_be_in_reg(const zend_op_array *op_array, zend_ssa *ssa,
 		} else {
 			ZEND_ASSERT(ssa->vars[var].definition_phi);
 			def_block = ssa->vars[var].definition_phi->block;
+			def_is_pi = ssa->vars[var].definition_phi->pi >= 0;
 		}
 
 		ZEND_WORKLIST_ALLOCA(&worklist, ssa->cfg.blocks_count, use_heap);
@@ -18042,9 +18052,14 @@ static bool zend_jit_may_be_in_reg(const zend_op_array *op_array, zend_ssa *ssa,
 
 		p = ssa->vars[var].phi_use_chain;
 		while (p) {
-			use_block = p->block;
-			if (use_block != def_block) {
-				bb = &ssa->cfg.blocks[use_block];
+			bb = &ssa->cfg.blocks[p->block];
+			if (p->pi >= 0) {
+				/* A Pi uses the value on the single edge from its "pi" block */
+				if (p->pi != def_block) {
+					zend_worklist_push(&worklist, p->pi);
+				}
+			} else if (p->block != def_block || !def_is_pi) {
+				/* Live to the end of the predecessor; a same-block Pi is zero-length */
 				for (j = 0; j < bb->predecessors_count; j++) {
 					if (p->sources[j] == var) {
 						use_block = ssa->cfg.predecessors[bb->predecessor_offset + j];

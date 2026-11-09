@@ -1887,6 +1887,24 @@ static ZEND_COLD bool zend_ast_valid_var_name(const char *s, size_t len)
 	return true;
 }
 
+static ZEND_COLD void zend_ast_export_class_const_name(smart_str *str, zend_ast *ast, int indent)
+{
+	if (ast->kind == ZEND_AST_ZVAL) {
+		const zval *zv = zend_ast_get_zval(ast);
+
+		/* A bare "class" would turn the dynamic fetch into a class name fetch. */
+		if (Z_TYPE_P(zv) == IS_STRING
+				&& zend_ast_valid_var_name(Z_STRVAL_P(zv), Z_STRLEN_P(zv))
+				&& !zend_string_equals_ci(Z_STR_P(zv), ZSTR_KNOWN(ZEND_STR_CLASS))) {
+			smart_str_append(str, Z_STR_P(zv));
+			return;
+		}
+	}
+	smart_str_appendc(str, '{');
+	zend_ast_export_ex(str, ast, 0, indent);
+	smart_str_appendc(str, '}');
+}
+
 static ZEND_COLD void zend_ast_export_var(smart_str *str, zend_ast *ast, int indent)
 {
 	if (ast->kind == ZEND_AST_ZVAL) {
@@ -1960,7 +1978,7 @@ static ZEND_COLD void zend_ast_export_name_list_ex(smart_str *str, const zend_as
 		if (i != 0) {
 			smart_str_appends(str, separator);
 		}
-		zend_ast_export_name(str, list->child[i], 0, indent);
+		zend_ast_export_ns_name(str, list->child[i], 0, indent);
 		i++;
 	}
 }
@@ -2131,7 +2149,7 @@ static ZEND_COLD void zend_ast_export_class_no_header(smart_str *str, const zend
 		zend_ast_export_ns_name(str, decl->child[0], 0, indent);
 	}
 	if (decl->child[1]) {
-		smart_str_appends(str, " implements ");
+		smart_str_appends(str, (decl->flags & ZEND_ACC_INTERFACE) ? " extends " : " implements ");
 		zend_ast_export_ex(str, decl->child[1], 0, indent);
 	}
 	smart_str_appends(str, " {\n");
@@ -2725,7 +2743,7 @@ simple_list:
 		case ZEND_AST_CLASS_CONST:
 			zend_ast_export_ns_name_or_expression(str, ast->child[0], 0, indent);
 			smart_str_appends(str, "::");
-			zend_ast_export_name(str, ast->child[1], 0, indent);
+			zend_ast_export_class_const_name(str, ast->child[1], indent);
 			break;
 		case ZEND_AST_CLASS_NAME:
 			if (ast->child[0] == NULL) {
@@ -2970,7 +2988,7 @@ simple_list:
 			break;
 		case ZEND_AST_TRAIT_METHOD_REFERENCE:
 			if (ast->child[0]) {
-				zend_ast_export_name(str, ast->child[0], 0, indent);
+				zend_ast_export_ns_name(str, ast->child[0], 0, indent);
 				smart_str_appends(str, "::");
 			}
 			zend_ast_export_name(str, ast->child[1], 0, indent);

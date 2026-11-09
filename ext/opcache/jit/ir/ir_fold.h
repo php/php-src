@@ -30,7 +30,7 @@ IR_FOLD(EQ(C_DOUBLE, C_DOUBLE))
 
 IR_FOLD(EQ(C_FLOAT, C_FLOAT))
 {
-	IR_FOLD_BOOL(op1_insn->val.d == op2_insn->val.d);
+	IR_FOLD_BOOL(op1_insn->val.f == op2_insn->val.f);
 }
 
 IR_FOLD(NE(C_BOOL, C_BOOL))
@@ -1001,7 +1001,8 @@ IR_FOLD(MUL_OV(C_I64, C_I64))
 	int64_t res;
 	IR_ASSERT(IR_OPT_TYPE(opt) == op1_insn->type);
 	res = op1_insn->val.u64 * op2_insn->val.u64;
-	if ((op1_insn->val.i64 != 0 && res / op1_insn->val.i64 != op2_insn->val.i64) || res < min || res > max) {
+	if ((op1_insn->val.i64 == -1 && res == INT64_MIN)
+	 || (op1_insn->val.i64 != 0 && res / op1_insn->val.i64 != op2_insn->val.i64) || res < min || res > max) {
 		IR_FOLD_NEXT;
 	}
 	IR_FOLD_CONST_U(res);
@@ -2669,10 +2670,6 @@ IR_FOLD(MUL(NEG, C_I8))
 IR_FOLD(MUL(NEG, C_I16))
 IR_FOLD(MUL(NEG, C_I32))
 IR_FOLD(MUL(NEG, C_I64))
-IR_FOLD(DIV(NEG, C_I8))
-IR_FOLD(DIV(NEG, C_I16))
-IR_FOLD(DIV(NEG, C_I32))
-IR_FOLD(DIV(NEG, C_I64))
 {
 	op1 = op1_insn->op1;
 	val.u64 = (0 - op2_insn->val.u64);
@@ -2868,11 +2865,20 @@ IR_FOLD(DIV(_, C_FLOAT))
 }
 
 IR_FOLD(MUL(NEG, NEG))
-IR_FOLD(DIV(NEG, NEG))
 {
 	op1 = op1_insn->op1;
 	op2 = op2_insn->op1;
 	IR_FOLD_RESTART;
+}
+
+IR_FOLD(DIV(NEG, NEG))
+{
+	if (IR_IS_TYPE_FP(IR_OPT_TYPE(opt))) {
+		op1 = op1_insn->op1;
+		op2 = op2_insn->op1;
+		IR_FOLD_RESTART;
+	}
+	IR_FOLD_NEXT;
 }
 
 IR_FOLD(AND(_, C_BOOL))
@@ -4269,7 +4275,7 @@ IR_FOLD(ULE(_, _))
 IR_FOLD(UGT(_, _))
 {
 	if (op1 == op2) {
-		if (IR_IS_TYPE_SCALAR(IR_OPT_TYPE(opt))) {
+		if (IR_IS_TYPE_INT(op1_insn->type)) {
 			/* a >= a => true (two low bits are differ) */
 			IR_FOLD_BOOL((opt ^ (opt >> 1)) & 1);
 		}

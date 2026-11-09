@@ -119,7 +119,20 @@ static void ir_print_double(double v, FILE *f)
 	char buf[128];
 
 	if (isnan(v)) {
-		fprintf(f, "nan");
+		union {
+			double d;
+			long long i;
+		} u1, u2, u3;
+		u1.d = v;
+		u2.d = NAN;
+		u3.d = -NAN;
+		if (u1.i == u2.i) {
+			fprintf(f, "nan");
+		} else if (u1.i == u3.i) {
+			fprintf(f, "-nan");
+		} else {
+			fprintf(f, "nan(0x%llx)", u1.i);
+		}
 	} else {
 		snprintf(buf, sizeof(buf), "%g", v);
 		if (strtod(buf, NULL) != v) {
@@ -137,7 +150,20 @@ static void ir_print_float(float v, FILE *f)
 	char buf[128];
 
 	if (isnan(v)) {
-		fprintf(f, "nan");
+		union {
+			float f;
+			int i;
+		} u1, u2, u3;
+		u1.f = v;
+		u2.f = NAN;
+		u3.f = -NAN;
+		if (u1.i == u2.i) {
+			fprintf(f, "nan");
+		} else if (u1.i == u3.i) {
+			fprintf(f, "-nan");
+		} else {
+			fprintf(f, "nan(0x%x)", u1.i);
+		}
 	} else {
 		snprintf(buf, sizeof(buf), "%g", v);
 		if (strtod(buf, NULL) != v) {

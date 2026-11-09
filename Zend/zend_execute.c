@@ -1357,7 +1357,7 @@ ZEND_API bool zend_internal_call_should_throw(const zend_function *fbc, zend_exe
 
 ZEND_API zend_never_inline ZEND_COLD void zend_internal_call_arginfo_violation(const zend_function *fbc)
 {
-	zend_error_noreturn(E_ERROR, "Arginfo / zpp mismatch during call of %s%s%s()",
+	zend_error_noreturn(E_CORE_ERROR, "Arginfo / zpp mismatch during call of %s%s%s()",
 		fbc->common.scope ? ZSTR_VAL(fbc->common.scope->name) : "",
 		fbc->common.scope ? "::" : "",
 		ZSTR_VAL(fbc->common.function_name));
@@ -4249,7 +4249,7 @@ static zend_never_inline void zend_fetch_this_var(int type OPLINE_DC EXECUTE_DAT
 				Z_ADDREF_P(result);
 			} else {
 				ZVAL_NULL(result);
-				zend_error_unchecked(E_WARNING, "Undefined variable $this");
+				zend_error(E_WARNING, "Undefined variable $this");
 			}
 			break;
 		case BP_VAR_IS:
@@ -5040,7 +5040,7 @@ ZEND_API void zend_cleanup_unfinished_execution(zend_execute_data *execute_data,
 	cleanup_live_vars(execute_data, op_num, catch_op_num);
 }
 
-ZEND_API ZEND_ATTRIBUTE_DEPRECATED HashTable *zend_unfinished_execution_gc(zend_execute_data *execute_data, zend_execute_data *call, zend_get_gc_buffer *gc_buffer)
+ZEND_ATTRIBUTE_DEPRECATED ZEND_API HashTable *zend_unfinished_execution_gc(zend_execute_data *execute_data, zend_execute_data *call, zend_get_gc_buffer *gc_buffer)
 {
 	return zend_unfinished_execution_gc_ex(execute_data, call, gc_buffer, false);
 }

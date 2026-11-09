@@ -4195,9 +4195,9 @@ static zend_string *zend_compile_partial_name(const zend_op_array *declaring_op_
 		}
 	}
 
-	zend_string *name = zend_strpprintf_unchecked(
+	zend_string *name = zend_strpprintf(
 		0,
-		"{closure:pfa:%S%S%S%s:%" PRIu32 "}",
+		"{closure:pfa:%pS%pS%pS%s:%" PRIu32 "}",
 		class,
 		separator,
 		function,
@@ -5443,9 +5443,19 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 
 	/* Evaluate function name */
 	znode func_node;
-	{
+	zend_ast *func_name_ast = callback->child[callback->kind == ZEND_AST_CALL ? 0 : 1];
+	if (callback->kind == ZEND_AST_CALL
+	 && func_name_ast->kind == ZEND_AST_ZVAL
+	 && Z_TYPE_P(zend_ast_get_zval(func_name_ast)) == IS_STRING) {
+		/* A literal function name has no side effects and must not be memoized:
+		 * compiling it as an expression would yield the unresolved string, which
+		 * ignores the current namespace, "use function" imports and the runtime
+		 * fallback to the global function. Compile the call in the loop body with
+		 * the original name instead, like a regular call. */
+		func_node.op_type = IS_UNUSED;
+	} else {
 		znode result;
-		zend_compile_expr(&result, callback->child[callback->kind == ZEND_AST_CALL ? 0 : 1]);
+		zend_compile_expr(&result, func_name_ast);
 		if (result.op_type == IS_CONST || result.op_type == IS_TMP_VAR) {
 			func_node = result;
 		} else {
@@ -5503,7 +5513,9 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 	/* loop body */
 	znode call_result;
 	zend_ast *func_ast;
-	if (func_node.op_type == IS_CONST) {
+	if (func_node.op_type == IS_UNUSED) {
+		func_ast = func_name_ast;
+	} else if (func_node.op_type == IS_CONST) {
 		func_ast = zend_ast_create_znode(&func_node);
 	} else {
 		znode copy_node;
@@ -5530,7 +5542,9 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 			break;
 		}
 	}
-	zend_ast_destroy(func_ast);
+	if (func_ast != func_name_ast) {
+		zend_ast_destroy(func_ast);
+	}
 	opline = zend_emit_op(NULL, ZEND_ADD_ARRAY_ELEMENT, &call_result, &key);
 	SET_NODE(opline->result, result);
 	/* end loop body */
@@ -5545,7 +5559,7 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 
 	zend_end_loop(opnum_fetch, &reset_node);
 	zend_emit_op(NULL, ZEND_FE_FREE, &reset_node, NULL);
-	if (func_node.op_type != IS_CONST) {
+	if (func_node.op_type != IS_UNUSED && func_node.op_type != IS_CONST) {
 		zend_emit_op(NULL, ZEND_FREE, &func_node, NULL);
 	}
 	if (class_node.op_type != IS_UNUSED && class_node.op_type != IS_CONST) {
@@ -6119,7 +6133,7 @@ static void zend_compile_static_var(zend_ast *ast) /* {{{ */
 	}
 
 	if (zend_hash_exists(CG(active_op_array)->static_variables, var_name)) {
-		zend_error_noreturn_unchecked(E_COMPILE_ERROR, "Duplicate declaration of static variable $%S", var_name);
+		zend_error_noreturn(E_COMPILE_ERROR, "Duplicate declaration of static variable $%pS", var_name);
 	}
 
 	zend_eval_const_expr(&ast->child[1]);
@@ -7708,8 +7722,13 @@ static void zend_compile_declare(const zend_ast *ast) /* {{{ */
 		} else if (zend_string_equals_literal_ci(name, "encoding")) {
 
 			if (FAILURE == zend_is_first_statement(ast, /* allow_nop */ false)) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Encoding declaration pragma must be "
+				zend_error_noreturn(E_COMPILE_ERROR, "Encoding declaration must be "
 					"the very first statement in the script");
+			}
+
+			if (ast->child[1] != NULL) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Encoding declaration must not "
+					"use block mode");
 			}
 		} else if (zend_string_equals_literal_ci(name, "strict_types")) {
 			zval value_zv;
@@ -8916,8 +8935,8 @@ static void zend_compile_closure_uses(zend_ast *ast) /* {{{ */
 			int i;
 			for (i = 0; i < op_array->last_var; i++) {
 				if (zend_string_equals(op_array->vars[i], var_name)) {
-					zend_error_noreturn_unchecked(E_COMPILE_ERROR,
-						"Cannot use lexical variable $%S as a parameter name", var_name);
+					zend_error_noreturn(E_COMPILE_ERROR,
+						"Cannot use lexical variable $%pS as a parameter name", var_name);
 				}
 			}
 		}
@@ -9089,9 +9108,9 @@ static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array,
 			}
 		}
 
-		unqualified_name = zend_strpprintf_unchecked(
+		unqualified_name = zend_strpprintf(
 			0,
-			"{closure:%S%S%S%s:%" PRIu32 "}",
+			"{closure:%pS%pS%pS%s:%" PRIu32 "}",
 			class,
 			separator,
 			function,
@@ -10176,7 +10195,7 @@ link_unbound:
 		zend_make_var_result(result, opline);
 		if (!zend_hash_add_ptr(CG(class_table), lcname, ce)) {
 			/* We checked above that the class name is not used. This really shouldn't happen. */
-			zend_error_noreturn(E_ERROR,
+			zend_error_noreturn(E_CORE_ERROR,
 				"Runtime definition key collision for %pS. This is a bug", name);
 		}
 	} else {
@@ -10498,12 +10517,15 @@ static void zend_compile_const_decl(zend_ast *ast) /* {{{ */
 			}
 		}
 
+		/* Register before the literal takes the name: interning it there may
+		 * release it, when opcache has put the same string in shared memory
+		 * since the call above. */
+		zend_register_seen_symbol(name, ZEND_SYMBOL_CONST);
+
 		name_node.op_type = IS_CONST;
 		ZVAL_STR(&name_node.u.constant, name);
 
 		last_op = zend_emit_op(NULL, ZEND_DECLARE_CONST, &name_node, &value_node);
-
-		zend_register_seen_symbol(name, ZEND_SYMBOL_CONST);
 	}
 	if (attributes_ast == NULL) {
 		return;

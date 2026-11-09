@@ -901,7 +901,7 @@ extern const uint8_t ir_type_size[IR_LAST_TYPE];
 
 IR_ALWAYS_INLINE ir_type ir_make_vector_type(ir_type base, uint8_t length)
 {
-	IR_ASSERT(IR_IS_TYPE_SCALAR(base) && length > 0 && length <= 64 && (length & (length - 1)) == 0);
+	IR_ASSERT(IR_IS_TYPE_SCALAR(base) && base != IR_ADDR && length > 0 && length <= 64 && (length & (length - 1)) == 0);
 
 	if (base == IR_CHAR) {
 		base = IR_I8;
@@ -1204,6 +1204,7 @@ void ir_iter_cleanup(ir_ctx *ctx);
 #define IR_BB_PREV_EMPTY_ENTRY  (1<<8)
 #define IR_BB_OSR_ENTRY_LOADS   (1<<9) /* OSR Entry-point with register LOADs   */
 #define IR_BB_LOOP_WITH_ENTRY   (1<<10) /* set together with LOOP_HEADER if there is an ENTRY in the loop */
+#define IR_BB_LOOP_WITH_ENTRY_IN_PREDS (1<<18) /* set together with LOOP_HEADER if an ENTRY reaches the loop bypassing its immediate dominator */
 
 /* The following flags are set by GCM */
 #define IR_BB_HAS_PHI           (1<<11)

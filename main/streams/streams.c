@@ -493,6 +493,8 @@ PHPAPI zend_result php_stream_fill_read_buffer(php_stream *stream, size_t size)
 			}
 
 			/* wind the handle... */
+			uint32_t orig_no_remove = stream->flags & PHP_STREAM_FLAG_NO_READ_FILTER_REMOVE;
+			stream->flags |= PHP_STREAM_FLAG_NO_READ_FILTER_REMOVE;
 			for (filter = stream->readfilters.head; filter; filter = filter->next) {
 				status = filter->fops->filter(stream, filter, brig_inp, brig_outp, NULL, flags);
 
@@ -508,6 +510,8 @@ PHPAPI zend_result php_stream_fill_read_buffer(php_stream *stream, size_t size)
 				brig_outp = brig_swap;
 				memset(brig_outp, 0, sizeof(*brig_outp));
 			}
+			stream->flags &= ~PHP_STREAM_FLAG_NO_READ_FILTER_REMOVE;
+			stream->flags |= orig_no_remove;
 
 			switch (status) {
 				case PSFS_PASS_ON:
@@ -1171,6 +1175,8 @@ static ssize_t php_stream_write_filtered(php_stream *stream, const char *buf, si
 		php_stream_bucket_append(&brig_in, bucket);
 	}
 
+	uint32_t orig_no_remove = stream->flags & PHP_STREAM_FLAG_NO_WRITE_FILTER_REMOVE;
+	stream->flags |= PHP_STREAM_FLAG_NO_WRITE_FILTER_REMOVE;
 	for (php_stream_filter *filter = stream->writefilters.head; filter; filter = filter->next) {
 		/* for our return value, we are interested in the number of bytes consumed from
 		 * the first filter in the chain */
@@ -1188,6 +1194,8 @@ static ssize_t php_stream_write_filtered(php_stream *stream, const char *buf, si
 		brig_outp = brig_swap;
 		memset(brig_outp, 0, sizeof(*brig_outp));
 	}
+	stream->flags &= ~PHP_STREAM_FLAG_NO_WRITE_FILTER_REMOVE;
+	stream->flags |= orig_no_remove;
 
 	switch (status) {
 		case PSFS_PASS_ON:
@@ -1323,6 +1331,10 @@ static bool php_stream_are_filters_seekable(php_stream_filter *filter, bool is_s
 static zend_result php_stream_filters_seek(php_stream *stream, php_stream_filter *filter,
 		bool is_start_seeking, zend_off_t offset, int whence, int chain_type)
 {
+	uint32_t no_remove_flag = chain_type == PHP_STREAM_FILTER_READ ?
+			PHP_STREAM_FLAG_NO_READ_FILTER_REMOVE : PHP_STREAM_FLAG_NO_WRITE_FILTER_REMOVE;
+	uint32_t orig_no_remove = stream->flags & no_remove_flag;
+	stream->flags |= no_remove_flag;
 	while (filter) {
 		php_stream_filter_seekable_t seekable = (chain_type == PHP_STREAM_FILTER_READ) ?
 				filter->read_seekable : filter->write_seekable;
@@ -1330,10 +1342,14 @@ static zend_result php_stream_filters_seek(php_stream *stream, php_stream_filter
 				seekable == PSFS_SEEKABLE_CHECK) &&
 				filter->fops->seek(stream, filter, offset, whence) == FAILURE) {
 			php_error_docref(NULL, E_WARNING, "Stream filter seeking for %s failed", filter->fops->label);
+			stream->flags &= ~no_remove_flag;
+			stream->flags |= orig_no_remove;
 			return FAILURE;
 		}
 		filter = filter->next;
 	}
+	stream->flags &= ~no_remove_flag;
+	stream->flags |= orig_no_remove;
 	return SUCCESS;
 }
 

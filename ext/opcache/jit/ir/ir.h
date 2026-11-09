@@ -904,16 +904,21 @@ IR_ALWAYS_INLINE void ir_insn_set_op(ir_insn *insn, int32_t n, ir_ref val)
 	*p = val;
 }
 
-IR_ALWAYS_INLINE uint32_t ir_insn_find_op(const ir_insn *insn, ir_ref val)
+IR_ALWAYS_INLINE uint32_t ir_insn_find_op_ex(const ir_insn *insn, ir_ref val, int start)
 {
 	int i, n = insn->inputs_count;
 
-	for (i = 1; i <= n; i++) {
+	for (i = start; i <= n; i++) {
 		if (ir_insn_op(insn, i) == val) {
 			return i;
 		}
 	}
 	return 0;
+}
+
+IR_ALWAYS_INLINE uint32_t ir_insn_find_op(const ir_insn *insn, ir_ref val)
+{
+	return ir_insn_find_op_ex(insn, val, 1);
 }
 
 ir_ref ir_fold(ir_ctx *ctx, uint32_t opt, ir_ref op1, ir_ref op2, ir_ref op3);
@@ -968,8 +973,9 @@ int ir_coalesce(ir_ctx *ctx);
 int ir_compute_dessa_moves(ir_ctx *ctx);
 int ir_reg_alloc(ir_ctx *ctx);
 int ir_reg_alloc_simple(ir_ctx *ctx);
+int ir_reg_alloc_fast(ir_ctx *ctx);
 
-#define ir_reg_alloc_O0(_ctx) ir_reg_alloc_simple(_ctx)
+#define ir_reg_alloc_O0(_ctx) ir_reg_alloc_fast(_ctx)
 
 int ir_regs_number(void);
 bool ir_reg_is_int(int32_t reg);

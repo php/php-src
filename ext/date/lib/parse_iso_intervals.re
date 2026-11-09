@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015-2019 Derick Rethans
+ * Copyright (c) 2015-2026 Derick Rethans
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,12 +27,15 @@
 
 #include <ctype.h>
 
-#define EOI      257
+#define EOI              257
 
-#define TIMELIB_PERIOD  260
+#define TIMELIB_PERIOD   260
 #define TIMELIB_ISO_DATE 261
-#define TIMELIB_ERROR   999
-#define TIMELIB_MAX_ERRORS 1000
+#define TIMELIB_ERROR    999
+
+#define TIMELIB_MAX_ERRORS            16
+#define TIMELIB_MAX_ERRORS_S          "16"
+#define TIMELIB_ERR_TOO_MANY_ERRORS_S "There are more than " TIMELIB_MAX_ERRORS_S " errors, which are not returned"
 
 typedef unsigned char uchar;
 
@@ -77,17 +80,37 @@ typedef struct _Scanner {
 	int have_end_date;
 } Scanner;
 
+static timelib_error_message *alloc_error_message(timelib_error_message **messages, int *count)
+{
+	/* Realloc in power of two increments */
+	int is_pow2 = (*count & (*count - 1)) == 0;
+
+	if (is_pow2) {
+		size_t alloc_size = *count ? (*count * 2) : 1;
+
+		*messages = timelib_realloc(*messages, alloc_size * sizeof(timelib_error_message));
+	}
+	return *messages + (*count)++;
+}
+
 static void add_error(Scanner *s, const char *error)
 {
-	if (s->errors->error_count >= TIMELIB_MAX_ERRORS) {
+	timelib_error_message *message;
+
+	if (s->errors->error_count == TIMELIB_MAX_ERRORS) {
+		message = alloc_error_message(&s->errors->error_messages, &s->errors->error_count);
+		message->position = -1;
+		message->character = 0;
+		message->message = timelib_strdup(TIMELIB_ERR_TOO_MANY_ERRORS_S);
+	}
+	if (s->errors->error_count > TIMELIB_MAX_ERRORS) {
 		return;
 	}
 
-	s->errors->error_count++;
-	s->errors->error_messages = timelib_realloc(s->errors->error_messages, s->errors->error_count * sizeof(timelib_error_message));
-	s->errors->error_messages[s->errors->error_count - 1].position = s->tok ? s->tok - s->str : 0;
-	s->errors->error_messages[s->errors->error_count - 1].character = s->tok ? *s->tok : 0;
-	s->errors->error_messages[s->errors->error_count - 1].message = timelib_strdup(error);
+	message = alloc_error_message(&s->errors->error_messages, &s->errors->error_count);
+	message->position = s->tok ? s->tok - s->str : 0;
+	message->character = s->tok ? *s->tok : 0;
+	message->message = timelib_strdup(error);
 }
 
 static char *timelib_string(Scanner *s)

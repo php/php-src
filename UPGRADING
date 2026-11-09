@@ -19,8 +19,13 @@ PHP 8.7 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- Core:
+  . Block declaration support for the encoding declare has been removed as it
+    did not function properly.
+
 - Curl:
-  . curl_multi_exec() now throws a TypeError when still_running is not an int.
+  . curl_multi_exec() now throws a TypeError when $still_running cannot be
+    converted to an int.
   . Nested arrays in CURLOPT_POSTFIELDS now throw a TypeError, instead of being
     silently converted to the string "Array".
 
@@ -52,6 +57,9 @@ PHP 8.7 UPGRADE NOTES
     application terminate one attribute and append further ones.
 
 - Standard:
+  . bindec(), octdec(), hexdec() and base_convert() now throw an Exception
+    when the passed string contains characters that are invalid for the
+    specified number base.
   . The number of filters that can be chained in a php://filter URL is limited
     to 16 by default. Set the stream context option max_filter_count to change
     this.
@@ -116,6 +124,11 @@ PHP 8.7 UPGRADE NOTES
   . Added Transliterator::toRules() and transliterator_to_rules() to export
     rules that can be used to recreate a transliterator. The optional
     $escapeUnprintable argument escapes unprintable characters when true.
+  . Added Collator::getRules() and collator_get_rules() to retrieve collation
+    tailoring rules as a UTF-8 string. These describe locale-specific adjustments
+    to the root collation order; the full root/UCA rules are not included. An
+    empty string is returned if no tailoring rules are available, or false if
+    the rules cannot be converted to UTF-8.
 
 ========================================
 7. New Classes and Interfaces
@@ -193,6 +206,8 @@ PHP 8.7 UPGRADE NOTES
     UTF-8.
   . htmlspecialchars() returns its input without copying it when nothing needs
     encoding.
+  . Improved performance of in_array() and array_search() in strict mode when
+    searching for a string.
 
 - MBString:
   . Improved performance of mb_strlen for UTF-8 strings.

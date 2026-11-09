@@ -80,6 +80,9 @@ static zend_array *zho_build_properties_ex(zend_object *zobj, bool check_access,
 			if (prop_info->flags & ZEND_ACC_STATIC) {
 				continue;
 			}
+			if (!prop_info->hooks && (prop_info->flags & ZEND_ACC_VIRTUAL)) {
+				continue;
+			}
 			zend_string *property_name = prop_info->name;
 			/* When promoting properties from protected to public, use the unmangled name to preserve order. */
 			if (prop_info->flags & ZEND_ACC_PROTECTED) {

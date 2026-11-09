@@ -50,7 +50,7 @@ echo zend_test_compile_to_ast( file_get_contents( __FILE__ ) );
 interface MyInterface1 {
 }
 
-interface MyInterface2 implements MyInterface1 {
+interface MyInterface2 extends MyInterface1 {
 }
 
 abstract class MyBaseClass implements MyInterface2 {

@@ -2851,6 +2851,17 @@ MBSTRING_API zend_string* php_mb_convert_encoding(const char *input, size_t leng
 	return php_mb_convert_encoding_ex(input, length, to_encoding, from_encoding);
 }
 
+static zend_always_inline bool mb_check_stack_limit(void)
+{
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		zend_call_stack_size_error();
+		return true;
+	}
+#endif
+	return false;
+}
+
 MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, const mbfl_encoding *to_encoding, const mbfl_encoding **from_encodings, size_t num_from_encodings)
 {
 	HashTable *output, *chash;
@@ -2859,6 +2870,10 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 	zval *entry, entry_tmp;
 
 	if (!input) {
+		return NULL;
+	}
+
+	if (mb_check_stack_limit()) {
 		return NULL;
 	}
 
@@ -2905,6 +2920,13 @@ try_again:
 					Z_ARRVAL_P(entry), to_encoding, from_encodings, num_from_encodings);
 				if (chash) {
 					ZVAL_ARR(&entry_tmp, chash);
+				} else if (UNEXPECTED(EG(exception))) {
+					if (key) {
+						zend_string_release(key);
+					}
+					GC_TRY_UNPROTECT_RECURSION(input);
+					zend_array_destroy(output);
+					return NULL;
 				} else {
 					ZVAL_EMPTY_ARRAY(&entry_tmp);
 				}
@@ -3010,7 +3032,9 @@ PHP_FUNCTION(mb_convert_encoding)
 		HashTable *tmp;
 		tmp = php_mb_convert_encoding_recursive(
 			input_ht, to_encoding, from_encodings, num_from_encodings);
-		RETVAL_ARR(tmp);
+		if (tmp) {
+			RETVAL_ARR(tmp);
+		}
 	}
 
 	if (free_from_encodings) {
@@ -3809,17 +3833,6 @@ next_option:
 	}
 
 	RETVAL_STR(jp_kana_convert(str, enc, opt));
-}
-
-static zend_always_inline bool mb_check_stack_limit(void)
-{
-#ifdef ZEND_CHECK_STACK_LIMIT
-	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
-		zend_call_stack_size_error();
-		return true;
-	}
-#endif
-	return false;
 }
 
 static unsigned int mb_recursive_count_strings(zval *var)
@@ -5758,6 +5771,10 @@ static bool php_mb_check_encoding_recursive(HashTable *vars, const mbfl_encoding
 	zval *entry;
 	bool valid = true;
 
+	if (mb_check_stack_limit()) {
+		return false;
+	}
+
 	if (GC_IS_RECURSIVE(vars)) {
 		php_error_docref(NULL, E_WARNING, "Cannot not handle circular references");
 		return false;
@@ -5780,6 +5797,10 @@ static bool php_mb_check_encoding_recursive(HashTable *vars, const mbfl_encoding
 				break;
 			case IS_ARRAY:
 				if (!php_mb_check_encoding_recursive(Z_ARRVAL_P(entry), encoding)) {
+					if (UNEXPECTED(EG(exception))) {
+						GC_TRY_UNPROTECT_RECURSION(vars);
+						return false;
+					}
 					valid = false;
 					break;
 				}

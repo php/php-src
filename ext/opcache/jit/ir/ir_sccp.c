@@ -2228,6 +2228,10 @@ static bool ir_try_promote_induction_var_ext(ir_ctx *ctx, ir_ref ext_ref, ir_ref
 				const ir_insn *use_insn = &ctx->ir_base[use];
 
 				if (use_insn->op >= IR_EQ && use_insn->op <= IR_UGT) {
+					if (op == IR_ZEXT && use_insn->op >= IR_LT && use_insn->op <= IR_GT) {
+						/* Zero extension may reset the sign bit and change the result of signed comparison */
+						return 0;
+					}
 					if (use_insn->op1 == phi_ref) {
 						if (IR_IS_TYPE_SIGNED(type) != IR_IS_TYPE_SIGNED(ctx->ir_base[use_insn->op2].type)) {
 							return 0;
@@ -2267,6 +2271,10 @@ static bool ir_try_promote_induction_var_ext(ir_ctx *ctx, ir_ref ext_ref, ir_ref
 				const ir_insn *use_insn = &ctx->ir_base[use];
 
 				if (use_insn->op >= IR_EQ && use_insn->op <= IR_UGT) {
+					if (op == IR_ZEXT && use_insn->op >= IR_LT && use_insn->op <= IR_GT) {
+						/* Zero extension may reset the sign bit and change the result of signed comparison */
+						return 0;
+					}
 					if (use_insn->op1 == op_ref) {
 						if (IR_IS_TYPE_SIGNED(type) != IR_IS_TYPE_SIGNED(ctx->ir_base[use_insn->op2].type)) {
 							return 0;
@@ -2673,16 +2681,16 @@ static bool ir_is_zero(const ir_ctx *ctx, ir_ref ref)
 		&& ctx->ir_base[ref].val.u32 == 0;
 }
 
-static bool ir_fix_min_max_const(ir_ctx *ctx, ir_insn *cond, ir_ref ref)
+static bool ir_is_min_max_const(const ir_ctx *ctx, const ir_insn *cond, ir_ref ref)
 {
 	if (cond->op == IR_ULE) {
 		/* (x <= 3 ? 4 : x) => (x < 4 ? 4 : x) =>  max(x, 4) */
 		/* (x <= 3 ? x : 4) => (x < 4 ? x : 4) =>  min(x, 4) */
 		if (!IR_IS_SYM_CONST(ctx->ir_base[cond->op2].op)
 		 && !IR_IS_SYM_CONST(ctx->ir_base[ref].op)
+		 && ctx->ir_base[ref].val.u64 != 0
 		 && ctx->ir_base[cond->op2].val.u64 == ctx->ir_base[ref].val.u64 - 1
 		 && ctx->ir_base[cond->op2].type == ctx->ir_base[ref].type) {
-			cond->op2 = ref;
 			return 1;
 		}
 	} else if (cond->op == IR_UGE) {
@@ -2690,9 +2698,9 @@ static bool ir_fix_min_max_const(ir_ctx *ctx, ir_insn *cond, ir_ref ref)
 		/* (x >= 3 ? x : 2) => (x > 2 ? x : 2) =>  max(x, 2) */
 		if (!IR_IS_SYM_CONST(ctx->ir_base[cond->op2].op)
 		 && !IR_IS_SYM_CONST(ctx->ir_base[ref].op)
+		 && ctx->ir_base[ref].val.u64 != UINT64_MAX
 		 && ctx->ir_base[cond->op2].val.u64 == ctx->ir_base[ref].val.u64 + 1
 		 && ctx->ir_base[cond->op2].type == ctx->ir_base[ref].type) {
-			cond->op2 = ref;
 			return 1;
 		}
 	} else if (cond->op == IR_LE) {
@@ -2700,9 +2708,9 @@ static bool ir_fix_min_max_const(ir_ctx *ctx, ir_insn *cond, ir_ref ref)
 		/* (x <= 3 ? x : 4) => (x < 4 ? x : 4) =>  min(x, 4) */
 		if (!IR_IS_SYM_CONST(ctx->ir_base[cond->op2].op)
 		 && !IR_IS_SYM_CONST(ctx->ir_base[ref].op)
-		 && ctx->ir_base[cond->op2].val.u64 == ctx->ir_base[ref].val.u64 - 1
+		 && ctx->ir_base[ref].val.i64 != INT64_MIN
+		 && ctx->ir_base[cond->op2].val.i64 == ctx->ir_base[ref].val.i64 - 1
 		 && ctx->ir_base[cond->op2].type == ctx->ir_base[ref].type) {
-			cond->op2 = ref;
 			return 1;
 		}
 	} else if (cond->op == IR_GE) {
@@ -2710,9 +2718,9 @@ static bool ir_fix_min_max_const(ir_ctx *ctx, ir_insn *cond, ir_ref ref)
 		/* (x >= 3 ? x : 2) => (x > 2 ? x : 2) =>  max(x, 2) */
 		if (!IR_IS_SYM_CONST(ctx->ir_base[cond->op2].op)
 		 && !IR_IS_SYM_CONST(ctx->ir_base[ref].op)
+		 && ctx->ir_base[ref].val.i64 != INT64_MAX
 		 && ctx->ir_base[cond->op2].val.i64 == ctx->ir_base[ref].val.i64 + 1
 		 && ctx->ir_base[cond->op2].type == ctx->ir_base[ref].type) {
-			cond->op2 = ref;
 			return 1;
 		}
 	}
@@ -2758,18 +2766,19 @@ static bool ir_optimize_phi(ir_ctx *ctx, ir_ref merge_ref, ir_insn *merge, ir_re
 				}
 
 				if (is_cmp
+				 && !IR_IS_TYPE_FP(type)
 				 && ((insn->op2 == cond->op1
 				   && (insn->op3 == cond->op2
 				    || (IR_IS_CONST_REF(cond->op2)
 				     && (IR_IS_CONST_REF(insn->op3)
 					 && IR_IS_TYPE_INT(insn->type)
-				     && ir_fix_min_max_const(ctx, cond, insn->op3)))))
+				     && ir_is_min_max_const(ctx, cond, insn->op3)))))
 				  || (insn->op3 == cond->op1
 				   && (insn->op2 == cond->op2
 				    || (IR_IS_CONST_REF(cond->op2)
 				     && (IR_IS_CONST_REF(insn->op2)
 					 && IR_IS_TYPE_INT(insn->type)
-				     && ir_fix_min_max_const(ctx, cond, insn->op2))))))) {
+				     && ir_is_min_max_const(ctx, cond, insn->op2))))))) {
 					/* MAX/MIN
 					 *
 					 *    prev                     prev
@@ -2804,11 +2813,16 @@ static bool ir_optimize_phi(ir_ctx *ctx, ir_ref merge_ref, ir_insn *merge, ir_re
 						ir_remove_unused_vars(ctx, start2_ref, end2_ref);
 					}
 
-					insn->op = (
-						(is_less ? cond->op1 : cond->op2)
-						==
-						((start1->op == IR_IF_TRUE) ? insn->op2 : insn->op3)
-						) ? IR_MIN : IR_MAX;
+					if (start1->op != IR_IF_TRUE) {
+						IR_ASSERT(start1->op == IR_IF_FALSE);
+						is_less = !is_less;
+					}
+					if (cond->op1 != insn->op2) {
+						IR_ASSERT(cond->op1 == insn->op3);
+						is_less = !is_less;
+					}
+
+					insn->op = is_less ? IR_MIN : IR_MAX;
 					insn->inputs_count = 2;
 					if (insn->op2 > insn->op3) {
 						insn->op1 = insn->op2;
@@ -2939,7 +2953,12 @@ static bool ir_optimize_phi(ir_ctx *ctx, ir_ref merge_ref, ir_insn *merge, ir_re
 					}
 
 					return 1;
-				} else if (insn->op2 <= root_ref && insn->op3 <= root_ref
+				} else if (((insn->op2 <= root_ref && insn->op3 <= root_ref)
+					 || ((cond->op >= IR_EQ && cond->op <= IR_UNORDERED)
+					  && ((insn->op2 == cond->op1 && (insn->op3 == cond->op2 || insn->op3 <= root_ref))
+					   || (insn->op2 == cond->op2 && (insn->op3 == cond->op1 || insn->op3 <= root_ref))
+					   || (insn->op3 == cond->op1 && insn->op2 <= root_ref)
+					   || (insn->op3 == cond->op2 && insn->op2 <= root_ref))))
 					&& cond->op != IR_OVERFLOW
 					// TODO: temporary disable IF-conversion for RLOAD.
 					// We don't track anti-dependencies in GCM and Local Scheduling.
