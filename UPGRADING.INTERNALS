@@ -47,6 +47,9 @@ PHP 8.7 INTERNALS UPGRADE NOTES
     * stream_error_state
     The motivation is to remove cyclic dependencies from PHP, as such it may be
     possible to omit including ext/standard/file.h to access those globals.
+  . The flock_compat.h header has been moved from the ext/standard/ folder to
+    the main/ folder. The motivation for this change is to remove cyclic
+    dependencies from PHP.
 
 - Removed:
   . The ZEND_LOG_XOR() macro was removed.
