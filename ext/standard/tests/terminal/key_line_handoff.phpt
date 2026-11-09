@@ -1,10 +1,5 @@
 --TEST--
 Io\Terminal\Terminal: pending UTF-8 handoff from readKey to readLine
---SKIPIF--
-<?php
-if (!class_exists(\Io\Terminal\Terminal::class)) die('skip Io\Terminal\Terminal not available');
-if (!class_exists(\Time\Duration::class)) die('skip Time\Duration not available');
-?>
 --FILE--
 <?php
 
