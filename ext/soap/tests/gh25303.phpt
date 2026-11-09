@@ -33,4 +33,4 @@ try {
 }
 ?>
 --EXPECT--
-SOAP-ERROR: Encoding: Failed to encode list item of type 'unknown' for list type 'U'
+SOAP-ERROR: Encoding: Value does not match any member type of union type 'U'
