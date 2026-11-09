@@ -105,24 +105,24 @@ foreach ($cases as $name => $schema) {
 }
 ?>
 --EXPECT--
-minOccurs: SoapFault: SOAP-ERROR: Parsing Schema: minOccurs value is out of range
-maxOccurs: SoapFault: SOAP-ERROR: Parsing Schema: maxOccurs value is out of range
-negative minOccurs: SoapFault: SOAP-ERROR: Parsing Schema: minOccurs value is out of range
-negative maxOccurs: SoapFault: SOAP-ERROR: Parsing Schema: maxOccurs value is out of range
-minExclusive: SoapFault: SOAP-ERROR: Parsing Schema: minExclusive value is out of range
-minInclusive: SoapFault: SOAP-ERROR: Parsing Schema: minInclusive value is out of range
-maxExclusive: SoapFault: SOAP-ERROR: Parsing Schema: maxExclusive value is out of range
-maxInclusive: SoapFault: SOAP-ERROR: Parsing Schema: maxInclusive value is out of range
-totalDigits: SoapFault: SOAP-ERROR: Parsing Schema: totalDigits value is out of range
-fractionDigits: SoapFault: SOAP-ERROR: Parsing Schema: fractionDigits value is out of range
-length: SoapFault: SOAP-ERROR: Parsing Schema: length value is out of range
-minLength: SoapFault: SOAP-ERROR: Parsing Schema: minLength value is out of range
-maxLength: SoapFault: SOAP-ERROR: Parsing Schema: maxLength value is out of range
-leading whitespace numeric-string: SoapFault: SOAP-ERROR: Parsing Schema: maxOccurs value is out of range
-leading plus numeric-string: SoapFault: SOAP-ERROR: Parsing Schema: maxOccurs value is out of range
-leading zero numeric-string: SoapFault: SOAP-ERROR: Parsing Schema: maxOccurs value is out of range
-leading numeric-string with trailing data: SoapFault: SOAP-ERROR: Parsing Schema: maxOccurs value is out of range
-negative out-of-range numeric-string: SoapFault: SOAP-ERROR: Parsing Schema: maxOccurs value is out of range
-decimal numeric-string: SoapFault: SOAP-ERROR: Parsing Schema: maxOccurs value is out of range
-exponent numeric-string: SoapFault: SOAP-ERROR: Parsing Schema: maxOccurs value is out of range
+minOccurs: SoapFault: SoapClient::__construct(): Parsing Schema: minOccurs value is out of range
+maxOccurs: SoapFault: SoapClient::__construct(): Parsing Schema: maxOccurs value is out of range
+negative minOccurs: SoapFault: SoapClient::__construct(): Parsing Schema: minOccurs value is out of range
+negative maxOccurs: SoapFault: SoapClient::__construct(): Parsing Schema: maxOccurs value is out of range
+minExclusive: SoapFault: SoapClient::__construct(): Parsing Schema: minExclusive value is out of range
+minInclusive: SoapFault: SoapClient::__construct(): Parsing Schema: minInclusive value is out of range
+maxExclusive: SoapFault: SoapClient::__construct(): Parsing Schema: maxExclusive value is out of range
+maxInclusive: SoapFault: SoapClient::__construct(): Parsing Schema: maxInclusive value is out of range
+totalDigits: SoapFault: SoapClient::__construct(): Parsing Schema: totalDigits value is out of range
+fractionDigits: SoapFault: SoapClient::__construct(): Parsing Schema: fractionDigits value is out of range
+length: SoapFault: SoapClient::__construct(): Parsing Schema: length value is out of range
+minLength: SoapFault: SoapClient::__construct(): Parsing Schema: minLength value is out of range
+maxLength: SoapFault: SoapClient::__construct(): Parsing Schema: maxLength value is out of range
+leading whitespace numeric-string: SoapFault: SoapClient::__construct(): Parsing Schema: maxOccurs value is out of range
+leading plus numeric-string: SoapFault: SoapClient::__construct(): Parsing Schema: maxOccurs value is out of range
+leading zero numeric-string: SoapFault: SoapClient::__construct(): Parsing Schema: maxOccurs value is out of range
+leading numeric-string with trailing data: SoapFault: SoapClient::__construct(): Parsing Schema: maxOccurs value is out of range
+negative out-of-range numeric-string: SoapFault: SoapClient::__construct(): Parsing Schema: maxOccurs value is out of range
+decimal numeric-string: SoapFault: SoapClient::__construct(): Parsing Schema: maxOccurs value is out of range
+exponent numeric-string: SoapFault: SoapClient::__construct(): Parsing Schema: maxOccurs value is out of range
 fractional numeric-string within int range: parsed

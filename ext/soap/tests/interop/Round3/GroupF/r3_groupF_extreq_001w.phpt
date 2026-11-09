@@ -14,4 +14,4 @@ echo $client->__getlastrequest();
 echo "ok\n";
 ?>
 --EXPECTF--
-Fatal error: SOAP-ERROR: Parsing WSDL: Unknown required WSDL extension 'http://soapinterop.org/ext' in %sr3_groupF_extreq_001w.php on line %d
+Fatal error: SoapClient::__construct(): Parsing WSDL: Unknown required WSDL extension 'http://soapinterop.org/ext' in %s on line %d
