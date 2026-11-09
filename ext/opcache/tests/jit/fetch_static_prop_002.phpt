@@ -3,7 +3,6 @@ FETCH_STATIC_PROP_* with static:: must respect the called scope
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
-opcache.jit=tracing
 opcache.jit_hot_loop=1
 opcache.jit_hot_func=1
 opcache.jit_hot_return=1
@@ -90,7 +89,7 @@ var_dump(A::getTyped(), B::getTyped());
 
 ?>
 --EXPECT--
-AAAAtrait1,BBBAtraitB1,AAAAtrait1,BBBAtraitB1,AAAAtrait1,BBBAtraitB1,AAAAtrait1,BBBAtraitB1
+AAAAtrait1,BBBBtraitB1,AAAAtrait1,BBBBtraitB1,AAAAtrait1,BBBBtraitB1,AAAAtrait1,BBBBtraitB1
 Array
 (
     [0] => 0
