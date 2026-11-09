@@ -34,6 +34,8 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-25268 (NULL php_libxml_ref_obj dereference in
     dom_objects_store_clone_obj when cloning Dom\Notation). (David Carlier)
+  . Fixed bug GH-25306 (Assertion status == LXB_STATUS_OK in dom_parse_selector
+    when lexbor allocation fails). (ndossche)
 
 - GD:
   . Fixed use-after-free when drawing with a brush or tile image that was
