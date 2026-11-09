@@ -19,6 +19,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-25314 (Assertion in ZEND_DO_FCALL: reference returned by
     &__get() reaches property hook TMP result). (ndossche)
   . Fix support for never-returning functions in PFAs. (ndossche)
+  . Fixed array_map() optimization not resolving the function name of an FCC.
+    (ChrisAbner)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
