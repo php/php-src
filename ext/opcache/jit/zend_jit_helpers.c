@@ -1262,11 +1262,27 @@ try_string_offset:
 		switch (Z_TYPE_P(dim)) {
 			/* case IS_LONG: */
 			case IS_STRING:
-				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), &offset, NULL, false)) {
-					goto out;
+			{
+				bool trailing_data = false;
+				/* Allow errors to warn on leading-numeric strings, like the VM */
+				if (IS_LONG != is_numeric_string_ex(Z_STRVAL_P(dim), Z_STRLEN_P(dim), &offset,
+						NULL, /* allow errors */ true, NULL, &trailing_data)) {
+					ZVAL_NULL(result);
+					return;
 				}
-				ZVAL_NULL(result);
-				return;
+				if (UNEXPECTED(trailing_data)) {
+					if (!(GC_FLAGS(str) & IS_STR_INTERNED)) {
+						GC_ADDREF(str);
+					}
+					zend_error(E_WARNING, "Illegal string offset \"%s\"", Z_STRVAL_P(dim));
+					if (!(GC_FLAGS(str) & IS_STR_INTERNED) && UNEXPECTED(GC_DELREF(str) == 0)) {
+						zend_string_efree(str);
+						ZVAL_NULL(result);
+						return;
+					}
+				}
+				goto out;
+			}
 			case IS_DOUBLE:
 				offset = zend_dval_to_lval_silent(Z_DVAL_P(dim));
 				goto out;
