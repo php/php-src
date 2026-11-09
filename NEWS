@@ -19,7 +19,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-25302 (Use-after-free in zend_compile_const_decl() with
     OPcache during concurrent compilation). (Nicolas Grekas)
   . Fixed use-after-free when the error handler releases a string while an
-    "Illegal string offset" warning is raised on read. (Jorg Sowa)
+    "Illegal string offset" warning is raised for its offset in a read, ?? or
+    nested isset()/empty(). (Jorg Sowa)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
@@ -47,8 +48,8 @@ PHP                                                                        NEWS
   . Fixed JIT ignoring leading-numeric string offsets in isset(), empty() and
     ??. (Jorg Sowa)
   . Fixed use-after-free in JIT when the error handler releases a string while
-    an undefined offset variable warning is raised under isset()/??.
-    (Jorg Sowa)
+    an "Undefined variable" warning is raised for its offset in ?? or nested
+    isset()/empty(). (Jorg Sowa)
 
 - PDO_Firebird:
   . Fixed stack buffer overflow with long connection user names, passwords,
