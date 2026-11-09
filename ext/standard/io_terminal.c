@@ -173,7 +173,7 @@ typedef struct php_io_terminal_stream_target {
 
 static zend_class_entry *php_io_terminal_exception_ce;
 static zend_class_entry *php_io_terminal_key_ce;
-static zend_class_entry *php_io_terminal_terminal_size_ce;
+static zend_class_entry *php_io_terminal_dimensions_ce;
 static zend_class_entry *php_io_terminal_mode_token_ce;
 static zend_class_entry *php_io_terminal_terminal_ce;
 static zend_object_handlers php_io_terminal_mode_token_handlers;
@@ -2732,8 +2732,8 @@ restore:
 }
 #endif /* !PHP_WIN32 */
 
-/* Io\Terminal\TerminalSize methods */
-PHP_METHOD(Io_Terminal_TerminalSize, __construct)
+/* Io\Terminal\Dimensions methods */
+PHP_METHOD(Io_Terminal_Dimensions, __construct)
 {
 	zend_long cols, rows;
 
@@ -2752,12 +2752,12 @@ PHP_METHOD(Io_Terminal_TerminalSize, __construct)
 		RETURN_THROWS();
 	}
 
-	zend_update_property_long(php_io_terminal_terminal_size_ce, Z_OBJ_P(ZEND_THIS), "cols", sizeof("cols") - 1, cols);
+	zend_update_property_long(php_io_terminal_dimensions_ce, Z_OBJ_P(ZEND_THIS), "cols", sizeof("cols") - 1, cols);
 	if (UNEXPECTED(EG(exception))) {
 		RETURN_THROWS();
 	}
 
-	zend_update_property_long(php_io_terminal_terminal_size_ce, Z_OBJ_P(ZEND_THIS), "rows", sizeof("rows") - 1, rows);
+	zend_update_property_long(php_io_terminal_dimensions_ce, Z_OBJ_P(ZEND_THIS), "rows", sizeof("rows") - 1, rows);
 	if (UNEXPECTED(EG(exception))) {
 		RETURN_THROWS();
 	}
@@ -2851,7 +2851,7 @@ PHP_METHOD(Io_Terminal_Terminal, fromStreams)
 	}
 }
 
-PHP_METHOD(Io_Terminal_Terminal, getSize)
+PHP_METHOD(Io_Terminal_Terminal, getDimensions)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -2878,7 +2878,7 @@ PHP_METHOD(Io_Terminal_Terminal, getSize)
 	zval params[2];
 	ZVAL_LONG(&params[0], columns);
 	ZVAL_LONG(&params[1], rows);
-	object_init_with_constructor(return_value, php_io_terminal_terminal_size_ce, 2, params, NULL);
+	object_init_with_constructor(return_value, php_io_terminal_dimensions_ce, 2, params, NULL);
 }
 
 PHP_METHOD(Io_Terminal_Terminal, enableRawMode)
@@ -4096,7 +4096,7 @@ PHP_MINIT_FUNCTION(terminal)
 
 	php_io_terminal_key_ce = register_class_Io_Terminal_Key();
 
-	php_io_terminal_terminal_size_ce = register_class_Io_Terminal_TerminalSize();
+	php_io_terminal_dimensions_ce = register_class_Io_Terminal_Dimensions();
 
 	php_io_terminal_mode_token_ce = register_class_Io_Terminal_ModeToken();
 	php_io_terminal_mode_token_ce->create_object = php_io_terminal_mode_token_create_object;

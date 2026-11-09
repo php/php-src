@@ -45,8 +45,24 @@ var_dump($k1_res === "€");
 fclose($reader);
 fclose($writer);
 
+// Separate Terminal wrappers also do not share split-CRLF state
+$mem = fopen('php://memory', 'w+');
+fwrite($mem, "secret\r\nWidget\r\n");
+rewind($mem);
+
+$first = Terminal::fromStreams($mem);
+$second = Terminal::fromStreams($mem);
+
+var_dump($first->readSecret() === "secret");
+var_dump($second->readLine() === "");
+var_dump($second->readLine() === "Widget");
+fclose($mem);
+
 ?>
 --EXPECT--
+bool(true)
+bool(true)
+bool(true)
 bool(true)
 bool(true)
 bool(true)

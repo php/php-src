@@ -43,7 +43,7 @@ namespace Io\Terminal {
     }
 
     /** @strict-properties */
-    final readonly class TerminalSize
+    final readonly class Dimensions
     {
         public readonly int $cols;
         public readonly int $rows;
@@ -81,7 +81,7 @@ namespace Io\Terminal {
             $output = null,
         ): Terminal {}
 
-        public function getSize(): ?TerminalSize {}
+        public function getDimensions(): ?Dimensions {}
 
         #[\NoDiscard(message: "as the returned token must stay alive to keep the raw-mode lease active")]
         public function enableRawMode(): ModeToken {}

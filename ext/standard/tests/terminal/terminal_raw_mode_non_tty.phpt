@@ -13,8 +13,8 @@ $terminal = Terminal::fromStreams($fp);
 $token = $terminal->enableRawMode();
 var_dump($token instanceof ModeToken);
 
-// getSize() continues to return null on non-terminal streams
-var_dump($terminal->getSize());
+// getDimensions() continues to return null on non-terminal streams
+var_dump($terminal->getDimensions());
 
 // Restoring the token succeeds
 $terminal->restoreMode($token);
