@@ -797,6 +797,15 @@ static PHP_INI_MH(OnChangeMailForceExtra)
 }
 /* }}} */
 
+static PHP_INI_MH(OnUpdateAutoDetectLineEndings)
+{
+	if (zend_ini_parse_bool(new_value)) {
+		zend_error(E_DEPRECATED, "auto_detect_line_endings is deprecated");
+	}
+	return OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+}
+
+
 /* defined in browscap.c */
 PHP_INI_MH(OnChangeBrowscap);
 
@@ -919,6 +928,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("syslog.facility",		"LOG_USER",		PHP_INI_SYSTEM,		OnSetFacility,		syslog_facility,	php_core_globals,		core_globals)
 	STD_PHP_INI_ENTRY("syslog.ident",		"php",			PHP_INI_SYSTEM,		OnUpdateString,		syslog_ident,		php_core_globals,		core_globals)
 	STD_PHP_INI_ENTRY("syslog.filter",		"no-ctrl",		PHP_INI_ALL,		OnSetLogFilter,		syslog_filter,		php_core_globals, 		core_globals)
+	STD_PHP_INI_ENTRY("default_socket_timeout", "60", PHP_INI_ALL, OnUpdateLong, default_socket_timeout, php_core_globals, core_globals)
+	STD_PHP_INI_BOOLEAN("auto_detect_line_endings", "0", PHP_INI_ALL, OnUpdateAutoDetectLineEndings, auto_detect_line_endings, php_core_globals, core_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -1870,6 +1881,12 @@ zend_result php_request_startup(void)
 #if PHP_SIGCHILD
 	signal(SIGCHLD, sigchld_handler);
 #endif
+
+	/* Default to global wrappers only */
+	PG(stream_wrappers) = NULL;
+
+	/* Default to global filters only */
+	PG(stream_filters) = NULL;
 
 	zend_try {
 		PG(in_error_log) = 0;

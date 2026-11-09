@@ -20,7 +20,6 @@
 #endif
 
 #include "php.h"
-#include "ext/standard/file.h"
 #include "ext/uri/php_uri.h"
 #include "streams/php_streams_int.h"
 #include "zend_smart_str.h"
@@ -3680,9 +3679,9 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 				if (value == -1) {
 					if (sslsock->s.timeout.tv_sec == -1) {
 #ifdef _WIN32
-						tv.tv_sec = (long)FG(default_socket_timeout);
+						tv.tv_sec = (long)PG(default_socket_timeout);
 #else
-						tv.tv_sec = (time_t)FG(default_socket_timeout);
+						tv.tv_sec = (time_t)PG(default_socket_timeout);
 #endif
 						tv.tv_usec = 0;
 					} else {
@@ -4053,9 +4052,9 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, size_t protolen,
 	sslsock->s.is_blocked = true;
 	/* this timeout is used by standard stream funcs, therefore it should use the default value */
 #ifdef _WIN32
-	sslsock->s.timeout.tv_sec = (long)FG(default_socket_timeout);
+	sslsock->s.timeout.tv_sec = (long)PG(default_socket_timeout);
 #else
-	sslsock->s.timeout.tv_sec = (time_t)FG(default_socket_timeout);
+	sslsock->s.timeout.tv_sec = (time_t)PG(default_socket_timeout);
 #endif
 	sslsock->s.timeout.tv_usec = 0;
 

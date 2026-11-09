@@ -34,7 +34,7 @@
 #include "php_streams_int.h"
 
 /* {{{ resource and registration code */
-/* Global wrapper hash, copied to FG(stream_wrappers) on registration of volatile wrapper */
+/* Global wrapper hash, copied to PG(stream_wrappers) on registration of volatile wrapper */
 static HashTable url_stream_wrappers_hash;
 static int le_stream = -1; /* true global */
 static int le_pstream = -1; /* true global */
@@ -57,7 +57,7 @@ PHPAPI int php_file_le_stream_filter(void)
 
 PHPAPI HashTable *php_stream_get_url_stream_wrappers_hash(void)
 {
-	return (FG(stream_wrappers) ? FG(stream_wrappers) : &url_stream_wrappers_hash);
+	return (PG(stream_wrappers) ? PG(stream_wrappers) : &url_stream_wrappers_hash);
 }
 
 PHPAPI HashTable *php_stream_get_url_stream_wrappers_hash_global(void)
@@ -186,7 +186,7 @@ fprintf(stderr, "stream_alloc: %s:%p persistent=%s\n", ops->label, ret, persiste
 	ret->open_lineno = __zend_orig_lineno ? __zend_orig_lineno : __zend_lineno;
 #endif
 
-	if (FG(auto_detect_line_endings)) {
+	if (PG(auto_detect_line_endings)) {
 		ret->flags |= PHP_STREAM_FLAG_DETECT_EOL;
 	}
 
@@ -1806,23 +1806,23 @@ static void stream_resource_persistent_dtor(zend_resource *rsrc)
 
 void php_shutdown_stream_hashes(void)
 {
-	FG(user_stream_current_filename) = NULL;
-	if (FG(stream_wrappers)) {
-		zend_hash_destroy(FG(stream_wrappers));
-		efree(FG(stream_wrappers));
-		FG(stream_wrappers) = NULL;
+	PG(user_stream_current_filename) = NULL;
+	if (PG(stream_wrappers)) {
+		zend_hash_destroy(PG(stream_wrappers));
+		efree(PG(stream_wrappers));
+		PG(stream_wrappers) = NULL;
 	}
 
-	if (FG(stream_filters)) {
-		zend_hash_destroy(FG(stream_filters));
-		efree(FG(stream_filters));
-		FG(stream_filters) = NULL;
+	if (PG(stream_filters)) {
+		zend_hash_destroy(PG(stream_filters));
+		efree(PG(stream_filters));
+		PG(stream_filters) = NULL;
 	}
 
-	if (FG(wrapper_logged_errors)) {
-		zend_hash_destroy(FG(wrapper_logged_errors));
-		efree(FG(wrapper_logged_errors));
-		FG(wrapper_logged_errors) = NULL;
+	if (PG(wrapper_logged_errors)) {
+		zend_hash_destroy(PG(wrapper_logged_errors));
+		efree(PG(wrapper_logged_errors));
+		PG(wrapper_logged_errors) = NULL;
 	}
 
 	php_stream_error_state_cleanup();
@@ -1896,9 +1896,9 @@ PHPAPI zend_result php_unregister_url_stream_wrapper(const char *protocol)
 
 static void clone_wrapper_hash(void)
 {
-	ALLOC_HASHTABLE(FG(stream_wrappers));
-	zend_hash_init(FG(stream_wrappers), zend_hash_num_elements(&url_stream_wrappers_hash), NULL, NULL, 0);
-	zend_hash_copy(FG(stream_wrappers), &url_stream_wrappers_hash, NULL);
+	ALLOC_HASHTABLE(PG(stream_wrappers));
+	zend_hash_init(PG(stream_wrappers), zend_hash_num_elements(&url_stream_wrappers_hash), NULL, NULL, 0);
+	zend_hash_copy(PG(stream_wrappers), &url_stream_wrappers_hash, NULL);
 }
 
 /* API for registering VOLATILE wrappers */
@@ -1908,27 +1908,27 @@ PHPAPI zend_result php_register_url_stream_wrapper_volatile(zend_string *protoco
 		return FAILURE;
 	}
 
-	if (!FG(stream_wrappers)) {
+	if (!PG(stream_wrappers)) {
 		clone_wrapper_hash();
 	}
 
-	return zend_hash_add_ptr(FG(stream_wrappers), protocol, wrapper) ? SUCCESS : FAILURE;
+	return zend_hash_add_ptr(PG(stream_wrappers), protocol, wrapper) ? SUCCESS : FAILURE;
 }
 
 PHPAPI zend_result php_unregister_url_stream_wrapper_volatile(zend_string *protocol)
 {
-	if (!FG(stream_wrappers)) {
+	if (!PG(stream_wrappers)) {
 		clone_wrapper_hash();
 	}
 
-	return zend_hash_del(FG(stream_wrappers), protocol);
+	return zend_hash_del(PG(stream_wrappers), protocol);
 }
 /* }}} */
 
 /* {{{ php_stream_locate_url_wrapper */
 PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const char **path_for_open, int options)
 {
-	const HashTable *wrapper_hash = (FG(stream_wrappers) ? FG(stream_wrappers) : &url_stream_wrappers_hash);
+	const HashTable *wrapper_hash = (PG(stream_wrappers) ? PG(stream_wrappers) : &url_stream_wrappers_hash);
 	php_stream_wrapper *wrapper = NULL;
 	const char *p, *protocol = NULL;
 	size_t n = 0;
@@ -2014,7 +2014,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 			return NULL;
 		}
 
-		if (FG(stream_wrappers)) {
+		if (PG(stream_wrappers)) {
 		/* The file:// wrapper may have been disabled/overridden */
 
 			if (wrapper) {

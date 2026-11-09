@@ -24,9 +24,7 @@
 #include "php.h"
 
 #include "php_network.h"
-#include "ext/standard/file.h"
 #include "ext/standard/info.h"
-#include "php_ini.h"
 #ifdef PHP_WIN32
 # include "windows_common.h"
 # include <windows.h>
@@ -2789,7 +2787,7 @@ PHP_FUNCTION(socket_export_stream)
 	stream_data = (php_netstream_data_t *) stream->abstract;
 	stream_data->socket = socket->bsd_socket;
 	stream_data->is_blocked = socket->blocking;
-	stream_data->timeout.tv_sec = FG(default_socket_timeout);
+	stream_data->timeout.tv_sec = PG(default_socket_timeout);
 	stream_data->timeout.tv_usec = 0;
 
 	php_stream_to_zval(stream, &socket->zstream);
