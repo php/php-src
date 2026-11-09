@@ -42,6 +42,8 @@ PHP                                                                        NEWS
     conversion in JIT). (Jorg Sowa)
   . Fixed bug GH-25037 (Function JIT ENTRY live var assertion).
     (Ilia Alshanetsky)
+  . Fixed JIT ignoring leading-numeric string offsets in isset(), empty() and
+    ??. (Jorg Sowa)
 
 - PDO_Firebird:
   . Fixed stack buffer overflow with long connection user names, passwords,
