@@ -29,5 +29,5 @@ foreach ([['NotBacked', 'A'], ['Backed', 'C'], ['Backed', 'A']] as [$class, $con
 ?>
 --EXPECT--
 Enum case NotBacked::A is not a backed case
-Enum case Backed::C is not a backed case
+Constant Backed::C is not a case
 int(1)
