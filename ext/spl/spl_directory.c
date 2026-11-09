@@ -283,7 +283,7 @@ static void spl_filesystem_dir_open(spl_filesystem_object* intern, zend_string *
 	bool skip_dots = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_SKIPDOTS);
 
 	intern->type = SPL_FS_DIR;
-	intern->u.dir.dirp = php_stream_opendir(ZSTR_VAL(path), REPORT_ERRORS, FG(default_context));
+	intern->u.dir.dirp = php_stream_opendir(ZSTR_VAL(path), REPORT_ERRORS, php_stream_context_get_default());
 
 	if (intern->u.dir.dirp) {
 		/* we prevent potential UAF with conflicting explicit fclose(), relying on the object destructor for this */

@@ -1190,10 +1190,7 @@ PHP_FUNCTION(stream_context_get_default)
 		Z_PARAM_ARRAY_HT_OR_NULL(params)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (FG(default_context) == NULL) {
-		FG(default_context) = php_stream_context_alloc();
-	}
-	context = FG(default_context);
+	context = php_stream_context_get_default();
 
 	if (params) {
 		if (parse_context_options(context, params) == FAILURE) {
@@ -1233,10 +1230,7 @@ PHP_FUNCTION(stream_context_set_default)
 		Z_PARAM_ARRAY_HT(options)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (FG(default_context) == NULL) {
-		FG(default_context) = php_stream_context_alloc();
-	}
-	context = FG(default_context);
+	context = php_stream_context_get_default();
 
 	if (php_stream_context_options_has_error_settings(options)) {
 		zend_value_error("Stream error handling options cannot be set on the default context");
