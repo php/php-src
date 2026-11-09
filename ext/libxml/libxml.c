@@ -1480,6 +1480,9 @@ PHP_LIBXML_API void php_libxml_node_free_resource(xmlNodePtr node)
 			break;
 		default:
 			if (node->parent == NULL || node->type == XML_NAMESPACE_DECL) {
+				if (node->type == XML_ATTRIBUTE_NODE && node->doc != NULL && ((xmlAttrPtr) node)->atype == XML_ATTRIBUTE_ID) {
+					xmlRemoveID(node->doc, (xmlAttrPtr) node);
+				}
 				php_libxml_node_free_list((xmlNodePtr) node->children);
 				if (node->type == XML_ELEMENT_NODE) {
 					php_libxml_node_free_list((xmlNodePtr) node->properties);

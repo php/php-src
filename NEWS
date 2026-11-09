@@ -25,6 +25,8 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-25268 (NULL php_libxml_ref_obj dereference in
     dom_objects_store_clone_obj when cloning Dom\Notation). (David Carlier)
+  . Fixed use-after-free in getElementById() after a removed ID attribute is
+    freed. (Ilia Alshanetsky)
 
 - MBString:
   . Fixed stack overflow in mb_check_encoding() and mb_convert_encoding() with
