@@ -303,6 +303,7 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	FILE *f;
 	int secPrefsError = 0;
 	xsltSecurityPrefsPtr secPrefs = NULL;
+	bool bailout = false;
 
 	node = php_libxml_import_node(docp);
 
@@ -319,6 +320,13 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 		zend_string *name = get_active_function_or_method_name();
 		zend_throw_error(NULL, "%s() can only be called after a stylesheet has been imported",
 			ZSTR_VAL(name));
+		zend_string_release(name);
+		return NULL;
+	}
+
+	if (UNEXPECTED(intern->transform_depth > 0)) {
+		zend_string *name = get_active_function_or_method_name();
+		zend_throw_error(NULL, "Cannot call %s() while a transformation is in progress", ZSTR_VAL(name));
 		zend_string_release(name);
 		return NULL;
 	}
@@ -409,7 +417,11 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	if (secPrefsError == 1) {
 		php_error_docref(NULL, E_WARNING, "Can't set libxslt security properties, not doing transformation for security reasons");
 	} else {
-		newdocp = xsltApplyStylesheetUser(style, doc, /* params (handled manually) */ NULL, /* output */ NULL, f, ctxt);
+		zend_try {
+			newdocp = xsltApplyStylesheetUser(style, doc, NULL, NULL, f, ctxt);
+		} zend_catch {
+			bailout = true;
+		} zend_end_try();
 	}
 
 out:
@@ -429,6 +441,10 @@ out:
 	intern->doc = NULL;
 
 	intern->transform_depth--;
+
+	if (bailout) {
+		zend_bailout();
+	}
 
 	return newdocp;
 
