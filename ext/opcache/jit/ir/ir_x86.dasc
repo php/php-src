@@ -26930,7 +26930,7 @@ next_block:;
 	if (ctx->code_buffer) {
 		entry = ctx->code_buffer->pos;
 		entry = (void*)IR_ALIGNED_SIZE(((size_t)(entry)), required_alignment);
-		if (size > (size_t)((char*)ctx->code_buffer->end - (char*)entry)) {
+		if ((char*)entry > (char*)ctx->code_buffer->end || size > (size_t)((char*)ctx->code_buffer->end - (char*)entry)) {
 			dasm_free(&data.dasm_state);
 			ctx->data = NULL;
 			ctx->status = IR_ERROR_CODE_MEM_OVERFLOW;
@@ -27070,7 +27070,7 @@ const void *ir_emit_exitgroup(uint32_t first_exit_point, uint32_t exit_points_pe
 
 	entry = code_buffer->pos;
 	entry = (void*)IR_ALIGNED_SIZE(((size_t)(entry)), 16);
-	if (size > (size_t)((char*)code_buffer->end - (char*)entry)) {
+	if ((char*)entry > (char*)code_buffer->end || size > (size_t)((char*)code_buffer->end - (char*)entry)) {
 		dasm_free(&dasm_state);
 		return NULL;
 	}
