@@ -14,7 +14,6 @@
 
 #include "php.h"
 #include "php_streams_int.h"
-#include "ext/standard/file.h" /* For FG(default_socket_timeout) */
 
 static HashTable xport_hash;
 
@@ -63,7 +62,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 	zend_string *error_text = NULL;
 	struct timeval default_timeout = { 0, 0 };
 
-	default_timeout.tv_sec = FG(default_socket_timeout);
+	default_timeout.tv_sec = PG(default_socket_timeout);
 
 	if (timeout == NULL) {
 		timeout = &default_timeout;

@@ -214,7 +214,7 @@ static inline bool sapi_cli_select(php_socket_t fd)
 {
 	struct timeval tv;
 
-	tv.tv_sec = (long)FG(default_socket_timeout);
+	tv.tv_sec = (long)PG(default_socket_timeout);
 	tv.tv_usec = 0;
 
 	return php_pollfd_for(fd, POLLOUT, &tv) != -1;
