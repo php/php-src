@@ -40,6 +40,21 @@ try {
     echo $e->getMessage(), "\n";
 }
 
+echo "Prepared statement:\n";
+$pdo->setAttribute(Pdo\Sqlite::ATTR_DQS, true);
+$stmt = $pdo->prepare('SELECT "abc"');
+$stmt->execute();
+var_dump($stmt->fetchColumn());
+$pdo->setAttribute(Pdo\Sqlite::ATTR_DQS, false);
+try {
+    $stmt->execute();
+} catch (PDOException $e) {
+    echo $e->getMessage(), "\n";
+}
+$pdo->setAttribute(Pdo\Sqlite::ATTR_DQS, true);
+$stmt->execute();
+var_dump($stmt->fetchColumn());
+
 echo "Constructor option:\n";
 $pdo = new Pdo\Sqlite('sqlite::memory:', options: [
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -62,6 +77,10 @@ SQLSTATE[HY000]: General error: 1 no such column: %Sabc%S
 string(3) "abc"
 int(1)
 SQLSTATE[HY000]: General error: 1 no such column: %Smissing%S
+Prepared statement:
+string(3) "abc"
+SQLSTATE[HY000]: General error: 1 no such column: %Sabc%S
+string(3) "abc"
 Constructor option:
 bool(false)
 SQLSTATE[HY000]: General error: 1 no such column: %Sabc%S
