@@ -1,9 +1,5 @@
 --TEST--
 Io\Terminal\Terminal: CRLF consumption across secret boundaries and chunk splits
---SKIPIF--
-<?php
-if (!class_exists(\Io\Terminal\Terminal::class)) die('skip Io\Terminal\Terminal not available');
-?>
 --FILE--
 <?php
 

@@ -2,8 +2,6 @@
 Io\Terminal\Terminal: readKey throws on truncated UTF-8 at EOF and preserves timeouts on open writer
 --SKIPIF--
 <?php
-if (!class_exists(\Io\Terminal\Terminal::class)) die('skip Io\Terminal\Terminal not available');
-if (!class_exists(\Time\Duration::class)) die('skip Time\Duration not available');
 if (!function_exists('proc_open')) die('skip proc_open is not available');
 ?>
 --FILE--
