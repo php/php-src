@@ -42,6 +42,8 @@ PHP                                                                        NEWS
     conversion in JIT). (Jorg Sowa)
   . Fixed bug GH-25037 (Function JIT ENTRY live var assertion).
     (Ilia Alshanetsky)
+  . Fixed bug GH-12010 (opcache crashes on high volume IIS servers (Windows)).
+    (Kamil Tekiela)
 
 - SOAP:
   . Fixed bug GH-25267 (NULL dereference in to_xml_any() with integer key).
