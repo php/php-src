@@ -5330,6 +5330,7 @@ void reflection_class_new_lazy(INTERNAL_FUNCTION_PARAMETERS,
 			strategy | options);
 
 	if (!obj) {
+		zend_release_fcall_info_cache(&fcc);
 		RETURN_THROWS();
 	}
 
