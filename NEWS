@@ -62,6 +62,8 @@ PHP                                                                        NEWS
 - SOAP:
   . Fixed bug GH-25267 (NULL dereference in to_xml_any() with integer key).
     (lazerg)
+  . Fixed bug GH-25303 (NULL encoder dereference in to_xml_list() error
+    message). (lazerg)
 
 - Readline:
   . Fixed incorrect handling of non-ASCII pending_input bytes in readline_info(),
