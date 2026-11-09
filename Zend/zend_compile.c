@@ -5443,9 +5443,19 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 
 	/* Evaluate function name */
 	znode func_node;
-	{
+	zend_ast *func_name_ast = callback->child[callback->kind == ZEND_AST_CALL ? 0 : 1];
+	if (callback->kind == ZEND_AST_CALL
+	 && func_name_ast->kind == ZEND_AST_ZVAL
+	 && Z_TYPE_P(zend_ast_get_zval(func_name_ast)) == IS_STRING) {
+		/* A literal function name has no side effects and must not be memoized:
+		 * compiling it as an expression would yield the unresolved string, which
+		 * ignores the current namespace, "use function" imports and the runtime
+		 * fallback to the global function. Compile the call in the loop body with
+		 * the original name instead, like a regular call. */
+		func_node.op_type = IS_UNUSED;
+	} else {
 		znode result;
-		zend_compile_expr(&result, callback->child[callback->kind == ZEND_AST_CALL ? 0 : 1]);
+		zend_compile_expr(&result, func_name_ast);
 		if (result.op_type == IS_CONST || result.op_type == IS_TMP_VAR) {
 			func_node = result;
 		} else {
@@ -5503,7 +5513,9 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 	/* loop body */
 	znode call_result;
 	zend_ast *func_ast;
-	if (func_node.op_type == IS_CONST) {
+	if (func_node.op_type == IS_UNUSED) {
+		func_ast = func_name_ast;
+	} else if (func_node.op_type == IS_CONST) {
 		func_ast = zend_ast_create_znode(&func_node);
 	} else {
 		znode copy_node;
@@ -5530,7 +5542,9 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 			break;
 		}
 	}
-	zend_ast_destroy(func_ast);
+	if (func_ast != func_name_ast) {
+		zend_ast_destroy(func_ast);
+	}
 	opline = zend_emit_op(NULL, ZEND_ADD_ARRAY_ELEMENT, &call_result, &key);
 	SET_NODE(opline->result, result);
 	/* end loop body */
@@ -5545,7 +5559,7 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 
 	zend_end_loop(opnum_fetch, &reset_node);
 	zend_emit_op(NULL, ZEND_FE_FREE, &reset_node, NULL);
-	if (func_node.op_type != IS_CONST) {
+	if (func_node.op_type != IS_UNUSED && func_node.op_type != IS_CONST) {
 		zend_emit_op(NULL, ZEND_FREE, &func_node, NULL);
 	}
 	if (class_node.op_type != IS_UNUSED && class_node.op_type != IS_CONST) {
