@@ -41,6 +41,9 @@ typedef struct {
 	php_dom_xpath_callback_ns *php_ns;
 	HashTable *namespaces;
 	HashTable *node_list;
+	HashTable *read_only_documents;
+	HashTable *read_only_trees;
+	uint32_t read_only_depth;
 } php_dom_xpath_callbacks;
 
 typedef enum {
@@ -48,9 +51,16 @@ typedef enum {
 	PHP_DOM_XPATH_CALLBACK_NAME_VALIDATE_NCNAME,
 } php_dom_xpath_callback_name_validation;
 
+static zend_always_inline bool php_dom_xpath_callbacks_registered(const php_dom_xpath_callbacks *registry)
+{
+	return registry->php_ns != NULL || registry->namespaces != NULL;
+}
+
 PHP_DOM_EXPORT void php_dom_xpath_callbacks_ctor(php_dom_xpath_callbacks *registry);
 PHP_DOM_EXPORT void php_dom_xpath_callbacks_dtor(php_dom_xpath_callbacks *registry);
 PHP_DOM_EXPORT void php_dom_xpath_callbacks_clean_node_list(php_dom_xpath_callbacks *registry);
+PHP_DOM_EXPORT void php_dom_xpath_callbacks_pin_tree(php_dom_xpath_callbacks *registry, xmlNodePtr node, dom_object *intern);
+PHP_DOM_EXPORT void php_dom_xpath_callbacks_release_read_only(php_dom_xpath_callbacks *registry);
 PHP_DOM_EXPORT void php_dom_xpath_callbacks_clean_argument_stack(xmlXPathParserContextPtr ctxt, uint32_t num_args);
 PHP_DOM_EXPORT void php_dom_xpath_callbacks_get_gc(php_dom_xpath_callbacks *registry, zend_get_gc_buffer *gc_buffer);
 PHP_DOM_EXPORT HashTable *php_dom_xpath_callbacks_get_gc_for_whole_object(php_dom_xpath_callbacks *registry, zend_object *object, zval **table, int *n);

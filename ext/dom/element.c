@@ -50,6 +50,10 @@ PHP_METHOD(DOMElement, __construct)
 		RETURN_THROWS();
 	}
 
+	if (dom_throw_if_node_read_only(Z_DOMOBJ_P(ZEND_THIS)->document, dom_object_get_node(Z_DOMOBJ_P(ZEND_THIS)))) {
+		return;
+	}
+
 	name_valid = xmlValidateName(BAD_CAST name, 0);
 	if (name_valid != 0) {
 		php_dom_throw_error(INVALID_CHARACTER_ERR, true);
@@ -429,6 +433,10 @@ PHP_METHOD(DOMElement, setAttribute)
 
 	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
 
+	if (dom_throw_if_node_read_only(intern->document, nodep)) {
+		RETURN_FALSE;
+	}
+
 	if (php_dom_follow_spec_intern(intern)) {
 		xmlChar *name_processed = BAD_CAST name;
 		if (php_dom_ns_is_html_and_document_is_html(nodep)) {
@@ -619,6 +627,10 @@ PHP_METHOD(DOMElement, removeAttribute)
 
 	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
 
+	if (dom_throw_if_node_read_only(intern->document, nodep)) {
+		RETURN_FALSE;
+	}
+
 	attrp = dom_get_attribute_or_nsdecl(intern, nodep, BAD_CAST name, name_len);
 	if (attrp == NULL) {
 		RETURN_FALSE;
@@ -639,6 +651,10 @@ PHP_METHOD(Dom_Element, removeAttribute)
 	}
 
 	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
+
+	if (dom_throw_if_node_read_only(intern->document, nodep)) {
+		RETURN_THROWS();
+	}
 
 	attrp = dom_get_attribute_or_nsdecl(intern, nodep, BAD_CAST name, name_len);
 	if (attrp != NULL) {
@@ -698,6 +714,10 @@ static void dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAMETERS, 
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 	DOM_GET_OBJ(attrp, node, xmlAttrPtr, attrobj);
+
+	if (dom_throw_if_node_read_only(intern->document, nodep) || dom_throw_if_node_read_only(attrobj->document, (xmlNodePtr) attrp)) {
+		RETURN_FALSE;
+	}
 
 	/* ZPP Guarantees that a DOMAttr class is given, as it is converted to a xmlAttr
 	 * to pass to libxml (see http://www.xmlsoft.org/html/libxml-tree.html#xmlAttr)
@@ -794,6 +814,10 @@ static void dom_element_remove_attribute_node(INTERNAL_FUNCTION_PARAMETERS, zend
 	DOM_GET_OBJ(attrp, node, xmlAttrPtr, attrobj);
 
 	ZEND_ASSERT(attrp->type == XML_ATTRIBUTE_NODE);
+
+	if (dom_throw_if_node_read_only(intern->document, nodep)) {
+		RETURN_FALSE;
+	}
 
 	if (attrp->parent != nodep) {
 		php_dom_throw_error(NOT_FOUND_ERR, dom_get_strict_error(intern->document));
@@ -1095,6 +1119,10 @@ PHP_METHOD(DOMElement, setAttributeNS)
 
 	DOM_GET_OBJ(elemp, id, xmlNodePtr, intern);
 
+	if (dom_throw_if_node_read_only(intern->document, elemp)) {
+		return;
+	}
+
 	if (php_dom_follow_spec_intern(intern)) {
 		dom_set_attribute_ns_modern(intern, elemp, uri, name, value);
 	} else {
@@ -1184,6 +1212,10 @@ PHP_METHOD(DOMElement, removeAttributeNS)
 	}
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
+
+	if (dom_throw_if_node_read_only(intern->document, nodep)) {
+		return;
+	}
 
 	bool follow_spec = php_dom_follow_spec_intern(intern);
 	if (follow_spec && uri_len == 0) {
@@ -1408,6 +1440,10 @@ PHP_METHOD(DOMElement, setIdAttribute)
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
+	if (dom_throw_if_node_read_only(intern->document, nodep)) {
+		return;
+	}
+
 	attrp = xmlHasNsProp(nodep, BAD_CAST name, NULL);
 	if (attrp == NULL || attrp->type == XML_ATTRIBUTE_DECL) {
 		php_dom_throw_error(NOT_FOUND_ERR, dom_get_strict_error(intern->document));
@@ -1437,6 +1473,10 @@ PHP_METHOD(DOMElement, setIdAttributeNS)
 
 	DOM_GET_OBJ(elemp, id, xmlNodePtr, intern);
 
+	if (dom_throw_if_node_read_only(intern->document, elemp)) {
+		return;
+	}
+
 	attrp = xmlHasNsProp(elemp, BAD_CAST name, BAD_CAST uri);
 	if (attrp == NULL || attrp->type == XML_ATTRIBUTE_DECL) {
 		php_dom_throw_error(NOT_FOUND_ERR, dom_get_strict_error(intern->document));
@@ -1464,6 +1504,10 @@ static void dom_element_set_id_attribute_node(INTERNAL_FUNCTION_PARAMETERS, zend
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 	DOM_GET_OBJ(attrp, node, xmlAttrPtr, attrobj);
+
+	if (dom_throw_if_node_read_only(intern->document, nodep)) {
+		return;
+	}
 
 	if (attrp->parent != nodep) {
 		php_dom_throw_error(NOT_FOUND_ERR, dom_get_strict_error(intern->document));
@@ -1665,6 +1709,10 @@ static void dom_element_insert_adjacent_element(INTERNAL_FUNCTION_PARAMETERS, ze
 	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, this_intern);
 	DOM_GET_OBJ(otherp, element_zval, xmlNodePtr, other_intern);
 
+	if (dom_throw_if_node_read_only(this_intern->document, thisp) || dom_throw_if_node_read_only(other_intern->document, otherp)) {
+		RETURN_NULL();
+	}
+
 	xmlNodePtr result = dom_insert_adjacent(where, thisp, this_intern, otherp);
 	if (result == NULL) {
 		RETURN_NULL();
@@ -1741,6 +1789,10 @@ static void dom_element_insert_adjacent_text(INTERNAL_FUNCTION_PARAMETERS, zend_
 
 	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, this_intern);
 
+	if (dom_throw_if_node_read_only(this_intern->document, thisp)) {
+		return;
+	}
+
 	if (UNEXPECTED(ZEND_SIZE_T_INT_OVFL(ZSTR_LEN(data)))) {
 		zend_argument_value_error(2, "is too long");
 		RETURN_THROWS();
@@ -1808,6 +1860,10 @@ PHP_METHOD(Dom_Element, insertAdjacentHTML)
 	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, this_intern);
+
+	if (dom_throw_if_node_read_only(this_intern->document, thisp)) {
+		RETURN_THROWS();
+	}
 
 	/* 1. We don't do injection sinks. */
 
@@ -1898,6 +1954,10 @@ PHP_METHOD(DOMElement, toggleAttribute)
 	}
 
 	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, intern);
+
+	if (dom_throw_if_node_read_only(intern->document, thisp)) {
+		RETURN_FALSE;
+	}
 
 	/* Step 1 */
 	if (xmlValidateName(BAD_CAST qname, 0) != 0) {
@@ -2176,6 +2236,10 @@ PHP_METHOD(Dom_Element, rename)
 	dom_object *intern;
 	xmlNodePtr nodep;
 	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
+
+	if (dom_throw_if_node_read_only(intern->document, nodep)) {
+		RETURN_THROWS();
+	}
 
 	xmlChar *localname = NULL, *prefix = NULL;
 	int errorcode = dom_validate_and_extract(namespace_uri, qualified_name, &localname, &prefix);

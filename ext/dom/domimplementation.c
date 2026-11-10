@@ -174,6 +174,9 @@ PHP_METHOD(DOMImplementation, createDocument)
 			php_dom_throw_error(WRONG_DOCUMENT_ERR, true);
 			RETURN_THROWS();
 		}
+		if (dom_throw_if_node_read_only(doctobj->document, (xmlNodePtr) doctype)) {
+			RETURN_THROWS();
+		}
 	} else {
 		doctobj = NULL;
 	}
@@ -261,6 +264,9 @@ PHP_METHOD(Dom_Implementation, createDocument)
 
 	if (dtd != NULL) {
 		DOM_GET_OBJ(doctype, dtd, xmlDtdPtr, doctobj);
+		if (dom_throw_if_node_read_only(doctobj->document, (xmlNodePtr) doctype)) {
+			RETURN_THROWS();
+		}
 	}
 
 	xmlDocPtr document = NULL;

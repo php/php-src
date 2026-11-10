@@ -373,6 +373,15 @@ static void change_node_zval(xmlNodePtr node, zend_string *value)
 }
 /* }}} */
 
+static bool sxe_throw_if_document_read_only(const php_sxe_object *sxe)
+{
+	if (php_libxml_is_node_read_only(sxe->document, sxe->node ? sxe->node->node : NULL)) {
+		zend_throw_error(NULL, "Cannot modify a node while an XPath evaluation or XSLT transformation that uses it is in progress");
+		return true;
+	}
+	return false;
+}
+
 /* {{{ sxe_property_write() */
 static zval *sxe_prop_dim_write(zend_object *object, zval *member, zval *value, sxe_access_mode access_mode, xmlNodePtr *pnewnode)
 {
@@ -392,6 +401,10 @@ static zval *sxe_prop_dim_write(zend_object *object, zval *member, zval *value, 
 	zend_string    *value_str = NULL;
 
 	sxe = php_sxe_fetch_object(object);
+
+	if (sxe_throw_if_document_read_only(sxe)) {
+		return &EG(error_zval);
+	}
 
 	if (!member) {
 		if (sxe->iter.type == SXE_ITER_ATTRLIST) {
@@ -796,6 +809,12 @@ static void sxe_prop_dim_delete(zend_object *object, zval *member, sxe_access_mo
 	zval            tmp_zv;
 	int             test = 0;
 
+	sxe = php_sxe_fetch_object(object);
+
+	if (sxe_throw_if_document_read_only(sxe)) {
+		return;
+	}
+
 	if (Z_TYPE_P(member) != IS_STRING && Z_TYPE_P(member) != IS_LONG) {
 		zend_string *str = zval_try_get_string_func(member);
 		if (UNEXPECTED(!str)) {
@@ -804,8 +823,6 @@ static void sxe_prop_dim_delete(zend_object *object, zval *member, sxe_access_mo
 		ZVAL_STR(&tmp_zv, str);
 		member = &tmp_zv;
 	}
-
-	sxe = php_sxe_fetch_object(object);
 
 	GET_NODE(sxe, node);
 
@@ -1732,6 +1749,10 @@ PHP_METHOD(SimpleXMLElement, addChild)
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
 	GET_NODE(sxe, node);
 
+	if (sxe_throw_if_document_read_only(sxe)) {
+		RETURN_THROWS();
+	}
+
 	if (sxe->iter.type == SXE_ITER_ATTRLIST) {
 		php_error_docref(NULL, E_WARNING, "Cannot add element to attributes");
 		return;
@@ -1806,6 +1827,10 @@ PHP_METHOD(SimpleXMLElement, addAttribute)
 
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
 	GET_NODE(sxe, node);
+
+	if (sxe_throw_if_document_read_only(sxe)) {
+		RETURN_THROWS();
+	}
 
 	node = php_sxe_get_first_node_non_destructive(sxe, node);
 

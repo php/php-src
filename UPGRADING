@@ -29,6 +29,17 @@ PHP 8.7 UPGRADE NOTES
   . Nested arrays in CURLOPT_POSTFIELDS now throw a TypeError, instead of being
     silently converted to the string "Array".
 
+- DOM:
+  . While DOMXPath or Dom\XPath evaluates an expression with PHP functions
+    registered, the nodes it can reach are read-only: the tree of the
+    evaluated document, the tree of every node a php:function() callback
+    returned, and the detached subtree of the context node or of a node
+    passed to a callback. Modifying such a node throws a DOMException with
+    code DOM_NO_MODIFICATION_ALLOWED_ERR (a warning when strictErrorChecking
+    is disabled), and modifying it through SimpleXML throws an Error.
+    Creating and modifying new nodes and setting document properties such as
+    formatOutput or documentURI are still allowed.
+
 - PDO:
   . PDOStatement::bindColumn() now throws a ValueError when the column name is
     not present in the result set. It previously reported the condition

@@ -1335,6 +1335,7 @@ PHP_LIBXML_API unsigned int php_libxml_increment_node_ptr(php_libxml_node_object
 			ret_refcount = 1;
 			object->node->node = node;
 			object->node->refcount = 1;
+			object->node->read_only_depth = 0;
 			object->node->_private = private_data;
 			node->_private = object->node;
 		}
@@ -1387,6 +1388,7 @@ PHP_LIBXML_API unsigned int php_libxml_increment_doc_ref(php_libxml_node_object 
 		object->document->class_type = PHP_LIBXML_CLASS_UNSET;
 		object->document->handlers = &php_libxml_default_document_handlers;
 		object->document->quirks_mode = PHP_LIBXML_NO_QUIRKS;
+		object->document->read_only_depth = 0;
 	}
 
 	return ret_refcount;
@@ -1425,6 +1427,20 @@ PHP_LIBXML_API unsigned int php_libxml_decrement_doc_ref(php_libxml_node_object 
 	}
 
 	return ret_refcount;
+}
+
+PHP_LIBXML_API bool php_libxml_is_tree_read_only(const php_libxml_ref_obj *document, const xmlNode *node)
+{
+	while (node->parent != NULL) {
+		node = node->parent;
+	}
+
+	if (node->type == XML_DOCUMENT_NODE || node->type == XML_HTML_DOCUMENT_NODE) {
+		return document != NULL && document->read_only_depth > 0;
+	}
+
+	const php_libxml_node_ptr *ptr = node->_private;
+	return ptr != NULL && ptr->read_only_depth > 0;
 }
 
 PHP_LIBXML_API void php_libxml_node_free_resource(xmlNodePtr node)
