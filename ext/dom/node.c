@@ -1533,6 +1533,10 @@ PHP_METHOD(DOMNode, cloneNode)
 		if (clone_document && private_data != NULL) {
 			php_dom_private_data_destroy(private_data);
 		}
+		if (instanceof_function(intern->std.ce, dom_modern_node_class_entry)) {
+			php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+			RETURN_THROWS();
+		}
 		RETURN_FALSE;
 	}
 
@@ -2691,14 +2695,14 @@ PHP_METHOD(Dom_Node, compareDocumentPosition)
 
 PHP_METHOD(Dom_Node, __construct)
 {
-	zend_throw_error(NULL, "Cannot directly construct %s, use document methods instead", ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
+	zend_throw_error(NULL, "Cannot directly construct %pS, use document methods instead", Z_OBJCE_P(ZEND_THIS)->name);
 }
 
 PHP_METHOD(DOMNode, __sleep)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	zend_throw_exception_ex(NULL, 0, "Serialization of '%s' is not allowed, unless serialization methods are implemented in a subclass", ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
+	zend_throw_exception_ex(NULL, 0, "Serialization of '%pS' is not allowed, unless serialization methods are implemented in a subclass", Z_OBJCE_P(ZEND_THIS)->name);
 	RETURN_THROWS();
 }
 
@@ -2706,7 +2710,7 @@ PHP_METHOD(DOMNode, __wakeup)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	zend_throw_exception_ex(NULL, 0, "Unserialization of '%s' is not allowed, unless unserialization methods are implemented in a subclass", ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
+	zend_throw_exception_ex(NULL, 0, "Unserialization of '%pS' is not allowed, unless unserialization methods are implemented in a subclass", Z_OBJCE_P(ZEND_THIS)->name);
 	RETURN_THROWS();
 }
 

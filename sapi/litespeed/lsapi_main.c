@@ -1690,6 +1690,10 @@ PHP_FUNCTION(litespeed_response_headers)
     if (!zend_llist_count(&SG(sapi_headers).headers)) {
 	    RETURN_FALSE;
     }
+
+    if (!&SG(sapi_headers).headers) {
+        RETURN_FALSE;
+    }
     array_init(return_value);
 
     h = zend_llist_get_first_ex(&SG(sapi_headers).headers, &pos);

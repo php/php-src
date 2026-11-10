@@ -3206,6 +3206,7 @@ static void zend_jit_setup_disasm(void)
 	REGISTER_HELPER(zend_jit_fetch_dim_isset_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_rw_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_w_helper);
+	REGISTER_HELPER(zend_jit_assign_dim_fetch_w_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_str_offset_r_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_str_r_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_str_is_helper);
@@ -3696,6 +3697,11 @@ static void _zend_jit_fix_merges(zend_jit_ctx *jit)
 				if (k != n) {
 					ir_ref n2, k2;
 
+					/* BEGIN reads op2 as a label, so clear the vacated inputs */
+					while (r != q) {
+						*r = IR_UNUSED;
+						r++;
+					}
 					if (k <= 1) {
 						insn->op = IR_BEGIN;
 						insn->inputs_count = 0;
@@ -12559,7 +12565,11 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 				ir_END_list(*end_inputs);
 				break;
 			case BP_VAR_W:
-				ref = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_fetch_dim_w_helper), ht_ref, ref);
+				if (opline->opcode == ZEND_ASSIGN_DIM && ((opline+1)->op1_type & (IS_VAR|IS_TMP_VAR))) {
+					ref = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_assign_dim_fetch_w_helper), ht_ref, ref);
+				} else {
+					ref = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_fetch_dim_w_helper), ht_ref, ref);
+				}
 				if_found = ir_IF(ref);
 				ir_IF_TRUE(if_found);
 				ir_refs_add(found_inputs, ir_END());
@@ -13506,6 +13516,7 @@ static int zend_jit_assign_dim(zend_jit_ctx  *jit,
 			// JIT: zend_throw_error(NULL, "Cannot add element to the array as the next element is already occupied");
 			jit_SET_EX_OPLINE(jit, opline);
 			ir_CALL(IR_VOID, jit_STUB_FUNC_ADDR(jit, jit_stub_cannot_add_element, IR_FASTCALL_FUNC));
+			jit_FREE_OP(jit, (opline+1)->op1_type, (opline+1)->op1, val_info, NULL);
 
 			ir_END_list(end_inputs);
 
@@ -17882,6 +17893,7 @@ static bool zend_jit_may_be_in_reg(const zend_op_array *op_array, zend_ssa *ssa,
 		zend_basic_block *bb;
 		zend_ssa_phi *p;
 		bool ret = true;
+		bool def_is_pi = false;
 		zend_worklist worklist;
 		ALLOCA_FLAG(use_heap)
 
@@ -17891,6 +17903,7 @@ static bool zend_jit_may_be_in_reg(const zend_op_array *op_array, zend_ssa *ssa,
 		} else {
 			ZEND_ASSERT(ssa->vars[var].definition_phi);
 			def_block = ssa->vars[var].definition_phi->block;
+			def_is_pi = ssa->vars[var].definition_phi->pi >= 0;
 		}
 
 		ZEND_WORKLIST_ALLOCA(&worklist, ssa->cfg.blocks_count, use_heap);
@@ -17908,9 +17921,14 @@ static bool zend_jit_may_be_in_reg(const zend_op_array *op_array, zend_ssa *ssa,
 
 		p = ssa->vars[var].phi_use_chain;
 		while (p) {
-			use_block = p->block;
-			if (use_block != def_block) {
-				bb = &ssa->cfg.blocks[use_block];
+			bb = &ssa->cfg.blocks[p->block];
+			if (p->pi >= 0) {
+				/* A Pi uses the value on the single edge from its "pi" block */
+				if (p->pi != def_block) {
+					zend_worklist_push(&worklist, p->pi);
+				}
+			} else if (p->block != def_block || !def_is_pi) {
+				/* Live to the end of the predecessor; a same-block Pi is zero-length */
 				for (j = 0; j < bb->predecessors_count; j++) {
 					if (p->sources[j] == var) {
 						use_block = ssa->cfg.predecessors[bb->predecessor_offset + j];

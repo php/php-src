@@ -2,6 +2,12 @@
 mb_strcut() doesn't reach hard limit - encodings without a length table
 --EXTENSIONS--
 mbstring
+--SKIPIF--
+<?php
+if (getenv('GITHUB_ACTIONS') && str_starts_with(php_uname('m'), 'ppc')) {
+    die('skip Too slow on GitHub Actions PPC runner');
+}
+?>
 --INI--
 memory_limit=8M
 memory_hard_limit_percent=125

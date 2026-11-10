@@ -39,8 +39,8 @@
  */
 
 #if (defined(URI_PASS_ANSI) && !defined(URI_NORMALIZE_H_ANSI)) \
-    || (defined(URI_PASS_UNICODE) && !defined(URI_NORMALIZE_H_UNICODE)) \
-    || (!defined(URI_PASS_ANSI) && !defined(URI_PASS_UNICODE))
+        || (defined(URI_PASS_UNICODE) && !defined(URI_NORMALIZE_H_UNICODE)) \
+        || (!defined(URI_PASS_ANSI) && !defined(URI_PASS_UNICODE))
 /* What encodings are enabled? */
 #  include <uriparser/UriDefsConfig.h>
 #  if (!defined(URI_PASS_ANSI) && !defined(URI_PASS_UNICODE))
@@ -57,9 +57,9 @@
 #    endif
 /* Only one pass for each encoding */
 #  elif (defined(URI_PASS_ANSI) && !defined(URI_NORMALIZE_H_ANSI) \
-         && defined(URI_ENABLE_ANSI)) \
-      || (defined(URI_PASS_UNICODE) && !defined(URI_NORMALIZE_H_UNICODE) \
-          && defined(URI_ENABLE_UNICODE))
+          && defined(URI_ENABLE_ANSI)) \
+          || (defined(URI_PASS_UNICODE) && !defined(URI_NORMALIZE_H_UNICODE) \
+                  && defined(URI_ENABLE_UNICODE))
 #    ifdef URI_PASS_ANSI
 #      define URI_NORMALIZE_H_ANSI 1
 #      include <uriparser/UriDefsAnsi.h>
@@ -68,8 +68,8 @@
 #      include <uriparser/UriDefsUnicode.h>
 #    endif
 
-void URI_FUNC(PreventLeakage)(URI_TYPE(Uri) * uri, unsigned int revertMask,
-                              UriMemoryManager * memory);
+void URI_FUNC(PreventLeakage)(
+        URI_TYPE(Uri) * uri, unsigned int revertMask, UriMemoryManager * memory);
 
 #  endif
 #endif

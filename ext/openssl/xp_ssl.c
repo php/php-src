@@ -1772,8 +1772,6 @@ static unsigned int php_openssl_psk_client_cb(SSL *ssl, const char *hint,
 		unsigned char *psk_out, unsigned int max_psk_len)
 {
 	(void)hint; /* identity hint deliberately not exposed as it is useless */
-	(void)max_identity_len;
-	(void)max_psk_len;
 
 	php_stream *stream = (php_stream *)SSL_get_ex_data(ssl,
 			php_openssl_get_ssl_stream_data_index());
@@ -1812,6 +1810,18 @@ static unsigned int php_openssl_psk_client_cb(SSL *ssl, const char *hint,
 		return 0;
 	}
 
+	/* Returned lengths are untrusted, so bound them to the buffers. */
+	if (ZSTR_LEN(identity_str) >= max_identity_len) {
+		zend_value_error("PSK identity must be shorter than %u bytes", max_identity_len);
+		zval_ptr_dtor(&result);
+		return 0;
+	}
+	if (ZSTR_LEN(psk_str) > max_psk_len) {
+		zend_value_error("PSK key must not exceed %u bytes", max_psk_len);
+		zval_ptr_dtor(&result);
+		return 0;
+	}
+
 	memcpy(identity_out, ZSTR_VAL(identity_str), ZSTR_LEN(identity_str));
 	identity_out[ZSTR_LEN(identity_str)] = '\0';
 	memcpy(psk_out, ZSTR_VAL(psk_str), ZSTR_LEN(psk_str));
@@ -1824,8 +1834,6 @@ static unsigned int php_openssl_psk_client_cb(SSL *ssl, const char *hint,
 static unsigned int php_openssl_psk_server_cb(SSL *ssl, const char *identity,
 		unsigned char *psk_out, unsigned int max_psk_len)
 {
-	(void)max_psk_len;
-
 	php_stream *stream = (php_stream *)SSL_get_ex_data(ssl,
 			php_openssl_get_ssl_stream_data_index());
 	if (stream == NULL) {
@@ -1861,6 +1869,13 @@ static unsigned int php_openssl_psk_server_cb(SSL *ssl, const char *identity,
 
 	zend_string *psk_str = php_openssl_psk_get_psk(&result);
 	if (psk_str == NULL) {
+		zval_ptr_dtor(&result);
+		return 0;
+	}
+
+	/* Returned length is untrusted, so bound it to the buffer. */
+	if (ZSTR_LEN(psk_str) > max_psk_len) {
+		zend_value_error("PSK key must not exceed %u bytes", max_psk_len);
 		zval_ptr_dtor(&result);
 		return 0;
 	}
@@ -1927,6 +1942,14 @@ static int php_openssl_psk_use_session_cb(SSL *ssl, const EVP_MD *md,
 			/* Could not satisfy the server's chosen digest */
 			return 1;
 		}
+		return 0;
+	}
+
+	/* Returned length is untrusted, so bound it to the buffer. */
+	if (ZSTR_LEN(identity_str) > PHP_OPENSSL_PSK_MAX_IDENTITY_LEN) {
+		zend_value_error("PSK identity must not exceed %d bytes", PHP_OPENSSL_PSK_MAX_IDENTITY_LEN);
+		SSL_SESSION_free(session);
+		zval_ptr_dtor(&result);
 		return 0;
 	}
 
@@ -2243,7 +2266,7 @@ static SSL_SESSION *php_openssl_session_get_cb(SSL *ssl, const unsigned char *se
 			SSL_SESSION_up_ref(obj->session);
 			session = obj->session;
 		}
-	} else if (Z_TYPE(retval) != IS_NULL) {
+	} else if (!Z_ISUNDEF(retval) && Z_TYPE(retval) != IS_NULL) {
 		zend_type_error("session_get_cb return type must be null or Openssl\\Session");
 	}
 
@@ -2774,6 +2797,14 @@ static zend_result php_openssl_setup_crypto(php_stream *stream,
 			php_stream_warn(stream, SslNotSupported, "Supplied SSL session stream is not set up");
 		} else if (sslsock->is_client && parent_sslsock->ssl_handle == NULL) {
 			php_stream_warn(stream, SslNotSupported, "Supplied SSL session stream is not initialized");
+		} else if (php_stream_is_persistent(stream) &&
+			  (parent_sslsock->session_callbacks
+			   || parent_sslsock->psk_callbacks
+#if defined(HAVE_TLS13)
+			   || parent_sslsock->early_data_callbacks
+#endif
+			  )) {
+			php_stream_warn(stream, PersistentNotSupported, "Supplied SSL session stream with callbacks is not supported for persistent streams");
 		} else {
 			SSL_CTX_up_ref(parent_sslsock->ctx);
 			sslsock->ctx = parent_sslsock->ctx;
@@ -3376,6 +3407,10 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle) /* {{{
 			sslsock->ssl_handle = NULL;
 		}
 		if (sslsock->ctx) {
+			/* Clear the ctx stream pointer as the ctx may outlive this stream. */
+			if (SSL_CTX_get_ex_data(sslsock->ctx, php_openssl_get_ctx_stream_data_index()) == stream) {
+				SSL_CTX_set_ex_data(sslsock->ctx, php_openssl_get_ctx_stream_data_index(), NULL);
+			}
 			SSL_CTX_free(sslsock->ctx);
 			sslsock->ctx = NULL;
 		}

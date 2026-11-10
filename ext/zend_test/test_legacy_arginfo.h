@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: 55c444ca86bbbd773e43ddb6bd470efb371c45a4
+ * Stub hash: be2d9755fd91c7405f05a71f2310ffe70e3f0c5c
  * Has decl header: yes */
 
 #include "zend_constants.h"
@@ -201,6 +201,11 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_object_init_with_constructor, 0, 0, 1)
 	ZEND_ARG_INFO(0, class)
 	ZEND_ARG_VARIADIC_INFO(0, args)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_object_init_with_constructor_array, 0, 0, 2)
+	ZEND_ARG_INFO(0, class)
+	ZEND_ARG_INFO(0, args)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_call_method_if_exists, 0, 0, 2)
@@ -455,6 +460,7 @@ static ZEND_FUNCTION(zend_test_attribute_with_named_argument);
 static ZEND_FUNCTION(zend_get_current_func_name);
 static ZEND_FUNCTION(zend_call_method);
 static ZEND_FUNCTION(zend_object_init_with_constructor);
+static ZEND_FUNCTION(zend_object_init_with_constructor_array);
 static ZEND_FUNCTION(zend_call_method_if_exists);
 static ZEND_FUNCTION(zend_test_call_with_consumed_args);
 static ZEND_FUNCTION(zend_test_refcount);
@@ -611,6 +617,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_get_current_func_name, arginfo_zend_get_current_func_name)
 	ZEND_FE(zend_call_method, arginfo_zend_call_method)
 	ZEND_FE(zend_object_init_with_constructor, arginfo_zend_object_init_with_constructor)
+	ZEND_FE(zend_object_init_with_constructor_array, arginfo_zend_object_init_with_constructor_array)
 	ZEND_FE(zend_call_method_if_exists, arginfo_zend_call_method_if_exists)
 	ZEND_FE(zend_test_call_with_consumed_args, arginfo_zend_test_call_with_consumed_args)
 	ZEND_FE(zend_test_refcount, arginfo_zend_test_refcount)

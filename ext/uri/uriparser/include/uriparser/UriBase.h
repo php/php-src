@@ -52,7 +52,7 @@
 /* Version */
 #  define URI_VER_MAJOR 1
 #  define URI_VER_MINOR 0
-#  define URI_VER_RELEASE 2
+#  define URI_VER_RELEASE 3
 #  define URI_VER_SUFFIX_ANSI ""
 #  define URI_VER_SUFFIX_UNICODE URI_ANSI_TO_UNICODE(URI_VER_SUFFIX_ANSI)
 
@@ -71,11 +71,11 @@
 
 /* Full version strings */
 #  define URI_VER_ANSI \
-      URI_VER_ANSI_HELPER(URI_VER_MAJOR, URI_VER_MINOR, URI_VER_RELEASE, \
-                          URI_VER_SUFFIX_ANSI)
+      URI_VER_ANSI_HELPER( \
+              URI_VER_MAJOR, URI_VER_MINOR, URI_VER_RELEASE, URI_VER_SUFFIX_ANSI)
 #  define URI_VER_UNICODE \
-      URI_VER_UNICODE_HELPER(URI_VER_MAJOR, URI_VER_MINOR, URI_VER_RELEASE, \
-                             URI_VER_SUFFIX_UNICODE)
+      URI_VER_UNICODE_HELPER( \
+              URI_VER_MAJOR, URI_VER_MINOR, URI_VER_RELEASE, URI_VER_SUFFIX_UNICODE)
 
 /* Unused parameter macro */
 #  ifdef __GNUC__
@@ -200,8 +200,8 @@ typedef void * (*UriFuncRealloc)(struct UriMemoryManagerStruct *, void *, size_t
  *
  * @since 0.9.0
  */
-typedef void * (*UriFuncReallocarray)(struct UriMemoryManagerStruct *, void *, size_t,
-                                      size_t);
+typedef void * (*UriFuncReallocarray)(
+        struct UriMemoryManagerStruct *, void *, size_t, size_t);
 
 /**
  * Function signature that custom free(3) functions must conform to
@@ -227,8 +227,8 @@ typedef struct UriMemoryManagerStruct {
     UriFuncReallocarray reallocarray; /**< Pointer to custom reallocarray(3); to emulate
                                          using realloc see uriEmulateReallocarray */
     UriFuncFree free; /**< Pointer to custom free(3) */
-    void *
-        userData; /**< Pointer to data that the other function members need access to */
+    void * userData; /**< Pointer to data that the other function members need access to
+                      */
 } UriMemoryManager; /**< @copydoc UriMemoryManagerStruct */
 
 /**
@@ -240,7 +240,7 @@ typedef enum UriBreakConversionEnum {
     URI_BR_TO_CR, /**< Convert to Macintosh line breaks ("\\x0d") */
     URI_BR_TO_UNIX = URI_BR_TO_LF, /**< @copydoc UriBreakConversionEnum::URI_BR_TO_LF */
     URI_BR_TO_WINDOWS =
-        URI_BR_TO_CRLF, /**< @copydoc UriBreakConversionEnum::URI_BR_TO_CRLF */
+            URI_BR_TO_CRLF, /**< @copydoc UriBreakConversionEnum::URI_BR_TO_CRLF */
     URI_BR_TO_MAC = URI_BR_TO_CR, /**< @copydoc UriBreakConversionEnum::URI_BR_TO_CR */
     URI_BR_DONT_TOUCH /**< Copy line breaks unmodified */
 } UriBreakConversion; /**< @copydoc UriBreakConversionEnum */
@@ -251,15 +251,15 @@ typedef enum UriBreakConversionEnum {
 typedef enum UriNormalizationMaskEnum {
     URI_NORMALIZED = 0, /**< Do not normalize anything */
     URI_NORMALIZE_SCHEME = 1 << 0, /**< Normalize scheme (fix uppercase letters) */
-    URI_NORMALIZE_USER_INFO =
-        1 << 1, /**< Normalize user info (fix uppercase percent-encodings) */
+    URI_NORMALIZE_USER_INFO = 1
+            << 1, /**< Normalize user info (fix uppercase percent-encodings) */
     URI_NORMALIZE_HOST = 1 << 2, /**< Normalize host (fix uppercase letters) */
     URI_NORMALIZE_PATH = 1 << 3, /**< Normalize path (fix uppercase percent-encodings and
                                     redundant dot segments) */
-    URI_NORMALIZE_QUERY =
-        1 << 4, /**< Normalize query (fix uppercase percent-encodings) */
-    URI_NORMALIZE_FRAGMENT =
-        1 << 5, /**< Normalize fragment (fix uppercase percent-encodings) */
+    URI_NORMALIZE_QUERY = 1
+            << 4, /**< Normalize query (fix uppercase percent-encodings) */
+    URI_NORMALIZE_FRAGMENT = 1
+            << 5, /**< Normalize fragment (fix uppercase percent-encodings) */
     URI_NORMALIZE_PORT = 1 << 6 /**< Normalize port (drop leading zeros) @since 0.9.9 */
 } UriNormalizationMask; /**< @copydoc UriNormalizationMaskEnum */
 
@@ -268,8 +268,8 @@ typedef enum UriNormalizationMaskEnum {
  */
 typedef enum UriResolutionOptionsEnum {
     URI_RESOLVE_STRICTLY = 0, /**< Full RFC conformance */
-    URI_RESOLVE_IDENTICAL_SCHEME_COMPAT =
-        1 << 0 /**< Treat %URI to resolve with identical scheme as having no scheme */
+    URI_RESOLVE_IDENTICAL_SCHEME_COMPAT = 1
+            << 0 /**< Treat %URI to resolve with identical scheme as having no scheme */
 } UriResolutionOptions; /**< @copydoc UriResolutionOptionsEnum */
 
 /**
@@ -307,8 +307,8 @@ typedef enum UriResolutionOptionsEnum {
  * @see UriMemoryManager
  * @since 0.9.0
  */
-URI_PUBLIC int uriCompleteMemoryManager(UriMemoryManager * memory,
-                                        UriMemoryManager * backend);
+URI_PUBLIC int uriCompleteMemoryManager(
+        UriMemoryManager * memory, UriMemoryManager * backend);
 
 /**
  * Offers emulation of calloc(3) based on memory-&gt;malloc and memset.
@@ -341,8 +341,8 @@ URI_PUBLIC void * uriEmulateCalloc(UriMemoryManager * memory, size_t nmemb, size
  * @see UriMemoryManager
  * @since 0.9.0
  */
-URI_PUBLIC void * uriEmulateReallocarray(UriMemoryManager * memory, void * ptr,
-                                         size_t nmemb, size_t size);
+URI_PUBLIC void * uriEmulateReallocarray(
+        UriMemoryManager * memory, void * ptr, size_t nmemb, size_t size);
 
 /**
  * Run multiple tests against a given memory manager.
@@ -396,7 +396,7 @@ URI_PUBLIC int uriTestMemoryManager(UriMemoryManager * memory);
  * @see uriTestMemoryManager
  * @since 1.0.0
  */
-URI_PUBLIC int uriTestMemoryManagerEx(UriMemoryManager * memory,
-                                      UriBool challengeAlignment);
+URI_PUBLIC int uriTestMemoryManagerEx(
+        UriMemoryManager * memory, UriBool challengeAlignment);
 
 #endif /* URI_BASE_H */
