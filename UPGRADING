@@ -81,6 +81,14 @@ PHP 8.7 UPGRADE NOTES
     same processor is already transforming, for example from a php:function()
     callback or from a suspended Fiber. Use a separate XSLTProcessor instance
     instead.
+  . While XSLTProcessor transforms a document, the tree of that document, the
+    tree of every node a php:function() callback returned, and the detached
+    subtree of the current node or of a node passed to a callback are
+    read-only. Modifying such a node, for example from a callback or an entity
+    loader, throws a DOMException with code DOM_NO_MODIFICATION_ALLOWED_ERR (a
+    warning when strictErrorChecking is disabled), and modifying it through
+    SimpleXML throws an Error. Set XSLTProcessor::$cloneDocument to true to
+    transform a copy and keep the original document modifiable.
 
 ========================================
 2. New Features

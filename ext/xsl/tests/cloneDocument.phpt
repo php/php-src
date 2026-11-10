@@ -11,7 +11,11 @@ $xml->loadXML('<?xml version="1.0"?><root><foo>hello</foo></root>');
 
 function test() {
     global $xml;
-    $xml->documentElement->firstChild->textContent = "bye";
+    try {
+        $xml->documentElement->firstChild->textContent = "bye";
+    } catch (DOMException $e) {
+        echo $e->getMessage(), "\n";
+    }
 }
 
 $xsl = new DOMDocument;
@@ -41,5 +45,6 @@ echo $xslt->transformToXml($xml);
 --EXPECT--
 <?xml version="1.0"?>
 hello
+Cannot modify a node while an XPath evaluation or XSLT transformation that uses it is in progress
 <?xml version="1.0"?>
 bye

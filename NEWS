@@ -212,6 +212,9 @@ PHP                                                                        NEWS
 - XSL:
   . Fixed a use-after-free when a transformation was started on a processor
     that is already transforming. (Ilia Alshanetsky)
+  . Fixed use-after-free when a php:function() callback or an entity loader
+    modifies the document being transformed; such modifications now throw a
+    DOMException or Error. (Ilia Alshanetsky)
 
 - Zlib:
   . Fixed inflate_init() dropping the preset dictionary for raw streams with
