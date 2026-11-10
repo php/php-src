@@ -12292,6 +12292,7 @@ static void zend_compile_const_expr_fcc(zend_ast **ast_ptr)
 
 	if (!is_fcc) {
 		fcc->filename = zend_string_copy(CG(active_op_array)->filename);
+		/* Not unique by content, but its address is a cache key until persisted */
 		fcc->name = zend_compile_partial_name(CG(active_op_array), fcc->lineno);
 	}
 

@@ -1361,8 +1361,8 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 			if (uses_variadic_placeholder) {
 				flags |= ZEND_PARTIAL_USES_VARIADIC_PLACEHOLDER;
 			}
-			/* The cached PFA keeps a non-interned name alive, unlike a non-persistent AST */
-			const uint32_t *cache_key = ZSTR_IS_INTERNED(fcc_ast->name)
+			/* A non-SHM AST may be freed, but the cached PFA keeps its name alive */
+			const uint32_t *cache_key = (flags & ZEND_PARTIAL_CACHEABLE_IN_SHM)
 				? &ast->lineno : (const uint32_t *) fcc_ast->name;
 			zend_partial_create(result, scope, &frame->This, fptr,
 					ZEND_CALL_NUM_ARGS(frame), ZEND_CALL_ARG(frame, 1),

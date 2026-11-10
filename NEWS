@@ -26,8 +26,9 @@ PHP                                                                        NEWS
   . Fixed use-after-free when the error handler releases a string while an
     "Illegal string offset" warning is raised for its offset in a read, ?? or
     nested isset()/empty(). (Jorg Sowa)
-  . Fixed partial function applications in eval'd code or class constants
-    reusing a stale cached function with wrong bound arguments. (Jorg Sowa)
+  . Fixed partial function applications in eval'd or included code, or in
+    class constants, reusing a stale cached function with wrong bound
+    arguments. (Jorg Sowa)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
