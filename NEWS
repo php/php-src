@@ -31,6 +31,8 @@ PHP                                                                        NEWS
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
 
 - Fileinfo:
+  . Fixed bug GH-25051 (TrueType fonts detected as application/octet-stream
+    since libmagic 5.48). (Weilin Du)
   . Fixed incorrect MIME type detection for HWPX files. (Weilin Du)
 
 - MBString:
