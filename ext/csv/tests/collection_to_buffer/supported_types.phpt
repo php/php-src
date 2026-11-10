@@ -11,7 +11,7 @@ enum Suit: string { case Hearts = 'H'; }
 enum Pure { case Foo; }
 
 class ThrowingStringable {
-    public function __toString(): string { throw new RuntimeException('__toString() failed'); }
+    public function __toString(): string { throw new RuntimeException('__toString() must not be called'); }
 }
 
 $collection = [
@@ -55,9 +55,9 @@ b,2,0.30000000000000004,0,1,x,H
 string(47) "a,1,1.5,1,0,,H
 b,2,0.30000000000000004,0,1,x,H
 "
-TypeError: Field 0 of element 1 of the collection must be of type null|bool|int|float|string|BackedEnum or an object convertible to string, Pure given
-TypeError: Field 0 of element 1 of the collection must be of type null|bool|int|float|string|BackedEnum or an object convertible to string, Pure given
-TypeError: Field "name" of element 1 of the collection must be of type null|bool|int|float|string|BackedEnum or an object convertible to string, resource given
-TypeError: Field "name" of element 1 of the collection must be of type null|bool|int|float|string|BackedEnum or an object convertible to string, resource given
-RuntimeException: __toString() failed
-RuntimeException: __toString() failed
+TypeError: Field 0 of element 1 of the collection must be of type null|bool|int|float|string|BackedEnum, Pure given
+TypeError: Field 0 of element 1 of the collection must be of type null|bool|int|float|string|BackedEnum, Pure given
+TypeError: Field "name" of element 1 of the collection must be of type null|bool|int|float|string|BackedEnum, resource given
+TypeError: Field "name" of element 1 of the collection must be of type null|bool|int|float|string|BackedEnum, resource given
+TypeError: Field 0 of element 1 of the collection must be of type null|bool|int|float|string|BackedEnum, ThrowingStringable given
+TypeError: Field 0 of element 1 of the collection must be of type null|bool|int|float|string|BackedEnum, ThrowingStringable given

@@ -59,5 +59,5 @@ try {
 
 ?>
 --EXPECT--
-TypeError: Field 1 of element 1 of the collection must be of type null|bool|int|float|string|BackedEnum or an object convertible to string, array given
-TypeError: Field 1 of element 1 of the collection must be of type null|bool|int|float|string|BackedEnum or an object convertible to string, stdClass given
+TypeError: Field 1 of element 1 of the collection must be of type null|bool|int|float|string|BackedEnum, array given
+TypeError: Field 1 of element 1 of the collection must be of type null|bool|int|float|string|BackedEnum, stdClass given

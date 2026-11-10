@@ -392,7 +392,7 @@ static ZEND_COLD void csv_throw_unsupported_field_type(
 	}
 	smart_str_0(&field_name);
 
-	zend_type_error("%s must be of type null|bool|int|float|string|BackedEnum or an object convertible to string, %s given",
+	zend_type_error("%s must be of type null|bool|int|float|string|BackedEnum, %s given",
 		ZSTR_VAL(field_name.s), zend_zval_value_name(field));
 	smart_str_free(&field_name);
 }
@@ -405,8 +405,8 @@ static ZEND_COLD void csv_throw_unsupported_field_type(
  * - int: decimal representation
  * - float: shortest round-trippable representation (serialize_precision), like json_encode()
  * - backed enum: backing value, converted as an int or a string
- * - object convertible to string (Stringable, or an internal class with a string cast such as GMP)
- * Any other value (array, resource, pure enum, other object) throws a TypeError.
+ * Any other value (array, resource, pure enum, any other object, including Stringable ones) throws
+ * a TypeError: objects are not implicitly converted with __toString() or a cast handler.
  *
  * Returns a string the caller must release, or a NULL pointer with an exception thrown.
  */
@@ -442,16 +442,6 @@ static zend_string* csv_field_to_string(
 				}
 				ZEND_ASSERT(Z_TYPE_P(value) == IS_STRING);
 				return zend_string_copy(Z_STR_P(value));
-			}
-			/* Any object the engine can convert to string: Stringable classes, and internal
-			 * classes with a string cast handler but no __toString() (e.g. GMP). */
-			zval tmp;
-			if (Z_OBJ_HT_P(field)->cast_object(Z_OBJ_P(field), &tmp, IS_STRING) == SUCCESS) {
-				return Z_STR(tmp);
-			}
-			if (UNEXPECTED(EG(exception))) {
-				/* __toString() threw */
-				return NULL;
 			}
 			break;
 		}
@@ -937,14 +927,8 @@ PHP_FUNCTION(Csv_collection_to_buffer)
 		nb_fields = new_nb_fields;
 		collection_index++;
 
-		/* Hold a reference to the row while formatting it: converting a field to string can run
-		 * userland code (__toString()) that resumes a generator or overwrites the element of the
-		 * collection, which would otherwise free the row while it is being iterated. */
-		zval row;
-		ZVAL_COPY(&row, fields);
-		zend_string *result = hashtable_to_rfc4180_string(Z_ARRVAL(row), delimiter, enclosure, eol_sequence,
+		zend_string *result = hashtable_to_rfc4180_string(Z_ARRVAL_P(fields), delimiter, enclosure, eol_sequence,
 			collection_index - 1);
-		zval_ptr_dtor(&row);
 		if (UNEXPECTED(result == NULL)) {
 			has_errors = true;
 			break;
@@ -1051,14 +1035,8 @@ PHP_FUNCTION(Csv_collection_to_file)
 		nb_fields = new_nb_fields;
 		collection_index++;
 
-		/* Hold a reference to the row while formatting it: converting a field to string can run
-		 * userland code (__toString()) that resumes a generator or overwrites the element of the
-		 * collection, which would otherwise free the row while it is being iterated. */
-		zval row;
-		ZVAL_COPY(&row, fields);
-		zend_string *result = hashtable_to_rfc4180_string(Z_ARRVAL(row), delimiter, enclosure, eol_sequence,
+		zend_string *result = hashtable_to_rfc4180_string(Z_ARRVAL_P(fields), delimiter, enclosure, eol_sequence,
 			collection_index - 1);
-		zval_ptr_dtor(&row);
 		if (UNEXPECTED(result == NULL)) {
 			has_errors = true;
 			break;

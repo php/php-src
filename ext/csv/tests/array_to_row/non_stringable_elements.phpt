@@ -39,5 +39,5 @@ try {
 
 ?>
 --EXPECT--
-TypeError: Field 2 must be of type null|bool|int|float|string|BackedEnum or an object convertible to string, array given
-TypeError: Field 2 must be of type null|bool|int|float|string|BackedEnum or an object convertible to string, stdClass given
+TypeError: Field 2 must be of type null|bool|int|float|string|BackedEnum, array given
+TypeError: Field 2 must be of type null|bool|int|float|string|BackedEnum, stdClass given

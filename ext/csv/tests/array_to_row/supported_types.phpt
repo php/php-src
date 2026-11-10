@@ -36,8 +36,6 @@ $supported = [
     'string backed enum' => Suit::Hearts,
     'string backed enum needing enclosure' => Suit::Spades,
     'int backed enum' => Level::High,
-    'Stringable' => new Name(),
-    'implicit Stringable' => new ImplicitStringable(),
     'reference' => &$string,
 ];
 
@@ -52,6 +50,8 @@ $unsupported = [
     'resource' => fopen('php://memory', 'r'),
     'pure enum' => Pure::Foo,
     'object' => new stdClass(),
+    'Stringable' => new Name(),
+    'implicit Stringable' => new ImplicitStringable(),
     'closure' => fn () => 1,
 ];
 
@@ -95,15 +95,13 @@ string backed enum needing enclosure    '"S, or ""spades"""
 '
 int backed enum                         '3
 '
-Stringable                              '"Name, as string"
-'
-implicit Stringable                     'implicit
-'
 reference                               'ref
 '
 
-array                                   Field "key" must be of type null|bool|int|float|string|BackedEnum or an object convertible to string, array given
-resource                                Field "key" must be of type null|bool|int|float|string|BackedEnum or an object convertible to string, resource given
-pure enum                               Field "key" must be of type null|bool|int|float|string|BackedEnum or an object convertible to string, Pure given
-object                                  Field "key" must be of type null|bool|int|float|string|BackedEnum or an object convertible to string, stdClass given
-closure                                 Field "key" must be of type null|bool|int|float|string|BackedEnum or an object convertible to string, Closure given
+array                                   Field "key" must be of type null|bool|int|float|string|BackedEnum, array given
+resource                                Field "key" must be of type null|bool|int|float|string|BackedEnum, resource given
+pure enum                               Field "key" must be of type null|bool|int|float|string|BackedEnum, Pure given
+object                                  Field "key" must be of type null|bool|int|float|string|BackedEnum, stdClass given
+Stringable                              Field "key" must be of type null|bool|int|float|string|BackedEnum, Name given
+implicit Stringable                     Field "key" must be of type null|bool|int|float|string|BackedEnum, ImplicitStringable given
+closure                                 Field "key" must be of type null|bool|int|float|string|BackedEnum, Closure given
