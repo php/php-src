@@ -20,7 +20,7 @@ $fields = [
 try {
     var_dump(Csv\array_to_row($fields));
 } catch (\Throwable $e) {
-    echo $e::class, $e->getMessage(), \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), \PHP_EOL;
 }
 
 $fields = [
@@ -34,12 +34,10 @@ $fields = [
 try {
     var_dump(Csv\array_to_row($fields));
 } catch (\Throwable $e) {
-    echo $e::class, $e->getMessage(), \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), \PHP_EOL;
 }
 
 ?>
---EXPECTF--
-Warning: Array to string conversion in %s on line %d
-string(80) "Hello,Field has spaces,Array,"Has field escape sequence "" inside field",Basic
-"
-ErrorObject of class stdClass could not be converted to string
+--EXPECT--
+TypeError: Field 2 must be of type null|bool|int|float|string|BackedEnum or an object convertible to string, array given
+TypeError: Field 2 must be of type null|bool|int|float|string|BackedEnum or an object convertible to string, stdClass given

@@ -30,6 +30,7 @@
 #include "zend_smart_str.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
+#include "zend_enum.h"
 
 PHP_MINFO_FUNCTION(csv)
 {
@@ -369,6 +370,99 @@ static bool csv_field_needs_enclosure(
 		&& csv_separator_and_field_may_start_token(delimiter, eol_sequence, field, next_separator);
 }
 
+/* Passed as element_index when the row being formatted is not part of a collection. */
+#define CSV_NO_ELEMENT_INDEX SIZE_MAX
+
+static ZEND_COLD void csv_throw_unsupported_field_type(
+	const zval *field, zend_ulong num_key, const zend_string *str_key, size_t element_index
+) {
+	smart_str field_name = {0};
+	if (str_key) {
+		smart_str_appends(&field_name, "Field \"");
+		smart_str_append(&field_name, str_key);
+		smart_str_appendc(&field_name, '"');
+	} else {
+		smart_str_appends(&field_name, "Field ");
+		smart_str_append_unsigned(&field_name, num_key);
+	}
+	if (element_index != CSV_NO_ELEMENT_INDEX) {
+		smart_str_appends(&field_name, " of element ");
+		smart_str_append_unsigned(&field_name, element_index);
+		smart_str_appends(&field_name, " of the collection");
+	}
+	smart_str_0(&field_name);
+
+	zend_type_error("%s must be of type null|bool|int|float|string|BackedEnum or an object convertible to string, %s given",
+		ZSTR_VAL(field_name.s), zend_zval_value_name(field));
+	smart_str_free(&field_name);
+}
+
+/**
+ * Converts a field to its CSV string representation:
+ * - string: as is
+ * - null: empty string
+ * - bool: "1" or "0"
+ * - int: decimal representation
+ * - float: shortest round-trippable representation (serialize_precision), like json_encode()
+ * - backed enum: backing value, converted as an int or a string
+ * - object convertible to string (Stringable, or an internal class with a string cast such as GMP)
+ * Any other value (array, resource, pure enum, other object) throws a TypeError.
+ *
+ * Returns a string the caller must release, or a NULL pointer with an exception thrown.
+ */
+static zend_string* csv_field_to_string(
+	zval *field, zend_ulong num_key, const zend_string *str_key, size_t element_index
+) {
+	ZVAL_DEREF(field);
+	switch (Z_TYPE_P(field)) {
+		case IS_STRING:
+			return zend_string_copy(Z_STR_P(field));
+		case IS_NULL:
+			return ZSTR_EMPTY_ALLOC();
+		case IS_FALSE:
+			return ZSTR_CHAR('0');
+		case IS_TRUE:
+			return ZSTR_CHAR('1');
+		case IS_LONG:
+			return zend_long_to_str(Z_LVAL_P(field));
+		case IS_DOUBLE: {
+			smart_str str = {0};
+			smart_str_append_double(&str, Z_DVAL_P(field), (int) PG(serialize_precision), false);
+			return smart_str_extract(&str);
+		}
+		case IS_OBJECT: {
+			zend_class_entry *ce = Z_OBJCE_P(field);
+			if (ce->ce_flags & ZEND_ACC_ENUM) {
+				if (ce->enum_backing_type == IS_UNDEF) {
+					break;
+				}
+				zval *value = zend_enum_fetch_case_value(Z_OBJ_P(field));
+				if (Z_TYPE_P(value) == IS_LONG) {
+					return zend_long_to_str(Z_LVAL_P(value));
+				}
+				ZEND_ASSERT(Z_TYPE_P(value) == IS_STRING);
+				return zend_string_copy(Z_STR_P(value));
+			}
+			/* Any object the engine can convert to string: Stringable classes, and internal
+			 * classes with a string cast handler but no __toString() (e.g. GMP). */
+			zval tmp;
+			if (Z_OBJ_HT_P(field)->cast_object(Z_OBJ_P(field), &tmp, IS_STRING) == SUCCESS) {
+				return Z_STR(tmp);
+			}
+			if (UNEXPECTED(EG(exception))) {
+				/* __toString() threw */
+				return NULL;
+			}
+			break;
+		}
+		default:
+			break;
+	}
+
+	csv_throw_unsupported_field_type(field, num_key, str_key, element_index);
+	return NULL;
+}
+
 /**
  * Follows RFC4180 https://tools.ietf.org/html/rfc4180
  * The terminology can be slightly confusing here as what PHP considers the 'enclosure' is what is used
@@ -382,17 +476,19 @@ static zend_string* hashtable_to_rfc4180_string(
 	HashTable *fields,
 	const zend_string *delimiter,
 	const zend_string *enclosure,
-	const zend_string *eol_sequence
+	const zend_string *eol_sequence,
+	size_t element_index
 ) {
 	uint32_t nb_fields;
 	uint32_t fields_iterated = 0;
 	zval *tmp_field_zval;
+	zend_ulong num_key;
+	zend_string *str_key;
 	smart_str row = {0};
 
 	nb_fields = zend_hash_num_elements(fields);
-	ZEND_HASH_FOREACH_VAL(fields, tmp_field_zval) {
-		zend_string *tmp_field_str;
-		zend_string *field_str = zval_try_get_tmp_string(tmp_field_zval, &tmp_field_str);
+	ZEND_HASH_FOREACH_KEY_VAL(fields, num_key, str_key, tmp_field_zval) {
+		zend_string *field_str = csv_field_to_string(tmp_field_zval, num_key, str_key, element_index);
 		if (UNEXPECTED(field_str == NULL)) {
 			smart_str_free(&row);
 			return NULL;
@@ -437,8 +533,7 @@ static zend_string* hashtable_to_rfc4180_string(
 			smart_str_append(&row, delimiter);
 		}
 
-		/* Clear temporary variable */
-		zend_tmp_string_release(tmp_field_str);
+		zend_string_release(field_str);
 	} ZEND_HASH_FOREACH_END();
 	/* Add the EOL sequence to indicate the end of the row. */
 	smart_str_append(&row, eol_sequence);
@@ -785,7 +880,8 @@ PHP_FUNCTION(Csv_array_to_row)
 
 	EOL_SEQUENCE_AND_DELIMITER_AND_ENCLOSURE_CHECKS(2, 3, 4);
 
-	zend_string *result = hashtable_to_rfc4180_string(fields, delimiter, enclosure, eol_sequence);
+	zend_string *result = hashtable_to_rfc4180_string(fields, delimiter, enclosure, eol_sequence,
+		CSV_NO_ELEMENT_INDEX);
 	zend_string_release(eol_sequence);
 	zend_string_release(delimiter);
 	zend_string_release(enclosure);
@@ -846,7 +942,8 @@ PHP_FUNCTION(Csv_collection_to_buffer)
 		 * collection, which would otherwise free the row while it is being iterated. */
 		zval row;
 		ZVAL_COPY(&row, fields);
-		zend_string *result = hashtable_to_rfc4180_string(Z_ARRVAL(row), delimiter, enclosure, eol_sequence);
+		zend_string *result = hashtable_to_rfc4180_string(Z_ARRVAL(row), delimiter, enclosure, eol_sequence,
+			collection_index - 1);
 		zval_ptr_dtor(&row);
 		if (UNEXPECTED(result == NULL)) {
 			has_errors = true;
@@ -959,7 +1056,8 @@ PHP_FUNCTION(Csv_collection_to_file)
 		 * collection, which would otherwise free the row while it is being iterated. */
 		zval row;
 		ZVAL_COPY(&row, fields);
-		zend_string *result = hashtable_to_rfc4180_string(Z_ARRVAL(row), delimiter, enclosure, eol_sequence);
+		zend_string *result = hashtable_to_rfc4180_string(Z_ARRVAL(row), delimiter, enclosure, eol_sequence,
+			collection_index - 1);
 		zval_ptr_dtor(&row);
 		if (UNEXPECTED(result == NULL)) {
 			has_errors = true;

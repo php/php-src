@@ -30,7 +30,7 @@ $collection = [
 try {
     var_dump(Csv\collection_to_buffer($collection));
 } catch (\Throwable $e) {
-    echo $e::class, $e->getMessage(), \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), \PHP_EOL;
 }
 
 $collection = [
@@ -54,14 +54,10 @@ $collection = [
 try {
     var_dump(Csv\collection_to_buffer($collection));
 } catch (\Throwable $e) {
-    echo $e::class, $e->getMessage(), \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), \PHP_EOL;
 }
 
 ?>
---EXPECTF--
-Warning: Array to string conversion in %s on line %d
-string(49) "One,Two,Three
-Four,Array,Six
-Seven,Eight,Nine
-"
-ErrorObject of class stdClass could not be converted to string
+--EXPECT--
+TypeError: Field 1 of element 1 of the collection must be of type null|bool|int|float|string|BackedEnum or an object convertible to string, array given
+TypeError: Field 1 of element 1 of the collection must be of type null|bool|int|float|string|BackedEnum or an object convertible to string, stdClass given
