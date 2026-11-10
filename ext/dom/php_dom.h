@@ -259,6 +259,15 @@ static zend_always_inline void php_dom_mark_cache_tag_up_to_date_from_doc_ref(ph
 	cache_tag->modification_nr = document->cache_tag.modification_nr;
 }
 
+static zend_always_inline bool dom_throw_if_node_read_only(php_libxml_ref_obj *document, const xmlNode *node)
+{
+	if (php_libxml_is_node_read_only(document, node)) {
+		php_dom_throw_read_only_node_error(document);
+		return true;
+	}
+	return false;
+}
+
 static zend_always_inline bool php_dom_follow_spec_node(const xmlNode *node)
 {
 	ZEND_ASSERT(node != NULL);
