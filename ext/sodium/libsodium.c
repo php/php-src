@@ -1570,7 +1570,7 @@ PHP_FUNCTION(sodium_crypto_stream_xchacha20_xor_ic)
 		RETURN_THROWS();
 	}
 	if (key_len != crypto_stream_xchacha20_KEYBYTES) {
-		zend_argument_error(sodium_exception_ce, 3, "must be SODIUM_CRYPTO_STREAM_XCHACHA20_KEYBYTES bytes long");
+		zend_argument_error(sodium_exception_ce, 4, "must be SODIUM_CRYPTO_STREAM_XCHACHA20_KEYBYTES bytes long");
 		RETURN_THROWS();
 	}
 	ciphertext_len = msg_len;
