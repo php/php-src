@@ -283,7 +283,7 @@ static zend_result do_closure_bind(zval *return_value, zval *zclosure, zend_obje
 
 		zend_closure *new_closure = (zend_closure*)Z_OBJ_P(return_value);
 		HashTable *static_variables = ZEND_MAP_PTR_GET(new_closure->func.op_array.static_variables_ptr);
-		ZEND_ASSERT(static_variables->nNumOfElements > 0);
+		ZEND_ASSERT(zend_hash_num_elements(static_variables) > 0);
 		zval *inner = &static_variables->arData[0].val;
 		ZEND_ASSERT(Z_TYPE_P(inner) == IS_OBJECT && Z_OBJCE_P(inner) == zend_ce_closure);
 
