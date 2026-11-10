@@ -3449,8 +3449,8 @@ ZEND_API bool ZEND_FASTCALL zendi_smart_streq(const zend_string *s1, const zend_
 	zend_long lval1 = 0, lval2 = 0;
 	double dval1 = 0.0, dval2 = 0.0;
 
-	if ((ret1 = is_numeric_string_ex(s1->val, s1->len, &lval1, &dval1, false, &oflow1, NULL)) &&
-		(ret2 = is_numeric_string_ex(s2->val, s2->len, &lval2, &dval2, false, &oflow2, NULL))) {
+	if ((ret1 = is_numeric_string_ex(ZSTR_VAL(s1), ZSTR_LEN(s1), &lval1, &dval1, false, &oflow1, NULL)) &&
+		(ret2 = is_numeric_string_ex(ZSTR_VAL(s2), ZSTR_LEN(s2), &lval2, &dval2, false, &oflow2, NULL))) {
 #if ZEND_ULONG_MAX == 0xFFFFFFFF
 		if (oflow1 != 0 && oflow1 == oflow2 && dval1 - dval2 == 0. &&
 			((oflow1 == 1 && dval1 > 9007199254740991. /*0x1FFFFFFFFFFFFF*/)
@@ -3497,8 +3497,8 @@ ZEND_API int ZEND_FASTCALL zendi_smart_strcmp(const zend_string *s1, const zend_
 	zend_long lval1 = 0, lval2 = 0;
 	double dval1 = 0.0, dval2 = 0.0;
 
-	if ((ret1 = is_numeric_string_ex(s1->val, s1->len, &lval1, &dval1, false, &oflow1, NULL)) &&
-		(ret2 = is_numeric_string_ex(s2->val, s2->len, &lval2, &dval2, false, &oflow2, NULL))) {
+	if ((ret1 = is_numeric_string_ex(ZSTR_VAL(s1), ZSTR_LEN(s1), &lval1, &dval1, false, &oflow1, NULL)) &&
+		(ret2 = is_numeric_string_ex(ZSTR_VAL(s2), ZSTR_LEN(s2), &lval2, &dval2, false, &oflow2, NULL))) {
 #if ZEND_ULONG_MAX == 0xFFFFFFFF
 		if (oflow1 != 0 && oflow1 == oflow2 && dval1 - dval2 == 0. &&
 			((oflow1 == 1 && dval1 > 9007199254740991. /*0x1FFFFFFFFFFFFF*/)
@@ -3535,7 +3535,7 @@ ZEND_API int ZEND_FASTCALL zendi_smart_strcmp(const zend_string *s1, const zend_
 	} else {
 		int strcmp_ret;
 string_cmp:
-		strcmp_ret = zend_binary_strcmp(s1->val, s1->len, s2->val, s2->len);
+		strcmp_ret = zend_binary_strcmp(ZSTR_VAL(s1), ZSTR_LEN(s1), ZSTR_VAL(s2), ZSTR_LEN(s2));
 		return ZEND_NORMALIZE_BOOL(strcmp_ret);
 	}
 }
