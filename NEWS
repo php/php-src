@@ -71,6 +71,10 @@ PHP                                                                        NEWS
   . Fix trampoline leak when object construction fails for lazy object.
     (ndossche)
 
+- Standard:
+  . Fixed dns_get_record() returning partially built records for malformed
+    DNS responses. (Marti2203)
+
 - Streams:
   . Fixed bug GH-22063 (Stream filter chain UAF on self-removal during
     callback). (Ilia Alshanetsky)
