@@ -701,7 +701,8 @@ static zend_op_array *zp_compile(zval *this_ptr, zend_function *function,
 		uint32_t argc, zval *argv, zend_array *extra_named_params,
 		const zend_array *named_positions,
 		zend_string *declaring_filename,
-		const uint32_t *declaring_lineno_ptr, void **cache_slot,
+		const uint32_t *declaring_lineno_ptr,
+		const zend_op_array *declaring_op_array, void **cache_slot,
 		zend_string *pfa_name, uint32_t flags, uint32_t const_args) {
 
 	zend_op_array *op_array = NULL;
@@ -1016,7 +1017,8 @@ static zend_op_array *zp_compile(zval *this_ptr, zend_function *function,
 
 	/* Takes ownership of closure_ast */
 	op_array = zend_accel_compile_pfa(closure_ast, declaring_filename,
-			declaring_lineno_ptr, function, pfa_name, flags & ZEND_PARTIAL_CACHEABLE_IN_SHM);
+			declaring_lineno_ptr, declaring_op_array, function, pfa_name,
+			flags & ZEND_PARTIAL_CACHEABLE_IN_SHM);
 
 clean:
 	zp_names_dtor(var_names, argc);
@@ -1040,7 +1042,8 @@ static const zend_op_array *zp_get_op_array(zval *this_ptr, zend_function *funct
 		uint32_t argc, zval *argv, zend_array *extra_named_params,
 		const zend_array *named_positions,
 		zend_string *declaring_filename,
-		const uint32_t *declaring_lineno_ptr, void **cache_slot,
+		const uint32_t *declaring_lineno_ptr,
+		const zend_op_array *declaring_op_array, void **cache_slot,
 		zend_string *pfa_name, uint32_t flags, uint32_t const_args) {
 
 	if (EXPECTED(function->type == ZEND_INTERNAL_FUNCTION
@@ -1056,7 +1059,7 @@ static const zend_op_array *zp_get_op_array(zval *this_ptr, zend_function *funct
 	if (UNEXPECTED(!op_array)) {
 		op_array = zp_compile(this_ptr, function, argc, argv,
 			extra_named_params, named_positions, declaring_filename, declaring_lineno_ptr,
-			cache_slot, pfa_name, flags, const_args);
+			declaring_op_array, cache_slot, pfa_name, flags, const_args);
 	}
 
 	if (EXPECTED(op_array) && !(function->common.fn_flags & ZEND_ACC_NEVER_CACHE)) {
@@ -1135,7 +1138,8 @@ void zend_partial_create(zval *result, zend_class_entry *scope, zval *this_ptr, 
 		uint32_t argc, zval *argv, zend_array *extra_named_params,
 		const zend_array *named_positions,
 		zend_string *declaring_filename,
-		const uint32_t *declaring_lineno_ptr, void **cache_slot,
+		const uint32_t *declaring_lineno_ptr,
+		const zend_op_array *declaring_op_array, void **cache_slot,
 		zend_string *pfa_name, uint32_t flags, uint32_t const_args) {
 
 	ZEND_ASSERT(pfa_name);
@@ -1143,7 +1147,7 @@ void zend_partial_create(zval *result, zend_class_entry *scope, zval *this_ptr, 
 	const zend_op_array *op_array = zp_get_op_array(this_ptr, function, argc, argv,
 			extra_named_params, named_positions,
 			declaring_filename, declaring_lineno_ptr,
-			cache_slot, pfa_name, flags, const_args);
+			declaring_op_array, cache_slot, pfa_name, flags, const_args);
 
 	if (UNEXPECTED(!op_array)) {
 		ZEND_ASSERT(EG(exception));

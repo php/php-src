@@ -1361,10 +1361,13 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 			if (uses_variadic_placeholder) {
 				flags |= ZEND_PARTIAL_USES_VARIADIC_PLACEHOLDER;
 			}
+			/* The cached PFA keeps a non-interned name alive, unlike a non-persistent AST */
+			const uint32_t *cache_key = ZSTR_IS_INTERNED(fcc_ast->name)
+				? &ast->lineno : (const uint32_t *) fcc_ast->name;
 			zend_partial_create(result, scope, &frame->This, fptr,
 					ZEND_CALL_NUM_ARGS(frame), ZEND_CALL_ARG(frame, 1),
 					extra_named_params, named_positions,
-					fcc_ast->filename, &ast->lineno,
+					fcc_ast->filename, cache_key, /* declaring_op_array */ NULL,
 					(void**)cache_slot, fcc_ast->name, flags, /* const_args */ 0);
 
 			if (named_positions) {
