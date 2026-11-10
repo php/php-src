@@ -400,6 +400,7 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 	BG(locale_changed) = 0;
 	BG(user_compare_fci) = empty_fcall_info;
 	BG(user_compare_fci_cache) = empty_fcall_info_cache;
+	BG(user_compare_known_func) = NULL;
 	BG(page_uid) = -1;
 	BG(page_gid) = -1;
 	BG(page_inode) = -1;

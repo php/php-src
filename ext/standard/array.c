@@ -755,6 +755,35 @@ PHP_FUNCTION(ksort)
 }
 /* }}} */
 
+static zend_always_inline zend_function *php_array_get_known_compare_func(const zend_fcall_info_cache *fcc)
+{
+	zend_function *func = fcc->function_handler;
+	if (func && (func->type == ZEND_USER_FUNCTION || func->type == ZEND_INTERNAL_FUNCTION)
+			&& !(func->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_DEPRECATED
+				| ZEND_ACC_GENERATOR))
+			&& !ARG_SHOULD_BE_SENT_BY_REF(func, 1) && !ARG_SHOULD_BE_SENT_BY_REF(func, 2)) {
+		return func;
+	}
+	return NULL;
+}
+
+/* A comparator can replace or clear the shared callback state while comparisons are running, for
+ * example through a nested array_udiff_assoc() call, a failed callable check or a fiber switch.
+ * Use the specialized call only while the cache still holds the previously checked function. */
+static zend_always_inline void php_array_call_user_compare(zval *args, zval *retval)
+{
+	const zend_function *func = BG(user_compare_fci_cache).function_handler;
+	if (EXPECTED(func != NULL && func == BG(user_compare_known_func))) {
+		if (EXPECTED(func->type == ZEND_USER_FUNCTION)) {
+			zend_call_known_user_function_with_2_params(&BG(user_compare_fci_cache), retval, &args[0], &args[1]);
+		} else {
+			zend_call_known_internal_function_with_2_params(&BG(user_compare_fci_cache), retval, &args[0], &args[1]);
+		}
+	} else {
+		zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache));
+	}
+}
+
 static inline int php_array_user_compare_unstable(Bucket *f, Bucket *s) /* {{{ */
 {
 	zval args[2];
@@ -766,7 +795,7 @@ static inline int php_array_user_compare_unstable(Bucket *f, Bucket *s) /* {{{ *
 	BG(user_compare_fci).param_count = 2;
 	BG(user_compare_fci).params = args;
 	BG(user_compare_fci).retval = &retval;
-	zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache));
+	php_array_call_user_compare(args, &retval);
 
 	if (UNEXPECTED(Z_TYPE(retval) == IS_FALSE || Z_TYPE(retval) == IS_TRUE)) {
 		if (!ARRAYG(compare_deprecation_thrown)) {
@@ -780,7 +809,7 @@ static inline int php_array_user_compare_unstable(Bucket *f, Bucket *s) /* {{{ *
 			/* Retry with swapped operands. */
 			ZVAL_COPY_VALUE(&args[0], &s->val);
 			ZVAL_COPY_VALUE(&args[1], &f->val);
-			zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache));
+			php_array_call_user_compare(args, &retval);
 
 			zend_long ret = php_get_long(&retval);
 			return -ZEND_NORMALIZE_BOOL(ret);
@@ -800,17 +829,21 @@ static int php_array_user_compare(Bucket *a, Bucket *b) /* {{{ */
 
 #define PHP_ARRAY_CMP_FUNC_VARS \
 	zend_fcall_info old_user_compare_fci; \
-	zend_fcall_info_cache old_user_compare_fci_cache \
+	zend_fcall_info_cache old_user_compare_fci_cache; \
+	zend_function *old_user_compare_known_func \
 
 #define PHP_ARRAY_CMP_FUNC_BACKUP() \
 	old_user_compare_fci = BG(user_compare_fci); \
 	old_user_compare_fci_cache = BG(user_compare_fci_cache); \
+	old_user_compare_known_func = BG(user_compare_known_func); \
 	ARRAYG(compare_deprecation_thrown) = 0; \
 	BG(user_compare_fci_cache) = empty_fcall_info_cache; \
+	BG(user_compare_known_func) = NULL; \
 
 #define PHP_ARRAY_CMP_FUNC_RESTORE() \
 	BG(user_compare_fci) = old_user_compare_fci; \
 	BG(user_compare_fci_cache) = old_user_compare_fci_cache; \
+	BG(user_compare_known_func) = old_user_compare_known_func; \
 
 static void php_usort(INTERNAL_FUNCTION_PARAMETERS, bucket_compare_func_t compare_func, bool renumber) /* {{{ */
 {
@@ -830,6 +863,8 @@ static void php_usort(INTERNAL_FUNCTION_PARAMETERS, bucket_compare_func_t compar
 		PHP_ARRAY_CMP_FUNC_RESTORE();
 		RETURN_TRUE;
 	}
+
+	BG(user_compare_known_func) = php_array_get_known_compare_func(&BG(user_compare_fci_cache));
 
 	/* Copy array, so the in-place modifications will not be visible to the callback function */
 	arr = zend_array_dup(arr);
@@ -879,7 +914,7 @@ static inline int php_array_user_key_compare_unstable(Bucket *f, Bucket *s) /* {
 	BG(user_compare_fci).param_count = 2;
 	BG(user_compare_fci).params = args;
 	BG(user_compare_fci).retval = &retval;
-	zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache));
+	php_array_call_user_compare(args, &retval);
 
 	if (UNEXPECTED(Z_TYPE(retval) == IS_FALSE || Z_TYPE(retval) == IS_TRUE)) {
 		if (!ARRAYG(compare_deprecation_thrown)) {
@@ -902,7 +937,7 @@ static inline int php_array_user_key_compare_unstable(Bucket *f, Bucket *s) /* {
 				ZVAL_STR(&args[1], f->key);
 			}
 
-			zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache));
+			php_array_call_user_compare(args, &retval);
 
 			zend_long ret = php_get_long(&retval);
 			return -ZEND_NORMALIZE_BOOL(ret);
@@ -5332,6 +5367,10 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 	}
 
 	PHP_ARRAY_CMP_FUNC_BACKUP();
+	zend_function *known_data_func = data_compare_type == INTERSECT_COMP_DATA_USER
+		? php_array_get_known_compare_func(fci_data_cache) : NULL;
+	zend_function *known_key_func = key_compare_type == INTERSECT_COMP_KEY_USER
+		? php_array_get_known_compare_func(fci_key_cache) : NULL;
 
 	/* for each argument, create and sort list with pointers to the hash buckets */
 	lists = (Bucket **)safe_emalloc(arr_argc, sizeof(Bucket *), 0);
@@ -5340,9 +5379,11 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 	if (behavior == INTERSECT_NORMAL && data_compare_type == INTERSECT_COMP_DATA_USER) {
 		BG(user_compare_fci) = *fci_data;
 		BG(user_compare_fci_cache) = *fci_data_cache;
+		BG(user_compare_known_func) = known_data_func;
 	} else if ((behavior & INTERSECT_ASSOC) && key_compare_type == INTERSECT_COMP_KEY_USER) {
 		BG(user_compare_fci) = *fci_key;
 		BG(user_compare_fci_cache) = *fci_key_cache;
+		BG(user_compare_known_func) = known_key_func;
 	}
 
 	for (i = 0; i < arr_argc; i++) {
@@ -5399,6 +5440,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 			&& key_compare_type == INTERSECT_COMP_KEY_USER) {
 			BG(user_compare_fci) = *fci_key;
 			BG(user_compare_fci_cache) = *fci_key_cache;
+			BG(user_compare_known_func) = known_key_func;
 		}
 
 		for (i = 1; i < arr_argc; i++) {
@@ -5418,12 +5460,14 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 					if (data_compare_type == INTERSECT_COMP_DATA_USER) {
 						BG(user_compare_fci) = *fci_data;
 						BG(user_compare_fci_cache) = *fci_data_cache;
+						BG(user_compare_known_func) = known_data_func;
 					}
 					if (intersect_data_compare_func(ptrs[0], ptrs[i]) != 0) {
 						c = 1;
 						if (key_compare_type == INTERSECT_COMP_KEY_USER) {
 							BG(user_compare_fci) = *fci_key;
 							BG(user_compare_fci_cache) = *fci_key_cache;
+							BG(user_compare_known_func) = known_key_func;
 							/* When KEY_USER, the last parameter is always the callback */
 						}
 						/* we are going to the break */
@@ -5936,6 +5980,10 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 	}
 
 	PHP_ARRAY_CMP_FUNC_BACKUP();
+	zend_function *known_data_func = data_compare_type == DIFF_COMP_DATA_USER
+		? php_array_get_known_compare_func(fci_data_cache) : NULL;
+	zend_function *known_key_func = key_compare_type == DIFF_COMP_KEY_USER
+		? php_array_get_known_compare_func(fci_key_cache) : NULL;
 
 	/* for each argument, create and sort list with pointers to the hash buckets */
 	lists = (Bucket **)safe_emalloc(arr_argc, sizeof(Bucket *), 0);
@@ -5944,9 +5992,11 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 	if (behavior == DIFF_NORMAL && data_compare_type == DIFF_COMP_DATA_USER) {
 		BG(user_compare_fci) = *fci_data;
 		BG(user_compare_fci_cache) = *fci_data_cache;
+		BG(user_compare_known_func) = known_data_func;
 	} else if ((behavior & DIFF_ASSOC) && key_compare_type == DIFF_COMP_KEY_USER) {
 		BG(user_compare_fci) = *fci_key;
 		BG(user_compare_fci_cache) = *fci_key_cache;
+		BG(user_compare_known_func) = known_key_func;
 	}
 
 	for (i = 0; i < arr_argc; i++) {
@@ -6000,6 +6050,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 		) {
 			BG(user_compare_fci) = *fci_key;
 			BG(user_compare_fci_cache) = *fci_key_cache;
+			BG(user_compare_known_func) = known_key_func;
 		}
 		c = 1;
 		for (i = 1; i < arr_argc; i++) {
@@ -6026,6 +6077,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 						if (data_compare_type == DIFF_COMP_DATA_USER) {
 							BG(user_compare_fci) = *fci_data;
 							BG(user_compare_fci_cache) = *fci_data_cache;
+							BG(user_compare_known_func) = known_data_func;
 						}
 						if (diff_data_compare_func(ptrs[0], ptr) != 0) {
 							/* the data is not the same */
@@ -6033,6 +6085,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 							if (key_compare_type == DIFF_COMP_KEY_USER) {
 								BG(user_compare_fci) = *fci_key;
 								BG(user_compare_fci_cache) = *fci_key_cache;
+								BG(user_compare_known_func) = known_key_func;
 							}
 						} else {
 							break;
