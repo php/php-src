@@ -70,5 +70,10 @@ if test "$PHP_FUZZER" != "no"; then
     fi
   fi
 
+  dnl HTML5 parsing of untrusted documents through the lexbor engine (ext/dom).
+  if test -n "$enable_dom" && test "$enable_dom" != "no"; then
+    PHP_FUZZER_TARGET([dom-html], [PHP_FUZZER_DOM_HTML_OBJS])
+  fi
+
   PHP_SUBST([PHP_FUZZER_BINARIES])
 fi
