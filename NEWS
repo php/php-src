@@ -33,6 +33,7 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Fixed bug GH-25051 (TrueType fonts detected as application/octet-stream
     since libmagic 5.48). (Weilin Du)
+  . Fixed incorrect MIME type detection for HWPX files. (Weilin Du)
 
 - MBString:
   . Fixed stack overflow in mb_check_encoding() and mb_convert_encoding() with
