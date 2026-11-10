@@ -96,6 +96,9 @@ PHP                                                                        NEWS
     callback). (Ilia Alshanetsky)
   . Fixed leaks and data loss when user filter leaves buckets on input
     brigade. (ndossche, Matthias Goergens, Jakub Zelenka)
+  . Fixed use-after-free of the previous request's default stream context when
+    a stream error is raised during request startup, such as when a POST body
+    cannot be buffered to a temporary file. (Go Kudo)
   . Fixed bug GH-24175 (Use-after-free when pclose() closes a stream from its
     user filter). (Edmond)
   . Fixed bug GH-15701 (Build failure: incompatible funopen() seeker pointer
