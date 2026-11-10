@@ -125,6 +125,10 @@ PHP                                                                        NEWS
     methods, which crashed when called for the ones of internal classes.
     (Nicolas Grekas)
 
+- SNMP:
+  . Fixed snmp3_set() citing the wrong argument number for an invalid $timeout
+    or $retries. (lacatoire)
+
 - SOAP:
   . Fixed bug GH-25267 (NULL dereference in to_xml_any() with integer key).
     (lazerg)
