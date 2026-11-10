@@ -422,7 +422,13 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	if (secPrefsError == 1) {
 		php_error_docref(NULL, E_WARNING, "Can't set libxslt security properties, not doing transformation for security reasons");
 	} else {
+		php_libxml_ref_obj *document = intern->doc->document;
+		document->read_only_depth++;
+		intern->xpath_callbacks.read_only_depth++;
 		newdocp = xsltApplyStylesheetUser(style, doc, /* params (handled manually) */ NULL, /* output */ NULL, f, ctxt);
+		intern->xpath_callbacks.read_only_depth--;
+		document->read_only_depth--;
+		php_dom_xpath_callbacks_release_read_only(&intern->xpath_callbacks);
 	}
 
 out:
