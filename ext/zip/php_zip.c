@@ -1184,7 +1184,12 @@ bool php_zip_archive_release(php_zip_archive *archive)
 		int err = zip_close(archive->za);
 		if (err != 0) {
 			if (!archive->bailout_callback) {
-				php_error_docref(NULL, E_WARNING, "Cannot destroy the zip context: %s", zip_strerror(archive->za));
+				/* An error handler that throws during shutdown bails out. */
+				zend_try {
+					php_error_docref(NULL, E_WARNING, "Cannot destroy the zip context: %s", zip_strerror(archive->za));
+				} zend_catch {
+					archive->bailout_callback = true;
+				} zend_end_try();
 			}
 			zip_discard(archive->za);
 		}
