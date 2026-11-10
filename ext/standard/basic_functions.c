@@ -158,7 +158,7 @@ zend_module_entry basic_functions_module = { /* {{{ */
 	PHP_STANDARD_VERSION,		/* extension version */
 	NO_MODULE_GLOBALS,
 	ZEND_MODULE_POST_ZEND_DEACTIVATE_N(streams),
-	STANDARD_MODULE_PROPERTIES_REQUEST_HOOKS(NULL, PHP_REND(basic))
+	STANDARD_MODULE_PROPERTIES_REQUEST_HOOKS(PHP_RBEGIN(basic), PHP_REND(basic))
 };
 /* }}} */
 
@@ -431,6 +431,14 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 
 /* Other state, like strtok() or the stat cache, is shared by the requests as in a long-running script */
 PHP_REND_FUNCTION(basic)
+{
+	BASIC_RSHUTDOWN_SUBMODULE(url_scanner_ex)
+
+	return SUCCESS;
+}
+
+/* Discards the URL rewriter state code running between two requests set */
+PHP_RBEGIN_FUNCTION(basic)
 {
 	BASIC_RSHUTDOWN_SUBMODULE(url_scanner_ex)
 

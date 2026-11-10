@@ -2000,6 +2000,34 @@ static void php_rehash_environment(void)
 	} ZEND_HASH_FOREACH_END();
 }
 
+/* Code running between two requests can set these after php_request_end(),
+ * sapi_activate() would drop them without releasing them */
+static void php_release_sapi_globals(void)
+{
+	if (ZEND_FCC_INITIALIZED(SG(send_header_fcc))) {
+		zend_fcall_info_cache callback = SG(send_header_fcc);
+		SG(send_header_fcc) = empty_fcall_info_cache;
+		zend_fcc_dtor(&callback);
+	}
+
+	zend_llist_clean(&SG(sapi_headers).headers);
+	if (SG(sapi_headers).http_status_line) {
+		efree(SG(sapi_headers).http_status_line);
+		SG(sapi_headers).http_status_line = NULL;
+	}
+	if (SG(sapi_headers).mimetype) {
+		efree(SG(sapi_headers).mimetype);
+		SG(sapi_headers).mimetype = NULL;
+	}
+
+	/* opening php://input creates an empty body */
+	php_stream *request_body = SG(request_info).request_body;
+	if (request_body) {
+		SG(request_info).request_body = NULL;
+		zend_list_delete(request_body->res);
+	}
+}
+
 /* Starts a new request in a script that served the previous one, such as a
  * worker script. The SAPI must fill SG(request_info) and SG(server_context) first. */
 PHPAPI zend_result php_request_begin(void)
@@ -2009,6 +2037,7 @@ PHPAPI zend_result php_request_begin(void)
 	zend_try {
 		/* the script reads the previous request's superglobals until now */
 		php_release_request_globals();
+		php_release_sapi_globals();
 
 		php_output_activate();
 
@@ -2026,6 +2055,8 @@ PHPAPI zend_result php_request_begin(void)
 	} zend_catch {
 		retval = FAILURE;
 	} zend_end_try();
+
+	SG(sapi_started) = 1;
 
 	return retval;
 }

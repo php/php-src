@@ -2394,6 +2394,12 @@ PHP_FUNCTION(session_id)
 		RETURN_FALSE;
 	}
 
+	/* code running between two requests served by the same script has no client */
+	if (name && UNEXPECTED(!SG(sapi_started))) {
+		php_error_docref(NULL, E_WARNING, "Session ID cannot be changed when no request is active");
+		RETURN_FALSE;
+	}
+
 	if (PS(id)) {
 		/* keep compatibility for "\0" characters ???
 		 * see: ext/session/tests/session_id_error3.phpt */
@@ -2711,6 +2717,12 @@ PHP_FUNCTION(session_start)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|a", &options) == FAILURE) {
 		RETURN_THROWS();
+	}
+
+	/* code running between two requests served by the same script has no client */
+	if (UNEXPECTED(!SG(sapi_started))) {
+		php_error_docref(NULL, E_WARNING, "Session cannot be started when no request is active");
+		RETURN_FALSE;
 	}
 
 	if (PS(session_status) == php_session_active) {
