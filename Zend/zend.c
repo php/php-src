@@ -1507,7 +1507,9 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 	}
 
 	// Always clear the last backtrace.
-	zval_ptr_dtor(&EG(last_fatal_error_backtrace));
+	if (EG(active)) {
+		zval_ptr_dtor(&EG(last_fatal_error_backtrace));
+	}
 	ZVAL_UNDEF(&EG(last_fatal_error_backtrace));
 
 	/* Report about uncaught exception in case of fatal errors */
@@ -1532,7 +1534,11 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 			}
 		}
 	} else if (EG(fatal_error_backtrace_on) && (type & E_FATAL_ERRORS)) {
-		zend_fetch_debug_backtrace(&EG(last_fatal_error_backtrace), 0, EG(exception_ignore_args) ? DEBUG_BACKTRACE_IGNORE_ARGS : 0, 0);
+		// EG(last_fatal_error_backtrace) is useless when the executor is
+		// inactive, and setting it at this point would leak.
+		if (EG(active)) {
+			zend_fetch_debug_backtrace(&EG(last_fatal_error_backtrace), 0, EG(exception_ignore_args) ? DEBUG_BACKTRACE_IGNORE_ARGS : 0, 0);
+		}
 	}
 
 	zend_observer_error_notify(type, error_filename, error_lineno, message);
