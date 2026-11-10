@@ -660,7 +660,11 @@ static bool php_zipobj_close(ze_zip_object *obj, zend_string **out_str) /* {{{ *
 		archive->close = true;
 		int err = zip_close(intern);
 		if (err) {
-			php_error_docref(NULL, E_WARNING, "%s", zip_strerror(intern));
+			zend_try {
+				php_error_docref(NULL, E_WARNING, "%s", zip_strerror(intern));
+			} zend_catch {
+				archive->bailout_callback = true;
+			} zend_end_try();
 			/* Save error for property reader */
 			zip_error_t *ziperr = zip_get_error(intern);
 			obj->err_zip = zip_error_code_zip(ziperr);
