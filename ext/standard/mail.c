@@ -253,7 +253,7 @@ PHPAPI zend_string *php_mail_build_headers(const HashTable *headers)
 	} ZEND_HASH_FOREACH_END();
 
 	/* Remove the last \r\n */
-	if (s.s) s.s->len -= 2;
+	if (s.s) ZSTR_LEN(s.s) -= 2;
 	smart_str_0(&s);
 
 	return s.s;
@@ -471,7 +471,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 
 			time(&curtime);
 			date_str = php_format_date("d-M-Y H:i:s e", 13, curtime, 1);
-			len = spprintf(&tmp, 0, "[%s] %s%s", date_str->val, logline, PHP_EOL);
+			len = spprintf(&tmp, 0, "[%s] %s%s", ZSTR_VAL(date_str), logline, PHP_EOL);
 
 			php_mail_log_to_file(mail_log, tmp, len);
 
