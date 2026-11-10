@@ -119,6 +119,8 @@ static inline void php_rinit_session_globals(void) /* {{{ */
 	PS(module_number) = my_module_number;
 	PS(in_rfc1867_update) = false;
 	ZVAL_UNDEF(&PS(http_session_vars));
+	PS(session_started_filename) = NULL;
+	PS(session_started_lineno) = 0;
 }
 /* }}} */
 
