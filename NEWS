@@ -109,6 +109,12 @@ PHP                                                                        NEWS
   . Fixed bug GH-15701 (Build failure: incompatible funopen() seeker pointer
     type on 32-bit platforms). (Kamil Tekiela)
 
+12 Nov 2026, PHP 8.6.0RC6
+
+- Core:
+  . Fix potential ABI incompatibility when adding fields in patches by adding
+    padding to globals. (ilutov)
+
 05 Nov 2026, PHP 8.6.0RC5
 
 - Core:
