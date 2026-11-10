@@ -330,6 +330,12 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 		return NULL;
 	}
 
+	object = Z_LIBXML_NODE_P(docp);
+	if (!intern->hasKeys && php_libxml_is_node_read_only(object->document, (xmlNodePtr) doc)) {
+		php_dom_throw_read_only_node_error(object->document);
+		return NULL;
+	}
+
 	intern->transform_depth++;
 
 	if (intern->profiling) {

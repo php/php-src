@@ -1,5 +1,5 @@
 --TEST--
-DOMXPath: a php:function callback that removes its argument node must not free it mid-evaluation
+DOMXPath: a php:function callback cannot remove its argument node mid-evaluation
 --EXTENSIONS--
 dom
 --FILE--
@@ -12,8 +12,10 @@ $xp->registerPhpFunctions();
 
 function cb($nodes) {
     foreach ($nodes as $n) {
-        if ($n->parentNode) {
+        try {
             $n->parentNode->removeChild($n);
+        } catch (DOMException $e) {
+            echo $e::class, ": ", $e->getMessage(), "\n";
         }
     }
     return true;
@@ -26,6 +28,10 @@ foreach ($res as $r) {
 echo "done\n";
 ?>
 --EXPECT--
+DOMException: Cannot modify a node while an XPath evaluation or XSLT transformation that uses it is in progress
+DOMException: Cannot modify a node while an XPath evaluation or XSLT transformation that uses it is in progress
+DOMException: Cannot modify a node while an XPath evaluation or XSLT transformation that uses it is in progress
+DOMException: Cannot modify a node while an XPath evaluation or XSLT transformation that uses it is in progress
 string(1) "a"
 string(1) "a"
 string(1) "a"

@@ -1547,6 +1547,9 @@ zend_result dom_html_document_body_write(dom_object *obj, zval *newval)
 		dom_object *newval_intern = Z_DOMOBJ_P(newval);
 		if (newval_intern->ptr != NULL) {
 			xmlNodePtr newval_node = ((php_libxml_node_ptr *) newval_intern->ptr)->node;
+			if (dom_throw_if_node_read_only(obj->document, (xmlNodePtr) docp) || dom_throw_if_node_read_only(newval_intern->document, newval_node)) {
+				return FAILURE;
+			}
 			/* Note: because this property has type HTMLElement, we know the namespace is correct. */
 			if (dom_accept_body_name(newval_node->name)) {
 				/* 2. If the new value is the same as the body element, return. */
@@ -1684,6 +1687,9 @@ static void dom_string_replace_all(xmlDocPtr docp, xmlNodePtr element, zval *zv)
 zend_result dom_html_document_title_write(dom_object *obj, zval *newval)
 {
 	DOM_PROP_NODE(xmlDocPtr, docp, obj);
+	if (dom_throw_if_node_read_only(obj->document, (xmlNodePtr) docp)) {
+		return FAILURE;
+	}
 	xmlNodePtr root = xmlDocGetRootElement(docp);
 
 	if (root == NULL) {

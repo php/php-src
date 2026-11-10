@@ -41,6 +41,10 @@ PHP_METHOD(DOMText, __construct)
 		RETURN_THROWS();
 	}
 
+	if (dom_throw_if_node_read_only(Z_DOMOBJ_P(ZEND_THIS)->document, dom_object_get_node(Z_DOMOBJ_P(ZEND_THIS)))) {
+		return;
+	}
+
 	nodep = xmlNewText(BAD_CAST value);
 
 	if (!nodep) {
@@ -106,6 +110,10 @@ PHP_METHOD(DOMText, splitText)
 		RETURN_THROWS();
 	}
 	DOM_GET_OBJ(node, ZEND_THIS, xmlNodePtr, intern);
+
+	if (dom_throw_if_node_read_only(intern->document, node)) {
+		RETURN_FALSE;
+	}
 
 	if (offset < 0) {
 		zend_argument_value_error(1, "must be greater than or equal to 0");
