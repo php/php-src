@@ -40,6 +40,10 @@ PHP_METHOD(DOMComment, __construct)
 		RETURN_THROWS();
 	}
 
+	if (dom_throw_if_node_read_only(Z_DOMOBJ_P(ZEND_THIS)->document, dom_object_get_node(Z_DOMOBJ_P(ZEND_THIS)))) {
+		return;
+	}
+
 	nodep = xmlNewComment(BAD_CAST value);
 
 	if (!nodep) {

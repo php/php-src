@@ -273,12 +273,51 @@ PHP_METHOD(DOMXPath, registerNamespace)
 }
 /* }}} */
 
+static xmlXPathObjectPtr dom_xpath_eval_expression(dom_xpath_object *intern, xmlXPathContextPtr ctxp, const char *expr, dom_object *context_obj)
+{
+	intern->evaluation_depth++;
+
+	if (!php_dom_xpath_callbacks_registered(&intern->xpath_callbacks)) {
+		xmlXPathObjectPtr xpathobjp = xmlXPathEvalExpression(BAD_CAST expr, ctxp);
+		intern->evaluation_depth--;
+		return xpathobjp;
+	}
+
+	php_libxml_ref_obj *document = intern->dom.document;
+	xmlXPathObjectPtr xpathobjp = NULL;
+	bool bailout = false;
+
+	document->read_only_depth++;
+	intern->xpath_callbacks.read_only_depth++;
+	if (context_obj != NULL) {
+		xmlNodePtr nodep = ctxp->node;
+		php_dom_xpath_callbacks_pin_tree(&intern->xpath_callbacks, nodep->type == XML_NAMESPACE_DECL ? nodep->parent : nodep, context_obj);
+	}
+	zend_try {
+		xpathobjp = xmlXPathEvalExpression(BAD_CAST expr, ctxp);
+	} zend_catch {
+		bailout = true;
+	} zend_end_try();
+	intern->xpath_callbacks.read_only_depth--;
+	document->read_only_depth--;
+	intern->evaluation_depth--;
+
+	if (bailout) {
+		if (intern->evaluation_depth == 0) {
+			php_dom_xpath_callbacks_release_read_only(&intern->xpath_callbacks);
+		}
+		zend_bailout();
+	}
+
+	return xpathobjp;
+}
+
 static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) /* {{{ */
 {
 	zval *context = NULL;
 	xmlNodePtr nodep = NULL;
 	size_t expr_len, xpath_type;
-	dom_object *nodeobj;
+	dom_object *nodeobj = NULL;
 	char *expr;
 
 	dom_xpath_object *intern = Z_XPATHOBJ_P(ZEND_THIS);
@@ -336,9 +375,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 		ctxp->nsNr = in_scope_ns.count;
 	}
 
-	intern->evaluation_depth++;
-	xmlXPathObjectPtr xpathobjp = xmlXPathEvalExpression(BAD_CAST expr, ctxp);
-	intern->evaluation_depth--;
+	xmlXPathObjectPtr xpathobjp = dom_xpath_eval_expression(intern, ctxp, expr, context != NULL ? nodeobj : NULL);
 	ctxp->node = old_node;
 	ctxp->namespaces = old_namespaces;
 	ctxp->nsNr = old_nsNr;
@@ -455,27 +492,37 @@ oom_nodeset:
 }
 /* }}} */
 
+static void dom_xpath_evaluate(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern)
+{
+	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, type, modern);
+
+	dom_xpath_object *intern = Z_XPATHOBJ_P(ZEND_THIS);
+	if (intern->evaluation_depth == 0) {
+		php_dom_xpath_callbacks_release_read_only(&intern->xpath_callbacks);
+	}
+}
+
 /* {{{ */
 PHP_METHOD(DOMXPath, query)
 {
-	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_QUERY, false);
+	dom_xpath_evaluate(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_QUERY, false);
 }
 
 PHP_METHOD(Dom_XPath, query)
 {
-	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_QUERY, true);
+	dom_xpath_evaluate(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_QUERY, true);
 }
 /* }}} end dom_xpath_query */
 
 /* {{{ */
 PHP_METHOD(DOMXPath, evaluate)
 {
-	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_EVALUATE, false);
+	dom_xpath_evaluate(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_EVALUATE, false);
 }
 
 PHP_METHOD(Dom_XPath, evaluate)
 {
-	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_EVALUATE, true);
+	dom_xpath_evaluate(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_EVALUATE, true);
 }
 /* }}} end dom_xpath_evaluate */
 

@@ -431,6 +431,9 @@ zend_result dom_token_list_value_write(dom_object *obj, zval *newval)
 		zend_value_error("Value must not contain any null bytes");
 		return FAILURE;
 	}
+	if (dom_throw_if_node_read_only(intern->dom.document, dom_token_list_get_element(intern))) {
+		return FAILURE;
+	}
 	php_libxml_invalidate_node_list_cache(intern->dom.document);
 	dom_set_attribute_value(dom_token_list_get_element(intern), NULL, BAD_CAST "class", BAD_CAST Z_STRVAL_P(newval));
 	/* Note: we don't update the set here, the set is always lazily updated for performance reasons. */
@@ -519,6 +522,9 @@ PHP_METHOD(Dom_TokenList, add)
 
 	/* 2. For each token in tokens, append token to this’s token set. */
 	dom_token_list_object *intern = TOKEN_LIST_GET_INTERNAL();
+	if (dom_throw_if_node_read_only(intern->dom.document, dom_token_list_get_element(intern))) {
+		RETURN_THROWS();
+	}
 	dom_token_list_ensure_set_up_to_date(intern);
 	HashTable *token_set = TOKEN_LIST_GET_SET(intern);
 	for (uint32_t i = 0; i < argc; i++) {
@@ -545,6 +551,9 @@ PHP_METHOD(Dom_TokenList, remove)
 
 	/* 2. For each token in tokens, remove token from this’s token set. */
 	dom_token_list_object *intern = TOKEN_LIST_GET_INTERNAL();
+	if (dom_throw_if_node_read_only(intern->dom.document, dom_token_list_get_element(intern))) {
+		RETURN_THROWS();
+	}
 	dom_token_list_ensure_set_up_to_date(intern);
 	HashTable *token_set = TOKEN_LIST_GET_SET(intern);
 	for (uint32_t i = 0; i < argc; i++) {
@@ -573,6 +582,9 @@ PHP_METHOD(Dom_TokenList, toggle)
 
 	/* 3. If this’s token set[token] exists, then: */
 	dom_token_list_object *intern = TOKEN_LIST_GET_INTERNAL();
+	if (dom_throw_if_node_read_only(intern->dom.document, dom_token_list_get_element(intern))) {
+		RETURN_THROWS();
+	}
 	dom_token_list_ensure_set_up_to_date(intern);
 	HashTable *token_set = TOKEN_LIST_GET_SET(intern);
 	zval *found_token = zend_hash_find(token_set, token);
@@ -619,6 +631,9 @@ PHP_METHOD(Dom_TokenList, replace)
 
 	/* 3. If this’s token set does not contain token, then return false. */
 	dom_token_list_object *intern = TOKEN_LIST_GET_INTERNAL();
+	if (dom_throw_if_node_read_only(intern->dom.document, dom_token_list_get_element(intern))) {
+		RETURN_THROWS();
+	}
 	dom_token_list_ensure_set_up_to_date(intern);
 	HashTable *token_set = TOKEN_LIST_GET_SET(intern);
 	zval *found_token = zend_hash_find(token_set, token);

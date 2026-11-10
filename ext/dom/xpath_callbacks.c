@@ -48,6 +48,9 @@ PHP_DOM_EXPORT void php_dom_xpath_callbacks_ctor(php_dom_xpath_callbacks *regist
 	registry->php_ns = NULL;
 	registry->namespaces = NULL;
 	registry->node_list = NULL;
+	registry->read_only_documents = NULL;
+	registry->read_only_trees = NULL;
+	registry->read_only_depth = 0;
 }
 
 PHP_DOM_EXPORT void php_dom_xpath_callbacks_clean_node_list(php_dom_xpath_callbacks *registry)
@@ -57,6 +60,81 @@ PHP_DOM_EXPORT void php_dom_xpath_callbacks_clean_node_list(php_dom_xpath_callba
 		registry->node_list = NULL;
 		zend_hash_destroy(node_list);
 		FREE_HASHTABLE(node_list);
+	}
+}
+
+static void php_dom_xpath_callbacks_make_read_only(php_dom_xpath_callbacks *registry, php_libxml_ref_obj *document)
+{
+	if (registry->read_only_depth == 0 || document == NULL) {
+		return;
+	}
+
+	if (registry->read_only_documents == NULL) {
+		registry->read_only_documents = zend_new_array(0);
+	}
+
+	if (zend_hash_index_add_ptr(registry->read_only_documents, (zend_ulong) (uintptr_t) document, document) != NULL) {
+		document->read_only_depth++;
+		document->refcount++;
+	}
+}
+
+PHP_DOM_EXPORT void php_dom_xpath_callbacks_pin_tree(php_dom_xpath_callbacks *registry, xmlNodePtr node, dom_object *intern)
+{
+	if (registry->read_only_depth == 0 || node == NULL || node->type == XML_NAMESPACE_DECL) {
+		return;
+	}
+
+	xmlNodePtr root = node;
+	while (root->parent != NULL) {
+		root = root->parent;
+	}
+
+	if (root->type == XML_DOCUMENT_NODE || root->type == XML_HTML_DOCUMENT_NODE) {
+		return;
+	}
+
+	zend_ulong key = (zend_ulong) (uintptr_t) root;
+	if (registry->read_only_trees != NULL && zend_hash_index_exists(registry->read_only_trees, key)) {
+		return;
+	}
+
+	if (root->doc == NULL) {
+		intern = NULL;
+	} else if (php_dom_object_get_data(root) == NULL && (intern == NULL || intern->document == NULL || intern->document->ptr != root->doc)) {
+		return;
+	}
+
+	zval root_zval;
+	php_dom_create_object(root, &root_zval, intern);
+	((php_libxml_node_ptr *) root->_private)->read_only_depth++;
+	if (registry->read_only_trees == NULL) {
+		registry->read_only_trees = zend_new_array(0);
+	}
+	zend_hash_index_add_new(registry->read_only_trees, key, &root_zval);
+}
+
+PHP_DOM_EXPORT void php_dom_xpath_callbacks_release_read_only(php_dom_xpath_callbacks *registry)
+{
+	if (registry->read_only_trees) {
+		HashTable *read_only_trees = registry->read_only_trees;
+		registry->read_only_trees = NULL;
+		zend_ulong key;
+		ZEND_HASH_FOREACH_NUM_KEY(read_only_trees, key) {
+			xmlNodePtr root = (xmlNodePtr) (uintptr_t) key;
+			((php_libxml_node_ptr *) root->_private)->read_only_depth--;
+		} ZEND_HASH_FOREACH_END();
+		zend_array_destroy(read_only_trees);
+	}
+	if (registry->read_only_documents) {
+		HashTable *read_only_documents = registry->read_only_documents;
+		registry->read_only_documents = NULL;
+		php_libxml_ref_obj *document;
+		ZEND_HASH_FOREACH_PTR(read_only_documents, document) {
+			document->read_only_depth--;
+			php_libxml_decrement_doc_ref_directly(document);
+		} ZEND_HASH_FOREACH_END();
+		zend_array_destroy(read_only_documents);
 	}
 }
 
@@ -93,6 +171,7 @@ PHP_DOM_EXPORT void php_dom_xpath_callbacks_dtor(php_dom_xpath_callbacks *regist
 		FREE_HASHTABLE(namespaces);
 	}
 	php_dom_xpath_callbacks_clean_node_list(registry);
+	php_dom_xpath_callbacks_release_read_only(registry);
 }
 
 static void php_dom_xpath_callback_ns_get_gc(php_dom_xpath_callback_ns *ns, zend_get_gc_buffer *gc_buffer)
@@ -323,8 +402,10 @@ PHP_DOM_EXPORT zend_result php_dom_xpath_callbacks_update_single_method_handler(
 	return SUCCESS;
 }
 
-static zval *php_dom_xpath_callback_fetch_args(xmlXPathParserContextPtr ctxt, uint32_t param_count, php_dom_xpath_nodeset_evaluation_mode evaluation_mode, dom_object *intern, php_dom_xpath_callbacks_proxy_factory proxy_factory)
+static zval *php_dom_xpath_callback_fetch_args(php_dom_xpath_callbacks *xpath_callbacks, xmlXPathParserContextPtr ctxt, uint32_t param_count, php_dom_xpath_nodeset_evaluation_mode evaluation_mode, dom_object *intern, php_dom_xpath_callbacks_proxy_factory proxy_factory)
 {
+	php_dom_xpath_callbacks_pin_tree(xpath_callbacks, ctxt->context->node, intern);
+
 	if (param_count == 0) {
 		return NULL;
 	}
@@ -354,6 +435,7 @@ static zval *php_dom_xpath_callback_fetch_args(xmlXPathParserContextPtr ctxt, ui
 					if (obj->nodesetval && obj->nodesetval->nodeNr > 0) {
 						array_init_size(param, obj->nodesetval->nodeNr);
 						zend_hash_real_init_packed(Z_ARRVAL_P(param));
+						xmlNodePtr previous = NULL;
 						for (int j = 0; j < obj->nodesetval->nodeNr; j++) {
 							xmlNodePtr node = obj->nodesetval->nodeTab[j];
 							zval child;
@@ -369,6 +451,11 @@ static zval *php_dom_xpath_callback_fetch_args(xmlXPathParserContextPtr ctxt, ui
 								php_dom_create_fake_namespace_decl(parent, original, &child, parent_intern);
 							} else {
 								proxy_factory(node, &child, intern, ctxt);
+								if (dom_object_get_node(Z_DOMOBJ_P(&child)) == node
+								 && (previous == NULL || node->parent == NULL || (node->parent != previous && node->parent != previous->parent))) {
+									php_dom_xpath_callbacks_pin_tree(xpath_callbacks, node, Z_DOMOBJ_P(&child));
+								}
+								previous = node;
 							}
 							zend_hash_next_index_insert_new(Z_ARRVAL_P(param), &child);
 						}
@@ -454,6 +541,10 @@ static zend_result php_dom_xpath_callback_dispatch(php_dom_xpath_callbacks *xpat
 			zend_hash_next_index_insert_new(xpath_callbacks->node_list, &callback_retval);
 			dom_object *obj = Z_DOMOBJ_P(&callback_retval);
 			xmlNodePtr nodep = dom_object_get_node(obj);
+			if (nodep != NULL) {
+				php_dom_xpath_callbacks_make_read_only(xpath_callbacks, obj->document);
+				php_dom_xpath_callbacks_pin_tree(xpath_callbacks, nodep, obj);
+			}
 			valuePush(ctxt, xmlXPathNewNodeSet(nodep));
 		} else if (Z_TYPE(callback_retval) == IS_FALSE || Z_TYPE(callback_retval) == IS_TRUE) {
 			valuePush(ctxt, xmlXPathNewBoolean(Z_TYPE(callback_retval) == IS_TRUE));
@@ -481,7 +572,7 @@ PHP_DOM_EXPORT zend_result php_dom_xpath_callbacks_call_php_ns(php_dom_xpath_cal
 	}
 
 	uint32_t param_count = num_args - 1;
-	zval *params = php_dom_xpath_callback_fetch_args(ctxt, param_count, evaluation_mode, intern, proxy_factory);
+	zval *params = php_dom_xpath_callback_fetch_args(xpath_callbacks, ctxt, param_count, evaluation_mode, intern, proxy_factory);
 
 	/* Last element of the stack is the function name */
 	xmlXPathObjectPtr obj = valuePop(ctxt);
@@ -510,7 +601,7 @@ cleanup_no_obj:
 PHP_DOM_EXPORT zend_result php_dom_xpath_callbacks_call_custom_ns(php_dom_xpath_callbacks *xpath_callbacks, xmlXPathParserContextPtr ctxt, int num_args, php_dom_xpath_nodeset_evaluation_mode evaluation_mode, dom_object *intern, php_dom_xpath_callbacks_proxy_factory proxy_factory)
 {
 	uint32_t param_count = num_args;
-	zval *params = php_dom_xpath_callback_fetch_args(ctxt, param_count, evaluation_mode, intern, proxy_factory);
+	zval *params = php_dom_xpath_callback_fetch_args(xpath_callbacks, ctxt, param_count, evaluation_mode, intern, proxy_factory);
 
 	const char *namespace = (const char *) ctxt->context->functionURI;
 	/* Impossible because it wouldn't have been registered inside the context. */

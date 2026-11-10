@@ -126,6 +126,7 @@ void php_dom_create_implementation(zval *retval, bool modern);
 int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child);
 bool dom_has_feature(zend_string *feature, zend_string *version);
 bool dom_node_is_read_only(const xmlNode *node);
+ZEND_COLD void php_dom_throw_read_only_node_error(php_libxml_ref_obj *document);
 bool dom_node_children_valid(const xmlNode *node);
 xmlNodePtr create_notation(xmlDtdPtr parent_dtd, const xmlChar *name, const xmlChar *ExternalID, const xmlChar *SystemID);
 void dom_free_notation(xmlEntityPtr entity);
@@ -257,6 +258,15 @@ static zend_always_inline void php_dom_mark_cache_tag_up_to_date_from_doc_ref(ph
 	ZEND_ASSERT(cache_tag != NULL);
 	ZEND_ASSERT(document != NULL);
 	cache_tag->modification_nr = document->cache_tag.modification_nr;
+}
+
+static zend_always_inline bool dom_throw_if_node_read_only(php_libxml_ref_obj *document, const xmlNode *node)
+{
+	if (php_libxml_is_node_read_only(document, node)) {
+		php_dom_throw_read_only_node_error(document);
+		return true;
+	}
+	return false;
 }
 
 static zend_always_inline bool php_dom_follow_spec_node(const xmlNode *node)
