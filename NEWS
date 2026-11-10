@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.6.0RC6
 
+- Core:
+  . Fix potential ABI incompatibility when adding fields in patches by adding
+    padding to globals. (ilutov)
+
 - Date:
   . Update timelib to 2026.03 (Derick)
 

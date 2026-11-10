@@ -169,6 +169,14 @@ struct _zend_compiler_globals {
 #ifdef ZTS
 	uint32_t copied_functions_count;
 #endif
+
+	/* Padding to maintain ABI compatibility for ZTS compile-time offsets. For
+	 * supported versions, add fields to this nested struct. For master, move them
+	 * to the top-level struct. */
+	union {
+		uint64_t padding[8];
+		// struct { Add here. };
+	};
 };
 
 
@@ -339,6 +347,12 @@ struct _zend_executor_globals {
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 
 	zend_oom_info delayed_oom;
+
+	/* See comment on zend_compiler_globals.padding. */
+	union {
+		uint64_t padding[8];
+		// struct { Add here. };
+	};
 };
 
 #ifdef ZTS
