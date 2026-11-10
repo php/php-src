@@ -97,6 +97,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed dns_get_record() returning partially built records for malformed
     DNS responses. (Marti2203)
+  . Fixed bug GH-25387 (Uploaded files leak in request_parse_body()).
+    (Kévin Dunglas)
 
 - Streams:
   . Fixed bug GH-22063 (Stream filter chain UAF on self-removal during
