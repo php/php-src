@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Update timelib to 2026.03 (Derick)
 
 - Fileinfo:
+  . Fixed bug GH-25051 (TrueType fonts detected as application/octet-stream
+    since libmagic 5.48). (Weilin Du)
   . Fixed incorrect MIME type detection for HWPX files. (Weilin Du)
 
 - Streams:
