@@ -16438,7 +16438,16 @@ static int zend_jit_fetch_static_prop(zend_jit_ctx *jit, const zend_op *opline, 
 	}
 
 	ir_ref run_time_cache_ptr = IR_UNUSED;
-	if (is_static) {
+	if (is_static
+	 && op_array->function_name
+	 && op_array->scope
+	 && (op_array->scope->ce_flags & ZEND_ACC_FINAL)
+	 && !(op_array->scope->ce_flags & ZEND_ACC_TRAIT)
+	 && !(op_array->fn_flags & (ZEND_ACC_CLOSURE|ZEND_ACC_TRAIT_CLONE))) {
+		/* A method in a final CE has a called scope equal to the scope.
+		 * So the cache slot is always monomorphic.
+		 * Closures are excluded because they can be bound to another scope, likewise traits are shared. */
+	} else if (is_static) {
 		/* The cache slot is polymorphic on the called scope. */
 		// JIT: if (CACHED_PTR(cache_slot) == called_scope)
 		run_time_cache_ptr = ir_LOAD_A(jit_EX(run_time_cache));
