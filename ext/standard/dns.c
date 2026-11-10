@@ -439,7 +439,7 @@ PHP_FUNCTION(dns_check_record)
 
 #define CHECKCP(n) do { \
 	if (cp + n > end) { \
-		return NULL; \
+		goto fail; \
 	} \
 } while (0)
 
@@ -526,7 +526,7 @@ static uint8_t *php_parserr(uint8_t *cp, uint8_t *end, querybuf *answer, int typ
 			}
 			n = dn_expand(answer->qb2, end, cp, name, (sizeof name) - 2);
 			if (n < 0) {
-				return NULL;
+				goto fail;
 			}
 			cp += n;
 			add_assoc_string(subarray, "target", name);
@@ -563,7 +563,7 @@ static uint8_t *php_parserr(uint8_t *cp, uint8_t *end, querybuf *answer, int typ
 			add_assoc_stringl(subarray, "tag", (char*)cp, n);
 			cp += n;
 			if ( (size_t) dlen < ((size_t)n) + 2 ) {
-				return NULL;
+				goto fail;
 			}
 			n = dlen - n - 2;
 			CHECKCP(n);
@@ -606,13 +606,13 @@ static uint8_t *php_parserr(uint8_t *cp, uint8_t *end, querybuf *answer, int typ
 			add_assoc_string(subarray, "type", "SOA");
 			n = dn_expand(answer->qb2, end, cp, name, (sizeof name) -2);
 			if (n < 0) {
-				return NULL;
+				goto fail;
 			}
 			cp += n;
 			add_assoc_string(subarray, "mname", name);
 			n = dn_expand(answer->qb2, end, cp, name, (sizeof name) -2);
 			if (n < 0) {
-				return NULL;
+				goto fail;
 			}
 			cp += n;
 			add_assoc_string(subarray, "rname", name);
@@ -733,7 +733,7 @@ static uint8_t *php_parserr(uint8_t *cp, uint8_t *end, querybuf *answer, int typ
 			if (cp < p + dlen) {
 				n = dn_expand(answer->qb2, end, cp, name, (sizeof name) - 2);
 				if (n < 0) {
-					return NULL;
+					goto fail;
 				}
 				cp += n;
 				add_assoc_string(subarray, "chain", name);
@@ -750,7 +750,7 @@ static uint8_t *php_parserr(uint8_t *cp, uint8_t *end, querybuf *answer, int typ
 			add_assoc_long(subarray, "port", n);
 			n = dn_expand(answer->qb2, end, cp, name, (sizeof name) - 2);
 			if (n < 0) {
-				return NULL;
+				goto fail;
 			}
 			cp += n;
 			add_assoc_string(subarray, "target", name);
@@ -786,7 +786,7 @@ static uint8_t *php_parserr(uint8_t *cp, uint8_t *end, querybuf *answer, int typ
 
 			n = dn_expand(answer->qb2, end, cp, name, (sizeof name) - 2);
 			if (n < 0) {
-				return NULL;
+				goto fail;
 			}
 			cp += n;
 			add_assoc_string(subarray, "replacement", name);
@@ -799,6 +799,12 @@ static uint8_t *php_parserr(uint8_t *cp, uint8_t *end, querybuf *answer, int typ
 	}
 
 	return cp;
+
+fail:
+	/* Drop the partially built record, so that the caller does not publish it. */
+	zval_ptr_dtor(subarray);
+	ZVAL_UNDEF(subarray);
+	return NULL;
 }
 /* }}} */
 
