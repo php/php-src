@@ -265,6 +265,18 @@ static zend_string* php_ldap_try_get_ldap_value_from_zval(zval *zv) {
 			return ZSTR_INIT_LITERAL("TRUE", false);
 		case IS_FALSE:
 			return ZSTR_INIT_LITERAL("FALSE", false);
+		case IS_DOUBLE: {
+			/* LDAP has no float syntax, but integral floats (e.g. the result of
+			 * round(), or an int that overflowed) are accepted as integers */
+			double dval = Z_DVAL_P(zv);
+			if (zend_finite(dval) && dval == floor(dval)) {
+				if (dval == 0) {
+					return ZSTR_CHAR('0');
+				}
+				return zend_strpprintf(0, "%.0F", dval);
+			}
+			ZEND_FALLTHROUGH;
+		}
 		default:
 			zend_type_error("LDAP value must be of type string|int|bool, %s given", zend_zval_value_name(zv));
 			return NULL;

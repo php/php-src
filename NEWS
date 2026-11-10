@@ -25,6 +25,10 @@ PHP                                                                        NEWS
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
 
+- LDAP:
+  . Fixed bug GH-22108 (Regression in 8.5: float values are treated as invalid
+    when updating LDAP values). (Juan Versolato Lopes)
+
 - MBString:
   . Fixed stack overflow in mb_check_encoding() and mb_convert_encoding() with
     deeply nested arrays. (Eyüp Can Akman)
