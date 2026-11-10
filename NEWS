@@ -204,6 +204,10 @@ PHP                                                                        NEWS
   . Fixed xml_get_current_byte_index() returning negative values for byte
     indexes beyond 2 GiB on Windows x64. (Marc Bennewitz)
 
+- XSL:
+  . Fixed a use-after-free when a transformation was started on a processor
+    that is already transforming. (Ilia Alshanetsky)
+
 - Zlib:
   . Fixed inflate_init() dropping the preset dictionary for raw streams with
     a non-default window. (Ilia Alshanetsky)

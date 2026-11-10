@@ -64,6 +64,13 @@ PHP 8.7 UPGRADE NOTES
     to 16 by default. Set the stream context option max_filter_count to change
     this.
 
+- XSL:
+  . XSLTProcessor::transformToDoc(), XSLTProcessor::transformToUri() and
+    XSLTProcessor::transformToXml() now throw an Error when called while the
+    same processor is already transforming, for example from a php:function()
+    callback or from a suspended Fiber. Use a separate XSLTProcessor instance
+    instead.
+
 ========================================
 2. New Features
 ========================================

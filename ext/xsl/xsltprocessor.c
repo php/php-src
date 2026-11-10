@@ -323,6 +323,13 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 		return NULL;
 	}
 
+	if (UNEXPECTED(intern->transform_depth > 0)) {
+		zend_string *name = get_active_function_or_method_name();
+		zend_throw_error(NULL, "Cannot call %s() while a transformation is in progress", ZSTR_VAL(name));
+		zend_string_release(name);
+		return NULL;
+	}
+
 	intern->transform_depth++;
 
 	if (intern->profiling) {
