@@ -66,13 +66,12 @@
 #  endif
 
 URI_CHAR * URI_FUNC(Escape)(const URI_CHAR * in, URI_CHAR * out, UriBool spaceToPlus,
-                            UriBool normalizeBreaks) {
+        UriBool normalizeBreaks) {
     return URI_FUNC(EscapeEx)(in, NULL, out, spaceToPlus, normalizeBreaks);
 }
 
 URI_CHAR * URI_FUNC(EscapeEx)(const URI_CHAR * inFirst, const URI_CHAR * inAfterLast,
-                              URI_CHAR * out, UriBool spaceToPlus,
-                              UriBool normalizeBreaks) {
+        URI_CHAR * out, UriBool spaceToPlus, UriBool normalizeBreaks) {
     const URI_CHAR * read = inFirst;
     URI_CHAR * write = out;
     UriBool prevWasCr = URI_FALSE;
@@ -179,8 +178,8 @@ const URI_CHAR * URI_FUNC(UnescapeInPlace)(URI_CHAR * inout) {
     return URI_FUNC(UnescapeInPlaceEx)(inout, URI_FALSE, URI_BR_DONT_TOUCH);
 }
 
-const URI_CHAR * URI_FUNC(UnescapeInPlaceEx)(URI_CHAR * inout, UriBool plusToSpace,
-                                             UriBreakConversion breakConversion) {
+const URI_CHAR * URI_FUNC(UnescapeInPlaceEx)(
+        URI_CHAR * inout, UriBool plusToSpace, UriBreakConversion breakConversion) {
     URI_CHAR * read = inout;
     URI_CHAR * write = inout;
     UriBool prevWasCr = URI_FALSE;

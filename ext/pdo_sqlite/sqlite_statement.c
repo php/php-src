@@ -65,11 +65,10 @@ static int pdo_sqlite_stmt_execute(pdo_stmt_t *stmt)
 			return 1;
 
 		case SQLITE_ERROR:
-			sqlite3_reset(S->stmt);
-			ZEND_FALLTHROUGH;
 		case SQLITE_MISUSE:
 		case SQLITE_BUSY:
 		default:
+			sqlite3_reset(S->stmt);
 			pdo_sqlite_error_stmt(stmt);
 			return 0;
 	}
@@ -118,7 +117,7 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 							}
 						} else {
 							convert_to_long(parameter);
-#if ZEND_LONG_MAX > 2147483647
+#ifdef ZEND_ENABLE_ZVAL_LONG64
 							if (SQLITE_OK == sqlite3_bind_int64(S->stmt, param->paramno + 1, Z_LVAL_P(parameter))) {
 								return 1;
 							}

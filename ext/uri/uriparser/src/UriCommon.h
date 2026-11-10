@@ -38,8 +38,8 @@
  */
 
 #if (defined(URI_PASS_ANSI) && !defined(URI_COMMON_H_ANSI)) \
-    || (defined(URI_PASS_UNICODE) && !defined(URI_COMMON_H_UNICODE)) \
-    || (!defined(URI_PASS_ANSI) && !defined(URI_PASS_UNICODE))
+        || (defined(URI_PASS_UNICODE) && !defined(URI_COMMON_H_UNICODE)) \
+        || (!defined(URI_PASS_ANSI) && !defined(URI_PASS_UNICODE))
 /* What encodings are enabled? */
 #  include <uriparser/UriDefsConfig.h>
 #  if (!defined(URI_PASS_ANSI) && !defined(URI_PASS_UNICODE))
@@ -56,9 +56,9 @@
 #    endif
 /* Only one pass for each encoding */
 #  elif (defined(URI_PASS_ANSI) && !defined(URI_COMMON_H_ANSI) \
-         && defined(URI_ENABLE_ANSI)) \
-      || (defined(URI_PASS_UNICODE) && !defined(URI_COMMON_H_UNICODE) \
-          && defined(URI_ENABLE_UNICODE))
+          && defined(URI_ENABLE_ANSI)) \
+          || (defined(URI_PASS_UNICODE) && !defined(URI_COMMON_H_UNICODE) \
+                  && defined(URI_ENABLE_UNICODE))
 #    ifdef URI_PASS_ANSI
 #      define URI_COMMON_H_ANSI 1
 #      include <uriparser/UriDefsAnsi.h>
@@ -82,29 +82,27 @@ int URI_FUNC(FreeUriPath)(URI_TYPE(Uri) * uri, UriMemoryManager * memory);
 bool URI_FUNC(RangeEquals)(const URI_TYPE(TextRange) * a, const URI_TYPE(TextRange) * b);
 
 UriBool URI_FUNC(CopyRange)(URI_TYPE(TextRange) * destRange,
-                            const URI_TYPE(TextRange) * sourceRange,
-                            UriMemoryManager * memory);
+        const URI_TYPE(TextRange) * sourceRange, UriMemoryManager * memory);
 UriBool URI_FUNC(CopyRangeAsNeeded)(URI_TYPE(TextRange) * destRange,
-                                    const URI_TYPE(TextRange) * sourceRange,
-                                    UriMemoryManager * memory);
+        const URI_TYPE(TextRange) * sourceRange, UriMemoryManager * memory);
 
-UriBool URI_FUNC(RemoveDotSegmentsAbsolute)(URI_TYPE(Uri) * uri,
-                                            UriMemoryManager * memory);
+UriBool URI_FUNC(RemoveDotSegmentsAbsolute)(
+        URI_TYPE(Uri) * uri, UriMemoryManager * memory);
 UriBool URI_FUNC(RemoveDotSegmentsEx)(URI_TYPE(Uri) * uri, UriBool relative,
-                                      UriBool pathOwned, UriMemoryManager * memory);
+        UriBool pathOwned, UriMemoryManager * memory);
 
 unsigned char URI_FUNC(HexdigToInt)(URI_CHAR hexdig);
 URI_CHAR URI_FUNC(HexToLetterEx)(unsigned int value, UriBool uppercase);
 
-UriBool URI_FUNC(CopyPath)(URI_TYPE(Uri) * dest, const URI_TYPE(Uri) * source,
-                           UriMemoryManager * memory);
-UriBool URI_FUNC(CopyAuthority)(URI_TYPE(Uri) * dest, const URI_TYPE(Uri) * source,
-                                UriMemoryManager * memory);
+UriBool URI_FUNC(CopyPath)(
+        URI_TYPE(Uri) * dest, const URI_TYPE(Uri) * source, UriMemoryManager * memory);
+UriBool URI_FUNC(CopyAuthority)(
+        URI_TYPE(Uri) * dest, const URI_TYPE(Uri) * source, UriMemoryManager * memory);
 
 UriBool URI_FUNC(FixAmbiguity)(URI_TYPE(Uri) * uri, UriMemoryManager * memory);
 UriBool URI_FUNC(FixPathNoScheme)(URI_TYPE(Uri) * uri, UriMemoryManager * memory);
-UriBool URI_FUNC(EnsureThatPathIsNotMistakenForHost)(URI_TYPE(Uri) * uri,
-                                                     UriMemoryManager * memory);
+UriBool URI_FUNC(EnsureThatPathIsNotMistakenForHost)(
+        URI_TYPE(Uri) * uri, UriMemoryManager * memory);
 void URI_FUNC(FixEmptyTrailSegment)(URI_TYPE(Uri) * uri, UriMemoryManager * memory);
 
 #  endif

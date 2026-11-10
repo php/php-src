@@ -67,8 +67,8 @@
 
 #  include <assert.h>
 
-UriBool URI_FUNC(IsWellFormedPath)(const URI_CHAR * first, const URI_CHAR * afterLast,
-                                   UriBool hasHost) {
+UriBool URI_FUNC(IsWellFormedPath)(
+        const URI_CHAR * first, const URI_CHAR * afterLast, UriBool hasHost) {
     if ((first == NULL) || (afterLast == NULL)) {
         return URI_FALSE;
     }
@@ -142,8 +142,8 @@ UriBool URI_FUNC(IsWellFormedPath)(const URI_CHAR * first, const URI_CHAR * afte
     return URI_TRUE;
 }
 
-static void URI_FUNC(DropEmptyFirstPathSegment)(URI_TYPE(Uri) * uri,
-                                                UriMemoryManager * memory) {
+static void URI_FUNC(DropEmptyFirstPathSegment)(
+        URI_TYPE(Uri) * uri, UriMemoryManager * memory) {
     assert(uri != NULL);
     assert(memory != NULL);
     assert(uri->pathHead != NULL);
@@ -162,13 +162,13 @@ static void URI_FUNC(DropEmptyFirstPathSegment)(URI_TYPE(Uri) * uri,
  * This function checks for a leading empty path segment (that would have the "visual
  * effect" of a leading slash during stringification) and transforms it into .absolutePath
  * == URI_TRUE instead, if present. */
-static void URI_FUNC(TransformEmptyLeadPathSegments)(URI_TYPE(Uri) * uri,
-                                                     UriMemoryManager * memory) {
+static void URI_FUNC(TransformEmptyLeadPathSegments)(
+        URI_TYPE(Uri) * uri, UriMemoryManager * memory) {
     assert(uri != NULL);
     assert(memory != NULL);
 
     if ((URI_FUNC(HasHost)(uri) == URI_TRUE) || (uri->pathHead == NULL)
-        || (uri->pathHead->text.first != uri->pathHead->text.afterLast)) {
+            || (uri->pathHead->text.first != uri->pathHead->text.afterLast)) {
         return; /* i.e. nothing to do */
     }
 
@@ -180,8 +180,7 @@ static void URI_FUNC(TransformEmptyLeadPathSegments)(URI_TYPE(Uri) * uri,
 }
 
 static int URI_FUNC(InternalSetPath)(URI_TYPE(Uri) * destUri, const URI_CHAR * first,
-                                     const URI_CHAR * afterLast,
-                                     UriMemoryManager * memory) {
+        const URI_CHAR * afterLast, UriMemoryManager * memory) {
     assert(destUri != NULL);
     assert(first != NULL);
     assert(afterLast != NULL);
@@ -220,7 +219,7 @@ static int URI_FUNC(InternalSetPath)(URI_TYPE(Uri) * destUri, const URI_CHAR * f
     }
 
     URI_CHAR * const candidate =
-        memory->malloc(memory, (candidateLenChars + 1) * sizeof(URI_CHAR));
+            memory->malloc(memory, (candidateLenChars + 1) * sizeof(URI_CHAR));
 
     if (candidate == NULL) {
         return URI_ERROR_MALLOC;
@@ -232,10 +231,10 @@ static int URI_FUNC(InternalSetPath)(URI_TYPE(Uri) * destUri, const URI_CHAR * f
 
     /* Parse as an RFC 3986 URI */
     URI_TYPE(Uri) tempUri;
-    int res = URI_FUNC(ParseSingleUriExMm)(&tempUri, candidate,
-                                           candidate + candidateLenChars, NULL, memory);
+    int res = URI_FUNC(ParseSingleUriExMm)(
+            &tempUri, candidate, candidate + candidateLenChars, NULL, memory);
     assert((res == URI_SUCCESS) || (res == URI_ERROR_SYNTAX)
-           || (res == URI_ERROR_MALLOC));
+            || (res == URI_ERROR_MALLOC));
     if (res != URI_SUCCESS) {
         memory->free(memory, candidate);
         return res;
@@ -290,7 +289,7 @@ static int URI_FUNC(InternalSetPath)(URI_TYPE(Uri) * destUri, const URI_CHAR * f
 }
 
 int URI_FUNC(SetPathMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                        const URI_CHAR * afterLast, UriMemoryManager * memory) {
+        const URI_CHAR * afterLast, UriMemoryManager * memory) {
     /* Input validation (before making any changes) */
     if ((uri == NULL) || ((first == NULL) != (afterLast == NULL))) {
         return URI_ERROR_NULL;
@@ -299,8 +298,8 @@ int URI_FUNC(SetPathMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
     URI_CHECK_MEMORY_MANAGER(memory); /* may return */
 
     if ((first != NULL)
-        && (URI_FUNC(IsWellFormedPath)(first, afterLast, URI_FUNC(HasHost)(uri))
-            == URI_FALSE)) {
+            && (URI_FUNC(IsWellFormedPath)(first, afterLast, URI_FUNC(HasHost)(uri))
+                    == URI_FALSE)) {
         return URI_ERROR_SYNTAX;
     }
 
@@ -331,12 +330,12 @@ int URI_FUNC(SetPathMm)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
     /* Apply new value */
     res = URI_FUNC(InternalSetPath)(uri, first, afterLast, memory);
     assert((res == URI_SUCCESS) || (res == URI_ERROR_SYNTAX)
-           || (res == URI_ERROR_MALLOC));
+            || (res == URI_ERROR_MALLOC));
     return res;
 }
 
-int URI_FUNC(SetPath)(URI_TYPE(Uri) * uri, const URI_CHAR * first,
-                      const URI_CHAR * afterLast) {
+int URI_FUNC(SetPath)(
+        URI_TYPE(Uri) * uri, const URI_CHAR * first, const URI_CHAR * afterLast) {
     return URI_FUNC(SetPathMm)(uri, first, afterLast, NULL);
 }
 

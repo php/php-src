@@ -766,7 +766,7 @@ PHP_METHOD(Phar, webPhar)
 			sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
 
 			if (not_cgi) {
-				tmp = strstr(path_info, basename) + fname_len;
+				tmp = strstr(path_info, basename) + (fname_len - (basename - fname));
 				sa = *tmp;
 				*tmp = '\0';
 			}
@@ -3095,7 +3095,7 @@ static int phar_set_compression(zval *zv, void *argument) /* {{{ */
 	phar_entry_info *entry = (phar_entry_info *)Z_PTR_P(zv);
 	uint32_t compress = *(uint32_t *)argument;
 
-	if (entry->is_deleted) {
+	if (entry->is_deleted || (entry->flags & PHAR_ENT_COMPRESSION_MASK) == compress) {
 		return ZEND_HASH_APPLY_KEEP;
 	}
 
@@ -3494,9 +3494,23 @@ PHP_METHOD(Phar, copy)
 	newentry.filename = zend_string_copy(new_file);
 	newentry.fp_refcount = 0;
 
+	if (newentry.symlink) {
+		newentry.symlink = zend_string_copy(newentry.symlink);
+	}
+
+	if (newentry.tmp) {
+		newentry.tmp = estrdup(newentry.tmp);
+	}
+
 	if (oldentry->fp_type != PHAR_FP) {
 		if (FAILURE == phar_copy_entry_fp(oldentry, &newentry, &error)) {
 			zend_string_release(newentry.filename);
+			if (newentry.symlink) {
+				zend_string_release(newentry.symlink);
+			}
+			if (newentry.tmp) {
+				efree(newentry.tmp);
+			}
 			php_stream_close(newentry.fp);
 			zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
 			efree(error);

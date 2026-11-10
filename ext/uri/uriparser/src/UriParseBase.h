@@ -42,8 +42,8 @@
 
 #  include <uriparser/UriBase.h>
 
-void uriWriteQuadToDoubleByte(const unsigned char * hexDigits, int digitCount,
-                              unsigned char * output);
+void uriWriteQuadToDoubleByte(
+        const unsigned char * hexDigits, int digitCount, unsigned char * output);
 unsigned char uriGetOctetValue(const unsigned char * digits, int digitCount);
 
 #endif /* URI_PARSE_BASE_H */

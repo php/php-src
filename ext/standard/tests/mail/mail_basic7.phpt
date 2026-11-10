@@ -207,7 +207,7 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing mail() : basic functionality ***
 
 
@@ -250,8 +250,8 @@ TypeError: Header "foo7" must only contain values of type string, stdClass found
 ************* TEST ******************
 ValueError: Header name "*:foo1" contains invalid characters
 ValueError: Header name "foo2:::" contains invalid characters
-ValueError: Header name "" contains invalid characters
-ValueError: Header name "foo7" contains invalid characters
+ValueError: Header name "%0foo6" contains invalid characters
+ValueError: Header name "foo7%0" contains invalid characters
 bool(true)
 To: user@example.com
 Subject: Test Subject

@@ -1,6 +1,114 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.6.0RC5
+?? ??? ????, PHP 8.6.1
+
+- CLI:
+  . Fixed built-in server rejecting long request paths, or paths received in
+    several pieces, as malformed. (Ilia Alshanetsky)
+
+- Core:
+  . Fixed AST printing of interface extends list as implements. (Jorg Sowa)
+  . Fixed AST printing dropping fully qualified and namespace-relative prefixes
+    of class names in implements, catch, and trait use lists. (Jorg Sowa)
+  . Fixed AST export dropping the braces of dynamic class constant fetches.
+    (Jorg Sowa)
+  . Fixed bug GH-25238 (ReflectionProperty::isInitialized() skips lazy init once
+    cached). (lazerg)
+  . Fixed bug GH-25265 (Misaligned read for virtual internal props in
+    hooked subclass). (Lazizbek Ergashev)
+  . Fixed bug GH-25314 (Assertion in ZEND_DO_FCALL: reference returned by
+    &__get() reaches property hook TMP result). (ndossche)
+  . Fix support for never-returning functions in PFAs. (ndossche)
+  . Fixed array_map() optimization not resolving the function name of an FCC.
+    (ChrisAbner)
+  . Fixed bug GH-25302 (Use-after-free in zend_compile_const_decl() with
+    OPcache during concurrent compilation). (Nicolas Grekas)
+  . Fixed use-after-free when the error handler releases a string while an
+    "Illegal string offset" warning is raised for its offset in a read, ?? or
+    nested isset()/empty(). (Jorg Sowa)
+
+- Curl:
+  . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
+
+- Fileinfo:
+  . Fixed bug GH-25051 (TrueType fonts detected as application/octet-stream
+    since libmagic 5.48). (Weilin Du)
+
+- MBString:
+  . Fixed stack overflow in mb_check_encoding() and mb_convert_encoding() with
+    deeply nested arrays. (Eyüp Can Akman)
+
+- Opcache:
+  . Fixed bug GH-22216 (spurious opcache.memory_consumption warning on each new
+    ZTS thread; the directive is also reported as 0 in worker threads).
+    (Daisuke Komazaki)
+  . Fixed bug GH-25165 (Tracing JIT loops forever once opcache.jit_buffer_size
+    is exhausted while compiling side traces). (Ilia Alshanetsky)
+  . Fixed bug GH-25164 (Function JIT loop calling a user function runs once
+    or never terminates). (Ilia Alshanetsky)
+  . Fixed memory leak in JIT ASSIGN_DIM when the assignment fails. (Jorg Sowa)
+  . Fixed bug GH-16396 (Failed to invoke user error handler during index
+    conversion in JIT). (Jorg Sowa)
+  . Fixed bug GH-24801 (JIT: SIGFPE in ir_fold MUL_OV constant folding).
+    (waroad)
+  . Fixed bug GH-25037 (Function JIT ENTRY live var assertion).
+    (Ilia Alshanetsky)
+  . Fixed bug GH-25195 (smm_shared_globals left dangling without an
+    SHM backend). (Grégoire Pineau)
+  . Fixed bug GH-25269 (JIT: misaligned zval passed to
+    ZEND_ADD_ARRAY_ELEMENT handler). (Jorg Sowa, ndossche)
+  . Fixed bug GH-25253 (JIT reads parent of an unlinked class).
+    (lazerg, mlenarciak)
+  . Fixed JIT ignoring leading-numeric string offsets in isset(), empty() and
+    ??. (Jorg Sowa)
+  . Fixed use-after-free in JIT when the error handler releases a string while
+    an "Undefined variable" warning is raised for its offset in ?? or nested
+    isset()/empty(). (Jorg Sowa)
+
+- OpenSSL:
+  . Fixed bug GH-25172 (TLS session reuse shares request-lifetime callback
+    structures with persistent streams). (cxxz16, David Carlier)
+  . Fixed an exception thrown by the session_get_cb stream context callback
+    being replaced with a TypeError. (Ilia Alshanetsky)
+
+- PDO_Firebird:
+  . Fixed stack buffer overflow with long connection user names, passwords,
+    charsets, or roles. (Ilia Alshanetsky)
+
+- SOAP:
+  . Fixed bug GH-25267 (NULL dereference in to_xml_any() with integer key).
+    (lazerg)
+  . Fixed bug GH-25303 (NULL encoder dereference in to_xml_list() error
+    message). (lazerg)
+
+- Readline:
+  . Fixed incorrect handling of non-ASCII pending_input bytes in readline_info(),
+    which could cause readline() to return false prematurely. (Weilin Du)
+
+- Reflection:
+  . Fixed bug GH-25266 (Misaligned read in ReflectionProperty::isReadable()).
+    (Lazizbek Ergashev)
+  . Fix trampoline leak when object construction fails for lazy object.
+    (ndossche)
+  . Fix ReflectionProperty::isReadable() not working for indirect slots.
+    (ndossche)
+
+- Streams:
+  . Fixed in-place URL decoding of interned strings in the HTTP and FTP
+    wrappers. (Alejandro Pacheco)
+  . Fixed bug GH-22063 (Stream filter chain UAF on self-removal during
+    callback). (Ilia Alshanetsky)
+  . Fixed leaks and data loss when user filter leaves buckets on input
+    brigade. (ndossche, Matthias Goergens, Jakub Zelenka)
+  . Fixed use-after-free of the previous request's default stream context when
+    a stream error is raised during request startup, such as when a POST body
+    cannot be buffered to a temporary file. (Go Kudo)
+  . Fixed bug GH-24175 (Use-after-free when pclose() closes a stream from its
+    user filter). (Edmond)
+  . Fixed bug GH-15701 (Build failure: incompatible funopen() seeker pointer
+    type on 32-bit platforms). (Kamil Tekiela)
+
+05 Nov 2026, PHP 8.6.0RC5
 
 - Core:
   . Fix function and constant imports in compile_to_ast and add support
@@ -13,10 +121,28 @@ PHP                                                                        NEWS
     (lazerg)
   . Fixed bug GH-25007 (Partial function application: named args in a constant
     expression cause out-of-bounds write in zp_compile()). (lazerg)
+  . Fixed AST printing dropping final on class constants and properties, and
+    abstract on properties. (Jorg Sowa)
+  . Fixed AST export of readonly anonymous classes dropping the readonly
+    modifier. (Jorg Sowa)
+  . Fixed memory leak of a duplicate named argument in new in initializer.
+    (Jorg Sowa)
+  . Fixed bug GH-25061 ($x = $x - 1 on null is optimized to PRE_DEC).
+    (Lazizbek Ergashev)
+  . Fixed bug GH-23911 (Don't use static closure cache when called_scope
+    diverges). (Roman Ondráček)
+  . Fixed first-class callables to static methods in trait constant
+    expressions resolving to the method of the first using class and
+    bypassing visibility checks. (Jorg Sowa)
 
 - CLI:
   . Fixed bug GH-24697 (PHP_HTTP_PARSER_STRICT build option doesn't work).
     (ndossche, devnexen)
+  . Fixed bug GH-9670 (List -C and -q in the CLI help). (Juan Versolato Lopes)
+
+- COM:
+  . Fixed bug GH-25008 (com_event_sink() and com_print_typeinfo() crash
+    resolving an event source with no loaded typelib). (Ilia Alshanetsky)
 
 - Curl:
   . Fix use-after-free of CURLOPT_STDERR stream on cloned curl handle.
@@ -28,15 +154,13 @@ PHP                                                                        NEWS
     NULL deref on first use after a failed open). (Girgias)
 
 - DOM:
+  . Fixed a use-after-free when reflected attribute setters replace an
+    attribute whose child still has a live wrapper. (Jakub Zelenka)
   . Fix error paths in dom_xml_serializing_a_document_node(). (ndossche)
 
 - FFI:
   . Fixed bug GH-24582 (Memory leaks in ext/ffi parser when finalize_type()
     bails out). (matyapiro31, David Carlier)
-
-- Fileinfo:
-  . Fixed bug GH-25051 (TrueType fonts detected as application/octet-stream
-    since libmagic 5.48). (Weilin Du)
 
 - FPM:
   . Fixed crash and stack memory disclosure in the worker output logging with
@@ -52,6 +176,9 @@ PHP                                                                        NEWS
   . Fixed null pointer dereference in fpm_get_status() when the scoreboard
     copy fails. (Marcel Hernandez)
 
+- GD:
+  . Fixed imagetruecolortopalette() error message. (Marc Bennewitz)
+
 - Hash:
   . Fix GOST and Snefru digests of 512 MiB or more. (Martin Mirchev)
 
@@ -63,6 +190,17 @@ PHP                                                                        NEWS
   . Fixed json_encode() leaving the recursion guard set on objects with hooked
     properties after running out of memory while escaping a property name.
     (adapik)
+  . Fixed json_encode() silently narrowing $depth values outside the int range,
+    which wrapped to an unrelated depth. (cuishuang)
+  . Fixed json_encode() continuing to encode after an array or object key
+    failed to encode. (Ilia Alshanetsky)
+
+- LDAP:
+  . Fix crash in ldap_exop_sync() when $response_data is omitted. (lacatoire)
+
+- MBString:
+  . Fixed negative mbstring.regex_stack_limit and mbstring.regex_retry_limit
+    on 32bit platforms. (Marc Bennewitz)
 
 - MySQLnd:
   . Fixed bug GH-24609 (OK packets without an info message rejected on x32
@@ -73,6 +211,8 @@ PHP                                                                        NEWS
     cannot describe a parameter). (Ilia Alshanetsky)
 
 - Opcache:
+  . Fixed bug GH-24397 (Assertion failure when dumping JIT IR).
+    (Ilia Alshanetsky)
   . Fixed tracing JIT returning a wrapped integer instead of a float on
     integer overflow after an integer was compared with a float or
     numeric-string literal. (Ilia Alshanetsky)
@@ -117,11 +257,21 @@ PHP                                                                        NEWS
     (Pavel Gushcha)
   . Fixed potential infinite recursion/hang (HYBRID/TAILCALL respectively)
     when zend_interrupt_function resets EG(vm_interrupt).  (Levi Morrison)
+  . Fix JIT losing the called scope of self::/parent:: calls in included files.
+    (ndossche)
+  . Fixed preloaded functions not JIT-compiled again after OPcache restart.
+    (Jorg Sowa)
+  . Fixed bug GH-24988 (Incorrect opcode range check causes bugs with exceptions in
+    function JIT). (ndossche, Jorg Sowa)
+  . Fix opcache phar check. (ndossche)
 
 - OpenSSL:
   . Fixed build with OpenSSL 4.1. (Weilin Du)
   . Fixed bug GH-24784 (openssl_pkcs7_read() and openssl_cms_read() overwrite
     certificates with CRLs). (Alexander Danilov)
+  . Fixed use-after-free in the TLS session remove callback when the listener
+    stream is closed while a shared context is still in use. (Jakub Zelenka)
+  . Fixed heap buffer overflow in TLS PSK callbacks. (Jakub Zelenka)
 
 - PDO_Firebird:
   . Fixed bug GH-25006 (getColumnMeta() reads out of bounds for an
@@ -130,12 +280,32 @@ PHP                                                                        NEWS
 - PDO_PGSQL:
   . Fixed bug GH-24461 (DISCARD ALL on persistent connection cleanup drops
     PgBouncer's prepared statements). (David Carlier, Artem Ukrainskiy)
+  . Fixed a use-after-free when a persistent connection receives a notice
+    after the request that called Pdo\Pgsql::setNoticeCallback() has ended.
+    (Ilia Alshanetsky)
+
+- PDO_SQLite:
+  . Fixed bug GH-24990 (Statement unusable after a failed execute()). (lazerg)
 
 - Phar:
+  . Fixed bug GH-25093 (Phar::webPhar() redirect reads past the request URI).
+    (lazerg)
+  . Fixed bug GH-25089 (Heap buffer over-read via crafted alias size in
+    zip-based phar). (Lazizbek Ergashev)
   . Fixed bug GH-8469 (Phar::decompressFiles() and Phar::compressFiles() retain
     compressed contents after changing compression). (Raphael Paez)
   . Fixed bug GH-24740 (Oversized tar metadata exhausts the memory limit).
     (Lazizbek Ergashev)
+  . Fixed bug GH-25090 (UAF in phar rename() of an entry with metadata).
+    (Lazizbek Ergashev)
+  . Fixed bug GH-25091 (UAF in phar rename() when source and destination
+    are equal). (Lazizbek Ergashev)
+  . Fixed bug GH-25092 (Double free in Phar::copy() on link and
+    mounted entries). (Lazizbek Ergashev)
+  . Fixed bug GH-24531 (Crash when modifying a zip-based phar whose file was
+    renamed). (Ilia Alshanetsky)
+  . Fixed Phar::buildFromIterator() accepting a negative getMTime() on 32bit
+    platforms. (Marc Bennewitz)
 
 - Reflection:
   . Fixed bug GH-21768 (Assertion failure in ReflectionProperty::isReadable()
@@ -162,6 +332,11 @@ PHP                                                                        NEWS
     properties). (Lazizbek Ergashev)
 
 - Standard:
+  . Fixed bug GH-25086 (Io\Poll kqueue backend leaks memory on every
+    Watcher::modifyEvents() call). (Lazizbek Ergashev, Jakub Zelenka)
+  . Fixed Io\Poll WSAPoll backend accepting handles that are not sockets, which
+    were then silently dropped by wait(). Adding them now fails with
+    ERROR_NOSUPPORT. (Nicolas Grekas)
   . Fixed memory leaks in checkdnsrr() and dns_check_record() on Windows.
     (Ilia Alshanetsky)
   . Fixed __unserialize() and __wakeup() being called for objects with a missing
@@ -180,6 +355,17 @@ PHP                                                                        NEWS
     parsing fails after Transfer-Encoding). (bercedev)
   . Fixed bug GH-24509 (HTTP wrapper leaks Location buffer on empty
     Location header). (bercedev)
+  . Fix out-of-bounds reads parsing ftp:// wrapper server replies.
+    (Alejandro Pacheco)
+
+- URI:
+  . Upgrade to uriparser 1.0.3. (CVE-2026-48841) (Sebastian Pipping, timwolla)
+
+- Windows:
+  . Fixed bug GH-25009 (GetConsoleTitleW() buffer size passed in bytes).
+    (Lazizbek Ergashev)
+  . Fixed sapi_windows_cp_set() and sapi_windows_cp_conv() accepting a negative
+    codepage on 32bit platforms. (Marc Bennewitz)
 
 - Zip:
   . Reject broken libzip versions 1.3.1, 1.7.0 and 1.12.0 during Windows
@@ -513,6 +699,8 @@ PHP                                                                        NEWS
     (Nicolas Grekas)
   . Fixed convert.quoted-printable-decode decoding lowercase hex digits to
     the wrong byte. (Ilia Alshanetsky)
+  . Fixed bug GH-23948 (Io\Poll: data buffered by the stream layer is not
+    reported). (Jakub Zelenka)
 
 - Tidy:
   . Fixed a use-after-free when a tidyNode is used after its document is

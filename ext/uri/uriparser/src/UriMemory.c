@@ -44,10 +44,17 @@
 
 #include "UriConfig.h" /* for HAVE_REALLOCARRAY */
 
+// NOTE: Please keep this block in sync with its sibling in file
+//       `CMakeLists.txt`!
 #ifdef HAVE_REALLOCARRAY
 // For glibc >=2.29 of 2019-02-01
 #  if !defined(_DEFAULT_SOURCE)
 #    define _DEFAULT_SOURCE 1
+#  endif
+
+// For glibc <2.29
+#  if !defined(_GNU_SOURCE)
+#    define _GNU_SOURCE 1
 #  endif
 
 // For NetBSD (stdlib.h revision 1.122 of 2020-05-26)
@@ -93,18 +100,18 @@ static void * uriDefaultMalloc(UriMemoryManager * URI_UNUSED(memory), size_t siz
     return malloc(size);
 }
 
-static void * uriDefaultCalloc(UriMemoryManager * URI_UNUSED(memory), size_t nmemb,
-                               size_t size) {
+static void * uriDefaultCalloc(
+        UriMemoryManager * URI_UNUSED(memory), size_t nmemb, size_t size) {
     return calloc(nmemb, size);
 }
 
-static void * uriDefaultRealloc(UriMemoryManager * URI_UNUSED(memory), void * ptr,
-                                size_t size) {
+static void * uriDefaultRealloc(
+        UriMemoryManager * URI_UNUSED(memory), void * ptr, size_t size) {
     return realloc(ptr, size);
 }
 
-static void * uriDefaultReallocarray(UriMemoryManager * URI_UNUSED(memory), void * ptr,
-                                     size_t nmemb, size_t size) {
+static void * uriDefaultReallocarray(
+        UriMemoryManager * URI_UNUSED(memory), void * ptr, size_t nmemb, size_t size) {
 #ifdef HAVE_REALLOCARRAY
     return reallocarray(ptr, nmemb, size);
 #else
@@ -122,9 +129,9 @@ static void uriDefaultFree(UriMemoryManager * URI_UNUSED(memory), void * ptr) {
 
 UriBool uriMemoryManagerIsComplete(const UriMemoryManager * memory) {
     return (memory && memory->malloc && memory->calloc && memory->realloc
-            && memory->reallocarray && memory->free)
-               ? URI_TRUE
-               : URI_FALSE;
+                   && memory->reallocarray && memory->free)
+                   ? URI_TRUE
+                   : URI_FALSE;
 }
 
 void * uriEmulateCalloc(UriMemoryManager * memory, size_t nmemb, size_t size) {
@@ -147,8 +154,8 @@ void * uriEmulateCalloc(UriMemoryManager * memory, size_t nmemb, size_t size) {
     return buffer;
 }
 
-void * uriEmulateReallocarray(UriMemoryManager * memory, void * ptr, size_t nmemb,
-                              size_t size) {
+void * uriEmulateReallocarray(
+        UriMemoryManager * memory, void * ptr, size_t nmemb, size_t size) {
     const size_t total_size = nmemb * size;
 
     if (memory == NULL) {
@@ -309,6 +316,7 @@ int uriTestMemoryManagerEx(UriMemoryManager * memory, UriBool challengeAlignment
     }
     for (index = 0; index < callocTotalSize; index++) { /* all zeros? */
         if (buffer[index] != '\0') {
+            memory->free(memory, buffer);
             return URI_ERROR_MEMORY_MANAGER_FAULTY;
         }
     }
@@ -324,12 +332,15 @@ int uriTestMemoryManagerEx(UriMemoryManager * memory, UriBool challengeAlignment
     for (index = 0; index < mallocSize; index++) {
         buffer[index] = '\xF3';
     }
-    buffer = memory->realloc(memory, buffer, reallocSize);
-    if (buffer == NULL) {
+    void * const reallocBuffer = memory->realloc(memory, buffer, reallocSize);
+    if (reallocBuffer == NULL) {
+        memory->free(memory, buffer);
         return URI_ERROR_MEMORY_MANAGER_FAULTY;
     }
+    buffer = reallocBuffer;
     for (index = 0; index < mallocSize; index++) { /* previous content? */
         if (buffer[index] != '\xF3') {
+            memory->free(memory, buffer);
             return URI_ERROR_MEMORY_MANAGER_FAULTY;
         }
     }
@@ -370,12 +381,16 @@ int uriTestMemoryManagerEx(UriMemoryManager * memory, UriBool challengeAlignment
     for (index = 0; index < mallocSize; index++) {
         buffer[index] = '\xF7';
     }
-    buffer = memory->reallocarray(memory, buffer, reallocarrayNmemb, reallocarraySize);
-    if (buffer == NULL) {
+    void * const reallocarrayBuffer =
+            memory->reallocarray(memory, buffer, reallocarrayNmemb, reallocarraySize);
+    if (reallocarrayBuffer == NULL) {
+        memory->free(memory, buffer);
         return URI_ERROR_MEMORY_MANAGER_FAULTY;
     }
+    buffer = reallocarrayBuffer;
     for (index = 0; index < mallocSize; index++) { /* previous content? */
         if (buffer[index] != '\xF7') {
+            memory->free(memory, buffer);
             return URI_ERROR_MEMORY_MANAGER_FAULTY;
         }
     }
@@ -450,7 +465,7 @@ int uriTestMemoryManagerEx(UriMemoryManager * memory, UriBool challengeAlignment
             ptr[3] = 3.3L;
 
             long double * const ptrNew =
-                memory->realloc(memory, ptr, 8 * sizeof(long double));
+                    memory->realloc(memory, ptr, 8 * sizeof(long double));
             if (ptrNew != NULL) {
                 ptr = ptrNew;
                 ptr[4] = 4.4L;
@@ -472,6 +487,6 @@ int uriTestMemoryManager(UriMemoryManager * memory) {
 }
 
 /*extern*/ UriMemoryManager defaultMemoryManager = {
-    uriDefaultMalloc,       uriDefaultCalloc, uriDefaultRealloc,
-    uriDefaultReallocarray, uriDefaultFree,   NULL /* userData */
+        uriDefaultMalloc, uriDefaultCalloc, uriDefaultRealloc, uriDefaultReallocarray,
+        uriDefaultFree, NULL /* userData */
 };

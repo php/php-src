@@ -91,3 +91,33 @@ PHPAPI php_socket_t php_poll_handle_get_fd(php_poll_handle_object *handle)
 
 	return handle->ops->get_fd(handle);
 }
+
+#define PHP_POLL_HANDLE_EXT_OPS_MAX 16
+
+static struct {
+	const php_poll_handle_ops *ops;
+	const php_poll_handle_ext_ops *ext_ops;
+} php_poll_handle_ext_ops_registry[PHP_POLL_HANDLE_EXT_OPS_MAX];
+static int php_poll_handle_ext_ops_count = 0;
+
+PHPAPI zend_result php_poll_handle_register_ext_ops(
+		const php_poll_handle_ops *ops, const php_poll_handle_ext_ops *ext_ops)
+{
+	if (!ops || !ext_ops || php_poll_handle_ext_ops_count == PHP_POLL_HANDLE_EXT_OPS_MAX) {
+		return FAILURE;
+	}
+	php_poll_handle_ext_ops_registry[php_poll_handle_ext_ops_count].ops = ops;
+	php_poll_handle_ext_ops_registry[php_poll_handle_ext_ops_count].ext_ops = ext_ops;
+	php_poll_handle_ext_ops_count++;
+	return SUCCESS;
+}
+
+PHPAPI const php_poll_handle_ext_ops *php_poll_handle_get_ext_ops(const php_poll_handle_ops *ops)
+{
+	for (int i = 0; i < php_poll_handle_ext_ops_count; i++) {
+		if (php_poll_handle_ext_ops_registry[i].ops == ops) {
+			return php_poll_handle_ext_ops_registry[i].ext_ops;
+		}
+	}
+	return NULL;
+}

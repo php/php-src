@@ -663,8 +663,8 @@ static zend_ast *zp_compile_forwarding_call(
 		call_ast = zend_ast_create(ZEND_AST_CALL, func_name_ast, args_ast);
 	}
 
-	/* Void functions can not 'return $expr' */
-	if (ZEND_TYPE_FULL_MASK(return_type) & MAY_BE_VOID) {
+	/* Void and never functions can not 'return $expr' */
+	if (ZEND_TYPE_FULL_MASK(return_type) & (MAY_BE_VOID|MAY_BE_NEVER)) {
 		stmts_ast = zend_ast_list_add(stmts_ast, call_ast);
 	} else {
 		zend_ast *return_ast = zend_ast_create(ZEND_AST_RETURN, call_ast);

@@ -1391,9 +1391,8 @@ static void php_cli_server_request_ctor(php_cli_server_request *req) /* {{{ */
 	req->query_string = NULL;
 	req->query_string_len = 0;
 	zend_hash_init(&req->headers, 0, NULL, cli_header_value_dtor, 1);
-	/* No destructor is registered as the value pointed by is the same as for &req->headers */
 	GC_MAKE_PERSISTENT_LOCAL(&req->headers);
-	zend_hash_init(&req->headers_original_case, 0, NULL, NULL, 1);
+	zend_hash_init(&req->headers_original_case, 0, NULL, cli_header_value_dtor, 1);
 	GC_MAKE_PERSISTENT_LOCAL(&req->headers_original_case);
 	req->content = NULL;
 	req->content_len = 0;
@@ -1608,21 +1607,22 @@ static void normalize_vpath(char **retval, size_t *retval_len, const char *vpath
 /* {{{ php_cli_server_client_read_request */
 static int php_cli_server_client_read_request_on_message_begin(php_http_parser *parser)
 {
-	return 0;
+	php_cli_server_client *client = parser->data;
+	return client->request_read;
 }
 
 static int php_cli_server_client_read_request_on_path(php_http_parser *parser, const char *at, size_t length)
 {
 	php_cli_server_client *client = parser->data;
-	{
-		char *vpath;
-		size_t vpath_len;
-		if (UNEXPECTED(client->request.vpath != NULL)) {
-			return 1;
-		}
-		normalize_vpath(&vpath, &vpath_len, at, length, 1);
-		client->request.vpath = vpath;
-		client->request.vpath_len = vpath_len;
+	if (EXPECTED(client->request.vpath == NULL)) {
+		client->request.vpath = pestrndup(at, length, true);
+		client->request.vpath_len = length;
+	} else {
+		ZEND_ASSERT(length <= PHP_HTTP_MAX_HEADER_SIZE && PHP_HTTP_MAX_HEADER_SIZE - length >= client->request.vpath_len);
+		client->request.vpath = perealloc(client->request.vpath, client->request.vpath_len + length + 1, true);
+		memcpy(client->request.vpath + client->request.vpath_len, at, length);
+		client->request.vpath_len += length;
+		client->request.vpath[client->request.vpath_len] = '\0';
 	}
 	return 0;
 }
@@ -1684,16 +1684,22 @@ static void php_cli_server_client_save_header(php_cli_server_client *client)
 	} else {
 		zend_string *curval = Z_STR_P(entry);
 		zend_string *newval = zend_string_safe_alloc(1, ZSTR_LEN(curval),  ZSTR_LEN(client->current_header_value) + 2, /* persistent */true);
+		GC_MAKE_PERSISTENT_LOCAL(newval);
 
 		memcpy(ZSTR_VAL(newval), ZSTR_VAL(curval), ZSTR_LEN(curval));
 		memcpy(ZSTR_VAL(newval) + ZSTR_LEN(curval), ", ", 2);
 		memcpy(ZSTR_VAL(newval) + ZSTR_LEN(curval) + 2, ZSTR_VAL(client->current_header_value), ZSTR_LEN(client->current_header_value) + 1);
 
 		ZVAL_STR(&tmp, newval);
+		zend_string_release_ex(client->current_header_value, /* persistent */ true);
 	}
 
 	/* Add/Update the wrapped zend_string to the HashTable */
 	zend_hash_update(&client->request.headers, lc_header_name, &tmp);
+	/* Each table owns a reference to the new value. The old value can outlive the update
+	 * above, as a repeat spelled differently keeps the first spelling's entry in
+	 * headers_original_case. */
+	zend_string_addref(Z_STR(tmp));
 	zend_hash_update(&client->request.headers_original_case, client->current_header_name, &tmp);
 
 	zend_string_release_ex(lc_header_name, /* persistent */ true);
@@ -1825,6 +1831,12 @@ static int php_cli_server_client_read_request_on_message_complete(php_http_parse
 {
 	php_cli_server_client *client = parser->data;
 	client->request.protocol_version = parser->http_major * 100 + parser->http_minor;
+	if (client->request.vpath) {
+		char *vpath = client->request.vpath;
+		normalize_vpath(&client->request.vpath, &client->request.vpath_len,
+			vpath, client->request.vpath_len, true);
+		pefree(vpath, true);
+	}
 	php_cli_server_request_translate_vpath(client->server, &client->request, client->server->document_root, client->server->document_root_len);
 	if (client->request.vpath) {
 		const char *vpath = client->request.vpath;

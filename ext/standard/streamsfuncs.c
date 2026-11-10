@@ -179,7 +179,7 @@ PHP_FUNCTION(stream_socket_client)
 		/* host might contain binary characters */
 		zend_string *quoted_host = php_addslashes(host);
 
-		php_error_docref(NULL, E_WARNING, "Unable to connect to %s (%s)", ZSTR_VAL(quoted_host), errstr == NULL ? "Unknown error" : ZSTR_VAL(errstr));
+		php_error_docref(NULL, E_WARNING, "Unable to connect to %pS (%s)", quoted_host, errstr == NULL ? "Unknown error" : ZSTR_VAL(errstr));
 		zend_string_release_ex(quoted_host, 0);
 	}
 
@@ -1394,7 +1394,23 @@ PHP_FUNCTION(stream_filter_remove)
 		RETURN_THROWS();
 	}
 
-	if (php_stream_filter_flush(filter, 1) == FAILURE) {
+	if (!filter->chain || !filter->chain->stream) {
+		php_error_docref(NULL, E_WARNING, "Unable to flush filter, not removing");
+		RETURN_FALSE;
+	}
+
+	php_stream *stream = filter->chain->stream;
+	uint32_t no_remove_flag = filter->chain == &stream->readfilters ?
+			PHP_STREAM_FLAG_NO_READ_FILTER_REMOVE : PHP_STREAM_FLAG_NO_WRITE_FILTER_REMOVE;
+	if (stream->flags & no_remove_flag) {
+		php_error_docref(NULL, E_WARNING, "Cannot remove filter while it is being applied");
+		RETURN_FALSE;
+	}
+
+	stream->flags |= no_remove_flag;
+	zend_result flushed = php_stream_filter_flush(filter, 1);
+	stream->flags &= ~no_remove_flag;
+	if (flushed == FAILURE) {
 		php_error_docref(NULL, E_WARNING, "Unable to flush filter, not removing");
 		RETURN_FALSE;
 	}
