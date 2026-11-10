@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Date:
   . Update timelib to 2026.03 (Derick)
 
+- Streams:
+  . Fixed use-after-free of the previous request's default stream context when
+    a stream error is raised during request startup, such as when a POST body
+    cannot be buffered to a temporary file. (Go Kudo)
 
 05 Nov 2026, PHP 8.6.0RC5
 
