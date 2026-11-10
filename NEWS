@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Date:
   . Update timelib to 2026.03 (Derick)
 
+- Fileinfo:
+  . Fixed incorrect MIME type detection for HWPX files. (Weilin Du)
+
 - Streams:
   . Fixed use-after-free of the previous request's default stream context when
     a stream error is raised during request startup, such as when a POST body
