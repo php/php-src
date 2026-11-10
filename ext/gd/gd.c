@@ -4128,7 +4128,7 @@ PHP_FUNCTION(imageaffine)
 					}
 					break;
 				default:
-					zend_argument_type_error(3, "contains invalid type for element %i", i);
+					zend_argument_type_error(2, "contains invalid type for element %i", i);
 					RETURN_THROWS();
 			}
 		}
