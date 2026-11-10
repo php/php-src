@@ -357,6 +357,7 @@ PHP                                                                        NEWS
     renamed). (Ilia Alshanetsky)
 
 - phpdbg:
+  . Fixed bug GH-25338 (opcode listing did not include property hooks). (crystarm)
   . Fix wrong command names. (ndossche, Weilin Du)
   . Fixed bug GH-22480 (Use-after-free when re-watching an already-watched
     variable). (Ilia Alshanetsky)
