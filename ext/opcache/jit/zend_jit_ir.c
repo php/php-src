@@ -2052,23 +2052,30 @@ static int zend_jit_exception_handler_free_op2_stub(zend_jit_ctx *jit)
 static int zend_jit_interrupt_handler_stub(zend_jit_ctx *jit)
 {
 	ir_ref if_timeout, if_exception;
+	ir_ref end_inputs = IR_UNUSED;
 
 	// EX(opline) = opline
 	ir_STORE(jit_EX(opline), jit_IP(jit));
 
 	ir_STORE(jit_EG(vm_interrupt), ir_CONST_U8(0));
-	if_timeout = ir_IF(ir_EQ(ir_LOAD_U8(jit_EG(timed_out)), ir_CONST_U8(0)));
-	ir_IF_FALSE(if_timeout);
-	ir_CALL(IR_VOID, ir_CONST_FUNC(zend_timeout)); // noreturn
-	ir_MERGE_WITH_EMPTY_TRUE(if_timeout);
 
-	// if (ZEND_HAS_OOM()) {
+	// if (EG(timed_out)) {
+	if_timeout = ir_IF(ir_LOAD_U8(jit_EG(timed_out)));
+	ir_IF_TRUE(if_timeout);
+	ir_CALL(IR_VOID, ir_CONST_FUNC(zend_timeout));
+	ir_CALL(IR_VOID, ir_CONST_FUNC(zend_jit_exception_in_interrupt_handler_helper));
+	// LOAD_OPLINE()
+	jit_STORE_IP(jit, ir_LOAD_A(jit_EX(opline)));
+	ir_END_list(end_inputs);
+	ir_IF_FALSE(if_timeout);
+
+	// } else if (ZEND_HAS_OOM()) {
 	ir_ref if_delayed_oom = ir_IF(ir_LOAD_U8(ir_ADD_OFFSET(jit_EG(delayed_oom), offsetof(zend_oom_info, state))));
 	ir_IF_TRUE(if_delayed_oom);
 	ir_CALL(IR_VOID, ir_CONST_FC_FUNC(zend_handle_delayed_oom));
 	// LOAD_OPLINE()
 	jit_STORE_IP(jit, ir_LOAD_A(jit_EX(opline)));
-	ir_ref if_delayed_oom_end = ir_END();
+	ir_END_list(end_inputs);
 	ir_IF_FALSE(if_delayed_oom);
 
 	if (zend_interrupt_function) {
@@ -2082,7 +2089,8 @@ static int zend_jit_interrupt_handler_stub(zend_jit_ctx *jit)
 		jit_STORE_IP(jit, ir_LOAD_A(jit_EX(opline)));
 	}
 
-	ir_MERGE_WITH(if_delayed_oom_end);
+	ir_END_list(end_inputs);
+	ir_MERGE_list(end_inputs);
 
 	if (GCC_GLOBAL_REGS || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL) {
 		zend_jit_tailcall_handler(jit, ir_LOAD_A(jit_IP(jit)));
