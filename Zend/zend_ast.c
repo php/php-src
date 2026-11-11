@@ -3124,6 +3124,9 @@ simple_list:
 			if (ast->attr & ZEND_ACC_FINAL) {
 				smart_str_appends(str, "final ");
 			}
+			if (ast->attr & ZEND_ACC_READONLY) {
+				smart_str_appends(str, "readonly ");
+			}
 			if (ast->child[0]) {
 				zend_ast_export_type(str, ast->child[0], indent);
 				smart_str_appendc(str, ' ');
