@@ -3659,6 +3659,7 @@ int zend_jit_check_support(void)
 
 void zend_jit_startup(void *buf, size_t size, bool reattached)
 {
+	ZEND_ASSERT(((uintptr_t)buf & (zend_get_page_size() - 1)) == 0);
 	zend_jit_halt_op = zend_get_halt_op();
 	zend_jit_profile_counter_rid = zend_get_op_array_extension_handle(ACCELERATOR_PRODUCT_NAME);
 
