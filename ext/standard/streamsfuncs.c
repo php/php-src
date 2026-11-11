@@ -1339,7 +1339,12 @@ static void apply_filter_to_stream(bool append, INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	if (read_write & PHP_STREAM_FILTER_WRITE) {
+		bool originally_no_fclose = stream->flags & PHP_STREAM_FLAG_NO_FCLOSE;
+		stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 		filter = php_stream_filter_create(filtername, filterparams, php_stream_is_persistent(stream));
+		if (!originally_no_fclose) {
+			stream->flags ^= PHP_STREAM_FLAG_NO_FCLOSE;
+		}
 		if (filter == NULL) {
 			RETURN_FALSE;
 		}
