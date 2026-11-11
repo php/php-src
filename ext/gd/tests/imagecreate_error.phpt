@@ -17,6 +17,6 @@ trycatch_dump(
 );
 
 ?>
---EXPECT--
-!! [ValueError] imagecreate(): Argument #1 ($width) must be greater than 0
-!! [ValueError] imagecreate(): Argument #2 ($height) must be greater than 0
+--EXPECTF--
+!! [ValueError] imagecreate(): Argument #1 ($width) must be greater than 0 and less than %d
+!! [ValueError] imagecreate(): Argument #2 ($height) must be greater than 0 and less than %d

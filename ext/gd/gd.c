@@ -693,12 +693,12 @@ PHP_FUNCTION(imagecreatetruecolor)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (x_size <= 0 || x_size >= INT_MAX) {
-		zend_argument_value_error(1, "must be greater than 0");
+		zend_argument_value_error(1, "must be greater than 0 and less than %d", INT_MAX);
 		RETURN_THROWS();
 	}
 
 	if (y_size <= 0 || y_size >= INT_MAX) {
-		zend_argument_value_error(2, "must be greater than 0");
+		zend_argument_value_error(2, "must be greater than 0 and less than %d", INT_MAX);
 		RETURN_THROWS();
 	}
 
@@ -1355,12 +1355,12 @@ PHP_FUNCTION(imagecreate)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (x_size <= 0 || x_size >= INT_MAX) {
-		zend_argument_value_error(1, "must be greater than 0");
+		zend_argument_value_error(1, "must be greater than 0 and less than %d", INT_MAX);
 		RETURN_THROWS();
 	}
 
 	if (y_size <= 0 || y_size >= INT_MAX) {
-		zend_argument_value_error(2, "must be greater than 0");
+		zend_argument_value_error(2, "must be greater than 0 and less than %d", INT_MAX);
 		RETURN_THROWS();
 	}
 
