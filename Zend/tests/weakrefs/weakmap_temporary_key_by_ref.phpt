@@ -58,6 +58,4 @@ int(3)
 Cannot modify a WeakMap dimension using a temporary object key
 int(0)
 Cannot modify a WeakMap dimension using a temporary object key
-int(0)
-Cannot modify a WeakMap dimension using a temporary object key
 NULL
