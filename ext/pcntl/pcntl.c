@@ -155,7 +155,6 @@ typedef psetid_t cpu_set_t;
 
 #include "pcntl_arginfo.h"
 #include "pcntl_decl.h"
-static zend_class_entry *QosClass_ce;
 
 ZEND_DECLARE_MODULE_GLOBALS(pcntl)
 static PHP_GINIT_FUNCTION(pcntl);
@@ -220,7 +219,7 @@ PHP_RINIT_FUNCTION(pcntl)
 
 PHP_MINIT_FUNCTION(pcntl)
 {
-	QosClass_ce = register_class_Pcntl_QosClass();
+	register_class_Pcntl_QosClass();
 	register_pcntl_symbols(module_number);
 	orig_interrupt_function = zend_interrupt_function;
 	zend_interrupt_function = pcntl_interrupt_function;
