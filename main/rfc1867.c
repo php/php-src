@@ -43,7 +43,7 @@ static char *php_ap_getword_conf(const zend_encoding *encoding, char *str);
 
 static php_rfc1867_encoding_translation_t php_rfc1867_encoding_translation = dummy_encoding_translation;
 static php_rfc1867_get_detect_order_t php_rfc1867_get_detect_order = NULL;
-static php_rfc1867_set_input_encoding_t php_rfc1867_set_input_encoding = NULL;
+ZEND_ATTRIBUTE_UNUSED static php_rfc1867_set_input_encoding_t php_rfc1867_set_input_encoding = NULL;
 static php_rfc1867_getword_t php_rfc1867_getword = php_ap_getword;
 static php_rfc1867_getword_conf_t php_rfc1867_getword_conf = php_ap_getword_conf;
 static php_rfc1867_basename_t php_rfc1867_basename = NULL;
