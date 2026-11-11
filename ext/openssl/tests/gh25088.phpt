@@ -5,7 +5,6 @@ openssl
 --SKIPIF--
 <?php
 if (!function_exists("proc_open")) die("skip no proc_open");
-if (!defined("OPENSSL_VERSION_NUMBER") || OPENSSL_VERSION_NUMBER < 0x10101000) die("skip OpenSSL 1.1.1+ required");
 ?>
 --FILE--
 <?php

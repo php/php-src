@@ -1486,12 +1486,9 @@ static int php_openssl_server_sni_callback(SSL *ssl_handle, int *al, void *arg) 
 }
 /* }}} */
 
-/* SSL_set_SSL_CTX() in the SNI callback switches the handshake to the per-host
- * context, so the cipher list, ALPN selection callback, DH parameters and
- * security level are taken from that context instead of the base one. Apply
- * the base context policy to the per-host context. */
+/* Per-host SNI contexts replace the base one, so apply the base policy to them. */
 static zend_result php_openssl_apply_server_policy_to_sni_ctx(php_stream *stream,
-		php_openssl_netstream_data_t *sslsock, SSL_CTX *ctx) /* {{{ */
+		php_openssl_netstream_data_t *sslsock, SSL_CTX *ctx)
 {
 	if (FAILURE == php_openssl_set_cipher_list(stream, ctx)) {
 		return FAILURE;
@@ -1513,10 +1510,9 @@ static zend_result php_openssl_apply_server_policy_to_sni_ctx(php_stream *stream
 
 	return SUCCESS;
 }
-/* }}} */
 
 static SSL_CTX *php_openssl_create_sni_server_ctx(php_stream *stream,
-		php_openssl_netstream_data_t *sslsock, char *cert_path, char *key_path)  /* {{{ */
+		php_openssl_netstream_data_t *sslsock, char *cert_path, char *key_path)
 {
 	/* The hello method is not inherited by SSL structs when assigning a new context
 	 * inside the SNI callback, so the just use SSLv23 */
@@ -1526,8 +1522,8 @@ static SSL_CTX *php_openssl_create_sni_server_ctx(php_stream *stream,
 		return NULL;
 	}
 
-	/* The security level must be set before loading the certificate and key,
-	 * as OpenSSL checks them against it. */
+	/* Must be done before loading the cert and key, OpenSSL checks them against the
+	 * security level. */
 	if (FAILURE == php_openssl_apply_server_policy_to_sni_ctx(stream, sslsock, ctx)) {
 		SSL_CTX_free(ctx);
 		return NULL;
@@ -1542,7 +1538,8 @@ static SSL_CTX *php_openssl_create_sni_server_ctx(php_stream *stream,
 		);
 		SSL_CTX_free(ctx);
 		return NULL;
-	} else if (SSL_CTX_use_PrivateKey_file(ctx, key_path, SSL_FILETYPE_PEM) != 1) {
+	}
+	if (SSL_CTX_use_PrivateKey_file(ctx, key_path, SSL_FILETYPE_PEM) != 1) {
 		php_error_docref(NULL, E_WARNING,
 			"Failed setting private key from file `%s'",
 			key_path
@@ -1553,7 +1550,6 @@ static SSL_CTX *php_openssl_create_sni_server_ctx(php_stream *stream,
 
 	return ctx;
 }
-/* }}} */
 
 static zend_result php_openssl_enable_server_sni(
 		php_stream *stream, php_openssl_netstream_data_t *sslsock, bool verify_peer)
