@@ -836,9 +836,11 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 		return FAILURE; /* executor is already inactive */
 	}
 	if (ZEND_HAS_OOM()) {
-		/* Callers expect SUCCESS || EG(exception), so let's throw right now */
+		/* Throws UnwindExit if the OOM is pending. If not pending, acts as if executor is inactive. */
 		zend_handle_delayed_oom();
-		return FAILURE;
+		if (!EG(exception)) {
+			return FAILURE;
+		}
 	}
 	if (EG(exception)) {
 		if (fci_cache) {
