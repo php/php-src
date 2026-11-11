@@ -13,3 +13,11 @@ for ($i = 0; $i < 3; $i++) {
 Warning: Undefined variable $missing in %s on line %d
 
 Deprecated: trim(): Passing null to parameter #1 ($string) of type string is deprecated in %s on line %d
+
+Warning: Undefined variable $missing in %s on line %d
+
+Deprecated: trim(): Passing null to parameter #1 ($string) of type string is deprecated in %s on line %d
+
+Warning: Undefined variable $missing in %s on line %d
+
+Deprecated: trim(): Passing null to parameter #1 ($string) of type string is deprecated in %s on line %d
