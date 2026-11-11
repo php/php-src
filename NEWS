@@ -1,9 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.6.0
-
-
-?? ??? ????, PHP 8.6.0
+12 Nov 2026, PHP 8.6.0RC7
 
 - Core:
   . Fixed array_map() optimization not resolving the function name of an FCC.
