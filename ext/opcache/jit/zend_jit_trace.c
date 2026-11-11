@@ -1295,6 +1295,21 @@ typedef struct _zend_tssa {
 
 static const zend_op _nop_opcode = {0};
 
+/* The func_info of an op_array lives in shared memory, but its SSA is allocated
+ * in the arena of the process that compiles a trace, and zend_jit_trace() resets
+ * it when the compilation ends. A process that dies in the middle of a
+ * compilation leaves its SSA behind, so a non-zero ssa->cfg.blocks_count does
+ * not prove that the SSA was built by the current compilation. */
+static bool zend_jit_trace_has_ssa(const zend_jit_op_array_trace_extension *jit_extension, const zend_op_array **op_arrays, int num_op_arrays)
+{
+	for (int i = 0; i < num_op_arrays; i++) {
+		if ((const void*)ZEND_FUNC_INFO(op_arrays[i]) == (const void*)jit_extension) {
+			return true;
+		}
+	}
+	return false;
+}
+
 static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uint32_t parent_trace, uint32_t exit_num, zend_script *script, const zend_op_array **op_arrays, int *num_op_arrays_ptr)
 {
 	zend_ssa *tssa;
@@ -1398,7 +1413,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 			jit_extension =
 				(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
 			ssa = &jit_extension->func_info.ssa;
-			if (ssa->cfg.blocks_count) {
+			if (zend_jit_trace_has_ssa(jit_extension, op_arrays, num_op_arrays)) {
 				/* pass */
 			} else if (num_op_arrays == ZEND_JIT_TRACE_MAX_FUNCS) {
 				/* Too many functions in single trace */
@@ -1416,7 +1431,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				jit_extension =
 					(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
 				ssa = &jit_extension->func_info.ssa;
-				if (ssa->cfg.blocks_count) {
+				if (zend_jit_trace_has_ssa(jit_extension, op_arrays, num_op_arrays)) {
 					/* pass */
 				} else if (num_op_arrays == ZEND_JIT_TRACE_MAX_FUNCS) {
 					/* Too many functions in single trace */
@@ -7450,6 +7465,8 @@ static zend_jit_trace_stop zend_jit_compile_root_trace(zend_jit_trace_rec *trace
 	zend_jit_trace_exit_info exit_info[ZEND_JIT_TRACE_MAX_EXITS];
 	bool do_bailout = 0;
 
+	/* Don't let a signal kill the process while func_info in SHM refers to our arena */
+	HANDLE_BLOCK_INTERRUPTIONS();
 	zend_shared_alloc_lock();
 
 	/* Checks under lock */
@@ -7590,6 +7607,7 @@ exit:;
 	}
 
 	zend_shared_alloc_unlock();
+	HANDLE_UNBLOCK_INTERRUPTIONS();
 
 	if (do_bailout) {
 		zend_bailout();
@@ -8288,6 +8306,8 @@ static zend_jit_trace_stop zend_jit_compile_side_trace(zend_jit_trace_rec *trace
 	zend_jit_trace_exit_info exit_info[ZEND_JIT_TRACE_MAX_EXITS];
 	bool do_bailout = 0;
 
+	/* Don't let a signal kill the process while func_info in SHM refers to our arena */
+	HANDLE_BLOCK_INTERRUPTIONS();
 	zend_shared_alloc_lock();
 
 	/* Checks under lock */
@@ -8430,6 +8450,7 @@ exit:;
 	}
 
 	zend_shared_alloc_unlock();
+	HANDLE_UNBLOCK_INTERRUPTIONS();
 
 	if (do_bailout) {
 		zend_bailout();
