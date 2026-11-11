@@ -2113,6 +2113,7 @@ const zend_op_array *zend_accel_pfa_cache_get(
 zend_op_array *zend_accel_compile_pfa(zend_ast *ast,
 		zend_string *declaring_filename,
 		const uint32_t *declaring_lineno_ptr,
+		const zend_op_array *declaring_op_array,
 		const zend_function *called_function,
 		zend_string *pfa_func_name, bool cacheable_in_shm)
 {
@@ -2169,21 +2170,33 @@ zend_op_array *zend_accel_compile_pfa(zend_ast *ast,
 		destroy_op_array(script_op_array);
 		efree(script_op_array);
 
+		const zend_op_array *retained[2];
+		uint32_t num_retained = 0;
 		if ((called_function->common.fn_flags & ZEND_ACC_CLOSURE)
 				&& called_function->type == ZEND_USER_FUNCTION
 				&& called_function->op_array.refcount) {
 			/* Extend the lifetime of the called opcodes if
 			 * the called function is a closure.
 			 * See comment in zend_accel_pfa_key(). */
-			zend_op_array *copy = zend_arena_alloc(&CG(arena), sizeof(*copy));
-			memcpy(copy, called_function, sizeof(*copy));
-			function_add_ref((zend_function *) copy);
-			/* Reference the copy in op_array->dynamic_func_defs so that it's
-			 * destroyed when op_array is destroyed. */
+			retained[num_retained++] = &called_function->op_array;
+		}
+		if (declaring_op_array && declaring_op_array->refcount) {
+			/* The key contains a declaring opline address, which eval() code may free and reuse. */
+			retained[num_retained++] = declaring_op_array;
+		}
+		if (num_retained) {
+			/* Copies in dynamic_func_defs are released with op_array. */
 			ZEND_ASSERT(!op_array->dynamic_func_defs && !op_array->num_dynamic_func_defs);
-			op_array->dynamic_func_defs = safe_emalloc(1, sizeof(*op_array->dynamic_func_defs), 0);
-			op_array->dynamic_func_defs[0] = copy;
-			op_array->num_dynamic_func_defs = 1;
+			op_array->dynamic_func_defs = safe_emalloc(num_retained, sizeof(*op_array->dynamic_func_defs), 0);
+			for (uint32_t i = 0; i < num_retained; i++) {
+				zend_op_array *copy = zend_arena_alloc(&CG(arena), sizeof(*copy));
+				memcpy(copy, retained[i], sizeof(*copy));
+				/* function_add_ref() ignores ZEND_EVAL_CODE */
+				copy->type = ZEND_USER_FUNCTION;
+				function_add_ref((zend_function *) copy);
+				op_array->dynamic_func_defs[i] = copy;
+			}
+			op_array->num_dynamic_func_defs = num_retained;
 		}
 
 		zend_hash_add_new_ptr(&EG(partial_function_application_cache), key, op_array);
