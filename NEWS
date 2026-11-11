@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 
 ?? ??? ????, PHP 8.6.0
 
+- Core:
+  . Fixed array_map() optimization not resolving the function name of an FCC.
+    (ChrisAbner)
+
 - OpenSSL:
   . Fixed use-after-free in TLS server ALPN and Windows certificate checks
     when the session stream passed to stream_socket_enable_crypto() is closed
