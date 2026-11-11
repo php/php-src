@@ -129,10 +129,10 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 				ZEND_ASSERT(!(destructor->common.fn_flags & ZEND_ACC_PUBLIC));
 				if (!zend_check_method_accessible(destructor, scope)) {
 					zend_throw_error(NULL,
-						"Call to %s %pS::__destruct() from %s%s",
+						"Call to %s %pS::__destruct() from %s%pS",
 						zend_visibility_string(destructor->common.fn_flags), object->ce->name,
 						scope ? "scope " : "global scope",
-						scope ? ZSTR_VAL(scope->name) : ""
+						scope ? scope->name : ZSTR_EMPTY_ALLOC()
 					);
 					return;
 				}

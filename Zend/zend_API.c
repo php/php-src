@@ -1788,7 +1788,7 @@ ZEND_API void object_properties_load(zend_object *object, const HashTable *prope
 
 				/* Mimic unserialize behaviour for virtual properties. */
 				if (UNEXPECTED(property_info->flags & ZEND_ACC_VIRTUAL)) {
-					zend_throw_error(NULL, "Cannot unserialize value for virtual property %s::$%s", ZSTR_VAL(object->ce->name), zend_get_unmangled_property_name(property_info->name));
+					zend_throw_error(NULL, "Cannot unserialize value for virtual property %pS::$%s", object->ce->name, zend_get_unmangled_property_name(property_info->name));
 					return;
 				}
 
