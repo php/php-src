@@ -16,7 +16,7 @@ file_put_contents($script, "<?php echo \"request completed\\n\";");
 
 $cookies = [];
 for ($i = 0; $i < 5000; $i++) {
-    $cookies[] = "cookie$i=value";
+    $cookies[] = "$i=x";
 }
 
 $process = proc_open(
