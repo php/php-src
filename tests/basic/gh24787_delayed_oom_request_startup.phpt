@@ -14,11 +14,11 @@ if (!extension_loaded('uri')) {
 $script = tempnam(sys_get_temp_dir(), 'gh24787');
 file_put_contents($script, "<?php echo \"request completed\\n\";");
 
+// Keep the cookie header under Windows' environment limit while allocating nested input variables.
 $cookies = [];
-for ($i = 0; $i < 2000; $i++) {
+for ($i = 0; $i < 2580; $i++) {
     $key = base_convert((string) $i, 10, 36);
-    $value = $i < 1500 ? "xx" : "x";
-    $cookies[] = 'c' . $key . '[0][0][0]=' . $value;
+    $cookies[] = $key . '[][][]=xx';
 }
 
 $process = proc_open(
