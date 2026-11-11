@@ -4526,7 +4526,7 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 							ssa->var_info[ssa_op->result_def].type &= ~MAY_BE_GUARD;
 						} else if (opline->result_type != IS_UNUSED
 						 && (res_info & (MAY_BE_ANY|MAY_BE_GUARD)) == (MAY_BE_DOUBLE|MAY_BE_GUARD)
-						 && !(res_info & MAY_BE_STRING)) {
+						 && !(op1_info & MAY_BE_STRING)) {
 							ssa->var_info[ssa_op->result_def].type &= ~MAY_BE_GUARD;
 						}
 						goto done;
