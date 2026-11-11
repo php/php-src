@@ -62,9 +62,15 @@
 	.module_number = 0, \
 	.build_id = ZEND_MODULE_BUILD_ID
 
+#ifdef ZTS
+# define GLOBALS_PTR_INITIALIZER .globals_id_ptr = NULL
+#else
+# define GLOBALS_PTR_INITIALIZER .globals_ptr = NULL
+#endif
+
 #define NO_MODULE_GLOBALS \
 	.globals_size = 0, \
-	/* .globals_id_ptr or .globals_ptr = */ NULL, \
+	GLOBALS_PTR_INITIALIZER, \
 	.globals_ctor = NULL, \
 	.globals_dtor = NULL
 
