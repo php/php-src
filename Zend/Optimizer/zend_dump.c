@@ -156,7 +156,7 @@ static void zend_dump_unused_op(const zend_op *opline, znode_op op, uint32_t fla
 ZEND_API void zend_dump_var(const zend_op_array *op_array, uint8_t var_type, uint32_t var_num)
 {
 	if (var_type == IS_CV && var_num < op_array->last_var) {
-		fprintf(stderr, "CV%d($%s)", var_num, op_array->vars[var_num]->val);
+		fprintf(stderr, "CV%d($%s)", var_num, ZSTR_VAL(op_array->vars[var_num]));
 	} else if (var_type == IS_VAR) {
 		fprintf(stderr, "V%d", var_num);
 	} else if ((var_type & (IS_VAR|IS_TMP_VAR)) == IS_TMP_VAR) {
@@ -223,9 +223,9 @@ static void zend_dump_type_info(uint32_t info, const zend_class_entry *ce, bool 
 		fprintf(stderr, "class");
 		if (ce) {
 			if (is_instanceof) {
-				fprintf(stderr, " (instanceof %s)", ce->name->val);
+				fprintf(stderr, " (instanceof %s)", ZSTR_VAL(ce->name));
 			} else {
-				fprintf(stderr, " (%s)", ce->name->val);
+				fprintf(stderr, " (%s)", ZSTR_VAL(ce->name));
 			}
 		}
 	} else if ((info & MAY_BE_ANY) == MAY_BE_ANY) {
@@ -358,9 +358,9 @@ static void zend_dump_type_info(uint32_t info, const zend_class_entry *ce, bool 
 			fprintf(stderr, "object");
 			if (ce) {
 				if (is_instanceof) {
-					fprintf(stderr, " (instanceof %s)", ce->name->val);
+					fprintf(stderr, " (instanceof %s)", ZSTR_VAL(ce->name));
 				} else {
-					fprintf(stderr, " (%s)", ce->name->val);
+					fprintf(stderr, " (%s)", ZSTR_VAL(ce->name));
 				}
 			}
 		}
@@ -931,9 +931,9 @@ void zend_dump_op_array_name(const zend_op_array *op_array)
 {
 	if (op_array->function_name) {
 		if (op_array->scope && op_array->scope->name) {
-			fprintf(stderr, "%s::%s", op_array->scope->name->val, op_array->function_name->val);
+			fprintf(stderr, "%s::%s", ZSTR_VAL(op_array->scope->name), ZSTR_VAL(op_array->function_name));
 		} else {
-			fprintf(stderr, "%s", op_array->function_name->val);
+			fprintf(stderr, "%s", ZSTR_VAL(op_array->function_name));
 		}
 	} else {
 		fprintf(stderr, "%s", "$_main");
@@ -1017,7 +1017,7 @@ ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_fl
 	if (msg) {
 		fprintf(stderr, "     ; (%s)\n", msg);
 	}
-	fprintf(stderr, "     ; %s:%u-%u\n", op_array->filename->val, op_array->line_start, op_array->line_end);
+	fprintf(stderr, "     ; %s:%u-%u\n", ZSTR_VAL(op_array->filename), op_array->line_start, op_array->line_end);
 
 	if (func_info) {
 		fprintf(stderr, "     ; return ");

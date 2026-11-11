@@ -2331,7 +2331,7 @@ static ZEND_METHOD(_ZendTestClass, takesUnionType)
 	);
 	if (!type_matches) {
 		zend_string *ty = zend_type_to_string(execute_data->func->internal_function.arg_info->type);
-		zend_argument_type_error(1, "must be of type %s, %s given", ty->val, obj->ce->name->val);
+		zend_argument_type_error(1, "must be of type %s, %s given", ZSTR_VAL(ty), ZSTR_VAL(obj->ce->name));
 		zend_string_release(ty);
 		RETURN_THROWS();
 	}
@@ -2392,7 +2392,7 @@ static ZEND_NAMED_FUNCTION(zend_test_internal_dnf_arguments)
 	);
 	if (!type_matches) {
 		zend_string *ty = zend_type_to_string(arginfo_zend_test_internal_dnf_arguments[1].type);
-		zend_argument_type_error(1, "must be of type %s, %s given", ty->val, obj->ce->name->val);
+		zend_argument_type_error(1, "must be of type %s, %s given", ZSTR_VAL(ty), ZSTR_VAL(obj->ce->name));
 		zend_string_release(ty);
 		RETURN_THROWS();
 	}
