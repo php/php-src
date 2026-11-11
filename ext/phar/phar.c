@@ -558,7 +558,8 @@ static zend_result phar_open_parsed_phar(char *fname, size_t fname_len, char *al
 		}
 
 		if (phar && error && !(options & REPORT_ERRORS)) {
-			efree(error);
+			efree(*error);
+			*error = NULL;
 		}
 
 		return FAILURE;
