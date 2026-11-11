@@ -693,6 +693,209 @@ PHP_FUNCTION(natcasesort)
 }
 /* }}} */
 
+/* {{{ Fast path for sort() and rsort() on packed arrays of integers
+ *
+ * With SORT_REGULAR, zend_compare() on two integers is a plain integer comparison: it
+ * cannot call user code, emit a diagnostic or throw. And as sort() and rsort() renumber
+ * the keys, equal integers cannot be told apart afterwards, so the stable order of ties
+ * is unobservable. A packed array of integers can therefore be sorted as a plain buffer
+ * of zend_long, instead of converting it to a hash, sorting its Buckets through
+ * comparison and swap callbacks, and converting it back.
+ *
+ * The algorithm is zend_sort()'s (insertion sort for up to 16 elements, quicksort with
+ * a median-of-3, or from 1024 elements median-of-5, pivot above that), specialised to
+ * zend_long. Runs of 2 to 5 elements are sorted with the branchless sorting networks
+ * that AlphaDev found for LLVM's libc++ (Mankowitz et al., Nature 618, 2023), which
+ * std::sort uses for arithmetic types. They are only correct for a strict weak ordering,
+ * which integer comparison is: they must never be used with a user comparator.
+ */
+
+#define PHP_SORT_LONG_SWAP(a, b) do { \
+		zend_long _tmp = *(a); \
+		*(a) = *(b); \
+		*(b) = _tmp; \
+	} while (0)
+
+/* Orders *x and *y without branching. */
+static zend_always_inline void php_sort_long_cond_swap(zend_long *x, zend_long *y)
+{
+	bool r = *x < *y;
+	zend_long tmp = r ? *x : *y;
+	*y = r ? *y : *x;
+	*x = tmp;
+}
+
+/* Orders *x, *y and *z without branching, given *y <= *z. */
+static zend_always_inline void php_sort_long_partially_sorted_swap(zend_long *x, zend_long *y, zend_long *z)
+{
+	bool r = *z < *x;
+	zend_long tmp = r ? *z : *x;
+	*z = r ? *x : *z;
+	r = tmp < *y;
+	*x = r ? *x : *y;
+	*y = r ? *y : tmp;
+}
+
+static zend_always_inline void php_sort_long_3(zend_long *a, zend_long *b, zend_long *c)
+{
+	php_sort_long_cond_swap(b, c);
+	php_sort_long_partially_sorted_swap(a, b, c);
+}
+
+static zend_always_inline void php_sort_long_4(zend_long *a, zend_long *b, zend_long *c, zend_long *d)
+{
+	php_sort_long_cond_swap(a, c);
+	php_sort_long_cond_swap(b, d);
+	php_sort_long_cond_swap(a, b);
+	php_sort_long_cond_swap(c, d);
+	php_sort_long_cond_swap(b, c);
+}
+
+static zend_always_inline void php_sort_long_5(zend_long *a, zend_long *b, zend_long *c, zend_long *d, zend_long *e)
+{
+	php_sort_long_cond_swap(a, b);
+	php_sort_long_cond_swap(d, e);
+	php_sort_long_partially_sorted_swap(c, d, e);
+	php_sort_long_cond_swap(b, e);
+	php_sort_long_partially_sorted_swap(a, c, d);
+	php_sort_long_partially_sorted_swap(b, c, d);
+}
+
+static void php_sort_longs(zend_long *base, size_t nmemb)
+{
+	while (nmemb > 16) {
+		zend_long *start = base, *end = base + nmemb;
+		size_t offset = nmemb >> 1;
+		zend_long *pivot = start + offset, *i, *j;
+		zend_long p;
+
+		if (nmemb >> 10) {
+			size_t delta = offset >> 1;
+			php_sort_long_5(start, start + delta, pivot, pivot + delta, end - 1);
+		} else {
+			php_sort_long_3(start, pivot, end - 1);
+		}
+		PHP_SORT_LONG_SWAP(start + 1, pivot);
+		pivot = start + 1;
+		p = *pivot;
+		i = pivot + 1;
+		j = end - 1;
+		while (1) {
+			while (p > *i) {
+				if (UNEXPECTED(++i == j)) {
+					goto done;
+				}
+			}
+			if (UNEXPECTED(--j == i)) {
+				goto done;
+			}
+			while (*j > p) {
+				if (UNEXPECTED(--j == i)) {
+					goto done;
+				}
+			}
+			PHP_SORT_LONG_SWAP(i, j);
+			if (UNEXPECTED(++i == j)) {
+				goto done;
+			}
+		}
+done:
+		PHP_SORT_LONG_SWAP(pivot, i - 1);
+		/* Recurse into the smaller partition and loop on the larger one. */
+		if ((i - 1) - start < end - i) {
+			php_sort_longs(start, (size_t)(i - start) - 1);
+			base = i;
+			nmemb = (size_t)(end - i);
+		} else {
+			php_sort_longs(i, (size_t)(end - i));
+			nmemb = (size_t)(i - start) - 1;
+		}
+	}
+
+	switch (nmemb) {
+		case 0:
+		case 1:
+			return;
+		case 2:
+			php_sort_long_cond_swap(base, base + 1);
+			return;
+		case 3:
+			php_sort_long_3(base, base + 1, base + 2);
+			return;
+		case 4:
+			php_sort_long_4(base, base + 1, base + 2, base + 3);
+			return;
+		case 5:
+			php_sort_long_5(base, base + 1, base + 2, base + 3, base + 4);
+			return;
+	}
+	for (size_t i = 1; i < nmemb; i++) {
+		zend_long x = base[i];
+		size_t j = i;
+		while (j > 0 && base[j - 1] > x) {
+			base[j] = base[j - 1];
+			j--;
+		}
+		base[j] = x;
+	}
+}
+
+/* Sorts ht as zend_array_sort(ht, cmp, true) would, if cmp compares like SORT_REGULAR and
+ * ht is a packed array of integers. Otherwise returns false without changing ht. */
+static bool php_sort_packed_longs(HashTable *ht, bucket_compare_func_t cmp)
+{
+	uint32_t n = zend_hash_num_elements(ht), k = 0, idx;
+	bool reverse;
+	zend_long *buf;
+	zval *zv;
+	ALLOCA_FLAG(use_heap)
+
+	if (cmp == php_array_data_compare) {
+		reverse = false;
+	} else if (cmp == php_array_reverse_data_compare) {
+		reverse = true;
+	} else {
+		return false;
+	}
+	if (!HT_IS_PACKED(ht) || n < 2) {
+		return false;
+	}
+
+	/* A single pass checks the types and gathers the integers, skipping holes. */
+	buf = do_alloca(sizeof(zend_long) * n, use_heap);
+	zv = ht->arPacked;
+	for (idx = 0; idx < ht->nNumUsed; idx++, zv++) {
+		if (EXPECTED(Z_TYPE_P(zv) == IS_LONG)) {
+			buf[k++] = Z_LVAL_P(zv);
+		} else if (Z_TYPE_P(zv) != IS_UNDEF) {
+			free_alloca(buf, use_heap);
+			return false;
+		}
+	}
+	ZEND_ASSERT(k == n);
+
+	php_sort_longs(buf, n);
+
+	/* Like zend_array_sort(), renumber the keys from 0 and squeeze out any holes. */
+	zv = ht->arPacked;
+	if (reverse) {
+		for (idx = 0; idx < n; idx++) {
+			ZVAL_LONG(zv + idx, buf[n - 1 - idx]);
+		}
+	} else {
+		for (idx = 0; idx < n; idx++) {
+			ZVAL_LONG(zv + idx, buf[idx]);
+		}
+	}
+	free_alloca(buf, use_heap);
+
+	ht->nNumUsed = n;
+	ht->nNextFreeElement = n;
+	ht->nInternalPointer = 0;
+	return true;
+}
+/* }}} */
+
 typedef bucket_compare_func_t(*get_compare_function)(zend_long);
 
 static zend_always_inline void php_sort(INTERNAL_FUNCTION_PARAMETERS, get_compare_function get_cmp, bool renumber) {
@@ -707,6 +910,10 @@ static zend_always_inline void php_sort(INTERNAL_FUNCTION_PARAMETERS, get_compar
 	ZEND_PARSE_PARAMETERS_END();
 
 	cmp = get_cmp(sort_type);
+
+	if (renumber && php_sort_packed_longs(array, cmp)) {
+		RETURN_TRUE;
+	}
 
 	zend_array_sort(array, cmp, renumber);
 
