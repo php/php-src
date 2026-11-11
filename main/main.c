@@ -1296,13 +1296,11 @@ PHPAPI void php_clear_last_error(bool clear_repeated_errors) {
 		PG(last_error_file) = NULL;
 	}
 	if (clear_repeated_errors) {
-		for (uint32_t i = 0; i < 32; i++) {
-			if (PG(repeated_error_messages)[i]) {
-				zend_string_release(PG(repeated_error_messages)[i]);
-				PG(repeated_error_messages)[i] = NULL;
-				zend_string_release(PG(repeated_error_files)[i]);
-				PG(repeated_error_files)[i] = NULL;
-			}
+		if (PG(repeated_error_message)) {
+			zend_string_release(PG(repeated_error_message));
+			PG(repeated_error_message) = NULL;
+			zend_string_release(PG(repeated_error_file));
+			PG(repeated_error_file) = NULL;
 		}
 	}
 }
@@ -1338,20 +1336,15 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 {
 	bool display;
 	int type = orig_type & E_ALL;
-	uint32_t repeated_error_index = 0;
 	zend_string *backtrace = ZSTR_EMPTY_ALLOC();
 	zend_string *repeated_error_file = error_filename ? error_filename : ZSTR_KNOWN(ZEND_STR_UNKNOWN_CAPITALIZED);
 
-	while (repeated_error_index < 31 && !(type & (1U << repeated_error_index))) {
-		repeated_error_index++;
-	}
-
 	/* check for repeated errors to be ignored */
-	if (PG(ignore_repeated_errors) && PG(repeated_error_messages)[repeated_error_index]) {
-		if (!zend_string_equals(PG(repeated_error_messages)[repeated_error_index], message)
+	if (PG(ignore_repeated_errors) && PG(repeated_error_message)) {
+		if (!zend_string_equals(PG(repeated_error_message), message)
 			|| (!PG(ignore_repeated_source)
-				&& ((PG(repeated_error_linenos)[repeated_error_index] != (int)error_lineno)
-					|| !zend_string_equals(PG(repeated_error_files)[repeated_error_index], repeated_error_file)))) {
+				&& ((PG(repeated_error_lineno) != error_lineno)
+					|| !zend_string_equals(PG(repeated_error_file), repeated_error_file)))) {
 			display = 1;
 		} else {
 			display = 0;
@@ -1401,15 +1394,15 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 		PG(last_error_lineno) = error_lineno;
 	}
 
-	if (!PG(repeated_error_messages)[repeated_error_index]
-		|| display) {
-		if (PG(repeated_error_messages)[repeated_error_index]) {
-			zend_string_release(PG(repeated_error_messages)[repeated_error_index]);
-			zend_string_release(PG(repeated_error_files)[repeated_error_index]);
+	if ((!PG(ignore_repeated_errors) || display)
+		&& ((EG(error_reporting) & type) || (type & E_CORE))) {
+		if (PG(repeated_error_message)) {
+			zend_string_release(PG(repeated_error_message));
+			zend_string_release(PG(repeated_error_file));
 		}
-		PG(repeated_error_linenos)[repeated_error_index] = error_lineno;
-		PG(repeated_error_messages)[repeated_error_index] = zend_string_copy(message);
-		PG(repeated_error_files)[repeated_error_index] = zend_string_copy(repeated_error_file);
+		PG(repeated_error_lineno) = error_lineno;
+		PG(repeated_error_message) = zend_string_copy(message);
+		PG(repeated_error_file) = zend_string_copy(repeated_error_file);
 	}
 
 	/* Discarding the output buffers frees every handler on the stack, which is
