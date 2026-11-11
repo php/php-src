@@ -1825,6 +1825,10 @@ static zend_never_inline void *zend_mm_realloc_huge(zend_mm_heap *heap, void *pt
 #if ZEND_DEBUG
 	real_size = size;
 	size = ZEND_MM_ALIGNED_SIZE(size) + ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info));
+	if (UNEXPECTED(size < real_size)) {
+		zend_mm_delayed_error_or_panic(heap->fallible, "Possible integer overflow in memory allocation (%zu + %zu)", ZEND_MM_ALIGNED_SIZE(real_size), ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info)));
+		return NULL;
+	}
 #endif
 	if (size > ZEND_MM_MAX_LARGE_SIZE) {
 #if ZEND_DEBUG
@@ -1835,10 +1839,15 @@ static zend_never_inline void *zend_mm_realloc_huge(zend_mm_heap *heap, void *pt
 		 * We allocate them with 2MB size granularity, to avoid many
 		 * reallocations when they are extended by small pieces
 		 */
-		new_size = ZEND_MM_ALIGNED_SIZE_EX(size, MAX(REAL_PAGE_SIZE, ZEND_MM_CHUNK_SIZE));
+		size_t alignment = MAX(REAL_PAGE_SIZE, ZEND_MM_CHUNK_SIZE);
 #else
-		new_size = ZEND_MM_ALIGNED_SIZE_EX(size, REAL_PAGE_SIZE);
+		size_t alignment = REAL_PAGE_SIZE;
 #endif
+		new_size = ZEND_MM_ALIGNED_SIZE_EX(size, alignment);
+		if (UNEXPECTED(new_size < size)) {
+			zend_mm_delayed_error_or_panic(heap->fallible, "Possible integer overflow in memory allocation (%zu + %zu)", size, alignment);
+			return NULL;
+		}
 		if (new_size == old_size) {
 #if ZEND_DEBUG
 			zend_mm_change_huge_block_size(heap, ptr, new_size, real_size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
@@ -1920,6 +1929,10 @@ static zend_always_inline void *zend_mm_realloc_heap(zend_mm_heap *heap, void *p
 		size_t real_size = size;
 
 		size = ZEND_MM_ALIGNED_SIZE(size) + ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info));
+		if (UNEXPECTED(size < real_size)) {
+			zend_mm_delayed_error_or_panic(heap->fallible, "Possible integer overflow in memory allocation (%zu + %zu)", ZEND_MM_ALIGNED_SIZE(real_size), ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info)));
+			return NULL;
+		}
 #endif
 
 		ZEND_MM_CHECK(chunk->heap == heap, "zend_mm_heap corrupted");
