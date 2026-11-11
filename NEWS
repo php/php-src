@@ -19,8 +19,6 @@ PHP                                                                        NEWS
   . Fixed bug GH-25314 (Assertion in ZEND_DO_FCALL: reference returned by
     &__get() reaches property hook TMP result). (ndossche)
   . Fix support for never-returning functions in PFAs. (ndossche)
-  . Fixed array_map() optimization not resolving the function name of an FCC.
-    (ChrisAbner)
   . Fixed bug GH-25302 (Use-after-free in zend_compile_const_decl() with
     OPcache during concurrent compilation). (Nicolas Grekas)
   . Fixed use-after-free when the error handler releases a string while an
@@ -133,6 +131,10 @@ PHP                                                                        NEWS
     type on 32-bit platforms). (Kamil Tekiela)
 
 ?? ??? ????, PHP 8.6.0
+
+- Core:
+  . Fixed array_map() optimization not resolving the function name of an FCC.
+    (ChrisAbner)
 
 - OpenSSL:
   . Fixed use-after-free in TLS server ALPN and Windows certificate checks
