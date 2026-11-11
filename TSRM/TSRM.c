@@ -73,10 +73,10 @@ static tsrm_shutdown_func_t tsrm_thread_free_handler = NULL;
 int tsrm_error(int level, const char *format, ...);
 
 /* Read a resource from a thread's resource storage */
+#ifdef TSRM_DEBUG
 static int tsrm_error_level;
 static FILE *tsrm_error_file;
 
-#ifdef TSRM_DEBUG
 #define TSRM_ERROR(args) tsrm_error args
 #define TSRM_SAFE_RETURN_RSRC(array, offset, range)																		\
 	{																													\
@@ -140,7 +140,9 @@ TSRM_API bool tsrm_startup(int expected_threads, int expected_resources, int deb
 	in_main_thread = true;
 	is_thread_shutdown = false;
 
+#ifdef TSRM_DEBUG
 	tsrm_error_file = stderr;
+#endif
 	tsrm_error_set(debug_level, debug_filename);
 	tsrm_tls_table_size = expected_threads;
 
@@ -238,9 +240,11 @@ TSRM_API void tsrm_shutdown(void)
 	tsrm_mutex_free(tsmm_mutex);
 	tsrm_mutex_free(tsrm_env_mutex);
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Shutdown TSRM"));
+#ifdef TSRM_DEBUG
 	if (tsrm_error_file!=stderr) {
 		fclose(tsrm_error_file);
 	}
+#endif
 #ifdef TSRM_WIN32
 	TlsFree(tls_key);
 	tls_key = TLS_OUT_OF_INDEXES;
@@ -838,9 +842,9 @@ int tsrm_error(int level, const char *format, ...)
 
 void tsrm_error_set(int level, const char *debug_filename)
 {/*{{{*/
+#ifdef TSRM_DEBUG
 	tsrm_error_level = level;
 
-#ifdef TSRM_DEBUG
 	if (tsrm_error_file!=stderr) { /* close files opened earlier */
 		fclose(tsrm_error_file);
 	}
