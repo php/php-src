@@ -2793,3 +2793,34 @@ static PHP_FUNCTION(zend_test_gh19792)
 	zend_error(E_WARNING, "a warning");
 	zend_throw_error(NULL, "an exception");
 }
+
+/* Wait until max_execution_time is triggered. */
+static PHP_FUNCTION(zend_test_timeout)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	/* Buzy wait, as some max_execution_time implementations use CPU time. */
+	while (true) {
+		if (atomic_load(&EG(vm_interrupt)) && EG(timed_out)) {
+			break;
+		}
+	}
+
+	RETURN_NULL();
+}
+
+/* Wait until max_execution_time is triggered, then throw. */
+static PHP_FUNCTION(zend_test_timeout_throw)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	/* Buzy wait, as some max_execution_time implementations use CPU time. */
+	while (true) {
+		if (atomic_load(&EG(vm_interrupt)) && EG(timed_out)) {
+			break;
+		}
+	}
+
+	zend_throw_exception(NULL, "Timeout", 0);
+	RETURN_THROWS();
+}
