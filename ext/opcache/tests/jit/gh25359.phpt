@@ -1,7 +1,5 @@
 --TEST--
 GH-25359 (Tracing JIT drops reference type of CV passed as a named by-ref argument)
---CREDITS--
-YuanchengJiang
 --EXTENSIONS--
 opcache
 --INI--
@@ -11,15 +9,19 @@ opcache.jit=tracing
 opcache.jit_hot_func=1
 --FILE--
 <?php
-namespace test;
-try { throw new \Exception; } catch (\Exception $e) {}
-function f(&$a = null, &$b = null) {}
-function g($s) {
+namespace Test;
+function f(&$a = null, &$b = null) { $b++; }
+function g(int $s) {
 	f(b: $s);
-	return $s;
+	return $s + 1;
 }
-g("x");
-var_dump(strtolower(g("FALSE")));
+for ($i = 0; $i < 5; $i++) {
+	var_dump(g(41));
+}
 ?>
 --EXPECT--
-string(5) "false"
+int(43)
+int(43)
+int(43)
+int(43)
+int(43)
