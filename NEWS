@@ -32,6 +32,8 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-25268 (NULL php_libxml_ref_obj dereference in
     dom_objects_store_clone_obj when cloning Dom\Notation). (David Carlier)
+  . Fixed use-after-free in getElementById() after a removed ID attribute is
+    freed. (Ilia Alshanetsky)
 
 - GD:
   . Fixed use-after-free when drawing with a brush or tile image that was
