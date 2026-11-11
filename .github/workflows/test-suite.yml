@@ -188,7 +188,6 @@ jobs:
             ${{ matrix.asan && '--asan' || '' }}
             ${{ matrix.repeat && '--repeat 2' || '' }}
             ${{ matrix.variation && '-d zend_test.observer.enabled=1 -d zend_test.observer.show_output=0' || '' }}
-          idleCpu: ${{ matrix.asan && 'true' || 'false' }}
       - name: Test Tracing JIT
         if: ${{ inputs.all_variations || matrix.asan }}
         uses: ./.github/actions/test-linux
