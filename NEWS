@@ -3,8 +3,8 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.4.28
 
 - Core:
-  . Fixed bug GH-23586 (Assertion failure during garbage collection upon memory
-    exhaustion). (Alessio Attilio)
+  . Garbage collection can complete wide graph traversals after the request
+    memory limit has been reached. (Alessio Attilio)
   . Fixed bug GH-24184 (System ID not being reinitialized after an Apache
     graceful restart, potentially causing incompatible OPcache file cache
     entries to be reused). (Levi Morrison)
