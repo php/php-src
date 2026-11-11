@@ -223,6 +223,8 @@ static zend_always_inline zend_string *zend_string_safe_falloc(size_t n, size_t 
 	if (ZEND_CONST_COND(fallible, true) && UNEXPECTED(ret == NULL)) {
 		return ret;
 	}
+	/* GCC can't see that allocation fails if l is too large, so make it explicit. */
+	ZEND_ASSERT(l <= ZSTR_MAX_LEN);
 
 	GC_SET_REFCOUNT(ret, 1);
 	GC_TYPE_INFO(ret) = GC_STRING | ((persistent ? IS_STR_PERSISTENT : 0) << GC_FLAGS_SHIFT);
@@ -408,6 +410,8 @@ static zend_always_inline zend_string *zend_string_safe_frealloc(zend_string *s,
 			if (ZEND_CONST_COND(fallible, true) && !ret) {
 				return NULL;
 			}
+			/* GCC can't see that allocation fails if l is too large, so make it explicit. */
+			ZEND_ASSERT(l <= ZSTR_MAX_LEN);
 			ZSTR_LEN(ret) = (n * m) + l;
 			zend_string_forget_hash_val(ret);
 			return ret;
