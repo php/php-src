@@ -26,6 +26,8 @@ PHP                                                                        NEWS
   . Fixed use-after-free when the error handler releases a string while an
     "Illegal string offset" warning is raised for its offset in a read, ?? or
     nested isset()/empty(). (Jorg Sowa)
+  . Fixed anonymous class names being truncated at the NUL byte in error
+    messages, the error log, and HTML and XML-RPC error output. (Jorg Sowa)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)

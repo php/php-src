@@ -707,18 +707,8 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_throw_non_object_erro
 
 static zend_never_inline ZEND_COLD void zend_verify_type_error_common(
 		const zend_function *zf, const zend_arg_info *arg_info, const zval *value,
-		const char **fname, const char **fsep, const char **fclass,
 		zend_string **need_msg, const char **given_kind)
 {
-	*fname = ZSTR_VAL(zf->common.function_name);
-	if (zf->common.scope) {
-		*fsep =  "::";
-		*fclass = ZSTR_VAL(zf->common.scope->name);
-	} else {
-		*fsep =  "";
-		*fclass = "";
-	}
-
 	*need_msg = zend_type_to_string_resolved(arg_info->type, zf->common.scope);
 
 	if (value) {
@@ -732,12 +722,10 @@ ZEND_API zend_never_inline ZEND_COLD void zend_verify_arg_error(
 		const zend_function *zf, const zend_arg_info *arg_info, uint32_t arg_num, const zval *value)
 {
 	const zend_execute_data *ptr = EG(current_execute_data)->prev_execute_data;
-	const char *fname, *fsep, *fclass;
 	zend_string *need_msg;
 	const char *given_msg;
 
-	zend_verify_type_error_common(
-		zf, arg_info, value, &fname, &fsep, &fclass, &need_msg, &given_msg);
+	zend_verify_type_error_common(zf, arg_info, value, &need_msg, &given_msg);
 
 	ZEND_ASSERT(zf->common.type == ZEND_USER_FUNCTION
 		&& "Arginfo verification is not performed for internal functions");
@@ -930,8 +918,8 @@ zend_never_inline ZEND_COLD void zend_match_unhandled_error(const zval *value)
 
 ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_readonly_property_modification_error(
 		const zend_property_info *info) {
-	zend_readonly_property_modification_error_ex(
-		ZSTR_VAL(info->ce->name), zend_get_unmangled_property_name(info->name));
+	zend_throw_error(NULL, "Cannot modify readonly property %pS::$%s",
+		info->ce->name, zend_get_unmangled_property_name(info->name));
 }
 
 ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_readonly_property_modification_error_ex(
@@ -978,12 +966,12 @@ ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_asymmetric_visibili
 		}
 	}
 
-	zend_throw_error(NULL, "Cannot %s %s property %pS::$%pS from %s%s",
+	zend_throw_error(NULL, "Cannot %s %s property %pS::$%pS from %s%pS",
 		operation,
 		visibility,
 		prop_info->ce->name,
 		prop_info->name,
-		scope ? "scope " : "global scope", scope ? ZSTR_VAL(scope->name) : "");
+		scope ? "scope " : "global scope", scope ? scope->name : ZSTR_EMPTY_ALLOC());
 }
 
 static const zend_class_entry *resolve_single_class_type(zend_string *name, const zend_class_entry *self_ce) {
@@ -1431,8 +1419,8 @@ ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(c
 	const zend_execute_data *ptr = EX(prev_execute_data);
 
 	if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
-		zend_throw_error(zend_ce_argument_count_error, "Too few arguments to function %s%s%pS(), %d passed in %pS on line %d and %s %d expected",
-			EX(func)->common.scope ? ZSTR_VAL(EX(func)->common.scope->name) : "",
+		zend_throw_error(zend_ce_argument_count_error, "Too few arguments to function %pS%s%pS(), %d passed in %pS on line %d and %s %d expected",
+			EX(func)->common.scope ? EX(func)->common.scope->name : ZSTR_EMPTY_ALLOC(),
 			EX(func)->common.scope ? "::" : "",
 			EX(func)->common.function_name,
 			EX_NUM_ARGS(),
@@ -1441,8 +1429,8 @@ ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(c
 			EX(func)->common.required_num_args == EX(func)->common.num_args ? "exactly" : "at least",
 			EX(func)->common.required_num_args);
 	} else {
-		zend_throw_error(zend_ce_argument_count_error, "Too few arguments to function %s%s%pS(), %d passed and %s %d expected",
-			EX(func)->common.scope ? ZSTR_VAL(EX(func)->common.scope->name) : "",
+		zend_throw_error(zend_ce_argument_count_error, "Too few arguments to function %pS%s%pS(), %d passed and %s %d expected",
+			EX(func)->common.scope ? EX(func)->common.scope->name : ZSTR_EMPTY_ALLOC(),
 			EX(func)->common.scope ? "::" : "",
 			EX(func)->common.function_name,
 			EX_NUM_ARGS(),
@@ -1454,17 +1442,17 @@ ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(c
 ZEND_API zend_never_inline ZEND_COLD void zend_verify_return_error(const zend_function *zf, const zval *value)
 {
 	const zend_arg_info *arg_info = &zf->common.arg_info[-1];
-	const char *fname, *fsep, *fclass;
+	zend_string *func_name = get_function_or_method_name(zf);
 	zend_string *need_msg;
 	const char *given_msg;
 
-	zend_verify_type_error_common(
-		zf, arg_info, value, &fname, &fsep, &fclass, &need_msg, &given_msg);
+	zend_verify_type_error_common(zf, arg_info, value, &need_msg, &given_msg);
 
-	zend_type_error("%s%s%s(): Return value must be of type %pS, %s returned",
-		fclass, fsep, fname, need_msg, given_msg);
+	zend_type_error("%pS(): Return value must be of type %pS, %s returned",
+		func_name, need_msg, given_msg);
 
 	zend_string_release(need_msg);
+	zend_string_release(func_name);
 }
 
 ZEND_API zend_never_inline ZEND_COLD void zend_verify_never_error(const zend_function *zf)
@@ -1481,33 +1469,24 @@ ZEND_API zend_never_inline ZEND_COLD void zend_verify_never_error(const zend_fun
 static zend_never_inline ZEND_COLD void zend_verify_internal_return_error(const zend_function *zf, const zval *value)
 {
 	const zend_arg_info *arg_info = &zf->common.arg_info[-1];
-	const char *fname, *fsep, *fclass;
+	zend_string *func_name = get_function_or_method_name(zf);
 	zend_string *need_msg;
 	const char *given_msg;
 
-	zend_verify_type_error_common(
-		zf, arg_info, value, &fname, &fsep, &fclass, &need_msg, &given_msg);
+	zend_verify_type_error_common(zf, arg_info, value, &need_msg, &given_msg);
 
-	zend_error_noreturn(E_CORE_ERROR, "%s%s%s(): Return value must be of type %pS, %s returned",
-		fclass, fsep, fname, need_msg, given_msg);
+	zend_error_noreturn(E_CORE_ERROR, "%pS(): Return value must be of type %pS, %s returned",
+		func_name, need_msg, given_msg);
 }
 
 static zend_never_inline ZEND_COLD void zend_verify_void_return_error(const zend_function *zf, const char *returned_msg, const char *returned_kind)
 {
-	const char *fname = ZSTR_VAL(zf->common.function_name);
-	const char *fsep;
-	const char *fclass;
+	zend_string *func_name = get_function_or_method_name(zf);
 
-	if (zf->common.scope) {
-		fsep =  "::";
-		fclass = ZSTR_VAL(zf->common.scope->name);
-	} else {
-		fsep =  "";
-		fclass = "";
-	}
+	zend_type_error("%pS() must not return a value, %s%s returned",
+		func_name, returned_msg, returned_kind);
 
-	zend_type_error("%s%s%s() must not return a value, %s%s returned",
-		fclass, fsep, fname, returned_msg, returned_kind);
+	zend_string_release(func_name);
 }
 
 ZEND_API bool zend_verify_internal_return_type(const zend_function *zf, zval *ret)

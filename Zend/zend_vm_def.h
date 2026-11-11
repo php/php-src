@@ -5460,9 +5460,9 @@ ZEND_VM_C_LABEL(send_again):
 
 					if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 						zend_error(
-							E_WARNING, "Cannot pass by-reference argument %d of %s%s%pS()"
+							E_WARNING, "Cannot pass by-reference argument %d of %pS%s%pS()"
 							" by unpacking a Traversable, passing by-value instead", arg_num,
-							EX(call)->func->common.scope ? ZSTR_VAL(EX(call)->func->common.scope->name) : "",
+							EX(call)->func->common.scope ? EX(call)->func->common.scope->name : ZSTR_EMPTY_ALLOC(),
 							EX(call)->func->common.scope ? "::" : "",
 							EX(call)->func->common.function_name
 						);
@@ -5486,9 +5486,9 @@ ZEND_VM_C_LABEL(send_again):
 
 					if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 						zend_error(
-							E_WARNING, "Cannot pass by-reference argument %d of %s%s%pS()"
+							E_WARNING, "Cannot pass by-reference argument %d of %pS%s%pS()"
 							" by unpacking a Traversable, passing by-value instead", arg_num,
-							EX(call)->func->common.scope ? ZSTR_VAL(EX(call)->func->common.scope->name) : "",
+							EX(call)->func->common.scope ? EX(call)->func->common.scope->name : ZSTR_EMPTY_ALLOC(),
 							EX(call)->func->common.scope ? "::" : "",
 							EX(call)->func->common.function_name
 						);
