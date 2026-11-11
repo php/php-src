@@ -119,7 +119,9 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 - Added php_request_begin() and php_request_end() for SAPIs running a script
   that serves several requests, such as a worker script. They replace copies of
   php_request_startup() and php_request_shutdown() and call the module
-  request_begin_func and request_end_func hooks.
+  request_begin_func and request_end_func hooks. They return FAILURE when a
+  hook fails or a step bails out: the SAPI should then end the script, as a
+  failing request_startup_func ends the process.
 - Added php_release_request_globals(), called by php_request_begin() before
   the output of the new request is active. The script reads the superglobals
   of the finished request until then. SAPIs running userland code between two

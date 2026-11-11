@@ -2051,7 +2051,7 @@ PHPAPI zend_result php_request_begin(void)
 
 		php_request_start_output();
 		php_rehash_environment();
-		zend_request_begin_modules();
+		retval = zend_request_begin_modules();
 	} zend_catch {
 		retval = FAILURE;
 	} zend_end_try();
@@ -2062,32 +2062,43 @@ PHPAPI zend_result php_request_begin(void)
 }
 
 /* Ends a request without ending the script serving it. */
-PHPAPI void php_request_end(void)
+PHPAPI zend_result php_request_end(void)
 {
 	php_stream *request_body = SG(request_info).request_body;
+	zend_result retval = SUCCESS;
 
 	zend_try {
 		php_output_end_all();
+	} zend_catch {
+		retval = FAILURE;
 	} zend_end_try();
 
 	zend_try {
 		zend_unset_timeout();
 	} zend_end_try();
 
-	zend_request_end_modules();
+	if (zend_request_end_modules() == FAILURE) {
+		retval = FAILURE;
+	}
 
 	zend_try {
 		php_output_deactivate();
+	} zend_catch {
+		retval = FAILURE;
 	} zend_end_try();
 
 	zend_try {
 		sapi_deactivate();
+	} zend_catch {
+		retval = FAILURE;
 	} zend_end_try();
 
 	/* sapi_deactivate() forgets the body without closing it */
 	if (request_body) {
 		zend_list_delete(request_body->res);
 	}
+
+	return retval;
 }
 
 /* {{{ php_request_shutdown */
