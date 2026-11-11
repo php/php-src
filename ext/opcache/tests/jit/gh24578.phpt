@@ -76,6 +76,7 @@ final class Repro {
     }
 }
 
+// A minus or slash without a following comment delimiter must not make the scanner stop.
 var_dump(Repro::interpolate('SELECT ? AS v', [3]));
 var_dump(Repro::interpolate('SELECT 5 -', []));
 var_dump(Repro::interpolate('SELECT 5 / 2', []));
