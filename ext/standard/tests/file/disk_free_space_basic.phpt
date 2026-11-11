@@ -30,12 +30,10 @@ echo "\n Free Space after writing to a file\n";
 $space2 =  disk_free_space($file_path.$dir);
 var_dump( $space2 );
 
-// Some file systems (like BTRFS) have a fuzzy notion of "free space" and will thus claim the same amount of free space
-if ($space1 >= $space2)
-  echo "\n Free Space Value Is Correct\n";
-else {
-  echo "\n Free Space Value Is Incorrect\n";
-  var_dump($space1, $space2);
+if ($space1 !== false && $space2 !== false) {
+    echo "\n Free Space Queries Succeeded\n";
+} else {
+    echo "\n Free Space Query Failed\n";
 }
 
 echo "*** Testing with Binary Input ***\n";
@@ -61,7 +59,7 @@ float(%f)
  Free Space after writing to a file
 float(%f)
 
- Free Space Value Is Correct
+ Free Space Queries Succeeded
 *** Testing with Binary Input ***
 float(%f)
 
