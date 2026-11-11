@@ -175,6 +175,8 @@ static inline zend_result mb_convert_buf_ensure(mb_convert_buf *buf, unsigned ch
 			buf->limit = *limit;
 			return FAILURE;
 		}
+		/* GCC can't see that allocation fails if growth is too large, so make it explicit. */
+		ZEND_ASSERT(growth <= ZSTR_MAX_LEN);
 		*out = (unsigned char*)ZSTR_VAL(newstr) + (*out - (unsigned char*)ZSTR_VAL((buf)->str));
 		*limit = (unsigned char*)ZSTR_VAL(newstr) + oldsize + growth;
 		(buf)->str = newstr;
