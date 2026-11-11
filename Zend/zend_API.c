@@ -3460,6 +3460,10 @@ ZEND_API void zend_activate_modules(void) /* {{{ */
 		const zend_module_entry *module = *p;
 
 		if (module->request_startup_func(module->type, module->module_number)==FAILURE) {
+			/* Surface a delayed OOM before reporting a generic module startup failure. */
+			if (ZEND_HAS_OOM()) {
+				zend_handle_delayed_oom();
+			}
 			zend_error(E_WARNING, "request_startup() for %s module failed", module->name);
 			exit(1);
 		}

@@ -188,7 +188,6 @@ jobs:
             ${{ matrix.asan && '--asan' || '' }}
             ${{ matrix.repeat && '--repeat 2' || '' }}
             ${{ matrix.variation && '-d zend_test.observer.enabled=1 -d zend_test.observer.show_output=0' || '' }}
-          idleCpu: ${{ matrix.asan && 'true' || 'false' }}
       - name: Test Tracing JIT
         if: ${{ inputs.all_variations || matrix.asan }}
         uses: ./.github/actions/test-linux
@@ -230,15 +229,14 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(inputs.branch).jobs.LINUX_X32.matrix }}
     name: "LINUX_X32_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
-    runs-on: ubuntu-latest
+    # The container seccomp profile blocks i386 socket syscalls used by the test suite.
+    runs-on: ubuntu-${{ fromJson(inputs.branch).config.ubuntu_version }}
     timeout-minutes: 180
-    container:
-      image: ubuntu:${{ fromJson(inputs.branch).config.ubuntu_version }}
     env:
-      MYSQL_TEST_HOST: mysql
-      PDO_MYSQL_TEST_DSN: mysql:host=mysql;dbname=test
-      PDO_MYSQL_TEST_HOST: mysql
-      PDO_FIREBIRD_TEST_DSN: firebird:dbname=firebird:test.fdb
+      MYSQL_TEST_HOST: 127.0.0.1
+      PDO_MYSQL_TEST_DSN: mysql:host=127.0.0.1;dbname=test
+      PDO_MYSQL_TEST_HOST: 127.0.0.1
+      PDO_FIREBIRD_TEST_DSN: firebird:dbname=localhost:test.fdb
     services:
       mysql:
         image: mysql:8.4
