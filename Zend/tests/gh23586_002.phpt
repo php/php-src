@@ -12,7 +12,7 @@ memory_limit=256M
 <?php
 gc_disable();
 $root = new stdClass();
-for ($i = 0; $i < 300000; $i++) {
+for ($i = 0; $i < 350000; $i++) {
     $root->children[] = (object) ['parent' => $root];
 }
 unset($root);
@@ -20,4 +20,4 @@ ini_set('memory_limit', (string) memory_get_usage(true));
 var_dump(gc_collect_cycles());
 ?>
 --EXPECT--
-int(300002)
+int(350002)
