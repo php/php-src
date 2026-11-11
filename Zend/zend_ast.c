@@ -1361,10 +1361,16 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 			if (uses_variadic_placeholder) {
 				flags |= ZEND_PARTIAL_USES_VARIADIC_PLACEHOLDER;
 			}
+			/* SHM names are shared by same-line PFAs, so they can't be a cache key */
+			ZEND_ASSERT((flags & ZEND_PARTIAL_CACHEABLE_IN_SHM)
+				|| !(GC_FLAGS(fcc_ast->name) & IS_STR_PERMANENT));
+			/* A non-SHM AST may be freed, but the cached PFA keeps its name alive */
+			const uint32_t *cache_key = (flags & ZEND_PARTIAL_CACHEABLE_IN_SHM)
+				? &ast->lineno : (const uint32_t *) fcc_ast->name;
 			zend_partial_create(result, scope, &frame->This, fptr,
 					ZEND_CALL_NUM_ARGS(frame), ZEND_CALL_ARG(frame, 1),
 					extra_named_params, named_positions,
-					fcc_ast->filename, &ast->lineno,
+					fcc_ast->filename, cache_key, /* declaring_op_array */ NULL,
 					(void**)cache_slot, fcc_ast->name, flags, /* const_args */ 0);
 
 			if (named_positions) {

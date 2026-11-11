@@ -26,6 +26,9 @@ PHP                                                                        NEWS
   . Fixed use-after-free when the error handler releases a string while an
     "Illegal string offset" warning is raised for its offset in a read, ?? or
     nested isset()/empty(). (Jorg Sowa)
+  . Fixed partial function applications in eval'd or included code, or in
+    class constants, reusing a stale cached function with wrong bound
+    arguments. (Jorg Sowa)
   . Fixed anonymous class names being truncated at the NUL byte in error
     messages, the error log, and HTML and XML-RPC error output. (Jorg Sowa)
   . Fixed AST printing dropping readonly on promoted constructor parameters.
@@ -33,6 +36,9 @@ PHP                                                                        NEWS
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
+
+- Date:
+  . Update timelib to 2026.03 (Derick)
 
 - DBA:
   . Fixed dba_close() not closing a database opened with dba_popen().
@@ -126,19 +132,6 @@ PHP                                                                        NEWS
 - Core:
   . Fix potential ABI incompatibility when adding fields in patches by adding
     padding to globals. (ilutov)
-
-- Date:
-  . Update timelib to 2026.03 (Derick)
-
-- Fileinfo:
-  . Fixed bug GH-25051 (TrueType fonts detected as application/octet-stream
-    since libmagic 5.48). (Weilin Du)
-  . Fixed incorrect MIME type detection for HWPX files. (Weilin Du)
-
-- Streams:
-  . Fixed use-after-free of the previous request's default stream context when
-    a stream error is raised during request startup, such as when a POST body
-    cannot be buffered to a temporary file. (Go Kudo)
 
 05 Nov 2026, PHP 8.6.0RC5
 

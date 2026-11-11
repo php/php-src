@@ -8690,7 +8690,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CALLABLE_CONV
 		(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) ?
 			call->extra_named_params : NULL,
 		IS_CONST == IS_CONST ? Z_ARRVAL_P(named_positions) : NULL,
-		EX(func)->op_array.filename, &opline->lineno, cache_slot,
+		EX(func)->op_array.filename, &opline->lineno, &EX(func)->op_array, cache_slot,
 		pfa_name, opline->extended_value & ZEND_PARTIAL_FLAGS, const_args);
 
 	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
@@ -12063,7 +12063,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CALLABLE_CONV
 		(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) ?
 			call->extra_named_params : NULL,
 		IS_UNUSED == IS_CONST ? Z_ARRVAL_P(named_positions) : NULL,
-		EX(func)->op_array.filename, &opline->lineno, cache_slot,
+		EX(func)->op_array.filename, &opline->lineno, &EX(func)->op_array, cache_slot,
 		pfa_name, opline->extended_value & ZEND_PARTIAL_FLAGS, const_args);
 
 	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
@@ -61585,7 +61585,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CALLABLE_CONVERT_P
 		(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) ?
 			call->extra_named_params : NULL,
 		IS_CONST == IS_CONST ? Z_ARRVAL_P(named_positions) : NULL,
-		EX(func)->op_array.filename, &opline->lineno, cache_slot,
+		EX(func)->op_array.filename, &opline->lineno, &EX(func)->op_array, cache_slot,
 		pfa_name, opline->extended_value & ZEND_PARTIAL_FLAGS, const_args);
 
 	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
@@ -64856,7 +64856,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CALLABLE_CONVERT_P
 		(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) ?
 			call->extra_named_params : NULL,
 		IS_UNUSED == IS_CONST ? Z_ARRVAL_P(named_positions) : NULL,
-		EX(func)->op_array.filename, &opline->lineno, cache_slot,
+		EX(func)->op_array.filename, &opline->lineno, &EX(func)->op_array, cache_slot,
 		pfa_name, opline->extended_value & ZEND_PARTIAL_FLAGS, const_args);
 
 	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {

@@ -353,6 +353,7 @@ const zend_op_array *zend_accel_pfa_cache_get(
 zend_op_array *zend_accel_compile_pfa(zend_ast *ast,
 		zend_string *declaring_filename,
 		const uint32_t *declaring_lineno_ptr,
+		const zend_op_array *declaring_op_array,
 		const zend_function *called_function,
 		zend_string *pfa_func_name, bool cacheable_in_shm);
 

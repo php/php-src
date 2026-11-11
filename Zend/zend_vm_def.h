@@ -9923,7 +9923,7 @@ ZEND_VM_HANDLER(212, ZEND_CALLABLE_CONVERT_PARTIAL, CONST, CONST|UNUSED, NUM)
 		(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) ?
 			call->extra_named_params : NULL,
 		OP2_TYPE == IS_CONST ? Z_ARRVAL_P(named_positions) : NULL,
-		EX(func)->op_array.filename, &opline->lineno, cache_slot,
+		EX(func)->op_array.filename, &opline->lineno, &EX(func)->op_array, cache_slot,
 		pfa_name, opline->extended_value & ZEND_PARTIAL_FLAGS, const_args);
 
 	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
