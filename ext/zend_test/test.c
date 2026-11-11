@@ -2599,7 +2599,7 @@ PHP_MINFO_FUNCTION(zend_test)
 	DISPLAY_INI_ENTRIES();
 }
 
-static void zend_test_child_init(void)
+static PHP_CINIT_FUNCTION(zend_test)
 {
 	ZT_G(child_init_count)++;
 }
@@ -2619,7 +2619,7 @@ zend_module_entry zend_test_module_entry = {
 	PHP_GSHUTDOWN(zend_test),
 	NULL,
 	STANDARD_MODULE_PROPERTIES_EX,
-	.child_init_func = zend_test_child_init
+	.child_init_func = PHP_CINIT(zend_test)
 };
 
 #ifdef COMPILE_DL_ZEND_TEST

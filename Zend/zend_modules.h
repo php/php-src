@@ -37,11 +37,21 @@
 #define USING_ZTS 0
 #endif
 
-#define STANDARD_MODULE_HEADER_EX sizeof(zend_module_entry), ZEND_MODULE_API_NO, ZEND_DEBUG, USING_ZTS
+#define STANDARD_MODULE_HEADER_EX \
+	.size = sizeof(zend_module_entry), \
+	.zend_api = ZEND_MODULE_API_NO, \
+	.zend_debug = ZEND_DEBUG, \
+	.zts = USING_ZTS \
+
 #define STANDARD_MODULE_HEADER \
-	STANDARD_MODULE_HEADER_EX, NULL, NULL
+	STANDARD_MODULE_HEADER_EX, \
+	.ini_entry = NULL, \
+	.deps = NULL
+
 #define ZE2_STANDARD_MODULE_HEADER \
-	STANDARD_MODULE_HEADER_EX, ini_entries, NULL
+	STANDARD_MODULE_HEADER_EX, \
+	.ini_entry = ini_entries, \
+	.deps = NULL
 
 #define ZEND_MODULE_BUILD_ID "API" ZEND_TOSTR(ZEND_MODULE_API_NO) ZEND_BUILD_TS ZEND_BUILD_DEBUG ZEND_BUILD_SYSTEM ZEND_BUILD_EXTRA
 
@@ -52,7 +62,11 @@
 	.module_number = 0, \
 	.build_id = ZEND_MODULE_BUILD_ID
 
-#define NO_MODULE_GLOBALS 0, NULL, NULL, NULL
+#define NO_MODULE_GLOBALS \
+	.globals_size = 0, \
+	/* .globals_id_ptr or .globals_ptr = */ NULL, \
+	.globals_ctor = NULL, \
+	.globals_dtor = NULL
 
 #ifdef ZTS
 # define ZEND_MODULE_GLOBALS(module_name) sizeof(zend_##module_name##_globals), &module_name##_globals_id
@@ -61,7 +75,10 @@
 #endif
 
 #define STANDARD_MODULE_PROPERTIES \
-	NO_MODULE_GLOBALS, NULL, STANDARD_MODULE_PROPERTIES_EX
+	NO_MODULE_GLOBALS, \
+	.post_deactivate_func = NULL, \
+	.child_init_func = NULL, \
+	STANDARD_MODULE_PROPERTIES_EX
 
 #define NO_VERSION_YET NULL
 
