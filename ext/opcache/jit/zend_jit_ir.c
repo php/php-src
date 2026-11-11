@@ -16437,11 +16437,21 @@ static int zend_jit_fetch_static_prop(zend_jit_ctx *jit, const zend_op *opline, 
 		default: ZEND_UNREACHABLE();
 	}
 
-	if (is_static) {
+	ir_ref run_time_cache_ptr = IR_UNUSED;
+	if (is_static
+	 && op_array->function_name
+	 && op_array->scope
+	 && (op_array->scope->ce_flags & ZEND_ACC_FINAL)
+	 && !(op_array->fn_flags & (ZEND_ACC_CLOSURE|ZEND_ACC_TRAIT_CLONE))) {
+		/* A method in a final CE has a called scope equal to the scope.
+		 * So the cache slot is always monomorphic.
+		 * Closures are excluded because they can be bound to another scope, likewise traits are shared. */
+	} else if (is_static) {
 		/* The cache slot is polymorphic on the called scope. */
 		// JIT: if (CACHED_PTR(cache_slot) == called_scope)
+		run_time_cache_ptr = ir_LOAD_A(jit_EX(run_time_cache));
 		ir_ref if_scope = ir_IF(ir_EQ(
-			ir_LOAD_A(ir_ADD_OFFSET(ir_LOAD_A(jit_EX(run_time_cache)), cache_slot)),
+			ir_LOAD_A(ir_ADD_OFFSET(run_time_cache_ptr, cache_slot)),
 			jit_called_scope(jit, op_array)));
 		ir_IF_FALSE_cold(if_scope);
 		ir_END_list(slow_inputs);
@@ -16449,8 +16459,10 @@ static int zend_jit_fetch_static_prop(zend_jit_ctx *jit, const zend_op *opline, 
 	}
 
 	// JIT: result = CACHED_PTR(cache_slot + sizeof(void *));
-	ref = ir_LOAD_A(
-		ir_ADD_OFFSET(ir_LOAD_A(jit_EX(run_time_cache)), cache_slot + sizeof(void*)));
+	if (run_time_cache_ptr == IR_UNUSED) {
+		run_time_cache_ptr = ir_LOAD_A(jit_EX(run_time_cache));
+	}
+	ref = ir_LOAD_A(ir_ADD_OFFSET(run_time_cache_ptr, cache_slot + sizeof(void*)));
 
 	// JIT: if (result)
 	if_cached = ir_IF(ref);
@@ -16467,7 +16479,7 @@ static int zend_jit_fetch_static_prop(zend_jit_ctx *jit, const zend_op *opline, 
 			if (!known_prop_info) {
 				// JIT: if (ZEND_TYPE_IS_SET(property_info->type))
 				prop_info_ref = ir_LOAD_L(
-					ir_ADD_OFFSET(ir_LOAD_A(jit_EX(run_time_cache)), cache_slot + sizeof(void*) * 2));
+					ir_ADD_OFFSET(run_time_cache_ptr, cache_slot + sizeof(void*) * 2));
 				if_typed = ir_IF(ir_AND_U32(
 					ir_LOAD_U32(ir_ADD_OFFSET(prop_info_ref, offsetof(zend_property_info, type.type_mask))),
 					ir_CONST_U32(_ZEND_TYPE_MASK)));
@@ -16496,7 +16508,7 @@ static int zend_jit_fetch_static_prop(zend_jit_ctx *jit, const zend_op *opline, 
 			if (!known_prop_info) {
 				// JIT: if (ZEND_TYPE_IS_SET(property_info->type))
 				prop_info_ref = ir_LOAD_L(
-					ir_ADD_OFFSET(ir_LOAD_A(jit_EX(run_time_cache)), cache_slot + sizeof(void*) * 2));
+					ir_ADD_OFFSET(run_time_cache_ptr, cache_slot + sizeof(void*) * 2));
 				if_typed = ir_IF(ir_AND_U32(
 					ir_LOAD_U32(ir_ADD_OFFSET(prop_info_ref, offsetof(zend_property_info, type.type_mask))),
 					ir_CONST_U32(_ZEND_TYPE_MASK)));
