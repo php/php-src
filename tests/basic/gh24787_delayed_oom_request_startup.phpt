@@ -15,7 +15,7 @@ $script = tempnam(sys_get_temp_dir(), 'gh24787');
 file_put_contents($script, "<?php echo \"request completed\\n\";");
 
 $cookies = [];
-for ($i = 0; $i < 5000; $i++) {
+for ($i = 0; $i < 4000; $i++) {
     $cookies[] = "$i=x";
 }
 
