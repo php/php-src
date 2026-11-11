@@ -19,4 +19,4 @@ register_shutdown_function(function () {
 
 ?>
 --EXPECTF--
-Fatal error: Maximum execution time of 1 second exceeded %s
+Fatal error: Maximum execution time of 1 second exceeded in %stimeout_variation_11.php on line %d

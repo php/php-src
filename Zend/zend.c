@@ -1651,7 +1651,7 @@ static ZEND_COLD void zend_error_va_list(
 
 static ZEND_COLD void get_filename_lineno(int type, zend_string **filename, uint32_t *lineno) {
 	/* Obtain relevant filename and lineno */
-	switch (type) {
+	switch (type & E_ALL) {
 		case E_CORE_ERROR:
 		case E_CORE_WARNING:
 			*filename = NULL;

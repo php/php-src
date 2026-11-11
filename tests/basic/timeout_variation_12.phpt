@@ -23,5 +23,5 @@ while (true) {}
 
 ?>
 --EXPECTF--
-Fatal error: Maximum execution time of 1 second exceeded %s
+Fatal error: Maximum execution time of 1 second exceeded in %stimeout_variation_12.php on line %d
 shutdown function called
