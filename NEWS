@@ -29,6 +29,10 @@ PHP                                                                        NEWS
   . Fixed partial function applications in eval'd or included code, or in
     class constants, reusing a stale cached function with wrong bound
     arguments. (Jorg Sowa)
+  . Fixed anonymous class names being truncated at the NUL byte in error
+    messages, the error log, and HTML and XML-RPC error output. (Jorg Sowa)
+  . Fixed AST printing dropping readonly on promoted constructor parameters.
+    (Jorg Sowa)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
@@ -39,6 +43,10 @@ PHP                                                                        NEWS
 - DBA:
   . Fixed dba_close() not closing a database opened with dba_popen().
     (Ilia Alshanetsky)
+
+- DOM:
+  . Fixed bug GH-25306 (Assertion status == LXB_STATUS_OK in dom_parse_selector
+    when lexbor allocation fails). (ndossche)
 
 - Fileinfo:
   . Fixed bug GH-25051 (TrueType fonts detected as application/octet-stream
