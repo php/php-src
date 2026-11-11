@@ -1584,6 +1584,33 @@ static zend_result php_openssl_enable_server_sni(
 	return SUCCESS;
 }
 
+static void php_openssl_share_server_sni(php_stream *stream, php_openssl_netstream_data_t *sslsock,
+		const php_openssl_netstream_data_t *parent_sslsock)
+{
+	if (sslsock->sni_certs || !parent_sslsock->sni_certs || !parent_sslsock->sni_cert_count) {
+		return;
+	}
+
+	bool persistent = php_stream_is_persistent(stream);
+	unsigned count = 0;
+
+	sslsock->sni_certs = safe_pemalloc(parent_sslsock->sni_cert_count,
+		sizeof(php_openssl_sni_cert_t), 0, persistent);
+
+	for (unsigned i = 0; i < parent_sslsock->sni_cert_count; i++) {
+		const php_openssl_sni_cert_t *parent_cert = &parent_sslsock->sni_certs[i];
+		if (!parent_cert->ctx) {
+			continue;
+		}
+		SSL_CTX_up_ref(parent_cert->ctx);
+		sslsock->sni_certs[count].ctx = parent_cert->ctx;
+		sslsock->sni_certs[count].name = pestrdup(parent_cert->name, persistent);
+		count++;
+	}
+
+	sslsock->sni_cert_count = count;
+}
+
 static void php_openssl_enable_client_sni(php_stream *stream, php_openssl_netstream_data_t *sslsock) /* {{{ */
 {
 	zval *val;
@@ -2846,6 +2873,9 @@ static zend_result php_openssl_setup_crypto(php_stream *stream,
 			}
 
 			SSL_set_ex_data(sslsock->ssl_handle, php_openssl_get_ssl_stream_data_index(), stream);
+#ifdef HAVE_TLS_SNI
+			php_openssl_share_server_sni(stream, sslsock, parent_sslsock);
+#endif
 
 			if (!SSL_set_fd(sslsock->ssl_handle, sslsock->s.socket)) {
 				php_openssl_handle_ssl_error(stream, 0, true);
