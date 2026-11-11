@@ -1868,6 +1868,12 @@ PHPAPI void php_child_init(void)
 	refresh_memory_manager();
 	zend_max_execution_timer_init();
 	php_clear_stat_cache(true, NULL, 0);
+
+	ZEND_HASH_MAP_FOREACH_PTR(&module_registry, zend_module_entry *module) {
+		if (module->module_started && module->child_init_func) {
+			module->child_init_func();
+		}
+	} ZEND_HASH_FOREACH_END();
 }
 
 /* {{{ php_request_startup */
