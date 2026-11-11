@@ -18,7 +18,7 @@ $cookies = [];
 for ($i = 0; $i < 2000; $i++) {
     $key = base_convert((string) $i, 10, 36);
     $value = $i < 1500 ? "xx" : "x";
-    $cookies[] = "c$key[0][0][0]=$value";
+    $cookies[] = 'c' . $key . '[0][0][0]=' . $value;
 }
 
 $process = proc_open(
