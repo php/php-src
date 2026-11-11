@@ -27,6 +27,7 @@
 #include "zend_closures.h"
 #include "zend_shared_alloc.h"
 #include "zend_accelerator_blacklist.h"
+#include "zend_accelerator_module.h"
 #include "php_ini.h"
 #include "SAPI.h"
 #include "zend_virtual_cwd.h"
@@ -58,6 +59,22 @@
 static zif_handler orig_file_exists = NULL;
 static zif_handler orig_is_file = NULL;
 static zif_handler orig_is_readable = NULL;
+
+ZEND_TLS int accel_last_fatal_error_type;
+ZEND_TLS zend_execute_data *accel_last_fatal_error_execute_data;
+ZEND_TLS bool accel_last_fatal_error_gc_protected;
+
+void zend_accel_record_fatal_error(
+		int type, zend_string *error_filename, uint32_t error_lineno, zend_string *message)
+{
+	if (type & E_FATAL_ERRORS) {
+		/* Record the origin before zend_bailout() clears the current execution frame.
+		 * Unlike last_error_type, notifications also cover ignored repeated errors. */
+		accel_last_fatal_error_type = type;
+		accel_last_fatal_error_execute_data = EG(current_execute_data);
+		accel_last_fatal_error_gc_protected = gc_protected();
+	}
+}
 
 static int validate_api_restriction(void)
 {
@@ -985,10 +1002,18 @@ ZEND_FUNCTION(opcache_compile_file)
 		 * state. */
 		op_array = persistent_compile_file(&handle, ZEND_INCLUDE);
 	} else {
+		accel_last_fatal_error_type = 0;
 		zend_try {
 			op_array = persistent_compile_file(&handle, ZEND_INCLUDE);
 		} zend_catch {
 			EG(current_execute_data) = orig_execute_data;
+			/* Only recover GC after a compile error in this frame, not a fatal error
+			 * that unwound user code called by a stream wrapper or another hook. */
+			if (accel_last_fatal_error_type == E_COMPILE_ERROR
+					&& accel_last_fatal_error_execute_data == orig_execute_data
+					&& !ZEND_HAS_OOM()) {
+				gc_protect(accel_last_fatal_error_gc_protected);
+			}
 			zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " could not compile file %s", ZSTR_VAL(handle.filename));
 		} zend_end_try();
 	}
