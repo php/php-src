@@ -15,8 +15,10 @@ $script = tempnam(sys_get_temp_dir(), 'gh24787');
 file_put_contents($script, "<?php echo \"request completed\\n\";");
 
 $cookies = [];
-for ($i = 0; $i < 5000; $i++) {
-    $cookies[] = base_convert((string) $i, 10, 36) . "=x";
+for ($i = 0; $i < 2000; $i++) {
+    $key = base_convert((string) $i, 10, 36);
+    $value = $i < 1500 ? "xx" : "x";
+    $cookies[] = "c$key[0][0][0]=$value";
 }
 
 $process = proc_open(
