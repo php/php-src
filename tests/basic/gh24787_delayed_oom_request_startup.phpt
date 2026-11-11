@@ -20,7 +20,7 @@ for ($i = 0; $i < 5000; $i++) {
 }
 
 $process = proc_open(
-    [getenv('TEST_PHP_CGI_EXECUTABLE'), '-n', '-d', 'memory_limit=8M', '-d', 'max_input_vars=10000', '-d', 'html_errors=0'],
+    [getenv('TEST_PHP_CGI_EXECUTABLE'), '-n', '-d', 'memory_limit=2M', '-d', 'max_input_vars=10000', '-d', 'html_errors=0'],
     [STDIN, ['pipe', 'w'], ['pipe', 'w']],
     $pipes,
     null,
