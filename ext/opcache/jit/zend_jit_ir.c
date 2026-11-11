@@ -16442,7 +16442,6 @@ static int zend_jit_fetch_static_prop(zend_jit_ctx *jit, const zend_op *opline, 
 	 && op_array->function_name
 	 && op_array->scope
 	 && (op_array->scope->ce_flags & ZEND_ACC_FINAL)
-	 && !(op_array->scope->ce_flags & ZEND_ACC_TRAIT)
 	 && !(op_array->fn_flags & (ZEND_ACC_CLOSURE|ZEND_ACC_TRAIT_CLONE))) {
 		/* A method in a final CE has a called scope equal to the scope.
 		 * So the cache slot is always monomorphic.
