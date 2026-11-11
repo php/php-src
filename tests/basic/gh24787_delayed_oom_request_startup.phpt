@@ -16,9 +16,9 @@ file_put_contents($script, "<?php echo \"request completed\\n\";");
 
 // Keep the cookie header under Windows' environment limit while allocating nested input variables.
 $cookies = [];
-for ($i = 0; $i < 2580; $i++) {
+for ($i = 0; $i < 2000; $i++) {
     $key = base_convert((string) $i, 10, 36);
-    $cookies[] = $key . '[][][]=xx';
+    $cookies[] = $key . '[][][][][]=x';
 }
 
 $process = proc_open(
