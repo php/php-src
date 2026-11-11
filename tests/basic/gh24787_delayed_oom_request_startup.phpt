@@ -15,8 +15,8 @@ $script = tempnam(sys_get_temp_dir(), 'gh24787');
 file_put_contents($script, "<?php echo \"request completed\\n\";");
 
 $cookies = [];
-for ($i = 0; $i < 4000; $i++) {
-    $cookies[] = "$i=x";
+for ($i = 0; $i < 5000; $i++) {
+    $cookies[] = base_convert((string) $i, 10, 36) . "=x";
 }
 
 $process = proc_open(
@@ -24,7 +24,7 @@ $process = proc_open(
     [STDIN, ['pipe', 'w'], ['pipe', 'w']],
     $pipes,
     null,
-    ['REQUEST_METHOD' => 'GET', 'HTTP_COOKIE' => implode('; ', $cookies), 'SCRIPT_FILENAME' => $script, 'REDIRECT_STATUS' => '1']
+    ['REQUEST_METHOD' => 'GET', 'HTTP_COOKIE' => implode(';', $cookies), 'SCRIPT_FILENAME' => $script, 'REDIRECT_STATUS' => '1']
 );
 $output = stream_get_contents($pipes[1]) . stream_get_contents($pipes[2]);
 fclose($pipes[1]);
