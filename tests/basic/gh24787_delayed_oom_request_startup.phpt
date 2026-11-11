@@ -14,8 +14,8 @@ if (!extension_loaded('uri')) {
 $script = tempnam(sys_get_temp_dir(), 'gh24787');
 file_put_contents($script, "<?php echo \"request completed\\n\";");
 
-// The field count needed to reach the startup gap differs between debug and release builds.
-$counts = PHP_DEBUG ? range(1700, 1950, 4) : range(880, 1040, 4);
+// The field count needed to reach the startup gap varies by build and platform.
+$counts = range(1700, 1950, 4);
 $rinitFailed = false;
 $oomReported = false;
 foreach ($counts as $count) {
