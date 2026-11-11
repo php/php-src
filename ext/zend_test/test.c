@@ -1128,7 +1128,7 @@ static ZEND_FUNCTION(zend_call_method)
 	} else if (Z_TYPE_P(class_or_object) == IS_STRING) {
 		ce = zend_lookup_class(Z_STR_P(class_or_object));
 		if (!ce) {
-			zend_error_noreturn(E_ERROR, "Unknown class '%s'", Z_STRVAL_P(class_or_object));
+			zend_error_noreturn(E_ERROR, "Unknown class '%pS'", Z_STR_P(class_or_object));
 		}
 	} else {
 		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_value_name(class_or_object));
@@ -1297,7 +1297,7 @@ static ZEND_FUNCTION(zend_test_zend_ini_parse_quantity)
 	RETVAL_LONG(zend_ini_parse_quantity(str, &errstr));
 
 	if (errstr) {
-		zend_error(E_WARNING, "%s", ZSTR_VAL(errstr));
+		zend_error(E_WARNING, "%pS", errstr);
 		zend_string_release(errstr);
 	}
 }
@@ -1314,7 +1314,7 @@ static ZEND_FUNCTION(zend_test_zend_ini_parse_uquantity)
 	RETVAL_LONG((zend_long)zend_ini_parse_uquantity(str, &errstr));
 
 	if (errstr) {
-		zend_error(E_WARNING, "%s", ZSTR_VAL(errstr));
+		zend_error(E_WARNING, "%pS", errstr);
 		zend_string_release(errstr);
 	}
 }
@@ -1457,7 +1457,7 @@ static ZEND_FUNCTION(zend_test_crash)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (message) {
-		php_printf("%s", ZSTR_VAL(message));
+		php_printf("%pS", message);
 	}
 
 	char *invalid = (char *) 1;
@@ -2331,7 +2331,7 @@ static ZEND_METHOD(_ZendTestClass, takesUnionType)
 	);
 	if (!type_matches) {
 		zend_string *ty = zend_type_to_string(execute_data->func->internal_function.arg_info->type);
-		zend_argument_type_error(1, "must be of type %s, %s given", ZSTR_VAL(ty), ZSTR_VAL(obj->ce->name));
+		zend_argument_type_error(1, "must be of type %pS, %pS given", ty, obj->ce->name);
 		zend_string_release(ty);
 		RETURN_THROWS();
 	}
@@ -2392,7 +2392,7 @@ static ZEND_NAMED_FUNCTION(zend_test_internal_dnf_arguments)
 	);
 	if (!type_matches) {
 		zend_string *ty = zend_type_to_string(arginfo_zend_test_internal_dnf_arguments[1].type);
-		zend_argument_type_error(1, "must be of type %s, %s given", ZSTR_VAL(ty), ZSTR_VAL(obj->ce->name));
+		zend_argument_type_error(1, "must be of type %pS, %pS given", ty, obj->ce->name);
 		zend_string_release(ty);
 		RETURN_THROWS();
 	}
