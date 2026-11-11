@@ -20,6 +20,9 @@ PHP                                                                        NEWS
   . Use recommended TYPE, HELP order for OpenMetrics metadata.
     (Marcel Hernandez)
 
+- GD:
+  . Fixed imagecolormatch() and imagejpeg() ValueError messages. (lacatoire)
+
 - Hash:
   . Fixed mhash_keygen_s2k() truncating a $length above INT_MAX instead of
     throwing a ValueError. (Marc Bennewitz)
