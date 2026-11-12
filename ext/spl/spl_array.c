@@ -40,6 +40,8 @@ typedef struct _spl_array_object {
 	zval              array;
 	HashTable         *sentinel_array;
 	uint32_t          ht_iter;
+	uint32_t          storage_id; /* Changes each time the storage is replaced */
+	uint32_t          ht_iter_storage_id; /* The storage_id of the owner when ht_iter was last moved */
 	int               ar_flags;
 	unsigned char	  nApplyCount;
 	zend_function     *fptr_offset_get;
@@ -50,6 +52,9 @@ typedef struct _spl_array_object {
 	zend_class_entry* ce_get_iterator;
 	zend_object       std;
 } spl_array_object;
+
+/* Gives each storage assignment an id that no other object holds */
+ZEND_TLS uint32_t spl_array_last_storage_id;
 
 #define spl_array_from_obj(obj) ZEND_CONTAINER_OF(obj, spl_array_object, std)
 
@@ -99,29 +104,97 @@ static inline HashTable *spl_array_get_hash_table(spl_array_object* intern) { /*
 }
 /* }}} */
 
-static inline bool spl_array_is_object(spl_array_object *intern) /* {{{ */
+/* Returns the object that holds the storage */
+static inline spl_array_object *spl_array_get_owner(spl_array_object *intern)
 {
 	while (intern->ar_flags & SPL_ARRAY_USE_OTHER) {
 		intern = Z_SPLARRAY_P(&intern->array);
 	}
+	return intern;
+}
+
+static inline bool spl_array_is_object(spl_array_object *intern) /* {{{ */
+{
+	intern = spl_array_get_owner(intern);
 	return (intern->ar_flags & SPL_ARRAY_IS_SELF) || Z_TYPE(intern->array) == IS_OBJECT;
 }
 /* }}} */
 
+/* Returns the storage, separated from its other holders so that it can be written to. */
+static HashTable *spl_array_get_hash_table_for_write(spl_array_object *intern)
+{
+	intern = spl_array_get_owner(intern);
+	if (!(intern->ar_flags & SPL_ARRAY_IS_SELF) && Z_TYPE(intern->array) == IS_ARRAY) {
+		SEPARATE_ARRAY(&intern->array);
+		return Z_ARRVAL(intern->array);
+	}
+	return spl_array_get_hash_table(intern);
+}
+
 static zend_result spl_array_skip_protected(spl_array_object *intern, HashTable *aht);
 
-static zend_never_inline void spl_array_create_ht_iter(HashTable *ht, spl_array_object* intern) /* {{{ */
+static void spl_array_create_ht_iter(HashTable *ht, spl_array_object* intern) /* {{{ */
 {
 	intern->ht_iter = zend_hash_iterator_add(ht, zend_hash_get_current_pos(ht));
+	intern->ht_iter_storage_id = spl_array_get_owner(intern)->storage_id;
 	zend_hash_internal_pointer_reset_ex(ht, &EG(ht_iterators)[intern->ht_iter].pos);
 	spl_array_skip_protected(intern, ht);
 }
 /* }}} */
 
+static void spl_array_update_ht_iter(HashTable *ht, spl_array_object* intern)
+{
+	uint32_t idx = intern->ht_iter;
+	HashPosition pos = EG(ht_iterators)[idx].pos;
+	uint32_t storage_id = spl_array_get_owner(intern)->storage_id;
+	bool has_copy = false;
+
+	/* When the storage is separated, zend_array_dup() registers a copy of the
+	 * iterator on the new table, with its position adjusted to it. When the
+	 * storage is replaced, the new array can also hold such a copy, if it was
+	 * duplicated from the storage while this iterator was alive. That copy is
+	 * ignored, so that the position doesn't depend on where the array came from. */
+	if (storage_id == intern->ht_iter_storage_id) {
+		for (uint32_t i = EG(ht_iterators)[idx].next_copy; i != idx; i = EG(ht_iterators)[i].next_copy) {
+			if (EG(ht_iterators)[i].ht == ht) {
+				has_copy = true;
+				break;
+			}
+		}
+	}
+	intern->ht_iter_storage_id = storage_id;
+
+	/* Moves the registration to the new table, so that the previous one stops
+	 * tracking this iterator, and takes the position of the copy if there is one. */
+	zend_hash_iterator_pos(idx, ht);
+	if (!has_copy) {
+		/* The storage was replaced: the position is kept as is */
+		EG(ht_iterators)[idx].pos = pos;
+	}
+}
+
+static zend_always_inline bool spl_array_ht_iter_is_on(const spl_array_object *intern, const HashTable *ht)
+{
+	/* The registered table is compared rather than a cached pointer: it is
+	 * poisoned when the table is destroyed, so a new table allocated at the
+	 * same address cannot be mistaken for it. */
+	return intern->ht_iter != (uint32_t)-1 && EG(ht_iterators)[intern->ht_iter].ht == ht;
+}
+
+static zend_never_inline uint32_t *spl_array_get_pos_ptr_slow(HashTable *ht, spl_array_object* intern)
+{
+	if (intern->ht_iter == (uint32_t)-1) {
+		spl_array_create_ht_iter(ht, intern);
+	} else {
+		spl_array_update_ht_iter(ht, intern);
+	}
+	return &EG(ht_iterators)[intern->ht_iter].pos;
+}
+
 static zend_always_inline uint32_t *spl_array_get_pos_ptr(HashTable *ht, spl_array_object* intern) /* {{{ */
 {
-	if (UNEXPECTED(intern->ht_iter == (uint32_t)-1)) {
-		spl_array_create_ht_iter(ht, intern);
+	if (UNEXPECTED(!spl_array_ht_iter_is_on(intern, ht))) {
+		return spl_array_get_pos_ptr_slow(ht, intern);
 	}
 	return &EG(ht_iterators)[intern->ht_iter].pos;
 }
@@ -159,6 +232,7 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zend_o
 	object_properties_init(&intern->std, class_type);
 
 	intern->ar_flags = 0;
+	intern->storage_id = ++spl_array_last_storage_id;
 	intern->ce_get_iterator = spl_ce_ArrayIterator;
 	if (orig) {
 		spl_array_object *other = spl_array_from_obj(orig);
@@ -338,6 +412,11 @@ static zval *spl_array_get_dimension_ptr(bool check_inherited, spl_array_object 
 			&EG(error_zval) : &EG(uninitialized_zval);
 	}
 
+	if (type != BP_VAR_R && type != BP_VAR_IS) {
+		/* The returned zval may be turned into a reference or written to */
+		ht = spl_array_get_hash_table_for_write(intern);
+	}
+
 	if (key.key) {
 		retval = zend_hash_find(ht, key.key);
 		if (retval) {
@@ -480,7 +559,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 
 	Z_TRY_ADDREF_P(value);
 	if (!offset || Z_TYPE_P(offset) == IS_NULL) {
-		ht = spl_array_get_hash_table(intern);
+		ht = spl_array_get_hash_table_for_write(intern);
 		if (UNEXPECTED(ht == intern->sentinel_array)) {
 			return;
 		}
@@ -494,7 +573,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 		return;
 	}
 
-	ht = spl_array_get_hash_table(intern);
+	ht = spl_array_get_hash_table_for_write(intern);
 	if (UNEXPECTED(ht == intern->sentinel_array)) {
 		spl_hash_key_release(&key);
 		return;
@@ -534,7 +613,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zend_object *objec
 		return;
 	}
 
-	ht = spl_array_get_hash_table(intern);
+	ht = spl_array_get_hash_table_for_write(intern);
 	if (key.key) {
 		zval *data = zend_hash_find(ht, key.key);
 		if (data) {
@@ -979,6 +1058,7 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 
 	intern->ar_flags &= ~SPL_ARRAY_IS_SELF & ~SPL_ARRAY_USE_OTHER;
 	intern->ar_flags |= ar_flags;
+	intern->storage_id = ++spl_array_last_storage_id;
 	if (intern->ht_iter != (uint32_t)-1) {
 		zend_hash_iterator_del(intern->ht_iter);
 		intern->ht_iter = (uint32_t)-1;
@@ -1562,7 +1642,9 @@ static zval *spl_array_it_get_current_data(zend_object_iterator *iter) /* {{{ */
 {
 	spl_array_iterator *array_iter = (spl_array_iterator*)iter;
 	spl_array_object *object = Z_SPLARRAY_P(&iter->data);
-	HashTable *aht = spl_array_get_hash_table(object);
+	HashTable *aht = array_iter->by_ref
+		? spl_array_get_hash_table_for_write(object)
+		: spl_array_get_hash_table(object);
 	zval *data = zend_hash_get_current_data_ex(aht, spl_array_get_pos_ptr(aht, object));
 	if (data && Z_TYPE_P(data) == IS_INDIRECT) {
 		data = Z_INDIRECT_P(data);
