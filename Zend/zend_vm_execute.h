@@ -3256,7 +3256,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(
 	const zend_op *throw_op = EG(opline_before_exception);
 
 	/* Exception was thrown before executing any op, or between two ops (see
-	 * zend_handle_delayed_oom()). */
+	 * zend_interrupt_helper). */
 	if (UNEXPECTED(!throw_op)) {
 		free_unfinished_calls(execute_data);
 		ZEND_VM_TAIL_CALL(zend_dispatch_try_catch_finally_helper_SPEC(-1, -1 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
@@ -3892,6 +3892,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_interrupt_he
 		zend_timeout();
 	} else if (ZEND_HAS_OOM()) {
 		zend_handle_delayed_oom();
+		EG(opline_before_exception) = NULL;
 		HANDLE_EXCEPTION();
 	} else if (zend_interrupt_function) {
 		zend_interrupt_function(execute_data);
