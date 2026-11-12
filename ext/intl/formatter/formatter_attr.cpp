@@ -232,12 +232,12 @@ U_CFUNC PHP_FUNCTION( numfmt_get_symbol )
 		RETURN_THROWS();
 	}
 
-	UNumberFormatSymbol symbol = static_cast<UNumberFormatSymbol>(lsymbol);
-
-	if (UNEXPECTED(symbol >= UNUM_FORMAT_SYMBOL_COUNT || symbol < 0)) {
+	if (UNEXPECTED(lsymbol < 0 || lsymbol >= UNUM_FORMAT_SYMBOL_COUNT)) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"invalid symbol value");
 		RETURN_FALSE;
 	}
+
+	UNumberFormatSymbol symbol = static_cast<UNumberFormatSymbol>(lsymbol);
 
 	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
@@ -274,12 +274,12 @@ U_CFUNC PHP_FUNCTION( numfmt_set_symbol )
 		RETURN_THROWS();
 	}
 
-	UNumberFormatSymbol symbol = static_cast<UNumberFormatSymbol>(lsymbol);
-
-	if (UNEXPECTED(symbol >= UNUM_FORMAT_SYMBOL_COUNT || symbol < 0)) {
+	if (UNEXPECTED(lsymbol < 0 || lsymbol >= UNUM_FORMAT_SYMBOL_COUNT)) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"invalid symbol value");
 		RETURN_FALSE;
 	}
+
+	UNumberFormatSymbol symbol = static_cast<UNumberFormatSymbol>(lsymbol);
 
 	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
