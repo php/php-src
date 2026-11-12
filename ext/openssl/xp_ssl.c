@@ -36,6 +36,10 @@
 #include <openssl/bn.h>
 #include <openssl/dh.h>
 
+#if PHP_OPENSSL_API_VERSION < 0x10100
+# define ASN1_STRING_get0_data(asn1) ((const unsigned char *)M_ASN1_STRING_data(asn1))
+#endif
+
 #ifdef PHP_WIN32
 #include "win32/winutil.h"
 #include "win32/time.h"
