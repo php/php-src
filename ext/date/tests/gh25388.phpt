@@ -1,5 +1,5 @@
 --TEST--
-GH-25388 (Invalid access or leak of ext/date tz cache after logging during startup)
+GH-25388 (Invalid access or leak of startup data for ext/date after early usage (php_log_err in minit+rinit))
 --CREDITS--
 bwoebi
 --INI--
@@ -16,7 +16,7 @@ echo date('e'), "\n";
 <?php
 @unlink(__DIR__ . '/gh25388.log');
 ?>
---EXPECTF--
+--EXPECT--
 Deprecated: Directive 'allow_url_include' is deprecated in Unknown on line 0
 
 Warning: PHP Request Startup: function "inexistent" not found or invalid function name in Unknown on line 0
