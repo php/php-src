@@ -3680,11 +3680,6 @@ ZEND_API void ZEND_FASTCALL zend_handle_delayed_oom(void)
 	/* Bailout discards EG(current_execute_data). Would be better to avoid the bailout here. */
 	EG(current_execute_data) = execute_data;
 
-	/* This function may be called from the VM interrupt handler: opline is not
-	 * executed yet. Set opline_before_exception to NULL so
-	 * ZEND_HANDLE_EXCEPTION does not use it. */
-	EG(opline_before_exception) = NULL;
-
 	zend_mm_oom_info_dtor(info);
 	info->state = ZEND_OOM_STATE_HANDLED;
 
