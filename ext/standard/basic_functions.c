@@ -33,6 +33,7 @@
 #include "zend_exceptions.h"
 #include "zend_ini.h"
 #include "zend_hrtime.h"
+#include "zend_locale.h"
 #include "zend_operators.h"
 #include "ext/standard/php_dns.h"
 #include "ext/standard/php_uuencode.h"
@@ -448,7 +449,7 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 	/* Check if locale was changed and change it back
 	 * to the value in startup environment */
 	if (BG(locale_changed)) {
-		setlocale(LC_ALL, "C");
+		zend_setlocale(LC_ALL, "C");
 		zend_reset_lc_ctype_locale();
 		zend_update_current_locale();
 		if (BG(ctype_string)) {

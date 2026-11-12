@@ -60,6 +60,11 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 - The ZTS symbols compiler_globals_offset and executor_globals_offset have been
   removed: CG()/EG() now reach the globals through a __thread struct.
 - Removed zend_error_noreturn_unchecked().
+- Added zend_setlocale(). During a request it only changes the locale of the
+  current thread, which is what the setlocale() function of PHP now does.
+  Extensions should use it instead of the setlocale() function of the C
+  library, which still changes the locale of the whole process and doesn't
+  return the locale of the current thread.
 
 ========================
 2. Build system changes
