@@ -60,6 +60,11 @@ PHP                                                                        NEWS
   . Fixed stack overflow in filter_var() and filter_var_array() with deeply
     nested arrays. (Eyüp Can Akman)
 
+- Intl:
+  . Fixed NumberFormatter::getSymbol(), setSymbol(), getAttribute() and
+    setAttribute() accepting out-of-range values that truncate to a valid one.
+    (Jorg Sowa)
+
 - MBString:
   . Fixed stack overflow in mb_check_encoding() and mb_convert_encoding() with
     deeply nested arrays. (Eyüp Can Akman)
