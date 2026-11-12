@@ -73,6 +73,8 @@ PHP                                                                        NEWS
     isset()/empty(). (Jorg Sowa)
   . Fixed tracing JIT reading the int result of ++/-- on a reference as a
     double. (ChrisAbner)
+  . Fixed bug GH-25359 (Tracing JIT drops reference type of a named by-ref
+    argument). (David Carlier)
 
 - PDO_Firebird:
   . Fixed stack buffer overflow with long connection user names, passwords,
