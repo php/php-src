@@ -36,6 +36,11 @@ pg_lo_write($handle, "x\0y");
 pg_lo_close($handle);
 $handle = pg_lo_open($db, $oid, "r");
 var_dump(bin2hex(pg_lo_read($handle)));
+try {
+    pg_lo_read($handle, -1);
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), "\n";
+}
 pg_lo_close($handle);
 pg_exec($db, "ROLLBACK");
 ?>
@@ -47,3 +52,4 @@ int(0)
 ValueError: pg_lo_write(): Argument #3 ($length) must be greater than or equal to 0
 ValueError: pg_lo_write(): Argument #3 ($length) must be less than or equal to the length of argument #2 ($data)
 string(6) "780079"
+ValueError: pg_lo_read(): Argument #2 ($length) must be greater than or equal to 0
