@@ -42,6 +42,7 @@ typedef struct _spl_array_object {
 	uint32_t          ht_iter;
 	int               ar_flags;
 	unsigned char	  nApplyCount;
+	HashPosition      empty_pos; /* The position in an empty immutable storage */
 	zend_function     *fptr_offset_get;
 	zend_function     *fptr_offset_set;
 	zend_function     *fptr_offset_has;
@@ -114,8 +115,8 @@ static bool spl_array_can_share(const HashTable *ht)
 	const zval *zv;
 
 	if (GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) {
-		/* Immutable arrays cannot hold iterators */
-		return false;
+		/* Immutable arrays hold no references */
+		return true;
 	}
 
 	ZEND_HASH_FOREACH_VAL(ht, zv) {
@@ -160,6 +161,7 @@ static zend_result spl_array_skip_protected(spl_array_object *intern, HashTable 
 
 static void spl_array_create_ht_iter(HashTable *ht, spl_array_object* intern) /* {{{ */
 {
+	ZEND_ASSERT(!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE));
 	intern->ht_iter = zend_hash_iterator_add(ht, zend_hash_get_current_pos(ht));
 	zend_hash_internal_pointer_reset_ex(ht, &EG(ht_iterators)[intern->ht_iter].pos);
 	spl_array_skip_protected(intern, ht);
@@ -171,6 +173,8 @@ static void spl_array_update_ht_iter(HashTable *ht, spl_array_object* intern)
 	uint32_t idx = intern->ht_iter;
 	HashPosition pos = EG(ht_iterators)[idx].pos;
 	bool has_copy = false;
+
+	ZEND_ASSERT(!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE));
 
 	/* When the storage is separated, zend_array_dup() registers a copy of the
 	 * iterator on the new table, with its position adjusted to it. */
@@ -200,6 +204,21 @@ static zend_always_inline bool spl_array_ht_iter_is_on(const spl_array_object *i
 
 static zend_never_inline uint32_t *spl_array_get_pos_ptr_slow(HashTable *ht, spl_array_object* intern)
 {
+	if (GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) {
+		if (!ht->nNumUsed) {
+			/* No iterator is needed as anything added to the storage separates it first */
+			intern->empty_pos = 0;
+			return &intern->empty_pos;
+		}
+		/* Iterators cannot be registered on immutable arrays, so the storage is separated.
+		 * zend_array_dup() copies immutable arrays as is: positions are the same in both
+		 * and callers can complete their read on the immutable array. */
+		ht = spl_array_get_hash_table_for_write(intern);
+		if (spl_array_ht_iter_is_on(intern, ht)) {
+			return &EG(ht_iterators)[intern->ht_iter].pos;
+		}
+	}
+
 	if (intern->ht_iter == (uint32_t)-1) {
 		spl_array_create_ht_iter(ht, intern);
 	} else {
@@ -853,7 +872,7 @@ static HashTable *spl_array_get_properties_for(zend_object *object, zend_prop_pu
 	}
 
 	ht = spl_array_get_hash_table(intern);
-	GC_ADDREF(ht);
+	GC_TRY_ADDREF(ht);
 	return ht;
 } /* }}} */
 
@@ -1268,6 +1287,11 @@ PHP_METHOD(ArrayObject, count)
 
 static void spl_array_method(zval *return_value, spl_array_object *intern, const char *fname, size_t fname_len, const zval *extra_arg) /* {{{ */
 {
+	/* The sorted array replaces the storage, which cannot be done for immutable arrays */
+	if (GC_FLAGS(spl_array_get_hash_table(intern)) & IS_ARRAY_IMMUTABLE) {
+		spl_array_get_hash_table_for_write(intern);
+	}
+
 	HashTable **ht_ptr = spl_array_get_hash_table_ptr(intern);
 	HashTable *aht = *ht_ptr;
 	zval params[2];
@@ -1292,9 +1316,25 @@ static void spl_array_method(zval *return_value, spl_array_object *intern, const
 	intern->nApplyCount--;
 
 	zval *ht_zv = Z_REFVAL(params[0]);
-	zend_array_release(*ht_ptr);
 	SEPARATE_ARRAY(ht_zv);
-	*ht_ptr = Z_ARRVAL_P(ht_zv);
+
+	/* nApplyCount only guards this object: when it points to another ArrayObject,
+	 * the callback may have replaced the storage of that one, so it is looked up
+	 * again, and an array storage is replaced as a zval to keep its type flags right. */
+	spl_array_object *owner = intern;
+	while (owner->ar_flags & SPL_ARRAY_USE_OTHER) {
+		owner = Z_SPLARRAY_P(&owner->array);
+	}
+	if (!(owner->ar_flags & SPL_ARRAY_IS_SELF) && Z_TYPE(owner->array) == IS_ARRAY) {
+		zval garbage;
+		ZVAL_COPY_VALUE(&garbage, &owner->array);
+		ZVAL_ARR(&owner->array, Z_ARRVAL_P(ht_zv));
+		zval_ptr_dtor(&garbage);
+	} else {
+		ht_ptr = spl_array_get_hash_table_ptr(intern);
+		zend_array_release(*ht_ptr);
+		*ht_ptr = Z_ARRVAL_P(ht_zv);
+	}
 	ZVAL_NULL(ht_zv);
 	zval_ptr_dtor(&params[0]);
 } /* }}} */
