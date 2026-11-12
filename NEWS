@@ -25,6 +25,7 @@ PHP                                                                        NEWS
     (Jorg Sowa)
   . Fixed bug GH-25311 (Assertion ret == SUCCESS in array_map()/array_filter()
     after delayed out-of-memory). (ndossche)
+  . Fixed AST export of by-reference property hooks. (Jorg Sowa)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
