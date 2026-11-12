@@ -196,7 +196,8 @@ again:
 				class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
 				const char *prefix = php_var_dump_object_prefix(Z_OBJ_P(struc));
 
-				php_printf("%s%sobject(%pS)#%d (%d) {\n", COMMON, prefix, class_name, Z_OBJ_HANDLE_P(struc), myht ? zend_array_count(myht) : 0);
+				/* %s keeps anonymous class names short, matching property labels and print_r(). */
+				php_printf("%s%sobject(%s)#%d (%d) {\n", COMMON, prefix, ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(struc), myht ? zend_array_count(myht) : 0);
 				zend_string_release_ex(class_name, 0);
 			}
 
@@ -407,7 +408,8 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 		class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
 		const char *prefix = php_var_dump_object_prefix(Z_OBJ_P(struc));
 
-		php_printf("%sobject(%pS)#%d (%d) refcount(%u){\n", prefix, class_name, Z_OBJ_HANDLE_P(struc), myht ? zend_array_count(myht) : 0, Z_REFCOUNT_P(struc));
+		/* %s keeps anonymous class names short, matching property labels and print_r(). */
+		php_printf("%sobject(%s)#%d (%d) refcount(%u){\n", prefix, ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(struc), myht ? zend_array_count(myht) : 0, Z_REFCOUNT_P(struc));
 		zend_string_release_ex(class_name, 0);
 		if (myht) {
 			ZEND_HASH_FOREACH_KEY_VAL(myht, index, key, val) {

@@ -10,6 +10,6 @@ $foo = function() {
 $closure = Closure::bind($foo, $class, $class);
 var_dump($closure());
 ?>
---EXPECTF--
-object(class@anonymous%0%s)#1 (0) {
+--EXPECT--
+object(class@anonymous)#1 (0) {
 }
