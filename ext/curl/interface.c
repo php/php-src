@@ -944,11 +944,15 @@ static curl_socket_t curl_opensocketfunction(void *clientp, curlsocktype purpose
 
 	php_curl_call_callback(ch, &ch->handlers.opensocket, &retval, /* argc */ 3, args);
 
-	/* retval is undefined when the callback threw: the connection is refused and
-	 * the exception propagates out of curl_exec(). */
+	/* retval is undefined when the callback threw, and must not be trusted when
+	 * an exception was thrown after it was set, e.g. by a destructor: either
+	 * way the connection is refused and the exception propagates out of
+	 * curl_exec(). */
 	if (!Z_ISUNDEF(retval)) {
 		_php_curl_verify_handlers(ch, /* reporterror */ true);
-		if (EXPECTED(Z_TYPE(retval) == IS_TRUE || Z_TYPE(retval) == IS_FALSE)) {
+		if (UNEXPECTED(EG(exception))) {
+			/* Refused. */
+		} else if (EXPECTED(Z_TYPE(retval) == IS_TRUE || Z_TYPE(retval) == IS_FALSE)) {
 			if (Z_TYPE(retval) == IS_TRUE) {
 				rval = socket(address->family, address->socktype, address->protocol);
 				/* Where socket() supports SOCK_NONBLOCK, libcurl only makes a

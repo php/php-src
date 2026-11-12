@@ -115,6 +115,18 @@ try {
 }
 var_dump(curl_errno($ch) === CURLE_COULDNT_CONNECT);
 
+echo "\nTesting with an exception thrown by a destructor after returning true\n";
+curl_setopt($ch, CURLOPT_OPENSOCKETFUNCTION, function (): bool {
+    $o = new class { function __destruct() { throw new \Exception('refused by destructor'); } };
+    return true;
+});
+try {
+    curl_exec($ch);
+} catch (\Exception $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+var_dump(curl_errno($ch) === CURLE_COULDNT_CONNECT);
+
 echo "\nTesting with an invalid option value\n";
 try {
     curl_setopt($ch, CURLOPT_OPENSOCKETFUNCTION, 42);
@@ -206,6 +218,10 @@ TypeError: The CURLOPT_OPENSOCKETFUNCTION callback must return a bool
 
 Testing with an exception thrown from the callback
 Exception: refused
+bool(true)
+
+Testing with an exception thrown by a destructor after returning true
+Exception: refused by destructor
 bool(true)
 
 Testing with an invalid option value
