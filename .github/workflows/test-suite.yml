@@ -35,6 +35,7 @@ jobs:
         with:
           configurationParameters: >-
             CFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC"
+            CXXFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC"
             LDFLAGS="-fsanitize=undefined,address -fno-sanitize=function"
             CC=clang-17
             CXX=clang++-17
@@ -85,6 +86,7 @@ jobs:
         with:
           configurationParameters: >-
             CFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC"
+            CXXFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC"
             LDFLAGS="-fsanitize=undefined,address -fno-sanitize=function"
             --enable-debug
             --enable-zts
@@ -169,7 +171,7 @@ jobs:
             ${{ matrix.variation && 'CFLAGS="-DZEND_RC_DEBUG=1 -DPROFITABILITY_CHECKS=0 -DZEND_VERIFY_FUNC_INFO=1 -DZEND_VERIFY_TYPE_INFERENCE"' || '' }}
             ${{ (matrix.variation && fromJson(inputs.branch).jobs.LINUX_X64.config.variation_enable_zend_max_execution_timers) && '--enable-zend-max-execution-timers' || '' }}
             --${{ matrix.debug && 'enable' || 'disable' }}-debug
-            ${{ (matrix.variation || matrix.debug) && format('CXXFLAGS="{0} {1}"', matrix.variation && '-DZEND_VERIFY_TYPE_INFERENCE' || '', matrix.debug && '-D_GLIBCXX_ASSERTIONS' || '') || '' }}
+            ${{ (matrix.asan || matrix.variation || matrix.debug) && format('CXXFLAGS="{0} {1} {2}"', matrix.asan && '-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC' || '', matrix.variation && '-DZEND_VERIFY_TYPE_INFERENCE' || '', matrix.debug && '-D_GLIBCXX_ASSERTIONS' || '') || '' }}
             --${{ matrix.zts && 'enable' || 'disable' }}-zts
           asan: ${{ matrix.asan && 'true' || 'false' }}
           skipSlow: ${{ (matrix.asan && !inputs.all_variations) && 'true' || 'false' }}
@@ -459,7 +461,7 @@ jobs:
           # CFLAGS removes O2, so we have to add it again...
           configurationParameters: >-
             --enable-zts
-            ${{ matrix.type == 'asan' && '--enable-debug CFLAGS="-fsanitize=undefined,address -fno-sanitize-recover -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address"' || '' }}
+            ${{ matrix.type == 'asan' && '--enable-debug CFLAGS="-fsanitize=undefined,address -fno-sanitize-recover -DZEND_TRACK_ARENA_ALLOC" CXXFLAGS="-fsanitize=undefined,address -fno-sanitize-recover -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address"' || '' }}
             ${{ matrix.type == 'verify_type_inference' && 'CFLAGS="-DZEND_VERIFY_TYPE_INFERENCE -O2"' || '' }}
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
