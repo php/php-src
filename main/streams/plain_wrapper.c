@@ -57,12 +57,16 @@ extern int php_get_uid_by_name(const char *name, uid_t *uid);
 extern int php_get_gid_by_name(const char *name, gid_t *gid);
 #endif
 
-#if defined(PHP_WIN32)
+#if defined(PHP_WIN32) || defined(__APPLE__) || defined(__MACH__) || defined(BSD) || defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 # define PLAIN_WRAP_BUF_SIZE(st) ((unsigned int)(st > INT_MAX ? INT_MAX : st))
+#else
+# define PLAIN_WRAP_BUF_SIZE(st) (st)
+#endif
+
+#if defined(PHP_WIN32)
 #define fsync _commit
 #define fdatasync fsync
 #else
-# define PLAIN_WRAP_BUF_SIZE(st) (st)
 # if !defined(HAVE_FDATASYNC)
 #  define fdatasync fsync
 # elif defined(__APPLE__)
@@ -382,7 +386,7 @@ static ssize_t php_stdiop_write(php_stream *stream, const char *buf, size_t coun
 #ifdef PHP_WIN32
 		bytes_written = _write(data->fd, buf, PLAIN_WRAP_BUF_SIZE(count));
 #else
-		bytes_written = write(data->fd, buf, count);
+		bytes_written = write(data->fd, buf, PLAIN_WRAP_BUF_SIZE(count));
 #endif
 		if (bytes_written < 0) {
 			if (PHP_IS_TRANSIENT_ERROR(errno)) {
