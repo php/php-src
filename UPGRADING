@@ -74,6 +74,8 @@ PHP 8.7 UPGRADE NOTES
 - Curl:
   . Multiple files can now be uploaded with the same field name by passing an
     array of CURLFile or CURLStringFile objects to CURLOPT_POSTFIELDS.
+  . Support for upstream options CURLOPT_ECH, CURLOPT_HAPROXY_CLIENT_IP, and
+    CURLOPT_SERVER_RESPONSE_TIMEOUT_MS.
 
 - Intl:
   . Added IntlRelativeDateTimeFormatter to format relative date and time offsets
@@ -164,6 +166,12 @@ PHP 8.7 UPGRADE NOTES
 ========================================
 10. New Global Constants
 ========================================
+
+- Curl:
+  . New options: CURLOPT_ECH, CURLOPT_HAPROXY_CLIENT_IP,
+    CURLOPT_SERVER_RESPONSE_TIMEOUT_MS.
+  . CURLOPT_MAIL_RCPT_ALLOWFAILS is the correctly spelled alternative to
+    CURLOPT_MAIL_RCPT_ALLLOWFAILS.
 
 ========================================
 11. Changes to INI File Handling
