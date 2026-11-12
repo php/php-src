@@ -1273,7 +1273,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 					Z_PARAM_LONG(retries)
 				ZEND_PARSE_PARAMETERS_END();
 
-				timeout_argument_offset = 10;
+				timeout_argument_offset = 11;
 			} else {
 				/* SNMP_CMD_GET
 				 * SNMP_CMD_GETNEXT
