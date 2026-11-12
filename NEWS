@@ -80,6 +80,9 @@ PHP                                                                        NEWS
   . Fixed stack buffer overflow with long connection user names, passwords,
     charsets, or roles. (Ilia Alshanetsky)
 
+- Phpdbg:
+  . Fixed bug GH-25338 (opcode listing did not include property hooks). (crystarm)
+
 - SOAP:
   . Fixed bug GH-25267 (NULL dereference in to_xml_any() with integer key).
     (lazerg)
