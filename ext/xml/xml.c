@@ -206,14 +206,16 @@ static PHP_GINIT_FUNCTION(xml)
 	xml_globals->default_encoding = (XML_Char*)"UTF-8";
 }
 
+/* Expat handles allocation failures (XML_ERROR_NO_MEMORY), so let it fail
+ * instead of exceeding the hard memory limit. */
 static void *php_xml_malloc_wrapper(size_t sz)
 {
-	return emalloc(sz);
+	return femalloc(sz, /* fallible */ true);
 }
 
 static void *php_xml_realloc_wrapper(void *ptr, size_t sz)
 {
-	return erealloc(ptr, sz);
+	return ferealloc(ptr, sz, /* fallible */ true);
 }
 
 static void php_xml_free_wrapper(void *ptr)
