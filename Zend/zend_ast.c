@@ -2255,6 +2255,9 @@ static ZEND_COLD void zend_ast_export_hook_list(smart_str *str, const zend_ast_l
 
 	for (uint32_t i = 0; i < hook_list->children; i++) {
 		const zend_ast_decl *hook = (const zend_ast_decl *)hook_list->child[i];
+		if (hook->child[4]) {
+			zend_ast_export_attributes(str, hook->child[4], indent, 1);
+		}
 		if (hook->flags & ZEND_ACC_FINAL) {
 			smart_str_appends(str, "final ");
 		}
@@ -2262,6 +2265,11 @@ static ZEND_COLD void zend_ast_export_hook_list(smart_str *str, const zend_ast_l
 			smart_str_appendc(str, '&');
 		}
 		smart_str_append(str, hook->name);
+		if (hook->child[0]) {
+			smart_str_appendc(str, '(');
+			zend_ast_export_ex(str, hook->child[0], 0, indent);
+			smart_str_appendc(str, ')');
+		}
 		zend_ast *body = hook->child[2];
 		if (body == NULL) {
 			smart_str_appendc(str, ';');
