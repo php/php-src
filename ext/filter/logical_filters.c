@@ -869,8 +869,9 @@ fixup_ip:
 }
 /* }}} */
 
-/* From the tables in RFC 6890 - Special-Purpose IP Address Registriesi
- * Including errata: https://www.rfc-editor.org/errata_search.php?rfc=6890&rec_status=1 */
+/* From the tables in RFC 6890 - Special-Purpose IP Address Registries
+ * Including errata: https://www.rfc-editor.org/errata_search.php?rfc=6890&rec_status=1
+ * Also treats multicast as reserved, as it is not a unicast destination */
 static bool ipv4_get_status_flags(const int ip[8], bool *global, bool *reserved, bool *private)
 {
 	*global = false;
@@ -915,6 +916,9 @@ static bool ipv4_get_status_flags(const int ip[8], bool *global, bool *reserved,
 		/* RFC 5737 - Documentation */
 	} else if (ip[0] == 203 && ip[1] == 0 && ip[2] == 113) {
 		/* RFC 5737 - Documentation */
+	} else if (ip[0] >= 224 && ip[0] <= 239) {
+		/* RFC 5771 - Multicast */
+		*reserved = true;
 	} else if (ip[0] >= 240 && ip[1] <= 255) {
 		/* RFC 1122 - Reserved */
 		*reserved = true;
@@ -940,7 +944,8 @@ static void ipv6_get_embedded_ipv4_status_flags(int high, int low, bool *global,
 }
 
 /* From the tables in RFC 6890 - Special-Purpose IP Address Registries, plus a few later blocks.
- * Also treats addresses embedding an IPv4 address according to that address. */
+ * Also treats multicast as reserved, deprecated site-local addresses as private, and addresses
+ * embedding an IPv4 address according to that address. */
 static bool ipv6_get_status_flags(const int ip[8], bool *global, bool *reserved, bool *private)
 {
 	*global = false;
@@ -988,6 +993,16 @@ static bool ipv6_get_status_flags(const int ip[8], bool *global, bool *reserved,
 	} else if (ip[0] >= 0xfe80 && ip[0] <= 0xfebf) {
 		/* RFC 4291 - Linked-Scoped Unicast */
 		*reserved = true;
+	} else if (ip[0] >= 0xfec0 && ip[0] <= 0xfeff) {
+		/* RFC 3879 - Site-Local Unicast (deprecated) */
+		*private = true;
+	} else if (ip[0] >= 0xff00) {
+		/* RFC 4291 - Multicast */
+		*reserved = true;
+	} else if (ip[0] == 0x3fff && ip[1] <= 0x0fff) {
+		/* RFC 9637 - Documentation */
+	} else if (ip[0] == 0x5f00) {
+		/* RFC 9602 - Segment Routing (SRv6) SIDs */
 	} else {
 		return false;
 	}

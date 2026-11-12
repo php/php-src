@@ -57,6 +57,9 @@ PHP                                                                        NEWS
     in NAT64 (64:ff9b::/96), 6to4 (still not global), IPv4-mapped,
     IPv4-compatible (::/96, now always reserved) and IPv4-translated IPv6
     addresses. (Xavier Leune)
+  . Fixed FILTER_VALIDATE_IP range flags missing the IPv6 site-local
+    (fec0::/10, private), multicast (ff00::/8 and 224.0.0.0/4, reserved),
+    documentation (3fff::/20) and SRv6 (5f00::/16) blocks. (Xavier Leune)
 
 - MBString:
   . Fixed stack overflow in mb_check_encoding() and mb_convert_encoding() with
