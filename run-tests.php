@@ -3866,6 +3866,9 @@ class JUnit
 
 class SkipCache
 {
+    // Kept on one line so SKIPIF line numbers are unchanged.
+    private const HELPERS = '<?php function skipif($condition, string $reason): void { if ($condition) { echo "skip $reason"; exit; } } ?>';
+
     private bool $enable;
     private bool $keepFile;
 
@@ -3893,12 +3896,12 @@ class SkipCache
         if (isset($this->skips[$key][$code])) {
             $this->hits++;
             if ($this->keepFile) {
-                save_text($checkFile, $code, $tempFile);
+                save_text($checkFile, self::HELPERS . $code, $tempFile);
             }
             return $this->skips[$key][$code];
         }
 
-        save_text($checkFile, $code, $tempFile);
+        save_text($checkFile, self::HELPERS . $code, $tempFile);
         $env['TEST_PHP_EVALUATING_SKIPIF'] = '1';
         $command[] = $checkFile;
         $result = trim(system_with_timeout($command, $env));
