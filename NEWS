@@ -122,6 +122,10 @@ PHP                                                                        NEWS
   . Fix ReflectionProperty::isReadable() not working for indirect slots.
     (ndossche)
 
+- Standard:
+  . Fixed bug GH-25387 (Uploaded files leak in request_parse_body()).
+    (Kévin Dunglas)
+
 - Streams:
   . Fixed in-place URL decoding of interned strings in the HTTP and FTP
     wrappers. (Alejandro Pacheco)
