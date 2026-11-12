@@ -45,7 +45,7 @@ U_CFUNC PHP_FUNCTION( numfmt_get_attribute )
 	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
-	switch(attribute) {
+	switch(lattribute) {
 		case UNUM_PARSE_INT_ONLY:
 		case UNUM_GROUPING_USED:
 		case UNUM_DECIMAL_ALWAYS_SHOWN:
@@ -149,7 +149,7 @@ U_CFUNC PHP_FUNCTION( numfmt_set_attribute )
 
 	UNumberFormatAttribute attribute = static_cast<UNumberFormatAttribute>(lattribute);
 
-	switch(attribute) {
+	switch(lattribute) {
 		case UNUM_PARSE_INT_ONLY:
 		case UNUM_GROUPING_USED:
 		case UNUM_DECIMAL_ALWAYS_SHOWN:
