@@ -69,6 +69,8 @@ PHP                                                                        NEWS
   . Fixed use-after-free in JIT when the error handler releases a string while
     an "Undefined variable" warning is raised for its offset in ?? or nested
     isset()/empty(). (Jorg Sowa)
+  . Fixed bug GH-24622 (Tracing JIT skips spilling inherited register values
+    before property helpers). (ndossche, Alessio Attilio)
 
 - PDO_Firebird:
   . Fixed stack buffer overflow with long connection user names, passwords,
