@@ -26,7 +26,15 @@
 
 #ifdef PHP_WIN32
 #include <winsock2.h>
+#include <ws2tcpip.h>
 #include <sys/types.h>
+#else
+#include <sys/socket.h>
+#include <netinet/in.h>
+# ifdef AF_UNIX
+# include <sys/un.h>
+# define PHP_CURL_HAVE_AF_UNIX 1
+# endif
 #endif
 
 #include <curl/curl.h>
@@ -36,6 +44,8 @@
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
 #include "ext/standard/url.h"
+#include "ext/standard/php_net.h"
+#include "php_network.h"
 #include "curl_private.h"
 
 #ifdef __GNUC__
@@ -499,6 +509,10 @@ static HashTable *curl_get_gc(zend_object *object, zval **table, int *n)
 		zend_get_gc_buffer_add_fcc(gc_buffer, &curl->handlers.debug);
 	}
 
+	if (ZEND_FCC_INITIALIZED(curl->handlers.opensocket)) {
+		zend_get_gc_buffer_add_fcc(gc_buffer, &curl->handlers.opensocket);
+	}
+
 #if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
 	if (ZEND_FCC_INITIALIZED(curl->handlers.prereq)) {
 		zend_get_gc_buffer_add_fcc(gc_buffer, &curl->handlers.prereq);
@@ -837,6 +851,100 @@ static int curl_ssh_hostkeyfunction(void *clientp, int keytype, const char *key,
 }
 #endif
 
+/* {{{ curl_opensocket */
+static curl_socket_t curl_opensocket(void *clientp, curlsocktype purpose, struct curl_sockaddr *address)
+{
+	php_curl *ch = (php_curl *) clientp;
+	curl_socket_t sock = CURL_SOCKET_BAD;
+
+#if PHP_CURL_DEBUG
+	fprintf(stderr, "curl_opensocket() called\n");
+	fprintf(stderr, "clientp = %p, purpose = %d, family = %d, socktype = %d, protocol = %d\n", clientp, purpose, address->family, address->socktype, address->protocol);
+#endif
+
+	/* Refuse what can't be passed to the callback. Once the callback threw, refuse
+	 * the remaining addresses too. */
+	if (UNEXPECTED(purpose != CURLSOCKTYPE_IPCXN || !ZEND_FCC_INITIALIZED(ch->handlers.opensocket) || EG(exception))) {
+		return sock;
+	}
+
+	zval args[3];
+	zend_long port = 0;
+	bool is_ip = true;
+
+	switch (address->family) {
+		case AF_INET:
+			port = ntohs(((const struct sockaddr_in *) &address->addr)->sin_port);
+			break;
+#ifdef AF_INET6
+		case AF_INET6:
+			port = ntohs(((const struct sockaddr_in6 *) &address->addr)->sin6_port);
+			break;
+#endif
+#ifdef PHP_CURL_HAVE_AF_UNIX
+		case AF_UNIX: {
+			/* The path of the socket, with its leading NUL byte for an abstract one */
+			const struct sockaddr_un *sa_un = (const struct sockaddr_un *) &address->addr;
+			size_t len = 0;
+			if (address->addrlen > offsetof(struct sockaddr_un, sun_path)) {
+				len = MIN(address->addrlen - offsetof(struct sockaddr_un, sun_path), sizeof(sa_un->sun_path));
+				if (len && sa_un->sun_path[0] != '\0') {
+					const char *nul = memchr(sa_un->sun_path, '\0', len);
+					if (nul) {
+						len = nul - sa_un->sun_path;
+					}
+				}
+			}
+			ZVAL_STRINGL(&args[1], sa_un->sun_path, len);
+			is_ip = false;
+			break;
+		}
+#endif
+		default:
+			return sock;
+	}
+
+	if (is_ip) {
+		zend_string *ip = php_inet_ntop(&address->addr);
+		if (UNEXPECTED(!ip)) {
+			return sock;
+		}
+		ZVAL_STR(&args[1], ip);
+	}
+
+	zval retval;
+
+	GC_ADDREF(&ch->std);
+	ZVAL_OBJ(&args[0], &ch->std);
+	ZVAL_LONG(&args[2], port);
+
+	php_curl_call_callback(ch, &ch->handlers.opensocket, &retval, /* argc */ 3, args);
+
+	if (!Z_ISUNDEF(retval)) {
+		_php_curl_verify_handlers(ch, /* reporterror */ true);
+		if (Z_TYPE(retval) == IS_TRUE) {
+			if (!EG(exception)) {
+				/* What libcurl does when no callback is set */
+				sock = socket(address->family, address->socktype, address->protocol);
+				/* libcurl doesn't make the socket non-blocking if the callback removed itself */
+				if (sock != CURL_SOCKET_BAD && php_set_sock_blocking(sock, false) != SUCCESS) {
+					closesocket(sock);
+					sock = CURL_SOCKET_BAD;
+				}
+			}
+		} else if (Z_TYPE(retval) != IS_FALSE) {
+			zend_type_error("The CURLOPT_OPENSOCKETFUNCTION callback must return a bool");
+			zval_ptr_dtor(&retval);
+		}
+	}
+
+	zval_ptr_dtor(&args[0]);
+	zval_ptr_dtor(&args[1]);
+
+	return sock;
+}
+/* }}} */
+
 /* {{{ curl_read */
 static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 {
@@ -1155,6 +1263,7 @@ void init_curl_handle(php_curl *ch)
 	ch->handlers.xferinfo = empty_fcall_info_cache;
 	ch->handlers.fnmatch = empty_fcall_info_cache;
 	ch->handlers.debug = empty_fcall_info_cache;
+	ch->handlers.opensocket = empty_fcall_info_cache;
 #if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
 	ch->handlers.prereq = empty_fcall_info_cache;
 #endif
@@ -1332,6 +1441,7 @@ void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
 	php_curl_copy_fcc_with_option(ch, CURLOPT_XFERINFODATA, &ch->handlers.xferinfo, &source->handlers.xferinfo);
 	php_curl_copy_fcc_with_option(ch, CURLOPT_FNMATCH_DATA, &ch->handlers.fnmatch, &source->handlers.fnmatch);
 	php_curl_copy_fcc_with_option(ch, CURLOPT_DEBUGDATA, &ch->handlers.debug, &source->handlers.debug);
+	php_curl_copy_fcc_with_option(ch, CURLOPT_OPENSOCKETDATA, &ch->handlers.opensocket, &source->handlers.opensocket);
 #if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
 	php_curl_copy_fcc_with_option(ch, CURLOPT_PREREQDATA, &ch->handlers.prereq, &source->handlers.prereq);
 #endif
@@ -1726,6 +1836,21 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		HANDLE_CURL_OPTION_CALLABLE(ch, CURLOPT_XFERINFO, handlers.xferinfo, curl_xferinfo);
 		HANDLE_CURL_OPTION_CALLABLE(ch, CURLOPT_FNMATCH_, handlers.fnmatch, curl_fnmatch);
 		HANDLE_CURL_OPTION_CALLABLE(ch, CURLOPT_DEBUG, handlers.debug, curl_debug);
+
+		case CURLOPT_OPENSOCKETFUNCTION: {
+			bool result = php_curl_set_callable_handler(&ch->handlers.opensocket, zvalue, is_array_config, "CURLOPT_OPENSOCKETFUNCTION");
+			/* Without a callback, libcurl creates the sockets itself */
+			if (ZEND_FCC_INITIALIZED(ch->handlers.opensocket)) {
+				curl_easy_setopt(ch->cp, CURLOPT_OPENSOCKETFUNCTION, curl_opensocket);
+				curl_easy_setopt(ch->cp, CURLOPT_OPENSOCKETDATA, ch);
+			} else {
+				curl_easy_setopt(ch->cp, CURLOPT_OPENSOCKETFUNCTION, NULL);
+			}
+			if (!result) {
+				return FAILURE;
+			}
+			break;
+		}
 
 #if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
 		HANDLE_CURL_OPTION_CALLABLE(ch, CURLOPT_PREREQ, handlers.prereq, curl_prereqfunction);
@@ -2925,6 +3050,9 @@ static void curl_free_obj(zend_object *object)
 	if (ZEND_FCC_INITIALIZED(ch->handlers.debug)) {
 		zend_fcc_dtor(&ch->handlers.debug);
 	}
+	if (ZEND_FCC_INITIALIZED(ch->handlers.opensocket)) {
+		zend_fcc_dtor(&ch->handlers.opensocket);
+	}
 #if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
 	if (ZEND_FCC_INITIALIZED(ch->handlers.prereq)) {
 		zend_fcc_dtor(&ch->handlers.prereq);
@@ -3015,6 +3143,10 @@ static void _php_curl_reset_handlers(php_curl *ch)
 
 	if (ZEND_FCC_INITIALIZED(ch->handlers.debug)) {
 		zend_fcc_dtor(&ch->handlers.debug);
+	}
+
+	if (ZEND_FCC_INITIALIZED(ch->handlers.opensocket)) {
+		zend_fcc_dtor(&ch->handlers.opensocket);
 	}
 
 #if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */

@@ -76,6 +76,13 @@ PHP 8.7 UPGRADE NOTES
     array of CURLFile or CURLStringFile objects to CURLOPT_POSTFIELDS.
   . Support for upstream options CURLOPT_ECH, CURLOPT_HAPROXY_CLIENT_IP, and
     CURLOPT_SERVER_RESPONSE_TIMEOUT_MS.
+  . Added CURLOPT_OPENSOCKETFUNCTION to register a callback that allows or
+    refuses each address libcurl is about to connect to, after DNS resolution
+    and before connect(). The callback receives the CurlHandle, the address
+    and the port. It must return true to let libcurl create the socket, or
+    false to make libcurl try the next address. The address is an IP address,
+    or the path of a UNIX domain socket with port 0. The callback isn't called
+    when a connection is reused, which CURLOPT_PREREQFUNCTION can check.
 
 - Intl:
   . Added IntlRelativeDateTimeFormatter to format relative date and time offsets
@@ -172,6 +179,7 @@ PHP 8.7 UPGRADE NOTES
     CURLOPT_SERVER_RESPONSE_TIMEOUT_MS.
   . CURLOPT_MAIL_RCPT_ALLOWFAILS is the correctly spelled alternative to
     CURLOPT_MAIL_RCPT_ALLLOWFAILS.
+  . CURLOPT_OPENSOCKETFUNCTION.
 
 ========================================
 11. Changes to INI File Handling
