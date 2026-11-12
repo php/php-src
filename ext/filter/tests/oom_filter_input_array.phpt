@@ -23,7 +23,22 @@ $body = "--$boundary\r\nContent-Disposition: form-data; name=\"k\"\r\n\r\n"
       . "\r\n--$boundary--\r\n";
 
 $p = proc_open(
-    [getenv('TEST_PHP_CGI_EXECUTABLE'), '-n', '-d', 'memory_limit=12M', '-d', 'html_errors=0'],
+    [
+        getenv('TEST_PHP_CGI_EXECUTABLE'), '-n',
+        '-d', 'memory_limit=12M',
+        '-d', 'html_errors=0',
+        ...((function () {
+            $extDir = ini_get("extension_dir");
+            if (file_exists($extDir."/filter.so")) {
+                return [
+                    '-d', sprintf("extension_dir=%s", ini_get('extension_dir')),
+                    '-d', 'extension=filter.so',
+                ];
+            } else {
+                return [];
+            }
+        })()),
+    ],
     [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
     $pipes,
     null,
