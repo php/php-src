@@ -152,6 +152,8 @@ PHP                                                                        NEWS
     (Ilia Alshanetsky)
 
 - SPL:
+  . ArrayObject and ArrayIterator now share the arrays they are given or hand
+    out until one side modifies them. (Nicolas Grekas)
   . Fixed bug GH-17935 (Assertion failure Zend/zend_hash.c when appending to
     serialized ArrayObject). (Nicolas Grekas)
   . Fixed bug GH-23385 (SplDoublyLinkedList::serialize() use-after-free when

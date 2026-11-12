@@ -9,8 +9,8 @@ function position(string $source, array $unset) {
     $it->next();
     switch ($source) {
         case 'copy':
-            // zend_array_dup() registers a copy of the iterator on this array,
-            // and exchangeArray() duplicates it again since its refcount is 2
+            // The array is shared with the storage until unset() separates it,
+            // then exchangeArray() shares it as is, holes included
             $array = $ao->getArrayCopy();
             foreach ($unset as $key) {
                 unset($array[$key]);
@@ -42,9 +42,9 @@ foreach ([['a', 'b'], ['a']] as $unset) {
 }
 ?>
 --EXPECT--
-copy: NULL
+copy: string(1) "c"
 packed: NULL
 holes: string(1) "c"
-copy: string(1) "d"
+copy: string(1) "c"
 packed: string(1) "d"
 holes: string(1) "c"
