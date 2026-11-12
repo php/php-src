@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?M=C3=A1t=C3=A9=20Kocsis?= <kocsismate@woohoolabs.com>
 Date: Mon, 21 Sep 2026 20:01:43 +0200
-Subject: [PATCH 23/24] URL: Keep replacement file drive paths hierarchical
+Subject: [PATCH 23/25] URL: Keep replacement file drive paths hierarchical
  (#423)
 
 WHATWG file state (https://url.spec.whatwg.org/#file-state) step 4.4.3.2 resets the path to an empty list. Do not mark it opaque, as that makes subsequent pathname updates silently do nothing.

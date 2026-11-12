@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Tim=20D=C3=BCsterhus?= <tim@tideways-gmbh.com>
 Date: Sat, 26 Sep 2026 18:41:05 +0200
-Subject: [PATCH 22/24] URL: Fix parsing of query and fragment after a
+Subject: [PATCH 22/25] URL: Fix parsing of query and fragment after a
  dot-component in path (#411)
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
