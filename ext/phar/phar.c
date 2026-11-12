@@ -2774,7 +2774,16 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 			return EOF;
 		}
 		newcrc32 = php_crc32_bulk_init();
-		php_crc32_stream_bulk_update(&newcrc32, file, entry->uncompressed_filesize);
+		if (php_crc32_stream_bulk_update(&newcrc32, file, entry->uncompressed_filesize) != SUCCESS) {
+			if (closeoldfile) {
+				php_stream_close(oldfile);
+			}
+			php_stream_close(newfile);
+			if (error) {
+				spprintf(error, 0, "unable to read file \"%s\" for crc32 while creating new phar \"%s\"", entry->filename, phar->fname);
+			}
+			return EOF;
+		}
 		entry->crc32 = php_crc32_bulk_end(newcrc32);
 		entry->is_crc_checked = 1;
 		if (!(entry->flags & PHAR_ENT_COMPRESSION_MASK)) {
