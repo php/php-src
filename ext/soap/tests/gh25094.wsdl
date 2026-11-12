@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:tns="http://test-uri"
+             targetNamespace="http://test-uri">
+  <types>
+    <xsd:schema targetNamespace="http://test-uri" elementFormDefault="qualified">
+      <xsd:element name="a" type="xsd:string"/>
+      <xsd:element name="b" type="xsd:string"/>
+    </xsd:schema>
+  </types>
+  <message name="TestRequest">
+    <part name="a" element="tns:a"/>
+    <part name="b" element="tns:b"/>
+  </message>
+  <message name="TestResponse">
+    <part name="r" element="tns:a"/>
+  </message>
+  <portType name="TestPortType">
+    <operation name="Test">
+      <input message="tns:TestRequest"/>
+      <output message="tns:TestResponse"/>
+    </operation>
+  </portType>
+  <binding name="TestBinding" type="tns:TestPortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="Test">
+      <soap:operation soapAction="http://test-uri/Test"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+    </operation>
+  </binding>
+  <service name="TestService">
+    <port name="TestPort" binding="tns:TestBinding">
+      <soap:address location="http://localhost/test"/>
+    </port>
+  </service>
+</definitions>
