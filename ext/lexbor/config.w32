@@ -24,6 +24,8 @@ ADD_SOURCES("ext/lexbor/lexbor/tag", "tag.c","lexbor");
 ADD_SOURCES("ext/lexbor/lexbor/unicode", "idna.c unicode.c","lexbor");
 ADD_SOURCES("ext/lexbor/lexbor/url", "url.c","lexbor");
 ADD_FLAG("CFLAGS_LEXBOR", "/D LEXBOR_BUILDING /utf-8");
+// Initial sizes of the tokenizer pools and of the mraw cache, see patch 0026.
+ADD_FLAG("CFLAGS_LEXBOR", "/D LXB_HTML_TKZ_TOKEN_POOL_SIZE=16 /D LXB_HTML_TKZ_ATTR_POOL_SIZE=256 /D LEXBOR_MRAW_CACHE_SIZE=64");
 
 AC_DEFINE("HAVE_LEXBOR", 1, "Define to 1 if the PHP extension 'lexbor' is available.");
 

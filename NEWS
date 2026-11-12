@@ -59,6 +59,8 @@ PHP                                                                        NEWS
     fragment serialization without a query. (alexandre-daubois)
   . Merge patch lexbor/lexbor@f4cbbcd, fixing lexbor_array_obj_t allocating 8
     times the memory it uses. (Nicolas Grekas)
+  . Reduced the initial size of the tokenizer pools and of the memory pool
+    caches, saving about 900KB per HTML parse. (Nicolas Grekas)
 
 - LibXML:
   . Clear the libxml last error in libxml_use_internal_errors(false).

@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Nicolas Grekas <nicolas.grekas@gmail.com>
 Date: Mon, 28 Sep 2026 21:25:27 +0200
-Subject: [PATCH 25/25] Core: fixed allocation and move sizes in
+Subject: [PATCH 25/26] Core: fixed allocation and move sizes in
  lexbor_array_obj_t. (#428)
 
 lexbor_array_obj_init() and lexbor_array_obj_expand() multiplied the
