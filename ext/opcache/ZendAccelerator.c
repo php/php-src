@@ -1839,8 +1839,8 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 		zend_begin_record_errors();
 	}
 
+	orig_compiler_options = CG(compiler_options);
 	zend_try {
-		orig_compiler_options = CG(compiler_options);
 		CG(compiler_options) |= ZEND_COMPILE_HANDLE_OP_ARRAY;
 		CG(compiler_options) |= ZEND_COMPILE_DELAYED_BINDING;
 		CG(compiler_options) |= ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION;
