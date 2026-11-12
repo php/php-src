@@ -592,3 +592,7 @@ PHP 8.2 UPGRADE NOTES
 ========================================
 14. Performance Improvements
 ========================================
+
+- Hash:
+  . hash_pbkdf2() is now faster. Applications using PBKDF2 may consider whether
+    their iteration count can be increased.
