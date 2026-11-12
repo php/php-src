@@ -2403,6 +2403,7 @@ propagate_arg:
 				/* Add statically inferred restrictions */
 				if (ssa_ops[idx].op1_def >= 0) {
 					if (opline->opcode == ZEND_SEND_VAR_EX
+					 && opline->op2_type != IS_CONST
 					 && frame
 					 && frame->call
 					 && frame->call->func
