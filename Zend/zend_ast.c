@@ -2012,9 +2012,11 @@ static ZEND_COLD void zend_ast_export_hook_list(smart_str *str, const zend_ast_l
 
 	for (uint32_t i = 0; i < hook_list->children; i++) {
 		const zend_ast_decl *hook = (const zend_ast_decl *)hook_list->child[i];
-		zend_ast_export_visibility(str, hook->flags, ZEND_MODIFIER_TARGET_PROPERTY);
 		if (hook->flags & ZEND_ACC_FINAL) {
 			smart_str_appends(str, "final ");
+		}
+		if (hook->flags & ZEND_ACC_RETURN_REFERENCE) {
+			smart_str_appendc(str, '&');
 		}
 		smart_str_append(str, hook->name);
 		zend_ast *body = hook->child[2];
