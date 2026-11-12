@@ -421,6 +421,8 @@ PHP                                                                        NEWS
     properties). (Lazizbek Ergashev)
 
 - Standard:
+  . Fixed bug GH-25413 (Frameless string predicates read arguments changed or
+    freed during coercion).
   . Fixed memory leaks in checkdnsrr() and dns_check_record() on Windows.
     (Ilia Alshanetsky)
   . Fixed __unserialize() and __wakeup() being called for objects with a missing

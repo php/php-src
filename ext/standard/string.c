@@ -1876,19 +1876,41 @@ PHP_FUNCTION(str_contains)
 }
 /* }}} */
 
-ZEND_FRAMELESS_FUNCTION(str_contains, 2)
+static zend_never_inline ZEND_COLD void php_string_predicate_slow(
+		zval *return_value, zval *arg1, zval *arg2, zend_frameless_function_2 handler)
 {
-	zval haystack_tmp, needle_tmp;
+	zval haystack_tmp, needle_tmp, haystack_copy, needle_copy;
 	zend_string *haystack, *needle;
+
+	/* Coercion may run user code that changes or frees either argument. */
+	ZVAL_COPY_DEREF(&haystack_copy, arg1);
+	ZVAL_COPY_DEREF(&needle_copy, arg2);
+	arg1 = &haystack_copy;
+	arg2 = &needle_copy;
 
 	Z_FLF_PARAM_STR(1, haystack, haystack_tmp);
 	Z_FLF_PARAM_STR(2, needle, needle_tmp);
 
-	RETVAL_BOOL(php_memnstr(ZSTR_VAL(haystack), ZSTR_VAL(needle), ZSTR_LEN(needle), ZSTR_VAL(haystack) + ZSTR_LEN(haystack)));
+	/* Both arguments are strings now, so the handler takes its fast path. */
+	handler(return_value, arg1, arg2);
 
 flf_clean:
 	Z_FLF_PARAM_FREE_STR(1, haystack_tmp);
 	Z_FLF_PARAM_FREE_STR(2, needle_tmp);
+	zval_ptr_dtor(&haystack_copy);
+	zval_ptr_dtor(&needle_copy);
+}
+
+ZEND_FRAMELESS_FUNCTION(str_contains, 2)
+{
+	if (UNEXPECTED(Z_TYPE_P(arg1) != IS_STRING || Z_TYPE_P(arg2) != IS_STRING)) {
+		php_string_predicate_slow(return_value, arg1, arg2, ZEND_FRAMELESS_FUNCTION_NAME(str_contains, 2));
+		return;
+	}
+
+	zend_string *haystack = Z_STR_P(arg1);
+	zend_string *needle = Z_STR_P(arg2);
+	RETVAL_BOOL(php_memnstr(ZSTR_VAL(haystack), ZSTR_VAL(needle), ZSTR_LEN(needle), ZSTR_VAL(haystack) + ZSTR_LEN(haystack)));
 }
 
 /* {{{ Checks if haystack starts with needle */
@@ -1907,17 +1929,14 @@ PHP_FUNCTION(str_starts_with)
 
 ZEND_FRAMELESS_FUNCTION(str_starts_with, 2)
 {
-	zval haystack_tmp, needle_tmp;
-	zend_string *haystack, *needle;
+	if (UNEXPECTED(Z_TYPE_P(arg1) != IS_STRING || Z_TYPE_P(arg2) != IS_STRING)) {
+		php_string_predicate_slow(return_value, arg1, arg2, ZEND_FRAMELESS_FUNCTION_NAME(str_starts_with, 2));
+		return;
+	}
 
-	Z_FLF_PARAM_STR(1, haystack, haystack_tmp);
-	Z_FLF_PARAM_STR(2, needle, needle_tmp);
-
+	zend_string *haystack = Z_STR_P(arg1);
+	zend_string *needle = Z_STR_P(arg2);
 	RETVAL_BOOL(zend_string_starts_with(haystack, needle));
-
-flf_clean:
-	Z_FLF_PARAM_FREE_STR(1, haystack_tmp);
-	Z_FLF_PARAM_FREE_STR(2, needle_tmp);
 }
 
 /* {{{ Checks if haystack ends with needle */
