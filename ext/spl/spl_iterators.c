@@ -1541,7 +1541,8 @@ static inline void spl_dual_it_next(spl_dual_it_object *intern, int do_free)
 {
 	if (do_free) {
 		spl_dual_it_free(intern);
-	} else if (!intern->inner.iterator) {
+	}
+	if (!intern->inner.iterator) {
 		zend_throw_error(NULL, "The inner constructor wasn't initialized with an iterator instance");
 		return;
 	}
@@ -2692,7 +2693,7 @@ PHP_METHOD(NoRewindIterator, valid)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
-	RETURN_BOOL(intern->inner.iterator->funcs->valid(intern->inner.iterator) == SUCCESS);
+	RETURN_BOOL(spl_dual_it_valid(intern) == SUCCESS);
 } /* }}} */
 
 /* {{{ Return inner iterators key() */
@@ -2704,7 +2705,7 @@ PHP_METHOD(NoRewindIterator, key)
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
 
-	if (intern->inner.iterator->funcs->get_current_key) {
+	if (intern->inner.iterator && intern->inner.iterator->funcs->get_current_key) {
 		intern->inner.iterator->funcs->get_current_key(intern->inner.iterator, return_value);
 	} else {
 		RETURN_NULL();
@@ -2720,6 +2721,9 @@ PHP_METHOD(NoRewindIterator, current)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
+	if (!intern->inner.iterator) {
+		RETURN_NULL();
+	}
 	data = intern->inner.iterator->funcs->get_current_data(intern->inner.iterator);
 	if (data) {
 		RETURN_COPY_DEREF(data);
@@ -2734,6 +2738,10 @@ PHP_METHOD(NoRewindIterator, next)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
+	if (!intern->inner.iterator) {
+		zend_throw_error(NULL, "The inner constructor wasn't initialized with an iterator instance");
+		RETURN_THROWS();
+	}
 	intern->inner.iterator->funcs->move_forward(intern->inner.iterator);
 } /* }}} */
 
