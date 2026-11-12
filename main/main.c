@@ -1379,11 +1379,13 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 		backtrace = zend_trace_to_string(Z_ARRVAL(EG(last_fatal_error_backtrace)), /* include_main */ true);
 	}
 
-	/* Keep error_get_last() up to date even when this occurrence is suppressed. */
+	/* A suppressed repeat may replace an intervening filtered error, but must
+	 * use the same source comparison as repeat suppression. */
 	if (display || !PG(last_error_message)
 		|| !zend_string_equals(PG(last_error_message), message)
-		|| PG(last_error_lineno) != error_lineno
-		|| !zend_string_equals(PG(last_error_file), repeated_error_file)) {
+		|| (!PG(ignore_repeated_source)
+			&& (PG(last_error_lineno) != error_lineno
+				|| !zend_string_equals(PG(last_error_file), repeated_error_file)))) {
 		php_clear_last_error(false);
 		if (!error_filename) {
 			error_filename = repeated_error_file;
