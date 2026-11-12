@@ -152,6 +152,8 @@ PHP                                                                        NEWS
     (Ilia Alshanetsky)
 
 - SPL:
+  . Fixed bug GH-17935 (Assertion failure Zend/zend_hash.c when appending to
+    serialized ArrayObject). (Nicolas Grekas)
   . Fixed bug GH-23385 (SplDoublyLinkedList::serialize() use-after-free when
     __serialize() removes an element). (David Carlier)
 
