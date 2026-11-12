@@ -53,6 +53,10 @@ PHP                                                                        NEWS
     since libmagic 5.48). (Weilin Du)
   . Fixed incorrect MIME type detection for HWPX files. (Weilin Du)
 
+- Filter:
+  . Fixed stack overflow in filter_var() and filter_var_array() with deeply
+    nested arrays. (Eyüp Can Akman)
+
 - MBString:
   . Fixed stack overflow in mb_check_encoding() and mb_convert_encoding() with
     deeply nested arrays. (Eyüp Can Akman)
