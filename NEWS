@@ -86,6 +86,8 @@ PHP                                                                        NEWS
     (ndossche)
 
 - Standard:
+  . Fixed bug GH-23089 (Stack overflow in array_merge_recursive() with deeply
+    nested arrays). (Lazizbek Ergashev, akasakariko)
   . Fixed dns_get_record() returning partially built records for malformed
     DNS responses. (Marti2203)
 
