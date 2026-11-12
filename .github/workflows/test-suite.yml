@@ -230,7 +230,7 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(inputs.branch).jobs.LINUX_X32.matrix }}
     name: "LINUX_X32_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 180
     container:
       image: ubuntu:${{ fromJson(inputs.branch).config.ubuntu_version }}
