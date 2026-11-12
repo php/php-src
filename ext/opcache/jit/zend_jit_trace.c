@@ -5134,6 +5134,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						if (opline->opcode == ZEND_SEND_VAL_EX
 						 && opline->op2.num > MAX_ARG_FLAG_NUM) {
+							if (!zend_jit_spill_op1_before_vm_send(&dasm_state, opline,
+									OP1_REG_ADDR(), OP1_INFO(), stack)) {
+								goto jit_failure;
+							}
 							break;
 						}
 						op1_info = OP1_INFO();
@@ -5180,6 +5184,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if ((opline->opcode == ZEND_SEND_VAR_EX
 						  || opline->opcode == ZEND_SEND_VAR_NO_REF_EX)
 						 && opline->op2.num > MAX_ARG_FLAG_NUM) {
+							if (!zend_jit_spill_op1_before_vm_send(&dasm_state, opline,
+									OP1_REG_ADDR(), OP1_INFO(), stack)) {
+								goto jit_failure;
+							}
 							break;
 						}
 						op1_addr = OP1_REG_ADDR();
