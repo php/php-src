@@ -424,6 +424,13 @@ static void php_zval_filter_recursive(zval *value, zend_long filter, zend_long f
 	if (Z_TYPE_P(value) == IS_ARRAY) {
 		zval *element;
 
+#ifdef ZEND_CHECK_STACK_LIMIT
+		if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+			zend_call_stack_size_error();
+			return;
+		}
+#endif
+
 		if (Z_IS_RECURSIVE_P(value)) {
 			return;
 		}
@@ -434,6 +441,10 @@ static void php_zval_filter_recursive(zval *value, zend_long filter, zend_long f
 			if (Z_TYPE_P(element) == IS_ARRAY) {
 				SEPARATE_ARRAY(element);
 				php_zval_filter_recursive(element, filter, flags, options, charset);
+				if (EG(exception)) {
+					Z_UNPROTECT_RECURSION_P(value);
+					return;
+				}
 			} else {
 				php_zval_filter(element, filter, flags, options, charset);
 			}
@@ -665,6 +676,7 @@ static void php_filter_array_handler(zval *input, HashTable *op_ht, zend_long op
 					2
 				);
 				if (EG(exception)) {
+					zval_ptr_dtor(&nval);
 					RETURN_THROWS();
 				}
 				zend_hash_update(Z_ARRVAL_P(return_value), arg_key, &nval);

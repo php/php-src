@@ -37,6 +37,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-25306 (Assertion status == LXB_STATUS_OK in dom_parse_selector
     when lexbor allocation fails). (ndossche)
 
+- Filter:
+  . Fixed stack overflow in filter_var() and filter_var_array() with deeply
+    nested arrays. (Eyüp Can Akman)
+
 - MBString:
   . Fixed stack overflow in mb_check_encoding() and mb_convert_encoding() with
     deeply nested arrays. (Eyüp Can Akman)
