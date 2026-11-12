@@ -2785,7 +2785,7 @@ PHP_FUNCTION(pg_lo_read)
 	CHECK_PGSQL_LOB(pgsql);
 
 	if (buffer_length < 0) {
-		zend_argument_value_error(2, "must be greater or equal than 0");
+		zend_argument_value_error(2, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
@@ -2825,7 +2825,7 @@ PHP_FUNCTION(pg_lo_write)
 			RETURN_THROWS();
 		}
 		if (z_len > (zend_long)ZSTR_LEN(str)) {
-			zend_argument_value_error(3, "must be less than or equal to the length of argument #2 ($buf)");
+			zend_argument_value_error(3, "must be less than or equal to the length of argument #2 ($data)");
 			RETURN_THROWS();
 		}
 		len = z_len;
