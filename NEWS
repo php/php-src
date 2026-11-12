@@ -45,6 +45,10 @@ PHP                                                                        NEWS
   . Fixed the argument blamed by the imagepolygon(), imageopenpolygon() and
     imagefilledpolygon() too few points error. (lacatoire)
 
+- Filter:
+  . Fixed stack overflow in filter_var() and filter_var_array() with deeply
+    nested arrays. (Eyüp Can Akman)
+
 - MBString:
   . Fixed stack overflow in mb_check_encoding() and mb_convert_encoding() with
     deeply nested arrays. (Eyüp Can Akman)
