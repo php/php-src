@@ -166,6 +166,19 @@ PHP_METHOD(Spoofchecker, setRestrictionLevel)
 }
 /* }}} */
 
+/* {{{ Get the configured restriction level. */
+PHP_METHOD(Spoofchecker, getRestrictionLevel)
+{
+	SPOOFCHECKER_METHOD_INIT_VARS;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	SPOOFCHECKER_METHOD_FETCH_OBJECT;
+
+	RETURN_LONG(uspoof_getRestrictionLevel(co->uspoof));
+}
+/* }}} */
+
 PHP_METHOD(Spoofchecker, setAllowedChars)
 {
 	zend_string *pattern;

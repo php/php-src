@@ -129,6 +129,8 @@ PHP 8.7 UPGRADE NOTES
     to the root collation order; the full root/UCA rules are not included. An
     empty string is returned if no tailoring rules are available, or false if
     the rules cannot be converted to UTF-8.
+  . Added Spoofchecker::getRestrictionLevel() to retrieve the configured
+    restriction level as one of the Spoofchecker restriction level constants.
 
 ========================================
 7. New Classes and Interfaces
