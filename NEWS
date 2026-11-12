@@ -83,6 +83,8 @@ PHP                                                                        NEWS
 - SOAP:
   . Fixed bug GH-25267 (NULL dereference in to_xml_any() with integer key).
     (lazerg)
+  . Fixed bug GH-25094 (NULL dereference in get_doc_function() with missing
+    parts). (lazerg)
 
 - Readline:
   . Fixed incorrect handling of non-ASCII pending_input bytes in readline_info(),
