@@ -928,7 +928,19 @@ static bool ipv4_get_status_flags(const int ip[8], bool *global, bool *reserved,
 	return true;
 }
 
-/* From the tables in RFC 6890 - Special-Purpose IP Address Registries */
+/* Flags of an IPv4 address embedded in an IPv6 address as two 16-bit blocks */
+static void ipv6_get_embedded_ipv4_status_flags(int high, int low, bool *global, bool *reserved, bool *private)
+{
+	const int ip4[8] = { high >> 8, high & 0xff, low >> 8, low & 0xff };
+
+	if (!ipv4_get_status_flags(ip4, global, reserved, private)) {
+		/* not a special-purpose IPv4 address */
+		*global = true;
+	}
+}
+
+/* From the tables in RFC 6890 - Special-Purpose IP Address Registries, plus a few later blocks.
+ * Also treats addresses embedding an IPv4 address according to that address. */
 static bool ipv6_get_status_flags(const int ip[8], bool *global, bool *reserved, bool *private)
 {
 	*global = false;
@@ -941,17 +953,19 @@ static bool ipv6_get_status_flags(const int ip[8], bool *global, bool *reserved,
 	} else if (ip[0] == 0 && ip[1] == 0 && ip[2] == 0 && ip[3] == 0 && ip[4] == 0 && ip[5] == 0 && ip[6] == 0 && ip[7] == 1) {
 		/* RFC 4291 - Loopback Address */
 		*reserved = true;
-	} else if (ip[0] == 0 && ip[1] == 0 && ip[2] == 0 && ip[3] == 0 && ip[4] == 0 && ip[5] == 0) {
-		/* RFC 4291 - IPv4-Compatible Address (deprecated) */
+	} else if (ip[0] == 0 && ip[1] == 0 && ip[2] == 0 && ip[3] == 0
+			&& ((ip[4] == 0 && (ip[5] == 0 || ip[5] == 0xffff)) || (ip[4] == 0xffff && ip[5] == 0))) {
+		/* RFC 4291 - IPv4-Compatible (deprecated) and IPv4-mapped Address, RFC 2765 - IPv4-translated Address:
+		 * reserved, and private if the embedded IPv4 address is */
+		ipv6_get_embedded_ipv4_status_flags(ip[6], ip[7], global, reserved, private);
+		*global = false;
 		*reserved = true;
 	} else if (ip[0] == 0x0064 && ip[1] == 0xff9b && ip[2] == 0 && ip[3] == 0 && ip[4] == 0 && ip[5] == 0) {
-		/* RFC 6052 - IPv4-IPv6 Translation */
-		*global = true;
+		/* RFC 6052 - IPv4-IPv6 Translation, classified as the embedded IPv4 address */
+		ipv6_get_embedded_ipv4_status_flags(ip[6], ip[7], global, reserved, private);
 	} else if (ip[0] == 0x0064 && ip[1] == 0xff9b && ip[2] == 0x0001) {
 		/* RFC 8215 - Local-Use IPv4/IPv6 Translation */
-	} else if (ip[0] == 0 && ip[1] == 0 && ip[2] == 0 && ip[3] == 0 && ip[4] == 0 && ip[5] == 0xffff) {
-		/* RFC 4291 - IPv4-mapped Address */
-		*reserved = true;
+		*private = true;
 	} else if (ip[0] == 0x0100 && ip[1] == 0 && ip[2] == 0 && ip[3] == 0) {
 		/* RFC 6666 - Discard-Only Address Block */
 	} else if (ip[0] == 0x2001 && ip[1] == 0x0000) {
@@ -965,7 +979,9 @@ static bool ipv6_get_status_flags(const int ip[8], bool *global, bool *reserved,
 	} else if (ip[0] == 0x2001 && ip[1] >= 0x0010 && ip[1] <= 0x001f) {
 		/* RFC 4843 - ORCHID */
 	} else if (ip[0] == 0x2002) {
-		/* RFC 3056 - 6to4 */
+		/* RFC 3056 - 6to4, not global (RFC 7526), private or reserved if the embedded IPv4 address is */
+		ipv6_get_embedded_ipv4_status_flags(ip[1], ip[2], global, reserved, private);
+		*global = false;
 	} else if (ip[0] >= 0xfc00 && ip[0] <= 0xfdff) {
 		/* RFC 4193 - Unique-Local */
 		*private = true;

@@ -49,7 +49,7 @@ foreach ($pairs as $dotted => $hex) {
 --EXPECT--
 fc00::1.2.3.4           none=accept global=reject no_priv=reject no_res=accept
 fd00::abcd:10.0.0.1     none=accept global=reject no_priv=reject no_res=accept
-64:ff9b::10.0.0.1       none=accept global=accept no_priv=accept no_res=accept
+64:ff9b::10.0.0.1       none=accept global=reject no_priv=reject no_res=accept
 fe80::127.0.0.1         none=accept global=reject no_priv=accept no_res=reject
 2001:db8::1.2.3.4       none=accept global=reject no_priv=accept no_res=accept
 2606:4700::8.8.8.8      none=accept global=accept no_priv=accept no_res=accept
