@@ -49,6 +49,11 @@ PHP                                                                        NEWS
 - Filter:
   . Fixed stack overflow in filter_var() and filter_var_array() with deeply
     nested arrays. (Eyüp Can Akman)
+  . Fixed FILTER_VALIDATE_IP range flags checking IPv6 addresses with a
+    dotted IPv4 suffix (e.g. fc00::1.2.3.4) as ::ffff:a.b.c.d. The deprecated
+    IPv4-compatible block ::/96 is now reserved. (Xavier Leune)
+  . Fixed FILTER_FLAG_GLOBAL_RANGE accepting the NAT64 local-use prefix
+    64:ff9b:1::/48. (Xavier Leune)
 
 - MBString:
   . Fixed stack overflow in mb_check_encoding() and mb_convert_encoding() with

@@ -762,6 +762,7 @@ static int _php_filter_validate_ipv6(const char *str, size_t str_len, int ip[8])
 {
 	int compressed_pos = -1;
 	int blocks = 0;
+	int max_blocks = 8;
 	unsigned int num, n;
 	int i;
 	const char *ipv4;
@@ -794,7 +795,8 @@ static int _php_filter_validate_ipv6(const char *str, size_t str_len, int ip[8])
 			str_len--;
 		}
 
-		blocks = 2;
+		/* the IPv4 part takes up the last two 16-bit blocks */
+		max_blocks = 6;
 	}
 
 	end = str + str_len;
@@ -809,12 +811,12 @@ static int _php_filter_validate_ipv6(const char *str, size_t str_len, int ip[8])
 				if (compressed_pos >= 0) {
 					return 0;
 				}
-				if (ip && blocks < 8) {
+				if (ip && blocks < max_blocks) {
 					ip[blocks] = -1;
 				}
 				compressed_pos = blocks++; /* :: means 1 or more 16-bit 0 blocks */
 				if (++str == end) {
-					if (blocks > 8) {
+					if (blocks > max_blocks) {
 						return 0;
 				}
 					goto fixup_ip;
@@ -838,35 +840,32 @@ static int _php_filter_validate_ipv6(const char *str, size_t str_len, int ip[8])
 			n++;
 			str++;
 		}
-		if (ip && blocks < 8) {
+		if (ip && blocks < max_blocks) {
 			ip[blocks] = num;
 		}
 		if (n < 1 || n > 4) {
 			return 0;
 		}
-		if (++blocks > 8)
+		if (++blocks > max_blocks)
 			return 0;
 	}
 
 fixup_ip:
-	if (ip && ipv4) {
-		for (i = 0; i < 5; i++) {
-			ip[i] = 0;
-}
-		ip[i++] = 0xffff;
-		ip[i++] = 256 * ip4elm[0] + ip4elm[1];
-		ip[i++] = 256 * ip4elm[2] + ip4elm[3];
-	} else if (ip && compressed_pos >= 0 && blocks <= 8) {
-		int offset = 8 - blocks;
-		for (i = 7; i > compressed_pos + offset; i--) {
+	if (ip && compressed_pos >= 0 && blocks <= max_blocks) {
+		int offset = max_blocks - blocks;
+		for (i = max_blocks - 1; i > compressed_pos + offset; i--) {
 			ip[i] = ip[i - offset];
 		}
 		for (i = compressed_pos + offset; i >= compressed_pos; i--) {
 			ip[i] = 0;
 		}
 	}
+	if (ip && ipv4) {
+		ip[6] = 256 * ip4elm[0] + ip4elm[1];
+		ip[7] = 256 * ip4elm[2] + ip4elm[3];
+	}
 
-	return (compressed_pos >= 0 && blocks <= 8) || blocks == 8;
+	return (compressed_pos >= 0 && blocks <= max_blocks) || blocks == max_blocks;
 }
 /* }}} */
 
@@ -942,9 +941,14 @@ static bool ipv6_get_status_flags(const int ip[8], bool *global, bool *reserved,
 	} else if (ip[0] == 0 && ip[1] == 0 && ip[2] == 0 && ip[3] == 0 && ip[4] == 0 && ip[5] == 0 && ip[6] == 0 && ip[7] == 1) {
 		/* RFC 4291 - Loopback Address */
 		*reserved = true;
-	} else if (ip[0] == 0x0064 && ip[1] == 0xff9b) {
+	} else if (ip[0] == 0 && ip[1] == 0 && ip[2] == 0 && ip[3] == 0 && ip[4] == 0 && ip[5] == 0) {
+		/* RFC 4291 - IPv4-Compatible Address (deprecated) */
+		*reserved = true;
+	} else if (ip[0] == 0x0064 && ip[1] == 0xff9b && ip[2] == 0 && ip[3] == 0 && ip[4] == 0 && ip[5] == 0) {
 		/* RFC 6052 - IPv4-IPv6 Translation */
 		*global = true;
+	} else if (ip[0] == 0x0064 && ip[1] == 0xff9b && ip[2] == 0x0001) {
+		/* RFC 8215 - Local-Use IPv4/IPv6 Translation */
 	} else if (ip[0] == 0 && ip[1] == 0 && ip[2] == 0 && ip[3] == 0 && ip[4] == 0 && ip[5] == 0xffff) {
 		/* RFC 4291 - IPv4-mapped Address */
 		*reserved = true;
