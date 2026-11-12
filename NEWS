@@ -28,6 +28,7 @@ PHP                                                                        NEWS
     throwing a ValueError. (Marc Bennewitz)
 
 - Intl:
+  . Added Spoofchecker::getRestrictionLevel(). (Weilin Du)
   . Added Collator::getRules() and collator_get_rules(). (Weilin Du)
   . Added IntlRelativeDateTimeFormatter for locale-aware relative date and time
     formatting, with enums for styles, capitalization contexts, and units.
