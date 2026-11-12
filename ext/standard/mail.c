@@ -471,7 +471,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 
 			time(&curtime);
 			date_str = php_format_date("d-M-Y H:i:s e", 13, curtime, 1);
-			len = spprintf(&tmp, 0, "[%s] %s%s", ZSTR_VAL(date_str), logline, PHP_EOL);
+			len = spprintf(&tmp, 0, "[%pS] %s%s", date_str, logline, PHP_EOL);
 
 			php_mail_log_to_file(mail_log, tmp, len);
 
@@ -515,9 +515,9 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 		f = php_basename(tmp, strlen(tmp), NULL, 0);
 
 		if (headers != NULL && *headers) {
-			spprintf(&ahdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s%s%s", php_getuid(), ZSTR_VAL(f), line_sep, headers);
+			spprintf(&ahdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%pS%s%s", php_getuid(), f, line_sep, headers);
 		} else {
-			spprintf(&ahdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s", php_getuid(), ZSTR_VAL(f));
+			spprintf(&ahdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%pS", php_getuid(), f);
 		}
 		hdr = ahdr;
 		zend_string_release_ex(f, 0);
@@ -549,7 +549,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 #endif
 	}
 	if (extra_cmd != NULL) {
-		spprintf(&sendmail_cmd, 0, "%s %s", sendmail_path, ZSTR_VAL(extra_cmd));
+		spprintf(&sendmail_cmd, 0, "%s %pS", sendmail_path, extra_cmd);
 	} else {
 		sendmail_cmd = (char*)sendmail_path;
 	}
