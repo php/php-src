@@ -529,8 +529,12 @@ PHP_FUNCTION(spl_autoload_register)
 			zend_is_callable_ex(&fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL);
 		}
 
+		/* A Closure of an internal function has the handler of the Closure, not the one of the function. */
 		if (fcc.function_handler->type == ZEND_INTERNAL_FUNCTION &&
-			fcc.function_handler->internal_function.handler == zif_spl_autoload_call) {
+			(fcc.function_handler->internal_function.handler == zif_spl_autoload_call
+			|| ((fcc.function_handler->common.fn_flags & ZEND_ACC_CLOSURE)
+				&& fcc.function_handler->common.scope == NULL
+				&& zend_string_equals_literal(fcc.function_handler->common.function_name, "spl_autoload_call")))) {
 			zend_argument_value_error(1, "must not be the spl_autoload_call() function");
 			RETURN_THROWS();
 		}
