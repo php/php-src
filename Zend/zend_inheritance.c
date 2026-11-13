@@ -1347,12 +1347,36 @@ static bool property_has_operation(zend_property_info *prop_info, zend_property_
 		|| (prop_info->hooks && prop_info->hooks[kind]);
 }
 
+static zend_property_info *separate_property_info(const zend_property_info *prop_info, zend_class_entry *ce)
+{
+	zend_property_info *new_prop_info = zend_arena_alloc(&CG(arena), sizeof(zend_property_info));
+	memcpy(new_prop_info, prop_info, sizeof(zend_property_info));
+	new_prop_info->ce = ce;
+	zend_string_addref(new_prop_info->name);
+	if (new_prop_info->doc_comment) {
+		zend_string_addref(new_prop_info->doc_comment);
+	}
+	if (new_prop_info->attributes && !(GC_FLAGS(new_prop_info->attributes) & IS_ARRAY_IMMUTABLE)) {
+		GC_ADDREF(new_prop_info->attributes);
+	}
+	zend_type_copy_ctor(&new_prop_info->type, /* use_arena */ true, /* persistent */ false);
+	if (new_prop_info->hooks) {
+		new_prop_info->hooks = zend_arena_alloc(&CG(arena), ZEND_PROPERTY_HOOK_STRUCT_SIZE);
+		for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
+			zend_function *hook = prop_info->hooks[i];
+			new_prop_info->hooks[i] = hook ? zend_duplicate_function(hook, ce) : NULL;
+		}
+	}
+	return new_prop_info;
+}
+
 static void inherit_property_hook(
 	zend_class_entry *ce,
 	zend_property_info *parent_info,
-	zend_property_info *child_info,
+	zval *child_zv,
 	zend_property_hook_kind kind
 ) {
+	zend_property_info *child_info = Z_PTR_P(child_zv);
 	zend_function *parent = parent_info->hooks ? parent_info->hooks[kind] : NULL;
 	zend_function *child = child_info->hooks ? child_info->hooks[kind] : NULL;
 
@@ -1374,12 +1398,23 @@ static void inherit_property_hook(
 			}
 			ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
 		}
+		if (child_info->ce != ce) {
+			child_info = separate_property_info(child_info, ce);
+			Z_PTR_P(child_zv) = child_info;
+		}
 		if (!child_info->hooks) {
 			ce->num_hooked_props++;
 			child_info->hooks = zend_arena_alloc(&CG(arena), ZEND_PROPERTY_HOOK_STRUCT_SIZE);
 			memset(child_info->hooks, 0, ZEND_PROPERTY_HOOK_STRUCT_SIZE);
 		}
 		child_info->hooks[kind] = zend_duplicate_function(parent, ce);
+		return;
+	}
+
+	if (child->common.scope != ce) {
+		do_inheritance_check_on_method(
+			child, child->common.scope, parent, parent->common.scope, ce, /* child */ NULL,
+			ZEND_INHERITANCE_CHECK_PROTO | ZEND_INHERITANCE_CHECK_VISIBILITY);
 		return;
 	}
 
@@ -1522,8 +1557,9 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 
 			if (parent_info->hooks || child_info->hooks) {
 				for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
-					inherit_property_hook(ce, parent_info, child_info, i);
+					inherit_property_hook(ce, parent_info, child, i);
 				}
+				child_info = Z_PTR_P(child);
 			}
 
 			prop_variance variance = prop_get_variance(parent_info);
