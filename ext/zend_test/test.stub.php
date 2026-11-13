@@ -353,6 +353,11 @@ namespace {
 	function zend_obj_sdtClass(stdClass $param): stdClass {}
 	function zend_obj_sdtClass_or_null(stdClass|null $param): stdClass|null {}
 
+	function zend_str(string $param): string {}
+	function zend_str_or_null(string|null $param): string|null {}
+	function zend_str_slow_zpp(string $param): string {}
+	function zend_str_or_null_slow_zpp(string|null $param): string|null {}
+
     /**
      * @param resource $param
      * @return resource

@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: 64eb27c89a9a5a378385e5f778cd17cfd67caed8
+ * Stub hash: 2e17e640c12b6e712f277417114064d76f958c7b
  * Has decl header: yes */
 
 #include "zend_constants.h"
@@ -141,6 +141,14 @@ ZEND_END_ARG_INFO()
 #define arginfo_zend_obj_sdtClass arginfo_zend_bool
 
 #define arginfo_zend_obj_sdtClass_or_null arginfo_zend_bool
+
+#define arginfo_zend_str arginfo_zend_bool
+
+#define arginfo_zend_str_or_null arginfo_zend_bool
+
+#define arginfo_zend_str_slow_zpp arginfo_zend_bool
+
+#define arginfo_zend_str_or_null_slow_zpp arginfo_zend_bool
 
 #define arginfo_zend_resource arginfo_zend_bool
 
@@ -448,6 +456,10 @@ static ZEND_FUNCTION(zend_object_sdtClass_slow_zpp);
 static ZEND_FUNCTION(zend_object_sdtClass_or_null_slow_zpp);
 static ZEND_FUNCTION(zend_obj_sdtClass);
 static ZEND_FUNCTION(zend_obj_sdtClass_or_null);
+static ZEND_FUNCTION(zend_str);
+static ZEND_FUNCTION(zend_str_or_null);
+static ZEND_FUNCTION(zend_str_slow_zpp);
+static ZEND_FUNCTION(zend_str_or_null_slow_zpp);
 static ZEND_FUNCTION(zend_resource);
 static ZEND_FUNCTION(zend_resource_or_null);
 static ZEND_FUNCTION(zend_resource_slow_zpp);
@@ -608,6 +620,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_object_sdtClass_or_null_slow_zpp, arginfo_zend_object_sdtClass_or_null_slow_zpp)
 	ZEND_FE(zend_obj_sdtClass, arginfo_zend_obj_sdtClass)
 	ZEND_FE(zend_obj_sdtClass_or_null, arginfo_zend_obj_sdtClass_or_null)
+	ZEND_FE(zend_str, arginfo_zend_str)
+	ZEND_FE(zend_str_or_null, arginfo_zend_str_or_null)
+	ZEND_FE(zend_str_slow_zpp, arginfo_zend_str_slow_zpp)
+	ZEND_FE(zend_str_or_null_slow_zpp, arginfo_zend_str_or_null_slow_zpp)
 	ZEND_FE(zend_resource, arginfo_zend_resource)
 	ZEND_FE(zend_resource_or_null, arginfo_zend_resource_or_null)
 	ZEND_FE(zend_resource_slow_zpp, arginfo_zend_resource_slow_zpp)
