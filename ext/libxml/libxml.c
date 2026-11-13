@@ -321,85 +321,128 @@ static void php_libxml_node_free(xmlNodePtr node)
 	}
 }
 
+static zend_always_inline bool php_libxml_node_free_list_descends(const xmlNode *node)
+{
+	switch (node->type) {
+		case XML_ENTITY_REF_NODE:
+		case XML_NOTATION_NODE:
+		case XML_ENTITY_DECL:
+			return false;
+		default:
+			return node->children != NULL;
+	}
+}
+
+static zend_always_inline bool php_libxml_node_free_list_owns_properties(const xmlNode *node)
+{
+	switch (node->type) {
+		case XML_ENTITY_REF_NODE:
+		case XML_NOTATION_NODE:
+		case XML_ENTITY_DECL:
+		case XML_ATTRIBUTE_NODE:
+		case XML_ATTRIBUTE_DECL:
+		case XML_DTD_NODE:
+		case XML_DOCUMENT_TYPE_NODE:
+		case XML_NAMESPACE_DECL:
+		case XML_TEXT_NODE:
+			return false;
+		default:
+			return true;
+	}
+}
+
+static void php_libxml_node_free_list_enter(xmlNodePtr node)
+{
+	if (node->type == XML_ATTRIBUTE_NODE) {
+		if ((node->doc != NULL) && (((xmlAttrPtr) node)->atype == XML_ATTRIBUTE_ID)) {
+			xmlRemoveID(node->doc, (xmlAttrPtr) node);
+		}
+	} else if (node->type == XML_ENTITY_DECL) {
+		php_libxml_unlink_entity_decl((xmlEntityPtr) node);
+	}
+}
+
+static void php_libxml_node_free_list_delay(xmlNodePtr curnode)
+{
+	/* Must unlink such that freeing of the parent doesn't free this child. */
+	xmlUnlinkNode(curnode);
+	if (curnode->type == XML_ELEMENT_NODE) {
+		/* This ensures that namespace references in this subtree are defined within this subtree,
+		 * otherwise a use-after-free would be possible when the original namespace holder gets freed. */
+		php_libxml_node_ptr *ptr = curnode->_private;
+
+		/* Checking in case it runs out of reference */
+		if (ptr->_private) {
+			php_libxml_node_object *obj = ptr->_private;
+			if (!obj->document || obj->document->class_type < PHP_LIBXML_CLASS_MODERN) {
+				if (LIBXML_VERSION < 21300 && UNEXPECTED(curnode->doc == NULL)) {
+					/* xmlReconciliateNs() in these versions just uses the document for xmlNewReconciledNs(),
+					 * which can create an oldNs xml namespace declaration via xmlSearchNs() -> xmlTreeEnsureXMLDecl(). */
+					xmlDoc dummy;
+					memset(&dummy, 0, sizeof(dummy));
+					dummy.type = XML_DOCUMENT_NODE;
+					curnode->doc = &dummy;
+					xmlReconciliateNs(curnode->doc, curnode);
+					curnode->doc = NULL;
+
+					/* Append oldNs to current node's nsDef, which can be at most one node. */
+					if (dummy.oldNs) {
+						ZEND_ASSERT(dummy.oldNs->next == NULL);
+						xmlNsPtr old = curnode->nsDef;
+						curnode->nsDef = dummy.oldNs;
+						dummy.oldNs->next = old;
+					}
+				} else {
+					xmlReconciliateNs(curnode->doc, curnode);
+				}
+			}
+		}
+	}
+}
+
 PHP_LIBXML_API void php_libxml_node_free_list(xmlNodePtr node)
 {
-	xmlNodePtr curnode;
+	if (node == NULL) {
+		return;
+	}
 
-	if (node != NULL) {
-		curnode = node;
-		while (curnode != NULL) {
-			/* If the _private field is set, there's still a userland reference somewhere. We'll delay freeing in this case. */
+	size_t depth = 0;
+	xmlNodePtr curnode = node;
+
+	while (true) {
+		while (!curnode->_private) {
+			php_libxml_node_free_list_enter(curnode);
+			if (!php_libxml_node_free_list_descends(curnode)) {
+				break;
+			}
+			curnode = curnode->children;
+			depth++;
+		}
+
+		while (true) {
+			xmlNodePtr next = curnode->next;
+			xmlNodePtr parent = curnode->parent;
+
 			if (curnode->_private) {
-				xmlNodePtr next = curnode->next;
-				/* Must unlink such that freeing of the parent doesn't free this child. */
-				xmlUnlinkNode(curnode);
-				if (curnode->type == XML_ELEMENT_NODE) {
-					/* This ensures that namespace references in this subtree are defined within this subtree,
-					 * otherwise a use-after-free would be possible when the original namespace holder gets freed. */
-					php_libxml_node_ptr *ptr = curnode->_private;
-
-					/* Checking in case it runs out of reference */
-					if (ptr->_private) {
-						php_libxml_node_object *obj = ptr->_private;
-						if (!obj->document || obj->document->class_type < PHP_LIBXML_CLASS_MODERN) {
-							if (LIBXML_VERSION < 21300 && UNEXPECTED(curnode->doc == NULL)) {
-								/* xmlReconciliateNs() in these versions just uses the document for xmlNewReconciledNs(),
-								 * which can create an oldNs xml namespace declaration via xmlSearchNs() -> xmlTreeEnsureXMLDecl(). */
-								xmlDoc dummy;
-								memset(&dummy, 0, sizeof(dummy));
-								dummy.type = XML_DOCUMENT_NODE;
-								curnode->doc = &dummy;
-								xmlReconciliateNs(curnode->doc, curnode);
-								curnode->doc = NULL;
-
-								/* Append oldNs to current node's nsDef, which can be at most one node. */
-								if (dummy.oldNs) {
-									ZEND_ASSERT(dummy.oldNs->next == NULL);
-									xmlNsPtr old = curnode->nsDef;
-									curnode->nsDef = dummy.oldNs;
-									dummy.oldNs->next = old;
-								}
-							} else {
-								xmlReconciliateNs(curnode->doc, curnode);
-							}
-						}
-					}
+				php_libxml_node_free_list_delay(curnode);
+			} else {
+				if (php_libxml_node_free_list_owns_properties(curnode)) {
+					php_libxml_node_free_list((xmlNodePtr) curnode->properties);
 				}
-				/* Skip freeing */
+				xmlUnlinkNode(curnode);
+				php_libxml_unregister_node(curnode);
+				php_libxml_node_free(curnode);
+			}
+
+			if (next != NULL) {
 				curnode = next;
-				continue;
+				break;
 			}
-
-			node = curnode;
-			switch (node->type) {
-				/* Skip property freeing for the following types */
-				case XML_ENTITY_REF_NODE:
-				case XML_NOTATION_NODE:
-					break;
-				case XML_ENTITY_DECL:
-					php_libxml_unlink_entity_decl((xmlEntityPtr) node);
-					break;
-				case XML_ATTRIBUTE_NODE:
-					if ((node->doc != NULL) && (((xmlAttrPtr) node)->atype == XML_ATTRIBUTE_ID)) {
-						xmlRemoveID(node->doc, (xmlAttrPtr) node);
-					}
-					ZEND_FALLTHROUGH;
-				case XML_ATTRIBUTE_DECL:
-				case XML_DTD_NODE:
-				case XML_DOCUMENT_TYPE_NODE:
-				case XML_NAMESPACE_DECL:
-				case XML_TEXT_NODE:
-					php_libxml_node_free_list(node->children);
-					break;
-				default:
-					php_libxml_node_free_list(node->children);
-					php_libxml_node_free_list((xmlNodePtr) node->properties);
+			if (depth == 0) {
+				return;
 			}
-
-			curnode = node->next;
-			xmlUnlinkNode(node);
-			php_libxml_unregister_node(node);
-			php_libxml_node_free(node);
+			depth--;
+			curnode = parent;
 		}
 	}
 }
