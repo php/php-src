@@ -70,6 +70,7 @@ static void delete_argv(struct _soap_class *class);
 
 static void soap_error_handler(int error_num, zend_string *error_filename, uint32_t error_lineno, zend_string *message);
 ZEND_NORETURN static ZEND_COLD void soap_fault_to_error(char *code);
+static ZEND_COLD void soap_client_option_error(zval *this_ptr, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 
 #define SOAP_SERVER_BEGIN_CODE() \
 	bool _old_handler = SOAP_GLOBAL(use_soap_error_handler);\
@@ -2049,6 +2050,40 @@ ZEND_NORETURN static ZEND_COLD void soap_fault_to_error(char *code) /* {{{ */
 }
 /* }}} */
 
+/* Reports an invalid option of the SoapClient constructor. With exceptions it
+ * throws the same SoapFault as the fatal error used to be turned into,
+ * "SoapClient::__construct(): <message>", without a bailout, and the caller
+ * must return. Otherwise it is the same fatal error as before. */
+static ZEND_COLD void soap_client_option_error(zval *this_ptr, const char *format, ...) /* {{{ */
+{
+	va_list args;
+	zend_string *details, *function, *message;
+	zval fault;
+	const char *code = SOAP_GLOBAL(error_code);
+
+	va_start(args, format);
+	if (Z_TYPE_P(Z_CLIENT_EXCEPTIONS_P(this_ptr)) == IS_FALSE) {
+		php_verror(NULL, E_ERROR, format, args);
+		ZEND_UNREACHABLE();
+	}
+	details = zend_vstrpprintf(0, format, args);
+	va_end(args);
+
+	function = get_active_function_or_method_name();
+	message = zend_strpprintf(0, "%s(): %s", ZSTR_VAL(function), ZSTR_VAL(details));
+	zend_string_release(function);
+	zend_string_release(details);
+
+	if (code == NULL) {
+		code = "Client";
+	}
+	add_soap_fault_ex_en(&fault, this_ptr, code, ZSTR_VAL(message));
+	Z_ADDREF(fault);
+	zend_string_release(message);
+	zend_throw_exception_object(&fault);
+}
+/* }}} */
+
 static zend_never_inline ZEND_COLD void soap_real_error_handler(int error_num, zend_string *error_filename, const uint32_t error_lineno, zend_string *message) /* {{{ */
 {
 	bool _old_in_compilation;
@@ -2230,7 +2265,8 @@ PHP_METHOD(SoapClient, __construct)
 			    Z_TYPE_P(tmp) == IS_STRING) {
 				ZVAL_STR_COPY(Z_CLIENT_URI_P(this_ptr), Z_STR_P(tmp));
 			} else {
-				php_error_docref(NULL, E_ERROR, "'uri' option is required in nonWSDL mode");
+				soap_client_option_error(this_ptr, "'uri' option is required in nonWSDL mode");
+				goto end;
 			}
 
 			if ((tmp = zend_hash_str_find(ht, "style", sizeof("style")-1)) != NULL &&
@@ -2250,7 +2286,8 @@ PHP_METHOD(SoapClient, __construct)
 		    Z_TYPE_P(tmp) == IS_STRING) {
 			ZVAL_STR_COPY(Z_CLIENT_LOCATION_P(this_ptr), Z_STR_P(tmp));
 		} else if (!wsdl) {
-			php_error_docref(NULL, E_ERROR, "'location' option is required in nonWSDL mode");
+			soap_client_option_error(this_ptr, "'location' option is required in nonWSDL mode");
+			goto end;
 		}
 
 		if ((tmp = zend_hash_str_find(ht, "soap_version", sizeof("soap_version")-1)) != NULL) {
@@ -2318,7 +2355,8 @@ PHP_METHOD(SoapClient, __construct)
 
 			encoding = xmlFindCharEncodingHandler(Z_STRVAL_P(tmp));
 			if (UNEXPECTED(encoding == NULL)) {
-				php_error_docref(NULL, E_ERROR, "Invalid 'encoding' option - '%s'", Z_STRVAL_P(tmp));
+				soap_client_option_error(this_ptr, "Invalid 'encoding' option - '%s'", Z_STRVAL_P(tmp));
+				goto end;
 			} else {
 				xmlCharEncCloseFunc(encoding);
 				ZVAL_STR_COPY(Z_CLIENT_ENCODING_P(this_ptr), Z_STR_P(tmp));
@@ -2421,7 +2459,8 @@ PHP_METHOD(SoapClient, __construct)
 
 		}
 	} else if (!wsdl) {
-		php_error_docref(NULL, E_ERROR, "'location' and 'uri' options are required in nonWSDL mode");
+		soap_client_option_error(this_ptr, "'location' and 'uri' options are required in nonWSDL mode");
+		goto end;
 	}
 
 	ZVAL_LONG(Z_CLIENT_SOAP_VERSION_P(this_ptr), soap_version);
