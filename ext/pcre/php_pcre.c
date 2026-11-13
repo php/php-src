@@ -592,6 +592,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 #endif
 	uint32_t			 eoptions = PHP_PCRE_DEFAULT_EXTRA_COPTIONS;
 	uint32_t			 all_options;
+	uint32_t			 has_backslash_c;
 	PCRE2_UCHAR	         error[128];
 	PCRE2_SIZE           erroffset;
 	int                  errnumber;
@@ -788,11 +789,18 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 
 	/* In-pattern verbs such as (*UTF) can enable PCRE2_UTF, in which \C is unsafe. */
 	if (re != NULL && !(coptions & PCRE2_NEVER_BACKSLASH_C)
+			&& pcre2_pattern_info(re, PCRE2_INFO_HASBACKSLASHC, &has_backslash_c) >= 0
+			&& has_backslash_c
 			&& pcre2_pattern_info(re, PCRE2_INFO_ALLOPTIONS, &all_options) >= 0
 			&& (all_options & PCRE2_UTF)) {
 		pcre2_code_free(re);
-		coptions |= PCRE2_NEVER_BACKSLASH_C;
-		re = pcre2_compile((PCRE2_SPTR)pattern, pattern_len, coptions, &errnumber, &erroffset, cctx);
+		if (key != regex) {
+			zend_string_release_ex(key, 0);
+		}
+		php_error_docref(NULL, E_WARNING, "Compilation failed: using \\C is incompatible with UTF-8 mode");
+		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
+		efree(pattern);
+		return NULL;
 	}
 
 	if (re == NULL) {
@@ -801,9 +809,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 		}
 		const char *err_msg = (const char*) error;
 		if (errnumber == PCRE2_ERROR_BACKSLASH_C_CALLER_DISABLED) {
-			err_msg = (coptions & PCRE2_UTF)
-				? "using \\C is incompatible with the 'u' modifier"
-				: "using \\C is incompatible with UTF-8 mode";
+			err_msg = "using \\C is incompatible with the 'u' modifier";
 		} else {
 			pcre2_get_error_message(errnumber, error, sizeof(error));
 		}

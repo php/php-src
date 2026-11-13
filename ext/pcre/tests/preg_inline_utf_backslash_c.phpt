@@ -21,19 +21,19 @@ var_dump(preg_match('/(*UTF)\\\\C/', 'x\C'));
 ?>
 --EXPECTF--
 
-Warning: preg_match(): Compilation failed: using \C is incompatible with UTF-8 mode at offset 8 in %s on line %d
+Warning: preg_match(): Compilation failed: using \C is incompatible with UTF-8 mode in %s on line %d
 bool(false)
 
-Warning: preg_match(): Compilation failed: using \C is incompatible with UTF-8 mode at offset 10 in %s on line %d
+Warning: preg_match(): Compilation failed: using \C is incompatible with UTF-8 mode in %s on line %d
 bool(false)
 
-Warning: preg_match(): Compilation failed: using \C is incompatible with UTF-8 mode at offset 27 in %s on line %d
+Warning: preg_match(): Compilation failed: using \C is incompatible with UTF-8 mode in %s on line %d
 bool(false)
 
 Warning: preg_match(): Compilation failed: using \C is incompatible with the 'u' modifier at offset 2 in %s on line %d
 bool(false)
 
-Warning: preg_match_all(): Compilation failed: using \C is incompatible with UTF-8 mode at offset 12 in %s on line %d
+Warning: preg_match_all(): Compilation failed: using \C is incompatible with UTF-8 mode in %s on line %d
 bool(false)
 NULL
 int(1)
