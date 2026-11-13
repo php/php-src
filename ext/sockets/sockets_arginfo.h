@@ -1,5 +1,5 @@
 /* This is a generated file, edit sockets.stub.php instead.
- * Stub hash: aceee39bed5332f7f26d5d768976c4d5ab96ab3c */
+ * Stub hash: 90fc2bdaaba067b3f337a272c7e44bc865c453b3 */
 
 #include "zend_constants.h"
 
@@ -989,6 +989,9 @@ static void register_sockets_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("SCM_CREDS", SCM_CREDS, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LOCAL_CREDS", LOCAL_CREDS, CONST_PERSISTENT);
 #endif
+#if defined(LOCAL_PEERCRED)
+	REGISTER_LONG_CONSTANT("LOCAL_PEERCRED", LOCAL_PEERCRED, CONST_PERSISTENT);
+#endif
 #if defined(SO_ATTACH_REUSEPORT_CBPF)
 	REGISTER_LONG_CONSTANT("SO_ATTACH_REUSEPORT_CBPF", SO_ATTACH_REUSEPORT_CBPF, CONST_PERSISTENT);
 #endif
@@ -1006,6 +1009,9 @@ static void register_sockets_symbols(int module_number)
 #endif
 #if defined(SO_NOSIGPIPE)
 	REGISTER_LONG_CONSTANT("SO_NOSIGPIPE", SO_NOSIGPIPE, CONST_PERSISTENT);
+#endif
+#if defined(SO_PEERCRED)
+	REGISTER_LONG_CONSTANT("SO_PEERCRED", SO_PEERCRED, CONST_PERSISTENT);
 #endif
 #if defined(TCP_QUICKACK)
 	REGISTER_LONG_CONSTANT("TCP_QUICKACK", TCP_QUICKACK, CONST_PERSISTENT);
