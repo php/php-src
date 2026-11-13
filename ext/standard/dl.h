@@ -19,8 +19,13 @@
 #ifndef DL_H
 #define DL_H
 
-PHPAPI int php_load_extension(const char *filename, int type, int start_now);
-PHPAPI void php_dl(const char *file, int type, zval *return_value, int start_now);
+/* start modes (values 0 and 1 match the former start_now argument) */
+#define PHP_DL_START_NONE    0 /* no startup */
+#define PHP_DL_START_REQUEST 1 /* module and request startup */
+#define PHP_DL_START_MODULE  2 /* module startup only */
+
+PHPAPI int php_load_extension(const char *filename, int type, int start_mode);
+PHPAPI void php_dl(const char *file, int type, zval *return_value, int start_mode);
 PHPAPI void *php_load_shlib(const char *path, char **errp);
 
 /* dynamic loading functions */
