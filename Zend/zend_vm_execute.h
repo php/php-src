@@ -2815,6 +2815,15 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV_
 		HANDLE_EXCEPTION();
 	}
 
+	/* Remember the class that satisfied the check, so that the next argument of the same class can take the fast path above.
+	 * Rewriting polymorphic slots is expensive, so fill only once. */
+	if ((opline->op2.num & _ZEND_TYPE_KIND_MASK)
+	 && CACHED_PTR(opline->extended_value) == NULL
+	 && Z_TYPE_P(op_1) == IS_OBJECT
+	 && zend_type_may_cache_ce(&EX(func)->common.arg_info[opline->op1.num - 1].type)) {
+		CACHE_PTR(opline->extended_value, (void*)Z_OBJCE_P(op_1));
+	}
+
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -4360,6 +4369,13 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_R
 	param = EX_VAR(opline->result.var);
 
 	if (UNEXPECTED(!(opline->op2.num & (1u << Z_TYPE_P(param))))) {
+		/* Monomorphic cache for CEs.
+		 * The cache slot only exists when the type has a class part. */
+		if (EXPECTED(Z_TYPE_P(param) == IS_OBJECT)
+		 && EXPECTED(opline->op2.num & _ZEND_TYPE_KIND_MASK)
+		 && EXPECTED(CACHED_PTR(opline->extended_value) == (void*)Z_OBJCE_P(param))) {
+			ZEND_VM_NEXT_OPCODE();
+		}
 		ZEND_VM_DISPATCH_TO_HELPER(zend_verify_recv_arg_type_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX param));
 	}
 
@@ -11274,6 +11290,13 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 			ZEND_VM_NEXT_OPCODE();
 		}
 
+		/* Monomorphic inline cache for class types when type declaration contains an object, see ZEND_RECV. */
+		if (EXPECTED(Z_TYPE_P(retval_ref) == IS_OBJECT)
+		 && EXPECTED(ZEND_TYPE_IS_COMPLEX(ret_info->type))
+		 && EXPECTED(CACHED_PTR(opline->extended_value) == (void*)Z_OBJCE_P(retval_ref))) {
+			ZEND_VM_NEXT_OPCODE();
+		}
+
 		if (IS_CONST == IS_CV && UNEXPECTED(Z_ISUNDEF_P(retval_ptr))) {
 			SAVE_OPLINE();
 			retval_ref = retval_ptr = ZVAL_UNDEFINED_OP1();
@@ -11308,6 +11331,13 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
+		}
+		/* SAFETY: See the ZEND_RECV helper for why this is safe and why it fills once. */
+		if (ZEND_TYPE_IS_COMPLEX(ret_info->type)
+		 && CACHED_PTR(opline->extended_value) == NULL
+		 && Z_TYPE_P(retval_ptr) == IS_OBJECT
+		 && zend_type_may_cache_ce(&ret_info->type)) {
+			CACHE_PTR(opline->extended_value, (void*)Z_OBJCE_P(retval_ptr));
 		}
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -21636,6 +21666,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 			ZEND_VM_NEXT_OPCODE();
 		}
 
+		/* Monomorphic inline cache for class types when type declaration contains an object, see ZEND_RECV. */
+		if (EXPECTED(Z_TYPE_P(retval_ref) == IS_OBJECT)
+		 && EXPECTED(ZEND_TYPE_IS_COMPLEX(ret_info->type))
+		 && EXPECTED(CACHED_PTR(opline->extended_value) == (void*)Z_OBJCE_P(retval_ref))) {
+			ZEND_VM_NEXT_OPCODE();
+		}
+
 		if (IS_TMP_VAR == IS_CV && UNEXPECTED(Z_ISUNDEF_P(retval_ptr))) {
 			SAVE_OPLINE();
 			retval_ref = retval_ptr = ZVAL_UNDEFINED_OP1();
@@ -21670,6 +21707,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
+		}
+		/* SAFETY: See the ZEND_RECV helper for why this is safe and why it fills once. */
+		if (ZEND_TYPE_IS_COMPLEX(ret_info->type)
+		 && CACHED_PTR(opline->extended_value) == NULL
+		 && Z_TYPE_P(retval_ptr) == IS_OBJECT
+		 && zend_type_may_cache_ce(&ret_info->type)) {
+			CACHE_PTR(opline->extended_value, (void*)Z_OBJCE_P(retval_ptr));
 		}
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -29682,6 +29726,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 			ZEND_VM_NEXT_OPCODE();
 		}
 
+		/* Monomorphic inline cache for class types when type declaration contains an object, see ZEND_RECV. */
+		if (EXPECTED(Z_TYPE_P(retval_ref) == IS_OBJECT)
+		 && EXPECTED(ZEND_TYPE_IS_COMPLEX(ret_info->type))
+		 && EXPECTED(CACHED_PTR(opline->extended_value) == (void*)Z_OBJCE_P(retval_ref))) {
+			ZEND_VM_NEXT_OPCODE();
+		}
+
 		if (IS_VAR == IS_CV && UNEXPECTED(Z_ISUNDEF_P(retval_ptr))) {
 			SAVE_OPLINE();
 			retval_ref = retval_ptr = ZVAL_UNDEFINED_OP1();
@@ -29716,6 +29767,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
+		}
+		/* SAFETY: See the ZEND_RECV helper for why this is safe and why it fills once. */
+		if (ZEND_TYPE_IS_COMPLEX(ret_info->type)
+		 && CACHED_PTR(opline->extended_value) == NULL
+		 && Z_TYPE_P(retval_ptr) == IS_OBJECT
+		 && zend_type_may_cache_ce(&ret_info->type)) {
+			CACHE_PTR(opline->extended_value, (void*)Z_OBJCE_P(retval_ptr));
 		}
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -37137,6 +37195,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 			ZEND_VM_NEXT_OPCODE();
 		}
 
+		/* Monomorphic inline cache for class types when type declaration contains an object, see ZEND_RECV. */
+		if (EXPECTED(Z_TYPE_P(retval_ref) == IS_OBJECT)
+		 && EXPECTED(ZEND_TYPE_IS_COMPLEX(ret_info->type))
+		 && EXPECTED(CACHED_PTR(opline->extended_value) == (void*)Z_OBJCE_P(retval_ref))) {
+			ZEND_VM_NEXT_OPCODE();
+		}
+
 		if (IS_UNUSED == IS_CV && UNEXPECTED(Z_ISUNDEF_P(retval_ptr))) {
 			SAVE_OPLINE();
 			retval_ref = retval_ptr = ZVAL_UNDEFINED_OP1();
@@ -37171,6 +37236,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
+		}
+		/* SAFETY: See the ZEND_RECV helper for why this is safe and why it fills once. */
+		if (ZEND_TYPE_IS_COMPLEX(ret_info->type)
+		 && CACHED_PTR(opline->extended_value) == NULL
+		 && Z_TYPE_P(retval_ptr) == IS_OBJECT
+		 && zend_type_may_cache_ce(&ret_info->type)) {
+			CACHE_PTR(opline->extended_value, (void*)Z_OBJCE_P(retval_ptr));
 		}
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -49377,6 +49449,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 			ZEND_VM_NEXT_OPCODE();
 		}
 
+		/* Monomorphic inline cache for class types when type declaration contains an object, see ZEND_RECV. */
+		if (EXPECTED(Z_TYPE_P(retval_ref) == IS_OBJECT)
+		 && EXPECTED(ZEND_TYPE_IS_COMPLEX(ret_info->type))
+		 && EXPECTED(CACHED_PTR(opline->extended_value) == (void*)Z_OBJCE_P(retval_ref))) {
+			ZEND_VM_NEXT_OPCODE();
+		}
+
 		if (IS_CV == IS_CV && UNEXPECTED(Z_ISUNDEF_P(retval_ptr))) {
 			SAVE_OPLINE();
 			retval_ref = retval_ptr = ZVAL_UNDEFINED_OP1();
@@ -49411,6 +49490,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
+		}
+		/* SAFETY: See the ZEND_RECV helper for why this is safe and why it fills once. */
+		if (ZEND_TYPE_IS_COMPLEX(ret_info->type)
+		 && CACHED_PTR(opline->extended_value) == NULL
+		 && Z_TYPE_P(retval_ptr) == IS_OBJECT
+		 && zend_type_may_cache_ce(&ret_info->type)) {
+			CACHE_PTR(opline->extended_value, (void*)Z_OBJCE_P(retval_ptr));
 		}
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -57239,6 +57325,13 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_RECV_S
 	param = EX_VAR(opline->result.var);
 
 	if (UNEXPECTED(!(opline->op2.num & (1u << Z_TYPE_P(param))))) {
+		/* Monomorphic cache for CEs.
+		 * The cache slot only exists when the type has a class part. */
+		if (EXPECTED(Z_TYPE_P(param) == IS_OBJECT)
+		 && EXPECTED(opline->op2.num & _ZEND_TYPE_KIND_MASK)
+		 && EXPECTED(CACHED_PTR(opline->extended_value) == (void*)Z_OBJCE_P(param))) {
+			ZEND_VM_NEXT_OPCODE();
+		}
 		ZEND_VM_DISPATCH_TO_HELPER(zend_verify_recv_arg_type_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX param));
 	}
 
@@ -64051,6 +64144,13 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIF
 			ZEND_VM_NEXT_OPCODE();
 		}
 
+		/* Monomorphic inline cache for class types when type declaration contains an object, see ZEND_RECV. */
+		if (EXPECTED(Z_TYPE_P(retval_ref) == IS_OBJECT)
+		 && EXPECTED(ZEND_TYPE_IS_COMPLEX(ret_info->type))
+		 && EXPECTED(CACHED_PTR(opline->extended_value) == (void*)Z_OBJCE_P(retval_ref))) {
+			ZEND_VM_NEXT_OPCODE();
+		}
+
 		if (IS_CONST == IS_CV && UNEXPECTED(Z_ISUNDEF_P(retval_ptr))) {
 			SAVE_OPLINE();
 			retval_ref = retval_ptr = ZVAL_UNDEFINED_OP1();
@@ -64085,6 +64185,13 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIF
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
+		}
+		/* SAFETY: See the ZEND_RECV helper for why this is safe and why it fills once. */
+		if (ZEND_TYPE_IS_COMPLEX(ret_info->type)
+		 && CACHED_PTR(opline->extended_value) == NULL
+		 && Z_TYPE_P(retval_ptr) == IS_OBJECT
+		 && zend_type_may_cache_ce(&ret_info->type)) {
+			CACHE_PTR(opline->extended_value, (void*)Z_OBJCE_P(retval_ptr));
 		}
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -74313,6 +74420,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 			ZEND_VM_NEXT_OPCODE();
 		}
 
+		/* Monomorphic inline cache for class types when type declaration contains an object, see ZEND_RECV. */
+		if (EXPECTED(Z_TYPE_P(retval_ref) == IS_OBJECT)
+		 && EXPECTED(ZEND_TYPE_IS_COMPLEX(ret_info->type))
+		 && EXPECTED(CACHED_PTR(opline->extended_value) == (void*)Z_OBJCE_P(retval_ref))) {
+			ZEND_VM_NEXT_OPCODE();
+		}
+
 		if (IS_TMP_VAR == IS_CV && UNEXPECTED(Z_ISUNDEF_P(retval_ptr))) {
 			SAVE_OPLINE();
 			retval_ref = retval_ptr = ZVAL_UNDEFINED_OP1();
@@ -74347,6 +74461,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
+		}
+		/* SAFETY: See the ZEND_RECV helper for why this is safe and why it fills once. */
+		if (ZEND_TYPE_IS_COMPLEX(ret_info->type)
+		 && CACHED_PTR(opline->extended_value) == NULL
+		 && Z_TYPE_P(retval_ptr) == IS_OBJECT
+		 && zend_type_may_cache_ce(&ret_info->type)) {
+			CACHE_PTR(opline->extended_value, (void*)Z_OBJCE_P(retval_ptr));
 		}
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -82359,6 +82480,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 			ZEND_VM_NEXT_OPCODE();
 		}
 
+		/* Monomorphic inline cache for class types when type declaration contains an object, see ZEND_RECV. */
+		if (EXPECTED(Z_TYPE_P(retval_ref) == IS_OBJECT)
+		 && EXPECTED(ZEND_TYPE_IS_COMPLEX(ret_info->type))
+		 && EXPECTED(CACHED_PTR(opline->extended_value) == (void*)Z_OBJCE_P(retval_ref))) {
+			ZEND_VM_NEXT_OPCODE();
+		}
+
 		if (IS_VAR == IS_CV && UNEXPECTED(Z_ISUNDEF_P(retval_ptr))) {
 			SAVE_OPLINE();
 			retval_ref = retval_ptr = ZVAL_UNDEFINED_OP1();
@@ -82393,6 +82521,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
+		}
+		/* SAFETY: See the ZEND_RECV helper for why this is safe and why it fills once. */
+		if (ZEND_TYPE_IS_COMPLEX(ret_info->type)
+		 && CACHED_PTR(opline->extended_value) == NULL
+		 && Z_TYPE_P(retval_ptr) == IS_OBJECT
+		 && zend_type_may_cache_ce(&ret_info->type)) {
+			CACHE_PTR(opline->extended_value, (void*)Z_OBJCE_P(retval_ptr));
 		}
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -89814,6 +89949,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 			ZEND_VM_NEXT_OPCODE();
 		}
 
+		/* Monomorphic inline cache for class types when type declaration contains an object, see ZEND_RECV. */
+		if (EXPECTED(Z_TYPE_P(retval_ref) == IS_OBJECT)
+		 && EXPECTED(ZEND_TYPE_IS_COMPLEX(ret_info->type))
+		 && EXPECTED(CACHED_PTR(opline->extended_value) == (void*)Z_OBJCE_P(retval_ref))) {
+			ZEND_VM_NEXT_OPCODE();
+		}
+
 		if (IS_UNUSED == IS_CV && UNEXPECTED(Z_ISUNDEF_P(retval_ptr))) {
 			SAVE_OPLINE();
 			retval_ref = retval_ptr = ZVAL_UNDEFINED_OP1();
@@ -89848,6 +89990,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
+		}
+		/* SAFETY: See the ZEND_RECV helper for why this is safe and why it fills once. */
+		if (ZEND_TYPE_IS_COMPLEX(ret_info->type)
+		 && CACHED_PTR(opline->extended_value) == NULL
+		 && Z_TYPE_P(retval_ptr) == IS_OBJECT
+		 && zend_type_may_cache_ce(&ret_info->type)) {
+			CACHE_PTR(opline->extended_value, (void*)Z_OBJCE_P(retval_ptr));
 		}
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -101952,6 +102101,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 			ZEND_VM_NEXT_OPCODE();
 		}
 
+		/* Monomorphic inline cache for class types when type declaration contains an object, see ZEND_RECV. */
+		if (EXPECTED(Z_TYPE_P(retval_ref) == IS_OBJECT)
+		 && EXPECTED(ZEND_TYPE_IS_COMPLEX(ret_info->type))
+		 && EXPECTED(CACHED_PTR(opline->extended_value) == (void*)Z_OBJCE_P(retval_ref))) {
+			ZEND_VM_NEXT_OPCODE();
+		}
+
 		if (IS_CV == IS_CV && UNEXPECTED(Z_ISUNDEF_P(retval_ptr))) {
 			SAVE_OPLINE();
 			retval_ref = retval_ptr = ZVAL_UNDEFINED_OP1();
@@ -101986,6 +102142,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
+		}
+		/* SAFETY: See the ZEND_RECV helper for why this is safe and why it fills once. */
+		if (ZEND_TYPE_IS_COMPLEX(ret_info->type)
+		 && CACHED_PTR(opline->extended_value) == NULL
+		 && Z_TYPE_P(retval_ptr) == IS_OBJECT
+		 && zend_type_may_cache_ce(&ret_info->type)) {
+			CACHE_PTR(opline->extended_value, (void*)Z_OBJCE_P(retval_ptr));
 		}
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -106639,6 +106802,15 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV_EX  z
 	SAVE_OPLINE();
 	if (UNEXPECTED(!zend_verify_recv_arg_type(EX(func), opline->op1.num, op_1))) {
 		HANDLE_EXCEPTION();
+	}
+
+	/* Remember the class that satisfied the check, so that the next argument of the same class can take the fast path above.
+	 * Rewriting polymorphic slots is expensive, so fill only once. */
+	if ((opline->op2.num & _ZEND_TYPE_KIND_MASK)
+	 && CACHED_PTR(opline->extended_value) == NULL
+	 && Z_TYPE_P(op_1) == IS_OBJECT
+	 && zend_type_may_cache_ce(&EX(func)->common.arg_info[opline->op1.num - 1].type)) {
+		CACHE_PTR(opline->extended_value, (void*)Z_OBJCE_P(op_1));
 	}
 
 	ZEND_VM_NEXT_OPCODE();
