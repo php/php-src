@@ -45,6 +45,12 @@ PHP 8.7 INTERNALS UPGRADE NOTES
   on POSIX platforms.
 - Function pointer signature for interface_gets_implemented has been made void.
   Implementations are expected to use zend_error_noreturn upon failure.
+- zend_module_entry gained the request_begin_func and request_end_func
+  fields, called between two requests served by the same script. Declare them
+  with PHP_RBEGIN_FUNCTION() and PHP_REND_FUNCTION(), and set them with
+  STANDARD_MODULE_PROPERTIES_REQUEST_HOOKS(). request_end_func releases only
+  the state built from the finished request or tied to its response. Other
+  state is shared by the requests, as in a long-running CLI script.
 - Added a new zend_object_copy() function which increases the refcount of
   a zend_object* and returns it. Allowing more descriptive code rather than
   doing an assignment followed by GC_ADDREF().
@@ -110,6 +116,17 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 5. SAPI changes
 ========================
 
+- Added php_request_begin() and php_request_end() for SAPIs running a script
+  that serves several requests, such as a worker script. They replace copies of
+  php_request_startup() and php_request_shutdown() and call the module
+  request_begin_func and request_end_func hooks. They return FAILURE when a
+  hook fails or a step bails out: the SAPI should then end the script, as a
+  failing request_startup_func ends the process.
+- Added php_release_request_globals(), called by php_request_begin() before
+  the output of the new request is active. The script reads the superglobals
+  of the finished request until then. SAPIs running userland code between two
+  requests can call it before waiting for the next one, so a destructor
+  throwing there doesn't affect the next request.
 - The size of the SAPI structure has changed.
   . The terminate_process method has been removed.
   . The force_http_10 method has been removed.

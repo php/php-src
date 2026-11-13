@@ -226,6 +226,8 @@ typedef struct _zend_fcall_info_cache {
 #define ZEND_MODULE_ACTIVATE_N(module)		zm_activate_##module
 #define ZEND_MODULE_DEACTIVATE_N(module)	zm_deactivate_##module
 #define ZEND_MODULE_POST_ZEND_DEACTIVATE_N(module)	zm_post_zend_deactivate_##module
+#define ZEND_MODULE_REQUEST_BEGIN_N(module)	zm_request_begin_##module
+#define ZEND_MODULE_REQUEST_END_N(module)	zm_request_end_##module
 #define ZEND_MODULE_INFO_N(module)			zm_info_##module
 #define ZEND_MODULE_GLOBALS_CTOR_N(module)  zm_globals_ctor_##module
 #define ZEND_MODULE_GLOBALS_DTOR_N(module)  zm_globals_dtor_##module
@@ -236,6 +238,8 @@ typedef struct _zend_fcall_info_cache {
 #define ZEND_MODULE_ACTIVATE_D(module)		zend_result ZEND_MODULE_ACTIVATE_N(module)(INIT_FUNC_ARGS)
 #define ZEND_MODULE_DEACTIVATE_D(module)	zend_result ZEND_MODULE_DEACTIVATE_N(module)(SHUTDOWN_FUNC_ARGS)
 #define ZEND_MODULE_POST_ZEND_DEACTIVATE_D(module)	zend_result ZEND_MODULE_POST_ZEND_DEACTIVATE_N(module)(void)
+#define ZEND_MODULE_REQUEST_BEGIN_D(module)	zend_result ZEND_MODULE_REQUEST_BEGIN_N(module)(INIT_FUNC_ARGS)
+#define ZEND_MODULE_REQUEST_END_D(module)	zend_result ZEND_MODULE_REQUEST_END_N(module)(SHUTDOWN_FUNC_ARGS)
 #define ZEND_MODULE_INFO_D(module)			ZEND_COLD void ZEND_MODULE_INFO_N(module)(ZEND_MODULE_INFO_FUNC_ARGS)
 #define ZEND_MODULE_GLOBALS_CTOR_D(module)  void ZEND_MODULE_GLOBALS_CTOR_N(module)(zend_##module##_globals *module##_globals)
 #define ZEND_MODULE_GLOBALS_DTOR_D(module)  void ZEND_MODULE_GLOBALS_DTOR_N(module)(zend_##module##_globals *module##_globals)
@@ -1156,6 +1160,8 @@ static zend_always_inline bool ZVAL_FSTRING(zval *z, const char *s) {
 #define ZEND_MSHUTDOWN		ZEND_MODULE_SHUTDOWN_N
 #define ZEND_RINIT			ZEND_MODULE_ACTIVATE_N
 #define ZEND_RSHUTDOWN		ZEND_MODULE_DEACTIVATE_N
+#define ZEND_RBEGIN			ZEND_MODULE_REQUEST_BEGIN_N
+#define ZEND_REND			ZEND_MODULE_REQUEST_END_N
 #define ZEND_MINFO			ZEND_MODULE_INFO_N
 #define ZEND_GINIT(module)		((void (*)(void*))(ZEND_MODULE_GLOBALS_CTOR_N(module)))
 #define ZEND_GSHUTDOWN(module)	((void (*)(void*))(ZEND_MODULE_GLOBALS_DTOR_N(module)))
@@ -1164,6 +1170,8 @@ static zend_always_inline bool ZVAL_FSTRING(zval *z, const char *s) {
 #define ZEND_MSHUTDOWN_FUNCTION		ZEND_MODULE_SHUTDOWN_D
 #define ZEND_RINIT_FUNCTION			ZEND_MODULE_ACTIVATE_D
 #define ZEND_RSHUTDOWN_FUNCTION		ZEND_MODULE_DEACTIVATE_D
+#define ZEND_RBEGIN_FUNCTION		ZEND_MODULE_REQUEST_BEGIN_D
+#define ZEND_REND_FUNCTION			ZEND_MODULE_REQUEST_END_D
 #define ZEND_MINFO_FUNCTION			ZEND_MODULE_INFO_D
 #define ZEND_GINIT_FUNCTION			ZEND_MODULE_GLOBALS_CTOR_D
 #define ZEND_GSHUTDOWN_FUNCTION		ZEND_MODULE_GLOBALS_DTOR_D

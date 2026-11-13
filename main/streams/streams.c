@@ -20,6 +20,7 @@
 #endif
 #include "php.h"
 #include "php_globals.h"
+#include "SAPI.h"
 #include "php_memory_streams.h"
 #include "php_network.h"
 #include "php_io.h"
@@ -389,6 +390,11 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 	}
 
 	if (close_options & PHP_STREAM_FREE_RELEASE_STREAM) {
+		/* The script closed the request body, php_request_end() must not release it again */
+		if (stream == SG(request_info).request_body) {
+			SG(request_info).request_body = NULL;
+		}
+
 		if (stream->poll_watchers) {
 			php_io_poll_stream_notify_close(stream);
 		}

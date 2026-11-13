@@ -2394,6 +2394,12 @@ PHP_FUNCTION(session_id)
 		RETURN_FALSE;
 	}
 
+	/* code running between two requests served by the same script has no client */
+	if (name && UNEXPECTED(!SG(sapi_started))) {
+		php_error_docref(NULL, E_WARNING, "Session ID cannot be changed when no request is active");
+		RETURN_FALSE;
+	}
+
 	if (PS(id)) {
 		/* keep compatibility for "\0" characters ???
 		 * see: ext/session/tests/session_id_error3.phpt */
@@ -2713,6 +2719,12 @@ PHP_FUNCTION(session_start)
 		RETURN_THROWS();
 	}
 
+	/* code running between two requests served by the same script has no client */
+	if (UNEXPECTED(!SG(sapi_started))) {
+		php_error_docref(NULL, E_WARNING, "Session cannot be started when no request is active");
+		RETURN_FALSE;
+	}
+
 	if (PS(session_status) == php_session_active) {
 		php_session_session_already_started_error(E_NOTICE, "Ignoring session_start() because a session is already active");
 		RETURN_TRUE;
@@ -2944,6 +2956,36 @@ static PHP_RINIT_FUNCTION(session)
 		zval_ptr_dtor(&PS(mod_user_names).struct_name); \
 		ZVAL_UNDEF(&PS(mod_user_names).struct_name); \
 	}
+
+static PHP_RBEGIN_FUNCTION(session)
+{
+	if (PS(auto_start) && PS(session_status) == php_session_none) {
+		php_session_start();
+	}
+
+	return SUCCESS;
+}
+
+/* Unlike RSHUTDOWN, keeps the save handlers registered by the running script */
+static PHP_REND_FUNCTION(session)
+{
+	bool uses_object_methods_as_handlers = PS(mod_user_uses_object_methods_as_handlers);
+
+	if (PS(session_status) == php_session_active) {
+		zend_try {
+			php_session_flush(true);
+		} zend_end_try();
+	}
+	php_rshutdown_session_globals();
+	php_rinit_session_globals();
+	PS(mod_user_uses_object_methods_as_handlers) = uses_object_methods_as_handlers;
+
+	if (PS(mod) == NULL || PS(serializer) == NULL) {
+		PS(session_status) = php_session_disabled;
+	}
+
+	return SUCCESS;
+}
 
 static PHP_RSHUTDOWN_FUNCTION(session)
 {
@@ -3469,7 +3511,7 @@ zend_module_entry session_module_entry = {
 	PHP_GINIT(ps),
 	NULL,
 	NULL,
-	STANDARD_MODULE_PROPERTIES_EX,
+	STANDARD_MODULE_PROPERTIES_REQUEST_HOOKS(PHP_RBEGIN(session), PHP_REND(session)),
 	.child_init_func = PHP_CINIT(session)
 };
 

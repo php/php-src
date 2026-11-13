@@ -15,6 +15,7 @@ function skipFunction($function): bool {
      || $function === 'zend_create_unterminated_string'
      || $function === 'zend_test_array_return'
      || $function === 'zend_test_crash'
+     || $function === 'zend_test_request_boundary'
      || $function === 'zend_leak_bytes'
         /* mess with output */
      || (is_string($function) && str_starts_with($function, 'ob_'))

@@ -34,6 +34,7 @@
 #include "Zend/Optimizer/zend_optimizer.h"
 #include "Zend/zend_alloc.h"
 #include "SAPI.h"
+#include "php_main.h"
 #include "rfc1867.h"
 #include "test_arginfo.h"
 #include "tmp_methods_arginfo.h"
@@ -104,6 +105,24 @@ static ZEND_FUNCTION(zend_test_void_return)
 {
 	/* dummy */
 	ZEND_PARSE_PARAMETERS_NONE();
+}
+
+static ZEND_FUNCTION(zend_test_request_boundary)
+{
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_FUNC_OR_NULL(fci, fcc)
+	ZEND_PARSE_PARAMETERS_END();
+
+	bool ended = php_request_end() == SUCCESS;
+	if (ZEND_FCI_INITIALIZED(fci)) {
+		zend_call_known_fcc(&fcc, NULL, 0, NULL, NULL);
+	}
+	bool begun = php_request_begin() == SUCCESS;
+	RETURN_BOOL(ended && begun);
 }
 
 static void pass1(zend_script *script, void *context)
@@ -2287,6 +2306,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.register_passes", "0", PHP_INI_SYSTEM, OnUpdateBool, register_passes, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.rearm_vm_interrupt", "0", PHP_INI_SYSTEM, OnUpdateBool, rearm_vm_interrupt, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.print_stderr_mshutdown", "0", PHP_INI_SYSTEM, OnUpdateBool, print_stderr_mshutdown, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_BOOLEAN("zend_test.request_begin_fails", "0", PHP_INI_ALL, OnUpdateBool, request_begin_fails, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_BOOLEAN("zend_test.request_end_fails", "0", PHP_INI_ALL, OnUpdateBool, request_end_fails, zend_zend_test_globals, zend_test_globals)
 #ifdef HAVE_COPY_FILE_RANGE
 	STD_PHP_INI_ENTRY("zend_test.limit_copy_file_range", "-1", PHP_INI_ALL, OnUpdateLong, limit_copy_file_range, zend_zend_test_globals, zend_test_globals)
 #endif
@@ -2574,6 +2595,16 @@ PHP_RSHUTDOWN_FUNCTION(zend_test)
 	return SUCCESS;
 }
 
+static PHP_RBEGIN_FUNCTION(zend_test)
+{
+	return ZT_G(request_begin_fails) ? FAILURE : SUCCESS;
+}
+
+static PHP_REND_FUNCTION(zend_test)
+{
+	return ZT_G(request_end_fails) ? FAILURE : SUCCESS;
+}
+
 static PHP_GINIT_FUNCTION(zend_test)
 {
 #if defined(COMPILE_DL_ZEND_TEST) && defined(ZTS)
@@ -2618,7 +2649,7 @@ zend_module_entry zend_test_module_entry = {
 	PHP_GINIT(zend_test),
 	PHP_GSHUTDOWN(zend_test),
 	NULL,
-	STANDARD_MODULE_PROPERTIES_EX,
+	STANDARD_MODULE_PROPERTIES_REQUEST_HOOKS(PHP_RBEGIN(zend_test), PHP_REND(zend_test)),
 	.child_init_func = zend_test_child_init
 };
 
