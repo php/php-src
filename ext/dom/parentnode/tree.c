@@ -285,10 +285,10 @@ static bool dom_is_pre_insert_valid_without_step_1(php_libxml_ref_obj *document,
 		dom_hierarchy(parentNode, node) != SUCCESS
 		/* 4. If node is not a DocumentFragment, DocumentType, Element, or CharacterData node, then throw a "HierarchyRequestError" DOMException. */
 		|| node->type == XML_ATTRIBUTE_NODE
+		|| node->type == XML_NOTATION_NODE
 		|| (php_dom_follow_spec_doc_ref(document) && (
 			node->type == XML_ENTITY_REF_NODE
 			|| node->type == XML_ENTITY_NODE
-			|| node->type == XML_NOTATION_NODE
 			|| node->type == XML_DOCUMENT_NODE
 			|| node->type == XML_HTML_DOCUMENT_NODE
 			|| node->type >= XML_ELEMENT_DECL))) {
