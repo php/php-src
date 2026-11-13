@@ -4377,11 +4377,106 @@ static int exif_isobmff_parse_box(unsigned char *buf, isobmff_box_type *box)
 	return 16;
 }
 
+
+/* Read an unsigned integer of up to 8 bytes from a bounded buffer. */
+static bool exif_isobmff_read_uint(const unsigned char **cursor, const unsigned char *end,
+	uint8_t width, uint64_t *value)
+{
+	if (width > 8 || *cursor > end || (size_t)(end - *cursor) < width) {
+		return false;
+	}
+
+	uint64_t result = 0;
+	for (unsigned int i = 0; i < width; i++) {
+		result = (result << 8) | (*cursor)[i];
+	}
+	*cursor += width;
+	*value = result;
+	return true;
+}
+
+/* iloc item records contain field widths declared by the box itself. */
+static void exif_isobmff_parse_iloc(const unsigned char *start, uint64_t box_size,
+	int header_size, int exif_id, isobmff_item_pos_type *pos)
+{
+	if (exif_id < 0 || box_size < (uint64_t)(header_size + 8)) {
+		return;
+	}
+
+	const unsigned char *p = start + header_size;
+	const unsigned char *end = start + (size_t)box_size;
+	uint64_t count, ignored;
+	uint8_t version = p[0];
+	if (version > 2) {
+		return;
+	}
+
+	p += 4; /* FullBox version and flags. */
+	uint8_t offset_size = p[0] >> 4;
+	uint8_t length_size = p[0] & 15;
+	uint8_t base_size = p[1] >> 4;
+	uint8_t index_size = version ? p[1] & 15 : 0;
+	p += 2;
+
+	if (offset_size > 8 || length_size > 8 || base_size > 8 || index_size > 8
+		|| !exif_isobmff_read_uint(&p, end, version == 2 ? 4 : 2, &count)) {
+		return;
+	}
+
+	for (uint64_t i = 0; i < count; i++) {
+		uint64_t item_id, method = 0, reference_index, base, extents;
+		if (!exif_isobmff_read_uint(&p, end, version == 2 ? 4 : 2, &item_id)) {
+			return;
+		}
+		if (version != 0) {
+			if (!exif_isobmff_read_uint(&p, end, 2, &method)) {
+				return;
+			}
+			method &= 15;
+		}
+		if (!exif_isobmff_read_uint(&p, end, 2, &reference_index)
+			|| !exif_isobmff_read_uint(&p, end, base_size, &base)
+			|| !exif_isobmff_read_uint(&p, end, 2, &extents)) {
+			return;
+		}
+
+		/* EXIF can be addressed by a single extent in the current reader. */
+		bool supported = item_id == (uint64_t)exif_id && method == 0
+			&& reference_index == 0 && extents == 1;
+		uint64_t found_offset = 0, found_length = 0;
+		for (uint64_t j = 0; j < extents; j++) {
+			uint64_t extent_offset, extent_length;
+			if (version != 0 && index_size != 0
+				&& !exif_isobmff_read_uint(&p, end, index_size, &ignored)) {
+				return;
+			}
+			if (!exif_isobmff_read_uint(&p, end, offset_size, &extent_offset)
+				|| !exif_isobmff_read_uint(&p, end, length_size, &extent_length)) {
+				return;
+			}
+			if (supported && base <= UINT64_MAX - extent_offset) {
+				found_offset = base + extent_offset;
+				found_length = extent_length;
+			} else {
+				supported = false;
+			}
+		}
+		if (supported && found_offset <= UINT32_MAX && found_length <= UINT32_MAX) {
+			pos->offset = (uint32_t)found_offset;
+			pos->size = (uint32_t)found_length;
+			return;
+		}
+	}
+}
+
 static void exif_isobmff_parse_meta(unsigned char *data, unsigned char *end, isobmff_item_pos_type *pos)
 {
 	isobmff_box_type box, item;
 	unsigned char *p;
 	int header_size, exif_id = -1, version, item_count, i;
+	const unsigned char *iloc_start = NULL;
+	uint64_t iloc_size = 0;
+	int iloc_header_size = 0;
 
 	size_t remain;
 #define CHECK(n) do { \
@@ -4398,8 +4493,8 @@ static void exif_isobmff_parse_meta(unsigned char *data, unsigned char *end, iso
 	unsigned char *box_offset = data + 4;
 	while (box_offset < end - 16) {
 		header_size = exif_isobmff_parse_box(box_offset, &box);
-		if (box.size < header_size) {
-			return;
+		if (box.size < header_size || box.size > (uint64_t)(end - box_offset)) {
+			break;
 		}
 		p = box_offset;
 		remain = end - p;
@@ -4416,7 +4511,9 @@ static void exif_isobmff_parse_meta(unsigned char *data, unsigned char *end, iso
 			}
 			for (i = 0; i < item_count && p < end - 20; i++) {
 				header_size = exif_isobmff_parse_box(p, &item);
-				if (item.size < header_size) {
+				if (item.size < (uint64_t)(header_size + 12) ||
+					(uint64_t)(p - box_offset) > box.size ||
+					item.size > box.size - (uint64_t)(p - box_offset)) {
 					return;
 				}
 				CHECK(header_size + 12);
@@ -4431,29 +4528,21 @@ static void exif_isobmff_parse_meta(unsigned char *data, unsigned char *end, iso
 			}
 		}
 		else if (box.type == FOURCC("iloc")) {
-			ADVANCE(header_size + 6);
-			version = p[-6];
-			if (version < 2) {
-				ADVANCE(2);
-				item_count = php_ifd_get16u(p - 2, 1);
-			} else {
-				ADVANCE(4);
-				item_count = php_ifd_get32u(p - 4, 1);
+			if (iloc_start == NULL) {
+				iloc_start = box_offset;
+				iloc_size = box.size;
+				iloc_header_size = header_size;
 			}
-			for (i = 0; i < item_count && p < end - 16; i++, p += 16) {
-				if (php_ifd_get16u(p, 1) == exif_id) {
-					pos->offset = php_ifd_get32u(p + 8, 1);
-					pos->size = php_ifd_get32u(p + 12, 1);
-					break;
-				}
-			}
-			break;
 		}
 
 		if (end - 16 - box_offset <= box.size) {
 			break;
 		}
 		box_offset += box.size;
+	}
+
+	if (iloc_start != NULL && exif_id >= 0) {
+		exif_isobmff_parse_iloc(iloc_start, iloc_size, iloc_header_size, exif_id, pos);
 	}
 
 #undef ADVANCE
