@@ -153,7 +153,7 @@ static inline int gdImageClipCopyResized(gdImagePtr dst, int *dstX, int *dstY, i
     int orig_dstW = *dstW;
     int orig_dstH = *dstH;
 
-    if (*dstW <= 0 || *dstH <= 0 || *srcW <= 0 || *srcH <= 0) {
+    if (*dstW <= 0 || *dstH <= 0 || *srcW == 0 || *srcH == 0) {
         return 0;
     }
     if (*dstX >= gdImageSX(dst) || *dstY >= gdImageSY(dst) || *dstX + *dstW <= 0 ||
