@@ -1937,18 +1937,16 @@ consult the installation file that came with this distribution, or visit \n\
 		}
 		if (backlog < -1 || backlog > SOMAXCONN) {
 			fprintf(stderr, "Invalid backlog %d, needs to be between -1 and %d\n", backlog, SOMAXCONN);
-#ifdef ZTS
-			tsrm_shutdown();
-#endif
-			return FAILURE;
+			free(bindpath);
+			exit_status = FAILURE;
+			goto parent_out;
 		}
 		fcgi_fd = fcgi_listen(bindpath, backlog);
 		if (fcgi_fd < 0) {
 			fprintf(stderr, "Couldn't create FastCGI listen socket on port %s\n", bindpath);
-#ifdef ZTS
-			tsrm_shutdown();
-#endif
-			return FAILURE;
+			free(bindpath);
+			exit_status = FAILURE;
+			goto parent_out;
 		}
 		fastcgi = fcgi_is_fastcgi();
 	}
