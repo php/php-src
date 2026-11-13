@@ -8,7 +8,7 @@ for ($i = 3; $i<= 5; $i++) {
 }
 
 $php = getenv("TEST_PHP_EXECUTABLE_ESCAPED");
-$callee = __DIR__ . "/proc_open_pipes_sleep.inc";
+$callee = __DIR__ . "/proc_open_pipes_exit.inc";
 $callee_escaped = escapeshellarg($callee);
 
 $spec[$i] = array('pi');
