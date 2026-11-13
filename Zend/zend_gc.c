@@ -2214,6 +2214,7 @@ rerun_gc:
 	 * run GC another time. */
 	if (should_rerun_gc && !did_rerun_gc) {
 		did_rerun_gc = true;
+		GC_G(visited) = 0;
 		goto rerun_gc;
 	}
 
