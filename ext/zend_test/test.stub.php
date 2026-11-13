@@ -250,6 +250,8 @@ namespace {
 
     function zend_trigger_bailout(): never {}
 
+    function zend_return_non_interned_string(string $str): string {}
+
     function zend_test_array_return(): array {}
 
     /** @genstubs-expose-comment-block

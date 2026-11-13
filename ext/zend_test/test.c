@@ -88,6 +88,16 @@ static ZEND_FUNCTION(zend_trigger_bailout)
 	zend_error(E_ERROR, "Bailout");
 }
 
+static ZEND_FUNCTION(zend_return_non_interned_string)
+{
+	zend_string *str;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &str) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_STRINGL(ZSTR_VAL(str), ZSTR_LEN(str));
+}
+
 static ZEND_FUNCTION(zend_test_array_return)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
