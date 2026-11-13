@@ -143,6 +143,11 @@ struct _zend_inheritance_cache_entry {
 	zend_class_entry             *traits_and_interfaces[1];
 };
 
+typedef struct {
+	uint32_t interface_index;
+	zend_string *property_name;
+} zend_interface_delegation;
+
 C23_ENUM(zend_class_type, uint8_t) {
 	ZEND_INTERNAL_CLASS = 1,
 	ZEND_USER_CLASS = 2,
@@ -217,6 +222,8 @@ struct _zend_class_entry {
 		zend_class_entry **interfaces;
 		zend_class_name *interface_names;
 	};
+	uint32_t num_interface_delegations;
+	zend_interface_delegation *interface_delegations;
 
 	zend_class_name *trait_names;
 	zend_trait_alias **trait_aliases;
