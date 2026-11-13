@@ -3975,6 +3975,18 @@ ZEND_METHOD(ReflectionClassConstant, __construct)
 		RETURN_THROWS();
 	}
 
+	if (instanceof_function(Z_OBJCE_P(object), reflection_enum_unit_case_ptr)) {
+		if (!(ZEND_CLASS_CONST_FLAGS(constant) & ZEND_CLASS_CONST_IS_CASE)) {
+			zend_throw_exception_ex(reflection_exception_ptr, 0, "Constant %s::%s is not a case", ZSTR_VAL(constant->ce->name), ZSTR_VAL(constname));
+			RETURN_THROWS();
+		}
+
+		if (instanceof_function(Z_OBJCE_P(object), reflection_enum_backed_case_ptr) && constant->ce->enum_backing_type == IS_UNDEF) {
+			zend_throw_exception_ex(reflection_exception_ptr, 0, "Enum case %s::%s is not a backed case", ZSTR_VAL(constant->ce->name), ZSTR_VAL(constname));
+			RETURN_THROWS();
+		}
+	}
+
 	if (intern->ptr) {
 		zval_ptr_dtor(reflection_prop_name(object));
 		zval_ptr_dtor(reflection_prop_class(object));
@@ -7750,20 +7762,6 @@ ZEND_METHOD(ReflectionEnum, getBackingType)
 ZEND_METHOD(ReflectionEnumUnitCase, __construct)
 {
 	ZEND_MN(ReflectionClassConstant___construct)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-	if (EG(exception)) {
-		RETURN_THROWS();
-	}
-
-	reflection_object *intern;
-	zend_class_constant *ref;
-
-	GET_REFLECTION_OBJECT_PTR(ref);
-
-	if (!(ZEND_CLASS_CONST_FLAGS(ref) & ZEND_CLASS_CONST_IS_CASE)) {
-		zval *case_name = reflection_prop_name(ZEND_THIS);
-		zend_throw_exception_ex(reflection_exception_ptr, 0, "Constant %s::%s is not a case", ZSTR_VAL(ref->ce->name), Z_STRVAL_P(case_name));
-		RETURN_THROWS();
-	}
 }
 
 ZEND_METHOD(ReflectionEnumUnitCase, getEnum)
@@ -7781,21 +7779,7 @@ ZEND_METHOD(ReflectionEnumUnitCase, getEnum)
 
 ZEND_METHOD(ReflectionEnumBackedCase, __construct)
 {
-	ZEND_MN(ReflectionEnumUnitCase___construct)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-	if (EG(exception)) {
-		RETURN_THROWS();
-	}
-
-	reflection_object *intern;
-	zend_class_constant *ref;
-
-	GET_REFLECTION_OBJECT_PTR(ref);
-
-	if (ref->ce->enum_backing_type == IS_UNDEF) {
-		zval *case_name = reflection_prop_name(ZEND_THIS);
-		zend_throw_exception_ex(reflection_exception_ptr, 0, "Enum case %s::%s is not a backed case", ZSTR_VAL(ref->ce->name), Z_STRVAL_P(case_name));
-		RETURN_THROWS();
-	}
+	ZEND_MN(ReflectionClassConstant___construct)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 ZEND_METHOD(ReflectionEnumBackedCase, getBackingValue)
