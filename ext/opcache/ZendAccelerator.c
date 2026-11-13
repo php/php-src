@@ -1607,7 +1607,7 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 	 * exclusive lock) */
 	bucket = zend_accel_hash_find_entry(&ZCSG(hash), new_persistent_script->script.filename);
 	if (bucket) {
-		zend_persistent_script *existing_persistent_script = (zend_persistent_script *)bucket->data;
+		zend_persistent_script *existing_persistent_script = zend_accel_hash_entry_data(bucket);
 
 		if (!existing_persistent_script->corrupted) {
 			if (key &&
@@ -2098,7 +2098,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 				bucket = zend_accel_hash_find_entry(&ZCSG(hash), file_handle->opened_path);
 
 				if (bucket) {
-					persistent_script = (zend_persistent_script *)bucket->data;
+					persistent_script = zend_accel_hash_entry_data(bucket);
 
 					if (key && !persistent_script->corrupted) {
 						HANDLE_BLOCK_INTERRUPTIONS();
@@ -2586,7 +2586,7 @@ static zend_string* persistent_zend_resolve_path(zend_string *filename)
 				if (key) {
 					zend_accel_hash_entry *bucket = zend_accel_hash_find_entry(&ZCSG(hash), key);
 					if (bucket != NULL) {
-						zend_persistent_script *persistent_script = (zend_persistent_script *)bucket->data;
+						zend_persistent_script *persistent_script = zend_accel_hash_entry_data(bucket);
 						if (!persistent_script->corrupted) {
 							ZCG(cache_opline) = EG(current_execute_data) ? EG(current_execute_data)->opline : NULL;
 							ZCG(cache_persistent_script) = persistent_script;
@@ -2607,7 +2607,7 @@ static zend_string* persistent_zend_resolve_path(zend_string *filename)
 				/* lookup by real path */
 				zend_accel_hash_entry *bucket = zend_accel_hash_find_entry(&ZCSG(hash), resolved_path);
 				if (bucket) {
-					zend_persistent_script *persistent_script = (zend_persistent_script *)bucket->data;
+					zend_persistent_script *persistent_script = zend_accel_hash_entry_data(bucket);
 					if (!persistent_script->corrupted) {
 						if (key) {
 							/* add another "key" for the same bucket */

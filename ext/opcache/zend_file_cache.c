@@ -1922,7 +1922,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 		 * exclusive lock) */
 		bucket = zend_accel_hash_find_entry(&ZCSG(hash), full_path);
 		if (bucket) {
-			script = (zend_persistent_script *)bucket->data;
+			script = zend_accel_hash_entry_data(bucket);
 			if (!script->corrupted) {
 				zend_shared_alloc_unlock();
 				zend_arena_release(&CG(arena), checkpoint);
