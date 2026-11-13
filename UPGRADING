@@ -444,7 +444,7 @@ PHP 8.6 UPGRADE NOTES
     and num_tickets. This allows saving and restoring client sessions across
     requests, implementing custom server-side session storage, and controlling
     session cache behavior.
-    RFC: https://wiki.php.net/rfc/tls_session_resumption
+    RFC: https://wiki.php.net/rfc/tls_session_resumption_api
   . Added TLS external PSK support for streams with new stream context options:
     psk_client_cb and psk_server_cb. This allows setting and receiving PSK.
   . Added TLS 1.3 early data (0-RTT) support for streams. Clients send early
@@ -906,7 +906,7 @@ PHP 8.6 UPGRADE NOTES
 - OpenSSL:
   . Openssl\OpensslException
   . Openssl\Session
-    RFC: https://wiki.php.net/rfc/tls_session_resumption
+    RFC: https://wiki.php.net/rfc/tls_session_resumption_api
   . Openssl\Psk
 
 - SNMP:
