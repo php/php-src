@@ -226,6 +226,26 @@ static ZEND_INI_MH(OnUpdateFileCache)
 	return SUCCESS;
 }
 
+#ifndef ZEND_WIN32
+static ZEND_INI_MH(OnUpdateFileCachePermissions)
+{
+	zend_long *p = ZEND_INI_GET_ADDR();
+	char *end;
+	zend_long permissions = ZEND_STRTOL(ZSTR_VAL(new_value), &end, 8);
+
+	/* The owner must be able to read and write its own cache files. They contain
+	 * the compiled scripts, so only share them with a group, never with others. */
+	if (end == ZSTR_VAL(new_value) || *end != '\0' || permissions < 0600 || (permissions & ~0770)) {
+		zend_accel_error(ACCEL_LOG_WARNING, "opcache.file_cache_permissions must be an octal mode from 0600 to 0770 without permissions for others, \"%s\" given.\n", ZSTR_VAL(new_value));
+		return FAILURE;
+	}
+
+	*p = permissions;
+
+	return SUCCESS;
+}
+#endif
+
 #ifdef HAVE_JIT
 static ZEND_INI_MH(OnUpdateJit)
 {
@@ -353,6 +373,9 @@ ZEND_INI_BEGIN()
 #endif
 
 	STD_PHP_INI_ENTRY("opcache.file_cache"                    , NULL  , PHP_INI_SYSTEM, OnUpdateFileCache, accel_directives.file_cache,                    zend_accel_globals, accel_globals)
+#ifndef ZEND_WIN32
+	STD_PHP_INI_ENTRY("opcache.file_cache_permissions"        , "0600", PHP_INI_SYSTEM, OnUpdateFileCachePermissions, accel_directives.file_cache_permissions, zend_accel_globals, accel_globals)
+#endif
 	STD_PHP_INI_BOOLEAN("opcache.file_cache_read_only"          , "0"   , PHP_INI_SYSTEM, OnUpdateBool,    accel_directives.file_cache_read_only,          zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.file_cache_only"               , "0"   , PHP_INI_SYSTEM, OnUpdateBool,	   accel_directives.file_cache_only,               zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.file_cache_consistency_checks" , "1"   , PHP_INI_SYSTEM, OnUpdateBool,	   accel_directives.file_cache_consistency_checks, zend_accel_globals, accel_globals)
@@ -878,6 +901,9 @@ ZEND_FUNCTION(opcache_get_configuration)
 #endif
 
 	add_assoc_string(&directives, "opcache.file_cache",                    ZCG(accel_directives).file_cache ? ZCG(accel_directives).file_cache : "");
+#ifndef ZEND_WIN32
+	add_assoc_long(&directives,   "opcache.file_cache_permissions",        ZCG(accel_directives).file_cache_permissions);
+#endif
 	add_assoc_bool(&directives,   "opcache.file_cache_read_only",          ZCG(accel_directives).file_cache_read_only);
 	add_assoc_bool(&directives,   "opcache.file_cache_only",               ZCG(accel_directives).file_cache_only);
 	add_assoc_bool(&directives,   "opcache.file_cache_consistency_checks", ZCG(accel_directives).file_cache_consistency_checks);

@@ -184,6 +184,11 @@ PHP 8.7 UPGRADE NOTES
     accepts values up to 1048793 (previously 1000000), and logs a warning for
     values other than 223, 463, 983, 1979, 3907, 7963, 16229, 32531, 65407,
     130987, 262237, 524521 and 1048793.
+  . Added opcache.file_cache_permissions to set the permissions of the files
+    that opcache.file_cache creates, as an octal mode from 0600 (the default)
+    to 0770 without permissions for others. New directories get the same
+    permissions plus search permission where the files are readable, and keep
+    a setgid bit inherited from their parent. It is not available on Windows.
 
 ========================================
 12. Windows Support
