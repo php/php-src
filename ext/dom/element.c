@@ -374,8 +374,8 @@ PHP_METHOD(DOMElement, getAttributeNames)
 	}
 
 	for (xmlAttrPtr attr = nodep->properties; attr; attr = attr->next) {
-		ZVAL_STR(&tmp, dom_node_get_node_name_attribute_or_element((const xmlNode *) attr, false));
-		zend_hash_next_index_insert(ht, &tmp);
+		zend_string *name = dom_node_get_node_name_attribute_or_element((const xmlNode *) attr, false);
+		add_next_index_str(ht, name);
 	}
 }
 /* }}} end DOMElement::getAttributeNames() */
