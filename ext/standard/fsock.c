@@ -55,7 +55,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	struct timeval tv;
 	char *hashkey = NULL;
 	php_stream *stream = NULL;
-	int err;
+	int err = 0;
 	char *hostname = NULL;
 	size_t hostname_len;
 	zend_string *errstr = NULL;
