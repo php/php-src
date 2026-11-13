@@ -92,6 +92,11 @@ PHP                                                                        NEWS
     (ndossche)
   . Fixed JIT ignoring exceptions from typed property set hooks. (David Carlier)
 
+- PCNTL:
+  . Added the $rekey_memory parameter to pcntl_fork(), pcntl_rfork() and
+    pcntl_forkx() to optionally avoid re-keying inherited allocator lists
+    (GH-25403). (Alessio Attilio)
+
 - PDO:
   . Fixed PDOStatement::getColumnMeta() reading out of bounds for an invalid
     column index. (Ilia Alshanetsky)
