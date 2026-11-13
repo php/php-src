@@ -101,7 +101,11 @@ gdImagePtr gdImageCreateFromWebpCtx (gdIOCtx * infile)
 	return im;
 }
 
-void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
+void gdImageWebpCtx(gdImagePtr im, gdIOCtx *outfile, int quality){
+    gdImageWebpCtxEx(im, outfile, quality);
+}
+
+bool gdImageWebpCtxEx (gdImagePtr im, gdIOCtx * outfile, int quality)
 {
 	uint8_t *argb;
 	int x, y;
@@ -110,12 +114,12 @@ void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
 	size_t out_size;
 
 	if (im == NULL) {
-		return;
+		return false;
 	}
 
 	if (!gdImageTrueColor(im)) {
 		gd_error("Palette image not supported by webp");
-		return;
+		return false;
 	}
 
 	if (quality == -1) {
@@ -123,16 +127,16 @@ void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
 	}
 
 	if (overflow2(gdImageSX(im), 4)) {
-		return;
+		return false;
 	}
 
 	if (overflow2(gdImageSX(im) * 4, gdImageSY(im))) {
-		return;
+		return false;
 	}
 
 	argb = (uint8_t *)gdMalloc(gdImageSX(im) * 4 * gdImageSY(im));
 	if (!argb) {
-		return;
+		return false;
 	}
 	p = argb;
 	for (y = 0; y < gdImageSY(im); y++) {
@@ -165,9 +169,12 @@ void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
 	}
 	gdPutBuf(out, out_size, outfile);
 	free(out);
+	gdFree(argb);
+	return true;
 
 freeargb:
 	gdFree(argb);
+	return false;
 }
 
 void gdImageWebpEx (gdImagePtr im, FILE * outFile, int quality)
