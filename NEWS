@@ -127,6 +127,10 @@ PHP                                                                        NEWS
   . Fix ReflectionProperty::isReadable() not working for indirect slots.
     (ndossche)
 
+- SPL:
+  . Fixed bug GH-25404 (Missing zend_return_unwrap_ref() calls trigger
+    assertion failures). (Juan Versolato Lopes)
+
 - Standard:
   . Fixed bug GH-25387 (Uploaded files leak in request_parse_body()).
     (Kévin Dunglas)
