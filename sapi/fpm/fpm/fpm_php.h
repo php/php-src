@@ -40,6 +40,7 @@ size_t fpm_php_content_length(void);
 void fpm_php_soft_quit(void);
 int fpm_php_init_main(void);
 int fpm_php_apply_defines_ex(struct key_value_s *kv, int mode);
+int fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_value, int new_value_length, int mode, int stage);
 int fpm_php_limit_extensions(char *path);
 bool fpm_php_is_key_in_table(zend_string *table, const char *key, size_t key_len);
 
