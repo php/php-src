@@ -386,7 +386,7 @@ cdf_check_summary_info(struct magic_set *ms, const cdf_info_t *info,
 	int i;
 	const char *str = NULL;
 	cdf_directory_t *d;
-	char name[__arraycount(d->d_name)];
+	char name[__arraycount(d->d_name) + 1];
 	size_t j, k;
 
 #ifdef CDF_DEBUG
@@ -400,8 +400,9 @@ cdf_check_summary_info(struct magic_set *ms, const cdf_info_t *info,
 		return i;
 	for (j = 0; str == NULL && j < dir->dir_len; j++) {
 		d = &dir->dir_tab[j];
-		for (k = 0; k < sizeof(name); k++)
+		for (k = 0; k < sizeof(name) - 1; k++)
 			name[k] = CAST(char, cdf_tole2(d->d_name[k]));
+		name[sizeof(name) - 1] = '\0';
 		str = cdf_app_to_mime(name,
 				      NOTMIME(ms) ? name2desc : name2mime);
 	}

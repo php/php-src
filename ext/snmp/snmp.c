@@ -263,8 +263,11 @@ static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval, int val
 				php_error_docref(NULL, E_WARNING, "snprint_value() asks for a buffer more than 512k, Net-SNMP bug?");
 				break;
 			}
-			 /* buffer is not long enough to hold full output, double it */
-			val_len *= 2;
+		 /* buffer is not long enough to hold full output, double it.
+		 * A zero-length value (e.g. ASN_NULL) never grows by doubling,
+		 * so make sure the buffer at least doubles from the current
+		 * buffer size to guarantee forward progress. */
+			val_len = MAX(val_len * 2, buflen * 2);
 		} else {
 			break;
 		}
