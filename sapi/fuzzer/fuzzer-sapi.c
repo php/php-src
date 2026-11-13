@@ -284,6 +284,9 @@ int fuzzer_do_request_from_buffer(
 			zend_destroy_static_vars(op_array);
 			destroy_op_array(op_array);
 			efree(op_array);
+		} else if (EG(delayed_oom).state == ZEND_OOM_STATE_PENDING) {
+			zend_clear_exception();
+			zend_handle_delayed_oom();
 		}
 	} zend_end_try();
 
