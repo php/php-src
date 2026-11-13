@@ -1940,27 +1940,20 @@ static HashTable *date_object_get_gc_timezone(zend_object *object, zval **table,
 static zend_string *date_create_tz_offset_str(timelib_sll offset)
 {
 	int seconds = offset % 60;
-	size_t size;
 	const char *format;
 
 	if (seconds == 0) {
-		size = sizeof("+05:00");
 		format = "%c%02d:%02d";
 	} else {
-		size = sizeof("+05:00:01");
 		format = "%c%02d:%02d:%02d";
 	}
 
-	zend_string *tmpstr = zend_string_alloc(size - 1, 0);
-
 	/* Note: if seconds == 0, the seconds argument will be excessive and therefore ignored. */
-	ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), size, format,
+	return zend_strpprintf(0, format,
 		offset < 0 ? '-' : '+',
 		abs((int)(offset / 3600)),
 		abs((int)(offset % 3600) / 60),
 		abs(seconds));
-
-	return tmpstr;
 }
 
 static void date_object_to_hash(php_date_obj *dateobj, HashTable *props)
