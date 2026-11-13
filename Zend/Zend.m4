@@ -190,6 +190,9 @@ AS_VAR_IF([ZEND_DEBUG], [yes], [
   echo " $CFLAGS" | grep ' -g' >/dev/null || CFLAGS="$CFLAGS -g"
 ], [AC_DEFINE([ZEND_DEBUG], [0])])
 
+# Add -Wno-unused-but-set-global after -Wall
+AX_CHECK_COMPILE_FLAG([-Wno-unused-but-set-global],
+  [CFLAGS="-Wno-unused-but-set-global $CFLAGS"])
 AS_VAR_IF([GCC], [yes],
   [CFLAGS="-Wall -Wextra -Wno-unused-parameter -Wno-sign-compare $CFLAGS"])
 

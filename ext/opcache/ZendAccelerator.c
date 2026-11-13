@@ -119,9 +119,7 @@ zend_accel_shared_globals *accel_shared_globals = NULL;
 char accel_uname_id[32];
 #endif
 bool accel_startup_ok = false;
-#ifdef __DEBUG_MESSAGES__
 static const char *zps_failure_reason = NULL;
-#endif
 const char *zps_api_failure_reason = NULL;
 bool file_cache_only = false;  /* process uses file cache only */
 #if ENABLE_FILE_CACHE_FALLBACK
@@ -3111,9 +3109,7 @@ static int accelerator_remove_cb(zend_extension *element1, zend_extension *eleme
 static void zps_startup_failure(const char *reason, const char *api_reason, int (*cb)(zend_extension *, zend_extension *))
 {
 	accel_startup_ok = false;
-#ifdef __DEBUG_MESSAGES__
 	zps_failure_reason = reason;
-#endif
 	zps_api_failure_reason = api_reason?api_reason:reason;
 	zend_llist_del_element(&zend_extensions, NULL, (int (*)(void *, void *))cb);
 }
