@@ -112,7 +112,7 @@ PHP_FUNCTION(stream_socket_client)
 	struct timeval tv;
 	char *hashkey = NULL;
 	php_stream *stream = NULL;
-	int err;
+	int err = 0;
 	zend_long flags = PHP_STREAM_CLIENT_CONNECT;
 	zend_string *errstr = NULL;
 	php_stream_context *context = NULL;
