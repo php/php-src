@@ -1,26 +1,26 @@
 --TEST--
-version_compare() rejects NUL bytes in version strings
+version_compare() compares version strings after NUL bytes
 --FILE--
 <?php
-foreach ([
-    ["1.0\0suffix", '1.0'],
-    ['1.0', "1.0\0suffix"],
-    ["\0", '1.0'],
-    ['1.0', "\0"],
-] as [$version1, $version2]) {
-    try {
-        version_compare($version1, $version2, 'eq');
-    } catch (ValueError $e) {
-        echo $e::class, ': ', $e->getMessage(), "\n";
-    }
-}
-var_dump(version_compare('1.0', '1.0'));
-var_dump(version_compare('1.0', '1.0', 'eq'));
+var_dump(version_compare("1.0\0pl1", '1.0'));
+var_dump(version_compare('1.0', "1.0\0pl1"));
+var_dump(version_compare("1.0\0pl1", '1.0pl1'));
+var_dump(version_compare("1.0\0dev", '1.0', 'lt'));
+var_dump(version_compare("\0", ''));
+var_dump(version_compare('', "\0"));
+var_dump(version_compare("\0", "\0"));
+var_dump(version_compare("\x001.0", '.1.0'));
+var_dump(version_compare("1.0\0", '1.0'));
+var_dump(version_compare("#\0pl1", '#.pl1'));
 ?>
 --EXPECT--
-ValueError: version_compare(): Argument #1 ($version1) must not contain any null bytes
-ValueError: version_compare(): Argument #2 ($version2) must not contain any null bytes
-ValueError: version_compare(): Argument #1 ($version1) must not contain any null bytes
-ValueError: version_compare(): Argument #2 ($version2) must not contain any null bytes
+int(1)
+int(-1)
 int(0)
 bool(true)
+int(1)
+int(-1)
+int(0)
+int(0)
+int(0)
+int(0)
