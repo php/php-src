@@ -19,7 +19,11 @@ $xsl = <<<EOB
 EOB;
 
 function getPath($input){
-  $input[0]->nodeValue .= 'a';
+  try {
+    $input[0]->nodeValue .= 'a';
+  } catch (DOMException $e) {
+    echo $e->getMessage(), "\n";
+  }
   return $input[0]->getNodePath() . ' = ' . $input[0]->nodeValue;
 }
 
@@ -32,12 +36,14 @@ $xmlDoc = new DOMDocument();
 $xmlDoc->loadXML($xml);
 echo @$proc->transformToXML($xmlDoc);
 
-// Tests modification of the nodes
+// Tests that the callback did not modify the nodes
 var_dump($xmlDoc->firstChild->firstChild->firstChild->getNodePath());
 var_dump($xmlDoc->firstChild->firstChild->firstChild->nodeValue);
 ?>
 --EXPECT--
+Cannot modify a node while an XPath evaluation or XSLT transformation that uses it is in progress
+Cannot modify a node while an XPath evaluation or XSLT transformation that uses it is in progress
 <?xml version="1.0"?>
-/allusers/user[1]/uid = boba<br/>/allusers/user[2]/uid = joea<br/>
+/allusers/user[1]/uid = bob<br/>/allusers/user[2]/uid = joe<br/>
 string(21) "/allusers/user[1]/uid"
-string(4) "boba"
+string(3) "bob"
