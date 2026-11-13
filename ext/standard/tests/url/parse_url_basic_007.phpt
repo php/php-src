@@ -95,10 +95,10 @@ echo "Done";
 --> http://?:/   : bool(false)
 --> http://@?:/   : bool(false)
 --> file:///:   : string(2) "/:"
---> file:///a:/   : string(3) "a:/"
+--> file:///a:/   : string(4) "/a:/"
 --> file:///ab:/   : string(5) "/ab:/"
---> file:///a:/   : string(3) "a:/"
---> file:///@:/   : string(3) "@:/"
+--> file:///a:/   : string(4) "/a:/"
+--> file:///@:/   : string(4) "/@:/"
 --> file:///:80/   : string(5) "/:80/"
 --> []   : string(2) "[]"
 --> http://[x:80]/   : string(1) "/"
