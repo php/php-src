@@ -229,6 +229,8 @@ PHP                                                                        NEWS
     values. (Marcel Hernandez)
   . Fixed null pointer dereference in fpm_get_status() when the scoreboard
     copy fails. (Marcel Hernandez)
+  . Fixed bug GH-21974 (Crash on worker shutdown in ZTS builds when
+    disable_functions is set in a pool configuration). (Sree24-ui)
 
 - Fileinfo:
   . Fixed bug GH-24289 (finfo::file() reports the wrong argument number for
