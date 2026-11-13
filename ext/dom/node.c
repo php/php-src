@@ -2331,7 +2331,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 
 		bytes = xmlOutputBufferClose(buf);
 		if (mode == 1 && (ret >= 0)) {
-			RETURN_LONG(bytes);
+			RETVAL_LONG(bytes);
 		}
 	}
 
