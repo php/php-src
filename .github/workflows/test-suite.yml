@@ -11,6 +11,45 @@ on:
 permissions:
   contents: read
 jobs:
+  APACHE_SAPI:
+    if: ${{ fromJson(inputs.branch).jobs.APACHE_SAPI }}
+    name: APACHE_SAPI
+    runs-on: ubuntu-${{ fromJson(inputs.branch).config.ubuntu_version }}
+    timeout-minutes: 30
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ fromJson(inputs.branch).ref }}
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y autoconf bison build-essential libtool libtool-bin pkg-config re2c libxml2-dev apache2-dev apache2
+      - name: Build Apache SAPI
+        run: |
+          ./buildconf --force
+          ./configure --enable-option-checking=fatal --disable-all --with-apxs2
+          make -j2
+  LITESPEED_SAPI:
+    if: ${{ fromJson(inputs.branch).jobs.LITESPEED_SAPI }}
+    name: LITESPEED_SAPI
+    runs-on: ubuntu-${{ fromJson(inputs.branch).config.ubuntu_version }}
+    timeout-minutes: 30
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ fromJson(inputs.branch).ref }}
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y autoconf bison build-essential libtool libtool-bin pkg-config re2c libxml2-dev
+      - name: Build LiteSpeed SAPI
+        run: |
+          ./buildconf --force
+          ./configure --enable-option-checking=fatal --disable-all --enable-litespeed
+          make -j2
+          sapi/litespeed/lsphp -v
   LINUX_PPC64:
     if: ${{ fromJson(inputs.branch).jobs.LINUX_PPC64 }}
     name: LINUX_PPC64_ASAN_DEBUG_ZTS
