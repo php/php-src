@@ -360,6 +360,13 @@ static void date_period_unset_property(zend_object *object, zend_string *name, v
 static HashTable *date_period_get_properties_for(zend_object *object, zend_prop_purpose purpose);
 static int date_object_compare_timezone(zval *tz1, zval *tz2);
 
+static PHP_RINIT_FUNCTION(date);
+static PHP_RSHUTDOWN_FUNCTION(date);
+static PHP_MINIT_FUNCTION(date);
+static PHP_MSHUTDOWN_FUNCTION(date);
+static PHP_MINFO_FUNCTION(date);
+static ZEND_MODULE_POST_ZEND_DEACTIVATE_D(date);
+
 /* {{{ Module struct */
 zend_module_entry date_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -400,7 +407,7 @@ static void _php_date_tzinfo_dtor(zval *zv) /* {{{ */
 } /* }}} */
 
 /* {{{ PHP_RINIT_FUNCTION */
-PHP_RINIT_FUNCTION(date)
+static PHP_RINIT_FUNCTION(date)
 {
 	if (DATEG(timezone)) {
 		efree(DATEG(timezone));
@@ -414,7 +421,7 @@ PHP_RINIT_FUNCTION(date)
 /* }}} */
 
 /* {{{ PHP_RSHUTDOWN_FUNCTION */
-PHP_RSHUTDOWN_FUNCTION(date)
+static PHP_RSHUTDOWN_FUNCTION(date)
 {
 	if (DATEG(timezone)) {
 		efree(DATEG(timezone));
@@ -429,7 +436,7 @@ PHP_RSHUTDOWN_FUNCTION(date)
 }
 /* }}} */
 
-ZEND_MODULE_POST_ZEND_DEACTIVATE_D(date)
+static ZEND_MODULE_POST_ZEND_DEACTIVATE_D(date)
 {
 	if (DATEG(tzcache)) {
 		zend_hash_destroy(DATEG(tzcache));
@@ -448,7 +455,7 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(date)
 #define DATE_TIMEZONEDB      php_date_global_timezone_db ? php_date_global_timezone_db : timelib_builtin_db()
 
 /* {{{ PHP_MINIT_FUNCTION */
-PHP_MINIT_FUNCTION(date)
+static PHP_MINIT_FUNCTION(date)
 {
 	php_date_global_timezone_db = NULL;
 	php_date_global_timezone_db_enabled = 0;
@@ -464,7 +471,7 @@ PHP_MINIT_FUNCTION(date)
 /* }}} */
 
 /* {{{ PHP_MSHUTDOWN_FUNCTION */
-PHP_MSHUTDOWN_FUNCTION(date)
+static PHP_MSHUTDOWN_FUNCTION(date)
 {
 	UNREGISTER_INI_ENTRIES();
 
@@ -481,7 +488,7 @@ PHP_MSHUTDOWN_FUNCTION(date)
 /* }}} */
 
 /* {{{ PHP_MINFO_FUNCTION */
-PHP_MINFO_FUNCTION(date)
+static PHP_MINFO_FUNCTION(date)
 {
 	const timelib_tzdb *tzdb = DATE_TIMEZONEDB;
 
