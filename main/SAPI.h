@@ -211,7 +211,6 @@ SAPI_API size_t sapi_read_post_block(char *buffer, size_t buflen);
 SAPI_API zend_result sapi_register_post_entries(const sapi_post_entry *post_entry);
 SAPI_API zend_result sapi_register_post_entry(const sapi_post_entry *post_entry);
 SAPI_API void sapi_unregister_post_entry(const sapi_post_entry *post_entry);
-SAPI_API zend_result sapi_register_default_post_reader(void (*default_post_reader)(void));
 SAPI_API zend_result sapi_register_treat_data(void (*treat_data)(int arg, char *str, zval *destArray));
 SAPI_API zend_result sapi_register_input_filter(unsigned int (*input_filter)(int arg, const char *var, char **val, size_t val_len, size_t *new_val_len), unsigned int (*input_filter_init)(void));
 
@@ -257,7 +256,6 @@ struct _sapi_module_struct {
 
 	char *php_ini_path_override;
 
-	void (*default_post_reader)(void);
 	void (*treat_data)(int arg, char *str, zval *destArray);
 	char *executable_location;
 
@@ -283,6 +281,11 @@ struct _sapi_post_entry {
 	void (*post_handler)(char *content_type_dup, void *arg);
 };
 
+BEGIN_EXTERN_C()
+/* Default POST entries to switch back to when overrode */
+extern SAPI_API const sapi_post_entry php_post_entries[];
+END_EXTERN_C()
+
 /* header_handler() constants */
 #define SAPI_HEADER_ADD			(1<<0)
 
@@ -301,16 +304,17 @@ struct _sapi_post_entry {
 #define SAPI_TREAT_DATA_FUNC(treat_data) void treat_data(int arg, char *str, zval* destArray)
 #define SAPI_INPUT_FILTER_FUNC(input_filter) unsigned int input_filter(int arg, const char *var, char **val, size_t val_len, size_t *new_val_len)
 
+#define DEFAULT_POST_CONTENT_TYPE "application/x-www-form-urlencoded"
+
 BEGIN_EXTERN_C()
+SAPI_API SAPI_POST_HANDLER_FUNC(php_std_post_handler);
 SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data);
-SAPI_API SAPI_POST_READER_FUNC(php_default_post_reader);
 SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data);
 SAPI_API SAPI_INPUT_FILTER_FUNC(php_default_input_filter);
 END_EXTERN_C()
 
 #define STANDARD_SAPI_MODULE_PROPERTIES \
 	NULL, /* php_ini_path_override   */ \
-	NULL, /* default_post_reader     */ \
 	NULL, /* treat_data              */ \
 	NULL, /* executable_location     */ \
 	0,    /* php_ini_ignore          */ \
