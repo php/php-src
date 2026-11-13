@@ -60,7 +60,7 @@
 #ifdef PHP_WIN32
 #include <io.h>
 #include "win32/php_registry.h"
-#include "ext/standard/flock_compat.h"
+#include "flock_compat.h"
 #endif
 #include "Zend/zend_builtin_functions.h"
 #include "Zend/zend_exceptions.h"

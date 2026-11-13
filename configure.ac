@@ -1654,6 +1654,7 @@ PHP_ADD_SOURCES([TSRM], m4_normalize([
 
 PHP_ADD_SOURCES([main], m4_normalize([
     explicit_bzero.c
+    flock_compat.c
     fopen_wrappers.c
     getopt.c
     main.c
