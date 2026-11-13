@@ -106,20 +106,14 @@ array(5) {
   [4]=>
   string(5) " data"
 }
-array(5) {
+array(3) {
   [0]=>
   string(4) "Gar
 "
   [1]=>
-  string(1) "
-"
-  [2]=>
   string(6) "bage 
 "
-  [3]=>
-  string(1) "
-"
-  [4]=>
+  [2]=>
   string(5) " data"
 }
 *** Testing with variation in use_include_path argument ***
