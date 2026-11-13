@@ -1727,7 +1727,9 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 	checkpoint = zend_arena_checkpoint(ctx->arena);
 	zend_build_cfg(&ctx->arena, op_array, 0, &cfg);
 
-	if (cfg.blocks_count * (op_array->last_var + op_array->T) > 64 * 1024 * 1024) {
+	uint64_t var_count = (uint64_t) op_array->last_var + op_array->T;
+
+	if (cfg.blocks_count != 0 && var_count > (64u * 1024 * 1024) / cfg.blocks_count) {
 		zend_arena_release(&ctx->arena, checkpoint);
 		return;
 	}
