@@ -85,7 +85,10 @@ static zend_always_inline bool ZSTR_IS_INTERNED(const zend_string *s) {
 }
 
 static inline bool ZSTR_IS_VALID_UTF8(const zend_string *s) {
-	return GC_FLAGS(s) & IS_STR_VALID_UTF8;
+	/* If string is persistent the check for flags must be atomic.
+	 * Not checking for persistence first, as this operation must also be run atomic.
+	 * So uses atomic operation directly to check valid utf8 instead. */
+	return GC_FLAGS_ATOMIC(s) & IS_STR_VALID_UTF8;
 }
 
 /* These are properties, encoded as flags, that will hold on the resulting string
