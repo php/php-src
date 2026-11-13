@@ -74,6 +74,22 @@
 
 #if defined(__aarch64__) || defined(_M_ARM64)
 #include <arm_neon.h>
+#if defined(_MSC_VER) && !defined(__clang__)
+#include <intrin.h>
+#define XSSE_SET_S8(...) (vld1q_s8(((const int8_t[]) { __VA_ARGS__ })))
+#define XSSE_SET_S16(...) (vld1q_s16(((const int16_t[]) { __VA_ARGS__ })))
+#define XSSE_SET_S32(...) (vld1q_s32(((const int32_t[]) { __VA_ARGS__ })))
+#define XSSE_SET_S64(...) (vld1q_s64(((const int64_t[]) { __VA_ARGS__ })))
+#define XSSE_SET_U8(...) (vld1q_u8(((const uint8_t[]) { __VA_ARGS__ })))
+#define XSSE_SET_U16(...) (vld1q_u16(((const uint16_t[]) { __VA_ARGS__ })))
+#else
+#define XSSE_SET_S8(...) ((int8x16_t) { __VA_ARGS__ })
+#define XSSE_SET_S16(...) ((int16x8_t) { __VA_ARGS__ })
+#define XSSE_SET_S32(...) ((int32x4_t) { __VA_ARGS__ })
+#define XSSE_SET_S64(...) ((int64x2_t) { __VA_ARGS__ })
+#define XSSE_SET_U8(...) ((uint8x16_t) { __VA_ARGS__ })
+#define XSSE_SET_U16(...) ((uint16x8_t) { __VA_ARGS__ })
+#endif
 #include <string.h>
 typedef int8x16_t __m128i;
 #endif
@@ -98,35 +114,35 @@ typedef int8x16_t __m128i;
  *****************************************************************************/
 
 #define _mm_set_epi8(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15) \
-	((int8x16_t) { \
+	(XSSE_SET_S8( \
 		(int8_t) (x15), (int8_t) (x14), (int8_t) (x13), (int8_t) (x12), \
 		(int8_t) (x11), (int8_t) (x10), (int8_t) (x9),  (int8_t) (x8), \
 		(int8_t) (x7),  (int8_t) (x6),  (int8_t) (x5),  (int8_t) (x4), \
-		(int8_t) (x3),  (int8_t) (x2),  (int8_t) (x1),  (int8_t) (x0) })
+		(int8_t) (x3),  (int8_t) (x2),  (int8_t) (x1),  (int8_t) (x0) ))
 #define _mm_set_epi16(x0, x1, x2, x3, x4, x5, x6, x7) \
-	(vreinterpretq_s8_s16((int16x8_t) { \
+	(vreinterpretq_s8_s16(XSSE_SET_S16( \
 		(int16_t) (x7), (int16_t) (x6), (int16_t) (x5), (int16_t) (x4), \
-		(int16_t) (x3), (int16_t) (x2), (int16_t) (x1), (int16_t) (x0) }))
+		(int16_t) (x3), (int16_t) (x2), (int16_t) (x1), (int16_t) (x0) )))
 #define _mm_set_epi32(x0, x1, x2, x3) \
-	(vreinterpretq_s8_s32((int32x4_t) { (int32_t) (x3), (int32_t) (x2), (int32_t) (x1), (int32_t) (x0) }))
-#define _mm_set_epi64x(x0, x1) (vreinterpretq_s8_s64((int64x2_t) { (int64_t) (x1), (int64_t) (x0) }))
+	(vreinterpretq_s8_s32(XSSE_SET_S32((int32_t) (x3), (int32_t) (x2), (int32_t) (x1), (int32_t) (x0) )))
+#define _mm_set_epi64x(x0, x1) (vreinterpretq_s8_s64(XSSE_SET_S64((int64_t) (x1), (int64_t) (x0) )))
 #define _mm_set1_epi8(x) (vdupq_n_s8((int8_t) (x)))
 #define _mm_set1_epi16(x) (vreinterpretq_s8_s16(vdupq_n_s16((int16_t) (x))))
 #define _mm_set1_epi32(x) (vreinterpretq_s8_s32(vdupq_n_s32((int32_t) (x))))
 #define _mm_set1_epi64x(x) (vreinterpretq_s8_s64(vdupq_n_s64((int64_t) (x))))
 
 #define _mm_setr_epi8(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15) \
-	((int8x16_t) { \
+	(XSSE_SET_S8( \
 		(int8_t) (x0), (int8_t) (x1), (int8_t) (x2), (int8_t) (x3), \
 		(int8_t) (x4), (int8_t) (x5), (int8_t) (x6), (int8_t) (x7), \
 		(int8_t) (x8), (int8_t) (x9), (int8_t) (x10), (int8_t) (x11), \
-		(int8_t) (x12), (int8_t) (x13), (int8_t) (x14), (int8_t) (x15) })
+		(int8_t) (x12), (int8_t) (x13), (int8_t) (x14), (int8_t) (x15) ))
 #define _mm_setr_epi16(x0, x1, x2, x3, x4, x5, x6, x7) \
-	(vreinterpretq_s8_s16((int16x8_t) { \
+	(vreinterpretq_s8_s16(XSSE_SET_S16( \
 		(int16_t) (x0), (int16_t) (x1), (int16_t) (x2), (int16_t) (x3), \
-		(int16_t) (x4), (int16_t) (x5), (int16_t) (x6), (int16_t) (x7) }))
+		(int16_t) (x4), (int16_t) (x5), (int16_t) (x6), (int16_t) (x7) )))
 #define _mm_setr_epi32(x0, x1, x2, x3) \
-	(vreinterpretq_s8_s32((int32x4_t) { (int32_t) (x0), (int32_t) (x1), (int32_t) (x2), (int32_t) (x3) }))
+	(vreinterpretq_s8_s32(XSSE_SET_S32((int32_t) (x0), (int32_t) (x1), (int32_t) (x2), (int32_t) (x3) )))
 
 #define _mm_setzero_si128() (vdupq_n_s8(0))
 #define _mm_undefined_si128() _mm_setzero_si128()
@@ -136,26 +152,26 @@ static XSSE_FORCE_INLINE __m128i _mm_loadu_si16(const void *ptr)
 {
 	int16_t val;
 	XSSE_MEMCPY(&val, ptr, 2);
-	return vreinterpretq_s8_s16((int16x8_t) {
+	return vreinterpretq_s8_s16(XSSE_SET_S16(
 		(int16_t) val, (int16_t) 0, (int16_t) 0, (int16_t) 0,
 		(int16_t) 0, (int16_t) 0, (int16_t) 0, (int16_t) 0
-	});
+	));
 }
 static XSSE_FORCE_INLINE __m128i _mm_loadu_si32(const void *ptr)
 {
 	int32_t val;
 	XSSE_MEMCPY(&val, ptr, 4);
-	return vreinterpretq_s8_s32((int32x4_t) {
+	return vreinterpretq_s8_s32(XSSE_SET_S32(
 		(int32_t) val, (int32_t) 0, (int32_t) 0, (int32_t) 0
-	});
+	));
 }
 static XSSE_FORCE_INLINE __m128i _mm_loadu_si64(const void *ptr)
 {
 	int64_t val;
 	XSSE_MEMCPY(&val, ptr, 8);
-	return vreinterpretq_s8_s64((int64x2_t) {
+	return vreinterpretq_s8_s64(XSSE_SET_S64(
 		(int64_t) val, (int64_t) 0
-	});
+	));
 }
 #define _mm_loadu_si128(x) _mm_load_si128(x)
 static XSSE_FORCE_INLINE __m128i _mm_loadl_epi64(__m128i const *x)
@@ -416,10 +432,10 @@ static XSSE_FORCE_INLINE __m128i _mm_sad_epu8(__m128i a, __m128i b)
 	uint32x4_t abs_diffs_32 = vpaddlq_u16(abs_diffs_16);
 	uint64x2_t abs_diffs_64 = vpaddlq_u32(abs_diffs_32);
 
-	return vreinterpretq_s8_u16((uint16x8_t) {
+	return vreinterpretq_s8_u16(XSSE_SET_U16(
 		(int16_t) vgetq_lane_u64(abs_diffs_64, 0), 0, 0, 0,
 		(int16_t) vgetq_lane_u64(abs_diffs_64, 1), 0, 0, 0
-	});
+	));
 }
 
 #define _mm_sub_epi8(a, b) (vreinterpretq_s8_u8(vsubq_u8(vreinterpretq_u8_s8(a), vreinterpretq_u8_s8(b))))
@@ -454,8 +470,8 @@ static XSSE_FORCE_INLINE __m128i _mm_sad_epu8(__m128i a, __m128i b)
  * Convert                                                                   *
  *****************************************************************************/
 
-#define _mm_cvtsi32_si128(x) (vreinterpretq_s8_s32((int32x4_t) { (int32_t) (x), 0, 0, 0 }))
-#define _mm_cvtsi64_si128(x) (vreinterpretq_s8_s64((int64x2_t) { (int64_t) (x), 0 }))
+#define _mm_cvtsi32_si128(x) (vreinterpretq_s8_s32(XSSE_SET_S32((int32_t) (x), 0, 0, 0 )))
+#define _mm_cvtsi64_si128(x) (vreinterpretq_s8_s64(XSSE_SET_S64((int64_t) (x), 0 )))
 #define _mm_cvtsi128_si32(x) (vgetq_lane_s32(vreinterpretq_s32_s8(x), 0))
 #define _mm_cvtsi128_si64(x) (vgetq_lane_s64(vreinterpretq_s64_s8(x), 0))
 
@@ -541,12 +557,12 @@ static XSSE_FORCE_INLINE __m128i _mm_shuffle_epi32(__m128i x, int imm)
 	int32_t arr[4];
 	vst1q_s32(arr, vec);
 
-	return vreinterpretq_s8_s32((int32x4_t) {
+	return vreinterpretq_s8_s32(XSSE_SET_S32(
 		arr[(imm >> 0) & 0x3],
 		arr[(imm >> 2) & 0x3],
 		arr[(imm >> 4) & 0x3],
 		arr[(imm >> 6) & 0x3]
-	});
+	));
 }
 static XSSE_FORCE_INLINE __m128i _mm_shufflehi_epi16(__m128i x, int imm)
 {
@@ -554,13 +570,13 @@ static XSSE_FORCE_INLINE __m128i _mm_shufflehi_epi16(__m128i x, int imm)
 	int16_t arr[8];
 	vst1q_s16(arr, vec);
 
-	return vreinterpretq_s8_s16((int16x8_t) {
+	return vreinterpretq_s8_s16(XSSE_SET_S16(
 		arr[0], arr[1], arr[2], arr[3],
 		arr[((imm >> 0) & 0x3) + 4],
 		arr[((imm >> 2) & 0x3) + 4],
 		arr[((imm >> 4) & 0x3) + 4],
 		arr[((imm >> 6) & 0x3) + 4]
-	});
+	));
 }
 static XSSE_FORCE_INLINE __m128i _mm_shufflelo_epi16(__m128i x, int imm)
 {
@@ -568,13 +584,13 @@ static XSSE_FORCE_INLINE __m128i _mm_shufflelo_epi16(__m128i x, int imm)
 	int16_t arr[8];
 	vst1q_s16(arr, vec);
 
-	return vreinterpretq_s8_s16((int16x8_t) {
+	return vreinterpretq_s8_s16(XSSE_SET_S16(
 		arr[((imm >> 0) & 0x3)],
 		arr[((imm >> 2) & 0x3)],
 		arr[((imm >> 4) & 0x3)],
 		arr[((imm >> 6) & 0x3)],
 		arr[4], arr[5], arr[6], arr[7]
-	});
+	));
 }
 #endif
 
@@ -588,20 +604,32 @@ static XSSE_FORCE_INLINE __m128i _mm_shufflelo_epi16(__m128i x, int imm)
 #define _mm_unpacklo_epi32(a, b) (vreinterpretq_s8_s32(vzip1q_s32(vreinterpretq_s32_s8(a), vreinterpretq_s32_s8(b))))
 #define _mm_unpacklo_epi64(a, b) (vreinterpretq_s8_s64(vzip1q_s64(vreinterpretq_s64_s8(a), vreinterpretq_s64_s8(b))))
 
-#define _mm_move_epi64(x) (vreinterpretq_s8_s64((int64x2_t) { vgetq_lane_s64(vreinterpretq_s64_s8(x), 0), 0 }))
+#define _mm_move_epi64(x) (vreinterpretq_s8_s64(XSSE_SET_S64(vgetq_lane_s64(vreinterpretq_s64_s8(x), 0), 0 )))
 
 #define _mm_clflush(x) ((void) 0)
 static XSSE_FORCE_INLINE void _mm_mfence(void)
 {
+#if defined(_MSC_VER) && !defined(__clang__)
+	__dsb(_ARM64_BARRIER_SY);
+#else
 	__asm__ __volatile__("dsb sy" ::: "memory");
+#endif
 }
 static XSSE_FORCE_INLINE void _mm_lfence(void)
 {
+#if defined(_MSC_VER) && !defined(__clang__)
+	__dsb(_ARM64_BARRIER_LD);
+#else
 	__asm__ __volatile__("dsb ld" ::: "memory");
+#endif
 }
 static XSSE_FORCE_INLINE void _mm_pause(void)
 {
+#if defined(_MSC_VER) && !defined(__clang__)
+	__yield();
+#else
 	__asm__ __volatile__("yield");
+#endif
 }
 
 #endif /* SSE2 */
@@ -932,7 +960,7 @@ static XSSE_FORCE_INLINE __m128i _mm_minpos_epu16(__m128i x)
 		index_mask8 >>= 8;
 	}
 #endif
-	return vreinterpretq_s8_u16((uint16x8_t) { min, index, 0, 0, 0, 0, 0, 0 });
+	return vreinterpretq_s8_u16(XSSE_SET_U16(min, index, 0, 0, 0, 0, 0, 0 ));
 }
 
 static XSSE_FORCE_INLINE __m128i _mm_mul_epi32(__m128i a, __m128i b)
@@ -1100,7 +1128,7 @@ static XSSE_FORCE_INLINE int _mm_testc_si128(__m128i a, __m128i b)
 
 #define _mm_blend_epi16(a, b, imm8) \
 	(vreinterpretq_s8_s16(vbslq_s16( \
-		(uint16x8_t){ \
+		XSSE_SET_U16( \
 			(imm8 & (1 << 0)) ? 0xFFFF : 0x0000, \
 			(imm8 & (1 << 1)) ? 0xFFFF : 0x0000, \
 			(imm8 & (1 << 2)) ? 0xFFFF : 0x0000, \
@@ -1109,7 +1137,7 @@ static XSSE_FORCE_INLINE int _mm_testc_si128(__m128i a, __m128i b)
 			(imm8 & (1 << 5)) ? 0xFFFF : 0x0000, \
 			(imm8 & (1 << 6)) ? 0xFFFF : 0x0000, \
 			(imm8 & (1 << 7)) ? 0xFFFF : 0x0000 \
-		}, \
+		), \
 		vreinterpretq_s16_s8(b), \
 		vreinterpretq_s16_s8(a) \
 	)))
@@ -1296,7 +1324,7 @@ static XSSE_FORCE_INLINE _xsse_pcmp_str_result_t _xsse_pcmp_str_core(const __m12
 		}
 
 		uint16x8_t cmp_ret;
-		uint16x8_t lanes = { 0, 1, 2, 3, 4, 5, 6, 7 };
+		uint16x8_t lanes = XSSE_SET_U16(0, 1, 2, 3, 4, 5, 6, 7 );
 		uint16x8_t a_threshold = vdupq_n_u16(la);
 		uint16x8_t b_threshold = vdupq_n_u16(lb);
 		uint16x8_t a_invalid_mask = vcgeq_u16(lanes, a_threshold);
@@ -1528,7 +1556,7 @@ static XSSE_FORCE_INLINE _xsse_pcmp_str_result_t _xsse_pcmp_str_core(const __m12
 		}
 
 		uint8x16_t cmp_ret;
-		uint8x16_t lanes = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+		uint8x16_t lanes = XSSE_SET_U8(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 );
 		uint8x16_t a_threshold = vdupq_n_u8(la);
 		uint8x16_t b_threshold = vdupq_n_u8(lb);
 		uint8x16_t a_invalid_mask = vcgeq_u8(lanes, a_threshold);
@@ -1859,20 +1887,20 @@ static XSSE_FORCE_INLINE __m128i _xsse_pcmp_str_m(const __m128i a, const int la,
 		uint64x2_t paired32 = vreinterpretq_u64_u32(vsraq_n_u32(high_bits, high_bits, 15));
 		uint8x16_t paired64 = vreinterpretq_u8_u64(vsraq_n_u64(paired32, paired32, 30));
 
-		return vreinterpretq_s8_u8((uint8x16_t) {
+		return vreinterpretq_s8_u8(XSSE_SET_U8(
 			(vgetq_lane_u8(paired64, 0) | (vgetq_lane_u8(paired64, 8) << 4)), 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0
-		});
+		));
 	} else {
 		uint16x8_t high_bits = vreinterpretq_u16_u8(vshrq_n_u8(result.mask, 7));
 		uint32x4_t paired16 = vreinterpretq_u32_u16(vsraq_n_u16(high_bits, high_bits, 7));
 		uint64x2_t paired32 = vreinterpretq_u64_u32(vsraq_n_u32(paired16, paired16, 14));
 		uint8x16_t paired64 = vreinterpretq_u8_u64(vsraq_n_u64(paired32, paired32, 28));
 
-		return vreinterpretq_s8_u8((uint8x16_t) {
+		return vreinterpretq_s8_u8(XSSE_SET_U8(
 			vgetq_lane_u8(paired64, 0), vgetq_lane_u8(paired64, 8), 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0
-		});
+		));
 	}
 }
 

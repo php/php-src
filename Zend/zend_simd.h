@@ -44,6 +44,19 @@
 
  #elif defined(__aarch64__) || defined(_M_ARM64)
  #include <arm_neon.h>
+ #if defined(_MSC_VER) && !defined(__clang__)
+ #define XSSE_SET_S8(...) (vld1q_s8(((const int8_t[]) { __VA_ARGS__ })))
+ #define XSSE_SET_S16(...) (vld1q_s16(((const int16_t[]) { __VA_ARGS__ })))
+ #define XSSE_SET_S32(...) (vld1q_s32(((const int32_t[]) { __VA_ARGS__ })))
+ #define XSSE_SET_S64(...) (vld1q_s64(((const int64_t[]) { __VA_ARGS__ })))
+ #define XSSE_SET_U16(...) (vld1q_u16(((const uint16_t[]) { __VA_ARGS__ })))
+ #else
+ #define XSSE_SET_S8(...) ((int8x16_t) { __VA_ARGS__ })
+ #define XSSE_SET_S16(...) ((int16x8_t) { __VA_ARGS__ })
+ #define XSSE_SET_S32(...) ((int32x4_t) { __VA_ARGS__ })
+ #define XSSE_SET_S64(...) ((int64x2_t) { __VA_ARGS__ })
+ #define XSSE_SET_U16(...) ((uint16x8_t) { __VA_ARGS__ })
+ #endif
  #define XSSE2
 
  typedef int8x16_t __m128i;
@@ -54,35 +67,35 @@
   *****************************************************************************/
 
  #define _mm_set_epi8(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15) \
-	 ((int8x16_t) { \
+	 (XSSE_SET_S8( \
 		 (int8_t) (x15), (int8_t) (x14), (int8_t) (x13), (int8_t) (x12), \
 		 (int8_t) (x11), (int8_t) (x10), (int8_t) (x9),  (int8_t) (x8), \
 		 (int8_t) (x7),  (int8_t) (x6),  (int8_t) (x5),  (int8_t) (x4), \
-		 (int8_t) (x3),  (int8_t) (x2),  (int8_t) (x1),  (int8_t) (x0) })
+		 (int8_t) (x3),  (int8_t) (x2),  (int8_t) (x1),  (int8_t) (x0) ))
  #define _mm_set_epi16(x0, x1, x2, x3, x4, x5, x6, x7) \
-	 (vreinterpretq_s8_s16((int16x8_t) { \
+	 (vreinterpretq_s8_s16(XSSE_SET_S16( \
 		 (int16_t) (x7), (int16_t) (x6), (int16_t) (x5), (int16_t) (x4), \
-		 (int16_t) (x3), (int16_t) (x2), (int16_t) (x1), (int16_t) (x0) }))
+		 (int16_t) (x3), (int16_t) (x2), (int16_t) (x1), (int16_t) (x0) )))
  #define _mm_set_epi32(x0, x1, x2, x3) \
-	 (vreinterpretq_s8_s32((int32x4_t) { (int32_t) (x3), (int32_t) (x2), (int32_t) (x1), (int32_t) (x0) }))
- #define _mm_set_epi64x(x0, x1) (vreinterpretq_s8_s64((int64x2_t) { (int64_t) (x1), (int64_t) (x0) }))
+	 (vreinterpretq_s8_s32(XSSE_SET_S32( (int32_t) (x3), (int32_t) (x2), (int32_t) (x1), (int32_t) (x0) )))
+ #define _mm_set_epi64x(x0, x1) (vreinterpretq_s8_s64(XSSE_SET_S64( (int64_t) (x1), (int64_t) (x0) )))
  #define _mm_set1_epi8(x) (vdupq_n_s8((int8_t) (x)))
  #define _mm_set1_epi16(x) (vreinterpretq_s8_s16(vdupq_n_s16((int16_t) (x))))
  #define _mm_set1_epi32(x) (vreinterpretq_s8_s32(vdupq_n_s32((int32_t) (x))))
  #define _mm_set1_epi64x(x) (vreinterpretq_s8_s64(vdupq_n_s64((int64_t) (x))))
 
  #define _mm_setr_epi8(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15) \
-	 ((int8x16_t) { \
+	 (XSSE_SET_S8( \
 		 (int8_t) (x0), (int8_t) (x1), (int8_t) (x2), (int8_t) (x3), \
 		 (int8_t) (x4), (int8_t) (x5), (int8_t) (x6), (int8_t) (x7), \
 		 (int8_t) (x8), (int8_t) (x9), (int8_t) (x10), (int8_t) (x11), \
-		 (int8_t) (x12), (int8_t) (x13), (int8_t) (x14), (int8_t) (x15) })
+		 (int8_t) (x12), (int8_t) (x13), (int8_t) (x14), (int8_t) (x15) ))
  #define _mm_setr_epi16(x0, x1, x2, x3, x4, x5, x6, x7) \
-	 (vreinterpretq_s8_s16((int16x8_t) { \
+	 (vreinterpretq_s8_s16(XSSE_SET_S16( \
 		 (int16_t) (x0), (int16_t) (x1), (int16_t) (x2), (int16_t) (x3), \
-		 (int16_t) (x4), (int16_t) (x5), (int16_t) (x6), (int16_t) (x7) }))
+		 (int16_t) (x4), (int16_t) (x5), (int16_t) (x6), (int16_t) (x7) )))
  #define _mm_setr_epi32(x0, x1, x2, x3) \
-	 (vreinterpretq_s8_s32((int32x4_t) { (int32_t) (x0), (int32_t) (x1), (int32_t) (x2), (int32_t) (x3) }))
+	 (vreinterpretq_s8_s32(XSSE_SET_S32( (int32_t) (x0), (int32_t) (x1), (int32_t) (x2), (int32_t) (x3) )))
 
  #define _mm_setzero_si128() (vdupq_n_s8(0))
 
@@ -244,10 +257,10 @@
 	 uint32x4_t abs_diffs_32 = vpaddlq_u16(abs_diffs_16);
 	 uint64x2_t abs_diffs_64 = vpaddlq_u32(abs_diffs_32);
 
-	 return vreinterpretq_s8_u16((uint16x8_t) {
+	 return vreinterpretq_s8_u16(XSSE_SET_U16(
 		 (int16_t) vgetq_lane_u64(abs_diffs_64, 0), 0, 0, 0,
 		 (int16_t) vgetq_lane_u64(abs_diffs_64, 1), 0, 0, 0
-	 });
+	 ));
  }
 
  #define _mm_sub_epi8(a, b) (vreinterpretq_s8_u8(vsubq_u8(vreinterpretq_u8_s8(a), vreinterpretq_u8_s8(b))))
@@ -282,8 +295,8 @@
   * Convert                                                                   *
   *****************************************************************************/
 
- #define _mm_cvtsi32_si128(x) (vreinterpretq_s8_s32((int32x4_t) { (int32_t) (x), 0, 0, 0 }))
- #define _mm_cvtsi64_si128(x) (vreinterpretq_s8_s64((int64x2_t) { (int64_t) (x), 0 }))
+ #define _mm_cvtsi32_si128(x) (vreinterpretq_s8_s32(XSSE_SET_S32( (int32_t) (x), 0, 0, 0 )))
+ #define _mm_cvtsi64_si128(x) (vreinterpretq_s8_s64(XSSE_SET_S64( (int64_t) (x), 0 )))
  #define _mm_cvtsi128_si32(x) (vgetq_lane_s32(vreinterpretq_s32_s8(x), 0))
  #define _mm_cvtsi128_si64(x) (vgetq_lane_s64(vreinterpretq_s64_s8(x), 0))
 
@@ -356,12 +369,12 @@
 	 int32_t arr[4];
 	 vst1q_s32(arr, vec);
 
-	 return vreinterpretq_s8_s32((int32x4_t) {
+	 return vreinterpretq_s8_s32(XSSE_SET_S32(
 		 arr[(imm >> 0) & 0x3],
 		 arr[(imm >> 2) & 0x3],
 		 arr[(imm >> 4) & 0x3],
 		 arr[(imm >> 6) & 0x3]
-	 });
+	 ));
  }
  static XSSE_FORCE_INLINE __m128i _mm_shufflehi_epi16(__m128i x, int imm)
  {
@@ -369,13 +382,13 @@
 	 int16_t arr[8];
 	 vst1q_s16(arr, vec);
 
-	 return vreinterpretq_s8_s16((int16x8_t) {
+	 return vreinterpretq_s8_s16(XSSE_SET_S16(
 		 arr[0], arr[1], arr[2], arr[3],
 		 arr[((imm >> 0) & 0x3) + 4],
 		 arr[((imm >> 2) & 0x3) + 4],
 		 arr[((imm >> 4) & 0x3) + 4],
 		 arr[((imm >> 6) & 0x3) + 4]
-	 });
+	 ));
  }
  static XSSE_FORCE_INLINE __m128i _mm_shufflelo_epi16(__m128i x, int imm)
  {
@@ -383,13 +396,13 @@
 	 int16_t arr[8];
 	 vst1q_s16(arr, vec);
 
-	 return vreinterpretq_s8_s16((int16x8_t) {
+	 return vreinterpretq_s8_s16(XSSE_SET_S16(
 		 arr[((imm >> 0) & 0x3)],
 		 arr[((imm >> 2) & 0x3)],
 		 arr[((imm >> 4) & 0x3)],
 		 arr[((imm >> 6) & 0x3)],
 		 arr[4], arr[5], arr[6], arr[7]
-	 });
+	 ));
  }
  #endif
 
@@ -403,7 +416,7 @@
  #define _mm_unpacklo_epi32(a, b) (vreinterpretq_s8_s32(vzip1q_s32(vreinterpretq_s32_s8(a), vreinterpretq_s32_s8(b))))
  #define _mm_unpacklo_epi64(a, b) (vreinterpretq_s8_s64(vzip1q_s64(vreinterpretq_s64_s8(a), vreinterpretq_s64_s8(b))))
 
- #define _mm_move_epi64(x) (vreinterpretq_s8_s64((int64x2_t) { vgetq_lane_s64(vreinterpretq_s64_s8(x), 0), 0 }))
+ #define _mm_move_epi64(x) (vreinterpretq_s8_s64(XSSE_SET_S64( vgetq_lane_s64(vreinterpretq_s64_s8(x), 0), 0 )))
 
  #endif
 
