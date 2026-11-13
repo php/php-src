@@ -210,6 +210,7 @@ typedef struct _zend_ffi_val {
 zend_result zend_ffi_parse_decl(const char *str, size_t len);
 zend_result zend_ffi_parse_type(const char *str, size_t len, zend_ffi_dcl *dcl);
 void zend_ffi_cleanup_dcl(zend_ffi_dcl *dcl);
+void zend_ffi_borrow_dcl(zend_ffi_dcl *dcl, const zend_ffi_dcl *common_dcl);
 
 /* parser callbacks */
 void ZEND_NORETURN zend_ffi_parser_error(const char *msg, ...);
@@ -220,7 +221,7 @@ void zend_ffi_declare_tag(const char *name, size_t name_len, zend_ffi_dcl *dcl, 
 void zend_ffi_make_enum_type(zend_ffi_dcl *dcl);
 void zend_ffi_add_enum_val(zend_ffi_dcl *enum_dcl, const char *name, size_t name_len, zend_ffi_val *val, int64_t *min, int64_t *max, int64_t *last);
 void zend_ffi_make_struct_type(zend_ffi_dcl *dcl);
-void zend_ffi_add_field(zend_ffi_dcl *struct_dcl, const char *name, size_t name_len, zend_ffi_dcl *field_dcl);
+void zend_ffi_add_field(zend_ffi_dcl *struct_dcl, const char *name, size_t name_len, zend_ffi_dcl *field_dcl, zend_ffi_dcl *common_dcl);
 void zend_ffi_add_anonymous_field(zend_ffi_dcl *struct_dcl, zend_ffi_dcl *field_dcl);
 void zend_ffi_add_bit_field(zend_ffi_dcl *struct_dcl, const char *name, size_t name_len, zend_ffi_dcl *field_dcl, zend_ffi_val *bits);
 void zend_ffi_adjust_struct_size(zend_ffi_dcl *dcl);
@@ -228,7 +229,7 @@ void zend_ffi_make_pointer_type(zend_ffi_dcl *dcl);
 void zend_ffi_make_array_type(zend_ffi_dcl *dcl, zend_ffi_val *len);
 void zend_ffi_make_func_type(zend_ffi_dcl *dcl, HashTable *args, zend_ffi_dcl *nested_dcl);
 void zend_ffi_add_arg(HashTable **args, const char *name, size_t name_len, zend_ffi_dcl *arg_dcl);
-void zend_ffi_declare(const char *name, size_t name_len, zend_ffi_dcl *dcl);
+void zend_ffi_declare(const char *name, size_t name_len, zend_ffi_dcl *dcl, zend_ffi_dcl *common_dcl);
 void zend_ffi_add_attribute(zend_ffi_dcl *dcl, const char *name, size_t name_len);
 void zend_ffi_add_attribute_value(zend_ffi_dcl *dcl, const char *name, size_t name_len, int n, zend_ffi_val *val);
 void zend_ffi_add_msvc_attribute_value(zend_ffi_dcl *dcl, const char *name, size_t name_len, zend_ffi_val *val);

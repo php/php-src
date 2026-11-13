@@ -321,7 +321,7 @@ static int parse_type_specifier(int sym, zend_ffi_dcl *dcl);
 static int parse_struct_or_union_specifier(int sym, zend_ffi_dcl *dcl);
 static int parse_struct_contents(int sym, zend_ffi_dcl *dcl);
 static int parse_struct_declaration(int sym, zend_ffi_dcl *struct_dcl);
-static int parse_struct_declarator(int sym, zend_ffi_dcl *struct_dcl, zend_ffi_dcl *field_dcl);
+static int parse_struct_declarator(int sym, zend_ffi_dcl *struct_dcl, zend_ffi_dcl *field_dcl, zend_ffi_dcl *common_field_dcl);
 static int parse_enum_specifier(int sym, zend_ffi_dcl *dcl);
 static int parse_enumerator_list(int sym, zend_ffi_dcl *enum_dcl);
 static int parse_enumerator(int sym, zend_ffi_dcl *enum_dcl, int64_t *min, int64_t *max, int64_t *last);
@@ -2079,7 +2079,7 @@ static int parse_declarations(int sym) {
 			const char *name;
 			size_t name_len;
 			zend_ffi_dcl dcl;
-			dcl = common_dcl;
+			zend_ffi_borrow_dcl(&dcl, &common_dcl);
 			sym = parse_declarator(sym, &dcl, &name, &name_len);
 			if (sym == YY___ASM__) {
 				zend_ffi_val asm_str;
@@ -2102,10 +2102,10 @@ static int parse_declarations(int sym) {
 			if (sym == YY__EQUAL) {
 				sym = parse_initializer(sym);
 			}
-			zend_ffi_declare(name, name_len, &dcl);
+			zend_ffi_declare(name, name_len, &dcl, &common_dcl);
 			while (sym == YY__COMMA) {
 				sym = get_sym();
-				dcl = common_dcl;
+				zend_ffi_borrow_dcl(&dcl, &common_dcl);
 				sym = parse_declarator(sym, &dcl, &name, &name_len);
 				if (YY_IN_SET(sym, (YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\000\000\000\000\000\000\360\017\000\000\000\000\000")) {
 					sym = parse_attributes(sym, &dcl);
@@ -2113,8 +2113,9 @@ static int parse_declarations(int sym) {
 				if (sym == YY__EQUAL) {
 					sym = parse_initializer(sym);
 				}
-				zend_ffi_declare(name, name_len, &dcl);
+				zend_ffi_declare(name, name_len, &dcl, &common_dcl);
 			}
+			zend_ffi_cleanup_dcl(&common_dcl);
 		} else if (sym == YY__SEMICOLON) {
 			if (common_dcl.flags & (ZEND_FFI_DCL_ENUM | ZEND_FFI_DCL_STRUCT | ZEND_FFI_DCL_UNION)) zend_ffi_cleanup_dcl(&common_dcl);
 		} else {
@@ -2472,28 +2473,29 @@ _yy_state_2:
 
 static int parse_struct_declaration(int sym, zend_ffi_dcl *struct_dcl) {
 	zend_ffi_dcl common_field_dcl = ZEND_FFI_ATTR_INIT;
-	zend_ffi_dcl base_field_dcl = ZEND_FFI_ATTR_INIT;
+	zend_ffi_dcl field_dcl;
 	sym = parse_specifier_qualifier_list(sym, &common_field_dcl);
-	base_field_dcl = common_field_dcl;
 	if (sym == YY__SEMICOLON || sym == YY__RBRACE) {
 		zend_ffi_add_anonymous_field(struct_dcl, &common_field_dcl);
 	} else if (sym == YY__STAR || sym == YY_ID || sym == YY__LPAREN || sym == YY__COLON) {
-		sym = parse_struct_declarator(sym, struct_dcl, &common_field_dcl);
+		zend_ffi_borrow_dcl(&field_dcl, &common_field_dcl);
+		sym = parse_struct_declarator(sym, struct_dcl, &field_dcl, &common_field_dcl);
 		while (sym == YY__COMMA) {
 			sym = get_sym();
-			zend_ffi_dcl field_dcl = base_field_dcl;
+			zend_ffi_borrow_dcl(&field_dcl, &common_field_dcl);
 			if (YY_IN_SET(sym, (YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\000\000\000\000\000\000\360\017\000\000\000\000\000")) {
 				sym = parse_attributes(sym, &field_dcl);
 			}
-			sym = parse_struct_declarator(sym, struct_dcl, &field_dcl);
+			sym = parse_struct_declarator(sym, struct_dcl, &field_dcl, &common_field_dcl);
 		}
+		zend_ffi_cleanup_dcl(&common_field_dcl);
 	} else {
 		yy_error_sym("unexpected", sym);
 	}
 	return sym;
 }
 
-static int parse_struct_declarator(int sym, zend_ffi_dcl *struct_dcl, zend_ffi_dcl *field_dcl) {
+static int parse_struct_declarator(int sym, zend_ffi_dcl *struct_dcl, zend_ffi_dcl *field_dcl, zend_ffi_dcl *common_field_dcl) {
 	const char *name = NULL;
 	size_t name_len = 0;
 	zend_ffi_val bits;
@@ -2510,7 +2512,7 @@ static int parse_struct_declarator(int sym, zend_ffi_dcl *struct_dcl, zend_ffi_d
 			if (YY_IN_SET(sym, (YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\000\000\000\000\000\000\360\017\000\000\000\000\000")) {
 				sym = parse_attributes(sym, field_dcl);
 			}
-			zend_ffi_add_field(struct_dcl, name, name_len, field_dcl);
+			zend_ffi_add_field(struct_dcl, name, name_len, field_dcl, common_field_dcl);
 		} else {
 			yy_error_sym("unexpected", sym);
 		}

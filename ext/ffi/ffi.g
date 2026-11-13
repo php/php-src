@@ -77,7 +77,7 @@ declarations:
 			{const char *name;}
 			{size_t name_len;}
 			{zend_ffi_dcl dcl;}
-			{dcl = common_dcl;}
+			{zend_ffi_borrow_dcl(&dcl, &common_dcl);}
 			declarator(&dcl, &name, &name_len)
 			(
 				{zend_ffi_val asm_str;}
@@ -89,14 +89,15 @@ declarations:
 			)?
 			attributes(&dcl)?
 			initializer?
-			{zend_ffi_declare(name, name_len, &dcl);}
+			{zend_ffi_declare(name, name_len, &dcl, &common_dcl);}
 			(	","
-				{dcl = common_dcl;}
+				{zend_ffi_borrow_dcl(&dcl, &common_dcl);}
 				declarator(&dcl, &name, &name_len)
 				attributes(&dcl)?
 				initializer?
-				{zend_ffi_declare(name, name_len, &dcl);}
+				{zend_ffi_declare(name, name_len, &dcl, &common_dcl);}
 			)*
+			{zend_ffi_cleanup_dcl(&common_dcl);}
 		|
 			/* empty */
 			{if (common_dcl.flags & (ZEND_FFI_DCL_ENUM | ZEND_FFI_DCL_STRUCT | ZEND_FFI_DCL_UNION)) zend_ffi_cleanup_dcl(&common_dcl);}
@@ -264,21 +265,22 @@ struct_contents(zend_ffi_dcl *dcl):
 
 struct_declaration(zend_ffi_dcl *struct_dcl):
 	{zend_ffi_dcl common_field_dcl = ZEND_FFI_ATTR_INIT;}
-	{zend_ffi_dcl base_field_dcl = ZEND_FFI_ATTR_INIT;}
+	{zend_ffi_dcl field_dcl;}
 	specifier_qualifier_list(&common_field_dcl)
-	{base_field_dcl = common_field_dcl;}
 	(	/* empty */
 		{zend_ffi_add_anonymous_field(struct_dcl, &common_field_dcl);}
-	|	struct_declarator(struct_dcl, &common_field_dcl)
+	|	{zend_ffi_borrow_dcl(&field_dcl, &common_field_dcl);}
+		struct_declarator(struct_dcl, &field_dcl, &common_field_dcl)
 		(	","
-			{zend_ffi_dcl field_dcl = base_field_dcl;}
+			{zend_ffi_borrow_dcl(&field_dcl, &common_field_dcl);}
 			attributes(&field_dcl)?
-			struct_declarator(struct_dcl, &field_dcl)
+			struct_declarator(struct_dcl, &field_dcl, &common_field_dcl)
 		)*
+		{zend_ffi_cleanup_dcl(&common_field_dcl);}
 	)
 ;
 
-struct_declarator(zend_ffi_dcl *struct_dcl, zend_ffi_dcl *field_dcl):
+struct_declarator(zend_ffi_dcl *struct_dcl, zend_ffi_dcl *field_dcl, zend_ffi_dcl *common_field_dcl):
 	{const char *name = NULL;}
 	{size_t name_len = 0;}
 	{zend_ffi_val bits;}
@@ -289,7 +291,7 @@ struct_declarator(zend_ffi_dcl *struct_dcl, zend_ffi_dcl *field_dcl):
 			{zend_ffi_add_bit_field(struct_dcl, name, name_len, field_dcl, &bits);}
 		|	/*empty */
 			attributes(field_dcl)?
-			{zend_ffi_add_field(struct_dcl, name, name_len, field_dcl);}
+			{zend_ffi_add_field(struct_dcl, name, name_len, field_dcl, common_field_dcl);}
 		)
 	|	":"
 		constant_expression(&bits)
