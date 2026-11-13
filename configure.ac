@@ -296,6 +296,10 @@ AS_VAR_IF([PHP_BINARIES],,
 dnl Exit early.
 AS_VAR_IF([PHP_INSTALLED_SAPIS],, [AC_MSG_ERROR([Nothing to build.])])
 
+AS_VAR_IF([php_tsrm_dlopened_sapi], [yes], [
+  AC_DEFINE([PHP_DISABLE_IFUNC], [1], [Define to disable IFUNC resolvers.])
+])
+
 dnl Add POSIX threads compilation and linker flags when thread safety is enabled
 dnl with either the '--enable-zts' configure option or automatically enabled by
 dnl PHP SAPIs. For example, Apache SAPI.
