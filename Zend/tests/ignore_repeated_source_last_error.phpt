@@ -36,6 +36,17 @@ var_dump(error_get_last()['type'] === E_USER_NOTICE);
 ini_set('ignore_repeated_source', '0');
 trigger_error('S', E_USER_WARNING);
 var_dump(error_get_last()['type'] === E_USER_WARNING);
+
+/* A hidden error of another type is still the most recent error. */
+ini_set('ignore_repeated_source', '1');
+error_reporting(E_ALL);
+error_clear_last();
+function trigger_hidden_error($type) {
+    @trigger_error('S', $type);
+}
+trigger_hidden_error(E_USER_WARNING);
+trigger_hidden_error(E_USER_NOTICE);
+var_dump(error_get_last()['type']);
 ?>
 --EXPECTF--
 Warning: S in %s on line %d
@@ -52,3 +63,4 @@ bool(true)
 
 Warning: S in %s on line %d
 bool(true)
+int(1024)
