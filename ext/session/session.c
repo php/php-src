@@ -3450,7 +3450,7 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 	return retval;
 }
 
-PHP_CINIT_FUNCTION(session)
+static PHP_CINIT_FUNCTION(session)
 {
 	/* Give each child a distinct, widely separated GC sequence without requesting new entropy. */
 	uint64_t advance = (uint64_t) getpid() << 32;
