@@ -149,6 +149,10 @@ PHP                                                                        NEWS
     expressions resolving to the method of the first using class and
     bypassing visibility checks. (Jorg Sowa)
 
+- Apache:
+  . Fixed bug #61471 (Incomplete POST does not timeout but is passed to PHP).
+    (Jakub Zelenka)
+
 - CLI:
   . Fixed bug GH-24697 (PHP_HTTP_PARSER_STRICT build option doesn't work).
     (ndossche, devnexen)
