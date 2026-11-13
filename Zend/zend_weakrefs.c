@@ -354,6 +354,8 @@ static void zend_weakmap_free_obj(zend_object *object)
 
 static zval *zend_weakmap_read_dimension(zend_object *object, zval *offset, int type, zval *rv)
 {
+	zval *orig_offset = offset;
+
 	if (offset == NULL) {
 		zend_throw_error(NULL, "Cannot append to WeakMap");
 		return NULL;
@@ -369,6 +371,15 @@ static zval *zend_weakmap_read_dimension(zend_object *object, zval *offset, int 
 	zend_object *obj_addr = Z_OBJ_P(offset);
 	zval *zv = zend_hash_index_find(&wm->ht, zend_object_to_weakref_key(obj_addr));
 	if (type == BP_VAR_W || type == BP_VAR_RW) {
+		const zend_execute_data *ex = EG(current_execute_data);
+		if (UNEXPECTED(GC_REFCOUNT(obj_addr) == 1)
+		 && ex && ex->func && ZEND_USER_CODE(ex->func->type)
+		 && ex->opline
+		 && (ex->opline->op2_type & (IS_TMP_VAR | IS_VAR))
+		 && orig_offset == ZEND_CALL_VAR(ex, ex->opline->op2.var)) {
+			zend_throw_error(NULL, "Cannot modify a WeakMap dimension using a temporary object key");
+			return NULL;
+		}
 		if (zv == NULL) {
 			zval value;
 			zend_weakref_register(obj_addr, ZEND_WEAKREF_ENCODE(&wm->ht, ZEND_WEAKREF_TAG_MAP));
