@@ -42,11 +42,12 @@ $iterators = [
 ];
 
 foreach ($iterators as $it) {
-    var_dump($it->valid(), $it->key(), $it->current());
-    try {
-        $it->next();
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    foreach (['valid', 'key', 'current', 'next'] as $method) {
+        try {
+            $it->$method();
+        } catch (Error $e) {
+            echo $e->getMessage(), "\n";
+        }
     }
 }
 
@@ -55,15 +56,15 @@ foreach ($iterators as $it) {
 Cannot traverse an already closed generator
 Cannot traverse an already closed generator
 Cannot traverse an already closed generator
-bool(false)
-NULL
-NULL
-The inner constructor wasn't initialized with an iterator instance
-bool(false)
-NULL
-NULL
-The inner constructor wasn't initialized with an iterator instance
-bool(false)
-NULL
-NULL
-The inner constructor wasn't initialized with an iterator instance
+The object is in an invalid state as the parent constructor was not called
+The object is in an invalid state as the parent constructor was not called
+The object is in an invalid state as the parent constructor was not called
+The object is in an invalid state as the parent constructor was not called
+The object is in an invalid state as the parent constructor was not called
+The object is in an invalid state as the parent constructor was not called
+The object is in an invalid state as the parent constructor was not called
+The object is in an invalid state as the parent constructor was not called
+The object is in an invalid state as the parent constructor was not called
+The object is in an invalid state as the parent constructor was not called
+The object is in an invalid state as the parent constructor was not called
+The object is in an invalid state as the parent constructor was not called

@@ -154,7 +154,7 @@ static inline spl_dual_it_object *spl_dual_it_from_obj(zend_object *obj) /* {{{ 
 #define SPL_FETCH_AND_CHECK_DUAL_IT(var, objzval) 												\
 	do { 																						\
 		spl_dual_it_object *it = Z_SPLDUAL_IT_P(objzval); 										\
-		if (it->dit_type == DIT_Unknown) { 														\
+		if (it->dit_type == DIT_Unknown || (!it->inner.iterator && it->dit_type != DIT_AppendIterator)) { \
 			zend_throw_error(NULL, "The object is in an invalid state as the parent constructor was not called"); 	\
 			RETURN_THROWS(); 																			\
 		} 																						\
@@ -1541,8 +1541,7 @@ static inline void spl_dual_it_next(spl_dual_it_object *intern, int do_free)
 {
 	if (do_free) {
 		spl_dual_it_free(intern);
-	}
-	if (!intern->inner.iterator) {
+	} else if (!intern->inner.iterator) {
 		zend_throw_error(NULL, "The inner constructor wasn't initialized with an iterator instance");
 		return;
 	}
@@ -2693,7 +2692,7 @@ PHP_METHOD(NoRewindIterator, valid)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
-	RETURN_BOOL(spl_dual_it_valid(intern) == SUCCESS);
+	RETURN_BOOL(intern->inner.iterator->funcs->valid(intern->inner.iterator) == SUCCESS);
 } /* }}} */
 
 /* {{{ Return inner iterators key() */
@@ -2705,7 +2704,7 @@ PHP_METHOD(NoRewindIterator, key)
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
 
-	if (intern->inner.iterator && intern->inner.iterator->funcs->get_current_key) {
+	if (intern->inner.iterator->funcs->get_current_key) {
 		intern->inner.iterator->funcs->get_current_key(intern->inner.iterator, return_value);
 	} else {
 		RETURN_NULL();
@@ -2721,9 +2720,6 @@ PHP_METHOD(NoRewindIterator, current)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
-	if (!intern->inner.iterator) {
-		RETURN_NULL();
-	}
 	data = intern->inner.iterator->funcs->get_current_data(intern->inner.iterator);
 	if (data) {
 		RETURN_COPY_DEREF(data);
@@ -2738,10 +2734,6 @@ PHP_METHOD(NoRewindIterator, next)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
-	if (!intern->inner.iterator) {
-		zend_throw_error(NULL, "The inner constructor wasn't initialized with an iterator instance");
-		RETURN_THROWS();
-	}
 	intern->inner.iterator->funcs->move_forward(intern->inner.iterator);
 } /* }}} */
 
