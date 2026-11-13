@@ -29,6 +29,9 @@ PHP                                                                        NEWS
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
+  . Fixed a leaked CurlHandle when a CURLMOPT_PUSHFUNCTION callback denies the
+    push or throws, and a crash using the denied handle if the callback kept
+    it. (Ilia Alshanetsky)
 
 - DBA:
   . Fixed dba_close() not closing a database opened with dba_popen().
