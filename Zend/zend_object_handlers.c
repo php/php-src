@@ -1124,6 +1124,15 @@ try_again:
 			} else {
 				guard = zend_get_property_guard(zobj, name);
 				error = (*guard) & IN_SET;
+				if (!error
+				 && cache_slot
+				 && (prop_info->flags & ZEND_ACC_PPP_SET_MASK)
+				 && !zend_asymmetric_property_has_set_access(prop_info)) {
+					/* The write is forwarded to __set() without checking set visibility.
+					 * Reset cache slot to dodge fast path in next execution. */
+					CACHE_POLYMORPHIC_PTR_EX(cache_slot, NULL, NULL);
+					CACHE_PTR_EX(cache_slot + 2, NULL);
+				}
 			}
 			if (error) {
 				if ((prop_info->flags & ZEND_ACC_READONLY)
