@@ -26,11 +26,11 @@ function test() {
         case 0:
             while ($xyz) {
                 continue 2; // INVALID
-            }
+            } fallthrough;
         case 1:
             while ($xyz) {
                 continue;
-            }
+            } fallthrough;
         case 2:
             while ($xyz) {
                 break 2;
@@ -42,11 +42,11 @@ function test() {
             case 0:
                 while ($xyz) {
                     continue 2; // INVALID
-                }
+                } fallthrough;
             case 1:
                 while ($xyz) {
                     continue 3;
-                }
+                } fallthrough;
             case 2:
                 while ($xyz) {
                     break 2;
