@@ -13,7 +13,7 @@ if(substr(PHP_OS, 0, 3) == 'WIN') {
 ?>
 --FILE--
 <?php
-$certFile = __DIR__ . DIRECTORY_SEPARATOR . 'stream_server_reneg_limit.pem.tmp';
+$certFile = __DIR__ . DIRECTORY_SEPARATOR . 'stream_server_reneg_limit_trampoline.pem.tmp';
 
 /**
  * This test uses the openssl binary directly to initiate renegotiation. At this time it's not
@@ -109,7 +109,7 @@ ServerClientTestCase::getInstance()->run($serverCode, $clientCode, false);
 ?>
 --CLEAN--
 <?php
-@unlink(__DIR__ . DIRECTORY_SEPARATOR . 'stream_server_reneg_limit.pem.tmp');
+@unlink(__DIR__ . DIRECTORY_SEPARATOR . 'stream_server_reneg_limit_trampoline.pem.tmp');
 ?>
 --EXPECTF--
 resource(%d) of type (stream)
