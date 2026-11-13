@@ -1,5 +1,7 @@
 --TEST--
 Bug #81652: The value of error_reporting() gets overridden
+--EXTENSIONS--
+zend_test
 --FILE--
 <?php
 

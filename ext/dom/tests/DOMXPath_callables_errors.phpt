@@ -2,6 +2,7 @@
 registerPHPFunctions() with callables - error cases
 --EXTENSIONS--
 dom
+zend_test
 --FILE--
 <?php
 
@@ -64,7 +65,7 @@ $x = new class {
 $classes = get_declared_classes();
 
 try {
-    $str = str_repeat($classes[count($classes) - 1] . '::dump', random_int(1, 1));
+    $str = zend_return_non_interned_string($classes[count($classes) - 1] . '::dump');
     $xpath->registerPhpFunctions([$str]);
 } catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";

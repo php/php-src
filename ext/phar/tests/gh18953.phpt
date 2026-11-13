@@ -3,13 +3,14 @@ GH-18953 (Phar: Stream double free)
 --EXTENSIONS--
 phar
 zlib
+zend_test
 --INI--
 phar.readonly=0
 --FILE--
 <?php
 
 $phar = new Phar(__DIR__ . "/gh18953.phar");
-$phar->addFromString("file", str_repeat("123", random_int(1, 1)));
+$phar->addFromString("file", zend_return_non_interned_string("123"));
 $phar->addEmptyDir("dir");
 $phar2 = $phar->compress(Phar::GZ);
 

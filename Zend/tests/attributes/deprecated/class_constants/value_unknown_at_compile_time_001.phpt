@@ -1,9 +1,11 @@
 --TEST--
 #[\Deprecated]: Class constant with value unknown at compile time.
+--EXTENSIONS--
+zend_test
 --FILE--
 <?php
 
-define('SUFFIX', random_int(1, 2) == 1 ? 'a' : 'b');
+define('SUFFIX', zend_return_non_interned_string('a'));
 
 class Clazz {
 	#[\Deprecated]
@@ -17,5 +19,5 @@ var_dump($value === 'Clazz-' . SUFFIX);
 ?>
 --EXPECTF--
 Deprecated: Constant Clazz::CONSTANT is deprecated in %s on line %d
-string(7) "Clazz-%c"
+string(7) "Clazz-a"
 bool(true)

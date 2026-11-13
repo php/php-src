@@ -1,9 +1,11 @@
 --TEST--
 #[\Deprecated]: Constant with value unknown at compile time.
+--EXTENSIONS--
+zend_test
 --FILE--
 <?php
 
-define('SUFFIX', random_int(1, 2) == 1 ? 'a' : 'b');
+define('SUFFIX', zend_return_non_interned_string('a'));
 
 #[\Deprecated]
 const CONSTANT = 'Prefix-' . SUFFIX;
@@ -15,5 +17,5 @@ var_dump($value === 'Prefix-' . SUFFIX);
 ?>
 --EXPECTF--
 Deprecated: Constant CONSTANT is deprecated in %s on line %d
-string(8) "Prefix-%c"
+string(8) "Prefix-a"
 bool(true)
