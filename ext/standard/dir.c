@@ -117,7 +117,7 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
-	context = php_stream_context_from_zval(zcontext, 0);
+	context = php_stream_context_from_zval_or_default(zcontext);
 
 	dirp = php_stream_opendir(dirname, REPORT_ERRORS, context);
 
@@ -579,7 +579,7 @@ PHP_FUNCTION(scandir)
 	}
 
 	if (zcontext) {
-		context = php_stream_context_from_zval(zcontext, 0);
+		context = php_stream_context_from_zval_or_default(zcontext);
 	}
 
 	if (flags == PHP_SCANDIR_SORT_ASCENDING) {

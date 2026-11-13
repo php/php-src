@@ -356,7 +356,7 @@ static void php_hash_do_hash(
 			zend_argument_value_error(2, "must not contain any null bytes");
 			RETURN_THROWS();
 		}
-		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, FG(default_context));
+		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, php_stream_context_get_default());
 		if (!stream) {
 			/* Stream will report errors opening file */
 			RETURN_FALSE;
@@ -499,7 +499,7 @@ static void php_hash_do_hash_hmac(
 			zend_argument_value_error(2, "must not contain any null bytes");
 			RETURN_THROWS();
 		}
-		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, FG(default_context));
+		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, php_stream_context_get_default());
 		if (!stream) {
 			/* Stream will report errors opening file */
 			RETURN_FALSE;
@@ -743,7 +743,7 @@ PHP_FUNCTION(hash_update_file)
 
 	hash = php_hashcontext_from_object(Z_OBJ_P(zhash));
 	PHP_HASHCONTEXT_VERIFY(hash);
-	context = php_stream_context_from_zval(zcontext, 0);
+	context = php_stream_context_from_zval_or_default(zcontext);
 
 	stream = php_stream_open_wrapper_ex(ZSTR_VAL(filename), "rb", REPORT_ERRORS, NULL, context);
 	if (!stream) {

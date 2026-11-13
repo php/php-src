@@ -436,11 +436,11 @@ PHP_FUNCTION(posix_ctermid)
 /* }}} */
 
 /* Checks if the provides resource is a stream and if it provides a file descriptor */
-static zend_result php_posix_stream_get_fd(zval *zfp, zend_long *ret) /* {{{ */
+static zend_result php_posix_stream_get_fd(zend_resource *zfp, zend_long *ret) /* {{{ */
 {
 	php_stream *stream;
 
-	php_stream_from_zval_no_verify(stream, zfp);
+	php_stream_from_res_no_verify(stream, zfp);
 
 	if (stream == NULL) {
 		return FAILURE;
@@ -481,7 +481,7 @@ PHP_FUNCTION(posix_ttyname)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(z_fd) == IS_RESOURCE) {
-		if (php_posix_stream_get_fd(z_fd, &fd) == FAILURE) {
+		if (php_posix_stream_get_fd(Z_RES_P(z_fd), &fd) == FAILURE) {
 			RETURN_FALSE;
 		}
 	} else {
@@ -543,7 +543,7 @@ PHP_FUNCTION(posix_isatty)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(z_fd) == IS_RESOURCE) {
-		if (php_posix_stream_get_fd(z_fd, &fd) == FAILURE) {
+		if (php_posix_stream_get_fd(Z_RES_P(z_fd), &fd) == FAILURE) {
 			RETURN_FALSE;
 		}
 	} else {
@@ -1363,7 +1363,7 @@ PHP_FUNCTION(posix_fpathconf)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(z_fd) == IS_RESOURCE) {
-		if (php_posix_stream_get_fd(z_fd, &fd) == FAILURE) {
+		if (php_posix_stream_get_fd(Z_RES_P(z_fd), &fd) == FAILURE) {
 			RETURN_FALSE;
 		}
 	} else {

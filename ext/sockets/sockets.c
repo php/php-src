@@ -2667,7 +2667,7 @@ PHP_FUNCTION(socket_import_stream)
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_RESOURCE(zstream)
 	ZEND_PARSE_PARAMETERS_END();
-	php_stream_from_zval(stream, zstream);
+	php_stream_from_res(stream, Z_RES_P(zstream));
 
 	if (php_stream_cast(stream, PHP_STREAM_AS_SOCKETD, (void**)&socket, 1) == FAILURE) {
 		/* error supposedly already shown */

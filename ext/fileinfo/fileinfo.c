@@ -300,7 +300,7 @@ PHP_FUNCTION(finfo_file)
 		zend_argument_must_not_be_empty_error(hasThis() ? 1 : 2);
 		RETURN_THROWS();
 	}
-	php_stream_context *context = php_stream_context_from_zval(zcontext, false);
+	php_stream_context *context = php_stream_context_from_zval_or_default(zcontext);
 	if (!context) {
 		RETURN_THROWS();
 	}
@@ -402,7 +402,7 @@ PHP_FUNCTION(mime_content_type)
 			break;
 
 		case IS_RESOURCE:
-			php_stream_from_zval(stream, path_or_stream);
+			php_stream_from_res(stream, Z_RES_P(path_or_stream));
 			break;
 
 		default:
@@ -424,7 +424,7 @@ PHP_FUNCTION(mime_content_type)
 
 	const char *ret_val;
 	if (path) {
-		php_stream_context *context = php_stream_context_get_default(false);
+		php_stream_context *context = php_stream_context_get_default();
 		ret_val = php_fileinfo_from_path(magic, path, context);
 	} else {
 		/* remember stream position for restoration */

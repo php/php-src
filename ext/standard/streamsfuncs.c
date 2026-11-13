@@ -68,7 +68,7 @@ PHP_FUNCTION(stream_socket_pair)
 	}
 
 	php_stream_error_operation_begin();
-	context = php_stream_context_from_zval(zcontext, 0);
+	context = php_stream_context_from_zval_or_default(zcontext);
 
     s1 = php_stream_sock_open_from_socket(pair[0], 0);
     if (s1 == NULL) {
@@ -529,7 +529,7 @@ PHP_FUNCTION(stream_copy_to_stream)
 	}
 
 	php_stream_error_operation_begin();
-	context = php_stream_context_from_zval(zcontext, 0);
+	context = php_stream_context_from_zval_or_default(zcontext);
 
 	if (pos > 0 && php_stream_seek(src, pos, SEEK_SET) < 0) {
 		php_stream_error_operation_end(context);
@@ -791,7 +791,7 @@ PHP_FUNCTION(stream_select)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_stream_error_operation_begin();
-	php_stream_context *context = php_stream_context_from_zval(zcontext, 0);
+	php_stream_context *context = php_stream_context_from_zval_or_default(zcontext);
 
 	/* The sets grow as streams are added, past FD_SETSIZE */
 	php_growable_fd_set rfds, wfds, efds;
@@ -1190,10 +1190,7 @@ PHP_FUNCTION(stream_context_get_default)
 		Z_PARAM_ARRAY_HT_OR_NULL(params)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (FG(default_context) == NULL) {
-		FG(default_context) = php_stream_context_alloc();
-	}
-	context = FG(default_context);
+	context = php_stream_context_get_default();
 
 	if (params) {
 		if (parse_context_options(context, params) == FAILURE) {
@@ -1233,10 +1230,7 @@ PHP_FUNCTION(stream_context_set_default)
 		Z_PARAM_ARRAY_HT(options)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (FG(default_context) == NULL) {
-		FG(default_context) = php_stream_context_alloc();
-	}
-	context = FG(default_context);
+	context = php_stream_context_get_default();
 
 	if (php_stream_context_options_has_error_settings(options)) {
 		zend_value_error("Stream error handling options cannot be set on the default context");
@@ -1697,7 +1691,7 @@ PHP_FUNCTION(stream_is_local)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(zstream) == IS_RESOURCE) {
-		php_stream_from_zval(stream, zstream);
+		php_stream_from_res(stream, Z_RES_P(zstream));
 		wrapper = stream->wrapper;
 	} else {
 		if (!try_convert_to_string(zstream)) {
@@ -1705,7 +1699,7 @@ PHP_FUNCTION(stream_is_local)
 		}
 
 		php_stream_error_operation_begin();
-		context = php_stream_context_from_zval(zcontext, 0);
+		context = php_stream_context_from_zval_or_default(zcontext);
 		wrapper = php_stream_locate_url_wrapper(Z_STRVAL_P(zstream), NULL, 0);
 		php_stream_error_operation_end(context);
 	}

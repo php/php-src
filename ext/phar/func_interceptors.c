@@ -64,7 +64,7 @@ PHP_FUNCTION(phar_opendir) /* {{{ */
 			zend_string_release_ex(entry, false);
 			zend_string_release_ex(arch, false);
 			if (zcontext) {
-				context = php_stream_context_from_zval(zcontext, 0);
+				context = php_stream_context_from_zval_or_default(zcontext);
 			}
 			stream = php_stream_opendir(name, REPORT_ERRORS, context);
 			efree(name);
@@ -185,7 +185,7 @@ PHP_FUNCTION(phar_file_get_contents) /* {{{ */
 		php_stream *stream;
 
 		if (zcontext) {
-			context = php_stream_context_from_zval(zcontext, 0);
+			context = php_stream_context_from_zval_or_default(zcontext);
 		}
 		stream = php_stream_open_wrapper_ex(ZSTR_VAL(name), "rb", 0 | REPORT_ERRORS, NULL, context);
 
@@ -245,7 +245,7 @@ PHP_FUNCTION(phar_readfile) /* {{{ */
 		}
 
 		php_stream *stream;
-		php_stream_context *context = php_stream_context_from_zval(zcontext, 0);
+		php_stream_context *context = php_stream_context_from_zval_or_default(zcontext);
 
 		stream = php_stream_open_wrapper_ex(ZSTR_VAL(name), "rb", 0 | REPORT_ERRORS, NULL, context);
 
@@ -292,7 +292,7 @@ PHP_FUNCTION(phar_fopen) /* {{{ */
 		}
 
 		php_stream *stream;
-		php_stream_context *context = php_stream_context_from_zval(zcontext, 0);
+		php_stream_context *context = php_stream_context_from_zval_or_default(zcontext);
 
 		stream = php_stream_open_wrapper_ex(ZSTR_VAL(name), mode, 0 | REPORT_ERRORS, NULL, context);
 
