@@ -871,13 +871,13 @@ function sodium_crypto_ipcrypt_decrypt(string $encrypted_ip, #[\SensitiveParamet
 
 function sodium_crypto_ipcrypt_nd_keygen(): string {}
 
-function sodium_crypto_ipcrypt_nd_encrypt(string $ip, #[\SensitiveParameter] string $key): string {}
+function sodium_crypto_ipcrypt_nd_encrypt(string $ip, #[\SensitiveParameter] string $key, ?string $tweak = null): string {}
 
 function sodium_crypto_ipcrypt_nd_decrypt(string $ciphertext_hex, #[\SensitiveParameter] string $key): string {}
 
 function sodium_crypto_ipcrypt_ndx_keygen(): string {}
 
-function sodium_crypto_ipcrypt_ndx_encrypt(string $ip, #[\SensitiveParameter] string $key): string {}
+function sodium_crypto_ipcrypt_ndx_encrypt(string $ip, #[\SensitiveParameter] string $key, ?string $tweak = null): string {}
 
 function sodium_crypto_ipcrypt_ndx_decrypt(string $ciphertext_hex, #[\SensitiveParameter] string $key): string {}
 
