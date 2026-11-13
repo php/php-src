@@ -1797,5 +1797,22 @@ namespace Dom
     }
 #endif
 
+#ifdef LIBXML_SCHEMAS_ENABLED
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
+    final class XMLSchema
+    {
+        private function __construct() {}
+
+        public static function createFromFile(string $path): XMLSchema {}
+
+        public static function createFromString(string $source): XMLSchema {}
+
+        public function validate(XMLDocument|\DOMDocument $document, int $flags = 0): bool {}
+    }
+#endif
+
     function import_simplexml(object $node): Attr|Element {}
 }

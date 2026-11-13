@@ -79,6 +79,9 @@ PHP_DOM_EXPORT zend_class_entry *dom_modern_entityreference_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_processinginstruction_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_modern_processinginstruction_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_abstract_base_document_class_entry;
+#ifdef LIBXML_SCHEMAS_ENABLED
+PHP_DOM_EXPORT zend_class_entry *dom_xml_schema_class_entry;
+#endif
 PHP_DOM_EXPORT zend_class_entry *dom_token_list_class_entry;
 #ifdef LIBXML_XPATH_ENABLED
 PHP_DOM_EXPORT zend_class_entry *dom_xpath_class_entry;
@@ -1353,6 +1356,11 @@ PHP_MINIT_FUNCTION(dom)
 	dom_modern_xpath_class_entry->default_object_handlers = &dom_xpath_object_handlers;
 
 	zend_hash_add_new_ptr(&classes, dom_modern_xpath_class_entry->name, &dom_xpath_prop_handlers);
+#endif
+
+#ifdef LIBXML_SCHEMAS_ENABLED
+	dom_xml_schema_class_entry = register_class_Dom_XMLSchema();
+	dom_xml_schema_init_class(dom_xml_schema_class_entry);
 #endif
 
 	dom_token_list_class_entry = register_class_Dom_TokenList(zend_ce_aggregate, zend_ce_countable);

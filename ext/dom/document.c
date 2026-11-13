@@ -1873,83 +1873,65 @@ PHP_METHOD(DOMDocument, validate)
 /* }}} */
 
 #ifdef LIBXML_SCHEMAS_ENABLED
-static void dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
+/* Compiles an XML Schema from a file path or a string. On failure returns NULL
+ * and either throws (throw_on_error) or emits a warning. */
+static xmlSchemaPtr dom_schema_compile(dom_load_mode mode, const char *source, size_t source_len, bool throw_on_error)
 {
-	zval *id;
-	xmlDoc *docp;
-	dom_object *intern;
-	char *source = NULL;
-	const char *valid_file = NULL;
-	size_t source_len = 0;
-	int valid_opts = 0;
-	zend_long flags = 0;
-	xmlSchemaParserCtxtPtr  parser;
-	xmlSchemaPtr            sptr;
-	xmlSchemaValidCtxtPtr   vptr;
-	int                     is_valid;
+	xmlSchemaParserCtxtPtr parser;
+	xmlSchemaPtr sptr;
 	char resolved_path[MAXPATHLEN + 1];
 
-	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &source, &source_len, &flags) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	if (!source_len) {
-		zend_argument_must_not_be_empty_error(1);
-		RETURN_THROWS();
-	}
-
-	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
-
-	PHP_LIBXML_SANITIZE_GLOBALS(new_parser_ctxt);
-
-	switch (type) {
-	case DOM_LOAD_FILE:
-		if (zend_char_has_nul_byte(source, source_len)) {
-			PHP_LIBXML_RESTORE_GLOBALS(new_parser_ctxt);
-			zend_argument_value_error(1, "must not contain any null bytes");
-			RETURN_THROWS();
-		}
-		valid_file = dom_get_valid_file_path(source, resolved_path, MAXPATHLEN);
+	if (mode == DOM_LOAD_FILE) {
+		const char *valid_file = dom_get_valid_file_path(source, resolved_path, MAXPATHLEN);
 		if (!valid_file) {
-			PHP_LIBXML_RESTORE_GLOBALS(new_parser_ctxt);
-			php_error_docref(NULL, E_WARNING, "Invalid Schema file source");
-			RETURN_FALSE;
+			if (throw_on_error) {
+				zend_throw_exception_ex(NULL, 0, "Cannot open schema file '%s'", source);
+			} else {
+				php_error_docref(NULL, E_WARNING, "Invalid Schema file source");
+			}
+			return NULL;
 		}
+		PHP_LIBXML_SANITIZE_GLOBALS(new_parser_ctxt);
 		parser = xmlSchemaNewParserCtxt(valid_file);
-		break;
-	case DOM_LOAD_STRING:
-		parser = xmlSchemaNewMemParserCtxt(source, source_len);
+		PHP_LIBXML_RESTORE_GLOBALS(new_parser_ctxt);
+	} else {
 		/* If loading from memory, we need to set the base directory for the document
 		   but it is not apparent how to do that for schema's */
-		break;
-	default:
-		return;
+		PHP_LIBXML_SANITIZE_GLOBALS(new_parser_ctxt);
+		parser = xmlSchemaNewMemParserCtxt(source, source_len);
+		PHP_LIBXML_RESTORE_GLOBALS(new_parser_ctxt);
 	}
 
+	PHP_LIBXML_SANITIZE_GLOBALS(parse);
 	xmlSchemaSetParserErrors(parser,
 		(xmlSchemaValidityErrorFunc) php_libxml_error_handler,
 		(xmlSchemaValidityWarningFunc) php_libxml_error_handler,
 		parser);
 	sptr = xmlSchemaParse(parser);
 	xmlSchemaFreeParserCtxt(parser);
-	PHP_LIBXML_RESTORE_GLOBALS(new_parser_ctxt);
-	if (!sptr) {
-		if (!EG(exception)) {
+	PHP_LIBXML_RESTORE_GLOBALS(parse);
+
+	if (!sptr && !EG(exception)) {
+		if (throw_on_error) {
+			zend_throw_exception(NULL, "Invalid Schema", 0);
+		} else {
 			php_error_docref(NULL, E_WARNING, "Invalid Schema");
 		}
-		RETURN_FALSE;
 	}
+	return sptr;
+}
 
-	docp = (xmlDocPtr) dom_object_get_node(intern);
-
-	vptr = xmlSchemaNewValidCtxt(sptr);
+/* Validates docp against a compiled schema with a fresh validation context.
+ * Returns true if the document is valid. Throws if the context cannot be created. */
+static bool dom_schema_validate_doc(xmlSchemaPtr sptr, xmlDocPtr docp, zend_long flags)
+{
+	xmlSchemaValidCtxtPtr vptr = xmlSchemaNewValidCtxt(sptr);
 	if (!vptr) {
-		xmlSchemaFree(sptr);
 		zend_throw_error(NULL, "Invalid Schema Validation Context");
-		RETURN_THROWS();
+		return false;
 	}
 
+	int valid_opts = 0;
 	if (flags & XML_SCHEMA_VAL_VC_I_CREATE) {
 		valid_opts |= XML_SCHEMA_VAL_VC_I_CREATE;
 	}
@@ -1959,17 +1941,50 @@ static void dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 	xmlSchemaSetValidErrors(vptr, php_libxml_error_handler, php_libxml_error_handler, vptr);
 	dom_validate_ns_guard guard;
 	dom_validate_ns_guard_begin(&guard, docp);
-	is_valid = xmlSchemaValidateDoc(vptr, docp);
+	int is_valid = xmlSchemaValidateDoc(vptr, docp);
 	dom_validate_ns_guard_end(&guard);
-	xmlSchemaFree(sptr);
 	xmlSchemaFreeValidCtxt(vptr);
 	PHP_LIBXML_RESTORE_GLOBALS(validate);
 
-	if (is_valid == 0) {
-		RETURN_TRUE;
-	} else {
+	return is_valid == 0;
+}
+
+static void dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, dom_load_mode mode) /* {{{ */
+{
+	xmlDoc *docp;
+	dom_object *intern;
+	char *source = NULL;
+	size_t source_len = 0;
+	zend_long flags = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &source, &source_len, &flags) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (!source_len) {
+		zend_argument_must_not_be_empty_error(1);
+		RETURN_THROWS();
+	}
+
+	DOM_GET_OBJ(docp, ZEND_THIS, xmlDocPtr, intern);
+
+	if (mode == DOM_LOAD_FILE && zend_char_has_nul_byte(source, source_len)) {
+		zend_argument_value_error(1, "must not contain any null bytes");
+		RETURN_THROWS();
+	}
+
+	xmlSchemaPtr sptr = dom_schema_compile(mode, source, source_len, false);
+	if (!sptr) {
 		RETURN_FALSE;
 	}
+
+	docp = (xmlDocPtr) dom_object_get_node(intern);
+	bool is_valid = dom_schema_validate_doc(sptr, docp, flags);
+	xmlSchemaFree(sptr);
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
+	RETURN_BOOL(is_valid);
 }
 /* }}} */
 
@@ -2086,6 +2101,121 @@ PHP_METHOD(DOMDocument, relaxNGValidateSource)
 	dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_STRING);
 }
 /* }}} end dom_document_relaxNG_validate_xml */
+
+/* Dom\XMLSchema: a compiled XML Schema that validates many documents. */
+typedef struct {
+	xmlSchemaPtr schema;
+	zend_object std;
+} dom_xml_schema_object;
+
+static zend_object_handlers dom_xml_schema_object_handlers;
+
+static inline dom_xml_schema_object *dom_xml_schema_from_obj(zend_object *obj)
+{
+	return (dom_xml_schema_object *) ((char *) obj - offsetof(dom_xml_schema_object, std));
+}
+
+static zend_object *dom_xml_schema_new(zend_class_entry *ce)
+{
+	dom_xml_schema_object *intern = zend_object_alloc(sizeof(dom_xml_schema_object), ce);
+	zend_object_std_init(&intern->std, ce);
+	object_properties_init(&intern->std, ce);
+	return &intern->std;
+}
+
+static void dom_xml_schema_free(zend_object *obj)
+{
+	dom_xml_schema_object *intern = dom_xml_schema_from_obj(obj);
+	if (intern->schema) {
+		xmlSchemaFree(intern->schema);
+	}
+	zend_object_std_dtor(obj);
+}
+
+void dom_xml_schema_init_class(zend_class_entry *ce)
+{
+	memcpy(&dom_xml_schema_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	dom_xml_schema_object_handlers.offset = offsetof(dom_xml_schema_object, std);
+	dom_xml_schema_object_handlers.free_obj = dom_xml_schema_free;
+	dom_xml_schema_object_handlers.clone_obj = NULL;
+	ce->create_object = dom_xml_schema_new;
+	ce->default_object_handlers = &dom_xml_schema_object_handlers;
+}
+
+static void dom_xml_schema_create(INTERNAL_FUNCTION_PARAMETERS, dom_load_mode mode)
+{
+	char *source;
+	size_t source_len;
+
+	if (mode == DOM_LOAD_FILE) {
+		ZEND_PARSE_PARAMETERS_START(1, 1)
+			Z_PARAM_PATH(source, source_len)
+		ZEND_PARSE_PARAMETERS_END();
+	} else {
+		ZEND_PARSE_PARAMETERS_START(1, 1)
+			Z_PARAM_STRING(source, source_len)
+		ZEND_PARSE_PARAMETERS_END();
+	}
+
+	if (!source_len) {
+		zend_argument_must_not_be_empty_error(1);
+		RETURN_THROWS();
+	}
+
+	xmlSchemaPtr sptr = dom_schema_compile(mode, source, source_len, true);
+	if (!sptr) {
+		RETURN_THROWS();
+	}
+
+	object_init_ex(return_value, dom_xml_schema_class_entry);
+	dom_xml_schema_from_obj(Z_OBJ_P(return_value))->schema = sptr;
+}
+
+PHP_METHOD(Dom_XMLSchema, __construct)
+{
+	zend_throw_error(NULL, "Cannot directly construct %pS, use createFromFile() or createFromString() instead", Z_OBJCE_P(ZEND_THIS)->name);
+}
+
+PHP_METHOD(Dom_XMLSchema, createFromFile)
+{
+	dom_xml_schema_create(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_FILE);
+}
+
+PHP_METHOD(Dom_XMLSchema, createFromString)
+{
+	dom_xml_schema_create(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_STRING);
+}
+
+PHP_METHOD(Dom_XMLSchema, validate)
+{
+	zval *document;
+	zend_long flags = 0;
+	xmlDocPtr docp;
+	dom_object *intern;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_OBJECT(document)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(flags)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!instanceof_function(Z_OBJCE_P(document), dom_xml_document_class_entry)
+		&& !instanceof_function(Z_OBJCE_P(document), dom_document_class_entry)) {
+		zend_argument_type_error(1, "must be of type Dom\\XMLDocument|DOMDocument, %s given", zend_zval_value_name(document));
+		RETURN_THROWS();
+	}
+
+	DOM_GET_OBJ(docp, document, xmlDocPtr, intern);
+
+	dom_xml_schema_object *schema = dom_xml_schema_from_obj(Z_OBJ_P(ZEND_THIS));
+	ZEND_ASSERT(schema->schema != NULL);
+
+	bool is_valid = dom_schema_validate_doc(schema->schema, docp, flags);
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
+	RETURN_BOOL(is_valid);
+}
 
 #endif
 

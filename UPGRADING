@@ -141,6 +141,12 @@ PHP 8.7 UPGRADE NOTES
 7. New Classes and Interfaces
 ========================================
 
+- DOM:
+  . Added Dom\XMLSchema. It compiles an XML Schema once with
+    Dom\XMLSchema::createFromFile() or Dom\XMLSchema::createFromString(),
+    and Dom\XMLSchema::validate() validates a Dom\XMLDocument or DOMDocument
+    against it without compiling the schema again.
+
 - Intl:
   . IntlRelativeDateTimeFormatter
   . enum IntlRelativeDateTimeFormatterStyle

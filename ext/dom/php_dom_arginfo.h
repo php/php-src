@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_dom.stub.php instead.
- * Stub hash: 8d7713834c924709155ed7acc554c9efc55e96c1
+ * Stub hash: 320f3926174801d208af4045a0b7844ff51de957
  * Has decl header: yes */
 
 #include "zend_attributes.h"
@@ -1134,6 +1134,24 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_Dom_XPath_quote arginfo_class_DOMXPath_quote
 #endif
 
+#if defined(LIBXML_SCHEMAS_ENABLED)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Dom_XMLSchema___construct, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Dom_XMLSchema_createFromFile, 0, 1, Dom\\XMLSchema, 0)
+	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Dom_XMLSchema_createFromString, 0, 1, Dom\\XMLSchema, 0)
+	ZEND_ARG_TYPE_INFO(0, source, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Dom_XMLSchema_validate, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_TYPE_MASK(0, document, Dom\\XMLDocument|DOMDocument, 0, NULL)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_FUNCTION(dom_import_simplexml);
 ZEND_FUNCTION(Dom_import_simplexml);
 ZEND_METHOD(DOMCdataSection, __construct);
@@ -1328,6 +1346,12 @@ ZEND_METHOD(Dom_TokenList, getIterator);
 ZEND_METHOD(Dom_XPath, __construct);
 ZEND_METHOD(Dom_XPath, evaluate);
 ZEND_METHOD(Dom_XPath, query);
+#endif
+#if defined(LIBXML_SCHEMAS_ENABLED)
+ZEND_METHOD(Dom_XMLSchema, __construct);
+ZEND_METHOD(Dom_XMLSchema, createFromFile);
+ZEND_METHOD(Dom_XMLSchema, createFromString);
+ZEND_METHOD(Dom_XMLSchema, validate);
 #endif
 
 static const zend_function_entry ext_functions[] = {
@@ -1805,6 +1829,16 @@ static const zend_function_entry class_Dom_XPath_methods[] = {
 	ZEND_RAW_FENTRY("registerPhpFunctions", zim_DOMXPath_registerPhpFunctions, arginfo_class_Dom_XPath_registerPhpFunctions, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("registerPhpFunctionNS", zim_DOMXPath_registerPhpFunctionNS, arginfo_class_Dom_XPath_registerPhpFunctionNS, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("quote", zim_DOMXPath_quote, arginfo_class_Dom_XPath_quote, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_FE_END
+};
+#endif
+
+#if defined(LIBXML_SCHEMAS_ENABLED)
+static const zend_function_entry class_Dom_XMLSchema_methods[] = {
+	ZEND_ME(Dom_XMLSchema, __construct, arginfo_class_Dom_XMLSchema___construct, ZEND_ACC_PRIVATE)
+	ZEND_ME(Dom_XMLSchema, createFromFile, arginfo_class_Dom_XMLSchema_createFromFile, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Dom_XMLSchema, createFromString, arginfo_class_Dom_XMLSchema_createFromString, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Dom_XMLSchema, validate, arginfo_class_Dom_XMLSchema_validate, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 #endif
@@ -3625,6 +3659,18 @@ static zend_class_entry *register_class_Dom_XPath(void)
 	zend_string *property_registerNodeNamespaces_name = zend_string_init("registerNodeNamespaces", sizeof("registerNodeNamespaces") - 1, true);
 	zend_declare_typed_property(class_entry, property_registerNodeNamespaces_name, &property_registerNodeNamespaces_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
 	zend_string_release_ex(property_registerNodeNamespaces_name, true);
+
+	return class_entry;
+}
+#endif
+
+#if defined(LIBXML_SCHEMAS_ENABLED)
+static zend_class_entry *register_class_Dom_XMLSchema(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Dom", "XMLSchema", class_Dom_XMLSchema_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }
