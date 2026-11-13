@@ -109,6 +109,7 @@ static int fpm_event_select_wait(struct fpm_event_queue_s *queue, unsigned long 
 		/* trigger POLLIN events */
 		q = queue;
 		while (q) {
+			struct fpm_event_queue_s *next = q->next;
 			if (q->ev) { /* sanity check */
 
 				/* check if the event has been triggered */
@@ -123,7 +124,7 @@ static int fpm_event_select_wait(struct fpm_event_queue_s *queue, unsigned long 
 					}
 				}
 			}
-			q = q->next; /* iterate */
+			q = next;
 		}
 	}
 	return ret;
