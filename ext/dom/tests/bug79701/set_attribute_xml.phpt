@@ -4,31 +4,31 @@ Bug #79701 (getElementById does not correctly work with duplicate definitions) -
 dom
 --FILE--
 <?php
-function test($dom, $fn) {
+function test($dom, $prefix, $fn) {
     $test1 = $dom->getElementById('x');
     $test2 = $dom->getElementById('y');
 
     echo "--- After resetting test1's id ---\n";
 
-    $fn($test1, 'xml:id', 'y');
+    $fn($test1, $prefix . 'id', 'y');
     var_dump($dom->getElementById('x')?->nodeName);
     var_dump($dom->getElementById('y')?->nodeName);
 
     echo "--- After resetting test2's id ---\n";
 
-    $fn($test2, 'xml:id', 'x');
+    $fn($test2, $prefix . 'id', 'x');
     var_dump($dom->getElementById('x')?->nodeName);
     var_dump($dom->getElementById('y')?->nodeName);
 
     echo "--- After resetting test1's id ---\n";
 
-    $fn($test1, 'xml:id', 'z');
+    $fn($test1, $prefix . 'id', 'z');
     var_dump($dom->getElementById('x')?->nodeName);
     var_dump($dom->getElementById('y')?->nodeName);
 
     echo "--- After resetting test2's id ---\n";
 
-    $fn($test2, 'xml:id', 'z');
+    $fn($test2, $prefix . 'id', 'z');
     var_dump($dom->getElementById('x')?->nodeName);
     var_dump($dom->getElementById('y')?->nodeName);
 
@@ -51,30 +51,43 @@ $common_xml = <<<XML
 </root>
 XML;
 
-echo "\n=== DOMDocument: setAttribute ===\n\n";
+echo "\n=== DOMDocument: setAttribute (prefixed) ===\n\n";
 
 $dom = new DOMDocument;
 $dom->loadXML($common_xml);
-test($dom, fn ($element, $name, $value) => $element->setAttribute($name, $value));
+test($dom, "xml:", fn ($element, $name, $value) => $element->setAttribute($name, $value));
 
-echo "\n=== DOMDocument: setAttributeNS ===\n\n";
+echo "\n=== DOMDocument: setAttributeNS (prefixed) ===\n\n";
 
 $dom = new DOMDocument;
 $dom->loadXML($common_xml);
-test($dom, fn ($element, $name, $value) => $element->setAttributeNS(getNamespace($name), $name, $value));
+test($dom, "xml:", fn ($element, $name, $value) => $element->setAttributeNS(getNamespace($name), $name, $value));
+
+echo "\n=== Dom\\XMLDocument: setAttribute (prefixed) ===\n\n";
+
+$dom = Dom\XMLDocument::createFromString($common_xml);
+test($dom, "xml:", fn ($element, $name, $value) => $element?->setAttribute($name, $value));
+
+echo "\n=== Dom\\XMLDocument: setAttributeNS (prefixed) ===\n\n";
+
+$dom = Dom\XMLDocument::createFromString($common_xml);
+test($dom, "xml:", fn ($element, $name, $value) => $element?->setAttribute(getNamespace($name), $name, $value));
 
 echo "\n=== Dom\\XMLDocument: setAttribute ===\n\n";
 
-$dom = Dom\XMLDocument::createFromString($common_xml);
-test($dom, fn ($element, $name, $value) => $element->setAttribute($name, $value));
+$common_xml = <<<XML
+<root>
+  <test1 id="x"/>
+  <test2 id="y"/>
+</root>
+XML;
 
-echo "\n=== Dom\\XMLDocument: setAttributeNS ===\n\n";
-
 $dom = Dom\XMLDocument::createFromString($common_xml);
-test($dom, fn ($element, $name, $value) => $element->setAttributeNS(getNamespace($name), $name, $value));
+test($dom, "", fn ($element, $name, $value) => $element?->setAttribute($name, $value));
+
 ?>
 --EXPECT--
-=== DOMDocument: setAttribute ===
+=== DOMDocument: setAttribute (prefixed) ===
 
 --- After resetting test1's id ---
 NULL
@@ -91,7 +104,7 @@ NULL
 --- Get id z ---
 string(5) "test1"
 
-=== DOMDocument: setAttributeNS ===
+=== DOMDocument: setAttributeNS (prefixed) ===
 
 --- After resetting test1's id ---
 NULL
@@ -107,25 +120,42 @@ NULL
 NULL
 --- Get id z ---
 string(5) "test1"
+
+=== Dom\XMLDocument: setAttribute (prefixed) ===
+
+--- After resetting test1's id ---
+NULL
+NULL
+--- After resetting test2's id ---
+NULL
+NULL
+--- After resetting test1's id ---
+NULL
+NULL
+--- After resetting test2's id ---
+NULL
+NULL
+--- Get id z ---
+NULL
+
+=== Dom\XMLDocument: setAttributeNS (prefixed) ===
+
+--- After resetting test1's id ---
+NULL
+NULL
+--- After resetting test2's id ---
+NULL
+NULL
+--- After resetting test1's id ---
+NULL
+NULL
+--- After resetting test2's id ---
+NULL
+NULL
+--- Get id z ---
+NULL
 
 === Dom\XMLDocument: setAttribute ===
-
---- After resetting test1's id ---
-NULL
-string(5) "test1"
---- After resetting test2's id ---
-string(5) "test2"
-string(5) "test1"
---- After resetting test1's id ---
-string(5) "test2"
-NULL
---- After resetting test2's id ---
-NULL
-NULL
---- Get id z ---
-string(5) "test1"
-
-=== Dom\XMLDocument: setAttributeNS ===
 
 --- After resetting test1's id ---
 NULL
