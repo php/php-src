@@ -2,15 +2,17 @@
 #
 # A wrapper around Autoconf that generates files to build PHP on *nix systems.
 
+set -ex
+
 PHP_AUTOCONF=${PHP_AUTOCONF:-autoconf}
 PHP_AUTOHEADER=${PHP_AUTOHEADER:-autoheader}
 force=0
 debug=0
 
 # Go to project root.
-cd "$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd -P)" || exit
+cd "$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd -P)"
 
-php_extra_version=$(grep '^AC_INIT(' configure.ac) || exit
+php_extra_version=$(grep '^AC_INIT(' configure.ac)
 case "$php_extra_version" in
   *-dev*)
     dev=1
