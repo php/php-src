@@ -8,11 +8,9 @@ foreach (['PCRE', 'Pcre', 'pCrE'] as $extension) {
     var_dump(ini_get_all($extension, false) === ini_get_all('pcre', false));
 }
 
-/* Extensions without INI settings still return an empty array. */
 var_dump(ini_get_all('REFLECTION'));
 var_dump(ini_get_all('Reflection', false));
 
-/* Unknown extensions still warn using the original name and return false. */
 var_dump(ini_get_all('NoSuchExtension'));
 var_dump(ini_get_all('NoSuchExtension', false));
 ?>
