@@ -414,9 +414,10 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 
 		if (filterparams) {
 			zval *tmpzval;
+			const HashTable *filter_params_ht = HASH_OF(filterparams);
 
 			if ((Z_TYPE_P(filterparams) == IS_ARRAY || Z_TYPE_P(filterparams) == IS_OBJECT) &&
-				(tmpzval = zend_hash_str_find_ind(HASH_OF(filterparams), "window", sizeof("window") - 1))) {
+				(tmpzval = zend_hash_str_find_ind(filter_params_ht, "window", sizeof("window") - 1))) {
 				/* log-2 base of history window (9 - 15) */
 				zend_long tmp = zval_get_long(tmpzval);
 				if (tmp < -MAX_WBITS || tmp > MAX_WBITS + 32) {
@@ -451,7 +452,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 			switch (Z_TYPE_P(filterparams)) {
 				case IS_ARRAY:
 				case IS_OBJECT: {
-					HashTable *ht = HASH_OF(filterparams);
+					const HashTable *ht = HASH_OF(filterparams);
 
 					if ((tmpzval = zend_hash_str_find_ind(ht, "memory", sizeof("memory") -1))) {
 						/* Memory Level (1 - 9) */
@@ -459,7 +460,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 						if (tmp < 1 || tmp > MAX_MEM_LEVEL) {
 							php_error_docref("filters.compression", E_WARNING, "Invalid parameter given for memory level (" ZEND_LONG_FMT ")", tmp);
 						} else {
-							memLevel = tmp;
+							memLevel = (int)tmp;
 						}
 					}
 
@@ -469,7 +470,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 						if (tmp < -MAX_WBITS || tmp > MAX_WBITS + 16) {
 							php_error_docref("filters.compression", E_WARNING, "Invalid parameter given for window size (" ZEND_LONG_FMT ")", tmp);
 						} else {
-							windowBits = tmp;
+							windowBits = (int)tmp;
 						}
 					}
 

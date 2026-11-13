@@ -1574,7 +1574,9 @@ static zval *spl_array_it_get_current_data(zend_object_iterator *iter) /* {{{ */
 	 && Z_TYPE(object->array) == IS_OBJECT
 	 && !(object->ar_flags & (SPL_ARRAY_IS_SELF|SPL_ARRAY_USE_OTHER))) {
 		zend_string *key;
-		zend_hash_get_current_key_ex(aht, &key, NULL, spl_array_get_pos_ptr(aht, object));
+		zend_ulong unused;
+		zend_hash_get_current_key_ex(aht, &key, &unused, spl_array_get_pos_ptr(aht, object));
+		ZEND_ASSERT(key != NULL);
 		zend_class_entry *ce = Z_OBJCE(object->array);
 		zend_property_info *prop_info = zend_get_property_info(ce, key, true);
 		ZEND_ASSERT(prop_info != ZEND_WRONG_PROPERTY_INFO);
