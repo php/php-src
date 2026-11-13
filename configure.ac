@@ -208,6 +208,10 @@ case $host_cpu in
     ;;
 esac
 
+dnl Build for SSE2 on x86 where supported. The flags are prepended to CFLAGS,
+dnl so that user flags such as -mno-sse2 still take precedence.
+PHP_CHECK_SSE2
+
 dnl See https://github.com/php/php-src/issues/14140
 AX_CHECK_COMPILE_FLAG([-ffp-contract=off], [CFLAGS="$CFLAGS -ffp-contract=off"])
 
