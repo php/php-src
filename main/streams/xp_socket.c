@@ -600,7 +600,7 @@ static const php_stream_ops php_stream_unixdg_socket_ops = {
 /* network socket operations */
 
 #ifdef AF_UNIX
-static inline int parse_unix_address(php_stream *stream, php_stream_xport_param *xparam,
+static inline void parse_unix_address(php_stream *stream, php_stream_xport_param *xparam,
 		struct sockaddr_un *unix_addr)
 {
 	memset(unix_addr, 0, sizeof(*unix_addr));
@@ -626,8 +626,6 @@ static inline int parse_unix_address(php_stream *stream, php_stream_xport_param 
 	}
 
 	memcpy(unix_addr->sun_path, xparam->inputs.name, xparam->inputs.namelen);
-
-	return 1;
 }
 #endif
 
