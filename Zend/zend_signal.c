@@ -199,7 +199,6 @@ static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context)
 				/* throw away any blocked signals */
 				zend_sigprocmask(SIG_UNBLOCK, &sigset, NULL);
 #ifdef ZTS
-# define RAISE_ERROR "raise() failed\n"
 				if (raise(signo) != 0) {
 					/* On some systems raise() fails with errno 3: No such process */
 					kill(getpid(), signo);
