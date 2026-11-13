@@ -204,6 +204,8 @@ PHP 8.7 UPGRADE NOTES
     is copied, and they are assigned to the targets directly. A value its
     target does not keep is now released at that assignment instead of after
     the last one.
+  . Improved performance of integer to string conversion (string casts, echo,
+    implode(), json_encode(), serialize(), var_export() and others).
 
 - Standard:
   . Improved performance of strcspn() and strpbrk() when searching longer strings

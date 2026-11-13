@@ -977,14 +977,20 @@ static zend_always_inline bool fast_is_not_identical_function(const zval *op1, c
 	return !zend_is_identical(op1, op2);
 }
 
+ZEND_API char *ZEND_FASTCALL zend_print_ulong_to_buf_slow(char *buf, zend_ulong num);
+
 /* buf points to the END of the buffer */
 static zend_always_inline char *zend_print_ulong_to_buf(char *buf, zend_ulong num) {
-	*buf = '\0';
-	do {
-		*--buf = (char) (num % 10) + '0';
-		num /= 10;
-	} while (num > 0);
-	return buf;
+	if (EXPECTED(num < 100)) {
+		uint32_t n = (uint32_t) num;
+		*buf = '\0';
+		*--buf = (char) (n % 10) + '0';
+		if (n >= 10) {
+			*--buf = (char) (n / 10) + '0';
+		}
+		return buf;
+	}
+	return zend_print_ulong_to_buf_slow(buf, num);
 }
 
 /* buf points to the END of the buffer */
