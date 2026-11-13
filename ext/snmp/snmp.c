@@ -169,6 +169,7 @@ static void snmp_session_free(php_snmp_session **session) /* {{{ */
 		PHP_SNMP_SESSION_FREE(community);
 		PHP_SNMP_SESSION_FREE(securityName);
 		PHP_SNMP_SESSION_FREE(contextEngineID);
+		PHP_SNMP_SESSION_FREE(contextName);
 		efree(*session);
 		*session = NULL;
 	}
@@ -1243,7 +1244,10 @@ static ZEND_ATTRIBUTE_NONNULL_ARGS(2) bool snmp_session_set_security(struct snmp
 
 	/* Setting contextName if specified */
 	if (contextName) {
-		session->contextName = ZSTR_VAL(contextName);
+		if (session->contextName) {
+			efree(session->contextName);
+		}
+		session->contextName = estrndup(ZSTR_VAL(contextName), ZSTR_LEN(contextName));
 		session->contextNameLen = ZSTR_LEN(contextName);
 	}
 
