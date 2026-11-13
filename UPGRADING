@@ -114,6 +114,10 @@ PHP 8.7 UPGRADE NOTES
 ========================================
 
 - Standard:
+  . intval() now recognizes the explicit octal prefix "0o"/"0O" when $base is
+    0 or 8, consistent with octal integer literals and octdec(). For example,
+    intval("0o17", 0) now returns 15 instead of 0. Numeric strings and
+    (int) casts are unaffected.
   . stream_select() no longer fails once a watched descriptor exceeds
     FD_SETSIZE. The descriptor set now grows on demand on both POSIX (bitset)
     and Windows (winsock fd_set), so code watching many streams works without
