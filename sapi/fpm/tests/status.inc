@@ -231,45 +231,46 @@ class Status
      */
     protected function checkStatusOpenmetrics(string $body, array $fields)
     {
+        $labels = '\{pool="' . $fields['pool'] . '"\}';
         $pattern = "(# TYPE phpfpm_up gauge\n" .
             "# HELP phpfpm_up Could pool " . $fields['pool'] . " using a " . $fields['process manager'] . " PM on PHP-FPM be reached\?\n" .
-            "phpfpm_up 1\n" .
+            "phpfpm_up" . $labels . " 1\n" .
             "# TYPE phpfpm_start_since counter\n" .
             "# HELP phpfpm_start_since The number of seconds since FPM has started\.\n" .
-            "phpfpm_start_since " . $fields['start since'] . "\n" .
+            "phpfpm_start_since" . $labels . " " . $fields['start since'] . "\n" .
             "# TYPE phpfpm_accepted_connections counter\n" .
             "# HELP phpfpm_accepted_connections The number of requests accepted by the pool\.\n" .
-            "phpfpm_accepted_connections " . $fields['accepted conn'] . "\n" .
+            "phpfpm_accepted_connections" . $labels . " " . $fields['accepted conn'] . "\n" .
             "# TYPE phpfpm_listen_queue gauge\n" .
             "# HELP phpfpm_listen_queue The number of requests in the queue of pending connections\.\n" .
-            "phpfpm_listen_queue " . $fields['listen queue'] . "\n" .
+            "phpfpm_listen_queue" . $labels . " " . $fields['listen queue'] . "\n" .
             "# TYPE phpfpm_max_listen_queue counter\n" .
             "# HELP phpfpm_max_listen_queue The maximum number of requests in the queue of pending connections since FPM has started\.\n" .
-            "phpfpm_max_listen_queue " . $fields['max listen queue'] . "\n" .
+            "phpfpm_max_listen_queue" . $labels . " " . $fields['max listen queue'] . "\n" .
             "# TYPE phpfpm_listen_queue_length gauge\n" .
             "# HELP phpfpm_listen_queue_length The size of the socket queue of pending connections\.\n" .
-            "phpfpm_listen_queue_length " . $fields['listen queue len'] . "\n" .
+            "phpfpm_listen_queue_length" . $labels . " " . $fields['listen queue len'] . "\n" .
             "# TYPE phpfpm_idle_processes gauge\n" .
             "# HELP phpfpm_idle_processes The number of idle processes\.\n" .
-            "phpfpm_idle_processes " . $fields['idle processes'] . "\n" .
+            "phpfpm_idle_processes" . $labels . " " . $fields['idle processes'] . "\n" .
             "# TYPE phpfpm_active_processes gauge\n" .
             "# HELP phpfpm_active_processes The number of active processes\.\n" .
-            "phpfpm_active_processes " . $fields['active processes'] . "\n" .
+            "phpfpm_active_processes" . $labels . " " . $fields['active processes'] . "\n" .
             "# TYPE phpfpm_total_processes gauge\n" .
             "# HELP phpfpm_total_processes The number of idle \+ active processes\.\n" .
-            "phpfpm_total_processes " . $fields['total processes'] . "\n" .
+            "phpfpm_total_processes" . $labels . " " . $fields['total processes'] . "\n" .
             "# TYPE phpfpm_max_active_processes counter\n" .
             "# HELP phpfpm_max_active_processes The maximum number of active processes since FPM has started\.\n" .
-            "phpfpm_max_active_processes " . $fields['max active processes'] . "\n" .
+            "phpfpm_max_active_processes" . $labels . " " . $fields['max active processes'] . "\n" .
             "# TYPE phpfpm_max_children_reached counter\n" .
             "# HELP phpfpm_max_children_reached The number of times, the process limit has been reached, when pm tries to start more children \(works only for pm 'dynamic' and 'ondemand'\)\.\n" .
-            "phpfpm_max_children_reached " . $fields['max children reached'] . "\n" .
+            "phpfpm_max_children_reached" . $labels . " " . $fields['max children reached'] . "\n" .
             "# TYPE phpfpm_slow_requests counter\n" .
             "# HELP phpfpm_slow_requests The number of requests that exceeded your 'request_slowlog_timeout' value\.\n" .
-            "phpfpm_slow_requests " . $fields['slow requests'] . "\n" .
+            "phpfpm_slow_requests" . $labels . " " . $fields['slow requests'] . "\n" .
             "# TYPE phpfpm_memory_peak gauge\n" .
             "# HELP phpfpm_memory_peak The memory usage peak since FPM has started\.\n" .
-            "phpfpm_memory_peak " . $fields['memory peak'] . "\n" .
+            "phpfpm_memory_peak" . $labels . " " . $fields['memory peak'] . "\n" .
             "# EOF)\n";
 
         if (!preg_match($pattern, $body)) {
