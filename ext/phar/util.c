@@ -1582,6 +1582,23 @@ zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t s
 
 	php_stream_rewind(fp);
 
+	if (sig_type != PHAR_SIG_OPENSSL && sig_type != PHAR_SIG_OPENSSL_SHA256 && sig_type != PHAR_SIG_OPENSSL_SHA512) {
+		php_stream_statbuf ssb;
+		char *pfile;
+		bool has_pubkey;
+
+		spprintf(&pfile, 0, "%s.pubkey", fname);
+		has_pubkey = php_stream_stat_path_ex(pfile, PHP_STREAM_URL_STAT_QUIET, &ssb, NULL) == 0;
+		efree(pfile);
+
+		if (has_pubkey) {
+			if (error) {
+				spprintf(error, 0, "openssl public key found, but the signature does not use openssl");
+			}
+			return FAILURE;
+		}
+	}
+
 	switch (sig_type) {
 		case PHAR_SIG_OPENSSL_SHA512:
 		case PHAR_SIG_OPENSSL_SHA256:
