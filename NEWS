@@ -39,6 +39,8 @@ PHP                                                                        NEWS
     dom_objects_store_clone_obj when cloning Dom\Notation). (David Carlier)
   . Fixed bug GH-25306 (Assertion status == LXB_STATUS_OK in dom_parse_selector
     when lexbor allocation fails). (ndossche)
+  . Fixed bug GH-25434 (C14NFile() on a Dom\XMLDocument leaves the document
+    changed and leaks memory). (lazerg)
 
 - GD:
   . Fixed use-after-free when drawing with a brush or tile image that was
