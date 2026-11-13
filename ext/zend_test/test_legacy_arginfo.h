@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: 64eb27c89a9a5a378385e5f778cd17cfd67caed8
+ * Stub hash: b3c6209d96da50e9aa0e0dbd0ee5e9926d64be4d
  * Has decl header: yes */
 
 #include "zend_constants.h"
@@ -8,6 +8,10 @@
 #endif
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_return_non_interned_string, 0, 0, 1)
+	ZEND_ARG_INFO(0, str)
 ZEND_END_ARG_INFO()
 
 #define arginfo_zend_test_array_return arginfo_zend_trigger_bailout
@@ -42,9 +46,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_zend_test_deprecated_aliased arginfo_zend_trigger_bailout
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_create_unterminated_string, 0, 0, 1)
-	ZEND_ARG_INFO(0, str)
-ZEND_END_ARG_INFO()
+#define arginfo_zend_create_unterminated_string arginfo_zend_return_non_interned_string
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_terminate_string, 0, 0, 1)
 	ZEND_ARG_INFO(1, str)
@@ -233,9 +235,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_test_refcount, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-#define arginfo_zend_test_zend_ini_parse_quantity arginfo_zend_create_unterminated_string
+#define arginfo_zend_test_zend_ini_parse_quantity arginfo_zend_return_non_interned_string
 
-#define arginfo_zend_test_zend_ini_parse_uquantity arginfo_zend_create_unterminated_string
+#define arginfo_zend_test_zend_ini_parse_uquantity arginfo_zend_return_non_interned_string
 
 #define arginfo_zend_test_zend_ini_str arginfo_zend_trigger_bailout
 
@@ -291,9 +293,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_test_is_zend_ptr, 0, 0, 1)
 	ZEND_ARG_INFO(0, addr)
 ZEND_END_ARG_INFO()
 
-#define arginfo_zend_test_log_err_debug arginfo_zend_create_unterminated_string
+#define arginfo_zend_test_log_err_debug arginfo_zend_return_non_interned_string
 
-#define arginfo_zend_test_compile_to_ast arginfo_zend_create_unterminated_string
+#define arginfo_zend_test_compile_to_ast arginfo_zend_return_non_interned_string
 
 #define arginfo_zend_test_gh18756 arginfo_zend_trigger_bailout
 
@@ -396,6 +398,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ZendTestNS2_ZendSubNS_Foo_method arginfo_zend_trigger_bailout
 
 static ZEND_FUNCTION(zend_trigger_bailout);
+static ZEND_FUNCTION(zend_return_non_interned_string);
 static ZEND_FUNCTION(zend_test_array_return);
 static ZEND_FUNCTION(zend_test_nullable_array_return);
 static ZEND_FUNCTION(zend_test_void_return);
@@ -542,6 +545,7 @@ static ZEND_METHOD(ZendTestNS2_ZendSubNS_Foo, method);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_trigger_bailout, arginfo_zend_trigger_bailout)
+	ZEND_FE(zend_return_non_interned_string, arginfo_zend_return_non_interned_string)
 	ZEND_FE(zend_test_array_return, arginfo_zend_test_array_return)
 	ZEND_FE(zend_test_nullable_array_return, arginfo_zend_test_nullable_array_return)
 	ZEND_FE(zend_test_void_return, arginfo_zend_test_void_return)
