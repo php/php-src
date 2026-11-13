@@ -1894,6 +1894,8 @@ function array_any(array $array, callable $callback): bool {}
 
 function array_all(array $array, callable $callback): bool {}
 
+function array_partition(array $array, callable $callback): array {}
+
 function array_map(?callable $callback, array $array, array ...$arrays): array {}
 
 /**
