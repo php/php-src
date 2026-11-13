@@ -27,7 +27,6 @@ typedef struct {
 	int lockfd;
 	php_stream *fp;
 	size_t CurrentFlatFilePos;
-	datum nextkey;
 } flatfile;
 
 #define FLATFILE_INSERT 1
