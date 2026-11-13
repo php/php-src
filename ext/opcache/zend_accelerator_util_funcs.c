@@ -457,7 +457,34 @@ static zend_always_inline void adler32_do16_loop(unsigned char *buf, const unsig
 	unsigned int s1 = *s1_out;
 	unsigned int s2 = *s2_out;
 
-#ifdef XSSE2
+#if defined(__aarch64__) || defined(_M_ARM64)
+	/* zend_simd.h maps the SSE2 loop below to NEON too, but its _mm_madd_epi16()
+	 * and _mm_sad_epu8() are slow there, so use NEON directly.
+	 * For each 16-byte block: s2 += 16 * s1 + sum((16 - i) * buf[i]), then
+	 * s1 += sum(buf[i]). The weighted products fit in 16 bits
+	 * (255 * 16 + 255 * 8), and all 32-bit sums wrap like the scalar code's, so
+	 * the result is identical for any input. */
+	static const uint8_t weights[16] = {16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+	const uint8x8_t weights_lo = vld1_u8(weights);
+	const uint8x8_t weights_hi = vld1_u8(weights + 8);
+	const unsigned int blocks = (unsigned int) ((end - buf) / 16);
+	uint32x4_t weighted_sum = vdupq_n_u32(0);
+	uint32x4_t byte_sum = vdupq_n_u32(0);
+	uint32x4_t byte_sum_at_block_start = vdupq_n_u32(0);
+
+	do {
+		const uint8x16_t read = vld1q_u8(buf);
+		byte_sum_at_block_start = vaddq_u32(byte_sum_at_block_start, byte_sum);
+		uint16x8_t products = vmull_u8(vget_low_u8(read), weights_lo);
+		products = vmlal_u8(products, vget_high_u8(read), weights_hi);
+		weighted_sum = vpadalq_u16(weighted_sum, products);
+		byte_sum = vpadalq_u16(byte_sum, vpaddlq_u8(read));
+		buf += 16;
+	} while (buf != end);
+
+	s2 += 16 * (blocks * s1 + vaddvq_u32(byte_sum_at_block_start)) + vaddvq_u32(weighted_sum);
+	s1 += vaddvq_u32(byte_sum);
+#elif defined(XSSE2)
 	const __m128i zero = _mm_setzero_si128();
 
 	__m128i accumulate_s2 = zero;
