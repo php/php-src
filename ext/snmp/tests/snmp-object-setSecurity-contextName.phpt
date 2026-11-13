@@ -2,6 +2,7 @@
 SNMP::setSecurity() - the context name is copied
 --EXTENSIONS--
 snmp
+zend_test
 --SKIPIF--
 <?php
 require_once(__DIR__.'/skipif.inc');
@@ -11,7 +12,7 @@ require_once(__DIR__.'/skipif.inc');
 require_once(__DIR__.'/snmp_include.inc');
 
 $session = new SNMP(SNMP::VERSION_3, $hostname, $rwuser, $timeout, $retries);
-$context = str_repeat('c', 5) . random_int(10, 99);
+$context = zend_return_non_interned_string('c');
 $session->setSecurity('authPriv', 'MD5', $auth_pass, 'AES', $priv_pass, $context);
 unset($context);
 // The agent does not know this context, only the lifetime of the name matters.

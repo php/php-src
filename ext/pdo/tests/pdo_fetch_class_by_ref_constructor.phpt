@@ -2,6 +2,7 @@
 PDO Common: PDO::FETCH_CLASS with by-ref constructor and arg by value
 --EXTENSIONS--
 pdo
+zend_test
 --SKIPIF--
 <?php
 $dir = getenv('REDIR_TEST_DIR');
@@ -36,8 +37,7 @@ class TestByRefCtor
 }
 
 $stmt->execute();
-// Use of random_int(10,10) is to defeat SCCP
-var_dump($stmt->fetchAll(PDO::FETCH_CLASS, 'TestByRefCtor', [str_repeat('a', random_int(10,10))]));
+var_dump($stmt->fetchAll(PDO::FETCH_CLASS, 'TestByRefCtor', [zend_return_non_interned_string('a')]));
 
 ?>
 --CLEAN--
@@ -48,13 +48,13 @@ PDOTest::dropTableIfExists($db, "pdo_fetch_class_by_ref_ctor");
 ?>
 --EXPECTF--
 Warning: TestByRefCtor::__construct(): Argument #1 ($str) must be passed by reference, value given in %s on line %d
-TestByRefCtor::__construct(aaaaaaaaaa, 1)
+TestByRefCtor::__construct(a, 1)
 
 Warning: TestByRefCtor::__construct(): Argument #1 ($str) must be passed by reference, value given in %s on line %d
-TestByRefCtor::__construct(aaaaaaaaaa, 2)
+TestByRefCtor::__construct(a, 2)
 
 Warning: TestByRefCtor::__construct(): Argument #1 ($str) must be passed by reference, value given in %s on line %d
-TestByRefCtor::__construct(aaaaaaaaaa, 3)
+TestByRefCtor::__construct(a, 3)
 array(3) {
   [0]=>
   object(TestByRefCtor)#%d (3) {
@@ -63,7 +63,7 @@ array(3) {
     ["val"]=>
     string(1) "A"
     ["str":"TestByRefCtor":private]=>
-    string(11) "aaaaaaaaaaA"
+    string(2) "aA"
   }
   [1]=>
   object(TestByRefCtor)#%d (3) {
@@ -72,7 +72,7 @@ array(3) {
     ["val"]=>
     string(1) "B"
     ["str":"TestByRefCtor":private]=>
-    string(11) "aaaaaaaaaaB"
+    string(2) "aB"
   }
   [2]=>
   object(TestByRefCtor)#%d (3) {
@@ -81,6 +81,6 @@ array(3) {
     ["val"]=>
     string(1) "C"
     ["str":"TestByRefCtor":private]=>
-    string(11) "aaaaaaaaaaC"
+    string(2) "aC"
   }
 }

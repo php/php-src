@@ -2,6 +2,7 @@
 MessageFormatter::format() invalid UTF-8 for arg key or value
 --EXTENSIONS--
 intl
+zend_test
 --INI--
 intl.use_exceptions=On
 --FILE--
@@ -29,7 +30,7 @@ try {
 try {
     var_dump($mf->format(array("foo" => new class {
         function __toString(): string {
-            return str_repeat("\x80", random_int(1, 1));
+            return zend_return_non_interned_string("\x80");
         }
     })));
 } catch (Throwable $e) {

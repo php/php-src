@@ -2,14 +2,15 @@
 ldap_set_option() - Leaks attrvalue and context
 --EXTENSIONS--
 ldap
+zend_test
 --FILE--
 <?php
 require "connect.inc";
 
 $link = ldap_connect($uri);
 
-$attrvalue = str_repeat("attrvalue", random_int(1, 1));
-$context = str_repeat("context", random_int(1, 1));
+$attrvalue = zend_return_non_interned_string("attrvalue");
+$context = zend_return_non_interned_string("context");
 
 $controls = [
     ["oid" => "2.16.840.1.113730.3.4.9", "value" => ["attrvalue" => $attrvalue, "context" => $context, "before" => 0, "after" => 0]],
