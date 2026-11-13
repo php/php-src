@@ -3,5 +3,5 @@
 ARG_ENABLE("tokenizer", "tokenizer support", "yes");
 
 if (PHP_TOKENIZER == "yes") {
-	EXTENSION("tokenizer", "tokenizer.c tokenizer_data.c");
+	EXTENSION("tokenizer", "tokenizer.c tokenizer_data.c", null, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 }
