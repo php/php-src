@@ -92,6 +92,9 @@ PHP                                                                        NEWS
     (ndossche)
   . Fixed JIT ignoring exceptions from typed property set hooks. (David Carlier)
 
+- OpenSSL:
+  . Added AES-GCM-SIV support. (Rakdos8)
+
 - PDO:
   . Fixed PDOStatement::getColumnMeta() reading out of bounds for an invalid
     column index. (Ilia Alshanetsky)
