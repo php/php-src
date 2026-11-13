@@ -56,6 +56,14 @@ if (!have_innodb($link))
         echo $exception->getMessage() . "\n";
     }
 
+    $link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+    mysqli_report(MYSQLI_REPORT_ERROR|MYSQLI_REPORT_STRICT);
+    try {
+        mysqli_commit($link);
+    } catch (\mysqli_sql_exception $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+
     print "done!";
 ?>
 --CLEAN--
@@ -64,4 +72,5 @@ require_once 'clean_table.inc';
 ?>
 --EXPECT--
 mysqli object is already closed
+There is no active transaction
 done!
