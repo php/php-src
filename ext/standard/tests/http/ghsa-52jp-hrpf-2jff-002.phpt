@@ -39,7 +39,7 @@ $clientCode = <<<'CODE'
  var_dump(http_get_last_response_headers());
 CODE;
 
-include sprintf("%s/../../../openssl/tests/ServerClientTestCase.inc", __DIR__);
+include dirname(__DIR__) . "/ServerClientTestCase.inc";
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --EXPECTF--

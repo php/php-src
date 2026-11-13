@@ -65,7 +65,7 @@ $certificateGenerator->saveNewCertAsFileWithKey($peerName, $certFile);
 $phar = new Phar($cacertPhar);
 $phar->addFromString($cacertFile, $certificateGenerator->getCaCert());
 
-include 'ServerClientTestCase.inc';
+include dirname(__DIR__, 2) . "/standard/tests/ServerClientTestCase.inc";
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --CLEAN--

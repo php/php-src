@@ -26,7 +26,7 @@ $client = new SoapClient(null, [
 var_dump($client->__doRequest('<x/>', 'http://{{ ADDR }}', 'T', 1));
 CODE;
 
-include sprintf('%s/../../openssl/tests/ServerClientTestCase.inc', __DIR__);
+include dirname(__DIR__, 2) . "/standard/tests/ServerClientTestCase.inc";
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --EXPECT--
