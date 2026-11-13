@@ -29,6 +29,7 @@
 #include "scanf.h"
 #include "zend_API.h"
 #include "zend_execute.h"
+#include "zend_locale.h"
 #include "basic_functions.h"
 #include "zend_smart_str.h"
 #include <Zend/zend_exceptions.h>
@@ -5093,7 +5094,7 @@ static zend_string *try_setlocale_str(zend_long cat, zend_string *loc) {
 	}
 
 # ifndef PHP_WIN32
-	retval = setlocale(cat, loc ? ZSTR_VAL(loc) : NULL);
+	retval = zend_setlocale(cat, loc ? ZSTR_VAL(loc) : NULL);
 # else
 	if (loc) {
 		/* BC: don't try /^[a-z]{2}_[A-Z]{2}($|\..*)/ except for /^u[ks]_U[KS]$/ */
@@ -5108,10 +5109,10 @@ static zend_string *try_setlocale_str(zend_long cat, zend_string *loc) {
 		) {
 			retval = NULL;
 		} else {
-			retval = setlocale(cat, ZSTR_VAL(loc));
+			retval = zend_setlocale(cat, ZSTR_VAL(loc));
 		}
 	} else {
-		retval = setlocale(cat, NULL);
+		retval = zend_setlocale(cat, NULL);
 	}
 # endif
 	if (!retval) {

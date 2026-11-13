@@ -416,6 +416,7 @@ AC_CHECK_HEADERS([
   unistd.h
   unix.h
   utime.h
+  xlocale.h
   sys/utsname.h
   sys/ipc.h
   dlfcn.h
@@ -586,6 +587,7 @@ AC_CHECK_FUNCS([
   symlink
   tzset
   unsetenv
+  uselocale
   usleep
   utime
   vasprintf
@@ -1801,6 +1803,7 @@ PHP_ADD_SOURCES([Zend], m4_normalize([
     zend_lazy_objects.c
     zend_list.c
     zend_llist.c
+    zend_locale.c
     zend_max_execution_timer.c
     zend_multibyte.c
     zend_object_handlers.c

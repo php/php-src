@@ -25,6 +25,7 @@
 
 #include "php_intl.h"
 #include "intl_convert.h"
+#include "zend_locale.h"
 
 #include <locale.h>
 #include <memory>
@@ -71,8 +72,8 @@ U_CFUNC PHP_FUNCTION( numfmt_parse )
 
 #if ICU_LOCALE_BUG && defined(LC_NUMERIC)
 	/* need to copy here since setlocale may change it later */
-	oldlocale = estrdup(setlocale(LC_NUMERIC, NULL));
-	setlocale(LC_NUMERIC, "C");
+	oldlocale = estrdup(zend_setlocale(LC_NUMERIC, NULL));
+	zend_setlocale(LC_NUMERIC, "C");
 #endif
 
 	switch(type) {
@@ -132,7 +133,7 @@ U_CFUNC PHP_FUNCTION( numfmt_parse )
 cleanup:
 
 #if ICU_LOCALE_BUG && defined(LC_NUMERIC)
-	setlocale(LC_NUMERIC, oldlocale);
+	zend_setlocale(LC_NUMERIC, oldlocale);
 	efree(oldlocale);
 #endif
 

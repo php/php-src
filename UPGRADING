@@ -120,6 +120,10 @@ PHP 8.7 UPGRADE NOTES
     rebuilding PHP with --enable-fd-setsize. On Windows, selecting on more than
     64 pipe or file handles no longer crashes; it fails with a warning, as that
     path remains bounded by WaitForMultipleObjects().
+  . setlocale() now only changes the locale of the current thread, as it
+    already did in thread-safe (ZTS) builds on Windows. Previously it changed
+    the locale of the whole process: in ZTS builds, requests running in other
+    threads used that locale too, and concurrent calls could crash.
 
 ========================================
 6. New Functions
