@@ -4234,7 +4234,9 @@ static bool zend_compile_ignore_class(zend_class_entry *ce, zend_string *filenam
 static bool zend_compile_ignore_function(zend_function *fbc, zend_string *filename)
 {
 	if (fbc->type == ZEND_INTERNAL_FUNCTION) {
-		return CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS;
+		return (CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS)
+			|| ((CG(compiler_options) & ZEND_COMPILE_IGNORE_OTHER_FILES)
+				&& fbc->internal_function.module->type == MODULE_TEMPORARY);
 	} else {
 		return (CG(compiler_options) & ZEND_COMPILE_IGNORE_USER_FUNCTIONS)
 			|| ((CG(compiler_options) & ZEND_COMPILE_IGNORE_OTHER_FILES)
