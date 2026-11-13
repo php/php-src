@@ -3585,6 +3585,52 @@ ZEND_API int ZEND_FASTCALL zend_compare_objects(zval *o1, zval *o2) /* {{{ */
 }
 /* }}} */
 
+static const char zend_two_digits[201] =
+	"0001020304050607080910111213141516171819202122232425262728293031323334353637383940414243444546474849"
+	"5051525354555657585960616263646566676869707172737475767778798081828384858687888990919293949596979899";
+
+static zend_always_inline char *zend_print_quad(char *buf, uint32_t quad)
+{
+	const char *hi = &zend_two_digits[(quad / 100) * 2];
+	const char *lo = &zend_two_digits[(quad % 100) * 2];
+	buf -= 4;
+	buf[0] = hi[0];
+	buf[1] = hi[1];
+	buf[2] = lo[0];
+	buf[3] = lo[1];
+	return buf;
+}
+
+static zend_always_inline char *zend_print_ulong_digits(char *buf, zend_ulong num)
+{
+	uint32_t rem;
+
+	while (num >= 10000) {
+		buf = zend_print_quad(buf, (uint32_t) (num % 10000));
+		num /= 10000;
+	}
+	rem = (uint32_t) num;
+	if (rem >= 100) {
+		const char *lo = &zend_two_digits[(rem % 100) * 2];
+		rem /= 100;
+		*--buf = lo[1];
+		*--buf = lo[0];
+	}
+	if (rem >= 10) {
+		*--buf = zend_two_digits[rem * 2 + 1];
+		*--buf = zend_two_digits[rem * 2];
+	} else {
+		*--buf = (char) rem + '0';
+	}
+	return buf;
+}
+
+ZEND_API char *ZEND_FASTCALL zend_print_ulong_to_buf_slow(char *buf, zend_ulong num)
+{
+	*buf = '\0';
+	return zend_print_ulong_digits(buf, num);
+}
+
 ZEND_API zend_string* ZEND_FASTCALL zend_long_to_str(zend_long num) /* {{{ */
 {
 	if ((zend_ulong)num <= 9) {
@@ -3618,17 +3664,12 @@ static zend_always_inline char *zend_print_u64_to_buf(char *buf, uint64_t num64)
 	return zend_print_ulong_to_buf(buf, num64);
 #else
 	*buf = '\0';
-	while (num64 > ZEND_ULONG_MAX) {
-		*--buf = (char) (num64 % 10) + '0';
-		num64 /= 10;
-	}
 
-	zend_ulong num = (zend_ulong) num64;
-	do {
-		*--buf = (char) (num % 10) + '0';
-		num /= 10;
-	} while (num > 0);
-	return buf;
+	while (num64 > ZEND_ULONG_MAX) {
+		buf = zend_print_quad(buf, (uint32_t) (num64 % 10000));
+		num64 /= 10000;
+	}
+	return zend_print_ulong_digits(buf, (zend_ulong) num64);
 #endif
 }
 

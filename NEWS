@@ -8,6 +8,9 @@ PHP                                                                        NEWS
     result is unused (GH-23048). (Artem Ukrainskiy)
   . Fixed bug GH-9993 (Bad performance with hard-coded GC_THRESHOLD_* values).
     (Kamil Tekiela)
+  . Improved performance of integer to string conversion, used by string casts,
+    echo, implode(), json_encode(), serialize() and other places, by emitting
+    two digits per step. (Alexander Danilov)
 
 - Curl:
   . Negative values for CURLOPT_POSTREDIR are now rejected, causing

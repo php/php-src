@@ -212,6 +212,8 @@ PHP 8.7 UPGRADE NOTES
   . The garbage collector now raises its threshold when its runs traverse a
     large graph of live objects, so that it runs less often. Before, it
     traversed the whole graph again after every 10000 possible roots.
+  . Improved performance of integer to string conversion (string casts, echo,
+    implode(), json_encode(), serialize(), var_export() and others).
 
 - DOM:
   . Parsing HTML with Dom\HTMLDocument or innerHTML uses much less memory for
