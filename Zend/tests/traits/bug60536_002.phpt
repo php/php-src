@@ -34,4 +34,4 @@ $t->hello = "foo";
 PRE-CLASS-GUARD
 POST-CLASS-GUARD
 
-Fatal error: TraitsTest and THello1 define the same property ($hello) in the composition of TraitsTest. However, the definition differs and is considered incompatible. Class was composed in %s on line %d
+Fatal error: TraitsTest and THello1 define the same property ($hello) in the composition of TraitsTest. However, the definition differs and is considered incompatible: the visibility differs. Class was composed in %s on line %d
