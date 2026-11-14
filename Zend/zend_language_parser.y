@@ -39,6 +39,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 
 %code requires {
 #include "zend_compile.h"
+#include "zend_async.h"
 }
 
 %define api.prefix {zend}
@@ -76,6 +77,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %left '+' '-'
 %left '*' '/' '%'
 %precedence '!'
+%precedence T_AWAIT
 %precedence T_INSTANCEOF
 %precedence '~' T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST T_UNSET_CAST '@'
 %right T_POW
@@ -110,6 +112,8 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token <ident> T_PRINT         "'print'"
 %token <ident> T_YIELD         "'yield'"
 %token <ident> T_YIELD_FROM    "'yield from'"
+%token <ident> T_ASYNC         "'async'"
+%token <ident> T_AWAIT         "'await'"
 %token <ident> T_INSTANCEOF    "'instanceof'"
 %token <ident> T_NEW           "'new'"
 %token <ident> T_CLONE         "'clone'"
@@ -310,7 +314,7 @@ reserved_non_modifiers:
 	| T_FUNCTION | T_CONST | T_RETURN | T_PRINT | T_YIELD | T_LIST | T_SWITCH | T_ENDSWITCH | T_CASE | T_DEFAULT | T_BREAK
 	| T_ARRAY | T_CALLABLE | T_EXTENDS | T_IMPLEMENTS | T_NAMESPACE | T_TRAIT | T_INTERFACE | T_CLASS
 	| T_CLASS_C | T_TRAIT_C | T_FUNC_C | T_METHOD_C | T_LINE | T_FILE | T_DIR | T_NS_C | T_FN | T_MATCH | T_ENUM
-	| T_PROPERTY_C
+	| T_PROPERTY_C | T_AWAIT
 ;
 
 semi_reserved:
@@ -387,6 +391,7 @@ attributes:
 
 attributed_statement:
 		function_declaration_statement		{ $$ = $1; }
+	|	T_ASYNC function_declaration_statement	{ $$ = zend_ast_create_async_function($2); }
 	|	class_declaration_statement			{ $$ = $1; }
 	|	trait_declaration_statement			{ $$ = $1; }
 	|	interface_declaration_statement		{ $$ = $1; }
@@ -998,6 +1003,10 @@ attributed_class_statement:
 		return_type backup_fn_flags method_body backup_fn_flags
 			{ $$ = zend_ast_create_decl(ZEND_AST_METHOD, $3 | $1 | $12, $2, $5,
 				  zend_ast_get_str($4), $7, NULL, $11, $9, NULL); CG(extra_fn_flags) = $10; }
+	|	method_modifiers T_ASYNC function returns_ref identifier backup_doc_comment '(' parameter_list ')'
+		return_type backup_fn_flags method_body backup_fn_flags
+			{ $$ = zend_ast_create_async_function(zend_ast_create_decl(ZEND_AST_METHOD, $4 | $1 | $13, $3, $6,
+				  zend_ast_get_str($5), $8, NULL, $12, $10, NULL)); CG(extra_fn_flags) = $11; }
 	|	enum_case { $$ = $1; }
 ;
 
@@ -1383,11 +1392,20 @@ expr:
 	|	T_YIELD expr T_DOUBLE_ARROW expr { $$ = zend_ast_create(ZEND_AST_YIELD, $4, $2); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
 	|	T_YIELD_FROM expr { $$ = zend_ast_create(ZEND_AST_YIELD_FROM, $2); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
 	|	T_THROW expr { $$ = zend_ast_create(ZEND_AST_THROW, $2); }
+	|	T_AWAIT expr { $$ = zend_ast_create_await($2); }
 	|	inline_function { $$ = $1; }
 	|	attributes inline_function { $$ = zend_ast_with_attributes($2, $1); }
 	|	T_STATIC inline_function { $$ = $2; ((zend_ast_decl *) $$)->flags |= ZEND_ACC_STATIC; }
 	|	attributes T_STATIC inline_function
 			{ $$ = zend_ast_with_attributes($3, $1); ((zend_ast_decl *) $$)->flags |= ZEND_ACC_STATIC; }
+	|	T_ASYNC inline_function { $$ = zend_ast_create_async_function($2); }
+	|	attributes T_ASYNC inline_function
+			{ $$ = zend_ast_with_attributes(zend_ast_create_async_function($3), $1); }
+	|	T_STATIC T_ASYNC inline_function
+			{ ((zend_ast_decl *) $3)->flags |= ZEND_ACC_STATIC; $$ = zend_ast_create_async_function($3); }
+	|	attributes T_STATIC T_ASYNC inline_function
+			{ ((zend_ast_decl *) $4)->flags |= ZEND_ACC_STATIC;
+			  $$ = zend_ast_with_attributes(zend_ast_create_async_function($4), $1); }
 	|	match { $$ = $1; }
 ;
 

@@ -1464,6 +1464,17 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	RETURN_TOKEN_WITH_IDENT(T_YIELD);
 }
 
+/* "async" is only a keyword when directly followed by "function" or "fn",
+ * so existing code using async() as a function name keeps working. */
+<ST_IN_SCRIPTING>"async"{WHITESPACE_OR_COMMENTS}("function"|"fn")[^a-zA-Z0-9_\x80-\xff] {
+	yyless(sizeof("async") - 1);
+	RETURN_TOKEN_WITH_IDENT(T_ASYNC);
+}
+
+<ST_IN_SCRIPTING>"await" {
+	RETURN_TOKEN_WITH_IDENT(T_AWAIT);
+}
+
 <ST_IN_SCRIPTING>"try" {
 	RETURN_TOKEN_WITH_IDENT(T_TRY);
 }

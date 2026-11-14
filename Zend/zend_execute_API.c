@@ -33,6 +33,7 @@
 #include "zend_vm.h"
 #include "zend_float.h"
 #include "zend_fibers.h"
+#include "zend_async.h"
 #include "zend_weakrefs.h"
 #include "zend_inheritance.h"
 #include "zend_observer.h"
@@ -199,6 +200,7 @@ void init_executor(void) /* {{{ */
 
 	zend_max_execution_timer_init();
 	zend_fiber_init();
+	zend_async_init();
 	zend_weakrefs_init();
 
 	zend_hash_init(&EG(callable_convert_cache), 8, NULL, ZVAL_PTR_DTOR, 0);
@@ -257,6 +259,9 @@ void shutdown_destructors(void) /* {{{ */
 	}
 	zend_try {
 		uint32_t symbols;
+
+		/* Destroy pending async tasks while destructors may still run. */
+		zend_async_shutdown();
 		do {
 			symbols = zend_hash_num_elements(&EG(symbol_table));
 			zend_hash_reverse_apply(&EG(symbol_table), (apply_func_t) zval_call_destructor);
@@ -476,6 +481,7 @@ void shutdown_executor(void) /* {{{ */
 		zend_stream_shutdown();
 	} zend_end_try();
 
+	zend_async_shutdown();
 	zend_shutdown_executor_values(fast_shutdown);
 
 	zend_weakrefs_shutdown();
