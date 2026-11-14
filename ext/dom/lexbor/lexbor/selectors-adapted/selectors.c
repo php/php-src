@@ -190,6 +190,10 @@ lxb_selectors_state_find(lxb_selectors_t *selectors,
 						 lxb_selectors_entry_t *entry);
 
 static lxb_selectors_entry_t *
+lxb_selectors_state_find_forward(lxb_selectors_t *selectors,
+								 lxb_selectors_entry_t *entry);
+
+static lxb_selectors_entry_t *
 lxb_selectors_state_found_check(lxb_selectors_t *selectors,
 								lxb_selectors_entry_t *entry);
 
@@ -673,6 +677,29 @@ lxb_inline void
 lxb_selectors_switch_to_not_found(lxb_selectors_t *selectors,
 								  lxb_selectors_nested_t *current)
 {
+	lxb_css_selector_combinator_t combinator;
+
+	combinator = current->entry->combinator;
+
+	/*
+	 * A nested selector rejected this candidate. Continue the combinator
+	 * before backtracking to another entry.
+	 */
+	if (combinator == LXB_CSS_SELECTOR_COMBINATOR_DESCENDANT
+		|| combinator == LXB_CSS_SELECTOR_COMBINATOR_FOLLOWING
+		|| (current->forward
+			&& combinator == LXB_CSS_SELECTOR_COMBINATOR_CHILD))
+	{
+		if (current->forward) {
+			selectors->state = lxb_selectors_state_find_forward;
+		}
+		else {
+			selectors->state = lxb_selectors_state_find;
+		}
+
+		return;
+	}
+
 	if (current->forward) {
 		selectors->state = lxb_selectors_state_not_found_forward;
 	}

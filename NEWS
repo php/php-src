@@ -41,6 +41,10 @@ PHP                                                                        NEWS
     when lexbor allocation fails). (ndossche)
   . Fixed bug GH-25434 (C14NFile() on a Dom\XMLDocument leaves the document
     changed and leaks memory). (lazerg)
+  . Fixed CSS selectors checking only the nearest element for a descendant or
+    subsequent-sibling combinator after a compound selector that starts with
+    :is(), :where(), :not(), :has() or :nth-child(An+B of S), by merging
+    lexbor/lexbor@f6c1d06. (phcorp)
 
 - GD:
   . Fixed use-after-free when drawing with a brush or tile image that was
