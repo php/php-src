@@ -1875,14 +1875,14 @@ static ZEND_COLD bool zend_ast_valid_var_name(const char *s, size_t len)
 		return false;
 	}
 	c = (unsigned char)s[0];
-	if (c != '_' && c < 127 &&
+	if (c != '_' && c < 128 &&
 	    (c < 'A' || c > 'Z') &&
 	    (c < 'a' || c > 'z')) {
 		return false;
 	}
 	for (i = 1; i < len; i++) {
 		c = (unsigned char)s[i];
-		if (c != '_' && c < 127 &&
+		if (c != '_' && c < 128 &&
 		    (c < '0' || c > '9') &&
 		    (c < 'A' || c > 'Z') &&
 		    (c < 'a' || c > 'z')) {
