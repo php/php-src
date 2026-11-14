@@ -15,6 +15,8 @@ PHP                                                                        NEWS
   . Uploading multiple files with the same field name is now possible by
     passing an array of CURLFile or CURLStringFile objects to
     CURLOPT_POSTFIELDS. (Sjoerd Langkemper)
+  . Added CURLOPT_OPENSOCKETFUNCTION to allow or refuse each connection libcurl
+    is about to make. (Xavier Leune)
 
 - FPM:
   . Use recommended TYPE, HELP order for OpenMetrics metadata.
