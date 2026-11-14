@@ -15,6 +15,7 @@
 #ifndef PDO_FIREBIRD_UTILS_H
 #define PDO_FIREBIRD_UTILS_H
 
+#include <stdint.h>
 #include <ibase.h>
 
 #ifdef __cplusplus
