@@ -3853,7 +3853,7 @@ static zend_always_inline void zend_memnstr_ex_pre(unsigned int td[], const char
 }
 /* }}} */
 
-ZEND_API const char* ZEND_FASTCALL zend_memnstr_ex(const char *haystack, const char *needle, size_t needle_len, const char *end) /* {{{ */
+static zend_never_inline const char* ZEND_FASTCALL zend_memnstr_sunday(const char *haystack, const char *needle, size_t needle_len, const char *end)
 {
 	unsigned int td[256];
 	size_t i;
@@ -3885,7 +3885,52 @@ ZEND_API const char* ZEND_FASTCALL zend_memnstr_ex(const char *haystack, const c
 
 	return NULL;
 }
-/* }}} */
+
+static zend_never_inline const char* ZEND_FASTCALL zend_memnstr_sunday_short(const char *haystack, const char *needle, size_t needle_len, const char *end)
+{
+	uint8_t td[256];
+	size_t i;
+	const char *p;
+
+	if (needle_len == 0 || (end - haystack) < needle_len) {
+		return NULL;
+	}
+
+	/* The dispatcher only sends short needles here, so every
+	 * Sunday shift fits in one byte. Avoid filling a 1 KiB table per word. */
+	memset(td, (unsigned char)(needle_len + 1), sizeof(td));
+	for (i = 0; i < needle_len; i++) {
+		td[(unsigned char)needle[i]] = (unsigned char)(needle_len - i);
+	}
+
+	p = haystack;
+	end -= needle_len;
+
+	while (p <= end) {
+		for (i = 0; i < needle_len; i++) {
+			if (needle[i] != p[i]) {
+				break;
+			}
+		}
+		if (i == needle_len) {
+			return p;
+		}
+		if (UNEXPECTED(p == end)) {
+			return NULL;
+		}
+		p += td[(unsigned char)(p[needle_len])];
+	}
+
+	return NULL;
+}
+
+ZEND_API const char* ZEND_FASTCALL zend_memnstr_ex(const char *haystack, const char *needle, size_t needle_len, const char *end)
+{
+	if (EXPECTED(needle_len < 32)) {
+		return zend_memnstr_sunday_short(haystack, needle, needle_len, end);
+	}
+	return zend_memnstr_sunday(haystack, needle, needle_len, end);
+}
 
 ZEND_API const char* ZEND_FASTCALL zend_memnrstr_ex(const char *haystack, const char *needle, size_t needle_len, const char *end) /* {{{ */
 {
