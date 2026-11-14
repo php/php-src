@@ -18,6 +18,7 @@
 
 #include "zend_API.h"
 #include "php.h"
+#include "filter_decl.h"
 
 extern zend_module_entry filter_module_entry;
 #define phpext_filter_ptr &filter_module_entry
