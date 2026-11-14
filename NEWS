@@ -27,6 +27,10 @@ PHP                                                                        NEWS
   . Fixed mhash_keygen_s2k() truncating a $length above INT_MAX instead of
     throwing a ValueError. (Marc Bennewitz)
 
+- JSON:
+  . Improved performance of json_decode(), json_validate() and json_encode()
+    for input containing strings. (zeynallow)
+
 - Intl:
   . Added Spoofchecker::getRestrictionLevel(). (Weilin Du)
   . Added Collator::getRules() and collator_get_rules(). (Weilin Du)
