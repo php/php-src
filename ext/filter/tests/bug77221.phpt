@@ -42,6 +42,8 @@ foreach ($non_global_ranges as $key => $range) {
 var_dump(filter_var('185.85.0.29', FILTER_VALIDATE_IP, FILTER_FLAG_GLOBAL_RANGE));
 var_dump(filter_var('64:ff9b::', FILTER_VALIDATE_IP, FILTER_FLAG_GLOBAL_RANGE));
 var_dump(filter_var('64:ff9b::ffff', FILTER_VALIDATE_IP, FILTER_FLAG_GLOBAL_RANGE));
+var_dump(filter_var('64:ff9b::808:808', FILTER_VALIDATE_IP, FILTER_FLAG_GLOBAL_RANGE));
+var_dump(filter_var('2606:4700::1', FILTER_VALIDATE_IP, FILTER_FLAG_GLOBAL_RANGE));
 
 ?>
 --EXPECT--
@@ -115,5 +117,7 @@ string(9) "fe80::/10"
 bool(false)
 bool(false)
 string(11) "185.85.0.29"
-string(9) "64:ff9b::"
-string(13) "64:ff9b::ffff"
+bool(false)
+bool(false)
+string(16) "64:ff9b::808:808"
+string(12) "2606:4700::1"

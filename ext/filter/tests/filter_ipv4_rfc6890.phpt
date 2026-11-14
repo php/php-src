@@ -70,8 +70,11 @@ $reservedRanges['192.168.0.0/16'] = array('192.168.0.0', '192.168.255.255');
 // 203.0.113.0/24
 $reservedRanges['203.0.113.0/24'] = array('203.0.113.0', '203.0.113.255');
 
+// 224.0.0.0/4
+$reservedRanges['224.0.0.0/4'] = array('224.0.0.0', '239.255.255.255');
+
 // 240.0.0.0/4 + 255.255.255.255/32
-$reservedRanges['240.0.0.0/4'] = array('224.0.0.0', '255.255.255.255');
+$reservedRanges['240.0.0.0/4'] = array('240.0.0.0', '255.255.255.255');
 
 foreach ($reservedRanges as $key => $range) {
     list($min, $max) = $range;
@@ -136,6 +139,9 @@ string(15) "192.168.255.255"
 string(14) "203.0.113.0/24"
 string(11) "203.0.113.0"
 string(13) "203.0.113.255"
+string(11) "224.0.0.0/4"
+bool(false)
+bool(false)
 string(11) "240.0.0.0/4"
-string(9) "224.0.0.0"
+bool(false)
 bool(false)
