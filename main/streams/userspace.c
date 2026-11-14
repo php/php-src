@@ -331,8 +331,8 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 	zval_ptr_dtor(&args[0]);
 
 	if (UNEXPECTED(call_result == FAILURE)) {
-		php_stream_wrapper_log_warn(wrapper, context, options,NotImplemented,
-				"\"%s::" USERSTREAM_OPEN "\" is not implemented", ZSTR_VAL(us->wrapper->ce->name));
+		php_stream_wrapper_log_warn(wrapper, context, options, NotImplemented,
+				"\"%pS::" USERSTREAM_OPEN "\" is not implemented", us->wrapper->ce->name);
 		zval_ptr_dtor(&args[3]);
 		goto end;
 	}
@@ -356,7 +356,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 	} else {
 		php_stream_wrapper_log_warn(wrapper, context, options,
 				UserspaceCallFailed,
-				"\"%s::" USERSTREAM_OPEN "\" call failed", ZSTR_VAL(us->wrapper->ce->name));
+				"\"%pS::" USERSTREAM_OPEN "\" call failed", us->wrapper->ce->name);
 	}
 
 	zval_ptr_dtor(&zretval);
@@ -421,8 +421,8 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 
 	if (UNEXPECTED(call_result == FAILURE)) {
 		php_stream_wrapper_log_warn(wrapper, context, options, NotImplemented,
-				"\"%s::" USERSTREAM_DIR_OPEN "\" is not implemented",
-				ZSTR_VAL(us->wrapper->ce->name));
+				"\"%pS::" USERSTREAM_DIR_OPEN "\" is not implemented",
+				us->wrapper->ce->name);
 		goto end;
 	}
 	/* Exception occurred in call */
@@ -439,7 +439,7 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 	} else {
 		php_stream_wrapper_log_warn(wrapper, context, options,
 				UserspaceCallFailed,
-				"\"%s::" USERSTREAM_DIR_OPEN "\" call failed", ZSTR_VAL(us->wrapper->ce->name));
+				"\"%pS::" USERSTREAM_DIR_OPEN "\" call failed", us->wrapper->ce->name);
 	}
 	zval_ptr_dtor(&zretval);
 

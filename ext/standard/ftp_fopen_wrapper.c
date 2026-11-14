@@ -270,7 +270,7 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 		zend_string *user = php_ftp_url_decode(resource->user);
 
 		if (php_ftp_has_cntrl(user)) {
-			php_stream_wrapper_log_warn(wrapper, context, options, AuthFailed, "Invalid login %s", ZSTR_VAL(user));
+			php_stream_wrapper_log_warn(wrapper, context, options, AuthFailed, "Invalid login %pS", user);
 			zend_string_efree(user);
 			goto connect_errexit;
 		}
@@ -292,7 +292,7 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 			zend_string *password = php_ftp_url_decode(resource->password);
 
 			if (php_ftp_has_cntrl(password)) {
-				php_stream_wrapper_log_warn(wrapper, context, options, AuthFailed, "Invalid password %s", ZSTR_VAL(password));
+				php_stream_wrapper_log_warn(wrapper, context, options, AuthFailed, "Invalid password %pS", password);
 				zend_string_efree(password);
 				goto connect_errexit;
 			}
