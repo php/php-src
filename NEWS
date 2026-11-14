@@ -56,6 +56,10 @@ PHP                                                                        NEWS
   . Fixed stack overflow in mb_check_encoding() and mb_convert_encoding() with
     deeply nested arrays. (Eyüp Can Akman)
 
+- MySQLnd:
+  . Fixed crash when a server sends a truncated or missing metadata EOF packet
+    for a prepared statement. (Ilia Alshanetsky)
+
 - Opcache:
   . Fixed bug GH-24801 (JIT: SIGFPE in ir_fold MUL_OV constant folding).
     (waroad)
