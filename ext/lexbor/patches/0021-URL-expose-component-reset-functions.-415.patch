@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?M=C3=A1t=C3=A9=20Kocsis?= <kocsismate@woohoolabs.com>
 Date: Tue, 22 Sep 2026 22:20:28 +0200
-Subject: [PATCH 21/24] URL: expose component reset functions. (#415)
+Subject: [PATCH 21/25] URL: expose component reset functions. (#415)
 
 * URL: expose component reset functions.
 
