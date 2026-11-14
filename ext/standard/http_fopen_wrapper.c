@@ -574,7 +574,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 
 	if (errstr) {
 		php_stream_wrapper_log_warn(wrapper, context, options, ProtocolError,
-			"%s", ZSTR_VAL(errstr));
+			"%pS", errstr);
 		zend_string_release_ex(errstr, 0);
 		errstr = NULL;
 	}
