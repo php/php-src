@@ -4620,7 +4620,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 {
 	USE_OPLINE
 	zval *val;
-	uint8_t op1_type;
+	zend_operand_type op1_type;
 
 	val = RT_CONSTANT(opline, opline->op1);
 
@@ -4654,7 +4654,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 {
 	USE_OPLINE
 	zval *val;
-	uint8_t op1_type;
+	zend_operand_type op1_type;
 
 	val = RT_CONSTANT(opline, opline->op1);
 
@@ -17071,7 +17071,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_J
 {
 	USE_OPLINE
 	zval *val;
-	uint8_t op1_type;
+	zend_operand_type op1_type;
 
 	val = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
 
@@ -17105,7 +17105,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_J
 {
 	USE_OPLINE
 	zval *val;
-	uint8_t op1_type;
+	zend_operand_type op1_type;
 
 	val = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
 
@@ -39836,7 +39836,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_J
 {
 	USE_OPLINE
 	zval *val;
-	uint8_t op1_type;
+	zend_operand_type op1_type;
 
 	val = EX_VAR(opline->op1.var);
 
@@ -39870,7 +39870,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_J
 {
 	USE_OPLINE
 	zval *val;
-	uint8_t op1_type;
+	zend_operand_type op1_type;
 
 	val = EX_VAR(opline->op1.var);
 
@@ -57499,7 +57499,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_JMPZ_
 {
 	USE_OPLINE
 	zval *val;
-	uint8_t op1_type;
+	zend_operand_type op1_type;
 
 	val = RT_CONSTANT(opline, opline->op1);
 
@@ -57533,7 +57533,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_JMPNZ
 {
 	USE_OPLINE
 	zval *val;
-	uint8_t op1_type;
+	zend_operand_type op1_type;
 
 	val = RT_CONSTANT(opline, opline->op1);
 
@@ -69848,7 +69848,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_JMPZ_S
 {
 	USE_OPLINE
 	zval *val;
-	uint8_t op1_type;
+	zend_operand_type op1_type;
 
 	val = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
 
@@ -69882,7 +69882,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_JMPNZ_
 {
 	USE_OPLINE
 	zval *val;
-	uint8_t op1_type;
+	zend_operand_type op1_type;
 
 	val = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
 
@@ -92513,7 +92513,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_JMPZ_S
 {
 	USE_OPLINE
 	zval *val;
-	uint8_t op1_type;
+	zend_operand_type op1_type;
 
 	val = EX_VAR(opline->op1.var);
 
@@ -92547,7 +92547,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_JMPNZ_
 {
 	USE_OPLINE
 	zval *val;
-	uint8_t op1_type;
+	zend_operand_type op1_type;
 
 	val = EX_VAR(opline->op1.var);
 
