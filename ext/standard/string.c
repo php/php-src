@@ -53,15 +53,65 @@
 static MUTEX_T locale_mutex = NULL;
 #endif
 
-/* {{{ php_hex2bin */
-static zend_string *php_hex2bin(const unsigned char *old, const size_t oldlen)
+#if defined(XSSE2) && !defined(WORDS_BIGENDIAN)
+static zend_never_inline bool php_hex2bin_simd_chunk(unsigned char *out16, const unsigned char *in32)
 {
-	size_t target_length = oldlen >> 1;
-	zend_string *str = zend_string_alloc(target_length, 0);
-	unsigned char *ret = (unsigned char *)ZSTR_VAL(str);
-	size_t i, j;
+	const __m128i lo_bound_digit = _mm_set1_epi8(0x2f); /* '0' - 1 */
+	const __m128i hi_bound_digit = _mm_set1_epi8(0x3a); /* '9' + 1 */
+	const __m128i lo_bound_upper = _mm_set1_epi8(0x40); /* 'A' - 1 */
+	const __m128i hi_bound_upper = _mm_set1_epi8(0x47); /* 'F' + 1 */
+	const __m128i lo_bound_lower = _mm_set1_epi8(0x60); /* 'a' - 1 */
+	const __m128i hi_bound_lower = _mm_set1_epi8(0x67); /* 'f' + 1 */
+	const __m128i letter_bit_mask = _mm_set1_epi8(0x40); /* set in 'A'-'F' and 'a'-'f', clear in '0'-'9' */
+	const __m128i low_nibble_mask = _mm_set1_epi8(0x0f);
+	const __m128i letter_nib_offset = _mm_set1_epi8(9);
+	const __m128i word_lo_mask = _mm_set1_epi16(0x00ff);
+	const __m128i nibble_hi_mask = _mm_set1_epi8((char) 0xf0);
+	const __m128i zero = _mm_setzero_si128();
+	__m128i packed[2];
+	bool chunk_valid = true;
 
-	for (i = j = 0; i < target_length; i++) {
+	for (int half = 0; half < 2; half++) {
+		__m128i c = _mm_loadu_si128((const __m128i *) (in32 + half * sizeof(__m128i)));
+
+		/* Signed cmpgt is safe here: every threshold is < 0x80, so bytes >= 0x80
+		   compare as negative and correctly fail every range test. */
+		__m128i is_digit = _mm_and_si128(_mm_cmpgt_epi8(c, lo_bound_digit), _mm_cmpgt_epi8(hi_bound_digit, c));
+		__m128i is_upper = _mm_and_si128(_mm_cmpgt_epi8(c, lo_bound_upper), _mm_cmpgt_epi8(hi_bound_upper, c));
+		__m128i is_lower = _mm_and_si128(_mm_cmpgt_epi8(c, lo_bound_lower), _mm_cmpgt_epi8(hi_bound_lower, c));
+		__m128i valid = _mm_or_si128(_mm_or_si128(is_digit, is_upper), is_lower);
+
+		if (_mm_movemask_epi8(valid) != 0xffff) {
+			chunk_valid = false;
+			break;
+		}
+
+		__m128i is_letter = _mm_cmpeq_epi8(_mm_and_si128(c, letter_bit_mask), letter_bit_mask);
+		__m128i nib = _mm_add_epi8(_mm_and_si128(c, low_nibble_mask), _mm_and_si128(is_letter, letter_nib_offset));
+
+		__m128i hi_src = _mm_and_si128(nib, word_lo_mask);
+		__m128i lo_src = _mm_srli_epi16(nib, 8);
+		__m128i hi_packed = _mm_packus_epi16(hi_src, zero);
+		__m128i lo_packed = _mm_packus_epi16(lo_src, zero);
+		__m128i hi_shifted = _mm_and_si128(_mm_slli_epi16(hi_packed, 4), nibble_hi_mask);
+
+		packed[half] = _mm_or_si128(hi_shifted, lo_packed);
+	}
+
+	if (!chunk_valid) {
+		return false;
+	}
+
+	memcpy(out16, &packed[0], 8);
+	memcpy(out16 + 8, &packed[1], 8);
+	return true;
+}
+#endif
+
+/* {{{ php_hex2bin */
+static zend_always_inline bool php_hex2bin_scalar(unsigned char *ret, const unsigned char *old, size_t i, size_t j, size_t target_length)
+{
+	for (; i < target_length; i++) {
 		unsigned char c = old[j++];
 		unsigned char l = c & ~0x20;
 		int is_letter = ((unsigned int) ((l - 'A') ^ (l - 'F' - 1))) >> (8 * sizeof(unsigned int) - 1);
@@ -71,8 +121,7 @@ static zend_string *php_hex2bin(const unsigned char *old, const size_t oldlen)
 		if (EXPECTED((((c ^ '0') - 10) >> (8 * sizeof(unsigned int) - 1)) | is_letter)) {
 			d = (l - 0x10 - 0x27 * is_letter) << 4;
 		} else {
-			zend_string_efree(str);
-			return NULL;
+			return false;
 		}
 		c = old[j++];
 		l = c & ~0x20;
@@ -80,12 +129,48 @@ static zend_string *php_hex2bin(const unsigned char *old, const size_t oldlen)
 		if (EXPECTED((((c ^ '0') - 10) >> (8 * sizeof(unsigned int) - 1)) | is_letter)) {
 			d |= l - 0x10 - 0x27 * is_letter;
 		} else {
-			zend_string_efree(str);
-			return NULL;
+			return false;
 		}
 		ret[i] = d;
 	}
-	ret[i] = '\0';
+	return true;
+}
+
+#if defined(XSSE2) && !defined(WORDS_BIGENDIAN)
+static zend_never_inline bool php_hex2bin_simd(unsigned char *ret, const unsigned char *old, size_t oldlen)
+{
+	size_t i = 0, j = 0;
+
+	for (; j + 2 * sizeof(__m128i) <= oldlen; j += 2 * sizeof(__m128i), i += sizeof(__m128i)) {
+		if (!php_hex2bin_simd_chunk(ret + i, old + j)) {
+			break;
+		}
+	}
+	return php_hex2bin_scalar(ret, old, i, j, oldlen >> 1);
+}
+#endif
+
+static zend_string *php_hex2bin(const unsigned char *old, const size_t oldlen)
+{
+	size_t target_length = oldlen >> 1;
+	zend_string *str = zend_string_alloc(target_length, 0);
+	unsigned char *ret = (unsigned char *)ZSTR_VAL(str);
+	bool ok;
+
+#if defined(XSSE2) && !defined(WORDS_BIGENDIAN)
+	if (oldlen >= 2 * sizeof(__m128i)) {
+		ok = php_hex2bin_simd(ret, old, oldlen);
+	} else
+#endif
+	{
+		ok = php_hex2bin_scalar(ret, old, 0, 0, target_length);
+	}
+
+	if (!ok) {
+		zend_string_efree(str);
+		return NULL;
+	}
+	ret[target_length] = '\0';
 
 	return str;
 }
