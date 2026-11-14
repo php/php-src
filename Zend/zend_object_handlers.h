@@ -310,6 +310,8 @@ ZEND_API int zend_objects_not_comparable(zval *o1, zval *o2);
 
 ZEND_API bool zend_check_protected(const zend_class_entry *ce, const zend_class_entry *scope);
 
+ZEND_API bool zend_check_friend(const zend_class_entry *ce, const zend_class_entry *scope);
+
 ZEND_API zend_result zend_check_property_access(const zend_object *zobj, zend_string *prop_info_name, bool is_dynamic);
 
 ZEND_API ZEND_ATTRIBUTE_NONNULL zend_function *zend_get_call_trampoline_func(const zend_function *fbc, zend_string *method_name);
