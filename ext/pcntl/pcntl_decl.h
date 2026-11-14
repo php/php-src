@@ -1,8 +1,8 @@
 /* This is a generated file, edit pcntl.stub.php instead.
- * Stub hash: ec6306e93fad6d127ff880fc01736ac287619cf7 */
+ * Stub hash: 8c2273c72be8d137c03c46418913ae31c42e716a */
 
-#ifndef ZEND_PCNTL_DECL_ec6306e93fad6d127ff880fc01736ac287619cf7_H
-#define ZEND_PCNTL_DECL_ec6306e93fad6d127ff880fc01736ac287619cf7_H
+#ifndef ZEND_PCNTL_DECL_8c2273c72be8d137c03c46418913ae31c42e716a_H
+#define ZEND_PCNTL_DECL_8c2273c72be8d137c03c46418913ae31c42e716a_H
 
 typedef enum zend_enum_Pcntl_QosClass {
 	ZEND_ENUM_Pcntl_QosClass_UserInteractive = 1,
@@ -12,4 +12,4 @@ typedef enum zend_enum_Pcntl_QosClass {
 	ZEND_ENUM_Pcntl_QosClass_Background = 5,
 } zend_enum_Pcntl_QosClass;
 
-#endif /* ZEND_PCNTL_DECL_ec6306e93fad6d127ff880fc01736ac287619cf7_H */
+#endif /* ZEND_PCNTL_DECL_8c2273c72be8d137c03c46418913ae31c42e716a_H */

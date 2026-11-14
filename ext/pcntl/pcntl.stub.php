@@ -1000,7 +1000,7 @@ const PCNTL_EUSERS = UNKNOWN;
 const PCNTL_ECAPMODE = UNKNOWN;
 #endif
 
-    function pcntl_fork(): int {}
+    function pcntl_fork(bool $rekey_memory = true): int {}
 
     /**
     * @param int $status
@@ -1085,11 +1085,11 @@ function pcntl_wifcontinued(int $status): bool {}
 #endif
 
 #ifdef HAVE_RFORK
-    function pcntl_rfork(int $flags, int $signal = 0): int{}
+    function pcntl_rfork(int $flags, int $signal = 0, bool $rekey_memory = true): int{}
 #endif
 
 #ifdef HAVE_FORKX
-    function pcntl_forkx(int $flags): int{}
+    function pcntl_forkx(int $flags, bool $rekey_memory = true): int{}
 #endif
 
 #ifdef HAVE_PIDFD_OPEN

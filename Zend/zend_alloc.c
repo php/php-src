@@ -2264,8 +2264,16 @@ static void zend_mm_init_key(zend_mm_heap *heap)
 	zend_mm_refresh_key(heap);
 }
 
-ZEND_API void zend_mm_refresh_key_child(zend_mm_heap *heap)
+static void zend_mm_refresh_key_child_ex(zend_mm_heap *heap, bool rekey)
 {
+	if (!rekey) {
+		memset(&heap->rand_state, 0, sizeof(heap->rand_state));
+#if ZEND_DEBUG
+		heap->pid = getpid();
+#endif
+		return;
+	}
+
 	uintptr_t old_key = heap->shadow_key;
 
 	zend_mm_init_key(heap);
@@ -2292,6 +2300,11 @@ ZEND_API void zend_mm_refresh_key_child(zend_mm_heap *heap)
 #if ZEND_DEBUG
 	heap->pid = getpid();
 #endif
+}
+
+ZEND_API void zend_mm_refresh_key_child(zend_mm_heap *heap)
+{
+	zend_mm_refresh_key_child_ex(heap, true);
 }
 
 static zend_mm_heap *zend_mm_init(void)
@@ -3403,9 +3416,14 @@ ZEND_API void shutdown_memory_manager(bool silent, bool full_shutdown)
 	zend_mm_shutdown(AG(mm_heap), full_shutdown, silent);
 }
 
+ZEND_API void refresh_memory_manager_ex(bool rekey)
+{
+	zend_mm_refresh_key_child_ex(AG(mm_heap), rekey);
+}
+
 ZEND_API void refresh_memory_manager(void)
 {
-	zend_mm_refresh_key_child(AG(mm_heap));
+	refresh_memory_manager_ex(true);
 }
 
 ZEND_NORETURN static ZEND_COLD void zend_out_of_memory(void)

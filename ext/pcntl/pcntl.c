@@ -268,8 +268,12 @@ PHP_MINFO_FUNCTION(pcntl)
 PHP_FUNCTION(pcntl_fork)
 {
 	pid_t id;
+	bool rekey_memory = true;
 
-	ZEND_PARSE_PARAMETERS_NONE();
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(rekey_memory)
+	ZEND_PARSE_PARAMETERS_END();
 
 	id = fork();
 	if (id == -1) {
@@ -295,7 +299,7 @@ PHP_FUNCTION(pcntl_fork)
 
 		}
 	} else if (id == 0) {
-		php_child_init();
+		php_child_init_ex(rekey_memory);
 	}
 
 	RETURN_LONG((zend_long) id);
@@ -1552,11 +1556,13 @@ PHP_FUNCTION(pcntl_rfork)
 	zend_long flags;
 	zend_long csignal = 0;
 	pid_t pid;
+	bool rekey_memory = true;
 
-	ZEND_PARSE_PARAMETERS_START(1, 2)
+	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_LONG(flags)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(csignal)
+		Z_PARAM_BOOL(rekey_memory)
 	ZEND_PARSE_PARAMETERS_END();
 
 	/* This is a flag to use with great caution in general, preferably not within PHP */
@@ -1599,7 +1605,7 @@ PHP_FUNCTION(pcntl_rfork)
 			php_error_docref(NULL, E_WARNING, "Error %d", errno);
 		}
 	} else if (pid == 0) {
-		php_child_init();
+		php_child_init_ex(rekey_memory);
 	}
 
 	RETURN_LONG((zend_long) pid);
@@ -1616,9 +1622,12 @@ PHP_FUNCTION(pcntl_forkx)
 {
 	zend_long flags;
 	pid_t pid;
+	bool rekey_memory = true;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_LONG(flags)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(rekey_memory)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (flags < FORK_NOSIGCHLD || flags > FORK_WAITPID) {
@@ -1644,7 +1653,7 @@ PHP_FUNCTION(pcntl_forkx)
 			php_error_docref(NULL, E_WARNING, "Error %d", errno);
 		}
 	} else if (pid == 0) {
-		php_child_init();
+		php_child_init_ex(rekey_memory);
 	}
 
 	RETURN_LONG((zend_long) pid);

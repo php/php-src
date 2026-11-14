@@ -1,11 +1,12 @@
 /* This is a generated file, edit pcntl.stub.php instead.
- * Stub hash: ec6306e93fad6d127ff880fc01736ac287619cf7
+ * Stub hash: 8c2273c72be8d137c03c46418913ae31c42e716a
  * Has decl header: yes */
 
 #include "zend_constants.h"
 #include "zend_enum.h"
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_fork, 0, 0, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, rekey_memory, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_waitpid, 0, 2, IS_LONG, 0)
@@ -98,9 +99,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_alarm, 0, 1, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_pcntl_get_last_error arginfo_pcntl_fork
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_get_last_error, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_pcntl_errno arginfo_pcntl_fork
+#define arginfo_pcntl_errno arginfo_pcntl_get_last_error
 
 #if defined(HAVE_GETPRIORITY)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pcntl_getpriority, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
@@ -135,12 +137,14 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_rfork, 0, 1, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, signal, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, rekey_memory, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(HAVE_FORKX)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_forkx, 0, 1, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, rekey_memory, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 #endif
 
