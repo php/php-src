@@ -1745,8 +1745,8 @@ PHPAPI zend_result php_session_start(void)
 	 * Cookies are preferred, because initially cookie and get
 	 * variables will be available.
 	 * URL/POST session ID may be used when use_only_cookies=Off.
-	 * session.use_strice_mode=On prevents session adoption.
-	 * Session based file upload progress uses non-cookie ID.
+	 * session.use_strict_mode=On prevents session adoption.
+	 * Session based file upload progress respects use_only_cookies.
 	 */
 
 	if (!PS(id)) {
@@ -3273,7 +3273,7 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 			if (data->name && data->value && value_len) {
 				size_t name_len = strlen(data->name);
 
-				if (zend_string_equals_cstr(PS(session_name), data->name, name_len)) {
+				if (!PS(use_only_cookies) && zend_string_equals_cstr(PS(session_name), data->name, name_len)) {
 					zval_ptr_dtor(&progress->sid);
 					ZVAL_STRINGL(&progress->sid, (*data->value), value_len);
 				} else if (zend_string_equals_cstr(PS(rfc1867_name), data->name, name_len)) {
