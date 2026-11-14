@@ -63,6 +63,11 @@ PHP 8.7 UPGRADE NOTES
   . bindec(), octdec(), hexdec() and base_convert() now throw an Exception
     when the passed string contains characters that are invalid for the
     specified number base.
+  . With pcntl_async_signals(true), time_sleep_until() now runs signal
+    handlers before the sleep ends. Previously, handlers waited until the
+    deadline. If a handler returns normally, the sleep resumes until the
+    original deadline. A handler can now interrupt the sleep by throwing an
+    exception or calling exit.
   . The number of filters that can be chained in a php://filter URL is limited
     to 16 by default. Set the stream context option max_filter_count to change
     this.
