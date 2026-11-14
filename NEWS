@@ -100,6 +100,10 @@ PHP                                                                        NEWS
   . Fix trampoline leak when object construction fails for lazy object.
     (ndossche)
 
+- Session:
+  . Fixed session upload progress to respect session.use_only_cookies.
+    (jorgsowa)
+
 - Standard:
   . Fixed dns_get_record() returning partially built records for malformed
     DNS responses. (Marti2203)
