@@ -1807,6 +1807,21 @@ static int check_nested_declarator_start(int sym) {
 			case YY___DECLSPEC:
 				sym = get_sym();
 				break;
+			case YY___CDECL:
+				sym = get_sym();
+				break;
+			case YY___STDCALL:
+				sym = get_sym();
+				break;
+			case YY___FASTCALL:
+				sym = get_sym();
+				break;
+			case YY___THISCALL:
+				sym = get_sym();
+				break;
+			case YY___VECTORCALL:
+				sym = get_sym();
+				break;
 			case YY__STAR:
 				sym = get_sym();
 				break;
