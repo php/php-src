@@ -275,6 +275,11 @@ zend_result phar_mount_entry(phar_archive_data *phar, const char *filename, size
 			return FAILURE;
 		}
 	} else {
+		if ((uint64_t) ssb.sb.st_size > UINT32_MAX) {
+			efree(entry.tmp);
+			zend_string_efree(entry.filename);
+			return FAILURE;
+		}
 		entry.is_dir = false;
 		entry.uncompressed_filesize = entry.compressed_filesize = ssb.sb.st_size;
 	}
