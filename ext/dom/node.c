@@ -1104,6 +1104,10 @@ static void dom_node_insert_before(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 
 	DOM_GET_OBJ(child, node, xmlNodePtr, childobj);
 
+	if (dom_throw_if_node_read_only(intern->document, parentp) || dom_throw_if_node_read_only(childobj->document, child)) {
+		RETURN_FALSE;
+	}
+
 	if (modern) {
 		dom_node_insert_before_modern(return_value, ref, intern, parentp, child);
 	} else {
@@ -1226,6 +1230,10 @@ static void dom_node_replace_child(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 	DOM_GET_OBJ(newchild, newnode, xmlNodePtr, newchildobj);
 	DOM_GET_OBJ(oldchild, oldnode, xmlNodePtr, oldchildobj);
 
+	if (dom_throw_if_node_read_only(intern->document, nodep) || dom_throw_if_node_read_only(newchildobj->document, newchild)) {
+		RETURN_FALSE;
+	}
+
 	bool stricterror = dom_get_strict_error(intern->document);
 
 	if (newchild->doc != nodep->doc && newchild->doc != NULL) {
@@ -1324,6 +1332,10 @@ static void dom_node_remove_child(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry
 	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
 
 	DOM_GET_OBJ(child, node, xmlNodePtr, childobj);
+
+	if (dom_throw_if_node_read_only(intern->document, nodep)) {
+		RETURN_FALSE;
+	}
 
 	bool stricterror = dom_get_strict_error(intern->document);
 
@@ -1456,6 +1468,10 @@ PHP_METHOD(DOMNode, appendChild)
 	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
 	DOM_GET_OBJ(child, node, xmlNodePtr, childobj);
 
+	if (dom_throw_if_node_read_only(intern->document, nodep) || dom_throw_if_node_read_only(childobj->document, child)) {
+		RETURN_FALSE;
+	}
+
 	dom_node_append_child_legacy(return_value, intern, childobj, nodep, child);
 }
 
@@ -1471,6 +1487,10 @@ PHP_METHOD(Dom_Node, appendChild)
 
 	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
 	DOM_GET_OBJ(child, node, xmlNodePtr, childobj);
+
+	if (dom_throw_if_node_read_only(intern->document, nodep) || dom_throw_if_node_read_only(childobj->document, child)) {
+		RETURN_THROWS();
+	}
 
 	/* Parent check from pre-insertion validation done here:
 	 * If parent is not a Document, DocumentFragment, or Element node, then throw a "HierarchyRequestError" DOMException. */
@@ -1582,6 +1602,10 @@ PHP_METHOD(DOMNode, normalize)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
+
+	if (dom_throw_if_node_read_only(intern->document, nodep)) {
+		return;
+	}
 
 	if (php_dom_follow_spec_intern(intern)) {
 		php_dom_normalize_modern(nodep);

@@ -164,6 +164,9 @@ static void dom_character_data_append_data(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
+	if (dom_throw_if_node_read_only(intern->document, nodep)) {
+		return;
+	}
 	xmlTextConcat(nodep, BAD_CAST arg, arg_len);
 }
 
@@ -201,6 +204,10 @@ static void dom_character_data_insert_data(INTERNAL_FUNCTION_PARAMETERS, bool re
 	}
 
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
+
+	if (dom_throw_if_node_read_only(intern->document, node)) {
+		RETURN_FALSE;
+	}
 
 	const xmlChar *cur = php_dom_get_content_or_empty(node);
 
@@ -266,6 +273,10 @@ static void dom_character_data_delete_data(INTERNAL_FUNCTION_PARAMETERS, bool re
 	}
 
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
+
+	if (dom_throw_if_node_read_only(intern->document, node)) {
+		RETURN_FALSE;
+	}
 
 	const xmlChar *cur = php_dom_get_content_or_empty(node);
 
@@ -336,6 +347,10 @@ static void dom_character_data_replace_data(INTERNAL_FUNCTION_PARAMETERS, bool r
 	}
 
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
+
+	if (dom_throw_if_node_read_only(intern->document, node)) {
+		RETURN_FALSE;
+	}
 
 	const xmlChar *cur = php_dom_get_content_or_empty(node);
 

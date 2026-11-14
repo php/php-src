@@ -36,6 +36,10 @@ PHP_METHOD(DOMDocumentFragment, __construct)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
+	if (dom_throw_if_node_read_only(Z_DOMOBJ_P(ZEND_THIS)->document, dom_object_get_node(Z_DOMOBJ_P(ZEND_THIS)))) {
+		return;
+	}
+
 	nodep = xmlNewDocFragment(NULL);
 
 	if (!nodep) {
@@ -71,6 +75,10 @@ PHP_METHOD(DOMDocumentFragment, appendXML) {
 
 	if (dom_node_is_read_only(nodep)) {
 		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(intern->document));
+		RETURN_FALSE;
+	}
+
+	if (dom_throw_if_node_read_only(intern->document, nodep)) {
 		RETURN_FALSE;
 	}
 
