@@ -76,6 +76,34 @@ static void zend_delete_call_instructions(const zend_op_array *op_array, zend_op
 	}
 }
 
+static bool zend_fetch_func_arg_container_to_r(const zend_op_array *op_array, zend_op *opline)
+{
+	zend_op *def = opline;
+
+	while (def > op_array->opcodes) {
+		def--;
+		if (def->result_type == IS_VAR && def->result.var == opline->op1.var) {
+			switch (def->opcode) {
+				case ZEND_DO_FCALL:
+				case ZEND_DO_ICALL:
+				case ZEND_DO_UCALL:
+				case ZEND_DO_FCALL_BY_NAME:
+					def->result_type = IS_TMP_VAR;
+					opline->op1_type = IS_TMP_VAR;
+					return true;
+				case ZEND_FETCH_R:
+				case ZEND_FETCH_DIM_R:
+				case ZEND_FETCH_OBJ_R:
+				case ZEND_FETCH_STATIC_PROP_R:
+					return true;
+				default:
+					return false;
+			}
+		}
+	}
+	return false;
+}
+
 static void zend_try_inline_call(zend_op_array *op_array, const zend_op *fcall, zend_op *opline, const zend_function *func)
 {
 	const uint32_t no_discard = RETURN_VALUE_USED(opline) ? 0 : ZEND_ACC_NODISCARD;
@@ -270,6 +298,14 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 							 * Performing the replacement would create an invalid opcode. */
 							call_stack[call - 1].try_inline = false;
 							/* Don't remove the associated CHECK_FUNC_ARG opcode. */
+							call_stack[call - 1].last_check_func_arg_opline = NULL;
+							break;
+						}
+
+						if ((opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG || opline->opcode == ZEND_FETCH_DIM_FUNC_ARG)
+						 && opline->op1_type == IS_VAR
+						 && !zend_fetch_func_arg_container_to_r(op_array, opline)) {
+							call_stack[call - 1].try_inline = false;
 							call_stack[call - 1].last_check_func_arg_opline = NULL;
 							break;
 						}
