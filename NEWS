@@ -128,6 +128,8 @@ PHP                                                                        NEWS
     arrays. (Weilin Du)
   . Fixed function JIT ASSIGN_DIM reporting an undefined value or key out of
     order, or when the VM does not, on non-array containers. (Jorg Sowa)
+  . Fixed bug GH-25449 (Element of a by-reference function result passed as
+    an argument arrives as null). (Ilia Alshanetsky)
 
 - OpenSSL:
   . Fixed bug GH-25172 (TLS session reuse shares request-lifetime callback
