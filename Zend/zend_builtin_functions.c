@@ -1734,7 +1734,11 @@ static bool debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 			return false;
 		}
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(arg_array)) {
-			if (call->func->type == ZEND_USER_FUNCTION) {
+			/* Extra args are moved after CVs and TMPs in user functions, except
+			 * for trampoline frames (see i_init_func_execute_data()).
+			 */
+			if (call->func->type == ZEND_USER_FUNCTION
+			 && !(call->func->op_array.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
 				uint32_t first_extra_arg = MIN(num_args, call->func->op_array.num_args);
 
 				if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_SYMBOL_TABLE)) {
