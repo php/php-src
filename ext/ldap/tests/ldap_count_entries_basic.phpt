@@ -14,7 +14,15 @@ require "connect.inc";
 $link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 insert_dummy_data($link, $base);
 $result = ldap_search($link, "$base", "(objectclass=person)");
-var_dump(ldap_count_entries($link, $result));
+var_dump(
+    ldap_count_entries($link, $result),
+    count($result),
+    $result->count(),
+    // Let’s check that result is not changed by iterating
+    $result->rewind(),
+    $result->next(),
+    $result->count(),
+);
 ?>
 --CLEAN--
 <?php
@@ -24,4 +32,9 @@ $link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 remove_dummy_data($link, $base);
 ?>
 --EXPECT--
+int(3)
+int(3)
+int(3)
+NULL
+NULL
 int(3)
