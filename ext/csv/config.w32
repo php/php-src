@@ -1,0 +1,9 @@
+// vim:ft=javascript
+
+ARG_ENABLE("csv", "CSV support", "yes");
+
+if (PHP_CSV != "no") {
+	EXTENSION("csv", "csv.c");
+	AC_DEFINE("HAVE_CSV", 1, "Define to 1 if the PHP extension 'csv' is available.");
+	PHP_INSTALL_HEADERS("ext/csv", "php_csv.h");
+}
