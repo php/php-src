@@ -1104,6 +1104,9 @@ static ZEND_FUNCTION(zend_call_method)
 
 	ZEND_ASSERT((argc >= 2) && (argc <= 4));
 	zend_call_method(obj, ce, NULL, ZSTR_VAL(method_name), ZSTR_LEN(method_name), return_value, argc - 2, arg1, arg2);
+	if (Z_ISREF_P(return_value)) {
+		zend_unwrap_reference(return_value);
+	}
 }
 
 /* Instantiate a class and run the constructor via object_init_with_constructor */

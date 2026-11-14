@@ -825,6 +825,9 @@ PHP_METHOD(RecursiveIteratorIterator, callHasChildren)
 		if (Z_TYPE_P(return_value) == IS_UNDEF) {
 			RETURN_FALSE;
 		}
+		if (Z_ISREF_P(return_value)) {
+			zend_unwrap_reference(return_value);
+		}
 	}
 } /* }}} */
 
@@ -846,6 +849,9 @@ PHP_METHOD(RecursiveIteratorIterator, callGetChildren)
 		zend_call_method_with_0_params(Z_OBJ_P(zobject), ce, &object->iterators[object->level].getchildren, "getchildren", return_value);
 		if (Z_TYPE_P(return_value) == IS_UNDEF) {
 			RETURN_NULL();
+		}
+		if (Z_ISREF_P(return_value)) {
+			zend_unwrap_reference(return_value);
 		}
 	}
 } /* }}} */
@@ -1672,6 +1678,9 @@ PHP_METHOD(RecursiveFilterIterator, hasChildren)
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
 
 	zend_call_method_with_0_params(Z_OBJ(intern->inner.zobject), intern->inner.ce, NULL, "haschildren", return_value);
+	if (Z_ISREF_P(return_value)) {
+		zend_unwrap_reference(return_value);
+	}
 } /* }}} */
 
 /* {{{ Return the inner iterator's children contained in a RecursiveFilterIterator */
