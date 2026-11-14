@@ -580,10 +580,6 @@ struct _zend_op_array {
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
 
-
-#define ZEND_RETURN_VALUE				0
-#define ZEND_RETURN_REFERENCE			1
-
 #define INTERNAL_FUNCTION_PARAMETERS zend_execute_data *execute_data, zval *return_value
 #define INTERNAL_FUNCTION_PARAM_PASSTHRU execute_data, return_value
 
@@ -1195,9 +1191,6 @@ static zend_always_inline bool zend_check_arg_send_type(const zend_function *zf,
 
 #define QUICK_ARG_MAY_BE_SENT_BY_REF(zf, arg_num) \
 	ZEND_CHECK_ARG_FLAG(zf, arg_num, ZEND_SEND_PREFER_REF)
-
-#define ZEND_RETURN_VAL 0
-#define ZEND_RETURN_REF 1
 
 #define ZEND_BIND_VAL      0
 #define ZEND_BIND_REF      1

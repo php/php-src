@@ -217,7 +217,7 @@ typedef struct _zend_fcall_info_cache {
 	static const zend_internal_arg_info name[] = { \
 		{ (const char*)(uintptr_t)(required_num_args), ZEND_TYPE_INIT_NONE(_ZEND_ARG_INFO_FLAGS(return_reference, 0, 0)), NULL },
 #define ZEND_BEGIN_ARG_INFO(name, _unused)	\
-	ZEND_BEGIN_ARG_INFO_EX(name, {}, ZEND_RETURN_VALUE, -1)
+	ZEND_BEGIN_ARG_INFO_EX(name, {}, 0, -1)
 #define ZEND_END_ARG_INFO()		};
 
 /* Name macros */
