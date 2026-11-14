@@ -11,6 +11,10 @@
     #include <sanitizer/asan_interface.h>
 #endif
 
+#ifndef LEXBOR_MRAW_CACHE_SIZE
+    #define LEXBOR_MRAW_CACHE_SIZE 64
+#endif
+
 
 #define lexbor_mraw_meta_set(data, size)                                       \
     do {                                                                       \
@@ -62,7 +66,7 @@ lexbor_mraw_init(lexbor_mraw_t *mraw, size_t chunk_size)
     /* Cache */
     mraw->cache = lexbor_bst_create();
 
-    status = lexbor_bst_init(mraw->cache, 512);
+    status = lexbor_bst_init(mraw->cache, LEXBOR_MRAW_CACHE_SIZE);
     if (status) {
         return status;
     }

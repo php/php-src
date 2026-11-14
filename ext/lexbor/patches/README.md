@@ -29,6 +29,10 @@ This contains the following patch files in mailbox format.
   **Note** for this patch the utilities to generate the tables are also patched.
   Make sure to apply on a fresh Lexbor clone and run (in `lexbor/utils/encoding`): `python3 single-byte.py` to generate the tables.
   Also run (in `lexbor/utils/lexbor/html`) `python3 tokenizer_entities_bst.py` to generate the static binary search tree for entities.
+* 0026-Core-HTML-reduced-initial-sizes-of-tokenizer-pools-a.patch
+  The patch of https://github.com/lexbor/lexbor/pull/427, which is not merged yet. It reduces the initial sizes
+  of the tokenizer pools and of the mraw cache, and allows setting them at build time.
+  PHP sets them in config.m4 and config.w32, so this patch can be replaced by the upstream commit once it is merged.
 
 ## How to apply
 

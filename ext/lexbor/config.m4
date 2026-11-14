@@ -1,4 +1,6 @@
 PHP_LEXBOR_CFLAGS="-Wno-unknown-warning-option -Wno-unterminated-string-initialization -I@ext_srcdir@/"
+dnl Initial sizes of the tokenizer pools and of the mraw cache, see patch 0026.
+PHP_LEXBOR_CFLAGS="$PHP_LEXBOR_CFLAGS -DLXB_HTML_TKZ_TOKEN_POOL_SIZE=16 -DLXB_HTML_TKZ_ATTR_POOL_SIZE=256 -DLEXBOR_MRAW_CACHE_SIZE=64"
 LEXBOR_DIR="lexbor"
 
 AC_DEFINE([HAVE_LEXBOR], [1], [Define to 1 if the PHP extension 'lexbor' is available.])

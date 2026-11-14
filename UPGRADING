@@ -205,6 +205,10 @@ PHP 8.7 UPGRADE NOTES
     target does not keep is now released at that assignment instead of after
     the last one.
 
+- DOM:
+  . Parsing HTML with Dom\HTMLDocument or innerHTML uses much less memory for
+    small inputs.
+
 - Standard:
   . Improved performance of strcspn() and strpbrk() when searching longer strings
     with a single-byte character mask.
