@@ -131,6 +131,10 @@ PHP                                                                        NEWS
   . Fix ReflectionProperty::isReadable() not working for indirect slots.
     (ndossche)
 
+- Session:
+  . Fixed session upload progress to respect session.use_only_cookies.
+    (jorgsowa)
+
 - Standard:
   . Fixed bug GH-25387 (Uploaded files leak in request_parse_body()).
     (Kévin Dunglas)
