@@ -99,6 +99,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug GH-25387 (Uploaded files leak in request_parse_body()).
     (Kévin Dunglas)
+  . Fixed bug GH-24743 (var_export() ignores exceptions from lazy object
+    initialization). (lazerg)
 
 - Streams:
   . Fixed in-place URL decoding of interned strings in the HTTP and FTP
