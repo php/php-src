@@ -12,10 +12,10 @@ if (getenv("USE_ZEND_ALLOC") === "0") {
 --FILE--
 <?php
 echo __LINE__ . "\n";
-ini_set('memory_limit', "2M");
+ini_set('memory_limit', "4M");
 ob_start();
 $i = 0;
-while($i++ < 5000)  {
+while($i++ < 10000)  {
   echo str_repeat("may not be displayed ", 42);
 }
 ob_end_clean();

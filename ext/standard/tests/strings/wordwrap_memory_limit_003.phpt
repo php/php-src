@@ -7,7 +7,7 @@ if (getenv("USE_ZEND_ALLOC") === "0") {
 }
 ?>
 --INI--
-memory_limit=10M
+memory_limit=12M
 --FILE--
 <?php
 
@@ -16,4 +16,4 @@ var_dump(wordwrap($str, 80, "\r\n", false));
 
 ?>
 --EXPECTF--
-Fatal error: Allowed memory size of 10485760 bytes exhausted%s(tried to allocate %d bytes) in %s on line 4
+Fatal error: Allowed memory size of 12582912 bytes exhausted%s(tried to allocate %d bytes) in %s on line 4

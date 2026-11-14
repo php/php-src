@@ -388,7 +388,7 @@ static PHP_INI_MH(OnChangeMaxMemoryLimit)
 
 	PG(memory_limit) = value;
 	PG(max_memory_limit) = value;
-	
+
 	return SUCCESS;
 }
 
@@ -1881,6 +1881,10 @@ zend_result php_request_startup(void)
 {
 	zend_result retval = SUCCESS;
 
+#if ZEND_DEBUG
+	zend_mm_check_in_userinput();
+#endif
+
 	zend_interned_strings_activate();
 
 #ifdef HAVE_DTRACE
@@ -1961,6 +1965,8 @@ zend_result php_request_startup(void)
 	if (max) {
 		zend_mm_set_max_allocs(ZEND_ATOL(max));
 	}
+
+	zend_mm_userinput_end();
 
 	return retval;
 }
