@@ -19,6 +19,8 @@ PHP                                                                        NEWS
 - FPM:
   . Use recommended TYPE, HELP order for OpenMetrics metadata.
     (Marcel Hernandez)
+  . php-fpm now includes the CLI SAPI when it is built, and runs as the CLI
+    when invoked as php (e.g. through a php symlink). (Matthieu Napoli)
 
 - GD:
   . Fixed imagecolormatch() and imagejpeg() ValueError messages. (lacatoire)
