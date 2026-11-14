@@ -97,7 +97,7 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, pdo_error_type sqlst
 	}
 
 	if (dbh->error_mode != PDO_ERRMODE_EXCEPTION) {
-		php_error_docref(NULL, E_WARNING, "%s", ZSTR_VAL(message));
+		php_error_docref(NULL, E_WARNING, "%pS", message);
 	} else {
 		zval ex, info;
 		zend_class_entry *pdo_ex = php_pdo_get_exception();
@@ -172,7 +172,7 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt) /* {{{ */
 	}
 
 	if (dbh->error_mode == PDO_ERRMODE_WARNING) {
-		php_error_docref(NULL, E_WARNING, "%s", ZSTR_VAL(message));
+		php_error_docref(NULL, E_WARNING, "%pS", message);
 	} else if (EG(exception) == NULL) {
 		zval ex;
 		zend_class_entry *pdo_ex = php_pdo_get_exception();
@@ -233,12 +233,12 @@ static bool create_driver_specific_pdo_object(pdo_driver_t *driver, zend_class_e
 		if (ce_based_on_driver_name) {
 			if (!instanceof_function(ce_based_on_called_object, ce_based_on_driver_name)) {
 				zend_throw_exception_ex(pdo_exception_ce, 0,
-					"%s::%s() cannot be used for connecting to the \"%s\" driver, "
-					"either call %s::%s() or PDO::%s() instead",
-					ZSTR_VAL(called_scope->name),
+					"%pS::%s() cannot be used for connecting to the \"%s\" driver, "
+					"either call %pS::%s() or PDO::%s() instead",
+					called_scope->name,
 					new_zval_object ? "connect" : "__construct",
 					driver->driver_name,
-					ZSTR_VAL(ce_based_on_driver_name->name),
+					ce_based_on_driver_name->name,
 					new_zval_object ? "connect" : "__construct",
 					new_zval_object ? "connect" : "__construct"
 				);
@@ -252,9 +252,9 @@ static bool create_driver_specific_pdo_object(pdo_driver_t *driver, zend_class_e
 			return true;
 		} else {
 			zend_throw_exception_ex(pdo_exception_ce, 0,
-				"%s::%s() cannot be used for connecting to an unknown driver, "
+				"%pS::%s() cannot be used for connecting to an unknown driver, "
 				"call PDO::%s() instead",
-				ZSTR_VAL(called_scope->name),
+				called_scope->name,
 				new_zval_object ? "connect" : "__construct",
 				new_zval_object ? "connect" : "__construct"
 			);
@@ -271,12 +271,12 @@ static bool create_driver_specific_pdo_object(pdo_driver_t *driver, zend_class_e
 		if (called_scope != pdo_dbh_ce) {
 			/* A driver-specific implementation is instantiated with a wrong driver class */
 			zend_throw_exception_ex(pdo_exception_ce, 0,
-				"%s::%s() cannot be used for connecting to the \"%s\" driver, "
-				"either call %s::%s() or PDO::%s() instead",
-				ZSTR_VAL(called_scope->name),
+				"%pS::%s() cannot be used for connecting to the \"%s\" driver, "
+				"either call %pS::%s() or PDO::%s() instead",
+				called_scope->name,
 				new_zval_object ? "connect" : "__construct",
 				driver->driver_name,
-				ZSTR_VAL(ce_based_on_driver_name->name),
+				ce_based_on_driver_name->name,
 				new_zval_object ? "connect" : "__construct",
 				new_zval_object ? "connect" : "__construct"
 			);
