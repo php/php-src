@@ -2078,6 +2078,7 @@ static int zend_jit_interrupt_handler_stub(zend_jit_ctx *jit)
 	ir_ref if_delayed_oom = ir_IF(ir_LOAD_U8(ir_ADD_OFFSET(jit_EG(delayed_oom), offsetof(zend_oom_info, state))));
 	ir_IF_TRUE(if_delayed_oom);
 	ir_CALL(IR_VOID, ir_CONST_FC_FUNC(zend_handle_delayed_oom));
+	ir_STORE(jit_EG(opline_before_exception), IR_NULL);
 	// LOAD_OPLINE()
 	jit_STORE_IP(jit, ir_LOAD_A(jit_EX(opline)));
 	ir_ref if_delayed_oom_end = ir_END();
