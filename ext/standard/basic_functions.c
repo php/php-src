@@ -418,13 +418,6 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 
 	/* Setup default context */
 	FG(default_context) = NULL;
-
-	/* Default to global wrappers only */
-	FG(stream_wrappers) = NULL;
-
-	/* Default to global filters only */
-	FG(stream_filters) = NULL;
-
 	return SUCCESS;
 }
 /* }}} */
@@ -456,9 +449,6 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 			BG(ctype_string) = NULL;
 		}
 	}
-
-	/* FG(stream_wrappers) and FG(stream_filters) are destroyed
-	 * during php_request_shutdown() */
 
 	PHP_RSHUTDOWN(filestat)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 #ifdef HAVE_SYSLOG_H

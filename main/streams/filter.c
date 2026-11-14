@@ -14,13 +14,12 @@
 
 #include "php.h"
 #include "php_network.h"
-#include "ext/standard/file.h"  /* For FG(stream_filters) */
 #include <stddef.h>
 #include <fcntl.h>
 
 #include "php_streams_int.h"
 
-/* Global filter hash, copied to FG(stream_filters) on registration of volatile filter */
+/* Global filter hash, copied to PG(stream_filters) on registration of volatile filter */
 static HashTable stream_filters_hash;
 
 /* Should only be used during core initialization */
@@ -32,7 +31,7 @@ PHPAPI HashTable *php_get_stream_filters_hash_global(void)
 /* Normal hash selection/retrieval call */
 PHPAPI HashTable *php_get_stream_filters_hash(void)
 {
-	return (FG(stream_filters) ? FG(stream_filters) : &stream_filters_hash);
+	return (PG(stream_filters) ? PG(stream_filters) : &stream_filters_hash);
 }
 
 /* API for registering GLOBAL filters */
@@ -53,13 +52,13 @@ PHPAPI zend_result php_stream_filter_unregister_factory(const char *filterpatter
 /* API for registering VOLATILE wrappers */
 PHPAPI zend_result php_stream_filter_register_factory_volatile(zend_string *filterpattern, const php_stream_filter_factory *factory)
 {
-	if (!FG(stream_filters)) {
-		ALLOC_HASHTABLE(FG(stream_filters));
-		zend_hash_init(FG(stream_filters), zend_hash_num_elements(&stream_filters_hash) + 1, NULL, NULL, 0);
-		zend_hash_copy(FG(stream_filters), &stream_filters_hash, NULL);
+	if (!PG(stream_filters)) {
+		ALLOC_HASHTABLE(PG(stream_filters));
+		zend_hash_init(PG(stream_filters), zend_hash_num_elements(&stream_filters_hash) + 1, NULL, NULL, 0);
+		zend_hash_copy(PG(stream_filters), &stream_filters_hash, NULL);
 	}
 
-	return zend_hash_add_ptr(FG(stream_filters), filterpattern, (void*)factory) ? SUCCESS : FAILURE;
+	return zend_hash_add_ptr(PG(stream_filters), filterpattern, (void*)factory) ? SUCCESS : FAILURE;
 }
 
 /* Buckets */
@@ -216,7 +215,7 @@ PHPAPI void php_stream_bucket_unlink(php_stream_bucket *bucket)
  * charsets (for example) but still be able to provide them all as filters */
 PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval *filterparams, bool persistent)
 {
-	HashTable *filter_hash = (FG(stream_filters) ? FG(stream_filters) : &stream_filters_hash);
+	HashTable *filter_hash = (PG(stream_filters) ? PG(stream_filters) : &stream_filters_hash);
 	const php_stream_filter_factory *factory = NULL;
 	php_stream_filter *filter = NULL;
 	size_t n;

@@ -130,7 +130,7 @@ PHP_FUNCTION(stream_socket_client)
 	RETVAL_FALSE;
 
 	if (timeout_is_null) {
-		timeout = (double)FG(default_socket_timeout);
+		timeout = (double)PG(default_socket_timeout);
 	} else if (!zend_finite(timeout)) {
 		zend_argument_value_error(4, "must be a finite value");
 		RETURN_THROWS();
@@ -290,7 +290,7 @@ PHP_FUNCTION(stream_socket_accept)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (timeout_is_null) {
-		timeout = (double)FG(default_socket_timeout);
+		timeout = (double)PG(default_socket_timeout);
 	} else if (!zend_finite(timeout)) {
 		zend_argument_value_error(2, "must be a finite value");
 		RETURN_THROWS();

@@ -134,6 +134,7 @@ struct _php_core_globals {
 	bool allow_url_fopen;
 	bool enable_post_data_reading;
 	bool report_zend_debug;
+	bool auto_detect_line_endings;
 
 	int last_error_type;
 	uint32_t last_error_lineno;
@@ -170,6 +171,12 @@ struct _php_core_globals {
 	char *syslog_ident;
 	zend_long syslog_filter;
 	zend_long error_log_mode;
+	zend_long default_socket_timeout;
+	const char *user_stream_current_filename; /* for simple recursion protection */
+	HashTable *stream_wrappers;			/* per-request copy of url_stream_wrappers_hash */
+	HashTable *stream_filters;			/* per-request copy of stream_filters_hash */
+	HashTable *wrapper_logged_errors;	/* key: wrapper address; value: linked list of error entries */
+	php_stream_error_state stream_error_state;
 };
 
 

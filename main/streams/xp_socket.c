@@ -354,7 +354,7 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 
 				if (value == -1) {
 					if (sock->timeout.tv_sec == -1) {
-						tv.tv_sec = FG(default_socket_timeout);
+						tv.tv_sec = PG(default_socket_timeout);
 						tv.tv_usec = 0;
 					} else {
 						tv = sock->timeout;
@@ -1168,7 +1168,7 @@ PHPAPI php_stream *php_stream_generic_socket_factory(const char *proto, size_t p
 	memset(sock, 0, sizeof(php_netstream_data_t));
 
 	sock->is_blocked = true;
-	sock->timeout.tv_sec = FG(default_socket_timeout);
+	sock->timeout.tv_sec = PG(default_socket_timeout);
 	sock->timeout.tv_usec = 0;
 
 	/* we don't know the socket until we have determined if we are binding or
