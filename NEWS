@@ -30,6 +30,10 @@ PHP                                                                        NEWS
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
 
+- Date:
+  . Fixed truncated timezone name for UTC offsets of 100 hours or more
+    created by DateTime::createFromFormat(). (Jorg Sowa)
+
 - DBA:
   . Fixed dba_close() not closing a database opened with dba_popen().
     (Ilia Alshanetsky)
