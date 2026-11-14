@@ -83,7 +83,7 @@ Arguments:
 
 Returns:          > 0 => success; value is the number of ovector pairs filled
                   = 0 => success, but ovector is not big enough
-                   -1 => failed to match (PCRE_ERROR_NOMATCH)
+                   -1 => failed to match (PCRE2_ERROR_NOMATCH)
                  < -1 => some kind of unexpected problem
 */
 
@@ -99,9 +99,8 @@ pcre2_jit_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 (void)length;
 (void)start_offset;
 (void)options;
-(void)match_data;
 (void)mcontext;
-return PCRE2_ERROR_JIT_BADOPTION;
+return match_data->rc = PCRE2_ERROR_JIT_BADOPTION;
 
 #else  /* SUPPORT_JIT */
 
@@ -118,13 +117,24 @@ jit_arguments arguments;
 int rc;
 int index = 0;
 
+/* The same check is performed by jit_check_exec(). */
 if ((options & PCRE2_PARTIAL_HARD) != 0)
   index = 2;
 else if ((options & PCRE2_PARTIAL_SOFT) != 0)
   index = 1;
 
 if (functions == NULL || functions->executable_funcs[index] == NULL)
-  return PCRE2_ERROR_JIT_BADOPTION;
+  return match_data->rc = PCRE2_ERROR_JIT_BADOPTION;
+
+/* If the match data block was previously used with PCRE2_COPY_MATCHED_SUBJECT,
+free the memory that was obtained. */
+
+if ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0)
+  {
+  match_data->memctl.free((void *)match_data->subject,
+    match_data->memctl.memory_data);
+  match_data->flags &= ~PCRE2_MD_COPIED_SUBJECT;
+  }
 
 /* Sanity checks should be handled by pcre2_match. */
 arguments.str = subject + start_offset;
@@ -176,14 +186,17 @@ else
 if (rc > (int)oveccount)
   rc = 0;
 match_data->code = re;
-match_data->subject = (rc >= 0 || rc == PCRE2_ERROR_PARTIAL)? subject : NULL;
+match_data->subject =
+  (rc >= 0 || rc == PCRE2_ERROR_NOMATCH || rc == PCRE2_ERROR_PARTIAL)? subject : NULL;
 match_data->subject_length = length;
+match_data->start_offset = start_offset;
 match_data->rc = rc;
 match_data->startchar = arguments.startchar_ptr - subject;
 match_data->leftchar = 0;
 match_data->rightchar = 0;
 match_data->mark = arguments.mark_ptr;
 match_data->matchedby = PCRE2_MATCHEDBY_JIT;
+match_data->options = options;
 
 #if defined(__has_feature)
 #if __has_feature(memory_sanitizer)
@@ -197,4 +210,4 @@ return match_data->rc;
 #endif  /* SUPPORT_JIT */
 }
 
-/* End of pcre2_jit_match.c */
+/* End of pcre2_jit_match_inc.h */
