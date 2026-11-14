@@ -132,6 +132,8 @@ PHP                                                                        NEWS
     (Kévin Dunglas)
   . Fixed uninitialized $errno in stream_socket_client() and fsockopen() for
     an unknown transport. (Jorg Sowa)
+  . Fixed bug GH-24743 (var_export() ignores exceptions from lazy object
+    initialization). (lazerg)
 
 - Streams:
   . Fixed in-place URL decoding of interned strings in the HTTP and FTP
