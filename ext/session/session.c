@@ -428,6 +428,7 @@ static zend_long php_session_gc(bool immediate)
 static zend_result php_session_initialize(void)
 {
 	zend_string *val = NULL;
+	bool is_new_id = false;
 
 	PS(session_status) = php_session_active;
 
@@ -462,6 +463,7 @@ static zend_result php_session_initialize(void)
 			}
 			return FAILURE;
 		}
+		is_new_id = true;
 		if (PS(use_cookies)) {
 			PS(send_cookie) = true;
 		}
@@ -478,6 +480,7 @@ static zend_result php_session_initialize(void)
 			}
 			return FAILURE;
 		}
+		is_new_id = true;
 		if (PS(use_cookies)) {
 			PS(send_cookie) = true;
 		}
@@ -507,7 +510,8 @@ static zend_result php_session_initialize(void)
 		PS(session_vars) = NULL;
 	}
 	if (val) {
-		if (PS(lazy_write)) {
+		/* A new ID has no stored record yet, so lazy_write must not skip the write */
+		if (PS(lazy_write) && !is_new_id) {
 			PS(session_vars) = zend_string_copy(val);
 		}
 		php_session_decode(val);
