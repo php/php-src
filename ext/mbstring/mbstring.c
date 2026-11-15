@@ -5196,7 +5196,7 @@ static bool mb_fast_check_utf8_default(zend_string *str)
 			vqtbl1q_u8(byte_1_high, vshrq_n_u8(prev1, 4)), \
 			vqtbl1q_u8(byte_1_low, vandq_u8(prev1, v_0f))), \
 			vqtbl1q_u8(byte_2_high, vshrq_n_u8((input), 4))); \
-		uint8x16_t must23 = veorq_u8( \
+		uint8x16_t must23 = vorrq_u8( \
 			vcgeq_u8(vextq_u8((prev), (input), 14), v_e0), \
 			vcgeq_u8(vextq_u8((prev), (input), 13), v_f0)); \
 		error = vorrq_u8(error, veorq_u8(vandq_u8(must23, v_80), sc)); \
@@ -5821,7 +5821,13 @@ static bool mb_fast_check_utf8_avx512(zend_string *str)
 	const __m512i v_80 = _mm512_set1_epi8((char)0x80);
 	const __m512i v_third = _mm512_set1_epi8((char)(0xE0 - 0x80));
 	const __m512i v_fourth = _mm512_set1_epi8((char)(0xF0 - 0x80));
-	const __m512i max_value = _mm512_setr_epi64(-1, -1, -1, -1, -1, -1, -1, (int64_t)0xBFDFEFFFFFFFFFFFULL);
+	/* A block ending with any of these is incomplete: ... 1111____ 111_____ 11______ */
+	const __m512i max_value = _mm512_setr_epi8(
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		(char)(0xF0 - 1), (char)(0xE0 - 1), (char)(0xC0 - 1));
 	/* Brings the last 16 bytes of `prev` in front of the first 48 bytes of `input` */
 	const __m512i prev_shuffle = _mm512_setr_epi32(28, 29, 30, 31, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
 
@@ -5836,7 +5842,12 @@ static bool mb_fast_check_utf8_avx512(zend_string *str)
 		__m512i in = _mm512_loadu_si512((const void*)p);
 		MB_UTF8_CHECK_AVX512(in, prev_input);
 		p += 64 - misalignment;
-		prev_input = _mm512_maskz_loadu_epi8(0xE000000000000000ULL, (const void*)(p - 64));
+		/* The 3 bytes before p belong to the string: misalignment <= 61, so
+		 * p - 3 does not step back past the start. They occupy the last 3 lanes. */
+		uint32_t ctx = 0;
+		memcpy(&ctx, p - 3, 3);
+		__m128i ctxv = _mm_slli_si128(_mm_cvtsi32_si128(ctx), 13);
+		prev_input = _mm512_inserti64x2(_mm512_setzero_si512(), ctxv, 3);
 		prev_incomplete = _mm512_subs_epu8(prev_input, max_value);
 	}
 

@@ -26,7 +26,9 @@ foreach ($fillers as $filler) {
                 foreach ([false, true] as $replace) {
                     $s = substr($base, 0, $pos) . $seq . substr($base, $pos + ($replace ? strlen($seq) : 0));
                     $expected = preg_match('//u', $s) === 1;
-                    $s = str_repeat($s, 1); // a fresh string, with no cached validity flag
+                    // preg_match('//u') sets the UTF-8 flag, and str_repeat($s, 1)
+                    // returns that same string. pack() allocates a new one without it.
+                    $s = ($s === "") ? $s : pack("H*", bin2hex($s));
                     if (mb_check_encoding($s, 'UTF-8') !== $expected) {
                         if ($mismatches++ < 10) {
                             echo "Mismatch: ", bin2hex($s), " expected ", var_export($expected, true), "\n";
@@ -36,6 +38,33 @@ foreach ($fillers as $filler) {
                 }
             }
         }
+    }
+}
+// Lengths past 2048 bytes take the AVX-512 alignment prologue.
+foreach ([2048, 2112, 4095] as $len) {
+    foreach ($fillers as $filler) {
+        $base = str_repeat($filler, intdiv($len, strlen($filler)) + 1);
+        $base = mb_strcut($base, 0, $len, 'UTF-8');
+        $probe = pack('H*', bin2hex($base));
+        if (mb_check_encoding($probe, 'UTF-8') !== (preg_match('//u', $base) === 1)) {
+            if ($mismatches++ < 10) {
+                echo "Mismatch: long ", bin2hex(substr($base, 0, 16)), "... len ", strlen($base), "\n";
+            }
+        }
+        $checked++;
+        if (strlen($base) < 65) {
+            continue;
+        }
+        $s = $probe;
+        $s[64] = "\x80";
+        $expected = preg_match('//u', $s) === 1;
+        $s = pack('H*', bin2hex($s));
+        if (mb_check_encoding($s, 'UTF-8') !== $expected) {
+            if ($mismatches++ < 10) {
+                echo "Mismatch: long mutated len ", strlen($s), "\n";
+            }
+        }
+        $checked++;
     }
 }
 echo $checked > 100000 ? "enough cases\n" : "too few cases: $checked\n";
