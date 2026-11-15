@@ -51,10 +51,9 @@ PHP 8.7 INTERNALS UPGRADE NOTES
   allowed anymore. User-facing HashTables must have pDestructor = ZVAL_PTR_DTOR
   or NULL, and must be freed with zend_array_destroy(). Other HashTables can be
   freed with zend_hash_destroy() + pefree().
-- The ZTS symbols compiler_globals_offset and executor_globals_offset have been
-  removed: CG()/EG() now reach the globals through a __thread struct.
-- PG(), SG(), CWDG(), SIGG(), ZCG(), JIT_G() and INI_SCNG() use native TLS.
-  The core_globals_offset, sapi_globals_offset, cwd_globals_offset,
+- CG(), EG(), PG(), SG(), CWDG(), SIGG(), ZCG(), JIT_G() and INI_SCNG() use
+  native TLS in ZTS builds. The compiler_globals_offset, executor_globals_offset,
+  core_globals_offset, sapi_globals_offset, cwd_globals_offset,
   zend_signal_globals_offset, accel_globals_offset, jit_globals_offset and
   ini_scanner_globals_offset symbols have been removed.
 - php_reserve_tsrm_memory() has been removed.
