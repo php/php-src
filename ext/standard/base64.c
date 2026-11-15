@@ -642,6 +642,24 @@ static zend_always_inline size_t php_base64_ctz64(uint64_t x)
 		c += 64; \
 	} \
 	\
+	/* Without pending values, the last 0 to 63 bytes are decoded 16 at a time while \
+	 * they are in the alphabet, and the rest one character at a time. Writing 16 \
+	 * bytes for 12 decoded bytes is safe, as 16 more bytes have been read. */ \
+	if (buffered == 0) { \
+		size_t i = 0, pad = 0, outl; \
+		while (end - c >= 16 && php_base64_decode_##isa##_step16(c, o)) { \
+			c += 16; \
+			o += 12; \
+		} \
+		outl = o - out; \
+		if (!php_base64_decode_loop(c, end - c, out, &outl, &i, &pad, strict) \
+				|| !php_base64_decode_finish(out, outl, i, pad, strict)) { \
+			goto fail; \
+		} \
+		ZSTR_LEN(result) = outl; \
+		return result; \
+	} \
+	\
 	/* The last 0 to 63 bytes, completed with zero bytes, which are not in the alphabet. */ \
 	memset(last, 0, sizeof(last)); \
 	php_base64_copy_short(last, c, end - c); \
@@ -742,62 +760,6 @@ zend_string *php_base64_encode_avx512_vbmi(const unsigned char *str, size_t leng
 	return result;
 }
 
-#define PHP_BASE64_AVX512_VBMI_TARGET __attribute__((target("avx512f,avx512cd,avx512vl,avx512dq,avx512bw,avx512vbmi,avx512vbmi2,popcnt")))
-
-/* ASCII to 6-bit values, for the 128 ASCII bytes; the others map to 0x80. */
-static const uint8_t php_base64_avx512_lookup[128] = {
-	0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
-	0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
-	0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x3e, 0x80, 0x80, 0x80, 0x3f,
-	0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3a, 0x3b, 0x3c, 0x3d, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
-	0x80, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e,
-	0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x80, 0x80, 0x80, 0x80, 0x80,
-	0x80, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28,
-	0x29, 0x2a, 0x2b, 0x2c, 0x2d, 0x2e, 0x2f, 0x30, 0x31, 0x32, 0x33, 0x80, 0x80, 0x80, 0x80, 0x80
-};
-
-typedef struct {
-	__m512i v;
-} php_base64_avx512_vbmi_block;
-
-static zend_always_inline PHP_BASE64_AVX512_VBMI_TARGET uint64_t php_base64_decode_avx512_vbmi_translate(php_base64_avx512_vbmi_block *b, const unsigned char *in)
-{
-	const __m512i s = _mm512_loadu_si512((const void *)in);
-
-	b->v = _mm512_permutex2var_epi8(_mm512_loadu_si512((const void *)php_base64_avx512_lookup), s,
-		_mm512_loadu_si512((const void *)(php_base64_avx512_lookup + 64)));
-
-	return _mm512_movepi8_mask(_mm512_or_si512(b->v, s));
-}
-
-static zend_always_inline PHP_BASE64_AVX512_VBMI_TARGET uint64_t php_base64_decode_avx512_vbmi_match(const unsigned char *in, const uint8_t *set)
-{
-	const __m512i s = _mm512_loadu_si512((const void *)in);
-
-	return _mm512_cmpeq_epi8_mask(_mm512_shuffle_epi8(_mm512_broadcast_i32x4(_mm_loadu_si128((const __m128i *)set)), s), s);
-}
-
-static zend_always_inline PHP_BASE64_AVX512_VBMI_TARGET size_t php_base64_decode_avx512_vbmi_compress(const php_base64_avx512_vbmi_block *b, uint64_t bad, uint8_t *out)
-{
-	_mm512_storeu_si512((void *)out, _mm512_maskz_compress_epi8(~bad, b->v));
-
-	return 64 - __builtin_popcountll(bad);
-}
-
-static zend_always_inline PHP_BASE64_AVX512_VBMI_TARGET void php_base64_decode_avx512_vbmi_pack(const php_base64_avx512_vbmi_block *b, unsigned char *out)
-{
-	const __m512i s = _mm512_madd_epi16(_mm512_maddubs_epi16(b->v, _mm512_set1_epi32(0x01400140)), _mm512_set1_epi32(0x00011000));
-
-	_mm512_storeu_si512((void *)out, _mm512_permutexvar_epi8(_mm512_setr_epi32(
-		0x06000102, 0x090a0405, 0x0c0d0e08, 0x16101112, 0x191a1415, 0x1c1d1e18,
-		0x26202122, 0x292a2425, 0x2c2d2e28, 0x36303132, 0x393a3435, 0x3c3d3e38,
-		0x00000000, 0x00000000, 0x00000000, 0x00000000), s));
-}
-
-zend_string *php_base64_decode_ex_avx512_vbmi(const unsigned char *str, size_t length, bool strict)
-{
-	PHP_BASE64_DECODE_SIMD(avx512_vbmi, false)
-}
 #endif
 
 #if defined(BASE64_INTRIN_AVX512_FUNC_PROTO) || defined(BASE64_INTRIN_AVX512_FUNC_PTR)
@@ -1200,6 +1162,21 @@ static zend_always_inline PHP_BASE64_SSSE3_TARGET __m128i php_base64_decode_pack
 	 * HHHHhhhh GGGGGGgg FFffffff EEEEeeee
 	 * DDDDDDdd CCcccccc BBBBbbbb AAAAAAaa */
 }
+
+/* If the 16 bytes at in are in the alphabet, decode them (writing 16 bytes). */
+static zend_always_inline PHP_BASE64_SSSE3_TARGET bool php_base64_decode_step16(const unsigned char *in, unsigned char *out)
+{
+	__m128i values;
+
+	if (php_base64_decode_translate16(in, &values)) {
+		return false;
+	}
+	_mm_storeu_si128((__m128i *)out, php_base64_decode_pack16(values));
+
+	return true;
+}
+#define php_base64_decode_ssse3_step16 php_base64_decode_step16
+#define php_base64_decode_avx2_step16 php_base64_decode_step16
 #endif
 
 #if defined(ZEND_INTRIN_SSSE3_NATIVE) || defined(ZEND_INTRIN_SSSE3_RESOLVER)
@@ -1350,6 +1327,67 @@ zend_string *php_base64_decode_ex_ssse3(const unsigned char *str, size_t length,
 # endif
 #endif /* ZEND_INTRIN_AVX2_NATIVE || ZEND_INTRIN_AVX2_RESOLVER || ZEND_INTRIN_SSSE3_NATIVE || ZEND_INTRIN_SSSE3_RESOLVER */
 
+#if defined(BASE64_INTRIN_AVX512_VBMI_FUNC_PROTO) || defined(BASE64_INTRIN_AVX512_VBMI_FUNC_PTR)
+#define PHP_BASE64_AVX512_VBMI_TARGET __attribute__((target("avx512f,avx512cd,avx512vl,avx512dq,avx512bw,avx512vbmi,avx512vbmi2,popcnt")))
+
+/* ASCII to 6-bit values, for the 128 ASCII bytes; the others map to 0x80. */
+static const uint8_t php_base64_avx512_lookup[128] = {
+	0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
+	0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
+	0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x3e, 0x80, 0x80, 0x80, 0x3f,
+	0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3a, 0x3b, 0x3c, 0x3d, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
+	0x80, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e,
+	0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x80, 0x80, 0x80, 0x80, 0x80,
+	0x80, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28,
+	0x29, 0x2a, 0x2b, 0x2c, 0x2d, 0x2e, 0x2f, 0x30, 0x31, 0x32, 0x33, 0x80, 0x80, 0x80, 0x80, 0x80
+};
+
+typedef struct {
+	__m512i v;
+} php_base64_avx512_vbmi_block;
+
+static zend_always_inline PHP_BASE64_AVX512_VBMI_TARGET uint64_t php_base64_decode_avx512_vbmi_translate(php_base64_avx512_vbmi_block *b, const unsigned char *in)
+{
+	const __m512i s = _mm512_loadu_si512((const void *)in);
+
+	b->v = _mm512_permutex2var_epi8(_mm512_loadu_si512((const void *)php_base64_avx512_lookup), s,
+		_mm512_loadu_si512((const void *)(php_base64_avx512_lookup + 64)));
+
+	return _mm512_movepi8_mask(_mm512_or_si512(b->v, s));
+}
+
+static zend_always_inline PHP_BASE64_AVX512_VBMI_TARGET uint64_t php_base64_decode_avx512_vbmi_match(const unsigned char *in, const uint8_t *set)
+{
+	const __m512i s = _mm512_loadu_si512((const void *)in);
+
+	return _mm512_cmpeq_epi8_mask(_mm512_shuffle_epi8(_mm512_broadcast_i32x4(_mm_loadu_si128((const __m128i *)set)), s), s);
+}
+
+static zend_always_inline PHP_BASE64_AVX512_VBMI_TARGET size_t php_base64_decode_avx512_vbmi_compress(const php_base64_avx512_vbmi_block *b, uint64_t bad, uint8_t *out)
+{
+	_mm512_storeu_si512((void *)out, _mm512_maskz_compress_epi8(~bad, b->v));
+
+	return 64 - __builtin_popcountll(bad);
+}
+
+static zend_always_inline PHP_BASE64_AVX512_VBMI_TARGET void php_base64_decode_avx512_vbmi_pack(const php_base64_avx512_vbmi_block *b, unsigned char *out)
+{
+	const __m512i s = _mm512_madd_epi16(_mm512_maddubs_epi16(b->v, _mm512_set1_epi32(0x01400140)), _mm512_set1_epi32(0x00011000));
+
+	_mm512_storeu_si512((void *)out, _mm512_permutexvar_epi8(_mm512_setr_epi32(
+		0x06000102, 0x090a0405, 0x0c0d0e08, 0x16101112, 0x191a1415, 0x1c1d1e18,
+		0x26202122, 0x292a2425, 0x2c2d2e28, 0x36303132, 0x393a3435, 0x3c3d3e38,
+		0x00000000, 0x00000000, 0x00000000, 0x00000000), s));
+}
+
+#define php_base64_decode_avx512_vbmi_step16 php_base64_decode_step16
+
+zend_string *php_base64_decode_ex_avx512_vbmi(const unsigned char *str, size_t length, bool strict)
+{
+	PHP_BASE64_DECODE_SIMD(avx512_vbmi, false)
+}
+#endif
+
 #if defined(__aarch64__) || defined(_M_ARM64)
 /* Translation from ASCII to 6-bit values (from simdutf): the entries for the
  * low nibble and for the top five bits of a byte share no bit (or only the bit 0
@@ -1481,6 +1519,27 @@ static zend_always_inline void php_base64_decode_neon_pack(const php_base64_neon
 	result.val[1] = vorrq_u8(vshrq_n_u8(v2, 2), vshlq_n_u8(v1, 4));
 	result.val[2] = vorrq_u8(v3, vshlq_n_u8(v2, 6));
 	vst3q_u8(out, result);
+}
+
+/* If the 16 bytes at in are in the alphabet, decode them (writing 16 bytes). */
+static zend_always_inline bool php_base64_decode_neon_step16(const unsigned char *in, unsigned char *out)
+{
+	static const uint8_t order[16] = {2, 1, 0, 6, 5, 4, 10, 9, 8, 14, 13, 12, 0xff, 0xff, 0xff, 0xff};
+	uint8x16_t values;
+	uint16x8_t w;
+	uint32x4_t u;
+
+	if (vminvq_u8(php_base64_decode_translate16(in, &values)) <= 1) {
+		return false;
+	}
+	/* aaaaaa bbbbbb cccccc dddddd: aaaaaabbbbbb and ccccccdddddd, then the 24 bits */
+	w = vreinterpretq_u16_u8(values);
+	w = vorrq_u16(vandq_u16(vshlq_n_u16(w, 6), vdupq_n_u16(0x0fc0)), vshrq_n_u16(w, 8));
+	u = vreinterpretq_u32_u16(w);
+	u = vorrq_u32(vshlq_n_u32(vandq_u32(u, vdupq_n_u32(0xffff)), 12), vshrq_n_u32(u, 16));
+	vst1q_u8(out, vqtbl1q_u8(vreinterpretq_u8_u32(u), vld1q_u8(order)));
+
+	return true;
 }
 #endif
 
