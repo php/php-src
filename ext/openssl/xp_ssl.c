@@ -2732,6 +2732,15 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 
 					return PHP_STREAM_OPTION_RETURN_OK;
 
+				case STREAM_XPORT_OP_SEND:
+					if (sslsock->ssl_active) {
+						/* A send() on the socket would put plaintext in the middle of the TLS records */
+						xparam->outputs.returncode = (int) php_openssl_sockop_write(stream,
+								xparam->inputs.buf, MIN(xparam->inputs.buflen, INT_MAX));
+						return PHP_STREAM_OPTION_RETURN_OK;
+					}
+					break;
+
 				default:
 					/* fall through */
 					break;
