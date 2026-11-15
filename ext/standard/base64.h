@@ -17,12 +17,15 @@
 #define BASE64_H
 
 /*
- * NEON and AVX512 implementation are based on https://github.com/WojciechMula/base64simd
+ * The vectorized decoders and the NEON encoder are based on
+ * https://github.com/simdutf/simdutf
+ *
+ * The AVX512 encoders are based on https://github.com/WojciechMula/base64simd
  * which is copyrighted to:
  * Copyright (c) 2015-2018, Wojciech Mula
  * All rights reserved.
  *
- * SSSE3 and AVX2 implementation are based on https://github.com/aklomp/base64
+ * The SSSE3 and AVX2 encoders are based on https://github.com/aklomp/base64
  * which is copyrighted to:
  *
  * Copyright (c) 2005-2007, Nick Galbreath
