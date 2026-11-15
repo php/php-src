@@ -108,6 +108,11 @@ PHP                                                                        NEWS
   . Fixed session upload progress to respect session.use_only_cookies.
     (jorgsowa)
 
+- SPL:
+  . Fixed use-after-free when an error handler replaces the backing store of
+    an ArrayObject during an offset access or ArrayIterator::seek().
+    (Nicolas Grekas)
+
 - Standard:
   . Fixed dns_get_record() returning partially built records for malformed
     DNS responses. (Marti2203)

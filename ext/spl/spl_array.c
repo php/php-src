@@ -325,9 +325,9 @@ static zval *spl_array_get_dimension_ptr(bool check_inherited, spl_array_object 
 {
 	zval *retval;
 	spl_hash_key key;
-	HashTable *ht = spl_array_get_hash_table(intern);
+	HashTable *ht;
 
-	if (!offset || Z_ISUNDEF_P(offset) || !ht) {
+	if (!offset || Z_ISUNDEF_P(offset)) {
 		return &EG(uninitialized_zval);
 	}
 
@@ -342,7 +342,11 @@ static zval *spl_array_get_dimension_ptr(bool check_inherited, spl_array_object 
 			&EG(error_zval) : &EG(uninitialized_zval);
 	}
 
+	/* Fetched after get_hash_key(), whose errors may call a handler that replaces the storage */
+	ht = spl_array_get_hash_table(intern);
+
 	if (key.key) {
+find_key:
 		retval = zend_hash_find(ht, key.key);
 		if (retval) {
 			if (Z_TYPE_P(retval) == IS_INDIRECT) {
@@ -358,7 +362,11 @@ static zval *spl_array_get_dimension_ptr(bool check_inherited, spl_array_object 
 							break;
 						case BP_VAR_RW:
 							zend_error(E_WARNING,"Undefined array key \"%s\"", ZSTR_VAL(key.key));
-							ZEND_FALLTHROUGH;
+							/* The error handler may have replaced the storage,
+							 * which can free the table that retval points to */
+							ht = spl_array_get_hash_table(intern);
+							type = BP_VAR_W;
+							goto find_key;
 						case BP_VAR_W: {
 							ZVAL_NULL(retval);
 						}
@@ -376,6 +384,8 @@ static zval *spl_array_get_dimension_ptr(bool check_inherited, spl_array_object 
 					break;
 				case BP_VAR_RW:
 					zend_error(E_WARNING,"Undefined array key \"%s\"", ZSTR_VAL(key.key));
+					/* The error handler may have replaced the storage */
+					ht = spl_array_get_hash_table(intern);
 					ZEND_FALLTHROUGH;
 				case BP_VAR_W: {
 				    zval value;
@@ -397,6 +407,8 @@ static zval *spl_array_get_dimension_ptr(bool check_inherited, spl_array_object 
 					break;
 				case BP_VAR_RW:
 					zend_error(E_WARNING, "Undefined array key " ZEND_LONG_FMT, key.h);
+					/* The error handler may have replaced the storage */
+					ht = spl_array_get_hash_table(intern);
 					ZEND_FALLTHROUGH;
 				case BP_VAR_W: {
 				    zval value;
@@ -596,13 +608,16 @@ static bool spl_array_has_dimension_ex(bool check_inherited, zend_object *object
 	}
 
 	if (!value) {
-		HashTable *ht = spl_array_get_hash_table(intern);
+		HashTable *ht;
 		spl_hash_key key;
 
 		if (get_hash_key(&key, intern, offset) == FAILURE) {
 			zend_illegal_container_offset(object->ce->name, offset, BP_VAR_IS);
 			return 0;
 		}
+
+		/* Fetched after get_hash_key(), whose errors may call a handler that replaces the storage */
+		ht = spl_array_get_hash_table(intern);
 
 		if (key.key) {
 			tmp = zend_hash_find(ht, key.key);
@@ -1687,7 +1702,7 @@ PHP_METHOD(ArrayIterator, seek)
 	zend_long opos, position;
 	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
-	HashTable *aht = spl_array_get_hash_table(intern);
+	HashTable *aht;
 	int result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &position) == FAILURE) {
@@ -1702,6 +1717,8 @@ PHP_METHOD(ArrayIterator, seek)
 
 		while (position-- > 0 && (result = spl_array_next(intern)) == SUCCESS);
 
+		/* Fetched after parsing the argument, as its errors may call a handler that replaces the storage */
+		aht = spl_array_get_hash_table(intern);
 		if (result == SUCCESS && zend_hash_has_more_elements_ex(aht, spl_array_get_pos_ptr(aht, intern)) == SUCCESS) {
 			return; /* ok */
 		}
