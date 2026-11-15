@@ -198,7 +198,9 @@ int zend_shared_alloc_startup(size_t requested_size, size_t reserved_size)
 
 	/* shared_free must be valid before we call zend_shared_alloc()
 	 * - make it temporarily point to a local variable
+	 * It is copied by value into shared memory below, so it must not contain stack garbage.
 	 */
+	memset(&tmp_shared_globals, 0, sizeof(tmp_shared_globals));
 	smm_shared_globals = &tmp_shared_globals;
 	ZSMMG(shared_free) = requested_size - reserved_size; /* goes to tmp_shared_globals.shared_free */
 
@@ -274,7 +276,7 @@ int zend_shared_alloc_startup(size_t requested_size, size_t reserved_size)
 	shared_segments_array_size = ZSMMG(shared_segments_count) * S_H(segment_type_size)();
 
 	/* move shared_segments and shared_free to shared memory */
-	ZCG(locked) = 1; /* no need to perform a real lock at this point */
+	ZCG(locked) = 1; /* no other process can access the new segment yet, see zend_shared_alloc_startup_done() */
 
 	p_tmp_shared_globals = (zend_smm_shared_globals *) zend_shared_alloc(sizeof(zend_smm_shared_globals));
 	if (!p_tmp_shared_globals) {
@@ -318,6 +320,13 @@ int zend_shared_alloc_startup(size_t requested_size, size_t reserved_size)
 	ZCG(locked) = 0;
 
 	return res;
+}
+
+void zend_shared_alloc_startup_done(void)
+{
+#ifdef ZEND_WIN32
+	zend_shared_alloc_win32_startup_done();
+#endif
 }
 
 void zend_shared_alloc_shutdown(void)

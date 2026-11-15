@@ -3305,6 +3305,7 @@ static zend_result accel_post_startup(void)
 #endif
 			case ALLOC_SUCCESS:
 				if (zend_accel_init_shm() == FAILURE) {
+					zend_shared_alloc_startup_done();
 					accel_startup_ok = false;
 					return FAILURE;
 				}
@@ -3368,6 +3369,10 @@ static zend_result accel_post_startup(void)
 #endif
 		zend_shared_alloc_save_state();
 		zend_shared_alloc_unlock();
+
+		/* A newly created segment, including the JIT buffer, is fully initialized now:
+		 * let other processes attach to it */
+		zend_shared_alloc_startup_done();
 
 		SHM_PROTECT();
 	} else if (!ZCG(accel_directives).file_cache) {

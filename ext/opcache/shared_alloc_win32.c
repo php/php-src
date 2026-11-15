@@ -40,6 +40,8 @@
 #define ACCEL_BASE_POINTER_SIZE (2 * sizeof(void*))
 
 static HANDLE memfile = NULL, memory_mutex = NULL;
+/* create_segments() created a new segment and still holds memory_mutex for its initialization */
+static bool startup_lock_held = false;
 static void *mapping_base;
 
 #define MAX_MAP_RETRIES 25
@@ -112,6 +114,14 @@ void zend_shared_alloc_lock_win32(void)
 void zend_shared_alloc_unlock_win32(void)
 {
 	ReleaseMutex(memory_mutex);
+}
+
+void zend_shared_alloc_win32_startup_done(void)
+{
+	if (startup_lock_held) {
+		startup_lock_held = false;
+		zend_shared_alloc_unlock_win32();
+	}
 }
 
 static int zend_shared_alloc_reattach(size_t requested_size, const char **error_in)
@@ -329,7 +339,9 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	shared_segment->pos = ACCEL_BASE_POINTER_SIZE;
 	shared_segment->size = requested_size;
 
-	zend_shared_alloc_unlock_win32();
+	/* Keep the mutex locked: the new segment is not initialized yet, and a process that attached now
+	 * would read uninitialized shared memory. zend_shared_alloc_startup_done() releases it. */
+	startup_lock_held = true;
 
 	return ALLOC_SUCCESS;
 }
