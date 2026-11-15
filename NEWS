@@ -8,6 +8,8 @@ PHP                                                                        NEWS
     result is unused (GH-23048). (Artem Ukrainskiy)
 
 - Curl:
+  . Negative values for CURLOPT_POSTREDIR are now rejected, causing
+    curl_setopt() to return false. (Sjoerd Langkemper)
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
   . curl_multi_exec() now throws a TypeError when $still_running cannot be
     converted to an int.
