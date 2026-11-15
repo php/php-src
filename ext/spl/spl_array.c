@@ -460,6 +460,17 @@ static zval *spl_array_read_dimension(zend_object *object, zval *offset, int typ
 	return spl_array_read_dimension_ex(1, object, offset, type, rv);
 } /* }}} */
 
+/* Stores the value, then destroys the previous one: its destructor may
+ * change the storage, which can free the table that data points to. */
+static void spl_array_replace_value(zval *data, zval *value)
+{
+	zval garbage;
+
+	ZVAL_COPY_VALUE(&garbage, data);
+	ZVAL_COPY_VALUE(data, value);
+	zval_ptr_dtor(&garbage);
+}
+
 static void spl_array_write_dimension_ex(int check_inherited, zend_object *object, zval *offset, zval *value) /* {{{ */
 {
 	spl_array_object *intern = spl_array_from_obj(object);
@@ -505,10 +516,23 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 	}
 
 	if (key.key) {
-		zend_hash_update_ind(ht, key.key, value);
+		zval *data = zend_hash_find(ht, key.key);
+		if (data) {
+			if (Z_TYPE_P(data) == IS_INDIRECT) {
+				data = Z_INDIRECT_P(data);
+			}
+			spl_array_replace_value(data, value);
+		} else {
+			zend_hash_add_new(ht, key.key, value);
+		}
 		spl_hash_key_release(&key);
 	} else {
-		zend_hash_index_update(ht, key.h, value);
+		zval *data = zend_hash_index_find(ht, key.h);
+		if (data) {
+			spl_array_replace_value(data, value);
+		} else {
+			zend_hash_index_add_new(ht, key.h, value);
+		}
 	}
 } /* }}} */
 
