@@ -44,6 +44,12 @@ PHP 8.7 UPGRADE NOTES
     ReflectionZendExtension, ReflectionAttribute and ReflectionConstant are
     now readonly.
 
+- SNMP:
+  . A remote port in the hostname must now be one or more decimal digits
+    with no other characters. An empty, nonnumeric or partially numeric
+    port, such as "host:", "host:abc" or "host:123abc", now throws a
+    ValueError instead of being read as 0 or as its leading digits.
+
 - SOAP:
   . SoapClient no longer follows an HTTP redirect to a different origin
     (scheme, host, or port) and throws a SoapFault instead. Previously the
