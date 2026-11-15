@@ -5105,15 +5105,192 @@ MBSTRING_API bool php_mb_check_encoding(const char *input, size_t length, const 
 # define MBSTRING_BROKEN_X86_MSVC_INTRINSICS
 #endif
 
+#if defined(ZEND_INTRIN_AVX2_NATIVE) || defined(ZEND_INTRIN_AVX2_RESOLVER) || defined(__aarch64__) || defined(_M_ARM64)
+
+/* UTF-8 validation following the "lookup" algorithm of
+ * John Keiser and Daniel Lemire, "Validating UTF-8 In Less Than One Instruction Per Byte",
+ * Software: Practice and Experience 51 (5), 2021. https://doi.org/10.1002/spe.2940
+ * The code is adapted from the simdutf library (https://github.com/simdutf/simdutf).
+ *
+ * Each byte is checked together with the byte which precedes it: three table lookups,
+ * on the high nibble of the previous byte, the low nibble of the previous byte and the
+ * high nibble of the current byte, each return a set of possible errors. A bit which is
+ * set in all three results is an actual error. The only error which cannot be detected
+ * from two successive bytes is a missing third or fourth byte of a multi-byte sequence;
+ * it is found by checking the bytes two and three positions back. */
+#define MB_UTF8_TOO_SHORT  (1 << 0) /* 11______ 0_______ or 11______ 11______ */
+#define MB_UTF8_TOO_LONG   (1 << 1) /* 0_______ 10______ */
+#define MB_UTF8_OVERLONG_3 (1 << 2) /* 11100000 100_____ */
+#define MB_UTF8_TOO_LARGE  (1 << 3) /* 11110100 1001____ and above */
+#define MB_UTF8_SURROGATE  (1 << 4) /* 11101101 101_____ */
+#define MB_UTF8_OVERLONG_2 (1 << 5) /* 1100000_ 10______ */
+#define MB_UTF8_TOO_LARGE_1000 (1 << 6) /* 11110101 1000____ and above */
+#define MB_UTF8_OVERLONG_4 (1 << 6) /* 11110000 1000____ */
+/* Bit 7 (0x80); written as -128 since _mm_setr_epi8 and friends take signed chars */
+#define MB_UTF8_TWO_CONTS  (-128) /* 10______ 10______ */
+#define MB_UTF8_CARRY (MB_UTF8_TOO_SHORT | MB_UTF8_TOO_LONG | MB_UTF8_TWO_CONTS)
+
+/* Lookup table indexed by the high nibble of the previous byte */
+#define MB_UTF8_BYTE_1_HIGH \
+	MB_UTF8_TOO_LONG, MB_UTF8_TOO_LONG, MB_UTF8_TOO_LONG, MB_UTF8_TOO_LONG, \
+	MB_UTF8_TOO_LONG, MB_UTF8_TOO_LONG, MB_UTF8_TOO_LONG, MB_UTF8_TOO_LONG, \
+	MB_UTF8_TWO_CONTS, MB_UTF8_TWO_CONTS, MB_UTF8_TWO_CONTS, MB_UTF8_TWO_CONTS, \
+	MB_UTF8_TOO_SHORT | MB_UTF8_OVERLONG_2, \
+	MB_UTF8_TOO_SHORT, \
+	MB_UTF8_TOO_SHORT | MB_UTF8_OVERLONG_3 | MB_UTF8_SURROGATE, \
+	MB_UTF8_TOO_SHORT | MB_UTF8_TOO_LARGE | MB_UTF8_TOO_LARGE_1000 | MB_UTF8_OVERLONG_4
+
+/* Lookup table indexed by the low nibble of the previous byte */
+#define MB_UTF8_BYTE_1_LOW \
+	MB_UTF8_CARRY | MB_UTF8_OVERLONG_3 | MB_UTF8_OVERLONG_2 | MB_UTF8_OVERLONG_4, \
+	MB_UTF8_CARRY | MB_UTF8_OVERLONG_2, \
+	MB_UTF8_CARRY, \
+	MB_UTF8_CARRY, \
+	MB_UTF8_CARRY | MB_UTF8_TOO_LARGE, \
+	MB_UTF8_CARRY | MB_UTF8_TOO_LARGE | MB_UTF8_TOO_LARGE_1000, \
+	MB_UTF8_CARRY | MB_UTF8_TOO_LARGE | MB_UTF8_TOO_LARGE_1000, \
+	MB_UTF8_CARRY | MB_UTF8_TOO_LARGE | MB_UTF8_TOO_LARGE_1000, \
+	MB_UTF8_CARRY | MB_UTF8_TOO_LARGE | MB_UTF8_TOO_LARGE_1000, \
+	MB_UTF8_CARRY | MB_UTF8_TOO_LARGE | MB_UTF8_TOO_LARGE_1000, \
+	MB_UTF8_CARRY | MB_UTF8_TOO_LARGE | MB_UTF8_TOO_LARGE_1000, \
+	MB_UTF8_CARRY | MB_UTF8_TOO_LARGE | MB_UTF8_TOO_LARGE_1000, \
+	MB_UTF8_CARRY | MB_UTF8_TOO_LARGE | MB_UTF8_TOO_LARGE_1000, \
+	MB_UTF8_CARRY | MB_UTF8_TOO_LARGE | MB_UTF8_TOO_LARGE_1000 | MB_UTF8_SURROGATE, \
+	MB_UTF8_CARRY | MB_UTF8_TOO_LARGE | MB_UTF8_TOO_LARGE_1000, \
+	MB_UTF8_CARRY | MB_UTF8_TOO_LARGE | MB_UTF8_TOO_LARGE_1000
+
+/* Lookup table indexed by the high nibble of the current byte */
+#define MB_UTF8_BYTE_2_HIGH \
+	MB_UTF8_TOO_SHORT, MB_UTF8_TOO_SHORT, MB_UTF8_TOO_SHORT, MB_UTF8_TOO_SHORT, \
+	MB_UTF8_TOO_SHORT, MB_UTF8_TOO_SHORT, MB_UTF8_TOO_SHORT, MB_UTF8_TOO_SHORT, \
+	MB_UTF8_TOO_LONG | MB_UTF8_OVERLONG_2 | MB_UTF8_TWO_CONTS | MB_UTF8_OVERLONG_3 | MB_UTF8_TOO_LARGE_1000 | MB_UTF8_OVERLONG_4, \
+	MB_UTF8_TOO_LONG | MB_UTF8_OVERLONG_2 | MB_UTF8_TWO_CONTS | MB_UTF8_OVERLONG_3 | MB_UTF8_TOO_LARGE, \
+	MB_UTF8_TOO_LONG | MB_UTF8_OVERLONG_2 | MB_UTF8_TWO_CONTS | MB_UTF8_SURROGATE | MB_UTF8_TOO_LARGE, \
+	MB_UTF8_TOO_LONG | MB_UTF8_OVERLONG_2 | MB_UTF8_TWO_CONTS | MB_UTF8_SURROGATE | MB_UTF8_TOO_LARGE, \
+	MB_UTF8_TOO_SHORT, MB_UTF8_TOO_SHORT, MB_UTF8_TOO_SHORT, MB_UTF8_TOO_SHORT
+
+/* mb_utf8_keep_mask[i] is 0xFF if i >= 64, 0 otherwise; loading a vector from
+ * mb_utf8_keep_mask + k gives a mask which clears its first 64 - k bytes */
+static const unsigned char mb_utf8_keep_mask[96] = {
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+};
+
+#endif
+
 /* If we are building an AVX2-only binary, don't compile the next function */
 #ifndef ZEND_INTRIN_AVX2_NATIVE
 
-/* SSE2-based function for validating UTF-8 strings
- * A faster implementation which uses AVX2 instructions follows */
+/* Function for validating UTF-8 strings, using NEON on ARM64 or SSE2 on x86
+ * Faster implementations which use AVX2 or AVX-512 instructions follow */
 static bool mb_fast_check_utf8_default(zend_string *str)
 {
 	unsigned char *p = (unsigned char*)ZSTR_VAL(str);
-# ifdef XSSE2
+# if defined(__aarch64__) || defined(_M_ARM64)
+	/* NEON version of the "lookup" algorithm; see mb_fast_check_utf8_avx2 */
+#  define MB_UTF8_CHECK_NEON(input, prev) do { \
+		uint8x16_t prev1 = vextq_u8((prev), (input), 15); \
+		uint8x16_t sc = vandq_u8(vandq_u8( \
+			vqtbl1q_u8(byte_1_high, vshrq_n_u8(prev1, 4)), \
+			vqtbl1q_u8(byte_1_low, vandq_u8(prev1, v_0f))), \
+			vqtbl1q_u8(byte_2_high, vshrq_n_u8((input), 4))); \
+		uint8x16_t must23 = veorq_u8( \
+			vcgeq_u8(vextq_u8((prev), (input), 14), v_e0), \
+			vcgeq_u8(vextq_u8((prev), (input), 13), v_f0)); \
+		error = vorrq_u8(error, veorq_u8(vandq_u8(must23, v_80), sc)); \
+	} while (0)
+
+	static const int8_t byte_1_high_table[16] = { MB_UTF8_BYTE_1_HIGH };
+	static const int8_t byte_1_low_table[16] = { MB_UTF8_BYTE_1_LOW };
+	static const int8_t byte_2_high_table[16] = { MB_UTF8_BYTE_2_HIGH };
+	/* A block ending with any of these is incomplete: ... 1111____ 111_____ 11______ */
+	static const uint8_t max_value_table[16] = { 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0xF0 - 1, 0xE0 - 1, 0xC0 - 1 };
+
+	const unsigned char *e = p + ZSTR_LEN(str);
+	const uint8x16_t byte_1_high = vreinterpretq_u8_s8(vld1q_s8(byte_1_high_table));
+	const uint8x16_t byte_1_low = vreinterpretq_u8_s8(vld1q_s8(byte_1_low_table));
+	const uint8x16_t byte_2_high = vreinterpretq_u8_s8(vld1q_s8(byte_2_high_table));
+	const uint8x16_t max_value = vld1q_u8(max_value_table);
+	const uint8x16_t v_0f = vdupq_n_u8(0x0F);
+	const uint8x16_t v_80 = vdupq_n_u8(0x80);
+	const uint8x16_t v_e0 = vdupq_n_u8(0xE0);
+	const uint8x16_t v_f0 = vdupq_n_u8(0xF0);
+
+	uint8x16_t error = vdupq_n_u8(0);
+	uint8x16_t prev_input = vdupq_n_u8(0);
+	uint8x16_t prev_incomplete = vdupq_n_u8(0);
+
+	while (e - p >= 64) {
+		/* The error vector is sticky, so it suffices to test it once in a while */
+		const unsigned char *stop = (e - p >= 1024 + 64) ? p + 1024 : e - 63;
+		do {
+			uint8x16_t in0 = vld1q_u8(p);
+			uint8x16_t in1 = vld1q_u8(p + 16);
+			uint8x16_t in2 = vld1q_u8(p + 32);
+			uint8x16_t in3 = vld1q_u8(p + 48);
+			if (vmaxvq_u8(vorrq_u8(vorrq_u8(in0, in1), vorrq_u8(in2, in3))) < 0x80) {
+				/* All ASCII; only need to check that the previous block was complete */
+				error = vorrq_u8(error, prev_incomplete);
+			} else {
+				MB_UTF8_CHECK_NEON(in0, prev_input);
+				MB_UTF8_CHECK_NEON(in1, in0);
+				MB_UTF8_CHECK_NEON(in2, in1);
+				MB_UTF8_CHECK_NEON(in3, in2);
+				prev_incomplete = vqsubq_u8(in3, max_value);
+				prev_input = in3;
+			}
+			p += 64;
+		} while (p < stop);
+		if (vmaxvq_u8(error)) {
+			return false;
+		}
+	}
+
+	while (e - p >= 16) {
+		uint8x16_t in = vld1q_u8(p);
+		if (vmaxvq_u8(in) < 0x80) {
+			error = vorrq_u8(error, prev_incomplete);
+		} else {
+			MB_UTF8_CHECK_NEON(in, prev_input);
+			prev_incomplete = vqsubq_u8(in, max_value);
+			prev_input = in;
+		}
+		p += 16;
+	}
+
+	if (p < e) {
+		/* Check the last 16 bytes of the string, using the 16 bytes before them as context.
+		 * Some of these bytes may have been checked already; checking them again is harmless. */
+		size_t len = ZSTR_LEN(str);
+		uint8x16_t in, prev;
+		if (len >= 32) {
+			in = vld1q_u8(e - 16);
+			prev = vld1q_u8(e - 32);
+		} else {
+			/* Short string: we may read up to 16 bytes before the start of the string, which
+			 * belong to the zend_string header, and clear them */
+			in = vld1q_u8(e - 16);
+			if (len >= 16) {
+				prev = vandq_u8(vld1q_u8(e - 32), vld1q_u8(mb_utf8_keep_mask + 32 + len));
+			} else {
+				in = vandq_u8(in, vld1q_u8(mb_utf8_keep_mask + 48 + len));
+				prev = vdupq_n_u8(0);
+			}
+		}
+		if (vmaxvq_u8(in) < 0x80) {
+			error = vorrq_u8(error, prev_incomplete);
+		} else {
+			MB_UTF8_CHECK_NEON(in, prev);
+			prev_incomplete = vqsubq_u8(in, max_value);
+		}
+	}
+
+	error = vorrq_u8(error, prev_incomplete);
+	return vmaxvq_u8(error) == 0;
+#  undef MB_UTF8_CHECK_NEON
+# elif defined(XSSE2)
 	/* `e` points 1 byte past the last full 16-byte block of string content
 	 * Note that we include the terminating null byte which is included in each zend_string
 	 * as part of the content to check; this ensures that multi-byte characters which are
@@ -5387,6 +5564,14 @@ finish_up_remaining_bytes:
 
 #endif /* #ifndef ZEND_INTRIN_AVX2_NATIVE */
 
+/* Only use the AVX-512 function when the AVX2 function is also selected at runtime */
+#if (defined(__x86_64__) || defined(_M_X64)) && defined(ZEND_INTRIN_AVX2_FUNC_PROTO) && defined(ZEND_INTRIN_AVX512_FUNC_PROTO)
+# define MBSTRING_INTRIN_AVX512_FUNC_PROTO 1
+#endif
+#if (defined(__x86_64__) || defined(_M_X64)) && defined(ZEND_INTRIN_AVX2_FUNC_PTR) && defined(ZEND_INTRIN_AVX512_FUNC_PTR)
+# define MBSTRING_INTRIN_AVX512_FUNC_PTR 1
+#endif
+
 #ifdef ZEND_INTRIN_AVX2_NATIVE
 
 /* We are building AVX2-only binary */
@@ -5405,6 +5590,9 @@ finish_up_remaining_bytes:
  * resolve symbols accordingly */
 
 ZEND_INTRIN_AVX2_FUNC_DECL(bool mb_fast_check_utf8_avx2(zend_string *str));
+#  ifdef MBSTRING_INTRIN_AVX512_FUNC_PROTO
+ZEND_INTRIN_AVX512_FUNC_DECL(bool mb_fast_check_utf8_avx512(zend_string *str));
+#  endif
 
 bool mb_fast_check_utf8(zend_string *str) __attribute__((ifunc("resolve_check_utf8")));
 
@@ -5414,6 +5602,11 @@ ZEND_NO_SANITIZE_ADDRESS
 ZEND_ATTRIBUTE_UNUSED
 static check_utf8_func_t resolve_check_utf8(void)
 {
+#  ifdef MBSTRING_INTRIN_AVX512_FUNC_PROTO
+	if (zend_cpu_supports_avx512()) {
+		return mb_fast_check_utf8_avx512;
+	}
+#  endif
 	if (zend_cpu_supports_avx2()) {
 		return mb_fast_check_utf8_avx2;
 	}
@@ -5428,8 +5621,14 @@ static check_utf8_func_t resolve_check_utf8(void)
 
 #ifdef HAVE_FUNC_ATTRIBUTE_TARGET
 static bool mb_fast_check_utf8_avx2(zend_string *str) __attribute__((target("avx2")));
+# ifdef MBSTRING_INTRIN_AVX512_FUNC_PTR
+static bool mb_fast_check_utf8_avx512(zend_string *str) __attribute__((target("avx512f,avx512cd,avx512vl,avx512dq,avx512bw")));
+# endif
 #else
 static bool mb_fast_check_utf8_avx2(zend_string *str);
+# ifdef MBSTRING_INTRIN_AVX512_FUNC_PTR
+static bool mb_fast_check_utf8_avx512(zend_string *str);
+# endif
 #endif
 
 static bool (*check_utf8_ptr)(zend_string *str) = NULL;
@@ -5441,6 +5640,12 @@ static bool mb_fast_check_utf8(zend_string *str)
 
 static void init_check_utf8(void)
 {
+#ifdef MBSTRING_INTRIN_AVX512_FUNC_PTR
+	if (zend_cpu_supports_avx512()) {
+		check_utf8_ptr = mb_fast_check_utf8_avx512;
+		return;
+	}
+#endif
 	if (zend_cpu_supports_avx2()) {
 		check_utf8_ptr = mb_fast_check_utf8_avx2;
 	} else {
@@ -5458,294 +5663,217 @@ static void init_check_utf8(void)
 
 #if defined(ZEND_INTRIN_AVX2_NATIVE) || defined(ZEND_INTRIN_AVX2_RESOLVER)
 
-/* GCC prior to version 8 does not define all intrinsics. See GH-11514.
- * Use a workaround from https://stackoverflow.com/questions/32630458/setting-m256i-to-the-value-of-two-m128i-values */
-#if defined(__GNUC__) && !defined(__llvm__) && !defined(__INTEL_COMPILER) && __GNUC__ < 8
-# define _mm256_set_m128i(v0, v1)  _mm256_insertf128_si256(_mm256_castsi128_si256(v1), (v0), 1)
-#endif
+/* The 32 bytes ending N bytes before the start of `input`, taken from `prev` and `input` */
+#define MB_UTF8_PREV_AVX2(input, prev, N) \
+	_mm256_alignr_epi8((input), _mm256_permute2x128_si256((prev), (input), 0x21), 16 - (N))
 
-/* Take (256-bit) `hi` and `lo` as a 512-bit value, shift down by some
- * number of bytes, then take the low 256 bits
- * This is used to take some number of trailing bytes from the previous 32-byte
- * block followed by some number of leading bytes from the current 32-byte block
- *
- * _mm256_alignr_epi8 (VPALIGNR) is used to shift out bytes from a 256-bit
- * YMM register while shifting in bytes from another YMM register... but
- * it works separately on respective 128-bit halves of the YMM registers,
- * which is not what we want.
- * To make it work as desired, we first do _mm256_permute2x128_si256
- * (VPERM2I128) to combine the low 128 bits from the previous block and
- * the high 128 bits of the current block in one YMM register.
- * Then VPALIGNR will do what is needed. */
-#define _mm256_shift_epi8(hi, lo, shift) _mm256_alignr_epi8(lo, _mm256_permute2x128_si256(hi, lo, 33), 16 - shift)
+/* OR the errors found in the 32-byte block `input` into `error`; `prev` is the preceding block */
+#define MB_UTF8_CHECK_AVX2(input, prev) do { \
+		__m256i prev1 = MB_UTF8_PREV_AVX2(input, prev, 1); \
+		__m256i sc = _mm256_and_si256(_mm256_and_si256( \
+			_mm256_shuffle_epi8(byte_1_high, _mm256_and_si256(_mm256_srli_epi16(prev1, 4), v_0f)), \
+			_mm256_shuffle_epi8(byte_1_low, _mm256_and_si256(prev1, v_0f))), \
+			_mm256_shuffle_epi8(byte_2_high, _mm256_and_si256(_mm256_srli_epi16(input, 4), v_0f))); \
+		/* A byte must be a continuation byte if it is the 3rd byte of a 3/4-byte sequence or \
+		 * the 4th byte of a 4-byte sequence; only such positions get the high bit set here */ \
+		__m256i must23 = _mm256_or_si256( \
+			_mm256_subs_epu8(MB_UTF8_PREV_AVX2(input, prev, 2), v_third), \
+			_mm256_subs_epu8(MB_UTF8_PREV_AVX2(input, prev, 3), v_fourth)); \
+		error = _mm256_or_si256(error, _mm256_xor_si256(_mm256_and_si256(must23, v_80), sc)); \
+	} while (0)
 
-/* AVX2-based UTF-8 validation function; validates text in 32-byte chunks
- *
- * Some parts of this function are the same as `mb_fast_check_utf8`; code comments
- * are not repeated, so consult `mb_fast_check_utf8` for information on uncommented
- * sections. */
 #ifdef ZEND_INTRIN_AVX2_FUNC_PROTO
 ZEND_API bool mb_fast_check_utf8_avx2(zend_string *str)
 #else
 static bool mb_fast_check_utf8_avx2(zend_string *str)
 #endif
 {
-	unsigned char *p = (unsigned char*)ZSTR_VAL(str);
-	unsigned char *e = p + ((ZSTR_LEN(str) + 1) & ~(sizeof(__m256i) - 1));
+	const unsigned char *p = (const unsigned char*)ZSTR_VAL(str);
+	const unsigned char *e = p + ZSTR_LEN(str);
 
-	/* The algorithm used here for UTF-8 validation is partially adapted from the
-	 * paper "Validating UTF-8 In Less Than One Instruction Per Byte", by John Keiser
-	 * and Daniel Lemire.
-	 * Ref: https://arxiv.org/pdf/2010.03090.pdf
-	 *
-	 * Most types of invalid UTF-8 text can be detected by examining pairs of
-	 * successive bytes. Specifically:
-	 *
-	 * • Overlong 2-byte code units start with 0xC0 or 0xC1.
-	 *   No valid UTF-8 string ever uses these byte values.
-	 * • Overlong 3-byte code units start with 0xE0, followed by a byte < 0xA0.
-	 * • Overlong 4-byte code units start with 0xF0, followed by a byte < 0x90.
-	 * • 5-byte or 6-byte code units, which should never be used, start with
-	 *   0xF8-FE.
-	 * • A codepoint value higher than U+10FFFF, which is the highest value for
-	 *   any Unicode codepoint, would either start with 0xF4, followed by a
-	 *   byte >= 0x90, or else would start with 0xF5-F7, followed by any value.
-	 * • A codepoint value from U+D800-DFFF, which are reserved and should never
-	 *   be used, would start with 0xED, followed by a byte >= 0xA0.
-	 * • The byte value 0xFF is also illegal and is never used in valid UTF-8.
-	 *
-	 * To detect all these problems, for each pair of successive bytes, we do
-	 * table lookups using the high nibble of the first byte, the low nibble of
-	 * the first byte, and the high nibble of the second byte. Each table lookup
-	 * retrieves a bitmask, in which each 1 bit indicates a possible invalid
-	 * combination; AND those three bitmasks together, and any 1 bit in the result
-	 * will indicate an actual invalid byte combination was found.
-	 */
+	const __m256i byte_1_high = _mm256_setr_epi8(MB_UTF8_BYTE_1_HIGH, MB_UTF8_BYTE_1_HIGH);
+	const __m256i byte_1_low = _mm256_setr_epi8(MB_UTF8_BYTE_1_LOW, MB_UTF8_BYTE_1_LOW);
+	const __m256i byte_2_high = _mm256_setr_epi8(MB_UTF8_BYTE_2_HIGH, MB_UTF8_BYTE_2_HIGH);
+	const __m256i v_0f = _mm256_set1_epi8(0x0F);
+	const __m256i v_80 = _mm256_set1_epi8((char)0x80);
+	const __m256i v_third = _mm256_set1_epi8((char)(0xE0 - 0x80)); /* only 111_____ will be >= 0x80 */
+	const __m256i v_fourth = _mm256_set1_epi8((char)(0xF0 - 0x80)); /* only 1111____ will be >= 0x80 */
+	/* A block ending with any of these is incomplete: ... 1111____ 111_____ 11______ */
+	const __m256i max_value = _mm256_setr_epi8(
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		(char)(0xF0 - 1), (char)(0xE0 - 1), (char)(0xC0 - 1));
 
-#define BAD_BYTE 0x1
-#define OVERLONG_2BYTE 0x2
-#define _1BYTE (BAD_BYTE | OVERLONG_2BYTE)
-#define OVERLONG_3BYTE 0x4
-#define SURROGATE 0x8
-#define OVERLONG_4BYTE 0x10
-#define INVALID_CP 0x20
+	__m256i error = _mm256_setzero_si256();
+	__m256i prev_input = _mm256_setzero_si256();
+	__m256i prev_incomplete = _mm256_setzero_si256();
 
-	/* Each of these are 16-entry tables, repeated twice; this is required by the
-	 * VPSHUFB instruction which we use to perform 32 table lookups in parallel
-	 * The first entry is for 0xF, the second is for 0xE, and so on down to 0x0
-	 *
-	 * So, for example, notice that the 4th entry in the 1st table is OVERLONG_2BYTE;
-	 * that means that high nibble 0xC is consistent with the byte pair being part of
-	 * an overlong 2-byte code unit */
-	const __m256i bad_hi_nibble2 = _mm256_set_epi8(
-		BAD_BYTE | OVERLONG_4BYTE | INVALID_CP, OVERLONG_3BYTE | SURROGATE, 0, OVERLONG_2BYTE,
-		0, 0, 0, 0,
-		0, 0, 0, 0,
-		0, 0, 0, 0,
-		BAD_BYTE | OVERLONG_4BYTE | INVALID_CP, OVERLONG_3BYTE | SURROGATE, 0, OVERLONG_2BYTE,
-		0, 0, 0, 0,
-		0, 0, 0, 0,
-		0, 0, 0, 0);
-	const __m256i bad_lo_nibble2 = _mm256_set_epi8(
-		BAD_BYTE, BAD_BYTE, BAD_BYTE | SURROGATE, BAD_BYTE,
-		BAD_BYTE, BAD_BYTE, BAD_BYTE, BAD_BYTE,
-		BAD_BYTE, BAD_BYTE, BAD_BYTE, INVALID_CP,
-		0, 0, OVERLONG_2BYTE, OVERLONG_2BYTE | OVERLONG_3BYTE | OVERLONG_4BYTE,
-		BAD_BYTE, BAD_BYTE, BAD_BYTE | SURROGATE, BAD_BYTE,
-		BAD_BYTE, BAD_BYTE, BAD_BYTE, BAD_BYTE,
-		BAD_BYTE, BAD_BYTE, BAD_BYTE, INVALID_CP,
-		0, 0, OVERLONG_2BYTE, OVERLONG_2BYTE | OVERLONG_3BYTE | OVERLONG_4BYTE);
-	const __m256i bad_hi_nibble = _mm256_set_epi8(
-		_1BYTE | SURROGATE | INVALID_CP, _1BYTE | SURROGATE | INVALID_CP,
-		_1BYTE | SURROGATE | INVALID_CP, _1BYTE | SURROGATE | INVALID_CP,
-		_1BYTE | SURROGATE | INVALID_CP, _1BYTE | SURROGATE | INVALID_CP,
-		_1BYTE | OVERLONG_3BYTE | INVALID_CP, _1BYTE | OVERLONG_3BYTE | OVERLONG_4BYTE,
-		_1BYTE | OVERLONG_3BYTE | OVERLONG_4BYTE, _1BYTE | OVERLONG_3BYTE | OVERLONG_4BYTE,
-		_1BYTE | OVERLONG_3BYTE | OVERLONG_4BYTE, _1BYTE | OVERLONG_3BYTE | OVERLONG_4BYTE,
-		_1BYTE | OVERLONG_3BYTE | OVERLONG_4BYTE, _1BYTE | OVERLONG_3BYTE | OVERLONG_4BYTE,
-		_1BYTE | OVERLONG_3BYTE | OVERLONG_4BYTE, _1BYTE | OVERLONG_3BYTE | OVERLONG_4BYTE,
-		_1BYTE | SURROGATE | INVALID_CP, _1BYTE | SURROGATE | INVALID_CP,
-		_1BYTE | SURROGATE | INVALID_CP, _1BYTE | SURROGATE | INVALID_CP,
-		_1BYTE | SURROGATE | INVALID_CP, _1BYTE | SURROGATE | INVALID_CP,
-		_1BYTE | OVERLONG_3BYTE | INVALID_CP, _1BYTE | OVERLONG_3BYTE | OVERLONG_4BYTE,
-		_1BYTE | OVERLONG_3BYTE | OVERLONG_4BYTE, _1BYTE | OVERLONG_3BYTE | OVERLONG_4BYTE,
-		_1BYTE | OVERLONG_3BYTE | OVERLONG_4BYTE, _1BYTE | OVERLONG_3BYTE | OVERLONG_4BYTE,
-		_1BYTE | OVERLONG_3BYTE | OVERLONG_4BYTE, _1BYTE | OVERLONG_3BYTE | OVERLONG_4BYTE,
-		_1BYTE | OVERLONG_3BYTE | OVERLONG_4BYTE, _1BYTE | OVERLONG_3BYTE | OVERLONG_4BYTE);
-
-	const __m256i find_continuation = _mm256_set1_epi8(-64);
-	const __m256i _b = _mm256_set1_epi8(0xB);
-	const __m256i _d = _mm256_set1_epi8(0xD);
-	const __m256i _f = _mm256_set1_epi8(0xF);
-
-	__m256i last_hi_nibbles = _mm256_setzero_si256(), last_lo_nibbles = _mm256_setzero_si256();
-	__m256i operand;
-
-	while (p < e) {
-		operand = _mm256_loadu_si256((__m256i*)p);
-
-check_operand:
-		if (!_mm256_movemask_epi8(operand)) {
-			/* Entire 32-byte block is ASCII characters; the only thing we need to validate is that
-			 * the previous block didn't end with an incomplete multi-byte character
-			 * (This will also confirm that the previous block didn't end with a bad byte like 0xFF) */
-			__m256i bad_mask = _mm256_set_epi8(0xB, 0xD, 0xE, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127);
-			__m256i bad = _mm256_cmpgt_epi8(last_hi_nibbles, bad_mask);
-			if (_mm256_movemask_epi8(bad)) {
-				return false;
+	while (e - p >= 64) {
+		/* The error vector is sticky, so it suffices to test it once in a while */
+		const unsigned char *stop = (e - p >= 1024 + 64) ? p + 1024 : e - 63;
+		do {
+			__m256i in0 = _mm256_loadu_si256((const __m256i*)p);
+			__m256i in1 = _mm256_loadu_si256((const __m256i*)(p + 32));
+			if (!_mm256_movemask_epi8(_mm256_or_si256(in0, in1))) {
+				/* All ASCII; only need to check that the previous block was complete.
+				 * `prev_input` is left alone: if it ends with an incomplete character, an error
+				 * is recorded here; otherwise it gives the same results as ASCII context would */
+				error = _mm256_or_si256(error, prev_incomplete);
+			} else {
+				MB_UTF8_CHECK_AVX2(in0, prev_input);
+				MB_UTF8_CHECK_AVX2(in1, in0);
+				prev_incomplete = _mm256_subs_epu8(in1, max_value);
+				prev_input = in1;
 			}
-
-			/* Consume as many full blocks of single-byte characters as we can */
-			while (true) {
-				p += sizeof(__m256i);
-				if (p >= e) {
-					goto finish_up_remaining_bytes;
-				}
-				operand = _mm256_loadu_si256((__m256i*)p);
-				if (_mm256_movemask_epi8(operand)) {
-					break;
-				}
-			}
-		}
-
-		__m256i hi_nibbles = _mm256_and_si256(_mm256_srli_epi16(operand, 4), _f);
-		__m256i lo_nibbles = _mm256_and_si256(operand, _f);
-
-		__m256i lo_nibbles2 = _mm256_shift_epi8(last_lo_nibbles, lo_nibbles, 1);
-		__m256i hi_nibbles2 = _mm256_shift_epi8(last_hi_nibbles, hi_nibbles, 1);
-
-		/* Do parallel table lookups in all 3 tables */
-		__m256i bad = _mm256_cmpgt_epi8(
-			_mm256_and_si256(
-				_mm256_and_si256(
-					_mm256_shuffle_epi8(bad_lo_nibble2, lo_nibbles2),
-					_mm256_shuffle_epi8(bad_hi_nibble2, hi_nibbles2)),
-				_mm256_shuffle_epi8(bad_hi_nibble, hi_nibbles)),
-			_mm256_setzero_si256());
-
-		__m256i cont_mask = _mm256_cmpgt_epi8(hi_nibbles2, _b);
-		__m256i hi_nibbles3 = _mm256_shift_epi8(last_hi_nibbles, hi_nibbles, 2);
-		cont_mask = _mm256_or_si256(cont_mask, _mm256_cmpgt_epi8(hi_nibbles3, _d));
-		__m256i hi_nibbles4 = _mm256_shift_epi8(last_hi_nibbles, hi_nibbles, 3);
-		cont_mask = _mm256_or_si256(cont_mask, _mm256_cmpeq_epi8(hi_nibbles4, _f));
-
-		__m256i continuation = _mm256_cmpgt_epi8(find_continuation, operand);
-		bad = _mm256_or_si256(bad, _mm256_xor_si256(continuation, cont_mask));
-
-		if (_mm256_movemask_epi8(bad)) {
+			p += 64;
+		} while (p < stop);
+		if (!_mm256_testz_si256(error, error)) {
 			return false;
 		}
-
-		last_hi_nibbles = hi_nibbles;
-		last_lo_nibbles = lo_nibbles;
-		p += sizeof(__m256i);
 	}
 
-finish_up_remaining_bytes:
-	if (p == e) {
-		uint8_t remaining_bytes = ZSTR_LEN(str) & (sizeof(__m256i) - 1); /* Not including terminating null */
-
-		switch (remaining_bytes) {
-		case 0: ;
-			/* No actual data bytes are remaining */
-			__m256i bad_mask = _mm256_set_epi8(0xB, 0xD, 0xE, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127);
-			__m256i bad = _mm256_cmpgt_epi8(last_hi_nibbles, bad_mask);
-			return _mm256_movemask_epi8(bad) == 0;
-		case 1:
-		case 2:
-			operand = _mm256_set_epi16(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, *((int16_t*)p));
-			goto check_operand;
-		case 3:
-		case 4:
-			operand = _mm256_set_epi32(0, 0, 0, 0, 0, 0, 0, *((int32_t*)p));
-			goto check_operand;
-		case 5:
-			operand = _mm256_set_m128i(_mm_setzero_si128(), _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 10)), 10));
-			goto check_operand;
-		case 6:
-			operand = _mm256_set_m128i(_mm_setzero_si128(), _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 9)), 9));
-			goto check_operand;
-		case 7:
-		case 8:
-#ifdef MBSTRING_BROKEN_X86_MSVC_INTRINSICS
-			operand = _mm256_set_epi32(0, 0, 0, 0, 0, 0, ((int32_t*)p)[1], ((int32_t*)p)[0]);
-#else
-			operand = _mm256_set_epi64x(0, 0, 0, *((int64_t*)p));
-#endif
-			goto check_operand;
-		case 9:
-			operand = _mm256_set_m128i(_mm_setzero_si128(), _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 6)), 6));
-			goto check_operand;
-		case 10:
-			operand = _mm256_set_m128i(_mm_setzero_si128(), _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 5)), 5));
-			goto check_operand;
-		case 11:
-			operand = _mm256_set_m128i(_mm_setzero_si128(), _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 4)), 4));
-			goto check_operand;
-		case 12:
-			operand = _mm256_set_m128i(_mm_setzero_si128(), _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 3)), 3));
-			goto check_operand;
-		case 13:
-			operand = _mm256_set_m128i(_mm_setzero_si128(), _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 2)), 2));
-			goto check_operand;
-		case 14:
-			operand = _mm256_set_m128i(_mm_setzero_si128(), _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 1)), 1));
-			goto check_operand;
-		case 15:
-		case 16:
-			operand = _mm256_set_m128i(_mm_setzero_si128(), _mm_loadu_si128((__m128i*)p));
-			goto check_operand;
-		case 17:
-			operand = _mm256_set_m128i(_mm_srli_si128(_mm_loadu_si128((__m128i*)(p + 2)), 14), _mm_loadu_si128((__m128i*)p));
-			goto check_operand;
-		case 18:
-			operand = _mm256_set_m128i(_mm_srli_si128(_mm_loadu_si128((__m128i*)(p + 3)), 13), _mm_loadu_si128((__m128i*)p));
-			goto check_operand;
-		case 19:
-			operand = _mm256_set_m128i(_mm_srli_si128(_mm_loadu_si128((__m128i*)(p + 4)), 12), _mm_loadu_si128((__m128i*)p));
-			goto check_operand;
-		case 20:
-			operand = _mm256_set_m128i(_mm_srli_si128(_mm_loadu_si128((__m128i*)(p + 5)), 11), _mm_loadu_si128((__m128i*)p));
-			goto check_operand;
-		case 21:
-			operand = _mm256_set_m128i(_mm_srli_si128(_mm_loadu_si128((__m128i*)(p + 6)), 10), _mm_loadu_si128((__m128i*)p));
-			goto check_operand;
-		case 22:
-			operand = _mm256_set_m128i(_mm_srli_si128(_mm_loadu_si128((__m128i*)(p + 7)), 9), _mm_loadu_si128((__m128i*)p));
-			goto check_operand;
-		case 23:
-			operand = _mm256_set_m128i(_mm_srli_si128(_mm_loadu_si128((__m128i*)(p + 8)), 8), _mm_loadu_si128((__m128i*)p));
-			goto check_operand;
-		case 24:
-			operand = _mm256_set_m128i(_mm_srli_si128(_mm_loadu_si128((__m128i*)(p + 9)), 7), _mm_loadu_si128((__m128i*)p));
-			goto check_operand;
-		case 25:
-			operand = _mm256_set_m128i(_mm_srli_si128(_mm_loadu_si128((__m128i*)(p + 10)), 6), _mm_loadu_si128((__m128i*)p));
-			goto check_operand;
-		case 26:
-			operand = _mm256_set_m128i(_mm_srli_si128(_mm_loadu_si128((__m128i*)(p + 11)), 5), _mm_loadu_si128((__m128i*)p));
-			goto check_operand;
-		case 27:
-			operand = _mm256_set_m128i(_mm_srli_si128(_mm_loadu_si128((__m128i*)(p + 12)), 4), _mm_loadu_si128((__m128i*)p));
-			goto check_operand;
-		case 28:
-			operand = _mm256_set_m128i(_mm_srli_si128(_mm_loadu_si128((__m128i*)(p + 13)), 3), _mm_loadu_si128((__m128i*)p));
-			goto check_operand;
-		case 29:
-			operand = _mm256_set_m128i(_mm_srli_si128(_mm_loadu_si128((__m128i*)(p + 14)), 2), _mm_loadu_si128((__m128i*)p));
-			goto check_operand;
-		case 30:
-			operand = _mm256_set_m128i(_mm_srli_si128(_mm_loadu_si128((__m128i*)(p + 15)), 1), _mm_loadu_si128((__m128i*)p));
-			goto check_operand;
-		case 31:
-			return true;
+	if (e - p >= 32) {
+		__m256i in = _mm256_loadu_si256((const __m256i*)p);
+		if (!_mm256_movemask_epi8(in)) {
+			error = _mm256_or_si256(error, prev_incomplete);
+		} else {
+			MB_UTF8_CHECK_AVX2(in, prev_input);
+			prev_incomplete = _mm256_subs_epu8(in, max_value);
+			prev_input = in;
 		}
-
-		ZEND_UNREACHABLE();
+		p += 32;
 	}
 
-	return true;
+	if (p < e) {
+		/* Check the last 32 bytes of the string, using the 32 bytes before them as context.
+		 * Some of these bytes may have been checked already; checking them again is harmless. */
+		size_t len = ZSTR_LEN(str);
+		__m256i in, prev;
+		if (len >= 64) {
+			in = _mm256_loadu_si256((const __m256i*)(e - 32));
+			prev = _mm256_loadu_si256((const __m256i*)(e - 64));
+		} else {
+			/* Short string: we may read up to 16 bytes before the start of the string, which
+			 * belong to the zend_string header, and clear them */
+			if (len >= 32) {
+				in = _mm256_loadu_si256((const __m256i*)(e - 32));
+				/* Only the last 3 bytes of the context matter */
+				uint32_t ctx;
+				memcpy(&ctx, e - 36, sizeof(ctx));
+				prev = _mm256_inserti128_si256(_mm256_setzero_si256(), _mm_slli_si128(_mm_cvtsi32_si128(ctx), 12), 1);
+				prev = _mm256_and_si256(prev, _mm256_loadu_si256((const __m256i*)(mb_utf8_keep_mask + len)));
+			} else {
+				if (len >= 16) {
+					in = _mm256_loadu_si256((const __m256i*)(e - 32));
+				} else {
+					in = _mm256_inserti128_si256(_mm256_setzero_si256(), _mm_loadu_si128((const __m128i*)(e - 16)), 1);
+				}
+				in = _mm256_and_si256(in, _mm256_loadu_si256((const __m256i*)(mb_utf8_keep_mask + 32 + len)));
+				prev = _mm256_setzero_si256();
+			}
+		}
+		if (!_mm256_movemask_epi8(in)) {
+			error = _mm256_or_si256(error, prev_incomplete);
+			prev_incomplete = _mm256_setzero_si256();
+		} else {
+			MB_UTF8_CHECK_AVX2(in, prev);
+			prev_incomplete = _mm256_subs_epu8(in, max_value);
+		}
+	}
+
+	error = _mm256_or_si256(error, prev_incomplete);
+	return _mm256_testz_si256(error, error);
 }
+
+#if defined(MBSTRING_INTRIN_AVX512_FUNC_PROTO) || defined(MBSTRING_INTRIN_AVX512_FUNC_PTR)
+
+/* The 64 bytes ending N bytes before the start of `input`, taken from `prev` and `input` */
+#define MB_UTF8_PREV_AVX512(input, prev, N) \
+	_mm512_alignr_epi8((input), _mm512_permutex2var_epi32((input), prev_shuffle, (prev)), 16 - (N))
+
+#define MB_UTF8_CHECK_AVX512(input, prev) do { \
+		__m512i prev1 = MB_UTF8_PREV_AVX512(input, prev, 1); \
+		__m512i sc = _mm512_ternarylogic_epi64( \
+			_mm512_shuffle_epi8(byte_1_high, _mm512_and_si512(_mm512_srli_epi16(prev1, 4), v_0f)), \
+			_mm512_shuffle_epi8(byte_1_low, _mm512_and_si512(prev1, v_0f)), \
+			_mm512_shuffle_epi8(byte_2_high, _mm512_and_si512(_mm512_srli_epi16(input, 4), v_0f)), \
+			0x80); /* a & b & c */ \
+		__m512i must23 = _mm512_or_si512( \
+			_mm512_subs_epu8(MB_UTF8_PREV_AVX512(input, prev, 2), v_third), \
+			_mm512_subs_epu8(MB_UTF8_PREV_AVX512(input, prev, 3), v_fourth)); \
+		/* error |= (must23 & 0x80) ^ sc */ \
+		error = _mm512_or_si512(error, _mm512_ternarylogic_epi64(must23, v_80, sc, 0x6A)); \
+	} while (0)
+
+# ifdef MBSTRING_INTRIN_AVX512_FUNC_PROTO
+ZEND_API bool mb_fast_check_utf8_avx512(zend_string *str)
+# else
+static bool mb_fast_check_utf8_avx512(zend_string *str)
+# endif
+{
+	const unsigned char *p = (const unsigned char*)ZSTR_VAL(str);
+	const unsigned char *e = p + ZSTR_LEN(str);
+
+	const __m512i byte_1_high = _mm512_broadcast_i32x4(_mm_setr_epi8(MB_UTF8_BYTE_1_HIGH));
+	const __m512i byte_1_low = _mm512_broadcast_i32x4(_mm_setr_epi8(MB_UTF8_BYTE_1_LOW));
+	const __m512i byte_2_high = _mm512_broadcast_i32x4(_mm_setr_epi8(MB_UTF8_BYTE_2_HIGH));
+	const __m512i v_0f = _mm512_set1_epi8(0x0F);
+	const __m512i v_80 = _mm512_set1_epi8((char)0x80);
+	const __m512i v_third = _mm512_set1_epi8((char)(0xE0 - 0x80));
+	const __m512i v_fourth = _mm512_set1_epi8((char)(0xF0 - 0x80));
+	const __m512i max_value = _mm512_setr_epi64(-1, -1, -1, -1, -1, -1, -1, (int64_t)0xBFDFEFFFFFFFFFFFULL);
+	/* Brings the last 16 bytes of `prev` in front of the first 48 bytes of `input` */
+	const __m512i prev_shuffle = _mm512_setr_epi32(28, 29, 30, 31, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
+
+	__m512i error = _mm512_setzero_si512();
+	__m512i prev_input = _mm512_setzero_si512();
+	__m512i prev_incomplete = _mm512_setzero_si512();
+
+	/* Align the loads on 64-byte boundaries for long strings: check one unaligned block, then
+	 * continue from the next boundary, taking the 3 bytes before it as context */
+	uintptr_t misalignment = (uintptr_t)p % 64;
+	if (e - p >= 2048 && misalignment != 0 && misalignment <= 61) {
+		__m512i in = _mm512_loadu_si512((const void*)p);
+		MB_UTF8_CHECK_AVX512(in, prev_input);
+		p += 64 - misalignment;
+		prev_input = _mm512_maskz_loadu_epi8(0xE000000000000000ULL, (const void*)(p - 64));
+		prev_incomplete = _mm512_subs_epu8(prev_input, max_value);
+	}
+
+	while (e - p >= 64) {
+		const unsigned char *stop = (e - p >= 1024 + 64) ? p + 1024 : e - 63;
+		do {
+			__m512i in = _mm512_loadu_si512((const void*)p);
+			if (!_mm512_movepi8_mask(in)) {
+				error = _mm512_or_si512(error, prev_incomplete);
+			} else {
+				MB_UTF8_CHECK_AVX512(in, prev_input);
+				prev_incomplete = _mm512_subs_epu8(in, max_value);
+				prev_input = in;
+			}
+			p += 64;
+		} while (p < stop);
+		if (_mm512_test_epi8_mask(error, error)) {
+			return false;
+		}
+	}
+
+	if (p < e) {
+		/* Bytes past the end of the string are loaded as zero (ASCII NUL) */
+		__m512i in = _mm512_maskz_loadu_epi8(~0ULL >> (64 - (e - p)), (const void*)p);
+		if (!_mm512_movepi8_mask(in)) {
+			error = _mm512_or_si512(error, prev_incomplete);
+		} else {
+			MB_UTF8_CHECK_AVX512(in, prev_input);
+			prev_incomplete = _mm512_subs_epu8(in, max_value);
+		}
+	}
+
+	error = _mm512_or_si512(error, prev_incomplete);
+	return !_mm512_test_epi8_mask(error, error);
+}
+
+#endif /* defined(MBSTRING_INTRIN_AVX512_FUNC_PROTO) || defined(MBSTRING_INTRIN_AVX512_FUNC_PTR) */
 
 #endif /* defined(ZEND_INTRIN_AVX2_NATIVE) || defined(ZEND_INTRIN_AVX2_RESOLVER) */
 
