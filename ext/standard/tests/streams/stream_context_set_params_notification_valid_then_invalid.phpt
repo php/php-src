@@ -17,4 +17,4 @@ try {
 ?>
 --EXPECT--
 bool(true)
-TypeError: stream_context_set_params(): Argument #1 ($context) must be an array with valid callbacks as values, function "fn_not_exist" not found or invalid function name
+TypeError: stream_context_set_params(): Argument #2 ($params) must have a valid callback for key "notification", function "fn_not_exist" not found or invalid function name
