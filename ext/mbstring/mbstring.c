@@ -5821,13 +5821,9 @@ static bool mb_fast_check_utf8_avx512(zend_string *str)
 	const __m512i v_80 = _mm512_set1_epi8((char)0x80);
 	const __m512i v_third = _mm512_set1_epi8((char)(0xE0 - 0x80));
 	const __m512i v_fourth = _mm512_set1_epi8((char)(0xF0 - 0x80));
-	/* A block ending with any of these is incomplete: ... 1111____ 111_____ 11______ */
-	const __m512i max_value = _mm512_setr_epi8(
-		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-		(char)(0xF0 - 1), (char)(0xE0 - 1), (char)(0xC0 - 1));
+	/* A block ending with any of these is incomplete: ... 1111____ 111_____ 11______
+	 * (bytes 61-63 are 0xEF, 0xDF, 0xBF; there is no _mm512_setr_epi8) */
+	const __m512i max_value = _mm512_setr_epi64(-1, -1, -1, -1, -1, -1, -1, (int64_t)0xBFDFEFFFFFFFFFFFULL);
 	/* Brings the last 16 bytes of `prev` in front of the first 48 bytes of `input` */
 	const __m512i prev_shuffle = _mm512_setr_epi32(28, 29, 30, 31, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
 
