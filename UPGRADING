@@ -205,6 +205,10 @@ PHP 8.7 UPGRADE NOTES
     target does not keep is now released at that assignment instead of after
     the last one.
 
+- Hash:
+  . hash_pbkdf2() is now faster. Applications using PBKDF2 may consider whether
+    their iteration count can be increased.
+
 - Standard:
   . Improved performance of strcspn() and strpbrk() when searching longer strings
     with a single-byte character mask.
