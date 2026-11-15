@@ -52,6 +52,10 @@ PHP                                                                        NEWS
   . Fixed stack overflow in filter_var() and filter_var_array() with deeply
     nested arrays. (Eyüp Can Akman)
 
+- Intl:
+  . Fixed Locale::lookup() ignoring the default locale when the language tag
+    list is empty. (Weilin Du)
+
 - MBString:
   . Fixed stack overflow in mb_check_encoding() and mb_convert_encoding() with
     deeply nested arrays. (Eyüp Can Akman)
