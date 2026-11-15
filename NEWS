@@ -95,6 +95,8 @@ PHP                                                                        NEWS
   . Fixed use-after-free in JIT when the error handler releases a string while
     an "Undefined variable" warning is raised for its offset in ?? or nested
     isset()/empty(). (Jorg Sowa)
+  . Fixed bug GH-25449 (Element of a by-reference function result passed as
+    an argument arrives as null). (Ilia Alshanetsky)
 
 - OpenSSL:
   . Fixed bug GH-25172 (TLS session reuse shares request-lifetime callback
