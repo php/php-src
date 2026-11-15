@@ -107,8 +107,8 @@ static zend_extension opcache_extension_entry;
 #ifndef ZTS
 zend_accel_globals accel_globals;
 #else
-ZEND_API int accel_globals_id;
-ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_accel_globals accel_globals;
+int accel_globals_id;
+TSRM_TLS TSRM_TLS_MODEL_ATTR zend_accel_globals accel_globals;
 static void *accel_globals_tls_addr(void) { return &accel_globals; }
 #endif
 

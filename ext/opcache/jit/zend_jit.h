@@ -151,17 +151,13 @@ typedef struct _zend_jit_globals {
 } zend_jit_globals;
 
 #ifdef ZTS
-extern ZEND_API int jit_globals_id;
-# ifdef ZEND_TLS_DIRECT
-#  define JIT_G(v) (jit_globals.v)
-extern ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_jit_globals jit_globals;
-# else
-#  define JIT_G(v) ZEND_TSRMG(jit_globals_id, zend_jit_globals *, v)
-# endif
+extern int jit_globals_id;
+extern TSRM_TLS TSRM_TLS_MODEL_ATTR zend_jit_globals jit_globals;
 #else
-# define JIT_G(v) (jit_globals.v)
 extern zend_jit_globals jit_globals;
 #endif
+
+#define JIT_G(v) (jit_globals.v)
 
 int  zend_jit_op_array(zend_op_array *op_array, zend_script *script);
 int  zend_jit_script(zend_script *script);

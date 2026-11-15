@@ -242,17 +242,13 @@ typedef struct _virtual_cwd_globals {
 } virtual_cwd_globals;
 
 #ifdef ZTS
-extern CWD_API ts_rsrc_id cwd_globals_id;
-# ifdef ZEND_TLS_DIRECT
-#  define CWDG(v) (cwd_globals.v)
-extern ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR virtual_cwd_globals cwd_globals;
-# else
-#  define CWDG(v) ZEND_TSRMG(cwd_globals_id, virtual_cwd_globals *, v)
-# endif
+extern ts_rsrc_id cwd_globals_id;
+extern TSRM_TLS TSRM_TLS_MODEL_ATTR virtual_cwd_globals cwd_globals;
 #else
 extern virtual_cwd_globals cwd_globals;
-# define CWDG(v) (cwd_globals.v)
 #endif
+
+#define CWDG(v) (cwd_globals.v)
 
 CWD_API void realpath_cache_clean(void);
 CWD_API void realpath_cache_del(const char *path, size_t path_len);

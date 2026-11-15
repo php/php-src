@@ -47,8 +47,8 @@
 #endif
 
 #ifdef ZTS
-ZEND_API int jit_globals_id;
-ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_jit_globals jit_globals;
+int jit_globals_id;
+TSRM_TLS TSRM_TLS_MODEL_ATTR zend_jit_globals jit_globals;
 static void *jit_globals_tls_addr(void) { return &jit_globals; }
 #else
 zend_jit_globals jit_globals;

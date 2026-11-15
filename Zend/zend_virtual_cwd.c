@@ -81,8 +81,8 @@ MUTEX_T cwd_mutex;
 #endif
 
 #ifdef ZTS
-CWD_API ts_rsrc_id cwd_globals_id;
-ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR virtual_cwd_globals cwd_globals;
+ts_rsrc_id cwd_globals_id;
+TSRM_TLS TSRM_TLS_MODEL_ATTR virtual_cwd_globals cwd_globals;
 static void *cwd_globals_tls_addr(void) { return &cwd_globals; }
 #else
 virtual_cwd_globals cwd_globals;
