@@ -2,6 +2,7 @@
 Returning refcounted value from callback must not leak
 --EXTENSIONS--
 curl
+zend_test
 --FILE--
 <?php
 include 'server.inc';
@@ -11,7 +12,7 @@ $url = "{$host}/get.inc";
 $ch = curl_init($url);
 
 function return_non_interned_string() {
-    return str_repeat('x', random_int(5, 5));
+    return zend_return_non_interned_string('x');
 }
 
 curl_setopt($ch, CURLOPT_NOPROGRESS, 0);

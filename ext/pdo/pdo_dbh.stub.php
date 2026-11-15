@@ -164,10 +164,10 @@ class PDO
     /** @cvalue LONG_CONST(PDO_CURSOR_SCROLL) */
     public const int CURSOR_SCROLL = UNKNOWN;
 
-    public function __construct(string $dsn, ?string $username = null, #[\SensitiveParameter] ?string $password = null, ?array $options = null) {}
+    public function __construct(#[\SensitiveParameter] string $dsn, ?string $username = null, #[\SensitiveParameter] ?string $password = null, ?array $options = null) {}
 
     public static function connect(
-        string $dsn,
+        #[\SensitiveParameter] string $dsn,
         ?string $username = null,
         #[\SensitiveParameter] ?string $password = null,
         ?array $options = null

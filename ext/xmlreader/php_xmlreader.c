@@ -199,7 +199,7 @@ static zval *xmlreader_write_property(zend_object *object, zend_string *name, zv
 	xmlreader_prop_handler *hnd = xmlreader_get_prop_handler(name, cache_slot);
 
 	if (hnd != NULL) {
-		zend_readonly_property_modification_error_ex(ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
+		zend_throw_error(NULL, "Cannot modify readonly property %pS::$%pS", object->ce->name, name);
 	} else {
 		value = zend_std_write_property(object, name, value, cache_slot);
 	}

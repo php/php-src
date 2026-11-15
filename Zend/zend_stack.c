@@ -19,8 +19,6 @@
 #include "zend.h"
 #include "zend_stack.h"
 
-#define ZEND_STACK_ELEMENT(stack, n) ((void *)((char *) (stack)->elements + (stack)->size * (n)))
-
 ZEND_API void zend_stack_init(zend_stack *stack, int size)
 {
 	stack->size = size;
@@ -41,22 +39,6 @@ ZEND_API int zend_stack_push(zend_stack *stack, const void *element)
 }
 
 
-ZEND_API void *zend_stack_top(const zend_stack *stack)
-{
-	if (stack->top > 0) {
-		return ZEND_STACK_ELEMENT(stack, stack->top - 1);
-	} else {
-		return NULL;
-	}
-}
-
-
-ZEND_API void zend_stack_del_top(zend_stack *stack)
-{
-	--stack->top;
-}
-
-
 ZEND_API int zend_stack_int_top(const zend_stack *stack)
 {
 	int *e = zend_stack_top(stack);
@@ -68,30 +50,12 @@ ZEND_API int zend_stack_int_top(const zend_stack *stack)
 }
 
 
-ZEND_API bool zend_stack_is_empty(const zend_stack *stack)
-{
-	return stack->top == 0;
-}
-
-
 ZEND_API void zend_stack_destroy(zend_stack *stack)
 {
 	if (stack->elements) {
 		efree(stack->elements);
 		stack->elements = NULL;
 	}
-}
-
-
-ZEND_API void *zend_stack_base(const zend_stack *stack)
-{
-	return stack->elements;
-}
-
-
-ZEND_API int zend_stack_count(const zend_stack *stack)
-{
-	return stack->top;
 }
 
 

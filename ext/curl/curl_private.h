@@ -26,6 +26,10 @@
 #include <curl/curl.h>
 #include <curl/multi.h>
 
+#if LIBCURL_VERSION_NUM < 0x080200 /* Available since 8.2.0 */
+# define CURLOPT_MAIL_RCPT_ALLOWFAILS CURLOPT_MAIL_RCPT_ALLLOWFAILS
+#endif
+
 #define CURLOPT_RETURNTRANSFER 19913
 #define CURLOPT_BINARYTRANSFER 19914 /* For Backward compatibility */
 #define PHP_CURL_STDOUT 0

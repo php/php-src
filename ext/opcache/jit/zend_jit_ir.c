@@ -7597,6 +7597,39 @@ static int zend_jit_identical(zend_jit_ctx   *jit,
 	return 1;
 }
 
+/* This is only for the tracing JIT.
+ * `taken` is used for the recorded direction in the tracing jit. */
+static int zend_jit_coalesce(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1_info, zend_jit_addr op1_addr, zend_jit_addr res_addr, bool taken, const void *exit_addr)
+{
+	ir_ref ref = jit_ZVAL_ADDR(jit, op1_addr);
+
+	ZEND_ASSERT(opline->op1_type & (IS_TMP_VAR|IS_CV));
+
+	if (opline->op1_type == IS_CV && (op1_info & MAY_BE_REF)) {
+		ref = jit_ZVAL_DEREF_ref(jit, ref);
+		op1_info &= ~MAY_BE_REF;
+	}
+
+	if (exit_addr) {
+		// JIT: if (Z_TYPE_P(value) > IS_NULL)
+		ir_ref cond = ir_GT(jit_Z_TYPE_ref(jit, ref), ir_CONST_U8(IS_NULL));
+
+		if (taken) {
+			ir_GUARD(cond, ir_CONST_ADDR(exit_addr));
+		} else {
+			ir_GUARD_NOT(cond, ir_CONST_ADDR(exit_addr));
+		}
+	}
+
+	if (taken) {
+		// JIT: ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
+		// JIT: Z_ADDREF_P(EX_VAR(opline->result.var)) for CV
+		jit_ZVAL_COPY(jit, res_addr, -1, ZEND_ADDR_REF_ZVAL(ref), op1_info & ~(MAY_BE_UNDEF|MAY_BE_NULL), opline->op1_type == IS_CV);
+	}
+
+	return 1;
+}
+
 static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1_info, zend_jit_addr op1_addr, zend_jit_addr res_addr, uint32_t target_label, uint32_t target_label2, int may_throw, uint8_t branch_opcode, const void *exit_addr, bool warn_undef)
 {
 	uint32_t true_label = -1;
@@ -9289,6 +9322,31 @@ static int zend_jit_init_method_call(zend_jit_ctx         *jit,
 	return 1;
 }
 
+/* Called scope of the current frame, as used by static:: and inherited by self::/parent:: calls. */
+static ir_ref jit_called_scope(zend_jit_ctx *jit, const zend_op_array *op_array)
+{
+	if (op_array->fn_flags & ZEND_ACC_STATIC) {
+		// JIT: Z_CE(EX(This))
+		return ir_LOAD_A(jit_EX(This.value.ref));
+	} else if (op_array->scope
+			&& op_array->function_name
+			&& !(op_array->fn_flags & ZEND_ACC_CLOSURE)) {
+		// JIT: Z_OBJCE(EX(This))
+		return ir_LOAD_A(ir_ADD_OFFSET(ir_LOAD_A(jit_EX(This.value.ref)), offsetof(zend_object, ce)));
+	} else {
+		/* Closures can be unbound, file/eval inherits This from the existing frame's scope. */
+		ir_ref if_object, values = IR_UNUSED;
+
+		if_object = ir_IF(ir_EQ(jit_Z_TYPE_ref(jit, jit_EX(This)), ir_CONST_U8(IS_OBJECT)));
+		ir_IF_TRUE(if_object);
+		ir_END_PHI_list(values,
+			ir_LOAD_A(ir_ADD_OFFSET(ir_LOAD_A(jit_EX(This.value.ref)), offsetof(zend_object, ce))));
+		ir_IF_FALSE(if_object);
+		ir_END_PHI_list(values, ir_LOAD_A(jit_EX(This.value.ref)));
+		return ir_PHI_list(values);
+	}
+}
+
 static int zend_jit_init_static_method_call(zend_jit_ctx         *jit,
                                             const zend_op        *opline,
                                             uint32_t              b,
@@ -9420,22 +9478,7 @@ static int zend_jit_init_static_method_call(zend_jit_ctx         *jit,
 		if (opline->op1_type == IS_UNUSED
 		 && ((opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_PARENT ||
 		     (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF)) {
-			if (op_array->fn_flags & ZEND_ACC_STATIC) {
-				scope_ref = ir_LOAD_A(jit_EX(This.value.ref));
-			} else if ((op_array->fn_flags & ZEND_ACC_CLOSURE) || !op_array->function_name) {
-				/* Closures can be unbound, file/eval inherits This from the existing frame's scope. */
-				ir_ref if_object, values = IR_UNUSED;
-
-				if_object = ir_IF(ir_EQ(jit_Z_TYPE_ref(jit, jit_EX(This)), ir_CONST_U8(IS_OBJECT)));
-				ir_IF_TRUE(if_object);
-				ir_END_PHI_list(values,
-					ir_LOAD_A(ir_ADD_OFFSET(ir_LOAD_A(jit_EX(This.value.ref)), offsetof(zend_object, ce))));
-				ir_IF_FALSE(if_object);
-				ir_END_PHI_list(values, ir_LOAD_A(jit_EX(This.value.ref)));
-				scope_ref = ir_PHI_list(values);
-			} else {
-				scope_ref = ir_LOAD_A(ir_ADD_OFFSET(ir_LOAD_A(jit_EX(This.value.ref)), offsetof(zend_object, ce)));
-			}
+			scope_ref = jit_called_scope(jit, op_array);
 		}
 		if (!zend_jit_push_call_frame(jit, opline, op_array, func, false, false, checked_stack, func_ref, scope_ref)) {
 			return 0;
@@ -16344,11 +16387,14 @@ static int zend_jit_fetch_static_prop(zend_jit_ctx *jit, const zend_op *opline, 
 	uint32_t cache_slot = opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS;
 	uint32_t flags;
 	ir_ref ref, ref2, if_cached, fast_path, cold_path, prop_info_ref, if_typed, if_def;
+	ir_ref slow_inputs = IR_UNUSED;
 	int fetch_type;
 	zend_property_info *known_prop_info = NULL;
 	zend_class_entry *ce;
+	bool is_static = opline->op2_type == IS_UNUSED
+		&& (opline->op2.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_STATIC;
 
-	ce = zend_get_known_class(op_array, opline, opline->op2_type, opline->op2);
+	ce = is_static ? NULL : zend_get_known_class(op_array, opline, opline->op2_type, opline->op2);
 	if (ce) {
 		zval *zv = RT_CONSTANT(opline, opline->op1);
 		zend_string *prop_name;
@@ -16391,9 +16437,32 @@ static int zend_jit_fetch_static_prop(zend_jit_ctx *jit, const zend_op *opline, 
 		default: ZEND_UNREACHABLE();
 	}
 
+	ir_ref run_time_cache_ptr = IR_UNUSED;
+	if (is_static
+	 && op_array->function_name
+	 && op_array->scope
+	 && (op_array->scope->ce_flags & ZEND_ACC_FINAL)
+	 && !(op_array->fn_flags & (ZEND_ACC_CLOSURE|ZEND_ACC_TRAIT_CLONE))) {
+		/* A method in a final CE has a called scope equal to the scope.
+		 * So the cache slot is always monomorphic.
+		 * Closures are excluded because they can be bound to another scope, likewise traits are shared. */
+	} else if (is_static) {
+		/* The cache slot is polymorphic on the called scope. */
+		// JIT: if (CACHED_PTR(cache_slot) == called_scope)
+		run_time_cache_ptr = ir_LOAD_A(jit_EX(run_time_cache));
+		ir_ref if_scope = ir_IF(ir_EQ(
+			ir_LOAD_A(ir_ADD_OFFSET(run_time_cache_ptr, cache_slot)),
+			jit_called_scope(jit, op_array)));
+		ir_IF_FALSE_cold(if_scope);
+		ir_END_list(slow_inputs);
+		ir_IF_TRUE(if_scope);
+	}
+
 	// JIT: result = CACHED_PTR(cache_slot + sizeof(void *));
-	ref = ir_LOAD_A(
-		ir_ADD_OFFSET(ir_LOAD_A(jit_EX(run_time_cache)), cache_slot + sizeof(void*)));
+	if (run_time_cache_ptr == IR_UNUSED) {
+		run_time_cache_ptr = ir_LOAD_A(jit_EX(run_time_cache));
+	}
+	ref = ir_LOAD_A(ir_ADD_OFFSET(run_time_cache_ptr, cache_slot + sizeof(void*)));
 
 	// JIT: if (result)
 	if_cached = ir_IF(ref);
@@ -16410,7 +16479,7 @@ static int zend_jit_fetch_static_prop(zend_jit_ctx *jit, const zend_op *opline, 
 			if (!known_prop_info) {
 				// JIT: if (ZEND_TYPE_IS_SET(property_info->type))
 				prop_info_ref = ir_LOAD_L(
-					ir_ADD_OFFSET(ir_LOAD_A(jit_EX(run_time_cache)), cache_slot + sizeof(void*) * 2));
+					ir_ADD_OFFSET(run_time_cache_ptr, cache_slot + sizeof(void*) * 2));
 				if_typed = ir_IF(ir_AND_U32(
 					ir_LOAD_U32(ir_ADD_OFFSET(prop_info_ref, offsetof(zend_property_info, type.type_mask))),
 					ir_CONST_U32(_ZEND_TYPE_MASK)));
@@ -16439,7 +16508,7 @@ static int zend_jit_fetch_static_prop(zend_jit_ctx *jit, const zend_op *opline, 
 			if (!known_prop_info) {
 				// JIT: if (ZEND_TYPE_IS_SET(property_info->type))
 				prop_info_ref = ir_LOAD_L(
-					ir_ADD_OFFSET(ir_LOAD_A(jit_EX(run_time_cache)), cache_slot + sizeof(void*) * 2));
+					ir_ADD_OFFSET(run_time_cache_ptr, cache_slot + sizeof(void*) * 2));
 				if_typed = ir_IF(ir_AND_U32(
 					ir_LOAD_U32(ir_ADD_OFFSET(prop_info_ref, offsetof(zend_property_info, type.type_mask))),
 					ir_CONST_U32(_ZEND_TYPE_MASK)));
@@ -16466,6 +16535,10 @@ static int zend_jit_fetch_static_prop(zend_jit_ctx *jit, const zend_op *opline, 
 	fast_path = ir_END();
 
 	ir_IF_FALSE_cold(if_cached);
+	if (slow_inputs) {
+		ir_END_list(slow_inputs);
+		ir_MERGE_list(slow_inputs);
+	}
 	jit_SET_EX_OPLINE(jit, opline);
 	ref2 = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_fetch_static_property), jit_FP(jit), ir_CONST_I32(fetch_type));
 	zend_jit_check_exception_undef_result(jit, opline);

@@ -78,6 +78,7 @@
 #include "zend_observer.h"
 #include "zend_system_id.h"
 #include "zend_smart_string.h"
+#include "zend_smart_str.h"
 
 #include "php_content_types.h"
 #include "php_ticks.h"
@@ -950,6 +951,24 @@ PHPAPI bool php_get_module_initialized(void)
 }
 /* }}} */
 
+/* Log sinks take C strings, so escape NUL bytes instead of truncating at them. */
+static zend_string *php_escape_nul_for_log(zend_string *message)
+{
+	if (!memchr(ZSTR_VAL(message), '\0', ZSTR_LEN(message))) {
+		return zend_string_copy(message);
+	}
+
+	smart_str buf = {0};
+	for (size_t i = 0; i < ZSTR_LEN(message); i++) {
+		if (ZSTR_VAL(message)[i] == '\0') {
+			smart_str_appendl(&buf, "\\0", 2);
+		} else {
+			smart_str_appendc(&buf, ZSTR_VAL(message)[i]);
+		}
+	}
+	return smart_str_extract(&buf);
+}
+
 /* {{{ php_log_err_with_severity */
 PHPAPI ZEND_COLD void php_log_err_with_severity(const char *log_message, int syslog_type_int)
 {
@@ -1439,19 +1458,21 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 		if (PG(log_errors)
 				|| (!module_initialized && (!PG(display_startup_errors) || !PG(display_errors)))) {
 			char *log_buffer;
+			zend_string *log_message = php_escape_nul_for_log(message);
 #ifdef PHP_WIN32
 			if (type == E_CORE_ERROR || type == E_CORE_WARNING) {
-				syslog(LOG_ALERT, "PHP %s: %s (%s)", error_type_str, ZSTR_VAL(message), GetCommandLine());
+				syslog(LOG_ALERT, "PHP %s: %s (%s)", error_type_str, ZSTR_VAL(log_message), GetCommandLine());
 			}
 #endif
-			spprintf(&log_buffer, 0, "PHP %s:  %s in %s on line %" PRIu32 "%s%s", error_type_str, ZSTR_VAL(message), ZSTR_VAL(error_filename), error_lineno, ZSTR_LEN(backtrace) ? "\nStack trace:\n" : "", ZSTR_VAL(backtrace));
+			spprintf(&log_buffer, 0, "PHP %s:  %s in %s on line %" PRIu32 "%s%s", error_type_str, ZSTR_VAL(log_message), ZSTR_VAL(error_filename), error_lineno, ZSTR_LEN(backtrace) ? "\nStack trace:\n" : "", ZSTR_VAL(backtrace));
+			zend_string_release(log_message);
 			php_log_err_with_severity(log_buffer, syslog_type_int);
 			efree(log_buffer);
 		}
 
 		if (PG(display_errors) && ((module_initialized && !PG(during_request_startup)) || (PG(display_startup_errors)))) {
 			if (PG(xmlrpc_errors)) {
-				php_printf("<?xml version=\"1.0\"?><methodResponse><fault><value><struct><member><name>faultCode</name><value><int>" ZEND_LONG_FMT "</int></value></member><member><name>faultString</name><value><string>%s:%s in %s on line %" PRIu32 "%s%s</string></value></member></struct></value></fault></methodResponse>", PG(xmlrpc_error_number), error_type_str, ZSTR_VAL(message), ZSTR_VAL(error_filename), error_lineno, ZSTR_LEN(backtrace) ? "\nStack trace:\n" : "", ZSTR_VAL(backtrace));
+				php_printf("<?xml version=\"1.0\"?><methodResponse><fault><value><struct><member><name>faultCode</name><value><int>" ZEND_LONG_FMT "</int></value></member><member><name>faultString</name><value><string>%s:%pS in %s on line %" PRIu32 "%s%s</string></value></member></struct></value></fault></methodResponse>", PG(xmlrpc_error_number), error_type_str, message, ZSTR_VAL(error_filename), error_lineno, ZSTR_LEN(backtrace) ? "\nStack trace:\n" : "", ZSTR_VAL(backtrace));
 			} else {
 				const char *prepend_string = zend_ini_string_literal("error_prepend_string");
 				const char *append_string = zend_ini_string_literal("error_append_string");
@@ -1459,7 +1480,7 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 				if (PG(html_errors)) {
 					if (type == E_ERROR || type == E_PARSE) {
 						zend_string *buf = escape_html(ZSTR_VAL(message), ZSTR_LEN(message));
-						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%" PRIu32 "</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, ZSTR_VAL(buf), ZSTR_VAL(error_filename), error_lineno, STR_PRINT(append_string));
+						php_printf("%s<br />\n<b>%s</b>:  %pS in <b>%s</b> on line <b>%" PRIu32 "</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buf, ZSTR_VAL(error_filename), error_lineno, STR_PRINT(append_string));
 						zend_string_free(buf);
 					} else {
 						php_printf("%s<br />\n<b>%s</b>:  %pS in <b>%s</b> on line <b>%" PRIu32 "</b><br />%s%s\n%s", STR_PRINT(prepend_string), error_type_str, message, ZSTR_VAL(error_filename), error_lineno, ZSTR_LEN(backtrace) ? "\nStack trace:\n" : "", ZSTR_VAL(backtrace), STR_PRINT(append_string));
@@ -1848,6 +1869,12 @@ PHPAPI void php_child_init(void)
 	refresh_memory_manager();
 	zend_max_execution_timer_init();
 	php_clear_stat_cache(true, NULL, 0);
+
+	ZEND_HASH_MAP_FOREACH_PTR(&module_registry, zend_module_entry *module) {
+		if (module->module_started && module->child_init_func) {
+			module->child_init_func();
+		}
+	} ZEND_HASH_FOREACH_END();
 }
 
 /* {{{ php_request_startup */

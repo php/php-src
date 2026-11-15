@@ -165,8 +165,8 @@ static void dom_xpath_construct(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *
 
 	dom_xpath_object *intern = Z_XPATHOBJ_P(ZEND_THIS);
 	if (UNEXPECTED(intern->evaluation_depth > 0)) {
-		zend_throw_error(NULL, "Cannot call %s::__construct() while an XPath evaluation is in progress",
-			ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
+		zend_throw_error(NULL, "Cannot call %pS::__construct() while an XPath evaluation is in progress",
+			Z_OBJCE_P(ZEND_THIS)->name);
 		RETURN_THROWS();
 	}
 

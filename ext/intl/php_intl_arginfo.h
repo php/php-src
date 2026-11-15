@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_intl.stub.php instead.
- * Stub hash: c54e9724edabab5a6531e535f2226f512a904c8e */
+ * Stub hash: 53be664062cb2b55770f3493e201c0401c9ef519 */
 
 #include "zend_attributes.h"
 #include "zend_constants.h"
@@ -252,13 +252,15 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_collator_get_locale, 0, 2, MAY_B
 	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_collator_get_rules, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_OBJ_INFO(0, object, Collator, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_collator_get_error_code, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, object, Collator, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_collator_get_error_message, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, object, Collator, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_collator_get_error_message arginfo_collator_get_rules
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_collator_get_sort_key, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, object, Collator, 0)
@@ -893,6 +895,7 @@ ZEND_FUNCTION(collator_sort);
 ZEND_FUNCTION(collator_sort_with_sort_keys);
 ZEND_FUNCTION(collator_asort);
 ZEND_FUNCTION(collator_get_locale);
+ZEND_FUNCTION(collator_get_rules);
 ZEND_FUNCTION(collator_get_error_code);
 ZEND_FUNCTION(collator_get_error_message);
 ZEND_FUNCTION(collator_get_sort_key);
@@ -1088,6 +1091,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(collator_sort_with_sort_keys, arginfo_collator_sort_with_sort_keys)
 	ZEND_FE(collator_asort, arginfo_collator_asort)
 	ZEND_FE(collator_get_locale, arginfo_collator_get_locale)
+	ZEND_FE(collator_get_rules, arginfo_collator_get_rules)
 	ZEND_FE(collator_get_error_code, arginfo_collator_get_error_code)
 	ZEND_FE(collator_get_error_message, arginfo_collator_get_error_message)
 	ZEND_FE(collator_get_sort_key, arginfo_collator_get_sort_key)

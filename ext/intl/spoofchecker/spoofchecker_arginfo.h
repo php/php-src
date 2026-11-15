@@ -1,5 +1,5 @@
 /* This is a generated file, edit spoofchecker.stub.php instead.
- * Stub hash: e701a18d8fd0c9bba50ee184e700263bffd882f8 */
+ * Stub hash: f836555c3a7d642b88c0856e0366447f0a70a9c7 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Spoofchecker___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -25,6 +25,9 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Spoofchecker_setRestrictionLevel, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, level, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Spoofchecker_getRestrictionLevel, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Spoofchecker_setAllowedChars, 0, 1, IS_VOID, 0)
@@ -56,6 +59,7 @@ ZEND_METHOD(Spoofchecker, areConfusable);
 ZEND_METHOD(Spoofchecker, setAllowedLocales);
 ZEND_METHOD(Spoofchecker, setChecks);
 ZEND_METHOD(Spoofchecker, setRestrictionLevel);
+ZEND_METHOD(Spoofchecker, getRestrictionLevel);
 ZEND_METHOD(Spoofchecker, setAllowedChars);
 ZEND_METHOD(Spoofchecker, getSkeleton);
 #if U_ICU_VERSION_MAJOR_NUM >= 74
@@ -70,6 +74,7 @@ static const zend_function_entry class_Spoofchecker_methods[] = {
 	ZEND_ME(Spoofchecker, setAllowedLocales, arginfo_class_Spoofchecker_setAllowedLocales, ZEND_ACC_PUBLIC)
 	ZEND_ME(Spoofchecker, setChecks, arginfo_class_Spoofchecker_setChecks, ZEND_ACC_PUBLIC)
 	ZEND_ME(Spoofchecker, setRestrictionLevel, arginfo_class_Spoofchecker_setRestrictionLevel, ZEND_ACC_PUBLIC)
+	ZEND_ME(Spoofchecker, getRestrictionLevel, arginfo_class_Spoofchecker_getRestrictionLevel, ZEND_ACC_PUBLIC)
 	ZEND_ME(Spoofchecker, setAllowedChars, arginfo_class_Spoofchecker_setAllowedChars, ZEND_ACC_PUBLIC)
 	ZEND_ME(Spoofchecker, getSkeleton, arginfo_class_Spoofchecker_getSkeleton, ZEND_ACC_PUBLIC)
 #if U_ICU_VERSION_MAJOR_NUM >= 74

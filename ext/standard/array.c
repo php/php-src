@@ -1601,6 +1601,22 @@ static zend_always_inline void _php_search_array(zval *return_value, zval *value
 					}
 				}
 			} ZEND_HASH_FOREACH_END();
+		} else if (Z_TYPE_P(value) == IS_STRING) {
+			zend_string *needle = Z_STR_P(value);
+			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+				ZVAL_DEREF(entry);
+				if (Z_TYPE_P(entry) == IS_STRING && zend_string_equals(Z_STR_P(entry), needle)) {
+					if (behavior == 0) {
+						RETURN_TRUE;
+					} else {
+						if (str_idx) {
+							RETURN_STR_COPY(str_idx);
+						} else {
+							RETURN_LONG(num_idx);
+						}
+					}
+				}
+			} ZEND_HASH_FOREACH_END();
 		} else {
 			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
 				ZVAL_DEREF(entry);

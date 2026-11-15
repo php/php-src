@@ -348,8 +348,8 @@ PHPAPI zend_string *php_random_bin2hex_le(const void *ptr, const size_t len)
 /* stolen from standard/string.c */
 PHPAPI bool php_random_hex2bin_le(zend_string *hexstr, void *dest)
 {
-	size_t len = hexstr->len >> 1;
-	unsigned char *str = (unsigned char *) hexstr->val, c, l, d;
+	size_t len = ZSTR_LEN(hexstr) >> 1;
+	unsigned char *str = (unsigned char *) ZSTR_VAL(hexstr), c, l, d;
 	unsigned char *ptr = (unsigned char *) dest;
 	int is_letter, i = 0;
 

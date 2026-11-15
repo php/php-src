@@ -765,9 +765,6 @@ static inline zend_result ct_eval_array_key_exists(zval *result, const zval *op1
 	if (Z_TYPE_P(op2) != IS_ARRAY && !IS_PARTIAL_ARRAY(op2)) {
 		return FAILURE;
 	}
-	if (Z_TYPE_P(op1) != IS_STRING && Z_TYPE_P(op1) != IS_LONG && Z_TYPE_P(op1) != IS_NULL) {
-		return FAILURE;
-	}
 	if (fetch_array_elem(&value, op2, op1) == FAILURE) {
 		return FAILURE;
 	}

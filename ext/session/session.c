@@ -409,18 +409,6 @@ static zend_long php_session_gc(bool immediate)
 	if ((PS(mod_data) || PS(mod_user_implemented))) {
 		/* Use probability-based GC if not forced and probability is configured */
 		if (!collect && PS(gc_probability) > 0) {
-			/* Seed lazily on first GC draw per process. */
-			if (UNEXPECTED(!PS(random_seeded))) {
-				php_random_uint128_t seed;
-				if (php_random_bytes_silent(&seed, sizeof(seed)) == FAILURE) {
-					seed = php_random_uint128_constant(
-						php_random_generate_fallback_seed(),
-						php_random_generate_fallback_seed()
-					);
-				}
-				php_random_pcgoneseq128xslrr64_seed128(PS(random).state, seed);
-				PS(random_seeded) = true;
-			}
 			collect = php_random_range(PS(random), 0, PS(gc_divisor) - 1) < PS(gc_probability);
 		}
 
@@ -1809,7 +1797,7 @@ PHPAPI zend_result php_session_start(void)
 	 * variables will be available.
 	 * URL/POST session ID may be used when use_only_cookies=Off.
 	 * session.use_strict_mode=On prevents session adoption.
-	 * Session based file upload progress uses non-cookie ID.
+	 * Session based file upload progress respects use_only_cookies.
 	 */
 
 	if (!PS(id)) {
@@ -3019,7 +3007,15 @@ static PHP_GINIT_FUNCTION(ps)
 		.algo = &php_random_algo_pcgoneseq128xslrr64,
 		.state = &ps_globals->random_state,
 	};
-	ps_globals->random_seeded = false;
+
+	php_random_uint128_t seed;
+	if (php_random_bytes_silent(&seed, sizeof(seed)) == FAILURE) {
+		seed = php_random_uint128_constant(
+			php_random_generate_fallback_seed(),
+			php_random_generate_fallback_seed()
+		);
+	}
+	php_random_pcgoneseq128xslrr64_seed128(ps_globals->random.state, seed);
 }
 
 /* Interfaces extending the given one are not flattened into ce->interfaces before they are
@@ -3306,7 +3302,7 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 			if (data->name && data->value && value_len) {
 				size_t name_len = strlen(data->name);
 
-				if (zend_string_equals_cstr(PS(session_name), data->name, name_len)) {
+				if (!PS(use_only_cookies) && zend_string_equals_cstr(PS(session_name), data->name, name_len)) {
 					zval_ptr_dtor(&progress->sid);
 					ZVAL_STRINGL(&progress->sid, (*data->value), value_len);
 				} else if (zend_string_equals_cstr(PS(rfc1867_name), data->name, name_len)) {
@@ -3454,6 +3450,13 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 	return retval;
 }
 
+PHP_CINIT_FUNCTION(session)
+{
+	/* Give each child a distinct, widely separated GC sequence without requesting new entropy. */
+	uint64_t advance = (uint64_t) getpid() << 32;
+	php_random_pcgoneseq128xslrr64_advance(PS(random).state, advance);
+}
+
 zend_module_entry session_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"session",
@@ -3466,7 +3469,8 @@ zend_module_entry session_module_entry = {
 	PHP_GINIT(ps),
 	NULL,
 	NULL,
-	STANDARD_MODULE_PROPERTIES_EX
+	STANDARD_MODULE_PROPERTIES_EX,
+	.child_init_func = PHP_CINIT(session)
 };
 
 #ifdef COMPILE_DL_SESSION

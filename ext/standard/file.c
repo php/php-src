@@ -111,6 +111,9 @@ PHPAPI int php_le_stream_context(void)
 static ZEND_RSRC_DTOR_FUNC(file_context_dtor)
 {
 	php_stream_context *context = (php_stream_context*)res->ptr;
+	if (context == FG(default_context)) {
+		FG(default_context) = NULL;
+	}
 	if (Z_TYPE(context->options) != IS_UNDEF) {
 		zval_ptr_dtor(&context->options);
 		ZVAL_UNDEF(&context->options);
@@ -870,6 +873,11 @@ PHP_FUNCTION(pclose)
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		PHP_Z_PARAM_STREAM(stream)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if ((stream->flags & PHP_STREAM_FLAG_NO_FCLOSE) != 0) {
+		php_error_docref(NULL, E_WARNING, "cannot close the provided stream, as it must not be manually closed");
+		RETURN_LONG(-1);
+	}
 
 	php_stream_context *context = PHP_STREAM_CONTEXT(stream);
 	if (context) {

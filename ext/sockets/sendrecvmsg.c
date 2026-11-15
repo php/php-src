@@ -154,7 +154,6 @@ static void destroy_ancillary_registry(void)
 ancillary_reg_entry *get_ancillary_reg_entry(int cmsg_level, int msg_type)
 {
 	anc_reg_key			key = { cmsg_level, msg_type };
-	ancillary_reg_entry	*entry;
 
 #ifdef ZTS
 	tsrm_mutex_lock(ancillary_mutex);
@@ -166,11 +165,7 @@ ancillary_reg_entry *get_ancillary_reg_entry(int cmsg_level, int msg_type)
 	tsrm_mutex_unlock(ancillary_mutex);
 #endif
 
-	if ((entry = zend_hash_str_find_ptr(&ancillary_registry.ht, (char*)&key, sizeof(key))) != NULL) {
-		return entry;
-	} else {
-		return NULL;
-	}
+	return zend_hash_str_find_ptr(&ancillary_registry.ht, (char*)&key, sizeof(key));
 }
 
 PHP_FUNCTION(socket_sendmsg)

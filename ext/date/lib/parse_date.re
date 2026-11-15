@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015-2023 Derick Rethans
+ * Copyright (c) 2015-2026 Derick Rethans
  * Copyright (c) 2018 MongoDB, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -66,7 +66,11 @@
 #define TIMELIB_RELATIVE       310
 
 #define TIMELIB_ERROR          999
-#define TIMELIB_MAX_ERRORS     1000
+#define TIMELIB_MAX_ERRORS      16
+#define TIMELIB_MAX_ERRORS_S  "16"
+
+#define TIMELIB_WARN_TOO_MANY_WARNINGS_S "There are more than " TIMELIB_MAX_ERRORS_S " warnings, which are not returned"
+#define TIMELIB_ERR_TOO_MANY_ERRORS_S "There are more than " TIMELIB_MAX_ERRORS_S " errors, which are not returned"
 
 /* Some compilers like AIX, defines uchar in sys/types.h */
 #undef uchar
@@ -361,12 +365,20 @@ static timelib_error_message *alloc_error_message(timelib_error_message **messag
 
 static void add_warning(Scanner *s, int error_code, const char *error)
 {
+	timelib_error_message *message;
+
+	if (s->errors->warning_count == TIMELIB_MAX_ERRORS) {
+		message = alloc_error_message(&s->errors->warning_messages, &s->errors->warning_count);
+		message->error_code = TIMELIB_WARN_TOO_MANY_WARNINGS;
+		message->position = -1;
+		message->character = 0;
+		message->message = timelib_strdup(TIMELIB_WARN_TOO_MANY_WARNINGS_S);
+	}
 	if (s->errors->warning_count >= TIMELIB_MAX_ERRORS) {
 		return;
 	}
 
-	timelib_error_message *message = alloc_error_message(&s->errors->warning_messages, &s->errors->warning_count);
-
+	message = alloc_error_message(&s->errors->warning_messages, &s->errors->warning_count);
 	message->error_code = error_code;
 	message->position = s->tok ? s->tok - s->str : 0;
 	message->character = s->tok ? *s->tok : 0;
@@ -375,12 +387,20 @@ static void add_warning(Scanner *s, int error_code, const char *error)
 
 static void add_error(Scanner *s, int error_code, const char *error)
 {
+	timelib_error_message *message;
+
+	if (s->errors->error_count == TIMELIB_MAX_ERRORS) {
+		message = alloc_error_message(&s->errors->error_messages, &s->errors->error_count);
+		message->error_code = TIMELIB_ERR_TOO_MANY_ERRORS;
+		message->position = -1;
+		message->character = 0;
+		message->message = timelib_strdup(TIMELIB_ERR_TOO_MANY_ERRORS_S);
+	}
 	if (s->errors->error_count >= TIMELIB_MAX_ERRORS) {
 		return;
 	}
 
-	timelib_error_message *message = alloc_error_message(&s->errors->error_messages, &s->errors->error_count);
-
+	message = alloc_error_message(&s->errors->error_messages, &s->errors->error_count);
 	message->error_code = error_code;
 	message->position = s->tok ? s->tok - s->str : 0;
 	message->character = s->tok ? *s->tok : 0;
@@ -389,12 +409,20 @@ static void add_error(Scanner *s, int error_code, const char *error)
 
 static void add_pbf_warning(Scanner *s, int error_code, const char *error, const char *sptr, const char *cptr)
 {
+	timelib_error_message *message;
+
+	if (s->errors->warning_count == TIMELIB_MAX_ERRORS) {
+		message = alloc_error_message(&s->errors->warning_messages, &s->errors->warning_count);
+		message->error_code = TIMELIB_WARN_TOO_MANY_WARNINGS;
+		message->position = -1;
+		message->character = 0;
+		message->message = timelib_strdup(TIMELIB_WARN_TOO_MANY_WARNINGS_S);
+	}
 	if (s->errors->warning_count >= TIMELIB_MAX_ERRORS) {
 		return;
 	}
 
-	timelib_error_message *message = alloc_error_message(&s->errors->warning_messages, &s->errors->warning_count);
-
+	message = alloc_error_message(&s->errors->warning_messages, &s->errors->warning_count);
 	message->error_code = error_code;
 	message->position = cptr - sptr;
 	message->character = *cptr;
@@ -403,12 +431,20 @@ static void add_pbf_warning(Scanner *s, int error_code, const char *error, const
 
 static void add_pbf_error(Scanner *s, int error_code, const char *error, const char *sptr, const char *cptr)
 {
+	timelib_error_message *message;
+
+	if (s->errors->error_count == TIMELIB_MAX_ERRORS) {
+		message = alloc_error_message(&s->errors->error_messages, &s->errors->error_count);
+		message->error_code = TIMELIB_ERR_TOO_MANY_ERRORS;
+		message->position = -1;
+		message->character = 0;
+		message->message = timelib_strdup(TIMELIB_ERR_TOO_MANY_ERRORS_S);
+	}
 	if (s->errors->error_count >= TIMELIB_MAX_ERRORS) {
 		return;
 	}
 
-	timelib_error_message *message = alloc_error_message(&s->errors->error_messages, &s->errors->error_count);
-
+	message = alloc_error_message(&s->errors->error_messages, &s->errors->error_count);
 	message->error_code = error_code;
 	message->position = cptr - sptr;
 	message->character = *cptr;

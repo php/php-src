@@ -1,11 +1,14 @@
 --TEST--
 Memory leak in preg_match() frameless function with invalid regex and object arguments
+--EXTENSIONS--
+pcre
+zend_test
 --FILE--
 <?php
 class Str {
     private $val;
     public function __construct($val) {
-        $this->val = str_repeat($val, random_int(1, 1));
+        $this->val = zend_return_non_interned_string($val);
     }
     public function __toString() {
         return $this->val;

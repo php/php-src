@@ -1878,11 +1878,15 @@ static ZEND_FUNCTION(zend_parent_hook_get_trampoline)
 	}
 
 	zval rv;
-	const zval *retval = obj->handlers->read_property(obj, prop_name, BP_VAR_R, NULL, &rv);
+	zval *retval = obj->handlers->read_property(obj, prop_name, BP_VAR_R, NULL, &rv);
 	if (retval == &rv) {
 		RETVAL_COPY_VALUE(retval);
+		if (UNEXPECTED(Z_ISREF_P(return_value))) {
+			/* __get() may return by reference. */
+			zend_unwrap_reference(return_value);
+		}
 	} else {
-		RETVAL_COPY(retval);
+		RETVAL_COPY_DEREF(retval);
 	}
 
 clean:
@@ -1953,10 +1957,10 @@ ZEND_API zend_function *zend_get_property_hook_trampoline(
 
 ZEND_API ZEND_COLD zend_never_inline void zend_bad_method_call(const zend_function *fbc, const zend_string *method_name, const zend_class_entry *scope) /* {{{ */
 {
-	zend_throw_error(NULL, "Call to %s method %s::%pS() from %s%s",
-		zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name,
+	zend_throw_error(NULL, "Call to %s method %pS::%pS() from %s%pS",
+		zend_visibility_string(fbc->common.fn_flags), fbc->common.scope->name, method_name,
 		scope ? "scope " : "global scope",
-		scope ? ZSTR_VAL(scope->name) : ""
+		scope ? scope->name : ZSTR_EMPTY_ALLOC()
 	);
 }
 /* }}} */

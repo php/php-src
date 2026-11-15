@@ -1,5 +1,5 @@
 /* This is a generated file, edit collator.stub.php instead.
- * Stub hash: cbe3c5f4c35d93f90c3e7164bdfc4e2fefc88c83 */
+ * Stub hash: e848695e9e3ae3bc8d0829570edbf855c5e50e23 */
 
 #include "zend_constants.h"
 
@@ -47,6 +47,9 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_Collator_getLoca
 	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_Collator_getRules, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_Collator_getErrorCode, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
@@ -68,6 +71,7 @@ ZEND_FUNCTION(collator_set_attribute);
 ZEND_FUNCTION(collator_get_strength);
 ZEND_FUNCTION(collator_set_strength);
 ZEND_FUNCTION(collator_get_locale);
+ZEND_FUNCTION(collator_get_rules);
 ZEND_FUNCTION(collator_get_error_code);
 ZEND_FUNCTION(collator_get_error_message);
 ZEND_FUNCTION(collator_get_sort_key);
@@ -84,6 +88,7 @@ static const zend_function_entry class_Collator_methods[] = {
 	ZEND_RAW_FENTRY("getStrength", zif_collator_get_strength, arginfo_class_Collator_getStrength, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("setStrength", zif_collator_set_strength, arginfo_class_Collator_setStrength, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getLocale", zif_collator_get_locale, arginfo_class_Collator_getLocale, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getRules", zif_collator_get_rules, arginfo_class_Collator_getRules, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getErrorCode", zif_collator_get_error_code, arginfo_class_Collator_getErrorCode, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getErrorMessage", zif_collator_get_error_message, arginfo_class_Collator_getErrorMessage, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getSortKey", zif_collator_get_sort_key, arginfo_class_Collator_getSortKey, ZEND_ACC_PUBLIC, NULL, NULL)

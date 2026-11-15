@@ -35,8 +35,6 @@
 #define zendcursor LANG_SCNG(yy_cursor)
 #define zendlimit  LANG_SCNG(yy_limit)
 
-static zend_class_entry *php_token_ce;
-
 /* {{{ tokenizer_module_entry */
 zend_module_entry tokenizer_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -246,7 +244,7 @@ PHP_MINIT_FUNCTION(tokenizer)
 {
 	register_tokenizer_data_symbols(module_number);
 	register_tokenizer_symbols(module_number);
-	php_token_ce = register_class_PhpToken(zend_ce_stringable);
+	register_class_PhpToken(zend_ce_stringable);
 
 	return SUCCESS;
 }

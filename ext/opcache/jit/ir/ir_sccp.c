@@ -2228,6 +2228,10 @@ static bool ir_try_promote_induction_var_ext(ir_ctx *ctx, ir_ref ext_ref, ir_ref
 				const ir_insn *use_insn = &ctx->ir_base[use];
 
 				if (use_insn->op >= IR_EQ && use_insn->op <= IR_UGT) {
+					if (op == IR_ZEXT && use_insn->op >= IR_LT && use_insn->op <= IR_GT) {
+						/* Zero extension may reset the sign bit and change the result of signed comparison */
+						return 0;
+					}
 					if (use_insn->op1 == phi_ref) {
 						if (IR_IS_TYPE_SIGNED(type) != IR_IS_TYPE_SIGNED(ctx->ir_base[use_insn->op2].type)) {
 							return 0;
@@ -2267,6 +2271,10 @@ static bool ir_try_promote_induction_var_ext(ir_ctx *ctx, ir_ref ext_ref, ir_ref
 				const ir_insn *use_insn = &ctx->ir_base[use];
 
 				if (use_insn->op >= IR_EQ && use_insn->op <= IR_UGT) {
+					if (op == IR_ZEXT && use_insn->op >= IR_LT && use_insn->op <= IR_GT) {
+						/* Zero extension may reset the sign bit and change the result of signed comparison */
+						return 0;
+					}
 					if (use_insn->op1 == op_ref) {
 						if (IR_IS_TYPE_SIGNED(type) != IR_IS_TYPE_SIGNED(ctx->ir_base[use_insn->op2].type)) {
 							return 0;

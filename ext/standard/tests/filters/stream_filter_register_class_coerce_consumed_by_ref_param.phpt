@@ -1,7 +1,5 @@
 --TEST--
 stream_filter_register() with a class that coerces the $consumed parameter of filter method
---XFAIL--
-This leaks memory
 --FILE--
 <?php
 

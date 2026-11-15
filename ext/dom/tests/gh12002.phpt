@@ -2,24 +2,20 @@
 GH-12002 (DOMDocument::encoding memory leak with invalid encoding)
 --EXTENSIONS--
 dom
+zend_test
 --FILE--
 <?php
 
-function make_nonconst(string $x) {
-    // Defeat SCCP, even with inlining
-    return str_repeat($x, random_int(1, 1));
-}
-
 $dom = new DOMDocument();
-$dom->encoding = make_nonconst('utf-8');
+$dom->encoding = zend_return_non_interned_string('utf-8');
 var_dump($dom->encoding);
 try {
-    $dom->encoding = make_nonconst('foobar');
+    $dom->encoding = zend_return_non_interned_string('foobar');
 } catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($dom->encoding);
-$dom->encoding = make_nonconst('utf-16le');
+$dom->encoding = zend_return_non_interned_string('utf-16le');
 var_dump($dom->encoding);
 try {
     $dom->encoding = NULL;

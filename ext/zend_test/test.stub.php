@@ -250,6 +250,8 @@ namespace {
 
     function zend_trigger_bailout(): never {}
 
+    function zend_return_non_interned_string(string $str): string {}
+
     function zend_test_array_return(): array {}
 
     /** @genstubs-expose-comment-block
@@ -281,6 +283,8 @@ namespace {
     #[\Deprecated(message: "custom message")]
     #[\NoDiscard(message: "custom message 2")]
     function zend_test_deprecated_nodiscard(): int {}
+
+    function zend_test_child_init_count(): int {}
 
     /** @alias zend_test_void_return */
     function zend_test_aliased(): void {}
@@ -411,6 +415,7 @@ namespace {
     function zend_call_method(object|string $obj_or_class, string $method, mixed $arg1 = UNKNOWN, mixed $arg2 = UNKNOWN): mixed {}
 
     function zend_object_init_with_constructor(string $class, mixed ...$args): mixed {}
+    function zend_object_init_with_constructor_array(string $class, array $args): mixed {}
 
     function zend_call_method_if_exists(object $obj, string $method, mixed ...$args): mixed {}
 

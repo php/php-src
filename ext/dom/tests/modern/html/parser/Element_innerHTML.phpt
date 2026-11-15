@@ -2,6 +2,7 @@
 Test writing Element::$innerHTML on HTML documents
 --EXTENSIONS--
 dom
+zend_test
 --FILE--
 <?php
 
@@ -20,7 +21,7 @@ $el->innerHTML = "invalid\xffutf-8𐍈𐍈𐍈";
 echo $dom->saveXML(), "\n";
 
 // Create a non-interned string that gets the UTF-8 validity flag added
-$str = str_repeat("my valid string", random_int(1, 1));
+$str = zend_return_non_interned_string("my valid string");
 preg_match('/^.*$/u', $str);
 $el->innerHTML = $str;
 echo $dom->saveXML(), "\n";

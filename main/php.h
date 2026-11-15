@@ -20,7 +20,7 @@
 #include <dmalloc.h>
 #endif
 
-#define PHP_API_VERSION 20260925
+#define PHP_API_VERSION 20261113
 #define YYDEBUG 0
 #define PHP_DEFAULT_CHARSET "UTF-8"
 
@@ -293,11 +293,11 @@ END_EXTERN_C()
 #define error_handling_t zend_error_handling_t
 
 BEGIN_EXTERN_C()
-static inline ZEND_ATTRIBUTE_DEPRECATED void php_set_error_handling(error_handling_t error_handling, zend_class_entry *exception_class)
+ZEND_ATTRIBUTE_DEPRECATED static inline void php_set_error_handling(error_handling_t error_handling, zend_class_entry *exception_class)
 {
 	zend_replace_error_handling(error_handling, exception_class, NULL);
 }
-static inline ZEND_ATTRIBUTE_DEPRECATED void php_std_error_handling(void) {}
+ZEND_ATTRIBUTE_DEPRECATED static inline void php_std_error_handling(void) {}
 
 PHPAPI ZEND_COLD void php_verror(const char *docref, int type, const char *format, va_list args) PHP_ATTRIBUTE_FORMAT(printf, 3, 0);
 
@@ -369,6 +369,7 @@ END_EXTERN_C()
 #define PHP_MINFO		ZEND_MODULE_INFO_N
 #define PHP_GINIT		ZEND_GINIT
 #define PHP_GSHUTDOWN	ZEND_GSHUTDOWN
+#define PHP_CINIT(module)		php_##module##_child_init
 
 #define PHP_MINIT_FUNCTION		ZEND_MODULE_STARTUP_D
 #define PHP_MSHUTDOWN_FUNCTION	ZEND_MODULE_SHUTDOWN_D
@@ -377,6 +378,7 @@ END_EXTERN_C()
 #define PHP_MINFO_FUNCTION		ZEND_MODULE_INFO_D
 #define PHP_GINIT_FUNCTION		ZEND_GINIT_FUNCTION
 #define PHP_GSHUTDOWN_FUNCTION	ZEND_GSHUTDOWN_FUNCTION
+#define PHP_CINIT_FUNCTION(module)	static void php_##module##_child_init(void)
 
 #define PHP_MODULE_GLOBALS		ZEND_MODULE_GLOBALS
 

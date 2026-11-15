@@ -5,6 +5,7 @@ session.gc_probability=0
 session.save_handler=files
 --EXTENSIONS--
 session
+zend_test
 --FILE--
 <?php
 ob_start();
@@ -17,7 +18,7 @@ session_set_save_handler(
     function(string $id): string|false { return ""; },
     function(string $id, string $data) { return true; },
     function(string $id) { return true; },
-    function(int $max) { return str_repeat("x", random_int(100, 100)); }
+    function(int $max) { return zend_return_non_interned_string("x"); }
 );
 
 session_start();

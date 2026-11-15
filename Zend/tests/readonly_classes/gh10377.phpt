@@ -34,9 +34,9 @@ try {
 var_dump($anon->field);
 
 ?>
---EXPECT--
+--EXPECTF--
 int(2)
-Error: Cannot modify readonly property class@anonymous::$field
+Error: Cannot modify readonly property class@anonymous%0%s::$field
 int(2)
 int(2)
 int(123)

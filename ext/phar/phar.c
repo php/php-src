@@ -489,7 +489,6 @@ static zend_result phar_open_parsed_phar(
 	size_t fname_len,
 	/* copyable & hash update */ zend_string *alias,
 	bool is_data,
-	uint32_t options,
 	phar_archive_data** pphar,
 	char **error
 ) {
@@ -552,10 +551,6 @@ static zend_result phar_open_parsed_phar(
 	} else {
 		if (pphar) {
 			*pphar = NULL;
-		}
-
-		if (phar && error && !(options & REPORT_ERRORS)) {
-			efree(error);
 		}
 
 		return FAILURE;
@@ -1344,7 +1339,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 5, 6) zend_result phar_open_or_create_filename(
 		return FAILURE;
 	}
 check_file:
-	if (phar_open_parsed_phar(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, is_data, options, test, &my_error) == SUCCESS) {
+	if (phar_open_parsed_phar(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, is_data, test, &my_error) == SUCCESS) {
 		*pphar = *test;
 
 		if ((*test)->is_data && !(*test)->is_tar && !(*test)->is_zip) {
@@ -1546,7 +1541,7 @@ zend_result phar_open_from_filename(
 		is_data = true;
 	}
 
-	if (phar_open_parsed_phar(fname, fname_len, alias, is_data, options, pphar, error) == SUCCESS) {
+	if (phar_open_parsed_phar(fname, fname_len, alias, is_data, pphar, error) == SUCCESS) {
 		return SUCCESS;
 	} else if (error && *error) {
 		return FAILURE;
@@ -2295,7 +2290,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2) zend_result phar_open_executed_filename(/* copyab
 		return FAILURE;
 	}
 
-	if (phar_open_parsed_phar(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, false, REPORT_ERRORS, NULL, NULL) == SUCCESS) {
+	if (phar_open_parsed_phar(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, false, NULL, NULL) == SUCCESS) {
 		return SUCCESS;
 	}
 

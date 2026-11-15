@@ -1362,10 +1362,16 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 			if (uses_variadic_placeholder) {
 				flags |= ZEND_PARTIAL_USES_VARIADIC_PLACEHOLDER;
 			}
+			/* SHM names are shared by same-line PFAs, so they can't be a cache key */
+			ZEND_ASSERT((flags & ZEND_PARTIAL_CACHEABLE_IN_SHM)
+				|| !(GC_FLAGS(fcc_ast->name) & IS_STR_PERMANENT));
+			/* A non-SHM AST may be freed, but the cached PFA keeps its name alive */
+			const uint32_t *cache_key = (flags & ZEND_PARTIAL_CACHEABLE_IN_SHM)
+				? &ast->lineno : (const uint32_t *) fcc_ast->name;
 			zend_partial_create(result, scope, &frame->This, fptr,
 					ZEND_CALL_NUM_ARGS(frame), ZEND_CALL_ARG(frame, 1),
 					extra_named_params, named_positions,
-					fcc_ast->filename, &ast->lineno,
+					fcc_ast->filename, cache_key, /* declaring_op_array */ NULL,
 					(void**)cache_slot, fcc_ast->name, flags, /* const_args */ 0);
 
 			if (named_positions) {
@@ -2250,11 +2256,21 @@ static ZEND_COLD void zend_ast_export_hook_list(smart_str *str, const zend_ast_l
 
 	for (uint32_t i = 0; i < hook_list->children; i++) {
 		const zend_ast_decl *hook = (const zend_ast_decl *)hook_list->child[i];
-		zend_ast_export_visibility(str, hook->flags, ZEND_MODIFIER_TARGET_PROPERTY);
+		if (hook->child[4]) {
+			zend_ast_export_attributes(str, hook->child[4], indent, 1);
+		}
 		if (hook->flags & ZEND_ACC_FINAL) {
 			smart_str_appends(str, "final ");
 		}
+		if (hook->flags & ZEND_ACC_RETURN_REFERENCE) {
+			smart_str_appendc(str, '&');
+		}
 		smart_str_append(str, hook->name);
+		if (hook->child[0]) {
+			smart_str_appendc(str, '(');
+			zend_ast_export_ex(str, hook->child[0], 0, indent);
+			smart_str_appendc(str, ')');
+		}
 		zend_ast *body = hook->child[2];
 		if (body == NULL) {
 			smart_str_appendc(str, ';');
@@ -3123,6 +3139,9 @@ simple_list:
 			zend_ast_export_visibility(str, ast->attr, ZEND_MODIFIER_TARGET_CPP);
 			if (ast->attr & ZEND_ACC_FINAL) {
 				smart_str_appends(str, "final ");
+			}
+			if (ast->attr & ZEND_ACC_READONLY) {
+				smart_str_appends(str, "readonly ");
 			}
 			if (ast->child[0]) {
 				zend_ast_export_type(str, ast->child[0], indent);

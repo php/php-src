@@ -20,6 +20,7 @@ $errno = null;
 $errstr = null;
 $timeout = 1.5;
 var_dump( fsockopen($hostname, $port, $errno, $errstr, $timeout) );
+var_dump($errno);
 var_dump($errstr);
 
 echo "Done";
@@ -37,5 +38,6 @@ string(%d) "%a"
 
 Warning: fsockopen(): Unable to connect to invalid://127.0.0.1:31337 (Unable to find the socket transport "invalid" - did you forget to enable it when you configured PHP?) in %s on line %d
 bool(false)
+int(0)
 string(100) "Unable to find the socket transport "invalid" - did you forget to enable it when you configured PHP?"
 Done

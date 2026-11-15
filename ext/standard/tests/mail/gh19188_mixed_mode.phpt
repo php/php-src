@@ -3,6 +3,7 @@ GH-19188: mail.cr_lf_mode=mixed
 --INI--
 sendmail_path={MAIL:gh19188_mixed_mode.out}
 mail.cr_lf_mode=mixed
+mail.add_x_header=off
 --FILE--
 <?php
 var_dump(mail('user@example.com', 'Test Subject', 'A Message', 'X-Test: mixed'));

@@ -137,6 +137,9 @@ class Collator
      */
     public function getLocale(int $type): string|false {}
 
+    /** @alias collator_get_rules */
+    public function getRules(): string|false {}
+
     /**
      * @tentative-return-type
      * @alias collator_get_error_code

@@ -30,7 +30,7 @@
 #define ZEND_MODULE_INFO_FUNC_ARGS zend_module_entry *zend_module
 #define ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU zend_module
 
-#define ZEND_MODULE_API_NO 20260925
+#define ZEND_MODULE_API_NO 20261113
 #ifdef ZTS
 #define USING_ZTS 1
 #else
@@ -45,7 +45,12 @@
 
 #define ZEND_MODULE_BUILD_ID "API" ZEND_TOSTR(ZEND_MODULE_API_NO) ZEND_BUILD_TS ZEND_BUILD_DEBUG ZEND_BUILD_SYSTEM ZEND_BUILD_EXTRA
 
-#define STANDARD_MODULE_PROPERTIES_EX 0, 0, NULL, 0, ZEND_MODULE_BUILD_ID
+#define STANDARD_MODULE_PROPERTIES_EX \
+	.module_started = 0, \
+	.type = 0, \
+	.handle = NULL, \
+	.module_number = 0, \
+	.build_id = ZEND_MODULE_BUILD_ID
 
 #define NO_MODULE_GLOBALS 0, NULL, NULL, NULL
 
@@ -91,6 +96,7 @@ struct _zend_module_entry {
 	void (*globals_ctor)(void *global);
 	void (*globals_dtor)(void *global);
 	zend_result (*post_deactivate_func)(void);
+	void (*child_init_func)(void);
 	int module_started;
 	unsigned char type;
 	void *handle;

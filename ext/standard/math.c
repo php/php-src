@@ -850,7 +850,7 @@ PHPAPI zend_long _php_math_basetolong(zval *arg, int base)
 /*
  * Convert a string representation of a base(2-36) number to a zval.
  */
-PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
+PHPAPI zend_result _php_math_basetozval(zend_string *str, int base, zval *ret)
 {
 	zend_long num = 0;
 	double fnum = 0;
@@ -858,7 +858,7 @@ PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
 	char c, *s, *e;
 	zend_long cutoff;
 	int cutlim;
-	int invalidchars = 0;
+	bool invalidchars = false;
 
 	s = ZSTR_VAL(str);
 	e = s + ZSTR_LEN(str);
@@ -888,13 +888,13 @@ PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
 		else if (c >= 'a' && c <= 'z')
 			c -= 'a' - 10;
 		else {
-			invalidchars++;
-			continue;
+			invalidchars = true;
+			break;
 		}
 
 		if (c >= base) {
-			invalidchars++;
-			continue;
+			invalidchars = true;
+			break;
 		}
 
 		switch (mode) {
@@ -903,7 +903,6 @@ PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
 				num = num * base + c;
 				break;
 			} else {
-				zend_error(E_NOTICE, "Input number is larger than PHP_INT_MAX, precision has been lost in conversion");
 				fnum = (double)num;
 				mode = 1;
 			}
@@ -913,15 +912,18 @@ PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
 		}
 	}
 
-	if (invalidchars > 0) {
-		zend_error(E_DEPRECATED, "Invalid characters passed for attempted conversion, these have been ignored");
+	if (invalidchars) {
+		zend_throw_exception(NULL, "Invalid characters passed for attempted conversion", 0);
+		return FAILURE;
 	}
 
 	if (mode == 1) {
+		zend_error(E_NOTICE, "Input number is larger than PHP_INT_MAX, precision has been lost in conversion");
 		ZVAL_DOUBLE(ret, fnum);
 	} else {
 		ZVAL_LONG(ret, num);
 	}
+	return SUCCESS;
 }
 /* }}} */
 
@@ -1039,7 +1041,9 @@ PHP_FUNCTION(bindec)
 		Z_PARAM_STR(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	_php_math_basetozval(arg, 2, return_value);
+	if (SUCCESS != _php_math_basetozval(arg, 2, return_value)) {
+		RETURN_THROWS();
+	}
 }
 /* }}} */
 
@@ -1052,7 +1056,9 @@ PHP_FUNCTION(hexdec)
 		Z_PARAM_STR(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	_php_math_basetozval(arg, 16, return_value);
+	if (SUCCESS != _php_math_basetozval(arg, 16, return_value)) {
+		RETURN_THROWS();
+	}
 }
 /* }}} */
 
@@ -1065,7 +1071,9 @@ PHP_FUNCTION(octdec)
 		Z_PARAM_STR(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	_php_math_basetozval(arg, 8, return_value);
+	if (SUCCESS != _php_math_basetozval(arg, 8, return_value)) {
+		RETURN_THROWS();
+	}
 }
 /* }}} */
 
@@ -1142,7 +1150,10 @@ PHP_FUNCTION(base_convert)
 		RETURN_THROWS();
 	}
 
-	_php_math_basetozval(number, (int)frombase, &temp);
+	if (SUCCESS != _php_math_basetozval(number, (int)frombase, &temp)) {
+		RETURN_THROWS();
+	}
+
 	result = _php_math_zvaltobase(&temp, (int)tobase);
 	if (!result) {
 		RETURN_THROWS();

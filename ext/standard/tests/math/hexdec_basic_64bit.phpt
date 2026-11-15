@@ -29,7 +29,11 @@ $values = array(0x123abc,
 
 foreach($values as $value) {
     echo "\n-- hexdec $value --\n";
-    var_dump(hexdec($value));
+    try {
+        var_dump(hexdec($value));
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage() . "\n";
+    }
 };
 
 ?>
@@ -61,9 +65,7 @@ int(2147483647)
 int(2147483648)
 
 -- hexdec 0x123XYZABC --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(1194684)
+Exception: Invalid characters passed for attempted conversion
 
 -- hexdec 311015 --
 int(3215381)
@@ -72,9 +74,7 @@ int(3215381)
 int(3215381)
 
 -- hexdec 31101.3 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(3215379)
+Exception: Invalid characters passed for attempted conversion
 
 -- hexdec 3110130 --
 int(51446064)

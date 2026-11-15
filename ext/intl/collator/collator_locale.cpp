@@ -59,3 +59,28 @@ U_CFUNC PHP_FUNCTION( collator_get_locale )
 	RETVAL_STRINGL( locale_name, strlen(locale_name) );
 }
 /* }}} */
+
+/* {{{ Gets the collation tailoring rules. */
+U_CFUNC PHP_FUNCTION(collator_get_rules)
+{
+	COLLATOR_METHOD_INIT_VARS
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
+			&object, Collator_ce_ptr) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	COLLATOR_METHOD_FETCH_OBJECT;
+
+	if (collator_check_initialized(co) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	int32_t rules_len;
+	const UChar *rules = ucol_getRules(co->ucoll, &rules_len);
+	zend_string *result = intl_convert_utf16_to_utf8(rules, rules_len, COLLATOR_ERROR_CODE_P(co));
+	COLLATOR_CHECK_STATUS(co, "Error converting collation rules to UTF-8");
+
+	RETURN_STR(result);
+}
+/* }}} */

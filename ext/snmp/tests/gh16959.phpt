@@ -2,6 +2,7 @@
 snmpget() modifies object_id array source
 --EXTENSIONS--
 snmp
+zend_test
 --SKIPIF--
 <?php
 require_once(__DIR__.'/skipif.inc');
@@ -25,17 +26,17 @@ try {
 }
 
 try {
-	snmp2_set($hostname, $communityWrite, $bad_object_ids, array(new stdClass()), array(null));
+	snmp2_set($hostname, $communityWrite, $bad_object_ids, [new stdClass()], [null]);
 } catch (Throwable $e) {
 	echo $e->getMessage() . PHP_EOL;
 }
 try {
-	snmp2_set($hostname, $communityWrite, $bad_object_ids, array("toolongtype"), array(null));
+	snmp2_set($hostname, $communityWrite, $bad_object_ids, ["toolongtype"], [null]);
 } catch (Throwable $e) {
 	echo $e->getMessage() . PHP_EOL;
 }
 try {
-	snmp2_set($hostname, $communityWrite, $bad_object_ids, array(str_repeat("onetoomuch", random_int(1, 1))), array(null));
+	snmp2_set($hostname, $communityWrite, $bad_object_ids, [zend_return_non_interned_string("onetoomuch")], [null]);
 } catch (Throwable $e) {
 	echo $e->getMessage();
 }

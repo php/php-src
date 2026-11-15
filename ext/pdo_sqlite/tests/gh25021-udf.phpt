@@ -5,9 +5,9 @@ pdo_sqlite
 --FILE--
 <?php
 
-$conn = new PDO('sqlite::memory:');
+$conn = new Pdo\Sqlite('sqlite::memory:');
 
-$conn->sqliteCreateFunction('my_udf_pass_int', static fn(int $v): int => $v);
+$conn->createFunction('my_udf_pass_int', static fn(int $v): int => $v);
 
 foreach ([
     10,
@@ -23,7 +23,6 @@ foreach ([
 }
 ?>
 --EXPECTF--
-Deprecated: Method PDO::sqliteCreateFunction() is deprecated since 8.5, use Pdo\Sqlite::createFunction() instead in %s on line %d
 bool(true)
 bool(true)
 bool(true)

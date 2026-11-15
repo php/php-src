@@ -1153,8 +1153,8 @@ static inheritance_status do_inheritance_check_on_method(
 			return INHERITANCE_ERROR;
 		}
 		zend_error_at_noreturn(E_COMPILE_ERROR, func_filename(child), func_lineno(child),
-			"Cannot override final method %s::%pS()",
-			ZEND_FN_SCOPE_NAME(parent), child->common.function_name);
+			"Cannot override final method %pS::%pS()",
+			parent->common.scope->name, child->common.function_name);
 	}
 
 	child_flags	= child->common.fn_flags;
@@ -1167,12 +1167,12 @@ static inheritance_status do_inheritance_check_on_method(
 		}
 		if (child_flags & ZEND_ACC_STATIC) {
 			zend_error_at_noreturn(E_COMPILE_ERROR, func_filename(child), func_lineno(child),
-				"Cannot make non static method %s::%pS() static in class %s",
-				ZEND_FN_SCOPE_NAME(parent), child->common.function_name, ZEND_FN_SCOPE_NAME(child));
+				"Cannot make non static method %pS::%pS() static in class %pS",
+				parent->common.scope->name, child->common.function_name, child->common.scope->name);
 		} else {
 			zend_error_at_noreturn(E_COMPILE_ERROR, func_filename(child), func_lineno(child),
-				"Cannot make static method %s::%pS() non static in class %s",
-				ZEND_FN_SCOPE_NAME(parent), child->common.function_name, ZEND_FN_SCOPE_NAME(child));
+				"Cannot make static method %pS::%pS() non static in class %pS",
+				parent->common.scope->name, child->common.function_name, child->common.scope->name);
 		}
 	}
 
@@ -1183,8 +1183,8 @@ static inheritance_status do_inheritance_check_on_method(
 			return INHERITANCE_ERROR;
 		}
 		zend_error_at_noreturn(E_COMPILE_ERROR, func_filename(child), func_lineno(child),
-			"Cannot make non abstract method %s::%pS() abstract in class %s",
-			ZEND_FN_SCOPE_NAME(parent), child->common.function_name, ZEND_FN_SCOPE_NAME(child));
+			"Cannot make non abstract method %pS::%pS() abstract in class %pS",
+			parent->common.scope->name, child->common.function_name, child->common.scope->name);
 	}
 
 	if ((flags & ZEND_INHERITANCE_SET_CHILD_CHANGED)
@@ -1218,8 +1218,8 @@ static inheritance_status do_inheritance_check_on_method(
 			return INHERITANCE_ERROR;
 		}
 		zend_error_at_noreturn(E_COMPILE_ERROR, func_filename(child), func_lineno(child),
-			"Access level to %s::%pS() must be %s (as in class %s)%s",
-			ZEND_FN_SCOPE_NAME(child), child->common.function_name, zend_visibility_string(parent_flags), ZEND_FN_SCOPE_NAME(parent), (parent_flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
+			"Access level to %pS::%pS() must be %s (as in class %pS)%s",
+			child->common.scope->name, child->common.function_name, zend_visibility_string(parent_flags), parent->common.scope->name, (parent_flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
 	}
 
 	if (flags & ZEND_INHERITANCE_CHECK_PROTO) {
@@ -2318,8 +2318,8 @@ void zend_inheritance_check_override(const zend_class_entry *ce)
 
 			zend_error_at_noreturn(
 				E_COMPILE_ERROR, f->op_array.filename, f->op_array.line_start,
-				"%s::%pS() has #[\\Override] attribute, but no matching parent method exists",
-				ZEND_FN_SCOPE_NAME(f), f->common.function_name);
+				"%pS::%pS() has #[\\Override] attribute, but no matching parent method exists",
+				f->common.scope->name, f->common.function_name);
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -2348,8 +2348,8 @@ void zend_inheritance_check_override(const zend_class_entry *ce)
 
 					zend_error_at_noreturn(
 						E_COMPILE_ERROR, f->op_array.filename, f->op_array.line_start,
-						"%s::%pS() has #[\\Override] attribute, but no matching parent method exists",
-						ZEND_FN_SCOPE_NAME(f), f->common.function_name);
+						"%pS::%pS() has #[\\Override] attribute, but no matching parent method exists",
+						f->common.scope->name, f->common.function_name);
 				}
 			}
 		}
@@ -3064,9 +3064,9 @@ ZEND_API void zend_class_use_internal_traits(zend_class_entry *class_entry, int 
 }
 
 #define MAX_ABSTRACT_INFO_CNT 3
-#define MAX_ABSTRACT_INFO_FMT "%s%s%s%s"
+#define MAX_ABSTRACT_INFO_FMT "%pS%s%s%s"
 #define DISPLAY_ABSTRACT_FN(idx) \
-	ai.afn[idx] ? ZEND_FN_SCOPE_NAME(ai.afn[idx]) : "", \
+	ai.afn[idx] ? ai.afn[idx]->common.scope->name : ZSTR_EMPTY_ALLOC(), \
 	ai.afn[idx] ? "::" : "", \
 	ai.afn[idx] ? ZSTR_VAL(ai.afn[idx]->common.function_name) : "", \
 	ai.afn[idx] && ai.afn[idx + 1] ? ", " : (ai.afn[idx] && ai.cnt > MAX_ABSTRACT_INFO_CNT ? ", ..." : "")

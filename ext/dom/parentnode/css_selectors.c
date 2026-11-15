@@ -82,11 +82,15 @@ static lxb_css_selector_list_t *dom_parse_selector(
 
 	memset(parser, 0, sizeof(lxb_css_parser_t));
 	status = lxb_css_parser_init(parser, NULL);
-	ZEND_ASSERT(status == LXB_STATUS_OK);
+	if (UNEXPECTED(status != LXB_STATUS_OK)) {
+		return NULL;
+	}
 
 	memset(selectors, 0, sizeof(lxb_selectors_t));
 	status = lxb_selectors_init(selectors);
-	ZEND_ASSERT(status == LXB_STATUS_OK);
+	if (UNEXPECTED(status != LXB_STATUS_OK)) {
+		return NULL;
+	}
 	lxb_selectors_opt_set(selectors, dom_quirks_opt(options, intern));
 
 	lxb_css_selector_list_t *list = lxb_css_selectors_parse(parser, (const lxb_char_t *) ZSTR_VAL(selectors_str), ZSTR_LEN(selectors_str));

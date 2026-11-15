@@ -3599,33 +3599,33 @@ static void ir_emit_shift(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 			IR_ASSERT(0);
 		case IR_SHL:
 			if (ir_type_size[type] == 1) {
-				|	and Rw(def_reg), Rw(op1_reg), #0xff
-				|	lsl Rw(def_reg), Rw(def_reg), Rw(op2_reg)
+				|	and Rw(IR_REG_INT_TMP), Rw(op1_reg), #0xff
+				|	lsl Rw(def_reg), Rw(IR_REG_INT_TMP), Rw(op2_reg)
 			} else if (ir_type_size[type] == 2) {
-				|	and Rw(def_reg), Rw(op1_reg), #0xffff
-				|	lsl Rw(def_reg), Rw(def_reg), Rw(op2_reg)
+				|	and Rw(IR_REG_INT_TMP), Rw(op1_reg), #0xffff
+				|	lsl Rw(def_reg), Rw(IR_REG_INT_TMP), Rw(op2_reg)
 			} else {
 				|	ASM_REG_REG_REG_OP lsl, type, def_reg, op1_reg, op2_reg
 			}
 			break;
 		case IR_SHR:
 			if (ir_type_size[type] == 1) {
-				|	and Rw(def_reg), Rw(op1_reg), #0xff
-				|	lsr Rw(def_reg), Rw(def_reg), Rw(op2_reg)
+				|	and Rw(IR_REG_INT_TMP), Rw(op1_reg), #0xff
+				|	lsr Rw(def_reg), Rw(IR_REG_INT_TMP), Rw(op2_reg)
 			} else if (ir_type_size[type] == 2) {
-				|	and Rw(def_reg), Rw(op1_reg), #0xffff
-				|	lsr Rw(def_reg), Rw(def_reg), Rw(op2_reg)
+				|	and Rw(IR_REG_INT_TMP), Rw(op1_reg), #0xffff
+				|	lsr Rw(def_reg), Rw(IR_REG_INT_TMP), Rw(op2_reg)
 			} else {
 				|	ASM_REG_REG_REG_OP lsr, type, def_reg, op1_reg, op2_reg
 			}
 			break;
 		case IR_SAR:
 			if (ir_type_size[type] == 1) {
-				|	sxtb Rw(def_reg), Rw(op1_reg)
-				|	asr Rw(def_reg), Rw(def_reg), Rw(op2_reg)
+				|	sxtb Rw(IR_REG_INT_TMP), Rw(op1_reg)
+				|	asr Rw(def_reg), Rw(IR_REG_INT_TMP), Rw(op2_reg)
 			} else if (ir_type_size[type] == 2) {
-				|	sxth Rw(def_reg), Rw(op1_reg)
-				|	asr Rw(def_reg), Rw(def_reg), Rw(op2_reg)
+				|	sxth Rw(IR_REG_INT_TMP), Rw(op1_reg)
+				|	asr Rw(def_reg), Rw(IR_REG_INT_TMP), Rw(op2_reg)
 			} else {
 				|	ASM_REG_REG_REG_OP asr, type, def_reg, op1_reg, op2_reg
 			}
@@ -6432,8 +6432,10 @@ static int32_t ir_emit_arguments(ir_ctx *ctx, ir_ref def, ir_insn *insn, const i
 		}
 		if (dst_reg != IR_REG_NONE) {
 			if (IR_IS_CONST_REF(arg) ||
-			    src_reg == IR_REG_NONE ||
-			    (IR_REG_SPILLED(src_reg) && !IR_REGSET_IN(cc->preserved_regs, IR_REG_NUM(src_reg)))) {
+				src_reg == IR_REG_NONE ||
+				(IR_REG_SPILLED(src_reg) &&
+					!IR_REGSET_IN(cc->preserved_regs, IR_REG_NUM(src_reg)) &&
+					ir_insn_find_op_ex(insn, arg, j + 1) == 0)) {
 				/* delay CONST->REG and MEM->REG moves to third pass */
 				do_pass3 = 1;
 			} else {
@@ -6519,8 +6521,10 @@ static int32_t ir_emit_arguments(ir_ctx *ctx, ir_ref def, ir_insn *insn, const i
 			}
 			if (dst_reg != IR_REG_NONE) {
 				if (IR_IS_CONST_REF(arg) ||
-				    src_reg == IR_REG_NONE ||
-				    (IR_REG_SPILLED(src_reg) && !IR_REGSET_IN(cc->preserved_regs, IR_REG_NUM(src_reg)))) {
+					src_reg == IR_REG_NONE ||
+					(IR_REG_SPILLED(src_reg) &&
+						!IR_REGSET_IN(cc->preserved_regs, IR_REG_NUM(src_reg)) &&
+						ir_insn_find_op_ex(insn, arg, j + 1) == 0)) {
 					if (IR_IS_CONST_REF(arg) && IR_IS_TYPE_INT(type)) {
 						if (ir_type_size[type] == 1) {
 							type = IR_ADDR;
@@ -10001,7 +10005,7 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 	if (ctx->code_buffer) {
 		entry = ctx->code_buffer->pos;
 		entry = (void*)IR_ALIGNED_SIZE(((size_t)(entry)), 16);
-		if (size > (size_t)((char*)ctx->code_buffer->end - (char*)entry)) {
+		if ((char*)entry > (char*)ctx->code_buffer->end || size > (size_t)((char*)ctx->code_buffer->end - (char*)entry)) {
 			dasm_free(&data.dasm_state);
 			ctx->data = NULL;
 			ctx->status = IR_ERROR_CODE_MEM_OVERFLOW;
@@ -10144,7 +10148,7 @@ const void *ir_emit_exitgroup(uint32_t first_exit_point, uint32_t exit_points_pe
 
 	entry = code_buffer->pos;
 	entry = (void*)IR_ALIGNED_SIZE(((size_t)(entry)), 16);
-	if (size > (size_t)((char*)code_buffer->end - (char*)entry)) {
+	if ((char*)entry > (char*)code_buffer->end || size > (size_t)((char*)code_buffer->end - (char*)entry)) {
 		dasm_free(&dasm_state);
 		return NULL;
 	}
@@ -10314,7 +10318,7 @@ void *ir_emit_thunk(ir_code_buffer *code_buffer, void *addr, size_t *size_ptr)
 
 	entry = code_buffer->pos;
 	entry = (void*)IR_ALIGNED_SIZE(((size_t)(entry)), 4);
-	if (size > (size_t)((char*)code_buffer->end - (char*)entry)) {
+	if ((char*)entry > (char*)code_buffer->end || size > (size_t)((char*)code_buffer->end - (char*)entry)) {
 		*size_ptr = size;
 		dasm_free(&dasm_state);
 		return NULL;

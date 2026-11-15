@@ -2,6 +2,7 @@
 GH-18276 (persistent connection - setAttribute(Pdo\Firebird::ATTR_DATE_FORMAT, ..) results in "zend_mm_heap corrupted")
 --EXTENSIONS--
 pdo_firebird
+zend_test
 --SKIPIF--
 <?php require('skipif.inc'); ?>
 --XLEAK--
@@ -23,9 +24,9 @@ for ($i = 0; $i < 2; $i++) {
         ],
     );
     // Avoid interned
-    $dbh->setAttribute(Pdo\Firebird::ATTR_DATE_FORMAT, str_repeat('Y----m----d', random_int(1, 1)));
-    $dbh->setAttribute(Pdo\Firebird::ATTR_TIME_FORMAT, str_repeat('H::::i::::s', random_int(1, 1)));
-    $dbh->setAttribute(Pdo\Firebird::ATTR_TIMESTAMP_FORMAT, str_repeat('Y----m----d....H::::i::::s', random_int(1, 1)));
+    $dbh->setAttribute(Pdo\Firebird::ATTR_DATE_FORMAT, zend_return_non_interned_string('Y----m----d'));
+    $dbh->setAttribute(Pdo\Firebird::ATTR_TIME_FORMAT, zend_return_non_interned_string('H::::i::::s'));
+    $dbh->setAttribute(Pdo\Firebird::ATTR_TIMESTAMP_FORMAT, zend_return_non_interned_string('Y----m----d....H::::i::::s'));
     unset($dbh);
 }
 

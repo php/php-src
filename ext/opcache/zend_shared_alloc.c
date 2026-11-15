@@ -238,6 +238,7 @@ int zend_shared_alloc_startup(size_t requested_size, size_t reserved_size)
 	if (!g_shared_alloc_handler) {
 		/* try memory handlers in order */
 		if (handler_table->name == NULL) {
+			smm_shared_globals = NULL;
 			return NO_SHM_BACKEND;
 		}
 		for (he = handler_table; he->name; he++) {

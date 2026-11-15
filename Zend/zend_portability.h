@@ -310,7 +310,9 @@ char *alloca();
 # define ZEND_ATTRIBUTE_PTR_FORMAT(type, idx, first)
 #endif
 
-#if ZEND_GCC_VERSION >= 3001 || __has_attribute(deprecated)
+#if __STDC_VERSION__ >= 202311L || (defined(__cplusplus) && __cplusplus >= 201402L)
+# define ZEND_ATTRIBUTE_DEPRECATED [[deprecated]]
+#elif ZEND_GCC_VERSION >= 3001 || __has_attribute(deprecated)
 # define ZEND_ATTRIBUTE_DEPRECATED  __attribute__((deprecated))
 #elif defined(ZEND_WIN32)
 # define ZEND_ATTRIBUTE_DEPRECATED  __declspec(deprecated)

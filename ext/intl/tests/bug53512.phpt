@@ -8,7 +8,7 @@ intl
 --FILE--
 <?php
 
-$badvals = array(4294901761, 2147483648, -2147483648, -1);
+$badvals = array(4294901761, 2147483648, -2147483648, -1, 4294967296, 4294967297);
 
 foreach ($badvals as $val) {
     $x = numfmt_create("en", NumberFormatter::PATTERN_DECIMAL);
@@ -18,6 +18,10 @@ foreach ($badvals as $val) {
 
 ?>
 --EXPECT--
+bool(false)
+string(67) "numfmt_set_symbol(): invalid symbol value: U_ILLEGAL_ARGUMENT_ERROR"
+bool(false)
+string(67) "numfmt_set_symbol(): invalid symbol value: U_ILLEGAL_ARGUMENT_ERROR"
 bool(false)
 string(67) "numfmt_set_symbol(): invalid symbol value: U_ILLEGAL_ARGUMENT_ERROR"
 bool(false)

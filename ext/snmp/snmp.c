@@ -169,6 +169,7 @@ static void snmp_session_free(php_snmp_session **session) /* {{{ */
 		PHP_SNMP_SESSION_FREE(community);
 		PHP_SNMP_SESSION_FREE(securityName);
 		PHP_SNMP_SESSION_FREE(contextEngineID);
+		PHP_SNMP_SESSION_FREE(contextName);
 		efree(*session);
 		*session = NULL;
 	}
@@ -763,7 +764,7 @@ static bool php_snmp_parse_oid(
 						objid_query->vars[objid_query->count].type = ptype;
 						idx_type++;
 					} else {
-						zend_argument_value_error(type_arg_num, "must contain a type for object ID '%s'", ZSTR_VAL(tmp));
+						zend_argument_value_error(type_arg_num, "must contain a type for object ID '%pS'", tmp);
 						php_free_objid_query(objid_query, oid_ht, value_ht, st);
 						return false;
 					}
@@ -798,7 +799,7 @@ static bool php_snmp_parse_oid(
 						objid_query->vars[objid_query->count].value = ZSTR_VAL(tmp);
 						idx_value++;
 					} else {
-						zend_argument_value_error(value_arg_num, "must contain a value for object ID '%s'", ZSTR_VAL(tmp));
+						zend_argument_value_error(value_arg_num, "must contain a value for object ID '%pS'", tmp);
 						php_free_objid_query(objid_query, oid_ht, value_ht, st);
 						return false;
 					}
@@ -963,7 +964,7 @@ static bool snmp_session_init(php_snmp_session **session_p, int version, zend_st
 	}
 
 	if (strlen(session->peername) == 0) {
-		php_error_docref(NULL, E_WARNING, "Unknown failure while resolving '%s'", ZSTR_VAL(hostname));
+		php_error_docref(NULL, E_WARNING, "Unknown failure while resolving '%pS'", hostname);
 		php_network_freeaddresses(psal);
 		return false;
 	}
@@ -1136,7 +1137,7 @@ static ZEND_ATTRIBUTE_NONNULL bool snmp_session_gen_auth_key(struct snmp_session
 	if ((snmp_errno = generate_Ku(s->securityAuthProto, s->securityAuthProtoLen,
 			(uint8_t *) ZSTR_VAL(pass), ZSTR_LEN(pass),
 			s->securityAuthKey, &(s->securityAuthKeyLen)))) {
-		php_error_docref(NULL, E_WARNING, "Error generating a key for authentication pass phrase '%s': %s", ZSTR_VAL(pass), snmp_api_errstring(snmp_errno));
+		php_error_docref(NULL, E_WARNING, "Error generating a key for authentication pass phrase '%pS': %s", pass, snmp_api_errstring(snmp_errno));
 		return false;
 	}
 	return true;
@@ -1152,7 +1153,7 @@ static ZEND_ATTRIBUTE_NONNULL bool snmp_session_gen_sec_key(struct snmp_session 
 	if ((snmp_errno = generate_Ku(s->securityAuthProto, s->securityAuthProtoLen,
 			(uint8_t *)ZSTR_VAL(pass), ZSTR_LEN(pass),
 			s->securityPrivKey, &(s->securityPrivKeyLen)))) {
-		php_error_docref(NULL, E_WARNING, "Error generating a key for privacy pass phrase '%s': %s", ZSTR_VAL(pass), snmp_api_errstring(snmp_errno));
+		php_error_docref(NULL, E_WARNING, "Error generating a key for privacy pass phrase '%pS': %s", pass, snmp_api_errstring(snmp_errno));
 		return false;
 	}
 	return true;
@@ -1250,7 +1251,10 @@ static ZEND_ATTRIBUTE_NONNULL_ARGS(2) bool snmp_session_set_security(struct snmp
 
 	/* Setting contextName if specified */
 	if (contextName) {
-		session->contextName = ZSTR_VAL(contextName);
+		if (session->contextName) {
+			efree(session->contextName);
+		}
+		session->contextName = estrndup(ZSTR_VAL(contextName), ZSTR_LEN(contextName));
 		session->contextNameLen = ZSTR_LEN(contextName);
 	}
 
@@ -2126,7 +2130,7 @@ zval *php_snmp_write_property(zend_object *object, zend_string *name, zval *valu
 
 	if (hnd) {
 		if (!hnd->write_func) {
-			zend_throw_error(NULL, "Cannot write read-only property %s::$%s", ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
+			zend_throw_error(NULL, "Cannot write read-only property %pS::$%pS", object->ce->name, name);
 			return &EG(error_zval);
 		}
 

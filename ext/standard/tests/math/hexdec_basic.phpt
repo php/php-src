@@ -25,8 +25,12 @@ $values = array(0x123abc,
                 false,
                 );
 for ($i = 0; $i < count($values); $i++) {
-    $res = hexdec($values[$i]);
-    var_dump($res);
+    try {
+        $res = hexdec($values[$i]);
+        var_dump($res);
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage() . "\n";
+    }
 }
 ?>
 --EXPECTF--
@@ -44,14 +48,10 @@ int(2147483647)
 
 Notice: Input number is larger than PHP_INT_MAX, precision has been lost in conversion in %s on line %d
 float(2147483648)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(1194684)
+Exception: Invalid characters passed for attempted conversion
 int(3215381)
 int(3215381)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(3215379)
+Exception: Invalid characters passed for attempted conversion
 int(51446064)
 int(18279)
 int(70199)

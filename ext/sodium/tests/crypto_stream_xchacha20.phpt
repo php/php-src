@@ -75,6 +75,11 @@ try {
 } catch (SodiumException $ex) {
     echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
+try {
+    sodium_crypto_stream_xchacha20_xor_ic($stream, $nonce, 0, substr($key, 1));
+} catch (Throwable $ex) {
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
+}
 
 ?>
 --EXPECT--
@@ -94,3 +99,4 @@ SodiumException: sodium_crypto_stream_xchacha20(): Argument #2 ($nonce) must be 
 SodiumException: sodium_crypto_stream_xchacha20(): Argument #3 ($key) must be SODIUM_CRYPTO_STREAM_XCHACHA20_KEYBYTES bytes long
 SodiumException: sodium_crypto_stream_xchacha20_xor(): Argument #2 ($nonce) must be SODIUM_CRYPTO_STREAM_XCHACHA20_NONCEBYTES bytes long
 SodiumException: sodium_crypto_stream_xchacha20_xor(): Argument #3 ($key) must be SODIUM_CRYPTO_STREAM_XCHACHA20_KEYBYTES bytes long
+SodiumException: sodium_crypto_stream_xchacha20_xor_ic(): Argument #4 ($key) must be SODIUM_CRYPTO_STREAM_XCHACHA20_KEYBYTES bytes long

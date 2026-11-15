@@ -5459,9 +5459,9 @@ ZEND_VM_C_LABEL(send_again):
 
 					if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 						zend_error(
-							E_WARNING, "Cannot pass by-reference argument %d of %s%s%pS()"
+							E_WARNING, "Cannot pass by-reference argument %d of %pS%s%pS()"
 							" by unpacking a Traversable, passing by-value instead", arg_num,
-							EX(call)->func->common.scope ? ZSTR_VAL(EX(call)->func->common.scope->name) : "",
+							EX(call)->func->common.scope ? EX(call)->func->common.scope->name : ZSTR_EMPTY_ALLOC(),
 							EX(call)->func->common.scope ? "::" : "",
 							EX(call)->func->common.function_name
 						);
@@ -5485,9 +5485,9 @@ ZEND_VM_C_LABEL(send_again):
 
 					if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 						zend_error(
-							E_WARNING, "Cannot pass by-reference argument %d of %s%s%pS()"
+							E_WARNING, "Cannot pass by-reference argument %d of %pS%s%pS()"
 							" by unpacking a Traversable, passing by-value instead", arg_num,
-							EX(call)->func->common.scope ? ZSTR_VAL(EX(call)->func->common.scope->name) : "",
+							EX(call)->func->common.scope ? EX(call)->func->common.scope->name : ZSTR_EMPTY_ALLOC(),
 							EX(call)->func->common.scope ? "::" : "",
 							EX(call)->func->common.function_name
 						);
@@ -9921,7 +9921,7 @@ ZEND_VM_HANDLER(212, ZEND_CALLABLE_CONVERT_PARTIAL, CONST, CONST|UNUSED, NUM)
 		(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) ?
 			call->extra_named_params : NULL,
 		OP2_TYPE == IS_CONST ? Z_ARRVAL_P(named_positions) : NULL,
-		EX(func)->op_array.filename, &opline->lineno, cache_slot,
+		EX(func)->op_array.filename, &opline->lineno, &EX(func)->op_array, cache_slot,
 		pfa_name, opline->extended_value & ZEND_PARTIAL_FLAGS, const_args);
 
 	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {

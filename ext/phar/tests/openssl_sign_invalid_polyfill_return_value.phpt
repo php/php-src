@@ -2,6 +2,7 @@
 openssl_sign() polyfill with wrong return value
 --EXTENSIONS--
 phar
+zend_test
 --SKIPIF--
 <?php
 if (getenv('SKIP_SLOW_TESTS')) die('skip');
@@ -14,7 +15,7 @@ phar.require_hash=0
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.tar';
 
 function openssl_sign() {
-    return str_repeat('foobar', random_int(1, 1));
+    return zend_return_non_interned_string('foobar');
 }
 
 $phar = new PharData($fname);
