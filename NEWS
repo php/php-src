@@ -77,6 +77,8 @@ PHP                                                                        NEWS
     (lacatoire)
 
 - MBString:
+  . Improved performance of UTF-8 validation in mb_check_encoding(),
+    mb_strlen(), mb_substr(), and related functions. (Daniel Lemire)
   . Fixed bug GH-23106 (mb_strpos() reads past the end of a haystack ending in
     a truncated UTF-8 sequence). (Lazizbek Ergashev)
   . Updated Unicode data tables to Unicode 18.0 (Yuya Hamada)
