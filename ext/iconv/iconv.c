@@ -2087,6 +2087,10 @@ PHP_FUNCTION(iconv_mime_encode)
 
 		if ((pzval = zend_hash_str_find_deref(Z_ARRVAL_P(pref), "line-length", sizeof("line-length") - 1)) != NULL) {
 			line_len = zval_get_long(pzval);
+			if (line_len <= 0) {
+				php_error_docref(NULL, E_WARNING, "The \"line-length\" option must be greater than 0");
+				RETURN_FALSE;
+			}
 		}
 
 		if ((pzval = zend_hash_str_find_deref(Z_ARRVAL_P(pref), "line-break-chars", sizeof("line-break-chars") - 1)) != NULL) {
