@@ -31,6 +31,8 @@ PHP                                                                        NEWS
   . Fix OSS-Fuzz #568005340 (FETCH_DIM_FUNC_ARG partial conversion). (ndossche)
   . Fixed bug GH-24218 (Invalid opcode for count() of a literal array when
     SCCP is disabled). (Lazizbek Ergashev)
+  . Fixed bug GH-8739 (OPcache restart corrupts SHM in threaded SAPIs).
+    (pavimus)
 
 - SOAP:
   . Fixed use of uninitialized func in do_request() on OOM bailout.
