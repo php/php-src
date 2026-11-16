@@ -334,9 +334,6 @@ PHP_FUNCTION(get_meta_tags)
 			looking_for_val = 0;
 		} else if (tok == TOK_OPENTAG) {
 			if (looking_for_val) {
-				if (name) efree(name);
-				if (value) efree(value);
-				name = value = NULL;
 				looking_for_val = 0;
 				have_name = saw_name = 0;
 				have_content = saw_content = 0;
@@ -351,13 +348,10 @@ PHP_FUNCTION(get_meta_tags)
 				} else {
 					add_assoc_string(return_value, name, "");
 				}
-
-				efree(name);
-				if (value) efree(value);
-			} else if (have_content) {
-				efree(value);
 			}
 
+			if (name) efree(name);
+			if (value) efree(value);
 			name = value = NULL;
 
 			/* Reset all of our flags */
