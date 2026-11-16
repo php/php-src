@@ -93,7 +93,12 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 
 static ZEND_INI_MH(OnUpdateInternedStringsBuffer)
 {
-	if (accel_startup_ok) {
+	/* Under ZTS, every thread started later re-applies the INI entries at
+	 * ZEND_INI_STAGE_STARTUP to fill its own globals. Accepting that is safe: the
+	 * value comes from the global INI directives, so it is the one OPcache was
+	 * set up with. NTS does not have this problem: STARTUP handlers run before
+	 * accel_startup_ok is set, and accel_shutdown() clears it again. */
+	if (accel_startup_ok && stage != ZEND_INI_STAGE_STARTUP) {
 		if (strcmp(sapi_module.name, "fpm-fcgi") == 0) {
 			zend_accel_error(ACCEL_LOG_WARNING, "opcache.interned_strings_buffer cannot be changed when OPcache is already set up. Are you using php_admin_value[opcache.interned_strings_buffer] in an individual pool's configuration?\n");
 		} else {

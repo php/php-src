@@ -118,7 +118,9 @@ members:
 				if ((parser->scanner.options & PHP_JSON_OBJECT_AS_ARRAY) && parser->methods.object_create == php_json_parser_object_create) {
 					ZVAL_EMPTY_ARRAY(&$$);
 				} else {
-					parser->methods.object_create(parser, &$$);
+					if (UNEXPECTED(parser->methods.object_create(parser, &$$) == FAILURE)) {
+						YYERROR;
+					}
 				}
 			}
 	|	member
@@ -127,7 +129,9 @@ members:
 member:
 		key ':' value
 			{
-				parser->methods.object_create(parser, &$$);
+				if (UNEXPECTED(parser->methods.object_create(parser, &$$) == FAILURE)) {
+					YYERROR;
+				}
 				if (parser->methods.object_update(parser, &$$, Z_STR($1), &$3) == FAILURE) {
 					YYERROR;
 				}
@@ -174,7 +178,9 @@ elements:
 				if (parser->methods.array_create == php_json_parser_array_create) {
 					ZVAL_EMPTY_ARRAY(&$$);
 				} else {
-					parser->methods.array_create(parser, &$$);
+					if (UNEXPECTED(parser->methods.array_create(parser, &$$) == FAILURE)) {
+						YYERROR;
+					}
 				}
 			}
 	|	element
@@ -183,12 +189,18 @@ elements:
 element:
 		value
 			{
-				parser->methods.array_create(parser, &$$);
-				parser->methods.array_append(parser, &$$, &$1);
+				if (UNEXPECTED(parser->methods.array_create(parser, &$$) == FAILURE)) {
+					YYERROR;
+				}
+				if (UNEXPECTED(parser->methods.array_append(parser, &$$, &$1) == FAILURE)) {
+					YYERROR;
+				}
 			}
 	|	element ',' value
 			{
-				parser->methods.array_append(parser, &$1, &$3);
+				if (UNEXPECTED(parser->methods.array_append(parser, &$1, &$3) == FAILURE)) {
+					YYERROR;
+				}
 				ZVAL_COPY_VALUE(&$$, &$1);
 			}
 ;
@@ -214,22 +226,34 @@ value:
 
 static int php_json_parser_array_create(php_json_parser *parser, zval *array)
 {
-	array_init(array);
+	if (UNEXPECTED(!array_finit(array))) {
+		ZEND_ASSERT(ZEND_HAS_OOM());
+		return FAILURE;
+	}
 	return SUCCESS;
 }
 
 static int php_json_parser_array_append(php_json_parser *parser, zval *array, zval *zvalue)
 {
-	zend_hash_next_index_insert(Z_ARRVAL_P(array), zvalue);
+	if (UNEXPECTED(zend_hash_next_index_finsert(Z_ARRVAL_P(array), zvalue) == HASH_NOMEM)) {
+		ZEND_ASSERT(ZEND_HAS_OOM());
+		return FAILURE;
+	}
 	return SUCCESS;
 }
 
 static int php_json_parser_object_create(php_json_parser *parser, zval *object)
 {
+	bool created;
+
 	if (parser->scanner.options & PHP_JSON_OBJECT_AS_ARRAY) {
-		array_init(object);
+		created = array_finit(object);
 	} else {
-		object_init(object);
+		created = object_finit(object);
+	}
+	if (UNEXPECTED(!created)) {
+		ZEND_ASSERT(ZEND_HAS_OOM());
+		return FAILURE;
 	}
 	return SUCCESS;
 }
@@ -238,7 +262,9 @@ static int php_json_parser_object_update(php_json_parser *parser, zval *object, 
 {
 	/* if JSON_OBJECT_AS_ARRAY is set */
 	if (Z_TYPE_P(object) == IS_ARRAY) {
-		zend_symtable_update(Z_ARRVAL_P(object), key, zvalue);
+		if (UNEXPECTED(zend_symtable_fupdate(Z_ARRVAL_P(object), key, zvalue) == HASH_NOMEM)) {
+			return FAILURE;
+		}
 	} else {
 		if (ZSTR_LEN(key) > 0 && ZSTR_VAL(key)[0] == '\0') {
 			parser->scanner.errcode = PHP_JSON_ERROR_INVALID_PROPERTY_NAME;
@@ -249,6 +275,9 @@ static int php_json_parser_object_update(php_json_parser *parser, zval *object, 
 		}
 		zend_std_write_property(Z_OBJ_P(object), key, zvalue, NULL);
 		Z_TRY_DELREF_P(zvalue);
+		if (ZEND_HAS_OOM()) {
+			return FAILURE;
+		}
 	}
 	zend_string_release_ex(key, 0);
 

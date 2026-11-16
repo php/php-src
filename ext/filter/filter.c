@@ -328,17 +328,25 @@ static unsigned int php_sapi_filter(int arg, const char *var, char **val, size_t
 
 	if (array_ptr) {
 		/* Store the RAW variable internally */
-		ZVAL_STRINGL(&raw_var, *val, val_len);
+		if (UNEXPECTED(!ZVAL_FSTRINGL(&raw_var, *val, val_len))) {
+			return 0;
+		}
 		php_register_variable_ex(var, &raw_var, array_ptr);
+		if (ZEND_HAS_OOM()) {
+			return 0;
+		}
 	}
 
 	if (val_len) {
 		/* Register mangled variable */
+		if (UNEXPECTED(!ZVAL_FSTRINGL(&new_var, *val, val_len))) {
+			return 0;
+		}
 		if (IF_G(default_filter) != FILTER_UNSAFE_RAW) {
-			ZVAL_STRINGL(&new_var, *val, val_len);
 			php_zval_filter(&new_var, IF_G(default_filter), IF_G(default_filter_flags), NULL, NULL, 0);
-		} else {
-			ZVAL_STRINGL(&new_var, *val, val_len);
+			if (ZEND_HAS_OOM()) {
+				return 0;
+			}
 		}
 	} else { /* empty string */
 		ZVAL_EMPTY_STRING(&new_var);
@@ -356,7 +364,19 @@ static unsigned int php_sapi_filter(int arg, const char *var, char **val, size_t
 		}
 		efree(*val);
 		if (ZSTR_LEN(str)) {
-			*val = estrndup(ZSTR_VAL(str), ZSTR_LEN(str));
+			*val = femalloc(ZSTR_LEN(str) + 1, /* fallible */ true);
+			if (UNEXPECTED(!*val)) {
+				/* The caller frees *val either way, so leave it pointing at
+				 * something. */
+				*val = estrdup("");
+				if (new_val_len) {
+					*new_val_len = 0;
+				}
+				zend_tmp_string_release(tmp_str);
+				zval_ptr_dtor(&new_var);
+				return 0;
+			}
+			memcpy(*val, ZSTR_VAL(str), ZSTR_LEN(str) + 1);
 		} else {
 			*val = estrdup("");
 		}
@@ -373,6 +393,13 @@ static void php_zval_filter_recursive(zval *value, zend_long filter, zend_long f
 	if (Z_TYPE_P(value) == IS_ARRAY) {
 		zval *element;
 
+#ifdef ZEND_CHECK_STACK_LIMIT
+		if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+			zend_call_stack_size_error();
+			return;
+		}
+#endif
+
 		if (Z_IS_RECURSIVE_P(value)) {
 			return;
 		}
@@ -383,6 +410,10 @@ static void php_zval_filter_recursive(zval *value, zend_long filter, zend_long f
 			if (Z_TYPE_P(element) == IS_ARRAY) {
 				SEPARATE_ARRAY(element);
 				php_zval_filter_recursive(element, filter, flags, options, charset, copy);
+				if (EG(exception)) {
+					Z_UNPROTECT_RECURSION_P(value);
+					return;
+				}
 			} else {
 				php_zval_filter(element, filter, flags, options, charset, copy);
 			}
@@ -570,6 +601,10 @@ static void php_filter_array_handler(zval *input, HashTable *op_ht, zend_long op
 					Z_TYPE_P(arg_elm) == IS_ARRAY ? 0 : zval_get_long(arg_elm),
 					0, FILTER_REQUIRE_SCALAR
 				);
+				if (EG(exception)) {
+					zval_ptr_dtor(&nval);
+					RETURN_THROWS();
+				}
 				zend_hash_update(Z_ARRVAL_P(return_value), arg_key, &nval);
 			}
 		} ZEND_HASH_FOREACH_END();

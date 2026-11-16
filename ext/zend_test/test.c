@@ -33,6 +33,8 @@
 #include "zend_weakrefs.h"
 #include "Zend/Optimizer/zend_optimizer.h"
 #include "Zend/zend_alloc.h"
+#include "SAPI.h"
+#include "rfc1867.h"
 #include "test_arginfo.h"
 #include "zend_call_stack.h"
 #include "zend_exceptions.h"
@@ -204,6 +206,44 @@ static ZEND_FUNCTION(zend_test_erealloc_block_size)
 
 	efree(fresh);
 	efree(ptr);
+}
+
+static ZEND_FUNCTION(zend_test_emalloc)
+{
+	zend_long size;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(size)
+	ZEND_PARSE_PARAMETERS_END();
+
+	void *ptr = emalloc((size_t)size);
+
+	ZEND_ASSERT(ptr);
+	memset(ptr, 0, (size_t)size);
+
+	efree(ptr);
+}
+
+static ZEND_FUNCTION(zend_test_callback)
+{
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_FUNC(fci, fci_cache)
+	ZEND_PARSE_PARAMETERS_END();
+
+	void *p = malloc(1024);
+
+	zval result;
+	fci.retval = &result;
+	fci.param_count = 0;
+	fci.params = NULL;
+	zend_call_function(&fci, &fci_cache);
+	zval_ptr_dtor(&result);
+
+	/* Reachable via unwind exit. */
+	free(p);
 }
 
 /* Leak a refcounted variable */
@@ -519,6 +559,28 @@ static ZEND_FUNCTION(zend_object_init_with_constructor)
 	zval obj;
 	/* We don't use return_value directly to check for memory leaks of the API on failure */
 	zend_result status = object_init_with_constructor(&obj, ce, num_args, args, named_args);
+	if (status == FAILURE) {
+		RETURN_THROWS();
+	}
+	ZEND_ASSERT(!EG(exception));
+	ZVAL_COPY_VALUE(return_value, &obj);
+}
+
+
+/* Instantiate a class and run the constructor via object_init_with_constructor */
+static ZEND_FUNCTION(zend_object_init_with_constructor_array)
+{
+	zend_class_entry *ce = NULL;
+	HashTable *args;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_CLASS(ce)
+		Z_PARAM_ARRAY_HT(args)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zval obj;
+	/* We don't use return_value directly to check for memory leaks of the API on failure */
+	zend_result status = object_init_with_constructor(&obj, ce, 0, NULL, args);
 	if (status == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -899,6 +961,141 @@ static ZEND_FUNCTION(zend_test_log_err_debug)
 	php_log_err_with_severity(ZSTR_VAL(str), LOG_DEBUG);
 }
 
+static php_stream *zend_test_post_stream = NULL;
+
+/* Give the POST handler a fresh $_POST or $_FILES to fill in. A request parses
+ * its body before creating the auto globals, so the handler expects an array
+ * that nothing else holds a reference to yet. */
+static void zend_test_reset_track_vars(int track_vars, const char *name, size_t name_len)
+{
+	/* Create the auto global first, so that it is not created, and reset, on
+	 * first access after this. */
+	zend_is_auto_global_str(name, name_len);
+
+	zval *zv = &PG(http_globals)[track_vars];
+
+	zval_ptr_dtor_nogc(zv);
+	array_init(zv);
+}
+
+/* Point $_POST or $_FILES at the array the POST handler filled in. */
+static void zend_test_publish_track_vars(int track_vars, const char *name, size_t name_len)
+{
+	zval *zv = &PG(http_globals)[track_vars];
+
+	zend_hash_str_update(&EG(symbol_table), name, name_len, zv);
+	Z_ADDREF_P(zv);
+}
+
+static size_t zend_test_read_post(char *buffer, size_t count_bytes)
+{
+	ssize_t read_bytes = php_stream_read(zend_test_post_stream, buffer, count_bytes);
+
+	return read_bytes > 0 ? (size_t) read_bytes : 0;
+}
+
+/* Run the POST handler registered for the content type over the contents of a
+ * stream, as if that stream were the body of the current request. */
+static ZEND_FUNCTION(zend_test_handle_post_data)
+{
+	zval *stream_zv;
+	char *content_type;
+	size_t content_type_len;
+	zend_long content_length;
+	php_stream *stream;
+
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_RESOURCE(stream_zv);
+		Z_PARAM_STRING(content_type, content_type_len);
+		Z_PARAM_LONG(content_length);
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_stream_from_zval(stream, stream_zv);
+
+	zend_test_reset_track_vars(TRACK_VARS_POST, ZEND_STRL("_POST"));
+	zend_test_reset_track_vars(TRACK_VARS_FILES, ZEND_STRL("_FILES"));
+
+	/* Tear down what a previous call set up, as the request shutdown would. */
+	if (SG(rfc1867_uploaded_files)) {
+		destroy_uploaded_files_hash();
+	}
+
+	php_stream *old_stream = zend_test_post_stream;
+	size_t (*old_read_post)(char *buffer, size_t count_bytes) = sapi_module.read_post;
+	sapi_request_info old_request_info = SG(request_info);
+	int64_t old_read_post_bytes = SG(read_post_bytes);
+	unsigned char old_post_read = SG(post_read);
+
+	zend_test_post_stream = stream;
+	sapi_module.read_post = zend_test_read_post;
+	/* php_default_post_reader() insists on a request method. */
+	SG(request_info).request_method = "POST";
+	SG(request_info).content_type = content_type;
+	SG(request_info).content_length = content_length;
+	SG(request_info).content_type_dup = NULL;
+	SG(request_info).post_entry = NULL;
+	SG(request_info).request_body = NULL;
+	SG(read_post_bytes) = 0;
+	SG(post_read) = 0;
+
+	bool bailed_out = false;
+
+	zend_try {
+		/* Pick the post handler for the content type, read the body, then run
+		 * the handler over it. Anything else is swallowed by the default post
+		 * reader, as it would be during a request. */
+		sapi_read_post_data();
+		sapi_handle_post(&PG(http_globals)[TRACK_VARS_POST]);
+	} zend_catch {
+		bailed_out = true;
+	} zend_end_try();
+
+	zend_test_publish_track_vars(TRACK_VARS_POST, ZEND_STRL("_POST"));
+	zend_test_publish_track_vars(TRACK_VARS_FILES, ZEND_STRL("_FILES"));
+
+	if (SG(request_info).request_body) {
+		php_stream_close(SG(request_info).request_body);
+	}
+	if (SG(request_info).content_type_dup) {
+		efree(SG(request_info).content_type_dup);
+	}
+
+	zend_test_post_stream = old_stream;
+	sapi_module.read_post = old_read_post;
+	SG(request_info) = old_request_info;
+	SG(read_post_bytes) = old_read_post_bytes;
+	SG(post_read) = old_post_read;
+
+	if (bailed_out) {
+		zend_bailout();
+	}
+}
+
+static ZEND_FUNCTION(zend_new_singleton_array)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	array_init_singleton(return_value);
+}
+
+static ZEND_FUNCTION(zend_test_set_local_var)
+{
+	zend_string *name;
+	zval *value;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR(name)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	Z_TRY_ADDREF_P(value);
+	if (zend_set_local_var(name, value, false) == FAILURE) {
+		zval_ptr_dtor(value);
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+}
+
 static zend_object *zend_test_class_new(zend_class_entry *class_type)
 {
 	zend_object *obj = zend_objects_new(class_type);
@@ -1180,10 +1377,24 @@ static ZEND_METHOD(_ZendTestMagicCallForward, __call)
 	zval_ptr_dtor(&rv);
 }
 
+static void (*zend_test_prev_interrupt_function)(zend_execute_data *execute_data);
+
+/* The VM clears EG(vm_interrupt) before calling this, so setting it again
+ * leaves an interrupt pending at all times. The VM must still make progress. */
+static void zend_test_rearm_interrupt_function(zend_execute_data *execute_data)
+{
+	zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+
+	if (zend_test_prev_interrupt_function) {
+		zend_test_prev_interrupt_function(execute_data);
+	}
+}
+
 PHP_INI_BEGIN()
 	PHP_INI_ENTRY("zend_test.register_system_entropy", "0", PHP_INI_SYSTEM, NULL)
 	STD_PHP_INI_BOOLEAN("zend_test.replace_zend_execute_ex", "0", PHP_INI_SYSTEM, OnUpdateBool, replace_zend_execute_ex, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.register_passes", "0", PHP_INI_SYSTEM, OnUpdateBool, register_passes, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_BOOLEAN("zend_test.rearm_vm_interrupt", "0", PHP_INI_SYSTEM, OnUpdateBool, rearm_vm_interrupt, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.print_stderr_mshutdown", "0", PHP_INI_SYSTEM, OnUpdateBool, print_stderr_mshutdown, zend_zend_test_globals, zend_test_globals)
 #ifdef HAVE_COPY_FILE_RANGE
 	STD_PHP_INI_ENTRY("zend_test.limit_copy_file_range", "-1", PHP_INI_ALL, OnUpdateLong, limit_copy_file_range, zend_zend_test_globals, zend_test_globals)
@@ -1398,6 +1609,11 @@ PHP_MINIT_FUNCTION(zend_test)
 		zend_optimizer_register_pass(pass2);
 	}
 
+	if (ZT_G(rearm_vm_interrupt)) {
+		zend_test_prev_interrupt_function = zend_interrupt_function;
+		zend_interrupt_function = zend_test_rearm_interrupt_function;
+	}
+
 	zend_test_observer_init(INIT_FUNC_ARGS_PASSTHRU);
 	zend_test_mm_custom_handlers_minit(INIT_FUNC_ARGS_PASSTHRU);
 	zend_test_fiber_init();
@@ -1417,6 +1633,11 @@ PHP_MSHUTDOWN_FUNCTION(zend_test)
 
 	zend_test_observer_shutdown(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 
+	if (zend_interrupt_function == zend_test_rearm_interrupt_function) {
+		zend_interrupt_function = zend_test_prev_interrupt_function;
+		zend_test_prev_interrupt_function = NULL;
+	}
+
 	if (ZT_G(print_stderr_mshutdown)) {
 		fprintf(stderr, "[zend_test] MSHUTDOWN\n");
 	}
@@ -1429,7 +1650,13 @@ PHP_RINIT_FUNCTION(zend_test)
 	ALLOC_HASHTABLE(ZT_G(global_weakmap));
 	zend_hash_init(ZT_G(global_weakmap), 8, NULL, ZVAL_PTR_DTOR, 0);
 	ZT_G(observer_nesting_depth) = 0;
+	ZT_G(observer_throw_on_vm_interrupt) = false;
 	zend_test_mm_custom_handlers_rinit();
+
+	if (ZT_G(rearm_vm_interrupt)) {
+		zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+	}
+
 	return SUCCESS;
 }
 
@@ -1633,6 +1860,28 @@ static PHP_FUNCTION(zend_test_create_throwing_resource)
 	ZEND_PARSE_PARAMETERS_NONE();
 	zend_resource *res = zend_register_resource(NULL, le_throwing_resource);
 	ZVAL_RES(return_value, res);
+}
+
+static PHP_FUNCTION(zend_test_compile_to_ast)
+{
+	zend_string *str;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_arena *ast_arena;
+	zend_ast *ast = zend_compile_string_to_ast(str, &ast_arena, ZSTR_EMPTY_ALLOC());
+	if (!ast) {
+		RETURN_THROWS();
+	}
+
+	zend_string *result = zend_ast_export("", ast, "");
+
+	zend_ast_destroy(ast);
+	zend_arena_destroy(ast_arena);
+
+	RETVAL_STR(result);
 }
 
 static PHP_FUNCTION(zend_test_gh18756)

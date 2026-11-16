@@ -14,4 +14,6 @@ hash_pbkdf2('md5', 'password', 'salt', 1, PHP_INT_MAX, true);
 
 ?>
 --EXPECTF--
-Fatal error: Allowed memory size of 134217728 bytes exhausted%s(tried to allocate 9223372036854775808 bytes) in %s on line %d
+Hard memory limit of 268435456 bytes exhausted %S(tried to allocate %d bytes) in %s on line %d
+
+Termsig=9

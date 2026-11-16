@@ -41,7 +41,7 @@ jobs:
       all_variations: ${{ steps.set-matrix.outputs.all_variations }}
       branches: ${{ steps.set-matrix.outputs.branches }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           # When running nightly, set fetch-depth to 0 to clone the full
           # repository including all branches. This is required to find the

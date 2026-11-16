@@ -3,21 +3,16 @@ Bug #81430 (Attribute instantiation leaves dangling execute_data pointer)
 --EXTENSIONS--
 zend_test
 --INI--
-memory_limit=20M
 zend_test.observer.enabled=1
 zend_test.observer.show_output=1
 zend_test.observer.observe_all=1
---SKIPIF--
-<?php
-if (getenv("USE_ZEND_ALLOC") === "0") die("skip requires zmm");
-?>
 --FILE--
 <?php
 
 #[\Attribute]
 class A {
     public function __construct() {
-        array_map("str_repeat", ["\xFF"], [100000000]); // cause a bailout
+        var_dump(new class { public function __debugInfo() { return ''; } }); // cause a bailout
     }
 }
 
@@ -40,14 +35,14 @@ call_user_func([$r->getAttributes(A::class)[0], 'newInstance']);
   <ReflectionAttribute::newInstance>
     <!-- init A::__construct() -->
     <A::__construct>
-      <!-- init array_map() -->
-      <array_map>
-        <!-- init str_repeat() -->
-        <str_repeat>
+      <!-- init var_dump() -->
+      <var_dump>
+        <!-- init class@anonymous::__debugInfo() -->
+        <class@anonymous::__debugInfo>
+        </class@anonymous::__debugInfo>
 
-Fatal error: Allowed memory size of %d bytes exhausted %s in %s on line %d
-        </str_repeat>
-      </array_map>
+Fatal error: __debuginfo() must return an array in %s on line %d
+      </var_dump>
     </A::__construct>
   </ReflectionAttribute::newInstance>
 </file '%s'>

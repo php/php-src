@@ -896,6 +896,9 @@ PHP_FUNCTION(grapheme_str_split)
 		if (i == split_len - 1) {
 			if ( pos != UBRK_DONE ) {
 				add_next_index_stringl(return_value, pstr, pos - current);
+				if (ZEND_HAS_OOM()) {
+					goto oom;
+				}
 				end = pstr + pos - current;
 				i = 0;
 				pstr += pos - current;
@@ -912,6 +915,12 @@ PHP_FUNCTION(grapheme_str_split)
 
 	utext_close(ut);
 	ubrk_close(bi);
+	return;
+
+oom:
+	utext_close(ut);
+	ubrk_close(bi);
+	RETURN_OOM();
 }
 
 /* }}} */

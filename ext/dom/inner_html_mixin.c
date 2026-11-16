@@ -181,7 +181,7 @@ static lxb_dom_document_cmode_t dom_translate_quirks_mode(php_libxml_quirks_mode
 }
 
 /* https://html.spec.whatwg.org/#html-fragment-parsing-algorithm */
-static xmlNodePtr dom_html_fragment_parsing_algorithm(dom_object *obj, xmlNodePtr context_node, const zend_string *input, php_libxml_quirks_mode quirks_mode)
+static xmlNodePtr dom_html_fragment_parsing_algorithm(dom_object *obj, xmlNodePtr context_node, const zend_string *input, php_libxml_quirks_mode quirks_mode, bool is_template)
 {
 	/* The whole algorithm is implemented in Lexbor, we just have to be the adapter between the
 	 * data structures used in PHP and what Lexbor expects. */
@@ -209,7 +209,7 @@ static xmlNodePtr dom_html_fragment_parsing_algorithm(dom_object *obj, xmlNodePt
 	xmlNodePtr fragment = NULL;
 	if (node != NULL) {
 		/* node->last_child could be NULL, but that is allowed. */
-		lexbor_libxml2_bridge_status status = lexbor_libxml2_bridge_convert_fragment(node->last_child, context_node->doc, &fragment, true, true, php_dom_get_private_data(obj));
+		lexbor_libxml2_bridge_status status = lexbor_libxml2_bridge_convert_fragment(node->last_child, context_node->doc, &fragment, true, true, is_template, php_dom_get_private_data(obj));
 		if (UNEXPECTED(status != LEXBOR_LIBXML2_BRIDGE_STATUS_OK)) {
 			php_dom_throw_error(INVALID_STATE_ERR, true);
 		}
@@ -342,18 +342,19 @@ zend_result dom_element_inner_html_write(dom_object *obj, zval *newval)
 {
 	DOM_PROP_NODE(xmlNodePtr, context_node, obj);
 
+	bool is_template = php_dom_ns_is_fast(context_node, php_dom_ns_is_html_magic_token) && xmlStrEqual(context_node->name, BAD_CAST "template");
 	xmlNodePtr fragment;
 	if (context_node->doc->type == XML_DOCUMENT_NODE) {
 		fragment = dom_xml_fragment_parsing_algorithm(obj, context_node, Z_STR_P(newval));
 	} else {
-		fragment = dom_html_fragment_parsing_algorithm(obj, context_node, Z_STR_P(newval), obj->document->quirks_mode);
+		fragment = dom_html_fragment_parsing_algorithm(obj, context_node, Z_STR_P(newval), obj->document->quirks_mode, is_template);
 	}
 
 	if (fragment == NULL) {
 		return FAILURE;
 	}
 
-	if (php_dom_ns_is_fast(context_node, php_dom_ns_is_html_magic_token) && xmlStrEqual(context_node->name, BAD_CAST "template")) {
+	if (is_template) {
 		context_node = php_dom_ensure_templated_content(php_dom_get_private_data(obj), context_node);
 		if (context_node == NULL) {
 			xmlFreeNode(fragment);

@@ -22,7 +22,7 @@ unset($p);
 
 include "php_cli_server.inc";
 
-$ini = '-d opcache.enable=1 -d opcache.enable_cli=1';
+$ini = '-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.file_update_protection=0';
 if (file_exists(ini_get('extension_dir').'/phar.'.PHP_SHLIB_SUFFIX)) {
     $ini .= ' -d extension=phar.'.PHP_SHLIB_SUFFIX;
 }

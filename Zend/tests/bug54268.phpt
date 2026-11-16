@@ -2,6 +2,7 @@
 Bug #54268 (Double free when destroy_zend_class fails)
 --INI--
 memory_limit=8M
+opcache.jit=disable
 --SKIPIF--
 <?php
 $zend_mm_enabled = getenv("USE_ZEND_ALLOC");

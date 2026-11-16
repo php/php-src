@@ -46,6 +46,14 @@
     case 'method':
       echo $_SERVER['REQUEST_METHOD'];
       break;
+    case 'bigbody':
+      $mib = isset($_GET['mib']) ? (int) $_GET['mib'] : 12;
+      header('Content-Type: application/octet-stream');
+      $chunk = str_repeat('x', 1024 * 1024);
+      for ($i = 0; $i < $mib; $i++) {
+        echo $chunk;
+      }
+      break;
     default:
       echo "Hello World!\n";
       echo "Hello World!";

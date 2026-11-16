@@ -1009,7 +1009,11 @@ static void php_xmlwriter_flush(INTERNAL_FUNCTION_PARAMETERS, int force_string) 
 	output_bytes = xmlTextWriterFlush(ptr);
 	if (buffer) {
 		const xmlChar *content = xmlBufferContent(buffer);
-		RETVAL_STRING((const char *) content);
+		zend_string *ret = zend_string_finit((const char *) content, strlen((const char *) content), /* persistent */ false, /* fallible */ true);
+		if (UNEXPECTED(!ret)) {
+			RETURN_OOM();
+		}
+		RETVAL_NEW_STR(ret);
 		if (empty) {
 			xmlBufferEmpty(buffer);
 		}

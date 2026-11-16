@@ -1,24 +1,18 @@
 --TEST--
-Test chunk_split() function : usage variations - unexpected large number of chunks
+Test chunk_split() function : usage variations - OOM with chunk length larger than str
 --SKIPIF--
 <?php
 if (getenv("USE_ZEND_ALLOC") === "0") die("skip ZMM is disabled");
 ?>
+--INI--
+memory_limit=128M
 --FILE--
 <?php
-$chunk_length = 1;
 
-echo "*** Testing chunk_split() : unexpected large 'end' string argument variation 2 ***\n";
+$str = str_repeat('a', 100*1024*1024);
 
-echo "Body generation\n";
-$body = str_repeat("Hello", 10000000);
+var_dump(chunk_split($str, 1024*1024*1024, $str));
 
-echo "Using chunk_split()\n";
-var_dump(chunk_split($body, $chunk_length));
 ?>
 --EXPECTF--
-*** Testing chunk_split() : unexpected large 'end' string argument variation 2 ***
-Body generation
-Using chunk_split()
-
-Fatal error: Allowed memory size of %d bytes exhausted%s(tried to allocate %d bytes) in %s on line %d
+Fatal error: Allowed memory size of %d bytes exhausted%s(tried to allocate %d bytes) in %s on line 5

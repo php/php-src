@@ -4,6 +4,7 @@ IntlDateFormatter::formatObject(): IntlCalendar tests
 intl
 --SKIPIF--
 <?php if (version_compare(INTL_ICU_VERSION, '72.1') < 0) die('skip for ICU >= 72.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '79.1') >= 0) die('skip for ICU < 79.1'); ?>
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);

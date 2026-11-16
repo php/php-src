@@ -22,6 +22,7 @@ PHP_MSHUTDOWN_FUNCTION(url_scanner_ex);
 
 PHP_RINIT_FUNCTION(url_scanner_ex);
 PHP_RSHUTDOWN_FUNCTION(url_scanner_ex);
+void php_url_scanner_early_rinit(void);
 
 PHPAPI char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, const char *name, const char *value, size_t *newlen, bool encode);
 PHPAPI zend_result php_url_scanner_add_session_var(const char *name, size_t name_len, const char *value, size_t value_len, bool encode);

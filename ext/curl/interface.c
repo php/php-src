@@ -611,7 +611,13 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 			return fwrite(data, size, nmemb, write_handler->fp);
 		case PHP_CURL_RETURN:
 			if (length > 0) {
-				smart_str_appendl(&write_handler->buf, data, length);
+				if (!smart_str_fappendl_ex(&write_handler->buf, data, length, /* persistent */ false, /* fallible */ true)) {
+#ifdef CURL_WRITEFUNC_ERROR
+					return CURL_WRITEFUNC_ERROR;
+#else
+					return 0;
+#endif
+				}
 			}
 			break;
 		case PHP_CURL_USER: {
@@ -806,6 +812,10 @@ static int curl_ssh_hostkeyfunction(void *clientp, int keytype, const char *key,
 {
 	php_curl *ch = (php_curl *)clientp;
 	int rval = CURLKHMATCH_MISMATCH; /* cancel connection in case of an exception */
+
+	if (!ZEND_FCC_INITIALIZED(ch->handlers.sshhostkey)) {
+		return rval;
+	}
 
 #if PHP_CURL_DEBUG
 	fprintf(stderr, "curl_ssh_hostkeyfunction() called\n");
@@ -1278,8 +1288,11 @@ static void php_curl_copy_fcc_with_option(php_curl *ch, CURLoption option, zend_
 {
 	if (ZEND_FCC_INITIALIZED(*source_fcc)) {
 		zend_fcc_dup(target_fcc, source_fcc);
-		curl_easy_setopt(ch->cp, option, (void *) ch);
 	}
+
+	/* The callback data (i.e. pointer to the curl handle) stays even if a user callback
+	 * is reset to NULL. Ensure the data pointer always points to the new handle. */
+	curl_easy_setopt(ch->cp, option, (void *) ch);
 }
 
 void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
@@ -1299,6 +1312,10 @@ void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
 		Z_ADDREF(source->handlers.write_header->stream);
 	}
 	ch->handlers.write_header->stream = source->handlers.write_header->stream;
+	if (!Z_ISUNDEF(source->handlers.std_err)) {
+		Z_ADDREF(source->handlers.std_err);
+	}
+	ch->handlers.std_err = source->handlers.std_err;
 
 	ch->handlers.write->fp = source->handlers.write->fp;
 	ch->handlers.write_header->fp = source->handlers.write_header->fp;
@@ -1319,7 +1336,6 @@ void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
 	curl_easy_setopt(ch->cp, CURLOPT_FILE,              (void *) ch);
 	curl_easy_setopt(ch->cp, CURLOPT_INFILE,            (void *) ch);
 	curl_easy_setopt(ch->cp, CURLOPT_WRITEHEADER,       (void *) ch);
-	curl_easy_setopt(ch->cp, CURLOPT_DEBUGDATA,         (void *) ch);
 
 	php_curl_copy_fcc_with_option(ch, CURLOPT_PROGRESSDATA, &ch->handlers.progress, &source->handlers.progress);
 	php_curl_copy_fcc_with_option(ch, CURLOPT_XFERINFODATA, &ch->handlers.xferinfo, &source->handlers.xferinfo);
@@ -3012,6 +3028,8 @@ PHP_FUNCTION(curl_reset)
 	}
 
 	curl_easy_reset(ch->cp);
+	zval_ptr_dtor(&ch->private_data);
+	ZVAL_UNDEF(&ch->private_data);
 	_php_curl_reset_handlers(ch);
 	_php_curl_set_default_options(ch);
 }

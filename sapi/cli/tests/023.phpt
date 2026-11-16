@@ -8,18 +8,19 @@ if (substr(PHP_OS, 0, 3) == "WIN") die("skip non windows test");
 --FILE--
 <?php
 $php = getenv("TEST_PHP_EXECUTABLE_ESCAPED");
+$args = getenv("TEST_PHP_EXTRA_ARGS");
 $cwd = getcwd();
 $ini_file = __DIR__ . "/023.ini";
 $ini_file_escaped = escapeshellarg($ini_file);
 file_put_contents($ini_file, <<<INI
 ; no sections should match as cli doesn't support any
-memory_limit = 40M
+max_input_vars = 4
 [PATH={$cwd}]
-memory_limit = 50M
+max_input_vars = 5
 [PATH=/does/not/exist]
-memory_limit = 60M
+max_input_vars = 6
 [HOST=some_fake_host]
-memory_limit = 70M
+max_input_vars = 7
 INI
 );
 $desc = array(
@@ -28,7 +29,7 @@ $desc = array(
     2 => array("pipe", "w"),
 );
 $pipes = array();
-$proc = proc_open("$php -c $ini_file_escaped -r 'echo ini_get(\"memory_limit\");'", $desc, $pipes);
+$proc = proc_open("$php $args -c $ini_file_escaped -r 'echo ini_get(\"max_input_vars\");'", $desc, $pipes);
 if (!$proc) {
     exit(1);
 }
@@ -43,5 +44,5 @@ proc_close($proc);
 unlink(__DIR__ . "/023.ini");
 ?>
 --EXPECT--
-string(3) "40M"
+string(1) "4"
 string(0) ""

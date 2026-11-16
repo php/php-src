@@ -67,6 +67,11 @@ on big endian machines, or a byte-by-byte read if the endianess is unknown.
   #define UNALIGNED_SAFE
 #endif
 
+/* Avoid miscompiled aligned reads with the v142 ARM64 optimizer. */
+#if defined(_MSC_VER) && _MSC_VER < 1930 && defined(_M_ARM64) && !defined(__clang__)
+  #define UNALIGNED_SAFE
+#endif
+
 /* Find best way to ROTL */
 #if defined(_MSC_VER)
   #define FORCE_INLINE  static __forceinline

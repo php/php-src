@@ -271,6 +271,22 @@ static void dba_close_info(dba_info *info)
 	info = NULL;
 }
 
+static bool dba_info_shares_stream(const dba_info *info)
+{
+	ZEND_HASH_FOREACH_PTR(&EG(persistent_list), zend_resource *le) {
+		if (le->type != le_pdb || le->ptr == NULL || le->ptr == info) {
+			continue;
+		}
+		const dba_info *other = le->ptr;
+		if ((info->fp && (info->fp == other->fp || info->fp == other->lock.fp))
+			|| (info->lock.fp && (info->lock.fp == other->fp || info->lock.fp == other->lock.fp))) {
+			return true;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return false;
+}
+
 static int remove_pconnection_from_list(zval *zv, void *p)
 {
 	zend_resource *le = Z_RES_P(zv);
@@ -297,6 +313,11 @@ static void dba_close_connection(dba_connection *connection)
 
 	if (!persistent) {
 		dba_close_info(connection->info);
+	} else if (connection->hash) {
+		zend_resource *le = zend_hash_find_ptr(&EG(persistent_list), connection->hash);
+		if (le) {
+			GC_DELREF(le);
+		}
 	}
 
 	connection->info = NULL;
@@ -501,6 +522,15 @@ static dba_info *php_dba_find(const zend_string *path)
 		}
 	} ZEND_HASH_FOREACH_END();
 
+	ZEND_HASH_FOREACH_PTR(&EG(persistent_list), zend_resource *le) {
+		if (le->type == le_pdb && GC_REFCOUNT(le) > 1) {
+			dba_info *info = le->ptr;
+			if (info && zend_string_equals(path, info->path)) {
+				return info;
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+
 	return NULL;
 }
 /* }}} */
@@ -596,6 +626,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 				efree(resource_key);
 				RETURN_FALSE;
 			}
+			GC_ADDREF(le);
 
 			object_init_ex(return_value, dba_connection_ce);
 			dba_connection *connection = Z_DBA_CONNECTION_P(return_value);
@@ -951,13 +982,15 @@ restart:
 	connection->info->hnd = hptr;
 
 	if (persistent) {
-		if (zend_register_persistent_resource(resource_key, resource_key_len, connection->info, le_pdb) == NULL) {
+		zend_resource *le = zend_register_persistent_resource(resource_key, resource_key_len, connection->info, le_pdb);
+		if (le == NULL) {
 			php_error_docref(NULL, E_WARNING, "Could not register persistent resource");
 			efree(resource_key);
 			dba_close_connection(connection);
 			zval_ptr_dtor(return_value);
 			RETURN_FALSE;
 		}
+		GC_ADDREF(le);
 	}
 
 	zend_hash_add_new(&DBA_G(connections), connection->hash, return_value);
@@ -1000,12 +1033,16 @@ PHP_FUNCTION(dba_close)
 	connection = Z_DBA_CONNECTION_P(id);
 	CHECK_DBA_CONNECTION(connection->info);
 
-	bool persistent = connection->info->flags & DBA_PERSISTENT;
+	dba_info *info = connection->info;
+	zend_resource *le = NULL;
+	if ((info->flags & DBA_PERSISTENT) && connection->hash) {
+		le = zend_hash_find_ptr(&EG(persistent_list), connection->hash);
+	}
 
 	dba_close_connection(connection);
 
-	if (persistent) {
-		zend_hash_apply_with_argument(&EG(persistent_list), remove_pconnection_from_list, (void *) connection->info);
+	if (le && GC_REFCOUNT(le) == 1 && !dba_info_shares_stream(info)) {
+		zend_hash_apply_with_argument(&EG(persistent_list), remove_pconnection_from_list, (void *) info);
 	}
 }
 /* }}} */

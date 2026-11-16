@@ -90,6 +90,10 @@ static php_stream_filter_status_t php_bz2_decompress_filter(
 
 		bucket = php_stream_bucket_make_writeable(buckets_in->head);
 		while (bin < bucket->buflen) {
+			/* Output is unbounded relative to the input. */
+			if (ZEND_HAS_OOM()) {
+				break;
+			}
 			if (data->status == PHP_BZ2_UNINITIALIZED) {
 				status = BZ2_bzDecompressInit(streamp, 0, data->small_footprint);
 
@@ -155,7 +159,7 @@ static php_stream_filter_status_t php_bz2_decompress_filter(
 	if ((data->status == PHP_BZ2_RUNNING) && (flags & PSFS_FLAG_FLUSH_CLOSE)) {
 		/* Spit it out! */
 		status = BZ_OK;
-		while (status == BZ_OK) {
+		while (status == BZ_OK && !ZEND_HAS_OOM()) {
 			status = BZ2_bzDecompress(&(data->strm));
 			if (data->strm.avail_out < data->outbuf_len) {
 				size_t bucketlen = data->outbuf_len - data->strm.avail_out;

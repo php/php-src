@@ -5,6 +5,9 @@ Test setlocale() function : usage variations - Setting all available locales in 
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip Not valid for windows');
 }
+if (PHP_OS === 'FreeBSD') {
+    die("skip Some locales listed by locale -a on FreeBSD (e.g. hr_HR.ISO8859-2) are incomplete, cannot test LC_ALL");
+}
 exec("locale -a", $output, $exit_code);
 if ($exit_code !== 0) {
     die("skip locale -a not available");

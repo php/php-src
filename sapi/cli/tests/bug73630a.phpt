@@ -1,7 +1,7 @@
 --TEST--
 Bug #73630 (Built-in Weberver - overwrite $_SERVER['request_uri'])
 --DESCRIPTION--
-Check that too long paths result in invalid request
+Check that paths exceeding the header size limit result in invalid request
 --SKIPIF--
 <?php
 include "skipif.inc";
@@ -17,7 +17,7 @@ php_cli_server_start($code);
 
 $host = PHP_CLI_SERVER_HOSTNAME;
 $fp = php_cli_server_connect();
-$path = "/" . str_repeat("x", 16400) . "//example.com";
+$path = "/" . str_repeat("x", 81920) . "//example.com";
 var_dump(file_get_contents("http://" . PHP_CLI_SERVER_ADDRESS . "$path"));
 ?>
 --EXPECTF--

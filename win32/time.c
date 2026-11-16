@@ -22,6 +22,7 @@
 #include <mmsystem.h>
 #include <errno.h>
 #include "php_win32_globals.h"
+#include "zend_hrtime.h"
 
 static zend_always_inline void getfilesystemtime(struct timeval *tv)
 {/*{{{*/
@@ -63,17 +64,44 @@ PHPAPI int gettimeofday(struct timeval *time_Info, struct timezone *timezone_Inf
 	return 0;
 }/*}}}*/
 
+static DWORD wait_timer_alertable(HANDLE timer)
+{/*{{{*/
+	DWORD result;
+
+#ifdef ZTS
+	/* Threads that PHP does not manage have no executor globals, and their APCs cannot run PHP code */
+	if (!tsrm_is_managed_thread()) {
+		return WaitForSingleObjectEx(timer, INFINITE, TRUE);
+	}
+#endif
+
+	/* APCs can run PHP code that bails out. Close the timer before propagating the bailout. */
+	zend_try {
+		result = WaitForSingleObjectEx(timer, INFINITE, TRUE);
+	} zend_catch {
+		CloseHandle(timer);
+		zend_bailout();
+	} zend_end_try();
+
+	return result;
+}/*}}}*/
+
 PHPAPI int usleep(unsigned int useconds)
 {/*{{{*/
 	HANDLE timer;
 	LARGE_INTEGER due;
+	DWORD result;
 
 	due.QuadPart = -(10 * (__int64)useconds);
 
 	timer = CreateWaitableTimer(NULL, TRUE, NULL);
 	SetWaitableTimer(timer, &due, 0, NULL, NULL, 0);
-	WaitForSingleObject(timer, INFINITE);
+	result = wait_timer_alertable(timer);
 	CloseHandle(timer);
+	if (result == WAIT_IO_COMPLETION) {
+		errno = EINTR;
+		return -1;
+	}
 	return 0;
 }/*}}}*/
 
@@ -84,5 +112,30 @@ PHPAPI int nanosleep( const struct timespec * rqtp, struct timespec * rmtp )
 		errno = EINVAL;
 		return -1;
 	}
-	return usleep( rqtp->tv_sec * 1000000 + rqtp->tv_nsec / 1000  );
+	/* Run already queued APCs first, so that their runtime doesn't count as time slept */
+	if (SleepEx(0, TRUE) == WAIT_IO_COMPLETION) {
+		if (rmtp != NULL) {
+			*rmtp = *rqtp;
+		}
+		errno = EINTR;
+		return -1;
+	}
+	zend_hrtime_t start = zend_hrtime();
+	int result = usleep(rqtp->tv_sec * 1000000 + rqtp->tv_nsec / 1000);
+	if (result == -1 && errno == EINTR && rmtp != NULL) {
+		zend_hrtime_t elapsed = zend_hrtime() - start;
+		time_t seconds = rqtp->tv_sec - (time_t) (elapsed / ZEND_NANO_IN_SEC);
+		long nanoseconds = rqtp->tv_nsec - (long) (elapsed % ZEND_NANO_IN_SEC);
+		if (nanoseconds < 0) {
+			seconds--;
+			nanoseconds += (long) ZEND_NANO_IN_SEC;
+		}
+		if (seconds < 0) {
+			seconds = 0;
+			nanoseconds = 0;
+		}
+		rmtp->tv_sec = seconds;
+		rmtp->tv_nsec = nanoseconds;
+	}
+	return result;
 }/*}}}*/

@@ -34,6 +34,43 @@
 
 #ifdef LIBXML_XPATH_ENABLED
 
+static dom_object *dom_xpath_intern_from_entry(zval *entry, xmlDocPtr doc)
+{
+	if (Z_TYPE_P(entry) == IS_OBJECT) {
+		dom_object *obj = Z_DOMOBJ_P(entry);
+		if (obj->document && obj->document->ptr == doc) {
+			return obj;
+		}
+	} else if (Z_TYPE_P(entry) == IS_ARRAY) {
+		zval *inner;
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(entry), inner) {
+			dom_object *obj = dom_xpath_intern_from_entry(inner, doc);
+			if (obj) {
+				return obj;
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+	return NULL;
+}
+
+static dom_object *dom_xpath_intern_for_doc(dom_xpath_object *xpath_obj, xmlDocPtr doc)
+{
+	if (xpath_obj->dom.document && xpath_obj->dom.document->ptr == doc) {
+		return &xpath_obj->dom;
+	}
+	HashTable *node_list = xpath_obj->xpath_callbacks.node_list;
+	if (node_list) {
+		zval *entry;
+		ZEND_HASH_PACKED_FOREACH_VAL(node_list, entry) {
+			dom_object *obj = dom_xpath_intern_from_entry(entry, doc);
+			if (obj) {
+				return obj;
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+	return &xpath_obj->dom;
+}
+
 void dom_xpath_objects_free_storage(zend_object *object)
 {
 	dom_xpath_object *intern = php_xpath_obj_from_obj(object);
@@ -60,7 +97,8 @@ static void dom_xpath_proxy_factory(xmlNodePtr node, zval *child, dom_object *in
 
 	ZEND_ASSERT(node->type != XML_NAMESPACE_DECL);
 
-	php_dom_create_object(node, child, intern);
+	dom_xpath_object *xobj = php_xpath_obj_from_obj(&intern->std);
+	php_dom_create_object(node, child, dom_xpath_intern_for_doc(xobj, node->doc));
 }
 
 static dom_xpath_object *dom_xpath_ext_fetch_intern(xmlXPathParserContextPtr ctxt)
@@ -349,7 +387,9 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 
 			if (xpathobjp->type == XPATH_NODESET && NULL != (nodesetp = xpathobjp->nodesetval) && nodesetp->nodeNr) {
 				array_init_size(&retval, nodesetp->nodeNr);
-				zend_hash_real_init_packed(Z_ARRVAL_P(&retval));
+				if (zend_hash_real_finit_packed(Z_ARRVAL(retval), /* fallible */ true) != SUCCESS) {
+					goto oom_nodeset;
+				}
 				for (int i = 0; i < nodesetp->nodeNr; i++) {
 					xmlNodePtr node = nodesetp->nodeTab[i];
 					zval child;
@@ -371,14 +411,18 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 
 						/* Make sure parent dom object exists, so we can take an extra reference. */
 						zval parent_zval; /* don't destroy me, my lifetime is transfered to the fake namespace decl */
-						php_dom_create_object(nsparent, &parent_zval, &intern->dom);
+						php_dom_create_object(nsparent, &parent_zval, dom_xpath_intern_for_doc(intern, nsparent->doc));
 						dom_object *parent_intern = Z_DOMOBJ_P(&parent_zval);
 
 						node = php_dom_create_fake_namespace_decl(nsparent, original, &child, parent_intern);
 					} else {
-						php_dom_create_object(node, &child, &intern->dom);
+						dom_object *parent = dom_xpath_intern_for_doc(intern, node->doc);
+						php_dom_create_object(node, &child, parent);
 					}
 					add_next_index_zval(&retval, &child);
+					if (ZEND_HAS_OOM()) {
+						goto oom_nodeset;
+					}
 				}
 			} else {
 				ZVAL_EMPTY_ARRAY(&retval);
@@ -387,6 +431,13 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 			nodeobj = Z_DOMOBJ_P(return_value);
 			dom_xpath_iter(&retval, nodeobj);
 			break;
+
+oom_nodeset:
+			zval_ptr_dtor(&retval);
+			xmlXPathFreeObject(xpathobjp);
+			zval_ptr_dtor(return_value);
+			ZVAL_NULL(return_value);
+			RETURN_OOM();
 		}
 
 		case XPATH_BOOLEAN:

@@ -27,32 +27,72 @@
 #define SMART_STR_NEW_LEN(len) \
 	(ZEND_MM_ALIGNED_SIZE_EX(len + SMART_STR_OVERHEAD, SMART_STR_PAGE) - SMART_STR_OVERHEAD)
 
-ZEND_API void ZEND_FASTCALL smart_str_erealloc(smart_str *str, size_t len)
+static zend_always_inline bool i_smart_str_erealloc(smart_str *str, size_t len, bool fallible)
 {
 	if (UNEXPECTED(!str->s)) {
-		str->a = len <= SMART_STR_START_LEN
+		size_t a = len <= SMART_STR_START_LEN
 				? SMART_STR_START_LEN
 				: SMART_STR_NEW_LEN(len);
-		str->s = zend_string_alloc(str->a, 0);
+		str->s = zend_string_falloc(a, /* persistent */ false, fallible);
+		if (ZEND_CONST_COND(fallible, true) && !str->s) {
+			return false;
+		}
+		str->a = a;
 		ZSTR_LEN(str->s) = 0;
 	} else {
-		str->a = SMART_STR_NEW_LEN(len);
-		str->s = (zend_string *) erealloc2(str->s, str->a + _ZSTR_HEADER_SIZE + 1, _ZSTR_HEADER_SIZE + ZSTR_LEN(str->s));
+		size_t a = SMART_STR_NEW_LEN(len);
+		zend_string *s = (zend_string *) ferealloc2(str->s, a + _ZSTR_HEADER_SIZE + 1, _ZSTR_HEADER_SIZE + ZSTR_LEN(str->s), fallible);
+		if (ZEND_CONST_COND(fallible, true) && !s) {
+			return false;
+		}
+		str->a = a;
+		str->s = s;
 	}
+	return true;
+}
+
+ZEND_API void ZEND_FASTCALL smart_str_erealloc(smart_str *str, size_t len)
+{
+	i_smart_str_erealloc(str, len, /* fallible */ false);
+}
+
+ZEND_API bool ZEND_FASTCALL smart_str_ferealloc(smart_str *str, size_t len, bool fallible)
+{
+	return i_smart_str_erealloc(str, len, fallible);
+}
+
+static zend_always_inline bool i_smart_str_realloc(smart_str *str, size_t len, bool fallible)
+{
+	if (UNEXPECTED(!str->s)) {
+		size_t a = len <= SMART_STR_START_LEN
+				? SMART_STR_START_LEN
+				: SMART_STR_NEW_LEN(len);
+		str->s = zend_string_falloc(a, /* persistent */ true, fallible);
+		if (ZEND_CONST_COND(fallible, true) && !str->s) {
+			return false;
+		}
+		str->a = a;
+		ZSTR_LEN(str->s) = 0;
+	} else {
+		size_t a = SMART_STR_NEW_LEN(len);
+		zend_string *s = (zend_string *) safe_fperealloc(str->s, 1, a, _ZSTR_HEADER_SIZE + 1, /* persistent */ true, fallible);
+		if (ZEND_CONST_COND(fallible, true) && !s) {
+			return false;
+		}
+		str->a = a;
+		str->s = s;
+	}
+	return true;
 }
 
 ZEND_API void ZEND_FASTCALL smart_str_realloc(smart_str *str, size_t len)
 {
-	if (UNEXPECTED(!str->s)) {
-		str->a = len <= SMART_STR_START_LEN
-				? SMART_STR_START_LEN
-				: SMART_STR_NEW_LEN(len);
-		str->s = zend_string_alloc(str->a, 1);
-		ZSTR_LEN(str->s) = 0;
-	} else {
-		str->a = SMART_STR_NEW_LEN(len);
-		str->s = (zend_string *) perealloc(str->s, str->a + _ZSTR_HEADER_SIZE + 1, 1);
-	}
+	i_smart_str_realloc(str, len, /* fallible */ false);
+}
+
+ZEND_API bool ZEND_FASTCALL smart_str_frealloc(smart_str *str, size_t len, bool fallible)
+{
+	return i_smart_str_realloc(str, len, fallible);
 }
 
 /* Windows uses VK_ESCAPE instead of \e */

@@ -248,6 +248,10 @@ namespace {
 
     function zend_test_erealloc_block_size(int $old_size, int $new_size): array {}
 
+    function zend_test_emalloc(int $size): void {}
+
+    function zend_test_callback(callable $callback): void {}
+
     function zend_string_or_object(object|string $param): object|string {}
 
     function zend_string_or_object_or_null(object|string|null $param): object|string|null {}
@@ -283,6 +287,7 @@ namespace {
     function zend_call_method(object|string $obj_or_class, string $method, mixed $arg1 = UNKNOWN, mixed $arg2 = UNKNOWN): mixed {}
 
     function zend_object_init_with_constructor(string $class, mixed ...$args): mixed {}
+    function zend_object_init_with_constructor_array(string $class, array $args): mixed {}
 
     function zend_test_zend_ini_parse_quantity(string $str): int {}
     function zend_test_zend_ini_parse_uquantity(string $str): int {}
@@ -326,10 +331,19 @@ function zend_test_override_libxml_global_state(): void {}
 
     function zend_test_log_err_debug(string $str): void {}
 
+    function zend_test_compile_to_ast(string $str): string {}
+
     function zend_test_gh18756(): void {}
 
     /** @compile-time-eval */
     function zend_test_gh19792(): void {}
+
+    /* @param resource $stream */
+    function zend_test_handle_post_data(mixed $stream, string $content_type, int $content_length): void {}
+
+    function zend_new_singleton_array(): array {}
+
+    function zend_test_set_local_var(string $name, mixed $value): bool {}
 }
 
 namespace ZendTestNS {

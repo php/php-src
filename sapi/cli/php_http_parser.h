@@ -36,12 +36,10 @@ extern "C" {
 
 #include <stdint.h>
 
-/* Compile with -DPHP_HTTP_PARSER_STRICT=0 to make less checks, but run
- * faster
+/* Compile with -DPHP_HTTP_PARSER_STRICT=1 to enable more checks, but run
+ * slower
  */
 #ifndef PHP_HTTP_PARSER_STRICT
-# define PHP_HTTP_PARSER_STRICT 1
-#else
 # define PHP_HTTP_PARSER_STRICT 0
 #endif
 

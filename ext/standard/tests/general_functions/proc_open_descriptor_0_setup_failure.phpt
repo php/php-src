@@ -5,8 +5,8 @@ proc_open() closes descriptor 0 when setup fails after pipe allocation
 if (!function_exists("proc_open")) {
     die("skip proc_open() unavailable");
 }
-if (!@is_dir("/proc/self/fd")) {
-    die("skip requires /proc/self/fd");
+if (!@is_link("/proc/self/fd/1")) {
+    die("skip requires /proc/self/fd symlinks");
 }
 ?>
 --FILE--

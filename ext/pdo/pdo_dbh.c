@@ -854,9 +854,16 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /
 			if (!pdo_get_long_param(&lval, value)) {
 				return false;
 			}
-			/* TODO Check for valid value (NULL_NATURAL, NULL_EMPTY_STRING, NULL_TO_STRING)? */
-			dbh->oracle_nulls = lval;
-			return true;
+			switch (lval) {
+				case PDO_NULL_NATURAL:
+				case PDO_NULL_EMPTY_STRING:
+				case PDO_NULL_TO_STRING:
+					dbh->oracle_nulls = lval;
+					return true;
+				default:
+					zend_value_error("PDO::ATTR_ORACLE_NULLS must be one of the PDO::NULL_* constants");
+					return false;
+			}
 
 		case PDO_ATTR_DEFAULT_FETCH_MODE:
 			if (Z_TYPE_P(value) == IS_ARRAY) {
@@ -900,7 +907,6 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /
 				pdo_raise_impl_error(dbh, NULL, "HY000",
 					"PDO::ATTR_STATEMENT_CLASS cannot be used with persistent PDO instances"
 					);
-				PDO_HANDLE_DBH_ERR();
 				return false;
 			}
 			if (Z_TYPE_P(value) != IS_ARRAY) {

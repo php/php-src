@@ -335,7 +335,7 @@ static zend_string *php_stream_http_response_headers_parse(php_stream_wrapper *w
 			zend_string_efree(last_header_line_str);
 			return NULL;
 		}
-		if (header_info->location_len == 0) {
+		if (header_info->location == NULL) {
 			header_info->location = emalloc(last_header_value_len + 1);
 		} else if (header_info->location_len <= last_header_value_len) {
 			header_info->location = erealloc(header_info->location, last_header_value_len + 1);
@@ -1259,6 +1259,8 @@ out:
 		if (stream->writepos > stream->readpos) {
 			php_stream_notify_progress_increment(context, stream->writepos - stream->readpos, 0);
 		}
+	} else if (header_info.transfer_encoding) {
+		php_stream_filter_free(header_info.transfer_encoding);
 	}
 
 	return stream;
@@ -1272,16 +1274,15 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, const char *pa
 
 	ZVAL_UNDEF(&headers);
 
-	zval_ptr_dtor(&BG(last_http_headers));
-	ZVAL_UNDEF(&BG(last_http_headers));
-
 	stream = php_stream_url_wrap_http_ex(
 		wrapper, path, mode, options, opened_path, context,
 		PHP_URL_REDIRECT_MAX, HTTP_WRAPPER_HEADER_INIT, &headers STREAMS_CC);
 
-	if (!Z_ISUNDEF(headers)) {
-		ZVAL_COPY(&BG(last_http_headers), &headers);
+	/* After the request: one made from its notification callback may have stored its own headers here. */
+	zval_ptr_dtor(&BG(last_http_headers));
+	ZVAL_COPY(&BG(last_http_headers), &headers);
 
+	if (!Z_ISUNDEF(headers)) {
 		if (FAILURE == zend_set_local_var_str(
 				"http_response_header", sizeof("http_response_header")-1, &headers, 0)) {
 			zval_ptr_dtor(&headers);

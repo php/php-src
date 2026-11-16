@@ -328,7 +328,11 @@ PHPAPI int php_stream_filter_append_ex(php_stream_filter_chain *chain, php_strea
 
 		bucket = php_stream_bucket_new(stream, (char*) stream->readbuf + stream->readpos, stream->writepos - stream->readpos, 0, 0);
 		php_stream_bucket_append(brig_inp, bucket);
+		uint32_t orig_no_remove = stream->flags & PHP_STREAM_FLAG_NO_READ_FILTER_REMOVE;
+		stream->flags |= PHP_STREAM_FLAG_NO_READ_FILTER_REMOVE;
 		status = filter->fops->filter(stream, filter, brig_inp, brig_outp, &consumed, PSFS_FLAG_NORMAL);
+		stream->flags &= ~PHP_STREAM_FLAG_NO_READ_FILTER_REMOVE;
+		stream->flags |= orig_no_remove;
 
 		if (stream->readpos + consumed > (uint32_t)stream->writepos) {
 			/* No behaving filter should cause this. */
@@ -420,6 +424,10 @@ PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish)
 
 	chain = filter->chain;
 	stream = chain->stream;
+	uint32_t no_remove_flag = chain == &stream->readfilters ?
+			PHP_STREAM_FLAG_NO_READ_FILTER_REMOVE : PHP_STREAM_FLAG_NO_WRITE_FILTER_REMOVE;
+	uint32_t orig_no_remove = stream->flags & no_remove_flag;
+	stream->flags |= no_remove_flag;
 
 	for(current = filter; current; current = current->next) {
 		php_stream_filter_status_t status;
@@ -427,9 +435,13 @@ PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish)
 		status = current->fops->filter(stream, current, inp, outp, NULL, flags);
 		if (status == PSFS_FEED_ME) {
 			/* We've flushed the data far enough */
+			stream->flags &= ~no_remove_flag;
+			stream->flags |= orig_no_remove;
 			return SUCCESS;
 		}
 		if (status == PSFS_ERR_FATAL) {
+			stream->flags &= ~no_remove_flag;
+			stream->flags |= orig_no_remove;
 			return FAILURE;
 		}
 		/* Otherwise we have data available to PASS_ON
@@ -442,6 +454,8 @@ PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish)
 
 		flags = PSFS_FLAG_NORMAL;
 	}
+	stream->flags &= ~no_remove_flag;
+	stream->flags |= orig_no_remove;
 
 	/* Last filter returned data via PSFS_PASS_ON
 		Do something with it */

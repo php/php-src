@@ -229,7 +229,7 @@ PHP_FUNCTION(readline_info)
 				if (!try_convert_to_string(value)) {
 					RETURN_THROWS();
 				}
-				rl_pending_input = Z_STRVAL_P(value)[0];
+				rl_pending_input = (unsigned char)Z_STRVAL_P(value)[0];
 			}
 			RETVAL_LONG(oldval);
 		} else if (zend_string_equals_literal_ci(what, "prompt")) {
@@ -248,7 +248,7 @@ PHP_FUNCTION(readline_info)
 				if (!try_convert_to_string(value)) {
 					RETURN_THROWS();
 				}
-				rl_completion_append_character = (int)Z_STRVAL_P(value)[0];
+				rl_completion_append_character = (unsigned char)Z_STRVAL_P(value)[0];
 			}
 			RETVAL_INTERNED_STR(
 				oldval == 0 ? ZSTR_EMPTY_ALLOC() : ZSTR_CHAR(oldval));

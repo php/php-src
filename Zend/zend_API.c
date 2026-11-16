@@ -34,7 +34,6 @@
 #include "zend_enum.h"
 #include "zend_object_handlers.h"
 #include "zend_observer.h"
-#include "zend_system_id.h"
 
 #include <stdarg.h>
 
@@ -1891,19 +1890,21 @@ ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *c
 		 * However, if there are named arguments (and it is not empty),
 		 * an Error must be thrown to be consistent with new ClassName() */
 		if (UNEXPECTED(named_params != NULL && zend_hash_num_elements(named_params) != 0)) {
-			/* Throw standard Error */
-			zend_string *arg_name = NULL;
-			zend_hash_get_current_key(named_params, &arg_name, /* num_index */ NULL);
-			ZEND_ASSERT(arg_name != NULL);
-			zend_throw_error(NULL, "Unknown named parameter $%s", ZSTR_VAL(arg_name));
-			/* Do not call destructor, free object, and set arg to IS_UNDEF */
-			zend_object_store_ctor_failed(obj);
-			zval_ptr_dtor(arg);
-			ZVAL_UNDEF(arg);
-			return FAILURE;
-		} else {
-			return SUCCESS;
+			/* As named_arguments may contain positional args we need to check there is actually a string key */
+			ZEND_HASH_FOREACH_STR_KEY(named_params, zend_string *arg_name) {
+				if (arg_name == NULL) {
+					continue;
+				}
+				/* Throw standard Error */
+				zend_throw_error(NULL, "Unknown named parameter $%s", ZSTR_VAL(arg_name));
+				/* Do not call destructor, free object, and set arg to IS_UNDEF */
+				zend_object_store_ctor_failed(obj);
+				zval_ptr_dtor(arg);
+				ZVAL_UNDEF(arg);
+				return FAILURE;
+			} ZEND_HASH_FOREACH_END();
 		}
+		return SUCCESS;
 	}
 	/* A constructor should not return a value, however if an exception is thrown
 	 * zend_call_known_function() will set the retval to IS_UNDEF */
@@ -1936,6 +1937,18 @@ ZEND_API void object_init(zval *arg) /* {{{ */
 	ZVAL_OBJ(arg, zend_objects_new(zend_standard_class_def));
 }
 /* }}} */
+
+ZEND_API bool object_finit(zval *arg)
+{
+	zend_object *obj = zend_objects_fnew(zend_standard_class_def);
+
+	if (UNEXPECTED(obj == NULL)) {
+		ZVAL_NULL(arg);
+		return false;
+	}
+	ZVAL_OBJ(arg, obj);
+	return true;
+}
 
 ZEND_API void add_assoc_long_ex(zval *arg, const char *key, size_t key_len, zend_long n) /* {{{ */
 {
@@ -3112,7 +3125,6 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 				}
 				zend_flf_handlers[zend_flf_count] = flf_info->handler;
 				zend_flf_functions[zend_flf_count] = (zend_function *)reg_function;
-				zend_add_system_entropy("frameless", ZSTR_VAL(reg_function->function_name), &flf_info->num_args, sizeof(flf_info->num_args));
 				zend_flf_count++;
 				flf_info++;
 			}

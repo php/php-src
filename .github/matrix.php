@@ -125,10 +125,9 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
             : ['debug' => [true], 'zts' => [true]];
     }
     if ($all_jobs || !$no_jobs || $test_macos) {
-        $test_arm = version_compare($php_version, '8.4', '>=');
         $jobs['MACOS']['matrix'] = $all_variations
-            ? ['arch' => $test_arm ? ['X64', 'ARM64'] : ['X64'], 'debug' => [true, false], 'zts' => [true, false]]
-            : ['include' => [['arch' => $test_arm ? 'ARM64' : 'X64', 'debug' => true, 'zts' => false]]];
+            ? ['arch' => ['ARM64'], 'debug' => [true, false], 'zts' => [true, false]]
+            : ['include' => [['arch' => 'ARM64', 'debug' => true, 'zts' => false]]];
         $jobs['MACOS']['config']['version'] = version_compare($php_version, '8.4', '>=') ? '26' : '15';
     }
     if ($all_jobs || $test_msan) {

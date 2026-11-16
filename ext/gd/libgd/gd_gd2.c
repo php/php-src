@@ -150,7 +150,7 @@ static int _gd2GetHeader(gdIOCtxPtr in, int *sx, int *sy, int *cs, int *vers, in
 		if (sidx <= 0) {
 			goto fail1;
 		}
-		cidx = gdCalloc(sidx, 1);
+		cidx = gdFCalloc(sidx, 1);
 		if (cidx == NULL) {
 			goto fail1;
 		}
@@ -306,8 +306,14 @@ gdImagePtr gdImageCreateFromGd2Ctx (gdIOCtxPtr in)
 		if (chunkMax <= 0) {
 			return 0;
 		}
-		chunkBuf = gdCalloc(chunkMax, 1);
-		compBuf = gdCalloc(compMax, 1);
+		chunkBuf = gdFCalloc(chunkMax, 1);
+		if (chunkBuf == NULL) {
+			goto fail2;
+		}
+		compBuf = gdFCalloc(compMax, 1);
+		if (compBuf == NULL) {
+			goto fail2;
+		}
 
 		GD2_DBG(gd_error("Largest compressed chunk is %d bytes", compMax));
 	}
@@ -503,8 +509,14 @@ gdImagePtr gdImageCreateFromGd2PartCtx (gdIOCtx * in, int srcx, int srcy, int w,
 			goto fail2;
 		}
 
-		chunkBuf = gdCalloc(chunkMax, 1);
-		compBuf = gdCalloc(compMax, 1);
+		chunkBuf = gdFCalloc(chunkMax, 1);
+		if (chunkBuf == NULL) {
+			goto fail2;
+		}
+		compBuf = gdFCalloc(compMax, 1);
+		if (compBuf == NULL) {
+			goto fail2;
+		}
 	}
 
 	/* Work out start/end chunks */

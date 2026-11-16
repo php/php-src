@@ -663,9 +663,11 @@ static zend_object *dom_objects_store_clone_obj(zend_object *zobject) /* {{{ */
 			xmlNodePtr cloned_node = dom_clone_node(php_dom_ns_mapper_from_private(private_data), node, node->doc, true);
 			if (cloned_node != NULL) {
 				dom_update_refcount_after_clone(intern, node, clone, cloned_node);
-			}
-			if (private_data != NULL) {
-				clone->document->private_data = php_dom_libxml_private_data_header(private_data);
+				if (private_data != NULL) {
+					clone->document->private_data = php_dom_libxml_private_data_header(private_data);
+				}
+			} else if (private_data != NULL && (node->type == XML_DOCUMENT_NODE || node->type == XML_HTML_DOCUMENT_NODE)) {
+				php_dom_private_data_destroy(private_data);
 			}
 		}
 	}
@@ -2406,6 +2408,15 @@ void dom_remove_all_children(xmlNodePtr nodep)
 		nodep->children = NULL;
 		nodep->last = NULL;
 	}
+}
+
+xmlAttrPtr dom_set_attribute_value(xmlNodePtr element, xmlNsPtr ns, const xmlChar *name, const xmlChar *value)
+{
+	xmlAttrPtr existing = xmlHasNsProp(element, name, ns == NULL ? NULL : ns->href);
+	if (existing != NULL && existing->type != XML_ATTRIBUTE_DECL) {
+		node_list_unlink(existing->children);
+	}
+	return xmlSetNsProp(element, ns, name, value);
 }
 
 void php_dom_get_content_into_zval(const xmlNode *nodep, zval *return_value, bool null_on_failure)
