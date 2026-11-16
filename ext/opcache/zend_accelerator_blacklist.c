@@ -218,6 +218,7 @@ void zend_accel_blacklist_shutdown(zend_blacklist *blacklist)
 	}
 	free(blacklist->entries);
 	blacklist->entries = NULL;
+	blacklist->pos = 0;
 	if (blacklist->regexp_list) {
 		zend_regexp_list *temp, *it = blacklist->regexp_list;
 		while (it) {
@@ -226,6 +227,7 @@ void zend_accel_blacklist_shutdown(zend_blacklist *blacklist)
 			it = it->next;
 			free(temp);
 		}
+		blacklist->regexp_list = NULL;
 	}
 }
 
