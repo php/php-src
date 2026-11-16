@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Tim=20D=C3=BCsterhus?= <tim@bastelstu.be>
 Date: Fri, 31 Jul 2026 20:56:18 +0200
-Subject: [PATCH 17/24] URL: Fix parsing of usernames containing `@`
+Subject: [PATCH 17/25] URL: Fix parsing of usernames containing `@`
 
 Fixes lexbor/lexbor#399.
 ---

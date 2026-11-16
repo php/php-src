@@ -124,6 +124,12 @@ lxb_dom_document_init(lxb_dom_document_t *document, lxb_dom_document_t *owner,
 
     document->css = NULL;
 
+    /*
+     * Set before the allocations: lxb_dom_document_destroy() frees a document
+     * that owns itself, and dereferences the owner of any other.
+     */
+    node->owner_document = document;
+
     /* For nodes */
     document->mraw = lexbor_mraw_create();
     status = lexbor_mraw_init(document->mraw, (4096 * 8));
@@ -166,18 +172,17 @@ lxb_dom_document_init(lxb_dom_document_t *document, lxb_dom_document_t *owner,
         goto failed;
     }
 
-    node->owner_document = document;
-
     return LXB_STATUS_OK;
 
 failed:
 
-    lexbor_mraw_destroy(document->mraw, true);
-    lexbor_mraw_destroy(document->text, true);
-    lexbor_hash_destroy(document->tags, true);
-    lexbor_hash_destroy(document->ns, true);
-    lexbor_hash_destroy(document->attrs, true);
-    lexbor_hash_destroy(document->prefix, true);
+    /* Reset, so that lxb_dom_document_destroy() does not free them again. */
+    document->mraw = lexbor_mraw_destroy(document->mraw, true);
+    document->text = lexbor_mraw_destroy(document->text, true);
+    document->tags = lexbor_hash_destroy(document->tags, true);
+    document->ns = lexbor_hash_destroy(document->ns, true);
+    document->attrs = lexbor_hash_destroy(document->attrs, true);
+    document->prefix = lexbor_hash_destroy(document->prefix, true);
 
     return LXB_STATUS_ERROR;
 }

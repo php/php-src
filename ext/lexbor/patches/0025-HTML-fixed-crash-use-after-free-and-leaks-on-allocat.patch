@@ -1,0 +1,94 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: sjanel <67502353+sjanel@users.noreply.github.com>
+Date: Wed, 11 Nov 2026 20:26:42 +0100
+Subject: [PATCH 25/25] HTML: fixed crash, use-after-free and leaks on
+ allocation failure in document create and parse (#448)
+
+HTML: fixed crash, use-after-free and leaks on allocation failure.
+---
+ source/lexbor/dom/interfaces/document.c  | 21 +++++++++++++--------
+ source/lexbor/html/interfaces/document.c |  2 +-
+ source/lexbor/html/parser.c              |  6 ++++++
+ 3 files changed, 20 insertions(+), 9 deletions(-)
+
+diff --git a/source/lexbor/dom/interfaces/document.c b/source/lexbor/dom/interfaces/document.c
+index 43eeba0..6428354 100644
+--- a/source/lexbor/dom/interfaces/document.c
++++ b/source/lexbor/dom/interfaces/document.c
+@@ -124,6 +124,12 @@ lxb_dom_document_init(lxb_dom_document_t *document, lxb_dom_document_t *owner,
+ 
+     document->css = NULL;
+ 
++    /*
++     * Set before the allocations: lxb_dom_document_destroy() frees a document
++     * that owns itself, and dereferences the owner of any other.
++     */
++    node->owner_document = document;
++
+     /* For nodes */
+     document->mraw = lexbor_mraw_create();
+     status = lexbor_mraw_init(document->mraw, (4096 * 8));
+@@ -166,18 +172,17 @@ lxb_dom_document_init(lxb_dom_document_t *document, lxb_dom_document_t *owner,
+         goto failed;
+     }
+ 
+-    node->owner_document = document;
+-
+     return LXB_STATUS_OK;
+ 
+ failed:
+ 
+-    lexbor_mraw_destroy(document->mraw, true);
+-    lexbor_mraw_destroy(document->text, true);
+-    lexbor_hash_destroy(document->tags, true);
+-    lexbor_hash_destroy(document->ns, true);
+-    lexbor_hash_destroy(document->attrs, true);
+-    lexbor_hash_destroy(document->prefix, true);
++    /* Reset, so that lxb_dom_document_destroy() does not free them again. */
++    document->mraw = lexbor_mraw_destroy(document->mraw, true);
++    document->text = lexbor_mraw_destroy(document->text, true);
++    document->tags = lexbor_hash_destroy(document->tags, true);
++    document->ns = lexbor_hash_destroy(document->ns, true);
++    document->attrs = lexbor_hash_destroy(document->attrs, true);
++    document->prefix = lexbor_hash_destroy(document->prefix, true);
+ 
+     return LXB_STATUS_ERROR;
+ }
+diff --git a/source/lexbor/html/interfaces/document.c b/source/lexbor/html/interfaces/document.c
+index b40c6c8..5059050 100644
+--- a/source/lexbor/html/interfaces/document.c
++++ b/source/lexbor/html/interfaces/document.c
+@@ -278,7 +278,7 @@ lxb_html_document_parser_prepare(lxb_html_document_t *document)
+         status = lxb_html_parser_init(doc->parser);
+ 
+         if (status != LXB_STATUS_OK) {
+-            lxb_html_parser_destroy(doc->parser);
++            doc->parser = lxb_html_parser_destroy(doc->parser);
+             return status;
+         }
+ 
+diff --git a/source/lexbor/html/parser.c b/source/lexbor/html/parser.c
+index 7d05104..62e7370 100644
+--- a/source/lexbor/html/parser.c
++++ b/source/lexbor/html/parser.c
+@@ -40,7 +40,12 @@ lxb_html_parser_init(lxb_html_parser_t *parser)
+     parser->tkz = lxb_html_tokenizer_create();
+     lxb_status_t status = lxb_html_tokenizer_init(parser->tkz);
+ 
++    /*
++     * A tokenizer or a tree that failed to initialize has no reference yet,
++     * so lxb_html_parser_destroy() could not release it: destroy it here.
++     */
+     if (status != LXB_STATUS_OK) {
++        parser->tkz = lxb_html_tokenizer_destroy(parser->tkz);
+         return status;
+     }
+ 
+@@ -51,6 +56,7 @@ lxb_html_parser_init(lxb_html_parser_t *parser)
+     status = lxb_html_tree_init(parser->tree, parser->tkz);
+ 
+     if (status != LXB_STATUS_OK) {
++        parser->tree = lxb_html_tree_destroy(parser->tree);
+         return status;
+     }
+ 
