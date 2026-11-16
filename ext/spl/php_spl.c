@@ -262,6 +262,7 @@ static int spl_autoload(zend_string *class_name, zend_string *lc_name, const cha
 			zend_execute(new_op_array, &result);
 			EG(jit_trace_num) = orig_jit_trace_num;
 
+			zend_destroy_static_vars(new_op_array);
 			destroy_op_array(new_op_array);
 			efree(new_op_array);
 			if (!EG(exception)) {
