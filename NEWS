@@ -75,6 +75,8 @@ PHP                                                                        NEWS
     isset()/empty(). (Jorg Sowa)
   . Fixed bug GH-24622 (Tracing JIT skips spilling inherited register values
     before property helpers). (ndossche, Alessio Attilio)
+  . Fixed bug GH-8739 (OPcache restart corrupts SHM in threaded SAPIs).
+    (pavimus)
 
 - PDO_Firebird:
   . Fixed stack buffer overflow with long connection user names, passwords,
