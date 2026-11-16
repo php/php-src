@@ -328,7 +328,12 @@ static int php_json_yylex(union YYSTYPE *value, php_json_parser *parser)
 static void php_json_yyerror(php_json_parser *parser, char const *msg)
 {
 	if (!parser->scanner.errcode) {
-		parser->scanner.errcode = PHP_JSON_ERROR_SYNTAX;
+		/* Bison reports that its stack limit was hit as "memory exhausted", the input is not malformed */
+		if (strcmp(msg, "memory exhausted") == 0) {
+			parser->scanner.errcode = PHP_JSON_ERROR_DEPTH;
+		} else {
+			parser->scanner.errcode = PHP_JSON_ERROR_SYNTAX;
+		}
 	}
 }
 
