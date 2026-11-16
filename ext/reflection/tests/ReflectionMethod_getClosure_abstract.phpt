@@ -24,14 +24,14 @@ $methods = [
 foreach ($methods as [$method, $object]) {
     try {
         $method->getClosure($object);
-    } catch (ReflectionException $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ": ", $e->getMessage(), "\n";
     }
 }
 
 ?>
 --EXPECT--
-Trying to create a closure from abstract method A::instance()
-Trying to create a closure from abstract method A::make()
-Trying to create a closure from abstract method Countable::count()
-Trying to create a closure from abstract method UnitEnum::cases()
+ReflectionException: Trying to create a closure from abstract method A::instance()
+ReflectionException: Trying to create a closure from abstract method A::make()
+ReflectionException: Trying to create a closure from abstract method Countable::count()
+ReflectionException: Trying to create a closure from abstract method UnitEnum::cases()
