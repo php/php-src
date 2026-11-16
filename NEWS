@@ -77,6 +77,8 @@ PHP                                                                        NEWS
     before property helpers). (ndossche, Alessio Attilio)
   . Fixed bug GH-8739 (OPcache restart corrupts SHM in threaded SAPIs).
     (pavimus)
+  . Fixed opcache.enable_file_override lookups racing with OPcache restarts
+    (pavimus)
 
 - PDO_Firebird:
   . Fixed stack buffer overflow with long connection user names, passwords,
