@@ -2,6 +2,58 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.6.0
 
+- CGI:
+  . Fixed GHSA-5j3f-64r7-f564 (PHP-CGI out-of-bounds read and write during
+    PATH_INFO correction). (CVE-2026-129538) (Jakub Zelenka)
+
+- Core:
+  . Fixed GHSA-8mjj-2r7p-4hg2 (Use-after-free in magic method backtraces can
+    lead to remote code execution). (CVE-2026-129474) (Arnaud Le Blanc)
+  . Fixed GHSA-2fjv-p558-g82m (Use-after-free via repopulation of
+    last_fatal_error_backtrace global after shutdown). (CVE-2026-129182)
+    (Arnaud Le Blanc, Jakub Zelenka)
+
+- Date:
+  . Fixed GHSA-gr4f-wgx5-jpfv (Timezone cache use-after-free can lead to remote
+    code execution). (CVE-2026-129496) (Ilija Tovilo)
+
+- DOM:
+  . Fixed GHSA-x8r7-mg3g-74hg (Double free during DOM XML serialization).
+    (CVE-2026-129501) (ndossche)
+
+- FPM:
+  . Fixed GHSA-qc49-hpvq-g2w6 (PHP-FPM request smuggling through an unread HTTP
+    request body). (CVE-2026-129289) (Jakub Zelenka)
+  . Fixed GHSA-3mg3-cr28-46gc (PHP-FPM status endpoint XSS via unescaped user
+    and script fields). (CVE-2026-129292) (Jakub Zelenka)
+
+- Phar:
+  . Fixed GHSA-68fq-fh7h-f8gr (PHAR OpenSSL signature bypass via algorithm
+    downgrade). (CVE-2026-128090) (Alexandre Daubois)
+
+- Session:
+  . Fixed GHSA-fm2m-fjf5-v3cp (Partially overwritten session files can lead to
+    remote code execution). (CVE-2026-126714) (Ilija Tovilo)
+  . Fixed GHSA-658j-r8rw-q6mx (Session serializer mismatch can lead to remote
+    code execution). (CVE-2026-115560) (Arnaud Le Blanc)
+  . Fixed GHSA-g3vh-838c-65v7 (Use-after-free after interrupted session
+    shutdown). (CVE-2026-129481) (Arnaud Le Blanc, Jakub Zelenka)
+
+- SOAP:
+  . Fixed GHSA-q23r-hr55-xmpg (SOAP information disclosure through malformed
+    array dimensions). (CVE-2026-15353) (Alexandre Daubois)
+  . Fixed GHSA-4646-p932-gw34 (SOAP use-after-free when processing DTD entity
+    references). (CVE-2026-129506) (Jakub Zelenka)
+
+- Standard:
+  . Fixed GHSA-f6gg-rchx-xw8j (Mixed-case HTTPS and FTPS URLs can expose data
+    in plaintext). (CVE-2026-128064) (Jakub Zelenka)
+  . Fixed GHSA-mmf9-xm3v-hg2x (Denial of service through folded HTTP response
+    headers). (CVE-2026-127960) (Jakub Zelenka)
+
+- URI:
+  . Fixed GHSA-mg3p-mxj9-g2mm (Incorrect RFC 3986 URI serialization for
+    oversized input). (CVE-2026-129438) (Tim Düsterhus, Alexandre Daubois)
 
 12 Nov 2026, PHP 8.6.0RC7
 
@@ -91,9 +143,8 @@ PHP                                                                        NEWS
   . Fixed crash and stack memory disclosure in the worker output logging with
     a pool name longer than the message prefix buffer or log_limit.
     (Martin Mirchev)
-  . Fixed bug GH-24046 (FPM worker stdio pipe fd closed twice when a child
-    process outlives the worker, breaking a later worker's stdio).
-    (Ian P. Christian, ndossche)
+  . Fixed GHSA-jm4m-qfqx-967m (PHP-FPM epoll use-after-free can lead to local
+    privilege escalation). (CVE-2026-129291) (Ian P. Christian, ndossche)
   . Fixed memory leaks of the _GET string on the status page error and HEAD
     request paths. (Marcel Hernandez)
   . Fixed use-after-free of the scoreboard copy when logging invalid status
@@ -407,8 +458,6 @@ PHP                                                                        NEWS
 - Session:
   . Fixed session_write_close() keeping the save handler open when the
     session data cannot be encoded. (Ilia Alshanetsky)
-  . Fixed session data loss in the files save handler when writing the session
-    file fails after it was already truncated. (Ilia Alshanetsky)
 
 - SOAP:
   . Fixed bug GH-23686 (SoapClient only strips `Authorization: Basic` when a
