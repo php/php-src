@@ -72,6 +72,7 @@ ZEND_API zval* zend_call_method(zend_object *object, zend_class_entry *obj_ce, z
 	} else {
 		fn = *fn_proxy;
 	}
+	ZEND_ASSERT(object || !fn->common.scope || (fn->common.fn_flags & ZEND_ACC_STATIC));
 
 	if (object) {
 		called_scope = object->ce;
