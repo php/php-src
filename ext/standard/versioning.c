@@ -129,7 +129,7 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 	char *ver1;
 	char *ver2;
 	char *p1, *p2, *n1, *n2;
-	long l1, l2;
+	zend_long l1, l2;
 	int compare = 0;
 
 	if (!*orig_ver1 || !*orig_ver2) {
@@ -160,8 +160,8 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 		}
 		if (isdigit((unsigned char)*p1) && isdigit((unsigned char)*p2)) {
 			/* compare element numerically */
-			l1 = strtol(p1, NULL, 10);
-			l2 = strtol(p2, NULL, 10);
+			l1 = ZEND_STRTOL(p1, NULL, 10);
+			l2 = ZEND_STRTOL(p2, NULL, 10);
 			compare = ZEND_NORMALIZE_BOOL(l1 - l2);
 		} else if (!isdigit((unsigned char)*p1) && !isdigit((unsigned char)*p2)) {
 			/* compare element names */
