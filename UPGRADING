@@ -126,6 +126,14 @@ PHP 8.7 UPGRADE NOTES
     64 pipe or file handles no longer crashes; it fails with a warning, as that
     path remains bounded by WaitForMultipleObjects().
 
+- PCNTL:
+  . pcntl_fork(), pcntl_rfork() and pcntl_forkx() now accept an optional
+    $rekey_free_lists argument, which defaults to true. Set it to false to avoid
+    rewriting the child's inherited small free lists. These free blocks will
+    not be reused by the child, but per-child allocator key isolation is
+    preserved. Cached chunks are still re-keyed, and the usual child
+    initialization is performed.
+
 ========================================
 6. New Functions
 ========================================
