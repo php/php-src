@@ -97,6 +97,8 @@ PHP                                                                        NEWS
     isset()/empty(). (Jorg Sowa)
   . Fixed bug GH-8739 (OPcache restart corrupts SHM in threaded SAPIs).
     (pavimus)
+  . Fixed opcache.enable_file_override lookups racing with OPcache restarts
+    (pavimus)
 
 - OpenSSL:
   . Fixed bug GH-25172 (TLS session reuse shares request-lifetime callback
