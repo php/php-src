@@ -557,7 +557,7 @@ PHP_METHOD(Phar, webPhar)
 	const char *basename;
 	size_t fname_len, index_php_len = 0;
 	size_t entry_len;
-	int code, not_cgi;
+	int code;
 	phar_archive_data *phar = NULL;
 	phar_entry_info *info = NULL;
 	size_t sapi_mod_name_len = strlen(sapi_module.name);
@@ -674,7 +674,6 @@ PHP_METHOD(Phar, webPhar)
 			pt = estrndup(testit, (pt - testit) + (fname_len - (basename - fname)));
 			efree(testit);
 		}
-		not_cgi = 0;
 	} else {
 		path_info = SG(request_info).request_uri;
 
@@ -689,7 +688,6 @@ PHP_METHOD(Phar, webPhar)
 		entry = estrndup(pt + (fname_len - (basename - fname)), entry_len);
 
 		pt = estrndup(path_info, (pt - path_info) + (fname_len - (basename - fname)));
-		not_cgi = 1;
 	}
 
 	if (ZEND_FCI_INITIALIZED(rewrite_fci)) {
@@ -758,29 +756,18 @@ PHP_METHOD(Phar, webPhar)
 		if (!phar || (info = phar_get_entry_info(phar, entry, entry_len, NULL, false)) == NULL) {
 			phar_do_404(phar, fname, fname_len, f404);
 		} else {
-			char *tmp = NULL, sa = '\0';
 			sapi_header_line ctr = {0};
 			ctr.response_code = 301;
 			ctr.line_len = sizeof("HTTP/1.1 301 Moved Permanently")-1;
 			ctr.line = "HTTP/1.1 301 Moved Permanently";
 			sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
 
-			if (not_cgi) {
-				tmp = strstr(path_info, basename) + (fname_len - (basename - fname));
-				sa = *tmp;
-				*tmp = '\0';
-			}
-
 			ctr.response_code = 0;
 
-			if (path_info[strlen(path_info)-1] == '/') {
-				ctr.line_len = spprintf((char **) &(ctr.line), 4096, "Location: %s%s", path_info, entry + 1);
+			if (pt[strlen(pt)-1] == '/') {
+				ctr.line_len = spprintf((char **) &(ctr.line), 4096, "Location: %s%s", pt, entry + 1);
 			} else {
-				ctr.line_len = spprintf((char **) &(ctr.line), 4096, "Location: %s%s", path_info, entry);
-			}
-
-			if (not_cgi) {
-				*tmp = sa;
+				ctr.line_len = spprintf((char **) &(ctr.line), 4096, "Location: %s%s", pt, entry);
 			}
 
 			sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
