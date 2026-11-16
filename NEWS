@@ -65,6 +65,9 @@ PHP                                                                        NEWS
     setAttribute() accepting out-of-range values that truncate to a valid one.
     (Jorg Sowa)
 
+- JSON:
+  . Fixed json_decode() and json_validate() error messages. (lacatoire)
+
 - MBString:
   . Fixed stack overflow in mb_check_encoding() and mb_convert_encoding() with
     deeply nested arrays. (Eyüp Can Akman)
