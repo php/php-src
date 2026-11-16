@@ -95,6 +95,8 @@ PHP                                                                        NEWS
   . Fixed use-after-free in JIT when the error handler releases a string while
     an "Undefined variable" warning is raised for its offset in ?? or nested
     isset()/empty(). (Jorg Sowa)
+  . Fixed bug GH-8739 (OPcache restart corrupts SHM in threaded SAPIs).
+    (pavimus)
 
 - OpenSSL:
   . Fixed bug GH-25172 (TLS session reuse shares request-lifetime callback
