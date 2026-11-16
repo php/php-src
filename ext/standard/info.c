@@ -831,9 +831,6 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 		php_info_print_table_row(2, "Scan this dir for additional .ini files", php_ini_scanned_path ? php_ini_scanned_path : "(none)");
 		php_info_print_table_row(2, "Additional .ini files parsed", php_ini_scanned_files ? php_ini_scanned_files : "(none)");
 
-		snprintf(temp_api, sizeof(temp_api), "%d", PHP_API_VERSION);
-		php_info_print_table_row(2, "PHP API", temp_api);
-
 		snprintf(temp_api, sizeof(temp_api), "%d", ZEND_MODULE_API_NO);
 		php_info_print_table_row(2, "PHP Extension", temp_api);
 

@@ -55,6 +55,8 @@ PHP 8.7 INTERNALS UPGRADE NOTES
     to work.
   . The ZTS symbols compiler_globals_offset and executor_globals_offset have
     been removed: CG()/EG() now reach the globals through a __thread struct.
+  . The unused PHP_API_VERSION was removed. ABI compatibility is verified
+    against ZEND_MODULE_API_NO and ZEND_EXTENSION_API_NO.
 
 - Changed:
   . The signature of zend_is_callable() has been changed to

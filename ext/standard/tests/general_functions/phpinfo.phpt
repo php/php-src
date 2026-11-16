@@ -24,7 +24,6 @@ Configuration File (php.ini) Path => %s
 Loaded Configuration File => %r(.+?)%r
 Scan this dir for additional .ini files => %r(.+?)%r
 Additional .ini files parsed => %r(.+?)%r
-PHP API => %d
 PHP Extension => %d
 Zend Extension => %d
 Zend Extension Build => API%s
