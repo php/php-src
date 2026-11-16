@@ -1798,7 +1798,10 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties)
 					ZSTR_VAL(object->ce->name), h);
 			}
 
-			prop = zend_hash_index_update(zend_std_get_properties_ex(object), h, prop);
+			/* Property tables only have string keys */
+			zend_string *name = zend_long_to_str(h);
+			prop = zend_hash_update(zend_std_get_properties_ex(object), name, prop);
+			zend_string_release_ex(name, false);
 			zval_add_ref(prop);
 		}
 	} ZEND_HASH_FOREACH_END();
