@@ -2,8 +2,6 @@
 Fibers in destructors 015: Exception thrown by a destructor called by the GC from internal code
 --INI--
 zend.enable_gc=1
---XFAIL--
-Destructor exception is not caught if fiber is produced from create_fiber()???
 --FILE--
 <?php
 
@@ -35,11 +33,7 @@ for ($i = 0; $i < 20000; $i++) {
 }
 
 function create_fiber() {
-    global $objects;
-    $copies = [...$objects];
-
-    // The fiber releases the copies after its function returned, which fills the GC root buffer
-    return new Fiber(function () use ($copies) {
+    return new Fiber(function () {
         new Cycle();
         echo "Return\n";
     });
@@ -47,7 +41,8 @@ function create_fiber() {
 
 $fiber = create_fiber();
 try {
-    $fiber->start();
+    // Arguments are released after the fiber call, which fills the GC root buffer
+    $fiber->start([...$objects]);
     echo "Not reached\n";
 } catch (Exception $e) {
     echo 'Caught: ', $e->getMessage(), "\n";
