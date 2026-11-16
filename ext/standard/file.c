@@ -334,6 +334,9 @@ PHP_FUNCTION(get_meta_tags)
 			looking_for_val = 0;
 		} else if (tok == TOK_OPENTAG) {
 			if (looking_for_val) {
+				if (name) efree(name);
+				if (value) efree(value);
+				name = value = NULL;
 				looking_for_val = 0;
 				have_name = saw_name = 0;
 				have_content = saw_content = 0;

@@ -117,6 +117,8 @@ PHP                                                                        NEWS
     (Kévin Dunglas)
   . Fixed bug GH-24743 (var_export() ignores exceptions from lazy object
     initialization). (lazerg)
+  . Fixed memory leak in get_meta_tags() when a tag opens while an attribute
+    value is expected. (Jorg Sowa)
 
 - Streams:
   . Fixed bug GH-22063 (Stream filter chain UAF on self-removal during
