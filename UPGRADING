@@ -118,6 +118,11 @@ PHP 8.7 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- FTP:
+  . ftp_nb_fget() and ftp_nb_fput() now declare int|false as their return
+    type. They already returned false when the connection is already in use,
+    as ftp_nb_get() and ftp_nb_put() do.
+
 - Standard:
   . stream_select() no longer fails once a watched descriptor exceeds
     FD_SETSIZE. The descriptor set now grows on demand on both POSIX (bitset)
