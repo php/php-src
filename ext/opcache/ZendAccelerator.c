@@ -2927,6 +2927,8 @@ zend_result accel_post_deactivate(void)
 	zend_shared_alloc_safe_unlock(); /* be sure we didn't leave cache locked */
 	accel_unlock_all();
 	ZCG(counted) = false;
+	/* the reference is released: do not use SHM until the next RINIT */
+	ZCG(accelerator_enabled) = false;
 
 	return SUCCESS;
 }
