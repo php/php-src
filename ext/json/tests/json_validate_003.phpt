@@ -14,6 +14,6 @@ try {
 
 ?>
 --EXPECTF--
-ValueError: json_validate(): Argument #2 ($depth) must be less than %d
+ValueError: json_validate(): Argument #2 ($depth) must be less than or equal to %d
 int(0)
 string(8) "No error"
