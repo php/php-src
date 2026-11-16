@@ -442,6 +442,8 @@ PHP                                                                        NEWS
     (Marti2203)
   . Fixed unserialize() of enums sharing its state with the unserialize()
     calls made by autoloaders. (nicolas-grekas)
+  . Fixed memory leak in get_meta_tags() when a tag opens while an attribute
+    value is expected. (Jorg Sowa)
 
 - Streams:
   . Fixed bug GH-22063 (Stream filter chain UAF on self-removal during
