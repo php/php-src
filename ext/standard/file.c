@@ -343,13 +343,10 @@ PHP_FUNCTION(get_meta_tags)
 				} else {
 					add_assoc_string(return_value, name, "");
 				}
-
-				efree(name);
-				if (value) efree(value);
-			} else if (have_content) {
-				efree(value);
 			}
 
+			if (name) efree(name);
+			if (value) efree(value);
 			name = value = NULL;
 
 			/* Reset all of our flags */
