@@ -396,6 +396,12 @@ ZEND_INI_END()
 static bool filename_is_in_cache(zend_string *filename)
 {
 	zend_string *key;
+	bool ret = 0;
+
+	/* The hash may be cleaned by a restart: only look it up while holding the read lock */
+	if (!ZCG(accelerator_enabled) || accelerator_shm_read_lock() != SUCCESS) {
+		return false;
+	}
 
 	key = accel_make_persistent_key(filename);
 	if (key != NULL) {
@@ -403,19 +409,19 @@ static bool filename_is_in_cache(zend_string *filename)
 		if (persistent_script && !persistent_script->corrupted) {
 			if (ZCG(accel_directives).validate_timestamps) {
 				zend_file_handle handle;
-				bool ret;
 
 				zend_stream_init_filename_ex(&handle, filename);
 				ret = validate_timestamp_and_record_ex(persistent_script, &handle) == SUCCESS;
 				zend_destroy_file_handle(&handle);
-				return ret;
+			} else {
+				ret = true;
 			}
-
-			return true;
 		}
 	}
 
-	return false;
+	accelerator_shm_read_unlock();
+
+	return ret;
 }
 
 static bool filename_is_in_file_cache(zend_string *filename)
