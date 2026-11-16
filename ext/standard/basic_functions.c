@@ -1471,18 +1471,9 @@ PHP_FUNCTION(error_clear_last)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (PG(last_error_message)) {
-		PG(last_error_type) = 0;
-		PG(last_error_lineno) = 0;
-
-		zend_string_release(PG(last_error_message));
-		PG(last_error_message) = NULL;
-
-		if (PG(last_error_file)) {
-			zend_string_release(PG(last_error_file));
-			PG(last_error_file) = NULL;
-		}
-	}
+	PG(last_error_type) = 0;
+	PG(last_error_lineno) = 0;
+	php_clear_last_error(true);
 
 	zval_ptr_dtor(&EG(last_fatal_error_backtrace));
 	ZVAL_UNDEF(&EG(last_fatal_error_backtrace));

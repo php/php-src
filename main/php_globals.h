@@ -139,6 +139,9 @@ struct _php_core_globals {
 	uint32_t last_error_lineno;
 	zend_string *last_error_message;
 	zend_string *last_error_file;
+	uint32_t repeated_error_lineno;
+	zend_string *repeated_error_message;
+	zend_string *repeated_error_file;
 
 	char *php_sys_temp_dir;
 
