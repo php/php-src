@@ -60,6 +60,11 @@ PHP 8.7 UPGRADE NOTES
     application terminate one attribute and append further ones.
 
 - Standard:
+  . ini_get_all() now matches extension names case-insensitively using ASCII
+    rules, independently of the current locale. Names that differ only in
+    capitalization from a loaded extension now succeed instead of emitting a
+    warning and returning false.
+    RFC: https://wiki.php.net/rfc/case_insensitive_ini_get_all
   . bindec(), octdec(), hexdec() and base_convert() now throw an Exception
     when the passed string contains characters that are invalid for the
     specified number base.

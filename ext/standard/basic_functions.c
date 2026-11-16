@@ -1950,7 +1950,7 @@ PHP_FUNCTION(ini_get_all)
 	zend_ini_sort_entries();
 
 	if (extname) {
-		if ((module = zend_hash_find_ptr(&module_registry, extname)) == NULL) {
+		if ((module = zend_hash_find_ptr_lc(&module_registry, extname)) == NULL) {
 			php_error_docref(NULL, E_WARNING, "Extension \"%pS\" cannot be found", extname);
 			RETURN_FALSE;
 		}
