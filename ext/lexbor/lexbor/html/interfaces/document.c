@@ -278,7 +278,7 @@ lxb_html_document_parser_prepare(lxb_html_document_t *document)
         status = lxb_html_parser_init(doc->parser);
 
         if (status != LXB_STATUS_OK) {
-            lxb_html_parser_destroy(doc->parser);
+            doc->parser = lxb_html_parser_destroy(doc->parser);
             return status;
         }
 
