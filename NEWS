@@ -300,6 +300,8 @@ PHP                                                                        NEWS
   . Fix opcache phar check. (ndossche)
   . Fixed bug GH-8739 (OPcache restart corrupts SHM in threaded SAPIs).
     (pavimus)
+  . Fixed opcache.enable_file_override lookups racing with OPcache restarts
+    (pavimus)
 
 - OpenSSL:
   . Fixed build and test compatibility with OpenSSL 4.0 and 4.1.
