@@ -1,5 +1,5 @@
 --TEST--
-iconv_mime_encode(): a non-positive line-length is rejected
+iconv_mime_encode(): a negative line-length behaves like 0
 --EXTENSIONS--
 iconv
 --FILE--
@@ -11,12 +11,12 @@ foreach ([-1, 0, PHP_INT_MIN] as $len) {
 var_dump(iconv_mime_encode("S", "héllo", $o + ["line-length" => 76]));
 ?>
 --EXPECTF--
-Warning: iconv_mime_encode(): The "line-length" option must be greater than 0 in %s on line %d
+Warning: iconv_mime_encode(): Buffer length exceeded in %s on line %d
 bool(false)
 
-Warning: iconv_mime_encode(): The "line-length" option must be greater than 0 in %s on line %d
+Warning: iconv_mime_encode(): Buffer length exceeded in %s on line %d
 bool(false)
 
-Warning: iconv_mime_encode(): The "line-length" option must be greater than 0 in %s on line %d
+Warning: iconv_mime_encode(): Buffer length exceeded in %s on line %d
 bool(false)
 string(%d) "S: =?UTF-8?B?%s?="
