@@ -13,10 +13,10 @@ $rc = new ReflectionClassConstant(Test::class, 'C');
 $name = &$rc->name;
 try {
     var_dump($rc->getValue());
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot assign string to class constant Test::C of type int
+TypeError: Cannot assign string to class constant Test::C of type int
