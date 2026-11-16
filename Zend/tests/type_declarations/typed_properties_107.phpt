@@ -22,5 +22,6 @@ Test1::$ref = new Test3;
 var_dump(Test1::$ref);
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Implicit conversion from Test3 to string for reference held by property Test2::$str of type string is deprecated in %s on line %d
 string(6) "foobar"

@@ -32,6 +32,9 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Implicit conversion from B to string for property A::$prop of type string is deprecated in %s on line %d
 Error: Object was released while assigning to property A::$prop
+
+Deprecated: Implicit conversion from B to string for property A::$prop of type string is deprecated in %s on line %d
 Error: Object was released while assigning to property A::$prop

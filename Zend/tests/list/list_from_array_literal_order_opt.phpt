@@ -10,7 +10,7 @@ opcache.optimization_level=-1
 <?php
 require __DIR__ . '/list_from_array_literal_order.inc';
 ?>
---EXPECT--
+--EXPECTF--
 -- values before targets
 value 1
 value 2
@@ -53,6 +53,8 @@ boom
 int(0)
 -- a variable that is a reference to a typed property
 construct coerced
+
+Deprecated: Implicit conversion from D to string for reference held by property S::$s of type string is deprecated in %s on line %d
 destruct coerced
 set y
 assigned

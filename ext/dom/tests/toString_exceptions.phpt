@@ -43,16 +43,35 @@ try { $pi->data = $badStr; } catch (Exception $e) { echo "Exception\n"; }
 echo $doc->saveXML();
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Implicit conversion from BadStr to string for property DOMDocument::$encoding of type ?string is deprecated in %s on line %d
 Exception
+
+Deprecated: Implicit conversion from BadStr to string for property DOMDocument::$version of type ?string is deprecated in %s on line %d
 Exception
+
+Deprecated: Implicit conversion from BadStr to string for property DOMDocument::$documentURI of type ?string is deprecated in %s on line %d
 Exception
+
+Deprecated: Implicit conversion from BadStr to string for property DOMAttr::$value of type string is deprecated in %s on line %d
 Exception
+
+Deprecated: Implicit conversion from BadStr to string for property DOMNode::$nodeValue of type ?string is deprecated in %s on line %d
 Exception
+
+Deprecated: Implicit conversion from BadStr to string for property DOMNode::$nodeValue of type ?string is deprecated in %s on line %d
 Exception
+
+Deprecated: Implicit conversion from BadStr to string for property DOMNode::$textContent of type string is deprecated in %s on line %d
 Exception
+
+Deprecated: Implicit conversion from BadStr to string for property DOMCharacterData::$data of type string is deprecated in %s on line %d
 Exception
+
+Deprecated: Implicit conversion from BadStr to string for property DOMNode::$prefix of type string is deprecated in %s on line %d
 Exception
+
+Deprecated: Implicit conversion from BadStr to string for property DOMProcessingInstruction::$data of type string is deprecated in %s on line %d
 Exception
 <?xml version="1.0"?>
 <root xmlns:ns="foo"><node attr="foo"/><node>Text</node><ns:node/><?pi foobar?></root>

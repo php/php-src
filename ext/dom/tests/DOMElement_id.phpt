@@ -37,13 +37,15 @@ echo $dom->saveXML();
 var_dump($dom->getElementById("12345") === $div);
 
 ?>
---EXPECT--
+--EXPECTF--
 string(0) ""
 string(15) "hello & world<>"
 string(0) ""
 string(2) "é"
 string(0) ""
 string(5) "12345"
+
+Deprecated: Implicit conversion from MyStringable to string for property DOMElement::$id of type string is deprecated in %s on line %d
 Exception: foo
 string(5) "12345"
 <?xml version="1.0"?>

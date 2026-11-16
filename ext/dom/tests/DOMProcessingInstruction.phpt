@@ -67,13 +67,15 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 --- Test construction ---
 DOMException: Invalid Character Error
 --- Test fields ---
 string(4) "test"
 string(0) ""
 string(2) "ok"
+
+Deprecated: Implicit conversion from FailingStringable to string for property DOMProcessingInstruction::$data of type string is deprecated in %s on line %d
 Exception: failed in __toString
 string(2) "ok"
 string(5) "12345"

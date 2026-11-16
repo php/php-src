@@ -879,6 +879,28 @@ static zend_never_inline ZEND_COLD void zend_verify_property_type_error(const ze
 	zend_string_release(type_str);
 }
 
+/* Returns false when the error handler threw an exception. */
+static zend_never_inline ZEND_COLD bool zend_object_to_string_property_deprecated(const zend_property_info *info, const zval *property, bool is_ref)
+{
+	const zend_object *obj = Z_OBJ_P(property);
+
+	/* Objects that cannot be converted only get the TypeError */
+	if (!obj->ce->__tostring && obj->handlers->cast_object == zend_std_cast_object_tostring) {
+		return true;
+	}
+
+	zend_string *type_str = zend_type_to_string(info->type);
+	zend_error(E_DEPRECATED, "Implicit conversion from %s to string for %sproperty %pS::$%s of type %pS is deprecated",
+		zend_zval_value_name(property),
+		is_ref ? "reference held by " : "",
+		info->ce->name,
+		zend_get_unmangled_property_name(info->name),
+		type_str);
+	zend_string_release(type_str);
+
+	return !EG(exception);
+}
+
 static zend_never_inline ZEND_COLD void zend_magic_get_property_type_inconsistency_error(const zend_property_info *info, const zval *property)
 {
 	/* we _may_ land here in case reading already errored and runtime cache thus has not been updated (i.e. it contains a valid but unrelated info) */
@@ -1066,6 +1088,10 @@ static zend_always_inline bool i_zend_check_property_type(const zend_property_in
 
 	uint32_t type_mask = ZEND_TYPE_FULL_MASK(info->type);
 	ZEND_ASSERT(!(type_mask & (MAY_BE_CALLABLE|MAY_BE_STATIC|MAY_BE_NEVER|MAY_BE_VOID)));
+	if (UNEXPECTED(Z_TYPE_P(property) == IS_OBJECT) && !strict && (type_mask & MAY_BE_STRING)
+			&& !zend_object_to_string_property_deprecated(info, property, false)) {
+		return 0;
+	}
 	return zend_verify_scalar_type_hint(type_mask, property, strict, false);
 }
 
@@ -4025,6 +4051,10 @@ type_error:
 		if (result < 0) {
 			if (!first_prop) {
 				first_prop = prop;
+				if (UNEXPECTED(Z_TYPE_P(zv) == IS_OBJECT) && (ZEND_TYPE_FULL_MASK(prop->type) & MAY_BE_STRING)
+						&& !zend_object_to_string_property_deprecated(prop, zv, true)) {
+					return 0;
+				}
 				ZVAL_COPY(&coerced_value, zv);
 				if (!zend_verify_weak_scalar_type_hint(
 						ZEND_TYPE_FULL_MASK(prop->type), &coerced_value)) {
