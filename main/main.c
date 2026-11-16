@@ -1949,6 +1949,9 @@ zend_result php_request_startup(void)
 		/* PG(during_request_startup) = 0; */
 
 		php_hash_environment();
+		if (ZEND_HAS_OOM()) {
+			zend_handle_delayed_oom();
+		}
 		zend_activate_modules();
 		PG(modules_activated)=1;
 	} zend_catch {
