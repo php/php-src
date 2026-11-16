@@ -302,6 +302,8 @@ PHP                                                                        NEWS
     (pavimus)
   . Fixed opcache.enable_file_override lookups racing with OPcache restarts
     (pavimus)
+  . Fixed bug GH-25456 (Tracing JIT: wrong values after an inner loop).
+    (Jorg Sowa)
 
 - OpenSSL:
   . Fixed build and test compatibility with OpenSSL 4.0 and 4.1.
