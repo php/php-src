@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Tim=20D=C3=BCsterhus?= <tim@tideways-gmbh.com>
 Date: Fri, 11 Sep 2026 22:45:33 +0200
-Subject: [PATCH 20/25] URL: Fix `lxb_url_serialize_fragment()` without a query
+Subject: [PATCH 20/26] URL: Fix `lxb_url_serialize_fragment()` without a query
  (#410)
 
 The `lxb_url_serialize_fragment()` function checked if the query contained data

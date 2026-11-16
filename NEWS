@@ -59,6 +59,9 @@ PHP                                                                        NEWS
     after a dot segment in a path, replacement file drive paths, the output
     encoding used for percent-encoding, the URLSearchParams tail pointer and
     fragment serialization without a query. (alexandre-daubois)
+  . Merge patch lexbor/lexbor@f4cbbcd, reducing the memory used by
+    Dom\HTMLDocument to parse documents with many sibling nodes.
+    (Nicolas Grekas)
 
 - LibXML:
   . Clear the libxml last error in libxml_use_internal_errors(false).
