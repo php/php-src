@@ -131,6 +131,10 @@ PHP                                                                        NEWS
   . Fixed socket_addrinfo_lookup() rejecting an empty packed hints array.
     (lacatoire)
 
+- SPL:
+  . Fixed memory leak of the static variables of a file loaded by
+    spl_autoload(). (lacatoire)
+
 - Standard:
   . Fixed bug GH-25474 (version_compare() treats large numeric parts as equal
     on 64-bit Windows). (lazerg)
