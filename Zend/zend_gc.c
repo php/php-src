@@ -333,7 +333,8 @@ struct _gc_stack {
 static zend_never_inline gc_stack* gc_stack_next(gc_stack *stack)
 {
 	if (UNEXPECTED(!stack->next)) {
-		gc_stack *segment = emalloc(sizeof(gc_stack));
+		/* Traversal must not bail out on the request memory limit after changing refcounts. */
+		gc_stack *segment = pemalloc(sizeof(gc_stack), true);
 		segment->prev = stack;
 		segment->next = NULL;
 		stack->next = segment;
@@ -371,7 +372,7 @@ static void gc_stack_free(gc_stack *stack)
 
 	while (p) {
 		stack = p->next;
-		efree(p);
+		pefree(p, true);
 		p = stack;
 	}
 }
@@ -1943,7 +1944,7 @@ static zend_never_inline void gc_call_destructors_in_fiber(uint32_t end)
 	}
 }
 
-ZEND_API int zend_gc_collect_cycles(void)
+static int zend_gc_collect_cycles_impl(gc_stack *stack)
 {
 	int total_count = 0;
 	bool should_rerun_gc = 0;
@@ -1961,10 +1962,6 @@ rerun_gc:
 		zend_refcounted *p;
 		uint32_t gc_flags = 0;
 		uint32_t idx, end;
-		gc_stack stack;
-
-		stack.prev = NULL;
-		stack.next = NULL;
 
 		if (GC_G(gc_active)) {
 			GC_G(collector_time) += zend_hrtime() - start_time;
@@ -1976,17 +1973,16 @@ rerun_gc:
 		GC_G(gc_active) = 1;
 
 		GC_TRACE("Marking roots");
-		gc_mark_roots(&stack);
+		gc_mark_roots(stack);
 		GC_TRACE("Scanning roots");
-		gc_scan_roots(&stack);
+		gc_scan_roots(stack);
 
 		GC_TRACE("Collecting roots");
-		count = gc_collect_roots(&gc_flags, &stack);
+		count = gc_collect_roots(&gc_flags, stack);
 
 		if (!GC_G(num_roots)) {
 			/* nothing to free */
 			GC_TRACE("Nothing to free");
-			gc_stack_free(&stack);
 			GC_G(gc_active) = 0;
 			goto finish;
 		}
@@ -2035,7 +2031,7 @@ rerun_gc:
 			while (idx != end) {
 				if (GC_IS_DTOR_GARBAGE(current->ref)) {
 					p = GC_GET_PTR(current->ref);
-					count -= gc_remove_nested_data_from_buffer(p, current, &stack);
+					count -= gc_remove_nested_data_from_buffer(p, current, stack);
 				}
 				current++;
 				idx++;
@@ -2057,8 +2053,6 @@ rerun_gc:
 				return 0;
 			}
 		}
-
-		gc_stack_free(&stack);
 
 		/* Destroy zvals. The root buffer may be reallocated. */
 		GC_TRACE("Destroying zvals");
@@ -2142,6 +2136,32 @@ finish:
 
 	GC_G(collector_time) += zend_hrtime() - start_time;
 	return total_count;
+}
+
+static int zend_gc_collect_cycles_with_stack(gc_stack *stack)
+{
+	int count;
+
+	zend_try {
+		count = zend_gc_collect_cycles_impl(stack);
+	} zend_catch {
+		gc_stack_free(stack);
+		zend_bailout();
+	} zend_end_try();
+
+	gc_stack_free(stack);
+	return count;
+}
+
+ZEND_API int zend_gc_collect_cycles(void)
+{
+	/* Keep the modified stack outside the function containing setjmp(), so it remains
+	 * valid when freeing traversal storage after a bailout. */
+	gc_stack stack;
+
+	stack.prev = NULL;
+	stack.next = NULL;
+	return zend_gc_collect_cycles_with_stack(&stack);
 }
 
 ZEND_API void zend_gc_get_status(zend_gc_status *status)
