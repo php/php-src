@@ -223,6 +223,8 @@ PHP                                                                        NEWS
     user filter). (Edmond)
   . Fixed bug GH-15701 (Build failure: incompatible funopen() seeker pointer
     type on 32-bit platforms). (Kamil Tekiela)
+  . Fixed bug GH-25464 (Segfault reading from php://memory after
+    stream_filter_remove() on a read filter). (David Carlier)
 
 - XSL:
   . Fixed a crash in XSLTProcessor::transformToDoc() when the return class
