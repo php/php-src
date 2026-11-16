@@ -12,7 +12,8 @@ if (getenv("USE_ZEND_ALLOC") === "0") die("skip Zend MM disabled");
 memory_limit=2M
 --FILE--
 <?php
-$str = str_repeat("a", (int)(1024 * 1024 * 1.25));
+// Leave less memory than lxb_dom_document_init() needs, whatever the build already uses
+$str = str_repeat("a", 2 * 1024 * 1024 - memory_get_usage() - 250 * 1024);
 Dom\HTMLDocument::createFromString("<p>x</p>");
 ?>
 --EXPECTF--
