@@ -762,6 +762,7 @@ static int _php_filter_validate_ipv6(const char *str, size_t str_len, int ip[8])
 {
 	int compressed_pos = -1;
 	int blocks = 0;
+	int max_blocks = 8;
 	unsigned int num, n;
 	int i;
 	const char *ipv4;
@@ -794,7 +795,8 @@ static int _php_filter_validate_ipv6(const char *str, size_t str_len, int ip[8])
 			str_len--;
 		}
 
-		blocks = 2;
+		/* the IPv4 part takes up the last two 16-bit blocks */
+		max_blocks = 6;
 	}
 
 	end = str + str_len;
@@ -809,12 +811,12 @@ static int _php_filter_validate_ipv6(const char *str, size_t str_len, int ip[8])
 				if (compressed_pos >= 0) {
 					return 0;
 				}
-				if (ip && blocks < 8) {
+				if (ip && blocks < max_blocks) {
 					ip[blocks] = -1;
 				}
 				compressed_pos = blocks++; /* :: means 1 or more 16-bit 0 blocks */
 				if (++str == end) {
-					if (blocks > 8) {
+					if (blocks > max_blocks) {
 						return 0;
 				}
 					goto fixup_ip;
@@ -838,40 +840,38 @@ static int _php_filter_validate_ipv6(const char *str, size_t str_len, int ip[8])
 			n++;
 			str++;
 		}
-		if (ip && blocks < 8) {
+		if (ip && blocks < max_blocks) {
 			ip[blocks] = num;
 		}
 		if (n < 1 || n > 4) {
 			return 0;
 		}
-		if (++blocks > 8)
+		if (++blocks > max_blocks)
 			return 0;
 	}
 
 fixup_ip:
-	if (ip && ipv4) {
-		for (i = 0; i < 5; i++) {
-			ip[i] = 0;
-}
-		ip[i++] = 0xffff;
-		ip[i++] = 256 * ip4elm[0] + ip4elm[1];
-		ip[i++] = 256 * ip4elm[2] + ip4elm[3];
-	} else if (ip && compressed_pos >= 0 && blocks <= 8) {
-		int offset = 8 - blocks;
-		for (i = 7; i > compressed_pos + offset; i--) {
+	if (ip && compressed_pos >= 0 && blocks <= max_blocks) {
+		int offset = max_blocks - blocks;
+		for (i = max_blocks - 1; i > compressed_pos + offset; i--) {
 			ip[i] = ip[i - offset];
 		}
 		for (i = compressed_pos + offset; i >= compressed_pos; i--) {
 			ip[i] = 0;
 		}
 	}
+	if (ip && ipv4) {
+		ip[6] = 256 * ip4elm[0] + ip4elm[1];
+		ip[7] = 256 * ip4elm[2] + ip4elm[3];
+	}
 
-	return (compressed_pos >= 0 && blocks <= 8) || blocks == 8;
+	return (compressed_pos >= 0 && blocks <= max_blocks) || blocks == max_blocks;
 }
 /* }}} */
 
-/* From the tables in RFC 6890 - Special-Purpose IP Address Registriesi
- * Including errata: https://www.rfc-editor.org/errata_search.php?rfc=6890&rec_status=1 */
+/* From the tables in RFC 6890 - Special-Purpose IP Address Registries
+ * Including errata: https://www.rfc-editor.org/errata_search.php?rfc=6890&rec_status=1
+ * Also treats multicast as reserved, as it is not a unicast destination */
 static bool ipv4_get_status_flags(const int ip[8], bool *global, bool *reserved, bool *private)
 {
 	*global = false;
@@ -916,6 +916,9 @@ static bool ipv4_get_status_flags(const int ip[8], bool *global, bool *reserved,
 		/* RFC 5737 - Documentation */
 	} else if (ip[0] == 203 && ip[1] == 0 && ip[2] == 113) {
 		/* RFC 5737 - Documentation */
+	} else if (ip[0] >= 224 && ip[0] <= 239) {
+		/* RFC 5771 - Multicast */
+		*reserved = true;
 	} else if (ip[0] >= 240 && ip[1] <= 255) {
 		/* RFC 1122 - Reserved */
 		*reserved = true;
@@ -929,7 +932,20 @@ static bool ipv4_get_status_flags(const int ip[8], bool *global, bool *reserved,
 	return true;
 }
 
-/* From the tables in RFC 6890 - Special-Purpose IP Address Registries */
+/* Flags of an IPv4 address embedded in an IPv6 address as two 16-bit blocks */
+static void ipv6_get_embedded_ipv4_status_flags(int high, int low, bool *global, bool *reserved, bool *private)
+{
+	const int ip4[8] = { high >> 8, high & 0xff, low >> 8, low & 0xff };
+
+	if (!ipv4_get_status_flags(ip4, global, reserved, private)) {
+		/* not a special-purpose IPv4 address */
+		*global = true;
+	}
+}
+
+/* From the tables in RFC 6890 - Special-Purpose IP Address Registries, plus a few later blocks.
+ * Also treats multicast as reserved, deprecated site-local addresses as private, and addresses
+ * embedding an IPv4 address according to that address. */
 static bool ipv6_get_status_flags(const int ip[8], bool *global, bool *reserved, bool *private)
 {
 	*global = false;
@@ -942,12 +958,19 @@ static bool ipv6_get_status_flags(const int ip[8], bool *global, bool *reserved,
 	} else if (ip[0] == 0 && ip[1] == 0 && ip[2] == 0 && ip[3] == 0 && ip[4] == 0 && ip[5] == 0 && ip[6] == 0 && ip[7] == 1) {
 		/* RFC 4291 - Loopback Address */
 		*reserved = true;
-	} else if (ip[0] == 0x0064 && ip[1] == 0xff9b) {
-		/* RFC 6052 - IPv4-IPv6 Translation */
-		*global = true;
-	} else if (ip[0] == 0 && ip[1] == 0 && ip[2] == 0 && ip[3] == 0 && ip[4] == 0 && ip[5] == 0xffff) {
-		/* RFC 4291 - IPv4-mapped Address */
+	} else if (ip[0] == 0 && ip[1] == 0 && ip[2] == 0 && ip[3] == 0
+			&& ((ip[4] == 0 && (ip[5] == 0 || ip[5] == 0xffff)) || (ip[4] == 0xffff && ip[5] == 0))) {
+		/* RFC 4291 - IPv4-Compatible (deprecated) and IPv4-mapped Address, RFC 2765 - IPv4-translated Address:
+		 * reserved, and private if the embedded IPv4 address is */
+		ipv6_get_embedded_ipv4_status_flags(ip[6], ip[7], global, reserved, private);
+		*global = false;
 		*reserved = true;
+	} else if (ip[0] == 0x0064 && ip[1] == 0xff9b && ip[2] == 0 && ip[3] == 0 && ip[4] == 0 && ip[5] == 0) {
+		/* RFC 6052 - IPv4-IPv6 Translation, classified as the embedded IPv4 address */
+		ipv6_get_embedded_ipv4_status_flags(ip[6], ip[7], global, reserved, private);
+	} else if (ip[0] == 0x0064 && ip[1] == 0xff9b && ip[2] == 0x0001) {
+		/* RFC 8215 - Local-Use IPv4/IPv6 Translation */
+		*private = true;
 	} else if (ip[0] == 0x0100 && ip[1] == 0 && ip[2] == 0 && ip[3] == 0) {
 		/* RFC 6666 - Discard-Only Address Block */
 	} else if (ip[0] == 0x2001 && ip[1] == 0x0000) {
@@ -961,13 +984,25 @@ static bool ipv6_get_status_flags(const int ip[8], bool *global, bool *reserved,
 	} else if (ip[0] == 0x2001 && ip[1] >= 0x0010 && ip[1] <= 0x001f) {
 		/* RFC 4843 - ORCHID */
 	} else if (ip[0] == 0x2002) {
-		/* RFC 3056 - 6to4 */
+		/* RFC 3056 - 6to4, not global (RFC 7526), private or reserved if the embedded IPv4 address is */
+		ipv6_get_embedded_ipv4_status_flags(ip[1], ip[2], global, reserved, private);
+		*global = false;
 	} else if (ip[0] >= 0xfc00 && ip[0] <= 0xfdff) {
 		/* RFC 4193 - Unique-Local */
 		*private = true;
 	} else if (ip[0] >= 0xfe80 && ip[0] <= 0xfebf) {
 		/* RFC 4291 - Linked-Scoped Unicast */
 		*reserved = true;
+	} else if (ip[0] >= 0xfec0 && ip[0] <= 0xfeff) {
+		/* RFC 3879 - Site-Local Unicast (deprecated) */
+		*private = true;
+	} else if (ip[0] >= 0xff00) {
+		/* RFC 4291 - Multicast */
+		*reserved = true;
+	} else if (ip[0] == 0x3fff && ip[1] <= 0x0fff) {
+		/* RFC 9637 - Documentation */
+	} else if (ip[0] == 0x5f00) {
+		/* RFC 9602 - Segment Routing (SRv6) SIDs */
 	} else {
 		return false;
 	}

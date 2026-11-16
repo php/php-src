@@ -10,5 +10,5 @@ var_dump(filter_var('0:0:0:0:0:0:0:1', FILTER_VALIDATE_IP, FILTER_FLAG_NO_RES_RA
 ?>
 --EXPECT--
 bool(false)
-string(18) "::ffff:192.168.1.1"
+bool(false)
 bool(false)
