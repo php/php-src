@@ -88,6 +88,9 @@ BEGIN_EXTERN_C()
 #ifndef InterlockedCompareExchange
 #define InterlockedCompareExchange _InterlockedCompareExchange
 #endif
+#ifndef InterlockedExchangeAdd
+#define InterlockedExchangeAdd _InterlockedExchangeAdd
+#endif
 
 #define ZEND_ATOMIC_BOOL_INIT(obj, desired) ((obj)->value = (desired))
 #define ZEND_ATOMIC_INT_INIT(obj, desired)  ((obj)->value = (desired))
@@ -101,6 +104,14 @@ static zend_always_inline bool zend_atomic_bool_exchange_ex(zend_atomic_bool *ob
 
 static zend_always_inline int zend_atomic_int_exchange_ex(zend_atomic_int *obj, int desired) {
 	return (int) InterlockedExchange(&obj->value, desired);
+}
+
+static zend_always_inline int zend_atomic_int_fetch_add_ex(zend_atomic_int *obj, int value) {
+	return (int) InterlockedExchangeAdd(&obj->value, value);
+}
+
+static zend_always_inline int zend_atomic_int_fetch_sub_ex(zend_atomic_int *obj, int value) {
+	return (int) InterlockedExchangeAdd(&obj->value, -value);
 }
 
 static zend_always_inline bool zend_atomic_bool_compare_exchange_ex(zend_atomic_bool *obj, bool *expected, bool desired) {
@@ -158,6 +169,14 @@ static zend_always_inline int zend_atomic_int_exchange_ex(zend_atomic_int *obj, 
 	return __c11_atomic_exchange(&obj->value, desired, __ATOMIC_SEQ_CST);
 }
 
+static zend_always_inline int zend_atomic_int_fetch_add_ex(zend_atomic_int *obj, int value) {
+	return __c11_atomic_fetch_add(&obj->value, value, __ATOMIC_SEQ_CST);
+}
+
+static zend_always_inline int zend_atomic_int_fetch_sub_ex(zend_atomic_int *obj, int value) {
+	return __c11_atomic_fetch_sub(&obj->value, value, __ATOMIC_SEQ_CST);
+}
+
 static zend_always_inline bool zend_atomic_bool_compare_exchange_ex(zend_atomic_bool *obj, bool *expected, bool desired) {
 	return __c11_atomic_compare_exchange_strong(&obj->value, expected, desired, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 }
@@ -202,6 +221,14 @@ static zend_always_inline int zend_atomic_int_exchange_ex(zend_atomic_int *obj, 
 	int prev = false;
 	__atomic_exchange(&obj->value, &desired, &prev, __ATOMIC_SEQ_CST);
 	return prev;
+}
+
+static zend_always_inline int zend_atomic_int_fetch_add_ex(zend_atomic_int *obj, int value) {
+	return __atomic_fetch_add(&obj->value, value, __ATOMIC_SEQ_CST);
+}
+
+static zend_always_inline int zend_atomic_int_fetch_sub_ex(zend_atomic_int *obj, int value) {
+	return __atomic_fetch_sub(&obj->value, value, __ATOMIC_SEQ_CST);
 }
 
 static zend_always_inline bool zend_atomic_bool_compare_exchange_ex(zend_atomic_bool *obj, bool *expected, bool desired) {
@@ -258,6 +285,14 @@ static zend_always_inline int zend_atomic_int_exchange_ex(zend_atomic_int *obj, 
 	 */
 	__sync_synchronize();
 	return prev;
+}
+
+static zend_always_inline int zend_atomic_int_fetch_add_ex(zend_atomic_int *obj, int value) {
+	return __sync_fetch_and_add(&obj->value, value);
+}
+
+static zend_always_inline int zend_atomic_int_fetch_sub_ex(zend_atomic_int *obj, int value) {
+	return __sync_fetch_and_sub(&obj->value, value);
 }
 
 static zend_always_inline bool zend_atomic_bool_compare_exchange_ex(zend_atomic_bool *obj, bool *expected, bool desired) {
@@ -362,6 +397,18 @@ static zend_always_inline int zend_atomic_int_exchange_ex(zend_atomic_int *obj, 
 	return prev;
 }
 
+static zend_always_inline int zend_atomic_int_fetch_add_ex(zend_atomic_int *obj, int value) {
+	int prev = obj->value;
+	obj->value = prev + value;
+	return prev;
+}
+
+static zend_always_inline int zend_atomic_int_fetch_sub_ex(zend_atomic_int *obj, int value) {
+	int prev = obj->value;
+	obj->value = prev - value;
+	return prev;
+}
+
 #endif
 
 ZEND_API void zend_atomic_bool_init(zend_atomic_bool *obj, bool desired);
@@ -375,6 +422,9 @@ ZEND_API bool zend_atomic_int_compare_exchange(zend_atomic_int *obj, int *expect
 
 ZEND_API void zend_atomic_bool_store(zend_atomic_bool *obj, bool desired);
 ZEND_API void zend_atomic_int_store(zend_atomic_int *obj, int desired);
+
+ZEND_API int zend_atomic_int_fetch_add(zend_atomic_int *obj, int value);
+ZEND_API int zend_atomic_int_fetch_sub(zend_atomic_int *obj, int value);
 
 #if defined(ZEND_WIN32) || defined(HAVE_SYNC_ATOMICS)
 /* On these platforms it is non-const due to underlying APIs. */
