@@ -934,6 +934,18 @@ ir_ref ir_var(ir_ctx *ctx, ir_type type, ir_ref region, const char *name);
 ir_ref ir_var_ex(ir_ctx *ctx, ir_type type, ir_ref region, ir_str name);
 
 /* IR Binding */
+/*
+ * A negative "var" binds "def" to the special spill slot at spill_base-var.
+ * The register allocator keeps a value in its bound slot only while it sees no
+ * conflicting access to that slot in the value's live range: a STORE or LOAD
+ * that may address it, a CALL that receives a pointer derived from spill_base,
+ * or an RSTORE of spill_base. Otherwise the value is spilled to an ordinary
+ * slot, and code where that value is also live at an ENTRY is rejected with
+ * IR_ERROR_BOUND_SLOT_CONFLICT. Writes it cannot see remain the caller's
+ * responsibility: a callee that reaches the frame through the spill_base
+ * register or a global, or through a frame pointer reloaded from memory, must
+ * not write a bound slot while a value bound to it is live.
+ */
 ir_ref ir_bind(ir_ctx *ctx, ir_ref var, ir_ref def);
 ir_ref ir_binding_find(const ir_ctx *ctx, ir_ref ref);
 
@@ -1198,6 +1210,7 @@ IR_ALWAYS_INLINE void *ir_jit_compile(ir_ctx *ctx, int opt_level, size_t *size)
 #define IR_ERROR_LINK                            4
 #define IR_ERROR_ENCODE                          5
 #define IR_ERROR_TOO_LARGE                       6
+#define IR_ERROR_BOUND_SLOT_CONFLICT             7
 
 /* IR Memmory Allocation */
 #ifndef ir_mem_malloc
