@@ -21,12 +21,14 @@ typedef struct _zend_test_fiber zend_test_fiber;
 
 struct _zend_test_fiber {
 	zend_object std;
-	uint8_t flags;
 	zend_fiber_context context;
 	zend_fiber_context *caller;
 	zend_fiber_context *previous;
 	zend_test_fiber *target;
-	zend_fcall_info fci;
+	uint8_t flags;
+	uint32_t param_count;
+	zval *params;
+	HashTable *named_params;
 	zend_fcall_info_cache fci_cache;
 	zval result;
 };
