@@ -200,6 +200,10 @@ dnl Check for support for implicit fallthrough level 1, also add after previous
 dnl CFLAGS as level 3 is enabled in -Wextra.
 AX_CHECK_COMPILE_FLAG([-Wimplicit-fallthrough=1],
   [CFLAGS="$CFLAGS -Wimplicit-fallthrough=1"])
+dnl Add -Wno-unused-but-set-global (after previous CFLAGS as the warning is
+dnl enabled by -Wall)
+AX_CHECK_COMPILE_FLAG([-Wno-unused-but-set-global],
+  [CFLAGS="$CFLAGS -Wno-unused-but-set-global"])
 AX_CHECK_COMPILE_FLAG([-Wduplicated-cond],
   [CFLAGS="-Wduplicated-cond $CFLAGS"])
 AX_CHECK_COMPILE_FLAG([-Wlogical-op],
