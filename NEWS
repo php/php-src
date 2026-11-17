@@ -36,6 +36,9 @@ PHP                                                                        NEWS
   . Fixed AST export of by-reference property hooks. (Jorg Sowa)
   . Fixed AST export of property hook parameter lists and attributes.
     (Jorg Sowa)
+  . Fixed object_properties_load() adding integer keys to property tables, which
+    made the properties unreadable and clone hit an assertion.
+    (Nicolas Grekas)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
