@@ -111,6 +111,9 @@ PHP                                                                        NEWS
 - Reflection:
   . Fix trampoline leak when object construction fails for lazy object.
     (ndossche)
+  . Fixed ReflectionMethod::getClosure() returning a closure for abstract
+    methods, which crashed when called for the ones of internal classes.
+    (Nicolas Grekas)
 
 - Session:
   . Fixed session upload progress to respect session.use_only_cookies.
