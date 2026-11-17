@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:enc12="http://www.w3.org/2003/05/soap-encoding"
+             xmlns:tns="urn:arraysize"
+             targetNamespace="urn:arraysize">
+
+  <types>
+    <xsd:schema targetNamespace="urn:arraysize">
+      <xsd:import namespace="http://www.w3.org/2003/05/soap-encoding"/>
+
+      <xsd:complexType name="ItemTypeArray">
+        <xsd:complexContent>
+          <xsd:restriction base="enc12:Array">
+            <xsd:attribute ref="enc12:itemType" wsdl:itemType="xsd:string"/>
+            <xsd:attribute ref="enc12:arraySize" wsdl:arraySize=""/>
+          </xsd:restriction>
+        </xsd:complexContent>
+      </xsd:complexType>
+
+      <xsd:complexType name="SizeOnlyArray">
+        <xsd:complexContent>
+          <xsd:restriction base="enc12:Array">
+            <xsd:attribute ref="enc12:arraySize" wsdl:arraySize=""/>
+          </xsd:restriction>
+        </xsd:complexContent>
+      </xsd:complexType>
+    </xsd:schema>
+  </types>
+
+  <message name="emptyRequest"/>
+  <message name="itemTypeResponse"><part name="result" type="tns:ItemTypeArray"/></message>
+  <message name="sizeOnlyResponse"><part name="result" type="tns:SizeOnlyArray"/></message>
+
+  <portType name="ArrayPortType">
+    <operation name="itemType">
+      <input message="tns:emptyRequest"/>
+      <output message="tns:itemTypeResponse"/>
+    </operation>
+    <operation name="sizeOnly">
+      <input message="tns:emptyRequest"/>
+      <output message="tns:sizeOnlyResponse"/>
+    </operation>
+  </portType>
+
+  <binding name="ArrayBinding" type="tns:ArrayPortType">
+    <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="itemType">
+      <soap:operation soapAction="itemType"/>
+      <input><soap:body use="encoded" namespace="urn:arraysize" encodingStyle="http://www.w3.org/2003/05/soap-encoding"/></input>
+      <output><soap:body use="encoded" namespace="urn:arraysize" encodingStyle="http://www.w3.org/2003/05/soap-encoding"/></output>
+    </operation>
+    <operation name="sizeOnly">
+      <soap:operation soapAction="sizeOnly"/>
+      <input><soap:body use="encoded" namespace="urn:arraysize" encodingStyle="http://www.w3.org/2003/05/soap-encoding"/></input>
+      <output><soap:body use="encoded" namespace="urn:arraysize" encodingStyle="http://www.w3.org/2003/05/soap-encoding"/></output>
+    </operation>
+  </binding>
+
+  <service name="ArrayService">
+    <port name="ArrayPort" binding="tns:ArrayBinding">
+      <soap:address location="test://"/>
+    </port>
+  </service>
+</definitions>

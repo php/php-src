@@ -125,6 +125,11 @@ PHP                                                                        NEWS
     precisely convert the given number. (Sjoerd Langkemper)
   . Added error_include_args INI option to make the display of function
     arguments consistent in error output. (Calvin Buckley)
+  . Fixed GHSA-8mjj-2r7p-4hg2 (Use-after-free in magic method backtraces can
+    lead to remote code execution). (CVE-2026-129474) (Arnaud Le Blanc)
+  . Fixed GHSA-2fjv-p558-g82m (Use-after-free via repopulation of
+    last_fatal_error_backtrace global after shutdown). (CVE-2026-129182)
+    (Arnaud Le Blanc, Jakub Zelenka)
 
 - BCMath:
   . Added NUL-byte validation to BCMath functions. (jorgsowa)
@@ -137,6 +142,10 @@ PHP                                                                        NEWS
 - Calendar:
   . Fixed *tojd() functions and cal_to_jd() truncating arguments outside the
     int range instead of rejecting them. (lacatoire)
+
+- CGI:
+  . Fixed GHSA-5j3f-64r7-f564 (PHP-CGI out-of-bounds read and write during
+    PATH_INFO correction). (CVE-2026-129538) (Jakub Zelenka)
 
 - CLI:
   . Fixed bug GH-24697 (PHP_HTTP_PARSER_STRICT build option doesn't work).
@@ -176,6 +185,8 @@ PHP                                                                        NEWS
     in-process module restart). (Lazizbek Ergashev)
   . Added Time\Duration. (timwolla, Derick)
   . Fixed bug GH-11368 (idate() doesn't work for the year -1). (Derick)
+  . Fixed GHSA-gr4f-wgx5-jpfv (Timezone cache use-after-free can lead to remote
+    code execution). (CVE-2026-129496) (Ilija Tovilo)
 
 - DBA:
   . Fixed bug GH-24641 (ndbm backend never checks dbm_open() return value,
@@ -209,6 +220,8 @@ PHP                                                                        NEWS
   . Fixed Dom\Notation nodes missing tree connection, so that ownerDocument,
     parentNode, isConnected and baseURI now return correct values, and
     textContent returns NULL per the DOM specification. (jordikroon)
+  . Fixed GHSA-x8r7-mg3g-74hg (Double free during DOM XML serialization).
+    (CVE-2026-129501) (ndossche)
 
 - Embed:
   . Made php-cli functionality available in embed builds. (henderkes)
@@ -233,9 +246,8 @@ PHP                                                                        NEWS
   . Fixed crash and stack memory disclosure in the worker output logging with
     a pool name longer than the message prefix buffer or log_limit.
     (Martin Mirchev)
-  . Fixed bug GH-24046 (FPM worker stdio pipe fd closed twice when a child
-    process outlives the worker, breaking a later worker's stdio).
-    (Ian P. Christian, ndossche)
+  . Fixed GHSA-jm4m-qfqx-967m (PHP-FPM epoll use-after-free can lead to local
+    privilege escalation). (CVE-2026-129291) (Ian P. Christian, ndossche)
   . Fixed memory leaks of the _GET string on the status page error and HEAD
     request paths. (Marcel Hernandez)
   . Fixed use-after-free of the scoreboard copy when logging invalid status
@@ -244,6 +256,10 @@ PHP                                                                        NEWS
     copy fails. (Marcel Hernandez)
   . Fixed bug GH-24229 (fcgi_close() passes shutdown() a literal 1, which is
     SHUT_RD in WASI). (Ryosuke Ishibashi)
+  . Fixed GHSA-qc49-hpvq-g2w6 (PHP-FPM request smuggling through an unread HTTP
+    request body). (CVE-2026-129289) (Jakub Zelenka)
+  . Fixed GHSA-3mg3-cr28-46gc (PHP-FPM status endpoint XSS via unescaped user
+    and script fields). (CVE-2026-129292) (Jakub Zelenka)
 
 - FTP:
   . Fix double free in ext/ftp data_accept() on accept failure. (alepacheco)
@@ -571,6 +587,8 @@ PHP                                                                        NEWS
     when building a phar. (ndossche)
   . Mark Phar::buildFromIterator() base directory argument as a path.
     (ndossche)
+  . Fixed GHSA-68fq-fh7h-f8gr (PHAR OpenSSL signature bypass via algorithm
+    downgrade). (CVE-2026-128090) (Alexandre Daubois)
 
 - PHPDBG:
   . Fix wrong command names. (ndossche, Weilin Du)
@@ -605,8 +623,6 @@ PHP                                                                        NEWS
     (Sjoerd Langkemper)
   . Fixed session_write_close() keeping the save handler open when the
     session data cannot be encoded. (Ilia Alshanetsky)
-  . Fixed session data loss in the files save handler when writing the session
-    file fails after it was already truncated. (Ilia Alshanetsky)
   . Fixed bug GH-23056 (missing handler name in session write warning).
     (lazerg)
   . SessionHandler::validateId() is now implemented, so
@@ -629,6 +645,12 @@ PHP                                                                        NEWS
     session.save_path uses the dirdepth prefix. (jorgsowa)
   . Changed defaults of session.use_strict_mode (now 1), session.cookie_httponly
     (now 1) and session.cookie_samesite (now "Lax"). (jorgsowa)
+  . Fixed GHSA-fm2m-fjf5-v3cp (Partially overwritten session files can lead to
+    remote code execution). (CVE-2026-126714) (Ilija Tovilo)
+  . Fixed GHSA-658j-r8rw-q6mx (Session serializer mismatch can lead to remote
+    code execution). (CVE-2026-115560) (Arnaud Le Blanc)
+  . Fixed GHSA-g3vh-838c-65v7 (Use-after-free after interrupted session
+    shutdown). (CVE-2026-129481) (Arnaud Le Blanc, Jakub Zelenka)
 
 - Shmop:
   . Fixed bug GH-9945 (shmop_open() silently truncates keys outside the key_t
@@ -672,6 +694,10 @@ PHP                                                                        NEWS
   . WSDL/XML Schema parsing now rejects out-of-range integer values for
     occurrence constraints and integer restriction facets. Negative minOccurs
     and maxOccurs values are rejected as well. (Weilin Du)
+  . Fixed GHSA-q23r-hr55-xmpg (SOAP information disclosure through malformed
+    array dimensions). (CVE-2026-15353) (Alexandre Daubois)
+  . Fixed GHSA-4646-p932-gw34 (SOAP use-after-free when processing DTD entity
+    references). (CVE-2026-129506) (Jakub Zelenka)
 
 - Sockets:
   . Fixed bug GH-24748 (socket_set_option() crashes with declared object
@@ -844,6 +870,10 @@ PHP                                                                        NEWS
     outside the range from -2147483648 to 2147483647). (Weilin Du)
   . Fixed bug GH-20862 (null pointer dereference in
     php_mail_detect_multiple_crlf via error_log). (jordikroon)
+  . Fixed GHSA-f6gg-rchx-xw8j (Mixed-case HTTPS and FTPS URLs can expose data
+    in plaintext). (CVE-2026-128064) (Jakub Zelenka)
+  . Fixed GHSA-mmf9-xm3v-hg2x (Denial of service through folded HTTP response
+    headers). (CVE-2026-127960) (Jakub Zelenka)
 
 - Streams:
   . Fixed bug GH-24508 (HTTP wrapper leaks the dechunk filter when header
@@ -889,6 +919,8 @@ PHP                                                                        NEWS
   . Added Uri\Rfc3986\Uri::getHostType() and Uri\WhatWg\Url::getHostType().
     (kocsismate)
   . Added Uri\Rfc3986\UriBuilder. (kocsismate)
+  . Fixed GHSA-mg3p-mxj9-g2mm (Incorrect RFC 3986 URI serialization for
+    oversized input). (CVE-2026-129438) (Tim Düsterhus, Alexandre Daubois)
 
 - Windows:
   . Fixed bug GH-25009 (GetConsoleTitleW() buffer size passed in bytes).

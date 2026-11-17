@@ -474,7 +474,8 @@ SAPI_API void sapi_deactivate_module(void)
 	zend_llist_destroy(&SG(sapi_headers).headers);
 	if (SG(request_info).request_body) {
 		SG(request_info).request_body = NULL;
-	} else if (SG(server_context)) {
+	}
+	if (SG(server_context)) {
 		if (!SG(post_read)) {
 			/* make sure we've consumed all request input data */
 			char dummy[SAPI_POST_BLOCK_SIZE];
