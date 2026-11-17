@@ -1635,6 +1635,9 @@ PHP_INTL_FUNCTION_WITH_ERROR_RESET(locale_lookup)
 	INTL_CHECK_LOCALE_LEN(loc_range_len);
 
 	if( !hash_arr || zend_hash_num_elements( hash_arr ) == 0 ) {
+		if (fallback_loc_str) {
+			RETURN_STR_COPY(fallback_loc_str);
+		}
 		RETURN_EMPTY_STRING();
 	}
 

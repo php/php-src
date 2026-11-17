@@ -64,6 +64,8 @@ PHP                                                                        NEWS
   . Fixed NumberFormatter::getSymbol(), setSymbol(), getAttribute() and
     setAttribute() accepting out-of-range values that truncate to a valid one.
     (Jorg Sowa)
+  . Fixed Locale::lookup() ignoring the default locale when the language tag
+    list is empty. (Weilin Du)
 
 - JSON:
   . Fixed json_decode() and json_validate() error messages. (lacatoire)
