@@ -2,10 +2,6 @@
 GH-25474 (version_compare() treats numeric parts > 2147483647 as equal on Windows)
 --CREDITS--
 HFigarella
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
-?>
 --FILE--
 <?php
 var_dump(version_compare('2147483648', '2147483647'));
