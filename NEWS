@@ -53,6 +53,8 @@ PHP                                                                        NEWS
   . Fixed crash when registerNodeClass() is given a class with a constant
     expression that cannot be evaluated; registerNodeClass() now throws the
     evaluation Error instead. (Ilia Alshanetsky)
+  . Fixed bug GH-25501 (querySelector() rejects a selector whose identifier
+    starts with a non-ASCII character). (David Carlier)
 
 - Filter:
   . Fixed stack overflow in filter_var() and filter_var_array() with deeply
