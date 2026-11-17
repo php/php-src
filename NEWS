@@ -62,6 +62,8 @@ PHP                                                                        NEWS
   . Merge patch lexbor/lexbor@f4cbbcd, reducing the memory used by
     Dom\HTMLDocument to parse documents with many sibling nodes.
     (Nicolas Grekas)
+  . Reduced the initial size of the tokenizer pools and of the memory pool
+    caches, saving about 900KB per HTML parse. (Nicolas Grekas)
 
 - LibXML:
   . Clear the libxml last error in libxml_use_internal_errors(false).

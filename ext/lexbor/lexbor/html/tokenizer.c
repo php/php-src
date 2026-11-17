@@ -20,6 +20,14 @@
 
 #define LXB_HTML_TKZ_TEMP_SIZE (4096 * 4)
 
+#ifndef LXB_HTML_TKZ_TOKEN_POOL_SIZE
+    #define LXB_HTML_TKZ_TOKEN_POOL_SIZE 16
+#endif
+
+#ifndef LXB_HTML_TKZ_ATTR_POOL_SIZE
+    #define LXB_HTML_TKZ_ATTR_POOL_SIZE 256
+#endif
+
 
 enum {
     LXB_HTML_TOKENIZER_OPT_TAGS_SELF       = 1 << 0,
@@ -63,14 +71,16 @@ lxb_html_tokenizer_init(lxb_html_tokenizer_t *tkz)
 
     tkz->dobj_token = lexbor_dobject_create();
     status = lexbor_dobject_init(tkz->dobj_token,
-                                 4096, sizeof(lxb_html_token_t));
+                                 LXB_HTML_TKZ_TOKEN_POOL_SIZE,
+                                 sizeof(lxb_html_token_t));
     if (status != LXB_STATUS_OK) {
         return status;
     }
 
     /* Init Token Attributes */
     tkz->dobj_token_attr = lexbor_dobject_create();
-    status = lexbor_dobject_init(tkz->dobj_token_attr, 4096,
+    status = lexbor_dobject_init(tkz->dobj_token_attr,
+                                 LXB_HTML_TKZ_ATTR_POOL_SIZE,
                                  sizeof(lxb_html_token_attr_t));
     if (status != LXB_STATUS_OK) {
         return status;
