@@ -176,6 +176,16 @@ ZEND_GET_MODULE(pcntl)
 
 static void (*orig_interrupt_function)(zend_execute_data *execute_data);
 
+#ifdef ZTS
+/* A process-directed signal (kill(), alarm()) may be delivered to any thread
+ * that does not block it, including one that never ran PHP, such as the
+ * libdispatch workers every macOS process has. Such a thread has no pcntl
+ * globals to queue the signal in, so it is forwarded to the thread that last
+ * installed a handler. */
+static pthread_t pcntl_signal_thread;
+static zend_atomic_bool pcntl_signal_thread_set;
+#endif
+
 #ifdef HAVE_STRUCT_SIGINFO_T
 static void pcntl_signal_handler(int, siginfo_t*, void*);
 static void pcntl_siginfo_to_zval(int, siginfo_t*, zval*);
@@ -241,6 +251,12 @@ PHP_RSHUTDOWN_FUNCTION(pcntl)
 	} ZEND_HASH_FOREACH_END();
 
 	zend_hash_destroy(&PCNTL_G(php_signal_table));
+
+#ifdef ZTS
+	if (zend_atomic_bool_load(&pcntl_signal_thread_set) && pthread_equal(pcntl_signal_thread, pthread_self())) {
+		zend_atomic_bool_store(&pcntl_signal_thread_set, false);
+	}
+#endif
 
 	while (PCNTL_G(head)) {
 		sig = PCNTL_G(head);
@@ -816,6 +832,11 @@ PHP_FUNCTION(pcntl_signal)
 		RETURN_FALSE;
 	}
 
+#ifdef ZTS
+	pcntl_signal_thread = pthread_self();
+	zend_atomic_bool_store(&pcntl_signal_thread_set, true);
+#endif
+
 	/* Add the function name to our signal table */
 	handle = zend_hash_index_update(&PCNTL_G(php_signal_table), signo, handle);
 	Z_TRY_ADDREF_P(handle);
@@ -1297,6 +1318,17 @@ static void pcntl_signal_handler(int signo, siginfo_t *siginfo, void *context)
 static void pcntl_signal_handler(int signo)
 #endif
 {
+#ifdef ZTS
+	/* Without zend signals this handler is installed directly, and PCNTL_G()
+	 * would dereference the missing TSRM storage of a thread that never ran PHP. */
+	if (!tsrm_is_managed_thread()) {
+		if (zend_atomic_bool_load(&pcntl_signal_thread_set)) {
+			pthread_kill(pcntl_signal_thread, signo);
+		}
+		return;
+	}
+#endif
+
 	struct php_pcntl_pending_signal *psig = PCNTL_G(spares);
 	if (!psig) {
 		/* oops, too many signals for us to track, so we'll forget about this one */
