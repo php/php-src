@@ -5771,7 +5771,8 @@ function replacePredefinedConstants(string $targetDirectory, array $constMap, ar
                 continue;
             }
 
-            foreach ($entry->getElementsByTagName("constant") as $manualConstantElement) {
+            $manualConstantElements = $entry->getElementsByTagName("constant");
+            foreach ($manualConstantElements as $manualConstantElement) {
                 if (!$manualConstantElement instanceof DOMElement) {
                     continue;
                 }
@@ -5784,6 +5785,10 @@ function replacePredefinedConstants(string $targetDirectory, array $constMap, ar
                 }
 
                 $documentedConstMap[$manualConstantName] = $manualConstantName;
+
+                if ($manualConstantElements->length > 1) {
+                    continue;
+                }
 
                 if ($row->firstChild instanceof DOMText) {
                     $indentationLevel = strlen(str_replace("\n", "", $row->firstChild->textContent));
