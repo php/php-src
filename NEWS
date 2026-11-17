@@ -129,16 +129,6 @@ PHP                                                                        NEWS
   . Fixed bug GH-25530 (posix_get_last_error() returns an error from a
     previous request). (Artem Ukrainskiy)
 
-- SOAP:
-  . Fixed bug GH-25267 (NULL dereference in to_xml_any() with integer key).
-    (lazerg)
-  . Fixed bug GH-25303 (NULL encoder dereference in to_xml_list() error
-    message). (lazerg)
-
-- Sockets:
-  . Fixed bug GH-25530 (socket_last_error() without a socket returns an error
-    from a previous request). (Artem Ukrainskiy)
-
 - Readline:
   . Fixed incorrect handling of non-ASCII pending_input bytes in readline_info(),
     which could cause readline() to return false prematurely. (Weilin Du)
@@ -157,6 +147,16 @@ PHP                                                                        NEWS
 - Session:
   . Fixed session upload progress to respect session.use_only_cookies.
     (jorgsowa)
+
+- SOAP:
+  . Fixed bug GH-25267 (NULL dereference in to_xml_any() with integer key).
+    (lazerg)
+  . Fixed bug GH-25303 (NULL encoder dereference in to_xml_list() error
+    message). (lazerg)
+
+- Sockets:
+  . Fixed bug GH-25530 (socket_last_error() without a socket returns an error
+    from a previous request). (Artem Ukrainskiy)
 
 - Standard:
   . Fixed bug GH-25474 (version_compare() treats large numeric parts as equal
