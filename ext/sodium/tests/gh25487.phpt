@@ -13,20 +13,16 @@ class A {
 }
 
 $a = new A;
-try {
-    sodium_memzero($a->s);
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
-var_dump($a->s);
+sodium_memzero($a->s);
+var_dump(bin2hex($a->s));
+
+$a->s = str_repeat('x', 4);
+sodium_memzero($a->s);
+var_dump(bin2hex($a->s));
 
 $a->state = sodium_crypto_generichash_init();
-try {
-    sodium_crypto_generichash_final($a->state);
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
-var_dump(strlen($a->state));
+var_dump(strlen(sodium_crypto_generichash_final($a->state)));
+var_dump($a->state === str_repeat("\0", 384));
 
 sodium_memzero($a->nullable);
 var_dump($a->nullable);
@@ -36,10 +32,10 @@ var_dump(strlen(sodium_crypto_generichash_final($a->nullable)));
 var_dump($a->nullable);
 ?>
 --EXPECT--
-Cannot assign null to reference held by property A::$s of type string
-string(6) "secret"
-Cannot assign null to reference held by property A::$state of type string
-int(384)
+string(12) "000000000000"
+string(8) "00000000"
+int(32)
+bool(true)
 NULL
 int(32)
 NULL

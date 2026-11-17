@@ -154,6 +154,27 @@ static void sodium_separate_string(zval *zv) {
 	}
 }
 
+/* Sets an already zeroed string reference to null. A typed property that does
+ * not accept null keeps a string of NUL bytes with the same length instead. */
+static void sodium_clear_string_ref(zval *ref) {
+	zval *zv = Z_REFVAL_P(ref);
+	zend_property_info *prop;
+
+	ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
+	ZEND_REF_FOREACH_TYPE_SOURCES(Z_REF_P(ref), prop) {
+		if (!ZEND_TYPE_ALLOW_NULL(prop->type)) {
+			if (!Z_REFCOUNTED_P(zv) || Z_REFCOUNT_P(zv) > 1) {
+				zend_string *zeroed = zend_string_alloc(Z_STRLEN_P(zv), 0);
+				memset(ZSTR_VAL(zeroed), 0, ZSTR_LEN(zeroed) + 1);
+				Z_TRY_DELREF_P(zv);
+				ZVAL_NEW_STR(zv, zeroed);
+			}
+			return;
+		}
+	} ZEND_REF_FOREACH_TYPE_SOURCES_END();
+	convert_to_null(zv);
+}
+
 PHP_MINIT_FUNCTION(sodium)
 {
 	if (sodium_init() < 0) {
@@ -211,7 +232,7 @@ PHP_FUNCTION(sodium_memzero)
 			sodium_memzero(buf, (size_t) buf_len);
 		}
 	}
-	ZEND_TRY_ASSIGN_REF_NULL(buf_ref);
+	sodium_clear_string_ref(buf_ref);
 }
 
 PHP_FUNCTION(sodium_increment)
@@ -562,11 +583,7 @@ PHP_FUNCTION(sodium_crypto_generichash_final)
 	}
 	sodium_memzero(&state_tmp, sizeof state_tmp);
 	sodium_memzero(state, state_len);
-	ZEND_TRY_ASSIGN_REF_NULL(state_ref);
-	if (UNEXPECTED(EG(exception))) {
-		zend_string_efree(hash);
-		RETURN_THROWS();
-	}
+	sodium_clear_string_ref(state_ref);
 	ZSTR_VAL(hash)[hash_len] = 0;
 
 	RETURN_NEW_STR(hash);
