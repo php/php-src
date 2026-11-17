@@ -546,6 +546,8 @@ static PHP_RSHUTDOWN_FUNCTION(sockets)
 		SOCKETS_G(strerror_buf) = NULL;
 	}
 
+	SOCKETS_G(last_error) = 0;
+
 	return SUCCESS;
 }
 /* }}} */

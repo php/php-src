@@ -100,9 +100,17 @@ PHP                                                                        NEWS
   . Fixed \C being allowed in patterns enabling UTF mode with (*UTF) instead
     of the u modifier. (Jorg Sowa)
 
+- POSIX:
+  . Fixed bug GH-25530 (posix_get_last_error() returns an error from a
+    previous request). (Artem Ukrainskiy)
+
 - SOAP:
   . Fixed bug GH-25267 (NULL dereference in to_xml_any() with integer key).
     (lazerg)
+
+- Sockets:
+  . Fixed bug GH-25530 (socket_last_error() without a socket returns an error
+    from a previous request). (Artem Ukrainskiy)
 
 - Readline:
   . Fixed incorrect handling of non-ASCII pending_input bytes in readline_info(),
