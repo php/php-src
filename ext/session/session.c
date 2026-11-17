@@ -388,14 +388,14 @@ static zend_result php_session_valid_key_len(const char *key, size_t key_len)
 }
 
 /* Validate the full zend_string, including embedded NUL bytes. */
-zend_result php_session_valid_key_ex(const zend_string *key)
+PHPAPI zend_result php_session_valid_key_ex(const zend_string *key)
 {
 	return php_session_valid_key_len(ZSTR_VAL(key), ZSTR_LEN(key));
 }
 
 /* C-string compatibility wrapper. Callers that have a zend_string should use
  * php_session_valid_key_ex() instead. */
-PHPAPI zend_result php_session_valid_key(const char *key)
+PHPAPI ZEND_ATTRIBUTE_DEPRECATED zend_result php_session_valid_key(const char *key)
 {
 	return php_session_valid_key_len(key, strlen(key));
 }
