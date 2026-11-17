@@ -620,6 +620,13 @@ static zend_always_inline size_t php_base64_ctz64(uint64_t x)
 		o += 96; \
 		c += 128; \
 	} \
+	/* One block at a time while there are no pending values and no byte to skip: \
+	 * testing for pending values in the loop below costs a cycle per block. */ \
+	while (end - c >= 64 && !php_base64_decode_##isa##_translate(&b, c)) { \
+		php_base64_decode_##isa##_pack(&b, o); \
+		o += 48; \
+		c += 64; \
+	} \
 	while (end - c >= 64) { \
 		bad = php_base64_decode_##isa##_translate(&b, c); \
 		if (EXPECTED(bad == 0 && buffered == 0)) { \
