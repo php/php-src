@@ -716,27 +716,31 @@ zend_string *php_base64_encode_avx512_vbmi(const unsigned char *str, size_t leng
 	const char *ascii_lookup_tbl = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 	const __m512i ascii_lookup = _mm512_loadu_si512((__m512i *)ascii_lookup_tbl);
 
-	/* Each iteration reads 48 bytes (masked load: never past the input) and
-	 * writes 64 bytes, which the output buffer always has room for. */
-	while (length >= 48) {
-		/* Step 1: load input data */
-		__m512i str = _mm512_maskz_loadu_epi8((__mmask64)0xffffffffffff, (const void *)c);
+	/* Each step consumes 48 bytes and writes 64 bytes, which the output
+	 * buffer always has room for. Only the first 48 loaded bytes are used:
+	 * the main loop loads 64 bytes while that stays within the input, and a
+	 * final step uses a masked load to avoid reading past the input. */
+#define PHP_BASE64_ENCODE_AVX512_VBMI_STEP(load) do { \
+		__m512i str = (load); \
+		/* splitting 24-bit words into 32-bit lanes */ \
+		str = _mm512_permutexvar_epi8(shuffle_splitting, str); \
+		/* moving 6-bit word to separate bytes */ \
+		str = _mm512_multishift_epi64_epi8(multi_shifts, str); \
+		/* conversion to ASCII */ \
+		str = _mm512_permutexvar_epi8(str, ascii_lookup); \
+		_mm512_storeu_si512((__m512i *)o, str); \
+		c += 48; \
+		o += 64; \
+		length -= 48; \
+	} while (0)
 
-		/* Step 2: splitting 24-bit words into 32-bit lanes */
-		str = _mm512_permutexvar_epi8(shuffle_splitting, str);
-
-		/* Step 3: moving 6-bit word to separate bytes */
-		str = _mm512_multishift_epi64_epi8(multi_shifts, str);
-
-		/* Step 4: conversion to ASCII */
-		str = _mm512_permutexvar_epi8(str, ascii_lookup);
-
-		/* Step 5: store the final result */
-		_mm512_storeu_si512((__m512i *)o, str);
-		c += 48;
-		o += 64;
-		length -= 48;
+	while (length >= 64) {
+		PHP_BASE64_ENCODE_AVX512_VBMI_STEP(_mm512_loadu_si512((const void *)c));
 	}
+	if (length >= 48) {
+		PHP_BASE64_ENCODE_AVX512_VBMI_STEP(_mm512_maskz_loadu_epi8((__mmask64)0xffffffffffff, (const void *)c));
+	}
+#undef PHP_BASE64_ENCODE_AVX512_VBMI_STEP
 
 	/* The last 0 to 47 bytes: masked load, padding with '=', masked store. */
 	if (length > 0) {
