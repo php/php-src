@@ -31,4 +31,3 @@ var_dump(gc_collect_cycles(false));
 --EXPECT--
 int(1)
 int(0)
-bool(false)

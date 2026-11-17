@@ -13,7 +13,7 @@ gc_collect_cycles();
 var_dump(gc_status());
 ?>
 --EXPECTF--
-array(12) {
+array(15) {
   ["running"]=>
   bool(false)
   ["protected"]=>
@@ -38,8 +38,14 @@ array(12) {
   float(%f)
   ["free_time"]=>
   float(%f)
+  ["mark_roots_time"]=>
+  float(0)
+  ["scan_roots_time"]=>
+  float(0)
+  ["collect_roots_time"]=>
+  float(0)
 }
-array(12) {
+array(15) {
   ["running"]=>
   bool(false)
   ["protected"]=>
@@ -63,5 +69,11 @@ array(12) {
   ["destructor_time"]=>
   float(%f)
   ["free_time"]=>
+  float(%f)
+  ["mark_roots_time"]=>
+  float(%f)
+  ["scan_roots_time"]=>
+  float(%f)
+  ["collect_roots_time"]=>
   float(%f)
 }
