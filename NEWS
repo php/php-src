@@ -370,6 +370,8 @@ PHP                                                                        NEWS
 - Reflection:
   . Fix trampoline leak when object construction fails for lazy object.
     (ndossche)
+  . Fixed ReflectionClassConstant::getValue() reading a reference as the name
+    of the constant in the error raised for a typed constant. (Nicolas Grekas)
 
 - SAPI:
   . Fixed infinite loop in sapi_header_op() for headers of 4 GiB or more.

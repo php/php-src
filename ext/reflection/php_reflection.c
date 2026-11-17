@@ -4143,6 +4143,9 @@ ZEND_METHOD(ReflectionClassConstant, getValue)
 		RETURN_THROWS();
 	}
 
+	ZVAL_DEREF(name);
+	ZEND_ASSERT(Z_TYPE_P(name) == IS_STRING);
+
 	if (Z_TYPE(ref->value) == IS_CONSTANT_AST) {
 		zend_result result = zend_update_class_constant(ref, Z_STR_P(name), ref->ce);
 		if (result == FAILURE) {
