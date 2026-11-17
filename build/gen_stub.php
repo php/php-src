@@ -5804,7 +5804,7 @@ function replacePredefinedConstants(string $targetDirectory, array $constMap, ar
         if ($updated) {
             $replacedXml = $doc->saveXML();
 
-            $replacedXml = preg_replace("/REPLACED-ENTITY-([A-Za-z0-9._{}%-]+?;)/", "&$1", $replacedXml);
+            $replacedXml = preg_replace(["/REPLACED-ENTITY-([A-Za-z0-9._{}%-]+?;)/", "/<(\/)*XI([A-Za-z]+?)/"], ["&$1", "<$1xi:$2"], $replacedXml);
 
             $predefinedConstants[$pathName] = reorderRootElementAttributes(removeAddedXmlDeclaration($xml, $replacedXml));
         }
@@ -5964,7 +5964,7 @@ function replaceClassSynopses(
 
             $replacedXml = $doc->saveXML();
 
-            $replacedXml = preg_replace("/REPLACED-ENTITY-([A-Za-z0-9._{}%-]+?;)/", "&$1", $replacedXml);
+            $replacedXml = preg_replace(["/REPLACED-ENTITY-([A-Za-z0-9._{}%-]+?;)/", "/<(\/)*XI([A-Za-z]+?)/"], ["&$1", "<$1xi:$2"], $replacedXml);
 
             $classSynopses[$pathName] = reorderRootElementAttributes(removeAddedXmlDeclaration($xml, $replacedXml));
         }
@@ -6233,7 +6233,7 @@ function replaceMethodSynopses(
 
             $replacedXml = $doc->saveXML();
 
-            $replacedXml = preg_replace("/REPLACED-ENTITY-([A-Za-z0-9._{}%-]+?;)/", "&$1", $replacedXml);
+            $replacedXml = preg_replace(["/REPLACED-ENTITY-([A-Za-z0-9._{}%-]+?;)/", "/<(\/)*XI([A-Za-z]+?)/"], ["&$1", "<$1xi:$2"], $replacedXml);
 
             $methodSynopses[$pathName] = reorderRootElementAttributes(removeAddedXmlDeclaration($xml, $replacedXml));
         }
