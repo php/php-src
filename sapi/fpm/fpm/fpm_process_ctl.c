@@ -539,7 +539,7 @@ void fpm_pctl_on_socket_accept(struct fpm_event_s *ev, short which, void *arg) /
 
 	for (child = wp->children; child; child = child->next) {
 		/* if there is at least on idle child, it will handle the connection, stop here */
-		if (fpm_request_is_idle(child)) {
+		if (fpm_request_is_idle(child) && !child->idle_kill) {
 			return;
 		}
 	}
