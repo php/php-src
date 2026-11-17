@@ -646,6 +646,10 @@ struct php_x509_request { /* {{{ */
 	EVP_PKEY * priv_key;
 
 	const EVP_CIPHER * priv_key_encrypt_cipher;
+
+	/* The process-wide default ASN.1 string mask before string_mask of the config was applied */
+	unsigned long saved_string_mask;
+	bool string_mask_set;
 };
 /* }}} */
 
@@ -1054,9 +1058,15 @@ static int php_openssl_parse_config(struct php_x509_request * req, zval * option
 
 	/* set the string mask */
 	str = php_openssl_conf_get_string(req->req_config, req->section_name, "string_mask");
-	if (str != NULL && !ASN1_STRING_set_default_mask_asc(str)) {
-		php_error_docref(NULL, E_WARNING, "Invalid global string mask setting %s", str);
-		return FAILURE;
+	if (str != NULL) {
+		unsigned long saved_string_mask = ASN1_STRING_get_default_mask();
+
+		if (!ASN1_STRING_set_default_mask_asc(str)) {
+			php_error_docref(NULL, E_WARNING, "Invalid global string mask setting %s", str);
+			return FAILURE;
+		}
+		req->saved_string_mask = saved_string_mask;
+		req->string_mask_set = true;
 	}
 
 	PHP_SSL_CONFIG_SYNTAX_CHECK(request_extensions_section);
@@ -1067,6 +1077,10 @@ static int php_openssl_parse_config(struct php_x509_request * req, zval * option
 
 static void php_openssl_dispose_config(struct php_x509_request * req) /* {{{ */
 {
+	if (req->string_mask_set) {
+		ASN1_STRING_set_default_mask(req->saved_string_mask);
+		req->string_mask_set = false;
+	}
 	if (req->priv_key) {
 		EVP_PKEY_free(req->priv_key);
 		req->priv_key = NULL;
