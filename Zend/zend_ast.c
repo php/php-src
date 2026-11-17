@@ -2113,7 +2113,7 @@ static ZEND_COLD void zend_ast_export_zval(smart_str *str, const zval *zv, int p
 			break;
 		case IS_DOUBLE:
 			smart_str_append_double(
-				str, Z_DVAL_P(zv), (int) EG(precision), /* zero_fraction */ true);
+				str, Z_DVAL_P(zv), /* precision */ -1, /* zero_fraction */ true);
 			break;
 		case IS_STRING:
 			zend_ast_export_quoted_str(str, Z_STR_P(zv));

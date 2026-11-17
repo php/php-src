@@ -36,6 +36,7 @@ PHP                                                                        NEWS
   . Fixed AST export of by-reference property hooks. (Jorg Sowa)
   . Fixed AST export of property hook parameter lists and attributes.
     (Jorg Sowa)
+  . Fixed float literals losing precision in AST export. (Jorg Sowa)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
