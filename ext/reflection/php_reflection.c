@@ -3323,8 +3323,8 @@ ZEND_METHOD(ReflectionMethod, getClosure)
 
 	if (mptr->common.fn_flags & ZEND_ACC_ABSTRACT) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-			"Trying to create a closure from abstract method %s::%s()",
-			ZSTR_VAL(mptr->common.scope->name), ZSTR_VAL(mptr->common.function_name));
+			"Trying to create a closure from abstract method %pS::%pS()",
+			mptr->common.scope->name, mptr->common.function_name);
 		RETURN_THROWS();
 	}
 
