@@ -210,6 +210,8 @@ PHP                                                                        NEWS
     cannot describe a parameter). (Ilia Alshanetsky)
 
 - Opcache:
+  . Fixed incorrect constant propagation when unpacking into partially known
+    arrays. (Weilin Du)
   . Fixed bug GH-20890 (Segfault in zval_undefined_cv with non-simple property
     hook with minimal tracing JIT). (ndossche)
   . Fixed bug GH-17626 (JIT corrupts an opline handler when blacklisting a
