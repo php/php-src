@@ -1456,7 +1456,7 @@ static inline CURLcode add_form_field(php_curl *ch, curl_mime *mime, zend_string
 		prop = zend_read_property_ex(curl_CURLFile_class, Z_OBJ_P(current), ZSTR_KNOWN(ZEND_STR_NAME), /* silent */ false, &rv);
 		ZVAL_DEREF(prop);
 		if (Z_TYPE_P(prop) != IS_STRING) {
-			php_error_docref(NULL, E_WARNING, "Invalid filename for key %s", ZSTR_VAL(string_key));
+			php_error_docref(NULL, E_WARNING, "Invalid filename for key %pS", string_key);
 		} else {
 			postval = Z_STR_P(prop);
 
