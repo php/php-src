@@ -51,6 +51,10 @@ PHP                                                                        NEWS
   . Fixed crash when registerNodeClass() is given a class with a constant
     expression that cannot be evaluated; registerNodeClass() now throws the
     evaluation Error instead. (Ilia Alshanetsky)
+  . Fixed CSS selectors checking only the nearest element for a descendant or
+    subsequent-sibling combinator after a compound selector that starts with
+    :is(), :where(), :not(), :has() or :nth-child(An+B of S), by merging
+    lexbor/lexbor@f6c1d06. (phcorp)
 
 - Filter:
   . Fixed stack overflow in filter_var() and filter_var_array() with deeply
