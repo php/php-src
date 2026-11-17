@@ -77,6 +77,15 @@ static PHP_MINIT_FUNCTION(posix)
 }
 /* }}} */
 
+/* {{{ PHP_RSHUTDOWN_FUNCTION(posix) */
+static PHP_RSHUTDOWN_FUNCTION(posix)
+{
+	POSIX_G(last_error) = 0;
+
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ posix_module_entry */
 zend_module_entry posix_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -85,7 +94,7 @@ zend_module_entry posix_module_entry = {
 	PHP_MINIT(posix),
 	NULL,
 	NULL,
-	NULL,
+	PHP_RSHUTDOWN(posix),
 	PHP_MINFO(posix),
 	PHP_POSIX_VERSION,
 	PHP_MODULE_GLOBALS(posix),

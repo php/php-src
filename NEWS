@@ -366,6 +366,10 @@ PHP                                                                        NEWS
   . Fixed over-read when watching a packed array element. (Ilia Alshanetsky)
   . Fixed double free of watch element chains. (Arnaud)
 
+- POSIX:
+  . Fixed bug GH-25530 (posix_get_last_error() returns an error from a
+    previous request). (Artem Ukrainskiy)
+
 - Readline:
   . Fixed incorrect handling of non-ASCII pending_input bytes in readline_info(),
     which could cause readline() to return false prematurely. (Weilin Du)
@@ -410,6 +414,8 @@ PHP                                                                        NEWS
 - Sockets:
   . Fixed bug GH-24748 (socket_set_option() crashes with declared object
     properties). (Lazizbek Ergashev)
+  . Fixed bug GH-25530 (socket_last_error() without a socket returns an error
+    from a previous request). (Artem Ukrainskiy)
 
 - SPL:
   . Fixed bug GH-24264 (Unwind/GracefulExit discarded in spl_iterators.c).
