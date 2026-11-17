@@ -3338,7 +3338,9 @@ PHP_FUNCTION(ldap_set_option)
 			LDAPControl **ctrls;
 
 			if (Z_TYPE_P(newval) != IS_ARRAY) {
-				zend_argument_type_error(3, "must be of type array for the LDAP_OPT_CLIENT_CONTROLS option, %s given", zend_zval_value_name(newval));
+				zend_argument_type_error(3, "must be of type array for the %s option, %s given",
+					option == LDAP_OPT_SERVER_CONTROLS ? "LDAP_OPT_SERVER_CONTROLS" : "LDAP_OPT_CLIENT_CONTROLS",
+					zend_zval_value_name(newval));
 				RETURN_THROWS();
 			}
 
