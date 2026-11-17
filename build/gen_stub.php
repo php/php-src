@@ -825,7 +825,7 @@ class ArgInfo {
     public function getDefaultValueAsMethodSynopsisString(): ?string {
         return match ($this->defaultValue) {
             'UNKNOWN' => null,
-            'false' | 'true' | 'null' => "&{$this->defaultValue};",
+            'false', 'true', 'null' => "&{$this->defaultValue};",
             default => $this->defaultValue,
         };
     }
