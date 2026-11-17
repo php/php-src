@@ -229,6 +229,8 @@ PHP                                                                        NEWS
   . Fixed use-after-free of the previous request's default stream context when
     a stream error is raised during request startup, such as when a POST body
     cannot be buffered to a temporary file. (Go Kudo)
+  . Fixed bug GH-24256 (fclose() returns false for stream wrappers without
+    stream_flush()). (lazerg, Tiago Cruz)
   . Fixed bug GH-24175 (Use-after-free when pclose() closes a stream from its
     user filter). (Edmond)
   . Fixed bug GH-15701 (Build failure: incompatible funopen() seeker pointer

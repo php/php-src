@@ -747,7 +747,13 @@ static int php_userstreamop_flush(php_stream *stream)
 	stream->flags &= ~PHP_STREAM_FLAG_NO_FCLOSE;
 	stream->flags |= orig_no_fclose;
 
-	int ret = call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF && zend_is_true(&retval) ? 0 : -1;
+	int ret;
+	if (call_result == FAILURE) {
+		/* stream_flush() is optional: when closing, a wrapper without it has nothing to flush */
+		ret = stream->in_free ? 0 : -1;
+	} else {
+		ret = Z_TYPE(retval) != IS_UNDEF && zend_is_true(&retval) ? 0 : -1;
+	}
 
 	zval_ptr_dtor(&retval);
 
