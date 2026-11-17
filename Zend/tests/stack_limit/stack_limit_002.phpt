@@ -9,6 +9,7 @@ if (getenv('SKIP_MSAN')) die("skip msan requires a considerably higher zend.rese
 zend_test
 --INI--
 fiber.stack_size=512k
+memory_limit=1G
 --FILE--
 <?php
 
