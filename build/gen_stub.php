@@ -5806,7 +5806,7 @@ function replacePredefinedConstants(string $targetDirectory, array $constMap, ar
 
             $replacedXml = preg_replace("/REPLACED-ENTITY-([A-Za-z0-9._{}%-]+?;)/", "&$1", $replacedXml);
 
-            $predefinedConstants[$pathName] = reorderRootElementAttributes($replacedXml);
+            $predefinedConstants[$pathName] = reorderRootElementAttributes(removeAddedXmlDeclaration($xml, $replacedXml));
         }
     }
 
@@ -5966,7 +5966,7 @@ function replaceClassSynopses(
 
             $replacedXml = preg_replace("/REPLACED-ENTITY-([A-Za-z0-9._{}%-]+?;)/", "&$1", $replacedXml);
 
-            $classSynopses[$pathName] = reorderRootElementAttributes($replacedXml);
+            $classSynopses[$pathName] = reorderRootElementAttributes(removeAddedXmlDeclaration($xml, $replacedXml));
         }
     }
 
@@ -6010,6 +6010,15 @@ function getReplacedSynopsisXml(string $xml): string
         ],
         $xml
     );
+}
+
+function removeAddedXmlDeclaration(string $originalXml, string $replacedXml): string
+{
+    if (str_starts_with(ltrim($originalXml), '<?xml')) {
+        return $replacedXml;
+    }
+
+    return preg_replace('/^<\?xml[^>]*\?>\s*/', '', $replacedXml);
 }
 
 function reorderRootElementAttributes(string $xml): string
@@ -6226,7 +6235,7 @@ function replaceMethodSynopses(
 
             $replacedXml = preg_replace("/REPLACED-ENTITY-([A-Za-z0-9._{}%-]+?;)/", "&$1", $replacedXml);
 
-            $methodSynopses[$pathName] = reorderRootElementAttributes($replacedXml);
+            $methodSynopses[$pathName] = reorderRootElementAttributes(removeAddedXmlDeclaration($xml, $replacedXml));
         }
     }
 
