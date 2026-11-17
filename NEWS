@@ -104,7 +104,13 @@ PHP                                                                        NEWS
   . Fixed bug GH-25530 (posix_get_last_error() returns an error from a
     previous request). (Artem Ukrainskiy)
 
+- Readline:
+  . Fixed incorrect handling of non-ASCII pending_input bytes in readline_info(),
+    which could cause readline() to return false prematurely. (Weilin Du)
+
 - Reflection:
+  . Fix trampoline leak when object construction fails for lazy object.
+    (ndossche)
   . Fixed ReflectionMethod::getClosure() returning a closure for abstract
     methods, which crashed when called for the ones of internal classes.
     (Nicolas Grekas)
@@ -122,14 +128,6 @@ PHP                                                                        NEWS
 - Sockets:
   . Fixed bug GH-25530 (socket_last_error() without a socket returns an error
     from a previous request). (Artem Ukrainskiy)
-
-- Readline:
-  . Fixed incorrect handling of non-ASCII pending_input bytes in readline_info(),
-    which could cause readline() to return false prematurely. (Weilin Du)
-
-- Reflection:
-  . Fix trampoline leak when object construction fails for lazy object.
-    (ndossche)
 
 - Session:
   . Fixed session upload progress to respect session.use_only_cookies.
