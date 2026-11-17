@@ -67,9 +67,13 @@ extern ZEND_API zend_php_scanner_globals language_scanner_globals;
 
 /* INI Scanner */
 #ifdef ZTS
-# define INI_SCNG(v) ZEND_TSRMG_FAST(ini_scanner_globals_offset, zend_ini_scanner_globals *, v)
 extern ZEND_API ts_rsrc_id ini_scanner_globals_id;
-extern ZEND_API size_t ini_scanner_globals_offset;
+# ifdef ZEND_TLS_DIRECT
+extern ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_ini_scanner_globals ini_scanner_globals;
+#  define INI_SCNG(v) (ini_scanner_globals.v)
+# else
+#  define INI_SCNG(v) ZEND_TSRMG(ini_scanner_globals_id, zend_ini_scanner_globals *, v)
+# endif
 #else
 # define INI_SCNG(v) (ini_scanner_globals.v)
 extern ZEND_API zend_ini_scanner_globals ini_scanner_globals;

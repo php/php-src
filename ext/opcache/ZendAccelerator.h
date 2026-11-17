@@ -308,13 +308,13 @@ extern zend_accel_shared_globals *accel_shared_globals;
 #define ZCSG(element)   (accel_shared_globals->element)
 
 #ifdef ZTS
-# define ZCG(v)	ZEND_TSRMG_FAST(accel_globals_offset, zend_accel_globals *, v)
 extern int accel_globals_id;
-extern size_t accel_globals_offset;
+extern TSRM_TLS TSRM_TLS_MODEL_ATTR zend_accel_globals accel_globals;
 #else
-# define ZCG(v) (accel_globals.v)
 extern zend_accel_globals accel_globals;
 #endif
+
+#define ZCG(v) (accel_globals.v)
 
 extern const char *zps_api_failure_reason;
 
