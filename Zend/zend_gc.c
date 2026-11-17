@@ -836,6 +836,11 @@ static zend_never_inline void ZEND_FASTCALL gc_possible_root_when_full(zend_refc
 			return;
 		} else if (UNEXPECTED(GC_INFO(ref))) {
 			return;
+		} else if (UNEXPECTED(GC_REF_OLD(ref))) {
+			/* ref was reachable from a live root and has been promoted to the
+			 * old generation by the GC run: buffer it as an old root. */
+			gc_possible_root(ref);
+			return;
 		}
 	}
 
