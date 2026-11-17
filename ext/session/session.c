@@ -395,7 +395,7 @@ PHPAPI zend_result php_session_valid_key_ex(const zend_string *key)
 
 /* C-string compatibility wrapper. Callers that have a zend_string should use
  * php_session_valid_key_ex() instead. */
-PHPAPI ZEND_ATTRIBUTE_DEPRECATED zend_result php_session_valid_key(const char *key)
+ZEND_ATTRIBUTE_DEPRECATED PHPAPI zend_result php_session_valid_key(const char *key)
 {
 	return php_session_valid_key_len(key, strlen(key));
 }
