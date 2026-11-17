@@ -276,6 +276,8 @@ static const zend_module_dep openssl_deps[] = {
 	ZEND_MOD_END
 };
 #endif
+static ZEND_MODULE_POST_ZEND_DEACTIVATE_D(openssl);
+
 /* {{{ openssl_module_entry */
 zend_module_entry openssl_module_entry = {
 #if defined(HAVE_OPENSSL_ARGON2)
@@ -295,7 +297,7 @@ zend_module_entry openssl_module_entry = {
 	PHP_MODULE_GLOBALS(openssl),
 	PHP_GINIT(openssl),
 	PHP_GSHUTDOWN(openssl),
-	NULL,
+	ZEND_MODULE_POST_ZEND_DEACTIVATE_N(openssl),
 	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
@@ -1361,6 +1363,25 @@ PHP_GINIT_FUNCTION(openssl)
 #endif
 	openssl_globals->errors = NULL;
 	openssl_globals->errors_mark = NULL;
+}
+/* }}} */
+
+/* {{{ ZEND_MODULE_POST_ZEND_DEACTIVATE_D */
+/* Clears the thread's errors, in OpenSSL's queue and in ours. Runs after the
+ * request's non-persistent resources, SSL streams included, are closed. */
+static ZEND_MODULE_POST_ZEND_DEACTIVATE_D(openssl)
+{
+	ERR_clear_error();
+	if (OPENSSL_G(errors)) {
+		OPENSSL_G(errors)->top = 0;
+		OPENSSL_G(errors)->bottom = 0;
+	}
+	if (OPENSSL_G(errors_mark)) {
+		OPENSSL_G(errors_mark)->top = 0;
+		OPENSSL_G(errors_mark)->bottom = 0;
+	}
+
+	return SUCCESS;
 }
 /* }}} */
 
