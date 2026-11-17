@@ -375,6 +375,9 @@ PHP                                                                        NEWS
 - Reflection:
   . Fix trampoline leak when object construction fails for lazy object.
     (ndossche)
+  . Fixed ReflectionMethod::getClosure() returning a closure for abstract
+    methods, which crashed when called for the ones of internal classes.
+    (Nicolas Grekas)
 
 - SAPI:
   . Fixed infinite loop in sapi_header_op() for headers of 4 GiB or more.
