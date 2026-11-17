@@ -3321,6 +3321,13 @@ ZEND_METHOD(ReflectionMethod, getClosure)
 
 	GET_REFLECTION_OBJECT_PTR(mptr);
 
+	if (mptr->common.fn_flags & ZEND_ACC_ABSTRACT) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
+			"Trying to create a closure from abstract method %pS::%pS()",
+			mptr->common.scope->name, mptr->common.function_name);
+		RETURN_THROWS();
+	}
+
 	if (mptr->common.fn_flags & ZEND_ACC_STATIC) {
 		zend_create_fake_closure(return_value, mptr, mptr->common.scope, mptr->common.scope, NULL);
 		return;
