@@ -4284,10 +4284,11 @@ class ClassInfo {
         foreach ($parents as $parent) {
             $classSynopsis->appendChild(new DOMText("\n$indentation"));
             $parentReference = self::getClassSynopsisReference($parent);
+            $parentSynopsis = str_contains($parent->toString(), "\\") ? "db:packagesynopsis/db:classsynopsis" : "db:classsynopsis";
 
             $includeElement = $this->createIncludeElement(
                 $doc,
-                "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$parentReference')/db:partintro/db:section/db:classsynopsis/db:fieldsynopsis[preceding-sibling::db:classsynopsisinfo[1][@role='comment' and text()='$label']]))"
+                "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$parentReference')/db:partintro/db:section/$parentSynopsis/db:fieldsynopsis[preceding-sibling::db:classsynopsisinfo[1][@role='comment' and text()='$label']]))"
             );
             $classSynopsis->appendChild($includeElement);
         }
