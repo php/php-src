@@ -635,7 +635,9 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 
 		fiber->fci.retval = &fiber->result;
 
-		zend_call_function(&fiber->fci, &fiber->fci_cache);
+		/* The fiber already owns and reports fci.object to the GC. A second
+		 * reference on the C stack would hide the cycle while suspended. */
+		zend_call_function_with_pinned_object(&fiber->fci, &fiber->fci_cache, fiber->fci.object);
 
 		/* Cleanup callback and unset field to prevent GC / duplicate dtor issues. */
 		zend_fiber_release_callable(fiber);

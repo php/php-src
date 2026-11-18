@@ -834,6 +834,13 @@ zend_result _call_user_function_impl(zval *object, zval *function_name, zval *re
 
 zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /* {{{ */
 {
+	return zend_call_function_with_pinned_object(fci, fci_cache, NULL);
+}
+/* }}} */
+
+zend_result zend_call_function_with_pinned_object(
+	zend_fcall_info *fci, zend_fcall_info_cache *fci_cache, zend_object *pinned_object) /* {{{ */
+{
 	zend_execute_data *call;
 	zend_fcall_info_cache fci_cache_local;
 	zend_function *func;
@@ -895,8 +902,10 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 	} else {
 		object_or_called_scope = fci_cache->object;
 		call_info = ZEND_CALL_TOP_FUNCTION | ZEND_CALL_DYNAMIC | ZEND_CALL_HAS_THIS;
-		pinned_this = fci_cache->object;
-		GC_ADDREF(pinned_this);
+		if (fci_cache->object != pinned_object) {
+			pinned_this = fci_cache->object;
+			GC_ADDREF(pinned_this);
+		}
 	}
 
 	if (UNEXPECTED(func->common.fn_flags & ZEND_ACC_DEPRECATED)) {

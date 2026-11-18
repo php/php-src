@@ -24,8 +24,25 @@ var_dump('COLLECT CYCLES');
 gc_collect_cycles();
 var_dump('DONE');
 
+$owner = new class {
+    public Fiber $fiber;
+
+    public function __construct() {
+        $this->fiber = new Fiber(function () {
+            Fiber::suspend();
+            return $this;
+        });
+    }
+};
+$owner->fiber->start();
+$weak = WeakReference::create($owner);
+unset($owner);
+gc_collect_cycles();
+var_dump($weak->get() === null);
+
 ?>
 --EXPECT--
 string(14) "COLLECT CYCLES"
 string(4) "DTOR"
 string(4) "DONE"
+bool(true)

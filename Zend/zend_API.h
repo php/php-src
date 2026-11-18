@@ -906,6 +906,9 @@ static zend_always_inline void zend_get_gc_buffer_add_fcc(zend_get_gc_buffer *gc
  * If the call or call setup throws, EG(exception) will be set and the retval
  * will be UNDEF. Otherwise, the retval will be a non-UNDEF value. */
 ZEND_API zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache);
+/* The caller owns a reference to pinned_object until the call returns. */
+zend_result zend_call_function_with_pinned_object(
+	zend_fcall_info *fci, zend_fcall_info_cache *fci_cache, zend_object *pinned_object);
 
 /* Call the FCI/FCC pair while setting the call return value to the passed zval*. */
 static zend_always_inline zend_result zend_call_function_with_return_value(
