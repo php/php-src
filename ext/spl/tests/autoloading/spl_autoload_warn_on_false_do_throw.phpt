@@ -11,6 +11,6 @@ spl_autoload_call('TestClass');
 var_dump(class_exists('TestClass', false));
 ?>
 --EXPECTF--
-Notice: spl_autoload_register(): Argument #2 ($do_throw) has been ignored, spl_autoload_register() will always throw in %s on line %d
+Notice: spl_autoload_register(): Argument #2 ($throw) has been ignored, spl_autoload_register() will always throw in %s on line %d
 %stestclass.class.inc
 bool(true)

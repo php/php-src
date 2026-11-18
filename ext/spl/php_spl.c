@@ -402,7 +402,7 @@ PHP_FUNCTION(spl_autoload_register)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!do_throw) {
-		php_error_docref(NULL, E_NOTICE, "Argument #2 ($do_throw) has been ignored, "
+		php_error_docref(NULL, E_NOTICE, "Argument #2 ($throw) has been ignored, "
 			"spl_autoload_register() will always throw");
 	}
 
