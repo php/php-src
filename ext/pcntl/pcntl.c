@@ -328,7 +328,7 @@ PHP_FUNCTION(pcntl_fork)
 		}
 	} else if (id == 0) {
 #if defined(ZTS)
-		zend_signal_forward_fork_child();
+		zend_signal_forward_fork_child(false);
 #endif
 		zend_max_execution_timer_init();
 		php_clear_stat_cache(true, NULL, 0);
@@ -1654,7 +1654,7 @@ PHP_FUNCTION(pcntl_rfork)
 		}
 	} else if (pid == 0) {
 #if defined(ZTS)
-		zend_signal_forward_fork_child();
+		zend_signal_forward_fork_child((flags & RFFDG) == 0);
 #endif
 		zend_max_execution_timer_init();
 		php_clear_stat_cache(true, NULL, 0);
@@ -1703,7 +1703,7 @@ PHP_FUNCTION(pcntl_forkx)
 		}
 	} else if (pid == 0) {
 #if defined(ZTS)
-		zend_signal_forward_fork_child();
+		zend_signal_forward_fork_child(false);
 #endif
 		zend_max_execution_timer_init();
 		php_clear_stat_cache(true, NULL, 0);

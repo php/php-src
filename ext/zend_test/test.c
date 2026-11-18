@@ -843,7 +843,10 @@ static zend_atomic_int zend_test_forward_replacement_hits;
 /* Polls instead of sleeping, so that a passing run does not depend on timing. */
 static bool zend_test_forward_wait_pending(void)
 {
-	for (int i = 0; i < 2000; i++) {
+	time_t start = time(NULL);
+
+	/* Measured in time, as signals interrupt the sleep. */
+	while (time(NULL) - start < 30) {
 		sigset_t pending;
 
 		sigpending(&pending);
@@ -956,7 +959,9 @@ static void zend_test_forward_raise_foreign(void)
 
 static bool zend_test_forward_wait(zend_atomic_int *hits)
 {
-	for (int i = 0; i < 2000; i++) {
+	time_t start = time(NULL);
+
+	while (time(NULL) - start < 30) {
 		if (zend_atomic_int_load(hits) > 0) {
 			return true;
 		}
@@ -988,6 +993,71 @@ static void *zend_test_forward_storm_main(void *arg)
 		usleep(50);
 	}
 	return NULL;
+}
+
+static void *zend_test_forward_churn_main(void *arg)
+{
+	while (!zend_atomic_bool_load(&zend_test_forward_stop)) {
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		zend_signal_forward_release(ZEND_TEST_FORWARD_SIGNAL, NULL);
+	}
+	return NULL;
+}
+
+/* A hang in a child fails the test instead of stalling it. */
+static bool zend_test_forward_wait_child(pid_t pid)
+{
+	time_t start = time(NULL);
+
+	while (time(NULL) - start < 60) {
+		int status = 0;
+		pid_t result = waitpid(pid, &status, WNOHANG);
+
+		if (result == pid) {
+			return WIFEXITED(status) && WEXITSTATUS(status) == 0;
+		}
+		if (result < 0) {
+			return false;
+		}
+		usleep(1000);
+	}
+	kill(pid, SIGKILL);
+	waitpid(pid, NULL, 0);
+	return false;
+}
+
+/* Forwarding must work in the child, where only the calling thread exists. */
+static bool zend_test_forward_child_delivers(void)
+{
+	zend_test_forward_main = pthread_self();
+	zend_atomic_bool_store(&zend_test_forward_helper_set, false);
+	zend_atomic_int_store(&zend_test_forward_main_hits, 0);
+	zend_signal_forward_fork_child(false);
+	zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
+	zend_test_forward_raise_foreign();
+	return zend_test_forward_wait(&zend_test_forward_main_hits);
+}
+
+static bool zend_test_forward_fork_and_check(void)
+{
+	pid_t pid = fork();
+
+	if (pid == 0) {
+		_exit(zend_test_forward_child_delivers() ? 0 : 1);
+	}
+	return pid > 0 && zend_test_forward_wait_child(pid);
+}
+
+static bool zend_test_forward_fork_chain(int depth)
+{
+	pid_t pid = fork();
+
+	if (pid == 0) {
+		bool result = zend_test_forward_child_delivers();
+
+		_exit(result && (depth == 0 || zend_test_forward_fork_chain(depth - 1)) ? 0 : 1);
+	}
+	return pid > 0 && zend_test_forward_wait_child(pid);
 }
 
 static bool zend_test_forward_scenario(const char *scenario)
@@ -1177,6 +1247,63 @@ static bool zend_test_forward_scenario(const char *scenario)
 		return zend_test_forward_wait(&zend_test_forward_main_hits);
 	}
 
+	if (strcmp(scenario, "fork_during_registration") == 0) {
+		pthread_t workers[ZEND_TEST_FORWARD_WORKERS];
+		bool result = true;
+
+		zend_atomic_bool_store(&zend_test_forward_stop, false);
+		for (int i = 0; i < ZEND_TEST_FORWARD_WORKERS; i++) {
+			pthread_create(&workers[i], NULL, zend_test_forward_churn_main, NULL);
+		}
+		for (int i = 0; i < 50 && result; i++) {
+			result = zend_test_forward_fork_and_check();
+		}
+		zend_atomic_bool_store(&zend_test_forward_stop, true);
+		for (int i = 0; i < ZEND_TEST_FORWARD_WORKERS; i++) {
+			pthread_join(workers[i], NULL);
+		}
+		return result;
+	}
+
+	if (strcmp(scenario, "fork_during_notification") == 0) {
+		pthread_t storm;
+		bool result = true;
+
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		zend_atomic_bool_store(&zend_test_forward_stop, false);
+		pthread_create(&storm, NULL, zend_test_forward_storm_main, NULL);
+		for (int i = 0; i < 50 && result; i++) {
+			result = zend_test_forward_fork_and_check();
+		}
+		zend_atomic_bool_store(&zend_test_forward_stop, true);
+		pthread_join(storm, NULL);
+		return result;
+	}
+
+	if (strcmp(scenario, "repeated_fork") == 0) {
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		return zend_test_forward_fork_chain(3);
+	}
+
+	if (strcmp(scenario, "timer_not_inherited") == 0) {
+		pid_t pid;
+		bool result;
+
+		zend_signal_forward_timer_arm(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		pid = fork();
+		if (pid == 0) {
+			zend_test_forward_main = pthread_self();
+			zend_signal_forward_fork_child(false);
+			zend_atomic_bool_store(&zend_test_forward_result, true);
+			zend_test_forward_raise_foreign();
+			_exit(!zend_atomic_bool_load(&zend_test_forward_result)
+				&& zend_atomic_int_load(&zend_test_forward_main_hits) == 0 ? 0 : 1);
+		}
+		result = pid > 0 && zend_test_forward_wait_child(pid);
+		zend_signal_forward_timer_disarm();
+		return result;
+	}
+
 	if (strcmp(scenario, "fork") == 0) {
 		pid_t pid;
 		int status = 0;
@@ -1187,7 +1314,7 @@ static bool zend_test_forward_scenario(const char *scenario)
 
 		pid = fork();
 		if (pid == 0) {
-			zend_signal_forward_fork_child();
+			zend_signal_forward_fork_child(false);
 			zend_atomic_bool_store(&zend_test_forward_helper_set, false);
 			zend_test_forward_raise_foreign();
 			_exit(zend_test_forward_wait(&zend_test_forward_main_hits) ? 0 : 1);

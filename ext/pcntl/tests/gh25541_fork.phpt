@@ -20,7 +20,7 @@ pcntl_signal(SIGUSR1, function () use (&$handled) {
 $pid = pcntl_fork();
 if ($pid === 0) {
     zend_test_raise_on_foreign_thread(SIGUSR1);
-    for ($i = 0; !$handled && $i < 100; $i++) {
+    for ($i = 0; !$handled && $i < 3000; $i++) {
         pcntl_signal_dispatch();
         usleep(10000);
     }

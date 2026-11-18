@@ -1641,26 +1641,21 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 	{
 		struct itimerval t_r;		/* timeout requested */
 		int signo;
+		int timer;
 
 		// Prevent EINVAL error
 		if (seconds < 0 || seconds > 999999999) {
 			seconds = 0;
 		}
 
-		if(seconds) {
-			t_r.it_value.tv_sec = seconds;
-			t_r.it_value.tv_usec = t_r.it_interval.tv_sec = t_r.it_interval.tv_usec = 0;
-
 # if defined(__CYGWIN__) || defined(__PASE__) || (defined(__aarch64__) && defined(__APPLE__))
-			// ITIMER_PROF is broken in Apple Silicon system with MacOS >= 14
-			// See https://openradar.appspot.com/radar?id=5583058442911744.
-			setitimer(ITIMER_REAL, &t_r, NULL);
-		}
+		// ITIMER_PROF is broken in Apple Silicon system with MacOS >= 14
+		// See https://openradar.appspot.com/radar?id=5583058442911744.
 		signo = SIGALRM;
+		timer = ITIMER_REAL;
 # else
-			setitimer(ITIMER_PROF, &t_r, NULL);
-		}
 		signo = SIGPROF;
+		timer = ITIMER_PROF;
 # endif
 
 		if (reset_signals) {
@@ -1689,11 +1684,21 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 #  endif /* HAVE_SIGACTION */
 			sigemptyset(&sigset);
 			sigaddset(&sigset, signo);
+#  ifdef ZTS
+			tsrm_sigmask(SIG_UNBLOCK, &sigset, NULL);
+#  else
 			sigprocmask(SIG_UNBLOCK, &sigset, NULL);
+#  endif
 # endif /* ZEND_SIGNALS */
 		}
 
 # ifdef ZTS
+		/* A previous timer must not expire on behalf of the one that is about to start. */
+		if (seconds) {
+			memset(&t_r, 0, sizeof(t_r));
+			setitimer(timer, &t_r, NULL);
+		}
+
 		/* The timer is still running while another thread's handler is installed. */
 		if (seconds && (zend_timeout_handler_is_installed(signo) || zend_signal_forward_has_handler(signo))) {
 #  ifdef ZEND_SIGNALS
@@ -1711,6 +1716,13 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 			zend_signal_forward_timer_disarm();
 		}
 # endif
+
+		/* Last, as a signal must find its handler and its owner. */
+		if (seconds) {
+			t_r.it_value.tv_sec = seconds;
+			t_r.it_value.tv_usec = t_r.it_interval.tv_sec = t_r.it_interval.tv_usec = 0;
+			setitimer(timer, &t_r, NULL);
+		}
 	}
 #endif /* HAVE_SETITIMER */
 }

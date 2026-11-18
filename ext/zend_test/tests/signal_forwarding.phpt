@@ -25,6 +25,10 @@ $scenarios = [
     'owner_exit_with_pending_signal',
     'thread_identifier_reuse',
     'fork',
+    'fork_during_registration',
+    'fork_during_notification',
+    'repeated_fork',
+    'timer_not_inherited',
 ];
 foreach ($scenarios as $scenario) {
     echo $scenario, ': ';
@@ -47,3 +51,7 @@ replaced_handler: bool(true)
 owner_exit_with_pending_signal: bool(true)
 thread_identifier_reuse: bool(true)
 fork: bool(true)
+fork_during_registration: bool(true)
+fork_during_notification: bool(true)
+repeated_fork: bool(true)
+timer_not_inherited: bool(true)

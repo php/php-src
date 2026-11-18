@@ -1,0 +1,36 @@
+--TEST--
+GH-25541 (forwarding keeps working in the parent of pcntl_rfork())
+--EXTENSIONS--
+pcntl
+zend_test
+--SKIPIF--
+<?php
+if (!PHP_ZTS) die('skip ZTS only');
+if (!function_exists('pcntl_rfork')) die('skip pcntl_rfork() is not available');
+if (!function_exists('zend_test_raise_on_foreign_thread')) die('skip zend_test_raise_on_foreign_thread() not available');
+?>
+--ENV--
+LSAN_OPTIONS=detect_leaks=0
+--FILE--
+<?php
+$handled = false;
+pcntl_signal(SIGUSR1, function () use (&$handled) {
+    $handled = true;
+});
+
+/* The child shares the file descriptor table of its parent. */
+$pid = pcntl_rfork(RFPROC);
+if ($pid === 0) {
+    exit(0);
+}
+pcntl_waitpid($pid, $status);
+
+zend_test_raise_on_foreign_thread(SIGUSR1);
+for ($i = 0; !$handled && $i < 3000; $i++) {
+    pcntl_signal_dispatch();
+    usleep(10000);
+}
+var_dump($handled);
+?>
+--EXPECT--
+bool(true)

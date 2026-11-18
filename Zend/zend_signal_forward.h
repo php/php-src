@@ -41,7 +41,7 @@ ZEND_API int zend_signal_forward_acquire(int signo, const struct sigaction *act)
 ZEND_API int zend_signal_forward_release(int signo, const struct sigaction *act);
 
 /* Whether a thread has a handler for signo, which the execution timer must not replace. */
-ZEND_API bool zend_signal_forward_has_handler(int signo);
+bool zend_signal_forward_has_handler(int signo);
 
 /* The calling thread armed the execution timer, which delivers signo. If act is
  * given, it is restored when a handler for signo is released. */
@@ -49,9 +49,10 @@ ZEND_API void zend_signal_forward_timer_arm(int signo, const struct sigaction *a
 ZEND_API void zend_signal_forward_timer_disarm(void);
 
 /* Everything registered by the calling thread ends with the request. */
-ZEND_API void zend_signal_forward_request_shutdown(void);
-/* To call in the child of a fork(), where only the calling thread exists. */
-ZEND_API void zend_signal_forward_fork_child(void);
+void zend_signal_forward_request_shutdown(void);
+/* To call in the child of a fork(), where only the calling thread exists. shares_fds
+ * tells that the child shares its file descriptor table with its parent. */
+ZEND_API void zend_signal_forward_fork_child(bool shares_fds);
 
 END_EXTERN_C()
 

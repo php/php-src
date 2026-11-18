@@ -21,16 +21,34 @@
  * Owner: the thread that most recently registered a handler for the signal, or
  * otherwise the thread that most recently armed the execution timer delivering it.
  *
- * Signal handlers only use lock-free atomics, getpid(), time() and write(). They
- * must not call pthread_kill(): POSIX allows it, but on macOS it takes a libpthread
- * lock that the interrupted thread may already hold, which aborts the process. A
- * helper thread reads the pipe and calls pthread_kill() in normal context.
+ * Signal handlers must not call pthread_kill(): POSIX allows it, but on macOS it
+ * takes a libpthread lock that the interrupted thread may already hold, which aborts
+ * the process. A helper thread reads a pipe and calls pthread_kill() instead.
  *
- * The helper holds the mutex across pthread_kill(), and a thread removes its record
- * under that mutex before it exits, so a signal never targets an exited thread.
+ * Invariants:
  *
- * A forwarded signal has the siginfo of the pthread_kill(): si_pid, si_uid, si_code
- * and any payload of the original signal are lost. Repeated signals coalesce. */
+ * 1. Handlers only use lock-free atomics and async-signal-safe functions, take no
+ *    lock, do not allocate, and preserve errno.
+ * 2. A handler publishes the pending flag before it writes to the pipe.
+ * 3. A nonzero flag means that a handler is about to write, that a byte is unread,
+ *    or that the helper has yet to scan that flag. Only the handler that sets a flag
+ *    from zero writes, so that a flag cannot wait for a wakeup that nobody will send.
+ * 4. EAGAIN is a wakeup: the pipe was full after the flag was published, so a read and
+ *    a scan are still to come. Any other write error clears the flag again.
+ * 5. The helper scans every flag when it starts and after every read.
+ * 6. A flag coalesces the signals that arrive between two scans into one delivery. It
+ *    keeps neither their number nor their siginfo: a forwarded signal has the siginfo
+ *    of the pthread_kill(), so si_pid, si_uid, si_code and any payload are lost.
+ * 7. pthread_kill() only runs on the helper with the mutex held, and a record leaves
+ *    the list under that mutex before its thread exits, so that a signal never targets
+ *    an exited thread. On Linux, the signal is sent with tgkill(): pthread_kill() takes
+ *    a lock in the target's descriptor, and a target that forks at that moment leaves
+ *    the lock held forever in its child, where the next forward would hang.
+ * 8. The pipe stays open as long as this process may write to it.
+ * 9. A forked child never reads the inherited list or mutex, which another thread may
+ *    have been updating. It only keeps the record of the calling thread.
+ * 10. zend_signal_forward_pid is only set while this process can notify a helper.
+ * 11. zend_signal_forward_shutdown() requires that no other thread runs PHP. */
 
 #include "zend.h"
 
@@ -41,8 +59,12 @@
 #include <limits.h>
 #include <pthread.h>
 #include <stdlib.h>
+#include <sys/time.h>
 #include <time.h>
 #include <unistd.h>
+#ifdef __linux__
+# include <sys/syscall.h>
+#endif
 
 #include "zend_atomic.h"
 
@@ -55,9 +77,13 @@
 
 typedef struct _zend_signal_forward_thread {
 	pthread_t thread;
+#ifdef SYS_tgkill
+	pid_t tid;
+#endif
 	pid_t process;
 	uint64_t handler[NSIG]; /* Registration order, 0 without a handler */
 	bool ignored[NSIG];
+	bool installed[NSIG];   /* The handler was installed through this component */
 	bool active;
 	int timer_signo;
 	uint64_t timer_order;
@@ -67,11 +93,11 @@ typedef struct _zend_signal_forward_thread {
 	struct _zend_signal_forward_thread *next;
 } zend_signal_forward_thread;
 
-/* What a forked child cannot safely reuse or free: the mutex may have been locked by
- * another thread, and the forking thread may still reach its record through the key. */
+/* The state of each process, which a forked child abandons instead of reusing. */
 typedef struct _zend_signal_forward_abandoned {
 	pthread_mutex_t mutex;
 	int process;
+	zend_signal_forward_thread *inherited_threads;
 	struct _zend_signal_forward_abandoned *previous;
 } zend_signal_forward_abandoned;
 
@@ -79,11 +105,11 @@ typedef struct _zend_signal_forward_abandoned {
 static zend_signal_forward_abandoned *zend_signal_forward_lock_state;
 static pthread_mutex_t *zend_signal_forward_mutex;
 static zend_signal_forward_thread *zend_signal_forward_threads;
-static zend_signal_forward_thread *zend_signal_forward_stale_threads;
 static uint64_t zend_signal_forward_order;
 static pthread_t zend_signal_forward_helper;
 static bool zend_signal_forward_helper_running;
 static bool zend_signal_forward_helper_stop;
+static bool zend_signal_forward_shared_fds;
 
 static pthread_key_t zend_signal_forward_key;
 static int zend_signal_forward_pipe[2] = {-1, -1};
@@ -132,21 +158,30 @@ static void zend_signal_forward_update(int signo)
 	zend_atomic_int_store_ex(&zend_signal_forward_targets[signo-1], targets);
 }
 
+/* The timer is process-wide, so the most recent one is the one that runs. */
+static zend_signal_forward_thread *zend_signal_forward_timer_owner(int signo)
+{
+	zend_signal_forward_thread *timer = NULL;
+
+	for (zend_signal_forward_thread *thread = zend_signal_forward_threads; thread; thread = thread->next) {
+		if (thread->timer_signo == signo && (!timer || thread->timer_order > timer->timer_order)) {
+			timer = thread;
+		}
+	}
+	return timer;
+}
+
 static zend_signal_forward_thread *zend_signal_forward_owner(int signo, bool *is_timer)
 {
-	zend_signal_forward_thread *owner = NULL, *timer = NULL;
+	zend_signal_forward_thread *owner = NULL;
 
 	for (zend_signal_forward_thread *thread = zend_signal_forward_threads; thread; thread = thread->next) {
 		if (thread->handler[signo-1] && (!owner || thread->handler[signo-1] > owner->handler[signo-1])) {
 			owner = thread;
 		}
-		/* The timer is process-wide, so the most recent one is the one that runs. */
-		if (thread->timer_signo == signo && (!timer || thread->timer_order > timer->timer_order)) {
-			timer = thread;
-		}
 	}
-	*is_timer = !owner && timer;
-	return owner ? owner : timer;
+	*is_timer = !owner;
+	return owner ? owner : zend_signal_forward_timer_owner(signo);
 }
 
 static void zend_signal_forward_next_generation(int signo)
@@ -154,6 +189,23 @@ static void zend_signal_forward_next_generation(int signo)
 	int generation = zend_atomic_int_load_ex(&zend_signal_forward_generation[signo-1]);
 
 	zend_atomic_int_store_ex(&zend_signal_forward_generation[signo-1], generation >= INT_MAX - 1 ? 0 : generation + 1);
+}
+
+static zend_always_inline void zend_signal_forward_identify(zend_signal_forward_thread *thread)
+{
+	thread->thread = pthread_self();
+#ifdef SYS_tgkill
+	thread->tid = (pid_t) syscall(SYS_gettid);
+#endif
+}
+
+static zend_always_inline void zend_signal_forward_kill(const zend_signal_forward_thread *thread, int signo)
+{
+#ifdef SYS_tgkill
+	syscall(SYS_tgkill, getpid(), thread->tid, signo);
+#else
+	pthread_kill(thread->thread, signo);
+#endif
 }
 
 static void zend_signal_forward_deliver(int signo, int pending)
@@ -164,7 +216,7 @@ static void zend_signal_forward_deliver(int signo, int pending)
 	if (owner) {
 		/* A timer that was re-armed meanwhile did not expire. */
 		if (!is_timer || pending == zend_atomic_int_load_ex(&zend_signal_forward_generation[signo-1]) + 1) {
-			pthread_kill(owner->thread, signo);
+			zend_signal_forward_kill(owner, signo);
 		}
 	} else if (zend_atomic_int_load_ex(&zend_signal_forward_ignoring[signo-1]) == 0
 	 && time(NULL) - zend_atomic_int_load_ex(&zend_signal_forward_disarmed_at[signo-1]) > ZEND_SIGNAL_FORWARD_TIMER_GRACE) {
@@ -175,28 +227,15 @@ static void zend_signal_forward_deliver(int signo, int pending)
 
 static void *zend_signal_forward_helper_main(void *arg)
 {
-	sigset_t all;
 	char buffer[64];
 
-	sigfillset(&all);
-	pthread_sigmask(SIG_BLOCK, &all, NULL);
-
 	while (1) {
-		ssize_t bytes = read(zend_signal_forward_pipe[0], buffer, sizeof(buffer));
-
-		if (bytes < 0 && errno == EINTR) {
-			continue;
-		}
-		if (bytes <= 0) {
-			/* Signals take their default policy from now on. */
-			zend_atomic_int_store_ex(&zend_signal_forward_pid, 0);
-			break;
-		}
+		ssize_t bytes;
 
 		pthread_mutex_lock(zend_signal_forward_mutex);
 		if (zend_signal_forward_helper_stop) {
 			pthread_mutex_unlock(zend_signal_forward_mutex);
-			break;
+			return NULL;
 		}
 		for (int signo = 1; signo < NSIG; signo++) {
 			int pending = zend_atomic_int_exchange_ex(&zend_signal_forward_pending[signo-1], 0);
@@ -206,7 +245,25 @@ static void *zend_signal_forward_helper_main(void *arg)
 			}
 		}
 		pthread_mutex_unlock(zend_signal_forward_mutex);
+
+		do {
+			bytes = read(zend_signal_forward_pipe[0], buffer, sizeof(buffer));
+		} while (bytes < 0 && errno == EINTR);
+
+		if (bytes <= 0) {
+			break;
+		}
 	}
+
+	/* The pipe is unusable: the next registration starts over with a new one. */
+	pthread_mutex_lock(zend_signal_forward_mutex);
+	if (!zend_signal_forward_helper_stop) {
+		zend_atomic_int_store_ex(&zend_signal_forward_pid, 0);
+		zend_signal_forward_pipe[0] = zend_signal_forward_pipe[1] = -1;
+		zend_signal_forward_helper_running = false;
+		pthread_detach(pthread_self());
+	}
+	pthread_mutex_unlock(zend_signal_forward_mutex);
 
 	return NULL;
 }
@@ -240,16 +297,26 @@ static bool zend_signal_forward_open_pipe(void)
 
 static void zend_signal_forward_helper_start(void)
 {
-	if (zend_signal_forward_helper_running || !zend_signal_forward_open_pipe()) {
+	sigset_t all, old;
+	bool created;
+
+	/* A pipe opened in a table shared with the parent would outlive this process. */
+	if (zend_signal_forward_helper_running || zend_signal_forward_shared_fds || !zend_signal_forward_open_pipe()) {
 		return;
 	}
 
-	/* Published first, as the new thread may receive a signal before it blocks them. */
 	zend_atomic_int_store_ex(&zend_signal_forward_fd, zend_signal_forward_pipe[1]);
 	zend_atomic_int_store_ex(&zend_signal_forward_pid, (int) getpid());
 
+	/* The helper inherits this mask, so that it never takes a signal for another thread:
+	 * it would reach its handler late, and after signals that were sent later. */
+	sigfillset(&all);
+	pthread_sigmask(SIG_BLOCK, &all, &old);
 	zend_signal_forward_helper_stop = false;
-	if (pthread_create(&zend_signal_forward_helper, NULL, zend_signal_forward_helper_main, NULL) != 0) {
+	created = pthread_create(&zend_signal_forward_helper, NULL, zend_signal_forward_helper_main, NULL) == 0;
+	pthread_sigmask(SIG_SETMASK, &old, NULL);
+
+	if (!created) {
 		zend_atomic_int_store_ex(&zend_signal_forward_pid, 0);
 		return;
 	}
@@ -261,7 +328,6 @@ static void zend_signal_forward_helper_start(void)
 static void zend_signal_forward_init(int process)
 {
 	zend_signal_forward_thread *self = pthread_getspecific(zend_signal_forward_key);
-	zend_signal_forward_thread *thread = zend_signal_forward_threads;
 
 	zend_atomic_int_store_ex(&zend_signal_forward_pid, 0);
 
@@ -275,25 +341,33 @@ static void zend_signal_forward_init(int process)
 			return;
 		}
 		state->process = process;
+		state->inherited_threads = NULL;
 		state->previous = zend_signal_forward_lock_state;
 		zend_signal_forward_lock_state = state;
 		zend_signal_forward_mutex = &state->mutex;
 	}
 
-	while (thread) {
-		zend_signal_forward_thread *next = thread->next;
+	/* Kept reachable, but never read: another thread may have been updating it. */
+	zend_signal_forward_lock_state->inherited_threads = zend_signal_forward_threads;
+	if (self) {
+		/* The inherited record stays as it is, in the list that was kept reachable. */
+		zend_signal_forward_thread *copy = malloc(sizeof(zend_signal_forward_thread));
 
-		if (thread != self) {
-			thread->prev = NULL;
-			thread->next = zend_signal_forward_stale_threads;
-			zend_signal_forward_stale_threads = thread;
+		if (copy && pthread_setspecific(zend_signal_forward_key, copy) == 0) {
+			*copy = *self;
+			self = copy;
+		} else {
+			free(copy);
 		}
-		thread = next;
 	}
 	zend_signal_forward_threads = self;
 	if (self) {
 		self->prev = self->next = NULL;
 		self->process = process;
+		zend_signal_forward_identify(self);
+		/* Timers are not inherited by a child. */
+		self->timer_signo = 0;
+		self->has_timer_action = false;
 	}
 
 	/* A child must not share the pipe of its parent. Otherwise the pipe stays open
@@ -307,6 +381,7 @@ static void zend_signal_forward_init(int process)
 
 	for (int signo = 1; signo < NSIG; signo++) {
 		zend_atomic_int_store_ex(&zend_signal_forward_pending[signo-1], 0);
+		zend_atomic_int_store_ex(&zend_signal_forward_disarmed_at[signo-1], 0);
 		zend_signal_forward_update(signo);
 	}
 
@@ -388,7 +463,7 @@ static zend_signal_forward_thread *zend_signal_forward_self(void)
 		}
 	}
 
-	self->thread = pthread_self();
+	zend_signal_forward_identify(self);
 	self->process = process;
 	self->next = zend_signal_forward_threads;
 	if (self->next) {
@@ -418,6 +493,7 @@ static bool zend_signal_forward_clear_self(zend_signal_forward_thread *self)
 	for (int signo = 1; signo < NSIG; signo++) {
 		if (self->handler[signo-1] || self->ignored[signo-1]) {
 			self->handler[signo-1] = 0;
+			self->installed[signo-1] = false;
 			self->ignored[signo-1] = false;
 			zend_signal_forward_update(signo);
 			cleared = true;
@@ -429,179 +505,6 @@ static bool zend_signal_forward_clear_self(zend_signal_forward_thread *self)
 	}
 	self->active = false;
 	return cleared;
-}
-
-static void zend_signal_forward_thread_exit(void *data)
-{
-	zend_signal_forward_thread *self = data;
-	zend_signal_forward_thread *thread;
-	sigset_t handled, pending, blocked;
-
-	if (!zend_signal_forward_lock()) {
-		return;
-	}
-
-	/* The record is left behind if this process was forked meanwhile. */
-	for (thread = zend_signal_forward_threads; thread && thread != self; thread = thread->next);
-	if (!thread) {
-		zend_signal_forward_unlock();
-		return;
-	}
-
-	sigemptyset(&handled);
-	for (int signo = 1; signo < NSIG; signo++) {
-		if (self->handler[signo-1]) {
-			sigaddset(&handled, signo);
-		}
-	}
-	zend_signal_forward_clear_self(self);
-	if (self->prev) {
-		self->prev->next = self->next;
-	} else {
-		zend_signal_forward_threads = self->next;
-	}
-	if (self->next) {
-		self->next->prev = self->prev;
-	}
-	free(self);
-	zend_signal_forward_unlock();
-
-	/* A signal that this thread blocks would be lost with it. */
-	sigpending(&pending);
-	pthread_sigmask(SIG_BLOCK, NULL, &blocked);
-	for (int signo = 1; signo < NSIG; signo++) {
-		if (sigismember(&handled, signo) == 1 && sigismember(&pending, signo) == 1 && sigismember(&blocked, signo) == 1) {
-			kill(getpid(), signo);
-		}
-	}
-}
-
-void zend_signal_forward_startup(void)
-{
-	if (pthread_key_create(&zend_signal_forward_key, zend_signal_forward_thread_exit) != 0) {
-		return;
-	}
-	zend_atomic_int_store_ex(&zend_signal_forward_process, 0);
-	zend_atomic_bool_store_ex(&zend_signal_forward_started, true);
-}
-
-void zend_signal_forward_shutdown(void)
-{
-	zend_signal_forward_thread *thread;
-
-	if (!zend_atomic_bool_load_ex(&zend_signal_forward_started)) {
-		return;
-	}
-
-	zend_atomic_int_store_ex(&zend_signal_forward_pid, 0);
-	zend_atomic_bool_store_ex(&zend_signal_forward_started, false);
-
-	if (zend_atomic_int_load_ex(&zend_signal_forward_process) == (int) getpid()) {
-		pthread_mutex_lock(zend_signal_forward_mutex);
-		zend_signal_forward_helper_stop = true;
-		pthread_mutex_unlock(zend_signal_forward_mutex);
-
-		if (zend_signal_forward_helper_running) {
-			while (write(zend_signal_forward_pipe[1], "", 1) < 0 && errno == EINTR);
-			pthread_join(zend_signal_forward_helper, NULL);
-			zend_signal_forward_helper_running = false;
-		}
-
-		pthread_mutex_lock(zend_signal_forward_mutex);
-		thread = zend_signal_forward_threads;
-		while (thread) {
-			zend_signal_forward_thread *next = thread->next;
-
-			free(thread);
-			thread = next;
-		}
-		zend_signal_forward_threads = NULL;
-		for (int signo = 1; signo < NSIG; signo++) {
-			zend_signal_forward_update(signo);
-		}
-		pthread_mutex_unlock(zend_signal_forward_mutex);
-	}
-
-	pthread_setspecific(zend_signal_forward_key, NULL);
-	pthread_key_delete(zend_signal_forward_key);
-}
-
-ZEND_API bool zend_signal_forward(int signo)
-{
-#ifdef HAVE_NO_ATOMICS
-	return false;
-#else
-	int errno_save = errno;
-	bool forwarded = false;
-
-	if (zend_signal_forward_is_trackable(signo)
-	 && zend_atomic_int_load_ex(&zend_signal_forward_pid) == (int) getpid()) {
-		if (zend_atomic_int_load_ex(&zend_signal_forward_targets[signo-1]) > 0) {
-			zend_atomic_int_store_ex(&zend_signal_forward_pending[signo-1],
-				zend_atomic_int_load_ex(&zend_signal_forward_generation[signo-1]) + 1);
-			/* If the pipe is full, the helper is about to read the flag anyway. */
-			(void) !write(zend_atomic_int_load_ex(&zend_signal_forward_fd), "", 1);
-			forwarded = true;
-		} else {
-			/* Ignored by a PHP thread, or the signal of a timer that was just disarmed. */
-			forwarded = zend_atomic_int_load_ex(&zend_signal_forward_ignoring[signo-1]) > 0
-				|| time(NULL) - zend_atomic_int_load_ex(&zend_signal_forward_disarmed_at[signo-1]) <= ZEND_SIGNAL_FORWARD_TIMER_GRACE;
-		}
-	}
-
-	errno = errno_save;
-	return forwarded;
-#endif
-}
-
-ZEND_API void zend_signal_forward_or_default(int signo)
-{
-	if (!zend_signal_forward(signo)) {
-		/* A handler is registered in this process, but forwarding could not be set up. */
-		if (zend_signal_forward_is_trackable(signo)
-		 && zend_atomic_int_load_ex(&zend_signal_forward_process) == (int) getpid()
-		 && zend_atomic_int_load_ex(&zend_signal_forward_handlers[signo-1]) > 0) {
-			return;
-		}
-		signal(signo, SIG_DFL);
-		kill(getpid(), signo);
-	}
-}
-
-ZEND_API bool zend_signal_forward_has_handler(int signo)
-{
-	return zend_signal_forward_is_trackable(signo)
-		&& zend_atomic_int_load_ex(&zend_signal_forward_handlers[signo-1]) > 0;
-}
-
-ZEND_API int zend_signal_forward_acquire(int signo, const struct sigaction *act)
-{
-	zend_signal_forward_thread *self;
-	int result = 0;
-
-	if (!zend_signal_forward_is_trackable(signo) || !zend_signal_forward_lock()) {
-		return act ? sigaction(signo, act, NULL) : 0;
-	}
-
-	self = zend_signal_forward_self();
-	if (self) {
-		self->handler[signo-1] = ++zend_signal_forward_order;
-		self->ignored[signo-1] = false;
-		self->active = true;
-		zend_signal_forward_update(signo);
-		zend_signal_forward_helper_start();
-	}
-
-	if (act) {
-		result = sigaction(signo, act, NULL);
-		if (result != 0 && self) {
-			self->handler[signo-1] = 0;
-			zend_signal_forward_update(signo);
-		}
-	}
-
-	zend_signal_forward_unlock();
-	return result;
 }
 
 /* The disposition is process-wide, so it follows what the remaining threads need. */
@@ -641,6 +544,242 @@ static int zend_signal_forward_apply(int signo, const struct sigaction *act)
 	return sigaction(signo, act, NULL);
 }
 
+static void zend_signal_forward_thread_exit(void *data)
+{
+	zend_signal_forward_thread *self = data;
+	zend_signal_forward_thread *thread;
+	sigset_t handled, installed, pending, blocked;
+#ifdef HAVE_SETITIMER
+	int timer_signo;
+#endif
+
+	if (!zend_signal_forward_lock()) {
+		return;
+	}
+
+	/* The record is left behind if this process was forked meanwhile. */
+	for (thread = zend_signal_forward_threads; thread && thread != self; thread = thread->next);
+	if (!thread) {
+		zend_signal_forward_unlock();
+		return;
+	}
+
+	sigemptyset(&handled);
+	sigemptyset(&installed);
+	for (int signo = 1; signo < NSIG; signo++) {
+		if (self->handler[signo-1]) {
+			sigaddset(&handled, signo);
+			if (self->installed[signo-1]) {
+				sigaddset(&installed, signo);
+			}
+		}
+	}
+
+#ifdef HAVE_SETITIMER
+	/* Nothing else would stop the timer of a thread that exits during a request. */
+	timer_signo = self->timer_signo;
+	if ((timer_signo == SIGALRM || timer_signo == SIGPROF) && zend_signal_forward_timer_owner(timer_signo) == self) {
+		bool timer_in_use = false;
+
+		for (thread = zend_signal_forward_threads; thread; thread = thread->next) {
+			timer_in_use = timer_in_use || (thread != self && thread->timer_signo == timer_signo);
+		}
+		if (!timer_in_use) {
+			struct itimerval no_timeout;
+
+			memset(&no_timeout, 0, sizeof(no_timeout));
+			setitimer(timer_signo == SIGALRM ? ITIMER_REAL : ITIMER_PROF, &no_timeout, NULL);
+		}
+	}
+#endif
+
+	zend_signal_forward_clear_self(self);
+	if (self->prev) {
+		self->prev->next = self->next;
+	} else {
+		zend_signal_forward_threads = self->next;
+	}
+	if (self->next) {
+		self->next->prev = self->prev;
+	}
+	free(self);
+
+	/* While the current disposition is still in place. */
+	zend_signal_forward_flush();
+
+	/* A handler installed for this thread must not outlive it. */
+	for (int signo = 1; signo < NSIG; signo++) {
+		if (sigismember(&installed, signo) == 1) {
+			struct sigaction default_action;
+
+			memset(&default_action, 0, sizeof(default_action));
+			default_action.sa_handler = SIG_DFL;
+			sigemptyset(&default_action.sa_mask);
+			zend_signal_forward_apply(signo, &default_action);
+		}
+	}
+
+	zend_signal_forward_unlock();
+
+	/* A signal that this thread blocks would be lost with it. */
+	sigpending(&pending);
+	pthread_sigmask(SIG_BLOCK, NULL, &blocked);
+	for (int signo = 1; signo < NSIG; signo++) {
+		if (sigismember(&handled, signo) == 1 && sigismember(&pending, signo) == 1 && sigismember(&blocked, signo) == 1) {
+			kill(getpid(), signo);
+		}
+	}
+}
+
+void zend_signal_forward_startup(void)
+{
+#ifndef ZEND_ATOMIC_SIGNAL_SAFE
+	return;
+#endif
+	if (pthread_key_create(&zend_signal_forward_key, zend_signal_forward_thread_exit) != 0) {
+		return;
+	}
+	zend_atomic_int_store_ex(&zend_signal_forward_process, 0);
+	zend_atomic_bool_store_ex(&zend_signal_forward_started, true);
+}
+
+void zend_signal_forward_shutdown(void)
+{
+	zend_signal_forward_thread *thread;
+
+	if (!zend_atomic_bool_load_ex(&zend_signal_forward_started)) {
+		return;
+	}
+
+	zend_atomic_int_store_ex(&zend_signal_forward_pid, 0);
+	zend_atomic_bool_store_ex(&zend_signal_forward_started, false);
+
+	if (zend_atomic_int_load_ex(&zend_signal_forward_process) == (int) getpid()) {
+		bool helper_running;
+
+		pthread_mutex_lock(zend_signal_forward_mutex);
+		zend_signal_forward_helper_stop = true;
+		helper_running = zend_signal_forward_helper_running;
+		pthread_mutex_unlock(zend_signal_forward_mutex);
+
+		if (helper_running) {
+			while (write(zend_signal_forward_pipe[1], "", 1) < 0 && errno == EINTR);
+			pthread_join(zend_signal_forward_helper, NULL);
+			zend_signal_forward_helper_running = false;
+		}
+
+		pthread_mutex_lock(zend_signal_forward_mutex);
+		thread = zend_signal_forward_threads;
+		while (thread) {
+			zend_signal_forward_thread *next = thread->next;
+
+			free(thread);
+			thread = next;
+		}
+		zend_signal_forward_threads = NULL;
+		for (int signo = 1; signo < NSIG; signo++) {
+			zend_signal_forward_update(signo);
+		}
+		pthread_mutex_unlock(zend_signal_forward_mutex);
+	}
+
+	pthread_setspecific(zend_signal_forward_key, NULL);
+	pthread_key_delete(zend_signal_forward_key);
+}
+
+ZEND_API bool zend_signal_forward(int signo)
+{
+#ifndef ZEND_ATOMIC_SIGNAL_SAFE
+	return false;
+#else
+	int errno_save = errno;
+	bool forwarded = false;
+
+	if (zend_signal_forward_is_trackable(signo)
+	 && zend_atomic_int_load_ex(&zend_signal_forward_pid) == (int) getpid()) {
+		if (zend_atomic_int_load_ex(&zend_signal_forward_targets[signo-1]) > 0) {
+			int value = zend_atomic_int_load_ex(&zend_signal_forward_generation[signo-1]) + 1;
+
+			forwarded = true;
+			if (zend_atomic_int_exchange_ex(&zend_signal_forward_pending[signo-1], value) == 0) {
+				ssize_t written;
+
+				do {
+					written = write(zend_atomic_int_load_ex(&zend_signal_forward_fd), "", 1);
+				} while (written < 0 && errno == EINTR);
+
+				if (written < 0 && errno != EAGAIN && errno != EWOULDBLOCK) {
+					/* If the helper took the flag meanwhile, the signal is on its way. */
+					forwarded = zend_atomic_int_exchange_ex(&zend_signal_forward_pending[signo-1], 0) == 0;
+				}
+			}
+		} else {
+			/* Ignored by a PHP thread, or the signal of a timer that was just disarmed. */
+			forwarded = zend_atomic_int_load_ex(&zend_signal_forward_ignoring[signo-1]) > 0
+				|| time(NULL) - zend_atomic_int_load_ex(&zend_signal_forward_disarmed_at[signo-1]) <= ZEND_SIGNAL_FORWARD_TIMER_GRACE;
+		}
+	}
+
+	errno = errno_save;
+	return forwarded;
+#endif
+}
+
+ZEND_API void zend_signal_forward_or_default(int signo)
+{
+#ifdef ZEND_ATOMIC_SIGNAL_SAFE
+	if (!zend_signal_forward(signo)) {
+		int errno_save = errno;
+
+		/* A handler is registered in this process, but forwarding could not be set up. */
+		if (!zend_signal_forward_is_trackable(signo)
+		 || zend_atomic_int_load_ex(&zend_signal_forward_process) != (int) getpid()
+		 || zend_atomic_int_load_ex(&zend_signal_forward_handlers[signo-1]) == 0) {
+			signal(signo, SIG_DFL);
+			kill(getpid(), signo);
+		}
+		errno = errno_save;
+	}
+#endif
+}
+
+bool zend_signal_forward_has_handler(int signo)
+{
+	return zend_signal_forward_is_trackable(signo)
+		&& zend_atomic_int_load_ex(&zend_signal_forward_handlers[signo-1]) > 0;
+}
+
+ZEND_API int zend_signal_forward_acquire(int signo, const struct sigaction *act)
+{
+	zend_signal_forward_thread *self;
+	int result = 0;
+
+	if (!zend_signal_forward_is_trackable(signo) || !zend_signal_forward_lock()) {
+		return act ? sigaction(signo, act, NULL) : 0;
+	}
+
+	self = zend_signal_forward_self();
+	if (self) {
+		self->handler[signo-1] = ++zend_signal_forward_order;
+		self->ignored[signo-1] = false;
+		self->installed[signo-1] = act != NULL;
+		self->active = true;
+		zend_signal_forward_update(signo);
+		zend_signal_forward_helper_start();
+	}
+
+	if (act) {
+		result = sigaction(signo, act, NULL);
+		if (result != 0 && self) {
+			self->handler[signo-1] = 0;
+			zend_signal_forward_update(signo);
+		}
+	}
+
+	zend_signal_forward_unlock();
+	return result;
+}
+
 ZEND_API int zend_signal_forward_release(int signo, const struct sigaction *act)
 {
 	zend_signal_forward_thread *self;
@@ -654,6 +793,7 @@ ZEND_API int zend_signal_forward_release(int signo, const struct sigaction *act)
 	self = ignore ? zend_signal_forward_self() : pthread_getspecific(zend_signal_forward_key);
 	if (self) {
 		self->handler[signo-1] = 0;
+		self->installed[signo-1] = false;
 		self->ignored[signo-1] = ignore;
 		self->active = self->active || ignore;
 		/* This thread replaced the handler of its own timer. */
@@ -708,7 +848,7 @@ ZEND_API void zend_signal_forward_timer_disarm(void)
 		return;
 	}
 
-	/* Most requests have no timer, and must not contend on the mutex. */
+	/* A request without a running timer must not contend on the mutex. */
 	self = pthread_getspecific(zend_signal_forward_key);
 	if (!self || !self->timer_signo || !zend_signal_forward_lock()) {
 		return;
@@ -718,7 +858,7 @@ ZEND_API void zend_signal_forward_timer_disarm(void)
 	zend_signal_forward_unlock();
 }
 
-ZEND_API void zend_signal_forward_request_shutdown(void)
+void zend_signal_forward_request_shutdown(void)
 {
 	zend_signal_forward_thread *self;
 	bool cleared;
@@ -741,8 +881,14 @@ ZEND_API void zend_signal_forward_request_shutdown(void)
 	}
 }
 
-ZEND_API void zend_signal_forward_fork_child(void)
+ZEND_API void zend_signal_forward_fork_child(bool shares_fds)
 {
+	/* Closing the pipe would close it for the parent too. */
+	zend_signal_forward_shared_fds = shares_fds;
+	if (shares_fds) {
+		zend_signal_forward_pipe[0] = zend_signal_forward_pipe[1] = -1;
+	}
+
 	if (!zend_signal_forward_lock()) {
 		return;
 	}

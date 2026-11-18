@@ -35,6 +35,15 @@
 
 #undef ZEND_GCC_PREREQ
 
+/* Whether these atomics are lock-free, and therefore usable in a signal handler. */
+#if (defined(HAVE_C11_ATOMICS) || defined(HAVE_GNUC_ATOMICS)) \
+ && __GCC_ATOMIC_INT_LOCK_FREE == 2 && __GCC_ATOMIC_BOOL_LOCK_FREE == 2
+# define ZEND_ATOMIC_SIGNAL_SAFE 1
+#elif defined(HAVE_SYNC_ATOMICS) \
+ && defined(__GCC_HAVE_SYNC_COMPARE_AND_SWAP_1) && defined(__GCC_HAVE_SYNC_COMPARE_AND_SWAP_4)
+# define ZEND_ATOMIC_SIGNAL_SAFE 1
+#endif
+
 /* Treat zend_atomic_* types as opaque. They have definitions only for size
  * and alignment purposes.
  */
