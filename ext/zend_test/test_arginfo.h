@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: b3c6209d96da50e9aa0e0dbd0ee5e9926d64be4d
+ * Stub hash: 628d55abb309f2585a8d249adbdbb8da8def52e7
  * Has decl header: yes */
 
 #include "zend_attributes.h"
@@ -364,6 +364,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_zend_test_opcache_preloading arginfo_zend_test_is_pcre_bundled
 
+#define arginfo_zend_test_opcache_shm_read_locked arginfo_zend_test_is_pcre_bundled
+
+#define arginfo_zend_test_opcache_last_restart_time arginfo_zend_test_nodiscard
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_uri_parser, 0, 2, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, parser, IS_STRING, 0)
@@ -583,6 +587,8 @@ static ZEND_FUNCTION(zend_test_log_err_debug);
 static ZEND_FUNCTION(zend_test_compile_to_ast);
 static ZEND_FUNCTION(zend_test_gh18756);
 static ZEND_FUNCTION(zend_test_opcache_preloading);
+static ZEND_FUNCTION(zend_test_opcache_shm_read_locked);
+static ZEND_FUNCTION(zend_test_opcache_last_restart_time);
 static ZEND_FUNCTION(zend_test_uri_parser);
 static ZEND_FUNCTION(zend_test_gh19792);
 static ZEND_FUNCTION(zend_test_handle_post_data);
@@ -772,6 +778,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_compile_to_ast, arginfo_zend_test_compile_to_ast)
 	ZEND_FE(zend_test_gh18756, arginfo_zend_test_gh18756)
 	ZEND_FE(zend_test_opcache_preloading, arginfo_zend_test_opcache_preloading)
+	ZEND_FE(zend_test_opcache_shm_read_locked, arginfo_zend_test_opcache_shm_read_locked)
+	ZEND_FE(zend_test_opcache_last_restart_time, arginfo_zend_test_opcache_last_restart_time)
 	ZEND_FE(zend_test_uri_parser, arginfo_zend_test_uri_parser)
 #if (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY("zend_test_gh19792", zif_zend_test_gh19792, arginfo_zend_test_gh19792, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)

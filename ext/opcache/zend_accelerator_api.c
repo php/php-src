@@ -19,3 +19,17 @@ ZEND_API bool opcache_preloading(void)
 {
 	return ZCG(preloading);
 }
+
+ZEND_API bool opcache_shm_read_locked(void)
+{
+	return ZCG(counted);
+}
+
+ZEND_API time_t opcache_last_restart_time(void)
+{
+	if (!accel_startup_ok) {
+		return 0;
+	}
+
+	return ZCSG(last_restart_time);
+}
