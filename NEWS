@@ -68,6 +68,10 @@ PHP                                                                        NEWS
   . Fixed use-after-free in getElementById() after a removed ID attribute is
     freed. (Ilia Alshanetsky)
 
+- FFI:
+  . Fixed bug GH-25558 (struct with an enum field passed by value is described
+    to libffi with a void element). (Davide Peressoni)
+
 - Filter:
   . Fixed stack overflow in filter_var() and filter_var_array() with deeply
     nested arrays. (Eyüp Can Akman)
