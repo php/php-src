@@ -7,7 +7,6 @@ zend_test
 <?php
 if (!PHP_ZTS) die('skip ZTS only');
 if (!function_exists('zend_test_raise_on_foreign_thread')) die('skip zend_test_raise_on_foreign_thread() not available');
-if (getenv('SKIP_ASAN')) die('skip sanitizers handle faults themselves');
 ?>
 --FILE--
 <?php
@@ -23,7 +22,7 @@ foreach (['SIGSEGV' => SIGSEGV, 'SIGTRAP' => SIGTRAP] as $name => $signo) {
     echo "survived\\n";
     CODE;
 
-    $process = proc_open("exec $php $args -r " . escapeshellarg($code), [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+    $process = proc_open("ASAN_OPTIONS=handle_segv=0 exec $php $args -r " . escapeshellarg($code), [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
     echo stream_get_contents($pipes[1]);
     do {
         $status = proc_get_status($process);

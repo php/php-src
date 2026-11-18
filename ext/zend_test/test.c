@@ -1325,6 +1325,188 @@ static bool zend_test_forward_scenario(const char *scenario)
 		return pid > 0 && WIFEXITED(status) && WEXITSTATUS(status) == 0;
 	}
 
+#if ZEND_DEBUG
+	if (strcmp(scenario, "pipe_saturation") == 0) {
+		bool result;
+
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_HOLD);
+		result = zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_SATURATE) == 1;
+		zend_test_forward_raise_foreign();
+		result = zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_HANDLER_EAGAIN) == 1 && result;
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_RELEASE);
+		result = zend_test_forward_wait(&zend_test_forward_main_hits) && result;
+		usleep(100000);
+		return result && zend_atomic_int_load(&zend_test_forward_main_hits) == 1;
+	}
+
+	if (strcmp(scenario, "read_failure_keeps_signal") == 0) {
+		int write_fd;
+
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		write_fd = zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_WRITE_FD);
+		/* The read that fails comes before the notification of this signal is read. */
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_HOLD);
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_FAIL_READ);
+		zend_test_forward_raise_foreign();
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_RELEASE);
+		if (!zend_test_forward_wait(&zend_test_forward_main_hits)
+		 || zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_WRITE_FD) == write_fd) {
+			return false;
+		}
+		/* The pipe that replaced the failed one works too. */
+		zend_atomic_int_store(&zend_test_forward_main_hits, 0);
+		zend_test_forward_raise_foreign();
+		return zend_test_forward_wait(&zend_test_forward_main_hits);
+	}
+
+	if (strcmp(scenario, "stale_timer_after_grace") == 0) {
+		time_t start;
+
+		zend_signal_forward_timer_arm(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_HOLD);
+		zend_test_forward_raise_foreign();
+		zend_signal_forward_timer_disarm();
+		for (start = time(NULL); time(NULL) - start < 4; usleep(10000));
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_RELEASE);
+		usleep(200000);
+		return zend_atomic_int_load(&zend_test_forward_main_hits) == 0;
+	}
+
+	if (strcmp(scenario, "rearmed_timer") == 0) {
+		zend_signal_forward_timer_arm(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_HOLD);
+		zend_test_forward_raise_foreign();
+		zend_signal_forward_timer_arm(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_RELEASE);
+		usleep(200000);
+		zend_signal_forward_timer_disarm();
+		return zend_atomic_int_load(&zend_test_forward_main_hits) == 0;
+	}
+
+	if (strcmp(scenario, "exit_during_forwarding") == 0) {
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		zend_test_forward_helper_start();
+		zend_test_forward_send(ZEND_TEST_FORWARD_RECORD);
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_HOLD);
+		zend_test_forward_raise_foreign();
+		zend_test_forward_helper_exit();
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_RELEASE);
+		return zend_test_forward_wait(&zend_test_forward_main_hits)
+			&& zend_atomic_int_load(&zend_test_forward_helper_hits) == 0;
+	}
+
+	if (strcmp(scenario, "concurrent_unregistration") == 0) {
+		pthread_t storm, workers[ZEND_TEST_FORWARD_WORKERS];
+
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		zend_atomic_bool_store(&zend_test_forward_stop, false);
+		pthread_create(&storm, NULL, zend_test_forward_storm_main, NULL);
+		for (int i = 0; i < ZEND_TEST_FORWARD_WORKERS; i++) {
+			pthread_create(&workers[i], NULL, zend_test_forward_churn_main, NULL);
+		}
+		for (int i = 0; i < 300; i++) {
+			pthread_t thread;
+
+			pthread_create(&thread, NULL, zend_test_forward_short_lived_main, NULL);
+			pthread_join(thread, NULL);
+		}
+		zend_atomic_bool_store(&zend_test_forward_stop, true);
+		for (int i = 0; i < ZEND_TEST_FORWARD_WORKERS; i++) {
+			pthread_join(workers[i], NULL);
+		}
+		pthread_join(storm, NULL);
+
+		zend_atomic_int_store(&zend_test_forward_main_hits, 0);
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		zend_test_forward_raise_foreign();
+		return zend_test_forward_wait(&zend_test_forward_main_hits);
+	}
+
+	if (strcmp(scenario, "fork_while_held") == 0) {
+		bool result;
+
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_HOLD);
+		/* The child inherits a locked mutex and a helper that does not exist there. */
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_LOCK);
+		result = zend_test_forward_fork_and_check();
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_UNLOCK);
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_RELEASE);
+		zend_test_forward_raise_foreign();
+		return zend_test_forward_wait(&zend_test_forward_main_hits) && result;
+	}
+
+	if (strcmp(scenario, "helper_restart") == 0) {
+		for (int i = 0; i < 4; i++) {
+			zend_atomic_int_store(&zend_test_forward_main_hits, 0);
+			zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
+			zend_test_forward_raise_foreign();
+			if (!zend_test_forward_wait(&zend_test_forward_main_hits)) {
+				return false;
+			}
+			zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_RESTART);
+		}
+		return true;
+	}
+
+	if (strcmp(scenario, "idle_retirement") == 0) {
+		time_t start = time(NULL);
+		bool retired = false;
+
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		zend_signal_forward_release(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_IDLE_SOON);
+		while (!retired && time(NULL) - start < 30) {
+			retired = zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_RUNNING) == 0;
+			usleep(1000);
+		}
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_IDLE_NORMAL);
+		retired = retired && zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_PID) == 0;
+
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		zend_test_forward_raise_foreign();
+		return zend_test_forward_wait(&zend_test_forward_main_hits) && retired;
+	}
+
+	if (strcmp(scenario, "no_retirement_during_grace") == 0) {
+		time_t start;
+		bool result = true;
+
+		zend_signal_forward_timer_arm(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		zend_signal_forward_timer_disarm();
+		start = time(NULL);
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_IDLE_SOON);
+		while (time(NULL) - start < 1) {
+			bool running = zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_RUNNING) == 1;
+
+			/* Only conclusive if the grace period is certainly not over yet. */
+			result = result && (running || time(NULL) - start > 1);
+			usleep(1000);
+		}
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_IDLE_NORMAL);
+		return result;
+	}
+
+	if (strcmp(scenario, "closed_stdio") == 0) {
+		pid_t pid;
+
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		pid = fork();
+		if (pid == 0) {
+			bool result;
+
+			close(0);
+			close(1);
+			close(2);
+			result = zend_test_forward_child_delivers();
+			_exit(result && zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_READ_FD) > 2
+				&& zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_WRITE_FD) > 2 ? 0 : 1);
+		}
+		return pid > 0 && zend_test_forward_wait_child(pid);
+	}
+#endif
+
 	zend_throw_error(NULL, "Unknown scenario");
 	return false;
 }

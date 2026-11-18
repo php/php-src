@@ -23,7 +23,8 @@
  *
  * Signal handlers must not call pthread_kill(): POSIX allows it, but on macOS it
  * takes a libpthread lock that the interrupted thread may already hold, which aborts
- * the process. A helper thread reads a pipe and calls pthread_kill() instead.
+ * the process. A helper thread reads a pipe and sends the signal instead. It exits
+ * after a minute without anything to forward, and the next registration restarts it.
  *
  * Invariants:
  *
@@ -34,8 +35,11 @@
  *    or that the helper has yet to scan that flag. Only the handler that sets a flag
  *    from zero writes, so that a flag cannot wait for a wakeup that nobody will send.
  * 4. EAGAIN is a wakeup: the pipe was full after the flag was published, so a read and
- *    a scan are still to come. Any other write error clears the flag again.
- * 5. The helper scans every flag when it starts and after every read.
+ *    a scan are still to come. Any other write error clears the flag again, and so does
+ *    a handler that finds the helper gone after it published the flag: the helper clears
+ *    the pid before its final scan, so either that scan or the handler sees the flag.
+ * 5. The helper scans every flag when it starts, after every read, whether or not the
+ *    read succeeded, and before it exits on its own.
  * 6. A flag coalesces the signals that arrive between two scans into one delivery. It
  *    keeps neither their number nor their siginfo: a forwarded signal has the siginfo
  *    of the pthread_kill(), so si_pid, si_uid, si_code and any payload are lost.
@@ -44,11 +48,17 @@
  *    an exited thread. On Linux, the signal is sent with tgkill(): pthread_kill() takes
  *    a lock in the target's descriptor, and a target that forks at that moment leaves
  *    the lock held forever in its child, where the next forward would hang.
- * 8. The pipe stays open as long as this process may write to it.
+ * 8. The pipe stays open as long as this process may write to it. After a failed read,
+ *    the helper publishes a new pipe before it scans, so that a handler that sets a flag
+ *    after the scan writes to the new one. The old descriptors are left alone: their
+ *    numbers may already belong to something else. Without a free descriptor, the helper
+ *    keeps scanning and tries again every second.
  * 9. A forked child never reads the inherited list or mutex, which another thread may
  *    have been updating. It only keeps the record of the calling thread.
  * 10. zend_signal_forward_pid is only set while this process can notify a helper.
- * 11. zend_signal_forward_shutdown() requires that no other thread runs PHP. */
+ * 11. zend_signal_forward_shutdown() requires that no other thread runs PHP.
+ * 12. The mutex is the only lock. Handlers never take it, and the helper only sends
+ *     signals while it holds it, so that no lock order can deadlock. */
 
 #include "zend.h"
 
@@ -57,6 +67,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <poll.h>
 #include <pthread.h>
 #include <stdlib.h>
 #include <sys/time.h>
@@ -74,6 +85,8 @@
 
 /* How long the signal of a timer that was just disarmed may still arrive. */
 #define ZEND_SIGNAL_FORWARD_TIMER_GRACE 2
+/* How long the helper waits for something to forward before it exits, in milliseconds. */
+#define ZEND_SIGNAL_FORWARD_HELPER_IDLE 60000
 
 typedef struct _zend_signal_forward_thread {
 	pthread_t thread;
@@ -128,6 +141,14 @@ static zend_atomic_int zend_signal_forward_pending[NSIG];
 static zend_atomic_int zend_signal_forward_generation[NSIG];
 static zend_atomic_int zend_signal_forward_disarmed_at[NSIG];
 
+#if ZEND_DEBUG
+static zend_atomic_bool zend_signal_forward_test_hold;
+static zend_atomic_bool zend_signal_forward_test_held;
+static zend_atomic_bool zend_signal_forward_test_fail_read;
+static zend_atomic_bool zend_signal_forward_test_idle;
+static zend_atomic_bool zend_signal_forward_test_eagain;
+#endif
+
 static zend_always_inline bool zend_signal_forward_is_trackable(int signo)
 {
 	/* A fault must stay on the faulting thread: the instruction would run again as
@@ -141,6 +162,15 @@ static zend_always_inline bool zend_signal_forward_is_trackable(int signo)
 		&& signo != SIGTRAP
 #endif
 	;
+}
+
+/* Wraps around with the clock, which does not fit an int after 2038. */
+static zend_always_inline bool zend_signal_forward_recently_disarmed(int signo)
+{
+	int disarmed_at = zend_atomic_int_load_ex(&zend_signal_forward_disarmed_at[signo-1]);
+
+	/* Signed, as the clock may have been set back since. */
+	return disarmed_at != 0 && (int) ((unsigned int) time(NULL) - (unsigned int) disarmed_at) <= ZEND_SIGNAL_FORWARD_TIMER_GRACE;
 }
 
 static void zend_signal_forward_update(int signo)
@@ -219,17 +249,56 @@ static void zend_signal_forward_deliver(int signo, int pending)
 			zend_signal_forward_kill(owner, signo);
 		}
 	} else if (zend_atomic_int_load_ex(&zend_signal_forward_ignoring[signo-1]) == 0
-	 && time(NULL) - zend_atomic_int_load_ex(&zend_signal_forward_disarmed_at[signo-1]) > ZEND_SIGNAL_FORWARD_TIMER_GRACE) {
-		/* The owner left meanwhile: the signal now takes its current action. */
+	 && pending == zend_atomic_int_load_ex(&zend_signal_forward_generation[signo-1]) + 1
+	 && !zend_signal_forward_recently_disarmed(signo)) {
+		/* The owner left meanwhile: the signal now takes its current action. A timer
+		 * that was disarmed since the signal was raised has a new generation. */
 		kill(getpid(), signo);
 	}
 }
+
+static void zend_signal_forward_scan(void)
+{
+	for (int signo = 1; signo < NSIG; signo++) {
+		int pending = zend_atomic_int_exchange_ex(&zend_signal_forward_pending[signo-1], 0);
+
+		if (pending) {
+			zend_signal_forward_deliver(signo, pending);
+		}
+	}
+}
+
+static bool zend_signal_forward_is_idle(void)
+{
+	for (int signo = 1; signo < NSIG; signo++) {
+		if (zend_atomic_int_load_ex(&zend_signal_forward_targets[signo-1]) > 0
+		 || zend_atomic_int_load_ex(&zend_signal_forward_ignoring[signo-1]) > 0
+		 || zend_signal_forward_recently_disarmed(signo)) {
+			return false;
+		}
+	}
+	return true;
+}
+
+/* The helper stops on its own: a new one starts with the next registration. */
+static void zend_signal_forward_helper_retire(void)
+{
+	zend_atomic_int_store_ex(&zend_signal_forward_pid, 0);
+	zend_signal_forward_scan();
+	zend_signal_forward_helper_running = false;
+	pthread_detach(pthread_self());
+}
+
+static bool zend_signal_forward_open_pipe(void);
 
 static void *zend_signal_forward_helper_main(void *arg)
 {
 	char buffer[64];
 
 	while (1) {
+		struct pollfd wait;
+		int timeout;
+		int ready;
 		ssize_t bytes;
 
 		pthread_mutex_lock(zend_signal_forward_mutex);
@@ -237,35 +306,65 @@ static void *zend_signal_forward_helper_main(void *arg)
 			pthread_mutex_unlock(zend_signal_forward_mutex);
 			return NULL;
 		}
-		for (int signo = 1; signo < NSIG; signo++) {
-			int pending = zend_atomic_int_exchange_ex(&zend_signal_forward_pending[signo-1], 0);
-
-			if (pending) {
-				zend_signal_forward_deliver(signo, pending);
-			}
+		if (zend_signal_forward_pipe[0] == -1 && zend_signal_forward_open_pipe()) {
+			zend_atomic_int_store_ex(&zend_signal_forward_fd, zend_signal_forward_pipe[1]);
 		}
+		zend_signal_forward_scan();
+		/* poll() ignores a negative descriptor, and only waits for the timeout. */
+		wait.fd = zend_signal_forward_pipe[0];
+		wait.events = POLLIN;
+		timeout = wait.fd == -1 ? 1000 : ZEND_SIGNAL_FORWARD_HELPER_IDLE;
 		pthread_mutex_unlock(zend_signal_forward_mutex);
 
-		do {
-			bytes = read(zend_signal_forward_pipe[0], buffer, sizeof(buffer));
-		} while (bytes < 0 && errno == EINTR);
-
-		if (bytes <= 0) {
-			break;
+#if ZEND_DEBUG
+		if (zend_atomic_bool_load_ex(&zend_signal_forward_test_idle)) {
+			timeout = 10;
 		}
-	}
+#endif
+		ready = poll(&wait, 1, timeout);
+		if (ready < 0) {
+			/* Says nothing about the pipe. */
+			if (errno != EINTR) {
+				usleep(10000);
+			}
+			continue;
+		}
 
-	/* The pipe is unusable: the next registration starts over with a new one. */
-	pthread_mutex_lock(zend_signal_forward_mutex);
-	if (!zend_signal_forward_helper_stop) {
-		zend_atomic_int_store_ex(&zend_signal_forward_pid, 0);
-		zend_signal_forward_pipe[0] = zend_signal_forward_pipe[1] = -1;
-		zend_signal_forward_helper_running = false;
-		pthread_detach(pthread_self());
-	}
-	pthread_mutex_unlock(zend_signal_forward_mutex);
+		if (ready == 0) {
+			pthread_mutex_lock(zend_signal_forward_mutex);
+			if (!zend_signal_forward_helper_stop && zend_signal_forward_is_idle()) {
+				zend_signal_forward_helper_retire();
+				pthread_mutex_unlock(zend_signal_forward_mutex);
+				return NULL;
+			}
+			pthread_mutex_unlock(zend_signal_forward_mutex);
+			continue;
+		}
 
-	return NULL;
+		bytes = read(wait.fd, buffer, sizeof(buffer));
+#if ZEND_DEBUG
+		if (zend_atomic_bool_load_ex(&zend_signal_forward_test_hold)) {
+			zend_atomic_bool_store_ex(&zend_signal_forward_test_held, true);
+			while (zend_atomic_bool_load_ex(&zend_signal_forward_test_hold)) {
+				usleep(1000);
+			}
+			zend_atomic_bool_store_ex(&zend_signal_forward_test_held, false);
+		}
+		if (zend_atomic_bool_exchange_ex(&zend_signal_forward_test_fail_read, false)) {
+			bytes = 0;
+		}
+#endif
+		if (bytes > 0 || (bytes < 0 && errno == EINTR)) {
+			continue;
+		}
+
+		/* The pipe is unusable, and the read may have consumed a notification. */
+		pthread_mutex_lock(zend_signal_forward_mutex);
+		if (!zend_signal_forward_helper_stop) {
+			zend_signal_forward_pipe[0] = zend_signal_forward_pipe[1] = -1;
+		}
+		pthread_mutex_unlock(zend_signal_forward_mutex);
+	}
 }
 
 static bool zend_signal_forward_open_pipe(void)
@@ -280,12 +379,26 @@ static bool zend_signal_forward_open_pipe(void)
 		return false;
 	}
 
+	/* With a standard stream closed, its number must not end up on the pipe. */
+	for (int i = 0; i < 2; i++) {
+		if (fds[i] < 3) {
+			int fd = fcntl(fds[i], F_DUPFD, 3);
+
+			close(fds[i]);
+			fds[i] = fd;
+		}
+	}
+
 	/* A full pipe already guarantees that the helper will wake up. */
-	flags = fcntl(fds[1], F_GETFL);
-	if (flags == -1 || fcntl(fds[1], F_SETFL, flags | O_NONBLOCK) == -1
+	flags = fds[1] == -1 ? -1 : fcntl(fds[1], F_GETFL);
+	if (fds[0] == -1 || flags == -1 || fcntl(fds[1], F_SETFL, flags | O_NONBLOCK) == -1
 	 || fcntl(fds[0], F_SETFD, FD_CLOEXEC) == -1 || fcntl(fds[1], F_SETFD, FD_CLOEXEC) == -1) {
-		close(fds[0]);
-		close(fds[1]);
+		if (fds[0] != -1) {
+			close(fds[0]);
+		}
+		if (fds[1] != -1) {
+			close(fds[1]);
+		}
 		return false;
 	}
 
@@ -318,6 +431,7 @@ static void zend_signal_forward_helper_start(void)
 
 	if (!created) {
 		zend_atomic_int_store_ex(&zend_signal_forward_pid, 0);
+		zend_signal_forward_scan();
 		return;
 	}
 	zend_signal_forward_helper_running = true;
@@ -330,6 +444,11 @@ static void zend_signal_forward_init(int process)
 	zend_signal_forward_thread *self = pthread_getspecific(zend_signal_forward_key);
 
 	zend_atomic_int_store_ex(&zend_signal_forward_pid, 0);
+
+#if ZEND_DEBUG
+	zend_atomic_bool_store_ex(&zend_signal_forward_test_hold, false);
+	zend_atomic_bool_store_ex(&zend_signal_forward_test_held, false);
+#endif
 
 	/* PHP may also start again in the same process. */
 	if (!zend_signal_forward_lock_state || zend_signal_forward_lock_state->process != process) {
@@ -699,24 +818,40 @@ ZEND_API bool zend_signal_forward(int signo)
 	 && zend_atomic_int_load_ex(&zend_signal_forward_pid) == (int) getpid()) {
 		if (zend_atomic_int_load_ex(&zend_signal_forward_targets[signo-1]) > 0) {
 			int value = zend_atomic_int_load_ex(&zend_signal_forward_generation[signo-1]) + 1;
+			int previous = zend_atomic_int_exchange_ex(&zend_signal_forward_pending[signo-1], value);
+			bool failed = false;
 
-			forwarded = true;
-			if (zend_atomic_int_exchange_ex(&zend_signal_forward_pending[signo-1], value) == 0) {
+			/* A handler that was interrupted since it read the generation must not replace
+			 * the signal of the timer that runs now. */
+			if (previous != 0 && previous != value
+			 && previous == zend_atomic_int_load_ex(&zend_signal_forward_generation[signo-1]) + 1) {
+				previous = zend_atomic_int_exchange_ex(&zend_signal_forward_pending[signo-1], previous);
+			}
+
+			if (previous == 0) {
 				ssize_t written;
 
 				do {
 					written = write(zend_atomic_int_load_ex(&zend_signal_forward_fd), "", 1);
 				} while (written < 0 && errno == EINTR);
 
-				if (written < 0 && errno != EAGAIN && errno != EWOULDBLOCK) {
-					/* If the helper took the flag meanwhile, the signal is on its way. */
-					forwarded = zend_atomic_int_exchange_ex(&zend_signal_forward_pending[signo-1], 0) == 0;
+				failed = written < 0 && errno != EAGAIN && errno != EWOULDBLOCK;
+#if ZEND_DEBUG
+				if (written < 0 && !failed) {
+					zend_atomic_bool_store_ex(&zend_signal_forward_test_eagain, true);
 				}
+#endif
+			}
+
+			/* If the helper took the flag meanwhile, the signal is on its way. */
+			forwarded = true;
+			if (failed || zend_atomic_int_load_ex(&zend_signal_forward_pid) != (int) getpid()) {
+				forwarded = zend_atomic_int_exchange_ex(&zend_signal_forward_pending[signo-1], 0) == 0;
 			}
 		} else {
 			/* Ignored by a PHP thread, or the signal of a timer that was just disarmed. */
 			forwarded = zend_atomic_int_load_ex(&zend_signal_forward_ignoring[signo-1]) > 0
-				|| time(NULL) - zend_atomic_int_load_ex(&zend_signal_forward_disarmed_at[signo-1]) <= ZEND_SIGNAL_FORWARD_TIMER_GRACE;
+				|| zend_signal_forward_recently_disarmed(signo);
 		}
 	}
 
@@ -902,5 +1037,79 @@ ZEND_API void zend_signal_forward_fork_child(bool shares_fds)
 
 	zend_signal_forward_unlock();
 }
+
+#if ZEND_DEBUG
+ZEND_API int zend_signal_forward_test(zend_signal_forward_test_op op)
+{
+	int result = 1;
+	int write_fd;
+
+	if (op == ZEND_SIGNAL_FORWARD_TEST_RESTART) {
+		zend_signal_forward_shutdown();
+		zend_signal_forward_startup();
+		return 1;
+	}
+
+	if (op == ZEND_SIGNAL_FORWARD_TEST_UNLOCK) {
+		zend_signal_forward_unlock();
+		return 1;
+	}
+	if (op == ZEND_SIGNAL_FORWARD_TEST_PID) {
+		return zend_atomic_int_load_ex(&zend_signal_forward_pid);
+	}
+
+	if (!zend_signal_forward_lock()) {
+		return 0;
+	}
+	if (op == ZEND_SIGNAL_FORWARD_TEST_LOCK) {
+		return 1;
+	}
+	write_fd = zend_signal_forward_pipe[1];
+	if (op == ZEND_SIGNAL_FORWARD_TEST_RUNNING) {
+		result = zend_signal_forward_helper_running;
+	} else if (op == ZEND_SIGNAL_FORWARD_TEST_READ_FD) {
+		result = zend_signal_forward_pipe[0];
+	} else if (op == ZEND_SIGNAL_FORWARD_TEST_WRITE_FD) {
+		result = write_fd;
+	}
+	zend_signal_forward_unlock();
+
+	switch (op) {
+		case ZEND_SIGNAL_FORWARD_TEST_HOLD:
+			zend_atomic_bool_store_ex(&zend_signal_forward_test_hold, true);
+			while (write(write_fd, "", 1) < 0 && errno == EINTR);
+			while (!zend_atomic_bool_load_ex(&zend_signal_forward_test_held)) {
+				usleep(1000);
+			}
+			break;
+		case ZEND_SIGNAL_FORWARD_TEST_RELEASE:
+			zend_atomic_bool_store_ex(&zend_signal_forward_test_hold, false);
+			while (zend_atomic_bool_load_ex(&zend_signal_forward_test_held)) {
+				usleep(1000);
+			}
+			break;
+		case ZEND_SIGNAL_FORWARD_TEST_SATURATE:
+			while (write(write_fd, "", 1) == 1);
+			result = errno == EAGAIN;
+			break;
+		case ZEND_SIGNAL_FORWARD_TEST_FAIL_READ:
+			zend_atomic_bool_store_ex(&zend_signal_forward_test_fail_read, true);
+			break;
+		case ZEND_SIGNAL_FORWARD_TEST_HANDLER_EAGAIN:
+			result = zend_atomic_bool_exchange_ex(&zend_signal_forward_test_eagain, false);
+			break;
+		case ZEND_SIGNAL_FORWARD_TEST_IDLE_SOON:
+			zend_atomic_bool_store_ex(&zend_signal_forward_test_idle, true);
+			while (write(write_fd, "", 1) < 0 && errno == EINTR);
+			break;
+		case ZEND_SIGNAL_FORWARD_TEST_IDLE_NORMAL:
+			zend_atomic_bool_store_ex(&zend_signal_forward_test_idle, false);
+			break;
+		default:
+			break;
+	}
+	return result;
+}
+#endif
 
 #endif /* defined(ZTS) && !defined(ZEND_WIN32) */

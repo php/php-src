@@ -54,6 +54,28 @@ void zend_signal_forward_request_shutdown(void);
  * tells that the child shares its file descriptor table with its parent. */
 ZEND_API void zend_signal_forward_fork_child(bool shares_fds);
 
+#if ZEND_DEBUG
+/* Lets ext/zend_test reach states that depend on the timing of the helper thread. */
+typedef enum {
+	ZEND_SIGNAL_FORWARD_TEST_HOLD,
+	ZEND_SIGNAL_FORWARD_TEST_RELEASE,
+	ZEND_SIGNAL_FORWARD_TEST_SATURATE,
+	ZEND_SIGNAL_FORWARD_TEST_FAIL_READ,
+	ZEND_SIGNAL_FORWARD_TEST_HANDLER_EAGAIN,
+	ZEND_SIGNAL_FORWARD_TEST_IDLE_SOON,
+	ZEND_SIGNAL_FORWARD_TEST_IDLE_NORMAL,
+	ZEND_SIGNAL_FORWARD_TEST_RUNNING,
+	ZEND_SIGNAL_FORWARD_TEST_RESTART,
+	ZEND_SIGNAL_FORWARD_TEST_READ_FD,
+	ZEND_SIGNAL_FORWARD_TEST_WRITE_FD,
+	ZEND_SIGNAL_FORWARD_TEST_LOCK,
+	ZEND_SIGNAL_FORWARD_TEST_UNLOCK,
+	ZEND_SIGNAL_FORWARD_TEST_PID
+} zend_signal_forward_test_op;
+
+ZEND_API int zend_signal_forward_test(zend_signal_forward_test_op op);
+#endif
+
 END_EXTERN_C()
 
 #endif /* defined(ZTS) && !defined(ZEND_WIN32) */

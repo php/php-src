@@ -2,6 +2,7 @@
 GH-25541 (forwarding keeps working in the parent of pcntl_rfork())
 --EXTENSIONS--
 pcntl
+posix
 zend_test
 --SKIPIF--
 <?php
@@ -9,8 +10,6 @@ if (!PHP_ZTS) die('skip ZTS only');
 if (!function_exists('pcntl_rfork')) die('skip pcntl_rfork() is not available');
 if (!function_exists('zend_test_raise_on_foreign_thread')) die('skip zend_test_raise_on_foreign_thread() not available');
 ?>
---ENV--
-LSAN_OPTIONS=detect_leaks=0
 --FILE--
 <?php
 $handled = false;
@@ -21,6 +20,10 @@ pcntl_signal(SIGUSR1, function () use (&$handled) {
 /* The child shares the file descriptor table of its parent. */
 $pid = pcntl_rfork(RFPROC);
 if ($pid === 0) {
+    /* LeakSanitizer does not support the exit of a forked child of a threaded process. */
+    if (getenv('SKIP_ASAN')) {
+        posix_kill(posix_getpid(), SIGKILL);
+    }
     exit(0);
 }
 pcntl_waitpid($pid, $status);

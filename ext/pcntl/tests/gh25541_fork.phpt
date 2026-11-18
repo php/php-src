@@ -2,14 +2,13 @@
 GH-25541 (signal on a thread that never ran PHP, in the child of pcntl_fork())
 --EXTENSIONS--
 pcntl
+posix
 zend_test
 --SKIPIF--
 <?php
 if (!PHP_ZTS) die('skip ZTS only');
 if (!function_exists('zend_test_raise_on_foreign_thread')) die('skip zend_test_raise_on_foreign_thread() not available');
 ?>
---ENV--
-LSAN_OPTIONS=detect_leaks=0
 --FILE--
 <?php
 $handled = false;
@@ -25,11 +24,15 @@ if ($pid === 0) {
         usleep(10000);
     }
     echo $handled ? "child handled\n" : "child lost\n";
+    /* LeakSanitizer does not support the exit of a forked child of a threaded process. */
+    if (getenv('SKIP_ASAN')) {
+        posix_kill(posix_getpid(), SIGKILL);
+    }
     exit(0);
 }
 
 pcntl_waitpid($pid, $status);
-var_dump(pcntl_wifexited($status));
+var_dump(getenv('SKIP_ASAN') ? pcntl_wtermsig($status) === SIGKILL : pcntl_wifexited($status) && pcntl_wexitstatus($status) === 0);
 ?>
 --EXPECT--
 child handled
