@@ -365,6 +365,9 @@ Shows configuration for extension
 .TP
 .B \-\-ini
 Show configuration file names
+.TP
+.B \-\-ini=diff
+Show INI entries that differ from the built-in default
 .SH FILES
 .TP 15
 .B php\-cli.ini
