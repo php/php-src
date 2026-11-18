@@ -387,12 +387,20 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 				}
 
 				rc = SQLDescribeParam(S->stmt, (SQLUSMALLINT) param->paramno+1, &sqltype, &precision, &scale, &nullable);
-				if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+				if (
+					(rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO)
+					|| sqltype == SQL_UNKNOWN_TYPE
+				) {
 					/* MS Access, for instance, doesn't support SQLDescribeParam,
 					 * so we need to guess */
+					precision = 4000;
+					scale = 5;
+					nullable = 1;
 					switch (PDO_PARAM_TYPE(param->param_type)) {
 						case PDO_PARAM_INT:
 							sqltype = SQL_INTEGER;
+							precision = 10;
+							scale = 0;
 							break;
 						case PDO_PARAM_LOB:
 							sqltype = SQL_LONGVARBINARY;
@@ -400,9 +408,6 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 						default:
 							sqltype = SQL_LONGVARCHAR;
 					}
-					precision = 4000;
-					scale = 5;
-					nullable = 1;
 
 					if (param->max_value_len > 0) {
 						precision = param->max_value_len;
