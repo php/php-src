@@ -719,14 +719,15 @@ PHP_FUNCTION(socket_create_listen)
 		RETURN_THROWS();
 	}
 
-	/* $backlog is narrowed to int by listen(), a value outside of its range would wrap */
-	if (ZEND_LONG_EXCEEDS_INT(backlog)) {
-		zend_argument_value_error(2, "must be between %d and %d", INT_MIN, INT_MAX);
-		RETURN_THROWS();
-	}
-
 	object_init_ex(return_value, socket_ce);
 	php_sock = Z_SOCKET_P(return_value);
+
+	/* listen() takes an int, clamp instead of letting a larger value wrap to a small queue */
+	if (ZEND_LONG_INT_OVFL(backlog)) {
+		backlog = INT_MAX;
+	} else if (ZEND_LONG_INT_UDFL(backlog)) {
+		backlog = INT_MIN;
+	}
 
 	if (!php_open_listen_sock(php_sock, (unsigned short)port, backlog)) {
 		zval_ptr_dtor(return_value);
@@ -850,13 +851,15 @@ PHP_FUNCTION(socket_listen)
 		Z_PARAM_LONG(backlog)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZEND_LONG_EXCEEDS_INT(backlog)) {
-		zend_argument_value_error(2, "must be between %d and %d", INT_MIN, INT_MAX);
-		RETURN_THROWS();
-	}
-
 	php_sock = Z_SOCKET_P(arg1);
 	ENSURE_SOCKET_VALID(php_sock);
+
+	/* listen() takes an int, clamp instead of letting a larger value wrap to a small queue */
+	if (ZEND_LONG_INT_OVFL(backlog)) {
+		backlog = INT_MAX;
+	} else if (ZEND_LONG_INT_UDFL(backlog)) {
+		backlog = INT_MIN;
+	}
 
 	if (listen(php_sock->bsd_socket, backlog) != 0) {
 		PHP_SOCKET_ERROR(php_sock, "unable to listen on socket", errno);
