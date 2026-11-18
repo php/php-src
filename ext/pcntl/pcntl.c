@@ -176,14 +176,24 @@ ZEND_GET_MODULE(pcntl)
 
 static void (*orig_interrupt_function)(zend_execute_data *execute_data);
 
-#ifdef ZTS
+#if defined(ZTS) && !defined(ZEND_SIGNALS)
 /* A process-directed signal (kill(), alarm()) may be delivered to any thread
  * that does not block it, including one that never ran PHP, such as the
  * libdispatch workers every macOS process has. Such a thread has no pcntl
- * globals to queue the signal in, so it is forwarded to the thread that last
- * installed a handler. */
-static pthread_t pcntl_signal_thread;
-static zend_atomic_bool pcntl_signal_thread_set;
+ * globals to queue the signal in, so it is forwarded to the thread that
+ * installed the handler for that signal. Zend signals do this themselves.
+ * Signals from NSIG up, which some systems allow, are not tracked. */
+static pthread_t pcntl_signal_threads[NSIG];
+static zend_atomic_bool pcntl_signal_thread_set[NSIG];
+
+static void pcntl_signal_thread_forget(int signo)
+{
+	if (signo < NSIG
+	 && zend_atomic_bool_load(&pcntl_signal_thread_set[signo-1])
+	 && pthread_equal(pcntl_signal_threads[signo-1], pthread_self())) {
+		zend_atomic_bool_store(&pcntl_signal_thread_set[signo-1], false);
+	}
+}
 #endif
 
 #ifdef HAVE_STRUCT_SIGINFO_T
@@ -252,9 +262,9 @@ PHP_RSHUTDOWN_FUNCTION(pcntl)
 
 	zend_hash_destroy(&PCNTL_G(php_signal_table));
 
-#ifdef ZTS
-	if (zend_atomic_bool_load(&pcntl_signal_thread_set) && pthread_equal(pcntl_signal_thread, pthread_self())) {
-		zend_atomic_bool_store(&pcntl_signal_thread_set, false);
+#if defined(ZTS) && !defined(ZEND_SIGNALS)
+	for (int i = 1; i < NSIG; i++) {
+		pcntl_signal_thread_forget(i);
 	}
 #endif
 
@@ -822,6 +832,9 @@ PHP_FUNCTION(pcntl_signal)
 			RETURN_FALSE;
 		}
 		zend_hash_index_update(&PCNTL_G(php_signal_table), signo, handle);
+#if defined(ZTS) && !defined(ZEND_SIGNALS)
+		pcntl_signal_thread_forget((int) signo);
+#endif
 		RETURN_TRUE;
 	}
 
@@ -832,9 +845,11 @@ PHP_FUNCTION(pcntl_signal)
 		RETURN_FALSE;
 	}
 
-#ifdef ZTS
-	pcntl_signal_thread = pthread_self();
-	zend_atomic_bool_store(&pcntl_signal_thread_set, true);
+#if defined(ZTS) && !defined(ZEND_SIGNALS)
+	if (signo < NSIG) {
+		pcntl_signal_threads[signo-1] = pthread_self();
+		zend_atomic_bool_store(&pcntl_signal_thread_set[signo-1], true);
+	}
 #endif
 
 	/* Add the function name to our signal table */
@@ -1318,12 +1333,23 @@ static void pcntl_signal_handler(int signo, siginfo_t *siginfo, void *context)
 static void pcntl_signal_handler(int signo)
 #endif
 {
-#ifdef ZTS
+#if defined(ZTS) && !defined(ZEND_SIGNALS)
 	/* Without zend signals this handler is installed directly, and PCNTL_G()
 	 * would dereference the missing TSRM storage of a thread that never ran PHP. */
 	if (!tsrm_is_managed_thread()) {
-		if (zend_atomic_bool_load(&pcntl_signal_thread_set)) {
-			pthread_kill(pcntl_signal_thread, signo);
+		/* A fault must stay on the faulting thread: the instruction would run
+		 * again as soon as this handler returned. */
+		if (signo == SIGSEGV || signo == SIGFPE || signo == SIGILL
+#ifdef SIGBUS
+		 || signo == SIGBUS
+#endif
+		) {
+			signal(signo, SIG_DFL);
+			raise(signo);
+			return;
+		}
+		if (signo < NSIG && zend_atomic_bool_load(&pcntl_signal_thread_set[signo-1])) {
+			pthread_kill(pcntl_signal_threads[signo-1], signo);
 		}
 		return;
 	}

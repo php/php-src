@@ -7,7 +7,6 @@ zend_test
 <?php
 if (!PHP_ZTS) die('skip ZTS only');
 if (!function_exists('zend_test_raise_on_foreign_thread')) die('skip zend_test_raise_on_foreign_thread() not available');
-if (ini_get('zend.signal_check') !== false) die('skip pcntl handlers are behind zend signals');
 ?>
 --FILE--
 <?php
