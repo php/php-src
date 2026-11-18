@@ -192,8 +192,13 @@ php_apache_sapi_read_post(char *buf, size_t count_bytes)
 	 */
 
 	while ((status = ap_get_brigade(r->input_filters, brigade, AP_MODE_READBYTES, APR_BLOCK_READ, len)) == APR_SUCCESS) {
-		apr_brigade_flatten(brigade, buf, &len);
+		status = apr_brigade_flatten(brigade, buf, &len);
 		apr_brigade_cleanup(brigade);
+
+		if (status != APR_SUCCESS) {
+			return 0;
+		}
+
 		tlen += len;
 		if (tlen == count_bytes || !len) {
 			break;
