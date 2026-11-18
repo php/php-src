@@ -103,6 +103,8 @@ PHP                                                                        NEWS
   . Fixed OSS-Fuzz #545352966 (default value AST of an SHM-persisted partial).
     (ndossche)
   . Fixed JIT ignoring exceptions from typed property set hooks. (David Carlier)
+  . Reduced the optimizer's compile time by skipping the leading opcodes
+    without a NOP when removing NOPs. (Marc Bennewitz)
 
 - PDO:
   . Fixed PDOStatement::getColumnMeta() reading out of bounds for an invalid
