@@ -820,6 +820,7 @@ static ZEND_FUNCTION(zend_test_raise_on_foreign_thread)
 enum {
 	ZEND_TEST_FORWARD_IDLE,
 	ZEND_TEST_FORWARD_RECORD,
+	ZEND_TEST_FORWARD_RECORD_TIMER,
 	ZEND_TEST_FORWARD_FORGET,
 	ZEND_TEST_FORWARD_RAISE,
 	ZEND_TEST_FORWARD_EXIT
@@ -863,6 +864,8 @@ static void *zend_test_forward_helper_main(void *arg)
 		if (command == ZEND_TEST_FORWARD_RECORD) {
 			zend_atomic_bool_store(&zend_test_forward_helper_registered, true);
 			zend_signal_thread_record(ZEND_TEST_FORWARD_SIGNAL);
+		} else if (command == ZEND_TEST_FORWARD_RECORD_TIMER) {
+			zend_signal_thread_record_timer(ZEND_TEST_FORWARD_SIGNAL);
 		} else if (command == ZEND_TEST_FORWARD_FORGET) {
 			zend_atomic_bool_store(&zend_test_forward_helper_registered, false);
 			zend_signal_thread_forget(ZEND_TEST_FORWARD_SIGNAL);
@@ -1022,6 +1025,31 @@ static bool zend_test_forward_scenario(const char *scenario)
 		zend_signal_thread_record(ZEND_TEST_FORWARD_SIGNAL);
 		zend_test_forward_raise_foreign();
 		return zend_test_forward_wait(&zend_test_forward_main_hits);
+	}
+
+	if (strcmp(scenario, "timer_keeps_no_disposition") == 0) {
+		bool result;
+
+		zend_signal_thread_record_timer(ZEND_TEST_FORWARD_SIGNAL);
+		result = !zend_signal_thread_is_registered(ZEND_TEST_FORWARD_SIGNAL);
+		zend_test_forward_raise_foreign();
+		result = zend_test_forward_wait(&zend_test_forward_main_hits) && result;
+		zend_signal_thread_record(ZEND_TEST_FORWARD_SIGNAL);
+		result = zend_signal_thread_is_registered(ZEND_TEST_FORWARD_SIGNAL) && result;
+		zend_signal_thread_forget_timer(ZEND_TEST_FORWARD_SIGNAL);
+		return zend_signal_thread_is_registered(ZEND_TEST_FORWARD_SIGNAL) && result;
+	}
+
+	if (strcmp(scenario, "handler_outranks_timer") == 0) {
+		bool result;
+
+		zend_signal_thread_record(ZEND_TEST_FORWARD_SIGNAL);
+		zend_test_forward_helper_start();
+		zend_test_forward_send(ZEND_TEST_FORWARD_RECORD_TIMER);
+		zend_test_forward_raise_foreign();
+		result = zend_test_forward_wait(&zend_test_forward_main_hits);
+		zend_test_forward_helper_exit();
+		return result;
 	}
 
 	if (strcmp(scenario, "fork") == 0) {

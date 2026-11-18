@@ -36,11 +36,16 @@ ZEND_API void zend_signal_thread_unlock(void);
 ZEND_API void zend_signal_thread_record(int signo);
 ZEND_API void zend_signal_thread_forget(int signo);
 ZEND_API void zend_signal_thread_forget_all(void);
-/* Whether any thread handles this signal. */
+/* The execution timer is process-wide. Unlike a handler, it does not keep a signal
+ * disposition in place for other threads. */
+ZEND_API void zend_signal_thread_record_timer(int signo);
+ZEND_API void zend_signal_thread_forget_timer(int signo);
+/* Whether any thread has a handler for this signal. */
 ZEND_API bool zend_signal_thread_is_registered(int signo);
 /* To call in the child of a fork(), where only the calling thread exists. */
 ZEND_API void zend_signal_thread_fork_child(void);
-/* Async-signal-safe. Returns whether the signal will reach a thread handling it. */
+/* Async-signal-safe. Returns whether the signal was handed over for forwarding. If the
+ * owner leaves first, the signal is sent to the process again and takes its current action. */
 ZEND_API bool zend_signal_thread_forward(int signo);
 END_EXTERN_C()
 #endif

@@ -1577,6 +1577,20 @@ VOID CALLBACK tq_timer_cb(PVOID arg, BOOLEAN timed_out)
 #define SIGPROF 27
 #endif
 
+#if defined(ZTS) && !defined(ZEND_WIN32) && !defined(ZEND_MAX_EXECUTION_TIMERS) && defined(HAVE_SETITIMER)
+/* Another handler may have replaced it, such as one installed with pcntl_signal(). */
+static bool zend_timeout_handler_is_installed(int signo)
+{
+# ifdef ZEND_SIGNALS
+	return SIGG(handlers)[signo-1].handler == (void *) zend_timeout_handler;
+# else
+	struct sigaction current;
+
+	return sigaction(signo, NULL, &current) == 0 && current.sa_handler == zend_timeout_handler;
+# endif
+}
+#endif
+
 static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 {
 #ifdef ZEND_WIN32
@@ -1674,12 +1688,12 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 # endif /* ZEND_SIGNALS */
 		}
 
-# if defined(ZTS) && !defined(ZEND_SIGNALS)
+# ifdef ZTS
 		/* Without a running timer, a stray signal must not end the request. */
-		if (seconds) {
-			zend_signal_thread_record(signo);
+		if (seconds && zend_timeout_handler_is_installed(signo)) {
+			zend_signal_thread_record_timer(signo);
 		} else {
-			zend_signal_thread_forget(signo);
+			zend_signal_thread_forget_timer(signo);
 		}
 # endif
 	}
@@ -1720,13 +1734,13 @@ void zend_unset_timeout(void) /* {{{ */
 
 # if defined(__CYGWIN__) || defined(__PASE__) || (defined(__aarch64__) && defined(__APPLE__))
 		setitimer(ITIMER_REAL, &no_timeout, NULL);
-#  if defined(ZTS) && !defined(ZEND_SIGNALS)
-		zend_signal_thread_forget(SIGALRM);
+#  ifdef ZTS
+		zend_signal_thread_forget_timer(SIGALRM);
 #  endif
 # else
 		setitimer(ITIMER_PROF, &no_timeout, NULL);
-#  if defined(ZTS) && !defined(ZEND_SIGNALS)
-		zend_signal_thread_forget(SIGPROF);
+#  ifdef ZTS
+		zend_signal_thread_forget_timer(SIGPROF);
 #  endif
 # endif
 	}

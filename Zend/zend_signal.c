@@ -63,6 +63,7 @@
 typedef struct _zend_signal_thread_t {
 	pthread_t thread;
 	uint64_t registered[NSIG]; /* Registration order, 0 when not registered */
+	bool timer[NSIG];          /* Registered for the execution timer, not for a handler */
 	struct _zend_signal_thread_t *prev;
 	struct _zend_signal_thread_t *next;
 } zend_signal_thread_t;
@@ -72,13 +73,14 @@ static pthread_key_t         zend_signal_thread_key;
 static bool                  zend_signal_forward_started;
 static zend_signal_thread_t *zend_signal_threads;
 static zend_signal_thread_t *zend_signal_owners[NSIG];
+static bool                  zend_signal_timer_left[NSIG];
 static uint64_t              zend_signal_registrations;
 static pthread_t             zend_signal_helper;
 static bool                  zend_signal_helper_running;
 static bool                  zend_signal_helper_stop;
 static int                   zend_signal_pipe[2] = {-1, -1};
 static pid_t                 zend_signal_pipe_process;
-static pid_t                 zend_signal_forward_process;
+static zend_atomic_int       zend_signal_forward_process;
 static zend_atomic_int       zend_signal_forward_init_lock;
 
 /* Read by signal handlers */
@@ -112,7 +114,13 @@ static void zend_signal_update_owner(int signo)
 	zend_signal_thread_t *owner = NULL;
 
 	for (zend_signal_thread_t *thread = zend_signal_threads; thread; thread = thread->next) {
-		if (thread->registered[signo-1] && (!owner || thread->registered[signo-1] > owner->registered[signo-1])) {
+		if (!thread->registered[signo-1]) {
+			continue;
+		}
+		/* A handler goes first: the timer does not need the signal of another thread. */
+		if (!owner
+		 || (owner->timer[signo-1] && !thread->timer[signo-1])
+		 || (owner->timer[signo-1] == thread->timer[signo-1] && thread->registered[signo-1] > owner->registered[signo-1])) {
 			owner = thread;
 		}
 	}
@@ -144,8 +152,14 @@ static void *zend_signal_helper_main(void *arg)
 			break;
 		}
 		for (int signo = 1; signo < NSIG; signo++) {
-			if (zend_atomic_bool_exchange_ex(&zend_signal_pending[signo-1], false) && zend_signal_owners[signo-1]) {
-				pthread_kill(zend_signal_owners[signo-1]->thread, signo);
+			if (zend_atomic_bool_exchange_ex(&zend_signal_pending[signo-1], false)) {
+				if (zend_signal_owners[signo-1]) {
+					pthread_kill(zend_signal_owners[signo-1]->thread, signo);
+				} else if (!zend_signal_timer_left[signo-1]) {
+					/* The owner left meanwhile: the signal now takes its current action.
+					 * The signal of a cancelled timer has no purpose anymore. */
+					kill(getpid(), signo);
+				}
 			}
 		}
 		pthread_mutex_unlock(&zend_signal_forward_mutex);
@@ -175,14 +189,16 @@ static void zend_signal_helper_start(void)
 		zend_signal_pipe_process = getpid();
 	}
 
+	/* Published first, as the new thread may receive a signal before it blocks them. */
+	zend_atomic_int_store_ex(&zend_signal_forward_fd, zend_signal_pipe[1]);
+	zend_atomic_int_store_ex(&zend_signal_forward_pid, (int) getpid());
+
 	zend_signal_helper_stop = false;
 	if (pthread_create(&zend_signal_helper, NULL, zend_signal_helper_main, NULL) != 0) {
+		zend_atomic_int_store_ex(&zend_signal_forward_pid, 0);
 		return;
 	}
 	zend_signal_helper_running = true;
-
-	zend_atomic_int_store_ex(&zend_signal_forward_fd, zend_signal_pipe[1]);
-	zend_atomic_int_store_ex(&zend_signal_forward_pid, (int) getpid());
 }
 
 /* Called once per process, including the child of a fork(), where only the
@@ -227,14 +243,14 @@ static void zend_signal_forward_init(void)
 		zend_signal_update_owner(signo);
 	}
 
-	zend_signal_forward_process = getpid();
+	zend_atomic_int_store_ex(&zend_signal_forward_process, (int) getpid());
 }
 
 static void zend_signal_forward_lock(void)
 {
 	int self = (int) getpid();
 
-	if (UNEXPECTED(zend_signal_forward_process != self)) {
+	if (UNEXPECTED(zend_atomic_int_load_ex(&zend_signal_forward_process) != self)) {
 		int expected = 0;
 
 		while (!zend_atomic_int_compare_exchange_ex(&zend_signal_forward_init_lock, &expected, self)) {
@@ -243,7 +259,7 @@ static void zend_signal_forward_lock(void)
 			}
 			expected = 0;
 		}
-		if (zend_signal_forward_process != self) {
+		if (zend_atomic_int_load_ex(&zend_signal_forward_process) != self) {
 			zend_signal_forward_init();
 		}
 		zend_atomic_int_store_ex(&zend_signal_forward_init_lock, 0);
@@ -266,51 +282,75 @@ static zend_always_inline void zend_signal_deliver_forwarded(void)
 	sigpending(&pending);
 }
 
-static void zend_signal_thread_forget_self(zend_signal_thread_t *self, int signo)
+static bool zend_signal_thread_forget_self(zend_signal_thread_t *self, int signo)
 {
-	if (self->registered[signo-1]) {
-		self->registered[signo-1] = 0;
-		if (zend_signal_owners[signo-1] == self) {
-			zend_signal_update_owner(signo);
-		}
+	if (!self->registered[signo-1]) {
+		return false;
 	}
+
+	zend_signal_timer_left[signo-1] = self->timer[signo-1];
+	self->registered[signo-1] = 0;
+	self->timer[signo-1] = false;
+	if (zend_signal_owners[signo-1] == self) {
+		zend_signal_update_owner(signo);
+	}
+	return true;
 }
 
 static void zend_signal_thread_exit(void *data)
 {
 	zend_signal_thread_t *self = data;
+	zend_signal_thread_t *thread;
+	sigset_t forgotten, pending, blocked;
 
+	sigemptyset(&forgotten);
 	zend_signal_forward_lock();
-	for (int signo = 1; signo < NSIG; signo++) {
-		zend_signal_thread_forget_self(self, signo);
+	/* The record is gone if the process forked or PHP shut down meanwhile. */
+	for (thread = zend_signal_threads; thread && thread != self; thread = thread->next);
+	if (thread) {
+		for (int signo = 1; signo < NSIG; signo++) {
+			if (zend_signal_thread_forget_self(self, signo)) {
+				sigaddset(&forgotten, signo);
+			}
+		}
+		if (self->prev) {
+			self->prev->next = self->next;
+		} else {
+			zend_signal_threads = self->next;
+		}
+		if (self->next) {
+			self->next->prev = self->prev;
+		}
+		free(self);
 	}
-	if (self->prev) {
-		self->prev->next = self->next;
-	} else {
-		zend_signal_threads = self->next;
-	}
-	if (self->next) {
-		self->next->prev = self->prev;
-	}
-	free(self);
 	zend_signal_forward_unlock();
+
+	/* A signal that this thread blocks would be lost with it. */
+	sigpending(&pending);
+	pthread_sigmask(SIG_BLOCK, NULL, &blocked);
+	for (int signo = 1; signo < NSIG; signo++) {
+		if (sigismember(&forgotten, signo) == 1 && sigismember(&pending, signo) == 1 && sigismember(&blocked, signo) == 1) {
+			kill(getpid(), signo);
+		}
+	}
 }
 
 void zend_signal_thread_startup(void)
 {
 	pthread_key_create(&zend_signal_thread_key, zend_signal_thread_exit);
-	zend_signal_forward_process = 0;
+	zend_atomic_int_store_ex(&zend_signal_forward_process, 0);
 	zend_signal_forward_started = true;
 }
 
 void zend_signal_thread_shutdown(void)
 {
 	zend_signal_thread_t *thread;
+	bool initialized = zend_atomic_int_load_ex(&zend_signal_forward_process) == (int) getpid();
 
 	zend_atomic_int_store_ex(&zend_signal_forward_pid, 0);
 	zend_signal_forward_started = false;
 
-	if (zend_signal_forward_process == getpid() && zend_signal_helper_running) {
+	if (initialized && zend_signal_helper_running) {
 		pthread_mutex_lock(&zend_signal_forward_mutex);
 		zend_signal_helper_stop = true;
 		pthread_mutex_unlock(&zend_signal_forward_mutex);
@@ -320,6 +360,9 @@ void zend_signal_thread_shutdown(void)
 		zend_signal_helper_running = false;
 	}
 
+	if (initialized) {
+		pthread_mutex_lock(&zend_signal_forward_mutex);
+	}
 	thread = zend_signal_threads;
 	while (thread) {
 		zend_signal_thread_t *next = thread->next;
@@ -330,6 +373,9 @@ void zend_signal_thread_shutdown(void)
 	for (int signo = 1; signo < NSIG; signo++) {
 		zend_signal_owners[signo-1] = NULL;
 		zend_atomic_bool_store_ex(&zend_signal_has_owner[signo-1], false);
+	}
+	if (initialized) {
+		pthread_mutex_unlock(&zend_signal_forward_mutex);
 	}
 	pthread_setspecific(zend_signal_thread_key, NULL);
 	pthread_key_delete(zend_signal_thread_key);
@@ -349,7 +395,7 @@ ZEND_API void zend_signal_thread_unlock(void)
 	}
 }
 
-ZEND_API void zend_signal_thread_record(int signo)
+static void zend_signal_thread_register(int signo, bool timer)
 {
 	zend_signal_thread_t *self;
 
@@ -374,15 +420,16 @@ ZEND_API void zend_signal_thread_record(int signo)
 		pthread_setspecific(zend_signal_thread_key, self);
 	}
 	self->registered[signo-1] = ++zend_signal_registrations;
-	zend_signal_owners[signo-1] = self;
-	zend_atomic_bool_store_ex(&zend_signal_has_owner[signo-1], true);
+	self->timer[signo-1] = timer;
+	zend_signal_update_owner(signo);
 	zend_signal_helper_start();
 	zend_signal_forward_unlock();
 }
 
-ZEND_API void zend_signal_thread_forget(int signo)
+static void zend_signal_thread_unregister(int signo, bool only_timer)
 {
 	zend_signal_thread_t *self;
+	bool forgotten = false;
 
 	if (!zend_signal_forward_started || !zend_signal_is_trackable(signo)) {
 		return;
@@ -390,16 +437,40 @@ ZEND_API void zend_signal_thread_forget(int signo)
 
 	zend_signal_forward_lock();
 	self = pthread_getspecific(zend_signal_thread_key);
-	if (self) {
-		zend_signal_thread_forget_self(self, signo);
+	if (self && (!only_timer || self->timer[signo-1])) {
+		forgotten = zend_signal_thread_forget_self(self, signo);
 	}
 	zend_signal_forward_unlock();
-	zend_signal_deliver_forwarded();
+
+	if (forgotten) {
+		zend_signal_deliver_forwarded();
+	}
+}
+
+ZEND_API void zend_signal_thread_record(int signo)
+{
+	zend_signal_thread_register(signo, false);
+}
+
+ZEND_API void zend_signal_thread_forget(int signo)
+{
+	zend_signal_thread_unregister(signo, false);
+}
+
+ZEND_API void zend_signal_thread_record_timer(int signo)
+{
+	zend_signal_thread_register(signo, true);
+}
+
+ZEND_API void zend_signal_thread_forget_timer(int signo)
+{
+	zend_signal_thread_unregister(signo, true);
 }
 
 ZEND_API void zend_signal_thread_forget_all(void)
 {
 	zend_signal_thread_t *self;
+	bool forgotten = false;
 
 	if (!zend_signal_forward_started) {
 		return;
@@ -409,23 +480,31 @@ ZEND_API void zend_signal_thread_forget_all(void)
 	self = pthread_getspecific(zend_signal_thread_key);
 	if (self) {
 		for (int signo = 1; signo < NSIG; signo++) {
-			zend_signal_thread_forget_self(self, signo);
+			forgotten |= zend_signal_thread_forget_self(self, signo);
 		}
 	}
 	zend_signal_forward_unlock();
-	zend_signal_deliver_forwarded();
+
+	if (forgotten) {
+		zend_signal_deliver_forwarded();
+	}
 }
 
 ZEND_API bool zend_signal_thread_is_registered(int signo)
 {
-	bool registered;
+	bool registered = false;
 
 	if (!zend_signal_forward_started || !zend_signal_is_trackable(signo)) {
 		return false;
 	}
 
 	zend_signal_forward_lock();
-	registered = zend_signal_owners[signo-1] != NULL;
+	for (zend_signal_thread_t *thread = zend_signal_threads; thread; thread = thread->next) {
+		if (thread->registered[signo-1] && !thread->timer[signo-1]) {
+			registered = true;
+			break;
+		}
+	}
 	zend_signal_forward_unlock();
 
 	return registered;
@@ -695,12 +774,11 @@ ZEND_API void zend_sigaction(int signo, const struct sigaction *act, struct siga
 	}
 	if (act != NULL) {
 		void *handler = (act->sa_flags & SA_SIGINFO) ? (void *) act->sa_sigaction : (void *) act->sa_handler;
+		int sigaction_result;
 #ifdef ZTS
-		bool has_handler = handler != (void *) SIG_DFL && handler != (void *) SIG_IGN;
-
 		/* While the handler is still there: a signal forwarded here afterwards
 		 * would take the default action. */
-		if (!has_handler) {
+		if (handler == (void *) SIG_DFL || handler == (void *) SIG_IGN) {
 			zend_signal_thread_forget(signo);
 		}
 #endif
@@ -709,13 +787,16 @@ ZEND_API void zend_sigaction(int signo, const struct sigaction *act, struct siga
 		SIGG(handlers)[signo-1].handler = handler;
 
 #ifdef ZTS
-		if (has_handler && zend_signal_may_forward(signo)) {
-			zend_signal_thread_record(signo);
-		}
+		zend_signal_thread_lock();
 #endif
 
 		memset(&sa, 0, sizeof(sa));
-		if (SIGG(handlers)[signo-1].handler == (void *) SIG_IGN) {
+		if (SIGG(handlers)[signo-1].handler == (void *) SIG_IGN
+#ifdef ZTS
+		 /* The disposition is process-wide, and another thread handles this signal. */
+		 && !zend_signal_thread_is_registered(signo)
+#endif
+		) {
 			sa.sa_sigaction = (void *) SIG_IGN;
 		} else {
 			sa.sa_flags     = SA_ONSTACK | SA_SIGINFO | (act->sa_flags & SA_FLAGS_MASK);
@@ -723,7 +804,11 @@ ZEND_API void zend_sigaction(int signo, const struct sigaction *act, struct siga
 			sa.sa_mask      = global_sigmask;
 		}
 
-		if (sigaction(signo, &sa, NULL) < 0) {
+		sigaction_result = sigaction(signo, &sa, NULL);
+#ifdef ZTS
+		zend_signal_thread_unlock();
+#endif
+		if (sigaction_result < 0) {
 			zend_error_noreturn(E_ERROR, "Error installing signal handler for %d", signo);
 		}
 

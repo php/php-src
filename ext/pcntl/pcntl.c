@@ -853,20 +853,25 @@ PHP_FUNCTION(pcntl_signal)
 		RETURN_TRUE;
 	}
 
-#if defined(ZTS) && !defined(ZEND_SIGNALS)
-	/* Before the handler is installed, so that no signal finds it without a thread to go to */
+#ifdef ZTS
+	/* Before the handler is installed, so that no signal finds it without a thread to go to.
+	 * With zend signals, installing it can bail out, so the lock is not held around it. */
+# ifndef ZEND_SIGNALS
 	zend_signal_thread_lock();
 	pcntl_signal_set_handled((int) signo, true);
+# endif
 	zend_signal_thread_record((int) signo);
 #endif
 
 	/* Register with the OS first so that on failure we don't record a handler that was never installed */
 	if (php_signal4(signo, pcntl_signal_handler, (int) restart_syscalls, 1) == (void *)SIG_ERR) {
 		PCNTL_G(last_error) = errno;
-#if defined(ZTS) && !defined(ZEND_SIGNALS)
-		pcntl_signal_set_handled((int) signo, false);
+#ifdef ZTS
 		zend_signal_thread_forget((int) signo);
+# ifndef ZEND_SIGNALS
+		pcntl_signal_set_handled((int) signo, false);
 		zend_signal_thread_unlock();
+# endif
 #endif
 		php_error_docref(NULL, E_WARNING, "Error assigning signal");
 		RETURN_FALSE;
