@@ -5670,17 +5670,29 @@ ZEND_VM_C_LABEL(send_array):
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(120, ZEND_SEND_USER, CONST|TMP|CV, NUM)
+ZEND_VM_HANDLER(120, ZEND_SEND_USER, CONST|TMP|CV, CONST|UNUSED|NUM)
 {
 	USE_OPLINE
 	zval *arg, *param;
+	uint32_t arg_num;
 
 	SAVE_OPLINE();
 
+	if (OP2_TYPE == IS_CONST) {
+		zend_string *arg_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
+		param = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
+		if (UNEXPECTED(!param)) {
+			FREE_OP1();
+			HANDLE_EXCEPTION();
+		}
+	} else {
+		param = ZEND_CALL_VAR(EX(call), opline->result.var);
+		arg_num = opline->op2.num;
+	}
+
 	arg = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
-	param = ZEND_CALL_VAR(EX(call), opline->result.var);
-	if (UNEXPECTED(ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num))) {
-		zend_param_must_be_ref(EX(call)->func, opline->op2.num);
+	if (UNEXPECTED(ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num))) {
+		zend_param_must_be_ref(EX(call)->func, arg_num);
 		Z_TRY_ADDREF_P(arg);
 		ZVAL_NEW_REF(param, arg);
 	} else {

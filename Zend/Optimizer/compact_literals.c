@@ -749,6 +749,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				case ZEND_SEND_VAR_NO_REF_EX:
 				case ZEND_SEND_REF:
 				case ZEND_SEND_FUNC_ARG:
+				case ZEND_SEND_USER:
 				case ZEND_SEND_PLACEHOLDER:
 				case ZEND_CHECK_FUNC_ARG:
 					if (opline->op2_type == IS_CONST) {
