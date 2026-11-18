@@ -1501,7 +1501,8 @@ static void zend_timeout_handler(int dummy) /* {{{ */
 # endif
 #ifdef ZTS
 	if (!tsrm_is_managed_thread()) {
-		fprintf(stderr, "zend_timeout_handler() called in a thread not managed by PHP. The expected signal handler will not be called. This is probably a bug.\n");
+		/* The timer is process-wide, so its signal may reach a thread that never ran PHP. */
+		zend_signal_thread_forward(dummy);
 
 		return;
 	}
@@ -1657,7 +1658,12 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 
 			act.sa_handler = zend_timeout_handler;
 			sigemptyset(&act.sa_mask);
+#   ifdef ZTS
+			/* A signal forwarded from another thread must still find this handler. */
+			act.sa_flags = SA_ONSTACK | SA_NODEFER;
+#   else
 			act.sa_flags = SA_ONSTACK | SA_RESETHAND | SA_NODEFER;
+#   endif
 			sigaction(signo, &act, NULL);
 #  else
 			signal(signo, zend_timeout_handler);
@@ -1667,6 +1673,15 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 			sigprocmask(SIG_UNBLOCK, &sigset, NULL);
 # endif /* ZEND_SIGNALS */
 		}
+
+# if defined(ZTS) && !defined(ZEND_SIGNALS)
+		/* Without a running timer, a stray signal must not end the request. */
+		if (seconds) {
+			zend_signal_thread_record(signo);
+		} else {
+			zend_signal_thread_forget(signo);
+		}
+# endif
 	}
 #endif /* HAVE_SETITIMER */
 }
@@ -1705,8 +1720,14 @@ void zend_unset_timeout(void) /* {{{ */
 
 # if defined(__CYGWIN__) || defined(__PASE__) || (defined(__aarch64__) && defined(__APPLE__))
 		setitimer(ITIMER_REAL, &no_timeout, NULL);
+#  if defined(ZTS) && !defined(ZEND_SIGNALS)
+		zend_signal_thread_forget(SIGALRM);
+#  endif
 # else
 		setitimer(ITIMER_PROF, &no_timeout, NULL);
+#  if defined(ZTS) && !defined(ZEND_SIGNALS)
+		zend_signal_thread_forget(SIGPROF);
+#  endif
 # endif
 	}
 #endif
