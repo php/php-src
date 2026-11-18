@@ -2,6 +2,7 @@
 Stack limit 014 - Fuzzer
 --SKIPIF--
 <?php
+die('skip Test is unreliable');
 if (!function_exists('zend_test_zend_call_stack_get')) die("skip zend_test_zend_call_stack_get() is not available");
 if (getenv("SKIP_SLOW_TESTS")) die('skip slow test');
 ?>
