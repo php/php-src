@@ -328,12 +328,7 @@ static int php_json_yylex(union YYSTYPE *value, php_json_parser *parser)
 static void php_json_yyerror(php_json_parser *parser, char const *msg)
 {
 	if (!parser->scanner.errcode) {
-		/* Bison reports that its stack limit was hit as "memory exhausted", the input is not malformed */
-		if (strcmp(msg, "memory exhausted") == 0) {
-			parser->scanner.errcode = PHP_JSON_ERROR_DEPTH;
-		} else {
-			parser->scanner.errcode = PHP_JSON_ERROR_SYNTAX;
-		}
+		parser->scanner.errcode = PHP_JSON_ERROR_SYNTAX;
 	}
 }
 
@@ -401,7 +396,14 @@ PHP_JSON_API void php_json_parser_init(php_json_parser *parser,
 
 PHP_JSON_API int php_json_parse(php_json_parser *parser)
 {
-	return php_json_yyparse(parser);
+	int ret = php_json_yyparse(parser);
+
+	/* Bison returns 2 when its stack limit was hit, the input is not malformed */
+	if (ret == 2) {
+		parser->scanner.errcode = PHP_JSON_ERROR_DEPTH;
+	}
+
+	return ret;
 }
 
 const php_json_parser_methods* php_json_get_validate_methods(void)
