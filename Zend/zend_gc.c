@@ -481,7 +481,7 @@ static void gc_trace_ref(zend_refcounted *ref) {
 		fprintf(stderr, "[%p] rc=%d addr=%d %s object(%s)#%d ",
 			ref, GC_REFCOUNT(ref), GC_REF_ADDRESS(ref),
 			gc_color_name(GC_REF_COLOR(ref)),
-			obj->ce->name->val, obj->handle);
+			ZSTR_VAL(obj->ce->name), obj->handle);
 	} else if (GC_TYPE(ref) == IS_ARRAY) {
 		zend_array *arr = (zend_array *) ref;
 		fprintf(stderr, "[%p] rc=%d addr=%d %s array(%d) ",

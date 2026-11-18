@@ -321,7 +321,7 @@ static zend_function *com_method_get(zend_object **object_ptr, zend_string *name
 			int i;
 
 			if (SUCCEEDED(ITypeInfo_GetTypeComp(obj->typeinfo, &comp))) {
-				olename = php_com_string_to_olestring(name->val, name->len, obj->code_page);
+				olename = php_com_string_to_olestring(ZSTR_VAL(name), ZSTR_LEN(name), obj->code_page);
 				lhash = LHashValOfNameSys(SYS_WIN32, LOCALE_NEUTRAL, olename);
 
 				if (SUCCEEDED(ITypeComp_Bind(comp, olename, lhash, INVOKE_FUNC, &TI, &kind, &bindptr))) {

@@ -581,7 +581,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_windows_id)
 	ZEND_PARSE_PARAMETERS_END();
 
 	error = U_ZERO_ERROR;
-	if (intl_stringFromChar(uID, id->val, id->len, &error) == FAILURE) {
+	if (intl_stringFromChar(uID, ZSTR_VAL(id), ZSTR_LEN(id), &error) == FAILURE) {
 		intl_error_set(NULL, error,
 		               "could not convert time zone id to UTF-16");
 		RETURN_FALSE;
@@ -619,14 +619,14 @@ U_CFUNC PHP_FUNCTION(intltz_get_id_for_windows_id)
 	ZEND_PARSE_PARAMETERS_END();
 
 	error = U_ZERO_ERROR;
-	if (intl_stringFromChar(uWinID, winID->val, winID->len, &error) == FAILURE) {
+	if (intl_stringFromChar(uWinID, ZSTR_VAL(winID), ZSTR_LEN(winID), &error) == FAILURE) {
 		intl_error_set(NULL, error,
 		               "could not convert time zone id to UTF-16");
 		RETURN_FALSE;
 	}
 
 	error = U_ZERO_ERROR;
-	TimeZone::getIDForWindowsID(uWinID, region ? region->val : NULL, uID, error);
+	TimeZone::getIDForWindowsID(uWinID, region ? ZSTR_VAL(region) : NULL, uID, error);
 	INTL_CHECK_STATUS(error, "unable to get windows ID for timezone");
 	if (uID.length() == 0) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,

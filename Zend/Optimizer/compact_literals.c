@@ -255,8 +255,8 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 
 #if DEBUG_COMPACT_LITERALS
 		{
-			fprintf(stderr, "File %s func %s\n", op_array->filename->val,
-					op_array->function_name ? op_array->function_name->val : "main");
+			fprintf(stderr, "File %s func %s\n", ZSTR_VAL(op_array->filename),
+					op_array->function_name ? ZSTR_VAL(op_array->function_name) : "main");
 			fprintf(stderr, "Literals table size %d\n", op_array->last_literal);
 
 			for (uint32_t i = 0; i < op_array->last_literal; i++) {

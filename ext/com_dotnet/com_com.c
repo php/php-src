@@ -471,7 +471,7 @@ zend_result php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_fu
 	if (FAILED(hr)) {
 		char *msg = NULL;
 		char *winerr = php_win32_error_to_msg(hr);
-		spprintf(&msg, 0, "Unable to lookup `%s': %s", f->function_name->val, winerr);
+		spprintf(&msg, 0, "Unable to lookup `%s': %s", ZSTR_VAL(f->function_name), winerr);
 		php_win32_error_msg_free(winerr);
 		php_com_throw_exception(hr, msg);
 		efree(msg);

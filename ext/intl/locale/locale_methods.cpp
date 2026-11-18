@@ -1142,7 +1142,7 @@ static int add_array_entry(const char* loc_name, zval* hash_arr, const char* key
 		if( result > 0 && key_value){
 			int cnt = 0;
 			/* Tokenize on the "_" or "-"  */
-			token = php_strtok_r( key_value->val , DELIMITER ,&last_ptr);
+			token = php_strtok_r( ZSTR_VAL(key_value) , DELIMITER ,&last_ptr);
 			/* Over-allocates a few bytes for the integer so we don't have to reallocate. */
 			size_t cur_key_name_size = (sizeof("-2147483648") - 1) + strlen(key_name) + 1;
 			cur_key_name.reset(reinterpret_cast<char *>(emalloc(cur_key_name_size)));
@@ -1242,7 +1242,7 @@ PHP_INTL_FUNCTION_WITH_ERROR_RESET(locale_get_all_variants)
 		variant = get_icu_value_internal( loc_name , LOC_VARIANT_TAG , &result ,0);
 		if( result > 0 && variant){
 			/* Tokenize on the "_" or "-" */
-			token = php_strtok_r( variant->val , DELIMITER , &saved_ptr);
+			token = php_strtok_r( ZSTR_VAL(variant) , DELIMITER , &saved_ptr);
 			add_next_index_stringl( return_value, token , strlen(token));
 			/* tokenize on the "_" or "-" and stop  at singleton if any	*/
 			while( (token = php_strtok_r(nullptr , DELIMITER, &saved_ptr)) && (strlen(token)>1) ){
@@ -1348,19 +1348,19 @@ PHP_INTL_FUNCTION_WITH_ERROR_RESET(locale_filter_matches)
 		}
 
 		/* Convert to lower case for case-insensitive comparison */
-		cur_lang_tag = std::unique_ptr<char, char_deleter>(reinterpret_cast<char *>(ecalloc(can_lang_tag->len + 1, sizeof(char))));
+		cur_lang_tag = std::unique_ptr<char, char_deleter>(reinterpret_cast<char *>(ecalloc(ZSTR_LEN(can_lang_tag) + 1, sizeof(char))));
 		char *p_cur_lang_tag = cur_lang_tag.get();
 
 		/* Convert to lower case for case-insensitive comparison */
-		result = strToMatch( can_lang_tag->val , p_cur_lang_tag);
+		result = strToMatch( ZSTR_VAL(can_lang_tag) , p_cur_lang_tag);
 		if( result == 0) {
 			zend_string_release_ex( can_lang_tag, false );
 			RETURN_FALSE;
 		}
 
-		cur_loc_range = std::unique_ptr<char, char_deleter>(reinterpret_cast<char *>(ecalloc(can_loc_range->len + 1, sizeof(char))));
+		cur_loc_range = std::unique_ptr<char, char_deleter>(reinterpret_cast<char *>(ecalloc(ZSTR_LEN(can_loc_range) + 1, sizeof(char))));
 		char *p_cur_loc_range = cur_loc_range.get();
-		result = strToMatch( can_loc_range->val , p_cur_loc_range );
+		result = strToMatch( ZSTR_VAL(can_loc_range) , p_cur_loc_range );
 		if( result == 0) {
 			zend_string_release_ex( can_lang_tag, false );
 			zend_string_release_ex( can_loc_range, false );
@@ -1372,7 +1372,7 @@ PHP_INTL_FUNCTION_WITH_ERROR_RESET(locale_filter_matches)
 
 		if( token && (token==p_cur_lang_tag) ){
 			/* check if the char. after match is SEPARATOR */
-			chrcheck = token + can_loc_range->len;
+			chrcheck = token + ZSTR_LEN(can_loc_range);
 			if( isIDSeparator(*chrcheck) || isKeywordSeparator(*chrcheck) || isEndOfTag(*chrcheck) ){
 				zend_string_release_ex( can_lang_tag, false );
 				zend_string_release_ex( can_loc_range, false );
@@ -1479,15 +1479,15 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 	if(canonicalize) {
 		for(i=0; i<cur_arr_len; i++) {
 			lang_tag = get_icu_value_internal(cur_arr[i*2], LOC_CANONICALIZE_TAG, &result, 0);
-			if(result != 1 || lang_tag == nullptr || !lang_tag->val[0]) {
+			if(result != 1 || lang_tag == nullptr || !ZSTR_VAL(lang_tag)[0]) {
 				if(lang_tag) {
 					zend_string_release_ex(lang_tag, 0);
 				}
 				intl_error_set(nullptr, U_ILLEGAL_ARGUMENT_ERROR, "unable to canonicalize lang_tag");
 				LOOKUP_CLEAN_RETURN(nullptr);
 			}
-			cur_arr[i*2] = reinterpret_cast<char *>(erealloc(cur_arr[i*2], lang_tag->len+1));
-			result = strToMatch(lang_tag->val, cur_arr[i*2]);
+			cur_arr[i*2] = reinterpret_cast<char *>(erealloc(cur_arr[i*2], ZSTR_LEN(lang_tag)+1));
+			result = strToMatch(ZSTR_VAL(lang_tag), cur_arr[i*2]);
 			zend_string_release_ex(lang_tag, 0);
 			if(result == 0) {
 				intl_error_set(nullptr, U_ILLEGAL_ARGUMENT_ERROR, "unable to canonicalize lang_tag");
@@ -1500,7 +1500,7 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 	if(canonicalize) {
 		/* Canonicalize the loc_range */
 		can_loc_range = get_icu_value_internal(loc_range, LOC_CANONICALIZE_TAG, &result , 0);
-		if( result != 1 || can_loc_range == nullptr || !can_loc_range->val[0]) {
+		if( result != 1 || can_loc_range == nullptr || !ZSTR_VAL(can_loc_range)[0]) {
 			/* Error */
 			intl_error_set(nullptr, U_ILLEGAL_ARGUMENT_ERROR, "unable to canonicalize loc_range");
 			if(can_loc_range) {
@@ -1508,7 +1508,7 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 			}
 			LOOKUP_CLEAN_RETURN(nullptr);
 		} else {
-			loc_range = can_loc_range->val;
+			loc_range = ZSTR_VAL(can_loc_range);
 		}
 	}
 

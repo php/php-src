@@ -89,7 +89,7 @@ static PHP_INI_MH(OnTypeLibFileUpdate)
 	char *typelib_name_buffer;
 	char *strtok_buf = NULL;
 
-	if (NULL == new_value || !new_value->val[0] || (typelib_file = VCWD_FOPEN(new_value->val, "r"))==NULL) {
+	if (NULL == new_value || !ZSTR_VAL(new_value)[0] || (typelib_file = VCWD_FOPEN(ZSTR_VAL(new_value), "r"))==NULL) {
 		return FAILURE;
 	}
 

@@ -888,7 +888,7 @@ static ir_ref jit_EMALLOC(zend_jit_ctx *jit, size_t size, const zend_op_array *o
 #if ZEND_DEBUG
 	return ir_CALL_5(IR_ADDR, ir_CONST_FC_FUNC(_emalloc),
 		ir_CONST_ADDR(size),
-		op_array->filename ? ir_CONST_ADDR(op_array->filename->val) : IR_NULL,
+		op_array->filename ? ir_CONST_ADDR(ZSTR_VAL(op_array->filename)) : IR_NULL,
 		ir_CONST_U32(opline ? opline->lineno : 0),
 		IR_NULL,
 		ir_CONST_U32(0));
@@ -908,7 +908,7 @@ static ir_ref jit_EFREE(zend_jit_ctx *jit, ir_ref ptr, size_t size, const zend_o
 #if ZEND_DEBUG
 	return ir_CALL_5(IR_ADDR, ir_CONST_FC_FUNC(_efree),
 		ptr,
-		op_array && op_array->filename ? ir_CONST_ADDR(op_array->filename->val) : IR_NULL,
+		op_array && op_array->filename ? ir_CONST_ADDR(ZSTR_VAL(op_array->filename)) : IR_NULL,
 		ir_CONST_U32(opline ? opline->lineno : 0),
 		IR_NULL,
 		ir_CONST_U32(0));

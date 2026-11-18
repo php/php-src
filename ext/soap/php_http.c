@@ -704,7 +704,7 @@ try_again:
 			}
 		}
 		smart_str_append_const(&soap_headers,"Content-Length: ");
-		smart_str_append_long(&soap_headers, request->len);
+		smart_str_append_long(&soap_headers, ZSTR_LEN(request));
 		smart_str_append_const(&soap_headers, "\r\n");
 
 		/* HTTP Authentication */
@@ -1555,7 +1555,7 @@ static zend_string* get_http_body(php_stream *stream, bool close, zend_string *h
 					}
 
 					while (len_size < buf_size) {
-						ssize_t len_read = php_stream_read(stream, http_buf->val + http_buf_size, buf_size - len_size);
+						ssize_t len_read = php_stream_read(stream, ZSTR_VAL(http_buf) + http_buf_size, buf_size - len_size);
 						if (UNEXPECTED(len_read <= 0)) {
 							/* Error or EOF */
 							done = true;
@@ -1616,7 +1616,7 @@ static zend_string* get_http_body(php_stream *stream, bool close, zend_string *h
 			return NULL;
 		}
 		while (http_buf_size < header_length) {
-			ssize_t len_read = php_stream_read(stream, http_buf->val + http_buf_size, header_length - http_buf_size);
+			ssize_t len_read = php_stream_read(stream, ZSTR_VAL(http_buf) + http_buf_size, header_length - http_buf_size);
 			if (UNEXPECTED(len_read <= 0)) {
 				zend_string_efree(http_buf);
 				return NULL;
@@ -1640,7 +1640,7 @@ static zend_string* get_http_body(php_stream *stream, bool close, zend_string *h
 			} else {
 				http_buf = zend_string_alloc(4096, 0);
 			}
-			len_read = php_stream_read(stream, http_buf->val + http_buf_size, 4096);
+			len_read = php_stream_read(stream, ZSTR_VAL(http_buf) + http_buf_size, 4096);
 			if (len_read > 0) {
 				http_buf_size += len_read;
 			}
@@ -1649,8 +1649,8 @@ static zend_string* get_http_body(php_stream *stream, bool close, zend_string *h
 		return NULL;
 	}
 
-	http_buf->val[http_buf_size] = '\0';
-	http_buf->len = http_buf_size;
+	ZSTR_VAL(http_buf)[http_buf_size] = '\0';
+	ZSTR_LEN(http_buf) = http_buf_size;
 	return http_buf;
 }
 

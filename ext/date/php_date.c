@@ -1351,7 +1351,7 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, bool gmt)
 	/* VS2012 strftime() returns number of characters, not bytes.
 		See VC++11 bug id 766205. */
 	if (real_len > 0) {
-		real_len = strlen(buf->val);
+		real_len = strlen(ZSTR_VAL(buf));
 	}
 #endif
 
