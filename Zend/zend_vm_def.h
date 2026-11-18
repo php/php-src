@@ -8454,6 +8454,7 @@ ZEND_VM_HANDLER(142, ZEND_DECLARE_LAMBDA_FUNCTION, UNUSED, NUM, NUM|CACHE_SLOT)
 	zend_create_closure(EX_VAR(opline->result.var), func,
 		EX(func)->op_array.scope, called_scope, object);
 	if (cache_slot != (uint32_t)-1
+	 && !(EX(func)->common.fn_flags & ZEND_ACC_HEAP_RT_CACHE)
 	 && !CACHED_PTR(cache_slot + sizeof(void *))) {
 		zend_object *closure = Z_OBJ_P(EX_VAR(opline->result.var));
 		GC_ADDREF(closure);
