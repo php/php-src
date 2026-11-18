@@ -8254,7 +8254,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 	const zend_op *throw_op = EG(opline_before_exception);
 
 	/* Exception was thrown before executing any op, or between two ops (see
-	 * zend_interrupt_helper). */
+	 * zend_handle_delayed_oom()). */
 	if (UNEXPECTED(!throw_op)) {
 		free_unfinished_calls(execute_data);
 		ZEND_VM_DISPATCH_TO_HELPER(zend_dispatch_try_catch_finally_helper, try_catch_offset, -1, op_num, -1);
@@ -10745,7 +10745,6 @@ ZEND_VM_HELPER(zend_interrupt_helper, ANY, ANY)
 		zend_timeout();
 	} else if (ZEND_HAS_OOM()) {
 		zend_handle_delayed_oom();
-		EG(opline_before_exception) = NULL;
 		HANDLE_EXCEPTION();
 	} else if (zend_interrupt_function) {
 		zend_interrupt_function(execute_data);
