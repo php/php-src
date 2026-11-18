@@ -148,6 +148,8 @@ PHP                                                                        NEWS
     initialization). (lazerg)
   . Fixed memory leak in get_meta_tags() when a tag opens while an attribute
     value is expected. (Jorg Sowa)
+  . Fixed getimagesize() reporting wrapped dimensions for XBM images with
+    out-of-range width or height. (Ilia Alshanetsky)
 
 - Streams:
   . Fixed in-place URL decoding of interned strings in the HTTP and FTP
