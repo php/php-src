@@ -8,6 +8,7 @@ if (!function_exists('zend_test_zend_call_stack_get')) die("skip zend_test_zend_
 zend_test
 --INI--
 fiber.stack_size=512k
+memory_limit=1G
 --FILE--
 <?php
 
