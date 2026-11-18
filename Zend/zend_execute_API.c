@@ -1590,6 +1590,20 @@ static bool zend_timeout_handler_is_installed(int signo)
 	return sigaction(signo, NULL, &current) == 0 && current.sa_handler == zend_timeout_handler;
 # endif
 }
+
+/* The process-wide disposition that delivers the signal of the execution timer. */
+static void zend_timeout_timer_action(struct sigaction *act)
+{
+# ifdef ZEND_SIGNALS
+	zend_signal_timer_action(act);
+# else
+	memset(act, 0, sizeof(*act));
+	act->sa_handler = zend_timeout_handler;
+	sigemptyset(&act->sa_mask);
+	/* Without SA_RESETHAND: a signal forwarded from another thread must still find it. */
+	act->sa_flags = SA_ONSTACK | SA_NODEFER;
+# endif
+}
 #endif
 
 static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
@@ -1666,19 +1680,18 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 #  ifdef HAVE_SIGACTION
 			struct sigaction act;
 
+#   ifdef ZTS
+			/* The disposition is process-wide, and another thread may handle this signal. */
+			if (!zend_timeout_handler_is_installed(signo)) {
+				zend_timeout_timer_action(&act);
+				zend_signal_forward_timer_install(signo, &act);
+			}
+#   else
 			act.sa_handler = zend_timeout_handler;
 			sigemptyset(&act.sa_mask);
-#   ifdef ZTS
-			/* A signal forwarded from another thread must still find this handler. */
-			act.sa_flags = SA_ONSTACK | SA_NODEFER;
-#   else
 			act.sa_flags = SA_ONSTACK | SA_RESETHAND | SA_NODEFER;
-#   endif
-#   ifdef ZTS
-			/* The disposition is process-wide, and another thread handles this signal. */
-			if (!zend_signal_forward_has_handler(signo))
-#   endif
 			sigaction(signo, &act, NULL);
+#   endif
 #  else
 			signal(signo, zend_timeout_handler);
 #  endif /* HAVE_SIGACTION */
@@ -1700,18 +1713,15 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 		}
 
 		/* The timer is still running while another thread's handler is installed. */
-		if (seconds && (zend_timeout_handler_is_installed(signo) || zend_signal_forward_has_handler(signo))) {
 #  ifdef ZEND_SIGNALS
-			zend_signal_forward_timer_arm(signo, NULL);
+		if (seconds && (zend_timeout_handler_is_installed(signo) || zend_signal_forward_has_handler(signo))) {
 #  else
+		if (seconds) {
+#  endif
 			struct sigaction timer_action;
 
-			memset(&timer_action, 0, sizeof(timer_action));
-			timer_action.sa_handler = zend_timeout_handler;
-			sigemptyset(&timer_action.sa_mask);
-			timer_action.sa_flags = SA_ONSTACK | SA_NODEFER;
+			zend_timeout_timer_action(&timer_action);
 			zend_signal_forward_timer_arm(signo, &timer_action);
-#  endif
 		} else {
 			zend_signal_forward_timer_disarm();
 		}

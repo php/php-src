@@ -1004,6 +1004,31 @@ static void *zend_test_forward_churn_main(void *arg)
 	return NULL;
 }
 
+#if ZEND_DEBUG
+static pthread_key_t zend_test_forward_exit_key;
+
+static void zend_test_forward_exit_destructor(void *arg)
+{
+	zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
+	/* Runs again for as many passes as the system makes over the destructors. */
+	if ((intptr_t) arg < 16) {
+		pthread_setspecific(zend_test_forward_exit_key, (void *) ((intptr_t) arg + 1));
+	}
+}
+
+static void *zend_test_forward_timer_install_main(void *arg)
+{
+	zend_signal_forward_timer_install(ZEND_TEST_FORWARD_SIGNAL, arg);
+	return NULL;
+}
+
+static void *zend_test_forward_exit_main(void *arg)
+{
+	pthread_setspecific(zend_test_forward_exit_key, (void *) 1);
+	return NULL;
+}
+#endif
+
 /* A hang in a child fails the test instead of stalling it. */
 static bool zend_test_forward_wait_child(pid_t pid)
 {
@@ -1326,6 +1351,251 @@ static bool zend_test_forward_scenario(const char *scenario)
 	}
 
 #if ZEND_DEBUG
+	if (strcmp(scenario, "handler_stalled_across_retirement") == 0) {
+		pthread_t raiser;
+		time_t start = time(NULL);
+		bool retired = false;
+
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_STALL_HANDLER);
+		pthread_create(&raiser, NULL, zend_test_forward_raise_main, NULL);
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_WAIT_STALLED);
+
+		/* The helper leaves after the handler checked that it runs. */
+		zend_signal_forward_release(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_IDLE_SOON);
+		while (!retired && time(NULL) - start < 30) {
+			retired = zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_RUNNING) == 0;
+			usleep(1000);
+		}
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_IDLE_NORMAL);
+
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_RESUME_HANDLER);
+		pthread_join(raiser, NULL);
+
+		/* Not reported as forwarded, and not delivered to the next owner either. */
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		usleep(100000);
+		return retired && !zend_atomic_bool_load(&zend_test_forward_result)
+			&& zend_atomic_int_load(&zend_test_forward_main_hits) == 0;
+	}
+
+	if (strcmp(scenario, "handler_stalled_across_rearm") == 0) {
+		pthread_t raiser;
+		bool result;
+
+		zend_signal_forward_timer_arm(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_HOLD);
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_STALL_HANDLER);
+		pthread_create(&raiser, NULL, zend_test_forward_raise_main, NULL);
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_WAIT_STALLED);
+
+		/* The new timer expires while a handler of the old one is still running. */
+		zend_signal_forward_timer_arm(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		zend_test_forward_raise_foreign();
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_RESUME_HANDLER);
+		pthread_join(raiser, NULL);
+
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_RELEASE);
+		result = zend_test_forward_wait(&zend_test_forward_main_hits);
+		zend_signal_forward_timer_disarm();
+		return result;
+	}
+
+	if (strcmp(scenario, "fork_with_pending_flag") == 0) {
+		pid_t pid;
+		bool result;
+
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_HOLD);
+		zend_test_forward_raise_foreign();
+		pid = fork();
+		if (pid == 0) {
+			/* That signal was sent to the parent. */
+			zend_test_forward_main = pthread_self();
+			zend_atomic_int_store(&zend_test_forward_main_hits, 0);
+			zend_signal_forward_fork_child(false);
+			usleep(200000);
+			_exit(zend_atomic_int_load(&zend_test_forward_main_hits) == 0 ? 0 : 1);
+		}
+		result = pid > 0 && zend_test_forward_wait_child(pid);
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_RELEASE);
+		return zend_test_forward_wait(&zend_test_forward_main_hits) && result;
+	}
+
+	if (strcmp(scenario, "saturation_storm") == 0) {
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		for (int round = 0; round < 20; round++) {
+			pthread_t raisers[ZEND_TEST_FORWARD_WORKERS];
+
+			zend_atomic_int_store(&zend_test_forward_main_hits, 0);
+			zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_HOLD);
+			zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_SATURATE);
+			for (int i = 0; i < ZEND_TEST_FORWARD_WORKERS; i++) {
+				pthread_create(&raisers[i], NULL, zend_test_forward_raise_main, NULL);
+			}
+			for (int i = 0; i < ZEND_TEST_FORWARD_WORKERS; i++) {
+				pthread_join(raisers[i], NULL);
+			}
+			zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_RELEASE);
+			if (!zend_test_forward_wait(&zend_test_forward_main_hits)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	if (strcmp(scenario, "timer_keeps_handler") == 0) {
+		struct sigaction handler, timer, current;
+		pthread_t installer;
+		bool result;
+
+		memset(&handler, 0, sizeof(handler));
+		handler.sa_handler = zend_test_forward_handler;
+		sigemptyset(&handler.sa_mask);
+		memset(&timer, 0, sizeof(timer));
+		timer.sa_handler = zend_test_forward_replacement_handler;
+		sigemptyset(&timer.sa_mask);
+
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, &handler);
+		zend_signal_forward_timer_install(ZEND_TEST_FORWARD_SIGNAL, &timer);
+		sigaction(ZEND_TEST_FORWARD_SIGNAL, NULL, &current);
+		result = current.sa_handler == zend_test_forward_handler;
+
+		zend_signal_forward_release(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		zend_signal_forward_timer_install(ZEND_TEST_FORWARD_SIGNAL, &timer);
+		sigaction(ZEND_TEST_FORWARD_SIGNAL, NULL, &current);
+		result = result && current.sa_handler == zend_test_forward_replacement_handler;
+
+		/* The disposition only changes under the mutex. */
+		sigaction(ZEND_TEST_FORWARD_SIGNAL, &handler, NULL);
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_LOCK);
+		pthread_create(&installer, NULL, zend_test_forward_timer_install_main, &timer);
+		usleep(100000);
+		sigaction(ZEND_TEST_FORWARD_SIGNAL, NULL, &current);
+		result = result && current.sa_handler == zend_test_forward_handler;
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_UNLOCK);
+		pthread_join(installer, NULL);
+		sigaction(ZEND_TEST_FORWARD_SIGNAL, NULL, &current);
+		return result && current.sa_handler == zend_test_forward_replacement_handler;
+	}
+
+	if (strcmp(scenario, "timer_arm_disposition") == 0) {
+		struct sigaction timer, other, current;
+		bool result;
+
+		memset(&timer, 0, sizeof(timer));
+		timer.sa_handler = zend_test_forward_replacement_handler;
+		sigemptyset(&timer.sa_mask);
+		memset(&other, 0, sizeof(other));
+		other.sa_handler = SIG_DFL;
+		sigemptyset(&other.sa_mask);
+
+		/* A running timer must not meet the default action. */
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		zend_signal_forward_release(ZEND_TEST_FORWARD_SIGNAL, &other);
+		zend_signal_forward_timer_arm(ZEND_TEST_FORWARD_SIGNAL, &timer);
+		sigaction(ZEND_TEST_FORWARD_SIGNAL, NULL, &current);
+		result = current.sa_handler == zend_test_forward_replacement_handler;
+		zend_signal_forward_timer_disarm();
+
+		/* A handler that something else installed stays. */
+		other.sa_handler = zend_test_forward_handler;
+		sigaction(ZEND_TEST_FORWARD_SIGNAL, &other, NULL);
+		zend_signal_forward_timer_arm(ZEND_TEST_FORWARD_SIGNAL, &timer);
+		sigaction(ZEND_TEST_FORWARD_SIGNAL, NULL, &current);
+		result = result && current.sa_handler == zend_test_forward_handler;
+		zend_signal_forward_timer_disarm();
+
+		/* So does a signal that this thread ignores. */
+		other.sa_handler = SIG_IGN;
+		zend_signal_forward_release(ZEND_TEST_FORWARD_SIGNAL, &other);
+		zend_signal_forward_timer_arm(ZEND_TEST_FORWARD_SIGNAL, &timer);
+		sigaction(ZEND_TEST_FORWARD_SIGNAL, NULL, &current);
+		zend_signal_forward_timer_disarm();
+		return result && current.sa_handler == SIG_IGN;
+	}
+
+	if (strcmp(scenario, "register_during_thread_exit") == 0) {
+		pthread_t thread;
+
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		pthread_key_create(&zend_test_forward_exit_key, zend_test_forward_exit_destructor);
+		pthread_create(&thread, NULL, zend_test_forward_exit_main, NULL);
+		pthread_join(thread, NULL);
+		pthread_key_delete(zend_test_forward_exit_key);
+
+		/* No record may be left of the thread that registered while it exited. */
+		zend_test_forward_raise_foreign();
+		return zend_test_forward_wait(&zend_test_forward_main_hits);
+	}
+
+	if (strcmp(scenario, "helper_start_failure") == 0) {
+		pid_t pid;
+		bool result;
+
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_RESTART);
+		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_FAIL_CREATE);
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		result = zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_RUNNING) == 0
+			&& zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_PID) == 0;
+
+		/* Without a helper, a signal is not reported as forwarded. */
+		zend_atomic_bool_store(&zend_test_forward_result, true);
+		zend_test_forward_raise_foreign();
+		result = result && !zend_atomic_bool_load(&zend_test_forward_result);
+
+		/* The next registration starts over. */
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		zend_test_forward_raise_foreign();
+		result = zend_test_forward_wait(&zend_test_forward_main_hits) && result;
+
+		pid = fork();
+		if (pid == 0) {
+			bool running;
+
+			zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_FAIL_PIPE);
+			zend_signal_forward_fork_child(false);
+			running = zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_RUNNING) == 1;
+			_exit(!running && zend_test_forward_child_delivers() ? 0 : 1);
+		}
+		return pid > 0 && zend_test_forward_wait_child(pid) && result;
+	}
+
+	if (strcmp(scenario, "init_failure") == 0) {
+		struct sigaction current;
+		pid_t pid;
+
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		pid = fork();
+		if (pid == 0) {
+			bool handled;
+
+			zend_test_forward_main = pthread_self();
+			zend_atomic_int_store(&zend_test_forward_main_hits, 0);
+			zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_FAIL_INIT);
+			zend_signal_forward_fork_child(false);
+			zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
+			zend_atomic_bool_store(&zend_test_forward_result, true);
+			zend_test_forward_raise_foreign();
+			usleep(100000);
+			/* A handler stays in place, including one registered after the failure. */
+			memset(&current, 0, sizeof(current));
+			current.sa_handler = zend_test_forward_handler;
+			sigemptyset(&current.sa_mask);
+			zend_signal_forward_acquire(SIGWINCH, &current);
+			zend_signal_forward_or_default(SIGWINCH);
+			zend_signal_forward_or_default(ZEND_TEST_FORWARD_SIGNAL);
+			sigaction(SIGWINCH, NULL, &current);
+			handled = current.sa_handler == zend_test_forward_handler;
+			sigaction(ZEND_TEST_FORWARD_SIGNAL, NULL, &current);
+			_exit(handled && !zend_atomic_bool_load(&zend_test_forward_result)
+				&& current.sa_handler == zend_test_forward_handler
+				&& zend_atomic_int_load(&zend_test_forward_main_hits) == 0 ? 0 : 1);
+		}
+		return pid > 0 && zend_test_forward_wait_child(pid);
+	}
+
 	if (strcmp(scenario, "pipe_saturation") == 0) {
 		bool result;
 
@@ -1473,17 +1743,17 @@ static bool zend_test_forward_scenario(const char *scenario)
 		time_t start;
 		bool result = true;
 
+		start = time(NULL);
 		zend_signal_forward_timer_arm(ZEND_TEST_FORWARD_SIGNAL, NULL);
 		zend_signal_forward_timer_disarm();
-		start = time(NULL);
 		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_IDLE_SOON);
-		while (time(NULL) - start < 1) {
+		do {
 			bool running = zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_RUNNING) == 1;
 
 			/* Only conclusive if the grace period is certainly not over yet. */
 			result = result && (running || time(NULL) - start > 1);
 			usleep(1000);
-		}
+		} while (time(NULL) - start < 1);
 		zend_signal_forward_test(ZEND_SIGNAL_FORWARD_TEST_IDLE_NORMAL);
 		return result;
 	}

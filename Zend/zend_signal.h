@@ -96,6 +96,9 @@ END_EXTERN_C()
 void zend_signal_init(void);
 
 ZEND_API void zend_signal(int signo, void (*handler)(int));
+#ifdef ZTS
+void zend_signal_timer_action(struct sigaction *act);
+#endif
 ZEND_API void zend_sigaction(int signo, const struct sigaction *act, struct sigaction *oldact);
 
 #else /* ZEND_SIGNALS */

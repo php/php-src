@@ -24,6 +24,15 @@ $scenarios = [
     'idle_retirement',
     'no_retirement_during_grace',
     'closed_stdio',
+    'handler_stalled_across_retirement',
+    'handler_stalled_across_rearm',
+    'fork_with_pending_flag',
+    'saturation_storm',
+    'timer_keeps_handler',
+    'timer_arm_disposition',
+    'register_during_thread_exit',
+    'helper_start_failure',
+    'init_failure',
 ];
 foreach ($scenarios as $scenario) {
     echo $scenario, ': ';
@@ -42,3 +51,12 @@ helper_restart: bool(true)
 idle_retirement: bool(true)
 no_retirement_during_grace: bool(true)
 closed_stdio: bool(true)
+handler_stalled_across_retirement: bool(true)
+handler_stalled_across_rearm: bool(true)
+fork_with_pending_flag: bool(true)
+saturation_storm: bool(true)
+timer_keeps_handler: bool(true)
+timer_arm_disposition: bool(true)
+register_during_thread_exit: bool(true)
+helper_start_failure: bool(true)
+init_failure: bool(true)

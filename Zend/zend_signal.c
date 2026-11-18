@@ -300,6 +300,17 @@ ZEND_API void zend_sigaction(int signo, const struct sigaction *act, struct siga
 }
 /* }}} */
 
+#ifdef ZTS
+/* The process-wide disposition of a signal that zend_signal() handles for a thread. */
+void zend_signal_timer_action(struct sigaction *act)
+{
+	memset(act, 0, sizeof(*act));
+	act->sa_flags     = SA_ONSTACK | SA_SIGINFO;
+	act->sa_sigaction = zend_signal_handler_defer;
+	act->sa_mask      = global_sigmask;
+}
+#endif
+
 /* {{{ zend_signal
  *  Register a signal handler that will be deferred in critical sections */
 ZEND_API void zend_signal(int signo, void (*handler)(int))

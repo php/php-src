@@ -43,10 +43,13 @@ ZEND_API int zend_signal_forward_release(int signo, const struct sigaction *act)
 /* Whether a thread has a handler for signo, which the execution timer must not replace. */
 bool zend_signal_forward_has_handler(int signo);
 
-/* The calling thread armed the execution timer, which delivers signo. If act is
- * given, it is restored when a handler for signo is released. */
+/* The calling thread armed the execution timer, which delivers signo. If act is given,
+ * it becomes the disposition unless a thread handles signo, this thread ignores it, or
+ * something else was installed for it, and it is restored when a handler is released. */
 ZEND_API void zend_signal_forward_timer_arm(int signo, const struct sigaction *act);
 ZEND_API void zend_signal_forward_timer_disarm(void);
+/* Installs the handler of the execution timer, unless a thread has a handler for signo. */
+ZEND_API int zend_signal_forward_timer_install(int signo, const struct sigaction *act);
 
 /* Everything registered by the calling thread ends with the request. */
 void zend_signal_forward_request_shutdown(void);
@@ -70,7 +73,13 @@ typedef enum {
 	ZEND_SIGNAL_FORWARD_TEST_WRITE_FD,
 	ZEND_SIGNAL_FORWARD_TEST_LOCK,
 	ZEND_SIGNAL_FORWARD_TEST_UNLOCK,
-	ZEND_SIGNAL_FORWARD_TEST_PID
+	ZEND_SIGNAL_FORWARD_TEST_PID,
+	ZEND_SIGNAL_FORWARD_TEST_STALL_HANDLER,
+	ZEND_SIGNAL_FORWARD_TEST_WAIT_STALLED,
+	ZEND_SIGNAL_FORWARD_TEST_RESUME_HANDLER,
+	ZEND_SIGNAL_FORWARD_TEST_FAIL_PIPE,
+	ZEND_SIGNAL_FORWARD_TEST_FAIL_CREATE,
+	ZEND_SIGNAL_FORWARD_TEST_FAIL_INIT
 } zend_signal_forward_test_op;
 
 ZEND_API int zend_signal_forward_test(zend_signal_forward_test_op op);
