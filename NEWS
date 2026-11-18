@@ -45,6 +45,8 @@ PHP                                                                        NEWS
 
 - Date:
   . Update timelib to 2026.03 (Derick)
+  . Fixed truncated timezone name for UTC offsets of 100 hours or more
+    created by DateTime::createFromFormat(). (Jorg Sowa)
 
 - DBA:
   . Fixed dba_close() not closing a database opened with dba_popen().
