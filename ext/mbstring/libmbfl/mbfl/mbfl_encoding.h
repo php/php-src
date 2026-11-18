@@ -168,6 +168,7 @@ static inline zend_result mb_convert_buf_ensure(mb_convert_buf *buf, unsigned ch
 	if ((size_t)(*limit - *out) < needed) {
 		size_t oldsize = *limit - (unsigned char*)ZSTR_VAL((buf)->str);
 		size_t newsize = oldsize + MAX(oldsize >> 1, needed);
+		size_t out_offset = *out - (unsigned char*)ZSTR_VAL((buf)->str);
 		zend_string *newstr = safe_ferealloc((buf)->str, 1, newsize, _ZSTR_STRUCT_SIZE(0), /* fallible */ true);
 		if (!newstr) {
 			/* An earlier growth may have moved the buffer. */
@@ -175,7 +176,7 @@ static inline zend_result mb_convert_buf_ensure(mb_convert_buf *buf, unsigned ch
 			buf->limit = *limit;
 			return FAILURE;
 		}
-		*out = (unsigned char*)ZSTR_VAL(newstr) + (*out - (unsigned char*)ZSTR_VAL((buf)->str));
+		*out = (unsigned char*)ZSTR_VAL(newstr) + out_offset;
 		*limit = (unsigned char*)ZSTR_VAL(newstr) + newsize;
 		(buf)->str = newstr;
 	}
