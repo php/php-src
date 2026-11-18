@@ -91,8 +91,6 @@ PHP                                                                        NEWS
     (pavimus)
   . Fixed opcache.enable_file_override lookups racing with OPcache restarts
     (pavimus)
-  . Fixed bug GH-25304 (JIT: SEGV in exception handler stub after OOM inside an
-    output-buffer callback). (David Carlier)
 
 - PDO_Firebird:
   . Fixed stack buffer overflow with long connection user names, passwords,
