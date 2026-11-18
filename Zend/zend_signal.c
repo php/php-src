@@ -86,14 +86,19 @@ static pthread_t        global_handler_threads[NSIG];
 static zend_atomic_bool global_handler_thread_set[NSIG];
 
 /* A fault must stay on the faulting thread: the instruction would run again as
- * soon as the handler returned. */
+ * soon as the handler returned. A handler installed before PHP started keeps
+ * receiving the signals delivered to threads that never ran PHP. */
 static zend_always_inline bool zend_signal_is_forwardable(int signo)
 {
 	return signo < NSIG && signo != SIGSEGV && signo != SIGFPE && signo != SIGILL
 #ifdef SIGBUS
 		&& signo != SIGBUS
 #endif
-	;
+#ifdef SIGTRAP
+		&& signo != SIGTRAP
+#endif
+		&& (global_orig_handlers[signo-1].handler == (void *) SIG_DFL
+		 || global_orig_handlers[signo-1].handler == (void *) SIG_IGN);
 }
 #endif
 

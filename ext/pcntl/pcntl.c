@@ -1343,6 +1343,9 @@ static void pcntl_signal_handler(int signo)
 #ifdef SIGBUS
 		 || signo == SIGBUS
 #endif
+#ifdef SIGTRAP
+		 || signo == SIGTRAP
+#endif
 		) {
 			signal(signo, SIG_DFL);
 			raise(signo);
