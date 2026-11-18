@@ -930,6 +930,10 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 
 	zend_cpu_startup();
 
+#if defined(ZTS) && !defined(ZEND_WIN32)
+	zend_signal_thread_startup();
+#endif
+
 #ifdef ZEND_WIN32
 	php_win32_cp_set_by_id(65001);
 #endif
@@ -1160,6 +1164,10 @@ zend_result zend_post_startup(void) /* {{{ */
 
 void zend_shutdown(void) /* {{{ */
 {
+#if defined(ZTS) && !defined(ZEND_WIN32)
+	zend_signal_thread_shutdown();
+#endif
+
 	zend_vm_dtor();
 
 	zend_destroy_rsrc_list(&EG(persistent_list));
