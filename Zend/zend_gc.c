@@ -834,6 +834,19 @@ ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref)
 	gc_remove_from_roots(root);
 }
 
+/* Buckets GC may walk. nNumUsed > 0 with a NULL data pointer is corrupt and
+ * dereferencing it segfaults. Do not ZEND_ASSERT the pointer: release builds
+ * turn that into ZEND_ASSUME and delete this guard. Treat the table as empty. */
+static zend_always_inline uint32_t gc_array_num_used(const HashTable *ht)
+{
+	uint32_t n = ht->nNumUsed;
+
+	if (UNEXPECTED(n != 0 && ht->arData == NULL)) {
+		return 0;
+	}
+	return n;
+}
+
 /* Mark all nodes reachable from ref as black (live). Restore the reference
  * counts decremented by gc_mark_grey(). See ScanBlack() in Bacon & Rajan.
  * To implement a depth-first search, discovered nodes are added to a stack
@@ -981,7 +994,7 @@ handle_zvals:
 		ZEND_ASSERT((zend_array*)ref != &EG(symbol_table));
 		ht = (zend_array*)ref;
 handle_ht:
-		n = ht->nNumUsed;
+		n = gc_array_num_used(ht);
 		zv = ht->arPacked;
 		if (HT_IS_PACKED(ht)) {
 			goto handle_zvals;
@@ -1158,7 +1171,7 @@ handle_zvals:
 		ZEND_ASSERT(((zend_array*)ref) != &EG(symbol_table));
 		ht = (zend_array*)ref;
 handle_ht:
-		n = ht->nNumUsed;
+		n = gc_array_num_used(ht);
 		if (HT_IS_PACKED(ht)) {
             zv = ht->arPacked;
             goto handle_zvals;
@@ -1377,7 +1390,7 @@ handle_zvals:
 		ZEND_ASSERT(ht != &EG(symbol_table));
 
 handle_ht:
-		n = ht->nNumUsed;
+		n = gc_array_num_used(ht);
 		if (HT_IS_PACKED(ht)) {
             zv = ht->arPacked;
             goto handle_zvals;
@@ -1625,7 +1638,7 @@ handle_zvals:
 		ht = (zend_array*)ref;
 
 handle_ht:
-		n = ht->nNumUsed;
+		n = gc_array_num_used(ht);
 		if (HT_IS_PACKED(ht)) {
 			zv = ht->arPacked;
 			goto handle_zvals;
@@ -1813,7 +1826,7 @@ handle_zvals:
 		ht = (zend_array*)ref;
 
 handle_ht:
-		n = ht->nNumUsed;
+		n = gc_array_num_used(ht);
 		if (HT_IS_PACKED(ht)) {
 			zv = ht->arPacked;
 			goto handle_zvals;

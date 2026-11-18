@@ -39,6 +39,8 @@ PHP                                                                        NEWS
   . Fixed object_properties_load() adding integer keys to property tables, which
     made the properties unreadable and clone hit an assertion.
     (Nicolas Grekas)
+  . Fixed bug GH-25567 (segfault when GC walks an array with nNumUsed > 0
+    and a NULL data pointer). (Kenta Usami)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
