@@ -41,6 +41,13 @@ struct php_pcntl_pending_signal {
 #endif
 };
 
+#if defined(ZTS) && !defined(ZEND_SIGNALS)
+# include <signal.h>
+# ifndef NSIG
+#  define NSIG 65
+# endif
+#endif
+
 ZEND_BEGIN_MODULE_GLOBALS(pcntl)
 	HashTable php_signal_table;
 	int processing_signal_queue;
@@ -49,6 +56,10 @@ ZEND_BEGIN_MODULE_GLOBALS(pcntl)
 	volatile char pending_signals;
 	bool async_signals;
 	unsigned num_signals;
+#if defined(ZTS) && !defined(ZEND_SIGNALS)
+	/* Read by the signal handler, where the signal table cannot be used */
+	zend_atomic_bool handled_signals[NSIG];
+#endif
 ZEND_END_MODULE_GLOBALS(pcntl)
 
 #if defined(ZTS) && defined(COMPILE_DL_PCNTL)

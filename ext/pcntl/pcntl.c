@@ -176,6 +176,39 @@ ZEND_GET_MODULE(pcntl)
 
 static void (*orig_interrupt_function)(zend_execute_data *execute_data);
 
+/* sigprocmask() applies to every thread on some systems, such as macOS. */
+#ifdef ZTS
+# define pcntl_thread_sigmask tsrm_sigmask
+#else
+# define pcntl_thread_sigmask sigprocmask
+#endif
+
+#if defined(ZTS) && !defined(ZEND_SIGNALS)
+static zend_always_inline void pcntl_signal_set_handled(int signo, bool handled)
+{
+	if (signo < NSIG) {
+		zend_atomic_bool_store_ex(&PCNTL_G(handled_signals)[signo-1], handled);
+	}
+}
+
+/* The disposition of a signal is process-wide, so it stays as it is while another
+ * thread handles the signal. */
+static bool pcntl_signal_release(int signo, Sigfunc *func, int restart)
+{
+	bool success = true;
+
+	zend_signal_thread_lock();
+	pcntl_signal_set_handled(signo, false);
+	zend_signal_thread_forget(signo);
+	if (!zend_signal_thread_is_registered(signo)) {
+		success = php_signal(signo, func, restart) != (void *)SIG_ERR;
+	}
+	zend_signal_thread_unlock();
+
+	return success;
+}
+#endif
+
 #ifdef HAVE_STRUCT_SIGINFO_T
 static void pcntl_signal_handler(int, siginfo_t*, void*);
 static void pcntl_siginfo_to_zval(int, siginfo_t*, zval*);
@@ -233,16 +266,14 @@ PHP_RSHUTDOWN_FUNCTION(pcntl)
 	zend_long signo;
 	zval *handle;
 
-#if defined(ZTS) && !defined(ZEND_SIGNALS)
-	/* While the handlers are still there: a signal forwarded here afterwards
-	 * would take the default action. */
-	zend_signal_thread_forget_all();
-#endif
-
 	/* Reset all signals to their default disposition */
 	ZEND_HASH_FOREACH_NUM_KEY_VAL(&PCNTL_G(php_signal_table), signo, handle) {
 		if (Z_TYPE_P(handle) != IS_LONG || Z_LVAL_P(handle) != (zend_long)SIG_DFL) {
+#if defined(ZTS) && !defined(ZEND_SIGNALS)
+			pcntl_signal_release((int) signo, (Sigfunc *)(zend_long)SIG_DFL, 0);
+#else
 			php_signal(signo, (Sigfunc *)(zend_long)SIG_DFL, 0);
+#endif
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -810,9 +841,10 @@ PHP_FUNCTION(pcntl_signal)
 	/* Special long value case for SIG_DFL and SIG_IGN */
 	if (Z_TYPE_P(handle) == IS_LONG) {
 #if defined(ZTS) && !defined(ZEND_SIGNALS)
-		zend_signal_thread_forget((int) signo);
-#endif
+		if (!pcntl_signal_release((int) signo, (Sigfunc *) Z_LVAL_P(handle), (int) restart_syscalls)) {
+#else
 		if (php_signal(signo, (Sigfunc *) Z_LVAL_P(handle), (int) restart_syscalls) == (void *)SIG_ERR) {
+#endif
 			PCNTL_G(last_error) = errno;
 			php_error_docref(NULL, E_WARNING, "Error assigning signal");
 			RETURN_FALSE;
@@ -823,6 +855,8 @@ PHP_FUNCTION(pcntl_signal)
 
 #if defined(ZTS) && !defined(ZEND_SIGNALS)
 	/* Before the handler is installed, so that no signal finds it without a thread to go to */
+	zend_signal_thread_lock();
+	pcntl_signal_set_handled((int) signo, true);
 	zend_signal_thread_record((int) signo);
 #endif
 
@@ -830,11 +864,16 @@ PHP_FUNCTION(pcntl_signal)
 	if (php_signal4(signo, pcntl_signal_handler, (int) restart_syscalls, 1) == (void *)SIG_ERR) {
 		PCNTL_G(last_error) = errno;
 #if defined(ZTS) && !defined(ZEND_SIGNALS)
+		pcntl_signal_set_handled((int) signo, false);
 		zend_signal_thread_forget((int) signo);
+		zend_signal_thread_unlock();
 #endif
 		php_error_docref(NULL, E_WARNING, "Error assigning signal");
 		RETURN_FALSE;
 	}
+#if defined(ZTS) && !defined(ZEND_SIGNALS)
+	zend_signal_thread_unlock();
+#endif
 
 	/* Add the function name to our signal table */
 	handle = zend_hash_index_update(&PCNTL_G(php_signal_table), signo, handle);
@@ -1319,8 +1358,10 @@ static void pcntl_signal_handler(int signo)
 {
 #if defined(ZTS) && !defined(ZEND_SIGNALS)
 	/* Without zend signals this handler is installed directly, and PCNTL_G()
-	 * would dereference the missing TSRM storage of a thread that never ran PHP. */
-	if (!tsrm_is_managed_thread()) {
+	 * would dereference the missing TSRM storage of a thread that never ran PHP.
+	 * The signal may also reach a PHP thread when another one handles it. */
+	if (!tsrm_is_managed_thread()
+	 || (signo < NSIG && !zend_atomic_bool_load_ex(&PCNTL_G(handled_signals)[signo-1]))) {
 		if (zend_signal_is_fault(signo)) {
 			signal(signo, SIG_DFL);
 			raise(signo);
@@ -1375,11 +1416,11 @@ void pcntl_signal_dispatch(void)
 
 	/* Mask all signals */
 	sigfillset(&mask);
-	sigprocmask(SIG_BLOCK, &mask, &old_mask);
+	pcntl_thread_sigmask(SIG_BLOCK, &mask, &old_mask);
 
 	/* Bail if the queue is empty or if we are already playing the queue */
 	if (!PCNTL_G(head) || PCNTL_G(processing_signal_queue)) {
-		sigprocmask(SIG_SETMASK, &old_mask, NULL);
+		pcntl_thread_sigmask(SIG_SETMASK, &old_mask, NULL);
 		return;
 	}
 
@@ -1483,7 +1524,7 @@ void pcntl_signal_dispatch(void)
 	zend_fiber_switch_unblock();
 
 	/* return signal mask to previous state */
-	sigprocmask(SIG_SETMASK, &old_mask, NULL);
+	pcntl_thread_sigmask(SIG_SETMASK, &old_mask, NULL);
 }
 
 static void pcntl_signal_dispatch_tick_function(int dummy_int, void *dummy_pointer)

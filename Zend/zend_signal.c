@@ -543,6 +543,14 @@ static void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *conte
 		zend_signal_handler(signo, siginfo, context);
 		return;
 	}
+
+	/* Another PHP thread may handle a signal that this one does not. */
+	if (zend_signal_may_forward(signo)
+	 && (SIGG(handlers)[signo-1].handler == (void *) SIG_DFL || SIGG(handlers)[signo-1].handler == (void *) SIG_IGN)
+	 && zend_signal_thread_forward(signo)) {
+		errno = errno_save;
+		return;
+	}
 #endif
 
 	if (EXPECTED(SIGG(active))) {
@@ -780,6 +788,11 @@ static zend_result zend_signal_register(int signo, void (*handler)(int, siginfo_
 void zend_signal_activate(void)
 {
 	size_t x;
+
+#ifdef ZTS
+	/* The handlers below replace any that this thread had registered. */
+	zend_signal_thread_forget_all();
+#endif
 
 	memcpy(&SIGG(handlers), &global_orig_handlers, sizeof(global_orig_handlers));
 
