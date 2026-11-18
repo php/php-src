@@ -931,7 +931,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	zend_cpu_startup();
 
 #if defined(ZTS) && !defined(ZEND_WIN32)
-	zend_signal_thread_startup();
+	zend_signal_forward_startup();
 #endif
 
 #ifdef ZEND_WIN32
@@ -1165,7 +1165,7 @@ zend_result zend_post_startup(void) /* {{{ */
 void zend_shutdown(void) /* {{{ */
 {
 #if defined(ZTS) && !defined(ZEND_WIN32)
-	zend_signal_thread_shutdown();
+	zend_signal_forward_shutdown();
 #endif
 
 	zend_vm_dtor();

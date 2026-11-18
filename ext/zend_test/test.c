@@ -814,7 +814,8 @@ static ZEND_FUNCTION(zend_test_raise_on_foreign_thread)
 
 /* Drives the record of which threads handle a signal, without running PHP code
  * on the other threads. */
-#define ZEND_TEST_FORWARD_SIGNAL SIGUSR2
+/* Ignored by default, so that a forward arriving after a scenario is harmless. */
+#define ZEND_TEST_FORWARD_SIGNAL SIGURG
 #define ZEND_TEST_FORWARD_WORKERS 4
 
 enum {
@@ -823,6 +824,8 @@ enum {
 	ZEND_TEST_FORWARD_RECORD_TIMER,
 	ZEND_TEST_FORWARD_FORGET,
 	ZEND_TEST_FORWARD_RAISE,
+	ZEND_TEST_FORWARD_BLOCK,
+	ZEND_TEST_FORWARD_WAIT_PENDING,
 	ZEND_TEST_FORWARD_EXIT
 };
 
@@ -834,6 +837,28 @@ static zend_atomic_int zend_test_forward_main_hits;
 static zend_atomic_int zend_test_forward_helper_hits;
 static zend_atomic_int zend_test_forward_command;
 static zend_atomic_bool zend_test_forward_stop;
+static zend_atomic_bool zend_test_forward_result;
+static zend_atomic_int zend_test_forward_replacement_hits;
+
+/* Polls instead of sleeping, so that a passing run does not depend on timing. */
+static bool zend_test_forward_wait_pending(void)
+{
+	for (int i = 0; i < 2000; i++) {
+		sigset_t pending;
+
+		sigpending(&pending);
+		if (sigismember(&pending, ZEND_TEST_FORWARD_SIGNAL) == 1) {
+			return true;
+		}
+		usleep(1000);
+	}
+	return false;
+}
+
+static void zend_test_forward_replacement_handler(int signo)
+{
+	zend_atomic_int_store(&zend_test_forward_replacement_hits, zend_atomic_int_load(&zend_test_forward_replacement_hits) + 1);
+}
 
 static void zend_test_forward_handler(int signo)
 {
@@ -845,7 +870,7 @@ static void zend_test_forward_handler(int signo)
 	 && zend_atomic_bool_load(&zend_test_forward_helper_registered)) {
 		zend_atomic_int_store(&zend_test_forward_helper_hits, zend_atomic_int_load(&zend_test_forward_helper_hits) + 1);
 	} else {
-		zend_signal_thread_forward(signo);
+		zend_atomic_bool_store(&zend_test_forward_result, zend_signal_forward(signo));
 	}
 }
 
@@ -863,14 +888,22 @@ static void *zend_test_forward_helper_main(void *arg)
 		}
 		if (command == ZEND_TEST_FORWARD_RECORD) {
 			zend_atomic_bool_store(&zend_test_forward_helper_registered, true);
-			zend_signal_thread_record(ZEND_TEST_FORWARD_SIGNAL);
+			zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
 		} else if (command == ZEND_TEST_FORWARD_RECORD_TIMER) {
-			zend_signal_thread_record_timer(ZEND_TEST_FORWARD_SIGNAL);
+			zend_signal_forward_timer_arm(ZEND_TEST_FORWARD_SIGNAL, NULL);
 		} else if (command == ZEND_TEST_FORWARD_FORGET) {
 			zend_atomic_bool_store(&zend_test_forward_helper_registered, false);
-			zend_signal_thread_forget(ZEND_TEST_FORWARD_SIGNAL);
+			zend_signal_forward_release(ZEND_TEST_FORWARD_SIGNAL, NULL);
 		} else if (command == ZEND_TEST_FORWARD_RAISE) {
 			raise(ZEND_TEST_FORWARD_SIGNAL);
+		} else if (command == ZEND_TEST_FORWARD_BLOCK) {
+			sigset_t block;
+
+			sigemptyset(&block);
+			sigaddset(&block, ZEND_TEST_FORWARD_SIGNAL);
+			pthread_sigmask(SIG_BLOCK, &block, NULL);
+		} else if (command == ZEND_TEST_FORWARD_WAIT_PENDING) {
+			zend_test_forward_wait_pending();
 		}
 		zend_atomic_int_store(&zend_test_forward_command, ZEND_TEST_FORWARD_IDLE);
 	}
@@ -902,6 +935,13 @@ static void zend_test_forward_helper_exit(void)
 
 static void *zend_test_forward_raise_main(void *arg)
 {
+	sigset_t unblock;
+
+	/* A new thread inherits the signal mask of its creator. */
+	sigemptyset(&unblock);
+	sigaddset(&unblock, ZEND_TEST_FORWARD_SIGNAL);
+	pthread_sigmask(SIG_UNBLOCK, &unblock, NULL);
+
 	raise(ZEND_TEST_FORWARD_SIGNAL);
 	return NULL;
 }
@@ -928,9 +968,16 @@ static bool zend_test_forward_wait(zend_atomic_int *hits)
 static void *zend_test_forward_worker_main(void *arg)
 {
 	for (int i = 0; i < 2000; i++) {
-		zend_signal_thread_record(ZEND_TEST_FORWARD_SIGNAL);
-		zend_signal_thread_forget(ZEND_TEST_FORWARD_SIGNAL);
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		zend_signal_forward_release(ZEND_TEST_FORWARD_SIGNAL, NULL);
 	}
+	return NULL;
+}
+
+static void *zend_test_forward_short_lived_main(void *arg)
+{
+	/* The record is removed when the thread exits. */
+	zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
 	return NULL;
 }
 
@@ -946,7 +993,7 @@ static void *zend_test_forward_storm_main(void *arg)
 static bool zend_test_forward_scenario(const char *scenario)
 {
 	if (strcmp(scenario, "unmanaged") == 0) {
-		zend_signal_thread_record(ZEND_TEST_FORWARD_SIGNAL);
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
 		zend_test_forward_raise_foreign();
 		return zend_test_forward_wait(&zend_test_forward_main_hits);
 	}
@@ -954,7 +1001,7 @@ static bool zend_test_forward_scenario(const char *scenario)
 	if (strcmp(scenario, "successor") == 0) {
 		bool result;
 
-		zend_signal_thread_record(ZEND_TEST_FORWARD_SIGNAL);
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
 		zend_test_forward_helper_start();
 		zend_test_forward_send(ZEND_TEST_FORWARD_RECORD);
 		zend_test_forward_send(ZEND_TEST_FORWARD_FORGET);
@@ -967,7 +1014,7 @@ static bool zend_test_forward_scenario(const char *scenario)
 	if (strcmp(scenario, "most_recent_owner") == 0) {
 		bool result;
 
-		zend_signal_thread_record(ZEND_TEST_FORWARD_SIGNAL);
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
 		zend_test_forward_helper_start();
 		zend_test_forward_send(ZEND_TEST_FORWARD_RECORD);
 		zend_test_forward_raise_foreign();
@@ -978,7 +1025,7 @@ static bool zend_test_forward_scenario(const char *scenario)
 	}
 
 	if (strcmp(scenario, "owner_exit") == 0) {
-		zend_signal_thread_record(ZEND_TEST_FORWARD_SIGNAL);
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
 		zend_test_forward_helper_start();
 		zend_test_forward_send(ZEND_TEST_FORWARD_RECORD);
 		zend_test_forward_helper_exit();
@@ -999,7 +1046,7 @@ static bool zend_test_forward_scenario(const char *scenario)
 	if (strcmp(scenario, "thread_without_handler") == 0) {
 		bool result;
 
-		zend_signal_thread_record(ZEND_TEST_FORWARD_SIGNAL);
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
 		zend_test_forward_helper_start();
 		zend_test_forward_send(ZEND_TEST_FORWARD_RAISE);
 		result = zend_test_forward_wait(&zend_test_forward_main_hits);
@@ -1022,28 +1069,25 @@ static bool zend_test_forward_scenario(const char *scenario)
 		pthread_join(storm, NULL);
 
 		zend_atomic_int_store(&zend_test_forward_main_hits, 0);
-		zend_signal_thread_record(ZEND_TEST_FORWARD_SIGNAL);
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
 		zend_test_forward_raise_foreign();
 		return zend_test_forward_wait(&zend_test_forward_main_hits);
 	}
 
-	if (strcmp(scenario, "timer_keeps_no_disposition") == 0) {
+	if (strcmp(scenario, "timer_owner") == 0) {
 		bool result;
 
-		zend_signal_thread_record_timer(ZEND_TEST_FORWARD_SIGNAL);
-		result = !zend_signal_thread_is_registered(ZEND_TEST_FORWARD_SIGNAL);
+		zend_signal_forward_timer_arm(ZEND_TEST_FORWARD_SIGNAL, NULL);
 		zend_test_forward_raise_foreign();
-		result = zend_test_forward_wait(&zend_test_forward_main_hits) && result;
-		zend_signal_thread_record(ZEND_TEST_FORWARD_SIGNAL);
-		result = zend_signal_thread_is_registered(ZEND_TEST_FORWARD_SIGNAL) && result;
-		zend_signal_thread_forget_timer(ZEND_TEST_FORWARD_SIGNAL);
-		return zend_signal_thread_is_registered(ZEND_TEST_FORWARD_SIGNAL) && result;
+		result = zend_test_forward_wait(&zend_test_forward_main_hits);
+		zend_signal_forward_timer_disarm();
+		return result;
 	}
 
 	if (strcmp(scenario, "handler_outranks_timer") == 0) {
 		bool result;
 
-		zend_signal_thread_record(ZEND_TEST_FORWARD_SIGNAL);
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
 		zend_test_forward_helper_start();
 		zend_test_forward_send(ZEND_TEST_FORWARD_RECORD_TIMER);
 		zend_test_forward_raise_foreign();
@@ -1052,17 +1096,98 @@ static bool zend_test_forward_scenario(const char *scenario)
 		return result;
 	}
 
+	if (strcmp(scenario, "stale_timer") == 0) {
+		zend_signal_forward_timer_arm(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		zend_signal_forward_timer_disarm();
+		zend_atomic_bool_store(&zend_test_forward_result, false);
+		zend_test_forward_raise_foreign();
+		/* The signal is consumed, and reaches nobody. */
+		return zend_atomic_bool_load(&zend_test_forward_result)
+			&& zend_atomic_int_load(&zend_test_forward_main_hits) == 0;
+	}
+
+	if (strcmp(scenario, "repeated_signals") == 0) {
+		sigset_t block, old;
+		bool result;
+
+		sigemptyset(&block);
+		sigaddset(&block, ZEND_TEST_FORWARD_SIGNAL);
+		pthread_sigmask(SIG_BLOCK, &block, &old);
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		for (int i = 0; i < 100; i++) {
+			zend_test_forward_raise_foreign();
+		}
+		result = zend_test_forward_wait_pending();
+		pthread_sigmask(SIG_SETMASK, &old, NULL);
+		result = zend_test_forward_wait(&zend_test_forward_main_hits) && result;
+		/* Repeated signals coalesce. */
+		return result && zend_atomic_int_load(&zend_test_forward_main_hits) < 100;
+	}
+
+	if (strcmp(scenario, "replaced_handler") == 0) {
+		struct sigaction replacement;
+		sigset_t block, old;
+		bool result;
+
+		sigemptyset(&block);
+		sigaddset(&block, ZEND_TEST_FORWARD_SIGNAL);
+		pthread_sigmask(SIG_BLOCK, &block, &old);
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		zend_test_forward_raise_foreign();
+		result = zend_test_forward_wait_pending();
+
+		memset(&replacement, 0, sizeof(replacement));
+		replacement.sa_handler = zend_test_forward_replacement_handler;
+		sigfillset(&replacement.sa_mask);
+		sigaction(ZEND_TEST_FORWARD_SIGNAL, &replacement, NULL);
+		pthread_sigmask(SIG_SETMASK, &old, NULL);
+
+		return zend_test_forward_wait(&zend_test_forward_replacement_hits) && result
+			&& zend_atomic_int_load(&zend_test_forward_main_hits) == 0;
+	}
+
+	if (strcmp(scenario, "owner_exit_with_pending_signal") == 0) {
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		zend_test_forward_helper_start();
+		zend_test_forward_send(ZEND_TEST_FORWARD_BLOCK);
+		zend_test_forward_send(ZEND_TEST_FORWARD_RECORD);
+		zend_test_forward_raise_foreign();
+		zend_test_forward_send(ZEND_TEST_FORWARD_WAIT_PENDING);
+		zend_test_forward_helper_exit();
+		return zend_test_forward_wait(&zend_test_forward_main_hits);
+	}
+
+	if (strcmp(scenario, "thread_identifier_reuse") == 0) {
+		pthread_t storm;
+
+		zend_atomic_bool_store(&zend_test_forward_stop, false);
+		pthread_create(&storm, NULL, zend_test_forward_storm_main, NULL);
+		for (int i = 0; i < 500; i++) {
+			pthread_t thread;
+
+			pthread_create(&thread, NULL, zend_test_forward_short_lived_main, NULL);
+			pthread_join(thread, NULL);
+		}
+		zend_atomic_bool_store(&zend_test_forward_stop, true);
+		pthread_join(storm, NULL);
+
+		zend_atomic_int_store(&zend_test_forward_main_hits, 0);
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
+		zend_test_forward_raise_foreign();
+		return zend_test_forward_wait(&zend_test_forward_main_hits);
+	}
+
 	if (strcmp(scenario, "fork") == 0) {
 		pid_t pid;
 		int status = 0;
 
-		zend_signal_thread_record(ZEND_TEST_FORWARD_SIGNAL);
+		zend_signal_forward_acquire(ZEND_TEST_FORWARD_SIGNAL, NULL);
 		zend_test_forward_helper_start();
 		zend_test_forward_send(ZEND_TEST_FORWARD_RECORD);
 
 		pid = fork();
 		if (pid == 0) {
-			zend_signal_thread_fork_child();
+			zend_signal_forward_fork_child();
 			zend_atomic_bool_store(&zend_test_forward_helper_set, false);
 			zend_test_forward_raise_foreign();
 			_exit(zend_test_forward_wait(&zend_test_forward_main_hits) ? 0 : 1);
@@ -1090,6 +1215,7 @@ static ZEND_FUNCTION(zend_test_signal_forwarding)
 	zend_test_forward_main = pthread_self();
 	zend_atomic_int_store(&zend_test_forward_main_hits, 0);
 	zend_atomic_int_store(&zend_test_forward_helper_hits, 0);
+	zend_atomic_int_store(&zend_test_forward_replacement_hits, 0);
 
 	memset(&action, 0, sizeof(action));
 	action.sa_handler = zend_test_forward_handler;
@@ -1099,13 +1225,27 @@ static ZEND_FUNCTION(zend_test_signal_forwarding)
 
 	result = zend_test_forward_scenario(ZSTR_VAL(scenario));
 
-	zend_signal_thread_forget(ZEND_TEST_FORWARD_SIGNAL);
+	zend_signal_forward_release(ZEND_TEST_FORWARD_SIGNAL, NULL);
 	sigaction(ZEND_TEST_FORWARD_SIGNAL, &previous, NULL);
 
 	if (EG(exception)) {
 		RETURN_THROWS();
 	}
 	RETURN_BOOL(result);
+}
+
+/* The signal of the execution timer, if it is process-wide. */
+static ZEND_FUNCTION(zend_test_timeout_signal)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+#if defined(ZEND_MAX_EXECUTION_TIMERS) || !defined(HAVE_SETITIMER)
+	RETURN_NULL();
+#elif defined(__CYGWIN__) || defined(__PASE__) || (defined(__aarch64__) && defined(__APPLE__))
+	RETURN_LONG(SIGALRM);
+#else
+	RETURN_LONG(SIGPROF);
+#endif
 }
 #endif
 

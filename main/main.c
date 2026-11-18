@@ -2031,7 +2031,7 @@ void php_request_shutdown(void *dummy)
 	/* 16. Deactivate Zend signals */
 #if defined(ZTS) && !defined(PHP_WIN32)
 	/* User code can no longer run, and this thread may exit after this request. */
-	zend_signal_thread_forget_all();
+	zend_signal_forward_request_shutdown();
 #endif
 #ifdef ZEND_SIGNALS
 	zend_signal_deactivate();

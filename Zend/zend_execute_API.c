@@ -1475,8 +1475,6 @@ static void zend_timeout_handler(int dummy, siginfo_t *si, void *uc) /* {{{ */
 {
 #ifdef ZTS
 	if (!tsrm_is_managed_thread()) {
-		fprintf(stderr, "zend_timeout_handler() called in a thread not managed by PHP. The expected signal handler will not be called. This is probably a bug.\n");
-
 		return;
 	}
 #endif
@@ -1500,10 +1498,13 @@ static void zend_timeout_handler(int dummy) /* {{{ */
 {
 # endif
 #ifdef ZTS
-	if (!tsrm_is_managed_thread()) {
-		/* The timer is process-wide, so its signal may reach a thread that never ran PHP. */
-		zend_signal_thread_forward(dummy);
+	/* The timer is process-wide, so its signal may reach a thread that did not arm it. */
+	if (!tsrm_is_managed_thread() || tsrm_is_shutdown()) {
+		zend_signal_forward(dummy);
 
+		return;
+	}
+	if (!EG(timeout_seconds) && zend_signal_forward(dummy)) {
 		return;
 	}
 #else
@@ -1578,7 +1579,7 @@ VOID CALLBACK tq_timer_cb(PVOID arg, BOOLEAN timed_out)
 #endif
 
 #if defined(ZTS) && !defined(ZEND_WIN32) && !defined(ZEND_MAX_EXECUTION_TIMERS) && defined(HAVE_SETITIMER)
-/* Another handler may have replaced it, such as one installed with pcntl_signal(). */
+/* A handler installed with pcntl_signal(), for example, replaces the timeout handler. */
 static bool zend_timeout_handler_is_installed(int signo)
 {
 # ifdef ZEND_SIGNALS
@@ -1678,6 +1679,10 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 #   else
 			act.sa_flags = SA_ONSTACK | SA_RESETHAND | SA_NODEFER;
 #   endif
+#   ifdef ZTS
+			/* The disposition is process-wide, and another thread handles this signal. */
+			if (!zend_signal_forward_has_handler(signo))
+#   endif
 			sigaction(signo, &act, NULL);
 #  else
 			signal(signo, zend_timeout_handler);
@@ -1689,11 +1694,21 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 		}
 
 # ifdef ZTS
-		/* Without a running timer, a stray signal must not end the request. */
-		if (seconds && zend_timeout_handler_is_installed(signo)) {
-			zend_signal_thread_record_timer(signo);
+		/* The timer is still running while another thread's handler is installed. */
+		if (seconds && (zend_timeout_handler_is_installed(signo) || zend_signal_forward_has_handler(signo))) {
+#  ifdef ZEND_SIGNALS
+			zend_signal_forward_timer_arm(signo, NULL);
+#  else
+			struct sigaction timer_action;
+
+			memset(&timer_action, 0, sizeof(timer_action));
+			timer_action.sa_handler = zend_timeout_handler;
+			sigemptyset(&timer_action.sa_mask);
+			timer_action.sa_flags = SA_ONSTACK | SA_NODEFER;
+			zend_signal_forward_timer_arm(signo, &timer_action);
+#  endif
 		} else {
-			zend_signal_thread_forget_timer(signo);
+			zend_signal_forward_timer_disarm();
 		}
 # endif
 	}
@@ -1734,16 +1749,13 @@ void zend_unset_timeout(void) /* {{{ */
 
 # if defined(__CYGWIN__) || defined(__PASE__) || (defined(__aarch64__) && defined(__APPLE__))
 		setitimer(ITIMER_REAL, &no_timeout, NULL);
-#  ifdef ZTS
-		zend_signal_thread_forget_timer(SIGALRM);
-#  endif
 # else
 		setitimer(ITIMER_PROF, &no_timeout, NULL);
-#  ifdef ZTS
-		zend_signal_thread_forget_timer(SIGPROF);
-#  endif
 # endif
 	}
+# ifdef ZTS
+	zend_signal_forward_timer_disarm();
+# endif
 #endif
 	zend_atomic_bool_store_ex(&EG(timed_out), false);
 }

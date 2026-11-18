@@ -191,21 +191,17 @@ static zend_always_inline void pcntl_signal_set_handled(int signo, bool handled)
 	}
 }
 
-/* The disposition of a signal is process-wide, so it stays as it is while another
- * thread handles the signal. */
-static bool pcntl_signal_release(int signo, Sigfunc *func, int restart)
+static int pcntl_signal_restore(int signo, Sigfunc *func, int restart)
 {
-	bool success = true;
+	struct sigaction act;
+	int result;
 
-	zend_signal_thread_lock();
+	php_signal_action(&act, func, restart, 0);
+	/* A signal already forwarded to this thread is still handled during the release. */
+	result = zend_signal_forward_release(signo, &act);
 	pcntl_signal_set_handled(signo, false);
-	zend_signal_thread_forget(signo);
-	if (!zend_signal_thread_is_registered(signo)) {
-		success = php_signal(signo, func, restart) != (void *)SIG_ERR;
-	}
-	zend_signal_thread_unlock();
 
-	return success;
+	return result;
 }
 #endif
 
@@ -270,7 +266,7 @@ PHP_RSHUTDOWN_FUNCTION(pcntl)
 	ZEND_HASH_FOREACH_NUM_KEY_VAL(&PCNTL_G(php_signal_table), signo, handle) {
 		if (Z_TYPE_P(handle) != IS_LONG || Z_LVAL_P(handle) != (zend_long)SIG_DFL) {
 #if defined(ZTS) && !defined(ZEND_SIGNALS)
-			pcntl_signal_release((int) signo, (Sigfunc *)(zend_long)SIG_DFL, 0);
+			pcntl_signal_restore((int) signo, (Sigfunc *)(zend_long)SIG_DFL, 0);
 #else
 			php_signal(signo, (Sigfunc *)(zend_long)SIG_DFL, 0);
 #endif
@@ -332,7 +328,7 @@ PHP_FUNCTION(pcntl_fork)
 		}
 	} else if (id == 0) {
 #if defined(ZTS)
-		zend_signal_thread_fork_child();
+		zend_signal_forward_fork_child();
 #endif
 		zend_max_execution_timer_init();
 		php_clear_stat_cache(true, NULL, 0);
@@ -841,7 +837,7 @@ PHP_FUNCTION(pcntl_signal)
 	/* Special long value case for SIG_DFL and SIG_IGN */
 	if (Z_TYPE_P(handle) == IS_LONG) {
 #if defined(ZTS) && !defined(ZEND_SIGNALS)
-		if (!pcntl_signal_release((int) signo, (Sigfunc *) Z_LVAL_P(handle), (int) restart_syscalls)) {
+		if (pcntl_signal_restore((int) signo, (Sigfunc *) Z_LVAL_P(handle), (int) restart_syscalls) != 0) {
 #else
 		if (php_signal(signo, (Sigfunc *) Z_LVAL_P(handle), (int) restart_syscalls) == (void *)SIG_ERR) {
 #endif
@@ -853,31 +849,31 @@ PHP_FUNCTION(pcntl_signal)
 		RETURN_TRUE;
 	}
 
-#ifdef ZTS
-	/* Before the handler is installed, so that no signal finds it without a thread to go to.
-	 * With zend signals, installing it can bail out, so the lock is not held around it. */
-# ifndef ZEND_SIGNALS
-	zend_signal_thread_lock();
-	pcntl_signal_set_handled((int) signo, true);
-# endif
-	zend_signal_thread_record((int) signo);
-#endif
-
 	/* Register with the OS first so that on failure we don't record a handler that was never installed */
-	if (php_signal4(signo, pcntl_signal_handler, (int) restart_syscalls, 1) == (void *)SIG_ERR) {
+#if defined(ZTS) && !defined(ZEND_SIGNALS)
+	struct sigaction act;
+
+	php_signal_action(&act, pcntl_signal_handler, (int) restart_syscalls, 1);
+	pcntl_signal_set_handled((int) signo, true);
+	if (zend_signal_forward_acquire((int) signo, &act) != 0) {
 		PCNTL_G(last_error) = errno;
-#ifdef ZTS
-		zend_signal_thread_forget((int) signo);
-# ifndef ZEND_SIGNALS
 		pcntl_signal_set_handled((int) signo, false);
-		zend_signal_thread_unlock();
-# endif
-#endif
 		php_error_docref(NULL, E_WARNING, "Error assigning signal");
 		RETURN_FALSE;
 	}
-#if defined(ZTS) && !defined(ZEND_SIGNALS)
-	zend_signal_thread_unlock();
+#else
+# ifdef ZTS
+	/* Before the handler is installed, so that no signal finds it without a thread to go to */
+	zend_signal_forward_acquire((int) signo, NULL);
+# endif
+	if (php_signal4(signo, pcntl_signal_handler, (int) restart_syscalls, 1) == (void *)SIG_ERR) {
+		PCNTL_G(last_error) = errno;
+# ifdef ZTS
+		zend_signal_forward_release((int) signo, NULL);
+# endif
+		php_error_docref(NULL, E_WARNING, "Error assigning signal");
+		RETURN_FALSE;
+	}
 #endif
 
 	/* Add the function name to our signal table */
@@ -1367,12 +1363,7 @@ static void pcntl_signal_handler(int signo)
 	 * The signal may also reach a PHP thread when another one handles it. */
 	if (!tsrm_is_managed_thread()
 	 || (signo < NSIG && !zend_atomic_bool_load_ex(&PCNTL_G(handled_signals)[signo-1]))) {
-		if (zend_signal_is_fault(signo)) {
-			signal(signo, SIG_DFL);
-			raise(signo);
-		} else {
-			zend_signal_thread_forward(signo);
-		}
+		zend_signal_forward_or_default(signo);
 		return;
 	}
 #endif
@@ -1663,7 +1654,7 @@ PHP_FUNCTION(pcntl_rfork)
 		}
 	} else if (pid == 0) {
 #if defined(ZTS)
-		zend_signal_thread_fork_child();
+		zend_signal_forward_fork_child();
 #endif
 		zend_max_execution_timer_init();
 		php_clear_stat_cache(true, NULL, 0);
@@ -1712,7 +1703,7 @@ PHP_FUNCTION(pcntl_forkx)
 		}
 	} else if (pid == 0) {
 #if defined(ZTS)
-		zend_signal_thread_fork_child();
+		zend_signal_forward_fork_child();
 #endif
 		zend_max_execution_timer_init();
 		php_clear_stat_cache(true, NULL, 0);

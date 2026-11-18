@@ -311,6 +311,8 @@ namespace {
     function zend_test_raise_on_foreign_thread(int $signal): void {}
 
     function zend_test_signal_forwarding(string $scenario): bool {}
+
+    function zend_test_timeout_signal(): ?int {}
 #endif
 
     function zend_test_fill_packed_array(array &$array): void {}

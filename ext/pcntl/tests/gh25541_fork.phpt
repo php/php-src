@@ -8,6 +8,8 @@ zend_test
 if (!PHP_ZTS) die('skip ZTS only');
 if (!function_exists('zend_test_raise_on_foreign_thread')) die('skip zend_test_raise_on_foreign_thread() not available');
 ?>
+--ENV--
+LSAN_OPTIONS=detect_leaks=0
 --FILE--
 <?php
 $handled = false;

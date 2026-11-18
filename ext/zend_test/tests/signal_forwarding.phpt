@@ -17,8 +17,13 @@ $scenarios = [
     'last_owner_exit',
     'thread_without_handler',
     'concurrent_registration',
-    'timer_keeps_no_disposition',
+    'timer_owner',
     'handler_outranks_timer',
+    'stale_timer',
+    'repeated_signals',
+    'replaced_handler',
+    'owner_exit_with_pending_signal',
+    'thread_identifier_reuse',
     'fork',
 ];
 foreach ($scenarios as $scenario) {
@@ -34,6 +39,11 @@ owner_exit: bool(true)
 last_owner_exit: bool(true)
 thread_without_handler: bool(true)
 concurrent_registration: bool(true)
-timer_keeps_no_disposition: bool(true)
+timer_owner: bool(true)
 handler_outranks_timer: bool(true)
+stale_timer: bool(true)
+repeated_signals: bool(true)
+replaced_handler: bool(true)
+owner_exit_with_pending_signal: bool(true)
+thread_identifier_reuse: bool(true)
 fork: bool(true)

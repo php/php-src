@@ -21,34 +21,7 @@
 #ifndef ZEND_SIGNAL_H
 #define ZEND_SIGNAL_H
 
-#if defined(ZTS) && !defined(ZEND_WIN32)
-# include "zend_portability.h"
-
-BEGIN_EXTERN_C()
-/* A process-directed signal may be delivered to a thread that never ran PHP.
- * These record which threads handle a signal, so that it can be forwarded. */
-void zend_signal_thread_startup(void);
-void zend_signal_thread_shutdown(void);
-ZEND_API bool zend_signal_is_fault(int signo);
-/* Keep a change of the signal disposition consistent with the registrations. */
-ZEND_API void zend_signal_thread_lock(void);
-ZEND_API void zend_signal_thread_unlock(void);
-ZEND_API void zend_signal_thread_record(int signo);
-ZEND_API void zend_signal_thread_forget(int signo);
-ZEND_API void zend_signal_thread_forget_all(void);
-/* The execution timer is process-wide. Unlike a handler, it does not keep a signal
- * disposition in place for other threads. */
-ZEND_API void zend_signal_thread_record_timer(int signo);
-ZEND_API void zend_signal_thread_forget_timer(int signo);
-/* Whether any thread has a handler for this signal. */
-ZEND_API bool zend_signal_thread_is_registered(int signo);
-/* To call in the child of a fork(), where only the calling thread exists. */
-ZEND_API void zend_signal_thread_fork_child(void);
-/* Async-signal-safe. Returns whether the signal was handed over for forwarding. If the
- * owner leaves first, the signal is sent to the process again and takes its current action. */
-ZEND_API bool zend_signal_thread_forward(int signo);
-END_EXTERN_C()
-#endif
+#include "zend_signal_forward.h"
 
 #ifdef ZEND_SIGNALS
 
