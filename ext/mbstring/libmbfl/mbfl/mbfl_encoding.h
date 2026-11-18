@@ -168,6 +168,8 @@ static inline zend_result mb_convert_buf_ensure(mb_convert_buf *buf, unsigned ch
 	if ((size_t)(*limit - *out) < needed) {
 		size_t oldsize = *limit - (unsigned char*)ZSTR_VAL((buf)->str);
 		size_t growth = MAX(oldsize >> 1, needed);
+		/* Save offset before realloc, which may move the buffer, subtracting invalidated pointers afterwards is UB */
+		size_t out_offset = *out - (unsigned char*)ZSTR_VAL((buf)->str);
 		zend_string *newstr = safe_ferealloc((buf)->str, 1, oldsize, zend_string_safe_offset(1, oldsize, growth), /* fallible */ true);
 		if (!newstr) {
 			/* An earlier growth may have moved the buffer. */
@@ -177,7 +179,7 @@ static inline zend_result mb_convert_buf_ensure(mb_convert_buf *buf, unsigned ch
 		}
 		/* GCC can't see that allocation fails if growth is too large, so make it explicit. */
 		ZEND_ASSERT(growth <= ZSTR_MAX_LEN);
-		*out = (unsigned char*)ZSTR_VAL(newstr) + (*out - (unsigned char*)ZSTR_VAL((buf)->str));
+		*out = (unsigned char*)ZSTR_VAL(newstr) + out_offset;
 		*limit = (unsigned char*)ZSTR_VAL(newstr) + oldsize + growth;
 		(buf)->str = newstr;
 	}
