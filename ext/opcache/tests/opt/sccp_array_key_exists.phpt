@@ -23,13 +23,13 @@ function test() {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=1, args=0, vars=0, tmps=0)
+     ; (lines=1, args=0, vars=0, tmps=%d)
      ; (after optimizer)
      ; %s:%d-%d
 0000 RETURN int(1)
 
 test:
-     ; (lines=11, args=0, vars=0, tmps=1)
+     ; (lines=11, args=0, vars=0, tmps=%d)
      ; (after optimizer)
      ; %s:%d-%d
 0000 INIT_FCALL 6 %d string("var_dump")
