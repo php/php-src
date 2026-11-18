@@ -21,6 +21,25 @@
 #ifndef ZEND_SIGNAL_H
 #define ZEND_SIGNAL_H
 
+#if defined(ZTS) && !defined(ZEND_WIN32)
+# include "zend_portability.h"
+
+BEGIN_EXTERN_C()
+/* A process-directed signal may be delivered to a thread that never ran PHP.
+ * These record which thread installed the handler for a signal, so that such a
+ * thread can forward the signal to it. */
+ZEND_API bool zend_signal_is_fault(int signo);
+ZEND_API void zend_signal_thread_record(int signo);
+ZEND_API void zend_signal_thread_forget(int signo);
+ZEND_API void zend_signal_thread_forget_all(void);
+/* To call in the child of a fork(), where only the calling thread exists. */
+ZEND_API void zend_signal_thread_fork_child(void);
+/* To call from a signal handler only: it blocks signals until the handler returns.
+ * Returns whether the signal was sent to the recorded thread. */
+ZEND_API bool zend_signal_thread_forward(int signo);
+END_EXTERN_C()
+#endif
+
 #ifdef ZEND_SIGNALS
 
 #include <signal.h>

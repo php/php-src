@@ -7,6 +7,7 @@ zend_test
 <?php
 if (!PHP_ZTS) die('skip ZTS only');
 if (!function_exists('zend_test_raise_on_foreign_thread')) die('skip zend_test_raise_on_foreign_thread() not available');
+if (getenv('SKIP_ASAN')) die('skip sanitizers handle faults themselves');
 ?>
 --FILE--
 <?php

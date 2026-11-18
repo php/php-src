@@ -2029,6 +2029,10 @@ void php_request_shutdown(void *dummy)
 	zend_set_memory_limit(PG(memory_limit));
 
 	/* 16. Deactivate Zend signals */
+#if defined(ZTS) && !defined(PHP_WIN32)
+	/* User code can no longer run, and this thread may exit after this request. */
+	zend_signal_thread_forget_all();
+#endif
 #ifdef ZEND_SIGNALS
 	zend_signal_deactivate();
 #endif
