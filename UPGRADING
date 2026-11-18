@@ -32,6 +32,12 @@ PHP 8.7 UPGRADE NOTES
     curl_setopt() return false, instead of being silently interpreted as a
     combination of redirect types.
 
+- DOM:
+  . Dom\import_simplexml() now throws a TypeError when the node already has a
+    legacy DOMNode object attached and its document is not yet locked to a
+    model. Previously it returned that legacy object, which violated the
+    Attr|Element return type.
+
 - PDO:
   . PDOStatement::bindColumn() now throws a ValueError when the column name is
     not present in the result set. It previously reported the condition
