@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 84b5600c974d901618c660cedb2a0df2f854e618 */
+ * Stub hash: 304ef5576769ae650887be38d061f601347de317 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -158,6 +158,10 @@ ZEND_END_ARG_INFO()
 #if defined(ZTS) && !defined(PHP_WIN32)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_raise_on_foreign_thread, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, signal, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_signal_forwarding, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, scenario, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
@@ -344,6 +348,7 @@ static ZEND_FUNCTION(zend_test_crash);
 static ZEND_FUNCTION(zend_test_raise_and_throw);
 #if defined(ZTS) && !defined(PHP_WIN32)
 static ZEND_FUNCTION(zend_test_raise_on_foreign_thread);
+static ZEND_FUNCTION(zend_test_signal_forwarding);
 #endif
 static ZEND_FUNCTION(zend_test_fill_packed_array);
 static ZEND_FUNCTION(zend_test_create_throwing_resource);
@@ -463,6 +468,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_raise_and_throw, arginfo_zend_test_raise_and_throw)
 #if defined(ZTS) && !defined(PHP_WIN32)
 	ZEND_FE(zend_test_raise_on_foreign_thread, arginfo_zend_test_raise_on_foreign_thread)
+	ZEND_FE(zend_test_signal_forwarding, arginfo_zend_test_signal_forwarding)
 #endif
 	ZEND_FE(zend_test_fill_packed_array, arginfo_zend_test_fill_packed_array)
 	ZEND_FE(zend_test_create_throwing_resource, arginfo_zend_test_create_throwing_resource)

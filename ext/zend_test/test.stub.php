@@ -309,6 +309,8 @@ namespace {
 
 #if defined(ZTS) && !defined(PHP_WIN32)
     function zend_test_raise_on_foreign_thread(int $signal): void {}
+
+    function zend_test_signal_forwarding(string $scenario): bool {}
 #endif
 
     function zend_test_fill_packed_array(array &$array): void {}

@@ -43,6 +43,7 @@
 #include <signal.h>
 #if defined(ZTS) && !defined(PHP_WIN32)
 # include <pthread.h>
+# include <sys/wait.h>
 #endif
 
 // `php.h` sets `NDEBUG` when not `PHP_DEBUG` which will make `assert()` from
@@ -809,6 +810,274 @@ static ZEND_FUNCTION(zend_test_raise_on_foreign_thread)
 		RETURN_THROWS();
 	}
 	pthread_join(thread, NULL);
+}
+
+/* Drives the record of which threads handle a signal, without running PHP code
+ * on the other threads. */
+#define ZEND_TEST_FORWARD_SIGNAL SIGUSR2
+#define ZEND_TEST_FORWARD_WORKERS 4
+
+enum {
+	ZEND_TEST_FORWARD_IDLE,
+	ZEND_TEST_FORWARD_RECORD,
+	ZEND_TEST_FORWARD_FORGET,
+	ZEND_TEST_FORWARD_RAISE,
+	ZEND_TEST_FORWARD_EXIT
+};
+
+static pthread_t zend_test_forward_main;
+static pthread_t zend_test_forward_helper;
+static zend_atomic_bool zend_test_forward_helper_set;
+static zend_atomic_bool zend_test_forward_helper_registered;
+static zend_atomic_int zend_test_forward_main_hits;
+static zend_atomic_int zend_test_forward_helper_hits;
+static zend_atomic_int zend_test_forward_command;
+static zend_atomic_bool zend_test_forward_stop;
+
+static void zend_test_forward_handler(int signo)
+{
+	pthread_t self = pthread_self();
+
+	if (pthread_equal(self, zend_test_forward_main)) {
+		zend_atomic_int_store(&zend_test_forward_main_hits, zend_atomic_int_load(&zend_test_forward_main_hits) + 1);
+	} else if (zend_atomic_bool_load(&zend_test_forward_helper_set) && pthread_equal(self, zend_test_forward_helper)
+	 && zend_atomic_bool_load(&zend_test_forward_helper_registered)) {
+		zend_atomic_int_store(&zend_test_forward_helper_hits, zend_atomic_int_load(&zend_test_forward_helper_hits) + 1);
+	} else {
+		zend_signal_thread_forward(signo);
+	}
+}
+
+static void *zend_test_forward_helper_main(void *arg)
+{
+	while (1) {
+		int command = zend_atomic_int_load(&zend_test_forward_command);
+
+		if (command == ZEND_TEST_FORWARD_IDLE) {
+			usleep(100);
+			continue;
+		}
+		if (command == ZEND_TEST_FORWARD_EXIT) {
+			return NULL;
+		}
+		if (command == ZEND_TEST_FORWARD_RECORD) {
+			zend_atomic_bool_store(&zend_test_forward_helper_registered, true);
+			zend_signal_thread_record(ZEND_TEST_FORWARD_SIGNAL);
+		} else if (command == ZEND_TEST_FORWARD_FORGET) {
+			zend_atomic_bool_store(&zend_test_forward_helper_registered, false);
+			zend_signal_thread_forget(ZEND_TEST_FORWARD_SIGNAL);
+		} else if (command == ZEND_TEST_FORWARD_RAISE) {
+			raise(ZEND_TEST_FORWARD_SIGNAL);
+		}
+		zend_atomic_int_store(&zend_test_forward_command, ZEND_TEST_FORWARD_IDLE);
+	}
+}
+
+static void zend_test_forward_send(int command)
+{
+	zend_atomic_int_store(&zend_test_forward_command, command);
+	while (zend_atomic_int_load(&zend_test_forward_command) != ZEND_TEST_FORWARD_IDLE) {
+		usleep(100);
+	}
+}
+
+static void zend_test_forward_helper_start(void)
+{
+	zend_atomic_int_store(&zend_test_forward_command, ZEND_TEST_FORWARD_IDLE);
+	pthread_create(&zend_test_forward_helper, NULL, zend_test_forward_helper_main, NULL);
+	zend_atomic_bool_store(&zend_test_forward_helper_set, true);
+}
+
+/* Returns once the thread has exited, which removes its record. */
+static void zend_test_forward_helper_exit(void)
+{
+	zend_atomic_int_store(&zend_test_forward_command, ZEND_TEST_FORWARD_EXIT);
+	pthread_join(zend_test_forward_helper, NULL);
+	zend_atomic_bool_store(&zend_test_forward_helper_set, false);
+	zend_atomic_bool_store(&zend_test_forward_helper_registered, false);
+}
+
+static void *zend_test_forward_raise_main(void *arg)
+{
+	raise(ZEND_TEST_FORWARD_SIGNAL);
+	return NULL;
+}
+
+static void zend_test_forward_raise_foreign(void)
+{
+	pthread_t thread;
+
+	pthread_create(&thread, NULL, zend_test_forward_raise_main, NULL);
+	pthread_join(thread, NULL);
+}
+
+static bool zend_test_forward_wait(zend_atomic_int *hits)
+{
+	for (int i = 0; i < 2000; i++) {
+		if (zend_atomic_int_load(hits) > 0) {
+			return true;
+		}
+		usleep(1000);
+	}
+	return false;
+}
+
+static void *zend_test_forward_worker_main(void *arg)
+{
+	for (int i = 0; i < 2000; i++) {
+		zend_signal_thread_record(ZEND_TEST_FORWARD_SIGNAL);
+		zend_signal_thread_forget(ZEND_TEST_FORWARD_SIGNAL);
+	}
+	return NULL;
+}
+
+static void *zend_test_forward_storm_main(void *arg)
+{
+	while (!zend_atomic_bool_load(&zend_test_forward_stop)) {
+		raise(ZEND_TEST_FORWARD_SIGNAL);
+		usleep(50);
+	}
+	return NULL;
+}
+
+static bool zend_test_forward_scenario(const char *scenario)
+{
+	if (strcmp(scenario, "unmanaged") == 0) {
+		zend_signal_thread_record(ZEND_TEST_FORWARD_SIGNAL);
+		zend_test_forward_raise_foreign();
+		return zend_test_forward_wait(&zend_test_forward_main_hits);
+	}
+
+	if (strcmp(scenario, "successor") == 0) {
+		bool result;
+
+		zend_signal_thread_record(ZEND_TEST_FORWARD_SIGNAL);
+		zend_test_forward_helper_start();
+		zend_test_forward_send(ZEND_TEST_FORWARD_RECORD);
+		zend_test_forward_send(ZEND_TEST_FORWARD_FORGET);
+		zend_test_forward_raise_foreign();
+		result = zend_test_forward_wait(&zend_test_forward_main_hits);
+		zend_test_forward_helper_exit();
+		return result;
+	}
+
+	if (strcmp(scenario, "most_recent_owner") == 0) {
+		bool result;
+
+		zend_signal_thread_record(ZEND_TEST_FORWARD_SIGNAL);
+		zend_test_forward_helper_start();
+		zend_test_forward_send(ZEND_TEST_FORWARD_RECORD);
+		zend_test_forward_raise_foreign();
+		result = zend_test_forward_wait(&zend_test_forward_helper_hits)
+			&& zend_atomic_int_load(&zend_test_forward_main_hits) == 0;
+		zend_test_forward_helper_exit();
+		return result;
+	}
+
+	if (strcmp(scenario, "owner_exit") == 0) {
+		zend_signal_thread_record(ZEND_TEST_FORWARD_SIGNAL);
+		zend_test_forward_helper_start();
+		zend_test_forward_send(ZEND_TEST_FORWARD_RECORD);
+		zend_test_forward_helper_exit();
+		zend_test_forward_raise_foreign();
+		return zend_test_forward_wait(&zend_test_forward_main_hits);
+	}
+
+	if (strcmp(scenario, "last_owner_exit") == 0) {
+		zend_test_forward_helper_start();
+		zend_test_forward_send(ZEND_TEST_FORWARD_RECORD);
+		zend_test_forward_helper_exit();
+		zend_test_forward_raise_foreign();
+		usleep(50000);
+		return zend_atomic_int_load(&zend_test_forward_main_hits) == 0
+			&& zend_atomic_int_load(&zend_test_forward_helper_hits) == 0;
+	}
+
+	if (strcmp(scenario, "thread_without_handler") == 0) {
+		bool result;
+
+		zend_signal_thread_record(ZEND_TEST_FORWARD_SIGNAL);
+		zend_test_forward_helper_start();
+		zend_test_forward_send(ZEND_TEST_FORWARD_RAISE);
+		result = zend_test_forward_wait(&zend_test_forward_main_hits);
+		zend_test_forward_helper_exit();
+		return result;
+	}
+
+	if (strcmp(scenario, "concurrent_registration") == 0) {
+		pthread_t workers[ZEND_TEST_FORWARD_WORKERS], storm;
+
+		zend_atomic_bool_store(&zend_test_forward_stop, false);
+		pthread_create(&storm, NULL, zend_test_forward_storm_main, NULL);
+		for (int i = 0; i < ZEND_TEST_FORWARD_WORKERS; i++) {
+			pthread_create(&workers[i], NULL, zend_test_forward_worker_main, NULL);
+		}
+		for (int i = 0; i < ZEND_TEST_FORWARD_WORKERS; i++) {
+			pthread_join(workers[i], NULL);
+		}
+		zend_atomic_bool_store(&zend_test_forward_stop, true);
+		pthread_join(storm, NULL);
+
+		zend_atomic_int_store(&zend_test_forward_main_hits, 0);
+		zend_signal_thread_record(ZEND_TEST_FORWARD_SIGNAL);
+		zend_test_forward_raise_foreign();
+		return zend_test_forward_wait(&zend_test_forward_main_hits);
+	}
+
+	if (strcmp(scenario, "fork") == 0) {
+		pid_t pid;
+		int status = 0;
+
+		zend_signal_thread_record(ZEND_TEST_FORWARD_SIGNAL);
+		zend_test_forward_helper_start();
+		zend_test_forward_send(ZEND_TEST_FORWARD_RECORD);
+
+		pid = fork();
+		if (pid == 0) {
+			zend_signal_thread_fork_child();
+			zend_atomic_bool_store(&zend_test_forward_helper_set, false);
+			zend_test_forward_raise_foreign();
+			_exit(zend_test_forward_wait(&zend_test_forward_main_hits) ? 0 : 1);
+		}
+
+		waitpid(pid, &status, 0);
+		zend_test_forward_helper_exit();
+		return pid > 0 && WIFEXITED(status) && WEXITSTATUS(status) == 0;
+	}
+
+	zend_throw_error(NULL, "Unknown scenario");
+	return false;
+}
+
+static ZEND_FUNCTION(zend_test_signal_forwarding)
+{
+	zend_string *scenario;
+	struct sigaction action, previous;
+	bool result;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(scenario)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_test_forward_main = pthread_self();
+	zend_atomic_int_store(&zend_test_forward_main_hits, 0);
+	zend_atomic_int_store(&zend_test_forward_helper_hits, 0);
+
+	memset(&action, 0, sizeof(action));
+	action.sa_handler = zend_test_forward_handler;
+	action.sa_flags = SA_RESTART;
+	sigfillset(&action.sa_mask);
+	sigaction(ZEND_TEST_FORWARD_SIGNAL, &action, &previous);
+
+	result = zend_test_forward_scenario(ZSTR_VAL(scenario));
+
+	zend_signal_thread_forget(ZEND_TEST_FORWARD_SIGNAL);
+	sigaction(ZEND_TEST_FORWARD_SIGNAL, &previous, NULL);
+
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
+	RETURN_BOOL(result);
 }
 #endif
 
