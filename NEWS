@@ -104,6 +104,10 @@ PHP                                                                        NEWS
   . Fixed \C being allowed in patterns enabling UTF mode with (*UTF) instead
     of the u modifier. (Jorg Sowa)
 
+- PDO_PGSQL:
+  . Fixed memory leaks when Pdo\Pgsql::setNoticeCallback() callbacks reference
+    their own nonpersistent connection. (Ilia Alshanetsky)
+
 - POSIX:
   . Fixed bug GH-25530 (posix_get_last_error() returns an error from a
     previous request). (Artem Ukrainskiy)
