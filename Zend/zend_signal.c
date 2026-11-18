@@ -447,6 +447,11 @@ void zend_signal_init(void) /* {{{ */
 	memset(&global_orig_handlers, 0, sizeof(global_orig_handlers));
 	for (signo = 1; signo < NSIG; ++signo) {
 		if (sigaction(signo, NULL, &sa) == 0) {
+			/* Left installed by an earlier startup in this process. Keeping it
+			 * as the original handler would make it call itself. */
+			if ((sa.sa_flags & SA_SIGINFO) && sa.sa_sigaction == zend_signal_handler_defer) {
+				continue;
+			}
 			global_orig_handlers[signo-1].flags = sa.sa_flags;
 			if (sa.sa_flags & SA_SIGINFO) {
 				global_orig_handlers[signo-1].handler = (void *) sa.sa_sigaction;
