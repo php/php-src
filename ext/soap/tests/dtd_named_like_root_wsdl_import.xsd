@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE schema [<!NOTATION n SYSTEM "x">]>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+        targetNamespace="urn:imported">
+  <complexType name="Imported">
+    <sequence>
+      <element name="a" type="string"/>
+    </sequence>
+  </complexType>
+</schema>

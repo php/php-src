@@ -276,6 +276,10 @@ int attr_is_equal_ex(xmlAttrPtr node, char *name, char *ns)
 
 int node_is_equal_ex(xmlNodePtr node, char *name, char *ns)
 {
+	/* A DTD node can carry the same name but is not an xmlNode. */
+	if (node->type != XML_ELEMENT_NODE) {
+		return FALSE;
+	}
 	if (name == NULL || ((node->name) && strcmp((char*)node->name, name) == 0)) {
 		if (ns) {
 			xmlNsPtr nsPtr = node_find_ns(node);
@@ -339,6 +343,9 @@ xmlNodePtr get_node_with_attribute_ex(xmlNodePtr node, char *name, char *name_ns
 			if (node==NULL) {
 				return NULL;
 			}
+		} else if (node->type != XML_ELEMENT_NODE) {
+			node = node->next;
+			continue;
 		}
 
 		attr = get_attribute_ex(node->properties, attribute, attr_ns);

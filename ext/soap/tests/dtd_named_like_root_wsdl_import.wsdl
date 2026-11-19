@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:im="urn:imported"
+             xmlns:tns="urn:test"
+             targetNamespace="urn:test"
+             name="Test">
+  <import namespace="urn:imported" location="dtd_named_like_root_wsdl_import.xsd"/>
+  <message name="echoRequest"><part name="p" type="im:Imported"/></message>
+  <message name="echoResponse"><part name="r" type="im:Imported"/></message>
+  <portType name="TestPort">
+    <operation name="echo">
+      <input message="tns:echoRequest"/>
+      <output message="tns:echoResponse"/>
+    </operation>
+  </portType>
+  <binding name="TestBinding" type="tns:TestPort">
+    <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="echo">
+      <soap:operation soapAction="urn:test#echo"/>
+      <input><soap:body use="encoded" namespace="urn:test" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/></input>
+      <output><soap:body use="encoded" namespace="urn:test" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/></output>
+    </operation>
+  </binding>
+  <service name="TestService">
+    <port name="TestPort" binding="tns:TestBinding">
+      <soap:address location="http://localhost/test"/>
+    </port>
+  </service>
+</definitions>

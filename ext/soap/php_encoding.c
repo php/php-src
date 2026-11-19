@@ -609,8 +609,12 @@ xmlNodePtr to_xml_user(encodeTypePtr type, zval *data, int style, xmlNodePtr par
 		}
 		if (Z_TYPE(return_value) == IS_STRING) {
 			xmlDocPtr doc = soap_xmlParseMemory(Z_STRVAL(return_value), Z_STRLEN(return_value));
-			if (doc && doc->children) {
-				ret = xmlDocCopyNode(doc->children, parent->doc, 1);
+			if (doc) {
+				/* Skip a DOCTYPE or processing instruction before the root. */
+				xmlNodePtr root = xmlDocGetRootElement(doc);
+				if (root) {
+					ret = xmlDocCopyNode(root, parent->doc, 1);
+				}
 			}
 			xmlFreeDoc(doc);
 		}
