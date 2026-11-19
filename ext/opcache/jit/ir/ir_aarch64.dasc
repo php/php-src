@@ -9427,6 +9427,10 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 	ir_ref igoto_dup_ref = IR_UNUSED;
 	uint32_t igoto_dup_block = 0;
 
+	if (ctx->status) {
+		return NULL;
+	}
+
 	memset(&data, 0, sizeof(data));
 	data.ra_data.cc = ir_get_call_conv_dsc(ctx->flags);
 	ctx->data = &data;

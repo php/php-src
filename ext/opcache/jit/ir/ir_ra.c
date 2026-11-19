@@ -3955,13 +3955,325 @@ static bool ir_ival_spill_for_fuse_load(ir_ctx *ctx, ir_live_interval *ival)
 	return 0;
 }
 
+typedef struct _ir_frame_write {
+	int32_t offset;
+	int32_t size;
+	ir_ref  ref;
+} ir_frame_write;
+
+#define IR_FRAME_WRITE_ANY INT32_MIN
+
+static int ir_frame_write_cmp(const void *a, const void *b)
+{
+	const ir_frame_write *w1 = a;
+	const ir_frame_write *w2 = b;
+
+	if (w1->offset != w2->offset) {
+		return w1->offset < w2->offset ? -1 : 1;
+	}
+	return w1->ref < w2->ref ? -1 : (w1->ref > w2->ref);
+}
+
+static ir_bitset ir_frame_derived_set(const ir_ctx *ctx)
+{
+	ir_bitset derived = ir_bitset_malloc(ctx->insns_count);
+	ir_list worklist;
+	ir_ref i, n, *p;
+	const ir_insn *insn;
+
+	ir_list_init(&worklist, 16);
+	for (i = 1, insn = ctx->ir_base + 1; i < ctx->insns_count;) {
+		if (insn->op == IR_RLOAD && insn->op2 == ctx->spill_base) {
+			ir_bitset_incl(derived, i);
+			ir_list_push(&worklist, i);
+		}
+		n = ir_insn_len(insn);
+		i += n;
+		insn += n;
+	}
+	while (ir_list_len(&worklist)) {
+		ir_ref ref = ir_list_pop(&worklist);
+		const ir_use_list *use_list = &ctx->use_lists[ref];
+
+		for (n = use_list->count, p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
+			ir_ref use = *p;
+
+			if (ir_bitset_in(derived, use)) {
+				continue;
+			}
+			insn = &ctx->ir_base[use];
+			if (((insn->op == IR_SUB || insn->op == IR_COPY || insn->op == IR_BITCAST) && insn->op1 == ref)
+			 || insn->op == IR_ADD
+			 || (insn->op == IR_COND && insn->op1 != ref)
+			 || (insn->op == IR_PHI && insn->op1 != ref)) {
+				ir_bitset_incl(derived, use);
+				ir_list_push(&worklist, use);
+			}
+		}
+	}
+	ir_list_free(&worklist);
+	return derived;
+}
+
+static bool ir_frame_derived(ir_bitset derived, ir_ref ref)
+{
+	return ref > 0 && ir_bitset_in(derived, ref);
+}
+
+static bool ir_frame_slot_address(const ir_ctx *ctx, ir_ref addr, int32_t *offset)
+{
+	const ir_insn *insn;
+
+	if (addr <= 0) {
+		return 0;
+	}
+	insn = &ctx->ir_base[addr];
+	*offset = 0;
+	if (insn->op == IR_ADD && IR_IS_CONST_REF(insn->op2) && insn->op1 > 0) {
+		const ir_insn *val = &ctx->ir_base[insn->op2];
+
+		if (IR_IS_SYM_CONST(val->op) || val->val.i64 <= 0 || val->val.i64 > INT32_MAX) {
+			return 0;
+		}
+		*offset = (int32_t)val->val.i64;
+		insn = &ctx->ir_base[insn->op1];
+	}
+	return insn->op == IR_RLOAD && insn->op2 == ctx->spill_base;
+}
+
+static void ir_frame_write_add(ir_frame_write **writes, uint32_t *count, uint32_t *size,
+                               int32_t offset, int32_t len, ir_ref ref)
+{
+	if (*count == *size) {
+		*size = *size ? *size * 2 : 16;
+		*writes = ir_mem_realloc(*writes, *size * sizeof(ir_frame_write));
+	}
+	(*writes)[*count].offset = offset;
+	(*writes)[*count].size = len;
+	(*writes)[*count].ref = ref;
+	(*count)++;
+}
+
+static ir_frame_write *ir_collect_frame_writes(const ir_ctx *ctx, uint32_t *count)
+{
+	ir_frame_write *writes = NULL;
+	uint32_t size = 0;
+	ir_ref i, j, n;
+	const ir_insn *insn;
+	int32_t offset;
+	ir_bitset derived = ir_frame_derived_set(ctx);
+
+	*count = 0;
+	for (i = 1, insn = ctx->ir_base + 1; i < ctx->insns_count;) {
+		if (insn->op == IR_STORE || insn->op == IR_STORE_v) {
+			if (ir_frame_slot_address(ctx, insn->op2, &offset)) {
+				ir_frame_write_add(&writes, count, &size, offset, ir_get_type_size(ctx->ir_base[insn->op3].type), i);
+			} else if (ir_frame_derived(derived, insn->op2)) {
+				ir_frame_write_add(&writes, count, &size, IR_FRAME_WRITE_ANY, 0, i);
+			}
+		} else if (insn->op == IR_LOAD || insn->op == IR_LOAD_v) {
+			if (ir_frame_slot_address(ctx, insn->op2, &offset)) {
+				ir_frame_write_add(&writes, count, &size, offset, ir_get_type_size(insn->type), i);
+			} else if (ir_frame_derived(derived, insn->op2)) {
+				ir_frame_write_add(&writes, count, &size, IR_FRAME_WRITE_ANY, 0, i);
+			}
+		} else if (insn->op == IR_CALL || insn->op == IR_TAILCALL) {
+			bool frame_arg = 0;
+
+			for (j = 3, n = insn->inputs_count; j <= n; j++) {
+				ir_ref arg = ir_insn_op(insn, j);
+
+				if (ir_frame_derived(derived, arg)) {
+					frame_arg = 1;
+				}
+			}
+			if (frame_arg) {
+				ir_frame_write_add(&writes, count, &size, IR_FRAME_WRITE_ANY, 0, i);
+			}
+		} else if (insn->op == IR_RSTORE && insn->op3 == ctx->spill_base) {
+			ir_frame_write_add(&writes, count, &size, IR_FRAME_WRITE_ANY, 0, i);
+		}
+		n = ir_insn_len(insn);
+		i += n;
+		insn += n;
+	}
+	ir_mem_free(derived);
+	if (*count > 1) {
+		qsort(writes, *count, sizeof(ir_frame_write), ir_frame_write_cmp);
+	}
+	return writes;
+}
+
+/* Accesses that define or store a value of the same (possibly coalesced) vreg don't conflict */
+static bool ir_frame_write_ignored(const ir_ctx *ctx, ir_ref write, int32_t vreg)
+{
+	const ir_insn *insn = &ctx->ir_base[write];
+
+	return ctx->vregs[write] == vreg
+		|| ((insn->op == IR_STORE || insn->op == IR_STORE_v)
+		 && insn->op3 > 0 && ctx->vregs[insn->op3] == vreg);
+}
+
+static uint32_t ir_frame_writes_lower_bound(const ir_frame_write *writes, uint32_t count, int32_t offset)
+{
+	uint32_t lo = 0, hi = count, k;
+
+	while (lo < hi) {
+		k = (lo + hi) / 2;
+		if (writes[k].offset < offset) {
+			lo = k + 1;
+		} else {
+			hi = k;
+		}
+	}
+	return lo;
+}
+
+static bool ir_bound_slot_group_is_written(const ir_ctx *ctx, int32_t vreg, uint32_t lo, int32_t offset, int32_t len,
+                                           ir_live_interval *ival, const ir_frame_write *writes, uint32_t count)
+{
+	int32_t key = writes[lo].offset;
+	uint32_t k;
+	ir_live_range *r;
+
+	for (; ival; ival = ival->next) {
+		for (r = &ival->range; r; r = r->next) {
+			uint32_t first = lo, last = count;
+
+			while (first < last) {
+				k = (first + last) / 2;
+				if (writes[k].offset > key
+				 || IR_DEF_LIVE_POS_FROM_REF(writes[k].ref) >= r->start) {
+					last = k;
+				} else {
+					first = k + 1;
+				}
+			}
+			for (k = first;
+			     k < count
+			      && writes[k].offset == key
+			      && IR_DEF_LIVE_POS_FROM_REF(writes[k].ref) < r->end;
+			     k++) {
+				if ((key == IR_FRAME_WRITE_ANY
+				  || ((int64_t)key < (int64_t)offset + len && (int64_t)key + writes[k].size > offset))
+				 && !ir_frame_write_ignored(ctx, writes[k].ref, vreg)) {
+					return 1;
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+static bool ir_bound_slot_is_overwritten(const ir_ctx *ctx, int32_t vreg, int32_t offset, int32_t len,
+                                         ir_live_interval *ival, const ir_frame_write *writes, uint32_t count,
+                                         int32_t max_size)
+{
+	uint32_t k = ir_frame_writes_lower_bound(writes, count, IR_FRAME_WRITE_ANY);
+
+	if (k < count && writes[k].offset == IR_FRAME_WRITE_ANY && ir_bound_slot_group_is_written(ctx, vreg, k, offset, len, ival, writes, count)) {
+		return 1;
+	}
+	for (k = ir_frame_writes_lower_bound(writes, count, (int32_t)IR_MAX((int64_t)offset - max_size, INT32_MIN + 1));
+	     k < count && (int64_t)writes[k].offset < (int64_t)offset + len;) {
+		uint32_t next = writes[k].offset == INT32_MAX ? count : ir_frame_writes_lower_bound(writes, count, writes[k].offset + 1);
+
+		if (ir_bound_slot_group_is_written(ctx, vreg, k, offset, len, ival, writes, count)) {
+			return 1;
+		}
+		k = next;
+	}
+	return 0;
+}
+
+typedef struct _ir_bound_cand {
+	int32_t     offset;
+	int32_t     size;
+	int32_t     vreg;
+	ir_live_pos start;
+	ir_live_pos end;
+} ir_bound_cand;
+
+static int ir_bound_cand_cmp(const void *a, const void *b)
+{
+	const ir_bound_cand *c1 = a;
+	const ir_bound_cand *c2 = b;
+
+	if (c1->start != c2->start) {
+		return c1->start < c2->start ? -1 : 1;
+	}
+	return c1->vreg < c2->vreg ? -1 : (c1->vreg > c2->vreg);
+}
+
+static bool ir_ival_chains_overlap(ir_live_interval *a, ir_live_interval *b)
+{
+	ir_live_interval *ib;
+	ir_live_range *ra, *rb;
+
+	for (; a; a = a->next) {
+		for (ra = &a->range; ra; ra = ra->next) {
+			for (ib = b; ib; ib = ib->next) {
+				for (rb = &ib->range; rb; rb = rb->next) {
+					if (ra->start < rb->end && rb->start < ra->end) {
+						return 1;
+					}
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+static bool ir_ival_live_at_entry(const ir_ctx *ctx, ir_live_interval *ival)
+{
+	uint32_t b;
+	const ir_block *bb;
+	ir_live_range *r;
+
+	for (b = 1, bb = ctx->cfg_blocks + 1; b <= ctx->cfg_blocks_count; b++, bb++) {
+		if (bb->flags & IR_BB_ENTRY) {
+			ir_live_pos start = IR_START_LIVE_POS_FROM_REF(bb->start);
+			ir_live_interval *iv;
+
+			for (iv = ival; iv; iv = iv->next) {
+				for (r = &iv->range; r; r = r->next) {
+					if (r->start <= start && r->end > start) {
+						return 1;
+					}
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+/* An ENTRY can't initialize an ordinary spill slot from the bound one, so such code is rejected */
+static void ir_reject_bound_slot(ir_ctx *ctx, ir_live_interval *ival)
+{
+	if (ctx->entries_count && ir_ival_live_at_entry(ctx, ival)) {
+		ctx->status = IR_ERROR_BOUND_SLOT_CONFLICT;
+	}
+}
+
 static void ir_assign_bound_spill_slots(ir_ctx *ctx)
 {
 	ir_hashtab_bucket *b = ctx->binding->data;
 	uint32_t n = ctx->binding->count;
+	uint32_t i, j, k, count = 0, active_count = 0;
+	uint32_t *active;
 	int32_t v;
-	ir_live_interval *ival;
+	ir_live_interval *ival, *iv;
+	ir_live_range *r;
+	ir_frame_write *writes;
+	uint32_t writes_count;
+	ir_bound_cand *cand;
+	int32_t max_size = 0;
 
+	writes = ir_collect_frame_writes(ctx, &writes_count);
+	for (i = 0; i < writes_count; i++) {
+		max_size = IR_MAX(max_size, writes[i].size);
+	}
+	cand = ir_mem_malloc(n * sizeof(ir_bound_cand));
 	while (n > 0) {
 		v = ctx->vregs[b->key];
 		if (v > 0) {
@@ -3970,14 +4282,70 @@ static void ir_assign_bound_spill_slots(ir_ctx *ctx)
 			 && ival->stack_spill_pos == -1
 			 && (ival->next || ival->reg == IR_REG_NONE)) {
 				IR_ASSERT(b->val < 0);
-				/* special spill slot */
+				if (ir_bound_slot_is_overwritten(ctx, v, -b->val, ir_get_type_size(ival->type), ival,
+						writes, writes_count, max_size)) {
+					ir_reject_bound_slot(ctx, ival);
+					b++;
+					n--;
+					continue;
+				}
+				/* reserve the special spill slot, so the same vreg is not collected twice */
 				ival->stack_spill_pos = -b->val;
-				ival->flags |= IR_LIVE_INTERVAL_SPILLED | IR_LIVE_INTERVAL_SPILL_SPECIAL;
+				cand[count].offset = -b->val;
+				cand[count].size = ir_get_type_size(ival->type);
+				cand[count].vreg = v;
+				cand[count].start = ival->range.start;
+				cand[count].end = 0;
+				for (iv = ival; iv; iv = iv->next) {
+					for (r = &iv->range; r; r = r->next) {
+						cand[count].end = IR_MAX(cand[count].end, r->end);
+					}
+				}
+				count++;
 			}
 		}
 		b++;
 		n--;
 	}
+	if (writes) {
+		ir_mem_free(writes);
+	}
+
+	if (count > 1) {
+		qsort(cand, count, sizeof(ir_bound_cand), ir_bound_cand_cmp);
+	}
+	active = ir_mem_malloc((count ? count : 1) * sizeof(uint32_t));
+	for (i = 0; i < count; i++) {
+		bool overlap = 0;
+
+		ival = ctx->live_intervals[cand[i].vreg];
+		for (j = 0, k = 0; j < active_count; j++) {
+			ir_bound_cand *c = &cand[active[j]];
+
+			if (c->end <= cand[i].start) {
+				continue;
+			}
+			active[k++] = active[j];
+			if (!overlap
+			 && (int64_t)c->offset < (int64_t)cand[i].offset + cand[i].size
+			 && (int64_t)cand[i].offset < (int64_t)c->offset + c->size
+			 && ir_ival_chains_overlap(ctx->live_intervals[c->vreg], ival)) {
+				overlap = 1;
+			}
+		}
+		active_count = k;
+		if (overlap) {
+			/* the spill store of one value would clobber the other */
+			ival->stack_spill_pos = -1;
+			ir_reject_bound_slot(ctx, ival);
+		} else {
+			/* special spill slot */
+			ival->flags |= IR_LIVE_INTERVAL_SPILLED | IR_LIVE_INTERVAL_SPILL_SPECIAL;
+			active[active_count++] = i;
+		}
+	}
+	ir_mem_free(active);
+	ir_mem_free(cand);
 }
 
 static int ir_linear_scan(ir_ctx *ctx, ir_ref vars)
