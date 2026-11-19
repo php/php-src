@@ -2246,7 +2246,9 @@ static zend_string* mb_get_substr(zend_string *input, size_t from, size_t len, c
 			}
 		}
 		zend_string *result = zend_string_init_fast((const char*)start, stop - start);
-		if (!ZSTR_IS_INTERNED(result)) {
+		if (ZSTR_IS_INTERNED(result)) {
+			GC_ADD_FLAGS_ATOMIC(result, IS_STR_VALID_UTF8);
+		} else {
 			GC_ADD_FLAGS(result, IS_STR_VALID_UTF8);
 		}
 		return result;
@@ -2364,8 +2366,12 @@ PHP_FUNCTION(mb_substr_count)
 		} else {
 			unsigned int num_errors = 0;
 			haystack_u8 = mb_fast_convert((unsigned char*)ZSTR_VAL(haystack), ZSTR_LEN(haystack), enc, &mbfl_encoding_utf8, 0, MBFL_OUTPUTFILTER_ILLEGAL_MODE_BADUTF8, &num_errors);
-			if (!num_errors && !ZSTR_IS_INTERNED(haystack)) {
-				GC_ADD_FLAGS(haystack, IS_STR_VALID_UTF8);
+			if (!num_errors) {
+				if (ZSTR_IS_INTERNED(haystack)) {
+					GC_ADD_FLAGS_ATOMIC(haystack, IS_STR_VALID_UTF8);
+				} else {
+					GC_ADD_FLAGS(haystack, IS_STR_VALID_UTF8);
+				}
 			}
 		}
 
@@ -2374,8 +2380,12 @@ PHP_FUNCTION(mb_substr_count)
 		} else {
 			unsigned int num_errors = 0;
 			needle_u8 = mb_fast_convert((unsigned char*)ZSTR_VAL(needle), ZSTR_LEN(needle), enc, &mbfl_encoding_utf8, 0, MBFL_OUTPUTFILTER_ILLEGAL_MODE_BADUTF8, &num_errors);
-			if (!num_errors && !ZSTR_IS_INTERNED(needle)) {
-				GC_ADD_FLAGS(needle, IS_STR_VALID_UTF8);
+			if (!num_errors) {
+				if (ZSTR_IS_INTERNED(needle)) {
+					GC_ADD_FLAGS_ATOMIC(needle, IS_STR_VALID_UTF8);
+				} else {
+					GC_ADD_FLAGS(needle, IS_STR_VALID_UTF8);
+				}
 			}
 		}
 	} else {
@@ -5756,8 +5766,12 @@ static bool mb_check_str_encoding(zend_string *str, const mbfl_encoding *encodin
 			return true;
 		}
 		bool result = mb_fast_check_utf8(str);
-		if (result && !ZSTR_IS_INTERNED(str)) {
-			GC_ADD_FLAGS(str, IS_STR_VALID_UTF8);
+		if (result) {
+			if (ZSTR_IS_INTERNED(str)) {
+				GC_ADD_FLAGS_ATOMIC(str, IS_STR_VALID_UTF8);
+			} else if(!ZSTR_IS_INTERNED(str)) {
+				GC_ADD_FLAGS(str, IS_STR_VALID_UTF8);
+			}
 		}
 		return result;
 	} else {

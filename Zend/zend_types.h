@@ -788,6 +788,49 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 		GC_TYPE_INFO(p) &= ~((flags) << GC_FLAGS_SHIFT); \
 	} while (0)
 
+#if defined(__cplusplus) || !defined(ATOMIC_INT_LOCK_FREE) || ATOMIC_INT_LOCK_FREE != 2
+	/* Fallback path for C++ compilation units or non-lock-free architectures */
+	#if defined(_MSC_VER)
+		#include <intrin.h>
+		#define GC_FLAGS_ATOMIC(p) zval_gc_flags(*(const volatile uint32_t *)&GC_TYPE_INFO(p))
+		#define GC_ADD_FLAGS_ATOMIC(p, flags) do { \
+			_InterlockedOr((volatile LONG *)&GC_TYPE_INFO(p), ((uint32_t)(flags)) << GC_FLAGS_SHIFT); \
+		} while (0)
+	#else
+		#define GC_FLAGS_ATOMIC(p) zval_gc_flags(*(const volatile uint32_t *)&GC_TYPE_INFO(p))
+		#define GC_ADD_FLAGS_ATOMIC(p, flags) do { \
+			uint32_t _old = *(volatile uint32_t *)&GC_TYPE_INFO(p); \
+			uint32_t _new; \
+			do { \
+				_new = _old | (((uint32_t)(flags)) << GC_FLAGS_SHIFT); \
+			} while (!_VAL_ATOMIC_CAS(&GC_TYPE_INFO(p), &_old, _new)); \
+		} while (0)
+	#endif
+#else
+	/* Native C11 lock-free atomic path */
+	#if defined(_MSC_VER)
+		#include <intrin.h>
+		#define GC_FLAGS_ATOMIC(p) zval_gc_flags(*(const volatile uint32_t *)&GC_TYPE_INFO(p))
+		#define GC_ADD_FLAGS_ATOMIC(p, flags) \
+			_InterlockedOr((volatile LONG *)&GC_TYPE_INFO(p), ((uint32_t)(flags)) << GC_FLAGS_SHIFT)
+	#elif defined(__GNUC__) || defined(__clang__)
+		#define GC_FLAGS_ATOMIC(p) zval_gc_flags(__atomic_load_n(&GC_TYPE_INFO(p), __ATOMIC_RELAXED))
+		#define GC_ADD_FLAGS_ATOMIC(p, flags) \
+			__atomic_fetch_or(&GC_TYPE_INFO(p), ((uint32_t)(flags)) << GC_FLAGS_SHIFT, __ATOMIC_RELAXED)
+	#else
+		#include <stdatomic.h>
+		#define GC_FLAGS_ATOMIC(p) zval_gc_flags( \
+			atomic_load_explicit((_Atomic(uint32_t) *)&GC_TYPE_INFO(p), memory_order_relaxed) \
+		)
+		#define GC_ADD_FLAGS_ATOMIC(p, flags) \
+			atomic_fetch_or_explicit( \
+				(_Atomic(uint32_t) *)&GC_TYPE_INFO(p), \
+				((uint32_t)(flags)) << GC_FLAGS_SHIFT, \
+				memory_order_relaxed \
+			)
+	#endif
+#endif
+
 #ifndef ZEND_RC_DEBUG
 # define ZEND_RC_DEBUG 0
 #endif
