@@ -115,7 +115,7 @@ static void soap_error_handler(int error_num, zend_string *error_filename, uint3
 				EG(vm_stack) = tmp; \
 				EG(vm_stack_end) = tmp->end; \
 			} \
-			EG(vm_stack)->top = _old_stack_top; \
+			EG(vm_stack_top) = _old_stack_top; \
 		} \
 	} zend_end_try();\
 	SOAP_GLOBAL(use_soap_error_handler) = _old_handler;\
