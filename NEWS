@@ -48,6 +48,9 @@ PHP                                                                        NEWS
     when lexbor allocation fails). (ndossche)
   . Fixed bug GH-25305 (NULL dereference in lxb_dom_document_destroy on lexbor
     document init failure). (David Carlier)
+  . Fixed crash when registerNodeClass() is given a class with a constant
+    expression that cannot be evaluated; registerNodeClass() now throws the
+    evaluation Error instead. (Ilia Alshanetsky)
 
 - Filter:
   . Fixed stack overflow in filter_var() and filter_var_array() with deeply
