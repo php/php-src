@@ -614,6 +614,10 @@ void umsg_parse_helper(UMessageFormat *fmt, int *count, zval **args, UChar *sour
 		return;
 	}
 
+	/* Let ICU destroy the array with the same ABI that allocated it. */
+	Formattable parsed;
+	parsed.adoptArray(fargs, *count);
+
 	*args = (zval *)safe_emalloc(*count, sizeof(zval), 0);
 
     // assign formattables to varargs
@@ -663,5 +667,4 @@ void umsg_parse_helper(UMessageFormat *fmt, int *count, zval **args, UChar *sour
             break;
         }
     }
-	delete[] fargs;
 }
