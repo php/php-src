@@ -458,6 +458,9 @@ struct _pdo_dbh_t {
 	/* when set, convert int/floats to strings */
 	bool stringify:1;
 
+	/* fetch table names; prepends to returned col name */
+	bool fetch_table_names:1;
+
 	/* bitmap for pdo_param_event(s) to skip in dispatch_param_event */
 	uint8_t skip_param_evt;
 
@@ -529,6 +532,7 @@ static inline pdo_dbh_t *php_pdo_dbh_fetch_inner(zend_object *obj) {
 /* describes a column */
 struct pdo_column_data {
 	zend_string *name;
+	zend_string *table;
 	zend_long maxlen;
 	zend_ulong precision;
 };
