@@ -7,6 +7,7 @@ zend_test
 <?php
 if (!PHP_ZTS) die('skip ZTS only');
 if (!function_exists('zend_test_raise_on_foreign_thread')) die('skip zend_test_raise_on_foreign_thread() not available');
+if (!zend_test_signal_forwarding('supported')) die('skip signal forwarding is not supported on this platform');
 ?>
 --FILE--
 <?php

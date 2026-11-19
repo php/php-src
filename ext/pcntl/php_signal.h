@@ -23,7 +23,6 @@ typedef void Sigfunc(int, siginfo_t*, void*);
 #else
 typedef void Sigfunc(int);
 #endif
-void php_signal_action(struct sigaction *act, Sigfunc *func, int restart, int mask_all);
 Sigfunc *php_signal(int signo, Sigfunc *func, int restart);
 Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all);
 

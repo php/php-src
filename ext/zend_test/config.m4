@@ -9,6 +9,7 @@ if test "$PHP_ZEND_TEST" != "no"; then
       iterators.c
       object_handlers.c
       observer.c
+      signal_forwarding.c
       test.c
       zend_mm_custom_handlers.c
     ]),

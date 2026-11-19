@@ -21,7 +21,16 @@
 
 #include <signal.h>
 
+#include "zend_atomic.h"
 #include "zend_portability.h"
+
+/* See the assumptions at the top of zend_signal_forward.c. Elsewhere, a signal on a thread
+ * without PHP context is not forwarded. */
+#if defined(ZEND_ATOMIC_SIGNAL_SAFE) && !defined(ZEND_SIGNAL_FORWARD_DISABLED) \
+ && ((defined(__linux__) && !defined(__BIONIC__) && !defined(__UCLIBC__)) \
+  || defined(__APPLE__) || defined(__FreeBSD__))
+# define ZEND_SIGNAL_FORWARD_ENABLED 1
+#endif
 
 BEGIN_EXTERN_C()
 
@@ -36,6 +45,15 @@ ZEND_API void zend_signal_forward_or_default(int signo);
 
 /* The calling thread handles signo. If act is given, it is installed. */
 ZEND_API int zend_signal_forward_acquire(int signo, const struct sigaction *act);
+/* The handler that the calling thread registered for signo was installed for it, and is
+ * removed with the thread. */
+ZEND_API void zend_signal_forward_mark_installed(int signo);
+/* The helper thread stops and starts again, for a system call that requires a process
+ * with a single thread. Signals meanwhile are forwarded when it has started again.
+ * Returns whether a helper was stopped. The system may count the thread for a moment
+ * after it was joined. */
+ZEND_API bool zend_signal_forward_suspend(void);
+ZEND_API void zend_signal_forward_resume(void);
 /* The calling thread no longer handles signo. If act is given, it is installed
  * unless the process-wide disposition is still needed by another thread. */
 ZEND_API int zend_signal_forward_release(int signo, const struct sigaction *act);
@@ -65,8 +83,6 @@ typedef enum {
 	ZEND_SIGNAL_FORWARD_TEST_SATURATE,
 	ZEND_SIGNAL_FORWARD_TEST_FAIL_READ,
 	ZEND_SIGNAL_FORWARD_TEST_HANDLER_EAGAIN,
-	ZEND_SIGNAL_FORWARD_TEST_IDLE_SOON,
-	ZEND_SIGNAL_FORWARD_TEST_IDLE_NORMAL,
 	ZEND_SIGNAL_FORWARD_TEST_RUNNING,
 	ZEND_SIGNAL_FORWARD_TEST_RESTART,
 	ZEND_SIGNAL_FORWARD_TEST_READ_FD,

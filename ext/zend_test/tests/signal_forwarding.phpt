@@ -6,6 +6,7 @@ zend_test
 <?php
 if (!PHP_ZTS) die('skip ZTS only');
 if (!function_exists('zend_test_signal_forwarding')) die('skip zend_test_signal_forwarding() not available');
+if (!zend_test_signal_forwarding('supported')) die('skip signal forwarding is not supported on this platform');
 ?>
 --FILE--
 <?php
@@ -23,6 +24,7 @@ $scenarios = [
     'repeated_signals',
     'replaced_handler',
     'owner_exit_with_pending_signal',
+    'blocked_owner_no_failover',
     'thread_identifier_reuse',
     'fork',
     'fork_during_registration',
@@ -49,6 +51,7 @@ stale_timer: bool(true)
 repeated_signals: bool(true)
 replaced_handler: bool(true)
 owner_exit_with_pending_signal: bool(true)
+blocked_owner_no_failover: bool(true)
 thread_identifier_reuse: bool(true)
 fork: bool(true)
 fork_during_registration: bool(true)

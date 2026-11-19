@@ -196,7 +196,14 @@ static int pcntl_signal_restore(int signo, Sigfunc *func, int restart)
 	struct sigaction act;
 	int result;
 
-	php_signal_action(&act, func, restart, 0);
+	memset(&act, 0, sizeof(act));
+#ifdef HAVE_STRUCT_SIGINFO_T
+	act.sa_sigaction = func;
+#else
+	act.sa_handler = func;
+#endif
+	sigemptyset(&act.sa_mask);
+	act.sa_flags = restart ? SA_RESTART : 0;
 	/* A signal already forwarded to this thread is still handled during the release. */
 	result = zend_signal_forward_release(signo, &act);
 	pcntl_signal_set_handled(signo, false);
@@ -850,30 +857,27 @@ PHP_FUNCTION(pcntl_signal)
 	}
 
 	/* Register with the OS first so that on failure we don't record a handler that was never installed */
-#if defined(ZTS) && !defined(ZEND_SIGNALS)
-	struct sigaction act;
-
-	php_signal_action(&act, pcntl_signal_handler, (int) restart_syscalls, 1);
-	pcntl_signal_set_handled((int) signo, true);
-	if (zend_signal_forward_acquire((int) signo, &act) != 0) {
-		PCNTL_G(last_error) = errno;
-		pcntl_signal_set_handled((int) signo, false);
-		php_error_docref(NULL, E_WARNING, "Error assigning signal");
-		RETURN_FALSE;
-	}
-#else
-# ifdef ZTS
+#ifdef ZTS
 	/* Before the handler is installed, so that no signal finds it without a thread to go to */
-	zend_signal_forward_acquire((int) signo, NULL);
+# ifndef ZEND_SIGNALS
+	pcntl_signal_set_handled((int) signo, true);
 # endif
+	zend_signal_forward_acquire((int) signo, NULL);
+#endif
 	if (php_signal4(signo, pcntl_signal_handler, (int) restart_syscalls, 1) == (void *)SIG_ERR) {
 		PCNTL_G(last_error) = errno;
-# ifdef ZTS
+#ifdef ZTS
 		zend_signal_forward_release((int) signo, NULL);
+# ifndef ZEND_SIGNALS
+		pcntl_signal_set_handled((int) signo, false);
 # endif
+#endif
 		php_error_docref(NULL, E_WARNING, "Error assigning signal");
 		RETURN_FALSE;
 	}
+#if defined(ZTS) && !defined(ZEND_SIGNALS)
+	/* Installed directly, so it must not outlive the threads that handle the signal. */
+	zend_signal_forward_mark_installed((int) signo);
 #endif
 
 	/* Add the function name to our signal table */
@@ -1557,7 +1561,20 @@ PHP_FUNCTION(pcntl_unshare)
 		Z_PARAM_LONG(flags)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (unshare(flags) == -1) {
+	int result = unshare(flags);
+#ifdef ZTS
+	if (result == -1 && errno == EINVAL && zend_signal_forward_suspend()) {
+		/* The kernel may require a single thread, which the signal forwarding helper is not. */
+		for (int i = 0; i < 100 && (result = unshare(flags)) == -1 && errno == EINVAL; i++) {
+			usleep(1000);
+		}
+		int unshare_errno = errno;
+		zend_signal_forward_resume();
+		errno = unshare_errno;
+	}
+#endif
+
+	if (result == -1) {
 		PCNTL_G(last_error) = errno;
 		switch (errno) {
 #ifdef EINVAL
@@ -1758,6 +1775,16 @@ PHP_FUNCTION(pcntl_setns)
 	}
 	ret = setns(fd, (int)nstype);
 	int setns_errno = errno;
+#ifdef ZTS
+	if (ret == -1 && setns_errno == EINVAL && zend_signal_forward_suspend()) {
+		/* The kernel may require a single thread, which the signal forwarding helper is not. */
+		for (int i = 0; i < 100 && (ret = setns(fd, (int)nstype)) == -1 && errno == EINVAL; i++) {
+			usleep(1000);
+		}
+		setns_errno = errno;
+		zend_signal_forward_resume();
+	}
+#endif
 	close(fd);
 
 	if (ret == -1) {

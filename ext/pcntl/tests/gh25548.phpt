@@ -8,6 +8,7 @@ zend_test
 if (!PHP_ZTS) die('skip ZTS only');
 if (!function_exists('zend_test_timeout_signal') || zend_test_timeout_signal() === null) die('skip the execution timer is not process-wide');
 if (getenv('SKIP_SLOW_TESTS')) die('skip slow test');
+if (!zend_test_signal_forwarding('supported')) die('skip signal forwarding is not supported on this platform');
 ?>
 --FILE--
 <?php

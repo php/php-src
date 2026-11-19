@@ -21,39 +21,33 @@
 
 /* php_signal using sigaction is derived from Advanced Programming
  * in the Unix Environment by W. Richard Stevens p 298. */
-void php_signal_action(struct sigaction *act, Sigfunc *func, int restart, int mask_all)
-{
-	memset(act, 0, sizeof(*act));
-#ifdef HAVE_STRUCT_SIGINFO_T
-	act->sa_sigaction = func;
-#else
-	act->sa_handler = func;
-#endif
-	if (mask_all) {
-		sigfillset(&act->sa_mask);
-	} else {
-		sigemptyset(&act->sa_mask);
-	}
-	act->sa_flags = SA_ONSTACK;
-#ifdef HAVE_STRUCT_SIGINFO_T
-	act->sa_flags |= SA_SIGINFO;
-#endif
-	if (!restart) {
-#ifdef SA_INTERRUPT
-		act->sa_flags |= SA_INTERRUPT; /* SunOS */
-#endif
-	} else {
-#ifdef SA_RESTART
-		act->sa_flags |= SA_RESTART; /* SVR4, 4.3+BSD */
-#endif
-	}
-}
-
 Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all)
 {
 	struct sigaction act,oact;
 
-	php_signal_action(&act, func, restart, mask_all);
+#ifdef HAVE_STRUCT_SIGINFO_T
+	act.sa_sigaction = func;
+#else
+	act.sa_handler = func;
+#endif
+	if (mask_all) {
+		sigfillset(&act.sa_mask);
+	} else {
+		sigemptyset(&act.sa_mask);
+	}
+	act.sa_flags = SA_ONSTACK;
+#ifdef HAVE_STRUCT_SIGINFO_T
+	act.sa_flags |= SA_SIGINFO;
+#endif
+	if (!restart) {
+#ifdef SA_INTERRUPT
+		act.sa_flags |= SA_INTERRUPT; /* SunOS */
+#endif
+	} else {
+#ifdef SA_RESTART
+		act.sa_flags |= SA_RESTART; /* SVR4, 4.3+BSD */
+#endif
+	}
 	zend_sigaction(signo, &act, &oact);
 
 #ifdef HAVE_STRUCT_SIGINFO_T
