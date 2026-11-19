@@ -1864,9 +1864,9 @@ static void sigchld_handler(int apar)
 /* }}} */
 #endif
 
-PHPAPI void php_child_init(void)
+PHPAPI void php_child_init_ex(bool rekey_free_lists)
 {
-	refresh_memory_manager();
+	refresh_memory_manager_ex(rekey_free_lists);
 	zend_max_execution_timer_init();
 	php_clear_stat_cache(true, NULL, 0);
 
@@ -1875,6 +1875,11 @@ PHPAPI void php_child_init(void)
 			module->child_init_func();
 		}
 	} ZEND_HASH_FOREACH_END();
+}
+
+PHPAPI void php_child_init(void)
+{
+	php_child_init_ex(true);
 }
 
 /* {{{ php_request_startup */

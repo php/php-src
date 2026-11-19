@@ -77,6 +77,12 @@ PHP 8.7 INTERNALS UPGRADE NOTES
     scheduled restart has been carried out and the SHM lock is released, on
     the thread that carried it out, with the same reason as the
     zend_accel_schedule_restart_hook callback.
+  . Added php_child_init_ex() and refresh_memory_manager_ex() variants that
+    take a rekey_free_lists argument. Passing false skips re-keying inherited
+    small free lists in a forked child; the child still receives a new
+    allocator key and cached chunks are still re-keyed. The existing
+    php_child_init() and refresh_memory_manager() functions retain their
+    default behavior.
 
 ========================
 2. Build system changes
