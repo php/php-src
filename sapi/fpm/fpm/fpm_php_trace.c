@@ -34,6 +34,42 @@
 #endif
 
 
+static int dump_request_additional_info(FILE *slowlog){
+	char buffer[1024];
+	long addr;
+
+	if (0 > fpm_trace_get_long((long) &SG(request_info).request_method, &addr)) {
+		return -1;
+	}
+
+	if (0 > fpm_trace_get_strz(buffer, sizeof(buffer), addr)) {
+		return -1;
+	}
+	fprintf(slowlog, "request_method = %s\n", buffer);
+
+	if (0 > fpm_trace_get_long((long) &SG(request_info).path_info, &addr)) {
+
+		return -1;
+	}
+
+	if (0 > fpm_trace_get_strz(buffer, sizeof(buffer), addr)) {
+		return -1;
+	}
+	fprintf(slowlog, "request_path_info = %s\n", buffer);
+
+
+	if (0 > fpm_trace_get_long((long) &SG(request_info).query_string, &addr)) {
+		return -1;
+	}
+
+	if (0 > fpm_trace_get_strz(buffer, sizeof(buffer), addr)) {
+		return -1;
+	}
+	fprintf(slowlog, "request_query_string = %s\n", buffer);
+
+	return 0;
+}
+
 static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ */
 {
 	int callers_limit = child->wp->config->request_slowlog_trace_depth;
@@ -61,6 +97,10 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 	}
 
 	fprintf(slowlog, "script_filename = %s\n", buf);
+
+	if(dump_request_additional_info(slowlog) == -1){
+		return -1;
+	}
 
 	if (0 > fpm_trace_get_long((long) &EG(current_execute_data), &l)) {
 		return -1;
