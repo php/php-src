@@ -158,6 +158,13 @@ PHP                                                                        NEWS
   . Fixed session upload progress to respect session.use_only_cookies.
     (jorgsowa)
 
+- SimpleXML:
+  . Fixed a crash with opcache when simplexml_load_string(),
+    simplexml_load_file() or simplexml_import_dom() is given a class whose
+    property defaults use constants. A class with an undefined constant now
+    throws an Error instead of returning an object with unresolved values.
+    (Ilia Alshanetsky)
+
 - SOAP:
   . Fixed bug GH-25267 (NULL dereference in to_xml_any() with integer key).
     (lazerg)
