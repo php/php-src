@@ -1317,6 +1317,9 @@ ZEND_API void zend_activate(void) /* {{{ */
 {
 #ifdef ZTS
 	virtual_cwd_activate();
+# ifndef ZEND_WIN32
+	zend_signal_unblock_rerouted();
+# endif
 #endif
 	gc_reset();
 	init_compiler();

@@ -37,6 +37,12 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#ifdef HAVE_SYS_UCONTEXT_H
+#include <sys/ucontext.h>
+#endif
+#if defined(ZTS) && !defined(ZEND_WIN32)
+#include <pthread.h>
+#endif
 
 #ifdef ZEND_SIGNALS
 
@@ -77,6 +83,14 @@ static const int zend_sigs[] = { TIMEOUT_SIG, SIGHUP, SIGINT, SIGQUIT, SIGTERM, 
 
 /* True globals, written only at process startup */
 static zend_signal_entry_t global_orig_handlers[NSIG];
+
+#ifdef ZTS
+/* Signals for which a PHP thread registered a handler: only these are sent on
+ * from threads that never ran PHP, the others keep the original disposition.
+ * Never cleared: a PHP thread that no longer handles the signal applies the
+ * original disposition, as the thread that received it would have. */
+static zend_atomic_bool global_php_handled[NSIG];
+#endif
 static sigset_t            global_sigmask;
 
 /* {{{ zend_signal_handler_defer
@@ -88,9 +102,16 @@ static void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *conte
 
 #ifdef ZTS
 	/* A signal could hit after TSRM shutdown, in this case globals are already freed.
-	 * Or it could be delivered to a thread that didn't execute PHP yet.
-	 * In the latter case we act as if SIGG(active) is false. */
+	 * Or it could be delivered to a thread that didn't execute PHP yet: if a PHP
+	 * thread handles this signal and the embedder does not, send it on to the
+	 * PHP threads. Otherwise act as if SIGG(active) is false. */
 	if (tsrm_is_shutdown() || !tsrm_is_managed_thread()) {
+		if (zend_atomic_bool_load_ex(&global_php_handled[signo-1])
+		 && (global_orig_handlers[signo-1].handler == (void *) SIG_DFL
+		  || global_orig_handlers[signo-1].handler == (void *) SIG_IGN)
+		 && zend_signal_reroute_from_foreign_thread(signo, siginfo, context)) {
+			return;
+		}
 		/* Forward to default handler handler */
 		zend_signal_handler(signo, siginfo, context);
 		return;
@@ -244,6 +265,13 @@ ZEND_API void zend_sigaction(int signo, const struct sigaction *act, struct siga
 		} else {
 			SIGG(handlers)[signo-1].handler = (void *) act->sa_handler;
 		}
+
+#ifdef ZTS
+		if (SIGG(handlers)[signo-1].handler != (void *) SIG_IGN
+		 && SIGG(handlers)[signo-1].handler != (void *) SIG_DFL) {
+			zend_atomic_bool_store_ex(&global_php_handled[signo-1], true);
+		}
+#endif
 
 		memset(&sa, 0, sizeof(sa));
 		if (SIGG(handlers)[signo-1].handler == (void *) SIG_IGN) {
@@ -446,3 +474,138 @@ ZEND_API void zend_signal_startup(void)
 
 
 #endif /* ZEND_SIGNALS */
+
+#if defined(ZTS) && !defined(ZEND_WIN32)
+/* Platforms whose kernel restores the thread's mask from uc_sigmask on return
+ * from a handler, and keeps a process signal that every thread blocks pending
+ * (see zend_signal_reroute_from_foreign_thread()). */
+# if defined(HAVE_SYS_UCONTEXT_H) && (defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__))
+#  define ZEND_SIGNAL_CAN_REROUTE 1
+# endif
+
+# ifdef NSIG
+#  define ZEND_SIGNAL_TRACKED NSIG
+# else
+#  define ZEND_SIGNAL_TRACKED 65
+# endif
+
+/* Signals re-routed at least once, so some threads may block them. */
+static zend_atomic_bool zend_signal_rerouted[ZEND_SIGNAL_TRACKED];
+
+/* {{{ zend_signal_is_synchronous
+ * Faults, and abort() on this thread, must take their default action on the
+ * thread they hit. The same signals sent with kill() are ordinary signals. */
+ZEND_API bool zend_signal_is_synchronous(int signo, const siginfo_t *siginfo)
+{
+	switch (signo) {
+		case SIGABRT:
+			return !siginfo || siginfo->si_pid == getpid();
+		case SIGSEGV:
+		case SIGFPE:
+		case SIGILL:
+# ifdef SIGBUS
+		case SIGBUS:
+# endif
+# ifdef SIGTRAP
+		case SIGTRAP:
+# endif
+# ifdef SIGSYS
+		case SIGSYS:
+# endif
+			if (!siginfo) {
+				return true;
+			}
+			/* Raised by the kernel. SI_USER is 0 on Linux, where the codes of
+			 * kill(), sigqueue() and tgkill() are not positive; it is 0x10001 on
+			 * macOS and FreeBSD, above the codes of faults. macOS reports
+			 * SIGSEGV and SIGBUS sent with kill() with a fault code, so those
+			 * are treated as faults there. Elsewhere, assume a fault. */
+# if defined(__linux__)
+			return siginfo->si_code > 0;
+# elif defined(__APPLE__) || defined(__FreeBSD__)
+			return siginfo->si_code > 0 && siginfo->si_code < SI_USER;
+# else
+			return true;
+# endif
+	}
+	return false;
+}
+/* }}} */
+
+/* {{{ zend_signal_reroute_from_foreign_thread
+ * Called by a signal handler running on a thread that never ran PHP and has no
+ * TSRM storage, such as a thread of the Go runtime in FrankenPHP or any thread
+ * created by an embedding application. That thread can neither run the handler
+ * a script registered nor use the original disposition: SIG_DFL would kill the
+ * process although the script handles the signal.
+ *
+ * Instead, block the signal on this thread once the handler returns, by adding
+ * it to the mask saved in the interrupted context (Linux, macOS and FreeBSD
+ * restore the thread's mask from uc_sigmask on sigreturn), and send it to the
+ * process again. The kernel delivers it to a thread that does not block it.
+ * Threads without PHP converge to blocking it, so it ends up on a PHP thread.
+ * If every thread blocks it, it stays pending. There is no loop: the handler
+ * runs with the signal blocked, and this thread keeps it blocked afterwards.
+ * A thread that starts a request unblocks it again, see
+ * zend_signal_unblock_rerouted(); this covers threads created by a thread
+ * that blocked it. Like zend_sigaction(), this also unblocks it where the
+ * SAPI blocked it on purpose.
+ *
+ * Limits: the signal mask of a thread the embedder owns changes; the siginfo of
+ * the re-sent signal names this process as the sender; the PHP thread that
+ * receives it is not necessarily the one that registered the handler; macOS
+ * attaches a process signal that every thread blocks to the main thread, so if
+ * the main thread does not run PHP, a signal re-sent while all PHP threads
+ * block it (e.g. during pcntl_signal_dispatch()) is not delivered.
+ *
+ * Returns false when the caller must handle the signal itself: synchronous
+ * signals, after TSRM shutdown, and on platforms not listed above. */
+ZEND_API bool zend_signal_reroute_from_foreign_thread(int signo, const siginfo_t *siginfo, void *context)
+{
+# ifdef ZEND_SIGNAL_CAN_REROUTE
+	int errno_save;
+
+	if (signo <= 0 || signo >= ZEND_SIGNAL_TRACKED || !context || tsrm_is_shutdown()
+	 || zend_signal_is_synchronous(signo, siginfo)) {
+		return false;
+	}
+
+	errno_save = errno;
+	zend_atomic_bool_store_ex(&zend_signal_rerouted[signo], true);
+	sigaddset(&((ucontext_t *) context)->uc_sigmask, signo);
+	kill(getpid(), signo);
+	errno = errno_save;
+	return true;
+# else
+	(void) signo;
+	(void) siginfo;
+	(void) context;
+	return false;
+# endif
+}
+/* }}} */
+
+/* {{{ zend_signal_unblock_rerouted
+ * Called when a thread starts a request: the thread, or the one that created
+ * it, may have blocked a signal while it did not run PHP. */
+ZEND_API void zend_signal_unblock_rerouted(void)
+{
+# ifdef ZEND_SIGNAL_CAN_REROUTE
+	sigset_t set;
+	bool any = false;
+	int signo;
+
+	sigemptyset(&set);
+	for (signo = 1; signo < ZEND_SIGNAL_TRACKED; signo++) {
+		if (zend_atomic_bool_load_ex(&zend_signal_rerouted[signo])) {
+			sigaddset(&set, signo);
+			any = true;
+		}
+	}
+	if (any) {
+		pthread_sigmask(SIG_UNBLOCK, &set, NULL);
+	}
+# endif
+}
+/* }}} */
+#endif
