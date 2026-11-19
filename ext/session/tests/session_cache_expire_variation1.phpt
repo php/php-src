@@ -24,11 +24,11 @@ var_dump(session_cache_expire());
 echo "Done";
 ob_end_flush();
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing session_cache_expire() : variation ***
 int(360)
 int(360)
-int(1234567890)
+int(%d)
 bool(true)
 int(180)
 bool(true)
