@@ -147,6 +147,13 @@ PHP                                                                        NEWS
   . Fixed session upload progress to respect session.use_only_cookies.
     (jorgsowa)
 
+- SimpleXML:
+  . Fixed a crash with opcache when simplexml_load_string(),
+    simplexml_load_file() or simplexml_import_dom() is given a class whose
+    property defaults use constants. A class with an undefined constant now
+    throws an Error instead of returning an object with unresolved values.
+    (Ilia Alshanetsky)
+
 - Standard:
   . Fixed bug GH-25474 (version_compare() treats large numeric parts as equal
     on 64-bit Windows). (lazerg, timwolla)
