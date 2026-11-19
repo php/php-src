@@ -131,6 +131,16 @@ static zend_always_inline zend_string *ZSTR_KNOWN(size_t idx) {
 #define ZSTR_MAX_OVERHEAD (ZEND_MM_ALIGNED_SIZE(_ZSTR_HEADER_SIZE + 1))
 #define ZSTR_MAX_LEN (SIZE_MAX - ZSTR_MAX_OVERHEAD)
 
+/* Offset for safe_*alloc(n, m, offset) to size the string like zend_string_alloc(n * m + l). */
+static zend_always_inline size_t zend_string_safe_offset(size_t n, size_t m, size_t l)
+{
+	if (UNEXPECTED(l > ZSTR_MAX_LEN)) {
+		return SIZE_MAX; /* Rejected by the allocator. */
+	}
+	/* Works even if n * m wraps, allocator detects that overflow. */
+	return ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(n * m + l)) - n * m;
+}
+
 #define ZSTR_ALLOCA_ALLOC(str, _len, use_heap) do { \
 	(str) = (zend_string *)do_alloca(ZEND_MM_ALIGNED_SIZE_EX(_ZSTR_STRUCT_SIZE(_len), 8), (use_heap)); \
 	GC_SET_REFCOUNT(str, 1); \
@@ -209,10 +219,12 @@ static zend_always_inline zend_string *zend_string_alloc(size_t len, bool persis
 /* Fallible variant of zend_string_safe_alloc */
 static zend_always_inline zend_string *zend_string_safe_falloc(size_t n, size_t m, size_t l, bool persistent, bool fallible)
 {
-	zend_string *ret = (zend_string *)safe_fpemalloc(n, m, ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(l)), persistent, fallible);
+	zend_string *ret = (zend_string *)safe_fpemalloc(n, m, zend_string_safe_offset(n, m, l), persistent, fallible);
 	if (ZEND_CONST_COND(fallible, true) && UNEXPECTED(ret == NULL)) {
 		return ret;
 	}
+	/* GCC can't see that allocation fails if l is too large, so make it explicit. */
+	ZEND_ASSERT(l <= ZSTR_MAX_LEN);
 
 	GC_SET_REFCOUNT(ret, 1);
 	GC_TYPE_INFO(ret) = GC_STRING | ((persistent ? IS_STR_PERSISTENT : 0) << GC_FLAGS_SHIFT);
@@ -394,10 +406,12 @@ static zend_always_inline zend_string *zend_string_safe_frealloc(zend_string *s,
 
 	if (!ZSTR_IS_INTERNED(s)) {
 		if (GC_REFCOUNT(s) == 1) {
-			ret = (zend_string *)safe_fperealloc(s, n, m, ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(l)), persistent, fallible);
+			ret = (zend_string *)safe_fperealloc(s, n, m, zend_string_safe_offset(n, m, l), persistent, fallible);
 			if (ZEND_CONST_COND(fallible, true) && !ret) {
 				return NULL;
 			}
+			/* GCC can't see that allocation fails if l is too large, so make it explicit. */
+			ZEND_ASSERT(l <= ZSTR_MAX_LEN);
 			ZSTR_LEN(ret) = (n * m) + l;
 			zend_string_forget_hash_val(ret);
 			return ret;

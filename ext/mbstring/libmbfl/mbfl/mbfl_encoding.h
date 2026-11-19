@@ -155,7 +155,7 @@ typedef zend_string* (*mb_cut_fn)(unsigned char *str, size_t from, size_t len, u
 static inline void mb_convert_buf_init(mb_convert_buf *buf, size_t initsize, uint32_t repl_char, unsigned int err_mode)
 {
 	buf->state = buf->errors = 0;
-	buf->str = emalloc(_ZSTR_STRUCT_SIZE(initsize));
+	buf->str = emalloc(ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(initsize)));
 	buf->out = (unsigned char*)ZSTR_VAL(buf->str);
 	buf->limit = buf->out + initsize;
 	buf->replacement_char = repl_char;
@@ -167,16 +167,18 @@ static inline zend_result mb_convert_buf_ensure(mb_convert_buf *buf, unsigned ch
 	ZEND_ASSERT(*out <= *limit);
 	if ((size_t)(*limit - *out) < needed) {
 		size_t oldsize = *limit - (unsigned char*)ZSTR_VAL((buf)->str);
-		size_t newsize = oldsize + MAX(oldsize >> 1, needed);
-		zend_string *newstr = safe_ferealloc((buf)->str, 1, newsize, _ZSTR_STRUCT_SIZE(0), /* fallible */ true);
+		size_t growth = MAX(oldsize >> 1, needed);
+		zend_string *newstr = safe_ferealloc((buf)->str, 1, oldsize, zend_string_safe_offset(1, oldsize, growth), /* fallible */ true);
 		if (!newstr) {
 			/* An earlier growth may have moved the buffer. */
 			buf->out = *out;
 			buf->limit = *limit;
 			return FAILURE;
 		}
+		/* GCC can't see that allocation fails if growth is too large, so make it explicit. */
+		ZEND_ASSERT(growth <= ZSTR_MAX_LEN);
 		*out = (unsigned char*)ZSTR_VAL(newstr) + (*out - (unsigned char*)ZSTR_VAL((buf)->str));
-		*limit = (unsigned char*)ZSTR_VAL(newstr) + newsize;
+		*limit = (unsigned char*)ZSTR_VAL(newstr) + oldsize + growth;
 		(buf)->str = newstr;
 	}
 	return SUCCESS;
