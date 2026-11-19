@@ -75,7 +75,7 @@
 
 #include "php_session.h"
 #include "mod_files.h"
-#include "ext/standard/flock_compat.h"
+#include "main/flock_compat.h"
 #include "php_open_temporary_file.h"
 
 #define FILE_PREFIX "sess_"

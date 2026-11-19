@@ -20,7 +20,7 @@
 /* {{{ includes */
 
 #include "php.h"
-#include "ext/standard/flock_compat.h"
+#include "main/flock_compat.h"
 #include "ext/standard/php_filestat.h"
 #include "php_open_temporary_file.h"
 #include "ext/standard/basic_functions.h"

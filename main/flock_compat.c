@@ -14,7 +14,7 @@
 
 #include "php.h"
 #include <errno.h>
-#include "ext/standard/flock_compat.h"
+#include "flock_compat.h"
 
 #ifndef HAVE_FLOCK
 PHPAPI int flock(int fd, int operation)

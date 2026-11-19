@@ -30,7 +30,7 @@
 
 #include "php_dba.h"
 #include "ext/standard/info.h"
-#include "ext/standard/flock_compat.h" /* Compatibility for Windows */
+#include "main/flock_compat.h" /* Compatibility for Windows */
 
 #include "php_gdbm.h"
 #include "php_ndbm.h"
