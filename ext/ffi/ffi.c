@@ -1018,6 +1018,7 @@ static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value) /* {{{ *
 
 	if (!zend_is_callable_ex(value, NULL, 0, NULL, &fcc, &error)) {
 		zend_throw_error(zend_ffi_exception_ce, "Attempt to assign an invalid callback, %s", error);
+		efree(error);
 		return NULL;
 	}
 
