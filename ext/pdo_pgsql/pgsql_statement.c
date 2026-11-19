@@ -793,11 +793,18 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pd
 	return 1;
 }
 
-static zend_always_inline char * pdo_pgsql_translate_oid_to_table(Oid oid, PGconn *conn)
+static zend_always_inline char * pdo_pgsql_translate_oid_to_table(Oid oid, pdo_pgsql_db_handle *H)
 {
+	PGconn *conn = H->server;
 	char *table_name = NULL;
 	PGresult *tmp_res;
 	char *querystr = NULL;
+
+	if (H->running_stmt && H->running_stmt->is_unbuffered) {
+		/* in single-row mode, libpq forbids passing a new query
+		 * while we're still flushing the current one's result */
+		return NULL;
+	}
 
 	spprintf(&querystr, 0, "SELECT RELNAME FROM PG_CLASS WHERE OID=%d", oid);
 
@@ -843,7 +850,7 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *r
 
 	table_oid = PQftable(S->result, colno);
 	add_assoc_long(return_value, "pgsql:table_oid", table_oid);
-	table_name = pdo_pgsql_translate_oid_to_table(table_oid, S->H->server);
+	table_name = pdo_pgsql_translate_oid_to_table(table_oid, S->H);
 	if (table_name) {
 		add_assoc_string(return_value, "table", table_name);
 		efree(table_name);
@@ -885,6 +892,10 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *r
 			break;
 		default:
 			/* Fetch metadata from Postgres system catalogue */
+			if (S->H->running_stmt && S->H->running_stmt->is_unbuffered) {
+				/* libpq forbids calling a query while we're still reading the preceding one's */
+				break;
+			}
 			spprintf(&q, 0, "SELECT TYPNAME FROM PG_TYPE WHERE OID=%u", S->cols[colno].pgsql_type);
 			res = PQexec(S->H->server, q);
 			efree(q);
