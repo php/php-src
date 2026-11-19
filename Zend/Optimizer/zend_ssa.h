@@ -27,14 +27,14 @@ typedef struct _zend_ssa_range {
 	bool              overflow;
 } zend_ssa_range;
 
-typedef enum _zend_ssa_negative_lat {
+C23_ENUM(zend_ssa_negative_lat, uint8_t) {
 	NEG_NONE      = 0,
 	NEG_INIT      = 1,
 	NEG_INVARIANT = 2,
 	NEG_USE_LT    = 3,
 	NEG_USE_GT    = 4,
 	NEG_UNKNOWN   = 5
-} zend_ssa_negative_lat;
+};
 
 /* Special kind of SSA Phi function used in eSSA */
 typedef struct _zend_ssa_range_constraint {
@@ -89,18 +89,18 @@ typedef struct _zend_ssa_op {
 	int                    res_use_chain;
 } zend_ssa_op;
 
-typedef enum _zend_ssa_alias_kind {
+C23_ENUM(zend_ssa_alias_kind, uint8_t) {
 	NO_ALIAS,
 	SYMTABLE_ALIAS,
 	HTTP_RESPONSE_HEADER_ALIAS
-} zend_ssa_alias_kind;
+};
 
-typedef enum _zend_ssa_escape_state {
+C23_ENUM(zend_ssa_escape_state, uint8_t) {
 	ESCAPE_STATE_UNKNOWN,
 	ESCAPE_STATE_NO_ESCAPE,
 	ESCAPE_STATE_FUNCTION_ESCAPE,
 	ESCAPE_STATE_GLOBAL_ESCAPE
-} zend_ssa_escape_state;
+};
 
 typedef struct _zend_ssa_var {
 	int                    var;            /* original var number; op.var for CVs and following numbers for VARs and TMP_VARs */
@@ -110,10 +110,10 @@ typedef struct _zend_ssa_var {
 	zend_ssa_phi          *definition_phi; /* phi that defines this value */
 	zend_ssa_phi          *phi_use_chain;  /* uses of this value in Phi, linked through use_chain */
 	zend_ssa_phi          *sym_use_chain;  /* uses of this value in Pi constraints */
-	bool                   no_val : 1;     /* value doesn't matter (used as op1 in ZEND_ASSIGN) */
-	bool                   scc_entry : 1;
-	unsigned int           alias : 2;  /* value may be changed indirectly */
-	unsigned int           escape_state : 2;
+	bool                   no_val;     /* value doesn't matter (used as op1 in ZEND_ASSIGN) */
+	bool                   scc_entry;
+	zend_ssa_alias_kind    alias;  /* value may be changed indirectly */
+	zend_ssa_escape_state  escape_state;
 } zend_ssa_var;
 
 typedef struct _zend_ssa_var_info {
