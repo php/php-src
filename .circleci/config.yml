@@ -42,6 +42,8 @@ jobs:
               ldap-utils \
               openssl \
               slapd \
+              apache2 \
+              apache2-dev \
               libgmp-dev \
               libicu-dev \
               libtidy-dev \
@@ -90,6 +92,7 @@ jobs:
               --prefix=/usr \
               --enable-phpdbg \
               --enable-fpm \
+              --with-apxs2 \
               --with-pdo-mysql=mysqlnd \
               --with-mysqli=mysqlnd \
               --with-pgsql \
