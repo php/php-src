@@ -396,7 +396,14 @@ PHP_JSON_API void php_json_parser_init(php_json_parser *parser,
 
 PHP_JSON_API int php_json_parse(php_json_parser *parser)
 {
-	return php_json_yyparse(parser);
+	int ret = php_json_yyparse(parser);
+
+	/* Bison returns 2 when its stack limit was hit, the input is not malformed */
+	if (ret == 2) {
+		parser->scanner.errcode = PHP_JSON_ERROR_DEPTH;
+	}
+
+	return ret;
 }
 
 const php_json_parser_methods* php_json_get_validate_methods(void)
