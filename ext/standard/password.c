@@ -244,138 +244,239 @@ const php_password_algo php_password_algo_bcrypt = {
 #ifdef HAVE_ARGON2LIB
 /* argon2i/argon2id shared implementation */
 
-static int extract_argon2_parameters(const zend_string *hash,
-									  zend_long *v, zend_long *memory_cost,
-									  zend_long *time_cost, zend_long *threads) /* {{{ */
-{
-	const char *p = ZSTR_VAL(hash);
-	if (!hash || (ZSTR_LEN(hash) < sizeof("$argon2id$"))) {
-		return FAILURE;
-	}
-	if (!memcmp(p, "$argon2i$", sizeof("$argon2i$") - 1)) {
-		p += sizeof("$argon2i$") - 1;
-	} else if (!memcmp(p, "$argon2id$", sizeof("$argon2id$") - 1)) {
-		p += sizeof("$argon2id$") - 1;
-	} else {
-		return FAILURE;
+typedef struct php_password_argon2_ops {
+	argon2_version v;
+	uint32_t m;
+	uint32_t t;
+	uint8_t p;
+	uint8_t salt_len;
+	uint8_t digest_len;
+} php_password_argon2_ops;
+
+static bool php_password_argon2_get_options(const zend_array *options, php_password_argon2_ops *ops, const bool silent) {
+	zval *zv;
+	zend_long zl;
+	*ops = (php_password_argon2_ops) {
+		.v = ARGON2_VERSION_13, /* Don't know the implications of a future version */
+		.m = PHP_PASSWORD_ARGON2_MEMORY_COST,
+		.t = PHP_PASSWORD_ARGON2_TIME_COST,
+		.p = PHP_PASSWORD_ARGON2_THREADS,
+		.salt_len = 16,
+		.digest_len = 32
+	};
+
+	if (options && (zv = zend_hash_str_find(options, "memory_cost", sizeof("memory_cost")-1)) != NULL) {
+		zl = zval_get_long(zv);
+		if (zl >= ARGON2_MIN_MEMORY && zl <= ARGON2_MAX_MEMORY) {
+			ops->m = zl;
+		} else if (!silent) {
+			zend_value_error("Memory cost is outside of allowed memory range");
+			return false;
+		}
 	}
 
-	sscanf(p, "v=" ZEND_LONG_FMT "$m=" ZEND_LONG_FMT ",t=" ZEND_LONG_FMT ",p=" ZEND_LONG_FMT,
-	       v, memory_cost, time_cost, threads);
+	if (options && (zv = zend_hash_str_find(options, "time_cost", sizeof("time_cost")-1)) != NULL) {
+		zl = zval_get_long(zv);
+		if (zl >= ARGON2_MIN_TIME && zl <= ARGON2_MAX_TIME) {
+			ops->t = zl;
+		} else if (!silent) {
+			zend_value_error("Time cost is outside of allowed time range");
+			return false;
+		}
+	}
 
-	return SUCCESS;
+	if (options && (zv = zend_hash_str_find(options, "threads", sizeof("threads")-1)) != NULL) {
+		zl = zval_get_long(zv);
+		/* ARGON2_MAX_LANES is a theoretical KDF value; 255 is specified by PHC strings. */
+		if (zl >= ARGON2_MIN_LANES && zl <= 255) {
+			ops->p = zl;
+		} else if (!silent) {
+			zend_value_error("Invalid number of threads");
+			return false;
+		}
+	}
+
+	return true;
 }
-/* }}} */
+
+static inline bool php_password_argon2_parse_prefix(const char **ptr, argon2_version *v) {
+	argon2_type type;
+	const char *h = *ptr;
+	if (memcmp(h, "$argon2id$", sizeof("$argon2id$")-1) == 0) {
+		type = Argon2_id;
+		h += sizeof("$argon2id$")-1;
+	} else if (memcmp(h, "$argon2i$", sizeof("$argon2i$")-1) == 0) {
+		type = Argon2_i;
+		h += sizeof("$argon2i$")-1;
+	} else {
+		return false;
+	}
+
+	if (memcmp(h, "v=19$", 5) == 0) {
+		*v = ARGON2_VERSION_13;
+		h += 5;
+	/* 1.0 hashes didn't tag the version, but it could be set by future implementers */
+	} else if (memcmp(h, "v=16$", 5) == 0) {
+		*v = ARGON2_VERSION_10;
+		h += 5;
+	} else if (h[0] == 'm') {
+		*v = ARGON2_VERSION_10;
+	} else {
+		return false;
+	}
+
+	*ptr = h;
+	/* Argon2id was introduced by version 1.3 */
+	return !(type == Argon2_id && *v == ARGON2_VERSION_10);
+}
+
+static inline bool php_password_argon2_parse_param(const char **ptr, const char param, const uint32_t maxval, zend_ulong *outval) {
+	const char *h = *ptr;
+	if (h[0] != param || h[1] != '=' || h[2] < '1' || h[2] > '9') {
+		return false;
+	}
+
+	char *dptr = NULL;
+	zend_ulong val = ZEND_STRTOUL(h + 2, &dptr, 10);
+	if (*dptr != (param == 'p' ? '$' : ',') || val > maxval) {
+		return false;
+	}
+	*outval = val;
+	*ptr = (const char *)dptr + 1;
+	return true;
+}
+
+static bool php_password_argon2_parse(const zend_string *hash, php_password_argon2_ops *ops) {
+	/* Min/max allowed by PHC strings. keyid and data params excluded as unsupported. */
+	if (ZSTR_LEN(hash) < 49 || ZSTR_LEN(hash) > 198) {
+		return false;
+	}
+
+	argon2_version v;
+	zend_ulong m, t, p;
+	const char *hashptr = ZSTR_VAL(hash);
+	// Don't use ARGON2_MAX_* values here; it gets weird on 32bit builds
+	if (!php_password_argon2_parse_prefix(&hashptr, &v) ||
+		!php_password_argon2_parse_param(&hashptr, 'm', UINT32_MAX, &m) ||
+		!php_password_argon2_parse_param(&hashptr, 't', UINT32_MAX, &t) ||
+		!php_password_argon2_parse_param(&hashptr, 'p', 255, &p)) {
+		return false;
+	}
+
+	if (m < p * 8) {
+		return false;
+	}
+
+	const char *end = ZSTR_VAL(hash) + ZSTR_LEN(hash);
+	uint8_t s_len = 0, d_len = 0;
+	for (bool is_salt = true; hashptr < end; hashptr++) {
+		char c = *hashptr;
+		if (c == '+' || (c >= '/' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) {
+			(is_salt) ? s_len++ : d_len++;
+		} else if (c == '$' && is_salt) {
+			is_salt = false;
+		} else {
+			return false;
+		}
+	}
+
+	if (s_len < 11 || s_len > 64 || s_len % 4 == 1 || d_len < 16 || d_len > 86 || d_len % 4 == 1) {
+		return false;
+	}
+
+	if (ops != NULL) {
+		*ops = (php_password_argon2_ops) {
+			.v = v, .m = m, .t = t, .p = p,
+			/* B64 length to binary size */
+			.salt_len = (3 * s_len) / 4,
+			.digest_len = (3 * d_len) / 4
+		};
+	}
+
+	return true;
+}
+
+static bool php_password_argon2_valid(const zend_string *hash) {
+	return php_password_argon2_parse(hash, NULL);
+}
 
 static int php_password_argon2_get_info(zval *return_value, const zend_string *hash) {
-	zend_long v = 0;
-	zend_long memory_cost = PHP_PASSWORD_ARGON2_MEMORY_COST;
-	zend_long time_cost = PHP_PASSWORD_ARGON2_TIME_COST;
-	zend_long threads = PHP_PASSWORD_ARGON2_THREADS;
+	php_password_argon2_ops ops;
+	if (!php_password_argon2_parse(hash, &ops)) {
+		return FAILURE;
+	}
 
-	extract_argon2_parameters(hash, &v, &memory_cost, &time_cost, &threads);
-
-	add_assoc_long(return_value, "memory_cost", memory_cost);
-	add_assoc_long(return_value, "time_cost", time_cost);
-	add_assoc_long(return_value, "threads", threads);
+	add_assoc_long(return_value, "memory_cost", ops.m);
+	add_assoc_long(return_value, "time_cost", ops.t);
+	/* Note: threads is a misnomer here, but it was voted-in as is. */
+	add_assoc_long(return_value, "threads", ops.p);
 
 	return SUCCESS;
 }
 
 static bool php_password_argon2_needs_rehash(const zend_string *hash, zend_array *options) {
-	zend_long v = 0;
-	zend_long new_memory_cost = PHP_PASSWORD_ARGON2_MEMORY_COST, memory_cost = 0;
-	zend_long new_time_cost = PHP_PASSWORD_ARGON2_TIME_COST, time_cost = 0;
-	zend_long new_threads = PHP_PASSWORD_ARGON2_THREADS, threads = 0;
-	zval *option_buffer;
+	php_password_argon2_ops new, old;
 
-	if (options && (option_buffer = zend_hash_str_find(options, "memory_cost", sizeof("memory_cost")-1)) != NULL) {
-		new_memory_cost = zval_get_long(option_buffer);
+	if (!php_password_argon2_get_options(options, &new, true)) {
+		return false;
 	}
 
-	if (options && (option_buffer = zend_hash_str_find(options, "time_cost", sizeof("time_cost")-1)) != NULL) {
-		new_time_cost = zval_get_long(option_buffer);
+	if (!php_password_argon2_parse(hash, &old)) {
+		return true;
 	}
 
-	if (options && (option_buffer = zend_hash_str_find(options, "threads", sizeof("threads")-1)) != NULL) {
-		new_threads = zval_get_long(option_buffer);
+	/* Keeping this separate as overriding to other conditions. */
+	if (old.v > ARGON2_VERSION_NUMBER) {
+		return false;
 	}
 
-	extract_argon2_parameters(hash, &v, &memory_cost, &time_cost, &threads);
-
-	return (new_time_cost != time_cost) ||
-			(new_memory_cost != memory_cost) ||
-			(new_threads != threads);
+	/* If anything except m,t,p differs, only rehash if it would be an upgrade */
+	return new.v > old.v || new.salt_len > old.salt_len || new.digest_len > old.digest_len ||
+		new.m != old.m || new.t != old.t || new.p != old.p;
 }
 
-static zend_string *php_password_argon2_hash(const zend_string *password, zend_array *options, argon2_type type) {
-	zval *option_buffer;
-	zend_string *salt, *out, *encoded;
-	size_t time_cost = PHP_PASSWORD_ARGON2_TIME_COST;
-	size_t memory_cost = PHP_PASSWORD_ARGON2_MEMORY_COST;
-	size_t threads = PHP_PASSWORD_ARGON2_THREADS;
-	size_t encoded_len;
-	int status = 0;
-
-	if (options && (option_buffer = zend_hash_str_find(options, "memory_cost", sizeof("memory_cost")-1)) != NULL) {
-		memory_cost = zval_get_long(option_buffer);
-	}
-
-	if (memory_cost > ARGON2_MAX_MEMORY || memory_cost < ARGON2_MIN_MEMORY) {
-		zend_value_error("Memory cost is outside of allowed memory range");
+static zend_string *php_password_argon2_hash(const zend_string *password, zend_array *options, const argon2_type type) {
+	if (ZSTR_LEN(password) > ARGON2_MAX_PWD_LENGTH) {
+		zend_value_error("Password is too long");
 		return NULL;
 	}
 
-	if (options && (option_buffer = zend_hash_str_find(options, "time_cost", sizeof("time_cost")-1)) != NULL) {
-		time_cost = zval_get_long(option_buffer);
-	}
-
-	if (time_cost > ARGON2_MAX_TIME || time_cost < ARGON2_MIN_TIME) {
-		zend_value_error("Time cost is outside of allowed time range");
+	php_password_argon2_ops ops;
+	if (!php_password_argon2_get_options(options, &ops, false)) {
 		return NULL;
 	}
 
-	if (options && (option_buffer = zend_hash_str_find(options, "threads", sizeof("threads")-1)) != NULL) {
-		threads = zval_get_long(option_buffer);
-	}
-
-	if (threads > ARGON2_MAX_LANES || threads == 0) {
-		zend_value_error("Invalid number of threads");
+	zend_string *salt;
+	if (!(salt = php_password_get_salt(NULL, ops.salt_len, options))) {
 		return NULL;
 	}
 
-	if (!(salt = php_password_get_salt(NULL, Z_UL(16), options))) {
-		return NULL;
-	}
-
-	out = zend_string_alloc(32, 0);
-	encoded_len = argon2_encodedlen(
-		time_cost,
-		memory_cost,
-		threads,
-		(uint32_t)ZSTR_LEN(salt),
-		ZSTR_LEN(out),
+	uint8_t encoded_len = argon2_encodedlen(
+		ops.t,
+		ops.m,
+		ops.p,
+		ops.salt_len,
+		ops.digest_len,
 		type
 	);
 
-	encoded = zend_string_alloc(encoded_len - 1, 0);
-	status = argon2_hash(
-		time_cost,
-		memory_cost,
-		threads,
+	zend_string *encoded = zend_string_alloc(encoded_len - 1, 0);
+	const int status = argon2_hash(
+		ops.t,
+		ops.m,
+		ops.p,
 		ZSTR_VAL(password),
 		ZSTR_LEN(password),
 		ZSTR_VAL(salt),
 		ZSTR_LEN(salt),
-		ZSTR_VAL(out),
-		ZSTR_LEN(out),
+		NULL,
+		ops.digest_len,
 		ZSTR_VAL(encoded),
 		encoded_len,
 		type,
-		ARGON2_VERSION_NUMBER
+		ops.v
 	);
 
-	zend_string_release_ex(out, 0);
 	zend_string_release_ex(salt, 0);
 
 	if (status != ARGON2_OK) {
@@ -391,7 +492,7 @@ static zend_string *php_password_argon2_hash(const zend_string *password, zend_a
 /* argon2i specific methods */
 
 static bool php_password_argon2i_verify(const zend_string *password, const zend_string *hash) {
-	return ARGON2_OK == argon2_verify(ZSTR_VAL(hash), ZSTR_VAL(password), ZSTR_LEN(password), Argon2_i);
+	return ARGON2_OK == argon2i_verify(ZSTR_VAL(hash), ZSTR_VAL(password), ZSTR_LEN(password));
 }
 
 static zend_string *php_password_argon2i_hash(const zend_string *password, zend_array *options) {
@@ -404,13 +505,13 @@ const php_password_algo php_password_algo_argon2i = {
 	php_password_argon2i_verify,
 	php_password_argon2_needs_rehash,
 	php_password_argon2_get_info,
-	NULL,
+	php_password_argon2_valid,
 };
 
 /* argon2id specific methods */
 
 static bool php_password_argon2id_verify(const zend_string *password, const zend_string *hash) {
-	return ARGON2_OK == argon2_verify(ZSTR_VAL(hash), ZSTR_VAL(password), ZSTR_LEN(password), Argon2_id);
+	return ARGON2_OK == argon2id_verify(ZSTR_VAL(hash), ZSTR_VAL(password), ZSTR_LEN(password));
 }
 
 static zend_string *php_password_argon2id_hash(const zend_string *password, zend_array *options) {
@@ -423,7 +524,7 @@ const php_password_algo php_password_algo_argon2id = {
 	php_password_argon2id_verify,
 	php_password_argon2_needs_rehash,
 	php_password_argon2_get_info,
-	NULL,
+	php_password_argon2_valid,
 };
 #endif
 
