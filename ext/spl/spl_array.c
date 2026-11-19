@@ -1100,14 +1100,20 @@ PHP_METHOD(ArrayObject, getIterator)
 {
 	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
+	zend_class_entry *ce = intern->ce_get_iterator;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (UNEXPECTED(zend_update_class_constants(intern->ce_get_iterator) != SUCCESS)) {
+	if (UNEXPECTED(ce->ce_flags & ZEND_ACC_UNINSTANTIABLE)) {
+		zend_cannot_instantiate_class(ce);
 		RETURN_THROWS();
 	}
 
-	RETURN_OBJ(spl_array_object_new_ex(intern->ce_get_iterator, Z_OBJ_P(object), 0));
+	if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
+		RETURN_THROWS();
+	}
+
+	RETURN_OBJ(spl_array_object_new_ex(ce, Z_OBJ_P(object), 0));
 }
 /* }}} */
 

@@ -474,12 +474,10 @@ static spl_filesystem_object *spl_filesystem_object_create_info(zend_string *fil
 	ZEND_ASSERT(file_path && ZSTR_LEN(file_path) > 0);
 	ZEND_ASSERT(ce != NULL);
 
-	if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
+	if (UNEXPECTED(object_init_ex(return_value, ce) != SUCCESS)) {
 		return NULL;
 	}
-
-	intern = spl_filesystem_from_obj(spl_filesystem_object_new(ce));
-	RETVAL_OBJ(&intern->std);
+	intern = spl_filesystem_from_obj(Z_OBJ_P(return_value));
 
 	if (ce->constructor->common.scope != spl_ce_SplFileInfo) {
 		ZVAL_STR(&arg1, file_path);
@@ -513,12 +511,10 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int num_args, sp
 		case SPL_FS_INFO:
 			ce = ce ? ce : source->info_class;
 
-			if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
+			if (UNEXPECTED(object_init_ex(return_value, ce) != SUCCESS)) {
 				return NULL;
 			}
-
-			intern = spl_filesystem_from_obj(spl_filesystem_object_new(ce));
-			RETVAL_OBJ(&intern->std);
+			intern = spl_filesystem_from_obj(Z_OBJ_P(return_value));
 
 			if (spl_filesystem_object_get_file_name(source) == FAILURE) {
 				return NULL;
@@ -545,12 +541,10 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int num_args, sp
 				return NULL;
 			}
 
-			if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
+			if (UNEXPECTED(object_init_ex(return_value, ce) != SUCCESS)) {
 				return NULL;
 			}
-
-			intern = spl_filesystem_from_obj(spl_filesystem_object_new(ce));
-			RETVAL_OBJ(&intern->std);
+			intern = spl_filesystem_from_obj(Z_OBJ_P(return_value));
 
 			if (spl_filesystem_object_get_file_name(source) == FAILURE) {
 				return NULL;
@@ -1686,6 +1680,10 @@ static zval *spl_filesystem_tree_it_current_data(zend_object_iterator *iter)
 				return NULL;
 			}
 			spl_filesystem_object_create_type(0, object, SPL_FS_INFO, NULL, &iterator->current);
+			if (UNEXPECTED(Z_TYPE(iterator->current) != IS_OBJECT)) {
+				ZVAL_UNDEF(&iterator->current);
+				return NULL;
+			}
 		}
 		return &iterator->current;
 	} else {

@@ -166,6 +166,9 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug GH-23385 (SplDoublyLinkedList::serialize() use-after-free when
     __serialize() removes an element). (David Carlier)
+  . ArrayObject::getIterator(), SplFileInfo::openFile(), getFileInfo(),
+    getPathInfo() and FilesystemIterator in CURRENT_AS_FILEINFO mode now throw
+    an Error instead of instantiating an abstract class. (Ilia Alshanetsky)
 
 - SQLite:
   . Fixed a crash when SQLite3::close() is called from a userland callback.
