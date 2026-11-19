@@ -139,6 +139,7 @@ typedef struct pgsql_link_handle {
 	PGconn *conn;
 	zend_string *hash;
 	HashTable *notices;
+	HashTable *meta_cache;
 	bool persistent;
 	zend_object std;
 } pgsql_link_handle;
