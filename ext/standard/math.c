@@ -539,7 +539,7 @@ PHP_FUNCTION(sinh)
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_DOUBLE(num)
 	ZEND_PARSE_PARAMETERS_END();
-	RETURN_DOUBLE(sinh(num));
+	RETURN_DOUBLE(zend_sinh(num));
 }
 /* }}} */
 
