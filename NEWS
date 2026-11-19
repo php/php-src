@@ -147,7 +147,7 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug GH-25474 (version_compare() treats large numeric parts as equal
-    on 64-bit Windows). (lazerg)
+    on 64-bit Windows). (lazerg, timwolla)
   . Fixed dns_get_record() returning partially built records for malformed
     DNS responses. (Marti2203)
   . Fixed bug GH-25387 (Uploaded files leak in request_parse_body()).
