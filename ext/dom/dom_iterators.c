@@ -131,8 +131,10 @@ static void php_dom_iterator_current_key(zend_object_iterator *iter, zval *key) 
 
 	/* Only dtd named node maps, i.e. the ones based on a libxml hash table or attribute collections,
 	 * are keyed by the name because in that case the name is unique. */
-	if (!objmap->ht && objmap->nodetype != XML_ATTRIBUTE_NODE) {
+	if (objmap->nodetype != XML_ATTRIBUTE_NODE && objmap->nodetype != XML_ENTITY_NODE && objmap->nodetype != XML_NOTATION_NODE) {
 		ZVAL_LONG(key, iterator->index);
+	} else if (Z_TYPE(iterator->curobj) != IS_OBJECT) {
+		ZVAL_NULL(key);
 	} else {
 		dom_object *intern = Z_DOMOBJ_P(&iterator->curobj);
 
