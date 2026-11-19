@@ -450,6 +450,8 @@ PHP                                                                        NEWS
     mounted entries). (Lazizbek Ergashev)
   . Fixed bug GH-24531 (Crash when modifying a zip-based phar whose file was
     renamed). (Ilia Alshanetsky)
+  . Fixed bug GH-25528 (Phar::setSignatureAlgorithm(): OpenSSL signing reads a
+    freed private key). (Artem Ukrainskiy)
 
 - Phpdbg:
   . Fix wrong command names. (ndossche, Weilin Du)
