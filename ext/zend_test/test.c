@@ -809,6 +809,30 @@ static ZEND_FUNCTION(zend_test_raise_on_foreign_thread)
 	}
 	pthread_join(thread, NULL);
 }
+
+static void *zend_test_idle_thread(void *arg)
+{
+	(void) arg;
+	for (;;) {
+		pause();
+	}
+	return NULL;
+}
+
+/* Starts a thread that never runs PHP and stays alive until the process exits.
+ * It inherits the caller's signal mask. */
+static ZEND_FUNCTION(zend_test_start_foreign_thread)
+{
+	pthread_t thread;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	if (pthread_create(&thread, NULL, zend_test_idle_thread, NULL) != 0) {
+		zend_throw_error(NULL, "pthread_create() failed");
+		RETURN_THROWS();
+	}
+	pthread_detach(thread);
+}
 #endif
 
 static bool has_opline(zend_execute_data *execute_data)
