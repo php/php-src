@@ -82,8 +82,7 @@ array(1) {
   string(15) "trusted:payload"
 }
 empty direct
-array(0) {
-}
+Error: Call to undefined function cand_86013_missing()
 empty dynamic-call control
 Error: Call to undefined function cand_86013_missing()
 direct array_map static call
