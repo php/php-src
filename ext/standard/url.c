@@ -60,9 +60,9 @@ static void php_replace_controlchars(char *str, size_t len)
 	}
 }
 
-PHPAPI php_url *php_url_parse(char const *str)
+PHPAPI php_url *php_url_parse(char const *str, php_url_error *url_error)
 {
-	return php_url_parse_ex(str, strlen(str));
+	return php_url_parse_ex(str, strlen(str), url_error);
 }
 
 static const char *binary_strcspn(const char *s, const char *e, const char *chars) {
@@ -77,15 +77,15 @@ static const char *binary_strcspn(const char *s, const char *e, const char *char
 }
 
 /* {{{ php_url_parse */
-PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
+PHPAPI php_url *php_url_parse_ex(char const *str, size_t length, php_url_error *error)
 {
 	bool has_port;
-	return php_url_parse_ex2(str, length, &has_port);
+	return php_url_parse_ex2(str, length, &has_port, error);
 }
 
 /* {{{ php_url_parse_ex2
  */
-PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port)
+PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port, php_url_error *url_error)
 {
 	char port_buf[6];
 	php_url *ret = ecalloc(1, sizeof(php_url));
@@ -188,10 +188,12 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 				}
 			} else {
 				php_url_free(ret);
+				*url_error = PHP_URL_ERR_INVALID_PORT;
 				return NULL;
 			}
 		} else if (p == pp && pp == ue) {
 			php_url_free(ret);
+			*url_error = PHP_URL_ERR_TRAILING_COLON;
 			return NULL;
 		} else if (s + 1 < ue && *s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
 			s += 2;
@@ -239,6 +241,7 @@ parse_host:
 			p++;
 			if (e-p > 5) { /* port cannot be longer then 5 characters */
 				php_url_free(ret);
+				*url_error = PHP_URL_ERR_PORT_TOO_LONG;
 				return NULL;
 			} else if (e - p > 0) {
 				zend_long port;
@@ -251,6 +254,7 @@ parse_host:
 					ret->port = (unsigned short)port;
 				} else {
 					php_url_free(ret);
+					*url_error = PHP_URL_ERR_INVALID_PORT;
 					return NULL;
 				}
 			}
@@ -262,6 +266,7 @@ parse_host:
 
 	/* check if we have a valid host, if we don't reject the string as url */
 	if ((p-s) < 1) {
+		*url_error = PHP_URL_ERR_EMPTY_HOST;
 		php_url_free(ret);
 		return NULL;
 	}
@@ -320,16 +325,33 @@ PHP_FUNCTION(parse_url)
 	zend_long key = -1;
 	zval tmp;
 	bool has_port;
-
+    php_url_error url_error = PHP_URL_ERR_NONE;
+	
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STRING(str, str_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(key)
 	ZEND_PARSE_PARAMETERS_END();
 
-	resource = php_url_parse_ex2(str, str_len, &has_port);
+	resource = php_url_parse_ex2(str, str_len, &has_port, &url_error);
 	if (resource == NULL) {
-		/* @todo Find a method to determine why php_url_parse_ex() failed */
+		 switch (url_error) {
+            case PHP_URL_ERR_INVALID_PORT:
+                php_error_docref(NULL, E_WARNING, "Invalid port in URL");
+                break;
+            case PHP_URL_ERR_TRAILING_COLON:
+                php_error_docref(NULL, E_WARNING, "Trailing colon without port in URL");
+                break;
+            case PHP_URL_ERR_PORT_TOO_LONG:
+                php_error_docref(NULL, E_WARNING, "Port number too long in URL");
+                break;
+            case PHP_URL_ERR_EMPTY_HOST:
+                php_error_docref(NULL, E_WARNING, "Empty host in URL");
+                break;
+            default:
+                php_error_docref(NULL, E_WARNING, "Unable to parse URL");
+                break;
+        }
 		RETURN_FALSE;
 	}
 
