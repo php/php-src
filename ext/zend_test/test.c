@@ -2587,8 +2587,6 @@ PHP_RINIT_FUNCTION(zend_test)
 {
 	ALLOC_HASHTABLE(ZT_G(global_weakmap));
 	zend_hash_init(ZT_G(global_weakmap), 8, NULL, ZVAL_PTR_DTOR, 0);
-	ZT_G(observer_nesting_depth) = 0;
-	ZT_G(observer_throw_on_vm_interrupt) = false;
 	zend_test_mm_custom_handlers_rinit();
 
 	if (ZT_G(rearm_vm_interrupt)) {
@@ -2653,7 +2651,7 @@ zend_module_entry zend_test_module_entry = {
 	PHP_RSHUTDOWN(zend_test),
 	PHP_MINFO(zend_test),
 	PHP_ZEND_TEST_VERSION,
-	PHP_MODULE_GLOBALS(zend_test),
+	PHP_MODULE_GLOBALS_EX(zend_test),
 	PHP_GINIT(zend_test),
 	PHP_GSHUTDOWN(zend_test),
 	NULL,
@@ -2848,4 +2846,18 @@ static PHP_FUNCTION(zend_test_gh19792)
 	RETVAL_STRING("this is a non-interned string");
 	zend_error(E_WARNING, "a warning");
 	zend_throw_error(NULL, "an exception");
+}
+
+static PHP_FUNCTION(zend_test_set_request_value)
+{
+	zend_long new_value;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(new_value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_long old_value = ZT_G(request_value);
+	ZT_G(request_value) = new_value;
+
+	RETURN_LONG(old_value);
 }

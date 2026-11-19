@@ -45,14 +45,11 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	int observer_set_vm_interrupt_on_begin;
 	int observer_set_vm_interrupt_on_begin_without_callback;
 	int observer_set_vm_interrupt_on_end;
-	bool observer_throw_on_vm_interrupt;
-	int observer_nesting_depth;
 	int observer_fiber_init;
 	int observer_fiber_switch;
 	int observer_fiber_destroy;
 	int observer_execute_internal;
 	int observer_reserve_op_array_handle;
-	HashTable *global_weakmap;
 	int replace_zend_execute_ex;
 	int register_passes;
 	bool rearm_vm_interrupt;
@@ -60,25 +57,35 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	bool warn_on_startup;
 	zend_long limit_copy_file_range;
 	int observe_opline_in_zendmm;
-	zend_mm_heap* zend_orig_heap;
-	zend_mm_heap* zend_test_heap;
-	zend_test_fiber *active_fiber;
 	zend_long quantity_value;
 	zend_string *str_test;
 	zend_string *not_empty_str_test;
 	int zend_mm_custom_handlers_enabled;
 
-	// the previous heap that was found in ZendMM
-	zend_mm_heap* original_heap;
-	// the custom handlers that might have been found in the previous heap
-	void* (*custom_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
-	void (*custom_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
-	void* (*custom_realloc)(void *, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
-	size_t (*custom_gc)(void);
-	void (*custom_shutdown)(bool, bool);
-	// this is our heap that we install our custom handlers on and inject into
-	// ZendMM
-	zend_mm_heap* observed_heap;
+	ZEND_BEGIN_MODULE_REQUEST_GLOBALS()
+		HashTable *global_weakmap;
+		bool observer_throw_on_vm_interrupt;
+		int observer_nesting_depth;
+
+		zend_test_fiber *active_fiber;
+
+		zend_mm_heap* zend_orig_heap;
+		zend_mm_heap* zend_test_heap;
+
+		// the previous heap that was found in ZendMM
+		zend_mm_heap* original_heap;
+		// the custom handlers that might have been found in the previous heap
+		void* (*custom_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
+		void (*custom_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
+		void* (*custom_realloc)(void *, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
+		size_t (*custom_gc)(void);
+		void (*custom_shutdown)(bool, bool);
+		// this is our heap that we install our custom handlers on and inject into
+		// ZendMM
+		zend_mm_heap* observed_heap;
+
+		zend_long request_value;
+	ZEND_END_MODULE_REQUEST_GLOBALS()
 ZEND_END_MODULE_GLOBALS(zend_test)
 
 extern ZEND_DECLARE_MODULE_GLOBALS(zend_test)

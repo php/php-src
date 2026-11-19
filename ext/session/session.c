@@ -122,20 +122,9 @@ static int my_module_number = 0;
 static inline void php_rinit_session_globals(void)
 {
 	/* Do NOT init PS(mod_user_names) here! */
-	PS(id) = NULL;
 	PS(session_status) = php_session_none;
-	PS(in_save_handler) = false;
-	PS(set_handler) = false;
-	PS(mod_data) = NULL;
-	PS(mod_user_is_open) = false;
-	PS(mod_user_uses_object_methods_as_handlers) = false;
 	PS(define_sid) = true;
-	PS(session_vars) = NULL;
 	PS(module_number) = my_module_number;
-	PS(in_rfc1867_update) = false;
-	ZVAL_UNDEF(&PS(http_session_vars));
-	PS(session_started_filename) = NULL;
-	PS(session_started_lineno) = 0;
 }
 
 static inline void php_session_headers_already_sent_error(int severity, const char *message) {
@@ -3001,32 +2990,6 @@ static PHP_GINIT_FUNCTION(ps)
 
 	ps_globals->save_path = NULL;
 	ps_globals->session_name = NULL;
-	ps_globals->id = NULL;
-	ps_globals->mod = NULL;
-	ps_globals->serializer = NULL;
-	ps_globals->mod_data = NULL;
-	ps_globals->in_rfc1867_update = false;
-	ps_globals->rfc1867_enabled = false;
-	ps_globals->session_status = php_session_none;
-	ps_globals->default_mod = NULL;
-	ps_globals->mod_user_implemented = false;
-	ps_globals->mod_user_is_open = false;
-	ps_globals->mod_user_uses_object_methods_as_handlers = false;
-	ps_globals->session_vars = NULL;
-	ps_globals->set_handler = false;
-	ps_globals->session_started_filename = NULL;
-	ps_globals->session_started_lineno = 0;
-	/* Unset user defined handlers */
-	ZVAL_UNDEF(&ps_globals->mod_user_names.ps_open);
-	ZVAL_UNDEF(&ps_globals->mod_user_names.ps_close);
-	ZVAL_UNDEF(&ps_globals->mod_user_names.ps_read);
-	ZVAL_UNDEF(&ps_globals->mod_user_names.ps_write);
-	ZVAL_UNDEF(&ps_globals->mod_user_names.ps_destroy);
-	ZVAL_UNDEF(&ps_globals->mod_user_names.ps_gc);
-	ZVAL_UNDEF(&ps_globals->mod_user_names.ps_create_sid);
-	ZVAL_UNDEF(&ps_globals->mod_user_names.ps_validate_sid);
-	ZVAL_UNDEF(&ps_globals->mod_user_names.ps_update_timestamp);
-	ZVAL_UNDEF(&ps_globals->http_session_vars);
 
 	ps_globals->random = (php_random_algo_with_state){
 		.algo = &php_random_algo_pcgoneseq128xslrr64,
@@ -3490,7 +3453,7 @@ zend_module_entry session_module_entry = {
 	PHP_RINIT(session), PHP_RSHUTDOWN(session),
 	PHP_MINFO(session),
 	PHP_SESSION_VERSION,
-	PHP_MODULE_GLOBALS(ps),
+	PHP_MODULE_GLOBALS_EX(ps),
 	PHP_GINIT(ps),
 	NULL,
 	NULL,

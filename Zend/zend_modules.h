@@ -52,13 +52,27 @@
 	.module_number = 0, \
 	.build_id = ZEND_MODULE_BUILD_ID
 
-#define NO_MODULE_GLOBALS 0, NULL, NULL, NULL
+#define NO_MODULE_GLOBALS 0, NULL, 0, 0, NULL, NULL
 
 #ifdef ZTS
-# define ZEND_MODULE_GLOBALS(module_name) sizeof(zend_##module_name##_globals), &module_name##_globals_id
+# define _ZEND_MODULE_GLOBALS(module_name) \
+	.globals_size = sizeof(zend_##module_name##_globals), \
+	.globals_id_ptr = &module_name##_globals_id
 #else
-# define ZEND_MODULE_GLOBALS(module_name) sizeof(zend_##module_name##_globals), &module_name##_globals
+# define _ZEND_MODULE_GLOBALS(module_name) \
+	.globals_size = sizeof(zend_##module_name##_globals), \
+	.globals_ptr = &module_name##_globals
 #endif
+
+#define ZEND_MODULE_GLOBALS(module_name) \
+	_ZEND_MODULE_GLOBALS(module_name), \
+	.request_globals_offset = 0, \
+	.request_globals_size = 0
+
+#define ZEND_MODULE_GLOBALS_EX(module_name) \
+	_ZEND_MODULE_GLOBALS(module_name), \
+	.request_globals_offset = offsetof(zend_##module_name##_globals, ___begin_request_globals), \
+	.request_globals_size = sizeof(zend_##module_name##_globals) - offsetof(zend_##module_name##_globals, ___begin_request_globals)
 
 #define STANDARD_MODULE_PROPERTIES \
 	NO_MODULE_GLOBALS, NULL, STANDARD_MODULE_PROPERTIES_EX
@@ -93,6 +107,8 @@ struct _zend_module_entry {
 #else
 	void* globals_ptr;
 #endif
+	size_t request_globals_offset;
+	size_t request_globals_size;
 	void (*globals_ctor)(void *global);
 	void (*globals_dtor)(void *global);
 	zend_result (*post_deactivate_func)(void);
