@@ -69,6 +69,8 @@ PHP                                                                        NEWS
 - MBString:
   . Fixed stack overflow in mb_check_encoding() and mb_convert_encoding() with
     deeply nested arrays. (Eyüp Can Akman)
+  . Fixed use-after-free of the mbstring.http_output_conv_mimetypes INI value
+    after mb_get_info(). (Gina Peter Banyard, Ilia Alshanetsky)
 
 - Opcache:
   . Fixed bug GH-24801 (JIT: SIGFPE in ir_fold MUL_OV constant folding).

@@ -4856,7 +4856,7 @@ PHP_FUNCTION(mb_get_info)
 		}
 
 		add_assoc_str(return_value, "http_output_conv_mimetypes",
-			zend_ini_str("mbstring.http_output_conv_mimetypes", sizeof("mbstring.http_output_conv_mimetypes") - 1, 0)
+			zend_string_copy(zend_ini_str("mbstring.http_output_conv_mimetypes", sizeof("mbstring.http_output_conv_mimetypes") - 1, 0))
 		);
 
 		name = (char *)mbfl_no_encoding2name(lang->mail_charset);
@@ -4917,7 +4917,7 @@ PHP_FUNCTION(mb_get_info)
 		ZEND_ASSERT(MBSTRG(current_http_output_encoding));
 		RETURN_STRING((char *)MBSTRG(current_http_output_encoding)->name);
 	} else if (zend_string_equals_literal_ci(type, "http_output_conv_mimetypes")) {
-		RETURN_STR(
+		RETURN_STR_COPY(
 			zend_ini_str(
 				"mbstring.http_output_conv_mimetypes",
 				sizeof("mbstring.http_output_conv_mimetypes") - 1,
