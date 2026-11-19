@@ -85,11 +85,29 @@ static const int zend_sigs[] = { TIMEOUT_SIG, SIGHUP, SIGINT, SIGQUIT, SIGTERM, 
 static zend_signal_entry_t global_orig_handlers[NSIG];
 
 #ifdef ZTS
-/* Signals for which a PHP thread registered a handler: only these are sent on
- * from threads that never ran PHP, the others keep the original disposition.
- * Never cleared: a PHP thread that no longer handles the signal applies the
- * original disposition, as the thread that received it would have. */
-static zend_atomic_bool global_php_handled[NSIG];
+/* Number of PHP threads whose handler for the signal is neither SIG_DFL nor
+ * SIG_IGN. Only signals with a handler are sent on from threads that never ran
+ * PHP; the others keep the original disposition on the thread they hit. */
+static zend_atomic_int global_php_handlers[NSIG];
+
+static bool zend_signal_entry_is_handler(const zend_signal_entry_t *entry)
+{
+	return entry->handler != (void *) SIG_DFL && entry->handler != (void *) SIG_IGN;
+}
+
+/* Called by a PHP thread when its handler for signo changes. */
+static void zend_signal_count_handler(int signo, bool before, bool after)
+{
+	zend_atomic_int *count = &global_php_handlers[signo-1];
+	int expected;
+
+	if (before == after) {
+		return;
+	}
+	expected = zend_atomic_int_load_ex(count);
+	while (!zend_atomic_int_compare_exchange_ex(count, &expected, expected + (after ? 1 : -1))) {
+	}
+}
 #endif
 static sigset_t            global_sigmask;
 
@@ -106,7 +124,7 @@ static void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *conte
 	 * thread handles this signal and the embedder does not, send it on to the
 	 * PHP threads. Otherwise act as if SIGG(active) is false. */
 	if (tsrm_is_shutdown() || !tsrm_is_managed_thread()) {
-		if (zend_atomic_bool_load_ex(&global_php_handled[signo-1])
+		if (zend_atomic_int_load_ex(&global_php_handlers[signo-1]) > 0
 		 && (global_orig_handlers[signo-1].handler == (void *) SIG_DFL
 		  || global_orig_handlers[signo-1].handler == (void *) SIG_IGN)
 		 && zend_signal_reroute_from_foreign_thread(signo, siginfo, context)) {
@@ -236,6 +254,9 @@ static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context)
 			if (p_sig.flags & SA_RESETHAND) {
 				SIGG(handlers)[signo-1].flags   = 0;
 				SIGG(handlers)[signo-1].handler = SIG_DFL;
+#ifdef ZTS
+				zend_signal_count_handler(signo, true, false);
+#endif
 			}
 			(*(void (*)(int, siginfo_t*, void*))p_sig.handler)(signo, siginfo, context);
 		} else {
@@ -259,6 +280,10 @@ ZEND_API void zend_sigaction(int signo, const struct sigaction *act, struct siga
 		oldact->sa_mask    = global_sigmask;
 	}
 	if (act != NULL) {
+#ifdef ZTS
+		bool was_handler = zend_signal_entry_is_handler(&SIGG(handlers)[signo-1]);
+#endif
+
 		SIGG(handlers)[signo-1].flags = act->sa_flags;
 		if (act->sa_flags & SA_SIGINFO) {
 			SIGG(handlers)[signo-1].handler = (void *) act->sa_sigaction;
@@ -267,10 +292,7 @@ ZEND_API void zend_sigaction(int signo, const struct sigaction *act, struct siga
 		}
 
 #ifdef ZTS
-		if (SIGG(handlers)[signo-1].handler != (void *) SIG_IGN
-		 && SIGG(handlers)[signo-1].handler != (void *) SIG_DFL) {
-			zend_atomic_bool_store_ex(&global_php_handled[signo-1], true);
-		}
+		zend_signal_count_handler(signo, was_handler, zend_signal_entry_is_handler(&SIGG(handlers)[signo-1]));
 #endif
 
 		memset(&sa, 0, sizeof(sa));
@@ -322,12 +344,19 @@ static zend_result zend_signal_register(int signo, void (*handler)(int, siginfo_
 			return FAILURE;
 		}
 
+#ifdef ZTS
+		bool was_handler = zend_signal_entry_is_handler(&SIGG(handlers)[signo-1]);
+#endif
+
 		SIGG(handlers)[signo-1].flags = sa.sa_flags;
 		if (sa.sa_flags & SA_SIGINFO) {
 			SIGG(handlers)[signo-1].handler = (void *)sa.sa_sigaction;
 		} else {
 			SIGG(handlers)[signo-1].handler = (void *)sa.sa_handler;
 		}
+#ifdef ZTS
+		zend_signal_count_handler(signo, was_handler, zend_signal_entry_is_handler(&SIGG(handlers)[signo-1]));
+#endif
 
 		sa.sa_flags     = SA_SIGINFO; /* we'll use a siginfo handler */
 		sa.sa_sigaction = handler;
@@ -348,6 +377,12 @@ void zend_signal_activate(void)
 {
 	size_t x;
 
+#ifdef ZTS
+	for (x = 1; x < NSIG; x++) {
+		zend_signal_count_handler((int) x, zend_signal_entry_is_handler(&SIGG(handlers)[x-1]),
+			zend_signal_entry_is_handler(&global_orig_handlers[x-1]));
+	}
+#endif
 	memcpy(&SIGG(handlers), &global_orig_handlers, sizeof(global_orig_handlers));
 
 	if (SIGG(reset)) {
@@ -415,6 +450,18 @@ static void zend_signal_globals_ctor(zend_signal_globals_t *zend_signal_globals)
 }
 /* }}} */
 
+#ifdef ZTS
+static void zend_signal_globals_dtor(zend_signal_globals_t *zend_signal_globals) /* {{{ */
+{
+	int signo;
+
+	for (signo = 1; signo < NSIG; signo++) {
+		zend_signal_count_handler(signo, zend_signal_entry_is_handler(&zend_signal_globals->handlers[signo-1]), false);
+	}
+}
+/* }}} */
+#endif
+
 void zend_signal_init(void) /* {{{ */
 {
 	int signo;
@@ -441,7 +488,7 @@ ZEND_API void zend_signal_startup(void)
 {
 
 #ifdef ZTS
-	ts_allocate_fast_id(&zend_signal_globals_id, &zend_signal_globals_offset, sizeof(zend_signal_globals_t), (ts_allocate_ctor) zend_signal_globals_ctor, NULL);
+	ts_allocate_fast_id(&zend_signal_globals_id, &zend_signal_globals_offset, sizeof(zend_signal_globals_t), (ts_allocate_ctor) zend_signal_globals_ctor, (ts_allocate_dtor) zend_signal_globals_dtor);
 #else
 	zend_signal_globals_ctor(&zend_signal_globals);
 #endif
