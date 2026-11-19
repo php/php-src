@@ -139,6 +139,8 @@ PHP                                                                        NEWS
 - SNMP:
   . Fixed snmp3_set() citing the wrong argument number for an invalid $timeout
     or $retries. (lacatoire)
+  . Fixed the procedural snmp functions citing the wrong argument number for an
+    invalid $hostname or $community. (lacatoire)
 
 - SOAP:
   . Fixed bug GH-25267 (NULL dereference in to_xml_any() with integer key).
