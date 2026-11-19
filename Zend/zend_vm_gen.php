@@ -1465,18 +1465,7 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
             while ($next != $num) {
               // If some opcode numbers are not used then fill hole with pointers
               // to handler of undefined opcode
-                switch ($kind) {
-                    case ZEND_VM_KIND_CALL:
-                    case ZEND_VM_KIND_TAILCALL:
-                        out($f,$prolog."ZEND_NULL{$variant}_HANDLER,\n");
-                        break;
-                    case ZEND_VM_KIND_SWITCH:
-                        out($f,$prolog."-1,\n");
-                        break;
-                    case ZEND_VM_KIND_GOTO:
-                        out($f,$prolog."(void*)&&ZEND_NULL_LABEL,\n");
-                        break;
-                }
+                gen_null_label($f, $kind, $prolog);
                 $next++;
             }
             if ($num >= 256) {
@@ -1512,18 +1501,7 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
                 }
                 $list[] = $dsc["op"];
             } else {
-                switch ($kind) {
-                    case ZEND_VM_KIND_CALL:
-                    case ZEND_VM_KIND_TAILCALL:
-                        out($f,$prolog."ZEND_NULL{$variant}_HANDLER,\n");
-                        break;
-                    case ZEND_VM_KIND_SWITCH:
-                        out($f,$prolog."-1,\n");
-                        break;
-                    case ZEND_VM_KIND_GOTO:
-                        out($f,$prolog."(void*)&&ZEND_NULL_LABEL,\n");
-                        break;
-                }
+                gen_null_label($f, $kind, $prolog);
                 $list[] = null;
             }
         }
