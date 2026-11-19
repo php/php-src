@@ -166,6 +166,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-25530 (socket_last_error() without a socket returns an error
     from a previous request). (Artem Ukrainskiy)
 
+- SPL:
+  . Fixed bug GH-25404 (Missing zend_return_unwrap_ref() calls trigger
+    assertion failures). (Juan Versolato Lopes)
+
 - Standard:
   . Fixed bug GH-25474 (version_compare() treats large numeric parts as equal
     on 64-bit Windows). (lazerg, timwolla)
