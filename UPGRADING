@@ -59,6 +59,11 @@ PHP 8.7 UPGRADE NOTES
     value was appended to the Set-Cookie header verbatim, which let an
     application terminate one attribute and append further ones.
 
+- Sockets:
+  . socket_create() and socket_create_pair() now throw a ValueError when $type
+    or $protocol is outside of the range of an int. Previously the value was
+    silently truncated to an int.
+
 - Standard:
   . ini_get_all() now matches extension names case-insensitively using ASCII
     rules, independently of the current locale. Names that differ only in
