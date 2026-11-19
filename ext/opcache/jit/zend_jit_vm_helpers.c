@@ -25,6 +25,7 @@
 #include "Zend/zend_API.h"
 
 #include <ZendAccelerator.h>
+#include "zend_shared_alloc.h"
 #include "Optimizer/zend_func_info.h"
 #include "Optimizer/zend_call_graph.h"
 #include "zend_jit.h"
@@ -543,10 +544,13 @@ static int zend_jit_trace_record_fake_init_call_ex(zend_execute_data *call, zend
 				func = (zend_function*)jit_extension->op_array;
 			}
 		}
-		if (is_megamorphic == ZEND_JIT_EXIT_POLYMORPHISM
-		 /* TODO: use more accurate check ??? */
-		 && ((ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC)
-		  || func->common.scope)) {
+		if ((is_megamorphic == ZEND_JIT_EXIT_POLYMORPHISM
+		  /* TODO: use more accurate check ??? */
+		  && ((ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC)
+		   || func->common.scope))
+		 || (func->type == ZEND_USER_FUNCTION
+		  && !zend_accel_in_shm(func->op_array.opcodes))) {
+			/* See zend_jit_trace_execute() about not persistent functions */
 			func = NULL;
 			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_MEGAMORPHIC);
 		}
@@ -1174,6 +1178,14 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 				} else if ((is_megamorphic == ZEND_JIT_EXIT_METHOD_CALL
 						 || is_megamorphic == ZEND_JIT_EXIT_CLOSURE_CALL)
 						&& trace_buffer[1].opline == opline - 1) {
+					func = NULL;
+				} else if (func->type == ZEND_USER_FUNCTION
+						&& !zend_accel_in_shm(func->op_array.opcodes)) {
+					/* The function is not persistent (e.g. its script is not cached because SHM
+					 * is full or the file is blacklisted). In a later request another function may
+					 * get the same op_array.opcodes address, so the guard that compares it
+					 * can't tell the functions apart, and the trace would use the frame size
+					 * and the arguments info of a wrong function. Don't specialize the call. */
 					func = NULL;
 				}
 				if (!func) {
