@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Same DOCTYPE shape as the W3C xmldsig-core-schema.xsd -->
+<!DOCTYPE schema
+  PUBLIC "-//W3C//DTD XMLSchema 200102//EN" "http://www.w3.org/2001/XMLSchema.dtd"
+ [
+   <!ATTLIST schema
+     xmlns:im CDATA #FIXED "urn:imported">
+   <!ENTITY im 'urn:imported'>
+   <!ENTITY % p ''>
+   <!ENTITY % s ''>
+  ]>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+        xmlns:im="urn:imported"
+        targetNamespace="urn:imported">
+  <complexType name="Imported">
+    <sequence>
+      <element name="a" type="string"/>
+    </sequence>
+  </complexType>
+</schema>
