@@ -29,6 +29,8 @@ PHP                                                                        NEWS
   . Fixed object_properties_load() adding integer keys to property tables, which
     made the properties unreadable and clone hit an assertion.
     (Nicolas Grekas)
+  . Fixed stack limit on OpenBSD threads other than the main one.
+    (Ostap Brehin)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
