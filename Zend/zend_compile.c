@@ -5714,7 +5714,6 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 		zend_emit_op_tmp(&copy_node, ZEND_COPY_TMP, &func_node, NULL);
 		func_ast = zend_ast_create_znode(&copy_node);
 	}
-	uint32_t opnum_call_start = get_next_op_number();
 	switch (callback->kind) {
 		case ZEND_AST_CALL: {
 			zend_compile_expr(&call_result, zend_ast_create(ZEND_AST_CALL, func_ast, call_args));
@@ -5732,18 +5731,6 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 
 			zend_compile_expr(&call_result, zend_ast_create(ZEND_AST_STATIC_CALL, class_ast, func_ast, call_args));
 			zend_ast_destroy(class_ast);
-			break;
-		}
-	}
-	/* Pass the element with ZEND_SEND_USER semantics when the callee's send mode
-	 * is not statically known by-value, so by-ref parameters warn and wrap instead
-	 * of throwing Error. */
-	for (uint32_t i = opnum_call_start; i < get_next_op_number(); i++) {
-		zend_op *op = &CG(active_op_array)->opcodes[i];
-		if (op->opcode == ZEND_SEND_VAL_EX
-		 && op->op1_type == IS_TMP_VAR
-		 && op->op1.var == value.u.op.var) {
-			op->opcode = ZEND_SEND_USER;
 			break;
 		}
 	}
