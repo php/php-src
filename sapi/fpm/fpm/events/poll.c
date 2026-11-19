@@ -150,6 +150,7 @@ static int fpm_event_poll_wait(struct fpm_event_queue_s *queue, unsigned long in
 		/* trigger POLLIN events */
 		q = queue;
 		while (q) {
+			struct fpm_event_queue_s *next = q->next;
 			/* ensure ev->index is valid */
 			if (q->ev && q->ev->index >= 0 && q->ev->index < npollfds && q->ev->fd == active_pollfds[q->ev->index].fd) {
 
@@ -165,7 +166,7 @@ static int fpm_event_poll_wait(struct fpm_event_queue_s *queue, unsigned long in
 					}
 				}
 			}
-			q = q->next; /* iterate */
+			q = next;
 		}
 	}
 
