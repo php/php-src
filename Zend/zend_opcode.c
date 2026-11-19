@@ -421,6 +421,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 							zend_hash_release(c->attributes);
 						}
 					}
+					if (c->ce == ce) {
+						zend_type_release(c->type, /* persistent */ 0);
+					}
 				} ZEND_HASH_FOREACH_END();
 			}
 			zend_hash_destroy(&ce->constants_table);

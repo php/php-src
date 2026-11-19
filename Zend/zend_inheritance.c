@@ -2847,6 +2847,7 @@ static void zend_do_traits_constant_binding(zend_class_entry *ce, zend_class_ent
 				constant->ce = ce;
 
 				Z_TRY_ADDREF(constant->value);
+				zend_type_copy_ctor(&constant->type, /* use_arena */ true, /* persistent */ false);
 				constant->doc_comment = constant->doc_comment ? zend_string_copy(constant->doc_comment) : NULL;
 				if (constant->attributes && (!(GC_FLAGS(constant->attributes) & IS_ARRAY_IMMUTABLE))) {
 					GC_ADDREF(constant->attributes);
@@ -3489,6 +3490,7 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 			Z_PTR(p->val) = new_c;
 			memcpy(new_c, c, sizeof(zend_class_constant));
 			new_c->ce = ce;
+			zend_type_copy_ctor(&new_c->type, /* use_arena */ true, /* persistent */ false);
 		}
 	}
 
