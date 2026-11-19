@@ -34,6 +34,9 @@ $targets = [
 	__DIR__ . "/escape/secret-config.txt",
 ];
 foreach ( $targets as $target ) {
+	if (PHP_OS_FAMILY === 'Windows') {
+		$target = str_replace('/', '\\', $target);
+	}
 	$fp = php_cli_server_connect();
 	$req = <<<END
 GET $target HTTP/1.1
