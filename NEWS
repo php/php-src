@@ -175,6 +175,8 @@ PHP                                                                        NEWS
     value is expected. (Jorg Sowa)
   . Fixed getimagesize() reporting wrapped dimensions for XBM images with
     out-of-range width or height. (Ilia Alshanetsky)
+  . Fixed JIT freeing the previous include_path returned by set_include_path()
+    while it is still in use. (Ilia Alshanetsky)
 
 - Streams:
   . Fixed in-place URL decoding of interned strings in the HTTP and FTP
