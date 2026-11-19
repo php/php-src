@@ -745,6 +745,11 @@ PHP_FUNCTION(posix_access)
 		Z_PARAM_LONG(mode)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (filename_len == 0) {
+		zend_argument_must_not_be_empty_error(1);
+		RETURN_THROWS();
+	}
+
 	path = expand_filepath(filename, NULL);
 	if (!path) {
 		POSIX_G(last_error) = EIO;

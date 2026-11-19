@@ -113,6 +113,8 @@ PHP                                                                        NEWS
 - POSIX:
   . Fixed bug GH-25530 (posix_get_last_error() returns an error from a
     previous request). (Artem Ukrainskiy)
+  . Fixed posix_access() returning false for an empty filename instead of
+    throwing a ValueError (GH-25589). (lacatoire)
 
 - Readline:
   . Fixed incorrect handling of non-ASCII pending_input bytes in readline_info(),
