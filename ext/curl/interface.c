@@ -1151,9 +1151,35 @@ php_curl *init_curl_handle_into_zval(zval *curl)
 	return ch;
 }
 
-void init_curl_handle(php_curl *ch)
+static void curl_init_to_free(php_curl *ch)
 {
 	ch->to_free = ecalloc(1, sizeof(struct _php_curl_free));
+	zend_llist_init(&ch->to_free->post,  sizeof(struct HttpPost *), (llist_dtor_func_t)curl_free_post,   0);
+	zend_llist_init(&ch->to_free->stream, sizeof(struct mime_data_cb_arg *), (llist_dtor_func_t)curl_free_cb_arg, 0);
+
+	ch->to_free->slist = emalloc(sizeof(HashTable));
+	zend_hash_init(ch->to_free->slist, 4, NULL, curl_free_slist, 0);
+
+	ch->clone = emalloc(sizeof(uint32_t));
+	*ch->clone = 1;
+}
+
+static void curl_release_to_free(php_curl *ch)
+{
+	if (--(*ch->clone) == 0) {
+		zend_llist_clean(&ch->to_free->post);
+		zend_llist_clean(&ch->to_free->stream);
+
+		zend_hash_destroy(ch->to_free->slist);
+		efree(ch->to_free->slist);
+		efree(ch->to_free);
+		efree(ch->clone);
+	}
+}
+
+void init_curl_handle(php_curl *ch)
+{
+	curl_init_to_free(ch);
 	ch->handlers.write = ecalloc(1, sizeof(php_curl_write));
 	ch->handlers.write_header = ecalloc(1, sizeof(php_curl_write));
 	ch->handlers.read = ecalloc(1, sizeof(php_curl_read));
@@ -1167,16 +1193,9 @@ void init_curl_handle(php_curl *ch)
 #if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
 	ch->handlers.sshhostkey = empty_fcall_info_cache;
 #endif
-	ch->clone = emalloc(sizeof(uint32_t));
-	*ch->clone = 1;
 
 	memset(&ch->err, 0, sizeof(struct _php_curl_error));
 
-	zend_llist_init(&ch->to_free->post,  sizeof(struct HttpPost *), (llist_dtor_func_t)curl_free_post,   0);
-	zend_llist_init(&ch->to_free->stream, sizeof(struct mime_data_cb_arg *), (llist_dtor_func_t)curl_free_cb_arg, 0);
-
-	ch->to_free->slist = emalloc(sizeof(HashTable));
-	zend_hash_init(ch->to_free->slist, 4, NULL, curl_free_slist, 0);
 	ZVAL_UNDEF(&ch->postfields);
 }
 
@@ -2854,7 +2873,7 @@ static void curl_free_obj(zend_object *object)
 	fprintf(stderr, "DTOR CALLED, ch = %x\n", ch);
 #endif
 
-	if (!ch->cp) {
+	if (!ch->clone) {
 		/* Can happen if constructor throws. */
 		zend_object_std_dtor(&ch->std);
 		return;
@@ -2865,15 +2884,7 @@ static void curl_free_obj(zend_object *object)
 	curl_easy_cleanup(ch->cp);
 
 	/* cURL destructors should be invoked only by last curl handle */
-	if (--(*ch->clone) == 0) {
-		zend_llist_clean(&ch->to_free->post);
-		zend_llist_clean(&ch->to_free->stream);
-
-		zend_hash_destroy(ch->to_free->slist);
-		efree(ch->to_free->slist);
-		efree(ch->to_free);
-		efree(ch->clone);
-	}
+	curl_release_to_free(ch);
 
 	smart_str_free(&ch->handlers.write->buf);
 	if (ZEND_FCC_INITIALIZED(ch->handlers.write->fcc)) {
@@ -3009,6 +3020,40 @@ static void _php_curl_reset_handlers(php_curl *ch)
 #endif
 }
 /* }}} */
+
+void _php_curl_reinit_handle(php_curl *ch)
+{
+	ch->cp = curl_easy_init();
+	if (!ch->cp) {
+		return;
+	}
+
+	_php_curl_reset_handlers(ch);
+	if (ZEND_FCC_INITIALIZED(ch->handlers.write->fcc)) {
+		zend_fcc_dtor(&ch->handlers.write->fcc);
+	}
+	if (ZEND_FCC_INITIALIZED(ch->handlers.write_header->fcc)) {
+		zend_fcc_dtor(&ch->handlers.write_header->fcc);
+	}
+	if (ZEND_FCC_INITIALIZED(ch->handlers.read->fcc)) {
+		zend_fcc_dtor(&ch->handlers.read->fcc);
+	}
+	_php_curl_cleanup_handle(ch);
+
+	zval_ptr_dtor(&ch->postfields);
+	ZVAL_UNDEF(&ch->postfields);
+	zval_ptr_dtor(&ch->private_data);
+	ZVAL_UNDEF(&ch->private_data);
+	if (ch->share) {
+		OBJ_RELEASE(&ch->share->std);
+		ch->share = NULL;
+	}
+
+	curl_release_to_free(ch);
+	curl_init_to_free(ch);
+
+	_php_curl_set_default_options(ch);
+}
 
 /* {{{ Reset all options of a libcurl session handle */
 PHP_FUNCTION(curl_reset)
