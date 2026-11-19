@@ -75,7 +75,8 @@ enum {
 	PDO_SQLITE_ATTR_EXTENDED_RESULT_CODES,
 	PDO_SQLITE_ATTR_BUSY_STATEMENT,
 	PDO_SQLITE_ATTR_EXPLAIN_STATEMENT,
-	PDO_SQLITE_ATTR_TRANSACTION_MODE
+	PDO_SQLITE_ATTR_TRANSACTION_MODE,
+	PDO_SQLITE_ATTR_DQS
 };
 
 typedef int pdo_sqlite_create_collation_callback(void*, int, const void*, int, const void*);
