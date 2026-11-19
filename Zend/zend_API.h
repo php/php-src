@@ -229,6 +229,7 @@ typedef struct _zend_fcall_info_cache {
 #define ZEND_MODULE_INFO_N(module)			zm_info_##module
 #define ZEND_MODULE_GLOBALS_CTOR_N(module)  zm_globals_ctor_##module
 #define ZEND_MODULE_GLOBALS_DTOR_N(module)  zm_globals_dtor_##module
+#define ZEND_MODULE_CHILD_INIT_N(module)    zm_child_init_##module
 
 /* Declaration macros */
 #define ZEND_MODULE_STARTUP_D(module)		zend_result ZEND_MODULE_STARTUP_N(module)(INIT_FUNC_ARGS)
@@ -239,6 +240,7 @@ typedef struct _zend_fcall_info_cache {
 #define ZEND_MODULE_INFO_D(module)			ZEND_COLD void ZEND_MODULE_INFO_N(module)(ZEND_MODULE_INFO_FUNC_ARGS)
 #define ZEND_MODULE_GLOBALS_CTOR_D(module)  void ZEND_MODULE_GLOBALS_CTOR_N(module)(zend_##module##_globals *module##_globals)
 #define ZEND_MODULE_GLOBALS_DTOR_D(module)  void ZEND_MODULE_GLOBALS_DTOR_N(module)(zend_##module##_globals *module##_globals)
+#define ZEND_MODULE_CHILD_INIT_D(module)    void ZEND_MODULE_CHILD_INIT_N(module)(void)
 
 #define ZEND_GET_MODULE(name) \
     BEGIN_EXTERN_C()\
@@ -1159,6 +1161,7 @@ static zend_always_inline bool ZVAL_FSTRING(zval *z, const char *s) {
 #define ZEND_MINFO			ZEND_MODULE_INFO_N
 #define ZEND_GINIT(module)		((void (*)(void*))(ZEND_MODULE_GLOBALS_CTOR_N(module)))
 #define ZEND_GSHUTDOWN(module)	((void (*)(void*))(ZEND_MODULE_GLOBALS_DTOR_N(module)))
+#define ZEND_CINIT			ZEND_MODULE_CHILD_INIT_N
 
 #define ZEND_MINIT_FUNCTION			ZEND_MODULE_STARTUP_D
 #define ZEND_MSHUTDOWN_FUNCTION		ZEND_MODULE_SHUTDOWN_D
@@ -1167,6 +1170,7 @@ static zend_always_inline bool ZVAL_FSTRING(zval *z, const char *s) {
 #define ZEND_MINFO_FUNCTION			ZEND_MODULE_INFO_D
 #define ZEND_GINIT_FUNCTION			ZEND_MODULE_GLOBALS_CTOR_D
 #define ZEND_GSHUTDOWN_FUNCTION		ZEND_MODULE_GLOBALS_DTOR_D
+#define ZEND_CINIT_FUNCTION			ZEND_MODULE_CHILD_INIT_D
 
 /* May modify arg in-place. Will free arg in failure case (and take ownership in success case).
  * Prefer using the ZEND_TRY_ASSIGN_* macros over these APIs. */
