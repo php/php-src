@@ -2,7 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.36
 
-
+- OpenSSL:
+  . Fixed bug GH-25402 (Build fails against OpenSSL 1.0.2 due to missing
+    ASN1_STRING_get0_data() in xp_ssl.c). (Chris Orlando)
 
 21 Oct 2026, PHP 8.2.35
 
