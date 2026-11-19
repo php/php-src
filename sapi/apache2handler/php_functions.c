@@ -205,6 +205,49 @@ PHP_FUNCTION(apache_response_headers)
 }
 /* }}} */
 
+/* {{{ The allows for direct select calls on Apache's connection socket */
+PHP_FUNCTION(apache_connection_stream)
+{
+	php_struct *ctx = SG(server_context);
+	request_rec *r;
+	apr_socket_t *apr_sock;
+	int fd;
+	php_stream *stream;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	if (!ctx) {
+		php_error_docref(NULL, E_WARNING, "Server context is not available");
+		RETURN_FALSE;
+	}
+
+	r = ctx->r;
+	if (!r) {
+		php_error_docref(NULL, E_WARNING, "Request record is not available");
+		RETURN_FALSE;
+	}
+
+	apr_sock = ap_get_conn_socket(r->connection);
+	if (!apr_sock) {
+		php_error_docref(NULL, E_WARNING, "Failed to obtain connection socket");
+		RETURN_FALSE;
+	}
+
+	if (apr_os_sock_get(&fd, apr_sock) != APR_SUCCESS) {
+		php_error_docref(NULL, E_WARNING, "Failed to get native socket descriptor");
+		RETURN_FALSE;
+	}
+
+	stream = php_stream_sock_open_from_socket(fd, NULL);
+	if (!stream) {
+		php_error_docref(NULL, E_WARNING, "Failed to open stream from socket");
+		RETURN_FALSE;
+	}
+
+	php_stream_to_zval(stream, return_value);
+}
+/* }}} */
+
 /* {{{ Get and set Apache request notes */
 PHP_FUNCTION(apache_note)
 {
