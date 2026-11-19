@@ -1006,15 +1006,7 @@ PHPAPI ZEND_COLD void php_log_err_with_severity(const char *log_message, int sys
 			zend_string *error_time_str;
 
 			time(&error_time);
-#ifdef ZTS
-			if (!php_during_module_startup()) {
-				error_time_str = php_format_date("d-M-Y H:i:s e", 13, error_time, 1);
-			} else {
-				error_time_str = php_format_date("d-M-Y H:i:s e", 13, error_time, 0);
-			}
-#else
-			error_time_str = php_format_date("d-M-Y H:i:s e", 13, error_time, 1);
-#endif
+			error_time_str = php_format_date("d-M-Y H:i:s e", 13, error_time, PG(modules_activated) && EG(active));
 			len = spprintf(&tmp, 0, "[%s] %s%s", ZSTR_VAL(error_time_str), log_message, PHP_EOL);
 #ifdef PHP_WIN32
 			php_flock(fd, LOCK_EX);
@@ -1388,7 +1380,7 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 		}
 	}
 
-	if (!Z_ISUNDEF(EG(last_fatal_error_backtrace))) {
+	if (EG(active) && !Z_ISUNDEF(EG(last_fatal_error_backtrace))) {
 		backtrace = zend_trace_to_string(Z_ARRVAL(EG(last_fatal_error_backtrace)), /* include_main */ true);
 	}
 

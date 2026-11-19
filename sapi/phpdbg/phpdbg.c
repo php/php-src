@@ -119,6 +119,7 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 	pg->flags = PHPDBG_DEFAULT_FLAGS;
 	memset(pg->io, 0, sizeof(pg->io));
 	pg->frame.num = 0;
+	pg->frame.generator = 0;
 	pg->sapi_name_ptr = NULL;
 	pg->unclean_eval = 0;
 
