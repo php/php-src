@@ -737,7 +737,7 @@ static char *make_filename_safe(const char *filename)
 		}
 		return estrdup(filename);
 	}
-	if (*filename && strcmp(filename, ":memory:")) {
+	if (*filename && strncmp(filename, ":memory:", sizeof(":memory:")-1) != 0) {
 		char *fullpath = expand_filepath(filename, NULL);
 
 		if (!fullpath) {
