@@ -55,6 +55,8 @@ PHP                                                                        NEWS
     evaluation Error instead. (Ilia Alshanetsky)
   . Fixed bug GH-25501 (querySelector() rejects a selector whose identifier
     starts with a non-ASCII character). (David Carlier)
+  . Fixed a crash and a use-after-free in key() of an attribute or DTD named
+    node map iterator that has no current item. (Ilia Alshanetsky)
 
 - Filter:
   . Fixed stack overflow in filter_var() and filter_var_array() with deeply
