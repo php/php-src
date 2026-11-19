@@ -2706,12 +2706,14 @@ static zend_result zend_ffi_pass_var_arg(zval *arg, ffi_type **pass_type, void *
 			*(void**)arg_values[n] = NULL;
 			break;
 		case IS_FALSE:
-			*pass_type = &ffi_type_uint8;
-			*(uint8_t*)arg_values[n] = 0;
+			/* default argument promotion: bool is passed as int */
+			*pass_type = &ffi_type_sint32;
+			*(int32_t*)arg_values[n] = 0;
 			break;
 		case IS_TRUE:
-			*pass_type = &ffi_type_uint8;
-			*(uint8_t*)arg_values[n] = 1;
+			/* default argument promotion: bool is passed as int */
+			*pass_type = &ffi_type_sint32;
+			*(int32_t*)arg_values[n] = 1;
 			break;
 		case IS_LONG:
 			if (sizeof(zend_long) == 4) {
