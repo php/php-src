@@ -182,6 +182,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15701 (Build failure: incompatible funopen() seeker pointer
     type on 32-bit platforms). (Kamil Tekiela)
 
+- URI:
+  . Fixed bug GH-25604 (Accepted IPv4 hosts report a fatal range error).
+    (Akouh Mohamed Amine)
+
 19 Nov 2026, PHP 8.5.13
 
 - Core:
