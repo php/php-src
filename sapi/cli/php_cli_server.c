@@ -400,6 +400,10 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 
 	client = SG(server_context);
 
+	if (!client) {
+		RETURN_EMPTY_ARRAY();
+	}
+
 	/* Need to duplicate the header HashTable */
 	RETURN_ARR(zend_array_dup(&client->request.headers_original_case));
 }
