@@ -92,6 +92,15 @@ static void dblib_handle_closer(pdo_dbh_t *dbh)
 	}
 }
 
+static void dblib_handle_request_shutdown(pdo_dbh_t *dbh)
+{
+	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
+
+	if (H && dbh->refcount <= 2) {
+		pdo_dblib_err_dtor(&H->err);
+	}
+}
+
 static bool dblib_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stmt, zval *driver_options)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
@@ -450,7 +459,7 @@ static const struct pdo_dbh_methods dblib_methods = {
 	dblib_get_attribute, /* get attr */
 	NULL, /* check liveness */
 	NULL, /* get driver methods */
-	NULL, /* request shutdown */
+	dblib_handle_request_shutdown,
 	NULL, /* in transaction, use PDO's internal tracking mechanism */
 	NULL, /* get gc */
 	NULL /* scanner */
