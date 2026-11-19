@@ -1292,7 +1292,7 @@ PHPAPI php_stream *_php_stream_sock_open_from_socket(php_socket_t socket, const 
 	memset(sock, 0, sizeof(php_netstream_data_t));
 
 	sock->is_blocked = true;
-	sock->timeout.tv_sec = FG(default_socket_timeout);
+	sock->timeout.tv_sec = PG(default_socket_timeout);
 	sock->timeout.tv_usec = 0;
 	sock->socket = socket;
 

@@ -557,9 +557,9 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 #endif
 	} else {
 #ifndef PHP_WIN32
-		timeout.tv_sec = FG(default_socket_timeout);
+		timeout.tv_sec = PG(default_socket_timeout);
 #else
-		timeout.tv_sec = (long)FG(default_socket_timeout);
+		timeout.tv_sec = (long)PG(default_socket_timeout);
 #endif
 		timeout.tv_usec = 0;
 	}
