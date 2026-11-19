@@ -1046,6 +1046,10 @@ static int fcgi_read_request(fcgi_request *req)
 	int len, padding;
 	unsigned char buf[FCGI_MAX_LENGTH+8];
 
+	if (UNEXPECTED(req->in_len != 0)) {
+		return 0;
+	}
+
 	req->keep = 0;
 	req->ended = 0;
 	req->in_len = 0;
@@ -1309,6 +1313,8 @@ void fcgi_close(fcgi_request *req, int force, int destroy)
 		req->nodelay = 0;
 #endif
 		req->fd = -1;
+		/* a partially read STDIN record does not outlive its connection */
+		req->in_len = 0;
 
 		req->hook.on_close();
 	}

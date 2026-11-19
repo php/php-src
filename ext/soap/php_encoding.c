@@ -2064,7 +2064,7 @@ static int calc_dimension_12(const char* str)
 		}
 		str++;
 	}
-	return i;
+	return i != 0 ? i : 1;
 }
 
 static int* get_position_12(int dimension, const char* str)

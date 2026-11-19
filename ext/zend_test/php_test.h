@@ -54,6 +54,7 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	int replace_zend_execute_ex;
 	int register_passes;
 	bool print_stderr_mshutdown;
+	bool warn_on_startup;
 	zend_long limit_copy_file_range;
 	int observe_opline_in_zendmm;
 	zend_mm_heap* zend_orig_heap;
