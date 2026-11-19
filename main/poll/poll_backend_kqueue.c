@@ -29,6 +29,7 @@
 
 typedef struct kqueue_backend_data {
 	int kqueue_fd;
+	pid_t owner_pid;
 	struct kevent *events;
 	int events_capacity;
 	int fd_count; /* Track number of unique FDs (not individual filters) */
@@ -62,6 +63,7 @@ static zend_result kqueue_backend_init(php_poll_ctx *ctx)
 		return FAILURE;
 	}
 	data->events_capacity = initial_capacity;
+	data->owner_pid = getpid();
 	data->fd_count = 0;
 	data->filter_count = 0;
 
@@ -81,7 +83,7 @@ static void kqueue_backend_cleanup(php_poll_ctx *ctx)
 {
 	kqueue_backend_data_t *data = (kqueue_backend_data_t *) ctx->backend_data;
 	if (data) {
-		if (data->kqueue_fd >= 0) {
+		if (data->kqueue_fd >= 0 && data->owner_pid == getpid()) {
 			close(data->kqueue_fd);
 		}
 		pefree(data->events, ctx->persistent);
