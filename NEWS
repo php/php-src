@@ -145,6 +145,10 @@ PHP                                                                        NEWS
   . Fixed session upload progress to respect session.use_only_cookies.
     (jorgsowa)
 
+- SPL:
+  . Fixed bug GH-25585 (Crash with opcache when SPL instantiates a class whose
+    property defaults use constants). (Ilia Alshanetsky)
+
 - Standard:
   . Fixed bug GH-25474 (version_compare() treats large numeric parts as equal
     on 64-bit Windows). (lazerg, timwolla)
