@@ -1204,7 +1204,7 @@ function system_with_timeout(
         $timeout *= 3;
     }
 
-    while (true) {
+    while ($pipes) {
         /* hide errors from interrupted syscalls */
         $r = $pipes;
         $w = null;
@@ -1223,17 +1223,13 @@ function system_with_timeout(
             return $data;
         }
 
-        if ($n > 0) {
-            if ($captureStdOut) {
-                $line = fread($pipes[1], 8192);
-            } elseif ($captureStdErr) {
-                $line = fread($pipes[2], 8192);
-            } else {
-                $line = '';
+        foreach ($r as $key => $pipe) {
+            $line = fread($pipe, 8192);
+            if (feof($pipe)) {
+                unset($pipes[$key]);
             }
-            if (strlen($line) == 0) {
-                /* EOF */
-                break;
+            if ($line === false) {
+                break 2;
             }
             $data .= $line;
         }
