@@ -156,17 +156,17 @@ typedef struct _type_reference {
 // TARGET_PARAMETER: target function, closure (or null), and offset
 // TARGET_CONST: zend_constant
 typedef union _attribute_target_reference {
-	const zend_class_entry *target_class;
-	const zend_function *target_function;
-	const zend_property_info *target_property;
-	const zend_constant *target_const;
+	zend_class_entry *target_class;
+	zend_function *target_function;
+	zend_property_info *target_property;
+	zend_constant *target_const;
 	struct {
-		const zend_class_constant *constant;
-		const zend_string *name;
+		zend_class_constant *constant;
+		zend_string *name;
 	} target_class_constant;
 	struct {
-		const zend_function *target_function;
-		const zval *closure_obj;
+		zend_function *target_function;
+		zval *closure_obj;
 		uint32_t offset;
 	} target_parameter;
 } attribute_target_reference;
@@ -2039,7 +2039,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getDocComment)
 ZEND_METHOD(ReflectionFunctionAbstract, getAttributes)
 {
 	const reflection_object *intern;
-	const zend_function *fptr;
+	zend_function *fptr;
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
@@ -2852,7 +2852,7 @@ ZEND_METHOD(ReflectionParameter, canBePassedByValue)
 /* {{{ Get parameter attributes. */
 ZEND_METHOD(ReflectionParameter, getAttributes)
 {
-	const reflection_object *intern;
+	reflection_object *intern;
 	const parameter_reference *param;
 
 	GET_REFLECTION_OBJECT_PTR(param);
@@ -8303,7 +8303,7 @@ ZEND_METHOD(ReflectionConstant, getExtensionName)
 ZEND_METHOD(ReflectionConstant, getAttributes)
 {
 	const reflection_object *intern;
-	const zend_constant *const_;
+	zend_constant *const_;
 
 	GET_REFLECTION_OBJECT_PTR(const_);
 
