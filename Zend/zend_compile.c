@@ -5354,6 +5354,74 @@ static const zend_class_entry *zend_resolve_compile_time_parent(const zend_class
 }
 /* }}} */
 
+/* FE_FETCH_R dereferences array elements, while array_map() preserves references
+ * when passing them to callbacks. Only inline a callback whose mapped argument
+ * is known at compile time to be passed by value. */
+static bool zend_array_map_callback_takes_value(zend_ast *callback, uint32_t arg_num, zend_string *arg_name)
+{
+	zend_ast *name_ast = callback->child[callback->kind == ZEND_AST_CALL ? 0 : 1];
+	if (name_ast->kind != ZEND_AST_ZVAL || Z_TYPE_P(zend_ast_get_zval(name_ast)) != IS_STRING) {
+		return false;
+	}
+
+	const zend_function *fbc = NULL;
+	if (callback->kind == ZEND_AST_CALL) {
+		bool is_fully_qualified;
+		zend_string *resolved = zend_resolve_function_name(
+			zend_ast_get_str(name_ast), name_ast->attr, &is_fully_qualified);
+		zend_string *lcname = zend_string_tolower(resolved);
+		fbc = zend_hash_find_ptr(CG(function_table), lcname);
+		zend_string_release_ex(lcname, 0);
+		zend_string_release_ex(resolved, 0);
+		if (fbc && zend_compile_ignore_function(fbc, CG(active_op_array)->filename)) {
+			return false;
+		}
+	} else {
+		zend_ast *class_ast = callback->child[0];
+		if (class_ast->kind != ZEND_AST_ZVAL
+		 || Z_TYPE_P(zend_ast_get_zval(class_ast)) != IS_STRING) {
+			return false;
+		}
+
+		const zend_class_entry *ce = NULL;
+		uint32_t fetch_type = zend_get_class_fetch_type(zend_ast_get_str(class_ast));
+		if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
+			zend_string *class_name = zend_resolve_class_name_ast(class_ast);
+			zend_string *lcname = zend_string_tolower(class_name);
+			ce = zend_hash_find_ptr(CG(class_table), lcname);
+			zend_string_release_ex(lcname, 0);
+			if (!ce && CG(active_class_entry)
+			 && zend_string_equals_ci(CG(active_class_entry)->name, class_name)) {
+				ce = CG(active_class_entry);
+			}
+			zend_string_release_ex(class_name, 0);
+		} else if (fetch_type == ZEND_FETCH_CLASS_SELF && zend_is_scope_known()) {
+			ce = CG(active_class_entry);
+		} else if (fetch_type == ZEND_FETCH_CLASS_PARENT && zend_is_scope_known()) {
+			ce = zend_resolve_compile_time_parent(CG(active_class_entry));
+		}
+
+		if (!ce) {
+			return false;
+		}
+		zend_string *lcname = zend_string_tolower(zend_ast_get_str(name_ast));
+		for (const zend_class_entry *cur_ce = ce; cur_ce && !fbc; cur_ce = zend_resolve_compile_time_parent(cur_ce)) {
+			if (!zend_compile_ignore_class(cur_ce, CG(active_op_array)->filename)) {
+				fbc = zend_get_compatible_func_or_null(cur_ce, lcname);
+			}
+		}
+		zend_string_release_ex(lcname, 0);
+	}
+
+	if (!fbc || !fbc_is_finalized(fbc) || (fbc->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS)) {
+		return false;
+	}
+	if (arg_name) {
+		arg_num = zend_get_arg_num(fbc, arg_name);
+	}
+	return arg_num != (uint32_t) -1 && !ARG_SHOULD_BE_SENT_BY_REF(fbc, arg_num);
+}
+
 static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *args, zend_string *lcname, uint32_t lineno, uint32_t type) /* {{{ */
 {
 	/* array_map() as an internal function calls the callback as if strict_types=0,
@@ -5391,9 +5459,14 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 	zend_ast_list *fcc_args = zend_ast_get_list(fcc->args);
 	bool uses_named_args = false;
 	bool has_placeholder = false;
+	uint32_t mapped_arg_num = 0;
+	zend_string *mapped_arg_name = NULL;
 	for (uint32_t i = 0; i < fcc_args->children; i++) {
 		zend_ast *arg = fcc_args->child[i];
 		if (arg->kind == ZEND_AST_NAMED_ARG) {
+			if (arg->child[1]->kind == ZEND_AST_PLACEHOLDER_ARG) {
+				mapped_arg_name = zend_ast_get_str(arg->child[0]);
+			}
 			uses_named_args = true;
 			arg = arg->child[1];
 		}
@@ -5406,6 +5479,7 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 				return FAILURE;
 			}
 			has_placeholder = true;
+			mapped_arg_num = i + 1;
 			continue;
 		}
 
@@ -5414,7 +5488,7 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 		}
 	}
 
-	if (!has_placeholder) {
+	if (!has_placeholder || !zend_array_map_callback_takes_value(callback, mapped_arg_num, mapped_arg_name)) {
 		return FAILURE;
 	}
 
