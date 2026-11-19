@@ -157,6 +157,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-12171 (SimpleXML property-proxy equality ignores element
     names). (Ilia Alshanetsky)
 
+- SNMP:
+  . Fixed bug GH-25137 (SNMP accepts malformed remote ports).
+    (somethingwithproof)
+
 - SOAP:
   . Fixed the SOAP client accepting a response body shorter than its
     Content-Length and reusing the connection. (Ilia Alshanetsky)
