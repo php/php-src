@@ -4520,6 +4520,10 @@ ZEND_API char *zend_gcvt(double value, int ndigit, char dec_point, char exponent
 	if (mode == 0) {
 		ndigit = 17;
 	}
+	/* A binary64 value has at most 767 significant decimal digits. */
+	if (ndigit > 770) {
+		ndigit = 770;
+	}
 	digits = zend_dtoa(value, mode, ndigit, &decpt, &sign, NULL);
 	if (decpt == 9999) {
 		/*
