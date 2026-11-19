@@ -57,6 +57,8 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	bool warn_on_startup;
 	zend_long limit_copy_file_range;
 	int observe_opline_in_zendmm;
+	zend_mm_heap* zend_orig_heap;
+	zend_mm_heap* zend_test_heap;
 	zend_long quantity_value;
 	zend_string *str_test;
 	zend_string *not_empty_str_test;
@@ -68,9 +70,6 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 		int observer_nesting_depth;
 
 		zend_test_fiber *active_fiber;
-
-		zend_mm_heap* zend_orig_heap;
-		zend_mm_heap* zend_test_heap;
 
 		// the previous heap that was found in ZendMM
 		zend_mm_heap* original_heap;
