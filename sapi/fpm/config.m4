@@ -476,6 +476,14 @@ if test "$PHP_FPM" != "no"; then
     [$PHP_FPM_FILES $PHP_FPM_TRACE_FILES $PHP_FPM_SD_FILES],
     [-I$abs_srcdir/sapi/fpm -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
+  dnl Link the CLI objects into php-fpm for do_php_cli(), so that php-fpm runs as
+  dnl the CLI when invoked under a "php" name (e.g. a php symlink to php-fpm).
+  AS_VAR_IF([PHP_CLI], [no],, [
+    AC_DEFINE([PHP_FPM_WITH_CLI], [1],
+      [Define to 1 if the CLI SAPI is linked into the FPM binary.])
+    PHP_FPM_OBJS="$PHP_FPM_OBJS $PHP_CLI_SHARED_OBJS"
+  ])
+
   AS_CASE([$host_alias],
     [*aix*], [
       BUILD_FPM="echo '\#! .' > php.sym && echo >>php.sym && nm -BCpg \`echo \$(PHP_GLOBAL_OBJS) \$(PHP_BINARY_OBJS) \$(PHP_FPM_OBJS) | sed 's/\([A-Za-z0-9_]*\)\.lo/\1.o/g'\` | \$(AWK) '{ if (((\$\$2 == \"T\") || (\$\$2 == \"D\") || (\$\$2 == \"B\")) && (substr(\$\$3,1,1) != \".\")) { print \$\$3 } }' | sort -u >> php.sym && \$(LIBTOOL) --tag=CC --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) -Wl,-brtl -Wl,-bE:php.sym \$(PHP_RPATHS) \$(PHP_GLOBAL_OBJS) \$(PHP_BINARY_OBJS) \$(PHP_FASTCGI_OBJS) \$(PHP_FPM_OBJS) \$(EXTRA_LIBS) \$(FPM_EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_FPM_PATH)"
