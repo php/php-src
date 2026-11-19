@@ -1353,7 +1353,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 					Z_PARAM_LONG(retries)
 				ZEND_PARSE_PARAMETERS_END();
 
-				timeout_arg_num = 10;
+				timeout_arg_num = 11;
 				oid_arg_num = 8;
 				type_arg_num = 9;
 				value_arg_num = 10;
