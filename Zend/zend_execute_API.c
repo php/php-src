@@ -1505,6 +1505,13 @@ static void zend_timeout_handler(int dummy) /* {{{ */
 
 		return;
 	}
+# ifndef ZEND_MAX_EXECUTION_TIMERS
+	/* The timer is process-wide. If this thread has no timeout armed, the signal
+	 * is stale (the timer was disarmed) or was meant for another thread. */
+	if (!EG(timeout_seconds)) {
+		return;
+	}
+# endif
 #else
 	if (zend_atomic_bool_load_ex(&EG(timed_out))) {
 		/* Die on hard timeout */
@@ -1550,6 +1557,27 @@ static void zend_timeout_handler(int dummy) /* {{{ */
 		zend_set_timeout_ex(EG(hard_timeout), 1);
 	}
 #endif
+}
+/* }}} */
+#endif
+
+#if defined(ZTS) && !defined(ZEND_WIN32) && !defined(ZEND_MAX_EXECUTION_TIMERS) \
+	&& defined(HAVE_SETITIMER) && !defined(ZEND_SIGNALS) && defined(HAVE_SIGACTION)
+# define ZEND_TIMEOUT_SIGNAL_REROUTE 1
+/* Whether the process-wide timer is armed. */
+static zend_atomic_bool zend_timer_armed;
+
+/* The timer signal may reach a thread that never ran PHP: send it on to a PHP
+ * thread while the timer is armed, and ignore it otherwise. */
+static void zend_timeout_signal_handler(int signo, siginfo_t *si, void *uc) /* {{{ */
+{
+	if (!tsrm_is_managed_thread()) {
+		if (!zend_atomic_bool_load_ex(&zend_timer_armed)
+		 || zend_signal_reroute_from_foreign_thread(signo, si, uc)) {
+			return;
+		}
+	}
+	zend_timeout_handler(signo);
 }
 /* }}} */
 #endif
@@ -1646,6 +1674,11 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 		}
 		signo = SIGPROF;
 # endif
+# ifdef ZEND_TIMEOUT_SIGNAL_REROUTE
+		if (seconds) {
+			zend_atomic_bool_store_ex(&zend_timer_armed, true);
+		}
+# endif
 
 		if (reset_signals) {
 # ifdef ZEND_SIGNALS
@@ -1655,9 +1688,17 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 #  ifdef HAVE_SIGACTION
 			struct sigaction act;
 
+#   ifdef ZTS
+			/* No SA_RESETHAND: the disposition is process-wide, and a signal
+			 * re-routed from another thread must still find the handler. */
+			act.sa_sigaction = zend_timeout_signal_handler;
+			sigemptyset(&act.sa_mask);
+			act.sa_flags = SA_ONSTACK | SA_SIGINFO;
+#   else
 			act.sa_handler = zend_timeout_handler;
 			sigemptyset(&act.sa_mask);
 			act.sa_flags = SA_ONSTACK | SA_RESETHAND | SA_NODEFER;
+#   endif
 			sigaction(signo, &act, NULL);
 #  else
 			signal(signo, zend_timeout_handler);
@@ -1707,6 +1748,9 @@ void zend_unset_timeout(void) /* {{{ */
 		setitimer(ITIMER_REAL, &no_timeout, NULL);
 # else
 		setitimer(ITIMER_PROF, &no_timeout, NULL);
+# endif
+# ifdef ZEND_TIMEOUT_SIGNAL_REROUTE
+		zend_atomic_bool_store_ex(&zend_timer_armed, false);
 # endif
 	}
 #endif

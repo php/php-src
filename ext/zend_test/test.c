@@ -833,6 +833,20 @@ static ZEND_FUNCTION(zend_test_start_foreign_thread)
 	}
 	pthread_detach(thread);
 }
+
+/* The signal of the execution timer if it is process-wide, null otherwise. */
+static ZEND_FUNCTION(zend_test_timeout_signal)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+#if defined(ZEND_MAX_EXECUTION_TIMERS) || !defined(HAVE_SETITIMER)
+	RETURN_NULL();
+#elif defined(__CYGWIN__) || defined(__PASE__) || (defined(__aarch64__) && defined(__APPLE__))
+	RETURN_LONG(SIGALRM);
+#else
+	RETURN_LONG(SIGPROF);
+#endif
+}
 #endif
 
 static bool has_opline(zend_execute_data *execute_data)
