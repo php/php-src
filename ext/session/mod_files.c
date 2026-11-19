@@ -236,6 +236,11 @@ static zend_result ps_files_write(ps_files *data, zend_string *key, zend_string 
 		return FAILURE;
 	}
 
+	if (ftruncate(data->fd, 0) != 0) {
+		php_error_docref(NULL, E_WARNING, "ftruncate() failed: %s (%d)", strerror(errno), errno);
+		return FAILURE;
+	}
+
 #ifdef HAVE_PWRITE
 	n = pwrite(data->fd, ZSTR_VAL(val), ZSTR_LEN(val), 0);
 #else
@@ -268,12 +273,6 @@ static zend_result ps_files_write(ps_files *data, zend_string *key, zend_string 
 		}
 		return FAILURE;
 	}
-
-	if (ZSTR_LEN(val) < data->st_size) {
-		php_ignore_value(ftruncate(data->fd, ZSTR_LEN(val)));
-	}
-
-	data->st_size = ZSTR_LEN(val);
 
 	return SUCCESS;
 }
