@@ -20,8 +20,10 @@ var_dump(size("'\\x41'"));
 var_dump(size("'\\x1f'"));
 var_dump(size("sizeof('a')"));
 var_dump(size("(0xFFFFFFFFu > 'A') ? 7 : 13"));
-var_dump(FFI::alignof(FFI::cdef("typedef _Alignas(16) char T;")->type("T")));
-var_dump(FFI::alignof(FFI::cdef("typedef _Alignas(0) int T;")->type("T")));
+$ffi = FFI::cdef("typedef _Alignas(16) char T;");
+var_dump(FFI::alignof($ffi->type("T")));
+$ffi = FFI::cdef("typedef _Alignas(0) int T;");
+var_dump(FFI::alignof($ffi->type("T")));
 try { FFI::cdef("typedef _Alignas(3) char T;"); } catch (FFI\ParserException $e) { echo $e->getMessage(), "\n"; }
 var_dump(size("(1/0) ? 7 : 13"));
 var_dump(size("(1%0) ? 7 : 13"));
