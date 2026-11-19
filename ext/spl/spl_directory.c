@@ -474,6 +474,10 @@ static spl_filesystem_object *spl_filesystem_object_create_info(zend_string *fil
 	ZEND_ASSERT(file_path && ZSTR_LEN(file_path) > 0);
 	ZEND_ASSERT(ce != NULL);
 
+	if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
+		return NULL;
+	}
+
 	intern = spl_filesystem_from_obj(spl_filesystem_object_new(ce));
 	RETVAL_OBJ(&intern->std);
 
@@ -509,6 +513,10 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int num_args, sp
 		case SPL_FS_INFO:
 			ce = ce ? ce : source->info_class;
 
+			if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
+				return NULL;
+			}
+
 			intern = spl_filesystem_from_obj(spl_filesystem_object_new(ce));
 			RETVAL_OBJ(&intern->std);
 
@@ -534,6 +542,10 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int num_args, sp
 			if (zend_parse_parameters(num_args, "|Sbr!",
 				&open_mode, &use_include_path, &resource) == FAILURE
 			) {
+				return NULL;
+			}
+
+			if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
 				return NULL;
 			}
 

@@ -1103,6 +1103,10 @@ PHP_METHOD(ArrayObject, getIterator)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
+	if (UNEXPECTED(zend_update_class_constants(intern->ce_get_iterator) != SUCCESS)) {
+		RETURN_THROWS();
+	}
+
 	RETURN_OBJ(spl_array_object_new_ex(intern->ce_get_iterator, Z_OBJ_P(object), 0));
 }
 /* }}} */
