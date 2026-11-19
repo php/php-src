@@ -8,11 +8,11 @@ xml
 memory_limit=-1
 --SKIPIF--
 <?php
-if (!getenv('RUN_RESOURCE_HEAVY_TESTS')) die('skip resource-heavy test');
+skipif(!getenv('RUN_RESOURCE_HEAVY_TESTS'), 'resource-heavy test');
 require __DIR__ . '/libxml_expat_skipif.inc';
-skipif(want_expat: false);
-if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
-if (PHP_INT_SIZE != 8) die("skip 64-bit only");
+skipif(xml_uses_expat(), 'test is for libxml');
+skipif(getenv('SKIP_SLOW_TESTS'), 'slow test');
+skipif(PHP_INT_SIZE != 8, '64-bit only');
 ?>
 --FILE--
 <?php
