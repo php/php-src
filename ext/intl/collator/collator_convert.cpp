@@ -57,7 +57,6 @@ static void collator_convert_hash_item_from_utf8_to_utf16(
 {
 	const char* old_val;
 	size_t      old_val_len;
-	zval        znew_val;
 
 	/* Process string values only. */
 	if( Z_TYPE_P( hashData ) != IS_STRING )
@@ -72,15 +71,12 @@ static void collator_convert_hash_item_from_utf8_to_utf16(
 		return;
 
 	/* Update current hash item with the converted value. */
-	ZVAL_NEW_STR( &znew_val, zstr );
-
-	if( hashKey)
-	{
+	if (hashKey) {
+		zval znew_val;
+		ZVAL_NEW_STR( &znew_val, zstr );
 		zend_hash_update( hash, hashKey, &znew_val);
-	}
-	else /* hashKeyType == HASH_KEY_IS_LONG */
-	{
-		zend_hash_index_update( hash, hashIndex, &znew_val);
+	} else /* hashKeyType == HASH_KEY_IS_LONG */ {
+		add_index_str(hash, hashIndex, zstr);
 	}
 }
 /* }}} */
@@ -93,7 +89,6 @@ static void collator_convert_hash_item_from_utf16_to_utf8(
 	const char* old_val;
 	size_t      old_val_len;
 	zend_string* u8str;
-	zval        znew_val;
 
 	/* Process string values only. */
 	if( Z_TYPE_P( hashData ) != IS_STRING )
@@ -109,15 +104,12 @@ static void collator_convert_hash_item_from_utf16_to_utf8(
 		return;
 
 	/* Update current hash item with the converted value. */
-	ZVAL_NEW_STR( &znew_val, u8str);
-
-	if( hashKey )
-	{
+	if (hashKey) {
+		zval znew_val;
+		ZVAL_NEW_STR( &znew_val, u8str );
 		zend_hash_update( hash, hashKey, &znew_val);
-	}
-	else /* hashKeyType == HASH_KEY_IS_LONG */
-	{
-		zend_hash_index_update( hash, hashIndex, &znew_val);
+	} else /* hashKeyType == HASH_KEY_IS_LONG */ {
+		add_index_str(hash, hashIndex, u8str);
 	}
 }
 /* }}} */
