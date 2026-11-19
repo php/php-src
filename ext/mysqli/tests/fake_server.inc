@@ -1445,6 +1445,36 @@ function my_mysqli_test_stmt_response_field_len_premature(my_mysqli_fake_server_
 	$conn->read(65536);
 }
 
+function my_mysqli_test_query_response_eof_one_byte(my_mysqli_fake_server_conn $conn): void
+{
+    $rh = $conn->packet_generator->server_query_execute_data_response('strval');
+    // MySQL 4.1 can send a 1-byte EOF packet (no warning count and status) after the metadata
+    $rh[3]->packet_length = '010000';
+    $rh[3]->warnings = '';
+    $rh[3]->server_status = '';
+
+    $conn->send_server_greetings();
+    $conn->read();
+    $conn->send_server_ok();
+    $conn->read();
+    $conn->send($conn->packets_to_bytes($rh), "Query Response [1-byte EOF packet]");
+    $conn->read(65536);
+}
+
+function my_mysqli_test_auth_response_old_password(my_mysqli_fake_server_conn $conn): void
+{
+    $p = new my_mysqli_fake_packet();
+    $p->packet_length = "010000";
+    $p->packet_number = "02";
+    // MySQL 4.1+ sends a single 0xFE byte when the account still uses an old password hash
+    $p->response_code = "fe";
+
+    $conn->send_server_greetings();
+    $conn->read();
+    $conn->send($p->to_bytes(), "Auth Response [old password]");
+    $conn->read(65536);
+}
+
 function run_fake_server(string $test_function, int|string $port = 0): void
 {
     $host = '127.0.0.1';
