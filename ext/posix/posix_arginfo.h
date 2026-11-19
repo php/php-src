@@ -1,5 +1,5 @@
 /* This is a generated file, edit posix.stub.php instead.
- * Stub hash: 25e0aa769d72988ebca07fff96c8ed1fcb6b7d5e */
+ * Stub hash: 058523eee3f040ad14c41bceca4068d877054892 */
 
 #include "zend_constants.h"
 
@@ -413,7 +413,7 @@ static void register_posix_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_NPTS", RLIMIT_NPTS, CONST_PERSISTENT);
 #endif
 #if defined(HAVE_SETRLIMIT)
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_INFINITY", RLIM_INFINITY, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_INFINITY", PHP_POSIX_RLIM_INFINITY, CONST_PERSISTENT);
 #endif
 #if defined(_SC_ARG_MAX)
 	REGISTER_LONG_CONSTANT("POSIX_SC_ARG_MAX", _SC_ARG_MAX, CONST_PERSISTENT);
