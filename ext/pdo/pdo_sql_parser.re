@@ -239,7 +239,7 @@ safe:
 				if (param->param_type == PDO_PARAM_LOB && Z_TYPE_P(parameter) == IS_RESOURCE) {
 					php_stream *stm;
 
-					php_stream_from_zval_no_verify(stm, parameter);
+					php_stream_from_res_no_verify(stm, Z_RES_P(parameter));
 					if (stm) {
 						zend_string *buf;
 

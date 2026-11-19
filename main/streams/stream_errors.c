@@ -473,7 +473,7 @@ PHPAPI void php_stream_error_operation_end(const php_stream_context *context)
 	}
 
 	if (context == NULL) {
-		context = FG(default_context);
+		context = php_stream_context_get_default();
 	}
 
 	php_stream_error_mode error_mode = php_stream_get_error_mode(context);

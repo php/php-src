@@ -24,16 +24,22 @@ typedef void (*php_stream_notification_func)(php_stream_context *context,
 #define PHP_STREAM_NOTIFIER_PROGRESS	1
 
 /* TODO: Remove dependence on ext/standard/file.h for the default context global */
-#define php_stream_context_get_default(without_context) \
-	(without_context) ? NULL : FG(default_context) ? FG(default_context) : \
-		(FG(default_context) = php_stream_context_alloc())
+#define php_stream_context_get_default() \
+	FG(default_context) ? FG(default_context) : (FG(default_context) = php_stream_context_alloc())
+
+#define php_stream_context_get_default_ex(without_context) \
+	(without_context) ? NULL : php_stream_context_get_default()
 
 /* Attempt to fetch context from the zval passed,
    If no context was passed, use the default context
    The default context has not yet been created, do it now. */
 #define php_stream_context_from_zval(zcontext, nocontext) ( \
 		(zcontext) ? zend_fetch_resource_ex(zcontext, "Stream-Context", php_le_stream_context()) : \
-		php_stream_context_get_default(nocontext))
+		php_stream_context_get_default_ex(nocontext))
+
+#define php_stream_context_from_zval_or_default(zcontext) ( \
+		(zcontext) ? zend_fetch_resource_ex(zcontext, "Stream-Context", php_le_stream_context()) : \
+		php_stream_context_get_default())
 
 #define php_stream_context_to_zval(context, zval) { ZVAL_RES(zval, (context)->res); GC_ADDREF((context)->res); }
 

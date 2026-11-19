@@ -386,7 +386,7 @@ PHP_FUNCTION(bzopen)
 		php_socket_t fd;
 		size_t stream_mode_len;
 
-		php_stream_from_zval(stream, file);
+		php_stream_from_res(stream, Z_RES_P(file));
 		stream_mode_len = strlen(stream->mode);
 
 		char primary_stream_mode;

@@ -138,7 +138,7 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 						}
 						if (Z_TYPE_P(parameter) == IS_RESOURCE) {
 							php_stream *stm = NULL;
-							php_stream_from_zval_no_verify(stm, parameter);
+							php_stream_from_res_no_verify(stm, Z_RES_P(parameter));
 							if (stm) {
 								zend_string *mem = php_stream_copy_to_mem(stm, PHP_STREAM_COPY_ALL, 0);
 								zval_ptr_dtor(parameter);

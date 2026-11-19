@@ -861,7 +861,7 @@ void pgsqlCopyFromFile_internal(INTERNAL_FUNCTION_PARAMETERS)
 	PDO_CONSTRUCT_CHECK;
 	PDO_DBH_CLEAR_ERR();
 
-	stream = php_stream_open_wrapper_ex(filename, "rb", 0, NULL, FG(default_context));
+	stream = php_stream_open_wrapper_ex(filename, "rb", 0, NULL, php_stream_context_get_default());
 	if (!stream) {
 		pdo_pgsql_error_msg(dbh, PGRES_FATAL_ERROR, "Unable to open the file");
 		PDO_HANDLE_DBH_ERR();
@@ -966,7 +966,7 @@ void pgsqlCopyToFile_internal(INTERNAL_FUNCTION_PARAMETERS)
 
 	H = (pdo_pgsql_db_handle *)dbh->driver_data;
 
-	stream = php_stream_open_wrapper_ex(filename, "wb", 0, NULL, FG(default_context));
+	stream = php_stream_open_wrapper_ex(filename, "wb", 0, NULL, php_stream_context_get_default());
 	if (!stream) {
 		pdo_pgsql_error_msg(dbh, PGRES_FATAL_ERROR, "Unable to open the file for writing");
 		PDO_HANDLE_DBH_ERR();

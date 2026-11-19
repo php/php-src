@@ -1407,7 +1407,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 		case IS_STRING:
 			break;
 		case IS_RESOURCE:
-			php_stream_from_zval_no_verify(fp, value);
+			php_stream_from_res_no_verify(fp, Z_RES_P(value));
 
 			if (!fp) {
 				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Iterator %pS returned an invalid stream handle", ce->name);
@@ -2849,7 +2849,7 @@ PHP_METHOD(Phar, setStub)
 			RETURN_THROWS();
 		}
 
-		if ((php_stream_from_zval_no_verify(stream, zstub)) != NULL) {
+		if ((php_stream_from_res_no_verify(stream, Z_RES_P(zstub))) != NULL) {
 			if (phar_obj->archive->is_persistent && FAILURE == phar_copy_on_write(&(phar_obj->archive))) {
 				zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%pS\" is persistent, unable to copy on write", phar_obj->archive->fname);
 				RETURN_THROWS();

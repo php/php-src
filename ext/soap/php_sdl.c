@@ -3396,7 +3396,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 	if (instanceof_function(Z_OBJCE_P(this_ptr), soap_class_entry)) {
 		tmp = Z_CLIENT_STREAM_CONTEXT_P(this_ptr);
 		if (Z_TYPE_P(tmp) == IS_RESOURCE) {
-			context = php_stream_context_from_zval(tmp, 0);
+			context = php_stream_context_from_zval_or_default(tmp);
 			/* Share a reference with new_context down below.
 			 * For new contexts, the reference is only in new_context so that doesn't need extra refcounting. */
 			GC_ADDREF(context->res);

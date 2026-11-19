@@ -1655,7 +1655,7 @@ static int php_sqlite3_bind_params(php_sqlite3_stmt *stmt_obj) /* {{{ */
 					php_stream *stream = NULL;
 					zend_string *buffer = NULL;
 					if (Z_TYPE_P(parameter) == IS_RESOURCE) {
-						php_stream_from_zval_no_verify(stream, parameter);
+						php_stream_from_res_no_verify(stream, Z_RES_P(parameter));
 						if (stream == NULL) {
 							php_sqlite3_error(stmt_obj->db_obj, 0, "Unable to read stream for parameter %ld", param->param_number);
 							return FAILURE;

@@ -702,7 +702,7 @@ PHP_FUNCTION(get_headers)
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
-	context = php_stream_context_from_zval(zcontext, 0);
+	context = php_stream_context_from_zval_or_default(zcontext);
 
 	if (!(stream = php_stream_open_wrapper_ex(url, "r", REPORT_ERRORS | STREAM_USE_URL | STREAM_ONLY_GET_HEADERS, NULL, context))) {
 		RETURN_FALSE;
