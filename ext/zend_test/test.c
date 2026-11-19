@@ -41,6 +41,9 @@
 #include "zend_system_id.h"
 #include "zend_mm_custom_handlers.h"
 #include <signal.h>
+#if defined(ZTS) && !defined(PHP_WIN32)
+# include <pthread.h>
+#endif
 
 // `php.h` sets `NDEBUG` when not `PHP_DEBUG` which will make `assert()` from
 // assert.h a no-op. In order to have `assert()` working on NDEBUG builds, we
@@ -782,6 +785,31 @@ static ZEND_FUNCTION(zend_test_raise_and_throw)
 
 	zend_throw_exception(NULL, "Exception after raise()", 0);
 }
+
+#if defined(ZTS) && !defined(PHP_WIN32)
+static void *zend_test_raise_thread(void *arg)
+{
+	raise((int) (intptr_t) arg);
+	return NULL;
+}
+
+/* Raises a signal on a thread that never ran PHP and has no TSRM storage. */
+static ZEND_FUNCTION(zend_test_raise_on_foreign_thread)
+{
+	zend_long signo;
+	pthread_t thread;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(signo)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (pthread_create(&thread, NULL, zend_test_raise_thread, (void *) (intptr_t) signo) != 0) {
+		zend_throw_error(NULL, "pthread_create() failed");
+		RETURN_THROWS();
+	}
+	pthread_join(thread, NULL);
+}
+#endif
 
 static bool has_opline(zend_execute_data *execute_data)
 {
