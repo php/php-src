@@ -12,6 +12,7 @@ if (readline_info('done') === NULL) {
 --FILE--
 <?php
 $php = getenv('TEST_PHP_EXECUTABLE');
+$args = getenv('TEST_PHP_EXTRA_ARGS');
 
 // disallow console escape sequences that may break the output
 putenv('TERM=VT100');
@@ -27,7 +28,7 @@ exit
 EOT;
 
 $code = escapeshellarg($code);
-echo `echo $code | "$php" -a`, "\n";
+echo `echo $code | "$php" $args -a`, "\n";
 ?>
 --EXPECT--
 Interactive shell
