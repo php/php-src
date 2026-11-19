@@ -28,7 +28,7 @@
  *
  */
 
-#include "libmbfl/config.h"
+#include <libmbfl/config.h>
 
 #include <stddef.h>
 #include <string.h>

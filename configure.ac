@@ -394,7 +394,6 @@ AC_CHECK_HEADERS([
   pty.h
   pwd.h
   resolv.h
-  strings.h
   syslog.h
   sysexits.h
   sys/ioctl.h
@@ -580,7 +579,6 @@ AC_CHECK_FUNCS([
   statfs
   statvfs
   std_syslog
-  strcasecmp
   strptime
   strtok_r
   symlink
