@@ -45,6 +45,8 @@ typedef struct php_struct {
 	int request_processed;
 	/* final content type */
 	char *content_type;
+	/* error status of the request body read (APR_SUCCESS if no error occurred) */
+	apr_status_t read_post_error;
 } php_struct;
 
 void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf);
