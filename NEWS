@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.36
+?? ??? ????, PHP 8.2.37
+
+
+19 Nov 2026, PHP 8.2.36
 
 - CGI:
   . Fixed GHSA-5j3f-64r7-f564 (PHP-CGI out-of-bounds read and write during
