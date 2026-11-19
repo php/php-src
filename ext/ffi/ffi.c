@@ -3639,6 +3639,46 @@ void zend_ffi_cleanup_dcl(zend_ffi_dcl *dcl) /* {{{ */
 }
 /* }}} */
 
+void zend_ffi_borrow_dcl(zend_ffi_dcl *dcl, const zend_ffi_dcl *common_dcl) /* {{{ */
+{
+	*dcl = *common_dcl;
+	dcl->type = ZEND_FFI_TYPE(common_dcl->type);
+}
+/* }}} */
+
+static void zend_ffi_adopt_type(zend_ffi_dcl *dcl, zend_ffi_dcl *common_dcl) /* {{{ */
+{
+	zend_ffi_type *common_type = ZEND_FFI_TYPE(common_dcl->type);
+	zend_ffi_type **ref = &dcl->type;
+
+	if (!ZEND_FFI_TYPE_IS_OWNED(common_dcl->type)) {
+		return;
+	}
+	while (ZEND_FFI_TYPE(*ref) != common_type) {
+		zend_ffi_type *type = ZEND_FFI_TYPE(*ref);
+
+		if (!ZEND_FFI_TYPE_IS_OWNED(*ref)) {
+			return;
+		}
+		switch (type->kind) {
+			case ZEND_FFI_TYPE_POINTER:
+				ref = &type->pointer.type;
+				break;
+			case ZEND_FFI_TYPE_ARRAY:
+				ref = &type->array.type;
+				break;
+			case ZEND_FFI_TYPE_FUNC:
+				ref = &type->func.ret_type;
+				break;
+			default:
+				return;
+		}
+	}
+	*ref = ZEND_FFI_TYPE_MAKE_OWNED(common_type);
+	common_dcl->type = common_type;
+}
+/* }}} */
+
 static void zend_ffi_throw_parser_error(const char *format, ...) /* {{{ */
 {
 	va_list va;
@@ -6078,6 +6118,7 @@ void zend_ffi_add_enum_val(zend_ffi_dcl *enum_dcl, const char *name, size_t name
 	}
 	sym = zend_hash_str_find_ptr(FFI_G(symbols), name, name_len);
 	if (sym) {
+		zend_ffi_cleanup_dcl(enum_dcl);
 		zend_ffi_parser_error("Redeclaration of \"%.*s\" at line %d", name_len, name, FFI_G(line));
 	} else {
 		sym = pemalloc(sizeof(zend_ffi_symbol), FFI_G(persistent));
@@ -6141,7 +6182,7 @@ static zend_result zend_ffi_validate_field_type(zend_ffi_type *type, zend_ffi_ty
 }
 /* }}} */
 
-void zend_ffi_add_field(zend_ffi_dcl *struct_dcl, const char *name, size_t name_len, zend_ffi_dcl *field_dcl) /* {{{ */
+void zend_ffi_add_field(zend_ffi_dcl *struct_dcl, const char *name, size_t name_len, zend_ffi_dcl *field_dcl, zend_ffi_dcl *common_dcl) /* {{{ */
 {
 	zend_ffi_field *field;
 	zend_ffi_type *struct_type = ZEND_FFI_TYPE(struct_dcl->type);
@@ -6149,6 +6190,7 @@ void zend_ffi_add_field(zend_ffi_dcl *struct_dcl, const char *name, size_t name_
 
 	ZEND_ASSERT(struct_type && struct_type->kind == ZEND_FFI_TYPE_STRUCT);
 	zend_ffi_finalize_type(field_dcl);
+	zend_ffi_adopt_type(field_dcl, common_dcl);
 	field_type = ZEND_FFI_TYPE(field_dcl->type);
 	if (zend_ffi_validate_field_type(field_type, struct_type) == FAILURE) {
 		zend_ffi_cleanup_dcl(field_dcl);
@@ -6644,7 +6686,7 @@ void zend_ffi_add_arg(HashTable **args, const char *name, size_t name_len, zend_
 }
 /* }}} */
 
-void zend_ffi_declare(const char *name, size_t name_len, zend_ffi_dcl *dcl) /* {{{ */
+void zend_ffi_declare(const char *name, size_t name_len, zend_ffi_dcl *dcl, zend_ffi_dcl *common_dcl) /* {{{ */
 {
 	zend_ffi_symbol *sym;
 
@@ -6683,9 +6725,12 @@ void zend_ffi_declare(const char *name, size_t name_len, zend_ffi_dcl *dcl) /* {
 				}
 			}
 		}
+		zend_ffi_adopt_type(dcl, common_dcl);
+		zend_ffi_cleanup_dcl(dcl);
 		zend_ffi_parser_error("Redeclaration of \"%.*s\" at line %d", name_len, name, FFI_G(line));
 	} else {
 		if ((dcl->flags & ZEND_FFI_DCL_STORAGE_CLASS) == ZEND_FFI_DCL_TYPEDEF) {
+			zend_ffi_adopt_type(dcl, common_dcl);
 			if (zend_ffi_validate_vla(ZEND_FFI_TYPE(dcl->type)) == FAILURE) {
 				zend_ffi_cleanup_dcl(dcl);
 				LONGJMP(FFI_G(bailout), FAILURE);
@@ -6713,11 +6758,13 @@ void zend_ffi_declare(const char *name, size_t name_len, zend_ffi_dcl *dcl) /* {
 
 			type = ZEND_FFI_TYPE(dcl->type);
 			if (zend_ffi_validate_type(type, (dcl->flags & ZEND_FFI_DCL_STORAGE_CLASS) == ZEND_FFI_DCL_EXTERN, 1) == FAILURE) {
+				zend_ffi_adopt_type(dcl, common_dcl);
 				zend_ffi_cleanup_dcl(dcl);
 				LONGJMP(FFI_G(bailout), FAILURE);
 			}
 			if ((dcl->flags & ZEND_FFI_DCL_STORAGE_CLASS) == 0 ||
 			    (dcl->flags & ZEND_FFI_DCL_STORAGE_CLASS) == ZEND_FFI_DCL_EXTERN) {
+				zend_ffi_adopt_type(dcl, common_dcl);
 				sym = pemalloc(sizeof(zend_ffi_symbol), FFI_G(persistent));
 				sym->kind = (type->kind == ZEND_FFI_TYPE_FUNC) ? ZEND_FFI_SYM_FUNC : ZEND_FFI_SYM_VAR;
 				sym->type = dcl->type;
