@@ -11,12 +11,12 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 define("PERMISSIONS_MASK", 0777);
 
-$script_directory = __DIR__;
+$script_directory = sys_get_temp_dir();
 chdir($script_directory);
 $test_dirname = basename(__FILE__, ".php") . "testdir";
 mkdir($test_dirname);
 
-$filepath = __FILE__ . ".tmp";
+$filepath = $script_directory . DIRECTORY_SEPARATOR . basename(__FILE__) . ".tmp";
 $filename = basename($filepath);
 $fd = fopen($filepath, "w+");
 fclose($fd);
