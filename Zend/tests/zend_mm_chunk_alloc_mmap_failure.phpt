@@ -29,4 +29,4 @@ $s = str_repeat('A', $size - 4096);
 echo "allocation succeeded\n";
 ?>
 --EXPECTREGEX--
-bool\(true\)\s+(.*Out of memory|allocation succeeded)\s*
+bool\(true\)\s+(.*Out of memory\s+Termsig=6|allocation succeeded)\s*
