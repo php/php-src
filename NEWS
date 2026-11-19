@@ -2,7 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.37
 
-
+- Opcache:
+  . Fixed bug GH-25247 (Tracing JIT uses a stale value for argument 13 and
+    above). (Rafael Molina)
 
 21 Oct 2026, PHP 8.3.36
 

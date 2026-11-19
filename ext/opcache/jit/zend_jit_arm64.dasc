@@ -15044,8 +15044,11 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 	switch (opline->opcode) {
 		case ZEND_SEND_VAR:
 		case ZEND_SEND_VAL:
-		case ZEND_SEND_VAL_EX:
 			return (opline->op2_type != IS_CONST);
+		case ZEND_SEND_VAL_EX:
+			/* Argument 13+ falls back to the VM handler, which reads the slot. */
+			return (opline->op2_type != IS_CONST)
+				&& opline->op2.num <= MAX_ARG_FLAG_NUM;
 		case ZEND_QM_ASSIGN:
 		case ZEND_IS_SMALLER:
 		case ZEND_IS_SMALLER_OR_EQUAL:
