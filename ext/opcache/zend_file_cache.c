@@ -198,16 +198,58 @@ typedef struct _zend_file_cache_metainfo {
 	uint32_t     checksum;
 } zend_file_cache_metainfo;
 
+#ifndef ZEND_WIN32
+# ifndef O_NOFOLLOW
+#  define O_NOFOLLOW 0
+# endif
+# ifndef O_DIRECTORY
+#  define O_DIRECTORY 0
+# endif
+
+/* mkdir() applies the umask, so apply the configured permissions afterwards.
+ * Go through a file descriptor, as other users of the cache could replace the
+ * new directory with a symlink, and only chmod when needed, as Linux may then
+ * drop a setgid bit inherited from the parent, which keeps the cache owned by
+ * a shared group. */
+static void zend_file_cache_chmod_dir(const char *dirname, mode_t mode)
+{
+	struct stat buf;
+	int fd = open(dirname, O_RDONLY | O_DIRECTORY | O_NOFOLLOW);
+
+	if (fd >= 0 && fstat(fd, &buf) == 0) {
+		if (!S_ISDIR(buf.st_mode)) {
+			errno = ENOTDIR;
+		} else if ((buf.st_mode & 0777) == mode || fchmod(fd, mode | (buf.st_mode & S_ISGID)) == 0) {
+			close(fd);
+			return;
+		}
+	}
+	zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot change permissions of directory '%s', %s\n", dirname, strerror(errno));
+	if (fd >= 0) {
+		close(fd);
+	}
+}
+#endif
+
 static int zend_file_cache_mkdir(char *filename, size_t start)
 {
 	char *s = filename + start;
+#ifndef ZEND_WIN32
+	/* Whoever may read the cache files may also search the directories */
+	mode_t mode = (mode_t) ZCG(accel_directives).file_cache_permissions;
+	mode |= (mode & 0444) >> 2;
+#endif
 
 	while (*s) {
 		if (IS_SLASH(*s)) {
 			char old = *s;
 			*s = '\000';
 #ifndef ZEND_WIN32
-			if (mkdir(filename, S_IRWXU) < 0 && errno != EEXIST) {
+			if (mkdir(filename, mode) == 0) {
+				if (mode != S_IRWXU) {
+					zend_file_cache_chmod_dir(filename, mode);
+				}
+			} else if (errno != EEXIST) {
 #else
 			if (php_win32_ioutil_mkdir(filename, 0700) < 0 && errno != EEXIST) {
 #endif
@@ -1181,6 +1223,15 @@ int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 		efree(filename);
 		return FAILURE;
 	}
+
+#ifndef ZEND_WIN32
+	/* open() applies the umask. Only let other users open the file once it is
+	 * locked, so that they cannot read it before it is written. */
+	if (ZCG(accel_directives).file_cache_permissions != (S_IRUSR | S_IWUSR)
+	 && fchmod(fd, (mode_t) ZCG(accel_directives).file_cache_permissions) < 0) {
+		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot change permissions of file '%s', %s\n", filename, strerror(errno));
+	}
+#endif
 
 #if defined(__AVX__) || defined(__SSE2__)
 	/* Align to 64-byte boundary */

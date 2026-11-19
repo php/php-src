@@ -1777,6 +1777,15 @@ ldap.max_links = -1
 ; SHM reset. The default "" disables file based caching.
 ;opcache.file_cache=
 
+; Octal permissions of the files created in the second level cache directory,
+; from 0600 to 0770 without permissions for others (for *nix only). Directories
+; get the same permissions plus search permission where the files are readable,
+; so 0660 makes them 0770. Existing files and directories are not changed.
+; Users sharing the cache need a common group, e.g. through a setgid cache
+; directory, and the same setting in every SAPI that writes to it. Group
+; members who can write to the cache can change the code that the others run.
+;opcache.file_cache_permissions=0600
+
 ; Enables or disables read-only mode for the second level cache directory.
 ; It should improve performance for read-only containers,
 ; when the cache is pre-warmed and packaged alongside the application.
