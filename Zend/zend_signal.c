@@ -220,9 +220,13 @@ static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context)
 	struct sigaction sa;
 	sigset_t sigset;
 	zend_signal_entry_t p_sig;
+	/* Whether p_sig is this thread's entry in SIGG(handlers), which only then
+	 * may be reset for SA_RESETHAND. */
+	bool own_handler = true;
 #ifdef ZTS
 	if (tsrm_is_shutdown() || !tsrm_is_managed_thread()) {
 		p_sig = global_orig_handlers[signo-1];
+		own_handler = false;
 	} else
 #endif
 	p_sig = SIGG(handlers)[signo-1];
@@ -251,7 +255,7 @@ static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context)
 		}
 	} else if (p_sig.handler != SIG_IGN) {
 		if (p_sig.flags & SA_SIGINFO) {
-			if (p_sig.flags & SA_RESETHAND) {
+			if ((p_sig.flags & SA_RESETHAND) && own_handler) {
 				SIGG(handlers)[signo-1].flags   = 0;
 				SIGG(handlers)[signo-1].handler = SIG_DFL;
 #ifdef ZTS
