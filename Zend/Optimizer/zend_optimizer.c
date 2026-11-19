@@ -1061,11 +1061,12 @@ static void zend_optimize(zend_op_array      *op_array,
 		return;
 	}
 
+	uint32_t dump_flags = (ctx->debug_level & ZEND_DUMP_LINE_NUMBERS_PASSTHRU)
+		? ZEND_DUMP_LINE_NUMBERS
+		: 0;
+
 	if (ctx->debug_level & ZEND_DUMP_BEFORE_OPTIMIZER) {
-		uint32_t additional_dump_flags = (ctx->debug_level & ZEND_DUMP_LINE_NUMBERS_PASSTHRU)
-			? ZEND_DUMP_LINE_NUMBERS
-			: 0;
-		zend_dump_op_array(op_array, ZEND_DUMP_LIVE_RANGES|additional_dump_flags, "before optimizer", NULL);
+		zend_dump_op_array(op_array, ZEND_DUMP_LIVE_RANGES|dump_flags, "before optimizer", NULL);
 	}
 
 	/* pass 1 (Simple local optimizations)
@@ -1079,7 +1080,7 @@ static void zend_optimize(zend_op_array      *op_array,
 	if (ZEND_OPTIMIZER_PASS_1 & ctx->optimization_level) {
 		zend_optimizer_pass1(op_array, ctx);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_1) {
-			zend_dump_op_array(op_array, 0, "after pass 1", NULL);
+			zend_dump_op_array(op_array, dump_flags, "after pass 1", NULL);
 		}
 	}
 
@@ -1089,7 +1090,7 @@ static void zend_optimize(zend_op_array      *op_array,
 	if (ZEND_OPTIMIZER_PASS_3 & ctx->optimization_level) {
 		zend_optimizer_pass3(op_array, ctx);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_3) {
-			zend_dump_op_array(op_array, 0, "after pass 3", NULL);
+			zend_dump_op_array(op_array, dump_flags, "after pass 3", NULL);
 		}
 	}
 
@@ -1099,7 +1100,7 @@ static void zend_optimize(zend_op_array      *op_array,
 	if (ZEND_OPTIMIZER_PASS_4 & ctx->optimization_level) {
 		zend_optimize_func_calls(op_array, ctx);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_4) {
-			zend_dump_op_array(op_array, 0, "after pass 4", NULL);
+			zend_dump_op_array(op_array, dump_flags, "after pass 4", NULL);
 		}
 	}
 
@@ -1109,7 +1110,7 @@ static void zend_optimize(zend_op_array      *op_array,
 	if (ZEND_OPTIMIZER_PASS_5 & ctx->optimization_level) {
 		zend_optimize_cfg(op_array, ctx);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_5) {
-			zend_dump_op_array(op_array, 0, "after pass 5", NULL);
+			zend_dump_op_array(op_array, dump_flags, "after pass 5", NULL);
 		}
 	}
 
@@ -1120,7 +1121,7 @@ static void zend_optimize(zend_op_array      *op_array,
 	    !(ZEND_OPTIMIZER_PASS_7 & ctx->optimization_level)) {
 		zend_optimize_dfa(op_array, ctx);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_6) {
-			zend_dump_op_array(op_array, 0, "after pass 6", NULL);
+			zend_dump_op_array(op_array, dump_flags, "after pass 6", NULL);
 		}
 	}
 
@@ -1131,7 +1132,7 @@ static void zend_optimize(zend_op_array      *op_array,
 	    !(ZEND_OPTIMIZER_PASS_7 & ctx->optimization_level)) {
 		zend_optimize_temporary_variables(op_array, ctx);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_9) {
-			zend_dump_op_array(op_array, 0, "after pass 9", NULL);
+			zend_dump_op_array(op_array, dump_flags, "after pass 9", NULL);
 		}
 	}
 
@@ -1141,7 +1142,7 @@ static void zend_optimize(zend_op_array      *op_array,
 	if (((ZEND_OPTIMIZER_PASS_10|ZEND_OPTIMIZER_PASS_5) & ctx->optimization_level) == ZEND_OPTIMIZER_PASS_10) {
 		zend_optimizer_nop_removal(op_array, ctx);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_10) {
-			zend_dump_op_array(op_array, 0, "after pass 10", NULL);
+			zend_dump_op_array(op_array, dump_flags, "after pass 10", NULL);
 		}
 	}
 
@@ -1153,7 +1154,7 @@ static void zend_optimize(zend_op_array      *op_array,
 	     !(ZEND_OPTIMIZER_PASS_7 & ctx->optimization_level))) {
 		zend_optimizer_compact_literals(op_array, ctx);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_11) {
-			zend_dump_op_array(op_array, 0, "after pass 11", NULL);
+			zend_dump_op_array(op_array, dump_flags, "after pass 11", NULL);
 		}
 	}
 
@@ -1162,7 +1163,7 @@ static void zend_optimize(zend_op_array      *op_array,
 	     !(ZEND_OPTIMIZER_PASS_7 & ctx->optimization_level))) {
 		zend_optimizer_compact_vars(op_array);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_13) {
-			zend_dump_op_array(op_array, 0, "after pass 13", NULL);
+			zend_dump_op_array(op_array, dump_flags, "after pass 13", NULL);
 		}
 	}
 
@@ -1171,7 +1172,7 @@ static void zend_optimize(zend_op_array      *op_array,
 	}
 
 	if (ctx->debug_level & ZEND_DUMP_AFTER_OPTIMIZER) {
-		zend_dump_op_array(op_array, 0, "after optimizer", NULL);
+		zend_dump_op_array(op_array, dump_flags, "after optimizer", NULL);
 	}
 }
 
@@ -1589,7 +1590,12 @@ static void step_adjust_fcall_stack_size(zend_op_array *op_array, void *context)
 }
 
 static void step_dump_after_optimizer(zend_op_array *op_array, void *context) {
-	zend_dump_op_array(op_array, ZEND_DUMP_LIVE_RANGES, "after optimizer", NULL);
+	const zend_optimizer_ctx *ctx = (const zend_optimizer_ctx *) context;
+	uint32_t dump_flags = ZEND_DUMP_LIVE_RANGES;
+	if (ctx->debug_level & ZEND_DUMP_LINE_NUMBERS_PASSTHRU) {
+		dump_flags |= ZEND_DUMP_LINE_NUMBERS;
+	}
+	zend_dump_op_array(op_array, dump_flags, "after optimizer", NULL);
 }
 
 static void zend_optimizer_call_registered_passes(zend_script *script, void *ctx) {
@@ -1608,6 +1614,9 @@ ZEND_API void zend_optimize_script(zend_script *script, zend_long optimization_l
 	zend_string *name;
 	zend_optimizer_ctx ctx;
 	zval *zv;
+	uint32_t dump_flags = (debug_level & ZEND_DUMP_LINE_NUMBERS_PASSTHRU)
+		? ZEND_DUMP_LINE_NUMBERS
+		: 0;
 
 	ctx.arena = zend_arena_create(64 * 1024);
 	ctx.script = script;
@@ -1662,7 +1671,7 @@ ZEND_API void zend_optimize_script(zend_script *script, zend_long optimization_l
 
 		if (debug_level & ZEND_DUMP_AFTER_PASS_7) {
 			for (i = 0; i < call_graph.op_arrays_count; i++) {
-				zend_dump_op_array(call_graph.op_arrays[i], 0, "after pass 7", NULL);
+				zend_dump_op_array(call_graph.op_arrays[i], dump_flags, "after pass 7", NULL);
 			}
 		}
 
@@ -1670,7 +1679,7 @@ ZEND_API void zend_optimize_script(zend_script *script, zend_long optimization_l
 			for (i = 0; i < call_graph.op_arrays_count; i++) {
 				zend_optimize_temporary_variables(call_graph.op_arrays[i], &ctx);
 				if (debug_level & ZEND_DUMP_AFTER_PASS_9) {
-					zend_dump_op_array(call_graph.op_arrays[i], 0, "after pass 9", NULL);
+					zend_dump_op_array(call_graph.op_arrays[i], dump_flags, "after pass 9", NULL);
 				}
 			}
 		}
@@ -1679,7 +1688,7 @@ ZEND_API void zend_optimize_script(zend_script *script, zend_long optimization_l
 			for (i = 0; i < call_graph.op_arrays_count; i++) {
 				zend_optimizer_compact_literals(call_graph.op_arrays[i], &ctx);
 				if (debug_level & ZEND_DUMP_AFTER_PASS_11) {
-					zend_dump_op_array(call_graph.op_arrays[i], 0, "after pass 11", NULL);
+					zend_dump_op_array(call_graph.op_arrays[i], dump_flags, "after pass 11", NULL);
 				}
 			}
 		}
@@ -1688,7 +1697,7 @@ ZEND_API void zend_optimize_script(zend_script *script, zend_long optimization_l
 			for (i = 0; i < call_graph.op_arrays_count; i++) {
 				zend_optimizer_compact_vars(call_graph.op_arrays[i]);
 				if (debug_level & ZEND_DUMP_AFTER_PASS_13) {
-					zend_dump_op_array(call_graph.op_arrays[i], 0, "after pass 13", NULL);
+					zend_dump_op_array(call_graph.op_arrays[i], dump_flags, "after pass 13", NULL);
 				}
 			}
 		}
@@ -1757,7 +1766,7 @@ ZEND_API void zend_optimize_script(zend_script *script, zend_long optimization_l
 
 	if ((debug_level & ZEND_DUMP_AFTER_OPTIMIZER) &&
 			(ZEND_OPTIMIZER_PASS_7 & optimization_level)) {
-		zend_foreach_op_array(script, step_dump_after_optimizer, NULL);
+		zend_foreach_op_array(script, step_dump_after_optimizer, &ctx);
 	}
 
 	if (ctx.constants) {
