@@ -1390,7 +1390,7 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr)
 	int call_result;
 	int ret = FAILURE;
 	/* If we are checking if the stream can cast, no return pointer is provided, so do not emit errors */
-	bool report_errors = retptr;
+	bool report_errors = retptr != NULL;
 
 	ZVAL_STRINGL(&func_name, USERSTREAM_CAST, sizeof(USERSTREAM_CAST)-1);
 
