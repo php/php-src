@@ -1284,10 +1284,23 @@ PHP_FUNCTION(curl_init)
 }
 /* }}} */
 
+static void php_curl_fcc_dup(zend_fcall_info_cache *dest, const zend_fcall_info_cache *src)
+{
+	zend_fcc_dup(dest, src);
+	/* Each FCC owns its trampoline copy, so the duplicate needs its own */
+	if (UNEXPECTED(dest->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+		zend_function *copy = emalloc(sizeof(zend_function));
+
+		memcpy(copy, src->function_handler, sizeof(zend_function));
+		zend_string_addref(copy->common.function_name);
+		dest->function_handler = copy;
+	}
+}
+
 static void php_curl_copy_fcc_with_option(php_curl *ch, CURLoption option, zend_fcall_info_cache *target_fcc, zend_fcall_info_cache *source_fcc)
 {
 	if (ZEND_FCC_INITIALIZED(*source_fcc)) {
-		zend_fcc_dup(target_fcc, source_fcc);
+		php_curl_fcc_dup(target_fcc, source_fcc);
 	}
 
 	/* The callback data (i.e. pointer to the curl handle) stays even if a user callback
@@ -1323,13 +1336,13 @@ void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
 	ch->handlers.read->res = source->handlers.read->res;
 
 	if (ZEND_FCC_INITIALIZED(source->handlers.read->fcc)) {
-		zend_fcc_dup(&ch->handlers.read->fcc, &source->handlers.read->fcc);
+		php_curl_fcc_dup(&ch->handlers.read->fcc, &source->handlers.read->fcc);
 	}
 	if (ZEND_FCC_INITIALIZED(source->handlers.write->fcc)) {
-		zend_fcc_dup(&ch->handlers.write->fcc, &source->handlers.write->fcc);
+		php_curl_fcc_dup(&ch->handlers.write->fcc, &source->handlers.write->fcc);
 	}
 	if (ZEND_FCC_INITIALIZED(source->handlers.write_header->fcc)) {
-		zend_fcc_dup(&ch->handlers.write_header->fcc, &source->handlers.write_header->fcc);
+		php_curl_fcc_dup(&ch->handlers.write_header->fcc, &source->handlers.write_header->fcc);
 	}
 
 	curl_easy_setopt(ch->cp, CURLOPT_ERRORBUFFER,       ch->err.str);
