@@ -21,5 +21,5 @@ foreach ([
 --EXPECT--
 TypeError: ldap_modify_batch(): Argument #3 ($modifications_info) the value for option "modtype" must be of type int, array given
 TypeError: ldap_modify_batch(): Argument #3 ($modifications_info) the value for option "modtype" must be of type int, float given
-TypeError: ldap_modify_batch(): Argument #3 ($modifications_info) the value for option "values" must be of type array, null given
+TypeError: ldap_modify_batch(): Argument #3 ($modifications_info) the value for option "values" must be of type array, string given
 TypeError: ldap_modify_batch(): Argument #3 ($modifications_info) the value for option "values" must be of type array, int given
