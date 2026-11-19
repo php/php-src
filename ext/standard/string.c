@@ -1152,6 +1152,17 @@ ZEND_FRAMELESS_FUNCTION(implode, 2)
 	zend_string *str;
 	zval *pieces;
 
+	/* Like PHP_FUNCTION(implode): implode($array, null) is the same as implode($array) */
+	if (Z_TYPE_P(arg1) == IS_ARRAY) {
+		Z_FLF_PARAM_ARRAY_OR_NULL(2, pieces);
+		if (pieces) {
+			zend_argument_type_error(1, "must be of type string, array given");
+		} else {
+			php_implode(ZSTR_EMPTY_ALLOC(), Z_ARR_P(arg1), return_value);
+		}
+		return;
+	}
+
 	Z_FLF_PARAM_STR(1, str, str_tmp);
 	Z_FLF_PARAM_ARRAY_OR_NULL(2, pieces);
 
