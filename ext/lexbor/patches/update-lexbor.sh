@@ -21,9 +21,9 @@ for f in "$PATCHES_DIR"/*.patch; do
 done
 cd "$LEXBOR_TMP_DIR"
 for patch in "${patches[@]}"; do
-    if ! git am -3 "$patch"; then
+    if ! git -c user.name=x -c user.email=x am -3 "$patch"; then
         read -p "Patch $(basename "$patch") did not apply cleanly. Resolve, stage and press Enter to continue. "
-        git am --continue
+        git -c user.name=x -c user.email=x am --continue
     fi
 done
 
