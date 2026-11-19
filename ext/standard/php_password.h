@@ -48,6 +48,7 @@ extern const php_password_algo php_password_algo_bcrypt;
 extern const php_password_algo php_password_algo_argon2i;
 extern const php_password_algo php_password_algo_argon2id;
 #endif
+extern const php_password_algo php_password_algo_bcrypt_wrap;
 
 PHPAPI int php_password_algo_register(const char*, const php_password_algo*);
 PHPAPI void php_password_algo_unregister(const char*);
