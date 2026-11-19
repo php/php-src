@@ -57,6 +57,10 @@ PHP                                                                        NEWS
   . Fixed imagecreatefromstring() continuing to decode after throwing for a
     string longer than INT_MAX. (lacatoire)
 
+- Gettext:
+  . Fixed bug GH-25584 (JIT frees the string returned by gettext(),
+    dgettext() or dcgettext() while it is still in use). (Ilia Alshanetsky)
+
 - Intl:
   . Fixed Locale::lookup() ignoring the default locale when the language tag
     list is empty. (Weilin Du)

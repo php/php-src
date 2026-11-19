@@ -146,9 +146,6 @@ static const func_info_t func_infos[] = {
 	F1("imageaffinematrixconcat", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_DOUBLE|MAY_BE_FALSE),
 	F1("imageresolution", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_LONG|MAY_BE_TRUE),
 	F1("textdomain", MAY_BE_STRING),
-	F1("gettext", MAY_BE_STRING),
-	F1("dgettext", MAY_BE_STRING),
-	F1("dcgettext", MAY_BE_STRING),
 	F1("bindtextdomain", MAY_BE_STRING|MAY_BE_FALSE),
 #if defined(HAVE_NGETTEXT)
 	F1("ngettext", MAY_BE_STRING),

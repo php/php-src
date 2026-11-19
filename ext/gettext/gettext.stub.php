@@ -5,16 +5,13 @@
 /** @refcount 1 */
 function textdomain(?string $domain = null): string {}
 
-/** @refcount 1 */
 function gettext(string $message): string {}
 
 /** @alias gettext */
 function _(string $message): string {}
 
-/** @refcount 1 */
 function dgettext(string $domain, string $message): string {}
 
-/** @refcount 1 */
 function dcgettext(string $domain, string $message, int $category): string {}
 
 /** @refcount 1 */
