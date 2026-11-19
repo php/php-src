@@ -250,7 +250,7 @@ array(1) {
   bool(true)
 }
 
-Warning: inc2(): Argument #1 ($x) must be passed by reference, value given in %s on line %d
+Warning: {closure:pfa:%s}(): Argument #1 ($x) must be passed by reference, value given in %s on line %d
 array(1) {
   [0]=>
   int(3)
@@ -271,7 +271,7 @@ array(1) {
   int(2)
 }
 
-Warning: inc2(): Argument #1 ($x) must be passed by reference, value given in %s on line %d
+Warning: {closure:pfa:%s}(): Argument #1 ($x) must be passed by reference, value given in %s on line %d
 array(1) {
   [0]=>
   int(4)
@@ -313,7 +313,7 @@ array(1) {
   int(2)
 }
 
-Warning: later2(): Argument #1 ($x) must be passed by reference, value given in %s on line %d
+Warning: {closure:pfa:%s}(): Argument #1 ($x) must be passed by reference, value given in %s on line %d
 array(1) {
   [0]=>
   int(4)
