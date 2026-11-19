@@ -4451,16 +4451,20 @@ PHP_FUNCTION(timezone_transitions_get)
 		}
 	}
 	if (tzobj->tzi.tz->posix_info && tzobj->tzi.tz->posix_info->dst_end) {
-		timelib_sll start_y, end_y, dummy_m, dummy_d;
+		timelib_sll start_y, begin_y, end_y, dummy_m, dummy_d;
 		timelib_sll last_transition_ts = tzobj->tzi.tz->trans[tzobj->tzi.tz->bit64.timecnt - 1];
 
 		/* Find out year for last transition */
 		timelib_unixtime2date(last_transition_ts, &start_y, &dummy_m, &dummy_d);
 
+		/* Find out year for first boundary timestamp */
+		timelib_unixtime2date(timestamp_begin, &begin_y, &dummy_m, &dummy_d);
+
 		/* Find out year for final boundary timestamp */
 		timelib_unixtime2date(timestamp_end, &end_y, &dummy_m, &dummy_d);
 
-		for (timelib_sll i = start_y; i <= end_y; i++) {
+		/* The previous year's rules can still produce a transition in the range */
+		for (timelib_sll i = MAX(start_y, begin_y - 1); i <= end_y; i++) {
 			timelib_posix_transitions transitions = { 0 };
 
 			timelib_get_transitions_for_year(tzobj->tzi.tz, i, &transitions);
