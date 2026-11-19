@@ -219,6 +219,9 @@ PHP 8.7 UPGRADE NOTES
   . Parsing HTML with Dom\HTMLDocument or innerHTML uses much less memory for
     small inputs.
 
+- Opcache:
+  . Improved performance of file cache checksum verification on AArch64.
+
 - Standard:
   . Improved performance of strcspn() and strpbrk() when searching longer strings
     with a single-byte character mask.
