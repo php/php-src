@@ -302,6 +302,10 @@ static int gdTcl_UtfToUniChar(const char *str, Tcl_UniChar *chPtr)
                         break;
                     n = (n * 16) + byte;
                 }
+                if (byte == ';') {
+                    *chPtr = (Tcl_UniChar)n;
+                    return ++i;
+                }
             } else {
                 for (i = 2; i < 8; i++) {
                     byte = *((unsigned char *)(str + i));
@@ -311,10 +315,10 @@ static int gdTcl_UtfToUniChar(const char *str, Tcl_UniChar *chPtr)
                         break;
                     }
                 }
-            }
-            if (byte == ';') {
-                *chPtr = (Tcl_UniChar)n;
-                return ++i;
+                if (byte == ';') {
+                    *chPtr = (Tcl_UniChar)n;
+                    return ++i;
+                }
             }
         } else {
             key.name = p = entity_name_buf;
