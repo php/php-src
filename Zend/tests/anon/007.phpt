@@ -18,6 +18,6 @@ namespace lone {
     new Outer();
 }
 ?>
---EXPECTF--
-object(class@%s)#2 (0) {
+--EXPECT--
+object(lone\@anonymous)#2 (0) {
 }

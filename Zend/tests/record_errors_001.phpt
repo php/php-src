@@ -16,4 +16,4 @@ new class extends DateTime {
 };
 ?>
 --EXPECT--
-Error: Return type of DateTime@anonymous::getTimezone() should either be compatible with DateTime::getTimezone(): DateTimeZone|false, or the #[\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice
+Error: Return type of class@anonymous::getTimezone() should either be compatible with DateTime::getTimezone(): DateTimeZone|false, or the #[\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice

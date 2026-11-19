@@ -10,6 +10,6 @@ namespace {
     var_dump ($hello);
 }
 ?>
---EXPECTF--
-object(class@%s)#1 (0) {
+--EXPECT--
+object(lone\@anonymous)#1 (0) {
 }
