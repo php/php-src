@@ -1213,6 +1213,10 @@ static void dom_document_adopt_node(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 		RETURN_FALSE;
 	}
 
+	if (dom_throw_if_node_read_only(dom_object_nodep->document, nodep)) {
+		RETURN_FALSE;
+	}
+
 	xmlDocPtr new_document;
 	dom_object *dom_object_new_document;
 	zval *new_document_zval = ZEND_THIS;
@@ -1253,6 +1257,10 @@ PHP_METHOD(DOMDocument, normalizeDocument)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
+
+	if (dom_throw_if_node_read_only(intern->document, (xmlNodePtr) docp)) {
+		return;
+	}
 
 	php_dom_normalize_legacy((xmlNodePtr) docp);
 }
@@ -1801,6 +1809,10 @@ PHP_METHOD(DOMDocument, xinclude)
 
 	DOM_GET_OBJ(docp, ZEND_THIS, xmlDocPtr, intern);
 
+	if (dom_throw_if_node_read_only(intern->document, (xmlNodePtr) docp)) {
+		RETURN_FALSE;
+	}
+
 	int err = dom_perform_xinclude(docp, intern, flags);
 
 	if (err) {
@@ -1826,6 +1838,10 @@ PHP_METHOD(Dom_XMLDocument, xinclude)
 	}
 
 	DOM_GET_OBJ(docp, ZEND_THIS, xmlDocPtr, intern);
+
+	if (dom_throw_if_node_read_only(intern->document, (xmlNodePtr) docp)) {
+		RETURN_THROWS();
+	}
 
 	int err = dom_perform_xinclude(docp, intern, flags);
 
