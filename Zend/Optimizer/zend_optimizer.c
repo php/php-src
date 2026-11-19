@@ -602,7 +602,7 @@ bool zend_optimizer_update_op2_const(zend_op_array *op_array,
 
 bool zend_optimizer_replace_by_const(zend_op_array *op_array,
                                     zend_op       *opline,
-                                    uint8_t        type,
+                                    zend_operand_type type,
                                     uint32_t       var,
                                     zval          *val)
 {

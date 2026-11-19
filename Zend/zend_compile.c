@@ -64,7 +64,7 @@
 
 typedef struct _zend_loop_var {
 	uint8_t opcode;
-	uint8_t var_type;
+	zend_operand_type var_type;
 	uint32_t   var_num;
 	uint32_t   try_catch_offset;
 } zend_loop_var;
@@ -6408,6 +6408,10 @@ static void zend_compile_void_cast(znode *result, const zend_ast *ast)
 		case IS_CONST:
 			zend_do_free(&expr_node);
 			break;
+		case IS_UNUSED:
+		case IS_CV:
+			/* Nothing to free */
+			break;
 	}
 }
 
@@ -7276,7 +7280,7 @@ static void zend_compile_match(znode *result, zend_ast *ast)
 	case_node.u.op.var = get_temporary_variable();
 
 	uint32_t num_conds = count_match_conds(arms);
-	uint8_t can_use_jumptable = can_match_use_jumptable(arms);
+	bool can_use_jumptable = can_match_use_jumptable(arms);
 	bool uses_jumptable = can_use_jumptable && num_conds >= 2;
 	HashTable *jumptable = NULL;
 	uint32_t *jmpnz_opnums = NULL;
