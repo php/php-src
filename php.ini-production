@@ -3,19 +3,27 @@
 ;;;;;;;;;;;;;;;;;;;
 ; About php.ini   ;
 ;;;;;;;;;;;;;;;;;;;
-; PHP's initialization file, generally called php.ini, is responsible for
-; configuring many of the aspects of PHP's behavior.
-
-; PHP attempts to find and load this configuration from a number of locations.
-; The following is a summary of its search order:
-; 1. SAPI module specific location.
-; 2. The PHPRC environment variable.
-; 3. A number of predefined registry keys on Windows
-; 4. Current working directory (except CLI)
-; 5. The web server's directory (for SAPI modules), or directory of PHP
-; (otherwise in Windows)
-; 6. The directory from the --with-config-file-path compile time option, or the
-; Windows directory (usually C:\windows)
+; PHP's primary initialization file, generally called php.ini, is responsible
+; for configuring most aspects of PHP's behavior.
+;
+; PHP locates this file as follows:
+; 1. If the active SAPI provides a php.ini path override, that is used.
+; 2. Otherwise, PHP builds a search path from:
+;    - the PHPRC environment variable,
+;    - on Windows, the path configured in the registry,
+;    - the current working directory (except for SAPIs that disable this,
+;      such as CLI),
+;    - the directory of the PHP executable or SAPI module,
+;    - the directory specified by the --with-config-file-path compile-time
+;      option, or the Windows directory (usually C:\windows).
+; 3. PHP then looks for php-SAPI.ini in that search path, and if that is not
+;    found, for php.ini.
+;
+; After the primary configuration file step, PHP may additionally scan
+; for .ini files in the path specified by the PHP_INI_SCAN_DIR
+; environment variable, or, if that is not set, by the
+; --with-config-file-scan-dir compile-time option.
+;
 ; See the PHP docs for more specific information.
 ; https://php.net/configuration.file
 
