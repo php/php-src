@@ -3,3 +3,8 @@ $(srcdir)/json_scanner.c $(srcdir)/php_json_scanner_defs.h: $(srcdir)/json_scann
 
 $(srcdir)/json_parser.tab.c $(srcdir)/json_parser.tab.h: $(srcdir)/json_parser.y
 	@$(YACC) $(YFLAGS) --defines -l $(srcdir)/json_parser.y -o $(srcdir)/json_parser.tab.c
+
+$(srcdir)/php_json_escape_table.h: $(srcdir)/gen_json_escape_table.php
+	@if test ! -z "$(PHP)"; then \
+		$(PHP) $(srcdir)/gen_json_escape_table.php; \
+	fi;
