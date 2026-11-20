@@ -101,7 +101,7 @@ AS_VAR_IF([PHP_OPCACHE_JIT], [yes], [
   ])
 ])
 
-AC_CHECK_FUNCS([mprotect shm_create_largepage])
+AC_CHECK_FUNCS([mprotect pkey_mprotect shm_create_largepage])
 
 AC_CACHE_CHECK([for sysvipc shared memory support], [php_cv_shm_ipc],
   [AC_RUN_IFELSE([AC_LANG_SOURCE([
