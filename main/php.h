@@ -380,8 +380,8 @@ END_EXTERN_C()
 #define PHP_GSHUTDOWN_FUNCTION	ZEND_GSHUTDOWN_FUNCTION
 #define PHP_CINIT_FUNCTION(module)	static void php_##module##_child_init(void)
 
-#define PHP_MODULE_GLOBALS		ZEND_MODULE_GLOBALS
-
+#define PHP_MODULE_GLOBALS		        ZEND_MODULE_GLOBALS
+#define PHP_MODULE_GLOBALS_EX           ZEND_MODULE_GLOBALS_EX
 
 /* Output support */
 #include "main/php_output.h"
