@@ -97,6 +97,10 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 
 - Unix build system changes:
   . Autoconf minimum required version upgraded to 2.71.
+  . Added the --enable-llvm-cov configure option, which enables LLVM
+    source-based code coverage (clang only) as an alternative to --enable-gcov.
+    Reports are generated with the llvm-cov-html, llvm-cov-report and
+    llvm-cov-lcov make targets.
 
 ========================
 3. Module changes

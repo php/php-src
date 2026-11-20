@@ -800,6 +800,18 @@ AS_VAR_IF([PHP_GCOV], [yes], [
   CXXFLAGS="$CXXFLAGS -O0 -fprofile-arcs -ftest-coverage"
 ])
 
+PHP_ARG_ENABLE([llvm-cov],
+  [whether to enable LLVM source-based code coverage],
+  [AS_HELP_STRING([--enable-llvm-cov],
+    [Enable LLVM source-based code coverage (clang only) - FOR DEVELOPERS
+    ONLY!!])],
+  [no],
+  [no])
+
+if test "$PHP_GCOV" = "yes" && test "$PHP_LLVM_COV" = "yes"; then
+  AC_MSG_ERROR([--enable-gcov and --enable-llvm-cov are mutually exclusive])
+fi
+
 PHP_ARG_ENABLE([debug],
   [whether to include debugging symbols],
   [AS_HELP_STRING([--enable-debug],
@@ -1523,6 +1535,28 @@ dnl Enable -Werror late, because it may break configure checks throwing warnings
 AS_VAR_IF([PHP_WERROR], [yes], [
   CFLAGS="$CFLAGS -Werror"
   CXXFLAGS="$CXXFLAGS -Werror"
+])
+
+dnl Enable LLVM source-based code coverage late, so that the programs compiled
+dnl and run by the configure checks are not instrumented.
+AS_VAR_IF([PHP_LLVM_COV], [yes], [
+  AX_CHECK_COMPILE_FLAG([-fprofile-instr-generate -fcoverage-mapping], [
+    dnl The raw profiles are written to an absolute path, because tests change
+    dnl the working directory and may run with a clean environment. The "%4m"
+    dnl makes the profile runtime merge the data of all processes into a pool
+    dnl of 4 files per instrumented binary, instead of one file per process.
+    dnl The LLVM_PROFILE_FILE environment variable overrides this path.
+    php_llvm_cov_flags="-fprofile-instr-generate=$abs_builddir/llvm_cov_profraw/php-%4m.profraw -fcoverage-mapping"
+    CFLAGS="$CFLAGS $php_llvm_cov_flags"
+    CXXFLAGS="$CXXFLAGS $php_llvm_cov_flags"
+  ], [AC_MSG_ERROR(m4_text_wrap([
+    LLVM source-based code coverage is not available. The --enable-llvm-cov
+    option requires clang.
+  ]))])
+
+  AC_DEFINE([HAVE_LLVM_COV], [1],
+    [Define to 1 if LLVM source-based code coverage is enabled.])
+  PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/build/Makefile.llvm-cov], [$abs_srcdir])
 ])
 
 if test "$PHP_MEMORY_SANITIZER" = "yes" &&
