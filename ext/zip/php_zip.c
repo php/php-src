@@ -431,7 +431,7 @@ static zend_result php_zip_parse_options(HashTable *options, zip_options *opts)
 				zend_type_error("Option \"comp_flags\" must be of type int, %s given", zend_zval_value_name(option));
 				return FAILURE;
 			}
-			if (tmp < 0 || tmp > USHRT_MAX) {
+			if (!ZEND_IN_RANGE_OF(tmp, unsigned short)) {
 				php_error_docref(NULL, E_WARNING, "Option \"comp_flags\" must be between 0 and %u", USHRT_MAX);
 			}
 			opts->comp_flags = (zip_uint32_t)tmp;
@@ -2691,7 +2691,7 @@ PHP_METHOD(ZipArchive, setCompressionName)
 		RETURN_THROWS();
 	}
 
-	if (comp_flags < 0 || comp_flags > USHRT_MAX) {
+	if (!ZEND_IN_RANGE_OF(comp_flags, unsigned short)) {
 		// comp_flags is cast down accordingly in libzip, zip_entry_t compression_level is of zip_uint16_t
 		zend_argument_value_error(3, "must be between 0 and %u", USHRT_MAX);
 		RETURN_THROWS();
@@ -2736,7 +2736,7 @@ PHP_METHOD(ZipArchive, setCompressionIndex)
 		RETURN_THROWS();
 	}
 
-	if (comp_flags < 0 || comp_flags > USHRT_MAX) {
+	if (!ZEND_IN_RANGE_OF(comp_flags, unsigned short)) {
 		// comp_flags is cast down accordingly in libzip, zip_entry_t compression_level is of zip_uint16_t
 		zend_argument_value_error(3, "must be between 0 and %u", USHRT_MAX);
 		RETURN_THROWS();
@@ -3440,7 +3440,7 @@ PHP_METHOD(ZipArchive, isEncryptionMethodSupported)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|b", &method, &enc) == FAILURE) {
 		return;
 	}
-	if (method < 0 || method > USHRT_MAX) {
+	if (!ZEND_IN_RANGE_OF(method, unsigned short)) {
 		zend_argument_value_error(1, "must be between 0 and %u", USHRT_MAX);
 		RETURN_THROWS();
 	}

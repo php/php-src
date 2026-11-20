@@ -157,7 +157,7 @@ static zend_always_inline zend_result bcmath_check_scale(zend_long scale, uint32
 
 static zend_result bcmath_check_precision(zend_long precision, uint32_t arg_num)
 {
-	if (ZEND_LONG_INT_OVFL(precision)) {
+	if (precision > 0 && !ZEND_IN_RANGE_OF(precision, int)) {
 		zend_argument_value_error(arg_num, "must be between " ZEND_LONG_FMT " and %d",
 			(zend_long) ZEND_LONG_MIN, INT_MAX);
 		return FAILURE;

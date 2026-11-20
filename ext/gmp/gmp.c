@@ -371,7 +371,7 @@ static zend_result shift_operator_helper(gmp_binary_ui_op_t op, zval *return_val
 	}
 
 	if (!have_shift_ui) {
-		if (shift < 0 || shift > ULONG_MAX) {
+		if (!ZEND_IN_RANGE_OF(shift, unsigned long)) {
 			gmp_shift_operator_range_error(opcode);
 			return FAILURE;
 		}
@@ -1165,7 +1165,7 @@ ZEND_FUNCTION(gmp_binomial)
 		Z_PARAM_LONG(k)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (k < 0 || k > ULONG_MAX) {
+	if (!ZEND_IN_RANGE_OF(k, unsigned long)) {
 		zend_argument_value_error(2, "must be between 0 and %lu", ULONG_MAX);
 		RETURN_THROWS();
 	}
@@ -1187,7 +1187,7 @@ ZEND_FUNCTION(gmp_pow)
 		Z_PARAM_LONG(exp)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (exp < 0 || exp > ULONG_MAX) {
+	if (!ZEND_IN_RANGE_OF(exp, unsigned long)) {
 		zend_argument_value_error(2, "must be between 0 and %lu", ULONG_MAX);
 		RETURN_THROWS();
 	}

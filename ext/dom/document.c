@@ -1532,11 +1532,11 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
-	if (ZEND_SIZE_T_INT_OVFL(source_len)) {
+	if (!ZEND_IN_RANGE_OF(source_len, int)) {
 		php_error_docref(NULL, E_WARNING, "Input string is too long");
 		RETURN_FALSE;
 	}
-	if (ZEND_LONG_EXCEEDS_INT(options)) {
+	if (!ZEND_IN_RANGE_OF(options, int)) {
 		php_error_docref(NULL, E_WARNING, "Invalid options");
 		RETURN_FALSE;
 	}
@@ -1794,7 +1794,7 @@ PHP_METHOD(DOMDocument, xinclude)
 		RETURN_THROWS();
 	}
 
-	if (ZEND_LONG_EXCEEDS_INT(flags)) {
+	if (!ZEND_IN_RANGE_OF(flags, int)) {
 		php_error_docref(NULL, E_WARNING, "Invalid flags");
 		RETURN_FALSE;
 	}
@@ -1820,7 +1820,7 @@ PHP_METHOD(Dom_XMLDocument, xinclude)
 		RETURN_THROWS();
 	}
 
-	if (ZEND_LONG_EXCEEDS_INT(flags)) {
+	if (!ZEND_IN_RANGE_OF(flags, int)) {
 		zend_argument_value_error(1, "is too large");
 		RETURN_THROWS();
 	}
@@ -2105,7 +2105,7 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		RETURN_THROWS();
 	}
 
-	if (ZEND_LONG_EXCEEDS_INT(options)) {
+	if (!ZEND_IN_RANGE_OF(options, int)) {
 		php_error_docref(NULL, E_WARNING, "Invalid options");
 		RETURN_FALSE;
 	}
@@ -2117,7 +2117,7 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		}
 		ctxt = htmlCreateFileParserCtxt(source, NULL);
 	} else {
-		if (ZEND_SIZE_T_INT_OVFL(source_len)) {
+		if (!ZEND_IN_RANGE_OF(source_len, int)) {
 			php_error_docref(NULL, E_WARNING, "Input string is too long");
 			RETURN_FALSE;
 		}

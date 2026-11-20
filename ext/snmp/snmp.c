@@ -907,7 +907,7 @@ static bool snmp_session_init(php_snmp_session **session_p, int version, zend_st
 			if (pptr[1] == ':') {
 				char *pport = pptr + 2;
 				tmp_port = atoi(pport);
-				if (tmp_port < 0 || tmp_port > USHRT_MAX) {
+				if (!ZEND_IN_RANGE_OF(tmp_port, unsigned short)) {
 					zend_argument_value_error(hostname_arg_num, "remote port must be between 0 and %u", USHRT_MAX);
 					return false;
 				}
@@ -922,7 +922,7 @@ static bool snmp_session_init(php_snmp_session **session_p, int version, zend_st
 		if ((pptr = strchr(host_ptr, ':'))) {
 			char *pport = pptr + 1;
 			tmp_port = atoi(pport);
-			if (tmp_port < 0 || tmp_port > USHRT_MAX) {
+			if (!ZEND_IN_RANGE_OF(tmp_port, unsigned short)) {
 				zend_argument_value_error(hostname_arg_num, "remote port must be between 0 and %u", USHRT_MAX);
 				return false;
 			}

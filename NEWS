@@ -83,6 +83,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-23958 (truncated encoding names resolving to full names). (Kamil Tekiela)
   . Fixed stack overflow in mb_check_encoding() and mb_convert_encoding() with
     deeply nested arrays. (Eyüp Can Akman)
+  . Fixed mbstring.regex_retry_limit above UINT_MAX being ignored.
+    (Marc Bennewitz)
 
 - MySQLi:
   . Fix GH-22854: Fixed failed assertion when accessing mysqli property after

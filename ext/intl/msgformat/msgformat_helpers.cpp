@@ -639,7 +639,7 @@ void umsg_parse_helper(UMessageFormat *fmt, int *count, zval **args, UChar *sour
 
         case Formattable::kInt64:
             aInt64 = fargs[i].getInt64();
-			if(aInt64 > ZEND_LONG_MAX || aInt64 < ZEND_LONG_MIN) {
+			if(!ZEND_IN_RANGE_OF(aInt64, zend_long)) {
 				ZVAL_DOUBLE(&(*args)[i], (double)aInt64);
 			} else {
 				ZVAL_LONG(&(*args)[i], (zend_long)aInt64);

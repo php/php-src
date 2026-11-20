@@ -77,6 +77,14 @@ PHP 8.7 INTERNALS UPGRADE NOTES
     scheduled restart has been carried out and the SHM lock is released, on
     the thread that carried it out, with the same reason as the
     zend_accel_schedule_restart_hook callback.
+  . ZEND_IN_RANGE_OF(x, T) was added to check whether the value of an integer
+    x is representable in the integer type T.
+  . ZEND_TYPE_MIN(T) and ZEND_TYPE_MAX(T) were added.
+
+- Deprecated:
+  . ZEND_LONG_INT_OVFL(), ZEND_LONG_INT_UDFL(), ZEND_LONG_EXCEEDS_INT(),
+    ZEND_LONG_UINT_OVFL(), ZEND_SIZE_T_INT_OVFL(), ZEND_SIZE_T_UINT_OVFL() and
+    the *_CAN_OVFL_* flags were deprecated. Use ZEND_IN_RANGE_OF() instead.
 
 ========================
 2. Build system changes

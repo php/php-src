@@ -176,7 +176,7 @@ void SdnToJulian(
 	/* Calculate the year and day of year (1 <= dayOfYear <= 366). */
 	{
 		long yearl = temp / DAYS_PER_4_YEARS;
-		if (yearl > INT_MAX || yearl < INT_MIN) {
+		if (!ZEND_IN_RANGE_OF(yearl, int)) {
 			goto fail;
 		}
 		year = (int) yearl;
