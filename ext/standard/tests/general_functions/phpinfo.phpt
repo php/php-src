@@ -32,7 +32,6 @@ PHP Extension Build => API%s
 PHP Integer Size => %d bits
 Debug Build => %s
 Thread Safety => %r(.+?)%r
-Zend Signal Handling => %s
 Zend Memory Manager => %s
 Zend Multibyte Support => %s
 Zend Max Execution Timers => %s

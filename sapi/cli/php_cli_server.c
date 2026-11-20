@@ -2975,8 +2975,6 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 	signal(SIGPIPE, SIG_IGN);
 #endif
 
-	zend_signal_init();
-
 	if (SUCCESS != php_cli_server_do_event_loop(&server)) {
 		r = 1;
 	}

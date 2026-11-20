@@ -216,7 +216,6 @@ AX_CHECK_COMPILE_FLAG([-fno-common],
   [CFLAGS="-fno-common $CFLAGS"])
 
 ZEND_CHECK_ALIGNMENT
-ZEND_CHECK_SIGNALS
 ZEND_CHECK_MAX_EXECUTION_TIMERS
 ])
 
@@ -433,28 +432,6 @@ AS_VAR_IF([php_cv_align_mm], [failed],
     [$zend_mm_8byte_realign],
     [Define to 1 if ZEND_MM needs 8-byte realignment, and to 0 if not.])
 ])
-])
-
-dnl
-dnl ZEND_CHECK_SIGNALS
-dnl
-dnl Check whether to enable Zend signal handling if supported by the system.
-dnl
-AC_DEFUN([ZEND_CHECK_SIGNALS], [dnl
-AC_ARG_ENABLE([zend-signals],
-  [AS_HELP_STRING([--disable-zend-signals],
-    [Disable Zend signal handling])],
-  [ZEND_SIGNALS=$enableval],
-  [ZEND_SIGNALS=yes])
-
-AC_CHECK_FUNCS([sigaction],, [ZEND_SIGNALS=no])
-AS_VAR_IF([ZEND_SIGNALS], [yes],
-  [AC_DEFINE([ZEND_SIGNALS], [1],
-    [Define to 1 if Zend signal handling is supported and enabled.])
-  AS_VAR_APPEND([CFLAGS], [" -DZEND_SIGNALS"])])
-
-AC_MSG_CHECKING([whether to enable Zend signal handling])
-AC_MSG_RESULT([$ZEND_SIGNALS])
 ])
 
 dnl

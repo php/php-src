@@ -5295,9 +5295,6 @@ static zend_result accel_finish_startup_preload(bool in_child)
 	char *(*orig_getenv)(const char *name, size_t name_len) = sapi_module.getenv;
 	size_t (*orig_ub_write)(const char *str, size_t str_length) = sapi_module.ub_write;
 	void (*orig_flush)(void *server_context) = sapi_module.flush;
-#ifdef ZEND_SIGNALS
-	bool old_reset_signals = SIGG(reset);
-#endif
 
 	ZCG(preloading) = true;
 
@@ -5312,10 +5309,6 @@ static zend_result accel_finish_startup_preload(bool in_child)
 	sapi_module.flush = preload_flush;
 
 	zend_interned_strings_switch_storage(1);
-
-#ifdef ZEND_SIGNALS
-	SIGG(reset) = false;
-#endif
 
 	orig_error_reporting = EG(error_reporting);
 	EG(error_reporting) = 0;
@@ -5351,11 +5344,6 @@ static zend_result accel_finish_startup_preload(bool in_child)
 
 		orig_report_memleaks = PG(report_memleaks);
 		PG(report_memleaks) = false;
-#ifdef ZEND_SIGNALS
-		/* We may not have registered signal handlers due to SIGG(reset)=0, so
-		 * also disable the check that they are registered. */
-		SIGG(check) = false;
-#endif
 		php_request_shutdown(NULL); /* calls zend_shared_alloc_unlock(); */
 		EG(class_table) = NULL;
 		EG(function_table) = NULL;
@@ -5369,9 +5357,6 @@ static zend_result accel_finish_startup_preload(bool in_child)
 		zend_shared_alloc_unlock();
 		ret = FAILURE;
 	}
-#ifdef ZEND_SIGNALS
-	SIGG(reset) = old_reset_signals;
-#endif
 
 	sapi_module.activate = orig_activate;
 	sapi_module.deactivate = orig_deactivate;

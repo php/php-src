@@ -575,6 +575,7 @@ AC_CHECK_FUNCS([
   setenv
   setitimer
   shutdown
+  sigaction
   sigprocmask
   splice
   statfs
@@ -1812,7 +1813,6 @@ PHP_ADD_SOURCES([Zend], m4_normalize([
     zend_partial.c
     zend_property_hooks.c
     zend_ptr_stack.c
-    zend_signal.c
     zend_smart_str.c
     zend_sort.c
     zend_stack.c

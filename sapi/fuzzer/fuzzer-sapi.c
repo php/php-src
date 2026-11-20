@@ -159,8 +159,6 @@ int fuzzer_init_php(const char *extra_ini)
 # endif
 #endif
 
-	zend_signal_startup();
-
 	sapi_startup(&fuzzer_module);
 	fuzzer_module.phpinfo_as_text = 1;
 
@@ -201,12 +199,6 @@ int fuzzer_request_startup(void)
 		php_module_shutdown();
 		return FAILURE;
 	}
-
-#ifdef ZEND_SIGNALS
-	/* Some signal handlers will be overridden,
-	 * don't complain about them during shutdown. */
-	SIGG(check) = 0;
-#endif
 
 	fuzzer_disable_classes();
 
