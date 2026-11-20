@@ -2441,7 +2441,7 @@ ZEND_API zend_result zend_startup_module_ex(zend_module_entry *module) /* {{{ */
 	if (module->module_started) {
 		return SUCCESS;
 	}
-	module->module_started = 1;
+	module->module_started = true;
 
 	/* Check module dependencies */
 	if (module->deps) {
@@ -2455,7 +2455,7 @@ ZEND_API zend_result zend_startup_module_ex(zend_module_entry *module) /* {{{ */
 				if (req_mod == NULL || !req_mod->module_started) {
 					/* TODO: Check version relationship */
 					zend_error(E_CORE_WARNING, "Cannot load module \"%s\" because required module \"%s\" is not loaded", module->name, dep->name);
-					module->module_started = 0;
+					module->module_started = false;
 					return FAILURE;
 				}
 			}
@@ -3389,7 +3389,7 @@ void module_destructor(zend_module_entry *module) /* {{{ */
 #endif
 	}
 
-	module->module_started=0;
+	module->module_started = false;
 	if (module->type == MODULE_TEMPORARY && module->functions) {
 		zend_unregister_functions(module->functions, -1, NULL);
 		/* Clean functions registered separately from module->functions */
