@@ -474,7 +474,10 @@ PHP_METHOD(XSLTProcessor, transformToDoc)
 				RETURN_THROWS();
 			}
 
-			object_init_ex(return_value, ret_class);
+			if (UNEXPECTED(object_init_ex(return_value, ret_class) != SUCCESS)) {
+				xmlFreeDoc(newdocp);
+				RETURN_THROWS();
+			}
 
 			interndoc = Z_LIBXML_NODE_P(return_value);
 			php_libxml_increment_doc_ref(interndoc, newdocp);
