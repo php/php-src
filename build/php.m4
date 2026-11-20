@@ -2493,23 +2493,25 @@ AS_VAR_IF([php_cv_have_avx512], [yes],
 dnl
 dnl PHP_CHECK_AVX512_VBMI_SUPPORTS
 dnl
-dnl Check whether the compiler supports the AVX-512 extensions with the VBMI
-dnl instruction set and define PHP_HAVE_AVX512_VBMI_SUPPORTS to 1 if found. Note
+dnl Check whether the compiler supports the AVX-512 extensions with the VBMI and
+dnl VBMI2 instruction sets and define PHP_HAVE_AVX512_VBMI_SUPPORTS to 1 if found. Note
 dnl that this is a compiler check, not a runtime check where additional
 dnl adjustments are done in the C code.
 dnl
 AC_DEFUN([PHP_CHECK_AVX512_VBMI_SUPPORTS],
-[AC_CACHE_CHECK([whether compiler supports AVX-512 VBMI],
+[AC_CACHE_CHECK([whether compiler supports AVX-512 VBMI and VBMI2],
 [php_cv_have_avx512vbmi],
 [save_CFLAGS="$CFLAGS"
-CFLAGS="-mavx512f -mavx512cd -mavx512vl -mavx512dq -mavx512bw -mavx512vbmi $CFLAGS"
+CFLAGS="-mavx512f -mavx512cd -mavx512vl -mavx512dq -mavx512bw -mavx512vbmi -mavx512vbmi2 $CFLAGS"
 AC_LINK_IFELSE([AC_LANG_SOURCE([[
   #include <immintrin.h>
   int main(void) {
     __m512i mask = _mm512_set1_epi32(0x1);
-    char out[32];
+    char out[64];
     _mm512_storeu_si512(out, _mm512_permutexvar_epi8(mask, mask));
-    return 0;
+    _mm512_storeu_si512(out, _mm512_maskz_compress_epi8(0x5555, mask));
+    /* The runtime check needs this name too. */
+    return !__builtin_cpu_supports("avx512vbmi2");
   }]])],
   [php_cv_have_avx512vbmi=yes],
   [php_cv_have_avx512vbmi=no])
@@ -2517,7 +2519,7 @@ CFLAGS="$save_CFLAGS"
 ])
 AS_VAR_IF([php_cv_have_avx512vbmi], [yes],
   [AC_DEFINE([PHP_HAVE_AVX512_VBMI_SUPPORTS], [1],
-    [Define to 1 if the compiler supports AVX-512 VBMI.])])
+    [Define to 1 if the compiler supports AVX-512 VBMI and VBMI2.])])
 ])
 
 dnl

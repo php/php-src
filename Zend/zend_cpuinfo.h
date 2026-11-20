@@ -226,7 +226,8 @@ static inline int zend_cpu_supports_avx512_vbmi(void) {
 #ifdef PHP_HAVE_BUILTIN_CPU_INIT
 	__builtin_cpu_init();
 #endif
-	return zend_cpu_supports_avx512() && __builtin_cpu_supports("avx512vbmi");
+	return zend_cpu_supports_avx512() && __builtin_cpu_supports("avx512vbmi")
+		&& __builtin_cpu_supports("avx512vbmi2");
 }
 #endif
 
