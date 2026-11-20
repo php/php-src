@@ -104,6 +104,8 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
 #ifdef ZTS
 PHPAPI int basic_globals_id;
+ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR php_basic_globals basic_globals;
+static void *basic_globals_tls_addr(void) { return &basic_globals; }
 #else
 PHPAPI php_basic_globals basic_globals;
 #endif
@@ -277,7 +279,7 @@ PHPAPI double php_get_inf(void) /* {{{ */
 PHP_MINIT_FUNCTION(basic) /* {{{ */
 {
 #ifdef ZTS
-	ts_allocate_id(&basic_globals_id, sizeof(php_basic_globals), (ts_allocate_ctor) basic_globals_ctor, (ts_allocate_dtor) basic_globals_dtor);
+	ts_allocate_tls_id(&basic_globals_id, basic_globals_tls_addr, sizeof(php_basic_globals), (ts_allocate_ctor) basic_globals_ctor, (ts_allocate_dtor) basic_globals_dtor);
 # ifdef PHP_WIN32
 	ts_allocate_id(&php_win32_core_globals_id, sizeof(php_win32_core_globals), (ts_allocate_ctor)php_win32_core_globals_ctor, (ts_allocate_dtor)php_win32_core_globals_dtor );
 # endif
