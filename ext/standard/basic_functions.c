@@ -1259,6 +1259,12 @@ PHP_FUNCTION(time_sleep_until)
 		if (errno != EINTR) {
 			RETURN_FALSE;
 		}
+		if (UNEXPECTED(atomic_load(&EG(vm_interrupt)))) {
+			zend_fcall_interrupt(execute_data);
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
+		}
 		zend_hrtime_t elapsed = zend_hrtime() - start;
 		if (elapsed >= diff_ns) {
 			break;
