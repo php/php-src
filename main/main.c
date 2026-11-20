@@ -147,6 +147,9 @@ PHPAPI char *php_get_version(sapi_module_struct *sapi_module)
 #ifdef HAVE_GCOV
 		" GCOV"
 #endif
+#ifdef HAVE_LLVM_COV
+		" LLVM-COV"
+#endif
 	);
 	smart_string_appends(&version_info, "Copyright © The PHP Group and Contributors\n");
 

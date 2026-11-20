@@ -1,0 +1,49 @@
+#
+# LLVM source-based code coverage
+#
+
+LLVM_COV = llvm-cov
+LLVM_PROFDATA = llvm-profdata
+
+LLVM_COV_IGNORE = \
+	-ignore-filename-regex='ext/bcmath/libbcmath/' \
+	-ignore-filename-regex='ext/date/lib/' \
+	-ignore-filename-regex='ext/fileinfo/libmagic/' \
+	-ignore-filename-regex='ext/gd/libgd/' \
+	-ignore-filename-regex='ext/hash/sha3/' \
+	-ignore-filename-regex='ext/mbstring/libmbfl/' \
+	-ignore-filename-regex='ext/pcre/pcre2lib/'
+
+LLVM_COV_OBJECTS = \
+	`for i in $(SAPI_CLI_PATH) $(SAPI_CGI_PATH) $(SAPI_FPM_PATH) $(SAPI_PHPDBG_PATH) $(SAPI_LITESPEED_PATH) modules/*.$(SHLIB_DL_SUFFIX_NAME); do \
+		if test -f "$$i"; then printf ' -object %s' "$$i"; fi; \
+	done`
+
+LLVM_COV_ARGS = -instr-profile=php_llvm_cov.profdata $(LLVM_COV_IGNORE) $(LLVM_COV_OBJECTS)
+
+llvm-cov: llvm-cov-html
+
+php_llvm_cov.profdata:
+	@echo "Merging raw profiles into $@"
+	$(LLVM_PROFDATA) merge -sparse -o $@ llvm_cov_profraw/
+
+llvm-cov-html: php_llvm_cov.profdata
+	@echo "Generating llvm-cov HTML"
+	@rm -rf llvm_cov_html/
+	$(LLVM_COV) show -format=html -output-dir=llvm_cov_html/ $(LLVM_COV_ARGS)
+
+llvm-cov-report: php_llvm_cov.profdata
+	@$(LLVM_COV) report $(LLVM_COV_ARGS)
+
+llvm-cov-lcov: php_llvm_cov.profdata
+	@echo "Generating php_llvm_cov.info"
+	$(LLVM_COV) export -format=lcov $(LLVM_COV_ARGS) > php_llvm_cov.info
+
+llvm-cov-clean:
+	rm -f php_llvm_cov.profdata php_llvm_cov.info
+	rm -rf llvm_cov_html/
+
+llvm-cov-clean-data:
+	rm -rf llvm_cov_profraw/
+
+.PHONY: llvm-cov llvm-cov-html llvm-cov-report llvm-cov-lcov llvm-cov-clean llvm-cov-clean-data php_llvm_cov.profdata

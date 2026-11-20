@@ -125,8 +125,8 @@ using std::memory_order_acquire;
 # define ZEND_ASSUME(c)
 #endif
 
-#ifdef HAVE_GCOV
-/* Disable assert() when compiling with gcov to avoid untested branch warning. */
+#if defined(HAVE_GCOV) || defined(HAVE_LLVM_COV)
+/* Disable assert() when compiling with code coverage to avoid untested branch warning. */
 # define ZEND_ASSERT(c) ((void)sizeof(c))
 #elif ZEND_DEBUG
 # define ZEND_ASSERT(c)	assert(c)
