@@ -53,9 +53,9 @@ PHP 8.7 INTERNALS UPGRADE NOTES
     the `disable_classes` INI setting in PHP 8.5.
   . Removed HAVE_NORETURN and HAVE_NORETURN_ALIAS. ZEND_NORETURN is guaranteed
     to work.
-  . CG(), EG(), PG(), SG(), CWDG(), SIGG(), ZCG(), JIT_G() and INI_SCNG() use
-    native TLS in ZTS builds. The compiler_globals_offset, executor_globals_offset,
-    core_globals_offset, sapi_globals_offset, cwd_globals_offset,
+  . CG(), EG(), PG(), SG(), CWDG(), SIGG(), ZCG(), JIT_G(), INI_SCNG(), PCRE_G()
+    and BG() use native TLS in ZTS builds. The compiler_globals_offset,
+    executor_globals_offset, core_globals_offset, sapi_globals_offset, cwd_globals_offset,
     zend_signal_globals_offset, accel_globals_offset, jit_globals_offset and
     ini_scanner_globals_offset symbols have been removed.
   . php_reserve_tsrm_memory() has been removed.
