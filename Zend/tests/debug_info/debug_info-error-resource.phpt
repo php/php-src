@@ -16,7 +16,13 @@ class C {
 }
 
 $c = new C(fopen("data:text/plain,Foo", 'r'));
-var_dump($c);
+try {
+    var_dump($c);
+} catch(TypeError $e) {
+    echo $e::class, ": ", $e->getMessage(), "\n";
+}
 ?>
 --EXPECTF--
-Fatal error: __debugInfo() must return an array in %s on line %d
+object(C)#%d (0) {
+}
+TypeError: C::__debugInfo() must return an array, resource returned

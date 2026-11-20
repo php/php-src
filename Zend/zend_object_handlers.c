@@ -206,6 +206,12 @@ ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, int *is_temp) /
 		return object->handlers->get_properties(object);
 	}
 
+	if (EG(exception)) {
+		/* Method call will fail */
+		*is_temp = 1;
+		return zend_new_array(0);
+	}
+
 	zend_call_known_instance_method_with_0_params(ce->__debugInfo, object, &retval);
 	if (UNEXPECTED(Z_ISREF(retval))) {
 		zend_unwrap_reference(&retval);
@@ -231,7 +237,11 @@ ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, int *is_temp) /
 		return ht;
 	}
 
-	zend_error_noreturn(E_ERROR, ZEND_DEBUGINFO_FUNC_NAME "() must return an array");
+	zend_type_error("%pS::__debugInfo() must return an array, %s returned", ce->name, zend_zval_value_name(&retval));
+	zval_ptr_dtor(&retval);
+
+	*is_temp = 1;
+	return zend_new_array(0);
 }
 /* }}} */
 

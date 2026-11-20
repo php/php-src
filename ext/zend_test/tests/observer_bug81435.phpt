@@ -21,7 +21,7 @@ function b() {
 }
 
 function bailout(...$args) {
-    var_dump(new class { public function __debugInfo() { return ''; } }); // cause a bailout
+    var_dump(zend_trigger_bailout());
 }
 
 function a() { // observed (first_observed_frame)
@@ -42,8 +42,7 @@ a();
   <d>
   </d>
   <!-- init bailout() -->
-  <!-- init var_dump() -->
-  <!-- init class@anonymous::__debugInfo() -->
+  <!-- init zend_trigger_bailout() -->
 
-Fatal error: __debugInfo() must return an array in %s on line %d
+Fatal error: Bailout in %s on line %d
 </a>

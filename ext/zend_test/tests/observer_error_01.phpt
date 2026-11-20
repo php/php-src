@@ -11,7 +11,7 @@ zend_test.observer.show_return_value=1
 <?php
 function foo()
 {
-    var_dump(new class { public function __debugInfo() { return ''; } }); // cause a bailout
+    var_dump(zend_trigger_bailout());
 }
 
 foo();
@@ -23,13 +23,10 @@ echo 'You should not see this.';
 <file '%s'>
   <!-- init foo() -->
   <foo>
-    <!-- init var_dump() -->
-    <var_dump>
-      <!-- init class@anonymous::__debugInfo() -->
-      <class@anonymous::__debugInfo>
-      </class@anonymous::__debugInfo:''>
+    <!-- init zend_trigger_bailout() -->
+    <zend_trigger_bailout>
 
-Fatal error: __debugInfo() must return an array in %s on line %d
-    </var_dump:NULL>
+Fatal error: Bailout in %s on line %d
+    </zend_trigger_bailout:NULL>
   </foo:NULL>
 </file '%s%eobserver_error_%d.php'>

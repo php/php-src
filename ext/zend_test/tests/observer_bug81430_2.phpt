@@ -12,7 +12,7 @@ zend_test.observer.observe_all=1
 #[\Attribute]
 class A {
     public function __construct() {
-        var_dump(new class { public function __debugInfo() { return ''; } }); // cause a bailout
+        var_dump(zend_trigger_bailout());
     }
 }
 
@@ -35,14 +35,11 @@ call_user_func([$r->getAttributes(A::class)[0], 'newInstance']);
   <ReflectionAttribute::newInstance>
     <!-- init A::__construct() -->
     <A::__construct>
-      <!-- init var_dump() -->
-      <var_dump>
-        <!-- init class@anonymous::__debugInfo() -->
-        <class@anonymous::__debugInfo>
-        </class@anonymous::__debugInfo>
+      <!-- init zend_trigger_bailout() -->
+      <zend_trigger_bailout>
 
-Fatal error: __debugInfo() must return an array in %s on line %d
-      </var_dump>
+Fatal error: Bailout in %s on line %d
+      </zend_trigger_bailout>
     </A::__construct>
   </ReflectionAttribute::newInstance>
 </file '%s'>

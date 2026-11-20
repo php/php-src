@@ -1,5 +1,7 @@
 --TEST--
 Fiber::getReturn() after bailout
+--EXTENSIONS--
+zend_test
 --FILE--
 <?php
 
@@ -9,13 +11,13 @@ register_shutdown_function(static function (): void {
 });
 
 $fiber = new Fiber(static function (): void {
-    var_dump(new class { public function __debugInfo() { return ''; } }); // cause a bailout
+    var_dump(zend_trigger_bailout());
 });
 $fiber->start();
 
 ?>
 --EXPECTF--
-Fatal error: __debugInfo() must return an array in %s on line %d
+Fatal error: Bailout in %s on line %d
 
 Fatal error: Uncaught FiberError: Cannot get fiber return value: The fiber exited with a fatal error in %sget-return-after-bailout.php:%d
 Stack trace:
