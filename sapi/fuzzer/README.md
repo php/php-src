@@ -27,6 +27,7 @@ When running `make` it creates these binaries in `sapi/fuzzer/`:
 * `php-fuzz-unserialize`: Fuzzing unserialize() function
 * `php-fuzz-unserializehash`: Fuzzing unserialize() for HashContext objects
 * `php-fuzz-json`: Fuzzing JSON parser
+* `php-fuzz-uri`: Fuzzing the `Uri\Rfc3986\Uri` and `Uri\WhatWg\Url` classes and `parse_url()`
 * `php-fuzz-exif`: Fuzzing `exif_read_data()` function (requires --enable-exif)
 * `php-fuzz-mbstring`: Fuzzing `mb_convert_encoding()` (requires `--enable-mbstring`)
 * `php-fuzz-mbregex`: Fuzzing `mb_ereg[i]()` (requires --enable-mbstring)
@@ -95,3 +96,10 @@ export ONIG_LIBS="-L$PWD/oniguruma/src/.libs -l:libonig.a"
 ```
 
 This will link an instrumented libonig statically into the PHP binary.
+
+For the uri fuzzer, a seed corpus is available:
+
+```sh
+cp -r sapi/fuzzer/corpus/uri ./my-uri-corpus
+sapi/fuzzer/php-fuzz-uri ./my-uri-corpus
+```
