@@ -154,7 +154,7 @@ static inline spl_dual_it_object *spl_dual_it_from_obj(zend_object *obj) /* {{{ 
 #define SPL_FETCH_AND_CHECK_DUAL_IT(var, objzval) 												\
 	do { 																						\
 		spl_dual_it_object *it = Z_SPLDUAL_IT_P(objzval); 										\
-		if (it->dit_type == DIT_Unknown) { 														\
+		if (it->dit_type == DIT_Unknown || (!it->inner.iterator && it->dit_type != DIT_AppendIterator)) { \
 			zend_throw_error(NULL, "The object is in an invalid state as the parent constructor was not called"); 	\
 			RETURN_THROWS(); 																			\
 		} 																						\
