@@ -46,7 +46,7 @@
 #define ZEND_MODULE_BUILD_ID "API" ZEND_TOSTR(ZEND_MODULE_API_NO) ZEND_BUILD_TS ZEND_BUILD_DEBUG ZEND_BUILD_SYSTEM ZEND_BUILD_EXTRA
 
 #define STANDARD_MODULE_PROPERTIES_EX \
-	.module_started = 0, \
+	.module_started = false, \
 	.type = 0, \
 	.handle = NULL, \
 	.module_number = 0, \
@@ -99,7 +99,7 @@ struct _zend_module_entry {
 	void (*globals_dtor)(void *global);
 	zend_result (*post_deactivate_func)(void);
 	void (*child_init_func)(void);
-	int module_started;
+	bool module_started;
 	zend_module_type type;
 	void *handle;
 	int module_number;
