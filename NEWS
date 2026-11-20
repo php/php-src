@@ -195,6 +195,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-15701 (Build failure: incompatible funopen() seeker pointer
     type on 32-bit platforms). (Kamil Tekiela)
 
+- URI:
+  . Fixed bug GH-25604 (Accepted IPv4 hosts report a fatal range error).
+    (Akouh Mohamed Amine)
 - XSL:
   . Fixed a crash in XSLTProcessor::transformToDoc() when the return class
     cannot be instantiated. (Ilia Alshanetsky)

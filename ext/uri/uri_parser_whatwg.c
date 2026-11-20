@@ -116,6 +116,10 @@ static const char *fill_errors(zval *errors)
 				error_str = "Ipv4NonDecimalPart";
 				ZVAL_FALSE(&failure);
 				break;
+			case LXB_URL_ERROR_TYPE_IPV4_LARGE_FINAL_PART:
+				error_str = "Ipv4OutOfRangePart";
+				ZVAL_FALSE(&failure);
+				break;
 			case LXB_URL_ERROR_TYPE_IPV4_OUT_OF_RANGE_PART:
 				error_str = "Ipv4OutOfRangePart";
 				ZVAL_TRUE(&failure);
