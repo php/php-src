@@ -2,6 +2,8 @@
 intl_error_name(): a code outside the int range is not truncated
 --EXTENSIONS--
 intl
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die('skip 64-bit only'); ?>
 --FILE--
 <?php
 var_dump(intl_error_name(2**32));
