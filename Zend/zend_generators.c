@@ -240,9 +240,13 @@ static inline bool check_node_running_in_fiber(zend_generator *generator) {
 static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 {
 	zend_generator *generator = (zend_generator*) object;
-	zend_generator *current_generator = zend_generator_get_current(generator);
-	zend_execute_data *ex = generator->execute_data;
+	zend_generator *current_generator;
+	zend_execute_data *ex;
 	uint32_t op_num, try_catch_offset;
+
+restart:
+	current_generator = zend_generator_get_current(generator);
+	ex = generator->execute_data;
 
 	/* If current_generator is running in a fiber, there are 2 cases to consider:
 	 *  - If generator is also marked with ZEND_GENERATOR_IN_FIBER, then the
@@ -273,6 +277,7 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 		clear_link_to_root(generator);
 		generator->node.parent = NULL;
 		OBJ_RELEASE(&parent->std);
+		goto restart;
 	} else {
 		clear_link_to_leaf(generator);
 	}
