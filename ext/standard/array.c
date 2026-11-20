@@ -149,12 +149,12 @@ static zend_always_inline int php_array_key_compare_numeric_unstable_i(Bucket *f
 	} else {
 		double d1, d2;
 		if (f->key) {
-			d1 = zend_strtod(f->key->val, NULL);
+			d1 = zend_strtod(ZSTR_VAL(f->key), NULL);
 		} else {
 			d1 = (double)(zend_long)f->h;
 		}
 		if (s->key) {
-			d2 = zend_strtod(s->key->val, NULL);
+			d2 = zend_strtod(ZSTR_VAL(s->key), NULL);
 		} else {
 			d2 = (double)(zend_long)s->h;
 		}
@@ -171,15 +171,15 @@ static zend_always_inline int php_array_key_compare_string_case_unstable_i(Bucke
 	char buf2[MAX_LENGTH_OF_LONG + 1];
 
 	if (f->key) {
-		s1 = f->key->val;
-		l1 = f->key->len;
+		s1 = ZSTR_VAL(f->key);
+		l1 = ZSTR_LEN(f->key);
 	} else {
 		s1 = zend_print_long_to_buf(buf1 + sizeof(buf1) - 1, f->h);
 		l1 = buf1 + sizeof(buf1) - 1 - s1;
 	}
 	if (s->key) {
-		s2 = s->key->val;
-		l2 = s->key->len;
+		s2 = ZSTR_VAL(s->key);
+		l2 = ZSTR_LEN(s->key);
 	} else {
 		s2 = zend_print_long_to_buf(buf2 + sizeof(buf2) - 1, s->h);
 		l2 = buf2 + sizeof(buf2) - 1 - s2;
@@ -196,15 +196,15 @@ static zend_always_inline int php_array_key_compare_string_unstable_i(Bucket *f,
 	char buf2[MAX_LENGTH_OF_LONG + 1];
 
 	if (f->key) {
-		s1 = f->key->val;
-		l1 = f->key->len;
+		s1 = ZSTR_VAL(f->key);
+		l1 = ZSTR_LEN(f->key);
 	} else {
 		s1 = zend_print_long_to_buf(buf1 + sizeof(buf1) - 1, f->h);
 		l1 = buf1 + sizeof(buf1) - 1 - s1;
 	}
 	if (s->key) {
-		s2 = s->key->val;
-		l2 = s->key->len;
+		s2 = ZSTR_VAL(s->key);
+		l2 = ZSTR_LEN(s->key);
 	} else {
 		s2 = zend_print_long_to_buf(buf2 + sizeof(buf2) - 1, s->h);
 		l2 = buf2 + sizeof(buf2) - 1 - s2;
@@ -221,15 +221,15 @@ static int php_array_key_compare_string_natural_general(Bucket *f, Bucket *s, bo
 	char buf2[MAX_LENGTH_OF_LONG + 1];
 
 	if (f->key) {
-		s1 = f->key->val;
-		l1 = f->key->len;
+		s1 = ZSTR_VAL(f->key);
+		l1 = ZSTR_LEN(f->key);
 	} else {
 		s1 = zend_print_long_to_buf(buf1 + sizeof(buf1) - 1, f->h);
 		l1 = buf1 + sizeof(buf1) - 1 - s1;
 	}
 	if (s->key) {
-		s2 = s->key->val;
-		l2 = s->key->len;
+		s2 = ZSTR_VAL(s->key);
+		l2 = ZSTR_LEN(s->key);
 	} else {
 		s2 = zend_print_long_to_buf(buf2 + sizeof(buf2) - 1, s->h);
 		l2 = buf2 + sizeof(buf2) - 1 - s2;
@@ -269,12 +269,12 @@ static zend_always_inline int php_array_key_compare_string_locale_unstable_i(Buc
 	char buf2[MAX_LENGTH_OF_LONG + 1];
 
 	if (f->key) {
-		s1 = f->key->val;
+		s1 = ZSTR_VAL(f->key);
 	} else {
 		s1 = zend_print_long_to_buf(buf1 + sizeof(buf1) - 1, f->h);
 	}
 	if (s->key) {
-		s2 = s->key->val;
+		s2 = ZSTR_VAL(s->key);
 	} else {
 		s2 = zend_print_long_to_buf(buf2 + sizeof(buf2) - 1, s->h);
 	}

@@ -309,7 +309,7 @@ static zend_execute_data* ZEND_FASTCALL zend_jit_int_extend_stack_helper(uint32_
 static zval* ZEND_FASTCALL zend_jit_symtable_find(HashTable *ht, zend_string *str)
 {
 	zend_ulong idx;
-	register const char *tmp = str->val;
+	register const char *tmp = ZSTR_VAL(str);
 
 	do {
 		if (*tmp > '9') {
@@ -323,7 +323,7 @@ static zval* ZEND_FASTCALL zend_jit_symtable_find(HashTable *ht, zend_string *st
 				break;
 			}
 		}
-		if (_zend_handle_numeric_str_ex(str->val, str->len, &idx)) {
+		if (_zend_handle_numeric_str_ex(ZSTR_VAL(str), ZSTR_LEN(str), &idx)) {
 			return zend_hash_index_find(ht, idx);
 		}
 	} while (0);
@@ -367,7 +367,7 @@ static zval* ZEND_FASTCALL zend_jit_hash_lookup_rw(HashTable *ht, zend_string *s
 static zval* ZEND_FASTCALL zend_jit_symtable_lookup_rw(HashTable *ht, zend_string *str)
 {
 	zend_ulong idx;
-	register const char *tmp = str->val;
+	register const char *tmp = ZSTR_VAL(str);
 	zval *retval;
 
 	do {
@@ -382,7 +382,7 @@ static zval* ZEND_FASTCALL zend_jit_symtable_lookup_rw(HashTable *ht, zend_strin
 				break;
 			}
 		}
-		if (_zend_handle_numeric_str_ex(str->val, str->len, &idx)) {
+		if (_zend_handle_numeric_str_ex(ZSTR_VAL(str), ZSTR_LEN(str), &idx)) {
 			retval = zend_hash_index_find(ht, idx);
 			if (!retval) {
 				retval = zend_undefined_offset_write(ht, idx);
@@ -402,7 +402,7 @@ static zval* ZEND_FASTCALL zend_jit_symtable_lookup_rw(HashTable *ht, zend_strin
 static zval* ZEND_FASTCALL zend_jit_symtable_lookup_w(HashTable *ht, zend_string *str)
 {
 	zend_ulong idx;
-	register const char *tmp = str->val;
+	register const char *tmp = ZSTR_VAL(str);
 
 	do {
 		if (*tmp > '9') {
@@ -416,7 +416,7 @@ static zval* ZEND_FASTCALL zend_jit_symtable_lookup_w(HashTable *ht, zend_string
 				break;
 			}
 		}
-		if (_zend_handle_numeric_str_ex(str->val, str->len, &idx)) {
+		if (_zend_handle_numeric_str_ex(ZSTR_VAL(str), ZSTR_LEN(str), &idx)) {
 			return zend_hash_index_lookup(ht, idx);
 		}
 	} while (0);
