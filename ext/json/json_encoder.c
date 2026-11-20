@@ -27,6 +27,11 @@
 #include "zend_enum.h"
 #include "zend_property_hooks.h"
 #include "zend_lazy_objects.h"
+#include "zend_bitset.h"
+
+#ifdef __SSE2__
+# include <emmintrin.h>
+#endif
 
 static const char digits[] = "0123456789abcdef";
 
@@ -359,11 +364,89 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 }
 /* }}} */
 
-zend_result php_json_escape_string(
-		smart_str *buf, const char *s, size_t len,
-		int options, php_json_encoder *encoder) /* {{{ */
+/* Number of leading bytes of s that are copied verbatim by php_json_escape_string()
+ * regardless of options, i.e. printable ASCII except " & ' / < > and backslash. */
+static zend_always_inline size_t php_json_verbatim_ascii_len(const char *s, size_t len)
 {
-	size_t pos, checkpoint;
+	size_t i = 0;
+#ifdef __SSE2__
+	/* Short runs are common in non-Latin text (e.g. a space between words). Check the first
+	 * byte before paying for the vector setup. */
+	if (len == 0) {
+		return 0;
+	} else {
+		const unsigned char c = (unsigned char) s[0];
+		if (c < 0x20 || c >= 0x80 || c == '"' || c == '&' || c == '\'' || c == '/'
+				|| c == '<' || c == '>' || c == '\\') {
+			return 0;
+		}
+	}
+	/* As signed bytes, both control characters (< 0x20) and non-ASCII bytes (>= 0x80) are < 0x20. */
+	const __m128i ctrl_or_high = _mm_set1_epi8(0x20);
+	while (len - i >= 16) {
+		const __m128i chunk = _mm_loadu_si128((const __m128i *) (s + i));
+		__m128i special = _mm_cmpgt_epi8(ctrl_or_high, chunk);
+		special = _mm_or_si128(special, _mm_cmpeq_epi8(chunk, _mm_set1_epi8('"')));
+		special = _mm_or_si128(special, _mm_cmpeq_epi8(chunk, _mm_set1_epi8('&')));
+		special = _mm_or_si128(special, _mm_cmpeq_epi8(chunk, _mm_set1_epi8('\'')));
+		special = _mm_or_si128(special, _mm_cmpeq_epi8(chunk, _mm_set1_epi8('/')));
+		special = _mm_or_si128(special, _mm_cmpeq_epi8(chunk, _mm_set1_epi8('<')));
+		special = _mm_or_si128(special, _mm_cmpeq_epi8(chunk, _mm_set1_epi8('>')));
+		special = _mm_or_si128(special, _mm_cmpeq_epi8(chunk, _mm_set1_epi8('\\')));
+		const int mask = _mm_movemask_epi8(special);
+		if (mask) {
+			return i + zend_ulong_ntz((zend_ulong) mask);
+		}
+		i += 16;
+	}
+#endif
+	while (i < len) {
+		const unsigned char c = (unsigned char) s[i];
+		if (c < 0x20 || c >= 0x80 || c == '"' || c == '&' || c == '\'' || c == '/'
+				|| c == '<' || c == '>' || c == '\\') {
+			break;
+		}
+		i++;
+	}
+	return i;
+}
+
+/* With JSON_UNESCAPED_UNICODE, a well-formed UTF-8 sequence is copied verbatim unless it encodes
+ * U+2028/U+2029 and JSON_UNESCAPED_LINE_TERMINATORS is not set. Returns the length of such a
+ * sequence at s (whose first byte is >= 0x80), or 0 if it needs the generic code path. */
+static zend_always_inline size_t php_json_verbatim_utf8_len(const unsigned char *s, size_t len, int options)
+{
+	const unsigned char c = s[0];
+	if (c >= 0xc2 && c < 0xe0) {
+		if (len >= 2 && (s[1] & 0xc0) == 0x80) {
+			return 2;
+		}
+	} else if (c >= 0xe0 && c < 0xf0) {
+		if (len >= 3 && (s[1] & 0xc0) == 0x80 && (s[2] & 0xc0) == 0x80) {
+			const unsigned int cp = ((c & 0x0f) << 12) | ((s[1] & 0x3f) << 6) | (s[2] & 0x3f);
+			if (cp >= 0x800 && (cp < 0xd800 || cp > 0xdfff)
+					&& (cp < 0x2028 || cp > 0x2029 || (options & PHP_JSON_UNESCAPED_LINE_TERMINATORS))) {
+				return 3;
+			}
+		}
+	} else if (c >= 0xf0 && c < 0xf5) {
+		if (len >= 4 && (s[1] & 0xc0) == 0x80 && (s[2] & 0xc0) == 0x80 && (s[3] & 0xc0) == 0x80) {
+			const unsigned int cp = ((c & 0x07) << 18) | ((s[1] & 0x3f) << 12) | ((s[2] & 0x3f) << 6) | (s[3] & 0x3f);
+			if (cp >= 0x10000 && cp <= 0x10ffff) {
+				return 4;
+			}
+		}
+	}
+	return 0;
+}
+
+/* verbatim_utf8 is (options & PHP_JSON_UNESCAPED_UNICODE), passed as a constant so that the
+ * default escaping path is compiled without the checks only needed for unescaped UTF-8. */
+static zend_always_inline zend_result php_json_escape_string_ex(
+		smart_str *buf, const char *s, size_t len,
+		int options, php_json_encoder *encoder, const bool verbatim_utf8)
+{
+	size_t pos, checkpoint, verbatim;
 	char *dst;
 
 	if (len == 0) {
@@ -404,8 +487,18 @@ zend_result php_json_escape_string(
 
 		unsigned int us = (unsigned char)s[pos];
 		if (EXPECTED(!ZEND_BIT_TEST(charmap, us))) {
-			pos++;
-			len--;
+			verbatim = 1 + php_json_verbatim_ascii_len(s + pos + 1, len - 1);
+			pos += verbatim;
+			len -= verbatim;
+			if (len == 0) {
+				smart_str_appendl(buf, s, pos);
+				break;
+			}
+		} else if (verbatim_utf8 && us >= 0x80
+				&& (verbatim = php_json_verbatim_utf8_len((const unsigned char *) s + pos, len, options))) {
+			/* Keep well-formed UTF-8 in the pending run instead of copying it on its own. */
+			pos += verbatim;
+			len -= verbatim;
 			if (len == 0) {
 				smart_str_appendl(buf, s, pos);
 				break;
@@ -575,6 +668,16 @@ zend_result php_json_escape_string(
 	smart_str_appendc(buf, '"');
 
 	return SUCCESS;
+}
+
+zend_result php_json_escape_string(
+		smart_str *buf, const char *s, size_t len,
+		int options, php_json_encoder *encoder) /* {{{ */
+{
+	if (options & PHP_JSON_UNESCAPED_UNICODE) {
+		return php_json_escape_string_ex(buf, s, len, options, encoder, true);
+	}
+	return php_json_escape_string_ex(buf, s, len, options, encoder, false);
 }
 /* }}} */
 
