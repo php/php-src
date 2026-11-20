@@ -245,13 +245,12 @@ mysqlnd_stats_end(MYSQLND_STATS * stats, const bool persistent)
 PHPAPI void
 _mysqlnd_get_client_stats(MYSQLND_STATS * stats_ptr, zval *return_value ZEND_FILE_LINE_DC)
 {
-	MYSQLND_STATS stats;
 	DBG_ENTER("_mysqlnd_get_client_stats");
-	if (!stats_ptr) {
-		memset(&stats, 0, sizeof(stats));
-		stats_ptr = &stats;
+	if (stats_ptr) {
+		mysqlnd_fill_stats_hash(stats_ptr, mysqlnd_stats_values_names, return_value ZEND_FILE_LINE_CC);
+	} else {
+		array_init(return_value);
 	}
-	mysqlnd_fill_stats_hash(stats_ptr, mysqlnd_stats_values_names, return_value ZEND_FILE_LINE_CC);
 	DBG_VOID_RETURN;
 }
 /* }}} */
