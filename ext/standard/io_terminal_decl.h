@@ -1,8 +1,8 @@
 /* This is a generated file, edit io_terminal.stub.php instead.
- * Stub hash: 8b56252cc2601bf72faabc551fd13a5dc0def051 */
+ * Stub hash: 6ec466cf7cb251dfcfc9c382bf30bc0dca5711b0 */
 
-#ifndef ZEND_IO_TERMINAL_DECL_8b56252cc2601bf72faabc551fd13a5dc0def051_H
-#define ZEND_IO_TERMINAL_DECL_8b56252cc2601bf72faabc551fd13a5dc0def051_H
+#ifndef ZEND_IO_TERMINAL_DECL_6ec466cf7cb251dfcfc9c382bf30bc0dca5711b0_H
+#define ZEND_IO_TERMINAL_DECL_6ec466cf7cb251dfcfc9c382bf30bc0dca5711b0_H
 
 typedef enum zend_enum_Io_Terminal_Key {
 	ZEND_ENUM_Io_Terminal_Key_Up = 1,
@@ -35,4 +35,4 @@ typedef enum zend_enum_Io_Terminal_Key {
 	ZEND_ENUM_Io_Terminal_Key_F12 = 28,
 } zend_enum_Io_Terminal_Key;
 
-#endif /* ZEND_IO_TERMINAL_DECL_8b56252cc2601bf72faabc551fd13a5dc0def051_H */
+#endif /* ZEND_IO_TERMINAL_DECL_6ec466cf7cb251dfcfc9c382bf30bc0dca5711b0_H */

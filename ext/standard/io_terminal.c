@@ -166,6 +166,7 @@ typedef struct php_io_terminal_stream_target {
 } php_io_terminal_stream_target;
 
 static zend_class_entry *php_io_terminal_exception_ce;
+static zend_class_entry *php_io_terminal_eof_exception_ce;
 static zend_class_entry *php_io_terminal_key_ce;
 static zend_class_entry *php_io_terminal_dimensions_ce;
 static zend_class_entry *php_io_terminal_mode_token_ce;
@@ -181,6 +182,14 @@ typedef enum php_io_terminal_read_status {
 	PHP_IO_TERMINAL_READ_SUCCESS = 1,
 	PHP_IO_TERMINAL_READ_RESIZE = 2,
 } php_io_terminal_read_status;
+
+typedef enum php_io_terminal_secret_status {
+	PHP_IO_TERMINAL_SECRET_SUCCESS = 0,
+	PHP_IO_TERMINAL_SECRET_TIMEOUT,
+	PHP_IO_TERMINAL_SECRET_EOF,
+	PHP_IO_TERMINAL_SECRET_CANCELLED,
+	PHP_IO_TERMINAL_SECRET_ERROR,
+} php_io_terminal_secret_status;
 
 #if !defined(PHP_WIN32)
 # if defined(HAVE_PTSNAME_R) || defined(_GNU_SOURCE) || defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
@@ -1139,7 +1148,12 @@ static bool php_io_terminal_read_console_record(
 
 	DWORD records_read;
 	if (!ReadConsoleInputW(handle, record, 1, &records_read) || records_read != 1) {
-		zend_throw_exception(php_io_terminal_exception_ce, "Failed to read console input", 0);
+		DWORD err = GetLastError();
+		if (err == ERROR_HANDLE_EOF || err == ERROR_BROKEN_PIPE) {
+			zend_throw_exception(php_io_terminal_eof_exception_ce, "End of file reached on terminal input stream", 0);
+		} else {
+			zend_throw_exception(php_io_terminal_exception_ce, "Failed to read console input", 0);
+		}
 		return false;
 	}
 
@@ -1238,10 +1252,10 @@ static zend_string *php_io_terminal_read_console_secret(
 	WCHAR *pending_high_surrogate,
 	DWORD wait_ms,
 	bool has_timeout,
-	bool *timed_out
+	php_io_terminal_secret_status *status
 )
 {
-	*timed_out = false;
+	*status = PHP_IO_TERMINAL_SECRET_ERROR;
 	HANDLE handle = input;
 	DWORD mode;
 
@@ -1257,8 +1271,6 @@ static zend_string *php_io_terminal_read_console_secret(
 	bool mode_changed = raw_mode != mode;
 	WCHAR high_surrogate = *pending_high_surrogate;
 	smart_str secret = {0};
-	bool success = false;
-	bool failed = false;
 
 	zend_hrtime_t overall_deadline_ns = 0;
 	if (has_timeout) {
@@ -1291,9 +1303,12 @@ static zend_string *php_io_terminal_read_console_secret(
 				pending_key,
 				pending_key_high_surrogate)) {
 			if (has_timeout && (current_wait == 0 || zend_hrtime() >= overall_deadline_ns)) {
-				*timed_out = true;
+				*status = PHP_IO_TERMINAL_SECRET_TIMEOUT;
+			} else if (EG(exception) && EG(exception)->ce == php_io_terminal_eof_exception_ce) {
+				*status = PHP_IO_TERMINAL_SECRET_EOF;
+			} else {
+				*status = PHP_IO_TERMINAL_SECRET_ERROR;
 			}
-			failed = true;
 			break;
 		}
 
@@ -1307,14 +1322,14 @@ static zend_string *php_io_terminal_read_console_secret(
 		}
 
 		if (key->wVirtualKeyCode == VK_RETURN) {
-			success = true;
+			*status = PHP_IO_TERMINAL_SECRET_SUCCESS;
 			break;
 		}
 
 		if (key->wVirtualKeyCode == VK_ESCAPE
 			|| ((key->wVirtualKeyCode == 'C' || key->wVirtualKeyCode == 'D')
 				&& (key->dwControlKeyState & (LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED)) != 0)) {
-			failed = true;
+			*status = PHP_IO_TERMINAL_SECRET_CANCELLED;
 			break;
 		}
 
@@ -1348,11 +1363,10 @@ static zend_string *php_io_terminal_read_console_secret(
 	*pending_high_surrogate = high_surrogate;
 
 	if (mode_changed && !SetConsoleMode(handle, mode)) {
-		failed = true;
-		*timed_out = false;
+		*status = PHP_IO_TERMINAL_SECRET_ERROR;
 	}
 
-	if (success && !failed) {
+	if (*status == PHP_IO_TERMINAL_SECRET_SUCCESS) {
 		return smart_str_extract(&secret);
 	}
 
@@ -1914,7 +1928,7 @@ static zend_string *php_io_terminal_finish_utf8_sequence(
 			case PHP_IO_TERMINAL_READ_TIMEOUT:
 				return NULL;
 			case PHP_IO_TERMINAL_READ_EOF:
-				zend_throw_exception(php_io_terminal_exception_ce, "End of file reached on terminal input stream", 0);
+				zend_throw_exception(php_io_terminal_eof_exception_ce, "End of file reached on terminal input stream", 0);
 				return NULL;
 			case PHP_IO_TERMINAL_READ_SUCCESS:
 				break;
@@ -2302,7 +2316,7 @@ static zend_string *php_io_terminal_read_stream_key(
 					);
 					break;
 				case PHP_IO_TERMINAL_READ_EOF:
-					zend_throw_exception(php_io_terminal_exception_ce, "End of file reached on terminal input stream", 0);
+					zend_throw_exception(php_io_terminal_eof_exception_ce, "End of file reached on terminal input stream", 0);
 					break;
 				case PHP_IO_TERMINAL_READ_TIMEOUT:
 					result = NULL;
@@ -2352,10 +2366,10 @@ static zend_string *php_io_terminal_read_stream_secret(
 	const struct timespec *timeout,
 	const struct timespec *sequence_timeout,
 	php_io_terminal_object *intern,
-	bool *timed_out
+	php_io_terminal_secret_status *status
 )
 {
-	*timed_out = false;
+	*status = PHP_IO_TERMINAL_SECRET_ERROR;
 	int fd = input;
 	bool is_tty = (fd >= 0 && isatty(fd) == 1);
 	struct termios mode;
@@ -2397,7 +2411,6 @@ static zend_string *php_io_terminal_read_stream_secret(
 	zend_hrtime_t seq_timeout_ns = php_io_terminal_timespec_to_ns(sequence_timeout);
 
 	smart_str secret = {0};
-	bool success = false;
 	unsigned char key = 0;
 
 	/* If pending UTF-8 bytes exist from previous readKey, process them first */
@@ -2412,7 +2425,7 @@ static zend_string *php_io_terminal_read_stream_secret(
 			if (has_overall_deadline) {
 				zend_hrtime_t now = zend_hrtime();
 				if (now >= overall_deadline_ns) {
-					*timed_out = true;
+					*status = PHP_IO_TERMINAL_SECRET_TIMEOUT;
 					goto restore;
 				}
 				php_io_terminal_ns_to_timespec(overall_deadline_ns - now, &cur_ts);
@@ -2420,11 +2433,15 @@ static zend_string *php_io_terminal_read_stream_secret(
 			}
 			php_io_terminal_read_status r = php_io_terminal_read_byte(fd, stream, poll_ctx, &next_b, cur_ts_ptr, false, NULL);
 			if (r == PHP_IO_TERMINAL_READ_TIMEOUT) {
-				*timed_out = true;
+				*status = PHP_IO_TERMINAL_SECRET_TIMEOUT;
+				goto restore;
+			}
+			if (r == PHP_IO_TERMINAL_READ_EOF) {
+				*status = PHP_IO_TERMINAL_SECRET_EOF;
 				goto restore;
 			}
 			if (r != PHP_IO_TERMINAL_READ_SUCCESS) {
-				*timed_out = false;
+				*status = PHP_IO_TERMINAL_SECRET_ERROR;
 				goto restore;
 			}
 			if ((next_b & 0xc0) == 0x80) {
@@ -2453,7 +2470,7 @@ static zend_string *php_io_terminal_read_stream_secret(
 			zend_hrtime_t now = zend_hrtime();
 			if (now >= overall_deadline_ns) {
 				if (is_positive_timeout) {
-					*timed_out = true;
+					*status = PHP_IO_TERMINAL_SECRET_TIMEOUT;
 					goto restore;
 				}
 				current_timeout.tv_sec = 0;
@@ -2466,11 +2483,15 @@ static zend_string *php_io_terminal_read_stream_secret(
 
 		php_io_terminal_read_status read_result = php_io_terminal_read_byte(fd, stream, poll_ctx, &key, current_timeout_ptr, false, NULL);
 		if (read_result == PHP_IO_TERMINAL_READ_TIMEOUT) {
-			*timed_out = true;
+			*status = PHP_IO_TERMINAL_SECRET_TIMEOUT;
+			goto restore;
+		}
+		if (read_result == PHP_IO_TERMINAL_READ_EOF) {
+			*status = PHP_IO_TERMINAL_SECRET_EOF;
 			goto restore;
 		}
 		if (read_result != PHP_IO_TERMINAL_READ_SUCCESS) {
-			*timed_out = false;
+			*status = PHP_IO_TERMINAL_SECRET_ERROR;
 			goto restore;
 		}
 
@@ -2496,7 +2517,7 @@ process_key:
 						intern->last_secret_ended_in_cr = true;
 					}
 				}
-				success = true;
+				*status = PHP_IO_TERMINAL_SECRET_SUCCESS;
 				goto restore;
 			case 0x7f:
 			case 0x08:
@@ -2504,7 +2525,7 @@ process_key:
 				break;
 			case 0x03:
 			case 0x04:
-				*timed_out = false;
+				*status = PHP_IO_TERMINAL_SECRET_CANCELLED;
 				goto restore;
 			case 0x1b:
 			{
@@ -2527,18 +2548,18 @@ process_key:
 				}
 				unsigned char next;
 				php_io_terminal_read_status read_res = php_io_terminal_read_byte(fd, stream, poll_ctx, &next, step_timeout_ptr, false, NULL);
-				if (read_res == PHP_IO_TERMINAL_READ_TIMEOUT) {
+				if (read_res == PHP_IO_TERMINAL_READ_TIMEOUT || read_res == PHP_IO_TERMINAL_READ_EOF) {
 					/* Standalone Escape cancels */
-					*timed_out = false;
+					*status = PHP_IO_TERMINAL_SECRET_CANCELLED;
 					goto restore;
 				}
 				if (read_res != PHP_IO_TERMINAL_READ_SUCCESS) {
-					*timed_out = false;
+					*status = PHP_IO_TERMINAL_SECRET_ERROR;
 					goto restore;
 				}
 
 				if (next == 0x03 || next == 0x04 || next == 0x1b || next == '\r' || next == '\n') {
-					*timed_out = false;
+					*status = PHP_IO_TERMINAL_SECRET_CANCELLED;
 					goto restore;
 				}
 
@@ -2548,7 +2569,7 @@ process_key:
 							zend_hrtime_t now = zend_hrtime();
 							if (now >= overall_deadline_ns) {
 								if (is_positive_timeout) {
-									*timed_out = true;
+									*status = PHP_IO_TERMINAL_SECRET_TIMEOUT;
 									goto restore;
 								}
 								step_timeout.tv_sec = 0;
@@ -2568,21 +2589,25 @@ process_key:
 						read_res = php_io_terminal_read_byte(fd, stream, poll_ctx, &csi_byte, step_timeout_ptr, false, NULL);
 						if (read_res != PHP_IO_TERMINAL_READ_SUCCESS) {
 							if (has_overall_deadline && zend_hrtime() >= overall_deadline_ns) {
-								*timed_out = true;
+								*status = PHP_IO_TERMINAL_SECRET_TIMEOUT;
 								goto restore;
 							}
 							if (read_res == PHP_IO_TERMINAL_READ_TIMEOUT) {
 								break;
 							}
-							*timed_out = false;
+							if (read_res == PHP_IO_TERMINAL_READ_EOF) {
+								*status = PHP_IO_TERMINAL_SECRET_EOF;
+								goto restore;
+							}
+							*status = PHP_IO_TERMINAL_SECRET_ERROR;
 							goto restore;
 						}
 						if (has_overall_deadline && is_positive_timeout && zend_hrtime() >= overall_deadline_ns) {
-							*timed_out = true;
+							*status = PHP_IO_TERMINAL_SECRET_TIMEOUT;
 							goto restore;
 						}
 						if (csi_byte == 0x03 || csi_byte == 0x04 || csi_byte == 0x1b || csi_byte == '\r' || csi_byte == '\n') {
-							*timed_out = false;
+							*status = PHP_IO_TERMINAL_SECRET_CANCELLED;
 							goto restore;
 						}
 						if (csi_byte >= 0x40 && csi_byte <= 0x7e) {
@@ -2597,7 +2622,7 @@ process_key:
 						zend_hrtime_t now = zend_hrtime();
 						if (now >= overall_deadline_ns) {
 							if (is_positive_timeout) {
-								*timed_out = true;
+								*status = PHP_IO_TERMINAL_SECRET_TIMEOUT;
 								goto restore;
 							}
 							step_timeout.tv_sec = 0;
@@ -2617,27 +2642,31 @@ process_key:
 					read_res = php_io_terminal_read_byte(fd, stream, poll_ctx, &ss3_byte, step_timeout_ptr, false, NULL);
 					if (read_res != PHP_IO_TERMINAL_READ_SUCCESS) {
 						if (has_overall_deadline && zend_hrtime() >= overall_deadline_ns) {
-							*timed_out = true;
+							*status = PHP_IO_TERMINAL_SECRET_TIMEOUT;
 							goto restore;
 						}
 						if (read_res == PHP_IO_TERMINAL_READ_TIMEOUT) {
 							break;
 						}
-						*timed_out = false;
+						if (read_res == PHP_IO_TERMINAL_READ_EOF) {
+							*status = PHP_IO_TERMINAL_SECRET_EOF;
+							goto restore;
+						}
+						*status = PHP_IO_TERMINAL_SECRET_ERROR;
 						goto restore;
 					}
 					if (has_overall_deadline && is_positive_timeout && zend_hrtime() >= overall_deadline_ns) {
-						*timed_out = true;
+						*status = PHP_IO_TERMINAL_SECRET_TIMEOUT;
 						goto restore;
 					}
 					if (ss3_byte == 0x03 || ss3_byte == 0x04 || ss3_byte == 0x1b || ss3_byte == '\r' || ss3_byte == '\n') {
-						*timed_out = false;
+						*status = PHP_IO_TERMINAL_SECRET_CANCELLED;
 						goto restore;
 					}
 					break;
 				}
 
-				*timed_out = false;
+				*status = PHP_IO_TERMINAL_SECRET_CANCELLED;
 				goto restore;
 			}
 			default:
@@ -2669,10 +2698,14 @@ process_key:
 						php_io_terminal_read_status cont_res = php_io_terminal_read_byte(fd, stream, poll_ctx, &seq[i], cont_timeout_ptr, false, NULL);
 						if (cont_res != PHP_IO_TERMINAL_READ_SUCCESS) {
 							if (has_overall_deadline && zend_hrtime() >= overall_deadline_ns) {
-								*timed_out = true;
+								*status = PHP_IO_TERMINAL_SECRET_TIMEOUT;
 								goto restore;
 							}
-							*timed_out = false;
+							if (cont_res == PHP_IO_TERMINAL_READ_EOF) {
+								*status = PHP_IO_TERMINAL_SECRET_EOF;
+								goto restore;
+							}
+							*status = PHP_IO_TERMINAL_SECRET_ERROR;
 							goto restore;
 						}
 						if ((seq[i] & 0xc0) != 0x80) {
@@ -2697,8 +2730,7 @@ process_key:
 
 restore:
 	if (mode_changed && tcsetattr(fd, TCSANOW, &mode) != 0) {
-		success = false;
-		*timed_out = false;
+		*status = PHP_IO_TERMINAL_SECRET_ERROR;
 		if (!EG(exception)) {
 			zend_throw_exception(php_io_terminal_exception_ce, "Failed to restore terminal mode", 0);
 		}
@@ -2708,7 +2740,7 @@ restore:
 		php_poll_destroy(poll_ctx);
 	}
 
-	if (success) {
+	if (*status == PHP_IO_TERMINAL_SECRET_SUCCESS) {
 		return smart_str_extract(&secret);
 	}
 
@@ -3091,7 +3123,7 @@ PHP_METHOD(Io_Terminal_Terminal, readKey)
 						);
 						break;
 					case PHP_IO_TERMINAL_READ_EOF:
-						zend_throw_exception(php_io_terminal_exception_ce, "End of file reached on terminal input stream", 0);
+						zend_throw_exception(php_io_terminal_eof_exception_ce, "End of file reached on terminal input stream", 0);
 						break;
 					case PHP_IO_TERMINAL_READ_TIMEOUT:
 						key = NULL;
@@ -3756,7 +3788,7 @@ PHP_METHOD(Io_Terminal_Terminal, readSecret)
 		RETURN_THROWS();
 	}
 
-	bool timed_out = false;
+	php_io_terminal_secret_status status = PHP_IO_TERMINAL_SECRET_ERROR;
 #ifdef PHP_WIN32
 	DWORD wait_ms = INFINITE;
 	bool has_timeout = false;
@@ -3786,12 +3818,11 @@ PHP_METHOD(Io_Terminal_Terminal, readSecret)
 			&intern->pending_high_surrogate,
 			wait_ms,
 			has_timeout,
-			&timed_out
+			&status
 		);
 	} else {
 		/* Non-console stream on Windows */
 		smart_str sec_str = {0};
-		bool success = false;
 		unsigned char byte = 0;
 		struct timespec win_sec_timeout;
 		struct timespec win_seq_timeout = {0, PHP_IO_TERMINAL_SEQUENCE_TIMEOUT_MS * 1000000L};
@@ -3836,7 +3867,7 @@ PHP_METHOD(Io_Terminal_Terminal, readSecret)
 				if (win_has_deadline) {
 					zend_hrtime_t now = zend_hrtime();
 					if (now >= win_deadline_ns) {
-						timed_out = true;
+						status = PHP_IO_TERMINAL_SECRET_TIMEOUT;
 						goto win_secret_done;
 					}
 					php_io_terminal_ns_to_timespec(win_deadline_ns - now, &cur_ts);
@@ -3844,11 +3875,15 @@ PHP_METHOD(Io_Terminal_Terminal, readSecret)
 				}
 				php_io_terminal_read_status r = php_io_terminal_read_byte(stream.native_stream, stream.php_stream, NULL, &next_b, cur_ts_ptr, false, NULL);
 				if (r == PHP_IO_TERMINAL_READ_TIMEOUT) {
-					timed_out = true;
+					status = PHP_IO_TERMINAL_SECRET_TIMEOUT;
+					goto win_secret_done;
+				}
+				if (r == PHP_IO_TERMINAL_READ_EOF) {
+					status = PHP_IO_TERMINAL_SECRET_EOF;
 					goto win_secret_done;
 				}
 				if (r != PHP_IO_TERMINAL_READ_SUCCESS) {
-					timed_out = false;
+					status = PHP_IO_TERMINAL_SECRET_ERROR;
 					goto win_secret_done;
 				}
 				if ((next_b & 0xc0) == 0x80) {
@@ -3876,7 +3911,7 @@ PHP_METHOD(Io_Terminal_Terminal, readSecret)
 				zend_hrtime_t now = zend_hrtime();
 				if (now >= win_deadline_ns) {
 					if (win_is_positive_timeout) {
-						timed_out = true;
+						status = PHP_IO_TERMINAL_SECRET_TIMEOUT;
 						break;
 					}
 					cur_to.tv_sec = 0;
@@ -3890,11 +3925,15 @@ PHP_METHOD(Io_Terminal_Terminal, readSecret)
 				stream.native_stream, stream.php_stream, NULL, &byte, cur_to_ptr, false, NULL
 			);
 			if (read_result == PHP_IO_TERMINAL_READ_TIMEOUT) {
-				timed_out = true;
+				status = PHP_IO_TERMINAL_SECRET_TIMEOUT;
+				break;
+			}
+			if (read_result == PHP_IO_TERMINAL_READ_EOF) {
+				status = PHP_IO_TERMINAL_SECRET_EOF;
 				break;
 			}
 			if (read_result != PHP_IO_TERMINAL_READ_SUCCESS) {
-				timed_out = false;
+				status = PHP_IO_TERMINAL_SECRET_ERROR;
 				break;
 			}
 
@@ -3918,7 +3957,7 @@ win_process_key:
 							intern->last_secret_ended_in_cr = true;
 						}
 					}
-					success = true;
+					status = PHP_IO_TERMINAL_SECRET_SUCCESS;
 					goto win_secret_done;
 				case 0x7f:
 				case 0x08:
@@ -3926,7 +3965,7 @@ win_process_key:
 					break;
 				case 0x03:
 				case 0x04:
-					timed_out = false;
+					status = PHP_IO_TERMINAL_SECRET_CANCELLED;
 					goto win_secret_done;
 				case 0x1b:
 				{
@@ -3949,11 +3988,11 @@ win_process_key:
 					php_io_terminal_read_status rnext = php_io_terminal_read_byte(stream.native_stream, stream.php_stream, NULL, &next_b, &esc_to, false, NULL);
 					if (rnext != PHP_IO_TERMINAL_READ_SUCCESS) {
 						/* Standalone Escape cancels */
-						timed_out = false;
+						status = PHP_IO_TERMINAL_SECRET_CANCELLED;
 						goto win_secret_done;
 					}
 					if (next_b == 0x03 || next_b == 0x04 || next_b == 0x1b || next_b == '\r' || next_b == '\n') {
-						timed_out = false;
+						status = PHP_IO_TERMINAL_SECRET_CANCELLED;
 						goto win_secret_done;
 					}
 					if (next_b == '[') {
@@ -3962,7 +4001,7 @@ win_process_key:
 								zend_hrtime_t now = zend_hrtime();
 								if (now >= win_deadline_ns) {
 									if (win_is_positive_timeout) {
-										timed_out = true;
+										status = PHP_IO_TERMINAL_SECRET_TIMEOUT;
 										goto win_secret_done;
 									}
 									esc_to.tv_sec = 0;
@@ -3980,17 +4019,17 @@ win_process_key:
 							php_io_terminal_read_status csi_r = php_io_terminal_read_byte(stream.native_stream, stream.php_stream, NULL, &csi_ch, &esc_to, false, NULL);
 							if (csi_r != PHP_IO_TERMINAL_READ_SUCCESS) {
 								if (win_has_deadline && zend_hrtime() >= win_deadline_ns) {
-									timed_out = true;
+									status = PHP_IO_TERMINAL_SECRET_TIMEOUT;
 									goto win_secret_done;
 								}
 								break;
 							}
 							if (win_has_deadline && win_is_positive_timeout && zend_hrtime() >= win_deadline_ns) {
-								timed_out = true;
+								status = PHP_IO_TERMINAL_SECRET_TIMEOUT;
 								goto win_secret_done;
 							}
 							if (csi_ch == 0x03 || csi_ch == 0x04 || csi_ch == 0x1b || csi_ch == '\r' || csi_ch == '\n') {
-								timed_out = false;
+								status = PHP_IO_TERMINAL_SECRET_CANCELLED;
 								goto win_secret_done;
 							}
 							if (csi_ch >= 0x40 && csi_ch <= 0x7e) break;
@@ -4002,7 +4041,7 @@ win_process_key:
 							zend_hrtime_t now = zend_hrtime();
 							if (now >= win_deadline_ns) {
 								if (win_is_positive_timeout) {
-									timed_out = true;
+									status = PHP_IO_TERMINAL_SECRET_TIMEOUT;
 									goto win_secret_done;
 								}
 								esc_to.tv_sec = 0;
@@ -4020,17 +4059,17 @@ win_process_key:
 						php_io_terminal_read_status ss3_r = php_io_terminal_read_byte(stream.native_stream, stream.php_stream, NULL, &ss3_ch, &esc_to, false, NULL);
 						if (ss3_r != PHP_IO_TERMINAL_READ_SUCCESS) {
 							if (win_has_deadline && zend_hrtime() >= win_deadline_ns) {
-								timed_out = true;
+								status = PHP_IO_TERMINAL_SECRET_TIMEOUT;
 								goto win_secret_done;
 							}
 							break;
 						}
 						if (win_has_deadline && win_is_positive_timeout && zend_hrtime() >= win_deadline_ns) {
-							timed_out = true;
+							status = PHP_IO_TERMINAL_SECRET_TIMEOUT;
 							goto win_secret_done;
 						}
 						if (ss3_ch == 0x03 || ss3_ch == 0x04 || ss3_ch == 0x1b || ss3_ch == '\r' || ss3_ch == '\n') {
-							timed_out = false;
+							status = PHP_IO_TERMINAL_SECRET_CANCELLED;
 							goto win_secret_done;
 						}
 						break;
@@ -4044,7 +4083,7 @@ win_process_key:
 		}
 
 win_secret_done:
-		if (success) {
+		if (status == PHP_IO_TERMINAL_SECRET_SUCCESS) {
 			secret = smart_str_extract(&sec_str);
 		} else {
 			smart_str_free(&sec_str);
@@ -4072,19 +4111,23 @@ win_secret_done:
 	}
 
 	zend_string *secret = php_io_terminal_read_stream_secret(
-		stream.native_stream, stream.php_stream, timeout_ptr, &sequence_timeout, intern, &timed_out
+		stream.native_stream, stream.php_stream, timeout_ptr, &sequence_timeout, intern, &status
 	);
 #endif
 	if (secret != NULL) {
 		RETURN_STR(secret);
 	}
 
-	if (timed_out) {
+	if (status == PHP_IO_TERMINAL_SECRET_TIMEOUT) {
 		RETURN_NULL();
 	}
 
 	if (!EG(exception)) {
-		zend_throw_exception(php_io_terminal_exception_ce, "Unable to read secret from terminal", 0);
+		if (status == PHP_IO_TERMINAL_SECRET_EOF) {
+			zend_throw_exception(php_io_terminal_eof_exception_ce, "End of file reached on terminal input stream", 0);
+		} else {
+			zend_throw_exception(php_io_terminal_exception_ce, "Unable to read secret from terminal", 0);
+		}
 	}
 	RETURN_THROWS();
 }
@@ -4100,6 +4143,9 @@ PHP_MINIT_FUNCTION(terminal)
 
 	php_io_terminal_exception_ce
 		= register_class_Io_Terminal_TerminalException(io_exception_ce);
+
+	php_io_terminal_eof_exception_ce
+		= register_class_Io_Terminal_EofException(php_io_terminal_exception_ce);
 
 	php_io_terminal_key_ce = register_class_Io_Terminal_Key();
 

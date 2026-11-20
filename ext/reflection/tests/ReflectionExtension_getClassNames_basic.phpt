@@ -31,6 +31,7 @@ Io\Poll\InvalidHandleException
 Io\Poll\PollException
 Io\Poll\Watcher
 Io\Terminal\Dimensions
+Io\Terminal\EofException
 Io\Terminal\Key
 Io\Terminal\ModeToken
 Io\Terminal\Terminal
