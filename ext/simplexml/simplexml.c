@@ -2286,6 +2286,10 @@ PHP_FUNCTION(simplexml_load_file)
 		RETURN_THROWS();
 	}
 
+	if (ce && UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
+		RETURN_THROWS();
+	}
+
 	PHP_LIBXML_SANITIZE_GLOBALS(read_file);
 	docp = xmlReadFile(filename, NULL, (int)options);
 	PHP_LIBXML_RESTORE_GLOBALS(read_file);
@@ -2337,6 +2341,10 @@ PHP_FUNCTION(simplexml_load_string)
 	}
 	if (ZEND_LONG_EXCEEDS_INT(options)) {
 		zend_argument_value_error(3, "is too large");
+		RETURN_THROWS();
+	}
+
+	if (ce && UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
 		RETURN_THROWS();
 	}
 
@@ -2647,6 +2655,10 @@ PHP_FUNCTION(simplexml_import_dom)
 	zend_function    *fptr_count;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o|C!", &node, &ce) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (ce && UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
 		RETURN_THROWS();
 	}
 

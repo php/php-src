@@ -557,7 +557,9 @@ jobs:
           cd event-loop
           git rev-parse HEAD
           php /usr/bin/composer install --no-progress --ignore-platform-req=php+
-          vendor/bin/phpunit || EXIT_CODE=$?
+          # Broken since https://github.com/php/php-src/pull/14452.
+          php -r '$c = file_get_contents("test/Driver/StreamSelectDriverTest.php"); $c = str_replace("public function testTooLargeFileDescriptorSet(): void", "/** @group skip */\n    #[\\PHPUnit\\Framework\\Attributes\\Group('"'"'skip'"'"')]\n    public function testTooLargeFileDescriptorSet(): void", $c); file_put_contents("test/Driver/StreamSelectDriverTest.php", $c);'
+          vendor/bin/phpunit --exclude-group skip || EXIT_CODE=$?
           if [ ${EXIT_CODE:-0} -gt 128 ]; then
             exit 1
           fi
