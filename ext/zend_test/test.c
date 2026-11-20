@@ -2841,6 +2841,20 @@ static PHP_FUNCTION(zend_test_opcache_preloading)
 	RETURN_BOOL(opcache_preloading());
 }
 
+static PHP_FUNCTION(zend_test_opcache_shm_read_locked)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_BOOL(opcache_shm_read_locked());
+}
+
+static PHP_FUNCTION(zend_test_opcache_last_restart_time)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_LONG((zend_long) opcache_last_restart_time());
+}
+
 static PHP_FUNCTION(zend_test_gh19792)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
