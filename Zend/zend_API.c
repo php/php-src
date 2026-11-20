@@ -2598,7 +2598,7 @@ ZEND_API void zend_destroy_modules(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module, int module_type) /* {{{ */
+ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module, zend_module_type module_type) /* {{{ */
 {
 	size_t name_len;
 	zend_string *lcname;
@@ -3022,7 +3022,7 @@ ZEND_API void zend_convert_internal_arg_info(zend_arg_info *new_arg_info, const 
 }
 
 /* registers all functions in *library_functions in the function hash */
-ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend_function_entry *functions, HashTable *function_table, int type) /* {{{ */
+ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend_function_entry *functions, HashTable *function_table, zend_module_type type) /* {{{ */
 {
 	const zend_function_entry *ptr = functions;
 	zend_function function;

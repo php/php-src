@@ -340,11 +340,11 @@ ZEND_API zend_result zend_parse_method_parameters_ex(int flags, uint32_t num_arg
 
 /* End of parameter parsing API -- andrei */
 
-ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend_function_entry *functions, HashTable *function_table, int type);
+ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend_function_entry *functions, HashTable *function_table, zend_module_type type);
 ZEND_API void zend_unregister_functions(const zend_function_entry *functions, int count, HashTable *function_table);
 ZEND_API zend_result zend_startup_module(zend_module_entry *module_entry);
 ZEND_API zend_module_entry* zend_register_internal_module(zend_module_entry *module_entry);
-ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module, int module_type);
+ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module, zend_module_type module_type);
 ZEND_API zend_result zend_startup_module_ex(zend_module_entry *module);
 ZEND_API void zend_startup_modules(void);
 ZEND_API void zend_collect_module_handlers(void);
