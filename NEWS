@@ -120,6 +120,8 @@ PHP                                                                        NEWS
     (pavimus)
   . Fixed opcache.enable_file_override lookups racing with OPcache restarts
     (pavimus)
+  . Fixed incorrect constant propagation when unpacking into partially known
+    arrays. (Weilin Du)
 
 - OpenSSL:
   . Fixed bug GH-25172 (TLS session reuse shares request-lifetime callback
