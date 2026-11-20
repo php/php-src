@@ -24,7 +24,9 @@ class my_exception extends exception
 throw new my_exception;
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Implicit conversion from my_file to string for property Exception::$file of type string is deprecated in %s on line %d
+
 Fatal error: Uncaught Error: Object of class stdClass could not be converted to string in [no active file]:0
 Stack trace:
 #0 [internal function]: Exception->__toString()

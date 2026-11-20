@@ -35,11 +35,14 @@ var_dump($d);
 
 ?>
 --EXPECTF--
+Deprecated: Implicit conversion from C to string for property D::$prop of type string is deprecated in %s on line %d
 Exception: C::__toString
 object(D)#%d (0) {
   ["prop"]=>
   uninitialized(string)
 }
+
+Deprecated: Implicit conversion from C to string for property D::$prop of type string is deprecated in %s on line %d
 Exception: C::__toString
 object(D)#2 (1) {
   ["prop"]=>

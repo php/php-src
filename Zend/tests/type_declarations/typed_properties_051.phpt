@@ -22,6 +22,7 @@ try {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Implicit conversion from B to string for property A::$a of type string is deprecated in %s on line %d
 string(4) "okok"
 TypeError: Cannot assign C to property A::$a of type string

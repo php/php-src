@@ -46,6 +46,8 @@ test('Proxy', $obj);
 ?>
 --EXPECTF--
 # Ghost
+
+Deprecated: Implicit conversion from class@anonymous to string for property C::$a of type string is deprecated in %s on line %d
 C::__construct
 bool(true)
 object(C)#%d (2) {
@@ -55,6 +57,8 @@ object(C)#%d (2) {
   string(1) "b"
 }
 # Proxy
+
+Deprecated: Implicit conversion from class@anonymous to string for property C::$a of type string is deprecated in %s on line %d
 C::__construct
 bool(true)
 lazy proxy object(C)#%d (1) {
