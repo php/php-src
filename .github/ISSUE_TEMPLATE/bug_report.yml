@@ -26,15 +26,15 @@ body:
     attributes:
       label: PHP Version
       description: |
-        Please run PHP with the `-v` flag (e.g. `php -v`, `php8.5 -v`, `php-fpm -v` or similar) and provide the full output of that command. If executing that command is not possible, please provide the full version number as given in PHPInfo.
+        Please run PHP with the `-v` flag (e.g. `php -v`, `php8.6 -v`, `php-fpm -v` or similar) and provide the full output of that command. If executing that command is not possible, please provide the full version number as given in PHPInfo.
 
         Please make sure that the used PHP version [is a supported version](https://www.php.net/supported-versions.php).
       placeholder: |
-        PHP 8.5.2 (cli) (built: Jan 21 2026 17:35:28) (NTS)
+        PHP 8.6.0 (cli) (built: Nov 19 2026 15:17:27) (ZTS)
         Copyright © The PHP Group and Contributors
         Built by Ubuntu
-        Zend Engine v4.5.2, Copyright © Zend by Perforce
-            with Zend OPcache v8.5.2, Copyright ©, Zend by Perforce
+        Zend Engine v4.6.0, Copyright © Zend by Perforce
+            with Zend OPcache v8.6.0, Copyright ©, by Zend by Perforce
       render: plain
     validations:
       required: true
@@ -42,4 +42,4 @@ body:
     attributes:
       label: Operating System
       description: "The used operating system, if relevant."
-      placeholder: "Ubuntu 24.04"
+      placeholder: "Ubuntu 26.04"
