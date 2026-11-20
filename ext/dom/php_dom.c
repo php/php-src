@@ -170,6 +170,11 @@ bool dom_node_is_read_only(const xmlNode *node) {
 	}
 }
 
+ZEND_COLD void php_dom_throw_read_only_node_error(php_libxml_ref_obj *document)
+{
+	php_dom_throw_error_with_message(NO_MODIFICATION_ALLOWED_ERR, "Cannot modify a node while an XPath evaluation or XSLT transformation that uses it is in progress", dom_get_strict_error(document));
+}
+
 bool dom_node_children_valid(const xmlNode *node) {
 	switch (node->type) {
 		case XML_DOCUMENT_TYPE_NODE:
@@ -430,6 +435,15 @@ zval *dom_write_property(zend_object *object, zend_string *name, zval *value, vo
 				zend_readonly_property_modification_error_ex(ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
 			}
 			return &EG(error_zval);
+		}
+
+		if (UNEXPECTED(obj->document == NULL || obj->document->read_only_depth > 0)
+		 && (instanceof_function(object->ce, dom_node_class_entry) || instanceof_function(object->ce, dom_modern_node_class_entry))) {
+			const xmlNode *nodep = dom_object_get_node(obj);
+			if (nodep != NULL && nodep->type != XML_DOCUMENT_NODE && nodep->type != XML_HTML_DOCUMENT_NODE
+			 && dom_throw_if_node_read_only(obj->document, nodep)) {
+				return value;
+			}
 		}
 
 		ZEND_ASSERT(prop && ZEND_TYPE_IS_SET(prop->type));

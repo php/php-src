@@ -482,6 +482,24 @@ static zend_result dom_sanity_check_node_list_types(zval *nodes, uint32_t nodesc
 	return SUCCESS;
 }
 
+static bool dom_throw_if_nodes_read_only(dom_object *context, const zval *nodes, uint32_t nodesc)
+{
+	if (dom_throw_if_node_read_only(context->document, dom_object_get_node(context))) {
+		return true;
+	}
+
+	for (uint32_t i = 0; i < nodesc; i++) {
+		if (Z_TYPE(nodes[i]) == IS_OBJECT) {
+			dom_object *intern = Z_DOMOBJ_P(&nodes[i]);
+			if (dom_throw_if_node_read_only(intern->document, dom_object_get_node(intern))) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
 static void php_dom_pre_insert_helper(xmlNodePtr insertion_point, xmlNodePtr parentNode, xmlNodePtr newchild, xmlNodePtr last)
 {
 	if (!insertion_point) {
@@ -609,6 +627,10 @@ void dom_parent_node_append(dom_object *context, zval *nodes, uint32_t nodesc)
 		return;
 	}
 
+	if (dom_throw_if_nodes_read_only(context, nodes, nodesc)) {
+		return;
+	}
+
 	xmlNode *parentNode = dom_object_get_node(context);
 
 	php_libxml_invalidate_node_list_cache(context->document);
@@ -637,6 +659,10 @@ void dom_parent_node_prepend(dom_object *context, zval *nodes, uint32_t nodesc)
 		return;
 	}
 
+	if (dom_throw_if_nodes_read_only(context, nodes, nodesc)) {
+		return;
+	}
+
 	php_libxml_invalidate_node_list_cache(context->document);
 
 	/* 1. Let node be the result of converting nodes into a node given nodes and this’s node document. */
@@ -653,6 +679,10 @@ void dom_parent_node_prepend(dom_object *context, zval *nodes, uint32_t nodesc)
 void dom_parent_node_after(dom_object *context, zval *nodes, uint32_t nodesc)
 {
 	if (UNEXPECTED(dom_sanity_check_node_list_types(nodes, nodesc, dom_get_node_ce(php_dom_follow_spec_doc_ref(context->document))) != SUCCESS)) {
+		return;
+	}
+
+	if (dom_throw_if_nodes_read_only(context, nodes, nodesc)) {
 		return;
 	}
 
@@ -685,6 +715,10 @@ void dom_parent_node_after(dom_object *context, zval *nodes, uint32_t nodesc)
 void dom_parent_node_before(dom_object *context, zval *nodes, uint32_t nodesc)
 {
 	if (UNEXPECTED(dom_sanity_check_node_list_types(nodes, nodesc, dom_get_node_ce(php_dom_follow_spec_doc_ref(context->document))) != SUCCESS)) {
+		return;
+	}
+
+	if (dom_throw_if_nodes_read_only(context, nodes, nodesc)) {
 		return;
 	}
 
@@ -722,6 +756,10 @@ void dom_parent_node_before(dom_object *context, zval *nodes, uint32_t nodesc)
 
 static zend_result dom_child_removal_preconditions(const xmlNode *child, const dom_object *context)
 {
+	if (dom_throw_if_node_read_only(context->document, child)) {
+		return FAILURE;
+	}
+
 	if (dom_node_is_read_only(child) ||
 		(child->parent != NULL && dom_node_is_read_only(child->parent))) {
 		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(context->document));
@@ -753,6 +791,10 @@ void dom_child_node_remove(dom_object *context)
 void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc)
 {
 	if (UNEXPECTED(dom_sanity_check_node_list_types(nodes, nodesc, dom_get_node_ce(php_dom_follow_spec_doc_ref(context->document))) != SUCCESS)) {
+		return;
+	}
+
+	if (dom_throw_if_nodes_read_only(context, nodes, nodesc)) {
 		return;
 	}
 
@@ -802,6 +844,10 @@ void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc)
 void dom_parent_node_replace_children(dom_object *context, zval *nodes, uint32_t nodesc)
 {
 	if (UNEXPECTED(dom_sanity_check_node_list_types(nodes, nodesc, dom_get_node_ce(php_dom_follow_spec_doc_ref(context->document))) != SUCCESS)) {
+		return;
+	}
+
+	if (dom_throw_if_nodes_read_only(context, nodes, nodesc)) {
 		return;
 	}
 
