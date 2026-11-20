@@ -928,7 +928,6 @@ static zend_string* ZEND_FASTCALL accel_replace_string_by_shm_permanent(zend_str
 
 static void accel_use_shm_interned_strings(void)
 {
-	HANDLE_BLOCK_INTERRUPTIONS();
 	SHM_UNPROTECT();
 	zend_shared_alloc_lock();
 
@@ -943,7 +942,6 @@ static void accel_use_shm_interned_strings(void)
 
 	zend_shared_alloc_unlock();
 	SHM_PROTECT();
-	HANDLE_UNBLOCK_INTERRUPTIONS();
 }
 
 #ifndef ZEND_WIN32
@@ -1393,7 +1391,6 @@ zend_string *accel_make_persistent_key(zend_string *str)
 
 					zend_string *str = accel_find_interned_string(cwd_str);
 					if (!str) {
-						HANDLE_BLOCK_INTERRUPTIONS();
 						SHM_UNPROTECT();
 						zend_shared_alloc_lock();
 						str = accel_new_interned_string(zend_string_copy(cwd_str));
@@ -1403,7 +1400,6 @@ zend_string *accel_make_persistent_key(zend_string *str)
 						}
 						zend_shared_alloc_unlock();
 						SHM_PROTECT();
-						HANDLE_UNBLOCK_INTERRUPTIONS();
 					}
 					if (str) {
 						char buf[32];
@@ -1437,7 +1433,6 @@ zend_string *accel_make_persistent_key(zend_string *str)
 
 					zend_string *str = accel_find_interned_string(ZCG(include_path));
 					if (!str) {
-						HANDLE_BLOCK_INTERRUPTIONS();
 						SHM_UNPROTECT();
 						zend_shared_alloc_lock();
 						str = accel_new_interned_string(zend_string_copy(ZCG(include_path)));
@@ -1447,7 +1442,6 @@ zend_string *accel_make_persistent_key(zend_string *str)
 						}
 						zend_shared_alloc_unlock();
 						SHM_PROTECT();
-						HANDLE_UNBLOCK_INTERRUPTIONS();
 					}
 					if (str) {
 						char buf[32];
@@ -1588,11 +1582,9 @@ zend_result zend_accel_invalidate(zend_string *filename, bool force)
 		if (force ||
 			!ZCG(accel_directives).validate_timestamps ||
 			do_validate_timestamps(persistent_script, &file_handle) == FAILURE) {
-			HANDLE_BLOCK_INTERRUPTIONS();
 			SHM_UNPROTECT();
 			zend_accel_lock_discard_script(persistent_script);
 			SHM_PROTECT();
-			HANDLE_UNBLOCK_INTERRUPTIONS();
 		}
 
 		file_handle.opened_path = NULL;
@@ -2058,11 +2050,9 @@ static zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int
 	    }
 	}
 
-	HANDLE_BLOCK_INTERRUPTIONS();
 	SHM_UNPROTECT();
 	persistent_script = zend_file_cache_script_load(file_handle);
 	SHM_PROTECT();
-	HANDLE_UNBLOCK_INTERRUPTIONS();
 	if (persistent_script) {
 		/* see bug #15471 (old BTS) */
 		if (persistent_script->script.filename) {
@@ -2327,7 +2317,6 @@ zend_op_array *zend_accel_compile_pfa(zend_ast *ast,
 		new_persistent_script->warnings = EG(errors).errors;
 	}
 
-	HANDLE_BLOCK_INTERRUPTIONS();
 	SHM_UNPROTECT();
 
 	bool from_shared_memory;
@@ -2341,7 +2330,6 @@ zend_op_array *zend_accel_compile_pfa(zend_ast *ast,
 	gc_enable(orig_gc_state);
 
 	SHM_PROTECT();
-	HANDLE_UNBLOCK_INTERRUPTIONS();
 
 	/* We may have switched to an existing persistent script that was persisted in
 	 * the meantime. Make sure to use its warnings if available. */
@@ -2443,13 +2431,11 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 					persistent_script = (zend_persistent_script *)bucket->data;
 
 					if (key && !persistent_script->corrupted) {
-						HANDLE_BLOCK_INTERRUPTIONS();
 						SHM_UNPROTECT();
 						zend_shared_alloc_lock();
 						zend_accel_add_key(key, bucket);
 						zend_shared_alloc_unlock();
 						SHM_PROTECT();
-						HANDLE_UNBLOCK_INTERRUPTIONS();
 					}
 				}
 			}
@@ -2493,7 +2479,6 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		return NULL;
 	}
 
-	HANDLE_BLOCK_INTERRUPTIONS();
 	SHM_UNPROTECT();
 
 	/* If script is found then validate_timestamps if option is enabled */
@@ -2520,7 +2505,6 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		/* No memory left. Behave like without the Accelerator */
 		if (ZSMMG(memory_exhausted) || ZCSG(restart_pending)) {
 			SHM_PROTECT();
-			HANDLE_UNBLOCK_INTERRUPTIONS();
 			if (ZCG(accel_directives).file_cache) {
 				return file_cache_compile_file(file_handle, type);
 			}
@@ -2530,9 +2514,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		zend_begin_record_errors();
 
 		SHM_PROTECT();
-		HANDLE_UNBLOCK_INTERRUPTIONS();
 		persistent_script = opcache_compile_file(file_handle, type, &op_array);
-		HANDLE_BLOCK_INTERRUPTIONS();
 		SHM_UNPROTECT();
 
 		/* Try and cache the script and assume that it is returned from_shared_memory.
@@ -2556,7 +2538,6 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		 */
 		if (!persistent_script) {
 			SHM_PROTECT();
-			HANDLE_UNBLOCK_INTERRUPTIONS();
 			zend_emit_recorded_errors();
 			zend_free_recorded_errors();
 			return op_array;
@@ -2571,7 +2552,6 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		}
 		persistent_script->dynamic_members.last_used = ZCG(request_time);
 		SHM_PROTECT();
-		HANDLE_UNBLOCK_INTERRUPTIONS();
 
 		/* We may have switched to an existing persistent script that was persisted in
 		 * the meantime. Make sure to use its warnings if available. */
@@ -2622,7 +2602,6 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		}
 		persistent_script->dynamic_members.last_used = ZCG(request_time);
 		SHM_PROTECT();
-		HANDLE_UNBLOCK_INTERRUPTIONS();
 
 		zend_emit_recorded_errors_ex(persistent_script->num_warnings, persistent_script->warnings);
 		from_shared_memory = true;
@@ -2968,13 +2947,11 @@ static zend_string* persistent_zend_resolve_path(zend_string *filename)
 					if (!persistent_script->corrupted) {
 						if (key) {
 							/* add another "key" for the same bucket */
-							HANDLE_BLOCK_INTERRUPTIONS();
 							SHM_UNPROTECT();
 							zend_shared_alloc_lock();
 							zend_accel_add_key(key, bucket);
 							zend_shared_alloc_unlock();
 							SHM_PROTECT();
-							HANDLE_UNBLOCK_INTERRUPTIONS();
 						} else {
 							ZSTR_LEN(ZCG(key)) = 0;
 						}
@@ -3068,7 +3045,6 @@ ZEND_RINIT_FUNCTION(zend_accelerator)
 	}
 #endif
 
-	HANDLE_BLOCK_INTERRUPTIONS();
 	SHM_UNPROTECT();
 
 	if (ZCG(counted)) {
@@ -3161,7 +3137,6 @@ ZEND_RINIT_FUNCTION(zend_accelerator)
 #endif
 
 	SHM_PROTECT();
-	HANDLE_UNBLOCK_INTERRUPTIONS();
 
 	/* Called once the SHM lock is released and the memory is protected again */
 	if (UNEXPECTED(restarted) && zend_accel_restart_hook) {
@@ -3985,7 +3960,6 @@ void zend_accel_schedule_restart(zend_accel_restart_reason reason)
 	zend_accel_error(ACCEL_LOG_DEBUG, "Restart Scheduled! Reason: %s",
 			zend_accel_restart_reason_text[reason]);
 
-	HANDLE_BLOCK_INTERRUPTIONS();
 	SHM_UNPROTECT();
 	ZCSG(restart_pending) = true;
 	ZCSG(restart_reason) = reason;
@@ -3998,7 +3972,6 @@ void zend_accel_schedule_restart(zend_accel_restart_reason reason)
 		ZCSG(force_restart_time) = 0;
 	}
 	SHM_PROTECT();
-	HANDLE_UNBLOCK_INTERRUPTIONS();
 }
 
 static void accel_deactivate_now(void)
@@ -5221,13 +5194,11 @@ static zend_result accel_preload(const char *config, bool in_child)
 
 		zend_shared_alloc_init_xlat_table();
 
-		HANDLE_BLOCK_INTERRUPTIONS();
 		SHM_UNPROTECT();
 
 		ZCSG(preload_script) = preload_script_in_shared_memory(script);
 
 		SHM_PROTECT();
-		HANDLE_UNBLOCK_INTERRUPTIONS();
 
 		preload_load(orig_map_ptr_static_last);
 
@@ -5238,7 +5209,6 @@ static zend_result accel_preload(const char *config, bool in_child)
 		EG(persistent_constants_count) = EG(zend_constants)->nNumUsed;
 
 		/* Store individual scripts with unlinked classes */
-		HANDLE_BLOCK_INTERRUPTIONS();
 		SHM_UNPROTECT();
 
 		i = 0;
@@ -5270,7 +5240,6 @@ static zend_result accel_preload(const char *config, bool in_child)
 #endif
 
 		SHM_PROTECT();
-		HANDLE_UNBLOCK_INTERRUPTIONS();
 
 		zend_shared_alloc_destroy_xlat_table();
 	} else {
