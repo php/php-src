@@ -43,7 +43,10 @@ foreach ([Terminal::class, ModeToken::class] as $class) {
 
 // Dimensions public constructor and validation
 $size = new Dimensions(80, 24);
-var_dump($size->cols, $size->rows);
+var_dump($size->columns, $size->rows);
+
+$namedSize = new Dimensions(columns: 80, rows: 24);
+var_dump($namedSize->columns, $namedSize->rows);
 
 foreach ([
     [0, 24],
@@ -58,7 +61,7 @@ foreach ([
     }
 }
 
-// Repeated Dimensions construction must produce only the first error ($cols)
+// Repeated Dimensions construction must produce only the first error ($columns)
 try {
     $size->__construct(100, 50);
 } catch (Throwable $e) {
@@ -68,7 +71,7 @@ try {
 // Dimensions serialization
 $serialized = serialize($size);
 $unserialized = unserialize($serialized);
-var_dump($unserialized instanceof Dimensions, $unserialized->cols, $unserialized->rows);
+var_dump($unserialized instanceof Dimensions, $unserialized->columns, $unserialized->rows);
 
 // Clone rejection
 foreach ([$t1, $t2] as $obj) {
@@ -100,11 +103,13 @@ Error: Call to private Io\Terminal\Terminal::__construct() from global scope
 Error: Call to private Io\Terminal\ModeToken::__construct() from global scope
 int(80)
 int(24)
-ValueError: Io\Terminal\Dimensions::__construct(): Argument #1 ($cols) must be greater than 0
+int(80)
+int(24)
+ValueError: Io\Terminal\Dimensions::__construct(): Argument #1 ($columns) must be greater than 0
 ValueError: Io\Terminal\Dimensions::__construct(): Argument #2 ($rows) must be greater than 0
-ValueError: Io\Terminal\Dimensions::__construct(): Argument #1 ($cols) must be greater than 0
+ValueError: Io\Terminal\Dimensions::__construct(): Argument #1 ($columns) must be greater than 0
 ValueError: Io\Terminal\Dimensions::__construct(): Argument #2 ($rows) must be greater than 0
-Error: Cannot modify readonly property Io\Terminal\Dimensions::$cols
+Error: Cannot modify readonly property Io\Terminal\Dimensions::$columns
 bool(true)
 int(80)
 int(24)

@@ -2720,14 +2720,14 @@ restore:
 /* Io\Terminal\Dimensions methods */
 PHP_METHOD(Io_Terminal_Dimensions, __construct)
 {
-	zend_long cols, rows;
+	zend_long columns, rows;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_LONG(cols)
+		Z_PARAM_LONG(columns)
 		Z_PARAM_LONG(rows)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (cols <= 0) {
+	if (columns <= 0) {
 		zend_argument_value_error(1, "must be greater than 0");
 		RETURN_THROWS();
 	}
@@ -2737,7 +2737,7 @@ PHP_METHOD(Io_Terminal_Dimensions, __construct)
 		RETURN_THROWS();
 	}
 
-	zend_update_property_long(php_io_terminal_dimensions_ce, Z_OBJ_P(ZEND_THIS), "cols", strlen("cols"), cols);
+	zend_update_property_long(php_io_terminal_dimensions_ce, Z_OBJ_P(ZEND_THIS), "columns", strlen("columns"), columns);
 	if (UNEXPECTED(EG(exception))) {
 		RETURN_THROWS();
 	}

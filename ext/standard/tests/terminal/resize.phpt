@@ -61,7 +61,7 @@ $r1 = fgets($pipes[2]);
 $terminal = Terminal::fromStreams($pipes[0]);
 
 $s1 = $terminal->getDimensions();
-echo "s1: {$s1->cols}x{$s1->rows}\n";
+echo "s1: {$s1->columns}x{$s1->rows}\n";
 
 // Signal child to change window size
 fwrite($pipes[0], "next\n");
@@ -72,7 +72,7 @@ $key = $terminal->readKey(Duration::fromSeconds(0));
 var_dump($key === Key::Resize);
 
 $s2 = $terminal->getDimensions();
-echo "s2: {$s2->cols}x{$s2->rows}\n";
+echo "s2: {$s2->columns}x{$s2->rows}\n";
 
 fwrite($pipes[0], "done\n");
 unset($terminal);

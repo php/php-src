@@ -1,12 +1,12 @@
 /* This is a generated file, edit io_terminal.stub.php instead.
- * Stub hash: e24d70debb197766b78c9a58b9d5300f6ced77a5
+ * Stub hash: 8b56252cc2601bf72faabc551fd13a5dc0def051
  * Has decl header: yes */
 
 #include "zend_attributes.h"
 #include "zend_enum.h"
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Io_Terminal_Dimensions___construct, 0, 0, 2)
-	ZEND_ARG_TYPE_INFO(0, cols, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, columns, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, rows, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
@@ -161,11 +161,11 @@ static zend_class_entry *register_class_Io_Terminal_Dimensions(void)
 	INIT_NS_CLASS_ENTRY(ce, "Io\\Terminal", "Dimensions", class_Io_Terminal_Dimensions_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_READONLY_CLASS);
 
-	zval property_cols_default_value;
-	ZVAL_UNDEF(&property_cols_default_value);
-	zend_string *property_cols_name = zend_string_init("cols", sizeof("cols") - 1, true);
-	zend_declare_typed_property(class_entry, property_cols_name, &property_cols_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release_ex(property_cols_name, true);
+	zval property_columns_default_value;
+	ZVAL_UNDEF(&property_columns_default_value);
+	zend_string *property_columns_name = zend_string_init("columns", sizeof("columns") - 1, true);
+	zend_declare_typed_property(class_entry, property_columns_name, &property_columns_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release_ex(property_columns_name, true);
 
 	zval property_rows_default_value;
 	ZVAL_UNDEF(&property_rows_default_value);
