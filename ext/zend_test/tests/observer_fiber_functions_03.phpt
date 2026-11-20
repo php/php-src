@@ -22,7 +22,7 @@ $notBailedOutFiber->start();
 $fiber = new Fiber(function (): void {
     var_dump(2);
     Fiber::suspend();
-    var_dump(new class { public function __debugInfo() { return ''; } }); // cause a bailout
+    var_dump(zend_trigger_bailout());
 });
 
 $fiber->start();
@@ -71,13 +71,11 @@ int(2)
 <!-- switching from fiber %s to %s -->
 <resume '%s'>
           </Fiber::suspend>
-          <var_dump>
-            <!-- init class@anonymous::__debugInfo() -->
-            <class@anonymous::__debugInfo>
-            </class@anonymous::__debugInfo>
+          <!-- init zend_trigger_bailout() -->
+          <zend_trigger_bailout>
 
-Fatal error: __debugInfo() must return an array in %s on line %d
-          </var_dump>
+Fatal error: Bailout in %s on line %d
+          </zend_trigger_bailout>
         </{closure:%s:%d}>
 <!-- switching from fiber %s to %s -->
 <returned '%s'>
