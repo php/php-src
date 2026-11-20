@@ -77,8 +77,8 @@ typedef struct _zend_module_dep zend_module_dep;
 struct _zend_module_entry {
 	unsigned short size;
 	unsigned int zend_api;
-	unsigned char zend_debug;
-	unsigned char zts;
+	bool zend_debug;
+	bool zts;
 	const struct _zend_ini_entry *ini_entry;
 	const struct _zend_module_dep *deps;
 	const char *name;
