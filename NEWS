@@ -48,6 +48,9 @@ PHP                                                                        NEWS
     when lexbor allocation fails). (ndossche)
   . Fixed bug GH-25305 (NULL dereference in lxb_dom_document_destroy on lexbor
     document init failure). (David Carlier)
+  . Fixed crash when registerNodeClass() is given a class with a constant
+    expression that cannot be evaluated; registerNodeClass() now throws the
+    evaluation Error instead. (Ilia Alshanetsky)
 
 - Filter:
   . Fixed stack overflow in filter_var() and filter_var_array() with deeply
@@ -56,6 +59,10 @@ PHP                                                                        NEWS
 - GD:
   . Fixed imagecreatefromstring() continuing to decode after throwing for a
     string longer than INT_MAX. (lacatoire)
+
+- Gettext:
+  . Fixed bug GH-25584 (JIT frees the string returned by gettext(),
+    dgettext() or dcgettext() while it is still in use). (Ilia Alshanetsky)
 
 - Intl:
   . Fixed Locale::lookup() ignoring the default locale when the language tag
@@ -67,6 +74,8 @@ PHP                                                                        NEWS
 - MBString:
   . Fixed stack overflow in mb_check_encoding() and mb_convert_encoding() with
     deeply nested arrays. (Eyüp Can Akman)
+  . Fixed the JIT freeing the string returned by mb_encode_mimeheader() or
+    mb_output_handler() while it is still in use. (Ilia Alshanetsky)
 
 - Opcache:
   . Fixed bug GH-25165 (Tracing JIT loops forever once opcache.jit_buffer_size
@@ -185,6 +194,9 @@ PHP                                                                        NEWS
 - URI:
   . Fixed bug GH-25604 (Accepted IPv4 hosts report a fatal range error).
     (Akouh Mohamed Amine)
+- XSL:
+  . Fixed a crash in XSLTProcessor::transformToDoc() when the return class
+    cannot be instantiated. (Ilia Alshanetsky)
 
 19 Nov 2026, PHP 8.5.13
 
