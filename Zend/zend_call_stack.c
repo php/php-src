@@ -492,7 +492,7 @@ static bool zend_call_stack_get_openbsd_pthread(zend_call_stack *stack)
 		return false;
 	}
 
-	stack->base = (char *)ss.ss_sp - ss.ss_size;
+	stack->base = ss.ss_sp;
 	stack->max_size = ss.ss_size - sysconf(_SC_PAGE_SIZE);
 
 	return true;
