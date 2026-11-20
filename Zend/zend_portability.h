@@ -32,6 +32,11 @@
  * general definitions
  */
 
+#if __STDC_VERSION__ < 202311L
+/* The object representation of nullptr is same as that of (void*)0. */
+# define nullptr (void*)0
+#endif
+
 #ifdef ZEND_WIN32
 # include "zend_config.w32.h"
 # define ZEND_PATHS_SEPARATOR		';'
