@@ -154,6 +154,27 @@ static void sodium_separate_string(zval *zv) {
 	}
 }
 
+/* Sets an already zeroed string reference to null. A typed property that does
+ * not accept null keeps a string of NUL bytes with the same length instead. */
+static void sodium_clear_string_ref(zval *ref) {
+	zval *zv = Z_REFVAL_P(ref);
+	zend_property_info *prop;
+
+	ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
+	ZEND_REF_FOREACH_TYPE_SOURCES(Z_REF_P(ref), prop) {
+		if (!ZEND_TYPE_ALLOW_NULL(prop->type)) {
+			if (!Z_REFCOUNTED_P(zv) || Z_REFCOUNT_P(zv) > 1) {
+				zend_string *zeroed = zend_string_alloc(Z_STRLEN_P(zv), 0);
+				memset(ZSTR_VAL(zeroed), 0, ZSTR_LEN(zeroed) + 1);
+				Z_TRY_DELREF_P(zv);
+				ZVAL_NEW_STR(zv, zeroed);
+			}
+			return;
+		}
+	} ZEND_REF_FOREACH_TYPE_SOURCES_END();
+	convert_to_null(zv);
+}
+
 PHP_MINIT_FUNCTION(sodium)
 {
 	if (sodium_init() < 0) {
@@ -191,14 +212,15 @@ PHP_MINFO_FUNCTION(sodium)
 
 PHP_FUNCTION(sodium_memzero)
 {
+	zval      *buf_ref;
 	zval      *buf_zv;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(),
-									"z", &buf_zv) == FAILURE) {
+									"z", &buf_ref) == FAILURE) {
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
-	ZVAL_DEREF(buf_zv);
+	buf_zv = Z_REFVAL_P(buf_ref);
 	if (Z_TYPE_P(buf_zv) != IS_STRING) {
 		zend_throw_exception(sodium_exception_ce, "a PHP string is required", 0);
 		RETURN_THROWS();
@@ -210,7 +232,7 @@ PHP_FUNCTION(sodium_memzero)
 			sodium_memzero(buf, (size_t) buf_len);
 		}
 	}
-	convert_to_null(buf_zv);
+	sodium_clear_string_ref(buf_ref);
 }
 
 PHP_FUNCTION(sodium_increment)
@@ -521,17 +543,18 @@ PHP_FUNCTION(sodium_crypto_generichash_final)
 {
 	crypto_generichash_state  state_tmp;
 	zend_string              *hash;
+	zval                     *state_ref;
 	zval                     *state_zv;
 	unsigned char            *state;
 	size_t                    state_len;
 	zend_long                 hash_len = crypto_generichash_BYTES;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|l",
-									&state_zv, &hash_len) == FAILURE) {
+									&state_ref, &hash_len) == FAILURE) {
 		sodium_remove_param_values_from_backtrace(EG(exception));
 		RETURN_THROWS();
 	}
-	ZVAL_DEREF(state_zv);
+	state_zv = Z_REFVAL_P(state_ref);
 	if (Z_TYPE_P(state_zv) != IS_STRING) {
 		zend_argument_error(sodium_exception_ce, 1, "must be a reference to a state");
 		RETURN_THROWS();
@@ -560,7 +583,7 @@ PHP_FUNCTION(sodium_crypto_generichash_final)
 	}
 	sodium_memzero(&state_tmp, sizeof state_tmp);
 	sodium_memzero(state, state_len);
-	convert_to_null(state_zv);
+	sodium_clear_string_ref(state_ref);
 	ZSTR_VAL(hash)[hash_len] = 0;
 
 	RETURN_NEW_STR(hash);
