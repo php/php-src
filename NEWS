@@ -29,6 +29,8 @@ PHP                                                                        NEWS
   . Fixed object_properties_load() adding integer keys to property tables, which
     made the properties unreadable and clone hit an assertion.
     (Nicolas Grekas)
+  . Fixed bug GH-25548 (Execution timeout delivered to a thread that never ran
+    PHP is lost and kills the process under ZTS). (phcorp)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
@@ -116,6 +118,8 @@ PHP                                                                        NEWS
 - PCNTL:
   . Fixed pcntl_signal() raising a fatal error for SIGKILL and SIGSTOP.
     (lacatoire)
+  . Fixed bug GH-25541 (Signal delivered to a thread that never ran PHP
+    crashes or kills the process under ZTS). (phcorp)
 
 - PCRE:
   . Fixed \C being allowed in patterns enabling UTF mode with (*UTF) instead

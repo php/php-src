@@ -111,4 +111,12 @@ ZEND_API void zend_sigaction(int signo, const struct sigaction *act, struct siga
 
 #endif /* ZEND_SIGNALS */
 
+#if defined(ZTS) && !defined(ZEND_WIN32)
+# include <signal.h>
+
+ZEND_API bool zend_signal_is_synchronous(int signo, const siginfo_t *siginfo);
+ZEND_API bool zend_signal_reroute_from_foreign_thread(int signo, const siginfo_t *siginfo, void *context);
+ZEND_API void zend_signal_unblock_rerouted(void);
+#endif
+
 #endif /* ZEND_SIGNAL_H */

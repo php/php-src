@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 20856900222b20ff71d57bf575ad7034ffc34bf4 */
+ * Stub hash: 8d9bda09350e35211527847e5bc41c9b9f9ddbce */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -154,6 +154,18 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_raise_and_throw, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, signal, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+
+#if defined(ZTS) && !defined(PHP_WIN32)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_raise_on_foreign_thread, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, signal, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_start_foreign_thread, 0, 0, IS_VOID, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_timeout_signal, 0, 0, IS_LONG, 1)
+ZEND_END_ARG_INFO()
+#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_fill_packed_array, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(1, array, IS_ARRAY, 0)
@@ -336,6 +348,11 @@ static ZEND_FUNCTION(zend_test_is_string_marked_as_valid_utf8);
 static ZEND_FUNCTION(zend_get_map_ptr_last);
 static ZEND_FUNCTION(zend_test_crash);
 static ZEND_FUNCTION(zend_test_raise_and_throw);
+#if defined(ZTS) && !defined(PHP_WIN32)
+static ZEND_FUNCTION(zend_test_raise_on_foreign_thread);
+static ZEND_FUNCTION(zend_test_start_foreign_thread);
+static ZEND_FUNCTION(zend_test_timeout_signal);
+#endif
 static ZEND_FUNCTION(zend_test_fill_packed_array);
 static ZEND_FUNCTION(zend_test_create_throwing_resource);
 static ZEND_FUNCTION(get_open_basedir);
@@ -452,6 +469,11 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_get_map_ptr_last, arginfo_zend_get_map_ptr_last)
 	ZEND_FE(zend_test_crash, arginfo_zend_test_crash)
 	ZEND_FE(zend_test_raise_and_throw, arginfo_zend_test_raise_and_throw)
+#if defined(ZTS) && !defined(PHP_WIN32)
+	ZEND_FE(zend_test_raise_on_foreign_thread, arginfo_zend_test_raise_on_foreign_thread)
+	ZEND_FE(zend_test_start_foreign_thread, arginfo_zend_test_start_foreign_thread)
+	ZEND_FE(zend_test_timeout_signal, arginfo_zend_test_timeout_signal)
+#endif
 	ZEND_FE(zend_test_fill_packed_array, arginfo_zend_test_fill_packed_array)
 	ZEND_FE(zend_test_create_throwing_resource, arginfo_zend_test_create_throwing_resource)
 	ZEND_FE(get_open_basedir, arginfo_get_open_basedir)
