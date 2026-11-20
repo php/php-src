@@ -179,6 +179,10 @@ typedef enum {
 
 #define DOM_DOCUMENT_MALFORMED ((xmlDocPtr) -1)
 
+#ifdef LIBXML_SCHEMAS_ENABLED
+void dom_xml_schema_init_class(zend_class_entry *ce);
+#endif
+
 xmlDocPtr dom_document_parser(zval *id, dom_load_mode mode, const char *source, size_t source_len, size_t options, xmlCharEncodingHandlerPtr encoding);
 
 /* parentnode */
