@@ -57,6 +57,9 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-25306 (Assertion status == LXB_STATUS_OK in dom_parse_selector
     when lexbor allocation fails). (ndossche)
+  . Fixed crash when registerNodeClass() is given a class with a constant
+    expression that cannot be evaluated; registerNodeClass() now throws the
+    evaluation Error instead. (Ilia Alshanetsky)
 
 - Fileinfo:
   . Fixed bug GH-25051 (TrueType fonts detected as application/octet-stream
