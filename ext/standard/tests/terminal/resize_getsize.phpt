@@ -77,14 +77,14 @@ $terminal = Terminal::fromStreams($pipes[0], $pipes[1]);
 $token = $terminal->enableRawMode();
 
 $sA = $terminal->getDimensions();
-echo "baseline A: {$sA->cols}x{$sA->rows}\n";
+echo "baseline A: {$sA->columns}x{$sA->rows}\n";
 
 // Resize to B (120x35), call getDimensions(), then verify readKey() still reports Key::Resize
 fwrite($pipes[0], "next\n");
 fgets($pipes[2]);
 
 $sB = $terminal->getDimensions();
-echo "getDimensions at B: {$sB->cols}x{$sB->rows}\n";
+echo "getDimensions at B: {$sB->columns}x{$sB->rows}\n";
 $kB1 = $terminal->readKey($zero);
 echo "readKey after getDimensions at B: " . ($kB1 === Key::Resize ? 'Key::Resize' : var_export($kB1, true)) . "\n";
 
@@ -99,7 +99,7 @@ fgets($pipes[2]);
 $sC1 = $terminal->getDimensions();
 $sC2 = $terminal->getDimensions();
 $sC3 = $terminal->getDimensions();
-echo "repeated getDimensions at C: {$sC1->cols}x{$sC1->rows}, {$sC2->cols}x{$sC2->rows}, {$sC3->cols}x{$sC3->rows}\n";
+echo "repeated getDimensions at C: {$sC1->columns}x{$sC1->rows}, {$sC2->columns}x{$sC2->rows}, {$sC3->columns}x{$sC3->rows}\n";
 $kC1 = $terminal->readKey($zero);
 $kC2 = $terminal->readKey($zero);
 echo "readKey after repeated getDimensions at C: " . ($kC1 === Key::Resize ? 'Key::Resize' : var_export($kC1, true)) . "\n";
@@ -109,12 +109,12 @@ echo "second readKey at C: " . var_export($kC2, true) . "\n";
 fwrite($pipes[0], "next\n");
 fgets($pipes[2]);
 $sD = $terminal->getDimensions();
-echo "intervening D: {$sD->cols}x{$sD->rows}\n";
+echo "intervening D: {$sD->columns}x{$sD->rows}\n";
 
 fwrite($pipes[0], "next\n");
 fgets($pipes[2]);
 $sE = $terminal->getDimensions();
-echo "intervening E: {$sE->cols}x{$sE->rows}\n";
+echo "intervening E: {$sE->columns}x{$sE->rows}\n";
 
 $kE1 = $terminal->readKey($zero);
 $kE2 = $terminal->readKey($zero);
@@ -130,7 +130,7 @@ fwrite($pipes[0], "next\n");
 fgets($pipes[2]);
 usleep(2000);
 $sF = $terminal2->getDimensions();
-echo "terminal2 getDimensions at F: {$sF->cols}x{$sF->rows}\n";
+echo "terminal2 getDimensions at F: {$sF->columns}x{$sF->rows}\n";
 $kF1 = $terminal2->readKey($zero);
 $kF2 = $terminal2->readKey($zero);
 $kF3 = $terminal2->readKey($zero);

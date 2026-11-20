@@ -45,10 +45,10 @@ namespace Io\Terminal {
     /** @strict-properties */
     final readonly class Dimensions
     {
-        public readonly int $cols;
+        public readonly int $columns;
         public readonly int $rows;
 
-        public function __construct(int $cols, int $rows) {}
+        public function __construct(int $columns, int $rows) {}
     }
 
     /**
