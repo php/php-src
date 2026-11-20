@@ -192,6 +192,25 @@ static void pcntl_signal_dispatch(void);
 static void pcntl_signal_dispatch_tick_function(int dummy_int, void *dummy_pointer);
 static void pcntl_interrupt_function(zend_execute_data *execute_data);
 
+static void pcntl_original_handler_dtor(zval *zv)
+{
+	efree(Z_PTR_P(zv));
+}
+
+/* Keeps the handler installed before the request (by the SAPI or host) for RSHUTDOWN to restore */
+static void pcntl_save_original_handler(int signo)
+{
+	struct sigaction oact;
+
+	if (zend_hash_index_exists(&PCNTL_G(original_handlers), signo)) {
+		return;
+	}
+
+	memset(&oact, 0, sizeof(oact));
+	zend_sigaction(signo, NULL, &oact);
+	zend_hash_index_add_mem(&PCNTL_G(original_handlers), signo, &oact, sizeof(oact));
+}
+
 static PHP_GINIT_FUNCTION(pcntl)
 {
 #if defined(COMPILE_DL_PCNTL) && defined(ZTS)
@@ -204,6 +223,7 @@ PHP_RINIT_FUNCTION(pcntl)
 {
 	php_add_tick_function(pcntl_signal_dispatch_tick_function, NULL);
 	zend_hash_init(&PCNTL_G(php_signal_table), 16, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_init(&PCNTL_G(original_handlers), 0, NULL, pcntl_original_handler_dtor, 0);
 	PCNTL_G(head) = PCNTL_G(tail) = PCNTL_G(spares) = NULL;
 	PCNTL_G(async_signals) = 0;
 	PCNTL_G(last_error) = 0;
@@ -231,16 +251,14 @@ PHP_MINIT_FUNCTION(pcntl)
 PHP_RSHUTDOWN_FUNCTION(pcntl)
 {
 	struct php_pcntl_pending_signal *sig;
-	zend_long signo;
-	zval *handle;
+	zend_ulong signo;
+	struct sigaction *oact;
 
-	/* Reset all signals to their default disposition */
-	ZEND_HASH_FOREACH_NUM_KEY_VAL(&PCNTL_G(php_signal_table), signo, handle) {
-		if (Z_TYPE_P(handle) != IS_LONG || Z_LVAL_P(handle) != (zend_long)SIG_DFL) {
-			php_signal(signo, (Sigfunc *)(zend_long)SIG_DFL, false);
-		}
+	ZEND_HASH_FOREACH_NUM_KEY_PTR(&PCNTL_G(original_handlers), signo, oact) {
+		zend_sigaction((int) signo, oact, NULL);
 	} ZEND_HASH_FOREACH_END();
 
+	zend_hash_destroy(&PCNTL_G(original_handlers));
 	zend_hash_destroy(&PCNTL_G(php_signal_table));
 
 	while (PCNTL_G(head)) {
@@ -845,6 +863,8 @@ PHP_FUNCTION(pcntl_signal)
 	if (restart_syscalls_is_null && signo == SIGALRM) {
 		restart_syscalls = 0;
 	}
+
+	pcntl_save_original_handler((int) signo);
 
 	/* Special long value case for SIG_DFL and SIG_IGN */
 	if (Z_TYPE_P(handle) == IS_LONG) {

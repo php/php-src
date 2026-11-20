@@ -41,6 +41,7 @@ struct php_pcntl_pending_signal {
 
 ZEND_BEGIN_MODULE_GLOBALS(pcntl)
 	HashTable php_signal_table;
+	HashTable original_handlers;
 	bool processing_signal_queue;
 	volatile bool pending_signals;
 	bool async_signals;
