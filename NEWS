@@ -79,6 +79,10 @@ PHP                                                                        NEWS
   . Fixed the JIT freeing the string returned by mb_encode_mimeheader() or
     mb_output_handler() while it is still in use. (Ilia Alshanetsky)
 
+- MySQLnd:
+  . Fixed crash when a server sends a truncated or missing metadata EOF packet
+    for a prepared statement. (Ilia Alshanetsky)
+
 - Opcache:
   . Fixed bug GH-24801 (JIT: SIGFPE in ir_fold MUL_OV constant folding).
     (waroad)

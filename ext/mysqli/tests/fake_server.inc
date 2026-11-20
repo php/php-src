@@ -1445,6 +1445,49 @@ function my_mysqli_test_stmt_response_field_len_premature(my_mysqli_fake_server_
 	$conn->read(65536);
 }
 
+function my_mysqli_test_stmt_execute_metadata_eof_short(my_mysqli_fake_server_conn $conn): void
+{
+    $rh = $conn->packet_generator->server_stmt_execute_items_response();
+    $rh[2]->packet_length = '040000';
+    $rh[2]->server_status = '02';
+
+    $conn->send_server_greetings();
+    $conn->read();
+    $conn->send_server_ok();
+    $conn->read();
+    $conn->send_server_stmt_prepare_items_response();
+    $conn->read();
+    $conn->send($conn->packets_to_bytes(array_slice($rh, 0, 3)), "Stmt Execute metadata with short EOF");
+    $conn->read(65536);
+}
+
+function my_mysqli_test_stmt_execute_metadata_then_close(my_mysqli_fake_server_conn $conn): void
+{
+    $rh = $conn->packet_generator->server_stmt_execute_items_response();
+
+    $conn->send_server_greetings();
+    $conn->read();
+    $conn->send_server_ok();
+    $conn->read();
+    $conn->send_server_stmt_prepare_items_response();
+    $conn->read();
+    $conn->send($conn->packets_to_bytes(array_slice($rh, 0, 2)), "Stmt Execute metadata without EOF");
+}
+
+function my_mysqli_test_stmt_prepare_metadata_eof_short(my_mysqli_fake_server_conn $conn): void
+{
+    $packets = $conn->packet_generator->server_stmt_prepare_items_response();
+    $packets[2]->server_status = '02';
+    $packets[2]->packet_length = '040000';
+
+    $conn->send_server_greetings();
+    $conn->read();
+    $conn->send_server_ok();
+    $conn->read();
+    $conn->send($conn->packets_to_bytes($packets), "Stmt prepare items with short EOF");
+    $conn->read();
+}
+
 function run_fake_server(string $test_function, int|string $port = 0): void
 {
     $host = '127.0.0.1';
