@@ -19,6 +19,7 @@
 #include "ext/standard/file.h"
 #include "ext/standard/flock_compat.h"
 #include "ext/standard/php_filestat.h"
+#include "ext/standard/php_string.h"
 #include <stddef.h>
 #include <fcntl.h>
 #ifdef HAVE_SYS_WAIT_H
@@ -1397,8 +1398,9 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 	if (ret == -1) {
 #ifndef PHP_WIN32
 		char errstr[256];
+		int rename_errno = errno;
 # ifdef EXDEV
-		if (errno == EXDEV) {
+		if (rename_errno == EXDEV) {
 			zend_stat_t sb;
 # if !defined(ZTS) && !defined(TSRM_WIN32)
 			/* not sure what to do in ZTS case, umask is not thread-safe */
@@ -1458,9 +1460,30 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 #ifdef PHP_WIN32
 		php_win32_stream_wrapper_warn_error(wrapper, context, options, PHP_STREAM_EC(RenameFailed), GetLastError());
 #else
-		php_stream_wrapper_warn(wrapper, context, options,
-				RenameFailed,
-				"%s", php_socket_strerror_s(errno, errstr, sizeof(errstr)));
+		if (rename_errno == ENOENT) {
+			zend_stat_t sb;
+			if (VCWD_STAT(url_from, &sb) != 0) {
+				php_stream_wrapper_warn(wrapper, context, options, RenameFailed,
+					"No such file or directory (source \"%s\")", url_from);
+			} else {
+				size_t to_len = strlen(url_to);
+				char *dir = estrndup(url_to, to_len);
+				php_dirname(dir, to_len);
+				if (dir[0] != '\0' && !(dir[0] == '.' && dir[1] == '\0')
+						&& VCWD_STAT(dir, &sb) != 0) {
+					php_stream_wrapper_warn(wrapper, context, options, RenameFailed,
+						"No such file or directory (destination directory \"%s\")", dir);
+				} else {
+					php_stream_wrapper_warn(wrapper, context, options, RenameFailed,
+						"%s", php_socket_strerror_s(rename_errno, errstr, sizeof(errstr)));
+				}
+				efree(dir);
+			}
+		} else {
+			php_stream_wrapper_warn(wrapper, context, options,
+					RenameFailed,
+					"%s", php_socket_strerror_s(rename_errno, errstr, sizeof(errstr)));
+		}
 #endif
 		return 0;
 	}
