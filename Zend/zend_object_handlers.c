@@ -237,7 +237,7 @@ ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, int *is_temp) /
 		return ht;
 	}
 
-	zend_type_error(ZEND_DEBUGINFO_FUNC_NAME "() must return an array, %s returned", zend_zval_value_name(&retval));
+	zend_type_error("%pS::__debugInfo() must return an array, %s returned", ce->name, zend_zval_value_name(&retval));
 	zval_ptr_dtor(&retval);
 
 	*is_temp = 1;

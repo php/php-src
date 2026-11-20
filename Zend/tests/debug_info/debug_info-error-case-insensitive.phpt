@@ -23,4 +23,4 @@ try {
 --EXPECTF--
 object(C)#%d (0) {
 }
-TypeError: __debugInfo() must return an array, int returned
+TypeError: C::__debugInfo() must return an array, int returned
