@@ -240,9 +240,10 @@ static int ps_files_write(ps_files *data, zend_string *key, zend_string *val)
 		return FAILURE;
 	}
 
-	/* Truncate file if the amount of new data is smaller than the existing data set. */
-	if (ZSTR_LEN(val) < data->st_size) {
-		php_ignore_value(ftruncate(data->fd, 0));
+	/* Always truncate the session file before writing new data. */
+	if (ftruncate(data->fd, 0) != 0) {
+	    php_error_docref(NULL, E_WARNING, "ftruncate() failed: %s (%d)", strerror(errno), errno);
+	    return FAILURE;
 	}
 
 #if defined(HAVE_PWRITE)
