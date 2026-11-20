@@ -65,6 +65,10 @@ U_CFUNC PHP_FUNCTION( intl_error_name )
 		Z_PARAM_LONG(err_code)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (err_code < INT32_MIN || err_code > INT32_MAX) {
+		err_code = INT32_MAX;
+	}
+
 	RETURN_STRING( (char*)u_errorName( static_cast<UErrorCode>(err_code) ) );
 }
 /* }}} */
