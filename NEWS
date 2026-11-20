@@ -106,6 +106,8 @@ PHP                                                                        NEWS
     (pavimus)
   . Fixed opcache.enable_file_override lookups racing with OPcache restarts
     (pavimus)
+  . Fixed incorrect constant propagation when unpacking into partially known
+    arrays. (Weilin Du)
 
 - PDO_Firebird:
   . Fixed stack buffer overflow with long connection user names, passwords,
