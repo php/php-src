@@ -249,8 +249,6 @@ int fpm_signals_init_child(void)
 		return -1;
 	}
 
-	zend_signal_init();
-
 	if (0 > fpm_signals_unblock()) {
 		return -1;
 	}

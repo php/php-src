@@ -1053,7 +1053,7 @@ static void phpdbg_signal_handler(int sig, siginfo_t *info, void *context) /* {{
 				if (PHPDBG_G(sigsegv_bailout)) {
 					LONGJMP(*PHPDBG_G(sigsegv_bailout), FAILURE);
 				}
-				zend_sigaction(sig, &PHPDBG_G(old_sigsegv_signal), NULL);
+				sigaction(sig, &PHPDBG_G(old_sigsegv_signal), NULL);
 			}
 			break;
 	}
@@ -1165,8 +1165,6 @@ phpdbg_main:
 	ZEND_TSRMLS_CACHE_UPDATE();
 # endif
 #endif
-
-	zend_signal_startup();
 
 	php_ini_builder_init(&ini_builder);
 	ini_ignore = 0;
@@ -1390,12 +1388,8 @@ phpdbg_main:
 			goto free_and_return;
 		}
 
-		zend_try {
-			zend_signal_activate();
-		} zend_end_try();
-
 #ifndef _WIN32
-		zend_signal(SIGHUP, phpdbg_sighup_handler);
+		signal(SIGHUP, phpdbg_sighup_handler);
 #endif
 
 		mm_heap = zend_mm_get_heap();
@@ -1458,11 +1452,11 @@ phpdbg_main:
 		if (!PHPDBG_G(watch_userfaultfd))
 #endif
 		{
-			zend_try { zend_sigaction(SIGSEGV, &signal_struct, &PHPDBG_G(old_sigsegv_signal)); } zend_end_try();
-			zend_try { zend_sigaction(SIGBUS, &signal_struct, &PHPDBG_G(old_sigsegv_signal)); } zend_end_try();
+			sigaction(SIGSEGV, &signal_struct, &PHPDBG_G(old_sigsegv_signal));
+			sigaction(SIGBUS, &signal_struct, &PHPDBG_G(old_sigsegv_signal));
 		}
 #endif
-		zend_try { zend_signal(SIGINT, phpdbg_sigint_handler); } zend_end_try();
+		signal(SIGINT, phpdbg_sigint_handler);
 
 
 		PHPDBG_G(io)[PHPDBG_STDIN].fd = fileno(stdin);
@@ -1728,7 +1722,7 @@ phpdbg_out:
 		}
 
 #ifndef _WIN32
-		/* force override (no zend_signals) to prevent crashes due to signal recursion in SIGSEGV/SIGBUS handlers */
+		/* prevent crashes due to signal recursion in SIGSEGV/SIGBUS handlers */
 		signal(SIGSEGV, SIG_DFL);
 		signal(SIGBUS, SIG_DFL);
 

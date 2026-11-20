@@ -207,7 +207,7 @@ static void pcntl_save_original_handler(int signo)
 	}
 
 	memset(&oact, 0, sizeof(oact));
-	if (zend_sigaction(signo, NULL, &oact) != 0) {
+	if (sigaction(signo, NULL, &oact) != 0) {
 		return;
 	}
 	zend_hash_index_add_mem(&PCNTL_G(original_handlers), signo, &oact, sizeof(oact));
@@ -255,7 +255,7 @@ PHP_RSHUTDOWN_FUNCTION(pcntl)
 	struct php_pcntl_pending_signal *sig;
 
 	ZEND_HASH_FOREACH_NUM_KEY_PTR(&PCNTL_G(original_handlers), zend_ulong signo, struct sigaction *oact) {
-		zend_sigaction((int) signo, oact, NULL);
+		sigaction((int) signo, oact, NULL);
 	} ZEND_HASH_FOREACH_END();
 
 	zend_hash_destroy(&PCNTL_G(original_handlers));
@@ -838,7 +838,6 @@ PHP_FUNCTION(pcntl_signal)
 		RETURN_THROWS();
 	}
 
-	/* sigaction() always fails for these, and zend_sigaction() turns that into a fatal error */
 	if (signo == SIGKILL || signo == SIGSTOP) {
 		PCNTL_G(last_error) = EINVAL;
 		php_error_docref(NULL, E_WARNING, "Error assigning signal");

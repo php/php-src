@@ -69,11 +69,6 @@ PHP_MINIT_FUNCTION(pdo_firebird) /* {{{ */
 	PdoFirebird_ce = register_class_Pdo_Firebird(pdo_dbh_ce);
 	PdoFirebird_ce->create_object = pdo_dbh_new;
 
-#ifdef ZEND_SIGNALS
-	/* firebird replaces some signals at runtime, suppress warnings. */
-	SIGG(check) = 0;
-#endif
-
 	return php_pdo_register_driver_specific_ce(&pdo_firebird_driver, PdoFirebird_ce);
 }
 /* }}} */
