@@ -49,6 +49,25 @@ on:
         options:
           - "0"
           - "1"
+      custom_code:
+        description: 'Trusted PHP code to benchmark instead of the standard tests (optional <?php tag)'
+        required: false
+        type: string
+      custom_iterations:
+        description: 'Samples per PHP version for custom_code (2-1000)'
+        required: false
+        default: 50
+        type: number
+      custom_warmup:
+        description: 'Warmup requests per sample for custom_code (0-1000)'
+        required: false
+        default: 5
+        type: number
+      custom_requests:
+        description: 'Measured requests per sample for custom_code (1-1000)'
+        required: false
+        default: 1
+        type: number
 permissions:
   contents: read
   pull-requests: write
@@ -125,6 +144,74 @@ jobs:
           ref: 'main'
           fetch-depth: 1
           path: 'php-version-benchmarks'
+      - name: Setup custom PHP benchmark
+        id: custom
+        run: |
+          set -euo pipefail
+
+          if [[ "$GITHUB_EVENT_NAME" != "workflow_dispatch" ]] || ! jq -e '.inputs.custom_code // "" | test("\\S")' "$GITHUB_EVENT_PATH" > /dev/null; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          validate_count() {
+            local name="$1" value="$2" minimum="$3"
+            if [[ ! "$value" =~ ^[0-9]{1,4}$ ]] || (( 10#$value < minimum || 10#$value > 1000 )); then
+              echo "$name must be an integer between $minimum and 1000" >&2
+              exit 1
+            fi
+          }
+
+          ITERATIONS=$(jq -r '.inputs.custom_iterations // 50' "$GITHUB_EVENT_PATH")
+          WARMUP=$(jq -r '.inputs.custom_warmup // 5' "$GITHUB_EVENT_PATH")
+          REQUESTS=$(jq -r '.inputs.custom_requests // 1' "$GITHUB_EVENT_PATH")
+          validate_count custom_iterations "$ITERATIONS" 2
+          validate_count custom_warmup "$WARMUP" 0
+          validate_count custom_requests "$REQUESTS" 1
+
+          # The suite sources test configs as shell code; only validated integers go into them.
+          SUITE=./php-version-benchmarks
+          cat << EOF > "$SUITE/config/test/custom_php.ini"
+          TEST_NAME="Custom PHP benchmark"
+          TEST_ID=custom_php
+          TEST_WARMUP=$((10#$WARMUP))
+          TEST_ITERATIONS=$((10#$ITERATIONS))
+          TEST_REQUESTS=$((10#$REQUESTS))
+          TEST_TYPE=micro
+          TEST_FILE=app/zend/custom_bench.php
+          EOF
+
+          # Read PHP as data, without interpolating it into shell code.
+          # app/zend is included in the suite's AWS source archive.
+          CODE_FILE="$SUITE/app/zend/custom_bench.php"
+          : > "$CODE_FILE"
+          if ! jq -e '.inputs.custom_code | test("^\\s*<\\?php")' "$GITHUB_EVENT_PATH" > /dev/null; then
+            printf '<?php\n' >> "$CODE_FILE"
+          fi
+          jq -j '.inputs.custom_code' "$GITHUB_EVENT_PATH" >> "$CODE_FILE"
+          printf '\n' >> "$CODE_FILE"
+
+          # Fail before timing if the script cannot run on any of the compared builds.
+          cat << 'EOF' > "$SUITE/config/test/custom_php_pre_init.sh"
+          #!/usr/bin/env bash
+          set -euo pipefail
+          for config in "$PROJECT_ROOT"/config/php/*.ini; do
+            (
+              # shellcheck source=/dev/null
+              source "$config"
+              php_source="$PROJECT_ROOT/tmp/$PHP_ID"
+              php_binary="$php_source/sapi/cgi/php-cgi"
+              opcache=()
+              if [[ -f "$php_source/modules/opcache.so" ]]; then
+                opcache=(-d "zend_extension=$php_source/modules/opcache.so")
+              fi
+              env -i "$php_binary" "${opcache[@]}" -l "$PROJECT_ROOT/app/zend/custom_bench.php"
+              env -i "$php_binary" "${opcache[@]}" -q "$PROJECT_ROOT/app/zend/custom_bench.php"
+            )
+          done
+          EOF
+          chmod +x "$SUITE/config/test/custom_php_pre_init.sh"
+          echo "enabled=true" >> "$GITHUB_OUTPUT"
       - name: Setup benchmark results
         run: |
           git config --global user.name "Benchmark"
@@ -230,6 +317,7 @@ jobs:
             PHP_JIT=${{ env.JIT }}
           EOF
       - name: Setup test config
+        if: steps.custom.outputs.enabled != 'true'
         run: |
           set -e
 
@@ -288,7 +376,14 @@ jobs:
           name: results
           path: |
             ./php-version-benchmarks/tmp/results/${{ env.YEAR }}/**/*
+            ${{ steps.custom.outputs.enabled == 'true' && './php-version-benchmarks/app/zend/custom_bench.php' || '' }}
+            ${{ steps.custom.outputs.enabled == 'true' && './php-version-benchmarks/config/test/custom_php.ini' || '' }}
+            ${{ steps.custom.outputs.enabled == 'true' && './php-version-benchmarks/config/test/custom_php_pre_init.sh' || '' }}
           retention-days: 30
+      - name: Summarize custom benchmark results
+        if: steps.custom.outputs.enabled == 'true'
+        run: |
+          sed "s|#ARTIFACT_URL#|${{ steps.upload.outputs.artifact-url }}|g" "${NEWEST_RESULT_DIRECTORY}result.md" >> "$GITHUB_STEP_SUMMARY"
       - name: Commit results
         if: github.repository == 'php/php-src' && github.event_name != 'workflow_dispatch'
         run: |
@@ -311,7 +406,7 @@ jobs:
           git commit -m "Add result for ${{ github.repository }}@${{ github.sha }}"
           git push
       - name: Comment results
-        if: github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'workflow_dispatch' && steps.custom.outputs.enabled != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
