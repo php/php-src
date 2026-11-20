@@ -347,16 +347,17 @@ static int php_openssl_handle_ssl_error(php_stream *stream, int nr_bytes, bool i
 						smart_str_appends(&ebuf, esbuf);
 					} while ((ecode = ERR_get_error()) != 0);
 
-					smart_str_0(&ebuf);
-
-					php_stream_warn(stream, ProtocolError,
-							"SSL operation failed with code %d. %s%s",
-							err,
-							ebuf.s ? "OpenSSL Error messages:\n" : "",
-							ebuf.s ? ZSTR_VAL(ebuf.s) : "");
-					if (ebuf.s) {
-						smart_str_free(&ebuf);
+					zend_string *openssl_error = smart_str_extract(&ebuf);
+					if (ZSTR_LEN(openssl_error) == 0) {
+						php_stream_warn(stream, ProtocolError,
+								"SSL operation failed with code %d.",
+								err);
+					} else {
+						php_stream_warn(stream, ProtocolError,
+								"SSL operation failed with code %d. OpenSSL Error messages:\n%pS",
+								err, openssl_error);
 					}
+					zend_string_release_ex(openssl_error, false);
 			}
 
 			retry = false;
