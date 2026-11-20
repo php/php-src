@@ -775,13 +775,15 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pdo
 			 * changed from 256 byte to LONG_COLUMN_BUFFER_SIZE.
 			 */
 			ssize_t to_fetch_len;
-			if (orig_fetched_len == SQL_NO_TOTAL && C->datalen > (LONG_COLUMN_BUFFER_SIZE - 1)) {
-				to_fetch_len = C->datalen;
-			} else if (orig_fetched_len > 0) {
+			if (orig_fetched_len > 0) {
 				/* implicitly not SQL_NO_TOTAL, should be OK */
 				to_fetch_len = orig_fetched_len;
 			} else {
-				/* size must be > 0 to actually get data */
+				/* SQL_NO_TOTAL: the total length is unknown, so read block by
+				 * block. C->datalen is the declared size of the column (e.g. 2 GB
+				 * for text), not the size of the value, so it must not be used as
+				 * the allocation size here (GH-25390). The block size must be > 0
+				 * to actually get data (GH-23443). */
 				to_fetch_len = (LONG_COLUMN_BUFFER_SIZE - 1);
 			}
 			ssize_t to_fetch_byte = to_fetch_len + 1;
