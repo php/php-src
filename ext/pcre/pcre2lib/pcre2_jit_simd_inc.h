@@ -766,7 +766,7 @@ if (common->match_end_ptr != 0)
 
 #endif /* SLJIT_CONFIG_X86 */
 
-#if (defined SLJIT_CONFIG_ARM_64 && SLJIT_CONFIG_ARM_64 && (defined __ARM_NEON || defined __ARM_NEON__))
+#if 0
 
 #include <arm_neon.h>
 
