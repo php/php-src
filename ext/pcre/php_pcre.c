@@ -417,7 +417,7 @@ static PHP_MINIT_FUNCTION(pcre)
 #ifdef ZTS
 	ts_allocate_tls_id(&pcre_globals_id, pcre_globals_tls_addr, sizeof(zend_pcre_globals), (ts_allocate_ctor) PHP_GINIT(pcre), (ts_allocate_dtor) PHP_GSHUTDOWN(pcre));
 #else
-	PHP_GINIT(pcre)(&pcre_globals);
+	ZEND_MODULE_GLOBALS_CTOR_N(pcre)(&pcre_globals);
 #endif
 
 #ifdef HAVE_PCRE_JIT_SUPPORT
@@ -446,7 +446,7 @@ static PHP_MSHUTDOWN_FUNCTION(pcre)
 #ifdef ZTS
 	ts_free_id(pcre_globals_id);
 #else
-	PHP_GSHUTDOWN(pcre)(&pcre_globals);
+	ZEND_MODULE_GLOBALS_DTOR_N(pcre)(&pcre_globals);
 #endif
 	UNREGISTER_INI_ENTRIES();
 
