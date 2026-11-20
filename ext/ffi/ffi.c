@@ -7529,8 +7529,19 @@ void zend_ffi_expr_div(zend_ffi_val *val, zend_ffi_val *op2) /* {{{ */
 }
 /* }}} */
 
+static bool zend_ffi_val_is_floating(const zend_ffi_val *val) /* {{{ */
+{
+	return val->kind == ZEND_FFI_VAL_FLOAT || val->kind == ZEND_FFI_VAL_DOUBLE
+		|| val->kind == ZEND_FFI_VAL_LONG_DOUBLE;
+}
+/* }}} */
+
 void zend_ffi_expr_mod(zend_ffi_val *val, zend_ffi_val *op2) /* {{{ */
 {
+	/* the operands of % must have integer type */
+	if (zend_ffi_val_is_floating(val) || zend_ffi_val_is_floating(op2)) {
+		zend_ffi_parser_error("Invalid operand of '%%' in constant expression at line %d", FFI_G(line));
+	}
 	if (zend_ffi_expr_int_div_invalid(val, op2)) {
 		zend_ffi_parser_error("Division by zero or overflow in constant expression at line %d", FFI_G(line));
 	}

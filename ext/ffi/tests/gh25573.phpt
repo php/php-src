@@ -29,6 +29,10 @@ var_dump(size("(1/0) ? 7 : 13"));
 var_dump(size("(1%0) ? 7 : 13"));
 var_dump(size("((-9223372036854775807 - 1) / -1) ? 7 : 13"));
 var_dump(size("(1/2) ? 7 : 13"));
+var_dump(size("(1.0 % 0) ? 7 : 13"));
+var_dump(size("(1 % 0.0) ? 7 : 13"));
+var_dump(size("((-9223372036854775807.0 - 1) % -1) ? 7 : 13"));
+var_dump(size("(7 % 4) ? 7 : 13"));
 ?>
 --EXPECT--
 int(7)
@@ -44,3 +48,7 @@ string(61) "Division by zero or overflow in constant expression at line 1"
 string(61) "Division by zero or overflow in constant expression at line 1"
 string(61) "Division by zero or overflow in constant expression at line 1"
 int(13)
+string(55) "Invalid operand of '%' in constant expression at line 1"
+string(55) "Invalid operand of '%' in constant expression at line 1"
+string(55) "Invalid operand of '%' in constant expression at line 1"
+int(7)
