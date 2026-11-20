@@ -52,8 +52,12 @@ static ssize_t php_stream_memory_write(php_stream *stream, const char *buf, size
 	if (ms->mode & TEMP_STREAM_APPEND) {
 		ms->fpos = data_len;
 	}
-	if (ms->fpos + count > data_len) {
-		zend_string *grown = zend_string_frealloc(ms->data, ms->fpos + count, 0, /* fallible */ true);
+	if (UNEXPECTED(count > SIZE_MAX - ms->fpos)) {
+		return (ssize_t) -1;
+	}
+	size_t new_pos = ms->fpos + count;
+	if (new_pos > data_len) {
+		zend_string *grown = zend_string_frealloc(ms->data, new_pos, 0, /* fallible */ true);
 		if (UNEXPECTED(!grown)) {
 			return (ssize_t) -1;
 		}
@@ -69,7 +73,7 @@ static ssize_t php_stream_memory_write(php_stream *stream, const char *buf, size
 		ZEND_ASSERT(buf != NULL);
 		memcpy(ZSTR_VAL(ms->data) + ms->fpos, (char*) buf, count);
 		ZSTR_VAL(ms->data)[ZSTR_LEN(ms->data)] = '\0';
-		ms->fpos += count;
+		ms->fpos = new_pos;
 	}
 	return count;
 }
@@ -142,9 +146,12 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 					return 0;
 				}
 			} else {
+				if (UNEXPECTED((size_t)offset > ZEND_LONG_MAX - ms->fpos)) {
+					return -1;
+				}
 				stream->eof = 0;
 				stream->fatal_error = 0;
-				ms->fpos = ms->fpos + offset;
+				ms->fpos += (size_t)offset;
 				*newoffs = ms->fpos;
 				return 0;
 			}
@@ -154,7 +161,7 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 				*newoffs = -1;
 				return -1;
 			} else {
-				ms->fpos = offset;
+				ms->fpos = (size_t)offset;
 				*newoffs = ms->fpos;
 				stream->eof = 0;
 				stream->fatal_error = 0;
@@ -162,7 +169,10 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 			}
 		case SEEK_END:
 			if (offset > 0) {
-				ms->fpos = ZSTR_LEN(ms->data) + offset;
+				if (UNEXPECTED((size_t)offset > ZEND_LONG_MAX - ZSTR_LEN(ms->data))) {
+					return -1;
+				}
+				ms->fpos = ZSTR_LEN(ms->data) + (size_t)offset;
 				*newoffs = ms->fpos;
 				stream->eof = 0;
 				stream->fatal_error = 0;
@@ -459,7 +469,6 @@ static int php_stream_temp_seek(php_stream *stream, zend_off_t offset, int whenc
 	assert(ts != NULL);
 
 	if (!ts->innerstream) {
-		*newoffs = -1;
 		return -1;
 	}
 	ret = php_stream_seek(ts->innerstream, offset, whence);
