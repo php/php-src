@@ -3638,7 +3638,7 @@ PHP_FUNCTION(pg_unescape_bytea)
 
 	tmp = (char *)PQunescapeBytea((unsigned char*)from, &to_len);
 	if (!tmp) {
-		zend_error_noreturn(E_ERROR, "Out of memory");
+		zend_mm_unrecoverable_error("Out of memory");
 	}
 
 	RETVAL_STRINGL(tmp, to_len);
@@ -3822,7 +3822,7 @@ PHP_FUNCTION(pg_connection_reset)
 	pgsql = link->conn;
 
 	PQreset(pgsql);
-	
+
 	RETURN_BOOL(PQstatus(pgsql) != CONNECTION_BAD);
 }
 /* }}} */
@@ -5124,7 +5124,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 				PGSQL_CONV_CHECK_IGNORE();
 				if (err) {
 					if (escape_err) {
-						php_error_docref(NULL, E_NOTICE, 
+						php_error_docref(NULL, E_NOTICE,
 							"String value escaping failed for PostgreSQL '%pS' (%pS)",
 							Z_STR_P(type), field);
 					} else {
