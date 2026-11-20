@@ -381,6 +381,8 @@ ZEND_COLD void zend_mm_oom_info_dtor(zend_oom_info *info);
 ZEND_API void zend_mm_set_max_allocs(uint64_t max_allocs);
 ZEND_API bool zend_mm_max_allocs_hit(void);
 
+ZEND_NORETURN ZEND_API ZEND_COLD void zend_mm_unrecoverable_error(const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 1, 2);
+
 /*
 
 // The following example shows how to use zend_mm_heap API with custom storage

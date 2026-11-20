@@ -480,10 +480,18 @@ ZEND_COLD void zend_mm_oom_info_dtor(zend_oom_info *info)
 	}
 }
 
-#ifdef ZEND_MM_LIMIT
-ZEND_NORETURN static ZEND_COLD void zend_mm_hard_limit_error(zend_mm_heap *heap,
-		size_t add_size ZEND_FILE_LINE_DC)
+ZEND_NORETURN ZEND_API ZEND_COLD void zend_mm_unrecoverable_error(const char *format, ...)
 {
+	va_list args;
+	va_start(args, format);
+
+	char buf[1024];
+	if (vsnprintf(buf, sizeof(buf), format, args) < 0) {
+		abort();
+	}
+
+	va_end(args);
+
 	zend_string *script_filename = NULL;
 	uint32_t script_lineno = 0;
 
@@ -500,24 +508,25 @@ ZEND_NORETURN static ZEND_COLD void zend_mm_hard_limit_error(zend_mm_heap *heap,
 		script_lineno = 0;
 	}
 
-	fprintf(stderr,
+	fprintf(stderr, "%s in %s on line %" PRIu32 "\n", buf, ZSTR_VAL(script_filename), script_lineno);
+	fflush(stderr);
+
+	_exit(137);
+}
+
+#ifdef ZEND_MM_LIMIT
+ZEND_NORETURN static ZEND_COLD void zend_mm_hard_limit_error(zend_mm_heap *heap,
+		size_t add_size ZEND_FILE_LINE_DC)
+{
+	zend_mm_unrecoverable_error(
 # if ZEND_DEBUG
-			"Hard memory limit of %zu bytes exhausted at %s:%d (tried to allocate %zu bytes) in %s on line %d\n",
+			"Hard memory limit of %zu bytes exhausted at %s:%d (tried to allocate %zu bytes)",
 # else
-			"Hard memory limit of %zu bytes exhausted (tried to allocate %zu bytes) in %s on line %d\n",
+			"Hard memory limit of %zu bytes exhausted (tried to allocate %zu bytes)",
 # endif
 			heap->hard_limit
 			ZEND_FILE_LINE_RELAY_CC,
-			add_size,
-			ZSTR_VAL(script_filename),
-			script_lineno);
-
-	/* See http://support.microsoft.com/kb/190351 */
-# ifdef ZEND_WIN32
-	fflush(stderr);
-# endif
-
-	_exit(137);
+			add_size);
 }
 #endif /* ZEND_MM_LIMIT */
 

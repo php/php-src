@@ -83,7 +83,7 @@ static zend_always_inline void* zend_arena_calloc(zend_arena **arena_ptr, size_t
 
 	size = zend_safe_address(unit_size, count, 0, &overflow);
 	if (UNEXPECTED(overflow)) {
-		zend_error_noreturn(E_ERROR, "Possible integer overflow in zend_arena_calloc() (%zu * %zu)", unit_size, count);
+		zend_mm_unrecoverable_error("Possible integer overflow in zend_arena_calloc() (%zu * %zu)", unit_size, count);
 	}
 	ret = zend_arena_alloc(arena_ptr, size);
 	memset(ret, 0, size);
@@ -179,7 +179,7 @@ static zend_always_inline void* zend_arena_calloc(zend_arena **arena_ptr, size_t
 
 	size = zend_safe_address(unit_size, count, 0, &overflow);
 	if (UNEXPECTED(overflow)) {
-		zend_error_noreturn(E_ERROR, "Possible integer overflow in zend_arena_calloc() (%zu * %zu)", unit_size, count);
+		zend_mm_unrecoverable_error("Possible integer overflow in zend_arena_calloc() (%zu * %zu)", unit_size, count);
 	}
 	ret = zend_arena_alloc(arena_ptr, size);
 	memset(ret, 0, size);
