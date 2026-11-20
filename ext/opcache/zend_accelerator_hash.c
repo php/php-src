@@ -33,7 +33,7 @@ void zend_accel_hash_clean(zend_accel_hash *accel_hash)
 {
 	accel_hash->num_entries = 0;
 	accel_hash->num_direct_entries = 0;
-	memset(accel_hash->hash_table, 0, sizeof(zend_accel_hash_entry *)*accel_hash->max_num_entries);
+	memset(accel_hash->hash_table, 0, sizeof(*accel_hash->hash_table)*accel_hash->max_num_entries);
 }
 
 void zend_accel_hash_init(zend_accel_hash *accel_hash, uint32_t hash_size)
@@ -52,7 +52,7 @@ void zend_accel_hash_init(zend_accel_hash *accel_hash, uint32_t hash_size)
 	accel_hash->max_num_entries = hash_size;
 
 	/* set up hash pointers table */
-	accel_hash->hash_table = zend_shared_alloc(sizeof(zend_accel_hash_entry *)*accel_hash->max_num_entries);
+	accel_hash->hash_table = zend_shared_alloc(sizeof(*accel_hash->hash_table)*accel_hash->max_num_entries);
 	if (!accel_hash->hash_table) {
 		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Insufficient shared memory!");
 		return;
@@ -64,7 +64,7 @@ void zend_accel_hash_init(zend_accel_hash *accel_hash, uint32_t hash_size)
 		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Insufficient shared memory!");
 		return;
 	}
-	memset(accel_hash->hash_table, 0, sizeof(zend_accel_hash_entry *)*accel_hash->max_num_entries);
+	memset(accel_hash->hash_table, 0, sizeof(*accel_hash->hash_table)*accel_hash->max_num_entries);
 }
 
 /* Returns NULL if hash is full
@@ -78,10 +78,12 @@ zend_accel_hash_entry* zend_accel_hash_update(zend_accel_hash *accel_hash, zend_
 	zend_accel_hash_entry *entry;
 	zend_accel_hash_entry *indirect_bucket = NULL;
 
+	ZEND_ASSERT(data != NULL && !((uintptr_t)data & ZEND_ACCEL_HASH_INDIRECT));
 	if (indirect) {
+		uintptr_t target;
 		indirect_bucket = (zend_accel_hash_entry*)data;
-		while (indirect_bucket->indirect) {
-			indirect_bucket = (zend_accel_hash_entry*)indirect_bucket->data;
+		while ((target = zend_accel_hash_load_data(indirect_bucket)) & ZEND_ACCEL_HASH_INDIRECT) {
+			indirect_bucket = zend_accel_hash_indirect_target(target);
 		}
 	}
 
@@ -92,25 +94,29 @@ zend_accel_hash_entry* zend_accel_hash_update(zend_accel_hash *accel_hash, zend_
 	index = hash_value % accel_hash->max_num_entries;
 
 	/* try to see if the element already exists in the hash */
-	entry = accel_hash->hash_table[index];
+	entry = zend_accel_hash_load_entry(&accel_hash->hash_table[index]);
 	while (entry) {
 		if (entry->hash_value == hash_value
 		 && zend_string_equals(entry->key, key)) {
+			uintptr_t old_data = zend_accel_hash_load_data(entry);
 
-			if (entry->indirect) {
-				if (indirect_bucket) {
-					entry->data = indirect_bucket;
-				} else {
-					((zend_accel_hash_entry*)entry->data)->data = data;
+			if (indirect_bucket) {
+				/* The target was resolved under the writer lock. Do not create
+				 * a self-reference when an existing alias resolves back to us. */
+				if (indirect_bucket != entry) {
+					if (!(old_data & ZEND_ACCEL_HASH_INDIRECT)) {
+						accel_hash->num_direct_entries--;
+					}
+					zend_accel_hash_store_data(entry,
+						(uintptr_t)indirect_bucket | ZEND_ACCEL_HASH_INDIRECT);
 				}
 			} else {
-				if (indirect_bucket) {
-					accel_hash->num_direct_entries--;
-					entry->data = indirect_bucket;
-					entry->indirect = 1;
-				} else {
-					entry->data = data;
+				zend_accel_hash_entry *target = entry;
+				while (old_data & ZEND_ACCEL_HASH_INDIRECT) {
+					target = zend_accel_hash_indirect_target(old_data);
+					old_data = zend_accel_hash_load_data(target);
 				}
+				zend_accel_hash_store_data(target, (uintptr_t)data);
 			}
 			return entry;
 		}
@@ -124,17 +130,16 @@ zend_accel_hash_entry* zend_accel_hash_update(zend_accel_hash *accel_hash, zend_
 
 	entry = &accel_hash->hash_entries[accel_hash->num_entries++];
 	if (indirect) {
-		entry->data = indirect_bucket;
-		entry->indirect = 1;
+		entry->data = (uintptr_t)indirect_bucket | ZEND_ACCEL_HASH_INDIRECT;
 	} else {
 		accel_hash->num_direct_entries++;
-		entry->data = data;
-		entry->indirect = 0;
+		entry->data = (uintptr_t)data;
 	}
 	entry->hash_value = hash_value;
 	entry->key = key;
-	entry->next = accel_hash->hash_table[index];
-	accel_hash->hash_table[index] = entry;
+	entry->next = zend_accel_hash_load_entry(&accel_hash->hash_table[index]);
+	/* Publish only after both the entry and its referenced data are ready. */
+	zend_accel_hash_store_entry(&accel_hash->hash_table[index], entry);
 	return entry;
 }
 
@@ -150,23 +155,15 @@ static zend_always_inline void* zend_accel_hash_find_ex(zend_accel_hash *accel_h
 #endif
 	index = hash_value % accel_hash->max_num_entries;
 
-	entry = accel_hash->hash_table[index];
+	entry = zend_accel_hash_load_entry(&accel_hash->hash_table[index]);
 	while (entry) {
 		if (entry->hash_value == hash_value
 		 && zend_string_equals(entry->key, key)) {
-			if (entry->indirect) {
-				if (data) {
-					return ((zend_accel_hash_entry*)entry->data)->data;
-				} else {
-					return entry->data;
-				}
-			} else {
-				if (data) {
-					return entry->data;
-				} else {
-					return entry;
-				}
+			uintptr_t value;
+			while ((value = zend_accel_hash_load_data(entry)) & ZEND_ACCEL_HASH_INDIRECT) {
+				entry = zend_accel_hash_indirect_target(value);
 			}
+			return data ? (void *)value : entry;
 		}
 		entry = entry->next;
 	}
@@ -187,36 +184,4 @@ void* zend_accel_hash_find(zend_accel_hash *accel_hash, zend_string *key)
 zend_accel_hash_entry* zend_accel_hash_find_entry(zend_accel_hash *accel_hash, zend_string *key)
 {
 	return (zend_accel_hash_entry *)zend_accel_hash_find_ex(accel_hash, key, 0);
-}
-
-int zend_accel_hash_unlink(zend_accel_hash *accel_hash, zend_string *key)
-{
-	zend_ulong hash_value;
-	zend_ulong index;
-	zend_accel_hash_entry *entry, *last_entry=NULL;
-
-	hash_value = zend_string_hash_val(key);
-#ifndef ZEND_WIN32
-	hash_value ^= ZCG(root_hash);
-#endif
-	index = hash_value % accel_hash->max_num_entries;
-
-	entry = accel_hash->hash_table[index];
-	while (entry) {
-		if (entry->hash_value == hash_value
-		 && zend_string_equals(entry->key, key)) {
-			if (!entry->indirect) {
-				accel_hash->num_direct_entries--;
-			}
-			if (last_entry) {
-				last_entry->next = entry->next;
-			} else {
-				accel_hash->hash_table[index] = entry->next;
-			}
-			return SUCCESS;
-		}
-		last_entry = entry;
-		entry = entry->next;
-	}
-	return FAILURE;
 }
