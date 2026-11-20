@@ -1987,6 +1987,7 @@ use_process_mem:
 		ZCSG(map_ptr_last) = CG(map_ptr_last);
 		zend_accel_pending_ce_cache_commit();
 		script->dynamic_members.last_used = ZCG(request_time);
+		script->dynamic_members.memory_consumption = ZEND_ALIGNED_SIZE(script->size);
 
 		zend_accel_hash_update(&ZCSG(hash), script->script.filename, 0, script);
 
