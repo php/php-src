@@ -20,6 +20,7 @@
 #include "Zend/zend_exceptions.h"
 
 #include <uriparser/Uri.h>
+#include "uriparser/src/UriSets.h"
 
 struct php_uri_parser_rfc3986_uris {
 	UriUriA uri;
@@ -796,6 +797,117 @@ ZEND_ATTRIBUTE_NONNULL static zend_string *php_uri_parser_rfc3986_to_string(void
 	return uri_string;
 }
 
+zend_string *php_uri_parser_rfc3986_query_component_percent_decode(const char *str, const size_t str_length, const bool plus_to_space)
+{
+	if (UNEXPECTED(str == NULL)) {
+		return NULL;
+	}
+
+	if (UNEXPECTED(str_length == 0)) {
+		return zend_empty_string;
+	}
+
+	const bool needs_decoding = memchr(str, '%', str_length) != NULL
+		|| (plus_to_space && memchr(str, '+', str_length) != NULL);
+	if (EXPECTED(!needs_decoding)) {
+		return zend_string_init(str, str_length, false);
+	}
+
+	zend_string *result = zend_string_alloc(str_length, false);
+
+	memcpy(ZSTR_VAL(result), str, str_length);
+	ZSTR_VAL(result)[str_length] = '\0';
+
+	const char *end = uriUnescapeInPlaceEx2A(
+		ZSTR_VAL(result), ZSTR_VAL(result) + str_length, plus_to_space, URI_BR_DONT_TOUCH);
+
+	ZSTR_LEN(result) = (size_t)(end - ZSTR_VAL(result));
+
+	return result;
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_rfc3986_query_component_percent_encode(const char *str, const size_t str_length, const bool space_to_plus)
+{
+	/* An RFC 1866 line break can expand to "%0D%0A". */
+	zend_string *result = zend_string_safe_alloc(space_to_plus ? 6 : 3, str_length, 0, false);
+
+	char *end;
+
+	if (space_to_plus) {
+		end = uriEscapeQueryRfc1866ExA(str, str + str_length, ZSTR_VAL(result));
+	} else {
+		end = uriEscapeQueryRfc3986ExA(str, str + str_length, ZSTR_VAL(result));
+
+		/* The generic query encoder leaves parameter delimiters unescaped. */
+		size_t delimiter_count = 0;
+		for (const char *p = ZSTR_VAL(result); p < end; p++) {
+			delimiter_count += *p == '&' || *p == '=';
+		}
+		if (delimiter_count != 0) {
+			/* Expand backwards within the already allocated worst-case buffer. */
+			char *read = end;
+			end += 2 * delimiter_count;
+			char *write = end;
+			*write = '\0';
+			while (read > ZSTR_VAL(result)) {
+				const char c = *--read;
+				if (c == '&' || c == '=') {
+					write -= 3;
+					memcpy(write, c == '&' ? "%26" : "%3D", 3);
+				} else {
+					*--write = c;
+				}
+			}
+		}
+	}
+
+	ZSTR_LEN(result) = (size_t)(end - ZSTR_VAL(result));
+
+	return result;
+}
+
+ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_rfc3986_query_component_append_to_string(
+	 const zend_string *component, const bool space_to_plus, smart_str *buf
+) {
+	const bool needs_percent_encoding = true; // TODO
+	if (UNEXPECTED(needs_percent_encoding)) {
+		zend_string *encoded = php_uri_parser_rfc3986_query_component_percent_encode(ZSTR_VAL(component), ZSTR_LEN(component), space_to_plus);
+		smart_str_append(buf, encoded);
+		zend_string_release(encoded);
+	} else {
+		smart_str_appendl(buf, ZSTR_VAL(component), ZSTR_LEN(component));
+	}
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_rfc3986_query_params_to_string(
+	const php_uri_query_params_object *query_params_object, const bool space_to_plus
+) {
+	smart_str buf = {0};
+	bool is_first = true;
+
+	ZEND_HASH_FOREACH_PTR(&query_params_object->entry_list, php_uri_query_param_list_entry *entry) {
+		const zend_string *name = entry->key;
+		const zend_string *value = entry->value;
+
+		if (name == NULL) {
+			continue;
+		}
+
+		if (!is_first) {
+			smart_str_appendc(&buf, '&');
+		}
+		is_first = false;
+
+		php_uri_parser_rfc3986_query_component_append_to_string(name, space_to_plus, &buf);
+		if (value != NULL) {
+			smart_str_appendc(&buf, '=');
+			php_uri_parser_rfc3986_query_component_append_to_string(value, space_to_plus, &buf);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return buf.s != NULL ? smart_str_extract(&buf) : ZSTR_EMPTY_ALLOC();
+}
+
 static void php_uri_parser_rfc3986_destroy(void *uri)
 {
 	php_uri_parser_rfc3986_uris *uriparser_uris = uri;
@@ -896,11 +1008,57 @@ ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_path_validate(const ze
 	return php_uri_parser_rfc3986_validate_component_result(well_formed, "path");
 }
 
+ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc1866_query_is_well_formed(const char *query, const size_t query_length)
+{
+	const char *first = query;
+	const char *after_last = first + query_length;
+
+	while (first < after_last) {
+		switch (first[0]) {
+			case URI_SET_UNRESERVED():
+			case '+':
+			case '&':
+			case '=':
+				break;
+
+				/* pct-encoded */
+			case '%':
+				if (after_last - first < 3) {
+					return false;
+				}
+				switch (first[1]) {
+					case URI_SET_HEXDIG():
+						break;
+					default:
+						return false;
+				}
+				switch (first[2]) {
+					case URI_SET_HEXDIG():
+						break;
+					default:
+						return false;
+				}
+				first += 2;
+				break;
+
+			default:
+				return false;
+		}
+
+		first++;
+	}
+
+	return true;
+}
+
+ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_query_is_well_formed(const char *query, const size_t query_length)
+{
+	return uriIsWellFormedQueryA(query, query + query_length) == URI_TRUE;
+}
+
 ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_query_validate(const zend_string *query)
 {
-	const char *p = ZSTR_VAL(query);
-	const size_t len = ZSTR_LEN(query);
-	const bool well_formed = uriIsWellFormedQueryA(p, p + len);
+	const bool well_formed = php_uri_parser_rfc3986_query_is_well_formed(ZSTR_VAL(query), ZSTR_LEN(query));
 
 	return php_uri_parser_rfc3986_validate_component_result(well_formed, "query");
 }

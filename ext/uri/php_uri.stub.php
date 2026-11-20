@@ -21,10 +21,81 @@ namespace Uri {
     {
     }
 
+    /** @strict-properties */
+    class InvalidQueryParamsException extends \Uri\UriException
+    {
+    }
+
     enum UriComparisonMode
     {
         case IncludeFragment;
         case ExcludeFragment;
+    }
+
+    /** @strict-properties */
+    final readonly class QueryParams implements \IteratorAggregate, \Countable
+    {
+        public static function parseRfc1866(string $queryString, int $maxParamCount = 1000): \Uri\QueryParams {}
+
+        public static function parseRfc3986(string $queryString, int $maxParamCount = 1000): \Uri\QueryParams {}
+
+        public static function parseWhatWgUrlSearchParams(string $queryString, int $maxParamCount = 1000): \Uri\QueryParams {}
+
+        public static function fromArray(array $queryParams): \Uri\QueryParams {}
+
+        public static function fromList(array $queryParams): \Uri\QueryParams {}
+
+        public function __construct() {}
+
+        public function has(string $name): bool {}
+
+        public function hasValue(string $name, string|int|float|\BackedEnum|null $value): bool {}
+
+        public function getFirst(string $name): ?string {}
+
+        public function getLast(string $name): ?string {}
+
+        public function getAll(string $name): array {}
+
+        public function getIterator(): \Traversable {}
+
+        public function count(): int {}
+
+        #[\NoDiscard]
+        public function append(string $name, string|int|float|\BackedEnum|null $value): static {}
+
+        #[\NoDiscard]
+        public function set(string $name, string|int|float|\BackedEnum|null $value): static {}
+
+        #[\NoDiscard]
+        public function delete(string $name): static {}
+
+        #[\NoDiscard]
+        public function deleteValue(string $name, string|int|float|\BackedEnum|null $value): static {}
+
+        #[\NoDiscard]
+        public function sortByBytes(): static {}
+
+        #[\NoDiscard]
+        public function sortByUtf16(): static {}
+
+        public function withArray(array $queryParams): static {}
+
+        public function toList(): array {}
+
+        public function toArray(int $maxNestingLevel = 64): array {}
+
+        public function toRfc1866String(): string {}
+
+        public function toRfc3986String(): string {}
+
+        public function toWhatWgUrlString(): string {}
+
+        public function __serialize(): array {}
+
+        public function __unserialize(array $data): void {}
+
+        public function __debugInfo(): array {}
     }
 }
 
@@ -126,7 +197,11 @@ namespace Uri\Rfc3986 {
 
         public function getRawQuery(): ?string {}
 
+        public function getQueryParams(int $maxParamCount = 1000): ?\Uri\QueryParams {}
+
         public function withQuery(?string $query): static {}
+
+        public function withQueryParams(?\Uri\QueryParams $queryParams): static {}
 
         public function getFragment(): ?string {}
 
@@ -293,8 +368,12 @@ namespace Uri\WhatWg {
         /** @implementation-alias Uri\Rfc3986\Uri::getQuery */
         public function getQuery(): ?string {}
 
+        public function getQueryParams(int $maxParamCount = 1000): ?\Uri\QueryParams {}
+
         /** @implementation-alias Uri\Rfc3986\Uri::withQuery */
         public function withQuery(?string $query): static {}
+
+        public function withQueryParams(?\Uri\QueryParams $queryParams): static {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::getFragment */
         public function getFragment(): ?string {}

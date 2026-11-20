@@ -442,6 +442,116 @@ URI_PUBLIC URI_CHAR * URI_FUNC(Escape)(const URI_CHAR * in, URI_CHAR * out,
         UriBool spaceToPlus, UriBool normalizeBreaks);
 
 /**
+ * Percent-encodes the input string according to the
+ * application/x-www-form-urlencoded format defined in RFC 1866, converting
+ * spaces to '+', normalizing line breaks to CR-LF pairs, and encoding all
+ * characters outside the unreserved set, then writes the result to the
+ * output string.
+ *
+ * NOTE: Be sure to allocate <b>6 times</b> the space of the input buffer for
+ * the output buffer (since e.g. "\x0d" becomes "%0D%0A" in that case).
+ *
+ * NOTE: The implementation treats (both <c>char</c> and) <c>wchar_t</c> units
+ * as code point integers, which works well for code points <c>U+0001</c> to <c>U+00ff</c>
+ * in host-native endianness but nothing more;
+ * in particular, using <c>uriEscapeQueryRfc1866ExW</c> with arbitrary Unicode input will
+ * not produce healthy results.
+ * Passing UTF-8 input to <c>uriEscapeQueryRfc1866ExA</c> may be useful in some scenarios.
+ * Keep in mind that uriparser is about %URI (RFC 3986) not %IRI (RFC 3987).
+ *
+ * @param inFirst           <b>IN</b>: Pointer to first character of the input text
+ * @param inAfterLast       <b>IN</b>: Pointer after the last character of the input text
+ * @param out               <b>OUT</b>: Encoded text destination
+ * @return                  Position of terminator in output string
+ *
+ * @see uriEscapeQueryRfc1866A
+ * @see uriUnescapeInPlaceExA
+ * @since 1.0.3
+ */
+URI_PUBLIC URI_CHAR * URI_FUNC(EscapeQueryRfc1866Ex)(
+        const URI_CHAR * inFirst, const URI_CHAR * inAfterLast, URI_CHAR * out);
+
+/**
+ * Percent-encodes the input string according to the
+ * application/x-www-form-urlencoded format defined in RFC 1866, converting
+ * spaces to '+', normalizing line breaks to CR-LF pairs, and encoding all
+ * characters outside the unreserved set, then writes the result to the
+ * output string.
+ *
+ * NOTE: Be sure to allocate <b>6 times</b> the space of the input buffer for
+ * the output buffer (since e.g. "\x0d" becomes "%0D%0A" in that case).
+ *
+ * NOTE: The implementation treats (both <c>char</c> and) <c>wchar_t</c> units
+ * as code point integers, which works well for code points <c>U+0001</c> to <c>U+00ff</c>
+ * in host-native endianness but nothing more;
+ * in particular, using <c>uriEscapeQueryRfc1866W</c> with arbitrary Unicode input will
+ * not produce healthy results.
+ * Passing UTF-8 input to <c>uriEscapeQueryRfc1866A</c> may be useful in some scenarios.
+ * Keep in mind that uriparser is about %URI (RFC 3986) not %IRI (RFC 3987).
+ *
+ * @param in                <b>IN</b>: Text source
+ * @param out               <b>OUT</b>: Encoded text destination
+ * @return                  Position of terminator in output string
+ *
+ * @see uriEscapeQueryRfc1866ExA
+ * @see uriUnescapeInPlaceA
+ * @since 1.0.3
+ */
+URI_PUBLIC URI_CHAR * URI_FUNC(EscapeQueryRfc1866)(const URI_CHAR * in, URI_CHAR * out);
+
+/**
+ * Percent-encodes the input string according to RFC 3986 (i.e. encoding all characters
+ * outside "pchar", "/" and "?"), then writes the result to the output string.
+ *
+ * NOTE: Be sure to allocate <b>3 times</b> the space of the input buffer for
+ * the output buffer.
+ *
+ * NOTE: The implementation treats (both <c>char</c> and) <c>wchar_t</c> units
+ * as code point integers, which works well for code points <c>U+0001</c> to <c>U+00ff</c>
+ * in host-native endianness but nothing more;
+ * in particular, using <c>uriEscapeQueryRfc3986ExW</c> with arbitrary Unicode input will
+ * not produce healthy results.
+ * Passing UTF-8 input to <c>uriEscapeQueryRfc3986ExA</c> may be useful in some scenarios.
+ * Keep in mind that uriparser is about %URI (RFC 3986) not %IRI (RFC 3987).
+ *
+ * @param inFirst           <b>IN</b>: Pointer to first character of the input text
+ * @param inAfterLast       <b>IN</b>: Pointer after the last character of the input text
+ * @param out               <b>OUT</b>: Encoded text destination
+ * @return                  Position of terminator in output string
+ *
+ * @see uriEscapeQueryRfc3986A
+ * @see uriUnescapeInPlaceExA
+ * @since 1.0.3
+ */
+URI_PUBLIC URI_CHAR * URI_FUNC(EscapeQueryRfc3986Ex)(
+        const URI_CHAR * inFirst, const URI_CHAR * inAfterLast, URI_CHAR * out);
+
+/**
+ * Percent-encodes the input string according to RFC 3986 (i.e. encoding all characters
+ * outside "pchar", "/" and "?"), then writes the result to the output string.
+ *
+ * NOTE: Be sure to allocate <b>3 times</b> the space of the input buffer for
+ * the output buffer.
+ *
+ * NOTE: The implementation treats (both <c>char</c> and) <c>wchar_t</c> units
+ * as code point integers, which works well for code points <c>U+0001</c> to <c>U+00ff</c>
+ * in host-native endianness but nothing more;
+ * in particular, using <c>uriEscapeQueryRfc3986W</c> with arbitrary Unicode input will
+ * not produce healthy results.
+ * Passing UTF-8 input to <c>uriEscapeQueryRfc3986A</c> may be useful in some scenarios.
+ * Keep in mind that uriparser is about %URI (RFC 3986) not %IRI (RFC 3987).
+ *
+ * @param in                <b>IN</b>: Text source
+ * @param out               <b>OUT</b>: Encoded text destination
+ * @return                  Position of terminator in output string
+ *
+ * @see uriEscapeQueryRfc3986ExA
+ * @see uriUnescapeInPlaceA
+ * @since 1.0.3
+ */
+URI_PUBLIC URI_CHAR * URI_FUNC(EscapeQueryRfc3986)(const URI_CHAR * in, URI_CHAR * out);
+
+/**
  * Unescapes percent-encoded groups in a given string.
  * E.g. "%20" will become " ". Unescaping is done in place.
  * The return value will be point to the new position
@@ -460,6 +570,26 @@ URI_PUBLIC URI_CHAR * URI_FUNC(Escape)(const URI_CHAR * in, URI_CHAR * out,
  */
 URI_PUBLIC const URI_CHAR * URI_FUNC(UnescapeInPlaceEx)(
         URI_CHAR * inout, UriBool plusToSpace, UriBreakConversion breakConversion);
+
+/**
+ * Unescapes percent-encoded groups in place, optionally using an explicit
+ * input end pointer. If inAfterLast is not NULL, embedded zero characters
+ * are preserved and decoding continues up to inAfterLast.
+ * The buffer must have room for a terminating zero at inAfterLast, which
+ * is written at the end of the decoded output. Use the returned pointer
+ * to determine the output length, including any embedded zero characters.
+ *
+ * @param inout             <b>INOUT</b>: Text to unescape/decode
+ * @param inAfterLast       <b>IN</b>: Pointer after the last input character, or NULL for zero-terminated input
+ * @param plusToSpace       <b>IN</b>: Whether to convert '+' to ' ' or not
+ * @param breakConversion   <b>IN</b>: Line break conversion mode
+ * @return                  Pointer to the terminating zero, or NULL if inout is NULL
+ *
+ * @see uriUnescapeInPlaceExA
+ */
+URI_PUBLIC const URI_CHAR *
+    URI_FUNC(UnescapeInPlaceEx2)(URI_CHAR * inout, const URI_CHAR * inAfterLast,
+                                 UriBool plusToSpace, UriBreakConversion breakConversion);
 
 /**
  * Unescapes percent-encoded groups in a given string.
