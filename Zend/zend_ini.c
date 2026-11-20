@@ -200,7 +200,7 @@ ZEND_API void zend_ini_sort_entries(void) /* {{{ */
 /*
  * Registration / unregistration
  */
-ZEND_API zend_result zend_register_ini_entries_ex(const zend_ini_entry_def *ini_entry, int module_number, int module_type)
+ZEND_API zend_result zend_register_ini_entries_ex(const zend_ini_entry_def *ini_entry, int module_number, zend_module_type module_type)
 {
 	zend_ini_entry *p;
 	zval *default_value;
@@ -282,7 +282,7 @@ ZEND_API zend_result zend_register_ini_entries(const zend_ini_entry_def *ini_ent
 }
 /* }}} */
 
-ZEND_API void zend_unregister_ini_entries_ex(int module_number, int module_type)
+ZEND_API void zend_unregister_ini_entries_ex(int module_number, zend_module_type module_type)
 {
 	HashTable *ini_directives;
 

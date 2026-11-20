@@ -17,7 +17,7 @@
 #ifndef DL_H
 #define DL_H
 
-PHPAPI zend_result php_load_extension(const char *filename, int type, bool start_now);
+PHPAPI zend_result php_load_extension(const char *filename, zend_module_type type, bool start_now);
 PHPAPI void *php_load_shlib(const char *path, char **errp);
 
 /* dynamic loading functions */

@@ -23,9 +23,9 @@
 #include "zend_compile.h"
 #include "zend_build.h"
 
-#define INIT_FUNC_ARGS		int type, int module_number
+#define INIT_FUNC_ARGS		zend_module_type type, int module_number
 #define INIT_FUNC_ARGS_PASSTHRU	type, module_number
-#define SHUTDOWN_FUNC_ARGS	int type, int module_number
+#define SHUTDOWN_FUNC_ARGS	zend_module_type type, int module_number
 #define SHUTDOWN_FUNC_ARGS_PASSTHRU type, module_number
 #define ZEND_MODULE_INFO_FUNC_ARGS zend_module_entry *zend_module
 #define ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU zend_module
@@ -65,8 +65,10 @@
 
 #define NO_VERSION_YET NULL
 
-#define MODULE_PERSISTENT 1
-#define MODULE_TEMPORARY 2
+C23_ENUM(zend_module_type, uint8_t) {
+	MODULE_PERSISTENT = 1,
+	MODULE_TEMPORARY  = 2,
+};
 
 struct _zend_ini_entry;
 typedef struct _zend_module_entry zend_module_entry;
@@ -98,15 +100,17 @@ struct _zend_module_entry {
 	zend_result (*post_deactivate_func)(void);
 	void (*child_init_func)(void);
 	int module_started;
-	unsigned char type;
+	zend_module_type type;
 	void *handle;
 	int module_number;
 	const char *build_id;
 };
 
-#define MODULE_DEP_REQUIRED		1
-#define MODULE_DEP_CONFLICTS	2
-#define MODULE_DEP_OPTIONAL		3
+C23_ENUM(zend_module_dependency_type, uint8_t) {
+	MODULE_DEP_REQUIRED	 = 1,
+	MODULE_DEP_CONFLICTS = 2,
+	MODULE_DEP_OPTIONAL	 = 3,
+};
 
 #define ZEND_MOD_REQUIRED_EX(name, rel, ver)	{ name, rel, ver, MODULE_DEP_REQUIRED  },
 #define ZEND_MOD_CONFLICTS_EX(name, rel, ver)	{ name, rel, ver, MODULE_DEP_CONFLICTS },
@@ -122,7 +126,7 @@ struct _zend_module_dep {
 	const char *name;		/* module name */
 	const char *rel;		/* version relationship: NULL (exists), lt|le|eq|ge|gt (to given version) */
 	const char *version;	/* version */
-	unsigned char type;		/* dependency type */
+	zend_module_dependency_type type; /* dependency type */
 };
 
 BEGIN_EXTERN_C()
