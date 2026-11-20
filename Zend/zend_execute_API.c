@@ -1205,6 +1205,145 @@ ZEND_API void zend_call_known_instance_method_with_2_params(
 	zend_call_known_instance_method(fn, this_ptr, retval_ptr, 2, params);
 }
 
+static zend_always_inline zend_result zend_call_known_function_with_2_params(
+		const zend_fcall_info_cache *fcc, zval *retval_ptr, zval *arg1, zval *arg2, bool internal)
+{
+	zval unused_retval;
+	zval *retval = retval_ptr ? retval_ptr : &unused_retval;
+
+	ZVAL_UNDEF(retval);
+	if (!EG(active)) {
+		return FAILURE;
+	}
+	if (ZEND_HAS_OOM()) {
+		zend_handle_delayed_oom();
+		ZEND_ASSERT(EG(exception));
+	}
+	if (EG(exception)) {
+		return SUCCESS;
+	}
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		zend_call_stack_size_error();
+		return SUCCESS;
+	}
+#endif
+
+	zend_function *func = fcc->function_handler;
+	ZEND_ASSERT(func && func->type == (internal ? ZEND_INTERNAL_FUNCTION : ZEND_USER_FUNCTION));
+	ZEND_ASSERT(!(func->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_DEPRECATED
+		| ZEND_ACC_GENERATOR)));
+	ZEND_ASSERT(!ARG_SHOULD_BE_SENT_BY_REF(func, 1) && !ARG_SHOULD_BE_SENT_BY_REF(func, 2));
+	zend_object *object = (func->common.fn_flags & ZEND_ACC_STATIC) ? NULL : fcc->object;
+	uint32_t call_info = ZEND_CALL_TOP_FUNCTION | ZEND_CALL_DYNAMIC;
+	if (object) {
+		GC_ADDREF(object);
+		call_info |= ZEND_CALL_HAS_THIS;
+	}
+	if (func->common.fn_flags & ZEND_ACC_CLOSURE) {
+		GC_ADDREF(ZEND_CLOSURE_OBJECT(func));
+		call_info |= ZEND_CALL_CLOSURE;
+		if (func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
+			call_info |= ZEND_CALL_FAKE_CLOSURE;
+		}
+	}
+	zend_execute_data *call = zend_vm_stack_push_call_frame(call_info, func, 2,
+		object ? (void *) object : (void *) fcc->called_scope);
+	ZVAL_COPY_DEREF(ZEND_CALL_ARG(call, 1), arg1);
+	ZVAL_COPY_DEREF(ZEND_CALL_ARG(call, 2), arg2);
+
+	const zend_class_entry *orig_fake_scope = EG(fake_scope);
+	EG(fake_scope) = NULL;
+	if (!internal) {
+		uint32_t orig_jit_trace_num = EG(jit_trace_num);
+		zend_init_func_execute_data(call, &func->op_array, retval);
+		ZEND_OBSERVER_FCALL_BEGIN(call);
+		zend_execute_ex(call);
+		EG(jit_trace_num) = orig_jit_trace_num;
+	} else {
+		ZVAL_NULL(retval);
+		call->prev_execute_data = EG(current_execute_data);
+		EG(current_execute_data) = call;
+#if ZEND_DEBUG
+		bool should_throw = zend_internal_call_should_throw(func, call);
+#endif
+		ZEND_OBSERVER_FCALL_BEGIN(call);
+		if (EXPECTED(zend_execute_internal == NULL)) {
+			func->internal_function.handler(call, retval);
+		} else {
+			zend_execute_internal(call, retval);
+		}
+#if ZEND_DEBUG
+		if (!EG(exception) && !ZEND_HAS_OOM() && call->func) {
+			if (should_throw) {
+				zend_internal_call_arginfo_violation(call->func);
+			}
+			if (call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+				bool result = zend_verify_internal_return_type(call->func, retval);
+				ZEND_ASSERT(result);
+			}
+			ZEND_ASSERT(((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) && !zend_return_should_unwrap_ref(call))
+				? Z_ISREF_P(retval) : !Z_ISREF_P(retval));
+			ZEND_ASSERT(!(call->func->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS));
+		}
+#endif
+		ZEND_OBSERVER_FCALL_END(call, retval);
+		EG(current_execute_data) = call->prev_execute_data;
+		zend_vm_stack_free_args(call);
+		if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) {
+			zend_array_release(call->extra_named_params);
+		}
+		if (EG(exception)) {
+			zval_ptr_dtor(retval);
+			ZVAL_UNDEF(retval);
+		}
+	}
+
+	if (UNEXPECTED(atomic_exchange(&EG(vm_interrupt), false))) {
+		if (atomic_load(&EG(timed_out))) {
+			zend_timeout();
+		} else if (ZEND_HAS_OOM()) {
+			zend_handle_delayed_oom();
+			zval_ptr_dtor(retval);
+			ZVAL_UNDEF(retval);
+		} else if (zend_interrupt_function) {
+			zend_interrupt_function(EG(current_execute_data));
+		}
+	}
+	if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS)) {
+		OBJ_RELEASE(Z_OBJ(call->This));
+	}
+	EG(fake_scope) = orig_fake_scope;
+	if (object) {
+		OBJ_RELEASE(object);
+	}
+	zend_vm_stack_free_call_frame(call);
+	if (UNEXPECTED(EG(exception))) {
+		if (UNEXPECTED(!EG(current_execute_data))) {
+			zend_throw_exception_internal(NULL);
+		} else if (EG(current_execute_data)->func
+				&& ZEND_USER_CODE(EG(current_execute_data)->func->common.type)) {
+			zend_rethrow_exception(EG(current_execute_data));
+		}
+	}
+	if (!retval_ptr) {
+		zval_ptr_dtor(&unused_retval);
+	}
+	return SUCCESS;
+}
+
+ZEND_API zend_result zend_call_known_user_function_with_2_params(
+		const zend_fcall_info_cache *fcc, zval *retval, zval *arg1, zval *arg2)
+{
+	return zend_call_known_function_with_2_params(fcc, retval, arg1, arg2, false);
+}
+
+ZEND_API zend_result zend_call_known_internal_function_with_2_params(
+		const zend_fcall_info_cache *fcc, zval *retval, zval *arg1, zval *arg2)
+{
+	return zend_call_known_function_with_2_params(fcc, retval, arg1, arg2, true);
+}
+
 ZEND_API zend_result zend_call_method_if_exists_ex(
 		zend_object *this_ptr, zend_string *method_name, zval *retval_ptr,
 		uint32_t param_count, zval *params, HashTable *named_params, char **error

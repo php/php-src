@@ -938,6 +938,14 @@ static zend_always_inline void zend_call_known_instance_method_with_1_params(
 ZEND_API void zend_call_known_instance_method_with_2_params(
 		zend_function *fn, zend_object *this_ptr, zval *retval_ptr, zval *param1, zval *param2);
 
+/* Call a resolved user/internal function with two by-value arguments.
+ * Excludes deprecated/generator functions, trampolines, by-reference passing for either parameter. */
+ZEND_API zend_result zend_call_known_user_function_with_2_params(
+	const zend_fcall_info_cache *fcc, zval *retval, zval *arg1, zval *arg2);
+
+ZEND_API zend_result zend_call_known_internal_function_with_2_params(
+	const zend_fcall_info_cache *fcc, zval *retval, zval *arg1, zval *arg2);
+
 /* Call method if it exists.
  * Return FAILURE if method does not exist.
  * If FAILURE is returned, retval will be UNDEF, and error will contain the validation failure message if provided.

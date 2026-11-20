@@ -16,6 +16,12 @@ f(time() > 0 ? [1, 2, 3] : []);
 
 array_map("count", [[], [1, 2]]);
 
+foreach (['strcmp', strcmp(...)] as $callback) {
+    $items = ['b', 'a'];
+    usort($items, $callback);
+    echo $items[0], $items[1], "\n";
+}
+
 ?>
 --EXPECTF--
 <!-- internal enter time() -->
@@ -35,3 +41,13 @@ int(6)
     0 => 0,
     1 => 2,
   ) -->
+<!-- internal enter usort() -->
+  <!-- internal enter strcmp() -->
+  <!-- internal leave strcmp():%d -->
+<!-- internal leave usort():true -->
+ab
+<!-- internal enter usort() -->
+  <!-- internal enter strcmp() -->
+  <!-- internal leave strcmp():%d -->
+<!-- internal leave usort():true -->
+ab
