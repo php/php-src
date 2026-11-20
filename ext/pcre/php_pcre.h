@@ -85,7 +85,12 @@ ZEND_BEGIN_MODULE_GLOBALS(pcre)
 ZEND_END_MODULE_GLOBALS(pcre)
 
 PHPAPI ZEND_EXTERN_MODULE_GLOBALS(pcre)
-#define PCRE_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(pcre, v)
+#ifdef ZEND_TLS_DIRECT
+# define PCRE_G(v) (pcre_globals.v)
+extern ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_pcre_globals pcre_globals;
+#else
+# define PCRE_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(pcre, v)
+#endif
 
 #define phpext_pcre_ptr pcre_module_ptr
 

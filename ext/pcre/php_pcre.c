@@ -61,6 +61,10 @@ struct _pcre_cache_entry {
 };
 
 PHPAPI ZEND_DECLARE_MODULE_GLOBALS(pcre)
+#ifdef ZTS
+ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_pcre_globals pcre_globals;
+static void *pcre_globals_tls_addr(void) { return &pcre_globals; }
+#endif
 
 #ifdef HAVE_PCRE_JIT_SUPPORT
 #define PCRE_JIT_STACK_MIN_SIZE (32 * 1024)
@@ -410,6 +414,12 @@ static PHP_MINFO_FUNCTION(pcre)
 /* {{{ PHP_MINIT_FUNCTION(pcre) */
 static PHP_MINIT_FUNCTION(pcre)
 {
+#ifdef ZTS
+	ts_allocate_tls_id(&pcre_globals_id, pcre_globals_tls_addr, sizeof(zend_pcre_globals), (ts_allocate_ctor) PHP_GINIT(pcre), (ts_allocate_dtor) PHP_GSHUTDOWN(pcre));
+#else
+	PHP_GINIT(pcre)(&pcre_globals);
+#endif
+
 #ifdef HAVE_PCRE_JIT_SUPPORT
 	if (UNEXPECTED(!pcre2_init_ok)) {
 		/* Retry. */
@@ -433,6 +443,11 @@ static PHP_MINIT_FUNCTION(pcre)
 /* {{{ PHP_MSHUTDOWN_FUNCTION(pcre) */
 static PHP_MSHUTDOWN_FUNCTION(pcre)
 {
+#ifdef ZTS
+	ts_free_id(pcre_globals_id);
+#else
+	PHP_GSHUTDOWN(pcre)(&pcre_globals);
+#endif
 	UNREGISTER_INI_ENTRIES();
 
 	free(php_pcre_version);
@@ -3147,10 +3162,7 @@ zend_module_entry pcre_module_entry = {
 	PHP_RSHUTDOWN(pcre),
 	PHP_MINFO(pcre),
 	PHP_PCRE_VERSION,
-	PHP_MODULE_GLOBALS(pcre),
-	PHP_GINIT(pcre),
-	PHP_GSHUTDOWN(pcre),
-	NULL,
+	NO_MODULE_GLOBALS,
 	STANDARD_MODULE_PROPERTIES_EX
 };
 

@@ -108,8 +108,13 @@ typedef struct _php_basic_globals {
 } php_basic_globals;
 
 #ifdef ZTS
-#define BG(v) ZEND_TSRMG(basic_globals_id, php_basic_globals *, v)
 PHPAPI extern int basic_globals_id;
+# ifdef ZEND_TLS_DIRECT
+#  define BG(v) (basic_globals.v)
+extern ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR php_basic_globals basic_globals;
+# else
+#  define BG(v) ZEND_TSRMG(basic_globals_id, php_basic_globals *, v)
+# endif
 #else
 #define BG(v) (basic_globals.v)
 PHPAPI extern php_basic_globals basic_globals;
