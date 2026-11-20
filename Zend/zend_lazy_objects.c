@@ -113,7 +113,7 @@ static zend_lazy_object_info* zend_lazy_object_get_info(const zend_object *obj)
 
 static bool zend_lazy_object_has_stale_info(const zend_object *obj)
 {
-	return zend_hash_index_find_ptr(&EG(lazy_objects_store).infos, obj->handle);
+	return zend_hash_index_find_ptr(&EG(lazy_objects_store).infos, obj->handle) != NULL;
 }
 
 zval* zend_lazy_object_get_initializer_zv(zend_object *obj)

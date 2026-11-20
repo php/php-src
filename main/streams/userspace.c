@@ -1431,7 +1431,7 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr)
 	php_stream * intstream = NULL;
 	int ret = FAILURE;
 	/* If we are checking if the stream can cast, no return pointer is provided, so do not emit errors */
-	bool report_errors = retptr;
+	bool report_errors = retptr != NULL;
 
 	switch(castas) {
 	case PHP_STREAM_AS_FD_FOR_SELECT:
