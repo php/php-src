@@ -12,6 +12,10 @@ PHP                                                                        NEWS
     echo, implode(), json_encode(), serialize() and other places, by emitting
     two digits per step. (Alexander Danilov)
 
+- CLI:
+  . Added --loglevel for the built-in development server to select process,
+    error, or request logs (GH-16855). (mvanhorn)
+
 - Curl:
   . Negative values for CURLOPT_POSTREDIR are now rejected, causing
     curl_setopt() to return false. (Sjoerd Langkemper)
