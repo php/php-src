@@ -119,4 +119,4 @@ bool(true)
 ValueError: Io\Terminal\Terminal::readKey(): Argument #1 ($timeout) must not be negative
 ValueError: Io\Terminal\Terminal::readKey(): Argument #2 ($sequenceTimeout) must not be negative
 bool(true)
-Io\Terminal\TerminalException: %s terminal input stream
+Io\Terminal\EofException: %s terminal input stream

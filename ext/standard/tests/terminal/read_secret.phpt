@@ -12,7 +12,7 @@ var_dump(is_subclass_of(TerminalException::class, \Io\IoException::class));
 $fp = fopen('php://temp', 'r+');
 $nonTty = Terminal::fromStreams($fp);
 
-// Empty non-tty stream without Enter throws TerminalException
+// Empty non-tty stream without Enter throws EofException
 try {
     $nonTty->readSecret();
     echo "FAIL: readSecret succeeded on empty non-tty\n";
@@ -57,7 +57,7 @@ fclose($fp);
 ?>
 --EXPECTF--
 bool(true)
-Io\Terminal\TerminalException: Unable to read secret from terminal
+Io\Terminal\EofException: End of file reached on terminal input stream
 TypeError: Io\Terminal\Terminal::readSecret(): Argument #1 ($timeout) must be of type ?Time\Duration, string given
 ArgumentCountError: Io\Terminal\Terminal::readSecret() expects at most 2 arguments, 3 given
 ValueError: Io\Terminal\Terminal::readSecret(): Argument #1 ($timeout) must not be negative

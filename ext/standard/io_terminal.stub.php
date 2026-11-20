@@ -10,6 +10,9 @@ namespace Io\Terminal {
     /** @strict-properties */
     class TerminalException extends \Io\IoException {}
 
+    /** @strict-properties */
+    class EofException extends TerminalException {}
+
     enum Key
     {
         case Up;

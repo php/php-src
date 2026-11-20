@@ -1,5 +1,5 @@
 /* This is a generated file, edit io_terminal.stub.php instead.
- * Stub hash: 8b56252cc2601bf72faabc551fd13a5dc0def051
+ * Stub hash: 6ec466cf7cb251dfcfc9c382bf30bc0dca5711b0
  * Has decl header: yes */
 
 #include "zend_attributes.h"
@@ -87,6 +87,16 @@ static zend_class_entry *register_class_Io_Terminal_TerminalException(zend_class
 
 	INIT_NS_CLASS_ENTRY(ce, "Io\\Terminal", "TerminalException", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Io_IoException, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Io_Terminal_EofException(zend_class_entry *class_entry_Io_Terminal_TerminalException)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Io\\Terminal", "EofException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Io_Terminal_TerminalException, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
 }
