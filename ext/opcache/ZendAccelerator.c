@@ -5069,6 +5069,7 @@ static zend_result accel_preload(const char *config, bool in_child)
 	CG(compiler_options) |= ZEND_COMPILE_IGNORE_OTHER_FILES;
 	CG(skip_shebang) = true;
 
+	zend_shared_alloc_unblock_signals();
 	zend_try {
 		zend_op_array *op_array;
 
@@ -5104,6 +5105,7 @@ static zend_result accel_preload(const char *config, bool in_child)
 	} zend_catch {
 		ret = FAILURE;
 	} zend_end_try();
+	zend_shared_alloc_block_signals();
 
 	PG(open_basedir) = orig_open_basedir;
 	accelerator_orig_compile_file = preload_orig_compile_file;

@@ -173,6 +173,9 @@ typedef union _align_test {
 void zend_shared_alloc_lock(void);
 void zend_shared_alloc_unlock(void); /* returns the allocated size during lock..unlock */
 void zend_shared_alloc_safe_unlock(void);
+/* For user code run under the lock: its signals and spawned processes must not inherit the blocked mask */
+void zend_shared_alloc_unblock_signals(void);
+void zend_shared_alloc_block_signals(void);
 
 /* old/new mapping functions */
 void zend_shared_alloc_init_xlat_table(void);

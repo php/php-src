@@ -40,6 +40,7 @@
 #include "zend_config.h"
 # include <sys/time.h>
 # include <sys/resource.h>
+# include <signal.h>
 #endif
 
 #ifdef HAVE_UNISTD_H
@@ -198,6 +199,9 @@ typedef struct _zend_accel_globals {
 	bool               counted;   /* the process uses shared memory */
 	bool               enabled;
 	bool               locked;    /* thread obtained exclusive lock */
+#ifndef ZEND_WIN32
+	sigset_t           lock_saved_sigmask;
+#endif
 #ifdef ZTS
 	uint32_t           unprotect_depth;
 #endif
