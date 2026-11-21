@@ -1262,7 +1262,7 @@ function system_with_timeout(
 function run_all_tests(array $test_files, array $env, ?string $redir_tested = null): void
 {
     global $test_results, $failed_tests_file, $result_tests_file, $php, $test_idx, $file_cache;
-    global $preload;
+    global $preload, $show_progress;
     // Parallel testing
     global $PHP_FAILED_TESTS, $workers, $workerID, $workerSock;
 
@@ -1306,6 +1306,13 @@ function run_all_tests(array $test_files, array $env, ?string $redir_tested = nu
         if ($workerID) {
             $PHP_FAILED_TESTS = ['BORKED' => [], 'FAILED' => [], 'WARNED' => [], 'LEAKED' => [], 'XFAILED' => [], 'XLEAKED' => [], 'SLOW' => []];
             ob_start();
+            if ($show_progress) {
+                send_message($workerSock, [
+                    "type" => "test_start",
+                    "name" => $name,
+                    "index" => $index,
+                ]);
+            }
         }
 
         $result = run_test($php, $name, $env);
@@ -1582,22 +1589,22 @@ escape:
                                 goto escape;
                             }
                             break;
+                        case "test_start":
+                            if ($show_progress) {
+                                $test_idx++;
+                                $shortname = str_replace(TEST_PHP_SRCDIR . '/', '', test_name($message['name']));
+
+                                clear_show_test();
+                                show_test($test_idx, $shortname, count($workerProcs) . "/$workers workers");
+                            }
+                            break;
                         case "test_result":
                             list($name, $index, $result, $resultText) = [$message["name"], $message["index"], $message["result"], $message["text"]];
                             foreach ($message["PHP_FAILED_TESTS"] as $category => $tests) {
                                 $PHP_FAILED_TESTS[$category] = array_merge($PHP_FAILED_TESTS[$category], $tests);
                             }
-                            $test_idx++;
-
-                            if ($show_progress) {
-                                clear_show_test();
-                            }
 
                             echo $resultText;
-
-                            if ($show_progress) {
-                                show_test($test_idx, count($workerProcs) . "/$workers concurrent test workers running");
-                            }
 
                             if (!is_array($name) && $result != 'REDIR') {
                                 $test_results[$index] = $result;
@@ -3215,12 +3222,16 @@ function show_redirect_ends(string $tests, string $tested, string $tested_file):
     }
 }
 
-function show_test(int $test_idx, string $shortname): void
+function show_test(int $test_idx, string $shortname, ?string $additional_text = null): void
 {
     global $test_cnt;
     global $line_length;
 
-    $str = "TEST $test_idx/$test_cnt [$shortname]\r";
+    $str = "TEST $test_idx/$test_cnt";
+    if ($additional_text) {
+        $str .= " ($additional_text)";
+    }
+    $str .= " [$shortname]\r";
     $line_length = strlen($str);
     echo $str;
     flush();
