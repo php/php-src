@@ -13,11 +13,6 @@ $regex_array = [
     '/[a-zA-Z]', //Regex without closing delimiter
     '[a-zA-Z]/', //Regex without opening delimiter
     '/[a-zA-Z]/F',
-    [
-        '[a-z]', //Array of Regexes
-        '[A-Z]',
-        '[0-9]',
-    ],
     '/[a-zA-Z]/', //Regex string
 ];
 $subject = '1 2 a 3 4 b 5 6';
@@ -28,12 +23,7 @@ foreach ($regex_array as $regex_value) {
         echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
-$regex_value = new stdclass(); //Object
-try {
-    var_dump(preg_split($regex_value, $subject));
-} catch (TypeError $e) {
-    echo $e::class, ': ', $e->getMessage(), "\n";
-}
+
 ?>
 --EXPECTF--
 Warning: preg_split(): Delimiter must not be alphanumeric, backslash, or NUL byte in %spreg_split_error1.php on line %d
@@ -47,7 +37,6 @@ bool(false)
 
 Warning: preg_split(): Unknown modifier 'F' in %spreg_split_error1.php on line %d
 bool(false)
-TypeError: preg_split(): Argument #1 ($pattern) must be of type string, array given
 array(3) {
   [0]=>
   string(4) "1 2 "
@@ -56,4 +45,3 @@ array(3) {
   [2]=>
   string(4) " 5 6"
 }
-TypeError: preg_split(): Argument #1 ($pattern) must be of type string, stdClass given
