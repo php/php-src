@@ -4284,7 +4284,7 @@ class ClassInfo {
         foreach ($parents as $parent) {
             $classSynopsis->appendChild(new DOMText("\n$indentation"));
             $parentReference = self::getClassSynopsisReference($parent);
-            $parentSynopsis = str_contains($parent->toString(), "\\") ? "db:packagesynopsis/db:classsynopsis" : "db:classsynopsis";
+            $parentSynopsis = count($parent->getParts()) > 1 ?"db:packagesynopsis/db:classsynopsis" : "db:classsynopsis";
 
             $includeElement = $this->createIncludeElement(
                 $doc,
