@@ -943,6 +943,19 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 		}
 	} else {
 		if (Z_OBJ_HT_P(array) == &spl_handler_ArrayObject) {
+			if (Z_OBJ_P(object) != Z_OBJ_P(array)) {
+				/* Reject storage that (indirectly) uses this object as its storage. */
+				spl_array_object *other = Z_SPLARRAY_P(array);
+				while (other->ar_flags & SPL_ARRAY_USE_OTHER) {
+					if (Z_OBJ(other->array) == Z_OBJ_P(object)) {
+						zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0,
+							"Cannot use %s as storage of %s, as it would create a cycle",
+							ZSTR_VAL(Z_OBJCE_P(array)->name), ZSTR_VAL(intern->std.ce->name));
+						return;
+					}
+					other = Z_SPLARRAY_P(&other->array);
+				}
+			}
 			ZVAL_COPY_VALUE(&garbage, &intern->array);
 			if (just_array)	{
 				spl_array_object *other = Z_SPLARRAY_P(array);
