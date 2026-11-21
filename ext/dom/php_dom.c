@@ -589,6 +589,12 @@ static void dom_import_simplexml_common(INTERNAL_FUNCTION_PARAMETERS, php_libxml
 			RETURN_THROWS();
 		}
 
+		if (old_class_type == PHP_LIBXML_CLASS_UNSET && new_class == PHP_LIBXML_CLASS_MODERN
+			&& php_dom_object_get_data(nodep) != NULL) {
+			zend_argument_type_error(1, "must not be already imported as a DOMNode");
+			RETURN_THROWS();
+		}
+
 		/* Lock the node class type to prevent creating multiple representations of the same node. */
 		nodeobj->document->class_type = new_class;
 
