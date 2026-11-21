@@ -80,22 +80,6 @@ static inline void zend_weakref_unref_single(
 	}
 }
 
-static void zend_weakref_unref(zend_object *object, void *tagged_ptr) {
-	void *ptr = ZEND_WEAKREF_GET_PTR(tagged_ptr);
-	uintptr_t tag = ZEND_WEAKREF_GET_TAG(tagged_ptr);
-	if (tag == ZEND_WEAKREF_TAG_HT) {
-		HashTable *ht = ptr;
-		ZEND_HASH_MAP_FOREACH_PTR(ht, tagged_ptr) {
-			zend_weakref_unref_single(
-				ZEND_WEAKREF_GET_PTR(tagged_ptr), ZEND_WEAKREF_GET_TAG(tagged_ptr), object);
-		} ZEND_HASH_FOREACH_END();
-		zend_hash_destroy(ht);
-		FREE_HASHTABLE(ht);
-	} else {
-		zend_weakref_unref_single(ptr, tag, object);
-	}
-}
-
 static void zend_weakref_register(zend_object *object, void *payload) {
 	GC_ADD_FLAGS(object, IS_OBJ_WEAKLY_REFERENCED);
 
@@ -201,10 +185,50 @@ void zend_weakrefs_notify(zend_object *object) {
 #if ZEND_DEBUG
 	ZEND_ASSERT(tagged_ptr && "Tracking of the IS_OBJ_WEAKLY_REFERENCE flag should be precise");
 #endif
-	if (tagged_ptr) {
-		zend_weakref_unref(object, tagged_ptr);
-		zend_hash_index_del(&EG(weakrefs), obj_key);
+	if (!tagged_ptr) {
+		return;
 	}
+
+	zend_hash_index_del(&EG(weakrefs), obj_key);
+	GC_DEL_FLAGS(object, IS_OBJ_WEAKLY_REFERENCED);
+
+	if (ZEND_WEAKREF_GET_TAG(tagged_ptr) != ZEND_WEAKREF_TAG_HT) {
+		zend_weakref_unref_single(ZEND_WEAKREF_GET_PTR(tagged_ptr), ZEND_WEAKREF_GET_TAG(tagged_ptr), object);
+		return;
+	}
+
+	/* Remove the object from every map before releasing any of the values. Releasing a value
+	 * may run arbitrary code, including the GC, which must not find the object (whose free_obj
+	 * is in progress) as a key of a map that was not processed yet: the GC does not scan such
+	 * an object, so it would never restore the refcount of the entries it holds in those maps. */
+	HashTable *refs = ZEND_WEAKREF_GET_PTR(tagged_ptr);
+	struct { zval value; dtor_func_t dtor; } *released =
+		safe_emalloc(zend_hash_num_elements(refs), sizeof(*released), 0);
+	uint32_t num_released = 0;
+	ZEND_HASH_MAP_FOREACH_PTR(refs, tagged_ptr) {
+		if (ZEND_WEAKREF_GET_TAG(tagged_ptr) == ZEND_WEAKREF_TAG_REF) {
+			zend_weakref_unref_single(ZEND_WEAKREF_GET_PTR(tagged_ptr), ZEND_WEAKREF_TAG_REF, object);
+			continue;
+		}
+		HashTable *ht = ZEND_WEAKREF_GET_PTR(tagged_ptr);
+		zval *zv = zend_hash_index_find(ht, obj_key);
+		ZEND_ASSERT(zv);
+		dtor_func_t dtor = ht->pDestructor;
+		ZVAL_COPY_VALUE(&released[num_released].value, zv);
+		released[num_released++].dtor = dtor;
+		ht->pDestructor = NULL;
+		zend_hash_index_del(ht, obj_key);
+		ht->pDestructor = dtor;
+	} ZEND_HASH_FOREACH_END();
+	zend_hash_destroy(refs);
+	FREE_HASHTABLE(refs);
+
+	for (uint32_t i = 0; i < num_released; i++) {
+		if (released[i].dtor) {
+			released[i].dtor(&released[i].value);
+		}
+	}
+	efree(released);
 }
 
 void zend_weakrefs_shutdown(void) {
