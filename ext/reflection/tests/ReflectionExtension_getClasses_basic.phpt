@@ -8,7 +8,7 @@ $ext = new ReflectionExtension('reflection');
 var_dump($ext->getClasses());
 ?>
 --EXPECTF--
-array(26) {
+array(28) {
   ["ReflectionException"]=>
   object(ReflectionClass)#%d (1) {
     ["name"]=>
@@ -23,6 +23,11 @@ array(26) {
   object(ReflectionClass)#%d (1) {
     ["name"]=>
     string(9) "Reflector"
+  }
+  ["ReflectionAttributeTarget"]=>
+  object(ReflectionClass)#%d (1) {
+    ["name"]=>
+    string(25) "ReflectionAttributeTarget"
   }
   ["ReflectionFunctionAbstract"]=>
   object(ReflectionClass)#%d (1) {
@@ -138,5 +143,10 @@ array(26) {
   object(ReflectionEnum)#%d (1) {
     ["name"]=>
     string(16) "PropertyHookType"
+  }
+  ["ReflectionTargetAwareAttribute"]=>
+  object(ReflectionClass)#%d (1) {
+    ["name"]=>
+    string(30) "ReflectionTargetAwareAttribute"
   }
 }
