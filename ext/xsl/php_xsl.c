@@ -159,7 +159,7 @@ static zval *xsl_objects_write_property_with_validation(zend_object *object, zen
 	/* Validate value *after* coercions have been performed, and restore the old value if necessary. */
 	if (UNEXPECTED(Z_LVAL_P(property) < 0)) {
 		Z_LVAL_P(property) = old_property_value;
-		zend_value_error("%s::$%s must be greater than or equal to 0", ZSTR_VAL(object->ce->name), ZSTR_VAL(member));
+		zend_value_error("%pS::$%pS must be greater than or equal to 0", object->ce->name, member);
 		return &EG(error_zval);
 	}
 
@@ -198,7 +198,7 @@ static zval *xsl_objects_read_property(zend_object *object, zend_string *member,
 {
 	/* read handler is being called as a fallback after get_property_ptr_ptr returned NULL */
 	if (type != BP_VAR_IS && type != BP_VAR_R && xsl_is_validated_property(member)) {
-		zend_throw_error(NULL, "Indirect modification of %s::$%s is not allowed", ZSTR_VAL(object->ce->name), ZSTR_VAL(member));
+		zend_throw_error(NULL, "Indirect modification of %pS::$%pS is not allowed", object->ce->name, member);
 		return &EG(uninitialized_zval);
 	}
 
@@ -208,7 +208,7 @@ static zval *xsl_objects_read_property(zend_object *object, zend_string *member,
 static void xsl_objects_unset_property(zend_object *object, zend_string *member, void **cache_slot)
 {
 	if (xsl_is_validated_property(member)) {
-		zend_throw_error(NULL, "Cannot unset %s::$%s", ZSTR_VAL(object->ce->name), ZSTR_VAL(member));
+		zend_throw_error(NULL, "Cannot unset %pS::$%pS", object->ce->name, member);
 		return;
 	}
 
