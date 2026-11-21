@@ -58,6 +58,10 @@ static MUTEX_T zts_protect_lock;
 static uint32_t zts_unprotected_threads;
 #endif
 
+#ifdef HAVE_PKEY_MPROTECT
+static int shm_pkey;
+#endif
+
 #ifndef ZEND_WIN32
 #ifdef ZTS
 static MUTEX_T zts_lock;
@@ -192,6 +196,10 @@ int zend_shared_alloc_startup(size_t requested_size, size_t reserved_size)
 #ifdef ZTS
 	zts_protect_lock = tsrm_mutex_alloc();
 	zts_unprotected_threads = 0;
+#endif
+
+#ifdef HAVE_PKEY_MPROTECT
+	shm_pkey = -1;
 #endif
 
 	/* shared_free must be valid before we call zend_shared_alloc()
@@ -354,6 +362,26 @@ void zend_shared_alloc_shutdown(void)
 #endif
 #ifdef ZTS
 	tsrm_mutex_free(zts_protect_lock);
+#endif
+#ifdef HAVE_PKEY_MPROTECT
+	if (shm_pkey >= 0) {
+		pkey_free(shm_pkey);
+		shm_pkey = -1;
+	}
+#endif
+}
+
+static zend_always_inline void zts_protect_lock_lock(void)
+{
+#ifdef ZTS
+	tsrm_mutex_lock(zts_protect_lock);
+#endif
+}
+
+static zend_always_inline void zts_protect_lock_unlock(void)
+{
+#ifdef ZTS
+	tsrm_mutex_unlock(zts_protect_lock);
 #endif
 }
 
@@ -642,37 +670,68 @@ const char *zend_accel_get_shared_model(void)
 
 void zend_accel_shared_protect(bool protected)
 {
-#if defined(HAVE_MPROTECT) || defined(ZEND_WIN32)
+#if defined(HAVE_MPROTECT) || defined(HAVE_PKEY_MPROTECT) || defined(ZEND_WIN32)
 	int i;
 
 	if (!smm_shared_globals) {
 		return;
 	}
 
-# ifdef ZTS
+# ifdef HAVE_PKEY_MPROTECT
+	if (UNEXPECTED(shm_pkey < 0)) {
+		if (shm_pkey == -2) {
+			return;
+		}
+#  ifdef ZTS
+		zts_protect_lock_lock();
+		/* Might have changed since we acquired the lock. */
+		if (shm_pkey == -2) {
+			zts_protect_lock_unlock();
+			return;
+		} else if (shm_pkey >= 0) {
+			zts_protect_lock_unlock();
+			goto key_allocated;
+		}
+#  endif
+		ZEND_ASSERT(shm_pkey == -1);
+		shm_pkey = pkey_alloc(0, PKEY_DISABLE_WRITE);
+		if (shm_pkey == -1) {
+			/* Stop trying. */
+			shm_pkey = -2;
+			zts_protect_lock_unlock();
+			return;
+		}
+		for (i = 0; i < ZSMMG(shared_segments_count); i++) {
+			pkey_mprotect(ZSMMG(shared_segments)[i]->p, ZSMMG(shared_segments)[i]->end, PROT_READ|PROT_WRITE, shm_pkey);
+		}
+		zts_protect_lock_unlock();
+	}
+key_allocated:
+	pkey_set(shm_pkey, protected ? PKEY_DISABLE_WRITE : 0);
+# else
+#  ifdef ZTS
 	/* Memory protection is process-wide, so overlapping writers must be tracked across threads. */
-	tsrm_mutex_lock(zts_protect_lock);
+	zts_protect_lock_lock();
 	if (protected) {
 		if (ZCG(unprotect_depth) && --ZCG(unprotect_depth) == 0) {
 			ZEND_ASSERT(zts_unprotected_threads > 0);
 			zts_unprotected_threads--;
 		}
 		if (zts_unprotected_threads) {
-			tsrm_mutex_unlock(zts_protect_lock);
+			zts_protect_lock_unlock();
 			return;
 		}
 	} else if (ZCG(unprotect_depth)++ == 0) {
 		zts_unprotected_threads++;
 	}
-# endif
-
-# ifdef HAVE_MPROTECT
+#  endif
+#  ifdef HAVE_MPROTECT
 	const int mode = protected ? PROT_READ : PROT_READ|PROT_WRITE;
 
 	for (i = 0; i < ZSMMG(shared_segments_count); i++) {
 		mprotect(ZSMMG(shared_segments)[i]->p, ZSMMG(shared_segments)[i]->end, mode);
 	}
-# elif defined(ZEND_WIN32)
+#  elif defined(ZEND_WIN32)
 	const int mode = protected ? PAGE_READONLY : PAGE_READWRITE;
 
 	for (i = 0; i < ZSMMG(shared_segments_count); i++) {
@@ -681,10 +740,8 @@ void zend_accel_shared_protect(bool protected)
 			zend_accel_error_noreturn(ACCEL_LOG_ERROR, "Failed to protect memory");
 		}
 	}
-# endif
-
-# ifdef ZTS
-	tsrm_mutex_unlock(zts_protect_lock);
+#  endif
+	zts_protect_lock_unlock();
 # endif
 #endif
 }
