@@ -12,6 +12,8 @@ if (!getenv('TEST_PHP_CGI_EXECUTABLE')) {
 $cmd = [
     getenv('TEST_PHP_CGI_EXECUTABLE'),
     '-C',
+    '-d',
+    'cgi.security_limit_extensions=".inc"',
     '-n',
     __DIR__ . '/GHSA-f883-x959-3vr9_007.inc',
 ];

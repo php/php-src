@@ -19,19 +19,19 @@ header("HTTP/1.1 403 Forbidden");
 header("Status: 403 Also Forbidden");
 ?>');
 
-echo shell_exec("$php -n $f");
+echo shell_exec("$php -n -d cgi.security_limit_extensions='' $f");
 
 file_put_contents($f, '<?php
 header("HTTP/1.1 403 Forbidden");
 ?>');
 
-echo shell_exec("$php -n $f");
+echo shell_exec("$php -n -d cgi.security_limit_extensions='' $f");
 
 file_put_contents($f, '<?php
 header("Status: 403 Also Forbidden");
 ?>');
 
-echo shell_exec("$php -n $f");
+echo shell_exec("$php -n -d cgi.security_limit_extensions='' $f");
 
 echo "Done\n";
 
