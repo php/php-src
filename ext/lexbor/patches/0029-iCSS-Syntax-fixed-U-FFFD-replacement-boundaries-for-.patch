@@ -1,0 +1,201 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Alexander Borisov <lex.borisov@gmail.com>
+Date: Wed, 8 Jul 2026 20:10:47 +0300
+Subject: [PATCH 29/31] iCSS::Syntax: fixed U+FFFD replacement boundaries for
+ UTF-8.
+
+The tokenizer replaced ill-formed UTF-8 with U+FFFD at boundaries that do
+not match the specification and browsers. A truncated sequence with valid
+continuation bytes (E2 8C) produced two U+FFFD instead of one, and a UTF-8
+encoded surrogate (ED A0 80) produced one U+FFFD instead of three.
+
+By specification, each maximal subpart of an ill-formed subsequence must
+be replaced with a single U+FFFD:
+https://drafts.csswg.org/css-syntax/#input-byte-stream
+https://encoding.spec.whatwg.org/#utf-8-decoder
+
+Per report from Jon Surrell (@sirreal).
+
+This closes #390 issue on GitHub.
+---
+ source/lexbor/css/syntax/state.c | 129 +++++++++----------------------
+ 1 file changed, 38 insertions(+), 91 deletions(-)
+
+diff --git a/source/lexbor/css/syntax/state.c b/source/lexbor/css/syntax/state.c
+index a011c5a..abcf930 100644
+--- a/source/lexbor/css/syntax/state.c
++++ b/source/lexbor/css/syntax/state.c
+@@ -67,21 +67,13 @@
+     }
+ 
+ #define LXB_CSS_SYNTAX_UTF_8_UP_80_BLOCK(tkz, begin, data, end)               \
++        const lxb_char_t *_bad = data;                                        \
+         lxb_codepoint_t cp = lxb_css_syntax_state_decode_utf_8_up_80(&data,   \
+                                                                      end);    \
+                                                                               \
+         if (cp == LXB_CSS_SYNTAX_ERROR_CODEPOINT) {                           \
+-            lxb_css_syntax_buffer_append_m(tkz, begin, data - begin);         \
+-            /* U+FFFD REPLACEMENT CHARACTER */                                \
+-            lxb_css_syntax_buffer_append_m(tkz, "\uFFFD",                     \
+-                                           lxb_css_syntax_replacement_length);\
+-            data += 1;                                                        \
+-            begin = data;                                                     \
+-        }                                                                     \
+-        /* Surrogate U+D800 to U+DFFF. */                                     \
+-        else if (cp >= 0xD800 && cp <= 0xDFFF) {                              \
+-            lxb_css_syntax_buffer_append_m(tkz, begin,                        \
+-                                           (data - begin) - 3);               \
++            /* Flush the run before the ill-formed sequence, then U+FFFD. */  \
++            lxb_css_syntax_buffer_append_m(tkz, begin, _bad - begin);         \
+             /* U+FFFD REPLACEMENT CHARACTER */                                \
+             lxb_css_syntax_buffer_append_m(tkz, "\uFFFD",                     \
+                                            lxb_css_syntax_replacement_length);\
+@@ -580,14 +572,6 @@ lxb_css_syntax_state_string(lxb_css_syntax_tokenizer_t *tkz, lxb_css_syntax_toke
+                             cp = lxb_css_syntax_state_decode_utf_8_up_80(&data, end);
+ 
+                             if (cp == LXB_CSS_SYNTAX_ERROR_CODEPOINT) {
+-                                /* U+FFFD REPLACEMENT CHARACTER */
+-                                lxb_css_syntax_buffer_append_m(tkz, "\uFFFD",
+-                                                               lxb_css_syntax_replacement_length);
+-                                data += 1;
+-                                begin = data;
+-                            }
+-                            /* Surrogate U+D800 to U+DFFF. */
+-                            else if (cp >= 0xD800 && cp <= 0xDFFF) {
+                                 /* U+FFFD REPLACEMENT CHARACTER */
+                                 lxb_css_syntax_buffer_append_m(tkz, "\uFFFD",
+                                                                lxb_css_syntax_replacement_length);
+@@ -1785,98 +1769,61 @@ static lxb_codepoint_t
+ lxb_css_syntax_state_decode_utf_8_up_80(const lxb_char_t **data,
+                                         const lxb_char_t *end)
+ {
+-    lxb_char_t ch;
++    lxb_char_t ch, lower, upper;
++    unsigned needed;
+     const lxb_char_t *p;
+     lxb_codepoint_t cp;
+ 
++    /*
++     * WHATWG UTF-8 decoder: https://encoding.spec.whatwg.org/#utf-8-decoder
++     */
++
+     p = *data;
+-    ch = *p;
++    ch = *p++;
+ 
+     if (ch <= 0xDF) {
+-        if (ch < 0xC2 || p + 1 >= end) {
++        if (ch < 0xC2) {
++            *data = p;
+             return LXB_CSS_SYNTAX_ERROR_CODEPOINT;
+         }
+ 
++        needed = 1;
++        lower = 0x80;
++        upper = 0xBF;
+         cp = ch & 0x1F;
+-
+-        if (p[1] < 0x80 || p[1] > 0xBF) {
+-            return LXB_CSS_SYNTAX_ERROR_CODEPOINT;
+-        }
+-
+-        cp = (cp << 6) | (p[1] & 0x3F);
+-
+-        *data += 2;
+     }
+-    else if (ch < 0xF0) {
++    else if (ch <= 0xEF) {
++        needed = 2;
++        lower = (ch == 0xE0) ? 0xA0 : 0x80;
++        upper = (ch == 0xED) ? 0x9F : 0xBF;
+         cp = ch & 0x0F;
+-
+-        if (p + 2 >= end) {
+-            return LXB_CSS_SYNTAX_ERROR_CODEPOINT;
+-        }
+-
+-        if (ch == 0xE0) {
+-            if (p[1] < 0xA0 || p[1] > 0xBF) {
+-                return LXB_CSS_SYNTAX_ERROR_CODEPOINT;
+-            }
+-        }
+-
+-        /*
+-         * We returning surrogate pair!
+-         */
+-/*
+-        else if (ch == 0xED) {
+-            if (p[1] < 0x80 || p[1] > 0x9F) {
+-                return LXB_CSS_SYNTAX_ERROR_CODEPOINT;
+-            }
+-        }
+- */
+-        else if (p[1] < 0x80 || p[1] > 0xBF) {
+-            return LXB_CSS_SYNTAX_ERROR_CODEPOINT;
+-        }
+-
+-        if (p[2] < 0x80 || p[2] > 0xBF) {
+-            return LXB_CSS_SYNTAX_ERROR_CODEPOINT;
+-        }
+-
+-        cp = (cp << 6) | (p[1] & 0x3F);
+-        cp = (cp << 6) | (p[2] & 0x3F);
+-
+-        *data += 3;
+     }
+-    else if (ch < 0xF5) {
++    else if (ch <= 0xF4) {
++        needed = 3;
++        lower = (ch == 0xF0) ? 0x90 : 0x80;
++        upper = (ch == 0xF4) ? 0x8F : 0xBF;
+         cp = ch & 0x07;
++    }
++    else {
++        /* 0xF5..0xFF: an invalid lead byte. */
++        *data = p;
++        return LXB_CSS_SYNTAX_ERROR_CODEPOINT;
++    }
+ 
+-        if (p + 3 >= end) {
+-            return LXB_CSS_SYNTAX_ERROR_CODEPOINT;
+-        }
+-
+-        if (ch == 0xF0) {
+-            if (p[1] < 0x90 || p[1] > 0xBF) {
+-                return LXB_CSS_SYNTAX_ERROR_CODEPOINT;
+-            }
+-        }
+-        else if (ch == 0xF4) {
+-            if (p[1] < 0x80 || p[1] > 0x8F) {
+-                return LXB_CSS_SYNTAX_ERROR_CODEPOINT;
+-            }
+-        }
+-        else if (p[1] < 0x80 || p[1] > 0xBF) {
+-            return LXB_CSS_SYNTAX_ERROR_CODEPOINT;
+-        }
+-
+-        if ((p[2] < 0x80 || p[2] > 0xBF) || (p[3] < 0x80 || p[3] > 0xBF)) {
++    do {
++        if (p >= end || *p < lower || *p > upper) {
++            *data = p;
+             return LXB_CSS_SYNTAX_ERROR_CODEPOINT;
+         }
+ 
+-        cp = (cp << 6) | (p[1] & 0x3F);
+-        cp = (cp << 6) | (p[2] & 0x3F);
+-        cp = (cp << 6) | (p[3] & 0x3F);
++        cp = (cp << 6) | (*p++ & 0x3F);
+ 
+-        *data += 4;
+-    }
+-    else {
+-        return LXB_CSS_SYNTAX_ERROR_CODEPOINT;
++        lower = 0x80;
++        upper = 0xBF;
+     }
++    while (--needed != 0);
++
++    *data = p;
+ 
+     return cp;
+ }

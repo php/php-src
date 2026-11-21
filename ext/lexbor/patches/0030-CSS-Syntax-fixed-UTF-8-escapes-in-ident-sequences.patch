@@ -1,0 +1,60 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Alexander Borisov <lex.borisov@gmail.com>
+Date: Thu, 9 Jul 2026 23:24:05 +0300
+Subject: [PATCH 30/31] CSS::Syntax: fixed UTF-8 escapes in ident sequences.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Non-hex escapes consumed only the first byte of a UTF-8 sequence and used it
+as a code point. Because of this, "a\é" became "aÃ�" instead of "aé".
+The same issue affected unquoted URL tokens.
+---
+ source/lexbor/css/syntax/state.c | 20 +++++++++++++++++++-
+ 1 file changed, 19 insertions(+), 1 deletion(-)
+
+diff --git a/source/lexbor/css/syntax/state.c b/source/lexbor/css/syntax/state.c
+index abcf930..a1db76a 100644
+--- a/source/lexbor/css/syntax/state.c
++++ b/source/lexbor/css/syntax/state.c
+@@ -628,6 +628,17 @@ lxb_css_syntax_state_hash(lxb_css_syntax_tokenizer_t *tkz,
+         return lxb_css_syntax_state_delim_set(token, data - 1, '#');
+     }
+ 
++    if (*data >= 0x80) {
++        begin = data;
++
++        if (lxb_css_syntax_state_start_ident_utf_8_80(&data, end)) {
++            data = begin;
++            goto hash;
++        }
++
++        return lxb_css_syntax_state_delim_set(token, begin - 1, '#');
++    }
++
+     if (lxb_css_syntax_res_name_map[*data] == 0x00) {
+         if (*data == 0x00) {
+             goto hash;
+@@ -1201,6 +1212,7 @@ lxb_css_syntax_state_consume_ident(lxb_css_syntax_tokenizer_t *tkz,
+         else {
+             LXB_CSS_SYNTAX_UTF_8_UP_80_BLOCK(tkz, begin, data, end)
+             else if (!lxb_css_syntax_state_non_ascii(cp)) {
++                data = _bad;
+                 break;
+             }
+         }
+@@ -1629,7 +1641,13 @@ lxb_css_syntax_state_escaped(lxb_css_syntax_tokenizer_t *tkz,
+ 
+         if (lexbor_str_res_map_hex[*data] == 0xFF) {
+             if (count == 0) {
+-                cp = (lxb_codepoint_t) *data++;
++                if (*data < 0x80) {
++                    cp = (lxb_codepoint_t) *data++;
++                }
++                else {
++                    cp = lxb_css_syntax_state_decode_utf_8_up_80(&data, end);
++                }
++
+                 goto done;
+             }
+ 
