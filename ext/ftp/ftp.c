@@ -2239,6 +2239,7 @@ ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_t 
 	return (ftp_nb_continue_read(ftp));
 
 bail:
+	ftp->nb = 0;
 	data_close(ftp);
 	return PHP_FTP_FAILED;
 }
