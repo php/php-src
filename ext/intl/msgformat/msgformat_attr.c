@@ -76,18 +76,24 @@ PHP_FUNCTION( msgfmt_set_pattern )
 	}
 #endif
 
-	umsg_applyPattern(MSG_FORMAT_OBJECT(mfo), spattern, spattern_len, &spattern_error, &INTL_DATA_ERROR_CODE(mfo));
+	/* ICU may discard the old pattern if parsing the new one fails. */
+	UMessageFormat *new_format = umsg_open(spattern, spattern_len,
+		umsg_getLocale(MSG_FORMAT_OBJECT(mfo)), &spattern_error, &INTL_DATA_ERROR_CODE(mfo));
 	if (spattern) {
 		efree(spattern);
 	}
 	if (U_FAILURE(INTL_DATA_ERROR_CODE(mfo))) {
 		char *msg;
+		umsg_close(new_format);
 		spprintf(&msg, 0, "Error setting symbol value at line %d, offset %d", spattern_error.line, spattern_error.offset);
 		intl_errors_set_custom_msg(INTL_DATA_ERROR_P(mfo), msg, 1);
 		efree(msg);
 		RETURN_FALSE;
 	}
 
+	umsg_close(MSG_FORMAT_OBJECT(mfo));
+	MSG_FORMAT_OBJECT(mfo) = new_format;
+	mfo->mf_data.tz_set = 0;
 	if(mfo->mf_data.orig_format) {
 		efree(mfo->mf_data.orig_format);
 	}
