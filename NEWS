@@ -127,6 +127,10 @@ PHP                                                                        NEWS
   . Fixed a crash when executing a prepared statement again after a failed
     execute() with libmysqlclient. (Ilia Alshanetsky)
 
+- PDO_SQLite:
+  . Fixed bug GH-25588 (Use-after-free of a string parameter omitted on a later
+    execute() or rebound while fetching). (Ilia Alshanetsky)
+
 - POSIX:
   . Fixed bug GH-25530 (posix_get_last_error() returns an error from a
     previous request). (Artem Ukrainskiy)
