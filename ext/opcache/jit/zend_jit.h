@@ -99,6 +99,7 @@
 typedef struct _zend_jit_trace_rec zend_jit_trace_rec;
 typedef struct _zend_jit_trace_stack_frame zend_jit_trace_stack_frame;
 typedef struct _sym_node zend_sym_node;
+typedef struct _zend_jit_ctx zend_jit_ctx;
 
 extern bool zend_jit_startup_ok;
 
@@ -142,6 +143,7 @@ typedef struct _zend_jit_globals {
 	uint32_t bad_root_slot;
 
 	uint8_t  *exit_counters;
+	zend_jit_ctx *active_ctx; /* non-NULL while zend_jit()/zend_jit_trace() owns a malloc'd IR buffer; outer zend_catch frees it on bailout */
 } zend_jit_globals;
 
 #ifdef ZTS
