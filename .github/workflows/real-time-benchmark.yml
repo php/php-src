@@ -9,7 +9,15 @@ on:
         required: true
         type: number
       jit:
-        description: 'Whether JIT is benchmarked'
+        description: 'Whether to benchmark JIT'
+        required: false
+        default: "0"
+        type: choice
+        options:
+          - "0"
+          - "1"
+      zts:
+        description: 'Whether to build PHP with thread safety'
         required: false
         default: "0"
         type: choice
@@ -67,6 +75,8 @@ jobs:
       BASELINE_COMMIT: "d5f6e56610c729710073350af318c4ea1b292cfe"
       ID: "master"
       JIT: "1"
+      ZTS: "0"
+      ZTS_LABEL: ""
       BINARY_LAYOUT_STRATEGY: ""
       COLLECT_EXTENDED_PERF_STATS: "0"
       DEBUG_ENVIRONMENT: "0"
@@ -100,6 +110,12 @@ jobs:
             echo "ID=benchmarked" >> $GITHUB_ENV
 
             echo "JIT=${{ inputs.jit }}" >> $GITHUB_ENV
+            echo "ZTS=${{ inputs.zts }}" >> $GITHUB_ENV
+            if [ "${{ inputs.zts }}" = "1" ]; then
+              echo "ZTS_LABEL=ZTS" >> $GITHUB_ENV
+            else
+              echo "ZTS_LABEL=NTS" >> $GITHUB_ENV
+            fi
             echo "BINARY_LAYOUT_STRATEGY=${{ inputs.binary_layout_strategy }}" >> $GITHUB_ENV
             echo "COLLECT_EXTENDED_PERF_STATS=${{ inputs.collect_extended_perf_stats }}" >> $GITHUB_ENV
             echo "DEBUG_ENVIRONMENT=${{ inputs.debug_environment }}" >> $GITHUB_ENV
@@ -146,7 +162,7 @@ jobs:
           BASELINE_SHORT_SHA="$(echo "${{ env.BASELINE_COMMIT }}" | cut -c 1-7)"
 
           cat << EOF > ./php-version-benchmarks/config/php/baseline.ini
-            PHP_NAME="PHP - baseline@$BASELINE_SHORT_SHA"
+            PHP_NAME="PHP - baseline@$BASELINE_SHORT_SHA${ZTS_LABEL:+ ($ZTS_LABEL)}"
             PHP_ID=php_baseline
 
             PHP_REPO=${{ github.server_url }}/${{ env.REPOSITORY }}.git
@@ -154,6 +170,7 @@ jobs:
             PHP_COMMIT=${{ env.BASELINE_COMMIT }}
 
             PHP_JIT=0
+            PHP_ZTS=${{ env.ZTS }}
           EOF
       - name: Setup PHP config - baseline PHP version with JIT
         if: github.event_name == 'workflow_dispatch' && inputs.jit == '1'
@@ -163,7 +180,7 @@ jobs:
           BASELINE_SHORT_SHA="$(echo "${{ env.BASELINE_COMMIT }}" | cut -c 1-7)"
 
           cat << EOF > ./php-version-benchmarks/config/php/baseline_jit.ini
-            PHP_NAME="PHP - baseline@$BASELINE_SHORT_SHA (JIT)"
+            PHP_NAME="PHP - baseline@$BASELINE_SHORT_SHA (JIT${ZTS_LABEL:+, $ZTS_LABEL})"
             PHP_ID=php_baseline_jit
 
             PHP_REPO=${{ github.server_url }}/${{ env.REPOSITORY }}.git
@@ -171,6 +188,7 @@ jobs:
             PHP_COMMIT=${{ env.BASELINE_COMMIT }}
 
             PHP_JIT=${{ env.JIT }}
+            PHP_ZTS=${{ env.ZTS }}
           EOF
       - name: Setup PHP config - previous PHP version
         if: github.event_name != 'workflow_dispatch'
@@ -199,13 +217,14 @@ jobs:
             PHP_COMMIT=$LAST_RESULT_SHA
 
             PHP_JIT=0
+            PHP_ZTS=${{ env.ZTS }}
           EOF
       - name: Setup PHP config - benchmarked PHP version
         run: |
           set -e
 
           cat << EOF > ./php-version-benchmarks/config/php/this.ini
-            PHP_NAME="PHP - ${{ env.BRANCH }}"
+            PHP_NAME="PHP - ${{ env.BRANCH }}${ZTS_LABEL:+ ($ZTS_LABEL)}"
             PHP_ID=php_${{ env.ID }}
 
             PHP_REPO=${{ github.server_url }}/${{ env.REPOSITORY }}.git
@@ -213,6 +232,7 @@ jobs:
             PHP_COMMIT=${{ env.COMMIT }}
 
             PHP_JIT=0
+            PHP_ZTS=${{ env.ZTS }}
           EOF
       - name: Setup PHP config - benchmarked PHP version with JIT
         if: env.JIT == '1'
@@ -220,7 +240,7 @@ jobs:
           set -e
 
           cat << EOF > ./php-version-benchmarks/config/php/this_jit.ini
-            PHP_NAME="PHP - ${{ env.BRANCH }} (JIT)"
+            PHP_NAME="PHP - ${{ env.BRANCH }} (JIT${ZTS_LABEL:+, $ZTS_LABEL})"
             PHP_ID=php_${{ env.ID }}_jit
 
             PHP_REPO=${{ github.server_url }}/${{ env.REPOSITORY }}.git
@@ -228,6 +248,7 @@ jobs:
             PHP_COMMIT=${{ env.COMMIT }}
 
             PHP_JIT=${{ env.JIT }}
+            PHP_ZTS=${{ env.ZTS }}
           EOF
       - name: Setup test config
         run: |
