@@ -60,7 +60,7 @@ include 'CertificateGenerator.inc';
 $certificateGenerator = new CertificateGenerator();
 $certificateGenerator->saveNewCertAsFileWithKey('tls_wrapper_with_tls_v1.3', $certFile);
 
-include 'ServerClientTestCase.inc';
+include dirname(__DIR__, 2) . "/standard/tests/ServerClientTestCase.inc";
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --CLEAN--

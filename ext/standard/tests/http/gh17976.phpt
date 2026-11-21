@@ -48,7 +48,7 @@ $clientCode = <<<'CODE'
     echo (str_contains($raw, "Injected-Nul:") ? "FAIL" : "OK") . ": user_agent NUL+CRLF\n";
 CODE;
 
-include sprintf("%s/../../../openssl/tests/ServerClientTestCase.inc", __DIR__);
+include dirname(__DIR__) . "/ServerClientTestCase.inc";
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --EXPECTF--

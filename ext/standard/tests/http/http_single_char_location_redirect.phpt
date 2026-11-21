@@ -32,7 +32,7 @@ $ctx = stream_context_create(['http' => ['follow_location' => 1]]);
 echo @file_get_contents("http://{{ ADDR }}/a/b", false, $ctx), "\n";
 CODE;
 
-include sprintf("%s/../../../openssl/tests/ServerClientTestCase.inc", __DIR__);
+include dirname(__DIR__) . "/ServerClientTestCase.inc";
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --EXPECT--

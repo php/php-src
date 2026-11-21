@@ -57,7 +57,7 @@ $clientCode = <<<'CODE'
     fclose($dest);
 CODE;
 
-include sprintf("%s/../../../openssl/tests/ServerClientTestCase.inc", __DIR__);
+include dirname(__DIR__) . "/ServerClientTestCase.inc";
 ServerClientTestCase::getInstance()->run($clientCode, [
     'source' => $sourceCode,
     'dest' => $destCode,

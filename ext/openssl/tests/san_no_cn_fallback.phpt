@@ -46,7 +46,7 @@ $certificateGenerator = new CertificateGenerator();
 $certificateGenerator->saveNewCertAsFileWithKey(
     'cn.example.org', $certFile, null, 'DNS:san.example.org');
 
-include 'ServerClientTestCase.inc';
+include dirname(__DIR__, 2) . "/standard/tests/ServerClientTestCase.inc";
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --CLEAN--

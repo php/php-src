@@ -38,7 +38,7 @@ $clientCode = <<<'CODE'
     @stream_socket_client("tls://{{ ADDR }}", $errno, $errstr, 1, $flags, $ctx);
 CODE;
 
-include 'ServerClientTestCase.inc';
+include dirname(__DIR__, 2) . "/standard/tests/ServerClientTestCase.inc";
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --EXPECT--

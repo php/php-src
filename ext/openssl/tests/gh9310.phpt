@@ -8,7 +8,7 @@ if (!function_exists("proc_open")) die("skip no proc_open");
 ?>
 --FILE--
 <?php
-include 'ServerClientTestCase.inc';
+include dirname(__DIR__, 2) . "/standard/tests/ServerClientTestCase.inc";
 
 $baseDir = __DIR__ . '/gh9310';
 @mkdir($baseDir);
@@ -42,7 +42,7 @@ copy($sniUkCertFile, $baseDirSniUkCertFile);
 
 $serverCodeTemplate = <<<'CODE'
     ini_set('log_errors', 'On');
-    ini_set('open_basedir',  __DIR__ . '/gh9310');
+    ini_set('open_basedir',  '%s');
     $serverUri = "ssl://127.0.0.1:0";
     $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
     $serverCtx = stream_context_create(['ssl' => [
@@ -70,7 +70,7 @@ CODE;
 
 $sniServerCodeV1 = <<<'CODE'
     ini_set('log_errors', 'On');
-    ini_set('open_basedir', __DIR__ . '/gh9310');
+    ini_set('open_basedir', '%s');
     $flags = STREAM_SERVER_BIND|STREAM_SERVER_LISTEN;
     $ctx = stream_context_create(['ssl' => [
         'SNI_server_certs' => [
@@ -83,11 +83,11 @@ $sniServerCodeV1 = <<<'CODE'
 
     stream_socket_accept($server);
 CODE;
-$sniServerCodeV1 = sprintf($sniServerCodeV1, $sniCsFile);
+$sniServerCodeV1 = sprintf($sniServerCodeV1, $baseDir, $sniCsFile);
 
 $sniServerCodeV2 = <<<'CODE'
     ini_set('log_errors', 'On');
-    ini_set('open_basedir', __DIR__ . '/gh9310');
+    ini_set('open_basedir', '%s');
     $flags = STREAM_SERVER_BIND|STREAM_SERVER_LISTEN;
     $ctx = stream_context_create(['ssl' => [
         'SNI_server_certs' => [
@@ -103,11 +103,11 @@ $sniServerCodeV2 = <<<'CODE'
 
     stream_socket_accept($server);
 CODE;
-$sniServerCodeV2 = sprintf($sniServerCodeV2, $baseDirSniUkCertFile, $sniUkKeyFile);
+$sniServerCodeV2 = sprintf($sniServerCodeV2, $baseDir, $baseDirSniUkCertFile, $sniUkKeyFile);
 
 $sniServerCodeV3 = <<<'CODE'
     ini_set('log_errors', 'On');
-    ini_set('open_basedir', __DIR__ . '/gh9310');
+    ini_set('open_basedir', '%s');
     $flags = STREAM_SERVER_BIND|STREAM_SERVER_LISTEN;
     $ctx = stream_context_create(['ssl' => [
         'SNI_server_certs' => [
@@ -123,7 +123,7 @@ $sniServerCodeV3 = <<<'CODE'
 
     stream_socket_accept($server);
 CODE;
-$sniServerCodeV3 = sprintf($sniServerCodeV3, $sniUsCertFile, $sniUsKeyFile);
+$sniServerCodeV3 = sprintf($sniServerCodeV3, $baseDir, $sniUsCertFile, $sniUsKeyFile);
 
 $sniClientCodeTemplate = <<<'CODE'
     $flags = STREAM_CLIENT_CONNECT;
@@ -136,16 +136,16 @@ $sniClientCodeTemplate = <<<'CODE'
     @stream_socket_client("tls://{{ ADDR }}", $errno, $errstr, 1, $flags, $ctx);
 CODE;
 
-$serverCode = sprintf($serverCodeTemplate, $baseDirCertFile . "\0test", $baseDirPkFile);
+$serverCode = sprintf($serverCodeTemplate, $baseDir, $baseDirCertFile . "\0test", $baseDirPkFile);
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 
-$serverCode = sprintf($serverCodeTemplate, $baseDirCertFile, $baseDirPkFile . "\0test");
+$serverCode = sprintf($serverCodeTemplate, $baseDir, $baseDirCertFile, $baseDirPkFile . "\0test");
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 
-$serverCode = sprintf($serverCodeTemplate, $certFile, $pkFile);
+$serverCode = sprintf($serverCodeTemplate, $baseDir, $certFile, $pkFile);
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 
-$serverCode = sprintf($serverCodeTemplate, $baseDirCertFile, $pkFile);
+$serverCode = sprintf($serverCodeTemplate, $baseDir, $baseDirCertFile, $pkFile);
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 
 $sniClientCode = sprintf($sniClientCodeTemplate, $sniCaFile, 'cs.php.net');

@@ -39,7 +39,7 @@ include 'CertificateGenerator.inc';
 $certificateGenerator = new CertificateGenerator();
 $certificateGenerator->saveNewCertAsFileWithKey('tls_early_data_invalid', $certFile);
 
-include 'ServerClientTestCase.inc';
+include dirname(__DIR__, 2) . "/standard/tests/ServerClientTestCase.inc";
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --CLEAN--
