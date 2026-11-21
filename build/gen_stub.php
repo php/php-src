@@ -2447,7 +2447,7 @@ abstract class VariableLike
     abstract protected function getFieldSynopsisName(): string;
 
     /** @param array<string, ConstInfo> $allConstInfos */
-    abstract protected function getFieldSynopsisValueString(array $allConstInfos): ?string;
+    abstract public function getFieldSynopsisValueString(array $allConstInfos): ?string;
 
     abstract public function discardInfoForOldPhpVersions(?int $minimumPhpVersionIdCompatibility): void;
 
@@ -2644,7 +2644,7 @@ class ConstInfo extends VariableLike
     }
 
     /** @param array<string, ConstInfo> $allConstInfos */
-    protected function getFieldSynopsisValueString(array $allConstInfos): ?string
+    public function getFieldSynopsisValueString(array $allConstInfos): ?string
     {
         $value = EvaluatedValue::createFromExpression($this->value, null, $this->cValue, $allConstInfos);
         if ($value->isUnknownConstValue) {
@@ -2663,19 +2663,28 @@ class ConstInfo extends VariableLike
     private function getPredefinedConstantElement(
         DOMDocument $doc,
         int $indentationLevel,
-        string $name
+        string $name,
+        DOMNodeList $manualConstantElements
     ): DOMElement {
         $indentation = str_repeat(" ", $indentationLevel);
 
         $element = $doc->createElement($name);
 
-        $constantElement = $doc->createElement("constant");
-        $constantElement->textContent = $this->name->__toString();
-
         $typeElement = ($this->phpDocType ?? $this->type)->getTypeForDoc($doc);
 
-        $element->appendChild(new DOMText("\n$indentation "));
-        $element->appendChild($constantElement);
+        foreach ($manualConstantElements as $i => $manualConstantElement) {
+            $constantElement = $doc->createElement("constant");
+            $constantElement->textContent = $manualConstantElement->textContent;
+            foreach ($manualConstantElement->attributes as $attribute) {
+                $constantElement->setAttribute($attribute->nodeName, $attribute->nodeValue);
+            }
+
+            if ($i > 0) {
+                $element->appendChild(new DOMText(","));
+            }
+            $element->appendChild(new DOMText("\n$indentation "));
+            $element->appendChild($constantElement);
+        }
         $element->appendChild(new DOMText("\n$indentation ("));
         $element->appendChild($typeElement);
         $element->appendChild(new DOMText(")\n$indentation"));
@@ -2683,12 +2692,12 @@ class ConstInfo extends VariableLike
         return $element;
     }
 
-    public function getPredefinedConstantTerm(DOMDocument $doc, int $indentationLevel): DOMElement {
-        return $this->getPredefinedConstantElement($doc, $indentationLevel, "term");
+    public function getPredefinedConstantTerm(DOMDocument $doc, int $indentationLevel, DOMNodeList $manualConstantElements): DOMElement {
+        return $this->getPredefinedConstantElement($doc, $indentationLevel, "term", $manualConstantElements);
     }
 
-    public function getPredefinedConstantEntry(DOMDocument $doc, int $indentationLevel): DOMElement {
-        return $this->getPredefinedConstantElement($doc, $indentationLevel, "entry");
+    public function getPredefinedConstantEntry(DOMDocument $doc, int $indentationLevel, DOMNodeList $manualConstantElements): DOMElement {
+        return $this->getPredefinedConstantElement($doc, $indentationLevel, "entry", $manualConstantElements);
     }
 
     public function discardInfoForOldPhpVersions(?int $minimumPhpVersionIdCompatibility): void {
@@ -3150,7 +3159,7 @@ class PropertyInfo extends VariableLike
     }
 
     /** @param array<string, ConstInfo> $allConstInfos */
-    protected function getFieldSynopsisValueString(array $allConstInfos): ?string
+    public function getFieldSynopsisValueString(array $allConstInfos): ?string
     {
         return $this->defaultValueString;
     }
@@ -5731,7 +5740,8 @@ function replacePredefinedConstants(string $targetDirectory, array $constMap, ar
             }
 
             foreach ($entry->getElementsByTagName("term") as $manualTermElement) {
-                $manualConstantElement = $manualTermElement->getElementsByTagName("constant")->item(0);
+                $manualConstantElements = $manualTermElement->getElementsByTagName("constant");
+                $manualConstantElement = $manualConstantElements->item(0);
                 if (!$manualConstantElement instanceof DOMElement) {
                     continue;
                 }
@@ -5743,14 +5753,16 @@ function replacePredefinedConstants(string $targetDirectory, array $constMap, ar
                     continue;
                 }
 
-                $documentedConstMap[$manualConstantName] = $manualConstantName;
+                foreach ($manualConstantElements as $manualConstantElement) {
+                    $documentedConstMap[$manualConstantElement->textContent] = $manualConstantElement->textContent;
+                }
 
                 if ($entry->firstChild instanceof DOMText) {
                     $indentationLevel = strlen(str_replace("\n", "", $entry->firstChild->textContent));
                 } else {
                     $indentationLevel = 3;
                 }
-                $newTermElement = $stubConstant->getPredefinedConstantTerm($doc, $indentationLevel);
+                $newTermElement = $stubConstant->getPredefinedConstantTerm($doc, $indentationLevel, $manualConstantElements);
 
                 if ($manualTermElement->textContent === $newTermElement->textContent) {
                     continue;
@@ -5771,34 +5783,36 @@ function replacePredefinedConstants(string $targetDirectory, array $constMap, ar
                 continue;
             }
 
-            foreach ($entry->getElementsByTagName("constant") as $manualConstantElement) {
-                if (!$manualConstantElement instanceof DOMElement) {
-                    continue;
-                }
-
-                $manualConstantName = $manualConstantElement->textContent;
-
-                $stubConstant = $constMap[$manualConstantName] ?? null;
-                if ($stubConstant === null) {
-                    continue;
-                }
-
-                $documentedConstMap[$manualConstantName] = $manualConstantName;
-
-                if ($row->firstChild instanceof DOMText) {
-                    $indentationLevel = strlen(str_replace("\n", "", $row->firstChild->textContent));
-                } else {
-                    $indentationLevel = 3;
-                }
-                $newEntryElement = $stubConstant->getPredefinedConstantEntry($doc, $indentationLevel);
-
-                if ($entry->textContent === $newEntryElement->textContent) {
-                    continue;
-                }
-
-                $entry->parentNode->replaceChild($newEntryElement, $entry);
-                $updated = true;
+            $manualConstantElements = $entry->getElementsByTagName("constant");
+            $manualConstantElement = $manualConstantElements->item(0);
+            if (!$manualConstantElement instanceof DOMElement) {
+                continue;
             }
+
+            $manualConstantName = $manualConstantElement->textContent;
+
+            $stubConstant = $constMap[$manualConstantName] ?? null;
+            if ($stubConstant === null) {
+                continue;
+            }
+
+            foreach ($manualConstantElements as $manualConstantElement) {
+                $documentedConstMap[$manualConstantElement->textContent] = $manualConstantElement->textContent;
+            }
+
+            if ($row->firstChild instanceof DOMText) {
+                $indentationLevel = strlen(str_replace("\n", "", $row->firstChild->textContent));
+            } else {
+                $indentationLevel = 3;
+            }
+            $newEntryElement = $stubConstant->getPredefinedConstantEntry($doc, $indentationLevel, $manualConstantElements);
+
+            if ($entry->textContent === $newEntryElement->textContent) {
+                continue;
+            }
+
+            $entry->parentNode->replaceChild($newEntryElement, $entry);
+            $updated = true;
         }
 
         if ($updated) {
