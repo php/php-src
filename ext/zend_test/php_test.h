@@ -62,6 +62,7 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	bool print_stderr_mshutdown;
 	bool warn_on_startup;
 	zend_long bailout_in_rinit;
+	zend_string *rinit_bailout_putenv;
 	zend_long limit_copy_file_range;
 	int observe_opline_in_zendmm;
 	zend_mm_heap* zend_orig_heap;

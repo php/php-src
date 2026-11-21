@@ -47,6 +47,10 @@ static zend_module_entry **modules_dl_loaded;
 
 static zend_class_entry  **class_cleanup_handlers;
 
+/* Where zend_activate_modules() stopped: NULL if it did not run, the
+ * terminating NULL if every RINIT returned, else the RINIT that bailed out */
+ZEND_TLS zend_module_entry **rinit_stop = NULL;
+
 ZEND_API zend_result zend_get_parameters_array_ex(uint32_t param_count, zval *argument_array) /* {{{ */
 {
 	zval *param_ptr;
@@ -3410,40 +3414,61 @@ void module_registry_unload(const zend_module_entry *module)
 
 ZEND_API void zend_activate_modules(void) /* {{{ */
 {
-	zend_module_entry ** volatile p = module_request_startup_handlers;
+	zend_module_entry **p = module_request_startup_handlers;
 
-	zend_try {
-		while (*p) {
-			zend_module_entry *module = *p;
+	while (*p) {
+		zend_module_entry *module = *p;
 
-			if (module->request_startup_func(module->type, module->module_number)==FAILURE) {
-				zend_error(E_WARNING, "request_startup() for %s module failed", module->name);
-				exit(1);
-			}
-			p++;
+		/* still points to this module if its RINIT bails out */
+		rinit_stop = p;
+		if (module->request_startup_func(module->type, module->module_number)==FAILURE) {
+			zend_error(E_WARNING, "request_startup() for %s module failed", module->name);
+			exit(1);
 		}
-	} zend_catch {
-		/* The request shutdown skips RSHUTDOWN unless every RINIT returned,
-		 * release what the modules activated so far hold (e.g. session locks) */
-		while (p > module_request_startup_handlers) {
-			zend_module_entry *module = *--p;
+		p++;
+	}
 
-			if (module->request_shutdown_func) {
-				zend_try {
-					module->request_shutdown_func(module->type, module->module_number);
-				} zend_end_try();
-			}
-		}
-		zend_bailout();
-	} zend_end_try();
+	rinit_stop = p;
 }
 /* }}} */
 
+/* Skips the modules whose RINIT never ran or bailed out */
+static void zend_deactivate_modules_after_rinit_bailout(const zend_module_entry *bailed_out)
+{
+	zend_module_entry *module;
+	bool rinit_ran = false;
+
+	ZEND_HASH_MAP_REVERSE_FOREACH_PTR(&module_registry, module) {
+		if (module == bailed_out) {
+			rinit_ran = true;
+			continue;
+		}
+		if (!module->request_shutdown_func || (!rinit_ran && module->request_startup_func)) {
+			continue;
+		}
+		zend_try {
+			module->request_shutdown_func(module->type, module->module_number);
+		} zend_catch {
+			/* module shutdown is incomplete */
+			_exit(1);
+		} zend_end_try();
+	} ZEND_HASH_FOREACH_END();
+}
+
 ZEND_API void zend_deactivate_modules(void) /* {{{ */
 {
+	zend_module_entry **stop = rinit_stop;
+
+	if (!stop) {
+		return;
+	}
+	rinit_stop = NULL;
+
 	EG(current_execute_data) = NULL; /* we're no longer executing anything */
 
-	if (EG(full_tables_cleanup)) {
+	if (*stop) {
+		zend_deactivate_modules_after_rinit_bailout(*stop);
+	} else if (EG(full_tables_cleanup)) {
 		zend_module_entry *module;
 
 		ZEND_HASH_MAP_REVERSE_FOREACH_PTR(&module_registry, module) {
