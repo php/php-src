@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: sjanel <67502353+sjanel@users.noreply.github.com>
 Date: Wed, 11 Nov 2026 20:26:42 +0100
-Subject: [PATCH 25/25] HTML: fixed crash, use-after-free and leaks on
+Subject: [PATCH 25/29] HTML: fixed crash, use-after-free and leaks on
  allocation failure in document create and parse (#448)
 
 HTML: fixed crash, use-after-free and leaks on allocation failure.
