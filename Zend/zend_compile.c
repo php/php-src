@@ -5355,9 +5355,9 @@ static const zend_class_entry *zend_resolve_compile_time_parent(const zend_class
 /* }}} */
 
 /* FE_FETCH_R dereferences array elements, while array_map() preserves references
- * when passing them to callbacks. Only inline a callback whose mapped argument
- * is known at compile time to be passed by value. */
-static bool zend_array_map_callback_takes_value(zend_ast *callback, uint32_t arg_num, zend_string *arg_name)
+ * when passing them to callbacks. Only inline a callback whose target function
+ * or method is statically known and takes the mapped argument by value. */
+static bool zend_array_map_callback_is_optimizable(zend_ast *callback, const zend_ast_list *fcc_args) /* {{{ */
 {
 	zend_ast *name_ast = callback->child[callback->kind == ZEND_AST_CALL ? 0 : 1];
 	if (name_ast->kind != ZEND_AST_ZVAL || Z_TYPE_P(zend_ast_get_zval(name_ast)) != IS_STRING) {
@@ -5365,6 +5365,7 @@ static bool zend_array_map_callback_takes_value(zend_ast *callback, uint32_t arg
 	}
 
 	const zend_function *fbc = NULL;
+	uint32_t fetch_type = ZEND_FETCH_CLASS_DEFAULT;
 	if (callback->kind == ZEND_AST_CALL) {
 		bool is_fully_qualified;
 		zend_string *resolved = zend_resolve_function_name(
@@ -5384,45 +5385,104 @@ static bool zend_array_map_callback_takes_value(zend_ast *callback, uint32_t arg
 		}
 
 		const zend_class_entry *ce = NULL;
-		uint32_t fetch_type = zend_get_class_fetch_type(zend_ast_get_str(class_ast));
+		fetch_type = zend_get_class_fetch_type_ast(class_ast);
 		if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
 			zend_string *class_name = zend_resolve_class_name_ast(class_ast);
 			zend_string *lcname = zend_string_tolower(class_name);
 			ce = zend_hash_find_ptr(CG(class_table), lcname);
 			zend_string_release_ex(lcname, 0);
-			if (!ce && CG(active_class_entry)
+			if (ce) {
+				if (zend_compile_ignore_class(ce, CG(active_op_array)->filename)) {
+					ce = NULL;
+				}
+			} else if (CG(active_class_entry)
 			 && zend_string_equals_ci(CG(active_class_entry)->name, class_name)) {
 				ce = CG(active_class_entry);
 			}
 			zend_string_release_ex(class_name, 0);
-		} else if (fetch_type == ZEND_FETCH_CLASS_SELF && zend_is_scope_known()) {
+		} else if (fetch_type == ZEND_FETCH_CLASS_SELF && CG(active_class_entry) && zend_is_scope_known()) {
 			ce = CG(active_class_entry);
-		} else if (fetch_type == ZEND_FETCH_CLASS_PARENT && zend_is_scope_known()) {
+		} else if (fetch_type == ZEND_FETCH_CLASS_PARENT && CG(active_class_entry) && zend_is_scope_known()) {
 			ce = zend_resolve_compile_time_parent(CG(active_class_entry));
 		}
 
-		if (!ce) {
+		if (!ce || (ce->ce_flags & ZEND_ACC_TRAIT)) {
 			return false;
 		}
+		/* Only look up on ce itself: linked classes already include inherited
+		 * and trait methods in function_table, while an unlinked class (such as
+		 * CG(active_class_entry) or one using traits) may override a parent
+		 * method via a trait or a declaration later in the class body. */
 		zend_string *lcname = zend_string_tolower(zend_ast_get_str(name_ast));
-		for (const zend_class_entry *cur_ce = ce; cur_ce && !fbc; cur_ce = zend_resolve_compile_time_parent(cur_ce)) {
-			if (!zend_compile_ignore_class(cur_ce, CG(active_op_array)->filename)) {
-				fbc = zend_get_compatible_func_or_null(cur_ce, lcname);
-			}
-		}
+		fbc = zend_get_compatible_func_or_null(ce, lcname);
 		zend_string_release_ex(lcname, 0);
 	}
 
-	if (!fbc || !fbc_is_finalized(fbc) || (fbc->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS)) {
+	if (!fbc
+	 || !fbc_is_finalized(fbc)
+	 || (fbc->common.fn_flags & ZEND_ACC_ABSTRACT)
+	 || (fbc->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS)) {
 		return false;
 	}
-	if (arg_name) {
-		arg_num = zend_get_arg_num(fbc, arg_name);
-	}
-	return arg_num != (uint32_t) -1 && !ARG_SHOULD_BE_SENT_BY_REF(fbc, arg_num);
-}
 
-static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *args, zend_string *lcname, uint32_t lineno, uint32_t type) /* {{{ */
+	if (callback->kind == ZEND_AST_STATIC_CALL
+	 && !(fbc->common.fn_flags & ZEND_ACC_STATIC)
+	 && (!zend_is_scope_known() || !CG(active_class_entry)
+	  || (CG(active_op_array)->fn_flags & ZEND_ACC_STATIC)
+	  || (fetch_type != ZEND_FETCH_CLASS_SELF && fetch_type != ZEND_FETCH_CLASS_PARENT))) {
+		return false;
+	}
+
+	bool uses_named_args = false;
+	bool has_placeholder = false;
+	uint32_t positional_count = 0;
+	for (uint32_t i = 0; i < fcc_args->children; i++) {
+		zend_ast *arg = fcc_args->child[i];
+		uint32_t arg_num;
+		if (arg->kind == ZEND_AST_NAMED_ARG) {
+			uses_named_args = true;
+			arg_num = zend_get_arg_num(fbc, zend_ast_get_str(arg->child[0]));
+			if (arg_num == (uint32_t) -1 || arg_num <= positional_count) {
+				return false;
+			}
+			for (uint32_t j = positional_count; j < i; j++) {
+				if (zend_string_equals(zend_ast_get_str(fcc_args->child[j]->child[0]),
+						zend_ast_get_str(arg->child[0]))) {
+					return false;
+				}
+			}
+			arg = arg->child[1];
+		} else {
+			if (uses_named_args) {
+				return false;
+			}
+			arg_num = ++positional_count;
+		}
+
+		if (arg->kind == ZEND_AST_PLACEHOLDER_ARG) {
+			if (has_placeholder) {
+				return false;
+			}
+			if (arg->attr == ZEND_PLACEHOLDER_VARIADIC && uses_named_args) {
+				return false;
+			}
+			if (ARG_SHOULD_BE_SENT_BY_REF(fbc, arg_num)) {
+				return false;
+			}
+			has_placeholder = true;
+			continue;
+		}
+
+		if (arg->kind != ZEND_AST_ZVAL || ARG_MUST_BE_SENT_BY_REF(fbc, arg_num)) {
+			return false;
+		}
+	}
+
+	return has_placeholder;
+}
+/* }}} */
+
+static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *args, zend_string *lcname, uint32_t lineno) /* {{{ */
 {
 	/* array_map() as an internal function calls the callback as if strict_types=0,
 	 * this optimization is therefore not legal if strict_types=1. */
@@ -5452,161 +5512,11 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 	}
 
 	/* PFAs with non-literal pre-bound arguments are not optimizable because we
-	 * can't memoize arguments without breaking pass-by-reference.
-	 * Also reject cases that zend_partial_apply() will refuse before emitting
-	 * any bytecode for the callee expression. */
+	 * can't memoize arguments without breaking pass-by-reference. Also require
+	 * a statically known by-value callee before emitting any bytecode. */
 	zend_ast_fcc *fcc = (zend_ast_fcc*)args_ast;
-	zend_ast_list *fcc_args = zend_ast_get_list(fcc->args);
-	bool uses_named_args = false;
-	bool has_placeholder = false;
-	uint32_t mapped_arg_num = 0;
-	zend_string *mapped_arg_name = NULL;
-	for (uint32_t i = 0; i < fcc_args->children; i++) {
-		zend_ast *arg = fcc_args->child[i];
-		if (arg->kind == ZEND_AST_NAMED_ARG) {
-			if (arg->child[1]->kind == ZEND_AST_PLACEHOLDER_ARG) {
-				mapped_arg_name = zend_ast_get_str(arg->child[0]);
-			}
-			uses_named_args = true;
-			arg = arg->child[1];
-		}
-
-		if (arg->kind == ZEND_AST_PLACEHOLDER_ARG) {
-			if (has_placeholder) {
-				return FAILURE;
-			}
-			if (arg->attr == ZEND_PLACEHOLDER_VARIADIC && uses_named_args) {
-				return FAILURE;
-			}
-			has_placeholder = true;
-			mapped_arg_num = i + 1;
-			continue;
-		}
-
-		if (arg->kind != ZEND_AST_ZVAL) {
-			return FAILURE;
-		}
-	}
-
-	if (!has_placeholder || !zend_array_map_callback_takes_value(callback, mapped_arg_num, mapped_arg_name)) {
+	if (!zend_array_map_callback_is_optimizable(callback, zend_ast_get_list(fcc->args))) {
 		return FAILURE;
-	}
-
-	zend_ast *func_name_ast = callback->child[callback->kind == ZEND_AST_CALL ? 0 : 1];
-	if (callback->kind == ZEND_AST_CALL
-	 && func_name_ast->kind == ZEND_AST_ZVAL
-	 && Z_TYPE_P(zend_ast_get_zval(func_name_ast)) == IS_STRING) {
-		bool is_fully_qualified;
-		zend_string *resolved_name = zend_resolve_function_name(
-			zend_ast_get_str(func_name_ast), func_name_ast->attr, &is_fully_qualified);
-		zend_string *callee_lcname = zend_string_tolower(resolved_name);
-		const zend_function *callee_fbc = zend_hash_find_ptr(CG(function_table), callee_lcname);
-		zend_string_release_ex(resolved_name, 0);
-		zend_string_release_ex(callee_lcname, 0);
-
-		if (callee_fbc
-		 && (!fbc_is_finalized(callee_fbc)
-		  || zend_compile_ignore_function(callee_fbc, CG(active_op_array)->filename))) {
-			callee_fbc = NULL;
-		}
-		if (callee_fbc && (callee_fbc->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS)) {
-			return FAILURE;
-		}
-		if (!callee_fbc && !is_fully_qualified && FC(current_namespace)) {
-			/* Unqualified calls in a namespace fall back to the global function at runtime. */
-			zend_string *global_lcname = zend_string_tolower(zend_ast_get_str(func_name_ast));
-			callee_fbc = zend_hash_find_ptr(CG(function_table), global_lcname);
-			zend_string_release_ex(global_lcname, 0);
-			if (callee_fbc
-			 && fbc_is_finalized(callee_fbc)
-			 && !zend_compile_ignore_function(callee_fbc, CG(active_op_array)->filename)
-			 && (callee_fbc->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS)) {
-				return FAILURE;
-			}
-		}
-	}
-
-	/* Evaluate class name */
-	znode class_node;
-	if (callback->kind == ZEND_AST_STATIC_CALL
-	 && callback->child[0]->kind == ZEND_AST_ZVAL
-	 && Z_TYPE_P(zend_ast_get_zval(callback->child[0])) == IS_STRING
-	 && zend_get_class_fetch_type(zend_ast_get_str(callback->child[0])) == ZEND_FETCH_CLASS_DEFAULT) {
-		/* Resolve the name against the namespace and imports, as compiling it
-		 * as an expression would yield the unresolved string. */
-		class_node.op_type = IS_CONST;
-		ZVAL_STR(&class_node.u.constant, zend_resolve_class_name_ast(callback->child[0]));
-	} else if (callback->kind == ZEND_AST_STATIC_CALL) {
-		znode result;
-		zend_compile_expr(&result, callback->child[0]);
-		if (result.op_type == IS_CONST || result.op_type == IS_TMP_VAR) {
-			class_node = result;
-		} else {
-			class_node = result;
-			zend_emit_op_tmp(&class_node, ZEND_QM_ASSIGN, &result, NULL);
-		}
-	} else {
-		class_node.op_type = IS_UNUSED;
-	}
-
-	/* Evaluate function name */
-	znode func_node;
-	if (callback->kind == ZEND_AST_CALL
-	 && func_name_ast->kind == ZEND_AST_ZVAL
-	 && Z_TYPE_P(zend_ast_get_zval(func_name_ast)) == IS_STRING) {
-		/* A literal function name has no side effects and must not be memoized:
-		 * compiling it as an expression would yield the unresolved string, which
-		 * ignores the current namespace, "use function" imports and the runtime
-		 * fallback to the global function. Compile the call in the loop body with
-		 * the original name instead, like a regular call. */
-		func_node.op_type = IS_UNUSED;
-	} else {
-		znode result;
-		zend_compile_expr(&result, func_name_ast);
-		if (result.op_type == IS_CONST || result.op_type == IS_TMP_VAR) {
-			func_node = result;
-		} else {
-			zend_emit_op_tmp(&func_node, ZEND_QM_ASSIGN, &result, NULL);
-		}
-	}
-
-	if (class_node.op_type == IS_CONST
-	 && func_node.op_type == IS_CONST
-	 && Z_TYPE(func_node.u.constant) == IS_STRING) {
-		const zend_class_entry *ce = NULL;
-		uint32_t fetch_type = zend_get_class_fetch_type(Z_STR(class_node.u.constant));
-		if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
-			zend_string *ce_lcname = zend_string_tolower(Z_STR(class_node.u.constant));
-			ce = zend_hash_find_ptr(CG(class_table), ce_lcname);
-			zend_string_release_ex(ce_lcname, 0);
-			if (ce) {
-				if (zend_compile_ignore_class(ce, CG(active_op_array)->filename)) {
-					ce = NULL;
-				}
-			} else if (CG(active_class_entry)
-					&& zend_string_equals_ci(CG(active_class_entry)->name, Z_STR(class_node.u.constant))) {
-				ce = CG(active_class_entry);
-			}
-		} else if (fetch_type == ZEND_FETCH_CLASS_SELF && zend_is_scope_known()) {
-			ce = CG(active_class_entry);
-		} else if (fetch_type == ZEND_FETCH_CLASS_PARENT && zend_is_scope_known()) {
-			ce = zend_resolve_compile_time_parent(CG(active_class_entry));
-		}
-		if (ce) {
-			zend_string *method_lcname = zend_string_tolower(Z_STR(func_node.u.constant));
-			const zend_function *callee_fbc = NULL;
-			for (const zend_class_entry *cur_ce = ce; cur_ce && !callee_fbc; cur_ce = zend_resolve_compile_time_parent(cur_ce)) {
-				if (!zend_compile_ignore_class(cur_ce, CG(active_op_array)->filename)) {
-					callee_fbc = zend_get_compatible_func_or_null(cur_ce, method_lcname);
-				}
-			}
-			zend_string_release_ex(method_lcname, 0);
-			if (callee_fbc && (callee_fbc->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS)) {
-				zval_ptr_dtor_nogc(&func_node.u.constant);
-				zval_ptr_dtor_nogc(&class_node.u.constant);
-				return FAILURE;
-			}
-		}
 	}
 
 	zend_op *opline;
@@ -5616,56 +5526,8 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 	/* array is an argument to both ZEND_TYPE_ASSERT and to ZEND_FE_RESET_R. */
 	if (array.op_type == IS_CONST) {
 		if (Z_TYPE(array.u.constant) != IS_ARRAY) {
-			if (class_node.op_type != IS_TMP_VAR && func_node.op_type != IS_TMP_VAR) {
-				zval_ptr_dtor_nogc(&array.u.constant);
-				if (func_node.op_type == IS_CONST) {
-					zval_ptr_dtor_nogc(&func_node.u.constant);
-				}
-				if (class_node.op_type == IS_CONST) {
-					zval_ptr_dtor_nogc(&class_node.u.constant);
-				}
-				return FAILURE;
-			}
-
-			/* Callee subexpressions already emitted runtime opcodes into TMP_VARs;
-			 * fall back to a regular array_map() call reusing them so nothing is
-			 * evaluated twice or leaked. */
-			zend_ast *func_ast = func_node.op_type == IS_UNUSED
-				? func_name_ast
-				: zend_ast_create_znode(&func_node);
-			zend_ast *cb_ast;
-			if (callback->kind == ZEND_AST_CALL) {
-				cb_ast = zend_ast_create(ZEND_AST_CALL, func_ast, args_ast);
-			} else {
-				zend_ast *class_ast;
-				if (class_node.op_type == IS_CONST) {
-					zval_ptr_dtor_nogc(&class_node.u.constant);
-					class_ast = callback->child[0];
-				} else {
-					class_ast = zend_ast_create_znode(&class_node);
-				}
-				cb_ast = zend_ast_create(ZEND_AST_STATIC_CALL, class_ast, func_ast, args_ast);
-			}
-			cb_ast->lineno = callback->lineno;
-
-			znode fcall_name;
-			fcall_name.op_type = IS_CONST;
-			ZVAL_STR_COPY(&fcall_name.u.constant, lcname);
-			opline = zend_emit_op(NULL, ZEND_INIT_FCALL, NULL, &fcall_name);
-			opline->lineno = lineno;
-			opline->result.num = zend_alloc_cache_slot();
-
-			const zval *fbc_zv = zend_hash_find(CG(function_table), lcname);
-			const zend_function *array_map_fbc = Z_PTR_P(fbc_zv);
-			if (array_map_fbc->type == ZEND_INTERNAL_FUNCTION) {
-				const Bucket *fbc_bucket = ZEND_CONTAINER_OF(fbc_zv, Bucket, val);
-				Z_EXTRA_P(CT_CONSTANT(opline->op2)) = fbc_bucket - CG(function_table)->arData;
-			}
-
-			zend_ast *fallback_args = zend_ast_create_list(2, ZEND_AST_ARG_LIST,
-				cb_ast, zend_ast_create_znode(&array));
-			zend_compile_call_common(result, fallback_args, array_map_fbc, lineno, type);
-			return SUCCESS;
+			zval_ptr_dtor_nogc(&array.u.constant);
+			return FAILURE;
 		}
 		Z_TRY_ADDREF(array.u.constant);
 	}
@@ -5704,39 +5566,11 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 
 	/* loop body */
 	znode call_result;
-	zend_ast *func_ast;
-	if (func_node.op_type == IS_UNUSED) {
-		func_ast = func_name_ast;
-	} else if (func_node.op_type == IS_CONST) {
-		func_ast = zend_ast_create_znode(&func_node);
-	} else {
-		znode copy_node;
-		zend_emit_op_tmp(&copy_node, ZEND_COPY_TMP, &func_node, NULL);
-		func_ast = zend_ast_create_znode(&copy_node);
-	}
-	switch (callback->kind) {
-		case ZEND_AST_CALL: {
-			zend_compile_expr(&call_result, zend_ast_create(ZEND_AST_CALL, func_ast, call_args));
-			break;
-		}
-		case ZEND_AST_STATIC_CALL: {
-			zend_ast *class_ast;
-			if (class_node.op_type == IS_CONST) {
-				class_ast = zend_ast_create_znode(&class_node);
-			} else {
-				znode copy_node;
-				zend_emit_op_tmp(&copy_node, ZEND_COPY_TMP, &class_node, NULL);
-				class_ast = zend_ast_create_znode(&copy_node);
-			}
-
-			zend_compile_expr(&call_result, zend_ast_create(ZEND_AST_STATIC_CALL, class_ast, func_ast, call_args));
-			zend_ast_destroy(class_ast);
-			break;
-		}
-	}
-	if (func_ast != func_name_ast) {
-		zend_ast_destroy(func_ast);
-	}
+	zend_ast *call_ast = callback->kind == ZEND_AST_CALL
+		? zend_ast_create(ZEND_AST_CALL, callback->child[0], call_args)
+		: zend_ast_create(ZEND_AST_STATIC_CALL, callback->child[0], callback->child[1], call_args);
+	call_ast->lineno = callback->lineno;
+	zend_compile_expr(&call_result, call_ast);
 	opline = zend_emit_op(NULL, ZEND_ADD_ARRAY_ELEMENT, &call_result, &key);
 	SET_NODE(opline->result, result);
 	/* end loop body */
@@ -5751,12 +5585,6 @@ static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *arg
 
 	zend_end_loop(opnum_fetch, &reset_node);
 	zend_emit_op(NULL, ZEND_FE_FREE, &reset_node, NULL);
-	if (func_node.op_type != IS_UNUSED && func_node.op_type != IS_CONST) {
-		zend_emit_op(NULL, ZEND_FREE, &func_node, NULL);
-	}
-	if (class_node.op_type != IS_UNUSED && class_node.op_type != IS_CONST) {
-		zend_emit_op(NULL, ZEND_FREE, &class_node, NULL);
-	}
 
 	return SUCCESS;
 }
@@ -5827,7 +5655,7 @@ static zend_result zend_try_compile_special_func_ex(znode *result, zend_string *
 	} else if (zend_string_equals(lcname, ZSTR_KNOWN(ZEND_STR_CLONE))) {
 		return zend_compile_func_clone(result, args);
 	} else if (zend_string_equals_literal(lcname, "array_map")) {
-		return zend_compile_func_array_map(result, args, lcname, lineno, type);
+		return zend_compile_func_array_map(result, args, lcname, lineno);
 	} else {
 		return FAILURE;
 	}
