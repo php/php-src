@@ -1025,7 +1025,7 @@ ZEND_API bool zend_check_type_and_coerce(
 	return status != ZEND_TYPE_CHECK_INVALID;
 }
 
-static bool zend_check_type_and_coerce_slow(
+ZEND_API bool zend_check_type_and_coerce_slow(
 	const zend_type *type,
 	zval *arg,
 	const zend_class_entry *scope,
@@ -1044,18 +1044,6 @@ static bool zend_check_return_type_slow(
 ) {
 	zend_type_check_mode check_mode = (ref && ZEND_REF_HAS_TYPE_SOURCES(ref)) ? ZEND_TYPE_CHECK_MODE_STRICT : ZEND_TYPE_CHECK_MODE_UNKNOWN_CURRENT_FRAME;
 	return zend_check_type_and_coerce(type, arg, NULL, check_mode, 0);
-}
-
-ZEND_API bool zend_check_user_type_slow(
-		const zend_type *type, zval *arg, const zend_class_entry *scope, zend_type_check_mode check_mode)
-{
-	return zend_check_type_and_coerce_slow(
-		type,
-		arg,
-		scope,
-		check_mode,
-		0
-	);
 }
 
 static zend_never_inline ZEND_COLD void zend_verify_property_type_error(const zend_property_info *info, const zval *property)

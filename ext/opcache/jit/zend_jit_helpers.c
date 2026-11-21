@@ -2001,9 +2001,8 @@ static bool ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, const zend_arg_inf
 {
 	zend_execute_data *execute_data = EG(current_execute_data);
 	const zend_op *opline = EX(opline);
-	const zend_class_entry *scope = EX(func)->common.scope;
-	bool ret = zend_check_user_type_slow(
-		&arg_info->type, arg, scope, ZEND_TYPE_CHECK_MODE_UNKNOWN_PRIOR_FRAME);
+	bool ret = zend_check_type_and_coerce_slow(
+		&arg_info->type, arg, NULL, ZEND_TYPE_CHECK_MODE_UNKNOWN_PRIOR_FRAME, 0);
 	if (UNEXPECTED(!ret)) {
 		zend_verify_arg_error(EX(func), arg_info, opline->op1.num, arg);
 		return false;
@@ -2019,8 +2018,8 @@ static void ZEND_FASTCALL zend_jit_verify_return_slow(zval *arg, const zend_op_a
 			return;
 		}
 	}
-	if (UNEXPECTED(!zend_check_user_type_slow(
-			&arg_info->type, arg, NULL, ZEND_TYPE_CHECK_MODE_UNKNOWN_CURRENT_FRAME))) {
+	if (UNEXPECTED(!zend_check_type_and_coerce_slow(
+			&arg_info->type, arg, NULL, ZEND_TYPE_CHECK_MODE_UNKNOWN_CURRENT_FRAME, 0))) {
 		zend_verify_return_error((zend_function*)op_array, arg);
 	}
 }

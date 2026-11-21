@@ -8975,10 +8975,10 @@ ZEND_VM_HOT_HANDLER(211, ZEND_TYPE_ASSERT, CONST, ANY, NUM)
 		uint16_t argno = opline->extended_value >> 16;
 		zend_arg_info *arginfo = &fbc->common.arg_info[argno - 1];
 
-		if (UNEXPECTED(!zend_check_type_and_coerce(
+		if (UNEXPECTED(!zend_check_type_and_coerce_slow(
 			&arginfo->type,
 			value,
-			EX(func)->common.scope,
+			NULL,
 			ZEND_TYPE_CHECK_MODE_UNKNOWN_PRIOR_FRAME,
 			IS_CALLABLE_SUPPRESS_DEPRECATIONS)
 		)) {

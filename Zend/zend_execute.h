@@ -114,14 +114,20 @@ typedef enum {
 	ZEND_TYPE_CHECK_MODE_UNKNOWN_PRIOR_FRAME = 3,
 } zend_type_check_mode;
 
+ZEND_API bool zend_check_type_and_coerce_slow(
+	const zend_type *type,
+	zval *arg,
+	const zend_class_entry *scope,
+	zend_type_check_mode type_check_mode,
+	uint32_t callable_check_flag
+);
 ZEND_API bool zend_check_type_and_coerce(
 	const zend_type *type,
 	zval *arg,
 	const zend_class_entry *scope,
 	zend_type_check_mode type_checking_mode,
-	const uint32_t callable_check_flag
+	uint32_t callable_check_flag
 );
-ZEND_API bool zend_check_user_type_slow(const zend_type *type, zval *arg, const zend_class_entry *scope, zend_type_check_mode type_check_mode);
 
 #if ZEND_DEBUG
 ZEND_API bool zend_internal_call_should_throw(const zend_function *fbc, zend_execute_data *call);
