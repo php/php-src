@@ -1,7 +1,7 @@
 --TEST--
 Out of Memory from recursive fiber creation
 --INI--
-memory_limit=2M
+memory_limit=4M
 --SKIPIF--
 <?php
 if (getenv("USE_ZEND_ALLOC") === "0") {

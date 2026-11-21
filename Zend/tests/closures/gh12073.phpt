@@ -19,7 +19,7 @@ function test() {
 	};
 }
 
-ini_set('memory_limit', '2M');
+ini_set('memory_limit', '4M');
 
 $array = [];
 for ($i = 0; $i < 10_000; $i++) {

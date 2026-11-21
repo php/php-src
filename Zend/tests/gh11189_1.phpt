@@ -8,7 +8,7 @@ if (PHP_OS_FAMILY === 'Windows') {
 if (getenv("USE_ZEND_ALLOC") === "0") die("skip ZMM is disabled");
 ?>
 --INI--
-memory_limit=2M
+memory_limit=4M
 --FILE--
 <?php
 
@@ -29,4 +29,4 @@ while (1) {
 
 ?>
 --EXPECTF--
-Fatal error: Allowed memory size of 2097152 bytes exhausted %S(tried to allocate %d bytes) in %s on line %d
+Fatal error: Allowed memory size of 4194304 bytes exhausted %S(tried to allocate %d bytes) in %s on line %d

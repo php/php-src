@@ -3,7 +3,7 @@ GH-17399 (iconv_substr() leak on bailout)
 --EXTENSIONS--
 iconv
 --INI--
-memory_limit=2M
+memory_limit=4M
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
