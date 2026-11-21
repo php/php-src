@@ -65,7 +65,10 @@ static zend_string *php_bin2hex(const unsigned char *old, const size_t oldlen)
 	zend_string *result;
 	size_t i, j;
 
-	result = zend_string_safe_alloc(oldlen, 2 * sizeof(char), 0, 0);
+	result = zend_string_safe_falloc(oldlen, 2 * sizeof(char), 0, 0, true);
+	if (UNEXPECTED(result == NULL)) {
+		return NULL;
+	}
 
 	for (i = j = 0; i < oldlen; i++) {
 		ZSTR_VAL(result)[j++] = hexconvtab[old[i] >> 4];
@@ -165,6 +168,9 @@ PHP_FUNCTION(bin2hex)
 	ZEND_PARSE_PARAMETERS_END();
 
 	result = php_bin2hex((unsigned char *)ZSTR_VAL(data), ZSTR_LEN(data));
+	if (UNEXPECTED(result == NULL)) {
+		RETURN_OOM();
+	}
 
 	RETURN_STR(result);
 }
@@ -6390,7 +6396,10 @@ static zend_string *php_utf8_encode(const char *s, size_t len)
 	zend_string *str;
 	unsigned char c;
 
-	str = zend_string_safe_alloc(len, 2, 0, 0);
+	str = zend_string_safe_falloc(len, 2, 0, 0, true);
+	if (UNEXPECTED(str == NULL)) {
+		return NULL;
+	}
 	ZSTR_LEN(str) = 0;
 	while (pos > 0) {
 		/* The lower 256 codepoints of Unicode are identical to Latin-1,
@@ -6454,7 +6463,11 @@ PHP_FUNCTION(utf8_encode)
 		Z_PARAM_STRING(arg, arg_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_STR(php_utf8_encode(arg, arg_len));
+	zend_string *result = php_utf8_encode(arg, arg_len);
+	if (UNEXPECTED(result == NULL)) {
+		RETURN_OOM();
+	}
+	RETURN_STR(result);
 }
 /* }}} */
 
