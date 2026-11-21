@@ -120,8 +120,6 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, const zend_ssa *ssa, z
 	uint32_t *shiftlist;
 	ALLOCA_FLAG(use_heap);
 
-	shiftlist = (uint32_t *)do_alloca(sizeof(uint32_t) * op_array->last, use_heap);
-	memset(shiftlist, 0, sizeof(uint32_t) * op_array->last);
 	/* remove empty callee_info */
 	func_info = ZEND_FUNC_INFO(op_array);
 	if (func_info) {
@@ -135,7 +133,36 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, const zend_ssa *ssa, z
 		}
 	}
 
+	/* Skip the leading blocks that contain no NOP: nothing moves there and shiftlist stays 0. */
 	for (b = blocks; b < blocks_end; b++) {
+		const zend_op *opline, *end;
+
+		if ((b->flags & (ZEND_BB_REACHABLE|ZEND_BB_UNREACHABLE_FREE)) != ZEND_BB_REACHABLE || b->start != i) {
+			break;
+		}
+
+		opline = op_array->opcodes + b->start;
+		end = opline + b->len;
+		while (opline < end && opline->opcode != ZEND_NOP) {
+			opline++;
+		}
+		if (opline != end) {
+			break;
+		}
+
+		i = target = b->start + b->len;
+	}
+
+	/* No NOP and no unreachable block: nothing moves. */
+	if (b == blocks_end) {
+		ZEND_ASSERT(i == op_array->last);
+		return;
+	}
+
+	shiftlist = (uint32_t *)do_alloca(sizeof(uint32_t) * op_array->last, use_heap);
+	memset(shiftlist, 0, sizeof(uint32_t) * op_array->last);
+
+	for (; b < blocks_end; b++) {
 		if (b->flags & (ZEND_BB_REACHABLE|ZEND_BB_UNREACHABLE_FREE)) {
 			if (b->len) {
 				uint32_t new_start, old_end;
