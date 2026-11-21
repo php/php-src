@@ -41,13 +41,6 @@
 extern zend_module_entry date_module_entry;
 #define phpext_date_ptr &date_module_entry
 
-PHP_RINIT_FUNCTION(date);
-PHP_RSHUTDOWN_FUNCTION(date);
-PHP_MINIT_FUNCTION(date);
-PHP_MSHUTDOWN_FUNCTION(date);
-PHP_MINFO_FUNCTION(date);
-ZEND_MODULE_POST_ZEND_DEACTIVATE_D(date);
-
 typedef struct _php_date_obj php_date_obj;
 typedef struct _php_timezone_obj php_timezone_obj;
 typedef struct _php_interval_obj php_interval_obj;
@@ -126,12 +119,8 @@ PHPAPI time_t php_time(void);
 
 /* Backwards compatibility wrapper */
 PHPAPI zend_long php_parse_date(const char *string, zend_long *now);
-PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, bool gmt);
 PHPAPI bool php_idate(char format, time_t ts, bool localtime, int *result);
 
-#define _php_strftime php_strftime
-
-PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, bool gm);
 PHPAPI zend_string *php_format_date(const char *format, size_t format_len, time_t ts, bool localtime);
 PHPAPI zend_string *php_format_date_obj(const char *format, size_t format_len, const php_date_obj *date_obj);
 
