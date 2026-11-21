@@ -1311,8 +1311,9 @@ static void pcntl_signal_handler(int signo)
 		info = siginfo;
 # endif
 		/* A fault happens again on return, now with the default action.
-		 * The syscall that raised SIGSYS just fails. */
-		if (zend_signal_is_synchronous(signo, info)
+		 * abort() raises SIGABRT again by itself, and the syscall that
+		 * raised SIGSYS just fails. */
+		if (zend_signal_is_synchronous(signo, info) && signo != SIGABRT
 # ifdef SIGSYS
 		 && signo != SIGSYS
 # endif

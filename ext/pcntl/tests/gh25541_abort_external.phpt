@@ -27,7 +27,10 @@ if ($pid === 0) {
     posix_kill(posix_getppid(), SIGUSR1);
     usleep(500000);
     pcntl_sigprocmask(SIG_UNBLOCK, [SIGABRT]);
-    pcntl_signal_dispatch();
+    for ($wait = 0; !$handled && $wait < 500; $wait++) {
+        pcntl_signal_dispatch();
+        usleep(10000);
+    }
     exit($handled ? 0 : 1);
 }
 

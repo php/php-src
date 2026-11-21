@@ -22,7 +22,10 @@ pcntl_sigprocmask(SIG_BLOCK, [SIGUSR1]);
 posix_kill(posix_getpid(), SIGUSR1);
 usleep(100000);
 pcntl_sigprocmask(SIG_UNBLOCK, [SIGUSR1]);
-pcntl_signal_dispatch();
+for ($wait = 0; !$handled && $wait < 500; $wait++) {
+    pcntl_signal_dispatch();
+    usleep(10000);
+}
 var_dump($handled);
 ?>
 --EXPECT--
