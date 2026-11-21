@@ -27,6 +27,8 @@
 # define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
+#define MAX_CONTENT_LENGTH ((ssize_t)(SIZE_MAX >> 1))
+
 
 #define CALLBACK2(FOR)                                               \
 do {                                                                 \
@@ -1228,6 +1230,7 @@ size_t php_http_parser_execute (php_http_parser *parser,
           case h_content_length:
             if (ch == ' ') break;
             if (ch < '0' || ch > '9') goto error;
+            if (parser->content_length > (MAX_CONTENT_LENGTH - (ch - '0')) / 10) goto error;
             parser->content_length *= 10;
             parser->content_length += ch - '0';
             break;
@@ -1433,6 +1436,7 @@ size_t php_http_parser_execute (php_http_parser *parser,
           goto error;
         }
 
+        if (parser->content_length > (MAX_CONTENT_LENGTH - c) / 16) goto error;
         parser->content_length *= 16;
         parser->content_length += c;
         break;
