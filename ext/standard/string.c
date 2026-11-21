@@ -64,7 +64,10 @@ static zend_string *php_bin2hex(const unsigned char *old, const size_t oldlen)
 	zend_string *result;
 	size_t i, j;
 
-	result = zend_string_safe_alloc(oldlen, 2 * sizeof(char), 0, 0);
+	result = zend_string_safe_falloc(oldlen, 2 * sizeof(char), 0, 0, /* fallible */ true);
+	if (UNEXPECTED(!result)) {
+		return NULL;
+	}
 
 	for (i = j = 0; i < oldlen; i++) {
 		ZSTR_VAL(result)[j++] = hexconvtab[old[i] >> 4];
@@ -177,6 +180,9 @@ PHP_FUNCTION(bin2hex)
 	ZEND_PARSE_PARAMETERS_END();
 
 	result = php_bin2hex((unsigned char *)ZSTR_VAL(data), ZSTR_LEN(data));
+	if (UNEXPECTED(!result)) {
+		RETURN_OOM();
+	}
 
 	RETURN_STR(result);
 }
