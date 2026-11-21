@@ -26,6 +26,9 @@
 #ifdef __APPLE__
 # include <pthread.h>
 #endif
+#ifdef __FreeBSD__
+# include <pthread_np.h>
+#endif
 
 #ifdef _MSC_VER
 #include <intrin.h>
@@ -79,7 +82,14 @@ static inline size_t zend_call_stack_default_size(void)
 #ifdef __linux__
 	return 8 * 1024 * 1024;
 #endif
-#if defined(__FreeBSD__) || defined(__NetBSD__)
+#ifdef __FreeBSD__
+	// libthr: THR_STACK_DEFAULT in lib/libthr/thread/thr_private.h
+	if (pthread_main_np() == 0) {
+		return sizeof(void *) / 4 * 1024 * 1024;
+	}
+	return 4 * 1024 * 1024;
+#endif
+#ifdef __NetBSD__
 	return 4 * 1024 * 1024;
 #endif
 #if defined(__DragonFly__)
