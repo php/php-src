@@ -920,8 +920,9 @@ static inline zend_result php_url_scanner_reset_var_impl(zend_string *name, int 
 		goto finish;
 	}
 	/* Check preceding separator */
+	ZEND_ASSERT(start >= ZSTR_VAL(url_state->url_app.s));
 	if (!sep_removed
-		&& (size_t)(start - ZSTR_VAL(PG(arg_separator).output)) >= separator_len
+		&& (size_t)(start - ZSTR_VAL(url_state->url_app.s)) >= separator_len
 		&& !memcmp(start - separator_len, ZSTR_VAL(PG(arg_separator).output), separator_len)) {
 		start -= separator_len;
 	}
