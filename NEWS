@@ -118,6 +118,8 @@ PHP                                                                        NEWS
 - PCNTL:
   . Fixed pcntl_signal() raising a fatal error for SIGKILL and SIGSTOP.
     (lacatoire)
+  . Fixed bug GH-25541 (Signal delivered to a thread that never ran PHP
+    crashes or kills the process under ZTS). (phcorp)
 
 - PCRE:
   . Fixed \C being allowed in patterns enabling UTF mode with (*UTF) instead

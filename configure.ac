@@ -395,6 +395,7 @@ AC_CHECK_HEADERS(m4_normalize([
   sys/vfs.h
   sys/sysexits.h
   sys/uio.h
+  sys/ucontext.h
   sys/wait.h
   sys/loadavg.h
   unistd.h

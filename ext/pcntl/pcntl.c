@@ -1297,7 +1297,38 @@ static void pcntl_signal_handler(int signo, siginfo_t *siginfo, void *context)
 static void pcntl_signal_handler(int signo)
 #endif
 {
-	struct php_pcntl_pending_signal *psig = PCNTL_G(spares);
+	struct php_pcntl_pending_signal *psig;
+
+#ifdef ZTS
+	/* Not a PHP thread: there is no PCNTL_G() here. */
+	if (UNEXPECTED(tsrm_is_shutdown() || !tsrm_is_managed_thread())) {
+		const siginfo_t *info = NULL;
+
+# ifdef HAVE_STRUCT_SIGINFO_T
+		if (zend_signal_reroute_from_foreign_thread(signo, siginfo, context)) {
+			return;
+		}
+		info = siginfo;
+# endif
+		/* A fault happens again on return, now with the default action.
+		 * abort() raises SIGABRT again by itself, and the syscall that
+		 * raised SIGSYS just fails. */
+		if (zend_signal_is_synchronous(signo, info) && signo != SIGABRT
+# ifdef SIGSYS
+		 && signo != SIGSYS
+# endif
+		) {
+			struct sigaction sa;
+			memset(&sa, 0, sizeof(sa));
+			sa.sa_handler = SIG_DFL;
+			sigemptyset(&sa.sa_mask);
+			sigaction(signo, &sa, NULL);
+		}
+		return;
+	}
+#endif
+
+	psig = PCNTL_G(spares);
 	if (!psig) {
 		/* oops, too many signals for us to track, so we'll forget about this one */
 		return;

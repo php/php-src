@@ -307,6 +307,14 @@ namespace {
 
     function zend_test_raise_and_throw(int $signal): void {}
 
+#if defined(ZTS) && !defined(PHP_WIN32)
+    function zend_test_raise_on_foreign_thread(int $signal): void {}
+
+    function zend_test_abort_on_foreign_thread(): void {}
+
+    function zend_test_start_foreign_thread(): void {}
+#endif
+
     function zend_test_fill_packed_array(array &$array): void {}
 
     /** @return resource */
