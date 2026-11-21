@@ -13,9 +13,8 @@ var_dump($formatter->setPattern('{0,date'));
 var_dump($formatter->getPattern());
 var_dump($formatter->format(['world']));
 
-date_default_timezone_set('Asia/Tokyo');
-var_dump($formatter->setPattern('{0,time,HH:mm}'));
-var_dump($formatter->format([0]));
+var_dump($formatter->setPattern('{0,number,integer} items'));
+var_dump($formatter->format([2]));
 ?>
 --EXPECT--
 string(13) "Hello, world!"
@@ -23,4 +22,4 @@ bool(false)
 string(11) "Hello, {0}!"
 string(13) "Hello, world!"
 bool(true)
-string(5) "09:00"
+string(7) "2 items"
