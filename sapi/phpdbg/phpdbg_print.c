@@ -235,7 +235,7 @@ static void phpdbg_print_opcodes_method_ce(zend_class_entry *ce, const char *fun
 	zend_function *func;
 
 	if (ce->type != ZEND_USER_CLASS) {
-		phpdbg_out("function name: %s::%s (internal)\n", ce->name->val, function);
+		phpdbg_out("function name: %s::%s (internal)\n", ZSTR_VAL(ce->name), function);
 		return;
 	}
 

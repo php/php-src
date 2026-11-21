@@ -1831,11 +1831,11 @@ void phpdbg_force_interruption(void) /* {{{ */ {
 				phpdbg_notice("Current opline: %p (op #%u) in %s:%u",
 				    data->opline,
 				    (uint32_t) (data->opline - data->func->op_array.opcodes),
-				    data->func->op_array.filename->val,
+				    ZSTR_VAL(data->func->op_array.filename),
 				    data->opline->lineno);
 			} else if (data->func->internal_function.function_name) {
 				phpdbg_notice("Current opline: in internal function %s",
-				    data->func->internal_function.function_name->val);
+				    ZSTR_VAL(data->func->internal_function.function_name));
 			} else {
 				phpdbg_notice("Current opline: executing internal code");
 			}
