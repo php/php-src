@@ -544,13 +544,16 @@ ZEND_API void zend_signal_startup(void)
 static zend_atomic_bool zend_signal_rerouted[ZEND_SIGNAL_TRACKED];
 
 /* {{{ zend_signal_is_synchronous
- * Faults, and abort() on this thread, must take their default action on the
- * thread they hit. The same signals sent with kill() are ordinary signals. */
+ * Faults must take their default action on the thread they hit. The same
+ * signals sent with kill() are ordinary signals.
+ *
+ * SIGABRT is not one of them: if a handler returns, abort() restores the
+ * default action and raises it again, even when the handler left it blocked.
+ * It also can't be told apart from kill(getpid(), SIGABRT), which the re-route
+ * itself sends, on every platform: macOS reports both alike. */
 ZEND_API bool zend_signal_is_synchronous(int signo, const siginfo_t *siginfo)
 {
 	switch (signo) {
-		case SIGABRT:
-			return !siginfo || siginfo->si_pid == getpid();
 		case SIGSEGV:
 		case SIGFPE:
 		case SIGILL:

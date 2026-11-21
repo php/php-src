@@ -810,6 +810,27 @@ static ZEND_FUNCTION(zend_test_raise_on_foreign_thread)
 	pthread_join(thread, NULL);
 }
 
+static void *zend_test_abort_thread(void *arg)
+{
+	(void) arg;
+	abort();
+	return NULL;
+}
+
+/* Calls abort() on a thread that never ran PHP and has no TSRM storage. */
+static ZEND_FUNCTION(zend_test_abort_on_foreign_thread)
+{
+	pthread_t thread;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	if (pthread_create(&thread, NULL, zend_test_abort_thread, NULL) != 0) {
+		zend_throw_error(NULL, "pthread_create() failed");
+		RETURN_THROWS();
+	}
+	pthread_join(thread, NULL);
+}
+
 static void *zend_test_idle_thread(void *arg)
 {
 	(void) arg;

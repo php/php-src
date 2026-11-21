@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 48ccd956ff33cb3abb8ed0a88329d6eff2a2ed5b */
+ * Stub hash: 8edb08faa803292b450ab11b2bb2c4f134aa37d3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -160,8 +160,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_raise_on_foreign_threa
 	ZEND_ARG_TYPE_INFO(0, signal, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_start_foreign_thread, 0, 0, IS_VOID, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_abort_on_foreign_thread, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
+
+#define arginfo_zend_test_start_foreign_thread arginfo_zend_test_abort_on_foreign_thread
 #endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_fill_packed_array, 0, 1, IS_VOID, 0)
@@ -347,6 +349,7 @@ static ZEND_FUNCTION(zend_test_crash);
 static ZEND_FUNCTION(zend_test_raise_and_throw);
 #if defined(ZTS) && !defined(PHP_WIN32)
 static ZEND_FUNCTION(zend_test_raise_on_foreign_thread);
+static ZEND_FUNCTION(zend_test_abort_on_foreign_thread);
 static ZEND_FUNCTION(zend_test_start_foreign_thread);
 #endif
 static ZEND_FUNCTION(zend_test_fill_packed_array);
@@ -467,6 +470,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_raise_and_throw, arginfo_zend_test_raise_and_throw)
 #if defined(ZTS) && !defined(PHP_WIN32)
 	ZEND_FE(zend_test_raise_on_foreign_thread, arginfo_zend_test_raise_on_foreign_thread)
+	ZEND_FE(zend_test_abort_on_foreign_thread, arginfo_zend_test_abort_on_foreign_thread)
 	ZEND_FE(zend_test_start_foreign_thread, arginfo_zend_test_start_foreign_thread)
 #endif
 	ZEND_FE(zend_test_fill_packed_array, arginfo_zend_test_fill_packed_array)
