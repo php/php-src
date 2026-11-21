@@ -380,8 +380,8 @@ static int php_sqlite_collation_callback(void *context, int string1_len, const v
 	if (!Z_ISUNDEF(retval)) {
 		if (Z_TYPE(retval) != IS_LONG) {
 			zend_string *func_name = get_active_function_or_method_name();
-			zend_type_error("%s(): Return value of the collation callback must be of type int, %s returned",
-				ZSTR_VAL(func_name), zend_zval_value_name(&retval));
+			zend_type_error("%pS(): Return value of the collation callback must be of type int, %s returned",
+				func_name, zend_zval_value_name(&retval));
 			zend_string_release(func_name);
 			zval_ptr_dtor(&retval);
 			return FAILURE;
