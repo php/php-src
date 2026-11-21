@@ -57,8 +57,12 @@ zend_result zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ct
 
 	zend_cfg_build_predecessors(&ctx->arena, &ssa->cfg);
 
+	uint32_t dump_flags = (ctx->debug_level & ZEND_DUMP_LINE_NUMBERS_PASSTHRU)
+		? ZEND_DUMP_LINE_NUMBERS
+		: 0;
+
 	if (ctx->debug_level & ZEND_DUMP_DFA_CFG) {
-		zend_dump_op_array(op_array, ZEND_DUMP_CFG, "dfa cfg", &ssa->cfg);
+		zend_dump_op_array(op_array, ZEND_DUMP_CFG | dump_flags, "dfa cfg", &ssa->cfg);
 	}
 
 	/* Compute Dominators Tree */
@@ -83,7 +87,7 @@ zend_result zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ct
 	}
 
 	if (ctx->debug_level & ZEND_DUMP_DFA_SSA) {
-		zend_dump_op_array(op_array, ZEND_DUMP_SSA, "dfa ssa", ssa);
+		zend_dump_op_array(op_array, ZEND_DUMP_SSA | dump_flags, "dfa ssa", ssa);
 	}
 
 
@@ -1059,8 +1063,13 @@ static bool zend_dfa_try_to_replace_result(const zend_op_array *op_array, const 
 
 void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, zend_ssa *ssa, zend_call_info **call_map)
 {
+	uint32_t dump_flags = ZEND_DUMP_SSA;
+	if (ctx->debug_level & ZEND_DUMP_LINE_NUMBERS_PASSTHRU) {
+		dump_flags |= ZEND_DUMP_LINE_NUMBERS;
+	}
+
 	if (ctx->debug_level & ZEND_DUMP_BEFORE_DFA_PASS) {
-		zend_dump_op_array(op_array, ZEND_DUMP_SSA, "before dfa pass", ssa);
+		zend_dump_op_array(op_array, dump_flags, "before dfa pass", ssa);
 	}
 
 	if (ssa->var_info) {
@@ -1093,7 +1102,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 				}
 			}
 			if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_8) {
-				zend_dump_op_array(op_array, ZEND_DUMP_SSA, "after sccp pass", ssa);
+				zend_dump_op_array(op_array, dump_flags, "after sccp pass", ssa);
 			}
 #if ZEND_DEBUG_DFA
 			ssa_verify_integrity(op_array, ssa, "after calls");
@@ -1108,7 +1117,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 				remove_nops = 1;
 			}
 			if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_14) {
-				zend_dump_op_array(op_array, ZEND_DUMP_SSA, "after dce pass", ssa);
+				zend_dump_op_array(op_array, dump_flags, "after dce pass", ssa);
 			}
 #if ZEND_DEBUG_DFA
 			ssa_verify_integrity(op_array, ssa, "after dce");
@@ -1683,7 +1692,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 	}
 
 	if (ctx->debug_level & ZEND_DUMP_AFTER_DFA_PASS) {
-		zend_dump_op_array(op_array, ZEND_DUMP_SSA, "after dfa pass", ssa);
+		zend_dump_op_array(op_array, dump_flags, "after dfa pass", ssa);
 	}
 }
 

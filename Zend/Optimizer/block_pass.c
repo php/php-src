@@ -1732,8 +1732,13 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		return;
 	}
 
+	uint32_t dump_flags = ZEND_DUMP_CFG;
+	if (ctx->debug_level & ZEND_DUMP_LINE_NUMBERS_PASSTHRU) {
+		dump_flags |= ZEND_DUMP_LINE_NUMBERS;
+	}
+
 	if (ctx->debug_level & ZEND_DUMP_BEFORE_BLOCK_PASS) {
-		zend_dump_op_array(op_array, ZEND_DUMP_CFG, "before block pass", &cfg);
+		zend_dump_op_array(op_array, dump_flags, "before block pass", &cfg);
 	}
 
 	bitset_len = zend_bitset_len(op_array->last_var + op_array->T);
@@ -1803,7 +1808,7 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 	assemble_code_blocks(&cfg, op_array, ctx);
 
 	if (ctx->debug_level & ZEND_DUMP_AFTER_BLOCK_PASS) {
-		zend_dump_op_array(op_array, ZEND_DUMP_CFG | ZEND_DUMP_HIDE_UNREACHABLE, "after block pass", &cfg);
+		zend_dump_op_array(op_array, dump_flags | ZEND_DUMP_HIDE_UNREACHABLE, "after block pass", &cfg);
 	}
 
 	/* Destroy CFG */
