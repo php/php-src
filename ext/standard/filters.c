@@ -650,6 +650,7 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 	unsigned int lb_cnt;
 	unsigned int trail_ws;
 	int opts;
+	bool flush;
 	static const char qp_digits[] = "0123456789ABCDEF";
 
 	line_ccnt = inst->line_ccnt;
@@ -657,12 +658,12 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 	lb_ptr = inst->lb_ptr;
 	lb_cnt = inst->lb_cnt;
 
-	if (in_pp == NULL || in_left_p == NULL) {
-		return PHP_CONV_ERR_SUCCESS;
-	}
+	/* A NULL input means the stream is being closed: emit any characters
+	 * held back while looking for a line break sequence. */
+	flush = (in_pp == NULL || in_left_p == NULL);
 
-	ps = (unsigned char *)(*in_pp);
-	icnt = *in_left_p;
+	ps = flush ? NULL : (unsigned char *)(*in_pp);
+	icnt = flush ? 0 : *in_left_p;
 	pd = (unsigned char *)(*out_pp);
 	ocnt = *out_left_p;
 	trail_ws = 0;
@@ -696,7 +697,9 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 			}
 		}
 
-		if (lb_ptr >= lb_cnt && icnt == 0) {
+		/* Keep a partial line break sequence at the end of the input until
+		 * more input arrives or the stream is flushed. */
+		if (icnt == 0 && (lb_ptr >= lb_cnt || !flush)) {
 			break;
 		}
 
@@ -725,7 +728,7 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 				}
 
 				/* Check to see if this is EOL whitespace. */
-				if (inst->lbchars != NULL) {
+				if (inst->lbchars != NULL && icnt > 0) {
 					unsigned char *ps2;
 					unsigned int lb_cnt2;
 					size_t j;
@@ -813,8 +816,10 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 		}
 	}
 
-	*in_pp = (const char *)ps;
-	*in_left_p = icnt;
+	if (!flush) {
+		*in_pp = (const char *)ps;
+		*in_left_p = icnt;
+	}
 	*out_pp = (char *)pd;
 	*out_left_p = ocnt;
 	inst->line_ccnt = line_ccnt;
