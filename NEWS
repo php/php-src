@@ -31,6 +31,8 @@ PHP                                                                        NEWS
     (Nicolas Grekas)
   . Fixed stack limit on OpenBSD threads other than the main one.
     (Ostap Brehin)
+  . Fixed stack limit fallback on FreeBSD threads other than the main one.
+    (Ostap Brehin)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
