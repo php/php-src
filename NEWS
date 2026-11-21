@@ -60,6 +60,8 @@ PHP                                                                        NEWS
   . Fixed crash when registerNodeClass() is given a class with a constant
     expression that cannot be evaluated; registerNodeClass() now throws the
     evaluation Error instead. (Ilia Alshanetsky)
+  . Fixed a crash and a use-after-free in key() of an attribute or DTD named
+    node map iterator that has no current item. (Ilia Alshanetsky)
 
 - Fileinfo:
   . Fixed bug GH-25051 (TrueType fonts detected as application/octet-stream
