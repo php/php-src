@@ -78,6 +78,9 @@ PHP                                                                        NEWS
     mb_output_handler() while it is still in use. (Ilia Alshanetsky)
 
 - Opcache:
+  . Fixed bug GH-25471 (Windows: a process attaching to freshly created OPcache
+    shared memory can read an unset app_shared_globals and crash in
+    accel_post_startup()). (Manuel Dimmler)
   . Fixed bug GH-25165 (Tracing JIT loops forever once opcache.jit_buffer_size
     is exhausted while compiling side traces). (Ilia Alshanetsky)
   . Fixed bug GH-25164 (Function JIT loop calling a user function runs once
