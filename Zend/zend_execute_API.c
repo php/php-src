@@ -1775,11 +1775,12 @@ check_fetch_type:
 			break;
 	}
 
-	ce = zend_lookup_class_ex(class_name, NULL, fetch_type);
+	zend_string *name = zend_string_copy(class_name);
+	ce = zend_lookup_class_ex(name, NULL, fetch_type);
 	if (!ce) {
-		report_class_fetch_error(class_name, fetch_type);
-		return NULL;
+		report_class_fetch_error(name, fetch_type);
 	}
+	zend_string_release(name);
 	return ce;
 }
 /* }}} */
@@ -1809,11 +1810,12 @@ zend_class_entry *zend_fetch_class_with_scope(
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
-	ce = zend_lookup_class_ex(class_name, NULL, fetch_type);
+	zend_string *name = zend_string_copy(class_name);
+	ce = zend_lookup_class_ex(name, NULL, fetch_type);
 	if (!ce) {
-		report_class_fetch_error(class_name, fetch_type);
-		return NULL;
+		report_class_fetch_error(name, fetch_type);
 	}
+	zend_string_release(name);
 	return ce;
 }
 
