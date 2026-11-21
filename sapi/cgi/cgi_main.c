@@ -1762,8 +1762,6 @@ int main(int argc, char *argv[])
 # endif
 #endif
 
-	zend_signal_startup();
-
 #ifdef ZTS
 	ts_allocate_id(&php_cgi_globals_id, sizeof(php_cgi_globals_struct), (ts_allocate_ctor) php_cgi_globals_ctor, NULL);
 #else
@@ -2044,7 +2042,6 @@ consult the installation file that came with this distribution, or visit \n\
 						sigaction(SIGTERM, &old_term, 0);
 						sigaction(SIGQUIT, &old_quit, 0);
 						sigaction(SIGINT,  &old_int,  0);
-						zend_signal_init();
 						break;
 					case -1:
 						perror("php (pre-forking)");
@@ -2084,7 +2081,6 @@ consult the installation file that came with this distribution, or visit \n\
 			}
 		} else {
 			parent = 0;
-			zend_signal_init();
 		}
 
 #else

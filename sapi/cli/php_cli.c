@@ -1252,8 +1252,6 @@ PHP_CLI_API int do_php_cli(int argc, char *argv[])
 # endif
 #endif
 
-	zend_signal_startup();
-
 #ifdef PHP_WIN32
 	_fmode = _O_BINARY;			/*sets default for file streams to binary */
 	_setmode(_fileno(stdin), O_BINARY);		/* make the stdio mode be binary */

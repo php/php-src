@@ -64,6 +64,14 @@ static MUTEX_T zts_lock;
 #endif
 int lock_file = -1;
 static char lockfile_name[MAXPATHLEN];
+/* Deferred while holding the write lock, so a killed process never leaves the SHM half-written */
+static sigset_t lock_sigmask;
+
+# ifdef ZTS
+#  define zend_shared_alloc_sigmask(how, set, oldset) tsrm_sigmask((how), (set), (oldset))
+# else
+#  define zend_shared_alloc_sigmask(how, set, oldset) sigprocmask((how), (set), (oldset))
+# endif
 #endif
 
 static const zend_shared_memory_handler_entry handler_table[] = {
@@ -86,6 +94,21 @@ static const zend_shared_memory_handler_entry handler_table[] = {
 void zend_shared_alloc_create_lock(char *lockfile_path)
 {
 	int val;
+
+	sigfillset(&lock_sigmask);
+	sigdelset(&lock_sigmask, SIGILL);
+	sigdelset(&lock_sigmask, SIGABRT);
+	sigdelset(&lock_sigmask, SIGFPE);
+	sigdelset(&lock_sigmask, SIGSEGV);
+#ifdef SIGBUS
+	sigdelset(&lock_sigmask, SIGBUS);
+#endif
+#ifdef SIGSYS
+	sigdelset(&lock_sigmask, SIGSYS);
+#endif
+#ifdef SIGTRAP
+	sigdelset(&lock_sigmask, SIGTRAP);
+#endif
 
 #ifdef ZTS
 	zts_lock = tsrm_mutex_alloc();
@@ -527,6 +550,9 @@ void zend_shared_alloc_lock(void)
 		}
 		break;
 	}
+
+	/* Masked only once acquired, so a process waiting for the lock stays killable */
+	zend_shared_alloc_sigmask(SIG_BLOCK, &lock_sigmask, &ZCG(lock_saved_sigmask));
 #else
 	zend_shared_alloc_lock_win32();
 #endif
@@ -556,8 +582,25 @@ void zend_shared_alloc_unlock(void)
 #ifdef ZTS
 	tsrm_mutex_unlock(zts_lock);
 #endif
+	zend_shared_alloc_sigmask(SIG_SETMASK, &ZCG(lock_saved_sigmask), NULL);
 #else
 	zend_shared_alloc_unlock_win32();
+#endif
+}
+
+void zend_shared_alloc_unblock_signals(void)
+{
+	ZEND_ASSERT(ZCG(locked));
+#ifndef ZEND_WIN32
+	zend_shared_alloc_sigmask(SIG_SETMASK, &ZCG(lock_saved_sigmask), NULL);
+#endif
+}
+
+void zend_shared_alloc_block_signals(void)
+{
+	ZEND_ASSERT(ZCG(locked));
+#ifndef ZEND_WIN32
+	zend_shared_alloc_sigmask(SIG_BLOCK, &lock_sigmask, NULL);
 #endif
 }
 
