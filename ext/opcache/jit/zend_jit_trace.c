@@ -8759,7 +8759,11 @@ abort:
 
 int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf *regs)
 {
+#ifdef ZREG_TRACE_NUM
+	uint32_t trace_num = (uint32_t) regs->gpr[ZREG_TRACE_NUM];
+#else
 	uint32_t trace_num = EG(jit_trace_num);
+#endif
 	zend_execute_data *execute_data = EG(current_execute_data);
 	const zend_op *orig_opline = EX(opline);
 	const zend_op *opline;

@@ -43,6 +43,14 @@
 #  define ZREG_FP             14 /* IR_REG_R14 */
 #  define ZREG_IP             15 /* IR_REG_R15 */
 # endif
+# if defined(__linux__) && defined(__LP64__)
+/* IR_EXITCALL saves both registers. Use one that the VM does not use for FP or IP. */
+#  if ZEND_VM_KIND == ZEND_VM_KIND_HYBRID
+#   define ZREG_TRACE_NUM     12 /* IR_REG_R12 */
+#  elif ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
+#   define ZREG_TRACE_NUM     14 /* IR_REG_R14 */
+#  endif
+# endif
 # define ZREG_FIRST_FPR      16
 # if defined(_WIN64)
 #  define IR_REGSET_PRESERVED ((1<<3) | (1<<5) | (1<<6) | (1<<7) | (1<<12) | (1<<13) | (1<<14) | (1<<15))
@@ -67,6 +75,11 @@
 # else
 #  define ZREG_FP             27 /* IR_REG_X27 */
 #  define ZREG_IP             28 /* IR_REG_X28 */
+# endif
+# if defined(__linux__) && defined(__LP64__) \
+		&& (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL)
+/* X22 is callee-saved, captured by IR_EXITCALL. */
+#  define ZREG_TRACE_NUM      22 /* IR_REG_X22 */
 # endif
 # define ZREG_FIRST_FPR      32
 # define IR_REGSET_PRESERVED ((1<<19) | (1<<20) | (1<<21) | (1<<22) | (1<<23) | \
@@ -2497,6 +2510,11 @@ static int zend_jit_trace_escape_stub(zend_jit_ctx *jit)
 static int zend_jit_trace_exit_stub(zend_jit_ctx *jit)
 {
 	ir_ref ref, ret, if_zero, addr;
+
+#ifdef ZREG_TRACE_NUM
+	/* Keep the trace number intact until IR_EXITCALL captures the registers. */
+	jit->ctx.fixed_regset |= 1u << ZREG_TRACE_NUM;
+#endif
 
 	// EX(opline) = opline
 	ir_STORE(jit_EX(opline), jit_IP(jit));
@@ -17706,7 +17724,12 @@ static int zend_jit_trace_start(zend_jit_ctx        *jit,
 
 	zend_jit_preserve_parent_regs(jit, ssa, parent, exit_num);
 
+#ifdef ZREG_TRACE_NUM
+	jit->ctx.fixed_regset |= 1u << ZREG_TRACE_NUM;
+	ir_RSTORE(ZREG_TRACE_NUM, ir_CONST_U32(trace_num));
+#else
 	ir_STORE(jit_EG(jit_trace_num), ir_CONST_U32(trace_num));
+#endif
 
 	return 1;
 }
