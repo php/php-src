@@ -31,6 +31,12 @@ var_dump(sodium_crypto_ipcrypt_decrypt($enc6, $key));
 $gen_key = sodium_crypto_ipcrypt_keygen();
 var_dump(strlen($gen_key) === SODIUM_CRYPTO_IPCRYPT_KEYBYTES);
 
+/* Known answer: draft-denis-ipcrypt A.1 vector 3 */
+$kat_key = sodium_hex2bin("2b7e151628aed2a6abf7158809cf4f3c");
+$kat = sodium_crypto_ipcrypt_encrypt("192.0.2.1", $kat_key);
+var_dump($kat);
+var_dump(sodium_crypto_ipcrypt_decrypt($kat, $kat_key));
+
 /* Error: wrong key length */
 try {
     sodium_crypto_ipcrypt_encrypt("192.168.1.1", "short");
@@ -58,6 +64,8 @@ bool(true)
 bool(true)
 string(3) "::1"
 bool(true)
+string(39) "1dbd:c1b9:fff1:7586:7d0b:67b4:e76e:4777"
+string(9) "192.0.2.1"
 sodium_crypto_ipcrypt_encrypt(): Argument #2 ($key) must be SODIUM_CRYPTO_IPCRYPT_KEYBYTES bytes long
 sodium_crypto_ipcrypt_encrypt(): Argument #1 ($ip) must be a valid IP address
 sodium_crypto_ipcrypt_decrypt(): Argument #2 ($key) must be SODIUM_CRYPTO_IPCRYPT_KEYBYTES bytes long
