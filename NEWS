@@ -66,6 +66,10 @@ PHP                                                                        NEWS
   . Fixed stack overflow in filter_var() and filter_var_array() with deeply
     nested arrays. (Eyüp Can Akman)
 
+- FPM:
+  . Fixed stack buffer overflow when logging an error with errno text and
+    log_limit above 2048. (Jorg Sowa)
+
 - GD:
   . Fixed use-after-free when drawing with a brush or tile image that was
     released after imagesetbrush() or imagesettile(). (lacatoire)
