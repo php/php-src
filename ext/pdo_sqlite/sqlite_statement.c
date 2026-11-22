@@ -162,9 +162,10 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 						if (SQLITE_OK == sqlite3_bind_blob(S->stmt, param->paramno + 1,
 								Z_STRVAL_P(parameter),
 								Z_STRLEN_P(parameter),
-								SQLITE_STATIC)) {
+								SQLITE_TRANSIENT)) {
 							return 1;
 						}
+						pdo_sqlite_error_stmt(stmt);
 						return 0;
 
 					case PDO_PARAM_STR:
@@ -185,7 +186,7 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 							if (SQLITE_OK == sqlite3_bind_text(S->stmt, param->paramno + 1,
 									Z_STRVAL_P(parameter),
 									Z_STRLEN_P(parameter),
-									SQLITE_STATIC)) {
+									SQLITE_TRANSIENT)) {
 								return 1;
 							}
 						}
