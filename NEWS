@@ -126,6 +126,8 @@ PHP                                                                        NEWS
     (pavimus)
   . Fixed incorrect constant propagation when unpacking into partially known
     arrays. (Weilin Du)
+  . Fixed function JIT ASSIGN_DIM reporting an undefined value or key out of
+    order, or when the VM does not, on non-array containers. (Jorg Sowa)
 
 - OpenSSL:
   . Fixed bug GH-25172 (TLS session reuse shares request-lifetime callback
