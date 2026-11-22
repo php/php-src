@@ -93,16 +93,9 @@ static int zend_file_cache_flock(int fd, int op)
 	}
 	return -1;
 }
-#elif defined(HAVE_FLOCK)
-# define zend_file_cache_flock flock
 #else
-# define LOCK_SH 0
-# define LOCK_EX 1
-# define LOCK_UN 2
-static int zend_file_cache_flock(int fd, int type)
-{
-	return 0;
-}
+# include "main/flock_compat.h"
+# define zend_file_cache_flock flock
 #endif
 
 #ifndef O_BINARY
