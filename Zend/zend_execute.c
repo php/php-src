@@ -2563,7 +2563,13 @@ ZEND_API ZEND_COLD zval* ZEND_FASTCALL zend_undefined_index_write(HashTable *ht,
 
 ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_method(const zend_class_entry *ce, const zend_string *method)
 {
-	zend_throw_error(NULL, "Call to undefined method %pS::%pS()", ce->name, method);
+	zend_execute_data *execute_data = EG(current_execute_data);
+
+	if (UNEXPECTED(execute_data != NULL && (EX(opline) + 1)->opcode == ZEND_CALLABLE_CONVERT)) {
+		zend_throw_error(NULL, "Failed to create closure from undefined method %pS::%pS()", ce->name, method);
+	} else {
+		zend_throw_error(NULL, "Call to undefined method %pS::%pS()", ce->name, method);
+	}
 }
 
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_invalid_method_call(const zval *object, const zval *function_name)
@@ -2574,10 +2580,19 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_invalid_method_call(c
 
 ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_non_static_method_call(const zend_function *fbc)
 {
-	zend_throw_error(
-		zend_ce_error,
-		"Non-static method %pS::%pS() cannot be called statically",
-		fbc->common.scope->name, fbc->common.function_name);
+	zend_execute_data *execute_data = EG(current_execute_data);
+
+	if (UNEXPECTED(execute_data != NULL && (EX(opline) + 1)->opcode == ZEND_CALLABLE_CONVERT)) {
+		zend_throw_error(
+			zend_ce_error,
+			"Failed to create closure from non-static method %pS::%pS()",
+			fbc->common.scope->name, fbc->common.function_name);
+	} else {
+		zend_throw_error(
+			zend_ce_error,
+			"Non-static method %pS::%pS() cannot be called statically",
+			fbc->common.scope->name, fbc->common.function_name);
+	}
 }
 
 ZEND_COLD void ZEND_FASTCALL zend_param_must_be_ref(const zend_function *func, uint32_t arg_num)

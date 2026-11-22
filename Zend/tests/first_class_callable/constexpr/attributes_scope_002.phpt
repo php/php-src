@@ -27,7 +27,7 @@ foreach ((new ReflectionClass(C::class))->getAttributes() as $reflectionAttribut
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Call to private method E::myMethod() from scope C in %s:%d
+Fatal error: Uncaught Error: Failed to create closure from private method E::myMethod() from scope C in %s:%d
 Stack trace:
 #0 %s(%d): ReflectionAttribute->newInstance()
 #1 {main}

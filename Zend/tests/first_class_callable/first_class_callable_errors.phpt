@@ -50,8 +50,8 @@ try {
 --EXPECT--
 Error: Value of type int is not callable
 Error: Failed to create closure from undefined function does_not_exist()
-Error: Call to undefined method stdClass::doesNotExist()
-Error: Call to undefined method stdClass::doesNotExist()
-Error: Call to undefined method stdClass::doesNotExist()
-Error: Call to private method Test::privateMethod() from global scope
-Error: Non-static method Test::instanceMethod() cannot be called statically
+Error: Failed to create closure from undefined method stdClass::doesNotExist()
+Error: Failed to create closure from undefined method stdClass::doesNotExist()
+Error: Failed to create closure from undefined method stdClass::doesNotExist()
+Error: Failed to create closure from private method Test::privateMethod() from global scope
+Error: Failed to create closure from non-static method Test::instanceMethod()

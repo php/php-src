@@ -1295,6 +1295,12 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 								if (!zend_check_method_accessible(fptr, scope)) {
 									if (ce->__callstatic) {
 										zend_throw_error(NULL, "Creating a callable for the magic __callStatic() method is not supported in constant expressions");
+									} else if (args->children == 1
+									 && args->child[0]->attr == ZEND_PLACEHOLDER_VARIADIC) {
+										zend_throw_error(NULL, "Failed to create closure from %s method %pS::%pS() from %s%pS",
+											zend_visibility_string(fptr->common.fn_flags), fptr->common.scope->name, method_name,
+											scope ? "scope " : "global scope",
+											scope ? scope->name : ZSTR_EMPTY_ALLOC());
 									} else {
 										zend_bad_method_call(fptr, method_name, scope);
 									}
@@ -1304,6 +1310,10 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 							} else {
 								if (ce->__callstatic) {
 									zend_throw_error(NULL, "Creating a callable for the magic __callStatic() method is not supported in constant expressions");
+								} else if (args->children == 1
+								 && args->child[0]->attr == ZEND_PLACEHOLDER_VARIADIC) {
+									zend_throw_error(NULL, "Failed to create closure from undefined method %pS::%pS()",
+										ce->name, method_name);
 								} else {
 									zend_undefined_method(ce, method_name);
 								}
@@ -1313,7 +1323,13 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 						}
 
 						if (!(fptr->common.fn_flags & ZEND_ACC_STATIC)) {
-							zend_non_static_method_call(fptr);
+							if (args->children == 1
+							 && args->child[0]->attr == ZEND_PLACEHOLDER_VARIADIC) {
+								zend_throw_error(NULL, "Failed to create closure from non-static method %pS::%pS()",
+									fptr->common.scope->name, fptr->common.function_name);
+							} else {
+								zend_non_static_method_call(fptr);
+							}
 
 							return FAILURE;
 						}

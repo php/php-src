@@ -11,7 +11,7 @@ var_dump(Closure);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Call to undefined method ThisClassDoesExist::thisMethodDoesNotExist() in %s:%d
+Fatal error: Uncaught Error: Failed to create closure from undefined method ThisClassDoesExist::thisMethodDoesNotExist() in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

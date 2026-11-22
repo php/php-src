@@ -19,4 +19,4 @@ try {
 ?>
 --EXPECT--
 A
-Error: Call to private method A::who() from scope B
+Error: Failed to create closure from private method A::who() from scope B

@@ -19,4 +19,4 @@ try {
 ?>
 --EXPECT--
 A
-Error: Call to undefined method B::who()
+Error: Failed to create closure from undefined method B::who()
