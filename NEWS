@@ -115,6 +115,10 @@ PHP                                                                        NEWS
   . Fixed function JIT ASSIGN_DIM reporting an undefined value or key out of
     order, or when the VM does not, on non-array containers. (Jorg Sowa)
 
+- PDO:
+  . Fixed bug GH-25650 (PDO::query() reports the wrong argument numbers for
+    FETCH_CLASS constructor arguments). (Tomasz Kowalczyk)
+
 - PDO_Firebird:
   . Fixed stack buffer overflow with long connection user names, passwords,
     charsets, or roles. (Ilia Alshanetsky)
