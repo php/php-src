@@ -125,6 +125,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20920 (LibreSSL build regression with PHP 8.5).
     (Eugene Gvozdetsky, Theo Buehler, Jakub Zelenka)
 
+- PDO:
+  . Fixed bug GH-25650 (PDO::query() reports the wrong argument numbers for
+    FETCH_CLASS constructor arguments). (Tomasz Kowalczyk)
+
 - PDO_Firebird:
   . Fixed stack buffer overflow with long connection user names, passwords,
     charsets, or roles. (Ilia Alshanetsky)
