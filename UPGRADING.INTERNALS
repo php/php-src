@@ -138,6 +138,9 @@ PHP 8.7 INTERNALS UPGRADE NOTES
   . The MYSQLND_STATS_LOCK() and MYSQLND_STATS_UNLOCK() macros were removed.
     MYSQLND_STATS_UPDATE_VALUE() is now an expression instead of a block.
 
+- Session:
+  . The module_number member of php_ps_globals was removed.
+
 - Standard:
   . php_explode() now takes a HashTable* instead of a zval* to store the
     resulting parts. It already expected the zval* to be IS_ARRAY.
