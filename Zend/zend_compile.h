@@ -261,6 +261,9 @@ typedef struct _zend_oparray_context {
 /* has #[\Override] attribute                             |     |     |     */
 #define ZEND_ACC_OVERRIDE                (1 << 28) /*     |  X  |  X  |     */
 /*                                                        |     |     |     */
+/* has #[\NoDiscard] attribute                            |     |     |     */
+#define ZEND_ACC_NODISCARD               (1 << 29) /*   X |  X  |     |     */
+/*                                                        |     |     |     */
 /* Property Flags (unused: 13-27,29...)                   |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
@@ -401,9 +404,6 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* supports opcache compile-time evaluation (funcs)       |     |     |     */
 #define ZEND_ACC_COMPILE_TIME_EVAL       (1 << 27) /*     |  X  |     |     */
-/*                                                        |     |     |     */
-/* has #[\NoDiscard] attribute                            |     |     |     */
-#define ZEND_ACC_NODISCARD               (1 << 29) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* op_array uses strict mode types                        |     |     |     */
 #define ZEND_ACC_STRICT_TYPES            (1U << 31) /*    |  X  |     |     */

@@ -63,6 +63,7 @@ extern ZEND_API const zend_internal_function zend_pass_function;
 ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(const zend_execute_data *execute_data);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_function(const zend_function *fbc);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_nodiscard_function(const zend_function *fbc);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_nodiscard_ce(zend_class_entry *ce);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_class_constant(const zend_class_constant *c, const zend_string *constant_name);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_constant(const zend_constant *c, const zend_string *constant_name);
 ZEND_API ZEND_COLD void zend_use_of_deprecated_trait(zend_class_entry *trait, const zend_string *used_by);
