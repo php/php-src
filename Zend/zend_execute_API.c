@@ -922,6 +922,37 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 
 	ZEND_ASSERT((consumed_args & (consumed_args - 1)) == 0);
 
+	if (!consumed_args && !fci->named_params) {
+		switch (fci->param_count) {
+			case 2:
+				if (UNEXPECTED(QUICK_ARG_SHOULD_BE_SENT_BY_REF(func, 2) || Z_ISUNDEF(fci->params[1]))) {
+					break;
+				}
+				ZEND_FALLTHROUGH;
+			case 1:
+				if (UNEXPECTED(QUICK_ARG_SHOULD_BE_SENT_BY_REF(func, 1) || Z_ISUNDEF(fci->params[0]))) {
+					break;
+				}
+
+				if (!(func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+					ZVAL_COPY_DEREF(ZEND_CALL_ARG(call, 1), &fci->params[0]);
+					if (fci->param_count == 2) {
+						ZVAL_COPY_DEREF(ZEND_CALL_ARG(call, 2), &fci->params[1]);
+					}
+				} else {
+					/* Don't separate references for __call */
+					ZVAL_COPY(ZEND_CALL_ARG(call, 1), &fci->params[0]);
+					if (fci->param_count == 2) {
+						ZVAL_COPY(ZEND_CALL_ARG(call, 2), &fci->params[1]);
+					}
+				}
+
+				ZEND_FALLTHROUGH;
+			case 0:
+				goto args_prepared;
+		}
+	}
+
 	for (uint32_t i = 0; i < fci->param_count; i++) {
 		zval *param = ZEND_CALL_ARG(call, i+1);
 		zval *arg = &fci->params[i];
@@ -1053,6 +1084,7 @@ cleanup_args:
 		}
 	}
 
+args_prepared:
 	if (UNEXPECTED(func->op_array.fn_flags & ZEND_ACC_CLOSURE)) {
 		uint32_t call_info;
 
