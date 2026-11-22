@@ -1261,7 +1261,13 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 						}
 
 						if (!fptr) {
-							zend_throw_error(NULL, "Call to undefined function %pS()", function_name);
+							if (args->children == 1
+							 && args->child[0]->attr == ZEND_PLACEHOLDER_VARIADIC) {
+								zend_throw_error(NULL, "Failed to create closure from undefined function %pS()",
+									function_name);
+							} else {
+								zend_throw_error(NULL, "Call to undefined function %pS()", function_name);
+							}
 							return FAILURE;
 						}
 

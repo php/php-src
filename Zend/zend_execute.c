@@ -5138,7 +5138,7 @@ static void zend_swap_operands(zend_op *op) /* {{{ */
 /* }}} */
 #endif
 
-static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_string *function, uint32_t num_args) /* {{{ */
+static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_string *function, uint32_t num_args, bool is_first_class_callable) /* {{{ */
 {
 	zend_function *fbc;
 	zend_class_entry *called_scope;
@@ -5194,7 +5194,12 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_s
 	} else {
 		fbc = zend_fetch_function(function);
 		if (UNEXPECTED(fbc == NULL)) {
-			zend_throw_error(NULL, "Call to undefined function %pS()", function);
+			if (UNEXPECTED(is_first_class_callable)) {
+				zend_throw_error(NULL, "Failed to create closure from undefined function %pS()",
+					function);
+			} else {
+				zend_throw_error(NULL, "Call to undefined function %pS()", function);
+			}
 			return NULL;
 		}
 		called_scope = NULL;

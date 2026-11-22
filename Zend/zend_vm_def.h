@@ -1002,7 +1002,12 @@ ZEND_VM_COLD_HELPER(zend_undefined_function_helper, ANY, ANY)
 
 	SAVE_OPLINE();
 	function_name = RT_CONSTANT(opline, opline->op2);
-	zend_throw_error(NULL, "Call to undefined function %pS()", Z_STR_P(function_name));
+	if (UNEXPECTED((opline+1)->opcode == ZEND_CALLABLE_CONVERT)) {
+		zend_throw_error(NULL, "Failed to create closure from undefined function %pS()",
+			Z_STR_P(function_name));
+	} else {
+		zend_throw_error(NULL, "Call to undefined function %pS()", Z_STR_P(function_name));
+	}
 	HANDLE_EXCEPTION();
 }
 
@@ -3933,7 +3938,8 @@ ZEND_VM_HANDLER(128, ZEND_INIT_DYNAMIC_CALL, ANY, CONST|TMP|CV, NUM)
 
 ZEND_VM_C_LABEL(try_function_name):
 	if (OP2_TYPE != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-		call = zend_init_dynamic_call_string(Z_STR_P(function_name), opline->extended_value);
+		call = zend_init_dynamic_call_string(Z_STR_P(function_name), opline->extended_value,
+			(opline+1)->opcode == ZEND_CALLABLE_CONVERT);
 	} else if (OP2_TYPE != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT)) {
 		call = zend_init_dynamic_call_object(Z_OBJ_P(function_name), opline->extended_value);
 	} else if (EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY)) {

@@ -773,7 +773,12 @@ static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_F
 
 	SAVE_OPLINE();
 	function_name = RT_CONSTANT(opline, opline->op2);
-	zend_throw_error(NULL, "Call to undefined function %pS()", Z_STR_P(function_name));
+	if (UNEXPECTED((opline+1)->opcode == ZEND_CALLABLE_CONVERT)) {
+		zend_throw_error(NULL, "Failed to create closure from undefined function %pS()",
+			Z_STR_P(function_name));
+	} else {
+		zend_throw_error(NULL, "Call to undefined function %pS()", Z_STR_P(function_name));
+	}
 	HANDLE_EXCEPTION();
 }
 
@@ -4121,7 +4126,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_DYNAMIC_
 
 try_function_name:
 	if (IS_CONST != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-		call = zend_init_dynamic_call_string(Z_STR_P(function_name), opline->extended_value);
+		call = zend_init_dynamic_call_string(Z_STR_P(function_name), opline->extended_value,
+			(opline+1)->opcode == ZEND_CALLABLE_CONVERT);
 	} else if (IS_CONST != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT)) {
 		call = zend_init_dynamic_call_object(Z_OBJ_P(function_name), opline->extended_value);
 	} else if (EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY)) {
@@ -4305,7 +4311,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_DYNAMIC_
 
 try_function_name:
 	if (IS_TMP_VAR != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-		call = zend_init_dynamic_call_string(Z_STR_P(function_name), opline->extended_value);
+		call = zend_init_dynamic_call_string(Z_STR_P(function_name), opline->extended_value,
+			(opline+1)->opcode == ZEND_CALLABLE_CONVERT);
 	} else if (IS_TMP_VAR != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT)) {
 		call = zend_init_dynamic_call_object(Z_OBJ_P(function_name), opline->extended_value);
 	} else if (EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY)) {
@@ -4503,7 +4510,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_DYNAMIC_
 
 try_function_name:
 	if (IS_CV != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-		call = zend_init_dynamic_call_string(Z_STR_P(function_name), opline->extended_value);
+		call = zend_init_dynamic_call_string(Z_STR_P(function_name), opline->extended_value,
+			(opline+1)->opcode == ZEND_CALLABLE_CONVERT);
 	} else if (IS_CV != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT)) {
 		call = zend_init_dynamic_call_object(Z_OBJ_P(function_name), opline->extended_value);
 	} else if (EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY)) {
@@ -53804,7 +53812,12 @@ static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_C
 
 	SAVE_OPLINE();
 	function_name = RT_CONSTANT(opline, opline->op2);
-	zend_throw_error(NULL, "Call to undefined function %pS()", Z_STR_P(function_name));
+	if (UNEXPECTED((opline+1)->opcode == ZEND_CALLABLE_CONVERT)) {
+		zend_throw_error(NULL, "Failed to create closure from undefined function %pS()",
+			Z_STR_P(function_name));
+	} else {
+		zend_throw_error(NULL, "Call to undefined function %pS()", Z_STR_P(function_name));
+	}
 	HANDLE_EXCEPTION();
 }
 
@@ -57000,7 +57013,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_DYNAMIC_CALL_
 
 try_function_name:
 	if (IS_CONST != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-		call = zend_init_dynamic_call_string(Z_STR_P(function_name), opline->extended_value);
+		call = zend_init_dynamic_call_string(Z_STR_P(function_name), opline->extended_value,
+			(opline+1)->opcode == ZEND_CALLABLE_CONVERT);
 	} else if (IS_CONST != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT)) {
 		call = zend_init_dynamic_call_object(Z_OBJ_P(function_name), opline->extended_value);
 	} else if (EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY)) {
@@ -57184,7 +57198,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_DYNAMIC_CALL_
 
 try_function_name:
 	if (IS_TMP_VAR != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-		call = zend_init_dynamic_call_string(Z_STR_P(function_name), opline->extended_value);
+		call = zend_init_dynamic_call_string(Z_STR_P(function_name), opline->extended_value,
+			(opline+1)->opcode == ZEND_CALLABLE_CONVERT);
 	} else if (IS_TMP_VAR != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT)) {
 		call = zend_init_dynamic_call_object(Z_OBJ_P(function_name), opline->extended_value);
 	} else if (EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY)) {
@@ -57382,7 +57397,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_DYNAMIC_CALL_
 
 try_function_name:
 	if (IS_CV != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
-		call = zend_init_dynamic_call_string(Z_STR_P(function_name), opline->extended_value);
+		call = zend_init_dynamic_call_string(Z_STR_P(function_name), opline->extended_value,
+			(opline+1)->opcode == ZEND_CALLABLE_CONVERT);
 	} else if (IS_CV != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT)) {
 		call = zend_init_dynamic_call_object(Z_OBJ_P(function_name), opline->extended_value);
 	} else if (EXPECTED(Z_TYPE_P(function_name) == IS_ARRAY)) {

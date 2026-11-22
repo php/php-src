@@ -12,7 +12,7 @@ var_dump((Closure)("abc"));
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Call to undefined function Foo\strrev() in %s:%d
+Fatal error: Uncaught Error: Failed to create closure from undefined function Foo\strrev() in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d
