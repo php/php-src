@@ -75,6 +75,7 @@ static void copy_zend_constant(zval *zv)
 	zend_constant *c = Z_PTR_P(zv);
 
 	ZEND_ASSERT(ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT);
+	ZEND_ASSERT(!(ZEND_CONSTANT_FLAGS(c) & CONST_ATTRIBUTED));
 	Z_PTR_P(zv) = pemalloc(sizeof(zend_constant), 1);
 	memcpy(Z_PTR_P(zv), c, sizeof(zend_constant));
 
@@ -497,9 +498,10 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, const zend_class_entry *
 static void* zend_hash_add_constant(HashTable *ht, zend_string *key, const zend_constant *c)
 {
 	void *ret;
-	zend_constant *copy = pemalloc(sizeof(zend_constant), ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT);
+	size_t size = (ZEND_CONSTANT_FLAGS(c) & CONST_ATTRIBUTED) ? sizeof(zend_attributed_constant) : sizeof(zend_constant);
+	zend_constant *copy = pemalloc(size, ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT);
 
-	memcpy(copy, c, sizeof(zend_constant));
+	memcpy(copy, c, size);
 	ret = zend_hash_add_ptr(ht, key, copy);
 	if (!ret) {
 		pefree(copy, ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT);
@@ -571,10 +573,11 @@ void zend_constant_add_attributes(zend_constant *c, HashTable *attributes) {
 	GC_TRY_ADDREF(attributes);
 	c->attributes = attributes;
 
-	zend_attribute *deprecated_attribute = zend_get_attribute_str(
+	zend_attribute *deprecated_attribute = zend_get_attribute_str_ex(
 		c->attributes,
 		"deprecated",
-		strlen("deprecated")
+		strlen("deprecated"),
+		zend_constant_attributes_offset(c)
 	);
 
 	if (deprecated_attribute) {
