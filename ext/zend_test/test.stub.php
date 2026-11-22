@@ -472,6 +472,10 @@ function zend_test_override_libxml_global_state(): void {}
 
     function zend_test_opcache_preloading(): bool {}
 
+    function zend_test_opcache_shm_read_locked(): bool {}
+
+    function zend_test_opcache_last_restart_time(): int {}
+
     function zend_test_uri_parser(string $uri, string $parser): array { }
 
     /** @compile-time-eval */

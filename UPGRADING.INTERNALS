@@ -124,6 +124,12 @@ PHP 8.7 INTERNALS UPGRADE NOTES
   . The MYSQLND_STATS_LOCK() and MYSQLND_STATS_UNLOCK() macros were removed.
     MYSQLND_STATS_UPDATE_VALUE() is now an expression instead of a block.
 
+- OPcache:
+  . Added opcache_shm_read_locked() and opcache_last_restart_time() to
+    zend_accelerator_api.h. They tell whether the current request holds the
+    read lock on shared memory, and when that memory was last reset by a
+    restart.
+
 - Standard:
   . php_explode() now takes a HashTable* instead of a zval* to store the
     resulting parts. It already expected the zval* to be IS_ARRAY.
