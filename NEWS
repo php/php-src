@@ -53,6 +53,8 @@ PHP                                                                        NEWS
 - DBA:
   . Fixed dba_close() not closing a database opened with dba_popen().
     (Ilia Alshanetsky)
+  . Fixed bug GH-24640 (tcadb handler allows injecting Tokyo Cabinet
+    parameters via "#" in the path). (Lazizbek Ergashev)
 
 - DOM:
   . Fixed bug GH-25306 (Assertion status == LXB_STATUS_OK in dom_parse_selector
