@@ -245,11 +245,10 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 						if (!Z_REFCOUNTED(ZEND_OP1_LITERAL(last_op))) {
 							zend_string *tmp = zend_string_alloc(l, 0);
 							memcpy(ZSTR_VAL(tmp), Z_STRVAL(ZEND_OP1_LITERAL(last_op)), old_len);
-							Z_STR(ZEND_OP1_LITERAL(last_op)) = tmp;
+							ZVAL_NEW_STR(&ZEND_OP1_LITERAL(last_op), tmp);
 						} else {
-							Z_STR(ZEND_OP1_LITERAL(last_op)) = zend_string_extend(Z_STR(ZEND_OP1_LITERAL(last_op)), l, 0);
+							ZVAL_NEW_STR(&ZEND_OP1_LITERAL(last_op), zend_string_extend(Z_STR(ZEND_OP1_LITERAL(last_op)), l, 0));
 						}
-						Z_TYPE_INFO(ZEND_OP1_LITERAL(last_op)) = IS_STRING_EX;
 						memcpy(Z_STRVAL(ZEND_OP1_LITERAL(last_op)) + old_len, Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRLEN(ZEND_OP1_LITERAL(opline)));
 						Z_STRVAL(ZEND_OP1_LITERAL(last_op))[l] = '\0';
 						zval_ptr_dtor_nogc(&ZEND_OP1_LITERAL(opline));
@@ -751,11 +750,10 @@ optimize_type_check:
 						if (!Z_REFCOUNTED(ZEND_OP2_LITERAL(src))) {
 							zend_string *tmp = zend_string_alloc(l, 0);
 							memcpy(ZSTR_VAL(tmp), Z_STRVAL(ZEND_OP2_LITERAL(src)), old_len);
-							Z_STR(ZEND_OP2_LITERAL(src)) = tmp;
+							ZVAL_NEW_STR(&ZEND_OP2_LITERAL(src), tmp);
 						} else {
-							Z_STR(ZEND_OP2_LITERAL(src)) = zend_string_extend(Z_STR(ZEND_OP2_LITERAL(src)), l, 0);
+							ZVAL_NEW_STR(&ZEND_OP2_LITERAL(src), zend_string_extend(Z_STR(ZEND_OP2_LITERAL(src)), l, 0));
 						}
-						Z_TYPE_INFO(ZEND_OP2_LITERAL(src)) = IS_STRING_EX;
 						memcpy(Z_STRVAL(ZEND_OP2_LITERAL(src)) + old_len, Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)));
 						Z_STRVAL(ZEND_OP2_LITERAL(src))[l] = '\0';
 						zval_ptr_dtor_str(&ZEND_OP2_LITERAL(opline));

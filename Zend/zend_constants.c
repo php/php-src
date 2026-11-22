@@ -88,7 +88,7 @@ static void copy_zend_constant(zval *zv)
 		GC_ADDREF(c->attributes);
 	}
 	if (Z_TYPE(c->value) == IS_STRING) {
-		Z_STR(c->value) = zend_string_dup(Z_STR(c->value), 1);
+		ZVAL_STR(&c->value, zend_string_dup(Z_STR(c->value), 1));
 	}
 }
 
