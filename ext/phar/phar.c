@@ -3514,6 +3514,11 @@ PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 		PHAR_G(cwd_init) = 0;
 	}
 
+	if (PHAR_G(openssl_privatekey)) {
+		zend_string_release(PHAR_G(openssl_privatekey));
+		PHAR_G(openssl_privatekey) = NULL;
+	}
+
 	PHAR_G(request_done) = 1;
 	return SUCCESS;
 }
