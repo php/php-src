@@ -2164,23 +2164,10 @@ static int zend_jit_invalid_this_stub(zend_jit_ctx *jit)
 
 static int zend_jit_undefined_function_stub(zend_jit_ctx *jit)
 {
-	// JIT: load EX(opline)
-	ir_ref ref = ir_LOAD_A(jit_FP(jit));
-	ir_ref arg3 = ir_LOAD_U32(ir_ADD_OFFSET(ref, offsetof(zend_op, op2.constant)));
-
-	if (sizeof(void*) == 8) {
-		arg3 = ir_LOAD_A(ir_ADD_A(ref, ir_SEXT_A(arg3)));
-	} else {
-		arg3 = ir_LOAD_A(arg3);
-	}
-	arg3 = ir_ADD_OFFSET(arg3, offsetof(zend_string, val));
-
-	ir_CALL_3(IR_VOID,
-		ir_CONST_FUNC_PROTO(zend_throw_error,
-			ir_proto_2(&jit->ctx, IR_VARARG_FUNC, IR_VOID, IR_ADDR, IR_ADDR)),
-		IR_NULL,
-		ir_CONST_ADDR("Call to undefined function %s()"),
-		arg3);
+	// JIT: zend_jit_undefined_function() may check the next opcode
+	// (ZEND_CALLABLE_CONVERT) to provide a better error message for
+	// first-class callable syntax of undefined functions.
+	ir_CALL(IR_VOID, ir_CONST_FC_FUNC(zend_jit_undefined_function));
 
 	ir_IJMP(jit_STUB_ADDR(jit, jit_stub_exception_handler));
 
@@ -3111,6 +3098,7 @@ static void zend_jit_setup_disasm(void)
 	REGISTER_HELPER(zend_jit_init_func_run_time_cache_helper);
 	REGISTER_HELPER(zend_jit_find_func_helper);
 	REGISTER_HELPER(zend_jit_find_ns_func_helper);
+	REGISTER_HELPER(zend_jit_undefined_function);
 	REGISTER_HELPER(zend_jit_jmp_frameless_helper);
 	REGISTER_HELPER(zend_jit_unref_helper);
 	REGISTER_HELPER(zend_jit_invalid_method_call);
