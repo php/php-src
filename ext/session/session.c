@@ -131,7 +131,6 @@ static inline void php_rinit_session_globals(void)
 	PS(mod_user_uses_object_methods_as_handlers) = false;
 	PS(define_sid) = true;
 	PS(session_vars) = NULL;
-	PS(module_number) = my_module_number;
 	PS(in_rfc1867_update) = false;
 	ZVAL_UNDEF(&PS(http_session_vars));
 	PS(session_started_filename) = NULL;
@@ -1705,7 +1704,7 @@ static void proposed_session_id_to_session_id(const zval *proposed_session_id) {
 
 PHPAPI zend_result php_session_reset_id(void)
 {
-	int module_number = PS(module_number);
+	int module_number = my_module_number;
 	zval *sid, *data, *potential_session_id;
 	bool apply_trans_sid;
 
@@ -3075,9 +3074,7 @@ static PHP_MINIT_FUNCTION(session)
 	zend_register_auto_global(zend_string_init_interned(ZEND_STRL("_SESSION"), true), false, NULL);
 
 	my_module_number = module_number;
-	PS(module_number) = module_number;
 
-	PS(session_status) = php_session_none;
 	REGISTER_INI_ENTRIES();
 
 #ifdef HAVE_LIBMM
