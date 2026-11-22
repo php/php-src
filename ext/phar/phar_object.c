@@ -2989,10 +2989,10 @@ PHP_METHOD(Phar, setDefaultStub)
 PHP_METHOD(Phar, setSignatureAlgorithm)
 {
 	zend_long algo;
-	char *error, *key = NULL;
-	size_t key_len = 0;
+	char *error;
+	zend_string *key = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|s!", &algo, &key, &key_len) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|S!", &algo, &key) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -3018,8 +3018,10 @@ PHP_METHOD(Phar, setSignatureAlgorithm)
 			}
 			phar_obj->archive->sig_flags = (uint32_t)algo;
 			phar_obj->archive->is_modified = 1;
-			PHAR_G(openssl_privatekey) = key;
-			PHAR_G(openssl_privatekey_len) = key_len;
+			if (PHAR_G(openssl_privatekey)) {
+				zend_string_release(PHAR_G(openssl_privatekey));
+			}
+			PHAR_G(openssl_privatekey) = key ? zend_string_copy(key) : NULL;
 
 			phar_flush(phar_obj->archive, &error);
 			if (error) {
