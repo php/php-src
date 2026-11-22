@@ -191,7 +191,7 @@ static bool php_stream_has_terminating_error(const php_stream_error_entry *entry
 
 static inline php_stream_error_operation *php_stream_get_operation_at_depth(uint32_t depth)
 {
-	php_stream_error_state *state = &FG(stream_error_state);
+	php_stream_error_state *state = &PG(stream_error_state);
 
 	if (depth < PHP_STREAM_ERROR_OPERATION_POOL_SIZE) {
 		return &state->operation_pool[depth];
@@ -204,7 +204,7 @@ static inline php_stream_error_operation *php_stream_get_operation_at_depth(uint
 
 static inline php_stream_error_operation *php_stream_get_parent_operation(void)
 {
-	const php_stream_error_state *state = &FG(stream_error_state);
+	const php_stream_error_state *state = &PG(stream_error_state);
 
 	if (state->operation_depth <= state->operation_floor) {
 		return NULL;
@@ -229,7 +229,7 @@ static void php_stream_error_entry_free(php_stream_error_entry *entry)
 
 PHPAPI void php_stream_error_state_cleanup(void)
 {
-	php_stream_error_state *state = &FG(stream_error_state);
+	php_stream_error_state *state = &PG(stream_error_state);
 
 	state->operation_floor = 0;
 	state->refused_operations = 0;
@@ -266,7 +266,7 @@ PHPAPI void php_stream_error_state_cleanup(void)
 
 PHPAPI void php_stream_error_get_last(zval *return_value)
 {
-	const php_stream_error_state *state = &FG(stream_error_state);
+	const php_stream_error_state *state = &PG(stream_error_state);
 
 	if (!state->stored_errors) {
 		ZVAL_EMPTY_ARRAY(return_value);
@@ -278,7 +278,7 @@ PHPAPI void php_stream_error_get_last(zval *return_value)
 
 PHPAPI void php_stream_error_clear_stored(void)
 {
-	php_stream_error_state *state = &FG(stream_error_state);
+	php_stream_error_state *state = &PG(stream_error_state);
 
 	php_stream_stored_error *stored = state->stored_errors;
 	while (stored) {
@@ -296,7 +296,7 @@ PHPAPI void php_stream_error_clear_stored(void)
 
 PHPAPI php_stream_error_operation *php_stream_error_operation_begin(void)
 {
-	php_stream_error_state *state = &FG(stream_error_state);
+	php_stream_error_state *state = &PG(stream_error_state);
 
 	if (state->operation_depth >= PHP_STREAM_ERROR_MAX_DEPTH) {
 		php_error_docref(NULL, E_WARNING,
@@ -338,7 +338,7 @@ PHPAPI php_stream_error_operation *php_stream_error_operation_begin(void)
 static void php_stream_error_add(zend_enum_StreamErrorCode code, const char *wrapper_name,
 		zend_string *message, const char *docref, int severity, bool terminating)
 {
-	php_stream_error_operation *op = FG(stream_error_state).current_operation;
+	php_stream_error_operation *op = PG(stream_error_state).current_operation;
 	if (!op) {
 		zend_string_release(message);
 		return;
@@ -448,7 +448,7 @@ static void php_stream_report_errors(const php_stream_context *context, const ph
 
 PHPAPI void php_stream_error_operation_end(const php_stream_context *context)
 {
-	php_stream_error_state *state = &FG(stream_error_state);
+	php_stream_error_state *state = &PG(stream_error_state);
 	php_stream_error_operation *op = state->current_operation;
 
 	if (state->refused_operations > 0) {
@@ -559,7 +559,7 @@ PHPAPI void php_stream_error_operation_end(const php_stream_context *context)
 
 PHPAPI void php_stream_error_operation_end_for_stream(const php_stream *stream)
 {
-	php_stream_error_state *state = &FG(stream_error_state);
+	php_stream_error_state *state = &PG(stream_error_state);
 	php_stream_error_operation *op = state->current_operation;
 
 	if (state->refused_operations > 0) {
@@ -586,7 +586,7 @@ PHPAPI void php_stream_error_operation_end_for_stream(const php_stream *stream)
 
 PHPAPI void php_stream_error_operation_abort(void)
 {
-	php_stream_error_state *state = &FG(stream_error_state);
+	php_stream_error_state *state = &PG(stream_error_state);
 	php_stream_error_operation *op = state->current_operation;
 
 	if (state->refused_operations > 0) {
@@ -613,7 +613,7 @@ static void php_stream_wrapper_error_internal(const char *wrapper_name, const ph
 		const char *docref, int severity, bool terminating,
 		zend_enum_StreamErrorCode code, zend_string *message)
 {
-	bool implicit_operation = (FG(stream_error_state).current_operation == NULL);
+	bool implicit_operation = (PG(stream_error_state).current_operation == NULL);
 	if (implicit_operation) {
 		php_stream_error_operation_begin();
 	}
@@ -710,19 +710,19 @@ static void php_stream_wrapper_log_store_error(zend_string *message, zend_enum_S
 	entry->severity = severity;
 	entry->terminating = terminating;
 
-	if (!FG(wrapper_logged_errors)) {
-		ALLOC_HASHTABLE(FG(wrapper_logged_errors));
-		zend_hash_init(FG(wrapper_logged_errors), 8, NULL, php_stream_error_list_dtor, 0);
+	if (!PG(wrapper_logged_errors)) {
+		ALLOC_HASHTABLE(PG(wrapper_logged_errors));
+		zend_hash_init(PG(wrapper_logged_errors), 8, NULL, php_stream_error_list_dtor, 0);
 	}
 
 	zend_llist *list
-			= zend_hash_str_find_ptr(FG(wrapper_logged_errors), wrapper_name, strlen(wrapper_name));
+			= zend_hash_str_find_ptr(PG(wrapper_logged_errors), wrapper_name, strlen(wrapper_name));
 
 	if (!list) {
 		zend_llist new_list;
 		zend_llist_init(
 				&new_list, sizeof(php_stream_error_entry *), php_stream_error_entry_dtor_legacy, 0);
-		list = zend_hash_str_update_mem(FG(wrapper_logged_errors), wrapper_name,
+		list = zend_hash_str_update_mem(PG(wrapper_logged_errors), wrapper_name,
 				strlen(wrapper_name), &new_list, sizeof(new_list));
 	}
 
@@ -750,11 +750,11 @@ PHPAPI void php_stream_wrapper_log_error(const php_stream_wrapper *wrapper,
 
 static zend_llist *php_stream_get_wrapper_errors_list(const char *wrapper_name)
 {
-	if (!FG(wrapper_logged_errors)) {
+	if (!PG(wrapper_logged_errors)) {
 		return NULL;
 	}
 	return (zend_llist *) zend_hash_str_find_ptr(
-			FG(wrapper_logged_errors), wrapper_name, strlen(wrapper_name));
+			PG(wrapper_logged_errors), wrapper_name, strlen(wrapper_name));
 }
 
 PHPAPI void php_stream_display_wrapper_name_errors(const char *wrapper_name,
@@ -839,8 +839,8 @@ PHPAPI void php_stream_display_wrapper_errors(const php_stream_wrapper *wrapper,
 
 PHPAPI void php_stream_tidy_wrapper_name_error_log(const char *wrapper_name)
 {
-	if (FG(wrapper_logged_errors)) {
-		zend_hash_str_del(FG(wrapper_logged_errors), wrapper_name, strlen(wrapper_name));
+	if (PG(wrapper_logged_errors)) {
+		zend_hash_str_del(PG(wrapper_logged_errors), wrapper_name, strlen(wrapper_name));
 	}
 }
 

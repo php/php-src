@@ -36,6 +36,17 @@ PHP 8.7 INTERNALS UPGRADE NOTES
     zend_constant.attributes can therefore be shared.
     Use zend_constant_attributes_offset() to get the offset of a constant's own attributes.
     Added zend_get_attribute_str_ex() to look up an attribute at a raw offset.
+  . The following globals have been moved from ext/standard/file.h to
+    php_globals.h, meaning the access macro is now PG() and no longer FG():
+    * auto_detect_line_endings
+    * default_socket_timeout
+    * user_stream_current_filename
+    * stream_wrappers
+    * stream_filters
+    * wrapper_logged_errors
+    * stream_error_state
+    The motivation is to remove cyclic dependencies from PHP, as such it may be
+    possible to omit including ext/standard/file.h to access those globals.
 
 - Removed:
   . The ZEND_LOG_XOR() macro was removed.

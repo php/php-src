@@ -15,7 +15,6 @@
 
 #include "php.h"
 #include "php_globals.h"
-#include "ext/standard/file.h"
 #include "ext/standard/flock_compat.h"
 #ifdef HAVE_SYS_FILE_H
 #include <sys/file.h>
@@ -288,12 +287,12 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 	bool old_in_user_include;
 
 	/* Try to catch bad usage without preventing flexibility */
-	if (FG(user_stream_current_filename) != NULL && strcmp(filename, FG(user_stream_current_filename)) == 0) {
+	if (PG(user_stream_current_filename) != NULL && strcmp(filename, PG(user_stream_current_filename)) == 0) {
 		php_stream_wrapper_log_warn(wrapper, context, options,
 				RecursionDetected, "infinite recursion prevented");
 		return NULL;
 	}
-	FG(user_stream_current_filename) = filename;
+	PG(user_stream_current_filename) = filename;
 
 	/* if the user stream was registered as local and we are in include context,
 		we add allow_url_include restrictions to allow_url_fopen ones */
@@ -363,7 +362,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 	zval_ptr_dtor(&args[3]);
 
 end:
-	FG(user_stream_current_filename) = NULL;
+	PG(user_stream_current_filename) = NULL;
 	PG(in_user_include) = old_in_user_include;
 	if (stream == NULL) {
 		if (us->object) {
@@ -393,12 +392,12 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 	php_stream *stream = NULL;
 
 	/* Try to catch bad usage without preventing flexibility */
-	if (FG(user_stream_current_filename) != NULL && strcmp(filename, FG(user_stream_current_filename)) == 0) {
+	if (PG(user_stream_current_filename) != NULL && strcmp(filename, PG(user_stream_current_filename)) == 0) {
 		php_stream_wrapper_log_warn(wrapper, context, options,
 				RecursionDetected, "infinite recursion prevented");
 		return NULL;
 	}
-	FG(user_stream_current_filename) = filename;
+	PG(user_stream_current_filename) = filename;
 
 	us = emalloc(sizeof(*us));
 	us->wrapper = uwrap;
@@ -444,7 +443,7 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 	zval_ptr_dtor(&zretval);
 
 end:
-	FG(user_stream_current_filename) = NULL;
+	PG(user_stream_current_filename) = NULL;
 	if (stream == NULL) {
 		if (us->object) {
 			OBJ_RELEASE(us->object);
