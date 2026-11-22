@@ -29,6 +29,10 @@
 #include "zend_globals.h"
 #include "zend_portability.h"
 
+#if defined(ZEND_MAX_EXECUTION_TIMER_CACHE) && defined(ZTS)
+# include "TSRM/TSRM_atexit.h"
+#endif
+
 #if __has_feature(memory_sanitizer)
 # include <sanitizer/msan_interface.h>
 #endif
@@ -46,6 +50,54 @@
 # define ZEND_MAX_EXECUTION_TIMERS_CLOCK CLOCK_BOOTTIME
 # endif
 
+#ifdef ZEND_MAX_EXECUTION_TIMER_CACHE
+typedef struct {
+	pid_t pid;
+	timer_t timer;
+} zend_cached_timer;
+
+static void timer_cache_dtor(void *ptr)
+{
+	zend_cached_timer *cache = ptr;
+	if (cache->pid == getpid()) {
+		timer_delete(cache->timer);
+		cache->pid = 0;
+	}
+}
+
+# ifdef ZTS
+static ts_rsrc_id timer_cache_id;
+# define TIMER_CACHE (timer_cache_id ? TSRMG_BULK_STATIC(timer_cache_id, zend_cached_timer *) : NULL)
+# define CAN_CACHE_TIMER() tsrm_atexit_is_registered()
+
+static void timer_cache_ctor(void *ptr)
+{
+	((zend_cached_timer *) ptr)->pid = 0;
+}
+
+void zend_max_execution_timer_cache_startup(void)
+{
+	ts_allocate_id(&timer_cache_id, sizeof(zend_cached_timer), timer_cache_ctor, timer_cache_dtor);
+}
+
+# else
+static zend_cached_timer process_timer_cache;
+# define TIMER_CACHE (&process_timer_cache)
+# define CAN_CACHE_TIMER() true
+# endif
+
+void zend_max_execution_timer_cache_shutdown(void)
+{
+# ifdef ZTS
+	if (timer_cache_id) {
+		ts_free_id(timer_cache_id);
+	}
+# else
+	timer_cache_dtor(&process_timer_cache);
+# endif
+}
+#endif
+
 ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
 {
 	pid_t pid = getpid();
@@ -53,6 +105,20 @@ ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
 	if (EG(pid) == pid) {
 		return;
 	}
+
+#ifdef ZEND_MAX_EXECUTION_TIMER_CACHE
+	zend_cached_timer *cache = TIMER_CACHE;
+	if (cache && cache->pid == pid) {
+		EG(max_execution_timer_timer) = cache->timer;
+		EG(pid) = pid;
+		cache->pid = 0;
+# ifdef MAX_EXECUTION_TIMERS_DEBUG
+		fprintf(stderr, "Timer %#jx reused on thread %d\n", (uintmax_t) EG(max_execution_timer_timer), (pid_t) syscall(SYS_gettid));
+# endif
+		sigaction(SIGRTMIN, NULL, &EG(oldact));
+		return;
+	}
+#endif
 
 	struct sigevent sev;
 	sev.sigev_notify = SIGEV_THREAD_ID;
@@ -119,6 +185,20 @@ void zend_max_execution_timer_shutdown(void) /* {{{ */
 	if (EG(pid) != getpid()) {
 		return;
 	}
+
+#ifdef ZEND_MAX_EXECUTION_TIMER_CACHE
+	static const struct itimerspec disarmed = {0};
+	zend_cached_timer *cache = TIMER_CACHE;
+	if (cache && CAN_CACHE_TIMER()
+			&& timer_settime(EG(max_execution_timer_timer), 0, &disarmed, NULL) == 0) {
+		*cache = (zend_cached_timer) {EG(pid), EG(max_execution_timer_timer)};
+		EG(pid) = 0;
+# ifdef MAX_EXECUTION_TIMERS_DEBUG
+		fprintf(stderr, "Timer %#jx disarmed and cached on thread %d\n", (uintmax_t) cache->timer, (pid_t) syscall(SYS_gettid));
+# endif
+		return;
+	}
+#endif
 
 	EG(pid) = 0;
 
