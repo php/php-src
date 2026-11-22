@@ -310,6 +310,11 @@ ZEND_API zend_attribute *zend_get_attribute_str(const HashTable *attributes, con
 	return get_attribute_str(attributes, str, len, 0);
 }
 
+ZEND_API zend_attribute *zend_get_attribute_str_ex(const HashTable *attributes, const char *str, size_t len, uint32_t offset)
+{
+	return get_attribute_str(attributes, str, len, offset);
+}
+
 ZEND_API zend_attribute *zend_get_parameter_attribute(const HashTable *attributes, const zend_string *lcname, uint32_t offset)
 {
 	return get_attribute(attributes, lcname, offset + 1);

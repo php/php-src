@@ -31,6 +31,11 @@ PHP 8.7 INTERNALS UPGRADE NOTES
     allowed anymore. User-facing HashTables must have pDestructor = ZVAL_PTR_DTOR
     or NULL, and must be freed with zend_array_destroy(). Other HashTables can
     be freed with zend_hash_destroy() + pefree().
+  . Removed ZEND_ACC_PTR_OPS. Attributes of user constants are now stored in
+    the attributes table of the declaring file's main op_array.
+    zend_constant.attributes can therefore be shared.
+    Use zend_constant_attributes_offset() to get the offset of a constant's own attributes.
+    Added zend_get_attribute_str_ex() to look up an attribute at a raw offset.
   . The following globals have been moved from ext/standard/file.h to
     php_globals.h, meaning the access macro is now PG() and no longer FG():
     * auto_detect_line_endings
@@ -141,6 +146,9 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 ========================
 4. OpCode changes
 ========================
+
+- ZEND_DECLARE_ATTRIBUTED_CONST no longer has an OP_DATA opline.
+  The offset of the constant's attributes in the op_array's attributes table is stored in extended_value.
 
 ========================
 5. SAPI changes

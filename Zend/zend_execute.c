@@ -1810,7 +1810,7 @@ ZEND_API zend_never_inline ZEND_COLD void zend_wrong_string_offset_error(void)
 	zend_throw_error(NULL, "%s", msg);
 }
 
-ZEND_COLD static zend_result ZEND_FASTCALL get_deprecation_suffix_from_attribute(HashTable *attributes, zend_class_entry* scope, zend_string **message_suffix)
+ZEND_COLD static zend_result ZEND_FASTCALL get_deprecation_suffix_from_attribute(HashTable *attributes, uint32_t offset, zend_class_entry* scope, zend_string **message_suffix)
 {
 	*message_suffix = ZSTR_EMPTY_ALLOC();
 
@@ -1818,7 +1818,7 @@ ZEND_COLD static zend_result ZEND_FASTCALL get_deprecation_suffix_from_attribute
 		return SUCCESS;
 	}
 
-	zend_attribute *deprecated = zend_get_attribute_str(attributes, "deprecated", sizeof("deprecated")-1);
+	zend_attribute *deprecated = zend_get_attribute_str_ex(attributes, "deprecated", sizeof("deprecated")-1, offset);
 
 	if (!deprecated) {
 		return SUCCESS;
@@ -1879,7 +1879,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_function(const zend_functi
 {
 	zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
 
-	if (get_deprecation_suffix_from_attribute(fbc->common.attributes, fbc->common.scope, &message_suffix) == FAILURE) {
+	if (get_deprecation_suffix_from_attribute(fbc->common.attributes, 0, fbc->common.scope, &message_suffix) == FAILURE) {
 		return;
 	}
 
@@ -1986,7 +1986,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_class_constant(const zend_
 {
 	zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
 
-	if (get_deprecation_suffix_from_attribute(c->attributes, c->ce, &message_suffix) == FAILURE) {
+	if (get_deprecation_suffix_from_attribute(c->attributes, 0, c->ce, &message_suffix) == FAILURE) {
 		return;
 	}
 
@@ -2007,7 +2007,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_constant(const zend_consta
 {
 	zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
 
-	if (get_deprecation_suffix_from_attribute(c->attributes, NULL, &message_suffix) == FAILURE) {
+	if (get_deprecation_suffix_from_attribute(c->attributes, zend_constant_attributes_offset(c), NULL, &message_suffix) == FAILURE) {
 		return;
 	}
 
@@ -2027,7 +2027,7 @@ ZEND_API ZEND_COLD void zend_use_of_deprecated_trait(
 ) {
 	zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
 
-	if (get_deprecation_suffix_from_attribute(trait->attributes, trait, &message_suffix) == FAILURE) {
+	if (get_deprecation_suffix_from_attribute(trait->attributes, 0, trait, &message_suffix) == FAILURE) {
 		return;
 	}
 
@@ -5213,31 +5213,29 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_object(zend_o
 	zend_object *object;
 	uint32_t call_info;
 
-	if (EXPECTED(function->handlers->get_closure) &&
-	    EXPECTED(function->handlers->get_closure(function, &called_scope, &fbc, &object, 0) == SUCCESS)) {
-
-		object_or_called_scope = called_scope;
-		if (EXPECTED(fbc->common.fn_flags & ZEND_ACC_CLOSURE)) {
-			/* Delay closure destruction until its invocation */
-			GC_ADDREF(ZEND_CLOSURE_OBJECT(fbc));
-			ZEND_ASSERT(ZEND_ACC_FAKE_CLOSURE == ZEND_CALL_FAKE_CLOSURE);
-			call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC | ZEND_CALL_CLOSURE |
-				(fbc->common.fn_flags & ZEND_ACC_FAKE_CLOSURE);
-			if (object) {
-				call_info |= ZEND_CALL_HAS_THIS;
-				object_or_called_scope = object;
-			}
-		} else {
-			call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC;
-			if (object) {
-				call_info |= ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS;
-				/* For $this pointer */
-				object_or_called_scope = zend_object_copy(object);
-			}
-		}
-	} else {
+	if (UNEXPECTED(!zend_get_closure(function, &called_scope, &fbc, &object, false))) {
 		zend_throw_error(NULL, "Object of type %pS is not callable", function->ce->name);
 		return NULL;
+	}
+
+	object_or_called_scope = called_scope;
+	if (EXPECTED(fbc->common.fn_flags & ZEND_ACC_CLOSURE)) {
+		/* Delay closure destruction until its invocation */
+		GC_ADDREF(ZEND_CLOSURE_OBJECT(fbc));
+		ZEND_ASSERT(ZEND_ACC_FAKE_CLOSURE == ZEND_CALL_FAKE_CLOSURE);
+		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC | ZEND_CALL_CLOSURE |
+			(fbc->common.fn_flags & ZEND_ACC_FAKE_CLOSURE);
+		if (object) {
+			call_info |= ZEND_CALL_HAS_THIS;
+			object_or_called_scope = object;
+		}
+	} else {
+		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC;
+		if (object) {
+			call_info |= ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS;
+			GC_ADDREF(object); /* For $this pointer */
+			object_or_called_scope = object;
+		}
 	}
 
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
