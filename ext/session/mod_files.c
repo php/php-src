@@ -233,11 +233,8 @@ static zend_result ps_files_write(ps_files *data, zend_string *key, zend_string 
 		return FAILURE;
 	}
 
-#ifdef HAVE_PWRITE
-	n = pwrite(data->fd, ZSTR_VAL(val), ZSTR_LEN(val), 0);
-#else
-	lseek(data->fd, 0, SEEK_SET);
 #ifdef PHP_WIN32
+	lseek(data->fd, 0, SEEK_SET);
 	{
 		unsigned int to_write = SESS_FILE_BUF_SIZE(ZSTR_LEN(val));
 		char *buf = ZSTR_VAL(val);
@@ -253,8 +250,7 @@ static zend_result ps_files_write(ps_files *data, zend_string *key, zend_string 
 		} while (wrote > 0);
 	}
 #else
-	n = write(data->fd, ZSTR_VAL(val), ZSTR_LEN(val));
-#endif
+	n = pwrite(data->fd, ZSTR_VAL(val), ZSTR_LEN(val), 0);
 #endif
 
 	if (n != ZSTR_LEN(val)) {
@@ -501,11 +497,8 @@ PS_READ_FUNC(files)
 
 	*val = zend_string_alloc(sbuf.st_size, false);
 
-#ifdef HAVE_PREAD
-	n = pread(data->fd, ZSTR_VAL(*val), ZSTR_LEN(*val), 0);
-#else
-	lseek(data->fd, 0, SEEK_SET);
 #ifdef PHP_WIN32
+	lseek(data->fd, 0, SEEK_SET);
 	{
 		unsigned int to_read = SESS_FILE_BUF_SIZE(ZSTR_LEN(*val));
 		char *buf = ZSTR_VAL(*val);
@@ -522,8 +515,7 @@ PS_READ_FUNC(files)
 
 	}
 #else
-	n = read(data->fd, ZSTR_VAL(*val), ZSTR_LEN(*val));
-#endif
+	n = pread(data->fd, ZSTR_VAL(*val), ZSTR_LEN(*val), 0);
 #endif
 
 	if (n != (zend_long)sbuf.st_size) {

@@ -12,8 +12,6 @@ PHP_ARG_WITH([mm],
   [no])
 
 if test "$PHP_SESSION" != "no"; then
-  PHP_PWRITE_TEST
-  PHP_PREAD_TEST
   PHP_NEW_EXTENSION([session],
     [mod_user_class.c session.c mod_files.c mod_mm.c mod_user.c],
     [$ext_shared],,
