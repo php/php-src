@@ -2909,8 +2909,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 					zend_hash_del(&ce->properties_info, prop_name);
 					flags |= ZEND_ACC_CHANGED;
 				} else {
-					bool is_compatible = false;
-					uint32_t flags_mask = ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC | ZEND_ACC_READONLY;
+					const char *reason = NULL;
 
 					if (colliding_prop->hooks || property_info->hooks) {
 						zend_error_noreturn(E_COMPILE_ERROR,
@@ -2921,10 +2920,16 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 							ce->name);
 					}
 
-					if ((colliding_prop->flags & flags_mask) == (flags & flags_mask) &&
-						verify_property_type_compatibility(property_info, colliding_prop, PROP_INVARIANT, false, false) == INHERITANCE_SUCCESS
-					) {
-						/* the flags are identical, thus, the properties may be compatible */
+					if ((colliding_prop->flags & ZEND_ACC_PPP_MASK) != (flags & ZEND_ACC_PPP_MASK)) {
+						reason = "the visibility differs";
+					} else if ((colliding_prop->flags & ZEND_ACC_STATIC) != (flags & ZEND_ACC_STATIC)) {
+						reason = "only one of them is static";
+					} else if ((colliding_prop->flags & ZEND_ACC_READONLY) != (flags & ZEND_ACC_READONLY)) {
+						reason = "only one of them is readonly";
+					} else if (verify_property_type_compatibility(property_info, colliding_prop, PROP_INVARIANT, false, false) != INHERITANCE_SUCCESS) {
+						reason = "the types differ";
+					} else {
+						/* the flags and types are identical, thus, the properties may be compatible */
 						zval *op1, *op2;
 
 						if (flags & ZEND_ACC_STATIC) {
@@ -2936,16 +2941,21 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 							op1 = &ce->default_properties_table[OBJ_PROP_TO_NUM(colliding_prop->offset)];
 							op2 = &traits[i]->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)];
 						}
-						is_compatible = check_trait_property_or_constant_value_compatibility(ce, op1, op2);
+						if ((Z_TYPE_P(op1) == IS_UNDEF) != (Z_TYPE_P(op2) == IS_UNDEF)) {
+							reason = "only one of them has a default value";
+						} else if (!check_trait_property_or_constant_value_compatibility(ce, op1, op2)) {
+							reason = "the default values differ";
+						}
 					}
 
-					if (!is_compatible) {
+					if (reason) {
 						zend_error_noreturn(E_COMPILE_ERROR,
-								"%pS and %pS define the same property ($%pS) in the composition of %pS. However, the definition differs and is considered incompatible. Class was composed",
+								"%pS and %pS define the same property ($%pS) in the composition of %pS. However, the definition differs and is considered incompatible: %s. Class was composed",
 								find_first_property_definition(ce, traits, i, prop_name, colliding_prop->ce)->name,
 								property_info->ce->name,
 								prop_name,
-								ce->name);
+								ce->name,
+								reason);
 					}
 					continue;
 				}
