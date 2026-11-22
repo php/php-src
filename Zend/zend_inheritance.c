@@ -1878,7 +1878,7 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 		);
 	}
 
-	if (ce->parent_name) {
+	if (!(ce->ce_flags & ZEND_ACC_RESOLVED_PARENT) && ce->parent_name) {
 		zend_string_release_ex(ce->parent_name, 0);
 	}
 	ce->parent = parent_ce;
@@ -3648,6 +3648,12 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 		zend_class_entry **trait_aliases;
 		bool trait_contains_abstract_methods = false;
 		if (ce->num_traits) {
+			/* Binding trait constants and properties may evaluate parent. */
+			if (parent) {
+				zend_string_release_ex(ce->parent_name, 0);
+				ce->parent = parent;
+				ce->ce_flags |= ZEND_ACC_RESOLVED_PARENT;
+			}
 			zend_traits_init_trait_structures(ce, traits_and_interfaces, &trait_exclude_tables, &trait_aliases);
 			zend_do_traits_method_binding(ce, traits_and_interfaces, trait_exclude_tables, trait_aliases, false, &trait_contains_abstract_methods);
 			zend_do_traits_constant_binding(ce, traits_and_interfaces);
