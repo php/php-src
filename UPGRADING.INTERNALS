@@ -31,6 +31,17 @@ PHP 8.7 INTERNALS UPGRADE NOTES
     allowed anymore. User-facing HashTables must have pDestructor = ZVAL_PTR_DTOR
     or NULL, and must be freed with zend_array_destroy(). Other HashTables can
     be freed with zend_hash_destroy() + pefree().
+  . The following globals have been moved from ext/standard/file.h to
+    php_globals.h, meaning the access macro is now PG() and no longer FG():
+    * auto_detect_line_endings
+    * default_socket_timeout
+    * user_stream_current_filename
+    * stream_wrappers
+    * stream_filters
+    * wrapper_logged_errors
+    * stream_error_state
+    The motivation is to remove cyclic dependencies from PHP, as such it may be
+    possible to omit including ext/standard/file.h to access those globals.
 
 - Removed:
   . The ZEND_LOG_XOR() macro was removed.

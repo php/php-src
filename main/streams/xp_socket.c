@@ -12,8 +12,7 @@
   +----------------------------------------------------------------------+
 */
 
-#include "php.h"
-#include "ext/standard/file.h"
+#include "php.h" /* Needed for PHPAPI */
 #include "php_streams.h"
 #include "php_io.h"
 
