@@ -71,7 +71,7 @@ extern int php_get_gid_by_name(const char *name, gid_t *gid);
 #endif
 
 /* parse standard "fopen" modes into open() flags */
-PHPAPI int php_stream_parse_fopen_modes(const char *mode, int *open_flags)
+PHPAPI zend_result php_stream_parse_fopen_modes(const char *mode, int *open_flags)
 {
 	int flags;
 
