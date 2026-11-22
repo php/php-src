@@ -278,7 +278,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_PROTECTED_SET           (1 << 11) /*     |     |  X  |     */
 #define ZEND_ACC_PRIVATE_SET             (1 << 12) /*     |     |  X  |     */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 31)                               |     |     |     */
+/* Class Flags (unused: -)                                |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -342,7 +342,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_FILE_CACHED             (1 << 27) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Class cannot be serialized or unserialized             |     |     |     */
-#define ZEND_ACC_NOT_SERIALIZABLE        (1 << 29) /*  X  |     |     |     */
+#define ZEND_ACC_NOT_SERIALIZABLE        (1 << 31) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Class Flags 2 (ce_flags2) (unused: 0-31)               |     |     |     */
 /* =========================                              |     |     |     */
