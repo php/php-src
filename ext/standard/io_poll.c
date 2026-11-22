@@ -364,45 +364,52 @@ static void php_io_poll_stream_unwatch(php_io_poll_watcher_object *watcher)
 	}
 }
 
-static bool php_io_poll_context_rebuild_after_fork(php_io_poll_context_object *context)
+static php_poll_error php_io_poll_context_rebuild_after_fork(php_io_poll_context_object *context)
 {
 	pid_t pid = getpid();
 
 	if (EXPECTED(context->owner_pid == pid)) {
-		return true;
+		return PHP_POLL_ERR_NONE;
 	}
 
 	php_poll_ctx *ctx = php_poll_create(php_poll_get_backend_type(context->ctx), 0);
 	if (!ctx) {
-		return false;
+		return PHP_POLL_ERR_SYSTEM;
 	}
 	if (php_poll_init(ctx) != SUCCESS) {
-		php_poll_destroy(ctx);
-		return false;
+		goto failure;
 	}
+
+	ZEND_HASH_FOREACH_VAL(context->watchers, zval *zv) {
+		php_io_poll_watcher_object *watcher = PHP_POLL_WATCHER_OBJ_FROM_ZV(zv);
+		if (!watcher->disarmed
+				&& php_poll_add(ctx, (int) watcher->fd, watcher->watched_events, watcher) != SUCCESS) {
+			goto failure;
+		}
+	} ZEND_HASH_FOREACH_END();
 
 	php_poll_destroy(context->ctx);
 	context->ctx = ctx;
 	context->owner_pid = pid;
 
-	ZEND_HASH_FOREACH_VAL(context->watchers, zval *zv) {
-		php_io_poll_watcher_object *watcher = PHP_POLL_WATCHER_OBJ_FROM_ZV(zv);
-		if (!watcher->disarmed) {
-			php_poll_add(ctx, (int) watcher->fd, watcher->watched_events, watcher);
-		}
-	} ZEND_HASH_FOREACH_END();
+	return PHP_POLL_ERR_NONE;
 
-	return true;
+failure:;
+	php_poll_error err = php_poll_get_error(ctx);
+	php_poll_destroy(ctx);
+	return err != PHP_POLL_ERR_NONE ? err : PHP_POLL_ERR_SYSTEM;
 }
 
 static bool php_io_poll_context_rebuild_after_fork_or_throw(php_io_poll_context_object *context)
 {
-	if (EXPECTED(php_io_poll_context_rebuild_after_fork(context))) {
+	php_poll_error err = php_io_poll_context_rebuild_after_fork(context);
+
+	if (EXPECTED(err == PHP_POLL_ERR_NONE)) {
 		return true;
 	}
 
 	php_io_poll_throw_failed_operation(php_io_poll_failed_context_init_class_entry,
-			"Failed to initialize polling context", PHP_POLL_ERR_SYSTEM);
+			"Failed to initialize polling context", err);
 	return false;
 }
 
@@ -411,7 +418,7 @@ static void php_io_poll_context_retire_watcher(
 {
 	php_socket_t fd = watcher->fd;
 
-	if (php_io_poll_context_rebuild_after_fork(context)) {
+	if (php_io_poll_context_rebuild_after_fork(context) == PHP_POLL_ERR_NONE) {
 		php_poll_remove(context->ctx, (int) fd);
 	}
 	php_io_poll_stream_unwatch(watcher);
