@@ -890,6 +890,13 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 		if (entry->fp_refcount <= 0 && entry->fileinfo_lock_count == 0) {
 			return ZEND_HASH_APPLY_REMOVE;
 		} else {
+			if (entry->fp_refcount) {
+				if (entry->fp_type == PHAR_FP) {
+					p->free_fp = 0;
+				} else if (entry->fp_type == PHAR_UFP) {
+					p->free_ufp = 0;
+				}
+			}
 			/* we can't delete this in-memory until it is closed */
 			return ZEND_HASH_APPLY_KEEP;
 		}

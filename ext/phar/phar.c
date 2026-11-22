@@ -2677,10 +2677,6 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 			php_stream_close(entry->cfp);
 			entry->cfp = 0;
 		}
-		if (entry->is_deleted || entry->is_mounted) {
-			/* remove this from the new phar */
-			continue;
-		}
 		if (entry->fp_refcount) {
 			/* open file pointers refer to this fp, do not free the stream */
 			switch (entry->fp_type) {
@@ -2692,6 +2688,10 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 				default:
 					break;
 			}
+		}
+		if (entry->is_deleted || entry->is_mounted) {
+			/* remove this from the new phar */
+			continue;
 		}
 		/* after excluding deleted files, calculate manifest size in bytes and number of entries */
 		++new_manifest_count;

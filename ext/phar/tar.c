@@ -796,6 +796,13 @@ static int phar_tar_writeheaders_int(phar_entry_info *entry, void *argument) /* 
 		if (entry->fp_refcount <= 0 && entry->fileinfo_lock_count == 0) {
 			return ZEND_HASH_APPLY_REMOVE;
 		} else {
+			if (entry->fp_refcount) {
+				if (entry->fp_type == PHAR_FP) {
+					fp->free_fp = 0;
+				} else if (entry->fp_type == PHAR_UFP) {
+					fp->free_ufp = 0;
+				}
+			}
 			/* we can't delete this in-memory until it is closed */
 			return ZEND_HASH_APPLY_KEEP;
 		}
