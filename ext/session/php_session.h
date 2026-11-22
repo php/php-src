@@ -120,7 +120,6 @@ typedef struct _php_session_rfc1867_progress {
 typedef struct _php_ps_globals {
 	zend_string *save_path;
 	zend_string *session_name;
-	zend_string *id;
 	char *extern_referer_chk;
 	zend_string *cache_limiter;
 	zend_long cookie_lifetime;
@@ -132,19 +131,9 @@ typedef struct _php_ps_globals {
 	bool  cookie_partitioned;
 	bool  use_cookies;
 	bool  use_only_cookies;
-	bool  send_cookie;
 	bool  auto_start;
-	bool  define_sid;
-	const ps_module *mod;
-	const ps_module *default_mod;
-	void *mod_data;
-	php_session_status session_status;
 	bool use_strict_mode; /* whether or not PHP accepts unknown session ids */
 	bool lazy_write; /* omit session write when it is possible */
-	bool in_save_handler; /* state if session is in save handler or not */
-	bool set_handler;     /* state if session module i setting handler or not */
-	zend_string *session_started_filename;
-	uint32_t session_started_lineno;
 	int module_number;
 	php_random_status_state_pcgoneseq128xslrr64 random_state;
 	php_random_algo_with_state random;
@@ -152,26 +141,10 @@ typedef struct _php_ps_globals {
 	zend_long gc_divisor;
 	zend_long gc_maxlifetime;
 	zend_long cache_expire;
-	struct {
-		zval ps_open;
-		zval ps_close;
-		zval ps_read;
-		zval ps_write;
-		zval ps_destroy;
-		zval ps_gc;
-		zval ps_create_sid;
-		zval ps_validate_sid;
-		zval ps_update_timestamp;
-	} mod_user_names;
-
-	zend_string *session_vars; /* serialized original session data */
-	const struct ps_serializer_struct *serializer;
-	zval http_session_vars;
 
 	zend_long sid_length;
 	zend_long sid_bits_per_character;
 
-	php_session_rfc1867_progress *rfc1867_progress;
 	zend_string *rfc1867_prefix;  /* session.upload_progress.prefix */
 	zend_string *rfc1867_name;    /* session.upload_progress.name */
 	zend_long rfc1867_freq;         /* session.upload_progress.freq */
@@ -179,11 +152,43 @@ typedef struct _php_ps_globals {
 	bool rfc1867_enabled; /* session.upload_progress.enabled */
 	bool rfc1867_cleanup; /* session.upload_progress.cleanup */
 
-	bool mod_user_implemented;
-	bool mod_user_is_open;
-	bool mod_user_uses_object_methods_as_handlers;
 	bool use_trans_sid; /* contains the INI value of whether to use trans-sid */
-	bool in_rfc1867_update;    /* php_session_rfc1867_update() is running */
+
+	ZEND_BEGIN_MODULE_REQUEST_GLOBALS()
+		zend_string *id;
+		bool  send_cookie;
+		bool  define_sid;
+		const ps_module *mod;
+		const ps_module *default_mod;
+		void *mod_data;
+		php_session_status session_status;
+		bool in_save_handler; /* state if session is in save handler or not */
+		bool set_handler;     /* state if session module i setting handler or not */
+		zend_string *session_started_filename;
+		uint32_t session_started_lineno;
+		struct {
+			zval ps_open;
+			zval ps_close;
+			zval ps_read;
+			zval ps_write;
+			zval ps_destroy;
+			zval ps_gc;
+			zval ps_create_sid;
+			zval ps_validate_sid;
+			zval ps_update_timestamp;
+		} mod_user_names;
+
+		zend_string *session_vars; /* serialized original session data */
+		const struct ps_serializer_struct *serializer;
+		zval http_session_vars;
+
+		php_session_rfc1867_progress *rfc1867_progress;
+
+		bool mod_user_implemented;
+		bool mod_user_is_open;
+		bool mod_user_uses_object_methods_as_handlers;
+		bool in_rfc1867_update;    /* php_session_rfc1867_update() is running */
+	ZEND_END_MODULE_REQUEST_GLOBALS()
 } php_ps_globals;
 
 typedef php_ps_globals zend_ps_globals;

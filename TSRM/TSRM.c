@@ -286,10 +286,12 @@ static void tsrm_update_active_threads(void)
 					if (resource_types_table[j].tls_addr) {
 						TSRM_ASSERT(p->thread_id == tsrm_thread_id());
 						p->storage[j] = resource_types_table[j].tls_addr();
+						memset(p->storage[j], 0, resource_types_table[j].size);
 					} else if (resource_types_table[j].fast_offset) {
 						p->storage[j] = (void *) (((char*)p) + resource_types_table[j].fast_offset);
+						memset(p->storage[j], 0, resource_types_table[j].size);
 					} else {
-						p->storage[j] = (void *) malloc(resource_types_table[j].size);
+						p->storage[j] = (void *) calloc(1, resource_types_table[j].size);
 					}
 					if (resource_types_table[j].ctor) {
 						resource_types_table[j].ctor(p->storage[j]);
@@ -446,7 +448,7 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 {/*{{{*/
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Creating data structures for thread %x", thread_id));
 	/* Fast resources live in the reserved space right behind the entry. */
-	(*thread_resources_ptr) = (tsrm_tls_entry *) malloc(TSRM_ALIGNED_SIZE(sizeof(tsrm_tls_entry)) + tsrm_reserved_size);
+	(*thread_resources_ptr) = (tsrm_tls_entry *) calloc(1, TSRM_ALIGNED_SIZE(sizeof(tsrm_tls_entry)) + tsrm_reserved_size);
 	(*thread_resources_ptr)->storage = NULL;
 	if (id_count > 0) {
 		(*thread_resources_ptr)->storage = (void **) malloc(sizeof(void *)*id_count);
@@ -467,10 +469,11 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 		} else {
 			if (resource_types_table[i].tls_addr) {
 				(*thread_resources_ptr)->storage[i] = resource_types_table[i].tls_addr();
+				memset((*thread_resources_ptr)->storage[i], 0, resource_types_table[i].size);
 			} else if (resource_types_table[i].fast_offset) {
 				(*thread_resources_ptr)->storage[i] = (void *) (((char*)(*thread_resources_ptr)) + resource_types_table[i].fast_offset);
 			} else {
-				(*thread_resources_ptr)->storage[i] = (void *) malloc(resource_types_table[i].size);
+				(*thread_resources_ptr)->storage[i] = (void *) calloc(1, resource_types_table[i].size);
 			}
 			if (resource_types_table[i].ctor) {
 				resource_types_table[i].ctor((*thread_resources_ptr)->storage[i]);

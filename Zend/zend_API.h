@@ -250,6 +250,23 @@ typedef struct _zend_fcall_info_cache {
 #define ZEND_END_MODULE_GLOBALS(module_name)		\
 	} zend_##module_name##_globals;
 
+#ifndef _MSC_VER
+# define _ZEND_ENSURE_LAST_FIELD(name) char ___##name[];
+#else
+# define _ZEND_ENSURE_LAST_FIELD(name)
+#endif
+
+/* Fields between ZEND_BEGIN_MODULE_REQUEST_GLOBALS() and ZEND_END_MODULE_REQUEST_GLOBALS()
+ * and declared with ZEND_MODULE_GLOBALS_EX() are request-scoped. They are zeroed between requests. */
+#define ZEND_BEGIN_MODULE_REQUEST_GLOBALS() \
+	union {                                 \
+		void *___begin_request_globals;     \
+		struct {
+#define ZEND_END_MODULE_REQUEST_GLOBALS()   \
+		};                                  \
+	};                                      \
+	_ZEND_ENSURE_LAST_FIELD(REQUEST_GLOBALS_MUST_BE_LAST)
+
 #ifdef ZTS
 
 #define ZEND_DECLARE_MODULE_GLOBALS(module_name)							\
@@ -271,8 +288,11 @@ typedef struct _zend_fcall_info_cache {
 	zend_##module_name##_globals module_name##_globals;
 #define ZEND_EXTERN_MODULE_GLOBALS(module_name)								\
 	extern zend_##module_name##_globals module_name##_globals;
-#define ZEND_INIT_MODULE_GLOBALS(module_name, globals_ctor, globals_dtor)	\
-	globals_ctor(&module_name##_globals);
+#define ZEND_INIT_MODULE_GLOBALS(module_name, globals_ctor, globals_dtor) do { \
+		/* In case of a second startup */ \
+		memset(&module_name##_globals, 0, sizeof(module_name##_globals)); \
+		globals_ctor(&module_name##_globals); \
+	} while (0);
 #define ZEND_MODULE_GLOBALS_ACCESSOR(module_name, v) (module_name##_globals.v)
 #define ZEND_MODULE_GLOBALS_BULK(module_name) (&module_name##_globals)
 
@@ -347,6 +367,7 @@ ZEND_API zend_module_entry* zend_register_internal_module(zend_module_entry *mod
 ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module, zend_module_type module_type);
 ZEND_API zend_result zend_startup_module_ex(zend_module_entry *module);
 ZEND_API void zend_startup_modules(void);
+void zend_reset_request_globals(void);
 ZEND_API void zend_collect_module_handlers(void);
 ZEND_API void zend_destroy_modules(void);
 ZEND_API void zend_check_magic_method_implementation(

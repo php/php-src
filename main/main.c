@@ -389,7 +389,7 @@ static PHP_INI_MH(OnChangeMaxMemoryLimit)
 
 	PG(memory_limit) = value;
 	PG(max_memory_limit) = value;
-	
+
 	return SUCCESS;
 }
 
@@ -2080,6 +2080,7 @@ void php_request_shutdown(void *dummy)
 	zend_try {
 		shutdown_memory_manager(CG(unclean_shutdown) || !report_memleaks, 0);
 	} zend_end_try();
+	zend_reset_request_globals();
 	EG(delayed_oom).state = ZEND_OOM_STATE_NONE;
 
 	/* Reset memory limit, as the reset during INI_STAGE_DEACTIVATE may have failed.
@@ -2495,6 +2496,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	/* Don't leak errors from startup into the per-request phase. */
 	clear_last_error();
 	shutdown_memory_manager(1, 0);
+	zend_reset_request_globals();
 	virtual_cwd_activate();
 
 	zend_interned_strings_switch_storage(1);
@@ -2561,6 +2563,7 @@ void php_module_shutdown(void)
 #ifndef ZTS
 	zend_ini_shutdown();
 	shutdown_memory_manager(CG(unclean_shutdown), 1);
+	zend_reset_request_globals();
 #else
 	zend_ini_global_shutdown();
 #endif

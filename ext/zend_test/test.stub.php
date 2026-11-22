@@ -375,7 +375,7 @@ namespace {
      * @return resource|null
      */
 	function zend_resource_or_null_slow_zpp($param) {}
-	
+
     function zend_test_emalloc(int $size): void {}
 
     function zend_test_callback(callable $callback): void {}
@@ -483,6 +483,8 @@ function zend_test_override_libxml_global_state(): void {}
     function zend_new_singleton_array(): array {}
 
     function zend_test_set_local_var(string $name, mixed $value): bool {}
+
+    function zend_test_set_request_value(int $value): int {}
 }
 
 namespace ZendTestNS {

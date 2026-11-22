@@ -2468,6 +2468,9 @@ ZEND_API zend_result zend_startup_module_ex(zend_module_entry *module) /* {{{ */
 #ifdef ZTS
 		ts_allocate_id(module->globals_id_ptr, module->globals_size, (ts_allocate_ctor) module->globals_ctor, (ts_allocate_dtor) module->globals_dtor);
 #else
+		/* In case of a second startup */
+		memset(module->globals_ptr, 0, module->globals_size);
+
 		if (module->globals_ctor) {
 			module->globals_ctor(module->globals_ptr);
 		}
@@ -2491,6 +2494,20 @@ static int zend_startup_module_zval(zval *zv) /* {{{ */
 	return (zend_startup_module_ex(module) == SUCCESS) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_REMOVE;
 }
 /* }}} */
+
+void zend_reset_request_globals(void)
+{
+	ZEND_HASH_FOREACH_PTR(&module_registry, zend_module_entry *module) {
+		if (module->request_globals_size) {
+#ifdef ZTS
+			void *globals = TSRMG_BULK(*module->globals_id_ptr, void*);
+#else
+			void *globals = module->globals_ptr;
+#endif
+			memset(globals + module->request_globals_offset, 0, module->request_globals_size);
+		}
+	} ZEND_HASH_FOREACH_END();
+}
 
 static void zend_sort_modules(void *base, size_t count, size_t siz, compare_func_t compare, swap_func_t swp) /* {{{ */
 {
