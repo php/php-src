@@ -15,15 +15,13 @@
 #ifndef FLOCK_COMPAT_H
 #define FLOCK_COMPAT_H
 
-#ifdef HAVE_STRUCT_FLOCK
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/file.h>
-#endif
-
 #ifdef PHP_WIN32
 #include <io.h>
 #include "config.w32.h"
+#else
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/file.h>
 #endif
 
 /* php_flock internally uses fcntl whether or not flock is available

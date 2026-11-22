@@ -24,7 +24,7 @@ PHPAPI int flock(int fd, int operation)
 #endif /* !defined(HAVE_FLOCK) */
 
 PHPAPI int php_flock(int fd, int operation)
-#ifdef HAVE_STRUCT_FLOCK /* {{{ */
+#ifndef PHP_WIN32
 {
 	struct flock flck;
 	int ret;
@@ -53,8 +53,7 @@ PHPAPI int php_flock(int fd, int operation)
 
 	return ret;
 }
-/* }}} */
-#elif defined(PHP_WIN32) /* {{{ */
+#else
 /*
  * Program:   Unix compatibility routines
  *
@@ -137,12 +136,5 @@ PHPAPI int php_flock(int fd, int operation)
 	}
 
 	return -1;
-}
-/* }}} */
-#else
-#warning no proper flock support for your site
-{
-	errno = 0;
-	return 0;
 }
 #endif
