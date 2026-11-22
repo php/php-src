@@ -146,6 +146,8 @@ PHP                                                                        NEWS
 - Phar:
   . Fixed bug GH-25528 (Phar::setSignatureAlgorithm(): OpenSSL signing reads a
     freed private key). (Artem Ukrainskiy)
+  . Fixed use-after-free when unsetting an entry with an open handle.
+    (David Carlier)
 
 - POSIX:
   . Fixed bug GH-25530 (posix_get_last_error() returns an error from a

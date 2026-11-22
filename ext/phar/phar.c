@@ -226,6 +226,21 @@ void phar_destroy_phar_data(phar_archive_data *phar) /* {{{ */
 
 	phar_metadata_tracker_free(&phar->metadata_tracker, phar->is_persistent);
 
+	if (phar->fp_refs) {
+		zend_ulong key;
+
+		ZEND_HASH_FOREACH_NUM_KEY(phar->fp_refs, key) {
+			php_stream *stream = (php_stream *) (uintptr_t) key;
+
+			if (stream != phar->fp && stream != phar->ufp) {
+				php_stream_close(stream);
+			}
+		} ZEND_HASH_FOREACH_END();
+		zend_hash_destroy(phar->fp_refs);
+		FREE_HASHTABLE(phar->fp_refs);
+		phar->fp_refs = NULL;
+	}
+
 	if (phar->fp) {
 		php_stream_close(phar->fp);
 		phar->fp = 0;
@@ -395,6 +410,59 @@ void destroy_phar_manifest_entry(zval *zv) /* {{{ */
 }
 /* }}} */
 
+void phar_fp_addref(phar_archive_data *phar, php_stream *fp) /* {{{ */
+{
+	zval *count, tmp;
+
+	if (!phar->fp_refs) {
+		ALLOC_HASHTABLE(phar->fp_refs);
+		zend_hash_init(phar->fp_refs, 2, NULL, NULL, 0);
+	}
+
+	count = zend_hash_index_find(phar->fp_refs, (zend_ulong) (uintptr_t) fp);
+	if (count) {
+		Z_LVAL_P(count)++;
+	} else {
+		ZVAL_LONG(&tmp, 1);
+		zend_hash_index_add_new(phar->fp_refs, (zend_ulong) (uintptr_t) fp, &tmp);
+	}
+}
+/* }}} */
+
+bool phar_fp_in_use(const phar_archive_data *phar, const php_stream *fp) /* {{{ */
+{
+	return phar->fp_refs && zend_hash_index_exists(phar->fp_refs, (zend_ulong) (uintptr_t) fp);
+}
+/* }}} */
+
+static void phar_entry_data_release_fp(phar_entry_data *idata) /* {{{ */
+{
+	phar_archive_data *phar = idata->phar;
+	php_stream *fp = idata->fp;
+	zval *count;
+
+	if (!fp) {
+		return;
+	}
+
+	count = phar->fp_refs ? zend_hash_index_find(phar->fp_refs, (zend_ulong) (uintptr_t) fp) : NULL;
+	if (count) {
+		if (--Z_LVAL_P(count) > 0) {
+			return;
+		}
+		zend_hash_index_del(phar->fp_refs, (zend_ulong) (uintptr_t) fp);
+		if (fp != phar->fp && fp != phar->ufp) {
+			php_stream_close(fp);
+		}
+		return;
+	}
+
+	if (fp != phar->fp && fp != phar->ufp && fp != idata->internal_file->fp) {
+		php_stream_close(fp);
+	}
+}
+/* }}} */
+
 void phar_entry_delref(phar_entry_data *idata) /* {{{ */
 {
 	if (idata->internal_file && !idata->internal_file->is_persistent) {
@@ -402,9 +470,7 @@ void phar_entry_delref(phar_entry_data *idata) /* {{{ */
 			idata->internal_file->fp_refcount = 0;
 		}
 
-		if (idata->fp && idata->fp != idata->phar->fp && idata->fp != idata->phar->ufp && idata->fp != idata->internal_file->fp) {
-			php_stream_close(idata->fp);
-		}
+		phar_entry_data_release_fp(idata);
 		/* if phar_get_or_create_entry_data returns a sub-directory, we have to free it */
 		if (idata->internal_file->is_temp_dir) {
 			destroy_phar_manifest_entry_int(idata->internal_file);
@@ -427,9 +493,7 @@ void phar_entry_remove(phar_entry_data *idata, char **error) /* {{{ */
 	phar = idata->phar;
 
 	if (idata->internal_file->fp_refcount < 2 && idata->internal_file->fileinfo_lock_count == 0) {
-		if (idata->fp && idata->fp != idata->phar->fp && idata->fp != idata->phar->ufp && idata->fp != idata->internal_file->fp) {
-			php_stream_close(idata->fp);
-		}
+		phar_entry_data_release_fp(idata);
 		zend_hash_str_del(&idata->phar->manifest, idata->internal_file->filename, idata->internal_file->filename_len);
 		idata->phar->refcount--;
 		efree(idata);
@@ -2534,8 +2598,6 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 	php_stream_filter *filter;
 	php_serialize_data_t metadata_hash;
 	smart_str main_metadata_str = {0};
-	bool free_fp = true;
-	bool free_ufp = true;
 	bool manifest_hack = false;
 	php_stream *shared_cfp = NULL;
 
@@ -2680,18 +2742,6 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 		if (entry->is_deleted || entry->is_mounted) {
 			/* remove this from the new phar */
 			continue;
-		}
-		if (entry->fp_refcount) {
-			/* open file pointers refer to this fp, do not free the stream */
-			switch (entry->fp_type) {
-				case PHAR_FP:
-					free_fp = false;
-					break;
-				case PHAR_UFP:
-					free_ufp = false;
-				default:
-					break;
-			}
 		}
 		/* after excluding deleted files, calculate manifest size in bytes and number of entries */
 		++new_manifest_count;
@@ -3116,12 +3166,12 @@ int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defau
 	/* finally, close the temp file, rename the original phar,
 	   move the temp to the old phar, unlink the old phar, and reload it into memory
 	*/
-	if (phar->fp && free_fp) {
+	if (phar->fp && !phar_fp_in_use(phar, phar->fp)) {
 		php_stream_close(phar->fp);
 	}
 
 	if (phar->ufp) {
-		if (free_ufp) {
+		if (!phar_fp_in_use(phar, phar->ufp)) {
 			php_stream_close(phar->ufp);
 		}
 		phar->ufp = NULL;
