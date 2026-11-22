@@ -19,7 +19,7 @@
 #include "php.h"
 #include "ext/standard/file.h"
 #include "ext/standard/php_filestat.h"
-#include "ext/standard/flock_compat.h"
+#include "main/flock_compat.h"
 #include "ext/standard/scanf.h"
 #include "ext/standard/php_string.h" /* For php_basename() */
 #include "zend_exceptions.h"

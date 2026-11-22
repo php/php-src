@@ -405,7 +405,6 @@ PHP_NEW_EXTENSION([standard], m4_normalize([
     file.c
     filestat.c
     filters.c
-    flock_compat.c
     formatted_print.c
     fsock.c
     ftok.c
