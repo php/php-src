@@ -65,13 +65,13 @@ PHPAPI HashTable *php_stream_get_url_stream_wrappers_hash_global(void)
 	return &url_stream_wrappers_hash;
 }
 
-static int forget_persistent_resource_id_numbers(zval *el)
+static void forget_persistent_resource_id_numbers(zval *el)
 {
 	php_stream *stream;
 	zend_resource *rsrc = Z_RES_P(el);
 
 	if (rsrc->type != le_pstream) {
-		return 0;
+		return;
 	}
 
 	stream = (php_stream*)rsrc->ptr;
@@ -83,8 +83,6 @@ fprintf(stderr, "forget_persistent: %s:%p\n", stream->ops->label, stream);
 	/* Request resources have been destroyed; clear their stale pointers. */
 	stream->res = NULL;
 	stream->ctx = NULL;
-
-	return 0;
 }
 
 ZEND_MODULE_POST_ZEND_DEACTIVATE_D(streams)
