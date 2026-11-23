@@ -536,7 +536,7 @@ BCinfo { int dp0, dp1, dplen, dsign, e0, inexact, nd, nd0, rounding, scale, uflc
 Bigint {
 	struct Bigint *next;
 	int k, maxwds, sign, wds;
-	ULong x[1];
+	ULong x[1] ZEND_ATTRIBUTE_FLEX_ARRAY;
 	};
 
  typedef struct Bigint Bigint;

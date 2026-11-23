@@ -396,6 +396,12 @@ char *alloca();
 # define HAVE_BUILTIN_CONSTANT_P
 #endif
 
+#if __has_attribute(strict_flex_array)
+# define ZEND_ATTRIBUTE_FLEX_ARRAY __attribute__((strict_flex_array(1)))
+#else
+# define ZEND_ATTRIBUTE_FLEX_ARRAY
+#endif
+
 #if __has_attribute(counted_by)
 #define ZEND_ELEMENT_COUNT(m) __attribute__((counted_by(m)))
 #else

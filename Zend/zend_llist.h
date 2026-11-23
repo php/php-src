@@ -24,7 +24,7 @@
 typedef struct _zend_llist_element {
 	struct _zend_llist_element *next;
 	struct _zend_llist_element *prev;
-	char data[1]; /* Needs to always be last in the struct */
+	char data[1] ZEND_ATTRIBUTE_FLEX_ARRAY; /* Needs to always be last in the struct */
 } zend_llist_element;
 
 typedef void (*llist_dtor_func_t)(void *);

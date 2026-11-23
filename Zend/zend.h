@@ -94,7 +94,7 @@ typedef struct _zend_trait_method_reference {
 typedef struct _zend_trait_precedence {
 	zend_trait_method_reference trait_method;
 	uint32_t num_excludes;
-	zend_string *exclude_class_names[1];
+	zend_string *exclude_class_names[1] ZEND_ATTRIBUTE_FLEX_ARRAY;
 } zend_trait_precedence;
 
 typedef struct _zend_trait_alias {
@@ -140,7 +140,7 @@ struct _zend_inheritance_cache_entry {
 	uint32_t                      dependencies_count;
 	uint32_t                      num_warnings;
 	zend_error_info             **warnings;
-	zend_class_entry             *traits_and_interfaces[1];
+	zend_class_entry             *traits_and_interfaces[1] ZEND_ATTRIBUTE_FLEX_ARRAY;
 };
 
 C23_ENUM(zend_class_type, uint8_t) {

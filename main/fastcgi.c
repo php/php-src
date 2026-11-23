@@ -174,7 +174,7 @@ typedef struct _fcgi_data_seg {
 	char                  *pos;
 	char                  *end;
 	struct _fcgi_data_seg *next;
-	char                   data[1];
+	char                   data[1] ZEND_ATTRIBUTE_FLEX_ARRAY;
 } fcgi_data_seg;
 
 typedef struct _fcgi_hash {

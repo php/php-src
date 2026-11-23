@@ -76,7 +76,7 @@ typedef struct _zend_attribute {
 	 * Everything else uses 0. */
 	uint32_t offset;
 	uint32_t argc;
-	zend_attribute_arg args[1];
+	zend_attribute_arg args[1] ZEND_ATTRIBUTE_FLEX_ARRAY;
 } zend_attribute;
 
 typedef struct _zend_internal_attribute {
