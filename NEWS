@@ -23,6 +23,9 @@ PHP                                                                        NEWS
     nested isset()/empty(). (Jorg Sowa)
   . Fixed AST printing dropping readonly on promoted constructor parameters.
     (Jorg Sowa)
+  . Fixed use-after-free when the error handler releases or modifies the array
+    or object while an undefined variable is assigned to one of its elements or
+    properties. (Jorg Sowa)
   . Fixed bug GH-25311 (Assertion ret == SUCCESS in array_map()/array_filter()
     after delayed out-of-memory). (ndossche)
   . Fixed AST export of by-reference property hooks. (Jorg Sowa)
