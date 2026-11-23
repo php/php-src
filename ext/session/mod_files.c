@@ -201,15 +201,6 @@ static void ps_files_open(ps_files *data, /* const */ zend_string *key)
 			do {
 				ret = flock(data->fd, LOCK_EX);
 			} while (ret == -1 && errno == EINTR);
-
-#if defined(F_SETFD) && !defined(O_CLOEXEC)
-# ifndef FD_CLOEXEC
-#  define FD_CLOEXEC 1
-# endif
-			if (fcntl(data->fd, F_SETFD, FD_CLOEXEC)) {
-				php_error_docref(NULL, E_WARNING, "fcntl(%d, F_SETFD, FD_CLOEXEC) failed: %s (%d)", data->fd, strerror(errno), errno);
-			}
-#endif
 		} else {
 			php_error_docref(NULL, E_WARNING, "open(%s, O_RDWR) failed: %s (%d)", buf, strerror(errno), errno);
 		}
