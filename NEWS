@@ -85,6 +85,7 @@ PHP                                                                        NEWS
     (Jorg Sowa)
   . Fixed Locale::lookup() ignoring the default locale when the language tag
     list is empty. (Weilin Du)
+  . Fixed IntlCalendar::setTime() accepting non-finite timestamps. (Weilin Du)
 
 - JSON:
   . Fixed json_decode() and json_validate() error messages. (lacatoire)
