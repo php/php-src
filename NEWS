@@ -81,6 +81,7 @@ PHP                                                                        NEWS
     list is empty. (Weilin Du)
   . Fixed intl_error_name() truncating error codes outside the int range.
     (lacatoire)
+  . Fixed IntlCalendar::setTime() accepting non-finite timestamps. (Weilin Du)
 
 - JSON:
   . Fixed json_decode() and json_validate() error messages. (lacatoire)
