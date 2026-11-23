@@ -72,6 +72,14 @@ PHP 8.7 UPGRADE NOTES
     to 16 by default. Set the stream context option max_filter_count to change
     this.
 
+- Streams:
+  . php://temp streams (and therefore SplTempFileObject) no longer report EOF
+    as soon as the last byte has been buffered. EOF is now only reported once a
+    read hits the end of the data, consistent with php://memory and plain
+    files. As a result, loops such as `while (!feof($fp)) { fgets($fp); }` or
+    iterating an SplTempFileObject perform one additional iteration at the
+    end, exactly as they already did for php://memory and plain files.
+
 ========================================
 2. New Features
 ========================================
