@@ -282,6 +282,21 @@ char *alloca();
 # define ZEND_ATTRIBUTE_ALLOC_SIZE2(X,Y)
 #endif
 
+/* ZEND_ATTRIBUTE_ALLOCATES names the function that releases what the annotated function returns,
+ * ZEND_ATTRIBUTE_RELEASES marks that function. GCC uses this for -Wmismatched-dealloc,
+ * -Wuse-after-free and -fanalyzer, the Clang Static Analyzer for unix.Malloc and
+ * unix.MismatchedDeallocator. */
+#if defined(__clang__) && __has_attribute(ownership_returns)
+# define ZEND_ATTRIBUTE_ALLOCATES(pool, deallocator) __attribute__((ownership_returns(pool)))
+# define ZEND_ATTRIBUTE_RELEASES(pool, index)        __attribute__((ownership_takes(pool, index)))
+#elif !defined(__clang__) && ZEND_GCC_VERSION >= 11000
+# define ZEND_ATTRIBUTE_ALLOCATES(pool, deallocator) __attribute__((malloc(deallocator, 1)))
+# define ZEND_ATTRIBUTE_RELEASES(pool, index)
+#else
+# define ZEND_ATTRIBUTE_ALLOCATES(pool, deallocator)
+# define ZEND_ATTRIBUTE_RELEASES(pool, index)
+#endif
+
 #if __STDC_VERSION__ >= 202311L || (defined(__cplusplus) && __cplusplus >= 201703L)
 # define ZEND_ATTRIBUTE_NODISCARD [[nodiscard]]
 #elif __has_attribute(__warn_unused_result__)
