@@ -264,7 +264,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set_time)
 
 	if (UNEXPECTED(!zend_finite(time_arg))) {
 		intl_errors_set(CALENDAR_ERROR_P(co), U_ILLEGAL_ARGUMENT_ERROR,
-			"Timestamp must be finite", 0);
+			"Timestamp must be finite");
 		RETURN_FALSE;
 	}
 
