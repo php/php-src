@@ -34,6 +34,42 @@ try {
 }
 
 try {
+    socket_bind($socket, ' 2', 1024);
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+
+try {
+    socket_bind($socket, '2 ', 1024);
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+
+try {
+    socket_bind($socket, '2.0', 1024);
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+
+try {
+    socket_bind($socket, '1e0', 1024);
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+
+try {
+    socket_bind($socket, '+2', 1024);
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+
+try {
+    socket_bind($socket, '', 1024);
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+
+try {
     socket_connect($socket, (string) VMADDR_CID_ANY);
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
@@ -50,6 +86,12 @@ var_dump(socket_bind($socket, (string) VMADDR_CID_ANY, VMADDR_PORT_ANY));
 socket_close($socket);
 ?>
 --EXPECT--
+ValueError: socket_bind(): Argument #2 ($address) must be a numeric context ID between 0 and 4294967295
+ValueError: socket_bind(): Argument #2 ($address) must be a numeric context ID between 0 and 4294967295
+ValueError: socket_bind(): Argument #2 ($address) must be a numeric context ID between 0 and 4294967295
+ValueError: socket_bind(): Argument #2 ($address) must be a numeric context ID between 0 and 4294967295
+ValueError: socket_bind(): Argument #2 ($address) must be a numeric context ID between 0 and 4294967295
+ValueError: socket_bind(): Argument #2 ($address) must be a numeric context ID between 0 and 4294967295
 ValueError: socket_bind(): Argument #2 ($address) must be a numeric context ID between 0 and 4294967295
 ValueError: socket_bind(): Argument #2 ($address) must be a numeric context ID between 0 and 4294967295
 ValueError: socket_bind(): Argument #2 ($address) must be a numeric context ID between 0 and 4294967295

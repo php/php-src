@@ -80,6 +80,10 @@
 # endif
 #endif
 
+#if defined(AF_VSOCK) && SIZEOF_ZEND_LONG < 8
+# undef AF_VSOCK
+#endif
+
 #include <stddef.h>
 
 #include "sockaddr_conv.h"
@@ -122,28 +126,25 @@ ZEND_DECLARE_MODULE_GLOBALS(sockets)
 #ifdef AF_VSOCK
 static bool php_vsock_parse_cid(zend_string *addr, uint32_t *cid)
 {
-	zend_long lval;
-	double dval;
+	const char *p = ZSTR_VAL(addr), *end = p + ZSTR_LEN(addr);
+	uint64_t val = 0;
 
-	switch (is_numeric_string(ZSTR_VAL(addr), ZSTR_LEN(addr), &lval, &dval, 0)) {
-		case IS_LONG:
-			if (ZEND_LONG_UINT_OVFL(lval)) {
-				return false;
-			}
-			*cid = (uint32_t) lval;
-			return true;
-
-		case IS_DOUBLE:
-			if (!(dval >= 0 && dval <= (double) UINT32_MAX)
-					|| dval != (double) (int64_t) dval) {
-				return false;
-			}
-			*cid = (uint32_t) (int64_t) dval;
-			return true;
-
-		default:
-			return false;
+	if (p == end) {
+		return false;
 	}
+
+	for (; p < end; p++) {
+		if (*p < '0' || *p > '9') {
+			return false;
+		}
+		val = val * 10 + (uint64_t) (*p - '0');
+		if (val > UINT32_MAX) {
+			return false;
+		}
+	}
+
+	*cid = (uint32_t) val;
+	return true;
 }
 
 static bool php_set_vsock_addr(struct sockaddr_vm *svm, zend_string *addr, zend_long port,
@@ -157,7 +158,7 @@ static bool php_set_vsock_addr(struct sockaddr_vm *svm, zend_string *addr, zend_
 		return false;
 	}
 
-	if (ZEND_LONG_UINT_OVFL(port)) {
+	if (!ZEND_IN_RANGE_OF(port, uint32_t)) {
 		zend_argument_value_error(port_arg_num, "must be between 0 and " ZEND_ULONG_FMT,
 			(zend_ulong) UINT32_MAX);
 		return false;
