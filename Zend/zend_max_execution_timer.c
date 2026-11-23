@@ -98,6 +98,18 @@ void zend_max_execution_timer_cache_shutdown(void)
 }
 #endif
 
+/* Remember the SIGRTMIN handler that zend_timeout_handler() forwards foreign
+ * signals to. After a request installs zend_timeout_handler(), the current
+ * handler is ours, and saving it would recursively forward forever. */
+static void zend_max_execution_timer_save_oldact(void)
+{
+	struct sigaction act;
+
+	if (sigaction(SIGRTMIN, NULL, &act) == 0 && act.sa_sigaction != zend_timeout_handler) {
+		EG(oldact) = act;
+	}
+}
+
 ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
 {
 	pid_t pid = getpid();
@@ -115,7 +127,6 @@ ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
 # ifdef MAX_EXECUTION_TIMERS_DEBUG
 		fprintf(stderr, "Timer %#jx reused on thread %d\n", (uintmax_t) EG(max_execution_timer_timer), (pid_t) syscall(SYS_gettid));
 # endif
-		sigaction(SIGRTMIN, NULL, &EG(oldact));
 		return;
 	}
 #endif
@@ -147,7 +158,7 @@ ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
 		fprintf(stderr, "Timer %#jx created on thread %d\n", (uintmax_t) EG(max_execution_timer_timer), sev.sigev_notify_thread_id);
 # endif
 
-	sigaction(sev.sigev_signo, NULL, &EG(oldact));
+	zend_max_execution_timer_save_oldact();
 }
 /* }}} */
 

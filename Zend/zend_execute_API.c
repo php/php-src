@@ -1520,7 +1520,7 @@ ZEND_NORETURN ZEND_API void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 
 #ifndef ZEND_WIN32
 # ifdef ZEND_MAX_EXECUTION_TIMERS
-static void zend_timeout_handler(int dummy, siginfo_t *si, void *uc) /* {{{ */
+void zend_timeout_handler(int dummy, siginfo_t *si, void *uc) /* {{{ */
 {
 #ifdef ZTS
 	if (!tsrm_is_managed_thread()) {
