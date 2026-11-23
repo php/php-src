@@ -85,6 +85,8 @@ PHP 8.7 INTERNALS UPGRADE NOTES
     from zend_is_callable(const zval *callable, uint32_t check_flags, zend_string **callable_name).
     This new signature covers the most common parameters used with
     zend_is_callable_ex().
+  . The `skip_last` parameter of `zend_fetch_debug_backtrace()` is now declared
+    as a `bool` rather than an `int`.
 
 - Added:
   . The zend_object_copy() function was added to increases the refcount of a
