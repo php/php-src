@@ -605,6 +605,9 @@ really_get_entry:
 	if (!phar->is_persistent) {
 		++(entry->fp_refcount);
 		++(entry->phar->refcount);
+		if ((*ret)->fp && ((*ret)->fp == phar->fp || (*ret)->fp == phar->ufp)) {
+			phar_fp_addref(phar, (*ret)->fp);
+		}
 	}
 
 	return SUCCESS;
