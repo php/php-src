@@ -41,6 +41,7 @@ PHP                                                                        NEWS
     (Nicolas Grekas)
   . Fixed bug GH-25571 (Incorrect null handlers when generating unspecialized
     Zend VMs). (Weilin Du)
+  . Fixed propagation of public(set) of readonly trait property. (ilutov)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
