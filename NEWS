@@ -65,6 +65,8 @@ PHP                                                                        NEWS
     evaluation Error instead. (Ilia Alshanetsky)
   . Fixed a crash and a use-after-free in key() of an attribute or DTD named
     node map iterator that has no current item. (Ilia Alshanetsky)
+  . Fixed use-after-free in getElementById() after a removed ID attribute is
+    freed. (Ilia Alshanetsky)
 
 - Fileinfo:
   . Fixed bug GH-25051 (TrueType fonts detected as application/octet-stream
