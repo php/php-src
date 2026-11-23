@@ -5222,6 +5222,24 @@ static bool mb_fast_check_utf8_default(zend_string *str)
 	uint8x16_t prev_input = vdupq_n_u8(0);
 	uint8x16_t prev_incomplete = vdupq_n_u8(0);
 
+	/* Align the loads on 64-byte boundaries for long strings, as in mb_fast_check_utf8_avx512 */
+	uintptr_t misalignment = (uintptr_t)p % 64;
+	if (e - p >= 2048 && misalignment != 0 && misalignment <= 61) {
+		uint8x16_t in0 = vld1q_u8(p);
+		uint8x16_t in1 = vld1q_u8(p + 16);
+		uint8x16_t in2 = vld1q_u8(p + 32);
+		uint8x16_t in3 = vld1q_u8(p + 48);
+		MB_UTF8_CHECK_NEON(in0, prev_input);
+		MB_UTF8_CHECK_NEON(in1, in0);
+		MB_UTF8_CHECK_NEON(in2, in1);
+		MB_UTF8_CHECK_NEON(in3, in2);
+		p += 64 - misalignment;
+		uint8_t ctx[16] = {0};
+		memcpy(ctx + 13, p - 3, 3);
+		prev_input = vld1q_u8(ctx);
+		prev_incomplete = vqsubq_u8(prev_input, max_value);
+	}
+
 	while (e - p >= 64) {
 		/* The error vector is sticky, so it suffices to test it once in a while */
 		const unsigned char *stop = (e - p >= 1024 + 64) ? p + 1024 : e - 63;
