@@ -287,6 +287,7 @@ jobs:
           sed -i 's/secret_key = ""/secret_key = "${{ secrets.PHP_VERSION_BENCHMARK_AWS_SECRET_KEY }}"/g' ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
           sed -i 's/state_bucket = ""/state_bucket = "${{ secrets.PHP_VERSION_BENCHMARK_STATE_BUCKET }}"/g' ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
           sed -i 's/github_token = ""/github_token = "${{ secrets.GITHUB_TOKEN }}"/g' ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
+          sed -i 's/termination_timeout_in_min = 120/termination_timeout_in_min = 60/g' ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
 
           WORKFLOW_RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           sed -i "s|log_url = \"\"|log_url = \"$WORKFLOW_RUN_URL\"|g" ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
