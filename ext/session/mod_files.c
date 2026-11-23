@@ -332,8 +332,8 @@ static int ps_files_cleanup_dir(const zend_string *dirname, zend_long maxlifetim
 				nrdels++;
 			}
 		} else {
-			/* intermediate depth: recurse into subdirectories */
-			if (VCWD_STAT(buf, &sbuf) != 0) {
+			/* intermediate depth: recurse into subdirectories, never through symlinks */
+			if (VCWD_LSTAT(buf, &sbuf) != 0) {
 				continue;
 			}
 			if (S_ISDIR(sbuf.st_mode)) {
