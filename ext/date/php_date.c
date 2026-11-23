@@ -2403,9 +2403,11 @@ PHPAPI bool php_date_initialize(php_date_obj *dateobj, const char *time_str, siz
 	time_t sec;
 	suseconds_t usec;
 	int options = 0;
+	bool is_now = false;
 
 	if (dateobj->time) {
 		timelib_time_dtor(dateobj->time);
+		dateobj->time = NULL;
 	}
 	if (format) {
 		if (time_str_len == 0) {
@@ -2417,7 +2419,10 @@ PHPAPI bool php_date_initialize(php_date_obj *dateobj, const char *time_str, siz
 			time_str = "now";
 			time_str_len = sizeof("now") - 1;
 		}
-		dateobj->time = timelib_strtotime(time_str, time_str_len, &err, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
+		is_now = time_str_len == sizeof("now") - 1 && memcmp(time_str, ZEND_STRL("now")) == 0;
+		if (!is_now) {
+			dateobj->time = timelib_strtotime(time_str, time_str_len, &err, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
+		}
 	}
 
 	/* update last errors and warnings */
@@ -2456,7 +2461,7 @@ PHPAPI bool php_date_initialize(php_date_obj *dateobj, const char *time_str, siz
 				return 0;
 		}
 		type = tzobj->type;
-	} else if (dateobj->time->tz_info) {
+	} else if (dateobj->time && dateobj->time->tz_info) {
 		tzi = dateobj->time->tz_info;
 	} else {
 		tzi = get_timezone_info();
@@ -2484,10 +2489,7 @@ PHPAPI bool php_date_initialize(php_date_obj *dateobj, const char *time_str, siz
 	timelib_unixtime2local(now, (timelib_sll) sec);
 	php_date_set_time_fraction(now, usec);
 
-	if (!format
-	 && time_str_len == sizeof("now") - 1
-	 && memcmp(time_str, "now", sizeof("now") - 1) == 0) {
-		timelib_time_dtor(dateobj->time);
+	if (is_now) {
 		dateobj->time = now;
 		return 1;
 	}
