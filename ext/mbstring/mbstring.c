@@ -5230,7 +5230,7 @@ static bool mb_fast_check_utf8_default(zend_string *str)
 			uint8x16_t in1 = vld1q_u8(p + 16);
 			uint8x16_t in2 = vld1q_u8(p + 32);
 			uint8x16_t in3 = vld1q_u8(p + 48);
-			if (vmaxvq_u8(vorrq_u8(vorrq_u8(in0, in1), vorrq_u8(in2, in3))) < 0x80) {
+			if (EXPECTED(vmaxvq_u8(vorrq_u8(vorrq_u8(in0, in1), vorrq_u8(in2, in3))) < 0x80)) {
 				/* All ASCII; only need to check that the previous block was complete */
 				error = vorrq_u8(error, prev_incomplete);
 			} else {
@@ -5243,7 +5243,7 @@ static bool mb_fast_check_utf8_default(zend_string *str)
 			}
 			p += 64;
 		} while (p < stop);
-		if (vmaxvq_u8(error)) {
+		if (UNEXPECTED(vmaxvq_u8(error))) {
 			return false;
 		}
 	}
@@ -5727,7 +5727,7 @@ static bool mb_fast_check_utf8_avx2(zend_string *str)
 			}
 			p += 64;
 		} while (p < stop);
-		if (!_mm256_testz_si256(error, error)) {
+		if (UNEXPECTED(!_mm256_testz_si256(error, error))) {
 			return false;
 		}
 	}
@@ -5851,7 +5851,7 @@ static bool mb_fast_check_utf8_avx512(zend_string *str)
 		const unsigned char *stop = (e - p >= 1024 + 64) ? p + 1024 : e - 63;
 		do {
 			__m512i in = _mm512_loadu_si512((const void*)p);
-			if (!_mm512_movepi8_mask(in)) {
+			if (EXPECTED(!_mm512_movepi8_mask(in))) {
 				error = _mm512_or_si512(error, prev_incomplete);
 			} else {
 				MB_UTF8_CHECK_AVX512(in, prev_input);
@@ -5860,7 +5860,7 @@ static bool mb_fast_check_utf8_avx512(zend_string *str)
 			}
 			p += 64;
 		} while (p < stop);
-		if (_mm512_test_epi8_mask(error, error)) {
+		if (UNEXPECTED(_mm512_test_epi8_mask(error, error))) {
 			return false;
 		}
 	}

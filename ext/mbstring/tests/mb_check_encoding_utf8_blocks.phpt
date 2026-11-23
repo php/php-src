@@ -40,31 +40,42 @@ foreach ($fillers as $filler) {
         }
     }
 }
-// Lengths past 2048 bytes take the AVX-512 alignment prologue.
-foreach ([2048, 2112, 4095] as $len) {
+// Long strings: errors are only tested every 1024 bytes, and lengths of 2048
+// bytes or more take the AVX-512 alignment prologue.
+$lengths = [1000, 1020, 1023, 1024, 1025, 1028, 1087, 1088, 1089, 1100,
+            2047, 2048, 2049, 2112, 3000, 4095, 4096, 4097];
+$bad = ["\x80", "\xC3", "\xED", "\xF0", "\xF4", "\xFF"];
+foreach ($lengths as $len) {
+    $offsets = [0, 1, 2, 3, 61, 62, 63, 64, 65, 66, 127, 128, 129,
+                1021, 1022, 1023, 1024, 1025, 1026, 1086, 1087, 1088, 1089,
+                2045, 2046, 2047, 2048, 2049, 2050];
+    for ($i = 1; $i <= 6; $i++) {
+        $offsets[] = $len - $i;
+    }
     foreach ($fillers as $filler) {
         $base = str_repeat($filler, intdiv($len, strlen($filler)) + 1);
         $base = mb_strcut($base, 0, $len, 'UTF-8');
-        $probe = pack('H*', bin2hex($base));
-        if (mb_check_encoding($probe, 'UTF-8') !== (preg_match('//u', $base) === 1)) {
-            if ($mismatches++ < 10) {
-                echo "Mismatch: long ", bin2hex(substr($base, 0, 16)), "... len ", strlen($base), "\n";
+        $n = strlen($base);
+        $variants = [$base];
+        foreach ($offsets as $pos) {
+            if ($pos >= 0 && $pos < $n) {
+                foreach ($bad as $byte) {
+                    $s = $base;
+                    $s[$pos] = $byte;
+                    $variants[] = $s;
+                }
             }
         }
-        $checked++;
-        if (strlen($base) < 65) {
-            continue;
-        }
-        $s = $probe;
-        $s[64] = "\x80";
-        $expected = preg_match('//u', $s) === 1;
-        $s = pack('H*', bin2hex($s));
-        if (mb_check_encoding($s, 'UTF-8') !== $expected) {
-            if ($mismatches++ < 10) {
-                echo "Mismatch: long mutated len ", strlen($s), "\n";
+        foreach ($variants as $s) {
+            $expected = preg_match('//u', $s) === 1;
+            $s = pack('H*', bin2hex($s));
+            if (mb_check_encoding($s, 'UTF-8') !== $expected) {
+                if ($mismatches++ < 10) {
+                    echo "Mismatch: long len ", strlen($s), " expected ", var_export($expected, true), "\n";
+                }
             }
+            $checked++;
         }
-        $checked++;
     }
 }
 echo $checked > 100000 ? "enough cases\n" : "too few cases: $checked\n";
