@@ -437,11 +437,6 @@ jobs:
       matrix: ${{ fromJson(inputs.branch).jobs.COMMUNITY.matrix }}
     name: "COMMUNITY_${{ matrix.type }}"
     runs-on: ubuntu-${{ fromJson(inputs.branch).config.ubuntu_version }}
-    env:
-      ASAN_OPTIONS: exitcode=139
-      UBSAN_OPTIONS: print_stacktrace=1
-      USE_ZEND_ALLOC: 0
-      USE_TRACKED_ALLOC: 1
     steps:
       - name: git checkout
         uses: actions/checkout@v7
@@ -476,14 +471,16 @@ jobs:
           echo memory_limit=-1 >> /etc/php.d/opcache.ini
           echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
           echo opcache.enable=1 >> /etc/php.d/opcache.ini
-          echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
           echo opcache.memory_consumption=256M >> /etc/php.d/opcache.ini
           echo opcache.file_update_protection=0 >> /etc/php.d/opcache.ini
           echo opcache.interned_strings_buffer=64 >> /etc/php.d/opcache.ini
           echo opcache.max_accelerated_files=130987 >> /etc/php.d/opcache.ini
-      - name: Enable JIT
+      - name: ASAN settings
         if: ${{ matrix.type != 'verify_type_inference' }}
         run: |
+          echo "ASAN_OPTIONS=exitcode=139" >> "$GITHUB_ENV"
+          echo "UBSAN_OPTIONS=print_stacktrace=1" >> "$GITHUB_ENV"
+          echo "USE_ZEND_ALLOC=0" >> "$GITHUB_ENV"
           echo opcache.jit=tracing >> /etc/php.d/opcache.ini
           echo opcache.jit_buffer_size=1G >> /etc/php.d/opcache.ini
           echo opcache.jit_max_root_traces=100000 >> /etc/php.d/opcache.ini
