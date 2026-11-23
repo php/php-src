@@ -42,6 +42,8 @@ PHP                                                                        NEWS
 - DBA:
   . Fixed dba_close() not closing a database opened with dba_popen().
     (Ilia Alshanetsky)
+  . Fixed bug GH-24640 (tcadb handler allows injecting Tokyo Cabinet
+    parameters via "#" in the path). (Lazizbek Ergashev)
 
 - DOM:
   . Fixed bug GH-25306 (Assertion status == LXB_STATUS_OK in dom_parse_selector
@@ -51,6 +53,8 @@ PHP                                                                        NEWS
   . Fixed crash when registerNodeClass() is given a class with a constant
     expression that cannot be evaluated; registerNodeClass() now throws the
     evaluation Error instead. (Ilia Alshanetsky)
+  . Fixed a crash and a use-after-free in key() of an attribute or DTD named
+    node map iterator that has no current item. (Ilia Alshanetsky)
 
 - Filter:
   . Fixed stack overflow in filter_var() and filter_var_array() with deeply
@@ -106,6 +110,10 @@ PHP                                                                        NEWS
     (pavimus)
   . Fixed opcache.enable_file_override lookups racing with OPcache restarts
     (pavimus)
+  . Fixed incorrect constant propagation when unpacking into partially known
+    arrays. (Weilin Du)
+  . Fixed function JIT ASSIGN_DIM reporting an undefined value or key out of
+    order, or when the VM does not, on non-array containers. (Jorg Sowa)
 
 - PDO_Firebird:
   . Fixed stack buffer overflow with long connection user names, passwords,
@@ -123,6 +131,13 @@ PHP                                                                        NEWS
   . Fixed bug GH-25390 (fetching a long text / ntext value allocates the
     declared column size when the driver returns SQL_NO_TOTAL). (licvido,
     chep6915)
+- PDO_SQLite:
+  . Fixed bug GH-25588 (Use-after-free of a string parameter omitted on a later
+    execute() or rebound while fetching). (Ilia Alshanetsky)
+
+- Phar:
+  . Fixed bug GH-25528 (Phar::setSignatureAlgorithm(): OpenSSL signing reads a
+    freed private key). (Artem Ukrainskiy)
 
 - POSIX:
   . Fixed bug GH-25530 (posix_get_last_error() returns an error from a
@@ -144,6 +159,8 @@ PHP                                                                        NEWS
 - SNMP:
   . Fixed snmp3_set() citing the wrong argument number for an invalid $timeout
     or $retries. (lacatoire)
+  . Fixed the procedural snmp functions citing the wrong argument number for an
+    invalid $hostname or $community. (lacatoire)
 
 - SOAP:
   . Fixed bug GH-25267 (NULL dereference in to_xml_any() with integer key).
@@ -195,6 +212,8 @@ PHP                                                                        NEWS
     user filter). (Edmond)
   . Fixed bug GH-15701 (Build failure: incompatible funopen() seeker pointer
     type on 32-bit platforms). (Kamil Tekiela)
+  . Fixed bug GH-25586 (Use-after-free in php_stream_cast() when a userspace
+    stream_flush() closes the stream). (lazerg)
 
 - XSL:
   . Fixed a crash in XSLTProcessor::transformToDoc() when the return class

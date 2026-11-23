@@ -718,9 +718,15 @@ static int php_userstreamop_flush(php_stream *stream)
 
 	assert(us != NULL);
 
+	uint32_t orig_no_fclose = stream->flags & PHP_STREAM_FLAG_NO_FCLOSE;
+	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
+
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_FLUSH, false);
 	zend_result call_result = zend_call_method_if_exists(Z_OBJ(us->object), func_name, &retval, 0, NULL);
 	zend_string_release_ex(func_name, false);
+
+	stream->flags &= ~PHP_STREAM_FLAG_NO_FCLOSE;
+	stream->flags |= orig_no_fclose;
 
 	int ret = call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF && zval_is_true(&retval) ? 0 : -1;
 
@@ -1403,7 +1409,7 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr)
 	php_stream * intstream = NULL;
 	int ret = FAILURE;
 	/* If we are checking if the stream can cast, no return pointer is provided, so do not emit errors */
-	bool report_errors = retptr;
+	bool report_errors = retptr != NULL;
 
 	switch(castas) {
 	case PHP_STREAM_AS_FD_FOR_SELECT:
