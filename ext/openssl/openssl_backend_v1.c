@@ -747,6 +747,16 @@ STACK_OF(X509_INFO) *php_openssl_pem_read_bio_x509_info(BIO *in)
 	return PEM_X509_INFO_read_bio(in, NULL, NULL, NULL);
 }
 
+X509_STORE_CTX *php_openssl_x509_store_ctx_new(void)
+{
+	return X509_STORE_CTX_new();
+}
+
+int php_openssl_x509_lookup_load_file(X509_LOOKUP *lookup, const char *file, int type)
+{
+	return X509_LOOKUP_load_file(lookup, file, type);
+}
+
 EVP_PKEY *php_openssl_pem_read_bio_public_key(BIO *in)
 {
 	return PEM_read_bio_PUBKEY(in, NULL, NULL, NULL);
