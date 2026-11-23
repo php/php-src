@@ -287,6 +287,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 				idata->internal_file = entry;
 				if (!phar->is_persistent) {
 					++(entry->phar->refcount);
+					phar_fp_addref(phar, stream);
 				}
 				++(entry->fp_refcount);
 				php_url_free(resource);
