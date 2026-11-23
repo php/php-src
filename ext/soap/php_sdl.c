@@ -271,7 +271,6 @@ void sdl_set_uri_credentials(sdlCtx *ctx, char *uri)
 {
 	char *s;
 	size_t l1, l2;
-	zval context;
 	zval *header = NULL;
 
 	/* check if we load xsd from the same server */
@@ -320,18 +319,13 @@ void sdl_set_uri_credentials(sdlCtx *ctx, char *uri)
 	if (l1 == l2 && memcmp(ctx->sdl->source, uri, l1) == 0) {
 		return;
 	}
-	/* another server. clear authentication credentals */
-	php_libxml_switch_context(NULL, &context);
-	php_libxml_switch_context(&context, NULL);
-	if (Z_TYPE(context) == IS_UNDEF) {
+	/* another server. clear authentication credentials */
+	php_stream_context *context = php_libxml_switch_context(NULL);
+	php_libxml_switch_context(context);
+	if (context == NULL) {
 		return;
 	}
-	zval *context_ptr = &context;
-	ctx->context = php_stream_context_from_zval(context_ptr, 1);
-
-	if (!ctx->context) {
-		return;
-	}
+	ctx->context = context;
 
 	header = php_stream_context_get_option(ctx->context, "http", "header");
 	if (header == NULL) {
@@ -3316,15 +3310,13 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 	char* old_error_code = SOAP_GLOBAL(error_code);
 	size_t uri_len = 0;
 	php_stream_context *context=NULL;
-	zval *tmp, orig_context, new_context;
+	zval *tmp;
 	smart_str headers = {0};
 	char* key = NULL;
 	time_t t = time(0);
 	bool has_proxy_authorization = false;
 	bool has_authorization = false;
 
-	ZVAL_UNDEF(&orig_context);
-	ZVAL_UNDEF(&new_context);
 	if (strchr(uri,':') != NULL || IS_ABSOLUTE_PATH(uri, uri_len)) {
 		uri_len = strlen(uri);
 	} else if (VCWD_REALPATH(uri, fn) == NULL) {
@@ -3397,9 +3389,6 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 		tmp = Z_CLIENT_STREAM_CONTEXT_P(this_ptr);
 		if (Z_TYPE_P(tmp) == IS_RESOURCE) {
 			context = php_stream_context_from_zval(tmp, 0);
-			/* Share a reference with new_context down below.
-			 * For new contexts, the reference is only in new_context so that doesn't need extra refcounting. */
-			GC_ADDREF(context->res);
 		}
 
 		tmp = Z_CLIENT_USER_AGENT_P(this_ptr);
@@ -3465,9 +3454,9 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 		zval_ptr_dtor(&str_headers);
 	}
 
+	php_stream_context *orig_context = NULL;
 	if (context) {
-		ZVAL_RES(&new_context, context->res);
-		php_libxml_switch_context(&new_context, &orig_context);
+		orig_context = php_libxml_switch_context(context);
 	}
 
 	SOAP_GLOBAL(error_code) = "WSDL";
@@ -3480,8 +3469,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 	SOAP_GLOBAL(error_code) = old_error_code;
 
 	if (context) {
-		php_libxml_switch_context(&orig_context, NULL);
-		zval_ptr_dtor(&new_context);
+		php_libxml_switch_context(orig_context);
 	}
 
 	if ((cache_wsdl & WSDL_CACHE_DISK) && key) {

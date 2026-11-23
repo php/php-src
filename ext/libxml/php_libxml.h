@@ -40,7 +40,7 @@ extern zend_module_entry libxml_module_entry;
 #define LIBXML_NS_TAG_HOOK 1
 
 ZEND_BEGIN_MODULE_GLOBALS(libxml)
-	zval stream_context;
+	php_stream_context *stream_context;
 	smart_str error_buffer;
 	zend_llist *error_list;
 	zend_fcall_info_cache entity_loader_callback;
@@ -205,7 +205,7 @@ PHP_LIBXML_API void php_libxml_ctx_warning(void *ctx, const char *msg, ...);
 PHP_LIBXML_API void php_libxml_pretend_ctx_error_ex(const char *file, int line, int column, const char *msg,...);
 PHP_LIBXML_API void php_libxml_ctx_error(void *ctx, const char *msg, ...);
 PHP_LIBXML_API void php_libxml_error_handler_va(php_libxml_error_level error_type, void *ctx, const char *msg, va_list args);
-PHP_LIBXML_API void php_libxml_switch_context(const zval *context, zval *oldcontext);
+PHP_LIBXML_API php_stream_context *php_libxml_switch_context(php_stream_context *context);
 PHP_LIBXML_API void php_libxml_issue_error(int level, const char *msg);
 PHP_LIBXML_API bool php_libxml_disable_entity_loader(bool disable);
 PHP_LIBXML_API void php_libxml_set_old_ns(xmlDocPtr doc, xmlNsPtr ns);
