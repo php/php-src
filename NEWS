@@ -66,6 +66,10 @@ PHP                                                                        NEWS
   . Fixed a crash and a use-after-free in key() of an attribute or DTD named
     node map iterator that has no current item. (Ilia Alshanetsky)
 
+- Exif:
+  . Fixed bug GH-25678 (exif_read_data() reports "Invalid WebP file" for a
+    valid WebP without an EXIF chunk). (Shane Rounce)
+
 - Fileinfo:
   . Fixed bug GH-25051 (TrueType fonts detected as application/octet-stream
     since libmagic 5.48). (Weilin Du)

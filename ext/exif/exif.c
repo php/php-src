@@ -4563,7 +4563,8 @@ static bool exif_scan_WEBP_header(image_info_type *ImageInfo, size_t riff_size)
 		offset = payload_offset + chunk_size + (chunk_size & 1);
 	}
 
-	return false;
+	/* Every chunk was well formed and none of them is EXIF: a valid WebP file without metadata. */
+	return true;
 }
 
 /* {{{ exif_scan_FILE_header
