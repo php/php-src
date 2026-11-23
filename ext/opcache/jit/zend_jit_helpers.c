@@ -2293,18 +2293,32 @@ static zval* ZEND_FASTCALL zend_jit_assign_var_to_typed_ref(zend_reference *ref,
 	return zend_jit_assign_to_typed_ref_helper(ref, value, IS_VAR);
 }
 
+/* Returns false if the error handler released the reference. */
+static bool zend_jit_undefined_typed_ref_value(zend_reference *ref)
+{
+	const zend_op *opline = EG(current_execute_data)->opline;
+	uint32_t var;
+	if (opline->opcode == ZEND_ASSIGN) {
+		var = opline->op2.var;
+	} else {
+		ZEND_ASSERT((opline + 1)->opcode == ZEND_OP_DATA);
+		var = (opline + 1)->op1.var;
+	}
+	GC_ADDREF(ref);
+	zend_jit_undefined_op_helper(var);
+	if (UNEXPECTED(GC_DELREF(ref) == 0)) {
+		rc_dtor_func((zend_refcounted *) ref);
+		return false;
+	}
+	return true;
+}
+
 static zval* ZEND_FASTCALL zend_jit_assign_cv_to_typed_ref(zend_reference *ref, zval *value)
 {
 	if (UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
-		const zend_op *opline = EG(current_execute_data)->opline;
-		uint32_t var;
-		if (opline->opcode == ZEND_ASSIGN) {
-			var = opline->op2.var;
-		} else {
-			ZEND_ASSERT((opline + 1)->opcode == ZEND_OP_DATA);
-			var = (opline + 1)->op1.var;
+		if (UNEXPECTED(!zend_jit_undefined_typed_ref_value(ref))) {
+			return &EG(uninitialized_zval);
 		}
-		zend_jit_undefined_op_helper(var);
 		value = &EG(uninitialized_zval);
 	}
 	return zend_jit_assign_to_typed_ref_helper(ref, value, IS_CV);
@@ -2342,15 +2356,10 @@ static zval* ZEND_FASTCALL zend_jit_assign_var_to_typed_ref2(zend_reference *ref
 static zval* ZEND_FASTCALL zend_jit_assign_cv_to_typed_ref2(zend_reference *ref, zval *value, zval *result)
 {
 	if (UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
-		const zend_op *opline = EG(current_execute_data)->opline;
-		uint32_t var;
-		if (opline->opcode == ZEND_ASSIGN) {
-			var = opline->op2.var;
-		} else {
-			ZEND_ASSERT((opline + 1)->opcode == ZEND_OP_DATA);
-			var = (opline + 1)->op1.var;
+		if (UNEXPECTED(!zend_jit_undefined_typed_ref_value(ref))) {
+			ZVAL_NULL(result);
+			return &EG(uninitialized_zval);
 		}
-		zend_jit_undefined_op_helper(var);
 		value = &EG(uninitialized_zval);
 	}
 	return zend_jit_assign_to_typed_ref2_helper(ref, value, result, IS_CV);

@@ -1861,6 +1861,10 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						 || Z_STRVAL_P(RT_CONSTANT(opline, opline->op2))[0] == '\0') {
 							break;
 						}
+						/* The VM inspects the object only after reporting an undefined OP_DATA. */
+						if ((opline+1)->op1_type == IS_CV && (OP1_DATA_INFO() & MAY_BE_UNDEF)) {
+							break;
+						}
 						if (PROFITABILITY_CHECKS && (!ssa->ops || !ssa->var_info)) {
 							break;
 						}
