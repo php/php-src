@@ -2580,6 +2580,7 @@ send_again:
 					Z_TRY_ADDREF_P(arg);
 
 					if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+						ZVAL_NEW_REF(top, arg);
 						zend_error(
 							E_WARNING, "Cannot pass by-reference argument %d of %s%s%s()"
 							" by unpacking a Traversable, passing by-value instead", arg_num,
@@ -2587,7 +2588,10 @@ send_again:
 							EX(call)->func->common.scope ? "::" : "",
 							ZSTR_VAL(EX(call)->func->common.function_name)
 						);
-						ZVAL_NEW_REF(top, arg);
+						if (UNEXPECTED(EG(exception) != NULL)) {
+							zend_string_release(name);
+							break;
+						}
 					} else {
 						ZVAL_COPY_VALUE(top, arg);
 					}
@@ -2604,8 +2608,10 @@ send_again:
 					top = ZEND_CALL_ARG(EX(call), arg_num);
 					ZVAL_DEREF(arg);
 					Z_TRY_ADDREF_P(arg);
+					ZEND_CALL_NUM_ARGS(EX(call))++;
 
 					if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+						ZVAL_NEW_REF(top, arg);
 						zend_error(
 							E_WARNING, "Cannot pass by-reference argument %d of %s%s%s()"
 							" by unpacking a Traversable, passing by-value instead", arg_num,
@@ -2613,12 +2619,12 @@ send_again:
 							EX(call)->func->common.scope ? "::" : "",
 							ZSTR_VAL(EX(call)->func->common.function_name)
 						);
-						ZVAL_NEW_REF(top, arg);
+						if (UNEXPECTED(EG(exception) != NULL)) {
+							break;
+						}
 					} else {
 						ZVAL_COPY_VALUE(top, arg);
 					}
-
-					ZEND_CALL_NUM_ARGS(EX(call))++;
 				}
 
 				funcs->move_forward(iter);
@@ -58425,6 +58431,7 @@ send_again:
 					Z_TRY_ADDREF_P(arg);
 
 					if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+						ZVAL_NEW_REF(top, arg);
 						zend_error(
 							E_WARNING, "Cannot pass by-reference argument %d of %s%s%s()"
 							" by unpacking a Traversable, passing by-value instead", arg_num,
@@ -58432,7 +58439,10 @@ send_again:
 							EX(call)->func->common.scope ? "::" : "",
 							ZSTR_VAL(EX(call)->func->common.function_name)
 						);
-						ZVAL_NEW_REF(top, arg);
+						if (UNEXPECTED(EG(exception) != NULL)) {
+							zend_string_release(name);
+							break;
+						}
 					} else {
 						ZVAL_COPY_VALUE(top, arg);
 					}
@@ -58449,8 +58459,10 @@ send_again:
 					top = ZEND_CALL_ARG(EX(call), arg_num);
 					ZVAL_DEREF(arg);
 					Z_TRY_ADDREF_P(arg);
+					ZEND_CALL_NUM_ARGS(EX(call))++;
 
 					if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+						ZVAL_NEW_REF(top, arg);
 						zend_error(
 							E_WARNING, "Cannot pass by-reference argument %d of %s%s%s()"
 							" by unpacking a Traversable, passing by-value instead", arg_num,
@@ -58458,12 +58470,12 @@ send_again:
 							EX(call)->func->common.scope ? "::" : "",
 							ZSTR_VAL(EX(call)->func->common.function_name)
 						);
-						ZVAL_NEW_REF(top, arg);
+						if (UNEXPECTED(EG(exception) != NULL)) {
+							break;
+						}
 					} else {
 						ZVAL_COPY_VALUE(top, arg);
 					}
-
-					ZEND_CALL_NUM_ARGS(EX(call))++;
 				}
 
 				funcs->move_forward(iter);
