@@ -136,6 +136,7 @@ PHP                                                                        NEWS
     an argument arrives as null). (Ilia Alshanetsky)
   . Fixed tracing JIT taking the wrong branch after a VM interrupt.
     (Brian Marks)
+  . Fix JIT register allocation for ASSIGN to traced reference. (ndossche)
 
 - OpenSSL:
   . Fixed bug GH-25172 (TLS session reuse shares request-lifetime callback
