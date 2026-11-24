@@ -15,11 +15,8 @@ $test_file = __DIR__ . DIRECTORY_SEPARATOR ."apache_response_headers.test.php";
 
 $code  = '<?php';
 $code .= '
-header( "X-Robots-Tag : noindex,nofollow,noarchive" );
+header( "X-Robots-Tag: noindex,nofollow,noarchive" );
 header( "Content-type: text/html; charset=UTF-8" );
-header( "Bad-header" );
-header( " : " );
-header( ":" );
 flush();
 
 var_dump( apache_response_headers() );

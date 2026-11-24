@@ -753,6 +753,9 @@ SAPI_API zend_result sapi_header_op(sapi_header_op_enum op, void *arg)
 					p->line[header_line_len-1] == '\r' ||
 					p->line[header_line_len-1] == '\n'
 				)) header_line_len--;
+				if (!header_line_len) {
+					return SUCCESS;
+				}
 				header_line = estrndup(p->line, header_line_len);
 				header_line[header_line_len] = 0;
 
