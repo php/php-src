@@ -481,6 +481,7 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 
 	/* Free last http headers */
 	zval_ptr_dtor(&BG(last_http_headers));
+	ZVAL_UNDEF(&BG(last_http_headers));
 
 	BG(page_uid) = -1;
 	BG(page_gid) = -1;
