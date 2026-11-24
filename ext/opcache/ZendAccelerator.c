@@ -2212,6 +2212,7 @@ const zend_op_array *zend_accel_pfa_cache_get(
 			}
 		}
 	} else {
+		ZEND_ASSERT(EG(active));
 		op_array = zend_hash_find_ptr(&EG(partial_function_application_cache), key);
 	}
 
@@ -2309,8 +2310,33 @@ zend_op_array *zend_accel_compile_pfa(zend_ast *ast,
 			op_array->num_dynamic_func_defs = num_retained;
 		}
 
+		ZEND_ASSERT(EG(active));
 		zend_hash_add_new_ptr(&EG(partial_function_application_cache), key, op_array);
-		zend_string_release(key);
+
+		if (!declaring_op_array) {
+			/* Also index the op_array by declaring_lineno_ptr so that zend_ast_destroy() can find and invalidate the
+			 * entry when declaring_lineno_ptr is going to be freed. */
+			zval *zv = zend_hash_index_lookup(&EG(partial_function_application_cache), (zend_ulong)(uintptr_t)declaring_lineno_ptr);
+			if (Z_TYPE_P(zv) == IS_NULL) {
+				ZVAL_STR(zv, key);
+			} else {
+				zend_array *ht;
+				if (Z_TYPE_P(zv) == IS_STRING) {
+					ht = zend_new_array(2);
+					zend_hash_next_index_insert(ht, zv);
+					ZVAL_ARR(zv, ht);
+				} else {
+					ZEND_ASSERT(Z_TYPE_P(zv) == IS_ARRAY);
+					ht = Z_ARRVAL_P(zv);
+				}
+
+				zval value;
+				ZVAL_STR(&value, key);
+				zend_hash_next_index_insert(ht, &value);
+			}
+		} else {
+			zend_string_release(key);
+		}
 
 		zend_emit_recorded_errors();
 		zend_free_recorded_errors();

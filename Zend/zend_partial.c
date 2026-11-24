@@ -1188,5 +1188,9 @@ void zend_partial_create(zval *result, zend_class_entry *scope, zval *this_ptr, 
 
 void zend_partial_op_array_dtor(zval *pDest)
 {
-	destroy_op_array(Z_PTR_P(pDest));
+	if (Z_TYPE_P(pDest) == IS_PTR) {
+		destroy_op_array(Z_PTR_P(pDest));
+	} else {
+		zval_ptr_dtor(pDest);
+	}
 }

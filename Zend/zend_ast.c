@@ -1361,16 +1361,10 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 			if (uses_variadic_placeholder) {
 				flags |= ZEND_PARTIAL_USES_VARIADIC_PLACEHOLDER;
 			}
-			/* SHM names are shared by same-line PFAs, so they can't be a cache key */
-			ZEND_ASSERT((flags & ZEND_PARTIAL_CACHEABLE_IN_SHM)
-				|| !(GC_FLAGS(fcc_ast->name) & IS_STR_PERMANENT));
-			/* A non-SHM AST may be freed, but the cached PFA keeps its name alive */
-			const uint32_t *cache_key = (flags & ZEND_PARTIAL_CACHEABLE_IN_SHM)
-				? &ast->lineno : (const uint32_t *) fcc_ast->name;
 			zend_partial_create(result, scope, &frame->This, fptr,
 					ZEND_CALL_NUM_ARGS(frame), ZEND_CALL_ARG(frame, 1),
 					extra_named_params, named_positions,
-					fcc_ast->filename, cache_key, /* declaring_op_array */ NULL,
+					fcc_ast->filename, &fcc_ast->lineno, /* declaring_op_array */ NULL,
 					(void**)cache_slot, fcc_ast->name, flags, /* const_args */ 0);
 
 			if (named_positions) {
@@ -1671,6 +1665,24 @@ tail_call:
 		}
 		if (fcc_ast->name) {
 			zend_string_release_ex(fcc_ast->name, 0);
+		}
+		if (EG(active)) {
+			/* Invalidate related PFAs as their cache key will be invalid.
+			 * Ignore when executor is not active as the cache can not be used
+			 * at this point. */
+			zval *zv = zend_hash_index_find(&EG(partial_function_application_cache), (zend_ulong)(uintptr_t)&ast->lineno);
+			if (zv) {
+				if (Z_TYPE_P(zv) == IS_STRING) {
+					zend_hash_del(&EG(partial_function_application_cache), Z_STR_P(zv));
+				} else {
+					ZEND_ASSERT(Z_TYPE_P(zv) == IS_ARRAY);
+					ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(zv), zval *val) {
+						ZEND_ASSERT(Z_TYPE_P(val) == IS_STRING);
+						zend_hash_del(&EG(partial_function_application_cache), Z_STR_P(val));
+					} ZEND_HASH_FOREACH_END();
+				}
+			}
+			zend_hash_index_del(&EG(partial_function_application_cache), (zend_ulong)(uintptr_t)&ast->lineno);
 		}
 		ast = fcc_ast->args;
 		goto tail_call;
