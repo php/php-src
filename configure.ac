@@ -818,7 +818,7 @@ AS_VAR_IF([PHP_DEBUG], [yes], [
   PHP_DEBUG=1
   ZEND_DEBUG=yes
   CFLAGS="$CFLAGS -UNDEBUG"
-  CXXFLAGS="$CXXFLAGS -UNDEBUG"
+  AS_VAR_APPEND([php_cxx_ndebug_flags], [" -UNDEBUG"])
   PHP_REMOVE_OPTIMIZATION_FLAGS
   dnl Add -O0 only if GCC or ICC is used.
   if test "$GCC" = "yes" || test "$ICC" = "yes"; then
@@ -838,7 +838,7 @@ AS_VAR_IF([PHP_DEBUG], [yes], [
   PHP_DEBUG=0
   ZEND_DEBUG=no
   CFLAGS="$CFLAGS -DNDEBUG"
-  CXXFLAGS="$CXXFLAGS -DNDEBUG"
+  AS_VAR_APPEND([php_cxx_ndebug_flags], [" -DNDEBUG"])
 ])
 
 PHP_ARG_ENABLE([debug-assertions],
@@ -852,7 +852,7 @@ AS_VAR_IF([PHP_DEBUG_ASSERTIONS], [yes], [
   PHP_DEBUG=1
   ZEND_DEBUG=yes
   CFLAGS="$CFLAGS -UNDEBUG"
-  CXXFLAGS="$CXXFLAGS -UNDEBUG"
+  AS_VAR_APPEND([php_cxx_ndebug_flags], [" -UNDEBUG"])
 ])
 
 AC_ARG_ENABLE([zts],
@@ -1503,6 +1503,10 @@ if test "$PHP_THREAD_SAFETY" = "yes" && test -n "$ac_cv_pthreads_cflags"; then
   CXXFLAGS="$CXXFLAGS $ac_cv_pthreads_cflags"
   CPPFLAGS="$CPPFLAGS $ac_cv_pthreads_cflags"
 fi
+
+dnl NDEBUG flags for C++ come after all AC_PROG_CXX calls. AC_PROG_CXX sets its
+dnl default CXXFLAGS (-g -O2) only when CXXFLAGS is unset.
+CXXFLAGS="$CXXFLAGS$php_cxx_ndebug_flags"
 
 dnl Enable -Werror late, because it may break configure checks throwing warnings.
 AS_VAR_IF([PHP_WERROR], [yes], [

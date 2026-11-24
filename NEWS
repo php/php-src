@@ -32,6 +32,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-25571 (Incorrect null handlers when generating unspecialized
     Zend VMs). (Weilin Du)
   . Fixed propagation of public(set) of readonly trait property. (ilutov)
+  . Fixed bug GH-25688 (C++ sources of intl and pdo_firebird are built without
+    optimization when CXXFLAGS isn't set). (Artem Ukrainskiy)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
