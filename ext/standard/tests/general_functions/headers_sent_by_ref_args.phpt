@@ -37,7 +37,7 @@ echo '$line:', PHP_EOL;
 var_dump($line);
 
 echo 'header():', PHP_EOL;
-var_dump(header("HTTP 1.0", true, 200));
+var_dump(header("HTTP/1.0", true, 200));
 
 ob_end_flush();
 

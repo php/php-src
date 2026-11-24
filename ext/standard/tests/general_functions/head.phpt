@@ -5,7 +5,7 @@ header() and friends
 
 $v1 = headers_sent();
 $v2 = headers_list();
-var_dump(header("HTTP 1.0", true, 200));
+var_dump(header("HTTP/1.0 200", true, 200));
 
 var_dump($v1);
 var_dump($v2);
