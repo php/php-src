@@ -210,7 +210,7 @@ static int phpdbg_print_symbols(bool show_globals) {
 
 		if (ops->function_name) {
 			if (ops->scope) {
-				phpdbg_notice("Variables in %s::%s() (%d)", ops->scope->name->val, ops->function_name->val, zend_hash_num_elements(&vars));
+				phpdbg_notice("Variables in %s::%s() (%d)", ZSTR_VAL(ops->scope->name), ZSTR_VAL(ops->function_name), zend_hash_num_elements(&vars));
 			} else {
 				phpdbg_notice("Variables in %s() (%d)", ZSTR_VAL(ops->function_name), zend_hash_num_elements(&vars));
 			}
@@ -309,9 +309,9 @@ PHPDBG_INFO(literal) /* {{{ */
 
 		if (ops->function_name) {
 			if (ops->scope) {
-				phpdbg_notice("Literal Constants in %s::%s() (%d)", ops->scope->name->val, ops->function_name->val, count);
+				phpdbg_notice("Literal Constants in %s::%s() (%d)", ZSTR_VAL(ops->scope->name), ZSTR_VAL(ops->function_name), count);
 			} else {
-				phpdbg_notice("Literal Constants in %s() (%d)", ops->function_name->val, count);
+				phpdbg_notice("Literal Constants in %s() (%d)", ZSTR_VAL(ops->function_name), count);
 			}
 		} else {
 			if (ops->filename) {
