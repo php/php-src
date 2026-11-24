@@ -784,7 +784,7 @@ int openssl_x509v3_subjectAltName(BIO *bio, PHP_OPENSSL_X509_EXTENSION *extensio
 				if (altname != NULL) {
 					char buf[1024];
 					ASN1_OCTET_STRING *as = (ASN1_OCTET_STRING *)value;
-					int length = ASN1_STRING_length((ASN1_STRING *)as);
+					int length = ASN1_STRING_get_length((ASN1_STRING *)as);
 					const unsigned char *ip = ASN1_STRING_get0_data((ASN1_STRING *)as);
 					if (length == 4) {
 						inet_ntop(AF_INET, ip, buf, sizeof(buf)-1);
