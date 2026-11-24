@@ -203,6 +203,8 @@ PHP                                                                        NEWS
     (lazerg)
   . Fixed bug GH-25303 (NULL encoder dereference in to_xml_list() error
     message). (lazerg)
+  . Fixed NULL dereference in SoapServer::handle() with an empty Body and a
+    SOAPAction matching an RPC operation. (Jorg Sowa)
 
 - Sockets:
   . Fixed bug GH-25530 (socket_last_error() without a socket returns an error
