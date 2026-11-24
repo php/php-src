@@ -5,10 +5,16 @@ session
 --SKIPIF--
 <?php
 include(__DIR__ . '/../skipif.inc');
-if (PHP_OS_FAMILY === 'Windows') die('skip not for Windows');
+$probe = __DIR__ . '/gc_dirdepth_symlink_probe';
+@mkdir($probe);
+$ok = @symlink($probe, "$probe.lnk");
+@rmdir("$probe.lnk") || @unlink("$probe.lnk");
+@rmdir($probe);
+if (!$ok) die('skip cannot create directory symlinks');
 ?>
 --INI--
 session.gc_probability=0
+session.gc_maxlifetime=10
 session.use_strict_mode=0
 --FILE--
 <?php
@@ -28,7 +34,7 @@ var_dump(session_gc(), file_exists("$outside/sess_a"));
 <?php
 $base = __DIR__ . '/gc_dirdepth_symlink';
 @unlink("$base/b/sess_b0");
-@unlink("$base/a");
+@rmdir("$base/a") || @unlink("$base/a");
 @rmdir("$base/b");
 @rmdir($base);
 @unlink("$base-outside/sess_a");
