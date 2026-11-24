@@ -2966,9 +2966,12 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 			if (support_opline
 			 && opline->opcode == ZEND_ASSIGN
 			 && opline->op1_type == IS_CV
-			 && ssa_op->op1_def >= 0
-			 && ssa->vars[ssa_op->op1_def].alias != NO_ALIAS) {
-				/* avoid register allocation in case of possibility of indirect modification*/
+			 && ((ssa_op->op1_def >= 0
+			   && ssa->vars[ssa_op->op1_def].alias != NO_ALIAS)
+			  || (p->op1_type != IS_UNKNOWN
+			   && (p->op1_type & IS_TRACE_REFERENCE)))) {
+				/* avoid register allocation in case of possibility of indirect modification
+				 * or assignment through a (possibly typed) reference */
 				support_opline = 0;
 			}
 
