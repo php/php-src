@@ -747,7 +747,9 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 
 		case PDO_FETCH_OBJ:
 			ce = zend_standard_class_def;
-			object_init(return_value);
+			/* Collect the row into the properties table, the object is created after the loop.
+			 * With a group key the first column is the key, not a property. */
+			array_init_size(return_value, stmt->column_count - (group_key != NULL));
 			break;
 
 		case PDO_FETCH_CLASS:
@@ -912,8 +914,11 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &val);
 				break;
 
-			case PDO_FETCH_CLASS:
 			case PDO_FETCH_OBJ:
+				zend_hash_update(Z_ARRVAL_P(return_value), column_name, &val);
+				break;
+
+			case PDO_FETCH_CLASS:
 			case PDO_FETCH_INTO:
 				zend_update_property_ex(ce, Z_OBJ_P(return_value), column_name, &val);
 				zval_ptr_dtor(&val);
@@ -924,6 +929,10 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 				break;
 			default: ZEND_UNREACHABLE();
 		}
+	}
+
+	if (how == PDO_FETCH_OBJ) {
+		object_and_properties_init(return_value, zend_standard_class_def, Z_ARRVAL_P(return_value));
 	}
 
 	/* Run constructor for objects if not already run and not unserialized */
