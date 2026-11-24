@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+<definitions
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:tns="http://testuri.org"
+    xmlns="http://schemas.xmlsoap.org/wsdl/"
+    targetNamespace="http://testuri.org">
+
+  <message name="AuthHeader">
+    <part name="Auth" type="xsd:string" />
+  </message>
+  <message name="TestRequest">
+  </message>
+  <message name="TestResponse">
+    <part name="result" type="xsd:string" />
+  </message>
+
+  <portType name="TestServicePortType">
+    <operation name="test">
+      <input message="tns:TestRequest" />
+      <output message="tns:TestResponse" />
+    </operation>
+  </portType>
+
+  <binding name="TestServiceBinding" type="tns:TestServicePortType">
+    <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http" />
+    <operation name="test">
+      <soap:operation soapAction="Test" style="rpc" />
+      <input>
+        <soap:body namespace="http://testuri.org" use="literal" />
+        <soap:header namespace="http://testuri.org" message="tns:AuthHeader" part="Auth" use="literal" />
+      </input>
+      <output>
+        <soap:body namespace="http://testuri.org" use="literal" />
+      </output>
+    </operation>
+  </binding>
+
+  <service name="TestService">
+    <port name="TestServicePort" binding="tns:TestServiceBinding">
+      <soap:address location="http://localhost/" />
+    </port>
+  </service>
+</definitions>
