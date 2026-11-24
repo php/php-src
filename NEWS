@@ -134,6 +134,8 @@ PHP                                                                        NEWS
     order, or when the VM does not, on non-array containers. (Jorg Sowa)
   . Fixed bug GH-25449 (Element of a by-reference function result passed as
     an argument arrives as null). (Ilia Alshanetsky)
+  . Fixed tracing JIT taking the wrong branch after a VM interrupt.
+    (Brian Marks)
 
 - OpenSSL:
   . Fixed bug GH-25172 (TLS session reuse shares request-lifetime callback
