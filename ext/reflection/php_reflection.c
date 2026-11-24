@@ -2065,7 +2065,7 @@ ZEND_METHOD(ReflectionFunction, invoke)
 	fcc.object = NULL;
 
 	if (!Z_ISUNDEF(intern->obj)) {
-		zend_get_closure(Z_OBJ(intern->obj), &fcc.calling_scope, &fcc.function_handler, &fcc.object, false);
+		zend_get_closure(Z_OBJ(intern->obj), &fcc.called_scope, &fcc.function_handler, &fcc.object, false);
 	}
 
 	zval retval;
