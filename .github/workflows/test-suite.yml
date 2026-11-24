@@ -577,6 +577,8 @@ jobs:
           if [ -e 'src/Symfony/Component/Console/Tests/Helper/FileInputHelperTest.php' ]; then
             php -r '$c = file_get_contents("src/Symfony/Component/Console/Tests/Helper/FileInputHelperTest.php"); $c = str_replace("public function testReadWithPasteDetectionAbortsBeyondMaxBytes()", "#[\\PHPUnit\\Framework\\Attributes\\Group('"'"'skip'"'"')]\n    public function testReadWithPasteDetectionAbortsBeyondMaxBytes()", $c); file_put_contents("src/Symfony/Component/Console/Tests/Helper/FileInputHelperTest.php", $c);'
           fi
+          # Breaks with USE_ZEND_ALLOC=0 but without USE_TRACKED_ALLOC=1.
+          php -r '$c = file_get_contents("src/Symfony/Component/Messenger/Tests/Command/ConsumeMessagesCommandTest.php"); $c = str_replace("public function testRunWithMemoryLimit()", "#[\\PHPUnit\\Framework\\Attributes\\Group('"'"'skip'"'"')]\n    public function testRunWithMemoryLimit()", $c); file_put_contents("src/Symfony/Component/Messenger/Tests/Command/ConsumeMessagesCommandTest.php", $c);'
           export SYMFONY_DEPRECATIONS_HELPER=max[total]=999
           X=0
           for component in $(find src/Symfony -mindepth 2 -type f -name phpunit.xml.dist -printf '%h\n'); do
