@@ -2230,6 +2230,11 @@ php_mysqlnd_cached_sha2_result_read(MYSQLND_CONN_DATA * conn, void * _packet)
 		}
 		DBG_RETURN(PASS);
 	}
+	if (0x00 == packet->response_code) {
+		/* OK packet: the server accepted the login without fast or full auth, e.g. for an auth_socket account */
+		packet->is_ok_packet = true;
+		DBG_RETURN(PASS);
+	}
 
 	if (0x1 != packet->response_code) {
 		DBG_ERR_FMT("Unexpected response code %d", packet->response_code);
