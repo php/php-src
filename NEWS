@@ -90,6 +90,8 @@ PHP                                                                        NEWS
   . Fixed Locale::lookup() ignoring the default locale when the language tag
     list is empty. (Weilin Du)
   . Fixed IntlCalendar::setTime() accepting non-finite timestamps. (Weilin Du)
+  . Fixed MessageFormatter::setPattern() losing the previous pattern when
+    the new pattern is invalid. (Weilin Du, David Carlier)
 
 - JSON:
   . Fixed json_decode() and json_validate() error messages. (lacatoire)
