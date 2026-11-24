@@ -19,6 +19,7 @@
 #include "zend_API.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
+#include "zend_enum.h"
 #include "zend_interfaces_arginfo.h"
 #include "zend_property_hooks.h"
 
@@ -30,6 +31,8 @@ ZEND_API zend_class_entry *zend_ce_serializable;
 ZEND_API zend_class_entry *zend_ce_countable;
 ZEND_API zend_class_entry *zend_ce_stringable;
 ZEND_API zend_class_entry *zend_ce_internal_iterator;
+ZEND_API zend_class_entry *zend_ce_operable;
+ZEND_API zend_class_entry *zend_ce_operand_side;
 
 static zend_object_handlers zend_internal_iterator_handlers;
 
@@ -669,5 +672,14 @@ ZEND_API void zend_register_interfaces(void)
 		sizeof(zend_object_handlers));
 	zend_internal_iterator_handlers.clone_obj = NULL;
 	zend_internal_iterator_handlers.free_obj = zend_internal_iterator_free;
+
+	zend_ce_operable = register_class_Operable();
+}
+/* }}} */
+
+/* {{{ zend_register_operand_side_ce */
+ZEND_API void zend_register_operand_side_ce(void)
+{
+	zend_ce_operand_side = register_class_OperandSide();
 }
 /* }}} */

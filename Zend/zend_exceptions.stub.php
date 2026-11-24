@@ -151,6 +151,10 @@ class TypeError extends Error
 {
 }
 
+class InvalidOperatorError extends TypeError
+{
+}
+
 class ArgumentCountError extends TypeError
 {
 }
