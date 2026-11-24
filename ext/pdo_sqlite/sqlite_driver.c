@@ -29,10 +29,19 @@
 int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line) /* {{{ */
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
+	int errcode = sqlite3_errcode(H->db);
+	const char *errmsg = errcode == SQLITE_OK ? NULL : sqlite3_errmsg(H->db);
+	return _pdo_sqlite_error_code(dbh, stmt, errcode, errmsg, file, line);
+}
+
+int _pdo_sqlite_error_code(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *errmsg,
+		const char *file, int line)
+{
+	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
 	pdo_error_type *pdo_err = stmt ? &stmt->error_code : &dbh->error_code;
 	pdo_sqlite_error_info *einfo = &H->einfo;
 
-	einfo->errcode = sqlite3_errcode(H->db);
+	einfo->errcode = errcode;
 	einfo->file = file;
 	einfo->line = line;
 
@@ -40,7 +49,7 @@ int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int li
 		if (einfo->errmsg) {
 			pefree(einfo->errmsg, dbh->is_persistent);
 		}
-		einfo->errmsg = pestrdup((char*)sqlite3_errmsg(H->db), dbh->is_persistent);
+		einfo->errmsg = pestrdup(errmsg, dbh->is_persistent);
 	} else { /* no error */
 		strncpy(*pdo_err, PDO_ERR_NONE, sizeof(*pdo_err));
 		return 0;

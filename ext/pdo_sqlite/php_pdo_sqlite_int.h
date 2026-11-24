@@ -64,8 +64,12 @@ extern const pdo_driver_t pdo_sqlite_driver;
 extern int pdo_sqlite_scanner(pdo_scanner_t *s);
 
 extern int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line);
+extern int _pdo_sqlite_error_code(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *errmsg,
+		const char *file, int line);
 #define pdo_sqlite_error(s) _pdo_sqlite_error(s, NULL, __FILE__, __LINE__)
 #define pdo_sqlite_error_stmt(s) _pdo_sqlite_error(stmt->dbh, stmt, __FILE__, __LINE__)
+#define pdo_sqlite_error_stmt_code(s, code) \
+	_pdo_sqlite_error_code((s)->dbh, (s), (code), sqlite3_errstr(code), __FILE__, __LINE__)
 
 extern const struct pdo_stmt_methods sqlite_stmt_methods;
 
