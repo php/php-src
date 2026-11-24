@@ -230,12 +230,12 @@ ZEND_API zend_result zend_parse_ini_file(zend_file_handle *fh, bool unbuffered_e
 
 	ini_parser_param.ini_parser_cb = ini_parser_cb;
 	ini_parser_param.arg = arg;
-	CG(ini_parser_param) = &ini_parser_param;
 
 	if (zend_ini_open_file_for_scanning(fh, scanner_mode) == FAILURE) {
 		return FAILURE;
 	}
 
+	CG(ini_parser_param) = &ini_parser_param;
 	CG(ini_parser_unbuffered_errors) = unbuffered_errors;
 	retval = ini_parse();
 
