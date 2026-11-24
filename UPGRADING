@@ -32,6 +32,11 @@ PHP 8.7 UPGRADE NOTES
     curl_setopt() return false, instead of being silently interpreted as a
     combination of redirect types.
 
+- Gettext:
+  . bindtextdomain() now throws a ValueError when $directory is "0", like
+    textdomain() does for its $domain. It previously treated it as an empty
+    string and bound the domain to the current directory.
+
 - PDO:
   . PDOStatement::bindColumn() now throws a ValueError when the column name is
     not present in the result set. It previously reported the condition
