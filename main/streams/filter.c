@@ -525,7 +525,8 @@ PHPAPI zend_result php_stream_filter_flush(php_stream_filter *filter, bool finis
 		}
 		if (flushed_size > (stream->readbuflen - stream->writepos)) {
 			/* Grow the buffer */
-			stream->readbuf = perealloc(stream->readbuf, stream->writepos + flushed_size + stream->chunk_size, stream->is_persistent);
+			stream->readbuflen = stream->writepos + flushed_size + stream->chunk_size;
+			stream->readbuf = perealloc(stream->readbuf, stream->readbuflen, stream->is_persistent);
 		}
 		while ((bucket = inp->head)) {
 			memcpy(stream->readbuf + stream->writepos, bucket->buf, bucket->buflen);
