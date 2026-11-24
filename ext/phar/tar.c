@@ -783,8 +783,6 @@ next:
 struct _phar_pass_tar_info {
 	php_stream *old;
 	php_stream *new;
-	bool free_fp;
-	bool free_ufp;
 	char **error;
 };
 
@@ -909,19 +907,6 @@ static int phar_tar_writeheaders_int(phar_entry_info *entry, void *argument) /* 
 
 		memset(padding, 0, 512);
 		php_stream_write(fp->new, padding, ((entry->uncompressed_filesize +511)&~511) - entry->uncompressed_filesize);
-	}
-
-	if (entry->fp_refcount) {
-		/* open file pointers refer to this fp, do not free the stream */
-		switch (entry->fp_type) {
-			case PHAR_FP:
-				fp->free_fp = 0;
-				break;
-			case PHAR_UFP:
-				fp->free_ufp = 0;
-			default:
-				break;
-		}
 	}
 
 	entry->is_modified = 0;
@@ -1188,8 +1173,6 @@ nostub:
 	pass.old = oldfile;
 	pass.new = newfile;
 	pass.error = error;
-	pass.free_fp = 1;
-	pass.free_ufp = 1;
 
 	if (phar_metadata_tracker_has_data(&phar->metadata_tracker, phar->is_persistent)) {
 		phar_entry_info *mentry;
@@ -1339,12 +1322,12 @@ nostub:
 		return EOF;
 	}
 
-	if (phar->fp && pass.free_fp) {
+	if (phar->fp && !phar_fp_in_use(phar, phar->fp)) {
 		php_stream_close(phar->fp);
 	}
 
 	if (phar->ufp) {
-		if (pass.free_ufp) {
+		if (!phar_fp_in_use(phar, phar->ufp)) {
 			php_stream_close(phar->ufp);
 		}
 		phar->ufp = NULL;

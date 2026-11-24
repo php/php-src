@@ -31,6 +31,7 @@ PHP                                                                        NEWS
     (Nicolas Grekas)
   . Fixed bug GH-25571 (Incorrect null handlers when generating unspecialized
     Zend VMs). (Weilin Du)
+  . Fixed propagation of public(set) of readonly trait property. (ilutov)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
@@ -42,6 +43,8 @@ PHP                                                                        NEWS
 - DBA:
   . Fixed dba_close() not closing a database opened with dba_popen().
     (Ilia Alshanetsky)
+  . Fixed bug GH-24640 (tcadb handler allows injecting Tokyo Cabinet
+    parameters via "#" in the path). (Lazizbek Ergashev)
 
 - DOM:
   . Fixed bug GH-25306 (Assertion status == LXB_STATUS_OK in dom_parse_selector
@@ -51,6 +54,10 @@ PHP                                                                        NEWS
   . Fixed crash when registerNodeClass() is given a class with a constant
     expression that cannot be evaluated; registerNodeClass() now throws the
     evaluation Error instead. (Ilia Alshanetsky)
+  . Fixed a crash and a use-after-free in key() of an attribute or DTD named
+    node map iterator that has no current item. (Ilia Alshanetsky)
+  . Fixed use-after-free in getElementById() after a removed ID attribute is
+    freed. (Ilia Alshanetsky)
 
 - Filter:
   . Fixed stack overflow in filter_var() and filter_var_array() with deeply
@@ -67,6 +74,7 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed Locale::lookup() ignoring the default locale when the language tag
     list is empty. (Weilin Du)
+  . Fixed IntlCalendar::setTime() accepting non-finite timestamps. (Weilin Du)
 
 - JSON:
   . Fixed json_decode() and json_validate() error messages. (lacatoire)
@@ -110,6 +118,12 @@ PHP                                                                        NEWS
     arrays. (Weilin Du)
   . Fixed tracing JIT taking the wrong branch after a VM interrupt.
     (Brian Marks)
+  . Fixed function JIT ASSIGN_DIM reporting an undefined value or key out of
+    order, or when the VM does not, on non-array containers. (Jorg Sowa)
+
+- OpenSSL:
+  . Fixed bug GH-20920 (LibreSSL build regression with PHP 8.5).
+    (Eugene Gvozdetsky, Theo Buehler, Jakub Zelenka)
 
 - PDO_Firebird:
   . Fixed stack buffer overflow with long connection user names, passwords,
@@ -122,6 +136,14 @@ PHP                                                                        NEWS
 - PDO_MYSQL:
   . Fixed a crash when executing a prepared statement again after a failed
     execute() with libmysqlclient. (Ilia Alshanetsky)
+
+- PDO_SQLite:
+  . Fixed bug GH-25588 (Use-after-free of a string parameter omitted on a later
+    execute() or rebound while fetching). (Ilia Alshanetsky)
+
+- Phar:
+  . Fixed bug GH-25528 (Phar::setSignatureAlgorithm(): OpenSSL signing reads a
+    freed private key). (Artem Ukrainskiy)
 
 - POSIX:
   . Fixed bug GH-25530 (posix_get_last_error() returns an error from a
@@ -139,6 +161,8 @@ PHP                                                                        NEWS
   . Fixed ReflectionMethod::getClosure() returning a closure for abstract
     methods, which crashed when called for the ones of internal classes.
     (Nicolas Grekas)
+  . Don't call destructor when constructor is not public in newInstance(Args)().
+    (ndossche)
 
 - SNMP:
   . Fixed snmp3_set() citing the wrong argument number for an invalid $timeout
@@ -149,6 +173,8 @@ PHP                                                                        NEWS
 - SOAP:
   . Fixed bug GH-25267 (NULL dereference in to_xml_any() with integer key).
     (lazerg)
+  . Fixed NULL dereference in SoapServer::handle() with an empty Body and a
+    SOAPAction matching an RPC operation. (Jorg Sowa)
 
 - Sockets:
   . Fixed bug GH-25530 (socket_last_error() without a socket returns an error

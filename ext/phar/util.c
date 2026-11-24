@@ -652,6 +652,9 @@ really_get_entry:
 	if (!phar->is_persistent) {
 		++(entry->fp_refcount);
 		++(entry->phar->refcount);
+		if ((*ret)->fp && ((*ret)->fp == phar->fp || (*ret)->fp == phar->ufp)) {
+			phar_fp_addref(phar, (*ret)->fp);
+		}
 	}
 
 	return SUCCESS;
@@ -1940,7 +1943,7 @@ zend_result phar_create_signature(phar_archive_data *phar, php_stream *fp, char 
 				mdtype = EVP_sha1();
 			}
 
-			in = BIO_new_mem_buf(PHAR_G(openssl_privatekey), PHAR_G(openssl_privatekey_len));
+			in = PHAR_G(openssl_privatekey) ? BIO_new_mem_buf(ZSTR_VAL(PHAR_G(openssl_privatekey)), (int) ZSTR_LEN(PHAR_G(openssl_privatekey))) : NULL;
 
 			if (in == NULL) {
 				if (error) {
@@ -2012,7 +2015,8 @@ zend_result phar_create_signature(phar_archive_data *phar, php_stream *fp, char 
 			siglen = 0;
 			php_stream_seek(fp, 0, SEEK_END);
 
-			if (FAILURE == phar_call_openssl_signverify(true, fp, php_stream_tell(fp), PHAR_G(openssl_privatekey), PHAR_G(openssl_privatekey_len), (char **)&sigbuf, &siglen, phar->sig_flags)) {
+			zend_string *privatekey = PHAR_G(openssl_privatekey);
+			if (FAILURE == phar_call_openssl_signverify(true, fp, php_stream_tell(fp), privatekey ? ZSTR_VAL(privatekey) : NULL, privatekey ? ZSTR_LEN(privatekey) : 0, (char **)&sigbuf, &siglen, phar->sig_flags)) {
 				if (error) {
 					spprintf(error, 0, "unable to write phar \"%s\" with requested openssl signature", phar->fname);
 				}

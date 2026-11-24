@@ -5184,6 +5184,7 @@ ZEND_METHOD(ReflectionClass, newInstance)
 
 		if (!(constructor->common.fn_flags & ZEND_ACC_PUBLIC)) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0, "Access to non-public constructor of class %s", ZSTR_VAL(ce->name));
+			zend_object_store_ctor_failed(Z_OBJ_P(return_value));
 			zval_ptr_dtor(return_value);
 			RETURN_NULL();
 		}
@@ -5257,6 +5258,7 @@ ZEND_METHOD(ReflectionClass, newInstanceArgs)
 	if (constructor) {
 		if (!(constructor->common.fn_flags & ZEND_ACC_PUBLIC)) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0, "Access to non-public constructor of class %s", ZSTR_VAL(ce->name));
+			zend_object_store_ctor_failed(Z_OBJ_P(return_value));
 			zval_ptr_dtor(return_value);
 			RETURN_NULL();
 		}
