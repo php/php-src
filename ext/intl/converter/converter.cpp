@@ -519,22 +519,31 @@ cleanup:
 }
 /* }}} */
 
+static void php_converter_set_subst_chars(UConverter *cnv, const zend_string *subst, UErrorCode *error)
+{
+	if (UNEXPECTED(ZSTR_LEN(subst) > SCHAR_MAX)) {
+		*error = U_ILLEGAL_ARGUMENT_ERROR;
+		return;
+	}
+
+	ucnv_setSubstChars(cnv, ZSTR_VAL(subst), (int8_t) ZSTR_LEN(subst), error);
+}
+
 /* {{{ */
 PHP_METHOD(UConverter, setSubstChars) {
 	php_converter_object *objval = CONV_GET(ZEND_THIS);
-	char *chars;
-	size_t chars_len;
+	zend_string *chars;
 	int ret = 1;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(chars, chars_len)
+		Z_PARAM_STR(chars)
 	ZEND_PARSE_PARAMETERS_END();
 
 	intl_errors_reset(&objval->error);
 
 	if (objval->src) {
 		UErrorCode error = U_ZERO_ERROR;
-		ucnv_setSubstChars(objval->src, chars, chars_len, &error);
+		php_converter_set_subst_chars(objval->src, chars, &error);
 		if (U_FAILURE(error)) {
 			THROW_UFAILURE(objval, error);
 			ret = 0;
@@ -546,7 +555,7 @@ PHP_METHOD(UConverter, setSubstChars) {
 
 	if (objval->dest) {
 		UErrorCode error = U_ZERO_ERROR;
-		ucnv_setSubstChars(objval->dest, chars, chars_len, &error);
+		php_converter_set_subst_chars(objval->dest, chars, &error);
 		if (U_FAILURE(error)) {
 			THROW_UFAILURE(objval, error);
 			ret = 0;
@@ -651,16 +660,6 @@ static zend_string* php_converter_do_convert(UConverter *dest_cnv,
 	return ret;
 }
 /* }}} */
-
-static void php_converter_set_subst_chars(UConverter *cnv, const zend_string *subst, UErrorCode *error)
-{
-	if (UNEXPECTED(ZSTR_LEN(subst) > SCHAR_MAX)) {
-		*error = U_ILLEGAL_ARGUMENT_ERROR;
-		return;
-	}
-
-	ucnv_setSubstChars(cnv, ZSTR_VAL(subst), (int8_t) ZSTR_LEN(subst), error);
-}
 
 /* {{{ */
 #define UCNV_REASON_CASE(v) case (UCNV_ ## v) : RETURN_STRINGL( "REASON_" #v , sizeof( "REASON_" #v ) - 1);
