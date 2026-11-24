@@ -2526,7 +2526,7 @@ get_next:
 					case V_ASN1_IA5STRING:
 						add_assoc_stringl(&subitem, objbuf,
 								  (const char *)ASN1_STRING_get0_data(bs),
-								  ASN1_STRING_length(bs));
+								  ASN1_STRING_get_length(bs));
 						break;
 					default:
 						add_assoc_stringl(&subitem, objbuf, unknown, sizeof(unknown));
