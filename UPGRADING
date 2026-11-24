@@ -32,6 +32,11 @@ PHP 8.7 UPGRADE NOTES
     curl_setopt() return false, instead of being silently interpreted as a
     combination of redirect types.
 
+- Intl:
+  . UConverter::setSubstChars() now rejects substitution strings longer than
+    127 bytes. Previously, the length could be truncated and only a prefix of
+    the string used for substitution.
+
 - PDO:
   . PDOStatement::bindColumn() now throws a ValueError when the column name is
     not present in the result set. It previously reported the condition
