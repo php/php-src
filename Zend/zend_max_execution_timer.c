@@ -51,6 +51,7 @@
 # endif
 
 #ifdef ZEND_MAX_EXECUTION_TIMER_CACHE
+/* Owns the timer from creation until deletion, including during a request. */
 typedef struct {
 	pid_t pid;
 	timer_t timer;
@@ -61,8 +62,8 @@ static void timer_cache_dtor(void *ptr)
 	zend_cached_timer *cache = ptr;
 	if (cache->pid == getpid()) {
 		timer_delete(cache->timer);
-		cache->pid = 0;
 	}
+	cache->pid = 0;
 }
 
 # ifdef ZTS
@@ -91,6 +92,7 @@ void zend_max_execution_timer_cache_shutdown(void)
 # ifdef ZTS
 	if (timer_cache_id) {
 		ts_free_id(timer_cache_id);
+		timer_cache_id = 0;
 	}
 # else
 	timer_cache_dtor(&process_timer_cache);
@@ -123,7 +125,6 @@ ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
 	if (cache && cache->pid == pid) {
 		EG(max_execution_timer_timer) = cache->timer;
 		EG(pid) = pid;
-		cache->pid = 0;
 # ifdef MAX_EXECUTION_TIMERS_DEBUG
 		fprintf(stderr, "Timer %#jx reused on thread %d\n", (uintmax_t) EG(max_execution_timer_timer), (pid_t) syscall(SYS_gettid));
 # endif
@@ -153,6 +154,11 @@ ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
 	}
 
 	EG(pid) = pid;
+#ifdef ZEND_MAX_EXECUTION_TIMER_CACHE
+	if (cache) {
+		*cache = (zend_cached_timer) {pid, EG(max_execution_timer_timer)};
+	}
+#endif
 
 # ifdef MAX_EXECUTION_TIMERS_DEBUG
 		fprintf(stderr, "Timer %#jx created on thread %d\n", (uintmax_t) EG(max_execution_timer_timer), sev.sigev_notify_thread_id);
@@ -200,14 +206,16 @@ void zend_max_execution_timer_shutdown(void) /* {{{ */
 #ifdef ZEND_MAX_EXECUTION_TIMER_CACHE
 	static const struct itimerspec disarmed = {0};
 	zend_cached_timer *cache = TIMER_CACHE;
-	if (cache && CAN_CACHE_TIMER()
+	if (cache && cache->pid == EG(pid) && CAN_CACHE_TIMER()
 			&& timer_settime(EG(max_execution_timer_timer), 0, &disarmed, NULL) == 0) {
-		*cache = (zend_cached_timer) {EG(pid), EG(max_execution_timer_timer)};
 		EG(pid) = 0;
 # ifdef MAX_EXECUTION_TIMERS_DEBUG
 		fprintf(stderr, "Timer %#jx disarmed and cached on thread %d\n", (uintmax_t) cache->timer, (pid_t) syscall(SYS_gettid));
 # endif
 		return;
+	}
+	if (cache) {
+		cache->pid = 0;
 	}
 #endif
 
