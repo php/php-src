@@ -47,10 +47,8 @@ int php_startup_sapi_content_types(void)
 /* }}} */
 
 /* {{{ php_setup_sapi_content_types */
-int php_setup_sapi_content_types(void)
+void php_setup_sapi_content_types(void)
 {
 	sapi_register_post_entries(php_post_entries);
-
-	return SUCCESS;
 }
 /* }}} */
