@@ -115,6 +115,8 @@ PHP                                                                        NEWS
     transaction still in use by another instance). (Lazizbek Ergashev)
   . Fixed PDOStatement::execute() leaving a partial set of bindings in place
     when binding its array argument fails. (Ilia Alshanetsky, Kamil Tekiela)
+  . Fixed bug GH-25650 (PDO::query() reports the wrong argument numbers for
+    FETCH_CLASS constructor arguments). (Tomasz Kowalczyk)
 
 - PDO_PGSQL:
   . Improved performance of the SQL parser that handles placeholders.
