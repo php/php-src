@@ -7081,67 +7081,21 @@ static bool zend_is_pipe_optimizable_func_name(zend_string *name)
 	return !fbc || !(fbc->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS);
 }
 
-static bool zend_is_pipe_optimizable_method_name(
-		const char *class_name, size_t class_name_len,
-		const char *method_name, size_t method_name_len)
+static bool zend_is_pipe_optimizable_callable_name(zend_ast *ast)
 {
-	const zend_class_entry *ce = zend_hash_str_find_ptr_lc(
-		CG(class_table), class_name, class_name_len);
-	if (!ce) {
-		return true;
-	}
+	if (ast->kind == ZEND_AST_ZVAL && Z_TYPE_P(zend_ast_get_zval(ast)) == IS_STRING) {
+		zend_string *orig_name = zend_ast_get_str(ast);
+		bool is_fully_qualified;
+		zend_string *resolved_name = zend_resolve_function_name(
+			orig_name, ast->attr, &is_fully_qualified);
 
-	const zend_function *fbc = zend_hash_str_find_ptr_lc(
-		&ce->function_table, method_name, method_name_len);
-	return !fbc || !(fbc->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS);
-}
-
-static bool zend_is_pipe_optimizable_callable(zend_ast *callable_ast)
-{
-	if (callable_ast->kind == ZEND_AST_CALL) {
-		zend_ast *name_ast = callable_ast->child[0];
-		if (name_ast->kind == ZEND_AST_ZVAL && Z_TYPE_P(zend_ast_get_zval(name_ast)) == IS_STRING) {
-			zend_string *orig_name = zend_ast_get_str(name_ast);
-			bool is_fully_qualified;
-			zend_string *resolved_name = zend_resolve_function_name(
-				orig_name, name_ast->attr, &is_fully_qualified);
-
-			bool optimizable = zend_is_pipe_optimizable_func_name(resolved_name);
-			if (optimizable && !is_fully_qualified && FC(current_namespace)) {
-				optimizable = zend_is_pipe_optimizable_func_name(orig_name);
-			}
-			if (optimizable) {
-				const char *colon = zend_memrchr(
-					ZSTR_VAL(resolved_name), ':', ZSTR_LEN(resolved_name));
-				if (colon != NULL && colon > ZSTR_VAL(resolved_name) && *(colon - 1) == ':') {
-					size_t class_len = (colon - 1) - ZSTR_VAL(resolved_name);
-					size_t method_len = ZSTR_LEN(resolved_name) - (colon - ZSTR_VAL(resolved_name)) - 1;
-					optimizable = zend_is_pipe_optimizable_method_name(
-						ZSTR_VAL(resolved_name), class_len, colon + 1, method_len);
-				}
-			}
-
-			zend_string_release_ex(resolved_name, false);
-			return optimizable;
+		bool optimizable = zend_is_pipe_optimizable_func_name(resolved_name);
+		if (optimizable && !is_fully_qualified && FC(current_namespace)) {
+			optimizable = zend_is_pipe_optimizable_func_name(orig_name);
 		}
-	} else if (callable_ast->kind == ZEND_AST_STATIC_CALL) {
-		zend_ast *class_ast = callable_ast->child[0];
-		zend_ast *method_ast = callable_ast->child[1];
-		if (class_ast->kind == ZEND_AST_ZVAL
-				&& Z_TYPE_P(zend_ast_get_zval(class_ast)) == IS_STRING
-				&& method_ast->kind == ZEND_AST_ZVAL
-				&& Z_TYPE_P(zend_ast_get_zval(method_ast)) == IS_STRING) {
-			zend_string *class_name = zend_ast_get_str(class_ast);
-			if (zend_get_class_fetch_type(class_name) == ZEND_FETCH_CLASS_DEFAULT) {
-				zend_string *resolved_class = zend_resolve_class_name_ast(class_ast);
-				zend_string *method_name = zend_ast_get_str(method_ast);
-				bool optimizable = zend_is_pipe_optimizable_method_name(
-					ZSTR_VAL(resolved_class), ZSTR_LEN(resolved_class),
-					ZSTR_VAL(method_name), ZSTR_LEN(method_name));
-				zend_string_release_ex(resolved_class, false);
-				return optimizable;
-			}
-		}
+
+		zend_string_release_ex(resolved_name, false);
+		return optimizable;
 	}
 
 	return true;
@@ -7160,7 +7114,8 @@ static zend_ast *zend_partial_apply(zend_ast *callable_ast, zend_ast *pipe_arg)
 		return NULL;
 	}
 
-	if (!zend_is_pipe_optimizable_callable(callable_ast)) {
+	if (callable_ast->kind == ZEND_AST_CALL &&
+			!zend_is_pipe_optimizable_callable_name(callable_ast->child[0])) {
 		return NULL;
 	}
 
