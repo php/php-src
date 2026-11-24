@@ -1150,6 +1150,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 
 	if (zend_file_cache_flock(fd, LOCK_EX) != 0) {
 		close(fd);
+		zend_file_cache_unlink(filename);
 		efree(filename);
 		return FAILURE;
 	}
