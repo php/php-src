@@ -17228,6 +17228,13 @@ static int zend_jit_trace_handler(zend_jit_ctx *jit, const zend_op_array *op_arr
 
 			jit_STORE_IP(jit, ir_AND_A(ref, ir_CONST_ADDR(~ZEND_VM_ENTER_BIT)));
 		} else {
+			/* A handler that jumps checks for interrupts. Once the interrupt
+			 * function has run, it returns the next opline with
+			 * ZEND_VM_ENTER_BIT set, which would fail the opline guard below
+			 * and exit to the wrong branch. */
+			if (zend_interrupt_function) {
+				ref = ir_AND_A(ref, ir_CONST_ADDR(~ZEND_VM_ENTER_BIT));
+			}
 			jit_STORE_IP(jit, ref);
 		}
 	}
