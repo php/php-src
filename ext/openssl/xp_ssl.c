@@ -631,11 +631,7 @@ static bool php_openssl_matches_common_name(php_stream *stream, const X509 *peer
 	}
 	name_asn1 = X509_NAME_ENTRY_get_data(name_entry);
 	cert_name_len = ASN1_STRING_get_length(name_asn1);
-	cert_name = (unsigned char *) OPENSSL_strndup((const char *) ASN1_STRING_get0_data(name_asn1), cert_name_len);
-	if (cert_name == NULL) {
-		php_stream_warn(stream, NetworkRecvFailed, "Unable to locate peer certificate CN");
-		return false;
-	}
+	cert_name = (unsigned char *) estrndup((const char *) ASN1_STRING_get0_data(name_asn1), cert_name_len);
 
 	if ((size_t)cert_name_len != strlen((const char *)cert_name)) {
 		php_stream_warn(stream, AuthFailed, "Peer certificate CN=`%.*s' is malformed", cert_name_len, (const char *)cert_name);
@@ -647,7 +643,7 @@ static bool php_openssl_matches_common_name(php_stream *stream, const X509 *peer
 			cert_name_len, (const char *)cert_name, subject_name);
 	}
 
-	OPENSSL_free(cert_name);
+	efree(cert_name);
 
 	return is_match;
 }
