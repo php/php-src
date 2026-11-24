@@ -167,6 +167,8 @@ PHP                                                                        NEWS
 - SOAP:
   . Fixed bug GH-25267 (NULL dereference in to_xml_any() with integer key).
     (lazerg)
+  . Fixed NULL dereference in SoapServer::handle() with an empty Body and a
+    SOAPAction matching an RPC operation. (Jorg Sowa)
 
 - Sockets:
   . Fixed bug GH-25530 (socket_last_error() without a socket returns an error
