@@ -16,6 +16,10 @@
 #include <config.h>
 #endif
 
+#include <memory>
+
+#include <unicode/msgfmt.h>
+
 #include "php_intl.h"
 #include "msgformat_class.h"
 #include "msgformat_data.h"
@@ -76,7 +80,13 @@ U_CFUNC PHP_FUNCTION( msgfmt_set_pattern )
 	}
 #endif
 
-	umsg_applyPattern(MSG_FORMAT_OBJECT(mfo), spattern, spattern_len, &spattern_error, &INTL_DATA_ERROR_CODE(mfo));
+	icu::MessageFormat *mf = reinterpret_cast<icu::MessageFormat *>(MSG_FORMAT_OBJECT(mfo));
+	std::unique_ptr<icu::MessageFormat> new_mf(static_cast<icu::MessageFormat *>(mf->clone()));
+	if (!new_mf) {
+		INTL_DATA_ERROR_CODE(mfo) = U_MEMORY_ALLOCATION_ERROR;
+	} else {
+		new_mf->applyPattern(icu::UnicodeString(spattern, spattern_len), spattern_error, INTL_DATA_ERROR_CODE(mfo));
+	}
 	if (spattern) {
 		efree(spattern);
 	}
@@ -88,6 +98,9 @@ U_CFUNC PHP_FUNCTION( msgfmt_set_pattern )
 		RETURN_FALSE;
 	}
 
+	delete mf;
+	MSG_FORMAT_OBJECT(mfo) = reinterpret_cast<UMessageFormat *>(new_mf.release());
+	mfo->mf_data.tz_set = 0;
 	if(mfo->mf_data.orig_format) {
 		efree(mfo->mf_data.orig_format);
 	}
