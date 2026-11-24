@@ -293,6 +293,8 @@ typedef struct st_mysqlnd_packet_cached_sha2_result {
 	char 		error[MYSQLND_ERRMSG_SIZE+1];
 	char 		sqlstate[MYSQLND_SQLSTATE_LENGTH + 1];
 	unsigned int 	error_no;
+	/* The server sent the final OK packet instead of an auth status */
+	bool		is_ok_packet;
 } MYSQLND_PACKET_CACHED_SHA2_RESULT;
 
 /* The following structure implements an optional value,

@@ -30,6 +30,15 @@ static const char * const mysqlnd_old_passwd  = "mysqlnd cannot connect to MySQL
 "store a new, and more secure, hash value in mysql.user. If this user is used in other scripts executed by PHP 5.2 or earlier you might need to remove the old-passwords "
 "flag from your my.cnf file";
 
+static enum_func_status
+mysqlnd_auth_handle_server_response(struct st_mysqlnd_authentication_plugin * auth_plugin,
+		MYSQLND_CONN_DATA * conn,
+		const zend_uchar * const auth_plugin_data, const size_t auth_plugin_data_len,
+		const char * const passwd, const size_t passwd_len,
+		char ** switch_to_auth_protocol, size_t * const switch_to_auth_protocol_len,
+		zend_uchar ** switch_to_auth_protocol_data, size_t * const switch_to_auth_protocol_data_len,
+		bool * const auth_done);
+
 
 /* {{{ mysqlnd_run_authentication */
 enum_func_status
@@ -255,6 +264,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 	enum_func_status ret = FAIL;
 	const MYSQLND_CHARSET * charset = NULL;
 	MYSQLND_PACKET_AUTH_RESPONSE auth_resp_packet;
+	bool auth_done;
 
 	DBG_ENTER("mysqlnd_auth_handshake");
 
@@ -313,13 +323,18 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 		PACKET_FREE(&auth_packet);
 	}
 
-	if (auth_plugin && auth_plugin->methods.handle_server_response) {
-		if (FAIL == auth_plugin->methods.handle_server_response(auth_plugin, conn,
-				orig_auth_plugin_data, orig_auth_plugin_data_len, passwd, passwd_len,
-				switch_to_auth_protocol, switch_to_auth_protocol_len,
-				switch_to_auth_protocol_data, switch_to_auth_protocol_data_len)) {
-			goto end;
-		}
+	if (FAIL == mysqlnd_auth_handle_server_response(auth_plugin, conn,
+			orig_auth_plugin_data, orig_auth_plugin_data_len, passwd, passwd_len,
+			switch_to_auth_protocol, switch_to_auth_protocol_len,
+			switch_to_auth_protocol_data, switch_to_auth_protocol_data_len, &auth_done)) {
+		goto end;
+	}
+
+	if (auth_done) {
+		/* The plugin already read the OK packet, a message from it is not available */
+		mysqlnd_set_string(&conn->last_message, NULL, 0);
+		ret = PASS;
+		goto end;
 	}
 
 	if (FAIL == PACKET_READ(conn, &auth_resp_packet) || auth_resp_packet.response_code >= 0xFE) {
@@ -385,6 +400,7 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 	enum_func_status ret = FAIL;
 	const MYSQLND_CHARSET * old_cs = conn->charset;
 	MYSQLND_PACKET_CHG_USER_RESPONSE chg_user_resp;
+	bool auth_done;
 
 	DBG_ENTER("mysqlnd_auth_change_user");
 
@@ -439,17 +455,20 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 		PACKET_FREE(&auth_packet);
 	}
 
-	if (auth_plugin && auth_plugin->methods.handle_server_response) {
-		if (FAIL == auth_plugin->methods.handle_server_response(auth_plugin, conn,
-				orig_auth_plugin_data, orig_auth_plugin_data_len, passwd, passwd_len,
-				switch_to_auth_protocol, switch_to_auth_protocol_len,
-				switch_to_auth_protocol_data, switch_to_auth_protocol_data_len)) {
-			goto end;
-		}
+	if (FAIL == mysqlnd_auth_handle_server_response(auth_plugin, conn,
+			orig_auth_plugin_data, orig_auth_plugin_data_len, passwd, passwd_len,
+			switch_to_auth_protocol, switch_to_auth_protocol_len,
+			switch_to_auth_protocol_data, switch_to_auth_protocol_data_len, &auth_done)) {
+		goto end;
 	}
 
-	ret = PACKET_READ(conn, &chg_user_resp);
-	COPY_CLIENT_ERROR(conn->error_info, chg_user_resp.error_info);
+	if (auth_done) {
+		/* The plugin already read the OK packet */
+		ret = PASS;
+	} else {
+		ret = PACKET_READ(conn, &chg_user_resp);
+		COPY_CLIENT_ERROR(conn->error_info, chg_user_resp.error_info);
+	}
 
 	if (0xFE == chg_user_resp.response_code) {
 		ret = FAIL;
@@ -1221,19 +1240,21 @@ static int is_secure_transport(MYSQLND_CONN_DATA *conn) {
 	return strcmp(conn->vio->data->stream->ops->label, "unix_socket") == 0;
 }
 
-/* {{{ mysqlnd_caching_sha2_handle_server_response */
+/* {{{ mysqlnd_caching_sha2_read_server_response */
 static enum_func_status
-mysqlnd_caching_sha2_handle_server_response(struct st_mysqlnd_authentication_plugin *self,
-		MYSQLND_CONN_DATA * conn,
+mysqlnd_caching_sha2_read_server_response(MYSQLND_CONN_DATA * conn,
 		const zend_uchar * auth_plugin_data, const size_t auth_plugin_data_len,
 		const char * const passwd,
 		const size_t passwd_len,
 		char **new_auth_protocol, size_t *new_auth_protocol_len,
-		zend_uchar **new_auth_protocol_data, size_t *new_auth_protocol_data_len
+		zend_uchar **new_auth_protocol_data, size_t *new_auth_protocol_data_len,
+		bool * const auth_done
 		)
 {
-	DBG_ENTER("mysqlnd_caching_sha2_handle_server_response");
+	DBG_ENTER("mysqlnd_caching_sha2_read_server_response");
 	MYSQLND_PACKET_CACHED_SHA2_RESULT result_packet;
+
+	*auth_done = false;
 
 	if (passwd_len == 0) {
 		DBG_INF("empty password fast path");
@@ -1242,6 +1263,12 @@ mysqlnd_caching_sha2_handle_server_response(struct st_mysqlnd_authentication_plu
 
 	conn->payload_decoder_factory->m.init_cached_sha2_result_packet(&result_packet);
 	if (FAIL == PACKET_READ(conn, &result_packet)) {
+		DBG_RETURN(PASS);
+	}
+
+	if (result_packet.is_ok_packet) {
+		/* The server sent the final OK packet, the caller must not wait for another one */
+		*auth_done = true;
 		DBG_RETURN(PASS);
 	}
 
@@ -1284,10 +1311,30 @@ mysqlnd_caching_sha2_handle_server_response(struct st_mysqlnd_authentication_plu
 			mnd_sprintf(&msg, 0, "Unexpected server response while doing caching_sha2 auth: %i", result_packet.response_code);
 			SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, msg);
 			mnd_sprintf_free(msg);
+			DBG_RETURN(FAIL);
 		}
 	}
 
 	DBG_RETURN(PASS);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_caching_sha2_handle_server_response */
+static enum_func_status
+mysqlnd_caching_sha2_handle_server_response(struct st_mysqlnd_authentication_plugin *self,
+		MYSQLND_CONN_DATA * conn,
+		const zend_uchar * auth_plugin_data, const size_t auth_plugin_data_len,
+		const char * const passwd,
+		const size_t passwd_len,
+		char **new_auth_protocol, size_t *new_auth_protocol_len,
+		zend_uchar **new_auth_protocol_data, size_t *new_auth_protocol_data_len
+		)
+{
+	bool auth_done;
+
+	return mysqlnd_caching_sha2_read_server_response(conn, auth_plugin_data, auth_plugin_data_len, passwd, passwd_len,
+		new_auth_protocol, new_auth_protocol_len, new_auth_protocol_data, new_auth_protocol_data_len, &auth_done);
 }
 /* }}} */
 
@@ -1314,6 +1361,37 @@ static struct st_mysqlnd_authentication_plugin mysqlnd_caching_sha2_auth_plugin 
 	}
 };
 #endif
+
+
+/* {{{ mysqlnd_auth_handle_server_response */
+static enum_func_status
+mysqlnd_auth_handle_server_response(struct st_mysqlnd_authentication_plugin * auth_plugin,
+		MYSQLND_CONN_DATA * conn,
+		const zend_uchar * const auth_plugin_data, const size_t auth_plugin_data_len,
+		const char * const passwd, const size_t passwd_len,
+		char ** switch_to_auth_protocol, size_t * const switch_to_auth_protocol_len,
+		zend_uchar ** switch_to_auth_protocol_data, size_t * const switch_to_auth_protocol_data_len,
+		bool * const auth_done)
+{
+	*auth_done = false;
+
+	if (!auth_plugin || !auth_plugin->methods.handle_server_response) {
+		return PASS;
+	}
+#ifdef MYSQLND_HAVE_SSL
+	/* The plugin method cannot report that it read the final OK packet, so call the built-in plugin directly */
+	if (auth_plugin->methods.handle_server_response == mysqlnd_caching_sha2_handle_server_response) {
+		return mysqlnd_caching_sha2_read_server_response(conn, auth_plugin_data, auth_plugin_data_len, passwd, passwd_len,
+				switch_to_auth_protocol, switch_to_auth_protocol_len,
+				switch_to_auth_protocol_data, switch_to_auth_protocol_data_len, auth_done);
+	}
+#endif
+	return auth_plugin->methods.handle_server_response(auth_plugin, conn,
+			auth_plugin_data, auth_plugin_data_len, passwd, passwd_len,
+			switch_to_auth_protocol, switch_to_auth_protocol_len,
+			switch_to_auth_protocol_data, switch_to_auth_protocol_data_len);
+}
+/* }}} */
 
 
 /* {{{ mysqlnd_register_builtin_authentication_plugins */
