@@ -7554,11 +7554,12 @@ static zend_jit_trace_stop zend_jit_compile_root_trace(zend_jit_trace_rec *trace
 
 				t->exit_counters = ZEND_JIT_EXIT_COUNTERS;
 				ZEND_JIT_EXIT_COUNTERS += t->exit_count;
-
-				((zend_op*)opline)->handler = handler;
-
+				/* Bookkeeping first: reachable code needs its slot, and the JITED flag to be invalidated */
 				ZEND_JIT_TRACE_NUM++;
 				ZEND_OP_TRACE_INFO(opline, offset)->trace_flags |= ZEND_JIT_TRACE_JITED;
+				ZEND_ATOMIC_FENCE_RELEASE();
+
+				((zend_op*)opline)->handler = handler;
 
 				ret = ZEND_JIT_TRACE_STOP_COMPILED;
 			} else if (t->exit_count >= ZEND_JIT_TRACE_MAX_EXITS ||
@@ -8104,6 +8105,8 @@ repeat:
 
 	/* Lock-free check if the root trace was already JIT-ed or blacklist-ed in another process */
 	if (ZEND_OP_TRACE_INFO(opline, offset)->trace_flags & (ZEND_JIT_TRACE_JITED|ZEND_JIT_TRACE_BLACKLISTED)) {
+		/* A process killed before installing the trace left the counting handler, which we re-enter */
+		++(*ZEND_OP_TRACE_INFO(opline, offset)->counter);
 		return 0;
 	}
 
@@ -8386,6 +8389,14 @@ static zend_jit_trace_stop zend_jit_compile_side_trace(zend_jit_trace_rec *trace
 					t->constants = constants;
 				}
 
+				t->exit_counters = ZEND_JIT_EXIT_COUNTERS;
+				ZEND_JIT_EXIT_COUNTERS += t->exit_count;
+
+				zend_jit_traces[zend_jit_traces[parent_num].root].child_count++;
+				/* Reserve the slot before the code that refers to it becomes reachable */
+				ZEND_JIT_TRACE_NUM++;
+				ZEND_ATOMIC_FENCE_RELEASE();
+
 				zend_jit_link_side_trace(
 					zend_jit_traces[parent_num].code_start,
 					zend_jit_traces[parent_num].code_size,
@@ -8393,11 +8404,6 @@ static zend_jit_trace_stop zend_jit_compile_side_trace(zend_jit_trace_rec *trace
 					exit_num,
 					handler);
 
-				t->exit_counters = ZEND_JIT_EXIT_COUNTERS;
-				ZEND_JIT_EXIT_COUNTERS += t->exit_count;
-
-				zend_jit_traces[zend_jit_traces[parent_num].root].child_count++;
-				ZEND_JIT_TRACE_NUM++;
 				zend_jit_traces[parent_num].exit_info[exit_num].flags |= ZEND_JIT_EXIT_JITED;
 
 				ret = ZEND_JIT_TRACE_STOP_COMPILED;
