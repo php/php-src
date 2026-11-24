@@ -120,6 +120,8 @@ PHP                                                                        NEWS
     (Brian Marks)
   . Fixed function JIT ASSIGN_DIM reporting an undefined value or key out of
     order, or when the VM does not, on non-array containers. (Jorg Sowa)
+  . Fixed segfault when storing a script with a closure in an attribute on a
+    promoted property in the file cache. (Evgenij Efimov)
 
 - OpenSSL:
   . Fixed bug GH-20920 (LibreSSL build regression with PHP 8.5).

@@ -377,10 +377,12 @@ static void zend_file_cache_serialize_ast(zend_ast                 *ast,
 			}
 		}
 	} else if (ast->kind == ZEND_AST_OP_ARRAY) {
-		zval z;
-		ZVAL_PTR(&z, zend_ast_get_op_array(ast)->op_array);
-		zend_file_cache_serialize_func(&z, script, info, buf);
-		zend_ast_get_op_array(ast)->op_array = Z_PTR(z);
+		if (!IS_SERIALIZED(zend_ast_get_op_array(ast)->op_array)) {
+			zval z;
+			ZVAL_PTR(&z, zend_ast_get_op_array(ast)->op_array);
+			zend_file_cache_serialize_func(&z, script, info, buf);
+			zend_ast_get_op_array(ast)->op_array = Z_PTR(z);
+		}
 	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
 		zend_ast_fcc *fcc = (zend_ast_fcc*)ast;
 		ZEND_MAP_PTR_INIT(fcc->fptr, NULL);
@@ -1282,10 +1284,12 @@ static void zend_file_cache_unserialize_ast(zend_ast                *ast,
 			}
 		}
 	} else if (ast->kind == ZEND_AST_OP_ARRAY) {
-		zval z;
-		ZVAL_PTR(&z, zend_ast_get_op_array(ast)->op_array);
-		zend_file_cache_unserialize_func(&z, script, buf);
-		zend_ast_get_op_array(ast)->op_array = Z_PTR(z);
+		if (!IS_UNSERIALIZED(zend_ast_get_op_array(ast)->op_array)) {
+			zval z;
+			ZVAL_PTR(&z, zend_ast_get_op_array(ast)->op_array);
+			zend_file_cache_unserialize_func(&z, script, buf);
+			zend_ast_get_op_array(ast)->op_array = Z_PTR(z);
+		}
 	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
 		zend_ast_fcc *fcc = (zend_ast_fcc*)ast;
 		if (!script->corrupted) {
