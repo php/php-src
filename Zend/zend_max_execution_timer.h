@@ -17,7 +17,6 @@
 
 # ifdef ZEND_MAX_EXECUTION_TIMERS
 
-#include <signal.h>
 #include "zend_long.h"
 
 /* Linux reuses each thread's timer across requests instead of recreating it. */
@@ -31,7 +30,6 @@ ZEND_API void zend_max_execution_timer_init(void);
 END_EXTERN_C()
 void zend_max_execution_timer_settime(zend_long seconds);
 void zend_max_execution_timer_shutdown(void);
-void zend_timeout_handler(int dummy, siginfo_t *si, void *uc);
 
 # else
 

@@ -1520,7 +1520,11 @@ ZEND_NORETURN ZEND_API void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 
 #ifndef ZEND_WIN32
 # ifdef ZEND_MAX_EXECUTION_TIMERS
-void zend_timeout_handler(int dummy, siginfo_t *si, void *uc) /* {{{ */
+/* The handler we displaced is process-wide. A null sigaction selects the one-argument handler. */
+static _Atomic(void (*)(int, siginfo_t *, void *)) previous_sigaction;
+static _Atomic(void (*)(int)) previous_handler;
+
+static void zend_timeout_handler(int dummy, siginfo_t *si, void *uc) /* {{{ */
 {
 #ifdef ZTS
 	if (!tsrm_is_managed_thread()) {
@@ -1535,12 +1539,16 @@ void zend_timeout_handler(int dummy, siginfo_t *si, void *uc) /* {{{ */
 		fprintf(stderr, "Executing previous handler (if set) for unexpected signal SIGRTMIN received on thread %d\n", (pid_t) syscall(SYS_gettid));
 #endif
 
-		if (EG(oldact).sa_sigaction) {
-			EG(oldact).sa_sigaction(dummy, si, uc);
+		void (*action)(int, siginfo_t *, void *) = atomic_load(&previous_sigaction);
+		if (action) {
+			action(dummy, si, uc);
 
 			return;
 		}
-		if (EG(oldact).sa_handler) EG(oldact).sa_handler(dummy);
+		void (*handler)(int) = atomic_load(&previous_handler);
+		if (handler != SIG_IGN && handler != SIG_DFL) {
+			handler(dummy);
+		}
 
 		return;
 	}
@@ -1658,12 +1666,21 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 
 	if (reset_signals) {
 		sigset_t sigset;
-		struct sigaction act;
+		struct sigaction act, old;
 
 		act.sa_sigaction = zend_timeout_handler;
 		sigemptyset(&act.sa_mask);
 		act.sa_flags = SA_ONSTACK | SA_SIGINFO;
-		sigaction(SIGRTMIN, &act, NULL);
+		if (sigaction(SIGRTMIN, NULL, &old) == 0
+				&& !((old.sa_flags & SA_SIGINFO) && old.sa_sigaction == zend_timeout_handler)) {
+			if ((old.sa_flags & SA_SIGINFO) && old.sa_handler != SIG_DFL && old.sa_handler != SIG_IGN) {
+				atomic_store(&previous_sigaction, old.sa_sigaction);
+			} else {
+				atomic_store(&previous_handler, old.sa_handler);
+				atomic_store(&previous_sigaction, NULL);
+			}
+			sigaction(SIGRTMIN, &act, NULL);
+		}
 		sigemptyset(&sigset);
 		sigaddset(&sigset, SIGRTMIN);
 		sigprocmask(SIG_UNBLOCK, &sigset, NULL);
