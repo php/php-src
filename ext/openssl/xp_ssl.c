@@ -569,15 +569,11 @@ static bool php_openssl_matches_common_name(X509 *peer, const char *subject_name
 
 	name_asn1 = X509_NAME_ENTRY_get_data(name_entry);
 	cert_name_len = ASN1_STRING_get_length(name_asn1);
-	cert_name = (unsigned char *) OPENSSL_strndup((const char *) ASN1_STRING_get0_data(name_asn1), cert_name_len);
-	if (cert_name == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to locate peer certificate CN");
-		return false;
-	}
+	cert_name = (unsigned char *) estrndup((const char *) ASN1_STRING_get0_data(name_asn1), cert_name_len);
 
 	if ((size_t)cert_name_len != strlen((const char *)cert_name)) {
 		php_error_docref(NULL, E_WARNING, "Peer certificate CN=`%.*s' is malformed", cert_name_len, (const char *)cert_name);
-		OPENSSL_free(cert_name);
+		efree(cert_name);
 		return false;
 	} else if (php_openssl_matches_wildcard_name(subject_name, (const char *)cert_name)) {
 		is_match = 1;
@@ -585,11 +581,11 @@ static bool php_openssl_matches_common_name(X509 *peer, const char *subject_name
 		php_error_docref(NULL, E_WARNING,
 			"Peer certificate CN=`%.*s' did not match expected CN=`%s'",
 			cert_name_len, (const char *)cert_name, subject_name);
-		OPENSSL_free(cert_name);
+		efree(cert_name);
 		return false;
 	}
 
-	OPENSSL_free(cert_name);
+	efree(cert_name);
 
 	return is_match;
 }
