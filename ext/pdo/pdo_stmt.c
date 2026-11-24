@@ -1741,7 +1741,7 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 					}
 					if (Z_TYPE(args[1]) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL(args[1]))) {
 						if (cep->constructor == NULL) {
-							zend_argument_value_error(3, "must be empty when class provided in argument #2 ($class) does not have a constructor");
+							zend_argument_value_error(constructor_arg_num, "must be empty when class provided in argument #%d ($class) does not have a constructor", arg1_arg_num);
 							return false;
 						}
 						fetch_ctor_args = Z_ARRVAL(args[1]);
