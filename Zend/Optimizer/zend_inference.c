@@ -2275,8 +2275,21 @@ static uint32_t binary_op_result_type(
 		/* Handle potentially overloaded operators.
 		 * This could be made more precise by checking the class type, if known. */
 		if ((t1_type & MAY_BE_OBJECT) || (t2_type & MAY_BE_OBJECT)) {
-			/* This is somewhat GMP specific. */
-			tmp |= MAY_BE_OBJECT | MAY_BE_FALSE | MAY_BE_RC1;
+			switch (opcode) {
+				case ZEND_ADD:
+				case ZEND_SUB:
+				case ZEND_MUL:
+				case ZEND_DIV:
+				case ZEND_MOD:
+				case ZEND_POW:
+					/* Operable methods may return any non-void/never type. */
+					tmp |= MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_RC1 | MAY_BE_RCN;
+					break;
+				default:
+					/* This is somewhat GMP specific. */
+					tmp |= MAY_BE_OBJECT | MAY_BE_FALSE | MAY_BE_RC1;
+					break;
+			}
 		}
 	}
 
