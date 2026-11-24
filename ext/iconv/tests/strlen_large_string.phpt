@@ -13,7 +13,7 @@ foreach (["a", "é", "€", "𝄞"] as $char) {
     }
 }
 
-$string = str_repeat("é", 1000000);
+$string = str_repeat("é", 2046) . "abc";
 var_dump(iconv_substr($string, 5, 3, "UTF-8"));
 var_dump(iconv_substr($string, -3, 3, "UTF-8"));
 var_dump(iconv_strlen("aé€𝄞", "UTF-8"));
@@ -21,7 +21,7 @@ var_dump(iconv_strlen(str_repeat("é", 1500) . "\xFF", "UTF-8"));
 ?>
 --EXPECTF--
 string(6) "ééé"
-string(6) "ééé"
+string(3) "abc"
 int(4)
 
 Notice: iconv_strlen(): Detected an illegal character in input string in %s on line %d
