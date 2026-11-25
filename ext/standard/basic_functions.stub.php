@@ -2920,13 +2920,19 @@ function sys_get_temp_dir(): string {}
 
 function fileatime(string $filename): int|false {}
 
+function fileatime_ns(string $filename): int|float|false {}
+
 function filectime(string $filename): int|false {}
+
+function filectime_ns(string $filename): int|float|false {}
 
 function filegroup(string $filename): int|false {}
 
 function fileinode(string $filename): int|false {}
 
 function filemtime(string $filename): int|false {}
+
+function filemtime_ns(string $filename): int|float|false {}
 
 function fileowner(string $filename): int|false {}
 

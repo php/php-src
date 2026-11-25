@@ -187,6 +187,9 @@ PHP                                                                        NEWS
     rmdir(), touch(), chmod() or stat(). (Ilia Alshanetsky)
 
 - Standard:
+  . Added fileatime_ns(), filemtime_ns(), and filectime_ns() to return file
+    timestamps as nanoseconds since the Unix epoch. (Alessio Attilio)
+
   . Made extension names in ini_get_all() case-insensitive. (Weilin Du)
   . Fixed bug GH-25387 (Uploaded files leak in request_parse_body()).
     (Kévin Dunglas)

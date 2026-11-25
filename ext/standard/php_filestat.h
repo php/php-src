@@ -61,5 +61,8 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value);
 #define FS_LSTAT   16
 #define FS_STAT    17
 #define FS_LPERMS  18
+#define FS_ATIME_NS 19
+#define FS_MTIME_NS 20
+#define FS_CTIME_NS 21
 
 #endif /* PHP_FILESTAT_H */

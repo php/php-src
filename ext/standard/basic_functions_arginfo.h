@@ -1374,6 +1374,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_fileatime, 0, 1, MAY_BE_LONG|MAY
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_fileatime_ns arginfo_filemtime_ns
+
 #define arginfo_filectime arginfo_fileatime
 
 #define arginfo_filegroup arginfo_fileatime
@@ -1381,6 +1383,12 @@ ZEND_END_ARG_INFO()
 #define arginfo_fileinode arginfo_fileatime
 
 #define arginfo_filemtime arginfo_fileatime
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_filemtime_ns, 0, 1, MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_filectime_ns arginfo_filemtime_ns
 
 #define arginfo_fileowner arginfo_fileatime
 
@@ -2713,10 +2721,13 @@ ZEND_FUNCTION(fnmatch);
 #endif
 ZEND_FUNCTION(sys_get_temp_dir);
 ZEND_FUNCTION(fileatime);
+ZEND_FUNCTION(fileatime_ns);
 ZEND_FUNCTION(filectime);
+ZEND_FUNCTION(filectime_ns);
 ZEND_FUNCTION(filegroup);
 ZEND_FUNCTION(fileinode);
 ZEND_FUNCTION(filemtime);
+ZEND_FUNCTION(filemtime_ns);
 ZEND_FUNCTION(fileowner);
 ZEND_FUNCTION(fileperms);
 ZEND_FUNCTION(filesize);
@@ -3327,10 +3338,13 @@ static const zend_function_entry ext_functions[] = {
 #endif
 	ZEND_FE(sys_get_temp_dir, arginfo_sys_get_temp_dir)
 	ZEND_FE(fileatime, arginfo_fileatime)
+	ZEND_FE(fileatime_ns, arginfo_fileatime_ns)
 	ZEND_FE(filectime, arginfo_filectime)
+	ZEND_FE(filectime_ns, arginfo_filectime_ns)
 	ZEND_FE(filegroup, arginfo_filegroup)
 	ZEND_FE(fileinode, arginfo_fileinode)
 	ZEND_FE(filemtime, arginfo_filemtime)
+	ZEND_FE(filemtime_ns, arginfo_filemtime_ns)
 	ZEND_FE(fileowner, arginfo_fileowner)
 	ZEND_FE(fileperms, arginfo_fileperms)
 	ZEND_FE(filesize, arginfo_filesize)

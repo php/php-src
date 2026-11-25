@@ -734,8 +734,11 @@ typedef struct {
 	__int32 st_blocks;
 #endif
 	php_win32_ioutil_time_t st_atime;
+	long st_atime_nsec;
 	php_win32_ioutil_time_t st_mtime;
+	long st_mtime_nsec;
 	php_win32_ioutil_time_t st_ctime;
+	long st_ctime_nsec;
 } php_win32_ioutil_stat_t;
 
 typedef struct {

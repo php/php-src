@@ -1021,6 +1021,9 @@ PW32IO int php_win32_ioutil_link_w(const wchar_t *target, const wchar_t *link)
 #define FILETIME_TO_TIME_T(filetime)                                        \
    (time_t)(FILETIME_TO_UINT(filetime) / 10000000ULL)
 
+#define FILETIME_TO_NSEC(filetime)                                          \
+   (long)((FILETIME_TO_UINT(filetime) % 10000000ULL) * 100)
+
 static int php_win32_ioutil_fstat_int(HANDLE h, php_win32_ioutil_stat_t *buf, const wchar_t *pathw, size_t pathw_len, PBY_HANDLE_FILE_INFORMATION dp)
 {/*{{{*/
 	BY_HANDLE_FILE_INFORMATION d;
@@ -1028,6 +1031,9 @@ static int php_win32_ioutil_fstat_int(HANDLE h, php_win32_ioutil_stat_t *buf, co
 	LARGE_INTEGER t;
 	uint8_t is_dir;
 
+	buf->st_atime_nsec = 0;
+	buf->st_mtime_nsec = 0;
+	buf->st_ctime_nsec = 0;
 	data = !dp ? &d : dp;
 
 	if(!GetFileInformationByHandle(h, data)) {
@@ -1046,8 +1052,11 @@ static int php_win32_ioutil_fstat_int(HANDLE h, php_win32_ioutil_stat_t *buf, co
 			buf->st_rdev = _buf.st_rdev;
 			buf->st_size = _buf.st_size;
 			buf->st_atime = _buf.st_atime;
+			buf->st_atime_nsec = 0;
 			buf->st_mtime = _buf.st_mtime;
+			buf->st_mtime_nsec = 0;
 			buf->st_ctime = _buf.st_ctime;
+			buf->st_ctime_nsec = 0;
 			return 0;
 		} else if(h == INVALID_HANDLE_VALUE && pathw_len > 0) {
 			/* An abnormal situation it is. For example, the user is the file
@@ -1129,8 +1138,11 @@ static int php_win32_ioutil_fstat_int(HANDLE h, php_win32_ioutil_stat_t *buf, co
 	as zend_long is 32 bit. */
 	buf->st_size = (zend_long)t.QuadPart;
 	buf->st_atime = FILETIME_TO_TIME_T(data->ftLastAccessTime);
+	buf->st_atime_nsec = FILETIME_TO_NSEC(data->ftLastAccessTime);
 	buf->st_ctime = FILETIME_TO_TIME_T(data->ftCreationTime);
+	buf->st_ctime_nsec = FILETIME_TO_NSEC(data->ftCreationTime);
 	buf->st_mtime = FILETIME_TO_TIME_T(data->ftLastWriteTime);
+	buf->st_mtime_nsec = FILETIME_TO_NSEC(data->ftLastWriteTime);
 
 	return 0;
 }/*}}}*/
