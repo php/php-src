@@ -75,6 +75,8 @@ PHP                                                                        NEWS
     (Ian Mattas)
   . Fixed bug GH-25750 (adoptNode() accepts DTD declaration nodes, which can
     crash at document teardown). (Ian Mattas)
+  . Fixed crash in Dom\Node::lookupPrefix() on a text node inside a DTD entity
+    declaration. (Ian Mattas)
 
 - FFI:
   . Fixed bug GH-25558 (struct with an enum field passed by value is described

@@ -45,6 +45,17 @@ foreach (['x', 'p', 'html'] as $name) {
     var_dump($x->lookupPrefix("test"));
 }
 
+echo "--- text node inside DTD entity declaration ---\n";
+
+$dom = Dom\XMLDocument::createFromString(<<<XML
+<?xml version="1.0"?>
+<!DOCTYPE r [<!ENTITY ent "E">]>
+<r>&ent;</r>
+XML);
+
+$text = $dom->doctype->childNodes->item(0)->childNodes->item(0);
+var_dump($text->lookupPrefix("urn:p"));
+
 ?>
 --EXPECT--
 --- NULL case because invalid node type ---
@@ -62,3 +73,5 @@ NULL
 string(1) "y"
 NULL
 string(1) "x"
+--- text node inside DTD entity declaration ---
+NULL

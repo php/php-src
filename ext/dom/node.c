@@ -1862,6 +1862,10 @@ PHP_METHOD(Dom_Node, isEqualNode)
 /* https://dom.spec.whatwg.org/#locate-a-namespace-prefix */
 static const xmlChar *dom_locate_a_namespace_prefix(xmlNodePtr elem, const char *uri)
 {
+	if (elem == NULL || elem->type != XML_ELEMENT_NODE) {
+		return NULL;
+	}
+
 	do {
 		/* 1. If element’s namespace is namespace and its namespace prefix is non-null, then return its namespace prefix. */
 		if (elem->ns != NULL && elem->ns->prefix != NULL && xmlStrEqual(elem->ns->href, BAD_CAST uri)) {
