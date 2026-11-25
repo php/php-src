@@ -227,7 +227,7 @@ void vzlog(const char *function, int line, int flags, const char *fmt, va_list a
 		if (flags & ZLOG_HAVE_ERRNO) {
 			len += snprintf(buf + len, buf_size - len,
 					": %s (%d)", strerror(saved_errno), saved_errno);
-			if (len >= zlog_limit) {
+			if (len >= zlog_limit || len >= buf_size) {
 				truncated = 1;
 			}
 		}
