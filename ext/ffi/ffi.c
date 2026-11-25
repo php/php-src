@@ -353,7 +353,11 @@ static ffi_type* zend_ffi_face_struct_add_fields(ffi_type* t, const zend_ffi_typ
 	zend_ffi_field *field;
 
 	ZEND_HASH_MAP_FOREACH_PTR(&type->record.fields, field) {
-		switch (ZEND_FFI_TYPE(field->type)->kind) {
+		zend_ffi_type_kind field_kind = ZEND_FFI_TYPE(field->type)->kind;
+		if (field_kind == ZEND_FFI_TYPE_ENUM) {
+			field_kind = ZEND_FFI_TYPE(field->type)->enumeration.kind;
+		}
+		switch (field_kind) {
 			case ZEND_FFI_TYPE_FLOAT:
 				t->elements[(*i)++] = &ffi_type_float;
 				break;
