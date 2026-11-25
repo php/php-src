@@ -1450,7 +1450,7 @@ PHPAPI void php_var_serialize_set_incomplete_classes_only(php_serialize_data_t d
 
 PHPAPI void php_var_serialize_destroy(php_serialize_data_t d) {
 	/* fprintf(stderr, "SERIALIZE_DESTROY   == lock: %u, level: %u\n", BG(serialize_lock), BG(serialize).level); */
-	if (BG(serialize_lock)) {
+	if (d != BG(serialize).data) {
 		zend_hash_destroy(&d->ht);
 		efree(d);
 	} else if (!--BG(serialize).level) {
