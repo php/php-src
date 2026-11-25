@@ -207,6 +207,8 @@ PHP                                                                        NEWS
     freed private key). (Artem Ukrainskiy)
   . Fixed use-after-free when unsetting an entry with an open handle.
     (David Carlier)
+  . Fixed bug GH-25722 (phar_archive_delref() double free on shared archive at
+    shutdown). (David Carlier)
 
 - POSIX:
   . Fixed bug GH-25530 (posix_get_last_error() returns an error from a
