@@ -439,14 +439,18 @@ static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key)
 			return -1;
 		}
 		shm_var = (sysvshm_chunk*) ((char *) ptr + pos);
+		/* A writer killed while removing a variable leaves garbage after the moved chunks */
+		if (ptr->end - pos < (zend_long) sizeof(sysvshm_chunk)
+			|| shm_var->next < (zend_long) sizeof(sysvshm_chunk)
+			|| shm_var->next > ptr->end - pos
+			|| shm_var->length < 0
+			|| shm_var->length > shm_var->next - (zend_long) XtOffsetOf(sysvshm_chunk, mem)) {
+			return -1;
+		}
 		if (shm_var->key == key) {
 			return pos;
 		}
 		pos += shm_var->next;
-
-		if (shm_var->next <= 0 || pos < ptr->start) {
-			return -1;
-		}
 	}
 	return -1;
 }
