@@ -1,5 +1,5 @@
 --TEST--
-Bug #25558 (FFI: struct with an enum field passed by value is described to libffi with a void element)
+GH-25558 (FFI: struct with an enum field passed by value is described to libffi with a void element)
 --EXTENSIONS--
 ffi
 --INI--
