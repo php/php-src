@@ -4327,6 +4327,7 @@ ZEND_METHOD(FFI, arrayType) /* {{{ */
 
 	ZEND_HASH_REVERSE_FOREACH_VAL(dims, val) {
 		zend_long n = zval_get_long(val);
+		size_t element_size = ZEND_FFI_TYPE(type)->size;
 		zend_ffi_type *new_type;
 
 		if (n < 0) {
@@ -4337,12 +4338,16 @@ ZEND_METHOD(FFI, arrayType) /* {{{ */
 			zend_throw_error(zend_ffi_exception_ce, "only the leftmost array can be undimensioned");
 			zend_ffi_type_dtor(type);
 			RETURN_THROWS();
+		} else if (element_size && n > SIZE_MAX / element_size) {
+			zend_throw_error(zend_ffi_exception_ce, "array size is too large");
+			zend_ffi_type_dtor(type);
+			RETURN_THROWS();
 		}
 
 		new_type = emalloc(sizeof(zend_ffi_type));
 		new_type->kind = ZEND_FFI_TYPE_ARRAY;
 		new_type->attr = 0;
-		new_type->size = n * ZEND_FFI_TYPE(type)->size;
+		new_type->size = (size_t) n * element_size;
 		new_type->align = ZEND_FFI_TYPE(type)->align;
 		new_type->array.type = type;
 		new_type->array.length = n;
@@ -6456,10 +6461,16 @@ void zend_ffi_make_array_type(zend_ffi_dcl *dcl, const zend_ffi_val *len) /* {{{
 		LONGJMP(FFI_G(bailout), FAILURE);
 	}
 
+	if (element_type->size && length > SIZE_MAX / element_type->size) {
+		zend_ffi_cleanup_dcl(dcl);
+		zend_ffi_parser_error("Array size is too large at line %d", FFI_G(line));
+		return;
+	}
+
 	type = pemalloc(sizeof(zend_ffi_type), FFI_G(persistent));
 	type->kind = ZEND_FFI_TYPE_ARRAY;
 	type->attr = FFI_G(default_type_attr) | (dcl->attr & ZEND_FFI_ARRAY_ATTRS);
-	type->size = length * element_type->size;
+	type->size = (size_t) length * element_type->size;
 	type->align = element_type->align;
 	type->array.type = dcl->type;
 	type->array.length = length;
@@ -7104,7 +7115,12 @@ static zend_result zend_ffi_nested_type(zend_ffi_type *type, zend_ffi_type *nest
 					return FAILURE;
 				}
 			}
-			nested_type->size = nested_type->array.length * ZEND_FFI_TYPE(nested_type->array.type)->size;
+			size_t element_size = ZEND_FFI_TYPE(nested_type->array.type)->size;
+			if (element_size && nested_type->array.length > SIZE_MAX / element_size) {
+				zend_ffi_throw_parser_error("Array size is too large at line %d", FFI_G(line));
+				return FAILURE;
+			}
+			nested_type->size = (size_t) nested_type->array.length * element_size;
 			nested_type->align = ZEND_FFI_TYPE(nested_type->array.type)->align;
 			return SUCCESS;
 			break;
