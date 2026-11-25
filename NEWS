@@ -110,6 +110,8 @@ PHP                                                                        NEWS
     deeply nested arrays. (Eyüp Can Akman)
   . Fixed the JIT freeing the string returned by mb_encode_mimeheader() or
     mb_output_handler() while it is still in use. (Ilia Alshanetsky)
+  . Fixed bug GH-25737 (mb_send_mail() ignores $additional_params).
+    (Tomasz Kowalczyk)
 
 - Opcache:
   . Fixed bug GH-22216 (spurious opcache.memory_consumption warning on each new
