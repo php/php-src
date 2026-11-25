@@ -135,6 +135,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token <ident> T_DEFAULT       "'default'"
 %token <ident> T_MATCH         "'match'"
 %token <ident> T_BREAK         "'break'"
+%token <ident> T_BY            "'by'"
 %token <ident> T_CONTINUE      "'continue'"
 %token <ident> T_GOTO          "'goto'"
 %token <ident> T_FUNCTION      "'function'"
@@ -274,6 +275,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> implements_list case_list if_stmt_without_else
 %type <ast> non_empty_parameter_list argument_list non_empty_argument_list property_list
 %type <ast> class_const_list class_const_decl class_name_list trait_adaptations method_body non_empty_for_exprs
+%type <ast> interface_list interface_reference
 %type <ast> ctor_arguments alt_if_stmt_without_else trait_adaptation_list lexical_vars
 %type <ast> lexical_var_list encaps_list
 %type <ast> array_pair non_empty_array_pair_list array_pair_list possible_array_pair
@@ -676,8 +678,21 @@ interface_extends_list:
 ;
 
 implements_list:
-		%empty		        		{ $$ = NULL; }
-	|	T_IMPLEMENTS class_name_list	{ $$ = $2; }
+		%empty			        { $$ = NULL; }
+		| T_IMPLEMENTS interface_list	{ $$ = $2; }
+;
+
+interface_list:
+		interface_list ',' interface_reference
+			{ $$ = zend_ast_list_add($1, $3); }
+		| interface_reference
+			{ $$ = zend_ast_create_list(1, ZEND_AST_NAME_LIST, $1); }
+;
+
+interface_reference:
+		class_name			{ $$ = $1; }
+		| class_name T_BY T_VARIABLE
+			{ $$ = zend_ast_create(ZEND_AST_INTERFACE_DELEGATION, $1, $3); }
 ;
 
 foreach_variable:
