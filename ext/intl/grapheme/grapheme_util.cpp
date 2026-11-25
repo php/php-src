@@ -230,15 +230,36 @@ finish:
 /* }}} */
 
 /* {{{ grapheme_ascii_check: ASCII check */
+/* Returns len when every byte is one grapheme: all bytes are ASCII and there is no CR LF pair (CR LF is one
+ * grapheme cluster). Returns -1 otherwise. */
 zend_long grapheme_ascii_check(const unsigned char *day, size_t len)
 {
-	int ret_len = len;
-	while ( len-- ) {
-	if ( *day++ > 0x7f || (*day == '\n' && *(day - 1) == '\r') )
+	const unsigned char *p = day;
+	const unsigned char *end = day + len;
+
+	for (; end - p > 8; p += 8) {
+		uint64_t word, next;
+		memcpy(&word, p, sizeof(word));
+		memcpy(&next, p + 1, sizeof(next));
+		if (word & UINT64_C(0x8080808080808080)) {
+			return -1;
+		}
+		/* A zero byte i marks a CR LF pair at p[i], p[i + 1]. */
+		uint64_t crlf = (word ^ UINT64_C(0x0d0d0d0d0d0d0d0d)) | (next ^ UINT64_C(0x0a0a0a0a0a0a0a0a));
+		if ((crlf - UINT64_C(0x0101010101010101)) & ~crlf & UINT64_C(0x8080808080808080)) {
+			return -1;
+		}
+	}
+	for (; end - p > 1; p++) {
+		if (*p > 0x7f || (*p == '\r' && p[1] == '\n')) {
+			return -1;
+		}
+	}
+	if (p < end && *p > 0x7f) {
 		return -1;
 	}
 
-	return ret_len;
+	return (zend_long) len;
 }
 
 /* }}} */
