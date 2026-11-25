@@ -611,7 +611,7 @@ jobs:
           cd symfony_demo
           git rev-parse HEAD
           sed -i 's/PHP_SAPI/"cli-server"/g' var/cache/dev/App_KernelDevDebugContainer.preload.php
-          APP_DEBUG=0 php -d opcache.preload=var/cache/dev/App_KernelDevDebugContainer.preload.php public/index.php
+          USE_TRACKED_ALLOC=1 APP_DEBUG=0 php -d opcache.preload=var/cache/dev/App_KernelDevDebugContainer.preload.php public/index.php
       - name: Test Wordpress
         if: ${{ !cancelled() }}
         run: |
