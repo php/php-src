@@ -37,6 +37,11 @@ PHP 8.7 UPGRADE NOTES
     127 bytes. Previously, the length could be truncated and only a prefix of
     the string used for substitution.
 
+- PCRE:
+  . preg_match() and preg_match_all() no longer throw a ValueError when the
+    offset is PHP_INT_MIN. Like any other negative offset beyond the length of
+    the subject, the search now starts at the beginning of the subject.
+
 - PDO:
   . PDOStatement::bindColumn() now throws a ValueError when the column name is
     not present in the result set. It previously reported the condition

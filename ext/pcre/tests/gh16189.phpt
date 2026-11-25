@@ -3,17 +3,9 @@ GH-16189 (preg_match/preg_match_all underflow on start_offset argument)
 --FILE--
 <?php
 
-try {
-	preg_match( '/<(\w+)[\s\w\-]+ id="S44_i89ew">/', '<br><div id="S44_i89ew">', $matches, 0, PHP_INT_MIN);
-} catch (\ValueError $e) {
-	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
-}
-try {
-	preg_match_all( '/<(\w+)[\s\w\-]+ id="S44_i89ew">/', '<br><div id="S44_i89ew">', $matches, 0, PHP_INT_MIN);
-} catch (\ValueError $e) {
-	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
-}
+var_dump(preg_match( '/<(\w+)[\s\w\-]+ id="S44_i89ew">/', '<br><div id="S44_i89ew">', $matches, 0, PHP_INT_MIN));
+var_dump(preg_match_all( '/<(\w+)[\s\w\-]+ id="S44_i89ew">/', '<br><div id="S44_i89ew">', $matches, 0, PHP_INT_MIN));
 ?>
---EXPECTF--
-ValueError: preg_match(): Argument #5 ($offset) must be greater than %s
-ValueError: preg_match_all(): Argument #5 ($offset) must be greater than %s
+--EXPECT--
+int(1)
+int(1)
