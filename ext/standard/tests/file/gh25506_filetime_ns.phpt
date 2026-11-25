@@ -62,7 +62,7 @@ fclose($pipes[1]);
 fclose($pipes[2]);
 proc_close($process);
 clearstatcache();
-var_dump(fileatime_ns($filename) === -1123456789);
+var_dump(fileatime_ns($filename) == -1123456789);
 
 foreach (['atime', 'mtime', 'ctime'] as $time) {
     $seconds = call_user_func('file' . $time, $filename);
