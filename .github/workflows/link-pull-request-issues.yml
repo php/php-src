@@ -1,0 +1,90 @@
+name: Link pull requests to issues
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - edited
+      - reopened
+
+permissions:
+  contents: read
+
+jobs:
+  link-issue:
+    if: github.repository == 'php/php-src'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.pull_request.title;
+            const matches = [...title.matchAll(/\bFix GH-(\d+)\b/g)];
+            const pullRequest = context.payload.pull_request;
+            const body = pullRequest.body ?? '';
+            const marker = '<!-- php-src-issue-link -->';
+            const withoutManagedReference = body
+              .replace(/\n?<!-- php-src-issue-link -->\nFixes #\d+\n?/g, '')
+              .trimEnd();
+
+            if (matches.length !== 1) {
+              if (matches.length > 1) {
+                core.warning(`Expected one GH issue in the title, found ${matches.length}.`);
+              }
+              if (body.includes(marker)) {
+                await github.rest.issues.update({
+                  ...context.repo,
+                  issue_number: pullRequest.number,
+                  body: withoutManagedReference,
+                });
+              }
+              return;
+            }
+
+            const issueNumber = Number(matches[0][1]);
+            const { owner, repo } = context.repo;
+            const { data: issue } = await github.rest.issues.get({
+              owner,
+              repo,
+              issue_number: issueNumber,
+            });
+
+            if (issue.pull_request) {
+              core.warning(`#${issueNumber} is a pull request, not an issue.`);
+              if (body.includes(marker)) {
+                await github.rest.issues.update({
+                  ...context.repo,
+                  issue_number: pullRequest.number,
+                  body: withoutManagedReference,
+                });
+              }
+              return;
+            }
+
+            const closingReference = new RegExp(
+              `\\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\\s+#${issueNumber}\\b`,
+              'i',
+            );
+
+            if (closingReference.test(withoutManagedReference)) {
+              if (body.includes(marker)) {
+                await github.rest.issues.update({
+                  ...context.repo,
+                  issue_number: pullRequest.number,
+                  body: withoutManagedReference,
+                });
+              }
+              return;
+            }
+
+            const separator = withoutManagedReference ? '\n\n' : '';
+            const updatedBody = `${withoutManagedReference}${separator}${marker}\nFixes #${issueNumber}\n`;
+            if (body !== updatedBody) {
+              await github.rest.issues.update({
+                ...context.repo,
+                issue_number: pullRequest.number,
+                body: updatedBody,
+              });
+            }
