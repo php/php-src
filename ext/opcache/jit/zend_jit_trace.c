@@ -49,9 +49,14 @@ static zend_always_inline const char *zend_jit_trace_star_desc(uint8_t trace_fla
 static void zend_jit_trace_startup(bool reattached)
 {
 	if (!reattached) {
-		zend_jit_traces = (zend_jit_trace_info*)zend_shared_alloc(sizeof(zend_jit_trace_info) * JIT_G(max_root_traces));
+		size_t size = sizeof(zend_jit_trace_info) * (size_t) JIT_G(max_root_traces);
+
+		zend_jit_traces = (zend_jit_trace_info*)zend_shared_alloc(size);
 		if (!zend_jit_traces) {
-			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not allocate JIT root traces buffer!");
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL,
+				"Could not allocate JIT root traces buffer of %zu bytes for opcache.jit_max_root_traces=" ZEND_LONG_FMT
+				", increase opcache.memory_consumption or decrease opcache.jit_max_root_traces",
+				size, JIT_G(max_root_traces));
 		}
 		zend_jit_exit_groups = (const void**)zend_shared_alloc(sizeof(void*) * (ZEND_JIT_TRACE_MAX_EXITS/ZEND_JIT_EXIT_POINTS_PER_GROUP));
 		if (!zend_jit_exit_groups) {
