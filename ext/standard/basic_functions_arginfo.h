@@ -1,5 +1,5 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: 53d47cfb46b55f62340f435b4637de62c4d0b531
+ * Stub hash: 514f1812914afe4e84777239b10ad8e47b5cb710
  * Has decl header: yes */
 
 #include "zend_attributes.h"
@@ -1374,9 +1374,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_fileatime, 0, 1, MAY_BE_LONG|MAY
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_fileatime_ns arginfo_filemtime_ns
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_fileatime_ns, 0, 1, MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_filectime arginfo_fileatime
+
+#define arginfo_filectime_ns arginfo_fileatime_ns
 
 #define arginfo_filegroup arginfo_fileatime
 
@@ -1384,11 +1388,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_filemtime arginfo_fileatime
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_filemtime_ns, 0, 1, MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
-#define arginfo_filectime_ns arginfo_filemtime_ns
+#define arginfo_filemtime_ns arginfo_fileatime_ns
 
 #define arginfo_fileowner arginfo_fileatime
 
