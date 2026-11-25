@@ -152,7 +152,7 @@ PHP                                                                        NEWS
     set to an empty string. (Ilia Alshanetsky)
 
 - Reflection:
-  . Fixed float default values losing precision in __toString() output.
+  . Fixed floats losing precision in __toString() output.
     (Jorg Sowa)
 
 - Session:

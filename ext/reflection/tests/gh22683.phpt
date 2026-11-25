@@ -25,4 +25,4 @@ Constant [ <persistent> float INF ] { INF }
 Constant [ public float MY_NAN ] { NAN }
 Constant [ public float MY_INF ] { INF }
 Constant [ public float MY_FLOAT ] { 1.5 }
-Constant [ public float MY_WHOLE ] { 2 }
+Constant [ public float MY_WHOLE ] { 2.0 }

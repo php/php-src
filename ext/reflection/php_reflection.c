@@ -593,7 +593,7 @@ static void _const_string(smart_str *str, const zend_string *name, const zval *v
 	} else if (Z_TYPE_P(value) == IS_STRING) {
 		smart_str_append(str, Z_STR_P(value));
 	} else if (Z_TYPE_P(value) == IS_DOUBLE) {
-		smart_str_append_double(str, Z_DVAL_P(value), (int) EG(precision), false);
+		smart_str_append_double(str, Z_DVAL_P(value), /* precision */ -1, /* zero_fraction */ true);
 	} else if (Z_TYPE_P(value) == IS_FALSE) {
 		smart_str_append(str, ZSTR_KNOWN(ZEND_STR_FALSE));
 	} else if (Z_TYPE_P(value) == IS_TRUE) {
@@ -633,7 +633,7 @@ static void _class_const_string(smart_str *str, const zend_string *name, zend_cl
 	} else if (Z_TYPE(c->value) == IS_OBJECT) {
 		smart_str_appends(str, "Object");
 	} else if (Z_TYPE(c->value) == IS_DOUBLE) {
-		smart_str_append_double(str, Z_DVAL(c->value), (int) EG(precision), false);
+		smart_str_append_double(str, Z_DVAL(c->value), /* precision */ -1, /* zero_fraction */ true);
 	} else if (Z_TYPE(c->value) == IS_FALSE) {
 		smart_str_append(str, ZSTR_KNOWN(ZEND_STR_FALSE));
 	} else if (Z_TYPE(c->value) == IS_TRUE) {
