@@ -1384,7 +1384,7 @@ typedef struct { unsigned char digest[sizeof(XXH128_hash_t)]; } XXH128_canonical
  * @pre
  *   @p dst must not be `NULL`.
  */
-XXH_PUBLIC_API void XXH128_canonicalFromHash(XXH_NOESCAPE XXH128_canonical_t* dst, XXH128_hash_t hash);
+static zend_always_inline void XXH128_canonicalFromHash(XXH_NOESCAPE XXH128_canonical_t* dst, XXH128_hash_t hash);
 
 /*!
  * @brief Converts an @ref XXH128_canonical_t to a native @ref XXH128_hash_t.
@@ -6658,7 +6658,7 @@ XXH_PUBLIC_API int XXH128_cmp(XXH_NOESCAPE const void* h128_1, XXH_NOESCAPE cons
 
 /*======   Canonical representation   ======*/
 /*! @ingroup XXH3_family */
-XXH_PUBLIC_API void
+static zend_always_inline void
 XXH128_canonicalFromHash(XXH_NOESCAPE XXH128_canonical_t* dst, XXH128_hash_t hash)
 {
     XXH_STATIC_ASSERT(sizeof(XXH128_canonical_t) == sizeof(XXH128_hash_t));
