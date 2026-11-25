@@ -69,6 +69,8 @@ PHP                                                                        NEWS
     freed. (Ilia Alshanetsky)
   . Fixed bug GH-25752 (Reading Dom\Notation publicId or systemId can crash).
     (Ian Mattas)
+  . Fixed bug GH-25750 (adoptNode() accepts DTD declaration nodes, which can
+    crash at document teardown). (Ian Mattas)
 
 - FFI:
   . Fixed bug GH-25558 (struct with an enum field passed by value is described
