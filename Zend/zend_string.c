@@ -27,6 +27,10 @@
 # include <sanitizer/msan_interface.h>
 #endif
 
+#ifdef __SANITIZE_ADDRESS__
+# include <sanitizer/asan_interface.h>
+#endif
+
 ZEND_API zend_new_interned_string_func_t zend_new_interned_string;
 ZEND_API zend_string_init_interned_func_t zend_string_init_interned;
 ZEND_API zend_string_init_existing_interned_func_t zend_string_init_existing_interned;
@@ -435,11 +439,29 @@ ZEND_API bool ZEND_FASTCALL I_REPLACE_SONAME_FNNAME_ZU(NONE,zend_string_equal_va
 {
 	return !memcmp(ZSTR_VAL(s1), ZSTR_VAL(s2), ZSTR_LEN(s1));
 }
+
+#ifdef __SANITIZE_ADDRESS__
+/* Inline asm in zend_string_equal_val() is not instrumented by ASan, so check
+ * explicitly that the aligned buffer the asm reads up to is addressable. */
+static zend_always_inline void zend_string_asan_check_aligned(const zend_string *s)
+{
+	size_t aligned_size = ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(ZSTR_LEN(s)));
+	void *poisoned = __asan_region_is_poisoned((void *)s, aligned_size);
+	if (UNEXPECTED(poisoned)) {
+		__asan_describe_address(poisoned);
+		abort();
+	}
+}
+#endif
 #endif
 
 #if defined(__GNUC__) && defined(__i386__)
 ZEND_API zend_never_inline NOIPA bool ZEND_FASTCALL zend_string_equal_val(const zend_string *s1, const zend_string *s2)
 {
+#ifdef __SANITIZE_ADDRESS__
+	zend_string_asan_check_aligned(s1);
+	zend_string_asan_check_aligned(s2);
+#endif
 	const char *ptr = ZSTR_VAL(s1);
 	uintptr_t delta = (uintptr_t) s2 - (uintptr_t) s1;
 	size_t len = ZSTR_LEN(s1);
@@ -478,6 +500,10 @@ ZEND_API zend_never_inline NOIPA bool ZEND_FASTCALL zend_string_equal_val(const 
 #elif defined(__GNUC__) && defined(__x86_64__) && !defined(__ILP32__)
 ZEND_API zend_never_inline NOIPA bool ZEND_FASTCALL zend_string_equal_val(const zend_string *s1, const zend_string *s2)
 {
+#ifdef __SANITIZE_ADDRESS__
+	zend_string_asan_check_aligned(s1);
+	zend_string_asan_check_aligned(s2);
+#endif
 	const char *ptr = ZSTR_VAL(s1);
 	uintptr_t delta = (uintptr_t) s2 - (uintptr_t) s1;
 	size_t len = ZSTR_LEN(s1);
