@@ -23,8 +23,6 @@ if ($result->num_rows > 0) {
         var_dump($row);
     }
 }
-$conn->close();
-
 $process->terminate();
 
 print "done!";

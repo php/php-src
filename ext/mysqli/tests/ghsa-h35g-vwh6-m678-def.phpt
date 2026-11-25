@@ -25,8 +25,6 @@ if ($result) {
     var_dump(get_object_vars($all_fields[0])["def"]);
 }
 
-$conn->close();
-
 $process->terminate();
 
 print "done!";

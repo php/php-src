@@ -23,8 +23,6 @@ while ($row = $result->fetch_row()) {
     var_dump($row);
 }
 $stmt->close();
-$conn->close();
-
 $process->terminate();
 
 print "done!";
