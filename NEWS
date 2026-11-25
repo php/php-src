@@ -46,6 +46,7 @@ PHP                                                                        NEWS
     a generator into a by-ref parameter throws). (ndossche)
   . Fixed arrow functions not capturing variables in partial application args.
     (mihaliak)
+  . Fixed float literals losing precision in AST export. (Jorg Sowa)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
@@ -205,6 +206,8 @@ PHP                                                                        NEWS
 - Session:
   . Fixed session upload progress to respect session.use_only_cookies.
     (jorgsowa)
+  . Fixed files save handler GC following symlinked subdirectories when
+    session.save_path sets a directory depth. (Jorg Sowa)
 
 - SimpleXML:
   . Fixed a crash with opcache when simplexml_load_string(),
