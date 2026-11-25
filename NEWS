@@ -76,6 +76,10 @@ PHP                                                                        NEWS
   . Fixed use-after-free in getElementById() after a removed ID attribute is
     freed. (Ilia Alshanetsky)
 
+- Enchant:
+  . Fixed bug GH-25766 (enchant_dict_suggest() crashes with JIT when the result
+    for a word without suggestions is modified). (Tomasz Kowalczyk)
+
 - FFI:
   . Fixed bug GH-25558 (struct with an enum field passed by value is described
     to libffi with a void element). (Davide Peressoni)

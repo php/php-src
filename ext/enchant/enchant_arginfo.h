@@ -1,5 +1,5 @@
 /* This is a generated file, edit enchant.stub.php instead.
- * Stub hash: 31974eb901477da53ede7476953d461d32f772ba */
+ * Stub hash: 9d4c55408db80a88d769eb52cd38ca732919cdf8 */
 
 #include "zend_attributes.h"
 #include "zend_constants.h"
