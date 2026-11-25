@@ -21,6 +21,7 @@ var_dump($doctype);
 
 var_dump($doctype->entities["test"]);
 var_dump($doctype->entities["myimage"]);
+// TODO: isConnected returning false is a bug
 var_dump($doctype->notations["GIF"]);
 
 ?>
