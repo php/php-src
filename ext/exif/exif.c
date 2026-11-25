@@ -4031,8 +4031,8 @@ static bool exif_scan_thumbnail(image_info_type *ImageInfo)
 		if (c == 0xFF)
 			return false;
 		marker = c;
-		if (pos>=ImageInfo->Thumbnail.size)
-			return false;
+		if (pos+1>=ImageInfo->Thumbnail.size)
+			return false; /* the 2 byte length field must fit */
 		length = php_jpg_get16(data+pos);
 		if (length > ImageInfo->Thumbnail.size || pos >= ImageInfo->Thumbnail.size - length) {
 			return false;
