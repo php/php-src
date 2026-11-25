@@ -4307,7 +4307,23 @@ static bool zend_compile_function_name(znode *name_node, zend_ast *name_ast) /* 
 }
 /* }}} */
 
-static void zend_compile_dynamic_call(znode *result, znode *name_node, zend_ast *args_ast, uint32_t lineno, uint32_t type) /* {{{ */
+static bool zend_func_forbids_dynamic_calls(zend_string *name) /* {{{ */
+{
+	const char *str = ZSTR_VAL(name);
+	size_t len = ZSTR_LEN(name);
+	if (len > 0 && str[0] == '\\') {
+		str++;
+		len--;
+	}
+
+	/* Only internal functions have ZEND_ACC2_FORBID_DYN_CALLS, so an undefined
+	 * function at compile time can be assumed not to forbid dynamic calls. */
+	const zend_function *fbc = zend_hash_str_find_ptr_lc(CG(function_table), str, len);
+	return fbc && (fbc->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS);
+}
+/* }}} */
+
+static void zend_compile_dynamic_call(znode *result, znode *name_node, zend_ast *args_ast, uint32_t lineno, uint32_t type, bool is_dynamic) /* {{{ */
 {
 	if (name_node->op_type == IS_CONST && Z_TYPE(name_node->u.constant) == IS_STRING) {
 		const char *colon;
@@ -4325,6 +4341,8 @@ static void zend_compile_dynamic_call(znode *result, znode *name_node, zend_ast 
 			/* 2 slots, for class and method */
 			opline->result.num = zend_alloc_cache_slots(2);
 			zval_ptr_dtor(&name_node->u.constant);
+		} else if (is_dynamic && zend_func_forbids_dynamic_calls(str)) {
+			zend_emit_op(NULL, ZEND_INIT_DYNAMIC_CALL, NULL, name_node);
 		} else {
 			zend_op *opline = get_next_op();
 
@@ -5715,7 +5733,7 @@ static void zend_compile_call(znode *result, const zend_ast *ast, uint32_t type)
 
 	if (name_ast->kind != ZEND_AST_ZVAL || Z_TYPE_P(zend_ast_get_zval(name_ast)) != IS_STRING) {
 		zend_compile_expr(&name_node, name_ast);
-		zend_compile_dynamic_call(result, &name_node, args_ast, ast->lineno, type);
+		zend_compile_dynamic_call(result, &name_node, args_ast, ast->lineno, type, /* is_dynamic */ true);
 		return;
 	}
 
@@ -5751,7 +5769,7 @@ static void zend_compile_call(znode *result, const zend_ast *ast, uint32_t type)
 		 || !fbc_is_finalized(fbc)
 		 || zend_compile_ignore_function(fbc, CG(active_op_array)->filename)) {
 			zend_string_release_ex(lcname, 0);
-			zend_compile_dynamic_call(result, &name_node, args_ast, ast->lineno, type);
+			zend_compile_dynamic_call(result, &name_node, args_ast, ast->lineno, type, /* is_dynamic */ false);
 			return;
 		}
 
@@ -7077,8 +7095,7 @@ static bool zend_is_pipe_optimizable_func_name(zend_string *name)
 	}
 
 	/* Functions that forbid dynamic calls must not be rewritten into direct calls. */
-	const zend_function *fbc = zend_hash_find_ptr_lc(CG(function_table), name);
-	return !fbc || !(fbc->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS);
+	return !zend_func_forbids_dynamic_calls(name);
 }
 
 static bool zend_is_pipe_optimizable_callable_name(zend_ast *ast)

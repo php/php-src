@@ -4120,7 +4120,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_DYNAMIC_
 	function_name = RT_CONSTANT(opline, opline->op2);
 
 try_function_name:
-	if (IS_CONST != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+	if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
 		call = zend_init_dynamic_call_string(Z_STR_P(function_name), opline->extended_value);
 	} else if (IS_CONST != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT)) {
 		call = zend_init_dynamic_call_object(Z_OBJ_P(function_name), opline->extended_value);
@@ -4304,7 +4304,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_DYNAMIC_
 	function_name = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
 
 try_function_name:
-	if (IS_TMP_VAR != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+	if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
 		call = zend_init_dynamic_call_string(Z_STR_P(function_name), opline->extended_value);
 	} else if (IS_TMP_VAR != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT)) {
 		call = zend_init_dynamic_call_object(Z_OBJ_P(function_name), opline->extended_value);
@@ -4502,7 +4502,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_DYNAMIC_
 	function_name = EX_VAR(opline->op2.var);
 
 try_function_name:
-	if (IS_CV != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+	if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
 		call = zend_init_dynamic_call_string(Z_STR_P(function_name), opline->extended_value);
 	} else if (IS_CV != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT)) {
 		call = zend_init_dynamic_call_object(Z_OBJ_P(function_name), opline->extended_value);
@@ -57015,7 +57015,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_DYNAMIC_CALL_
 	function_name = RT_CONSTANT(opline, opline->op2);
 
 try_function_name:
-	if (IS_CONST != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+	if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
 		call = zend_init_dynamic_call_string(Z_STR_P(function_name), opline->extended_value);
 	} else if (IS_CONST != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT)) {
 		call = zend_init_dynamic_call_object(Z_OBJ_P(function_name), opline->extended_value);
@@ -57199,7 +57199,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_DYNAMIC_CALL_
 	function_name = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
 
 try_function_name:
-	if (IS_TMP_VAR != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+	if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
 		call = zend_init_dynamic_call_string(Z_STR_P(function_name), opline->extended_value);
 	} else if (IS_TMP_VAR != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT)) {
 		call = zend_init_dynamic_call_object(Z_OBJ_P(function_name), opline->extended_value);
@@ -57397,7 +57397,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_DYNAMIC_CALL_
 	function_name = EX_VAR(opline->op2.var);
 
 try_function_name:
-	if (IS_CV != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+	if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
 		call = zend_init_dynamic_call_string(Z_STR_P(function_name), opline->extended_value);
 	} else if (IS_CV != IS_CONST && EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT)) {
 		call = zend_init_dynamic_call_object(Z_OBJ_P(function_name), opline->extended_value);
