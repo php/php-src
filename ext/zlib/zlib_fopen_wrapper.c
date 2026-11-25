@@ -64,17 +64,23 @@ static ssize_t php_gziop_write(php_stream *stream, const char *buf, size_t count
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *) stream->abstract;
 	ssize_t total_written = 0;
 
-	/* Despite the count argument of gzread() being "unsigned int",
-	 * the return value is "int". Error returns are values < 0, otherwise the count is returned.
-	 * To properly distinguish error values from success value, we therefore need to cap at INT_MAX.
+	/* Despite the count argument of gzwrite() being "unsigned int",
+	 * the return value is "int". Error returns are 0, otherwise the count is returned.
+	 * To keep the count representable in the return value, we therefore need to cap at INT_MAX.
 	 */
 	do {
 		unsigned int chunk_size = MIN(count, INT_MAX);
 		int written = gzwrite(self->gz_file, buf, chunk_size);
 		count -= chunk_size;
 
-		if (UNEXPECTED(written < 0)) {
-			return written;
+		if (UNEXPECTED(written <= 0)) {
+			int error = Z_OK;
+
+			gzerror(self->gz_file, &error);
+			if (error != Z_OK && total_written == 0) {
+				return -1;
+			}
+			return total_written;
 		}
 
 		total_written += written;
