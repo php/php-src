@@ -49,6 +49,7 @@ PHP                                                                        NEWS
     (mihaliak)
   . Fixed bug GH-25379 (array_map() foreach optimization changes callback
     semantics). (prateekbhujel)
+  . Fix OSS-Fuzz #588264417. (ndossche)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)

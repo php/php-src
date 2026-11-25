@@ -6774,7 +6774,9 @@ static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
 		if (res_inputs->count == 1) {
 			phi = res_inputs->refs[0];
 		} else {
-			phi = ir_PHI_N((var_def_info & MAY_BE_LONG & MAY_BE_LONG) ? IR_LONG : IR_DOUBLE,
+			/* var_def_info may be ANY (e.g. ASSIGN_DIM) so use the fact that phi inputs must be the same type,
+			 * and therefore use the type of the incoming values. */
+			phi = ir_PHI_N(jit->ctx.ir_base[res_inputs->refs[0]].type,
 				res_inputs->count, res_inputs->refs);
 		}
 		if (Z_MODE(var_addr) == IS_REG) {
