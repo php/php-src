@@ -1198,6 +1198,11 @@ PHP_FUNCTION(socket_connect)
 			sin6.sin6_family = AF_INET6;
 			sin6.sin6_port   = htons((unsigned short int)port);
 
+			if (CHECK_NULL_PATH(addr, addr_len)) {
+				zend_argument_value_error(2, "must not contain any null bytes");
+				RETURN_THROWS();
+			}
+
 			if (! php_set_inet6_addr(&sin6, addr, php_sock)) {
 				RETURN_FALSE;
 			}
@@ -1216,6 +1221,11 @@ PHP_FUNCTION(socket_connect)
 
 			sin.sin_family = AF_INET;
 			sin.sin_port   = htons((unsigned short int)port);
+
+			if (CHECK_NULL_PATH(addr, addr_len)) {
+				zend_argument_value_error(2, "must not contain any null bytes");
+				RETURN_THROWS();
+			}
 
 			if (! php_set_inet_addr(&sin, addr, php_sock)) {
 				RETURN_FALSE;
@@ -1319,6 +1329,11 @@ PHP_FUNCTION(socket_bind)
 				sa->sin_family = AF_INET;
 				sa->sin_port = htons((unsigned short) port);
 
+				if (CHECK_NULL_PATH(addr, addr_len)) {
+					zend_argument_value_error(2, "must not contain any null bytes");
+					RETURN_THROWS();
+				}
+
 				if (! php_set_inet_addr(sa, addr, php_sock)) {
 					RETURN_FALSE;
 				}
@@ -1333,6 +1348,11 @@ PHP_FUNCTION(socket_bind)
 
 				sa->sin6_family = AF_INET6;
 				sa->sin6_port = htons((unsigned short) port);
+
+				if (CHECK_NULL_PATH(addr, addr_len)) {
+					zend_argument_value_error(2, "must not contain any null bytes");
+					RETURN_THROWS();
+				}
 
 				if (! php_set_inet6_addr(sa, addr, php_sock)) {
 					RETURN_FALSE;
@@ -1617,6 +1637,11 @@ PHP_FUNCTION(socket_sendto)
 			sin.sin_family = AF_INET;
 			sin.sin_port = htons((unsigned short) port);
 
+			if (CHECK_NULL_PATH(addr, addr_len)) {
+				zend_argument_value_error(5, "must not contain any null bytes");
+				RETURN_THROWS();
+			}
+
 			if (! php_set_inet_addr(&sin, addr, php_sock)) {
 				RETURN_FALSE;
 			}
@@ -1633,6 +1658,11 @@ PHP_FUNCTION(socket_sendto)
 			memset(&sin6, 0, sizeof(sin6));
 			sin6.sin6_family = AF_INET6;
 			sin6.sin6_port = htons((unsigned short) port);
+
+			if (CHECK_NULL_PATH(addr, addr_len)) {
+				zend_argument_value_error(5, "must not contain any null bytes");
+				RETURN_THROWS();
+			}
 
 			if (! php_set_inet6_addr(&sin6, addr, php_sock)) {
 				RETURN_FALSE;
@@ -2511,9 +2541,9 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 	php_addrinfo *res;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
-		Z_PARAM_STR(hostname)
+		Z_PARAM_PATH_STR(hostname)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING_OR_NULL(service, service_len)
+		Z_PARAM_PATH_OR_NULL(service, service_len)
 		Z_PARAM_ARRAY(zhints)
 	ZEND_PARSE_PARAMETERS_END();
 
