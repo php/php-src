@@ -71,6 +71,8 @@ PHP                                                                        NEWS
 - FFI:
   . Fixed bug GH-25558 (struct with an enum field passed by value is described
     to libffi with a void element). (Davide Peressoni)
+  . Fixed FFI::string() reading out of bounds for a negative size.
+    (Marc Bennewitz)
 
 - Filter:
   . Fixed stack overflow in filter_var() and filter_var_array() with deeply

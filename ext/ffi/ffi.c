@@ -4624,6 +4624,10 @@ ZEND_METHOD(FFI, string) /* {{{ */
 	cdata = (zend_ffi_cdata*)Z_OBJ_P(zv);
 	type = ZEND_FFI_TYPE(cdata->type);
 	if (!size_is_null) {
+		if (size < 0) {
+			zend_argument_value_error(2, "must be greater than or equal to 0");
+			RETURN_THROWS();
+		}
 		if (type->kind == ZEND_FFI_TYPE_POINTER) {
 			ptr = *(void**)cdata->ptr;
 		} else {
