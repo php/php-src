@@ -67,6 +67,10 @@ PHP                                                                        NEWS
   . Fixed use-after-free in getElementById() after a removed ID attribute is
     freed. (Ilia Alshanetsky)
 
+- FFI:
+  . Fixed FFI::string() reading out of bounds for a negative size.
+    (Marc Bennewitz)
+
 - Filter:
   . Fixed stack overflow in filter_var() and filter_var_array() with deeply
     nested arrays. (Eyüp Can Akman)
