@@ -1692,6 +1692,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_always_inline zval *_zend_hash_append_ex(Hash
 	nIndex = (uint32_t)p->h | ht->nTableMask;
 	Z_NEXT(p->val) = HT_HASH(ht, nIndex);
 	HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);
+	GC_DEL_FLAGS(ht, GC_NOT_COLLECTABLE);
 	ht->nNumOfElements++;
 	return &p->val;
 }
@@ -1719,6 +1720,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_always_inline zval *_zend_hash_append_ptr_ex(
 	nIndex = (uint32_t)p->h | ht->nTableMask;
 	Z_NEXT(p->val) = HT_HASH(ht, nIndex);
 	HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);
+	GC_DEL_FLAGS(ht, GC_NOT_COLLECTABLE);
 	ht->nNumOfElements++;
 	return &p->val;
 }
@@ -1745,6 +1747,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_always_inline void _zend_hash_append_ind(Hash
 	nIndex = (uint32_t)p->h | ht->nTableMask;
 	Z_NEXT(p->val) = HT_HASH(ht, nIndex);
 	HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);
+	GC_DEL_FLAGS(ht, GC_NOT_COLLECTABLE);
 	ht->nNumOfElements++;
 }
 
