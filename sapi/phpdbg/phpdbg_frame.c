@@ -50,6 +50,12 @@ zend_string *phpdbg_compile_stackframe(zend_execute_data *ex) {
 	uint32_t i = 0, first_extra_arg = op_array->num_args, num_args = ZEND_CALL_NUM_ARGS(ex);
 	zval *p = ZEND_CALL_ARG(ex, 1);
 
+	if (ex->func->op_array.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
+		/* A __call/__callStatic trampoline doesn't move extra args
+		 * behind the CVs and TMPs (see i_init_func_execute_data()). */
+		first_extra_arg = num_args;
+	}
+
 	if (op_array->scope) {
 		smart_str_append(&s, op_array->scope->name);
 		smart_str_appends(&s, "::");
@@ -79,6 +85,8 @@ zend_string *phpdbg_compile_stackframe(zend_execute_data *ex) {
 	} else {
 		smart_str_appends(&s, " [internal function]");
 	}
+
+	smart_str_0(&s);
 
 	return s.s;
 }

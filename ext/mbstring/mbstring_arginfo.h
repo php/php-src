@@ -1,5 +1,5 @@
 /* This is a generated file, edit mbstring.stub.php instead.
- * Stub hash: f02c317efd6814f902ea75c9d222893713546845 */
+ * Stub hash: db95469ee39648ca5f0e67354126f1cb1fdcb21b */
 
 #if defined(HAVE_MBREGEX)
 #include "zend_attributes.h"

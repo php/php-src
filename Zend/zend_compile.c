@@ -8808,6 +8808,10 @@ static void find_implicit_binds_recursively(closure_info *info, zend_ast *ast) {
 			zend_hash_copy(&info->uses, &inner_info.uses, NULL);
 		}
 		zend_hash_destroy(&inner_info.uses);
+	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
+		/* The arguments of a partial application are not child nodes. */
+		const zend_ast_fcc *fcc_ast = (const zend_ast_fcc *) ast;
+		find_implicit_binds_recursively(info, fcc_ast->args);
 	} else if (!zend_ast_is_special(ast)) {
 		uint32_t i, children = zend_ast_get_num_children(ast);
 		for (i = 0; i < children; i++) {

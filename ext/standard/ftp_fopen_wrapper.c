@@ -178,7 +178,7 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 	ZEND_ASSERT(pos == NULL);
 #endif
 
-	use_ssl = resource->scheme && (ZSTR_LEN(resource->scheme) > 3) && ZSTR_VAL(resource->scheme)[3] == 's';
+	use_ssl = resource->scheme && zend_string_equals_literal_ci(resource->scheme, "ftps");
 
 	/* use port 21 if one wasn't specified */
 	if (resource->port == 0)

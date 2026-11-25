@@ -1,5 +1,5 @@
 /* This is a generated file, edit gettext.stub.php instead.
- * Stub hash: c675dc9492943bbac106c5906b75c31436964423 */
+ * Stub hash: d2e9b8df0156e5b9f7e87f1b963530021d95d5f2 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_textdomain, 0, 0, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, domain, IS_STRING, 1, "null")

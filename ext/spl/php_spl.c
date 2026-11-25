@@ -290,6 +290,7 @@ static bool spl_autoload(zend_string *lc_name, const char *ext, size_t ext_len) 
 			zend_execute(new_op_array, &result);
 			EG(jit_trace_num) = orig_jit_trace_num;
 
+			zend_destroy_static_vars(new_op_array);
 			destroy_op_array(new_op_array);
 			efree(new_op_array);
 			zval_ptr_dtor(&result);

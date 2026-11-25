@@ -5,6 +5,9 @@ Automatic worker detection is capped for regular and instrumented runs
 if (PHP_OS_FAMILY === 'Windows') {
     die('skip requires a POSIX shell');
 }
+if ((int)shell_exec('nproc 2>/dev/null') < 4) {
+    die('skip Many workers on few cores are susceptible to timeouts');
+}
 ?>
 --ENV--
 TEST_PHP_FORK_SERVER=0

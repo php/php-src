@@ -541,6 +541,9 @@ static inline zend_result ct_eval_add_array_unpack(zval *result, const zval *arr
 	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(array), key, value) {
 		if (key) {
 			value = zend_hash_update(Z_ARR_P(result), key, value);
+		} else if (IS_PARTIAL_ARRAY(result)) {
+			/* The next free index of a partial array is unknown. */
+			continue;
 		} else {
 			value = zend_hash_next_index_insert(Z_ARR_P(result), value);
 		}

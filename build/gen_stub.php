@@ -825,7 +825,7 @@ class ArgInfo {
     public function getDefaultValueAsMethodSynopsisString(): ?string {
         return match ($this->defaultValue) {
             'UNKNOWN' => null,
-            'false' | 'true' | 'null' => "&{$this->defaultValue};",
+            'false', 'true', 'null' => "&{$this->defaultValue};",
             default => $this->defaultValue,
         };
     }
@@ -3981,8 +3981,7 @@ class ClassInfo {
                 $classSynopsis->appendChild(new DOMText("\n$classSynopsisIndentation "));
                 $includeElement = $this->createIncludeElement(
                     $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[@role='$escapedName'])",
-                    $classSynopsisIndentationLevel + 1
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[@role='$escapedName'])"
                 );
                 $classSynopsis->appendChild($includeElement);
             }
@@ -3991,8 +3990,7 @@ class ClassInfo {
                 $classSynopsis->appendChild(new DOMText("\n$classSynopsisIndentation "));
                 $includeElement = $this->createIncludeElement(
                     $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[@role='$escapedName'])",
-                    $classSynopsisIndentationLevel + 1
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[@role='$escapedName'])"
                 );
                 $classSynopsis->appendChild($includeElement);
             }
@@ -4001,8 +3999,7 @@ class ClassInfo {
                 $classSynopsis->appendChild(new DOMText("\n$classSynopsisIndentation "));
                 $includeElement = $this->createIncludeElement(
                     $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:destructorsynopsis[@role='$escapedName'])",
-                    $classSynopsisIndentationLevel + 1
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:destructorsynopsis[@role='$escapedName'])"
                 );
                 $classSynopsis->appendChild($includeElement);
             }
@@ -4025,8 +4022,7 @@ class ClassInfo {
                     $classSynopsis->appendChild(new DOMText("\n$classSynopsisIndentation "));
                     $includeElement = $this->createIncludeElement(
                         $doc,
-                        "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$parentReference')/db:refentry/db:refsect1[@role='description']/descendant::db:{$parentMethodsynopsisType}[@role='$escapedParentName'])",
-                        $classSynopsisIndentationLevel + 1
+                        "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$parentReference')/db:refentry/db:refsect1[@role='description']/descendant::db:{$parentMethodsynopsisType}[@role='$escapedParentName'])"
                     );
 
                     $classSynopsis->appendChild($includeElement);
@@ -4252,18 +4248,12 @@ class ClassInfo {
         return $this->name->getLast();
     }
 
-    private function createIncludeElement(DOMDocument $doc, string $query, int $indentationLevel): DOMElement
+    private function createIncludeElement(DOMDocument $doc, string $query): DOMElement
     {
-        $indentation = str_repeat(" ", $indentationLevel);
-
         $includeElement = $doc->createElement("xi:include");
         $attr = $doc->createAttribute("xpointer");
         $attr->value = $query;
         $includeElement->appendChild($attr);
-        $fallbackElement = $doc->createElement("xi:fallback");
-        $includeElement->appendChild(new DOMText("\n$indentation "));
-        $includeElement->appendChild($fallbackElement);
-        $includeElement->appendChild(new DOMText("\n$indentation"));
 
         return $includeElement;
     }
@@ -4294,11 +4284,11 @@ class ClassInfo {
         foreach ($parents as $parent) {
             $classSynopsis->appendChild(new DOMText("\n$indentation"));
             $parentReference = self::getClassSynopsisReference($parent);
+            $parentSynopsis = count($parent->getParts()) > 1 ?"db:packagesynopsis/db:classsynopsis" : "db:classsynopsis";
 
             $includeElement = $this->createIncludeElement(
                 $doc,
-                "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$parentReference')/db:partintro/db:section/db:classsynopsis/db:fieldsynopsis[preceding-sibling::db:classsynopsisinfo[1][@role='comment' and text()='$label']]))",
-                $indentationLevel
+                "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$parentReference')/db:partintro/db:section/$parentSynopsis/db:fieldsynopsis[preceding-sibling::db:classsynopsisinfo[1][@role='comment' and text()='$label']]))"
             );
             $classSynopsis->appendChild($includeElement);
         }

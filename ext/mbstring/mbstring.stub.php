@@ -82,7 +82,6 @@ function mb_preferred_mime_name(string $encoding): string|false {}
 /** @param array $result */
 function mb_parse_str(string $string, &$result): bool {}
 
-/** @refcount 1 */
 function mb_output_handler(string $string, int $status): string {}
 
 function mb_str_split(string $string, int $length = 1, ?string $encoding = null): array {}
@@ -160,7 +159,6 @@ function mb_list_encodings(): array {}
  */
 function mb_encoding_aliases(string $encoding): array {}
 
-/** @refcount 1 */
 function mb_encode_mimeheader(string $string, ?string $charset = null, ?string $transfer_encoding = null, string $newline = "\r\n", int $indent = 0): string {}
 
 /** @refcount 1 */

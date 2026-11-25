@@ -121,6 +121,26 @@ static int compare_special_version_forms(char *form1, char *form2)
 }
 
 /* }}} */
+
+static int compare_numeric_version_forms(const char *num1, const char *num2)
+{
+	while (*num1 == '0') {
+		num1++;
+	}
+	while (*num2 == '0') {
+		num2++;
+	}
+
+	size_t len1 = strspn(num1, "0123456789");
+	size_t len2 = strspn(num2, "0123456789");
+
+	if (len1 != len2) {
+		return ZEND_THREEWAY_COMPARE(len1, len2);
+	}
+
+	return ZEND_NORMALIZE_BOOL(memcmp(num1, num2, len1));
+}
+
 /* {{{ php_version_compare() */
 
 PHPAPI int
@@ -129,7 +149,6 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 	char *ver1;
 	char *ver2;
 	char *p1, *p2, *n1, *n2;
-	zend_long l1, l2;
 	int compare = 0;
 
 	if (!*orig_ver1 || !*orig_ver2) {
@@ -160,9 +179,7 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 		}
 		if (isdigit((unsigned char)*p1) && isdigit((unsigned char)*p2)) {
 			/* compare element numerically */
-			l1 = ZEND_STRTOL(p1, NULL, 10);
-			l2 = ZEND_STRTOL(p2, NULL, 10);
-			compare = ZEND_NORMALIZE_BOOL(l1 - l2);
+			compare = compare_numeric_version_forms(p1, p2);
 		} else if (!isdigit((unsigned char)*p1) && !isdigit((unsigned char)*p2)) {
 			/* compare element names */
 			compare = compare_special_version_forms(p1, p2);

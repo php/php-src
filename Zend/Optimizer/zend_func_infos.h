@@ -146,9 +146,6 @@ static const func_info_t func_infos[] = {
 	F1("imageaffinematrixconcat", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_DOUBLE|MAY_BE_FALSE),
 	F1("imageresolution", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_LONG|MAY_BE_TRUE),
 	F1("textdomain", MAY_BE_STRING),
-	F1("gettext", MAY_BE_STRING),
-	F1("dgettext", MAY_BE_STRING),
-	F1("dcgettext", MAY_BE_STRING),
 	F1("bindtextdomain", MAY_BE_STRING|MAY_BE_FALSE),
 #if defined(HAVE_NGETTEXT)
 	F1("ngettext", MAY_BE_STRING),
@@ -209,7 +206,6 @@ static const func_info_t func_infos[] = {
 	F1("mb_detect_order", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_TRUE),
 	F1("mb_substitute_character", MAY_BE_STRING|MAY_BE_LONG|MAY_BE_BOOL),
 	F1("mb_preferred_mime_name", MAY_BE_STRING|MAY_BE_FALSE),
-	F1("mb_output_handler", MAY_BE_STRING),
 	F1("mb_strstr", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("mb_strrchr", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("mb_stristr", MAY_BE_STRING|MAY_BE_FALSE),
@@ -223,7 +219,6 @@ static const func_info_t func_infos[] = {
 	F1("mb_detect_encoding", MAY_BE_STRING|MAY_BE_FALSE),
 	FN("mb_list_encodings", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 	F1("mb_encoding_aliases", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
-	F1("mb_encode_mimeheader", MAY_BE_STRING),
 	F1("mb_decode_mimeheader", MAY_BE_STRING),
 	F1("mb_convert_kana", MAY_BE_STRING),
 	F1("mb_convert_variables", MAY_BE_STRING|MAY_BE_FALSE),
@@ -425,7 +420,6 @@ static const func_info_t func_infos[] = {
 	F1("php_strip_whitespace", MAY_BE_STRING),
 	F1("highlight_string", MAY_BE_STRING|MAY_BE_TRUE),
 	F1("ini_get_all", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_NULL|MAY_BE_FALSE),
-	F1("set_include_path", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("print_r", MAY_BE_STRING|MAY_BE_TRUE),
 #if defined(HAVE_GETSERVBYPORT)
 	F1("getservbyport", MAY_BE_STRING|MAY_BE_FALSE),

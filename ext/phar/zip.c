@@ -863,8 +863,7 @@ struct _phar_zip_pass {
 	php_stream *centralfp;
 	php_stream *old;
 	char **error;
-	bool free_fp;
-	bool free_ufp;
+	uint32_t count;
 };
 /* perform final modification of zip contents for each file in the manifest before saving */
 static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ */
@@ -1139,18 +1138,6 @@ continue_dir:
 		entry->is_modified = 0;
 	} else {
 		entry->is_modified = 0;
-		if (entry->fp_refcount) {
-			/* open file pointers refer to this fp, do not free the stream */
-			switch (entry->fp_type) {
-				case PHAR_FP:
-					p->free_fp = false;
-					break;
-				case PHAR_UFP:
-					p->free_ufp = false;
-				default:
-					break;
-			}
-		}
 
 		if (!entry->is_dir && entry->compressed_filesize && (!p->old || SUCCESS != php_stream_copy_to_stream_ex(p->old, p->filefp, entry->compressed_filesize, NULL))) {
 			spprintf(p->error, 0, "unable to copy contents of file \"%s\" while creating zip-based phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(entry->phar->fname));
@@ -1168,6 +1155,8 @@ continue_dir:
 			return ZEND_HASH_APPLY_STOP;
 		}
 	}
+
+	p->count++;
 
 	return ZEND_HASH_APPLY_KEEP;
 }
@@ -1409,19 +1398,12 @@ fperror:
 		goto fperror;
 	}
 
-	pass.free_fp = pass.free_ufp = true;
+	pass.count = 0;
 	memset(&eocd, 0, sizeof(eocd));
 
 	memcpy(eocd.signature, "PK\5\6", 4);
 	if (!phar->is_data && !phar->sig_flags) {
 		phar->sig_flags = PHAR_SIG_SHA256;
-	}
-	if (phar->sig_flags) {
-		PHAR_SET_16(eocd.counthere, zend_hash_num_elements(&phar->manifest) + 1);
-		PHAR_SET_16(eocd.count, zend_hash_num_elements(&phar->manifest) + 1);
-	} else {
-		PHAR_SET_16(eocd.counthere, zend_hash_num_elements(&phar->manifest));
-		PHAR_SET_16(eocd.count, zend_hash_num_elements(&phar->manifest));
 	}
 	zend_hash_apply_with_argument(&phar->manifest, phar_zip_changed_apply, (void *) &pass);
 
@@ -1439,6 +1421,9 @@ nocentralerror:
 		}
 		return EOF;
 	}
+
+	PHAR_SET_16(eocd.counthere, pass.count);
+	PHAR_SET_16(eocd.count, pass.count);
 
 	/* save zip */
 	cdir_size = php_stream_tell(pass.centralfp);
@@ -1479,12 +1464,12 @@ nocentralerror:
 		}
 	}
 
-	if (phar->fp && pass.free_fp) {
+	if (phar->fp && !phar_fp_in_use(phar, phar->fp)) {
 		php_stream_close(phar->fp);
 	}
 
 	if (phar->ufp) {
-		if (pass.free_ufp) {
+		if (!phar_fp_in_use(phar, phar->ufp)) {
 			php_stream_close(phar->ufp);
 		}
 		phar->ufp = NULL;

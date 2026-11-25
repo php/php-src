@@ -605,6 +605,9 @@ really_get_entry:
 	if (!phar->is_persistent) {
 		++(entry->fp_refcount);
 		++(entry->phar->refcount);
+		if ((*ret)->fp && ((*ret)->fp == phar->fp || (*ret)->fp == phar->ufp)) {
+			phar_fp_addref(phar, (*ret)->fp);
+		}
 	}
 
 	return SUCCESS;
@@ -1503,6 +1506,23 @@ zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t s
 
 	php_stream_rewind(fp);
 
+	if (sig_type != PHAR_SIG_OPENSSL && sig_type != PHAR_SIG_OPENSSL_SHA256 && sig_type != PHAR_SIG_OPENSSL_SHA512) {
+		php_stream_statbuf ssb;
+		char *pfile;
+		bool has_pubkey;
+
+		spprintf(&pfile, 0, "%s.pubkey", fname);
+		has_pubkey = php_stream_stat_path_ex(pfile, PHP_STREAM_URL_STAT_QUIET, &ssb, NULL) == 0;
+		efree(pfile);
+
+		if (has_pubkey) {
+			if (error) {
+				spprintf(error, 0, "openssl public key found, but the signature does not use openssl");
+			}
+			return FAILURE;
+		}
+	}
+
 	switch (sig_type) {
 		case PHAR_SIG_OPENSSL_SHA512:
 		case PHAR_SIG_OPENSSL_SHA256:
@@ -1873,7 +1893,7 @@ ZEND_ATTRIBUTE_NONNULL zend_string* phar_create_signature(phar_archive_data *pha
 				mdtype = EVP_sha1();
 			}
 
-			in = BIO_new_mem_buf(PHAR_G(openssl_privatekey), PHAR_G(openssl_privatekey_len));
+			in = PHAR_G(openssl_privatekey) ? BIO_new_mem_buf(ZSTR_VAL(PHAR_G(openssl_privatekey)), (int) ZSTR_LEN(PHAR_G(openssl_privatekey))) : NULL;
 
 			if (in == NULL) {
 				spprintf(error, 0, "unable to write to phar \"%s\" with requested openssl signature", ZSTR_VAL(phar->fname));
@@ -1935,7 +1955,8 @@ ZEND_ATTRIBUTE_NONNULL zend_string* phar_create_signature(phar_archive_data *pha
 			siglen = 0;
 			php_stream_seek(fp, 0, SEEK_END);
 
-			if (FAILURE == phar_call_openssl_sign(fp, php_stream_tell(fp), PHAR_G(openssl_privatekey), PHAR_G(openssl_privatekey_len), (char **)&sigbuf, &siglen, phar->sig_flags)) {
+			zend_string *privatekey = PHAR_G(openssl_privatekey);
+			if (FAILURE == phar_call_openssl_sign(fp, php_stream_tell(fp), privatekey ? ZSTR_VAL(privatekey) : NULL, privatekey ? ZSTR_LEN(privatekey) : 0, (char **)&sigbuf, &siglen, phar->sig_flags)) {
 				spprintf(error, 0, "unable to write phar \"%s\" with requested openssl signature", ZSTR_VAL(phar->fname));
 				return NULL;
 			}

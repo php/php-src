@@ -3489,6 +3489,9 @@ ZEND_API void zend_deactivate_modules(void) /* {{{ */
 			if (module->request_shutdown_func) {
 				zend_try {
 					module->request_shutdown_func(module->type, module->module_number);
+				} zend_catch {
+					/* module shutdown is incomplete */
+					_exit(1);
 				} zend_end_try();
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -3499,6 +3502,9 @@ ZEND_API void zend_deactivate_modules(void) /* {{{ */
 			const zend_module_entry *module = *p;
 			zend_try {
 				module->request_shutdown_func(module->type, module->module_number);
+			} zend_catch {
+				/* module shutdown is incomplete */
+				_exit(1);
 			} zend_end_try();
 			p++;
 		}

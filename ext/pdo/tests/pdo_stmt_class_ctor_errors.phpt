@@ -38,6 +38,11 @@ try {
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), \PHP_EOL;
 }
+try {
+    var_dump($db->query('SELECT id, val, val2 from pdo_fetch_all_class_ctor_error', PDO::FETCH_CLASS, 'TestBase', [0]));
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), \PHP_EOL;
+}
 
 ?>
 --CLEAN--
@@ -49,3 +54,4 @@ PDOTest::dropTableIfExists($db, "pdo_fetch_all_class_ctor_error");
 --EXPECT--
 ValueError: PDOStatement::fetchAll(): Argument #3 must be empty when class provided in argument #2 ($class) does not have a constructor
 ValueError: PDOStatement::setFetchMode(): Argument #3 must be empty when class provided in argument #2 ($class) does not have a constructor
+ValueError: PDO::query(): Argument #4 must be empty when class provided in argument #3 ($class) does not have a constructor

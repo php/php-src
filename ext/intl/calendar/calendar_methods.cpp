@@ -262,6 +262,12 @@ U_CFUNC PHP_FUNCTION(intlcal_set_time)
 
 	CALENDAR_METHOD_FETCH_OBJECT;
 
+	if (UNEXPECTED(!zend_finite(time_arg))) {
+		intl_errors_set(CALENDAR_ERROR_P(co), U_ILLEGAL_ARGUMENT_ERROR,
+			"Timestamp must be finite");
+		RETURN_FALSE;
+	}
+
 	co->ucal->setTime((UDate)time_arg, CALENDAR_ERROR_CODE(co));
 	INTL_METHOD_CHECK_STATUS(co, "Call to underlying method failed");
 

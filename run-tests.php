@@ -2315,6 +2315,9 @@ TEST $file
             if ($num_repeats > 1) {
                 return skip_test($tested, $tested_file, $shortname, 'opt_debug_level tests are not repeatable');
             }
+            if ($file_cache) {
+                return skip_test($tested, $tested_file, $shortname, 'opt_debug_level tests don\'t work with file cache');
+            }
         }
     }
 

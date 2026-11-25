@@ -514,7 +514,7 @@ static int php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, const HashT
 					}
 					if (ldap_put_vrFilter(ber, ZSTR_VAL(tmpstring)) == -1) {
 						rc = -1;
-						php_error_docref(NULL, E_WARNING, "Failed to create control value: Bad ValuesReturnFilter: %s", ZSTR_VAL(tmpstring));
+						php_error_docref(NULL, E_WARNING, "Failed to create control value: Bad ValuesReturnFilter: %pS", tmpstring);
 					} else if (ber_flatten2(ber, &control_value, control_value_alloc) == -1) {
 						rc = -1;
 					}
@@ -700,7 +700,7 @@ static int php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, const HashT
 				zend_string_release_ex(context_str, false);
 			}
 		} else {
-			zend_type_error("%s(): Control OID %s cannot be of type array", get_active_function_name(), ZSTR_VAL(control_oid));
+			zend_type_error("%s(): Control OID %pS cannot be of type array", get_active_function_name(), control_oid);
 			rc = -1;
 		}
 	}
@@ -2339,7 +2339,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, bool ext)
 			uint32_t num_values = zend_hash_num_elements(Z_ARRVAL_P(attribute_values));
 			if (num_values == 0) {
 				if (UNEXPECTED(oper == LDAP_MOD_ADD)) {
-					zend_argument_value_error(3, "attribute \"%s\" must be a non-empty list of attribute values", ZSTR_VAL(attribute));
+					zend_argument_value_error(3, "attribute \"%pS\" must be a non-empty list of attribute values", attribute);
 					RETVAL_FALSE;
 					goto cleanup;
 				}
@@ -2348,7 +2348,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, bool ext)
 				continue;
 			}
 			if (!php_ldap_is_numerically_indexed_array(Z_ARRVAL_P(attribute_values))) {
-				zend_argument_value_error(3, "attribute \"%s\" must be an array of attribute values with numeric keys", ZSTR_VAL(attribute));
+				zend_argument_value_error(3, "attribute \"%pS\" must be an array of attribute values with numeric keys", attribute);
 				RETVAL_FALSE;
 				goto cleanup;
 			}
@@ -2688,7 +2688,7 @@ PHP_FUNCTION(ldap_modify_batch)
 
 		ZVAL_DEREF(modtype_zv);
 		if (UNEXPECTED(Z_TYPE_P(modtype_zv) != IS_LONG)) {
-			zend_argument_type_error(3, "the value for option \"" LDAP_MODIFY_BATCH_MODTYPE "\" must be of type int, %s given", zend_zval_value_name(attrib));
+			zend_argument_type_error(3, "the value for option \"" LDAP_MODIFY_BATCH_MODTYPE "\" must be of type int, %s given", zend_zval_value_name(modtype_zv));
 			RETURN_THROWS();
 		}
 		zend_long modtype = Z_LVAL_P(modtype_zv);
@@ -2724,7 +2724,7 @@ PHP_FUNCTION(ldap_modify_batch)
 
 		ZVAL_DEREF(modification_values_zv);
 		if (Z_TYPE_P(modification_values_zv) != IS_ARRAY) {
-			zend_argument_type_error(3, "the value for option \"" LDAP_MODIFY_BATCH_VALUES "\" must be of type array, %s given", zend_zval_value_name(attrib));
+			zend_argument_type_error(3, "the value for option \"" LDAP_MODIFY_BATCH_VALUES "\" must be of type array, %s given", zend_zval_value_name(modification_values_zv));
 			RETURN_THROWS();
 		}
 
@@ -4087,7 +4087,7 @@ static void php_ldap_exop(INTERNAL_FUNCTION_PARAMETERS, bool force_sync) {
 			retoid ? &lretoid : NULL,
 			&lretdata );
 		if (rc != LDAP_SUCCESS ) {
-			php_error_docref(NULL, E_WARNING, "Extended operation %s failed: %s (%d)", ZSTR_VAL(reqoid), ldap_err2string(rc), rc);
+			php_error_docref(NULL, E_WARNING, "Extended operation %pS failed: %s (%d)", reqoid, ldap_err2string(rc), rc);
 			RETVAL_FALSE;
 			goto cleanup;
 		}
@@ -4122,14 +4122,14 @@ static void php_ldap_exop(INTERNAL_FUNCTION_PARAMETERS, bool force_sync) {
 		NULL,
 		&msgid);
 	if (rc != LDAP_SUCCESS ) {
-		php_error_docref(NULL, E_WARNING, "Extended operation %s failed: %s (%d)", ZSTR_VAL(reqoid), ldap_err2string(rc), rc);
+		php_error_docref(NULL, E_WARNING, "Extended operation %pS failed: %s (%d)", reqoid, ldap_err2string(rc), rc);
 		RETVAL_FALSE;
 		goto cleanup;
 	}
 
 	rc = ldap_result(ld->link, msgid, 1 /* LDAP_MSG_ALL */, NULL, &ldap_res);
 	if (rc == -1) {
-		php_error_docref(NULL, E_WARNING, "Extended operation %s failed", ZSTR_VAL(reqoid));
+		php_error_docref(NULL, E_WARNING, "Extended operation %pS failed", reqoid);
 		RETVAL_FALSE;
 		goto cleanup;
 	}

@@ -2960,7 +2960,7 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 
 	{
 		r = 0;
-		bool ipv6 = strchr(server.host, ':');
+		bool ipv6 = strchr(server.host, ':') != NULL;
 		php_cli_server_logf(
 			PHP_CLI_SERVER_LOG_PROCESS,
 			"PHP %s Development Server (http://%s%s%s:%d) started",

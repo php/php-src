@@ -144,8 +144,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	char*       cwd;
 	uint32_t    cwd_len;
 	bool        cwd_init;
-	char        *openssl_privatekey;
-	uint32_t    openssl_privatekey_len;
+	zend_string *openssl_privatekey;
 	/* phar_get_archive cache */
 	const zend_string *last_phar_name;
 	uint32_t    last_alias_len;
@@ -262,6 +261,8 @@ struct _phar_archive_data {
 	php_stream               *fp;
 	/* decompressed file contents are stored here */
 	php_stream               *ufp;
+	/* number of open entry handles per fp/ufp stream, current or replaced by a flush */
+	HashTable                *fp_refs;
 	uint32_t                 sig_flags;
 	uint32_t                 sig_len;
 	char                     *signature;
@@ -489,6 +490,8 @@ extern HashTable cached_alias;
 
 bool phar_archive_delref(phar_archive_data *phar);
 void phar_entry_delref(phar_entry_data *idata);
+void phar_fp_addref(phar_archive_data *phar, php_stream *fp);
+bool phar_fp_in_use(const phar_archive_data *phar, const php_stream *fp);
 
 phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, size_t path_len, char **error, bool security);
 phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, size_t path_len, char dir, char **error, bool security);
