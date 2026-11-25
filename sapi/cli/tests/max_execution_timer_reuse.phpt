@@ -1,5 +1,7 @@
 --TEST--
 Zend max execution timers keep firing when reused across requests on one thread
+--ENV--
+PHP_CLI_SERVER_WORKERS=
 --INI--
 allow_url_fopen=1
 --SKIPIF--
