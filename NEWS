@@ -47,6 +47,8 @@ PHP                                                                        NEWS
   . Fixed float literals losing precision in AST export. (Jorg Sowa)
   . Fixed arrow functions not capturing variables in partial application args.
     (mihaliak)
+  . Fixed bug GH-25379 (array_map() foreach optimization changes callback
+    semantics). (prateekbhujel)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
