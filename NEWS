@@ -45,6 +45,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-25313 (Assertion !EG(exception) in ZEND_FE_FREE when unpacking
     a generator into a by-ref parameter throws). (ndossche)
   . Fixed float literals losing precision in AST export. (Jorg Sowa)
+  . Fixed arrow functions not capturing variables in partial application args.
+    (mihaliak)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
