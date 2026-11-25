@@ -141,7 +141,7 @@ object(Dom\Entity)#3 (17) {
   ["textContent"]=>
   NULL
 }
-object(Dom\Notation)#4 (16) {
+object(Dom\Notation)#4 (15) {
   ["publicId"]=>
   string(0) ""
   ["systemId"]=>
@@ -153,11 +153,9 @@ object(Dom\Notation)#4 (16) {
   ["baseURI"]=>
   string(%d) "%s"
   ["isConnected"]=>
-  bool(true)
-  ["ownerDocument"]=>
-  string(22) "(object value omitted)"
+  bool(false)
   ["parentNode"]=>
-  string(22) "(object value omitted)"
+  NULL
   ["parentElement"]=>
   NULL
   ["childNodes"]=>
@@ -173,5 +171,5 @@ object(Dom\Notation)#4 (16) {
   ["nodeValue"]=>
   NULL
   ["textContent"]=>
-  NULL
+  string(0) ""
 }
