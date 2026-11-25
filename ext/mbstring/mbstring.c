@@ -4885,7 +4885,7 @@ PHP_FUNCTION(mb_send_mail)
 
 	str_headers = smart_str_extract(&str);
 
-	zend_string *force_extra_parameters = zend_ini_str_literal("mail.force_extra_parameters");
+	zend_string *force_extra_parameters = zend_ini_str_ex(ZEND_STRL("mail.force_extra_parameters"), false, NULL);
 	if (force_extra_parameters) {
 		extra_cmd = php_escape_shell_cmd(force_extra_parameters);
 	} else if (extra_cmd) {
