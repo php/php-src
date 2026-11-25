@@ -266,23 +266,26 @@ try_again:
 			break;
 		case IS_RESOURCE:
 			{
-				zend_long l = Z_RES_HANDLE_P(op);
-				zval_ptr_dtor(op);
-				ZVAL_LONG(op, l);
+				zval old;
+
+				ZVAL_COPY_VALUE(&old, op);
+				ZVAL_LONG(op, Z_RES_HANDLE(old));
+				zval_ptr_dtor(&old);
 			}
 			break;
 		case IS_OBJECT:
 			{
-				zval dst;
+				zval dst, old;
 
 				convert_object_to_type(op, &dst, _IS_NUMBER);
-				zval_ptr_dtor(op);
+				ZVAL_COPY_VALUE(&old, op);
 
 				if (Z_TYPE(dst) == IS_LONG || Z_TYPE(dst) == IS_DOUBLE) {
 					ZVAL_COPY_VALUE(op, &dst);
 				} else {
 					ZVAL_LONG(op, 1);
 				}
+				zval_ptr_dtor(&old);
 			}
 			break;
 	}
@@ -554,6 +557,7 @@ ZEND_API zend_long ZEND_FASTCALL zval_try_get_long(const zval *op, bool *failed)
 ZEND_API void ZEND_FASTCALL convert_to_long(zval *op) /* {{{ */
 {
 	zend_long tmp;
+	zval old;
 
 try_again:
 	switch (Z_TYPE_P(op)) {
@@ -565,9 +569,9 @@ try_again:
 			ZVAL_LONG(op, 1);
 			break;
 		case IS_RESOURCE:
-			tmp = Z_RES_HANDLE_P(op);
-			zval_ptr_dtor(op);
-			ZVAL_LONG(op, tmp);
+			ZVAL_COPY_VALUE(&old, op);
+			ZVAL_LONG(op, Z_RES_HANDLE(old));
+			zval_ptr_dtor(&old);
 			break;
 		case IS_LONG:
 			break;
@@ -583,21 +587,23 @@ try_again:
 			break;
 		case IS_ARRAY:
 			tmp = (zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);
-			zval_ptr_dtor(op);
+			ZVAL_COPY_VALUE(&old, op);
 			ZVAL_LONG(op, tmp);
+			zval_ptr_dtor(&old);
 			break;
 		case IS_OBJECT:
 			{
 				zval dst;
 
 				convert_object_to_type(op, &dst, IS_LONG);
-				zval_ptr_dtor(op);
+				ZVAL_COPY_VALUE(&old, op);
 
 				if (Z_TYPE(dst) == IS_LONG) {
 					ZVAL_LONG(op, Z_LVAL(dst));
 				} else {
 					ZVAL_LONG(op, 1);
 				}
+				zval_ptr_dtor(&old);
 				return;
 			}
 		case IS_REFERENCE:
@@ -611,6 +617,7 @@ try_again:
 ZEND_API void ZEND_FASTCALL convert_to_double(zval *op) /* {{{ */
 {
 	double tmp;
+	zval old;
 
 try_again:
 	switch (Z_TYPE_P(op)) {
@@ -623,8 +630,9 @@ try_again:
 			break;
 		case IS_RESOURCE: {
 				double d = (double) Z_RES_HANDLE_P(op);
-				zval_ptr_dtor(op);
+				ZVAL_COPY_VALUE(&old, op);
 				ZVAL_DOUBLE(op, d);
+				zval_ptr_dtor(&old);
 			}
 			break;
 		case IS_LONG:
@@ -642,21 +650,23 @@ try_again:
 			break;
 		case IS_ARRAY:
 			tmp = (zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);
-			zval_ptr_dtor(op);
+			ZVAL_COPY_VALUE(&old, op);
 			ZVAL_DOUBLE(op, tmp);
+			zval_ptr_dtor(&old);
 			break;
 		case IS_OBJECT:
 			{
 				zval dst;
 
 				convert_object_to_type(op, &dst, IS_DOUBLE);
-				zval_ptr_dtor(op);
+				ZVAL_COPY_VALUE(&old, op);
 
 				if (Z_TYPE(dst) == IS_DOUBLE) {
 					ZVAL_DOUBLE(op, Z_DVAL(dst));
 				} else {
 					ZVAL_DOUBLE(op, 1.0);
 				}
+				zval_ptr_dtor(&old);
 				break;
 			}
 		case IS_REFERENCE:
@@ -669,14 +679,18 @@ try_again:
 
 ZEND_API void ZEND_FASTCALL convert_to_null(zval *op) /* {{{ */
 {
-	zval_ptr_dtor(op);
+	zval old;
+
+	ZVAL_COPY_VALUE(&old, op);
 	ZVAL_NULL(op);
+	zval_ptr_dtor(&old);
 }
 /* }}} */
 
 ZEND_API void ZEND_FASTCALL convert_to_boolean(zval *op) /* {{{ */
 {
 	bool tmp;
+	zval old;
 
 try_again:
 	switch (Z_TYPE_P(op)) {
@@ -689,8 +703,9 @@ try_again:
 		case IS_RESOURCE: {
 				zend_long l = (Z_RES_HANDLE_P(op) ? 1 : 0);
 
-				zval_ptr_dtor(op);
+				ZVAL_COPY_VALUE(&old, op);
 				ZVAL_BOOL(op, l);
+				zval_ptr_dtor(&old);
 			}
 			break;
 		case IS_LONG:
@@ -714,21 +729,23 @@ try_again:
 			break;
 		case IS_ARRAY:
 			tmp = (zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);
-			zval_ptr_dtor(op);
+			ZVAL_COPY_VALUE(&old, op);
 			ZVAL_BOOL(op, tmp);
+			zval_ptr_dtor(&old);
 			break;
 		case IS_OBJECT:
 			{
 				zval dst;
 
 				convert_object_to_type(op, &dst, _IS_BOOL);
-				zval_ptr_dtor(op);
+				ZVAL_COPY_VALUE(&old, op);
 
 				if (Z_TYPE_INFO(dst) == IS_FALSE || Z_TYPE_INFO(dst) == IS_TRUE) {
 					Z_TYPE_INFO_P(op) = Z_TYPE_INFO(dst);
 				} else {
 					ZVAL_TRUE(op);
 				}
+				zval_ptr_dtor(&old);
 				break;
 			}
 		case IS_REFERENCE:
@@ -741,6 +758,8 @@ try_again:
 
 ZEND_API void ZEND_FASTCALL _convert_to_string(zval *op) /* {{{ */
 {
+	zval old;
+
 try_again:
 	switch (Z_TYPE_P(op)) {
 		case IS_UNDEF:
@@ -756,8 +775,9 @@ try_again:
 			break;
 		case IS_RESOURCE: {
 			zend_string *str = zend_strpprintf(0, "Resource id #" ZEND_LONG_FMT, (zend_long)Z_RES_HANDLE_P(op));
-			zval_ptr_dtor(op);
+			ZVAL_COPY_VALUE(&old, op);
 			ZVAL_NEW_STR(op, str);
+			zval_ptr_dtor(&old);
 			break;
 		}
 		case IS_LONG:
@@ -768,21 +788,24 @@ try_again:
 			break;
 		case IS_ARRAY:
 			zend_error(E_WARNING, "Array to string conversion");
-			zval_ptr_dtor(op);
+			ZVAL_COPY_VALUE(&old, op);
 			ZVAL_INTERNED_STR(op, ZSTR_KNOWN(ZEND_STR_ARRAY_CAPITALIZED));
+			zval_ptr_dtor(&old);
 			break;
 		case IS_OBJECT: {
 			zval tmp;
 			if (Z_OBJ_HT_P(op)->cast_object(Z_OBJ_P(op), &tmp, IS_STRING) == SUCCESS) {
-				zval_ptr_dtor(op);
+				ZVAL_COPY_VALUE(&old, op);
 				ZVAL_COPY_VALUE(op, &tmp);
+				zval_ptr_dtor(&old);
 				return;
 			}
 			if (!EG(exception)) {
 				zend_throw_error(NULL, "Object of class %s could not be converted to string", ZSTR_VAL(Z_OBJCE_P(op)->name));
 			}
-			zval_ptr_dtor(op);
+			ZVAL_COPY_VALUE(&old, op);
 			ZVAL_EMPTY_STRING(op);
+			zval_ptr_dtor(&old);
 			break;
 		}
 		case IS_REFERENCE:
@@ -796,14 +819,16 @@ try_again:
 ZEND_API bool ZEND_FASTCALL _try_convert_to_string(zval *op) /* {{{ */
 {
 	zend_string *str;
+	zval old;
 
 	ZEND_ASSERT(Z_TYPE_P(op) != IS_STRING);
 	str = zval_try_get_string_func(op);
 	if (UNEXPECTED(!str)) {
 		return 0;
 	}
-	zval_ptr_dtor(op);
+	ZVAL_COPY_VALUE(&old, op);
 	ZVAL_STR(op, str);
+	zval_ptr_dtor(&old);
 	return 1;
 }
 /* }}} */
@@ -828,9 +853,10 @@ try_again:
 				convert_scalar_to_array(op);
 			} else if (ZEND_STD_BUILD_OBJECT_PROPERTIES_ARRAY_COMPATIBLE(op)) {
 				/* Optimized version without rebuilding properties HashTable */
-				HashTable *ht = zend_std_build_object_properties_array(Z_OBJ_P(op));
-				OBJ_RELEASE(Z_OBJ_P(op));
+				zend_object *obj = Z_OBJ_P(op);
+				HashTable *ht = zend_std_build_object_properties_array(obj);
 				ZVAL_ARR(op, ht);
+				OBJ_RELEASE(obj);
 			} else {
 				HashTable *obj_ht = zend_get_properties_for(op, ZEND_PROP_PURPOSE_ARRAY_CAST);
 				if (obj_ht) {
@@ -838,13 +864,15 @@ try_again:
 						(Z_OBJCE_P(op)->default_properties_count ||
 						 Z_OBJ_P(op)->handlers != &std_object_handlers ||
 						 GC_IS_RECURSIVE(obj_ht)));
-					zval_ptr_dtor(op);
+					zend_object *obj = Z_OBJ_P(op);
 					ZVAL_ARR(op, new_obj_ht);
 					zend_release_properties(obj_ht);
+					OBJ_RELEASE(obj);
 				} else {
-					zval_ptr_dtor(op);
+					zend_object *obj = Z_OBJ_P(op);
 					/*ZVAL_EMPTY_ARRAY(op);*/
 					array_init(op);
+					OBJ_RELEASE(obj);
 				}
 			}
 			break;
