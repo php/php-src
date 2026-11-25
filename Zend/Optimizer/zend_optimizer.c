@@ -679,6 +679,16 @@ bool zend_optimizer_replace_by_const(zend_op_array *op_array,
 
 		if (opline->op2_type == type &&
 			opline->op2.var == var) {
+			if (opline->opcode == ZEND_TYPE_ASSERT) {
+				/* Does not consume its operand, which is used again later. */
+				Z_TRY_ADDREF_P(val);
+				if (!zend_optimizer_update_op2_const(op_array, opline, val)) {
+					zval_ptr_dtor(val);
+					return false;
+				}
+				opline++;
+				continue;
+			}
 			return zend_optimizer_update_op2_const(op_array, opline, val);
 		}
 		opline++;
