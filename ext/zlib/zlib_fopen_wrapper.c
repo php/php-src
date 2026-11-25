@@ -78,6 +78,11 @@ static ssize_t php_gziop_write(php_stream *stream, const char *buf, size_t count
 
 			gzerror(self->gz_file, &error);
 			if (error != Z_OK && total_written == 0) {
+				if (error == Z_ERRNO && !(stream->flags & PHP_STREAM_FLAG_SUPPRESS_ERRORS)) {
+					char errstr[256];
+					php_error_docref(NULL, E_NOTICE, "Write of %u bytes failed with errno=%d %s",
+							chunk_size, errno, php_socket_strerror_s(errno, errstr, sizeof(errstr)));
+				}
 				return -1;
 			}
 			return total_written;
