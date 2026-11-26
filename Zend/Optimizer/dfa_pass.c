@@ -1425,12 +1425,16 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 				} else if (opline->opcode == ZEND_POST_INC) {
 					int result_var = ssa->ops[op_1].result_def;
 
+					/* $i++ < $n is equivalent to ++$i <= $n only if $i and $n are integers
+					 * and ++$i does not overflow to a double. */
 					if (result_var >= 0
-					 && (ssa->var_info[result_var].type & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF) - (MAY_BE_LONG|MAY_BE_DOUBLE))) == 0) {
+					 && (ssa->var_info[result_var].type & (MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)) == MAY_BE_LONG
+					 && (ssa->var_info[v].type & (MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)) == MAY_BE_LONG) {
 						int use = ssa->vars[result_var].use_chain;
 
 						if (use >= 0 && op_array->opcodes[use].opcode == ZEND_IS_SMALLER
 						 && ssa->ops[use].op1_use == result_var
+						 && (_ssa_op2_info(op_array, ssa, &op_array->opcodes[use], &ssa->ops[use]) & (MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)) == MAY_BE_LONG
 						 && zend_dfa_try_to_replace_result(op_array, ssa, op_1, v)) {
 							opline->opcode = ZEND_PRE_INC;
 							op_array->opcodes[use].opcode = ZEND_IS_SMALLER_OR_EQUAL;
@@ -1439,12 +1443,16 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 				} else if (opline->opcode == ZEND_POST_DEC) {
 					int result_var = ssa->ops[op_1].result_def;
 
+					/* $n < $i-- is equivalent to $n <= --$i only if $i and $n are integers
+					 * and --$i does not overflow to a double. */
 					if (result_var >= 0
-					 && (ssa->var_info[result_var].type & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF) - (MAY_BE_LONG|MAY_BE_DOUBLE))) == 0) {
+					 && (ssa->var_info[result_var].type & (MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)) == MAY_BE_LONG
+					 && (ssa->var_info[v].type & (MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)) == MAY_BE_LONG) {
 						int use = ssa->vars[result_var].use_chain;
 
 						if (use >= 0 && op_array->opcodes[use].opcode == ZEND_IS_SMALLER
 						 && ssa->ops[use].op2_use == result_var
+						 && (_ssa_op1_info(op_array, ssa, &op_array->opcodes[use], &ssa->ops[use]) & (MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)) == MAY_BE_LONG
 						 && zend_dfa_try_to_replace_result(op_array, ssa, op_1, v)) {
 							opline->opcode = ZEND_PRE_DEC;
 							op_array->opcodes[use].opcode = ZEND_IS_SMALLER_OR_EQUAL;
