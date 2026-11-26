@@ -202,7 +202,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-25530 (socket_last_error() without a socket returns an error
     from a previous request). (Artem Ukrainskiy)
   . Fixed host names being truncated at NUL bytes in socket_addrinfo_lookup(),
-    socket_bind(), socket_connect() and socket_sendto(). (Jorg Sowa)
+    socket_bind(), socket_connect(), socket_sendto() and socket_sendmsg().
+    (Jorg Sowa)
 
 - Session:
   . Fixed session upload progress to respect session.use_only_cookies.
