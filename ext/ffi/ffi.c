@@ -7704,7 +7704,7 @@ void zend_ffi_expr_sizeof_val(zend_ffi_val *val) /* {{{ */
 #endif
 	} else if (val->kind == ZEND_FFI_VAL_CHAR) {
 		val->kind = ZEND_FFI_VAL_UINT32;
-		val->u64 = zend_ffi_type_char.size;
+		val->u64 = zend_ffi_type_sint32.size; /* a character constant has type int */
 	} else if (val->kind == ZEND_FFI_VAL_STRING) {
 		if (memchr(val->str, '\\', val->len)) {
 			// TODO: support for escape sequences ???
@@ -7752,7 +7752,7 @@ void zend_ffi_expr_alignof_val(zend_ffi_val *val) /* {{{ */
 #endif
 	} else if (val->kind == ZEND_FFI_VAL_CHAR) {
 		val->kind = ZEND_FFI_VAL_UINT32;
-		val->u64 = zend_ffi_type_char.size;
+		val->u64 = zend_ffi_type_sint32.align; /* a character constant has type int */
 	} else if (val->kind == ZEND_FFI_VAL_STRING) {
 		val->kind = ZEND_FFI_VAL_UINT32;
 		val->u64 = _Alignof(char*);
