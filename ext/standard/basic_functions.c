@@ -2526,6 +2526,7 @@ PHP_FUNCTION(parse_ini_file)
 	zend_long scanner_mode = ZEND_INI_SCANNER_NORMAL;
 	zend_file_handle fh;
 	zend_ini_parser_cb_t ini_parser_cb;
+	zval prev_ini_file_section;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_PATH_STR(filename)
@@ -2540,6 +2541,7 @@ PHP_FUNCTION(parse_ini_file)
 	}
 
 	/* Set callback function */
+	ZVAL_COPY_VALUE(&prev_ini_file_section, &BG(active_ini_file_section));
 	if (process_sections) {
 		ZVAL_UNDEF(&BG(active_ini_file_section));
 		ini_parser_cb = (zend_ini_parser_cb_t) php_ini_parser_cb_with_sections;
@@ -2555,6 +2557,7 @@ PHP_FUNCTION(parse_ini_file)
 		zend_array_destroy(Z_ARR_P(return_value));
 		RETVAL_FALSE;
 	}
+	ZVAL_COPY_VALUE(&BG(active_ini_file_section), &prev_ini_file_section);
 	zend_destroy_file_handle(&fh);
 }
 /* }}} */
@@ -2567,6 +2570,7 @@ PHP_FUNCTION(parse_ini_string)
 	bool process_sections = 0;
 	zend_long scanner_mode = ZEND_INI_SCANNER_NORMAL;
 	zend_ini_parser_cb_t ini_parser_cb;
+	zval prev_ini_file_section;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_STRING(str, str_len)
@@ -2580,6 +2584,7 @@ PHP_FUNCTION(parse_ini_string)
 	}
 
 	/* Set callback function */
+	ZVAL_COPY_VALUE(&prev_ini_file_section, &BG(active_ini_file_section));
 	if (process_sections) {
 		ZVAL_UNDEF(&BG(active_ini_file_section));
 		ini_parser_cb = (zend_ini_parser_cb_t) php_ini_parser_cb_with_sections;
@@ -2597,6 +2602,7 @@ PHP_FUNCTION(parse_ini_string)
 		zend_array_destroy(Z_ARR_P(return_value));
 		RETVAL_FALSE;
 	}
+	ZVAL_COPY_VALUE(&BG(active_ini_file_section), &prev_ini_file_section);
 	efree(string);
 }
 /* }}} */
