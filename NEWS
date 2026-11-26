@@ -225,6 +225,10 @@ PHP                                                                        NEWS
   . Fixed socket_addrinfo_lookup() rejecting an empty packed hints array.
     (lacatoire)
 
+- Sodium:
+  . Fixed sodium_add() and sodium_increment() retaining stale string hashes
+    and UTF-8 validity flags. (lacatoire)
+
 - SPL:
   . Fixed memory leak of the static variables of a file loaded by
     spl_autoload(). (lacatoire)
