@@ -216,7 +216,7 @@ PHP_METHOD(com, __construct)
 		char *werr, *msg;
 
 		werr = php_win32_error_to_msg(res);
-		spprintf(&msg, 0, "Failed to create COM object `%s': %s", module_name, werr);
+		spprintf(&msg, 0, "Failed to create COM object \"%s\": %s", module_name, werr);
 		php_win32_error_msg_free(werr);
 
 		php_com_throw_exception(res, msg);
@@ -471,7 +471,7 @@ zend_result php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_fu
 	if (FAILED(hr)) {
 		char *msg = NULL;
 		char *winerr = php_win32_error_to_msg(hr);
-		spprintf(&msg, 0, "Unable to lookup `%s': %s", ZSTR_VAL(f->function_name), winerr);
+		spprintf(&msg, 0, "Unable to lookup \"%pS\": %s", f->function_name, winerr);
 		php_win32_error_msg_free(winerr);
 		php_com_throw_exception(hr, msg);
 		efree(msg);
@@ -638,7 +638,7 @@ zend_result php_com_do_invoke(php_com_dotnet_object *obj, zend_string *name,
 
 	if (FAILED(hr)) {
 		char *winerr = php_win32_error_to_msg(hr);
-		spprintf(&msg, 0, "Unable to lookup `%pS': %s", name, winerr);
+		spprintf(&msg, 0, "Unable to lookup \"%pS\": %s", name, winerr);
 		php_win32_error_msg_free(winerr);
 		php_com_throw_exception(hr, msg);
 		efree(msg);
