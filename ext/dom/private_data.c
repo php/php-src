@@ -125,6 +125,21 @@ xmlNodePtr php_dom_ensure_templated_content(php_dom_private_data *private_data, 
 	return result;
 }
 
+xmlNodePtr php_dom_detach_templated_content(php_dom_private_data *private_data, const xmlNode *template_node)
+{
+	if (private_data->template_fragments != NULL) {
+		zval *zv = zend_hash_index_find(private_data->template_fragments, dom_mangle_pointer_for_key(template_node));
+		if (zv != NULL) {
+			xmlNodePtr node = Z_PTR_P(zv);
+			ZEND_ASSERT(offsetof(Bucket, val) == 0 && "Type cast only works if this is true");
+			Bucket *bucket = (Bucket *) zv;
+			zend_hash_del_bucket(private_data->template_fragments, bucket);
+			return node;
+		}
+	}
+	return NULL;
+}
+
 void php_dom_remove_templated_content(php_dom_private_data *private_data, const xmlNode *template_node)
 {
 	if (private_data->template_fragments != NULL) {
