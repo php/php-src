@@ -7853,7 +7853,8 @@ void zend_ffi_val_character(zend_ffi_val *val, const char *str, size_t str_len) 
 		if (str_len == 3) {
 			val->ch = str[1];
 		} else if (str[1] == '\\') {
-			if (str[2] == 'a') {
+			if (str[2] == 'a' && str_len == 4) {
+				val->ch = '\a';
 			} else if (str[2] == 'b' && str_len == 4) {
 				val->ch = '\b';
 			} else if (str[2] == 'f' && str_len == 4) {
