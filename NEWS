@@ -597,6 +597,8 @@ PHP                                                                        NEWS
     table). (evankford)
 
 - SPL:
+  . Fixed use-after-free when a destructor of an element of the old array
+    accesses the ArrayObject during ArrayObject::unserialize(). (Roman Ondráček)
   . Fixed bug GH-24264 (Unwind/GracefulExit discarded in spl_iterators.c).
     (Lazizbek Ergashev)
 
