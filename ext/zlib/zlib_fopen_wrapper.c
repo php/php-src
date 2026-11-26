@@ -167,9 +167,11 @@ php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, const char *path, con
 		php_socket_t fd;
 
 		if (SUCCESS == php_stream_cast(innerstream, PHP_STREAM_AS_FD, (void **) &fd, REPORT_ERRORS)) {
+			int gz_fd = dup(fd);
+
 			self = emalloc(sizeof(*self));
 			self->stream = innerstream;
-			self->gz_file = gzdopen(dup(fd), mode);
+			self->gz_file = gzdopen(gz_fd, mode);
 
 			if (self->gz_file) {
 				zval *zlevel = context ? php_stream_context_get_option(context, "zlib", "level") : NULL;
@@ -184,6 +186,8 @@ php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, const char *path, con
 				}
 
 				gzclose(self->gz_file);
+			} else if (gz_fd >= 0) {
+				close(gz_fd);
 			}
 
 			efree(self);
