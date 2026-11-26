@@ -1031,9 +1031,15 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 				}
 			}
 			if (ht->pDestructor) {
-				ht->pDestructor(data);
+				/* Store the new value before destroying the old one, so that
+				 * destructors observe a consistent hash table. */
+				zval tmp;
+				ZVAL_COPY_VALUE(&tmp, data);
+				ZVAL_COPY_VALUE(data, pData);
+				ht->pDestructor(&tmp);
+			} else {
+				ZVAL_COPY_VALUE(data, pData);
 			}
-			ZVAL_COPY_VALUE(data, pData);
 			return data;
 		}
 	}
@@ -1110,9 +1116,15 @@ static zend_always_inline zval *_zend_hash_str_add_or_update_i(HashTable *ht, co
 				}
 			}
 			if (ht->pDestructor) {
-				ht->pDestructor(data);
+				/* Store the new value before destroying the old one, so that
+				 * destructors observe a consistent hash table. */
+				zval tmp;
+				ZVAL_COPY_VALUE(&tmp, data);
+				ZVAL_COPY_VALUE(data, pData);
+				ht->pDestructor(&tmp);
+			} else {
+				ZVAL_COPY_VALUE(data, pData);
 			}
-			ZVAL_COPY_VALUE(data, pData);
 			return data;
 		}
 	}
@@ -1290,9 +1302,15 @@ replace:
 					return NULL;
 				}
 				if (ht->pDestructor) {
-					ht->pDestructor(zv);
+					/* Store the new value before destroying the old one, so that
+					 * destructors observe a consistent hash table. */
+					zval tmp;
+					ZVAL_COPY_VALUE(&tmp, zv);
+					ZVAL_COPY_VALUE(zv, pData);
+					ht->pDestructor(&tmp);
+				} else {
+					ZVAL_COPY_VALUE(zv, pData);
 				}
-				ZVAL_COPY_VALUE(zv, pData);
 				return zv;
 			} else { /* we have to keep the order :( */
 				zend_result status = zend_hash_fconvert_packed_to_hash(ht, flag & HASH_FALLIBLE);
@@ -1863,9 +1881,13 @@ ZEND_API zend_result ZEND_FASTCALL zend_hash_str_del_ind(HashTable *ht, const ch
 					return FAILURE;
 				} else {
 					if (ht->pDestructor) {
-						ht->pDestructor(data);
+						zval tmp;
+						ZVAL_COPY_VALUE(&tmp, data);
+						ZVAL_UNDEF(data);
+						ht->pDestructor(&tmp);
+					} else {
+						ZVAL_UNDEF(data);
 					}
-					ZVAL_UNDEF(data);
 					HT_FLAGS(ht) |= HASH_FLAG_HAS_EMPTY_IND;
 				}
 			} else {

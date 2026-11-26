@@ -37,6 +37,11 @@ PHP                                                                        NEWS
   . Fixed bug GH-25313 (Assertion !EG(exception) in ZEND_FE_FREE when unpacking
     a generator into a by-ref parameter throws). (ndossche)
   . Fix OSS-Fuzz #588264417. (ndossche)
+  . Fixed bug GH-25700 (Use-after-free when a lazily created auto-global
+    replaces an existing global variable). (Roman Ondráček)
+  . Fixed bug GH-25706 (session_start() / session_decode() with php_serialize:
+    use-after-free when a value added by __unserialize() has a destructor).
+    (Roman Ondráček)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
