@@ -1260,7 +1260,7 @@ PHP_MINIT_FUNCTION(dom)
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_notation_prop_handlers, "publicId", dom_notation_public_id_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_notation_prop_handlers, "systemId", dom_notation_system_id_read, NULL);
 	zend_hash_merge(&dom_modern_notation_prop_handlers, &dom_modern_node_prop_handlers, NULL, false);
-	zend_hash_add_new_ptr(&classes, dom_modern_notation_class_entry->name, &dom_modern_node_prop_handlers);
+	zend_hash_add_new_ptr(&classes, dom_modern_notation_class_entry->name, &dom_modern_notation_prop_handlers);
 
 	dom_entity_class_entry = register_class_DOMEntity(dom_node_class_entry);
 	dom_entity_class_entry->create_object = dom_objects_new;
