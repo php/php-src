@@ -7497,6 +7497,11 @@ void zend_ffi_expr_div(zend_ffi_val *val, const zend_ffi_val *op2) /* {{{ */
 
 void zend_ffi_expr_mod(zend_ffi_val *val, const zend_ffi_val *op2) /* {{{ */
 {
+	/* the operands of % must have integer type */
+	if (val->kind == ZEND_FFI_VAL_FLOAT || val->kind == ZEND_FFI_VAL_DOUBLE || val->kind == ZEND_FFI_VAL_LONG_DOUBLE
+	 || op2->kind == ZEND_FFI_VAL_FLOAT || op2->kind == ZEND_FFI_VAL_DOUBLE || op2->kind == ZEND_FFI_VAL_LONG_DOUBLE) {
+		zend_ffi_parser_error("Invalid operand of '%%' in constant expression at line %d", FFI_G(line));
+	}
 	zend_ffi_expr_int_math(val, op2, %); // ???
 }
 /* }}} */
