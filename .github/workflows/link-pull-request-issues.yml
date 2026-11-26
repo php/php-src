@@ -64,7 +64,7 @@ jobs:
             }
 
             const closingReference = new RegExp(
-              `\\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\\s+#${issueNumber}\\b`,
+              `\\b(?:close|closes|fix|fixes|resolve|resolves)\\s+(?:#|GH-)${issueNumber}\\b`,
               'i',
             );
 
