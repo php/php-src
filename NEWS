@@ -175,6 +175,8 @@ PHP                                                                        NEWS
 - PGSQL:
   . Fixed bug GH-25772 (pg_fetch_object() crashes with JIT when the constructor
     keeps a reference and the result is discarded). (Tomasz Kowalczyk)
+  . Fixed bug GH-25802 (pg_get_notify() result is never === false with opcache
+    enabled). (Tomasz Kowalczyk)
 
 - Phar:
   . Fixed bug GH-25528 (Phar::setSignatureAlgorithm(): OpenSSL signing reads a
