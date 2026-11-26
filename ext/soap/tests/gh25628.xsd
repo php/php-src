@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+            targetNamespace="urn:security"
+            elementFormDefault="qualified">
+  <xsd:import namespace="http://www.w3.org/2000/09/xmldsig#" schemaLocation="gh25628_xmldsig.xsd"/>
+  <xsd:element name="SignedRequest">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="ds:Signature"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+</xsd:schema>
