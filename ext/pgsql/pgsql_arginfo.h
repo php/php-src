@@ -1,5 +1,5 @@
 /* This is a generated file, edit pgsql.stub.php instead.
- * Stub hash: 5e2eb05437a08252a9554c45711febbf4a846bcc */
+ * Stub hash: a9b191d12693f913c9573da7354398bf36e9e019 */
 
 #include "zend_attributes.h"
 #include "zend_constants.h"

@@ -99,6 +99,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-25584 (JIT frees the string returned by gettext(),
     dgettext() or dcgettext() while it is still in use). (Ilia Alshanetsky)
 
+- Hash:
+  . Fixed hash() and hash_file() hanging on invalid xxh3/xxh128 options.
+    (lacatoire)
+
 - Intl:
   . Fixed NumberFormatter::getSymbol(), setSymbol(), getAttribute() and
     setAttribute() accepting out-of-range values that truncate to a valid one.
@@ -192,6 +196,8 @@ PHP                                                                        NEWS
     execute() or rebound while fetching). (Ilia Alshanetsky)
 
 - Phar:
+  . Fixed Phar file stats using the string header instead of the entry
+    filename to compute the inode number. (Hohphu)
   . Fixed bug GH-25528 (Phar::setSignatureAlgorithm(): OpenSSL signing reads a
     freed private key). (Artem Ukrainskiy)
 
@@ -243,6 +249,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-25530 (socket_last_error() without a socket returns an error
     from a previous request). (Artem Ukrainskiy)
 
+- Sodium:
+  . Fixed sodium_add() and sodium_increment() retaining stale string hashes
+    and UTF-8 validity flags. (lacatoire)
+
 - Standard:
   . Fixed bug GH-25474 (version_compare() treats large numeric parts as equal
     on 64-bit Windows). (lazerg, timwolla)
@@ -279,6 +289,10 @@ PHP                                                                        NEWS
 - XSL:
   . Fixed a crash in XSLTProcessor::transformToDoc() when the return class
     cannot be instantiated. (Ilia Alshanetsky)
+
+- Zip:
+  . Fixed bug GH-25360 (ZipArchive assertion when an error handler throws
+    on implicit close at shutdown). (lazerg)
 
 19 Nov 2026, PHP 8.6.0
 
