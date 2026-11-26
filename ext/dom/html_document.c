@@ -535,6 +535,11 @@ static bool dom_decode_encode_fast_path(
 		lxb_char_t buf[4];
 		lxb_char_t *buf_ptr = buf;
 		lxb_codepoint_t codepoint = lxb_encoding_decode_utf_8_single(&decoding_encoding_ctx->decode, &buf_ref, buf_end);
+		if (codepoint == LXB_ENCODING_DECODE_CONTINUE) {
+			ZEND_ASSERT(buf_ref == buf_end);
+			*buf_ref_ref = buf_ref;
+			return true;
+		}
 		if (lxb_encoding_encode_utf_8_single(&decoding_encoding_ctx->encode, &buf_ptr, buf + sizeof(buf), codepoint) > sizeof(buf)) {
 			buf_ptr = zend_mempcpy(buf, LXB_ENCODING_REPLACEMENT_BYTES, LXB_ENCODING_REPLACEMENT_SIZE);
 		}
