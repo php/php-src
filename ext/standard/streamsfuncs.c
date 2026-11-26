@@ -952,7 +952,7 @@ static zend_result parse_context_params(php_stream_context *context, HashTable *
 		ZVAL_COPY(&context->notifier->ptr, tmp);
 		context->notifier->dtor = user_space_stream_notifier_dtor;
 	}
-	if (NULL != (tmp = zend_hash_str_find(params, "options", sizeof("options")-1))) {
+	if (NULL != (tmp = zend_hash_str_find_deref(params, "options", sizeof("options")-1))) {
 		ZVAL_DEREF(tmp);
 		if (Z_TYPE_P(tmp) == IS_ARRAY) {
 			return parse_context_options(context, Z_ARRVAL_P(tmp));
