@@ -259,7 +259,7 @@ void phpdbg_dump_backtrace(size_t num) /* {{{ */
 	}
 
 	phpdbg_try_access {
-		zend_fetch_debug_backtrace(&zbacktrace, 0, 0, limit);
+		zend_fetch_debug_backtrace(&zbacktrace, false, 0, limit);
 	} phpdbg_catch_access {
 		phpdbg_error("Couldn't fetch backtrace, invalid data source");
 		return;

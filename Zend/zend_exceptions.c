@@ -268,7 +268,7 @@ static zend_object *zend_default_exception_new(zend_class_entry *class_type) /* 
 
 	if (EG(current_execute_data)) {
 		zend_fetch_debug_backtrace(&trace,
-			0,
+			false,
 			EG(exception_ignore_args) ? DEBUG_BACKTRACE_IGNORE_ARGS : 0, 0);
 	} else {
 		ZVAL_EMPTY_ARRAY(&trace);
@@ -656,7 +656,7 @@ ZEND_API zend_string *zend_trace_current_function_args_string(void) {
 
 	/* get a backtrace to snarf function args */
 	zval backtrace;
-	zend_fetch_debug_backtrace(&backtrace, /* skip_last */ 0, /* options */ 0, /* limit */ 1);
+	zend_fetch_debug_backtrace(&backtrace, /* skip_last */ false, /* options */ 0, /* limit */ 1);
 	/* can fail esp if low memory condition */
 	if (Z_TYPE(backtrace) == IS_ARRAY) {
 		zval *first_frame = zend_hash_index_find(Z_ARRVAL(backtrace), 0);

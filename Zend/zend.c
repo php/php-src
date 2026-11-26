@@ -1543,7 +1543,7 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 		// EG(last_fatal_error_backtrace) is useless when the executor is
 		// inactive, and setting it at this point would leak.
 		if (EG(active)) {
-			zend_fetch_debug_backtrace(&EG(last_fatal_error_backtrace), 0, EG(exception_ignore_args) ? DEBUG_BACKTRACE_IGNORE_ARGS : 0, 0);
+			zend_fetch_debug_backtrace(&EG(last_fatal_error_backtrace), false, EG(exception_ignore_args) ? DEBUG_BACKTRACE_IGNORE_ARGS : 0, 0);
 		}
 	}
 

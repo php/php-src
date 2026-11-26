@@ -1904,7 +1904,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 		RETURN_THROWS();
 	}
 
-	zend_fetch_debug_backtrace(&backtrace, 1, options, limit);
+	zend_fetch_debug_backtrace(&backtrace, true, options, limit);
 	ZEND_ASSERT(Z_TYPE(backtrace) == IS_ARRAY);
 
 	zend_string *str = zend_trace_to_string(Z_ARRVAL(backtrace), /* include_main */ false);
@@ -1915,7 +1915,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 
 /* }}} */
 
-ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int options, int limit) /* {{{ */
+ZEND_API void zend_fetch_debug_backtrace(zval *return_value, bool skip_last, int options, int limit) /* {{{ */
 {
 	zend_execute_data *call, *last_call = NULL;
 	zend_object *object;
@@ -2257,7 +2257,7 @@ ZEND_FUNCTION(debug_backtrace)
 		RETURN_THROWS();
 	}
 
-	zend_fetch_debug_backtrace(return_value, 1, options, limit);
+	zend_fetch_debug_backtrace(return_value, true, options, limit);
 }
 /* }}} */
 
