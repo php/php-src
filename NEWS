@@ -280,6 +280,10 @@ PHP                                                                        NEWS
   . Fixed a crash in XSLTProcessor::transformToDoc() when the return class
     cannot be instantiated. (Ilia Alshanetsky)
 
+- Zip:
+  . Fixed bug GH-25360 (ZipArchive assertion when an error handler throws
+    on implicit close at shutdown). (lazerg)
+
 19 Nov 2026, PHP 8.6.0
 
 - Core:
