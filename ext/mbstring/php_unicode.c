@@ -279,6 +279,47 @@ static bool scan_back_for_cased_letter(uint32_t *begin, uint32_t *end)
 	return false;
 }
 
+/* Copy the longest ASCII prefix of `in` to `out`, flipping the case of the
+ * letters from `first` to `first + 25`. Return the length of that prefix,
+ * which ends at the first byte >= 0x80 or at the end of the input. */
+static zend_never_inline size_t convert_case_ascii_prefix(const unsigned char *in, size_t len, unsigned char *out, unsigned char first)
+{
+	size_t i = 0;
+#if defined(__SSE2__)
+	const __m128i offset = _mm_set1_epi8((signed char)(SCHAR_MIN - first));
+	const __m128i threshold = _mm_set1_epi8(SCHAR_MIN + 26);
+	const __m128i flip = _mm_set1_epi8(0x20);
+	for (; i + 16 <= len; i += 16) {
+		const __m128i v = _mm_loadu_si128((const __m128i *)(in + i));
+		if (_mm_movemask_epi8(v)) {
+			break;
+		}
+		const __m128i is_letter = _mm_cmplt_epi8(_mm_add_epi8(v, offset), threshold);
+		_mm_storeu_si128((__m128i *)(out + i), _mm_xor_si128(v, _mm_and_si128(is_letter, flip)));
+	}
+#elif defined(__aarch64__) || defined(_M_ARM64)
+	const uint8x16_t first_v = vdupq_n_u8(first);
+	const uint8x16_t last_offset = vdupq_n_u8(25);
+	const uint8x16_t flip = vdupq_n_u8(0x20);
+	for (; i + 16 <= len; i += 16) {
+		const uint8x16_t v = vld1q_u8(in + i);
+		if (vmaxvq_u8(v) >= 0x80) {
+			break;
+		}
+		const uint8x16_t is_letter = vcleq_u8(vsubq_u8(v, first_v), last_offset);
+		vst1q_u8(out + i, veorq_u8(v, vandq_u8(is_letter, flip)));
+	}
+#endif
+	for (; i < len; i++) {
+		unsigned char c = in[i];
+		if (c >= 0x80) {
+			break;
+		}
+		out[i] = c ^ (((unsigned char)(c - first) < 26) << 5);
+	}
+	return i;
+}
+
 MBSTRING_API zend_string *php_unicode_convert_case(php_case_mode case_mode, const char *srcstr, size_t in_len, const mbfl_encoding *src_encoding, const mbfl_encoding *dst_encoding, int illegal_mode, uint32_t illegal_substchar)
 {
 	/* A Unicode codepoint can expand out to up to 3 codepoints when uppercased, lowercased, or title cased
@@ -292,6 +333,48 @@ MBSTRING_API zend_string *php_unicode_convert_case(php_case_mode case_mode, cons
 
 	mb_convert_buf buf;
 	mb_convert_buf_init(&buf, in_len + 1, illegal_substchar, illegal_mode);
+
+	/* For UTF-8, optimistically convert the leading ASCII characters with a fast
+	 * loop, then let the general loop below handle the rest of the string.
+	 * The general loop converts 64 codepoints at a time, and the special casing
+	 * of the Greek letter sigma looks back at the previous 64 codepoints. So we
+	 * hand over at a multiple of 64 bytes, with the last 64 converted characters
+	 * in converted_buf: the result is exactly what the general loop alone gives.
+	 * Title case is left to the general loop. */
+	if (src_encoding == &mbfl_encoding_utf8 && dst_encoding == &mbfl_encoding_utf8) {
+		unsigned char first = 0;
+		switch (case_mode) {
+		case PHP_UNICODE_CASE_UPPER:
+		case PHP_UNICODE_CASE_UPPER_SIMPLE:
+			first = 'a';
+			break;
+		case PHP_UNICODE_CASE_LOWER:
+		case PHP_UNICODE_CASE_LOWER_SIMPLE:
+		case PHP_UNICODE_CASE_FOLD:
+		case PHP_UNICODE_CASE_FOLD_SIMPLE:
+			first = 'A';
+			break;
+		default:
+			break;
+		}
+		if (first) {
+			size_t ascii_len = convert_case_ascii_prefix(in, in_len, buf.out, first);
+			if (ascii_len == in_len) {
+				buf.out += ascii_len;
+				return mb_convert_buf_result(&buf, dst_encoding);
+			}
+			ascii_len &= ~(size_t)63;
+			if (ascii_len) {
+				buf.out += ascii_len;
+				for (size_t i = 0; i < 64; i++) {
+					converted_buf[i] = buf.out[(ptrdiff_t)i - 64];
+				}
+				converted_end = converted_buf + 64;
+				in += ascii_len;
+				in_len -= ascii_len;
+			}
+		}
+	}
 
 	while (in_len) {
 		size_t out_len = src_encoding->to_wchar(&in, &in_len, wchar_buf, 64, &state);
