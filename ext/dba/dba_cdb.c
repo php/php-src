@@ -54,6 +54,7 @@ typedef struct {
 #endif
 	uint32 eod; /* size of constant database */
 	uint32 pos; /* current position for traversing */
+	size_t file_size;
 } dba_cdb;
 
 DBA_OPEN_FUNC(cdb)
@@ -110,6 +111,22 @@ DBA_OPEN_FUNC(cdb)
 #endif
 	cdb->file = file;
 
+#ifdef DBA_CDB_BUILTIN
+	if (!make) {
+		php_stream_statbuf ssb;
+		if (php_stream_stat(file, &ssb) == 0 && ssb.sb.st_size > 0) {
+			cdb->file_size = ssb.sb.st_size;
+		}
+	}
+#else
+	{
+		zend_stat_t sb;
+		if (zend_fstat(file, &sb) == 0 && sb.st_size > 0) {
+			cdb->file_size = sb.st_size;
+		}
+	}
+#endif
+
 	pinfo->dbf = cdb;
 	return SUCCESS;
 }
@@ -159,6 +176,9 @@ DBA_FETCH_FUNC(cdb)
 			}
 		}
 		len = cdb_datalen(&cdb->c);
+		if (len > cdb->file_size) {
+			return NULL;
+		}
 		fetched_val = zend_string_alloc(len, /* persistent */ false);
 
 		if (php_cdb_read(&cdb->c, ZSTR_VAL(fetched_val), len, cdb_datapos(&cdb->c)) == -1) {
@@ -262,6 +282,10 @@ DBA_FIRSTKEY_FUNC(cdb)
 	uint32_unpack(buf, &klen);
 	uint32_unpack(buf + 4, &dlen);
 
+	if (klen > cdb->file_size) {
+		return NULL;
+	}
+
 	key = zend_string_alloc(klen, /* persistent */ false);
 	if (cdb_file_read(cdb->file, ZSTR_VAL(key), klen) < klen) {
 		zend_string_release_ex(key, /* persistent */ false);
@@ -292,6 +316,10 @@ DBA_NEXTKEY_FUNC(cdb)
 	CREAD(8);
 	uint32_unpack(buf, &klen);
 	uint32_unpack(buf + 4, &dlen);
+
+	if (klen > cdb->file_size) {
+		return NULL;
+	}
 
 	key = zend_string_alloc(klen, /* persistent */ false);
 	if (cdb_file_read(cdb->file, ZSTR_VAL(key), klen) < klen) {
