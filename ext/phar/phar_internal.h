@@ -413,7 +413,7 @@ static inline void phar_set_inode(phar_entry_info *entry) /* {{{ */
 		memcpy(tmp, ZSTR_VAL(entry->phar->fname), len1);
 
 		size_t len2 = MIN(tmp_len - len1, ZSTR_LEN(entry->filename));
-		memcpy(tmp + len1, entry->filename, len2);
+		memcpy(tmp + len1, ZSTR_VAL(entry->filename), len2);
 
 		entry->inode = (unsigned short) zend_hash_func(tmp, tmp_len);
 	} else {
