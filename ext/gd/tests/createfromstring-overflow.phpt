@@ -2,6 +2,12 @@
 imagecreatefromstring overflow with compressed chunk of size INT_MAX
 --EXTENSIONS--
 gd
+--SKIPIF--
+<?php
+    if (!GD_BUNDLED && version_compare(GD_VERSION, '2.4.0', '<')) {
+        die("skip test requires GD 2.4.0 or newer");
+    }
+?>
 --FILE--
 <?php
 
