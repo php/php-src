@@ -5334,7 +5334,15 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 		}
 	}
 
-	ZVAL_OBJ(EX_VAR(opline->result.var), clone_call(zobj));
+	zend_object *cloned = clone_call(zobj);
+	if (UNEXPECTED(!cloned)) {
+		ZEND_ASSERT(EG(exception));
+
+
+		ZVAL_UNDEF(EX_VAR(opline->result.var));
+		HANDLE_EXCEPTION();
+	}
+	ZVAL_OBJ(EX_VAR(opline->result.var), cloned);
 
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -15865,7 +15873,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CLONE_SPEC_TM
 		}
 	}
 
-	ZVAL_OBJ(EX_VAR(opline->result.var), clone_call(zobj));
+	zend_object *cloned = clone_call(zobj);
+	if (UNEXPECTED(!cloned)) {
+		ZEND_ASSERT(EG(exception));
+		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+		ZVAL_UNDEF(EX_VAR(opline->result.var));
+		HANDLE_EXCEPTION();
+	}
+	ZVAL_OBJ(EX_VAR(opline->result.var), cloned);
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -34368,7 +34383,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CLONE_SPEC_UN
 		}
 	}
 
-	ZVAL_OBJ(EX_VAR(opline->result.var), clone_call(zobj));
+	zend_object *cloned = clone_call(zobj);
+	if (UNEXPECTED(!cloned)) {
+		ZEND_ASSERT(EG(exception));
+
+
+		ZVAL_UNDEF(EX_VAR(opline->result.var));
+		HANDLE_EXCEPTION();
+	}
+	ZVAL_OBJ(EX_VAR(opline->result.var), cloned);
 
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -42084,7 +42107,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CLONE_SPEC_CV
 		}
 	}
 
-	ZVAL_OBJ(EX_VAR(opline->result.var), clone_call(zobj));
+	zend_object *cloned = clone_call(zobj);
+	if (UNEXPECTED(!cloned)) {
+		ZEND_ASSERT(EG(exception));
+
+
+		ZVAL_UNDEF(EX_VAR(opline->result.var));
+		HANDLE_EXCEPTION();
+	}
+	ZVAL_OBJ(EX_VAR(opline->result.var), cloned);
 
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -61078,7 +61109,15 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CLONE
 		}
 	}
 
-	ZVAL_OBJ(EX_VAR(opline->result.var), clone_call(zobj));
+	zend_object *cloned = clone_call(zobj);
+	if (UNEXPECTED(!cloned)) {
+		ZEND_ASSERT(EG(exception));
+
+
+		ZVAL_UNDEF(EX_VAR(opline->result.var));
+		HANDLE_EXCEPTION();
+	}
+	ZVAL_OBJ(EX_VAR(opline->result.var), cloned);
 
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -71507,7 +71546,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CLONE_SPEC_TMPVAR_
 		}
 	}
 
-	ZVAL_OBJ(EX_VAR(opline->result.var), clone_call(zobj));
+	zend_object *cloned = clone_call(zobj);
+	if (UNEXPECTED(!cloned)) {
+		ZEND_ASSERT(EG(exception));
+		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+		ZVAL_UNDEF(EX_VAR(opline->result.var));
+		HANDLE_EXCEPTION();
+	}
+	ZVAL_OBJ(EX_VAR(opline->result.var), cloned);
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -89910,7 +89956,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CLONE_SPEC_UNUSED_
 		}
 	}
 
-	ZVAL_OBJ(EX_VAR(opline->result.var), clone_call(zobj));
+	zend_object *cloned = clone_call(zobj);
+	if (UNEXPECTED(!cloned)) {
+		ZEND_ASSERT(EG(exception));
+
+
+		ZVAL_UNDEF(EX_VAR(opline->result.var));
+		HANDLE_EXCEPTION();
+	}
+	ZVAL_OBJ(EX_VAR(opline->result.var), cloned);
 
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -97626,7 +97680,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CLONE_SPEC_CV_TAIL
 		}
 	}
 
-	ZVAL_OBJ(EX_VAR(opline->result.var), clone_call(zobj));
+	zend_object *cloned = clone_call(zobj);
+	if (UNEXPECTED(!cloned)) {
+		ZEND_ASSERT(EG(exception));
+
+
+		ZVAL_UNDEF(EX_VAR(opline->result.var));
+		HANDLE_EXCEPTION();
+	}
+	ZVAL_OBJ(EX_VAR(opline->result.var), cloned);
 
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();

@@ -6073,7 +6073,14 @@ ZEND_VM_COLD_CONST_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|THIS|CV, ANY)
 		}
 	}
 
-	ZVAL_OBJ(EX_VAR(opline->result.var), clone_call(zobj));
+	zend_object *cloned = clone_call(zobj);
+	if (UNEXPECTED(!cloned)) {
+		ZEND_ASSERT(EG(exception));
+		FREE_OP1();
+		ZVAL_UNDEF(EX_VAR(opline->result.var));
+		HANDLE_EXCEPTION();
+	}
+	ZVAL_OBJ(EX_VAR(opline->result.var), cloned);
 
 	FREE_OP1();
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
