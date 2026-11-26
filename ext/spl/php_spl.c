@@ -578,9 +578,14 @@ PHP_FUNCTION(spl_autoload_unregister)
 
 	if (fcc.function_handler && zend_string_equals_literal(
 			fcc.function_handler->common.function_name, "spl_autoload_call")) {
-		if (spl_autoload_functions) {
-			/* Don't destroy the hash table, as we might be iterating over it right now. */
-			zend_hash_clean(spl_autoload_functions);
+		if (spl_autoload_functions && spl_autoload_functions->nNumUsed) {
+			/* Detach the entries before destroying them so destructors cannot
+			 * re-enter on buckets currently being cleaned, while keeping the
+			 * HashTable pointer valid for active autoload iteration. */
+			HashTable tmp = *spl_autoload_functions;
+			zend_hash_init(spl_autoload_functions, 1, NULL, autoload_func_info_zval_dtor, 0);
+			zend_hash_real_init_mixed(spl_autoload_functions);
+			zend_hash_destroy(&tmp);
 		}
 		RETURN_TRUE;
 	}
