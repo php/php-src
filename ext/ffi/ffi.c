@@ -7124,11 +7124,16 @@ void zend_ffi_align_as_val(zend_ffi_dcl *dcl, const zend_ffi_val *align_val) /* 
 	switch (align_val->kind) {
 		case ZEND_FFI_VAL_INT32:
 		case ZEND_FFI_VAL_UINT32:
-			dcl->align = zend_ffi_type_uint32.align;
-			break;
 		case ZEND_FFI_VAL_INT64:
 		case ZEND_FFI_VAL_UINT64:
-			dcl->align = zend_ffi_type_uint64.align;
+			/* _Alignas(0) has no effect */
+			if (align_val->u64 == 0) {
+				break;
+			}
+			if (align_val->u64 > 0x80000000 || (align_val->u64 & (align_val->u64 - 1)) != 0) {
+				zend_ffi_parser_error("Invalid alignment %" PRIu64 " at line %d", align_val->u64, FFI_G(line));
+			}
+			dcl->align = (uint32_t)align_val->u64;
 			break;
 		case ZEND_FFI_VAL_FLOAT:
 			dcl->align = zend_ffi_type_float.align;
