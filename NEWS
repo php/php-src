@@ -35,6 +35,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-25313 (Assertion !EG(exception) in ZEND_FE_FREE when unpacking
     a generator into a by-ref parameter throws). (ndossche)
   . Fix OSS-Fuzz #588264417. (ndossche)
+  . Fixed bug GH-25788 (clone() with properties corrupts memory with JIT when
+    __clone() keeps a reference and the result is discarded). (Tomasz Kowalczyk)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
