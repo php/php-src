@@ -175,6 +175,9 @@ PHP_FUNCTION(apache_request_headers)
 	array_init(return_value);
 
 	ctx = SG(server_context);
+	if (!ctx) {
+		return;
+	}
 	arr = apr_table_elts(ctx->r->headers_in);
 
 	APR_ARRAY_FOREACH_OPEN(arr, key, val) {
@@ -196,6 +199,9 @@ PHP_FUNCTION(apache_response_headers)
 	array_init(return_value);
 
 	ctx = SG(server_context);
+	if (!ctx) {
+		return;
+	}
 	arr = apr_table_elts(ctx->r->headers_out);
 
 	APR_ARRAY_FOREACH_OPEN(arr, key, val) {
@@ -218,6 +224,10 @@ PHP_FUNCTION(apache_note)
 	}
 
 	ctx = SG(server_context);
+	if (!ctx) {
+		php_error_docref(NULL, E_WARNING, "No request context available, called outside of a request?");
+		RETURN_FALSE;
+	}
 
 	old_note_val = (char *) apr_table_get(ctx->r->notes, note_name);
 
@@ -250,6 +260,10 @@ PHP_FUNCTION(apache_setenv)
 	}
 
 	ctx = SG(server_context);
+	if (!ctx) {
+		php_error_docref(NULL, E_WARNING, "No request context available, called outside of a request?");
+		RETURN_FALSE;
+	}
 
 	r = ctx->r;
 	if (walk_to_top) {
@@ -282,6 +296,10 @@ PHP_FUNCTION(apache_getenv)
 	}
 
 	ctx = SG(server_context);
+	if (!ctx) {
+		php_error_docref(NULL, E_WARNING, "No request context available, called outside of a request?");
+		RETURN_FALSE;
+	}
 
 	r = ctx->r;
 	if (walk_to_top) {
