@@ -937,14 +937,17 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /
 					zend_zval_value_name(item));
 				return false;
 			}
+			/* Store the new arguments before releasing the old ones, so that
+			 * destructors of the old arguments do not observe them being destroyed. */
+			zval old_ctor_args;
+			ZVAL_COPY_VALUE(&old_ctor_args, &dbh->def_stmt_ctor_args);
 			dbh->def_stmt_ce = pce;
-			if (!Z_ISUNDEF(dbh->def_stmt_ctor_args)) {
-				zval_ptr_dtor(&dbh->def_stmt_ctor_args);
-				ZVAL_UNDEF(&dbh->def_stmt_ctor_args);
-			}
 			if (item != NULL) {
 				ZVAL_COPY(&dbh->def_stmt_ctor_args, item);
+			} else {
+				ZVAL_UNDEF(&dbh->def_stmt_ctor_args);
 			}
+			zval_ptr_dtor(&old_ctor_args);
 			return true;
 		}
 		/* Don't throw a ValueError as the attribute might be a driver specific one */
