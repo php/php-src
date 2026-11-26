@@ -843,6 +843,30 @@ static bool php_snmp_parse_oid(
 }
 /* }}} */
 
+/* Parse a remote port: one or more decimal digits, nothing else, at most USHRT_MAX. */
+static bool snmp_parse_port(const char *port_string, unsigned short *port)
+{
+	unsigned int value = 0;
+
+	if (*port_string == '\0') {
+		return false;
+	}
+
+	do {
+		if (!ZEND_IS_DIGIT(*port_string)) {
+			return false;
+		}
+
+		value = value * 10 + (unsigned int) (*port_string - '0');
+		if (value > USHRT_MAX) {
+			return false;
+		}
+	} while (*++port_string != '\0');
+
+	*port = (unsigned short) value;
+	return true;
+}
+
 /* {{{ snmp_session_init
 	allocates memory for session and session->peername, caller should free it manually using snmp_session_free() and efree()
 */
@@ -884,7 +908,6 @@ static bool snmp_session_init(php_snmp_session **session_p, int version, zend_st
 
 	// TODO: Do not strip and re-add the port in peername?
 	unsigned short remote_port = SNMP_PORT;
-	int tmp_port;
 
 	*session_p = (php_snmp_session *)emalloc(sizeof(php_snmp_session));
 	session = *session_p;
@@ -905,13 +928,10 @@ static bool snmp_session_init(php_snmp_session **session_p, int version, zend_st
 		host_ptr++;
 		if ((pptr = strchr(host_ptr, ']'))) {
 			if (pptr[1] == ':') {
-				char *pport = pptr + 2;
-				tmp_port = atoi(pport);
-				if (!ZEND_IN_RANGE_OF(tmp_port, unsigned short)) {
+				if (!snmp_parse_port(pptr + 2, &remote_port)) {
 					zend_argument_value_error(hostname_arg_num, "remote port must be between 0 and %u", USHRT_MAX);
 					return false;
 				}
-				remote_port = (unsigned short)tmp_port;
 			}
 			*pptr = '\0';
 		} else {
@@ -920,13 +940,10 @@ static bool snmp_session_init(php_snmp_session **session_p, int version, zend_st
 		}
 	} else { /* IPv4 address */
 		if ((pptr = strchr(host_ptr, ':'))) {
-			char *pport = pptr + 1;
-			tmp_port = atoi(pport);
-			if (!ZEND_IN_RANGE_OF(tmp_port, unsigned short)) {
+			if (!snmp_parse_port(pptr + 1, &remote_port)) {
 				zend_argument_value_error(hostname_arg_num, "remote port must be between 0 and %u", USHRT_MAX);
 				return false;
 			}
-			remote_port = (unsigned short)tmp_port;
 			*pptr = '\0';
 		}
 	}
