@@ -218,6 +218,11 @@ PHP                                                                        NEWS
 - Session:
   . Fixed session upload progress to respect session.use_only_cookies.
     (jorgsowa)
+  . Fixed bug GH-25705 (session_reset() destroys $_SESSION while
+    PS(http_session_vars) still points to it). (Roman Ondráček)
+  . Fixed use-after-free when a destructor of a session value runs while
+    session_unset(), session_destroy() or the php_serialize decoder releases
+    $_SESSION. (Roman Ondráček)
 
 - SimpleXML:
   . Fixed a crash with opcache when simplexml_load_string(),
