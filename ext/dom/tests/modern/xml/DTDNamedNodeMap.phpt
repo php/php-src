@@ -141,7 +141,11 @@ object(Dom\Entity)#3 (17) {
   ["textContent"]=>
   NULL
 }
-object(Dom\Notation)#4 (14) {
+object(Dom\Notation)#4 (16) {
+  ["publicId"]=>
+  string(0) ""
+  ["systemId"]=>
+  string(11) "viewgif.exe"
   ["nodeType"]=>
   int(12)
   ["nodeName"]=>
