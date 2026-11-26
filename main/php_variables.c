@@ -828,8 +828,8 @@ static bool php_auto_globals_create_get(zend_string *name)
 		array_init(&PG(http_globals)[TRACK_VARS_GET]);
 	}
 
-	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_GET]);
 	Z_ADDREF(PG(http_globals)[TRACK_VARS_GET]);
+	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_GET]);
 
 	return 0; /* don't rearm */
 }
@@ -847,8 +847,8 @@ static bool php_auto_globals_create_post(zend_string *name)
 		array_init(&PG(http_globals)[TRACK_VARS_POST]);
 	}
 
-	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_POST]);
 	Z_ADDREF(PG(http_globals)[TRACK_VARS_POST]);
+	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_POST]);
 
 	return 0; /* don't rearm */
 }
@@ -862,8 +862,8 @@ static bool php_auto_globals_create_cookie(zend_string *name)
 		array_init(&PG(http_globals)[TRACK_VARS_COOKIE]);
 	}
 
-	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_COOKIE]);
 	Z_ADDREF(PG(http_globals)[TRACK_VARS_COOKIE]);
+	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_COOKIE]);
 
 	return 0; /* don't rearm */
 }
@@ -874,8 +874,8 @@ static bool php_auto_globals_create_files(zend_string *name)
 		array_init(&PG(http_globals)[TRACK_VARS_FILES]);
 	}
 
-	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_FILES]);
 	Z_ADDREF(PG(http_globals)[TRACK_VARS_FILES]);
+	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_FILES]);
 
 	return 0; /* don't rearm */
 }
@@ -923,8 +923,8 @@ static bool php_auto_globals_create_server(zend_string *name)
 	}
 
 	check_http_proxy(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]));
-	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_SERVER]);
 	Z_ADDREF(PG(http_globals)[TRACK_VARS_SERVER]);
+	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_SERVER]);
 
 	/* TODO: TRACK_VARS_SERVER is modified in a number of places (e.g. phar) past this point,
 	 * where rc>1 due to the $_SERVER global. Ideally this shouldn't happen, but for now we
@@ -944,8 +944,8 @@ static bool php_auto_globals_create_env(zend_string *name)
 	}
 
 	check_http_proxy(Z_ARRVAL(PG(http_globals)[TRACK_VARS_ENV]));
-	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_ENV]);
 	Z_ADDREF(PG(http_globals)[TRACK_VARS_ENV]);
+	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_ENV]);
 
 	return 0; /* don't rearm */
 }
