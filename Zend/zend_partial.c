@@ -522,8 +522,10 @@ static zend_ast *zp_compile_forwarding_call(
 	bool forward_superfluous_args,
 	zend_ast *stmts_ast, uint32_t const_args)
 {
-	bool is_assert = zend_string_equals(function->common.function_name,
-			ZSTR_KNOWN(ZEND_STR_ASSERT));
+	bool is_assert = function->type == ZEND_INTERNAL_FUNCTION
+			&& !function->common.scope
+			&& zend_string_equals(function->common.function_name,
+				ZSTR_KNOWN(ZEND_STR_ASSERT));
 
 	zend_ast *args_ast = zend_ast_create_list(0, ZEND_AST_ARG_LIST);
 	zend_ast *call_ast = NULL;
