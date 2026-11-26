@@ -7132,11 +7132,16 @@ void zend_ffi_align_as_val(zend_ffi_dcl *dcl, const zend_ffi_val *align_val) /* 
 	switch (align_val->kind) {
 		case ZEND_FFI_VAL_INT32:
 		case ZEND_FFI_VAL_UINT32:
-			dcl->align = zend_ffi_type_uint32.align;
-			break;
 		case ZEND_FFI_VAL_INT64:
 		case ZEND_FFI_VAL_UINT64:
-			dcl->align = zend_ffi_type_uint64.align;
+			/* _Alignas(0) has no effect */
+			if (align_val->u64 == 0) {
+				break;
+			}
+			if (align_val->u64 > 0x80000000 || (align_val->u64 & (align_val->u64 - 1)) != 0) {
+				zend_ffi_parser_error("Invalid alignment %" PRIu64 " at line %d", align_val->u64, FFI_G(line));
+			}
+			dcl->align = (uint32_t)align_val->u64;
 			break;
 		case ZEND_FFI_VAL_FLOAT:
 			dcl->align = zend_ffi_type_float.align;
@@ -7314,7 +7319,7 @@ void zend_ffi_align_as_val(zend_ffi_dcl *dcl, const zend_ffi_val *align_val) /* 
 			val->i64 = (zend_ffi_double)val->u64 OP op2->d; \
 		} else if (op2->kind == ZEND_FFI_VAL_CHAR) { \
 			val->kind = ZEND_FFI_VAL_INT32; \
-			val->i64 = val->u64 OP op2->d; \
+			val->i64 = val->u64 OP op2->ch; \
 		} else { \
 			val->kind = ZEND_FFI_VAL_ERROR; \
 		} \
@@ -7500,6 +7505,11 @@ void zend_ffi_expr_div(zend_ffi_val *val, const zend_ffi_val *op2) /* {{{ */
 
 void zend_ffi_expr_mod(zend_ffi_val *val, const zend_ffi_val *op2) /* {{{ */
 {
+	/* the operands of % must have integer type */
+	if (val->kind == ZEND_FFI_VAL_FLOAT || val->kind == ZEND_FFI_VAL_DOUBLE || val->kind == ZEND_FFI_VAL_LONG_DOUBLE
+	 || op2->kind == ZEND_FFI_VAL_FLOAT || op2->kind == ZEND_FFI_VAL_DOUBLE || op2->kind == ZEND_FFI_VAL_LONG_DOUBLE) {
+		zend_ffi_parser_error("Invalid operand of '%%' in constant expression at line %d", FFI_G(line));
+	}
 	zend_ffi_expr_int_math(val, op2, %); // ???
 }
 /* }}} */
@@ -7712,7 +7722,7 @@ void zend_ffi_expr_sizeof_val(zend_ffi_val *val) /* {{{ */
 #endif
 	} else if (val->kind == ZEND_FFI_VAL_CHAR) {
 		val->kind = ZEND_FFI_VAL_UINT32;
-		val->u64 = zend_ffi_type_char.size;
+		val->u64 = zend_ffi_type_sint32.size; /* a character constant has type int */
 	} else if (val->kind == ZEND_FFI_VAL_STRING) {
 		if (memchr(val->str, '\\', val->len)) {
 			// TODO: support for escape sequences ???
@@ -7760,7 +7770,7 @@ void zend_ffi_expr_alignof_val(zend_ffi_val *val) /* {{{ */
 #endif
 	} else if (val->kind == ZEND_FFI_VAL_CHAR) {
 		val->kind = ZEND_FFI_VAL_UINT32;
-		val->u64 = zend_ffi_type_char.size;
+		val->u64 = zend_ffi_type_sint32.align; /* a character constant has type int */
 	} else if (val->kind == ZEND_FFI_VAL_STRING) {
 		val->kind = ZEND_FFI_VAL_UINT32;
 		val->u64 = _Alignof(char*);
@@ -7861,7 +7871,8 @@ void zend_ffi_val_character(zend_ffi_val *val, const char *str, size_t str_len) 
 		if (str_len == 3) {
 			val->ch = str[1];
 		} else if (str[1] == '\\') {
-			if (str[2] == 'a') {
+			if (str[2] == 'a' && str_len == 4) {
+				val->ch = '\a';
 			} else if (str[2] == 'b' && str_len == 4) {
 				val->ch = '\b';
 			} else if (str[2] == 'f' && str_len == 4) {
