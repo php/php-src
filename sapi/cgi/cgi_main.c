@@ -2305,17 +2305,23 @@ parent_loop_end:
 							CG(compiler_options) |= ZEND_COMPILE_EXTENDED_INFO;
 							break;
 
-						case 'f': /* parse file */
-							if (script_file) {
-								efree(script_file);
-							}
-							script_file = estrdup(php_optarg);
+						case 'f': { /* parse file */
+							/* script_file outlives the request: in benchmark mode
+							 * it is reused after php_request_shutdown() has reset
+							 * the memory manager. It is also installed as argv[0],
+							 * which overwrites the argv slot php_optarg refers to,
+							 * so copy before freeing the current buffer. */
+							char *new_script_file = strdup(php_optarg);
+
+							free(script_file);
+							script_file = new_script_file;
 							no_headers = 1;
 							break;
+						}
 
 						case 'i': /* php info & quit */
 							if (script_file) {
-								efree(script_file);
+								free(script_file);
 							}
 							if (php_request_startup() == FAILURE) {
 								SG(server_context) = NULL;
@@ -2340,7 +2346,7 @@ parent_loop_end:
 
 						case 'm': /* list compiled in modules */
 							if (script_file) {
-								efree(script_file);
+								free(script_file);
 							}
 							SG(headers_sent) = true;
 							php_printf("[PHP Modules]\n");
@@ -2359,7 +2365,7 @@ parent_loop_end:
 
 						case 'v': /* show php version & quit */
 							if (script_file) {
-								efree(script_file);
+								free(script_file);
 							}
 							no_headers = 1;
 							if (php_request_startup() == FAILURE) {
@@ -2389,7 +2395,10 @@ do_repeat:
 				if (script_file) {
 					/* override path_translated if -f on command line */
 					if (SG(request_info).path_translated) efree(SG(request_info).path_translated);
-					SG(request_info).path_translated = script_file;
+					/* script_file must not be aliased: it would be freed along with
+					 * path_translated at the end of the request and reused as a
+					 * dangling pointer on the next benchmark iteration. */
+					SG(request_info).path_translated = estrdup(script_file);
 					/* before registering argv to module exchange the *new* argv[0] */
 					/* we can achieve this without allocating more memory */
 					SG(request_info).argc = argc - (php_optind - 1);
@@ -2595,19 +2604,31 @@ fastcgi_request_done:
 							time(&start);
 #endif
 						}
+						/* When the script was given with -f, script_file is a
+						 * process-lifetime allocation that survives the memory
+						 * manager reset in php_request_shutdown(), so it can be
+						 * reused as is. Otherwise the script was given as a
+						 * positional argument, and the getopt state must be
+						 * reset to re-parse it for the next iteration. */
+						if (!script_file) {
+							php_optind = orig_optind;
+							php_optarg = orig_optarg;
+						}
 						continue;
 					} else {
 						repeats--;
 						if (repeats > 0) {
-							script_file = NULL;
-							php_optind = orig_optind;
-							php_optarg = orig_optarg;
+							if (!script_file) {
+								php_optind = orig_optind;
+								php_optarg = orig_optarg;
+							}
 							continue;
 						}
 					}
 				}
 				if (behavior == PHP_MODE_LINT && argc - 1 > php_optind) {
 					php_optind++;
+					free(script_file);
 					script_file = NULL;
 					goto do_repeat;
 				}
