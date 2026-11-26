@@ -4,10 +4,11 @@ Testing stream_get_meta_data() "eof" field on a udp socket
 <?php
 
 /* Setup socket server */
-$server = stream_socket_server('tcp://127.0.0.1:31334');
+$server = stream_socket_server('tcp://127.0.0.1:0');
+$address = stream_socket_get_name($server, false);
 
 /* Connect to it */
-$client = fsockopen('tcp://127.0.0.1:31334');
+$client = fsockopen("tcp://$address");
 if (!$client) {
     die("Unable to create socket");
 }
@@ -52,7 +53,7 @@ array(8) {
   ["seekable"]=>
   bool(false)
   ["uri"]=>
-  string(21) "tcp://127.0.0.1:31334"
+  string(%d) "tcp://127.0.0.1:%d"
 }
 
 
@@ -73,7 +74,7 @@ array(8) {
   ["seekable"]=>
   bool(false)
   ["uri"]=>
-  string(21) "tcp://127.0.0.1:31334"
+  string(%d) "tcp://127.0.0.1:%d"
 }
 
 
@@ -94,5 +95,5 @@ array(8) {
   ["seekable"]=>
   bool(false)
   ["uri"]=>
-  string(21) "tcp://127.0.0.1:31334"
+  string(%d) "tcp://127.0.0.1:%d"
 }
