@@ -1,5 +1,5 @@
 /* This is a generated file, edit mysqli.stub.php instead.
- * Stub hash: f5327d48b275a5358b740232281478c83bb8a3db */
+ * Stub hash: d120933a1b62b7b9e6d19e797b7841a02913c2bf */
 
 #include "zend_attributes.h"
 #include "zend_constants.h"

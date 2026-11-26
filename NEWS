@@ -52,6 +52,8 @@ PHP                                                                        NEWS
   . Fix OSS-Fuzz #588264417. (ndossche)
   . Fixed partial application treating methods named assert() as the global
     assert(). (hohphu8)
+  . Fixed bug GH-25788 (clone() with properties corrupts memory with JIT when
+    __clone() keeps a reference and the result is discarded). (Tomasz Kowalczyk)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
@@ -124,6 +126,11 @@ PHP                                                                        NEWS
   . Fixed the JIT freeing the string returned by mb_encode_mimeheader() or
     mb_output_handler() while it is still in use. (Ilia Alshanetsky)
   . Fixed bug GH-25737 (mb_send_mail() ignores $additional_params).
+    (Tomasz Kowalczyk)
+
+- MySQLi:
+  . Fixed bug GH-25779 (mysqli_fetch_object() crashes with JIT when the
+    constructor keeps a reference and the result is discarded).
     (Tomasz Kowalczyk)
 
 - Opcache:
