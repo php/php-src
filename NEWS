@@ -230,6 +230,10 @@ PHP                                                                        NEWS
   . Fixed sodium_add() and sodium_increment() retaining stale string hashes
     and UTF-8 validity flags. (lacatoire)
 
+- SQLite:
+  . Fixed bug GH-25809 (SQLite3::backup() returns true when the backup fails).
+    (Tomasz Kowalczyk)
+
 - Standard:
   . Fixed bug GH-25474 (version_compare() treats large numeric parts as equal
     on 64-bit Windows). (lazerg, timwolla)

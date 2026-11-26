@@ -1442,7 +1442,7 @@ PHP_METHOD(SQLite3, backup)
 		rc = sqlite3_backup_finish(dbBackup);
 	}
 	else {
-		rc = sqlite3_errcode(source_obj->db);
+		rc = sqlite3_errcode(destination_obj->db);
 	}
 
 	if (rc != SQLITE_OK) {
@@ -1453,7 +1453,7 @@ PHP_METHOD(SQLite3, backup)
 			php_sqlite3_error(source_obj, rc, "Backup failed: source database is locked");
 		}
 		else {
-			php_sqlite3_error(source_obj, rc, "Backup failed: %s", sqlite3_errmsg(source_obj->db));
+			php_sqlite3_error(source_obj, rc, "Backup failed: %s", sqlite3_errmsg(destination_obj->db));
 		}
 		RETURN_FALSE;
 	}
