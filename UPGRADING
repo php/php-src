@@ -247,6 +247,9 @@ PHP 8.7 UPGRADE NOTES
 - MBString:
   . Improved performance of mb_strlen for UTF-8 strings.
   . Improved performance of mb_substr and mb_strpos for UTF-8 strings.
+  . Improved performance of UTF-8 validation, used by mb_check_encoding() and
+    by the UTF-8 fast paths of mb_strlen(), mb_substr() and other functions.
+    It now uses AVX-512 on x86-64 when available, and NEON on ARM64.
 
 - PDO:
   . Improved performance of fetching rows with PDO::FETCH_BOTH, the default
