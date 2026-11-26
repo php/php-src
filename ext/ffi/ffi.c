@@ -7498,14 +7498,88 @@ void zend_ffi_expr_mul(zend_ffi_val *val, zend_ffi_val *op2) /* {{{ */
 }
 /* }}} */
 
+static bool zend_ffi_val_is_floating(const zend_ffi_val *val) /* {{{ */
+{
+	return val->kind == ZEND_FFI_VAL_FLOAT || val->kind == ZEND_FFI_VAL_DOUBLE
+		|| val->kind == ZEND_FFI_VAL_LONG_DOUBLE;
+}
+/* }}} */
+
+/* Whether dividing val by op2 traps (integer division by zero, or INT64_MIN / -1).
+ * zend_ffi_expr_math() divides floating operands as floating point;
+ * zend_ffi_expr_int_math() first converts them to integers. */
+static bool zend_ffi_expr_div_traps(const zend_ffi_val *val, const zend_ffi_val *op2, bool int_math) /* {{{ */
+{
+	bool val_fp = zend_ffi_val_is_floating(val);
+	bool op2_fp = zend_ffi_val_is_floating(op2);
+	int64_t n, d;
+
+	if (val_fp || op2_fp) {
+		if (!int_math || (val_fp && (op2_fp || op2->kind == ZEND_FFI_VAL_CHAR))) {
+			return false;
+		}
+	}
+	switch (val->kind) {
+		case ZEND_FFI_VAL_UINT32:
+		case ZEND_FFI_VAL_UINT64:
+		case ZEND_FFI_VAL_INT32:
+		case ZEND_FFI_VAL_INT64:
+			n = val->i64;
+			break;
+		case ZEND_FFI_VAL_CHAR:
+			n = val->ch;
+			break;
+		case ZEND_FFI_VAL_FLOAT:
+		case ZEND_FFI_VAL_DOUBLE:
+		case ZEND_FFI_VAL_LONG_DOUBLE:
+			n = (int64_t)val->d;
+			break;
+		default:
+			return false;
+	}
+	switch (op2->kind) {
+		case ZEND_FFI_VAL_UINT32:
+		case ZEND_FFI_VAL_UINT64:
+		case ZEND_FFI_VAL_INT32:
+		case ZEND_FFI_VAL_INT64:
+			d = op2->i64;
+			break;
+		case ZEND_FFI_VAL_CHAR:
+			d = op2->ch;
+			break;
+		case ZEND_FFI_VAL_FLOAT:
+		case ZEND_FFI_VAL_DOUBLE:
+		case ZEND_FFI_VAL_LONG_DOUBLE:
+			d = (int64_t)op2->d;
+			break;
+		default:
+			return false;
+	}
+	if (d == 0) {
+		return true;
+	}
+	/* signed division: a signed (or converted floating) dividend by a signed divisor */
+	return n == INT64_MIN && d == -1
+		&& (val->kind == ZEND_FFI_VAL_INT32 || val->kind == ZEND_FFI_VAL_INT64 || val_fp)
+		&& (op2->kind == ZEND_FFI_VAL_INT32 || op2->kind == ZEND_FFI_VAL_INT64
+			|| op2->kind == ZEND_FFI_VAL_CHAR);
+}
+/* }}} */
+
 void zend_ffi_expr_div(zend_ffi_val *val, zend_ffi_val *op2) /* {{{ */
 {
+	if (zend_ffi_expr_div_traps(val, op2, false)) {
+		zend_ffi_parser_error("Division by zero or overflow in constant expression at line %d", FFI_G(line));
+	}
 	zend_ffi_expr_math(val, op2, /);
 }
 /* }}} */
 
 void zend_ffi_expr_mod(zend_ffi_val *val, zend_ffi_val *op2) /* {{{ */
 {
+	if (zend_ffi_expr_div_traps(val, op2, true)) {
+		zend_ffi_parser_error("Division by zero or overflow in constant expression at line %d", FFI_G(line));
+	}
 	zend_ffi_expr_int_math(val, op2, %); // ???
 }
 /* }}} */
@@ -7901,9 +7975,9 @@ void zend_ffi_val_character(zend_ffi_val *val, const char *str, size_t str_len) 
 				if (str[3] >= '0' && str[3] <= '9') {
 					n = str[3] - '0';
 				} else if (str[3] >= 'A' && str[3] <= 'F') {
-					n = str[3] - 'A';
+					n = str[3] - 'A' + 10;
 				} else if (str[3] >= 'a' && str[3] <= 'f') {
-					n = str[3] - 'a';
+					n = str[3] - 'a' + 10;
 				} else {
 					val->kind = ZEND_FFI_VAL_ERROR;
 					return;
@@ -7911,9 +7985,9 @@ void zend_ffi_val_character(zend_ffi_val *val, const char *str, size_t str_len) 
 				if ((str[4] >= '0' && str[4] <= '9') && str_len == 6) {
 					n = n * 16 + (str[4] - '0');
 				} else if ((str[4] >= 'A' && str[4] <= 'F') && str_len == 6) {
-					n = n * 16 + (str[4] - 'A');
+					n = n * 16 + (str[4] - 'A' + 10);
 				} else if ((str[4] >= 'a' && str[4] <= 'f') && str_len == 6) {
-					n = n * 16 + (str[4] - 'a');
+					n = n * 16 + (str[4] - 'a' + 10);
 				} else if (str_len != 5) {
 					val->kind = ZEND_FFI_VAL_ERROR;
 					return;
