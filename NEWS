@@ -116,6 +116,11 @@ PHP                                                                        NEWS
   . Fixed the JIT freeing the string returned by mb_encode_mimeheader() or
     mb_output_handler() while it is still in use. (Ilia Alshanetsky)
 
+- MySQLi:
+  . Fixed bug GH-25779 (mysqli_fetch_object() crashes with JIT when the
+    constructor keeps a reference and the result is discarded).
+    (Tomasz Kowalczyk)
+
 - Opcache:
   . Fixed bug GH-24801 (JIT: SIGFPE in ir_fold MUL_OV constant folding).
     (waroad)
