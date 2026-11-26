@@ -1535,11 +1535,12 @@ session.trans_sid_tags = "a=href,area=href,frame=src,form="
 session.sid_bits_per_character = 5
 
 ; Enable upload progress tracking in $_SESSION
-; Default Value: On
-; Development Value: On
-; Production Value: On
+; When On, session INI settings cannot be changed at runtime.
+; Default Value: Off
+; Development Value: Off
+; Production Value: Off
 ; https://php.net/session.upload-progress.enabled
-;session.upload_progress.enabled = On
+;session.upload_progress.enabled = Off
 
 ; Cleanup the progress information as soon as all POST data has been read
 ; (i.e. upload completed).
