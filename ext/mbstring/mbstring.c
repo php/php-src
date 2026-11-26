@@ -3761,9 +3761,9 @@ next_option:
 	RETVAL_STR(jp_kana_convert(str, enc, opt));
 }
 
-static unsigned int mb_recursive_count_strings(zval *var)
+static uint64_t mb_recursive_count_strings(zval *var)
 {
-	unsigned int count = 0;
+	uint64_t count = 0;
 	ZVAL_DEREF(var);
 
 	if (mb_check_stack_limit()) {
@@ -3796,7 +3796,7 @@ static unsigned int mb_recursive_count_strings(zval *var)
 	return count;
 }
 
-static bool mb_recursive_find_strings(zval *var, const unsigned char **val_list, size_t *len_list, unsigned int *count)
+static bool mb_recursive_find_strings(zval *var, const unsigned char **val_list, size_t *len_list, size_t *count)
 {
 	ZVAL_DEREF(var);
 
@@ -3968,14 +3968,19 @@ PHP_FUNCTION(mb_convert_variables)
 		from_encoding = *elist;
 	} else {
 		/* auto detect */
-		unsigned int num = 0;
+		uint64_t num = 0;
 		for (size_t n = 0; n < argc; n++) {
 			zval *zv = &args[n];
 			num += mb_recursive_count_strings(zv);
 		}
+		if (UNEXPECTED(num > SIZE_MAX / sizeof(char *))) {
+			efree(ZEND_VOIDP(elist));
+			php_error_docref(NULL, E_WARNING, "Input contains too many strings");
+			RETURN_FALSE;
+		}
 		const unsigned char **val_list = (const unsigned char**)ecalloc(num, sizeof(char *));
 		size_t *len_list = (size_t*)ecalloc(num, sizeof(size_t));
-		unsigned int i = 0;
+		size_t i = 0;
 		for (size_t n = 0; n < argc; n++) {
 			zval *zv = &args[n];
 			if (mb_recursive_find_strings(zv, val_list, len_list, &i)) {
