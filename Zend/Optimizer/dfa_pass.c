@@ -1034,6 +1034,10 @@ static bool zend_dfa_try_to_replace_result(zend_op_array *op_array, zend_ssa *ss
 	return 0;
 }
 
+/* Compared bitwise with memcmp(), so that 0.0 and -0.0 are told apart */
+static const double neg_zero = -0.0;
+static const double pos_zero = 0.0;
+
 void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, zend_ssa *ssa, zend_call_info **call_map)
 {
 	if (ctx->debug_level & ZEND_DUMP_BEFORE_DFA_PASS) {
@@ -1160,9 +1164,8 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 							  && Z_LVAL_P(zv) == 0)
 							 || ((OP2_INFO() & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_DOUBLE
 							  && Z_TYPE_INFO_P(zv) == IS_DOUBLE
-							  && Z_DVAL_P(zv) == 0.0
 							  /* 0.0 + -0.0 is 0.0, so only -0.0 is the identity */
-							  && signbit(Z_DVAL_P(zv)))) {
+							  && memcmp(&Z_DVAL_P(zv), &neg_zero, sizeof(double)) == 0)) {
 
 // op_1: #v.? = ADD 0, #?.? [long] => #v.? = QM_ASSIGN #?.?
 // op_1: #v.? = ADD -0.0, #?.? [double] => #v.? = QM_ASSIGN #?.?
@@ -1214,9 +1217,8 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 							  && Z_LVAL_P(zv) == 0)
 							 || ((OP1_INFO() & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_DOUBLE
 							  && Z_TYPE_INFO_P(zv) == IS_DOUBLE
-							  && Z_DVAL_P(zv) == 0.0
 							  /* -0.0 + 0.0 and -0.0 - -0.0 are 0.0, so only x + -0.0 and x - 0.0 are x */
-							  && (opline->opcode == ZEND_ADD) == !!signbit(Z_DVAL_P(zv)))) {
+							  && memcmp(&Z_DVAL_P(zv), opline->opcode == ZEND_ADD ? &neg_zero : &pos_zero, sizeof(double)) == 0)) {
 
 // op_1: #v.? = ADD #?.? [long], 0 => #v.? = QM_ASSIGN #?.?
 // op_1: #v.? = ADD #?.? [double], -0.0 => #v.? = QM_ASSIGN #?.?
