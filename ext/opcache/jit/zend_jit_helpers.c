@@ -2492,8 +2492,8 @@ static void ZEND_FASTCALL zend_jit_assign_op_to_typed_ref(zend_reference *ref, z
 		return;
 	}
 
-	binary_op(&z_copy, &ref->val, val);
-	if (EXPECTED(zend_verify_ref_assignable_zval(ref, &z_copy, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
+	if (EXPECTED(binary_op(&z_copy, &ref->val, val) == SUCCESS)
+	 && EXPECTED(zend_verify_ref_assignable_zval(ref, &z_copy, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
 		zval_ptr_dtor(&ref->val);
 		ZVAL_COPY_VALUE(&ref->val, &z_copy);
 	} else {
@@ -2505,8 +2505,8 @@ static void ZEND_FASTCALL zend_jit_assign_op_to_typed_ref_tmp(zend_reference *re
 {
 	zval z_copy;
 
-	binary_op(&z_copy, &ref->val, val);
-	if (EXPECTED(zend_verify_ref_assignable_zval(ref, &z_copy, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
+	if (EXPECTED(binary_op(&z_copy, &ref->val, val) == SUCCESS)
+	 && EXPECTED(zend_verify_ref_assignable_zval(ref, &z_copy, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
 		zval_ptr_dtor(&ref->val);
 		ZVAL_COPY_VALUE(&ref->val, &z_copy);
 	} else {
@@ -2772,8 +2772,8 @@ static void ZEND_FASTCALL zend_jit_assign_op_to_typed_prop(zval *zptr, zend_prop
 		return;
 	}
 
-	binary_op(&z_copy, zptr, value);
-	if (EXPECTED(zend_verify_property_type(prop_info, &z_copy, EX_USES_STRICT_TYPES()))) {
+	if (EXPECTED(binary_op(&z_copy, zptr, value) == SUCCESS)
+	 && EXPECTED(zend_verify_property_type(prop_info, &z_copy, EX_USES_STRICT_TYPES()))) {
 		Z_PROP_FLAG_P(zptr) &= ~IS_PROP_REINITABLE;
 		zval_ptr_dtor(zptr);
 		ZVAL_COPY_VALUE(zptr, &z_copy);
