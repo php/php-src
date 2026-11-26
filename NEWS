@@ -11,6 +11,8 @@ PHP                                                                        NEWS
   . Improved performance of integer to string conversion, used by string casts,
     echo, implode(), json_encode(), serialize() and other places, by emitting
     two digits per step. (Alexander Danilov)
+  . Fixed bug GH-25788 (clone() with properties corrupts memory with JIT when
+    __clone() keeps a reference and the result is discarded). (Tomasz Kowalczyk)
 
 - Curl:
   . Negative values for CURLOPT_POSTREDIR are now rejected, causing
@@ -100,6 +102,11 @@ PHP                                                                        NEWS
   . Fixed field_count not resetting on OK packet. (Kamil Tekiela)
   . Fixed bug GH-24609 (OK packets without an info message rejected on x32
     builds). (lazerg)
+
+- MySQLi:
+  . Fixed bug GH-25779 (mysqli_fetch_object() crashes with JIT when the
+    constructor keeps a reference and the result is discarded).
+    (Tomasz Kowalczyk)
 
 - Opcache:
   . Fixed range inference of assignments through typed references.

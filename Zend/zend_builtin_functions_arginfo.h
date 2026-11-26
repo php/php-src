@@ -1,5 +1,5 @@
 /* This is a generated file, edit zend_builtin_functions.stub.php instead.
- * Stub hash: 5d7145b7bc305bb50b45e75c02740206148223b1 */
+ * Stub hash: d789f1e73220716b443b153ba0c84e2c010a691b */
 
 #include "zend_attributes.h"
 

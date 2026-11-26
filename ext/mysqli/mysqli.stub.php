@@ -1433,7 +1433,6 @@ function mysqli_fetch_array(mysqli_result $result, int $mode = MYSQLI_BOTH): arr
  */
 function mysqli_fetch_assoc(mysqli_result $result): array|null|false {}
 
-/** @refcount 1 */
 function mysqli_fetch_object(mysqli_result $result, string $class = "stdClass", array $constructor_args = []): object|null|false {}
 
 /**
