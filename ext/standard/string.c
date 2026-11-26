@@ -4875,6 +4875,7 @@ PHP_FUNCTION(parse_str)
 {
 	char *arg;
 	zval *arrayArg = NULL;
+	zval array;
 	char *res = NULL;
 	size_t arglen;
 
@@ -4883,13 +4884,14 @@ PHP_FUNCTION(parse_str)
 		Z_PARAM_ZVAL(arrayArg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	arrayArg = zend_try_array_init(arrayArg);
-	if (!arrayArg) {
+	if (!zend_try_array_init(arrayArg)) {
 		RETURN_THROWS();
 	}
 
+	array_init(&array);
 	res = estrndup(arg, arglen);
-	sapi_module.treat_data(PARSE_STRING, res, arrayArg);
+	sapi_module.treat_data(PARSE_STRING, res, &array);
+	ZEND_TRY_ASSIGN_REF_VALUE(arrayArg, &array);
 }
 /* }}} */
 
