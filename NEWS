@@ -520,6 +520,8 @@ PHP                                                                        NEWS
     certificates with CRLs). (Alexander Danilov)
 
 - PDO:
+  . Fixed use-after-free when a destructor of an old PDO::ATTR_STATEMENT_CLASS
+    constructor argument reads the attribute. (Roman Ondráček)
   . Fixed invalid ATTR_ORACLE_NULLS values being accepted and truncated.
     (Ilia Alshanetsky)
   . Fixed a duplicate warning when ATTR_STATEMENT_CLASS is rejected on a
