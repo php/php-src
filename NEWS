@@ -249,6 +249,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-25530 (socket_last_error() without a socket returns an error
     from a previous request). (Artem Ukrainskiy)
 
+- Sodium:
+  . Fixed sodium_add() and sodium_increment() retaining stale string hashes
+    and UTF-8 validity flags. (lacatoire)
+
 - Standard:
   . Fixed bug GH-25474 (version_compare() treats large numeric parts as equal
     on 64-bit Windows). (lazerg, timwolla)

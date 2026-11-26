@@ -298,6 +298,9 @@ static void sodium_separate_string(zval *zv) {
 		zend_string *copy = zend_string_init(Z_STRVAL_P(zv), Z_STRLEN_P(zv), 0);
 		Z_TRY_DELREF_P(zv);
 		ZVAL_STR(zv, copy);
+	} else {
+		/* The caller writes into the string: drop its cached hash and UTF-8 flag */
+		zend_string_forget_hash_val(Z_STR_P(zv));
 	}
 }
 
