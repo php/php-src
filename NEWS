@@ -99,6 +99,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-25584 (JIT frees the string returned by gettext(),
     dgettext() or dcgettext() while it is still in use). (Ilia Alshanetsky)
 
+- Hash:
+  . Fixed hash() and hash_file() hanging on invalid xxh3/xxh128 options.
+    (lacatoire)
+
 - Intl:
   . Fixed NumberFormatter::getSymbol(), setSymbol(), getAttribute() and
     setAttribute() accepting out-of-range values that truncate to a valid one.
