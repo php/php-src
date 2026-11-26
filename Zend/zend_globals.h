@@ -327,7 +327,6 @@ struct _zend_executor_globals {
 #ifdef ZEND_MAX_EXECUTION_TIMERS
 	timer_t max_execution_timer_timer;
 	pid_t pid;
-	struct sigaction oldact;
 #endif
 
 	zend_strtod_state strtod_state;

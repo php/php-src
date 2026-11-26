@@ -851,7 +851,6 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 #endif
 #ifdef ZEND_MAX_EXECUTION_TIMERS
 	executor_globals->pid = 0;
-	executor_globals->oldact = (struct sigaction){0};
 #endif
 	memset(executor_globals->strtod_state.freelist, 0,
 			sizeof(executor_globals->strtod_state.freelist));
@@ -1090,6 +1089,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	zend_optimizer_startup();
 
 #ifdef ZTS
+	zend_max_execution_timer_cache_startup();
 	tsrm_set_new_thread_end_handler(zend_new_thread_end_handler);
 	tsrm_set_thread_free_handler(zend_thread_free_handler);
 	tsrm_set_shutdown_handler(zend_interned_strings_dtor);

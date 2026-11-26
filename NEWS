@@ -11,6 +11,8 @@ PHP                                                                        NEWS
   . Improved performance of integer to string conversion, used by string casts,
     echo, implode(), json_encode(), serialize() and other places, by emitting
     two digits per step. (Alexander Danilov)
+  . Zend max execution timers are now reused across requests on Linux
+    instead of being recreated for every request. (henderkes)
 
 - Curl:
   . Negative values for CURLOPT_POSTREDIR are now rejected, causing

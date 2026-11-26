@@ -44,6 +44,11 @@ void tsrm_atexit_set_data(tsrm_tls_entry *thread_resources)
 	pthread_setspecific(tsrm_exit_key, thread_resources);
 }
 
+bool tsrm_atexit_is_registered(void)
+{
+	return tsrm_thread_exit_armed && pthread_getspecific(tsrm_exit_key) != NULL;
+}
+
 void tsrm_atexit_disarm(void)
 {
 	if (!tsrm_thread_exit_armed) {

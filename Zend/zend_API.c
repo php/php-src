@@ -2595,6 +2595,7 @@ ZEND_API void zend_destroy_modules(void) /* {{{ */
 	free(module_request_startup_handlers);
 	module_request_startup_handlers = NULL;
 	zend_hash_graceful_reverse_destroy(&module_registry);
+	zend_max_execution_timer_cache_shutdown();
 }
 /* }}} */
 
