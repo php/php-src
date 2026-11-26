@@ -75,11 +75,16 @@ if (file_exists($vout)) {
 }
 
 // S/MIME next
-print("\nS/MIME Detached (an error):\n");
+print("\nS/MIME Detached:\n");
 var_dump(openssl_cms_sign($infile, $outfile, openssl_x509_read($single_cert), $privkey, $headers,
 	     OPENSSL_CMS_DETACHED,OPENSSL_ENCODING_SMIME));
-var_dump(openssl_cms_verify($infile,OPENSSL_CMS_NOVERIFY|OPENSSL_CMS_DETACHED,
-         NULL, array(), NULL, $vout, NULL, $outfile, OPENSSL_ENCODING_SMIME));
+$signed = file_get_contents($outfile);
+var_dump(str_contains($signed, "multipart/signed"));
+var_dump(str_contains($signed, "application/x-pkcs7-signature") || str_contains($signed, "application/pkcs7-signature"));
+var_dump(str_contains($signed, "Now is the winter of our discontent."));
+var_dump(openssl_cms_verify($outfile,OPENSSL_CMS_NOVERIFY, NULL, array(), NULL, $vout));
+print("\nValidated content:\n");
+readfile($vout);
 if (file_exists($outfile)) {
     echo "true\n";
     unlink($outfile);
@@ -87,6 +92,19 @@ if (file_exists($outfile)) {
 
 if (file_exists($vout)) {
     echo "true\n";
+    unlink($vout);
+}
+
+// a separate signature file cannot be combined with S/MIME
+print("\nS/MIME with a separate signature file (an error):\n");
+var_dump(openssl_cms_sign($infile, $outfile, openssl_x509_read($single_cert), $privkey, $headers,
+	     OPENSSL_CMS_DETACHED,OPENSSL_ENCODING_SMIME));
+var_dump(openssl_cms_verify($infile,OPENSSL_CMS_NOVERIFY|OPENSSL_CMS_DETACHED,
+         NULL, array(), NULL, $vout, NULL, $outfile, OPENSSL_ENCODING_SMIME));
+if (file_exists($outfile)) {
+    unlink($outfile);
+}
+if (file_exists($vout)) {
     unlink($vout);
 }
 ?>
@@ -120,10 +138,20 @@ Now is the winter of our discontent.
 true
 true
 
-S/MIME Detached (an error):
+S/MIME Detached:
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 
-Warning: openssl_cms_sign(): Detached signatures not possible with S/MIME encoding in %s on line %d
-bool(false)
+Validated content:
+Now is the winter of our discontent.
+true
+true
 
-Warning: openssl_cms_verify(): Detached signatures not possible with S/MIME encoding in %s on line %d
+S/MIME with a separate signature file (an error):
+bool(true)
+
+Warning: openssl_cms_verify(): A separate signature file cannot be used with S/MIME encoding, the signature is read from the message in %s on line %d
 bool(false)
