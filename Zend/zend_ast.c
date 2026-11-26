@@ -1681,8 +1681,8 @@ tail_call:
 						zend_hash_del(&EG(partial_function_application_cache), Z_STR_P(val));
 					} ZEND_HASH_FOREACH_END();
 				}
+				zend_hash_index_del(&EG(partial_function_application_cache), (zend_ulong)(uintptr_t)&ast->lineno);
 			}
-			zend_hash_index_del(&EG(partial_function_application_cache), (zend_ulong)(uintptr_t)&ast->lineno);
 		}
 		ast = fcc_ast->args;
 		goto tail_call;
