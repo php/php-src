@@ -380,13 +380,20 @@ PHPAPI void php_io_poll_stream_notify_close(php_stream *stream)
 	HashTable *watchers = stream->poll_watchers;
 	stream->poll_watchers = NULL;
 
+	/* Retire all watchers before releasing them so destructors see them inactive. */
 	ZEND_HASH_FOREACH_VAL(watchers, zval *zv) {
 		php_io_poll_watcher_object *watcher = Z_PTR_P(zv);
 		watcher->stream = NULL;
 		watcher->closed = true;
+		GC_ADDREF(&watcher->std);
 		if (watcher->context) {
 			php_io_poll_context_retire_watcher(watcher->context, watcher);
 		}
+	} ZEND_HASH_FOREACH_END();
+
+	ZEND_HASH_FOREACH_VAL(watchers, zval *zv) {
+		php_io_poll_watcher_object *watcher = Z_PTR_P(zv);
+		OBJ_RELEASE(&watcher->std);
 	} ZEND_HASH_FOREACH_END();
 
 	zend_hash_destroy(watchers);
@@ -503,9 +510,11 @@ static zend_result php_io_poll_watcher_modify_data(php_io_poll_watcher_object *w
 		return FAILURE;
 	}
 
-	/* Update user data */
-	zval_ptr_dtor(&watcher->data);
+	/* Update user data safely against re-entrant destructor */
+	zval old_data;
+	ZVAL_COPY_VALUE(&old_data, &watcher->data);
 	ZVAL_COPY(&watcher->data, data);
+	zval_ptr_dtor(&old_data);
 
 	return SUCCESS;
 }
