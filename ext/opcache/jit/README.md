@@ -41,8 +41,7 @@ Miscellaneous
 
 ### How to build 32-bit builds on x86_64 environments
 
-Refer to [../../../.github/workflows/push.yml](../../../.github/workflows/push.yml) for examples of
-dependencies to install.
+The [32-bit dependency setup](../../../.github/actions/apt-x32/action.yml) lists the i386 packages that CI installs. The [32-bit configure action](../../../.github/actions/configure-x32/action.yml) sets the compiler and linker flags.
 
 If you are running this natively (outside of Docker or a VM):
 
