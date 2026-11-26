@@ -941,6 +941,13 @@ static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER)
 	const unsigned char *cursor, *limit, *marker, *start;
 	zval *rval_ref;
 
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		zend_call_stack_size_error();
+		return 0;
+	}
+#endif
+
 	limit = max;
 	cursor = *p;
 
