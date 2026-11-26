@@ -192,6 +192,8 @@ PHP                                                                        NEWS
     execute() or rebound while fetching). (Ilia Alshanetsky)
 
 - Phar:
+  . Fixed Phar file stats using the string header instead of the entry
+    filename to compute the inode number. (Hohphu)
   . Fixed bug GH-25528 (Phar::setSignatureAlgorithm(): OpenSSL signing reads a
     freed private key). (Artem Ukrainskiy)
 
