@@ -365,6 +365,14 @@ static void php_hash_do_hash(
 
 	context = php_hash_alloc_context(ops);
 	ops->hash_init(context, args);
+	if (UNEXPECTED(EG(exception))) {
+		/* The options were rejected, the context is not usable */
+		php_hash_free_context(ops, context);
+		if (stream) {
+			php_stream_close(stream);
+		}
+		RETURN_THROWS();
+	}
 
 	if (isfilename) {
 		char buf[1024];
