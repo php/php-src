@@ -7311,7 +7311,7 @@ void zend_ffi_align_as_val(zend_ffi_dcl *dcl, const zend_ffi_val *align_val) /* 
 			val->i64 = (zend_ffi_double)val->u64 OP op2->d; \
 		} else if (op2->kind == ZEND_FFI_VAL_CHAR) { \
 			val->kind = ZEND_FFI_VAL_INT32; \
-			val->i64 = val->u64 OP op2->d; \
+			val->i64 = val->u64 OP op2->ch; \
 		} else { \
 			val->kind = ZEND_FFI_VAL_ERROR; \
 		} \
