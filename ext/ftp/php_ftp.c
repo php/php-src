@@ -518,8 +518,9 @@ PHP_FUNCTION(ftp_mlsd)
 	char		**llist, **ptr, *dir;
 	size_t		dir_len;
 	zval		entry;
+	bool		normalize_fact_names = false;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os", &z_ftp, php_ftp_ce, &dir, &dir_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os|b", &z_ftp, php_ftp_ce, &dir, &dir_len, &normalize_fact_names) == FAILURE) {
 		RETURN_THROWS();
 	}
 	GET_FTPBUF(ftp, z_ftp);
@@ -532,7 +533,7 @@ PHP_FUNCTION(ftp_mlsd)
 	array_init(return_value);
 	for (ptr = llist; *ptr; ptr++) {
 		array_init(&entry);
-		if (ftp_mlsd_parse_line(Z_ARRVAL_P(&entry), *ptr) == SUCCESS) {
+		if (ftp_mlsd_parse_line(Z_ARRVAL_P(&entry), *ptr, normalize_fact_names) == SUCCESS) {
 			zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &entry);
 		} else {
 			zval_ptr_dtor(&entry);

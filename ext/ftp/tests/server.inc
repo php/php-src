@@ -488,6 +488,15 @@ if ($pid) {
             fputs($s, "250 Rename successful\r\n");
         }elseif (preg_match('/^MLSD no_exists\//', $buf, $matches)) {
             fputs($s, "425 Error establishing connection\r\n");
+        }elseif ($buf === "MLSD normalize\r\n") {
+            with_data_connection(function ($fs) {
+                fputs($fs, "Type=FiLe;SIZE=51574;Modify=20240605091325;UNIX.mode=0644; mixed Case file.txt\r\n");
+                fputs($fs, "type=DIR;size=5; lower.txt\r\n");
+                fputs($fs, "Name=wrong;Type=file; actual.txt\r\n");
+                fputs($fs, "name=wrong;Type=file; actual2.txt\r\n");
+                fputs($fs, "Type=FIRST;type=SeCoNd;Type=THIRD; collision.txt\r\n");
+                fputs($fs, "X.\xC4FOO=VaLuE; nonascii.txt\r\n");
+            });
         }elseif (preg_match("~^MLSD(?: ([A-Za-z./]+))?\r\n$~", $buf, $m)) {
 
             if(isset($m[1]) && (($m[1] === 'bogusdir') || ($m[1] === '/bogusdir'))) {

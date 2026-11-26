@@ -99,7 +99,7 @@ namespace {
      * @return array<int, array>|false
      * @refcount 1
      */
-    function ftp_mlsd(FTP\Connection $ftp, string $directory): array|false {}
+    function ftp_mlsd(FTP\Connection $ftp, string $directory, bool $normalize_fact_names = false): array|false {}
 
     function ftp_systype(FTP\Connection $ftp): string|false {}
 
