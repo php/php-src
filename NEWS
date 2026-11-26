@@ -50,6 +50,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-25379 (array_map() foreach optimization changes callback
     semantics). (prateekbhujel)
   . Fix OSS-Fuzz #588264417. (ndossche)
+  . Fixed partial application treating methods named assert() as the global
+    assert(). (hohphu8)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
