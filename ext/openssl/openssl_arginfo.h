@@ -1,5 +1,5 @@
 /* This is a generated file, edit openssl.stub.php instead.
- * Stub hash: 28a534a72142f6813e1e93e0ed42db2c2a2cbea0 */
+ * Stub hash: 1654d5c7f1c9d3a4344739c057cb022ee91e7163 */
 
 #include "zend_attributes.h"
 #include "zend_constants.h"
@@ -411,6 +411,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_password_verify, 0, 3, _
 ZEND_END_ARG_INFO()
 #endif
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_oid_lookup, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, txt, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Openssl_Psk___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, psk, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, identity, IS_STRING, 1, "null")
@@ -516,6 +520,7 @@ ZEND_FUNCTION(openssl_get_cert_locations);
 ZEND_FUNCTION(openssl_password_hash);
 ZEND_FUNCTION(openssl_password_verify);
 #endif
+ZEND_FUNCTION(openssl_oid_lookup);
 ZEND_METHOD(Openssl_Psk, __construct);
 ZEND_METHOD(Openssl_Session, export);
 ZEND_METHOD(Openssl_Session, import);
@@ -600,6 +605,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(openssl_password_hash, arginfo_openssl_password_hash)
 	ZEND_FE(openssl_password_verify, arginfo_openssl_password_verify)
 #endif
+	ZEND_FE(openssl_oid_lookup, arginfo_openssl_oid_lookup)
 	ZEND_FE_END
 };
 
