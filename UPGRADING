@@ -76,6 +76,8 @@ PHP 8.7 UPGRADE NOTES
   . The number of filters that can be chained in a php://filter URL is limited
     to 16 by default. Set the stream context option max_filter_count to change
     this.
+  . stream_socket_sendto() now returns false on failure, as documented.
+    Previously it returned -1 unless the address could not be parsed.
 
 ========================================
 2. New Features
