@@ -170,6 +170,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-25650 (PDO::query() reports the wrong argument numbers for
     FETCH_CLASS constructor arguments). (Tomasz Kowalczyk)
 
+- PDO_DBLIB:
+  . Fixed a crash on persistent connections after an error raised through
+    PDO::exec(). (Ilia Alshanetsky)
+
 - PDO_Firebird:
   . Fixed stack buffer overflow with long connection user names, passwords,
     charsets, or roles. (Ilia Alshanetsky)
