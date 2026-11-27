@@ -14804,6 +14804,19 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 		}
 	}
 
+	if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE && (val_info & MAY_BE_UNDEF)) {
+		int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+		const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+
+		if (!exit_addr) {
+			return 0;
+		}
+
+		jit_guard_not_Z_TYPE(jit, val_addr, IS_UNDEF, exit_addr);
+
+		val_info &= ~MAY_BE_UNDEF;
+	}
+
 	ZEND_ASSERT(opline->op2_type == IS_CONST);
 	ZEND_ASSERT(op1_info & MAY_BE_OBJECT);
 
@@ -17474,6 +17487,12 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 			if (opline->op2_type != IS_CONST
 			 || Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) != IS_STRING
 			 || Z_STRVAL_P(RT_CONSTANT(opline, opline->op2))[0] == '\0') {
+				return 0;
+			}
+			if (!trace
+			 && opline->opcode == ZEND_ASSIGN_OBJ
+			 && (opline+1)->op1_type == IS_CV
+			 && (OP1_DATA_INFO() & MAY_BE_UNDEF)) {
 				return 0;
 			}
 			op1_info = OP1_INFO();

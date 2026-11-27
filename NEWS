@@ -27,6 +27,9 @@ PHP                                                                        NEWS
     nested isset()/empty(). (Jorg Sowa)
   . Fixed AST printing dropping readonly on promoted constructor parameters.
     (Jorg Sowa)
+  . Fixed use-after-free when the error handler releases or modifies the array
+    or object while an undefined variable is assigned to one of its elements or
+    properties. (Jorg Sowa)
   . Fixed bug GH-25311 (Assertion ret == SUCCESS in array_map()/array_filter()
     after delayed out-of-memory). (ndossche)
   . Fixed AST export of by-reference property hooks. (Jorg Sowa)
@@ -165,6 +168,8 @@ PHP                                                                        NEWS
   . Fixed function JIT ASSIGN_DIM reporting an undefined value or key out of
     order, or when the VM does not, on non-array containers. (Jorg Sowa)
   . Fix JIT register allocation for ASSIGN to traced reference. (ndossche)
+  . Fixed use-after-free in JIT when the error handler releases the object or
+    typed reference while an undefined variable is assigned to it. (Jorg Sowa)
 
 - PDO_Firebird:
   . Fixed stack buffer overflow with long connection user names, passwords,

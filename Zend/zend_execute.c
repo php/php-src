@@ -281,6 +281,35 @@ static zend_never_inline ZEND_COLD zval* zval_undefined_cv(uint32_t var EXECUTE_
 	return &EG(uninitialized_zval);
 }
 
+/* Returns false if the error handler destroyed or shared the array. */
+static zend_never_inline ZEND_COLD bool zend_undefined_op_data_write(HashTable *ht, uint32_t var EXECUTE_DATA_DC)
+{
+	GC_ADDREF(ht);
+	zval_undefined_cv(var EXECUTE_DATA_CC);
+	if (UNEXPECTED(GC_DELREF(ht) != 1)) {
+		if (!GC_REFCOUNT(ht)) {
+			zend_array_destroy(ht);
+		}
+		return false;
+	}
+	return true;
+}
+
+/* An INDIRECT op1 may point into storage the error handler releases, so keep a copy in its slot. */
+static zend_never_inline ZEND_COLD zval *zend_undefined_op_data_obj(zval *object, const zend_op *opline EXECUTE_DATA_DC)
+{
+	if (opline->op1_type == IS_VAR) {
+		zval *var = EX_VAR(opline->op1.var);
+
+		if (Z_TYPE_P(var) == IS_INDIRECT) {
+			ZVAL_COPY(var, object);
+			object = var;
+		}
+	}
+	zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+	return object;
+}
+
 static zend_never_inline ZEND_COLD zval* ZEND_FASTCALL _zval_undefined_op1(EXECUTE_DATA_D)
 {
 	return zval_undefined_cv(EX(opline)->op1.var EXECUTE_DATA_CC);

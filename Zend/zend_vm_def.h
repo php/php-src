@@ -1023,7 +1023,12 @@ ZEND_VM_HANDLER(28, ZEND_ASSIGN_OBJ_OP, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, OP)
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	do {
-		value = GET_OP_DATA_ZVAL_PTR(BP_VAR_R);
+		if ((opline+1)->op1_type == IS_CV && UNEXPECTED(Z_TYPE_P(EX_VAR((opline+1)->op1.var)) == IS_UNDEF)) {
+			object = zend_undefined_op_data_obj(object, opline EXECUTE_DATA_CC);
+			value = &EG(uninitialized_zval);
+		} else {
+			value = GET_OP_DATA_ZVAL_PTR(BP_VAR_R);
+		}
 
 		if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 			if (Z_ISREF_P(object) && Z_TYPE_P(Z_REFVAL_P(object)) == IS_OBJECT) {
@@ -1177,7 +1182,14 @@ ZEND_VM_C_LABEL(assign_dim_op_new_array):
 			}
 		}
 
-		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
+		if ((opline+1)->op1_type == IS_CV && UNEXPECTED(Z_TYPE_P(EX_VAR((opline+1)->op1.var)) == IS_UNDEF)) {
+			if (UNEXPECTED(!zend_undefined_op_data_write(ht, (opline+1)->op1.var EXECUTE_DATA_CC))) {
+				ZEND_VM_C_GOTO(assign_dim_op_ret_null);
+			}
+			value = &EG(uninitialized_zval);
+		} else {
+			value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
+		}
 
 		do {
 			if (OP2_TYPE != IS_UNUSED && UNEXPECTED(Z_ISREF_P(var_ptr))) {
@@ -2433,7 +2445,11 @@ ZEND_VM_HANDLER(24, ZEND_ASSIGN_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE_
 
 	SAVE_OPLINE();
 	object = GET_OP1_OBJ_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
-	value = GET_OP_DATA_ZVAL_PTR(BP_VAR_R);
+	value = GET_OP_DATA_ZVAL_PTR_UNDEF(BP_VAR_R);
+	if (OP_DATA_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+		object = zend_undefined_op_data_obj(object, opline EXECUTE_DATA_CC);
+		value = &EG(uninitialized_zval);
+	}
 
 	if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		if (Z_ISREF_P(object) && Z_TYPE_P(Z_REFVAL_P(object)) == IS_OBJECT) {
@@ -2629,22 +2645,19 @@ ZEND_VM_HANDLER(23, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMPVAR|UNUSED|NEXT|CV, SPEC(O
 ZEND_VM_C_LABEL(try_assign_dim_array):
 		SEPARATE_ARRAY(object_ptr);
 		if (OP2_TYPE == IS_UNUSED) {
+			HashTable *ht = Z_ARRVAL_P(object_ptr);
+
 			value = GET_OP_DATA_ZVAL_PTR_UNDEF(BP_VAR_R);
 			if (OP_DATA_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
-				HashTable *ht = Z_ARRVAL_P(object_ptr);
-				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
-					GC_ADDREF(ht);
-				}
-				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
-				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
-					zend_array_destroy(ht);
+				if (UNEXPECTED(!zend_undefined_op_data_write(ht, (opline+1)->op1.var EXECUTE_DATA_CC))) {
 					ZEND_VM_C_GOTO(assign_dim_error);
 				}
+				value = &EG(uninitialized_zval);
 			}
 			if (OP_DATA_TYPE == IS_CV || OP_DATA_TYPE == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
-			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			value = zend_hash_next_index_insert(ht, value);
 			if (UNEXPECTED(value == NULL)) {
 				zend_cannot_add_element();
 				ZEND_VM_C_GOTO(assign_dim_error);
@@ -2675,7 +2688,13 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 			if (UNEXPECTED(variable_ptr == NULL)) {
 				ZEND_VM_C_GOTO(assign_dim_error);
 			}
-			value = GET_OP_DATA_ZVAL_PTR(BP_VAR_R);
+			value = GET_OP_DATA_ZVAL_PTR_UNDEF(BP_VAR_R);
+			if (OP_DATA_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				if (UNEXPECTED(!zend_undefined_op_data_write(Z_ARRVAL_P(object_ptr), (opline+1)->op1.var EXECUTE_DATA_CC))) {
+					ZEND_VM_C_GOTO(assign_dim_error);
+				}
+				value = &EG(uninitialized_zval);
+			}
 			value = zend_assign_to_variable_ex(variable_ptr, value, OP_DATA_TYPE, EX_USES_STRICT_TYPES(), &garbage);
 		}
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
