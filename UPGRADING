@@ -107,6 +107,12 @@ PHP 8.7 UPGRADE NOTES
     A ValueError is thrown if the array is empty or contains an invalid
     locale, and a TypeError if it contains a non-string value.
 
+- Sockets:
+  . Added AF_VSOCK support on 64-bit platforms. socket_bind(),
+    socket_connect() and socket_sendto() take the context ID as a decimal
+    string in the address argument, and the port accepts the full unsigned
+    32-bit range.
+
 - Streams:
   . The so_linger, so_rcvbuf and so_sndbuf stream socket context options are
     now also applied to unix and unix datagram sockets.
@@ -184,6 +190,14 @@ PHP 8.7 UPGRADE NOTES
     CURLOPT_SERVER_RESPONSE_TIMEOUT_MS.
   . CURLOPT_MAIL_RCPT_ALLOWFAILS is the correctly spelled alternative to
     CURLOPT_MAIL_RCPT_ALLLOWFAILS.
+
+- Sockets:
+  . AF_VSOCK.
+  . VMADDR_CID_ANY.
+  . VMADDR_CID_HYPERVISOR.
+  . VMADDR_CID_LOCAL.
+  . VMADDR_CID_HOST.
+  . VMADDR_PORT_ANY.
 
 ========================================
 11. Changes to INI File Handling
