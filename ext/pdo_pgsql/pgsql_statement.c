@@ -191,7 +191,7 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 
 	pgsql_stmt_finish(S, FIN_DISCARD|(server_obj_usable ? FIN_CLOSE|FIN_ABORT : 0));
 
-	if (server_obj_usable && S->H->running_stmt == S) {
+	if ((server_obj_usable || stmt->database_object_handle == NULL) && S->H->running_stmt == S) {
 		S->H->running_stmt = NULL;
 	}
 
