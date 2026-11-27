@@ -38,4 +38,4 @@ object(variant)#%d (0) {
 }
 object(variant)#%d (0) {
 }
-Unable to lookup `qux': %s
+Unable to lookup "qux": %s

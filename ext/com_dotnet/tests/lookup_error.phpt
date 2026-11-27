@@ -12,4 +12,4 @@ try {
 }
 ?>
 --EXPECTF--
-Unable to lookup `unknownProperty': %s
+Unable to lookup "unknownProperty": %s
