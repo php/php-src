@@ -36,6 +36,8 @@ PHP                                                                        NEWS
   . Fixed AST export of by-reference property hooks. (Jorg Sowa)
   . Fixed AST export of property hook parameter lists and attributes.
     (Jorg Sowa)
+  . Fixed bug GH-25540 (Objects holding a suspended Fiber with a callback bound
+    to the same object are not collected). (akasakariko)
   . Fixed object_properties_load() adding integer keys to property tables, which
     made the properties unreadable and clone hit an assertion.
     (Nicolas Grekas)
