@@ -1157,6 +1157,7 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, bool global) /* {{{ 
 	zval			 *subpats = NULL;	/* Array for subpatterns */
 	zend_long		  flags = 0;		/* Match control flags */
 	zend_long		  start_offset = 0;	/* Where the new search starts */
+	size_t			  offset;
 
 	ZEND_PARSE_PARAMETERS_START(2, 5)
 		Z_PARAM_STR(regex)
@@ -1172,14 +1173,20 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, bool global) /* {{{ 
 		RETURN_FALSE;
 	}
 
-	if (start_offset == ZEND_LONG_MIN) {
-		zend_argument_value_error(5, "must be greater than " ZEND_LONG_FMT, ZEND_LONG_MIN);
-		RETURN_THROWS();
+	if (start_offset < 0) {
+		/* Negative offset counts from the end of the string. */
+		if (EXPECTED(start_offset != ZEND_LONG_MIN && (size_t)-start_offset <= ZSTR_LEN(subject))) {
+			offset = ZSTR_LEN(subject) - (size_t)-start_offset;
+		} else {
+			offset = 0;
+		}
+	} else {
+		offset = (size_t)start_offset;
 	}
 
 	pce->refcount++;
 	php_pcre_match_impl(pce, subject, return_value, subpats,
-		global, flags, start_offset);
+		global, flags, offset);
 	pce->refcount--;
 }
 /* }}} */
@@ -1202,7 +1209,7 @@ static zend_always_inline bool is_known_valid_utf8(
 
 /* {{{ php_pcre_match_impl() */
 PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str, zval *return_value,
-	zval *subpats, bool global, zend_long flags, zend_off_t start_offset)
+	zval *subpats, bool global, zend_long flags, size_t start_offset)
 {
 	zval			 result_set;		/* Holds a set of subpatterns after
 										   a global match */
@@ -1219,7 +1226,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	PCRE2_SPTR       mark = NULL;		/* Target for MARK name */
 	HashTable		*marks = NULL;		/* Array of marks for PREG_PATTERN_ORDER */
 	pcre2_match_data *match_data;
-	PCRE2_SIZE		 start_offset2, orig_start_offset;
+	PCRE2_SIZE		 search_offset;
 	bool old_mdata_used;
 
 	char *subject = ZSTR_VAL(subject_str);
@@ -1256,21 +1263,11 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 		unmatched_as_null = 0;
 	}
 
-	/* Negative offset counts from the end of the string. */
-	if (start_offset < 0) {
-		if ((PCRE2_SIZE)-start_offset <= subject_len) {
-			start_offset2 = subject_len + start_offset;
-		} else {
-			start_offset2 = 0;
-		}
-	} else {
-		start_offset2 = (PCRE2_SIZE)start_offset;
-	}
-
-	if (start_offset2 > subject_len) {
+	if (start_offset > subject_len) {
 		pcre_handle_exec_error(PCRE2_ERROR_BADOFFSET);
 		RETURN_FALSE;
 	}
+	search_offset = start_offset;
 
 	/* Calculate the size of the offsets array, and allocate memory for it. */
 	num_subpats = pce->capture_count + 1;
@@ -1313,19 +1310,18 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	/* Array of subpattern offsets */
 	PCRE2_SIZE *const offsets = pcre2_get_ovector_pointer(match_data);
 
-	orig_start_offset = start_offset2;
 	options =
-		(pce->compile_options & PCRE2_UTF) && !is_known_valid_utf8(subject_str, orig_start_offset)
+		(pce->compile_options & PCRE2_UTF) && !is_known_valid_utf8(subject_str, start_offset)
 			? 0 : PCRE2_NO_UTF_CHECK;
 
 	/* Execute the regular expression. */
 #ifdef HAVE_PCRE_JIT_SUPPORT
 	if ((pce->preg_options & PREG_JIT) && options) {
-		count = pcre2_jit_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset2,
+		count = pcre2_jit_match(pce->re, (PCRE2_SPTR)subject, subject_len, search_offset,
 				PCRE2_NO_UTF_CHECK, match_data, mctx);
 	} else
 #endif
-	count = pcre2_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset2,
+	count = pcre2_match(pce->re, (PCRE2_SPTR)subject, subject_len, search_offset,
 			options, match_data, mctx);
 
 	while (1) {
@@ -1449,14 +1445,14 @@ matched:
 			}
 
 			/* Advance to the next piece. */
-			start_offset2 = offsets[1];
+			search_offset = offsets[1];
 
 			/* If we have matched an empty string, mimic what Perl's /g options does.
 			   This turns out to be rather cunning. First we set PCRE2_NOTEMPTY_ATSTART and try
 			   the match again at the same point. If this fails (picked up above) we
 			   advance to the next character. */
-			if (start_offset2 == offsets[0]) {
-				count = pcre2_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset2,
+			if (search_offset == offsets[0]) {
+				count = pcre2_match(pce->re, (PCRE2_SPTR)subject, subject_len, search_offset,
 					PCRE2_NO_UTF_CHECK | PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED, match_data, mctx);
 				if (count >= 0) {
 					if (global) {
@@ -1469,10 +1465,10 @@ matched:
 					   this is not necessarily the end. We need to advance
 					   the start offset, and continue. Fudge the offset values
 					   to achieve this, unless we're already at the end of the string. */
-					if (start_offset2 < subject_len) {
-						size_t unit_len = calculate_unit_length(pce, subject + start_offset2);
+					if (search_offset < subject_len) {
+						size_t unit_len = calculate_unit_length(pce, subject + search_offset);
 
-						start_offset2 += unit_len;
+						search_offset += unit_len;
 					} else {
 						break;
 					}
@@ -1495,15 +1491,15 @@ error:
 		/* Execute the regular expression. */
 #ifdef HAVE_PCRE_JIT_SUPPORT
 		if ((pce->preg_options & PREG_JIT)) {
-			if (start_offset2 > subject_len) {
+			if (search_offset > subject_len) {
 				pcre_handle_exec_error(PCRE2_ERROR_BADOFFSET);
 				break;
 			}
-			count = pcre2_jit_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset2,
+			count = pcre2_jit_match(pce->re, (PCRE2_SPTR)subject, subject_len, search_offset,
 					PCRE2_NO_UTF_CHECK, match_data, mctx);
 		} else
 #endif
-		count = pcre2_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset2,
+		count = pcre2_match(pce->re, (PCRE2_SPTR)subject, subject_len, search_offset,
 				PCRE2_NO_UTF_CHECK, match_data, mctx);
 	}
 	if (match_data != mdata) {
@@ -1542,7 +1538,7 @@ error:
 	if (PCRE_G(error_code) == PHP_PCRE_NO_ERROR) {
 		/* If there was no error and we're in /u mode, remember that the string is valid UTF-8. */
 		if ((pce->compile_options & PCRE2_UTF)
-				&& !ZSTR_IS_INTERNED(subject_str) && orig_start_offset == 0) {
+				&& !ZSTR_IS_INTERNED(subject_str) && start_offset == 0) {
 			GC_ADD_FLAGS(subject_str, IS_STR_VALID_UTF8);
 		}
 

@@ -117,6 +117,11 @@ PHP                                                                        NEWS
     (ndossche)
   . Fixed JIT ignoring exceptions from typed property set hooks. (David Carlier)
 
+- PCRE:
+  . preg_match() and preg_match_all() no longer throw a ValueError for an
+    offset of PHP_INT_MIN, which now starts at the beginning of the subject
+    like any other negative offset beyond its length. (Marc Bennewitz)
+
 - PDO:
   . Fixed PDOStatement::getColumnMeta() reading out of bounds for an invalid
     column index. (Ilia Alshanetsky)
