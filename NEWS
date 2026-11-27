@@ -184,6 +184,8 @@ PHP                                                                        NEWS
   . Fixed tracing JIT taking the wrong branch after a VM interrupt.
     (Brian Marks)
   . Fix JIT register allocation for ASSIGN to traced reference. (ndossche)
+  . Fixed a double free when a destructor throws while freeing a temporary
+    whose result the optimizer discarded. (Ilia Alshanetsky)
 
 - OpenSSL:
   . Fixed bug GH-25172 (TLS session reuse shares request-lifetime callback
