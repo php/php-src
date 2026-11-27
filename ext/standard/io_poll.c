@@ -70,6 +70,7 @@ struct php_io_poll_context_object {
 	php_poll_ctx *ctx;
 	HashTable *watchers; /* Maps fd -> watcher object */
 	bool buffered_readers; /* Some watcher can report buffered data */
+	pid_t owner_pid;
 	zend_object std;
 };
 
@@ -363,12 +364,63 @@ static void php_io_poll_stream_unwatch(php_io_poll_watcher_object *watcher)
 	}
 }
 
+static php_poll_error php_io_poll_context_rebuild_after_fork(php_io_poll_context_object *context)
+{
+	pid_t pid = getpid();
+
+	if (EXPECTED(context->owner_pid == pid)) {
+		return PHP_POLL_ERR_NONE;
+	}
+
+	php_poll_ctx *ctx = php_poll_create(php_poll_get_backend_type(context->ctx), 0);
+	if (!ctx) {
+		return PHP_POLL_ERR_SYSTEM;
+	}
+	if (php_poll_init(ctx) != SUCCESS) {
+		goto failure;
+	}
+
+	ZEND_HASH_FOREACH_VAL(context->watchers, zval *zv) {
+		php_io_poll_watcher_object *watcher = PHP_POLL_WATCHER_OBJ_FROM_ZV(zv);
+		if (!watcher->disarmed
+				&& php_poll_add(ctx, (int) watcher->fd, watcher->watched_events, watcher) != SUCCESS) {
+			goto failure;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	php_poll_destroy(context->ctx);
+	context->ctx = ctx;
+	context->owner_pid = pid;
+
+	return PHP_POLL_ERR_NONE;
+
+failure:;
+	php_poll_error err = php_poll_get_error(ctx);
+	php_poll_destroy(ctx);
+	return err != PHP_POLL_ERR_NONE ? err : PHP_POLL_ERR_SYSTEM;
+}
+
+static bool php_io_poll_context_rebuild_after_fork_or_throw(php_io_poll_context_object *context)
+{
+	php_poll_error err = php_io_poll_context_rebuild_after_fork(context);
+
+	if (EXPECTED(err == PHP_POLL_ERR_NONE)) {
+		return true;
+	}
+
+	php_io_poll_throw_failed_operation(php_io_poll_failed_context_init_class_entry,
+			"Failed to initialize polling context", err);
+	return false;
+}
+
 static void php_io_poll_context_retire_watcher(
 		php_io_poll_context_object *context, php_io_poll_watcher_object *watcher)
 {
 	php_socket_t fd = watcher->fd;
 
-	php_poll_remove(context->ctx, (int) fd);
+	if (php_io_poll_context_rebuild_after_fork(context) == PHP_POLL_ERR_NONE) {
+		php_poll_remove(context->ctx, (int) fd);
+	}
 	php_io_poll_stream_unwatch(watcher);
 	php_io_poll_watcher_deactivate(watcher);
 	zend_hash_index_del(context->watchers, (zend_ulong) fd);
@@ -470,6 +522,10 @@ static zend_result php_io_poll_watcher_modify_events(
 	if (!watcher->active || !watcher->context) {
 		zend_throw_exception(
 				php_io_poll_inactive_watcher_class_entry, "Cannot modify inactive watcher", 0);
+		return FAILURE;
+	}
+
+	if (!php_io_poll_context_rebuild_after_fork_or_throw(watcher->context)) {
 		return FAILURE;
 	}
 
@@ -790,6 +846,7 @@ PHP_METHOD(Io_Poll_Context, __construct)
 
 	intern->watchers = emalloc(sizeof(HashTable));
 	zend_hash_init(intern->watchers, 8, NULL, ZVAL_PTR_DTOR, 0);
+	intern->owner_pid = getpid();
 }
 
 PHP_METHOD(Io_Poll_Context, add)
@@ -811,6 +868,10 @@ PHP_METHOD(Io_Poll_Context, add)
 	events = php_io_poll_event_enums_to_events(event_enums);
 	if (!events) {
 		zend_argument_type_error(2, "must be array of Event enums");
+		RETURN_THROWS();
+	}
+
+	if (!php_io_poll_context_rebuild_after_fork_or_throw(intern)) {
 		RETURN_THROWS();
 	}
 
@@ -908,6 +969,10 @@ PHP_METHOD(Io_Poll_Context, wait)
 
 		timeout_ts.tv_sec = timeout->duration.seconds;
 		timeout_ts.tv_nsec = timeout->duration.nanoseconds;
+	}
+
+	if (!php_io_poll_context_rebuild_after_fork_or_throw(intern)) {
+		RETURN_THROWS();
 	}
 
 	if (max_events_is_null) {
