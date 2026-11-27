@@ -1144,7 +1144,6 @@ static ZEND_FUNCTION(zend_call_method)
 		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_value_name(class_or_object));
 		return;
 	}
-
 	ZEND_ASSERT((argc >= 2) && (argc <= 4));
 	zend_call_method(obj, ce, NULL, ZSTR_VAL(method_name), ZSTR_LEN(method_name), return_value, argc - 2, arg1, arg2);
 }
