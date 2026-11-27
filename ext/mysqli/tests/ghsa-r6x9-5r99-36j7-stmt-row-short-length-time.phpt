@@ -25,7 +25,7 @@ while ($row = $result->fetch_row()) {
 $stmt->close();
 $conn->close();
 
-$process->terminate();
+$process->terminate(true);
 
 print "done!";
 ?>
@@ -42,4 +42,6 @@ print "done!";
 [*] Sending - Malicious Stmt Response for data timval [length too short]: 01000001023200000203646566087068705f74657374046461746104646174610673747276616c0673747276616c0ce000c8000000fd01100000003200000303646566087068705f74657374046461746104646174610674696d76616c0674696d76616c0c3f000a0000000b811000000005000004fe00002200090000050000047465737401de05000006fe00002200
 
 Warning: mysqli_result::fetch_row(): Malformed server packet. Field length is too short for the field type in %s on line %d
+[*] Received: 0500000019010000000100000001
+[*] Server finished
 done!

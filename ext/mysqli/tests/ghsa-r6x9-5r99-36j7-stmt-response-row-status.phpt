@@ -18,8 +18,6 @@ $conn = new mysqli( $servername, $username, $password, "", $process->getPort() )
 echo "[*] Preparing statement on the fake server...\n";
 $conn->prepare("SELECT item FROM items");
 
-$conn->close();
-
 $process->terminate();
 
 print "done!";

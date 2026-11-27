@@ -18,9 +18,7 @@ $conn = new mysqli( $servername, $username, $password, "", $process->getPort() )
 echo "[*] Preparing statement on the fake server...\n";
 $conn->prepare("SELECT item FROM items");
 
-$conn->close();
-
-$process->terminate();
+$process->terminate(true);
 
 print "done!";
 ?>
@@ -35,4 +33,6 @@ print "done!";
 [*] Sending - Stmt prepare items: 0c0000010001000000010000000000003000000203646566087068705f74657374056974656d73056974656d73046974656dfe6974656d0ce000c8000000fd01100000001f000003fe00000200
 
 Warning: mysqli::prepare(): Protocol error. Server sent NULL_LENGTH. The server is faulty in %s on line %d
+[*] Received: 050000001901000000
+[*] Server finished
 done!

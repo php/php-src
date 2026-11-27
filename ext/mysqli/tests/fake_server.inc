@@ -1373,8 +1373,6 @@ function my_mysqli_test_stmt_response_row_over_read_status(my_mysqli_fake_server
 
 function my_mysqli_test_stmt_response_field_len_faulty(my_mysqli_fake_server_conn $conn): void
 {
-	$rh = $conn->packet_generator->server_stmt_execute_items_response();
-
 	$conn->send_server_greetings();
 	$conn->read();
 	$conn->send_server_ok();
@@ -1385,8 +1383,6 @@ function my_mysqli_test_stmt_response_field_len_faulty(my_mysqli_fake_server_con
 	$packets[2]->packet_length = '1f0000';
 	$conn->send($conn->packets_to_bytes($packets), "Stmt prepare items");
 	$conn->read();
-	$conn->send($conn->packets_to_bytes($rh), "Malicious Stmt Response for fields [Extract heap through buffer over-read]");
-	$conn->read(65536);
 }
 
 function my_mysqli_test_stmt_response_field_len_premature(my_mysqli_fake_server_conn $conn): void

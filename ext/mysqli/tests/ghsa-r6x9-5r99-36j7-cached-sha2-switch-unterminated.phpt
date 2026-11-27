@@ -20,8 +20,6 @@ $process->wait();
 
 $conn = new mysqli( $servername, $username, $password, "", $process->getPort() );
 echo "[*] connect_errno: ", $conn->connect_errno, "\n";
-$conn->close();
-
 $process->terminate();
 
 print "done!";

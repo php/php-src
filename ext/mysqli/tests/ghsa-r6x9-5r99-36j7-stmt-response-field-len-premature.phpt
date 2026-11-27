@@ -18,9 +18,7 @@ $conn = new mysqli( $servername, $username, $password, "", $process->getPort() )
 echo "[*] Preparing statement on the fake server...\n";
 $conn->prepare("SELECT item FROM items");
 
-$conn->close();
-
-$process->terminate();
+$process->terminate(true);
 
 print "done!";
 ?>
@@ -39,4 +37,6 @@ Warning: mysqli::prepare(): Protocol error. Server sent false length. Expected 1
 Warning: mysqli::prepare(): Premature end of data (mysqlnd_wireprotocol.c:%d) in %s on line %d
 
 Warning: mysqli::prepare(): Result set field packet shorter than expected in %s on line %d
+[*] Received: 050000001901000000
+[*] Server finished
 done!
