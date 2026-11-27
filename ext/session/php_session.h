@@ -134,6 +134,7 @@ typedef struct _php_ps_globals {
 	bool  use_only_cookies;
 	bool  send_cookie;
 	bool  auto_start;
+	bool  auto_start_tried; /* the current request already tried session.auto_start */
 	bool  define_sid;
 	const ps_module *mod;
 	const ps_module *default_mod;

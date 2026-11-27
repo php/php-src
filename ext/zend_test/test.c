@@ -2308,6 +2308,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.print_stderr_mshutdown", "0", PHP_INI_SYSTEM, OnUpdateBool, print_stderr_mshutdown, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.request_begin_fails", "0", PHP_INI_ALL, OnUpdateBool, request_begin_fails, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.request_end_fails", "0", PHP_INI_ALL, OnUpdateBool, request_end_fails, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_BOOLEAN("zend_test.print_request_hooks", "0", PHP_INI_ALL, OnUpdateBool, print_request_hooks, zend_zend_test_globals, zend_test_globals)
 #ifdef HAVE_COPY_FILE_RANGE
 	STD_PHP_INI_ENTRY("zend_test.limit_copy_file_range", "-1", PHP_INI_ALL, OnUpdateLong, limit_copy_file_range, zend_zend_test_globals, zend_test_globals)
 #endif
@@ -2592,16 +2593,29 @@ PHP_RSHUTDOWN_FUNCTION(zend_test)
 	}
 
 	zend_test_mm_custom_handlers_rshutdown();
+
+	if (ZT_G(print_request_hooks)) {
+		php_printf("request_shutdown\n");
+	}
+
 	return SUCCESS;
 }
 
 static PHP_RBEGIN_FUNCTION(zend_test)
 {
+	if (ZT_G(print_request_hooks)) {
+		php_printf("request_begin\n");
+	}
+
 	return ZT_G(request_begin_fails) ? FAILURE : SUCCESS;
 }
 
 static PHP_REND_FUNCTION(zend_test)
 {
+	if (ZT_G(print_request_hooks)) {
+		php_printf("request_end\n");
+	}
+
 	return ZT_G(request_end_fails) ? FAILURE : SUCCESS;
 }
 

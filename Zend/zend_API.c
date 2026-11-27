@@ -44,6 +44,7 @@ ZEND_API bool zend_dl_use_deepbind = false;
 
 static zend_module_entry **module_request_startup_handlers;
 static zend_module_entry **module_request_shutdown_handlers;
+static zend_module_entry **module_request_begin_handlers;
 static zend_module_entry **module_post_deactivate_handlers;
 static zend_module_entry **modules_dl_loaded;
 
@@ -2572,6 +2573,7 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 	int startup_count = 0;
 	int shutdown_count = 0;
 	int post_deactivate_count = 0;
+	int begin_count = 0;
 	int dl_loaded_count = 0;
 
 	/* Collect extensions with request startup/shutdown handlers */
@@ -2579,8 +2581,11 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 		if (module->request_startup_func) {
 			startup_count++;
 		}
-		if (module->request_shutdown_func) {
+		if (module->request_shutdown_func || module->request_end_func) {
 			shutdown_count++;
+		}
+		if (module->request_begin_func) {
+			begin_count++;
 		}
 		if (module->post_deactivate_func) {
 			post_deactivate_count++;
@@ -2594,22 +2599,29 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 	    sizeof(zend_module_entry*) *
 		(startup_count + 1 +
 		 shutdown_count + 1 +
-		 post_deactivate_count + 1), true);
+		 post_deactivate_count + 1 +
+		 begin_count + 1), true);
 	module_request_startup_handlers[startup_count] = NULL;
 	module_request_shutdown_handlers = module_request_startup_handlers + startup_count + 1;
 	module_request_shutdown_handlers[shutdown_count] = NULL;
 	module_post_deactivate_handlers = module_request_shutdown_handlers + shutdown_count + 1;
 	module_post_deactivate_handlers[post_deactivate_count] = NULL;
+	module_request_begin_handlers = module_post_deactivate_handlers + post_deactivate_count + 1;
+	module_request_begin_handlers[begin_count] = NULL;
 	/* Cannot reuse module_request_startup_handlers because it is freed in zend_destroy_modules, which happens before zend_unload_modules. */
 	modules_dl_loaded = perealloc(modules_dl_loaded, sizeof(zend_module_entry*) * (dl_loaded_count + 1), true);
 	modules_dl_loaded[dl_loaded_count] = NULL;
 	startup_count = 0;
+	begin_count = 0;
 
 	ZEND_HASH_MAP_FOREACH_PTR(&module_registry, module) {
 		if (module->request_startup_func) {
 			module_request_startup_handlers[startup_count++] = module;
 		}
-		if (module->request_shutdown_func) {
+		if (module->request_begin_func) {
+			module_request_begin_handlers[begin_count++] = module;
+		}
+		if (module->request_shutdown_func || module->request_end_func) {
 			module_request_shutdown_handlers[--shutdown_count] = module;
 		}
 		if (module->post_deactivate_func) {
@@ -3468,66 +3480,136 @@ ZEND_API void zend_activate_modules(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_result zend_request_begin_modules(void)
+/* A bailout doesn't skip the next modules: each module entering its request_begin_func gets its request_end_func */
+static zend_result zend_request_begin_module(const zend_module_entry *module)
 {
-	zend_module_entry *module;
 	zend_result result = SUCCESS;
 
-	ZEND_HASH_MAP_FOREACH_PTR(&module_registry, module) {
-		if (module->request_begin_func
-				&& module->request_begin_func(module->type, module->module_number) == FAILURE) {
+	zend_try {
+		if (module->request_begin_func(module->type, module->module_number) == FAILURE) {
 			zend_error(E_WARNING, "request_begin() for %s module failed", module->name);
 			result = FAILURE;
 		}
-	} ZEND_HASH_FOREACH_END();
+	} zend_catch {
+		result = FAILURE;
+	} zend_end_try();
 
 	return result;
 }
 
-ZEND_API zend_result zend_request_end_modules(void)
+ZEND_API zend_result zend_request_begin_dl_module(const zend_module_entry *module)
 {
-	zend_module_entry *module;
+	if (!(EG(flags) & EG_FLAGS_REQUEST_BEGUN) || !module->request_begin_func) {
+		return SUCCESS;
+	}
+
+	return zend_request_begin_module(module);
+}
+
+/* Does nothing when the hooks already began the current request */
+ZEND_API zend_result zend_request_begin_modules(void)
+{
 	zend_result result = SUCCESS;
 
-	ZEND_HASH_MAP_REVERSE_FOREACH_PTR(&module_registry, module) {
-		if (module->request_end_func) {
-			zend_try {
-				if (module->request_end_func(module->type, module->module_number) == FAILURE) {
-					zend_error(E_WARNING, "request_end() for %s module failed", module->name);
-					result = FAILURE;
-				}
-			} zend_catch {
+	if (EG(flags) & EG_FLAGS_REQUEST_BEGUN) {
+		return SUCCESS;
+	}
+	EG(flags) |= EG_FLAGS_REQUEST_BEGUN;
+
+	/* dl() loads modules missing from the handler lists */
+	if (EG(full_tables_cleanup)) {
+		zend_module_entry *module;
+
+		ZEND_HASH_MAP_FOREACH_PTR(&module_registry, module) {
+			if (module->request_begin_func && zend_request_begin_module(module) == FAILURE) {
 				result = FAILURE;
-			} zend_end_try();
+			}
+		} ZEND_HASH_FOREACH_END();
+	} else {
+		for (zend_module_entry **p = module_request_begin_handlers; *p; p++) {
+			if (zend_request_begin_module(*p) == FAILURE) {
+				result = FAILURE;
+			}
 		}
-	} ZEND_HASH_FOREACH_END();
+	}
 
 	return result;
 }
 
-ZEND_API void zend_deactivate_modules(void) /* {{{ */
+static zend_result zend_request_end_module(const zend_module_entry *module)
 {
-	EG(current_execute_data) = NULL; /* we're no longer executing anything */
+	zend_result result = SUCCESS;
+
+	zend_try {
+		if (module->request_end_func(module->type, module->module_number) == FAILURE) {
+			zend_error(E_WARNING, "request_end() for %s module failed", module->name);
+			result = FAILURE;
+		}
+	} zend_catch {
+		result = FAILURE;
+	} zend_end_try();
+
+	return result;
+}
+
+/* Does nothing when the hooks didn't begin the current request */
+ZEND_API zend_result zend_request_end_modules(void)
+{
+	zend_result result = SUCCESS;
+
+	if (!(EG(flags) & EG_FLAGS_REQUEST_BEGUN)) {
+		return SUCCESS;
+	}
+	EG(flags) &= ~EG_FLAGS_REQUEST_BEGUN;
 
 	if (EG(full_tables_cleanup)) {
 		zend_module_entry *module;
 
 		ZEND_HASH_MAP_REVERSE_FOREACH_PTR(&module_registry, module) {
-			if (module->request_shutdown_func) {
-				zend_try {
-					module->request_shutdown_func(module->type, module->module_number);
-				} zend_end_try();
+			if (module->request_end_func && zend_request_end_module(module) == FAILURE) {
+				result = FAILURE;
 			}
 		} ZEND_HASH_FOREACH_END();
 	} else {
-		zend_module_entry **p = module_request_shutdown_handlers;
+		for (zend_module_entry **p = module_request_shutdown_handlers; *p; p++) {
+			if ((*p)->request_end_func && zend_request_end_module(*p) == FAILURE) {
+				result = FAILURE;
+			}
+		}
+	}
 
-		while (*p) {
-			const zend_module_entry *module = *p;
-			zend_try {
-				module->request_shutdown_func(module->type, module->module_number);
-			} zend_end_try();
-			p++;
+	return result;
+}
+
+/* A module ends the request right before its own shutdown, keeping the order other modules rely on */
+static void zend_deactivate_module(const zend_module_entry *module, bool request_begun)
+{
+	if (request_begun && module->request_end_func) {
+		zend_request_end_module(module);
+	}
+	if (module->request_shutdown_func) {
+		zend_try {
+			module->request_shutdown_func(module->type, module->module_number);
+		} zend_end_try();
+	}
+}
+
+ZEND_API void zend_deactivate_modules(void) /* {{{ */
+{
+	bool request_begun = EG(flags) & EG_FLAGS_REQUEST_BEGUN;
+
+	EG(current_execute_data) = NULL; /* we're no longer executing anything */
+	EG(flags) &= ~EG_FLAGS_REQUEST_BEGUN;
+
+	if (EG(full_tables_cleanup)) {
+		zend_module_entry *module;
+
+		ZEND_HASH_MAP_REVERSE_FOREACH_PTR(&module_registry, module) {
+			zend_deactivate_module(module, request_begun);
+		} ZEND_HASH_FOREACH_END();
+	} else {
+		for (zend_module_entry **p = module_request_shutdown_handlers; *p; p++) {
+			zend_deactivate_module(*p, request_begun);
 		}
 	}
 }

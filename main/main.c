@@ -2038,6 +2038,8 @@ PHPAPI zend_result php_request_begin(void)
 		/* the script reads the previous request's superglobals until now */
 		php_release_request_globals();
 		php_release_sapi_globals();
+		/* code running between two requests can enable the URL rewriter too */
+		PHP_RSHUTDOWN(url_scanner_ex)(MODULE_PERSISTENT, 0);
 
 		php_output_activate();
 
@@ -2143,7 +2145,7 @@ void php_request_shutdown(void *dummy)
 		zend_unset_timeout();
 	} zend_end_try();
 
-	/* 5. Call all extensions RSHUTDOWN functions */
+	/* 5. Call all extensions REND and RSHUTDOWN functions */
 	if (PG(modules_activated)) {
 		zend_deactivate_modules();
 	}
@@ -2789,6 +2791,15 @@ PHPAPI bool php_execute_script_ex(zend_file_handle *primary_file, zval *retval)
 			zend_unset_timeout();
 #endif
 			zend_set_timeout(zend_ini_long_literal("max_execution_time"), false);
+		}
+
+		/* userland code runs from here, unlike when linting or serving a status page */
+		if (zend_request_begin_modules() == FAILURE) {
+			result = false;
+			EG(exit_status) = 255;
+			if (!SG(headers_sent)) {
+				SG(sapi_headers).http_response_code = 500;
+			}
 		}
 
 		if (prepend_file_p && result) {

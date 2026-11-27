@@ -249,6 +249,9 @@ PHPAPI zend_result php_load_extension(const char *filename, int type, bool start
 			return FAILURE;
 		}
 	}
+	if ((type == MODULE_TEMPORARY || start_now) && zend_request_begin_dl_module(module_entry) == FAILURE) {
+		return FAILURE;
+	}
 	return SUCCESS;
 }
 /* }}} */

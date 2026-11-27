@@ -203,7 +203,9 @@ static void phpdbg_line_init(char *cmd, struct phpdbg_init_state *state) {
 				if (memcmp(cmd, ":>", sizeof(":>")-1) == SUCCESS) {
 					state->in_code = 0;
 					state->code[state->code_len] = '\0';
-					zend_eval_stringl(state->code, state->code_len, NULL, "phpdbginit code");
+					if (zend_request_begin_modules() == SUCCESS) {
+						zend_eval_stringl(state->code, state->code_len, NULL, "phpdbginit code");
+					}
 					free(state->code);
 					state->code = NULL;
 					return;
@@ -855,7 +857,9 @@ free_cmd:
 		zend_try {
 			PHPDBG_G(flags) ^= PHPDBG_IS_INTERACTIVE;
 			PHPDBG_G(flags) |= PHPDBG_IS_RUNNING;
-			zend_execute(PHPDBG_G(ops), &PHPDBG_G(retval));
+			if (zend_request_begin_modules() == SUCCESS) {
+				zend_execute(PHPDBG_G(ops), &PHPDBG_G(retval));
+			}
 			PHPDBG_G(flags) ^= PHPDBG_IS_INTERACTIVE;
 		} zend_catch {
 			PHPDBG_G(in_execution) = 0;
@@ -941,7 +945,8 @@ PHPDBG_COMMAND(ev) /* {{{ */
 	/* disable stepping while eval() in progress */
 	PHPDBG_G(flags) |= PHPDBG_IN_EVAL;
 	zend_try {
-		if (zend_eval_stringl(param->str, param->len, &retval, "eval()'d code") == SUCCESS) {
+		if (zend_request_begin_modules() == SUCCESS
+				&& zend_eval_stringl(param->str, param->len, &retval, "eval()'d code") == SUCCESS) {
 			if (EG(exception)) {
 				ex = EG(exception);
 				zend_exception_error(EG(exception), E_ERROR);

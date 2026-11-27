@@ -127,6 +127,7 @@ static inline void php_rinit_session_globals(void)
 	PS(session_vars) = NULL;
 	PS(module_number) = my_module_number;
 	PS(in_rfc1867_update) = false;
+	PS(auto_start_tried) = false;
 	ZVAL_UNDEF(&PS(http_session_vars));
 }
 
@@ -2940,6 +2941,7 @@ static zend_result php_rinit_session(bool auto_start)
 	}
 
 	if (auto_start) {
+		PS(auto_start_tried) = true;
 		php_session_start();
 	}
 
@@ -2959,7 +2961,8 @@ static PHP_RINIT_FUNCTION(session)
 
 static PHP_RBEGIN_FUNCTION(session)
 {
-	if (PS(auto_start) && PS(session_status) == php_session_none) {
+	if (PS(auto_start) && !PS(auto_start_tried) && PS(session_status) == php_session_none) {
+		PS(auto_start_tried) = true;
 		php_session_start();
 	}
 

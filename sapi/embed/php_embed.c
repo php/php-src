@@ -238,6 +238,13 @@ EMBED_SAPI_API int php_embed_init(int argc, char **argv)
 	SG(request_info).no_headers = 1;
 	php_register_variable("PHP_SELF", "-", NULL);
 
+	/* embedders may run code with zend_eval_string() instead of php_execute_script() */
+	if (zend_request_begin_modules() == FAILURE) {
+		php_request_shutdown(NULL);
+		php_module_shutdown();
+		return FAILURE;
+	}
+
 	return SUCCESS;
 }
 

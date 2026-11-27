@@ -508,6 +508,19 @@ static void php_cli_usage(char *argv0)
 
 static php_stream *s_in_process = NULL;
 
+/* code run with zend_eval_string() doesn't go through php_execute_script(), which begins the request hooks */
+static bool cli_request_begin(void)
+{
+	static bool failed = false;
+
+	if (!failed && zend_request_begin_modules() == FAILURE) {
+		failed = true;
+		EG(exit_status) = 255;
+	}
+
+	return !failed;
+}
+
 static void cli_register_file_handles(void)
 {
 	php_stream *s_in, *s_out, *s_err;
@@ -938,7 +951,9 @@ do_repeat:
 			cli_register_file_handles();
 
 			if (interactive) {
-				EG(exit_status) = cli_shell_callbacks.cli_shell_run();
+				if (cli_request_begin()) {
+					EG(exit_status) = cli_shell_callbacks.cli_shell_run();
+				}
 			} else {
 				php_execute_script(&file_handle);
 			}
@@ -970,7 +985,9 @@ do_repeat:
 			break;
 		case PHP_CLI_MODE_CLI_DIRECT:
 			cli_register_file_handles();
-			zend_eval_string_ex(exec_direct, NULL, "Command line code", 1);
+			if (cli_request_begin()) {
+				zend_eval_string_ex(exec_direct, NULL, "Command line code", 1);
+			}
 			break;
 
 		case PHP_CLI_MODE_PROCESS_STDIN:
@@ -986,7 +1003,7 @@ do_repeat:
 
 				cli_register_file_handles();
 
-				if (exec_begin) {
+				if (exec_begin && cli_request_begin()) {
 					zend_eval_string_ex(exec_begin, NULL, "Command line begin code", 1);
 				}
 				while (EG(exit_status) == SUCCESS && (input = php_stream_gets(s_in_process, NULL, 0)) != NULL) {
@@ -999,7 +1016,9 @@ do_repeat:
 					ZVAL_LONG(&argi, ++index);
 					zend_hash_str_update(&EG(symbol_table), "argi", sizeof("argi")-1, &argi);
 					if (exec_run) {
-						zend_eval_string_ex(exec_run, NULL, "Command line run code", 1);
+						if (cli_request_begin()) {
+							zend_eval_string_ex(exec_run, NULL, "Command line run code", 1);
+						}
 					} else {
 						if (script_file) {
 							if (cli_seek_file_begin(&file_handle, script_file) == FAILURE) {
@@ -1012,7 +1031,7 @@ do_repeat:
 					}
 					efree(input);
 				}
-				if (exec_end) {
+				if (exec_end && cli_request_begin()) {
 					zend_eval_string_ex(exec_end, NULL, "Command line end code", 1);
 				}
 

@@ -365,6 +365,7 @@ struct _zend_tsrm_ls_cache {
 #define EG_FLAGS_IN_SHUTDOWN			(1<<0)
 #define EG_FLAGS_OBJECT_STORE_NO_REUSE	(1<<1)
 #define EG_FLAGS_IN_RESOURCE_SHUTDOWN	(1<<2)
+#define EG_FLAGS_REQUEST_BEGUN			(1<<3)
 
 struct _zend_ini_scanner_globals {
 	zend_file_handle *yy_in;

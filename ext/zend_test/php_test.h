@@ -59,6 +59,7 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	bool print_stderr_mshutdown;
 	bool request_begin_fails;
 	bool request_end_fails;
+	bool print_request_hooks;
 	zend_long limit_copy_file_range;
 	int observe_opline_in_zendmm;
 	zend_mm_heap* zend_orig_heap;
