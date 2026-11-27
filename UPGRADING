@@ -64,6 +64,16 @@ PHP 8.7 UPGRADE NOTES
     value was appended to the Set-Cookie header verbatim, which let an
     application terminate one attribute and append further ones.
 
+- SPL:
+  . ArrayObject::getIterator(), SplFileInfo::openFile(),
+    SplFileInfo::getFileInfo(), SplFileInfo::getPathInfo(), and
+    FilesystemIterator, RecursiveDirectoryIterator and GlobIterator in
+    CURRENT_AS_FILEINFO mode now throw an Error when the class they create is
+    abstract, whether it was set through the ArrayObject constructor,
+    unserialize(), setIteratorClass(), setFileClass(), setInfoClass() or the
+    method's class argument. Previously an instance of the abstract class was
+    created.
+
 - Standard:
   . ini_get_all() now matches extension names case-insensitively using ASCII
     rules, independently of the current locale. Names that differ only in
