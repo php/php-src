@@ -16,7 +16,8 @@ all
 memory_limit=-1
 --FILE--
 <?php
-$uri = new Uri\Rfc3986\Uri("a://b/" . str_repeat("x", 2147483648 - 6));
+// Keep the length of each path segment below the 32-bit INT_MAX that uriparser uses while the recomposed path exceeds it.
+$uri = new Uri\Rfc3986\Uri(str_repeat("x", 2147483648 - 2) . "/x");
 
 try {
     $uri->toRawString();

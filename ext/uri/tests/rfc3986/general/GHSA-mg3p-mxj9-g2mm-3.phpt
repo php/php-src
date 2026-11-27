@@ -16,14 +16,12 @@ all
 memory_limit=-1
 --FILE--
 <?php
-$uri = new Uri\Rfc3986\Uri("a://b/" . str_repeat("x", 2147483646 - 6));
-
-$string = $uri->toRawString();
+$length = 2147483646; // 32-bit INT_MAX - 1
+// Parsing a single relative path segment is cheap under sanitizers.
+$string = (new Uri\Rfc3986\Uri(str_repeat("x", $length)))->toRawString();
 var_dump(strlen($string));
-var_dump(substr($string, 0, 8));
-var_dump(strspn($string, "x", 6) === 2147483646 - 6);
+var_dump(strcmp($string, str_repeat("x", $length)) === 0);
 ?>
 --EXPECT--
 int(2147483646)
-string(8) "a://b/xx"
 bool(true)
