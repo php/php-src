@@ -1598,7 +1598,7 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 				RETURN_THROWS();
 			}
 
-			cryptokind = Z_LVAL_P(val);
+			cryptokind = zval_get_long(val);
 		}
 
 		if (zsessstream) {
