@@ -52,6 +52,7 @@ PHP 8.7 INTERNALS UPGRADE NOTES
     dependencies from PHP.
 
 - Removed:
+  . The HAVE_STRUCT_FLOCK configure macro was removed.
   . The ZEND_LOG_XOR() macro was removed.
   . The ZEND_TRUTH() macro was removed.
   . Removed zend_execute_scripts(). Manually call zend_execute_script() in a
